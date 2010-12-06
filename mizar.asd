@@ -16,4 +16,5 @@
   :components ((:file "packages")
 	       (:file "mizar")
 	       (:file "article")
+	       (:file "item")
 	       (:file "itemize")))
