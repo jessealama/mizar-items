@@ -2209,7 +2209,7 @@ sub TestXMLElems ($$$)
 
     # sanity
     die "Verification errors"
-      unless system ("$verifier -l -q $filestem > /dev/null 2>/dev/null") == 0;
+      unless system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") == 0;
 
     my %removed = (); ## indices of removed elements
 
@@ -2226,7 +2226,7 @@ sub TestXMLElems ($$$)
 	    $removed{$chunk * $chunksize + $elem} = 1;
 	}
 	PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	if (system ("$verifier -l -q $filestem > /dev/null 2>/dev/null") != 0)
+	if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
 	{
 	    foreach my $elem (0 .. $chunksize -1)
 	    {
@@ -2242,7 +2242,7 @@ sub TestXMLElems ($$$)
 		{
 		    $removed{$chunk * $chunksize + $elem} = 1;
 		    PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-		    if (system ("$verifier -l -q $filestem > /dev/null 2>/dev/null") != 0)
+		    if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
 		    {
 			delete $removed{$chunk * $chunksize + $elem};
 			$found = 1;
@@ -2260,12 +2260,16 @@ sub TestXMLElems ($$$)
     # 	delete $removed{$chunk} if(system("$verifier -l -q $filestem") !=0);
     # }
     ## print the final form
-    my $needed 
+    my $needed
       = PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
     ## print stats
-    print 'total ', $xml_elem, ': ', $total, "\n";
-    print 'removed: ', $total - $needed, "\n";
-    print 'needed: ', $needed, "\n";
+
+    if ($be_verbose) {
+      print 'total ', $xml_elem, ': ', $total, "\n";
+      print 'removed: ', $total - $needed, "\n";
+      print 'needed: ', $needed, "\n";
+    }
+
 }
 
 my %item_to_extension =
@@ -2284,6 +2288,10 @@ my %item_to_extension =
 
 sub reduce_imported_items {
   my $item_number = shift;
+
+  if ($be_verbose) {
+    print "Reducing item #$item_number\n";
+  }
 
   my $item_stem = catfile ($local_db_in_workdir, 'text', "item$item_number");
   foreach my $item_type (keys %item_to_extension) {
