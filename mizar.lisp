@@ -13,8 +13,23 @@ variable (at load time).")
   ((location
     :initarg :location
     :type pathname
-    :initform *mizfiles*))
+    :initform *mizfiles*)
+   (mml-lar
+    :type list))
   (:documentation "A wrapper around a copy of the MML."))
+
+(defmethod initialize-instance :after ((lib mizar-library) &key)
+  (let (lines)
+    (with-open-file (mml-lar (concatenate 'string
+					  (slot-value lib 'location)
+					  "/"
+					  "mml.lar"))
+      (symbol-macrolet
+	  (($line (read mml-lar nil nil)))
+	(do ((line $line $line))
+	    ((null line))
+	  (push line lines))))
+    (setf (slot-value lib 'mml-lar) (reverse lines))))
 
 (defclass sandbox ()
   ((articles
