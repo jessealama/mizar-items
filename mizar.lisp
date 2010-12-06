@@ -1,3 +1,4 @@
+;;; mizar.lisp Interface to the mizar tools and the MML
 
 (in-package :mizar)
 
