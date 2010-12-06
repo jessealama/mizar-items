@@ -15,4 +15,5 @@
   :depends-on nil
   :components ((:file "packages")
 	       (:file "mizar")
+	       (:file "article")
 	       (:file "itemize")))

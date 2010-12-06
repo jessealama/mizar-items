@@ -64,51 +64,7 @@ variable (at load time).")
 (defmethod trash ((s sandbox))
   (with-slots (location) s
     ;; just delete the directory for now
-    (delete-directory location)))
-
-(defclass article ()
-  ((name
-    :initarg :name
-    :reader name
-    ;; no writer: changing this object is not allowed
-    :type symbol
-    :documentation "The name of this article, as a symbol."))
-  (:documentation "A representation of a mizar article."))
-
-(defun vocabularies (article)
-  "The contents of the vocabularies directive.  It is a list of symbols.")
-
-(defun notations (article)
-  "The contents of the notations directive.  It is a list of symbols.")
-
-(defun constructors (article)
-  "The contents of the constructors directive.  It is a list of symbols.")
-
-(defun requirements (article)
-  "The contents of the requirements directive.  It is a list of symbols.")
-
-(defun definitions (article)
-  "The contents of the definitions directive.  It is a list of symbols.")
-
-(defun theorems (article)
-  "The contents of the theorems directive.  It is a list of symbols.")
-
-(defun schemes (article)
-  "The contents of the schemes directive.  It is a list of symbols.")
-
-(defgeneric complete-environment (article)
-  (:documentation "All articles mentioned in the environment of
-ARTICLE.  The notations, constructors, requirements, definitions,
-theorems, and schemes directives are consulted; the vocabularies
-directive is not consulted."))
-
-(defmethod complete-environment ((article article))
-  (remove-duplicates (append (notations article)
-			     (constructors article)
-			     (requirements article)
-			     (definitions article)
-			     (theorems article)
-			     (schemes article))))
+    (sb-ext:delete-directory location))) ;; not ideal: we shouldn't use sb-ext
 
 (defun run-mizar-utility (utility)
   (declare (ignore utility))
