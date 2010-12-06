@@ -1059,6 +1059,10 @@ sub line_and_column {
   return ($line,$col);
 }
 
+my %set_statements = ();
+
+load_set_statements ();
+
 sub pretext_from_item_type_and_beginning {
   my $node = shift;
   my $begin_line = shift;
@@ -1071,13 +1075,36 @@ sub pretext_from_item_type_and_beginning {
     warn "Looking for pretext starting from $begin_line and $begin_col";
   }
 
-  my $pretext;
+  my $pretext = '';
+
+  # first, compute all the set statements oocurring before $begin_line
+
+  if ($debug) {
+    print "We are about to consider ", scalar (keys %set_statements), " set statements\n";
+  }
+
+  foreach my $key (keys %set_statements) {
+    my ($set_begin_line,$set_begin_col) = split (':', $key);
+    my $set_statement = $set_statements{$key};
+    if ($set_begin_line <= $begin_line) {
+
+      if ($debug) {
+	print "We have a set statement occurring before this item\n";
+      } else {
+	print "The set statement in question begins after this item\n";
+      }
+
+      $pretext .= $set_statement;
+      $pretext .= "\n";
+    }
+  }
+
   if ($item_type eq 'JustifiedTheorem') {
     # $pretext = theorem_before_position ($begin_line, $begin_col);
     if ($node->exists ('SkippedProof')) {
-      $pretext = 'canceled;'; # in this case, the pretext is the whole text
+      $pretext .= 'canceled;'; # in this case, the pretext is the whole text
     } else {
-      $pretext = 'theorem ';
+      $pretext .= 'theorem ';
     }
   } elsif ($item_type eq 'Proposition') {
     my $vid = $item_node->findvalue ('@vid');
@@ -1103,17 +1130,17 @@ sub pretext_from_item_type_and_beginning {
 
     my $theorem = extract_region ($lemma_begin_line, $lemma_begin_col,
 				  $begin_line, $begin_col - 1);
-    $pretext = "theorem $theorem";
+    $pretext .= "theorem $theorem";
   } elsif ($item_type eq 'SchemeBlock') {
-    $pretext = 'scheme ';
+    $pretext .= 'scheme ';
   } elsif ($item_type eq 'NotationBlock') {
-    $pretext = "notation ";
+    $pretext .= "notation ";
   } elsif ($item_type eq 'DefinitionBlock') {
-    $pretext = "definition ";
+    $pretext .= "definition ";
   } elsif ($item_type eq 'RegistrationBlock') {
-    $pretext = "registration ";
+    $pretext .= "registration ";
   } else {
-    $pretext = '';
+    $pretext .= '';
   }
   return $pretext;
 }
@@ -1202,10 +1229,75 @@ my @handled_node_types = keys %node_processors;
 # I wish I knew how to deal with these :-<
 my @unhandled_node_types = ('DefFunc',
 			    'Defpred',
-			    'Set',
+			    # 'Set',
 			    'Consider',
 			    'Reconsider',
 			    'Proposition[not(@vid)]');
+
+sub load_set_statements {
+  chdir $workdir;
+  my @egrep_lines = ();
+  my @egrep_bol_lines
+    = `egrep -n '^set +[A-Za-z0-9]+ *=' $article_in_workdir`;
+  my @egrep_non_bol_lines
+    = `egrep -n ' set +[A-Za-z0-9]+ *=' $article_in_workdir`;
+  push (@egrep_lines, @egrep_bol_lines);
+  push (@egrep_lines, @egrep_non_bol_lines);
+  chomp @egrep_lines;
+
+  foreach my $egrep_line (@egrep_lines) {
+    my ($begin_line_num,$match) = split (':', $egrep_line, 2);
+    # if ':' appears $match, don't use it for splitting    ^
+
+    if ($debug) {
+      print "We found a candidate set statement starting at line $begin_line_num; it looks like this: '$match'\n";
+    }
+
+    my $initial_whitespace = $match =~ / *[ ^]/;
+    my $offset = length $initial_whitespace;
+
+    my $semicolon_found = 0;
+    my $end_line_num = $begin_line_num;
+    my $end_col_num;
+    until ($semicolon_found) {
+      my $str_to_inspect;
+      if ($end_line_num == $begin_line_num) {
+	$str_to_inspect = $match;
+      } else {
+	$str_to_inspect = $article_lines[$end_line_num - 1];
+      }
+      if ($str_to_inspect =~ m/;/g) {
+	$semicolon_found = 1;
+	$end_col_num = pos $str_to_inspect;
+      } else {
+	$end_line_num++;
+      }
+    }
+
+    if ($debug) {
+      print "Found a set statement starting at line $begin_line_num column $offset and going to line $end_line_num column $end_col_num\n"
+    }
+
+    my $full_set_statement = extract_region ($begin_line_num,
+					     $offset - 1,
+					     $end_line_num,
+					     $end_col_num - 1);
+
+    $full_set_statement =~ s/\n/ /g;
+
+    $full_set_statement =~ s/^ +([^ ])/$1/;
+
+    if ($debug) {
+      print "The full set statement is: '$full_set_statement'\n";
+    }
+
+    $set_statements{"$begin_line_num:$offset"} = $full_set_statement;
+
+  }
+
+  return;
+
+}
 
 sub load_items {
   my $doc = miz_xml ();
@@ -1215,8 +1307,10 @@ sub load_items {
     = map { "Article/$_" } @unhandled_node_types;
   my $unhandled_query = join (' | ', @toplevel_unhandled_item_xpaths);
 
-  if ($doc->exists ($unhandled_query)) {
-    warn "There's an unhandled node type in this article; sorry";
+  my ($unhandled) = $doc->findnodes ($unhandled_query);
+  if (defined $unhandled) {
+    my $unhandled_type = $unhandled->nodeName;
+    warn "There's an unhandled node type in this article (type $unhandled_type); sorry";
     exit 2;
   }
 
@@ -1266,6 +1360,24 @@ sub process_notationblock {}
 load_items ();
 load_deftheorems ();
 init_reservation_table ();
+
+sub lex_less_than {
+  my $a1 = shift;
+  my $a2 = shift;
+  my $b1 = shift;
+  my $b2 = shift;
+  if ($a1 < $b1) {
+    return 1;
+  } elsif ($a1 == $b1) {
+    if ($a2 < $b2) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+}
 
 sub itemize {
 
@@ -1464,6 +1576,36 @@ sub itemize {
 	print "the region of interest is ($begin_line,$begin_col)-($end_line,$end_col)\n";
       }
 
+      # now that we've determined this item's extension (i.e., its
+      # beginning line, beginning column, end line, and end column),
+      # we need to remove all the precomputed set statements that fall
+      # within this interval, because these correspond to non-toplevel
+      # set statements.
+      my @set_statement_keys_to_delete = ();
+      foreach my $key (keys %set_statements) {
+	my $set_statement = $set_statements{$key};
+	my ($set_begin_line,$set_begin_col) = split (':', $key);
+	
+	if ($debug) {
+	  print "We are considering a set statement that begins on line $set_begin_line column $set_begin_col\n";
+	}
+
+	if (lex_less_than ($begin_line,$begin_col,
+			   $set_begin_line,$set_begin_col)
+	    && lex_less_than ($set_begin_line, $set_begin_col,
+			      $end_line,end_col)) {
+
+	  if ($debug) {
+	    print "We found a 'local' set statement to remove: '$set_statement'\n";
+	  }
+
+	  push (@set_statement_keys_to_delete, $key);
+	}
+      }
+      foreach my $key (@set_statement_keys_to_delete) {
+	delete $set_statements{$key};
+      }
+
       # look into the node to find references that might need to be
       # rewritten.  First, distinguish between unexported toplevel
       # theorems and the rest; for the former, the references to be
@@ -1605,6 +1747,10 @@ sub itemize {
 	    }
 	  }
 	}
+      }
+
+      if ($debug) {
+	print "before computing the pretext, there are ", scalar (keys %set_statements), " set statements still available", "\n";
       }
 
       my $pretext
