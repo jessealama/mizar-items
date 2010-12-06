@@ -2604,7 +2604,7 @@ From ARYTM_2 (from MML 4.150.1103):
 set IR = { A where A is Subset of RAT+: r in A implies (for s st s <=' r holds
 s in A) & ex s st s in A & r < s}, RA = {{ s: s < t}: t <> {}};
 
-item unlabeled unexported theorems
+=item unlabeled unexported theorems
 
 =back
 
