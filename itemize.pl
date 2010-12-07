@@ -1229,10 +1229,9 @@ my @handled_node_types = keys %node_processors;
 # I wish I knew how to deal with these :-<
 my @unhandled_node_types = ('DefFunc',
 			    'Defpred',
-			    # 'Set',
 			    'Consider',
-			    'Reconsider',
-			    'Proposition[not(@vid)]');
+			    'Reconsider');
+
 
 sub load_set_statements {
   chdir $workdir;
