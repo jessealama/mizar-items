@@ -658,6 +658,10 @@ sub from_keyword_to_position {
   # find the maximal line and column in @article_lines before column
   # $col of line $line that starts with $keyword.
 
+  if ($debug) {
+    print "looking for keyword '$keyword' before line $line and column $col", "\n";
+  }
+
   # first, check whether the current line already contains the keyword.
   my $first_line = $article_lines[$line -1]; # count lines from 1
   my $first_line_length = length $first_line;
