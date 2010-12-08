@@ -218,6 +218,9 @@ unless (-x $makeenv) {
   die "The makeenv at '$makeenv' is not executable!";
 }
 
+# --no-reduction
+my $do_reduction = defined{$ENV{'--no-reduction'}} ? 0 : 1;
+
 ######################################################################
 ### End command-line processing.
 ###
@@ -2564,8 +2567,10 @@ sub reduce_imported_items {
   }
 }
 
-foreach my $i (1 .. $genuine_item_number) {
-  reduce_imported_items ($i);
+if ($do_reduction) {
+  foreach my $i (1 .. $genuine_item_number) {
+    reduce_imported_items ($i);
+  }
 }
 
 cleanup ();
@@ -2671,6 +2676,10 @@ this option is unset, then the current directory ('.') is used.
 Don't remove auxiliary, intermediate files generated for the sake of
 decomposing the given article. (By default, all such files will be
 deleted before terminating.)
+
+=item --no-reduction
+
+Itemize only; don't try to compute minimal dependencies.
 
 =item --verbose
 
