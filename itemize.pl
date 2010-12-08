@@ -219,7 +219,20 @@ unless (-x $makeenv) {
 }
 
 # --no-reduction
-my $do_reduction = defined{$ARGV{'--no-reduction'}} ? 0 : 1;
+my $do_reduction = defined $ARGV{'--no-reduction'} ? 0 : 1;
+
+# --tmpdir
+my $temp_dir = $ARGV{'--tmpdir'};
+my $workdir = defined $temp_dir ? $temp_dir
+                                : tempdir (CLEANUP => $cleanup_afterward);
+
+# sanity
+unless (-e $workdir) {
+  die "The work directory, '$workdir', does not exist!";
+}
+unless (-d $workdir) {
+  die "The work directory, '$workdir', is not actually a directory!";
+}
 
 ######################################################################
 ### End command-line processing.
@@ -237,15 +250,7 @@ my $do_reduction = defined{$ARGV{'--no-reduction'}} ? 0 : 1;
 
 ### 1. Prepare the work directory.
 
-# First, create it.
-my $workdir = tempdir (CLEANUP => $cleanup_afterward)
-  or die 'Error: Unable to create a working directory!';
-
-if ($be_verbose) {
-  print "Setting the work directory to $workdir\n";
-}
-
-# Now copy the specified mizar article to the work directory
+# Copy the specified mizar article to the work directory
 my $article_in_workdir = catfile ($workdir, $article_miz);
 copy ($article_miz_path, $article_in_workdir)
   or die "Error: Unable to copy article ($article_miz) to work directory ($article_in_workdir):\n\n$!";
@@ -2680,6 +2685,12 @@ deleted before terminating.)
 =item --no-reduction
 
 Itemize only; don't try to compute minimal dependencies.
+
+=item --tmpdir=<DIRECTORY>
+
+Use <DIRECTORY> as the temporary directory in which computation will
+be carried out.  If unspecified, some OS-specific temporary directory
+will be created and used.
 
 =item --verbose
 
