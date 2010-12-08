@@ -219,7 +219,7 @@ unless (-x $makeenv) {
 }
 
 # --no-reduction
-my $do_reduction = defined{$ENV{'--no-reduction'}} ? 0 : 1;
+my $do_reduction = defined{$ARGV{'--no-reduction'}} ? 0 : 1;
 
 ######################################################################
 ### End command-line processing.
