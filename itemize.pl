@@ -489,7 +489,7 @@ sub read_mml_lar {
 read_mml_lar ();
 
 sub export_item {
-  my ($number, $begin_line, $text) = @_;
+  my ($number, $begin_line, $begin_col, $text) = @_;
 
   # copy the article environment
   my @vocabularies = @vocabularies;
@@ -504,7 +504,7 @@ sub export_item {
   # pad the copied environment with references to ALL earlier items
   # special case: vocabularies, requirements; don't pad these (we will
   # get errors from the mizar tools otherwise).
-  @earlier_items = map { "ITEM$_" } 1 .. $number - 1;
+  my @earlier_items = map { "ITEM$_" } 1 .. $number - 1;
   push (@notations, @earlier_items);
   push (@constructors, @earlier_items);
   push (@registrations, @earlier_items);
@@ -555,10 +555,11 @@ sub export_item {
   print {$item_miz} 'begin';
   print {$item_miz} "\n";
 
-  # reservations
-  my @reservations = @{reservations_before_line ($begin_line)};
-  foreach my $reservation (@reservations) {
-    print {$item_miz} 'reserve ', $reservation, "\n";
+  # pseudo-items
+  my @pseudo_items
+    = @{pseudo_items_before_line_and_column ($begin_line,$begin_col)};
+  foreach my $pseudo_item (@pseudo_items) {
+    print {$item_miz} $pseudo_item, "\n";
   }
 
   # the item proper
@@ -575,9 +576,9 @@ sub miz_xml {
   return ($parser->parse_file($article_xml_absrefs));
 }
 
-my %reservation_table = ();
+my %pseudo_item_table = ();
 
-sub init_reservation_table {
+sub init_reservations {
   foreach my $line_num (0 .. $num_article_lines - 1) {
     my $miz_line = $article_lines[$line_num];
     if ($miz_line =~ m/^reserve[ ]+[^ ]|[ ]+reserve[ ][^ ]/g) {
@@ -599,7 +600,7 @@ sub init_reservation_table {
 	    warn "Computed reservation $reserve";
 	  }
 
-	  $reservation_table{$line_num} = $reserve;
+	  $pseudo_item_table{"$line_num:1"} = "reserve $reserve"
 	}
       }
     }
@@ -607,24 +608,39 @@ sub init_reservation_table {
   return;
 }
 
-sub print_reservation_table {
-  foreach my $key (keys (%reservation_table)) {
+sub print_pseudo_item_table {
+  foreach my $key (keys (%pseudo_item_table)) {
     print "$key:\n";
-    print ($reservation_table{$key});
+    print ($pseudo_item_table{$key});
     print ("\n");
   }
   return;
 }
 
-sub reservations_before_line {
+# given strings "num1:num2" and "num3:num4", determine whether the the
+# first is lexicographically less than the second, considered as
+# pairs.
+sub colon_delimited_lex_less_than_cmp {
+  my ($a1,$b1) = split (':', $a);
+  my ($a2,$b2) = split (':', $b);
+  return lex_less_than_cmp ($a1,$b1,$a2,$b2);
+}
+
+sub pseudo_items_before_line_and_column {
   my $line = shift;
-  my @reservations = ();
-  foreach my $key (sort {$a <=> $b} keys %reservation_table) {
-    if ($key < $line) {
-      push (@reservations, $reservation_table{$key});
+  my $col = shift;
+  my @pseudo_items = ();
+  foreach my $key (sort colon_delimited_lex_less_than_cmp keys %pseudo_item_table) {
+    my ($key_a,$key_b) = split (':', $key);
+    if (lex_less_than ($key_a, $key_b, $line, $col)) {
+      my $pseudo_item = $pseudo_item_table{$key};
+      if ($debug) {
+	print "The following pseudo-item occurs before ($line,$col): $pseudo_item", "\n";
+      }
+      push (@pseudo_items, $pseudo_item);
     }
   }
-  return \@reservations;
+  return \@pseudo_items;
 }
 
 sub from_keyword_to_position {
@@ -1039,6 +1055,30 @@ my %diffuse_lemmas_to_vid = ();
 my %vid_to_scheme_num = ();
 my %scheme_num_to_vid = ();
 
+sub next_semicolon_after {
+  my ($begin_line_num,$begin_col_num) = shift;
+
+  my $semicolon_found = 0;
+  my $end_line_num = $begin_line_num;
+  my $line = $article_lines[$end_line_num - 1];
+  my $end_col_num;
+  until ($semicolon_found) {
+    my $str_to_inspect
+      = $end_line_num == $begin_line_num ? substr $line, $begin_col_num
+	                                 : $line;
+    if ($str_to_inspect =~ m/[;]/g) {
+      $semicolon_found = 1;
+      $end_col_num = pos $str_to_inspect;
+    } else {
+      $end_line_num++;
+      $line = $article_lines[$end_line_num - 1];
+    }
+  }
+
+  return ($end_line_num,$end_col_num - 1);
+  #                                  ^ discount the actual semicolon ';'
+}
+
 sub line_and_column {
   my $node = shift;
 
@@ -1056,12 +1096,29 @@ sub line_and_column {
     die ("Node lacks a col attribute");
   }
 
+  # special case! when dealing with From nodes, the line and column
+  # information ends at the 'from', NOT at the semicolon
+  if ($node->nodeName eq 'From') {
+    
+    if ($debug) {
+      print "looking for a semicolon after line $line column $col", "\n";
+    }
+
+    ($line,$col) = next_semicolon_after ($line,$col);
+
+    if ($debug) {
+      print "we found a semicolon at line $line column $col", "\n";
+    }
+  }
+
   return ($line,$col);
 }
 
 my %set_statements = ();
 
 load_set_statements ();
+load_defpred_statements ();
+load_deffunc_statements ();
 
 sub pretext_from_item_type_and_beginning {
   my $node = shift;
@@ -1104,7 +1161,14 @@ sub pretext_from_item_type_and_beginning {
     if ($node->exists ('SkippedProof')) {
       $pretext .= 'canceled;'; # in this case, the pretext is the whole text
     } else {
-      $pretext .= 'theorem ';
+      my $vid = $item_node->findvalue ('@vid');
+      
+      if ($debug) {
+	warn ("exported toplevel theorem with vid $vid...");
+    }
+
+      my $prop_label = $idx_table{$vid};
+      $pretext .= "theorem ";
     }
   } elsif ($item_type eq 'Proposition') {
     my $vid = $item_node->findvalue ('@vid');
@@ -1130,7 +1194,7 @@ sub pretext_from_item_type_and_beginning {
 
     my $theorem = extract_region ($lemma_begin_line, $lemma_begin_col,
 				  $begin_line, $begin_col - 1);
-    $pretext .= "theorem $theorem";
+    $pretext .= "$prop_label: $theorem";
   } elsif ($item_type eq 'SchemeBlock') {
     $pretext .= 'scheme ';
   } elsif ($item_type eq 'NotationBlock') {
@@ -1139,6 +1203,23 @@ sub pretext_from_item_type_and_beginning {
     $pretext .= "definition ";
   } elsif ($item_type eq 'RegistrationBlock') {
     $pretext .= "registration ";
+  } elsif ($item_type eq 'Reconsider') {
+    $pretext .= "reconsider ";
+  } elsif ($item_type eq 'Consider') {
+    $pretext .= "consider ";
+  } elsif ($item_type eq 'Now') {
+    my $vid = $item_node->findvalue ('@vid');
+    
+    if ($debug) {
+      warn ("exported toplevel theorem with vid $vid...");
+    }
+    
+    my $prop_label = $idx_table{$vid};
+    if (defined $prop_label) {
+      $pretext .= "$prop_label: now ";
+    } else {
+      $pretext .= "now ";
+    }
   } else {
     $pretext .= '';
   }
@@ -1222,16 +1303,15 @@ my %node_processors
      'SchemeBlock' => \&process_schemeblock,
      'RegistrationBlock' => \&process_registrationblock,
      'NotationBlock' => \&process_notationblock,
+     'Reconsider' => \&process_reconsider,
+     'Consider' => \&process_consider,
+     'Now' => \&process_now,
     );
 
 my @handled_node_types = keys %node_processors;
 
 # I wish I knew how to deal with these :-<
-my @unhandled_node_types = ('DefFunc',
-			    'Defpred',
-			    'Consider',
-			    'Reconsider');
-
+my @unhandled_node_types = ();
 
 sub load_set_statements {
   chdir $workdir;
@@ -1290,7 +1370,137 @@ sub load_set_statements {
       print "The full set statement is: '$full_set_statement'\n";
     }
 
-    $set_statements{"$begin_line_num:$offset"} = $full_set_statement;
+    $pseudo_item_table{"$begin_line_num:$offset"} = $full_set_statement;
+
+  }
+
+  return;
+
+}
+
+sub load_defpred_statements {
+  chdir $workdir;
+  my @egrep_lines = ();
+  my @egrep_bol_lines
+    = `egrep -n '^defpred +[A-Za-z0-9]+' $article_in_workdir`;
+  my @egrep_non_bol_lines
+    = `egrep -n ' defpred +[A-Za-z0-9]+' $article_in_workdir`;
+  push (@egrep_lines, @egrep_bol_lines);
+  push (@egrep_lines, @egrep_non_bol_lines);
+  chomp @egrep_lines;
+
+  foreach my $egrep_line (@egrep_lines) {
+    my ($begin_line_num,$match) = split (':', $egrep_line, 2);
+    # if ':' appears $match, don't use it for splitting    ^
+
+    if ($debug) {
+      print "We found a candidate defpred statement starting at line $begin_line_num; it looks like this: '$match'\n";
+    }
+
+    my $initial_whitespace = $match =~ / *[ ^]/;
+    my $offset = length $initial_whitespace;
+
+    my $semicolon_found = 0;
+    my $end_line_num = $begin_line_num;
+    my $end_col_num;
+    until ($semicolon_found) {
+      my $str_to_inspect;
+      if ($end_line_num == $begin_line_num) {
+	$str_to_inspect = $match;
+      } else {
+	$str_to_inspect = $article_lines[$end_line_num - 1];
+      }
+      if ($str_to_inspect =~ m/;/g) {
+	$semicolon_found = 1;
+	$end_col_num = pos $str_to_inspect;
+      } else {
+	$end_line_num++;
+      }
+    }
+
+    if ($debug) {
+      print "Found a defpred statement starting at line $begin_line_num column $offset and going to line $end_line_num column $end_col_num\n"
+    }
+
+    my $full_defpred_statement = extract_region ($begin_line_num,
+						 $offset - 1,
+						 $end_line_num,
+						 $end_col_num - 1);
+
+    $full_defpred_statement =~ s/\n/ /g;
+
+    $full_defpred_statement =~ s/^ +([^ ])/$1/;
+
+    if ($debug) {
+      print "The full defpred statement is: '$full_defpred_statement'\n";
+    }
+
+    $pseudo_item_table{"$begin_line_num:$offset"} = $full_defpred_statement;
+
+  }
+
+  return;
+
+}
+
+sub load_deffunc_statements {
+  chdir $workdir;
+  my @egrep_lines = ();
+  my @egrep_bol_lines
+    = `egrep -n '^deffunc +[A-Za-z0-9]+' $article_in_workdir`;
+  my @egrep_non_bol_lines
+    = `egrep -n ' deffunc +[A-Za-z0-9]+' $article_in_workdir`;
+  push (@egrep_lines, @egrep_bol_lines);
+  push (@egrep_lines, @egrep_non_bol_lines);
+  chomp @egrep_lines;
+
+  foreach my $egrep_line (@egrep_lines) {
+    my ($begin_line_num,$match) = split (':', $egrep_line, 2);
+    # if ':' appears $match, don't use it for splitting    ^
+
+    if ($debug) {
+      print "We found a candidate deffunc statement starting at line $begin_line_num; it looks like this: '$match'\n";
+    }
+
+    my $initial_whitespace = $match =~ / *[ ^]/;
+    my $offset = length $initial_whitespace;
+
+    my $semicolon_found = 0;
+    my $end_line_num = $begin_line_num;
+    my $end_col_num;
+    until ($semicolon_found) {
+      my $str_to_inspect;
+      if ($end_line_num == $begin_line_num) {
+	$str_to_inspect = $match;
+      } else {
+	$str_to_inspect = $article_lines[$end_line_num - 1];
+      }
+      if ($str_to_inspect =~ m/;/g) {
+	$semicolon_found = 1;
+	$end_col_num = pos $str_to_inspect;
+      } else {
+	$end_line_num++;
+      }
+    }
+
+    if ($debug) {
+      print "Found a deffunc statement starting at line $begin_line_num column $offset and going to line $end_line_num column $end_col_num\n"
+    }
+
+    my $full_deffunc_statement = extract_region ($begin_line_num,
+						 $offset - 1,
+						 $end_line_num,
+						 $end_col_num - 1);
+
+    $full_deffunc_statement =~ s/\n/ /g;
+
+    $full_deffunc_statement =~ s/^ +([^ ])/$1/;
+
+    if ($debug) {
+      print "The full deffunc statement is: '$full_deffunc_statement'\n";
+    }
+
+    $pseudo_item_table{"$begin_line_num:$offset"} = $full_deffunc_statement;
 
   }
 
@@ -1302,15 +1512,17 @@ sub load_items {
   my $doc = miz_xml ();
   # check for unhandled nodes; die quickly
 
-  my @toplevel_unhandled_item_xpaths
-    = map { "Article/$_" } @unhandled_node_types;
-  my $unhandled_query = join (' | ', @toplevel_unhandled_item_xpaths);
-
-  my ($unhandled) = $doc->findnodes ($unhandled_query);
-  if (defined $unhandled) {
-    my $unhandled_type = $unhandled->nodeName;
-    warn "There's an unhandled node type in this article (type $unhandled_type); sorry";
-    exit 2;
+  if (@unhandled_node_types != 0) {
+    my @toplevel_unhandled_item_xpaths
+      = map { "Article/$_" } @unhandled_node_types;
+    my $unhandled_query = join (' | ', @toplevel_unhandled_item_xpaths);
+    
+    my ($unhandled) = $doc->findnodes ($unhandled_query);
+    if (defined $unhandled) {
+      my $unhandled_type = $unhandled->nodeName;
+      warn "There's an unhandled node type in this article (type $unhandled_type); sorry";
+      exit 2;
+    }
   }
 
   my @toplevel_item_xpaths = map { "Article/$_" } @handled_node_types;
@@ -1327,38 +1539,39 @@ sub load_items {
 sub process_justifiedtheorem {}
 sub process_toplevel_proposition {}
 
-sub process_definitionblock {
-  # register definitions, making sure to count the ones that
-  # generate DefTheorems
-  my @local_definition_nodes = $node->findnodes ('.//Definition');
-  foreach my $local_definition_node (@local_definition_nodes) {
-    my $vid = $local_definition_node->findvalue ('@vid');
-    # search for the Definiens following this node, if any
-    my $next = $node->nextNonBlankSibling ();
-    $definition_vid_to_absnum{$vid} = $i;
-  }
-}
+# sub process_definitionblock {
+#   # register definitions, making sure to count the ones that
+#   # generate DefTheorems
+#   my @local_definition_nodes = $node->findnodes ('.//Definition');
+#   foreach my $local_definition_node (@local_definition_nodes) {
+#     my $vid = $local_definition_node->findvalue ('@vid');
+#     # search for the Definiens following this node, if any
+#     my $next = $node->nextNonBlankSibling ();
+#     $definition_vid_to_absnum{$vid} = $i;
+#   }
+# }
 
-{
-  my $scheme_num = 0;
-  sub process_schemeblock {
-    # register a scheme, if necessary
-    $scheme_num++;
-    $scheme_num_to_abs_num{$scheme_num} = $i;
-    my $vid = $node->findvalue ('@vid');
-    unless (defined $vid) {
-      die "SchemeBlock node lacks a vid!";
-    }
-    $scheme_num_to_vid{$scheme_num} = $vid;
-  }
-}
+# {
+#   my $scheme_num = 0;
+#   sub process_schemeblock {
+#     # register a scheme, if necessary
+#     $scheme_num++;
+#     $scheme_num_to_abs_num{$scheme_num} = $i;
+#     my $vid = $node->findvalue ('@vid');
+#     unless (defined $vid) {
+#       die "SchemeBlock node lacks a vid!";
+#     }
+#     $scheme_num_to_vid{$scheme_num} = $vid;
+#   }
+# }
 
 sub process_registrationblock {}
 sub process_notationblock {}
 
 load_items ();
 load_deftheorems ();
-init_reservation_table ();
+init_reservations ();
+print_pseudo_item_table ();
 
 sub lex_less_than {
   my $a1 = shift;
@@ -1378,17 +1591,47 @@ sub lex_less_than {
   }
 }
 
+sub lex_less_than_cmp {
+  my $a1 = shift;
+  my $a2 = shift;
+  my $b1 = shift;
+  my $b2 = shift;
+  if ($a1 < $b1) {
+    return -1;
+  } elsif ($a1 == $b1) {
+    if ($a2 < $b2) {
+      return -1;
+    } elsif ($a2 == $b2) {
+      return 0;
+    } else {
+      return 1;
+    }
+  } else {
+    return 1;
+  }
+}
+
+my @pseudo_item_numbers = (); # keep track of 'pseudo-items'
+my $genuine_item_number = 0;
+
 sub itemize {
 
   my $scheme_num = 0;
+
   foreach my $i (1 .. scalar (@nodes)) {
     my $node = $nodes[$i-1];
     my $node_name = $node->nodeName;
 
+    if ($node_name eq 'Proposition' || $node_name eq 'Reconsider' || $node_name eq 'Consider' || $node_name eq 'Now') {
+      push (@pseudo_item_numbers, $i);
+    } else {
+      $genuine_item_number++;
+    }
+
     # register a scheme, if necessary
     if ($node_name eq 'SchemeBlock') {
       $scheme_num++;
-      $scheme_num_to_abs_num{$scheme_num} = $i;
+      $scheme_num_to_abs_num{$scheme_num} = $genuine_item_number;
       my $vid = $node->findvalue ('@vid');
       unless (defined $vid) {
 	die "SchemeBlock node lacks a vid!";
@@ -1404,28 +1647,8 @@ sub itemize {
 	my $vid = $local_definition_node->findvalue ('@vid');
 	# search for the Definiens following this node, if any
 	my $next = $node->nextNonBlankSibling ();
-	$definition_vid_to_absnum{$vid} = $i;
+	$definition_vid_to_absnum{$vid} = $genuine_item_number;
       }
-    }
-
-    if ($node_name eq 'Defpred') {
-      warn "Node $i is a global defpred statement; we don't know how to handle these yet.";
-      exit 2;
-    }
-
-    if ($node_name eq 'Deffunc') {
-      warn "Node $i is a global deffunc statement; we don't know how to handle these yet.";
-      exit 2;
-    }
-
-    if ($node_name eq 'Reconsider') {
-      warn "Node $i is a global reconsider statement; we don't know how to handle these yet.";
-      exit 2;
-    }
-
-    if ($node_name eq 'Set') {
-      warn "Node $i is a global reconsider statement; we don't know how to handle these yet.";
-      exit 2;
     }
 
     # deal with Definiens elements corresponding to Definition
@@ -1445,7 +1668,7 @@ sub itemize {
     }
 
     # register theorems that get referred to later in the article
-    if ($node_name eq 'JustifiedTheorem' or $node_name eq 'Proposition') {
+    if ($node_name eq 'JustifiedTheorem') {
       my $proposition_node;
       if ($node_name eq 'JustifiedTheorem') {
 	($proposition_node) = $node->findnodes ('Proposition[position()=1]');
@@ -1462,11 +1685,11 @@ sub itemize {
 	    warn ("we found a theorem that gets referred to later! its nr is $nr and its vid is $vid");
 	  }
 
-	  $theorem_nr_to_absnum{$nr} = $i;
-	  $theorem_vid_to_absnum{$vid} = $i;	
+	  $theorem_nr_to_absnum{$nr} = $genuine_item_number;
+	  $theorem_vid_to_absnum{$vid} = $genuine_item_number;	
 	}
       } else {
-	die "Weird: a JustiiedTheorem without a Proposition child element? Why?";
+	die "Weird: a JustifiedTheorem without a Proposition child element? Why?";
       }
     }
 
@@ -1489,11 +1712,13 @@ sub itemize {
 	warn ("unexported toplevel theorem with vid $vid...");
       }
 
-      my $prop_label = $idx_table{$vid};
       ($begin_line, $begin_col) = line_and_column ($node);
       # weird: this might not be accurate!
+      # my $prop_label = $idx_table{$vid};
       # ($begin_line, $begin_col)
       #  	= from_keyword_to_position ($prop_label, $begin_line, $begin_col);
+    } elsif ($node_name eq 'Now') {
+      ($begin_line,$begin_col) = line_and_column ($node);
     } else { # JustifiedTheorem
       my ($theorem_proposition) = $node->findnodes ('Proposition[position()=1]');
       unless (defined ($theorem_proposition)) {
@@ -1554,6 +1779,17 @@ sub itemize {
 	    die ("Node $i, a JustifiedTheorem, lacks a Proof as well as a SkippedProof, nor is it immediately justified by a By or From statement");
 	  }
 	}
+      } elsif ($node_name eq 'Reconsider' || $node_name eq 'Consider') {
+	my ($by_or_from) = $node->findnodes ('By | From');
+	my ($last_ref) = $by_or_from->findnodes ('Ref[position()=last()]');
+	if (defined ($last_ref)) {
+	  $last_endposition_child = $last_ref;
+	} else {
+	  $last_endposition_child = $by_or_from;
+	}
+      } elsif ($node_name eq 'Now') {
+	($last_endposition_child)
+	  = $node->findnodes ('./EndPosition[position()=last()]');
       } else {
 	($last_endposition_child)
 	  = $node->findnodes ('EndPosition[position()=last()]');
@@ -1571,6 +1807,19 @@ sub itemize {
 	$end_col--;
       }
 
+      # special case: for consider and reconsider statements, we can
+      # compute from the XML where they end but not where they begin.
+      # So we need to look at the text and find where the first
+      # instance of 'reconsider' before the end position
+      if ($node_name eq 'Reconsider') {
+	($begin_line,$begin_col)
+	  = from_keyword_to_position ('reconsider', $end_line,$end_col);
+      }
+      if ($node_name eq 'Consider') {
+	($begin_line,$begin_col)
+	  = from_keyword_to_position ('consider', $end_line,$end_col);
+      }
+
       if ($debug) {
 	print "the region of interest is ($begin_line,$begin_col)-($end_line,$end_col)\n";
       }
@@ -1581,28 +1830,31 @@ sub itemize {
       # within this interval, because these correspond to non-toplevel
       # set statements.
       my @set_statement_keys_to_delete = ();
-      foreach my $key (keys %set_statements) {
-	my $set_statement = $set_statements{$key};
-	my ($set_begin_line,$set_begin_col) = split (':', $key);
-	
-	if ($debug) {
-	  print "We are considering a set statement that begins on line $set_begin_line column $set_begin_col\n";
-	}
-
-	if (lex_less_than ($begin_line,$begin_col,
-			   $set_begin_line,$set_begin_col)
-	    && lex_less_than ($set_begin_line, $set_begin_col,
-			      $end_line,end_col)) {
-
+      foreach my $key (keys %pseudo_item_table) {
+	my $pseudo_item = $pseudo_item_table{$key};
+	unless ($pseudo_item =~ /^reserve/) {
+	  my ($set_begin_line,$set_begin_col) = split (':', $key);
+	  
 	  if ($debug) {
-	    print "We found a 'local' set statement to remove: '$set_statement'\n";
+	    print "We are considering a set statement that begins on line $set_begin_line column $set_begin_col\n";
 	  }
-
+	  
+	  if (lex_less_than ($begin_line,$begin_col,
+			     $set_begin_line,$set_begin_col)
+	      && lex_less_than ($set_begin_line, $set_begin_col,
+				$end_line,$end_col)) {
+	    
+	    if ($debug) {
+	      print "We found a 'local' set statement to remove: '$pseudo_item'\n";
+	    }
+	    
 	  push (@set_statement_keys_to_delete, $key);
+	  }
 	}
       }
+
       foreach my $key (@set_statement_keys_to_delete) {
-	delete $set_statements{$key};
+	delete $pseudo_item_table{$key};
       }
 
       # look into the node to find references that might need to be
@@ -1808,13 +2060,24 @@ sub itemize {
 	= extract_article_region_replacing_schemes_and_definitions_and_theorems ($node_keyword, $label, $begin_line, $begin_col, $end_line, $end_col, \@local_schemes, \@local_definitions, \@local_theorems);
 
       chomp $text;
-      print ("Item $i: $node_name: ($begin_line,$begin_col)-($end_line,$end_col)\n");
-      print ("======================================================================\n");
-      print ("$pretext$text");
-      print ("\n");
-      print ("======================================================================\n");
 
-      export_item ($i, $begin_line, "$pretext$text");
+      unless ($node_name eq 'Proposition') {
+	print ("Item $genuine_item_number: $node_name: ($begin_line,$begin_col)-($end_line,$end_col)\n");
+	print ("======================================================================\n");
+	print ("$pretext$text");
+	print ("\n");
+	print ("======================================================================\n");
+      }
+
+      if ($node_name eq 'Proposition' || $node_name eq 'Reconsider' || $node_name eq 'Consider' || $node_name eq 'Now') {
+	$pseudo_item_table{"$begin_line:$begin_col"} = "$pretext$text";
+      } else {
+	export_item ($genuine_item_number,
+		     $begin_line,
+		     $begin_col,
+		     "$pretext$text");	
+      }
+
     }
   }
 
@@ -2019,7 +2282,7 @@ sub trim_item_with_number {
   return;
 }
 
-foreach my $item_number (1 .. $num_items) {
+foreach my $item_number (1 .. $genuine_item_number) {
   trim_item_with_number ($item_number);
   verify_item_with_number ($item_number);
   export_item_with_number ($item_number);
@@ -2122,7 +2385,7 @@ sub trim_vocabularies_for_item {
   my @unused_by_column = ();
 
   foreach my $err_line (@err_lines) {
-    @line_column_errcode = split / /, $err_line;
+    my @line_column_errcode = split / /, $err_line;
     unless (@line_column_errcode == 3) {
       die "We found an error line that does not have exactly three fields: @line_column_errcode";
     }
@@ -2301,7 +2564,7 @@ sub reduce_imported_items {
   }
 }
 
-foreach my $i (1 .. $num_items) {
+foreach my $i (1 .. $genuine_item_number) {
   reduce_imported_items ($i);
 }
 
@@ -2558,12 +2821,6 @@ From ABCMIZ_1 (of MML 4.150.1103):
 deffunc F(set,set) =
 {[varcl A, j] where A is Subset of $2, j is Element of NAT: A is finite};
 
-=item defpred
-
-From FINSEQ_1 (of MML 4.150.1103):
-
-defpred P[set,set] means ex k st $1 = k & $2 = k+1;
-
 =item consider
 
 Consider this bad boy from AFVECT01 (of MML 4.150.1103):
@@ -2582,26 +2839,6 @@ Hairy!
 For a less hairy example, look at BHSP_1 (from MML 4.150.1103):
 
 consider V0 being RealLinearSpace;
-
-=item reconsider
-
-From RAT_1 (of MML 4.150.1103):
-
-then reconsider 09 = 0 as Element of REAL+ by ARYTM_2:2;
-
-(The "then" links the reconsider with the previous statement, an
-unexported toplevel theorem
-
-  0 in omega;
-
-with no proof.)
-
-=item set
-
-From ARYTM_2 (from MML 4.150.1103):
-
-set IR = { A where A is Subset of RAT+: r in A implies (for s st s <=' r holds
-s in A) & ex s st s in A & r < s}, RA = {{ s: s < t}: t <> {}};
 
 =item unlabeled unexported theorems
 
