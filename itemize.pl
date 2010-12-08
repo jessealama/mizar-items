@@ -2176,7 +2176,7 @@ sub trim_directive {
   my @directive_contents = @{shift ()};
   my @trimmed = ();
   foreach my $directive_item (@directive_contents) {
-    my $file_to_look_for = catfile ($article_prel_dir, "$directive_item.$extension_for_directive");
+    my $file_to_look_for = catfile ($article_prel_dir, lc "$directive_item.$extension_for_directive");
     if (grep (/^$directive_item$/i, @mml_lar)) {
       push (@trimmed, $directive_item);
     } elsif ($directive_item eq 'TARSKI') { # TARSKI is not listed in mml.lar
