@@ -2527,6 +2527,7 @@ sub TestXMLElems ($$$)
     }
 
     if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+      %removed = ();
       foreach my $chunk (0 .. $chunks) {
 	foreach my $elem (0 .. $chunksize -1)
 	{
