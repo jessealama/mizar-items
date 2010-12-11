@@ -688,8 +688,17 @@ sub from_keyword_to_position {
       $current_line = $article_lines[$target_line_num];
     }
 
+    # sanity
+    if ($target_line_num < 0) {
+      die "We apparently backed up over the beginning of the article looking for '$keyword'!";
+    }
+
+    if ($debug) {
+      print "looking at line $target_line_num, which is '$current_line'", "\n";
+    }
+
     my $match_pos;
-    if ($current_line =~ m/^$keyword|[ ]$keyword$|[ ]$keyword[ ]/g) {
+    if ($current_line =~ m/(^$keyword$)|(^$keyword[ ])|([ ]$keyword$)|([ ]$keyword[ ])/g) {
       # check this this occurrence of $keyword isn't commented out
       my $match_pos = pos $current_line;
       my $truncated_current_line = substr $current_line, 0, $match_pos;
@@ -700,13 +709,14 @@ sub from_keyword_to_position {
   }
 
   # we have found our line; now find the LAST use of $keyword
-  while ($target_line =~ m/^$keyword|[ ]$keyword$|[ ]$keyword[ ]/g) {
+  while ($target_line =~ m/(^$keyword$)|(^$keyword[ ])|([ ]$keyword$)|([ ]$keyword[ ])/g) {
     $pos = pos $target_line;
   }
 
   $target_line_num++; # off by one?!
 
-  return ($target_line_num, $pos);
+  $keyword =~ /:$/ ? return ($target_line_num, $pos - 1) # adjust for ':'
+                   : return ($target_line_num, $pos);
 }
 
 sub theorem_before_position {
@@ -1136,7 +1146,6 @@ sub pretext_from_item_type_and_beginning {
   my $node = shift;
   my $begin_line = shift;
   my $begin_col = shift;
-  my $item_node = shift;
 
   my $item_type = $node->nodeName;
 
@@ -1173,7 +1182,7 @@ sub pretext_from_item_type_and_beginning {
     if ($node->exists ('SkippedProof')) {
       $pretext .= 'canceled;'; # in this case, the pretext is the whole text
     } else {
-      my $vid = $item_node->findvalue ('@vid');
+      my $vid = $node->findvalue ('@vid');
       
       if ($debug) {
 	warn ("exported toplevel theorem with vid $vid...");
@@ -1183,7 +1192,7 @@ sub pretext_from_item_type_and_beginning {
       $pretext .= "theorem ";
     }
   } elsif ($item_type eq 'Proposition') {
-    my $vid = $item_node->findvalue ('@vid');
+    my $vid = $node->findvalue ('@vid');
 
     if ($debug) {
       warn ("unexported toplevel theorem with vid $vid...");
@@ -1197,7 +1206,7 @@ sub pretext_from_item_type_and_beginning {
     }
 
     my ($lemma_begin_line,$lemma_begin_col)
-      = from_keyword_to_position ($prop_label, $begin_line, $begin_col);
+      = from_keyword_to_position ("$prop_label:", $begin_line, $begin_col);
     $lemma_begin_col++; # because of the colon after the keyword
 
     if ($debug) {
@@ -1220,7 +1229,7 @@ sub pretext_from_item_type_and_beginning {
   } elsif ($item_type eq 'Consider') {
     $pretext .= "consider ";
   } elsif ($item_type eq 'Now') {
-    my $vid = $item_node->findvalue ('@vid');
+    my $vid = $node->findvalue ('@vid');
     
     if ($debug) {
       warn ("exported toplevel theorem with vid $vid...");
@@ -1231,6 +1240,19 @@ sub pretext_from_item_type_and_beginning {
       $pretext .= "$prop_label: now ";
     } else {
       $pretext .= "now ";
+    }
+  } elsif ($item_type eq 'IterEquality') {
+    my $vid = $node->findvalue ('@vid');
+    
+    if ($debug) {
+      warn ("toplevel iterated equality with vid $vid...");
+    }
+    
+    my $prop_label = $idx_table{$vid};
+    if (defined $prop_label) {
+      $pretext .= "$prop_label: ";
+    } else {
+      $pretext .= "";
     }
   } else {
     $pretext .= '';
@@ -1318,6 +1340,7 @@ my %node_processors
      'Reconsider' => \&process_reconsider,
      'Consider' => \&process_consider,
      'Now' => \&process_now,
+     'IterEquality' => \&process_iterequality,
     );
 
 my @handled_node_types = keys %node_processors;
@@ -1634,7 +1657,7 @@ sub itemize {
     my $node = $nodes[$i-1];
     my $node_name = $node->nodeName;
 
-    if ($node_name eq 'Proposition' || $node_name eq 'Reconsider' || $node_name eq 'Consider' || $node_name eq 'Now') {
+    if ($node_name eq 'Proposition' || $node_name eq 'Reconsider' || $node_name eq 'Consider' || $node_name eq 'Now' || $node_name eq 'IterEquality') {
       push (@pseudo_item_numbers, $i);
     } else {
       $genuine_item_number++;
@@ -1649,6 +1672,10 @@ sub itemize {
 	die "SchemeBlock node lacks a vid!";
       }
       $scheme_num_to_vid{$scheme_num} = $vid;
+
+      if ($debug) {
+	print "registering scheme $scheme_num as vid $vid", "\n";
+      }
     }
 
     # register definitions, making sure to count the ones that
@@ -1731,6 +1758,9 @@ sub itemize {
       #  	= from_keyword_to_position ($prop_label, $begin_line, $begin_col);
     } elsif ($node_name eq 'Now') {
       ($begin_line,$begin_col) = line_and_column ($node);
+    } elsif ($node_name eq 'IterEquality') {
+      # this is actually inaccurate; we will fix it later
+      ($begin_line,$begin_col) = line_and_column ($node);
     } else { # JustifiedTheorem
       my ($theorem_proposition) = $node->findnodes ('Proposition[position()=1]');
       unless (defined ($theorem_proposition)) {
@@ -1802,6 +1832,26 @@ sub itemize {
       } elsif ($node_name eq 'Now') {
 	($last_endposition_child)
 	  = $node->findnodes ('./EndPosition[position()=last()]');
+      } elsif ($node_name eq 'IterEquality') {
+	my @by_or_from_nodes
+	  = $node->findnodes ('.//By|From');
+	if (@by_or_from_nodes != 0) {
+	  my $last_by_or_from = $by_or_from_nodes[scalar @by_or_from_nodes - 1];
+	  if ($last_by_or_from->nodeName eq 'By') {
+	    my ($last_ref)
+	      = $last_by_or_from->findnodes ('Ref[position()=last()]');
+	    if (defined $last_ref) {
+	      $last_endposition_child = $last_ref;
+	    } else {
+	      $last_endposition_child = $last_by_or_from;
+	    }
+	  } else {
+	    $last_endposition_child = $node;
+	  }
+	} else {
+	  $last_endposition_child = $node;
+	}
+
       } else {
 	($last_endposition_child)
 	  = $node->findnodes ('EndPosition[position()=last()]');
@@ -1819,10 +1869,14 @@ sub itemize {
 	$end_col--;
       }
 
-      # special case: for consider and reconsider statements, we can
-      # compute from the XML where they end but not where they begin.
-      # So we need to look at the text and find where the first
-      # instance of 'reconsider' before the end position
+      # special case: for consider and reconsider statements, and for
+      # iterative equalities, we can compute from the XML where they
+      # end but not where they begin.  So we need to look at the text
+      # and find where the first instance of 'reconsider' or
+      # 'consider' before the end position, in the case of reconsider
+      # and consider statements; for iterative equalities, we need to
+      # look backward for their label, which exists since we're using
+      # dellink on our article.
       if ($node_name eq 'Reconsider') {
 	($begin_line,$begin_col)
 	  = from_keyword_to_position ('reconsider', $end_line,$end_col);
@@ -1830,6 +1884,18 @@ sub itemize {
       if ($node_name eq 'Consider') {
 	($begin_line,$begin_col)
 	  = from_keyword_to_position ('consider', $end_line,$end_col);
+      }
+      if ($node_name eq 'IterEquality') {
+	my $vid = $node->findvalue ('@vid');
+
+	if ($debug) {
+	  warn ("toplevel iterated equality with vid $vid...");
+	}
+
+	my $prop_label = $idx_table{$vid};
+	
+	($begin_line,$begin_col)
+	  = from_keyword_to_position ("$prop_label:", $end_line, $end_col);
       }
 
       if ($debug) {
@@ -1881,7 +1947,7 @@ sub itemize {
 	if ($next_name eq 'Proof') {
 	  $ref_containing_node = $next;
 	} else {
-	  $ref_containing_node = $node; # there's no following proof; there's no need to rewrite references
+	  $ref_containing_node = $next;
 	}
       } else {
 	$ref_containing_node = $node;
@@ -1889,7 +1955,10 @@ sub itemize {
 
       # gather all local schemes
       my @local_schemes = ();
-      my @local_scheme_nodes = $ref_containing_node->findnodes ('.//From');
+      my @local_scheme_nodes 
+	= $ref_containing_node->nodeName eq 'From'
+	  ? ($ref_con)
+	  : $ref_containing_node->findnodes ('.//From');
 
       if ($debug) {
 	warn ("this node has " . scalar (@local_scheme_nodes) . " local scheme nodes");
@@ -2007,6 +2076,8 @@ sub itemize {
 
 	      my @local_theorem_info = ($line,$col,$th_label,$theorem_nr_absnum);
 	      push (@local_theorems, \@local_theorem_info);
+	    } else {
+	      die "Weird: theorem_nr_absnum ($theorem_nr_absnum) and theorem_vid_absnum ($theorem_vid_absnum) are defined, but they are not equal!";
 	    }
 	  }
 	}
@@ -2019,8 +2090,7 @@ sub itemize {
       my $pretext
 	= pretext_from_item_type_and_beginning ($node,
 						$begin_line,
-						$begin_col,
-						$node);
+						$begin_col);
 
       if ($debug) {
 	print "the pretext is '$pretext'\n";
@@ -2073,15 +2143,13 @@ sub itemize {
 
       chomp $text;
 
-      unless ($node_name eq 'Proposition') {
-	print ("Item $genuine_item_number: $node_name: ($begin_line,$begin_col)-($end_line,$end_col)\n");
-	print ("======================================================================\n");
-	print ("$pretext$text");
-	print ("\n");
-	print ("======================================================================\n");
-      }
+      print ("Item $i: $node_name: ($begin_line,$begin_col)-($end_line,$end_col)\n");
+      print ("======================================================================\n");
+      print ("$pretext$text");
+      print ("\n");
+      print ("======================================================================\n");
 
-      if ($node_name eq 'Proposition' || $node_name eq 'Reconsider' || $node_name eq 'Consider' || $node_name eq 'Now') {
+      if ($node_name eq 'Proposition' || $node_name eq 'Reconsider' || $node_name eq 'Consider' || $node_name eq 'Now' || $node_name eq 'IterEquality') {
 	$pseudo_item_table{"$begin_line:$begin_col"} = "$pretext$text";
       } else {
 	export_item ($genuine_item_number,
@@ -2746,6 +2814,12 @@ This program uses the MIZFILES environment variable.
 
 =head1 DEPENDENCIES
 
+=head2 MIZAR DEPENDENCIES
+
+To handle some articles in the MML with many reservations, one must
+run a custom accom, verifier, and exporter with a value for
+MaxResNbr in limits.pas greater than 50.
+
 =head2 PERL DEPENDENCIES
 
 =head3 Non-standard modules
@@ -2837,298 +2911,6 @@ module rather than here.
 =item Unhandled items
 
 =over
-
-=item deffunc
-
-From ABCMIZ_1 (of MML 4.150.1103):
-
-deffunc F(set,set) =
-{[varcl A, j] where A is Subset of $2, j is Element of NAT: A is finite};
-
-=item consider
-
-Consider this bad boy from AFVECT01 (of MML 4.150.1103):
-
-consider AFV0 being WeakAffVect;
-set X = the carrier of AFV0;
-set XX = [:X,X:];
-defpred P[set,set] means ex a,b,c,d being Element of X st $1=[a,b] & $2=[c,d]
-& a,b '||' c,d;
-consider P being Relation of XX,XX such that
-Lm13: for x,y being set holds [x,y] in P iff x in XX & y in XX & P[x,y]
-from RELSET_1:sch 1;
-
-Hairy!
-
-For a less hairy example, look at BHSP_1 (from MML 4.150.1103):
-
-consider V0 being RealLinearSpace;
-
-=item unlabeled unexported theorems
-
-=back
-
-The following 129 articles of MML 4.150.1103 contain, at the toplevel,
-either reconsider, set, defpred, deffunc, or unlabeled unexported
-theorems:
-
-=over
-
-=item abcmiz_1
-
-=item abcmiz_a
-
-=item afvect01
-
-=item ami_4
-
-=item ami_wstd
-
-=item amistd_1
-
-=item analmetr
-
-=item arytm_0
-
-=item arytm_1
-
-=item arytm_2
-
-=item arytm_3
-
-=item axioms
-
-=item bhsp_1
-
-=item bhsp_2
-
-=item bhsp_3
-
-=item bhsp_4
-
-=item binop_2
-
-=item brouwer
-
-=item card_1
-
-=item card_2
-
-=item card_lar
-
-=item cardfin2
-
-=item cfdiff_1
-
-=item chain_1
-
-=item classes1
-
-=item classes2
-
-=item closure2
-
-=item clvect_1
-
-=item clvect_2
-
-=item clvect_3
-
-=item collsp
-
-=item commacat
-
-=item comptrig
-
-=item comseq_2
-
-=item comseq_3
-
-=item convex2
-
-=item cqc_sim1
-
-=item csspace
-
-=item dtconstr
-
-=item euclid_9
-
-=item euler_1
-
-=item fdiff_1
-
-=item fib_num
-
-=item fib_num4
-
-=item filter_1
-
-=item filter_2
-
-=item finset_1
-
-=item geomtrap
-
-=item heyting1
-
-=item heyting2
-
-=item int_3
-
-=item jgraph_2
-
-=item jordan
-
-=item jordan1a
-
-=item jordan1c
-
-=item jordan1d
-
-=item jordan24
-
-=item lattice3
-
-=item limfunc1
-
-=item measure7
-
-=item metric_1
-
-=item monoid_0
-
-=item monoid_1
-
-=item mssublat
-
-=item msualg_1
-
-=item nagata_2
-
-=item normsp_0
-
-=item normsp_1
-
-=item numbers
-
-=item ortsp_1
-
-=item parsp_1
-
-=item pcs_0
-
-=item pdiff_1
-
-=item polyalg1
-
-=item polyeq_1
-
-=item polyeq_2
-
-=item pre_circ
-
-=item pre_ff
-
-=item prelamb
-
-=item prvect_1
-
-=item qc_lang3
-
-=item qmax_1
-
-=item quantal1
-
-=item rat_1
-
-=item rcomp_3
-
-=item real_3
-
-=item realset2
-
-=item scm_comp
-
-=item scm_halt
-
-=item scmbsort
-
-=item scmfsa6c
-
-=item scmfsa7b
-
-=item scmfsa8a
-
-=item scmfsa8b
-
-=item scmfsa9a
-
-=item scmfsa_7
-
-=item scmfsa_9
-
-=item scmisort
-
-=item scmp_gcd
-
-=item scmpds_2
-
-=item scmpds_6
-
-=item scmpds_7
-
-=item scmpds_8
-
-=item scpinvar
-
-=item scpisort
-
-=item scpqsort
-
-=item sfmastr1
-
-=item sfmastr2
-
-=item sin_cos
-
-=item sin_cos6
-
-=item sincos10
-
-=item symsp_1
-
-=item topalg_2
-
-=item topalg_3
-
-=item topalg_4
-
-=item topalg_5
-
-=item topgen_3
-
-=item topreal2
-
-=item topreala
-
-=item toprealb
-
-=item twoscomp
-
-=item valued_2
-
-=item vectsp_1
-
-=item vectsp_2
-
-=item xcmplx_0
-
-=item xreal_0
-
-=item xreal_1
-
-=item zf_model
 
 =item zfmodel1
 
