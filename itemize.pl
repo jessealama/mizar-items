@@ -1646,6 +1646,11 @@ sub lex_less_than_cmp {
   }
 }
 
+sub ensure_final_semicolon {
+  my $str = shift;
+  $str =~ /[;]$/ ? return $str : return "$str;";
+}
+
 my @pseudo_item_numbers = (); # keep track of 'pseudo-items'
 my $genuine_item_number = 0;
 
@@ -1957,7 +1962,7 @@ sub itemize {
       my @local_schemes = ();
       my @local_scheme_nodes 
 	= $ref_containing_node->nodeName eq 'From'
-	  ? ($ref_con)
+	  ? ($ref_containing_node)
 	  : $ref_containing_node->findnodes ('.//From');
 
       if ($debug) {
@@ -2142,6 +2147,8 @@ sub itemize {
 	= extract_article_region_replacing_schemes_and_definitions_and_theorems ($node_keyword, $label, $begin_line, $begin_col, $end_line, $end_col, \@local_schemes, \@local_definitions, \@local_theorems);
 
       chomp $text;
+
+      $text = ensure_final_semicolon ($text);
 
       print ("Item $i: $node_name: ($begin_line,$begin_col)-($end_line,$end_col)\n");
       print ("======================================================================\n");
