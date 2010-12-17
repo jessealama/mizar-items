@@ -1745,7 +1745,7 @@ sub itemize {
     } elsif ($node_name eq 'IterEquality') {
       # this is actually inaccurate; we will fix it later
       ($begin_line,$begin_col) = line_and_column ($node);
-    } else { # JustifiedTheorem
+    } elsif ($node_name eq 'JustifiedTheorem') {
       my ($theorem_proposition) = $node->findnodes ('Proposition[position()=1]');
       unless (defined ($theorem_proposition)) {
 	die ("Weird: node $i, a JustifiedTheorem, lacks a Proposition child element");
