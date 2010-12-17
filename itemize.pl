@@ -1359,7 +1359,7 @@ sub load_set_statements {
       } else {
 	$str_to_inspect = $article_lines[$end_line_num - 1];
       }
-      if ($str_to_inspect =~ m/;/g) {
+      if ($str_to_inspect =~ m/[;]$|[;] /g) {
 	$semicolon_found = 1;
 	$end_col_num = pos $str_to_inspect;
       } else {
