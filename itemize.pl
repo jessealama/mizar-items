@@ -719,26 +719,6 @@ sub from_keyword_to_position {
                    : return ($target_line_num, $pos);
 }
 
-sub theorem_before_position {
-  my $end_line = shift;
-  my $end_col = shift;
-  my ($begin_line,$begin_col)
-    = from_keyword_to_position ('theorem', $end_line, $end_col);
-
-  if ($debug) {
-    warn "For this theorem, we started at line $end_line and column $end_col";
-    warn "For this theorem, the begin_line is $begin_line and the begin_col is $begin_col";
-  }
-
-  my $theorem = extract_region ($begin_line,$begin_col,$end_line,$end_col);
-
-  if ($debug) {
-    warn "Just extracted theorem: $theorem";
-  }
-
-  return $theorem;
-}
-
 sub extract_region {
   my $beg_line = shift;
   my $beg_col = shift;
@@ -1178,7 +1158,6 @@ sub pretext_from_item_type_and_beginning {
   }
 
   if ($item_type eq 'JustifiedTheorem') {
-    # $pretext = theorem_before_position ($begin_line, $begin_col);
     if ($node->exists ('SkippedProof')) {
       $pretext .= 'canceled;'; # in this case, the pretext is the whole text
     } else {
