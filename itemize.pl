@@ -309,7 +309,7 @@ if (-s $article_err) {
 ### 2. Run JA1, edtfile, overwrite the non-JA1'd .miz, and load it
 
 # JA1
-system ("JA1 -q -s -l $article_miz > /dev/null 2> /dev/null") == 0
+system ("JA1 -q -s -l $article_name > /dev/null 2> /dev/null") == 0
   or die "Error: Something went wrong when calling JA1 on $article_name: the error was\n\n$!";
 if (-s $article_err) {
   die "Error: although the JA1 tool returned successfully, it nonetheless generated a non-empty error file";
