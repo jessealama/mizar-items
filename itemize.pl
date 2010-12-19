@@ -241,6 +241,17 @@ unless (-d $workdir) {
 ######################################################################
 
 ######################################################################
+### Ensure that all the non-standard mizar tools we need are available
+######################################################################
+
+my @mizar_tools = ('dellink', 'JA1', 'envget');
+foreach my $mizar_tool (@mizar_tools) {
+  unless (system ("which $mizar_tool") == 0) {
+    die "The mizar tool $mizar_tool cannot be found in your PATH or is not executable!";
+  }
+}
+
+######################################################################
 ### Prepare result directories:
 ###
 ### 1. The work directory, where sed, dellink, JA1, etc., will be run.
