@@ -838,10 +838,6 @@ sub extract_article_region_replacing_schemes_and_definitions_and_theorems {
   my @sorted_instructions
     = sort instruction_greater_than @instructions; # apply in REVERSE order
 
-  if ($item_kind eq 'canceled') {
-    return ''; # the pretext is already 'canceled;'
-  }
-
   # do it
   my @buffer = @{extract_region_as_array ($bl, $bc, $el, $ec)};
 
@@ -1158,18 +1154,14 @@ sub pretext_from_item_type_and_beginning {
   }
 
   if ($item_type eq 'JustifiedTheorem') {
-    if ($node->exists ('SkippedProof')) {
-      $pretext .= 'canceled;'; # in this case, the pretext is the whole text
-    } else {
-      my $vid = $node->findvalue ('@vid');
-      
-      if ($debug) {
-	warn ("exported toplevel theorem with vid $vid...");
+    my $vid = $node->findvalue ('@vid');
+    
+    if ($debug) {
+      warn ("exported toplevel theorem with vid $vid...");
     }
 
-      my $prop_label = $idx_table{$vid};
-      $pretext .= "theorem ";
-    }
+    my $prop_label = $idx_table{$vid};
+    $pretext .= "theorem ";
   } elsif ($item_type eq 'Proposition') {
     my $vid = $node->findvalue ('@vid');
 
@@ -1797,13 +1789,7 @@ sub itemize {
 	    # die ("Node $i, a JustifiedTheorem, is immediately justified, but no statements are mentioned after the by/from keyword!");
 	  }
 	} else {
-	  # this is the case of cancelled theorems
-	  if ($node->exists ('SkippedProof')) { # toplevel skipped proof
-	    my ($prop_node) = $node->findnodes ('Proposition');
-	    $last_endposition_child = $prop_node;
-	  } else {
-	    die ("Node $i, a JustifiedTheorem, lacks a Proof as well as a SkippedProof, nor is it immediately justified by a By or From statement");
-	  }
+	  die ("Node $i, a JustifiedTheorem, lacks a Proof as well as a SkippedProof, nor is it immediately justified by a By or From statement");
 	}
       } elsif ($node_name eq 'Reconsider' || $node_name eq 'Consider') {
 	my ($by_or_from) = $node->findnodes ('By | From');
@@ -2105,11 +2091,7 @@ sub itemize {
 
       my $node_keyword;
       if ($node_name eq 'JustifiedTheorem') {
-	if ($node->exists ('SkippedProof')) {
-	  $node_keyword = 'canceled';
-	} else {
-	  $node_keyword = 'theorem';	
-	}
+	$node_keyword = 'theorem';	
       } elsif ($node_name eq 'Proposition') {
 	$node_keyword = 'proposition';
       } elsif ($node_name eq 'SchemeBlock') {
