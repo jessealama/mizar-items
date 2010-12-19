@@ -246,7 +246,7 @@ unless (-d $workdir) {
 
 my @mizar_tools = ('dellink', 'JA1', 'envget');
 foreach my $mizar_tool (@mizar_tools) {
-  unless (system ("which $mizar_tool") == 0) {
+  unless (system ("which $mizar_tool > /dev/null 2> /dev/null") == 0) {
     die "The mizar tool $mizar_tool cannot be found in your PATH or is not executable!";
   }
 }
