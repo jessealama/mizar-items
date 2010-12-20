@@ -2,7 +2,7 @@
 (in-package :cl-user)
 
 (defpackage :mizar
-  (:use :cl))
+  (:use :cl :cl-ppcre))
 
 (defvar *mizar-package* (find-package :mizar))
 

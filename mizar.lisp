@@ -82,8 +82,140 @@ variable (at load time).")
     ;; just delete the directory for now
     (sb-ext:delete-directory location))) ;; not ideal: we shouldn't use sb-ext
 
-(defun run-mizar-utility (utility)
-  (declare (ignore utility))
-  nil)
+(defgeneric strip-comments (article))
+
+(defmethod strip-comments ((article-path pathname))
+  (if (probe-file article-path)
+      (let* ((tmp-path (replace-extension article-path "miz" "stripped"))
+	     (proc (sb-ext:run-program "sed" (list "-e" "s/::.*$//" (namestring article-path))
+				       :search t
+				       :output tmp-path
+				       :if-output-exists :error)))
+	(if (zerop (sb-ext:process-exit-code proc))
+	    (rename-file tmp-path article-path)
+	    (error "Something went wrong when stripping comments; the process exited with code ~S" (sb-ext:process-exit-code proc))))
+      (error "No such file ~A" article-path)))
+
+(defmethod strip-comments ((article-path string))
+  (strip-comments (pathname article-path)))
+
+(defmethod strip-comments ((article article))
+  (strip-comments (path article))
+  (refresh-text article))
+
+(defgeneric run-mizar-tool (tool article &rest flags))
+
+(defmethod run-mizar-tool ((tool string) (article-path pathname) &rest flags)
+  (let ((name (namestring article-path)))
+    (if (probe-file article-path)
+	(let ((proc (sb-ext:run-program tool (append flags (list name)) :search t)))
+	  (if (zerop (sb-ext:process-exit-code proc))
+	      (let ((err-filename (replace-extension article-path "miz" "err")))
+		(if (and (probe-file err-filename)
+			 (not (zerop (file-size err-filename))))
+		    (error "Although ~S returned successfully, it nonetheless generated a non-empty error file" tool)
+		    t))
+	      (error "~S did not exit cleanly working on ~S" tool article-path)))
+	(error "No such file: ~S" name))))
+
+(defmethod run-mizar-tool ((tool string) (article-path string) &rest flags)
+  (apply 'run-mizar-tool tool (pathname article-path) flags))
+
+(defmethod run-mizar-tool ((tool string) (article article) &rest flags)
+  (if (slot-boundp article 'path)
+      (apply 'run-mizar-tool tool (path article) flags)
+      (error "Cannot apply ~S to ~S because we don't know its path"
+	     tool article)))
+
+(defmethod run-mizar-tool ((tool symbol) article &rest flags)
+  (apply 'run-mizar-tool 
+	 (format nil "~(~a~)" (string tool)) ; lowercase: watch out
+	 article
+	 flags))
+
+(defmacro define-mizar-tool (tool)
+  ; check that TOOL is real
+  (let ((check (sb-ext:run-program "which" (list tool) :search t)))
+    (if (zerop (sb-ext:process-exit-code check))
+	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
+	  `(progn
+	     (defgeneric ,tool-as-symbol (article &rest flags))
+	     (defmethod ,tool-as-symbol ((article-path pathname) &rest flags)
+	       (apply 'run-mizar-tool ,tool article-path flags))
+	     (defmethod ,tool-as-symbol ((article-path string) &rest flags)
+	       (apply 'run-mizar-tool ,tool article-path flags))
+	     (defmethod ,tool-as-symbol ((article article) &rest flags)
+	       (apply 'run-mizar-tool ,tool article flags))))
+	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
+
+
+(define-mizar-tool "edtfile")
+
+(defmacro define-mizar-text-transformer (tool)
+  ; check that TOOL is real
+  (let ((check (sb-ext:run-program "which" (list tool) :search t)))
+    (if (zerop (sb-ext:process-exit-code check))
+	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
+	  `(progn
+	     (defgeneric ,tool-as-symbol (article &rest flags))
+	     (defmethod ,tool-as-symbol ((article-path pathname) &rest flags)
+	       (let ((edtfile-path (replace-extension article-path
+						      "miz" "$-$")))
+		 (apply 'run-mizar-tool ,tool article-path flags)
+		 (edtfile article-path "-l")
+		 (rename-file edtfile-path article-path)))
+	     (defmethod ,tool-as-symbol ((article-path string) &rest flags)
+	       (apply ',tool-as-symbol (pathname article-path) flags))
+	     (defmethod ,tool-as-symbol ((article article) &rest flags)
+	       (apply ',tool-as-symbol (path article) flags)
+	       (refresh-text article))))
+	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
+
+;; our text transformers -- thanks, Karol Pąk et al.! 
+(define-mizar-text-transformer "JA1")
+(define-mizar-text-transformer "dellink")
+(define-mizar-text-transformer "CutSet")
+(define-mizar-text-transformer "CutReconsider")
+
+;; workhorses
+(define-mizar-tool "makeenv")
+(define-mizar-tool "accom")
+(define-mizar-tool "verifier")
+(define-mizar-tool "envget")
+
+;;; absrefs
+
+(defparameter *xsl4mizar-root* 
+  (ensure-directories-exist "/Users/alama/sources/mizar/xsl4mizar"))
+
+(defparameter *addabsrefs-stylesheet*
+  (probe-file (make-pathname :directory *xsl4mizar-root*
+			     :name "addabsrefs.xsl")))
+
+(defgeneric absrefs (article))
+
+(defmethod absrefs ((article-path pathname))
+  (let ((article-xml-path (replace-extension article-path "miz" "xml"))
+	(new-article-xml-path (replace-extension article-path "miz" "xml1")))
+    (if (probe-file article-xml-path)
+	(progn
+	  (sb-ext:run-program "xsltproc"
+			      (list (namestring *addabsrefs-stylesheet*)
+				    (namestring article-xml-path)
+				    "-o"
+				    (namestring new-article-xml-path))
+			      :search t)
+	  ;; xsltproc returns non-zero error code on most articles,
+	  ;; owing to the bex and fex entities generated by the
+	  ;; verifier.  For now, just assume it was successful
+	  (rename-file new-article-xml-path article-xml-path))
+	(error "File does not exist: ~S" article-xml-path))))
+
+(defmethod absrefs ((article-path string))
+  (absrefs (pathname article-path)))
+
+(defmethod absrefs ((article article))
+  (absrefs (path article))
+  (refresh-xml article))
 
 ;;; mizar.lisp ends here

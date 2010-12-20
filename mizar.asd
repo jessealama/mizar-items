@@ -12,9 +12,11 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on nil
+  :depends-on ("xpath" "cl-ppcre")
   :components ((:file "packages")
-	       (:file "mizar")
+	       (:file "xml-utils")
+	       (:file "file-utils")
 	       (:file "article")
+	       (:file "mizar")
 	       (:file "item")
 	       (:file "itemize")))
