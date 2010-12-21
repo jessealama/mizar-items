@@ -9,10 +9,6 @@
 (defun article-uses-article (article-1 article-2)
   (member article-1 (complete-environment article-2)))
 
-(defun itemize (&rest articles)
-  (let ((articles (sort articles #'article-uses-article)))
-    articles))
-
 (defun reservation-statements (article)
   (article-lines-matching "^ *reserve .*$" article))
 
