@@ -20,6 +20,9 @@
 (defun value-of-col-attribute (node)
   (integer-value-of-attribute node "col"))
 
+(defun value-of-vid-attribute (node)
+  (integer-value-of-attribute node "vid"))
+
 (defun line-and-column (line-and-column-node)
   (values (value-of-line-attribute line-and-column-node)
 	  (value-of-col-attribute line-and-column-node)))
