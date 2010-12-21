@@ -292,23 +292,57 @@ sibling elements; these need to be stored."
     (let ((sorted-everything (stable-sort everything #'item-lex-less)))
       (reverse (disjoin-items sorted-everything)))))
 
-(defun itemize-preprocess (article)
+(defun preprocess-text (article)
   (strip-comments article)
   (accom article "-q" "-l" "-s")
   (JA1 article "-q" "-l" "-s")
   (dellink article "-q" "-l" "-s")
   (CutSet article "-q" "-l" "-s")
   (CutReconsider article "-q" "-l" "-s")
-  (change article "-q" "-l" "-s")
+  (change article "-q" "-l" "-s"))
+
+(defun initialize-context-for-items (article)
+  ;; compute a conservative estimate of what pseudo-items each item
+  ;; will depend on, namely: all previous ones
+  (loop
+     with candidates = (item-candidates article)
+     with num-candidates = (length candidates)
+     with earlier-pseudo-items = (make-hash-table :test #'eq :size num-candidates)
+     for candidate in candidates
+     for candidate-num from 1 upto num-candidates
+     do
+       (if (typep candidate 'pseudo-item)
+	   (setf (gethash candidate-num earlier-pseudo-items)
+		 candidate)
+	   (setf (context-items candidate)
+		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
+     finally (return article)))
+
+(defun itemize-preprocess (article)
+  (preprocess-text article)
+
+  ;; ensure the article XML is now synchonized with the changed text
   (verifier article "-q" "-l" "-s")
   (absrefs article)
   (refresh-text article)
-  (refresh-idx article))
+  (refresh-idx article)
 
-(defun itemize (article)
+  (initialize-context-for-items article))
+
+(defun rewrite-item (item theorem-and-definition-table scheme-table)
+  (declare (ignore theorem-and-definition-table scheme-table)) ;; too hard right now
+  item)
+
+(defun exportable-items (article)
   (itemize-preprocess article)
-  (dolist (candidates (item-candidates article))
-    (export candidate)))
-    
+  (loop
+     with nr-vid-table = (make-hash-table :test #'equal) ; keys are pairs of integers
+     with scheme-table = (make-hash-table :test #'eq) ; keys are integers
+     with candidates = (remove-if-not #'(lambda (candidate)
+					  (typep candidate 'pseudo-item))
+				      (item-candidates article))
+     for candidate in candidates
+     collecting (rewrite-item candidate nr-vid-table scheme-table) into items
+     finally (return items)))
 
 ;;; itemize.lisp ends here
