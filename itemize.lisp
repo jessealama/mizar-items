@@ -200,6 +200,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
   (CutReconsider article "-q" "-l" "-s")
   (change article "-q" "-l" "-s")
   (verifier article "-q" "-l" "-s")
+  (absrefs article)
   (refresh-text article)
   (refresh-xml article)
   (refresh-idx article))
