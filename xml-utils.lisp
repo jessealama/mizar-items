@@ -77,4 +77,13 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 	(setf next (next-non-blank-sibling next))))
     (reverse deftheorem-nodes)))
 
+(defun all-by-descendents (node)
+  (xpath:all-nodes (xpath:evaluate ".//By" node)))
+
+(defun all-from-descendents (node)
+  (xpath:all-nodes (xpath:evaluate ".//From" node)))
+
+(defun all-ref-descendents (node)
+  (xpath:all-nodes (xpath:evaluate ".//Ref" node)))
+
 ;;; xml-utils.lisp ends here
