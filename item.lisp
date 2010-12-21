@@ -28,6 +28,20 @@
   (:documentation "A mizar item represents a free-standing piece of a
   mizar article, such as a definition, a theorem, a notation, or a registration."))
 
+(defmethod initialize-instance :after ((item item) &key)
+  "If we know the bounds and the soruce article, compute the text (if not already set)."
+  (when (and (slot-boundp item 'source-article)
+	     (slot-boundp item 'begin-line-number)
+	     (slot-boundp item 'begin-column-number)
+	     (slot-boundp item 'end-line-number)
+	     (slot-boundp item 'end-column-number)
+	     (not (slot-boundp item 'text)))
+    (setf (text item) (region (source-article item)
+			      (begin-line-number item)
+			      (begin-column-number item)
+			      (end-line-number item)
+			      (end-column-number item)))))
+
 (defclass pseudo-item (item)
   ()
   (:documentation "A pseudo-item represents a non-exportable part of a
