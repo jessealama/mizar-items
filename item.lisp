@@ -91,7 +91,10 @@
 (defclass defpred-item (pseudo-item)
   ())
 
-(defclass iterequality-item (xml-item labelled-item-mixin)
+(defclass iterequality-item (xml-item labelled-item-mixin pseudo-item)
+  ())
+
+(defclass now-item (xml-item labelled-item-mixin pseudo-item)
   ())
 
 (defclass theorem-item (xml-item labelled-item-mixin)
