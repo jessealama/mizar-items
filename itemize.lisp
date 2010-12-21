@@ -32,8 +32,25 @@
   (article-lines-matching "^ *deffunc .*$" article))
 
 (defun now-statements (article)
-  (declare (ignore article))
-  nil)
+  (with-slots (xml-doc)
+      article
+    (let (statements)
+      (xpath:do-node-set (now-node (xpath:evaluate "Article/Now" xml-doc))
+	(let (begin-line-num begin-column-num end-line-num end-column-num)
+	  (let ((vid (value-of-vid-attribute now-node))
+		(label nil))
+	    (when vid
+	      (setf label (gethash vid (idx-table article))))
+	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
+		(line-and-column now-node)
+	      (multiple-value-setq (begin-line-num begin-column-num)
+		(first-keyword-before article (format nil "~A:" label) almost-begin-line-num almost-begin-col-num))
+	      (let ((last-endposition-child (last-child-with-name now-node "EndPosition")))
+		(multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
+	      (push (list begin-line-num begin-column-num
+			  end-line-num end-column-num)
+		    statements)))))
+	(reverse statements))))
 
 (defun iter-equality-statements (article)
   (declare (ignore article))
