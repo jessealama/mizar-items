@@ -19,8 +19,7 @@
 			       :begin-line-number begin
 			       :begin-column-number end
 			       :end-line-number begin ; text is one line
-			       :end-column-number end-col
-			       :text (region article begin 0 begin end-col))
+			       :end-column-number end-col)
        into items
      finally (return items)))
 
