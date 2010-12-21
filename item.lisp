@@ -24,7 +24,11 @@
     :accessor end-column-number)
    (text
     :initarg :text
-    :accessor text))
+    :accessor text)
+   (context-items
+    :initarg :context
+    :accessor context-items
+    :type list))
   (:documentation "A mizar item represents a free-standing piece of a
   mizar article, such as a definition, a theorem, a notation, or a registration."))
 
