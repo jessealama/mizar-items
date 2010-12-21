@@ -152,7 +152,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		(if proof-node
 		    (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
 		      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
-		    (let ((by-or-from (xpath:first-node (xpath:evaluate "By | From" proposition-node))))
+		    (let ((by-or-from (by-or-from-after-proposition proposition-node)))
 		      (if by-or-from
 			  (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
 			    (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
