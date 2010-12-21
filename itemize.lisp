@@ -11,7 +11,7 @@
 
 (defun single-line-items-by-keyword (article keyword class)
   (loop
-     with regex = (format nil "^ *~A .*$" keyword)
+     with regex = (format nil "^( *)~A .*$" keyword)
      for (begin end text) in (article-lines-matching regex article)
      for end-col = (length text)
      collecting (make-instance class
@@ -30,16 +30,16 @@
   (single-line-items-by-keyword article "set" 'set-item))
 
 (defun consider-items (article)
-  (single-line-items-by-keyword article "consider" 'set-item))
+  (single-line-items-by-keyword article "consider" 'consider-item))
 
 (defun reconsider-items (article)
-  (single-line-items-by-keyword article "reconsider" 'set-item))
+  (single-line-items-by-keyword article "reconsider" 'reconsider-item))
 
 (defun defpred-items (article)
-  (single-line-items-by-keyword article "defpred" 'set-item))
+  (single-line-items-by-keyword article "defpred" 'defpred-item))
 
 (defun deffunc-items (article)
-  (single-line-items-by-keyword article "deffunc" 'set-item))
+  (single-line-items-by-keyword article "deffunc" 'deffunc-item))
 
 (defun now-items (article)
   (with-slots (xml-doc)
