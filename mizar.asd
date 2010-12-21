@@ -14,6 +14,7 @@
   :serial t
   :depends-on ("xpath" "cl-ppcre")
   :components ((:file "packages")
+	       (:file "utils")
 	       (:file "xml-utils")
 	       (:file "file-utils")
 	       (:file "article")
