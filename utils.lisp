@@ -22,4 +22,16 @@
 (defmacro while (condition &body body)
   `(do nil ((not ,condition)) ,@body))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Hash tables
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun values-for-keys-less-than (table key &key (predicate #'<))
+  (let (result)
+    (maphash #'(lambda (k v)
+		 (when (funcall predicate k key)
+		   (push v result)))
+	     table)
+    result))
+
 ;;; utils.lisp ends here
