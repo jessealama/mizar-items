@@ -77,7 +77,16 @@
   of a mizar article.  This means: theorem, definition, notation, and
   registration statements (and their contents)."))
 
+(defclass iterequality-item (item)
+  ())
+
 (defclass theorem-item (exportable-item)
+  ())
+
+(defclass scheme-item (exportable-item)
+  ())
+
+(defclass proposition-item (exportable-item)
   ())
 
 (defclass definition-item (exportable-item)
