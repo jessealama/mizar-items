@@ -53,8 +53,35 @@
 	(reverse statements))))
 
 (defun iter-equality-statements (article)
-  (declare (ignore article))
-  nil)
+  (with-slots (xml-doc)
+      article
+    (let (statements)
+      (xpath:do-node-set (iterequality-node (xpath:evaluate "Article/IterEquality" xml-doc))
+	(let (begin-line-num begin-column-num end-line-num end-column-num)
+	  ;; iterequalities are weird: in the xml, we find out now
+	  ;; where they begin, but where they end.  To find out where
+	  ;; they begin, we have to look backwards from the end for
+	  ;; the label.
+	  (let ((vid (value-of-vid-attribute iterequality-node))
+		(label nil))
+	    (when vid
+	      (setf label (gethash vid (idx-table article))))
+	    (let ((last-iterstep (last-child-with-name iterequality-node
+						       "IterStep")))
+	      (let* ((last-by (last-child-with-name last-iterstep "By"))
+		     (last-from (last-child-with-name last-iterstep "From"))
+		     (real-last (or last-by last-from)))
+	      (multiple-value-setq (end-line-num end-column-num)
+		(if real-last
+		    (line-and-column real-last)
+		    (line-and-column iterequality-node)))))
+	    (multiple-value-setq (begin-line-num begin-column-num)
+	      (first-keyword-before article (format nil "~A:" label) 
+				    end-line-num end-column-num)))
+	  (push (list begin-line-num begin-column-num
+		      end-line-num end-column-num)
+		statements)))
+	(reverse statements))))
 
 (defun first-keyword-before (article keyword line-num col-num)
   "Look for the first occurence of the keyword KEYWORD (e.g.,
