@@ -26,12 +26,10 @@
   (article-lines-matching "^ *reconsider .*$" article))
 
 (defun defpred-statements (article)
-  (declare (ignore article))
-  nil)
+  (article-lines-matching "^ *defpred .*$" article))
 
 (defun deffunc-statements (article)
-  (declare (ignore article))
-  nil)
+  (article-lines-matching "^ *deffunc .*$" article))
 
 (defun now-statements (article)
   (declare (ignore article))
@@ -114,12 +112,13 @@
 (defun itemize-preprocess (article)
   (strip-comments article)
   (accom article "-q" "-l" "-s")
-  (verifier article "-q" "-l" "-s")
   (absrefs article)
   (JA1 article "-q" "-l" "-s")
   (dellink article "-q" "-l" "-s")
   (CutSet article "-q" "-l" "-s")
   (CutReconsider article "-q" "-l" "-s")
+  (change article "-q" "-l" "-s")
+  (verifier article "-q" "-l" "-s")
   (refresh-xml article)
   (refresh-idx article))
 
