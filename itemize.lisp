@@ -83,8 +83,9 @@
   "Look for the first occurence of the keyword KEYWORD (e.g.,
 'theorem', 'definition', or possibly a label such as 'Lm3') before
 LINE-NUM and COL-NUM in the text of ARTICLE."
-  ; assume the keyword always begins a line -- a terrible assumption
-  (let ((bol-theorem-scanner (create-scanner (format nil "(^~A$)|(^~A )" keyword keyword))))
+  ; assume the keyword always begins a line, possibly with whitespace
+  ; -- a terrible assumption
+  (let ((bol-theorem-scanner (create-scanner (format nil "(^ *~A$)|(^ *~A )" keyword keyword))))
     (loop for l from line-num downto 0
 	  for line = (line-at article l)
        do
