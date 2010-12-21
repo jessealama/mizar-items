@@ -55,8 +55,12 @@
 		(first-keyword-before article (format nil "~A:" label) almost-begin-line-num almost-begin-col-num))
 	      (let ((last-endposition-child (last-child-with-name now-node "EndPosition")))
 		(multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
-	      (push (list begin-line-num begin-column-num
-			  end-line-num end-column-num)
+	      (push (make-instance 'now-item
+				   :source-article article
+				   :begin-line-number begin-line-num
+				   :begin-column-number begin-column-num
+				   :end-line-number end-line-num
+				   :end-column-number end-column-num)
 		    items)))))
 	(reverse items))))
 
@@ -84,8 +88,12 @@
 	    (multiple-value-setq (begin-line-num begin-column-num)
 	      (first-keyword-before article (format nil "~A:" label) 
 				    end-line-num end-column-num)))
-	  (push (list begin-line-num begin-column-num
-		      end-line-num end-column-num)
+	  (push (make-instance 'iterequality-item
+			       :source-article article
+			       :begin-line-number begin-line-num
+			       :begin-column-number begin-column-num
+			       :end-line-number end-line-num
+			       :end-column-number end-column-num)
 		items)))
 	(reverse items))))
 
@@ -139,8 +147,12 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			  (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
 			    (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
 			  (multiple-value-setq (end-line-num end-column-num) prop-node))))))
-	    (push (list begin-line-num begin-column-num
-			end-line-num end-column-num)
+	    (push (make-instance 'theorem-item
+				 :source-article article
+				 :begin-line-number begin-line-num
+				 :begin-column-number begin-column-num
+				 :end-line-number end-line-num
+				 :end-column-number end-column-num)
 		  items))))
 	(reverse items))))
 
@@ -165,12 +177,16 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			  (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
 			    (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
 			  (multiple-value-setq (end-line-num end-column-num) proposition-node))))))
-	    (push (list begin-line-num begin-column-num
-			end-line-num end-column-num)
+	    (push (make-instance 'proposition-item
+			       :source-article article
+			       :begin-line-number begin-line-num
+			       :begin-column-number begin-column-num
+			       :end-line-number end-line-num
+			       :end-column-number end-column-num)
 		  items))))
 	(reverse items))))
 
-(defun block-items (xml-element-name mizar-keyword article)
+(defun block-items (xml-element-name mizar-keyword class-name article)
   (with-slots (xml-doc)
       article
     (let (items)
@@ -182,22 +198,26 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	      (first-keyword-before article mizar-keyword almost-begin-line-num almost-begin-col-num))
 	    (let ((last-endposition-child (last-child-with-name block-node "EndPosition")))
 	      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child))
-	      (push (list begin-line-num begin-column-num
-			  end-line-num end-column-num)
+	      (push (make-instance class-name
+				   :source-article article
+				   :begin-line-number begin-line-num
+				   :begin-column-number begin-column-num
+				   :end-line-number end-line-num
+				   :end-column-number end-column-num)
 		    items)))))
     (reverse items))))
 
 (defun definitionblock-items (article)
-  (block-items "DefinitionBlock" "definition" article))
+  (block-items "DefinitionBlock" "definition" 'definition-item article))
 
 (defun schemeblock-items (article)
-  (block-items "SchemeBlock" "scheme" article))
+  (block-items "SchemeBlock" "scheme" 'scheme-item article))
 
 (defun registrationblock-items (article)
-  (block-items "RegistrationBlock" "registration" article))
+  (block-items "RegistrationBlock" "registration" 'registration-item article))
 
 (defun notationblock-items (article)
-  (block-items "NotationBlock" "notation" article))
+  (block-items "NotationBlock" "notation" 'notation-item article))
 
 (defun tuple-lex-less (tuple-1 tuple-2)
   "Determine whether TUPLE-1 is lexicographically less than TUPLE-2,
