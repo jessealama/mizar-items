@@ -149,6 +149,20 @@
 	  (push (list line-num column-num (subseq line line-num column-num))
 		result))))))
 
+(defun region (article begin-line-num begin-col-num end-line-num end-col-num)
+  (loop 
+     with newline = (make-string 1 :initial-element #\Newline)
+     for l from begin-line-num upto end-line-num
+     for maybe-line = (line-at article l)
+     collecting (if (= l begin-line-num)
+		    (if (= begin-line-num end-line-num)
+			(subseq maybe-line begin-col-num end-col-num)
+			(concat (subseq maybe-line begin-col-num) newline))
+		    (if (= l end-line-num)
+			(subseq maybe-line 0 end-col-num)
+			(concat maybe-line newline))) into lines
+     finally (return (apply #'concat lines))))
+
 (defgeneric complete-environment (article)
   (:documentation "All articles mentioned in the environment of
 ARTICLE.  The notations, constructors, requirements, definitions,
