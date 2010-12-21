@@ -230,7 +230,29 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
     (reverse items))))
 
 (defun definitionblock-items (article)
-  (block-items "DefinitionBlock" "definition" 'definition-item article))
+  "Definitions are a special case.  They can generate DefTheorem
+sibling elements; these need to be stored."
+  (let ((items (block-items "DefinitionBlock" "definition" 'definition-item article)))
+    (dolist (definitionblock-item items items)
+      (let (deftheorem-items)
+	(let ((definitionblock-node (xml-node definitionblock-item)))
+	  (let ((deftheorem-nodes (deftheorems-after-definitionblock definitionblock-node)))
+	    (dolist (deftheorem-node deftheorem-nodes deftheorem-items)
+	      ;; we want the vid and nr of the DefTheorem's Proposition
+	      ;; child element; the nr and vid of the DefTheorem itself are
+	      ;; useless.
+	      (let* ((proposition-child (first-child-with-name deftheorem-node "Proposition"))
+		     (nr (value-of-nr-attribute proposition-child))
+		     (vid (value-of-nr-attribute proposition-child))
+		     (label (label-for-vid article vid)))
+		(push (make-instance 'deftheorem-item
+				     :source definitionblock-node
+				     :node deftheorem-node
+				     :nr nr
+				     :vid vid
+				     :label label)
+		      deftheorem-items)))))
+	(setf (deftheorems definitionblock-item) deftheorem-items)))))
 
 (defun schemeblock-items (article)
   (block-items "SchemeBlock" "scheme" 'scheme-item article))
