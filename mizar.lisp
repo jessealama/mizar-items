@@ -145,7 +145,8 @@ variable (at load time).")
 	     (defmethod ,tool-as-symbol ((article-path string) &rest flags)
 	       (apply 'run-mizar-tool ,tool article-path flags))
 	     (defmethod ,tool-as-symbol ((article article) &rest flags)
-	       (apply 'run-mizar-tool ,tool article flags))))
+	       (apply 'run-mizar-tool ,tool article flags)
+	       article)))
 	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
 
 
