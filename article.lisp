@@ -28,6 +28,10 @@
     :initarg :requirements
     :accessor requirements
     :type list)
+   (registrations
+    :initarg :registrations
+    :accessor registrations
+    :type list)
    (definitions
      :initarg :definitions
      :accessor definitions
