@@ -43,4 +43,15 @@ next (non-text) node really is a Proof node.  Return nil otherwise."
 	(and (string= (dom:local-name next-next) "Proof")
 	     next-next)))))
 
+(defun by-or-from-after-proposition (proposition-node)
+  "Get the following By node or From node following PROPOSITION-NODE.
+Ensure that we didn't fall off the end of the document, and that the
+next (non-text) node really is a By or From node.  Return nil otherwise."
+  (let ((next (dom:next-sibling proposition-node)))
+    (when next
+      (let ((next-next (dom:next-sibling next))) ; this is probably a proof node...
+	(and (or (string= (dom:local-name next-next) "By")
+		 (string= (dom:local-name next-next) "From"))
+	     next-next)))))
+
 ;;; xml-utils.lisp ends here
