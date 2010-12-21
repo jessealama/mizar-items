@@ -48,7 +48,7 @@
 		    statements)))))
 	(reverse statements))))
 
-(defun iter-equality-statements (article)
+(defun iterequality-statements (article)
   (with-slots (xml-doc)
       article
     (let (statements)
@@ -210,7 +210,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		(defpred-statements article)
 		(deffunc-statements article)
 		(now-statements article)
-		(iter-equality-statements article)
+		(iterequality-statements article)
 		(justified-theorem-statements article)
 		(proposition-statements article)
 		(definitionblock-statements article)
