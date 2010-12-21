@@ -86,6 +86,11 @@
 	  article)
 	(error "No IDX file for article under ~S" (path article)))))
 
+(defun label-for-vid (article vid)
+  (with-slots (idx-table)
+      article
+    (gethash vid (idx-table article))))
+
 (defun evl (evl-path)
   (if (probe-file evl-path)
       (let ((environ (make-hash-table :test #'equal))) ; keys will be strings
