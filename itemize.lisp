@@ -9,25 +9,40 @@
 (defun article-uses-article (article-1 article-2)
   (member article-1 (complete-environment article-2)))
 
-(defun reservation-statements (article)
-  (article-lines-matching "^ *reserve .*$" article))
+(defun single-line-items-by-keyword (article keyword class)
+  (loop
+     with regex = (format nil "^ *~A .*$" keyword)
+     for (begin end text) in (article-lines-matching regex article)
+     for end-col = (length text)
+     collecting (make-instance class
+			       :source-article article
+			       :begin-line-number begin
+			       :begin-column-number end
+			       :end-line-number begin ; text is one line
+			       :end-column-number end-col
+			       :text (region article begin 0 begin end-col))
+       into items
+     finally (return items)))
 
-(defun set-statements (article)
-  (article-lines-matching "^ *set .*$" article))
+(defun reservation-items (article)
+  (single-line-items-by-keyword article "reserve" 'reservation-item))
 
-(defun consider-statements (article)
-  (article-lines-matching "^ *consider .*$" article))
+(defun set-items (article)
+  (single-line-items-by-keyword article "set" 'set-item))
 
-(defun reconsider-statements (article)
-  (article-lines-matching "^ *reconsider .*$" article))
+(defun consider-items (article)
+  (single-line-items-by-keyword article "consider" 'set-item))
 
-(defun defpred-statements (article)
-  (article-lines-matching "^ *defpred .*$" article))
+(defun reconsider-items (article)
+  (single-line-items-by-keyword article "reconsider" 'set-item))
 
-(defun deffunc-statements (article)
-  (article-lines-matching "^ *deffunc .*$" article))
+(defun defpred-items (article)
+  (single-line-items-by-keyword article "defpred" 'set-item))
 
-(defun now-statements (article)
+(defun deffunc-items (article)
+  (single-line-items-by-keyword article "deffunc" 'set-item))
+
+(defun now-items (article)
   (with-slots (xml-doc)
       article
     (let (statements)
@@ -48,7 +63,7 @@
 		    statements)))))
 	(reverse statements))))
 
-(defun iterequality-statements (article)
+(defun iterequality-items (article)
   (with-slots (xml-doc)
       article
     (let (statements)
@@ -109,7 +124,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun first-scheme-keword-before (article line-num col-num)
   (first-keyword-before article "scheme" line-num col-num))
 
-(defun justified-theorem-statements (article)
+(defun justified-theorem-items (article)
   (with-slots (xml-doc)
       article
     (let (statements)
@@ -134,7 +149,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		  statements))))
 	(reverse statements))))
 
-(defun proposition-statements (article)
+(defun proposition-items (article)
   (with-slots (xml-doc)
       article
     (let (statements)
@@ -162,7 +177,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		  statements))))
 	(reverse statements))))
 
-(defun block-statements (xml-element-name mizar-keyword article)
+(defun block-items (xml-element-name mizar-keyword article)
   (with-slots (xml-doc)
       article
     (let (statements)
@@ -179,17 +194,17 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		    statements)))))
     (reverse statements))))
 
-(defun definitionblock-statements (article)
-  (block-statements "DefinitionBlock" "definition" article))
+(defun definitionblock-items (article)
+  (block-items "DefinitionBlock" "definition" article))
 
-(defun schemeblock-statements (article)
-  (block-statements "SchemeBlock" "scheme" article))
+(defun schemeblock-items (article)
+  (block-items "SchemeBlock" "scheme" article))
 
-(defun registrationblock-statements (article)
-  (block-statements "RegistrationBlock" "registration" article))
+(defun registrationblock-items (article)
+  (block-items "RegistrationBlock" "registration" article))
 
-(defun notationblock-statements (article)
-  (block-statements "NotationBlock" "notation" article))
+(defun notationblock-items (article)
+  (block-items "NotationBlock" "notation" article))
 
 (defun tuple-lex-less (tuple-1 tuple-2)
   "Determine whether TUPLE-1 is lexicographically less than TUPLE-2,
@@ -203,20 +218,20 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	     (< second-1 second-2)))))
 
 (defun item-candidates (article)
-  (sort (append (reservation-statements article)
-		(set-statements article)
-		(consider-statements article)
-		(reconsider-statements article)
-		(defpred-statements article)
-		(deffunc-statements article)
-		(now-statements article)
-		(iterequality-statements article)
-		(justified-theorem-statements article)
-		(proposition-statements article)
-		(definitionblock-statements article)
-		(schemeblock-statements article)
-		(registrationblock-statements article)
-		(notationblock-statements article))
+  (sort (append (reservation-items article)
+		(set-items article)
+		(consider-items article)
+		(reconsider-items article)
+		(defpred-items article)
+		(deffunc-items article)
+		(now-items article)
+		(iterequality-items article)
+		(justified-theorem-items article)
+		(proposition-items article)
+		(definitionblock-items article)
+		(schemeblock-items article)
+		(registrationblock-items article)
+		(notationblock-items article))
 	#'tuple-lex-less))
 
 (defun itemize-preprocess (article)
