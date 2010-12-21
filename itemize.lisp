@@ -134,7 +134,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun first-scheme-keword-before (article line-num col-num)
   (first-keyword-before article "scheme" line-num col-num))
 
-(defun justified-theorem-items (article)
+(defun justifiedtheorem-items (article)
   (with-slots (xml-doc)
       article
     (let (items)
@@ -256,7 +256,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			    (deffunc-items article)
 			    (now-items article)
 			    (iterequality-items article)
-			    (justified-theorem-items article)
+			    (justifiedtheorem-items article)
 			    (proposition-items article)
 			    (definitionblock-items article)
 			    (schemeblock-items article)
