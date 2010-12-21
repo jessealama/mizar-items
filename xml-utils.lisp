@@ -33,4 +33,14 @@
 (defun last-child-with-name (node name)
   (xpath:first-node (xpath:evaluate (format nil "~A[position()=last()]" name) node)))
 
+(defun proof-after-proposition (proposition-node)
+  "Get the following Proof node following PROPOSITION-NODE.  Ensure
+that we didn't fall off the end of the document, and that the
+next (non-text) node really is a Proof node.  Return nil otherwise."
+  (let ((next (dom:next-sibling proposition-node)))
+    (when next
+      (let ((next-next (dom:next-sibling next))) ; this is probably a proof node...
+	(and (string= (dom:local-name next-next) "Proof")
+	     next-next)))))
+
 ;;; xml-utils.lisp ends here
