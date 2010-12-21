@@ -150,11 +150,12 @@
      do
       ; doesn't look for multiple occurences of REGEX within line
       ; for an elegant solution, we should have a multiple-value do/while/until
-       (multiple-value-bind (start-col end-col)
+       (multiple-value-bind (start-col end-col start-register end-register)	  
 	   (scan scanner line)
+	 (declare (ignore start-register))
 	 (when start-col ; we have a match
 	   (push (list current-line-num 
-		       start-col
+		       (aref end-register 0)
 		       (subseq line start-col end-col))
 		 results)))
      finally (return (reverse results))))
