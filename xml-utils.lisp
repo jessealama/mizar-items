@@ -65,4 +65,16 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 		 (string= (dom:local-name next-next) "From"))
 	     next-next)))))
 
+(defun deftheorems-after-definitionblock (definitionblock-node)
+  "Get all the DefTheorem nodes that follow DEFINITIONBLOCK-NODE."
+  (let (deftheorem-nodes)
+    ;; first skip over all the Definiens nodes after DEFINITIONBLOCK-NODE
+    (let ((next (next-non-blank-sibling definitionblock-node)))
+      (while (string= (dom:local-name next) "Definiens")
+	(setf next (next-non-blank-sibling next)))
+      (while (string= (dom:local-name next) "DefTheorem")
+	(push next deftheorem-nodes)
+	(setf next (next-non-blank-sibling next))))
+    (reverse deftheorem-nodes)))
+
 ;;; xml-utils.lisp ends here
