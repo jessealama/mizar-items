@@ -196,4 +196,53 @@ directive is not consulted."))
   (complete-environment (make-instance 'article
 				       :name article-name)))
 
+(defun print-directive (stream directive-name directive-contents)
+  (let ((without-hidden (remove "HIDDEN" directive-contents :test #'string=)))
+    (when without-hidden
+      (format stream "~A " directive-name)
+      (loop
+	 with len = (length without-hidden)
+	 for name in without-hidden
+	 for i from 0 upto (1- len)
+	 do
+	   (format stream name)
+	   (if (= i (1- len))
+	       (format stream ";")
+	       (format stream ", ")))
+      (terpri stream))
+    t))
+
+(defun print-vocabularies (article item-stream)
+  (let ((directive-contents (vocabularies article)))
+    (print-directive item-stream "vocabularies" directive-contents)))
+
+(defun print-notations (article item-stream)
+  (let ((directive-contents (notations article)))
+    (print-directive item-stream "notations" directive-contents)))
+
+(defun print-constructors (article item-stream)
+  (let ((directive-contents (constructors article)))
+    (print-directive item-stream "constructors" directive-contents)))
+
+(defun print-requirements (article item-stream)
+  (let ((directive-contents (requirements article)))
+    (print-directive item-stream "requirements" directive-contents)))
+
+(defun print-registrations (article item-stream)
+  (let ((directive-contents (registrations article)))
+    (print-directive item-stream "registrations" directive-contents)))
+
+(defun print-theorems (article item-stream)
+  (let ((directive-contents (theorems article)))
+    (print-directive item-stream "theorems" directive-contents)))
+
+(defun print-definitions (article item-stream)
+  (let ((directive-contents (definitions article)))
+    (print-directive item-stream "definitions" directive-contents)))
+
+(defun print-schemes (article item-stream)
+  (let ((directive-contents (schemes article)))
+    (print-directive item-stream "schemes" directive-contents)))
+
+
 ;;; article.lisp ends here
