@@ -42,6 +42,22 @@
 			      (end-line-number item)
 			      (end-column-number item)))))
 
+(defclass xml-item (item)
+  ((xml-node 
+    :initarg :node
+    :accessor xml-node)
+   (vid
+    :initarg :vid
+    :accessor vid-value)
+   (nr
+    :initarg :nr
+    :accessor nr-value)))
+
+(defclass labelled-item-mixin ()
+  ((label
+    :initarg :label
+    :accessor label)))
+
 (defclass pseudo-item (item)
   ()
   (:documentation "A pseudo-item represents a non-exportable part of a
@@ -71,31 +87,25 @@
 (defclass defpred-item (pseudo-item)
   ())
 
-(defclass exportable-item (item)
-  ()
-  (:documentation "An exportable-item represents an exportable piece
-  of a mizar article.  This means: theorem, definition, notation, and
-  registration statements (and their contents)."))
-
-(defclass iterequality-item (item)
+(defclass iterequality-item (xml-item labelled-item-mixin)
   ())
 
-(defclass theorem-item (exportable-item)
+(defclass theorem-item (xml-item labelled-item-mixin)
   ())
 
-(defclass scheme-item (exportable-item)
+(defclass scheme-item (xml-item labelled-item-mixin)
   ())
 
-(defclass proposition-item (exportable-item)
+(defclass proposition-item (xml-item labelled-item-mixin)
   ())
 
-(defclass definition-item (exportable-item)
+(defclass definition-item (xml-item)
   ())
 
-(defclass notation-item (exportable-item)
+(defclass notation-item (xml-item)
   ())
 
-(defclass registration-item (exportable-item)
+(defclass registration-item (xml-item)
   ())
 
 (defun item-contained-in-item (item-1 item-2)
