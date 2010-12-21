@@ -64,7 +64,8 @@
 				   :end-column-number end-column-num
 				   :vid vid
 				   :nr nr
-				   :label label)
+				   :label label
+				   :node now-node)
 		    items)))))
 	(reverse items))))
 
@@ -100,7 +101,8 @@
 				 :end-line-number end-line-num
 				 :end-column-number end-column-num
 				 :nr nr
-				 :vid vid)
+				 :vid vid
+				 :node iterequality-node)
 		  items))))
 	(reverse items))))
 
@@ -165,7 +167,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				   :end-column-number end-column-num
 				   :nr nr
 				   :vid vid
-				   :label label)
+				   :label label
+				   :node justifiedtheorem-node)
 		  items)))))
 	(reverse items))))
 
@@ -199,7 +202,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			       :end-column-number end-column-num
 			       :nr nr
 			       :vid vid
-			       :label label)
+			       :label label
+			       :node proposition-node)
 		  items))))
 	(reverse items))))
 
@@ -220,7 +224,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				   :begin-line-number begin-line-num
 				   :begin-column-number begin-column-num
 				   :end-line-number end-line-num
-				   :end-column-number end-column-num)
+				   :end-column-number end-column-num
+				   :node block-node)
 		    items)))))
     (reverse items))))
 
