@@ -49,11 +49,10 @@
   "Get the following Proof node following PROPOSITION-NODE.  Ensure
 that we didn't fall off the end of the document, and that the
 next (non-text) node really is a Proof node.  Return nil otherwise."
-  (let ((next (dom:next-sibling proposition-node)))
-    (when next
-      (let ((next-next (dom:next-sibling next))) ; this is probably a proof node...
-	(and (string= (dom:local-name next-next) "Proof")
-	     next-next)))))
+  (let ((next (next-non-blank-sibling proposition-node)))
+    (if (string= (dom:local-name next) "Proof")
+	next
+	(error "The next non-blank sibling after ~S is not a proof node (it is ~S)" proposition-node next))))
 
 (defun by-or-from-after-proposition (proposition-node)
   "Get the following By node or From node following PROPOSITION-NODE.
