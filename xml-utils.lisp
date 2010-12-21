@@ -35,6 +35,16 @@
 (defun last-child-with-name (node name)
   (xpath:first-node (xpath:evaluate (format nil "~A[position()=last()]" name) node)))
 
+(defun next-non-blank-sibling (node)
+  (let ((next (dom:next-sibling node)))
+    (if next
+	(if (dom:text-node-p next)
+	    (let ((next-next (dom:next-sibling next)))
+	      (or next-next
+		  (error "After the text sibling of ~S, there are no further nodes" node)))
+	    next)
+	(error "No node follows ~S in the document" node))))
+
 (defun proof-after-proposition (proposition-node)
   "Get the following Proof node following PROPOSITION-NODE.  Ensure
 that we didn't fall off the end of the document, and that the
