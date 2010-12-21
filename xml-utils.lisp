@@ -8,8 +8,10 @@
       (xpath:evaluate "string()" name-attribute))))
 
 (defun integer-value-of-attribute (node attribute)
-  (let ((xpath (format nil "@~A + 0" attribute))) ; coerce to integer
-    (floor (xpath:evaluate xpath node))))
+  (let* ((xpath (format nil "@~A" attribute))
+	 (value (xpath:evaluate xpath node)))
+    (unless (xpath:node-set-empty-p value)
+      (parse-integer (dom:get-attribute node attribute)))))
 
 (defun value-of-nr-attribute (node)
   (integer-value-of-attribute node "nr"))
