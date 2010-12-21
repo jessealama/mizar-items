@@ -229,7 +229,6 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
   (verifier article "-q" "-l" "-s")
   (absrefs article)
   (refresh-text article)
-  (refresh-xml article)
   (refresh-idx article))
 
 ;;; itemize.lisp ends here
