@@ -220,7 +220,6 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun itemize-preprocess (article)
   (strip-comments article)
   (accom article "-q" "-l" "-s")
-  (absrefs article)
   (JA1 article "-q" "-l" "-s")
   (dellink article "-q" "-l" "-s")
   (CutSet article "-q" "-l" "-s")
