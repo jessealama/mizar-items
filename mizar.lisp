@@ -149,8 +149,13 @@ variable (at load time).")
 	       article)))
 	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
 
-
+;; workhorses
 (define-mizar-tool "edtfile")
+(define-mizar-tool "makeenv")
+(define-mizar-tool "accom")
+(define-mizar-tool "verifier")
+(define-mizar-tool "envget")
+(define-mizar-tool "exporter")
 
 (defmacro define-mizar-text-transformer (tool)
   ; check that TOOL is real
@@ -178,12 +183,6 @@ variable (at load time).")
 (define-mizar-text-transformer "CutSet")
 (define-mizar-text-transformer "CutReconsider")
 (define-mizar-text-transformer "change") ; clever name...
-
-;; workhorses
-(define-mizar-tool "makeenv")
-(define-mizar-tool "accom")
-(define-mizar-tool "verifier")
-(define-mizar-tool "envget")
 
 ;;; absrefs
 
