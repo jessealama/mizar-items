@@ -12,4 +12,14 @@
      collecting elt into items
      finally (return items)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Iteration
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro until (condition &body body)
+  `(do nil (,condition) ,@body))
+
+(defmacro while (condition &body body)
+  `(do nil ((not ,condition)) ,@body))
+
 ;;; utils.lisp ends here
