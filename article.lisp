@@ -137,17 +137,22 @@
   "Return a list of triples (LINE COLUMN MATCH), where LINE and COLUMN
   are the line and column within ARTICLE that matches the regular
   expression REGEX; MATCH is the matched string."
-  (let ((scanner (create-scanner regex))
-	(lines (lines article))
-	(result nil))
-    (dolist (line lines (reverse result))
+  (loop
+     with scanner = (create-scanner regex)
+     with results = nil
+     for line in (lines article)
+     for current-line-num from 1
+     do
       ; doesn't look for multiple occurences of REGEX within line
       ; for an elegant solution, we should have a multiple-value do/while/until
-      (multiple-value-bind (line-num column-num)
-	  (scan scanner line)
-	(when (and (integerp line-num) (integerp column-num))
-	  (push (list line-num column-num (subseq line line-num column-num))
-		result))))))
+       (multiple-value-bind (start-col end-col)
+	   (scan scanner line)
+	 (when start-col ; we have a match
+	   (push (list current-line-num 
+		       start-col
+		       (subseq line start-col end-col))
+		 results)))
+     finally (return (reverse results))))
 
 (defun region (article begin-line-num begin-col-num end-line-num end-col-num)
   (loop 
