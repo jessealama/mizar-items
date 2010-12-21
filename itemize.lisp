@@ -45,13 +45,11 @@
 (defun now-items (article)
   (with-slots (xml-doc)
       article
-    (let (statements)
+    (let (items)
       (xpath:do-node-set (now-node (xpath:evaluate "Article/Now" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
-	  (let ((vid (value-of-vid-attribute now-node))
-		(label nil))
-	    (when vid
-	      (setf label (gethash vid (idx-table article))))
+	  (let ((label (label-for-vid article
+				      (value-of-vid-attribute now-node))))
 	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		(line-and-column now-node)
 	      (multiple-value-setq (begin-line-num begin-column-num)
@@ -60,23 +58,21 @@
 		(multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
 	      (push (list begin-line-num begin-column-num
 			  end-line-num end-column-num)
-		    statements)))))
-	(reverse statements))))
+		    items)))))
+	(reverse items))))
 
 (defun iterequality-items (article)
   (with-slots (xml-doc)
       article
-    (let (statements)
+    (let (items)
       (xpath:do-node-set (iterequality-node (xpath:evaluate "Article/IterEquality" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
 	  ;; iterequalities are weird: in the xml, we find out now
 	  ;; where they begin, but where they end.  To find out where
 	  ;; they begin, we have to look backwards from the end for
 	  ;; the label.
-	  (let ((vid (value-of-vid-attribute iterequality-node))
-		(label nil))
-	    (when vid
-	      (setf label (gethash vid (idx-table article))))
+	  (let ((label (label-for-vid article
+				      (value-of-vid-attribute iterequality-node))))
 	    (let ((last-iterstep (last-child-with-name iterequality-node
 						       "IterStep")))
 	      (let* ((last-by (last-child-with-name last-iterstep "By"))
@@ -91,8 +87,8 @@
 				    end-line-num end-column-num)))
 	  (push (list begin-line-num begin-column-num
 		      end-line-num end-column-num)
-		statements)))
-	(reverse statements))))
+		items)))
+	(reverse items))))
 
 (defun first-keyword-before (article keyword line-num col-num)
   "Look for the first occurence of the keyword KEYWORD (e.g.,
@@ -127,7 +123,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun justified-theorem-items (article)
   (with-slots (xml-doc)
       article
-    (let (statements)
+    (let (items)
       (xpath:do-node-set (justifiedtheorem-node (xpath:evaluate "Article/JustifiedTheorem[not(SkippedProof)]" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
 	  (let ((prop-node (first-child-with-name justifiedtheorem-node "Proposition")))
@@ -146,19 +142,17 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			  (multiple-value-setq (end-line-num end-column-num) prop-node))))))
 	    (push (list begin-line-num begin-column-num
 			end-line-num end-column-num)
-		  statements))))
-	(reverse statements))))
+		  items))))
+	(reverse items))))
 
 (defun proposition-items (article)
   (with-slots (xml-doc)
       article
-    (let (statements)
+    (let (items)
       (xpath:do-node-set (proposition-node (xpath:evaluate "Article/Proposition" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
-	  (let ((vid (value-of-vid-attribute proposition-node))
-		(label nil))
-	    (when vid
-	      (setf label (gethash vid (idx-table article))))
+	  (let ((label (label-for-vid article
+				      (value-of-vid-attribute proposition-node))))
 	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		(line-and-column proposition-node)
 	      (multiple-value-setq (begin-line-num begin-column-num)
@@ -174,13 +168,13 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			  (multiple-value-setq (end-line-num end-column-num) proposition-node))))))
 	    (push (list begin-line-num begin-column-num
 			end-line-num end-column-num)
-		  statements))))
-	(reverse statements))))
+		  items))))
+	(reverse items))))
 
 (defun block-items (xml-element-name mizar-keyword article)
   (with-slots (xml-doc)
       article
-    (let (statements)
+    (let (items)
       (xpath:do-node-set (block-node (xpath:evaluate (format nil "Article/~A" xml-element-name) xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
 	  (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
@@ -191,8 +185,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child))
 	      (push (list begin-line-num begin-column-num
 			  end-line-num end-column-num)
-		    statements)))))
-    (reverse statements))))
+		    items)))))
+    (reverse items))))
 
 (defun definitionblock-items (article)
   (block-items "DefinitionBlock" "definition" article))
