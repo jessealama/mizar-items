@@ -98,4 +98,69 @@
 (defclass registration-item (exportable-item)
   ())
 
+(defun item-contained-in-item (item-1 item-2)
+  "Determine whether ITEM-1 occurs wholly inside ITEM-2."
+  (with-slots ((source-1 source-article))
+      item-1
+    (with-slots ((source-2 source-article))
+	item-2
+      (if (eq source-1 source-2)
+	  (with-slots ((bl-1 begin-line-number)
+		       (bc-1 begin-column-number)
+		       (el-1 end-line-number)
+		       (ec-1 end-column-number))
+	      item-1
+	    (with-slots ((bl-2 begin-line-number)
+			 (bc-2 begin-column-number)
+			 (el-2 end-line-number)
+			 (ec-2 end-column-number))
+		item-2
+	      (cond ((< bl-1 bl-2) nil)
+		    ((= bl-1 bl-2) (cond ((< bc-1 bc-2) nil)
+					 ((= bc-1 bc-2) nil)
+					 (t (cond ((< el-1 el-2) t)
+						  ((= el-1 el-2) (< ec-1 ec-2))
+						  (t nil)))))
+		    (t (cond ((< el-1 el-2) t)
+			     ((= el-1 el-2) (< ec-1 ec-2))
+			     (t nil))))))
+
+	  (error "Cannot compare ~S and ~S: the first comes from article ~S, but the second comes from a differet article, ~S"
+		 item-1 item-2 source-1 source-2)))))
+
+(defun disjoin-items (item-list &optional (result nil))
+  "Return a sublist of ITEM-LIST which is such that no item is wholly
+contained in any other.  The order of the items returned might be
+strange; sort if necessary."
+  (if (null item-list)
+      result
+      (let ((item (car item-list)))
+	(disjoin-items (cdr item-list)
+		       (if (some #'(lambda (known-item)
+				     (item-contained-in-item item known-item))
+				 result)
+			   result
+			   (cons item result))))))
+
+(defun item-lex-less (item-1 item-2)
+  "Determine whether ITEM-1 occurs earlier than ITEM-2.  This
+  procedure assumes that neither item is wholly contained in the
+  other, so that we need to look only at where the items begin."
+  (with-slots ((source-1 source-article))
+      item-1
+    (with-slots ((source-2 source-article))
+	item-2
+      (if (eq source-1 source-2)
+	  (with-slots ((bl-1 begin-line-number)
+		       (bc-1 begin-column-number))
+	      item-1
+	    (with-slots ((bl-2 begin-line-number)
+			 (bc-2 begin-column-number))
+		item-2
+	      (or (< bl-1 bl-2)
+		  (and (= bl-1 bl-2)
+		       (< bc-1 bc-2)))))
+	  (error "Cannot compare ~S and ~S: the first comes from article ~S, but the second comes from a differet article, ~S"
+		 item-1 item-2 source-1 source-2)))))
+
 ;;; item.lisp ends here
