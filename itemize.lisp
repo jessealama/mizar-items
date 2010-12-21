@@ -47,8 +47,9 @@
     (let (items)
       (xpath:do-node-set (now-node (xpath:evaluate "Article/Now" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
-	  (let ((label (label-for-vid article
-				      (value-of-vid-attribute now-node))))
+	  (let* ((vid (value-of-vid-attribute now-node))
+		 (nr (value-of-nr-attribute now-node))
+		 (label (label-for-vid article vid)))
 	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		(line-and-column now-node)
 	      (multiple-value-setq (begin-line-num begin-column-num)
@@ -60,7 +61,10 @@
 				   :begin-line-number begin-line-num
 				   :begin-column-number begin-column-num
 				   :end-line-number end-line-num
-				   :end-column-number end-column-num)
+				   :end-column-number end-column-num
+				   :vid vid
+				   :nr nr
+				   :label label)
 		    items)))))
 	(reverse items))))
 
@@ -74,27 +78,30 @@
 	  ;; where they begin, but where they end.  To find out where
 	  ;; they begin, we have to look backwards from the end for
 	  ;; the label.
-	  (let ((label (label-for-vid article
-				      (value-of-vid-attribute iterequality-node))))
+	  (let* ((vid (value-of-vid-attribute iterequality-node))
+		 (nr (value-of-nr-attribute iterequality-node))
+		 (label (label-for-vid article vid)))
 	    (let ((last-iterstep (last-child-with-name iterequality-node
 						       "IterStep")))
 	      (let* ((last-by (last-child-with-name last-iterstep "By"))
 		     (last-from (last-child-with-name last-iterstep "From"))
 		     (real-last (or last-by last-from)))
-	      (multiple-value-setq (end-line-num end-column-num)
-		(if real-last
-		    (line-and-column real-last)
-		    (line-and-column iterequality-node)))))
+		(multiple-value-setq (end-line-num end-column-num)
+		  (if real-last
+		      (line-and-column real-last)
+		      (line-and-column iterequality-node)))))
 	    (multiple-value-setq (begin-line-num begin-column-num)
 	      (first-keyword-before article (format nil "~A:" label) 
-				    end-line-num end-column-num)))
-	  (push (make-instance 'iterequality-item
-			       :source-article article
-			       :begin-line-number begin-line-num
-			       :begin-column-number begin-column-num
-			       :end-line-number end-line-num
-			       :end-column-number end-column-num)
-		items)))
+				    end-line-num end-column-num))
+	    (push (make-instance 'iterequality-item
+				 :source-article article
+				 :begin-line-number begin-line-num
+				 :begin-column-number begin-column-num
+				 :end-line-number end-line-num
+				 :end-column-number end-column-num
+				 :nr nr
+				 :vid vid)
+		  items))))
 	(reverse items))))
 
 (defun first-keyword-before (article keyword line-num col-num)
@@ -134,26 +141,32 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
       (xpath:do-node-set (justifiedtheorem-node (xpath:evaluate "Article/JustifiedTheorem[not(SkippedProof)]" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
 	  (let ((prop-node (first-child-with-name justifiedtheorem-node "Proposition")))
-	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
-	      (line-and-column prop-node)
-	      (multiple-value-setq (begin-line-num begin-column-num)
-		(first-theorem-keword-before article almost-begin-line-num almost-begin-col-num))
-	      (let ((proof-node (first-child-with-name justifiedtheorem-node "Proof")))
-		(if proof-node
-		    (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
-		      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
-		    (let ((by-or-from (xpath:first-node (xpath:evaluate "By | From" justifiedtheorem-node))))
-		      (if by-or-from
-			  (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
-			    (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
-			  (multiple-value-setq (end-line-num end-column-num) prop-node))))))
-	    (push (make-instance 'theorem-item
-				 :source-article article
-				 :begin-line-number begin-line-num
-				 :begin-column-number begin-column-num
-				 :end-line-number end-line-num
-				 :end-column-number end-column-num)
-		  items))))
+	    (let* ((vid (value-of-vid-attribute justifiedtheorem-node))
+		   (nr (value-of-nr-attribute justifiedtheorem-node))
+		   (label (label-for-vid article vid)))
+	      (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
+		  (line-and-column prop-node)
+		(multiple-value-setq (begin-line-num begin-column-num)
+		  (first-theorem-keword-before article almost-begin-line-num almost-begin-col-num))
+		(let ((proof-node (first-child-with-name justifiedtheorem-node "Proof")))
+		  (if proof-node
+		      (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
+			(multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
+		      (let ((by-or-from (xpath:first-node (xpath:evaluate "By | From" justifiedtheorem-node))))
+			(if by-or-from
+			    (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
+			      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
+			    (multiple-value-setq (end-line-num end-column-num) prop-node))))))
+	      (push (make-instance 'theorem-item
+				   :source-article article
+				   :begin-line-number begin-line-num
+				   :begin-column-number begin-column-num
+				   :end-line-number end-line-num
+				   :end-column-number end-column-num
+				   :nr nr
+				   :vid vid
+				   :label label)
+		  items)))))
 	(reverse items))))
 
 (defun proposition-items (article)
@@ -162,8 +175,9 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
     (let (items)
       (xpath:do-node-set (proposition-node (xpath:evaluate "Article/Proposition" xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
-	  (let ((label (label-for-vid article
-				      (value-of-vid-attribute proposition-node))))
+	  (let* ((vid (value-of-vid-attribute proposition-node))
+		 (nr (value-of-nr-attribute proposition-node))
+		 (label (label-for-vid article vid)))
 	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		(line-and-column proposition-node)
 	      (multiple-value-setq (begin-line-num begin-column-num)
@@ -182,7 +196,10 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			       :begin-line-number begin-line-num
 			       :begin-column-number begin-column-num
 			       :end-line-number end-line-num
-			       :end-column-number end-column-num)
+			       :end-column-number end-column-num
+			       :nr nr
+			       :vid vid
+			       :label label)
 		  items))))
 	(reverse items))))
 
