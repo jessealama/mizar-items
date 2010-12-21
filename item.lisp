@@ -100,7 +100,14 @@
   ())
 
 (defclass definition-item (xml-item)
-  ())
+  ((deftheorems
+     :initarg :deftheorems
+     :accessor deftheorems)))
+
+(defclass deftheorem-item (xml-item labelled-item-mixin)
+  ((source :initarg :source
+	   :accessor source
+	   :type definition-item)))
 
 (defclass notation-item (xml-item)
   ())
