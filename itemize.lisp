@@ -305,4 +305,10 @@ sibling elements; these need to be stored."
   (refresh-text article)
   (refresh-idx article))
 
+(defun itemize (article)
+  (itemize-preprocess article)
+  (dolist (candidates (item-candidates article))
+    (export candidate)))
+    
+
 ;;; itemize.lisp ends here
