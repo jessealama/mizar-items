@@ -85,12 +85,17 @@
 LINE-NUM and COL-NUM in the text of ARTICLE."
   ; assume the keyword always begins a line, possibly with whitespace
   ; -- a terrible assumption
-  (let ((bol-theorem-scanner (create-scanner (format nil "(^ *~A$)|(^ *~A )" keyword keyword))))
+  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A " keyword keyword))))
     (loop for l from line-num downto 0
 	  for line = (line-at article l)
        do
-	 (when (scan bol-theorem-scanner line)
-	   (return (values l 0)))
+	 (multiple-value-bind (begin end registers-begin registers-end)
+	     (scan bol-theorem-scanner line)
+	   (declare (ignore end))
+	   (when begin
+	     (if (null (aref registers-begin 0))
+		 (return (values l (aref registers-end 1)))
+		 (return (values l (aref registers-end 0))))))
        finally
 	 (error "We didn't find the required keyword ~A before line ~d and column ~d in article ~S"
 		keyword line-num col-num article))))
