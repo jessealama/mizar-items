@@ -50,6 +50,10 @@
 	      :type hash-table))
   (:documentation "A representation of a mizar article."))
 
+(defun line-at (article line-number)
+  (nth (1- line-number) 
+       (lines article))) ; start counting lines at 1
+
 (defun refresh-text (article)
   "Ensure that the LINES slot of ARTICLE accurately reflects the
   contents of the file pointed to by ARTICLE's PATH slot."
