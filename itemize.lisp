@@ -424,10 +424,10 @@ sibling elements; these need to be stored."
 (defun apply-editing-instruction (item instruction)
   (with-slots (old-label new-label target-line-number target-column-number)
       instruction
-    (let* ((article (source-article item))
-	   (line (line-at article target-line-number))
+    (let* ((line (line-at item target-line-number))
 	   (new-line (regex-replace old-label line new-label)))
-      (set-line item target-line-number new-line))))
+      (set-line item target-line-number new-line)))
+  item)
 
 (defun apply-editing-instructions (item instructions)
   (let ((sorted-instructions (sort instructions #'instruction->)))
