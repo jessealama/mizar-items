@@ -51,7 +51,12 @@
 	    :accessor xml-doc)
    (idx-table :initarg :idx-table
 	      :accessor idx-table
-	      :type hash-table))
+	      :type hash-table)
+   (scheme-table
+    :initarg :scheme-table
+    :initform (make-hash-table :test #'eq) ; keys are integers
+    :accessor scheme-table
+    :type hash-table))
   (:documentation "A representation of a mizar article."))
 
 (defun line-at (article line-number)
