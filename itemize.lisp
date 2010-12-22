@@ -261,7 +261,13 @@ sibling elements; these need to be stored."
 	(setf (deftheorems definitionblock-item) deftheorem-items)))))
 
 (defun schemeblock-items (article)
-  (block-items "SchemeBlock" "scheme" 'scheme-item article))
+  (let ((items (block-items "SchemeBlock" "scheme" 'scheme-item article)))
+    (with-slots (scheme-table)
+	article
+      (dolist (item items items)
+	(let* ((xml (xml-node item))
+	       (schemenr (value-of-schemenr-attribute xml)))
+	  (setf (gethash schemenr scheme-table) item))))))
 
 (defun registrationblock-items (article)
   (block-items "RegistrationBlock" "registration" 'registration-item article))
