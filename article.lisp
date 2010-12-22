@@ -175,6 +175,11 @@ unbound, it will be bound in the new article and have value NIL."
   (when (and (slot-boundp article 'path)
 	     (not (slot-boundp article 'lines)))
     (refresh-text article))
+  (when (and (slot-boundp article 'path)
+	     (not (slot-boundp article 'name)))
+    (let* ((filename (file-namestring (path article)))
+	   (basename (pathname-name filename)))
+      (setf (name article) basename)))
   article)
 
 (defun article-lines-matching (regex article)
