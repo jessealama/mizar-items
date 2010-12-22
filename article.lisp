@@ -250,5 +250,8 @@ directive is not consulted."))
   (let ((directive-contents (schemes article)))
     (print-directive item-stream "schemes" directive-contents)))
 
+(defun write-article (article)
+  article) ; do this later
+	   
 
 ;;; article.lisp ends here
