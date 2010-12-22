@@ -324,8 +324,33 @@ sibling elements; these need to be stored."
   nil)
 
 (defun theorem-editing-instructions (item theorem-table items->articles)
-  (declare (ignore item theorem-table items->articles))
-  nil)
+  (let* ((item-xml-node (xml-node item))
+	 (ref-nodes (all-ref-descendents item-xml-node))
+	 (instructions nil))
+    (dolist (ref-node ref-nodes instructions)
+      (multiple-value-bind (ref-line-num ref-col-num)
+	  (line-and-column ref-node)
+	(let ((nr (value-of-nr-attribute ref-node))
+	      (vid (value-of-vid-attribute ref-node)))
+	  (if (and nr vid)
+	      (let ((theorem-item (gethash (cons nr vid) theorem-table)))
+		(when theorem-item
+		  (let ((theorem-label (label theorem-item)))
+		    (if theorem-label
+			(let ((article-for-theorem-item (gethash theorem-item items->articles)))
+			  (if article-for-theorem-item
+			      (let ((name (name article-for-theorem-item)))
+				(let ((instruction (make-instance 'editing-instruction
+								  :old-label theorem-label
+								  :new-label (format nil "~:@(~A~):1" name)
+								  :target-line-number ref-line-num
+								  :target-column-number ref-col-num)))
+				  (push instruction instructions)))
+			      (error "No article is associated with ~S in the item-to-article table"
+				     theorem-item)))
+			(error "The theorem item ~S lacks a label!" theorem-item)))))
+	      (error "The Ref node ~S does not have both NR and VID attributes"
+		     ref-node)))))))
 
 (defun scheme-editing-instructions (item scheme-table items->articles)
   (let* ((item-xml-node (xml-node item))
