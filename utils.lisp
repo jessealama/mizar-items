@@ -31,6 +31,17 @@
      collecting elt into items
      finally (return items)))
 
+(defun tuple-lex-less (tuple-1 tuple-2)
+  "Determine whether TUPLE-1 is lexicographically less than TUPLE-2,
+  ignoring all but the first and second components of both tuples."
+  (let ((first-1 (first tuple-1))
+	(first-2 (first tuple-2))
+	(second-1 (second tuple-1))
+	(second-2 (second tuple-2)))
+    (or (< first-1 first-2)
+	(and (= first-1 first-2)
+	     (< second-1 second-2)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
