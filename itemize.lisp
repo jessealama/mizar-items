@@ -544,4 +544,28 @@ sibling elements; these need to be stored."
 (defmethod itemize ((article-path string) &key (work-directory "/tmp"))
   (itemize (pathname article-path) :work-directory work-directory))
 
+(defun export-itemization (article &key (work-directory "/tmp"))
+  (let ((name (if (slot-boundp article 'name)
+		  (name article)
+		  (error "Article ~S lacks a name" article))))
+    (if (probe-file work-directory)
+	(let* ((local-db (pathname-as-directory (pathname
+						 (concat (namestring (pathname-as-directory work-directory))
+							 name))))
+	       (dict-subdir (pathname-as-directory (concat (namestring local-db) "dict")))
+	       (prel-subdir (pathname-as-directory (concat (namestring local-db) "prel")))
+	       (text-subdir (pathname-as-directory (concat (namestring local-db) "text"))))
+	  (let ((items (keys (itemize article))))
+	    (loop
+	       with len = (length items)
+	       for item in items
+	       for i from 1 upto len
+	       do
+		 (export-item item 
+			      :name-prefix "item"
+			      :directory (ensure-directories-exist text-subdir)
+			      :number i))
+	    t))
+	(error "Cannot use ~A as the work directory because it doesn't exist" work-directory))))
+
 ;;; itemize.lisp ends here
