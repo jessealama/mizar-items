@@ -519,7 +519,7 @@ sibling elements; these need to be stored."
 	 (dolist (deftheorem (deftheorems candidate))
 	   (with-slots (nr vid)
 	       deftheorem
-	     (setf (gethash (cons nr vid) definition-table) candidate))))
+	     (setf (gethash (cons nr vid) definition-table) deftheorem))))
        (when (or (typep candidate 'theorem-item)
 		 (typep candidate 'proposition-item))
 	 (with-slots (nr vid)
