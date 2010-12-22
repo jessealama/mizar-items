@@ -332,25 +332,23 @@ sibling elements; these need to be stored."
 	  (line-and-column ref-node)
 	(let ((nr (value-of-nr-attribute ref-node))
 	      (vid (value-of-vid-attribute ref-node)))
-	  (if (and nr vid)
-	      (let ((theorem-item (gethash (cons nr vid) theorem-table)))
-		(when theorem-item
-		  (let ((theorem-label (label theorem-item)))
-		    (if theorem-label
-			(let ((article-for-theorem-item (gethash theorem-item items->articles)))
-			  (if article-for-theorem-item
-			      (let ((name (name article-for-theorem-item)))
-				(let ((instruction (make-instance 'editing-instruction
-								  :old-label theorem-label
-								  :new-label (format nil "~:@(~A~):1" name)
-								  :target-line-number ref-line-num
-								  :target-column-number ref-col-num)))
-				  (push instruction instructions)))
-			      (error "No article is associated with ~S in the item-to-article table"
-				     theorem-item)))
-			(error "The theorem item ~S lacks a label!" theorem-item)))))
-	      (error "The Ref node ~S does not have both NR and VID attributes"
-		     ref-node)))))))
+	  (when (and nr vid)
+	    (let ((theorem-item (gethash (cons nr vid) theorem-table)))
+	      (when theorem-item
+		(let ((theorem-label (label theorem-item)))
+		  (if theorem-label
+		      (let ((article-for-theorem-item (gethash theorem-item items->articles)))
+			(if article-for-theorem-item
+			    (let ((name (name article-for-theorem-item)))
+			      (let ((instruction (make-instance 'editing-instruction
+								:old-label theorem-label
+								:new-label (format nil "~:@(~A~):1" name)
+								:target-line-number ref-line-num
+								:target-column-number ref-col-num)))
+				(push instruction instructions)))
+			    (error "No article is associated with ~S in the item-to-article table"
+				   theorem-item)))
+		      (error "The theorem item ~S lacks a label!" theorem-item)))))))))))
 
 (defun scheme-editing-instructions (item scheme-table items->articles)
   (let* ((item-xml-node (xml-node item))
