@@ -290,23 +290,6 @@ sibling elements; these need to be stored."
 		 (typep object 'pseudo-item))
 	     (item-candidates article)))
 
-(defun initialize-context-for-items (article)
-  ;; compute a conservative estimate of what pseudo-items each item
-  ;; will depend on, namely: all previous ones
-  (loop
-     with candidates = (item-candidates article)
-     with num-candidates = (length candidates)
-     with earlier-pseudo-items = (make-hash-table :test #'eq :size num-candidates)
-     for candidate in candidates
-     for candidate-num from 1 upto num-candidates
-     do
-       (if (typep candidate 'pseudo-item)
-	   (setf (gethash candidate-num earlier-pseudo-items)
-		 candidate)
-	   (setf (context-items candidate)
-		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
-     finally (return article)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Editing instructions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -417,6 +400,22 @@ sibling elements; these need to be stored."
   (warn "change...")
   (change article "-q" "-l" "-s"))
 
+(defun initialize-context-for-items (article)
+  ;; compute a conservative estimate of what pseudo-items each item
+  ;; will depend on, namely: all previous ones
+  (loop
+     with candidates = (item-candidates article)
+     with num-candidates = (length candidates)
+     with earlier-pseudo-items = (make-hash-table :test #'eq :size num-candidates)
+     for candidate in candidates
+     for candidate-num from 1 upto num-candidates
+     do
+       (if (typep candidate 'pseudo-item)
+	   (setf (gethash candidate-num earlier-pseudo-items)
+		 candidate)
+	   (setf (context-items candidate)
+		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
+     finally (return article)))
 
 (defun itemize-preprocess (article)
   (preprocess-text article)
