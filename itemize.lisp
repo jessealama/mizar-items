@@ -459,7 +459,11 @@ sibling elements; these need to be stored."
   (warn "CutReconsider...")
   (CutReconsider article "-q" "-l" "-s")
   (warn "change...")
-  (change article "-q" "-l" "-s"))
+  (change article "-q" "-l" "-s")
+  (warn "Squeezing repeated newlines...")
+  (squeeze-repeated-newlines article)
+  (warn "Squeezing repeated spaces...")
+  (squeeze-repeated-spaces article))
 
 (defun initialize-context-for-items (article)
   ;; compute a conservative estimate of what pseudo-items each item
