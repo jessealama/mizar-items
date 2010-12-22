@@ -246,19 +246,11 @@ strange; sort if necessary."
 	   name-prefix number)))
 
 (defmethod export-item (item &key number directory name-prefix)
-  (let* ((article-for-item (make-instance 'article))
-	 (original-article (source-article item)))
+  (let* ((original-article (source-article item))
+	 (article-for-item (make-article-copying-environment-from original-article)))
     (setf (path article-for-item)
-	  (make-pathname :directory directory
-			 :name (format nil "~A_~A.miz" name-prefix number)))
-    (setf (vocabularies article-for-item) (vocabularies original-article)
-	  (notations article-for-item) (notations original-article)
-	  (constructors article-for-item) (constructors original-article)
-	  (requirements article-for-item) (requirements original-article)
-	  (registrations article-for-item) (registrations original-article)
-	  (theorems article-for-item) (theorems original-article)
-	  (definitions article-for-item) (definitions original-article)
-	  (schemes article-for-item) (schemes original-article))
+	  (pathname-as-file (concat (namestring (pathname-as-directory (pathname directory)))
+				    (format nil "~A_~A.miz" name-prefix number))))
     (write-article article-for-item)))
 
 ;;; item.lisp ends here
