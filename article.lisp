@@ -12,6 +12,10 @@
     :initarg :path
     :reader path
     :type pathname)
+   (text
+    :initarg :text
+    :accessor text
+    :type string)
    (vocabularies
     :initarg :vocabularies
     :accessor vocabularies
