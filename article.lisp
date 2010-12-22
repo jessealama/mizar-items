@@ -10,7 +10,7 @@
     :documentation "The name of this article, as a string.")
    (path
     :initarg :path
-    :reader path
+    :accessor path
     :type pathname)
    (text
     :initarg :text
