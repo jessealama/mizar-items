@@ -77,8 +77,8 @@
 	     line-number item end-line-number))
     (let ((text-as-array (lines-as-array (text item))))
       (setf (aref text-as-array (- line-number begin-line-number)) new-line)
-      (setf (text item) (array->newline-delimited-string text-as-array)))
-    item))
+      (setf (text item) (array->newline-delimited-string text-as-array))))
+  item)
 
 (defclass xml-item (item)
   ((xml-node 
