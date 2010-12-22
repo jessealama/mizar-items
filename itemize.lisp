@@ -253,12 +253,13 @@ sibling elements; these need to be stored."
 
 (defun schemeblock-items (article)
   (let ((items (block-items "SchemeBlock" "scheme" 'scheme-item article)))
-    (with-slots (scheme-table)
-	article
-      (dolist (item items items)
-	(let* ((xml (xml-node item))
-	       (schemenr (value-of-schemenr-attribute xml)))
-	  (setf (gethash schemenr scheme-table) item))))))
+    (dolist (item items items)
+      (let* ((xml (xml-node item))
+	     (schemenr (value-of-schemenr-attribute xml))
+	     (vid (value-of-vid-attribute xml))
+	     (label (label-for-vid article vid)))
+	(setf (schemenr item) schemenr)
+	(setf (label item) label)))))
 
 (defun registrationblock-items (article)
   (block-items "RegistrationBlock" "registration" 'registration-item article))
