@@ -341,15 +341,44 @@ sibling elements; these need to be stored."
 
   (initialize-context-for-items article))
 
-(defun rewrite-item (item theorem-and-definition-table scheme-table)
-  (declare (ignore theorem-and-definition-table scheme-table)) ;; too hard right now
-  item)
+(defun rewrite-item-text (item theorem-and-definition-table scheme-table items->articles)
+  (declare (ignore theorem-and-definition-table))
+  (let ((item-xml-node (xml-node item))
+	(source-article (source-article item))
+	(item-text-as-array (lines-as-array (text item)))
+	(begin-line-number (begin-line-number item)))
+    (let ((from-nodes (article-local-froms item-xml-node)))
+      (dolist (from-node from-nodes)
+	(let ((from-line-num (line-and-column from-node)))
+	  (let ((line (line-at source-article from-line-num))
+		(schemenr (value-of-absnr-attribute from-node)))
+	    (if schemenr
+		(let ((scheme-item (gethash schemenr scheme-table)))
+		  (if scheme-item
+		      (let ((scheme-label (label scheme-item)))
+			(if scheme-label
+			    (let ((article-for-scheme-item (gethash scheme-item items->articles)))
+			      (if article-for-scheme-item
+				  (let ((name (name article-for-scheme-item)))
+				    (setf (aref item-text-as-array (- from-line-num begin-line-number))
+					  (regex-replace scheme-label 
+							 line
+							 (format nil "~:@(~A~):sch 1" name))))
+				  (error "No article is associated with ~S in the item-to-article table"
+					 scheme-item)))
+			    (error "The scheme item ~S lacks a label!" scheme-item)))
+		      (error "No scheme item is associated with the scheme number ~S in the scheme table"
+			     schemenr)))
+		(error "The From node ~S lacks a value for the schemenr attribute"
+		       from-node))))))
+    (setf (text item)
+	  (array->newline-delimited-string item-text-as-array))))
 
 (defun exportable-items (article)
   (itemize-preprocess article)
   (loop
-     with nr-vid-table = (make-hash-table :test #'equal) ; keys are pairs of integers
-     with scheme-table = (make-hash-table :test #'eq) ; keys are integers
+     with nr-vid-table = (make-hash-table :test #'equal) ; keys are pairs of integers; for theorems and definitions
+     with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
      with candidates = (remove-if-not #'(lambda (candidate)
 					  (typep candidate 'pseudo-item))
 				      (item-candidates article))
