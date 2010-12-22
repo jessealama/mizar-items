@@ -240,10 +240,10 @@ sibling elements; these need to be stored."
 	      ;; useless.
 	      (let* ((proposition-child (first-child-with-name deftheorem-node "Proposition"))
 		     (nr (value-of-nr-attribute proposition-child))
-		     (vid (value-of-nr-attribute proposition-child))
+		     (vid (value-of-vid-attribute proposition-child))
 		     (label (label-for-vid article vid)))
 		(push (make-instance 'deftheorem-item
-				     :source definitionblock-node
+				     :source definitionblock-item
 				     :node deftheorem-node
 				     :nr nr
 				     :vid vid
