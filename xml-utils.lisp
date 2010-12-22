@@ -86,4 +86,9 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 (defun all-ref-descendents (node)
   (xpath:all-nodes (xpath:evaluate ".//Ref" node)))
 
+(defun article-local-froms (node)
+  (remove-if-not #'(lambda (node)
+		     (string= (dom:get-attribute node "articlenr") "0"))
+		 (all-from-descendents node)))
+
 ;;; xml-utils.lisp ends here
