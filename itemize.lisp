@@ -455,7 +455,8 @@ sibling elements; these need to be stored."
 	   (with-slots (nr vid)
 	       deftheorem
 	     (setf (gethash (cons nr vid) definition-table) candidate))))
-       (when (typep candidate 'theorem-item)
+       (when (or (typep candidate 'theorem-item)
+		 (typep candidate 'proposition-item))
 	 (with-slots (nr vid)
 	     candidate
 	   (setf (gethash (cons nr vid) theorem-table) candidate)))
