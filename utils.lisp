@@ -53,4 +53,10 @@
 	     table)
     result))
 
+(defun keys (table)
+  (loop 
+     for k being the hash-keys in table
+     collecting k into keys
+     finally (return keys)))
+
 ;;; utils.lisp ends here
