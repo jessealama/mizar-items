@@ -3,11 +3,8 @@
 (in-package :mizar)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Itemization
+;;; Computing candidate items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun article-uses-article (article-1 article-2)
-  (member article-1 (complete-environment article-2)))
 
 (defun single-line-items-by-keyword (article keyword class)
   (loop
