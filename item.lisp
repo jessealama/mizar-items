@@ -191,44 +191,38 @@ strange; sort if necessary."
 ;;; Exporting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgeneric export-item (item &key number context-items directory name-prefix)
+(defgeneric export-item (item &key number directory name-prefix)
   (:documentation "Generate an article corresponding to ITEM.  The
   article will be written under the directory DIRECTORY, and its name
   will be '<NAME-PREFIX><NUMBER>.miz'.  CONTEXT-ITEMS is a list of
   pseudo-items that will be prepended, in the order that they appear,
   to the text of ITEM."))
 
-(defmethod export-item :before (item &key number context-items directory name-prefix)
-  (declare (ignore number context-items name-prefix))
+(defmethod export-item :before (item &key number directory name-prefix)
+  (declare (ignore number name-prefix))
   (unless (ensure-directories-exist directory)
     (error "Unable to export item to directory ~S: the path is invalid" directory)))
 
-(defmethod export-item :before (item &key number context-items directory name-prefix)
-  (declare (ignore context-items directory))
+(defmethod export-item :before (item &key number directory name-prefix)
+  (declare (ignore directory))
   (when (> (length (concat name-prefix "_" (format nil "~A" number))) 8)
     (error "Invalid item name: the proposed name '~A_~A' is longer than eight characters"
 	   name-prefix number)))
 
-(defmethod export-item (item &key number context-items directory name-prefix)
-  (let ((item-path (make-pathname :directory directory
-				  :name (format nil "~A_~A.miz" name-prefix number))))
-    (let ((article (source-article item)))
-      (with-open-file (item-stream item-path
-				   :direction :output
-				   :if-exists :error)
-	(format item-stream "environ~%")
-	(print-vocabularies article item-stream)
-	(print-notations article item-stream)
-	(print-constructors article item-stream)
-	(print-requirements article item-stream)
-	(print-registrations article item-stream)
-	(print-theorems article item-stream)
-	(print-definitions article item-stream)
-	(print-schemes article item-stream)
-	(format item-stream "begin~%")
-	(dolist (context-item context-items)
-	  (format item-stream "~A~%" (text context-item)))
-	(format item-stream "~A~%" (text item))))
-    item-path))
+(defmethod export-item (item &key number directory name-prefix)
+  (let* ((article-for-item (make-instance 'article))
+	 (original-article (source-article item)))
+    (setf (path article-for-item)
+	  (make-pathname :directory directory
+			 :name (format nil "~A_~A.miz" name-prefix number)))
+    (setf (vocabularies article-for-item) (vocabularies original-article)
+	  (notations article-for-item) (notations original-article)
+	  (constructors article-for-item) (constructors original-article)
+	  (requirements article-for-item) (requirements original-article)
+	  (registrations article-for-item) (registrations original-article)
+	  (theorems article-for-item) (theorems original-article)
+	  (definitions article-for-item) (definitions original-article)
+	  (schemes article-for-item) (schemes original-article))
+    (write-article article-for-item)))
 
 ;;; item.lisp ends here
