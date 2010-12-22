@@ -210,11 +210,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
     (let (items)
       (xpath:do-node-set (block-node (xpath:evaluate (format nil "Article/~A" xml-element-name) xml-doc))
 	(let (begin-line-num begin-column-num end-line-num end-column-num)
-	  (let* ((vid (value-of-vid-attribute block-node))
-		 (nr (value-of-nr-attribute block-node))
-		 (label (label-for-vid article vid)))
-	    (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
-		(line-and-column block-node)
+	  (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
+	      (line-and-column block-node)
 	      (multiple-value-setq (begin-line-num begin-column-num)
 		(first-keyword-before article mizar-keyword almost-begin-line-num almost-begin-col-num))
 	      (let ((last-endposition-child (last-child-with-name block-node "EndPosition")))
@@ -225,11 +222,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				     :begin-column-number begin-column-num
 				     :end-line-number end-line-num
 				     :end-column-number end-column-num
-				     :node block-node
-				     :vid vid
-				     :nr nr
-				     :label label)
-		    items))))))
+				     :node block-node)
+		    items)))))
     (reverse items))))
 
 (defun definitionblock-items (article)
