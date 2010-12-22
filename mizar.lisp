@@ -82,26 +82,58 @@ variable (at load time).")
     ;; just delete the directory for now
     (sb-ext:delete-directory location))) ;; not ideal: we shouldn't use sb-ext
 
-(defgeneric strip-comments (article))
+(defmacro define-file-transformer (name program &rest arguments)
+  ; check that TOOL is real
+  (let ((check (sb-ext:run-program "which" (list program) :search t)))
+    (if (zerop (sb-ext:process-exit-code check))
+	`(progn
+	   (defgeneric ,name (file))
+	   (defmethod ,name ((miz-path pathname))
+	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
+		    (proc (sb-ext:run-program ,program 
+					      (append ',arguments (list (namestring miz-path)))
+					      :search t
+					      :output tmp-path
+					      :if-output-exists :supersede)))
+	       (if (zerop (sb-ext:process-exit-code proc))
+		   (rename-file tmp-path miz-path)
+		   (error "Something went wrong when stripping comments; the process exited with code ~S" (sb-ext:process-exit-code proc)))))
+	     (defmethod ,name ((article-path string))
+	       (,name (pathname article-path)))
+	     (defmethod ,name ((article article))
+	       (,name (path article))
+	       (refresh-text article)))
+	(error "The program ~S could not be found in your path (or it is not executable)" program))))
 
-(defmethod strip-comments ((article-path pathname))
-  (if (probe-file article-path)
-      (let* ((tmp-path (replace-extension article-path "miz" "stripped"))
-	     (proc (sb-ext:run-program "sed" (list "-e" "s/::.*$//" (namestring article-path))
-				       :search t
-				       :output tmp-path
-				       :if-output-exists :error)))
-	(if (zerop (sb-ext:process-exit-code proc))
-	    (rename-file tmp-path article-path)
-	    (error "Something went wrong when stripping comments; the process exited with code ~S" (sb-ext:process-exit-code proc))))
-      (error "No such file ~A" article-path)))
+(defmacro define-input-transformer (name program &rest arguments)
+  ; check that TOOL is real
+  (let ((check (sb-ext:run-program "which" (list program) :search t)))
+    (if (zerop (sb-ext:process-exit-code check))
+	`(progn
+	   (defgeneric ,name (file))
+	   (defmethod ,name ((miz-path pathname))
+	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
+		    (proc (sb-ext:run-program ,program
+					      ',arguments 
+					      :search t
+					      :input miz-path
+					      :output tmp-path
+					      :if-output-exists :supersede)))
+	       (if (zerop (sb-ext:process-exit-code proc))
+		   (rename-file tmp-path miz-path)
+		   (error "Something went wrong when stripping comments; the process exited with code ~S" (sb-ext:process-exit-code proc)))))
+	     (defmethod ,name ((article-path string))
+	       (,name (pathname article-path)))
+	     (defmethod ,name ((article article))
+	       (,name (path article))
+	       (refresh-text article)))
+	(error "The program ~S could not be found in your path (or it is not executable)" program))))
 
-(defmethod strip-comments ((article-path string))
-  (strip-comments (pathname article-path)))
+(define-file-transformer strip-comments "sed" "-e" "s/::.*$//")
+(define-file-transformer fix-by-and-from "fix-by-and-from.sh")
+(define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
+(define-input-transformer squeeze-repeated-spaces "tr" "-s" "\ ")
 
-(defmethod strip-comments ((article article))
-  (strip-comments (path article))
-  (refresh-text article))
 
 (defgeneric run-mizar-tool (tool article &rest flags))
 
