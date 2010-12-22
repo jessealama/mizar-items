@@ -138,7 +138,8 @@
 	    (gethash "Theorems" environment-as-table))
       (setf (schemes article)
 	    (gethash "Schemes" environment-as-table))))
-  (unless (slot-boundp article 'lines)
+  (when (and (slot-boundp article 'path)
+	     (not (slot-boundp article 'lines)))
     (refresh-text article))
   article)
 
