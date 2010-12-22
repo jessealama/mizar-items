@@ -296,14 +296,10 @@ sibling elements; these need to be stored."
     (let ((sorted-everything (stable-sort everything #'item-lex-less)))
       (reverse (disjoin-items sorted-everything)))))
 
-(defun preprocess-text (article)
-  (strip-comments article)
-  (accom article "-q" "-l" "-s")
-  (JA1 article "-q" "-l" "-s")
-  (dellink article "-q" "-l" "-s")
-  (CutSet article "-q" "-l" "-s")
-  (CutReconsider article "-q" "-l" "-s")
-  (change article "-q" "-l" "-s"))
+(defun non-pseudo-item-candidates (article)
+  (remove-if #'(lambda (object)
+		 (typep object 'pseudo-item))
+	     (item-candidates article)))
 
 (defun initialize-context-for-items (article)
   ;; compute a conservative estimate of what pseudo-items each item
@@ -322,60 +318,176 @@ sibling elements; these need to be stored."
 		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
      finally (return article)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Editing instructions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass editing-instruction ()
+  ((old-label
+    :initarg :old-label
+    :accessor old-label
+    :type string)
+   (new-label
+    :initarg :new-label
+    :accessor new-label
+    :type string)
+   (target-line-number
+    :initarg :target-line-number
+    :accessor target-line-number
+    :type integer)
+   (target-column-number
+    :initarg :target-column-number
+    :accessor target-column-number
+    :type integer)))
+
+(defun instruction-> (editing-instruction-1 editing-instruction-2)
+  (with-slots ((l-1 target-line-number) (c-1 target-column-number))
+      editing-instruction-1
+    (with-slots ((l-2 target-line-number) (c-2 target-column-number))
+	editing-instruction-2
+      (tuple-lex-less (list l-2 c-2) (list l-1 c-1)))))
+
+(defun definition-editing-instructions (item definition-table items->articles)
+  (declare (ignore item definition-table items->articles))
+  nil)
+
+(defun theorem-editing-instructions (item theorem-table items->articles)
+  (declare (ignore item theorem-table items->articles))
+  nil)
+
+(defun scheme-editing-instructions (item scheme-table items->articles)
+  (let* ((item-xml-node (xml-node item))
+	 (from-nodes (article-local-froms item-xml-node))
+	 (instructions nil))
+    (dolist (from-node from-nodes instructions)
+      (multiple-value-bind (from-line-num from-col-num)
+	  (line-and-column from-node)
+	(let ((schemenr (value-of-absnr-attribute from-node)))
+	  (if schemenr
+	      (let ((scheme-item (gethash schemenr scheme-table)))
+		(if scheme-item
+		    (let ((scheme-label (label scheme-item)))
+		      (if scheme-label
+			  (let ((article-for-scheme-item (gethash scheme-item items->articles)))
+			    (if article-for-scheme-item
+				(let ((name (name article-for-scheme-item)))
+				  (let ((instruction (make-instance 'editing-instruction
+								    :old-label scheme-label
+								    :new-label (format nil "~:@(~A~):sch 1" name)
+								    :target-line-number from-line-num
+								    :target-column-number from-col-num)))
+				    (push instruction instructions)))
+				(error "No article is associated with ~S in the item-to-article table"
+				       scheme-item)))
+			  (error "The scheme item ~S lacks a label!" scheme-item)))
+		    (error "No scheme item is associated with the scheme number ~S in the scheme table"
+			   schemenr)))
+	      (error "The From node ~S lacks a value for the schemenr attribute"
+		     from-node)))))))
+
+(defun editing-instructions (item definition-table theorem-table scheme-table items->articles)
+  (append (definition-editing-instructions item definition-table items->articles)
+	  (theorem-editing-instructions item theorem-table items->articles)
+	  (scheme-editing-instructions item scheme-table items->articles)))
+
+(defun apply-editing-instruction (item instruction)
+  (with-slots (old-label new-label target-line-number target-column-number)
+      instruction
+    (let* ((article (source-article item))
+	   (line (line-at article target-line-number))
+	   (new-line (regex-replace old-label line new-label)))
+      (set-line item target-line-number new-line))))
+
+(defun apply-editing-instructions (item instructions)
+  (let ((sorted-instructions (sort instructions #'instruction->)))
+    (dolist (instruction sorted-instructions)
+      (apply-editing-instruction item instruction))))
+
+(defun rewrite-item-text (item theorem-table definition-table scheme-table items->articles)
+  (apply-editing-instructions item
+			      (editing-instructions item theorem-table definition-table scheme-table items->articles)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Itemization
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun preprocess-text (article)
+  (warn "Preprocessing ~S..." article)
+  (warn "Stripping comments...")
+  (strip-comments article)
+  (warn "Accommodating...")
+  (accom article "-q" "-l" "-s")
+  (warn "JA1...")
+  (JA1 article "-q" "-l" "-s")
+  (warn "dellink...")
+  (dellink article "-q" "-l" "-s")
+  (warn "CutSet...")
+  (CutSet article "-q" "-l" "-s")
+  (warn "CutReconsider...")
+  (CutReconsider article "-q" "-l" "-s")
+  (warn "change...")
+  (change article "-q" "-l" "-s"))
+
+
 (defun itemize-preprocess (article)
   (preprocess-text article)
 
   ;; ensure the article XML is now synchonized with the changed text
+  (warn "Verifying...")
   (verifier article "-q" "-l" "-s")
+  (warn "Generating absolute references...")
   (absrefs article)
   (refresh-text article)
   (refresh-idx article)
 
   (initialize-context-for-items article))
 
-(defun rewrite-item-text (item theorem-and-definition-table scheme-table items->articles)
-  (declare (ignore theorem-and-definition-table))
-  (let ((item-xml-node (xml-node item))
-	(source-article (source-article item))
-	(item-text-as-array (lines-as-array (text item)))
-	(begin-line-number (begin-line-number item)))
-    (let ((from-nodes (article-local-froms item-xml-node)))
-      (dolist (from-node from-nodes)
-	(let ((from-line-num (line-and-column from-node)))
-	  (let ((line (line-at source-article from-line-num))
-		(schemenr (value-of-absnr-attribute from-node)))
-	    (if schemenr
-		(let ((scheme-item (gethash schemenr scheme-table)))
-		  (if scheme-item
-		      (let ((scheme-label (label scheme-item)))
-			(if scheme-label
-			    (let ((article-for-scheme-item (gethash scheme-item items->articles)))
-			      (if article-for-scheme-item
-				  (let ((name (name article-for-scheme-item)))
-				    (setf (aref item-text-as-array (- from-line-num begin-line-number))
-					  (regex-replace scheme-label 
-							 line
-							 (format nil "~:@(~A~):sch 1" name))))
-				  (error "No article is associated with ~S in the item-to-article table"
-					 scheme-item)))
-			    (error "The scheme item ~S lacks a label!" scheme-item)))
-		      (error "No scheme item is associated with the scheme number ~S in the scheme table"
-			     schemenr)))
-		(error "The From node ~S lacks a value for the schemenr attribute"
-		       from-node))))))
-    (setf (text item)
-	  (array->newline-delimited-string item-text-as-array))))
+(defgeneric itemize (thing &key work-directory))
 
-(defun exportable-items (article)
+(defmethod itemize ((article article) &key (work-directory "/tmp"))
+  (declare (ignore work-directory))
   (itemize-preprocess article)
   (loop
-     with nr-vid-table = (make-hash-table :test #'equal) ; keys are pairs of integers; for theorems and definitions
+     with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
+     with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
      with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
-     with candidates = (remove-if-not #'(lambda (candidate)
-					  (typep candidate 'pseudo-item))
-				      (item-candidates article))
+     with items->articles = (make-hash-table :test #'eq) ; keys are item objects
+     with candidates = (non-pseudo-item-candidates article)
+     with num-candidates = (length candidates)
      for candidate in candidates
-     collecting (rewrite-item candidate nr-vid-table scheme-table) into items
-     finally (return items)))
+     for candidate-num from 1 upto num-candidates
+     do
+       ; udpate the tables for schemes, definitions, and theorems
+       (when (typep candidate 'scheme-item)
+	 (with-slots (schemenr)
+	     candidate
+	   (setf (gethash schemenr scheme-table) candidate)))
+       (when (typep candidate 'definition-item)
+	 (dolist (deftheorem (deftheorems candidate))
+	   (with-slots (nr vid)
+	       deftheorem
+	     (setf (gethash (cons nr vid) definition-table) candidate))))
+       (when (typep candidate 'theorem-item)
+	 (with-slots (nr vid)
+	     candidate
+	   (setf (gethash (cons nr vid) theorem-table) candidate)))
+       (let* ((new-text (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles))
+	      (article-for-item (make-instance 'article 
+					       :text new-text
+					       :name (format nil "item~d" candidate-num))))
+	 (setf (gethash candidate items->articles) article-for-item))
+     finally (return items->articles)))
+
+(defmethod itemize :before ((article-path pathname) &key work-directory)
+  (declare (ignore work-directory))
+  (unless (probe-file article-path)
+    (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
+
+(defmethod itemize ((article-path pathname) &key (work-directory "/tmp"))
+  (let ((article (make-instance 'article :path article-path)))
+    (itemize article :work-directory work-directory)))
+
+(defmethod itemize ((article-path string) &key (work-directory "/tmp"))
+  (itemize (pathname article-path) :work-directory work-directory))
 
 ;;; itemize.lisp ends here
