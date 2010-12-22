@@ -326,8 +326,38 @@ sibling elements; these need to be stored."
       (tuple-lex-less (list l-2 c-2) (list l-1 c-1)))))
 
 (defun definition-editing-instructions (item definition-table items->articles)
-  (declare (ignore item definition-table items->articles))
-  nil)
+  (let* ((item-xml-node (xml-node item))
+	 (ref-nodes (all-ref-descendents item-xml-node))
+	 (instructions nil))
+    (dolist (ref-node ref-nodes instructions)
+      (multiple-value-bind (ref-line-num ref-col-num)
+	  (line-and-column ref-node)
+	(let ((nr (value-of-nr-attribute ref-node))
+	      (vid (value-of-vid-attribute ref-node)))
+	  (when (and nr vid)
+	    (let ((deftheorem-item (gethash (cons nr vid) definition-table)))
+	      (when deftheorem-item
+		(let ((definition-item (source deftheorem-item))
+		       (deftheorem-label (label deftheorem-item)))
+		  (if definition-item
+		      (let* ((deftheorems (deftheorems definition-item))
+			     (index (position deftheorem-item deftheorems)))
+			(if index
+			    (if deftheorem-label
+				(let ((article-for-definition-item (gethash definition-item items->articles)))
+				  (if article-for-definition-item
+				      (let* ((name (name article-for-definition-item))
+					     (instruction (make-instance 'editing-instruction
+									 :old-label deftheorem-label
+									 :new-label (format nil "~:@(~A~):def ~d" name (1+ index))
+									 :target-line-number ref-line-num
+									 :target-column-number ref-col-num)))
+					(push instruction instructions))
+				      (error "No article is associated with ~S in the item-to-article table"
+					     definition-item)))
+				(error "The deftheorem item ~S lacks a label!" deftheorem-item))
+			    (error "The deftheorem item ~S cannot be found among thte deftheorem items for the definition item ~S" deftheorem-item definition-item)))
+		      (error "The deftheorem item ~S does not have a source definition item!" deftheorem-item)))))))))))
 
 (defun theorem-editing-instructions (item theorem-table items->articles)
   (let* ((item-xml-node (xml-node item))
