@@ -16,6 +16,9 @@
 (defun value-of-nr-attribute (node)
   (integer-value-of-attribute node "nr"))
 
+(defun value-of-absnr-attribute (node)
+  (integer-value-of-attribute node "absnr"))
+
 (defun value-of-line-attribute (node)
   (integer-value-of-attribute node "line"))
 
@@ -24,6 +27,9 @@
 
 (defun value-of-vid-attribute (node)
   (integer-value-of-attribute node "vid"))
+
+(defun value-of-schemenr-attribute (node)
+  (integer-value-of-attribute node "schemenr"))
 
 (defun line-and-column (line-and-column-node)
   (values (value-of-line-attribute line-and-column-node)
