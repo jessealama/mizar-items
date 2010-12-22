@@ -312,6 +312,12 @@ sibling elements; these need to be stored."
     :accessor target-column-number
     :type integer)))
 
+(defmethod print-object ((instruction editing-instruction) stream)
+  (with-slots (old-label new-label)
+      instruction
+    (print-unreadable-object (instruction stream :type nil)
+      (format stream "~A ==> ~A" old-label new-label))))
+
 (defun instruction-> (editing-instruction-1 editing-instruction-2)
   (with-slots ((l-1 target-line-number) (c-1 target-column-number))
       editing-instruction-1
