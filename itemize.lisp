@@ -446,6 +446,8 @@ sibling elements; these need to be stored."
   (warn "Preprocessing ~S..." article)
   (warn "Stripping comments...")
   (strip-comments article)
+  (warn "Fixing by and from statements...")
+  (fix-by-and-from article)
   (warn "Accommodating...")
   (accom article "-q" "-l" "-s")
   (warn "JA1...")
