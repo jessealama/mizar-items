@@ -63,7 +63,32 @@
     :type hash-table))
   (:documentation "A representation of a mizar article."))
 
-(defun line-at (article line-number)
+(defun make-article-copying-environment-from (article)
+  "Make a new article, and initialize its environment by copying the
+environment of ARTICLE.  If an environment slot of ARTICLE is
+unbound, it will be bound in the new article and have value NIL."
+  (let ((new-article (make-instance 'article)))
+    (setf (vocabularies new-article) (when (slot-boundp article 'vocabularies)
+				       (vocabularies article))
+	  (notations new-article) (when (slot-boundp article 'notations)
+				    (notations article))
+	  (constructors new-article) (when (slot-boundp article 'constructors)
+				       (constructors article))
+	  (requirements new-article) (when (slot-boundp article 'requirements)
+				       (requirements article))
+	  (registrations new-article) (when (slot-boundp article 'registrations)
+					(registrations article))
+	  (definitions new-article) (when (slot-boundp article 'definitions)
+				      (definitions article))
+	  (theorems new-article) (when (slot-boundp article 'theorems)
+				   (theorems article))
+	  (schemes new-article) (when (slot-boundp article 'schemes)
+				  (schemes article)))
+    new-article))
+
+(defgeneric line-at (text line-number))
+
+(defmethod line-at ((article article) line-number)
   (nth (1- line-number) 
        (lines article))) ; start counting lines at 1
 
