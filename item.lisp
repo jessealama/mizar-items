@@ -115,7 +115,9 @@
   ())
 
 (defclass scheme-item (xml-item labelled-item-mixin)
-  ())
+  ((schemenr
+    :initarg :schemenr
+    :accessor schemenr)))
 
 (defclass proposition-item (xml-item labelled-item-mixin)
   ())
