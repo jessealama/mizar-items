@@ -79,7 +79,8 @@ variable (at load time).")
 
 (defun belongs-to-mml (article-str)
   (let ((article-str-lc (lowercase article-str)))
-    (member article-str-lc *mml-lar* :test #'string=)))
+    (or (string= article-str-lc "tarski")
+	(member article-str-lc *mml-lar* :test #'string=))))
 
 (defgeneric trash (sandbox)
   (:documentation "Delete whatever articles that are being monitored
