@@ -94,6 +94,66 @@ unbound, it will be bound in the new article and have value NIL."
 				  (schemes article)))
     new-article))
 
+(defun file-exists-under-prel (local-db file extension)
+  (let ((prel (concat (namestring (pathname-as-directory local-db))
+		      (namestring (pathname-as-directory "prel")))))
+    (let ((file-path (concat prel (format "~A.~A" file extension))))
+      (probe-file file-path))))
+
+(defun trim-environment (article &optional local-db)
+  "Remove entries in the environment that don't exist in the MML.  If
+  LOCAL-DB is non-nil, use it as a further source of
+  information (specifically, consult its prel and dict subdirectories
+  to determine whether certain things specified in the environment
+  really do exist)."
+  (with-slots (vocabularies
+	       notations
+	       constructors
+	       requirements
+	       registrations
+	       definitions
+	       theorems
+	       schemes)
+      article
+    (declare (ignore vocabularies requirements)) ;; ignore for now
+    (setf notations (remove-if-not #'(lambda (notation)
+				       (or (belongs-to-mml notation)
+					   (file-exists-under-prel local-db 
+								   notation
+								   "dno")))
+				   notations)
+	  constructors (remove-if-not #'(lambda (constructor)
+					  (or (belongs-to-mml constructor)
+					      (file-exists-under-prel local-db
+								      constructor
+								      "dco")))
+				      constructors)
+	  registrations (remove-if-not #'(lambda (registration)
+					   (or (belongs-to-mml registration)
+					       (file-exists-under-prel local-db
+								       registration
+								       "dcl")))
+				       registrations)
+	  definitions (remove-if-not #'(lambda (definition)
+					 (or (belongs-to-mml definition)
+					     (file-exists-under-prel local-db
+								     definition
+								     "def")))
+				     definitions)
+	  theorems (remove-if-not #'(lambda (theorem)
+				      (or (belongs-to-mml theorem)
+					  (file-exists-under-prel local-db
+								  theorem
+								  "the")))
+				  theorems)
+	  schemes (remove-if-not #'(lambda (scheme)
+				     (or (belongs-to-mml scheme)
+					 (file-exists-under-prel local-db
+								 scheme
+								 "sch")))
+				 schemes)))
+  article)
+
 (defgeneric line-at (text line-number))
 
 (defmethod line-at ((article article) line-number)
