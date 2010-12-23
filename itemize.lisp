@@ -606,20 +606,18 @@ sibling elements; these need to be stored."
 	(let* ((local-db (pathname-as-directory (pathname
 						 (concat (namestring (pathname-as-directory work-directory))
 							 name))))
-	       (dict-subdir (pathname-as-directory (concat (namestring local-db) "dict")))
-	       (prel-subdir (pathname-as-directory (concat (namestring local-db) "prel")))
 	       (text-subdir (pathname-as-directory (concat (namestring local-db) "text"))))
-	  (let ((items (keys (itemize article))))
-	    (loop
-	       with len = (length items)
-	       for item in items
-	       for i from 1 upto len
-	       do
-		 (export-item item 
-			      :name-prefix "item"
-			      :directory (ensure-directories-exist text-subdir)
-			      :number i))
-	    t))
+	  (loop
+	     with items = (keys (itemize article))
+	     with len = (length items)
+	     for item in items
+	     collecting item into earlier-items
+	     for i from 1 upto len
+	     do
+	       (write-item item
+			   :name (format nil "item~d" i)
+			   :directory (ensure-directories-exist text-subdir)))
+	    t)
 	(error "Cannot use ~A as the work directory because it doesn't exist" work-directory))))
 
 ;;; itemize.lisp ends here
