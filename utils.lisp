@@ -76,4 +76,19 @@
      collecting k into keys
      finally (return keys)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Files
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun lines-of-file (path)
+  (let (lines)
+    (with-open-file (file path :direction :input
+			       :if-does-not-exist :error)
+      (symbol-macrolet
+	  (($line (read-line file nil nil)))
+	(do ((line $line $line))
+	    ((null line))
+	  (push line lines))))
+    (reverse lines)))
+
 ;;; utils.lisp ends here
