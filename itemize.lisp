@@ -608,15 +608,24 @@ sibling elements; these need to be stored."
 							 name))))
 	       (text-subdir (pathname-as-directory (concat (namestring local-db) "text"))))
 	  (loop
+	     with earlier-item-names = nil
 	     with items = (keys (itemize article))
 	     with len = (length items)
-	     for item in items
-	     collecting item into earlier-items
 	     for i from 1 upto len
+	     for item in items
 	     do
-	       (write-item item
-			   :name (format nil "item~d" i)
-			   :directory (ensure-directories-exist text-subdir)))
+	       (setf (name item) (format nil "item~d" i))
+	       (let ((earlier (reverse earlier-item-names)))
+		 (write-item item
+			     :directory (ensure-directories-exist text-subdir)
+			     :additional-notations earlier
+			     :additional-constructors earlier
+			     :additional-requirements earlier
+			     :additional-registrations earlier
+			     :additional-definitions earlier
+			     :additional-theorems earlier
+			     :additional-schemes earlier))
+	       (push (uppercase (name item)) earlier-item-names))
 	    t)
 	(error "Cannot use ~A as the work directory because it doesn't exist" work-directory))))
 

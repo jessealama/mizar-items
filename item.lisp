@@ -231,24 +231,70 @@ strange; sort if necessary."
 ;;; Outputting items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgeneric write-item (item &key directory name)
+(defgeneric write-item (item &key directory additional-vocablaries
+			                    additional-notations
+					    additional-constructors
+					    additional-requirements
+					    additional-registrations
+					    additional-definitions
+					    additional-theorems
+					    additional-schemes)
   (:documentation "Generate an article corresponding to ITEM.  The
   article will be written under the directory DIRECTORY, and its name
-  will be '<NAME>.miz'."))
+  will be '<name>.miz', where <name> is the value of the NAME slot in
+  ITEM."))
 
-(defmethod write-item :before (item &key directory name)
-  (declare (ignore name))
+(defmethod write-item :before (item &key directory additional-vocablaries
+				                   additional-notations
+						   additional-constructors
+						   additional-requirements
+						   additional-registrations
+						   additional-definitions
+						   additional-theorems
+						   additional-schemes)
   (unless (probe-file directory)
     (error "Unable to write item to directory ~S: the directory doesn't exist" directory)))
 
-(defmethod write-item :before (item &key directory name)
+(defmethod write-item :before (item &key directory additional-vocablaries
+				                   additional-notations
+						   additional-constructors
+						   additional-requirements
+						   additional-registrations
+						   additional-definitions
+						   additional-theorems
+						   additional-schemes)
   (declare (ignore directory))
-  (when (> (length name) 8)
-    (error "Invalid item name: the proposed name '~A' is longer than eight characters" name)))
+  (let ((name (name item)))
+    (when (> (length name) 8)
+      (error "Invalid item name: the proposed name '~A' is longer than eight characters" name))))
 
-(defmethod write-item (item &key directory name)
-  (let* ((original-article (source-article item))
+(defmethod write-item (item &key directory additional-vocablaries
+		                           additional-notations
+		                           additional-constructors
+		                           additional-requirements
+		                           additional-registrations
+		                           additional-definitions
+		                           additional-theorems
+		                           additional-schemes)
+  (let* ((name (name item))
+	 (original-article (source-article item))
 	 (article-for-item (make-article-copying-environment-from original-article)))
+    (setf (vocabularies article-for-item)
+	  (append (vocabularies article-for-item) additional-vocablaries))
+    (setf (notations article-for-item)
+	  (append (notations article-for-item) additional-notations))
+    (setf (constructors article-for-item)
+	  (append (constructors article-for-item) additional-constructors))
+    (setf (requirements article-for-item)
+	  (append (requirements article-for-item) additional-requirements))
+    (setf (registrations article-for-item)
+	  (append (registrations article-for-item) additional-registrations))
+    (setf (definitions article-for-item)
+	  (append (definitions article-for-item) additional-definitions))
+    (setf (theorems article-for-item)
+	  (append (theorems article-for-item) additional-theorems))
+    (setf (schemes article-for-item)
+	  (append (schemes article-for-item) additional-schemes))
     (setf (path article-for-item)
 	  (pathname-as-file (concat (namestring (pathname-as-directory (pathname directory)))
 				    (format nil "~A.miz" name))))
