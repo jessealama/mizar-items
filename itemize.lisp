@@ -584,14 +584,21 @@ sibling elements; these need to be stored."
   (unless (probe-file article-path)
     (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
 
-(defmethod itemize ((article-path pathname) &key (work-directory "/tmp"))
-  (let ((article (make-instance 'article :path article-path)))
-    (itemize article :work-directory work-directory)))
+(defmethod itemize ((article-path pathname))
+  (itemize (make-instance 'article :path article-path)))
 
-(defmethod itemize ((article-path string) &key (work-directory "/tmp"))
-  (itemize (pathname article-path) :work-directory work-directory))
+(defmethod itemize ((article-path string))
+  (itemize (pathname article-path)))
 
-(defun export-itemization (article &key (work-directory "/tmp"))
+(defgeneric export-itemization (article &key work-directory))
+
+(defmethod export-itemization ((article-path string) &key (work-directory "/tmp"))
+  (export-itemization (make-instance 'article :path article-path) :work-directory work-directory))
+
+(defmethod export-itemization ((article-path pathname) &key (work-directory "/tmp"))
+  (export-itemization (make-instance 'article :path article-path) :work-directory work-directory))
+
+(defmethod export-itemization ((article article) &key (work-directory "/tmp"))
   (let ((name (if (slot-boundp article 'name)
 		  (name article)
 		  (error "Article ~S lacks a name" article))))
