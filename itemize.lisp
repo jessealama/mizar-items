@@ -268,22 +268,64 @@ sibling elements; these need to be stored."
   (block-items "NotationBlock" "notation" 'notation-item article))
 
 (defun item-candidates (article)
-  (let ((everything (append (reservation-items article)
-			    (set-items article)
-			    (consider-items article)
-			    (reconsider-items article)
-			    (defpred-items article)
-			    (deffunc-items article)
-			    (now-items article)
-			    (iterequality-items article)
-			    (justifiedtheorem-items article)
-			    (proposition-items article)
-			    (definitionblock-items article)
-			    (schemeblock-items article)
-			    (registrationblock-items article)
-			    (notationblock-items article))))
-    (let ((sorted-everything (stable-sort everything #'item-lex-less)))
-      (reverse (disjoin-items sorted-everything)))))
+  (let ((reservation-items (reservation-items article))
+	(set-items (set-items article))
+	(consider-items (consider-items article))
+	(reconsider-items (reconsider-items article))
+	(defpred-items (defpred-items article))
+	(deffunc-items (deffunc-items article))
+	(now-items (now-items article))
+	(iterequality-items (iterequality-items article))
+	(justifiedtheorem-items (justifiedtheorem-items article))
+	(proposition-items (proposition-items article))
+	(definitionblock-items (definitionblock-items article))
+	(schemeblock-items (schemeblock-items article))
+	(registrationblock-items (registrationblock-items article))
+	(notationblock-items (notationblock-items article)))
+    (let ((everything (append reservation-items
+			      set-items
+			      consider-items
+			      reconsider-items
+			      defpred-items
+			      deffunc-items
+			      now-items
+			      iterequality-items
+			      justifiedtheorem-items
+			      proposition-items
+			      definitionblock-items
+			      schemeblock-items
+			      registrationblock-items
+			      notationblock-items)))
+      (let ((sorted-everything (stable-sort everything #'item-lex-less)))
+	(let ((disjoined (reverse (disjoin-items sorted-everything))))
+
+	  ;; Kludge: now that we've got the whittled-down list of
+	  ;; items, before returning, assign xml nodes to all pseudo
+	  ;; items.  Any pseduo-items remaining after DISJOIN must be
+	  ;; toplevel items and need to have XML nodes assigned to them.
+	  ;;
+	  ;; If the XML line and column information for these items
+	  ;; were accurate, there would be no need to do this here.
+	  ;; Alas.
+	  (let ((class-element-pairs (list '(reservation-item . "Reservation")
+					   '(set-item         . "Set")
+					   '(consider-item    . "Consider")
+					   '(reconsider-item  . "Reconsider")
+					   '(defpred-item     . "DefPred")
+					   '(deffunc-item     . "DefFunc"))))
+	    (dolist (class-element-pair class-element-pairs)
+	      (destructuring-bind (class . element-name)
+		  class-element-pair
+		(loop
+		   with xml-doc = (xml-doc article)
+		   with items = (remove-if-not #'(lambda (item) (typep item class)) disjoined)
+		   with nodes = (xpath:all-nodes (xpath:evaluate (format nil "Article/~A" element-name) xml-doc))
+		   for node in nodes
+		   for item in items
+		   do
+		     (setf (xml-node item) node)))))
+	  
+	  disjoined)))))
 
 (defun non-pseudo-item-candidates (article)
   (remove-if #'(lambda (object)

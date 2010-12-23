@@ -96,7 +96,7 @@
     :initarg :label
     :accessor label)))
 
-(defclass pseudo-item (item)
+(defclass pseudo-item (xml-item)
   ()
   (:documentation "A pseudo-item represents a non-exportable part of a
   mizar article.  This means: reserve, set,
@@ -125,10 +125,10 @@
 (defclass defpred-item (pseudo-item)
   ())
 
-(defclass iterequality-item (xml-item labelled-item-mixin pseudo-item)
+(defclass iterequality-item (xml-item labelled-item-mixin)
   ())
 
-(defclass now-item (xml-item labelled-item-mixin pseudo-item)
+(defclass now-item (labelled-item-mixin xml-item)
   ())
 
 (defclass theorem-item (xml-item labelled-item-mixin)
