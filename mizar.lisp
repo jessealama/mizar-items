@@ -70,6 +70,17 @@ variable (at load time).")
   "Verify all mizar articles contained in SANDBOX."
   (declare (ignore sandbox)))
 
+(defparameter *mml-lar-path* (make-pathname :directory *mizfiles*
+					    :name "mml.lar"))
+(defparameter *mml-lar*
+  (if (probe-file *mml-lar-path*)
+      (lines-of-file *mml-lar-path*)
+      (error "Unable to initialize mml.lar: file does not exist under ~A" *mml-lar-path*)))
+
+(defun belongs-to-mml (article-str)
+  (let ((article-str-lc (lowercase article-str)))
+    (member article-str-lc *mml-lar* :test #'string=)))
+
 (defgeneric trash (sandbox)
   (:documentation "Delete whatever articles that are being monitored
   by SANDBOX, and, if the directory corresponding to SANDBOX is empty,
