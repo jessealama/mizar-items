@@ -537,10 +537,9 @@ sibling elements; these need to be stored."
 
   (initialize-context-for-items article))
 
-(defgeneric itemize (thing &key work-directory))
+(defgeneric itemize (thing))
 
-(defmethod itemize ((article article) &key (work-directory "/tmp"))
-  (declare (ignore work-directory))
+(defmethod itemize ((article article))
   (itemize-preprocess article)
   (loop
      with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
