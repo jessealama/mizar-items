@@ -546,35 +546,41 @@ sibling elements; these need to be stored."
      with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
      with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
      with items->articles = (make-hash-table :test #'eq) ; keys are item objects
-     with candidates = (non-pseudo-item-candidates article)
-     with num-candidates = (length candidates)
-     for candidate in candidates
-     for candidate-num from 1 upto num-candidates
+     with all-candidates = (item-candidates article)
+     with pseudo-candidates = nil
+     with candidate-num = 1
+     for candidate in all-candidates
      do
-       ; udpate the tables for schemes, definitions, and theorems
-       (when (typep candidate 'scheme-item)
-	 (with-slots (schemenr)
-	     candidate
-	   (setf (gethash schemenr scheme-table) candidate)))
-       (when (typep candidate 'definition-item)
-	 (dolist (deftheorem (deftheorems candidate))
-	   (with-slots (nr vid)
-	       deftheorem
-	     (setf (gethash (cons nr vid) definition-table) deftheorem))))
-       (when (or (typep candidate 'theorem-item)
-		 (typep candidate 'proposition-item))
-	 (with-slots (nr vid)
-	     candidate
-	   (setf (gethash (cons nr vid) theorem-table) candidate)))
-       (let* ((new-text (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles))
-	      (article-for-item (make-instance 'article 
-					       :text new-text
-					       :name (format nil "item~d" candidate-num))))
-	 (setf (gethash candidate items->articles) article-for-item))
+       (cond ((typep candidate 'pseudo-item)
+	      (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
+	      (push candidate pseudo-candidates))
+	     (t
+	      ; udpate the tables for schemes, definitions, and theorems
+	      (when (typep candidate 'scheme-item)
+		(with-slots (schemenr)
+		    candidate
+		  (setf (gethash schemenr scheme-table) candidate)))
+	      (when (typep candidate 'definition-item)
+		(dolist (deftheorem (deftheorems candidate))
+		  (with-slots (nr vid)
+		      deftheorem
+		    (setf (gethash (cons nr vid) definition-table) deftheorem))))
+	      (when (or (typep candidate 'theorem-item)
+			(typep candidate 'proposition-item))
+		(with-slots (nr vid)
+		    candidate
+		  (setf (gethash (cons nr vid) theorem-table) candidate)))
+	      (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
+	      (setf (context-items candidate)
+		    (reverse pseudo-candidates))
+	      (let ((article-for-item (make-instance 'article 
+						     :text (text candidate)
+						     :name (format nil "item~d" candidate-num))))
+		(setf (gethash candidate items->articles) article-for-item))
+	      (incf candidate-num)))
      finally (return items->articles)))
 
-(defmethod itemize :before ((article-path pathname) &key work-directory)
-  (declare (ignore work-directory))
+(defmethod itemize :before ((article-path pathname))
   (unless (probe-file article-path)
     (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
 
