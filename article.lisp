@@ -15,7 +15,15 @@
    (text
     :initarg :text
     :accessor text
-    :type string)
+    :type string
+    :documentation "TEXT, if set, contains a string representing only the text proper of an article; it is supposed to exclude the initial environment.  Contrast with the FULL-TEXT slot.")
+   (full-text
+    :initarg :full-text
+    :accessor full-text
+    :type string
+    :documentation "FULL-TEXT, if set,
+    contains a string representing the entire text of an article,
+    complete with the environment.  Contrast with TEXT slot, which is intended to contain only the text proper, sans environment, of an article.")
    (vocabularies
     :initarg :vocabularies
     :accessor vocabularies
@@ -285,7 +293,27 @@ directive is not consulted."))
     (print-directive item-stream "schemes" directive-contents)))
 
 (defun write-article (article)
-  article) ; do this later
-	   
+  (let ((path (path article)))
+    (if (ensure-directories-exist path)
+	(with-open-file (miz path
+			     :direction :output
+			     :if-exists :error)
+	  (cond ((slot-boundp article 'full-text)
+		 (format miz "~A~%" (full-text article)))
+		((slot-boundp article 'text)
+		 (format miz "environ~%")
+		 (print-vocabularies article miz)
+		 (print-notations article miz)
+		 (print-constructors article miz)
+		 (print-requirements article miz)
+		 (print-registrations article miz)
+		 (print-theorems article miz)
+		 (print-definitions article miz)
+		 (print-schemes article miz)
+		 (format miz "begin~%")
+		 (format miz "~A~%" (text article)))
+		(t
+		 (error "Neither a complete text nor a text proper is known for ~S" article))))
+	(error "The path ~A is invalid: we cannot ensure that the directories mentioned in it exist." path))))
 
 ;;; article.lisp ends here

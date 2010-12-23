@@ -224,33 +224,34 @@ strange; sort if necessary."
 		 item-1 item-2 source-1 source-2)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Exporting
+;;; Outputting items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgeneric export-item (item &key number directory name-prefix)
+(defgeneric write-item (item &key directory name)
   (:documentation "Generate an article corresponding to ITEM.  The
   article will be written under the directory DIRECTORY, and its name
-  will be '<NAME-PREFIX><NUMBER>.miz'.  CONTEXT-ITEMS is a list of
-  pseudo-items that will be prepended, in the order that they appear,
-  to the text of ITEM."))
+  will be '<NAME>.miz'."))
 
-(defmethod export-item :before (item &key number directory name-prefix)
-  (declare (ignore number name-prefix))
-  (unless (ensure-directories-exist directory)
-    (error "Unable to export item to directory ~S: the path is invalid" directory)))
+(defmethod write-item :before (item &key directory name)
+  (declare (ignore name))
+  (unless (probe-file directory)
+    (error "Unable to write item to directory ~S: the directory doesn't exist" directory)))
 
-(defmethod export-item :before (item &key number directory name-prefix)
+(defmethod write-item :before (item &key directory name)
   (declare (ignore directory))
-  (when (> (length (concat name-prefix "_" (format nil "~A" number))) 8)
-    (error "Invalid item name: the proposed name '~A_~A' is longer than eight characters"
-	   name-prefix number)))
+  (when (> (length name) 8)
+    (error "Invalid item name: the proposed name '~A' is longer than eight characters" name)))
 
-(defmethod export-item (item &key number directory name-prefix)
+(defmethod write-item (item &key directory name)
   (let* ((original-article (source-article item))
 	 (article-for-item (make-article-copying-environment-from original-article)))
     (setf (path article-for-item)
 	  (pathname-as-file (concat (namestring (pathname-as-directory (pathname directory)))
-				    (format nil "~A_~A.miz" name-prefix number))))
+				    (format nil "~A.miz" name))))
+    (setf (text article-for-item) (concat (apply #'concat (mapcar #'(lambda (item)
+								      (format nil "~A~%" (text item)))
+								  (context-items item)))
+					  (text item)))
     (write-article article-for-item)))
 
 ;;; item.lisp ends here
