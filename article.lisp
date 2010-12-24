@@ -94,10 +94,11 @@ unbound, it will be bound in the new article and have value NIL."
 				  (schemes article)))
     new-article))
 
-(defun file-exists-under-prel (local-db file extension)
+(defun file-exists-under-prel (local-db file)
   (let ((prel (concat (namestring (pathname-as-directory local-db))
 		      (namestring (pathname-as-directory "prel")))))
-    (let ((file-path (concat prel (format "~A.~A" file extension))))
+    (let ((file-path (make-pathname :directory prel
+				    :name file)))
       (probe-file file-path))))
 
 (defun trim-environment (article &optional local-db)
@@ -119,38 +120,32 @@ unbound, it will be bound in the new article and have value NIL."
     (setf notations (remove-if-not #'(lambda (notation)
 				       (or (belongs-to-mml notation)
 					   (file-exists-under-prel local-db 
-								   notation
-								   "dno")))
+								   (format nil "~A.dno" notation))))
 				   notations)
 	  constructors (remove-if-not #'(lambda (constructor)
 					  (or (belongs-to-mml constructor)
 					      (file-exists-under-prel local-db
-								      constructor
-								      "dco")))
+								      (format nil "~A.dco" constructor))))
 				      constructors)
 	  registrations (remove-if-not #'(lambda (registration)
 					   (or (belongs-to-mml registration)
 					       (file-exists-under-prel local-db
-								       registration
-								       "dcl")))
+								       (format nil "~A.dcl" registration))))
 				       registrations)
 	  definitions (remove-if-not #'(lambda (definition)
 					 (or (belongs-to-mml definition)
 					     (file-exists-under-prel local-db
-								     definition
-								     "def")))
+								     (format nil "~A.def" definition))))
 				     definitions)
 	  theorems (remove-if-not #'(lambda (theorem)
 				      (or (belongs-to-mml theorem)
 					  (file-exists-under-prel local-db
-								  theorem
-								  "the")))
+								  (format nil "~A.the" theorem))))
 				  theorems)
 	  schemes (remove-if-not #'(lambda (scheme)
 				     (or (belongs-to-mml scheme)
 					 (file-exists-under-prel local-db
-								 scheme
-								 "sch")))
+								 (format nil "~A.sch" scheme))))
 				 schemes)))
   article)
 
