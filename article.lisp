@@ -158,8 +158,11 @@ unbound, it will be bound in the new article and have value NIL."
 (defun refresh-text (article)
   "Ensure that the LINES slot of ARTICLE accurately reflects the
   contents of the file pointed to by ARTICLE's PATH slot."
-  (setf (lines article) (lines-in-file (path article)))
-  article)
+  (let ((path (path article)))
+    (if (probe-file path)
+	(setf (lines article) (lines-in-file path))
+	(error "Unable to refresh the text for article ~S: its path '~A' doesn't exist"
+	     article path))))
 
 (defun article-xml-path (article)
   (replace-extension (path article) "miz" "xml"))
