@@ -612,20 +612,46 @@ sibling elements; these need to be stored."
 	     with items = (keys (itemize article))
 	     with len = (length items)
 	     for i from 1 upto len
+	     with item-name = (format nil "item~d" i)
+	     with item-path = (concat (namestring (pathname-as-file text-subdir))
+				      "/"
+				      (format nil "~A.miz" item-name))
 	     for item in items
 	     do
-	       (setf (name item) (format nil "item~d" i))
+	       (setf (name item) item-name)
 	       (let ((earlier (reverse earlier-item-names)))
-		 (write-item item
-			     :directory (ensure-directories-exist text-subdir)
-			     :additional-notations earlier
-			     :additional-constructors earlier
-			     :additional-requirements earlier
-			     :additional-registrations earlier
-			     :additional-definitions earlier
-			     :additional-theorems earlier
-			     :additional-schemes earlier))
-	       (push (uppercase (name item)) earlier-item-names))
+		 (let ((new-vocabularies (vocabularies article))
+		       (new-notations (notations article))
+		       (new-contructors (append (constructors article) earlier))
+		       (new-requirements (requirements article))
+		       (new-registrations (append (registrations article) earlier))
+		       (new-definitions (append (definitions article) earlier))
+		       (new-theorems (append (theorems article) earlier))
+		       (new-schemes (append (schemes article) earlier)))
+		   (let ((text (concat (apply #'concat (mapcar #'(lambda (item)
+								   (format nil "~A~%" (text item)))
+							       (context-items item)))
+				       (text item))))
+		   (let ((article-for-item (make-instance 'article
+							  :vocabularies new-vocabularies
+							  :notations new-notations
+							  :constructors new-contructors
+							  :requirements new-requirements
+							  :registrations new-registrations
+							  :definitions new-definitions
+							  :theorems new-theorems
+							  :schemes new-schemes
+							  :path item-path
+							  :name item-name
+							  :text text)))
+		     (trim-environment article-for-item local-db)
+		     (write-article article-for-item)
+		     (sb-posix:chdir text-subdir)
+		     (accom article-for-item "-q" "-l" "-s")
+		     (verifier article-for-item "-q" "-l" "-s")
+		     (exporter article-for-item "-q" "-l" "-s")
+		     (transfer article-for-item "-q" "-l" "-s")))
+	       (push (uppercase item-name) earlier-item-names))))
 	    t)
 	(error "Cannot use ~A as the work directory because it doesn't exist" work-directory))))
 
