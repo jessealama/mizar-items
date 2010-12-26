@@ -638,39 +638,40 @@ sibling elements; these need to be stored."
      for item-path = (concat (namestring (pathname-as-file text-subdir))
 			     "/"
 			     (format nil "~A.miz" item-name))
+     for earlier = (reverse earlier-item-names)
+     for new-vocabularies = (vocabularies article)
+     for new-notations = (append (notations article) earlier)
+     for new-contructors = (append (constructors article) earlier)
+     for new-requirements = (requirements article)
+     for new-registrations = (append (registrations article) earlier)
+     for new-definitions = (append (definitions article) earlier)
+     for new-theorems = (append (theorems article) earlier)
+     for new-schemes = (append (schemes article) earlier)
+     for context = (context-items item)
+     for text = (concat (apply #'concat (mapcar #'(lambda (item)
+						    (format nil "~A~%" (text item)))
+						context))
+			(if (typep item 'proposition-item)
+			    (format nil "theorem~%~A" (text item))
+			    (text item)))
      do
-       (setf (name item) item-name)
-       (let ((earlier (reverse earlier-item-names)))
-	 (let ((new-vocabularies (vocabularies article))
-	       (new-notations (append (notations article) earlier))
-	       (new-contructors (append (constructors article) earlier))
-	       (new-requirements (requirements article))
-	       (new-registrations (append (registrations article) earlier))
-	       (new-definitions (append (definitions article) earlier))
-	       (new-theorems (append (theorems article) earlier))
-	       (new-schemes (append (schemes article) earlier)))
-	   (let ((text (concat (apply #'concat (mapcar #'(lambda (item)
-							   (format nil "~A~%" (text item)))
-						       (context-items item)))
-			       (if (typep item 'proposition-item)
-				   (format nil "theorem~%~A" (text item))
-				   (text item)))))
-	     (let ((article-for-item (make-instance 'article
-						    :vocabularies new-vocabularies
-						    :notations new-notations
-						    :constructors new-contructors
-						    :requirements new-requirements
-						    :registrations new-registrations
-						    :definitions new-definitions
-						    :theorems new-theorems
-						    :schemes new-schemes
-						    :path item-path
-						    :name item-name
-						    :text text)))
-	       (trim-environment article-for-item local-db)
-	       (write-article article-for-item)
-	       (verify-and-export article-for-item local-db))))
-	 (push (uppercase item-name) earlier-item-names))
+       (let ((article-for-item (make-instance 'article
+					      :vocabularies new-vocabularies
+					      :notations new-notations
+					      :constructors new-contructors
+					      :requirements new-requirements
+					      :registrations new-registrations
+					      :definitions new-definitions
+					      :theorems new-theorems
+					      :schemes new-schemes
+					      :path item-path
+					      :name item-name
+					      :text text)))
+	 (trim-environment article-for-item local-db)
+	 (setf (name item) item-name)
+	 (write-article article-for-item)
+	 (verify-and-export article-for-item local-db))
+       (push (uppercase item-name) earlier-item-names)
      finally (return t)))
 
 ;;; itemize.lisp ends here
