@@ -625,9 +625,7 @@ sibling elements; these need to be stored."
 (defmethod export-itemization ((article article) &key (work-directory "/tmp"))
   (loop
      with name = (name article)
-     with local-db = (pathname-as-directory (pathname
-					     (concat (namestring (pathname-as-directory work-directory))
-						     name)))
+     with local-db = (pathname-as-directory (concat (namestring (pathname-as-directory work-directory)) name))
      with text-subdir = (pathname-as-directory (concat (namestring local-db) "text"))
      with earlier-item-names = nil
      with items = (keys (itemize article))
@@ -635,9 +633,8 @@ sibling elements; these need to be stored."
      for i from 1 upto len
      for item in items
      for item-name = (format nil "item~d" i)
-     for item-path = (concat (namestring (pathname-as-file text-subdir))
-			     "/"
-			     (format nil "~A.miz" item-name))
+     for miz-filename = (format nil "~A.miz" item-name)
+     for item-path = (concat (namestring (pathname-as-file text-subdir)) "/" miz-filename)
      for earlier = (reverse earlier-item-names)
      for new-vocabularies = (vocabularies article)
      for new-notations = (append (notations article) earlier)
@@ -648,29 +645,27 @@ sibling elements; these need to be stored."
      for new-theorems = (append (theorems article) earlier)
      for new-schemes = (append (schemes article) earlier)
      for context = (context-items item)
-     for text = (concat (apply #'concat (mapcar #'(lambda (item)
-						    (format nil "~A~%" (text item)))
-						context))
+     for text = (concat (apply #'concat (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
 			(if (typep item 'proposition-item)
 			    (format nil "theorem~%~A" (text item))
 			    (text item)))
+     for article-for-item = (make-instance 'article
+					   :vocabularies new-vocabularies
+					   :notations new-notations
+					   :constructors new-contructors
+					   :requirements new-requirements
+					   :registrations new-registrations
+					   :definitions new-definitions
+					   :theorems new-theorems
+					   :schemes new-schemes
+					   :path item-path
+					   :name item-name
+					   :text text)
      do
-       (let ((article-for-item (make-instance 'article
-					      :vocabularies new-vocabularies
-					      :notations new-notations
-					      :constructors new-contructors
-					      :requirements new-requirements
-					      :registrations new-registrations
-					      :definitions new-definitions
-					      :theorems new-theorems
-					      :schemes new-schemes
-					      :path item-path
-					      :name item-name
-					      :text text)))
-	 (trim-environment article-for-item local-db)
-	 (setf (name item) item-name)
-	 (write-article article-for-item)
-	 (verify-and-export article-for-item local-db))
+       (trim-environment article-for-item local-db)
+       (setf (name item) item-name)
+       (write-article article-for-item)
+       (verify-and-export article-for-item local-db)
        (push (uppercase item-name) earlier-item-names)
      finally (return t)))
 
