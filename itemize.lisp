@@ -251,7 +251,7 @@ sibling elements; these need to be stored."
 				     :vid vid
 				     :label label)
 		      deftheorem-items)))))
-	(setf (deftheorems definitionblock-item) deftheorem-items)))))
+	(setf (deftheorems definitionblock-item) (reverse deftheorem-items))))))
 
 (defun schemeblock-items (article)
   (let ((items (block-items "SchemeBlock" "scheme" 'scheme-item article)))
