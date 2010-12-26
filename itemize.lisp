@@ -634,7 +634,7 @@ sibling elements; these need to be stored."
      for item in items
      for item-name = (format nil "item~d" i)
      for miz-filename = (format nil "~A.miz" item-name)
-     for item-path = (concat (namestring (pathname-as-file text-subdir)) "/" miz-filename)
+     for item-path = (concat (namestring (pathname-as-directory text-subdir)) miz-filename)
      for earlier = (reverse earlier-item-names)
      for new-vocabularies = (vocabularies article)
      for new-notations = (append (notations article) earlier)
