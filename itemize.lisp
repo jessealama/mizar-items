@@ -486,28 +486,28 @@ sibling elements; these need to be stored."
 ;;; Itemization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun preprocess-text (article)
+(defun preprocess-text (article &optional (directory (sb-posix:getcwd)))
   (warn "Preprocessing ~S..." article)
   (warn "Stripping comments...")
-  (strip-comments article)
+  (strip-comments article directory)
   (warn "Fixing by and from statements...")
-  (fix-by-and-from article)
+  (fix-by-and-from article directory)
   (warn "Accommodating...")
-  (accom article "-q" "-l" "-s")
+  (accom article directory "-q" "-l" "-s")
   (warn "JA1...")
-  (JA1 article "-q" "-l" "-s")
+  (JA1 article directory "-q" "-l" "-s")
   (warn "dellink...")
-  (dellink article "-q" "-l" "-s")
+  (dellink article directory "-q" "-l" "-s")
   (warn "CutSet...")
-  (CutSet article "-q" "-l" "-s")
+  (CutSet article directory "-q" "-l" "-s")
   (warn "CutReconsider...")
-  (CutReconsider article "-q" "-l" "-s")
+  (CutReconsider article directory "-q" "-l" "-s")
   (warn "change...")
-  (change article "-q" "-l" "-s")
+  (change article directory "-q" "-l" "-s")
   (warn "Squeezing repeated newlines...")
-  (squeeze-repeated-newlines article)
+  (squeeze-repeated-newlines article directory)
   (warn "Squeezing repeated spaces...")
-  (squeeze-repeated-spaces article))
+  (squeeze-repeated-spaces article directory))
 
 (defun initialize-context-for-items (article)
   ;; compute a conservative estimate of what pseudo-items each item
@@ -526,12 +526,12 @@ sibling elements; these need to be stored."
 		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
      finally (return article)))
 
-(defun itemize-preprocess (article)
-  (preprocess-text article)
+(defun itemize-preprocess (article &optional (directory (sb-posix:getcwd)))
+  (preprocess-text article directory)
 
   ;; ensure the article XML is now synchonized with the changed text
   (warn "Verifying...")
-  (verifier article "-q" "-l" "-s")
+  (verifier article directory "-q" "-l" "-s")
   (warn "Generating absolute references...")
   (absrefs article)
   (refresh-text article)
@@ -539,10 +539,10 @@ sibling elements; these need to be stored."
 
   (initialize-context-for-items article))
 
-(defgeneric itemize (thing))
+(defgeneric itemize (thing &optional directory))
 
-(defmethod itemize ((article article))
-  (itemize-preprocess article)
+(defmethod itemize ((article article) &optional (directory (sb-posix:getcwd)))
+  (itemize-preprocess article directory)
   (loop
      with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
      with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
@@ -582,15 +582,16 @@ sibling elements; these need to be stored."
 	      (incf candidate-num)))
      finally (return items->articles)))
 
-(defmethod itemize :before ((article-path pathname))
+(defmethod itemize :before ((article-path pathname) &optional directory)
+  (declare (ignore directory))
   (unless (probe-file article-path)
     (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
 
-(defmethod itemize ((article-path pathname))
-  (itemize (make-instance 'article :path article-path)))
+(defmethod itemize ((article-path pathname) &optional (directory (sb-posix:getcwd)))
+  (itemize (make-instance 'article :path article-path) directory))
 
-(defmethod itemize ((article-path string))
-  (itemize (pathname article-path)))
+(defmethod itemize ((article-path string) &optional (directory (sb-posix:getcwd)))
+  (itemize (pathname article-path) directory))
 
 (defgeneric export-itemization (article &key work-directory))
 
@@ -599,6 +600,13 @@ sibling elements; these need to be stored."
 
 (defmethod export-itemization ((article-path pathname) &key (work-directory "/tmp"))
   (export-itemization (make-instance 'article :path article-path) :work-directory work-directory))
+
+(defun verify-and-export (article directory)
+  (warn "Verifying and exporting article with name ~A and path ~A in directory ~A" (name article) (path article) directory)
+  (accom article directory "-q" "-l" "-s")
+  (verifier article directory "-q" "-l" "-s")
+  (exporter article directory "-q" "-l" "-s")
+  (transfer article directory "-q" "-l" "-s"))
 
 (defmethod export-itemization ((article article) &key (work-directory "/tmp"))
   (let ((name (if (slot-boundp article 'name)
