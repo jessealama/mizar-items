@@ -94,26 +94,38 @@ variable (at load time).")
     ;; just delete the directory for now
     (sb-ext:delete-directory location))) ;; not ideal: we shouldn't use sb-ext
 
+(defun run-in-directory (program directory args &key input output if-output-exists)
+  (if (directory-p (file-exists-p directory))
+      (let ((dir-as-string (directory-namestring (pathname-as-directory directory))))
+	(sb-ext:run-program "exec-in-dir.sh" 
+			    (append (list dir-as-string program) args)
+			    :search t
+			    :input input
+			    :output output
+			    :if-output-exists if-output-exists))
+      (error "No such directory ~A" directory)))
+
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
-  (let ((check (sb-ext:run-program "which" (list program) :search t)))
+  (let* ((check (sb-ext:run-program "which" (list program) 
+				    :search t)))
     (if (zerop (sb-ext:process-exit-code check))
 	`(progn
-	   (defgeneric ,name (file))
-	   (defmethod ,name ((miz-path pathname))
+	   (defgeneric ,name (file &optional directory))
+	   (defmethod ,name ((miz-path pathname) &optional (directory (sb-posix:getcwd)))
 	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-		    (proc (sb-ext:run-program ,program 
-					      (append ',arguments (list (namestring miz-path)))
-					      :search t
-					      :output tmp-path
-					      :if-output-exists :supersede)))
+		    (proc (run-in-directory ,program
+					    directory
+					    (append ',arguments (list (namestring miz-path)))
+					    :output tmp-path
+					    :if-output-exists :supersede)))
 	       (if (zerop (sb-ext:process-exit-code proc))
 		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when stripping comments; the process exited with code ~S" (sb-ext:process-exit-code proc)))))
-	     (defmethod ,name ((article-path string))
-	       (,name (pathname article-path)))
-	     (defmethod ,name ((article article))
-	       (,name (path article))
+		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,program ',arguments (sb-ext:process-exit-code proc)))))
+	     (defmethod ,name ((article-path string) &optional (directory (sb-posix:getcwd)))
+	       (,name (pathname article-path) directory))
+	     (defmethod ,name ((article article) &optional (directory (sb-posix:getcwd)))
+	       (,name (path article) directory)
 	       (refresh-text article)))
 	(error "The program ~S could not be found in your path (or it is not executable)" program))))
 
@@ -122,59 +134,61 @@ variable (at load time).")
   (let ((check (sb-ext:run-program "which" (list program) :search t)))
     (if (zerop (sb-ext:process-exit-code check))
 	`(progn
-	   (defgeneric ,name (file))
-	   (defmethod ,name ((miz-path pathname))
+	   (defgeneric ,name (file &optional directory))
+	   (defmethod ,name ((miz-path pathname) &optional (directory (sb-posix:getcwd)))
 	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-		    (proc (sb-ext:run-program ,program
-					      ',arguments 
-					      :search t
-					      :input miz-path
-					      :output tmp-path
-					      :if-output-exists :supersede)))
+		    (proc (run-in-directory ,program
+					    directory
+					    ',arguments 
+					    :input miz-path
+					    :output tmp-path
+					    :if-output-exists :supersede)))
 	       (if (zerop (sb-ext:process-exit-code proc))
 		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when stripping comments; the process exited with code ~S" (sb-ext:process-exit-code proc)))))
-	     (defmethod ,name ((article-path string))
-	       (,name (pathname article-path)))
-	     (defmethod ,name ((article article))
-	       (,name (path article))
+		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,program ',arguments (sb-ext:process-exit-code proc)))))
+	     (defmethod ,name ((article-path string) &optional (directory (sb-posix:getcwd)))
+	       (,name (pathname article-path) directory))
+	     (defmethod ,name ((article article) &optional (directory (sb-posix:getcwd)))
+	       (,name (path article) directory)
 	       (refresh-text article)))
 	(error "The program ~S could not be found in your path (or it is not executable)" program))))
 
 (define-file-transformer strip-comments "sed" "-e" "s/::.*$//")
 (define-file-transformer fix-by-and-from "fix-by-and-from.sh")
 (define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
-(define-input-transformer squeeze-repeated-spaces "tr" "-s" "\ ")
+(define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
 
+(defgeneric run-mizar-tool (tool article directory &rest flags))
 
-(defgeneric run-mizar-tool (tool article &rest flags))
-
-(defmethod run-mizar-tool ((tool string) (article-path pathname) &rest flags)
+(defmethod run-mizar-tool ((tool string) (article-path pathname) directory &rest flags)
   (let ((name (namestring article-path)))
     (if (probe-file article-path)
-	(let ((proc (sb-ext:run-program tool (append flags (list name)) :search t)))
-	  (if (zerop (sb-ext:process-exit-code proc))
-	      (let ((err-filename (replace-extension article-path "miz" "err")))
-		(if (and (probe-file err-filename)
-			 (not (zerop (file-size err-filename))))
-		    (error "Although ~S returned successfully, it nonetheless generated a non-empty error file" tool)
-		    t))
-	      (error "~S did not exit cleanly working on ~S" tool article-path)))
+	(if (directory-p (file-exists-p directory))
+	    (let ((proc (run-in-directory tool directory (append flags (list name)))))
+	      (if (zerop (sb-ext:process-exit-code proc))
+		  (let ((err-filename (replace-extension article-path "miz" "err")))
+		    (if (and (probe-file err-filename)
+			     (not (zerop (file-size err-filename))))
+			(error "Although ~S returned successfully, it nonetheless generated a non-empty error file" tool)
+			t))
+		  (error "~S did not exit cleanly working on ~S" tool article-path)))
+	    (error "The specified directory, ~A, in which to apply the mizar tool ~A is not a directory!" directory tool))
 	(error "No such file: ~S" name))))
 
-(defmethod run-mizar-tool ((tool string) (article-path string) &rest flags)
-  (apply 'run-mizar-tool tool (pathname article-path) flags))
+(defmethod run-mizar-tool ((tool string) (article-path string) directory &rest flags)
+  (apply 'run-mizar-tool tool (pathname article-path) directory flags))
 
-(defmethod run-mizar-tool ((tool string) (article article) &rest flags)
+(defmethod run-mizar-tool ((tool string) (article article) directory &rest flags)
   (if (slot-boundp article 'path)
-      (apply 'run-mizar-tool tool (path article) flags)
+      (apply 'run-mizar-tool tool (path article) directory flags)
       (error "Cannot apply ~S to ~S because we don't know its path"
 	     tool article)))
 
-(defmethod run-mizar-tool ((tool symbol) article &rest flags)
+(defmethod run-mizar-tool ((tool symbol) article directory &rest flags)
   (apply 'run-mizar-tool 
 	 (format nil "~(~a~)" (string tool)) ; lowercase: watch out
 	 article
+	 directory
 	 flags))
 
 (defmacro define-mizar-tool (tool)
@@ -183,13 +197,13 @@ variable (at load time).")
     (if (zerop (sb-ext:process-exit-code check))
 	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
 	  `(progn
-	     (defgeneric ,tool-as-symbol (article &rest flags))
-	     (defmethod ,tool-as-symbol ((article-path pathname) &rest flags)
-	       (apply 'run-mizar-tool ,tool article-path flags))
-	     (defmethod ,tool-as-symbol ((article-path string) &rest flags)
-	       (apply 'run-mizar-tool ,tool article-path flags))
-	     (defmethod ,tool-as-symbol ((article article) &rest flags)
-	       (apply 'run-mizar-tool ,tool article flags)
+	     (defgeneric ,tool-as-symbol (article directory &rest flags))
+	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
+	       (apply 'run-mizar-tool ,tool article-path directory flags))
+	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
+	       (apply 'run-mizar-tool ,tool article-path directory flags))
+	     (defmethod ,tool-as-symbol ((article article) directory &rest flags)
+	       (apply 'run-mizar-tool ,tool article directory flags)
 	       article)))
 	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
 
@@ -208,17 +222,17 @@ variable (at load time).")
     (if (zerop (sb-ext:process-exit-code check))
 	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
 	  `(progn
-	     (defgeneric ,tool-as-symbol (article &rest flags))
-	     (defmethod ,tool-as-symbol ((article-path pathname) &rest flags)
+	     (defgeneric ,tool-as-symbol (article directory &rest flags))
+	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
 	       (let ((edtfile-path (replace-extension article-path
 						      "miz" "$-$")))
-		 (apply 'run-mizar-tool ,tool article-path flags)
-		 (edtfile article-path "-l")
+		 (apply 'run-mizar-tool ,tool article-path directory flags)
+		 (edtfile article-path directory "-l")
 		 (rename-file edtfile-path article-path)))
-	     (defmethod ,tool-as-symbol ((article-path string) &rest flags)
-	       (apply ',tool-as-symbol (pathname article-path) flags))
-	     (defmethod ,tool-as-symbol ((article article) &rest flags)
-	       (apply ',tool-as-symbol (path article) flags)
+	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
+	       (apply ',tool-as-symbol (pathname article-path) directory flags))
+	     (defmethod ,tool-as-symbol ((article article) directory &rest flags)
+	       (apply ',tool-as-symbol (path article) directory flags)
 	       (refresh-text article))))
 	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
 
