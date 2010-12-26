@@ -371,7 +371,9 @@ sibling elements; these need to be stored."
 
 (defun definition-editing-instructions (item definition-table items->articles)
   (let* ((item-xml-node (xml-node item))
-	 (ref-nodes (all-ref-descendents item-xml-node))
+	 (ref-nodes (if (typep item 'proposition-item)
+			(all-ref-descendents (proof-after-proposition item-xml-node))
+			(all-ref-descendents item-xml-node)))
 	 (instructions nil))
     (dolist (ref-node ref-nodes instructions)
       (multiple-value-bind (ref-line-num ref-col-num)
@@ -405,7 +407,9 @@ sibling elements; these need to be stored."
 
 (defun theorem-editing-instructions (item theorem-table items->articles)
   (let* ((item-xml-node (xml-node item))
-	 (ref-nodes (all-ref-descendents item-xml-node))
+	 (ref-nodes (if (typep item 'proposition-item)
+			(all-ref-descendents (proof-after-proposition item-xml-node))
+			(all-ref-descendents item-xml-node)))
 	 (instructions nil))
     (dolist (ref-node ref-nodes instructions)
       (multiple-value-bind (ref-line-num ref-col-num)
