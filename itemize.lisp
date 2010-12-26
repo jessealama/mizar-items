@@ -644,11 +644,14 @@ sibling elements; these need to be stored."
      for new-definitions = (append (definitions article) earlier)
      for new-theorems = (append (theorems article) earlier)
      for new-schemes = (append (schemes article) earlier)
+     for original-text = (text item)
      for context = (context-items item)
-     for text = (concat (apply #'concat (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
+     for context-lines = (mapcar #'(lambda (item) (pad-with-newline (text item))) context)
+     for context-lines-as-str = (apply #'concat context-lines)
+     for text = (concat context-lines-as-str
 			(if (typep item 'proposition-item)
-			    (format nil "theorem~%~A" (text item))
-			    (text item)))
+			    (format nil "theorem~%~A" original-text)
+			    original-text))
      for article-for-item = (make-instance 'article
 					   :vocabularies new-vocabularies
 					   :notations new-notations
