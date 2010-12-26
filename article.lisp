@@ -221,7 +221,7 @@ unbound, it will be bound in the new article and have value NIL."
 	     (not (slot-boundp article 'definitions))
 	     (not (slot-boundp article 'theorems))
 	     (not (slot-boundp article 'schemes)))
-    (envget article "-l")
+    (envget article (directory-namestring (path article)) "-l")
     (let* ((path (path article))
 	   (evl-path (replace-extension path "miz" "evl"))
 	   (environment-as-table (evl evl-path)))
