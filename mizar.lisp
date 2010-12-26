@@ -278,4 +278,10 @@ variable (at load time).")
   (absrefs (path article))
   (refresh-xml article))
 
+(defun verify-and-export (article &optional directory)
+  (accom article directory "-q" "-s" "-l")
+  (verifier article directory "-q" "-s" "-l")
+  (exporter article directory "-q" "-s" "-l")
+  (transfer article directory "-q" "-s" "-l"))
+
 ;;; mizar.lisp ends here
