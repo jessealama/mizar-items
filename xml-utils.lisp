@@ -67,9 +67,9 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
   (let ((next (dom:next-sibling proposition-node)))
     (when next
       (let ((next-next (dom:next-sibling next))) ; this is probably a proof node...
-	(and (or (string= (dom:local-name next-next) "By")
+	(when (or (string= (dom:local-name next-next) "By")
 		 (string= (dom:local-name next-next) "From"))
-	     next-next)))))
+	  next-next)))))
 
 (defun deftheorems-after-definitionblock (definitionblock-node)
   "Get all the DefTheorem nodes that follow DEFINITIONBLOCK-NODE."
