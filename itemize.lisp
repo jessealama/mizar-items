@@ -161,7 +161,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				   :begin-line-number begin-line-num
 				   :begin-column-number begin-column-num
 				   :end-line-number end-line-num
-				   :end-column-number end-column-num
+				   :end-column-number (1+ end-column-num) ; to get the ';'
 				   :nr nr
 				   :vid vid
 				   :label label
@@ -196,7 +196,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			       :begin-line-number begin-line-num
 			       :begin-column-number begin-column-num
 			       :end-line-number end-line-num
-			       :end-column-number end-column-num
+			       :end-column-number (1+ end-column-num) ; to get the final ';'
 			       :nr nr
 			       :vid vid
 			       :label label
@@ -221,7 +221,9 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				     :begin-line-number begin-line-num
 				     :begin-column-number begin-column-num
 				     :end-line-number end-line-num
-				     :end-column-number end-column-num
+				     :end-column-number (if (string= xml-element-name "SchemeBlock") ; Schemes are special
+							    end-column-num
+							    (1+ end-column-num))
 				     :node block-node)
 		    items)))))
     (reverse items))))
