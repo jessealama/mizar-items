@@ -469,22 +469,28 @@ sibling elements; these need to be stored."
 	  (theorem-editing-instructions item theorem-table items->articles)
 	  (scheme-editing-instructions item scheme-table items->articles)))
 
-(defun apply-editing-instruction (item instruction)
-  (with-slots (old-label new-label target-line-number target-column-number)
-      instruction
-    (let* ((line (line-at item target-line-number))
-	   (new-line (regex-replace old-label line new-label)))
-      (set-line item target-line-number new-line)))
-  item)
-
-(defun apply-editing-instructions (item instructions)
-  (let ((sorted-instructions (sort instructions #'instruction->)))
-    (dolist (instruction sorted-instructions)
-      (apply-editing-instruction item instruction))))
+(defun apply-editing-instructions (item instructions lines)
+  (loop
+     with sorted-instructions = (sort instructions #'instruction->)
+     with item-begin-line = (begin-line-number item)
+     for instruction in sorted-instructions
+     for old-label = (old-label instruction)
+     for new-label = (new-label instruction)
+     for target-line-number = (target-line-number instruction)
+     for target-column-number = (target-column-number instruction)
+     for index = (- target-line-number item-begin-line)
+     for line = (aref lines index)
+     for new-line = (regex-replace old-label line new-label)
+     do
+       (setf (aref lines index) new-line)
+     finally (return lines)))
 
 (defun rewrite-item-text (item theorem-table definition-table scheme-table items->articles)
-  (apply-editing-instructions item
-			      (editing-instructions item theorem-table definition-table scheme-table items->articles)))
+  (setf (text item)
+	(array->newline-delimited-string
+	 (apply-editing-instructions item
+				     (editing-instructions item theorem-table definition-table scheme-table items->articles)
+				     (lines-as-array (text item))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Itemization
