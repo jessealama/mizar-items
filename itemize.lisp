@@ -543,6 +543,47 @@ sibling elements; these need to be stored."
   (exporter article directory "-q" "-l" "-s")
   (transfer article directory "-q" "-l" "-s"))
 
+(defgeneric exportable? (item &optional directory)
+  (:documentation "Determine whether ITEM is 'exportable' in the sense
+  that it can be accommodated, verified, and generates something
+  exportable (i.e., calling exporter and transfer on the article
+  fragment associated with ITEM creates something new in the prel
+  subdirectory of DIRECTORY, the local mizar database.
+
+In general, the contents of DIRECTORY will be be changed; calling this
+function has side effects.")
+
+(defmethod exportable? ((item pseudo-item) &optional directory)
+  nil)
+
+(defmethod exportable? ((item iterequality-item) &optional directory)
+  nil)
+
+(defmethod exportable? ((item now-item) &optional directory)
+  nil)
+
+(defmethod exportable? ((item deftheorem-item) &optional directory)
+  nil)
+
+(defmethod exportable? ((item theorem-item) &optional directory)
+  t)
+
+(defmethod exportable? ((item scheme-item) &optional directory)
+  t)
+
+
+(defclass proposition-item (xml-item labelled-item-mixin)
+  ())
+
+(defmethod exportable? ((item definition-item) &optional directory)
+  t)
+
+(defmethod exportable? ((item notation-item) &optional directory)
+  t)
+
+(defmethod exportable? ((item registration-item) &optional directory)
+  t)
+
 (defgeneric itemize (thing &optional directory))
 
 (defmethod itemize :around ((article article) &optional work-directory)
