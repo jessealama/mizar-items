@@ -551,6 +551,16 @@ sibling elements; these need to be stored."
 
 (defgeneric itemize (thing &optional directory))
 
+(defmethod export-itemization :before ((article article) &key work-directory)
+  (declare (ignore work-directory))
+  (unless (slot-boundp article 'name)
+    (error "Article ~S lacks a name" article)))
+
+(defmethod itemize :before ((article-path pathname) &optional directory)
+  (declare (ignore directory))
+  (unless (probe-file article-path)
+    (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
+
 (defmethod itemize ((article article) &optional (directory (sb-posix:getcwd)))
   (itemize-preprocess article directory)
   (loop
@@ -591,11 +601,6 @@ sibling elements; these need to be stored."
 	      (incf candidate-num)))
      finally (return items->articles)))
 
-(defmethod itemize :before ((article-path pathname) &optional directory)
-  (declare (ignore directory))
-  (unless (probe-file article-path)
-    (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
-
 (defmethod itemize ((article-path pathname) &optional (directory (sb-posix:getcwd)))
   (itemize (make-instance 'article :path article-path) directory))
 
@@ -608,19 +613,6 @@ sibling elements; these need to be stored."
   (verifier article directory "-q" "-l" "-s")
   (exporter article directory "-q" "-l" "-s")
   (transfer article directory "-q" "-l" "-s"))
-
-(defgeneric export-itemization (article &key work-directory))
-
-(defmethod export-itemization ((article-path string) &key (work-directory "/tmp"))
-  (export-itemization (make-instance 'article :path article-path) :work-directory work-directory))
-
-(defmethod export-itemization ((article-path pathname) &key (work-directory "/tmp"))
-  (export-itemization (make-instance 'article :path article-path) :work-directory work-directory))
-
-(defmethod export-itemization :before ((article article) &key work-directory)
-  (declare (ignore work-directory))
-  (unless (slot-boundp article 'name)
-    (error "Article ~S lacks a name" article)))
 
 (defmethod export-itemization :before ((article article) &key work-directory)
   (declare (ignore article))
