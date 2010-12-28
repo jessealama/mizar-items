@@ -95,15 +95,18 @@ variable (at load time).")
     (sb-ext:delete-directory location))) ;; not ideal: we shouldn't use sb-ext
 
 (defun run-in-directory (program directory args &key input output if-output-exists)
-  (if (directory-p (file-exists-p directory))
-      (let ((dir-as-string (directory-namestring (pathname-as-directory directory))))
-	(sb-ext:run-program "exec-in-dir.sh" 
-			    (append (list dir-as-string program) args)
-			    :search t
-			    :input input
-			    :output output
-			    :if-output-exists if-output-exists))
-      (error "No such directory ~A" directory)))
+  (let ((real-dir-name (file-exists-p directory)))
+    (if real-dir-name
+	(if (directory-p real-dir-name)
+	    (let ((dir-as-string (directory-namestring (pathname-as-directory real-dir-name))))
+	      (sb-ext:run-program "exec-in-dir.sh" 
+				  (append (list dir-as-string program) args)
+				  :search t
+				  :input input
+				  :output output
+				  :if-output-exists if-output-exists))
+	    (error "No such directory ~A" directory))
+	(error "No file under the path '~A'" directory))))
 
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
