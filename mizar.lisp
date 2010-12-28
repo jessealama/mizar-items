@@ -157,7 +157,7 @@ variable (at load time).")
 	(error "The program ~S could not be found in your path (or it is not executable)" program))))
 
 (define-file-transformer strip-comments "sed" "-e" "s/::.*$//")
-(define-file-transformer fix-by-and-from "fix-by-and-from.sh")
+(define-file-transformer fix-by-and-from "/Users/alama/sources/mizar/mizar-items/fix-by-and-from.sh")
 (define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
 (define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
 
