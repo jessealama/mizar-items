@@ -558,8 +558,10 @@ sibling elements; these need to be stored."
 
 (defmethod itemize :before ((article-path pathname) &optional directory)
   (declare (ignore directory))
-  (unless (probe-file article-path)
-    (error "Cannot itemize file at ~S becuase there is no file there" article-path)))
+  (let ((directory (file-exists-p article-path)))
+    (when (or (null directory)
+	      (not (directory-p directory)))
+      (error "Cannot itemize file at ~S becuase there is no file there" article-path))))
 
 (defmethod itemize ((article article) &optional (directory (sb-posix:getcwd)))
   (itemize-preprocess article directory)
