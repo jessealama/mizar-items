@@ -485,12 +485,15 @@ sibling elements; these need to be stored."
        (setf (aref lines index) new-line)
      finally (return lines)))
 
+(defun revised-item-text (item theorem-table definition-table scheme-table items->articles)
+  (array->newline-delimited-string
+   (apply-editing-instructions item
+			       (editing-instructions item theorem-table definition-table scheme-table items->articles)
+			       (lines-as-array (text item)))))
+
 (defun rewrite-item-text (item theorem-table definition-table scheme-table items->articles)
   (setf (text item)
-	(array->newline-delimited-string
-	 (apply-editing-instructions item
-				     (editing-instructions item theorem-table definition-table scheme-table items->articles)
-				     (lines-as-array (text item))))))
+	(revised-item-text item theorem-table definition-table scheme-table items->articles)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Itemization
