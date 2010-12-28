@@ -536,19 +536,6 @@ sibling elements; these need to be stored."
 		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
      finally (return article)))
 
-(defun itemize-preprocess (article &optional (directory (sb-posix:getcwd)))
-  (preprocess-text article directory)
-
-  ;; ensure the article XML is now synchonized with the changed text
-  (warn "Verifying...")
-  (verifier article directory "-q" "-l" "-s")
-  (warn "Generating absolute references...")
-  (absrefs article)
-  (refresh-text article)
-  (refresh-idx article)
-
-  (initialize-context-for-items article))
-
 (defgeneric itemize (thing &optional directory))
 
 (defmethod itemize :around ((article article) &optional work-directory)
@@ -566,8 +553,18 @@ sibling elements; these need to be stored."
 	    (call-next-method)
 	    (error "Cannot carry out itemization in directory ~A becuase that is not actually a directory" directory)))))
 
-(defmethod itemize :before ((article article) &optional (directory (sb-posix:getcwd))
-  (itemize-preprocess article directory))
+(defmethod itemize :before ((article article) &optional directory)
+  (preprocess-text article directory)
+
+  ;; ensure the article XML is now synchonized with the changed text
+  (warn "Verifying...")
+  (verifier article directory "-q" "-l" "-s")
+  (warn "Generating absolute references...")
+  (absrefs article)
+  (refresh-text article)
+  (refresh-idx article)
+
+  (initialize-context-for-items article))
 
 (defmethod itemize ((article article) &optional (directory (sb-posix:getcwd)))
   (loop
