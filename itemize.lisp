@@ -566,8 +566,10 @@ sibling elements; these need to be stored."
 	    (call-next-method)
 	    (error "Cannot carry out itemization in directory ~A becuase that is not actually a directory" directory)))))
 
+(defmethod itemize :before ((article article) &optional (directory (sb-posix:getcwd))
+  (itemize-preprocess article directory))
+
 (defmethod itemize ((article article) &optional (directory (sb-posix:getcwd)))
-  (itemize-preprocess article directory)
   (loop
      with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
      with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
