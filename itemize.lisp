@@ -563,8 +563,8 @@ sibling elements; these need to be stored."
      with candidate-num = 1
      for candidate in all-candidates
      do
+       (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
        (cond ((typep candidate 'pseudo-item)
-	      (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
 	      (push candidate pseudo-candidates))
 	     (t
 	      ; udpate the tables for schemes, definitions, and theorems
@@ -582,7 +582,6 @@ sibling elements; these need to be stored."
 		(with-slots (nr vid)
 		    candidate
 		  (setf (gethash (cons nr vid) theorem-table) candidate)))
-	      (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
 	      (setf (context-items candidate)
 		    (reverse pseudo-candidates))
 	      (let ((article-for-item (make-instance 'article 
