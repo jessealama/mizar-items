@@ -154,7 +154,9 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		      (let ((by-or-from (xpath:first-node (xpath:evaluate "By | From" justifiedtheorem-node))))
 			(if by-or-from
 			    (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
-			      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
+			      (if last-ref-node
+				  (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node))
+				  (multiple-value-setq (end-line-num end-column-num) (line-and-column by-or-from))))
 			    (multiple-value-setq (end-line-num end-column-num) prop-node))))))
 	      (push (make-instance 'theorem-item
 				   :source-article article
@@ -182,15 +184,23 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		(line-and-column proposition-node)
 	      (multiple-value-setq (begin-line-num begin-column-num)
 		(first-keyword-before article (format nil "~A:" label) almost-begin-line-num almost-begin-col-num))
-	      (let ((proof-node (proof-after-proposition proposition-node)))
-		(if proof-node
-		    (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
-		      (multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))
-		    (let ((by-or-from (by-or-from-after-proposition proposition-node)))
-		      (if by-or-from
-			  (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
-			    (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node)))
-			  (multiple-value-setq (end-line-num end-column-num) proposition-node))))))
+	      (let ((next (next-non-blank-sibling proposition-node)))
+		(if next
+		    (let ((next-name (dom:local-name next)))
+		      (cond ((string= next-name "Proof")
+			     (let ((proof-node (proof-after-proposition proposition-node)))
+			       (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
+				 (multiple-value-setq (end-line-num end-column-num) (line-and-column last-endposition-child)))))
+			    ((or (string= next-name "By")
+				 (string= next-name "From"))
+			     (let ((by-or-from (by-or-from-after-proposition proposition-node)))
+			       (let ((last-ref-node (last-child-with-name by-or-from "Ref")))
+				 (if last-ref-node
+				     (multiple-value-setq (end-line-num end-column-num) (line-and-column last-ref-node))
+				     (multiple-value-setq (end-line-num end-column-num) (line-and-column by-or-from))))))
+			    (t
+			     (error "Unknown next sibling after proposition node: ~S" next))))
+		    (error "This proposition node (~S) is the final non-blank node of the entire document, but lacks a Proof nor is it immediately justified by a By or From statement" proposition-node))))
 	    (push (make-instance 'proposition-item
 			       :source-article article
 			       :begin-line-number begin-line-num
@@ -372,7 +382,7 @@ sibling elements; these need to be stored."
 (defun definition-editing-instructions (item definition-table items->articles)
   (let* ((item-xml-node (xml-node item))
 	 (ref-nodes (if (typep item 'proposition-item)
-			(all-ref-descendents (proof-after-proposition item-xml-node))
+			(all-ref-descendents (proposition-ref-bearer item-xml-node))
 			(all-ref-descendents item-xml-node)))
 	 (instructions nil))
     (dolist (ref-node ref-nodes instructions)
@@ -408,7 +418,7 @@ sibling elements; these need to be stored."
 (defun theorem-editing-instructions (item theorem-table items->articles)
   (let* ((item-xml-node (xml-node item))
 	 (ref-nodes (if (typep item 'proposition-item)
-			(all-ref-descendents (proof-after-proposition item-xml-node))
+			(all-ref-descendents (proposition-ref-bearer item-xml-node))
 			(all-ref-descendents item-xml-node)))
 	 (instructions nil))
     (dolist (ref-node ref-nodes instructions)
