@@ -28,7 +28,8 @@
    (context-items
     :initarg :context
     :accessor context-items
-    :type list)
+    :type list
+    :initform nil)
    (name
     :initarg :name
     :accessor name
