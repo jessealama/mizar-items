@@ -618,11 +618,6 @@ sibling elements; these need to be stored."
   (exporter article directory "-q" "-l" "-s")
   (transfer article directory "-q" "-l" "-s"))
 
-(defmethod export-itemization :before ((article article) &key work-directory)
-  (declare (ignore article))
-  (unless (probe-file work-directory)
-    (error "Cannot use ~A as the work directory because it doesn't exist" work-directory)))
-
 (defmethod export-itemization ((article article) &key (work-directory "/tmp"))
   (loop
      with name = (name article)
