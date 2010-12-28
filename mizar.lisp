@@ -161,6 +161,11 @@ variable (at load time).")
 (define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
 (define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
 
+(define-condition mizar-error (error)
+  ((tool :initarg :tool :accessor tool)
+   (working-directory :initarg :working-directory :accessor working-directory)
+   (argument :initarg :argument :accessor argument)))
+
 (defgeneric run-mizar-tool (tool article directory &rest flags))
 
 (defmethod run-mizar-tool :around (tool article-path directory &rest flags)
@@ -185,9 +190,9 @@ variable (at load time).")
 	  (let ((err-filename (replace-extension article-path "miz" "err")))
 	    (if (and (probe-file err-filename)
 		     (not (zerop (file-size err-filename))))
-		(error "Although ~S returned successfully, it nonetheless generated a non-empty error file" tool)
+		(error 'mizar-error :tool tool :working-directory directory :argument article-path)
 		t))
-	  (error "~S did not exit cleanly working on ~S" tool article-path)))))
+	  (error 'mizar-error :tool tool :working-directory directory :argument article-path)))))
 
 (defmethod run-mizar-tool ((tool string) (article-path string) directory &rest flags)
   (apply 'run-mizar-tool tool (pathname article-path) directory flags))
