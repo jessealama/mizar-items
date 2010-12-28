@@ -551,7 +551,7 @@ sibling elements; these need to be stored."
 
 (defgeneric itemize (thing &optional directory))
 
-(defmethod export-itemization :before ((article article) &key work-directory)
+(defmethod itemize :before ((article article) &optional work-directory)
   (declare (ignore work-directory))
   (unless (slot-boundp article 'name)
     (error "Article ~S lacks a name" article)))
