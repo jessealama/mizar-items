@@ -51,6 +51,30 @@
 	    next)
 	(error "No node follows ~S in the document" node))))
 
+(defun last-non-blank-node? (node)
+  (null (next-non-blank-sibling node)))
+
+(defun node-followed-by-proof (node)
+  (let ((next (next-non-blank-sibling node)))
+    (and next
+	 (string= (dom:local-name next) "Proof"))))
+
+(defun node-followed-by-by-or-from (node)
+  (let ((next (next-non-blank-sibling node)))
+    (and next
+	 (or (string= (dom:local-name next) "By")
+	     (string= (dom:local-name next) "From")))))
+
+(defun proposition-ref-bearer (proposition-node)
+  (cond ((last-non-blank-node? proposition-node)
+	 proposition-node)
+	((node-followed-by-proof proposition-node)
+	 (proof-after-proposition proposition-node))
+	((node-followed-by-by-or-from proposition-node)
+	 (next-non-blank-sibling proposition-node))
+	(t
+	 proposition-node)))
+
 (defun proof-after-proposition (proposition-node)
   "Get the following Proof node following PROPOSITION-NODE.  Ensure
 that we didn't fall off the end of the document, and that the
