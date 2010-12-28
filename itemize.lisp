@@ -536,6 +536,13 @@ sibling elements; these need to be stored."
 		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
      finally (return article)))
 
+(defun verify-and-export (article directory)
+  (warn "Verifying and exporting article with name ~A and path ~A in directory ~A" (name article) (path article) directory)
+  (accom article directory "-q" "-l" "-s")
+  (verifier article directory "-q" "-l" "-s")
+  (exporter article directory "-q" "-l" "-s")
+  (transfer article directory "-q" "-l" "-s"))
+
 (defgeneric itemize (thing &optional directory))
 
 (defmethod itemize :around ((article article) &optional work-directory)
@@ -610,13 +617,6 @@ sibling elements; these need to be stored."
 
 (defmethod itemize ((article-path string) &optional (directory (sb-posix:getcwd)))
   (itemize (pathname article-path) directory))
-
-(defun verify-and-export (article directory)
-  (warn "Verifying and exporting article with name ~A and path ~A in directory ~A" (name article) (path article) directory)
-  (accom article directory "-q" "-l" "-s")
-  (verifier article directory "-q" "-l" "-s")
-  (exporter article directory "-q" "-l" "-s")
-  (transfer article directory "-q" "-l" "-s"))
 
 (defmethod export-itemization ((article article) &key (work-directory "/tmp"))
   (loop
