@@ -562,7 +562,6 @@ sibling elements; these need to be stored."
 
 (defmethod itemize :before ((article article) &optional directory)
   (preprocess-text article directory)
-
   ;; ensure the article XML is now synchonized with the changed text
   (warn "Verifying...")
   (verifier article directory "-q" "-l" "-s")
@@ -570,7 +569,6 @@ sibling elements; these need to be stored."
   (absrefs article)
   (refresh-text article)
   (refresh-idx article)
-
   (initialize-context-for-items article))
 
 (defmethod itemize ((article article) &optional (directory (sb-posix:getcwd)))
