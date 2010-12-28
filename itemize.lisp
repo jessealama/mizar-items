@@ -564,7 +564,7 @@ sibling elements; these need to be stored."
   subdirectory of DIRECTORY, the local mizar database.
 
 In general, the contents of DIRECTORY will be be changed; calling this
-function has side effects.")
+function has side effects."))
 
 (defmethod exportable? ((item pseudo-item) &optional directory)
   nil)
