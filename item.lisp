@@ -32,7 +32,12 @@
    (name
     :initarg :name
     :accessor name
-    :type string))
+    :type string)
+   (dependencies
+    :initarg :dependencies
+    :accessor dependencies
+    :type list
+    :initform nil))
   (:documentation "A mizar item represents a free-standing piece of a
   mizar article, such as a definition, a theorem, a notation, or a registration."))
 
