@@ -567,34 +567,43 @@ In general, the contents of DIRECTORY will be be changed; calling this
 function has side effects."))
 
 (defmethod exportable? ((item pseudo-item) &optional directory)
+  (declare (ignore directory))
   nil)
 
 (defmethod exportable? ((item iterequality-item) &optional directory)
+  (declare (ignore directory))
   nil)
 
 (defmethod exportable? ((item now-item) &optional directory)
+  (declare (ignore directory))
   nil)
 
 (defmethod exportable? ((item deftheorem-item) &optional directory)
+  (declare (ignore directory))
   nil)
 
 (defmethod exportable? ((item theorem-item) &optional directory)
+  (declare (ignore directory))
   t)
 
 (defmethod exportable? ((item scheme-item) &optional directory)
+  (declare (ignore directory))
   t)
 
-
-(defclass proposition-item (xml-item labelled-item-mixin)
-  ())
+(defmethod exportable? ((item proposition-item) &optional directory)
+  (declare (ignore directory))
+  nil)
 
 (defmethod exportable? ((item definition-item) &optional directory)
+  (declare (ignore directory))
   t)
 
 (defmethod exportable? ((item notation-item) &optional directory)
+  (declare (ignore directory))
   t)
 
 (defmethod exportable? ((item registration-item) &optional directory)
+  (declare (ignore directory))
   t)
 
 (defgeneric itemize (thing &optional directory))
