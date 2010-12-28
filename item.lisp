@@ -237,7 +237,7 @@ strange; sort if necessary."
 ;;; Outputting items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgeneric write-item (item &key directory additional-vocablaries
+(defgeneric write-item (item &key directory additional-vocabularies
 			                    additional-notations
 					    additional-constructors
 					    additional-requirements
@@ -250,7 +250,7 @@ strange; sort if necessary."
   will be '<name>.miz', where <name> is the value of the NAME slot in
   ITEM."))
 
-(defmethod write-item :before (item &key directory additional-vocablaries
+(defmethod write-item :before (item &key directory additional-vocabularies
 				                   additional-notations
 						   additional-constructors
 						   additional-requirements
@@ -261,7 +261,7 @@ strange; sort if necessary."
   (unless (probe-file directory)
     (error "Unable to write item to directory ~S: the directory doesn't exist" directory)))
 
-(defmethod write-item :before (item &key directory additional-vocablaries
+(defmethod write-item :before (item &key directory additional-vocabularies
 				                   additional-notations
 						   additional-constructors
 						   additional-requirements
@@ -274,7 +274,7 @@ strange; sort if necessary."
     (when (> (length name) 8)
       (error "Invalid item name: the proposed name '~A' is longer than eight characters" name))))
 
-(defmethod write-item (item &key directory additional-vocablaries
+(defmethod write-item (item &key directory additional-vocabularies
 		                           additional-notations
 		                           additional-constructors
 		                           additional-requirements
@@ -286,7 +286,7 @@ strange; sort if necessary."
 	 (original-article (source-article item))
 	 (article-for-item (make-article-copying-environment-from original-article)))
     (setf (vocabularies article-for-item)
-	  (append (vocabularies article-for-item) additional-vocablaries))
+	  (append (vocabularies article-for-item) additional-vocabularies))
     (setf (notations article-for-item)
 	  (append (notations article-for-item) additional-notations))
     (setf (constructors article-for-item)
