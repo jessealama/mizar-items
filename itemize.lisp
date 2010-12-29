@@ -381,10 +381,10 @@ sibling elements; these need to be stored."
     :type integer)))
 
 (defmethod print-object ((instruction editing-instruction) stream)
-  (with-slots (old-label new-label)
+  (with-slots (old-label new-label target-line-number target-column-number)
       instruction
     (print-unreadable-object (instruction stream :type nil)
-      (format stream "~A ==> ~A" old-label new-label))))
+      (format stream "~A ==> ~A (line ~d column ~d)" old-label new-label target-line-number target-column-number))))
 
 (defun instruction-> (editing-instruction-1 editing-instruction-2)
   (with-slots ((l-1 target-line-number) (c-1 target-column-number))
