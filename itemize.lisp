@@ -493,6 +493,13 @@ sibling elements; these need to be stored."
 	  (theorem-editing-instructions item theorem-table items->articles)
 	  (scheme-editing-instructions item scheme-table items->articles)))
 
+(defun replace-label (old line new start)
+  "Like CL-PPCRE:REGEX-REPLACE, but give the result of replacing OLD
+by NEW in LINE starting from column START, and not just the substring
+of LINE starting from START."
+  (concat (subseq line 0 start) 
+	  (regex-replace old line new :start start)))
+
 (defun apply-editing-instructions (item instructions lines)
   (loop
      with sorted-instructions = (sort instructions #'instruction->)
@@ -504,8 +511,10 @@ sibling elements; these need to be stored."
      for target-column-number = (target-column-number instruction)
      for index = (- target-line-number item-begin-line)
      for line = (aref lines index)
-     for new-line = (regex-replace old-label line new-label)
+     for new-line = (replace-label old-label line new-label target-column-number)
      do
+       (when (string= line new-line)
+	 (error "Applying the instruction ~S to the line~%~%~A~%~%had no effect!" instruction line))
        (setf (aref lines index) new-line)
      finally (return lines)))
 
