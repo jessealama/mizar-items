@@ -564,7 +564,6 @@ sibling elements; these need to be stored."
      finally (return article)))
 
 (defun verify-and-export (article directory)
-  (warn "Verifying and exporting article with name ~A and path ~A in directory ~A" (name article) (path article) directory)
   (accom article directory "-q" "-l" "-s")
   (verifier article directory "-q" "-l" "-s")
   (exporter article directory "-q" "-l" "-s")
