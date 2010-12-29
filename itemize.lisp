@@ -421,7 +421,7 @@ sibling elements; these need to be stored."
 									 :old-label deftheorem-label
 									 :new-label (format nil "~:@(~A~):def ~d" name (1+ index))
 									 :target-line-number ref-line-num
-									 :target-column-number ref-col-num)))
+									 :target-column-number (- ref-col-num (length deftheorem-label)))))
 					(push instruction instructions))
 				      (error "No article is associated with ~S in the item-to-article table"
 					     definition-item)))
@@ -452,7 +452,7 @@ sibling elements; these need to be stored."
 								:old-label theorem-label
 								:new-label (format nil "~:@(~A~):1" name)
 								:target-line-number ref-line-num
-								:target-column-number ref-col-num)))
+								:target-column-number (- ref-col-num (length theorem-label)))))
 				(push instruction instructions)))
 			    (error "No article is associated with ~S in the item-to-article table"
 				   theorem-item)))
