@@ -279,7 +279,21 @@ sibling elements; these need to be stored."
 (defun notationblock-items (article)
   (block-items "NotationBlock" "notation" 'notation-item article))
 
-(defun item-candidates (article)
+(defgeneric item-candidates (article))
+
+(defmethod item-candidates ((article-path string))
+  (let ((article (make-instance 'article :path (pathname article-path))))
+    (refresh-xml article)
+    (refresh-idx article)
+    (item-candidates article)))
+
+(defmethod item-candidates ((article-path pathname))
+  (let ((article (make-instance 'article :path article-path)))
+    (refresh-xml article)
+    (refresh-idx article)
+    (item-candidates article)))
+
+(defmethod item-candidates ((article article))
   (let ((reservation-items (reservation-items article))
 	(set-items (set-items article))
 	(consider-items (consider-items article))
