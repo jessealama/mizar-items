@@ -173,4 +173,10 @@ from the beginning of the list."
 	  (push line lines))))
     (reverse lines)))
 
+(defun file-as-string (path)
+  (let ((newline (make-string 1 :initial-element #\Newline)))
+    (reduce #'(lambda (s1 s2)
+		(concat s1 newline s2))
+	    (lines-of-file path))))
+
 ;;; utils.lisp ends here
