@@ -108,13 +108,19 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
     (reverse deftheorem-nodes)))
 
 (defun all-by-descendents (node)
-  (xpath:all-nodes (xpath:evaluate ".//By" node)))
+  (flet ((bys (node)
+	   (xpath:all-nodes (xpath:evaluate ".//By" node))))
+    (reduce #'append (map 'list #'bys (dom:child-nodes node)))))
 
 (defun all-from-descendents (node)
-  (xpath:all-nodes (xpath:evaluate ".//From" node)))
+  (flet ((froms (node)
+	   (xpath:all-nodes (xpath:evaluate ".//From" node))))
+    (reduce #'append (map 'list #'froms (dom:child-nodes node)))))
 
 (defun all-ref-descendents (node)
-  (xpath:all-nodes (xpath:evaluate ".//Ref" node)))
+  (flet ((refs (node)
+	   (xpath:all-nodes (xpath:evaluate ".//Ref" node))))
+    (reduce #'append (map 'list #'refs (dom:child-nodes node)))))
 
 (defun article-local-froms (node)
   (remove-if-not #'(lambda (node)
