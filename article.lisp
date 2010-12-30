@@ -149,8 +149,8 @@ unbound, it will be bound in the new article and have value NIL."
 				     (or (belongs-to-mml scheme)
 					 (file-exists-under-prel local-db
 								 (format nil "~A.sch" scheme))))
-				 schemes)))
-  article)
+				 schemes))
+    (values notations constructors registrations definitions theorems schemes)))
 
 (defgeneric line-at (text line-number))
 
