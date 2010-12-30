@@ -89,6 +89,14 @@ unbound, it will be bound in the new article and have value NIL."
 				  (schemes article)))
     new-article))
 
+(defun copy-article (article)
+  (let ((new-article (make-article-copying-environment-from article)))
+    (when (slot-boundp article 'text)
+      (setf (text new-article) (text article)))
+    (when (slot-boundp article 'full-text)
+      (setf (full-text new-article) (full-text article)))
+    new-article))
+
 (defun file-exists-under-prel (local-db file)
   (let ((prel (concat (namestring (pathname-as-directory local-db))
 		      (namestring (pathname-as-directory "prel")))))
