@@ -578,55 +578,27 @@ of LINE starting from START."
   (exporter article directory "-q" "-l" "-s")
   (transfer article directory "-q" "-l" "-s"))
 
-(defgeneric exportable? (item &optional directory)
-  (:documentation "Determine whether ITEM is 'exportable' in the sense
-  that it can be accommodated, verified, and generates something
-  exportable (i.e., calling exporter and transfer on the article
-  fragment associated with ITEM creates something new in the prel
-  subdirectory of DIRECTORY, the local mizar database.
+(defun minimal-context (item &optional (directory (sb-posix:getcwd)))
+  (remove-unneeded
+   (context-items item)
+   #'(lambda (lst)
+       (verifiable? (let ((article (item->article
+				    (let ((new-item (copy-item item)))
+				      (setf (context-items new-item) lst)
+				      new-item))))
+		      (setf (path article)
+			    (concat (namestring (pathname-as-directory (pathname directory)))
+				    "splork.miz"))
+		      article)
+		    directory))))
 
-In general, the contents of DIRECTORY will be be changed; calling this
-function has side effects."))
-
-(defmethod exportable? ((item pseudo-item) &optional directory)
-  (declare (ignore directory))
-  nil)
-
-(defmethod exportable? ((item iterequality-item) &optional directory)
-  (declare (ignore directory))
-  nil)
-
-(defmethod exportable? ((item now-item) &optional directory)
-  (declare (ignore directory))
-  nil)
-
-(defmethod exportable? ((item deftheorem-item) &optional directory)
-  (declare (ignore directory))
-  nil)
-
-(defmethod exportable? ((item theorem-item) &optional directory)
-  (declare (ignore directory))
-  t)
-
-(defmethod exportable? ((item scheme-item) &optional directory)
-  (declare (ignore directory))
-  t)
-
-(defmethod exportable? ((item proposition-item) &optional directory)
-  (declare (ignore directory))
-  nil)
-
-(defmethod exportable? ((item definition-item) &optional directory)
-  (declare (ignore directory))
-  t)
-
-(defmethod exportable? ((item notation-item) &optional directory)
-  (declare (ignore directory))
-  t)
-
-(defmethod exportable? ((item registration-item) &optional directory)
-  (declare (ignore directory))
-  t)
+(defun minimize-context (item &optional (directory (sb-posix:getcwd)))
+  (warn "Minimizing context for item ~S..." item)
+  (let* ((context (context-items item))
+	 (minimal-context (minimal-context item directory)))
+    (setf (context-items item) minimal-context)
+    (warn "...done minimizing context.  We eliminated ~d items" (- (length context)
+								   (length minimal-context)))))
 
 (defgeneric itemize (thing &optional directory))
 
