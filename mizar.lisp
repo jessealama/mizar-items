@@ -15,6 +15,7 @@ variable (at load time).")
     :type pathname
     :initform (pathname *mizfiles*))
    (mml-lar
+    :accessor mml-lar
     :type list))
   (:documentation "A wrapper around a copy of the MML."))
 
