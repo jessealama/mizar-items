@@ -304,4 +304,15 @@ variable (at load time).")
   (exporter article directory "-q" "-s" "-l")
   (transfer article directory "-q" "-s" "-l"))
 
+(defun listvoc (article-name)
+  (let ((proc (sb-ext:run-program "listvoc.sh"
+				  (list article-name)
+				  :search t
+				  :output :stream)))
+    (let ((exit-code (sb-ext:process-exit-code proc)))
+      (if (zerop exit-code)
+	  (sb-ext:process-output proc)
+	  (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code)))))
+		      
+
 ;;; mizar.lisp ends here
