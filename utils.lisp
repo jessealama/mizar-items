@@ -75,18 +75,41 @@ from the beginning of the list."
 	    (minimal-sublist-satisfying tail predicate)
 	    (cons head (minimal-sublist-satisfying tail predicate))))))
 
+(defun all-but-last (lst)
+  (reverse (cdr (reverse lst))))
+
+(defun remove-nth-element (lst n)
+  (append (first-n lst n)
+	  (nthcdr (1+ n) lst)))
+
+(defun last-removable-element (list pred)
+  (loop
+     with len = (length list)
+     for i from (1- len) downto 0
+     for trimmed = (remove-nth-element list i)
+     do
+       (when (funcall pred trimmed)
+	 (return i))
+     finally
+       (return nil)))
+
+(defun remove-unneeded (list pred)
+  (let ((index-of-last-unneeded (last-removable-element list pred)))
+    (if index-of-last-unneeded
+	(remove-unneeded (remove-nth-element list
+					     index-of-last-unneeded)
+			 pred)
+	list)))
+
 (defun subsequence-from-indices (seq indices)
-  (let* ((num-indices (length indices))
-	 (sorted-indices (sort indices #'<))
-	 (new-seq (make-array (list num-indices))))
-    (loop
-       for i from 0 upto num-indices
-       for index in sorted-indices
-       do
-	 (setf (aref new-seq i) 
-	       (aref seq index))
-       finally
-	 (return new-seq))))
+  (loop
+     with num-indices = (length indices)
+     with sorted-indices = (sort indices #'<)
+     with new-seq = (make-array (list num-indices))
+     for i from 0 upto num-indices
+     for index in sorted-indices
+     do (setf (aref new-seq i) (aref seq index))
+     finally (return new-seq)))
 
 (defun numbers-from-to (start end)
   (loop
