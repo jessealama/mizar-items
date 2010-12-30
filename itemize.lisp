@@ -689,6 +689,7 @@ function has side effects."))
      with local-db = (pathname-as-directory (concat (namestring (pathname-as-directory directory)) name))
      with text-subdir = (pathname-as-directory (concat (namestring local-db) "text"))
      for candidate in all-candidates
+     initially (warn "About to consider ~d candidate items" (length all-candidates))
      do
        (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
        (when (typep candidate 'pseudo-item)
