@@ -63,12 +63,7 @@
 	    :accessor xml-doc)
    (idx-table :initarg :idx-table
 	      :accessor idx-table
-	      :type hash-table)
-   (scheme-table
-    :initarg :scheme-table
-    :initform (make-hash-table :test #'eq) ; keys are integers
-    :accessor scheme-table
-    :type hash-table))
+	      :type hash-table))
   (:documentation "A representation of a mizar article."))
 
 (defun make-article-copying-environment-from (article)
@@ -92,6 +87,14 @@ unbound, it will be bound in the new article and have value NIL."
 				   (theorems article))
 	  (schemes new-article) (when (slot-boundp article 'schemes)
 				  (schemes article)))
+    new-article))
+
+(defun copy-article (article)
+  (let ((new-article (make-article-copying-environment-from article)))
+    (when (slot-boundp article 'text)
+      (setf (text new-article) (text article)))
+    (when (slot-boundp article 'full-text)
+      (setf (full-text new-article) (full-text article)))
     new-article))
 
 (defun file-exists-under-prel (local-db file)
@@ -146,8 +149,8 @@ unbound, it will be bound in the new article and have value NIL."
 				     (or (belongs-to-mml scheme)
 					 (file-exists-under-prel local-db
 								 (format nil "~A.sch" scheme))))
-				 schemes)))
-  article)
+				 schemes))
+    (values notations constructors registrations definitions theorems schemes)))
 
 (defgeneric line-at (text line-number))
 
@@ -361,7 +364,7 @@ directive is not consulted."))
     (if (ensure-directories-exist path)
 	(with-open-file (miz path
 			     :direction :output
-			     :if-exists :error)
+			     :if-exists :supersede)
 	  (cond ((slot-boundp article 'full-text)
 		 (format miz "~A~%" (full-text article)))
 		((slot-boundp article 'text)
@@ -379,5 +382,101 @@ directive is not consulted."))
 		(t
 		 (error "Neither a complete text nor a text proper is known for ~S" article))))
 	(error "The path ~A is invalid: we cannot ensure that the directories mentioned in it exist." path))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Trimming the environment to eliminate uneeded parts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun verifiable? (article &optional (directory (sb-posix:getcwd)))
+  (write-article article)
+  (handler-case (or (and (accom article directory "-q" "-s" "-l")
+			 (verifier article directory "-q" "-s" "-l"))
+		    t)
+    (mizar-error () nil)))
+
+(defun verifiable-with-directive (article directive-name directive-contents &optional (directory (sb-posix:getcwd)))
+  (let ((new-article (make-article-copying-environment-from article)))
+    (setf (text new-article) (text article))
+    (setf (path new-article) (path article))
+    (cond ((string= directive-name "vocabularies")
+	   (setf (vocabularies new-article) directive-contents))
+	  ((string= directive-name "notations")
+	   (setf (notations new-article) directive-contents))
+	  ((string= directive-name "constructors")
+	   (setf (constructors new-article) directive-contents))
+	  ((string= directive-name "registrations")
+	   (setf (registrations new-article) directive-contents))
+	  ((string= directive-name "requirements")
+	   (setf (requirements new-article) directive-contents))
+	  ((string= directive-name "definitions")
+	   (setf (definitions new-article) directive-contents))
+	  ((string= directive-name "theorems")
+	   (setf (theorems new-article) directive-contents))
+	  ((string= directive-name "schemes")
+	   (setf (schemes new-article) directive-contents))
+	  (t
+	   (error "Unknown directive name '~A'" directive-name)))
+    (write-article new-article)
+    (verifiable? new-article directory)))
+
+(defun find-minimal-vocabularies (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (vocabularies article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "vocabularies" lst directory))))
+
+(defun find-minimal-notations (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (notations article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "notations" lst directory))))
+
+(defun find-minimal-constructors (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (constructors article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "constructors" lst directory))))
+
+(defun find-minimal-requirements (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (requirements article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "requirements" lst directory))))
+
+(defun find-minimal-registrations (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (registrations article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "registrations" lst directory))))
+
+(defun find-minimal-definitions (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (definitions article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "definitions" lst directory))))
+
+(defun find-minimal-theorems (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (theorems article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "theorems" lst directory))))
+
+(defun find-minimal-schemes (article &optional (directory (sb-posix:getcwd)))
+  (minimal-sublist-satisfying (schemes article)
+			      #'(lambda (lst)
+				  (verifiable-with-directive article "schemes" lst directory))))
+
+(defun minimize-environment (article &optional (directory (sb-posix:getcwd)))
+  (let ((new-article (copy-article article)))
+    (setf (vocabularies new-article)
+	  (find-minimal-vocabularies article directory))
+    (setf (notations new-article)
+	  (find-minimal-notations article directory))
+    (setf (constructors new-article)
+	  (find-minimal-constructors article directory))
+    (setf (requirements new-article)
+	  (find-minimal-requirements article directory))
+    (setf (registrations new-article)
+	  (find-minimal-registrations article directory))
+    (setf (definitions new-article)
+	  (find-minimal-definitions article directory))
+    (setf (theorems new-article)
+	  (find-minimal-theorems article directory))
+    (setf (schemes new-article)
+	  (find-minimal-schemes article directory))
+    new-article))
 
 ;;; article.lisp ends here
