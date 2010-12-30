@@ -73,7 +73,8 @@
    (name
     :initarg :name
     :accessor name
-    :type string)
+    :initform nil
+    :type (or string nil))
    (dependencies
     :initarg :dependencies
     :accessor dependencies
