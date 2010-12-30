@@ -138,7 +138,7 @@
 (defclass iterequality-item (xml-item labelled-item-mixin)
   ())
 
-(defclass now-item (labelled-item-mixin xml-item)
+(defclass now-item (pseudo-item labelled-item-mixin)
   ())
 
 (defclass theorem-item (xml-item labelled-item-mixin)
