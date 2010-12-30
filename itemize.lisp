@@ -684,6 +684,7 @@ function has side effects."))
      with all-candidates = (item-candidates article)
      with pseudo-candidates = nil
      with earlier-item-names = nil
+     with real-items = nil
      with candidate-num = 1
      with name = (name article)
      with local-db = (pathname-as-directory (concat (namestring (pathname-as-directory directory)) name))
@@ -753,6 +754,7 @@ function has side effects."))
 			   (verify-and-export article-for-item local-db)
 			   (push (uppercase item-name) earlier-item-names)
 			   (setf (gethash candidate items->articles) article-for-item)
+			   (push candidate real-items)
 			   (incf candidate-num))
 	     (mizar-error () (progn
 			       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
@@ -761,6 +763,6 @@ function has side effects."))
 				 (remhash (cons nr vid) theorem-table))
 			       (delete-file (path article-for-item))
 			       (push candidate pseudo-candidates))))))
-     finally (return t)))
+     finally (return (reverse real-items))))
 
 ;;; itemize.lisp ends here
