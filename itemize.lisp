@@ -753,6 +753,10 @@ function has side effects."))
 			   (setf (gethash candidate items->articles) article-for-item)
 			   (incf candidate-num))
 	     (mizar-error () (progn
+			       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
+			       (with-slots (nr vid)
+				   candidate
+				 (remhash (cons nr vid) theorem-table))
 			       (delete-file (path article-for-item))
 			       (push candidate pseudo-candidates))))))
      finally (return t)))
