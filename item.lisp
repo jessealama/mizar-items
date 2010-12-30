@@ -301,77 +301,69 @@ strange; sort if necessary."
 ;;; Outputting items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgeneric write-item (item &key directory additional-vocabularies
-			                    additional-notations
-					    additional-constructors
-					    additional-requirements
-					    additional-registrations
-					    additional-definitions
-					    additional-theorems
-					    additional-schemes)
+(defgeneric write-item (item &key directory)
   (:documentation "Generate an article corresponding to ITEM.  The
   article will be written under the directory DIRECTORY, and its name
   will be '<name>.miz', where <name> is the value of the NAME slot in
   ITEM."))
 
-(defmethod write-item :before (item &key directory additional-vocabularies
-				                   additional-notations
-						   additional-constructors
-						   additional-requirements
-						   additional-registrations
-						   additional-definitions
-						   additional-theorems
-						   additional-schemes)
+(defmethod write-item :before (item &key directory)
   (unless (probe-file directory)
     (error "Unable to write item to directory ~S: the directory doesn't exist" directory)))
 
-(defmethod write-item :before (item &key directory additional-vocabularies
-				                   additional-notations
-						   additional-constructors
-						   additional-requirements
-						   additional-registrations
-						   additional-definitions
-						   additional-theorems
-						   additional-schemes)
+(defmethod write-item :before (item &key directory)
   (declare (ignore directory))
   (let ((name (name item)))
     (when (> (length name) 8)
       (error "Invalid item name: the proposed name '~A' is longer than eight characters" name))))
 
-(defmethod write-item (item &key directory additional-vocabularies
-		                           additional-notations
-		                           additional-constructors
-		                           additional-requirements
-		                           additional-registrations
-		                           additional-definitions
-		                           additional-theorems
-		                           additional-schemes)
-  (let* ((name (name item))
-	 (original-article (source-article item))
-	 (article-for-item (make-article-copying-environment-from original-article)))
-    (setf (vocabularies article-for-item)
-	  (append (vocabularies article-for-item) additional-vocabularies))
-    (setf (notations article-for-item)
-	  (append (notations article-for-item) additional-notations))
-    (setf (constructors article-for-item)
-	  (append (constructors article-for-item) additional-constructors))
-    (setf (requirements article-for-item)
-	  (append (requirements article-for-item) additional-requirements))
-    (setf (registrations article-for-item)
-	  (append (registrations article-for-item) additional-registrations))
-    (setf (definitions article-for-item)
-	  (append (definitions article-for-item) additional-definitions))
-    (setf (theorems article-for-item)
-	  (append (theorems article-for-item) additional-theorems))
-    (setf (schemes article-for-item)
-	  (append (schemes article-for-item) additional-schemes))
+(defun item->article (item)
+  (with-slots (additional-vocabularies
+	       additional-notations
+	       additional-constructors
+	       additional-registrations
+	       additional-requirements
+	       additional-definitions
+	       additional-theorems
+	       additional-schemes)
+      item
+    (let* ((original-article (source-article item))
+	   (article-for-item (make-article-copying-environment-from original-article)))
+      (setf (vocabularies article-for-item)
+	    (remove-duplicates (append (vocabularies article-for-item) additional-vocabularies)
+			       :test #'string=))
+      (setf (notations article-for-item)
+	    (remove-duplicates (append (notations article-for-item) additional-notations)
+			       :test #'string=))
+      (setf (constructors article-for-item)
+	    (remove-duplicates (append (constructors article-for-item) additional-constructors)
+			       :test #'string=))
+      (setf (requirements article-for-item)
+	    (remove-duplicates (append (requirements article-for-item) additional-requirements)
+			       :test #'string=))
+      (setf (registrations article-for-item)
+	    (remove-duplicates (append (registrations article-for-item) additional-registrations)
+			       :test #'string=))
+      (setf (definitions article-for-item)
+	    (remove-duplicates (append (definitions article-for-item) additional-definitions)
+			       :test #'string=))
+      (setf (theorems article-for-item)
+	    (remove-duplicates (append (theorems article-for-item) additional-theorems)
+			       :test #'string=))
+      (setf (schemes article-for-item)
+	    (remove-duplicates (append (schemes article-for-item) additional-schemes)
+			       :test #'string=))
+      (setf (text article-for-item) (concat (apply #'concat (mapcar #'(lambda (item)
+									(format nil "~A~%" (text item)))
+								    (context-items item)))
+					    (text item)))
+      article-for-item)))
+
+(defmethod write-item (item &key (directory (sb-posix:getcwd)))
+  (let ((article-for-item (item->article item)))
     (setf (path article-for-item)
 	  (pathname-as-file (concat (namestring (pathname-as-directory (pathname directory)))
-				    (format nil "~A.miz" name))))
-    (setf (text article-for-item) (concat (apply #'concat (mapcar #'(lambda (item)
-								      (format nil "~A~%" (text item)))
-								  (context-items item)))
-					  (text item)))
+				    (format nil "~A.miz" (name item)))))
     (write-article article-for-item)))
 
 ;;; item.lisp ends here
