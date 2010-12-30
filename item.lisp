@@ -10,6 +10,46 @@
   ((source-article
     :initarg :source-article
     :accessor source-article)
+   (additional-vocabularies
+    :initarg :additional-vocabularies
+    :initform nil
+    :type list
+    :accessor additional-vocabularies)
+   (additional-notations
+    :initarg :additional-notations
+    :initform nil
+    :type list
+    :accessor additional-notations)
+   (additional-constructors
+    :initarg :additional-constructors
+    :initform nil
+    :type list
+    :accessor additional-constructors)
+   (additional-registrations
+    :initarg :additional-registrations
+    :initform nil
+    :type list
+    :accessor additional-registrations)
+   (additional-requirements
+    :initarg :additional-requirements
+    :initform nil
+    :type list
+    :accessor additional-requirements)
+   (additional-definitions
+    :initarg :additional-definitions
+    :initform nil
+    :type list
+    :accessor additional-definitions)
+   (additional-theorems
+    :initarg :additional-theorems
+    :initform nil
+    :type list
+    :accessor additional-theorems)
+   (additional-schemes
+    :initarg :additional-schemes
+    :initform nil
+    :type list
+    :accessor additional-schemes)
    (begin-line-number
     :initarg :begin-line-number
     :accessor begin-line-number)
