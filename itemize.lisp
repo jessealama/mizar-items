@@ -691,6 +691,7 @@ function has side effects."))
      for candidate in all-candidates
      initially (warn "About to consider ~d candidate items" (length all-candidates))
      do
+       (warn "Dealing with item ~S" candidate)
        (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
        (when (typep candidate 'pseudo-item)
 	 (push candidate pseudo-candidates))
