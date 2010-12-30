@@ -43,13 +43,10 @@
 
 (defun next-non-blank-sibling (node)
   (let ((next (dom:next-sibling node)))
-    (if next
-	(if (dom:text-node-p next)
-	    (let ((next-next (dom:next-sibling next)))
-	      (or next-next
-		  (error "After the text sibling of ~S, there are no further nodes" node)))
-	    next)
-	(error "No node follows ~S in the document" node))))
+    (when next
+      (if (dom:text-node-p next)
+	  (dom:next-sibling next)
+	  next))))
 
 (defun last-non-blank-node? (node)
   (null (next-non-blank-sibling node)))
@@ -100,11 +97,12 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
   (let (deftheorem-nodes)
     ;; first skip over all the Definiens nodes after DEFINITIONBLOCK-NODE
     (let ((next (next-non-blank-sibling definitionblock-node)))
-      (while (string= (dom:local-name next) "Definiens")
-	(setf next (next-non-blank-sibling next)))
-      (while (string= (dom:local-name next) "DefTheorem")
-	(push next deftheorem-nodes)
-	(setf next (next-non-blank-sibling next))))
+      (when next
+	(while (and next (string= (dom:local-name next) "Definiens"))
+	  (setf next (next-non-blank-sibling next)))
+	(while (and next (string= (dom:local-name next) "DefTheorem"))
+	  (push next deftheorem-nodes)
+	  (setf next (next-non-blank-sibling next)))))
     (reverse deftheorem-nodes)))
 
 (defun all-by-descendents (node)
