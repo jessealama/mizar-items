@@ -50,11 +50,13 @@
 	     (slot-boundp item 'end-line-number)
 	     (slot-boundp item 'end-column-number)
 	     (not (slot-boundp item 'text)))
-    (setf (text item) (region (source-article item)
-			      (begin-line-number item)
-			      (begin-column-number item)
-			      (end-line-number item)
-			      (end-column-number item)))))
+    (setf (text item)
+	  (ensure-final-semicolon
+	   (region (source-article item)
+		   (begin-line-number item)
+		   (begin-column-number item)
+		   (end-line-number item)
+		   (end-column-number item))))))
 
 (defmethod line-at :before ((item item) line-number)
   (with-slots (begin-line-number)
