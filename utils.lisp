@@ -40,7 +40,7 @@
 	(format nil "~A;" str))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Lists
+;;; Lists and sequences
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun first-n (lst n)
@@ -60,6 +60,52 @@
     (or (< first-1 first-2)
 	(and (= first-1 first-2)
 	     (< second-1 second-2)))))
+
+(defun minimal-sublist-satisfying (list predicate)
+  "Find a minimal sublist of LIST that satisfies PREDICATE, which is
+assumed to take a single argument of type list.
+
+The computed sublist will be built by successively removing elements
+from the beginning of the list."
+  (if (null list)
+      nil
+      (let ((head (car list))
+	    (tail (cdr list)))
+	(if (funcall predicate tail)
+	    (minimal-sublist-satisfying tail predicate)
+	    (cons head (minimal-sublist-satisfying tail predicate))))))
+
+(defun subsequence-from-indices (seq indices)
+  (let* ((num-indices (length indices))
+	 (sorted-indices (sort indices #'<))
+	 (new-seq (make-array (list num-indices))))
+    (loop
+       for i from 0 upto num-indices
+       for index in sorted-indices
+       do
+	 (setf (aref new-seq i) 
+	       (aref seq index))
+       finally
+	 (return new-seq))))
+
+(defun numbers-from-to (start end)
+  (loop
+     for i from start upto end 
+     collecting i into nums
+     finally (return nums)))
+
+(defun minimal-subsequence-satisfying (seq predicate)
+  (loop
+     with len = (length seq)
+     with needed-indices = (numbers-from-to 0 (1- len))
+     for i from len downto 1
+     for elt = (aref seq (1- i))
+     for candidate = (subsequence-from-indices seq needed-indices)
+     do
+       (unless (funcall predicate candidate)
+	 (delete (1- i) needed-indices))
+     finally
+       (return (subsequence-from-indices seq needed-indices))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
