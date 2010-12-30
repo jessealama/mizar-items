@@ -630,14 +630,27 @@ function has side effects."))
 
 (defgeneric itemize (thing &optional directory))
 
+(defmethod itemize :around ((article article) &optional directory)
+  (declare (ignore directory))
+  (if (slot-boundp article 'path)
+      (with-slots (path)
+	  article
+	(let ((real-name (file-exists-p article)))
+	  (if real-name
+	      (if (directory-p real-name)
+		  (error "The path ~A for the article to itemize isn't a file, but a directory!" path)
+		  (call-next-method))
+	      (error "The path ~A for the article to itemize doesn't exist" path))))
+      (error "The article ~S lacks a path" article)))
+
 (defmethod itemize :around ((article article) &optional work-directory)
   (declare (ignore work-directory))
   (if (slot-boundp article 'name)
       (call-next-method)
       (error "Article ~S lacks a name" article)))
 
-(defmethod itemize :around ((article-path pathname) &optional directory)
-  (declare (ignore article-path))
+(defmethod itemize :around (article &optional directory)
+  (declare (ignore article))
   (let ((real-directory (file-exists-p directory)))
     (if (null real-directory)
 	(error "Cannot carry out itemization in directory ~A because there is directory there" directory)
