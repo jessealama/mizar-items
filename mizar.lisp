@@ -13,7 +13,7 @@ variable (at load time).")
   ((location
     :initarg :location
     :type pathname
-    :initform *mizfiles*)
+    :initform (pathname *mizfiles*))
    (mml-lar
     :type list))
   (:documentation "A wrapper around a copy of the MML."))
