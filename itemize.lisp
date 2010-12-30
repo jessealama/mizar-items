@@ -722,12 +722,12 @@ of LINE starting from START."
 						 :text text)))
 	   (multiple-value-bind (notations constructors registrations definitions theorems schemes)
 	       (trim-environment article-for-item local-db)
-	     (setf (additional-notations candidate) notations
-		   (additional-constructors candidate) constructors
-		   (additional-registrations candidate) registrations
-		   (additional-definitions candidate) definitions
-		   (additional-theorems candidate) theorems
-		   (additional-schemes candidate) schemes))
+	     (setf (notations candidate) notations
+		   (constructors candidate) constructors
+		   (registrations candidate) registrations
+		   (definitions candidate) definitions
+		   (theorems candidate) theorems
+		   (schemes candidate) schemes))
 	   (handler-case (progn
 			   (write-article article-for-item)
 			   (verify-and-export article-for-item local-db)
