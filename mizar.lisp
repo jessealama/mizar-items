@@ -23,8 +23,7 @@ variable (at load time).")
   (setf (mml-lar lib) 
 	(lines-of-file (concat *mizfiles* "/" "mml.lar"))))
 
-(defparameter *default-mizar-library* (make-instance 'mizar-library
-						     :location (pathname *mizfiles*))
+(defparameter *default-mizar-library* (make-instance 'mizar-library)
   "A Mizar library using the value of MIZFILES in the environment.")
 
 (defclass sandbox ()
