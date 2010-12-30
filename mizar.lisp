@@ -185,7 +185,7 @@ variable (at load time).")
 
 (defmethod run-mizar-tool ((tool string) (article-path pathname) directory &rest flags)
   (let ((name (namestring article-path))
-	(err-filename (concat directory "/" (namestring (replace-extension article-path "miz" "err")))))
+	(err-filename (replace-extension article-path "miz" "err")))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
       (if (zerop (sb-ext:process-exit-code proc))
 	  (if (and (probe-file err-filename)
