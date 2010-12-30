@@ -159,7 +159,7 @@ from the beginning of the list."
      finally (return keys)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Files
+;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun lines-of-file (path)
@@ -178,5 +178,14 @@ from the beginning of the list."
     (reduce #'(lambda (s1 s2)
 		(concat s1 newline s2))
 	    (lines-of-file path))))
+
+(defun stream-lines (stream)
+  (let (lines)
+    (symbol-macrolet
+	(($line (read-line stream nil nil)))
+      (do ((line $line $line))
+	  ((null line))
+	(push line lines)))
+    (reverse lines)))
 
 ;;; utils.lisp ends here
