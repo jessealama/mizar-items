@@ -31,6 +31,10 @@ variable (at load time).")
 	  (push line lines))))
     (setf (slot-value lib 'mml-lar) (reverse lines))))
 
+(defparameter *default-mizar-library* (make-instance 'mizar-library
+						     :location (pathname *mizfiles*))
+  "A Mizar library using the value of MIZFILES in the environment.")
+
 (defclass sandbox ()
   ((articles
     :initarg :articles
