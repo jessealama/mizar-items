@@ -731,6 +731,7 @@ of LINE starting from START."
 	   (handler-case (progn
 			   (write-article article-for-item)
 			   (verify-and-export article-for-item local-db)
+			   (minimize-context candidate (namestring local-db))
 			   (push (uppercase item-name) earlier-item-names)
 			   (setf (gethash candidate items->articles) article-for-item)
 			   (push candidate real-items)
