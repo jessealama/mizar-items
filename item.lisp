@@ -10,46 +10,46 @@
   ((source-article
     :initarg :source-article
     :accessor source-article)
-   (additional-vocabularies
-    :initarg :additional-vocabularies
+   (vocabularies
+    :initarg :vocabularies
     :initform nil
     :type list
-    :accessor additional-vocabularies)
-   (additional-notations
-    :initarg :additional-notations
+    :accessor vocabularies)
+   (notations
+    :initarg :notations
     :initform nil
     :type list
-    :accessor additional-notations)
-   (additional-constructors
-    :initarg :additional-constructors
+    :accessor notations)
+   (constructors
+    :initarg :constructors
     :initform nil
     :type list
-    :accessor additional-constructors)
-   (additional-registrations
-    :initarg :additional-registrations
+    :accessor constructors)
+   (registrations
+    :initarg :registrations
     :initform nil
     :type list
-    :accessor additional-registrations)
-   (additional-requirements
-    :initarg :additional-requirements
+    :accessor registrations)
+   (requirements
+    :initarg :requirements
     :initform nil
     :type list
-    :accessor additional-requirements)
-   (additional-definitions
-    :initarg :additional-definitions
+    :accessor requirements)
+   (definitions
+    :initarg :definitions
     :initform nil
     :type list
-    :accessor additional-definitions)
-   (additional-theorems
-    :initarg :additional-theorems
+    :accessor definitions)
+   (theorems
+    :initarg :theorems
     :initform nil
     :type list
-    :accessor additional-theorems)
-   (additional-schemes
-    :initarg :additional-schemes
+    :accessor theorems)
+   (schemes
+    :initarg :schemes
     :initform nil
     :type list
-    :accessor additional-schemes)
+    :accessor schemes)
    (begin-line-number
     :initarg :begin-line-number
     :accessor begin-line-number)
@@ -94,14 +94,14 @@
     (setf (context-items new-item) (context-items item))
     (setf (name new-item) (name item))
     (setf (dependencies new-item) (dependencies item))
-    (setf (additional-vocabularies new-item) (additional-vocabularies item))
-    (setf (additional-notations new-item) (additional-notations item))
-    (setf (additional-constructors new-item) (additional-constructors item))
-    (setf (additional-registrations new-item) (additional-registrations item))
-    (setf (additional-requirements new-item) (additional-requirements item))
-    (setf (additional-definitions new-item) (additional-definitions item))
-    (setf (additional-theorems new-item) (additional-theorems item))
-    (setf (additional-schemes new-item) (additional-schemes item))
+    (setf (vocabularies new-item) (vocabularies item))
+    (setf (notations new-item) (notations item))
+    (setf (constructors new-item) (constructors item))
+    (setf (registrations new-item) (registrations item))
+    (setf (requirements new-item) (requirements item))
+    (setf (definitions new-item) (definitions item))
+    (setf (theorems new-item) (theorems item))
+    (setf (schemes new-item) (schemes item))
     new-item))
 
 (defmethod initialize-instance :after ((item item) &key)
@@ -318,40 +318,40 @@ strange; sort if necessary."
       (error "Invalid item name: the proposed name '~A' is longer than eight characters" name))))
 
 (defun item->article (item)
-  (with-slots (additional-vocabularies
-	       additional-notations
-	       additional-constructors
-	       additional-registrations
-	       additional-requirements
-	       additional-definitions
-	       additional-theorems
-	       additional-schemes)
+  (with-slots (vocabularies
+	       notations
+	       constructors
+	       registrations
+	       requirements
+	       definitions
+	       theorems
+	       schemes)
       item
     (let* ((original-article (source-article item))
 	   (article-for-item (make-article-copying-environment-from original-article)))
       (setf (vocabularies article-for-item)
-	    (remove-duplicates (append (vocabularies article-for-item) additional-vocabularies)
+	    (remove-duplicates (append (vocabularies article-for-item) vocabularies)
 			       :test #'string=))
       (setf (notations article-for-item)
-	    (remove-duplicates (append (notations article-for-item) additional-notations)
+	    (remove-duplicates (append (notations article-for-item) notations)
 			       :test #'string=))
       (setf (constructors article-for-item)
-	    (remove-duplicates (append (constructors article-for-item) additional-constructors)
+	    (remove-duplicates (append (constructors article-for-item) constructors)
 			       :test #'string=))
       (setf (requirements article-for-item)
-	    (remove-duplicates (append (requirements article-for-item) additional-requirements)
+	    (remove-duplicates (append (requirements article-for-item) requirements)
 			       :test #'string=))
       (setf (registrations article-for-item)
-	    (remove-duplicates (append (registrations article-for-item) additional-registrations)
+	    (remove-duplicates (append (registrations article-for-item) registrations)
 			       :test #'string=))
       (setf (definitions article-for-item)
-	    (remove-duplicates (append (definitions article-for-item) additional-definitions)
+	    (remove-duplicates (append (definitions article-for-item) definitions)
 			       :test #'string=))
       (setf (theorems article-for-item)
-	    (remove-duplicates (append (theorems article-for-item) additional-theorems)
+	    (remove-duplicates (append (theorems article-for-item) theorems)
 			       :test #'string=))
       (setf (schemes article-for-item)
-	    (remove-duplicates (append (schemes article-for-item) additional-schemes)
+	    (remove-duplicates (append (schemes article-for-item) schemes)
 			       :test #'string=))
       (setf (text article-for-item) (concat (apply #'concat (mapcar #'(lambda (item)
 									(format nil "~A~%" (text item)))
