@@ -20,17 +20,8 @@ variable (at load time).")
   (:documentation "A wrapper around a copy of the MML."))
 
 (defmethod initialize-instance :after ((lib mizar-library) &key)
-  (let (lines)
-    (with-open-file (mml-lar (concatenate 'string
-					  (slot-value lib 'location)
-					  "/"
-					  "mml.lar"))
-      (symbol-macrolet
-	  (($line (read mml-lar nil nil)))
-	(do ((line $line $line))
-	    ((null line))
-	  (push line lines))))
-    (setf (slot-value lib 'mml-lar) (reverse lines))))
+  (setf (mml-lar lib) 
+	(lines-of-file (concat *mizfiles* "/" "mml.lar"))))
 
 (defparameter *default-mizar-library* (make-instance 'mizar-library
 						     :location (pathname *mizfiles*))
