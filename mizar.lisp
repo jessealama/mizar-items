@@ -23,6 +23,12 @@ variable (at load time).")
   (setf (mml-lar lib) 
 	(lines-of-file (concat *mizfiles* "/" "mml.lar"))))
 
+(defmethod print-object ((lib mizar-library) stream)
+  (with-slots (location mml-lar)
+      lib
+    (print-unreadable-object (lib stream :type nil)
+      (format stream "location ~A, with ~d articles" location (length mml-lar)))))
+
 (defparameter *default-mizar-library* (make-instance 'mizar-library)
   "A Mizar library using the value of MIZFILES in the environment.")
 
