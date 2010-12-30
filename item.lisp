@@ -83,6 +83,27 @@
   (:documentation "A mizar item represents a free-standing piece of a
   mizar article, such as a definition, a theorem, a notation, or a registration."))
 
+(defun copy-item (item)
+  (let ((new-item (make-instance 'item)))
+    (setf (source-article new-item) (source-article item))
+    (setf (begin-line-number new-item) (begin-line-number item))
+    (setf (end-line-number new-item) (end-line-number item))
+    (setf (begin-column-number new-item) (begin-column-number item))
+    (setf (end-column-number new-item) (end-column-number item))
+    (setf (text new-item) (text item))
+    (setf (context-items new-item) (context-items item))
+    (setf (name new-item) (name item))
+    (setf (dependencies new-item) (dependencies item))
+    (setf (additional-vocabularies new-item) (additional-vocabularies item))
+    (setf (additional-notations new-item) (additional-notations item))
+    (setf (additional-constructors new-item) (additional-constructors item))
+    (setf (additional-registrations new-item) (additional-registrations item))
+    (setf (additional-requirements new-item) (additional-requirements item))
+    (setf (additional-definitions new-item) (additional-definitions item))
+    (setf (additional-theorems new-item) (additional-theorems item))
+    (setf (additional-schemes new-item) (additional-schemes item))
+    new-item))
+
 (defmethod initialize-instance :after ((item item) &key)
   "If we know the bounds and the soruce article, compute the text (if not already set)."
   (when (and (slot-boundp item 'source-article)
