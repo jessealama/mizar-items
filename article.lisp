@@ -364,7 +364,7 @@ directive is not consulted."))
     (if (ensure-directories-exist path)
 	(with-open-file (miz path
 			     :direction :output
-			     :if-exists :error)
+			     :if-exists :supersede)
 	  (cond ((slot-boundp article 'full-text)
 		 (format miz "~A~%" (full-text article)))
 		((slot-boundp article 'text)
