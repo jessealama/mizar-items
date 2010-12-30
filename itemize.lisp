@@ -733,7 +733,7 @@ function has side effects."))
 		(context-lines-as-str (apply #'concat context-lines))
 		(text (concat context-lines-as-str
 			      (if (typep candidate 'proposition-item)
-				  (format nil "theorem~%~A" original-text)
+				  (format nil "theorem~%~A" original-text) ; promote to theorem
 				  original-text)))
 		(article-for-item (make-instance 'article
 						 :vocabularies new-vocabularies
