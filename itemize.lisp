@@ -720,7 +720,14 @@ of LINE starting from START."
 						 :path item-path
 						 :name item-name
 						 :text text)))
-	   (trim-environment article-for-item local-db)
+	   (multiple-value-bind (notations constructors registrations definitions theorems schemes)
+	       (trim-environment article-for-item local-db)
+	     (setf (additional-notations candidate) notations
+		   (additional-constructors candidate) constructors
+		   (additional-registrations candidate) registrations
+		   (additional-definitions candidate) definitions
+		   (additional-theorems candidate) theorems
+		   (additional-schemes candidate) schemes))
 	   (handler-case (progn
 			   (write-article article-for-item)
 			   (verify-and-export article-for-item local-db)
