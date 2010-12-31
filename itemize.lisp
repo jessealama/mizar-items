@@ -660,9 +660,25 @@ of LINE starting from START."
      with candidate-num = 1
      with name = (name article)
      with local-db = (pathname-as-directory (concat (namestring (pathname-as-directory directory)) name))
+     with dict-subdir = (pathname-as-directory (concat (namestring local-db) "dict"))
+     with article-vocab = (vocabularies article)
+     with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
+     with num-symbols = (length symbols)
      with text-subdir = (pathname-as-directory (concat (namestring local-db) "text"))
      for candidate in all-candidates
-     initially (warn "About to consider ~d candidate items" (length all-candidates))
+     initially 
+       (loop
+	  with len = (length symbols)
+	  for sym in symbols
+	  for i from 1 upto len
+	  for voc-filename = (format nil "sym~d.voc" i)
+	  for voc-path = (concat (namestring dict-subdir) voc-filename)
+	  initially 
+	    (ensure-directories-exist dict-subdir)
+	  do
+	    (with-open-file (sym-file voc-path :direction :output)
+	      (format sym-file "~A~%" sym)))
+       (warn "About to consider ~d candidate items" (length all-candidates))
      do
        (warn "Dealing with item ~S" candidate)
        (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
@@ -692,7 +708,7 @@ of LINE starting from START."
 		(miz-filename (format nil "~A.miz" item-name))
 		(item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
 		(earlier (reverse earlier-item-names))
-		(new-vocabularies (vocabularies article))
+		(new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
 		(new-notations (append (notations article) earlier))
 		(new-contructors (append (constructors article) earlier))
 		(new-requirements (requirements article))
