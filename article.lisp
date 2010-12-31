@@ -389,9 +389,9 @@ directive is not consulted."))
 
 (defun verifiable? (article &optional (directory (sb-posix:getcwd)))
   (write-article article)
-  (handler-case (or (and (accom article directory "-q" "-s" "-l")
-			 (verifier article directory "-q" "-s" "-l"))
-		    t)
+  (handler-case (and (accom article directory "-q" "-s" "-l")
+		     (verifier article directory "-q" "-s" "-l")
+		     t)
     (mizar-error () nil)))
 
 (defun verifiable-with-directive (article directive-name directive-contents &optional (directory (sb-posix:getcwd)))
