@@ -305,14 +305,15 @@ variable (at load time).")
   (transfer article directory "-q" "-s" "-l"))
 
 (defun listvoc (article-name)
-  (let ((proc (sb-ext:run-program "listvoc.sh"
-				  (list article-name)
-				  :search t
-				  :output :stream)))
-    (let ((exit-code (sb-ext:process-exit-code proc)))
-      (if (zerop exit-code)
-	  (sb-ext:process-output proc)
-	  (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code)))))
-		      
+  (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
+      nil
+      (let ((proc (sb-ext:run-program "listvoc.sh"
+				      (list article-name)
+				      :search t
+				      :output :stream)))
+	(let ((exit-code (sb-ext:process-exit-code proc)))
+	  (if (zerop exit-code)
+	      (stream-lines (sb-ext:process-output proc))
+	      (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code))))))
 
 ;;; mizar.lisp ends here
