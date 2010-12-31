@@ -766,9 +766,19 @@ of LINE starting from START."
 			   (incf candidate-num))
 	     (mizar-error () (progn
 			       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
-			       (with-slots (nr vid)
-				   candidate
-				 (remhash (cons nr vid) theorem-table))
+			       (cond ((typep candidate 'scheme-item)
+				      (with-slots (schemenr)
+					  candidate
+					(remhash schemenr scheme-table)))
+				     ((typep candidate 'definition-item)
+				      (with-slots (nr vid)
+					  candidate
+					(remhash (cons nr vid) definition-table)))
+				     ((or (typep candidate 'theorem-item)
+					  (typep candidate 'proposition-item))
+				      (with-slots (nr vid)
+					  candidate
+					(remhash (cons nr vid) theorem-table))))
 			       (delete-file (path article-for-item))
 			       (push candidate pseudo-candidates))))))
      finally (return (reverse real-items))))
