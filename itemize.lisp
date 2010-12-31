@@ -661,7 +661,7 @@ of LINE starting from START."
      with name = (name article)
      with local-db = (pathname-as-directory (concat (namestring (pathname-as-directory directory)) name))
      with dict-subdir = (pathname-as-directory (concat (namestring local-db) "dict"))
-     with article-vocab = (vocabularies article)
+     with article-vocab = (remove "TARSKI" (vocabularies article) :test #'string=)
      with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
      with num-symbols = (length symbols)
      with text-subdir = (pathname-as-directory (concat (namestring local-db) "text"))
@@ -725,7 +725,9 @@ of LINE starting from START."
 				  (format nil "theorem~%~A" original-text) ; promote to theorem
 				  original-text)))
 		(article-for-item (make-instance 'article
-						 :vocabularies new-vocabularies
+						 :vocabularies (if (member "TARSKI" (vocabularies article) :test #'string=)
+								   (cons "TARSKI" new-vocabularies)
+								   new-vocabularies)
 						 :notations new-notations
 						 :constructors new-contructors
 						 :requirements new-requirements
