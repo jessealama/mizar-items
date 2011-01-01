@@ -633,10 +633,9 @@ of LINE starting from START."
 (defmethod itemize ((article article))
   (let* ((name (name article))
 	 (sandbox (fresh-sandbox name))
-	 (directory (location sandbox))
-	 (article-in-sandbox (concat (namestring directory) (format nil "~A.miz" name))))
+	 (directory (location sandbox)))
     (warn "Itemizing in the directory ~A" (namestring (location sandbox)))
-    (copy-file (path article) article-in-sandbox)
+    (copy-file-to-sandbox (path article) sandbox)
     (preprocess-text article directory)
     ;; ensure the article XML is now synchonized with the changed text
     (warn "Verifying...")
@@ -656,22 +655,24 @@ of LINE starting from START."
        with earlier-item-names = nil
        with real-items = nil
        with candidate-num = 1
-       with local-db = (pathname-as-directory (concat (namestring (pathname-as-directory directory)) name))
-       with dict-subdir = (pathname-as-directory (concat (namestring local-db) "dict"))
+       with local-db = (make-directory-in-sandbox name sandbox)
+       with dict-subdir = (ensure-directory (concat local-db "dict"))
+       with prel-subdir = (ensure-directory (concat local-db "prel"))
+       with text-subdir = (ensure-directory (concat local-db "text"))
        with article-vocab = (remove "TARSKI" (vocabularies article) :test #'string=)
        with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
        with num-symbols = (length symbols)
-       with text-subdir = (pathname-as-directory (concat (namestring local-db) "text"))
        for candidate in all-candidates
        initially 
+	 (ensure-directories-exist dict-subdir)
+	 (ensure-directories-exist prel-subdir)
+	 (ensure-directories-exist text-subdir)
 	 (loop
 	    with len = (length symbols)
 	    for sym in symbols
 	    for i from 1 upto len
 	    for voc-filename = (format nil "sym~d.voc" i)
 	    for voc-path = (concat (namestring dict-subdir) voc-filename)
-	    initially 
-	      (ensure-directories-exist dict-subdir)
 	    do
 	      (with-open-file (sym-file voc-path :direction :output)
 		(format sym-file "~A~%" sym)))
