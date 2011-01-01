@@ -1,0 +1,105 @@
+* How to itemize multiple articles
+  I think we've got itemization of single articles down.  How to
+  itemize multiple articles?
+** Assumption: all articles come from the MML
+   That way, we can deal with them in the order specified in mml.lar.
+** Rewriting the environment
+  Let's consider just the simple case of itemizing two articles,
+  XBOOLE_0 and BOOLE, the first two entries in mml.lar.
+
+  What information do we need after itemizing XBOOLE_0 to successfully
+  itemize BOOLE?
+
+  For starters, we need to modify the environment of the article.  The
+  environment of BOOLE (as of MML version 4.156.1106) looks like this:
+
+  vocabularies XBOOLE_0, TARSKI;
+  notations TARSKI, XBOOLE_0;
+  constructors TARSKI, XBOOLE_0;
+  definitions XBOOLE_0, TARSKI;
+  theorems XBOOLE_0, TARSKI;
+
+  This needs to be changed:
+
+  - XBOOLE_0 in the vocabularies directive needs to be changed to
+    SYM1, SYM2, ..., SYM10 (10 symbols are listed when one calls
+    listvoc XBOOLE_0).  Keep TARSKI unchanged.
+
+  - the notations directive could be expanded, in a conservative way,
+    by listing all items that generated .dno files.
+
+  - the other directives need to be expanded in a similar way.
+
+  What, then, is needed from the itemization of XBOOLE_0 just to edit
+  the environment of BOOLE?  We need to keep track of:
+  - the names of the vocabulary files created;
+  - a list of all items that generated .dno files
+  - a list of all items that generated .dco files,
+  - same fot the other extensions
+
+  By the way, the extensions are:
+
+  - notations ==> .dno
+  - constructors ==> .dco
+  - registrations ==> .dcl
+  - definitions ==> .def
+  - theorems ==> .the
+  - schemes ==> .sch
+** Rewriting the text
+   We already know how to edit the text of an article so that its
+   article-interal references are rewritten to refer to article
+   fragments.  How to rewrite the text so that article-external
+   references are properly rewritten?
+
+   Again, let's think of the example of using an itemized XBOOLE_0 to
+   itemize BOOLE.  How can I transform the first theorem of BOOLE
+
+   theorem
+     for X being set holds X \/ {} = X
+   proof
+     let X be set;
+     thus X \/ {} c= X
+     proof
+       let x be set;
+       assume x in X \/ {};
+       then x in X or x in {} by XBOOLE_0:def 3;
+       hence thesis by XBOOLE_0:def 1;
+     end;
+     let x be set;
+     assume x in X;
+     hence thesis by XBOOLE_0:def 3;
+   end;
+
+  into this:
+
+   theorem
+     for X being set holds X \/ {} = X
+   proof
+     let X be set;
+     thus X \/ {} c= X
+     proof
+       let x be set;
+       assume x in X \/ {};
+       then x in X or x in {} by ITEM2:def 3;
+       hence thesis by ITEM1:def 1;
+     end;
+     let x be set;
+     assume x in X;
+     hence thesis by ITEM2:def 2;
+   end;
+
+  ?
+
+  This example reveals a couple problems:
+
+  - we need to have some kind of naming scheme for items.  In the
+    one-article-at-a-time itemizer, I simply create articles called
+    item1.miz, item2.miz, ..., etc.  I suppose I can just keep this
+    up, naming items serially, but we'll need to keep track of what
+    items correspond to which articles (e.g., we'll need to map 1, or
+    "1" or "item1" or "item1.miz" to "XBOOLE_0").
+
+  - For definitions, we will need some way to compute, first of all,
+    which (definition) item corresponds to "XBOOLE_0:def 3", and,
+    further, which deftheorem within that item corresponds to
+    XBOOLE_0:def 3.
