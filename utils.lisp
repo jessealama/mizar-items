@@ -188,4 +188,16 @@ from the beginning of the list."
 	(push line lines)))
     (reverse lines)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Paths
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun ensure-directory (directory)
+  (namestring (pathname-as-directory directory)))
+
+(defun file-in-directory (directory filename &optional extension)
+  (concat (ensure-directory directory) filename (if (null extension)
+						    ""
+						    (concat "." extension))))
+
 ;;; utils.lisp ends here
