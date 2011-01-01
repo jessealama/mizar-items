@@ -611,7 +611,7 @@ of LINE starting from START."
        (with-open-file (sym-file voc-path :direction :output)
 	 (format sym-file "~A~%" sym))))
 
-(defgeneric itemize (thing))
+(defgeneric itemize (things))
 
 (defmethod itemize :around ((article article))
   (if (slot-boundp article 'path)
@@ -783,5 +783,11 @@ of LINE starting from START."
 				 (delete-file (path article-for-item))
 				 (push candidate pseudo-candidates))))))
        finally (return (reverse real-items)))))
+
+(defmethod itemize ((articles list))
+  (if (null articles)
+      nil
+      (itemize (car articles))))
+  
 
 ;;; itemize.lisp ends here
