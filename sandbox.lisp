@@ -27,6 +27,17 @@
 	 (ensure-directories-exist dir)
 	 (return (make-instance 'sandbox :location dir)))))
 
+(defun copy-file-to-sandbox (file sandbox)
+  (let ((file-in-sandbox (file-in-directory (location sandbox) (file-namestring file))))
+    (copy-file file file-in-sandbox)))
+
+(defun make-directory-in-sandbox (directory-name sandbox)
+  (let ((dir (ensure-directory
+	      (concat (namestring (ensure-directory (location sandbox)))
+		      directory-name))))
+  (ensure-directories-exist dir)
+  dir))
+
 (defun sync-from-to (source-sandbox target-sandbox)
   (let* ((source-directory (location source-sandbox))
 	 (target-directory (location target-sandbox))
