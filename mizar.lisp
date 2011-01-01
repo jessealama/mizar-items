@@ -32,45 +32,6 @@ variable (at load time).")
 (defparameter *default-mizar-library* (make-instance 'mizar-library)
   "A Mizar library using the value of MIZFILES in the environment.")
 
-(defclass sandbox ()
-  ((articles
-    :initarg :articles
-    :accessor articles
-    :type list
-    :initform nil
-    :documentation "A list of symbols that name articles that this sandbox is guarding.")
-   (location
-    :initarg :location
-    :reader location
-    ;; no writer method -- changing the location is not allowed
-    :type pathname
-    :documentation "A pathname, which should point to a directory,
-     where the contents of the sandbox will be stored."))
-  (:documentation "A sandbox is a wrapper around a directory.  It
-  stores a list of articles; mizar processing for these articles will
-  take place in the directory."))
-
-;; we need to check the validity of the arguments: LOCATION
-;; points to a directory, ARTICLE is a list of symbols, and
-;; the directory contains files whose names are derived from
-;; the list of symbols in ARTICLES
-;; (defmethod initialize-instance :after ((s sandbox))
-;;   nil) 
-
-(defun fresh-sandbox ()
-  (make-instance 'sandbox
-		 :location (pathname "/tmp"))) ;; this should obviously not be fixed
-
-(defun verify-in-sandbox (sandbox article)
-  "Call the mizar verifier on ARTICLE, which should be a symbol, in
-  SANDBOX.  Signals an error if ARTICLE does not actually belong to
-  SANDBOX."
-  (declare (ignore sandbox article)))
-
-(defun verify-sandbox (sandbox)
-  "Verify all mizar articles contained in SANDBOX."
-  (declare (ignore sandbox)))
-
 (defparameter *mml-lar-path* (make-pathname :directory *mizfiles*
 					    :name "mml.lar"))
 (defparameter *mml-lar*
@@ -82,18 +43,6 @@ variable (at load time).")
   (let ((article-str-lc (lowercase article-str)))
     (or (string= article-str-lc "tarski")
 	(member article-str-lc *mml-lar* :test #'string=))))
-
-(defgeneric trash (sandbox)
-  (:documentation "Delete whatever articles that are being monitored
-  by SANDBOX, and, if the directory corresponding to SANDBOX is empty,
-  delete that too.  Signals a condition if the directory associated
-  with SANDBOX contains any 'unknown' files, that is, files that do
-  not come from mizar processing of the articles monitored by the sandbox."))
-
-(defmethod trash ((s sandbox))
-  (with-slots (location) s
-    ;; just delete the directory for now
-    (sb-ext:delete-directory location))) ;; not ideal: we shouldn't use sb-ext
 
 (defun run-in-directory (program directory args &key input output if-output-exists)
   (let ((real-dir-name (file-exists-p directory)))

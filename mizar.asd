@@ -12,8 +12,9 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames")
+  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria")
   :components ((:file "packages")
+	       (:file "sandbox")
 	       (:file "utils")
 	       (:file "xml-utils")
 	       (:file "file-utils")
