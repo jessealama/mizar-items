@@ -600,6 +600,17 @@ of LINE starting from START."
     (warn "...done minimizing context.  We eliminated ~d items" (- (length context)
 								   (length minimal-context)))))
 
+(defun write-symbols (symbols directory)
+  (loop
+     with len = (length symbols)
+     for sym in symbols
+     for i from 1 upto len
+     for voc-filename = (format nil "sym~d.voc" i)
+     for voc-path = (concat directory voc-filename)
+     do
+       (with-open-file (sym-file voc-path :direction :output)
+	 (format sym-file "~A~%" sym))))
+
 (defgeneric itemize (thing))
 
 (defmethod itemize :around ((article article))
@@ -667,15 +678,7 @@ of LINE starting from START."
 	 (ensure-directories-exist dict-subdir)
 	 (ensure-directories-exist prel-subdir)
 	 (ensure-directories-exist text-subdir)
-	 (loop
-	    with len = (length symbols)
-	    for sym in symbols
-	    for i from 1 upto len
-	    for voc-filename = (format nil "sym~d.voc" i)
-	    for voc-path = (concat (namestring dict-subdir) voc-filename)
-	    do
-	      (with-open-file (sym-file voc-path :direction :output)
-		(format sym-file "~A~%" sym)))
+	 (write-symbols symbols dict-subdir)
 	 (warn "About to consider ~d candidate items" (length all-candidates))
        do
 	 (warn "Dealing with item ~S" candidate)
