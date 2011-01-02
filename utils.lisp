@@ -158,6 +158,12 @@ from the beginning of the list."
      collecting k into keys
      finally (return keys)))
 
+(defun values-of-table (table)
+  (loop
+     for v being the hash-values in table
+     collecting v into vals
+     finally (return vals)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
