@@ -637,7 +637,7 @@ of LINE starting from START."
     :type sandbox)
    (names-to-items
     :initarg :names-to-items
-    :initform (make-hash-table :test #'equal) ; keys are strings
+    :initform (make-hash-table :test #'equal) ; keys are strings like "XBOOLE_0"
     :accessor names-to-items
     :type hash-table)
    (definition-labels-to-items
