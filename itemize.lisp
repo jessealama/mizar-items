@@ -735,6 +735,8 @@ of LINE starting from START."
 	     for candidate in all-candidates
 	     initially 
 	       (ensure-directories-exist dict-subdir)
+	       (ensure-directories-exist prel-subdir)
+	       (ensure-directories-exist text-subdir)
 	       (write-new-symbols symbols symbol-table dict-subdir)
 	       (ensure-directories-exist prel-subdir)
 	       (ensure-directories-exist text-subdir)
