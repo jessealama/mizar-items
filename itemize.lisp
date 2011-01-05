@@ -659,7 +659,11 @@ of LINE starting from START."
     :initarg :symbol-table
     :initform (make-hash-table :test #'equal) ; keys are strings like "Vempty" and "O\ 32", values are numbers
     :accessor symbol-table
-    :type hash-table)))
+    :type hash-table)
+   (num-items
+    :initform 0
+    :type integer
+    :accessor num-items)))
 
 (defgeneric itemize (things &optional itemization-record))
 
