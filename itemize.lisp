@@ -846,7 +846,7 @@ of LINE starting from START."
 						(remhash (cons nr vid) theorem-table))))
 				       (delete-file (path article-for-item))
 				       (push candidate pseudo-candidates))))))
-	     finally (return (reverse real-items))))))))
+	     finally (return itemization-record)))))))
 
 (defmethod itemize ((articles list) &optional itemization-record)
   (if (null articles)
