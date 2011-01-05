@@ -738,8 +738,6 @@ of LINE starting from START."
 	       (ensure-directories-exist prel-subdir)
 	       (ensure-directories-exist text-subdir)
 	       (write-new-symbols symbols symbol-table dict-subdir)
-	       (ensure-directories-exist prel-subdir)
-	       (ensure-directories-exist text-subdir)
 	       (warn "About to consider ~d candidate items" (length all-candidates))
 	     do
 	       (warn "Dealing with item ~S" candidate)
