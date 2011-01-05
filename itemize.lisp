@@ -728,7 +728,7 @@ of LINE starting from START."
 	     with pseudo-candidates = nil
 	     with earlier-item-names = nil
 	     with real-items = nil
-	     with candidate-num = 1
+	     with candidate-num = (1+ (num-items itemization-record))
 	     with local-db = (make-directory-in-sandbox name sandbox)
 	     with dict-subdir = (ensure-directory (concat local-db "dict"))
 	     with prel-subdir = (ensure-directory (concat local-db "prel"))
@@ -827,6 +827,7 @@ of LINE starting from START."
 				   (push (uppercase item-name) earlier-item-names)
 				   (setf (gethash candidate items->articles) article-for-item)
 				   (push candidate real-items)
+				   (incf (num-items itemization-record))
 				   (incf candidate-num))
 		     (mizar-error () (progn
 				       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
