@@ -3,7 +3,7 @@
 (in-package :mizar)
 
 (defparameter *mizfiles* 
-  (sb-ext:posix-getenv "MIZFILES")
+  (ensure-directory (sb-ext:posix-getenv "MIZFILES"))
   "The directory that contains the MML and the mml.lar file.
 
 The default value is the value of the MIZFILES environment
@@ -21,7 +21,7 @@ variable (at load time).")
 
 (defmethod initialize-instance :after ((lib mizar-library) &key)
   (setf (mml-lar lib) 
-	(lines-of-file (concat *mizfiles* "/" "mml.lar"))))
+	(lines-of-file (concat *mizfiles* "mml.lar"))))
 
 (defmethod print-object ((lib mizar-library) stream)
   (with-slots (location mml-lar)
