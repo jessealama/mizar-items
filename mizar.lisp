@@ -12,8 +12,9 @@ variable (at load time).")
 (defclass mizar-library ()
   ((location
     :initarg :location
-    :type pathname
-    :initform (pathname *mizfiles*))
+    :accessor location
+    :type string
+    :initform *mizfiles*)
    (mml-lar
     :accessor mml-lar
     :type list))
