@@ -33,6 +33,9 @@ variable (at load time).")
 (defparameter *default-mizar-library* (make-instance 'mizar-library)
   "A Mizar library using the value of MIZFILES in the environment.")
 
+(defun article-exists-p (name &optional (library *default-mizar-library*))
+  (member name (mml-lar library) :test #'string=))
+
 (defparameter *mml-lar-path* (make-pathname :directory *mizfiles*
 					    :name "mml.lar"))
 (defparameter *mml-lar*
