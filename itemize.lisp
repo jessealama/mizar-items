@@ -698,155 +698,165 @@ of LINE starting from START."
 (defmethod itemize ((article-path string) &optional itemization-record)
   (itemize (pathname article-path) itemization-record))
 
+(defmethod itemize ((article-name string) &optional itemization-record)
+  (if (article-exists-p article-name)
+      (itemize (make-instance 'article
+			      :name article-name
+			      :path (file-in-directory (concat (location *default-mizar-library*) "mml") article-name "miz"))
+	       itemization-record)
+      (error "No such article '~A' in the default mizar library at ~A" article-name (location *default-mizar-library*))))
+
 (defmethod itemize ((article article) &optional itemization-record)
-  (let ((name (name article)))
-    (let (itemization)
-      (if (null itemization-record)
-	  (setf itemization (make-instance 'itemization
-					   :sandbox (fresh-sandbox name)))
-	  (setf itemization itemization-record))
-      (with-slots (sandbox definition-labels-to-items theorem-labels-to-items scheme-labels-to-items symbol-table)
-	  itemization
-	(let ((directory (location sandbox)))
-	  (warn "Itemizing in the directory ~A" (namestring (location sandbox)))
-	  (copy-file-to-sandbox (path article) sandbox)
-	  (preprocess-text article directory)
-	  ;; ensure the article XML is now synchonized with the changed text
-	  (warn "Verifying...")
-	  (verifier article directory "-q" "-l" "-s")
-	  (warn "Generating absolute references...")
-	  (absrefs article)
-	  (refresh-text article)
-	  (refresh-idx article)
-	  (initialize-context-for-items article)
-	  (loop
-	     with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
-	     with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
-	     with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
-	     with items->articles = (make-hash-table :test #'eq) ; keys are item objects
-	     with all-candidates = (item-candidates article)
-	     with pseudo-candidates = nil
-	     with earlier-item-names = nil
-	     with real-items = nil
-	     with candidate-num = (1+ (num-items itemization-record))
-	     with local-db = (make-directory-in-sandbox name sandbox)
-	     with dict-subdir = (ensure-directory (concat local-db "dict"))
-	     with prel-subdir = (ensure-directory (concat local-db "prel"))
-	     with text-subdir = (ensure-directory (concat local-db "text"))
-	     with article-vocab = (remove "TARSKI" (vocabularies article) :test #'string=)
-	     with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
-	     with num-symbols = (length symbols)
-	     for candidate in all-candidates
-	     initially 
-	       (ensure-directories-exist dict-subdir)
-	       (ensure-directories-exist prel-subdir)
-	       (ensure-directories-exist text-subdir)
-	       (write-new-symbols symbols symbol-table dict-subdir)
-	       (warn "About to consider ~d candidate items" (length all-candidates))
-	     do
-	       (warn "Dealing with item ~S" candidate)
-	       (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
-	       (when (typep candidate 'pseudo-item)
-		 (push candidate pseudo-candidates))
-	       (case (type-of candidate)
-		 (scheme-item
-		  (with-slots (schemenr)
-		      candidate
-		    (setf (gethash schemenr scheme-table) candidate)))
-		 (definition-item
-		  (dolist (deftheorem (deftheorems candidate))
-		    (with-slots (nr vid)
-			deftheorem
-		      (setf (gethash (cons nr vid) definition-table) deftheorem))))
-		 (theorem-item
+
+  (let ((itemization (or itemization-record
+			 (make-instance 'itemization
+					:sandbox (fresh-sandbox (name article))))))
+    (with-slots (sandbox definition-labels-to-items theorem-labels-to-items scheme-labels-to-items symbol-table)
+	itemization
+      (copy-file-to-sandbox (path article) sandbox)
+      (let* ((name (name article))
+	     (directory (location sandbox))
+	     (article-in-sandbox (make-instance 'article 
+						:name (name article)
+						:path (file-in-directory (location sandbox) (name article) "miz"))))
+	(warn "Itemizing in the directory ~A" (namestring (location sandbox)))
+	(preprocess-text article-in-sandbox directory)
+	;; ensure the article XML is now synchonized with the changed text
+	(warn "Verifying...")
+	(verifier article-in-sandbox directory "-q" "-l" "-s")
+	(warn "Generating absolute references...")
+	(absrefs article-in-sandbox)
+	(refresh-text article-in-sandbox)
+	(refresh-idx article-in-sandbox)
+	(initialize-context-for-items article-in-sandbox)
+	(loop
+	   with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
+	   with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
+	   with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
+	   with items->articles = (make-hash-table :test #'eq) ; keys are item objects
+	   with all-candidates = (item-candidates article-in-sandbox)
+	   with pseudo-candidates = nil
+	   with earlier-item-names = nil
+	   with real-items = nil
+	   with candidate-num = (1+ (num-items itemization))
+	   with local-db = (make-directory-in-sandbox name sandbox)
+	   with dict-subdir = (ensure-directory (concat local-db "dict"))
+	   with prel-subdir = (ensure-directory (concat local-db "prel"))
+	   with text-subdir = (ensure-directory (concat local-db "text"))
+	   with article-vocab = (remove "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
+	   with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
+	   with num-symbols = (length symbols)
+	   for candidate in all-candidates
+	   initially 
+	     (ensure-directories-exist dict-subdir)
+	     (ensure-directories-exist prel-subdir)
+	     (ensure-directories-exist text-subdir)
+	     (write-new-symbols symbols symbol-table dict-subdir)
+	     (warn "About to consider ~d candidate items" (length all-candidates))
+	   do
+	     (warn "Dealing with item ~S" candidate)
+	     (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles)
+	     (when (typep candidate 'pseudo-item)
+	       (push candidate pseudo-candidates))
+	     (case (type-of candidate)
+	       (scheme-item
+		(with-slots (schemenr)
+		    candidate
+		  (setf (gethash schemenr scheme-table) candidate)))
+	       (definition-item
+		(dolist (deftheorem (deftheorems candidate))
 		  (with-slots (nr vid)
-		      candidate
-		    (setf (gethash (cons nr vid) theorem-table) candidate)))
-		 (proposition-item
-		  (with-slots (nr vid)
-		      candidate
-		    (setf (gethash (cons nr vid) theorem-table) candidate))))
-	       (unless (typep candidate 'pseudo-item)
-		 (setf (context-items candidate) (reverse pseudo-candidates))
-		 (let* ((item-name (format nil "item~d" candidate-num))
-			(miz-filename (format nil "~A.miz" item-name))
-			(item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
-			(earlier (reverse earlier-item-names))
-			(new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
-			(new-notations (append (notations article) earlier))
-			(new-contructors (append (constructors article) earlier))
-			(new-requirements (requirements article))
-			(new-registrations (append (registrations article) earlier))
-			(new-definitions (append (definitions article) earlier))
-			(new-theorems (append (theorems article) earlier))
-			(new-schemes (append (schemes article) earlier))
-			(original-text (text candidate))
-			(context (context-items candidate))
-			(context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
-			(context-lines-as-str (apply #'concat context-lines))
-			(text (concat context-lines-as-str
-				      (if (typep candidate 'proposition-item)
-					  (format nil "theorem~%~A" original-text) ; promote to theorem
-					  original-text)))
-			(article-for-item (make-instance 'article
-							 :vocabularies (if (member "TARSKI" (vocabularies article) :test #'string=)
-									   (cons "TARSKI" new-vocabularies)
-									   new-vocabularies)
-							 :notations new-notations
-							 :constructors new-contructors
-							 :requirements new-requirements
-							 :registrations new-registrations
-							 :definitions new-definitions
-							 :theorems new-theorems
-							 :schemes new-schemes
-							 :path item-path
-							 :name item-name
-							 :text text)))
-		   (multiple-value-bind (notations constructors registrations definitions theorems schemes)
-		       (trim-environment article-for-item local-db)
-		     (setf (notations candidate) notations
-			   (constructors candidate) constructors
-			   (registrations candidate) registrations
-			   (definitions candidate) definitions
-			   (theorems candidate) theorems
-			   (schemes candidate) schemes))
-		   (handler-case (progn
-				   (write-article article-for-item)
-				   (verify-and-export article-for-item local-db)
-				   ;(minimize-context candidate (namestring local-db))
-				   ;(minimize-environment article-for-item (namestring local-db))
+		      deftheorem
+		    (setf (gethash (cons nr vid) definition-table) deftheorem))))
+	       (theorem-item
+		(with-slots (nr vid)
+		    candidate
+		  (setf (gethash (cons nr vid) theorem-table) candidate)))
+	       (proposition-item
+		(with-slots (nr vid)
+		    candidate
+		  (setf (gethash (cons nr vid) theorem-table) candidate))))
+	     (unless (typep candidate 'pseudo-item)
+	       (setf (context-items candidate) (reverse pseudo-candidates))
+	       (let* ((item-name (format nil "item~d" candidate-num))
+		      (miz-filename (format nil "~A.miz" item-name))
+		      (item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
+		      (earlier (reverse earlier-item-names))
+		      (new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
+		      (new-notations (append (notations article-in-sandbox) earlier))
+		      (new-contructors (append (constructors article-in-sandbox) earlier))
+		      (new-requirements (requirements article-in-sandbox))
+		      (new-registrations (append (registrations article-in-sandbox) earlier))
+		      (new-definitions (append (definitions article-in-sandbox) earlier))
+		      (new-theorems (append (theorems article-in-sandbox) earlier))
+		      (new-schemes (append (schemes article-in-sandbox) earlier))
+		      (original-text (text candidate))
+		      (context (context-items candidate))
+		      (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
+		      (context-lines-as-str (apply #'concat context-lines))
+		      (text (concat context-lines-as-str
+				    (if (typep candidate 'proposition-item)
+					(format nil "theorem~%~A" original-text) ; promote to theorem
+					original-text)))
+		      (article-for-item (make-instance 'article
+						       :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
+									 (cons "TARSKI" new-vocabularies)
+									 new-vocabularies)
+						       :notations new-notations
+						       :constructors new-contructors
+						       :requirements new-requirements
+						       :registrations new-registrations
+						       :definitions new-definitions
+						       :theorems new-theorems
+						       :schemes new-schemes
+						       :path item-path
+						       :name item-name
+						       :text text)))
+		 (multiple-value-bind (notations constructors registrations definitions theorems schemes)
+		     (trim-environment article-for-item local-db)
+		   (setf (notations candidate) notations
+			 (constructors candidate) constructors
+			 (registrations candidate) registrations
+			 (definitions candidate) definitions
+			 (theorems candidate) theorems
+			 (schemes candidate) schemes))
+		 (handler-case (progn
+				 (write-article article-for-item)
+				 (verify-and-export article-for-item local-db)
+					;(minimize-context candidate (namestring local-db))
+					;(minimize-environment article-for-item (namestring local-db))
 					; synchronize with CANDIDATE
-				   (setf (vocabularies candidate) (vocabularies article-for-item))
-				   (setf (notations candidate) (notations article-for-item))
-				   (setf (constructors candidate) (constructors article-for-item))
-				   (setf (requirements candidate) (requirements article-for-item))
-				   (setf (registrations candidate) (registrations article-for-item))
-				   (setf (definitions candidate) (definitions article-for-item))
-				   (setf (theorems candidate) (theorems article-for-item))				 
-				   (setf (schemes candidate) (schemes article-for-item))				 
-				   (push (uppercase item-name) earlier-item-names)
-				   (setf (gethash candidate items->articles) article-for-item)
-				   (push candidate real-items)
-				   (incf (num-items itemization-record))
-				   (incf candidate-num))
-		     (mizar-error () (progn
-				       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
-				       (cond ((typep candidate 'scheme-item)
-					      (with-slots (schemenr)
-						  candidate
-						(remhash schemenr scheme-table)))
-					     ((typep candidate 'definition-item)
-					      (with-slots (nr vid)
-						  candidate
-						(remhash (cons nr vid) definition-table)))
-					     ((or (typep candidate 'theorem-item)
-						  (typep candidate 'proposition-item))
-					      (with-slots (nr vid)
-						  candidate
-						(remhash (cons nr vid) theorem-table))))
-				       (delete-file (path article-for-item))
-				       (push candidate pseudo-candidates))))))
-	     finally (return itemization-record)))))))
+				 (setf (vocabularies candidate) (vocabularies article-for-item))
+				 (setf (notations candidate) (notations article-for-item))
+				 (setf (constructors candidate) (constructors article-for-item))
+				 (setf (requirements candidate) (requirements article-for-item))
+				 (setf (registrations candidate) (registrations article-for-item))
+				 (setf (definitions candidate) (definitions article-for-item))
+				 (setf (theorems candidate) (theorems article-for-item))				 
+				 (setf (schemes candidate) (schemes article-for-item))				 
+				 (push (uppercase item-name) earlier-item-names)
+				 (setf (gethash candidate items->articles) article-for-item)
+				 (push candidate real-items)
+				 (incf (num-items itemization))
+				 (incf candidate-num))
+		   (mizar-error () (progn
+				     (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
+				     (cond ((typep candidate 'scheme-item)
+					    (with-slots (schemenr)
+						candidate
+					      (remhash schemenr scheme-table)))
+					   ((typep candidate 'definition-item)
+					    (with-slots (nr vid)
+						candidate
+					      (remhash (cons nr vid) definition-table)))
+					   ((or (typep candidate 'theorem-item)
+						(typep candidate 'proposition-item))
+					    (with-slots (nr vid)
+						candidate
+					      (remhash (cons nr vid) theorem-table))))
+				     (delete-file (path article-for-item))
+				     (push candidate pseudo-candidates))))))
+	   finally (return itemization))))))
 
 (defmethod itemize ((articles list) &optional itemization-record)
   (if (null articles)
