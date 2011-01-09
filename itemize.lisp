@@ -809,7 +809,7 @@ of LINE starting from START."
 		  (setf (gethash (cons nr vid) theorem-table) candidate))))
 	     (unless (typep candidate 'pseudo-item)
 	       (setf (context-items candidate) (reverse pseudo-candidates))
-	       (let* ((item-name (format nil "item~d" candidate-num))
+	       (let* ((item-name (format nil "i~d" candidate-num))
 		      (miz-filename (format nil "~A.miz" item-name))
 		      (item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
 		      (earlier (reverse earlier-item-names))
