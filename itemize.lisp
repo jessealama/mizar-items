@@ -653,7 +653,7 @@ of LINE starting from START."
    (scheme-labels-to-items
     :initarg :scheme-labels-to-items
     :accessor scheme-labels-to-items
-    :initform (make-hash-table :test #'equal) ; keys are strings like "XBOOLE_0:sch 2", values are item objects
+    :initform (make-hash-table :test #'equal) ; keys are pairs like ("XBOOLE_0" . "2"), values are positive natural numbers
     :type hash-table)
    (symbol-table
     :initarg :symbol-table
