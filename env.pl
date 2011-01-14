@@ -6,7 +6,7 @@
 # This kind of tool has probably been written a billion times.  Oh well.
 
 sub usage {
-  print ("Usage: list-vocab.pl DIRECTIVE ARTICLE\n");
+  print ("Usage: env.pl DIRECTIVE ARTICLE\n");
   print ("\n");
   print ("DIRECTIVE must be one of\n");
   print ("\n");
