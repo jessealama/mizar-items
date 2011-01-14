@@ -7,6 +7,11 @@
     (let ((name-attribute (first (xpath:all-nodes name-attribute-as-node-set))))
       (xpath:evaluate "string()" name-attribute))))
 
+(defun value-of-aid-attribute (node)
+  (let ((value (xpath:evaluate "@aid" node)))
+    (unless (xpath:node-set-empty-p value)
+      (dom:get-attribute node "aid"))))
+
 (defun integer-value-of-attribute (node attribute)
   (let* ((xpath (format nil "@~A" attribute))
 	 (value (xpath:evaluate xpath node)))
@@ -18,6 +23,9 @@
 
 (defun value-of-absnr-attribute (node)
   (integer-value-of-attribute node "absnr"))
+
+(defun value-of-articlenr-attribute (node)
+  (integer-value-of-attribute node "articlenr"))
 
 (defun value-of-line-attribute (node)
   (integer-value-of-attribute node "line"))
