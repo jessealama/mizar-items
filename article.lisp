@@ -135,7 +135,7 @@ unbound, it will be bound in the new article and have value NIL."
 					       (file-exists-under-prel local-db
 								       (format nil "~(~a~).dcl" registration))
 					       (file-exists-under-prel local-db
-								       (format nil "~(~a~).did" definition))))
+								       (format nil "~(~a~).did" registration))))
 				       registrations)
 	  definitions (remove-if-not #'(lambda (definition)
 					 (or (belongs-to-mml definition)
