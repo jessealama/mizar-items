@@ -123,32 +123,32 @@ unbound, it will be bound in the new article and have value NIL."
     (setf notations (remove-if-not #'(lambda (notation)
 				       (or (belongs-to-mml notation)
 					   (file-exists-under-prel local-db 
-								   (format nil "~A.dno" notation))))
+								   (format nil "~(~a~).dno" notation))))
 				   notations)
 	  constructors (remove-if-not #'(lambda (constructor)
 					  (or (belongs-to-mml constructor)
 					      (file-exists-under-prel local-db
-								      (format nil "~A.dco" constructor))))
+								      (format nil "~(~a~).dco" constructor))))
 				      constructors)
 	  registrations (remove-if-not #'(lambda (registration)
 					   (or (belongs-to-mml registration)
 					       (file-exists-under-prel local-db
-								       (format nil "~A.dcl" registration))))
+								       (format nil "~(~a~).dcl" registration))))
 				       registrations)
 	  definitions (remove-if-not #'(lambda (definition)
 					 (or (belongs-to-mml definition)
 					     (file-exists-under-prel local-db
-								     (format nil "~A.def" definition))))
+								     (format nil "~(~a~).def" definition))))
 				     definitions)
 	  theorems (remove-if-not #'(lambda (theorem)
 				      (or (belongs-to-mml theorem)
 					  (file-exists-under-prel local-db
-								  (format nil "~A.the" theorem))))
+								  (format nil "~(~a~).the" theorem))))
 				  theorems)
 	  schemes (remove-if-not #'(lambda (scheme)
 				     (or (belongs-to-mml scheme)
 					 (file-exists-under-prel local-db
-								 (format nil "~A.sch" scheme))))
+								 (format nil "~(~a~).sch" scheme))))
 				 schemes))
     (values notations constructors registrations definitions theorems schemes)))
 
