@@ -160,10 +160,12 @@
     :accessor xml-node)
    (vid
     :initarg :vid
-    :accessor vid-value)
+    :accessor vid-value
+    :initform nil)
    (nr
     :initarg :nr
-    :accessor nr-value)))
+    :accessor nr-value
+    :initform nil)))
 
 (defclass labelled-item-mixin ()
   ((label
