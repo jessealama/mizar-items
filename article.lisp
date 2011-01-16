@@ -138,7 +138,9 @@ unbound, it will be bound in the new article and have value NIL."
 	  definitions (remove-if-not #'(lambda (definition)
 					 (or (belongs-to-mml definition)
 					     (file-exists-under-prel local-db
-								     (format nil "~(~a~).def" definition))))
+								     (format nil "~(~a~).def" definition))
+					     (file-exists-under-prel local-db
+								     (format nil "~(~a~).did" definition))))
 				     definitions)
 	  theorems (remove-if-not #'(lambda (theorem)
 				      (or (belongs-to-mml theorem)
