@@ -133,14 +133,14 @@ unbound, it will be bound in the new article and have value NIL."
 	  registrations (remove-if-not #'(lambda (registration)
 					   (or (belongs-to-mml registration)
 					       (file-exists-under-prel local-db
-								       (format nil "~(~a~).dcl" registration))))
+								       (format nil "~(~a~).dcl" registration))
+					       (file-exists-under-prel local-db
+								       (format nil "~(~a~).did" definition))))
 				       registrations)
 	  definitions (remove-if-not #'(lambda (definition)
 					 (or (belongs-to-mml definition)
 					     (file-exists-under-prel local-db
-								     (format nil "~(~a~).def" definition))
-					     (file-exists-under-prel local-db
-								     (format nil "~(~a~).did" definition))))
+								     (format nil "~(~a~).def" definition))))
 				     definitions)
 	  theorems (remove-if-not #'(lambda (theorem)
 				      (or (belongs-to-mml theorem)
