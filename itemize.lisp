@@ -142,7 +142,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	  (let ((prop-node (first-child-with-name justifiedtheorem-node "Proposition")))
 	    (let* ((vid (value-of-vid-attribute prop-node))
 		   (nr (value-of-nr-attribute prop-node))
-		   (label (label-for-vid article vid)))
+		   (label (label-for-vid article vid))
+		   (absnr (value-of-nr-attribute justifiedtheorem-node)))
 	      (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		  (line-and-column prop-node)
 		(multiple-value-setq (begin-line-num begin-column-num)
@@ -165,6 +166,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				   :end-line-number end-line-num
 				   :end-column-number (1+ end-column-num) ; to get the ';'
 				   :nr nr
+				   :absnr absnr
 				   :vid vid
 				   :label label
 				   :node justifiedtheorem-node)
@@ -243,8 +245,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 sibling elements; these need to be stored."
   (let ((items (block-items "DefinitionBlock" "definition" 'definition-item article)))
     (dolist (definitionblock-item items items)
-      (let (deftheorem-items)
-	(let ((definitionblock-node (xml-node definitionblock-item)))
+      (let ((definitionblock-node (xml-node definitionblock-item)))
+	(let (deftheorem-items)
 	  (let ((deftheorem-nodes (deftheorems-after-definitionblock definitionblock-node)))
 	    (dolist (deftheorem-node deftheorem-nodes deftheorem-items)
 	      ;; we want the vid and nr of the DefTheorem's Proposition
@@ -252,16 +254,36 @@ sibling elements; these need to be stored."
 	      ;; useless.
 	      (let* ((proposition-child (first-child-with-name deftheorem-node "Proposition"))
 		     (nr (value-of-nr-attribute proposition-child))
+		     (absnr (value-of-nr-attribute deftheorem-node))
 		     (vid (value-of-vid-attribute proposition-child))
 		     (label (label-for-vid article vid)))
 		(push (make-instance 'deftheorem-item
 				     :source definitionblock-item
 				     :node deftheorem-node
 				     :nr nr
+				     :absnr absnr
 				     :vid vid
 				     :label label)
-		      deftheorem-items)))))
-	(setf (deftheorems definitionblock-item) (reverse deftheorem-items))))))
+		      deftheorem-items))))
+	(setf (deftheorems definitionblock-item) (reverse deftheorem-items)))
+	; register definiens
+	(let ((definiens-nodes (definiens-after-definitionblock definitionblock-node)))
+	  (dolist (definiens-node definiens-nodes)
+	    (let ((constrkind (value-of-constrkind-attribute definiens-node))
+		  (constrnr (value-of-constrnr-attribute definiens-node)))
+	      (push (cons constrkind constrnr) (definientia definitionblock-item)))))
+	; now gather any Constructor and Format child elements
+	(dolist (definition-node (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node)))
+	  (let ((patterns-for-definition (xpath:all-nodes (xpath:evaluate "Pattern" definition-node)))
+		(constructors-for-definition (xpath:all-nodes (xpath:evaluate "Constructor" definition-node))))
+	    (dolist (pattern-for-definition patterns-for-definition)
+	      (let ((kind (value-of-kind-attribute pattern-for-definition))
+		    (nr (value-of-nr-attribute pattern-for-definition)))
+		(push (cons kind nr) (definition-patterns definitionblock-item))))
+	    (dolist (constructor-for-definition constructors-for-definition)
+	      (let ((kind (value-of-kind-attribute constructor-for-definition))
+		    (nr (value-of-nr-attribute constructor-for-definition)))
+		(push (cons kind nr) (definition-constructors definitionblock-item))))))))))
 
 (defun schemeblock-items (article)
   (let ((items (block-items "SchemeBlock" "scheme" 'scheme-item article)))
@@ -274,10 +296,33 @@ sibling elements; these need to be stored."
 	(setf (label item) label)))))
 
 (defun registrationblock-items (article)
-  (block-items "RegistrationBlock" "registration" 'registration-item article))
+  (let ((items (block-items "RegistrationBlock" "registration" 'registration-item article)))
+    (dolist (item items items)
+      (let ((item-xml (xml-node item)))
+	(dolist (registration (xpath:all-nodes (xpath:evaluate "Registration" item-xml)))
+	  (dolist (rcluster (xpath:all-nodes (xpath:evaluate "RCluster" registration)))
+	    (let ((nr (value-of-nr-attribute rcluster)))
+	      (push nr (rclusters item))))
+	  (dolist (fcluster (xpath:all-nodes (xpath:evaluate "FCluster" registration)))
+	    (let ((nr (value-of-nr-attribute fcluster)))
+	      (push nr (fclusters item))))
+	  (dolist (ccluster (xpath:all-nodes (xpath:evaluate "CCluster" registration)))
+	    (let ((nr (value-of-nr-attribute ccluster)))
+	      (push nr (cclusters item)))))
+	(dolist (identify-registration (xpath:all-nodes (xpath:evaluate "IdentifyRegistration" item-xml)))
+	  (dolist (identify (xpath:all-nodes (xpath:evaluate "Identify" identify-registration)))
+	    (let ((nr (value-of-nr-attribute identify))
+		  (constrkind (value-of-constrkind-attribute identify)))
+	      (push (cons constrkind nr) (identifications item)))))))))
 
 (defun notationblock-items (article)
-  (block-items "NotationBlock" "notation" 'notation-item article))
+  (let ((items (block-items "NotationBlock" "notation" 'notation-item article)))
+    (dolist (item items items)
+      (let ((item-xml (xml-node item)))
+	(dolist (pattern-node (xpath:all-nodes (xpath:evaluate "Pattern" item-xml)))
+	  (let ((kind (value-of-kind-attribute pattern-node))
+		(nr (value-of-nr-attribute pattern-node)))
+	    (push (cons kind nr) (patterns item))))))))
 
 (defgeneric item-candidates (article))
 
@@ -679,6 +724,10 @@ of LINE starting from START."
     :initarg :sandbox
     :accessor sandbox
     :type sandbox)
+   (items
+    :initarg :items
+    :accessor items
+    :initform (make-hash-table :test #'eq)) ; keys are natural numbers
    (names-to-items
     :initarg :names-to-items
     :initform (make-hash-table :test #'equal) ; keys are strings like "XBOOLE_0"
@@ -737,6 +786,51 @@ of LINE starting from START."
     :initarg :names->schemes
     :accessor names->schemes
     :initform (make-hash-table :test #'equal) ; keys are strings like "XBOOLE_0", values are lists of strings like ("ITEM2" "ITEM5")
+    :type hash-table)
+   (constructors
+    :initarg :constructors
+    :accessor constructors
+    :initform (make-hash-table :test #'equal) ; keys are triples like ("XBOOLE_0" "V" 1), values are item objects
+    :type hash-table)
+   (patterns
+    :initarg :patterns
+    :accessor patterns
+    :initform (make-hash-table :test #'equal) ; keys are triples like ("XBOOLE_0" "V" 1), values are item objects
+    :type hash-table)
+   (definientia
+    :initarg :definientia
+    :accessor definientia
+    :initform (make-hash-table :test #'equal) ; keys are triples like ("XBOOLE_0" "V" 1), values are item objects
+    :type hash-table)
+   (identifications
+    :initarg :identifications
+    :accessor identifications
+    :initform (make-hash-table :test #'equal) ; keys are triples like ("XBOOLE_0" "V" 1), values are item objects
+    :type hash-table)
+   (theorems
+    :initarg :theorems
+    :accessor theorems
+    :initform (make-hash-table :test #'equal) ; keys are triples like ("XBOOLE_0" 1), values are item objects
+    :type hash-table)
+   (schemes
+    :initarg :schemes
+    :accessor schemes
+    :initform (make-hash-table :test #'equal) ; keys are triples like ("XBOOLE_0" 1), values are item objects
+    :type hash-table)
+   (rclusters
+    :initarg :rclusters
+    :accessor rclusters
+    :initform (make-hash-table :test #'equal) ; keys are pairs like ("XBOOLE_0" 1), values are item objects
+    :type hash-table)
+   (fclusters
+    :initarg :fclusters
+    :accessor fclusters
+    :initform (make-hash-table :test #'equal) ; keys are pairs like ("XBOOLE_0" 1), values are item objects
+    :type hash-table)
+   (cclusters
+    :initarg :cclusters
+    :accessor cclusters
+    :initform (make-hash-table :test #'equal) ; keys are pairs like ("XBOOLE_0" 1), values are item objects
     :type hash-table)))
 
 (defun singleton-if-not-present (thing table)
@@ -824,7 +918,6 @@ of LINE starting from START."
       (error "No such article '~A' in the default mizar library at ~A" article-name (location *default-mizar-library*))))
 
 (defmethod itemize ((article article) &optional itemization-record)
-
   (let ((itemization (or itemization-record
 			 (make-instance 'itemization
 					:sandbox (fresh-sandbox (name article))))))
@@ -864,7 +957,7 @@ of LINE starting from START."
 	   with text-subdir = (ensure-directory (concat local-db "text"))
 	   with article-vocab = (remove "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
 	   with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
-	   with num-symbols = (length symbols)
+	   ;with num-symbols = (length symbols)
 	   with scheme-nr = 0
 	   with deftheorem-nr = 0
 	   for candidate in all-candidates
@@ -906,26 +999,33 @@ of LINE starting from START."
 		      (miz-filename (format nil "~A.miz" item-name))
 		      (item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
 		      (earlier (reverse earlier-item-names))
-		      (new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
-		      (new-notations (append (expand-previous-notations article-in-sandbox
-									(names->notations itemization))
-					     earlier))
-		      (new-contructors (append (expand-previous-constructors article-in-sandbox
-									     (names->constructors itemization))
-					       earlier))
+		      ;; (new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
+		      (new-vocabularies (vocabularies article-in-sandbox))
+		      (new-notations (append (notations article-in-sandbox) earlier))
+		      (new-contructors (append (constructors article-in-sandbox) earlier))
 		      (new-requirements (requirements article-in-sandbox))
-		      (new-registrations (append (expand-previous-registrations article-in-sandbox
-										(names->registrations itemization))
-						 earlier))
-		      (new-definitions (append (expand-previous-definitions article-in-sandbox
-									    (names->definitions itemization))
-					       earlier))
-		      (new-theorems (append (expand-previous-theorems article-in-sandbox
-								      (names->theorems itemization))
-					    earlier))
-		      (new-schemes (append (expand-previous-schemes article-in-sandbox
-								    (names->schemes itemization))
-					   earlier))
+		      (new-registrations (append (registrations article-in-sandbox) earlier))
+		      (new-definitions (append (definitions article-in-sandbox) earlier))
+		      (new-theorems (append (theorems article-in-sandbox) earlier))
+		      (new-schemes (append (schemes article-in-sandbox) earlier))
+		      ;; (new-notations (append (expand-previous-notations article-in-sandbox
+		      ;; 							(names->notations itemization))
+		      ;; 			     earlier))
+		      ;; (new-contructors (append (expand-previous-constructors article-in-sandbox
+		      ;; 							     (names->constructors itemization))
+		      ;; 			       earlier))
+		      ;; (new-registrations (append (expand-previous-registrations article-in-sandbox
+		      ;; 								(names->registrations itemization))
+		      ;; 				 earlier))
+		      ;; (new-definitions (append (expand-previous-definitions article-in-sandbox
+		      ;; 							    (names->definitions itemization))
+		      ;; 			       earlier))
+		      ;; (new-theorems (append (expand-previous-theorems article-in-sandbox
+		      ;; 						      (names->theorems itemization))
+		      ;; 			    earlier))
+		      ;; (new-schemes (append (expand-previous-schemes article-in-sandbox
+		      ;; 						    (names->schemes itemization))
+		      ;; 			   earlier))
 		      (original-text (text candidate))
 		      (context (context-items candidate))
 		      (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
@@ -935,9 +1035,10 @@ of LINE starting from START."
 					(format nil "theorem~%~A" original-text) ; promote to theorem
 					original-text)))
 		      (article-for-item (make-instance 'article
-						       :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
-									 (cons "TARSKI" new-vocabularies)
-									 new-vocabularies)
+						       ;; :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
+						       ;; 			 (cons "TARSKI" new-vocabularies)
+						       ;; 			 new-vocabularies)
+						       :vocabularies new-vocabularies
 						       :notations new-notations
 						       :constructors new-contructors
 						       :requirements new-requirements
@@ -970,21 +1071,21 @@ of LINE starting from START."
 				       (definitions candidate) (definitions article-for-item)
 				       (theorems candidate) (theorems article-for-item)
 				       (schemes candidate) (schemes article-for-item))
-				 (when (typep candidate 'scheme-item)
-				   (setf (gethash (cons name-uc scheme-nr)
-						  (scheme-labels-to-items itemization))
-					 candidate-num))
-				 (when (typep candidate 'definition-item)
-				   (loop
-				      with deftheorems = (deftheorems candidate)
-				      with num-deftheorems = (length deftheorems)
-				      with definition-table = (definition-labels-to-items itemization)
-				      for i from 0
-				      for deftheorem in deftheorems
-				      do
-					(setf (gethash (cons name-uc (1+ (- deftheorem-nr (- num-deftheorems i))))
-						       definition-table)
-					      (cons candidate-num (1+ i)))))
+				 ;; (when (typep candidate 'scheme-item)
+				 ;;   (setf (gethash (cons name-uc scheme-nr)
+				 ;; 		  (scheme-labels-to-items itemization))
+				 ;; 	 candidate-num))
+				 ;; (when (typep candidate 'definition-item)
+				 ;;   (loop
+				 ;;      with deftheorems = (deftheorems candidate)
+				 ;;      with num-deftheorems = (length deftheorems)
+				 ;;      with definition-table = (definition-labels-to-items itemization)
+				 ;;      for i from 0
+				 ;;      for deftheorem in deftheorems
+				 ;;      do
+				 ;; 	(setf (gethash (cons name-uc (1+ (- deftheorem-nr (- num-deftheorems i))))
+				 ;; 		       definition-table)
+				 ;; 	      (cons candidate-num (1+ i)))))
 				 ;; (when (typep candidate 'definition-item)
 				 ;;   (loop
 				 ;;      with deftheorems = (deftheorems candidate)
@@ -996,10 +1097,11 @@ of LINE starting from START."
 				 (push (uppercase item-name) earlier-item-names)
 				 (setf (gethash candidate items->articles) article-for-item)
 				 (push candidate real-items)
+				 (setf (gethash candidate-num (items itemization)) candidate)
 				 (incf (num-items itemization))
 				 (incf candidate-num))
 		   (mizar-error () (progn
-				     (error "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
+				     (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
 				     (cond ((typep candidate 'scheme-item)
 					    (with-slots (schemenr)
 						candidate
@@ -1053,6 +1155,41 @@ of LINE starting from START."
 			   (remove-if-not #'(lambda (num)
 					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.sch" num))))
 					  (numbers-from-to starting-item-number candidate-num))))
+	     ; register constructors, notations/patterns, registrations, definiens, theorems, and schemes
+	     (dolist (item (remove-if #'(lambda (item) (typep item 'pseudo-item)) all-candidates))
+	       (when (typep item 'definition-item)
+		 (dolist (constructor-kind-and-nr (definition-constructors item))
+		   (destructuring-bind (kind . nr)
+		       constructor-kind-and-nr
+		     (setf (gethash (list name-uc kind nr) (constructors itemization)) item)))
+		 (dolist (pattern-kind-and-nr (definition-patterns item))
+		   (destructuring-bind (kind . nr)
+		       pattern-kind-and-nr
+		     (setf (gethash (list name-uc kind nr) (patterns itemization)) item)))
+		 (dolist (constrkind-and-constrnr (definientia item))
+		   (destructuring-bind (constrkind . constrnr)
+		       constrkind-and-constrnr
+		     (setf (gethash (list name-uc constrkind constrnr) (definientia itemization)) item))))
+	       (when (typep item 'notation-item)
+		 (dolist (pattern-kind-and-nr (patterns item))
+		   (destructuring-bind (kind . nr)
+		       pattern-kind-and-nr
+		     (setf (gethash (list name-uc kind nr) (patterns itemization)) item))))
+	       (when (typep item 'registration-item)
+		 (dolist (rcluster-nr (rclusters item))
+		   (setf (gethash (list name-uc rcluster-nr) (rclusters itemization)) item))
+		 (dolist (fcluster-nr (fclusters item))
+		   (setf (gethash (list name-uc fcluster-nr) (fclusters itemization)) item))
+		 (dolist (ccluster-nr (cclusters item))
+		   (setf (gethash (list name-uc ccluster-nr) (cclusters itemization)) item))
+		 (dolist (constrkind-and-nr (identifications item))
+		   (destructuring-bind (constrkind . nr)
+		       constrkind-and-nr
+		     (setf (gethash (list name-uc constrkind nr) (identifications itemization)) item))))
+	       (when (typep item 'theorem-item)
+		 (setf (gethash (list name-uc (absnr item)) (theorems itemization)) item))
+	       (when (typep item 'scheme-item)
+		 (setf (gethash (list name-uc (schemenr item)) (schemes itemization)) item)))
 	     (return itemization))))))
 
 (defmethod itemize ((articles list) &optional itemization-record)
@@ -1062,5 +1199,111 @@ of LINE starting from START."
 				       (or itemization-record
 					   (make-instance 'itemization
 							  :sandbox (fresh-sandbox "itemization")))))))
+
+(defun dependency-graph (itemization)
+  (loop
+     with graph = nil
+     with text-subdir = (concat (location (sandbox itemization)) "text/")
+     with cclusters-table = (cclusters itemization)
+     with constructors-table = (constructors itemization)
+     with definientia-table = (definientia itemization)
+     with fclusters-table = (fclusters itemization)
+     with identification-table = (identifications itemization)
+     with patterns-table = (patterns itemization)
+     with rclusters-table = (rclusters itemization)
+     with schemes-table = (schemes itemization)
+     with theorems-table = (theorems itemization)
+     with item-table = (items itemization)
+     for item-number being the hash-keys in item-table
+     for item being the hash-values in item-table
+     do
+       (let ((needed-ccluster-path (file-in-directory text-subdir (format nil "~d-needed-CCluster" item-number)))
+	     (needed-constructor-path (file-in-directory text-subdir (format nil "~d-needed-Constructor" item-number)))
+	     (needed-definientia-path (file-in-directory text-subdir (format nil "~d-needed-Definiens" item-number)))
+	     (needed-fcluster-path (file-in-directory text-subdir (format nil "~d-needed-FCluster" item-number)))
+	     (needed-identifications-path (file-in-directory text-subdir (format nil "~d-needed-Identify" item-number)))
+	     (needed-pattern-path (file-in-directory text-subdir (format nil "~d-needed-Pattern" item-number)))
+	     (needed-rcluster-path (file-in-directory text-subdir (format nil "~d-needed-RCluster" item-number)))
+	     (needed-scheme-path (file-in-directory text-subdir (format nil "~d-needed-Scheme" item-number)))
+	     (needed-theorem-path (file-in-directory text-subdir (format nil "~d-needed-Theorem" item-number))))
+	 (let* ((needed-ccluster-xml (cxml:parse-file needed-ccluster-path (cxml-dom:make-dom-builder)))
+		(ccluster-nodes (xpath:all-nodes (xpath:evaluate "Registrations/CCluster" needed-ccluster-xml))))
+	   (dolist (ccluster-node ccluster-nodes)
+	     (let* ((aid (value-of-aid-attribute ccluster-node))
+		    (nr (value-of-nr-attribute ccluster-node))
+		    (dependent-item (gethash (list aid nr) cclusters-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-constructor-xml (cxml:parse-file needed-constructor-path (cxml-dom:make-dom-builder)))
+		(constructor-nodes (xpath:all-nodes (xpath:evaluate "Constructors/Constructor" needed-constructor-xml))))
+	   (dolist (constructor-node constructor-nodes)
+	     (let* ((aid (value-of-aid-attribute constructor-node))
+		    (kind (value-of-kind-attribute constructor-node))
+		    (nr (value-of-nr-attribute constructor-node))
+		    (dependent-item (gethash (list aid kind nr) constructors-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-definientia-xml (cxml:parse-file needed-definientia-path (cxml-dom:make-dom-builder)))
+		(definiens-nodes (xpath:all-nodes (xpath:evaluate "Definientia/Definiens" needed-definientia-xml))))
+	   (dolist (definiens-node definiens-nodes)
+	     (let* ((aid (value-of-aid-attribute definiens-node))
+		    (constrkind (value-of-constrkind-attribute definiens-node))
+		    (constrnr (value-of-constrnr-attribute definiens-node))
+		    (dependent-item (gethash (list aid constrkind constrnr) definientia-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-fcluster-xml (cxml:parse-file needed-fcluster-path (cxml-dom:make-dom-builder)))
+		(fcluster-nodes (xpath:all-nodes (xpath:evaluate "Registrations/FCluster" needed-fcluster-xml))))
+	   (dolist (fcluster-node fcluster-nodes)
+	     (let* ((aid (value-of-aid-attribute fcluster-node))
+		    (nr (value-of-nr-attribute fcluster-node))
+		    (dependent-item (gethash (list aid nr) fclusters-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-identifications-xml (cxml:parse-file needed-identifications-path (cxml-dom:make-dom-builder)))
+		(identify-nodes (xpath:all-nodes (xpath:evaluate "IdentifyRegistrations/Identify" needed-identifications-xml))))
+	   (dolist (identify-node identify-nodes)
+	     (let* ((aid (value-of-aid-attribute identify-node))
+		    (constrkind (value-of-constrkind-attribute identify-node))
+		    (nr (value-of-nr-attribute identify-node))
+		    (dependent-item (gethash (list aid constrkind nr) identification-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-pattern-xml (cxml:parse-file needed-pattern-path (cxml-dom:make-dom-builder)))
+		(pattern-nodes (xpath:all-nodes (xpath:evaluate "Patterns/Pattern" needed-pattern-xml))))
+	   (dolist (pattern-node pattern-nodes)
+	     (let* ((aid (value-of-aid-attribute pattern-node))
+		    (kind (value-of-kind-attribute pattern-node))
+		    (nr (value-of-nr-attribute pattern-node))
+		    (dependent-item (gethash (list aid kind nr) patterns-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-rcluster-xml (cxml:parse-file needed-rcluster-path (cxml-dom:make-dom-builder)))
+		(rcluster-nodes (xpath:all-nodes (xpath:evaluate "Registrations/RCluster" needed-rcluster-xml))))
+	   (dolist (rcluster-node rcluster-nodes)
+	     (let* ((aid (value-of-aid-attribute rcluster-node))
+		    (nr (value-of-nr-attribute rcluster-node))
+		    (dependent-item (gethash (list aid nr) rclusters-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-scheme-xml (cxml:parse-file needed-scheme-path (cxml-dom:make-dom-builder)))
+		(scheme-nodes (xpath:all-nodes (xpath:evaluate "Schemes/Scheme" needed-scheme-xml))))
+	   (dolist (scheme-node scheme-nodes)
+	     (let* ((aid (value-of-aid-attribute scheme-node))
+		    (schemenr (value-of-schemenr-attribute scheme-node))
+		    (dependent-item (gethash (list aid schemenr) schemes-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph)))))
+	 (let* ((needed-theorem-xml (cxml:parse-file needed-theorem-path (cxml-dom:make-dom-builder)))
+		(theorem-nodes (xpath:all-nodes (xpath:evaluate "Theorems/Theorem" needed-theorem-xml))))
+	   (dolist (theorem-node theorem-nodes)
+	     (let* ((aid (value-of-aid-attribute theorem-node))
+		    (absnr (value-of-absnr-attribute theorem-node))
+		    (dependent-item (gethash (list aid absnr) theorems-table)))
+	       (when dependent-item
+		 (push (cons item dependent-item) graph))))))
+     finally
+       (return graph)))
+
 
 ;;; itemize.lisp ends here

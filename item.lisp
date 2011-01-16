@@ -206,7 +206,10 @@
   ())
 
 (defclass theorem-item (xml-item labelled-item-mixin)
-  ())
+  ((absnr
+    :initarg :absnr
+    :accessor absnr
+    :initform nil)))
 
 (defclass scheme-item (xml-item labelled-item-mixin)
   ((schemenr
@@ -219,18 +222,60 @@
 (defclass definition-item (xml-item)
   ((deftheorems
      :initarg :deftheorems
-     :accessor deftheorems)))
+     :accessor deftheorems)
+   (definition-patterns
+    :initarg :definition-patterns
+    :accessor definition-patterns
+    :initform nil
+    :type list)
+   (definition-constructors
+    :initarg :definition-constructors
+    :accessor definition-constructors
+    :initform nil
+    :type list)
+   (definientia
+    :initarg :definientia
+    :accessor definientia
+    :initform nil
+    :type list)))
 
 (defclass deftheorem-item (xml-item labelled-item-mixin)
   ((source :initarg :source
 	   :accessor source
-	   :type definition-item)))
+	   :type definition-item)
+   (absnr
+    :initarg :absnr
+    :accessor absnr
+    :initform nil)))
 
 (defclass notation-item (xml-item)
-  ())
+  ((patterns
+    :initarg :patterns
+    :accessor patterns
+    :initform nil
+    :type list)))
 
 (defclass registration-item (xml-item)
-  ())
+  ((rclusters
+    :initarg :rclusters
+    :accessor rclusters
+    :type list
+    :initform nil)
+   (fclusters
+    :initarg :fclusters
+    :accessor fclusters
+    :type list
+    :initform nil)
+   (cclusters
+    :initarg :cclusters
+    :accessor cclusters
+    :type list
+    :initform nil)
+   (identifications
+    :initarg :identifications
+    :accessor identifications
+    :type list
+    :initform nil)))
 
 (defun item-contained-in-item (item-1 item-2)
   "Determine whether ITEM-1 occurs wholly inside ITEM-2."

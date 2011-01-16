@@ -7,6 +7,16 @@
     (let ((name-attribute (first (xpath:all-nodes name-attribute-as-node-set))))
       (xpath:evaluate "string()" name-attribute))))
 
+(defun value-of-kind-attribute (node)
+  (let ((kind-attribute-as-node-set (xpath:evaluate "@kind" node)))
+    (let ((kind-attribute (first (xpath:all-nodes kind-attribute-as-node-set))))
+      (xpath:evaluate "string()" kind-attribute))))
+
+(defun value-of-constrkind-attribute (node)
+  (let ((kind-attribute-as-node-set (xpath:evaluate "@constrkind" node)))
+    (let ((kind-attribute (first (xpath:all-nodes kind-attribute-as-node-set))))
+      (xpath:evaluate "string()" kind-attribute))))
+
 (defun value-of-aid-attribute (node)
   (let ((value (xpath:evaluate "@aid" node)))
     (unless (xpath:node-set-empty-p value)
@@ -20,6 +30,9 @@
 
 (defun value-of-nr-attribute (node)
   (integer-value-of-attribute node "nr"))
+
+(defun value-of-constrnr-attribute (node)
+  (integer-value-of-attribute node "constrnr"))
 
 (defun value-of-absnr-attribute (node)
   (integer-value-of-attribute node "absnr"))
@@ -112,6 +125,17 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 	  (push next deftheorem-nodes)
 	  (setf next (next-non-blank-sibling next)))))
     (reverse deftheorem-nodes)))
+
+(defun definiens-after-definitionblock (definitionblock-node)
+  "Get all the Definiens nodes that follow DEFINITIONBLOCK-NODE."
+  (let (definiens-nodes)
+    ;; first skip over all the Definiens nodes after DEFINITIONBLOCK-NODE
+    (let ((next (next-non-blank-sibling definitionblock-node)))
+      (when next
+	(while (and next (string= (dom:local-name next) "Definiens"))
+	  (push next definiens-nodes)
+	  (setf next (next-non-blank-sibling next)))))
+    (reverse definiens-nodes)))
 
 (defun all-by-descendents (node)
   (flet ((bys (node)
