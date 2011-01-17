@@ -1060,7 +1060,7 @@ of LINE starting from START."
 		 (handler-case (progn
 				 (write-article article-for-item)
 				 (verify-and-export article-for-item local-db)
-					;(minimize-context candidate (namestring local-db))
+				 (minimize-context candidate (namestring local-db))
 					;(minimize-environment article-for-item (namestring local-db))
 					; synchronize with CANDIDATE
 				 (setf (vocabularies candidate) (vocabularies article-for-item)
@@ -1071,6 +1071,15 @@ of LINE starting from START."
 				       (definitions candidate) (definitions article-for-item)
 				       (theorems candidate) (theorems article-for-item)
 				       (schemes candidate) (schemes article-for-item))
+				 (let* ((context (context-items candidate))
+				 	(context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
+				 	(context-lines-as-str (apply #'concat context-lines))
+				 	(text (concat context-lines-as-str
+				 		      (if (typep candidate 'proposition-item)
+				 			  (format nil "theorem~%~A" original-text) ; promote to theorem
+				 			  original-text))))
+				   (setf (text article-for-item) text))
+				 (write-article article-for-item)
 				 ;; (when (typep candidate 'scheme-item)
 				 ;;   (setf (gethash (cons name-uc scheme-nr)
 				 ;; 		  (scheme-labels-to-items itemization))
