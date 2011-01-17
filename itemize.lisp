@@ -1038,6 +1038,7 @@ of LINE starting from START."
 						       ;; :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
 						       ;; 			 (cons "TARSKI" new-vocabularies)
 						       ;; 			 new-vocabularies)
+						       :pretext (dom:map-document (cxml:make-string-sink) (xml-node candidate))
 						       :vocabularies new-vocabularies
 						       :notations new-notations
 						       :constructors new-contructors

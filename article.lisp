@@ -63,7 +63,12 @@
 	    :accessor xml-doc)
    (idx-table :initarg :idx-table
 	      :accessor idx-table
-	      :type hash-table))
+	      :type hash-table)
+   (pretext
+    :initarg :pretext
+    :accessor pretext
+    :type string
+    :initform ""))
   (:documentation "A representation of a mizar article."))
 
 (defun make-article-copying-environment-from (article)
@@ -373,6 +378,10 @@ directive is not consulted."))
 	  (cond ((slot-boundp article 'full-text)
 		 (format miz "~A~%" (full-text article)))
 		((slot-boundp article 'text)
+		 (let ((pretext (pretext article)))
+		   (unless (string= pretext "")
+		     (dolist (line (split (make-string 1 :initial-element #\Newline) pretext))
+		       (format miz ":: ~a~%" line))))
 		 (format miz "environ~%")
 		 (print-vocabularies article miz)
 		 (print-notations article miz)
