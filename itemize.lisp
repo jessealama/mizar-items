@@ -450,12 +450,12 @@ sibling elements; these need to be stored."
 	    (line-and-column ref-node)
 	  (when (and ref-line-num ref-col-num)
 	    (let ((aid (value-of-aid-attribute ref-node)))
-	      (warn "aid is '~A', length ~d" aid (length aid))
+	      ;; (warn "aid is '~A', length ~d" aid (length aid))
 	      (if (null aid) ; article-local definition reference
 		  (let ((nr (value-of-nr-attribute ref-node))
 			(vid (value-of-vid-attribute ref-node)))
 		    (when (and nr vid)
-		      (warn "nil case, with nr ~d and vid ~d" nr vid)
+		      ;; (warn "nil case, with nr ~d and vid ~d" nr vid)
 		      (let ((deftheorem-item (gethash (cons nr vid) definition-table)))
 			(when deftheorem-item
 			  (let ((definition-item (source deftheorem-item))
@@ -488,7 +488,7 @@ sibling elements; these need to be stored."
 				  (error "There is no entry in the definition labels-to-items table for (~d . ~d)" aid absnr))
 				(setf old-label (format nil "~:@(~A~):def ~d" aid absnr)
 				      new-label (format nil "I~d:def ~d" item-number def-number)))))))))
-	    (warn "old label is '~A', new label is '~A'" old-label new-label)
+	    ;; (warn "old label is '~A', new label is '~A'" old-label new-label)
 	    (when (and old-label new-label)
 	      (push (make-instance 'editing-instruction
 				   :old-label old-label
@@ -539,7 +539,7 @@ sibling elements; these need to be stored."
 	      (new-label nil))
 	  (if (zerop articlenr) ; article-internal scheme reference
 	      (let ((schemenr (value-of-absnr-attribute from-node)))
-		(warn "We found an article-internal scheme reference to scheme number ~d" schemenr)
+		;; (warn "We found an article-internal scheme reference to scheme number ~d" schemenr)
 		(if schemenr
 		    (let ((scheme-item (gethash schemenr scheme-table)))
 		      (if scheme-item
@@ -558,7 +558,7 @@ sibling elements; these need to be stored."
 			   from-node)))
 	      (let ((aid (value-of-aid-attribute from-node))
 		    (absnr (value-of-absnr-attribute from-node)))
-		(warn "We found a scheme editing instruction.  Its aid is ~A and its absnr is ~A" aid absnr)
+		;; (warn "We found a scheme editing instruction.  Its aid is ~A and its absnr is ~A" aid absnr)
 		(if aid
 		    (if absnr
 			(let ((earlier-item-number (gethash (cons aid absnr) (scheme-labels-to-items itemization))))
