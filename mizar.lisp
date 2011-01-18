@@ -120,15 +120,15 @@ variable (at load time).")
    (working-directory :initarg :working-directory :accessor working-directory)
    (argument :initarg :argument :accessor argument)))
 
-(defgeneric run-mizar-tool (tool article directory &rest flags))
+(defgeneric run-mizar-tool (tool article directory ignore-exit-code &rest flags))
 
-(defmethod run-mizar-tool :around (tool article-path directory &rest flags)
+(defmethod run-mizar-tool :around (tool article-path directory ignore-exit-code &rest flags)
   (declare (ignore tool directory flags))
   (if (probe-file article-path)
       (call-next-method)
       (error "No such file: ~S" article-path)))
 
-(defmethod run-mizar-tool :around (tool article-path directory &rest flags)
+(defmethod run-mizar-tool :around (tool article-path directory ignore-exit-code &rest flags)
   (declare (ignore tool article-path flags))
   (let ((real-name (file-exists-p directory)))
     (if real-name
@@ -137,31 +137,33 @@ variable (at load time).")
 	    (error "The specified directory, ~A, in which to apply the mizar tool ~A is not a directory!" directory tool))
 	(error "It appears that there is no file at the specified work directory path ~A" directory))))
 
-(defmethod run-mizar-tool ((tool string) (article-path pathname) directory &rest flags)
+(defmethod run-mizar-tool ((tool string) (article-path pathname) directory ignore-exit-code &rest flags)
   (let ((name (namestring article-path))
 	(err-filename (replace-extension article-path "miz" "err")))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
-      (if (zerop (sb-ext:process-exit-code proc))
-	  (if (and (probe-file err-filename)
-		   (not (zerop (file-size err-filename))))
-	      (error 'mizar-error :tool tool :working-directory directory :argument article-path)
-	      t)
-	  (error 'mizar-error :tool tool :working-directory directory :argument article-path)))))
+      (unless ignore-exit-code
+	(if (zerop (sb-ext:process-exit-code proc))
+	    (if (and (probe-file err-filename)
+		     (not (zerop (file-size err-filename))))
+		(error 'mizar-error :tool tool :working-directory directory :argument article-path)
+		t)
+	    (error 'mizar-error :tool tool :working-directory directory :argument article-path))))))
 
-(defmethod run-mizar-tool ((tool string) (article-path string) directory &rest flags)
-  (apply 'run-mizar-tool tool (pathname article-path) directory flags))
+(defmethod run-mizar-tool ((tool string) (article-path string) directory ignore-exit-code &rest flags)
+  (apply 'run-mizar-tool tool (pathname article-path) directory ignore-exit-code flags))
 
-(defmethod run-mizar-tool ((tool string) (article article) directory &rest flags)
+(defmethod run-mizar-tool ((tool string) (article article) directory ignore-exit-code &rest flags)
   (if (slot-boundp article 'path)
-      (apply 'run-mizar-tool tool (path article) directory flags)
+      (apply 'run-mizar-tool tool (path article) directory ignore-exit-code flags)
       (error "Cannot apply ~S to ~S because we don't know its path"
 	     tool article)))
 
-(defmethod run-mizar-tool ((tool symbol) article directory &rest flags)
+(defmethod run-mizar-tool ((tool symbol) article directory ignore-exit-code &rest flags)
   (apply 'run-mizar-tool 
 	 (format nil "~(~a~)" (string tool)) ; lowercase: watch out
 	 article
 	 directory
+	 ignore-exit-code
 	 flags))
 
 (defmacro define-mizar-tool (tool)
@@ -189,7 +191,7 @@ variable (at load time).")
 (define-mizar-tool "exporter")
 (define-mizar-tool "transfer")
 
-(defmacro define-mizar-text-transformer (tool)
+(defmacro define-mizar-text-transformer (tool &optional (ignore-exit-code nil))
   ; check that TOOL is real
   (let ((check (sb-ext:run-program "which" (list tool) :search t)))
     (if (zerop (sb-ext:process-exit-code check))
@@ -199,7 +201,7 @@ variable (at load time).")
 	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
 	       (let ((edtfile-path (replace-extension article-path
 						      "miz" "$-$")))
-		 (apply 'run-mizar-tool ,tool article-path directory flags)
+		 (apply 'run-mizar-tool ,tool article-path directory ,ignore-exit-code flags)
 		 (edtfile article-path directory "-l")
 		 (rename-file edtfile-path article-path)))
 	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
@@ -211,6 +213,7 @@ variable (at load time).")
 
 ;; our text transformers -- thanks, Karol Pąk et al.! 
 (define-mizar-text-transformer "JA1")
+(define-mizar-text-transformer "unhereby" t)
 (define-mizar-text-transformer "dellink")
 (define-mizar-text-transformer "CutSet")
 (define-mizar-text-transformer "CutReconsider")
