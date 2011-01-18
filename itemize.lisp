@@ -1058,76 +1058,55 @@ of LINE starting from START."
 			 (definitions candidate) definitions
 			 (theorems candidate) theorems
 			 (schemes candidate) schemes))
-		 (handler-case (progn
-				 (write-article article-for-item)
-				 (verify-and-export article-for-item local-db)
-				 (minimize-context candidate (namestring local-db))
-					;(minimize-environment article-for-item (namestring local-db))
-					; synchronize with CANDIDATE
-				 (setf (vocabularies candidate) (vocabularies article-for-item)
-				       (notations candidate) (notations article-for-item)
-				       (constructors candidate) (constructors article-for-item)
-				       (requirements candidate) (requirements article-for-item)
-				       (registrations candidate) (registrations article-for-item)
-				       (definitions candidate) (definitions article-for-item)
-				       (theorems candidate) (theorems article-for-item)
-				       (schemes candidate) (schemes article-for-item))
-				 (let* ((context (context-items candidate))
-				 	(context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
-				 	(context-lines-as-str (apply #'concat context-lines))
-				 	(text (concat context-lines-as-str
-				 		      (if (typep candidate 'proposition-item)
-				 			  (format nil "theorem~%~A" original-text) ; promote to theorem
-				 			  original-text))))
-				   (setf (text article-for-item) text))
-				 (write-article article-for-item)
-				 ;; (when (typep candidate 'scheme-item)
-				 ;;   (setf (gethash (cons name-uc scheme-nr)
-				 ;; 		  (scheme-labels-to-items itemization))
-				 ;; 	 candidate-num))
-				 ;; (when (typep candidate 'definition-item)
-				 ;;   (loop
-				 ;;      with deftheorems = (deftheorems candidate)
-				 ;;      with num-deftheorems = (length deftheorems)
-				 ;;      with definition-table = (definition-labels-to-items itemization)
-				 ;;      for i from 0
-				 ;;      for deftheorem in deftheorems
-				 ;;      do
-				 ;; 	(setf (gethash (cons name-uc (1+ (- deftheorem-nr (- num-deftheorems i))))
-				 ;; 		       definition-table)
-				 ;; 	      (cons candidate-num (1+ i)))))
-				 ;; (when (typep candidate 'definition-item)
-				 ;;   (loop
-				 ;;      with deftheorems = (deftheorems candidate)
-				 ;;      with num-deftheorems = (length deftheorems)
-				 ;;      for i from 1
-				 ;;      for deftheorem in deftheorems
-				 ;;      do
-				 ;; 	(setf (gethash (cons name-uc (- deftheorem-nr
-				 (push (uppercase item-name) earlier-item-names)
-				 (setf (gethash candidate items->articles) article-for-item)
-				 (push candidate real-items)
-				 (setf (gethash candidate-num (items itemization)) candidate)
-				 (incf (num-items itemization))
-				 (incf candidate-num))
-		   (mizar-error () (progn
-				     (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
-				     (cond ((typep candidate 'scheme-item)
-					    (with-slots (schemenr)
-						candidate
-					      (remhash schemenr scheme-table)))
-					   ((typep candidate 'definition-item)
-					    (with-slots (nr vid)
-						candidate
-					      (remhash (cons nr vid) definition-table)))
-					   ((or (typep candidate 'theorem-item)
-						(typep candidate 'proposition-item))
-					    (with-slots (nr vid)
-						candidate
-					      (remhash (cons nr vid) theorem-table))))
-				     (delete-file (path article-for-item))
-				     (push candidate pseudo-candidates))))))
-	   finally 
+		 (restart-case
+		     (progn
+		       (write-article article-for-item)
+		       (verify-and-export article-for-item local-db)
+		       (minimize-context candidate (namestring local-db))
+		       ;;(minimize-environment article-for-item (namestring local-db))
+		       ;; synchronize with CANDIDATE
+		       (setf (vocabularies candidate) (vocabularies article-for-item)
+			     (notations candidate) (notations article-for-item)
+			     (constructors candidate) (constructors article-for-item)
+			     (requirements candidate) (requirements article-for-item)
+			     (registrations candidate) (registrations article-for-item)
+			     (definitions candidate) (definitions article-for-item)
+			     (theorems candidate) (theorems article-for-item)
+			     (schemes candidate) (schemes article-for-item))
+		       (let* ((context (context-items candidate))
+			      (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
+			      (context-lines-as-str (apply #'concat context-lines))
+			      (text (concat context-lines-as-str
+					    (if (typep candidate 'proposition-item)
+						(format nil "theorem~%~A" original-text) ; promote to theorem
+						original-text))))
+			 (setf (text article-for-item) text))
+		       (write-article article-for-item)
+		       (push (uppercase item-name) earlier-item-names)
+		       (setf (gethash candidate items->articles) article-for-item)
+		       (push candidate real-items)
+		       (setf (gethash candidate-num (items itemization)) candidate)
+		       (incf (num-items itemization))
+		       (incf candidate-num))
+  (continue-itemizing () 
+    (progn
+      (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
+      (cond ((typep candidate 'scheme-item)
+	     (with-slots (schemenr)
+		 candidate
+	       (remhash schemenr scheme-table)))
+	    ((typep candidate 'definition-item)
+	     (with-slots (nr vid)
+		 candidate
+	       (remhash (cons nr vid) definition-table)))
+	    ((or (typep candidate 'theorem-item)
+		 (typep candidate 'proposition-item))
+	     (with-slots (nr vid)
+		 candidate
+	       (remhash (cons nr vid) theorem-table))))
+      (delete-file (path article-for-item))
+      (push candidate pseudo-candidates))))))
+  finally 
 	     ; record what exported items were just generated by itemization
 	     (setf (gethash name-uc (names->notations itemization))
 		   (mapcar #'(lambda (num)
