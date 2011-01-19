@@ -598,10 +598,8 @@ of LINE starting from START."
      for target-column-number = (target-column-number instruction)
      for index = (- target-line-number item-begin-line)
      for line = (aref lines index)
-     for new-line = (replace-label old-label line new-label target-column-number)
+     for new-line = (replace-label old-label line new-label (1- target-column-number))
      do
-       ;; (when (string= line new-line)
-       ;; 	 (error "Applying the instruction ~S to the line~%~%~A~%~%had no effect!" instruction line))
        (setf (aref lines index) new-line)
      finally (return lines)))
 
