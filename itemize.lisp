@@ -1060,7 +1060,7 @@ of LINE starting from START."
 			 (definitions candidate) definitions
 			 (theorems candidate) theorems
 			 (schemes candidate) schemes))
-		 (restart-case
+		 (handler-case
 		     (progn
 		       (write-article article-for-item)
 		       (verify-and-export article-for-item local-db)
@@ -1090,7 +1090,7 @@ of LINE starting from START."
 		       (setf (gethash candidate-num (items itemization)) candidate)
 		       (incf (num-items itemization))
 		       (incf candidate-num))
-  (continue-itemizing () 
+  (mizar-error () 
     (progn
       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
       (cond ((typep candidate 'scheme-item)
@@ -1232,6 +1232,14 @@ of LINE starting from START."
 				       (or itemization-record
 					   (make-instance 'itemization
 							  :sandbox (fresh-sandbox "itemization")))))))
+
+(defun itemize-no-errors (article)
+  (handler-case
+      (progn
+	(itemize article)
+	(format t "~a: success" article))
+      (error ()
+	(format t "~a: failure" article))))
 
 (defun dependency-graph (itemization)
   (loop
