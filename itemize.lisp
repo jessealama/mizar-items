@@ -109,7 +109,7 @@
 LINE-NUM and COL-NUM in the text of ARTICLE."
   ; assume the keyword always begins a line, possibly with whitespace
   ; -- a terrible assumption
-  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A " keyword keyword))))
+  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A" keyword keyword))))
     (loop for l from line-num downto 0
 	  for line = (line-at article l)
        do
@@ -598,7 +598,9 @@ of LINE starting from START."
      for target-column-number = (target-column-number instruction)
      for index = (- target-line-number item-begin-line)
      for line = (aref lines index)
-     for new-line = (replace-label old-label line new-label (1- target-column-number))
+     for new-line = (replace-label old-label line new-label (if (<= target-column-number 0)
+								0
+								(1- target-column-number)))
      do
        (setf (aref lines index) new-line)
      finally (return lines)))
@@ -627,6 +629,8 @@ of LINE starting from START."
   (accom article directory "-q" "-l" "-s")
   (warn "JA1...")
   (JA1 article directory "-q" "-l" "-s")
+  (warn "unhereby...")
+  (unhereby article directory "-q" "-l" "-s")
   (warn "dellink...")
   (dellink article directory "-q" "-l" "-s")
   (warn "CutSet...")
@@ -1056,7 +1060,7 @@ of LINE starting from START."
 			 (definitions candidate) definitions
 			 (theorems candidate) theorems
 			 (schemes candidate) schemes))
-		 (restart-case
+		 (handler-case
 		     (progn
 		       (write-article article-for-item)
 		       (verify-and-export article-for-item local-db)
@@ -1086,7 +1090,7 @@ of LINE starting from START."
 		       (setf (gethash candidate-num (items itemization)) candidate)
 		       (incf (num-items itemization))
 		       (incf candidate-num))
-  (continue-itemizing () 
+  (mizar-error () 
     (progn
       (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
       (cond ((typep candidate 'scheme-item)
@@ -1228,6 +1232,14 @@ of LINE starting from START."
 				       (or itemization-record
 					   (make-instance 'itemization
 							  :sandbox (fresh-sandbox "itemization")))))))
+
+(defun itemize-no-errors (article)
+  (handler-case
+      (progn
+	(itemize article)
+	(format t "~a: success" article))
+      (error ()
+	(format t "~a: failure" article))))
 
 (defun dependency-graph (itemization)
   (loop
