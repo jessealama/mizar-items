@@ -82,6 +82,51 @@ from the beginning of the list."
   (append (first-n lst n)
 	  (nthcdr (1+ n) lst)))
 
+(defun chunkify (list chunk-size)
+  "A list (CHUNK-1 CHUNK-2 ... CHUNK-n) of sublists of LIST all having
+  size equal to CHUNK-SIZE, except CHUNK-n, which will be of size at
+  least 1 but at most CHUNK-SIZE.  The list (CHUNK-1 CHUNK-2
+  ... CHUNK-n) is such that appending each of them together yields a
+  list equal to LIST.  If CHUNK-SIZE is less than 1, the value is NIl."
+  (unless (< chunk-size 1)
+    (loop
+       with chunks = nil
+       with chunk = nil
+       with len = (length list)
+       with i = 0
+       for elt in list
+       for counter from 1 upto len
+       do
+	 (push elt chunk)
+	 (incf i)
+	 (when (or (= i chunk-size)
+		   (= counter len))
+	   (push (reverse chunk) chunks)
+	   (setf chunk nil
+		 i 0))
+       finally
+	 (return (reverse chunks)))))
+
+(defun shortest-admissible-initial-segment (list pred)
+  (labels ((iteratively-remove-from-end (list pred)
+	     (loop
+		with len = (length list)
+		for i from (1- len) downto 0
+		for trimmed = (first-n list i)
+		do
+		  (when (not (funcall pred trimmed))
+		    (return (append trimmed (list (nth i list)))))))
+	   (iteratively-with-chunks (chunks pred)
+	     (let ((pred-on-chunked-list #'(lambda (chunks)
+					     (funcall pred (apply #'append chunks)))))
+	       (iteratively-remove-from-end chunks pred-on-chunked-list)))
+	   (shortest-with-chunks (list pred)
+	     (let* ((len (length list))
+		    (chunks (chunkify list (floor (sqrt len))))
+		    (initial-chunk-segment (iteratively-with-chunks chunks pred)))
+	       (iteratively-remove-from-end (apply #'append initial-chunk-segment) pred))))
+    (shortest-with-chunks list pred)))
+
 (defun last-removable-element (list pred)
   (loop
      with len = (length list)
@@ -92,6 +137,20 @@ from the beginning of the list."
 	 (return i))
      finally
        (return nil)))
+
+;; (defun remove-unneeded (list pred)
+;;   (loop
+;;      with left-limit = 0
+;;      with right-limit = (length list)
+;;      for half = (ceiling (/ (- right-limit left-limit) 2))
+;;      for lst = nil then (first-n list right-limit)
+;;      do
+;;        (break "left limit = ~d and right limit = ~d and half = ~d and lst = ~A" left-limit right-limit half lst)
+;;        (if (= left-limit right-limit)
+;; 	   (return lst)
+;; 	   (if (funcall pred lst)
+;; 	       (setf right-limit (ceiling (/ right-limit 2)))
+;; 	       (setf left-limit half)))))
 
 (defun remove-unneeded (list pred)
   (let ((index-of-last-unneeded (last-removable-element list pred)))
