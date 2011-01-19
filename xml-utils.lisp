@@ -154,7 +154,7 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 	   (if (string= (dom:local-name node) "Ref")
 	       (list node)
 	       (xpath:all-nodes (xpath:evaluate ".//Ref" node)))))
-    (apply #'append (map 'list #'refs (remove-if #'dom:text-node-p (dom:child-nodes node))))))
+    (reduce #'append (map 'list #'refs (remove-if #'dom:text-node-p (dom:child-nodes node))))))
 
 (defun article-local-froms (node)
   (remove-if-not #'(lambda (node)
