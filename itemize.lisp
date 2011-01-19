@@ -598,7 +598,9 @@ of LINE starting from START."
      for target-column-number = (target-column-number instruction)
      for index = (- target-line-number item-begin-line)
      for line = (aref lines index)
-     for new-line = (replace-label old-label line new-label (1- target-column-number))
+     for new-line = (replace-label old-label line new-label (if (<= target-column-number 0)
+								0
+								(1- target-column-number)))
      do
        (setf (aref lines index) new-line)
      finally (return lines)))
