@@ -164,6 +164,16 @@ from the beginning of the list."
      collecting v into vals
      finally (return vals)))
 
+(defun key-for-value (val table)
+  (loop
+     for k being the hash-keys in table
+     for v being the hash-values in table
+     do
+       (when (eq v val)
+	 (return k))
+     finally
+       (return nil)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
