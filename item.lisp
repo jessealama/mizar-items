@@ -184,7 +184,14 @@
   'carried along', prefixed to an exportable item."))
 
 (defclass reservation-item (pseudo-item)
-  ())
+  ((vid
+    :initarg :vid
+    :initform nil
+    :accessor vid)))
+
+(defmethod print-object ((res reservation-item) stream)
+  (print-unreadable-object (res stream :type t)
+    (format stream "vid=~a" (vid res))))
 
 (defclass set-item (pseudo-item)
   ())
