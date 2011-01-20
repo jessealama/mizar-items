@@ -21,7 +21,16 @@
      finally (return items)))
 
 (defun reservation-items (article)
-  (single-line-items-by-keyword article "reserve" 'reservation-item))
+  (let ((res-items (single-line-items-by-keyword article "reserve" 'reservation-item)))
+    (loop
+       for res-item in res-items
+       for reservation-node in (reservation-nodes (xml-doc article))
+       do
+	 (let* ((ident-child (xpath:first-node (xpath:evaluate "Ident" reservation-node)))
+		(vid (value-of-vid-attribute ident-child)))
+	   (setf (vid res-item) vid))
+       finally
+	 (return res-items))))
 
 (defun set-items (article)
   (single-line-items-by-keyword article "set" 'set-item))
