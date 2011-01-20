@@ -679,18 +679,29 @@ of LINE starting from START."
   (transfer article directory "-q" "-l" "-s"))
 
 (defun minimal-context (item &optional (directory (sb-posix:getcwd)))
-  (remove-unneeded
-   (context-items item)
-   #'(lambda (lst)
-       (verifiable? (let ((article (item->article
-				    (let ((new-item (copy-item item)))
-				      (setf (context-items new-item) lst)
-				      new-item))))
-		      (setf (path article)
-			    (concat (namestring (pathname-as-directory (pathname directory)))
-				    "splork.miz"))
-		      article)
-		    directory))))
+  (let* ((vids (all-vid-attribute-values (xml-node item)))
+	 (pruned-context-items (remove-if-not #'(lambda (thing)
+						  (if (typep thing 'reservation-item)
+						      (let ((vid (vid thing)))
+							(member vid vids))
+						      t))
+					      (context-items item))))
+    (let ((non-res-items (remove-if #'(lambda (thing) (typep thing 'reservation-item)) pruned-context-items)))
+      (loop
+	 with needed-non-res-items = non-res-items
+	 for non-res-item in (reverse non-res-items)
+	 do
+	   (let ((new-item (copy-item item)))
+	     (setf (context-items new-item) (remove non-res-item pruned-context-items))
+	     (let ((article (item->article new-item)))
+	       (setf (path article)
+		     (concat (namestring (pathname-as-directory (pathname directory)))
+			     "splork.miz"))
+	       (unless (verifiable? article directory)
+		 (push non-res-item needed-non-res-items)
+		 (setf pruned-context-items (remove non-res-item pruned-context-items)))))
+	 finally 
+	   (return pruned-context-items)))))
 
 (defun minimize-context (item &optional (directory (sb-posix:getcwd)))
   (warn "Minimizing context for item ~S..." item)
