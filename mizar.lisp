@@ -141,13 +141,9 @@ variable (at load time).")
   (let ((name (namestring article-path))
 	(err-filename (replace-extension article-path "miz" "err")))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
-      (unless ignore-exit-code
-	(if (zerop (sb-ext:process-exit-code proc))
-	    (if (and (probe-file err-filename)
-		     (not (zerop (file-size err-filename))))
-		(error 'mizar-error :tool tool :working-directory directory :argument article-path)
-		t)
-	    (error 'mizar-error :tool tool :working-directory directory :argument article-path))))))
+      (or ignore-exit-code
+	  (or (zerop (sb-ext:process-exit-code proc))
+	      (error 'mizar-error :tool tool :working-directory directory :argument article-path))))))
 
 (defmethod run-mizar-tool ((tool string) (article-path string) directory ignore-exit-code &rest flags)
   (apply 'run-mizar-tool tool (pathname article-path) directory ignore-exit-code flags))
