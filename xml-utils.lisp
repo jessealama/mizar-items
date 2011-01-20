@@ -163,10 +163,9 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 
 
 (defun all-vid-attribute-values (node)
-  (remove-duplicates
-   (mapcar #'(lambda (attribute)
-	       (parse-integer (xpath:evaluate "string()" attribute)))
-	   (xpath:all-nodes (xpath:evaluate ".//@vid" node)))))
+  (mapcar #'(lambda (attribute)
+	      (parse-integer (xpath:evaluate "string()" attribute)))
+	  (xpath:all-nodes (xpath:evaluate ".//@vid" node))))
 
 (defun reservation-nodes (toplevel-node)
   (xpath:all-nodes (xpath:evaluate "Article/Reservation" toplevel-node)))
