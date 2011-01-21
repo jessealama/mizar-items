@@ -679,16 +679,15 @@ of LINE starting from START."
   (transfer article directory "-q" "-l" "-s"))
 
 (defun minimal-context (item &optional (directory (sb-posix:getcwd)))
-  (let* ((vids (all-vid-attribute-values (xml-node item)))
+  (let* ((xml (xml-node item))
 	 (pruned-context-items (remove-if-not #'(lambda (thing)
 						  (if (typep thing 'reservation-item)
 						      (let ((vid (vid thing)))
-							(member vid vids))
+							(vid-present-in-node vid xml))
 						      t))
 					      (context-items item))))
     (let ((non-res-items (remove-if #'(lambda (thing) (typep thing 'reservation-item)) pruned-context-items)))
       (loop
-	 with needed-non-res-items = non-res-items
 	 for non-res-item in (reverse non-res-items)
 	 do
 	   (let ((new-item (copy-item item)))
@@ -697,9 +696,11 @@ of LINE starting from START."
 	       (setf (path article)
 		     (concat (namestring (pathname-as-directory (pathname directory)))
 			     "splork.miz"))
-	       (unless (verifiable? article directory)
-		 (push non-res-item needed-non-res-items)
-		 (setf pruned-context-items (remove non-res-item pruned-context-items)))))
+	       (if (verifiable? article directory)
+		   (progn
+		     (setf pruned-context-items (remove non-res-item pruned-context-items))
+		     (warn "We can safely remove ~A from the context" non-res-item))
+		   (warn "We cannot remove ~A from the context" non-res-item))))
 	 finally 
 	   (return pruned-context-items)))))
 
