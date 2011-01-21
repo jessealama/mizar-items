@@ -164,6 +164,16 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 	      (parse-integer (xpath:evaluate "string()" attribute)))
 	  (xpath:all-nodes (xpath:evaluate ".//@vid" node))))
 
+(defun vid-present-in-node (vid node)
+  (let ((xpath (format nil "*[@vid=~d]" vid)))
+    (labels ((find-it (node)
+	       (if (xpath:first-node (xpath:evaluate xpath node))
+		   t
+		   (when
+		       (some #'find-it (remove-if #'dom:text-node-p (dom:child-nodes node)))
+		     t))))
+      (find-it node))))
+
 (defun reservation-nodes (toplevel-node)
   (xpath:all-nodes (xpath:evaluate "Article/Reservation" toplevel-node)))
 
