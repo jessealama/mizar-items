@@ -165,6 +165,9 @@ unbound, it will be bound in the new article and have value NIL."
   (nth (1- line-number) 
        (lines article))) ; start counting lines at 1
 
+(defun num-lines (article)
+  (length (lines article)))
+
 (defun refresh-text (article)
   "Ensure that the LINES slot of ARTICLE accurately reflects the
   contents of the file pointed to by ARTICLE's PATH slot."
@@ -302,6 +305,15 @@ unbound, it will be bound in the new article and have value NIL."
 			(subseq maybe-line 0 end-col-num)
 			(concat maybe-line newline))) into lines
      finally (return (apply #'concat lines))))
+
+(defun region-up-to (article up-to-line up-to-col)
+  (region article 1 0 up-to-line up-to-col))
+
+(defun region-after (article after-line after-col)
+  (let* ((num-lines (num-lines article))
+	 (last-line (line-at article num-lines))
+	 (last-line-length (length last-line)))
+    (region article after-line after-col num-lines last-line-length)))
 
 (defgeneric complete-environment (article)
   (:documentation "All articles mentioned in the environment of
