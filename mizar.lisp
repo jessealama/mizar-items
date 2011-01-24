@@ -138,8 +138,7 @@ variable (at load time).")
 	(error "It appears that there is no file at the specified work directory path ~A" directory))))
 
 (defmethod run-mizar-tool ((tool string) (article-path pathname) directory ignore-exit-code &rest flags)
-  (let ((name (namestring article-path))
-	(err-filename (replace-extension article-path "miz" "err")))
+  (let ((name (namestring article-path)))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
       (or ignore-exit-code
 	  (or (zerop (sb-ext:process-exit-code proc))
