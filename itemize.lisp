@@ -292,16 +292,23 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		   (multiple-value-setq (end-line-num end-col-num)
 		     (line-and-column last-line-and-col-node)))
 		 (error "We found a Definition node that lacks descendents with line and column information"))))
+	 
 	 (setf last-line end-line-num
 	       last-col end-col-num)
 	 (push (ensure-final-semicolon
-		(format nil "definition~%~A~%~A~%end;"
+		(format nil 
+			(if (= i 1)
+			    "~%~A~%~A~%end;"
+			    "definition~%~A~%~A~%end;")
 			(reduce #'concat (reverse context))
-			(region article
-				begin-line-num
-				begin-col-num
-				end-line-num
-				end-col-num)))
+			(ensure-final-semicolon
+			 (string-trim
+			  '(#\Space #\Newline)
+			  (region article
+				  begin-line-num
+				  begin-col-num
+				  end-line-num
+				  end-col-num)))))
 	       new-definitions))
      finally (return (reverse new-definitions))))
 
@@ -993,11 +1000,13 @@ of LINE starting from START."
       (error "No mizar article at ~A" (namestring article-path))))
 
 (defmethod itemize :around ((article article) itemization)
-  (unless (slot-boundp article 'xml-doc)
-    (let ((name (name article)))
-      (with-slots (sandbox definition-labels-to-items theorem-labels-to-items scheme-labels-to-items symbol-table)
-	  itemization
-	(copy-file-to-sandbox (file-in-directory (concat (location *default-mizar-library*) "mml/") name "miz") sandbox)
+  (when (slot-boundp article 'path)
+    (refresh-text article))
+  (let ((name (name article)))
+    (with-slots (sandbox definition-labels-to-items theorem-labels-to-items scheme-labels-to-items symbol-table)
+	itemization
+      (unless (file-exists-in-sandbox (concat name ".miz") sandbox)
+	(copy-file-to-sandbox (file-in-directory (concat (location *default-mizar-library*) "mml/") name "miz") sandbox))
       (let* ((directory (location sandbox))
 	     (article-in-sandbox (make-instance 'article 
 						:name name
@@ -1013,9 +1022,11 @@ of LINE starting from START."
 	(refresh-idx article-in-sandbox)
 	(initialize-context-for-items article-in-sandbox)
 	(setf (xml-doc article) (xml-doc article-in-sandbox))
+	(setf (idx-table article) (idx-table article-in-sandbox))
 	(setf (lines article) (lines article-in-sandbox))
-	(setf (path article) (path article-in-sandbox))))))
+	(setf (path article) (path article-in-sandbox)))))
   (let ((xml (xml-doc article)))
+    (warn "xml-doc is ~A" xml)
     (let ((bad-ones (remove-if-not #'(lambda (definitionblock-node)
 				       (> (length (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node))) 1))
 				   (xpath:all-nodes (xpath:evaluate "Article/DefinitionBlock" xml)))))
@@ -1029,7 +1040,7 @@ of LINE starting from START."
 		(multiple-value-bind (end-line end-col)
 		    (line-and-column final-endposition-child)
 		  (let ((before-bad (region-up-to article begin-line begin-col))
-			(after-bad (region-after article end-line end-col))
+			(after-bad (region-after article end-line (1+ end-col)))
 			(split-definitions (split-definitionblock-node bad article)))
 		    (with-open-file (new-article-stream (path article)
 							:direction :output
@@ -1062,12 +1073,15 @@ of LINE starting from START."
       (error "No such article '~A' in the default mizar library at ~A" article-name (location *default-mizar-library*))))
 
 (defmethod itemize ((article article) itemization)
+  (warn "primary method")
   (let* ((name (name article))
 	 (name-uc (format nil "~:@(~A~)" name))
 	 (sandbox (sandbox itemization))
 	 (symbol-table (symbol-table itemization))
 	 (article-in-sandbox (make-instance 'article 
 					    :name (name article)
+					    :xml-doc (xml-doc article)
+					    :idx-table (idx-table article)
 					    :path (file-in-directory (location sandbox) (name article) "miz"))))
     (loop
        with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
@@ -1370,7 +1384,7 @@ of LINE starting from START."
 (defun itemize-no-errors (article)
   (handler-case
       (progn
-	(itemize article)
+	(itemize article nil)
 	(format t "~a: success" article))
       (error ()
 	(format t "~a: failure" article))))
