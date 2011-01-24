@@ -39,6 +39,23 @@
 	str
 	(format nil "~A;" str))))
 
+(defun maybe-strip-semicolon (string)
+  (if (string= string "")
+      ""
+      (if (char= (aref string 0) #\;)
+	  (subseq string 1)
+	  string)))
+
+(defun chomp (string)
+  (let ((len (length string)))
+    (if (zerop len)
+	""
+	(if (char= (aref string (1- len)) #\Newline)
+	    (if (= len 1)
+		""
+		(subseq string 0 (- len 2)))
+	    string))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Lists and sequences
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
