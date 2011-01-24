@@ -367,6 +367,63 @@ sibling elements; these need to be stored."
 	(setf (schemenr item) schemenr)
 	(setf (label item) label)))))
 
+(defun split-registrationblock-node (registrationblock-node article)
+  (loop
+     with new-registrations = nil
+     with registration-nodes = (xpath:all-nodes (xpath:evaluate "Registration" registrationblock-node))
+     with last-line = nil
+     with last-col = nil
+     with context = nil
+     for i from 1
+     for registration-node in registration-nodes
+     do
+       (when (= i 1)
+	 (multiple-value-setq (last-line last-col)
+	   (line-and-column registrationblock-node)))
+       (let (candidate-begin-line-num candidate-begin-col-num
+	     begin-line-num begin-col-num end-line-num end-col-num )
+	 (let ((correctness-node (xpath:first-node (xpath:evaluate "*[position()=2]" registration-node))))
+	   (if correctness-node
+	       (let ((proposition-child (first-child-with-name correctness-node
+							       "Proposition")))
+		 (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
+		   (line-and-column proposition-child)))
+	       (error "This registration node lacks a correctness node!")))
+	 (multiple-value-setq (begin-line-num begin-col-num)
+	   (first-keyword-before article
+				 "cluster"
+				 candidate-begin-line-num
+				 candidate-begin-col-num))
+	 (push (maybe-strip-semicolon
+		(string-trim
+		 (list #\Space #\Newline)
+		 (region article last-line last-col begin-line-num begin-col-num)))
+	       context)
+	 (let ((last-line-and-col (last (descendents-with-line-and-column registration-node))))
+	   (if last-line-and-col
+	       (let ((last-line-and-col-node (first last-line-and-col)))
+		 (multiple-value-setq (end-line-num end-col-num)
+		   (line-and-column last-line-and-col-node)))
+	       (error "We found a Registration node that lacks descendents with line and column information")))
+	 (setf last-line end-line-num
+	       last-col end-col-num)
+	 (push (ensure-final-semicolon
+		(format nil 
+			(if (= i 1)
+			    "~%~A~%~A~%end;"
+			    "registration~%~A~%~A~%end;")
+			(reduce #'concat (reverse context))
+			(ensure-final-semicolon
+			 (string-trim
+			  '(#\Space #\Newline)
+			  (region article
+				  begin-line-num
+				  begin-col-num
+				  end-line-num
+				  end-col-num)))))
+	       new-registrations))
+  finally (return (reverse new-registrations))))
+
 (defun registrationblock-items (article)
   (let ((items (block-items "RegistrationBlock" "registration" 'registration-item article)))
     (dolist (item items items)
@@ -1026,22 +1083,27 @@ of LINE starting from START."
 	(setf (lines article) (lines article-in-sandbox))
 	(setf (path article) (path article-in-sandbox)))))
   (let ((xml (xml-doc article)))
-    (warn "xml-doc is ~A" xml)
-    (let ((bad-ones (remove-if-not #'(lambda (definitionblock-node)
-				       (> (length (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node))) 1))
-				   (xpath:all-nodes (xpath:evaluate "Article/DefinitionBlock" xml)))))
-      (if bad-ones
-	  (let ((bad (car bad-ones)))
-	    (warn "bad!")
-	    (multiple-value-bind (begin-line begin-col)
-		(line-and-column bad)
-	      (let ((final-endposition-child (xpath:first-node (xpath:evaluate "EndPosition[position()=last()]" bad))))
-		(warn "there was some bad stuff")
-		(multiple-value-bind (end-line end-col)
-		    (line-and-column final-endposition-child)
+    (let ((bad-definitionblocks
+	   (remove-if-not #'(lambda (definitionblock-node)
+			      (> (length (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node)))
+				 1))
+			  (xpath:all-nodes (xpath:evaluate "Article/DefinitionBlock" xml))))
+	  (bad-registrationblocks
+	   (remove-if-not #'(lambda (registrationblock-node)
+			      (> (length (xpath:all-nodes (xpath:evaluate "Registration" registrationblock-node)))
+				 1))
+			  (xpath:all-nodes (xpath:evaluate "Article/RegistrationBlock" xml)))))
+      (cond (bad-definitionblocks
+	     (let ((bad (car bad-definitionblocks)))
+	       (multiple-value-bind (begin-line begin-col)
+		   (line-and-column bad)
+		 (let ((final-endposition-child (xpath:first-node (xpath:evaluate "EndPosition[position()=last()]" bad))))
+		   (multiple-value-bind (end-line end-col)
+		       (line-and-column final-endposition-child)
 		  (let ((before-bad (region-up-to article begin-line begin-col))
 			(after-bad (region-after article end-line (1+ end-col)))
 			(split-definitions (split-definitionblock-node bad article)))
+		    (warn "Splitting definition block into ~d new singleton definition blocks" (length split-definitions))
 		    (with-open-file (new-article-stream (path article)
 							:direction :output
 							:if-exists :supersede)
@@ -1051,8 +1113,30 @@ of LINE starting from START."
 		      (format new-article-stream after-bad))
 		    (let ((new-article (make-instance 'article
 						      :path (path article))))
-		      (itemize new-article itemization)))))))
-	  (call-next-method)))))
+		      (itemize new-article itemization))))))))
+	    (bad-registrationblocks
+	     (let ((bad (car bad-registrationblocks)))
+	       (multiple-value-bind (begin-line begin-col)
+		   (line-and-column bad)
+		 (let ((final-endposition-child (xpath:first-node (xpath:evaluate "EndPosition[position()=last()]" bad))))
+		   (multiple-value-bind (end-line end-col)
+		       (line-and-column final-endposition-child)
+		  (let ((before-bad (region-up-to article begin-line begin-col))
+			(after-bad (region-after article end-line (1+ end-col)))
+			(split-registrations (split-registrationblock-node bad article)))
+		    (warn "Splitting registration block into ~d new singleton registration blocks" (length split-registrations))
+		    (with-open-file (new-article-stream (path article)
+							:direction :output
+							:if-exists :supersede)
+		      (format new-article-stream before-bad)
+		      (dolist (split-registration split-registrations)
+			(format new-article-stream "~A~%" split-registration))
+		      (format new-article-stream after-bad))
+		    (let ((new-article (make-instance 'article
+						      :path (path article))))
+		      (itemize new-article itemization))))))))
+	    (t
+	     (call-next-method))))))
 
 (defmethod itemize :around ((article article) (itemization-record (eql nil)))
   (itemize article (make-instance 'itemization
@@ -1073,7 +1157,6 @@ of LINE starting from START."
       (error "No such article '~A' in the default mizar library at ~A" article-name (location *default-mizar-library*))))
 
 (defmethod itemize ((article article) itemization)
-  (warn "primary method")
   (let* ((name (name article))
 	 (name-uc (format nil "~:@(~A~)" name))
 	 (sandbox (sandbox itemization))
