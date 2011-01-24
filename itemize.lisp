@@ -146,7 +146,9 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	  for line = (line-at article l)
        do
 	 (multiple-value-bind (begin end registers-begin registers-end)
-	     (scan bol-theorem-scanner line)
+	     (scan bol-theorem-scanner line :start (if (= l line-num)
+						       col-num
+						       0))
 	   (declare (ignore end))
 	   (when begin
 	     (if (null (aref registers-begin 0))
@@ -289,68 +291,101 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
        (let (candidate-begin-line-num candidate-begin-col-num
 	     begin-line-num begin-col-num end-line-num end-col-num )
 	 (let ((definition-kind (value-of-kind-attribute definition-node))
-	       (redefinition (value-of-redefinition-attribute definition-node)))
-	   (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
-	     (line-and-column definition-node))
-	   (multiple-value-setq (begin-line-num begin-col-num)
-	     (first-keyword-before article
-				   (if (string= redefinition "true")
-				       "redefine"
-				       (cond ((string= definition-kind "K") "func")
-					     ((string= definition-kind "R") "pred")
-					     ((string= definition-kind "M") "mode")
-					     ((string= definition-kind "V") "attr")
-					     ((string= definition-kind "G") "struct")))
-				   candidate-begin-line-num
-				   candidate-begin-col-num))
+	       (redefinition (value-of-redefinition-attribute definition-node))
+	       (expandable (value-of-expandable-attribute definition-node)))
+	   (cond ((and (string= definition-kind "M")
+		       (string= expandable "true"))
+		  (multiple-value-setq (begin-line-num begin-col-num)
+		    (first-keyword-after article "mode" last-line last-col)))
+		 (t
+		  (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
+		    (line-and-column definition-node))
+		  (multiple-value-setq (begin-line-num begin-col-num)
+		    (first-keyword-before article
+					  (if (string= redefinition "true")
+					      "redefine"
+					      (cond ((string= definition-kind "K") "func")
+						    ((string= definition-kind "R") "pred")
+						    ((string= definition-kind "M") "mode")
+						    ((string= definition-kind "V") "attr")
+						    ((string= definition-kind "G") "struct")))
+					  candidate-begin-line-num
+					  candidate-begin-col-num))))
 	   (push (maybe-strip-semicolon
 		  (string-trim
 		   (list #\Space #\Newline)
 		   (region article last-line last-col begin-line-num begin-col-num)))
 		 context)
 	   (if (or (string= definition-kind "R")
-		   (string= definition-kind "M"))
-	       (if (= i num-definition-nodes)
-		   (let ((endposition-child (xpath:first-node (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))
-		     (multiple-value-bind (block-end-line block-end-col)
-			 (line-and-column endposition-child)
-		       (setf end-line-num block-end-line
-			     end-col-num (- block-end-col 3)))) ; remove "end"
-		   (let* ((sibling (next-non-blank-sibling definition-node))
-			  (sibling-kind (value-of-kind-attribute sibling)))
-		     (multiple-value-setq (end-line-num end-col-num)
-		       (first-keyword-after article
-					    (cond ((string= sibling-kind "K")
-						   "func")
-						  ((string= sibling-kind "R")
-						   "pred")
-						  ((string= sibling-kind "M")
-						   "mode")
-						  ((string= sibling-kind "V")
-						   "attr")
-						  ((string= sibling-kind "G")
-						   "struct"))
-					    begin-line-num
-					    begin-col-num))
-		     (if (zerop end-col-num)
-			 (setf end-line-num (1- end-line-num)
-			       end-col-num (length (line-at article
-							    (1- end-line-num))))
-			 (setf end-col-num (1- end-col-num)))))
+		   (string= definition-kind "V"))
+	       (progn
+		 (if (= i num-definition-nodes)
+		     (let ((endposition-child (car (last (xpath:all-nodes (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))))
+		       (multiple-value-bind (block-end-line block-end-col)
+			   (line-and-column endposition-child)
+			 (setf end-line-num block-end-line
+			       end-col-num (- block-end-col 3)))) ; remove "end"
+		     (let* ((sibling (next-non-blank-sibling definition-node))
+			    (sibling-kind (value-of-kind-attribute sibling)))
+		       (multiple-value-setq (end-line-num end-col-num)
+			 (first-keyword-after article
+					      (cond ((string= sibling-kind "K")
+						     "func")
+						    ((string= sibling-kind "R")
+						     "pred")
+						    ((string= sibling-kind "M")
+						     "mode")
+						    ((string= sibling-kind "V")
+						     "attr")
+						    ((string= sibling-kind "G")
+						     "struct"))
+					      begin-line-num
+					      (1+ begin-col-num)))
+		       (if (zerop end-col-num)
+			   (setf end-line-num (1- end-line-num)
+				 end-col-num (length (line-at article
+							      (1- end-line-num))))
+			   (setf end-col-num (1- end-col-num))))))
 	       (let ((last-line-and-col (last (descendents-with-line-and-column definition-node))))
 		 (if last-line-and-col
 		     (let ((last-line-and-col-node (first last-line-and-col)))
 		       (multiple-value-setq (end-line-num end-col-num)
 			 (line-and-column last-line-and-col-node)))
-		     (error "We found a Definition node that lacks descendents with line and column information")))))
+		     (if (= i num-definition-nodes)
+			 (let ((endposition-child (car (last (xpath:all-nodes (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))))
+			   (multiple-value-bind (block-end-line block-end-col)
+			       (line-and-column endposition-child)
+			     (setf end-line-num block-end-line
+				   end-col-num (- block-end-col 3)))) ; remove "end"
+			 (let* ((sibling (next-non-blank-sibling definition-node))
+				(sibling-kind (value-of-kind-attribute sibling)))
+			   (multiple-value-setq (end-line-num end-col-num)
+			     (first-keyword-after article
+						  (cond ((string= sibling-kind "K")
+							 "func")
+							((string= sibling-kind "R")
+							 "pred")
+							((string= sibling-kind "M")
+							 "mode")
+							((string= sibling-kind "V")
+							 "attr")
+							((string= sibling-kind "G")
+							 "struct"))
+						  begin-line-num
+					      (1+ begin-col-num)))
+			   (if (zerop end-col-num)
+			       (setf end-line-num (1- end-line-num)
+				     end-col-num (length (line-at article
+								  (1- end-line-num))))
+			       (setf end-col-num (1- end-col-num)))))))))
 	 (setf last-line end-line-num
 	       last-col end-col-num)
 	 (push (ensure-final-semicolon
-		(format nil 
-			(if (= i 1)
-			    "~%~A~%~A~%end;"
-			    "definition~%~A~%~A~%end;")
+		(concat (if (= i 1)
+			    (format nil "~%")
+			    (format nil "definition~%"))
 			(reduce #'concat (reverse context))
+			(format nil "~%")
 			(ensure-final-semicolon
 			 (string-trim
 			  '(#\Space #\Newline)
@@ -358,7 +393,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				  begin-line-num
 				  begin-col-num
 				  end-line-num
-				  end-col-num)))))
+				  end-col-num)))
+			(format nil "~%end;")))
 	       new-definitions))
      finally (return (reverse new-definitions))))
 
@@ -461,10 +497,9 @@ sibling elements; these need to be stored."
 	 (setf last-line end-line-num
 	       last-col end-col-num)
 	 (push (ensure-final-semicolon
-		(format nil 
-			(if (= i 1)
-			    "~%~A~%~A~%end;"
-			    "registration~%~A~%~A~%end;")
+		(concat (if (= i 1)
+			    (format nil "~%")
+			    (format nil "registration~%"))
 			(reduce #'concat (reverse context))
 			(ensure-final-semicolon
 			 (string-trim
@@ -473,7 +508,8 @@ sibling elements; these need to be stored."
 				  begin-line-num
 				  begin-col-num
 				  end-line-num
-				  end-col-num)))))
+				  end-col-num)))
+			(format nil "~%end;")))
 	       new-registrations))
   finally (return (reverse new-registrations))))
 
@@ -1160,10 +1196,10 @@ of LINE starting from START."
 		    (with-open-file (new-article-stream (path article)
 							:direction :output
 							:if-exists :supersede)
-		      (format new-article-stream before-bad)
+		      (format new-article-stream "~A" before-bad)
 		      (dolist (split-definition split-definitions)
 			(format new-article-stream "~A~%" split-definition))
-		      (format new-article-stream after-bad))
+		      (format new-article-stream "~A" after-bad))
 		    (let ((new-article (make-instance 'article
 						      :path (path article))))
 		      (itemize new-article itemization))))))))
@@ -1181,10 +1217,10 @@ of LINE starting from START."
 		    (with-open-file (new-article-stream (path article)
 							:direction :output
 							:if-exists :supersede)
-		      (format new-article-stream before-bad)
+		      (format new-article-stream "~A" before-bad)
 		      (dolist (split-registration split-registrations)
 			(format new-article-stream "~A~%" split-registration))
-		      (format new-article-stream after-bad))
+		      (format new-article-stream "~A" after-bad))
 		    (let ((new-article (make-instance 'article
 						      :path (path article))))
 		      (itemize new-article itemization))))))))
@@ -1639,4 +1675,4 @@ of LINE starting from START."
      finally
        (return graph)))
 
-;;; itemize.lisp ends here
+;;; itemize.lisp ends herexoo
