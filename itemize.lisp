@@ -370,7 +370,7 @@ sibling elements; these need to be stored."
 (defun split-registrationblock-node (registrationblock-node article)
   (loop
      with new-registrations = nil
-     with registration-nodes = (xpath:all-nodes (xpath:evaluate "Registration" registrationblock-node))
+     with registration-nodes = (xpath:all-nodes (xpath:evaluate "Registration | IdentifyRegistration" registrationblock-node))
      with last-line = nil
      with last-col = nil
      with context = nil
@@ -391,7 +391,10 @@ sibling elements; these need to be stored."
 	       (error "This registration node lacks a correctness node!")))
 	 (multiple-value-setq (begin-line-num begin-col-num)
 	   (first-keyword-before article
-				 "cluster"
+				 (if (string= (dom:local-name registration-node)
+					      "Registration")
+				     "cluster"
+				     "identify")
 				 candidate-begin-line-num
 				 candidate-begin-col-num))
 	 (push (maybe-strip-semicolon
