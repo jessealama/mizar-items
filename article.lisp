@@ -293,7 +293,7 @@ unbound, it will be bound in the new article and have value NIL."
      finally (return (reverse results))))
 
 (defun region (article begin-line-num begin-col-num end-line-num end-col-num)
-  (loop 
+  (loop
      with newline = (make-string 1 :initial-element #\Newline)
      for l from begin-line-num upto end-line-num
      for maybe-line = (line-at article l)
