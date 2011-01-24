@@ -309,11 +309,16 @@ unbound, it will be bound in the new article and have value NIL."
 (defun region-up-to (article up-to-line up-to-col)
   (region article 1 0 up-to-line up-to-col))
 
-(defun region-after (article after-line after-col)
+(defun region-after (article after-line-num after-col-num)
   (let* ((num-lines (num-lines article))
 	 (last-line (line-at article num-lines))
 	 (last-line-length (length last-line)))
-    (region article after-line after-col num-lines last-line-length)))
+    ;; (let ((after-line (line-at article after-line-num)))
+    ;;   (if (<= (length after-line) after-col-num)
+    ;; 	  (if (= after-line-num num-lines)
+    ;; 	      ""
+    ;; 	      (region article (1+ after-line-num) 0 num-lines last-line-length))
+	  (region article after-line-num after-col-num num-lines last-line-length)))
 
 (defgeneric complete-environment (article)
   (:documentation "All articles mentioned in the environment of
