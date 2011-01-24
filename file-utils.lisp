@@ -15,7 +15,7 @@
 
 (defun lines-in-file (path)
   (let (lines)
-    (with-open-file (stream path)
+    (with-open-file (stream path :external-format :iso-8859-1)
       (do ((line (read-line stream nil)
 		 (read-line stream nil)))
 	  ((null line))
