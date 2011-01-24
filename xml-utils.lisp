@@ -22,6 +22,11 @@
     (let ((kind-attribute (first (xpath:all-nodes kind-attribute-as-node-set))))
       (xpath:evaluate "string()" kind-attribute))))
 
+(defun value-of-expandable-attribute (node)
+  (let ((kind-attribute-as-node-set (xpath:evaluate "@expandable" node)))
+    (let ((kind-attribute (first (xpath:all-nodes kind-attribute-as-node-set))))
+      (xpath:evaluate "string()" kind-attribute))))
+
 (defun value-of-aid-attribute (node)
   (let ((value (xpath:evaluate "@aid" node)))
     (unless (xpath:node-set-empty-p value)
