@@ -62,4 +62,8 @@
 		      :error nil)
   t)
 
+(defun file-exists-in-sandbox (filename sandbox)
+  (let ((location (location sandbox)))
+    (file-exists-p (file-in-directory location filename))))
+
 ;;; sandbox.lisp ends here
