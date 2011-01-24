@@ -17,6 +17,11 @@
     (let ((kind-attribute (first (xpath:all-nodes kind-attribute-as-node-set))))
       (xpath:evaluate "string()" kind-attribute))))
 
+(defun value-of-redefinition-attribute (node)
+  (let ((kind-attribute-as-node-set (xpath:evaluate "@redefinition" node)))
+    (let ((kind-attribute (first (xpath:all-nodes kind-attribute-as-node-set))))
+      (xpath:evaluate "string()" kind-attribute))))
+
 (defun value-of-aid-attribute (node)
   (let ((value (xpath:evaluate "@aid" node)))
     (unless (xpath:node-set-empty-p value)
@@ -152,6 +157,14 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 
 (defun all-ref-descendents (node)
   (descendents-with-name node "Ref"))
+
+(defun descendents-with-line-and-column (node)
+  (let ((xpath "@line and @col"))
+    (labels ((descendents (node)
+	       (append (when (xpath:evaluate xpath node)
+			 (list node))
+		       (reduce #'append (map 'list #'descendents (remove-if #'dom:text-node-p (dom:child-nodes node)))))))
+     (descendents node))))
 
 (defun article-local-froms (node)
   (remove-if-not #'(lambda (node)
