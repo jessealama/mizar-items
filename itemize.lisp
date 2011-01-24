@@ -95,7 +95,8 @@
 		     (real-last (or last-by last-from)))
 		(multiple-value-setq (end-line-num end-column-num)
 		  (if real-last
-		      (line-and-column real-last)
+		      (let ((last-ref-child (last-child-with-name real-last "Ref")))
+			(line-and-column last-ref-child))
 		      (line-and-column iterequality-node)))))
 	    (multiple-value-setq (begin-line-num begin-column-num)
 	      (first-keyword-before article (format nil "~A:" label) 
@@ -108,6 +109,7 @@
 				 :end-column-number end-column-num
 				 :nr nr
 				 :vid vid
+				 :label label
 				 :node iterequality-node)
 		  items))))
 	(reverse items))))
@@ -248,6 +250,60 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 				     :node block-node)
 		    items)))))
     (reverse items))))
+
+(defun split-definitionblock-node (definitionblock-node article)
+  (loop
+     with new-definitions = nil
+     with definition-nodes = (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node))
+     with last-line = nil
+     with last-col = nil
+     with context = nil
+     for i from 1
+     for definition-node in definition-nodes
+     do
+       (when (= i 1)
+	 (multiple-value-setq (last-line last-col)
+	   (line-and-column definitionblock-node)))
+       (let (candidate-begin-line-num candidate-begin-col-num
+	     begin-line-num begin-col-num end-line-num end-col-num )
+	 (let ((definition-kind (value-of-kind-attribute definition-node))
+	       (redefinition (value-of-redefinition-attribute definition-node)))
+	   (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
+	     (line-and-column definition-node))
+	   (multiple-value-setq (begin-line-num begin-col-num)
+	     (first-keyword-before article
+				   (if (string= redefinition "true")
+				       "redefine"
+				       (cond ((string= definition-kind "K") "func")
+					     ((string= definition-kind "R") "pred")
+					     ((string= definition-kind "M") "mode")
+					     ((string= definition-kind "V") "attr")
+					     ((string= definition-kind "G") "struct")))
+				   candidate-begin-line-num
+				   candidate-begin-col-num))
+	   (push (maybe-strip-semicolon
+		  (string-trim
+		   (list #\Space #\Newline)
+		   (region article last-line last-col begin-line-num begin-col-num)))
+		 context)
+	   (let ((last-line-and-col (last (descendents-with-line-and-column definition-node))))
+	     (if last-line-and-col
+		 (let ((last-line-and-col-node (first last-line-and-col)))
+		   (multiple-value-setq (end-line-num end-col-num)
+		     (line-and-column last-line-and-col-node)))
+		 (error "We found a Definition node that lacks descendents with line and column information"))))
+	 (setf last-line end-line-num
+	       last-col end-col-num)
+	 (push (ensure-final-semicolon
+		(format nil "definition~%~A~%~A~%end;"
+			(reduce #'concat (reverse context))
+			(region article
+				begin-line-num
+				begin-col-num
+				end-line-num
+				end-col-num)))
+	       new-definitions))
+     finally (return (reverse new-definitions))))
 
 (defun definitionblock-items (article)
   "Definitions are a special case.  They can generate DefTheorem
@@ -496,7 +552,7 @@ sibling elements; these need to be stored."
 				(when (or (null item-number) (null def-number))
 				  (error "There is no entry in the definition labels-to-items table for (~d . ~d)" aid absnr))
 				(setf old-label (format nil "~:@(~A~):def ~d" aid absnr)
-				      new-label (format nil "I~d:def ~d" item-number def-number)))))))))
+				      new-label (format nil "ckb~d:def ~d" item-number def-number)))))))))
 	    ;; (warn "old label is '~A', new label is '~A'" old-label new-label)
 	    (when (and old-label new-label)
 	      (push (make-instance 'editing-instruction
@@ -573,7 +629,7 @@ sibling elements; these need to be stored."
 			(let ((earlier-item-number (gethash (cons aid absnr) (scheme-labels-to-items itemization))))
 			  (setf old-label (format nil "~:@(~A~):sch ~d" aid absnr))
 			  (if earlier-item-number
-			      (setf new-label (format nil "I~d:sch 1" earlier-item-number))
+			      (setf new-label (format nil "CKB~d:sch 1" earlier-item-number))
 			      (setf new-label (format nil "~:@(~A~):sch ~d" aid absnr))))
 			(error "The From node ~A lacks an absnr attribute!" from-node))
 		    (error "The From node ~A lacks an aid attribute!" from-node))))
@@ -678,31 +734,41 @@ of LINE starting from START."
   (exporter article directory "-q" "-l" "-s")
   (transfer article directory "-q" "-l" "-s"))
 
+;; (defun minimal-context (item &optional (directory (sb-posix:getcwd)))
+;;   (shortest-admissible-initial-segment
+;;    (context-items item)
+;;    #'(lambda (lst)
+;;        (verifiable? (let ((article (item->article
+;; 				        (let ((new-item (copy-item item)))
+;; 					        (setf (context-items new-item) lst)
+;; 						      new-item))))
+;; 		            (setf (path article)
+;; 				      (concat (namestring (pathname-as-directory (pathname directory)))
+;; 					      "splork.miz"))
+;; 			    article)
+;; 		    directory))))
+
 (defun minimal-context (item &optional (directory (sb-posix:getcwd)))
-  (let* ((xml (xml-node item))
-	 (pruned-context-items (remove-if-not #'(lambda (thing)
-						  (if (typep thing 'reservation-item)
-						      (let ((vid (vid thing)))
-							(vid-present-in-node vid xml))
-						      t))
-					      (context-items item))))
-    (let ((non-res-items (remove-if #'(lambda (thing) (typep thing 'reservation-item)) pruned-context-items)))
-      (loop
-	 for non-res-item in (reverse non-res-items)
-	 do
-	   (let ((new-item (copy-item item)))
-	     (setf (context-items new-item) (remove non-res-item pruned-context-items))
-	     (let ((article (item->article new-item)))
-	       (setf (path article)
-		     (concat (namestring (pathname-as-directory (pathname directory)))
-			     "splork.miz"))
-	       (if (verifiable? article directory)
-		   (progn
-		     (setf pruned-context-items (remove non-res-item pruned-context-items))
-		     (warn "We can safely remove ~A from the context" non-res-item))
-		   (warn "We cannot remove ~A from the context" non-res-item))))
-	 finally 
-	   (return pruned-context-items)))))
+  (flet ((check-item-with-context (new-context)
+	   (verifiable? (let ((article (item->article
+				        (let ((new-item (copy-item item)))
+					  (setf (context-items new-item) new-context)
+					  new-item))))
+			  (setf (path article)
+				(concat (namestring (pathname-as-directory (pathname directory)))
+					"splork.miz"))
+			  article)
+		        directory)))
+    (let* ((xml (xml-node item))
+	   (pruned-context-items (remove-if-not #'(lambda (thing)
+						    (if (typep thing 'reservation-item)
+							(let ((vid (vid thing)))
+							  (vid-present-in-node vid xml))
+							t))
+						(context-items item))))
+      (if (check-item-with-context pruned-context-items)
+	  (shortest-admissible-initial-segment pruned-context-items #'check-item-with-context)
+	  (shortest-admissible-initial-segment (context-items item) #'check-item-with-context)))))
 
 (defun minimize-context (item &optional (directory (sb-posix:getcwd)))
   (warn "Minimizing context for item ~S..." item)
@@ -899,9 +965,9 @@ of LINE starting from START."
 				 (singleton-if-not-present thing schemes-table))
 			     schemes))))
 
-(defgeneric itemize (things &optional itemization-record))
+(defgeneric itemize (things itemization-record))
 
-(defmethod itemize :around ((article article) &optional itemization-record)
+(defmethod itemize :around ((article article) itemization-record)
   (declare (ignore itemization-record))
   (if (slot-boundp article 'path)
       (with-slots (path)
@@ -914,45 +980,28 @@ of LINE starting from START."
 	      (error "The path ~A for the article to itemize doesn't exist" path))))
       (error "The article ~S lacks a path" article)))
 
-(defmethod itemize :around ((article article) &optional itemization-record)
+(defmethod itemize :around ((article article) itemization-record)
   (declare (ignore itemization-record))
   (if (slot-boundp article 'name)
       (call-next-method)
       (error "Article ~S lacks a name" article)))
 
-(defmethod itemize :around ((article-path pathname) &optional itemization-record)
+(defmethod itemize :around ((article-path pathname) itemization-record)
   (declare (ignore itemization-record))
   (if (file-exists-p article-path)
       (call-next-method)
       (error "No mizar article at ~A" (namestring article-path))))
 
-(defmethod itemize ((article-path pathname) &optional itemization-record)
-  (itemize (make-instance 'article :path article-path) itemization-record))
-
-(defmethod itemize ((article-path string) &optional itemization-record)
-  (itemize (pathname article-path) itemization-record))
-
-(defmethod itemize ((article-name string) &optional itemization-record)
-  (if (article-exists-p article-name)
-      (itemize (make-instance 'article
-			      :name article-name
-			      :path (file-in-directory (concat (location *default-mizar-library*) "mml") article-name "miz"))
-	       itemization-record)
-      (error "No such article '~A' in the default mizar library at ~A" article-name (location *default-mizar-library*))))
-
-(defmethod itemize ((article article) &optional itemization-record)
-  (let ((itemization (or itemization-record
-			 (make-instance 'itemization
-					:sandbox (fresh-sandbox (name article))))))
-    (with-slots (sandbox definition-labels-to-items theorem-labels-to-items scheme-labels-to-items symbol-table)
-	itemization
-      (copy-file-to-sandbox (path article) sandbox)
-      (let* ((name (name article))
-	     (name-uc (format nil "~:@(~A~)" name))
-	     (directory (location sandbox))
+(defmethod itemize :around ((article article) itemization)
+  (unless (slot-boundp article 'xml-doc)
+    (let ((name (name article)))
+      (with-slots (sandbox definition-labels-to-items theorem-labels-to-items scheme-labels-to-items symbol-table)
+	  itemization
+	(copy-file-to-sandbox (file-in-directory (concat (location *default-mizar-library*) "mml/") name "miz") sandbox)
+      (let* ((directory (location sandbox))
 	     (article-in-sandbox (make-instance 'article 
-						:name (name article)
-						:path (file-in-directory (location sandbox) (name article) "miz"))))
+						:name name
+						:path (file-in-directory (location sandbox) name "miz"))))
 	(warn "Itemizing in the directory ~A" (namestring (location sandbox)))
 	(preprocess-text article-in-sandbox directory)
 	;; ensure the article XML is now synchonized with the changed text
@@ -963,212 +1012,276 @@ of LINE starting from START."
 	(refresh-text article-in-sandbox)
 	(refresh-idx article-in-sandbox)
 	(initialize-context-for-items article-in-sandbox)
-	(loop
-	   with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
-	   with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
-	   with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
-	   with items->articles = (make-hash-table :test #'eq) ; keys are item objects
-	   with all-candidates = (item-candidates article-in-sandbox)
-	   with pseudo-candidates = nil
-	   with earlier-item-names = nil
-	   with real-items = nil
-	   with starting-item-number = (1+ (num-items itemization))
-	   with candidate-num = starting-item-number
-	   with local-db = (location sandbox)
-	   with dict-subdir = (ensure-directory (concat local-db "dict"))
-	   with prel-subdir = (ensure-directory (concat local-db "prel"))
-	   with text-subdir = (ensure-directory (concat local-db "text"))
-	   with article-vocab = (remove "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
-	   with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
-	   ;with num-symbols = (length symbols)
-	   with scheme-nr = 0
-	   with deftheorem-nr = 0
-	   for candidate in all-candidates
-	   initially 
-	     (ensure-directories-exist dict-subdir)
-	     (ensure-directories-exist prel-subdir)
-	     (ensure-directories-exist text-subdir)
-	     (write-new-symbols symbols symbol-table dict-subdir)
-	     (warn "About to consider ~d candidate items" (length all-candidates))
-	   do
-	     (warn "Dealing with item ~S" candidate)
-	     (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles itemization)
-	     (when (typep candidate 'pseudo-item)
-	       (push candidate pseudo-candidates))
-	     (case (type-of candidate)
-	       (scheme-item
-		(incf scheme-nr)
-		(with-slots (schemenr)
-		    candidate
-		  (setf (gethash schemenr scheme-table) candidate)))
-	       (definition-item
-		(let ((deftheorems (deftheorems candidate)))
-		  (incf deftheorem-nr (length deftheorems))
-		  (dolist (deftheorem deftheorems)
-		    (with-slots (nr vid)
-			deftheorem
-		      (setf (gethash (cons nr vid) definition-table) deftheorem)))))
-	       (theorem-item
-		(with-slots (nr vid)
-		    candidate
-		  (setf (gethash (cons nr vid) theorem-table) candidate)))
-	       (proposition-item
-		(with-slots (nr vid)
-		    candidate
-		  (setf (gethash (cons nr vid) theorem-table) candidate))))
-	     (unless (typep candidate 'pseudo-item)
-	       (setf (context-items candidate) (reverse pseudo-candidates))
-	       (let* ((item-name (format nil "i~d" candidate-num))
-		      (miz-filename (format nil "~A.miz" item-name))
-		      (item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
-		      (earlier (reverse earlier-item-names))
-		      ;; (new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
-		      (new-vocabularies (vocabularies article-in-sandbox))
-		      (new-notations (append (notations article-in-sandbox) earlier))
-		      (new-contructors (append (constructors article-in-sandbox) earlier))
-		      (new-requirements (requirements article-in-sandbox))
-		      (new-registrations (append (registrations article-in-sandbox) earlier))
-		      (new-definitions (append (definitions article-in-sandbox) earlier))
-		      (new-theorems (append (theorems article-in-sandbox) earlier))
-		      (new-schemes (append (schemes article-in-sandbox) earlier))
-		      ;; (new-notations (append (expand-previous-notations article-in-sandbox
-		      ;; 							(names->notations itemization))
-		      ;; 			     earlier))
-		      ;; (new-contructors (append (expand-previous-constructors article-in-sandbox
-		      ;; 							     (names->constructors itemization))
-		      ;; 			       earlier))
-		      ;; (new-registrations (append (expand-previous-registrations article-in-sandbox
-		      ;; 								(names->registrations itemization))
-		      ;; 				 earlier))
-		      ;; (new-definitions (append (expand-previous-definitions article-in-sandbox
-		      ;; 							    (names->definitions itemization))
-		      ;; 			       earlier))
-		      ;; (new-theorems (append (expand-previous-theorems article-in-sandbox
-		      ;; 						      (names->theorems itemization))
-		      ;; 			    earlier))
-		      ;; (new-schemes (append (expand-previous-schemes article-in-sandbox
-		      ;; 						    (names->schemes itemization))
-		      ;; 			   earlier))
-		      (original-text (text candidate))
-		      (context (context-items candidate))
-		      (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
-		      (context-lines-as-str (apply #'concat context-lines))
-		      (text (concat context-lines-as-str
-				    (if (typep candidate 'proposition-item)
-					(format nil "theorem~%~A" original-text) ; promote to theorem
-					original-text)))
-		      (article-for-item (make-instance 'article
-						       ;; :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
-						       ;; 			 (cons "TARSKI" new-vocabularies)
-						       ;; 			 new-vocabularies)
-						       :pretext (dom:map-document (cxml:make-string-sink) (xml-node candidate))
-						       :vocabularies new-vocabularies
-						       :notations new-notations
-						       :constructors new-contructors
-						       :requirements new-requirements
-						       :registrations new-registrations
-						       :definitions new-definitions
-						       :theorems new-theorems
-						       :schemes new-schemes
-						       :path item-path
-						       :name item-name
-						       :text text)))
-		 (multiple-value-bind (notations constructors registrations definitions theorems schemes)
-		     (trim-environment article-for-item local-db)
-		   (setf (notations candidate) notations
-			 (constructors candidate) constructors
-			 (registrations candidate) registrations
-			 (definitions candidate) definitions
-			 (theorems candidate) theorems
-			 (schemes candidate) schemes))
-		 (handler-case
-		     (progn
-		       (write-article article-for-item)
-		       (verify-and-export article-for-item local-db)
-		       (minimize-context candidate (namestring local-db))
-		       ;;(minimize-environment article-for-item (namestring local-db))
-		       ;; synchronize with CANDIDATE
-		       (setf (vocabularies candidate) (vocabularies article-for-item)
-			     (notations candidate) (notations article-for-item)
-			     (constructors candidate) (constructors article-for-item)
-			     (requirements candidate) (requirements article-for-item)
-			     (registrations candidate) (registrations article-for-item)
-			     (definitions candidate) (definitions article-for-item)
-			     (theorems candidate) (theorems article-for-item)
-			     (schemes candidate) (schemes article-for-item))
-		       (let* ((context (context-items candidate))
-			      (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
-			      (context-lines-as-str (apply #'concat context-lines))
-			      (text (concat context-lines-as-str
-					    (if (typep candidate 'proposition-item)
-						(format nil "theorem~%~A" original-text) ; promote to theorem
-						original-text))))
-			 (setf (text article-for-item) text))
-		       (write-article article-for-item)
-		       (push (uppercase item-name) earlier-item-names)
-		       (setf (gethash candidate items->articles) article-for-item)
-		       (push candidate real-items)
-		       (setf (gethash candidate-num (items itemization)) candidate)
-		       (incf (num-items itemization))
-		       (incf candidate-num))
-  (mizar-error () 
-    (progn
-      (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
-      (cond ((typep candidate 'scheme-item)
-	     (with-slots (schemenr)
-		 candidate
-	       (remhash schemenr scheme-table)))
-	    ((typep candidate 'definition-item)
-	     (with-slots (nr vid)
-		 candidate
-	       (remhash (cons nr vid) definition-table)))
-	    ((or (typep candidate 'theorem-item)
-		 (typep candidate 'proposition-item))
-	     (with-slots (nr vid)
-		 candidate
-	       (remhash (cons nr vid) theorem-table))))
-      (delete-file (path article-for-item))
-      (push candidate pseudo-candidates))))))
-  finally 
-	     ; record what exported items were just generated by itemization
-	     (setf (gethash name-uc (names->notations itemization))
-		   (mapcar #'(lambda (num)
-			       (format nil "I~d" num))
-			   (remove-if-not #'(lambda (num)
-					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.dno" num))))
-					  (numbers-from-to starting-item-number candidate-num)))
-		   (gethash name-uc (names->constructors itemization))
-		   (mapcar #'(lambda (num)
-			       (format nil "I~d" num))
-			   (remove-if-not #'(lambda (num)
-					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.dco" num))))
-					  (numbers-from-to starting-item-number candidate-num)))
-		   (gethash name-uc (names->registrations itemization))
-		   (mapcar #'(lambda (num)
-			       (format nil "I~d" num))
-			   (remove-if-not #'(lambda (num)
-					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.dcl" num))))
-					  (numbers-from-to starting-item-number candidate-num)))
-		   (gethash name-uc (names->definitions itemization))
-		   (mapcar #'(lambda (num)
-			       (format nil "I~d" num))
-			   (remove-if-not #'(lambda (num)
-					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.def" num))))
-					  (numbers-from-to starting-item-number candidate-num)))
-		   (gethash name-uc (names->theorems itemization))
-		   (mapcar #'(lambda (num)
-			       (format nil "I~d" num))
-			   (remove-if-not #'(lambda (num)
-					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.the" num))))
-					  (numbers-from-to starting-item-number candidate-num)))
-		   (gethash name-uc (names->schemes itemization))
-		   (mapcar #'(lambda (num)
-			       (format nil "I~d" num))
-			   (remove-if-not #'(lambda (num)
-					      (file-exists-p (file-in-directory prel-subdir (format nil "i~d.sch" num))))
-					  (numbers-from-to starting-item-number candidate-num))))
-	     ; register constructors, notations/patterns, registrations, definiens, theorems, and schemes
-	     (dolist (item (remove-if #'(lambda (item) (typep item 'pseudo-item)) all-candidates))
+	(setf (xml-doc article) (xml-doc article-in-sandbox))
+	(setf (lines article) (lines article-in-sandbox))
+	(setf (path article) (path article-in-sandbox))))))
+  (let ((xml (xml-doc article)))
+    (let ((bad-ones (remove-if-not #'(lambda (definitionblock-node)
+				       (> (length (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node))) 1))
+				   (xpath:all-nodes (xpath:evaluate "Article/DefinitionBlock" xml)))))
+      (if bad-ones
+	  (let ((bad (car bad-ones)))
+	    (warn "bad!")
+	    (multiple-value-bind (begin-line begin-col)
+		(line-and-column bad)
+	      (let ((final-endposition-child (xpath:first-node (xpath:evaluate "EndPosition[position()=last()]" bad))))
+		(warn "there was some bad stuff")
+		(multiple-value-bind (end-line end-col)
+		    (line-and-column final-endposition-child)
+		  (let ((before-bad (region-up-to article begin-line begin-col))
+			(after-bad (region-after article end-line end-col))
+			(split-definitions (split-definitionblock-node bad article)))
+		    (with-open-file (new-article-stream (path article)
+							:direction :output
+							:if-exists :supersede)
+		      (format new-article-stream before-bad)
+		      (dolist (split-definition split-definitions)
+			(format new-article-stream "~A~%" split-definition))
+		      (format new-article-stream after-bad))
+		    (let ((new-article (make-instance 'article
+						      :path (path article))))
+		      (itemize new-article itemization)))))))
+	  (call-next-method)))))
+
+(defmethod itemize :around ((article article) (itemization-record (eql nil)))
+  (itemize article (make-instance 'itemization
+				  :sandbox (fresh-sandbox (name article)))))
+
+
+(defmethod itemize :around ((article-name string) (itemization-record (eql nil)))
+  (itemize article-name (make-instance 'itemization
+				       :sandbox (fresh-sandbox article-name))))
+
+
+(defmethod itemize ((article-path string) itemization-record)
+  (itemize (pathname article-path) itemization-record))
+
+(defmethod itemize ((article-name string) itemization)
+  (if (article-exists-p article-name)
+      (itemize (make-instance 'article :name article-name) itemization)
+      (error "No such article '~A' in the default mizar library at ~A" article-name (location *default-mizar-library*))))
+
+(defmethod itemize ((article article) itemization)
+  (let* ((name (name article))
+	 (name-uc (format nil "~:@(~A~)" name))
+	 (sandbox (sandbox itemization))
+	 (symbol-table (symbol-table itemization))
+	 (article-in-sandbox (make-instance 'article 
+					    :name (name article)
+					    :path (file-in-directory (location sandbox) (name article) "miz"))))
+    (loop
+       with definition-table = (make-hash-table :test #'equal) ; keys are pairs of integers
+	 with theorem-table = (make-hash-table :test #'equal) ; keys are pairs of integers
+	 with scheme-table = (make-hash-table :test #'eq) ; keys are integers; for schemes only
+	 with items->articles = (make-hash-table :test #'eq) ; keys are item objects
+	 with all-candidates = (item-candidates article-in-sandbox)
+	 with pseudo-candidates = nil
+	 with earlier-item-names = nil
+	 with real-items = nil
+	 with starting-item-number = (1+ (num-items itemization))
+	 with candidate-num = starting-item-number
+	 with local-db = (location sandbox)
+	 with dict-subdir = (ensure-directory (concat local-db "dict"))
+	 with prel-subdir = (ensure-directory (concat local-db "prel"))
+	 with text-subdir = (ensure-directory (concat local-db "text"))
+	 with article-vocab = (remove "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
+	 with symbols = (reduce #'append (mapcar #'listvoc article-vocab))
+					;with num-symbols = (length symbols)
+	 with scheme-nr = 0
+	 with deftheorem-nr = 0
+	 for candidate in all-candidates
+	 initially 
+	   (ensure-directories-exist dict-subdir)
+	   (ensure-directories-exist prel-subdir)
+	   (ensure-directories-exist text-subdir)
+	   (write-new-symbols symbols symbol-table dict-subdir)
+	   (warn "About to consider ~d candidate items" (length all-candidates))
+	 do
+	   (warn "Dealing with item ~S" candidate)
+	   (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles itemization)
+	   (when (typep candidate 'pseudo-item)
+	     (push candidate pseudo-candidates))
+	   (case (type-of candidate)
+	     (scheme-item
+	      (incf scheme-nr)
+	      (with-slots (schemenr)
+		  candidate
+		(setf (gethash schemenr scheme-table) candidate)))
+	     (definition-item
+	      (let ((deftheorems (deftheorems candidate)))
+		(incf deftheorem-nr (length deftheorems))
+		(dolist (deftheorem deftheorems)
+		  (with-slots (nr vid)
+		      deftheorem
+		    (setf (gethash (cons nr vid) definition-table) deftheorem)))))
+	     (theorem-item
+	      (with-slots (nr vid)
+		  candidate
+		(setf (gethash (cons nr vid) theorem-table) candidate)))
+	     (iterequality-item
+	      (with-slots (nr vid)
+		  candidate
+		(setf (gethash (cons nr vid) theorem-table) candidate)))
+	     (proposition-item
+	      (with-slots (nr vid)
+		  candidate
+		(setf (gethash (cons nr vid) theorem-table) candidate))))
+	   (unless (typep candidate 'pseudo-item)
+	     (setf (context-items candidate) (reverse pseudo-candidates))
+	     (let* ((item-name (format nil "ckb~d" candidate-num))
+		    (miz-filename (format nil "~A.miz" item-name))
+		    (item-path (concat (namestring (pathname-as-directory text-subdir)) miz-filename))
+		    (earlier (reverse earlier-item-names))
+		    ;; (new-vocabularies (mapcar #'(lambda (num) (format nil "SYM~d" num)) (numbers-from-to 1 num-symbols)))
+		    (new-vocabularies (vocabularies article-in-sandbox))
+		    (new-notations (append (notations article-in-sandbox) earlier))
+		    (new-contructors (append (constructors article-in-sandbox) earlier))
+		    (new-requirements (requirements article-in-sandbox))
+		    (new-registrations (append (registrations article-in-sandbox) earlier))
+		    (new-definitions (append (definitions article-in-sandbox) earlier))
+		    (new-theorems (append (theorems article-in-sandbox) earlier))
+		    (new-schemes (append (schemes article-in-sandbox) earlier))
+		    ;; (new-notations (append (expand-previous-notations article-in-sandbox
+		    ;; 							(names->notations itemization))
+		    ;; 			     earlier))
+		    ;; (new-contructors (append (expand-previous-constructors article-in-sandbox
+		    ;; 							     (names->constructors itemization))
+		    ;; 			       earlier))
+		    ;; (new-registrations (append (expand-previous-registrations article-in-sandbox
+		    ;; 								(names->registrations itemization))
+		    ;; 				 earlier))
+		    ;; (new-definitions (append (expand-previous-definitions article-in-sandbox
+		    ;; 							    (names->definitions itemization))
+		    ;; 			       earlier))
+		    ;; (new-theorems (append (expand-previous-theorems article-in-sandbox
+		    ;; 						      (names->theorems itemization))
+		    ;; 			    earlier))
+		    ;; (new-schemes (append (expand-previous-schemes article-in-sandbox
+		    ;; 						    (names->schemes itemization))
+		    ;; 			   earlier))
+		    (original-text (text candidate))
+		    (context (context-items candidate))
+		    (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
+		    (context-lines-as-str (apply #'concat context-lines))
+		    (text (concat context-lines-as-str
+				  (if (or (typep candidate 'proposition-item)
+					  (typep candidate 'iterequality-item))
+				      (format nil "theorem~%~A" original-text) ; promote to theorem
+				      original-text)))
+		    (article-for-item (make-instance 'article
+						     ;; :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
+						     ;; 			 (cons "TARSKI" new-vocabularies)
+						     ;; 			 new-vocabularies)
+						     :pretext (dom:map-document (cxml:make-string-sink) (xml-node candidate))
+						     :vocabularies new-vocabularies
+						     :notations new-notations
+						     :constructors new-contructors
+						     :requirements new-requirements
+						     :registrations new-registrations
+						     :definitions new-definitions
+						     :theorems new-theorems
+						     :schemes new-schemes
+						     :path item-path
+						     :name item-name
+						     :text text)))
+	       (multiple-value-bind (notations constructors registrations definitions theorems schemes)
+		   (trim-environment article-for-item local-db)
+		 (setf (notations candidate) notations
+		       (constructors candidate) constructors
+		       (registrations candidate) registrations
+		       (definitions candidate) definitions
+		       (theorems candidate) theorems
+		       (schemes candidate) schemes))
+	       (handler-case
+		   (progn
+		     (write-article article-for-item)
+		     (verify-and-export article-for-item local-db)
+		     (minimize-context candidate (namestring local-db))
+		     ;;(minimize-environment article-for-item (namestring local-db))
+		     ;; synchronize with CANDIDATE
+		     (setf (vocabularies candidate) (vocabularies article-for-item)
+			   (notations candidate) (notations article-for-item)
+			   (constructors candidate) (constructors article-for-item)
+			   (requirements candidate) (requirements article-for-item)
+			   (registrations candidate) (registrations article-for-item)
+			   (definitions candidate) (definitions article-for-item)
+			   (theorems candidate) (theorems article-for-item)
+			   (schemes candidate) (schemes article-for-item))
+		     (let* ((context (context-items candidate))
+			    (context-lines (mapcar #'(lambda (item) (pad-with-newline (text item))) context))
+			    (context-lines-as-str (apply #'concat context-lines))
+			    (text (concat context-lines-as-str
+					  (if (or (typep candidate 'proposition-item)
+						  (typep candidate 'iterequality-item))
+					      (format nil "theorem~%~A" original-text) ; promote to theorem
+					      original-text))))
+		       (setf (text article-for-item) text))
+		     (write-article article-for-item)
+		     (push (uppercase item-name) earlier-item-names)
+		     (setf (gethash candidate items->articles) article-for-item)
+		     (push candidate real-items)
+		     (setf (gethash candidate-num (items itemization)) candidate)
+		     (incf (num-items itemization))
+		     (incf candidate-num))
+		 (mizar-error () 
+		   (progn
+		     (warn "We got a mizar error for the item ~S, with text~%~%~A" candidate (text candidate))
+		     (cond ((typep candidate 'scheme-item)
+			    (with-slots (schemenr)
+				candidate
+			      (remhash schemenr scheme-table)))
+			   ((typep candidate 'definition-item)
+			    (with-slots (nr vid)
+				candidate
+			      (remhash (cons nr vid) definition-table)))
+			   ((or (typep candidate 'theorem-item)
+				(typep candidate 'proposition-item)
+				(typep candidate 'iterequality-item))
+			    (with-slots (nr vid)
+				candidate
+			      (remhash (cons nr vid) theorem-table))))
+		     (delete-file (path article-for-item))
+		     (push candidate pseudo-candidates))))))
+	 finally 
+					; record what exported items were just generated by itemization
+	   (setf (gethash name-uc (names->notations itemization))
+		 (mapcar #'(lambda (num)
+			     (format nil "ckb~d" num))
+			 (remove-if-not #'(lambda (num)
+					    (file-exists-p (file-in-directory prel-subdir (format nil "ckb~d.dno" num))))
+					(numbers-from-to starting-item-number candidate-num)))
+		 (gethash name-uc (names->constructors itemization))
+		 (mapcar #'(lambda (num)
+			     (format nil "ckb~d" num))
+			 (remove-if-not #'(lambda (num)
+					    (file-exists-p (file-in-directory prel-subdir (format nil "ckb~d.dco" num))))
+					(numbers-from-to starting-item-number candidate-num)))
+		 (gethash name-uc (names->registrations itemization))
+		 (mapcar #'(lambda (num)
+			     (format nil "ckb~d" num))
+			 (remove-if-not #'(lambda (num)
+					    (file-exists-p (file-in-directory prel-subdir (format nil "ckb~d.dcl" num))))
+					(numbers-from-to starting-item-number candidate-num)))
+		 (gethash name-uc (names->definitions itemization))
+		 (mapcar #'(lambda (num)
+			     (format nil "ckb~d" num))
+			 (remove-if-not #'(lambda (num)
+					    (file-exists-p (file-in-directory prel-subdir (format nil "ckb~d.def" num))))
+					(numbers-from-to starting-item-number candidate-num)))
+		 (gethash name-uc (names->theorems itemization))
+		 (mapcar #'(lambda (num)
+			     (format nil "ckb~d" num))
+			 (remove-if-not #'(lambda (num)
+					    (file-exists-p (file-in-directory prel-subdir (format nil "ckb~d.the" num))))
+					(numbers-from-to starting-item-number candidate-num)))
+		 (gethash name-uc (names->schemes itemization))
+		 (mapcar #'(lambda (num)
+			     (format nil "ckb~d" num))
+			 (remove-if-not #'(lambda (num)
+					    (file-exists-p (file-in-directory prel-subdir (format nil "ckb~d.sch" num))))
+					(numbers-from-to starting-item-number candidate-num))))
+					; register constructors, notations/patterns, registrations, definiens, theorems, and schemes
+	   (dolist (item (remove-if #'(lambda (item) (typep item 'pseudo-item)) all-candidates))
 	     (let ((candidate-num (key-for-value item (items itemization))))
 	       (when (typep item 'definition-item)
 		 (dolist (constructor-kind-and-nr (definition-constructors item))
@@ -1185,15 +1298,15 @@ of LINE starting from START."
 		     (setf (gethash (list name-uc constrkind constrnr) (definientia itemization)) item)))
 		 (dolist (constrkind (list "M" "L" "K" "G" "O" "R" "U" "V"))
 		   (let ((definientia (remove-if-not #'(lambda (constrkind-1)
-						 (string= constrkind constrkind-1))
-					     (definientia item)
-					     :key #'first)))
-		   (loop
-		      for definiens in definientia
-		      for i from 1
-		      do
-			(setf (gethash (list (format nil "I~d" candidate-num) constrkind i) (definientia itemization))
-			      item)))))
+							 (string= constrkind constrkind-1))
+						     (definientia item)
+						     :key #'first)))
+		     (loop
+			for definiens in definientia
+			for i from 1
+			do
+			  (setf (gethash (list (format nil "CKB~d" candidate-num) constrkind i) (definientia itemization))
+				item)))))
 	       (when (typep item 'notation-item)
 		 (dolist (pattern-kind-and-nr (patterns item))
 		   (destructuring-bind (kind . nr)
@@ -1201,52 +1314,52 @@ of LINE starting from START."
 		     (setf (gethash (list name-uc kind nr) (patterns itemization)) item)))
 		 (dolist (pattern-kind (list "M" "L" "K" "G" "O" "R" "U" "V"))
 		   (let ((patterns (remove-if-not #'(lambda (pattern-kind-1)
-							 (string= pattern-kind pattern-kind-1))
-						     (patterns item)
-						     :key #'first)))
+						      (string= pattern-kind pattern-kind-1))
+						  (patterns item)
+						  :key #'first)))
 		     (loop
 			for pattern in patterns
 			for i from 1
 			do
-			  (setf (gethash (list (format nil "I~d" candidate-num) pattern-kind i) (patterns itemization))
+			  (setf (gethash (list (format nil "CKB~d" candidate-num) pattern-kind i) (patterns itemization))
 				item)))))
 	       (when (typep item 'registration-item)
 		 (dolist (rcluster-nr (rclusters item))
 		   (setf (gethash (list name-uc rcluster-nr) (rclusters itemization)) item))
 		 (dotimes (rcluster-nr (length (rclusters item)))
-		   (setf (gethash (list (format nil "I~d" candidate-num) (1+ rcluster-nr)) (rclusters itemization)) item))
+		   (setf (gethash (list (format nil "CKB~d" candidate-num) (1+ rcluster-nr)) (rclusters itemization)) item))
 		 (dolist (fcluster-nr (fclusters item))
 		   (setf (gethash (list name-uc fcluster-nr) (fclusters itemization)) item))
 		 (dotimes (fcluster-nr (length (fclusters item)))
-		   (setf (gethash (list (format nil "I~d" candidate-num) (1+ fcluster-nr)) (fclusters itemization)) item))
+		   (setf (gethash (list (format nil "CKB~d" candidate-num) (1+ fcluster-nr)) (fclusters itemization)) item))
 		 (dolist (ccluster-nr (cclusters item))
 		   (setf (gethash (list name-uc ccluster-nr) (cclusters itemization)) item))
 		 (dotimes (ccluster-nr (length (cclusters item)))
-		   (setf (gethash (list (format nil "I~d" candidate-num) (1+ ccluster-nr)) (cclusters itemization)) item))
+		   (setf (gethash (list (format nil "CKB~d" candidate-num) (1+ ccluster-nr)) (cclusters itemization)) item))
 		 (dolist (constrkind-and-nr (identifications item))
 		   (destructuring-bind (constrkind . nr)
 		       constrkind-and-nr
 		     (setf (gethash (list name-uc constrkind nr) (identifications itemization)) item)))
 		 (dolist (constrkind (list "M" "L" "K" "G" "O" "R" "U" "V"))
 		   (let ((identifications (remove-if-not #'(lambda (constrkind-1)
-							 (string= constrkind constrkind-1))
-						     (identifications item)
-						     :key #'first)))
+							     (string= constrkind constrkind-1))
+							 (identifications item)
+							 :key #'first)))
 		     (loop
 			for identification in identifications
 			for i from 1
 			do
-			  (setf (gethash (list (format nil "I~d" candidate-num) constrkind i) (identifications itemization))
+			  (setf (gethash (list (format nil "CKB~d" candidate-num) constrkind i) (identifications itemization))
 				item)))))
 	       (when (typep item 'theorem-item)
 		 (setf (gethash (list name-uc (absnr item)) (theorems itemization)) item)
-		 (setf (gethash (list (format nil "I~d" candidate-num) 1) (theorems itemization)) item))
+		 (setf (gethash (list (format nil "CKB~d" candidate-num) 1) (theorems itemization)) item))
 	       (when (typep item 'scheme-item)
-		 (setf (gethash (list (format nil "I~d" candidate-num) 1) (schemes itemization)) item)
+		 (setf (gethash (list (format nil "CKB~d" candidate-num) 1) (schemes itemization)) item)
 		 (setf (gethash (list name-uc (schemenr item)) (schemes itemization)) item))))
-	     (return itemization))))))
+	   (return itemization))))
 
-(defmethod itemize ((articles list) &optional itemization-record)
+(defmethod itemize ((articles list) itemization-record)
   (if (null articles)
       itemization-record
       (itemize (cdr articles) (itemize (car articles)
@@ -1279,15 +1392,15 @@ of LINE starting from START."
      for item-number being the hash-keys in item-table
      for item being the hash-values in item-table
      do
-       (let ((needed-ccluster-path (file-in-directory text-subdir (format nil "i~d-needed-CCluster" item-number)))
-	     (needed-constructor-path (file-in-directory text-subdir (format nil "i~d-needed-Constructor" item-number)))
-	     (needed-definientia-path (file-in-directory text-subdir (format nil "i~d-needed-Definiens" item-number)))
-	     (needed-fcluster-path (file-in-directory text-subdir (format nil "i~d-needed-FCluster" item-number)))
-	     (needed-identifications-path (file-in-directory text-subdir (format nil "i~d-needed-Identify" item-number)))
-	     (needed-pattern-path (file-in-directory text-subdir (format nil "i~d-needed-Pattern" item-number)))
-	     (needed-rcluster-path (file-in-directory text-subdir (format nil "i~d-needed-RCluster" item-number)))
-	     (needed-scheme-path (file-in-directory text-subdir (format nil "i~d-needed-Scheme" item-number)))
-	     (needed-theorem-path (file-in-directory text-subdir (format nil "i~d-needed-Theorem" item-number))))
+       (let ((needed-ccluster-path (file-in-directory text-subdir (format nil "ckb~d-needed-CCluster" item-number)))
+	     (needed-constructor-path (file-in-directory text-subdir (format nil "ckb~d-needed-Constructor" item-number)))
+	     (needed-definientia-path (file-in-directory text-subdir (format nil "ckb~d-needed-Definiens" item-number)))
+	     (needed-fcluster-path (file-in-directory text-subdir (format nil "ckb~d-needed-FCluster" item-number)))
+	     (needed-identifications-path (file-in-directory text-subdir (format nil "ckb~d-needed-Identify" item-number)))
+	     (needed-pattern-path (file-in-directory text-subdir (format nil "ckb~d-needed-Pattern" item-number)))
+	     (needed-rcluster-path (file-in-directory text-subdir (format nil "ckb~d-needed-RCluster" item-number)))
+	     (needed-scheme-path (file-in-directory text-subdir (format nil "ckb~d-needed-Scheme" item-number)))
+	     (needed-theorem-path (file-in-directory text-subdir (format nil "ckb~d-needed-Theorem" item-number))))
 	 (when (file-exists-p needed-ccluster-path)
 	   (let* ((needed-ccluster-xml (cxml:parse-file needed-ccluster-path (cxml-dom:make-dom-builder)))
 		  (ccluster-nodes (xpath:all-nodes (xpath:evaluate "Registrations/CCluster" needed-ccluster-xml))))
