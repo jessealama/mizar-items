@@ -135,6 +135,27 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	 (error "We didn't find the required keyword ~A before line ~d and column ~d in article ~S"
 		keyword line-num col-num article))))
 
+(defun first-keyword-after (article keyword line-num col-num)
+  "Look for the first occurence of the keyword KEYWORD (e.g.,
+'theorem', 'definition', or possibly a label such as 'Lm3') before
+LINE-NUM and COL-NUM in the text of ARTICLE."
+  ; assume the keyword always begins a line, possibly with whitespace
+  ; -- a terrible assumption
+  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A" keyword keyword))))
+    (loop for l from line-num
+	  for line = (line-at article l)
+       do
+	 (multiple-value-bind (begin end registers-begin registers-end)
+	     (scan bol-theorem-scanner line)
+	   (declare (ignore end))
+	   (when begin
+	     (if (null (aref registers-begin 0))
+		 (return (values l (aref registers-end 1)))
+		 (return (values l (aref registers-end 0))))))
+       finally
+	 (error "We didn't find the required keyword ~A after line ~d and column ~d in article ~S"
+		keyword line-num col-num article))))
+
 (defun first-theorem-keword-before (article line-num col-num)
   (first-keyword-before article "theorem" line-num col-num))
 
@@ -255,6 +276,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
   (loop
      with new-definitions = nil
      with definition-nodes = (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node))
+     with num-definition-nodes = (length definition-nodes)
      with last-line = nil
      with last-col = nil
      with context = nil
@@ -286,13 +308,41 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		   (list #\Space #\Newline)
 		   (region article last-line last-col begin-line-num begin-col-num)))
 		 context)
-	   (let ((last-line-and-col (last (descendents-with-line-and-column definition-node))))
-	     (if last-line-and-col
-		 (let ((last-line-and-col-node (first last-line-and-col)))
-		   (multiple-value-setq (end-line-num end-col-num)
-		     (line-and-column last-line-and-col-node)))
-		 (error "We found a Definition node that lacks descendents with line and column information"))))
-	 
+	   (if (or (string= definition-kind "R")
+		   (string= definition-kind "M"))
+	       (if (= i num-definition-nodes)
+		   (let ((endposition-child (xpath:first-node (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))
+		     (multiple-value-bind (block-end-line block-end-col)
+			 (line-and-column endposition-child)
+		       (setf end-line-num block-end-line
+			     end-col-num (- block-end-col 3)))) ; remove "end"
+		   (let* ((sibling (next-non-blank-sibling definition-node))
+			  (sibling-kind (value-of-kind-attribute sibling)))
+		     (multiple-value-setq (end-line-num end-col-num)
+		       (first-keyword-after article
+					    (cond ((string= sibling-kind "K")
+						   "func")
+						  ((string= sibling-kind "R")
+						   "pred")
+						  ((string= sibling-kind "M")
+						   "mode")
+						  ((string= sibling-kind "V")
+						   "attr")
+						  ((string= sibling-kind "G")
+						   "struct"))
+					    begin-line-num
+					    begin-col-num))
+		     (if (zerop end-col-num)
+			 (setf end-line-num (1- end-line-num)
+			       end-col-num (length (line-at article
+							    (1- end-line-num))))
+			 (setf end-col-num (1- end-col-num)))))
+	       (let ((last-line-and-col (last (descendents-with-line-and-column definition-node))))
+		 (if last-line-and-col
+		     (let ((last-line-and-col-node (first last-line-and-col)))
+		       (multiple-value-setq (end-line-num end-col-num)
+			 (line-and-column last-line-and-col-node)))
+		     (error "We found a Definition node that lacks descendents with line and column information")))))
 	 (setf last-line end-line-num
 	       last-col end-col-num)
 	 (push (ensure-final-semicolon
