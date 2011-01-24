@@ -1489,5 +1489,4 @@ of LINE starting from START."
      finally
        (return graph)))
 
-
 ;;; itemize.lisp ends here
