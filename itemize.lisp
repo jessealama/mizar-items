@@ -300,17 +300,29 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		 (t
 		  (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
 		    (line-and-column definition-node))
-		  (multiple-value-setq (begin-line-num begin-col-num)
-		    (first-keyword-before article
-					  (if (string= redefinition "true")
-					      "redefine"
-					      (cond ((string= definition-kind "K") "func")
-						    ((string= definition-kind "R") "pred")
-						    ((string= definition-kind "M") "mode")
-						    ((string= definition-kind "V") "attr")
-						    ((string= definition-kind "G") "struct")))
-					  candidate-begin-line-num
-					  candidate-begin-col-num))))
+		  (if (and candidate-begin-line-num candidate-begin-col-num)
+		      (multiple-value-setq (begin-line-num begin-col-num)
+			(first-keyword-before article
+					      (if (string= redefinition "true")
+						  "redefine"
+						  (cond ((string= definition-kind "K") "func")
+							((string= definition-kind "R") "pred")
+							((string= definition-kind "M") "mode")
+							((string= definition-kind "V") "attr")
+							((string= definition-kind "G") "struct")))
+					      candidate-begin-line-num
+					      candidate-begin-col-num))
+		      (multiple-value-setq (begin-line-num begin-col-num)
+			(first-keyword-after article
+					      (if (string= redefinition "true")
+						  "redefine"
+						  (cond ((string= definition-kind "K") "func")
+							((string= definition-kind "R") "pred")
+							((string= definition-kind "M") "mode")
+							((string= definition-kind "V") "attr")
+							((string= definition-kind "G") "struct")))
+					      last-line
+					      last-col)))))
 	   (push (maybe-strip-semicolon
 		  (string-trim
 		   (list #\Space #\Newline)
