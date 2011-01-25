@@ -142,7 +142,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
   ; assume the keyword always begins a line, possibly with whitespace
   ; -- a terrible assumption
   (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A" keyword keyword))))
-    (loop for l from line-num
+    (loop for l from line-num upto (num-lines article)
 	  for line = (line-at article l)
        do
 	 (multiple-value-bind (begin end registers-begin registers-end)
