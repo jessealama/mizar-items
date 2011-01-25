@@ -79,6 +79,17 @@
 	  (dom:next-sibling next)
 	  next))))
 
+(defun next-non-blank-sibling-with-name (node target-name)
+  (loop
+     for next = (dom:next-sibling node) then (dom:next-sibling next)
+     do
+       (if next
+	   (unless (dom:text-node-p next)
+	     (let ((name (dom:local-name next)))
+	       (when (string= name target-name)
+		 (return next))))
+	   (return nil))))
+
 (defun last-non-blank-node? (node)
   (null (next-non-blank-sibling node)))
 
