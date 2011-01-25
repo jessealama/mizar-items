@@ -788,7 +788,16 @@ sibling elements; these need to be stored."
 
 (defun scheme-editing-instructions (item scheme-table items->articles itemization)
   (let* ((item-xml-node (xml-node item))
-	 (from-nodes (all-from-descendents item-xml-node))
+	 (item-xml-name (dom:local-name item-xml-node))
+	 (from-nodes (append (all-from-descendents item-xml-node)
+			     (when (string= item-xml-name "Proposition")
+			       (let* ((sibling (next-non-blank-sibling item-xml-node))
+				      (sibling-name (dom:local-name sibling)))
+				 (if (string= sibling-name "From")
+				     (list sibling)
+				     (if (string= sibling-name "By")
+					 nil
+					 (all-from-descendents sibling)))))))
 	 (instructions nil))
     (dolist (from-node from-nodes instructions)
       (multiple-value-bind (from-line-num from-col-num)
