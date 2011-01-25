@@ -898,7 +898,7 @@ of LINE starting from START."
   (warn "JA1...")
   (JA1 article directory "-q" "-l" "-s")
   (warn "unhereby...")
-  (unhereby article directory "-q" "-l" "-s")
+  (unhereby article directory "-q" "-l")
   (warn "dellink...")
   (dellink article directory "-q" "-l" "-s")
   (warn "CutSet...")
