@@ -67,6 +67,9 @@
      collecting elt into items
      finally (return items)))
 
+(defun last-n (lst n)
+  (nthcdr (- (length lst) n) lst))
+
 (defun tuple-lex-less (tuple-1 tuple-2)
   "Determine whether TUPLE-1 is lexicographically less than TUPLE-2,
   ignoring all but the first and second components of both tuples."
@@ -124,15 +127,15 @@ from the beginning of the list."
        finally
 	 (return (reverse chunks)))))
 
-(defun shortest-admissible-initial-segment (list pred)
+(defun shortest-admissible-final-segment (list pred)
   (labels ((iteratively-remove-from-end (list pred)
 	     (loop
 		with len = (length list)
-		for i from (1- len) downto 0
-		for trimmed = (first-n list i)
+		for i from 0 upto len
+		for trimmed = (last-n list i)
 		do
-		  (when (not (funcall pred trimmed))
-		    (return (append trimmed (list (nth i list)))))))
+		  (when (funcall pred trimmed)
+		    (return trimmed))))
 	   (iteratively-with-chunks (chunks pred)
 	     (let ((pred-on-chunked-list #'(lambda (chunks)
 					     (funcall pred (apply #'append chunks)))))
