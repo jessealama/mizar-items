@@ -379,7 +379,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			 (line-and-column last-line-and-col-node))
 		       (when (string= (dom:local-name last-line-and-col-node) "From") ; need to adjust forwards
 			 (multiple-value-bind (next-word-begin next-word-end)
-			     (scan "[A-Za-z0-9;]+" (line-at article end-line-num) :start end-col-num)
+			     (scan "[^;]+" (line-at article end-line-num) :start end-col-num)
 			   (declare (ignore next-word-begin))
 			   (setf end-col-num next-word-end)
 			   (warn "adjusting! real end is line ~d and col ~d" end-line-num end-col-num))))
