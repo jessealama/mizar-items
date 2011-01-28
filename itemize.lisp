@@ -1327,6 +1327,7 @@ of LINE starting from START."
 					;with num-symbols = (length symbols)
 	 with scheme-nr = 0
 	 with deftheorem-nr = 0
+         with num-errors = 0
 	 for candidate in all-candidates
 	 initially 
 	   (ensure-directories-exist dict-subdir)
