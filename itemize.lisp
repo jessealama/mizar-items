@@ -96,7 +96,9 @@
 		(multiple-value-setq (end-line-num end-column-num)
 		  (if real-last
 		      (let ((last-ref-child (last-child-with-name real-last "Ref")))
-			(line-and-column last-ref-child))
+			(if last-ref-child
+			    (line-and-column last-ref-child)
+			    (line-and-column real-last)))
 		      (line-and-column iterequality-node)))))
 	    (multiple-value-setq (begin-line-num begin-column-num)
 	      (first-keyword-before article (format nil "~A:" label) 
