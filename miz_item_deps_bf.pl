@@ -187,7 +187,6 @@ sub min { my ($x,$y) = @_; ($x <= $y)? $x : $y }
 sub PrepareXml
 {
     my ($filestem,$file_ext,$xmlelems,$removed,$xmlbeg,$xmlend) = @_;
-    print "preparexml: $filestem$file_ext\n";
     my $res = 0;
     open(XML1,">$filestem$file_ext");
     print XML1 $xmlbeg;
@@ -208,11 +207,8 @@ sub PrepareXml
 sub TestXMLElems ($$$)
 {
     my ($xml_elem,$file_ext,$filestem) = @_;
-    print $filestem;
-    print $gmakeenv;
-    print getcwd();
 
-    die "Accomodation errors" if(system("accom -l -q $filestem") != 0);
+    die "Accomodation errors" if(system("accom -l -q $filestem > /dev/null 2>/dev/null") != 0);
 
     my $xitemfile = $filestem . $file_ext;
     if (-e $xitemfile) {
@@ -231,7 +227,7 @@ sub TestXMLElems ($$$)
     if (defined $xmlbeg) {
       ## call Mizar parser to get the tp positions
       my @xmlelems = $xmlnodes =~ m/(<$xml_elem\b.*?<\/$xml_elem>)/sg; # this is a multiline match
-      die "Verification errors" if(system("$gverifier -l -q  $filestem") !=0);
+      die "Verification errors" if(system("$gverifier -l -q  $filestem > /dev/null 2>/dev/null") !=0);
       my %removed = ();		## indeces of removed elements
       ## ok, the first simple heuristic is to remove consecutive chunks
       ## of sqrt size and to retract to one-by-one if the chunk fails
@@ -245,7 +241,7 @@ sub TestXMLElems ($$$)
 	  $removed{$chunk * $chunksize + $elem} = 1;
 	}
 	PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	if (system("$gverifier -l -q  $filestem") !=0) {
+	if (system("$gverifier -l -q  $filestem > /dev/null 2> /dev/null") !=0) {
 	  foreach my $elem (0 .. $chunksize-1) {
 	    delete $removed{$chunk * $chunksize + $elem};
 	  }
@@ -256,7 +252,7 @@ sub TestXMLElems ($$$)
 		($chunk * $chunksize + $elem <= $#xmlelems)) {
 	      $removed{$chunk * $chunksize + $elem} = 1;
 	      PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	      if (system("$gverifier -l -q  $filestem") !=0) {
+	      if (system("$gverifier -l -q  $filestem > /dev/null 2> /dev/null") !=0) {
 		delete $removed{$chunk * $chunksize + $elem};
 		$found = 1;
 	      }
