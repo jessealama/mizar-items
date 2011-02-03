@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 
+use strict;
+
 my %item_to_extension =
   (
-   'Vocabulary' => 'vcl',
    'Definiens' => 'dfs',
    'RCluster' => 'ecl',
    'CCluster' => 'ecl',
