@@ -2547,7 +2547,7 @@ sub TestXMLElems ($$$)
 	    $removed{$chunk * $chunksize + $elem} = 1;
 	}
 	PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
+	if (system ("$verifier -a -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
 	{
 	    foreach my $elem (0 .. $chunksize -1)
 	    {
@@ -2563,16 +2563,45 @@ sub TestXMLElems ($$$)
 		{
 		    $removed{$chunk * $chunksize + $elem} = 1;
 		    PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-		    if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
+		    if (system ("$verifier -a -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
 		    {
 			delete $removed{$chunk * $chunksize + $elem};
 			$found = 1;
 		    }
 		}
-	    }
+	      }
 	}
     }
 
+    if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+      %removed = ();
+      foreach my $chunk (0 .. $chunks) {
+	foreach my $elem (0 .. $chunksize -1)
+	{
+	    $removed{$chunk * $chunksize + $elem} = 1;
+	}
+	PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
+	if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+	  foreach my $elem (0 .. $chunksize -1) {
+	    delete $removed{$chunk * $chunksize + $elem};
+	  }
+	  my $found = 0; ## when 1, at least one was found necessary already from these
+	  foreach my $elem (0 .. $chunksize -1) {
+	    ## if the first condition is unmet, we know the last
+	    ## elem is culprit and don't have to test
+	    if (!(($elem == $chunksize -1) && ($found == 0)) && 
+		($chunk * $chunksize + $elem <= $#xmlelems)) {
+	      $removed{$chunk * $chunksize + $elem} = 1;
+	      PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
+	      if (system ("$verifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+		delete $removed{$chunk * $chunksize + $elem};
+		$found = 1;
+	      }
+	    }
+	  }
+	}
+      }
+    }
 	
     # foreach my $chunk (0 .. $#xmlelems)
     # {
