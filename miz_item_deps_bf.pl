@@ -185,7 +185,7 @@ sub PrepareXml
     my $res = 0;
     open(XML1,">$filestem$file_ext");
     print XML1 $xmlbeg;
-    foreach my $elemnr (0 .. scalar(@$xmlelems)-1)
+    foreach my $elemnr (0 .. scalar(@$xmlelems) -1)
     {
 	if(! exists $removed->{$elemnr})
 	{
