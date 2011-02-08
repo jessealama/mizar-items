@@ -491,6 +491,7 @@ directive is not consulted."))
 				  (verifiable-with-directive article "schemes" lst directory))))
 
 (defun minimize-environment (article &optional (directory (sb-posix:getcwd)))
+  (warn "Minimizing the environment for ~A" article)
   (let ((new-article (copy-article article)))
     (setf (path new-article) (path article))
     (setf (vocabularies new-article)
