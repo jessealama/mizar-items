@@ -178,11 +178,6 @@ my $pxext = '.parx';
 my $miz = $gfilestem . ".miz";
 my $xml = $gfilestem . ".xml";
 
-sub MAXLINENR ()  { 100000000 } # we will break on files with lines above this nr
-
-sub min { my ($x,$y) = @_; ($x <= $y)? $x : $y }
-
-
 ## return the number of printed
 sub PrepareXml
 {
