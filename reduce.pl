@@ -59,7 +59,7 @@ foreach my $item (@items_for_article) {
 
   print "Brutalizing item $item of article $article...", "\n";
 
-  print "Verifiying article...", "\n";
+  print "Verifiying item...", "\n";
   
   my $verifier_time 
       = `/usr/bin/time --quiet --format="\%U" /mnt/sdb3/alama/mizar-items/verify-quietly.sh $item 2>&1`;
@@ -92,7 +92,7 @@ foreach my $item (@items_for_article) {
       my $err_message = $!;
       if ($exit_code == 0) {
 	print "successfully minimized item kind $item_kind", "\n";
-	system ('cp', "$article.$extension", "$article-needed-$item_kind");
+	system ('cp', "$item.$extension", "$item-needed-$item_kind");
       } else {
 	print "failure", "\n";
 	system ('rm', "-Rf", "/dev/shm/alama/itemization/$article") == 0
