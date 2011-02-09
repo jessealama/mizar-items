@@ -233,44 +233,78 @@ sub TestXMLElems ($$$)
       my $total = scalar(@xmlelems);
       my $chunksize = 1 + int(sqrt($total));
       my $chunks = int($total / $chunksize);
-      foreach my $chunk (0 .. $chunks) {
-	foreach my $elem (0 .. $chunksize-1) {
-	  $removed{$chunk * $chunksize + $elem} = 1;
+      foreach my $chunk (0 .. $chunks) 
+	{
+	  foreach my $elem (0 .. $chunksize -1)
+	    {
+	      $removed{$chunk * $chunksize + $elem} = 1;
+	    }
+	  PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
+	  if (system ("$gverifier -a -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
+	    {
+	      foreach my $elem (0 .. $chunksize -1)
+		{
+		  delete $removed{$chunk * $chunksize + $elem};
+		}
+	      my $found = 0; ## when 1, at least one was found necessary already from these
+	      foreach my $elem (0 .. $chunksize -1)
+		{
+		  ## if the first condition is unmet, we know the last
+		  ## elem is culprit and don't have to test
+		  if(!(($elem == $chunksize -1) && ($found == 0)) && 
+		     ($chunk * $chunksize + $elem <= $#xmlelems))
+		    {
+		      $removed{$chunk * $chunksize + $elem} = 1;
+		      PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
+		      if (system ("$gverifier -a -s -l -q $filestem > /dev/null 2>/dev/null") != 0)
+			{
+			  delete $removed{$chunk * $chunksize + $elem};
+			  $found = 1;
+			}
+		    }
+		}
+	    }
 	}
-	PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	if (system("timeout $timeout $gverifier -l -q -s $filestem > /dev/null 2> /dev/null") !=0) {
-	  foreach my $elem (0 .. $chunksize-1) {
+      
+      if (system ("$gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+	print "heuristic failed for $filestem", "\n";
+	%removed = ();
+	foreach my $chunk (0 .. $chunks) {
+	  foreach my $elem (0 .. $chunksize -1)
+	    {
+	      $removed{$chunk * $chunksize + $elem} = 1;
+	    }
+	  PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
+	if (system ("$gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+	  foreach my $elem (0 .. $chunksize -1) {
 	    delete $removed{$chunk * $chunksize + $elem};
 	  }
 	  my $found = 0; ## when 1, at least one was found necessary already from these
-	  foreach my $elem (0 .. $chunksize-1) {
-	    ## if the first condition is unmet, we know the last elem is culprit and don't have to test
-	    if (!(($elem==$chunksize-1) && ($found==0)) && 
+	  foreach my $elem (0 .. $chunksize -1) {
+	    ## if the first condition is unmet, we know the last
+	    ## elem is culprit and don't have to test
+	    if (!(($elem == $chunksize -1) && ($found == 0)) && 
 		($chunk * $chunksize + $elem <= $#xmlelems)) {
 	      $removed{$chunk * $chunksize + $elem} = 1;
 	      PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	      if (system("timeout $timeout $gverifier -l -q -s $filestem > /dev/null 2> /dev/null") !=0) {
+	      if (system ("$gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
 		delete $removed{$chunk * $chunksize + $elem};
 		$found = 1;
 	      }
 	    }
 	  }
 	}
+	}
+      } else {
+	print "heuristic succeeded for $filestem!", "\n";
       }
-
-	
-      # foreach my $chunk (0 .. $#xmlelems)
-      # {
-      # 	$removed{$chunk} = 1;
-      # 	PrepareXml($filestem,$file_ext,$xmlelems,$removed,$xmlbeg,$xmlend);
-      # 	delete $removed{$chunk} if(system("$gverifier $glflag $gquietflag  $filestem") !=0);
-      # }
+      
       ## print the final form
       my $needed = PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
       ## print stats
       print ("total ", $xml_elem, ": ", $total, ", removed: ", $total-$needed, ", needed: ", $needed, "\n");
     }
-
+    
 }
 
 TestXMLElems ($gelem, $gext, $gdirectories . $gfilestem);
