@@ -1460,7 +1460,26 @@ of LINE starting from START."
 					      (format nil "theorem~%~A" original-text) ; promote to theorem
 					      original-text))))
 		       (setf (text article-for-item) text))
-		     (write-article article-for-item)
+		     ;; trim irrelevant vocabularies, theorems, and schemes
+		     (let* ((real-evl-name (format nil "~A.evl" item-name))
+			   (real-evl-path (concat (namestring (pathname-as-directory text-subdir)) real-evl-name))
+			   (tmp-evl-name (format nil "~A.$ev" item-name))
+			   (tmp-evl-path (concat (namestring (pathname-as-directory text-subdir)) tmp-evl-name)))
+		       (handler-case
+			   (irrvoc article-for-item (location sandbox) "-l")
+			 (mizar-error () nil))
+		       (when (file-exists-p tmp-evl-path)
+			 (warn "trimming vocab!")
+			 (rename-file tmp-evl-path real-evl-path)
+			 (refresh-environment article-for-item))
+		       (handler-case
+			   (irrths article-for-item (location sandbox) "-l")
+			 (mizar-error () nil))
+		       (when (file-exists-p tmp-evl-path)
+			 (warn "trimming theorems/schemes!")
+			 (rename-file tmp-evl-path real-evl-path)
+			 (refresh-environment article-for-item)))
+		     (write-article article-for-item) 
 		     (push (uppercase item-name) earlier-item-names)
 		     (setf (gethash candidate items->articles) article-for-item)
 		     (push candidate real-items)
