@@ -1441,7 +1441,7 @@ of LINE starting from START."
 		     (write-article article-for-item)
 		     (verify-and-export article-for-item local-db)
 		     (minimize-context candidate (namestring local-db))
-		     (minimize-environment article-for-item (namestring local-db))
+		     ;; (minimize-environment article-for-item (namestring local-db))
 		     ;; synchronize with CANDIDATE
 		     (setf (vocabularies candidate) (vocabularies article-for-item)
 			   (notations candidate) (notations article-for-item)
