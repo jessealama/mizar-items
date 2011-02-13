@@ -206,7 +206,7 @@ sub TestXMLElems ($$$)
 {
     my ($xml_elem,$file_ext,$filestem) = @_;
 
-    die "Accomodation errors for $filestem under $gtopdir" if(system("timeout $timeout accom -l -q -s $filestem > /dev/null 2>/dev/null") != 0);
+    # die "Accomodation errors for $filestem under $gtopdir" if(system("timeout $timeout accom -l -q -s $filestem > /dev/null 2>/dev/null") != 0);
 
     my $xitemfile = $filestem . $file_ext;
     if (-e $xitemfile) {
