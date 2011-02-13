@@ -122,7 +122,7 @@
 LINE-NUM and COL-NUM in the text of ARTICLE."
   ; assume the keyword always begins a line, possibly with whitespace
   ; -- a terrible assumption
-  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A[: ]" keyword keyword))))
+  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A[: ]*" keyword keyword))))
     (loop for l from line-num downto 1
 	  for line = (line-at article l)
        do
@@ -1441,7 +1441,7 @@ of LINE starting from START."
 		     (write-article article-for-item)
 		     (verify-and-export article-for-item local-db)
 		     (minimize-context candidate (namestring local-db))
-		     (minimize-environment article-for-item (namestring local-db))
+		     ;; (minimize-environment article-for-item (namestring local-db))
 		     ;; synchronize with CANDIDATE
 		     (setf (vocabularies candidate) (vocabularies article-for-item)
 			   (notations candidate) (notations article-for-item)
