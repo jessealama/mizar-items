@@ -76,7 +76,7 @@ foreach my $item (@items_for_article) {
   chomp $verifier_time;
   print "It took $verifier_time seconds to verifiy $item", "\n";
 
-  my $timeout = (int ($verifier_time * 5) + 1) . "s";
+  my $timeout = (int ($verifier_time * 2) + 1) . "s";
 
   print "Using a timeout of $timeout seconds", "\n";
 
