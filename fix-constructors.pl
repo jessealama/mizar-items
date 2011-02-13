@@ -4,15 +4,7 @@ use strict;
 
 my %item_to_extension =
   (
-   'Definiens' => 'dfs',
-   '[RCF]Cluster' => 'ecl',
-#   'CCluster' => 'ecl',
-#   'FCluster' => 'ecl',
-#   'Scheme' => 'esh',
    'Constructor' => 'atr',
-#   'Theorem' => 'eth',
-   'Identify' => 'eid',
-   'Pattern' => 'eno',
   );
 
 my $article = $ARGV[0];
@@ -76,42 +68,17 @@ foreach my $item (@items_for_article) {
   chomp $verifier_time;
   print "It took $verifier_time seconds to verifiy $item", "\n";
 
-  my $timeout = (int ($verifier_time * 2) + 1) . "s";
+  my $timeout = (int ($verifier_time * 5) + 1) . "s";
 
   print "Using a timeout of $timeout seconds", "\n";
 
-  my $item_evl = "$item.evl";
-  my $item_ev_tmp = "$item.\$ev";
+  print "making new ecl file...", "\n";
 
-  # reduce vocabularies
-  my $irrvoc_result = system ('irrvoc', '-l', $item);
-  my $irrvoc_exit_code = ($irrvoc_result >> 8);
-  if ($irrvoc_exit_code == 0) {
-    # do nothing -- there were no non-redundant vocabularies
-  } elsif ($irrvoc_exit_code == 1) {
-    unless (-e $item_ev_tmp) {
-      die "irrvoc exited with code 1, but it failed to generate a new evl file";
-    }
-    system ('mv', $item_ev_tmp, $item_evl) == 0
-      or die "Failure: can't move '$item_ev_tmp' to '$item_evl': $!";
-  } else {
-      die "irrvoc died on item $item of article $article with exit code $irrvoc_exit_code!";
-  }
-
-  # reduce theorems and schemes
-  system ('irrths', '-l', $item);
-  my $irrths_result = system ('irrths', '-l', $item);
-  my $irrths_exit_code = ($irrths_result >> 8);
-  if ($irrths_exit_code == 0) {
-    # do nothing -- there were no non-redundant theorems/schemes
-  } elsif ($irrths_exit_code == 1) {
-    unless (-e $item_ev_tmp) {
-      die "irrths exited with code 1, but it failed to generate a new evl file";
-    }
-    system ('mv', $item_ev_tmp, $item_evl) == 0
-      or die "Failure: can't move '$item_ev_tmp' to '$item_evl': $!";
-  } else {
-      die "irrths died on item $item of article $article with exit code $irrths_exit_code!";
+  my $ecl_file = "$article_on_harddisk.ecl";
+  open (ECL, ">", $ecl_file) or die "Can't open an output filestream for $ecl_file!";
+  if (-e $article_on_harddisk-needed-CCluster) {
+      my $ccluster_parser = XML::LibXML->new();
+      my $ccluster_doc = $idx_parser->parse_file ($article_idx);
   }
 
   foreach my $item_kind (keys %item_to_extension) {
@@ -126,7 +93,7 @@ foreach my $item (@items_for_article) {
       my $err_message = $!;
       if ($exit_code == 0) {
 	print "successfully minimized item kind $item_kind", "\n";
-	# system ('cp', "$item.$extension", "$item-needed-$item_kind");
+	system ('cp', "$item.$extension", "$item-needed-$item_kind");
       } else {
 	print "failure", "\n";
 	system ('rm', "-Rf", "/dev/shm/alama/itemization/$article") == 0
