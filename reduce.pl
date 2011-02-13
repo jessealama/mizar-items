@@ -62,15 +62,16 @@ foreach my $item (@items_for_article) {
   print "Verifiying item...", "\n";
   
   my $verifier_time 
-      = `/usr/bin/time --quiet --format="\%U" /mnt/sdb3/alama/mizar-items/verify-quietly.sh $item 2>&1`;
-#                                                                                                 ^^^^
-# /usr/bin/time reports its output on standard error.  If you drop the
-# "2>&1", you will find that $verifier_time is equal to the empty
-# string, and you'll *see* the output of the time command printed on
-# the terminal where you're executing this script.
-  if ($? != 0) {
+      = `timeout 5m /mnt/sdb3/alama/mizar-items/timed-quiet-verify.sh $item`;
+  my $exit_code = $?;
+  $exit_code >> 8;
+  if ($exit_code != 0) {
     system ('rm', "-Rf", $article_in_ramdisk); # trash whatever is there
-    die "Failure: we were unable to verify item $item or article $article!";
+    if ($exit_code == 124) {
+	die "Failure: timeout verifying item $item of article $article!";
+    } else {
+	die "Failure: we were unable to verify item $item of article $article!";
+    }
   }
   chomp $verifier_time;
   print "It took $verifier_time seconds to verifiy $item", "\n";
