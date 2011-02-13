@@ -451,44 +451,52 @@ directive is not consulted."))
     (verifiable? new-article directory)))
 
 (defun find-minimal-vocabularies (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (vocabularies article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "vocabularies" lst directory))))
+  (shortest-admissible-final-segment
+   (vocabularies article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "vocabularies" lst directory))))
 
 (defun find-minimal-notations (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (notations article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "notations" lst directory))))
+  (shortest-admissible-final-segment
+   (notations article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "notations" lst directory))))
 
 (defun find-minimal-constructors (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (constructors article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "constructors" lst directory))))
+  (shortest-admissible-final-segment
+   (constructors article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "constructors" lst directory))))
 
 (defun find-minimal-requirements (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (requirements article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "requirements" lst directory))))
+  (shortest-admissible-final-segment
+   (requirements article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "requirements" lst directory))))
 
 (defun find-minimal-registrations (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (registrations article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "registrations" lst directory))))
+  (shortest-admissible-final-segment
+   (registrations article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "registrations" lst directory))))
 
 (defun find-minimal-definitions (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (definitions article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "definitions" lst directory))))
+  (shortest-admissible-final-segment
+   (definitions article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "definitions" lst directory))))
 
 (defun find-minimal-theorems (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (theorems article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "theorems" lst directory))))
+  (shortest-admissible-final-segment
+   (theorems article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "theorems" lst directory))))
 
 (defun find-minimal-schemes (article &optional (directory (sb-posix:getcwd)))
-  (minimal-sublist-satisfying (schemes article)
-			      #'(lambda (lst)
-				  (verifiable-with-directive article "schemes" lst directory))))
+  (shortest-admissible-final-segment
+   (schemes article)
+   #'(lambda (lst)
+       (verifiable-with-directive article "schemes" lst directory))))
 
 (defun minimize-environment (article &optional (directory (sb-posix:getcwd)))
   (warn "Minimizing the environment for ~A" article)
@@ -510,6 +518,14 @@ directive is not consulted."))
 	  (find-minimal-registrations new-article directory))
     (setf (definitions new-article)
 	  (find-minimal-definitions new-article directory))
+    ;; report shortenings
+    (warn "we cut ~d items from the vocabularies directive" (- (length (vocabularies article)) (length (vocabularies new-article))))
+    (warn "we cut ~d items from the theorems directive" (- (length (theorems article)) (length (theorems new-article))))
+    (warn "we cut ~d items from the requirements directive" (- (length (requirements article)) (length (requirements new-article))))
+    (warn "we cut ~d items from the schemes directive" (- (length (schemes article)) (length (schemes new-article))))
+    (warn "we cut ~d items from the notations directive" (- (length (notations article)) (length (notations new-article))))
+    (warn "we cut ~d items from the constructors directive" (- (length (constructors article)) (length (constructors new-article))))
+    (warn "we cut ~d items from the definitions directive" (- (length (definitions article)) (length (definitions new-article))))
     ;; now sync
     (setf (vocabularies article)
 	  (vocabularies new-article))
