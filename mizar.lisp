@@ -185,6 +185,8 @@ variable (at load time).")
 (define-mizar-tool "envget")
 (define-mizar-tool "exporter")
 (define-mizar-tool "transfer")
+(define-mizar-tool "irrths")
+(define-mizar-tool "irrvoc")
 
 (defmacro define-mizar-text-transformer (tool &optional (ignore-exit-code nil))
   ; check that TOOL is real
