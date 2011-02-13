@@ -126,7 +126,7 @@ foreach my $item (@items_for_article) {
       my $err_message = $!;
       if ($exit_code == 0) {
 	print "successfully minimized item kind $item_kind", "\n";
-	system ('cp', "$item.$extension", "$item-needed-$item_kind");
+	# system ('cp', "$item.$extension", "$item-needed-$item_kind");
       } else {
 	print "failure", "\n";
 	system ('rm', "-Rf", "/dev/shm/alama/itemization/$article") == 0
