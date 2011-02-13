@@ -84,7 +84,7 @@ foreach my $item (@items_for_article) {
   my $item_ev_tmp = "$item.\$ev";
 
   # reduce vocabularies
-  my $irrvoc_result = system ('irrvoc', '-l', $item);
+  my $irrvoc_result = system ("irrvoc -l $item > /dev/null 2>&1");
   my $irrvoc_exit_code = ($irrvoc_result >> 8);
   if ($irrvoc_exit_code == 0) {
     # do nothing -- there were no non-redundant vocabularies
@@ -99,7 +99,7 @@ foreach my $item (@items_for_article) {
   }
 
   # reduce theorems and schemes
-  system ('irrths', '-l', $item);
+  system ("irrths -l $item > /dev/null 2>&1");
   my $irrths_result = system ('irrths', '-l', $item);
   my $irrths_exit_code = ($irrths_result >> 8);
   if ($irrths_exit_code == 0) {
