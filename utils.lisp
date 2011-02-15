@@ -33,11 +33,13 @@
   (format nil "~A~%" str))
 
 (defun ensure-final-semicolon (str)
-  (let* ((len (length str))
-	 (final-char (aref str (1- len))))
-    (if (eq final-char #\;)
-	str
-	(format nil "~A;" str))))
+  (if (string= str "")
+      ""
+      (let* ((len (length str))
+	     (final-char (aref str (1- len))))
+	(if (eq final-char #\;)
+	    str
+	    (format nil "~A;" str)))))
 
 (defun maybe-strip-semicolon (string)
   (if (string= string "")
