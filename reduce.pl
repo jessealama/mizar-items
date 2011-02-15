@@ -8,9 +8,9 @@ my %item_to_extension =
    '[RCF]Cluster' => 'ecl',
 #   'CCluster' => 'ecl',
 #   'FCluster' => 'ecl',
-   'Scheme' => 'esh',
+#   'Scheme' => 'esh',
    'Constructor' => 'atr',
-   'Theorem' => 'eth',
+#   'Theorem' => 'eth',
    'Identify' => 'eid',
    'Pattern' => 'eno',
   );
