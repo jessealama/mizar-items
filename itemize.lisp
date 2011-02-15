@@ -276,102 +276,93 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		    items)))))
     (reverse items))))
 
+(defun definition-kind->keyword (definition-kind)
+  (cond ((string= definition-kind "K") "func")
+	((string= definition-kind "R") "pred")
+	((string= definition-kind "M") "mode")
+	((string= definition-kind "V") "attr")
+	((string= definition-kind "G") "struct")))
+
+(defun attribute-or-predicate (definition-kind)
+  (or (string= definition-kind "R")
+      (string= definition-kind "V")))
+
 (defun split-definitionblock-node (definitionblock-node article)
-  (loop
-     with new-definitions = nil
-     with definition-nodes = (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node))
-     with num-definition-nodes = (length definition-nodes)
-     with last-line = nil
-     with last-col = nil
-     with context = nil
-     for i from 1
-     for definition-node in definition-nodes
-     do
-       (when (= i 1)
+  (flet ((keyword-for-item-kind (item-name redefinition? item-kind)
+	   (cond ((string= item-name "Definition")
+		  (if (string= redefinition? "true")
+		      "redefine"
+		      (definition-kind->keyword item-kind)))
+		 ((string= item-name "Canceled") "canceled")
+		 ((string= item-name "Let") "let")
+		 (t (error "Unknown node type following a Definition: '~A'" item-name)))))
+    (loop
+       with new-definitions = nil
+       with definition-nodes = (xpath:all-nodes (xpath:evaluate "Definition | Canceled" definitionblock-node))
+       with num-definition-nodes = (length definition-nodes)
+       with last-line = nil
+       with last-col = nil
+       with block-end-line = nil
+       with block-end-col = nil
+       with context = nil
+       with endposition-child = (car (last (xpath:all-nodes (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))
+       for i from 1
+       for definition-node in definition-nodes
+       for definition-kind = (value-of-kind-attribute definition-node)
+       for redefinition = (value-of-redefinition-attribute definition-node)
+       for expandable = (value-of-expandable-attribute definition-node)
+       for node-type = (dom:local-name definition-node)
+       for sibling = (next-non-blank-sibling definition-node)
+       for sibling-kind = (value-of-kind-attribute sibling)
+       for sibling-name = (dom:local-name sibling)
+       for sibling-redefinition = (value-of-redefinition-attribute sibling)
+       initially
+	 (warn "we have to consider ~d items" num-definition-nodes)
 	 (multiple-value-setq (last-line last-col)
-	   (line-and-column definitionblock-node)))
-       (let (candidate-begin-line-num candidate-begin-col-num
-	     begin-line-num begin-col-num end-line-num end-col-num )
-	 (let ((definition-kind (value-of-kind-attribute definition-node))
-	       (redefinition (value-of-redefinition-attribute definition-node))
-	       (expandable (value-of-expandable-attribute definition-node)))
-	   (cond ((and (string= definition-kind "M")
-		       (string= expandable "true"))
-		  (multiple-value-setq (begin-line-num begin-col-num)
-		    (first-keyword-after article "mode" last-line last-col)))
-		 (t
-		  (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
-		    (line-and-column definition-node))
-		  (if (and candidate-begin-line-num candidate-begin-col-num)
-		      (multiple-value-setq (begin-line-num begin-col-num)
-			(first-keyword-before article
-					      (if (string= redefinition "true")
-						  "redefine"
-						  (cond ((string= definition-kind "K") "func")
-							((string= definition-kind "R") "pred")
-							((string= definition-kind "M") "mode")
-							((string= definition-kind "V") "attr")
-							((string= definition-kind "G") "struct")))
-					      candidate-begin-line-num
-					      candidate-begin-col-num))
-		      (multiple-value-setq (begin-line-num begin-col-num)
-			(first-keyword-after article
-					      (if (string= redefinition "true")
-						  "redefine"
-						  (cond ((string= definition-kind "K") "func")
-							((string= definition-kind "R") "pred")
-							((string= definition-kind "M") "mode")
-							((string= definition-kind "V") "attr")
-							((string= definition-kind "G") "struct")))
-					      last-line
-					      last-col)))))
+	   (line-and-column definitionblock-node))
+	 (multiple-value-setq (block-end-line block-end-col)
+	   (line-and-column endposition-child))
+       do
+         ;; first find the beginning of this definition/canceled
+	 (let (begin-line-num begin-col-num end-line-num end-col-num)
+	   (multiple-value-setq (begin-line-num begin-col-num)
+	     (if (and (string= definition-kind "M") (string= expandable "true"))
+		 (first-keyword-after article "mode" last-line last-col)
+		 (multiple-value-bind (candidate-begin-line-num candidate-begin-col-num)
+		     (line-and-column definition-node)
+		   (warn "candidate-begin-line = ~d and candidate-begin-col = ~d" candidate-begin-line-num candidate-begin-col-num)
+		   (if (and candidate-begin-line-num candidate-begin-col-num)
+		       (first-keyword-after article
+					     (if (string= redefinition "true")
+						 "redefine"
+						 (definition-kind->keyword definition-kind))
+					     candidate-begin-line-num
+					     candidate-begin-col-num)
+		       (first-keyword-after article
+					    (if (string= node-type "Canceled")
+						"canceled"
+						(if (string= redefinition "true")
+						    "redefine"
+						    (definition-kind->keyword definition-kind)))
+					    last-line
+					    last-col)))))
+	   ;; now that we've found the beginning, let's grab the text
 	   (push (maybe-strip-semicolon
 		  (string-trim
 		   (list #\Space #\Newline)
 		   (region article last-line last-col begin-line-num begin-col-num)))
 		 context)
-	   (if (or (string= definition-kind "R")
-		   (string= definition-kind "V"))
+	   (if (attribute-or-predicate definition-kind)
 	       (if (= i num-definition-nodes)
-		   (let ((endposition-child (car (last (xpath:all-nodes (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))))
-		     (warn "R or V case")
-		     (multiple-value-bind (block-end-line block-end-col)
-			 (line-and-column endposition-child)
-		       (setf end-line-num block-end-line
-			     end-col-num (- block-end-col 3)))) ; remove "end"
-		   (let* ((sibling (next-non-blank-sibling definition-node))
-			  (sibling-kind (value-of-kind-attribute sibling))
-			  (sibling-name (dom:local-name sibling))
-			  (sibling-redefinition (value-of-redefinition-attribute sibling)))
-		     (let ((keyword-to-look-for (cond ((string= sibling-name "Definition")
-						       (if (string= sibling-redefinition "true")
-							   "redefine"
-							   (cond ((string= sibling-kind "K")
-								  "func")
-								 ((string= sibling-kind "R")
-								  "pred")
-								 ((string= sibling-kind "M")
-								  "mode")
-								 ((string= sibling-kind "V")
-								  "attr")
-								 ((string= sibling-kind "G")
-								  "struct"))))
-						      ((string= sibling-name "Canceled")
-						       "canceled")
-						      ((string= sibling-name "Let")
-						       (warn "let case!")
-						       "let"))))
+		   (setf end-line-num block-end-line
+			 end-col-num (- block-end-col 3)) ; remove "end"
+		   (let ((keyword-to-look-for (keyword-for-item-kind sibling-name sibling-redefinition sibling-kind)))
 		     (multiple-value-setq (end-line-num end-col-num)
 		       (first-keyword-after article
 					    keyword-to-look-for
 					    begin-line-num
 					    (1+ begin-col-num)))
-		     (warn "end-line = ~d and end-col is ~d" end-line-num end-col-num)
-		     (if (zerop end-col-num)
-			 (setf end-line-num (1- end-line-num)
-			       end-col-num (length (line-at article
-							    (1- end-line-num))))
-			 (setf end-col-num (1- end-col-num))))))
+		     (warn "end-line = ~d and end-col is ~d" end-line-num end-col-num)))
 	       (let ((last-line-and-col (last (descendents-with-line-and-column definition-node))))
 		 (if last-line-and-col
 		     (let ((last-line-and-col-node (first last-line-and-col)))
@@ -384,64 +375,40 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 			   (setf end-col-num next-word-end)
 			   (warn "adjusting! real end is line ~d and col ~d" end-line-num end-col-num))))
 		     (if (= i num-definition-nodes)
-			 (let ((endposition-child (car (last (xpath:all-nodes (xpath:evaluate "EndPosition[position()=last()]" definitionblock-node))))))
-			   (multiple-value-bind (block-end-line block-end-col)
-			       (line-and-column endposition-child)
-			     (setf end-line-num block-end-line
-				   end-col-num (- block-end-col 3)))) ; remove "end"
-			 (let* ((sibling (next-non-blank-sibling definition-node))
-				(sibling-name (dom:local-name sibling))
-				(sibling-kind (value-of-kind-attribute sibling))
-				(sibling-redefinition (value-of-redefinition-attribute sibling)))
+			 (setf end-line-num block-end-line
+			       end-col-num (- block-end-col 3)) ; remove "end"
+			 (progn
 			   (multiple-value-setq (end-line-num end-col-num)
 			     (first-keyword-after article
-						  (cond ((string= sibling-name "Definition")
-							 (if (string= sibling-redefinition "true")
-							     "redefine"
-							     (cond ((string= sibling-kind "K")
-								    "func")
-								   ((string= sibling-kind "R")
-								    "pred")
-								   ((string= sibling-kind "M")
-								    "mode")
-								   ((string= sibling-kind "V")
-								    "attr")
-								   ((string= sibling-kind "G")
-								    "struct"))))
-							((string= sibling-name "Canceled")
-							  "canceled")
-							((string= sibling-name "Let")
-							 "let")
-							(t
-							 (error "Unknown node type following a Definition: '~A'" sibling-name)))
+						  (keyword-for-item-kind sibling-name sibling-redefinition sibling-kind)
 						  begin-line-num
-					      (1+ begin-col-num)))
+						  (1+ begin-col-num)))
 			   (if (zerop end-col-num)
 			       (setf end-line-num (1- end-line-num)
 				     end-col-num (length (line-at article
 								  (1- end-line-num))))
-			       (setf end-col-num (1- end-col-num)))))))))
-	 (setf last-line end-line-num
-	       last-col end-col-num)
-	 (push (ensure-final-semicolon
-		(concat (if (= i 1)
-			    (format nil "~%")
-			    (format nil "definition~%"))
-			(reduce #'concat (reverse context))
-			(format nil "~%")
-			(ensure-final-semicolon
-			 (string-trim
-			  '(#\Space #\Newline)
-			  (region article
-				  begin-line-num
-				  begin-col-num
-				  end-line-num
-				  end-col-num)))
-			(format nil "~%end;")))
-	       new-definitions))
-     finally (return (reverse new-definitions))))
+			       (setf end-col-num (1- end-col-num))))))))
+	   (setf last-line end-line-num
+		 last-col end-col-num)
+	   (push (ensure-final-semicolon
+		  (concat (if (= i 1)
+			      (format nil "~%")
+			      (format nil "definition~%"))
+			  (reduce #'concat (reverse context))
+			  (format nil "~%")
+			  (ensure-final-semicolon
+			   (string-trim
+			    '(#\Space #\Newline)
+			    (region article
+				    begin-line-num
+				    begin-col-num
+				    end-line-num
+				    end-col-num)))
+			  (format nil "~%end;")))
+		 new-definitions))
+       finally (return (reverse new-definitions)))))
 
-(defun definitionblock-items (article)
+(Defun definitionblock-items (article)
   "Definitions are a special case.  They can generate DefTheorem
 sibling elements; these need to be stored."
   (let ((items (block-items "DefinitionBlock" "definition" 'definition-item article)))
@@ -1250,7 +1217,7 @@ of LINE starting from START."
        for init = (initialize-article)
        for xml = (xml-doc article)
        for bad-definitionblocks = (remove-if-not #'(lambda (definitionblock-node)
-						     (> (length (xpath:all-nodes (xpath:evaluate "Definition" definitionblock-node)))
+						     (> (length (xpath:all-nodes (xpath:evaluate "Definition | Canceled" definitionblock-node)))
 							1))
 						 (xpath:all-nodes (xpath:evaluate "Article/DefinitionBlock" xml)))
        for bad-registrationblocks = (remove-if-not #'(lambda (registrationblock-node)
