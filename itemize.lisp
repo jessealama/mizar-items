@@ -1383,7 +1383,26 @@ of LINE starting from START."
 						     ;; :vocabularies (if (member "TARSKI" (vocabularies article-in-sandbox) :test #'string=)
 						     ;; 			 (cons "TARSKI" new-vocabularies)
 						     ;; 			 new-vocabularies)
-						     :pretext (dom:map-document (cxml:make-string-sink) (cxml-dom:create-document (xml-node candidate)))
+						     :pretext (concat
+							       (dom:map-document (cxml:make-string-sink) (cxml-dom:create-document (xml-node candidate))
+										 :include-doctype nil)
+							       (if (typep candidate 'definition-item)
+								   (loop
+								      with start = (xml-node candidate)
+								      with def-xml = ""
+								      for sibling = (next-non-blank-sibling start) then (next-non-blank-sibling sibling)
+								      do
+									(if (null sibling)
+									    (return def-xml)
+									    (let ((sibling-name (dom:local-name sibling)))
+									      (if (or (string= sibling-name "DefTheorem")
+										      (string= sibling-name "Definiens"))
+										  (setf def-xml 
+											(concat def-xml
+												(format nil "~%")
+												(dom:map-document (cxml:make-string-sink) (cxml-dom:create-document sibling))))
+										  (return def-xml)))))
+								   ""))
 						     :vocabularies new-vocabularies
 						     :notations new-notations
 						     :constructors new-contructors
