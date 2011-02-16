@@ -7,12 +7,11 @@ article_on_harddisk=$harddisk/$article;
 article_in_ramdisk=$ramdisk/$article-1;
 
 sbcl --disable-ldb \
-     --dynamic-space-size 16000 \
+     --dynamic-space-size 8000 \
      --noinform \
      --core mizar \
      --eval '(in-package :mizar)' \
-     --eval "(handler-bind ((warning #'muffle-warning)) (itemize-no-errors \"$article\"))" \
-     --eval '(sb-ext:quit)' \
+     --eval "(if (handler-bind ((warning #'muffle-warning)) (itemize-no-errors \"$article\")) (sb-ext:quit :unix-status 0) (sb-ext:quit :unix-status 1))"
      > /dev/null 2>&1;
 
 if [[ $? -eq "0" ]]; then

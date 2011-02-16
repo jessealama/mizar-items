@@ -332,7 +332,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		     (line-and-column definition-node)
 		   (warn "candidate-begin-line = ~d and candidate-begin-col = ~d" candidate-begin-line-num candidate-begin-col-num)
 		   (if (and candidate-begin-line-num candidate-begin-col-num)
-		       (first-keyword-after article
+		       (first-keyword-before article
 					     (if (string= redefinition "true")
 						 "redefine"
 						 (definition-kind->keyword definition-kind))
@@ -1626,9 +1626,11 @@ of LINE starting from START."
   (handler-case
       (progn
 	(itemize article nil)
-	(format t "~a: success" article))
+	(format t "~a: success~%" article)
+	t)
       (error ()
-	(format t "~a: failure" article))))
+	(format *error-output* "~a: failure~%" article)
+	nil)))
 
 (defun dependency-graph (itemization)
   (loop
