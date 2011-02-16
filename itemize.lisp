@@ -1626,9 +1626,11 @@ of LINE starting from START."
   (handler-case
       (progn
 	(itemize article nil)
-	(format t "~a: success" article))
+	(format t "~a: success~%" article)
+	t)
       (error ()
-	(format t "~a: failure" article))))
+	(format *error-output* "~a: failure~%" article)
+	nil)))
 
 (defun dependency-graph (itemization)
   (loop
