@@ -32,8 +32,8 @@ my %item_to_extension =
 
 my $article = $ARGV[0];
 
-my $ramdisk = "/dev/shm/alama/itemization";
-my $harddisk = "/mnt/sdb3/alama/itemization";
+my $ramdisk = "/Volumes/ramdisk";
+my $harddisk = "/tmp";
 
 # Make sure we don't max out the ramdisk
 my @stuff_in_ramdisk = `find $ramdisk -mindepth 1 -maxdepth 1 -type d`;
@@ -173,7 +173,7 @@ foreach my $item (@items_for_article) {
   print "Verifiying item...", "\n";
   
   my $verifier_time 
-    = `timeout 5m /mnt/sdb3/alama/mizar-items/timed-quiet-verify.sh $item`;
+      = `gtimeout 5m /Users/alama/sources/mizar/mizar-items/timed-quiet-verify.sh $item`;
   my $exit_code = $?;
   $exit_code >> 8;
   if ($exit_code != 0) {
@@ -192,7 +192,7 @@ foreach my $item (@items_for_article) {
   print "Using a timeout of $timeout seconds", "\n";
 
   # absrefs
-  system ("xsltproc /home/urban/gr/xsl4mizar/addabsrefs.xsl $item.xml -o $item.xml1 > /dev/null 2>&1");
+  system ("xsltproc /Users/alama/sources/mizar/xsl4mizar/addabsrefs.xsl $item.xml -o $item.xml1 > /dev/null 2>&1");
   # skip checking the exit code because it seems that this doesn't always give us 0 -- bad :-<
 
   # take cae of theorems and schemes first
@@ -258,7 +258,7 @@ foreach my $item (@items_for_article) {
       
     if (-e "$item.$extension") {
       print "brutalizing item kind $item_kind for item $item of article $article...", "\n";
-      my $exit_code = system ('/mnt/sdb3/alama/mizar-items/miz_item_deps_bf.pl', $item_kind, $extension, $item, $timeout);
+      my $exit_code = system ('/Users/alama/sources/mizar/mizar-items/miz_item_deps_bf.pl', $item_kind, $extension, $item, $timeout);
 	
       my $exit_code = $exit_code >> 8;
       my $err_message = $!;
@@ -267,7 +267,7 @@ foreach my $item (@items_for_article) {
 	# system ('cp', "$item.$extension", "$item-needed-$item_kind");
       } else {
 	print "failure", "\n";
-	system ('rm', "-Rf", "/dev/shm/alama/itemization/$article") == 0
+	system ('rm', "-Rf", "/Volumes/ramdisk/$article") == 0
 	  or die "Failure: error deleting $article from the ramdisk!";
 	die "Failure: something went wrong brutalizing item kind $item_kind for $item of $article: the exit code was $exit_code and the error output was: $err_message";
       }
