@@ -2,31 +2,42 @@
 
 article=$1;
 
-cclusters=$article-needed-CCluster;
-fclusters=$article-needed-FCluster;
-rclusters=$article-needed-RCluster;
-theorems=$article-needed-Theorem;
-schemes=$article-needed-Scheme;
-definientia=$article-needed-Definiens;
-patterns=$article-needed-Pattern;
-identifications=$article-needed-Identify;
-constructors=$article-needed-Constructor;
+clusters=$article.ecl;
+theorems=$article.eth;
+schemes=$article.esh;
+definientia=$article.dfs;
+patterns=$article.eno;
+identifications=$article.eid;
+constructors=$article.atr;
 
 ourgrep='grep --only-matching';
 
-grep --silent '<JustifiedTheorem' $article.miz;
-if [[ $? -eq "0" ]]; then
-    if [[ -e $cclusters ]]; then
-	$ourgrep '<CCluster .*' $cclusters;
-    fi;
-    
-    if [[ -e $fclusters ]]; then
-	$ourgrep '<FCluster .*' $fclusters;
-    fi;
-    
-    if [[ -e $rclusters ]]; then
-	$ourgrep '<RCluster .*' $rclusters;
-    fi;
+if [[ -e $clusters ]]; then
+    $ourgrep '<[RCF]Cluster .*' $clusters;
+fi
+
+if [[ -e $theorems ]]; then
+    $ourgrep '<Theorem .*' $theorems;
+fi
+
+if [[ -e $schemes ]]; then
+    $ourgrep '<Scheme .*' $schemes;
+fi
+
+if [[ -e $definientia ]]; then
+    $ourgrep '<Definiens .*' $definientia;
+fi
+
+if [[ -e $patterns ]]; then
+    $ourgrep '<Pattern .*' $patterns;
+fi
+
+if [[ -e $identifications ]]; then
+    $ourgrep '<Identify .*' $identifications;
+fi
+
+if [[ -e $constructors ]]; then
+    $ourgrep '<Constructor .*' $constructors;
 fi
 
 exit 0;
