@@ -192,7 +192,7 @@ foreach my $item (@items_for_article) {
   print "Using a timeout of $timeout seconds", "\n";
 
   # absrefs
-  system ("xsltproc /home/urban/gr/xsl4mizar/addabsrefs.xsl $item.xml -o $item.xml1 > /dev/null 2>&1");
+  system ("xsltproc /home/urban/gr/xsl4mizar/addabsrefs.xsl $item.xml > $item.xml1 2>/dev/null");
   # skip checking the exit code because it seems that this doesn't always give us 0 -- bad :-<
 
   # take cae of theorems and schemes first
