@@ -204,26 +204,38 @@ foreach my $item (@items_for_article) {
   if (-e "$item.eno") {
     my $item_xml_parser = XML::LibXML->new();
     my $item_xml_doc = $item_xml_parser->parse_file ("$item.xml1");
-    my @patterns = $item_xml_doc->findnodes ('.//*[@pid >= 0]');
+    my @pid_bearers = $item_xml_doc->findnodes ('.//*[@pid > 0]');
     my @preds = $item_xml_doc->findnodes ('.//Pred');
+    my @patterns = $item_xml_doc->findnodes ('.//Pattern');
 
     my %pattern_table = ();
 
-    foreach my $pattern_node (@patterns, @preds) {
-      my $aid = $pattern_node->findvalue ('@aid');
-      my $kind = $pattern_node->findvalue ('@kind');
-      my $nr = $pattern_node->findvalue ('@nr');
+    foreach my $pid_bearer (@pid_bearers, @preds) {
+      my $aid = $pid_bearer->findvalue ('@aid');
+      my $kind = $pid_bearer->findvalue ('@kind');
+      my $nr = $pid_bearer->findvalue ('@nr');
       unless (defined $aid && defined $kind && defined $nr) {
-	die "We found a Pattern node in $item.eno that lacks either an AID, KIND, or NR attribute";
+  	die "We found a PID-bearing node in $item.eno that lacks either an AID, KIND, or NR attribute";
       }
-      # warn "putting '$aid:$kind:$nr' into the pattern table";
+      warn "putting '$aid:$kind:$nr' into the pattern table";
       $pattern_table{"$aid:$kind:$nr"} = 0;
+    }
+
+    foreach my $pattern_node (@patterns) {
+      my $constraid = $pattern_node->findvalue ('@constraid');
+      my $constrkind = $pattern_node->findvalue ('@constrkind');
+      my $constrnr = $pattern_node->findvalue ('@constrnr');
+      unless (defined $constraid && defined $constrkind && defined $constrnr) {
+  	die "We found a Pattern node in $item.eno that lacks either a CONSTRAID, CONSTRKIND, or CONSTRNR attribute";
+      }
+      warn "putting '$constraid:$constrkind:$constrnr' into the pattern table";
+      $pattern_table{"$constraid:$constrkind:$constrnr"} = 0;
     }
 
     my $xitemfile = "$item.eno";
     {
       open(XML, $xitemfile) 
-	or die "Unable to open an output filehandle for $xitemfile in directory $article_in_ramdisk!";
+  	or die "Unable to open an output filehandle for $xitemfile in directory $article_in_ramdisk!";
       local $/; $_ = <XML>;
       close(XML);
     }
@@ -238,10 +250,10 @@ foreach my $item (@items_for_article) {
     foreach my $pattern_str (@xmlelems) {
       $pattern_str =~ /aid=\"([^"]+)\" .*constrkind=\"([A-Z])\" constrnr=\"([0-9]+)\"/ or die "Bad pattern string: $pattern_str";
       my ($aid,$kind,$nr) = ($1,$2,$3);
-      # warn "looking for '$aid:$kind:$nr' in the pattern table...";
+      warn "looking for '$aid:$kind:$nr' in the pattern table...";
       if (defined $pattern_table{"$aid:$kind:$nr"}) {
-	# warn "wow, there's a match!";
-	print XML1 "$pattern_str\n";
+  	warn "wow, there's a match!";
+  	print XML1 "$pattern_str\n";
       }
     }
 
