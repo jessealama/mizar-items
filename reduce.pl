@@ -201,7 +201,12 @@ foreach my $item (@items_for_article) {
   PruneRefXML ('Theorem', '.eth', $item, $parsed_ref);
 
   # now brutalize the Patterns
+
   if (-e "$item.eno") {
+    # first, save the eno file; we will brutalize it, but we might need the original form later
+    system ("cp $item.eno $item.eno.orig");
+
+    # now we start the brutalization proper
     my $item_xml_parser = XML::LibXML->new();
     my $item_xml_doc = $item_xml_parser->parse_file ("$item.xml1");
     my @pid_bearers = $item_xml_doc->findnodes ('.//*[@pid > 0]');
@@ -217,7 +222,7 @@ foreach my $item (@items_for_article) {
       unless (defined $aid && defined $kind && defined $nr) {
   	die "We found a PID-bearing node in $item.eno that lacks either an AID, KIND, or NR attribute";
       }
-      warn "putting '$aid:$kind:$nr' into the pattern table";
+      # warn "putting '$aid:$kind:$nr' into the pattern table";
       $pattern_table{"$aid:$kind:$nr"} = 0;
     }
 
@@ -228,7 +233,7 @@ foreach my $item (@items_for_article) {
       unless (defined $constraid && defined $constrkind && defined $constrnr) {
   	die "We found a Pattern node in $item.eno that lacks either a CONSTRAID, CONSTRKIND, or CONSTRNR attribute";
       }
-      warn "putting '$constraid:$constrkind:$constrnr' into the pattern table";
+      # warn "putting '$constraid:$constrkind:$constrnr' into the pattern table";
       $pattern_table{"$constraid:$constrkind:$constrnr"} = 0;
     }
 
@@ -250,9 +255,9 @@ foreach my $item (@items_for_article) {
     foreach my $pattern_str (@xmlelems) {
       $pattern_str =~ /aid=\"([^"]+)\" .*constrkind=\"([A-Z])\" constrnr=\"([0-9]+)\"/ or die "Bad pattern string: $pattern_str";
       my ($aid,$kind,$nr) = ($1,$2,$3);
-      warn "looking for '$aid:$kind:$nr' in the pattern table...";
+      # warn "looking for '$aid:$kind:$nr' in the pattern table...";
       if (defined $pattern_table{"$aid:$kind:$nr"}) {
-  	warn "wow, there's a match!";
+  	# warn "wow, there's a match!";
   	print XML1 "$pattern_str\n";
       }
     }
@@ -260,6 +265,18 @@ foreach my $item (@items_for_article) {
     print XML1 $xmlend;
 
     close XML1;
+
+    # check that this heuristic worked.  If not, brutalize patterns in the usual way
+    if (system ("verifier -q -s -l $item.miz") != 0) {
+      # warn "pattern heuristic failed";
+      my @pattern_list = ('Pattern');
+      push (@pattern_list, @item_kinds);
+      @item_kinds = @pattern_list;
+      system ("mv $item.eno.orig $item.eno");
+    } else {
+      # warn "pattern heuristic succeeded for $item";
+    }
+
   } else {
     print "no patterns to trim for $item", "\n";
   }
