@@ -20,7 +20,7 @@ sub kind_attribute {
   return $1;
 }
 
-my @articles = `head -n 5 /sw/share/mizar/mml.lar`;
+my @articles = `head -n 10 /mnt/sdb3/alama/7.11.07_4.156.1112/mml.lar`;
 chomp @articles;
 
 my %mml_name_to_item_number = ();
@@ -46,9 +46,14 @@ my %mml_name_to_item_number = ();
     my $xml_fragment = shift;
 
     chdir "/mnt/sdb3/alama/itemization/$article_name";
-    my $item_miz = "ckb$item_num.miz";
+    my $item_miz = "text/ckb$item_num.miz";
+    unless (-e $item_miz) {
+	die "Can't find '$item_miz' here!"
+    }
     my $second_line = `head -n 2 $item_miz | tail -n 1`;
     chomp $second_line;
+
+    # warn "looking at second line $second_line";
 
     # special case: we need to keep track of toplevel unexported
     # propositions
@@ -78,31 +83,38 @@ my %mml_name_to_item_number = ();
 
       my $constructor_line = `grep --max-count=1 '<Constructor ' $item_miz`;
       chomp $constructor_line;
-      my $constructor_nr = nr_attribute ($constructor_line);
-      $mml_name_to_item_number{"$article_name:constructor:$constructor_nr"}
-	= "$article_name:$item_num";
+      unless ($constructor_line eq '') {
+	  my $constructor_nr = nr_attribute ($constructor_line);
+	  $mml_name_to_item_number{"$article_name:constructor:$constructor_nr"}
+	  = "$article_name:$item_num";
+      }
 
       my $pattern_line = `grep --max-count=1 '<Pattern ' $item_miz`;
       chomp $pattern_line;
-      my $pattern_nr = nr_attribute ($pattern_line);
-      $mml_name_to_item_number{"$article_name:pattern:$pattern_nr"}
-	= "$article_name:$item_num";
+      unless ($pattern_line eq '') {
+	  my $pattern_nr = nr_attribute ($pattern_line);
+	  $mml_name_to_item_number{"$article_name:pattern:$pattern_nr"}
+	  = "$article_name:$item_num";
+      }
 
       my $definiens_line = `grep --max-count=1 '<Definiens ' $item_miz`;
       chomp $definiens_line;
-      if (defined $definiens_line && ! $definiens_line eq '') {
-	my $definiens_nr = nr_attribute ($definiens_line);
-	$mml_name_to_item_number{"$article_name:definiens:$definiens_nr"}
+      unless ($definiens_line eq '') {
+	  my $definiens_nr = nr_attribute ($definiens_line);
+	  $mml_name_to_item_number{"$article_name:definiens:$definiens_nr"}
 	  = "$article_name:$item_num";
       }
 
       my $deftheorem_line = `grep --max-count=1 '<DefTheorem ' $item_miz`;
       chomp $deftheorem_line;
-      if (defined $deftheorem_line && ! $deftheorem_line eq '') {
-	my $deftheorem_nr = nr_attribute ($deftheorem_line);
-	$mml_name_to_item_number{"$article_name:deftheorem:$deftheorem_nr"}
-	  = "$article_name:$item_num";
+      unless ($deftheorem_line eq '') {
+	  if (defined $deftheorem_line && ! $deftheorem_line eq '') {
+	      my $deftheorem_nr = nr_attribute ($deftheorem_line);
+	      $mml_name_to_item_number{"$article_name:deftheorem:$deftheorem_nr"}
+	      = "$article_name:$item_num";
+	  }
       }
+
     } elsif ($second_line =~ /SchemeBlock/) {
       my $schemenr = schemenr_attribute ($second_line);
       $mml_name_to_item_number{"$article_name:scheme:$schemenr"}
@@ -140,12 +152,12 @@ my %mml_name_to_item_number = ();
 }
 
 foreach my $article (@articles) {
-  my $proposition_num = 0; # count toplevel unexported propositions ourselves
   chdir "/mnt/sdb3/alama/itemization/$article";
-  my @items = `find text -name "ckb*.miz`;
+  my @items = `find text -name "ckb*.miz"`;
   chomp @items;
-  foreach my $item_num (scalar @items) {
+  foreach my $item_num (1 .. scalar @items) {
     my $item = $items[$item_num - 1];
+    # warn "about to register item $item of article $article...";
     register_item_for_article ($article, $item_num);
   }
 }
