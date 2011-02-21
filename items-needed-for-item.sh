@@ -8,7 +8,7 @@ schemes=$article.esh;
 definientia=$article.dfs;
 patterns=$article.eno;
 identifications=$article.eid;
-constructors=$article.atr;
+constructors=$article.atr.pruned;
 
 ourgrep='grep --only-matching';
 

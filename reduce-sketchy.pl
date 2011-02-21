@@ -3,9 +3,8 @@
 use strict;
 use XML::LibXML;
 
-# my @gitem_kinds = ('Pattern', 'Definiens', 'Identify', 'RCFCluster', 'Constructor');
-# my @gitem_kinds = ('Definiens', 'Identify', '[RCF]Cluster', 'Constructor');
-my @gitem_kinds = ('Definiens', 'Identify', '[RCF]Cluster');
+# my @item_kinds = ('Pattern', 'Definiens', 'Identify', 'RCFCluster', 'Constructor');
+my @item_kinds = ('Definiens', 'Identify', '[RCF]Cluster', 'Constructor');
 # - Definiens: gather these from from XML, compare to what appers in dfs
 #
 # - Identification: similar to Definiens.
@@ -88,16 +87,6 @@ sub ParseRef
     }
     close(REF);
     die "Wrong number of ref kinds: $i" if($i != 3);
-    
-    # DEBUG
-    foreach my $i (0 .. 2) {
-      my %hash = %{$refs[$i]};
-      warn "ParseRef: hash number $i";
-      foreach my $key (keys (%hash)) {
-	warn "key: $key, value ", $hash{$key};
-      }
-    }
-
     return \@refs;
 }
 
@@ -179,14 +168,12 @@ chomp @items_for_article;
 
 foreach my $item (@items_for_article) {
 
-  my @item_kinds = @gitem_kinds;
-
   print "Brutalizing item $item of article $article...", "\n";
 
   print "Verifiying item...", "\n";
   
   my $verifier_time 
-      = `timeout 5m /mnt/sdb3/alama/mizar-items/timed-quiet-verify.sh $item`;
+    = `timeout 5m /mnt/sdb3/alama/mizar-items/timed-quiet-verify.sh $item`;
   my $exit_code = $?;
   $exit_code >> 8;
   if ($exit_code != 0) {
@@ -214,46 +201,29 @@ foreach my $item (@items_for_article) {
   PruneRefXML ('Theorem', '.eth', $item, $parsed_ref);
 
   # now brutalize the Patterns
-
   if (-e "$item.eno") {
-    # first, save the eno file; we will brutalize it, but we might need the original form later
-    system ("cp $item.eno $item.eno.orig");
-
-    # now we start the brutalization proper
     my $item_xml_parser = XML::LibXML->new();
     my $item_xml_doc = $item_xml_parser->parse_file ("$item.xml1");
-    my @pid_bearers = $item_xml_doc->findnodes ('.//*[@pid > 0]');
+    my @patterns = $item_xml_doc->findnodes ('.//*[@pid >= 0]');
     my @preds = $item_xml_doc->findnodes ('.//Pred');
-    my @patterns = $item_xml_doc->findnodes ('.//Pattern');
 
     my %pattern_table = ();
 
-    foreach my $pid_bearer (@pid_bearers, @preds) {
-      my $aid = $pid_bearer->findvalue ('@aid');
-      my $kind = $pid_bearer->findvalue ('@kind');
-      my $nr = $pid_bearer->findvalue ('@nr');
+    foreach my $pattern_node (@patterns, @preds) {
+      my $aid = $pattern_node->findvalue ('@aid');
+      my $kind = $pattern_node->findvalue ('@kind');
+      my $nr = $pattern_node->findvalue ('@nr');
       unless (defined $aid && defined $kind && defined $nr) {
-  	die "We found a PID-bearing node in $item.eno that lacks either an AID, KIND, or NR attribute";
+	die "We found a Pattern node in $item.eno that lacks either an AID, KIND, or NR attribute";
       }
       # warn "putting '$aid:$kind:$nr' into the pattern table";
       $pattern_table{"$aid:$kind:$nr"} = 0;
     }
 
-    foreach my $pattern_node (@patterns) {
-      my $constraid = $pattern_node->findvalue ('@constraid');
-      my $constrkind = $pattern_node->findvalue ('@constrkind');
-      my $constrnr = $pattern_node->findvalue ('@constrnr');
-      unless (defined $constraid && defined $constrkind && defined $constrnr) {
-  	die "We found a Pattern node in $item.eno that lacks either a CONSTRAID, CONSTRKIND, or CONSTRNR attribute";
-      }
-      # warn "putting '$constraid:$constrkind:$constrnr' into the pattern table";
-      $pattern_table{"$constraid:$constrkind:$constrnr"} = 0;
-    }
-
     my $xitemfile = "$item.eno";
     {
       open(XML, $xitemfile) 
-  	or die "Unable to open an output filehandle for $xitemfile in directory $article_in_ramdisk!";
+	or die "Unable to open an output filehandle for $xitemfile in directory $article_in_ramdisk!";
       local $/; $_ = <XML>;
       close(XML);
     }
@@ -270,26 +240,14 @@ foreach my $item (@items_for_article) {
       my ($aid,$kind,$nr) = ($1,$2,$3);
       # warn "looking for '$aid:$kind:$nr' in the pattern table...";
       if (defined $pattern_table{"$aid:$kind:$nr"}) {
-  	# warn "wow, there's a match!";
-  	print XML1 "$pattern_str\n";
+	# warn "wow, there's a match!";
+	print XML1 "$pattern_str\n";
       }
     }
 
     print XML1 $xmlend;
 
     close XML1;
-
-    # check that this heuristic worked.  If not, brutalize patterns in the usual way
-    if (system ("verifier -q -s -l $item.miz > /dev/null 2> /dev/null") != 0) {
-      print "pattern heuristic failed", "\n";
-      my @pattern_list = ('Pattern');
-      push (@pattern_list, @item_kinds);
-      @item_kinds = @pattern_list;
-      system ("mv $item.eno.orig $item.eno");
-    } else {
-      print "pattern heuristic succeeded for $item", "\n";
-    }
-
   } else {
     print "no patterns to trim for $item", "\n";
   }
