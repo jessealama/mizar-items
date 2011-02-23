@@ -169,6 +169,24 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun first-scheme-keword-before (article line-num col-num)
   (first-keyword-before article "scheme" line-num col-num))
 
+(defun canceled-items (article)
+  (with-slots (xml-doc)
+      article
+    (let (items)
+      (xpath:do-node-set (canceled-node (xpath:evaluate "Article/JustifiedTheorem[SkippedProof]" xml-doc))
+	(let ((prop-child (first-child-with-name canceled-node "Proposition")))
+	  (multiple-value-bind (begin-line begin-col)
+	      (line-and-column prop-child)
+	    (push (make-instance 'canceled-item
+				 :source-article article
+				 :begin-line-number begin-line
+				 :begin-column-number begin-col
+				 :end-line-number begin-line
+				 :end-column-number (+ begin-col 9) ; "canceled;"
+				 :node canceled-node)
+		  items))))
+      (reverse items))))
+
 (defun justifiedtheorem-items (article)
   (with-slots (xml-doc)
       article
@@ -575,6 +593,7 @@ sibling elements; these need to be stored."
 	(deffunc-items (deffunc-items article))
 	(now-items (now-items article))
 	(iterequality-items (iterequality-items article))
+	(canceled-items (canceled-items article))
 	(justifiedtheorem-items (justifiedtheorem-items article))
 	(proposition-items (proposition-items article))
 	(definitionblock-items (definitionblock-items article))
@@ -589,6 +608,7 @@ sibling elements; these need to be stored."
 			      deffunc-items
 			      now-items
 			      iterequality-items
+			      canceled-items
 			      justifiedtheorem-items
 			      proposition-items
 			      definitionblock-items
@@ -896,8 +916,9 @@ of LINE starting from START."
        (if (typep candidate 'pseudo-item)
 	   (setf (gethash candidate-num earlier-pseudo-items)
 		 candidate)
-	   (setf (context-items candidate)
-		 (values-for-keys-less-than earlier-pseudo-items candidate-num)))
+	   (unless (typep candidate 'canceled-item)
+	     (setf (context-items candidate)
+		   (values-for-keys-less-than earlier-pseudo-items candidate-num))))
      finally (return article)))
 
 (defun verify-and-export (article directory)
@@ -1308,8 +1329,9 @@ of LINE starting from START."
 	   (write-new-symbols symbols symbol-table dict-subdir)
 	   (warn "About to consider ~d candidate items" (length all-candidates))
 	 do
-	   (warn "Dealing with item ~S" candidate)
-	   (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles itemization)
+	 (warn "Dealing with item ~S" candidate)
+	 (unless (typep candidate 'canceled-item)
+	   (rewrite-item-text candidate definition-table theorem-table scheme-table items->articles itemization))
 	   (when (typep candidate 'pseudo-item)
 	     (push candidate pseudo-candidates))
 	   (case (type-of candidate)

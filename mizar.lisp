@@ -53,7 +53,7 @@ variable (at load time).")
     (if real-dir-name
 	(if (directory-p real-dir-name)
 	    (let ((dir-as-string (directory-namestring (pathname-as-directory real-dir-name))))
-	      (sb-ext:run-program "exec-in-dir.sh" 
+	      (sb-ext:run-program "/Users/alama/sources/mizar/mizar-items/exec-in-dir.sh" 
 				  (append (list dir-as-string program) args)
 				  :search t
 				  :input input
@@ -260,7 +260,7 @@ variable (at load time).")
 (defun listvoc (article-name)
   (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
       nil
-      (let ((proc (sb-ext:run-program "listvoc.sh"
+      (let ((proc (sb-ext:run-program "/Users/alama/sources/mizar/mizar-items/listvoc.sh"
 				      (list article-name)
 				      :search t
 				      :output :stream)))
