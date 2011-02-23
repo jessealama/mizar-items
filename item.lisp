@@ -214,6 +214,9 @@
 (defclass now-item (pseudo-item labelled-item-mixin)
   ())
 
+(defclass canceled-item (xml-item)
+  ((text :initform "theorem not contradiction;")))
+
 (defclass theorem-item (xml-item labelled-item-mixin)
   ((absnr
     :initarg :absnr
