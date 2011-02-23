@@ -3,7 +3,7 @@
 use strict;
 
 my $article_name = shift (@ARGV);
-my $article_dir = "/mnt/sdb3/alama/itemization/$article_name";
+my $article_dir = "/tmp/$article_name";
 
 # sanity
 unless (-e $article_dir) {
@@ -27,44 +27,55 @@ my %item_num_to_cluster = ();
 
 sub print_cluster_fragment {
   my $item = shift;
+  warn "item is $item";
   # this is a theorem -- need to get its nr
   my $second_line = `head -n 2 $item.miz | tail -n 1`;
   chomp $second_line;
-  # warn "second line is $second_line";
-  $second_line =~ m/nr=\"([0-9]+)\"/;
-  my $theorem_nr = $1;
-  my @xml_lines = `/mnt/sdb3/alama/mizar-items/items-needed-for-item.sh $item`;
-  if (scalar (@xml_lines) == 0) {
-    print "t", $theorem_nr, "_", $article_name, " : NOTHING", "\n";
-  } else {
-    foreach my $xml_fragment (@xml_lines) {
-      chomp $xml_fragment;
-      unless ($xml_fragment eq '') {
-	$xml_fragment =~ m/([RFC])Cluster aid=\"([^\"]+)\" nr=\"([0-9]+)\"/;
-	my $kind = $1;
-	my $aid = lc $2;
-	my $nr = $3;
-	
-	print "t", $theorem_nr, "_", $article_name, " : ";
-	
-	if ($aid =~ /^ckb[0-9]+/) { # local case
-	  $aid =~ /ckb([0-9]+)/;
-	  my $item_num = $1;
-	  my $kind_cluster_nr = $item_num_to_cluster{$item_num};
-	  my ($kind,$cluster_nr) = split (':', $kind_cluster_nr);
-	  print $kind, "c", $cluster_nr, "_", $article_name, "\n";
-	} else {
-	  if ($kind eq "R") {
-	    print "r";
-	  } elsif ($kind eq "F") {
-	    print "f";
+  warn "second line is $second_line";
+  if ($second_line =~ /JustifiedTheorem/) {
+    $second_line =~ m/nr=\"([0-9]+)\"/;
+    my $theorem_nr = $1;
+    my @xml_lines = `/Users/alama/sources/mizar/mizar-items/items-needed-for-item.sh $item`;
+    if (scalar (@xml_lines) == 0) {
+      print "t", $theorem_nr, "_", $article_name, " : NOTHING", "\n";
+    } else {
+      foreach my $xml_fragment (@xml_lines) {
+	chomp $xml_fragment;
+	warn "looking at xml fragment $xml_fragment";
+	unless ($xml_fragment eq '') {
+	  if ($xml_fragment =~ m/([RFC])Cluster aid=\"([^\"]+)\" nr=\"([0-9]+)\"/) {
+	    my $kind = $1;
+	    my $aid = lc $2;
+	    my $nr = $3;
+	  
+	    warn "this is a cluster";
+	  
+	    print "t", $theorem_nr, "_", $article_name, " : ";
+	  
+	    if ($aid =~ /^ckb[0-9]+/) { # local case
+	      $aid =~ /ckb([0-9]+)/;
+	      my $item_num = $1;
+	      my $kind_cluster_nr = $item_num_to_cluster{$item_num};
+	      my ($kind,$cluster_nr) = split (':', $kind_cluster_nr);
+	      print $kind, "c", $cluster_nr, "_", $article_name, "\n";
+	    } else {
+	      if ($kind eq "R") {
+		print "r";
+	      } elsif ($kind eq "F") {
+		print "f";
+	      } else {
+		print "c";
+	      }
+	      print "c", $nr, "_", $aid, "\n";
+	    }
 	  } else {
-	    print "c";
+	    warn "we're not dealing with a cluster -- what to do?";
 	  }
-	  print "c", $nr, "_", $aid, "\n";
 	}
       }
     }
+  } else {
+    warn "this isn't a theorem!";
   }
 }
   
@@ -83,9 +94,9 @@ foreach my $i (1 .. $num_items) {
     my $kind = lc $1;
     $cluster_line =~ m/nr=\"([0-9]+)\"/;
     my $cluster_nr = $1;
-    # warn "item $i of $article_name is cluster kind $kind, number $cluster_nr";
+    warn "item $i of $article_name is cluster kind $kind, number $cluster_nr";
     $item_num_to_cluster{$i} = "$kind:$cluster_nr";
-  } elsif ($second_line =~ /JustifiedTheorem/) {
+  } else {
     print_cluster_fragment ("ckb$i");
   }
 }

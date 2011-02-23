@@ -33,8 +33,8 @@ my %item_to_extension =
 
 my $article = $ARGV[0];
 
-my $ramdisk = "/dev/shm/alama/itemization";
-my $harddisk = "/mnt/sdb3/alama/itemization";
+my $ramdisk = "/Volumes/ramdisk";
+my $harddisk = "/tmp";
 
 # Make sure we don't max out the ramdisk
 my @stuff_in_ramdisk = `find $ramdisk -mindepth 1 -maxdepth 1 -type d`;
@@ -186,7 +186,7 @@ foreach my $item (@items_for_article) {
   print "Verifiying item...", "\n";
   
   my $verifier_time 
-      = `timeout 5m /mnt/sdb3/alama/mizar-items/timed-quiet-verify.sh $item`;
+      = `timeout 5m /Users/alama/sources/mizar/mizar-items/timed-quiet-verify.sh $item`;
   my $exit_code = $?;
   $exit_code >> 8;
   if ($exit_code != 0) {

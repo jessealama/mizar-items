@@ -169,6 +169,17 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun first-scheme-keword-before (article line-num col-num)
   (first-keyword-before article "scheme" line-num col-num))
 
+(defun canceled-items (article)
+  (with-slots (xml-doc)
+      article
+    (let (items)
+      (xpath:do-node-set (canceled-node (xpath:evaluate "Article/JustifiedTheorem[SkippedProof]" xml-doc))
+	(push (make-instance 'canceled-theorem
+			     :source-article article
+			     :node canceled-node)
+		  items))
+      (reverse items))))
+
 (defun justifiedtheorem-items (article)
   (with-slots (xml-doc)
       article
@@ -575,6 +586,7 @@ sibling elements; these need to be stored."
 	(deffunc-items (deffunc-items article))
 	(now-items (now-items article))
 	(iterequality-items (iterequality-items article))
+	;; (canceled-items (canceled-items article))
 	(justifiedtheorem-items (justifiedtheorem-items article))
 	(proposition-items (proposition-items article))
 	(definitionblock-items (definitionblock-items article))
