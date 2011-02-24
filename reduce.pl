@@ -208,6 +208,9 @@ foreach my $item (@items_for_article) {
   system ("xsltproc /home/urban/gr/xsl4mizar/addabsrefs.xsl $item.xml -o $item.xml1 > /dev/null 2>&1");
   # skip checking the exit code because it seems that this doesn't always give us 0 -- bad :-<
 
+  my $item_xml_parser = XML::LibXML->new();
+  my $item_xml_doc = $item_xml_parser->parse_file ("$item.xml1");
+
   # take care of theorems and schemes first
   my $parsed_ref = ParseRef ($item);
   PruneRefXML ('Scheme', '.esh', $item, $parsed_ref);
@@ -220,8 +223,6 @@ foreach my $item (@items_for_article) {
     system ("cp $item.eno $item.eno.orig");
 
     # now we start the brutalization proper
-    my $item_xml_parser = XML::LibXML->new();
-    my $item_xml_doc = $item_xml_parser->parse_file ("$item.xml1");
     my @pid_bearers = $item_xml_doc->findnodes ('.//*[@pid > 0]');
     my @preds = $item_xml_doc->findnodes ('.//Pred');
     my @patterns = $item_xml_doc->findnodes ('.//Pattern');
@@ -302,7 +303,7 @@ foreach my $item (@items_for_article) {
       print "brutalizing item kind $item_kind for item $item of article $article...", "\n";
       my $exit_code = system ('/mnt/sdb3/alama/mizar-items/miz_item_deps_bf.pl', $item_kind, $extension, $item, $timeout);
 	
-      my $exit_code = $exit_code >> 8;
+      $exit_code = $exit_code >> 8;
       my $err_message = $!;
       if ($exit_code == 0) {
 	print "successfully minimized item kind $item_kind", "\n";
