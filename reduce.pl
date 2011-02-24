@@ -318,6 +318,72 @@ foreach my $item (@items_for_article) {
       print "Success: nothing to brutalize for items of kind $item_kind for item $item of article $article", "\n";
     }
   }
+
+# now infer what the constructors should be
+
+  # now we start the brutalization proper
+  my @preds = $item_xml_doc->findnodes ('.//Pred');
+  my @funcs = $item_xml_doc->findnodes ('.//Func');
+  my @typs = $item_xml_doc->findnodes ('.//Typ');
+  my @adjectives = $item_xml_doc->findnodes ('.//Adjective');
+  my @patterns = $item_xml_doc->findnodes ('.//Pattern');
+
+  my %constr_table = ();
+
+  foreach my $kind_and_nr_bearer (@preds, @funcs, @typs, @adjectives) {
+    unless ($kind_and_nr_bearer->exists ('@kind')) {
+      die "We found a node that lacks a value for its KIND attribute! $kind_and_nr_bearer";
+    }
+    unless ($kind_and_nr_bearer->exists ('@nr')) {
+      die "We found a node that lacks a value for its NR attribute! $kind_and_nr_bearer";
+    }
+    my $kind = $kind_and_nr_bearer->findvalue ('@kind');
+    my $nr = $kind_and_nr_bearer->findvalue ('@nr');
+    # warn "putting '$aid:$kind:$nr' into the pattern table";
+    $constr_table{"$kind:$nr"} = 0;
+  }
+
+  foreach my $pattern_node (@patterns) {
+    unless ($pattern_node->exists ('@constrkind')) {
+      die "We found a Pattern node that lacks a CONSTRKIND attribute! $pattern_node"
+    }
+    unless ($pattern_node->exists ('@constrnr')) {
+      die "We found a Pattern node that lacks a CONSTRNR attribute! $pattern_node"
+    }
+    my $constrkind = $pattern_node->findvalue ('@constrkind');
+    my $constrnr = $pattern_node->findvalue ('@constrnr');
+    # warn "putting '$constraid:$constrkind:$constrnr' into the pattern table";
+    $constr_table{"$constrkind:$constrnr"} = 0;
+  }
+
+  my $xitemfile = "$item.aco";
+  {
+      open(XML, $xitemfile) 
+	  or die "Unable to open an output filehandle for $xitemfile in directory !";
+      local $/; $_ = <XML>;
+      close(XML);
+  }
+
+  my ($xmlbeg,$xmlnodes,$xmlend) = $_ =~ m/(.*?)([<]Constructor\b.*[<]\/Constructor>)(.*)/s;
+
+  open(XML1,'>', "$item.atr.pruned") 
+      or die "Unable to open an output filehandle for $item.atr.pruned in directory  !";
+  print XML1 $xmlbeg;
+
+  my @xmlelems = $xmlnodes =~ m/(<Constructor\b.*?<\/Constructor>)/sg; # this is a multiline match
+  foreach my $pattern_str (@xmlelems) {
+      $pattern_str =~ /<Constructor.*\bkind=\"([A-Z])\" .*\brelnr=\"([0-9]+)\"/ or die "Bad constr string: $pattern_str";
+      my ($kind,$nr) = ($1,$2);
+      # warn "looking for '$aid:$kind:$nr' in the pattern table...";
+      if (defined $constr_table{"$kind:$nr"}) {
+	  # warn "wow, there's a match!";
+	  print XML1 "$pattern_str\n";
+      }
+  }
+
+  print XML1 $xmlend;
+
+  close XML1;
 }
 
 system ('rm', '-Rf', $article_on_harddisk);
