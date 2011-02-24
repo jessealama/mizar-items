@@ -208,7 +208,7 @@ foreach my $item (@items_for_article) {
   system ("xsltproc /home/urban/gr/xsl4mizar/addabsrefs.xsl $item.xml -o $item.xml1 > /dev/null 2>&1");
   # skip checking the exit code because it seems that this doesn't always give us 0 -- bad :-<
 
-  # take cae of theorems and schemes first
+  # take care of theorems and schemes first
   my $parsed_ref = ParseRef ($item);
   PruneRefXML ('Scheme', '.esh', $item, $parsed_ref);
   PruneRefXML ('Theorem', '.eth', $item, $parsed_ref);
