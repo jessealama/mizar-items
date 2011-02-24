@@ -188,7 +188,7 @@ foreach my $item (@items_for_article) {
   my $verifier_time 
       = `timeout 5m /Users/alama/sources/mizar/mizar-items/timed-quiet-verify.sh $item`;
   my $exit_code = $?;
-  $exit_code >> 8;
+  $exit_code = $exit_code >> 8;
   if ($exit_code != 0) {
     system ('rm', "-Rf", $article_in_ramdisk); # trash whatever is there
     if ($exit_code == 124) {
