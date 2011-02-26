@@ -12,6 +12,7 @@ my @gitem_kinds = ('Definiens', 'Identify', '[RCF]Cluster');
 my %item_to_extension =
   (
    'Definiens' => 'dfs',
+   'Pattern' => 'eno',
    '[RCF]Cluster' => 'ecl',
    'Identify' => 'eid',
   );
