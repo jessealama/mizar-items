@@ -1638,7 +1638,8 @@ of LINE starting from START."
 (defun itemize-no-errors (article)
   (handler-case
       (progn
-	(itemize article nil)
+	(handler-bind ((warning #'muffle-warning))
+	  (itemize article nil))
 	(format t "~a: success~%" article)
 	t)
       (error ()
