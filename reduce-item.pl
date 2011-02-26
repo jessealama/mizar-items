@@ -19,31 +19,10 @@ my %item_to_extension =
 
 my $ramdisk = "/Volumes/ramdisk";
 my $harddisk = "/tmp";
-
-# Make sure we don't max out the ramdisk
-my @stuff_in_ramdisk = `find $ramdisk -mindepth 1 -maxdepth 1 -type d`;
-if (@stuff_in_ramdisk > 20) {
-  die "Failure: ramdisk is full; refusing to proceed";
-}
-
-# sanity check: article exists on the harddisk
 my $article_on_harddisk = "$harddisk/$article";
-unless (-e $article_on_harddisk) {
-    die "$article doesn't exist under $harddisk!";
-}
-
-# check that this article is brutalizable: it has been fully itemized
-unless (-e "$article_on_harddisk/prel") {
-    die "Failure: article $article was not properly itemized!";
-}
+my $article_in_ramdisk = "$ramdisk/$article";
 
 print "Brutalizing $article...", "\n";
-
-# sanity check: the article isn't already in the ramdisk
-my $article_in_ramdisk = "$ramdisk/$article";
-if (-e $article_in_ramdisk) {
-    die "Failure: $article is already in the ramdisk -- why?";
-}
 
 ## return three hash pointers - first for schemes, then theorems, then definitions
 sub ParseRef
@@ -74,13 +53,13 @@ sub ParseRef
     die "Wrong number of ref kinds: $i" if($i != 3);
     
     # DEBUG
-    foreach my $i (0 .. 2) {
-      my %hash = %{$refs[$i]};
-      warn "ParseRef: hash number $i";
-      foreach my $key (keys (%hash)) {
-	warn "key: $key, value ", $hash{$key};
-      }
-    }
+    # foreach my $i (0 .. 2) {
+    #  my %hash = %{$refs[$i]};
+      # warn "ParseRef: hash number $i";
+      # foreach my $key (keys (%hash)) {
+	# warn "key: $key, value ", $hash{$key};
+    #   }
+    # }
 
     return \@refs;
 }
@@ -151,53 +130,49 @@ sub PruneRefXML
   }
 }
 
-if (system ('cp', '-Rf', $article_on_harddisk, $ramdisk) != 0) {
-  system ('rm', "-Rf", $article_in_ramdisk); # trash whatever is there
-  die "Failure: error copying $article to the ramdisk: $!";
-}
-
 my @item_kinds = @gitem_kinds;
 
 print "Brutalizing item $item of article $article...", "\n";
 
-print "Verifiying item...", "\n";
-  
-my $verifier_time 
-  = `timeout 5m /Users/alama/sources/mizar/mizar-items/timed-quiet-verify.sh $item`;
-my $exit_code = $?;
+print "Verifiying $item...", "\n";
+
+chdir $article_in_ramdisk;
+
+unless (-e "$article_fragment_name.miz") {
+  die "Article fragment '$article_fragment_name.miz' doesn't exist!";
+}
+
+my $exit_code = system ("verifier -q -s -l $article_fragment_name > /dev/null 2> /dev/null");
 $exit_code = $exit_code >> 8;
 if ($exit_code != 0) {
-  system ('rm', "-Rf", $article_in_ramdisk); # trash whatever is there
-  if ($exit_code == 124) {
-    die "Failure: timeout verifying item $item of article $article!";
-  } else {
-    die "Failure: we were unable to verify item $item of article $article!";
-  }
+  die "Failure: we were unable to verify $article_fragment_name of article $article (exit code $exit_code)!";
 }
-chomp $verifier_time;
-print "It took $verifier_time seconds to verifiy $item", "\n";
-
-my $timeout = (int ($verifier_time * 2) + 1) . "s";
-
-print "Using a timeout of $timeout seconds", "\n";
 
 # absrefs
-system ("xsltproc /home/urban/gr/xsl4mizar/addabsrefs.xsl $item.xml -o $item.xml1 > /dev/null 2>&1");
+my $absrefs = '/Users/alama/sources/mizar/xsl4mizar/addabsrefs.xsl';
+# sanity
+unless (-e $absrefs) {
+  die "The absrefs stylesheet at '$absrefs' doesn't exist!";
+}
+unless (-r $absrefs) {
+  die "The absrefs stylesheet at '$absrefs' is not readable!";
+}
+system ("xsltproc $absrefs $article_fragment_name.xml -o $article_fragment_name.xml1 > /dev/null 2>&1");
 # skip checking the exit code because it seems that this doesn't always give us 0 -- bad :-<
 
 my $item_xml_parser = XML::LibXML->new();
-my $item_xml_doc = $item_xml_parser->parse_file ("$item.xml1");
+my $item_xml_doc = $item_xml_parser->parse_file ("$article_fragment_name.xml1");
 
 # take care of theorems and schemes first
-my $parsed_ref = ParseRef ($item);
-PruneRefXML ('Scheme', '.esh', $item, $parsed_ref);
-PruneRefXML ('Theorem', '.eth', $item, $parsed_ref);
+my $parsed_ref = ParseRef ($article_fragment_name);
+PruneRefXML ('Scheme', '.esh', $article_fragment_name, $parsed_ref);
+PruneRefXML ('Theorem', '.eth', $article_fragment_name, $parsed_ref);
 
 # now brutalize the Patterns
 
-if (-e "$item.eno") {
+if (-e "$article_fragment_name.eno") {
   # first, save the eno file; we will brutalize it, but we might need the original form later
-  system ("cp $item.eno $item.eno.orig");
+  system ("cp $article_fragment_name.eno $article_fragment_name.eno.orig");
 
   # now we start the brutalization proper
   my @pid_bearers = $item_xml_doc->findnodes ('.//*[@pid > 0]');
@@ -211,7 +186,7 @@ if (-e "$item.eno") {
     my $kind = $pid_bearer->findvalue ('@kind');
     my $nr = $pid_bearer->findvalue ('@nr');
     unless (defined $aid && defined $kind && defined $nr) {
-      die "We found a PID-bearing node in $item.eno that lacks either an AID, KIND, or NR attribute";
+      die "We found a PID-bearing node in $article_fragment_name.eno that lacks either an AID, KIND, or NR attribute";
     }
     # warn "putting '$aid:$kind:$nr' into the pattern table";
     $pattern_table{"$aid:$kind:$nr"} = 0;
@@ -222,13 +197,13 @@ if (-e "$item.eno") {
     my $constrkind = $pattern_node->findvalue ('@constrkind');
     my $constrnr = $pattern_node->findvalue ('@constrnr');
     unless (defined $constraid && defined $constrkind && defined $constrnr) {
-      die "We found a Pattern node in $item.eno that lacks either a CONSTRAID, CONSTRKIND, or CONSTRNR attribute";
+      die "We found a Pattern node in $article_fragment_name.eno that lacks either a CONSTRAID, CONSTRKIND, or CONSTRNR attribute";
     }
     # warn "putting '$constraid:$constrkind:$constrnr' into the pattern table";
     $pattern_table{"$constraid:$constrkind:$constrnr"} = 0;
   }
 
-  my $xitemfile = "$item.eno";
+  my $xitemfile = "$article_fragment_name.eno";
   {
     open(XML, $xitemfile) 
       or die "Unable to open an output filehandle for $xitemfile in directory $article_in_ramdisk!";
@@ -238,8 +213,8 @@ if (-e "$item.eno") {
 
   my ($xmlbeg,$xmlnodes,$xmlend) = $_ =~ m/(.*?)([<]Pattern\b.*[<]\/Pattern>)(.*)/s;
 
-  open(XML1,'>', "$item.eno") 
-    or die "Unable to open an output filehandle for $item.eno in directory $article_in_ramdisk: $!";
+  open(XML1,'>', "$article_fragment_name.eno") 
+    or die "Unable to open an output filehandle for $article_fragment_name.eno in directory $article_in_ramdisk: $!";
   print XML1 $xmlbeg;
 
   my @xmlelems = $xmlnodes =~ m/(<Pattern\b.*?<\/Pattern>)/sg; # this is a multiline match
@@ -258,41 +233,38 @@ if (-e "$item.eno") {
   close XML1;
 
   # check that this heuristic worked.  If not, brutalize patterns in the usual way
-  if (system ("verifier -q -s -l $item.miz > /dev/null 2> /dev/null") != 0) {
+  if (system ("verifier -q -s -l $article_fragment_name > /dev/null 2> /dev/null") != 0) {
     print "pattern heuristic failed", "\n";
     my @pattern_list = ('Pattern');
     push (@pattern_list, @item_kinds);
     @item_kinds = @pattern_list;
-    system ("mv $item.eno.orig $item.eno");
+    system ("mv $article_fragment_name.eno.orig $article_fragment_name.eno");
   } else {
-    print "pattern heuristic succeeded for $item", "\n";
+    print "pattern heuristic succeeded for $article_fragment_name", "\n";
   }
 
 } else {
-  print "no patterns to trim for $item", "\n";
+  print "no patterns to trim for $article_fragment_name", "\n";
 }
 
 foreach my $item_kind (@item_kinds) {
 
   my $extension = $item_to_extension{$item_kind};
-      
-  if (-e "$item.$extension") {
-    print "brutalizing item kind $item_kind for item $item of article $article...", "\n";
-    my $exit_code = system ('/mnt/sdb3/alama/mizar-items/miz_item_deps_bf.pl', $item_kind, $extension, $item, $timeout);
+
+  if (-e "$article_fragment_name.$extension") {
+    print "brutalizing item kind $item_kind for item $article_fragment_name of article $article...", "\n";
+    my $exit_code = system ('/Users/alama/sources/mizar/mizar-items/miz_item_deps_bf.pl', $item_kind, $extension, $article_fragment_name);
 	
     $exit_code = $exit_code >> 8;
     my $err_message = $!;
     if ($exit_code == 0) {
       print "successfully minimized item kind $item_kind", "\n";
-      # system ('cp', "$item.$extension", "$item-needed-$item_kind");
     } else {
       print "failure", "\n";
-      system ('rm', "-Rf", $article_in_ramdisk) == 0
-	or die "Failure: error deleting $article from the ramdisk!";
-      die "Failure: something went wrong brutalizing item kind $item_kind for $item of $article: the exit code was $exit_code and the error output was: $err_message";
+      die "Failure: something went wrong brutalizing item kind $item_kind for $$article_fragment_name of $article: the exit code was $exit_code and the error output was: $err_message";
     }
   } else {
-    print "Success: nothing to brutalize for items of kind $item_kind for item $item of article $article", "\n";
+    print "Success: nothing to brutalize for items of kind $item_kind for item $article_fragment_name of article $article", "\n";
   }
 }
 
@@ -331,9 +303,9 @@ foreach my $pattern_node (@patterns) {
   $constr_table{"$constrkind:$constrnr"} = 0;
 }
 
-my $xitemfile = "$item.aco";
+my $xitemfile = "$article_fragment_name.aco";
 {
-  open(XML, $xitemfile) 
+  open(XML, $xitemfile)
     or die "Unable to open an output filehandle for $xitemfile in directory !";
   local $/; $_ = <XML>;
   close(XML);
@@ -341,8 +313,8 @@ my $xitemfile = "$item.aco";
 
 my ($xmlbeg,$xmlnodes,$xmlend) = $_ =~ m/(.*?)([<]Constructor\b.*[<]\/Constructor>)(.*)/s;
 
-open(XML1,'>', "$item.atr.pruned") 
-  or die "Unable to open an output filehandle for $item.atr.pruned in directory  !";
+open(XML1,'>', "$article_fragment_name.atr.pruned") 
+  or die "Unable to open an output filehandle for $article_fragment_name.atr.pruned in directory  !";
 print XML1 $xmlbeg;
 
 my @xmlelems = $xmlnodes =~ m/(<Constructor\b.*?<\/Constructor>)/sg; # this is a multiline match
@@ -360,6 +332,4 @@ print XML1 $xmlend;
 
 close XML1;
 
-system ('rm', '-Rf', $article_on_harddisk);
-system ('mv', $article_in_ramdisk, $harddisk) == 0
-  or die "Failure: error moving $article out of the ramdisk!";
+exit 0;
