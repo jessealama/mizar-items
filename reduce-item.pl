@@ -285,7 +285,7 @@ foreach my $item_kind (@item_kinds) {
       # system ('cp', "$item.$extension", "$item-needed-$item_kind");
     } else {
       print "failure", "\n";
-      system ('rm', "-Rf", "/dev/shm/alama/itemization/$article") == 0
+      system ('rm', "-Rf", $article_in_ramdisk) == 0
 	or die "Failure: error deleting $article from the ramdisk!";
       die "Failure: something went wrong brutalizing item kind $item_kind for $item of $article: the exit code was $exit_code and the error output was: $err_message";
     }
