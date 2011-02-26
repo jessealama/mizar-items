@@ -7,6 +7,8 @@ my $item = $ARGV[0];
 
 my ($article,$item_number) = split (/:/, $item);
 
+my $article_fragment_name = "text/ckb$item_number";
+
 my @gitem_kinds = ('Definiens', 'Identify', '[RCF]Cluster');
 
 my %item_to_extension =
