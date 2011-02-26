@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-miz_item_deps_bf.pl [Options] XMLElementRegexp ExtensionOfImportedFile ArticleName timeout
+miz_item_deps_bf.pl [Options] XMLElementRegexp ExtensionOfImportedFile ArticleName
 
 (get precise implicit Mizar dependencies on imported constructs using
 a brute-force approach)
@@ -130,15 +130,13 @@ GetOptions('parallelize|j=i'    => \$gparallelize,
 pod2usage(1) if($help);
 pod2usage(-exitstatus => 0, -verbose => 2) if($man);
 
-pod2usage(2) if ($#ARGV != 3);
+pod2usage(2) if ($#ARGV != 2);
 
 my $gelem = shift(@ARGV);
 my $gext = '.' . shift(@ARGV);
 
 my ($gvolume,$gdirectories,$gfilestem) = File::Spec->splitpath( shift(@ARGV) );
 if($gfilestem =~ m/(.*)[.]miz$/) { $gfilestem = $1;}
-
-my $timeout = shift (@ARGV);
 
 #chdir($gvolume . $gdirectories) if(defined($gdirectories) and !($gdirectories eq ''));
 my $gtopdir = getcwd();
@@ -206,7 +204,7 @@ sub TestXMLElems ($$$)
 {
     my ($xml_elem,$file_ext,$filestem) = @_;
 
-    # die "Accomodation errors for $filestem under $gtopdir" if(system("timeout $timeout accom -l -q -s $filestem > /dev/null 2>/dev/null") != 0);
+    # die "Accomodation errors for $filestem under $gtopdir" if(system("accom -l -q -s $filestem > /dev/null 2>/dev/null") != 0);
 
     my $xitemfile = $filestem . $file_ext;
     if (-e $xitemfile) {
@@ -224,7 +222,7 @@ sub TestXMLElems ($$$)
     if (defined $xmlbeg) {
       ## call Mizar parser to get the tp positions
       my @xmlelems = $xmlnodes =~ m/(<$xml_elem\b.*?<\/$xml_elem>)/sg; # this is a multiline match
-      # die "Verification errors for $filestem under $gtopdir!" if(system("timeout $timeout $gverifier -l -q -s $filestem > /dev/null 2>/dev/null") !=0);
+      # die "Verification errors for $filestem under $gtopdir!" if(system("$gverifier -l -q -s $filestem > /dev/null 2>/dev/null") !=0);
       my %removed = ();		## indeces of removed elements
       ## ok, the first simple heuristic is to remove consecutive chunks
       ## of sqrt size and to retract to one-by-one if the chunk fails
@@ -240,7 +238,7 @@ sub TestXMLElems ($$$)
 	      $removed{$chunk * $chunksize + $elem} = 1;
 	    }
 	  PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	  if (system ("timeout $timeout $gverifier -a -l -q $filestem > /dev/null 2>/dev/null") != 0)
+	  if (system ("$gverifier -a -l -q $filestem > /dev/null 2>/dev/null") != 0)
 	    {
 	      foreach my $elem (0 .. $chunksize -1)
 		{
@@ -256,7 +254,7 @@ sub TestXMLElems ($$$)
 		    {
 		      $removed{$chunk * $chunksize + $elem} = 1;
 		      PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-		      if (system ("timeout $timeout $gverifier -a -l -q $filestem > /dev/null 2>/dev/null") != 0)
+		      if (system ("$gverifier -a -l -q $filestem > /dev/null 2>/dev/null") != 0)
 			{
 			  delete $removed{$chunk * $chunksize + $elem};
 			  $found = 1;
@@ -266,7 +264,7 @@ sub TestXMLElems ($$$)
 	    }
 	}
       
-      if (system ("timeout $timeout $gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+      if (system ("$gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
 	print "heuristic failed for $gelem of $filestem", "\n";
 	%removed = ();
 	foreach my $chunk (0 .. $chunks) {
@@ -275,7 +273,7 @@ sub TestXMLElems ($$$)
 	      $removed{$chunk * $chunksize + $elem} = 1;
 	    }
 	  PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-	  if (system ("timeout $timeout $gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+	  if (system ("$gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
 	    foreach my $elem (0 .. $chunksize -1) {
 	      delete $removed{$chunk * $chunksize + $elem};
 	    }
@@ -287,7 +285,7 @@ sub TestXMLElems ($$$)
 		  ($chunk * $chunksize + $elem <= $#xmlelems)) {
 		$removed{$chunk * $chunksize + $elem} = 1;
 		PrepareXml($filestem,$file_ext,\@xmlelems,\%removed,$xmlbeg,$xmlend);
-		if (system ("timeout $timeout $gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
+		if (system ("$gverifier -s -l -q $filestem > /dev/null 2>/dev/null") != 0) {
 		  delete $removed{$chunk * $chunksize + $elem};
 		  $found = 1;
 		}
