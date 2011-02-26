@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use XML::LibXML;
 
 my $item = $ARGV[0];
 
