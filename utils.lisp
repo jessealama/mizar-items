@@ -182,6 +182,22 @@ from the beginning of the list."
 			 pred)
 	list)))
 
+(defun remove-unneeded-chunked (list pred)
+  (let* ((len (length list))
+	 (chunk-size (floor (sqrt len))))
+    (let ((first-pass (loop
+			 with chunks = (chunkify list chunk-size)
+			 with needed-chunks = chunks
+			 for chunk in chunks
+			 do
+			   (let* ((sans-chunk (remove chunk needed-chunks))
+				  (stripped-list (apply #'append sans-chunk)))
+			     (when (funcall pred stripped-list)
+			       (setf needed-chunks sans-chunk)))
+			 finally
+			   (return (apply #'append needed-chunks)))))
+      (remove-unneeded first-pass pred))))
+
 (defun subsequence-from-indices (seq indices)
   (loop
      with num-indices = (length indices)

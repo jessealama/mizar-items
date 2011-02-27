@@ -982,8 +982,8 @@ of LINE starting from START."
 							t))
 						(context-items item))))
       (if (check-item-with-context pruned-context-items)
-	  (shortest-admissible-final-segment pruned-context-items #'check-item-with-context)
-	  (shortest-admissible-final-segment (context-items item) #'check-item-with-context)))))
+	  (remove-unneeded pruned-context-items #'check-item-with-context)
+	  (remove-unneeded (context-items item) #'check-item-with-context)))))
 
 (defun minimize-context (item &optional (directory (sb-posix:getcwd)))
   (warn "Minimizing context for item ~S..." item)
