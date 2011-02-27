@@ -1459,7 +1459,7 @@ of LINE starting from START."
 					      (format nil "theorem~%~A" original-text) ; promote to theorem
 					      original-text))))
 		       (setf (text article-for-item) text))
-		     ;; trim irrelevant vocabularies, theorems, and schemes
+		     ;; ;; trim irrelevant vocabularies, theorems, and schemes
 		     ;; (let* ((real-evl-name (format nil "~A.evl" item-name))
 		     ;; 	   (real-evl-path (concat (namestring (pathname-as-directory text-subdir)) real-evl-name))
 		     ;; 	   (tmp-evl-name (format nil "~A.$ev" item-name))
