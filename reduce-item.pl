@@ -5,9 +5,14 @@ use XML::LibXML;
 
 my $item = $ARGV[0];
 
+warn "item is $item";
+
 my ($article,$item_number) = split (/:/, $item);
 
-my $article_fragment_name = "text/ckb$item_number";
+my $article_fragment_name 
+    = defined $item_number ? "text/ckb$item_number"
+                           : "$article";
+    
 
 my @gitem_kinds = ('Definiens', 'Identify', '[RCF]Cluster');
 
