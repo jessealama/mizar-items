@@ -190,7 +190,19 @@ my %xml_pattern_for_extension =
 
 sub ckb_node {
   my $node = shift;
-  return ($node->exists ('@aid') && $node->findvalue ('@aid') =~ /CKB[0-9]+/);
+  if ($node->exists ('@aid')) {
+    my $aid = $node->findvalue ('@aid');
+    warn "aid is $aid";
+    $aid =~ /CKB[0-9]+/ ? return 1 : return 0;
+  } else {
+    return 0;
+  }
+}
+
+sub first_non_blank_child {
+  my $node = shift;
+  my @children = $node->nonBlankChildNodes ();
+  return $children[0];
 }
 
 my @extensions = keys %xml_pattern_for_extension;
@@ -209,29 +221,58 @@ foreach my $i (1 .. scalar @articles) {
       my ($toplevel_item) = split ('/', $prototype);
       my $xpath_query = join (' | ', @patterns_for_extension);
       my @article_nodes = $dom->findnodes ($xpath_query);
-      my ($article_root_node) = $dom->findnodes ($toplevel_item);
+      my $article_root_node = $dom->documentElement ();
       foreach my $j (1 .. $num_items_for_article) {
+	warn "treating item $j, extention $extension";
 	my $item_name = "ckb$j";
 	my $env_file_for_item
 	  = article_in_ramdisk ($article) . '/text/' . $item_name . '.' . $extension;
 	if (-e $env_file_for_item) {
 	  my $item_parser = XML::LibXML->new ();
 	  my $item_dom = $item_parser->parse_file ($env_file_for_item);
-	  my ($item_root) = $item_dom->findnodes ($toplevel_item);
-	  my ($first_node) = $item_dom->findnodes ($xpath_query);
-	  foreach my $article_node (@article_nodes) {
-	    $item_root->insertBefore ($article_node, $first_node);
-	  }
+	  my $item_root = $item_dom->documentElement ();
+
+	  warn "deleting non-CKB nodes...";
 	  my @item_nodes = $item_dom->findnodes ($xpath_query);
+	  warn "there are ", scalar @item_nodes, " nodes matching the query '$xpath_query' in file ckb$j.$extension";
 	  foreach my $item_node (@item_nodes) {
 	    unless (ckb_node ($item_node)) {
+	      warn "removing a node!";
 	      $item_root->removeChild ($item_node);
 	    }
 	  }
-	  $item_dom->setDocumentElement ($item_root);
+
+	  my @children = $item_root->nonBlankChildNodes ();
+	  warn "after deleting, the item root has ", scalar @children, " nodes";
+
+	  warn "inserting nodes";
+	  my $blank_node = $item_dom->createTextNode ("\n");
+	  my $first_node = first_non_blank_child ($item_root);
+	  if (defined $first_node) {
+	    warn "first node is defined";
+	    foreach my $article_node (@article_nodes) {
+	      warn "about to insert a blank node";
+	      $item_root->insertBefore ($article_node, $first_node);
+	      warn "about to insert something real";
+	      $item_root->insertBefore ($blank_node, $first_node);
+	    }
+	  } else {
+	    warn "first node is undefined";
+	    foreach my $article_node (@article_nodes) {
+	      $item_root->addChild ($article_node);
+	    }
+	  }
+
+	  @children = $item_root->nonBlankChildNodes ();
+	  warn "done inserting nodes; the item root now has ", scalar @children, " nodes";
+
+
+
+	  @children = $item_root->nonBlankChildNodes ();
+	  warn "the item root has ", scalar @children, " nodes";
 	  open (ITEM_XML, '>', $env_file_for_item)
 	    or die "Couldn't open an output filehandle for $env_file_for_item!";
-	  print ITEM_XML ($item_dom->toString ());
+	  print ITEM_XML ($item_dom->toString (0));
 	  close ITEM_XML
 	    or die "Couldn't close the output filehandle for $env_file_for_item!";
 	} else {
