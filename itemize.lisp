@@ -1465,12 +1465,12 @@ of LINE starting from START."
 		     	   (tmp-evl-name (format nil "~A.$ev" item-name))
 		     	   (tmp-evl-path (concat (namestring (pathname-as-directory text-subdir)) tmp-evl-name)))
 		       (handler-case
-		     	   (irrvoc article-for-item (location sandbox) "-l")
-		     	 (mizar-error () nil))
+		       	   (irrvoc article-for-item (location sandbox) "-l")
+		       	 (mizar-error () nil))
 		       (when (file-exists-p tmp-evl-path)
-		     	 (warn "trimming vocab!")
-		     	 (rename-file tmp-evl-path real-evl-path)
-		     	 (refresh-environment article-for-item))
+		       	 (warn "trimming vocab!")
+		       	 (rename-file tmp-evl-path real-evl-path)
+		       	 (refresh-environment article-for-item))
 		       (handler-case
 		     	   (irrths article-for-item (location sandbox) "-l")
 		     	 (mizar-error () nil))
