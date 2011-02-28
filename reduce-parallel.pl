@@ -192,7 +192,6 @@ sub ckb_node {
   my $node = shift;
   if ($node->exists ('@aid')) {
     my $aid = $node->findvalue ('@aid');
-    warn "aid is $aid";
     $aid =~ /CKB[0-9]+/ ? return 1 : return 0;
   } else {
     return 0;
@@ -223,7 +222,6 @@ foreach my $i (1 .. scalar @articles) {
       my @article_nodes = $dom->findnodes ($xpath_query);
       my $article_root_node = $dom->documentElement ();
       foreach my $j (1 .. $num_items_for_article) {
-	warn "treating item $j, extention $extension";
 	my $item_name = "ckb$j";
 	my $env_file_for_item
 	  = article_in_ramdisk ($article) . '/text/' . $item_name . '.' . $extension;
@@ -232,49 +230,42 @@ foreach my $i (1 .. scalar @articles) {
 	  my $item_dom = $item_parser->parse_file ($env_file_for_item);
 	  my $item_root = $item_dom->documentElement ();
 
-	  warn "deleting non-CKB nodes...";
+	  # kludge
+	  my $item_root_mizfiles = $item_root->findvalue ('@mizfiles');
+	  $item_root_mizfiles =~ s/\//&#47;/g;
+	  $item_root->setAttribute ('mizfiles', $item_root_mizfiles);
+
 	  my @item_nodes = $item_dom->findnodes ($xpath_query);
-	  warn "there are ", scalar @item_nodes, " nodes matching the query '$xpath_query' in file ckb$j.$extension";
-	  foreach my $item_node (@item_nodes) {
-	    unless (ckb_node ($item_node)) {
-	      warn "removing a node!";
-	      $item_root->removeChild ($item_node);
-	    }
-	  }
-
-	  my @children = $item_root->nonBlankChildNodes ();
-	  warn "after deleting, the item root has ", scalar @children, " nodes";
-
-	  warn "inserting nodes";
-	  my $blank_node = $item_dom->createTextNode ("\n");
-	  my $first_node = first_non_blank_child ($item_root);
-	  if (defined $first_node) {
-	    warn "first node is defined";
-	    foreach my $article_node (@article_nodes) {
-	      warn "about to insert a blank node";
-	      $item_root->insertBefore ($article_node, $first_node);
-	      warn "about to insert something real";
-	      $item_root->insertBefore ($blank_node, $first_node);
-	    }
+	  
+ 	  # check that the item environment isn't already smaller than
+	  # the whole article's environment
+	  if (scalar @item_nodes < scalar @article_nodes) {
+	    warn "environment file ckb$j.$extension is already smaller than the original article's environment -- not doing any further work";
 	  } else {
-	    warn "first node is undefined";
+	    # do some work
+	    $item_root->removeChildNodes ();
+	    
+	    my $blank_node = $item_dom->createTextNode ("\n");
+	    
+	    $item_root->appendChild ($blank_node);
 	    foreach my $article_node (@article_nodes) {
-	      $item_root->addChild ($article_node);
+	      $item_root->appendChild ($article_node);
+	      $item_root->appendChild ($blank_node);
 	    }
+	    
+	    foreach my $item_node (@item_nodes) {
+	      if (ckb_node ($item_node)) {
+		$item_root->appendChild ($blank_node);
+		$item_root->appendChild ($item_node);
+	      }
+	    }
+	    
+	    open (ITEM_XML, '>', $env_file_for_item)
+	      or die "Couldn't open an output filehandle for $env_file_for_item!";
+	    print ITEM_XML ($item_dom->toString (0));
+	    close ITEM_XML
+	      or die "Couldn't close the output filehandle for $env_file_for_item!";
 	  }
-
-	  @children = $item_root->nonBlankChildNodes ();
-	  warn "done inserting nodes; the item root now has ", scalar @children, " nodes";
-
-
-
-	  @children = $item_root->nonBlankChildNodes ();
-	  warn "the item root has ", scalar @children, " nodes";
-	  open (ITEM_XML, '>', $env_file_for_item)
-	    or die "Couldn't open an output filehandle for $env_file_for_item!";
-	  print ITEM_XML ($item_dom->toString (0));
-	  close ITEM_XML
-	    or die "Couldn't close the output filehandle for $env_file_for_item!";
 	} else {
 	  warn "Weird: the original article has a .$extension file, but item $j does not";
 	}
