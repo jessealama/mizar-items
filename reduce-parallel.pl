@@ -178,26 +178,6 @@ sub parse_xml {
   }
 }
 
-sub ckb_xmls_matching {
-  my $xml_path = shift;
-  my $xml_elem = shift;
-
-  if (-e $xml_path) {
-
-    {
-      open(XML, '<', $xml_path)
-	or die "Unable to open an input filehandle for $xml_path!";
-      local $/; $_ = <XML>;
-      close(XML);
-    }
-
-    my ($xmlbeg,$xmlnodes,$xmlend) 
-      = $_ =~ m/(.*?)([<]$xml_elem\b.*aid=\"CKB[0-9]+\".*[<]\/$xml_elem>)(.*)/s; # multiline match
-    warn "matching xml nodes for element $xml_elem in file $xml_path: $xmlnodes";
-    return ($xmlbeg,$xmlnodes,$xmlend);
-  }
-}
-
 my %xml_pattern_for_extension =
   (
    'dfs' => ['Definientia/Definiens'],
