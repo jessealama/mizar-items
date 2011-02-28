@@ -199,42 +199,61 @@ sub ckb_xmls_matching {
 }
 
 my %xml_pattern_for_extension =
-  ('dfs' => 'Definiens',
-   'eno' => 'Pattern',
-   'ecl' => '[RCF]Cluster',
-   'eid' => 'Identify');
+  (
+   'dfs' => ['Definientia/Definiens'],
+   'eno' => ['Notations/Pattern'],
+   'ecl' => ['Registrations/CCluster',
+	     'Registrations/FCluster',
+	     'Registrations/RCluster'],
+   'eid' => ['IdentifyRegistrations/Identify']
+  );
+
+sub ckb_node {
+  my $node = shift;
+  return ($node->exists ('@aid') && $node->findvalue ('@aid') =~ /CKB[0-9]+/);
+}
 
 my @extensions = keys %xml_pattern_for_extension;
 
 foreach my $i (1 .. scalar @articles) {
   my $article = $articles[$i - 1];
   foreach my $extension (@extensions) {
-    my $pattern_for_extension = $xml_pattern_for_extension{$extension};
+    my @patterns_for_extension = @{$xml_pattern_for_extension{$extension}};
+    my $prototype = $patterns_for_extension[0];
     my $env_file_for_article 
       = article_in_ramdisk ($article) . '/' . $article . '.' . $extension;
     if (-e $env_file_for_article) {
       my $num_items_for_article = $num_items[$i - 1];
+      my $parser = XML::LibXML->new ();
+      my $dom = $parser->parse_file ($env_file_for_article);
+      my ($toplevel_item) = split ('/', $prototype);
+      my $xpath_query = join (' | ', @patterns_for_extension);
+      my @article_nodes = $dom->findnodes ($xpath_query);
+      my ($article_root_node) = $dom->findnodes ($toplevel_item);
       foreach my $j (1 .. $num_items_for_article) {
 	my $item_name = "ckb$j";
-	my ($article_xml_beg,$article_xml,$article_xml_end)
-	  = parse_xml ($env_file_for_article, $pattern_for_extension);
-	my $env_file_for_item 
+	my $env_file_for_item
 	  = article_in_ramdisk ($article) . '/text/' . $item_name . '.' . $extension;
 	if (-e $env_file_for_item) {
-	  my ($item_xml_beg,$item_xml,$item_xml_end)
-	    = ckb_xmls_matching ($env_file_for_item, $pattern_for_extension);
-	  
-	  if (defined $item_xml) {
-	    open (ITEM_XML, '>', $env_file_for_item)
-	      or die "Couldn't open an output filehandle fo $env_file_for_item!";
-	    warn "Appending $item_xml after $article_xml";
-	    print ITEM_XML ($item_xml_beg, "\n");
-	    print ITEM_XML ($article_xml, "\n");
-	    print ITEM_XML ($item_xml, "\n");
-	    print ITEM_XML ($item_xml_end, "\n");
-	    close ITEM_XML
-	      or die "Couldn't close the output filehandle for $env_file_for_item!";
+	  my $item_parser = XML::LibXML->new ();
+	  my $item_dom = $item_parser->parse_file ($env_file_for_item);
+	  my ($item_root) = $item_dom->findnodes ($toplevel_item);
+	  my ($first_node) = $item_dom->findnodes ($xpath_query);
+	  foreach my $article_node (@article_nodes) {
+	    $item_root->insertBefore ($article_node, $first_node);
 	  }
+	  my @item_nodes = $item_dom->findnodes ($xpath_query);
+	  foreach my $item_node (@item_nodes) {
+	    unless (ckb_node ($item_node)) {
+	      $item_root->removeChild ($item_node);
+	    }
+	  }
+	  $item_dom->setDocumentElement ($item_root);
+	  open (ITEM_XML, '>', $env_file_for_item)
+	    or die "Couldn't open an output filehandle for $env_file_for_item!";
+	  print ITEM_XML ($item_dom->toString ());
+	  close ITEM_XML
+	    or die "Couldn't close the output filehandle for $env_file_for_item!";
 	} else {
 	  warn "Weird: the original article has a .$extension file, but item $j does not";
 	}
