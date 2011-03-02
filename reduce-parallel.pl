@@ -126,15 +126,15 @@ foreach my $article (@articles) {
 }
 
 # brutalize the original articles
-foreach my $article (@articles) {
-  warn "brutalizing article $article...";
-  my $brutalization_exit_code
-    = system ("$reduce_item_script $article");
-  $brutalization_exit_code = $brutalization_exit_code >> 8;
-  unless ($brutalization_exit_code == 0) {
-    die "We failed to brutalize article $article!";
-  }
-}
+# foreach my $article (@articles) {
+#   warn "brutalizing article $article...";
+#   my $brutalization_exit_code
+#     = system ("$reduce_item_script $article");
+#   $brutalization_exit_code = $brutalization_exit_code >> 8;
+#   unless ($brutalization_exit_code == 0) {
+#     die "We failed to brutalize article $article!";
+#   }
+# }
 
 # now use the result of each of the article brutlizations as an
 # initial approxiamation of the brutalization of each of the article's
@@ -206,73 +206,73 @@ sub first_non_blank_child {
 
 my @extensions = keys %xml_pattern_for_extension;
 
-foreach my $i (1 .. scalar @articles) {
-  my $article = $articles[$i - 1];
-  foreach my $extension (@extensions) {
-    my @patterns_for_extension = @{$xml_pattern_for_extension{$extension}};
-    my $prototype = $patterns_for_extension[0];
-    my $env_file_for_article 
-      = article_in_ramdisk ($article) . '/' . $article . '.' . $extension;
-    if (-e $env_file_for_article) {
-      my $num_items_for_article = $num_items[$i - 1];
-      my $parser = XML::LibXML->new ();
-      my $dom = $parser->parse_file ($env_file_for_article);
-      my ($toplevel_item) = split ('/', $prototype);
-      my $xpath_query = join (' | ', @patterns_for_extension);
-      my @article_nodes = $dom->findnodes ($xpath_query);
-      my $article_root_node = $dom->documentElement ();
-      foreach my $j (1 .. $num_items_for_article) {
-	my $item_name = "ckb$j";
-	my $env_file_for_item
-	  = article_in_ramdisk ($article) . '/text/' . $item_name . '.' . $extension;
-	if (-e $env_file_for_item) {
-	  my $item_parser = XML::LibXML->new ();
-	  my $item_dom = $item_parser->parse_file ($env_file_for_item);
-	  my $item_root = $item_dom->documentElement ();
+# foreach my $i (1 .. scalar @articles) {
+#   my $article = $articles[$i - 1];
+#   foreach my $extension (@extensions) {
+#     my @patterns_for_extension = @{$xml_pattern_for_extension{$extension}};
+#     my $prototype = $patterns_for_extension[0];
+#     my $env_file_for_article 
+#       = article_in_ramdisk ($article) . '/' . $article . '.' . $extension;
+#     if (-e $env_file_for_article) {
+#       my $num_items_for_article = $num_items[$i - 1];
+#       my $parser = XML::LibXML->new ();
+#       my $dom = $parser->parse_file ($env_file_for_article);
+#       my ($toplevel_item) = split ('/', $prototype);
+#       my $xpath_query = join (' | ', @patterns_for_extension);
+#       my @article_nodes = $dom->findnodes ($xpath_query);
+#       my $article_root_node = $dom->documentElement ();
+#       foreach my $j (1 .. $num_items_for_article) {
+# 	my $item_name = "ckb$j";
+# 	my $env_file_for_item
+# 	  = article_in_ramdisk ($article) . '/text/' . $item_name . '.' . $extension;
+# 	if (-e $env_file_for_item) {
+# 	  my $item_parser = XML::LibXML->new ();
+# 	  my $item_dom = $item_parser->parse_file ($env_file_for_item);
+# 	  my $item_root = $item_dom->documentElement ();
 
-	  # kludge
-	  my $item_root_mizfiles = $item_root->findvalue ('@mizfiles');
-	  $item_root_mizfiles =~ s/\//&#47;/g;
-	  $item_root->setAttribute ('mizfiles', $item_root_mizfiles);
+# 	  # kludge
+# 	  my $item_root_mizfiles = $item_root->findvalue ('@mizfiles');
+# 	  $item_root_mizfiles =~ s/\//&#47;/g;
+# 	  $item_root->setAttribute ('mizfiles', $item_root_mizfiles);
 
-	  my @item_nodes = $item_dom->findnodes ($xpath_query);
+# 	  my @item_nodes = $item_dom->findnodes ($xpath_query);
 	  
- 	  # check that the item environment isn't already smaller than
-	  # the whole article's environment
-	  if (scalar @item_nodes < scalar @article_nodes) {
-	    warn "environment file ckb$j.$extension is already smaller than the original article's environment -- not doing any further work";
-	  } else {
-	    # do some work
-	    $item_root->removeChildNodes ();
+#  	  # check that the item environment isn't already smaller than
+# 	  # the whole article's environment
+# 	  if (scalar @item_nodes < scalar @article_nodes) {
+# 	    warn "environment file ckb$j.$extension is already smaller than the original article's environment -- not doing any further work";
+# 	  } else {
+# 	    # do some work
+# 	    $item_root->removeChildNodes ();
 	    
-	    my $blank_node = $item_dom->createTextNode ("\n");
+# 	    my $blank_node = $item_dom->createTextNode ("\n");
 	    
-	    $item_root->appendChild ($blank_node);
-	    foreach my $article_node (@article_nodes) {
-	      $item_root->appendChild ($article_node);
-	      $item_root->appendChild ($blank_node);
-	    }
+# 	    $item_root->appendChild ($blank_node);
+# 	    foreach my $article_node (@article_nodes) {
+# 	      $item_root->appendChild ($article_node);
+# 	      $item_root->appendChild ($blank_node);
+# 	    }
 	    
-	    foreach my $item_node (@item_nodes) {
-	      if (ckb_node ($item_node)) {
-		$item_root->appendChild ($blank_node);
-		$item_root->appendChild ($item_node);
-	      }
-	    }
+# 	    foreach my $item_node (@item_nodes) {
+# 	      if (ckb_node ($item_node)) {
+# 		$item_root->appendChild ($blank_node);
+# 		$item_root->appendChild ($item_node);
+# 	      }
+# 	    }
 	    
-	    open (ITEM_XML, '>', $env_file_for_item)
-	      or die "Couldn't open an output filehandle for $env_file_for_item!";
-	    print ITEM_XML ($item_dom->toString (0));
-	    close ITEM_XML
-	      or die "Couldn't close the output filehandle for $env_file_for_item!";
-	  }
-	} else {
-	  warn "Weird: the original article has a .$extension file, but item $j does not";
-	}
-      }
-    }
-  }
-}
+# 	    open (ITEM_XML, '>', $env_file_for_item)
+# 	      or die "Couldn't open an output filehandle for $env_file_for_item!";
+# 	    print ITEM_XML ($item_dom->toString (0));
+# 	    close ITEM_XML
+# 	      or die "Couldn't close the output filehandle for $env_file_for_item!";
+# 	  }
+# 	} else {
+# 	  warn "Weird: the original article has a .$extension file, but item $j does not";
+# 	}
+#       }
+#     }
+#   }
+# }
 
 my $parallel_items = '';
 foreach my $i (1 .. scalar @articles) {
