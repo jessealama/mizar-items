@@ -2,6 +2,10 @@
 
 use strict;
 
+my $itemization_source = '/tmp';
+my $mml_lar = '/sw/share/mizar/mml.lar';
+my $items_needed_script = '/Users/alama/sources/mizar/mizar-items/items-needed-for-item.sh';
+
 sub nr_attribute {
   my $xml_line = shift;
   $xml_line =~ / nr=\"([0-9]+)\"/;
@@ -50,8 +54,9 @@ sub constrkind_attribute {
   return $1;
 }
 
+my $num_articles_handled = 10;
 my @articles = ('tarski');
-my @first_hundred = `head -n 100 /mnt/sdb3/alama/7.11.07_4.156.1112/mml.lar`;
+my @first_hundred = `head -n $num_articles_handled $mml_lar`;
 chomp @first_hundred;
 push (@articles, @first_hundred);
 
@@ -144,7 +149,7 @@ $mml_name_to_item_number{'tarski:theorem:7'} = 'tarski:6';
     my $item_num = shift;
     my $xml_fragment = shift;
 
-    chdir "/mnt/sdb3/alama/itemization/$article_name";
+    chdir "$itemization_source/$article_name";
     my $item_miz = "text/ckb$item_num.miz";
     unless (-e $item_miz) {
 	die "Can't find '$item_miz' here!"
@@ -266,7 +271,7 @@ $mml_name_to_item_number{'tarski:theorem:7'} = 'tarski:6';
 
 # build our table
 foreach my $article (@articles) {
-  chdir "/mnt/sdb3/alama/itemization/$article";
+  chdir "$itemization_source/$article";
   my @items = `find text -name "ckb*.miz"`;
   chomp @items;
   foreach my $item_num (1 .. scalar @items) {
@@ -278,7 +283,7 @@ foreach my $article (@articles) {
 
 # now compute the dependencies
 foreach my $article (@articles) {
-  chdir "/mnt/sdb3/alama/itemization/$article";
+  chdir "$itemization_source/$article";
   my @items;
   if ($article eq 'tarski') {
     @items = ('tarski1', 'tarski2', 'tarski3', 'tarski4', 'tarski5',
@@ -298,13 +303,13 @@ foreach my $article (@articles) {
       $item_num = $1;
     }
 
-    my @needed = `/mnt/sdb3/alama/mizar-items/items-needed-for-item.sh $item`;
+    my @needed = `$items_needed_script $item`;
     foreach my $needed (@needed) {
       my $aid = aid_attribute ($needed);
       my $aid_lc = lc $aid;
       if ($aid_lc =~ /ckb([0-9]+)/) {
 	my $local_item_num = $1;
-	print "$article:$item_num ==> $article:$local_item_num", "\n";
+	print "$article:$item_num $article:$local_item_num", "\n";
       } else {
 	my $key;
 	if ($needed =~ /Pattern/) {
@@ -354,13 +359,11 @@ foreach my $article (@articles) {
 	}
 
 	if (defined $key) {
-	  if ($key !~ /hidden/) {
-	    my $maps_to = $mml_name_to_item_number{"$key"};
-	    if (defined $maps_to) {
-	      print "$article:$item_num ==> $maps_to", "\n";
-	    } else {
-	      warn "weird: there is no value for $key in the table (processing article $article item $item)";
-	    }
+	  my $maps_to = $mml_name_to_item_number{"$key"};
+	  if (defined $maps_to) {
+	    print "$article:$item_num $maps_to", "\n";
+	  } else {
+	    warn "weird: there is no value for $key in the table (processing article $article item $item)";
 	  }
 	}
       }
@@ -371,11 +374,11 @@ foreach my $article (@articles) {
 
 # hard-coded hidden dependencies
 # loop!
-# print 'hidden:1 ==> hidden:1';
-print 'hidden:2 ==> hidden:1', "\n";
-print 'hidden:3 ==> hidden:1', "\n";
-print 'hidden:3 ==> hidden:2', "\n";
-print 'hidden:4 ==> hidden:1', "\n";
+# print 'hidden:1 hidden:1';
+print 'hidden:2 hidden:1', "\n";
+print 'hidden:3 hidden:1', "\n";
+print 'hidden:3 hidden:2', "\n";
+print 'hidden:4 hidden:1', "\n";
 
 # # hard-coded tarski dependencies
 
