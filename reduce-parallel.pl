@@ -284,7 +284,7 @@ foreach my $i (1 .. scalar @articles) {
 }
 
 my $parallel_exit_code 
-  = system ("parallel --jobs +0 --progress --sshloginfile /Users/alama/sources/mizar/mizar-items/brutalizers '$reduce_item_script {} 2>&1' ::: $parallel_items");
+  = system ("parallel --jobs +0 --progress --halt-on-error=1 '$reduce_item_script {} 2>&1' ::: $parallel_items");
 $parallel_exit_code = $parallel_exit_code >> 8;
 unless ($parallel_exit_code == 0) {
   die "parallel did not exit cleanly; its exit code was $parallel_exit_code"
