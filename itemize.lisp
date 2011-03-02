@@ -541,6 +541,58 @@ sibling elements; these need to be stored."
 	       new-registrations))
   finally (return (reverse new-registrations))))
 
+(defun split-notationblock-node (notationblock-node article)
+  (loop
+     with new-notations = nil
+     with notation-nodes = (xpath:all-nodes (xpath:evaluate "Pattern" notationblock-node))
+     with last-line = nil
+     with last-col = nil
+     with context = nil
+     for i from 1
+     for notation-node in notation-nodes
+     do
+       (when (= i 1)
+	 (multiple-value-setq (last-line last-col)
+	   (line-and-column notationblock-node)))
+       (let (candidate-begin-line-num candidate-begin-col-num
+	     begin-line-num begin-col-num end-line-num end-col-num)
+	 (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
+	   (line-and-column proposition-child)))
+       (multiple-value-setq (begin-line-num begin-col-num)
+	 (first-keyword-before article
+			       "antonym|synonym"
+			       candidate-begin-line-num
+			       candidate-begin-col-num))
+       (push (maybe-strip-semicolon
+	      (string-trim
+	       (list #\Space #\Newline)
+	       (region article last-line last-col begin-line-num begin-col-num)))
+	     context)
+       (let ((last-line-and-col (last (descendents-with-line-and-column notation-node))))
+	 (if last-line-and-col
+	     (let ((last-line-and-col-node (first last-line-and-col)))
+	       (multiple-value-setq (end-line-num end-col-num)
+		 (line-and-column last-line-and-col-node)))
+	     (error "We found a Notation node that lacks descendents with line and column information")))
+       (setf last-line end-line-num
+	     last-col end-col-num)
+       (push (ensure-final-semicolon
+	      (concat (if (= i 1)
+			  (format nil "~%")
+			  (format nil "notation~%"))
+		      (reduce #'concat (reverse context))
+		      (ensure-final-semicolon
+		       (string-trim
+			'(#\Space #\Newline)
+			(region article
+				begin-line-num
+				begin-col-num
+				end-line-num
+				end-col-num)))
+		      (format nil "~%end;")))
+	     new-notations))
+  finally (return (reverse new-notations)))
+
 (defun multi-part-node-p (node)
   (let ((name (dom:local-name node)))
     (cond ((string= name "DefinitionBlock")
@@ -551,6 +603,10 @@ sibling elements; these need to be stored."
 	   (> (length 
 	       (xpath:all-nodes (xpath:evaluate "Registration | Canceled" node)))
 	      1))
+	  ((string= name "NotationBlock")
+	   (> (length 
+	       (xpath:all-nodes (xpath:evaluate "Pattern" node)))
+	      1))
 	  (t
 	   (error "Unknown node type: '~A'" name)))))
 
@@ -560,6 +616,8 @@ sibling elements; these need to be stored."
 	   (split-definitionblock-node node article))
 	  ((string= name "RegistrationBlock")
 	   (split-registrationblock-node node article))
+	  ((string= name "NotationBlock")
+	   (split-notationblock-node node article))
 	  (t
 	   (error "Unknown node type: '~A'" name)))))
 
