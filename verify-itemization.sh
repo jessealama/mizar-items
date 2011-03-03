@@ -2,8 +2,8 @@
 
 article=$1;
 
-article_in_ramdisk=/dev/shm/alama/itemization/$article;
-article_on_harddisk=/mnt/sdb3/alama/itemization/$article;
+article_in_ramdisk=/Volumes/ramdisk/$article;
+article_on_harddisk=/tmp/$article;
 
 cp -R $article_on_harddisk $article_in_ramdisk;
 cd $article_in_ramdisk;
