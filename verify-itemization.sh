@@ -17,9 +17,10 @@ for item in $items; do
 	    rm -Rf $article_in_ramdisk;
 	    exit 1;
 	fi;
-	# else
+	#else
 	# echo "$article:$item: not ok (accommodator error)";
-	# fi;
+	# exit 1;
+    # fi;
 done
 echo "$article: ok";
 rm -Rf $article_in_ramdisk;
