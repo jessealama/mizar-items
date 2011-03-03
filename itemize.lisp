@@ -557,41 +557,41 @@ sibling elements; these need to be stored."
        (let (candidate-begin-line-num candidate-begin-col-num
 	     begin-line-num begin-col-num end-line-num end-col-num)
 	 (multiple-value-setq (candidate-begin-line-num candidate-begin-col-num)
-	   (line-and-column proposition-child)))
-       (multiple-value-setq (begin-line-num begin-col-num)
-	 (first-keyword-before article
-			       "antonym|synonym"
-			       candidate-begin-line-num
-			       candidate-begin-col-num))
-       (push (maybe-strip-semicolon
-	      (string-trim
-	       (list #\Space #\Newline)
-	       (region article last-line last-col begin-line-num begin-col-num)))
-	     context)
-       (let ((last-line-and-col (last (descendents-with-line-and-column notation-node))))
-	 (if last-line-and-col
+	   (line-and-column notationblock-node))
+	 (multiple-value-setq (begin-line-num begin-col-num)
+	   (first-keyword-before article
+				 "antonym|synonym"
+				 candidate-begin-line-num
+				 candidate-begin-col-num))
+	 (push (maybe-strip-semicolon
+		(string-trim
+		 (list #\Space #\Newline)
+		 (region article last-line last-col begin-line-num begin-col-num)))
+	       context)
+	 (let ((last-line-and-col (last (descendents-with-line-and-column notation-node))))
+	   (if last-line-and-col
 	     (let ((last-line-and-col-node (first last-line-and-col)))
 	       (multiple-value-setq (end-line-num end-col-num)
 		 (line-and-column last-line-and-col-node)))
 	     (error "We found a Notation node that lacks descendents with line and column information")))
-       (setf last-line end-line-num
-	     last-col end-col-num)
-       (push (ensure-final-semicolon
-	      (concat (if (= i 1)
-			  (format nil "~%")
-			  (format nil "notation~%"))
-		      (reduce #'concat (reverse context))
-		      (ensure-final-semicolon
-		       (string-trim
-			'(#\Space #\Newline)
-			(region article
-				begin-line-num
-				begin-col-num
-				end-line-num
-				end-col-num)))
-		      (format nil "~%end;")))
-	     new-notations))
-  finally (return (reverse new-notations)))
+	 (setf last-line end-line-num
+	       last-col end-col-num)
+	 (push (ensure-final-semicolon
+		(concat (if (= i 1)
+			    (format nil "~%")
+			    (format nil "notation~%"))
+			(reduce #'concat (reverse context))
+			(ensure-final-semicolon
+			 (string-trim
+			  '(#\Space #\Newline)
+			  (region article
+				  begin-line-num
+				  begin-col-num
+				  end-line-num
+				  end-col-num)))
+			(format nil "~%end;")))
+	       new-notations))
+  finally (return (reverse new-notations))))
 
 (defun multi-part-node-p (node)
   (let ((name (dom:local-name node)))
