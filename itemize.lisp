@@ -570,10 +570,10 @@ sibling elements; these need to be stored."
 	       context)
 	 (let ((last-line-and-col (last (descendents-with-line-and-column notation-node))))
 	   (if last-line-and-col
-	     (let ((last-line-and-col-node (first last-line-and-col)))
-	       (multiple-value-setq (end-line-num end-col-num)
-		 (line-and-column last-line-and-col-node)))
-	     (error "We found a Notation node that lacks descendents with line and column information")))
+	       (let ((last-line-and-col-node (first last-line-and-col)))
+		 (multiple-value-setq (end-line-num end-col-num)
+		   (line-and-column last-line-and-col-node)))
+	       (error "We found a Notation node that lacks descendents with line and column information")))
 	 (setf last-line end-line-num
 	       last-col end-col-num)
 	 (push (ensure-final-semicolon
