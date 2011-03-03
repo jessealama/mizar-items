@@ -1,14 +1,15 @@
 #!/bin/bash
 
 article=$1;
-harddisk=/mnt/sdb3/alama/itemization;
-ramdisk=/dev/shm/alama/itemization;
+harddisk=/tmp/itemization;
+ramdisk=/Volumes/ramdisk;
+image=/Users/alama/sources/mizar/mizar-items/mizar
 article_on_harddisk=$harddisk/$article;
 article_in_ramdisk=$ramdisk/$article-1;
 
 sbcl --disable-ldb \
      --noinform \
-     --core mizar \
+     --core $image \
      --eval '(in-package :mizar)' \
      --eval "(if (handler-bind ((warning #'muffle-warning)) (itemize-no-errors \"$article\")) (sb-ext:quit :unix-status 0) (sb-ext:quit :unix-status 1))"
      > /dev/null 2>&1;
