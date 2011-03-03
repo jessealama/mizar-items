@@ -12,7 +12,7 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria")
+  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria" "ucw")
   :components ((:file "packages")
 	       (:file "sandbox")
 	       (:file "utils")
@@ -21,4 +21,5 @@
 	       (:file "article")
 	       (:file "mizar")
 	       (:file "item")
-	       (:file "itemize")))
+	       (:file "itemize")
+	       (:file "site")))
