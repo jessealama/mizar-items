@@ -118,7 +118,32 @@
 	 do
 	   (unless (file-exists-p item-path)
 	     (error "Can't register URI '~a' to point to '~a', because there's no file at that path" item-uri item-path))
-	   (push (create-static-file-dispatcher-and-handler item-uri
-							    item-path
-							    "text/html")
-		 *dispatch-table*)))))
+	   (let* ((item-html (file-as-string item-path))
+		  (item-name (format nil "~a:~d" article i))
+		  (forward-deps (gethash item-name *dependency-graph-forward*))
+		  (backward-deps (gethash item-name *dependency-graph-backward*)))
+	     (flet ((emit-dependency-page ()
+		      (with-html-output-to-string (*standard-output* nil
+								     :prologue t
+								     :indent t)
+			(:html
+			 (:title (str item-name))
+			 (:body
+			  (:table
+			   (:tr
+			    (:td :rowspan 2 (str item-html))
+			    (:td "This item depends on:"
+				 (:ul
+				  (dolist (forward-dep forward-deps)
+				    (htm
+				     (:li (str forward-dep)))))))
+			   (:tr
+			    (:td "These items depend on this one:"
+				 (:ul
+				  (dolist (backward-dep backward-deps)
+				    (htm
+				     (:li (str backward-dep)))))))))))))
+	       (push (create-regex-dispatcher 
+		      (format nil "/~a/~d" article i)
+		      #'emit-dependency-page)
+		     *dispatch-table*)))))))
