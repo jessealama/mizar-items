@@ -135,14 +135,22 @@
 			    (:td "This item depends on:"
 				 (:ul
 				  (dolist (forward-dep forward-deps)
-				    (htm
-				     (:li (str forward-dep)))))))
+				    (destructuring-bind (dep-name dep-num)
+					(split ":" forward-dep)
+				      (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+					(htm
+					 (:li (:a (:href dep-uri) 
+						  (str forward-dep))))))))))
 			   (:tr
 			    (:td "These items depend on this one:"
 				 (:ul
 				  (dolist (backward-dep backward-deps)
-				    (htm
-				     (:li (str backward-dep)))))))))))))
+				    (destructuring-bind (dep-name dep-num)
+					(split ":" backward-dep)
+				      (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+					(htm
+					 (:li (:a (:href dep-uri)
+						  (str backward-dep))))))))))))))))
 	       (push (create-regex-dispatcher 
 		      (format nil "/~a/~d" article i)
 		      #'emit-dependency-page)
