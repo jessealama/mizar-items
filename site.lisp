@@ -55,7 +55,7 @@
 			    (declare (ignore foo))
 			    (incf counter))
 		    :test #'(lambda (path)
-			      (scan "ckb[0-9]*\.miz" (namestring path))))
+			      (scan "ckb[0-9]+\.miz$" (namestring path))))
     counter))
 
 (defun load-article-num-items ()
