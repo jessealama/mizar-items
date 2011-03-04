@@ -204,9 +204,17 @@
 			      (:body
 			       (:p (fmt "Here is a path from ~a to ~a" ai bj))
 			       (:ol
-				(dolist (step (explain-solution solution))
+				(let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
 				  (htm
-				   (:li (str step))))))))
+				   (:li ((:a :href ai-uri)
+					 (str ai)))))
+				(dolist (step (explain-solution solution))
+				  (destructuring-bind (step-article step-num)
+				      (split ":" step)
+				    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+				      (htm
+				       (:li ((:a :href step-uri)
+					     (str step)))))))))))
 			   (with-html-output-to-string (*standard-output* nil
 									  :prologue t
 									  :indent t)
