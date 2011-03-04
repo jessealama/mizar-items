@@ -22,4 +22,6 @@
 	       (:file "mizar")
 	       (:file "item")
 	       (:file "itemize")
+	       (:file "queue")
+	       (:file "search")
 	       (:file "site")))
