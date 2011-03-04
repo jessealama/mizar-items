@@ -80,6 +80,17 @@
 
 ;; set up articles
 
+(defun item-< (item-name-1 item-name-2)
+  (destructuring-bind (item-article-name-1 item-num-as-str-1)
+      (split ":" item-name-1)
+    (destructuring-bind (item-article-name-2 item-num-as-str-2)
+	(split ":" item-name-2)
+      (or (string< item-article-name-1 item-article-name-2)
+	  (let ((item-num-1 (parse-integer item-num-as-str-1))
+		(item-num-2 (parse-integer item-num-as-str-2)))
+	    (and (string= item-article-name-1 item-article-name-2)
+		 (< item-num-1 item-num-2)))))))
+
 (defun initialize-uris ()
   (dolist (article *articles* t)
     (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
@@ -123,7 +134,9 @@
 	   (let* ((item-html (file-as-string item-path))
 		  (item-name (format nil "~a:~d" article i))
 		  (forward-deps (gethash item-name *dependency-graph-forward*))
-		  (backward-deps (gethash item-name *dependency-graph-backward*)))
+		  (backward-deps (gethash item-name *dependency-graph-backward*))
+		  (forward-deps-sorted (sort forward-deps #'item-<))
+		  (backward-deps-sorted (sort backward-deps #'item-<)))
 	     (flet ((emit-dependency-page ()
 		      (with-html-output-to-string (*standard-output* nil
 								     :prologue t
@@ -136,7 +149,7 @@
 			    (:td :rowspan 2 (str item-html))
 			    (:td "This item depends on:"
 				 (:ul
-				  (dolist (forward-dep forward-deps)
+				  (dolist (forward-dep forward-deps-sorted)
 				    (destructuring-bind (dep-name dep-num)
 					(split ":" forward-dep)
 				      (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
@@ -146,7 +159,7 @@
 			   (:tr
 			    (:td "These items depend on this one:"
 				 (:ul
-				  (dolist (backward-dep backward-deps)
+				  (dolist (backward-dep backward-deps-sorted)
 				    (destructuring-bind (dep-name dep-num)
 					(split ":" backward-dep)
 				      (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
