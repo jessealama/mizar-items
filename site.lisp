@@ -161,24 +161,30 @@
 			   (:tr
 			    (:td :rowspan 2 (str item-html))
 			    (:td "This item immediately depends on:"
-				 (:ul
-				  (dolist (forward-dep forward-deps-sorted)
-				    (destructuring-bind (dep-name dep-num)
-					(split ":" forward-dep)
-				      (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-					(htm
-					 (:li ((:a :href dep-uri)
-					       (str forward-dep))))))))))
+				 (if forward-deps-sorted
+				     (htm
+				      (:ul
+				       (dolist (forward-dep forward-deps-sorted)
+					 (destructuring-bind (dep-name dep-num)
+					     (split ":" forward-dep)
+					   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+					     (htm
+					      (:li ((:a :href dep-uri)
+						    (str forward-dep))))))))
+				      (htm (:p (:em "(none)")))))))
 			   (:tr
 			    (:td "These items immediately depend on this one:"
-				 (:ul
-				  (dolist (backward-dep backward-deps-sorted)
-				    (destructuring-bind (dep-name dep-num)
-					(split ":" backward-dep)
-				      (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-					(htm
-					 (:li ((:a :href dep-uri)
-					       (str backward-dep))))))))))))))))
+				 (if backward-deps-sorted
+				     (htm
+				      (:ul
+				       (dolist (backward-dep backward-deps-sorted)
+					 (destructuring-bind (dep-name dep-num)
+					     (split ":" backward-dep)
+					   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+					     (htm
+					      (:li ((:a :href dep-uri)
+						    (str backward-dep)))))))))
+				     (htm (:p (:em "(none)"))))))))))))
 	       (push (create-regex-dispatcher 
 		      (format nil "^/~a/~d$" article i)
 		      #'emit-dependency-page)
