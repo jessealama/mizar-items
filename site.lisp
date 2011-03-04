@@ -12,7 +12,8 @@
 (defparameter *itemization-source*
   "/Users/alama/sources/mizar/mizar-items/itemization")
 
-(defparameter *articles* (list "tarski"
+(defparameter *articles* (list "hidden"
+			       "tarski"
 			       "xboole_0"
 			       "boole" 
 			       "xboole_1"
@@ -42,8 +43,8 @@
       (destructuring-bind (lhs rhs)
 	  (split " " line)
 	(push (cons lhs rhs) edges)
-	(push rhs (gethash lhs forward-table))
-	(push lhs (gethash rhs backward-table))))
+	(pushnew rhs (gethash lhs forward-table) :test #'string=)
+	(pushnew lhs (gethash rhs backward-table) :test #'string=)))
     (setf *dependency-graph* edges
 	  *dependency-graph-forward* forward-table
 	  *dependency-graph-backward* backward-table)
