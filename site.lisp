@@ -5,42 +5,6 @@
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *items-server-port* 8000)
-
-(defun make-items-backend ()
-  (make-backend
-   :httpd
-   :host "127.0.0.1"
-   :port *items-server-port*))
-
-(defun make-items-server ()
-  (make-instance
-   'standard-server
-   :backend (make-items-backend)))
-
-(defvar *items-server* (make-items-server))
-
-(defun startup-items-server ()
-  (startup-server *items-server*))
-
-(defun shutdown-items-server ()
- (shutdown-server *items-server*))
-
-(defclass mizar-items-application (standard-application 
-				cookie-session-application-mixin)
-  ()
-  (:default-initargs
-   :url-prefix "/"
-    :debug-on-error t))
-
-(defvar *mizar-items-application* (make-instance 'mizar-items-application))
-
-(register-application *items-server* *mizar-items-application*)
-
-(defentry-point "" (:application *mizar-items-application*)
-    ()
-    (call 'toplevel-window))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Static data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -62,15 +26,27 @@
 (defparameter *dependency-graph-file* 
   "/Users/alama/sources/mizar/mizar-items/depgraph")
 
+(defparameter *dependency-graph* nil)
+
+(defparameter *dependency-graph-forward* nil)
+
+(defparameter *dependency-graph-backward* nil)
+
 (defun load-dependency-graph ()
   (let ((lines (lines-of-file *dependency-graph-file*))
-	(edges nil))
-    (dolist (line lines edges)
-      (multiple-value-bind (lhs rhs)
+	(edges nil)
+	(forward-table (make-hash-table :test #'equal))
+	(backward-table (make-hash-table :test #'equal)))
+    (dolist (line lines)
+      (destructuring-bind (lhs rhs)
 	  (split " " line)
-	(push (cons lhs rhs) edges)))))
-
-(defparameter *dependency-graph* (load-dependency-graph))
+	(push (cons lhs rhs) edges)
+	(push rhs (gethash lhs forward-table))
+	(push lhs (gethash rhs backward-table))))
+    (setf *dependency-graph* edges
+	  *dependency-graph-forward* forward-table
+	  *dependency-graph-backward* backward-table)
+    t))
 
 (defun count-miz-in-directory (dir)
   (let ((counter 0))
@@ -88,47 +64,61 @@
 	(setf (gethash article-name num-items-table)
 	      (count-miz-in-directory article-dir))))))
 
-(defparameter *article-num-items* (load-article-num-items))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Components
+;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcomponent mml-listing-component
-    ()
-  ())
+(defvar *acceptor* (make-instance 'hunchentoot:acceptor :port 4242))
 
-(defcomponent about-this-site-component
-    ()
-  ())
+(defun start-server ()
+  (hunchentoot:start *acceptor*)
+  (setf *message-log-pathname* "/tmp/hunchentoot-messages")
+  (setf *access-log-pathname* "/tmp/hunchentoot-access")
+  t)
 
-(defcomponent contact-component
-    ()
-  ())
+;; set up articles
 
-(defcomponent toplevel-window (standard-window-component)
-  ()
-  (:default-initargs
-      :title "Explore fine-grained dependencies in the Mizar Mathematical Library"
-      :doctype yaclml:+xhtml-strict-doctype+
-      :body
-      (make-instance 'tabbed-pane
-		     :current-component-key "mml listing"
-		     :key-test #'string=
-		     :contents 
-		     `(("mml listing" . ,(make-instance 'mml-listing-component))
-		       ("about this site" . ,(make-instance 'about-this-site-component))
-		       ("contact" . ,(make-instance 'contact-component))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Rendering methods
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod render ((mml-listing mml-listing-component))
-  (<:p "Here's the mml."))
-
-(defmethod render ((about about-this-site-component))
-  (<:p "I made this because I wanted to make something cool."))
-
-(defmethod render ((contact contact-component))
-  (<:p "my email address is jesse.alama@gmail.com."))
+(defun initialize-uris ()
+  (dolist (article *articles* t)
+    (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
+	   (miz-uri (format nil "/~a.miz" article))
+	   (miz-path (format nil "~a/~a.miz" article-dir article))
+	   (html-uri (format nil "/~a.html" article))
+	   (html-path (format nil "~a/~a.html" article-dir article)))
+      ;; static files for the whole article
+      (push (create-static-file-dispatcher-and-handler miz-uri 
+						       miz-path
+						       "text/plain")
+	    *dispatch-table*)
+      (push (create-static-file-dispatcher-and-handler html-uri
+						       html-path
+						       "text/html")
+	    *dispatch-table*)
+      ;; items for the article
+      (loop
+	 with article-text-dir = (format nil "~a/text" article-dir)
+	 with num-items = (count-miz-in-directory article-text-dir)
+	 for i from 1 upto num-items
+	 for item-uri = (format nil "/~a/~d" article i)
+	 for item-path = (format nil "~a/ckb~d.html" article-text-dir i)
+	 initially
+	   (flet ((emit-article-page ()
+		    (with-html-output-to-string (*standard-output* nil 
+								   :prologue t
+								   :indent t)
+		      (:html
+		       (:title (format nil "~a" article))
+		       (:body
+			(:p "The article " article " has " (:b (str num-items)) " items ")
+			(:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") "."))))))
+	     (push (create-regex-dispatcher
+		    (format nil "^/~a$|^/~a/$" article article)
+		    #'emit-article-page)
+		   *dispatch-table*))
+	 do
+	   (unless (file-exists-p item-path)
+	     (error "Can't register URI '~a' to point to '~a', because there's no file at that path" item-uri item-path))
+	   (push (create-static-file-dispatcher-and-handler item-uri
+							    item-path
+							    "text/html")
+		 *dispatch-table*)))))
