@@ -59,12 +59,25 @@
 			      (scan "ckb[0-9]+\.miz$" (namestring path))))
     counter))
 
+(defparameter *article-num-items* nil)
+
 (defun load-article-num-items ()
   (let ((num-items-table (make-hash-table :test #'equal)))
-    (dolist (article-name *articles* num-items-table)
+    (dolist (article-name *articles* (setf *article-num-items* num-items-table))
       (let ((article-dir (concat *itemization-source* "/" article-name "/" "text")))
 	(setf (gethash article-name num-items-table)
 	      (count-miz-in-directory article-dir))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Searching for paths between items
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defstruct (item-search-problem (:include problem)))
+
+(defmethod successors ((isp item-search-problem) node)
+  (mapcar #'(lambda (item)
+	      (cons item item))
+	  (gethash (node-state node) *dependency-graph-forward*)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
@@ -92,7 +105,7 @@
 		 (< item-num-1 item-num-2)))))))
 
 (defun initialize-uris ()
-  (dolist (article *articles* t)
+  (dolist (article *articles*)
     (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
 	   (miz-uri (format nil "/~a.miz" article))
 	   (miz-path (format nil "~a/~a.miz" article-dir article))
@@ -110,7 +123,7 @@
       ;; items for the article
       (loop
 	 with article-text-dir = (format nil "~a/text" article-dir)
-	 with num-items = (count-miz-in-directory article-text-dir)
+	 with num-items = (gethash article *article-num-items*)
 	 for i from 1 upto num-items
 	 for item-uri = (format nil "/~a/~d" article i)
 	 for item-path = (format nil "~a/ckb~d.html" article-text-dir i)
@@ -167,6 +180,44 @@
 					 (:li ((:a :href dep-uri)
 					       (str backward-dep))))))))))))))))
 	       (push (create-regex-dispatcher 
-		      (format nil "/~a/~d" article i)
+		      (format nil "^/~a/~d$" article i)
 		      #'emit-dependency-page)
-		     *dispatch-table*)))))))
+		     *dispatch-table*))))))
+  ;; set up path searcher
+  (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
+    (flet ((find-path ()
+	     (let ((uri (request-uri*)))
+	       (register-groups-bind (article-1 num-1 article-2 num-2)
+		   ("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
+		 (let ((ai (format nil "~a:~a" article-1 num-1))
+		       (bj (format nil "~a:~a" article-2 num-2))) 
+		   (let ((ai-to-bj-problem (make-item-search-problem 
+					    :initial-state ai
+					    :goal bj)))
+		     (let ((solution (depth-first-search ai-to-bj-problem)))
+		       (if solution
+			   (with-html-output-to-string (*standard-output* nil
+									  :prologue t
+									  :indent t)
+			     (:html
+			      (:title (fmt "from ~a to ~a" ai bj))
+			      (:body
+			       (:p (fmt "Here is a path from ~a to ~a" ai bj))
+			       (:ol
+				(dolist (step (explain-solution solution))
+				  (htm
+				   (:li (str step))))))))
+			   (with-html-output-to-string (*standard-output* nil
+									  :prologue t
+									  :indent t)
+			     (:html
+			      (:title (fmt "from ~a to ~a" ai bj))
+			      (:body
+			       (:p (fmt "There is no path from ~a to ~a" ai bj)))))))))))))
+    (push
+     (create-regex-dispatcher ai-to-bj-uri-regex
+			      #'find-path)
+     *dispatch-table*))
+    t))
+			     
+	
