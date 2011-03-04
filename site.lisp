@@ -12,7 +12,8 @@
 (defparameter *itemization-source*
   "/Users/alama/sources/mizar/mizar-items/itemization")
 
-(defparameter *articles* (list "xboole_0"
+(defparameter *articles* (list "tarski"
+			       "xboole_0"
 			       "boole" 
 			       "xboole_1"
 			       "enumset1"
