@@ -160,7 +160,7 @@
 			  (:table
 			   (:tr
 			    (:td :rowspan 2 (str item-html))
-			    (:td "This item depends on:"
+			    (:td "This item immediately depends on:"
 				 (:ul
 				  (dolist (forward-dep forward-deps-sorted)
 				    (destructuring-bind (dep-name dep-num)
@@ -170,7 +170,7 @@
 					 (:li ((:a :href dep-uri)
 					       (str forward-dep))))))))))
 			   (:tr
-			    (:td "These items depend on this one:"
+			    (:td "These items immediately depend on this one:"
 				 (:ul
 				  (dolist (backward-dep backward-deps-sorted)
 				    (destructuring-bind (dep-name dep-num)
