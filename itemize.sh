@@ -1,9 +1,17 @@
 #!/bin/bash
 
 article=$1;
-harddisk=/tmp/itemization;
-ramdisk=/Volumes/ramdisk;
-image=/Users/alama/sources/mizar/mizar-items/mizar
+host=`hostname -s`;
+if [[ $host -eq "mizar" ]]; then
+    harddisk=/local/data/proofs/itemization;
+    ramdisk=/dev/shm;
+    image=/home/alama/mizar-items/mizar;
+else
+    harddisk=/mnt/sdb3/alama/itemization;
+    ramdisk=/dev/shm/alama/itemization;
+    image=/mnt/sdb3/alama/mizar;
+fi
+
 article_on_harddisk=$harddisk/$article;
 article_in_ramdisk=$ramdisk/$article-1;
 
@@ -15,12 +23,17 @@ sbcl --disable-ldb \
      > /dev/null 2>&1;
 
 if [[ $? -eq "0" ]]; then
-    rm -Rf $article_on_harddisk;
-    mv $article_in_ramdisk $article_on_harddisk;
-    touch $harddisk/$article-itemization-stamp;
+    tarfile=$article.tar
+    ramdisk_tarfile=$ramdisk/$tarfile;
+    harddisk_tarfile=$harddisk/$tarfile;
+    cd $ramdisk;
+    tar cf $tarfile $article-1;
+    bzip2 $tarfile;
+    rm -f $harddisk_tarfile.bz2
+    mv $tarfile.bz2 $HOME;
 else
     rm -Rf $article_in_ramdisk;
-    echo "Failure: lisp died while itemizing $article";
+    echo "Failure: error itemizing $article";
 fi
 
 exit 0;
