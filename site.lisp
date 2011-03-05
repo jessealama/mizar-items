@@ -29,6 +29,7 @@
   "/Users/alama/sources/mizar/mizar-items/depgraph")
 
 (defparameter *dependency-graph* nil)
+(defparameter *num-dependency-graph-edges* nil)
 
 (defparameter *dependency-graph-forward* nil)
 
@@ -46,6 +47,7 @@
 	(pushnew rhs (gethash lhs forward-table) :test #'string=)
 	(pushnew lhs (gethash rhs backward-table) :test #'string=)))
     (setf *dependency-graph* edges
+	  *num-dependency-graph-edges* (length edges)
 	  *dependency-graph-forward* forward-table
 	  *dependency-graph-backward* backward-table)
     t))
