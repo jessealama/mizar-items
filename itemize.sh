@@ -2,7 +2,7 @@
 
 article=$1;
 host=`hostname -s`;
-if [[ $host -eq "mizar" ]]; then
+if [[ $host = "mizar" ]]; then
     harddisk=/local/data/proofs/itemization;
     ramdisk=/dev/shm;
     image=/home/alama/mizar-items/mizar;
