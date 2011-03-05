@@ -187,7 +187,66 @@ returning NIL."
 		  (:html
 		   (:title (fmt "from ~a to ~a" ai bj))
 		   (:body
-		    (:p (fmt "There is no path from ~a to ~a" ai bj))))))))))))
+		    (:p (fmt "There is no path from ~a to ~a." ai bj)
+			" Care to " ((:a :href (fmt "/~a/~a/~a/~a"
+						    article-2 num-2
+						    article-1 num-1))
+				     "search for a path going the other way")
+			"?")))))))))))
+
+(defun emit-path-between-items-via-item ()
+  (let ((uri (request-uri*)))
+    (register-groups-bind (source-article source-num 
+			   via-article via-num
+			   destination-article destination-num)
+	("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
+      (let ((source (format nil "~a:~a" source-article source-num))
+	    (via (format nil "~a:~a" via-article via-num))
+	    (destination (format nil "~a:~a" destination-article destination-num)))	
+	(let ((source-to-via-problem (make-item-search-problem 
+				      :initial-state source
+				      :goal via))
+	      (via-to-destination-problem (make-item-search-problem
+					   :initial-state via
+					   :goal destination)))
+	  (let ((solution-to-via (depth-first-search source-to-via-problem))
+		(solution-to-destination (depth-first-search via-to-destination-problem))
+		(title (format nil "from ~a to ~a via ~a" source destination via)))
+	    (if solution-to-via
+		(if solution-to-destination
+		    (with-title (str title)
+		      (:p (fmt "Here is a path from ~a to ~a via ~a" source destination via))
+		      (:ol
+		       (let ((source-uri (format nil "/~a/~a" source-article source-num)))
+			 (htm
+			  (:li (:b ((:a :href source-uri) (str source))))))
+		       (dolist (step (all-but-last (explain-solution solution-to-via)))
+			 (destructuring-bind (step-article step-num)
+			     (split ":" step)
+			   (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+			     (htm
+			      (:li ((:a :href step-uri)
+				    (str step)))))))
+		       (let ((via-uri (format nil "/~a/~a" via-article via-num)))
+			 (htm
+			  (:li (:b ((:a :href via-uri)) (str via)))))
+		       (dolist (step (all-but-last (cdr (explain-solution solution-to-destination))))
+			 (destructuring-bind (step-article step-num)
+			     (split ":" step)
+			   (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+			     (htm
+			      (:li ((:a :href step-uri)
+				    (str step)))))))
+		       (let ((destination-uri (format nil "/~a/~a" destination-article destination-num)))
+			 (htm
+			  (:li (:b ((:a :href destination-uri)) (str destination)))))))
+		    (with-title (str title)
+		      (:p "There is a path from " (str source) " to " (str via) ", but there is no path from " (str via) " to " (str destination) ".")))
+		(if solution-to-destination
+		    (with-title (str title)
+		      (:p "There is no path from " (str source) " to " (str via) ", but there is a path from " (str via) " to " (str destination) "."))
+		    (with-title (str title)
+		      (:p "There is no path from " (str source) " to " (str via) ", nor is there is a path from " (str via) " to " (str destination) "."))))))))))
 
 (defun emit-article-page (article)
   (let ((num-items (gethash article *article-num-items*)))
@@ -290,4 +349,6 @@ returning NIL."
   ;; set up path searcher
   (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
     (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
+  (let ((source-via-dest-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
+    (register-regexp-dispatcher source-via-dest-regex #'emit-path-between-items-via-item))
     t)
