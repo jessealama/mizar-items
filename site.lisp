@@ -138,6 +138,19 @@ returning NIL."
 	    (and (string= item-article-name-1 item-article-name-2)
 		 (< item-num-1 item-num-2)))))))
 
+(defun emit-about-page ()
+  (with-title "fine-grained dependencies in the mizar mathematical library"
+    (:p "This site aims to illustrate fine-grained dependency
+    information about " (:a :href "http://www.mizar.org" "the Mizar
+    Mathematical Library") ", a large collection of formalized mathematical knowledge.")
+    (:p "For more information about the method for computing this
+    information and some applications of it, see:")
+    (:ul
+     (:li (str "&ldquo;") (:a :href "http://centria.di.fct.unl.pt/~alama/materials/preprints/dependencies-in-formal-mathematics.pdf" "Dependencies in formal mathematics") (str "&rdquo;"))
+     (:li (str "&ldquo;") (:a :href "http://centria.di.fct.unl.pt/~alama/materials/preprints/premise-selection-for-mathematics-by-corpus-analysis-and-kernel-methods.pdf" "Premise selection for mathematics by corpus analysis and kernel methods") (str "&rdquo;")))
+    (:hr)
+    (:address (:a :href "mailto:j.alama@fct.unl.pt" "Contact the maintainer"))))
+
 (defun emit-path-between-items ()
   (let ((uri (request-uri*)))
     (register-groups-bind (article-1 num-1 article-2 num-2)
@@ -249,6 +262,8 @@ returning NIL."
     items-dispatch-table))
 
 (defun initialize-uris ()
+  ;; about page
+  (register-regexp-dispatcher "^/about$" #'emit-about-page)
   (dolist (article *articles*)
     (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
 	   (miz-uri (format nil "/~a.miz" article))
