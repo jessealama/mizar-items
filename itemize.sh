@@ -35,7 +35,7 @@ if [[ $? -eq "0" ]]; then
     bzip2 $tarfile;
     rm -f $harddisk_tarfile.bz2
     mv $tarfile.bz2 $HOME;
-    rm $article_in_ramdisk;
+    rm -Rf $article_in_ramdisk;
     exit 0;
 else
     rm -Rf $article_in_ramdisk;
