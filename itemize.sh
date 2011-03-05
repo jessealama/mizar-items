@@ -24,7 +24,7 @@ sbcl --disable-ldb \
      --core $image \
      --eval '(in-package :mizar)' \
      --eval "(if (handler-bind ((warning #'muffle-warning)) (itemize-no-errors \"$article\")) (sb-ext:quit :unix-status 0) (sb-ext:quit :unix-status 1))"
-     2>&1;
+     > dev/null 2>&1;
 
 if [[ $? -eq "0" ]]; then
     tarfile=$article.tar
