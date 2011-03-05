@@ -981,7 +981,9 @@ of LINE starting from START."
   (warn "Squeezing repeated newlines...")
   (squeeze-repeated-newlines article directory)
   (warn "Squeezing repeated spaces...")
-  (squeeze-repeated-spaces article directory))
+  (squeeze-repeated-spaces article directory)
+  (warn "Exanding canceled theorems...")
+  (expand-canceled article directory))
 
 (defun initialize-context-for-items (article)
   ;; compute a conservative estimate of what pseudo-items each item
