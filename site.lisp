@@ -83,13 +83,45 @@
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar *acceptor* (make-instance 'hunchentoot:acceptor :port 4242))
+(defvar items-dispatch-table nil)
+
+(defun items-request-dispatcher (request)
+  "Selects a request handler based on a list of individual request
+dispatchers all of which can either return a handler or neglect by
+returning NIL."
+  (loop for dispatcher in items-dispatch-table
+        for action = (funcall dispatcher request)
+        when action return (funcall action)
+        finally (setf (return-code *reply*) +http-not-found+)))
+
+(defvar *acceptor* (make-instance 'hunchentoot:acceptor 
+				  :port 4242
+				  :request-dispatcher #'items-request-dispatcher))
 
 (defun start-server ()
   (hunchentoot:start *acceptor*)
-  (setf *message-log-pathname* "/tmp/hunchentoot-messages")
-  (setf *access-log-pathname* "/tmp/hunchentoot-access")
   t)
+
+(defun setup-server ()
+  (load-article-num-items)
+  (load-dependency-graph)
+  (initialize-uris)
+  (setf *message-log-pathname* "/tmp/hunchentoot-messages"
+	*access-log-pathname* "/tmp/hunchentoot-access"
+	*handle-http-errors-p* t
+	*http-error-handler* #'handle-http-error
+	*log-lisp-errors-p* t
+	*log-lisp-warnings-p* t
+	*log-lisp-backtraces-p* t)
+  
+  t)
+
+(defun handle-http-error (error-code)
+  (when (= error-code +http-not-found+)
+    (with-title "No"
+      (:p "I still haven't found what you're looking for."))))
+
+(setq *http-error-handler* #'handle-http-error)
 
 ;; set up articles
 
@@ -104,6 +136,116 @@
 	    (and (string= item-article-name-1 item-article-name-2)
 		 (< item-num-1 item-num-2)))))))
 
+(defun emit-path-between-items ()
+  (let ((uri (request-uri*)))
+    (register-groups-bind (article-1 num-1 article-2 num-2)
+	("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
+      (let ((ai (format nil "~a:~a" article-1 num-1))
+	    (bj (format nil "~a:~a" article-2 num-2))) 
+	(let ((ai-to-bj-problem (make-item-search-problem 
+				 :initial-state ai
+				 :goal bj)))
+	  (let ((solution (depth-first-search ai-to-bj-problem)))
+	    (if solution
+		(with-html-output-to-string (*standard-output* nil
+							       :prologue t
+							       :indent t)
+		  (:html
+		   (:title (fmt "from ~a to ~a" ai bj))
+		   (:body
+		    (:p (fmt "Here is a path from ~a to ~a" ai bj))
+		    (:ol
+		     (let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
+		       (htm
+			(:li ((:a :href ai-uri)
+			      (str ai)))))
+		     (dolist (step (explain-solution solution))
+		       (destructuring-bind (step-article step-num)
+			   (split ":" step)
+			 (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+			   (htm
+			    (:li ((:a :href step-uri)
+				  (str step)))))))))))
+		(with-html-output-to-string (*standard-output* nil
+							       :prologue t
+							       :indent t)
+		  (:html
+		   (:title (fmt "from ~a to ~a" ai bj))
+		   (:body
+		    (:p (fmt "There is no path from ~a to ~a" ai bj))))))))))))
+
+(defun emit-article-page (article)
+  (let ((num-items (gethash article *article-num-items*)))
+    #'(lambda ()
+	(with-html-output-to-string (*standard-output* nil 
+						       :prologue t
+						       :indent t)
+	  (:html
+	   (:title (format nil "~a" article))
+	   (:body
+	    (:p "The article " article " has " (:b (str num-items)) " items ")
+	    (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))))
+
+(defun emit-dependency-page (article item-number)
+  (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
+	 (article-text-dir (format nil "~a/text" article-dir))
+	 (item-path (format nil "~a/ckb~d.html" article-text-dir item-number))
+	 (item-html (file-as-string item-path))
+	 (item-name (format nil "~a:~d" article item-number))
+	 (forward-deps (gethash item-name *dependency-graph-forward*))
+	 (backward-deps (gethash item-name *dependency-graph-backward*))
+	 (forward-deps-sorted (sort forward-deps #'item-<))
+	 (backward-deps-sorted (sort backward-deps #'item-<)))
+    #'(lambda ()
+	(with-html-output-to-string (*standard-output* nil
+						       :prologue t
+						       :indent t)
+	  (:html
+	   (:title (str item-name))
+	   (:body
+	    (:table
+	     (:tr
+	      (:td :rowspan 2 (str item-html))
+	      (:td "This item immediately depends on:"
+		   (if forward-deps-sorted
+		       (htm
+			(:ul
+			 (dolist (forward-dep forward-deps-sorted)
+			   (destructuring-bind (dep-name dep-num)
+			       (split ":" forward-dep)
+			     (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+			       (htm
+				(:li ((:a :href dep-uri)
+				      (str forward-dep)))))))))
+		       (htm (:p (:em "(none)"))))))
+	     (:tr
+	      (:td "These items immediately depend on this one:"
+		   (if backward-deps-sorted
+		       (htm
+			(:ul
+			 (dolist (backward-dep backward-deps-sorted)
+			   (destructuring-bind (dep-name dep-num)
+			       (split ":" backward-dep)
+			     (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+			       (htm
+				(:li ((:a :href dep-uri)
+				      (str backward-dep)))))))))
+		       (htm (:p (:em "(none)")))))))))))))
+
+(defmacro register-static-file-dispatcher (uri path &optional mime-type)
+  `(progn
+     (unless (file-exists-p ,path)
+       (error "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
+     (push (create-static-file-dispatcher-and-handler ,uri 
+						      ,path
+						      ,mime-type)
+	   items-dispatch-table)))
+
+(defmacro register-regexp-dispatcher (uri-regexp dispatcher)
+  `(push
+    (create-regex-dispatcher ,uri-regexp ,dispatcher)
+    items-dispatch-table))
+
 (defun initialize-uris ()
   (dolist (article *articles*)
     (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
@@ -112,126 +254,23 @@
 	   (html-uri (format nil "/~a.html" article))
 	   (html-path (format nil "~a/~a.html" article-dir article)))
       ;; static files for the whole article
-      (push (create-static-file-dispatcher-and-handler miz-uri 
-						       miz-path
-						       "text/plain")
-	    *dispatch-table*)
-      (push (create-static-file-dispatcher-and-handler html-uri
-						       html-path
-						       "text/html")
-	    *dispatch-table*)
+      (register-static-file-dispatcher miz-uri miz-path "text/plain")
+      (register-static-file-dispatcher html-uri html-path "text/html")
       ;; items for the article
       (loop
-	 with article-text-dir = (format nil "~a/text" article-dir)
 	 with num-items = (gethash article *article-num-items*)
 	 for i from 1 upto num-items
-	 for item-uri = (format nil "/~a/~d" article i)
-	 for item-path = (format nil "~a/ckb~d.html" article-text-dir i)
 	 initially
-	   (flet ((emit-article-page ()
-		    (with-html-output-to-string (*standard-output* nil 
-								   :prologue t
-								   :indent t)
-		      (:html
-		       (:title (format nil "~a" article))
-		       (:body
-			(:p "The article " article " has " (:b (str num-items)) " items ")
-			(:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") "."))))))
-	     (push (create-regex-dispatcher
-		    (format nil "^/~a$|^/~a/$" article article)
-		    #'emit-article-page)
-		   *dispatch-table*))
+	   (push (create-regex-dispatcher
+		  (format nil "^/~a$|^/~a/$" article article)
+		  (emit-article-page article))
+		  items-dispatch-table)
 	 do
-	   (unless (file-exists-p item-path)
-	     (error "Can't register URI '~a' to point to '~a', because there's no file at that path" item-uri item-path))
-	   (let* ((item-html (file-as-string item-path))
-		  (item-name (format nil "~a:~d" article i))
-		  (forward-deps (gethash item-name *dependency-graph-forward*))
-		  (backward-deps (gethash item-name *dependency-graph-backward*))
-		  (forward-deps-sorted (sort forward-deps #'item-<))
-		  (backward-deps-sorted (sort backward-deps #'item-<)))
-	     (flet ((emit-dependency-page ()
-		      (with-html-output-to-string (*standard-output* nil
-								     :prologue t
-								     :indent t)
-			(:html
-			 (:title (str item-name))
-			 (:body
-			  (:table
-			   (:tr
-			    (:td :rowspan 2 (str item-html))
-			    (:td "This item immediately depends on:"
-				 (if forward-deps-sorted
-				     (htm
-				      (:ul
-				       (dolist (forward-dep forward-deps-sorted)
-					 (destructuring-bind (dep-name dep-num)
-					     (split ":" forward-dep)
-					   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-					     (htm
-					      (:li ((:a :href dep-uri)
-						    (str forward-dep))))))))
-				      (htm (:p (:em "(none)")))))))
-			   (:tr
-			    (:td "These items immediately depend on this one:"
-				 (if backward-deps-sorted
-				     (htm
-				      (:ul
-				       (dolist (backward-dep backward-deps-sorted)
-					 (destructuring-bind (dep-name dep-num)
-					     (split ":" backward-dep)
-					   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-					     (htm
-					      (:li ((:a :href dep-uri)
-						    (str backward-dep)))))))))
-				     (htm (:p (:em "(none)"))))))))))))
-	       (push (create-regex-dispatcher 
-		      (format nil "^/~a/~d$" article i)
-		      #'emit-dependency-page)
-		     *dispatch-table*))))))
+	   (push (create-regex-dispatcher 
+		  (format nil "^/~a/~d$" article i)
+		  (emit-dependency-page article i))
+		 items-dispatch-table))))
   ;; set up path searcher
   (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
-    (flet ((find-path ()
-	     (let ((uri (request-uri*)))
-	       (register-groups-bind (article-1 num-1 article-2 num-2)
-		   ("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
-		 (let ((ai (format nil "~a:~a" article-1 num-1))
-		       (bj (format nil "~a:~a" article-2 num-2))) 
-		   (let ((ai-to-bj-problem (make-item-search-problem 
-					    :initial-state ai
-					    :goal bj)))
-		     (let ((solution (depth-first-search ai-to-bj-problem)))
-		       (if solution
-			   (with-html-output-to-string (*standard-output* nil
-									  :prologue t
-									  :indent t)
-			     (:html
-			      (:title (fmt "from ~a to ~a" ai bj))
-			      (:body
-			       (:p (fmt "Here is a path from ~a to ~a" ai bj))
-			       (:ol
-				(let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
-				  (htm
-				   (:li ((:a :href ai-uri)
-					 (str ai)))))
-				(dolist (step (explain-solution solution))
-				  (destructuring-bind (step-article step-num)
-				      (split ":" step)
-				    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-				      (htm
-				       (:li ((:a :href step-uri)
-					     (str step)))))))))))
-			   (with-html-output-to-string (*standard-output* nil
-									  :prologue t
-									  :indent t)
-			     (:html
-			      (:title (fmt "from ~a to ~a" ai bj))
-			      (:body
-			       (:p (fmt "There is no path from ~a to ~a" ai bj)))))))))))))
-    (push
-     (create-regex-dispatcher ai-to-bj-uri-regex
-			      #'find-path)
-     *dispatch-table*))
-    t))
-			     
-	
+    (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
+    t)
