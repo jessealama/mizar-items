@@ -32,9 +32,9 @@ if [[ $? -eq "0" ]]; then
     harddisk_tarfile=$harddisk/$tarfile;
     cd $ramdisk;
     tar cf $tarfile $article-1;
-    bzip2 $tarfile;
-    rm -f $harddisk_tarfile.bz2
-    mv $tarfile.bz2 $HOME;
+    gzip $tarfile;
+    rm -f $harddisk_tarfile.gz
+    mv $tarfile.gz $HOME;
     rm -Rf $article_in_ramdisk;
     exit 0;
 else
