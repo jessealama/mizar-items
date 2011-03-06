@@ -201,43 +201,43 @@ returning NIL."
 					   :initial-state via
 					   :goal destination)))
 	  (let ((solution-to-via (depth-first-search source-to-via-problem))
-		(solution-to-destination (depth-first-search via-to-destination-problem))
-		(title (format nil "from ~a to ~a via ~a" source destination via)))
-	    (if solution-to-via
-		(if solution-to-destination
-		    (with-title (str title)
-		      (:p (fmt "Here is a path from ~a to ~a via ~a" source destination via))
-		      (:ol
-		       (let ((source-uri (format nil "/~a/~a" source-article source-num)))
-			 (htm
-			  (:li (:b ((:a :href source-uri) (str source))))))
-		       (dolist (step (all-but-last (explain-solution solution-to-via)))
-			 (destructuring-bind (step-article step-num)
-			     (split ":" step)
-			   (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-			     (htm
-			      (:li ((:a :href step-uri)
-				    (str step)))))))
-		       (let ((via-uri (format nil "/~a/~a" via-article via-num)))
-			 (htm
-			  (:li (:b ((:a :href via-uri)) (str via)))))
-		       (dolist (step (all-but-last (cdr (explain-solution solution-to-destination))))
-			 (destructuring-bind (step-article step-num)
-			     (split ":" step)
-			   (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-			     (htm
-			      (:li ((:a :href step-uri)
-				    (str step)))))))
-		       (let ((destination-uri (format nil "/~a/~a" destination-article destination-num)))
-			 (htm
-			  (:li (:b ((:a :href destination-uri)) (str destination)))))))
-		    (with-title (str title)
-		      (:p "There is a path from " (str source) " to " (str via) ", but there is no path from " (str via) " to " (str destination) ".")))
-		(if solution-to-destination
-		    (with-title (str title)
-		      (:p "There is no path from " (str source) " to " (str via) ", but there is a path from " (str via) " to " (str destination) "."))
-		    (with-title (str title)
-		      (:p "There is no path from " (str source) " to " (str via) ", nor is there is a path from " (str via) " to " (str destination) "."))))))))))
+		(solution-to-destination (depth-first-search via-to-destination-problem)))
+	    (with-title (fmt "from ~a to ~a via ~a" source destination via)
+	      (if solution-to-via
+		  (if solution-to-destination
+		      (htm
+		       (:p (fmt "Here is a path from ~a to ~a via ~a" source destination via))
+		       (:ol
+			(let ((source-uri (format nil "/~a/~a" source-article source-num)))
+			  (htm
+			   (:li (:b ((:a :href source-uri) (str source))))))
+			(dolist (step (all-but-last (explain-solution solution-to-via)))
+			  (destructuring-bind (step-article step-num)
+			      (split ":" step)
+			    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+			      (htm
+			       (:li ((:a :href step-uri)
+				     (str step)))))))
+			(let ((via-uri (format nil "/~a/~a" via-article via-num)))
+			  (htm
+			   (:li (:b ((:a :href via-uri)) (str via)))))
+			(dolist (step (all-but-last (cdr (explain-solution solution-to-destination))))
+			  (destructuring-bind (step-article step-num)
+			      (split ":" step)
+			    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+			      (htm
+			       (:li ((:a :href step-uri)
+				     (str step)))))))
+			(let ((destination-uri (format nil "/~a/~a" destination-article destination-num)))
+			  (htm
+			   (:li (:b ((:a :href destination-uri)) (str destination)))))))
+		      (htm
+		       (:p "There is a path from " (str source) " to " (str via) ", but there is no path from " (str via) " to " (str destination) ".")))
+		  (if solution-to-destination
+		      (htm
+		       (:p "There is no path from " (str source) " to " (str via) ", but there is a path from " (str via) " to " (str destination) "."))
+		      (htm
+		       (:p "There is no path from " (str source) " to " (str via) ", nor is there is a path from " (str via) " to " (str destination) ".")))))))))))
 
 (defun emit-article-page (article)
   (let ((num-items (gethash article *article-num-items*)))
