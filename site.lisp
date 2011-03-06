@@ -287,6 +287,19 @@ returning NIL."
 				    (str backward-dep)))))))))
 		     (htm (:p (:em "(none)")))))))))))
 
+(defun emit-random-page ()
+  (let* ((random-edge-index (random *num-dependency-graph-edges*))
+	 (random-zero-one (random 2))
+	 (random-edge (nth random-edge-index *dependency-graph*))
+	 (random-vertex (if (zerop random-zero-one)
+			    (car random-edge)
+			    (cdr random-edge))))
+    (destructuring-bind (random-article-name random-item-num)
+	(split ":" random-vertex)
+      (let ((random-uri (format nil "/~a/~a" 
+				random-article-name random-item-num)))
+	(redirect random-uri)))))
+
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
      (unless (file-exists-p ,path)
@@ -308,6 +321,7 @@ returning NIL."
 (defun initialize-uris ()
   ;; about page
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
+  (register-exact-uri-dispatcher "/random" #'emit-random-page)
   (dolist (article *articles*)
     (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
 	   (miz-uri (format nil "/~a.miz" article))
