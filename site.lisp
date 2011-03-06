@@ -162,33 +162,27 @@ returning NIL."
 				 :goal bj)))
 	  (let ((solution (depth-first-search ai-to-bj-problem)))
 	    (if solution
-		(with-html-output-to-string (*standard-output* nil
-							       :prologue t
-							       :indent t)
-		  (with-title (fmt "from ~a to ~a" ai bj)
-		    (:p (fmt "Here is a path from ~a to ~a" ai bj))
-		    (:ol
-		     (let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
-		       (htm
-			(:li ((:a :href ai-uri)
-			      (str ai)))))
-		     (dolist (step (explain-solution solution))
-		       (destructuring-bind (step-article step-num)
-			   (split ":" step)
-			 (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-			   (htm
-			    (:li ((:a :href step-uri)
-				  (str step))))))))))
-		(with-html-output-to-string (*standard-output* nil
-							       :prologue t
-							       :indent t)
-		  (with-title (fmt "from ~a to ~a" ai bj)
-		    (:p (fmt "There is no path from ~a to ~a." ai bj)
-			" Care to " ((:a :href (fmt "/~a/~a/~a/~a"
-						    article-2 num-2
-						    article-1 num-1))
-				     "search for a path going the other way")
-			"?"))))))))))
+		(with-title (fmt "from ~a to ~a" ai bj)
+		  (:p (fmt "Here is a path from ~a to ~a" ai bj))
+		  (:ol
+		   (let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
+		     (htm
+		      (:li ((:a :href ai-uri)
+			    (str ai)))))
+		   (dolist (step (explain-solution solution))
+		     (destructuring-bind (step-article step-num)
+			 (split ":" step)
+		       (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+			 (htm
+			  (:li ((:a :href step-uri)
+				(str step)))))))))
+		(with-title (fmt "from ~a to ~a" ai bj)
+		  (:p (fmt "There is no path from ~a to ~a." ai bj)
+		      " Care to " ((:a :href (fmt "/~a/~a/~a/~a"
+						  article-2 num-2
+						  article-1 num-1))
+				   "search for a path going the other way")
+		      "?")))))))))
 
 (defun emit-path-between-items-via-item ()
   (let ((uri (request-uri*)))
@@ -247,12 +241,9 @@ returning NIL."
 (defun emit-article-page (article)
   (let ((num-items (gethash article *article-num-items*)))
     #'(lambda ()
-	(with-html-output-to-string (*standard-output* nil 
-						       :prologue t
-						       :indent t)
-	  (with-title (fmt "~a" article)
-	    (:p "The article " article " has " (:b (str num-items)) " items ")
-	    (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") "."))))))
+	(with-title (fmt "~a" article)
+	  (:p "The article " article " has " (:b (str num-items)) " items ")
+	  (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
 
 (defun emit-dependency-page (article item-number)
   (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
@@ -265,38 +256,35 @@ returning NIL."
 	 (forward-deps-sorted (sort forward-deps #'item-<))
 	 (backward-deps-sorted (sort backward-deps #'item-<)))
     #'(lambda ()
-	(with-html-output-to-string (*standard-output* nil
-						       :prologue t
-						       :indent t)
-	  (with-title (str item-name)
-	    (:table
-	     (:tr
-	      (:td :rowspan 2 (str item-html))
-	      (:td "This item immediately depends on:"
-		   (if forward-deps-sorted
-		       (htm
-			(:ul
-			 (dolist (forward-dep forward-deps-sorted)
-			   (destructuring-bind (dep-name dep-num)
-			       (split ":" forward-dep)
-			     (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-			       (htm
-				(:li ((:a :href dep-uri)
-				      (str forward-dep)))))))))
-		       (htm (:p (:em "(none)"))))))
-	     (:tr
-	      (:td "These items immediately depend on this one:"
-		   (if backward-deps-sorted
-		       (htm
-			(:ul
-			 (dolist (backward-dep backward-deps-sorted)
-			   (destructuring-bind (dep-name dep-num)
-			       (split ":" backward-dep)
-			     (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-			       (htm
-				(:li ((:a :href dep-uri)
-				      (str backward-dep)))))))))
-		       (htm (:p (:em "(none)"))))))))))))
+	(with-title (str item-name)
+	  (:table
+	   (:tr
+	    (:td :rowspan 2 (str item-html))
+	    (:td "This item immediately depends on:"
+		 (if forward-deps-sorted
+		     (htm
+		      (:ul
+		       (dolist (forward-dep forward-deps-sorted)
+			 (destructuring-bind (dep-name dep-num)
+			     (split ":" forward-dep)
+			   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+			     (htm
+			      (:li ((:a :href dep-uri)
+				    (str forward-dep)))))))))
+		     (htm (:p (:em "(none)"))))))
+	   (:tr
+	    (:td "These items immediately depend on this one:"
+		 (if backward-deps-sorted
+		     (htm
+		      (:ul
+		       (dolist (backward-dep backward-deps-sorted)
+			 (destructuring-bind (dep-name dep-num)
+			     (split ":" backward-dep)
+			   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
+			     (htm
+			      (:li ((:a :href dep-uri)
+				    (str backward-dep)))))))))
+		     (htm (:p (:em "(none)")))))))))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
