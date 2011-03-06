@@ -359,15 +359,13 @@ returning NIL."
 	 with num-items = (gethash article *article-num-items*)
 	 for i from 1 upto num-items
 	 initially
-	   (push (create-regex-dispatcher
-		  (format nil "^/~a$|^/~a/$" article article)
-		  (emit-article-page article))
-		  items-dispatch-table)
+	   (register-regexp-dispatcher 
+	    (format nil "^/~a$|^/~a/$" article article)
+	    (emit-article-page article))
 	 do
-	   (push (create-regex-dispatcher 
-		  (format nil "^/~a/~d$" article i)
-		  (emit-dependency-page article i))
-		 items-dispatch-table))))
+	   (register-regexp-dispatcher
+	    (format nil "^/~a/~d$" article i)
+	    (emit-dependency-page article i)))))
   ;; set up path searcher
   (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
     (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
