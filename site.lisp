@@ -165,9 +165,7 @@ returning NIL."
 		(with-html-output-to-string (*standard-output* nil
 							       :prologue t
 							       :indent t)
-		  (:html
-		   (:title (fmt "from ~a to ~a" ai bj))
-		   (:body
+		  (with-title (fmt "from ~a to ~a" ai bj)
 		    (:p (fmt "Here is a path from ~a to ~a" ai bj))
 		    (:ol
 		     (let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
@@ -180,19 +178,17 @@ returning NIL."
 			 (let ((step-uri (format nil "/~a/~a" step-article step-num)))
 			   (htm
 			    (:li ((:a :href step-uri)
-				  (str step)))))))))))
+				  (str step))))))))))
 		(with-html-output-to-string (*standard-output* nil
 							       :prologue t
 							       :indent t)
-		  (:html
-		   (:title (fmt "from ~a to ~a" ai bj))
-		   (:body
+		  (with-title (fmt "from ~a to ~a" ai bj)
 		    (:p (fmt "There is no path from ~a to ~a." ai bj)
 			" Care to " ((:a :href (fmt "/~a/~a/~a/~a"
 						    article-2 num-2
 						    article-1 num-1))
 				     "search for a path going the other way")
-			"?")))))))))))
+			"?"))))))))))
 
 (defun emit-path-between-items-via-item ()
   (let ((uri (request-uri*)))
@@ -254,11 +250,9 @@ returning NIL."
 	(with-html-output-to-string (*standard-output* nil 
 						       :prologue t
 						       :indent t)
-	  (:html
-	   (:title (format nil "~a" article))
-	   (:body
+	  (with-title (fmt "~a" article)
 	    (:p "The article " article " has " (:b (str num-items)) " items ")
-	    (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))))
+	    (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") "."))))))
 
 (defun emit-dependency-page (article item-number)
   (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
@@ -274,9 +268,7 @@ returning NIL."
 	(with-html-output-to-string (*standard-output* nil
 						       :prologue t
 						       :indent t)
-	  (:html
-	   (:title (str item-name))
-	   (:body
+	  (with-title (str item-name)
 	    (:table
 	     (:tr
 	      (:td :rowspan 2 (str item-html))
@@ -304,7 +296,7 @@ returning NIL."
 			       (htm
 				(:li ((:a :href dep-uri)
 				      (str backward-dep)))))))))
-		       (htm (:p (:em "(none)")))))))))))))
+		       (htm (:p (:em "(none)"))))))))))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
