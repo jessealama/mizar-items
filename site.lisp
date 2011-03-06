@@ -342,11 +342,14 @@ returning NIL."
 	   (html-uri (format nil "/~a.html" article))
 	   (html-path (format nil "~a/~a.html" article-dir article))
 	   (prel-dir-uri (format nil "/~a/prel/" article))
-	   (prel-dir-path (format nil "~a/prel/" article-dir)))
+	   (prel-dir-path (format nil "~a/prel/" article-dir))
+	   (text-dir-uri (format nil "/~a/text" article))
+	   (text-dir-path (format nil "~a/text/" article-dir)))
       ;; static files for the whole article
       (register-static-file-dispatcher miz-uri miz-path "text/plain")
       (register-static-file-dispatcher html-uri html-path "text/html")
       (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
+      (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path)
       ;; items for the article
       (loop
 	 with num-items = (gethash article *article-num-items*)
