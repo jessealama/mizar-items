@@ -26,16 +26,19 @@
 			       "funct_1"))
 
 (defparameter *dependency-graph-file* 
-  "/Users/alama/sources/mizar/mizar-items/depgraph")
+  "/Users/alama/sources/mizar/mizar-items/ckb-ckb-depgraph")
+(defparameter *item-to-ckb-file*
+  "/Users/alama/sources/mizar/mizar-items/mizar-item-ckb-table")
 
 (defparameter *dependency-graph* nil)
 (defparameter *num-dependency-graph-edges* nil)
-
 (defparameter *dependency-graph-forward* nil)
-
 (defparameter *dependency-graph-backward* nil)
+(defparameter *item-to-ckb-table* nil)
+(defparameter *ckb-to-items-table* nil)
 
 (defun load-dependency-graph ()
+  ;; ckb graph
   (let ((lines (lines-of-file *dependency-graph-file*))
 	(edges nil)
 	(forward-table (make-hash-table :test #'equal))
@@ -49,8 +52,19 @@
     (setf *dependency-graph* edges
 	  *num-dependency-graph-edges* (length edges)
 	  *dependency-graph-forward* forward-table
-	  *dependency-graph-backward* backward-table)
-    t))
+	  *dependency-graph-backward* backward-table))
+  ;; items-to-ckbs
+  (let ((lines (lines-of-file *item-to-ckb-file*))
+	(item-to-ckb-table (make-hash-table :test #'equal))
+	(ckb-to-items-table (make-hash-table :test #'equal)))
+    (dolist (line lines)
+      (destructuring-bind (item ckb)
+	  (split " " line)
+	(setf (gethash item item-to-ckb-table) ckb)
+	(pushnew item (gethash ckb ckb-to-items-table) :test #'string=)))
+    (setf *item-to-ckb-table* item-to-ckb-table
+	  *ckb-to-items-table* ckb-to-items-table))
+  t)
 
 (defun count-miz-in-directory (dir)
   (let ((counter 0))
