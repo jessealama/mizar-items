@@ -155,34 +155,35 @@ returning NIL."
   (let ((uri (request-uri*)))
     (register-groups-bind (article-1 num-1 article-2 num-2)
 	("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
-      (let ((ai (format nil "~a:~a" article-1 num-1))
-	    (bj (format nil "~a:~a" article-2 num-2))) 
-	(let ((ai-to-bj-problem (make-item-search-problem 
-				 :initial-state ai
-				 :goal bj)))
-	  (let ((solution (depth-first-search ai-to-bj-problem)))
-	    (if solution
-		(with-title (fmt "from ~a to ~a" ai bj)
-		  (:p (fmt "Here is a path from ~a to ~a" ai bj))
-		  (:ol
-		   (let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
-		     (htm
-		      (:li ((:a :href ai-uri)
-			    (str ai)))))
-		   (dolist (step (explain-solution solution))
-		     (destructuring-bind (step-article step-num)
-			 (split ":" step)
-		       (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-			 (htm
-			  (:li ((:a :href step-uri)
-				(str step)))))))))
-		(with-title (fmt "from ~a to ~a" ai bj)
-		  (:p (fmt "There is no path from ~a to ~a." ai bj)
-		      " Care to " ((:a :href (fmt "/~a/~a/~a/~a"
-						  article-2 num-2
-						  article-1 num-1))
-				   "search for a path going the other way")
-		      "?")))))))))
+      (let* ((ai (format nil "~a:~a" article-1 num-1))
+	     (bj (format nil "~a:~a" article-2 num-2))
+	     (ai-to-bj-problem (make-item-search-problem 
+				:initial-state ai
+				:goal bj))
+	     (solution (depth-first-search ai-to-bj-problem)))
+	(with-title (fmt "from ~a to ~a" ai bj)
+	  (if solution
+	      (htm
+	       (:p (fmt "Here is a path from ~a to ~a" ai bj))
+	       (:ol
+		(let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
+		  (htm
+		   (:li ((:a :href ai-uri)
+			 (str ai)))))
+		(dolist (step (explain-solution solution))
+		  (destructuring-bind (step-article step-num)
+		      (split ":" step)
+		    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
+		      (htm
+		       (:li ((:a :href step-uri)
+			     (str step)))))))))
+	      (htm
+	       (:p (fmt "There is no path from ~a to ~a." ai bj)
+		   " Care to " ((:a :href (fmt "/~a/~a/~a/~a"
+					       article-2 num-2
+					       article-1 num-1))
+				"search for a path going the other way")
+		   "?"))))))))
 
 (defun emit-path-between-items-via-item ()
   (let ((uri (request-uri*)))
