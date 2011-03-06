@@ -301,9 +301,13 @@ returning NIL."
     (create-regex-dispatcher ,uri-regexp ,dispatcher)
     items-dispatch-table))
 
+(defmacro register-exact-uri-dispatcher (uri dispatcher)
+  (let ((exact-uri (concatenate 'string "^" uri "$")))
+    `(register-regexp-dispatcher ,exact-uri ,dispatcher)))
+
 (defun initialize-uris ()
   ;; about page
-  (register-regexp-dispatcher "^/about$" #'emit-about-page)
+  (register-exact-uri-dispatcher "/about" #'emit-about-page)
   (dolist (article *articles*)
     (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
 	   (miz-uri (format nil "/~a.miz" article))
