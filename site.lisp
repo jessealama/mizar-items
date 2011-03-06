@@ -307,7 +307,8 @@ returning NIL."
      (push (create-static-file-dispatcher-and-handler ,uri 
 						      ,path
 						      ,mime-type)
-	   items-dispatch-table)))
+	   items-dispatch-table)
+     t))
 
 (defmacro register-directory-dispatcher (uri path &optional mime-type)
   `(progn
@@ -318,12 +319,15 @@ returning NIL."
      (unless (scan "/$" ,uri)
        (error "Can't register URI '~a' to point to directory '~a', because '~a'  doesn't end with a slash '/'" ,uri ,path ,uri))
      (push (create-folder-dispatcher-and-handler ,uri ,path ,mime-type)
-	   items-dispatch-table)))
+	   items-dispatch-table)
+     t))
 
 (defmacro register-regexp-dispatcher (uri-regexp dispatcher)
-  `(push
-    (create-regex-dispatcher ,uri-regexp ,dispatcher)
-    items-dispatch-table))
+  `(progn
+     (push
+      (create-regex-dispatcher ,uri-regexp ,dispatcher)
+      items-dispatch-table)
+     t))
 
 (defmacro register-exact-uri-dispatcher (uri dispatcher)
   (let ((exact-uri (concatenate 'string "^" uri "$")))
