@@ -15,7 +15,7 @@
     :type pathname)))
 
 (defparameter *sandbox-factory* (make-instance 'sandbox-factory
-					       :home (pathname-as-directory "/Volumes/ramdisk")))
+					       :home (pathname-as-directory "/dev/shm/alama/itemization")))
 
 (defun fresh-sandbox (&optional (name-prefix ""))
   (loop

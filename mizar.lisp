@@ -53,7 +53,7 @@ variable (at load time).")
     (if real-dir-name
 	(if (directory-p real-dir-name)
 	    (let ((dir-as-string (directory-namestring (pathname-as-directory real-dir-name))))
-	      (sb-ext:run-program "/Users/alama/sources/mizar/mizar-items/exec-in-dir.sh" 
+	      (sb-ext:run-program "/mnt/sdb3/alama/mizar-items/exec-in-dir.sh" 
 				  (append (list dir-as-string program) args)
 				  :search t
 				  :input input
@@ -111,10 +111,10 @@ variable (at load time).")
 	(error "The program ~S could not be found in your path (or it is not executable)" program))))
 
 (define-file-transformer strip-comments "sed" "-e" "s/::.*$//")
-(define-file-transformer fix-by-and-from "/Users/alama/sources/mizar/mizar-items/fix-by-and-from.sh")
+(define-file-transformer fix-by-and-from "/mnt/sdb3/alama/mizar-items/fix-by-and-from.sh")
 (define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
 (define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
-(define-input-transformer expand-canceled "/Users/alama/sources/mizar/mizar-items/expand-canceled.pl")
+(define-input-transformer expand-canceled "/mnt/sdb3/alama/mizar-items/expand-canceled.pl")
 
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
@@ -220,7 +220,7 @@ variable (at load time).")
 ;;; absrefs
 
 (defparameter *xsl4mizar-root* 
-  (ensure-directories-exist "/Users/alama/sources/mizar/xsl4mizar"))
+  (ensure-directories-exist "/mnt/sdb3/alama/xsl4mizar"))
 
 (defparameter *addabsrefs-stylesheet*
   (probe-file (make-pathname :directory *xsl4mizar-root*
@@ -261,7 +261,7 @@ variable (at load time).")
 (defun listvoc (article-name)
   (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
       nil
-      (let ((proc (sb-ext:run-program "/Users/alama/sources/mizar/mizar-items/listvoc.sh"
+      (let ((proc (sb-ext:run-program "/mnt/sdb3/alama/mizar-items/listvoc.sh"
 				      (list article-name)
 				      :search t
 				      :output :stream)))
