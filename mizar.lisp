@@ -114,6 +114,7 @@ variable (at load time).")
 (define-file-transformer fix-by-and-from "/Users/alama/sources/mizar/mizar-items/fix-by-and-from.sh")
 (define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
 (define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
+(define-input-transformer expand-canceled "/Users/alama/sources/mizar/mizar-items/expand-canceled.pl")
 
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
