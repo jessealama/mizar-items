@@ -5,6 +5,9 @@
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defmacro with-mizar-favicon-and-title (title &body body)
+  `(with-favicon-and-title "/favicon.ico" ,title ,@body))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Static data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -158,7 +161,7 @@ returning NIL."
 
 (defun handle-http-error (error-code)
   (when (= error-code +http-not-found+)
-    (with-title "No"
+    (with-mizar-favicon-and-title "No"
       (:p "I still haven't found what you're looking for."))))
 
 (setq *http-error-handler* #'handle-http-error)
@@ -190,7 +193,7 @@ returning NIL."
 		    (< item-num-1 item-num-2)))))))))
 
 (defun emit-about-page ()
-  (with-title "fine-grained dependencies in the mizar mathematical library"
+  (with-mizar-favicon-and-title "fine-grained dependencies in the mizar mathematical library"
     (:p "This site aims to illustrate fine-grained dependency
     information about " (:a :href "http://www.mizar.org" "the Mizar
     Mathematical Library") ", a large collection of formalized mathematical knowledge.")
@@ -212,7 +215,7 @@ returning NIL."
 				:initial-state ai
 				:goal bj))
 	     (solution (depth-first-search ai-to-bj-problem)))
-	(with-title (fmt "from ~a to ~a" ai bj)
+	(with-mizar-favicon-and-title (fmt "from ~a to ~a" ai bj)
 	  (if solution
 	      (htm
 	       (:p (fmt "Here is a path from ~a to ~a" ai bj))
@@ -253,7 +256,7 @@ returning NIL."
 					   :goal destination)))
 	  (let ((solution-to-via (depth-first-search source-to-via-problem))
 		(solution-to-destination (depth-first-search via-to-destination-problem)))
-	    (with-title (fmt "from ~a to ~a via ~a" source destination via)
+	    (with-mizar-favicon-and-title (fmt "from ~a to ~a via ~a" source destination via)
 	      (if solution-to-via
 		  (if solution-to-destination
 		      (htm
@@ -293,7 +296,7 @@ returning NIL."
 (defun emit-article-page (article)
   (let ((num-items (gethash article *article-num-items*)))
     #'(lambda ()
-	(with-title (fmt "~a" article)
+	(with-mizar-favicon-and-title (fmt "~a" article)
 	  (:p "The article " article " has " (:b (str num-items)) " items ")
 	  (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
 
@@ -308,7 +311,7 @@ returning NIL."
 	 (forward-deps-sorted (sort forward-deps #'ckb-item-<))
 	 (backward-deps-sorted (sort backward-deps #'ckb-item-<)))
     #'(lambda ()
-	(with-title (str item-name)
+	(with-mizar-favicon-and-title (str item-name)
 	  (:table
 	   (:tr
 	    (:td :rowspan 2 (str item-html))
@@ -405,7 +408,7 @@ returning NIL."
 				   article-text-dir
 				   ckb-number))
 		 (item-html (file-as-string ckb-item-path)))
-	(with-title (str item-key)
+	(with-mizar-favicon-and-title (str item-key)
 	  (:p (str item-key) " is toplevel item " (str ckb-number) " of article " (str article-name) ".")
 	  (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
 	      (htm 
@@ -455,6 +458,7 @@ returning NIL."
   ;; about page
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   (register-exact-uri-dispatcher "/random" #'emit-random-page)
+  (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
   (dolist (article *articles*)

@@ -13,6 +13,14 @@
      (:html :xmlns "http://www.w3.org/1999/xhtml"
 	,@body)))
 
+(defmacro with-favicon-and-title (favicon-url title &body body)
+  `(with-html
+     (:head 
+      (:link :rel "icon" :href ,favicon-url :type "image/x-icon")
+      (:title ,title))
+     (:body ,@body)))
+
+
 (defmacro with-title (title &body body)
   `(with-html
      (:head (:title ,title))
