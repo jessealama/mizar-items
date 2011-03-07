@@ -421,33 +421,34 @@ returning NIL."
 		      (htm
 		       (:li ((:a :href other-item-uri) (str other-item))))))))))
 	  (:table
-	   (:tr
+	   ((:tr :valign "top")
+	    (:td 
+	     (if forward-deps-sorted
+		 (htm
+		  (:table
+		   (:caption "This item immediately depends on")
+		   (dolist (forward-dep forward-deps-sorted)
+		    (destructuring-bind (dep-name dep-kind dep-num)
+			(split ":" forward-dep)
+		      (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+			(htm
+			 (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
+		 (htm (:p (:em "(This item immediately depends on nothing.)")))))
+	    (:td (str "&lArr;"))
 	    (:td :rowspan 2 (str item-html))
-	    (:td "This item immediately depends on:"
-		 (if forward-deps-sorted
-		     (htm
-		      (:ul
-		       (dolist (forward-dep forward-deps-sorted)
-			 (destructuring-bind (dep-name dep-kind dep-num)
-			     (split ":" forward-dep)
-			   (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
-			     (htm
-			      (:li ((:a :href dep-uri)
-				    (str forward-dep)))))))))
-		     (htm (:p (:em "(none)"))))))
-	   (:tr
-	    (:td "These items immediately depend on this one:"
-		 (if backward-deps-sorted
-		     (htm
-		      (:ul
-		       (dolist (backward-dep backward-deps-sorted)
-			 (destructuring-bind (dep-name dep-kind dep-num)
-			     (split ":" backward-dep)
-			   (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
-			     (htm
-			      (:li ((:a :href dep-uri)
-				    (str backward-dep)))))))))
-		     (htm (:p (:em "(none)"))))))))))))))
+	    (:td (str "&rArr;"))
+	    (:td 
+	     (if backward-deps-sorted
+		 (htm
+		  (:table
+		   (:caption "These items immediately depend on this one:")
+		   (dolist (backward-dep backward-deps-sorted)
+		     (destructuring-bind (dep-name dep-kind dep-num)
+			 (split ":" backward-dep)
+		       (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+			 (htm
+			  (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
+		 (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
 	  
 
 (defun initialize-uris ()
