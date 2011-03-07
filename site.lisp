@@ -32,8 +32,10 @@
 
 (defparameter *dependency-graph* nil)
 (defparameter *num-dependency-graph-edges* nil)
-(defparameter *dependency-graph-forward* nil)
-(defparameter *dependency-graph-backward* nil)
+(defparameter *ckb-dependency-graph-forward* nil)
+(defparameter *ckb-dependency-graph-backward* nil)
+(defparameter *true-item-dependency-graph-forward* nil)
+(defparameter *true-item-dependency-graph-backward* nil)
 (defparameter *item-to-ckb-table* nil)
 (defparameter *ckb-to-items-table* nil)
 
@@ -41,18 +43,18 @@
   ;; ckb graph
   (let ((lines (lines-of-file *dependency-graph-file*))
 	(edges nil)
-	(forward-table (make-hash-table :test #'equal))
-	(backward-table (make-hash-table :test #'equal)))
+	(ckb-forward-table (make-hash-table :test #'equal))
+	(ckb-backward-table (make-hash-table :test #'equal)))
     (dolist (line lines)
       (destructuring-bind (lhs rhs)
 	  (split " " line)
 	(push (cons lhs rhs) edges)
-	(pushnew rhs (gethash lhs forward-table) :test #'string=)
-	(pushnew lhs (gethash rhs backward-table) :test #'string=)))
+	(pushnew rhs (gethash lhs ckb-forward-table) :test #'string=)
+	(pushnew lhs (gethash rhs ckb-backward-table) :test #'string=)))
     (setf *dependency-graph* edges
 	  *num-dependency-graph-edges* (length edges)
-	  *dependency-graph-forward* forward-table
-	  *dependency-graph-backward* backward-table))
+	  *ckb-dependency-graph-forward* ckb-forward-table
+	  *ckb-dependency-graph-backward* ckb-backward-table))
   ;; items-to-ckbs
   (let ((lines (lines-of-file *item-to-ckb-file*))
 	(item-to-ckb-table (make-hash-table :test #'equal))
@@ -64,6 +66,28 @@
 	(pushnew item (gethash ckb ckb-to-items-table) :test #'string=)))
     (setf *item-to-ckb-table* item-to-ckb-table
 	  *ckb-to-items-table* ckb-to-items-table))
+  (let 	((true-item-forward-table (make-hash-table :test #'equal))
+	 (true-item-backward-table (make-hash-table :test #'equal)))
+    (loop
+       for item being the hash-keys of *item-to-ckb-table*
+       for ckb = (gethash item *item-to-ckb-table*)
+       for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
+       for backward-ckb-deps = (gethash ckb *ckb-dependency-graph-backward*)
+       do
+	 (let ((forward-item-deps 
+		(reduce #'append (mapcar #'(lambda (ckb-dep)
+					     (gethash ckb-dep *ckb-to-items-table*))
+					 forward-ckb-deps))))
+	   (setf (gethash item true-item-forward-table)
+		 forward-item-deps))
+	 (let ((backward-item-deps 
+		(reduce #'append (mapcar #'(lambda (ckb-dep)
+					     (gethash ckb-dep *ckb-to-items-table*))
+					 backward-ckb-deps))))
+	   (setf (gethash item true-item-backward-table)
+		 backward-item-deps)))
+    (setf *true-item-dependency-graph-forward* true-item-forward-table
+	  *true-item-dependency-graph-backward* true-item-backward-table))
   t)
 
 (defun count-miz-in-directory (dir)
@@ -93,7 +117,7 @@
 (defmethod successors ((isp item-search-problem) node)
   (mapcar #'(lambda (item)
 	      (cons item item))
-	  (gethash (node-state node) *dependency-graph-forward*)))
+	  (gethash (node-state node) *ckb-dependency-graph-forward*)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
@@ -266,8 +290,8 @@ returning NIL."
 	 (item-path (format nil "~a/ckb~d.html" article-text-dir item-number))
 	 (item-html (file-as-string item-path))
 	 (item-name (format nil "~a:~d" article item-number))
-	 (forward-deps (gethash item-name *dependency-graph-forward*))
-	 (backward-deps (gethash item-name *dependency-graph-backward*))
+	 (forward-deps (gethash item-name *ckb-dependency-graph-forward*))
+	 (backward-deps (gethash item-name *ckb-dependency-graph-backward*))
 	 (forward-deps-sorted (sort forward-deps #'item-<))
 	 (backward-deps-sorted (sort backward-deps #'item-<)))
     #'(lambda ()
@@ -347,6 +371,20 @@ returning NIL."
   (let ((exact-uri (concatenate 'string "^" uri "$")))
     `(register-regexp-dispatcher ,exact-uri ,dispatcher)))
 
+(defun emit-mizar-item-page ()
+  (let ((request-uri (request-uri*))
+	(mizar-item-regexp "^/([a-z_0-9]+)/([a-z]+)/([0-9]+)$"))
+    (register-groups-bind (article-name item-kind item-number)
+        (mizar-item-regexp request-uri)
+      (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	     (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	     (items-for-ckb (gethash ckb-for-item *ckb-to-items-table*)))
+	(declare (ignore items-for-ckb))
+	(with-title (str item-key)
+	  (if ckb-for-item
+	      (htm (:p "not supported yet (there is a CKB for this item"))
+	      (htm (:p "there is no CKB for this item"))))))))
+
 (defun initialize-uris ()
   ;; about page
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
@@ -368,7 +406,7 @@ returning NIL."
       (register-static-file-dispatcher html-uri html-path "text/html")
       (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
       (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path)
-      ;; items for the article
+      ;; CKB items for the article
       (loop
 	 with num-items = (gethash article *article-num-items*)
 	 for i from 1 upto num-items
@@ -379,7 +417,11 @@ returning NIL."
 	 do
 	   (register-regexp-dispatcher
 	    (format nil "^/~a/~d$" article i)
-	    (emit-dependency-page article i)))))
+	    (emit-dependency-page article i)))
+      ;; "true" items
+      (register-regexp-dispatcher
+       (format nil "^/~a/[a-z]+/[0-9]+$" article)
+       #'emit-mizar-item-page)))
   ;; set up path searcher
   (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
     (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
