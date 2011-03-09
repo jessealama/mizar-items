@@ -313,6 +313,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		      (definition-kind->keyword item-kind)))
 		 ((string= item-name "Canceled") "canceled")
 		 ((string= item-name "Let") "let")
+		 ((string= item-name "Assume") "assume")
 		 (t (error "Unknown node type following a Definition: '~A'" item-name)))))
     (loop
        with new-definitions = nil
