@@ -217,6 +217,7 @@ variable (at load time).")
 (define-mizar-text-transformer "CutSet")
 (define-mizar-text-transformer "CutReconsider")
 (define-mizar-text-transformer "change") ; clever name...
+(define-mizar-text-transformer "ref") ; clever name...
 
 ;;; absrefs
 
