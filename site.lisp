@@ -120,7 +120,44 @@
 (defmethod successors ((isp item-search-problem) node)
   (mapcar #'(lambda (item)
 	      (cons item item))
-	  (gethash (node-state node) *ckb-dependency-graph-forward*)))
+	  (gethash (node-state node) *true-item-dependency-graph-forward*)))
+
+(defun all-paths (source destination)
+  (if (string= source destination)
+      (list (list source))
+      (mapcar #'(lambda (path)
+		  (cons source path))
+	      (reduce #'append 
+		      (mapcar #'(lambda (successor)
+				  (all-paths successor destination))
+			      (successors source))))))
+
+(defun all-paths-from-via (source destination via)
+  (remove-if-not #'(lambda (path)
+		     (member via path :test #'string=))
+		 (all-paths source destination)))
+
+(defun all-paths-pass-through (source destination via)
+  "Determine whether all paths from SOURCE to DESTINATION pass through
+VIA.  Return two values: if all paths from SOURCE to DESTINATION do
+pass through VIA, return T and NIL; otherwise, return NIL and a path
+from SOURCE to DESTINATION that does not pass through VIA.
+
+Note that STRING= is used as the hard-coded test for vertex equality."
+  (every-with-falsifying-witness (all-paths source destination)
+				 #'(lambda (path)
+				     (member via path :test #'string=))))
+
+(defun all-paths-avoid (source destination bad-guy)
+  "Detemine whether all paths from node SOURCE to node DESTINATION
+avoid (that is, do not pass through) node BAD-GUY.  Returns two
+values: if there is a path from SOURCE to DESTINATION that passes
+through BAD-GUY, return NIL as the first value and that withnessing
+path as the second value; otherwise, return T as the first value and
+NIL as the second value."
+  (every-with-falsifying-witness (all-paths source destination)
+				 #'(lambda (path)
+				     (not (member via path :test #'string=)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
