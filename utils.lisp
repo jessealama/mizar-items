@@ -227,6 +227,19 @@ from the beginning of the list."
      finally
        (return (subsequence-from-indices seq needed-indices))))
 
+(defun every-with-falsifying-witness (list pred)
+  "Determine whether every member of LIST satisfies the unary
+predicate PRED.  Rreturns two values: if there is a member of LIST
+that fails to satisfy PRED, return NIL and the first such member of
+LIST; otherwise, return T and NIL."
+  (loop
+     for elt in list
+     do
+       (unless (funcall pred elt)
+	 (return (values nil elt)))
+     finally
+       (return (values t nil))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
