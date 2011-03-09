@@ -163,12 +163,6 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 (defun first-theorem-keyword-before (article line-num col-num)
   (first-keyword-before article "theorem" line-num col-num))
 
-(defun first-definition-keword-before (article line-num col-num)
-  (first-keyword-before article "definition" line-num col-num))
-
-(defun first-scheme-keword-before (article line-num col-num)
-  (first-keyword-before article "scheme" line-num col-num))
-
 (defun canceled-items (article)
   (with-slots (xml-doc)
       article
