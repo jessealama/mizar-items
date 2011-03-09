@@ -160,7 +160,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	 (error "We didn't find the required keyword ~A after line ~d and column ~d in article ~S"
 		keyword line-num col-num article))))
 
-(defun first-theorem-keword-before (article line-num col-num)
+(defun first-theorem-keyword-before (article line-num col-num)
   (first-keyword-before article "theorem" line-num col-num))
 
 (defun first-definition-keword-before (article line-num col-num)
@@ -201,7 +201,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	      (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		  (line-and-column prop-node)
 		(multiple-value-setq (begin-line-num begin-column-num)
-		  (first-theorem-keword-before article almost-begin-line-num almost-begin-col-num))
+		  (first-theorem-keyword-before article almost-begin-line-num almost-begin-col-num))
 		(let ((proof-node (first-child-with-name justifiedtheorem-node "Proof")))
 		  (if proof-node
 		      (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
