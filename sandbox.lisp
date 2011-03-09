@@ -15,7 +15,7 @@
     :type pathname)))
 
 (defparameter *sandbox-factory* (make-instance 'sandbox-factory
-					       :home (pathname-as-directory "/Volumes/ramdisk")))
+					       :home (gethash 'sandbox-location *mizar-items-config*)))
 
 (defun fresh-sandbox (&optional (name-prefix ""))
   (loop
