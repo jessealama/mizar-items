@@ -41,56 +41,66 @@
 (defparameter *true-item-dependency-graph-backward* nil)
 (defparameter *item-to-ckb-table* nil)
 (defparameter *ckb-to-items-table* nil)
+(defparameter *all-ckb-items* nil)
+(defparameter *all-true-items* nil)
 
 (defun load-dependency-graph ()
-  ;; ckb graph
-  (let ((lines (lines-of-file *dependency-graph-file*))
-	(edges nil)
-	(ckb-forward-table (make-hash-table :test #'equal))
-	(ckb-backward-table (make-hash-table :test #'equal)))
-    (dolist (line lines)
-      (destructuring-bind (lhs rhs)
-	  (split " " line)
-	(push (cons lhs rhs) edges)
-	(pushnew rhs (gethash lhs ckb-forward-table) :test #'string=)
-	(pushnew lhs (gethash rhs ckb-backward-table) :test #'string=)))
-    (setf *dependency-graph* edges
-	  *num-dependency-graph-edges* (length edges)
-	  *ckb-dependency-graph-forward* ckb-forward-table
-	  *ckb-dependency-graph-backward* ckb-backward-table))
-  ;; items-to-ckbs
-  (let ((lines (lines-of-file *item-to-ckb-file*))
-	(item-to-ckb-table (make-hash-table :test #'equal))
-	(ckb-to-items-table (make-hash-table :test #'equal)))
-    (dolist (line lines)
-      (destructuring-bind (item ckb)
-	  (split " " line)
-	(setf (gethash item item-to-ckb-table) ckb)
-	(pushnew item (gethash ckb ckb-to-items-table) :test #'string=)))
-    (setf *item-to-ckb-table* item-to-ckb-table
-	  *ckb-to-items-table* ckb-to-items-table))
-  (let 	((true-item-forward-table (make-hash-table :test #'equal))
-	 (true-item-backward-table (make-hash-table :test #'equal)))
-    (loop
-       for item being the hash-keys of *item-to-ckb-table*
-       for ckb = (gethash item *item-to-ckb-table*)
-       for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
-       for backward-ckb-deps = (gethash ckb *ckb-dependency-graph-backward*)
-       do
-	 (let ((forward-item-deps 
-		(reduce #'append (mapcar #'(lambda (ckb-dep)
-					     (gethash ckb-dep *ckb-to-items-table*))
-					 forward-ckb-deps))))
-	   (setf (gethash item true-item-forward-table)
-		 forward-item-deps))
-	 (let ((backward-item-deps 
-		(reduce #'append (mapcar #'(lambda (ckb-dep)
-					     (gethash ckb-dep *ckb-to-items-table*))
-					 backward-ckb-deps))))
-	   (setf (gethash item true-item-backward-table)
-		 backward-item-deps)))
-    (setf *true-item-dependency-graph-forward* true-item-forward-table
-	  *true-item-dependency-graph-backward* true-item-backward-table))
+  ;; all possible items 
+  (let ((all-ckb-items (make-hash-table :test #'equal))
+	(all-true-items (make-hash-table :test #'equal)))
+    ;; ckb graph
+    (let ((lines (lines-of-file *dependency-graph-file*))
+	  (edges nil)
+	  (ckb-forward-table (make-hash-table :test #'equal))
+	  (ckb-backward-table (make-hash-table :test #'equal)))
+      (dolist (line lines)
+	(destructuring-bind (lhs rhs)
+	    (split " " line)
+	  (push (cons lhs rhs) edges)
+	  (setf (gethash lhs all-ckb-items) t
+		(gethash rhs all-ckb-items) t)
+	  (pushnew rhs (gethash lhs ckb-forward-table) :test #'string=)
+	  (pushnew lhs (gethash rhs ckb-backward-table) :test #'string=)))
+      (setf *dependency-graph* edges
+	    *num-dependency-graph-edges* (length edges)
+	    *ckb-dependency-graph-forward* ckb-forward-table
+	    *ckb-dependency-graph-backward* ckb-backward-table))
+    ;; items-to-ckbs
+    (let ((lines (lines-of-file *item-to-ckb-file*))
+	  (item-to-ckb-table (make-hash-table :test #'equal))
+	  (ckb-to-items-table (make-hash-table :test #'equal)))
+      (dolist (line lines)
+	(destructuring-bind (item ckb)
+	    (split " " line)
+	  (setf (gethash item all-true-items) t)
+	  (setf (gethash item item-to-ckb-table) ckb)
+	  (pushnew item (gethash ckb ckb-to-items-table) :test #'string=)))
+      (setf *item-to-ckb-table* item-to-ckb-table
+	    *ckb-to-items-table* ckb-to-items-table))
+    (let 	((true-item-forward-table (make-hash-table :test #'equal))
+		 (true-item-backward-table (make-hash-table :test #'equal)))
+      (loop
+	 for item being the hash-keys of *item-to-ckb-table*
+	 for ckb = (gethash item *item-to-ckb-table*)
+	 for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
+	 for backward-ckb-deps = (gethash ckb *ckb-dependency-graph-backward*)
+	 do
+	   (let ((forward-item-deps 
+		  (reduce #'append (mapcar #'(lambda (ckb-dep)
+					       (gethash ckb-dep *ckb-to-items-table*))
+					   forward-ckb-deps))))
+	     (setf (gethash item true-item-forward-table)
+		   forward-item-deps))
+	   (let ((backward-item-deps 
+		  (reduce #'append (mapcar #'(lambda (ckb-dep)
+					       (gethash ckb-dep *ckb-to-items-table*))
+					   backward-ckb-deps))))
+	     (setf (gethash item true-item-backward-table)
+		   backward-item-deps)))
+      (setf *true-item-dependency-graph-forward* true-item-forward-table
+	    *true-item-dependency-graph-backward* true-item-backward-table))
+    (setf *all-ckb-items* all-ckb-items
+	  *all-true-items* all-true-items))
   t)
 
 (defun count-miz-in-directory (dir)
