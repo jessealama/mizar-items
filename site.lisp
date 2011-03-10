@@ -133,9 +133,14 @@
 			      (gethash source *true-item-dependency-graph-forward*))))))
 
 (defun all-paths-from-via (source destination via)
-  (remove-if-not #'(lambda (path)
-		     (member via path :test #'string=))
-		 (all-paths source destination)))
+  (let ((paths-from-source-to-via (all-paths source via)))
+    (when paths-from-source-to-via
+      (let ((paths-from-via-to-destination (all-paths via destination)))
+	(when paths-from-via-to-destination
+	  (map-product #'(lambda (path-1 path-2)
+			   (append path-1 (cdr path-2)))
+		       paths-from-source-to-via
+		       paths-from-via-to-destination))))))
 
 (defun all-paths-pass-through (source destination via)
   "Determine whether all paths from SOURCE to DESTINATION pass through
