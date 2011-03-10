@@ -160,10 +160,19 @@ values: if there is a path from SOURCE to DESTINATION that passes
 through BAD-GUY, return NIL as the first value and that withnessing
 path as the second value; otherwise, return T as the first value and
 NIL as the second value."
-  (every-with-falsifying-witness (all-paths source destination)
-				 #'(lambda (path)
-				     (not (member bad-guy path
-						  :test #'string=)))))
+  (let* ((to-bad-guy (make-item-search-problem :goal bad-guy
+					       :initial-state source))
+	 (to-bad-guy-solution (depth-first-search to-bad-guy)))
+    (if to-bad-guy-solution
+	(let* ((from-bad-guy (make-item-search-problem :goal destination
+						       :initial-state bad-guy))
+	       (from-bad-guy-solution (depth-first-search from-bad-guy)))
+	  (if from-bad-guy-solution
+	      (let ((path-to-bad-guy (explain-solution to-bad-guy-solution))
+		    (path-from-bad-guy (explain-solution from-bad-guy-solution)))
+		(values nil (append path-to-bad-guy (cdr path-from-bad-guy))))
+	      (values t nil)))
+	(values t nil))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
