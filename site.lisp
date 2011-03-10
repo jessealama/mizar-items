@@ -130,7 +130,7 @@
 	      (reduce #'append 
 		      (mapcar #'(lambda (successor)
 				  (all-paths successor destination))
-			      (successors source))))))
+			      (gethash source *true-item-dependency-graph-forward*))))))
 
 (defun all-paths-from-via (source destination via)
   (remove-if-not #'(lambda (path)
