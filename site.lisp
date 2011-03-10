@@ -152,6 +152,22 @@
 		       paths-from-source-to-via
 		       paths-from-via-to-destination))))))
 
+(defun one-path-from-via (source destination via)
+  "Find one path from SOURCE to DESTINATION that passes through VIA.
+If there is no such path, return nil."
+  (let ((source-to-via-problem (make-item-search-problem 
+				:initial-state source
+				:goal via))
+	(via-to-destination-problem (make-item-search-problem
+				     :initial-state via
+				     :goal destination)))
+    (let ((solution-to-via (depth-first-search source-to-via-problem)))
+      (when solution-to-via
+	(let ((solution-to-destination (depth-first-search via-to-destination-problem)))
+	  (when solution-to-destination
+	    (append (explain-solution solution-to-via)
+		    (cdr (explain-solution solution-to-destination)))))))))
+
 (defun all-paths-pass-through (source destination via)
   "Determine whether all paths from SOURCE to DESTINATION pass through
 VIA.  Return two values: if all paths from SOURCE to DESTINATION do
@@ -342,71 +358,58 @@ returning NIL."
 							 article-1 kind-1 num-1))
 					  "search for a path going the other way")
 			     "?")))))
-		(with-favicon-and-title "Invalid URI"
+		(with-mizar-favicon-and-title "Invalid URI"
 		    (:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
-	    (with-favicon-and-title "Invalid URI"
+	    (with-mizar-favicon-and-title "Invalid URI"
 		(:p "The requested source item, '" (str source-item) "', is not the name of any known item.")))))))
 
 (defun emit-path-between-items-via-item ()
   (let ((uri (request-uri*))
-	(path-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
-					   "/" "(" +number-regexp+ ")"
-					   "/" "(" +article-name-regexp+ ")"
-					   "/" "(" +number-regexp+ ")"
-					   "/" "(" +article-name-regexp+ ")"
-					   "/" "(" +number-regexp+ ")"
-					   "/?"))))
-    (register-groups-bind (source-article source-num 
-			   via-article via-num
-			   destination-article destination-num)
+	(path-regexp (concat "/" "([^/]+)" ; article name
+			     "/" "([^/]+)" ; item kind
+			     "/" "([^/]+)" ; number
+			     "/" "([^/]+)" ; article name
+			     "/" "([^/]+)" ; item kind
+			     "/" "([^/]+)" ; number
+			     "/" "([^/]+)" ; article name
+			     "/" "([^/]+)" ; item kind
+			     "/" "([^/]+)" ; number
+			     "/?" ; maybe end with a '/'
+			     )))
+    (register-groups-bind (source-article source-kind source-num 
+			   via-article via-kind via-num
+			   destination-article destination-kind destination-num)
 	(path-regexp uri)
-      (let ((source (format nil "~a:~a" source-article source-num))
-	    (via (format nil "~a:~a" via-article via-num))
-	    (destination (format nil "~a:~a" destination-article destination-num)))	
-	(let ((source-to-via-problem (make-item-search-problem 
-				      :initial-state source
-				      :goal via))
-	      (via-to-destination-problem (make-item-search-problem
-					   :initial-state via
-					   :goal destination)))
-	  (let ((solution-to-via (depth-first-search source-to-via-problem))
-		(solution-to-destination (depth-first-search via-to-destination-problem)))
-	    (with-mizar-favicon-and-title (fmt "from ~a to ~a via ~a" source destination via)
-	      (if solution-to-via
-		  (if solution-to-destination
-		      (htm
-		       (:p (fmt "Here is a path from ~a to ~a via ~a" source destination via))
-		       (:ol
-			(let ((source-uri (format nil "/~a/~a" source-article source-num)))
-			  (htm
-			   (:li (:b ((:a :href source-uri) (str source))))))
-			(dolist (step (all-but-last (explain-solution solution-to-via)))
-			  (destructuring-bind (step-article step-num)
-			      (split ":" step)
-			    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-			      (htm
-			       (:li ((:a :href step-uri)
-				     (str step)))))))
-			(let ((via-uri (format nil "/~a/~a" via-article via-num)))
-			  (htm
-			   (:li (:b ((:a :href via-uri)) (str via)))))
-			(dolist (step (all-but-last (cdr (explain-solution solution-to-destination))))
-			  (destructuring-bind (step-article step-num)
-			      (split ":" step)
-			    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-			      (htm
-			       (:li ((:a :href step-uri)
-				     (str step)))))))
-			(let ((destination-uri (format nil "/~a/~a" destination-article destination-num)))
-			  (htm
-			   (:li (:b ((:a :href destination-uri)) (str destination)))))))
-		      (htm
-		       (:p "There is a path from " (str source) " to " (str via) ", but there is no path from " (str via) " to " (str destination) ".")))
-		  (if solution-to-destination
-		      (htm
-		       (:p "There is no path from " (str source) " to " (str via) ", but there is a path from " (str via) " to " (str destination) "."))
-		      (htm
-		       (:p "There is no path from " (str source) " to " (str via) ", nor is there is a path from " (str via) " to " (str destination) ".")))))))))))
+      (let ((source (format nil "~a:~a:~a" source-article source-kind source-num))
+	    (via (format nil "~a:~a:~a" via-article via-kind via-num))
+	    (destination (format nil "~a:~a:~a" destination-article destination-kind destination-num)))	
+	(if (gethash source *all-true-items*)
+	    (if (gethash via *all-true-items*)
+		(if (gethash destination *all-true-items*)
+		    (let ((get-params (get-parameters*)))
+		      (if (null get-params) ; first time here, eh?
+			  (with-mizar-favicon-and-title (fmt "from ~a to ~a via ~a" source destination via)
+			      (:dl
+			       (:dt "Source")
+			       (:dd (str source))
+			       (:dt "Destination")
+			       (:dd (str destination))
+			       (:dt "Via")
+			       (:dd (str via)))
+			    (:p "What kind of search would you like to do?")
+			    (:ul
+			     (:li "Find one path from source to destination;)")
+			     (:li "Find " (:em "all") " paths;")
+			     (:li "Find a path from the source to the destination that " (:em "avoids") " the the intermediate verte;x")
+			     (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex.")))
+			  (with-mizar-favicon-and-title "You're asking too much"
+			      (:p "I can't handle this: " (fmt "~A" get-params)))))
+		    (with-mizar-favicon-and-title "Invalid URI"
+			(:p "There given destination item, '" (str destination) "', is not the name of any known item.")))
+		(with-mizar-favicon-and-title "Invalid URI"
+		    (:p "There given intermediate item, '" (str via) "', is not the name of any known item.")))
+	    (with-mizar-favicon-and-title "Invalid URI"
+		(:p "There given source item, '" (str source) "', is not the name of any known item.")))))))
 
 (defun emit-article-page (article)
   (let ((num-items (gethash article *article-num-items*)))
@@ -614,6 +617,8 @@ returning NIL."
     (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
   (let ((real-item-to-real-item-uri-regexp "^/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/?"))
     (register-regexp-dispatcher real-item-to-real-item-uri-regexp #'emit-path-between-items))
+  (let ((real-item-via-real-item-to-real-item-uri-regexp "^/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/?$"))
+    (register-regexp-dispatcher real-item-via-real-item-to-real-item-uri-regexp #'emit-path-between-items-via-item))
   (let ((source-via-dest-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
     (register-regexp-dispatcher source-via-dest-regex #'emit-path-between-items-via-item))
     t)
