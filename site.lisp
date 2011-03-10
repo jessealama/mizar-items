@@ -300,42 +300,52 @@ returning NIL."
 
 (defun emit-path-between-items ()
   (let ((uri (request-uri*))
-	(path-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
-					   "/" "(" +number-regexp+ ")"
-					   "/" "(" +article-name-regexp+ ")"
-					   "/" "(" +number-regexp+ ")"
-					   "/?"))))
-    (register-groups-bind (article-1 num-1 article-2 num-2)
+	(path-regexp (exact-regexp (concat "/" "([^/]+)" ; article name
+					   "/" "([^/]+)" ; item kind
+					   "/" "([^/]+)" ; number
+					   "/" "([^/]+)" ; article name
+					   "/" "([^/]+)" ; item kind
+					   "/" "([^/]+)" ; number
+					   "/?" ; maybe end with a '/'
+					   ))))
+    (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
 	(path-regexp uri)
-      (let* ((ai (format nil "~a:~a" article-1 num-1))
-	     (bj (format nil "~a:~a" article-2 num-2))
-	     (ai-to-bj-problem (make-item-search-problem 
-				:initial-state ai
-				:goal bj))
-	     (solution (depth-first-search ai-to-bj-problem)))
-	(with-mizar-favicon-and-title (fmt "from ~a to ~a" ai bj)
-	  (if solution
-	      (htm
-	       (:p (fmt "Here is a path from ~a to ~a" ai bj))
-	       (:ol
-		(let ((ai-uri (format nil "/~a/~a" article-1 num-1)))
-		  (htm
-		   (:li ((:a :href ai-uri)
-			 (str ai)))))
-		(dolist (step (explain-solution solution))
-		  (destructuring-bind (step-article step-num)
-		      (split ":" step)
-		    (let ((step-uri (format nil "/~a/~a" step-article step-num)))
-		      (htm
-		       (:li ((:a :href step-uri)
-			     (str step)))))))))
-	      (htm
-	       (:p (fmt "There is no path from ~a to ~a." ai bj)
-		   " Care to " ((:a :href (fmt "/~a/~a/~a/~a"
-					       article-2 num-2
-					       article-1 num-1))
-				"search for a path going the other way")
-		   "?"))))))))
+      ;; check that these items exist
+      (let ((source-item (format nil "~a:~a:~a" article-1 kind-1 num-1))
+	    (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
+	(if (gethash source-item *all-true-items*)
+	    (if (gethash destination-item *all-true-items*)
+		(let* ((problem (make-item-search-problem 
+				 :initial-state source-item
+				 :goal destination-item))
+		       (solution (depth-first-search problem)))
+		  (with-mizar-favicon-and-title (fmt "from ~a to ~a" source-item destination-item)
+		    (if solution
+			(htm
+			 (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
+			 (:ol
+			  (let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
+			    (htm
+			     (:li ((:a :href source-uri)
+				   (str source-item)))))
+			  (dolist (step (explain-solution solution))
+			    (destructuring-bind (step-article step-kind step-num)
+				(split ":" step)
+			      (let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
+				(htm
+				 (:li ((:a :href step-uri)
+				       (str step)))))))))
+			(htm
+			 (:p (fmt "There is no path from ~a to ~a." source-item destination-item)
+			     " Care to " ((:a :href (fmt "/~a/~a/~a/~a/~a/~a"
+							 article-2 kind-2 num-2
+							 article-1 kind-1 num-1))
+					  "search for a path going the other way")
+			     "?")))))
+		(with-favicon-and-title "Invalid URI"
+		    (:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
+	    (with-favicon-and-title "Invalid URI"
+		(:p "The requested source item, '" (str source-item) "', is not the name of any known item.")))))))
 
 (defun emit-path-between-items-via-item ()
   (let ((uri (request-uri*))
@@ -602,6 +612,8 @@ returning NIL."
   ;; set up path searcher
   (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
     (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
+  (let ((real-item-to-real-item-uri-regexp "^/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/?"))
+    (register-regexp-dispatcher real-item-to-real-item-uri-regexp #'emit-path-between-items))
   (let ((source-via-dest-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
     (register-regexp-dispatcher source-via-dest-regex #'emit-path-between-items-via-item))
     t)
