@@ -308,6 +308,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		 ((string= item-name "Canceled") "canceled")
 		 ((string= item-name "Let") "let")
 		 ((string= item-name "Assume") "assume")
+		 ((string= item-name "DefFunc") "deffunc")
 		 (t (error "Unknown node type following a Definition: '~A'" item-name)))))
     (loop
        with new-definitions = nil
