@@ -157,7 +157,8 @@ path as the second value; otherwise, return T as the first value and
 NIL as the second value."
   (every-with-falsifying-witness (all-paths source destination)
 				 #'(lambda (path)
-				     (not (member via path :test #'string=)))))
+				     (not (member bad-guy path
+						  :test #'string=)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
