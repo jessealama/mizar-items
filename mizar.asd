@@ -25,5 +25,4 @@
 	       (:file "itemize")
 	       (:file "queue")
 	       (:file "search")
-	       (:file "hunchentoot-utils")
 	       (:file "site")))
