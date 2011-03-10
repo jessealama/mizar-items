@@ -14,6 +14,7 @@
   :serial t
   :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria")
   :components ((:file "packages")
+	       (:file "config")
 	       (:file "sandbox")
 	       (:file "utils")
 	       (:file "xml-utils")

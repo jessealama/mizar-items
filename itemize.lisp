@@ -122,7 +122,7 @@
 LINE-NUM and COL-NUM in the text of ARTICLE."
   ; assume the keyword always begins a line, possibly with whitespace
   ; -- a terrible assumption
-  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A[: ]*" keyword keyword))))
+  (let ((bol-theorem-scanner (create-scanner (format nil "^( *)~A$|^( *)~A[: ]" keyword keyword))))
     (loop for l from line-num downto 1
 	  for line = (line-at article l)
        do
@@ -160,14 +160,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	 (error "We didn't find the required keyword ~A after line ~d and column ~d in article ~S"
 		keyword line-num col-num article))))
 
-(defun first-theorem-keword-before (article line-num col-num)
+(defun first-theorem-keyword-before (article line-num col-num)
   (first-keyword-before article "theorem" line-num col-num))
-
-(defun first-definition-keword-before (article line-num col-num)
-  (first-keyword-before article "definition" line-num col-num))
-
-(defun first-scheme-keword-before (article line-num col-num)
-  (first-keyword-before article "scheme" line-num col-num))
 
 (defun canceled-items (article)
   (with-slots (xml-doc)
@@ -201,7 +195,7 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 	      (multiple-value-bind (almost-begin-line-num almost-begin-col-num)
 		  (line-and-column prop-node)
 		(multiple-value-setq (begin-line-num begin-column-num)
-		  (first-theorem-keword-before article almost-begin-line-num almost-begin-col-num))
+		  (first-theorem-keyword-before article almost-begin-line-num almost-begin-col-num))
 		(let ((proof-node (first-child-with-name justifiedtheorem-node "Proof")))
 		  (if proof-node
 		      (let ((last-endposition-child (last-child-with-name proof-node "EndPosition")))
@@ -313,6 +307,8 @@ LINE-NUM and COL-NUM in the text of ARTICLE."
 		      (definition-kind->keyword item-kind)))
 		 ((string= item-name "Canceled") "canceled")
 		 ((string= item-name "Let") "let")
+		 ((string= item-name "Assume") "assume")
+		 ((string= item-name "DefFunc") "deffunc")
 		 (t (error "Unknown node type following a Definition: '~A'" item-name)))))
     (loop
        with new-definitions = nil
@@ -974,8 +970,8 @@ of LINE starting from START."
   (CutSet article directory "-q" "-l" "-s")
   (warn "CutReconsider...")
   (CutReconsider article directory "-q" "-l" "-s")
-  (warn "change...")
-  (change article directory "-q" "-l" "-s")
+  (warn "ref...")
+  (ref article directory "-q" "-l" "-s")
   (warn "Fixing by and from statements...")
   (fix-by-and-from article directory)
   (warn "Squeezing repeated newlines...")

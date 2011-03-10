@@ -53,7 +53,7 @@ variable (at load time).")
     (if real-dir-name
 	(if (directory-p real-dir-name)
 	    (let ((dir-as-string (directory-namestring (pathname-as-directory real-dir-name))))
-	      (sb-ext:run-program "/Users/alama/sources/mizar/mizar-items/exec-in-dir.sh" 
+	      (sb-ext:run-program (mizar-items-config 'exec-in-dir-script-path)
 				  (append (list dir-as-string program) args)
 				  :search t
 				  :input input
@@ -64,37 +64,38 @@ variable (at load time).")
 
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
-  (let* ((check (sb-ext:run-program "which" (list program) 
-				    :search t)))
+  (let* ((eval-program (eval program))
+	 (check (sb-ext:run-program "which" (list eval-program) :search t)))
     (if (zerop (sb-ext:process-exit-code check))
 	`(progn
 	   (defgeneric ,name (file &optional directory))
 	   (defmethod ,name ((miz-path pathname) &optional (directory (sb-posix:getcwd)))
 	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-		    (proc (run-in-directory ,program
+		    (proc (run-in-directory ,eval-program
 					    directory
 					    (append ',arguments (list (namestring miz-path)))
 					    :output tmp-path
 					    :if-output-exists :supersede)))
 	       (if (zerop (sb-ext:process-exit-code proc))
 		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,program ',arguments (sb-ext:process-exit-code proc)))))
+		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (sb-ext:process-exit-code proc)))))
 	     (defmethod ,name ((article-path string) &optional (directory (sb-posix:getcwd)))
 	       (,name (pathname article-path) directory))
 	     (defmethod ,name ((article article) &optional (directory (sb-posix:getcwd)))
 	       (,name (path article) directory)
 	       (refresh-text article)))
-	(error "The program ~S could not be found in your path (or it is not executable)" program))))
+	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
 
 (defmacro define-input-transformer (name program &rest arguments)
   ; check that TOOL is real
-  (let ((check (sb-ext:run-program "which" (list program) :search t)))
+  (let* ((eval-program (eval program))
+	 (check (sb-ext:run-program "which" (list eval-program) :search t)))
     (if (zerop (sb-ext:process-exit-code check))
 	`(progn
 	   (defgeneric ,name (file &optional directory))
 	   (defmethod ,name ((miz-path pathname) &optional (directory (sb-posix:getcwd)))
 	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-		    (proc (run-in-directory ,program
+		    (proc (run-in-directory ,eval-program
 					    directory
 					    ',arguments 
 					    :input miz-path
@@ -102,19 +103,19 @@ variable (at load time).")
 					    :if-output-exists :supersede)))
 	       (if (zerop (sb-ext:process-exit-code proc))
 		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,program ',arguments (sb-ext:process-exit-code proc)))))
+		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (sb-ext:process-exit-code proc)))))
 	     (defmethod ,name ((article-path string) &optional (directory (sb-posix:getcwd)))
 	       (,name (pathname article-path) directory))
 	     (defmethod ,name ((article article) &optional (directory (sb-posix:getcwd)))
 	       (,name (path article) directory)
 	       (refresh-text article)))
-	(error "The program ~S could not be found in your path (or it is not executable)" program))))
+	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
 
 (define-file-transformer strip-comments "sed" "-e" "s/::.*$//")
-(define-file-transformer fix-by-and-from "/Users/alama/sources/mizar/mizar-items/fix-by-and-from.sh")
+(define-file-transformer fix-by-and-from (mizar-items-config 'fix-by-and-from-script-path))
 (define-input-transformer squeeze-repeated-newlines "tr" "-s" "\\n")
 (define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
-(define-input-transformer expand-canceled "/Users/alama/sources/mizar/mizar-items/expand-canceled.pl")
+(define-input-transformer expand-canceled (mizar-items-config 'expand-canceled-script-path))
 
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
@@ -216,12 +217,12 @@ variable (at load time).")
 (define-mizar-text-transformer "CutSet")
 (define-mizar-text-transformer "CutReconsider")
 (define-mizar-text-transformer "change") ; clever name...
+(define-mizar-text-transformer "ref") ; clever name...
 
 ;;; absrefs
 
 (defparameter *xsl4mizar-root* 
-  (ensure-directories-exist "/Users/alama/sources/mizar/xsl4mizar"))
-
+  (ensure-directories-exist (mizar-items-config 'xsl4mizar-path)))
 (defparameter *addabsrefs-stylesheet*
   (probe-file (make-pathname :directory *xsl4mizar-root*
 			     :name "addabsrefs.xsl")))
@@ -261,7 +262,7 @@ variable (at load time).")
 (defun listvoc (article-name)
   (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
       nil
-      (let ((proc (sb-ext:run-program "/Users/alama/sources/mizar/mizar-items/listvoc.sh"
+      (let ((proc (sb-ext:run-program (mizar-items-config 'listvoc-script-path)
 				      (list article-name)
 				      :search t
 				      :output :stream)))
