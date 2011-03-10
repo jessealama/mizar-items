@@ -230,6 +230,37 @@ returning NIL."
 			(item-num-2 (parse-integer item-num-as-str-2)))
 		    (< item-num-1 item-num-2)))))))))
 
+(define-constant +article-name-regexp+ "[a-z_0-9]+" 
+  :test #'string=)
+(define-constant +number-regexp+ "[0-9]+"
+  :test #'string=)
+(define-constant +item-kinds-prefixes+ (list "k" "m" "r")
+  :test #'equal)
+(define-constant +cluster-kinds+ (list "c" "f" "r")
+  :test #'equal)
+(define-constant +item-kinds-string+ 
+  (append (mapcar #'(lambda (sym)
+		      (concat sym "constructor"))
+		  +item-kinds-prefixes+)
+	  (mapcar #'(lambda (sym)
+		      (concat sym "pattern"))
+		  +item-kinds-prefixes+)
+	  (mapcar #'(lambda (sym)
+		      (concat sym "definiens"))
+		  +item-kinds-prefixes+)
+	  '("deftheorem"
+	    "theorem"
+	    "scheme"
+	    "identification")
+	  (mapcar #'(lambda (sym)
+		      (concat sym "cluster"))
+		  +cluster-kinds+))
+  :test #'equal)
+
+(define-constant +item-kind-regexp+ 
+    (reduce #'regexp-disjoin +item-kinds-string+)
+  :test #'string=)
+
 (defun emit-about-page ()
   (with-mizar-favicon-and-title "fine-grained dependencies in the mizar mathematical library"
     (:p "This site aims to illustrate fine-grained dependency
@@ -244,9 +275,14 @@ returning NIL."
     (:address (:a :href "mailto:j.alama@fct.unl.pt" "Contact the maintainer"))))
 
 (defun emit-path-between-items ()
-  (let ((uri (request-uri*)))
+  (let ((uri (request-uri*))
+	(path-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
+					   "/" "(" +number-regexp+ ")"
+					   "/" "(" +article-name-regexp+ ")"
+					   "/" "(" +number-regexp+ ")"
+					   "/?"))))
     (register-groups-bind (article-1 num-1 article-2 num-2)
-	("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
+	(path-regexp uri)
       (let* ((ai (format nil "~a:~a" article-1 num-1))
 	     (bj (format nil "~a:~a" article-2 num-2))
 	     (ai-to-bj-problem (make-item-search-problem 
@@ -278,11 +314,18 @@ returning NIL."
 		   "?"))))))))
 
 (defun emit-path-between-items-via-item ()
-  (let ((uri (request-uri*)))
+  (let ((uri (request-uri*))
+	(path-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
+					   "/" "(" +number-regexp+ ")"
+					   "/" "(" +article-name-regexp+ ")"
+					   "/" "(" +number-regexp+ ")"
+					   "/" "(" +article-name-regexp+ ")"
+					   "/" "(" +number-regexp+ ")"
+					   "/?"))))
     (register-groups-bind (source-article source-num 
 			   via-article via-num
 			   destination-article destination-num)
-	("^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$" uri)
+	(path-regexp uri)
       (let ((source (format nil "~a:~a" source-article source-num))
 	    (via (format nil "~a:~a" via-article via-num))
 	    (destination (format nil "~a:~a" destination-article destination-num)))	
@@ -422,12 +465,14 @@ returning NIL."
      t))
 
 (defmacro register-exact-uri-dispatcher (uri dispatcher)
-  (let ((exact-uri (concatenate 'string "^" uri "$")))
+  (let ((exact-uri (exact-regexp uri)))
     `(register-regexp-dispatcher ,exact-uri ,dispatcher)))
 
 (defun emit-mizar-item-page ()
   (let ((request-uri (request-uri*))
-	(mizar-item-regexp "^/([a-z_0-9]+)/([a-z]+)/([0-9]+)$"))
+	(mizar-item-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
+						 "/" "(" +item-kind-regexp+ ")"
+						 "/" "(" +number-regexp+ ")"))))
     (register-groups-bind (article-name item-kind item-number)
         (mizar-item-regexp request-uri)
       (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
