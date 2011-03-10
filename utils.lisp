@@ -326,4 +326,16 @@ LIST; otherwise, return T and NIL."
 						    ""
 						    (concat "." extension))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Regular expressions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun regexp-disjoin (&optional str-1 str-2)
+  (if (and str-1 str-2)
+      (concat str-1 "|" str-2)
+      ""))
+
+(defun exact-regexp (str)
+  (concatenate 'string "^" str "$"))
+
 ;;; utils.lisp ends here
