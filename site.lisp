@@ -290,6 +290,7 @@ returning NIL."
 		  +item-kinds-prefixes+)
 	  '("deftheorem"
 	    "theorem"
+	    "lemma"
 	    "scheme"
 	    "identification")
 	  (mapcar #'(lambda (sym)
