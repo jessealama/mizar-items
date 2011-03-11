@@ -638,9 +638,49 @@ returning NIL."
 			 (htm
 			  (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
 		 (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
-	  
+
+(defun emit-main-page ()
+  (with-mizar-favicon-and-title (str "fine-grained dependencies in mizar")
+    (:p "Interested in learning more about the " (:tt "MIZAR") "
+    Mathematical Library (MML)?  This site provides a way to
+    get a handle on the large contents of the MML.")
+    (:p "This site is based on MML version 4.156.1102
+    and " (:tt "MIZAR") " binaries based on version 7.11.07.  For more information, consult the " (:tt "MIZAR") " homepage at")
+    (:blockquote
+     ((:a :href "http://www.mizar.org/") "http://www.mizar.org/"))
+    (:p (:b "Note:") " There are slight differences between the
+    official MML and official binary releases available on
+    the " (:tt "MIZAR") " homepage.  To process " (:tt "MIZAR") "
+    articles so that they can be analyzed in the way that I do, some
+    pre-processors are applied to normalize the text of the articles
+    of the MML.  The texts needed to be adjusted to suit this
+    pre-processing.  Thankfully, very few articles of the MML needed
+    to be adjusted.  Moreover, there are are a couple trivial
+    differences between the " (:tt "MIZAR") " verifier that is being
+    used here and the verifier that one would obtain by downloading
+    binaries from the " (:tt "MIZAR") " homepage.  For those who
+    know " (:tt "MIZAR") ", the differences are:")
+    (:ul
+     (:li "The official verifier permits only 50 reservation
+     statements to be present in an article.  Because of some
+     transformations taht I carry out on the texts, this turns out to
+     be too low; I permit 100 reservations.")
+     (:li "The official verifier permits at most 90 variables to be
+     reserved.  Again, for my purposes, this is too low, and I changed
+     it to 150."))
+    (:p "These differences have no logical significance; the verifier
+    with these changes validates a slightly larger set of texts, but
+    the difference has no bearing on the mathematical soundness of
+    the " (:tt "MIAR") " verifier.  Informally, the difference is
+    this: the verifier would reject locutions such as")
+    ((:blockquote :style "font-style:oblique;")
+     "Let X" (:sub "1") ", X" (:sub "2") ", " (str "&hellip;") ", X" (:sub "90") ", X" (:sub "91") " be sets such that " (str "&hellip;"))
+    (:p "simply because there are too many variables: here, there are 91, but the hard-coded limit in the official " (:tt "MIZAR") " verifier is 90.")))
+    
 
 (defun initialize-uris ()
+  ;; intro
+  (register-exact-uri-dispatcher "/" #'emit-main-page)
   ;; about page
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   (register-exact-uri-dispatcher "/random" #'emit-random-page)
