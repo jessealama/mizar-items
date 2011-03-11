@@ -274,7 +274,7 @@ returning NIL."
   :test #'string=)
 (define-constant +number-regexp+ "[0-9]+"
   :test #'string=)
-(define-constant +item-kinds-prefixes+ (list "k" "m" "r")
+(define-constant +item-kinds-prefixes+ (list "k" "m" "r" "v")
   :test #'equal)
 (define-constant +cluster-kinds+ (list "c" "f" "r")
   :test #'equal)
