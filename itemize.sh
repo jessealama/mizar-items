@@ -6,6 +6,7 @@ if [[ $host = "mizar" ]]; then
     harddisk=/local/data/proofs/itemization;
     ramdisk=/dev/shm;
     image=/home/alama/mizar-items/mizar;
+    data_store=/local/data/alama;
     export PATH=/home/alama/mizsrc/7_11_07/bin:$PATH
     export MIZFILES=/home/alama/mizsrc/7_11_07;
 elif [[ $host = "mws" ]]; then
@@ -38,7 +39,7 @@ if [[ $? -eq "0" ]]; then
     tar cf $tarfile $article-1;
     gzip $tarfile;
     rm -f $harddisk_tarfile.gz
-    mv $tarfile.gz $HOME;
+    mv $tarfile.gz $data_store;
     rm -Rf $article_in_ramdisk;
     exit 0;
 else
