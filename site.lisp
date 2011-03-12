@@ -254,13 +254,13 @@ returning NIL."
 	*http-error-handler* #'handle-http-error
 	*log-lisp-errors-p* t
 	*log-lisp-warnings-p* t
-	*log-lisp-backtraces-p* t)
-  
+	*log-lisp-backtraces-p* t
+	*show-lisp-errors-p* t)
   t)
 
 (defun handle-http-error (error-code)
   (when (= error-code +http-not-found+)
-    (with-mizar-favicon-and-title "No"
+    (miz-item-html "No"
       (:p "I still haven't found what you're looking for."))))
 
 (setq *http-error-handler* #'handle-http-error)
