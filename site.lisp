@@ -481,7 +481,7 @@ returning NIL."
 	 (forward-deps-sorted (sort forward-deps #'ckb-item-<))
 	 (backward-deps-sorted (sort backward-deps #'ckb-item-<)))
     #'(lambda ()
-	(with-mizar-favicon-and-title (str item-name)
+	(miz-item-html (str item-name)
 	  (:table
 	   (:tr
 	    (:td :rowspan 2 (str item-html))
