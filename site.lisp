@@ -716,6 +716,13 @@ returning NIL."
     
 
 (defun initialize-uris ()
+  ;; ecmascript, css
+  (register-static-file-dispatcher "/mhtml.css"
+				   "/Users/alama/sources/mizar/mizar-items/xsl4mizar/MHTML/mhtml.css"
+				   "text/css")
+  (register-static-file-dispatcher "/mhtml.js"
+				   "/Users/alama/sources/mizar/mizar-items/xsl4mizar/MHTML/mhtml.js"
+				   "text/ecmascript")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)
   ;; about page
