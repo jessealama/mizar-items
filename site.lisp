@@ -323,8 +323,58 @@ returning NIL."
     (reduce #'regexp-disjoin +item-kinds-string+)
   :test #'string=)
 
+(define-constant +true-item-uri-regexp+
+    (exact-regexp (concat "/" "item"
+			  "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"))
+  :test #'string=)
+
+(defun uri-for-item (article kind number)
+  (format nil "/item/~a/~a/~a" article kind number))
+
+(define-constant +ckb-item-uri-regexp+
+    (exact-regexp (concat "/" "fragment"
+			  "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"
+			  "/?"))
+  :test #'string=)
+
+(define-constant +article-uri-regexp+
+    (exact-regexp (concat "/" "article"
+			  "/" "(" +article-name-regexp+ ")" "/?"))
+  :test #'string=)
+
+(defun uri-for-article (article)
+  (format nil "/article/~a" article))
+
+(define-constant +path-between-true-items-uri-regexp+
+    (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"
+			  "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"
+			  "/?" ; maybe end with a '/'
+			  ))
+  :test #'string=)
+
+(define-constant +path-between-true-items-via-item-uri-regexp+
+    (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"
+			  "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"
+			  "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +number-regexp+ ")"
+			  "/?" ; maybe end with a '/'
+			  ))
+  :test #'string=)
+
 (defun emit-about-page ()
-  (with-mizar-favicon-and-title "fine-grained dependencies in the mizar mathematical library"
+  (miz-item-html "fine-grained dependencies in the mizar mathematical library"
     (:p "This site aims to illustrate fine-grained dependency
     information about " (:a :href "http://www.mizar.org" "the Mizar
     Mathematical Library") ", a large collection of formalized mathematical knowledge.")
@@ -337,108 +387,88 @@ returning NIL."
     (:address (:a :href "mailto:j.alama@fct.unl.pt" "Contact the maintainer"))))
 
 (defun emit-path-between-items ()
-  (let ((uri (request-uri*))
-	(path-regexp (exact-regexp (concat "/" "([^/]+)" ; article name
-					   "/" "([^/]+)" ; item kind
-					   "/" "([^/]+)" ; number
-					   "/" "([^/]+)" ; article name
-					   "/" "([^/]+)" ; item kind
-					   "/" "([^/]+)" ; number
-					   "/?" ; maybe end with a '/'
-					   ))))
-    (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
-	(path-regexp uri)
-      ;; check that these items exist
-      (let ((source-item (format nil "~a:~a:~a" article-1 kind-1 num-1))
-	    (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
-	(if (gethash source-item *all-true-items*)
-	    (if (gethash destination-item *all-true-items*)
-		(let* ((problem (make-item-search-problem 
-				 :initial-state source-item
-				 :goal destination-item))
-		       (solution (depth-first-search problem)))
-		  (with-mizar-favicon-and-title (fmt "from ~a to ~a" source-item destination-item)
-		    (if solution
-			(htm
-			 (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
-			 (:ol
-			  (let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
-			    (htm
-			     (:li ((:a :href source-uri)
-				   (str source-item)))))
-			  (dolist (step (explain-solution solution))
-			    (destructuring-bind (step-article step-kind step-num)
-				(split ":" step)
-			      (let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
-				(htm
-				 (:li ((:a :href step-uri)
-				       (str step)))))))))
-			(htm
-			 (:p (fmt "There is no path from ~a to ~a." source-item destination-item)
-			     " Care to " ((:a :href (fmt "/~a/~a/~a/~a/~a/~a"
-							 article-2 kind-2 num-2
-							 article-1 kind-1 num-1))
-					  "search for a path going the other way")
-			     "?")))))
-		(with-mizar-favicon-and-title "Invalid URI"
-		    (:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
-	    (with-mizar-favicon-and-title "Invalid URI"
-		(:p "The requested source item, '" (str source-item) "', is not the name of any known item.")))))))
+  (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
+      (+path-between-true-items-uri-regexp+ (request-uri*))
+    ;; check that these items exist
+    (let ((source-item (format nil "~a:~a:~a" article-1 kind-1 num-1))
+	  (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
+      (if (gethash source-item *all-true-items*)
+	  (if (gethash destination-item *all-true-items*)
+	      (let* ((problem (make-item-search-problem 
+			       :initial-state source-item
+			       :goal destination-item))
+		     (solution (depth-first-search problem)))
+		(miz-item-html (fmt "from ~a to ~a" source-item destination-item)
+		  (if solution
+		      (htm
+		       (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
+		       (:ol
+			(let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
+			  (htm
+			   (:li ((:a :href source-uri)
+				 (str source-item)))))
+			(dolist (step (explain-solution solution))
+			  (destructuring-bind (step-article step-kind step-num)
+			      (split ":" step)
+			    (let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
+			      (htm
+			       (:li ((:a :href step-uri)
+				     (str step)))))))))
+		      (htm
+		       (:p (fmt "There is no path from ~a to ~a." source-item destination-item)
+			   " Care to " ((:a :href (fmt "/~a/~a/~a/~a/~a/~a"
+						       article-2 kind-2 num-2
+						       article-1 kind-1 num-1))
+					"search for a path going the other way")
+			   "?")))))
+	      (miz-item-html "Invalid URI"
+		(:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
+	  (miz-item-html "Invalid URI"
+	    (:p "The requested source item, '" (str source-item) "', is not the name of any known item."))))))
 
 (defun emit-path-between-items-via-item ()
-  (let ((uri (request-uri*))
-	(path-regexp (concat "/" "([^/]+)" ; article name
-			     "/" "([^/]+)" ; item kind
-			     "/" "([^/]+)" ; number
-			     "/" "([^/]+)" ; article name
-			     "/" "([^/]+)" ; item kind
-			     "/" "([^/]+)" ; number
-			     "/" "([^/]+)" ; article name
-			     "/" "([^/]+)" ; item kind
-			     "/" "([^/]+)" ; number
-			     "/?" ; maybe end with a '/'
-			     )))
-    (register-groups-bind (source-article source-kind source-num 
-			   via-article via-kind via-num
-			   destination-article destination-kind destination-num)
-	(path-regexp uri)
-      (let ((source (format nil "~a:~a:~a" source-article source-kind source-num))
-	    (via (format nil "~a:~a:~a" via-article via-kind via-num))
-	    (destination (format nil "~a:~a:~a" destination-article destination-kind destination-num)))	
-	(if (gethash source *all-true-items*)
-	    (if (gethash via *all-true-items*)
-		(if (gethash destination *all-true-items*)
-		    (let ((get-params (get-parameters*)))
-		      (if (null get-params) ; first time here, eh?
-			  (with-mizar-favicon-and-title (fmt "from ~a to ~a via ~a" source destination via)
-			      (:dl
-			       (:dt "Source")
-			       (:dd (str source))
-			       (:dt "Destination")
-			       (:dd (str destination))
-			       (:dt "Via")
-			       (:dd (str via)))
-			    (:p "What kind of search would you like to do?")
-			    (:ul
-			     (:li "Find one path from source to destination;)")
-			     (:li "Find " (:em "all") " paths;")
-			     (:li "Find a path from the source to the destination that " (:em "avoids") " the the intermediate verte;x")
-			     (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex.")))
-			  (with-mizar-favicon-and-title "You're asking too much"
-			      (:p "I can't handle this: " (fmt "~A" get-params)))))
-		    (with-mizar-favicon-and-title "Invalid URI"
-			(:p "There given destination item, '" (str destination) "', is not the name of any known item.")))
-		(with-mizar-favicon-and-title "Invalid URI"
-		    (:p "There given intermediate item, '" (str via) "', is not the name of any known item.")))
-	    (with-mizar-favicon-and-title "Invalid URI"
-		(:p "There given source item, '" (str source) "', is not the name of any known item.")))))))
+  (register-groups-bind (source-article source-kind source-num 
+					via-article via-kind via-num
+					destination-article destination-kind destination-num)
+      (+path-between-true-items-via-item-uri-regexp+ (request-uri*))
+    (let ((source (format nil "~a:~a:~a" source-article source-kind source-num))
+	  (via (format nil "~a:~a:~a" via-article via-kind via-num))
+	  (destination (format nil "~a:~a:~a" destination-article destination-kind destination-num)))	
+      (if (gethash source *all-true-items*)
+	  (if (gethash via *all-true-items*)
+	      (if (gethash destination *all-true-items*)
+		  (let ((get-params (get-parameters*)))
+		    (if (null get-params) ; first time here, eh?
+			(miz-item-html (fmt "from ~a to ~a via ~a" source destination via)
+			  (:dl
+			   (:dt "Source")
+			   (:dd (str source))
+			   (:dt "Destination")
+			   (:dd (str destination))
+			   (:dt "Via")
+			   (:dd (str via)))
+			  (:p "What kind of search would you like to do?")
+			  (:ul
+			   (:li "Find one path from source to destination;)")
+			   (:li "Find " (:em "all") " paths;")
+			   (:li "Find a path from the source to the destination that " (:em "avoids") " the the intermediate verte;x")
+			   (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex.")))
+			(miz-item-html "You're asking too much"
+			  (:p "I can't handle this: " (fmt "~A" get-params)))))
+		  (miz-item-html "Invalid URI"
+		    (:p "There given destination item, '" (str destination) "', is not the name of any known item.")))
+	      (miz-item-html "Invalid URI"
+		(:p "There given intermediate item, '" (str via) "', is not the name of any known item.")))
+	  (miz-item-html "Invalid URI"
+	    (:p "There given source item, '" (str source) "', is not the name of any known item."))))))
 
-(defun emit-article-page (article)
-  (let ((num-items (gethash article *article-num-items*)))
-    #'(lambda ()
-	(with-mizar-favicon-and-title (fmt "~a" article)
-	  (:p "The article " article " has " (:b (str num-items)) " items ")
-	  (:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
+(defun emit-article-page ()
+  (register-groups-bind (article)
+      (+article-uri-regexp+ (request-uri*))
+    (let ((num-items (gethash article *article-num-items*)))
+      (miz-item-html (fmt "~a" article)
+	(:p "The article " (str article) " has " (:b (str num-items)) " items ")
+	(:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
 
 (defun emit-dependency-page (article item-number)
   (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
@@ -482,17 +512,10 @@ returning NIL."
 		     (htm (:p (:em "(none)")))))))))))
 
 (defun emit-random-page ()
-  (let* ((random-edge-index (random *num-dependency-graph-edges*))
-	 (random-zero-one (random 2))
-	 (random-edge (nth random-edge-index *dependency-graph*))
-	 (random-vertex (if (zerop random-zero-one)
-			    (car random-edge)
-			    (cdr random-edge))))
-    (destructuring-bind (random-article-name random-item-num)
+  (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
+    (destructuring-bind (article kind number)
 	(split ":" random-vertex)
-      (let ((random-uri (format nil "/~a/~a" 
-				random-article-name random-item-num)))
-	(redirect random-uri)))))
+      (redirect (uri-for-item article kind number)))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
@@ -528,140 +551,133 @@ returning NIL."
     `(register-regexp-dispatcher ,exact-uri ,dispatcher)))
 
 (defun emit-mizar-item-page ()
-  (let ((request-uri (request-uri*))
-	(mizar-item-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
-						 "/" "(" +item-kind-regexp+ ")"
-						 "/" "(" +number-regexp+ ")"))))
-    (register-groups-bind (article-name item-kind item-number)
-        (mizar-item-regexp request-uri)
-      (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
-	     (ckb-for-item (gethash item-key *item-to-ckb-table*))
-	     (article-dir (format nil "~a/~a" *itemization-source* article-name))
-	     (article-text-dir (format nil "~a/text" article-dir))
-	     (items-for-ckb (gethash ckb-for-item *ckb-to-items-table*))
-	     (forward-deps (gethash item-key *true-item-dependency-graph-forward*))
-	     (backward-deps (gethash item-key *true-item-dependency-graph-backward*))
-	     (forward-deps-sorted (sort forward-deps #'true-item-<))
-	     (backward-deps-sorted (sort backward-deps #'true-item-<)))
-	(destructuring-bind (ckb-article-name ckb-number)
-	    (split ":" ckb-for-item)
-	  (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	  (let* ((ckb-item-path (format nil "~a/ckb~d.html"
-				   article-text-dir
-				   ckb-number))
-		 (item-html (file-as-string ckb-item-path)))
-	(with-mizar-favicon-and-title (str item-key)
-	  (:p (str item-key) " comes from toplevel item " (str ckb-number) " of article " (str article-name) ".")
-	  (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
-	      (htm 
-	       (:p "This is the only item generated by that toplevel item."))
-	      
-	      (htm
-	       (:p "This toplevel item generates this item, as well as these other items:")
-	       (:ul
-		(dolist (other-item items-for-ckb)
-		  (destructuring-bind (other-item-article other-item-kind other-item-number)
-		      (split ":" other-item)
-		    (let ((other-item-uri (format nil "/~a/~a/~a" other-item-article other-item-kind other-item-number)))
-		      (htm
-		       (:li ((:a :href other-item-uri) (str other-item))))))))))
-	  (:table
-	   ((:tr :valign "top")
-	    ((:td :colspan 2 :width "100%") (str item-html)))
-	   ((:tr :valign "top")
-	    ((:td :width "50%")
-	     (if forward-deps-sorted
-		 (htm
-		  (:table
-		   (:caption "This item immediately depends on")
-		   (dolist (forward-dep forward-deps-sorted)
-		    (destructuring-bind (dep-name dep-kind dep-num)
-			(split ":" forward-dep)
-		      (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+  (register-groups-bind (article-name item-kind item-number)
+      (+true-item-uri-regexp+ (request-uri*))
+    (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
+	   (article-text-dir (format nil "~a/text" article-dir))
+	   (items-for-ckb (gethash ckb-for-item *ckb-to-items-table*))
+	   (forward-deps (gethash item-key *true-item-dependency-graph-forward*))
+	   (backward-deps (gethash item-key *true-item-dependency-graph-backward*))
+	   (forward-deps-sorted (sort forward-deps #'true-item-<))
+	   (backward-deps-sorted (sort backward-deps #'true-item-<)))
+      (destructuring-bind (ckb-article-name ckb-number)
+	  (split ":" ckb-for-item)
+	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
+	(let* ((ckb-item-path (format nil "~a/ckb~d.html"
+				      article-text-dir
+				      ckb-number))
+	       (item-html (file-as-string ckb-item-path)))
+	  (miz-item-html (str item-key)
+	    (:p (str item-key) " comes from toplevel item " (str ckb-number) " of article " (str article-name) ".")
+	    (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
+		(htm 
+		 (:p "This is the only item generated by that toplevel item."))
+		
+		(htm
+		 (:p "This toplevel item generates this item, as well as these other items:")
+		 (:ul
+		  (dolist (other-item items-for-ckb)
+		    (destructuring-bind (other-item-article other-item-kind other-item-number)
+			(split ":" other-item)
+		      (let ((other-item-uri (format nil "/~a/~a/~a" other-item-article other-item-kind other-item-number)))
 			(htm
-			 (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
-		 (htm (:p (:em "(This item immediately depends on nothing.)")))))
-	    ((:td :width "50%")
-	     (if backward-deps-sorted
-		 (htm
-		  (:table
-		   (:caption "These items immediately depend on this one:")
-		   (dolist (backward-dep backward-deps-sorted)
-		     (destructuring-bind (dep-name dep-kind dep-num)
-			 (split ":" backward-dep)
-		       (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
-			 (htm
-			  (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
-		 (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
+			 (:li ((:a :href other-item-uri) (str other-item))))))))))
+	    (:table
+	     ((:tr :valign "top")
+	      ((:td :colspan 2) (str item-html)))
+	     ((:tr :valign "top")
+	      (:td
+	       (if forward-deps-sorted
+		   (htm
+		    (:table
+		     (:caption "This item immediately depends on")
+		     (dolist (forward-dep forward-deps-sorted)
+		       (destructuring-bind (dep-name dep-kind dep-num)
+			   (split ":" forward-dep)
+			 (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+			   (htm
+			    (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
+		   (htm (:p (:em "(This item immediately depends on nothing.)")))))
+	      (:td
+	       (if backward-deps-sorted
+		   (htm
+		    (:table
+		     (:caption "These items immediately depend on this one:")
+		     (dolist (backward-dep backward-deps-sorted)
+		       (destructuring-bind (dep-name dep-kind dep-num)
+			   (split ":" backward-dep)
+			 (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+			   (htm
+			    (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
+		   (htm (:p (:em "(No item immediately depends on this one.)")))))))))))))
 
 (defun emit-ckb-item-page ()
-  (let ((request-uri (request-uri*))
-	(ckb-item-regexp (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
-						 "/" "(" +number-regexp+ ")"))))
-    (register-groups-bind (article-name item-number)
-        (ckb-item-regexp request-uri)
-      (let* ((item-key (format nil "~a:~a" article-name item-number))
-	     (article-dir (format nil "~a/~a" *itemization-source* article-name))
-	     (article-text-dir (format nil "~a/text" article-dir))
-	     (items-for-ckb (gethash item-key *ckb-to-items-table*))
-	     (forward-deps (gethash item-key *ckb-dependency-graph-forward*))
-	     (backward-deps (gethash item-key *ckb-dependency-graph-backward*))
-	     (forward-deps-sorted (sort forward-deps #'ckb-item-<))
-	     (backward-deps-sorted (sort backward-deps #'ckb-item-<)))
-	(destructuring-bind (ckb-article-name ckb-number)
-	    (split ":" item-key)
-	  (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	  (let* ((ckb-item-path (format nil "~a/ckb~a.html"
-				   article-text-dir
-				   ckb-number))
-		 (item-html (file-as-string ckb-item-path)))
-	(with-mizar-favicon-and-title (str item-key)
-	  (:p (str item-key) " is toplevel item " (str ckb-number) " of article " (str article-name) ".")
-	  (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
-	      (htm 
-	       (:p "This is the only item generated by that toplevel item."))
-	      
-	      (htm
-	       (:p "This toplevel item generates this item, as well as these other items:")
-	       (:ul
-		(dolist (other-item items-for-ckb)
-		  (destructuring-bind (other-item-article other-item-kind other-item-number)
-		      (split ":" other-item)
-		    (let ((other-item-uri (format nil "/~a/~a/~a" other-item-article other-item-kind other-item-number)))
-		      (htm
-		       (:li ((:a :href other-item-uri) (str other-item))))))))))
-	  (:table
-	   ((:tr :valign "top")
-	    (:td 
-	     (if forward-deps-sorted
-		 (htm
-		  (:table
-		   (:caption "This item immediately depends on")
-		   (dolist (forward-dep forward-deps-sorted)
-		    (destructuring-bind (dep-name dep-num)
-			(split ":" forward-dep)
-		      (let ((dep-uri (format nil "/~a/~a" dep-name dep-num)))
+  (register-groups-bind (article-name item-number)
+      (+ckb-item-uri-regexp+ (request-uri*))
+    (let* ((item-key (format nil "~a:~a" article-name item-number))
+	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
+	   (article-text-dir (format nil "~a/text" article-dir))
+	   (items-for-ckb (gethash item-key *ckb-to-items-table*))
+	   (forward-deps (gethash item-key *ckb-dependency-graph-forward*))
+	   (backward-deps (gethash item-key *ckb-dependency-graph-backward*))
+	   (forward-deps-sorted (sort forward-deps #'ckb-item-<))
+	   (backward-deps-sorted (sort backward-deps #'ckb-item-<)))
+      (destructuring-bind (ckb-article-name ckb-number)
+	  (split ":" item-key)
+	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
+	(let* ((ckb-item-path (format nil "~a/ckb~a.html"
+				      article-text-dir
+				      ckb-number))
+	       (item-html (file-as-string ckb-item-path)))
+	  (miz-item-html (str item-key)
+	    (:p (str item-key) " is toplevel item " (str ckb-number) " of article " (str article-name) ".")
+	    (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
+		(htm 
+		 (:p "This is the only item generated by that toplevel item."))
+		
+		(htm
+		 (:p "This toplevel item generates this item, as well as these other items:")
+		 (:ul
+		  (dolist (other-item items-for-ckb)
+		    (destructuring-bind (other-item-article other-item-kind other-item-number)
+			(split ":" other-item)
+		      (let ((other-item-uri (format nil "/~a/~a/~a" other-item-article other-item-kind other-item-number)))
 			(htm
-			 (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
-		 (htm (:p (:em "(This item immediately depends on nothing.)")))))
-	    (:td (str "&lArr;"))
-	    (:td :rowspan 2 (str item-html))
-	    (:td (str "&rArr;"))
-	    (:td 
-	     (if backward-deps-sorted
-		 (htm
-		  (:table
-		   (:caption "These items immediately depend on this one:")
-		   (dolist (backward-dep backward-deps-sorted)
-		     (destructuring-bind (dep-name dep-num)
-			 (split ":" backward-dep)
-		       (let ((dep-uri (format nil "/~a/~a" dep-name dep-num)))
-			 (htm
-			  (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
-		 (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
+			 (:li ((:a :href other-item-uri) (str other-item))))))))))
+	    (:table
+	     ((:tr :valign "top")
+	      (:td 
+	       (if forward-deps-sorted
+		   (htm
+		    (:table
+		     (:caption "This item immediately depends on")
+		     (dolist (forward-dep forward-deps-sorted)
+		       (destructuring-bind (dep-name dep-num)
+			   (split ":" forward-dep)
+			 (let ((dep-uri (format nil "/~a/~a" dep-name dep-num)))
+			   (htm
+			    (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
+		   (htm (:p (:em "(This item immediately depends on nothing.)")))))
+	      (:td (str "&lArr;"))
+	      (:td :rowspan 2 (str item-html))
+	      (:td (str "&rArr;"))
+	      (:td 
+	       (if backward-deps-sorted
+		   (htm
+		    (:table
+		     (:caption "These items immediately depend on this one:")
+		     (dolist (backward-dep backward-deps-sorted)
+		       (destructuring-bind (dep-name dep-num)
+			   (split ":" backward-dep)
+			 (let ((dep-uri (format nil "/~a/~a" dep-name dep-num)))
+			   (htm
+			    (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
+		   (htm (:p (:em "(No item immediately depends on this one.)")))))))))))))
 
 (defun emit-main-page ()
-  (with-mizar-favicon-and-title (str "fine-grained dependencies in mizar")
+  (miz-item-html (str "fine-grained dependencies in mizar")
     (:p "Interested in learning more about the " (:tt "MIZAR") "
     Mathematical Library (MML)?  This site provides a way to
     get a handle on the large contents of the MML.")
@@ -723,26 +739,11 @@ returning NIL."
       (register-static-file-dispatcher html-uri html-path "text/html")
       (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
       (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path)))
-  (let ((article-name-uri-regexp (exact-regexp (concat "/" +article-name-regexp+
-						       "/?"))))
-    (register-regexp-dispatcher article-name-uri-regexp
-				#'emit-article-page))
-  (let ((ckb-item-uri-regexp (exact-regexp (concat "/" +article-name-regexp+
-						   "/" +number-regexp+))))
-    (register-regexp-dispatcher ckb-item-uri-regexp
-				#'emit-ckb-item-page))
-  (let ((true-item-uri-regexp (exact-regexp (concat "/" +article-name-regexp+
-						    "/" "(" +item-kind-regexp+ ")"
-						    "/" +number-regexp+))))
-    (register-regexp-dispatcher true-item-uri-regexp
-				#'emit-mizar-item-page))
-  ;; set up path searcher
-  (let ((ai-to-bj-uri-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
-    (register-regexp-dispatcher ai-to-bj-uri-regex #'emit-path-between-items))
-  (let ((real-item-to-real-item-uri-regexp "^/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/?"))
-    (register-regexp-dispatcher real-item-to-real-item-uri-regexp #'emit-path-between-items))
-  (let ((real-item-via-real-item-to-real-item-uri-regexp "^/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/[a-z_0-9]+/[a-z]+/[0-9]+/?$"))
-    (register-regexp-dispatcher real-item-via-real-item-to-real-item-uri-regexp #'emit-path-between-items-via-item))
-  (let ((source-via-dest-regex "^/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/([a-z_0-9]+)/([0-9]+)/?$"))
-    (register-regexp-dispatcher source-via-dest-regex #'emit-path-between-items-via-item))
-    t)
+  (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
+  (register-regexp-dispatcher +ckb-item-uri-regexp+ #'emit-ckb-item-page)
+  (register-regexp-dispatcher +true-item-uri-regexp+ #'emit-mizar-item-page)
+  (register-regexp-dispatcher +path-between-true-items-via-item-uri-regexp+
+			      #'emit-path-between-items)
+  (register-regexp-dispatcher +path-between-true-items-via-item-uri-regexp+
+			      #'emit-path-between-items-via-item)
+  t)
