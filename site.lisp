@@ -560,7 +560,7 @@ returning NIL."
 		     (dolist (forward-dep forward-deps-sorted)
 		       (destructuring-bind (dep-name dep-kind dep-num)
 			   (split ":" forward-dep)
-			 (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+			 (let ((dep-uri (uri-for-item dep-name dep-kind dep-num)))
 			   (htm
 			    (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
 		   (htm (:p (:em "(This item immediately depends on nothing.)")))))
@@ -572,7 +572,7 @@ returning NIL."
 		     (dolist (backward-dep backward-deps-sorted)
 		       (destructuring-bind (dep-name dep-kind dep-num)
 			   (split ":" backward-dep)
-			 (let ((dep-uri (format nil "/~a/~a/~a" dep-name dep-kind dep-num)))
+			 (let ((dep-uri (uri-for-item dep-name dep-kind dep-num)))
 			   (htm
 			    (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
 		   (htm (:p (:em "(No item immediately depends on this one.)")))))))))))))
