@@ -8,6 +8,27 @@
 (defmacro with-mizar-favicon-and-title (title &body body)
   `(with-favicon-and-title "/favicon.ico" ,title ,@body))
 
+(defmacro miz-item-html (title &body body)
+  `(with-html
+     (:head 
+      ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
+      ((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
+      ((:script :src "/mhtml.js" :type "text/ecmascript"))
+      (:title ,title))
+     (:body
+      ((:table :border "1"
+	       :summary "navigation"
+	       :class "header"
+	       :width "100%")
+       (:tr
+	(:td
+	 ((:a :href "") "main")
+	 ((:span :class "hide") ":")
+	 ((:span :class "menu")
+	  ((:a :href "about") "about")
+	  ((:a :href "random") "random")))))
+      ,@body)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Static data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
