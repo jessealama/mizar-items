@@ -475,47 +475,6 @@ returning NIL."
 	(:p "The article " (str article) " has " (:b (str num-items)) " items ")
 	(:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
 
-(defun emit-dependency-page (article item-number)
-  (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
-	 (article-text-dir (format nil "~a/text" article-dir))
-	 (item-path (format nil "~a/ckb~d.html" article-text-dir item-number))
-	 (item-html (file-as-string item-path))
-	 (item-name (format nil "~a:~d" article item-number))
-	 (forward-deps (gethash item-name *ckb-dependency-graph-forward*))
-	 (backward-deps (gethash item-name *ckb-dependency-graph-backward*))
-	 (forward-deps-sorted (sort forward-deps #'ckb-item-<))
-	 (backward-deps-sorted (sort backward-deps #'ckb-item-<)))
-    #'(lambda ()
-	(miz-item-html (str item-name)
-	  (:table
-	   (:tr
-	    (:td :rowspan 2 (str item-html))
-	    (:td "This item immediately depends on:"
-		 (if forward-deps-sorted
-		     (htm
-		      (:ul
-		       (dolist (forward-dep forward-deps-sorted)
-			 (destructuring-bind (dep-name dep-num)
-			     (split ":" forward-dep)
-			   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-			     (htm
-			      (:li ((:a :href dep-uri)
-				    (str forward-dep)))))))))
-		     (htm (:p (:em "(none)"))))))
-	   (:tr
-	    (:td "These items immediately depend on this one:"
-		 (if backward-deps-sorted
-		     (htm
-		      (:ul
-		       (dolist (backward-dep backward-deps-sorted)
-			 (destructuring-bind (dep-name dep-num)
-			     (split ":" backward-dep)
-			   (let ((dep-uri (format nil "/~a/~d" dep-name dep-num)))
-			     (htm
-			      (:li ((:a :href dep-uri)
-				    (str backward-dep)))))))))
-		     (htm (:p (:em "(none)")))))))))))
-
 (defun emit-random-page ()
   (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
     (destructuring-bind (article kind number)
