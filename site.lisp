@@ -22,11 +22,11 @@
 	       :width "100%")
        (:tr
 	(:td
-	 ((:a :href "") "main")
+	 ((:a :href "/") "main")
 	 ((:span :class "hide") ":")
 	 ((:span :class "menu")
-	  ((:a :href "about") "about")
-	  ((:a :href "random") "random")))))
+	  ((:a :href "/about") "about")
+	  ((:a :href "/random") "random")))))
       ,@body)
      (:hr
       ((:div :class "footer")
