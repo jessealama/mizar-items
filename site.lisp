@@ -524,8 +524,10 @@ returning NIL."
 	   (items-for-ckb (gethash ckb-for-item *ckb-to-items-table*))
 	   (forward-deps (gethash item-key *true-item-dependency-graph-forward*))
 	   (backward-deps (gethash item-key *true-item-dependency-graph-backward*))
-	   (forward-deps-sorted (sort forward-deps #'true-item-<))
-	   (backward-deps-sorted (sort backward-deps #'true-item-<)))
+	   (forward-deps-sorted (sort (copy-list forward-deps) 
+				      #'true-item-<))
+	   (backward-deps-sorted (sort (copy-list backward-deps)
+				       #'true-item-<)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" ckb-for-item)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
@@ -586,8 +588,8 @@ returning NIL."
 	   (items-for-ckb (gethash item-key *ckb-to-items-table*))
 	   (forward-deps (gethash item-key *ckb-dependency-graph-forward*))
 	   (backward-deps (gethash item-key *ckb-dependency-graph-backward*))
-	   (forward-deps-sorted (sort forward-deps #'ckb-item-<))
-	   (backward-deps-sorted (sort backward-deps #'ckb-item-<)))
+	   (forward-deps-sorted (sort (copy-list forward-deps) #'ckb-item-<))
+	   (backward-deps-sorted (sort (copy-list backward-deps) #'ckb-item-<)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" item-key)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
