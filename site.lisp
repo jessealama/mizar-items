@@ -677,7 +677,11 @@ returning NIL."
     ((:blockquote :style "font-style:oblique;")
      "Let X" (:sub "1") ", X" (:sub "2") ", " (str "&hellip;") ", X" (:sub "90") ", X" (:sub "91") " be sets such that " (str "&hellip;"))
     (:p "simply because there are too many variables: here, there are 91, but the hard-coded limit in the official " (:tt "MIZAR") " verifier is 90.")))
-    
+
+(defun emit-feedback-page ()
+  (miz-item-html "feedback"
+    (:p
+     "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports, or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
 (defun initialize-uris ()
   ;; ecmascript, css
@@ -691,6 +695,8 @@ returning NIL."
   (register-exact-uri-dispatcher "/" #'emit-main-page)
   ;; about page
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
+  ;; feedback page
+  (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
   (register-exact-uri-dispatcher "/random" #'emit-random-page)
   (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
   ;; directory setup
