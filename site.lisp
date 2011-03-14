@@ -487,6 +487,12 @@ returning NIL."
 	(split ":" random-vertex)
       (redirect (uri-for-item article kind number)))))
 
+(defun emit-random-path ()
+  (let* ((keys (hash-table-keys *all-true-items*))
+	 (random-vertex-1 (random-elt keys))
+	 (random-vertex-2 (random-elt keys)))
+    (redirect (link-for-two-items random-vertex-1 random-vertex-2))))
+
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
      (unless (file-exists-p ,path)
@@ -698,6 +704,7 @@ returning NIL."
   ;; feedback page
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
+  (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
   (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
@@ -719,7 +726,7 @@ returning NIL."
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
   (register-regexp-dispatcher +ckb-item-uri-regexp+ #'emit-ckb-item-page)
   (register-regexp-dispatcher +true-item-uri-regexp+ #'emit-mizar-item-page)
-  (register-regexp-dispatcher +path-between-true-items-via-item-uri-regexp+
+  (register-regexp-dispatcher +path-between-true-items-uri-regexp+
 			      #'emit-path-between-items)
   (register-regexp-dispatcher +path-between-true-items-via-item-uri-regexp+
 			      #'emit-path-between-items-via-item)
