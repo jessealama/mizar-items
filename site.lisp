@@ -5,6 +5,10 @@
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define-constant +search-depth+ 10
+  :test #'=
+  :documentation "The depth limit for doing searches.")
+
 (defmacro with-mizar-favicon-and-title (title &body body)
   `(with-favicon-and-title "/favicon.ico" ,title ,@body))
 
@@ -27,7 +31,8 @@
 	 ((:span :class "hide") ":")
 	 ((:span :class "menu")
 	  ((:a :href "/about") "about")
-	  ((:a :href "/random-item") "random item")))))
+	  ((:a :href "/random-item") "random item")
+	  ((:a :href "/random-path") "random path")))))
       ,@body)
      (:hr)
      ((:div :class "footer")
@@ -188,12 +193,21 @@ If there is no such path, return nil."
 	(via-to-destination-problem (make-item-search-problem
 				     :initial-state via
 				     :goal destination)))
-    (let ((solution-to-via (depth-first-search source-to-via-problem)))
-      (when solution-to-via
-	(let ((solution-to-destination (depth-first-search via-to-destination-problem)))
-	  (when solution-to-destination
-	    (append (explain-solution solution-to-via)
-		    (cdr (explain-solution solution-to-destination)))))))))
+    (multiple-value-bind (solution-to-via-found? solution-to-via)
+	(bounded-depth-first-search source-to-via-problem +search-depth+)
+      (if solution-to-via-found?
+	  (multiple-value-bind (solution-to-dest-found? solution-to-dest)
+	      (bounded-depth-first-search via-to-destination-problem
+					  +search-depth+)
+	    (if solution-to-dest-found?
+		(append (explain-solution solution-to-via)
+			(cdr (explain-solution solution-to-dest)))
+		(if (null solution-to-dest)
+		    (values nil nil)
+		    (values nil :cut-off))))
+	  (if (null solution-to-via)
+	      (values nil nil)
+	      (values nil :cut-off))))))
 
 (defun all-paths-pass-through (source destination via)
   "Determine whether all paths from SOURCE to DESTINATION pass through
@@ -215,11 +229,13 @@ path as the second value; otherwise, return T as the first value and
 NIL as the second value."
   (let* ((to-bad-guy (make-item-search-problem :goal bad-guy
 					       :initial-state source))
-	 (to-bad-guy-solution (depth-first-search to-bad-guy)))
+	 (to-bad-guy-solution (bounded-depth-first-search to-bad-guy
+							  +search-depth+)))
     (if to-bad-guy-solution
 	(let* ((from-bad-guy (make-item-search-problem :goal destination
 						       :initial-state bad-guy))
-	       (from-bad-guy-solution (depth-first-search from-bad-guy)))
+	       (from-bad-guy-solution (bounded-depth-first-search from-bad-guy
+								  +search-depth+)))
 	  (if from-bad-guy-solution
 	      (let ((path-to-bad-guy (explain-solution to-bad-guy-solution))
 		    (path-from-bad-guy (explain-solution from-bad-guy-solution)))
@@ -355,7 +371,8 @@ returning NIL."
   (format nil "/article/~a" article))
 
 (define-constant +path-between-true-items-uri-regexp+
-    (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
+    (exact-regexp (concat "/" "path"
+			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"
 			  "/" "(" +article-name-regexp+ ")"
@@ -397,6 +414,15 @@ returning NIL."
       (split ":" item)
     (format nil "/item/~a/~a/~a" article kind num)))
 
+(defun link-for-two-items (item-1 item-2)
+  (destructuring-bind (article-1 kind-1 num-1)
+      (split ":" item-1)
+    (destructuring-bind (article-2 kind-2 num-2)
+	(split ":" item-2)
+      (format nil "/path/~a/~a/~a/~a/~a/~a" 
+	          article-1 kind-1 num-1
+		  article-2 kind-2 num-2))))
+
 (defun emit-path-between-items ()
   (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
       (+path-between-true-items-uri-regexp+ (request-uri*))
@@ -405,12 +431,17 @@ returning NIL."
 	  (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
       (if (gethash source-item *all-true-items*)
 	  (if (gethash destination-item *all-true-items*)
-	      (let* ((problem (make-item-search-problem 
+	      (let ((problem (make-item-search-problem 
 			       :initial-state source-item
 			       :goal destination-item))
-		     (solution (depth-first-search problem)))
-		(miz-item-html (fmt "from ~a to ~a" source-item destination-item)
-		  (if solution
+		    (source-item-uri (link-for-item source-item))
+		    (dest-item-uri (link-for-item destination-item))
+		    (opposite-path-uri (link-for-two-items destination-item
+							   source-item)))
+		(multiple-value-bind (solution-exists? solution)
+		    (bounded-depth-first-search problem +search-depth+)
+		  (miz-item-html (fmt "from ~a to ~a" source-item destination-item)
+		  (if solution-exists?
 		      (htm
 		       (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
 		       (:ol
@@ -425,13 +456,14 @@ returning NIL."
 			      (htm
 			       (:li ((:a :href step-uri)
 				     (str step)))))))))
-		      (htm
-		       (:p (fmt "There is no path from ~a to ~a." source-item destination-item)
-			   " Care to " ((:a :href (fmt "/~a/~a/~a/~a/~a/~a"
-						       article-2 kind-2 num-2
-						       article-1 kind-1 num-1))
-					"search for a path going the other way")
-			   "?")))))
+		      (if (null solution)
+			  (htm
+			   (:p "There is no path from " ((:a :href source-item-uri) (str source-item)) " to " ((:a :href dest-item-uri) (str destination-item)) ".  Care to " 
+			       ((:a :href opposite-path-uri)
+				"search for a path going the other way")
+			       "?"))
+			  (htm
+			   (:p "There may be a path from "  ((:a :href source-item-uri) (str source-item)) "  to "  ((:a :href dest-item-uri) (str destination-item)) ", but I'm afraid we were unable to find one given the current depth limit in effect on searches.")))))))
 	      (miz-item-html "Invalid URI"
 		(:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
 	  (miz-item-html "Invalid URI"
