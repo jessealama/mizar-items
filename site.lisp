@@ -527,7 +527,6 @@ returning NIL."
 	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
 	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
-	   (items-for-ckb (gethash ckb-for-item *ckb-to-items-table*))
 	   (forward-deps (gethash item-key *true-item-dependency-graph-forward*))
 	   (backward-deps (gethash item-key *true-item-dependency-graph-backward*))
 	   (forward-deps-sorted (sort (copy-list forward-deps) 
