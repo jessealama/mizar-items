@@ -481,7 +481,7 @@ returning NIL."
 	(:p "The article " (str article) " has " (:b (str num-items)) " items ")
 	(:p "See " (:a :href (format nil "/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
 
-(defun emit-random-page ()
+(defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
@@ -697,7 +697,7 @@ returning NIL."
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   ;; feedback page
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
-  (register-exact-uri-dispatcher "/random-item" #'emit-random-page)
+  (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
