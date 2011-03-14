@@ -686,6 +686,9 @@ returning NIL."
   (register-static-file-dispatcher "/mhtml.css"
 				   (mizar-items-config 'mhtml-css-path)
 				   "text/css")
+  (register-static-file-dispatcher "/screen.css"
+				   (mizar-items-config 'screen-css-path)
+				   "text/css")
   (register-static-file-dispatcher "/mhtml.js"
 				   (mizar-items-config 'mhtml-js-path)
 				   "text/ecmascript")
