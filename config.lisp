@@ -34,7 +34,7 @@
 (update-mizar-items-config 'mhtml-css-path
 			   (file-in-xsl4mizar-dir "MHTML/mhtml.css"))
 (update-mizar-items-config 'screen-css-path
-			   (file-in-mizar-items-dir "screen.css"))
+			   (file-in-xsl4mizar-dir "MHTML/screen.css"))
 (update-mizar-items-config 'mhtml-js-path
 			   (file-in-xsl4mizar-dir "MHTML/mhtml.js"))
 (update-mizar-items-config 'fragment-depdenency-graph
