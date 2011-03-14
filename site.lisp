@@ -29,11 +29,11 @@
 	  ((:a :href "/about") "about")
 	  ((:a :href "/random") "random")))))
       ,@body)
-     (:hr
-      ((:div :class "footer")
-       ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us."))
-      ((:p :class "validate")
-       "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML")))))
+     (:hr)
+     ((:div :class "footer")
+      ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
+     ((:span :class "menu")
+      "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Static data
