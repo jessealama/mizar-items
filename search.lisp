@@ -207,6 +207,10 @@ how the node was obtained, starting from an initial node."
 deeper than DEPTH."
   (general-bounded-search problem #'enqueue-at-end depth))
 
+(defun bounded-depth-first-search (problem depth)
+  "Search the deepest nodes in the search tree first."
+  (general-bounded-search problem #'enqueue-at-front depth))
+
 (defun bounded-breadth-first-search-with-nodes (problem depth &optional queue)
   "Search the shallowest nodes in the search tree first, but don't go
 deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of
