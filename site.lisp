@@ -54,10 +54,10 @@
 			       "relat_1"
 			       "funct_1"))
 
-(defparameter *dependency-graph-file* 
-  "/Users/alama/sources/mizar/mizar-items/ckb-ckb-depgraph")
+(defparameter *dependency-graph-file*
+  (mizar-items-config 'fragment-depdenency-graph))
 (defparameter *item-to-ckb-file*
-  "/Users/alama/sources/mizar/mizar-items/mizar-item-ckb-table")
+  (mizar-items-config 'item-to-fragment-path))
 
 (defparameter *dependency-graph* nil)
 (defparameter *num-dependency-graph-edges* nil)
@@ -688,10 +688,10 @@ returning NIL."
 (defun initialize-uris ()
   ;; ecmascript, css
   (register-static-file-dispatcher "/mhtml.css"
-				   "/Users/alama/sources/mizar/mizar-items/xsl4mizar/MHTML/mhtml.css"
+				   (mizar-items-config 'mhtml-css-path)
 				   "text/css")
   (register-static-file-dispatcher "/mhtml.js"
-				   "/Users/alama/sources/mizar/mizar-items/xsl4mizar/MHTML/mhtml.js"
+				   (mizar-items-config 'mhtml-js-path)
 				   "text/ecmascript")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)
