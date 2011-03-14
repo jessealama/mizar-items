@@ -13,6 +13,7 @@
      (:head 
       ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
       ((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
+      ((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
       ((:script :src "/mhtml.js" :type "text/ecmascript"))
       (:title ,title))
      (:body
