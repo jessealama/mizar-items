@@ -27,9 +27,8 @@
 	       :width "100%")
        (:tr
 	(:td
-	 ((:a :href "/") "main")
-	 ((:span :class "hide") ":")
 	 ((:span :class "menu")
+	  ((:a :href "/") "main")
 	  ((:a :href "/about") "about")
 	  ((:a :href "/random-item") "random item")
 	  ((:a :href "/random-path") "random path")))))
@@ -401,13 +400,45 @@ returning NIL."
     (:p "This site aims to illustrate fine-grained dependency
     information about " (:a :href "http://www.mizar.org" "the Mizar
     Mathematical Library") ", a large collection of formalized mathematical knowledge.")
+    (:h1 "How are dependencies computed?")
     (:p "For more information about the method for computing this
     information and some applications of it, see:")
     (:ul
      (:li (str "&ldquo;") (:a :href "http://centria.di.fct.unl.pt/~alama/materials/preprints/dependencies-in-formal-mathematics.pdf" "Dependencies in formal mathematics") (str "&rdquo;"))
      (:li (str "&ldquo;") (:a :href "http://centria.di.fct.unl.pt/~alama/materials/preprints/premise-selection-for-mathematics-by-corpus-analysis-and-kernel-methods.pdf" "Premise selection for mathematics by corpus analysis and kernel methods") (str "&rdquo;")))
-    (:hr)
-    (:address (:a :href "mailto:j.alama@fct.unl.pt" "Contact the maintainer"))))
+    (:h1 "Divergences from the official MIZAR Mathematical Library")
+    (:p "This site is based on MML version 4.156.1102
+    and " (:tt "MIZAR") " binaries based on version 7.11.07.  For more information, consult the " (:tt "MIZAR") " homepage at")
+    :blockquote
+    ((:a :href "http://www.mizar.org/") "http://www.mizar.org/")
+    (:p "There are slight differences between the
+    official MML and official binary releases available on
+    the " (:tt "MIZAR") " homepage.  To process " (:tt "MIZAR") "
+    articles so that they can be analyzed in the way that I do, some
+    pre-processors are applied to normalize the text of the articles
+    of the MML.  The texts needed to be adjusted to suit this
+    pre-processing.  Thankfully, very few articles of the MML needed
+    to be adjusted.  Moreover, there are are a couple trivial
+    differences between the " (:tt "MIZAR") " verifier that is being
+    used here and the verifier that one would obtain by downloading
+    binaries from the " (:tt "MIZAR") " homepage.  For those who
+    know " (:tt "MIZAR") ", the differences are:")
+    (:ul
+     (:li "The official verifier permits only 50 reservation
+     statements to be present in an article.  Because of some
+     transformations taht I carry out on the texts, this turns out to
+     be too low; I permit 100 reservations.")
+     (:li "The official verifier permits at most 90 variables to be
+     reserved.  Again, for my purposes, this is too low, and I changed
+     it to 150."))
+    (:p "These differences have no logical significance; the verifier
+    with these changes validates a slightly larger set of texts, but
+    the difference has no bearing on the mathematical soundness of
+    the " (:tt "MIAR") " verifier.  Informally, the difference is
+    this: the verifier would reject locutions such as")
+    ((:blockquote :style "font-style:oblique;")
+     "Let X" (:sub "1") ", X" (:sub "2") ", " (str "&hellip;") ", X" (:sub "90") ", X" (:sub "91") " be sets such that " (str "&hellip;"))
+    (:p "simply because there are too many variables: here, there are 91, but the hard-coded limit in the official " (:tt "MIZAR") " verifier is 90.")))
 
 (defun link-for-item (item)
   (destructuring-bind (article kind num)
@@ -677,41 +708,27 @@ returning NIL."
 
 (defun emit-main-page ()
   (miz-item-html (str "fine-grained dependencies in mizar")
-    (:p "Interested in learning more about the " (:tt "MIZAR") "
-    Mathematical Library (MML)?  This site provides a way to
+    (:h1 "welcome")
+    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML.")
-    (:p "This site is based on MML version 4.156.1102
-    and " (:tt "MIZAR") " binaries based on version 7.11.07.  For more information, consult the " (:tt "MIZAR") " homepage at")
+    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
+    (:h1 "getting started")
+    (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
+    (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
+    (:h1 "learning more about" (:tt "MIZAR"))
+    (:p "The " (:tt "MIZAR") " system and its library, the MML, are rather complex.  To learn more about the system, see the excellent overview article")
     (:blockquote
-     ((:a :href "http://www.mizar.org/") "http://www.mizar.org/"))
-    (:p (:b "Note:") " There are slight differences between the
-    official MML and official binary releases available on
-    the " (:tt "MIZAR") " homepage.  To process " (:tt "MIZAR") "
-    articles so that they can be analyzed in the way that I do, some
-    pre-processors are applied to normalize the text of the articles
-    of the MML.  The texts needed to be adjusted to suit this
-    pre-processing.  Thankfully, very few articles of the MML needed
-    to be adjusted.  Moreover, there are are a couple trivial
-    differences between the " (:tt "MIZAR") " verifier that is being
-    used here and the verifier that one would obtain by downloading
-    binaries from the " (:tt "MIZAR") " homepage.  For those who
-    know " (:tt "MIZAR") ", the differences are:")
-    (:ul
-     (:li "The official verifier permits only 50 reservation
-     statements to be present in an article.  Because of some
-     transformations taht I carry out on the texts, this turns out to
-     be too low; I permit 100 reservations.")
-     (:li "The official verifier permits at most 90 variables to be
-     reserved.  Again, for my purposes, this is too low, and I changed
-     it to 150."))
-    (:p "These differences have no logical significance; the verifier
-    with these changes validates a slightly larger set of texts, but
-    the difference has no bearing on the mathematical soundness of
-    the " (:tt "MIAR") " verifier.  Informally, the difference is
-    this: the verifier would reject locutions such as")
-    ((:blockquote :style "font-style:oblique;")
-     "Let X" (:sub "1") ", X" (:sub "2") ", " (str "&hellip;") ", X" (:sub "90") ", X" (:sub "91") " be sets such that " (str "&hellip;"))
-    (:p "simply because there are too many variables: here, there are 91, but the hard-coded limit in the official " (:tt "MIZAR") " verifier is 90.")))
+     "&ldquo;"
+     ((:a :href "http://jfr.cib.unibo.it/article/view/1980") "Mizar in a nutshell")
+     "&rdquo; , by Adam Grabowski, Artur Kornilowicz, and Adam Naumowicz, " (:em "Journal of Formalized Reasoning") (:b "3") "(2), (2010), pp. 153&ndash;245")
+    (:p "For a historical overview, see:")
+    (:blockquote
+     "&ldquo;"
+     ((:a :href "http://markun.cs.shinshu-u.ac.jp/mizar/mma.dir/2005/mma2005(2).pdf") "MIZAR: The first 30 years")
+     "&rdquo , by Roman Mutuszewski and Piotr Rudnicki, " (:em "Mechanized Mathematics and its Applications " (:b "4") "(1), (2005), pp. 3&ndash;24"))
+    (:p "At the moment, this site is not really interactive: you can't work with " (:tt "MIZAR") " texts here.  If you'd like to get your hands dirty, you might want to visit " ((:a :href "http://mws.cs.ru.nl/mwiki/") "the " (:tt "MIZAR") " wiki") " project at Radboud University Nijmegen.")))
+     
+
 
 (defun emit-feedback-page ()
   (miz-item-html "feedback"
