@@ -406,6 +406,28 @@ returning NIL."
     (:ul
      (:li (str "&ldquo;") (:a :href "http://centria.di.fct.unl.pt/~alama/materials/preprints/dependencies-in-formal-mathematics.pdf" "Dependencies in formal mathematics") (str "&rdquo;"))
      (:li (str "&ldquo;") (:a :href "http://centria.di.fct.unl.pt/~alama/materials/preprints/premise-selection-for-mathematics-by-corpus-analysis-and-kernel-methods.pdf" "Premise selection for mathematics by corpus analysis and kernel methods") (str "&rdquo;")))
+    (:h1 "What exactly are &ldquo;items&rdquo;?")
+    (:p "An " (:b "item") " is a top-level piece of
+    a " (:tt "MIZAR") " article.")
+    (:p "Here are all the different kinds of items:")
+    (:dl
+     (:dt "theorem")
+     (:dt "lemma")
+     (:dt "scheme")
+     (:dt "constructor")
+     (:dt "pattern")
+     (:dt "deftheorem")
+     (:dt "definiens")
+     (:dt "cluster")
+     (:dt "identification"))
+    (:p "There are, further, two kinds of items.  The item kinds " (:em "theorem") "," (:em "lemma") "," (:em "scheme") "," (:em "cluster") ", and " (:em "identification") " are, for lack of a better term, " (:b "self-standing") " because and when a top-level block for one of thes kinds of items is processed by the " (:tt "MIZAR") " verifier, one and only one item is produced.  The four items kinds " (:em "constructor") "," (:em "pattern") "," (:em "deftheorem") ", and " (:em "definiens") " are, in general, not self-standing in this sense.  All of these items are produced by a " (:tt "MIZAR") "definition, but moreover, one " (:tt "MIZAR") " definition can produce " (:b "multiple") " items.  For example: the definition (taken from the article " ((:a :href "/article/xboole_0") (:tt "XBOOLE_0")) ")")
+    (:pre "definition
+  let X be set;
+  attr X is empty means
+  :Def1:
+  not ex x being set st x in X;
+end;")
+    (:p "is definition of empty set.  The " (:tt "MIZAR") "verifier produces " (:em "four") " items from this single definition: one constructor, one pattern, one definiens, and one deftheorem.  One can see this by viewing" ((:a :href "/fragment/xboole_0/2") "the view of the article fragment for this definition") ".")
     (:h1 "Divergences from the official MIZAR Mathematical Library")
     (:p "This site is based on MML version 4.156.1102
     and " (:tt "MIZAR") " binaries based on version 7.11.07.  For more information, consult the " (:tt "MIZAR") " homepage at")
