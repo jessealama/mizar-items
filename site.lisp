@@ -446,7 +446,7 @@ end;"))
       (:p "Here, the lemma is called " (:tt "Lm1") ".  It says that the singleton set {" (:em "x") "} is included (in " (:tt "MIZAR") "-ese, that's '"(:tt "c=") "') in " (:em "X") " precisely when " (:em "x") " is a member of " (:em "X") ".  The statement of a lemma is geneally followed by a proof.  In the example above, the proof has six lines.  It uses two definitions defined in the article TARSKI: " (:tt "TARSKI:def 1") " and " (:tt "TARSKI:def 3") "."))
      (:dt "scheme")
      (:dd
-      (:p "A scheme represnts a collection of theorems that are
+      (:p "A scheme represents a collection of theorems that are
       substitution instances of some theorem-pattern.  For example:")
       ((:div :class "miz-example")
        (:pre "
