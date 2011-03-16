@@ -5,7 +5,7 @@
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-constant +search-depth+ 10
+(define-constant +search-depth+ 15
   :test #'=
   :documentation "The depth limit for doing searches.")
 
