@@ -614,7 +614,7 @@ returning NIL."
 	     ((:tr :valign "top" :width "100%")
 	      (:td (str item-html)))
 	     ((:tr :valign "center" :width "100%")
-	      (:td
+	      ((:td :width "100%" :align "center")
 	       ((:table :rules "cols")
 		(:tr
 		 ((:td :align "center" :class "arrow")
