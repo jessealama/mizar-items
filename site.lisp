@@ -64,16 +64,16 @@
 (defparameter *item-to-ckb-file*
   (mizar-items-config 'item-to-fragment-path))
 
-(defparameter *dependency-graph* nil)
-(defparameter *num-dependency-graph-edges* nil)
-(defparameter *ckb-dependency-graph-forward* nil)
-(defparameter *ckb-dependency-graph-backward* nil)
-(defparameter *true-item-dependency-graph-forward* nil)
-(defparameter *true-item-dependency-graph-backward* nil)
-(defparameter *item-to-ckb-table* nil)
-(defparameter *ckb-to-items-table* nil)
-(defparameter *all-ckb-items* nil)
-(defparameter *all-true-items* nil)
+(defvar *dependency-graph* nil)
+(defvar *num-dependency-graph-edges* nil)
+(defvar *ckb-dependency-graph-forward* nil)
+(defvar *ckb-dependency-graph-backward* nil)
+(defvar *true-item-dependency-graph-forward* nil)
+(defvar *true-item-dependency-graph-backward* nil)
+(defvar *item-to-ckb-table* nil)
+(defvar *ckb-to-items-table* nil)
+(defvar *all-ckb-items* nil)
+(defvar *all-true-items* nil)
 
 (defun number-of-edges ()
   (loop
