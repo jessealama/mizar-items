@@ -29,8 +29,11 @@
 	(:td
 	 ((:span :class "menu")
 	  ((:a :href "/") "main")
+	  " "
 	  ((:a :href "/about") "about")
+	  " "
 	  ((:a :href "/random-item") "random-item")
+	  " "
 	  ((:a :href "/random-path") "random-path")))))
       ,@body
       (:hr)
