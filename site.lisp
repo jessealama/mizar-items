@@ -333,10 +333,8 @@ returning NIL."
 	  (mapcar #'(lambda (sym)
 		      (concat sym "pattern"))
 		  +item-kinds-prefixes+)
-	  (mapcar #'(lambda (sym)
-		      (concat sym "definiens"))
-		  +item-kinds-prefixes+)
-	  '("deftheorem"
+	  '("definiens"
+	    "deftheorem"
 	    "theorem"
 	    "lemma"
 	    "scheme"
