@@ -737,7 +737,7 @@ end;"))
 	    ((:table :width "100%")
 	     ((:tr :valign "top")
 	      (:td (str item-html)))
-	     ((:tr :valign "center")
+	     ((:tr :valign "middle")
 	      ((:td :width "100%" :align "center")
 	       ((:table :rules "cols")
 		(:tr
