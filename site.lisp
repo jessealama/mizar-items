@@ -424,9 +424,9 @@ returning NIL."
       ((:div :class "miz-example")
      (:pre "
 theorem
-  [x,y] in f iff x in dom f & y = f.x
+  [x,y] in f iff x in dom f &amp; y = f.x
 proof
-  thus [x,y] in f implies x in dom f & y = f.x
+  thus [x,y] in f implies x in dom f &amp; y = f.x
   proof
     assume
 A1: [x,y] in f;
