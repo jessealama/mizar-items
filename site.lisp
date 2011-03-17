@@ -271,9 +271,10 @@ returning NIL."
   (hunchentoot:start *acceptor*)
   t)
 
-(defun setup-server ()
+(defun setup-server (&optional reload-graphs)
   (load-article-num-items)
-  (load-dependency-graph)
+  (when reload-graphs
+    (load-dependency-graph))
   (initialize-uris)
   (setf *message-log-pathname* "/tmp/hunchentoot-messages"
 	*access-log-pathname* "/tmp/hunchentoot-access"
