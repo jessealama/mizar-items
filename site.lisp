@@ -75,6 +75,12 @@
 (defparameter *all-ckb-items* nil)
 (defparameter *all-true-items* nil)
 
+(defun number-of-edges ()
+  (loop
+     for v being the hash-values of *true-item-dependency-graph-forward*
+     summing (length v) into num-edges
+     finally (return num-edges)))
+
 (defun load-dependency-graph ()
   ;; all possible items 
   (let ((all-ckb-items (make-hash-table :test #'equal))
@@ -826,7 +832,7 @@ end;"))
     (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML.")
     (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
-    (:p "The dependency graph that this site lets you explore has "  (:b (str (length *all-true-items*))) " nodes (items) and " (:b (str (length (hash-table-keys *true-item-dependency-graph-backward*)))) " edges.")
+    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-true-items*))) " nodes (items) and " (:b (str (number-of-edges))) " edges.")
     (:h1 "getting started")
     (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
