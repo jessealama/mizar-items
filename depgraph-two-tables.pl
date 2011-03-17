@@ -319,10 +319,10 @@ my %mml_name_to_item_number
       my $definiens_line = `grep --max-count=1 '<Definiens ' $item_miz`;
       chomp $definiens_line;
       unless ($definiens_line eq '') {
-	  my $nr = nr_attribute ($definiens_line);
+	  my $defnr = defnr_attribute ($definiens_line);
 	  my $constrkind = constrkind_attribute ($definiens_line);
 	  my $constrkind_lc = lc $constrkind;
-	  my $key = "$article_name" . ":" . "definiens" . ":" . "$nr";
+	  my $key = "$article_name" . ":" . "definiens" . ":" . "$defnr";
 	  $mml_name_to_item_number{$key} = "$article_name:$item_num";
       }
 
