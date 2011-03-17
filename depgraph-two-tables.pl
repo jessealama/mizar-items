@@ -61,73 +61,185 @@ my @first_hundred = `head -n $num_articles_handled $mml_lar`;
 chomp @first_hundred;
 push (@articles, @first_hundred);
 
-my %mml_name_to_item_number = ();
+
 # keys are strings such as "xboole_0:deftheorem:1", values are string
 # like "xboole_0:1", which means: xboole_0 item 1 gives rise to
 # xboole_0 deftheorem #1.
 
-# hard-coded hidden mappings
+
 #
 # 'set'
-$mml_name_to_item_number{'hidden:mpattern:1'} = 'hidden:1';
-$mml_name_to_item_number{'hidden:mconstructor:1'} = 'hidden:1';
+my %mml_name_to_item_number 
+  = (
+     # hard-coded hidden mappings
 
-# =
-$mml_name_to_item_number{'hidden:rconstructor:1'} = 'hidden:2';
-$mml_name_to_item_number{'hidden:rpattern:1'} = 'hidden:2';
+     # set
+     'hidden:mpattern:1' => 'hidden:1',
+     'hidden:mconstructor:1' => 'hidden:1',
 
-# <>
-$mml_name_to_item_number{'hidden:rpattern:2'} = 'hidden:3'; 
+     # =
+     'hidden:rconstructor:1' => 'hidden:2',
+     'hidden:rpattern:1' => 'hidden:2',
 
-# in
-$mml_name_to_item_number{'hidden:rconstructor:2'} = 'hidden:4';
-$mml_name_to_item_number{'hidden:rpattern:3'} = 'hidden:4'; 
+     # <>
+     'hidden:rpattern:2' => 'hidden:3',
 
-# hard-coded tarski mappings
-$mml_name_to_item_number{'tarski:theorem:1'} = 'tarski:1';
+     # in
+     'hidden:rconstructor:2' => 'hidden:4',
+     'hidden:rpattern:3' => 'hidden:4',
 
-$mml_name_to_item_number{'tarski:kconstructor:1'} = 'tarski:2';
-$mml_name_to_item_number{'tarski:kdefiniens:1'} = 'tarski:2';
-$mml_name_to_item_number{'tarski:kpattern:1'} = 'tarski:2';
-$mml_name_to_item_number{'tarski:deftheorem:1'} = 'tarski:2';
+     # hard-coded tarski mappings
 
-$mml_name_to_item_number{'tarski:kconstructor:2'} = 'tarski:3';
-$mml_name_to_item_number{'tarski:kpattern:2'} = 'tarski:3';
-$mml_name_to_item_number{'tarski:kdefiniens:2'} = 'tarski:3';
-$mml_name_to_item_number{'tarski:deftheorem:2'} = 'tarski:3';
+     # 1: canceled
+     #
+     # canceled;
+     'tarski:theorem:1' => 'tarski:1',
 
-$mml_name_to_item_number{'tarski:rconstructor:1'} = 'tarski:4';
-$mml_name_to_item_number{'tarski:rdefiniens:1'} = 'tarski:4';
-$mml_name_to_item_number{'tarski:rpattern:1'} = 'tarski:4';
-$mml_name_to_item_number{'tarski:deftheorem:3'} = 'tarski:4';
+     # 2: extensionality
+     #
+     # theorem
+     # (for x holds x in X iff x in Y) implies X = Y;
+     'tarski:theorem:2' => 'tarski:2',
 
-$mml_name_to_item_number{'tarski:kconstructor:3'} = 'tarski:5';
-$mml_name_to_item_number{'tarski:kdefiniens:3'} = 'tarski:5';
-$mml_name_to_item_number{'tarski:kpattern:3'} = 'tarski:5';
-$mml_name_to_item_number{'tarski:deftheorem:4'} = 'tarski:5';
+     # 3: singleton
+     #
+     # definition
+     #   let y;
+     #   func
+     #     { y } -> set
+     #   means
+     #     x in it iff x = y;
+     #   correctness;
+     # end;
+     'tarski:kconstructor:1' => 'tarski:3',
+     'tarski:definiens:1' => 'tarski:3',
+     'tarski:kpattern:1' => 'tarski:3',
+     'tarski:deftheorem:1' => 'tarski:3',
 
-$mml_name_to_item_number{'tarski:theorem:2'} = 'tarski:6';
+     # 4: unordered pair
+     #
+     # definition
+     #   let y, z;
+     #   func
+     #     { y, z } -> set
+     #   means
+     #     x in it iff x = y or x = z;
+     #   correctness;
+     #   commutativity;
+     # end;
+     'tarski:kconstructor:2' => 'tarski:4',
+     'tarski:kpattern:2' => 'tarski:4',
+     'tarski:definiens:2' => 'tarski:4',
+     'tarski:deftheorem:2' => 'tarski:4',
 
-$mml_name_to_item_number{'tarski:scheme:1'} = 'tarski:7';
+     # 5: canceled
+     'tarski:theorem:3' => 'tarski:5',
 
-$mml_name_to_item_number{'tarski:kconstructor:4'} = 'tarski:8';
-$mml_name_to_item_number{'tarski:kdefiniens:4'} = 'tarski:8';
-$mml_name_to_item_number{'tarski:kpattern:4'} = 'tarski:8';
-$mml_name_to_item_number{'tarski:deftheorem:5'} = 'tarski:8';
+     # 6: canceled
+     'tarski:theorem:4' => 'tarski:6',
 
-$mml_name_to_item_number{'tarski:rconstructor:2'} = 'tarski:9';
-$mml_name_to_item_number{'tarski:rdefiniens:2'} = 'tarski:9';
-$mml_name_to_item_number{'tarski:rpattern:2'} = 'tarski:9';
-$mml_name_to_item_number{'tarski:deftheorem:6'} = 'tarski:9';
+     # 7: definition of subset relation
+     #
+     # definition
+     #   let X,Y;
+     #   pred
+     #     X c= Y
+     #   means
+     #     x in X implies x in Y;
+     # end;
+     'tarski:rconstructor:1' => 'tarski:7',
+     'tarski:definiens:3' => 'tarski:7',
+     'tarski:rpattern:1' => 'tarski:7',
+     'tarski:deftheorem:3' => 'tarski:7',
 
-$mml_name_to_item_number{'tarski:theorem:3'} = 'tarski:10';
+     # 8: union
+     #
+     # definition
+     #   let X;
+     #   func
+     #     union X -> set
+     #   means
+     #     x in it iff ex Y st x in Y & Y in X;
+     #   correctness;
+     # end;
+     'tarski:kconstructor:3' => 'tarski:8',
+     'tarski:definiens:4' => 'tarski:8',
+     'tarski:kpattern:3' => 'tarski:8',
+     'tarski:deftheorem:4' => 'tarski:8',
 
-# hacks: not sure why...
-$mml_name_to_item_number{'tarski:rdefiniens:3'} = 'tarski:4';
-$mml_name_to_item_number{'tarski:rdefiniens:6'} = 'tarski:9';
-$mml_name_to_item_number{'tarski:kdefiniens:5'} = 'tarski:8';
-$mml_name_to_item_number{'tarski:theorem:9'} = 'tarski:10';
-$mml_name_to_item_number{'tarski:theorem:7'} = 'tarski:6';
+     # 9: canceled
+     'tarski:theorem:5' => 'tarski:9',
+
+     # 10: canceled
+     'tarski:theorem:6' => 'tarski:10',
+
+     # 11: foundation
+     #
+     # theorem
+     # x in X implies ex Y st Y in X & not ex x st x in X & x in Y;
+     'tarski:theorem:7' => 'tarski:11',
+
+     # 12: replacement
+     #
+     # scheme Fraenkel { A()-> set, P[set, set] } :
+     #  ex X st for x holds x in X iff ex y st y in A() & P[y,x]
+     # provided
+     #  for x,y,z st P[x,y] & P[x,z] holds y = z
+     # proof
+     #   thus thesis;
+     # end;
+     'tarski:scheme:1' => 'tarski:12',
+
+     # 13: definition of ordered pair
+     #
+     # definition
+     #   let x,y;
+     #   func
+     #     [x,y]
+     #   means
+     #     it = { { x,y }, { x } };
+     #   correctness;
+     # end;
+     'tarski:kconstructor:4' => 'tarski:13',
+     'tarski:definiens:5' => 'tarski:13',
+     'tarski:kpattern:4' => 'tarski:13',
+     'tarski:deftheorem:5' => 'tarski:13',
+
+     # 14: canceled
+     'tarski:theorem:8' => 'tarski:13',
+
+     # 15: definition of equipotent sets
+     # definition
+     #   let X,Y;
+     #   pred
+     #     X,Y are_equipotent
+     #   means
+     #     ex Z st
+     #       (for x st x in X ex y st y in Y & [x,y] in Z) &
+     #       (for y st y in Y ex x st x in X & [x,y] in Z) &
+     #       for x,y,z,u st [x,y] in Z & [z,u] in Z holds x = z iff y = u;
+     # end;
+     'tarski:rconstructor:2' => 'tarski:15',
+     'tarski:definiens:6' => 'tarski:15',
+     'tarski:rpattern:2' => 'tarski:15',
+     'tarski:deftheorem:6' => 'tarski:15',
+
+     # 16: Tarski universe axiom
+     #
+     # theorem
+     #   ex M st N in M &
+     #      (for X,Y holds X in M & Y c= X implies Y in M) &
+     #      (for X st X in M ex Z st Z in M & for Y st Y c= X holds Y in Z) &
+     #      (for X holds X c= M implies X,M are_equipotent or X in M);
+     'tarski:theorem:9' => 'tarski:16',
+     );
+
+# # hacks: not sure why...
+# $mml_name_to_item_number{'tarski:rdefiniens:3'} = 'tarski:4';
+# $mml_name_to_item_number{'tarski:rdefiniens:6'} = 'tarski:9';
+# $mml_name_to_item_number{'tarski:kdefiniens:5'} = 'tarski:8';
+# $mml_name_to_item_number{'tarski:theorem:9'} = 'tarski:10';
+# $mml_name_to_item_number{'tarski:theorem:7'} = 'tarski:6';
 
 # print ('tarski:kconstructor:4 ==> tarski:kconstructor:2');
 # print ('tarski:rdefiniens:2 ==> tarski:kconstructor:4');
@@ -207,10 +319,10 @@ $mml_name_to_item_number{'tarski:theorem:7'} = 'tarski:6';
       my $definiens_line = `grep --max-count=1 '<Definiens ' $item_miz`;
       chomp $definiens_line;
       unless ($definiens_line eq '') {
-	  my $defnr = defnr_attribute ($definiens_line);
+	  my $nr = nr_attribute ($definiens_line);
 	  my $constrkind = constrkind_attribute ($definiens_line);
 	  my $constrkind_lc = lc $constrkind;
-	  my $key = "$article_name" . ":" . "$constrkind_lc" . "definiens" . ":" . "$defnr";
+	  my $key = "$article_name" . ":" . "definiens" . ":" . "$nr";
 	  $mml_name_to_item_number{$key} = "$article_name:$item_num";
       }
 
@@ -338,10 +450,10 @@ foreach my $article (@articles) {
 	  my $nr = nr_attribute ($needed);
 	  $key = "$aid_lc:scheme:$nr";
 	} elsif ($needed =~ /Definiens/) {
-	  my $defnr = defnr_attribute ($needed);
+	  my $nr = defnr_attribute ($needed);
 	  my $constrkind = constrkind_attribute ($needed);
 	  my $constrkind_lc = lc $constrkind;
-	  $key = "$aid_lc" . ':' . "$constrkind_lc" . "definiens" . ":" . "$defnr";
+	  $key = "$aid_lc" . ':' . "definiens" . ":" . "$nr";
 	} elsif ($needed =~ /[RCF]Cluster/) {
 	  my $nr = nr_attribute ($needed);
 	  my $cluster_kind;
