@@ -74,6 +74,7 @@
 (defvar *ckb-to-items-table* nil)
 (defvar *all-ckb-items* nil)
 (defvar *all-true-items* nil)
+(defvar *graphs-loaded* nil)
 
 (defun number-of-edges ()
   (loop
@@ -138,6 +139,7 @@
 	    *true-item-dependency-graph-backward* true-item-backward-table))
     (setf *all-ckb-items* all-ckb-items
 	  *all-true-items* all-true-items))
+  (setf *graphs-loaded* t)
   t)
 
 (defun count-miz-in-directory (dir)
@@ -273,7 +275,7 @@ returning NIL."
 
 (defun setup-server (&optional reload-graphs)
   (load-article-num-items)
-  (when reload-graphs
+  (when (or reload-graphs (null *graphs-loaded*))
     (load-dependency-graph))
   (initialize-uris)
   (setf *message-log-pathname* "/tmp/hunchentoot-messages"
