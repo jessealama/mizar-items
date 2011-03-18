@@ -87,6 +87,31 @@
      summing (length v) into num-edges
      finally (return num-edges)))
 
+(defun write-full-item-dependency-graph ()
+  (loop
+     with true-item-forward-table = (make-hash-table :test #'equal)
+     for item being the hash-keys of *item-to-ckb-table*
+     for ckb = (gethash item *item-to-ckb-table*)
+     for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
+     for forward-item-deps = (reduce #'append (mapcar #'(lambda (ckb-dep)
+							  (gethash ckb-dep *ckb-to-items-table*))
+						      forward-ckb-deps))
+     do
+       (setf (gethash item true-item-forward-table)
+	     forward-item-deps)
+     finally
+       (with-open-file (item-depgraph *full-item-dependency-graph*
+				      :direction :output
+				      :if-exists :error
+				      :if-does-not-exist :create)
+	 (loop
+	    for item being the hash-keys of true-item-forward-table
+	    for deps = (gethash item true-item-forward-table)
+	    do
+	      (dolist (dep deps)
+		(format item-depgraph "~a ~a~%" item dep))))))
+
+
 (defun load-dependency-graph ()
   ;; all possible items 
   (let ((all-ckb-items (make-hash-table :test #'equal))
