@@ -750,7 +750,7 @@ end;"))
 		  (if forward-deps-sorted
 		      (htm
 		       (:table
-			((:caption :align "left") "Depends On")
+			(:caption "Depends On")
 			(dolist (forward-dep forward-deps-sorted)
 			  (let ((dep-uri (link-for-item forward-dep)))
 			    (htm
@@ -760,7 +760,7 @@ end;"))
 		  (if backward-deps-sorted
 		      (htm
 		       (:table
-			((:caption :align "right") "Supports")
+			(:caption "Supports")
 			(dolist (backward-dep backward-deps-sorted)
 			  (let ((dep-uri (link-for-item backward-dep)))
 			    (htm
