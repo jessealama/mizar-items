@@ -758,7 +758,7 @@ end;"))
     the difference has no bearing on the mathematical soundness of
     the " (:tt "MIAR") " verifier.  Informally, the difference is
     this: the verifier would reject locutions such as")
-    ((:blockquote :style "font-style:oblique;")
+    ((:blockquote :class "font-style:oblique;")
      "Let X" (:sub "1") ", X" (:sub "2") ", " (str "&hellip;") ", X" (:sub "90") ", X" (:sub "91") " be sets such that " (str "&hellip;"))
     (:p "simply because there are too many variables: here, there are 91, but the hard-coded limit in the official " (:tt "MIZAR") " verifier is 90.")
     (:h1 "getting the data")
@@ -958,7 +958,7 @@ end;"))
 	     ((:tr :valign "top")
 	      (:td (str item-html)))
 	     ((:tr :valign "middle")
-	      ((:td :style "fullwidth" :align "center")
+	      ((:td :class "fullwidth" :align "center")
 	       ((:table :rules "cols")
 		(:tr
 		 ((:td :align "center" :class "arrow")
@@ -966,7 +966,7 @@ end;"))
 		 ((:td :align "center" :class "arrow")
 		  (str "&#8595;")))
 		((:tr :valign "top")
-		 ((:td :style "halfwidth" :align "center")
+		 ((:td :class "halfwidth" :align "center")
 		  (if forward-deps-sorted
 		      (htm
 		       (:table
@@ -976,7 +976,7 @@ end;"))
 			    (htm
 			     (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
 		      (htm (:p (:em "(This item immediately depends on nothing.)")))))
-		 ((:td :style "halfwidth" :align "center")
+		 ((:td :class "halfwidth" :align "center")
 		  (if backward-deps-sorted
 		      (htm
 		       (:table
@@ -1069,9 +1069,9 @@ end;"))
 	 do
 	   (htm
 	    (:tr
-	     ((:td :style "article-name")
+	     ((:td :class "article-name")
 	      ((:a :href (format nil "/~a" article-name)) (str article-name)))
-	     ((:td :style "article-title") (str title)))))))
+	     ((:td :class "article-title") (str title)))))))
     (:h1 "getting started")
     (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
