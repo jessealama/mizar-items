@@ -1118,7 +1118,7 @@ end;"))
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
   (loop
-     for (article . title) in *articles
+     for (article . title) in *articles*
      do
        (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
 	      (miz-uri (format nil "/~a.miz" article))
