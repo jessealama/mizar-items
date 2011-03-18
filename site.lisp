@@ -1058,7 +1058,7 @@ end;"))
     (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
     (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-true-items*))) " nodes (items) and " (:b (str (length *dependency-graph*))) " edges.")
     (:p "The following articles from the MML are handled:")
-    ((:table :class "article-listing")
+    ((:table :class "article-listing" :rules "rows")
      (:thead
       (:tr
        (:th "MML Name")
