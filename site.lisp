@@ -1066,7 +1066,7 @@ end;"))
      (:tbody
       (loop
 	 for (article-name . title) in *articles*
-	 for article-uri = (format nil "/~a" article-name))
+	 for article-uri = (format nil "/~a" article-name)
 	 do
 	   (htm
 	    (:tr
