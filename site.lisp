@@ -899,7 +899,8 @@ end;"))
 	     do
 	       (htm
 		((:li :class "fragment-listing")
-		 ((:a :href item-uri) (str item-html)))))))))))
+		 ((:a :href item-uri :class "fragment-listing")
+		  (str item-html)))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
