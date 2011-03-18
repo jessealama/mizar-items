@@ -1066,7 +1066,7 @@ end;"))
      (:tbody
       (loop
 	 for (article-name . title) in *articles*
-	 for article-uri = (format nil "/~a" article-name)
+	 for article-uri = (format nil "/article/~a" article-name)
 	 for title-escaped = (escape-string title)
 	 do
 	   (htm
