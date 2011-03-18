@@ -886,7 +886,18 @@ end;"))
     (let ((num-items (gethash article *article-num-items*)))
       (miz-item-html (fmt "~a" article)
 	(:p "The article " (str article) " has " (:b (str num-items)) " items ")
-	(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")))))
+	(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
+	(htm
+	 ((:ol :class "fragment-listing")
+	  (loop
+	     with article-dir = (format nil "~a/~a" *itemization-source* article)
+	     with article-text-dir = (format nil "~a/text" article-dir)
+	     for i from 1 upto num-items
+	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+	     for item-html = (file-as-string fragment-path)
+	     do
+	       (htm
+		(str item-html)))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
