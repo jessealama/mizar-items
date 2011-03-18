@@ -41,6 +41,8 @@
 			   (file-in-mizar-items-dir "ckb-ckb-depgraph"))
 (update-mizar-items-config 'item-to-fragment-path
 			   (file-in-mizar-items-dir "mizar-item-ckb-table"))
+(update-mizar-items-config 'full-item-dependency-graph
+			   (file-in-mizar-items-dir "full-item-depgraph"))
 (update-mizar-items-config 'favicon-path
 			   (file-in-mizar-items-dir "favicon.ico"))
 
