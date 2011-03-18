@@ -895,9 +895,11 @@ end;"))
 	     for i from 1 upto num-items
 	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
 	     for item-html = (file-as-string fragment-path)
+	     for item-uri = (format nil "/fragment/~a/~d" article i)
 	     do
 	       (htm
-		(:li (str item-html))))))))))
+		((:li :class "fragment-listing")
+		 ((:a :href item-uri) (str item-html)))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
