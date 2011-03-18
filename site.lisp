@@ -1070,7 +1070,8 @@ end;"))
 	   (htm
 	    (:tr
 	     ((:td :class "article-name")
-	      ((:a :href (format nil "/~a" article-name) :title (str title))
+	      ((:a :href (str (format nil "/~a" article-name))
+		   :title (str title))
 	       (str article-name)))
 	     ((:td :class "article-title") (str title)))))))
     (:h1 "getting started")
