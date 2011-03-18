@@ -94,7 +94,7 @@
     ("finsub_1" . "Boolean Domains")
     ("orders_1" . "Partially Ordered Sets")
     ("setwiseo" . "Semilattice Operations on Finite Subsets")
-    ("fraenkel" . "Function Domains and Fr&ae;nkel Operator")
+    ("fraenkel" . "Function Domains and Fr&aelig;nkel Operator")
     ("card_1" . "Cardinal Numbers")
     ("funct_5" . "Curried and Uncurried Functions")
     ("partfun2" . "Partial Functions from a Domain to a Domain")
