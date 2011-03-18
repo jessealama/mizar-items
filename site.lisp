@@ -195,7 +195,7 @@
     ("binarith" . "Binary Arithmetics. Addition")
     ("pre_circ" . "Preliminaries to Circuits, I")
     ("finseq_6" . "On the Decomposition of Finite Sequences")
-    ("mboolean" . "Definitions and Basic Properties of Boolean & Union of Many Sorted Sets")
+    ("mboolean" . "Definitions and Basic Properties of Boolean &amp; Union of Many Sorted Sets")
     ("wsierp_1" . "The Chinese Remainder Theorem")
     ("glib_000" . "Alternative Graph Structures")
     ("pzfmisc1" . "Some Basic Properties of Many Sorted Sets")
