@@ -1066,12 +1066,12 @@ end;"))
      (:tbody
       (loop
 	 for (article-name . title) in *articles*
+	 for article-uri = (format nil "/~a" article-name))
 	 do
 	   (htm
 	    (:tr
 	     ((:td :class "article-name")
-	      ((:a :href (str (format nil "/~a" article-name))
-		   :title (str title))
+	      ((:a :href article-uri :title title)
 	       (str article-name)))
 	     ((:td :class "article-title") (str title)))))))
     (:h1 "getting started")
