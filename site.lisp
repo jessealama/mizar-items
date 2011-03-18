@@ -490,10 +490,16 @@ returning NIL."
   t)
 
 (defun setup-server (&optional reload-graphs)
+  (format t "Loading article item counts...")
   (load-article-num-items)
+  (format t "done.~%")
   (when (or reload-graphs (null *graphs-loaded*))
-    (load-dependency-graph))
+    (format t "Loading dependency graph data...")
+    (load-dependency-graph)
+    (format t "done.~%"))
+  (format t "Initializing URIs...")
   (initialize-uris)
+  (format t "done~%")
   (setf *message-log-pathname* "/tmp/hunchentoot-messages"
 	*access-log-pathname* "/tmp/hunchentoot-access"
 	*handle-http-errors-p* t
