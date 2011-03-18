@@ -131,7 +131,7 @@
     ("member_1" . "Collective Operations on Number-Membered Sets")
     ("supinf_1" . "Infimum and Supremum of the Set of Real Numbers. Measure Theory")
     ("quin_1" . "Quadratic Inequalities")
-    ("card_3" . "K&ouml;onig's Theorem")
+    ("card_3" . "K&ouml;nig's Theorem")
     ("realset1" . "Group and Field Definitions")
     ("classes2" . "Universal Classes")
     ("ordinal4" . "Increasing and Continuous Ordinal Sequences")
