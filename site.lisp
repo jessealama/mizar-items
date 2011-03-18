@@ -157,7 +157,7 @@
     ("newton" . "Factorial and Newton coefficients")
     ("card_4" . "Countable Sets and Hessenberg's Theorem")
     ("card_5" . "On Powers of Cardinals")
-    ("trees_2" . "K&ouml;onig's Lemma")
+    ("trees_2" . "K&ouml;nig's Lemma")
     ("valued_2" . "Arithmetic Operations on Functions from Sets into Functional Sets")
     ("seqm_3" . "Monotone Real Sequences. Subsequences")
     ("rfinseq" . "Functions and Finite Sequences of Real Numbers")
