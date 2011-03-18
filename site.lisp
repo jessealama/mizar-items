@@ -66,6 +66,8 @@
   (mizar-items-config 'fragment-depdenency-graph))
 (defparameter *item-to-ckb-file*
   (mizar-items-config 'item-to-fragment-path))
+(defparameter *full-item-dependency-graph*
+  (mizar-items-config 'full-item-dependency-graph))
 
 (defvar *dependency-graph* nil)
 (defvar *num-dependency-graph-edges* nil)
