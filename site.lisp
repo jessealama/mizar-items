@@ -738,7 +738,7 @@ end;"))
 	     ((:tr :valign "top")
 	      (:td (str item-html)))
 	     ((:tr :valign "middle")
-	      ((:td :width "100%" :align "center")
+	      ((:td :style "fullwidth" :align "center")
 	       ((:table :rules "cols")
 		(:tr
 		 ((:td :align "center" :class "arrow")
@@ -746,7 +746,7 @@ end;"))
 		 ((:td :align "center" :class "arrow")
 		  (str "&#8595;")))
 		((:tr :valign "top")
-		 ((:td :width "50%" :align "center")
+		 ((:td :style "halfwidth" :align "center")
 		  (if forward-deps-sorted
 		      (htm
 		       (:table
@@ -756,7 +756,7 @@ end;"))
 			    (htm
 			     (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
 		      (htm (:p (:em "(This item immediately depends on nothing.)")))))
-		 ((:td :width "50%" :align "center")
+		 ((:td :style "halfwidth" :align "center")
 		  (if backward-deps-sorted
 		      (htm
 		       (:table
