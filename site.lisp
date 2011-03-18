@@ -897,7 +897,7 @@ end;"))
 	     for item-html = (file-as-string fragment-path)
 	     do
 	       (htm
-		(str item-html)))))))))
+		(:li (str item-html))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
