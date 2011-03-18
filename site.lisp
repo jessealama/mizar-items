@@ -1068,8 +1068,8 @@ end;"))
 	 do
 	   (htm
 	    (:tr
-	     (:td (str article-name))
-	     (:td (str title)))))))
+	     (:td :style "article-name" (str article-name))
+	     (:td :style "article-title" (str title)))))))
     (:h1 "getting started")
     (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
