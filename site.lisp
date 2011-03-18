@@ -366,15 +366,16 @@
 (defparameter *article-num-items* nil)
 
 (defun load-article-num-items ()
-  (loop
-     with num-items-table = (make-hash-table :test #'equal)
-     for (article-name . title) in *articles*
-     do
-       (let ((article-dir (concat *itemization-source* "/" article-name "/" "text")))
-	 (setf (gethash article-name num-items-table)
-	       (count-miz-in-directory article-dir)))
-     finally
-       (setf *article-num-items* num-items-table)))
+  (unless *article-num-items*
+    (loop
+       with num-items-table = (make-hash-table :test #'equal)
+       for (article-name . title) in *articles*
+       do
+	 (let ((article-dir (concat *itemization-source* "/" article-name "/" "text")))
+	   (setf (gethash article-name num-items-table)
+		 (count-miz-in-directory article-dir)))
+       finally
+	 (setf *article-num-items* num-items-table))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for paths between items
