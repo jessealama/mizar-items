@@ -363,7 +363,7 @@
 			      (scan "ckb[0-9]+\.miz$" (namestring path))))
     counter))
 
-(defparameter *article-num-items* nil)
+(defvar *article-num-items* nil)
 
 (defun load-article-num-items ()
   (unless *article-num-items*
