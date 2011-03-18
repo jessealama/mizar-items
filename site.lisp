@@ -145,28 +145,22 @@
 	  (pushnew item (gethash ckb ckb-to-items-table) :test #'string=)))
       (setf *item-to-ckb-table* item-to-ckb-table
 	    *ckb-to-items-table* ckb-to-items-table))
-    (let 	((true-item-forward-table (make-hash-table :test #'equal))
-		 (true-item-backward-table (make-hash-table :test #'equal)))
-      (loop
-	 for item being the hash-keys of *item-to-ckb-table*
-	 for ckb = (gethash item *item-to-ckb-table*)
-	 for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
-	 for backward-ckb-deps = (gethash ckb *ckb-dependency-graph-backward*)
-	 do
-	   (let ((forward-item-deps 
-		  (reduce #'append (mapcar #'(lambda (ckb-dep)
-					       (gethash ckb-dep *ckb-to-items-table*))
-					   forward-ckb-deps))))
-	     (setf (gethash item true-item-forward-table)
-		   forward-item-deps))
-	   (let ((backward-item-deps 
-		  (reduce #'append (mapcar #'(lambda (ckb-dep)
-					       (gethash ckb-dep *ckb-to-items-table*))
-					   backward-ckb-deps))))
-	     (setf (gethash item true-item-backward-table)
-		   backward-item-deps)))
-      (setf *true-item-dependency-graph-forward* true-item-forward-table
-	    *true-item-dependency-graph-backward* true-item-backward-table))
+    ;; if the full item dependency graph doesn't exist, make it
+    (unless (file-exists-p *full-item-dependency-graph*)
+      (write-full-item-dependency-graph))
+    ;; now it exists; load it
+    (let ((lines (lines-of-file *full-item-dependency-graph*))
+	  (edges nil)
+	  (forward-table (make-hash-table :test #'equal))
+	  (backward-table (make-hash-table :test #'equal)))
+      (dolist (line lines)
+	(destructuring-bind (lhs rhs)
+	    (split " " line)
+	  (push (cons lhs rhs) edges)
+	  (pushnew rhs (gethash lhs forward-table) :test #'string=)
+	  (pushnew lhs (gethash rhs backward-table) :test #'string=)))
+      (setf *true-item-dependency-graph-forward* forward-table
+	    *true-item-dependency-graph-backward* backward-table))
     (setf *all-ckb-items* all-ckb-items
 	  *all-true-items* all-true-items))
   (setf *graphs-loaded* t)
