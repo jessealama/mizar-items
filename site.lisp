@@ -275,12 +275,6 @@
 (defvar *all-true-items* nil)
 (defvar *graphs-loaded* nil)
 
-(defun number-of-edges ()
-  (loop
-     for v being the hash-values of *true-item-dependency-graph-forward*
-     summing (length v) into num-edges
-     finally (return num-edges)))
-
 (defun write-full-item-dependency-graph ()
   (loop
      with true-item-forward-table = (make-hash-table :test #'equal)
