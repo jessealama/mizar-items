@@ -465,8 +465,8 @@
 
 (defvar *article-num-items* nil)
 
-(defun load-article-num-items ()
-  (unless *article-num-items*
+(defun load-article-num-items (&optional force)
+  (unless (or force *article-num-items*)
     (loop
        with num-items-table = (make-hash-table :test #'equal)
        for (article-name . title) in *articles*
@@ -592,7 +592,7 @@ returning NIL."
 
 (defun setup-server (&optional reload-graphs)
   (format t "Loading article item counts...")
-  (load-article-num-items)
+  (load-article-num-items reload-graphs)
   (format t "done.~%")
   (when (or reload-graphs (null *graphs-loaded*))
     (format t "Loading dependency graph data...")
