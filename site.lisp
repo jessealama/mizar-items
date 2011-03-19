@@ -466,7 +466,7 @@
 (defvar *article-num-items* nil)
 
 (defun load-article-num-items (&optional force)
-  (unless (or force *article-num-items*)
+  (if (or force (null *article-num-items*))
     (loop
        with num-items-table = (make-hash-table :test #'equal)
        for (article-name . title) in *articles*
@@ -475,7 +475,9 @@
 	   (setf (gethash article-name num-items-table)
 		 (count-miz-in-directory article-dir)))
        finally
-	 (setf *article-num-items* num-items-table))))
+	 (setf *article-num-items* num-items-table)
+	 (return *article-num-items*))
+    *article-num-items*))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for paths between items
