@@ -354,8 +354,7 @@
     ("tops_1" . "Subsets of Topological Spaces")
     ("connsp_1" . "Connected Spaces")
     ("tops_2" . "Families of Subsets, Subspaces and Mappings in Topological Spaces")
-    ("rlvect_1" . "Vectors in Real Linear Space")
-
+    ("rlvect_1" . "Vectors in Real Linear Space")))
 
 (defparameter *dependency-graph-file*
   (mizar-items-config 'fragment-depdenency-graph))
