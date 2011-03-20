@@ -554,6 +554,8 @@
   (setf *graphs-loaded* t)
   t)
 
+(defvar *article-num-items* nil)
+
 (defun count-miz-in-directory (dir)
   (let ((counter 0))
     (walk-directory dir #'(lambda (foo)
@@ -562,8 +564,6 @@
 		    :test #'(lambda (path)
 			      (scan "ckb[0-9]+\.miz$" (namestring path))))
     counter))
-
-(defvar *article-num-items* nil)
 
 (defun load-article-num-items (&optional force)
   (if (or force (null *article-num-items*))
