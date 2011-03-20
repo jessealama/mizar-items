@@ -20,7 +20,7 @@
   (setf (gethash key *mizar-items-config*) value))
 
 (update-mizar-items-config 'sandbox-location 
-			   "/Volumes/ramdisk/")
+			   "/tmp/")
 (update-mizar-items-config 'exec-in-dir-script-path
 			   (file-in-mizar-items-dir "exec-in-dir.sh"))
 (update-mizar-items-config 'fix-by-and-from-script-path
