@@ -66,8 +66,6 @@ push (@articles, @first_hundred);
 # like "xboole_0:1", which means: xboole_0 item 1 gives rise to
 # xboole_0 deftheorem #1.
 
-
-#
 # 'set'
 my %mml_name_to_item_number 
   = (
@@ -233,6 +231,15 @@ my %mml_name_to_item_number
      #      (for X holds X c= M implies X,M are_equipotent or X in M);
      'tarski:theorem:9' => 'tarski:16',
      );
+
+my %hidden_items 
+  = ('set:pattern' => 'hidden:mpattern:1',
+     'set:constructor' => 'hidden:mconstructor:1',
+     '=:constructor' => 'hidden:rconstructor:1',
+     '=:pattern' => 'hidden:rpattern:1',
+     '<>:pattern' => 'hidden:rpattern:2',
+     'in:constructor' => 'hidden:rconstructor:2',
+     'in:pattern' => 'hidden:rpattern:3');
 
 # # hacks: not sure why...
 # $mml_name_to_item_number{'tarski:rdefiniens:3'} = 'tarski:4';
@@ -492,83 +499,305 @@ foreach my $article (@articles) {
   }
 }
 
+######################################################################
+### Hard-coded dependencies: HIDDEN and TARSKI
+######################################################################
+
+sub print_deps {
+  my $item = shift;
+  my @deps = @{shift ()};
+  foreach my $dep (@deps) {
+    print DEPGRAPH ("$item $dep", "\n");
+  }
+}
+
+sub print_hidden_deps {
+  my $item = shift;
+  my @hidden_deps = @{shift ()};
+  foreach my $hidden_dep (@hidden_deps) {
+    my $fragment = $hidden_items{$hidden_dep};
+    unless (defined $fragment) {
+      die "There is no value for '$hidden_dep'!";
+    }
+    print DEPGRAPH ("$item $hidden_dep", "\n");
+  }
+}
+
 # hard-coded hidden dependencies
+
 # loop!
-# print 'hidden:1 hidden:1';
-print DEPGRAPH ('hidden:2 hidden:1', "\n");
-print DEPGRAPH ('hidden:3 hidden:1', "\n");
-print DEPGRAPH ('hidden:3 hidden:2', "\n");
-print DEPGRAPH ('hidden:4 hidden:1', "\n");
+# print_deps ('hidden:1', ['hidden:1']);
+print_deps ('hidden:2', ['hidden:1']);
+print_deps ('hidden:3', ['hidden:1']);
+print_deps ('hidden:3', ['hidden:2']);
+print_deps ('hidden:4', ['hidden:1']);
 
-# # hard-coded tarski dependencies
+# hard-coded tarski dependencies
 
-print DEPGRAPH ('tarski:1', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:1', ' ', $mml_name_to_item_number{'hidden:rpattern:1'}, "\n");
-print DEPGRAPH ('tarski:1', ' ', $mml_name_to_item_number{'hidden:rpattern:2'}, "\n");
-print DEPGRAPH ('tarski:1', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:1', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:1', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# 1.
+#
+# canceled
 
-print DEPGRAPH ('tarski:2', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:2', ' ', $mml_name_to_item_number{'hidden:rpattern:1'}, "\n");
-print DEPGRAPH ('tarski:2', ' ', $mml_name_to_item_number{'hidden:rpattern:3'}, "\n");
-print DEPGRAPH ('tarski:2', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:2', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:2', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# depends on nothing
 
-print DEPGRAPH ('tarski:3', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:3', ' ', $mml_name_to_item_number{'hidden:rpattern:1'}, "\n");
-print DEPGRAPH ('tarski:3', ' ', $mml_name_to_item_number{'hidden:rpattern:3'}, "\n");
-print DEPGRAPH ('tarski:3', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:3', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:3', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# 2.
+#
+# reserve x for set;
+# reserve X for set;
+# reserve Y for set;
+#
+# theorem
+# (for x holds x in X iff x in Y) implies X = Y;
 
-print DEPGRAPH ('tarski:4', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:4', ' ', $mml_name_to_item_number{'hidden:rpattern:3'}, "\n");
-print DEPGRAPH ('tarski:4', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:4', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:4', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+print_hidden_deps ('tarski:2', ['set:constructor',
+				'set:pattern',
+				'in:constructor',
+				'in:pattern',
+				'=:constructor',
+				'=:pattern']);
 
-print DEPGRAPH ('tarski:5', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:5', ' ', $mml_name_to_item_number{'hidden:rpattern:3'}, "\n");
-print DEPGRAPH ('tarski:5', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:5', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:5', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# 3.
+#
+# reserve x for set;
+# reserve y for set;
+#
+# definition
+#   let y;
+#   func
+#     { y } -> set
+#   means
+#     x in it iff x = y;
+#   correctness;
+# end;
 
-print DEPGRAPH ('tarski:6', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:6', ' ', $mml_name_to_item_number{'hidden:rpattern:3'}, "\n");
-print DEPGRAPH ('tarski:6', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:6', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:6', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+print_hidden_deps ('tarski:3', ['set:constructor',
+				'set:pattern',
+				'in:constructor',
+				'in:pattern',
+				'=:constructor',
+				'=:pattern']);
 
-print DEPGRAPH ('tarski:7', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:7', ' ', $mml_name_to_item_number{'hidden:rpattern:1'}, "\n");
-print DEPGRAPH ('tarski:7', ' ', $mml_name_to_item_number{'hidden:rpattern:3'}, "\n");
-print DEPGRAPH ('tarski:7', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:7', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:7', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# 4.
+#
+# reserve x for set;
+# reserve y for set;
+# reserve z for set;
+#
+# definition
+#   let y, z;
+#   func
+#     { y, z } -> set
+#   means
+#     x in it iff x = y or x = z;
+#   correctness;
+#   commutativity;
+# end;
 
-print DEPGRAPH ('tarski:8', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:8', ' ', $mml_name_to_item_number{'hidden:rpattern:1'}, "\n");
-print DEPGRAPH ('tarski:8', ' ', 'tarski:2', "\n");
-print DEPGRAPH ('tarski:8', ' ', 'tarski:3', "\n");
-print DEPGRAPH ('tarski:8', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+print_hidden_deps ('tarski:4', ['set:constructor',
+				'set:pattern',
+				'in:constructor',
+				'in:pattern',
+				'=:constructor',
+				'=:pattern']);
 
-print DEPGRAPH ('tarski:9', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:9', ' ', $mml_name_to_item_number{'hidden:rpattern:2'}, "\n");
-print DEPGRAPH ('tarski:9', ' ', $mml_name_to_item_number{'hidden:rpattern:2'}, "\n");
-print DEPGRAPH ('tarski:9', ' ', 'tarski:8', "\n");
-print DEPGRAPH ('tarski:9', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:9', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:9', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# 5.
+#
+# canceled
 
-print DEPGRAPH ('tarski:10', ' ', $mml_name_to_item_number{'hidden:mpattern:1'}, "\n");
-print DEPGRAPH ('tarski:10', ' ', $mml_name_to_item_number{'hidden:rpattern:2'}, "\n");
-print DEPGRAPH ('tarski:10', ' ', 'tarski:4', "\n");
-print DEPGRAPH ('tarski:10', ' ', 'tarski:9', "\n");
-print DEPGRAPH ('tarski:10', ' ', $mml_name_to_item_number{'hidden:mconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:10', ' ', $mml_name_to_item_number{'hidden:rconstructor:1'}, "\n");
-print DEPGRAPH ('tarski:10', ' ', $mml_name_to_item_number{'hidden:rconstructor:2'}, "\n");
+# depends on nothing
+
+# 6.
+#
+# canceled
+
+# depends on nothing
+
+# 7.
+#
+# begin
+#
+# reserve x for set;
+# reserve X for set;
+# reserve Y for set;
+#
+# definition
+#   let X,Y;
+#   pred
+#     X c= Y
+#   means
+#     x in X implies x in Y;
+# end;
+
+print_hidden_deps ('tarski:7', ['set:constructor',
+				'set:pattern',
+				'in:constructor',
+				'in:pattern']);
+
+# 8.
+#
+# reserve x for set;
+# reserve X for set;
+# reserve Y for set;
+#
+# definition
+#   let X;
+#   func
+#     union X -> set
+#   means
+#     x in it iff ex Y st x in Y & Y in X;
+#   correctness;
+# end;
+
+print_hidden_deps ('tarski:8', ['set:constructor',
+				'set:pattern',
+				'in:constructor',
+				'in:pattern']);
+
+# 9.
+#
+# canceled;
+
+# depends on nothing
+
+# 10.
+#
+# canceled;
+
+# depends on nothing
+
+# 11.
+#
+# reserve x for set;
+# reserve X for set;
+# reserve Y for set;
+#
+# theorem
+# x in X implies ex Y st Y in X & not ex x st x in X & x in Y;
+
+print_hidden_deps ('tarski:11', ['set:constructor',
+				 'set:pattern',
+				 'in:constructor',
+				 'in:pattern']);
+
+# 12.
+#
+# reserve x for set;
+# reserve y for set;
+# reserve z for set;
+# reserve X for set;
+#
+# scheme Fraenkel { A()-> set, P[set, set] } :
+#  ex X st for x holds x in X iff ex y st y in A() & P[y,x]
+# provided
+#  for x,y,z st P[x,y] & P[x,z] holds y = z
+# proof
+#   thus thesis;
+# end;
+
+print_hidden_deps ('tarski:12', ['set:constructor',
+				 'set:pattern',
+				 'in:constructor',
+				 'in:pattern',
+				 '=:constructor',
+				 '=:pattern']);
+
+# 13.
+#
+# reserve x for set;
+# reserve y for set;
+# 
+# definition
+#   let x,y;
+#   func
+#     [x,y]
+#   means
+#     it = { { x,y }, { x } };
+#   correctness;
+# end;
+
+print_hidden_deps ('tarski:13', ['set:constructor',
+				 'set:pattern',
+				 '=:constructor',
+				 '=:pattern']);
+
+# this fragment depends on other items from TARSKI; it does not depend
+# solely on HIDDEN: its environment is
+#
+# notations CKB3, CKB4;
+# constructors CKB3, CKB4;
+
+print_deps ('tarski:13', ['tarski:3', 'tarski:4']);
+
+# 14.
+#
+# canceled;
+
+# depends on nothing
+
+# 15.
+#
+# reserve X for set;
+# reserve Y for set;
+# reserve Z for set;
+# reserve x for set;
+# reserve y for set;
+# reserve z for set;
+# reserve u for set;
+#
+# definition
+#   let X,Y;
+#   pred
+#     X,Y are_equipotent
+#   means
+#     ex Z st
+#       (for x st x in X ex y st y in Y & [x,y] in Z) &
+#       (for y st y in Y ex x st x in X & [x,y] in Z) &
+#       for x,y,z,u st [x,y] in Z & [z,u] in Z holds x = z iff y = u;
+# end;
+
+print_hidden_deps ('tarski:15', ['set:constructor',
+				 'set:pattern',
+				 'in:constructor',
+				 'in:pattern',
+				 '=:constructor',
+				 '=:pattern']);
+
+# this fragment does not depend solely on HIDDEN; its environment is:
+#
+# notations CKB13;
+# constructors CKB13;
+
+print_deps ('tarski:15', ['tarski:13']);
+
+# 16.
+#
+# reserve M for set;
+# reserve N for set;
+# reserve X for set;
+# reserve Y for set;
+# reserve Z for set;
+#
+# theorem
+#   ex M st N in M &
+#      (for X,Y holds X in M & Y c= X implies Y in M) &
+#      (for X st X in M ex Z st Z in M & for Y st Y c= X holds Y in Z) &
+#      (for X holds X c= M implies X,M are_equipotent or X in M);
+
+print_hidden_deps ('tarski:16', ['set:constructor',
+				 'set:pattern',
+				 'in:constructor',
+				 'in:pattern']);
+
+# also:
+#
+# notations CKB7, CKB15;
+# constructors CKB7, CKB15;
+
+print_deps ('tarski:16', ['tarski:7', 'tarski:15']);
+
+######################################################################
+### Done printing hard-coded HIDDEN and TARSKI dependencies
+######################################################################
 
 close DEPGRAPH
   or die "Couldn't close output filehandle at '$ckb_ckb_depgraph': $!";
