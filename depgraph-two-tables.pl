@@ -241,17 +241,6 @@ my %hidden_items
      'in:constructor' => 'hidden:rconstructor:2',
      'in:pattern' => 'hidden:rpattern:3');
 
-# # hacks: not sure why...
-# $mml_name_to_item_number{'tarski:rdefiniens:3'} = 'tarski:4';
-# $mml_name_to_item_number{'tarski:rdefiniens:6'} = 'tarski:9';
-# $mml_name_to_item_number{'tarski:kdefiniens:5'} = 'tarski:8';
-# $mml_name_to_item_number{'tarski:theorem:9'} = 'tarski:10';
-# $mml_name_to_item_number{'tarski:theorem:7'} = 'tarski:6';
-
-# print ('tarski:kconstructor:4 ==> tarski:kconstructor:2');
-# print ('tarski:rdefiniens:2 ==> tarski:kconstructor:4');
-# print ('tarski:deftheorem:6 ==> tarski:kconstructor:4');
-
 {
   my %num_propositions_for_article = ();
 
