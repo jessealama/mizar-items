@@ -296,24 +296,28 @@ my %mml_name_to_item_number
 
       # find any constructor, pattern, definiens and deftheorem
 
-      my $constructor_line = `grep --max-count=1 '<Constructor ' $item_miz`;
-      chomp $constructor_line;
-      unless ($constructor_line eq '') {
-	my $constructor_nr = nr_attribute ($constructor_line);
-	my $constructor_kind = kind_attribute ($constructor_line);
-	my $constructor_kind_lc = lc $constructor_kind;
-	my $key = "$article_name" . ":" . "$constructor_kind_lc" . "constructor" . ":" . $constructor_nr;
-	$mml_name_to_item_number{$key} = "$article_name:$item_num";
+      my @constructor_lines = `grep '<Constructor ' $item_miz`;
+      foreach my $constructor_line (@constructor_lines) {
+	chomp $constructor_line;
+	unless ($constructor_line eq '') {
+	  my $constructor_nr = nr_attribute ($constructor_line);
+	  my $constructor_kind = kind_attribute ($constructor_line);
+	  my $constructor_kind_lc = lc $constructor_kind;
+	  my $key = "$article_name" . ":" . "$constructor_kind_lc" . "constructor" . ":" . $constructor_nr;
+	  $mml_name_to_item_number{$key} = "$article_name:$item_num";
+	}
       }
 
-      my $pattern_line = `grep --max-count=1 '<Pattern ' $item_miz`;
-      chomp $pattern_line;
-      unless ($pattern_line eq '') {
+      my @pattern_lines = `grep '<Pattern ' $item_miz`;
+      foreach my $pattern_line (@pattern_lines) {
+	chomp $pattern_line;
+	unless ($pattern_line eq '') {
 	  my $pattern_nr = nr_attribute ($pattern_line);
 	  my $pattern_kind = kind_attribute ($pattern_line);
 	  my $pattern_kind_lc = lc $pattern_kind;
 	  my $key = "$article_name" . ":" . "$pattern_kind_lc" . "pattern" . ":" . "$pattern_nr";
 	  $mml_name_to_item_number{$key} = "$article_name:$item_num";
+	}
       }
 
       my $definiens_line = `grep --max-count=1 '<Definiens ' $item_miz`;
