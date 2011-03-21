@@ -982,7 +982,13 @@ end;"))
 	   (:tt "node-A node-B"))
 	  (:p "is an edge in the graph and means: " (:em "node-A generates node-B") ". The syntax of nodes in this graph is ")
 	  (:blockquote
-	   (:tt (str "&lang;article-name&rang;:&lang;fragment-number&rang; &lang;article-name&rang;:&lang;item-kind&rang;:&lang;item-number&rang;")))))
+	   (:tt (str "&lang;article-name&rang;:&lang;fragment-number&rang; &lang;article-name&rang;:&lang;item-kind&rang;:&lang;item-number&rang;"))))
+     (:li ((:a :href "/full-item-depgraph" :title "The complete dependency graph for items"))
+	  (:p "The dependency graph for items.  It is composed from the previous two graphs.")
+	  (:p "The file is a list of space-separated lines.  A line")
+	  (:blockquote
+	   (:tt (str "&lang;article-name&rang;:&lang;item-kind&rang;:&lang;number&rang; &lang;article-name&rang;:&lang;item-kind&rang;:&lang;number&rang;")))
+	  (:p "is an edge in the graph and means: " (:em "the item on the left-hand side immediately depends on the item on the right-hand side") ".")))
     (:h1 "behind the scenes")
     (:p "This site was implemented in " ((:a :href "http://en.wikipedia.org/wiki/Common_Lisp" :title "Common Lisp (wikipedia)") "Common Lisp") " and runs on the " ((:a :href "http://weitz.de/hunchentoot/") "hunchentoot") " web server.  If you're curious, you're welcome to " ((:a :href "https://github.com/jessealama/mizar-items/blob/hunchentoot-site/site.lisp") "browse the source code") " of the site.")))
 
@@ -1329,6 +1335,9 @@ end;"))
 				   "text/ecmascript")
   (register-static-file-dispatcher "/ckb-ckb-depgraph"
 				   (mizar-items-config 'fragment-depdenency-graph)
+				   "text/plain")
+  (register-static-file-dispatcher "/full-item-depgraph"
+				   (mizar-items-config 'full-item-dependency-graph)
 				   "text/plain")
   (register-static-file-dispatcher "/mizar-item-ckb-table"
 				   (mizar-items-config 'item-to-fragment-path)
