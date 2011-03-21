@@ -1316,7 +1316,7 @@ end;"))
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
-(defun initialize-uris ()
+(defun initialize-uris (&optional (articles :all))
   ;; ecmascript, css
   (register-static-file-dispatcher "/mhtml.css"
 				   (mizar-items-config 'mhtml-css-path)
