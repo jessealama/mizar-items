@@ -692,7 +692,7 @@ returning NIL."
   (hunchentoot:start *acceptor*)
   t)
 
-(defun setup-server (&optional reload-graphs)
+(defun setup-server (&optional reload-graphs (articles :all))
   (format t "Loading article item counts...")
   (load-article-num-items reload-graphs)
   (format t "done.~%")
@@ -701,7 +701,7 @@ returning NIL."
     (load-dependency-graph)
     (format t "done.~%"))
   (format t "Initializing URIs...")
-  (initialize-uris)
+  (initialize-uris articles)
   (format t "done~%")
   (setf *message-log-pathname* "/tmp/hunchentoot-messages"
 	*access-log-pathname* "/tmp/hunchentoot-access"
@@ -1344,20 +1344,23 @@ end;"))
   (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
-  (loop
-     for (article . title) in *articles*
-     do
-       (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
-	      (miz-uri (format nil "/~a.miz" article))
-	      (miz-path (format nil "~a/~a.miz" article-dir article))
-	      (prel-dir-uri (format nil "/~a/prel/" article))
-	      (prel-dir-path (format nil "~a/prel/" article-dir))
-	      (text-dir-uri (format nil "/~a/text" article))
-	      (text-dir-path (format nil "~a/text/" article-dir)))
-	 ;; static files for the whole article
-	 (register-static-file-dispatcher miz-uri miz-path "text/plain")
-	 (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
-	 (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path)))
+  (when articles
+    (loop
+       for (article . title) in (if (eq articles :all) 
+				    *articles*
+				    (first-n *articles* articles))
+       do
+	 (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
+		(miz-uri (format nil "/~a.miz" article))
+		(miz-path (format nil "~a/~a.miz" article-dir article))
+		(prel-dir-uri (format nil "/~a/prel/" article))
+		(prel-dir-path (format nil "~a/prel/" article-dir))
+		(text-dir-uri (format nil "/~a/text" article))
+		(text-dir-path (format nil "~a/text/" article-dir)))
+	   ;; static files for the whole article
+	   (register-static-file-dispatcher miz-uri miz-path "text/plain")
+	   (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
+	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))))
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
   (register-regexp-dispatcher +ckb-item-uri-regexp+ #'emit-ckb-item-page)
   (register-regexp-dispatcher +true-item-uri-regexp+ #'emit-mizar-item-page)
