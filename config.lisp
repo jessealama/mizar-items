@@ -18,7 +18,6 @@
 
 (update-mizar-items-config 'sandbox-location 
 			   "/dev/shm/")
-
 (update-mizar-items-config 'exec-in-dir-script-path
 			   (file-in-mizar-items-dir "exec-in-dir.sh"))
 (update-mizar-items-config 'fix-by-and-from-script-path
