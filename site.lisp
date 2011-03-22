@@ -5,9 +5,6 @@
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro with-mizar-favicon-and-title (title &body body)
-  `(with-favicon-and-title "/favicon.ico" ,title ,@body))
-
 (defvar items-dispatch-table nil)
 
 (defun items-request-dispatcher (request)
@@ -55,6 +52,13 @@ returning NIL."
       (:p "I still haven't found what you're looking for."))))
 
 (setq *http-error-handler* #'handle-http-error)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; HTML output
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro with-mizar-favicon-and-title (title &body body)
+  `(with-favicon-and-title "/favicon.ico" ,title ,@body))
 
 (defmacro miz-item-html (title &body body)
   `(with-html
