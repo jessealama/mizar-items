@@ -528,7 +528,7 @@
 	(push (cons lhs rhs) edges)
 	(pushnew rhs (gethash lhs vertex-neighbors) :test #'string=)))
     (with-open-file (vertex-neighbors
-		     *full-item-vertex-neighbors-dependency-graph*
+		     *full-vertex-neighbors-dependency-graph*
 		     :direction :output
 		     :if-exists :error
 		     :if-does-not-exist :create)
@@ -590,7 +590,7 @@
 	      (null *true-item-dependency-graph-backward*))
       (load-full-item-dependency-graphs))
     ;; if the full vertex-neighbors dependency graph doesn't exist, make it
-    (unless (file-exists-p *full-item-vertex-neighbors-dependency-graph*)
+    (unless (file-exists-p *full-vertex-neighbors-dependency-graph*)
       (write-full-vertex-neighbors-dependency-graph))
     (when (null *vertex-neighbors-dependency-graph*)
       (load-vertex-neighbors-dependency-graph))
