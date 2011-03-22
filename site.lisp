@@ -534,7 +534,7 @@
 		     :if-exists :error
 		     :if-does-not-exist :create)
       (flet ((write-vertex-and-neighbors (vertex neighbors)
-	       (format vertex-neighbors "~a ~{~a~^ ~}" vertex neighbors)))
+	       (format vertex-neighbors "~a ~{~a~^ ~}~%" vertex neighbors)))
 	(maphash #'write-vertex-and-neighbors
 		 *true-item-dependency-graph-forward*))))
   t)
