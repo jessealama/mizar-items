@@ -461,6 +461,8 @@
   (mizar-items-config 'item-to-fragment-path))
 (defparameter *full-item-dependency-graph*
   (mizar-items-config 'full-item-dependency-graph))
+(defparameter *full-vertex-neighbors-dependency-graph*
+  (mizar-items-config 'full-item-vertex-neighbors-dependency-graph))
 
 (defvar *dependency-graph* nil)
 (defvar *num-dependency-graph-edges* nil)
@@ -470,6 +472,7 @@
 (defvar *true-item-dependency-graph-backward* nil)
 (defvar *item-to-ckb-table* nil)
 (defvar *ckb-to-items-table* nil)
+(defvar *vertex-neighbors-dependency-graph* nil)
 (defvar *all-ckb-items* nil)
 (defvar *all-true-items* nil)
 (defvar *graphs-loaded* nil)
@@ -498,6 +501,54 @@
 	      (dolist (dep deps)
 		(format item-depgraph "~a ~a~%" item dep))))))
 
+(defun load-full-item-dependency-graphs ()
+  (unless (file-exists-p *full-item-dependency-graph*)
+    (write-full-item-dependency-graph))
+  (let ((lines (lines-of-file *full-item-dependency-graph*))
+	(forward-table (make-hash-table :test #'equal))
+	(backward-table (make-hash-table :test #'equal)))
+    (dolist (line lines)
+      (destructuring-bind (lhs rhs)
+	  (split " " line)
+	(pushnew rhs (gethash lhs forward-table) :test #'string=)
+	(pushnew lhs (gethash rhs backward-table) :test #'string=)))
+    (setf *true-item-dependency-graph-forward* forward-table
+	  *true-item-dependency-graph-backward* backward-table))
+  t)
+
+(defun write-vertex-neighbors-dependency-graph ()
+  (unless (file-exists-p *full-item-dependency-graph*)
+    (write-full-item-dependency-graph))
+  (let ((lines (lines-of-file *full-item-dependency-graph*))
+	(edges nil)
+	(vertex-neighbors (make-hash-table :test #'equal)))
+    (dolist (line lines)
+      (destructuring-bind (lhs rhs)
+	  (split " " line)
+	(push (cons lhs rhs) edges)
+	(pushnew rhs (gethash lhs vertex-neighbors) :test #'string=)))
+    (with-open-file (vertex-neighbors
+		     *full-item-vertex-neighbors-dependency-graph*
+		     :direction :output
+		     :if-exists :error
+		     :if-does-not-exist :create)
+      (flet ((write-vertex-and-neighbors (vertex neighbors)
+	       (format vertex-neighbors "~a ~{~a~^ ~}" vertex neighbors)))
+	(maphash #'write-vertex-and-neighbors
+		 *true-item-dependency-graph-forward*))))
+  t)
+
+(defun load-vertex-neighbors-dependency-graph ()
+  (unless (file-exists-p *full-vertex-neighbors-dependency-graph*)
+    (write-vertex-neighbors-dependency-graph))
+  (let ((lines (lines-of-file *full-vertex-neighbors-dependency-graph*))
+	(vertex-neighbors (make-hash-table :test #'equal)))
+    (dolist (line lines)
+      (destructuring-bind (vertex &rest neighbors)
+	  (split " " line)
+	(setf (gethash vertex vertex-neighbors) neighbors)))
+    (setf *vertex-neighbors-dependency-graph* vertex-neighbors))
+  t)
 
 (defun load-dependency-graph ()
   ;; all possible items 
@@ -535,19 +586,14 @@
     ;; if the full item dependency graph doesn't exist, make it
     (unless (file-exists-p *full-item-dependency-graph*)
       (write-full-item-dependency-graph))
-    ;; now it exists; load it
-    (let ((lines (lines-of-file *full-item-dependency-graph*))
-	  (edges nil)
-	  (forward-table (make-hash-table :test #'equal))
-	  (backward-table (make-hash-table :test #'equal)))
-      (dolist (line lines)
-	(destructuring-bind (lhs rhs)
-	    (split " " line)
-	  (push (cons lhs rhs) edges)
-	  (pushnew rhs (gethash lhs forward-table) :test #'string=)
-	  (pushnew lhs (gethash rhs backward-table) :test #'string=)))
-      (setf *true-item-dependency-graph-forward* forward-table
-	    *true-item-dependency-graph-backward* backward-table))
+    (when (or (null *true-item-dependency-graph-forward*)
+	      (null *true-item-dependency-graph-backward*))
+      (load-full-item-dependency-graphs))
+    ;; if the full vertex-neighbors dependency graph doesn't exist, make it
+    (unless (file-exists-p *full-item-vertex-neighbors-dependency-graph*)
+      (write-full-vertex-neighbors-dependency-graph))
+    (when (null *vertex-neighbors-dependency-graph*)
+      (load-vertex-neighbors-dependency-graph))
     (setf *all-ckb-items* all-ckb-items
 	  *all-true-items* all-true-items))
   (setf *graphs-loaded* t)
@@ -1341,6 +1387,9 @@ end;"))
 				   "text/plain")
   (register-static-file-dispatcher "/mizar-item-ckb-table"
 				   (mizar-items-config 'item-to-fragment-path)
+				   "text/plain")
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph"
+				   (mizar-items-config 'full-vertex-neighbors-dependency-graph)
 				   "text/plain")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)

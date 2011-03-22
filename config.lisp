@@ -41,6 +41,8 @@
 			   (file-in-mizar-items-dir "mizar-item-ckb-table"))
 (update-mizar-items-config 'full-item-dependency-graph
 			   (file-in-mizar-items-dir "full-item-depgraph"))
+(update-mizar-items-config 'full-vertex-neighbors-dependency-graph
+			   (file-in-mizar-items-dir "full-vertex-neighbors-depgraph"))
 (update-mizar-items-config 'favicon-path
 			   (file-in-mizar-items-dir "favicon.ico"))
 
