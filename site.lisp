@@ -57,9 +57,6 @@ returning NIL."
 ;;; HTML output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro with-mizar-favicon-and-title (title &body body)
-  `(with-favicon-and-title "/favicon.ico" ,title ,@body))
-
 (defmacro miz-item-html (title &body body)
   `(with-html
      (:head 
