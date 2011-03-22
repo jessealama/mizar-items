@@ -46,5 +46,4 @@
 			   (file-in-mizar-items-dir "favicon.ico"))
 
 (defun mizar-items-config (key)
-  (ensure-gethash key *mizar-items-config*
-		  (error "There is no value for the key '~a' in the mizar configuration table" key)))
+  (gethash key *mizar-items-config*))
