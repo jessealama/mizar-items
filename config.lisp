@@ -40,8 +40,10 @@
 			   (file-in-mizar-items-dir "mizar-item-ckb-table"))
 (update-mizar-items-config 'full-item-dependency-graph
 			   (file-in-mizar-items-dir "full-item-depgraph"))
-(update-mizar-items-config 'full-vertex-neighbors-dependency-graph
-			   (file-in-mizar-items-dir "full-vertex-neighbors-depgraph"))
+(update-mizar-items-config 'vertex-neighbors-forward-graph-path
+			   (file-in-mizar-items-dir "full-vertex-neighbors-forward-depgraph"))
+(update-mizar-items-config 'vertex-neighbors-backward-graph-path
+			   (file-in-mizar-items-dir "full-vertex-neighbors-backward-depgraph"))
 (update-mizar-items-config 'favicon-path
 			   (file-in-mizar-items-dir "favicon.ico"))
 (update-mizar-items-config 'server-access-log-file
