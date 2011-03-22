@@ -131,7 +131,7 @@ returning NIL."
 (defun uri-for-item (article kind number)
   (format nil "/item/~a/~a/~a" article kind number))
 
-(define-constant +ckb-item-uri-regexp+
+(define-constant +fragment-uri-regexp+
     (exact-regexp (concat "/" "fragment"
 			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"
@@ -176,7 +176,7 @@ returning NIL."
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun ckb-item-< (item-name-1 item-name-2)
+(defun fragment-< (item-name-1 item-name-2)
   (destructuring-bind (item-article-name-1 item-num-as-str-1)
       (split ":" item-name-1)
     (destructuring-bind (item-article-name-2 item-num-as-str-2)
@@ -544,10 +544,10 @@ end;"))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" ckb-for-item)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((ckb-item-path (format nil "~a/ckb~d.html"
+	(let* ((fragment-path (format nil "~a/ckb~d.html"
 				      article-text-dir
 				      ckb-number))
-	       (item-html (file-as-string ckb-item-path)))
+	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
 	    ((:table :width "100%")
 	     ((:tr :valign "top")
@@ -582,24 +582,24 @@ end;"))
 			     (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
 		  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))))
 
-(defun emit-ckb-item-page ()
+(defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
-      (+ckb-item-uri-regexp+ (request-uri*))
+      (+fragment-uri-regexp+ (request-uri*))
     (let* ((item-key (format nil "~a:~a" article-name item-number))
 	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
 	   (items-for-ckb (gethash item-key *ckb-to-items-table*))
 	   (forward-deps (gethash item-key *ckb-dependency-graph-forward*))
 	   (backward-deps (gethash item-key *ckb-dependency-graph-backward*))
-	   (forward-deps-sorted (sort (copy-list forward-deps) #'ckb-item-<))
-	   (backward-deps-sorted (sort (copy-list backward-deps) #'ckb-item-<)))
+	   (forward-deps-sorted (sort (copy-list forward-deps) #'fragment-<))
+	   (backward-deps-sorted (sort (copy-list backward-deps) #'fragment-<)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" item-key)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((ckb-item-path (format nil "~a/ckb~a.html"
+	(let* ((fragment-path (format nil "~a/ckb~a.html"
 				      article-text-dir
 				      ckb-number))
-	       (item-html (file-as-string ckb-item-path)))
+	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
 	    (:p (str item-key) " is fragment #" (str ckb-number) " of article " (str article-name) ".")
 	    (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
@@ -747,7 +747,7 @@ end;"))
 	   (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
 	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))))
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
-  (register-regexp-dispatcher +ckb-item-uri-regexp+ #'emit-ckb-item-page)
+  (register-regexp-dispatcher +fragment-uri-regexp+ #'emit-fragment-page)
   (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
   (register-regexp-dispatcher +path-between-items-uri-regexp+
 			      #'emit-path-between-items)
