@@ -88,34 +88,8 @@ returning NIL."
 	"Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Main page
+;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; set up articles
-
-(defun ckb-item-< (item-name-1 item-name-2)
-  (destructuring-bind (item-article-name-1 item-num-as-str-1)
-      (split ":" item-name-1)
-    (destructuring-bind (item-article-name-2 item-num-as-str-2)
-	(split ":" item-name-2)
-      (or (string< item-article-name-1 item-article-name-2)
-	  (let ((item-num-1 (parse-integer item-num-as-str-1))
-		(item-num-2 (parse-integer item-num-as-str-2)))
-	    (and (string= item-article-name-1 item-article-name-2)
-		 (< item-num-1 item-num-2)))))))
-
-(defun true-item-< (item-name-1 item-name-2)
-  (destructuring-bind (item-article-name-1 item-kind-1 item-num-as-str-1)
-      (split ":" item-name-1)
-    (destructuring-bind (item-article-name-2 item-kind-2 item-num-as-str-2)
-	(split ":" item-name-2)
-      (or (string< item-article-name-1 item-article-name-2)
-	  (when (string= item-article-name-1 item-article-name-2)
-	    (or (string< item-kind-1 item-kind-2)
-		(when (string= item-kind-1 item-kind-2)
-		  (let ((item-num-1 (parse-integer item-num-as-str-1))
-			(item-num-2 (parse-integer item-num-as-str-2)))
-		    (< item-num-1 item-num-2)))))))))
 
 (define-constant +article-name-regexp+ "[a-z_0-9]+" 
   :test #'string=)
@@ -197,6 +171,34 @@ returning NIL."
 			  "/?" ; maybe end with a '/'
 			  ))
   :test #'string=)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Main page
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun ckb-item-< (item-name-1 item-name-2)
+  (destructuring-bind (item-article-name-1 item-num-as-str-1)
+      (split ":" item-name-1)
+    (destructuring-bind (item-article-name-2 item-num-as-str-2)
+	(split ":" item-name-2)
+      (or (string< item-article-name-1 item-article-name-2)
+	  (let ((item-num-1 (parse-integer item-num-as-str-1))
+		(item-num-2 (parse-integer item-num-as-str-2)))
+	    (and (string= item-article-name-1 item-article-name-2)
+		 (< item-num-1 item-num-2)))))))
+
+(defun true-item-< (item-name-1 item-name-2)
+  (destructuring-bind (item-article-name-1 item-kind-1 item-num-as-str-1)
+      (split ":" item-name-1)
+    (destructuring-bind (item-article-name-2 item-kind-2 item-num-as-str-2)
+	(split ":" item-name-2)
+      (or (string< item-article-name-1 item-article-name-2)
+	  (when (string= item-article-name-1 item-article-name-2)
+	    (or (string< item-kind-1 item-kind-2)
+		(when (string= item-kind-1 item-kind-2)
+		  (let ((item-num-1 (parse-integer item-num-as-str-1))
+			(item-num-2 (parse-integer item-num-as-str-2)))
+		    (< item-num-1 item-num-2)))))))))
 
 (defun emit-about-page ()
   (miz-item-html "fine-grained dependencies in the mizar mathematical library"
