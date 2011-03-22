@@ -46,8 +46,7 @@
 ;;; Static data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *itemization-source*
-  "/Users/alama/sources/mizar/mizar-items/itemization")
+(defparameter *itemization-source* "/local/data/alama/non-brutalized-itemizations")
 
 (defparameter *articles*
   '(
@@ -1351,7 +1350,7 @@ end;"))
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
-  (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
+  (register-static-file-dispatcher "/favicon.ico" (mizar-items-config 'favicon-path))
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
   (when articles
