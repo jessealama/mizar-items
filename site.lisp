@@ -462,6 +462,8 @@
   (mizar-items-config 'item-to-fragment-path))
 (defparameter *full-item-dependency-graph*
   (mizar-items-config 'full-item-dependency-graph))
+(defparameter *full-item-vertex-neighbors-dependency-graph*
+  (mizar-items-config 'full-item-vertex-neighbors-dependency-graph))
 
 (defvar *dependency-graph* nil)
 (defvar *num-dependency-graph-edges* nil)
