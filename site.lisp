@@ -32,6 +32,8 @@
 	  " "
 	  ((:a :href "/about") "about")
 	  " "
+	  ((:a :href "/landmarks") "landmarks")
+	  " "
 	  ((:a :href "/random-item") "random-item")
 	  " "
 	  ((:a :href "/random-path") "random-path")))))
@@ -1299,7 +1301,7 @@ end;"))
 	     ((:td :class "article-title") (str title)))))))
     (:h1 "getting started")
     (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
-    (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
+    (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.") 
     (:h1 "learning more about" (:tt "MIZAR"))
     (:p "The " (:tt "MIZAR") " system and its library, the MML, are rather complex.  To learn more about the system, see the excellent overview article")
     (:blockquote
@@ -1315,7 +1317,9 @@ end;"))
       "&rdquo; , by Roman Mutuszewski and Piotr Rudnicki, " (:em "Mechanized Mathematics and its Applications") (:b "4") "(1), (2005), pp. 3&ndash;24"))
     (:p "At the moment, this site is not really interactive: you can't work with " (:tt "MIZAR") " texts here.  If you'd like to get your hands dirty, you might want to visit " ((:a :href "http://mws.cs.ru.nl/mwiki/") "the " (:tt "MIZAR") " wiki") " project at Radboud University Nijmegen.")))
      
-
+(defun emit-landmarks-page ()
+    (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
+    (:p "One might also be interested in the list of " ((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database."))
 
 (defun emit-feedback-page ()
   (miz-item-html "feedback"
@@ -1348,6 +1352,7 @@ end;"))
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   ;; feedback page
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
+  (register-exact-uri-dispatcher "/landmarks") #'emit-landmarks-page
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
   (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
