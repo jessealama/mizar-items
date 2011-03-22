@@ -5,6 +5,10 @@
 ;;; Searching for paths between items
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define-constant +search-depth+ 15
+  :test #'=
+  :documentation "The depth limit for doing searches.")
+
 (defstruct (item-search-problem (:include problem)))
 
 (defmethod successors ((isp item-search-problem) node)

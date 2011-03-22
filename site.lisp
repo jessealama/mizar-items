@@ -5,10 +5,6 @@
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-constant +search-depth+ 15
-  :test #'=
-  :documentation "The depth limit for doing searches.")
-
 (defmacro with-mizar-favicon-and-title (title &body body)
   `(with-favicon-and-title "/favicon.ico" ,title ,@body))
 
