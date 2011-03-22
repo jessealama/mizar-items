@@ -711,6 +711,7 @@ returning NIL."
 	*log-lisp-warnings-p* t
 	*log-lisp-backtraces-p* t
 	*show-lisp-errors-p* t)
+  (setf *attribute-quote-char* #\")
   t)
 
 (defun handle-http-error (error-code)
