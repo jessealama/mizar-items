@@ -1360,6 +1360,9 @@ end;"))
   (register-static-file-dispatcher "/mizar-item-ckb-table"
 				   (mizar-items-config 'item-to-fragment-path)
 				   "text/plain")
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph"
+				   (mizar-items-config 'full-vertex-neighbors-dependency-graph)
+				   "text/plain")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)
   ;; about page
