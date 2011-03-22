@@ -121,7 +121,7 @@ returning NIL."
     (reduce #'regexp-disjoin +item-kinds-string+)
   :test #'string=)
 
-(define-constant +true-item-uri-regexp+
+(define-constant +item-uri-regexp+
     (exact-regexp (concat "/" "item"
 			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
@@ -146,7 +146,7 @@ returning NIL."
 (defun uri-for-article (article)
   (format nil "/article/~a" article))
 
-(define-constant +path-between-true-items-uri-regexp+
+(define-constant +path-between-items-uri-regexp+
     (exact-regexp (concat "/" "path"
 			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
@@ -158,7 +158,7 @@ returning NIL."
 			  ))
   :test #'string=)
 
-(define-constant +path-between-true-items-via-item-uri-regexp+
+(define-constant +path-between-items-via-item-uri-regexp+
     (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"
@@ -187,7 +187,7 @@ returning NIL."
 	    (and (string= item-article-name-1 item-article-name-2)
 		 (< item-num-1 item-num-2)))))))
 
-(defun true-item-< (item-name-1 item-name-2)
+(defun item-< (item-name-1 item-name-2)
   (destructuring-bind (item-article-name-1 item-kind-1 item-num-as-str-1)
       (split ":" item-name-1)
     (destructuring-bind (item-article-name-2 item-kind-2 item-num-as-str-2)
@@ -381,12 +381,12 @@ end;"))
 
 (defun emit-path-between-items ()
   (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
-      (+path-between-true-items-uri-regexp+ (request-uri*))
+      (+path-between-items-uri-regexp+ (request-uri*))
     ;; check that these items exist
     (let ((source-item (format nil "~a:~a:~a" article-1 kind-1 num-1))
 	  (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
-      (if (gethash source-item *all-true-items*)
-	  (if (gethash destination-item *all-true-items*)
+      (if (gethash source-item *all-items*)
+	  (if (gethash destination-item *all-items*)
 	      (let ((problem (make-item-search-problem 
 			       :initial-state source-item
 			       :goal destination-item))
@@ -429,13 +429,13 @@ end;"))
   (register-groups-bind (source-article source-kind source-num 
 					via-article via-kind via-num
 					destination-article destination-kind destination-num)
-      (+path-between-true-items-via-item-uri-regexp+ (request-uri*))
+      (+path-between-items-via-item-uri-regexp+ (request-uri*))
     (let ((source (format nil "~a:~a:~a" source-article source-kind source-num))
 	  (via (format nil "~a:~a:~a" via-article via-kind via-num))
 	  (destination (format nil "~a:~a:~a" destination-article destination-kind destination-num)))	
-      (if (gethash source *all-true-items*)
-	  (if (gethash via *all-true-items*)
-	      (if (gethash destination *all-true-items*)
+      (if (gethash source *all-items*)
+	  (if (gethash via *all-items*)
+	      (if (gethash destination *all-items*)
 		  (let ((get-params (get-parameters*)))
 		    (if (null get-params) ; first time here, eh?
 			(miz-item-html (fmt "from ~a to ~a via ~a" source destination via)
@@ -484,13 +484,13 @@ end;"))
 		  (str item-html)))))))))))
 
 (defun emit-random-item ()
-  (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
+  (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
       (redirect (uri-for-item article kind number)))))
 
 (defun emit-random-path ()
-  (let* ((keys (hash-table-keys *all-true-items*))
+  (let* ((keys (hash-table-keys *all-items*))
 	 (random-vertex-1 (random-elt keys))
 	 (random-vertex-2 (random-elt keys)))
     (redirect (link-for-two-items random-vertex-1 random-vertex-2))))
@@ -530,17 +530,17 @@ end;"))
 
 (defun emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number)
-      (+true-item-uri-regexp+ (request-uri*))
+      (+item-uri-regexp+ (request-uri*))
     (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
 	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
 	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
-	   (forward-deps (gethash item-key *true-item-dependency-graph-forward*))
-	   (backward-deps (gethash item-key *true-item-dependency-graph-backward*))
+	   (forward-deps (gethash item-key *item-dependency-graph-forward*))
+	   (backward-deps (gethash item-key *item-dependency-graph-backward*))
 	   (forward-deps-sorted (sort (copy-list forward-deps) 
-				      #'true-item-<))
+				      #'item-<))
 	   (backward-deps-sorted (sort (copy-list backward-deps)
-				       #'true-item-<)))
+				       #'item-<)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" ckb-for-item)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
@@ -651,7 +651,7 @@ end;"))
     (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML.")
     (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
-    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-true-items*))) " nodes (items) and " (:b (str (length *dependency-graph*))) " edges.")
+    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (length *dependency-graph*))) " edges.")
     (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
@@ -748,9 +748,9 @@ end;"))
 	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))))
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
   (register-regexp-dispatcher +ckb-item-uri-regexp+ #'emit-ckb-item-page)
-  (register-regexp-dispatcher +true-item-uri-regexp+ #'emit-mizar-item-page)
-  (register-regexp-dispatcher +path-between-true-items-uri-regexp+
+  (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
+  (register-regexp-dispatcher +path-between-items-uri-regexp+
 			      #'emit-path-between-items)
-  (register-regexp-dispatcher +path-between-true-items-via-item-uri-regexp+
+  (register-regexp-dispatcher +path-between-items-via-item-uri-regexp+
 			      #'emit-path-between-items-via-item)
   t)
