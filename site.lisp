@@ -55,7 +55,7 @@
 (defparameter *full-item-dependency-graph*
   (mizar-items-config 'full-item-dependency-graph))
 (defparameter *full-vertex-neighbors-dependency-graph*
-  (mizar-items-config 'full-item-vertex-neighbors-dependency-graph))
+  (mizar-items-config 'full-vertex-neighbors-dependency-graph))
 
 (defvar *dependency-graph* nil)
 (defvar *num-dependency-graph-edges* nil)
