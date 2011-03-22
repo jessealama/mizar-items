@@ -501,6 +501,31 @@
 	      (dolist (dep deps)
 		(format item-depgraph "~a ~a~%" item dep))))))
 
+(defun write-full-vertex-neighbors-dependency-graph ()
+  (unless (file-exists-p *full-item-dependency-graph*)
+    (write-full-item-dependency-graph))
+  (let ((lines (lines-of-file *full-item-dependency-graph*))
+	(edges nil)
+	(forward-table (make-hash-table :test #'equal))
+	(backward-table (make-hash-table :test #'equal)))
+    (dolist (line lines)
+      (destructuring-bind (lhs rhs)
+	  (split " " line)
+	(push (cons lhs rhs) edges)
+	(pushnew rhs (gethash lhs forward-table) :test #'string=)
+	(pushnew lhs (gethash rhs backward-table) :test #'string=)))
+    (setf *true-item-dependency-graph-forward* forward-table
+	  *true-item-dependency-graph-backward* backward-table)
+    (with-open-file (vertex-neighbors
+		     *full-item-vertex-neighbors-dependency-graph*
+		     :direction :output
+		     :if-exists :error
+		     :if-does-not-exist :create)
+      (flet ((write-vertex-and-neighbors (vertex neighbors)
+	       (format vertex-neighbors "~a ~{~a~^ ~}" vertex neighbors)))
+	(maphash #'write-vertex-and-neighbors
+		 *true-item-dependency-graph-forward*))))
+  t)
 
 (defun load-dependency-graph ()
   ;; all possible items 
@@ -539,18 +564,8 @@
     (unless (file-exists-p *full-item-dependency-graph*)
       (write-full-item-dependency-graph))
     ;; now it exists; load it
-    (let ((lines (lines-of-file *full-item-dependency-graph*))
-	  (edges nil)
-	  (forward-table (make-hash-table :test #'equal))
-	  (backward-table (make-hash-table :test #'equal)))
-      (dolist (line lines)
-	(destructuring-bind (lhs rhs)
-	    (split " " line)
-	  (push (cons lhs rhs) edges)
-	  (pushnew rhs (gethash lhs forward-table) :test #'string=)
-	  (pushnew lhs (gethash rhs backward-table) :test #'string=)))
-      (setf *true-item-dependency-graph-forward* forward-table
-	    *true-item-dependency-graph-backward* backward-table))
+    (unless (file-exists-p *full-item-vertex-neighbors-dependency-graph*)
+      (write-full-vertex-neighbors-dependency-graph))
     (setf *all-ckb-items* all-ckb-items
 	  *all-true-items* all-true-items))
   (setf *graphs-loaded* t)
