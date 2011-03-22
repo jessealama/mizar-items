@@ -14,7 +14,7 @@
 (defmethod successors ((isp item-search-problem) node)
   (mapcar #'(lambda (item)
 	      (cons item item))
-	  (gethash (node-state node) *true-item-dependency-graph-forward*)))
+	  (gethash (node-state node) *item-dependency-graph-forward*)))
 
 (defun all-paths (source destination)
   (if (string= source destination)
@@ -24,7 +24,7 @@
 	      (reduce #'append 
 		      (mapcar #'(lambda (successor)
 				  (all-paths successor destination))
-			      (gethash source *true-item-dependency-graph-forward*))))))
+			      (gethash source *item-dependency-graph-forward*))))))
 
 (defun all-paths-from-via (source destination via)
   (let ((paths-from-source-to-via (all-paths source via)))

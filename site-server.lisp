@@ -29,14 +29,12 @@ returning NIL."
   (load-article-num-items reload-graphs)
   (format t "done.~%")
   (when (or reload-graphs (null *graphs-loaded*))
-    (format t "Loading dependency graph data...")
-    (load-dependency-graph)
-    (format t "done.~%"))
+    (load-dependency-graphs reload-graphs))
   (format t "Initializing URIs...")
   (initialize-uris articles)
   (format t "done~%")
   (setf *message-log-pathname* (mizar-items-config 'server-messages-log-file)
-	*access-log-pathname* (miar-items-config 'server-access-log-file)
+	*access-log-pathname* (mizar-items-config 'server-access-log-file)
 	*handle-http-errors-p* t
 	*http-error-handler* #'handle-http-error
 	*log-lisp-errors-p* t
