@@ -184,7 +184,7 @@
       (load-full-item-dependency-graphs))
     ;; if the full vertex-neighbors dependency graph doesn't exist, make it
     (unless (file-exists-p *full-vertex-neighbors-dependency-graph*)
-      (write-full-vertex-neighbors-dependency-graph))
+      (write-vertex-neighbors-dependency-graph))
     (when (null *vertex-neighbors-dependency-graph*)
       (load-vertex-neighbors-dependency-graph))
     (setf *all-ckb-items* all-ckb-items
