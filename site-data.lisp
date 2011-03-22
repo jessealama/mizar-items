@@ -7,10 +7,7 @@
 
 (defparameter *itemization-source* "/local/data/alama/non-brutalized-itemizations")
 
-(defparameter *item-to-ckb-file*
-  (mizar-items-config 'item-to-fragment-path))
-
-(defvar *dependency-graph* nil)
+(defvar *item-to-item-dependency-graph* nil)
 (defvar *num-dependency-graph-edges* nil)
 (defvar *ckb-dependency-graph-forward* nil)
 (defvar *ckb-dependency-graph-backward* nil)
@@ -18,7 +15,6 @@
 (defvar *item-dependency-graph-backward* nil)
 (defvar *item-to-ckb-table* nil)
 (defvar *ckb-to-items-table* nil)
-(defvar *vertex-neighbors-dependency-graph* nil)
 (defvar *all-ckb-items* nil)
 (defvar *all-items* nil)
 (defvar *graphs-loaded* nil)
@@ -71,30 +67,54 @@
 	    (error "The vertex-neighbors file (backwards) doesn't exist at the expected location '~a'" backward-file))
 	(error "The vertex-neighbors file (forwards) doesn't exist at the expected location '~a'" forward-file))))
 
+(defun load-item-to-item-depgraph ()
+  (let (edges)
+    (flet ((register-deps (item deps)
+	     (dolist (dep deps)
+	       (push (cons item dep) edges))))
+      (maphash #'(lambda (item ckb)
+		   (let* ((dependent-ckbs (gethash ckb *ckb-dependency-graph-forward*))
+			  (dependent-items (reduce #'append (mapcar #'(lambda (dep-ckb)
+									(gethash dep-ckb *ckb-to-items-table*))
+								    dependent-ckbs))))
+		     (register-deps item dependent-items)))
+	       *item-to-ckb-table*))
+    edges))
+
+(defun dependency-tables-from-edge-list ()
+  (format t "Computing the vertex-neighbors dependency graph...")
+  (let ((forward-table (make-hash-table :test #'equal))
+	(backward-table (make-hash-table :test #'equal)))
+    (loop
+       for (lhs . rhs) in *item-to-item-dependency-graph*
+       do
+	 (pushnew rhs (gethash lhs forward-table) :test #'string=)
+	 (pushnew lhs (gethash rhs backward-table) :test #'string=)
+       finally
+	 (format t "done~%")
+	 (return (values forward-table backward-table)))))
+
 (defun write-vertex-neighbors-dependency-graphs ()
-  (if (file-exists-p (mizar-items-config 'full-item-dependency-graph))
-      (progn
-	(format t "Writing the vertex-neighbors dependency graphs...")
-	(with-open-file (vertex-neighbors
-			 (mizar-items-config 'vertex-neighbors-forward-graph-path)
-			 :direction :output
-			 :if-exists :error
-			 :if-does-not-exist :create)
-	  (flet ((write-vertex-and-neighbors (vertex neighbors)
+  (format t "Writing the vertex-neighbors dependency graphs...")
+  (with-open-file (vertex-neighbors
+		   (mizar-items-config 'vertex-neighbors-forward-graph-path)
+		   :direction :output
+		   :if-exists :supersede
+		   :if-does-not-exist :create)
+    (flet ((write-vertex-and-neighbors (vertex neighbors)
 		   (format vertex-neighbors "~a ~{~a~^ ~}~%" vertex neighbors)))
 	    (maphash #'write-vertex-and-neighbors
 		     *item-dependency-graph-forward*)))
 	(with-open-file (vertex-neighbors
 			 (mizar-items-config 'vertex-neighbors-backward-graph-path)
 			 :direction :output
-			 :if-exists :error
+			 :if-exists :supersede
 			 :if-does-not-exist :create)
 	  (flet ((write-vertex-and-neighbors (vertex neighbors)
 		   (format vertex-neighbors "~a ~{~a~^ ~}~%" vertex neighbors)))
 	    (maphash #'write-vertex-and-neighbors
 		     *item-dependency-graph-backward*)))
 	(format t "done~%"))
-      (error "We cannot produce the vertex-neighbors dependency graph, because the item-to-item dependency graph does not exist at the expected location '~a'" (mizar-items-config 'full-item-dependency-graph))))
 
 (defun load-vertex-neighbors-dependency-graphs ()
   (let ((backward-path (mizar-items-config 'vertex-neighbors-backward-graph-path))
@@ -138,8 +158,8 @@
       (error "The fragment dependency graph doesn't exist at the expected location, '~a'" (mizar-items-config 'fragment-depdenency-graph))))
 
 (defun load-item-to-fragment-table ()
-  (if (file-exists-p *item-to-ckb-file*)
-      (let ((lines (lines-of-file *item-to-ckb-file*))
+  (if (file-exists-p (mizar-items-config 'item-to-fragment-path))
+      (let ((lines (lines-of-file (mizar-items-config 'item-to-fragment-path)))
 	    (item-to-ckb-table (make-hash-table :test #'equal))
 	    (ckb-to-items-table (make-hash-table :test #'equal)))
 	(format t "Loading item-to-fragment table...")
@@ -171,19 +191,37 @@
     (multiple-value-setq (*item-to-ckb-table* *ckb-to-items-table*)
       (load-item-to-fragment-table)))
 
+  ;; the fragment dependencies and the item-to-fragment table are the
+  ;; two pieces of information that comes from outside lisp.  The rest
+  ;; of the data is computed form these.  But always check first to
+  ;; see whether we've already done the computation.
+
   ;; if the item dependency graph doesn't exist, make it and write it
   ;; to disk, no matter the value of FORCE
   (let ((item-depgraph-path (mizar-items-config 'full-item-dependency-graph)))
-    (unless (file-exists-p item-depgraph-path)
-      (write-full-item-dependency-graph)))
+    (if (file-exists-p item-depgraph-path)
+	(format t "The item-to-item dependency graph already exists; not recomputing it.~%")
+	(write-full-item-dependency-graph)))
+
+  ;; now load the full item dependency graph (which is just a list of
+  ;; edges)
+  (when (or force (null *item-to-item-dependency-graph*)) 
+    (setf *item-to-item-dependency-graph* (load-item-to-item-depgraph)))
+
+  (when (or (null *item-dependency-graph-forward*)
+	    (null *item-dependency-graph-backward*))
+    (multiple-value-setq (*item-dependency-graph-forward*
+			  *item-dependency-graph-backward*)
+      (dependency-tables-from-edge-list)))
 
   ;; if the full vertex-neighbors dependency graph doesn't exist, make
   ;; it and write it to disk, no matter the value of FORCE
   (let ((forward-path (mizar-items-config 'vertex-neighbors-forward-graph-path))
 	(backward-path (mizar-items-config 'vertex-neighbors-backward-graph-path)))
-    (when (or (not (file-exists-p forward-path))
-	      (not (file-exists-p backward-path)))
-      (write-vertex-neighbors-dependency-graphs)))
+    (if (or (not (file-exists-p forward-path))
+	    (not (file-exists-p backward-path)))
+	(write-vertex-neighbors-dependency-graphs)
+	(format t "The item-to-items dependency graphs already exist; not recomputing them.~%")))
 
   (when (or force
 	    (null *item-dependency-graph-forward*)
