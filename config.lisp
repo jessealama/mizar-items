@@ -44,6 +44,10 @@
 			   (file-in-mizar-items-dir "full-vertex-neighbors-depgraph"))
 (update-mizar-items-config 'favicon-path
 			   (file-in-mizar-items-dir "favicon.ico"))
+(update-mizar-items-config 'server-access-log-file
+			   "/tmp/mizar-items-access")
+(update-mizar-items-config 'server-messages-log-file
+			   "/tmp/mizar-items-messages")
 
 (defun mizar-items-config (key)
   (gethash key *mizar-items-config*))
