@@ -26,4 +26,5 @@
 	       (:file "queue")
 	       (:file "search")
 	       (:file "mml")
+	       (:file "site-data")
 	       (:file "site")))
