@@ -10,7 +10,6 @@
 							*mizar-items-root*
 							"/"
 							"xsl4mizar"))
-
 (defun file-in-xsl4mizar-dir (filename)
   (concatenate 'string *mizar-items-xsl4mizar-root* "/" filename))
 
