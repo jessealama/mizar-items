@@ -2,15 +2,8 @@
 (in-package :mizar)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Server and application setup
+;;; HTML output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define-constant +search-depth+ 15
-  :test #'=
-  :documentation "The depth limit for doing searches.")
-
-(defmacro with-mizar-favicon-and-title (title &body body)
-  `(with-favicon-and-title "/favicon.ico" ,title ,@body))
 
 (defmacro miz-item-html (title &body body)
   `(with-html
@@ -45,709 +38,8 @@
 	"Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Static data
+;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defparameter *itemization-source*
-  "/Users/alama/sources/mizar/mizar-items/itemization")
-
-(defparameter *articles*
-  '(
-    ("hidden" . "Built-in Concepts")
-    ("tarski" . "Tarski-Grothendieck Set Theory")
-    ("xboole_0" . "Boolean Properties of Sets - Definitions")
-    ("boole" . "Boolean Properties of Sets - Requirements")
-    ("xboole_1" . "Boolean Properties of Sets - Theorems")
-    ("enumset1" . "Enumerated Sets")
-    ("zfmisc_1" . "Some Basic Properties of Sets")
-    ("subset_1" . "Properties of Subsets")
-    ("subset" . "Basic Properties of Subsets - Requirements")
-    ("setfam_1" . "Families of Sets")
-    ("relat_1" . "Relations and Their Basic Properties")
-    ("funct_1" . "Functions and Their Basic Properties")
-    ("grfunc_1" . "Graphs of Functions")
-    ("relat_2" . "Properties of Binary Relations")
-    ("ordinal1" . "The Ordinal Numbers. Transfinite Induction and Defining by Transfinite Induction")
-    ("wellord1" . "The Well Ordering Relations")
-    ("relset_1" . "Relations Defined on Sets")
-    ("partfun1" . "Partial Functions")
-    ("mcart_1" . "Tuples, Projections and Cartesian Products")
-    ("wellord2" . "Zermelo Theorem and Axiom of Choice. The correspondence of well ordering relations and ordinal numbers")
-    ("funct_2" . "Functions from a Set to a Set")
-    ("binop_1" . "Binary Operations")
-    ("domain_1" . "Domains and Their Cartesian Products")
-    ("funct_3" . "Basic Functions and Operations on Functions")
-    ("funcop_1" . "Binary Operations Applied to Functions")
-    ("funct_4" . "The Modification of a Function by a Function and the Iteration of the Composition of a Function")
-    ("numerals" . "Numerals - Requirements")
-    ("ordinal2" . "Sequences of Ordinal Numbers. Beginnings of Ordinal Arithmetics")
-    ("ordinal3" . "Ordinal Arithmetics")
-    ("wellset1" . "Zermelo's Theorem")
-    ("multop_1" . "Three-Argument Operations and Four-Argument Operations")
-    ("mcart_2" . "N-Tuples and Cartesian Products for n=5")
-    ("schems_1" . "Schemes")
-    ("sysrel" . "Some Properties of Binary Relations")
-    ("gate_1" . "Logic Gates and Logical Equivalence of Adders")
-    ("gate_2" . "Correctness of Binary Counter Circuits")
-    ("gate_3" . "Correctness of Johnson Counter Circuits")
-    ("gate_4" . "Correctness of a Cyclic Redundancy Check Code Generator")
-    ("gate_5" . "Correctness of the High Speed Array Multiplier Circuits")
-    ("finset_1" . "Finite Sets")
-    ("finsub_1" . "Boolean Domains")
-    ("orders_1" . "Partially Ordered Sets")
-    ("setwiseo" . "Semilattice Operations on Finite Subsets")
-    ("fraenkel" . "Function Domains and Fr&aelig;nkel Operator")
-    ("card_1" . "Cardinal Numbers")
-    ("funct_5" . "Curried and Uncurried Functions")
-    ("partfun2" . "Partial Functions from a Domain to a Domain")
-    ("classes1" . "Tarski's Classes and Ranks")
-    ("arytm_3" . "Arithmetic of Non Negative Rational Numbers")
-    ("arytm_2" . "Non negative real numbers. Part I")
-    ("arytm_1" . "Non negative real numbers. Part II")
-    ("numbers" . "Subsets of Complex Numbers")
-    ("arytm_0" . "Introduction to Arithmetics")
-    ("xcmplx_0" . "Complex Numbers - Basic Definitions")
-    ("arithm" . "Field Properties of Complex Numbers - Requirements")
-    ("xxreal_0" . "Introduction to Arithmetic of Extended Real Numbers")
-    ("xreal_0" . "Introduction to Arithmetic of Real Numbers")
-    ("real" . "Basic Properties of Real Numbers - Requirements")
-    ("xcmplx_1" . "Complex Numbers - Basic Theorems")
-    ("xreal_1" . "Real Numbers - Basic Theorems")
-    ("axioms" . "Strong arithmetic of real numbers")
-    ("real_1" . "Basic Properties of Real Numbers")
-    ("square_1" . "Some Properties of Real Numbers. Operations: min, max, square, and square root")
-    ("nat_1" . "The Fundamental Properties of Natural Numbers")
-    ("int_1" . "Integers")
-    ("rat_1" . "Basic Properties of Rational Numbers")
-    ("membered" . "On the Sets Inhabited by Numbers")
-    ("valued_0" . "Number-Valued Functions")
-    ("complex1" . "The Complex Numbers")
-    ("absvalue" . "Some Properties of Functions Modul and Signum")
-    ("int_2" . "The Divisibility of Integers and Integer Relatively Primes")
-    ("nat_d" . "Divisibility of Natural Numbers")
-    ("binop_2" . "Binary Operations on Numbers")
-    ("xxreal_1" . "Basic Properties of Extended Real Numbers")
-    ("card_2" . "Cardinal Arithmetics")
-    ("xxreal_2" . "Suprema and Infima of Intervals of Extended Real Numbers")
-    ("xxreal_3" . "Basic Operations on Extended Real Numbers")
-    ("member_1" . "Collective Operations on Number-Membered Sets")
-    ("supinf_1" . "Infimum and Supremum of the Set of Real Numbers. Measure Theory")
-    ("quin_1" . "Quadratic Inequalities")
-    ("card_3" . "K&ouml;nig's Theorem")
-    ("realset1" . "Group and Field Definitions")
-    ("classes2" . "Universal Classes")
-    ("ordinal4" . "Increasing and Continuous Ordinal Sequences")
-    ("finseq_1" . "Segments of Natural Numbers and Finite Sequences")
-    ("recdef_1" . "Recursive Definitions")
-    ("valued_1" . "Properties of Number-Valued Functions")
-    ("finseq_2" . "Finite Sequences and Tuples of Elements of a Non-empty Sets")
-    ("seq_1" . "Real Sequences and Basic Operations on Them")
-    ("xboolean" . "On the Arithmetic of Boolean Values")
-    ("eqrel_1" . "Equivalence Relations and Classes of Abstraction")
-    ("seq_2" . "Convergent Sequences and the Limit of Sequences")
-    ("finseqop" . "Binary Operations Applied to Finite Sequences")
-    ("finseq_3" . "Non-contiguous Substrings and One-to-one Finite Sequences")
-    ("margrel1" . "Many-Argument Relations")
-    ("toler_1" . "Relations of Tolerance")
-    ("trees_1" . "Introduction to Trees")
-    ("finseq_4" . "Pigeon Hole Principle")
-    ("finsop_1" . "Binary Operations on Finite Sequences")
-    ("setwop_2" . "Semigroup operations on finite subsets")
-    ("rfunct_1" . "Partial Functions from a Domain to the Set of Real Numbers")
-    ("rvsum_1" . "The Sum and Product of Finite Sequences of Real Numbers")
-    ("pboole" . "Manysorted Sets")
-    ("newton" . "Factorial and Newton coefficients")
-    ("card_4" . "Countable Sets and Hessenberg's Theorem")
-    ("card_5" . "On Powers of Cardinals")
-    ("trees_2" . "K&ouml;nig's Lemma")
-    ("valued_2" . "Arithmetic Operations on Functions from Sets into Functional Sets")
-    ("seqm_3" . "Monotone Real Sequences. Subsequences")
-    ("rfinseq" . "Functions and Finite Sequences of Real Numbers")
-    ("seq_4" . "Convergent Real Sequences. Upper and Lower Bound of Sets of Real Numbers")
-    ("rcomp_1" . "Topological Properties of Subsets in Real Numbers")
-    ("comseq_1" . "Complex Sequences")
-    ("comseq_2" . "Conjugate Sequences, Bounded Complex Sequences and Convergent Complex Sequences")
-    ("rfunct_2" . "Properties of Real Functions")
-    ("cfunct_1" . "Property of Complex Functions")
-    ("fcont_1" . "Real Function Continuity")
-    ("fcont_2" . "Real Function Uniform Continuity")
-    ("fdiff_1" . "Real Function Differentiability")
-    ("rolle" . "Average Value Theorems for Real Functions of One Variable")
-    ("prepower" . "Integer and Rational Exponents")
-    ("finseq_5" . "Some Properties of Restrictions of Finite Sequences")
-    ("rewrite1" . "Reduction Relations")
-    ("funct_7" . "Miscellaneous Facts about Functions")
-    ("scheme1" . "Schemes of Existence of some Types of Functions")
-    ("abian" . "Abian's Fixed Point Theorem")
-    ("power" . "Real Exponents and Logarithms")
-    ("polyeq_1" . "Solving Roots of Polynomial Equations of Degree 2 and 3 with Real Coefficients")
-    ("series_1" . "Series")
-    ("comseq_3" . "Convergence and the Limit of Complex Sequences. Series")
-    ("cfcont_1" . "Property of Complex Sequence and Continuity of Complex Function")
-    ("cfdiff_1" . "Complex Function Differentiability")
-    ("rpr_1" . "Introduction to Probability")
-    ("funct_6" . "Cartesian Product of Functions")
-    ("supinf_2" . "Series of Positive Real Numbers. Measure Theory")
-    ("trees_a" . "Replacement of Subtrees in a Tree")
-    ("pre_ff" . "Two Programs for <b>SCM</b>. Part I - Preliminaries")
-    ("trees_3" . "Sets and Functions of Trees and Joining Operations of Trees")
-    ("partit1" . "A theory of partitions, I")
-    ("trees_4" . "Joining of Decorated Trees")
-    ("card_fil" . "Basic facts about inaccessible and measurable cardinals")
-    ("binarith" . "Binary Arithmetics. Addition")
-    ("pre_circ" . "Preliminaries to Circuits, I")
-    ("finseq_6" . "On the Decomposition of Finite Sequences")
-    ("mboolean" . "Definitions and Basic Properties of Boolean &amp; Union of Many Sorted Sets")
-    ("wsierp_1" . "The Chinese Remainder Theorem")
-    ("glib_000" . "Alternative Graph Structures")
-    ("pzfmisc1" . "Some Basic Properties of Many Sorted Sets")
-    ("genealg1" . "Basic Properties of Genetic Algorithm")
-    ("binari_2" . "Binary Arithmetics. Addition and Subtraction of Integers")
-    ("trees_9" . "Subtrees")
-    ("mssubfam" . "Certain Facts about Families of Subsets of Many Sorted Sets")
-    ("relset_2" . "Properties of First and Second Order Cutting of Binary Relations")
-    ("recdef_2" . "Recursive Definitions. Part II")
-    ("prob_1" . "&sigma;-Fields and Probability")
-    ("prob_2" . "Probability. Independence of Events and Conditional Probability")
-    ("limfunc1" . "The Limit of a Real Function at Infinity. Halflines. Real Sequence Divergent to Infinity")
-    ("limfunc2" . "One-Side Limits of a Real Function at a Point")
-    ("seqfunc" . "Functional Sequence from a Domain to a Domain")
-    ("limfunc3" . "The Limit of a Real Function at a Point")
-    ("fcont_3" . "Monotonic and Continuous Real Function")
-    ("limfunc4" . "The Limit of a Composition of Real Functions")
-    ("l_hospit" . "The de l'Hospital Theorem")
-    ("fdiff_2" . "Real Function Differentiability - Part II")
-    ("fdiff_3" . "Real Function One-Side Differantiability")
-    ("measure1" . "The &sigma;-additive Measure Theory")
-    ("measure2" . "Several Properties of the &sigma;-additive Measure. Discrete categories")
-    ("measure3" . "Completeness of the &sigma;-Additive Measure. Measure Theory")
-    ("measure4" . "Properties of Caratheodor's Measure")
-    ("rfunct_3" . "Properties of Partial Functions from a Domain to the Set of Real Numbers")
-    ("measure5" . "Properties of the Intervals of Real Numbers")
-    ("rearran1" . "Introduction to Theory of Rearrangment")
-    ("measure6" . "Some Properties of the Intervals")
-    ("extreal1" . "Basic Properties of Extended Real Numbers")
-    ("measure7" . "The One-Dimensional Lebesgue Measure As an Example of a Formalization in the Mizar Language of the Classical Definition of a Mathematical Object")
-    ("rfunct_4" . "Introduction to Several Concepts of Convexity and Semicontinuity for Function from REAL to REAL")
-    ("mesfunc1" . "Definitions and Basic Properties of Measurable Functions")
-    ("extreal2" . "Some Properties of Extended Real Numbers Operations: absolute value, min and max")
-    ("sin_cos" . "Trigonometric Functions and Existence of Circle Ratio")
-    ("mesfunc2" . "Measurability of Extended Real Valued Functions")
-    ("sin_cos2" . "Properties of Trigonometric Function")
-    ("sin_cos3" . "Trigonometric Functions on Complex Space")
-    ("sin_cos4" . "Formulas And Identities of Trigonometric Functions")
-    ("sin_cos5" . "Formulas And Identities of Trigonometric Functions")
-    ("asympt_0" . "Asymptotic notation. Part I: Theory")
-    ("comptrig" . "Trigonometric Form of Complex Numbers")
-    ("asympt_0" . "Asymptotic notation. Part I: Theory")
-    ("comptrig" . "Trigonometric Form of Complex Numbers")
-    ("complex2" . "Inner Products and Angles of Complex Numbers")
-    ("polyeq_2" . "Solving Roots of Polynomial Equation of Degree 4 with Real Coefficients")
-    ("polyeq_3" . "Solving Complex Roots of Polynomial Equation of Degree 2 and 3 with Complex Coefficients")
-    ("polyeq_4" . "Solving the Roots of the Special Polynomial Equation with Real Coefficients")
-    ("polyeq_5" . "Solution of Cubic and Quartic Equations")
-    ("sin_cos6" . "Inverse Trigonometric Functions Arcsin and Arccos")
-    ("euler_1" . "Euler's Function")
-    ("euler_2" . "Euler's Theorem and Small Fermat's Theorem")
-    ("asympt_1" . "Asymptotic notation. Part II: Examples and Problems")
-    ("series_3" . "On the Partial Product of Series and Related Basic Inequalities")
-    ("series_4" . "Partial Sum and Partial Product of Some Series")
-    ("series_5" . "On the Partial Product and Partial Sum of Series and Related Basic Inequalities")
-    ("quaterni" . "The Quaternion Numbers")
-    ("afinsq_1" . "Zero Based Finite Sequences")
-    ("nat_2" . "Natural Numbers")
-    ("pepin" . "Public-Key Cryptography and Pepin's Test for the Primality of Fermat Numbers")
-    ("irrat_1" . "Irrationality of e")
-    ("taylor_1" . "The Taylor Expansions")
-    ("holder_1" . "H&ouml;lder's Inequality and Minkowski's Inequality")
-    ("fdiff_4" . "Several Differentiable Formulas of Special Functions")
-    ("fdiff_5" . "Some Differentiable Formulas of Special Functions")
-    ("fdiff_6" . "Several Differentiable Formulas of Special Functions &ndash; Part II")
-    ("fdiff_7" . "Several Differentiation Formulas of Special Functions &ndash; Part III")
-    ("fdiff_8" . "Several Differentiation Formulas of Special Functions &ndash; Part IV")
-    ("sin_cos7" . "Formulas And Identities of Inverse Hyperbolic Functions")
-    ("sin_cos8" . "Formulas and Identities of Hyperbolic Functions")
-    ("bvfunc_1" . "A Theory of Boolean Valued Functions and Partitions")
-    ("bvfunc_2" . "A Theory of Boolean Valued Functions and Quantifiers with Respect to Partitions")
-    ("taylor_2" . "The Maclaurin Expansions")
-    ("catalan1" . "Catalan Numbers")
-    ("pythtrip" . "Pythagorean triples")
-    ("series_2" . "Partial Sum of Some Series")
-    ("fib_num" . "Fibonacci Numbers")
-    ("partit_2" . "Classes of Independent Partitions")
-    ("bvfunc_3" . "Predicate Calculus for Boolean Valued Functions, I")
-    ("bvfunc_4" . "Predicate Calculus for Boolean Valued Functions, II")
-    ("bvfunc_5" . "Propositional Calculus for Boolean Valued Functions, I")
-    ("bvfunc_6" . "Propositional Calculus for Boolean Valued Functions, II")
-    ("bvfunc_7" . "Propositional Calculus For Boolean Valued Functions, III")
-    ("bvfunc_8" . "Propositional Calculus For Boolean Valued Functions, IV")
-    ("bvfunc_9" . "Propositional Calculus for Boolean Valued Functions, V")
-    ("bvfunc10" . "Propositional Calculus for Boolean Valued Functions, VI")
-    ("bvfunc11" . "Predicate Calculus for Boolean Valued Functions, III")
-    ("bvfunc14" . "Predicate Calculus for Boolean Valued Functions, VI")
-    ("bvfunc25" . "Propositional Calculus for Boolean Valued Functions, VII")
-    ("bvfunc26" . "Propositional Calculus for Boolean Valued Functions, VIII")
-    ("finseq_7" . "On Replace Function and Swap Function for Finite Sequences")
-    ("prgcor_1" . "Correctness of Non Overwriting Programs. Part I")
-    ("fdiff_9" . "Several Differentiation Formulas of Special Functions &ndash; Part V")
-    ("arrow" . "Arrow's Impossibility Theorem")
-    ("real_3" . "Simple Continued Fractions and Their Convergents")
-    ("fdiff_10" . "Several Differentiation Formulas of Special Functions &ndash; Part V")
-    ("hfdiff_1" . "Several Higher Differentiation Formulas of Special Functions")
-    ("pre_poly" . "Preliminaries to Polynomials")
-    ("prgcor_2" . "Logical Correctness of Vector Calculation Programs")
-    ("sin_cos9" . "Inverse Trigonometric Functions Arctan and Arccot")
-    ("sincos10" . "Inverse Trigonometric Functions Arcsec1, Arcsec2, Arccosec1 and Arccosec2")
-    ("mesfunc3" . "Lebesgue Integral of Simple Valued Function")
-    ("mesfunc4" . "Linearity of Lebesgue Integral of Simple Valued Function")
-    ("rvsum_2" . "The Sum and Product of Finite Sequences of Complex Numbers")
-    ("finseq_8" . "Concatenation of Finite Sequences Reducing Overlapping Part and an Argument of Separators of Sequential Files")
-    ("integra1" . "The Definition of Riemann Definite Integral and some Related Lemmas")
-    ("integra2" . "Scalar Multiple of Riemann Definite Integral")
-    ("rfinseq2" . "Sorting Operators for Finite Sequences")
-    ("integra3" . "Darboux's Theorem")
-    ("integra4" . "Integrability of Bounded Total Functions")
-    ("integra5" . "Definition of Integrability for Partial Functions from REAL to REAL and Integrability for Continuous Functions")
-    ("integr12" . "Integrability Formulas &ndash; Part I")
-    ("integra8" . "Several Integrability Formulas of Special Functions")
-    ("card_lar" . "Mahlo and inaccessible cardinals")
-    ("zf_lang" . "A Model of ZF Set Theory Language")
-    ("zf_model" . "Models and Satisfiability. Defining by Structural Induction and Free Variables in ZF-formulae")
-    ("zf_colla" . "The Contraction Lemma")
-    ("zfmodel1" . "Properties of ZF Models")
-    ("zf_lang1" . "Replacing of Variables in Formulas of ZF Theory")
-    ("zf_refle" . "The Reflection Theorem")
-    ("zfrefle1" . "Consequences of the Reflection Theorem")
-    ("qc_lang1" . "A First Order Language")
-    ("qc_lang2" . "Connectives and Subformulae of the First Order Language")
-    ("qc_lang3" . "Variables in Formulae of the First Order Language")
-    ("cqc_lang" . "A Classical First Order Language")
-    ("cqc_the1" . "A First-Order Predicate Calculus. Axiomatics, the Consequence Operation and a Concept of Proof")
-    ("valuat_1" . "Interpretation and Satisfiability in the First Order Logic")
-    ("zfmodel2" . "Definable Functions")
-    ("lukasi_1" . "Propositional Calculus")
-    ("procal_1" . "Calculus of Propositions")
-    ("zf_fund1" . "Mostowski's Fundamental Operations - Part I")
-    ("intpro_1" . "Intuitionistic Propositional Calculus in the Extended Framework with Modal Operator, Part I")
-    ("cqc_the2" . "Calculus of Quantifiers. Deduction Theorem")
-    ("zf_fund2" . "Mostowski's Fundamental Operations - Part II")
-    ("hilbert1" . "Hilbert Positive Propositional Calculus")
-    ("cqc_sim1" . "Similarity of Formulae")
-    ("modal_1" . "Introduction to Modal Propositional Logic")
-    ("cqc_the3" . "Logical Equivalence of Formulae")
-    ("qc_lang4" . "The Subformula Tree of a Formula of the First Order Language")
-    ("substut1" . "Substitution in First-Order Formulas: Elementary Properties")
-    ("sublemma" . "Coincidence Lemma and Substitution Lemma")
-    ("substut2" . "Substitution in First-Order Formulas &ndash; Part II. The Construction of First-Order Formulas")
-    ("calcul_1" . "A Sequent Calculus for First-Order Logic")
-    ("calcul_2" . "Consequences of the Sequent Calculus")
-    ("henmodel" . "Equivalences of Inconsistency and Henkin Models")
-    ("goedelcp" . "G&ouml;del's Completeness Theorem")
-    ("struct_0" . "Preliminaries to Structures")
-    ("algstr_0" . "Basic Algebraic Structures")
-    ("incsp_1" . "Axioms of Incidence")
-    ("pre_topc" . "Topological Spaces and Continuous Functions")
-    ("orders_2" . "Kuratowski - Zorn Lemma")
-    ("graph_1" . "Graphs")
-    ("cat_1" . "Introduction to Categories and Functors")
-    ("petri" . "Basic Petri Net Concepts. Place/Transition Net Structure, Deadlocks, Traps, Dual Nets")
-    ("net_1" . "Some Elementary Notions of the Theory of Petri Nets")
-    ("lattices" . "Introduction to Lattice Theory")
-    ("tops_1" . "Subsets of Topological Spaces")
-    ("connsp_1" . "Connected Spaces")
-    ("tops_2" . "Families of Subsets, Subspaces and Mappings in Topological Spaces")
-    ("rlvect_1" . "Vectors in Real Linear Space")
-    ("rlsub_1" . "Subspaces and Cosets of Subspaces in Real Linear Space")
-    ("group_1" . "Groups")
-    ("vectsp_1" . "Abelian Groups, Fields and Vector Spaces")
-    ("algstr_1" . "From Loops to Abelian Multiplicative Groups with Zero")
-    ("complfld" . "The Field of Complex Numbers")
-    ("parsp_1" . "Parallelity Spaces")
-    ("symsp_1" . "Construction of a bilinear antisymmetric form in symplectic vector space")
-    ("ortsp_1" . "Construction of a bilinear symmetric form in orthogonal vector space")
-    ("compts_1" . "Compact Spaces")
-    ("rlsub_2" . "Operations on Subspaces in Real Linear Space")
-    ("midsp_1" . "Midpoint algebras")
-    ("funcsdom" . "Real Functions Spaces")
-    ("vectsp_2" . "Construction of Rings and Left-, Right-, and Bi-Modules over a Ring")
-    ("filter_0" . "Filters - Part I. Implicative Lattices")
-    ("lattice2" . "Finite Join and Finite Meet, and Dual Lattices")
-    ("realset2" . "Properties of Fields")
-    ("robbins1" . "Robbins Algebras vs. Boolean Algebras")
-    ("qmax_1" . "The Fundamental Logic Structure in Quantum Mechanics")
-    ("parsp_2" . "Fano-Desargues Parallelity Spaces")
-    ("rlvect_2" . "Linear Combinations in Real Linear Space")
-    ("analoaf" . "Analytical Ordered Affine Spaces")
-    ("metric_1" . "Metric Spaces")
-    ("diraf" . "Ordered Affine Spaces Defined in Terms of Directed Parallelity - part I")
-    ("aff_1" . "Parallelity and Lines in Affine Spaces")
-    ("aff_2" . "Classical Configurations in Affine Planes")
-    ("aff_3" . "Affine Localizations of Desargues Axiom")
-    ("collsp" . "The Collinearity Structure")
-    ("pasch" . "Classical and Non--classical Pasch Configurations in Ordered Affine Planes")
-    ("real_lat" . "The Lattice of Real Numbers. The Lattice of Real Functions")
-    ("tdgroup" . "A Construction of an Abstract Space of Congruence of Vectors")
-    ("transgeo" . "Transformations in Affine Spaces")
-    ("cat_2" . "Subcategories and Products of Categories")
-    ("translac" . "Translations in Affine Planes")
-    ("anproj_1" . "A Construction of Analytical Projective Space")
-    ("anproj_2" . "Projective Spaces")
-    ("rlvect_3" . "Basis of Real Linear Space")
-    ("group_2" . "Subgroup and Cosets of Subgroups. Lagrange theorem")
-    ("vectsp_4" . "Subspaces and Cosets of Subspaces in Vector Space")
-    ("vectsp_5" . "Operations on Subspaces in Vector Space")
-    ("normsp_0" . "Preliminaries to Normed Spaces")
-    ("normsp_1" . "Real Normed Space")
-    ("vfunct_1" . "Algebra of Vector Functions")
-    ("vectsp_6" . "Linear Combinations in Vector Space")
-    ("vectsp_7" . "Basis of Vector Space")
-    ("analmetr" . "Analytical Metric Affine Spaces and Planes")
-    ("group_3" . "Classes of Conjugation. Normal Subgroups")
-    ("projdes1" . "Desargues Theorem In Projective 3-Space")
-    ("group_4" . "Lattice of Subgroups of a Group. Frattini Subgroup")
-    ("connsp_2" . "Locally Connected Spaces")
-    ("algseq_1" . "Construction of Finite Sequences over Ring and Left-, Right-, and Bi-Modules over a Ring")))
-    ;; ("homothet" . "Homotheties and Shears in Affine Planes")
-    ;; ("afvect0" . "Directed Geometrical Bundles and Their Analytical Representation")
-    ;; ("complsp1" . "Complex Spaces")
-    ;; ("realset3" . "Several Properties of Fields. Field Theory")
-    ;; ("algstr_2" . "From Double Loops to Fields")
-    ;; ("metric_2" . "On Pseudometric Spaces")
-    ;; ("metric_3" . "Metrics in Cartesian Product")
-    ;; ("hessenbe" . "Hessenberg Theorem")
-    ;; ("incproj" . "Incidence Projective Spaces")
-    ;; ("afvect01" . "One-Dimensional Congruence of Segments, Basic Facts and Midpoint Relation")
-    ;; ("normform" . "Algebra of Normal Forms")
-    ;; ("o_ring_1" . "Ordered Rings - Part I")
-    ;; ("algstr_3" . "Ternary Fields")
-    ;; ("projred1" . "Incidence Projective Space (a reduction theorem in a plane)")
-    ;; ("lmod_5" . "Linear Independence in Left Module over Domain")
-    ;; ("rmod_2" . "Submodules and Cosets of Submodules in Right Module over Associative Ring")
-    ;; ("rmod_3" . "Operations on Submodules in Right Module over Associative Ring")
-    ;; ("rmod_4" . "Linear Combinations in Right Module over Associative Ring")
-    ;; ("geomtrap" . "A Construction of Analytical Ordered Trapezium Spaces")
-    ;; ("projred2" . "On Projections in Projective Planes. Part II")
-    ;; ("conaffm" . "Metric-Affine Configurations in Metric Affine Planes -  Part I")
-    ;; ("conmetr" . "Metric-Affine Configurations in Metric Affine Planes - Part II")
-    ;; ("papdesaf" . "Fanoian, Pappian and Desarguesian Affine Spaces")
-    ;; ("pardepap" . "Elementary Variants of Affine Configurational Theorems")
-    ;; ("semi_af1" . "Semi-Affine Space")
-    ;; ("aff_4" . "Planes in Affine Spaces")
-    ;; ("afproj" . "A Projective Closure and Projective Horizon of an Affine Space")
-    ;; ("heyting1" . "Algebra of Normal Forms Is a Heyting Algebra")
-    ;; ("prelamb" . "Preliminaries to the Lambek Calculus")
-    ;; ("oppcat_1" . "Opposite Categories and Contravariant Functors")
-    ;; ("euclmetr" . "Fundamental Types of Metric Affine Spaces")
-    ;; ("filter_1" . "Filters - Part II. Quotient Lattices Modulo Filters and Direct Product of Two Lattices")
-    ;; ("conmetr1" . "Shear Theorems and Their Role in Affine Geometry")
-    ;; ("nat_lat" . "The Lattice of Natural Numbers and The Sublattice of it. The Set of Prime Numbers")
-    ;; ("group_5" . "Commutator and Center of a Group")
-    ;; ("nattra_1" . "Natural Transformations. Discrete Categories")
-    ;; ("matrix_1" . "Matrices. Abelian Group of Matrices")
-    ;; ("pcomps_1" . "Paracompact and Metrizable Spaces")
-    ;; ("midsp_2" . "Atlas of Midpoint Algebra")
-    ;; ("ali2" . "Fix Point Theorem for Compact Spaces")
-    ;; ("bhsp_1" . "Introduction to Banach and Hilbert spaces - Part I")
-    ;; ("bhsp_2" . "Introduction to Banach and Hilbert spaces - Part II")
-    ;; ("bhsp_3" . "Introduction to Banach and Hilbert spaces - Part III")
-    ;; ("ens_1" . "Category Ens")
-    ;; ("borsuk_1" . "A Borsuk Theorem on Homotopy Types")
-    ;; ("tbsp_1" . "Totally Bounded Metric Spaces")
-    ;; ("grcat_1" . "Categories of Groups")
-    ;; ("group_6" . "Homomorphisms and Isomorphisms of Groups. Quotient Group")
-    ;; ("matrix_2" . "Transpose Matrices and Groups of Permutations")
-    ;; ("fvsum_1" . "Sum and Product of Finite Sequences of Elements of a Field")))
-
-(defparameter *dependency-graph-file*
-  (mizar-items-config 'fragment-depdenency-graph))
-(defparameter *item-to-ckb-file*
-  (mizar-items-config 'item-to-fragment-path))
-(defparameter *full-item-dependency-graph*
-  (mizar-items-config 'full-item-dependency-graph))
-
-(defvar *dependency-graph* nil)
-(defvar *num-dependency-graph-edges* nil)
-(defvar *ckb-dependency-graph-forward* nil)
-(defvar *ckb-dependency-graph-backward* nil)
-(defvar *true-item-dependency-graph-forward* nil)
-(defvar *true-item-dependency-graph-backward* nil)
-(defvar *item-to-ckb-table* nil)
-(defvar *ckb-to-items-table* nil)
-(defvar *all-ckb-items* nil)
-(defvar *all-true-items* nil)
-(defvar *graphs-loaded* nil)
-
-(defun write-full-item-dependency-graph ()
-  (loop
-     with true-item-forward-table = (make-hash-table :test #'equal)
-     for item being the hash-keys of *item-to-ckb-table*
-     for ckb = (gethash item *item-to-ckb-table*)
-     for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
-     for forward-item-deps = (reduce #'append (mapcar #'(lambda (ckb-dep)
-							  (gethash ckb-dep *ckb-to-items-table*))
-						      forward-ckb-deps))
-     do
-       (setf (gethash item true-item-forward-table)
-	     forward-item-deps)
-     finally
-       (with-open-file (item-depgraph *full-item-dependency-graph*
-				      :direction :output
-				      :if-exists :error
-				      :if-does-not-exist :create)
-	 (loop
-	    for item being the hash-keys of true-item-forward-table
-	    for deps = (gethash item true-item-forward-table)
-	    do
-	      (dolist (dep deps)
-		(format item-depgraph "~a ~a~%" item dep))))))
-
-
-(defun load-dependency-graph ()
-  ;; all possible items 
-  (let ((all-ckb-items (make-hash-table :test #'equal))
-	(all-true-items (make-hash-table :test #'equal)))
-    ;; ckb graph
-    (let ((lines (lines-of-file *dependency-graph-file*))
-	  (edges nil)
-	  (ckb-forward-table (make-hash-table :test #'equal))
-	  (ckb-backward-table (make-hash-table :test #'equal)))
-      (dolist (line lines)
-	(destructuring-bind (lhs rhs)
-	    (split " " line)
-	  (push (cons lhs rhs) edges)
-	  (setf (gethash lhs all-ckb-items) t
-		(gethash rhs all-ckb-items) t)
-	  (pushnew rhs (gethash lhs ckb-forward-table) :test #'string=)
-	  (pushnew lhs (gethash rhs ckb-backward-table) :test #'string=)))
-      (setf *dependency-graph* edges
-	    *num-dependency-graph-edges* (length edges)
-	    *ckb-dependency-graph-forward* ckb-forward-table
-	    *ckb-dependency-graph-backward* ckb-backward-table))
-    ;; items-to-ckbs
-    (let ((lines (lines-of-file *item-to-ckb-file*))
-	  (item-to-ckb-table (make-hash-table :test #'equal))
-	  (ckb-to-items-table (make-hash-table :test #'equal)))
-      (dolist (line lines)
-	(destructuring-bind (item ckb)
-	    (split " " line)
-	  (setf (gethash item all-true-items) t)
-	  (setf (gethash item item-to-ckb-table) ckb)
-	  (pushnew item (gethash ckb ckb-to-items-table) :test #'string=)))
-      (setf *item-to-ckb-table* item-to-ckb-table
-	    *ckb-to-items-table* ckb-to-items-table))
-    ;; if the full item dependency graph doesn't exist, make it
-    (unless (file-exists-p *full-item-dependency-graph*)
-      (write-full-item-dependency-graph))
-    ;; now it exists; load it
-    (let ((lines (lines-of-file *full-item-dependency-graph*))
-	  (edges nil)
-	  (forward-table (make-hash-table :test #'equal))
-	  (backward-table (make-hash-table :test #'equal)))
-      (dolist (line lines)
-	(destructuring-bind (lhs rhs)
-	    (split " " line)
-	  (push (cons lhs rhs) edges)
-	  (pushnew rhs (gethash lhs forward-table) :test #'string=)
-	  (pushnew lhs (gethash rhs backward-table) :test #'string=)))
-      (setf *true-item-dependency-graph-forward* forward-table
-	    *true-item-dependency-graph-backward* backward-table))
-    (setf *all-ckb-items* all-ckb-items
-	  *all-true-items* all-true-items))
-  (setf *graphs-loaded* t)
-  t)
-
-(defvar *article-num-items* nil)
-
-(defun count-miz-in-directory (dir)
-  (let ((counter 0))
-    (walk-directory dir #'(lambda (foo)
-			    (declare (ignore foo))
-			    (incf counter))
-		    :test #'(lambda (path)
-			      (scan "ckb[0-9]+\.miz$" (namestring path))))
-    counter))
-
-(defun load-article-num-items (&optional force)
-  (if (or force (null *article-num-items*))
-    (loop
-       with num-items-table = (make-hash-table :test #'equal)
-       for (article-name . title) in *articles*
-       do
-	 (let ((article-dir (concat *itemization-source* "/" article-name "/" "text")))
-	   (setf (gethash article-name num-items-table)
-		 (count-miz-in-directory article-dir)))
-       finally
-	 (setf *article-num-items* num-items-table)
-	 (return *article-num-items*))
-    *article-num-items*))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Searching for paths between items
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defstruct (item-search-problem (:include problem)))
-
-(defmethod successors ((isp item-search-problem) node)
-  (mapcar #'(lambda (item)
-	      (cons item item))
-	  (gethash (node-state node) *true-item-dependency-graph-forward*)))
-
-(defun all-paths (source destination)
-  (if (string= source destination)
-      (list (list source))
-      (mapcar #'(lambda (path)
-		  (cons source path))
-	      (reduce #'append 
-		      (mapcar #'(lambda (successor)
-				  (all-paths successor destination))
-			      (gethash source *true-item-dependency-graph-forward*))))))
-
-(defun all-paths-from-via (source destination via)
-  (let ((paths-from-source-to-via (all-paths source via)))
-    (when paths-from-source-to-via
-      (let ((paths-from-via-to-destination (all-paths via destination)))
-	(when paths-from-via-to-destination
-	  (map-product #'(lambda (path-1 path-2)
-			   (append path-1 (cdr path-2)))
-		       paths-from-source-to-via
-		       paths-from-via-to-destination))))))
-
-(defun one-path-from-via (source destination via)
-  "Find one path from SOURCE to DESTINATION that passes through VIA.
-If there is no such path, return nil."
-  (let ((source-to-via-problem (make-item-search-problem 
-				:initial-state source
-				:goal via))
-	(via-to-destination-problem (make-item-search-problem
-				     :initial-state via
-				     :goal destination)))
-    (multiple-value-bind (solution-to-via-found? solution-to-via)
-	(bounded-depth-first-search source-to-via-problem +search-depth+)
-      (if solution-to-via-found?
-	  (multiple-value-bind (solution-to-dest-found? solution-to-dest)
-	      (bounded-depth-first-search via-to-destination-problem
-					  +search-depth+)
-	    (if solution-to-dest-found?
-		(append (explain-solution solution-to-via)
-			(cdr (explain-solution solution-to-dest)))
-		(if (null solution-to-dest)
-		    (values nil nil)
-		    (values nil :cut-off))))
-	  (if (null solution-to-via)
-	      (values nil nil)
-	      (values nil :cut-off))))))
-
-(defun all-paths-pass-through (source destination via)
-  "Determine whether all paths from SOURCE to DESTINATION pass through
-VIA.  Return two values: if all paths from SOURCE to DESTINATION do
-pass through VIA, return T and NIL; otherwise, return NIL and a path
-from SOURCE to DESTINATION that does not pass through VIA.
-
-Note that STRING= is used as the hard-coded test for vertex equality."
-  (every-with-falsifying-witness (all-paths source destination)
-				 #'(lambda (path)
-				     (member via path :test #'string=))))
-
-(defun all-paths-avoid (source destination bad-guy)
-  "Detemine whether all paths from node SOURCE to node DESTINATION
-avoid (that is, do not pass through) node BAD-GUY.  Returns two
-values: if there is a path from SOURCE to DESTINATION that passes
-through BAD-GUY, return NIL as the first value and that withnessing
-path as the second value; otherwise, return T as the first value and
-NIL as the second value."
-  (let* ((to-bad-guy (make-item-search-problem :goal bad-guy
-					       :initial-state source))
-	 (to-bad-guy-solution (bounded-depth-first-search to-bad-guy
-							  +search-depth+)))
-    (if to-bad-guy-solution
-	(let* ((from-bad-guy (make-item-search-problem :goal destination
-						       :initial-state bad-guy))
-	       (from-bad-guy-solution (bounded-depth-first-search from-bad-guy
-								  +search-depth+)))
-	  (if from-bad-guy-solution
-	      (let ((path-to-bad-guy (explain-solution to-bad-guy-solution))
-		    (path-from-bad-guy (explain-solution from-bad-guy-solution)))
-		(values nil (append path-to-bad-guy (cdr path-from-bad-guy))))
-	      (values t nil)))
-	(values t nil))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Main page
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defvar items-dispatch-table nil)
-
-(defun items-request-dispatcher (request)
-  "Selects a request handler based on a list of individual request
-dispatchers all of which can either return a handler or neglect by
-returning NIL."
-  (loop for dispatcher in items-dispatch-table
-        for action = (funcall dispatcher request)
-        when action return (funcall action)
-        finally (setf (return-code *reply*) +http-not-found+)))
-
-(defvar *acceptor* (make-instance 'hunchentoot:acceptor 
-				  :port 4242
-				  :request-dispatcher #'items-request-dispatcher))
-
-(defun start-server ()
-  (hunchentoot:start *acceptor*)
-  t)
-
-(defun setup-server (&optional reload-graphs (articles :all))
-  (format t "Loading article item counts...")
-  (load-article-num-items reload-graphs)
-  (format t "done.~%")
-  (when (or reload-graphs (null *graphs-loaded*))
-    (format t "Loading dependency graph data...")
-    (load-dependency-graph)
-    (format t "done.~%"))
-  (format t "Initializing URIs...")
-  (initialize-uris articles)
-  (format t "done~%")
-  (setf *message-log-pathname* "/tmp/hunchentoot-messages"
-	*access-log-pathname* "/tmp/hunchentoot-access"
-	*handle-http-errors-p* t
-	*http-error-handler* #'handle-http-error
-	*log-lisp-errors-p* t
-	*log-lisp-warnings-p* t
-	*log-lisp-backtraces-p* t
-	*show-lisp-errors-p* t)
-  (setf *attribute-quote-char* #\")
-  t)
-
-(defun handle-http-error (error-code)
-  (when (= error-code +http-not-found+)
-    (miz-item-html "No"
-      (:p "I still haven't found what you're looking for."))))
-
-(setq *http-error-handler* #'handle-http-error)
-
-;; set up articles
-
-(defun ckb-item-< (item-name-1 item-name-2)
-  (destructuring-bind (item-article-name-1 item-num-as-str-1)
-      (split ":" item-name-1)
-    (destructuring-bind (item-article-name-2 item-num-as-str-2)
-	(split ":" item-name-2)
-      (or (string< item-article-name-1 item-article-name-2)
-	  (let ((item-num-1 (parse-integer item-num-as-str-1))
-		(item-num-2 (parse-integer item-num-as-str-2)))
-	    (and (string= item-article-name-1 item-article-name-2)
-		 (< item-num-1 item-num-2)))))))
-
-(defun true-item-< (item-name-1 item-name-2)
-  (destructuring-bind (item-article-name-1 item-kind-1 item-num-as-str-1)
-      (split ":" item-name-1)
-    (destructuring-bind (item-article-name-2 item-kind-2 item-num-as-str-2)
-	(split ":" item-name-2)
-      (or (string< item-article-name-1 item-article-name-2)
-	  (when (string= item-article-name-1 item-article-name-2)
-	    (or (string< item-kind-1 item-kind-2)
-		(when (string= item-kind-1 item-kind-2)
-		  (let ((item-num-1 (parse-integer item-num-as-str-1))
-			(item-num-2 (parse-integer item-num-as-str-2)))
-		    (< item-num-1 item-num-2)))))))))
 
 (define-constant +article-name-regexp+ "[a-z_0-9]+" 
   :test #'string=)
@@ -779,7 +71,7 @@ returning NIL."
     (reduce #'regexp-disjoin +item-kinds-string+)
   :test #'string=)
 
-(define-constant +true-item-uri-regexp+
+(define-constant +item-uri-regexp+
     (exact-regexp (concat "/" "item"
 			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
@@ -789,7 +81,7 @@ returning NIL."
 (defun uri-for-item (article kind number)
   (format nil "/item/~a/~a/~a" article kind number))
 
-(define-constant +ckb-item-uri-regexp+
+(define-constant +fragment-uri-regexp+
     (exact-regexp (concat "/" "fragment"
 			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"
@@ -804,7 +96,7 @@ returning NIL."
 (defun uri-for-article (article)
   (format nil "/article/~a" article))
 
-(define-constant +path-between-true-items-uri-regexp+
+(define-constant +path-between-items-uri-regexp+
     (exact-regexp (concat "/" "path"
 			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
@@ -816,7 +108,7 @@ returning NIL."
 			  ))
   :test #'string=)
 
-(define-constant +path-between-true-items-via-item-uri-regexp+
+(define-constant +path-between-items-via-item-uri-regexp+
     (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"
@@ -829,6 +121,34 @@ returning NIL."
 			  "/?" ; maybe end with a '/'
 			  ))
   :test #'string=)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Main page
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun fragment-< (item-name-1 item-name-2)
+  (destructuring-bind (item-article-name-1 item-num-as-str-1)
+      (split ":" item-name-1)
+    (destructuring-bind (item-article-name-2 item-num-as-str-2)
+	(split ":" item-name-2)
+      (or (string< item-article-name-1 item-article-name-2)
+	  (let ((item-num-1 (parse-integer item-num-as-str-1))
+		(item-num-2 (parse-integer item-num-as-str-2)))
+	    (and (string= item-article-name-1 item-article-name-2)
+		 (< item-num-1 item-num-2)))))))
+
+(defun item-< (item-name-1 item-name-2)
+  (destructuring-bind (item-article-name-1 item-kind-1 item-num-as-str-1)
+      (split ":" item-name-1)
+    (destructuring-bind (item-article-name-2 item-kind-2 item-num-as-str-2)
+	(split ":" item-name-2)
+      (or (string< item-article-name-1 item-article-name-2)
+	  (when (string= item-article-name-1 item-article-name-2)
+	    (or (string< item-kind-1 item-kind-2)
+		(when (string= item-kind-1 item-kind-2)
+		  (let ((item-num-1 (parse-integer item-num-as-str-1))
+			(item-num-2 (parse-integer item-num-as-str-2)))
+		    (< item-num-1 item-num-2)))))))))
 
 (defun emit-about-page ()
   (miz-item-html "fine-grained dependencies in the mizar mathematical library"
@@ -1011,12 +331,12 @@ end;"))
 
 (defun emit-path-between-items ()
   (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
-      (+path-between-true-items-uri-regexp+ (request-uri*))
+      (+path-between-items-uri-regexp+ (request-uri*))
     ;; check that these items exist
     (let ((source-item (format nil "~a:~a:~a" article-1 kind-1 num-1))
 	  (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
-      (if (gethash source-item *all-true-items*)
-	  (if (gethash destination-item *all-true-items*)
+      (if (gethash source-item *all-items*)
+	  (if (gethash destination-item *all-items*)
 	      (let ((problem (make-item-search-problem 
 			       :initial-state source-item
 			       :goal destination-item))
@@ -1059,13 +379,13 @@ end;"))
   (register-groups-bind (source-article source-kind source-num 
 					via-article via-kind via-num
 					destination-article destination-kind destination-num)
-      (+path-between-true-items-via-item-uri-regexp+ (request-uri*))
+      (+path-between-items-via-item-uri-regexp+ (request-uri*))
     (let ((source (format nil "~a:~a:~a" source-article source-kind source-num))
 	  (via (format nil "~a:~a:~a" via-article via-kind via-num))
 	  (destination (format nil "~a:~a:~a" destination-article destination-kind destination-num)))	
-      (if (gethash source *all-true-items*)
-	  (if (gethash via *all-true-items*)
-	      (if (gethash destination *all-true-items*)
+      (if (gethash source *all-items*)
+	  (if (gethash via *all-items*)
+	      (if (gethash destination *all-items*)
 		  (let ((get-params (get-parameters*)))
 		    (if (null get-params) ; first time here, eh?
 			(miz-item-html (fmt "from ~a to ~a via ~a" source destination via)
@@ -1114,13 +434,13 @@ end;"))
 		  (str item-html)))))))))))
 
 (defun emit-random-item ()
-  (let ((random-vertex (random-elt (hash-table-keys *all-true-items*))))
+  (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
       (redirect (uri-for-item article kind number)))))
 
 (defun emit-random-path ()
-  (let* ((keys (hash-table-keys *all-true-items*))
+  (let* ((keys (hash-table-keys *all-items*))
 	 (random-vertex-1 (random-elt keys))
 	 (random-vertex-2 (random-elt keys)))
     (redirect (link-for-two-items random-vertex-1 random-vertex-2))))
@@ -1160,24 +480,24 @@ end;"))
 
 (defun emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number)
-      (+true-item-uri-regexp+ (request-uri*))
+      (+item-uri-regexp+ (request-uri*))
     (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
 	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
 	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
-	   (forward-deps (gethash item-key *true-item-dependency-graph-forward*))
-	   (backward-deps (gethash item-key *true-item-dependency-graph-backward*))
+	   (forward-deps (gethash item-key *item-dependency-graph-forward*))
+	   (backward-deps (gethash item-key *item-dependency-graph-backward*))
 	   (forward-deps-sorted (sort (copy-list forward-deps) 
-				      #'true-item-<))
+				      #'item-<))
 	   (backward-deps-sorted (sort (copy-list backward-deps)
-				       #'true-item-<)))
+				       #'item-<)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" ckb-for-item)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((ckb-item-path (format nil "~a/ckb~d.html"
+	(let* ((fragment-path (format nil "~a/ckb~d.html"
 				      article-text-dir
 				      ckb-number))
-	       (item-html (file-as-string ckb-item-path)))
+	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
 	    ((:table :width "100%")
 	     ((:tr :valign "top")
@@ -1212,24 +532,24 @@ end;"))
 			     (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
 		  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))))
 
-(defun emit-ckb-item-page ()
+(defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
-      (+ckb-item-uri-regexp+ (request-uri*))
+      (+fragment-uri-regexp+ (request-uri*))
     (let* ((item-key (format nil "~a:~a" article-name item-number))
 	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
 	   (items-for-ckb (gethash item-key *ckb-to-items-table*))
 	   (forward-deps (gethash item-key *ckb-dependency-graph-forward*))
 	   (backward-deps (gethash item-key *ckb-dependency-graph-backward*))
-	   (forward-deps-sorted (sort (copy-list forward-deps) #'ckb-item-<))
-	   (backward-deps-sorted (sort (copy-list backward-deps) #'ckb-item-<)))
+	   (forward-deps-sorted (sort (copy-list forward-deps) #'fragment-<))
+	   (backward-deps-sorted (sort (copy-list backward-deps) #'fragment-<)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" item-key)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((ckb-item-path (format nil "~a/ckb~a.html"
+	(let* ((fragment-path (format nil "~a/ckb~a.html"
 				      article-text-dir
 				      ckb-number))
-	       (item-html (file-as-string ckb-item-path)))
+	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
 	    (:p (str item-key) " is fragment #" (str ckb-number) " of article " (str article-name) ".")
 	    (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
@@ -1281,7 +601,7 @@ end;"))
     (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML.")
     (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
-    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-true-items*))) " nodes (items) and " (:b (str (length *dependency-graph*))) " edges.")
+    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (length *dependency-graph*))) " edges.")
     (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
@@ -1347,6 +667,9 @@ end;"))
   (register-static-file-dispatcher "/mizar-item-ckb-table"
 				   (mizar-items-config 'item-to-fragment-path)
 				   "text/plain")
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph"
+				   (mizar-items-config 'full-vertex-neighbors-dependency-graph)
+				   "text/plain")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)
   ;; about page
@@ -1356,7 +679,7 @@ end;"))
   (register-exact-uri-dispatcher "/landmarks") #'emit-landmarks-page
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
-  (register-static-file-dispatcher "/favicon.ico" "/Users/alama/sources/mizar/mizar-items/mizar.ico")
+  (register-static-file-dispatcher "/favicon.ico" (mizar-items-config 'favicon-path))
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
   (when articles
@@ -1377,10 +700,10 @@ end;"))
 	   (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
 	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))))
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
-  (register-regexp-dispatcher +ckb-item-uri-regexp+ #'emit-ckb-item-page)
-  (register-regexp-dispatcher +true-item-uri-regexp+ #'emit-mizar-item-page)
-  (register-regexp-dispatcher +path-between-true-items-uri-regexp+
+  (register-regexp-dispatcher +fragment-uri-regexp+ #'emit-fragment-page)
+  (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
+  (register-regexp-dispatcher +path-between-items-uri-regexp+
 			      #'emit-path-between-items)
-  (register-regexp-dispatcher +path-between-true-items-via-item-uri-regexp+
+  (register-regexp-dispatcher +path-between-items-via-item-uri-regexp+
 			      #'emit-path-between-items-via-item)
   t)

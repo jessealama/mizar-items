@@ -25,4 +25,8 @@
 	       (:file "itemize")
 	       (:file "queue")
 	       (:file "search")
+	       (:file "mml")
+	       (:file "site-data")
+	       (:file "site-search")
+	       (:file "site-server")
 	       (:file "site")))
