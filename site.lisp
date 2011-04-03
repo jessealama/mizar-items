@@ -697,7 +697,7 @@ end;"))
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   ;; feedback page
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
-  (register-exact-uri-dispatcher "/landmarks") #'emit-landmarks-page
+  (register-exact-uri-dispatcher "/landmarks" #'emit-landmarks-page)
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
   (register-static-file-dispatcher "/favicon.ico" (mizar-items-config 'favicon-path))
