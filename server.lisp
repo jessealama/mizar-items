@@ -20,11 +20,9 @@ returning NIL."
 				  :port 4242
 				  :request-dispatcher #'items-request-dispatcher))
 
-(defun start-server ()
-  (hunchentoot:start *acceptor*)
-  t)
-
-(defun setup-server (&optional reload-graphs (articles :all))
+(defun initialize-server (&optional reload-graphs (articles :all))
+  (unless (hunchentoot::acceptor-listen-socket *acceptor*)
+    (hunchentoot:start *acceptor*))
   (format t "Loading article item counts...")
   (load-article-num-items reload-graphs)
   (format t "done.~%")
