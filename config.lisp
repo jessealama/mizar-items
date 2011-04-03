@@ -1,15 +1,13 @@
 
 (in-package :mizar)
 
-(defparameter *mizar-items-root* "/home/mizar-items/mizar-items")
+(defparameter *mizar-items-root* "/Users/alama/sources/mizar/mizar-items")
 
 (defun file-in-mizar-items-dir (filename)
   (concatenate 'string *mizar-items-root* "/" filename))
 
-(defparameter *mizar-items-xsl4mizar-root* (concatenate 'string
-							*mizar-items-root*
-							"/"
-							"xsl4mizar"))
+(defparameter *mizar-items-xsl4mizar-root* "/Users/alama/sources/mizar/xsl4mizar")
+
 (defun file-in-xsl4mizar-dir (filename)
   (concatenate 'string *mizar-items-xsl4mizar-root* "/" filename))
 
@@ -27,7 +25,7 @@
 (update-mizar-items-config 'expand-canceled-script-path
 			   (file-in-mizar-items-dir "expand-canceled.pl"))
 (update-mizar-items-config 'xsl4mizar-path
-			   "/home/mizar-items/xsl4mizar")
+			   "/Users/alama/sources/mizar/xsl4mizar")
 (update-mizar-items-config 'listvoc-script-path
 			   (file-in-mizar-items-dir "listvoc.sh"))
 (update-mizar-items-config 'mhtml-css-path
