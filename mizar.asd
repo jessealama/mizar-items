@@ -1,6 +1,8 @@
 
 (in-package :cl-user)
 
+(declaim (optimize (speed 1) (debug 3)))
+
 (defpackage :mizar-asd
   (:use :cl :asdf))
 
