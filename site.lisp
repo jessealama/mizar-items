@@ -414,24 +414,44 @@ end;"))
 (defun emit-article-page ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
-    (let ((num-items (gethash article *article-num-items*)))
-      (miz-item-html (fmt "~a" article)
-	(:p "The article " (str article) " has " (:b (str num-items)) " items ")
-	(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
-	(htm
-	 ((:ol :class "fragment-listing")
-	  (loop
-	     with article-dir = (format nil "~a/~a" *itemization-source* article)
-	     with article-text-dir = (format nil "~a/text" article-dir)
-	     for i from 1 upto num-items
-	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
-	     for item-html = (file-as-string fragment-path)
-	     for item-uri = (format nil "/fragment/~a/~d" article i)
-	     do
-	       (htm
-		((:li :class "fragment-listing")
-		 ((:a :href item-uri :class "fragment-listing")
-		  (str item-html)))))))))))
+      (if (member article *articles* :key #'car :test #'string=)
+	  (let ((num-items (gethash article *article-num-items*)))
+	    (miz-item-html (fmt "~a" article)
+	      (:p "The article " (str article) " has " (:b (str num-items)) " items ")
+	     (:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
+	     (htm
+	      ((:ol :class "fragment-listing")
+	       (loop
+		  with article-dir = (format nil "~a/~a" *itemization-source* article)
+		  with article-text-dir = (format nil "~a/text" article-dir)
+		  for i from 1 upto num-items
+		  for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+		  for item-html = (file-as-string fragment-path)
+		  for item-uri = (format nil "/fragment/~a/~d" article i)
+		  do
+		    (htm
+		     ((:li :class "fragment-listing")
+		      ((:a :href item-uri :class "fragment-listing")
+		       (str item-html)))))))))
+	  (miz-item-html "article not found"
+	    (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
+	    ((:table :class "article-listing" :rules "rows")
+	     (:thead
+	      (:tr
+	       (:th "MML Name")
+	       (:th "Title")))
+	     (:tbody
+	      (loop
+		 for (article-name . title) in *articles*
+		 for article-uri = (format nil "/article/~a" article-name)
+		 for title-escaped = (escape-string title)
+		 do
+		   (htm
+		    (:tr
+		     ((:td :class "article-name")
+		      ((:a :href article-uri :title title-escaped)
+		       (str article-name)))
+		     ((:td :class "article-title") (str title)))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
