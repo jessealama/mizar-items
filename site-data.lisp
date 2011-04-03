@@ -208,19 +208,17 @@
   (when (or force (null *item-to-item-dependency-graph*)) 
     (setf *item-to-item-dependency-graph* (load-item-to-item-depgraph)))
 
-  (when (or (null *item-dependency-graph-forward*)
-	    (null *item-dependency-graph-backward*))
-    (multiple-value-setq (*item-dependency-graph-forward*
-			  *item-dependency-graph-backward*)
-      (dependency-tables-from-edge-list)))
-
   ;; if the full vertex-neighbors dependency graph doesn't exist, make
   ;; it and write it to disk, no matter the value of FORCE
   (let ((forward-path (mizar-items-config 'vertex-neighbors-forward-graph-path))
 	(backward-path (mizar-items-config 'vertex-neighbors-backward-graph-path)))
     (if (or (not (file-exists-p forward-path))
 	    (not (file-exists-p backward-path)))
-	(write-vertex-neighbors-dependency-graphs)
+	(progn
+	  (multiple-value-setq (*item-dependency-graph-forward*
+				*item-dependency-graph-backward*)
+	    (dependency-tables-from-edge-list))
+	  (write-vertex-neighbors-dependency-graphs))
 	(format t "The item-to-items dependency graphs already exist; not recomputing them.~%")))
 
   (when (or force
