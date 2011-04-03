@@ -433,25 +433,27 @@ end;"))
 		     ((:li :class "fragment-listing")
 		      ((:a :href item-uri :class "fragment-listing")
 		       (str item-html)))))))))
-	  (miz-item-html "article not found"
-	    (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
-	    ((:table :class "article-listing" :rules "rows")
-	     (:thead
-	      (:tr
-	       (:th "MML Name")
-	       (:th "Title")))
-	     (:tbody
-	      (loop
-		 for (article-name . title) in *articles*
-		 for article-uri = (format nil "/article/~a" article-name)
-		 for title-escaped = (escape-string title)
-		 do
-		   (htm
-		    (:tr
-		     ((:td :class "article-name")
-		      ((:a :href article-uri :title title-escaped)
-		       (str article-name)))
-		     ((:td :class "article-title") (str title)))))))))))
+	  (progn
+	    (setf (return-code *reply*) +http-not-found+)
+	    (miz-item-html "article not found"
+	      (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
+	      ((:table :class "article-listing" :rules "rows")
+	       (:thead
+		(:tr
+		 (:th "MML Name")
+		 (:th "Title")))
+	       (:tbody
+		(loop
+		   for (article-name . title) in *articles*
+		   for article-uri = (format nil "/article/~a" article-name)
+		   for title-escaped = (escape-string title)
+		   do
+		     (htm
+		      (:tr
+		       ((:td :class "article-name")
+			((:a :href article-uri :title title-escaped)
+			 (str article-name)))
+		       ((:td :class "article-title") (str title))))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
