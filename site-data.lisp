@@ -7,7 +7,6 @@
 
 (defvar *mml-version* nil)
 (defvar *item-to-item-dependency-graph* nil)
-(defvar *num-dependency-graph-edges* nil)
 (defvar *ckb-dependency-graph-forward* nil)
 (defvar *ckb-dependency-graph-backward* nil)
 (defvar *item-dependency-graph-forward* nil)
