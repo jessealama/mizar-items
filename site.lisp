@@ -690,8 +690,11 @@ end;"))
   (register-static-file-dispatcher "/mizar-item-ckb-table"
 				   (mizar-items-config 'item-to-fragment-path)
 				   "text/plain")
-  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph"
-				   (mizar-items-config 'full-vertex-neighbors-dependency-graph)
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph-backward"
+				   (mizar-items-config 'vertex-neighbors-backward-graph-path)
+				   "text/plain")
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph-forward"
+				   (mizar-items-config 'vertex-neighbors-forward-graph-path)
 				   "text/plain")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)
