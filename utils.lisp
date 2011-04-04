@@ -284,6 +284,16 @@ LIST; otherwise, return T and NIL."
      finally
        (return nil)))
 
+(defun keys-with-rest->hash-table (keys)
+  "Given a list of lists of the form (KEY1 . REST1), make a hash table whose keys are the KEYs, and whose values are the associated RESTs."
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for (key . val) in keys
+     do
+       (setf (gethash key table) val)
+     finally 
+       (return table)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
