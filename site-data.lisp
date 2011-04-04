@@ -246,7 +246,7 @@
        with num-items-table = (make-hash-table :test #'equal)
        for (article-name . title) in *articles*
        do
-	 (let ((article-dir (concat *itemization-source* "/" article-name "/" "text")))
+	 (let ((article-dir (concat (mizar-items-config 'itemization-source) "/" article-name "/" "text")))
 	   (setf (gethash article-name num-items-table)
 		 (count-miz-in-directory article-dir)))
        finally
@@ -268,4 +268,23 @@
       (error "Althought we just compiled the data for MML version ~a, there is no FASL file at the expected location '~a'" mml-version data-path-fasl))
     (format t "Loading data for MML version ~a..." mml-version)
     (load data-path-fasl)
-    (format t "done~%")))
+    (format t "done~%")
+    (when (or (null *item-dependency-graph-backward*)
+	      (null *item-dependency-graph-forward*))
+      (error "We loaded the dependency data for MML version ~a at '~a', but the dependency graphs do not have initialized values" mml-version data-path-fasl))
+    ;; accumulate all items
+    (loop
+       initially
+	 (setf *all-items* (make-hash-table :test #'equal))
+       for k being the hash-key in *item-dependency-graph-forward*
+       for vals being the hash-value in *item-dependency-graph-forward*
+       do
+	 (setf (gethash k *all-items*) t)
+	 (dolist (val vals)
+	   (setf (gethash val *all-items*) t)))))
+
+(defun count-dependency-graph-edges ()
+  (loop
+     for v being the hash-values in *item-dependency-graph-backward*
+     summing (length v) into num-edges
+     finally (return num-edges)))
