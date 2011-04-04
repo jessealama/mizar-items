@@ -20,14 +20,15 @@ returning NIL."
 				  :port 4242
 				  :request-dispatcher #'items-request-dispatcher))
 
-(defun initialize-server (&optional reload-graphs (articles :all))
+(defun initialize-server (mml-version &optional reload-graphs (articles :all))
   (unless (hunchentoot::acceptor-listen-socket *acceptor*)
     (hunchentoot:start *acceptor*))
+  (load-mml mml-version)
   (format t "Loading article item counts...")
   (load-article-num-items reload-graphs)
   (format t "done.~%")
-  (when (or reload-graphs (null *graphs-loaded*))
-    (load-dependency-graphs reload-graphs))
+  ;; (when (or reload-graphs (null *graphs-loaded*))
+  ;;   (load-dependency-graphs reload-graphs))
   (format t "Initializing URIs...")
   (initialize-uris articles)
   (format t "done~%")
