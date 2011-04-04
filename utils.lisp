@@ -294,6 +294,13 @@ LIST; otherwise, return T and NIL."
      finally 
        (return table)))
 
+(defun count-hash-table-keys (table)
+  "Assuming that all values of the hash table TABLE are sequences, sum the length of all of them."
+  (loop
+     for v being the hash-values in table
+     summing (length v) into num-edges
+     finally (return num-edges)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

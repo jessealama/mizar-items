@@ -284,7 +284,4 @@
 	   (setf (gethash val *all-items*) t)))))
 
 (defun count-dependency-graph-edges ()
-  (loop
-     for v being the hash-values in *item-dependency-graph-backward*
-     summing (length v) into num-edges
-     finally (return num-edges)))
+  (count-hash-table-keys *item-dependency-graph-backward*))
