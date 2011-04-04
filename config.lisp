@@ -50,6 +50,8 @@
 			   "/tmp/mizar-items-access")
 (update-mizar-items-config 'server-messages-log-file
 			   "/tmp/mizar-items-messages")
+(update-mizar-items-config 'itemization-source
+			   "/Users/alama/sources/mizar/mizar-items/itemization")
 
 (defun mizar-items-config (key)
   (gethash key *mizar-items-config*))

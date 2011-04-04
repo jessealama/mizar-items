@@ -5,8 +5,6 @@
 ;;; Static data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *itemization-source* "/local/data/alama/non-brutalized-itemizations")
-
 (defvar *mml-version* nil)
 (defvar *item-to-item-dependency-graph* nil)
 (defvar *num-dependency-graph-edges* nil)
