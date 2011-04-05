@@ -651,6 +651,19 @@ end;"))
 (defun emit-landmarks-page ()
   (miz-item-html "landmarks"
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
+    (:p "This page is divided into the following sections:")
+    (:ul
+     (:li ((:a :href "#selected-list") "The site designer's biased list of notable theorems"))
+     (:li ((:a :href "#100theorems") "100 Theorems")))
+    ((:h1 :id "selected-list") "A selected list of landmarks")
+    ((:h1 :id "100theorems") "100 Theorems")
+    (:ul
+     (:li "Axiom of infinity")
+     (:li "Power set")
+     (:li "Axiom of choice")
+     (:li "Zorn's lemma")
+     (:li "Zermelo's well-ordering theorem")
+     (:li "All vector spaces have a basis")
     (:p "One might also be interested in the list of " ((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
     (:dl
      (loop
