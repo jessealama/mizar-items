@@ -443,11 +443,11 @@ end;"))
 			 ((:a :href item-uri :class "fragment-listing")
 			  (str item-html)))))))))
 	    (progn
-	      (setf (return-code *reply*) +http-not-found+)
+	      ; (setf (return-code *reply*) +http-not-found+)
 	      (miz-item-html "article cannot be displayed"
 		(:p "The article '" (fmt "~a" article) "' is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
 	(progn
-	  (setf (return-code *reply*) +http-not-found+)
+	  ; (setf (return-code *reply*) +http-not-found+)
 	  (miz-item-html "article not found"
 	    (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
 	    ((:table :class "article-listing" :rules "rows")
@@ -516,56 +516,61 @@ end;"))
 (defun emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number)
       (+item-uri-regexp+ (request-uri*))
-    (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
-	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
-	   (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
-	   (article-text-dir (format nil "~a/text" article-dir))
-	   (forward-deps (gethash item-key *item-dependency-graph-forward*))
-	   (backward-deps (gethash item-key *item-dependency-graph-backward*))
-	   (forward-deps-sorted (sort (copy-list forward-deps) 
-				      #'item-<))
-	   (backward-deps-sorted (sort (copy-list backward-deps)
-				       #'item-<)))
-      (destructuring-bind (ckb-article-name ckb-number)
-	  (split ":" ckb-for-item)
-	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((fragment-path (format nil "~a/ckb~d.html"
-				      article-text-dir
-				      ckb-number))
-	       (item-html (file-as-string fragment-path)))
-	  (miz-item-html (str item-key)
-	    ((:table :width "100%")
-	     ((:tr :valign "top")
-	      (:td (str item-html)))
-	     ((:tr :valign "middle")
-	      ((:td :class "fullwidth" :align "center")
-	       ((:table :rules "cols")
-		(:tr
-		 ((:td :align "center" :class "arrow")
-		  (str "&#8593;"))
-		 ((:td :align "center" :class "arrow")
-		  (str "&#8595;")))
-		((:tr :valign "top")
-		 ((:td :class "halfwidth" :align "center")
-		  (if forward-deps-sorted
-		      (htm
-		       (:table
-			(:caption "Depends On")
-			(dolist (forward-dep forward-deps-sorted)
-			  (let ((dep-uri (link-for-item forward-dep)))
-			    (htm
-			     (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
-		      (htm (:p (:em "(This item immediately depends on nothing.)")))))
-		 ((:td :class "halfwidth" :align "center")
-		  (if backward-deps-sorted
-		      (htm
-		       (:table
-			(:caption "Supports")
-			(dolist (backward-dep backward-deps-sorted)
-			  (let ((dep-uri (link-for-item backward-dep)))
-			    (htm
-			     (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
-		  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))))
+    (if (member article-name *handled-articles* :test #'string=)
+	(let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	       (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	       (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	       (article-text-dir (format nil "~a/text" article-dir))
+	       (forward-deps (gethash item-key *item-dependency-graph-forward*))
+	       (backward-deps (gethash item-key *item-dependency-graph-backward*))
+	       (forward-deps-sorted (sort (copy-list forward-deps) 
+					  #'item-<))
+	       (backward-deps-sorted (sort (copy-list backward-deps)
+					   #'item-<)))
+	  (destructuring-bind (ckb-article-name ckb-number)
+	      (split ":" ckb-for-item)
+	    (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
+	    (let* ((fragment-path (format nil "~a/ckb~d.html"
+					  article-text-dir
+					  ckb-number))
+		   (item-html (file-as-string fragment-path)))
+	      (miz-item-html (str item-key)
+		((:table :width "100%")
+		 ((:tr :valign "top")
+		  (:td (str item-html)))
+		 ((:tr :valign "middle")
+		  ((:td :class "fullwidth" :align "center")
+		   ((:table :rules "cols")
+		    (:tr
+		     ((:td :align "center" :class "arrow")
+		      (str "&#8593;"))
+		     ((:td :align "center" :class "arrow")
+		      (str "&#8595;")))
+		    ((:tr :valign "top")
+		     ((:td :class "halfwidth" :align "center")
+		      (if forward-deps-sorted
+			  (htm
+			   (:table
+			    (:caption "Depends On")
+			    (dolist (forward-dep forward-deps-sorted)
+			      (let ((dep-uri (link-for-item forward-dep)))
+				(htm
+				 (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
+			  (htm (:p (:em "(This item immediately depends on nothing.)")))))
+		     ((:td :class "halfwidth" :align "center")
+		      (if backward-deps-sorted
+			  (htm
+			   (:table
+			    (:caption "Supports")
+			    (dolist (backward-dep backward-deps-sorted)
+			      (let ((dep-uri (link-for-item backward-dep)))
+				(htm
+				 (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
+			  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
+	(progn
+	  ; (setf (return-code *reply*) +http-not-found+)
+	  (miz-item-html "unhandled article"
+	    (:p "The article '" (str article-name) "' is not known, or not yet suitably processed for this site.  Please try again later."))))))
 
 (defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
@@ -648,7 +653,7 @@ end;"))
 	 for article-name in *handled-articles*
 	 for article-uri = (format nil "/article/~a" article-name)
 	 do
-	   (let ((bib-entry (member article-name *mml-lar*
+	   (let ((bib-entry (member article-name *articles*
 				    :key #'first
 				    :test #'string=)))
 	     (if bib-entry
@@ -664,9 +669,9 @@ end;"))
 		       ((:td :class "article-title") (str title))))))
 		 (htm
 		  (:tr
-		   ((:td :class "article-name"))
-		   ((:a :href article-uri :title (str article-name))
-		    (str article-name))
+		   ((:td :class "article-name")
+		    ((:a :href article-uri :title article-name)
+		     (str article-name)))
 		   ((:td :class "article-title") "(no title was supplied)"))))))))
     (:h1 "getting started")
     (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
