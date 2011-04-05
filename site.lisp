@@ -571,7 +571,7 @@ end;"))
 	    (let ((fragment-uri (format nil "/article/~a/#~d" article-name ckb-number))
 		  (article-uri (format nil "/article/~a" article-name)))
 	      (htm
-	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri) (str article-name)) ".")
+	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri :class "article-name") (str article-name)) ".")
 	       (if (null (cdr items-for-ckb))
 		   (let ((item (car items-for-ckb)))
 		     (destructuring-bind (item-article item-kind item-number)
