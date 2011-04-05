@@ -645,16 +645,29 @@ end;"))
        (:th "Title")))
      (:tbody
       (loop
-	 for (article-name title author) in *articles*
+	 for article-name in *handled-articles*
 	 for article-uri = (format nil "/article/~a" article-name)
-	 for title-escaped = (escape-string title)
 	 do
-	   (htm
-	    (:tr
-	     ((:td :class "article-name")
-	      ((:a :href article-uri :title title-escaped)
-	       (str article-name)))
-	     ((:td :class "article-title") (str title)))))))
+	   (let ((bib-entry (member article-name *mml-lar*
+				    :key #'first
+				    :test #'string=)))
+	     (if bib-entry
+		 (destructuring-bind (identifier title author)
+		     (car bib-entry)
+		   (declare (ignore identifier author))
+		   (let ((title-escaped (escape-string title)))
+		     (htm
+		      (:tr
+		       ((:td :class "article-name")
+			((:a :href article-uri :title title-escaped)
+			 (str article-name)))
+		       ((:td :class "article-title") (str title))))))
+		 (htm
+		  (:tr
+		   ((:td :class "article-name"))
+		   ((:a :href article-uri :title (str article-name))
+		    (str article-name))
+		   ((:td :class "article-title") "(no title was supplied)"))))))))
     (:h1 "getting started")
     (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
     (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.") 
