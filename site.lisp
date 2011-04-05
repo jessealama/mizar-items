@@ -25,6 +25,8 @@
 	  " "
 	  ((:a :href "/about") "about")
 	  " "
+	  ((:a :href "/articles") "articles")
+	  " "
 	  ((:a :href "/landmarks") "landmarks")
 	  " "
 	  ((:a :href "/random-item") "random-item")
@@ -635,13 +637,8 @@ end;"))
 			    (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
 		   (htm (:p (:em "(No fragment immediately depends on this one.)")))))))))))))
 
-(defun emit-main-page ()
-  (miz-item-html (str "fine-grained dependencies in mizar")
-    (:h1 "welcome")
-    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
-    get a handle on the large contents of the MML.")
-    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
-    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (count-dependency-graph-edges))) " edges.")
+(defun emit-articles-page ()
+  (miz-item-html "articles from the mml"
     (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
@@ -672,9 +669,17 @@ end;"))
 		   ((:td :class "article-name")
 		    ((:a :href article-uri :title article-name)
 		     (str article-name)))
-		   ((:td :class "article-title") "(no title was supplied)"))))))))
+		   ((:td :class "article-title") "(no title was supplied)"))))))))))
+
+(defun emit-main-page ()
+  (miz-item-html (str "fine-grained dependencies in mizar")
+    (:h1 "welcome")
+    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
+    get a handle on the large contents of the MML.")
+    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
+    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (count-dependency-graph-edges))) " edges.")
     (:h1 "getting started")
-    (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
+    (:p "One can visit " ((:a :href "/articles") "the complete list of handled articles") ".  Alternatively, one can visit " ((:a :href "/random-item") " a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
     (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.") 
     (:h1 "learning more about" (:tt "MIZAR"))
     (:p "The " (:tt "MIZAR") " system and its library, the MML, are rather complex.  To learn more about the system, see the excellent overview article")
@@ -733,6 +738,8 @@ end;"))
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   ;; feedback page
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
+  ;; articles page
+  (register-exact-uri-dispatcher "/articles" #'emit-articles-page)
   (register-exact-uri-dispatcher "/landmarks" #'emit-landmarks-page)
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
