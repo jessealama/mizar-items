@@ -126,6 +126,14 @@
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defvar *handled-articles* nil
+  "Articles that we can handle (i.e., articles for which we have
+accurate dependency information and which are stored properly.")
+
+(defvar *unhandled-articles* nil
+  "Articles that might be present in our dependency data, but
+  which we do not handle.")
+
 (defun fragment-< (item-name-1 item-name-2)
   (destructuring-bind (item-article-name-1 item-num-as-str-1)
       (split ":" item-name-1)
@@ -414,46 +422,51 @@ end;"))
 (defun emit-article-page ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
-      (if (member article *articles* :key #'car :test #'string=)
-	  (let ((num-items (gethash article *article-num-items*)))
-	    (miz-item-html (fmt "~a" article)
-	      (:p "The article " (str article) " has " (:b (str num-items)) " items ")
-	     (:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
-	     (htm
-	      ((:ol :class "fragment-listing")
-	       (loop
-		  with article-dir = (format nil "~a/~a" (mizar-items-config 'itemization-source) article)
-		  with article-text-dir = (format nil "~a/text" article-dir)
-		  for i from 1 upto num-items
-		  for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
-		  for item-html = (file-as-string fragment-path)
-		  for item-uri = (format nil "/fragment/~a/~d" article i)
-		  do
-		    (htm
-		     ((:li :class "fragment-listing")
-		      ((:a :href item-uri :class "fragment-listing")
-		       (str item-html)))))))))
-	  (progn
-	    (setf (return-code *reply*) +http-not-found+)
-	    (miz-item-html "article not found"
-	      (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
-	      ((:table :class "article-listing" :rules "rows")
-	       (:thead
-		(:tr
-		 (:th "MML Name")
-		 (:th "Title")))
-	       (:tbody
-		(loop
-		   for (article-name . title) in *articles*
-		   for article-uri = (format nil "/article/~a" article-name)
-		   for title-escaped = (escape-string title)
-		   do
-		     (htm
-		      (:tr
-		       ((:td :class "article-name")
-			((:a :href article-uri :title title-escaped)
-			 (str article-name)))
-		       ((:td :class "article-title") (str title))))))))))))
+    (if (member article *mml-lar* :key #'car :test #'string=)
+	(if (member article *handled-articles* :test #'string=)
+	    (let ((num-items (gethash article *article-num-items*)))
+	      (miz-item-html (fmt "~a" article)
+		(:p "The article " (str article) " has " (:b (str num-items)) " items ")
+		(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
+		(htm
+		 ((:ol :class "fragment-listing")
+		  (loop
+		     with article-dir = (format nil "~a/~a" (mizar-items-config 'itemization-source) article)
+		     with article-text-dir = (format nil "~a/text" article-dir)
+		     for i from 1 upto num-items
+		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+		     for item-html = (file-as-string fragment-path)
+		     for item-uri = (format nil "/fragment/~a/~d" article i)
+		     do
+		       (htm
+			((:li :class "fragment-listing")
+			 ((:a :href item-uri :class "fragment-listing")
+			  (str item-html)))))))))
+	    (progn
+	      (setf (return-code *reply*) +http-not-found+)
+	      (miz-item-html "article cannot be displayed"
+		(:p "The article '" (fmt "~a" article) "' is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
+	(progn
+	  (setf (return-code *reply*) +http-not-found+)
+	  (miz-item-html "article not found"
+	    (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
+	    ((:table :class "article-listing" :rules "rows")
+	     (:thead
+	      (:tr
+	       (:th "MML Name")
+	       (:th "Title")))
+	     (:tbody
+	      (loop
+		 for (article-name title author) in *articles*
+		 for article-uri = (format nil "/article/~a" article-name)
+		 for title-escaped = (escape-string title)
+		 do
+		   (htm
+		    (:tr
+		     ((:td :class "article-name")
+		      ((:a :href article-uri :title title-escaped)
+		       (str article-name)))
+		     ((:td :class "article-title") (str title))))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
@@ -710,10 +723,11 @@ end;"))
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
   (when articles
     (loop
-       for (article . title) in (if (eq articles :all) 
-				    *articles*
-				    (first-n *articles* articles))
+       for article in (if (eq articles :all)
+			      *mml-lar*
+			      (first-n *mml-lar* articles))
        do
+	 (push article *handled-articles*)
 	 (let* ((article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article))
 		(miz-uri (format nil "/~a.miz" article))
 		(miz-path (format nil "~a/~a.miz" article-dir article))
@@ -724,7 +738,11 @@ end;"))
 	   ;; static files for the whole article
 	   (register-static-file-dispatcher miz-uri miz-path "text/plain")
 	   (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
-	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))))
+	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))
+       finally
+	 (when (integerp articles)
+	   (setf *unhandled-articles* (last-n *mml-lar*
+					      (- (length *mml-lar*) articles))))))
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
   (register-regexp-dispatcher +fragment-uri-regexp+ #'emit-fragment-page)
   (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
