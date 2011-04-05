@@ -477,6 +477,22 @@ end;"))
   (let ((exact-uri (exact-regexp uri)))
     `(register-regexp-dispatcher ,exact-uri ,dispatcher)))
 
+(defun split-item-identifier (item-string)
+  (split ":" item-string))
+
+(defun html-path-for-item (item-string)
+  (destructuring-bind (article-name item-kind item-number)
+      (split-item-identifier item-string)
+    (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	   (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	   (article-text-dir (format nil "~a/text" article-dir)))
+      (when ckb-for-item
+	(destructuring-bind (ckb-article-name ckb-number)
+	    (split-item-identifier ckb-for-item)
+	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
+	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
+
 (defun emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number)
       (+item-uri-regexp+ (request-uri*))
@@ -628,6 +644,9 @@ end;"))
       ((:a :href "http://markun.cs.shinshu-u.ac.jp/mizar/mma.dir/2005/mma2005(2).pdf") "MIZAR: The first 30 years")
       "&rdquo; , by Roman Mutuszewski and Piotr Rudnicki, " (:em "Mechanized Mathematics and its Applications") (:b "4") "(1), (2005), pp. 3&ndash;24"))
     (:p "At the moment, this site is not really interactive: you can't work with " (:tt "MIZAR") " texts here.  If you'd like to get your hands dirty, you might want to visit " ((:a :href "http://mws.cs.ru.nl/mwiki/") "the " (:tt "MIZAR") " wiki") " project at Radboud University Nijmegen.")))
+
+(defun item-uri (item-identifier)
+  (format nil "/item/~a" (substitute #\/ #\: item-identifier)))
      
 (defun emit-landmarks-page ()
   (miz-item-html "landmarks"
@@ -642,25 +661,44 @@ end;"))
 	  (htm
 	   (:dt (fmt "~d. ~a" i theorem-name))
 	   (:dd
-	    (let ((formalizations (gethash i +mizar-formalized+)))
-	      (if formalizations
-		  (if (cdr formalizations) ; more than one formalization
-		      (htm
-		       (:ul
-			(dolist (formalization formalizations)
-			  (let ((formalization-uri (format nil "/item/~a" formalization)))
-			    (htm
-			     (:li ((:a :href formalization-uri
-				       :title theorem-name-escaped)
-				   (str formalization))))))))
-		      (let* ((formalization (car formalizations))
-			     (formalization-uri (format nil "/item/~a" formalization)))
-			(htm
-			 ((:a :href formalization-uri
-			      :title theorem-name-escaped)
-			  (str formalization)))))
-		  (htm
-		   (:em "(not yet formalized in " (:tt "MIZAR") ")"))))))))))
+	    (:p
+	     (let ((formalizations (gethash i +mizar-formalized+)))
+	       (if formalizations
+		   (if (cdr formalizations) ; more than one formalization
+		       (htm
+			(:ul
+			 (dolist (formalization formalizations)
+			   (let* ((formalization-uri (item-uri formalization))
+				  (formalization-html-path (html-path-for-item formalization))
+				  (formalization-html (if formalization-html-path
+							  (if (file-exists-p formalization-html-path)
+							      (file-as-string formalization-html-path)
+							      "(HTML representation not present)")
+							  "(HTML representation not present)")))
+			     (htm
+			      (:li ((:a :href formalization-uri
+					:title theorem-name-escaped)
+				    (str formalization-html))))))))
+		       (let* ((formalization (car formalizations))
+			      (formalization-uri (item-uri formalization))
+			      (formalization-html-path (html-path-for-item formalization))
+			      (formalization-html (if formalization-html-path
+						      (if (file-exists-p formalization-html-path)
+							  (file-as-string formalization-html-path)
+							  "(HTML representation not present)")
+						      "(HTML representation not present)")))
+			 (htm
+			  ((:a :href formalization-uri
+			       :title theorem-name-escaped)
+			   (str formalization-html)))))
+		   (htm
+		    (:em "(not yet formalized in " (:tt "MIZAR") ")")))))
+	    (let ((100theorems-uri (format nil "http://www.cs.ru.nl/~~freek/100/#~d" i))
+		  (100theorems-title (format nil "Known formalizations of: ~a" theorem-name-escaped)))
+	      (htm
+	       (:p "[" ((:a :href 100theorems-uri
+			    :title 100theorems-title)
+			"other formalizations") "]")))))))))
 
 (defun emit-feedback-page ()
   (miz-item-html "feedback"
