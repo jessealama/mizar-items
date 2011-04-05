@@ -398,12 +398,13 @@ end;"))
 		     with article-dir = (format nil "~a/~a" (mizar-items-config 'itemization-source) article)
 		     with article-text-dir = (format nil "~a/text" article-dir)
 		     for i from 1 upto num-items
+		     for i-str = (format nil "~d" i)
 		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
 		     for item-html = (file-as-string fragment-path)
 		     for item-uri = (format nil "/fragment/~a/~d" article i)
 		     do
 		       (htm
-			((:li :class "fragment-listing")
+			((:li :class "fragment-listing" :id i-str)
 			 ((:a :href item-uri :class "fragment-listing")
 			  (str item-html)))))))))
 	    (progn
