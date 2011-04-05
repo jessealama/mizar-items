@@ -87,5 +87,3 @@ returning NIL."
   (when (= error-code +http-not-found+)
     (miz-item-html "No"
       (:p "I still haven't found what you're looking for."))))
-
-(setq *http-error-handler* #'handle-http-error)
