@@ -244,7 +244,7 @@
   (if (or force (null *article-num-items*))
     (loop
        with num-items-table = (make-hash-table :test #'equal)
-       for (article-name . title) in *articles*
+       for (article-name title author) in *articles*
        do
 	 (let ((article-dir (concat (mizar-items-config 'itemization-source) "/" article-name "/" "text")))
 	   (setf (gethash article-name num-items-table)
