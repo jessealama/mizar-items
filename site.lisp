@@ -727,7 +727,7 @@ end;"))
 			      *mml-lar*
 			      (first-n *mml-lar* articles))
        do
-	 (push article *handled-articles*)
+	 (pushnew article *handled-articles* :test #'string=)
 	 (let* ((article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article))
 		(miz-uri (format nil "/~a.miz" article))
 		(miz-path (format nil "~a/~a.miz" article-dir article))
