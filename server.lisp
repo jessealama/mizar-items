@@ -2,6 +2,44 @@
 (in-package :mizar)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; HTML output
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro miz-item-html (title &body body)
+  `(with-html
+     (:head 
+      ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
+      ((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
+      ((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
+      ((:script :src "/mhtml.js" :type "text/ecmascript"))
+      (:title ,title))
+     (:body
+      ((:table :border "1"
+	       :summary "navigation"
+	       :class "header"
+	       :width "100%")
+       (:tr
+	(:td
+	 ((:span :class "menu")
+	  ((:a :href "/") "main")
+	  " | "
+	  ((:a :href "/about") "about")
+	  " | "
+	  ((:a :href "/articles") "articles")
+	  " | "
+	  ((:a :href "/landmarks") "landmarks")
+	  " | "
+	  ((:a :href "/random-item") "random-item")
+	  " | "
+	  ((:a :href "/random-path") "random-path")))))
+      ,@body
+      (:hr)
+      ((:div :class "footer")
+       ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
+       ((:span :class "menu")
+	"Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Server and application setup
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
