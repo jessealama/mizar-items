@@ -27,6 +27,8 @@ returning NIL."
   (format t "Loading article item counts...")
   (load-article-num-items reload-graphs)
   (format t "done.~%")
+  (multiple-value-setq (*item-to-ckb-table* *ckb-to-items-table*)
+    (load-item-to-fragment-table))
   ;; (when (or reload-graphs (null *graphs-loaded*))
   ;;   (load-dependency-graphs reload-graphs))
   (format t "Initializing URIs...")
