@@ -632,7 +632,35 @@ end;"))
 (defun emit-landmarks-page ()
   (miz-item-html "landmarks"
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
-    (:p "One might also be interested in the list of " ((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")))
+    (:p "One might also be interested in the list of " ((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
+    (:dl
+     (loop
+	for i from 1 upto 100
+	for theorem-name across +100-theorems+
+	for theorem-name-escaped = (escape-string theorem-name)
+	do
+	  (htm
+	   (:dt (fmt "~d. ~a" i theorem-name))
+	   (:dd
+	    (let ((formalizations (gethash i +mizar-formalized+)))
+	      (if formalizations
+		  (if (cdr formalizations) ; more than one formalization
+		      (htm
+		       (:ul
+			(dolist (formalization formalizations)
+			  (let ((formalization-uri (format nil "/item/~a" formalization)))
+			    (htm
+			     (:li ((:a :href formalization-uri
+				       :title theorem-name-escaped)
+				   (str formalization))))))))
+		      (let* ((formalization (car formalizations))
+			     (formalization-uri (format nil "/item/~a" formalization)))
+			(htm
+			 ((:a :href formalization-uri
+			      :title theorem-name-escaped)
+			  (str formalization)))))
+		  (htm
+		   (:em "(not yet formalized in " (:tt "MIZAR") ")"))))))))))
 
 (defun emit-feedback-page ()
   (miz-item-html "feedback"
