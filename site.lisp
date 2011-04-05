@@ -568,24 +568,27 @@ end;"))
 				      ckb-number))
 	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
-	    (:p (str item-key) " is fragment #" (str ckb-number) " of article " (str article-name) ".")
-	    (if (null (cdr items-for-ckb))
-		(let ((item (car items-for-ckb)))
-		  (destructuring-bind (item-article item-kind item-number)
-		      item
-		    (let ((item-uri (format nil "/item/~a/~a/~a" item-article item-kind item-number)))
-		      (htm 
-		       (:p "This fragment generates only one item: " ((:a :href item-uri) (str item)) ".")))))
-		(htm
-		 (:p "This fragment generates multiple items:")
-		 ((:ul :class "dep-list")
-		  (dolist (other-item items-for-ckb)
-		    (destructuring-bind (other-item-article other-item-kind other-item-number)
-			(split ":" other-item)
-		      (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
-			(htm
-			 (:li ((:a :href other-item-uri) (str other-item))))))))))
-	    (str item-html)))))))
+	    (let ((fragment-uri (format nil "/fragment/~a/~d" article-name ckb-number))
+		  (article-uri (format nil "/article/~a" article-name)))
+	      (htm
+	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri) (str article-name)) ".")
+	       (if (null (cdr items-for-ckb))
+		   (let ((item (car items-for-ckb)))
+		     (destructuring-bind (item-article item-kind item-number)
+			 (split ":" item)
+		       (let ((item-uri (format nil "/item/~a/~a/~a" item-article item-kind item-number)))
+			 (htm 
+			  (:p "This fragment generates only one item: " ((:a :href item-uri) (str item)) ".")))))
+		   (htm
+		    (:p "This fragment generates multiple items:")
+		    ((:ul :class "dep-list")
+		     (dolist (other-item items-for-ckb)
+		       (destructuring-bind (other-item-article other-item-kind other-item-number)
+			   (split ":" other-item)
+			 (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
+			   (htm
+			    (:li ((:a :href other-item-uri) (str other-item))))))))))
+	       (str item-html)))))))))
 
 (defun emit-articles-page ()
   (miz-item-html "articles from the mml"
