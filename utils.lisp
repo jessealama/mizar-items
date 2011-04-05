@@ -301,6 +301,15 @@ LIST; otherwise, return T and NIL."
      summing (length v) into num-edges
      finally (return num-edges)))
 
+(defun hash-table-from-keys-and-values (test &rest keys-and-values)
+  (loop
+     with table = (make-hash-table :test test)
+     for (key . value) in keys-and-values
+     do
+       (setf (gethash key table) value)
+     finally
+       (return table)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
