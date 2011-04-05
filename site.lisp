@@ -483,7 +483,7 @@ end;"))
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
      (unless (file-exists-p ,path)
-       (error "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
+       (warn "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
      (push (create-static-file-dispatcher-and-handler ,uri 
 						      ,path
 						      ,mime-type)
