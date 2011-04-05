@@ -298,3 +298,26 @@
 
 (defun count-dependency-graph-edges ()
   (count-hash-table-keys *item-dependency-graph-backward*))
+
+(defun items-for-article (article)
+  (loop
+     with items = nil
+     for k being the hash-keys of *item-dependency-graph-forward*
+     for (key-article key-kind key-number) = (split ":" k)
+     do
+       (when (string= article key-article)
+	 (pushnew k items :test #'string=))
+     finally
+       (return items)))
+
+(defun items-of-kind-for-article (article kind)
+  (loop
+     with items = nil
+     for k being the hash-keys of *item-dependency-graph-forward*
+     for (key-article key-kind key-number) = (split ":" k)
+     do
+       (when (and (string= article key-article)
+		  (string= kind key-kind))
+	 (pushnew k items :test #'string=))
+     finally
+       (return items)))
