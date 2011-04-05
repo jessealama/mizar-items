@@ -568,7 +568,7 @@ end;"))
 				      ckb-number))
 	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
-	    (let ((fragment-uri (format nil "/fragment/~a/~d" article-name ckb-number))
+	    (let ((fragment-uri (format nil "/article/~a/#~d" article-name ckb-number))
 		  (article-uri (format nil "/article/~a" article-name)))
 	      (htm
 	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri) (str article-name)) ".")
