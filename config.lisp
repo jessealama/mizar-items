@@ -51,7 +51,9 @@
 (update-mizar-items-config 'server-messages-log-file
 			   "/tmp/mizar-items-messages")
 (update-mizar-items-config 'itemization-source
-			   "/Users/alama/sources/mizar/mizar-items/itemization")
+			   "/Users/alama/sources/mizar/mizar-items/itemization-brutalized")
+(update-mizar-items-config 'html-source
+			   "/Users/alama/sources/mizar/mizar-items/itemization-non-brutalized")
 
 (defun mizar-items-config (key)
   (gethash key *mizar-items-config*))
