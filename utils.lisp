@@ -284,6 +284,32 @@ LIST; otherwise, return T and NIL."
      finally
        (return nil)))
 
+(defun keys-with-rest->hash-table (keys)
+  "Given a list of lists of the form (KEY1 . REST1), make a hash table whose keys are the KEYs, and whose values are the associated RESTs."
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for (key . val) in keys
+     do
+       (setf (gethash key table) val)
+     finally 
+       (return table)))
+
+(defun count-hash-table-keys (table)
+  "Assuming that all values of the hash table TABLE are sequences, sum the length of all of them."
+  (loop
+     for v being the hash-values in table
+     summing (length v) into num-edges
+     finally (return num-edges)))
+
+(defun hash-table-from-keys-and-values (test &rest keys-and-values)
+  (loop
+     with table = (make-hash-table :test test)
+     for (key . value) in keys-and-values
+     do
+       (setf (gethash key table) value)
+     finally
+       (return table)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
