@@ -391,6 +391,9 @@ end;"))
 	    (let ((num-items (gethash article *article-num-items*)))
 	      (miz-item-html (fmt "~a" article)
 		(:p "The article " (str article) " has " (:b (str num-items)) " items ")
+		(when (zerop num-items)		  
+		  (htm
+		   (:p "(Zero items?  How did that happen?")))
 		(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
 		(htm
 		 ((:ol :class "fragment-listing")
