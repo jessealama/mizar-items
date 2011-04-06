@@ -1,4 +1,4 @@
-#!/bin/sh -
+#!/bin/bash -
 
 mmllar=`cat $MIZFILES/mml.lar`;
 itemization_source=/local/data/alama;
