@@ -74,15 +74,15 @@ close (FRAGMENT_DEPGRAPH)
 warn "Done loading the fragment dependency graph at '$fragment_depgraph_file";
 
 # print the fragment depgraph
-foreach my $key (keys %fragment_depgraph) {
-  my $val_ref = $fragment_depgraph{$key};
-  my @vals = @{$val_ref};
-  print $key;
-  foreach my $val (@vals) {
-    print ' ', $val;
-  }
-  print "\n";
-}
+# foreach my $key (keys %fragment_depgraph) {
+#   my $val_ref = $fragment_depgraph{$key};
+#   my @vals = @{$val_ref};
+#   print $key;
+#   foreach my $val (@vals) {
+#     print ' ', $val;
+#   }
+#   print "\n";
+# }
 
 # load the item-to-fragment table
 my %item_to_fragment = ();
