@@ -232,14 +232,23 @@ my %mml_name_to_item_number
      'tarski:theorem:9' => 'tarski:16',
      );
 
-my %hidden_items 
-  = ('set:pattern' => 'hidden:mpattern:1',
-     'set:constructor' => 'hidden:mconstructor:1',
-     '=:constructor' => 'hidden:rconstructor:1',
-     '=:pattern' => 'hidden:rpattern:1',
-     '<>:pattern' => 'hidden:rpattern:2',
-     'in:constructor' => 'hidden:rconstructor:2',
-     'in:pattern' => 'hidden:rpattern:3');
+# my %hidden_items 
+#   = ('set:pattern' => 'hidden:mpattern:1',
+#      'set:constructor' => 'hidden:mconstructor:1',
+#      '=:constructor' => 'hidden:rconstructor:1',
+#      '=:pattern' => 'hidden:rpattern:1',
+#      '<>:pattern' => 'hidden:rpattern:2',
+#      'in:constructor' => 'hidden:rconstructor:2',
+#      'in:pattern' => 'hidden:rpattern:3');
+
+my %hidden_items
+  = ('set:pattern' => 'hidden:1',
+     'set:constructor' => 'hidden:1',
+     '=:constructor' => 'hidden:2',
+     '=:pattern' => 'hidden:2',
+     '<>:pattern' => 'hidden:3',
+     'in:constructor' => 'hidden:4',
+     'in:pattern' => 'hidden:4');
 
 {
   my %num_propositions_for_article = ();
