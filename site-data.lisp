@@ -5,10 +5,8 @@
 ;;; Static data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *itemization-source* "/local/data/alama/non-brutalized-itemizations")
-
+(defvar *mml-version* nil)
 (defvar *item-to-item-dependency-graph* nil)
-(defvar *num-dependency-graph-edges* nil)
 (defvar *ckb-dependency-graph-forward* nil)
 (defvar *ckb-dependency-graph-backward* nil)
 (defvar *item-dependency-graph-forward* nil)
@@ -208,19 +206,17 @@
   (when (or force (null *item-to-item-dependency-graph*)) 
     (setf *item-to-item-dependency-graph* (load-item-to-item-depgraph)))
 
-  (when (or (null *item-dependency-graph-forward*)
-	    (null *item-dependency-graph-backward*))
-    (multiple-value-setq (*item-dependency-graph-forward*
-			  *item-dependency-graph-backward*)
-      (dependency-tables-from-edge-list)))
-
   ;; if the full vertex-neighbors dependency graph doesn't exist, make
   ;; it and write it to disk, no matter the value of FORCE
   (let ((forward-path (mizar-items-config 'vertex-neighbors-forward-graph-path))
 	(backward-path (mizar-items-config 'vertex-neighbors-backward-graph-path)))
     (if (or (not (file-exists-p forward-path))
 	    (not (file-exists-p backward-path)))
-	(write-vertex-neighbors-dependency-graphs)
+	(progn
+	  (multiple-value-setq (*item-dependency-graph-forward*
+				*item-dependency-graph-backward*)
+	    (dependency-tables-from-edge-list))
+	  (write-vertex-neighbors-dependency-graphs))
 	(format t "The item-to-items dependency graphs already exist; not recomputing them.~%")))
 
   (when (or force
@@ -248,12 +244,80 @@
   (if (or force (null *article-num-items*))
     (loop
        with num-items-table = (make-hash-table :test #'equal)
-       for (article-name . title) in *articles*
+       for (article-name title author) in *articles*
        do
-	 (let ((article-dir (concat *itemization-source* "/" article-name "/" "text")))
+	 (let ((article-dir (concat (mizar-items-config 'itemization-source) "/" article-name "/" "text")))
 	   (setf (gethash article-name num-items-table)
 		 (count-miz-in-directory article-dir)))
        finally
 	 (setf *article-num-items* num-items-table)
 	 (return *article-num-items*))
     *article-num-items*))
+
+(defun load-mml (mml-version)
+  (let ((data-path-lisp (format nil "data/~a.lisp" mml-version))
+	(data-path-lisp-xz (format nil "data/~a.lisp.xz" mml-version))
+	(data-path-fasl (format nil "data/~a.fasl" mml-version)))
+    (when (file-exists-p data-path-lisp-xz)
+      (when (or (and (file-exists-p data-path-lisp)
+		     (< (file-write-date data-path-lisp)
+			(file-write-date data-path-lisp-xz)))
+		(not (file-exists-p data-path-lisp)))
+	(format t "Decompressing data at '~a'..." data-path-lisp-xz)
+	(let* ((xz-truename (namestring (truename data-path-lisp-xz)))
+	       (process (sb-ext:run-program "unxz" (list xz-truename) :search t)))
+	  (unless (zerop (sb-ext:process-exit-code process))
+	    (error "There was a problem decompressing the compressed data!")))
+	(format t "done~%")))
+    (unless (file-exists-p data-path-lisp)
+      (error "Cannot load data for MML version ~a because there is no
+      data file at the expected location '~a'" mml-version data-path-lisp))
+    (when (or (not (file-exists-p data-path-fasl))
+	      (< (file-write-date data-path-fasl)
+		 (file-write-date data-path-lisp)))
+      (unless (compile-file data-path-lisp)
+	(error "Something went wrong compiling the data file for MML version ~a at '~a'" mml-version data-path-lisp)))
+    (unless (file-exists-p data-path-fasl)
+      (error "Althought we just compiled the data for MML version ~a, there is no FASL file at the expected location '~a'" mml-version data-path-fasl))
+    (format t "Loading data for MML version ~a..." mml-version)
+    (load data-path-fasl)
+    (format t "done~%")
+    (when (or (null *item-dependency-graph-backward*)
+	      (null *item-dependency-graph-forward*))
+      (error "We loaded the dependency data for MML version ~a at '~a', but the dependency graphs do not have initialized values" mml-version data-path-fasl))
+    ;; accumulate all items
+    (loop
+       initially
+	 (setf *all-items* (make-hash-table :test #'equal))
+       for k being the hash-key in *item-dependency-graph-forward*
+       for vals being the hash-value in *item-dependency-graph-forward*
+       do
+	 (setf (gethash k *all-items*) t)
+	 (dolist (val vals)
+	   (setf (gethash val *all-items*) t)))))
+
+(defun count-dependency-graph-edges ()
+  (count-hash-table-keys *item-dependency-graph-backward*))
+
+(defun items-for-article (article)
+  (loop
+     with items = nil
+     for k being the hash-keys of *item-dependency-graph-forward*
+     for (key-article key-kind key-number) = (split ":" k)
+     do
+       (when (string= article key-article)
+	 (pushnew k items :test #'string=))
+     finally
+       (return items)))
+
+(defun items-of-kind-for-article (article kind)
+  (loop
+     with items = nil
+     for k being the hash-keys of *item-dependency-graph-forward*
+     for (key-article key-kind key-number) = (split ":" k)
+     do
+       (when (and (string= article key-article)
+		  (string= kind key-kind))
+	 (pushnew k items :test #'string=))
+     finally
+       (return items)))

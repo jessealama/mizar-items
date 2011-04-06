@@ -2,40 +2,6 @@
 (in-package :mizar)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; HTML output
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmacro miz-item-html (title &body body)
-  `(with-html
-     (:head 
-      ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
-      ((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
-      ((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
-      ((:script :src "/mhtml.js" :type "text/ecmascript"))
-      (:title ,title))
-     (:body
-      ((:table :border "1"
-	       :summary "navigation"
-	       :class "header"
-	       :width "100%")
-       (:tr
-	(:td
-	 ((:span :class "menu")
-	  ((:a :href "/") "main")
-	  " "
-	  ((:a :href "/about") "about")
-	  " "
-	  ((:a :href "/random-item") "random-item")
-	  " "
-	  ((:a :href "/random-path") "random-path")))))
-      ,@body
-      (:hr)
-      ((:div :class "footer")
-       ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
-       ((:span :class "menu")
-	"Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -123,6 +89,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar *handled-articles* nil
+  "Articles that we can handle (i.e., articles for which we have
+accurate dependency information and which are stored properly.")
+
+(defvar *unhandled-articles* nil
+  "Articles that might be present in our dependency data, but
+  which we do not handle.")
 
 (defun fragment-< (item-name-1 item-name-2)
   (destructuring-bind (item-article-name-1 item-num-as-str-1)
@@ -412,24 +386,52 @@ end;"))
 (defun emit-article-page ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
-    (let ((num-items (gethash article *article-num-items*)))
-      (miz-item-html (fmt "~a" article)
-	(:p "The article " (str article) " has " (:b (str num-items)) " items ")
-	(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
-	(htm
-	 ((:ol :class "fragment-listing")
-	  (loop
-	     with article-dir = (format nil "~a/~a" *itemization-source* article)
-	     with article-text-dir = (format nil "~a/text" article-dir)
-	     for i from 1 upto num-items
-	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
-	     for item-html = (file-as-string fragment-path)
-	     for item-uri = (format nil "/fragment/~a/~d" article i)
-	     do
-	       (htm
-		((:li :class "fragment-listing")
-		 ((:a :href item-uri :class "fragment-listing")
-		  (str item-html)))))))))))
+    (if (member article *mml-lar* :test #'string=)
+	(if (member article *handled-articles* :test #'string=)
+	    (let ((num-items (gethash article *article-num-items*)))
+	      (miz-item-html (fmt "~a" article)
+		(:p "The article " (str article) " has " (:b (str num-items)) " items ")
+		(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
+		(htm
+		 ((:ol :class "fragment-listing")
+		  (loop
+		     with article-dir = (format nil "~a/~a" (mizar-items-config 'itemization-source) article)
+		     with article-text-dir = (format nil "~a/text" article-dir)
+		     for i from 1 upto num-items
+		     for i-str = (format nil "~d" i)
+		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+		     for item-html = (file-as-string fragment-path)
+		     for item-uri = (format nil "/fragment/~a/~d" article i)
+		     do
+		       (htm
+			((:li :class "fragment-listing" :id i-str)
+			 ((:a :href item-uri :class "fragment-listing")
+			  (str item-html)))))))))
+	    (progn
+	      ; (setf (return-code *reply*) +http-not-found+)
+	      (miz-item-html "article cannot be displayed"
+		(:p "The article '" (fmt "~a" article) "' is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
+	(progn
+	  ; (setf (return-code *reply*) +http-not-found+)
+	  (miz-item-html "article not found"
+	    (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
+	    ((:table :class "article-listing" :rules "rows")
+	     (:thead
+	      (:tr
+	       (:th "MML Name")
+	       (:th "Title")))
+	     (:tbody
+	      (loop
+		 for (article-name title author) in *articles*
+		 for article-uri = (format nil "/article/~a" article-name)
+		 for title-escaped = (escape-string title)
+		 do
+		   (htm
+		    (:tr
+		     ((:td :class "article-name")
+		      ((:a :href article-uri :title title-escaped)
+		       (str article-name)))
+		     ((:td :class "article-title") (str title))))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
@@ -446,7 +448,7 @@ end;"))
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
      (unless (file-exists-p ,path)
-       (error "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
+       (warn "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
      (push (create-static-file-dispatcher-and-handler ,uri 
 						      ,path
 						      ,mime-type)
@@ -476,71 +478,88 @@ end;"))
   (let ((exact-uri (exact-regexp uri)))
     `(register-regexp-dispatcher ,exact-uri ,dispatcher)))
 
+(defun split-item-identifier (item-string)
+  (split ":" item-string))
+
+(defun html-path-for-item (item-string)
+  (destructuring-bind (article-name item-kind item-number)
+      (split-item-identifier item-string)
+    (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	   (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	   (article-text-dir (format nil "~a/text" article-dir)))
+      (when ckb-for-item
+	(destructuring-bind (ckb-article-name ckb-number)
+	    (split-item-identifier ckb-for-item)
+	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
+	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
+
 (defun emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number)
       (+item-uri-regexp+ (request-uri*))
-    (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
-	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
-	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
-	   (article-text-dir (format nil "~a/text" article-dir))
-	   (forward-deps (gethash item-key *item-dependency-graph-forward*))
-	   (backward-deps (gethash item-key *item-dependency-graph-backward*))
-	   (forward-deps-sorted (sort (copy-list forward-deps) 
-				      #'item-<))
-	   (backward-deps-sorted (sort (copy-list backward-deps)
-				       #'item-<)))
-      (destructuring-bind (ckb-article-name ckb-number)
-	  (split ":" ckb-for-item)
-	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((fragment-path (format nil "~a/ckb~d.html"
-				      article-text-dir
-				      ckb-number))
-	       (item-html (file-as-string fragment-path)))
-	  (miz-item-html (str item-key)
-	    ((:table :width "100%")
-	     ((:tr :valign "top")
-	      (:td (str item-html)))
-	     ((:tr :valign "middle")
-	      ((:td :class "fullwidth" :align "center")
-	       ((:table :rules "cols")
-		(:tr
-		 ((:td :align "center" :class "arrow")
-		  (str "&#8593;"))
-		 ((:td :align "center" :class "arrow")
-		  (str "&#8595;")))
-		((:tr :valign "top")
-		 ((:td :class "halfwidth" :align "center")
-		  (if forward-deps-sorted
-		      (htm
-		       (:table
-			(:caption "Depends On")
-			(dolist (forward-dep forward-deps-sorted)
-			  (let ((dep-uri (link-for-item forward-dep)))
-			    (htm
-			     (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
-		      (htm (:p (:em "(This item immediately depends on nothing.)")))))
-		 ((:td :class "halfwidth" :align "center")
-		  (if backward-deps-sorted
-		      (htm
-		       (:table
-			(:caption "Supports")
-			(dolist (backward-dep backward-deps-sorted)
-			  (let ((dep-uri (link-for-item backward-dep)))
-			    (htm
-			     (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
-		  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))))
+    (if (member article-name *handled-articles* :test #'string=)
+	(let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	       (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	       (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	       (article-text-dir (format nil "~a/text" article-dir))
+	       (forward-deps (gethash item-key *item-dependency-graph-forward*))
+	       (backward-deps (gethash item-key *item-dependency-graph-backward*))
+	       (forward-deps-sorted (sort (copy-list forward-deps) 
+					  #'item-<))
+	       (backward-deps-sorted (sort (copy-list backward-deps)
+					   #'item-<)))
+	  (destructuring-bind (ckb-article-name ckb-number)
+	      (split ":" ckb-for-item)
+	    (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
+	    (let* ((fragment-path (format nil "~a/ckb~d.html"
+					  article-text-dir
+					  ckb-number))
+		   (item-html (file-as-string fragment-path)))
+	      (miz-item-html (str item-key)
+		((:table :width "100%")
+		 ((:tr :valign "top")
+		  (:td (str item-html)))
+		 ((:tr :valign "middle")
+		  ((:td :class "fullwidth" :align "center")
+		   ((:table :rules "cols")
+		    (:tr
+		     ((:td :align "center" :class "arrow")
+		      (str "&#8593;"))
+		     ((:td :align "center" :class "arrow")
+		      (str "&#8595;")))
+		    ((:tr :valign "top")
+		     ((:td :class "halfwidth" :align "center")
+		      (if forward-deps-sorted
+			  (htm
+			   (:table
+			    (:caption "Depends On")
+			    (dolist (forward-dep forward-deps-sorted)
+			      (let ((dep-uri (link-for-item forward-dep)))
+				(htm
+				 (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
+			  (htm (:p (:em "(This item immediately depends on nothing.)")))))
+		     ((:td :class "halfwidth" :align "center")
+		      (if backward-deps-sorted
+			  (htm
+			   (:table
+			    (:caption "Supports")
+			    (dolist (backward-dep backward-deps-sorted)
+			      (let ((dep-uri (link-for-item backward-dep)))
+				(htm
+				 (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
+			  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
+	(progn
+	  ; (setf (return-code *reply*) +http-not-found+)
+	  (miz-item-html "unhandled article"
+	    (:p "The article '" (str article-name) "' is not known, or not yet suitably processed for this site.  Please try again later."))))))
 
 (defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
       (+fragment-uri-regexp+ (request-uri*))
     (let* ((item-key (format nil "~a:~a" article-name item-number))
-	   (article-dir (format nil "~a/~a" *itemization-source* article-name))
+	   (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
-	   (items-for-ckb (gethash item-key *ckb-to-items-table*))
-	   (forward-deps (gethash item-key *ckb-dependency-graph-forward*))
-	   (backward-deps (gethash item-key *ckb-dependency-graph-backward*))
-	   (forward-deps-sorted (sort (copy-list forward-deps) #'fragment-<))
-	   (backward-deps-sorted (sort (copy-list backward-deps) #'fragment-<)))
+	   (items-for-ckb (gethash item-key *ckb-to-items-table*)))
       (destructuring-bind (ckb-article-name ckb-number)
 	  (split ":" item-key)
 	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
@@ -549,57 +568,30 @@ end;"))
 				      ckb-number))
 	       (item-html (file-as-string fragment-path)))
 	  (miz-item-html (str item-key)
-	    (:p (str item-key) " is fragment #" (str ckb-number) " of article " (str article-name) ".")
-	    (if (null (cdr items-for-ckb)) ; the CKB for this item generates only this item
-		(htm 
-		 (:p "This is the only item generated by the fragment."))
-		
-		(htm
-		 (:p "This fragment generates this item, as well as these other items:")
-		 ((:ul :class "dep-list")
-		  (dolist (other-item items-for-ckb)
-		    (destructuring-bind (other-item-article other-item-kind other-item-number)
-			(split ":" other-item)
-		      (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
-			(htm
-			 (:li ((:a :href other-item-uri) (str other-item))))))))))
-	    (:table
-	     ((:tr :valign "top")
-	      (:td 
-	       (if forward-deps-sorted
+	    (let ((fragment-uri (format nil "/article/~a/#~d" article-name ckb-number))
+		  (article-uri (format nil "/article/~a" article-name)))
+	      (htm
+	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri :class "article-name") (str article-name)) ".")
+	       (if (null (cdr items-for-ckb))
+		   (let ((item (car items-for-ckb)))
+		     (destructuring-bind (item-article item-kind item-number)
+			 (split ":" item)
+		       (let ((item-uri (format nil "/item/~a/~a/~a" item-article item-kind item-number)))
+			 (htm 
+			  (:p "This fragment generates only one item: " ((:a :href item-uri) (str item)) ".")))))
 		   (htm
-		    (:table
-		     (:caption "This fragment immediately depends on")
-		     (dolist (forward-dep forward-deps-sorted)
-		       (destructuring-bind (dep-name dep-num)
-			   (split ":" forward-dep)
-			 (let ((dep-uri (format nil "/fragment/~a/~a" dep-name dep-num)))
+		    (:p "This fragment generates multiple items:")
+		    ((:ul :class "dep-list")
+		     (dolist (other-item items-for-ckb)
+		       (destructuring-bind (other-item-article other-item-kind other-item-number)
+			   (split ":" other-item)
+			 (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
 			   (htm
-			    (:tr (:td ((:a :href dep-uri) (str forward-dep))))))))))
-		   (htm (:p (:em "(This fragment immediately depends on nothing.)")))))
-	      (:td (str "&lArr;"))
-	      (:td :rowspan 2 (str item-html))
-	      (:td (str "&rArr;"))
-	      (:td 
-	       (if backward-deps-sorted
-		   (htm
-		    (:table
-		     (:caption "These fragments immediately depends on this one:")
-		     (dolist (backward-dep backward-deps-sorted)
-		       (destructuring-bind (dep-name dep-num)
-			   (split ":" backward-dep)
-			 (let ((dep-uri (format nil "/fragment/~a/~a" dep-name dep-num)))
-			   (htm
-			    (:tr (:td ((:a :href dep-uri) (str backward-dep))))))))))
-		   (htm (:p (:em "(No fragment immediately depends on this one.)")))))))))))))
+			    (:li ((:a :href other-item-uri) (str other-item))))))))))
+	       (str item-html)))))))))
 
-(defun emit-main-page ()
-  (miz-item-html (str "fine-grained dependencies in mizar")
-    (:h1 "welcome")
-    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
-    get a handle on the large contents of the MML.")
-    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends") "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
-    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (length *dependency-graph*))) " edges.")
+(defun emit-articles-page ()
+  (miz-item-html "articles from the mml"
     (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
@@ -608,19 +600,40 @@ end;"))
        (:th "Title")))
      (:tbody
       (loop
-	 for (article-name . title) in *articles*
+	 for article-name in *handled-articles*
 	 for article-uri = (format nil "/article/~a" article-name)
-	 for title-escaped = (escape-string title)
 	 do
-	   (htm
-	    (:tr
-	     ((:td :class "article-name")
-	      ((:a :href article-uri :title title-escaped)
-	       (str article-name)))
-	     ((:td :class "article-title") (str title)))))))
+	   (let ((bib-entry (member article-name *articles*
+				    :key #'first
+				    :test #'string=)))
+	     (if bib-entry
+		 (destructuring-bind (identifier title author)
+		     (car bib-entry)
+		   (declare (ignore identifier author))
+		   (let ((title-escaped (escape-string title)))
+		     (htm
+		      (:tr
+		       ((:td :class "article-name")
+			((:a :href article-uri :title title-escaped)
+			 (str article-name)))
+		       ((:td :class "article-title") (str title))))))
+		 (htm
+		  (:tr
+		   ((:td :class "article-name")
+		    ((:a :href article-uri :title article-name)
+		     (str article-name)))
+		   ((:td :class "article-title") "(no title was supplied)"))))))))))
+
+(defun emit-main-page ()
+  (miz-item-html (str "fine-grained dependencies in mizar")
+    (:h1 "welcome")
+    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") " Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
+    get a handle on the large contents of the MML.")
+    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
+    (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (count-dependency-graph-edges))) " edges.")
     (:h1 "getting started")
-    (:p "One can inspect " ((:a :href "/random-item") "a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
-    (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
+    (:p "One can visit " ((:a :href "/articles") "the complete list of handled articles") ".  Alternatively, one can visit " ((:a :href "/random-item") " a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
+    (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.") 
     (:h1 "learning more about" (:tt "MIZAR"))
     (:p "The " (:tt "MIZAR") " system and its library, the MML, are rather complex.  To learn more about the system, see the excellent overview article")
     (:blockquote
@@ -635,8 +648,76 @@ end;"))
       ((:a :href "http://markun.cs.shinshu-u.ac.jp/mizar/mma.dir/2005/mma2005(2).pdf") "MIZAR: The first 30 years")
       "&rdquo; , by Roman Mutuszewski and Piotr Rudnicki, " (:em "Mechanized Mathematics and its Applications") (:b "4") "(1), (2005), pp. 3&ndash;24"))
     (:p "At the moment, this site is not really interactive: you can't work with " (:tt "MIZAR") " texts here.  If you'd like to get your hands dirty, you might want to visit " ((:a :href "http://mws.cs.ru.nl/mwiki/") "the " (:tt "MIZAR") " wiki") " project at Radboud University Nijmegen.")))
-     
 
+(defun item-uri (item-identifier)
+  (format nil "/item/~a" (substitute #\/ #\: item-identifier)))
+     
+(defun emit-landmarks-page ()
+  (miz-item-html "landmarks"
+    (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
+    (:p "This page is divided into the following sections:")
+    (:ul
+     (:li ((:a :href "#selected-list") "The site designer's biased list of notable theorems"))
+     (:li ((:a :href "#100theorems") "100 Theorems")))
+    ((:h1 :id "selected-list") "A selected list of landmarks")
+    (:p "The following is a selected list of some notable mathematical results that can be found in the " (:tt "MIZAR") " Mathematical Library.  What does 'notable' mean?  Obviously, it's a value term.  The following list has a bias towards results of metamathematical or foundational significance, which is what the site designer is especially interested in.  If you're not especially interested in mathematical logic, see the other section, " ((:a :href "#100theorems" :title "100 Theorems Formalized in Mizar") "100 Theorems Formalized in Mizar") ", for more mathematical contentful examples.")
+    (:ul
+     (:li ((:a :href "/item/tarski/theorem/9" :title "Tarski universe axiom") "Tarski universe axiom"))
+     (:li "Axiom of infinity")
+     (:li "Power set")
+     (:li "Axiom of choice")
+     (:li "Zorn's lemma")
+     (:li "Zermelo's well-ordering theorem")
+     (:li "All vector spaces have a basis"))
+    ((:h1 :id "100theorems") "100 Theorems")
+    (:p "The following is a list of 'notable' mathematical results formalized in " (:tt "MIZAR") ".  What does 'notable' mean here?  Certainly, it's a value term.  This list comes from Freek Wiedijk's "((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
+    (:dl
+     (loop
+	for i from 1 upto 100
+	for theorem-name across +100-theorems+
+	for theorem-name-escaped = (escape-string theorem-name)
+	do
+	  (htm
+	   (:dt (fmt "~d. ~a" i theorem-name))
+	   (:dd
+	    (:p
+	     (let ((formalizations (gethash i +mizar-formalized+)))
+	       (if formalizations
+		   (if (cdr formalizations) ; more than one formalization
+		       (htm
+			(:ul
+			 (dolist (formalization formalizations)
+			   (let* ((formalization-uri (item-uri formalization))
+				  (formalization-html-path (html-path-for-item formalization))
+				  (formalization-html (if formalization-html-path
+							  (if (file-exists-p formalization-html-path)
+							      (file-as-string formalization-html-path)
+							      "(HTML representation not present)")
+							  "(HTML representation not present)")))
+			     (htm
+			      (:li ((:a :href formalization-uri
+					:title theorem-name-escaped)
+				    (str formalization-html))))))))
+		       (let* ((formalization (car formalizations))
+			      (formalization-uri (item-uri formalization))
+			      (formalization-html-path (html-path-for-item formalization))
+			      (formalization-html (if formalization-html-path
+						      (if (file-exists-p formalization-html-path)
+							  (file-as-string formalization-html-path)
+							  "(HTML representation not present)")
+						      "(HTML representation not present)")))
+			 (htm
+			  ((:a :href formalization-uri
+			       :title theorem-name-escaped)
+			   (str formalization-html)))))
+		   (htm
+		    (:em "(not yet formalized in " (:tt "MIZAR") ")")))))
+	    (let ((100theorems-uri (format nil "http://www.cs.ru.nl/~~freek/100/#~d" i))
+		  (100theorems-title (format nil "Known formalizations of: ~a" theorem-name-escaped)))
+	      (htm
+	       (:p "[" ((:a :href 100theorems-uri
+			    :title 100theorems-title)
+			"other formalizations") "]")))))))))
 
 (defun emit-feedback-page ()
   (miz-item-html "feedback"
@@ -663,8 +744,11 @@ end;"))
   (register-static-file-dispatcher "/mizar-item-ckb-table"
 				   (mizar-items-config 'item-to-fragment-path)
 				   "text/plain")
-  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph"
-				   (mizar-items-config 'full-vertex-neighbors-dependency-graph)
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph-backward"
+				   (mizar-items-config 'vertex-neighbors-backward-graph-path)
+				   "text/plain")
+  (register-static-file-dispatcher "/full-vertex-neighbors-depgraph-forward"
+				   (mizar-items-config 'vertex-neighbors-forward-graph-path)
 				   "text/plain")
   ;; intro
   (register-exact-uri-dispatcher "/" #'emit-main-page)
@@ -672,6 +756,9 @@ end;"))
   (register-exact-uri-dispatcher "/about" #'emit-about-page)
   ;; feedback page
   (register-exact-uri-dispatcher "/feedback" #'emit-feedback-page)
+  ;; articles page
+  (register-exact-uri-dispatcher "/articles" #'emit-articles-page)
+  (register-exact-uri-dispatcher "/landmarks" #'emit-landmarks-page)
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
   (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
   (register-static-file-dispatcher "/favicon.ico" (mizar-items-config 'favicon-path))
@@ -679,11 +766,12 @@ end;"))
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
   (when articles
     (loop
-       for (article . title) in (if (eq articles :all) 
-				    *articles*
-				    (first-n *articles* articles))
+       for article in (if (eq articles :all)
+			      *mml-lar*
+			      (first-n *mml-lar* articles))
        do
-	 (let* ((article-dir (format nil "~a/~a" *itemization-source* article))
+	 (pushnew article *handled-articles* :test #'string=)
+	 (let* ((article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article))
 		(miz-uri (format nil "/~a.miz" article))
 		(miz-path (format nil "~a/~a.miz" article-dir article))
 		(prel-dir-uri (format nil "/~a/prel/" article))
@@ -693,7 +781,11 @@ end;"))
 	   ;; static files for the whole article
 	   (register-static-file-dispatcher miz-uri miz-path "text/plain")
 	   (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
-	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))))
+	   (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path))
+       finally
+	 (when (integerp articles)
+	   (setf *unhandled-articles* (last-n *mml-lar*
+					      (- (length *mml-lar*) articles))))))
   (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
   (register-regexp-dispatcher +fragment-uri-regexp+ #'emit-fragment-page)
   (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
