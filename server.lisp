@@ -84,6 +84,23 @@ returning NIL."
   t)
 
 (defun handle-http-error (error-code)
-  (when (= error-code +http-not-found+)
-    (miz-item-html "No"
-      (:p "I still haven't found what you're looking for."))))
+  (if (= error-code +http-not-found+)
+      (miz-item-html "not found"
+	(:p "I can't find what you're looking for.")
+	(:p "Your request was:")
+	(:dl
+	 (loop
+	    for (param . value) in (get-parameters*)
+	    do
+	      (htm
+	       (:dt param)
+	       (:dd value)))))
+      (miz-item-html "unprocessable"
+	(:p "We cannot make sense of your request:")
+	(:dl
+	 (loop
+	    for (param . value) in (get-parameters*)
+	    do
+	      (htm
+	       (:dt param)
+	       (:dd value)))))))
