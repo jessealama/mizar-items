@@ -2,9 +2,33 @@
 
 use strict;
 
+use Getopt::Long;
+
 my $itemization_source = '/Users/alama/sources/mizar/mizar-items/itemization';
-my $mml_lar = '/sw/share/mizar/mml.lar';
+my $mizfiles = $ENV{'MIZFILES'};
 my $items_needed_script = '/Users/alama/sources/mizar/mizar-items/items-needed-for-item.sh';
+my $ckb_ckb_depgraph = '/Users/alama/sources/mizar/mizar-items/ckb-ckb-depgraph';
+my $mizar_item_to_ckb = '/Users/alama/sources/mizar/mizar-items/mizar-item-ckb-table';
+my $num_articles_handled = 200;
+
+GetOptions (
+	    "itemization-source=s" => \$itemization_source,
+	    "mizfiles=s" => \$mizfiles,
+	    "needed-items-script=s" => \$items_needed_script,
+	    "fragment-dependency-graph=s" => \$ckb_ckb_depgraph,
+	    "item-to-fragment-table=s" => \$mizar_item_to_ckb,
+	    "num-articles=i" => \$num_articles_handled,
+	   );
+
+# don't overwrite -- these computations are hard-earned!
+if (-e $ckb_ckb_depgraph) {
+  die "There is already a dependency graph at '$ckb_ckb_depgraph' -- refusing to overwrite it.";
+}
+if (-e $mizar_item_to_ckb) {
+  die "There is already a mizar-item-to-CKB table at '$mizar_item_to_ckb' -- refusing to overwrite it.";
+}
+
+my $mml_lar = $mizfiles . '/mml.lar';
 
 sub nr_attribute {
   my $xml_line = shift;
@@ -54,7 +78,6 @@ sub constrkind_attribute {
   return $1;
 }
 
-my $num_articles_handled = 200;
 # my @articles = ('tarski');
 my @articles = ();
 my @first_hundred = `head -n $num_articles_handled $mml_lar`;
@@ -389,17 +412,6 @@ my %hidden_items
       warn "Don't know how to handle an item that looks like '$second_line', coming from $item_miz";
     }
   }
-}
-
-my $ckb_ckb_depgraph = "/Users/alama/sources/mizar/mizar-items/ckb-ckb-depgraph";
-my $mizar_item_to_ckb = "/Users/alama/sources/mizar/mizar-items/mizar-item-ckb-table";
-
-# don't overwrite -- these computations are hard-earned!
-if (-e $ckb_ckb_depgraph) {
-  die "There is already a dependency graph at '$ckb_ckb_depgraph' -- refusing to overwrite it.";
-}
-if (-e $mizar_item_to_ckb) {
-  die "There is already a mizar-item-to-CKB table at '$mizar_item_to_ckb' -- refusing to overwrite it.";
 }
 
 # build our table
