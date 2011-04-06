@@ -2,10 +2,22 @@
 
 use strict;
 
+use Getopt::Long;
+
 my $fragment_depgraph_file
   = '/Users/alama/sources/mizar/mizar-items/ckb-ckb-depgraph';
 my $item_to_fragment_table_file
   = '/Users/alama/sources/mizar/mizar-items/mizar-item-ckb-table';
+
+my $lisp_output;
+my $reverse_fragment_depgraph;
+
+GetOptions (
+	    "fragment-dependency-graph=s" => \$fragment_depgraph_file,
+	    "item-to-fragment-table=s" => \$item_to_fragment_table_file,
+	    "lisp-output" => \$lisp_output,
+	    "reverse" => \$reverse_fragment_depgraph,
+	   );
 
 # sanity
 unless (-e $fragment_depgraph_file) {
@@ -35,32 +47,41 @@ while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
   unless ($lhs ne '' && $rhs ne '') {
     die "One of the fields of the dependency graph line '$depgraph_line' is empty";
   }
-  my $dep_ref = $fragment_depgraph{$lhs};
+  my $dep_ref = $reverse_fragment_depgraph ? $fragment_depgraph{$rhs} : $fragment_depgraph{$lhs};
   if (defined $dep_ref) {
     # warn "We've seen a reference for '$lhs' before";
     my @earlier = @{$dep_ref};
-    push (@earlier, $rhs);
-    $fragment_depgraph{$lhs} = \@earlier;
+    $reverse_fragment_depgraph ? push (@earlier, $lhs) : push (@earlier, $rhs);
+    if ($reverse_fragment_depgraph) {
+      $fragment_depgraph{$rhs} = \@earlier;
+    } else {
+      $fragment_depgraph{$lhs} = \@earlier;
+    }
   } else {
     # warn "We've not seen a reference for '$lhs' before";
     my @first = ();
-    push (@first, $rhs);
-    $fragment_depgraph{$lhs} = \@first;
+    $reverse_fragment_depgraph ? push (@first, $lhs) : push (@first, $rhs);
+    if ($reverse_fragment_depgraph) {
+      $fragment_depgraph{$rhs} = \@first;
+    } else {
+      $fragment_depgraph{$lhs} = \@first;
+    }
   }
 }
 close (FRAGMENT_DEPGRAPH) 
   or die "Unable to close input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
+warn "Done loading the fragment dependency graph at '$fragment_depgraph_file";
 
 # print the fragment depgraph
-# foreach my $key (keys %fragment_depgraph) {
-#   my $val_ref = $fragment_depgraph{$key};
-#   my @vals = @{$val_ref};
-#   print $key;
-#   foreach my $val (@vals) {
-#     print ' ', $val;
-#   }
-#   print "\n";
-# }
+foreach my $key (keys %fragment_depgraph) {
+  my $val_ref = $fragment_depgraph{$key};
+  my @vals = @{$val_ref};
+  print $key;
+  foreach my $val (@vals) {
+    print ' ', $val;
+  }
+  print "\n";
+}
 
 # load the item-to-fragment table
 my %item_to_fragment = ();
@@ -141,10 +162,25 @@ foreach my $item (keys %item_to_fragment) {
     }
   }
   unless (scalar @deps == 0) {
-    print $item;
-    foreach my $dep_item (@deps) {
-      print ' ', $dep_item;
+    if ($lisp_output) {
+      print '(', '"', $item, '"';
+    } else {
+      print $item;
     }
+
+    foreach my $dep_item (@deps) {
+      if ($lisp_output) {
+	print ' ', '"', $dep_item, '"';
+      } else {
+	print ' ', $dep_item;
+      }
+
+    }
+
+    if ($lisp_output) {
+      print ')';
+    }
+
     print "\n";
   }
 
