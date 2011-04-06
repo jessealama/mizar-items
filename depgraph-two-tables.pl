@@ -7,8 +7,8 @@ use Getopt::Long;
 my $itemization_source = '/Users/alama/sources/mizar/mizar-items/itemization';
 my $mizfiles = $ENV{'MIZFILES'};
 my $items_needed_script = '/Users/alama/sources/mizar/mizar-items/items-needed-for-item.sh';
-my $ckb_ckb_depgraph = 'ckb-ckb-depgraph';
-my $mizar_item_to_ckb = 'mizar-item-ckb-table';
+my $ckb_ckb_depgraph = '/Users/alama/sources/mizar/mizar-items/ckb-ckb-depgraph';
+my $mizar_item_to_ckb = '/Users/alama/sources/mizar/mizar-items/mizar-item-ckb-table';
 my $num_articles_handled = 200;
 
 GetOptions (
