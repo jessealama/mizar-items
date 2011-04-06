@@ -55,6 +55,5 @@
 (update-mizar-items-config 'html-source
 			   "/local/data/alama/non-brutalized-itemizations")
 
-
 (defun mizar-items-config (key)
   (gethash key *mizar-items-config*))
