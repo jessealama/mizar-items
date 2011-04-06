@@ -517,7 +517,7 @@ sub print_hidden_deps {
     unless (defined $fragment) {
       die "There is no value for '$hidden_dep'!";
     }
-    print DEPGRAPH ("$item $hidden_dep", "\n");
+    print DEPGRAPH ("$item $fragment", "\n");
   }
 }
 
