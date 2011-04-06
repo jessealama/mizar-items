@@ -662,7 +662,7 @@ end;"))
     ((:h1 :id "selected-list") "A selected list of landmarks")
     (:p "The following is a selected list of some notable mathematical results that can be found in the " (:tt "MIZAR") " Mathematical Library.  What does 'notable' mean?  Obviously, it's a value term.  The following list has a bias towards results of metamathematical or foundational significance, which is what the site designer is especially interested in.  If you're not especially interested in mathematical logic, see the other section, " ((:a :href "#100theorems" :title "100 Theorems Formalized in Mizar") "100 Theorems Formalized in Mizar") ", for more mathematical contentful examples.")
     (:ul
-     (:li ((:a :href "/item/tarski/theorem/6" :title "Tarski universe axiom") "Tarski universe axiom"))
+     (:li ((:a :href "/item/tarski/theorem/9" :title "Tarski universe axiom") "Tarski universe axiom"))
      (:li "Axiom of infinity")
      (:li "Power set")
      (:li "Axiom of choice")
