@@ -36,6 +36,7 @@ unless (-e $item_to_fragment_table_file) {
 # load the fragment dependency graph
 my %fragment_depgraph = ();
 
+warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
 open (FRAGMENT_DEPGRAPH, '<', $fragment_depgraph_file) 
   or die "Unable to open an input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
 while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
