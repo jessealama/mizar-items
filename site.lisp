@@ -395,7 +395,7 @@ end;"))
 		(htm
 		 ((:ol :class "fragment-listing")
 		  (loop
-		     with article-dir = (format nil "~a/~a" (mizar-items-config 'itemization-source) article)
+		     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
 		     with article-text-dir = (format nil "~a/text" article-dir)
 		     for i from 1 upto num-items
 		     for i-str = (format nil "~d" i)
