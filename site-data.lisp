@@ -244,11 +244,16 @@
   (if (or force (null *article-num-items*))
     (loop
        with num-items-table = (make-hash-table :test #'equal)
-       for (article-name title author) in *articles*
+       for article-name in *mml-lar*
        do
 	 (let ((article-dir (concat (mizar-items-config 'itemization-source) "/" article-name "/" "text")))
-	   (setf (gethash article-name num-items-table)
-		 (count-miz-in-directory article-dir)))
+	   (if (file-exists-p article-dir)
+	       (setf (gethash article-name num-items-table)
+		     (count-miz-in-directory article-dir))
+	       
+	       (progn
+		 (warn "When counting the number of fragments for '~a', we expected to find a directory at '~a', but it doesn't exist; setting the number of items for this article to 0" article-name article-dir)
+		 (setf (gethash article-name num-items-table) 0))))
        finally
 	 (setf *article-num-items* num-items-table)
 	 (return *article-num-items*))
