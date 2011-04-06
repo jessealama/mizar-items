@@ -2,9 +2,19 @@
 
 use strict;
 
+use Getopt::Long;
+
 my $itemization_source = '/Users/alama/sources/mizar/mizar-items/itemization';
-my $mml_lar = '/sw/share/mizar/mml.lar';
+my $mizfiles = $ENV{'MIZFILES'};
 my $items_needed_script = '/Users/alama/sources/mizar/mizar-items/items-needed-for-item.sh';
+
+GetOptions (
+	    "itemization-source=s" => \$itemization_source,
+	    "mizfiles=s" => \$mizfiles,
+	    "needed-items-script=s" => \$items_needed_script,
+	   );
+
+my $mml_lar = $mizfiles . '/mml.lar';
 
 sub nr_attribute {
   my $xml_line = shift;
