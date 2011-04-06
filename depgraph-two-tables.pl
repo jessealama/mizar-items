@@ -15,7 +15,7 @@ GetOptions (
 	    "itemization-source=s" => \$itemization_source,
 	    "mizfiles=s" => \$mizfiles,
 	    "needed-items-script=s" => \$items_needed_script,
-	    "graph=s" => \$ckb_ckb_depgraph,
+	    "fragment-dependency-graph=s" => \$ckb_ckb_depgraph,
 	    "item-to-fragment-table=s" => \$mizar_item_to_ckb,
 	    "num-articles=i" => \$num_articles_handled,
 	   );
