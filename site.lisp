@@ -694,9 +694,11 @@ end;"))
 				  (formalization-html-path (html-path-for-item formalization))
 				  (formalization-html (if formalization-html-path
 							  (if (file-exists-p formalization-html-path)
-							      (file-as-string formalization-html-path)
+							      (if (empty-file-p formalization-html-path)
+								  "(The HTML representation exists but is empty; please notify the site maintainer.)"
+								  (file-as-string formalization-html-path))
 							      "(HTML representation not present)")
-							  "(HTML representation not present)")))
+							      "(HTML representation not present)")))
 			     (htm
 			      (:li ((:a :href formalization-uri
 					:title theorem-name-escaped)
@@ -706,7 +708,9 @@ end;"))
 			      (formalization-html-path (html-path-for-item formalization))
 			      (formalization-html (if formalization-html-path
 						      (if (file-exists-p formalization-html-path)
-							  (file-as-string formalization-html-path)
+							  (if (empty-file-p formalization-html-path)
+							      "(The HTML representation exists but is empty; please notify the site maintainer.)"
+							      (file-as-string formalization-html-path))
 							  "(HTML representation not present)")
 						      "(HTML representation not present)")))
 			 (htm
