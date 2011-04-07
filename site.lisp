@@ -690,36 +690,35 @@ end;"))
 		       (htm
 			(:ul
 			 (dolist (formalization formalizations)
-			   (let* ((formalization-uri (item-uri formalization))
-				  (formalization-html-path (html-path-for-item formalization))
-				  (formalization-html (if formalization-html-path
-							  (if (file-exists-p formalization-html-path)
-							      (if (empty-file-p formalization-html-path)
-								  "(The HTML representation exists but is empty; please notify the site maintainer.)"
-								  (file-as-string formalization-html-path))
-							      "(HTML representation not present)")
-							      "(HTML representation not present)")))
-			     (htm
-			      (:li
-			       ((:a :href formalization-uri
-				    :class "mhtml-text"
-				    :title theorem-name-escaped)
-				(str formalization-html))))))))
+			   (htm
+			    (:li
+			     (let* ((formalization-uri (item-uri formalization))
+				    (formalization-html-path (html-path-for-item formalization)))
+			       (if formalization-html-path
+				   (if (file-exists-p formalization-html-path)
+				       (if (empty-file-p formalization-html-path)
+					   (htm "(The HTML representation exists but is empty; please notify the site maintainer.)")
+					   (let ((formalization-html (file-as-string formalization-html-path)))
+					     (htm ((:a :href formalization-uri
+						       :class "mhtml-text"
+						       :title theorem-name-escaped))
+						  (str formalization-html))))
+				       (htm "(HTML representation not present)")))))))))
 		       (let* ((formalization (car formalizations))
 			      (formalization-uri (item-uri formalization))
-			      (formalization-html-path (html-path-for-item formalization))
-			      (formalization-html (if formalization-html-path
-						      (if (file-exists-p formalization-html-path)
-							  (if (empty-file-p formalization-html-path)
-							      "(The HTML representation exists but is empty; please notify the site maintainer.)"
-							      (file-as-string formalization-html-path))
-							  "(HTML representation not present)")
-						      "(HTML representation not present)")))
-			 (htm
-			  ((:a :href formalization-uri
-			       :class "mhtml-text"
-			       :title theorem-name-escaped)
-			   (str formalization-html)))))
+			      (formalization-html-path (html-path-for-item formalization)))
+			 (if formalization-html-path
+			     (if (file-exists-p formalization-html-path)
+				 (if (empty-file-p formalization-html-path)
+				     (htm "(The HTML representation exists but is empty; please notify the site maintainer.)")
+				     (let ((formalization-html (file-as-string formalization-html-path)))
+				       (htm
+					((:a :href formalization-uri
+					     :class "mhtml-text"
+					     :title theorem-name-escaped)
+					 (str formalization-html)))))
+				 (htm "(HTML representation not present)"))
+			     (htm "(HTML representation not present)"))))
 		   (htm
 		    (:em "(not yet formalized in " (:tt "MIZAR") ")")))))
 	    (let ((100theorems-uri (format nil "http://www.cs.ru.nl/~~freek/100/#~d" i))
