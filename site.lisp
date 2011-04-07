@@ -535,7 +535,7 @@ end;"))
 		      (if forward-deps-sorted
 			  (htm
 			   (:table
-			    (:caption "Depends On")
+			    (:caption "Requires")
 			    (dolist (forward-dep forward-deps-sorted)
 			      (let ((dep-uri (link-for-item forward-dep)))
 				(htm
