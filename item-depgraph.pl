@@ -11,12 +11,14 @@ my $item_to_fragment_table_file
 
 my $lisp_output;
 my $reverse_fragment_depgraph;
+my $compute_tc;
 
 GetOptions (
 	    "fragment-dependency-graph=s" => \$fragment_depgraph_file,
 	    "item-to-fragment-table=s" => \$item_to_fragment_table_file,
 	    "lisp-output" => \$lisp_output,
 	    "reverse" => \$reverse_fragment_depgraph,
+	    "transitive-closure" => \$compute_tc,
 	   );
 
 # sanity
@@ -33,56 +35,73 @@ unless (-e $item_to_fragment_table_file) {
   die "The item-to-fragment table at '$item_to_fragment_table_file' is not readable!";
 }
 
+# don't overwrite
+my $tc_file = '/tmp/tc';
+if ($compute_tc) {
+  if (-e $tc_file) {
+    print "Cannot save the transitive closure to '$tc_file' because there is already a file there", "\n";
+    exit 1;
+  }
+}
+
 # load the fragment dependency graph
 my %fragment_depgraph = ();
 
-warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
-open (FRAGMENT_DEPGRAPH, '<', $fragment_depgraph_file) 
-  or die "Unable to open an input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
-while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
-  chomp $depgraph_line;
-  my ($lhs, $rhs) = split (/ /, $depgraph_line);
-  unless (defined $lhs && defined $rhs) {
-    die "Unable to properly parse dependeny graph line '$depgraph_line'!";
-  }
-  unless ($lhs ne '' && $rhs ne '') {
-    die "One of the fields of the dependency graph line '$depgraph_line' is empty";
-  }
-  my $dep_ref = $reverse_fragment_depgraph ? $fragment_depgraph{$rhs} : $fragment_depgraph{$lhs};
-  if (defined $dep_ref) {
-    # warn "We've seen a reference for '$lhs' before";
-    my @earlier = @{$dep_ref};
-    $reverse_fragment_depgraph ? push (@earlier, $lhs) : push (@earlier, $rhs);
-    if ($reverse_fragment_depgraph) {
-      $fragment_depgraph{$rhs} = \@earlier;
-    } else {
-      $fragment_depgraph{$lhs} = \@earlier;
+sub load_fragment_depgraph {
+  warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
+  open (FRAGMENT_DEPGRAPH, '<', $fragment_depgraph_file) 
+    or die "Unable to open an input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
+  while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
+    chomp $depgraph_line;
+    my ($lhs, $rhs) = split (/ /, $depgraph_line);
+    unless (defined $lhs && defined $rhs) {
+      die "Unable to properly parse dependeny graph line '$depgraph_line'!";
     }
-  } else {
-    # warn "We've not seen a reference for '$lhs' before";
-    my @first = ();
-    $reverse_fragment_depgraph ? push (@first, $lhs) : push (@first, $rhs);
-    if ($reverse_fragment_depgraph) {
-      $fragment_depgraph{$rhs} = \@first;
-    } else {
-      $fragment_depgraph{$lhs} = \@first;
+    unless ($lhs ne '' && $rhs ne '') {
+      die "One of the fields of the dependency graph line '$depgraph_line' is empty";
     }
+    my $dep_ref = $reverse_fragment_depgraph ? $fragment_depgraph{$rhs} : $fragment_depgraph{$lhs};
+    if (defined $dep_ref) {
+      # warn "We've seen a reference for '$lhs' before";
+      my @earlier = @{$dep_ref};
+      $reverse_fragment_depgraph ? push (@earlier, $lhs) : push (@earlier, $rhs);
+      if ($reverse_fragment_depgraph) {
+	$fragment_depgraph{$rhs} = \@earlier;
+      } else {
+	$fragment_depgraph{$lhs} = \@earlier;
+      }
+    } else {
+      # warn "We've not seen a reference for '$lhs' before";
+      my @first = ();
+      $reverse_fragment_depgraph ? push (@first, $lhs) : push (@first, $rhs);
+      if ($reverse_fragment_depgraph) {
+	$fragment_depgraph{$rhs} = \@first;
+      } else {
+	$fragment_depgraph{$lhs} = \@first;
+      }
+    }
+  }
+  close (FRAGMENT_DEPGRAPH) 
+    or die "Unable to close input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
+  warn "Done loading the fragment dependency graph at '$fragment_depgraph_file";
+
+  return;
+
+}
+
+load_fragment_depgraph ();
+
+sub print_fragment_depgraph {
+  foreach my $key (keys %fragment_depgraph) {
+    my $val_ref = $fragment_depgraph{$key};
+    my @vals = @{$val_ref};
+    print $key;
+    foreach my $val (@vals) {
+      print ' ', $val;
+    }
+    print "\n";
   }
 }
-close (FRAGMENT_DEPGRAPH) 
-  or die "Unable to close input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
-warn "Done loading the fragment dependency graph at '$fragment_depgraph_file";
-
-# print the fragment depgraph
-# foreach my $key (keys %fragment_depgraph) {
-#   my $val_ref = $fragment_depgraph{$key};
-#   my @vals = @{$val_ref};
-#   print $key;
-#   foreach my $val (@vals) {
-#     print ' ', $val;
-#   }
-#   print "\n";
-# }
 
 # load the item-to-fragment table
 my %item_to_fragment = ();
@@ -132,6 +151,27 @@ while ((my $item,my $fragment) = each %item_to_fragment) {
 #   }
 #   print "\n";
 # }
+
+if ($compute_tc) {
+  my $tc_file = '/tmp/tc';
+  if (-e $tc_file) {
+    print "Cannot save the transitive closure to '$tc_file' because there is already a file there", "\n";
+    exit 1;
+  }
+  warn "Computing the transitive closure...";
+  my $tc_exit_code
+    = system ("./tc.pl $fragment_depgraph_file > $tc_file");
+  if ($tc_exit_code == 0) {
+    warn "Done computing transitive closure";
+    # reload the fragment dependency graph
+    $fragment_depgraph_file = $tc_file;
+    load_fragment_depgraph ();
+  } else {
+    my $tc_message = $tc_exit_code >> 8;
+    print "Something went wrong computing the transitive closure: '$tc_message'";
+    exit 1;
+  }
+}
 
 foreach my $item (keys %item_to_fragment) {
   my @deps = ();
