@@ -733,6 +733,26 @@ end;"))
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
+(defun register-proofs-for-article (article)
+  (let ((num-items (gethash article *article-num-items*)))
+    (if (integerp num-items)
+	(loop
+	   for i from 1 upto num-items
+	   for fragment-proof-dir = (format nil "~a/~a/proofs/ckb~d"
+					    (mizar-items-config 'html-source)
+					    article
+					    i)
+	   for proofs = (list-directory fragment-proof-dir)
+	   do
+	     (loop
+		for proof-path in proofs
+		for proof-namestring = (namestring proof-path)
+		for proof-name = (car (last (split "/" proof-namestring)))
+		for proof-uri = (format nil "/proofs/~a/ckb/~a" article proof-name)
+		do
+		  (register-static-file-dispatcher proof-uri proof-path "text/xml")))
+	(error "The article '~a' does not have a known number of items!" article))))
+
 (defun initialize-uris (&optional (articles :all))
   ;; ecmascript, css
   (register-static-file-dispatcher "/mhtml.css"
@@ -802,4 +822,9 @@ end;"))
 			      #'emit-path-between-items)
   (register-regexp-dispatcher +path-between-items-via-item-uri-regexp+
 			      #'emit-path-between-items-via-item)
+  ;; proofs
+  (loop
+     for article in *handled-articles*
+     do
+       (register-proofs-for-article article))
   t)
