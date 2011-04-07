@@ -681,7 +681,7 @@ end;"))
 	for theorem-name-escaped = (escape-string theorem-name)
 	do
 	  (htm
-	   (:dt (fmt "~d. ~a" i theorem-name))
+	   ((:dt :class "theorem-name") (fmt "~d. ~a" i theorem-name))
 	   (:dd
 	    (:p
 	     (let ((formalizations (gethash i +mizar-formalized+)))
