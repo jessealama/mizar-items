@@ -5,7 +5,7 @@ use strict;
 use Graph::TransitiveClosure::Matrix;
 use Graph::AdjacencyMatrix;
 use Graph::Directed; # or Undirected
-use Graph::Writer::Dot;
+# use Graph::Writer::Dot;
 
 my $dep_graph_file = $ARGV[0];
 
