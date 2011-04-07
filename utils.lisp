@@ -343,6 +343,12 @@ LIST; otherwise, return T and NIL."
 	(push line lines)))
     (reverse lines)))
 
+(defun empty-file-p (path)
+  (with-open-file (s path :direction :input)                               
+    (let ((c (peek-char t s nil :end)))                                                         
+      (when (eq c :end)                                                                           
+	t))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
