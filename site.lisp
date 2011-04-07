@@ -700,9 +700,11 @@ end;"))
 							      "(HTML representation not present)")
 							      "(HTML representation not present)")))
 			     (htm
-			      (:li ((:a :href formalization-uri
-					:title theorem-name-escaped)
-				    (str formalization-html))))))))
+			      (:li
+			       ((:a :href formalization-uri
+				    :class "mhtml-text"
+				    :title theorem-name-escaped)
+				(str formalization-html))))))))
 		       (let* ((formalization (car formalizations))
 			      (formalization-uri (item-uri formalization))
 			      (formalization-html-path (html-path-for-item formalization))
@@ -715,6 +717,7 @@ end;"))
 						      "(HTML representation not present)")))
 			 (htm
 			  ((:a :href formalization-uri
+			       :class "mhtml-text"
 			       :title theorem-name-escaped)
 			   (str formalization-html)))))
 		   (htm
