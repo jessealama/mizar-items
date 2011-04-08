@@ -413,7 +413,7 @@ end;"))
 	    (progn
 	      ; (setf (return-code *reply*) +http-not-found+)
 	      (miz-item-html "article cannot be displayed"
-		(:p "The article '" (fmt "~a" article) "' is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
+		(:p "The article '" ((:span :class "article-name") article) "' is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
 	  (miz-item-html "article not found"
