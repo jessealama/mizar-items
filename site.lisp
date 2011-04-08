@@ -388,13 +388,15 @@ end;"))
       (+article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
 	(if (member article *handled-articles* :test #'string=)
-	    (let ((num-items (gethash article *article-num-items*)))
-	      (miz-item-html (fmt "~a" article)
-		(:p ((:span :class "article-name") (str article)) " has " (:b (str num-items)) " items ")
-		(when (zerop num-items)		  
-		  (htm
-		   (:p "(Zero items?  How did that happen?")))
-		(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
+	    (let* ((num-items (gethash article *article-num-items*))
+		   (source-uri (format nil "/~a.miz" article))
+		   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
+		   (bib-title (article-title article))
+		   (title (if bib-title
+			      (format nil "~a: ~a" article bib-title)
+			      (format nil "~a" article))))
+	      (miz-item-html title
+		(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
 		(htm
 		 ((:ol :class "fragment-listing")
 		  (loop
