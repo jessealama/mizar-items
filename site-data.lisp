@@ -326,3 +326,13 @@
 	 (pushnew k items :test #'string=))
      finally
        (return items)))
+
+(defun article-title (article)
+  (let ((present (member article *articles* :key #'first :test #'string=)))
+    (when present
+      (second (car present)))))
+
+(defun article-author (article)
+  (let ((present (member article *articles* :key #'first :test #'string=)))
+    (when present
+      (third (car present)))))
