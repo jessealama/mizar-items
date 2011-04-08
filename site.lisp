@@ -390,7 +390,7 @@ end;"))
 	(if (member article *handled-articles* :test #'string=)
 	    (let ((num-items (gethash article *article-num-items*)))
 	      (miz-item-html (fmt "~a" article)
-		(:p ((:span :class "article-name") article) " has " (:b (str num-items)) " items ")
+		(:p ((:span :class "article-name") (str article)) " has " (:b (str num-items)) " items ")
 		(when (zerop num-items)		  
 		  (htm
 		   (:p "(Zero items?  How did that happen?")))
@@ -413,11 +413,11 @@ end;"))
 	    (progn
 	      ; (setf (return-code *reply*) +http-not-found+)
 	      (miz-item-html "article cannot be displayed"
-		(:p ((:span :class "article-name") article) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
+		(:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
 	  (miz-item-html "article not found"
-	    (:p ((:span :class "article-name") article) " is not known.  Here is a list of all known articles:")
+	    (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
 	    ((:table :class "article-listing" :rules "rows")
 	     (:thead
 	      (:tr
@@ -554,7 +554,7 @@ end;"))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
 	  (miz-item-html "unhandled article"
-	    (:p ((:span :class "article-name") article-name) " is not known, or not yet suitably processed for this site.  Please try again later."))))))
+	    (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later."))))))
 
 (defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
