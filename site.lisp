@@ -752,7 +752,7 @@ end;"))
 		for proof-name = (car (last (split "/" proof-namestring)))
 		for proof-uri = (format nil "/proofs/~a/ckb~d/~a" article i proof-name)
 		do
-		  (warn "Registering URI '~a' to point to path '~a'" proof-uri proof-path)
+		  ;; (warn "Registering URI '~a' to point to path '~a'" proof-uri proof-path)
 		  (register-static-file-dispatcher proof-uri proof-path "text/xml")))
 	(error "The article '~a' does not have a known number of items!" article))))
 
