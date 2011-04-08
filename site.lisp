@@ -534,25 +534,29 @@ end;"))
 		      (str "&#8595;")))
 		    ((:tr :valign "top")
 		     ((:td :class "halfwidth" :align "center")
-		      (if forward-deps-sorted
-			  (htm
-			   (:table
-			    (:caption "Requires")
-			    (dolist (forward-dep forward-deps-sorted)
-			      (let ((dep-uri (link-for-item forward-dep)))
-				(htm
-				 (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
-			  (htm (:p (:em "(This item immediately depends on nothing.)")))))
+		      (:table
+		       (:caption "Requires")
+		       (if forward-deps-sorted
+			   (dolist (forward-dep forward-deps-sorted)
+			     (let ((dep-uri (link-for-item forward-dep)))
+			       (htm
+				(:tr (:td ((:a :href dep-uri) (str forward-dep)))))))
+			   (htm 
+			    (:tr
+			     (:td
+			      (:em "(This item immediately depends on nothing.)")))))))
 		     ((:td :class "halfwidth" :align "center")
+		      (:table
+		       (:caption "Supports")
 		      (if backward-deps-sorted
-			  (htm
-			   (:table
-			    (:caption "Supports")
-			    (dolist (backward-dep backward-deps-sorted)
-			      (let ((dep-uri (link-for-item backward-dep)))
-				(htm
-				 (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
-			  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
+			  (dolist (backward-dep backward-deps-sorted)
+			    (let ((dep-uri (link-for-item backward-dep)))
+			      (htm
+			       (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))
+			  (htm 
+			   (:td
+			    (:td
+			     (:em "(No item immediately depends on this one.)"))))))))))))))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
 	  (miz-item-html "unhandled article"
