@@ -49,10 +49,15 @@ my %fragment_depgraph = ();
 
 sub load_fragment_depgraph {
   warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
+  my $num_lines = 0;
   open (FRAGMENT_DEPGRAPH, '<', $fragment_depgraph_file) 
     or die "Unable to open an input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
   while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
     chomp $depgraph_line;
+    $num_lines++;
+    if ($num_lines % 10000 == 0) {
+      warn "Seen $num_lines lines";
+    }
     my ($lhs, $rhs) = split (/ /, $depgraph_line);
     unless (defined $lhs && defined $rhs) {
       die "Unable to properly parse dependeny graph line '$depgraph_line'!";
@@ -62,7 +67,7 @@ sub load_fragment_depgraph {
     }
     my $dep_ref = $reverse_fragment_depgraph ? $fragment_depgraph{$rhs} : $fragment_depgraph{$lhs};
     if (defined $dep_ref) {
-      # warn "We've seen a reference for '$lhs' before";
+      # warn "We've seen a reference for this reference before";
       my @earlier = @{$dep_ref};
       $reverse_fragment_depgraph ? push (@earlier, $lhs) : push (@earlier, $rhs);
       if ($reverse_fragment_depgraph) {
@@ -71,7 +76,7 @@ sub load_fragment_depgraph {
 	$fragment_depgraph{$lhs} = \@earlier;
       }
     } else {
-      # warn "We've not seen a reference for '$lhs' before";
+      # warn "We've not seen this reference before";
       my @first = ();
       $reverse_fragment_depgraph ? push (@first, $lhs) : push (@first, $rhs);
       if ($reverse_fragment_depgraph) {
@@ -83,7 +88,7 @@ sub load_fragment_depgraph {
   }
   close (FRAGMENT_DEPGRAPH) 
     or die "Unable to close input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
-  warn "Done loading the fragment dependency graph at '$fragment_depgraph_file";
+  warn "Done loading the fragment dependency graph at '$fragment_depgraph_file'";
 
   return;
 
