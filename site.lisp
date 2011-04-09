@@ -666,9 +666,71 @@ end;"))
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
     (:p "This page is divided into the following sections:")
     (:ul
+     (:li ((:a :href "#mmlquery") "A selected list taken from the work of the MML Query project"))
      (:li ((:a :href "#selected-list") "The site designer's biased list of notable theorems"))
      (:li ((:a :href "#100theorems") "100 Theorems")))
-    ((:h1 :id "selected-list") "A selected list of landmarks")
+    ((:h1 :id "mmlquery")
+     "A selected list taken from the work of the MML Query project")
+    (:p "The following is a list of theorems selected by the maintainers of the " ((:a :href "http://mmlquery.mizar.org/" :title "MML Query") "MML Query") " project, " ((:a :href "http://webdocs.cs.ualberta.ca/~piotr/Mizar/Important_thms.html" :title "Name-carrying facts/theorems/definitions in MML") "extended by Piotr Rudnicki")  ".")
+    (:ul
+     (loop
+	for (entry items) in +piotr-theorems+
+	do
+	  (if (stringp items) ; unique reference ("/item/article/theorem/5")
+	      (htm
+	       (:li ((:a :href items :title entry) (str entry))))
+	      (if (stringp (car items))
+		  (let ((num-alternatives (length items))) ; list of anonymous alternatives ("/item/article/deftheorem/1" "/item/article/deftheorem/5")
+		    (if (> num-alternatives 2) ; count alternatives: "Alternative 1" "Alternative 2", ...
+			(let ((primary-alternative (first items))
+			      (remaining-alternatives (rest items)))
+			  (htm
+			   (:li 
+			    ((:a :href primary-alternative :title entry) (str entry))
+			    "["
+			    (let ((second-alternative (car remaining-alternatives))
+				  (second-alternative-text "alternative 1")
+				  (second-alternative-title (format nil "~a (alternative 1)" entry)))
+			      (htm
+			       ((:a :href second-alternative :title second-alternative-title)
+				(str second-alternative-text))))
+			    (loop
+			       for alternative in (cdr remaining-alternatives)
+			       for i from 2
+			       for alternative-text = (format nil "alternative ~d" i)
+			       for alternative-title = (format nil "~a (alternative ~d" entry i)
+			       do
+				 (htm
+				  ", "
+				  ((:a :href alternative :title alternative-title)
+				   (str alternative-text))))
+			    "]")))
+			(let* ((primary (first items))
+			       (alternative (second items)) ; only one alternative
+			       (alternative-title (format nil "~a (alternative)" entry)))
+			  (htm
+			   (:li
+			    (str entry)
+			    (:ul
+			     (:li
+			      ((:a :href primary :title entry) "Primary version"))
+			     (:li
+			      ((:a :href alternative :title alternative-title) "Another version"))))))))
+		  (htm  ; list of named alternatives (("First" "/item/article/theorem/25") ("Second" "/item/article/theorem/50") ...)
+		   (:li (str entry)
+			(:ul
+			 (dolist (item items)
+			   (destructuring-bind (name uri)
+			       item
+			     (let ((alternative-name (format nil "~a (~a)"
+							     entry 
+							     name)))
+			       (htm
+				(:li ((:a :href uri 
+					  :title alternative-name)
+				      (str name))))))))))))))
+    ((:h1 :id "selected-list")
+     "A selected list of landmarks")
     (:p "The following is a selected list of some notable mathematical results that can be found in the " (:tt "MIZAR") " Mathematical Library.  What does 'notable' mean?  Obviously, it's a value term.  The following list has a bias towards results of metamathematical or foundational significance, which is what the site designer is especially interested in.  If you're not especially interested in mathematical logic, see the other section, " ((:a :href "#100theorems" :title "100 Theorems Formalized in Mizar") "100 Theorems Formalized in Mizar") ", for more mathematical contentful examples.")
     (:ul
      (:li ((:a :href "/item/tarski/theorem/9" :title "Tarski universe axiom") "Tarski universe axiom"))
