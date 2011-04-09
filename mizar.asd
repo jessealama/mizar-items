@@ -32,4 +32,5 @@
 	       (:file "site-search")
 	       (:file "server")
 	       (:file "100theorems")
+	       (:file "piotr")
 	       (:file "site")))
