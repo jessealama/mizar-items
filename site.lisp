@@ -740,7 +740,8 @@ end;"))
      (:li "Zorn's lemma")
      (:li "Zermelo's well-ordering theorem")
      (:li "All vector spaces have a basis"))
-    ((:h1 :id "100theorems") "100 Theorems")
+    ((:h1 :id "100theorems")
+     "100 Theorems")
     (:p "The following is a list of 'notable' mathematical results formalized in " (:tt "MIZAR") ".  What does 'notable' mean here?  Certainly, it's a value term.  This list comes from Freek Wiedijk's "((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
     (:dl
      (loop
