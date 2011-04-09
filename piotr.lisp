@@ -173,4 +173,16 @@
     ("Zermelo Theorem" "/item/wellord2/theorem/26")
     ("L'Hospital Rule" "/item/l_hospit/theorem/10")
     )
+  :documentation
+  "A list of theorems from Piotr Rudnicki's
+list (http://webdocs.cs.ualberta.ca/~piotr/Mizar/Important_thms.html).
+This is a list of lists, each member of which is a two-element proper
+list (NAME SOMETHING), where NAME is a string; SOMETHING takes the
+form either (a) of a string, which should be a URI, indicating that
+the named theorem NAME has exactly one representation in the MML, (b)
+a list of URIs, indicating that there is a primary representation in
+the MML and possibly some further alternative representations, all of
+which deserve the name NAME, or (c) a list of two-element proper
+lists (VARIANT URI), indicating that the theorem with name NAME has
+some notable variants in the MML."
   :test #'equalp)
