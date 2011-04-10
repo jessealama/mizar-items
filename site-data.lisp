@@ -244,20 +244,25 @@
   (if (or force (null *article-num-items*))
     (loop
        with num-items-table = (make-hash-table :test #'equal)
-       for (article-name title author) in *articles*
+       for article-name in *mml-lar*
        do
 	 (let ((article-dir (concat (mizar-items-config 'itemization-source) "/" article-name "/" "text")))
-	   (setf (gethash article-name num-items-table)
-		 (count-miz-in-directory article-dir)))
+	   (if (file-exists-p article-dir)
+	       (setf (gethash article-name num-items-table)
+		     (count-miz-in-directory article-dir))
+	       
+	       (progn
+		 (warn "When counting the number of fragments for '~a', we expected to find a directory at '~a', but it doesn't exist; setting the number of items for this article to 0" article-name article-dir)
+		 (setf (gethash article-name num-items-table) 0))))
        finally
 	 (setf *article-num-items* num-items-table)
 	 (return *article-num-items*))
     *article-num-items*))
 
 (defun load-mml (mml-version)
-  (let ((data-path-lisp (format nil "data/~a.lisp" mml-version))
-	(data-path-lisp-xz (format nil "data/~a.lisp.xz" mml-version))
-	(data-path-fasl (format nil "data/~a.fasl" mml-version)))
+  (let ((data-path-lisp (file-in-data-dir (format nil "~a.lisp" mml-version)))
+	(data-path-lisp-xz (file-in-data-dir (format nil "~a.lisp.xz" mml-version)))
+	(data-path-fasl (file-in-data-dir (format nil "~a.fasl" mml-version))))
     (when (file-exists-p data-path-lisp-xz)
       (when (or (and (file-exists-p data-path-lisp)
 		     (< (file-write-date data-path-lisp)
@@ -298,3 +303,36 @@
 
 (defun count-dependency-graph-edges ()
   (count-hash-table-keys *item-dependency-graph-backward*))
+
+(defun items-for-article (article)
+  (loop
+     with items = nil
+     for k being the hash-keys of *item-dependency-graph-forward*
+     for (key-article key-kind key-number) = (split ":" k)
+     do
+       (when (string= article key-article)
+	 (pushnew k items :test #'string=))
+     finally
+       (return items)))
+
+(defun items-of-kind-for-article (article kind)
+  (loop
+     with items = nil
+     for k being the hash-keys of *item-dependency-graph-forward*
+     for (key-article key-kind key-number) = (split ":" k)
+     do
+       (when (and (string= article key-article)
+		  (string= kind key-kind))
+	 (pushnew k items :test #'string=))
+     finally
+       (return items)))
+
+(defun article-title (article)
+  (let ((present (member article *articles* :key #'first :test #'string=)))
+    (when present
+      (second (car present)))))
+
+(defun article-author (article)
+  (let ((present (member article *articles* :key #'first :test #'string=)))
+    (when present
+      (third (car present)))))

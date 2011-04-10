@@ -123,7 +123,8 @@ accurate dependency information and which are stored properly.")
 		    (< item-num-1 item-num-2)))))))))
 
 (defun emit-about-page ()
-  (miz-item-html "fine-grained dependencies in the mizar mathematical library"
+  (miz-item-html ("fine-grained dependencies in the mizar mathematical library")
+      nil
     (:p "This site aims to illustrate fine-grained dependency
     information about " (:a :href "http://www.mizar.org" "the Mizar
     Mathematical Library") ", a large collection of formalized mathematical knowledge.")
@@ -318,33 +319,38 @@ end;"))
 							   source-item)))
 		(multiple-value-bind (solution-exists? solution)
 		    (bounded-depth-first-search problem +search-depth+)
-		  (miz-item-html (fmt "from ~a to ~a" source-item destination-item)
-		  (if solution-exists?
-		      (htm
-		       (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
-		       (:ol
-			(let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
+		  (let ((title (format nil "from ~a to ~a"
+				       source-item destination-item)))
+		    (miz-item-html (title)
+			nil
+		      (if solution-exists?
 			  (htm
-			   (:li ((:a :href source-uri)
-				 (str source-item)))))
-			(dolist (step (explain-solution solution))
-			  (destructuring-bind (step-article step-kind step-num)
-			      (split ":" step)
-			    (let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
+			   (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
+			   (:ol
+			    (let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
 			      (htm
-			       (:li ((:a :href step-uri)
-				     (str step)))))))))
-		      (if (null solution)
-			  (htm
-			   (:p "There is no path from " ((:a :href source-item-uri) (str source-item)) " to " ((:a :href dest-item-uri) (str destination-item)) ".  Care to " 
-			       ((:a :href opposite-path-uri)
-				"search for a path going the other way")
-			       "?"))
-			  (htm
-			   (:p "There may be a path from "  ((:a :href source-item-uri) (str source-item)) "  to "  ((:a :href dest-item-uri) (str destination-item)) ", but I'm afraid we were unable to find one given the current depth limit in effect on searches.")))))))
-	      (miz-item-html "Invalid URI"
+			       (:li ((:a :href source-uri)
+				     (str source-item)))))
+			    (dolist (step (explain-solution solution))
+			      (destructuring-bind (step-article step-kind step-num)
+				  (split ":" step)
+				(let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
+				  (htm
+				   (:li ((:a :href step-uri)
+					 (str step)))))))))
+			  (if (null solution)
+			      (htm
+			       (:p "There is no path from " ((:a :href source-item-uri) (str source-item)) " to " ((:a :href dest-item-uri) (str destination-item)) ".  Care to " 
+				   ((:a :href opposite-path-uri)
+				    "search for a path going the other way")
+				   "?"))
+			      (htm
+			       (:p "There may be a path from "  ((:a :href source-item-uri) (str source-item)) "  to "  ((:a :href dest-item-uri) (str destination-item)) ", but I'm afraid we were unable to find one given the current depth limit in effect on searches."))))))))
+	      (miz-item-html ("Invalid URI")
+		  (:return-code +http-not-found+)
 		(:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
-	  (miz-item-html "Invalid URI"
+	  (miz-item-html ("Invalid URI")
+	      (:return-code +http-not-found+)
 	    (:p "The requested source item, '" (str source-item) "', is not the name of any known item."))))))
 
 (defun emit-path-between-items-via-item ()
@@ -360,27 +366,33 @@ end;"))
 	      (if (gethash destination *all-items*)
 		  (let ((get-params (get-parameters*)))
 		    (if (null get-params) ; first time here, eh?
-			(miz-item-html (fmt "from ~a to ~a via ~a" source destination via)
-			  (:dl
-			   (:dt "Source")
-			   (:dd (str source))
-			   (:dt "Destination")
-			   (:dd (str destination))
-			   (:dt "Via")
-			   (:dd (str via)))
-			  (:p "What kind of search would you like to do?")
-			  (:ul
-			   (:li "Find one path from source to destination;)")
-			   (:li "Find " (:em "all") " paths;")
-			   (:li "Find a path from the source to the destination that " (:em "avoids") " the the intermediate verte;x")
-			   (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex.")))
-			(miz-item-html "You're asking too much"
+			(let ((title (format nil "from ~a to ~a via ~a" source destination via)))
+			  (miz-item-html (title)
+			      nil
+			    (:dl
+			     (:dt "Source")
+			     (:dd (str source))
+			     (:dt "Destination")
+			     (:dd (str destination))
+			     (:dt "Via")
+			     (:dd (str via)))
+			    (:p "What kind of search would you like to do?")
+			    (:ul
+			     (:li "Find one path from source to destination;)")
+			     (:li "Find " (:em "all") " paths;")
+			     (:li "Find a path from the source to the destination that " (:em "avoids") " the intermediate vertex")
+			     (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex."))))
+			(miz-item-html ("You're asking too much")
+			    (:return-code +http-service-unavailable+)
 			  (:p "I can't handle this: " (fmt "~A" get-params)))))
-		  (miz-item-html "Invalid URI"
+		  (miz-item-html ("Invalid URI")
+		      (:return-code +http-not-found+)
 		    (:p "There given destination item, '" (str destination) "', is not the name of any known item.")))
-	      (miz-item-html "Invalid URI"
+	      (miz-item-html ("Invalid URI")
+		  (:return-code +http-not-found+)
 		(:p "There given intermediate item, '" (str via) "', is not the name of any known item.")))
-	  (miz-item-html "Invalid URI"
+	  (miz-item-html ("Invalid URI")
+	      (:return-code +http-not-found+)
 	    (:p "There given source item, '" (str source) "', is not the name of any known item."))))))
 
 (defun emit-article-page ()
@@ -388,32 +400,41 @@ end;"))
       (+article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
 	(if (member article *handled-articles* :test #'string=)
-	    (let ((num-items (gethash article *article-num-items*)))
-	      (miz-item-html (fmt "~a" article)
-		(:p "The article " (str article) " has " (:b (str num-items)) " items ")
-		(:p "See " (:a :href (format nil "http://mizar.org/version/current/html/~a.html" article) "an HTMLized presentation of the whole article") ", or " (:a :href (format nil "/~a.miz" article) "its raw source") ".")
+	    (let* ((num-items (gethash article *article-num-items*))
+		   (source-uri (format nil "/~a.miz" article))
+		   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
+		   (bib-title (article-title article))
+		   (title (if bib-title
+			      (format nil "~a: ~a" article bib-title)
+			      (format nil "~a" article))))
+	      (miz-item-html (title)
+		  nil
+		(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
 		(htm
 		 ((:ol :class "fragment-listing")
 		  (loop
-		     with article-dir = (format nil "~a/~a" (mizar-items-config 'itemization-source) article)
+		     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
 		     with article-text-dir = (format nil "~a/text" article-dir)
 		     for i from 1 upto num-items
+		     for i-str = (format nil "fragment-~d" i)
 		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
 		     for item-html = (file-as-string fragment-path)
 		     for item-uri = (format nil "/fragment/~a/~d" article i)
 		     do
 		       (htm
-			((:li :class "fragment-listing")
+			((:li :class "fragment-listing" :id i-str)
 			 ((:a :href item-uri :class "fragment-listing")
 			  (str item-html)))))))))
 	    (progn
 	      ; (setf (return-code *reply*) +http-not-found+)
-	      (miz-item-html "article cannot be displayed"
-		(:p "The article '" (fmt "~a" article) "' is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
+	      (miz-item-html ("article cannot be displayed")
+		  (:return-code +http-not-found+)
+		(:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
-	  (miz-item-html "article not found"
-	    (:p "The article '" (fmt "~a" article) "' is not known.  Here is a list of all known articles:")
+	  (miz-item-html ("article not found")
+	      (:return-code +http-not-found+)
+	    (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
 	    ((:table :class "article-listing" :rules "rows")
 	     (:thead
 	      (:tr
@@ -436,13 +457,21 @@ end;"))
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
-      (redirect (uri-for-item article kind number)))))
+      (let ((client-server-protocol (server-protocol*)))	
+	    (redirect (uri-for-item article kind number)
+		      :code (if (string= client-server-protocol "HTTP/1.1")
+				+http-temporary-redirect+
+				+http-moved-temporarily+))))))
 
 (defun emit-random-path ()
   (let* ((keys (hash-table-keys *all-items*))
 	 (random-vertex-1 (random-elt keys))
 	 (random-vertex-2 (random-elt keys)))
-    (redirect (link-for-two-items random-vertex-1 random-vertex-2))))
+    (let ((client-server-protocol (server-protocol*)))
+      (redirect (link-for-two-items random-vertex-1 random-vertex-2)
+		:code (if (string= client-server-protocol "HTTP/1.1")
+			  +http-temporary-redirect+
+			  +http-moved-temporarily+)))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
@@ -485,7 +514,7 @@ end;"))
       (split-item-identifier item-string)
     (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
 	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
-	   (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir)))
       (when ckb-for-item
 	(destructuring-bind (ckb-article-name ckb-number)
@@ -499,7 +528,7 @@ end;"))
     (if (member article-name *handled-articles* :test #'string=)
 	(let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
 	       (ckb-for-item (gethash item-key *item-to-ckb-table*))
-	       (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	       (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	       (article-text-dir (format nil "~a/text" article-dir))
 	       (forward-deps (gethash item-key *item-dependency-graph-forward*))
 	       (backward-deps (gethash item-key *item-dependency-graph-backward*))
@@ -514,7 +543,8 @@ end;"))
 					  article-text-dir
 					  ckb-number))
 		   (item-html (file-as-string fragment-path)))
-	      (miz-item-html (str item-key)
+	      (miz-item-html (item-key)
+		  nil
 		((:table :width "100%")
 		 ((:tr :valign "top")
 		  (:td (str item-html)))
@@ -528,35 +558,40 @@ end;"))
 		      (str "&#8595;")))
 		    ((:tr :valign "top")
 		     ((:td :class "halfwidth" :align "center")
-		      (if forward-deps-sorted
-			  (htm
-			   (:table
-			    (:caption "Depends On")
-			    (dolist (forward-dep forward-deps-sorted)
-			      (let ((dep-uri (link-for-item forward-dep)))
-				(htm
-				 (:tr (:td ((:a :href dep-uri) (str forward-dep)))))))))
-			  (htm (:p (:em "(This item immediately depends on nothing.)")))))
+		      (:table
+		       (:caption "Requires")
+		       (if forward-deps-sorted
+			   (dolist (forward-dep forward-deps-sorted)
+			     (let ((dep-uri (link-for-item forward-dep)))
+			       (htm
+				(:tr (:td ((:a :href dep-uri) (str forward-dep)))))))
+			   (htm 
+			    (:tr
+			     (:td
+			      (:em "(This item immediately depends on nothing.)")))))))
 		     ((:td :class "halfwidth" :align "center")
+		      (:table
+		       (:caption "Supports")
 		      (if backward-deps-sorted
-			  (htm
-			   (:table
-			    (:caption "Supports")
-			    (dolist (backward-dep backward-deps-sorted)
-			      (let ((dep-uri (link-for-item backward-dep)))
-				(htm
-				 (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))))
-			  (htm (:p (:em "(No item immediately depends on this one.)"))))))))))))))
+			  (dolist (backward-dep backward-deps-sorted)
+			    (let ((dep-uri (link-for-item backward-dep)))
+			      (htm
+			       (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))
+			  (htm 
+			   (:td
+			    (:td
+			     (:em "(No item immediately depends on this one.)"))))))))))))))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
-	  (miz-item-html "unhandled article"
-	    (:p "The article '" (str article-name) "' is not known, or not yet suitably processed for this site.  Please try again later."))))))
+	  (miz-item-html ("unhandled article")
+	      nil
+	    (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later."))))))
 
 (defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
       (+fragment-uri-regexp+ (request-uri*))
     (let* ((item-key (format nil "~a:~a" article-name item-number))
-	   (article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article-name))
+	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
 	   (items-for-ckb (gethash item-key *ckb-to-items-table*)))
       (destructuring-bind (ckb-article-name ckb-number)
@@ -566,28 +601,33 @@ end;"))
 				      article-text-dir
 				      ckb-number))
 	       (item-html (file-as-string fragment-path)))
-	  (miz-item-html (str item-key)
-	    (:p (str item-key) " is fragment #" (str ckb-number) " of article " (str article-name) ".")
-	    (if (null (cdr items-for-ckb))
-		(let ((item (car items-for-ckb)))
-		  (destructuring-bind (item-article item-kind item-number)
-		      item
-		    (let ((item-uri (format nil "/item/~a/~a/~a" item-article item-kind item-number)))
-		      (htm 
-		       (:p "This fragment generates only one item: " ((:a :href item-uri) (str item)) ".")))))
-		(htm
-		 (:p "This fragment generates multiple items:")
-		 ((:ul :class "dep-list")
-		  (dolist (other-item items-for-ckb)
-		    (destructuring-bind (other-item-article other-item-kind other-item-number)
-			(split ":" other-item)
-		      (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
-			(htm
-			 (:li ((:a :href other-item-uri) (str other-item))))))))))
-	    (str item-html)))))))
+	  (miz-item-html (item-key)
+	      nil
+	    (let ((fragment-uri (format nil "/article/~a/#fragment~d" article-name ckb-number))
+		  (article-uri (format nil "/article/~a" article-name)))
+	      (htm
+	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri :class "article-name") (str article-name)) ".")
+	       (if (null (cdr items-for-ckb))
+		   (let ((item (car items-for-ckb)))
+		     (destructuring-bind (item-article item-kind item-number)
+			 (split ":" item)
+		       (let ((item-uri (format nil "/item/~a/~a/~a" item-article item-kind item-number)))
+			 (htm 
+			  (:p "This fragment generates only one item: " ((:a :href item-uri) (str item)) ".")))))
+		   (htm
+		    (:p "This fragment generates multiple items:")
+		    ((:ul :class "dep-list")
+		     (dolist (other-item items-for-ckb)
+		       (destructuring-bind (other-item-article other-item-kind other-item-number)
+			   (split ":" other-item)
+			 (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
+			   (htm
+			    (:li ((:a :href other-item-uri) (str other-item))))))))))
+	       (str item-html)))))))))
 
 (defun emit-articles-page ()
-  (miz-item-html "articles from the mml"
+  (miz-item-html ("articles from the mml")
+      nil
     (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
@@ -621,37 +661,117 @@ end;"))
 		   ((:td :class "article-title") "(no title was supplied)"))))))))))
 
 (defun emit-main-page ()
-  (miz-item-html (str "fine-grained dependencies in mizar")
+  (miz-item-html ("fine-grained dependencies in mizar")
+      nil
     (:h1 "welcome")
-    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") "Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
+    (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") " Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML.")
-    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  "upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
+    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  " upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
     (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (count-dependency-graph-edges))) " edges.")
     (:h1 "getting started")
     (:p "One can visit " ((:a :href "/articles") "the complete list of handled articles") ".  Alternatively, one can visit " ((:a :href "/random-item") " a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
     (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.") 
-    (:h1 "learning more about" (:tt "MIZAR"))
+    (:h1 "learning more about " (:tt "MIZAR"))
     (:p "The " (:tt "MIZAR") " system and its library, the MML, are rather complex.  To learn more about the system, see the excellent overview article")
     (:blockquote
      (:p
       "&ldquo;"
       ((:a :href "http://jfr.cib.unibo.it/article/view/1980") "Mizar in a nutshell")
-      "&rdquo; , by Adam Grabowski, Artur Kornilowicz, and Adam Naumowicz, " (:em "Journal of Formalized Reasoning") (:b "3") "(2), (2010), pp. 153&ndash;245"))
+      "&rdquo;, by Adam Grabowski, Artur Kornilowicz, and Adam Naumowicz, " (:em "Journal of Formalized Reasoning") (:b "3") "(2), (2010), pp. 153&ndash;245"))
     (:p "For a historical overview, see:")
     (:blockquote
      (:p
       "&ldquo;"
       ((:a :href "http://markun.cs.shinshu-u.ac.jp/mizar/mma.dir/2005/mma2005(2).pdf") "MIZAR: The first 30 years")
-      "&rdquo; , by Roman Mutuszewski and Piotr Rudnicki, " (:em "Mechanized Mathematics and its Applications") (:b "4") "(1), (2005), pp. 3&ndash;24"))
+      "&rdquo;, by Roman Mutuszewski and Piotr Rudnicki, " (:em "Mechanized Mathematics and its Applications") (:b "4") "(1), (2005), pp. 3&ndash;24"))
     (:p "At the moment, this site is not really interactive: you can't work with " (:tt "MIZAR") " texts here.  If you'd like to get your hands dirty, you might want to visit " ((:a :href "http://mws.cs.ru.nl/mwiki/") "the " (:tt "MIZAR") " wiki") " project at Radboud University Nijmegen.")))
 
 (defun item-uri (item-identifier)
   (format nil "/item/~a" (substitute #\/ #\: item-identifier)))
      
 (defun emit-landmarks-page ()
-  (miz-item-html "landmarks"
+  (miz-item-html ("landmarks")
+      nil
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
-    (:p "One might also be interested in the list of " ((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
+    (:p "This page is divided into the following sections:")
+    (:ul
+     (:li ((:a :href "#mmlquery") "A selected list taken from the work of the MML Query project"))
+     (:li ((:a :href "#selected-list") "The site designer's biased list of notable theorems"))
+     (:li ((:a :href "#100theorems") "100 Theorems")))
+    ((:h1 :id "mmlquery")
+     "A selected list taken from the work of the MML Query project")
+    (:p "The following is a list of theorems selected by the maintainers of the " ((:a :href "http://mmlquery.mizar.org/" :title "MML Query") "MML Query") " project, " ((:a :href "http://webdocs.cs.ualberta.ca/~piotr/Mizar/Important_thms.html" :title "Name-carrying facts/theorems/definitions in MML") "extended by Piotr Rudnicki")  ".")
+    (:ul
+     (loop
+	for (entry items) in +piotr-theorems+
+	do
+	  (if (stringp items) ; unique reference ("/item/article/theorem/5")
+	      (htm
+	       (:li ((:a :href items :title entry) (str entry))))
+	      (if (stringp (car items))
+		  (let ((num-alternatives (length items))) ; list of anonymous alternatives ("/item/article/deftheorem/1" "/item/article/deftheorem/5")
+		    (if (> num-alternatives 2) ; count alternatives: "Alternative 1" "Alternative 2", ...
+			(let ((primary-alternative (first items))
+			      (remaining-alternatives (rest items)))
+			  (htm
+			   (:li 
+			    ((:a :href primary-alternative :title entry) (str entry))
+			    "["
+			    (let ((second-alternative (car remaining-alternatives))
+				  (second-alternative-text "alternative 1")
+				  (second-alternative-title (format nil "~a (alternative 1)" entry)))
+			      (htm
+			       ((:a :href second-alternative :title second-alternative-title)
+				(str second-alternative-text))))
+			    (loop
+			       for alternative in (cdr remaining-alternatives)
+			       for i from 2
+			       for alternative-text = (format nil "alternative ~d" i)
+			       for alternative-title = (format nil "~a (alternative ~d" entry i)
+			       do
+				 (htm
+				  ", "
+				  ((:a :href alternative :title alternative-title)
+				   (str alternative-text))))
+			    "]")))
+			(let* ((primary (first items))
+			       (alternative (second items)) ; only one alternative
+			       (alternative-title (format nil "~a (alternative)" entry)))
+			  (htm
+			   (:li
+			    (str entry)
+			    (:ul
+			     (:li
+			      ((:a :href primary :title entry) "Primary version"))
+			     (:li
+			      ((:a :href alternative :title alternative-title) "Another version"))))))))
+		  (htm  ; list of named alternatives (("First" "/item/article/theorem/25") ("Second" "/item/article/theorem/50") ...)
+		   (:li (str entry)
+			(:ul
+			 (dolist (item items)
+			   (destructuring-bind (name uri)
+			       item
+			     (let ((alternative-name (format nil "~a (~a)"
+							     entry 
+							     name)))
+			       (htm
+				(:li ((:a :href uri 
+					  :title alternative-name)
+				      (str name))))))))))))))
+    ((:h1 :id "selected-list")
+     "A selected list of landmarks")
+    (:p "The following is a selected list of some notable mathematical results that can be found in the " (:tt "MIZAR") " Mathematical Library.  What does 'notable' mean?  Obviously, it's a value term.  The following list has a bias towards results of metamathematical or foundational significance, which is what the site designer is especially interested in.  If you're not especially interested in mathematical logic, see the other section, " ((:a :href "#100theorems" :title "100 Theorems Formalized in Mizar") "100 Theorems Formalized in Mizar") ", for more mathematical contentful examples.")
+    (:ul
+     (:li ((:a :href "/item/tarski/theorem/9" :title "Tarski universe axiom") "Tarski universe axiom"))
+     (:li "Axiom of infinity")
+     (:li "Power set")
+     (:li "Axiom of choice")
+     (:li "Zorn's lemma")
+     (:li "Zermelo's well-ordering theorem")
+     (:li "All vector spaces have a basis"))
+    ((:h1 :id "100theorems")
+     "100 Theorems")
+    (:p "The following is a list of 'notable' mathematical results formalized in " (:tt "MIZAR") ".  What does 'notable' mean here?  Certainly, it's a value term.  This list comes from Freek Wiedijk's "((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
     (:dl
      (loop
 	for i from 1 upto 100
@@ -659,7 +779,7 @@ end;"))
 	for theorem-name-escaped = (escape-string theorem-name)
 	do
 	  (htm
-	   (:dt (fmt "~d. ~a" i theorem-name))
+	   ((:dt :class "theorem-name") (fmt "~d. ~a" i theorem-name))
 	   (:dd
 	    (:p
 	     (let ((formalizations (gethash i +mizar-formalized+)))
@@ -668,29 +788,35 @@ end;"))
 		       (htm
 			(:ul
 			 (dolist (formalization formalizations)
-			   (let* ((formalization-uri (item-uri formalization))
-				  (formalization-html-path (html-path-for-item formalization))
-				  (formalization-html (if formalization-html-path
-							  (if (file-exists-p formalization-html-path)
-							      (file-as-string formalization-html-path)
-							      "(HTML representation not present)")
-							  "(HTML representation not present)")))
-			     (htm
-			      (:li ((:a :href formalization-uri
-					:title theorem-name-escaped)
-				    (str formalization-html))))))))
+			   (htm
+			    (:li
+			     (let* ((formalization-uri (item-uri formalization))
+				    (formalization-html-path (html-path-for-item formalization)))
+			       (if formalization-html-path
+				   (if (file-exists-p formalization-html-path)
+				       (if (empty-file-p formalization-html-path)
+					   (htm "(The HTML representation exists but is empty; please notify the site maintainer.)")
+					   (let ((formalization-html (file-as-string formalization-html-path)))
+					     (htm ((:a :href formalization-uri
+						       :class "mhtml-text"
+						       :title theorem-name-escaped))
+						  (str formalization-html))))
+				       (htm "(HTML representation not present)")))))))))
 		       (let* ((formalization (car formalizations))
 			      (formalization-uri (item-uri formalization))
-			      (formalization-html-path (html-path-for-item formalization))
-			      (formalization-html (if formalization-html-path
-						      (if (file-exists-p formalization-html-path)
-							  (file-as-string formalization-html-path)
-							  "(HTML representation not present)")
-						      "(HTML representation not present)")))
-			 (htm
-			  ((:a :href formalization-uri
-			       :title theorem-name-escaped)
-			   (str formalization-html)))))
+			      (formalization-html-path (html-path-for-item formalization)))
+			 (if formalization-html-path
+			     (if (file-exists-p formalization-html-path)
+				 (if (empty-file-p formalization-html-path)
+				     (htm "(The HTML representation exists but is empty; please notify the site maintainer.)")
+				     (let ((formalization-html (file-as-string formalization-html-path)))
+				       (htm
+					((:a :href formalization-uri
+					     :class "mhtml-text"
+					     :title theorem-name-escaped)
+					 (str formalization-html)))))
+				 (htm "(HTML representation not present)"))
+			     (htm "(HTML representation not present)"))))
 		   (htm
 		    (:em "(not yet formalized in " (:tt "MIZAR") ")")))))
 	    (let ((100theorems-uri (format nil "http://www.cs.ru.nl/~~freek/100/#~d" i))
@@ -701,9 +827,31 @@ end;"))
 			"other formalizations") "]")))))))))
 
 (defun emit-feedback-page ()
-  (miz-item-html "feedback"
+  (miz-item-html ("feedback")
+      nil
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
+
+(defun register-proofs-for-article (article)
+  (let ((num-items (gethash article *article-num-items*)))
+    (if (integerp num-items)
+	(loop
+	   for i from 1 upto num-items
+	   for fragment-proof-dir = (format nil "~a/~a/proofs/ckb~d"
+					    (mizar-items-config 'html-source)
+					    article
+					    i)
+	   for proofs = (list-directory fragment-proof-dir)
+	   do
+	     (loop
+		for proof-path in proofs
+		for proof-namestring = (namestring proof-path)
+		for proof-name = (car (last (split "/" proof-namestring)))
+		for proof-uri = (format nil "/proofs/~a/ckb~d/~a" article i proof-name)
+		do
+		  ;; (warn "Registering URI '~a' to point to path '~a'" proof-uri proof-path)
+		  (register-static-file-dispatcher proof-uri proof-path "text/xml")))
+	(error "The article '~a' does not have a known number of items!" article))))
 
 (defun initialize-uris (&optional (articles :all))
   ;; ecmascript, css
@@ -752,7 +900,7 @@ end;"))
 			      (first-n *mml-lar* articles))
        do
 	 (pushnew article *handled-articles* :test #'string=)
-	 (let* ((article-dir (format nil "~a/~a" (mizar-items-config 'itemization-source) article))
+	 (let* ((article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article))
 		(miz-uri (format nil "/~a.miz" article))
 		(miz-path (format nil "~a/~a.miz" article-dir article))
 		(prel-dir-uri (format nil "/~a/prel/" article))
@@ -774,4 +922,9 @@ end;"))
 			      #'emit-path-between-items)
   (register-regexp-dispatcher +path-between-items-via-item-uri-regexp+
 			      #'emit-path-between-items-via-item)
+  ;; proofs
+  (loop
+     for article in *handled-articles*
+     do
+       (register-proofs-for-article article))
   t)

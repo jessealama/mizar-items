@@ -5,39 +5,50 @@
 ;;; HTML output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro miz-item-html (title &body body)
-  `(with-html
-     (:head 
-      ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
-      ((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
-      ((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
-      ((:script :src "/mhtml.js" :type "text/ecmascript"))
-      (:title ,title))
-     (:body
-      ((:table :border "1"
-	       :summary "navigation"
-	       :class "header"
-	       :width "100%")
-       (:tr
-	(:td
+(defmacro miz-item-html ((title)
+			 (&rest rest
+			  &key (content-type "text/html; charset=UTF-8")
+			       (xml-declaration "<?xml version='1.0' encoding='UTF-8'?>")
+			       (doctype "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">")
+			       (return-code +http-ok+)
+			  &allow-other-keys)
+			 &body body)
+    `(with-html (:content-type ,content-type
+	         :xml-declaration ,xml-declaration
+		 :doctype ,doctype
+		 :return-code ,return-code
+		 ,@rest)
+       (:head 
+	((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
+	((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
+	((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
+	((:script :src "/mhtml.js" :type "text/ecmascript"))
+	(:title ,(if (stringp title) title (list 'str title)))
+       (:body
+	((:table :border "1"
+		 :summary "navigation"
+		 :class "header"
+		 :width "100%")
+	 (:tr
+	  (:td
+	   ((:span :class "menu")
+	    ((:a :href "/") "main")
+	    " | "
+	    ((:a :href "/about") "about")
+	    " | "
+	    ((:a :href "/articles") "articles")
+	    " | "
+	    ((:a :href "/landmarks") "landmarks")
+	    " | "
+	    ((:a :href "/random-item") "random-item")
+	    " | "
+	    ((:a :href "/random-path") "random-path")))))
+	,@body
+	(:hr)
+	((:div :class "footer")
+	 ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
 	 ((:span :class "menu")
-	  ((:a :href "/") "main")
-	  " | "
-	  ((:a :href "/about") "about")
-	  " | "
-	  ((:a :href "/articles") "articles")
-	  " | "
-	  ((:a :href "/landmarks") "landmarks")
-	  " | "
-	  ((:a :href "/random-item") "random-item")
-	  " | "
-	  ((:a :href "/random-path") "random-path")))))
-      ,@body
-      (:hr)
-      ((:div :class "footer")
-       ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
-       ((:span :class "menu")
-	"Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") ((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
+	  "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") " | "((:a :href "http://validator.w3.org/check/referer") "XHTML")))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Server and application setup
@@ -85,5 +96,23 @@ returning NIL."
 
 (defun handle-http-error (error-code)
   (when (= error-code +http-not-found+)
-    (miz-item-html "No"
-      (:p "I still haven't found what you're looking for."))))
+    (miz-item-html ("not found")
+                   (:return-code +http-not-found+)
+      (:p "I can't find what you're looking for.")
+      (:p "Your request was:")
+      (:dl
+       (loop
+	  for (param . value) in (get-parameters*)
+	  do
+	    (htm
+	     (:dt param)
+	     (:dd value)))))))
+      ;; (miz-item-html "unprocessable"
+      ;; 	(:p "We cannot make sense of your request:")
+      ;; 	(:dl
+      ;; 	 (loop
+      ;; 	    for (param . value) in (get-parameters*)
+      ;; 	    do
+      ;; 	      (htm
+      ;; 	       (:dt param)
+      ;; 	       (:dd value)))))))

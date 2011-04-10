@@ -326,10 +326,13 @@ LIST; otherwise, return T and NIL."
     (reverse lines)))
 
 (defun file-as-string (path)
-  (let ((newline (make-string 1 :initial-element #\Newline)))
-    (reduce #'(lambda (s1 s2)
-		(concat s1 newline s2))
-	    (lines-of-file path))))
+  (let ((newline (make-string 1 :initial-element #\Newline))
+	(lines (lines-of-file path)))
+    (if lines
+	(reduce #'(lambda (s1 s2)
+		    (concat s1 newline s2))
+		(lines-of-file path))
+	"")))
 
 (defun stream-lines (stream)
   (let (lines)
@@ -339,6 +342,12 @@ LIST; otherwise, return T and NIL."
 	  ((null line))
 	(push line lines)))
     (reverse lines)))
+
+(defun empty-file-p (path)
+  (with-open-file (s path :direction :input)                               
+    (let ((c (peek-char t s nil :end)))                                                         
+      (when (eq c :end)                                                                           
+	t))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Paths

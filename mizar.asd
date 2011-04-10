@@ -1,7 +1,7 @@
 
 (in-package :cl-user)
 
-(declaim (optimize (speed 1) (debug 3)))
+(declaim (optimize (compilation-speed 0) (speed 0) (debug 3)))
 
 (defpackage :mizar-asd
   (:use :cl :asdf))
@@ -29,7 +29,9 @@
 	       (:file "search")
 	       (:file "mml")
 	       (:file "site-data")
+	       (:file "tc")
 	       (:file "site-search")
 	       (:file "server")
 	       (:file "100theorems")
+	       (:file "piotr")
 	       (:file "site")))
