@@ -123,7 +123,8 @@ accurate dependency information and which are stored properly.")
 		    (< item-num-1 item-num-2)))))))))
 
 (defun emit-about-page ()
-  (miz-item-html "fine-grained dependencies in the mizar mathematical library"
+  (miz-item-html ("fine-grained dependencies in the mizar mathematical library")
+      nil
     (:p "This site aims to illustrate fine-grained dependency
     information about " (:a :href "http://www.mizar.org" "the Mizar
     Mathematical Library") ", a large collection of formalized mathematical knowledge.")
@@ -318,33 +319,38 @@ end;"))
 							   source-item)))
 		(multiple-value-bind (solution-exists? solution)
 		    (bounded-depth-first-search problem +search-depth+)
-		  (miz-item-html (fmt "from ~a to ~a" source-item destination-item)
-		  (if solution-exists?
-		      (htm
-		       (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
-		       (:ol
-			(let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
+		  (let ((title (format nil "from ~a to ~a"
+				       source-item destination-item)))
+		    (miz-item-html (title)
+			nil
+		      (if solution-exists?
 			  (htm
-			   (:li ((:a :href source-uri)
-				 (str source-item)))))
-			(dolist (step (explain-solution solution))
-			  (destructuring-bind (step-article step-kind step-num)
-			      (split ":" step)
-			    (let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
+			   (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
+			   (:ol
+			    (let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
 			      (htm
-			       (:li ((:a :href step-uri)
-				     (str step)))))))))
-		      (if (null solution)
-			  (htm
-			   (:p "There is no path from " ((:a :href source-item-uri) (str source-item)) " to " ((:a :href dest-item-uri) (str destination-item)) ".  Care to " 
-			       ((:a :href opposite-path-uri)
-				"search for a path going the other way")
-			       "?"))
-			  (htm
-			   (:p "There may be a path from "  ((:a :href source-item-uri) (str source-item)) "  to "  ((:a :href dest-item-uri) (str destination-item)) ", but I'm afraid we were unable to find one given the current depth limit in effect on searches.")))))))
-	      (miz-item-html "Invalid URI"
+			       (:li ((:a :href source-uri)
+				     (str source-item)))))
+			    (dolist (step (explain-solution solution))
+			      (destructuring-bind (step-article step-kind step-num)
+				  (split ":" step)
+				(let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
+				  (htm
+				   (:li ((:a :href step-uri)
+					 (str step)))))))))
+			  (if (null solution)
+			      (htm
+			       (:p "There is no path from " ((:a :href source-item-uri) (str source-item)) " to " ((:a :href dest-item-uri) (str destination-item)) ".  Care to " 
+				   ((:a :href opposite-path-uri)
+				    "search for a path going the other way")
+				   "?"))
+			      (htm
+			       (:p "There may be a path from "  ((:a :href source-item-uri) (str source-item)) "  to "  ((:a :href dest-item-uri) (str destination-item)) ", but I'm afraid we were unable to find one given the current depth limit in effect on searches."))))))))
+	      (miz-item-html ("Invalid URI")
+		  (:return-code +http-not-found+)
 		(:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
-	  (miz-item-html "Invalid URI"
+	  (miz-item-html ("Invalid URI")
+	      (:return-code +http-not-found+)
 	    (:p "The requested source item, '" (str source-item) "', is not the name of any known item."))))))
 
 (defun emit-path-between-items-via-item ()
@@ -360,27 +366,33 @@ end;"))
 	      (if (gethash destination *all-items*)
 		  (let ((get-params (get-parameters*)))
 		    (if (null get-params) ; first time here, eh?
-			(miz-item-html (fmt "from ~a to ~a via ~a" source destination via)
-			  (:dl
-			   (:dt "Source")
-			   (:dd (str source))
-			   (:dt "Destination")
-			   (:dd (str destination))
-			   (:dt "Via")
-			   (:dd (str via)))
-			  (:p "What kind of search would you like to do?")
-			  (:ul
-			   (:li "Find one path from source to destination;)")
-			   (:li "Find " (:em "all") " paths;")
-			   (:li "Find a path from the source to the destination that " (:em "avoids") " the the intermediate verte;x")
-			   (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex.")))
-			(miz-item-html "You're asking too much"
+			(let ((title (format nil "from ~a to ~a via ~a" source destination via)))
+			  (miz-item-html (title)
+			      nil
+			    (:dl
+			     (:dt "Source")
+			     (:dd (str source))
+			     (:dt "Destination")
+			     (:dd (str destination))
+			     (:dt "Via")
+			     (:dd (str via)))
+			    (:p "What kind of search would you like to do?")
+			    (:ul
+			     (:li "Find one path from source to destination;)")
+			     (:li "Find " (:em "all") " paths;")
+			     (:li "Find a path from the source to the destination that " (:em "avoids") " the intermediate vertex")
+			     (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex."))))
+			(miz-item-html ("You're asking too much")
+			    (:return-code +http-service-unavailable+)
 			  (:p "I can't handle this: " (fmt "~A" get-params)))))
-		  (miz-item-html "Invalid URI"
+		  (miz-item-html ("Invalid URI")
+		      (:return-code +http-not-found+)
 		    (:p "There given destination item, '" (str destination) "', is not the name of any known item.")))
-	      (miz-item-html "Invalid URI"
+	      (miz-item-html ("Invalid URI")
+		  (:return-code +http-not-found+)
 		(:p "There given intermediate item, '" (str via) "', is not the name of any known item.")))
-	  (miz-item-html "Invalid URI"
+	  (miz-item-html ("Invalid URI")
+	      (:return-code +http-not-found+)
 	    (:p "There given source item, '" (str source) "', is not the name of any known item."))))))
 
 (defun emit-article-page ()
@@ -395,7 +407,8 @@ end;"))
 		   (title (if bib-title
 			      (format nil "~a: ~a" article bib-title)
 			      (format nil "~a" article))))
-	      (miz-item-html title
+	      (miz-item-html (title)
+		  nil
 		(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
 		(htm
 		 ((:ol :class "fragment-listing")
@@ -414,11 +427,13 @@ end;"))
 			  (str item-html)))))))))
 	    (progn
 	      ; (setf (return-code *reply*) +http-not-found+)
-	      (miz-item-html "article cannot be displayed"
+	      (miz-item-html ("article cannot be displayed")
+		  (:return-code +http-not-found+)
 		(:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
-	  (miz-item-html "article not found"
+	  (miz-item-html ("article not found")
+	      (:return-code +http-not-found+)
 	    (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
 	    ((:table :class "article-listing" :rules "rows")
 	     (:thead
@@ -520,7 +535,8 @@ end;"))
 					  article-text-dir
 					  ckb-number))
 		   (item-html (file-as-string fragment-path)))
-	      (miz-item-html (str item-key)
+	      (miz-item-html (item-key)
+		  nil
 		((:table :width "100%")
 		 ((:tr :valign "top")
 		  (:td (str item-html)))
@@ -559,7 +575,8 @@ end;"))
 			     (:em "(No item immediately depends on this one.)"))))))))))))))))
 	(progn
 	  ; (setf (return-code *reply*) +http-not-found+)
-	  (miz-item-html "unhandled article"
+	  (miz-item-html ("unhandled article")
+	      nil
 	    (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later."))))))
 
 (defun emit-fragment-page ()
@@ -576,7 +593,8 @@ end;"))
 				      article-text-dir
 				      ckb-number))
 	       (item-html (file-as-string fragment-path)))
-	  (miz-item-html (str item-key)
+	  (miz-item-html (item-key)
+	      nil
 	    (let ((fragment-uri (format nil "/article/~a/#fragment~d" article-name ckb-number))
 		  (article-uri (format nil "/article/~a" article-name)))
 	      (htm
@@ -600,7 +618,8 @@ end;"))
 	       (str item-html)))))))))
 
 (defun emit-articles-page ()
-  (miz-item-html "articles from the mml"
+  (miz-item-html ("articles from the mml")
+      nil
     (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
@@ -634,7 +653,8 @@ end;"))
 		   ((:td :class "article-title") "(no title was supplied)"))))))))))
 
 (defun emit-main-page ()
-  (miz-item-html (str "fine-grained dependencies in mizar")
+  (miz-item-html ("fine-grained dependencies in mizar")
+      nil
     (:h1 "welcome")
     (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") " Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML.")
@@ -662,7 +682,8 @@ end;"))
   (format nil "/item/~a" (substitute #\/ #\: item-identifier)))
      
 (defun emit-landmarks-page ()
-  (miz-item-html "landmarks"
+  (miz-item-html ("landmarks")
+      nil
     (:p "One might also be interested in entering the vast space of " (:tt "MIZAR") " items by inspecting some landmarks.")
     (:p "This page is divided into the following sections:")
     (:ul
@@ -798,7 +819,8 @@ end;"))
 			"other formalizations") "]")))))))))
 
 (defun emit-feedback-page ()
-  (miz-item-html "feedback"
+  (miz-item-html ("feedback")
+      nil
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
