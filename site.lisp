@@ -457,13 +457,21 @@ end;"))
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
-      (redirect (uri-for-item article kind number)))))
+      (let ((client-server-protocol (server-protocol*)))	
+	    (redirect (uri-for-item article kind number)
+		      :code (if (string= client-server-protocol "HTTP/1.1")
+				+http-temporary-redirect+
+				+http-moved-temporarily+))))))
 
 (defun emit-random-path ()
   (let* ((keys (hash-table-keys *all-items*))
 	 (random-vertex-1 (random-elt keys))
 	 (random-vertex-2 (random-elt keys)))
-    (redirect (link-for-two-items random-vertex-1 random-vertex-2))))
+    (let ((client-server-protocol (server-protocol*)))
+      (redirect (link-for-two-items random-vertex-1 random-vertex-2)
+		:code (if (string= client-server-protocol "HTTP/1.1")
+			  +http-temporary-redirect+
+			  +http-moved-temporarily+)))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
