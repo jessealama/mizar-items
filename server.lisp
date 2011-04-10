@@ -5,19 +5,18 @@
 ;;; HTML output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro miz-item-html ((&rest rest
+(defmacro miz-item-html ((title)
+			 (&rest rest
 			  &key (content-type "text/html; charset=UTF-8")
 			       (xml-declaration "<?xml version='1.0' encoding='UTF-8'?>")
 			       (doctype "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">")
-			       (response-code +http-ok+)
-			       (title "")
+			       (return-code +http-ok+)
 			  &allow-other-keys)
 			 &body body)
-  `(with-html (:title ,title
-	       :content-type ,content-type
+  `(with-html (:content-type ,content-type
 	       :xml-declaration ,xml-declaration
 	       :doctype ,doctype
-	       :response-code ,response-code
+	       :return-code ,return-code
 	       ,@rest)
      (:head 
       ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
@@ -97,7 +96,8 @@ returning NIL."
 
 (defun handle-http-error (error-code)
   (when (= error-code +http-not-found+)
-    (miz-item-html "not found"
+    (miz-item-html ("not found")
+                   (:return-code +http-not-found+)
       (:p "I can't find what you're looking for.")
       (:p "Your request was:")
       (:dl
