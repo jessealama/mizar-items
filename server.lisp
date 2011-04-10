@@ -5,8 +5,20 @@
 ;;; HTML output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro miz-item-html (title &body body)
-  `(with-html
+(defmacro miz-item-html ((&rest rest
+			  &key (content-type "text/html; charset=UTF-8")
+			       (xml-declaration "<?xml version='1.0' encoding='UTF-8'?>")
+			       (doctype "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">")
+			       (response-code +http-ok+)
+			       (title "")
+			  &allow-other-keys)
+			 &body body)
+  `(with-html (:title ,title
+	       :content-type ,content-type
+	       :xml-declaration ,xml-declaration
+	       :doctype ,doctype
+	       :response-code ,response-code
+	       ,@rest)
      (:head 
       ((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
       ((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
