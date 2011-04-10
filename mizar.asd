@@ -29,6 +29,7 @@
 	       (:file "search")
 	       (:file "mml")
 	       (:file "site-data")
+	       (:file "tc")
 	       (:file "site-search")
 	       (:file "server")
 	       (:file "100theorems")
