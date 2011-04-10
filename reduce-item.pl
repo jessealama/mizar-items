@@ -22,8 +22,8 @@ my %item_to_extension =
    'Identify' => 'eid',
   );
 
-my $ramdisk = "/Volumes/ramdisk";
-my $harddisk = "/tmp";
+my $ramdisk = "/dev/shm";
+my $harddisk = "/local/data/alama";
 my $article_on_harddisk = "$harddisk/$article";
 my $article_in_ramdisk = "$ramdisk/$article";
 
@@ -141,7 +141,7 @@ print "Brutalizing item $item of article $article...", "\n";
 
 print "Verifiying $item...", "\n";
 
-chdir $article_in_ramdisk;
+chdir $article_in_ramdisk or die "Couldn't change directory to '$article_in_ramdisk'!";
 
 unless (-e "$article_fragment_name.miz") {
   die "Article fragment '$article_fragment_name.miz' doesn't exist!";
@@ -154,7 +154,7 @@ if ($exit_code != 0) {
 }
 
 # absrefs
-my $absrefs = '/Users/alama/sources/mizar/xsl4mizar/addabsrefs.xsl';
+my $absrefs = '/home/mptp/gr/xsl4mizar/addabsrefs.xsl';
 # sanity
 unless (-e $absrefs) {
   die "The absrefs stylesheet at '$absrefs' doesn't exist!";
@@ -252,13 +252,25 @@ if (-e "$article_fragment_name.eno") {
   print "no patterns to trim for $article_fragment_name", "\n";
 }
 
+my $brutalizer_script = '/home/alama/mizar-items/miz_item_deps_bf.pl';
+# sanity
+unless (-e $brutalizer_script) {
+  die "The needed brutalizer script doesn't exist at '$brutalizer_script'!";
+}
+unless (-r $brutalizer_script) {
+  die "The brutalizer script at '$brutalizer_script' cannot be read!";
+}
+unless (-x $brutalizer_script) {
+  die "The brutalizer script at '$brutalizer_script' is not executable!";
+}
+
 foreach my $item_kind (@item_kinds) {
 
   my $extension = $item_to_extension{$item_kind};
 
   if (-e "$article_fragment_name.$extension") {
     print "brutalizing item kind $item_kind for item $article_fragment_name of article $article...", "\n";
-    my $exit_code = system ('/Users/alama/sources/mizar/mizar-items/miz_item_deps_bf.pl', $item_kind, $extension, $article_fragment_name);
+    my $exit_code = system ($brutalizer_script, $item_kind, $extension, $article_fragment_name);
 	
     $exit_code = $exit_code >> 8;
     my $err_message = $!;
