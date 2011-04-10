@@ -227,6 +227,19 @@ from the beginning of the list."
      finally
        (return (subsequence-from-indices seq needed-indices))))
 
+(defun every-with-falsifying-witness (list pred)
+  "Determine whether every member of LIST satisfies the unary
+predicate PRED.  Rreturns two values: if there is a member of LIST
+that fails to satisfy PRED, return NIL and the first such member of
+LIST; otherwise, return T and NIL."
+  (loop
+     for elt in list
+     do
+       (unless (funcall pred elt)
+	 (return (values nil elt)))
+     finally
+       (return (values t nil))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -271,6 +284,32 @@ from the beginning of the list."
      finally
        (return nil)))
 
+(defun keys-with-rest->hash-table (keys)
+  "Given a list of lists of the form (KEY1 . REST1), make a hash table whose keys are the KEYs, and whose values are the associated RESTs."
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for (key . val) in keys
+     do
+       (setf (gethash key table) val)
+     finally 
+       (return table)))
+
+(defun count-hash-table-keys (table)
+  "Assuming that all values of the hash table TABLE are sequences, sum the length of all of them."
+  (loop
+     for v being the hash-values in table
+     summing (length v) into num-edges
+     finally (return num-edges)))
+
+(defun hash-table-from-keys-and-values (test &rest keys-and-values)
+  (loop
+     with table = (make-hash-table :test test)
+     for (key . value) in keys-and-values
+     do
+       (setf (gethash key table) value)
+     finally
+       (return table)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -287,10 +326,13 @@ from the beginning of the list."
     (reverse lines)))
 
 (defun file-as-string (path)
-  (let ((newline (make-string 1 :initial-element #\Newline)))
-    (reduce #'(lambda (s1 s2)
-		(concat s1 newline s2))
-	    (lines-of-file path))))
+  (let ((newline (make-string 1 :initial-element #\Newline))
+	(lines (lines-of-file path)))
+    (if lines
+	(reduce #'(lambda (s1 s2)
+		    (concat s1 newline s2))
+		(lines-of-file path))
+	"")))
 
 (defun stream-lines (stream)
   (let (lines)
@@ -300,6 +342,12 @@ from the beginning of the list."
 	  ((null line))
 	(push line lines)))
     (reverse lines)))
+
+(defun empty-file-p (path)
+  (with-open-file (s path :direction :input)                               
+    (let ((c (peek-char t s nil :end)))                                                         
+      (when (eq c :end)                                                                           
+	t))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Paths
@@ -312,5 +360,17 @@ from the beginning of the list."
   (concat (ensure-directory directory) filename (if (null extension)
 						    ""
 						    (concat "." extension))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Regular expressions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun regexp-disjoin (&optional str-1 str-2)
+  (if (and str-1 str-2)
+      (concat str-1 "|" str-2)
+      ""))
+
+(defun exact-regexp (str)
+  (concatenate 'string "^" str "$"))
 
 ;;; utils.lisp ends here
