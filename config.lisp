@@ -11,6 +11,12 @@
 (defun file-in-xsl4mizar-dir (filename)
   (concatenate 'string *mizar-items-xsl4mizar-root* "/" filename))
 
+(defparameter *mizar-items-data-root*
+  (concatenate 'string *mizar-items-root* "/" "data"))
+
+(defun file-in-data-dir (filename)
+  (concatenate 'string *mizar-items-data-root* "/" filename))
+
 (defvar *mizar-items-config* (make-hash-table))
 
 (defun update-mizar-items-config (key value)
