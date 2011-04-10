@@ -260,9 +260,9 @@
     *article-num-items*))
 
 (defun load-mml (mml-version)
-  (let ((data-path-lisp (format nil "data/~a.lisp" mml-version))
-	(data-path-lisp-xz (format nil "data/~a.lisp.xz" mml-version))
-	(data-path-fasl (format nil "data/~a.fasl" mml-version)))
+  (let ((data-path-lisp (file-in-data-dir (format nil "~a.lisp" mml-version)))
+	(data-path-lisp-xz (file-in-data-dir (format nil "~a.lisp.xz" mml-version)))
+	(data-path-fasl (file-in-data-dir (format nil "~a.fasl" mml-version))))
     (when (file-exists-p data-path-lisp-xz)
       (when (or (and (file-exists-p data-path-lisp)
 		     (< (file-write-date data-path-lisp)
