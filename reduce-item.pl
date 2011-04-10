@@ -5,8 +5,6 @@ use XML::LibXML;
 
 my $item = $ARGV[0];
 
-warn "item is $item";
-
 my ($article,$item_number) = split (/:/, $item);
 
 my $article_fragment_name 

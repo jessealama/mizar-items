@@ -1,6 +1,8 @@
 
 (in-package :cl-user)
 
+(declaim (optimize (speed 1) (debug 3)))
+
 (defpackage :mizar-asd
   (:use :cl :asdf))
 
@@ -12,7 +14,7 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria")
+  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria" "hunchentoot" "cl-who" "hunchentoot-dir-lister" "hunchentoot-utils")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
@@ -22,4 +24,12 @@
 	       (:file "article")
 	       (:file "mizar")
 	       (:file "item")
-	       (:file "itemize")))
+	       (:file "itemize")
+	       (:file "queue")
+	       (:file "search")
+	       (:file "mml")
+	       (:file "site-data")
+	       (:file "site-search")
+	       (:file "server")
+	       (:file "100theorems")
+	       (:file "site")))

@@ -54,7 +54,7 @@ sub constrkind_attribute {
   return $1;
 }
 
-my $num_articles_handled = 10;
+my $num_articles_handled = 200;
 # my @articles = ('tarski');
 my @articles = ();
 my @first_hundred = `head -n $num_articles_handled $mml_lar`;
