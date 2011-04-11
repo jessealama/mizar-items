@@ -11,12 +11,6 @@
     :accessors pretty-name
     :documentation "Human-readable name for a landmark."
     :type (or nil string))
-   (inline-html-name
-    :initform nil
-    :initarg :html-name
-    :accessor inline-html-name
-    :documentation "An presentation of the landmarks's name suitable for inline HTML contexts"
-    :type (or nil string))
    (escaped-html-name
     :initform nil
     :initarg :html-name
@@ -60,13 +54,12 @@
     :documentation "A list of (possibly anonymous) landmarks that are variants of this one."
     :type list)))
 
-(defun make-landmark (&key pretty-name inline-html-name escaped-html-name
+(defun make-landmark (&key pretty-name escaped-html-name
 		           article item-kind item-number id variants)
   (if (member id *registered-ids* :test #'string=)
       (error "Cannot make a new landmark with the ID '~a', because there is always a landmark with this ID.")
       (make-instance 'landmark
 		     :pretty-name pretty-name
-		     :inline-html-name inline-html-name
 		     :escaped-html-name escaped-html-name
 		     :article article
 		     :item-kind item-kind
@@ -77,7 +70,7 @@
 (defparameter *landmarks* nil
   "A list of registered landmarks.")
 
-(defmacro register-landmark (&key pretty-name inline-html-name escaped-html-name
+(defmacro register-landmark (&key pretty-name escaped-html-name
 			          article item-kind item-number id variants)
   `(push (make-landmark :pretty-name ,pretty-name
 			:id ,id
