@@ -340,3 +340,17 @@
   (let ((present (member article *articles* :key #'first :test #'string=)))
     (when present
       (third (car present)))))
+
+(defun all-known-items ()
+  (let ((everything (make-hash-table :test #'equal)))
+    (loop
+       for k being the hash-keys in *item-dependency-graph-forward*
+       do
+	 (setf (gethash k everything) t)
+	 (dolist (dep (gethash k *item-dependency-graph-forward*))
+	   (setf (gethash dep everything) t))
+       finally
+	 (return (keys everything)))))
+
+(defun count-items ()
+  (length (all-known-items)))
