@@ -665,8 +665,7 @@ end;"))
       nil
     (:h1 "welcome")
     (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") " Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
-    get a handle on the large contents of the MML.")
-    (:p "The " (:tt "MIZAR") " community has " ((:a :href "http://mizar.org/version/current/html/") "an attractive presentation of the contents of the MML") ".  (It is simply a directory listing at the moment, listing every article of the MML in alphabetical order.)  This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  " upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
+    get a handle on the large contents of the MML. This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  " upon and conversely (what items depend on the item).  This website presents " (:tt "MIZAR") " items, their dependency information, and provides a way of exploring these dependencies by finding " (:b "paths") " among dependencies.")
     (:p "The dependency graph that this site lets you explore has "  (:b (str (hash-table-count *all-items*))) " nodes (items) and " (:b (str (count-dependency-graph-edges))) " edges.")
     (:h1 "getting started")
     (:p "One can visit " ((:a :href "/articles") "the complete list of handled articles") ".  Alternatively, one can visit " ((:a :href "/random-item") " a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
@@ -677,7 +676,7 @@ end;"))
      (:p
       "&ldquo;"
       ((:a :href "http://jfr.cib.unibo.it/article/view/1980") "Mizar in a nutshell")
-      "&rdquo;, by Adam Grabowski, Artur Kornilowicz, and Adam Naumowicz, " (:em "Journal of Formalized Reasoning") (:b "3") "(2), (2010), pp. 153&ndash;245"))
+      "&rdquo;, by Adam Grabowski, Artur Kornilowicz, and Adam Naumowicz, " (:em "Journal of Formalized Reasoning") " " (:b "3") "(2), (2010), pp. 153&ndash;245"))
     (:p "For a historical overview, see:")
     (:blockquote
      (:p
