@@ -47,6 +47,12 @@
     :accessor item-number
     :documentation "The item number of this landmark, relative to ARTICLE and ITEM-KIND, if applicable."
     :type (or nil fixnum))
+   (parent
+    :initform nil
+    :initarg :parent
+    :accessor parent
+    :documentation "The 'parent' of this landmark, if this landmark is a variant of some other landmark."
+    :type (or nil landmark))
    (variants
     :initform nil
     :initarg :variants
