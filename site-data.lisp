@@ -280,8 +280,14 @@
     (when (or (not (file-exists-p data-path-fasl))
 	      (< (file-write-date data-path-fasl)
 		 (file-write-date data-path-lisp)))
-      (unless (compile-file data-path-lisp)
-	(error "Something went wrong compiling the data file for MML version ~a at '~a'" mml-version data-path-lisp)))
+      (multiple-value-bind (output-filename warnings failure)
+	  (compile-file data-path-lisp)
+	(when (null output-filename)
+	  (error "Something went wrong compiling the data file for MML version ~a at '~a': no output file was produced" mml-version data-path-lisp))
+	(when warnings
+	  (error "Something went wrong compiling the data file for MML version ~a at '~a': there were warnings or errors during compilation." mml-version data-path-lisp))
+	(when failure
+	  (error "Something went wrong compiling the data file for MML version ~a at '~a': there were warnings or errors during compilation." mml-version data-path-lisp))))
     (unless (file-exists-p data-path-fasl)
       (error "Althought we just compiled the data for MML version ~a, there is no FASL file at the expected location '~a'" mml-version data-path-fasl))
     (format t "Loading data for MML version ~a..." mml-version)
