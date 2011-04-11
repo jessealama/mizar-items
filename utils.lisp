@@ -344,9 +344,10 @@ LIST; otherwise, return T and NIL."
     (reverse lines)))
 
 (defun empty-file-p (path)
-  (with-open-file (s path :direction :input)                               
-    (let ((c (peek-char t s nil :end)))                                                         
-      (when (eq c :end)                                                                           
+  (with-open-file (s path :direction :input
+		          :if-does-not-exist :error)
+    (let ((c (peek-char t s nil :end)))
+      (when (eq c :end)
 	t))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
