@@ -338,22 +338,23 @@ It may also contain:
 			   :goal destination)))
       (multiple-value-bind (solution-found? solution)
 	  (bounded-depth-first-search search-problem +search-depth+)
-	(if solution-found?
-	    (let ((steps (explain-solution solution)))
-	      (miz-item-html ("seach for paths")
+	(cond (solution-found?
+	       (let ((steps (explain-solution solution)))
+		 (miz-item-html ("seach for paths")
 		  nil
-		(:p "Here's a solution:")
-		(:ol
-		 (dolist (step steps)
-		   (htm
-		    (:li (str step)))))))
-	    (if (eq solution :cut-off)
-		(miz-item-html ("search cut off")
-		    nil
-		  (:p "There may be a path from " (str source) " to " (str destination) ", but we were unable to find one given the current search limits."))
-		(miz-item-html ("there is no path")
-		    nil
-		  (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
+		   (:p "Here's a solution:")
+		   (:ol
+		    (dolist (step steps)
+		      (htm
+		       (:li (str step))))))))
+	      ((eq solution :cut-off)
+	       (miz-item-html ("search cut off")
+		   nil
+		 (:p "There may be a path from " (str source) " to " (str destination) ", but we were unable to find one given the current search limits.")))
+	      (t
+	       (miz-item-html ("there is no path")
+		   nil
+		 (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
 
 
 (defun emit-article-page ()
