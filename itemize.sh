@@ -25,6 +25,7 @@ article_on_harddisk=$harddisk/$article;
 article_in_ramdisk=$ramdisk/$article-1;
 
 sbcl --disable-ldb \
+    --dynamic-space-size 24000 \
      --noinform \
      --core $image \
      --eval '(in-package :mizar)' \

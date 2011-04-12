@@ -4,8 +4,8 @@ use strict;
 use XML::LibXML;
 
 # set up the ramdisk and itemization source
-my $ramdisk = "/Volumes/ramdisk";
-my $harddisk = "/tmp";
+my $ramdisk = "/dev/shm";
+my $harddisk = "/local/data/alama";
 
 # sanity
 unless (-e $ramdisk) {
@@ -40,8 +40,8 @@ sub article_in_ramdisk {
   return "$ramdisk/$article";
 }
 
-my $reduce_item_script = '/Users/alama/sources/mizar/mizar-items/reduce-item.pl';
-my $reduce_article_script = '/Users/alama/sources/mizar/mizar-items/reduce.pl';
+my $reduce_item_script = '/home/alama/reduce-item.pl';
+my $reduce_article_script = '/home/alama/mizar-items/reduce.pl';
 
 # sanity
 unless (-e $reduce_item_script) {
@@ -97,14 +97,14 @@ foreach my $article (@articles) {
 my @num_items = ();
 foreach my $article (@articles) {
   my $article_on_harddisk = article_on_harddisk ($article);
-  my $num_items_for_article = `find $article_on_harddisk/text -name "ckb*.miz" | gwc --lines`;
+  my $num_items_for_article = `find $article_on_harddisk/text -name "ckb*.miz" | wc --lines`;
   chomp $num_items_for_article;
   push (@num_items, $num_items_for_article);
 }
 
 # Make sure we don't max out the ramdisk
 my @stuff_in_ramdisk = `find $ramdisk -mindepth 1 -maxdepth 1 -type d`;
-if (@stuff_in_ramdisk > 20) {
+if (@stuff_in_ramdisk > 500) {
   die "Failure: ramdisk is full; refusing to proceed";
 }
 
@@ -204,7 +204,7 @@ sub first_non_blank_child {
   return $children[0];
 }
 
-my @extensions = keys %xml_pattern_for_extension;
+# my @extensions = keys %xml_pattern_for_extension;
 
 # foreach my $i (1 .. scalar @articles) {
 #   my $article = $articles[$i - 1];
