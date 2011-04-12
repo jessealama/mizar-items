@@ -23,7 +23,7 @@
 	((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
 	((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
 	((:script :src "/mhtml.js" :type "text/ecmascript"))
-	(:title ,(if (stringp title) title (list 'str title)))
+	(:title ,(if (stringp title) title (list 'str title))))
        (:body
 	((:table :border "1"
 		 :summary "navigation"
@@ -48,7 +48,7 @@
 	((:div :class "footer")
 	 ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
 	 ((:span :class "menu")
-	  "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") " | "((:a :href "http://validator.w3.org/check/referer") "XHTML")))))))
+	  "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") " | "((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Server and application setup
