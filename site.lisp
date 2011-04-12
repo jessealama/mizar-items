@@ -299,27 +299,59 @@ end;"))
 		  article-2 kind-2 num-2))))
 
 (defun emit-path-between-items ()
-  (let ((query (query-string*)))
-    (miz-item-html ("search for paths between items")
-	nil
-      ;; validate the query string.  It must contain:
-      ;; * source ('from')
-      ;; * destination ('to')
-      ;; It may also contain:
-      ;; * intermediate steps ('via'), semicolon delimited
-      ((let ((source (get-parameter "from"))
-	     (destination (get-parameter "to"))
-	     (via (get-parameter "via")))
-	 (if source
-	     (if destination
-		 (let ((intermediates (split #\; via)))
-		   (multiple-value-bind (all-ok bad-guy)
-		       (every-with-falsifying-witness #'known-item?
-						      intermediates)
-		     (if all-ok
-			 (if (known-item? source)
-			     (if (known-item? destination)
-				 
+  ;; validate the query string.  It must contain:
+  ;; * source ('from')
+  ;; * destination ('to')
+  ;; It may also contain:
+  ;; * intermediate steps ('via'), semicolon delimited
+  (let* ((source (get-parameter "from"))
+	 (destination (get-parameter "to"))
+	 (via (get-parameter "via")))
+    (if source
+	(if destination
+	    (let ((intermediates (split #\; via)))
+	      (multiple-value-bind (all-ok bad-guy)
+		  (every-with-falsifying-witness #'known-item?
+						 intermediates)
+		(if all-ok
+		    (if (known-item? source)
+			(if (known-item? destination)
+			    (let ((search-problem (make-item-search-problem 
+						   :initial-state source
+						   :goal destination)))
+			      (multiple-value-bind (solution-found? solution)
+				  (bounded-depth-first-search search-problem +search-depth+)
+				(if solution-found?
+				    (let ((steps (explain-solution solution)))
+				      (miz-item-html ("seach for paths")
+					  nil
+					(:p "Here's a solution:")
+					(:ol
+					 (dolist (step steps)
+					   (htm
+					    (:li (str step)))))))
+				    (if (eq solution :cut-off)
+					(miz-item-html ("search cut off")
+					    nil
+					  (:p "There may be a path from " (str source) " to " (str destination) ", but we were unable to find one given the current search limits."))
+					(miz-item-html ("there is no path")
+					    nil
+					  (:p "There is no path from " (str source) " to " (str destination) ".."))))))
+			    (miz-item-html ("invalid item")
+				(:return-code +http-bad-request+)
+			      (:p "The parameter '" (str destination) "' is not the name of a known item.")))
+			(miz-item-html ("invalid item")
+			    (:return-code +http-bad-request+)
+			  (:p "The parameter '" (str source) "' is not the name of a known item.")))
+		    (miz-item-html ("invalid item")
+			(:return-code +http-bad-request+)
+		      (:p "The parameter '" (str bad-guy) "' is not the name of a known item.")))))
+	    (miz-item-html ("invalid item")
+		(:return-code +http-bad-request+)
+	      (:p "You must specify a destination item.")))
+	(miz-item-html ("invalid item")
+	    (:return-code +http-bad-request+)
+	  (:p "You must specify a source item.")))))
 
 (defun emit-path-between-items-via-item ()
   (register-groups-bind (source-article source-kind source-num 
