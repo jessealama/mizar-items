@@ -40,9 +40,7 @@
 	    " | "
 	    ((:a :href "/landmarks") "landmarks")
 	    " | "
-	    ((:a :href "/random-item") "random-item")
-	    " | "
-	    ((:a :href "/random-path") "random-path")))))
+	    ((:a :href "/random-item") "random item")))))
 	,@body
 	(:hr)
 	((:div :class "footer")
