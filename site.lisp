@@ -2,6 +2,18 @@
 (in-package :mizar)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Entities
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-constant +downward-arrow-entity+ "&dArr;"
+  :test #'string=
+  :documentation "A downward-pointing arrow (see also http://www.blooberry.com/indexdot/html/tagpages/entities/arrow.htm).")
+
+(define-constant +upward-arrow-entity+ "&uArr;"
+  :test #'string=
+  :documentation "An upward-pointing arrow (see also http://www.blooberry.com/indexdot/html/tagpages/entities/arrow.htm).")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -295,22 +307,23 @@ end;"))
       (split ":" source)
     (destructuring-bind (dest-article dest-item-kind dest-item-number-str)
 	(split ":" destination)
-      (let ((steps (explain-solution solution)))
+      (let ((steps (explain-solution solution))
+	    (source-uri (uri-for-item-as-string source))
+	    (dest-uri (uri-for-item-as-string destination)))
 	(with-html-output-to-string (s nil :indent nil)
-	  (:table
+	  ((:table :class "dependence-path")
 	   (:caption
 	    "A path of dependence from "
-	    ((:span :class "article-name") (str source-article)) ":" (str source-item-kind) ":" (str source-item-number-str)
+	    ((:a :href source-uri :title source) ((:span :class "article-name") (str source-article)) ":" (str source-item-kind) ":" (str source-item-number-str))
 	    " to "
-	    ((:span :class "article-name") (str dest-article)) ":" (str dest-item-kind) ":" (str dest-item-number-str))
-	   (:thead
-	    (:tr
-	     (:th "Item")))
+	    ((:a :href dest-uri :title destination) ((:span :class "article-name") (str dest-article)) ":" (str dest-item-kind) ":" (str dest-item-number-str)))
+	   (:thead (:tr (:th "Item")))
 	   (:tbody
 	    (if (length= 1 steps)
 		(let* ((item (car steps))
 		       (item-html (file-as-string (html-path-for-item item))))
-		  (htm (:tr (:td (str item-html)))))
+		  (htm ((:tr :class "dependence-path-node")
+			(:td (str item-html)))))
 		(loop
 		   for step-from in steps
 		   for step-to in (cdr steps)
@@ -322,12 +335,11 @@ end;"))
 		   for dependence-link-title = (format nil "~a depends on ~a" step-from step-to)
 		   do
 		     (htm
-		      (:tr
+		      ((:tr :class "dependence-path-node")
 		       (:td ((:a :href step-from-uri :title step-from) (str step-from-html))))
-		      (:tr
-		       ((:td :align "center" :class "arrow")
-			((:a :href dependence-uri :title dependence-link-title) (str "&#8595;"))))
-		      (:tr
+		      ((:tr :class "dependence-path-edge")
+		       ((:td :class "arrow") ((:a :href dependence-uri :title dependence-link-title) (str +downward-arrow-entity+))))
+		      ((:tr :class "dependence-path-node")
 		       (:td ((:a :href step-to-uri :title step-to) (str step-to-html))))))))))))))
 
 (defgeneric emit-path-between-items ()
@@ -541,9 +553,9 @@ It may also contain:
 		   ((:table :rules "cols")
 		    (:tr
 		     ((:td :align "center" :class "arrow")
-		      (str "&#8593;"))
+		      (str +upward-arrow-entity+))
 		     ((:td :align "center" :class "arrow")
-		      (str "&#8595;")))
+		      (str +downward-arrow-entity+)))
 		    ((:tr :valign "top")
 		     ((:td :class "halfwidth" :align "center")
 		      (:table
