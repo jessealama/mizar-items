@@ -365,48 +365,6 @@ It may also contain:
 		  (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
 
 
-(defun emit-path-between-items-via-item ()
-  (register-groups-bind (source-article source-kind source-num 
-					via-article via-kind via-num
-					destination-article destination-kind destination-num)
-      (+path-between-items-via-item-uri-regexp+ (request-uri*))
-    (let ((source (format nil "~a:~a:~a" source-article source-kind source-num))
-	  (via (format nil "~a:~a:~a" via-article via-kind via-num))
-	  (destination (format nil "~a:~a:~a" destination-article destination-kind destination-num)))	
-      (if (gethash source *all-items*)
-	  (if (gethash via *all-items*)
-	      (if (gethash destination *all-items*)
-		  (let ((get-params (get-parameters*)))
-		    (if (null get-params) ; first time here, eh?
-			(let ((title (format nil "from ~a to ~a via ~a" source destination via)))
-			  (miz-item-html (title)
-			      nil
-			    (:dl
-			     (:dt "Source")
-			     (:dd (str source))
-			     (:dt "Destination")
-			     (:dd (str destination))
-			     (:dt "Via")
-			     (:dd (str via)))
-			    (:p "What kind of search would you like to do?")
-			    (:ul
-			     (:li "Find one path from source to destination;)")
-			     (:li "Find " (:em "all") " paths;")
-			     (:li "Find a path from the source to the destination that " (:em "avoids") " the intermediate vertex")
-			     (:li "Find " (:em "all") " paths from the source to the destination that avood the intermediate vertex."))))
-			(miz-item-html ("You're asking too much")
-			    (:return-code +http-service-unavailable+)
-			  (:p "I can't handle this: " (fmt "~A" get-params)))))
-		  (miz-item-html ("Invalid URI")
-		      (:return-code +http-not-found+)
-		    (:p "There given destination item, '" (str destination) "', is not the name of any known item.")))
-	      (miz-item-html ("Invalid URI")
-		  (:return-code +http-not-found+)
-		(:p "There given intermediate item, '" (str via) "', is not the name of any known item.")))
-	  (miz-item-html ("Invalid URI")
-	      (:return-code +http-not-found+)
-	    (:p "There given source item, '" (str source) "', is not the name of any known item."))))))
-
 (defun emit-article-page ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
@@ -921,8 +879,6 @@ It may also contain:
   (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
   (register-regexp-dispatcher +path-between-items-uri-regexp+
 			      #'emit-path-between-items)
-  (register-regexp-dispatcher +path-between-items-via-item-uri-regexp+
-			      #'emit-path-between-items-via-item)
   ;; proofs
   (loop
      for article in *handled-articles*
