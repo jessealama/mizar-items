@@ -70,20 +70,6 @@
   :test #'string=
   :documentation "A regular expression that matches the URI (sans query parameters) for searching for paths in the items dependency graph.")
 
-(define-constant +path-between-items-via-item-uri-regexp+
-    (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
-			  "/" "(" +item-kind-regexp+ ")"
-			  "/" "(" +number-regexp+ ")"
-			  "/" "(" +article-name-regexp+ ")"
-			  "/" "(" +item-kind-regexp+ ")"
-			  "/" "(" +number-regexp+ ")"
-			  "/" "(" +article-name-regexp+ ")"
-			  "/" "(" +item-kind-regexp+ ")"
-			  "/" "(" +number-regexp+ ")"
-			  "/?" ; maybe end with a '/'
-			  ))
-  :test #'string=)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
