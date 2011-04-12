@@ -475,16 +475,6 @@ It may also contain:
 				+http-temporary-redirect+
 				+http-moved-temporarily+))))))
 
-(defun emit-random-path ()
-  (let* ((keys (hash-table-keys *all-items*))
-	 (random-vertex-1 (random-elt keys))
-	 (random-vertex-2 (random-elt keys)))
-    (let ((client-server-protocol (server-protocol*)))
-      (redirect (link-for-two-items random-vertex-1 random-vertex-2)
-		:code (if (string= client-server-protocol "HTTP/1.1")
-			  +http-temporary-redirect+
-			  +http-moved-temporarily+)))))
-
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
      (unless (file-exists-p ,path)
