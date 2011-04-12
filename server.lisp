@@ -40,6 +40,8 @@
 	    " | "
 	    ((:a :href "/landmarks") "landmarks")
 	    " | "
+	    ((:a :href "/path") "paths")
+	    " | "
 	    ((:a :href "/random-item") "random item")))))
 	,@body
 	(:hr)
