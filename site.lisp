@@ -45,6 +45,11 @@
 (defun uri-for-item (article kind number)
   (format nil "/item/~a/~a/~a" article kind number))
 
+(defun uri-for-item-as-string (item-string)
+  (destructuring-bind (article kind number)
+      (split-item-identifier item-string)
+    (uri-for-item article kind number)))
+
 (define-constant +fragment-uri-regexp+
     (exact-regexp (concat "/" "fragment"
 			  "/" "(" +article-name-regexp+ ")"
