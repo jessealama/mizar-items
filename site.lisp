@@ -61,16 +61,9 @@
   (format nil "/article/~a" article))
 
 (define-constant +path-between-items-uri-regexp+
-    (exact-regexp (concat "/" "path"
-			  "/" "(" +article-name-regexp+ ")"
-			  "/" "(" +item-kind-regexp+ ")"
-			  "/" "(" +number-regexp+ ")"
-			  "/" "(" +article-name-regexp+ ")"
-			  "/" "(" +item-kind-regexp+ ")"
-			  "/" "(" +number-regexp+ ")"
-			  "/?" ; maybe end with a '/'
-			  ))
-  :test #'string=)
+    (format nil "^/path[?]?")
+  :test #'string=
+  :documentation "A regular expression that matches the URI (sans query parameters) for searching for paths in the items dependency graph.")
 
 (define-constant +path-between-items-via-item-uri-regexp+
     (exact-regexp (concat "/" "(" +article-name-regexp+ ")"
@@ -93,6 +86,9 @@
 (defvar *handled-articles* nil
   "Articles that we can handle (i.e., articles for which we have
 accurate dependency information and which are stored properly.")
+
+(defun handled-article (article)
+  (member article *handled-articles* :test #'string=))
 
 (defvar *unhandled-articles* nil
   "Articles that might be present in our dependency data, but
@@ -303,55 +299,27 @@ end;"))
 		  article-2 kind-2 num-2))))
 
 (defun emit-path-between-items ()
-  (register-groups-bind (article-1 kind-1 num-1 article-2 kind-2 num-2)
-      (+path-between-items-uri-regexp+ (request-uri*))
-    ;; check that these items exist
-    (let ((source-item (format nil "~a:~a:~a" article-1 kind-1 num-1))
-	  (destination-item (format nil "~a:~a:~a" article-2 kind-2 num-2)))
-      (if (gethash source-item *all-items*)
-	  (if (gethash destination-item *all-items*)
-	      (let ((problem (make-item-search-problem 
-			       :initial-state source-item
-			       :goal destination-item))
-		    (source-item-uri (link-for-item source-item))
-		    (dest-item-uri (link-for-item destination-item))
-		    (opposite-path-uri (link-for-two-items destination-item
-							   source-item)))
-		(multiple-value-bind (solution-exists? solution)
-		    (bounded-depth-first-search problem +search-depth+)
-		  (let ((title (format nil "from ~a to ~a"
-				       source-item destination-item)))
-		    (miz-item-html (title)
-			nil
-		      (if solution-exists?
-			  (htm
-			   (:p (fmt "Here is a path from ~a to ~a" source-item destination-item))
-			   (:ol
-			    (let ((source-uri (format nil "/~a/~a/~a" article-1 kind-1 num-1)))
-			      (htm
-			       (:li ((:a :href source-uri)
-				     (str source-item)))))
-			    (dolist (step (explain-solution solution))
-			      (destructuring-bind (step-article step-kind step-num)
-				  (split ":" step)
-				(let ((step-uri (format nil "/~a/~a/~a" step-article step-kind step-num)))
-				  (htm
-				   (:li ((:a :href step-uri)
-					 (str step)))))))))
-			  (if (null solution)
-			      (htm
-			       (:p "There is no path from " ((:a :href source-item-uri) (str source-item)) " to " ((:a :href dest-item-uri) (str destination-item)) ".  Care to " 
-				   ((:a :href opposite-path-uri)
-				    "search for a path going the other way")
-				   "?"))
-			      (htm
-			       (:p "There may be a path from "  ((:a :href source-item-uri) (str source-item)) "  to "  ((:a :href dest-item-uri) (str destination-item)) ", but I'm afraid we were unable to find one given the current depth limit in effect on searches."))))))))
-	      (miz-item-html ("Invalid URI")
-		  (:return-code +http-not-found+)
-		(:p "The requested destination item, '" (str destination-item) "', is not the name of any known item.")))
-	  (miz-item-html ("Invalid URI")
-	      (:return-code +http-not-found+)
-	    (:p "The requested source item, '" (str source-item) "', is not the name of any known item."))))))
+  (let ((query (query-string*)))
+    (miz-item-html ("search for paths between items")
+	nil
+      ;; validate the query string.  It must contain:
+      ;; * source ('from')
+      ;; * destination ('to')
+      ;; It may also contain:
+      ;; * intermediate steps ('via'), semicolon delimited
+      ((let ((source (get-parameter "from"))
+	     (destination (get-parameter "to"))
+	     (via (get-parameter "via")))
+	 (if source
+	     (if destination
+		 (let ((intermediates (split #\; via)))
+		   (multiple-value-bind (all-ok bad-guy)
+		       (every-with-falsifying-witness #'known-item?
+						      intermediates)
+		     (if all-ok
+			 (if (known-item? source)
+			     (if (known-item? destination)
+				 
 
 (defun emit-path-between-items-via-item ()
   (register-groups-bind (source-article source-kind source-num 
