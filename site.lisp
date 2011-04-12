@@ -289,15 +289,6 @@ end;"))
       (split ":" item)
     (format nil "/item/~a/~a/~a" article kind num)))
 
-(defun link-for-two-items (item-1 item-2)
-  (destructuring-bind (article-1 kind-1 num-1)
-      (split ":" item-1)
-    (destructuring-bind (article-2 kind-2 num-2)
-	(split ":" item-2)
-      (format nil "/path/~a/~a/~a/~a/~a/~a" 
-	          article-1 kind-1 num-1
-		  article-2 kind-2 num-2))))
-
 (defgeneric emit-path-between-items ()
   (:documentation "Display a path that shows a path between two items, possibly with some intermediate items in between."))
 
