@@ -302,7 +302,8 @@ It may also contain:
 
 * intermediate steps ('via'), semicolon delimited"
   (let ((source (get-parameter "from"))
-	(destination (get-parameter "to")))
+	(destination (get-parameter "to"))
+	(via (get-parameter "via")))
     (if source
 	(if destination
 	    (let ((intermediates (split #\; via)))
