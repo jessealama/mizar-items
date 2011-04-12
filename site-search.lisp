@@ -36,9 +36,111 @@
 		       paths-from-source-to-via
 		       paths-from-via-to-destination))))))
 
-(defun one-path-from-via (source destination via)
+(defgeneric one-path-via (source destination &rest via)
+  (:documentation "Find one path from SOURCE to DESTINATION that passes
+through all the items listed in VIA.  The order of items in VIA is
+immaterial.
+
+Returns two values (SOLUTION EXPLANATION).  SOLUTION is the path
+found, or NIL.  EXPLANATION is either NIL or the keyword :CUTOFF.  If
+SOLUTION is NIL and EXPLANATION is NIL, then there are no paths at all
+that start at SOURCE, end at DESTINATION, and pass through all the
+items listed in VIA.  If SOLUTION is NIL and EXPLANATION is :CUTOFF,
+then this means that the search for the desired paths was terminated
+because we reached the cutoff depth specified under
++SEARCH-CUTOFF+.  (If a solution was found, i.e., if SOLUTION is
+non-NIL, then the meaning of the secondary return value EXPLANATION is
+undefined.)"))
+
+(defmethod one-path-via :around (source destination &rest via)
+  "This auxiliary method implements a quick sanity
+  check to ensure that we do not search for paths that do not exist.  We check that either:
+
+* the article of SOURCE and the article of DESTINATION are equal, in
+  which case we require that
+
+** every item in VIA also comes from the same article,
+  
+** the fragment number of SOURCE is greater than the fragment number
+   of DESTINATION, and
+  
+** every item in VIA comes from the same article as SOURCE and
+   DESTINATION
+  
+** the fragment number of every item in VIA is (weakly) between the
+   item number of DESTINATION and SOURCE
+
+or
+  
+* the article of SOURCE and VIA are different, in which case we
+  require that
+  
+** SOURCE appears no later in the MML.LAR order than DESTINATION,
+  
+** Every item in VIA is such that:
+  
+*** it appears no earlier in MML.LAR order than SOURCE
+  
+*** it appears no later in MML.LAR order than DESTINATION"
+  (let ((source-mml-pos (mml-lar-index source))
+	(dest-mml-pos (mml-lar-index destination)))
+    (if (< source-mml-pos dest-mml-pos)
+	(values nil nil)
+	(destructuring-bind (source-article source-item-kind source-item-number)
+	    (split ":" source)
+	  (declare (ignore source-item-kind source-item-number))
+	  (destructuring-bind (dest-article dest-item-kind dest-item-number)
+	      (split ":" destination)
+	    (declare (ignore dest-item-kind dest-item-number))
+	    (let ((source-fragment (gethash source *item-to-ckb-table*))
+		  (dest-fragment (gethash destination *item-to-ckb-table*)))
+	      (destructuring-bind (source-fragment-article source-fragment-num-str)
+		  (split ":" source-fragment)
+		(declare (ignore source-fragment-article)) ; should be string= to SOURCE-ARTICLE
+		(destructuring-bind (dest-fragment-article dest-fragment-num-str)
+		    (split ":" dest-fragment)
+		  (declare (ignore dest-fragment-article)) ; should be string= to DEST-ARTICLE
+		  (let ((source-fragment-num (parse-integer source-fragment-num-str))
+			(dest-fragment-num (parse-integer dest-fragment-num-str)))
+		    (labels ((intermediate-mml-order-ok (intermediate)
+			       (let ((int-mml-pos (mml-lar-index intermediate)))
+				 (and (<= int-mml-pos dest-mml-pos)
+				      (<= source-mml-pos int-mml-pos))))
+			     (intermediate-same-source-ok (intermediate) ; assumes INTERMEDIATE and SOURCE come from the first article
+			       (let ((int-fragment (gethash intermediate *item-to-ckb-table*)))
+				 (destructuring-bind (int-fragment-article int-fragment-num-str)
+				     (split ":" int-fragment)
+				   (declare (ignore int-fragment-article)) ; should be string= to INT-ARTICLEh
+				   (let ((int-fragment-num (parse-integer int-fragment-num-str)))
+				     (<= source-fragment-num int-fragment-num)))))
+			     (intermediate-same-dest-ok (intermediate) ; assumes INTERMEDIATE and DESTINATION come from the first article
+			       (let ((int-fragment (gethash intermediate *item-to-ckb-table*)))
+				 (destructuring-bind (int-fragment-article int-fragment-num-str)
+				     (split ":" int-fragment)
+				   (declare (ignore int-fragment-article)) ; should be string= to INT-ARTICLE
+				   (let ((int-fragment-num (parse-integer int-fragment-num-str)))
+				     (<= int-fragment-num dest-fragment-num)))))
+			     (intermediate-ok (intermediate)
+			       (and (intermediate-mml-order-ok intermediate)
+				    (destructuring-bind (int-article int-item-kind int-item-num)
+					intermediate
+				      (declare (ignore int-item-kind int-item-num))
+				      (if (string= int-article source-article)
+					  (intermediate-same-source-ok intermediate)
+					  (if (string= int-article dest-article)
+					      (intermediate-same-dest-ok intermediate)
+					      t))))))
+		      (if (every #'intermediate-ok via)
+			  (if (= source-mml-pos dest-mml-pos)
+			      (if (< source-fragment-num dest-fragment-num)
+				  (call-next-method)
+				  (values nil nil))
+			      (call-next-method))
+			  (values nil nil))))))))))))
+
+(defmethod one-path-via (source destination &rest via)
   "Find one path from SOURCE to DESTINATION that passes through VIA.
-If there is no such path, return nil."
+If there is no such path, return nil." 
   (let ((source-to-via-problem (make-item-search-problem 
 				:initial-state source
 				:goal via))
