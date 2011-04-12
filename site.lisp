@@ -308,8 +308,7 @@ It may also contain:
 	(if destination
 	    (let ((intermediates (split #\; via)))
 	      (multiple-value-bind (all-ok bad-guy)
-		  (every-with-falsifying-witness #'known-item?
-						 intermediates)
+		  (every-with-falsifying-witness intermediates #'known-item?)
 		(if all-ok
 		    (if (known-item? source)
 			(if (known-item? destination)
