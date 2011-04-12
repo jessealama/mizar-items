@@ -17,6 +17,12 @@
 (defvar *all-items* nil)
 (defvar *graphs-loaded* nil)
 
+(defun known-item? (item)
+  (multiple-value-bind (val present)
+      (gethash item *all-items*)
+    (declare (ignore val))
+    present))
+
 (defun write-full-item-dependency-graph ()
   (loop
      with item-forward-table = (make-hash-table :test #'equal)
