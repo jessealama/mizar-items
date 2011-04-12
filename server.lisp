@@ -85,7 +85,7 @@ returning NIL."
   (format t "done~%")
   (setf *message-log-pathname* (mizar-items-config 'server-messages-log-file)
 	*access-log-pathname* (mizar-items-config 'server-access-log-file)
-	*handle-http-errors-p* t
+	*handle-http-errors-p* nil
 	*http-error-handler* #'handle-http-error
 	*log-lisp-errors-p* t
 	*log-lisp-warnings-p* t
