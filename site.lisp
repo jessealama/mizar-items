@@ -713,7 +713,6 @@ It may also contain:
     (:p "This page is divided into the following sections:")
     (:ul
      (:li ((:a :href "#mmlquery") "A selected list taken from the work of the MML Query project"))
-     (:li ((:a :href "#selected-list") "The site designer's biased list of notable theorems"))
      (:li ((:a :href "#100theorems") "100 Theorems")))
     ((:h1 :id "mmlquery")
      "A selected list taken from the work of the MML Query project")
@@ -775,17 +774,6 @@ It may also contain:
 				(:li ((:a :href uri 
 					  :title alternative-name)
 				      (str name))))))))))))))
-    ((:h1 :id "selected-list")
-     "A selected list of landmarks")
-    (:p "The following is a selected list of some notable mathematical results that can be found in the " (:tt "MIZAR") " Mathematical Library.  What does 'notable' mean?  Obviously, it's a value term.  The following list has a bias towards results of metamathematical or foundational significance, which is what the site designer is especially interested in.  If you're not especially interested in mathematical logic, see the other section, " ((:a :href "#100theorems" :title "100 Theorems Formalized in Mizar") "100 Theorems Formalized in Mizar") ", for more mathematical contentful examples.")
-    (:ul
-     (:li ((:a :href "/item/tarski/theorem/9" :title "Tarski universe axiom") "Tarski universe axiom"))
-     (:li "Axiom of infinity")
-     (:li "Power set")
-     (:li "Axiom of choice")
-     (:li "Zorn's lemma")
-     (:li "Zermelo's well-ordering theorem")
-     (:li "All vector spaces have a basis"))
     ((:h1 :id "100theorems")
      "100 Theorems")
     (:p "The following is a list of 'notable' mathematical results formalized in " (:tt "MIZAR") ".  What does 'notable' mean here?  Certainly, it's a value term.  This list comes from Freek Wiedijk's "((:a :href "http://www.cs.ru.nl/~freek/100/" :title "Formalizing 100 Theorems") "100 theorems") " and its associated list of " ((:a :href "http://www.cs.ru.nl/~freek/100/mizar.html" :title "Formalizing 100 Theorems in Mizar") "theorems formalized in " (:tt "MIZAR")) ".  Here is the list, with links to the corresponding entries in this site's database.")
