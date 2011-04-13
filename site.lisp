@@ -888,7 +888,6 @@ It may also contain:
   (register-exact-uri-dispatcher "/articles" #'emit-articles-page)
   (register-exact-uri-dispatcher "/landmarks" #'emit-landmarks-page)
   (register-exact-uri-dispatcher "/random-item" #'emit-random-item)
-  (register-exact-uri-dispatcher "/random-path" #'emit-random-path)
   (register-static-file-dispatcher "/favicon.ico" (mizar-items-config 'favicon-path))
   ;; directory setup
   (push 'hunchentoot-dir-lister:dispatch-dir-listers items-dispatch-table)
