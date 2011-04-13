@@ -578,9 +578,11 @@ It may also contain:
 		       (:caption "Requires")
 		       (if forward-deps-sorted
 			   (dolist (forward-dep forward-deps-sorted)
-			     (let ((dep-uri (link-for-item forward-dep)))
+			     (let ((dep-uri (dependence-uri-for-items forward-dep item-key))
+				   (dep-link-title (dependence-link-title item-key forward-dep)))
 			       (htm
-				(:tr (:td ((:a :href dep-uri) (str forward-dep)))))))
+				(:tr (:td ((:a :href dep-uri :title dep-link-title)
+					   (str forward-dep)))))))
 			   (htm 
 			    (:tr
 			     (:td
@@ -590,9 +592,11 @@ It may also contain:
 		       (:caption "Supports")
 		      (if backward-deps-sorted
 			  (dolist (backward-dep backward-deps-sorted)
-			    (let ((dep-uri (link-for-item backward-dep)))
+			    (let ((dep-uri (dependence-uri-for-items backward-dep item-key))
+				  (dep-link-title (dependence-link-title backward-dep item-key)))
 			      (htm
-			       (:tr (:td ((:a :href dep-uri) (str backward-dep)))))))
+			       (:tr (:td ((:a :href dep-uri :title dep-link-title)
+					  (str backward-dep)))))))
 			  (htm 
 			   (:td
 			    (:td
