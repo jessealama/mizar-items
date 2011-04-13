@@ -451,7 +451,6 @@ It may also contain:
 		     do
 		       (htm
 			((:li :class "fragment-listing" :id i-str)
-			 ((:a :href item-uri :class "fragment-listing"))
 			 (str item-html))))))))
 	    (miz-item-html ("article cannot be displayed")
 		(:return-code +http-not-found+)
