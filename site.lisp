@@ -541,69 +541,174 @@ It may also contain:
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
 
+(defun pretty-item-kind (item-kind)
+  (switch (item-kind :test #'string=)
+    ("mconstructor" "type")
+    ("theorem" "theorem")
+    ("lemma" "lemma")
+    ("scheme" "scheme")    
+    (t "(unknown)")))
+
+
+	       ;; (forward-deps (gethash item-key *item-dependency-graph-forward*))
+	       ;; (backward-deps (gethash item-key *item-dependency-graph-backward*))
+	       ;; (forward-deps-sorted (sort (copy-list forward-deps) 
+	       ;; 				  #'item-<))
+	       ;; (backward-deps-sorted (sort (copy-list backward-deps)
+	       ;; 				   #'item-<)))
+
+		   ;; ((:table :rules "cols")
+		   ;;  (:tr
+		   ;;   ((:td :align "center" :class "arrow")
+		   ;;    (str +upward-arrow-entity+))
+		   ;;   ((:td :align "center" :class "arrow")
+		   ;;    (str +downward-arrow-entity+)))
+		   ;;  ((:tr :valign "top")
+		   ;;   ((:td :class "halfwidth" :align "center")
+		   ;;    (:table
+		   ;;     (:caption "Requires")
+		   ;;     (if forward-deps-sorted
+		   ;; 	   (dolist (forward-dep forward-deps-sorted)
+		   ;; 	     (let ((dep-uri (dependence-uri-for-items forward-dep item-key))
+		   ;; 		   (dep-link-title (dependence-link-title item-key forward-dep)))
+		   ;; 	       (htm
+		   ;; 		(:tr (:td ((:a :href dep-uri :title dep-link-title)
+		   ;; 			   (str forward-dep)))))))
+		   ;; 	   (htm 
+		   ;; 	    (:tr
+		   ;; 	     (:td
+		   ;; 	      (:em "(This item immediately depends on nothing.)")))))))
+		   ;;   ((:td :class "halfwidth" :align "center")
+		   ;;    (:table
+		   ;;     (:caption "Supports")
+		   ;;    (if backward-deps-sorted
+		   ;; 	  (dolist (backward-dep backward-deps-sorted)
+		   ;; 	    (let ((dep-uri (dependence-uri-for-items backward-dep item-key))
+		   ;; 		  (dep-link-title (dependence-link-title backward-dep item-key)))
+		   ;; 	      (htm
+		   ;; 	       (:tr (:td ((:a :href dep-uri :title dep-link-title)
+		   ;; 			  (str backward-dep)))))))
+		   ;; 	  (htm 
+		   ;; 	   (:td
+		   ;; 	    (:td
+		   ;; 	     (:em "(No item immediately depends on this one.)"))))))))))))))))
+
+(defun requires-uri-for-item (article-name item-kind item-number)
+  (format nil "/item/~a/~a/~a/requires" article-name item-kind item-number))
+
+(defun supports-uri-for-item (article-name item-kind item-number)
+  (format nil "/item/~a/~a/~a/supports" article-name item-kind item-number))
+
+(defun search-from-uri (item)
+  (format nil "/path?from=~a" item))
+
+(defun search-to-uri (item)
+  (format nil "/path?to=~a" item))
+
+(defun search-via-uri (item)
+  (format nil "/path?via=~a" item))
+
 (defun emit-mizar-item-page ()
-  (register-groups-bind (article-name item-kind item-number)
+  (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
     (if (member article-name *handled-articles* :test #'string=)
-	(let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	(let* ((item-number (parse-integer item-number-str))
+	       (item-kind-pretty (pretty-item-kind item-kind))
+	       (article-uri (uri-for-article article-name))
+	       (num-items-for-article (gethash article-name *article-num-items*))
+	       (item-key (format nil "~a:~a:~d" article-name item-kind item-number))
 	       (ckb-for-item (gethash item-key *item-to-ckb-table*))
 	       (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
-	       (article-text-dir (format nil "~a/text" article-dir))
-	       (forward-deps (gethash item-key *item-dependency-graph-forward*))
-	       (backward-deps (gethash item-key *item-dependency-graph-backward*))
-	       (forward-deps-sorted (sort (copy-list forward-deps) 
-					  #'item-<))
-	       (backward-deps-sorted (sort (copy-list backward-deps)
-					   #'item-<)))
-	  (destructuring-bind (ckb-article-name ckb-number)
+	       (article-text-dir (format nil "~a/text" article-dir)))
+	  (destructuring-bind (ckb-article-name ckb-number-str)
 	      (split ":" ckb-for-item)
 	    (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	    (let* ((fragment-path (format nil "~a/ckb~d.html"
+	    (let* ((article-name-uc (format nil "~:@(~a~)" article-name))
+		   (fragment-path (format nil "~a/ckb~d.html"
 					  article-text-dir
-					  ckb-number))
-		   (item-html (file-as-string fragment-path)))
+					  ckb-number-str))
+		   (item-html (file-as-string fragment-path))
+		   (ckb-number (parse-integer ckb-number-str))
+		   (prev-ckb-uri (unless (= ckb-number 1)
+				   (uri-for-fragment article-name (1- ckb-number))))
+		   (prev-ckb-link-title (format nil "Previous fragment in ~:@(~a~)" article-name))
+		   (next-ckb-uri (unless (= ckb-number num-items-for-article)
+				   (uri-for-fragment article-name (1+ ckb-number))))
+		   (next-ckb-link-title (format nil "Next fragment in ~:@(~a~)" article-name))
+		   (prev-item-kind-uri (unless (= item-number 1)
+					 (uri-for-item article-name item-kind (1- item-number))))
+		   (prev-item-kind-link-title (format nil "Previous item of this kind in ~:@(~a~)" article-name))
+		   (next-item-kind-uri (unless (= item-number (count-items-of-kind-for-article article-name item-kind))
+					 (uri-for-item article-name item-kind (1+ item-number))))
+		   (next-item-kind-link-title (format nil "Next item of this kind in ~:@(~a~)" article-name))
+		   (search-from-uri (search-from-uri item-key))
+		   (search-from-link-title (format nil "Search for paths of dependence starting from ~:@(~a~):~a:~d" article-name item-kind item-number))
+		   (search-to-uri (search-to-uri item-key))
+		   (search-to-link-title (format nil "Search for paths of dependence ending at ~:@(~a~):~a:~d" article-name item-kind item-number))
+		   (search-via-uri (search-via-uri item-key))
+		   (search-via-link-title (format nil "Search for paths of dependence passing through ~:@(~a~):~a:~d" article-name item-kind item-number))
+		   (requires-uri (requires-uri-for-item article-name item-kind item-number))
+		   (supports-uri (supports-uri-for-item article-name item-kind item-number)))
 	      (miz-item-html (item-key)
 		  nil
-		((:table :width "100%")
-		 ((:tr :valign "top")
-		  (:td (str item-html)))
-		 ((:tr :valign "middle")
-		  ((:td :class "fullwidth" :align "center")
-		   ((:table :rules "cols")
-		    (:tr
-		     ((:td :align "center" :class "arrow")
-		      (str +upward-arrow-entity+))
-		     ((:td :align "center" :class "arrow")
-		      (str +downward-arrow-entity+)))
-		    ((:tr :valign "top")
-		     ((:td :class "halfwidth" :align "center")
-		      (:table
-		       (:caption "Requires")
-		       (if forward-deps-sorted
-			   (dolist (forward-dep forward-deps-sorted)
-			     (let ((dep-uri (dependence-uri-for-items forward-dep item-key))
-				   (dep-link-title (dependence-link-title item-key forward-dep)))
-			       (htm
-				(:tr (:td ((:a :href dep-uri :title dep-link-title)
-					   (str forward-dep)))))))
-			   (htm 
-			    (:tr
-			     (:td
-			      (:em "(This item immediately depends on nothing.)")))))))
-		     ((:td :class "halfwidth" :align "center")
-		      (:table
-		       (:caption "Supports")
-		      (if backward-deps-sorted
-			  (dolist (backward-dep backward-deps-sorted)
-			    (let ((dep-uri (dependence-uri-for-items backward-dep item-key))
-				  (dep-link-title (dependence-link-title backward-dep item-key)))
-			      (htm
-			       (:tr (:td ((:a :href dep-uri :title dep-link-title)
-					  (str backward-dep)))))))
-			  (htm 
-			   (:td
-			    (:td
-			     (:em "(No item immediately depends on this one.)"))))))))))))))))
+		((:table :class "item-table")
+		 (:tr
+		  ((:td :width "25%" :align "left")
+		   ((:table :class "item-info")
+		    ((:tr :class "item-info-row")
+		     ((:td :colspan "2" :class "item-info-heading") "Info"))
+		    ((:tr :class "item-info-row")
+		     ((:td :class "item-info-key") "Article")
+		     ((:td :class "item-info-value")
+		      ((:a :href article-uri :class "article-name" :title article-name-uc)
+		       ((:span :class "article-name") (str article-name)))))
+		    ((:tr :class "item-info-row")
+		     ((:td :class "item-info-key") "Fragment")
+		     ((:td :class "item-info-value")
+		      "[" (if prev-ckb-uri
+			      (htm ((:a :href prev-ckb-uri :title prev-ckb-link-title) "&lt;"))
+			      (htm "&lt;"))
+		      "]"
+		      " "
+		      (str ckb-number-str)
+		      " "
+		      "[" (if next-ckb-uri
+			      (htm ((:a :href next-ckb-uri :title next-ckb-link-title) "&gt;"))
+			      (htm "&gt;"))
+		      "]"))
+		    ((:tr :class "item-info-row")
+		     ((:td :class "item-info-key") "Item Kind")
+		     ((:td :class "item-info-value") (str item-kind-pretty)))
+		    ((:tr :class "item-info-row")
+		     ((:td :class "item-info-key") "Number")
+		     ((:td :class "item-info-value")
+		      "[" (if prev-item-kind-uri
+			      (htm ((:a :href prev-item-kind-uri :title prev-item-kind-link-title) "&lt;"))
+			      (htm "&lt"))
+		      "]"
+		      " "
+		      (str item-number-str)
+		      " "
+		      "[" (if next-item-kind-uri
+			      (htm ((:a :href next-item-kind-uri :title next-item-kind-link-title) "&gt;"))
+			      (htm "&gt;"))
+		      "]"))
+		    ((:tr :class "item-info-row")
+		     ((:td :colspan "2" :class "item-info-heading") "Actions"))
+		    ((:tr :class "item-info-row")
+		     ((:td :colspan "2") "Search for a path of dependence:"
+		      ((:ul :class "path-options")
+		       (:li ((:a :href search-from-uri :title search-from-link-title) (:b "starting at")))
+		       (:li ((:a :href search-via-uri :title search-via-link-title) (:b "passing through")))
+		       (:li ((:a :href search-to-uri :title search-to-link-title) (:b "ending at"))))
+		      "this item."))
+		    ((:tr :class "item-info-row")
+		     ((:td :colspan "2") "See what this item"
+		      ((:ul :class "item-dep-options")
+		      (:li ((:a :href requires-uri :title "Items on which this item depends") (:b "requires")))
+		      (:li ((:a :href supports-uri :title "Items that this item supports") (:b "supports"))))))))
+		 ((:td :width "75%" :valign "top")
+		   (str item-html))))))))
 	(miz-item-html ("unhandled article")
 	    nil
 	  (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later.")))))
