@@ -393,10 +393,18 @@ It may also contain:
 	  (:p "You must specify a source item.")))))
 
 (defmethod emit-path-between-items ()
-  (let ((source (get-parameter "from"))
-	 (destination (get-parameter "to")))
+  (let* ((source (get-parameter "from"))
+	 (destination (get-parameter "to"))
+	 (source-mml-pos (mml-lar-index source)))
     (let ((search-problem (make-item-search-problem :initial-state source
 						    :goal destination)))
+      ;; custom successors method: if the current node occurs earler
+      ;; in the MML than the destination node, don't expand
+      (defmethod successors :around ((problem (eql search-problem)) node)
+	(let* ((ns (node-state node))
+	       (mml-pos (mml-lar-index ns)))
+	  (when (<= source-mml-pos mml-pos)
+	    (call-next-method))))
       (multiple-value-bind (solution-found? solution)
 	  (bounded-depth-first-search search-problem +search-depth+)
 	(cond (solution-found?
