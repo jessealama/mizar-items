@@ -433,35 +433,34 @@ It may also contain:
 		     do
 		       (htm
 			((:li :class "fragment-listing" :id i-str)
-			 ((:a :href item-uri :class "fragment-listing")
-			  (str item-html)))))))))
-	    (progn
-	      ; (setf (return-code *reply*) +http-not-found+)
-	      (miz-item-html ("article cannot be displayed")
-		  (:return-code +http-not-found+)
-		(:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later."))))
-	(progn
-	  ; (setf (return-code *reply*) +http-not-found+)
-	  (miz-item-html ("article not found")
-	      (:return-code +http-not-found+)
-	    (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
-	    ((:table :class "article-listing" :rules "rows")
-	     (:thead
-	      (:tr
-	       (:th "MML Name")
-	       (:th "Title")))
-	     (:tbody
-	      (loop
-		 for (article-name title author) in *articles*
-		 for article-uri = (format nil "/article/~a" article-name)
-		 for title-escaped = (escape-string title)
-		 do
-		   (htm
-		    (:tr
-		     ((:td :class "article-name")
-		      ((:a :href article-uri :title title-escaped)
-		       (str article-name)))
-		     ((:td :class "article-title") (str title))))))))))))
+			 ((:a :href item-uri :class "fragment-listing"))
+			 (str item-html))))))))
+	    (miz-item-html ("article cannot be displayed")
+		(:return-code +http-not-found+)
+	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later.")))
+	(miz-item-html ("article not found")
+	    (:return-code +http-not-found+)
+	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
+	  (:p "The result of testing presence in the MML: " (let ((present (member article *mml-lar* :test #'string=)))
+							      (htm
+							       (str present))))
+	  ((:table :class "article-listing" :rules "rows")
+	   (:thead
+	    (:tr
+	     (:th "MML Name")
+	     (:th "Title")))
+	   (:tbody
+	    (loop
+	       for (article-name title author) in *articles*
+	       for article-uri = (format nil "/article/~a" article-name)
+	       for title-escaped = (escape-string title)
+	       do
+		 (htm
+		  (:tr
+		   ((:td :class "article-name")
+		    ((:a :href article-uri :title title-escaped)
+		     (str article-name)))
+		   ((:td :class "article-title") (str title)))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
@@ -581,11 +580,9 @@ It may also contain:
 			   (:td
 			    (:td
 			     (:em "(No item immediately depends on this one.)"))))))))))))))))
-	(progn
-	  ; (setf (return-code *reply*) +http-not-found+)
-	  (miz-item-html ("unhandled article")
-	      nil
-	    (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later."))))))
+	(miz-item-html ("unhandled article")
+	    nil
+	  (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later.")))))
 
 (defun emit-fragment-page ()
   (register-groups-bind (article-name item-number)
