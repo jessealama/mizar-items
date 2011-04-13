@@ -296,6 +296,16 @@ end;"))
 (defun dependence-uri-for-items (item-1 item-2)
   (format nil "/dependence/~a/~a" item-1 item-2))
 
+(defun dependence-link-title (dependent-item supporting-item)
+  (destructuring-bind (dep-article dep-kind dep-num)
+      dependent-item
+    (destructuring-bind (sup-article sup-kind sup-num)
+	supporting-item
+      (format nil 
+	      "~:@(~a~):~a:~a depends on ~:@(~a~):~a:~a"
+	      dep-article dep-kind dep-num
+	      sup-article sup-kind sup-num))))
+
 (defun emit-direct-dependence-page (item-1 item-2)
   (declare (ignore item-1 item-2))
   (miz-item-html ("verify a dependence")
