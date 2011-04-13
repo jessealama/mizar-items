@@ -54,6 +54,9 @@
 			  "/" "(" +number-regexp+ ")"))
   :test #'string=)
 
+(defun uri-for-fragment (article fragment-number)
+  (format nil "/fragment/~a/~d" article fragment-number))
+
 (defun uri-for-item (article kind number)
   (format nil "/item/~a/~a/~a" article kind number))
 
