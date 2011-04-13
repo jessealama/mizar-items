@@ -337,6 +337,13 @@
      finally
        (return items)))
 
+(defun count-items-of-kind-for-article (article kind)
+  (loop
+     with kind-regexp = (format nil "~a:~a:[0-9]+" article kind)
+     for k being the hash-keys of *item-dependency-graph-forward*
+     counting (scan kind-regexp k) into num-items
+     finally (return num-items)))
+
 (defun article-title (article)
   (let ((present (member article *articles* :key #'first :test #'string=)))
     (when present
