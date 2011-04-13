@@ -342,7 +342,7 @@ end;"))
 		   for step-to-html = (file-as-string (html-path-for-item step-to))
 		   for step-to-uri = (uri-for-item-as-string step-to)
 		   for dependence-uri = (dependence-uri-for-items step-from step-to)
-		   for dependence-link-title = (format nil "~a depends on ~a" step-from step-to)
+		   for dependence-link-title = (dependence-link-title step-from step-to)
 		   do
 		     (htm
 		      ((:tr :class "dependence-path-node")
