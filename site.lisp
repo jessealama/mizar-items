@@ -85,6 +85,27 @@
   :test #'string=
   :documentation "A regular expression that matches the URI (sans query parameters) for searching for paths in the items dependency graph.")
 
+(define-constant +requires-uri-regexp+
+    (exact-regexp
+     (concat "/" "item"
+	     "/" "(" +article-name-regexp+ ")"
+	     "/" "(" +item-kind-regexp+ ")"
+	     "/" "(" +number-regexp+ ")"
+	     "/" "/requires"))
+  :test #'string=
+  :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
+
+(define-constant +supports-uri-regexp+
+    (exact-regexp
+     (concat "/" "item"
+	     "/" "(" +article-name-regexp+ ")"
+	     "/" "(" +item-kind-regexp+ ")"
+	     "/" "(" +number-regexp+ ")"
+	     "/" "/supports"))
+  :test #'string=
+  :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -945,6 +966,16 @@ It may also contain:
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
+(defun emit-requires-page ()
+  (miz-item-html ("requires")
+      nil
+    (:p (:em "(not yet implemented)"))))
+
+(defun emit-supports-page ()
+  (miz-item-html ("supports")
+      nil
+    (:p (:em "(not yet implemented)"))))
+
 (defun register-proofs-for-article (article)
   (let ((num-items (gethash article *article-num-items*)))
     (if (integerp num-items)
@@ -1029,6 +1060,9 @@ It may also contain:
   (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
   (register-regexp-dispatcher +path-between-items-uri-regexp+
 			      #'emit-path-between-items)
+  ;; requires and supports
+  (register-regexp-dispatcher +requires-uri-regexp+ #'emit-requires-page)
+  (register-regexp-dispatcher +supports-uri-regexp+ #'emit-supports-page)
   ;; proofs
   (loop
      for article in *handled-articles*
