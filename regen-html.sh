@@ -2,6 +2,16 @@
 
 html_stylesheet=~/sources/mizar/xsl4mizar/MHTML/mhtml_main.xsl
 
+# sanity
+if [ ! -e $html_stylesheet ]; then
+    echo "Error: the mizar HTML stylesheet cannot be found at the expected location '$html_stylesheet'" 1>&2;
+    exit 1;
+fi
+if [ ! -r $html_stylesheet ]; then
+    echo "Error: the mizar HTML stylesheet at '$html_stylesheet' is unreadable" 1>&2;
+    exit 1;
+fi
+
 for article in hidden tarski `cat $MIZFILES/mml.lar`; do
  echo $article;
  cd $article;
