@@ -472,10 +472,13 @@ It may also contain:
 		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
 		     for item-html = (file-as-string fragment-path)
 		     for item-uri = (format nil "/fragment/~a/~d" article i)
+		     for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
 		     do
 		       (htm
 			((:li :class "fragment-listing" :id i-str)
-			 (str item-html))))))))
+			 
+			 ((:a :href item-uri :title item-link-title)
+			  (str item-html)))))))))
 	    (miz-item-html ("article cannot be displayed")
 		(:return-code +http-not-found+)
 	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later.")))
