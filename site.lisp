@@ -568,6 +568,8 @@ It may also contain:
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
     ("mconstructor" "type")
+    ("ccluster" "registration")
+    ("vpattern" "notation")
     ("theorem" "theorem")
     ("lemma" "lemma")
     ("scheme" "scheme")    
