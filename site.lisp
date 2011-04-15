@@ -577,50 +577,6 @@ It may also contain:
     ("scheme" "scheme")    
     (t "(unknown)")))
 
-
-	       ;; (forward-deps (gethash item-key *item-dependency-graph-forward*))
-	       ;; (backward-deps (gethash item-key *item-dependency-graph-backward*))
-	       ;; (forward-deps-sorted (sort (copy-list forward-deps) 
-	       ;; 				  #'item-<))
-	       ;; (backward-deps-sorted (sort (copy-list backward-deps)
-	       ;; 				   #'item-<)))
-
-		   ;; ((:table :rules "cols")
-		   ;;  (:tr
-		   ;;   ((:td :align "center" :class "arrow")
-		   ;;    (str +upward-arrow-entity+))
-		   ;;   ((:td :align "center" :class "arrow")
-		   ;;    (str +downward-arrow-entity+)))
-		   ;;  ((:tr :valign "top")
-		   ;;   ((:td :class "halfwidth" :align "center")
-		   ;;    (:table
-		   ;;     (:caption "Requires")
-		   ;;     (if forward-deps-sorted
-		   ;; 	   (dolist (forward-dep forward-deps-sorted)
-		   ;; 	     (let ((dep-uri (dependence-uri-for-items forward-dep item-key))
-		   ;; 		   (dep-link-title (dependence-link-title item-key forward-dep)))
-		   ;; 	       (htm
-		   ;; 		(:tr (:td ((:a :href dep-uri :title dep-link-title)
-		   ;; 			   (str forward-dep)))))))
-		   ;; 	   (htm 
-		   ;; 	    (:tr
-		   ;; 	     (:td
-		   ;; 	      (:em "(This item immediately depends on nothing.)")))))))
-		   ;;   ((:td :class "halfwidth" :align "center")
-		   ;;    (:table
-		   ;;     (:caption "Supports")
-		   ;;    (if backward-deps-sorted
-		   ;; 	  (dolist (backward-dep backward-deps-sorted)
-		   ;; 	    (let ((dep-uri (dependence-uri-for-items backward-dep item-key))
-		   ;; 		  (dep-link-title (dependence-link-title backward-dep item-key)))
-		   ;; 	      (htm
-		   ;; 	       (:tr (:td ((:a :href dep-uri :title dep-link-title)
-		   ;; 			  (str backward-dep)))))))
-		   ;; 	  (htm 
-		   ;; 	   (:td
-		   ;; 	    (:td
-		   ;; 	     (:em "(No item immediately depends on this one.)"))))))))))))))))
-
 (defun requires-uri-for-item (article-name item-kind item-number)
   (format nil "/item/~a/~a/~a/requires" article-name item-kind item-number))
 
