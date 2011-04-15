@@ -105,6 +105,22 @@
   :test #'string=
   :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
 
+(define-constant +item-regexp+
+    (concat +article-name-regexp+
+	    ":"
+	    "(" +item-kind-regexp+ ")"
+	    ":"
+	    +number-regexp+)
+  :test #'string=
+  :documentation "A regular expression matching names of items.")
+
+(define-constant +dependence-uri-regexp+
+    (exact-regexp
+     (concat "/" "dependence"
+	     "/" "(" +item-regexp+ ")"
+	     "/" "(" +item-regexp+ ")"))
+  :test #'string=
+  :documentation "A regular expression matching URIs associated with displaying the dependence of one item on another.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
@@ -1016,6 +1032,40 @@ It may also contain:
 			   (:li ((:a :href dep-uri :title dep-link-title)
 				 (str dep-inline-name)))))))))))))))
 
+(defun emit-dependence-page ()
+  (register-groups-bind (supporting-item whatever dependent-item)
+      (+dependence-uri-regexp+ (request-uri*))
+    (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
+    (destructuring-bind (supp-article supp-kind supp-num)
+	(split-item-identifier supporting-item)
+      (destructuring-bind (dep-article dep-kind dep-num)
+	  (split-item-identifier dependent-item)
+	(let* ((supp-html-path (html-path-for-item supporting-item))
+	       (dep-html-path (html-path-for-item dependent-item))
+	       (supp-html (file-as-string supp-html-path))
+	       (dep-html (file-as-string dep-html-path))
+	       (supp-title (item-link-title supp-article supp-kind supp-num))
+	       (dep-title (item-link-title dep-article dep-kind dep-num))
+	       (title (format nil "~a depends on ~a" supp-title dep-title))
+	       (supp-name-inline (item-inline-name supp-article supp-kind supp-num))
+	       (dep-name-inline (item-inline-name dep-article dep-kind dep-num))
+	       (supp-uri (item-uri supporting-item))
+	       (dep-uri (item-uri supporting-item)))
+      (miz-item-html (title)
+	  nil
+	(:p "The item " ((:a :href supp-uri :title supp-title) (str supp-name-inline)))
+	(str supp-html)
+	(:p "depends on " ((:a :href dep-uri :title dep-title) (str dep-name-inline)))
+	(str dep-html)
+	(:p "because verifying "
+	    ((:a :href supp-uri :title supp-title) (str supp-name-inline))
+	    " in the absense of "
+	    ((:a :href dep-uri :title dep-title) (str dep-name-inline))
+	    " would generate the following " (:tt "MIZAR") " errors:")
+	(:blockquote
+	 (:em "(not implemented yet; check back soon)"))))))))
+
+
 (defun register-proofs-for-article (article)
   (let ((num-items (gethash article *article-num-items*)))
     (if (integerp num-items)
@@ -1103,6 +1153,8 @@ It may also contain:
   ;; requires and supports
   (register-regexp-dispatcher +requires-uri-regexp+ #'emit-requires-page)
   (register-regexp-dispatcher +supports-uri-regexp+ #'emit-supports-page)
+  ;; dependence
+  (register-regexp-dispatcher +dependence-uri-regexp+ #'emit-dependence-page)
   ;; proofs
   (loop
      for article in *handled-articles*
