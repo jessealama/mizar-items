@@ -91,7 +91,7 @@
 	     "/" "(" +article-name-regexp+ ")"
 	     "/" "(" +item-kind-regexp+ ")"
 	     "/" "(" +number-regexp+ ")"
-	     "/" "/requires"))
+	     "/" "requires"))
   :test #'string=
   :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
 
@@ -101,7 +101,7 @@
 	     "/" "(" +article-name-regexp+ ")"
 	     "/" "(" +item-kind-regexp+ ")"
 	     "/" "(" +number-regexp+ ")"
-	     "/" "/supports"))
+	     "/" "supports"))
   :test #'string=
   :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
 
