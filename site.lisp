@@ -1032,7 +1032,55 @@ It may also contain:
 			   (:li ((:a :href dep-uri :title dep-link-title)
 				 (str dep-inline-name)))))))))))))))
 
-(defun emit-dependence-page ()
+(defgeneric emit-dependence-page ()
+  (:documentation "Emit an HTML description of the dependence between two items."))
+
+(defmethod emit-dependence-page :around ()
+  ;; sanity check
+  (register-groups-bind (supporting-item whatever dependent-item)
+      (+dependence-uri-regexp+ (request-uri*))
+    (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
+    (if supporting-item
+	(if dependent-item
+	    (if (known-item? supporting-item)
+		(if (known-item? dependent-item)
+		    (let ((supp-html-path (html-path-for-item supporting-item))
+			  (dep-html-path (html-path-for-item dependent-item)))
+		      (if (file-exists-p supp-html-path)
+			  (if (file-exists-p dep-html-path)
+			      (call-next-method)
+			      (miz-item-html ("error")
+				  (:return-code +http-internal-server-error+)
+				(:p "The HTML file for the item")
+				(:blockquote
+				 (fmt "~a" dependent-item))
+				(:p "doesn't exist at the expected location")
+				(:blockquote
+				 (fmt "~a" dep-html-path))
+				(:p "Please inform the site administrator about this.")))
+			  (miz-item-html ("error")
+			      (:return-code +http-internal-server-error+)
+			    (:p "The HTML file for the item")
+			    (:blockquote
+			     (fmt "~a" supporting-item))
+			    (:p "doesn't exist at the expected location")
+			    (:blockquote
+			     (fmt "~a" supp-html-path))
+			    (:p "Please inform the site administrator about this."))))
+		    (miz-item-html ("error")
+			(:return-code +http-bad-request+)
+		      (:p (fmt "'~a' is not the name of a known item." dependent-item))))
+		(miz-item-html ("error")
+		    (:return-code +http-bad-request+)
+		  (:p (fmt "'~a' is not the name of a known item." supporting-item))))
+	    (miz-item-html ("error")
+		(:return-code +http-bad-request+)
+	      (:p (fmt "Something went wrong matching the requested URI, '~a', against the pattern for this page" (request-uri*)))))
+	(miz-item-html ("error")
+	    (:return-code +http-bad-request+)
+	  (:p (fmt "Something went wrong matching the requested URI, '~a', against the pattern for this page" (request-uri*)))))))
+
+(defmethod emit-dependence-page ()
   (register-groups-bind (supporting-item whatever dependent-item)
       (+dependence-uri-regexp+ (request-uri*))
     (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
