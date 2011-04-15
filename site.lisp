@@ -929,15 +929,87 @@ It may also contain:
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
+(defun items-by-mml-order (item-list)
+  (sort (copy-list item-list) #'item-<))
+
+(defun item-from-components (article-name item-kind item-number)
+  (format nil "~a:~a:~a" article-name item-kind item-number))
+
+(defun item-link-title (article kind number)
+  (format nil "~:@(~a~):~a:~a" article kind number))
+
+(defun item-inline-name (article kind number)
+  (with-html-output-to-string (foo)
+    (:span
+     ((:span :class "article-name") (str article))
+     ":"
+     (str kind)
+     ":"
+     (str number))))
+
 (defun emit-requires-page ()
-  (miz-item-html ("requires")
-      nil
-    (:p (:em "(not yet implemented)"))))
+  (register-groups-bind (article kind number)
+      (+requires-uri-regexp+ (request-uri*))
+    (let* ((item (item-from-components article kind number))
+	   (item-uri (item-uri item))
+	   (item-link-title (item-link-title article kind number))
+	   (item-inline-name (item-inline-name article kind number))
+	   (deps (gethash item *item-dependency-graph-forward*))
+	   (deps-sorted (items-by-mml-order deps)))
+      (let* ((requires-page-title (format nil "requirements of ~a" item-link-title))
+	     (html-path (html-path-for-item item))
+	     (html (file-as-string html-path)))
+	(miz-item-html (requires-page-title)
+	    nil
+	  (:p "The item "
+	      ((:a :href item-uri :title item-link-title)
+	       (str item-inline-name)))
+	  (str html)
+	  (if (null deps)
+	      (htm (:p "requires nothing."))
+	      (htm (:p "requires:")
+		   (:ul
+		    (dolist (dep deps-sorted)
+		      (destructuring-bind (dep-article dep-kind dep-num)
+			  (split-item-identifier dep)
+			(let ((dep-uri (dependence-uri-for-items dep item))
+			      (dep-link-title (dependence-link-title item dep))
+			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+			  (htm
+			   (:li ((:a :href dep-uri :title dep-link-title)
+				 (str dep-inline-name)))))))))))))))
 
 (defun emit-supports-page ()
-  (miz-item-html ("supports")
-      nil
-    (:p (:em "(not yet implemented)"))))
+  (register-groups-bind (article kind number)
+      (+supports-uri-regexp+ (request-uri*))
+    (let* ((item (item-from-components article kind number))
+	   (item-uri (item-uri item))
+	   (item-link-title (item-link-title article kind number))
+	   (item-inline-name (item-inline-name article kind number))
+	   (deps (gethash item *item-dependency-graph-backward*))
+	   (deps-sorted (items-by-mml-order deps)))
+      (let* ((supports-page-title (format nil "what ~a supports" item-link-title))
+	     (html-path (html-path-for-item item))
+	     (html (file-as-string html-path)))
+	(miz-item-html (supports-page-title)
+	    nil
+	  (:p "The item "
+	      ((:a :href item-uri :title item-link-title)
+	       (str item-inline-name)))
+	  (str html)
+	  (if (null deps)
+	      (htm (:p "supports nothing."))
+	      (htm (:p "supports:")
+		   (:ul
+		    (dolist (dep deps-sorted)
+		      (destructuring-bind (dep-article dep-kind dep-num)
+			  (split-item-identifier dep)
+			(let ((dep-uri (dependence-uri-for-items dep item))
+			      (dep-link-title (dependence-link-title item dep))
+			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+			  (htm
+			   (:li ((:a :href dep-uri :title dep-link-title)
+				 (str dep-inline-name)))))))))))))))
 
 (defun register-proofs-for-article (article)
   (let ((num-items (gethash article *article-num-items*)))
