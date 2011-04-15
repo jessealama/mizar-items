@@ -322,9 +322,9 @@ end;"))
 
 (defun dependence-link-title (dependent-item supporting-item)
   (destructuring-bind (dep-article dep-kind dep-num)
-      dependent-item
+      (split-item-identifier dependent-item)
     (destructuring-bind (sup-article sup-kind sup-num)
-	supporting-item
+	(split-item-identifier supporting-item)
       (format nil 
 	      "~:@(~a~):~a:~a depends on ~:@(~a~):~a:~a"
 	      dep-article dep-kind dep-num
