@@ -993,7 +993,7 @@ It may also contain:
 		    (dolist (dep deps-sorted)
 		      (destructuring-bind (dep-article dep-kind dep-num)
 			  (split-item-identifier dep)
-			(let ((dep-uri (dependence-uri-for-items dep item))
+			(let ((dep-uri (dependence-uri-for-items item dep))
 			      (dep-link-title (dependence-link-title item dep))
 			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
 			  (htm
