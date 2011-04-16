@@ -123,6 +123,19 @@
   :documentation "A regular expression matching URIs associated with displaying the dependence of one item on another.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Emitting XML
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun absrefs (article-xml-path)
+  (xuriella:apply-stylesheet (pathname (mizar-items-config 'addabsrefs-stylesheet))
+			     (pathname article-xml-path)))
+
+
+(defun mhtml (article-xml-path)
+  (xuriella:apply-stylesheet (mizar-items-config 'mhtml-stylesheet)
+			     (absrefs article-xml-path)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -617,7 +630,39 @@ It may also contain:
 (defun search-via-uri (item)
   (format nil "/path?via=~a" item))
 
-(defun emit-mizar-item-page ()
+(defgeneric emit-mizar-item-page ()
+  (:documentation "Emit an HTML representation of a single Mizar item."))
+
+(defmethod emit-mizar-item-page :around ()
+  (register-groups-bind (article-name item-kind item-number-str)
+      (+item-uri-regexp+ (request-uri*))
+    (if (known-article? article-name)
+	(let ((item (item-from-components article-name item-kind item-number-str)))
+	  (if (known-item? item)
+	      (let ((html-path (html-path-for-item item))
+		    (item-name-pretty (item-inline-name article-name item-kind item-number-str)))
+		(if (file-exists-p html-path)
+		    (if (empty-file-p html-path)
+			(miz-item-html ("error")
+			    (:return-code +http-internal-server-error+)
+			  (:p "The HTML file for the item " (str item-name-pretty) " exists, but has zero size.")
+			  (:p "Please inform the site maintainers about this."))
+			(call-next-method))
+		    (miz-item-html ("error")
+			(:return-code +http-internal-server-error+)
+		      (:p "The HTML file for the item " (str item-name-pretty) " does not exist.")
+		      (:p "Please inform the site maintainers about this."))))
+	      (miz-item-html ("error")
+		  (:return-code +http-bad-request+)
+		(:p "The identifier")
+		(:blockquote
+		 (str item))
+		(:p "is not the name of a known item"))))
+	(miz-item-html ("error")
+	    (:return-code +http-bad-request+)
+	  (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later.")))))
+
+(defmethod emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
     (if (member article-name *handled-articles* :test #'string=)
