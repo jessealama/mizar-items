@@ -40,6 +40,10 @@
 			   (file-in-xsl4mizar-dir "MHTML/screen.css"))
 (update-mizar-items-config 'mhtml-js-path
 			   (file-in-xsl4mizar-dir "MHTML/mhtml.js"))
+(update-mizar-items-config 'absrefs-stylesheet
+			   (file-in-xsl4mizar-dir "addabsrefs.xsl"))
+(update-mizar-items-config 'mhtml-stylesheet
+			   (file-in-xsl4mizar-dir "MHTML/mhtml_main.xsl"))
 (update-mizar-items-config 'fragment-depdenency-graph
 			   (file-in-mizar-items-dir "ckb-ckb-depgraph"))
 (update-mizar-items-config 'item-to-fragment-path

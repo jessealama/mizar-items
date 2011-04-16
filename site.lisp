@@ -129,35 +129,83 @@
 (defparameter *absrefs-params*
   (list (xuriella:make-parameter "0" "explainbyfrom")))
 
-(defun absrefs (article-xml-path)
-  (xuriella:apply-stylesheet (pathname (mizar-items-config 'absrefs-stylesheet))
-			     (pathname article-xml-path)
-			     :parameters *absrefs-params*))
+(defparameter *absrefs-sylesheet*
+  (xuriella:parse-stylesheet
+   (pathname (mizar-items-config 'absrefs-stylesheet))))
+
+(let* ((absrefs-path (mizar-items-config 'absrefs-stylesheet))
+       (orig-absrefs-md5 (md5:md5sum-file absrefs-path))
+       (cache (make-hash-table :test #'equalp)))
+  (labels ((transform (filename)
+	     (xuriella:apply-stylesheet *absrefs-sylesheet*
+					(pathname filename)
+					:parameters *absrefs-params*))
+	   (update-cache (path md5)
+	     (setf (gethash md5 cache) (transform path))))
+    (defun absrefs (article-xml-path)
+      (let ((new-absrefs-md5 (md5:md5sum-file
+			      (mizar-items-config 'absrefs-stylesheet)))
+	    (xml-md5 (md5:md5sum-file article-xml-path)))
+	(cond ((equalp orig-absrefs-md5 new-absrefs-md5) ; stylesheet unchanged
+	       (multiple-value-bind (cached present?)
+		   (gethash xml-md5 cache)
+		 (if present?
+		     cached
+		     (update-cache article-xml-path xml-md5))))
+	      (t ; the stylesheet has changed
+	       (clrhash cache) ; all old values are now unreliable
+	       (setf orig-absrefs-md5 new-absrefs-md5)
+	       (update-cache article-xml-path xml-md5)))))))
 
 (defparameter *mhtml-params*
   (list (xuriella:make-parameter "1" "colored")
 	(xuriella:make-parameter "1" "proof_links")
 	(xuriella:make-parameter "1" "titles")))
 
-(defun mhtml (article-xml-path &optional source-article-name)
-  (let ((dir (directory-namestring article-xml-path)))
-    (flet ((file-in-dir (uri)
-	     (let ((path (puri:uri-path uri)))
-	       (when (scan ".(idx|eno|dfs|eth)$" path)
-		 (register-groups-bind (after-root)
-		     ("^/(.+)" path)
-		   (let ((new-path (merge-pathnames after-root dir)))
-		     (setf (puri:uri-path uri) (namestring new-path)))))
-	       uri)))
-      (xuriella:apply-stylesheet
-       (pathname (mizar-items-config 'mhtml-stylesheet))
-       (absrefs article-xml-path)
-       :parameters (append
-		    (when source-article-name
-		      (list (xuriella:make-parameter "source_article" source-article-name)
-			    (xuriella:make-parameter "mizar_items" "1")))
-		    *mhtml-params*)
-       :uri-resolver #'file-in-dir))))
+(defparameter *mhtml-stylesheet*
+  (xuriella:parse-stylesheet
+   (pathname (mizar-items-config 'mhtml-stylesheet))))
+
+(let* ((mhtml-path (mizar-items-config 'mhtml-stylesheet))
+       (orig-mhtml-md5 (md5:md5sum-file mhtml-path))
+       (cache (make-hash-table :test #'equalp)))
+  (labels ((transform (filename &optional source-article-name)
+	     (let ((dir (directory-namestring filename))
+		   (source-article-param (xuriella:make-parameter "source_article" source-article-name))
+		   (mizar-items-param (xuriella:make-parameter "mizar_items" "1")))
+	       (flet ((file-in-dir (uri)
+			(let ((path (puri:uri-path uri)))
+			  (when (scan ".(idx|eno|dfs|eth)$" path)
+			    (register-groups-bind (after-root)
+				("^/(.+)" path)
+			      (let ((new-path (merge-pathnames after-root dir)))
+				(setf (puri:uri-path uri)
+				      (namestring new-path)))))
+			  uri)))
+		 (xuriella:apply-stylesheet
+		  *mhtml-stylesheet*
+		  (absrefs filename)
+		  :parameters (append
+			       (when source-article-name
+				 (list source-article-param
+				       mizar-items-param))
+			       *mhtml-params*)
+		  :uri-resolver #'file-in-dir))))
+	   (update-cache (path md5 &optional source-file-name)
+	     (setf (gethash md5 cache) (transform path source-file-name))))
+    (defun mhtml (article-xml-path &optional source-article-name)
+      (let ((new-mhtml-md5 (md5:md5sum-file mhtml-path))
+	    (xml-md5 (md5:md5sum-file article-xml-path)))
+	(cond ((equalp orig-mhtml-md5 new-mhtml-md5) ; stylesheet unchanged
+	       (multiple-value-bind (cached present?)
+		   (gethash xml-md5 cache)
+		 (if present?
+		     cached
+		     (update-cache article-xml-path xml-md5 source-article-name))))
+	      (t ; the stylesheet has changed
+	       (clrhash cache) ; all old values are now unreliable
+	       (setf orig-mhtml-md5 new-mhtml-md5)
+	       (update-cache article-xml-path xml-md5 source-article-name)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
