@@ -143,7 +143,7 @@
   "Articles that we can handle (i.e., articles for which we have
 accurate dependency information and which are stored properly.")
 
-(defun handled-article (article)
+(defun handled-article? (article)
   (member article *handled-articles* :test #'string=))
 
 (defvar *unhandled-articles* nil
@@ -480,7 +480,7 @@ It may also contain:
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
-	(if (member article *handled-articles* :test #'string=)
+	(if (handled-article? article)
 	    (let* ((num-items (gethash article *article-num-items*))
 		   (source-uri (format nil "/~a.miz" article))
 		   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
@@ -636,7 +636,7 @@ It may also contain:
 (defmethod emit-mizar-item-page :around ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
-    (if (known-article? article-name)
+    (if (handled-article? article-name)
 	(let ((item (item-from-components article-name item-kind item-number-str)))
 	  (if (known-item? item)
 	      (let ((html-path (html-path-for-item item))
@@ -665,7 +665,7 @@ It may also contain:
 (defmethod emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
-    (if (member article-name *handled-articles* :test #'string=)
+    (if (handled-article? article-name)
 	(let* ((item-number (parse-integer item-number-str))
 	       (item-kind-pretty (pretty-item-kind item-kind))
 	       (article-uri (uri-for-article article-name))
