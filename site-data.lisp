@@ -23,6 +23,9 @@
     (declare (ignore val))
     present))
 
+(defun known-article? (article-name)
+  (member article-name *handled-articles* :test #'string=))
+
 (defun write-full-item-dependency-graph ()
   (loop
      with item-forward-table = (make-hash-table :test #'equal)
