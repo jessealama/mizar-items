@@ -123,17 +123,41 @@
   :documentation "A regular expression matching URIs associated with displaying the dependence of one item on another.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Emitting XML
+;;; Emitting XML/HTML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defparameter *absrefs-params*
+  (list (xuriella:make-parameter "0" "explainbyfrom")))
+
 (defun absrefs (article-xml-path)
-  (xuriella:apply-stylesheet (pathname (mizar-items-config 'addabsrefs-stylesheet))
-			     (pathname article-xml-path)))
+  (xuriella:apply-stylesheet (pathname (mizar-items-config 'absrefs-stylesheet))
+			     (pathname article-xml-path)
+			     :parameters *absrefs-params*))
 
+(defparameter *mhtml-params*
+  (list (xuriella:make-parameter "1" "colored")
+	(xuriella:make-parameter "1" "proof_links")
+	(xuriella:make-parameter "1" "titles")))
 
-(defun mhtml (article-xml-path)
-  (xuriella:apply-stylesheet (mizar-items-config 'mhtml-stylesheet)
-			     (absrefs article-xml-path)))
+(defun mhtml (article-xml-path &optional source-article-name)
+  (let ((dir (directory-namestring article-xml-path)))
+    (flet ((file-in-dir (uri)
+	     (let ((path (puri:uri-path uri)))
+	       (when (scan ".(idx|eno|dfs|eth)$" path)
+		 (register-groups-bind (after-root)
+		     ("/(.+)" path)
+		   (let ((new-path (merge-pathnames after-root dir)))
+		     (setf (puri:uri-path uri) (namestring new-path)))))
+	       uri)))
+      (xuriella:apply-stylesheet
+       (pathname (mizar-items-config 'mhtml-stylesheet))
+       (absrefs article-xml-path)
+       :parameters (append
+		    (when source-article-name
+		      (list (xuriella:make-parameter "source_article" source-article-name)
+			    (xuriella:make-parameter "mizar_items" "1")))
+		    *mhtml-params*)
+       :uri-resolver #'file-in-dir))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
