@@ -145,7 +145,7 @@
 	     (let ((path (puri:uri-path uri)))
 	       (when (scan ".(idx|eno|dfs|eth)$" path)
 		 (register-groups-bind (after-root)
-		     ("/(.+)" path)
+		     ("^/(.+)" path)
 		   (let ((new-path (merge-pathnames after-root dir)))
 		     (setf (puri:uri-path uri) (namestring new-path)))))
 	       uri)))
