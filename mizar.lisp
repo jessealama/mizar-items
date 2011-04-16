@@ -48,6 +48,9 @@ variable (at load time).")
     (or (string= article-str-lc "tarski")
 	(member article-str-lc *mml-lar* :test #'string=))))
 
+(defun mml-lar-index (article)
+  (position article *mml-lar* :test #'string=))
+
 (defun run-in-directory (program directory args &key input output if-output-exists)
   (let ((real-dir-name (file-exists-p directory)))
     (if real-dir-name

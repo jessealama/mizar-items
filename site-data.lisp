@@ -17,6 +17,12 @@
 (defvar *all-items* nil)
 (defvar *graphs-loaded* nil)
 
+(defun known-item? (item)
+  (multiple-value-bind (val present)
+      (gethash item *all-items*)
+    (declare (ignore val))
+    present))
+
 (defun write-full-item-dependency-graph ()
   (loop
      with item-forward-table = (make-hash-table :test #'equal)
@@ -330,6 +336,13 @@
 	 (pushnew k items :test #'string=))
      finally
        (return items)))
+
+(defun count-items-of-kind-for-article (article kind)
+  (loop
+     with kind-regexp = (format nil "~a:~a:[0-9]+" article kind)
+     for k being the hash-keys of *item-dependency-graph-forward*
+     counting (scan kind-regexp k) into num-items
+     finally (return num-items)))
 
 (defun article-title (article)
   (let ((present (member article *articles* :key #'first :test #'string=)))

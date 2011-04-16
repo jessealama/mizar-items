@@ -21,9 +21,8 @@
        (:head 
 	((:link :rel "icon" :href "/favicon.ico" :type "image/x-icon"))
 	((:link :href "/mhtml.css" :rel "stylesheet" :type "text/css"))
-	((:link :href "/screen.css" :rel "stylesheet" :type "text/css"))
 	((:script :src "/mhtml.js" :type "text/ecmascript"))
-	(:title ,(if (stringp title) title (list 'str title)))
+	(:title ,(if (stringp title) title (list 'str title))))
        (:body
 	((:table :border "1"
 		 :summary "navigation"
@@ -40,15 +39,15 @@
 	    " | "
 	    ((:a :href "/landmarks") "landmarks")
 	    " | "
-	    ((:a :href "/random-item") "random-item")
+	    ((:a :href "/path") "paths")
 	    " | "
-	    ((:a :href "/random-path") "random-path")))))
+	    ((:a :href "/random-item") "random item")))))
 	,@body
 	(:hr)
 	((:div :class "footer")
 	 ((:span :class "fleft") "See the " ((:a :href "/feedback") "feedback page") " for information about contacting us.")
 	 ((:span :class "menu")
-	  "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") " | "((:a :href "http://validator.w3.org/check/referer") "XHTML")))))))
+	  "Validate: " ((:a :href "http://jigsaw.w3.org/css-validator/check/referer") "CSS") " | "((:a :href "http://validator.w3.org/check/referer") "XHTML"))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Server and application setup
@@ -85,7 +84,7 @@ returning NIL."
   (format t "done~%")
   (setf *message-log-pathname* (mizar-items-config 'server-messages-log-file)
 	*access-log-pathname* (mizar-items-config 'server-access-log-file)
-	*handle-http-errors-p* t
+	*handle-http-errors-p* nil
 	*http-error-handler* #'handle-http-error
 	*log-lisp-errors-p* t
 	*log-lisp-warnings-p* t
