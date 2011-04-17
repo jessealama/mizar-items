@@ -121,6 +121,17 @@ returning NIL."
   (setf *attribute-quote-char* #\")
   t)
 
+(defun shutdown-server ()
+  (stop *acceptor*))
+
+(defun re-initialize-server (mml-version &optional reload-graphs (articles :all))
+  (shutdown-server)
+  (setf *acceptor* (make-instance 'hunchentoot:acceptor
+				  :port 4242
+				  :acceptor #'items-request-dispatcher))
+  (setf items-dispatch-table nil)
+  (initialize-server mml-version reload-graphs articles))
+
 (defun handle-http-error (error-code)
   (if (= error-code +http-not-found+)
       (miz-item-html ("not found")
