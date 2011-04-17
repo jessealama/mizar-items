@@ -134,28 +134,28 @@
    (pathname (mizar-items-config 'absrefs-stylesheet))))
 
 (let* ((absrefs-path (mizar-items-config 'absrefs-stylesheet))
-       (orig-absrefs-md5 (md5:md5sum-file absrefs-path))
+       (orig-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
        (cache (make-hash-table :test #'equalp)))
   (labels ((transform (filename)
 	     (xuriella:apply-stylesheet *absrefs-sylesheet*
 					(pathname filename)
 					:parameters *absrefs-params*))
-	   (update-cache (path md5)
+	   (update-cache (path sha1)
 	     (setf (gethash md5 cache) (transform path))))
     (defun absrefs (article-xml-path)
-      (let ((new-absrefs-md5 (md5:md5sum-file
+      (let ((new-absrefs-sha1 (sha1:sha1sum-file
 			      (mizar-items-config 'absrefs-stylesheet)))
-	    (xml-md5 (md5:md5sum-file article-xml-path)))
-	(cond ((equalp orig-absrefs-md5 new-absrefs-md5) ; stylesheet unchanged
+	    (xml-sha1 (sha1:sha1sum-file article-xml-path)))
+	(cond ((equalp orig-absrefs-sha1 new-absrefs-sha1) ; stylesheet unchanged
 	       (multiple-value-bind (cached present?)
-		   (gethash xml-md5 cache)
+		   (gethash xml-sha1 cache)
 		 (if present?
 		     cached
-		     (update-cache article-xml-path xml-md5))))
+		     (update-cache article-xml-path xml-sha1))))
 	      (t ; the stylesheet has changed
 	       (clrhash cache) ; all old values are now unreliable
-	       (setf orig-absrefs-md5 new-absrefs-md5)
-	       (update-cache article-xml-path xml-md5)))))))
+	       (setf orig-absrefs-sha1 new-absrefs-sha1)
+	       (update-cache article-xml-path xml-sha1)))))))
 
 (defparameter *mhtml-params*
   (list (xuriella:make-parameter "1" "colored")
@@ -167,7 +167,7 @@
    (pathname (mizar-items-config 'mhtml-stylesheet))))
 
 (let* ((mhtml-path (mizar-items-config 'mhtml-stylesheet))
-       (orig-mhtml-md5 (md5:md5sum-file mhtml-path))
+       (orig-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
        (cache (make-hash-table :test #'equalp)))
   (labels ((transform (filename &optional source-article-name)
 	     (let ((dir (directory-namestring filename))
@@ -191,21 +191,21 @@
 				       mizar-items-param))
 			       *mhtml-params*)
 		  :uri-resolver #'file-in-dir))))
-	   (update-cache (path md5 &optional source-file-name)
-	     (setf (gethash md5 cache) (transform path source-file-name))))
+	   (update-cache (path sha1 &optional source-file-name)
+	     (setf (gethash sha1 cache) (transform path source-file-name))))
     (defun mhtml (article-xml-path &optional source-article-name)
-      (let ((new-mhtml-md5 (md5:md5sum-file mhtml-path))
-	    (xml-md5 (md5:md5sum-file article-xml-path)))
-	(cond ((equalp orig-mhtml-md5 new-mhtml-md5) ; stylesheet unchanged
+      (let ((new-mhtml-sha1 (sha1:sha1sum-file mhtml-path))
+	    (xml-sha1 (sha1:sha1sum-file article-xml-path)))
+	(cond ((equalp orig-mhtml-sha1 new-mhtml-sha1) ; stylesheet unchanged
 	       (multiple-value-bind (cached present?)
-		   (gethash xml-md5 cache)
+		   (gethash xml-sha1 cache)
 		 (if present?
 		     cached
-		     (update-cache article-xml-path xml-md5 source-article-name))))
+		     (update-cache article-xml-path xml-sha1 source-article-name))))
 	      (t ; the stylesheet has changed
 	       (clrhash cache) ; all old values are now unreliable
-	       (setf orig-mhtml-md5 new-mhtml-md5)
-	       (update-cache article-xml-path xml-md5 source-article-name)))))))
+	       (setf orig-mhtml-sha1 new-mhtml-sha1)
+	       (update-cache article-xml-path xml-sha1 source-article-name)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
