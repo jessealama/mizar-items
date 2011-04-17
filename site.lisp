@@ -1139,6 +1139,51 @@ It may also contain:
 		  (register-static-file-dispatcher proof-uri proof-path "text/xml")))
 	(error "The article '~a' does not have a known number of items!" article))))
 
+(defun ignore-post-request ()
+  (when (eq (request-method*) :post)
+    (let ((uri (request-uri*)))
+      (miz-item-html ("unsupported http method")
+	  (:return-code +http-method-not-allowed+)
+	(:p "The POST HTTP method is not allowed for the resource")
+	(:blockquote
+	 (:tt (str uri)))
+	(:p "Perhaps you meant to GET this resource?")))))
+
+(defun ignore-delete-request ()
+  (when (eq (request-method*) :delete)
+    (let ((uri (request-uri*)))
+      (miz-item-html ("unsupported http method")
+	  (:return-code +http-method-not-allowed+)
+	(:p "The DELETE HTTP method is not allowed for the resource")
+	(:blockquote
+	 (:tt (str uri)))
+	(:p "Perhaps you meant to GET this resource?")))))
+
+(defun ignore-put-request ()
+  (when (eq (request-method*) :put)
+    (let ((uri (request-uri*)))
+      (miz-item-html ("unsupported http method")
+	  (:return-code +http-method-not-allowed+)
+	(:p "The PUT HTTP method is not allowed for the resource")
+	(:blockquote
+	 (:tt (str uri)))
+	(:p "Perhaps you meant to GET this resource?")))))
+
+(defun ignore-trace-request ()
+  (when (eq (request-method*) :trace)
+    (let ((uri (request-uri*)))
+      (miz-item-html ("unsupported http method")
+	  (:return-code +http-method-not-allowed+)
+	(:p "The TRACE HTTP method is not allowed for the resource")
+	(:blockquote
+	 (:tt (str uri)))
+	(:p "Perhaps you meant to GET this resource?")))))
+
+(defun handled-options ()
+  (when (eq (request-method*) :options)
+    (setf (return-code *reply*) +http-ok+)
+    (setf (header-out "Allow") "GET, OPTIONS")))
+
 (defun initialize-uris (&optional (articles :all))
   ;; ecmascript, css
   (register-static-file-dispatcher "/mhtml.css"
@@ -1212,4 +1257,11 @@ It may also contain:
      for article in *handled-articles*
      do
        (register-proofs-for-article article))
+  ;; ignore POST, DELETE, PUT, TRACE
+  (register-regexp-dispatcher ".*" #'ignore-post-request)
+  (register-regexp-dispatcher ".*" #'ignore-delete-request)
+  (register-regexp-dispatcher ".*" #'ignore-put-request)
+  (register-regexp-dispatcher ".*" #'ignore-trace-request)
+  ;; options: we support only GET (and OPTIONS)
+  (register-regexp-dispatcher ".*" #'handled-options)
   t)
