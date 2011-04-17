@@ -1109,7 +1109,33 @@ It may also contain:
      ":"
      (str number))))
 
-(defun emit-requires-page ()
+(defgeneric emit-requires-page ()
+  (:documentation "An HTML presentation of a page showing what a given item requires"))
+
+(defmethod emit-requires-page :around ()
+  (register-groups-bind (article kind number)
+      (+requires-uri-regexp+ (request-uri*))
+    (if (belongs-to-mml article)
+	(let ((item (item-from-components article kind number)))
+	  (if (known-item? item)
+	      (call-next-method)
+	      (let ((article-uri (uri-for-article article)))
+		(miz-item-html ("unknown item")
+		    (:return-code +http-not-found+)
+		  (:p "The item "
+		      ((:a :href article-uri :class "article-name")
+		       (str article))
+		      ":"
+		      (str kind)
+		      ":"
+		      (str number)
+		      " is not known.")))))
+	(miz-item-html ("unknown article")
+	    (:return-code +http-not-found+)
+	  (:p (fmt "'~a'" article) " is not the name of a known article.  Here is a list of all known articles:")
+	  (str (article-listing))))))
+
+(defmethod emit-requires-page ()
   (register-groups-bind (article kind number)
       (+requires-uri-regexp+ (request-uri*))
     (let* ((item (item-from-components article kind number))
