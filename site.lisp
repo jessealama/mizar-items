@@ -546,48 +546,28 @@ It may also contain:
 		   nil
 		 (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
 
+(defgeneric emit-article-page ()
+  (:documentation "An HTML representation of an article."))
 
-(defun emit-article-page ()
+(defmethod emit-article-page :around ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
 	(if (handled-article? article)
-	    (let* ((num-items (gethash article *article-num-items*))
-		   (source-uri (format nil "/~a.miz" article))
-		   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
-		   (bib-title (article-title article))
-		   (title (if bib-title
-			      (format nil "~a: ~a" article bib-title)
-			      (format nil "~a" article))))
-	      (miz-item-html (title)
-		  nil
-		(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
-		(htm
-		 ((:ol :class "fragment-listing")
-		  (loop
-		     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
-		     with article-text-dir = (format nil "~a/text" article-dir)
-		     for i from 1 upto num-items
-		     for i-str = (format nil "fragment-~d" i)
-		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
-		     for item-html = (file-as-string fragment-path)
-		     for item-uri = (format nil "/fragment/~a/~d" article i)
-		     for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
-		     do
-		       (htm
-			((:li :class "fragment-listing" :id i-str)
-			 
-			 ((:a :href item-uri :title item-link-title)
-			  (str item-html)))))))))
+	    (let ((num-items (gethash article *article-num-items*)))
+	      (if (zerop num-items)
+		  (miz-item-html ("error")
+		      (:return-code +http-internal-server-error+)
+		    (:p "The article "
+			((:span :class "article-name") (str article))
+			" somehow has zero items in it.  Please notify the site maintainers."))
+		  (call-next-method)))
 	    (miz-item-html ("article cannot be displayed")
-		(:return-code +http-not-found+)
-	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later.")))
+		(:return-code +http-internal-server-error+)
+	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but it has not yet been processed by this site.  Please try again later.")))
 	(miz-item-html ("article not found")
 	    (:return-code +http-not-found+)
 	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
-	  (:p "The result of testing presence in the MML: " (let ((present (member article *mml-lar* :test #'string=)))
-							      (htm
-							       (str present))))
 	  ((:table :class "article-listing" :rules "rows")
 	   (:thead
 	    (:tr
@@ -605,6 +585,37 @@ It may also contain:
 		    ((:a :href article-uri :title title-escaped)
 		     (str article-name)))
 		   ((:td :class "article-title") (str title)))))))))))
+
+(defmethod emit-article-page ()
+  (register-groups-bind (article)
+      (+article-uri-regexp+ (request-uri*))
+    (let* ((num-items (gethash article *article-num-items*))
+	   (source-uri (format nil "/~a.miz" article))
+	   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
+	   (bib-title (article-title article))
+	   (title (if bib-title
+		      (format nil "~a: ~a" article bib-title)
+		      (format nil "~a" article))))
+      (miz-item-html (title)
+	  nil
+	(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
+	(htm
+	 ((:ol :class "fragment-listing")
+	  (loop
+	     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
+	     with article-text-dir = (format nil "~a/text" article-dir)
+	     for i from 1 upto num-items
+	     for i-str = (format nil "fragment-~d" i)
+	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+	     for item-html = (file-as-string fragment-path)
+	     for item-uri = (format nil "/fragment/~a/~d" article i)
+	     for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
+	     do
+	       (htm
+		((:li :class "fragment-listing" :id i-str)
+		 
+		 ((:a :href item-uri :title item-link-title)
+		  (str item-html)))))))))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
