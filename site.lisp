@@ -546,6 +546,26 @@ It may also contain:
 		   nil
 		 (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
 
+(defun article-listing ()
+  (with-html-output-to-string (foo)
+    ((:table :class "article-listing" :rules "rows")
+     (:thead
+      (:tr
+       (:th "MML Name")
+       (:th "Title")))
+     (:tbody
+      (loop
+	 for (article-name title author) in *articles*
+	 for article-uri = (format nil "/article/~a" article-name)
+	 for title-escaped = (escape-string title)
+	 do
+	   (htm
+	    (:tr
+	     ((:td :class "article-name")
+	      ((:a :href article-uri :title title-escaped)
+	       (str article-name)))
+	     ((:td :class "article-title") (str title)))))))))
+
 (defgeneric emit-article-page ()
   (:documentation "An HTML representation of an article."))
 
