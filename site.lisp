@@ -91,7 +91,7 @@
 	     "/" "(" +article-name-regexp+ ")"
 	     "/" "(" +item-kind-regexp+ ")"
 	     "/" "(" +number-regexp+ ")"
-	     "/" "/requires"))
+	     "/" "requires"))
   :test #'string=
   :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
 
@@ -101,10 +101,26 @@
 	     "/" "(" +article-name-regexp+ ")"
 	     "/" "(" +item-kind-regexp+ ")"
 	     "/" "(" +number-regexp+ ")"
-	     "/" "/supports"))
+	     "/" "supports"))
   :test #'string=
   :documentation "A regular expression for matching URIs associated with the action of computing what an item requires/depends on.")
 
+(define-constant +item-regexp+
+    (concat +article-name-regexp+
+	    ":"
+	    "(" +item-kind-regexp+ ")"
+	    ":"
+	    +number-regexp+)
+  :test #'string=
+  :documentation "A regular expression matching names of items.")
+
+(define-constant +dependence-uri-regexp+
+    (exact-regexp
+     (concat "/" "dependence"
+	     "/" "(" +item-regexp+ ")"
+	     "/" "(" +item-regexp+ ")"))
+  :test #'string=
+  :documentation "A regular expression matching URIs associated with displaying the dependence of one item on another.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
@@ -322,9 +338,9 @@ end;"))
 
 (defun dependence-link-title (dependent-item supporting-item)
   (destructuring-bind (dep-article dep-kind dep-num)
-      dependent-item
+      (split-item-identifier dependent-item)
     (destructuring-bind (sup-article sup-kind sup-num)
-	supporting-item
+	(split-item-identifier supporting-item)
       (format nil 
 	      "~:@(~a~):~a:~a depends on ~:@(~a~):~a:~a"
 	      dep-article dep-kind dep-num
@@ -567,55 +583,24 @@ It may also contain:
 
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
+    ("definiens" "definiens")
+    ("deftheorem" "definitional theorem")
+    ("kconstructor" "function")
     ("mconstructor" "type")
+    ("rconstructor" "relation")
+    ("vconstructor" "adjective")
+    ("ccluster" "registration")
+    ("fcluster" "registration")
+    ("rcluster" "registration")
+    ("kpattern" "notation (function)")
+    ("mpattern" "notation (type)")
+    ("rpattern" "notation (relation)")
+    ("vpattern" "notation (adjective)")
     ("theorem" "theorem")
     ("lemma" "lemma")
-    ("scheme" "scheme")    
+    ("scheme" "scheme")
+    ("identification" "identification")
     (t "(unknown)")))
-
-
-	       ;; (forward-deps (gethash item-key *item-dependency-graph-forward*))
-	       ;; (backward-deps (gethash item-key *item-dependency-graph-backward*))
-	       ;; (forward-deps-sorted (sort (copy-list forward-deps) 
-	       ;; 				  #'item-<))
-	       ;; (backward-deps-sorted (sort (copy-list backward-deps)
-	       ;; 				   #'item-<)))
-
-		   ;; ((:table :rules "cols")
-		   ;;  (:tr
-		   ;;   ((:td :align "center" :class "arrow")
-		   ;;    (str +upward-arrow-entity+))
-		   ;;   ((:td :align "center" :class "arrow")
-		   ;;    (str +downward-arrow-entity+)))
-		   ;;  ((:tr :valign "top")
-		   ;;   ((:td :class "halfwidth" :align "center")
-		   ;;    (:table
-		   ;;     (:caption "Requires")
-		   ;;     (if forward-deps-sorted
-		   ;; 	   (dolist (forward-dep forward-deps-sorted)
-		   ;; 	     (let ((dep-uri (dependence-uri-for-items forward-dep item-key))
-		   ;; 		   (dep-link-title (dependence-link-title item-key forward-dep)))
-		   ;; 	       (htm
-		   ;; 		(:tr (:td ((:a :href dep-uri :title dep-link-title)
-		   ;; 			   (str forward-dep)))))))
-		   ;; 	   (htm 
-		   ;; 	    (:tr
-		   ;; 	     (:td
-		   ;; 	      (:em "(This item immediately depends on nothing.)")))))))
-		   ;;   ((:td :class "halfwidth" :align "center")
-		   ;;    (:table
-		   ;;     (:caption "Supports")
-		   ;;    (if backward-deps-sorted
-		   ;; 	  (dolist (backward-dep backward-deps-sorted)
-		   ;; 	    (let ((dep-uri (dependence-uri-for-items backward-dep item-key))
-		   ;; 		  (dep-link-title (dependence-link-title backward-dep item-key)))
-		   ;; 	      (htm
-		   ;; 	       (:tr (:td ((:a :href dep-uri :title dep-link-title)
-		   ;; 			  (str backward-dep)))))))
-		   ;; 	  (htm 
-		   ;; 	   (:td
-		   ;; 	    (:td
-		   ;; 	     (:em "(No item immediately depends on this one.)"))))))))))))))))
 
 (defun requires-uri-for-item (article-name item-kind item-number)
   (format nil "/item/~a/~a/~a/requires" article-name item-kind item-number))
@@ -969,15 +954,169 @@ It may also contain:
     (:p
      "Thanks for using this site.  The maintainer is " ((:a :href "http://centria.di.fct.unl.pt/~alama/") "Jesse Alama") ".  If your have questions, comments, bug reports (e.g., broken links), or feature requests, please do " ((:a :href "mailto:jesse.alama@gmail.com") "send an email") "; your feedback is appreciated.")))
 
+(defun items-by-mml-order (item-list)
+  (sort (copy-list item-list) #'item-<))
+
+(defun item-from-components (article-name item-kind item-number)
+  (format nil "~a:~a:~a" article-name item-kind item-number))
+
+(defun item-link-title (article kind number)
+  (format nil "~:@(~a~):~a:~a" article kind number))
+
+(defun item-inline-name (article kind number)
+  (with-html-output-to-string (foo)
+    (:span
+     ((:span :class "article-name") (str article))
+     ":"
+     (str kind)
+     ":"
+     (str number))))
+
 (defun emit-requires-page ()
-  (miz-item-html ("requires")
-      nil
-    (:p (:em "(not yet implemented)"))))
+  (register-groups-bind (article kind number)
+      (+requires-uri-regexp+ (request-uri*))
+    (let* ((item (item-from-components article kind number))
+	   (item-uri (item-uri item))
+	   (item-link-title (item-link-title article kind number))
+	   (item-inline-name (item-inline-name article kind number))
+	   (deps (gethash item *item-dependency-graph-forward*))
+	   (deps-sorted (items-by-mml-order deps)))
+      (let* ((requires-page-title (format nil "requirements of ~a" item-link-title))
+	     (html-path (html-path-for-item item))
+	     (html (file-as-string html-path)))
+	(miz-item-html (requires-page-title)
+	    nil
+	  (:p "The item "
+	      ((:a :href item-uri :title item-link-title)
+	       (str item-inline-name)))
+	  (str html)
+	  (if (null deps)
+	      (htm (:p "requires nothing."))
+	      (htm (:p "requires:")
+		   (:ul
+		    (dolist (dep deps-sorted)
+		      (destructuring-bind (dep-article dep-kind dep-num)
+			  (split-item-identifier dep)
+			(let ((dep-uri (dependence-uri-for-items item dep))
+			      (dep-link-title (dependence-link-title item dep))
+			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+			  (htm
+			   (:li ((:a :href dep-uri :title dep-link-title)
+				 (str dep-inline-name)))))))))))))))
 
 (defun emit-supports-page ()
-  (miz-item-html ("supports")
-      nil
-    (:p (:em "(not yet implemented)"))))
+  (register-groups-bind (article kind number)
+      (+supports-uri-regexp+ (request-uri*))
+    (let* ((item (item-from-components article kind number))
+	   (item-uri (item-uri item))
+	   (item-link-title (item-link-title article kind number))
+	   (item-inline-name (item-inline-name article kind number))
+	   (deps (gethash item *item-dependency-graph-backward*))
+	   (deps-sorted (items-by-mml-order deps)))
+      (let* ((supports-page-title (format nil "what ~a supports" item-link-title))
+	     (html-path (html-path-for-item item))
+	     (html (file-as-string html-path)))
+	(miz-item-html (supports-page-title)
+	    nil
+	  (:p "The item "
+	      ((:a :href item-uri :title item-link-title)
+	       (str item-inline-name)))
+	  (str html)
+	  (if (null deps)
+	      (htm (:p "supports nothing."))
+	      (htm (:p "supports:")
+		   (:ul
+		    (dolist (dep deps-sorted)
+		      (destructuring-bind (dep-article dep-kind dep-num)
+			  (split-item-identifier dep)
+			(let ((dep-uri (dependence-uri-for-items dep item))
+			      (dep-link-title (dependence-link-title item dep))
+			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+			  (htm
+			   (:li ((:a :href dep-uri :title dep-link-title)
+				 (str dep-inline-name)))))))))))))))
+
+(defgeneric emit-dependence-page ()
+  (:documentation "Emit an HTML description of the dependence between two items."))
+
+(defmethod emit-dependence-page :around ()
+  ;; sanity check
+  (register-groups-bind (supporting-item whatever dependent-item)
+      (+dependence-uri-regexp+ (request-uri*))
+    (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
+    (if supporting-item
+	(if dependent-item
+	    (if (known-item? supporting-item)
+		(if (known-item? dependent-item)
+		    (let ((supp-html-path (html-path-for-item supporting-item))
+			  (dep-html-path (html-path-for-item dependent-item)))
+		      (if (file-exists-p supp-html-path)
+			  (if (file-exists-p dep-html-path)
+			      (call-next-method)
+			      (miz-item-html ("error")
+				  (:return-code +http-internal-server-error+)
+				(:p "The HTML file for the item")
+				(:blockquote
+				 (fmt "~a" dependent-item))
+				(:p "doesn't exist at the expected location")
+				(:blockquote
+				 (fmt "~a" dep-html-path))
+				(:p "Please inform the site administrator about this.")))
+			  (miz-item-html ("error")
+			      (:return-code +http-internal-server-error+)
+			    (:p "The HTML file for the item")
+			    (:blockquote
+			     (fmt "~a" supporting-item))
+			    (:p "doesn't exist at the expected location")
+			    (:blockquote
+			     (fmt "~a" supp-html-path))
+			    (:p "Please inform the site administrator about this."))))
+		    (miz-item-html ("error")
+			(:return-code +http-bad-request+)
+		      (:p (fmt "'~a' is not the name of a known item." dependent-item))))
+		(miz-item-html ("error")
+		    (:return-code +http-bad-request+)
+		  (:p (fmt "'~a' is not the name of a known item." supporting-item))))
+	    (miz-item-html ("error")
+		(:return-code +http-bad-request+)
+	      (:p (fmt "Something went wrong matching the requested URI, '~a', against the pattern for this page" (request-uri*)))))
+	(miz-item-html ("error")
+	    (:return-code +http-bad-request+)
+	  (:p (fmt "Something went wrong matching the requested URI, '~a', against the pattern for this page" (request-uri*)))))))
+
+(defmethod emit-dependence-page ()
+  (register-groups-bind (supporting-item whatever dependent-item)
+      (+dependence-uri-regexp+ (request-uri*))
+    (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
+    (destructuring-bind (supp-article supp-kind supp-num)
+	(split-item-identifier supporting-item)
+      (destructuring-bind (dep-article dep-kind dep-num)
+	  (split-item-identifier dependent-item)
+	(let* ((supp-html-path (html-path-for-item supporting-item))
+	       (dep-html-path (html-path-for-item dependent-item))
+	       (supp-html (file-as-string supp-html-path))
+	       (dep-html (file-as-string dep-html-path))
+	       (supp-title (item-link-title supp-article supp-kind supp-num))
+	       (dep-title (item-link-title dep-article dep-kind dep-num))
+	       (title (format nil "~a depends on ~a" supp-title dep-title))
+	       (supp-name-inline (item-inline-name supp-article supp-kind supp-num))
+	       (dep-name-inline (item-inline-name dep-article dep-kind dep-num))
+	       (supp-uri (item-uri supporting-item))
+	       (dep-uri (item-uri supporting-item)))
+      (miz-item-html (title)
+	  nil
+	(:p "The item " ((:a :href supp-uri :title supp-title) (str supp-name-inline)))
+	(str supp-html)
+	(:p "depends on " ((:a :href dep-uri :title dep-title) (str dep-name-inline)))
+	(str dep-html)
+	(:p "because verifying "
+	    ((:a :href supp-uri :title supp-title) (str supp-name-inline))
+	    " in the absense of "
+	    ((:a :href dep-uri :title dep-title) (str dep-name-inline))
+	    " would generate the following " (:tt "MIZAR") " errors:")
+	(:blockquote
+	 (:em "(not implemented yet; check back soon)"))))))))
+
 
 (defun register-proofs-for-article (article)
   (let ((num-items (gethash article *article-num-items*)))
@@ -1066,6 +1205,8 @@ It may also contain:
   ;; requires and supports
   (register-regexp-dispatcher +requires-uri-regexp+ #'emit-requires-page)
   (register-regexp-dispatcher +supports-uri-regexp+ #'emit-supports-page)
+  ;; dependence
+  (register-regexp-dispatcher +dependence-uri-regexp+ #'emit-dependence-page)
   ;; proofs
   (loop
      for article in *handled-articles*
