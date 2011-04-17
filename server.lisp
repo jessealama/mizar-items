@@ -56,7 +56,7 @@
 (defvar items-dispatch-table nil)
 
 (define-constant +unsupported-methods+
-    (list :put :post :delete :trace)
+    (list :put :post :delete :trace :connect)
   :test #'set-equal
   :documentation "A list of those HTTP methods which are not supported for any resource")
 
