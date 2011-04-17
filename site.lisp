@@ -141,11 +141,10 @@
 					(pathname filename)
 					:parameters *absrefs-params*))
 	   (update-cache (path sha1)
-	     (setf (gethash md5 cache) (transform path))))
+	     (setf (gethash sha1 cache) (transform path))))
     (defun absrefs (article-xml-path)
-      (let ((new-absrefs-sha1 (sha1:sha1sum-file
-			      (mizar-items-config 'absrefs-stylesheet)))
-	    (xml-sha1 (sha1:sha1sum-file article-xml-path)))
+      (let ((new-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
+	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
 	(cond ((equalp orig-absrefs-sha1 new-absrefs-sha1) ; stylesheet unchanged
 	       (multiple-value-bind (cached present?)
 		   (gethash xml-sha1 cache)
@@ -194,8 +193,8 @@
 	   (update-cache (path sha1 &optional source-file-name)
 	     (setf (gethash sha1 cache) (transform path source-file-name))))
     (defun mhtml (article-xml-path &optional source-article-name)
-      (let ((new-mhtml-sha1 (sha1:sha1sum-file mhtml-path))
-	    (xml-sha1 (sha1:sha1sum-file article-xml-path)))
+      (let ((new-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
+	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
 	(cond ((equalp orig-mhtml-sha1 new-mhtml-sha1) ; stylesheet unchanged
 	       (multiple-value-bind (cached present?)
 		   (gethash xml-sha1 cache)
