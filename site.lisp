@@ -588,23 +588,7 @@ It may also contain:
 	(miz-item-html ("article not found")
 	    (:return-code +http-not-found+)
 	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
-	  ((:table :class "article-listing" :rules "rows")
-	   (:thead
-	    (:tr
-	     (:th "MML Name")
-	     (:th "Title")))
-	   (:tbody
-	    (loop
-	       for (article-name title author) in *articles*
-	       for article-uri = (format nil "/article/~a" article-name)
-	       for title-escaped = (escape-string title)
-	       do
-		 (htm
-		  (:tr
-		   ((:td :class "article-name")
-		    ((:a :href article-uri :title title-escaped)
-		     (str article-name)))
-		   ((:td :class "article-title") (str title)))))))))))
+	  (str (article-listing))))))
 
 (defmethod emit-article-page ()
   (register-groups-bind (article)
