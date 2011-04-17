@@ -73,8 +73,9 @@
 
 (defun respond-to-options ()
   (setf (return-code *reply*) +http-ok+)
-  (setf (header-out "Allow") "OPTIONS, GET")
-  (setf (content-length* *reply*) 0))
+  (setf (header-out "Allow") "OPTIONS, GET, HEAD")
+  (setf (content-length* *reply*) 0)
+  (send-headers))
 
 (defun items-request-dispatcher (request)
   "Selects a request handler based on a list of individual request
