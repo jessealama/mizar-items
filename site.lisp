@@ -1166,7 +1166,33 @@ It may also contain:
 			   (:li ((:a :href dep-uri :title dep-link-title)
 				 (str dep-inline-name)))))))))))))))
 
-(defun emit-supports-page ()
+(defgeneric emit-supports-page ()
+  (:documentation "An HTML presentation of the items that a given item supports."))
+
+(defmethod emit-supports-page :around ()
+  (register-groups-bind (article kind number)
+      (+requires-uri-regexp+ (request-uri*))
+    (if (belongs-to-mml article)
+	(let ((item (item-from-components article kind number)))
+	  (if (known-item? item)
+	      (call-next-method)
+	      (let ((article-uri (uri-for-article article)))
+		(miz-item-html ("unknown item")
+		    (:return-code +http-not-found+)
+		  (:p "The item "
+		      ((:a :href article-uri :class "article-name")
+		       (str article))
+		      ":"
+		      (str kind)
+		      ":"
+		      (str number)
+		      " is not known.")))))
+	(miz-item-html ("unknown article")
+	    (:return-code +http-not-found+)
+	  (:p (fmt "'~a'" article) " is not the name of a known article.  Here is a list of all known articles:")
+	  (str (article-listing))))))
+
+(defmethod emit-supports-page ()
   (register-groups-bind (article kind number)
       (+supports-uri-regexp+ (request-uri*))
     (let* ((item (item-from-components article kind number))
