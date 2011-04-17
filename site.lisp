@@ -617,15 +617,18 @@ It may also contain:
 		 ((:a :href item-uri :title item-link-title)
 		  (str item-html)))))))))))
 
+(defun http-sensitive-redirect (new-uri)
+  (let ((client-server-protocol (server-protocol*)))	
+    (redirect new-uri
+	      :code (if (string= client-server-protocol "HTTP/1.1")
+			+http-temporary-redirect+
+			+http-moved-temporarily+))))
+
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
-      (let ((client-server-protocol (server-protocol*)))	
-	    (redirect (uri-for-item article kind number)
-		      :code (if (string= client-server-protocol "HTTP/1.1")
-				+http-temporary-redirect+
-				+http-moved-temporarily+))))))
+      (http-sensitive-redirect (uri-for-item article kind number)))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
