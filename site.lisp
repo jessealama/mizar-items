@@ -455,15 +455,15 @@ end;"))
 	   (:tbody
 	    (if (length= 1 steps)
 		(let* ((item (car steps))
-		       (item-html (file-as-string (html-path-for-item item))))
+		       (item-html (html-for-item item)))
 		  (htm ((:tr :class "dependence-path-node")
 			(:td (str item-html)))))
 		(loop
 		   for step-from in steps
 		   for step-to in (cdr steps)
-		   for step-from-html = (file-as-string (html-path-for-item step-from))
+		   for step-from-html = (html-for-item step-from)
 		   for step-from-uri = (uri-for-item-as-string step-from)
-		   for step-to-html = (file-as-string (html-path-for-item step-to))
+		   for step-to-html = (html-for-item step-to)
 		   for step-to-uri = (uri-for-item-as-string step-to)
 		   for dependence-uri = (dependence-uri-for-items step-from step-to)
 		   for dependence-link-title = (dependence-link-title step-from step-to)
@@ -664,6 +664,9 @@ It may also contain:
 	    (split-item-identifier ckb-for-item)
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
+
+(defun html-for-item (item-string)
+  (file-as-string item-string))
 
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
@@ -1098,8 +1101,7 @@ It may also contain:
 	   (deps (gethash item *item-dependency-graph-forward*))
 	   (deps-sorted (items-by-mml-order deps)))
       (let* ((requires-page-title (format nil "requirements of ~a" item-link-title))
-	     (html-path (html-path-for-item item))
-	     (html (file-as-string html-path)))
+	     (html (html-for-item item)))
 	(miz-item-html (requires-page-title)
 	    nil
 	  (:p "The item "
@@ -1130,8 +1132,7 @@ It may also contain:
 	   (deps (gethash item *item-dependency-graph-backward*))
 	   (deps-sorted (items-by-mml-order deps)))
       (let* ((supports-page-title (format nil "what ~a supports" item-link-title))
-	     (html-path (html-path-for-item item))
-	     (html (file-as-string html-path)))
+	     (html (html-for-item item)))
 	(miz-item-html (supports-page-title)
 	    nil
 	  (:p "The item "
@@ -1208,10 +1209,8 @@ It may also contain:
 	(split-item-identifier supporting-item)
       (destructuring-bind (dep-article dep-kind dep-num)
 	  (split-item-identifier dependent-item)
-	(let* ((supp-html-path (html-path-for-item supporting-item))
-	       (dep-html-path (html-path-for-item dependent-item))
-	       (supp-html (file-as-string supp-html-path))
-	       (dep-html (file-as-string dep-html-path))
+	(let* ((supp-html (html-for-item supporting-item))
+	       (dep-html (html-for-item dependent-item))
 	       (supp-title (item-link-title supp-article supp-kind supp-num))
 	       (dep-title (item-link-title dep-article dep-kind dep-num))
 	       (title (format nil "~a depends on ~a" supp-title dep-title))
