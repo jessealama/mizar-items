@@ -106,12 +106,3 @@ returning NIL."
 	    (htm
 	     (:dt param)
 	     (:dd value)))))))
-      ;; (miz-item-html "unprocessable"
-      ;; 	(:p "We cannot make sense of your request:")
-      ;; 	(:dl
-      ;; 	 (loop
-      ;; 	    for (param . value) in (get-parameters*)
-      ;; 	    do
-      ;; 	      (htm
-      ;; 	       (:dt param)
-      ;; 	       (:dd value)))))))
