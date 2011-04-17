@@ -123,15 +123,25 @@ returning NIL."
   t)
 
 (defun handle-http-error (error-code)
-  (when (= error-code +http-not-found+)
-    (miz-item-html ("not found")
-                   (:return-code +http-not-found+)
-      (:p "I can't find what you're looking for.")
-      (:p "Your request was:")
-      (:dl
-       (loop
-	  for (param . value) in (get-parameters*)
-	  do
-	    (htm
-	     (:dt param)
-	     (:dd value)))))))
+  (if (= error-code +http-not-found+)
+      (miz-item-html ("not found")
+	  (:return-code +http-not-found+)
+	(:p "I can't find what you're looking for.")
+	(:p "Your request was:")
+	(:dl
+	 (loop
+	    for (param . value) in (get-parameters*)
+	    do
+	      (htm
+	       (:dt param)
+	       (:dd value)))))
+      (when (= error-code +http-method-not-allowed+)
+	(let* ((uri (request-uri*))
+	       (method (request-method*))
+	       (method-name (symbol-name method)))
+	  (miz-item-html ("unsupported http method")
+	      (:return-code +http-method-not-allowed+)
+	    (:p "The " (str method-name) " HTTP method is not allowed for the resource")
+	    (:blockquote
+	     (:tt (str uri)))
+	    (:p "Perhaps you meant to GET this resource?"))))))
