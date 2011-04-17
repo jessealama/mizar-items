@@ -1,6 +1,6 @@
 #!/bin/bash -
 
-html_stylesheet=~/sources/mizar/xsl4mizar/MHTML/mhtml_main.xsl
+html_stylesheet=~mizar-items/xsl4mizar/MHTML/mhtml_main.xsl
 cwd=`pwd`;
 
 # sanity
@@ -18,11 +18,12 @@ for article in hidden tarski `cat $MIZFILES/mml.lar`; do
  echo $article;
  cd $article_dir;
  if [ $? = '0' ]; then
-     article_text_dir="$article/text";
+     article_text_dir="$article_dir/text";
      if [ -e $article_text_dir ]; then
 	 find text -name "ckb*.xml1" ! -empty | parallel --jobs +0 "xsltproc --param linking 's' --param colored '1' --param mizar_items '1' --param proof_links '1' --param ajax_proofs '0' --stringparam source_article '$article' $html_stylesheet {} > {.}.html";
      else
 	 echo "Error: article $article lacks a text subdirectory" 1>&2;
+     fi
   else
      echo "Error: cannot change diectory to '$article_dir' for $article" 1>&2;
  fi
