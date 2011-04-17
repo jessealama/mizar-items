@@ -556,7 +556,7 @@ It may also contain:
      (:tbody
       (loop
 	 for (article-name title author) in *articles*
-	 for article-uri = (format nil "/article/~a" article-name)
+	 for article-uri = (uri-for-article article-name)
 	 for title-escaped = (escape-string title)
 	 do
 	   (htm
@@ -876,7 +876,7 @@ It may also contain:
 	  (miz-item-html (item-key)
 	      nil
 	    (let ((fragment-uri (format nil "/article/~a/#fragment~d" article-name ckb-number))
-		  (article-uri (format nil "/article/~a" article-name)))
+		  (article-uri (uri-for-article article-name)))
 	      (htm
 	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri :class "article-name") (str article-name)) ".")
 	       (if (null (cdr items-for-ckb))
@@ -909,7 +909,7 @@ It may also contain:
      (:tbody
       (loop
 	 for article-name in *handled-articles*
-	 for article-uri = (format nil "/article/~a" article-name)
+	 for article-uri = (uri-for-article article-name)
 	 do
 	   (let ((bib-entry (member article-name *articles*
 				    :key #'first
