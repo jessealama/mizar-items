@@ -80,18 +80,17 @@
   "Selects a request handler based on a list of individual request
 dispatchers all of which can either return a handler or neglect by
 returning NIL."
-  (loop
-     for dispatcher in items-dispatch-table
-     for action = (funcall dispatcher request)
-     for method = (request-method*)
-     do
-       (cond ((member method +unsupported-methods+)
-	      (respond-to-unhandled-request))
-	     ((eq method :options)
-	      (respond-to-options))
-	     (action
-	      (return (funcall action))))
-     finally (setf (return-code *reply*) +http-not-found+)))
+  (let ((method (request-method*)))
+    (cond ((member method +unsupported-methods+)
+	   (respond-to-unhandled-request))
+	  ((eq method :options)
+	   (respond-to-options))
+	  (t
+	   (loop
+	      for dispatcher in items-dispatch-table
+	      for action = (funcall dispatcher request)
+	      when action return (funcall action)
+	      finally (setf (return-code *reply*) +http-not-found+))))))
 
 (defvar *acceptor* (make-instance 'hunchentoot:acceptor 
 				  :port 4242
