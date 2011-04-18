@@ -90,7 +90,13 @@ returning NIL."
 	   (loop
 	      for dispatcher in items-dispatch-table
 	      for action = (funcall dispatcher request)
-	      when action return (funcall action)
+	      when action return (let ((response (funcall action)))
+				   (if (eq method :head)
+				       (progn
+					 (setf (content-length*)
+					       (length response))
+					 (send-headers))
+				       response))
 	      finally (setf (return-code *reply*) +http-not-found+))))))
 
 (defvar *acceptor* (make-instance 'hunchentoot:acceptor 
