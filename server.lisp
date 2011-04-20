@@ -55,14 +55,49 @@
 
 (defvar items-dispatch-table nil)
 
+(define-constant +unsupported-methods+
+    (list :put :post :delete :trace :connect)
+  :test #'set-equal
+  :documentation "A list of those HTTP methods which are not supported for any resource")
+
+(defun respond-to-unhandled-request ()
+  (let* ((uri (request-uri*))
+	 (method (request-method*))
+	 (method-name (symbol-name method)))
+    (miz-item-html ("unsupported http method")
+	(:return-code +http-method-not-allowed+)
+      (:p "The " (str method-name) " HTTP method is not allowed for the resource")
+	(:blockquote
+	 (:tt (str uri)))
+	(:p "Perhaps you meant to GET this resource?"))))
+
+(defun respond-to-options ()
+  (setf (return-code *reply*) +http-ok+)
+  (setf (header-out "Allow") "OPTIONS, GET, HEAD")
+  (setf (content-length* *reply*) 0)
+  (send-headers))
+
 (defun items-request-dispatcher (request)
   "Selects a request handler based on a list of individual request
 dispatchers all of which can either return a handler or neglect by
 returning NIL."
-  (loop for dispatcher in items-dispatch-table
-        for action = (funcall dispatcher request)
-        when action return (funcall action)
-        finally (setf (return-code *reply*) +http-not-found+)))
+  (let ((method (request-method*)))
+    (cond ((member method +unsupported-methods+)
+	   (respond-to-unhandled-request))
+	  ((eq method :options)
+	   (respond-to-options))
+	  (t
+	   (loop
+	      for dispatcher in items-dispatch-table
+	      for action = (funcall dispatcher request)
+	      when action return (let ((response (funcall action)))
+				   (if (eq method :head)
+				       (progn
+					 (setf (content-length*)
+					       (length response))
+					 (send-headers))
+				       response))
+	      finally (setf (return-code *reply*) +http-not-found+))))))
 
 (defvar *acceptor* (make-instance 'hunchentoot:acceptor 
 				  :port 4242
@@ -93,25 +128,37 @@ returning NIL."
   (setf *attribute-quote-char* #\")
   t)
 
+(defun shutdown-server ()
+  (stop *acceptor*))
+
+(defun re-initialize-server (mml-version &optional reload-graphs (articles :all))
+  (shutdown-server)
+  (setf *acceptor* (make-instance 'hunchentoot:acceptor
+				  :port 4242
+				  :acceptor #'items-request-dispatcher))
+  (setf items-dispatch-table nil)
+  (initialize-server mml-version reload-graphs articles))
+
 (defun handle-http-error (error-code)
-  (when (= error-code +http-not-found+)
-    (miz-item-html ("not found")
-                   (:return-code +http-not-found+)
-      (:p "I can't find what you're looking for.")
-      (:p "Your request was:")
-      (:dl
-       (loop
-	  for (param . value) in (get-parameters*)
-	  do
-	    (htm
-	     (:dt param)
-	     (:dd value)))))))
-      ;; (miz-item-html "unprocessable"
-      ;; 	(:p "We cannot make sense of your request:")
-      ;; 	(:dl
-      ;; 	 (loop
-      ;; 	    for (param . value) in (get-parameters*)
-      ;; 	    do
-      ;; 	      (htm
-      ;; 	       (:dt param)
-      ;; 	       (:dd value)))))))
+  (if (= error-code +http-not-found+)
+      (miz-item-html ("not found")
+	  (:return-code +http-not-found+)
+	(:p "I can't find what you're looking for.")
+	(:p "Your request was:")
+	(:dl
+	 (loop
+	    for (param . value) in (get-parameters*)
+	    do
+	      (htm
+	       (:dt param)
+	       (:dd value)))))
+      (when (= error-code +http-method-not-allowed+)
+	(let* ((uri (request-uri*))
+	       (method (request-method*))
+	       (method-name (symbol-name method)))
+	  (miz-item-html ("unsupported http method")
+	      (:return-code +http-method-not-allowed+)
+	    (:p "The " (str method-name) " HTTP method is not allowed for the resource")
+	    (:blockquote
+	     (:tt (str uri)))
+	    (:p "Perhaps you meant to GET this resource?"))))))
