@@ -123,6 +123,90 @@
   :documentation "A regular expression matching URIs associated with displaying the dependence of one item on another.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Emitting XML/HTML
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defparameter *absrefs-params*
+  (list (xuriella:make-parameter "0" "explainbyfrom")))
+
+(defparameter *absrefs-sylesheet*
+  (xuriella:parse-stylesheet
+   (pathname (mizar-items-config 'absrefs-stylesheet))))
+
+(let* ((absrefs-path (mizar-items-config 'absrefs-stylesheet))
+       (orig-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
+       (cache (make-hash-table :test #'equalp)))
+  (labels ((transform (filename)
+	     (xuriella:apply-stylesheet *absrefs-sylesheet*
+					(pathname filename)
+					:parameters *absrefs-params*))
+	   (update-cache (path sha1)
+	     (setf (gethash sha1 cache) (transform path))))
+    (defun absrefs (article-xml-path)
+      (let ((new-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
+	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
+	(cond ((equalp orig-absrefs-sha1 new-absrefs-sha1) ; stylesheet unchanged
+	       (multiple-value-bind (cached present?)
+		   (gethash xml-sha1 cache)
+		 (if present?
+		     cached
+		     (update-cache article-xml-path xml-sha1))))
+	      (t ; the stylesheet has changed
+	       (clrhash cache) ; all old values are now unreliable
+	       (setf orig-absrefs-sha1 new-absrefs-sha1)
+	       (update-cache article-xml-path xml-sha1)))))))
+
+(defparameter *mhtml-params*
+  (list (xuriella:make-parameter "1" "colored")
+	(xuriella:make-parameter "1" "proof_links")
+	(xuriella:make-parameter "1" "titles")))
+
+(defparameter *mhtml-stylesheet*
+  (xuriella:parse-stylesheet
+   (pathname (mizar-items-config 'mhtml-stylesheet))))
+
+(let* ((mhtml-path (mizar-items-config 'mhtml-stylesheet))
+       (orig-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
+       (cache (make-hash-table :test #'equalp)))
+  (labels ((transform (filename &optional source-article-name)
+	     (let ((dir (directory-namestring filename))
+		   (source-article-param (xuriella:make-parameter "source_article" source-article-name))
+		   (mizar-items-param (xuriella:make-parameter "mizar_items" "1")))
+	       (flet ((file-in-dir (uri)
+			(let ((path (puri:uri-path uri)))
+			  (when (scan ".(idx|eno|dfs|eth)$" path)
+			    (register-groups-bind (after-root)
+				("^/(.+)" path)
+			      (let ((new-path (merge-pathnames after-root dir)))
+				(setf (puri:uri-path uri)
+				      (namestring new-path)))))
+			  uri)))
+		 (xuriella:apply-stylesheet
+		  *mhtml-stylesheet*
+		  (absrefs filename)
+		  :parameters (append
+			       (when source-article-name
+				 (list source-article-param
+				       mizar-items-param))
+			       *mhtml-params*)
+		  :uri-resolver #'file-in-dir))))
+	   (update-cache (path sha1 &optional source-file-name)
+	     (setf (gethash sha1 cache) (transform path source-file-name))))
+    (defun mhtml (article-xml-path &optional source-article-name)
+      (let ((new-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
+	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
+	(cond ((equalp orig-mhtml-sha1 new-mhtml-sha1) ; stylesheet unchanged
+	       (multiple-value-bind (cached present?)
+		   (gethash xml-sha1 cache)
+		 (if present?
+		     cached
+		     (update-cache article-xml-path xml-sha1 source-article-name))))
+	      (t ; the stylesheet has changed
+	       (clrhash cache) ; all old values are now unreliable
+	       (setf orig-mhtml-sha1 new-mhtml-sha1)
+	       (update-cache article-xml-path xml-sha1 source-article-name)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -130,7 +214,7 @@
   "Articles that we can handle (i.e., articles for which we have
 accurate dependency information and which are stored properly.")
 
-(defun handled-article (article)
+(defun handled-article? (article)
   (member article *handled-articles* :test #'string=))
 
 (defvar *unhandled-articles* nil
@@ -371,15 +455,15 @@ end;"))
 	   (:tbody
 	    (if (length= 1 steps)
 		(let* ((item (car steps))
-		       (item-html (file-as-string (html-path-for-item item))))
+		       (item-html (html-for-item item)))
 		  (htm ((:tr :class "dependence-path-node")
 			(:td (str item-html)))))
 		(loop
 		   for step-from in steps
 		   for step-to in (cdr steps)
-		   for step-from-html = (file-as-string (html-path-for-item step-from))
+		   for step-from-html = (html-for-item step-from)
 		   for step-from-uri = (uri-for-item-as-string step-from)
-		   for step-to-html = (file-as-string (html-path-for-item step-to))
+		   for step-to-html = (html-for-item step-to)
 		   for step-to-uri = (uri-for-item-as-string step-to)
 		   for dependence-uri = (dependence-uri-for-items step-from step-to)
 		   for dependence-link-title = (dependence-link-title step-from step-to)
@@ -462,75 +546,93 @@ It may also contain:
 		   nil
 		 (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
 
+(defun article-listing ()
+  (with-html-output-to-string (foo)
+    ((:table :class "article-listing" :rules "rows")
+     (:thead
+      (:tr
+       (:th "MML Name")
+       (:th "Title")))
+     (:tbody
+      (loop
+	 for (article-name title author) in *articles*
+	 for article-uri = (uri-for-article article-name)
+	 for title-escaped = (escape-string title)
+	 do
+	   (htm
+	    (:tr
+	     ((:td :class "article-name")
+	      ((:a :href article-uri :title title-escaped)
+	       (str article-name)))
+	     ((:td :class "article-title") (str title)))))))))
 
-(defun emit-article-page ()
+(defgeneric emit-article-page ()
+  (:documentation "An HTML representation of an article."))
+
+(defmethod emit-article-page :around ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
-	(if (member article *handled-articles* :test #'string=)
-	    (let* ((num-items (gethash article *article-num-items*))
-		   (source-uri (format nil "/~a.miz" article))
-		   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
-		   (bib-title (article-title article))
-		   (title (if bib-title
-			      (format nil "~a: ~a" article bib-title)
-			      (format nil "~a" article))))
-	      (miz-item-html (title)
-		  nil
-		(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
-		(htm
-		 ((:ol :class "fragment-listing")
-		  (loop
-		     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
-		     with article-text-dir = (format nil "~a/text" article-dir)
-		     for i from 1 upto num-items
-		     for i-str = (format nil "fragment-~d" i)
-		     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
-		     for item-html = (file-as-string fragment-path)
-		     for item-uri = (format nil "/fragment/~a/~d" article i)
-		     for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
-		     do
-		       (htm
-			((:li :class "fragment-listing" :id i-str)
-			 
-			 ((:a :href item-uri :title item-link-title)
-			  (str item-html)))))))))
+	(if (handled-article? article)
+	    (let ((num-items (gethash article *article-num-items*)))
+	      (if (zerop num-items)
+		  (miz-item-html ("error")
+		      (:return-code +http-internal-server-error+)
+		    (:p "The article "
+			((:span :class "article-name") (str article))
+			" somehow has zero items in it.  Please notify the site maintainers."))
+		  (call-next-method)))
 	    (miz-item-html ("article cannot be displayed")
-		(:return-code +http-not-found+)
-	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but unfortunately it has not yet been processed by this site.  Please try again later.")))
+		(:return-code +http-internal-server-error+)
+	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but it has not yet been processed by this site.  Please try again later.")))
 	(miz-item-html ("article not found")
 	    (:return-code +http-not-found+)
 	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
-	  (:p "The result of testing presence in the MML: " (let ((present (member article *mml-lar* :test #'string=)))
-							      (htm
-							       (str present))))
-	  ((:table :class "article-listing" :rules "rows")
-	   (:thead
-	    (:tr
-	     (:th "MML Name")
-	     (:th "Title")))
-	   (:tbody
-	    (loop
-	       for (article-name title author) in *articles*
-	       for article-uri = (format nil "/article/~a" article-name)
-	       for title-escaped = (escape-string title)
-	       do
-		 (htm
-		  (:tr
-		   ((:td :class "article-name")
-		    ((:a :href article-uri :title title-escaped)
-		     (str article-name)))
-		   ((:td :class "article-title") (str title)))))))))))
+	  (str (article-listing))))))
+
+(defmethod emit-article-page ()
+  (register-groups-bind (article)
+      (+article-uri-regexp+ (request-uri*))
+    (let* ((num-items (gethash article *article-num-items*))
+	   (source-uri (format nil "/~a.miz" article))
+	   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
+	   (bib-title (article-title article))
+	   (title (if bib-title
+		      (format nil "~a: ~a" article bib-title)
+		      (format nil "~a" article))))
+      (miz-item-html (title)
+	  nil
+	(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
+	(htm
+	 ((:ol :class "fragment-listing")
+	  (loop
+	     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
+	     with article-text-dir = (format nil "~a/text" article-dir)
+	     for i from 1 upto num-items
+	     for i-str = (format nil "fragment-~d" i)
+	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+	     for item-html = (file-as-string fragment-path)
+	     for item-uri = (format nil "/fragment/~a/~d" article i)
+	     for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
+	     do
+	       (htm
+		((:li :class "fragment-listing" :id i-str)
+		 
+		 ((:a :href item-uri :title item-link-title)
+		  (str item-html)))))))))))
+
+(defun http-sensitive-redirect (new-uri)
+  (let ((client-server-protocol (server-protocol*)))	
+    (redirect new-uri
+	      :code (if (string= client-server-protocol "HTTP/1.1")
+			+http-temporary-redirect+
+			+http-moved-temporarily+))))
 
 (defun emit-random-item ()
   (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
     (destructuring-bind (article kind number)
 	(split ":" random-vertex)
-      (let ((client-server-protocol (server-protocol*)))	
-	    (redirect (uri-for-item article kind number)
-		      :code (if (string= client-server-protocol "HTTP/1.1")
-				+http-temporary-redirect+
-				+http-moved-temporarily+))))))
+      (http-sensitive-redirect (uri-for-item article kind number)))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
@@ -581,6 +683,9 @@ It may also contain:
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
 
+(defun html-for-item (item-string)
+  (file-as-string item-string))
+
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
     ("definiens" "definiens")
@@ -617,10 +722,42 @@ It may also contain:
 (defun search-via-uri (item)
   (format nil "/path?via=~a" item))
 
-(defun emit-mizar-item-page ()
+(defgeneric emit-mizar-item-page ()
+  (:documentation "Emit an HTML representation of a single Mizar item."))
+
+(defmethod emit-mizar-item-page :around ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
-    (if (member article-name *handled-articles* :test #'string=)
+    (if (handled-article? article-name)
+	(let ((item (item-from-components article-name item-kind item-number-str)))
+	  (if (known-item? item)
+	      (let ((html-path (html-path-for-item item))
+		    (item-name-pretty (item-inline-name article-name item-kind item-number-str)))
+		(if (file-exists-p html-path)
+		    (if (empty-file-p html-path)
+			(miz-item-html ("error")
+			    (:return-code +http-internal-server-error+)
+			  (:p "The HTML file for the item " (str item-name-pretty) " exists, but has zero size.")
+			  (:p "Please inform the site maintainers about this."))
+			(call-next-method))
+		    (miz-item-html ("error")
+			(:return-code +http-internal-server-error+)
+		      (:p "The HTML file for the item " (str item-name-pretty) " does not exist.")
+		      (:p "Please inform the site maintainers about this."))))
+	      (miz-item-html ("error")
+		  (:return-code +http-bad-request+)
+		(:p "The identifier")
+		(:blockquote
+		 (str item))
+		(:p "is not the name of a known item"))))
+	(miz-item-html ("error")
+	    (:return-code +http-bad-request+)
+	  (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later.")))))
+
+(defmethod emit-mizar-item-page ()
+  (register-groups-bind (article-name item-kind item-number-str)
+      (+item-uri-regexp+ (request-uri*))
+    (if (handled-article? article-name)
 	(let* ((item-number (parse-integer item-number-str))
 	       (item-kind-pretty (pretty-item-kind item-kind))
 	       (article-uri (uri-for-article article-name))
@@ -739,7 +876,7 @@ It may also contain:
 	  (miz-item-html (item-key)
 	      nil
 	    (let ((fragment-uri (format nil "/article/~a/#fragment~d" article-name ckb-number))
-		  (article-uri (format nil "/article/~a" article-name)))
+		  (article-uri (uri-for-article article-name)))
 	      (htm
 	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri :class "article-name") (str article-name)) ".")
 	       (if (null (cdr items-for-ckb))
@@ -772,7 +909,7 @@ It may also contain:
      (:tbody
       (loop
 	 for article-name in *handled-articles*
-	 for article-uri = (format nil "/article/~a" article-name)
+	 for article-uri = (uri-for-article article-name)
 	 do
 	   (let ((bib-entry (member article-name *articles*
 				    :key #'first
@@ -1013,7 +1150,33 @@ It may also contain:
 	 (sorted (sort by-article #'mml-< :key #'first)))
     sorted))
 
-(defun emit-requires-page ()
+(defgeneric emit-requires-page ()
+  (:documentation "An HTML presentation of a page showing what a given item requires"))
+
+(defmethod emit-requires-page :around ()
+  (register-groups-bind (article kind number)
+      (+requires-uri-regexp+ (request-uri*))
+    (if (belongs-to-mml article)
+	(let ((item (item-from-components article kind number)))
+	  (if (known-item? item)
+	      (call-next-method)
+	      (let ((article-uri (uri-for-article article)))
+		(miz-item-html ("unknown item")
+		    (:return-code +http-not-found+)
+		  (:p "The item "
+		      ((:a :href article-uri :class "article-name")
+		       (str article))
+		      ":"
+		      (str kind)
+		      ":"
+		      (str number)
+		      " is not known.")))))
+	(miz-item-html ("unknown article")
+	    (:return-code +http-not-found+)
+	  (:p (fmt "'~a'" article) " is not the name of a known article.  Here is a list of all known articles:")
+	  (str (article-listing))))))
+
+(defmethod emit-requires-page ()
   (register-groups-bind (article kind number)
       (+requires-uri-regexp+ (request-uri*))
     (let* ((item (item-from-components article kind number))
@@ -1022,8 +1185,7 @@ It may also contain:
 	   (item-inline-name (item-inline-name article kind number))
 	   (deps (item-requires-tsorted item)))
       (let* ((requires-page-title (format nil "requirements of ~a" item-link-title))
-	     (html-path (html-path-for-item item))
-	     (html (file-as-string html-path)))
+	     (html (html-for-item item)))
 	(miz-item-html (requires-page-title)
 	    nil
 	  (:p "The item "
@@ -1050,7 +1212,33 @@ It may also contain:
 				       (:li ((:a :href dep-uri :title dep-link-title)
 					     (str dep-inline-name)))))))))))))))))))
 
-(defun emit-supports-page ()
+(defgeneric emit-supports-page ()
+  (:documentation "An HTML presentation of the items that a given item supports."))
+
+(defmethod emit-supports-page :around ()
+  (register-groups-bind (article kind number)
+      (+requires-uri-regexp+ (request-uri*))
+    (if (belongs-to-mml article)
+	(let ((item (item-from-components article kind number)))
+	  (if (known-item? item)
+	      (call-next-method)
+	      (let ((article-uri (uri-for-article article)))
+		(miz-item-html ("unknown item")
+		    (:return-code +http-not-found+)
+		  (:p "The item "
+		      ((:a :href article-uri :class "article-name")
+		       (str article))
+		      ":"
+		      (str kind)
+		      ":"
+		      (str number)
+		      " is not known.")))))
+	(miz-item-html ("unknown article")
+	    (:return-code +http-not-found+)
+	  (:p (fmt "'~a'" article) " is not the name of a known article.  Here is a list of all known articles:")
+	  (str (article-listing))))))
+
+(defmethod emit-supports-page ()
   (register-groups-bind (article kind number)
       (+supports-uri-regexp+ (request-uri*))
     (let* ((item (item-from-components article kind number))
@@ -1059,8 +1247,7 @@ It may also contain:
 	   (item-inline-name (item-inline-name article kind number))
 	   (deps (item-supports-tsorted item)))
       (let* ((supports-page-title (format nil "what ~a supports" item-link-title))
-	     (html-path (html-path-for-item item))
-	     (html (file-as-string html-path)))
+	     (html (html-for-item item)))
 	(miz-item-html (supports-page-title)
 	    nil
 	  (:p "The item "
@@ -1143,10 +1330,8 @@ It may also contain:
 	(split-item-identifier supporting-item)
       (destructuring-bind (dep-article dep-kind dep-num)
 	  (split-item-identifier dependent-item)
-	(let* ((supp-html-path (html-path-for-item supporting-item))
-	       (dep-html-path (html-path-for-item dependent-item))
-	       (supp-html (file-as-string supp-html-path))
-	       (dep-html (file-as-string dep-html-path))
+	(let* ((supp-html (html-for-item supporting-item))
+	       (dep-html (html-for-item dependent-item))
 	       (supp-title (item-link-title supp-article supp-kind supp-num))
 	       (dep-title (item-link-title dep-article dep-kind dep-num))
 	       (title (format nil "~a depends on ~a" supp-title dep-title))
