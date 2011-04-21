@@ -972,6 +972,47 @@ It may also contain:
      ":"
      (str number))))
 
+(defun item-requires-tsorted (item)
+  (flet ((item-< (item-1 item-2)
+	   (< (position item-1 *items-tsorted*)
+	      (position item-2 *items-tsorted*))))
+    (let* ((requires (gethash item *item-dependency-graph-forward*))
+	   (sorted (sort (copy-list requires) #'item-<)))
+      sorted)))
+
+(defun item-supports-tsorted (item)
+  (flet ((item-< (item-1 item-2)
+	   (< (position item-1 *items-tsorted*)
+	      (position item-2 *items-tsorted*))))
+    (let* ((requires (gethash item *item-dependency-graph-backward*))
+	   (sorted (sort (copy-list requires) #'item-<)))
+      sorted)))
+
+(defun item-article (item-identifier)
+  (destructuring-bind (article kind number)
+      (split-item-identifier item-identifier)
+    (declare (ignore kind number))
+    article))
+
+(defun items-by-article (item-list)
+  (let ((by-article (make-hash-table :test #'equal)))
+    (dolist (item item-list)
+      (let ((article (item-article item)))
+	(push item (gethash article by-article))))
+    (loop
+       with by-article-as-list = nil
+       for k being the hash-keys in by-article
+       do
+	 (push (cons k (gethash k by-article))
+	       by-article-as-list)
+       finally
+	 (return by-article-as-list))))
+
+(defun items-by-article-in-mml-lar-order (item-list)
+  (let* ((by-article (items-by-article item-list))
+	 (sorted (sort by-article #'mml-< :key #'first)))
+    sorted))
+
 (defun emit-requires-page ()
   (register-groups-bind (article kind number)
       (+requires-uri-regexp+ (request-uri*))
@@ -979,8 +1020,7 @@ It may also contain:
 	   (item-uri (item-uri item))
 	   (item-link-title (item-link-title article kind number))
 	   (item-inline-name (item-inline-name article kind number))
-	   (deps (gethash item *item-dependency-graph-forward*))
-	   (deps-sorted (items-by-mml-order deps)))
+	   (deps (item-requires-tsorted item)))
       (let* ((requires-page-title (format nil "requirements of ~a" item-link-title))
 	     (html-path (html-path-for-item item))
 	     (html (file-as-string html-path)))
@@ -994,15 +1034,21 @@ It may also contain:
 	      (htm (:p "requires nothing."))
 	      (htm (:p "requires:")
 		   (:ul
-		    (dolist (dep deps-sorted)
-		      (destructuring-bind (dep-article dep-kind dep-num)
-			  (split-item-identifier dep)
-			(let ((dep-uri (dependence-uri-for-items item dep))
-			      (dep-link-title (dependence-link-title item dep))
-			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
-			  (htm
-			   (:li ((:a :href dep-uri :title dep-link-title)
-				 (str dep-inline-name)))))))))))))))
+		    (loop
+		       for (article . deps-from-article) in (items-by-article-in-mml-lar-order deps)
+		       do
+			 (htm
+			  (:li ((:span :class "article-name") (str article))
+			       (:ul
+				(dolist (dep deps-from-article)
+				  (destructuring-bind (dep-article dep-kind dep-num)
+				      (split-item-identifier dep)
+				    (let ((dep-uri (dependence-uri-for-items item dep))
+					  (dep-link-title (dependence-link-title item dep))
+					  (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+				      (htm
+				       (:li ((:a :href dep-uri :title dep-link-title)
+					     (str dep-inline-name)))))))))))))))))))
 
 (defun emit-supports-page ()
   (register-groups-bind (article kind number)
@@ -1011,8 +1057,7 @@ It may also contain:
 	   (item-uri (item-uri item))
 	   (item-link-title (item-link-title article kind number))
 	   (item-inline-name (item-inline-name article kind number))
-	   (deps (gethash item *item-dependency-graph-backward*))
-	   (deps-sorted (items-by-mml-order deps)))
+	   (deps (item-supports-tsorted item)))
       (let* ((supports-page-title (format nil "what ~a supports" item-link-title))
 	     (html-path (html-path-for-item item))
 	     (html (file-as-string html-path)))
@@ -1026,15 +1071,21 @@ It may also contain:
 	      (htm (:p "supports nothing."))
 	      (htm (:p "supports:")
 		   (:ul
-		    (dolist (dep deps-sorted)
-		      (destructuring-bind (dep-article dep-kind dep-num)
-			  (split-item-identifier dep)
-			(let ((dep-uri (dependence-uri-for-items dep item))
-			      (dep-link-title (dependence-link-title item dep))
-			      (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
-			  (htm
-			   (:li ((:a :href dep-uri :title dep-link-title)
-				 (str dep-inline-name)))))))))))))))
+		    (loop
+		       for (article . deps-from-article) in (items-by-article-in-mml-lar-order deps)
+		       do
+			 (htm
+			  (:li ((:span :class "article-name") (str article))
+			       (:ul
+				(dolist (dep deps-from-article)
+				  (destructuring-bind (dep-article dep-kind dep-num)
+				      (split-item-identifier dep)
+				    (let ((dep-uri (dependence-uri-for-items dep item))
+					  (dep-link-title (dependence-link-title item dep))
+					  (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+				      (htm
+				       (:li ((:a :href dep-uri :title dep-link-title)
+					     (str dep-inline-name)))))))))))))))))))
 
 (defgeneric emit-dependence-page ()
   (:documentation "Emit an HTML description of the dependence between two items."))
@@ -1109,9 +1160,9 @@ It may also contain:
 	(str supp-html)
 	(:p "depends on " ((:a :href dep-uri :title dep-title) (str dep-name-inline)))
 	(str dep-html)
-	(:p "because verifying "
+	(:p "because the attempt to verify "
 	    ((:a :href supp-uri :title supp-title) (str supp-name-inline))
-	    " in the absense of "
+	    " in the absence of "
 	    ((:a :href dep-uri :title dep-title) (str dep-name-inline))
 	    " would generate the following " (:tt "MIZAR") " errors:")
 	(:blockquote

@@ -12,6 +12,7 @@ my $item_to_fragment_table_file
 my $lisp_output;
 my $reverse_fragment_depgraph;
 my $compute_tc;
+my $one_edge_per_line;
 
 GetOptions (
 	    "fragment-dependency-graph=s" => \$fragment_depgraph_file,
@@ -19,6 +20,7 @@ GetOptions (
 	    "lisp-output" => \$lisp_output,
 	    "reverse" => \$reverse_fragment_depgraph,
 	    "transitive-closure" => \$compute_tc,
+	    "one-edge-per-line" => \$one_edge_per_line,
 	   );
 
 # sanity
@@ -48,16 +50,17 @@ if ($compute_tc) {
 my %fragment_depgraph = ();
 
 sub load_fragment_depgraph {
-  warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
+  # warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
   my $num_lines = 0;
   open (FRAGMENT_DEPGRAPH, '<', $fragment_depgraph_file) 
     or die "Unable to open an input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
   while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
     chomp $depgraph_line;
     $num_lines++;
-    if ($num_lines % 10000 == 0) {
-      warn "Seen $num_lines lines";
-    }
+    # DEBUG
+    # if ($num_lines % 10000 == 0) {
+    #   warn "Seen $num_lines lines";
+    # }
     my ($lhs, $rhs) = split (/ /, $depgraph_line);
     unless (defined $lhs && defined $rhs) {
       die "Unable to properly parse dependeny graph line '$depgraph_line'!";
@@ -88,7 +91,7 @@ sub load_fragment_depgraph {
   }
   close (FRAGMENT_DEPGRAPH) 
     or die "Unable to close input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
-  warn "Done loading the fragment dependency graph at '$fragment_depgraph_file'";
+  # warn "Done loading the fragment dependency graph at '$fragment_depgraph_file'";
 
   return;
 
@@ -208,26 +211,49 @@ foreach my $item (keys %item_to_fragment) {
     }
   }
   unless (scalar @deps == 0) {
-    if ($lisp_output) {
-      print '(', '"', $item, '"';
-    } else {
-      print $item;
-    }
 
-    foreach my $dep_item (@deps) {
-      if ($lisp_output) {
-	print ' ', '"', $dep_item, '"';
-      } else {
-	print ' ', $dep_item;
+    if ($one_edge_per_line) {
+      
+      foreach my $dep_item (@deps) {
+	if ($lisp_output) {
+	  print '(', '"', $item, '"', ' ', '"', $dep_item, '"', ')';
+	} else {
+	  print $item, ' ', $dep_item;
+	}
+	
+	print "\n";
       }
+      
+    } else {
 
+      if ($lisp_output) {
+	print '(', '"', $item, '"';
+      } else {
+	print $item;
+      }
+      
+      foreach my $dep_item (@deps) {
+	if ($lisp_output) {
+	  print ' ', '"', $dep_item, '"';
+	} else {
+	  print ' ', $dep_item;
+	}
+	
+      if ($lisp_output) {
+	print ')', "\n";
+      } else {
+	print "\n";
+      }
+	
+      }
+      
+      if ($lisp_output) {
+	print ')';
+      }
+      print "\n";
+      
     }
-
-    if ($lisp_output) {
-      print ')';
-    }
-
-    print "\n";
+    
   }
 
 }

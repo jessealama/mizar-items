@@ -51,6 +51,10 @@ variable (at load time).")
 (defun mml-lar-index (article)
   (position article *mml-lar* :test #'string=))
 
+(defun mml-< (article-1 article-2)
+  (< (mml-lar-index article-1)
+     (mml-lar-index article-2)))
+
 (defun run-in-directory (program directory args &key input output if-output-exists)
   (let ((real-dir-name (file-exists-p directory)))
     (if real-dir-name
