@@ -618,8 +618,8 @@ It may also contain:
 	       (htm
 		((:li :class "fragment-listing" :id i-str)
 		 
-		 ((:a :href item-uri :title item-link-title)
-		  (str item-html)))))))))))
+		 ((:a :href item-uri :title item-link-title))
+		  (str item-html))))))))))
 
 (defun http-sensitive-redirect (new-uri)
   (let ((client-server-protocol (server-protocol*)))	
