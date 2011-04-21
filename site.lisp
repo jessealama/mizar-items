@@ -1160,9 +1160,9 @@ It may also contain:
 	(str supp-html)
 	(:p "depends on " ((:a :href dep-uri :title dep-title) (str dep-name-inline)))
 	(str dep-html)
-	(:p "because verifying "
+	(:p "because the attempt to verify "
 	    ((:a :href supp-uri :title supp-title) (str supp-name-inline))
-	    " in the absense of "
+	    " in the absence of "
 	    ((:a :href dep-uri :title dep-title) (str dep-name-inline))
 	    " would generate the following " (:tt "MIZAR") " errors:")
 	(:blockquote
