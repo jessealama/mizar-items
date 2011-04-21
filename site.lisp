@@ -670,6 +670,19 @@ It may also contain:
 (defun split-item-identifier (item-string)
   (split ":" item-string))
 
+(defun xml-path-for-item (item-string)
+  (destructuring-bind (article-name item-kind item-number)
+      (split-item-identifier item-string)
+    (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
+	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
+	   (article-text-dir (format nil "~a/text" article-dir)))
+      (when ckb-for-item
+	(destructuring-bind (ckb-article-name ckb-number)
+	    (split-item-identifier ckb-for-item)
+	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
+	  (format nil "~a/ckb~d.xml" article-text-dir ckb-number))))))
+
 (defun html-path-for-item (item-string)
   (destructuring-bind (article-name item-kind item-number)
       (split-item-identifier item-string)
@@ -683,8 +696,11 @@ It may also contain:
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
 
+;; (defun html-for-item (item-string)
+;;   (file-as-string (html-path-for-item item-string)))
+
 (defun html-for-item (item-string)
-  (file-as-string item-string))
+  (mhtml (xml-path-for-item item-string)))
 
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
