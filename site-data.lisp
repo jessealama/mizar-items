@@ -15,6 +15,7 @@
 (defvar *ckb-to-items-table* nil)
 (defvar *all-ckb-items* nil)
 (defvar *all-items* nil)
+(defvar *items-tsorted* nil)
 (defvar *graphs-loaded* nil)
 
 (defun known-item? (item)
