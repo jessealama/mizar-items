@@ -12,6 +12,7 @@ my $item_to_fragment_table_file
 my $lisp_output;
 my $reverse_fragment_depgraph;
 my $compute_tc;
+my $one_edge_per_line;
 
 GetOptions (
 	    "fragment-dependency-graph=s" => \$fragment_depgraph_file,
@@ -19,6 +20,7 @@ GetOptions (
 	    "lisp-output" => \$lisp_output,
 	    "reverse" => \$reverse_fragment_depgraph,
 	    "transitive-closure" => \$compute_tc,
+	    "one-edge-per-line" => \$one_edge_per_line,
 	   );
 
 # sanity
@@ -209,26 +211,49 @@ foreach my $item (keys %item_to_fragment) {
     }
   }
   unless (scalar @deps == 0) {
-    if ($lisp_output) {
-      print '(', '"', $item, '"';
-    } else {
-      print $item;
-    }
 
-    foreach my $dep_item (@deps) {
-      if ($lisp_output) {
-	print ' ', '"', $dep_item, '"';
-      } else {
-	print ' ', $dep_item;
+    if ($one_edge_per_line) {
+      
+      foreach my $dep_item (@deps) {
+	if ($lisp_output) {
+	  print '(', '"', $item, '"', ' ', '"', $dep_item, '"', ')';
+	} else {
+	  print $item, ' ', $dep_item;
+	}
+	
+	print "\n";
       }
+      
+    } else {
 
+      if ($lisp_output) {
+	print '(', '"', $item, '"';
+      } else {
+	print $item;
+      }
+      
+      foreach my $dep_item (@deps) {
+	if ($lisp_output) {
+	  print ' ', '"', $dep_item, '"';
+	} else {
+	  print ' ', $dep_item;
+	}
+	
+      if ($lisp_output) {
+	print ')', "\n";
+      } else {
+	print "\n";
+      }
+	
+      }
+      
+      if ($lisp_output) {
+	print ')';
+      }
+      print "\n";
+      
     }
-
-    if ($lisp_output) {
-      print ')';
-    }
-
-    print "\n";
+    
   }
 
 }
