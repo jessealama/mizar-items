@@ -48,16 +48,17 @@ if ($compute_tc) {
 my %fragment_depgraph = ();
 
 sub load_fragment_depgraph {
-  warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
+  # warn "Loading the fragment dependency graph at '$fragment_depgraph_file";
   my $num_lines = 0;
   open (FRAGMENT_DEPGRAPH, '<', $fragment_depgraph_file) 
     or die "Unable to open an input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
   while (defined (my $depgraph_line = <FRAGMENT_DEPGRAPH>)) {
     chomp $depgraph_line;
     $num_lines++;
-    if ($num_lines % 10000 == 0) {
-      warn "Seen $num_lines lines";
-    }
+    # DEBUG
+    # if ($num_lines % 10000 == 0) {
+    #   warn "Seen $num_lines lines";
+    # }
     my ($lhs, $rhs) = split (/ /, $depgraph_line);
     unless (defined $lhs && defined $rhs) {
       die "Unable to properly parse dependeny graph line '$depgraph_line'!";
@@ -88,7 +89,7 @@ sub load_fragment_depgraph {
   }
   close (FRAGMENT_DEPGRAPH) 
     or die "Unable to close input filehandle for the fragment dependency graph at '$fragment_depgraph_file': $!";
-  warn "Done loading the fragment dependency graph at '$fragment_depgraph_file'";
+  # warn "Done loading the fragment dependency graph at '$fragment_depgraph_file'";
 
   return;
 
