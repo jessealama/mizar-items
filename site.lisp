@@ -72,10 +72,20 @@
 			  "/?"))
   :test #'string=)
 
-(define-constant +article-uri-regexp+
+(define-constant +itemized-article-uri-regexp+
     (exact-regexp (concat "/" "article"
 			  "/" "(" +article-name-regexp+ ")" "/?"))
   :test #'string=)
+
+(define-constant +article-html-uri-regexp+
+    (exact-regexp (concat "/" "(" +article-name-regexp+ ")" ".html"))
+  :test #'string=
+  :documentation "A regular expression matching the URI of an HTML representation of a whole, non-itemized presentation of an article")
+
+(define-constant +article-xml-uri-regexp+
+    (exact-regexp (concat "/" "(" +article-name-regexp+ ")" ".xml"))
+  :test #'string=
+  :documentation "A regular expression matching the URI of an XML representation of an article.")
 
 (defun uri-for-article (article)
   (format nil "/article/~a" article))
@@ -174,7 +184,7 @@
 		   (mizar-items-param (xuriella:make-parameter "mizar_items" "1")))
 	       (flet ((file-in-dir (uri)
 			(let ((path (puri:uri-path uri)))
-			  (when (scan ".(idx|eno|dfs|eth)$" path)
+			  (when (scan ".(idx|eno|dfs|eth|esh)$" path)
 			    (register-groups-bind (after-root)
 				("^/(.+)" path)
 			      (let ((new-path (merge-pathnames after-root dir)))
@@ -566,10 +576,62 @@ It may also contain:
 	       (str article-name)))
 	     ((:td :class "article-title") (str title)))))))))
 
-(defgeneric emit-article-page ()
-  (:documentation "An HTML representation of an article."))
+(defgeneric emit-article-xml ()
+  (:documentation "Emit an XML representation of an article."))
 
-(defmethod emit-article-page :around ()
+(defmethod emit-article-xml :around ()
+  (register-groups-bind (article)
+      (+article-xml-uri-regexp+ (request-uri*))
+    (if (member article *mml-lar* :test #'string=)
+	(if (handled-article? article)
+	    (call-next-method)
+	    (miz-item-html ("article cannot be displayed")
+		(:return-code +http-internal-server-error+)
+	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but it has not yet been processed by this site.  Please try again later.")))
+	(miz-item-html ("article not found")
+	    (:return-code +http-not-found+)
+	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
+	  (str (article-listing))))))
+
+(defmethod emit-article-xml ()
+  (register-groups-bind (article)
+      (+article-xml-uri-regexp+ (request-uri*))
+    (let ((xml-path (xml-path-for-article article)))
+      (handle-static-file xml-path "application/xml"))))
+
+(defgeneric emit-unitemized-article-page ()
+  (:documentation "An HTML representation of an itemized article."))
+
+(defmethod emit-unitemized-article-page :around ()
+  (register-groups-bind (article)
+      (+article-html-uri-regexp+ (request-uri*))
+    (if (member article *mml-lar* :test #'string=)
+	(if (handled-article? article)
+	    (call-next-method)
+	    (miz-item-html ("article cannot be displayed")
+		(:return-code +http-internal-server-error+)
+	      (:p ((:span :class "article-name") (str article)) " is a valid article in the MML, but it has not yet been processed by this site.  Please try again later.")))
+	(miz-item-html ("article not found")
+	    (:return-code +http-not-found+)
+	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
+	  (str (article-listing))))))
+
+(defmethod emit-unitemized-article-page ()
+  (register-groups-bind (article)
+      (+article-html-uri-regexp+ (request-uri*))
+    (let* ((html (html-for-article article))
+	   (bib-title (article-title article))
+	   (title (if bib-title
+		      (format nil "~a: ~a" article bib-title)
+		      (format nil "~a" article))))
+      (miz-item-html (title)
+	  nil
+	(str html)))))
+
+(defgeneric emit-itemized-article-page ()
+  (:documentation "An HTML representation of an itemized article."))
+
+(defmethod emit-itemized-article-page :around ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
@@ -590,12 +652,12 @@ It may also contain:
 	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
 	  (str (article-listing))))))
 
-(defmethod emit-article-page ()
+(defmethod emit-itemized-article-page ()
   (register-groups-bind (article)
       (+article-uri-regexp+ (request-uri*))
     (let* ((num-items (gethash article *article-num-items*))
 	   (source-uri (format nil "/~a.miz" article))
-	   (mizar-uri (format nil "http://mizar.org/version/current/html/~a.html" article))
+	   (mizar-uri (format nil "/~a.html" article))
 	   (bib-title (article-title article))
 	   (title (if bib-title
 		      (format nil "~a: ~a" article bib-title)
@@ -683,6 +745,10 @@ It may also contain:
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.xml" article-text-dir ckb-number))))))
 
+(defun xml-path-for-article (article-name)
+  (let ((article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name)))
+    (format nil "~a/~a.xml" article-dir article-name)))
+
 (defun html-path-for-item (item-string)
   (destructuring-bind (article-name item-kind item-number)
       (split-item-identifier item-string)
@@ -701,6 +767,9 @@ It may also contain:
 
 (defun html-for-item (item-string)
   (mhtml (xml-path-for-item item-string)))
+
+(defun html-for-article (article-name)
+  (mhtml (xml-path-for-article article-name)))
 
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
@@ -1449,16 +1518,27 @@ It may also contain:
 	 (when (integerp articles)
 	   (setf *unhandled-articles* (last-n *mml-lar*
 					      (- (length *mml-lar*) articles))))))
-  (register-regexp-dispatcher +article-uri-regexp+ #'emit-article-page)
+
+  ;; three presentations of an article: itemized HTML, unitemized HTML, raw XML
+  (register-regexp-dispatcher +itemized-article-uri-regexp+ #'emit-itemized-article-page)
+  (register-regexp-dispatcher +article-html-uri-regexp+ #'emit-unitemized-article-page)
+  (register-regexp-dispatcher +article-xml-uri-regexp+ #'emit-article-xml)
+
+  ;; fragments
   (register-regexp-dispatcher +fragment-uri-regexp+ #'emit-fragment-page)
+
+  ;; items, what they require, and what they support
   (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
-  (register-regexp-dispatcher +path-between-items-uri-regexp+
-			      #'emit-path-between-items)
-  ;; requires and supports
   (register-regexp-dispatcher +requires-uri-regexp+ #'emit-requires-page)
   (register-regexp-dispatcher +supports-uri-regexp+ #'emit-supports-page)
-  ;; dependence
+
+  ;; paths
+  (register-regexp-dispatcher +path-between-items-uri-regexp+
+			      #'emit-path-between-items)
+
+  ;; dependence between items
   (register-regexp-dispatcher +dependence-uri-regexp+ #'emit-dependence-page)
+
   ;; proofs
   (loop
      for article in *handled-articles*
