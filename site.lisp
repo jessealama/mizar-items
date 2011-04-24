@@ -184,7 +184,7 @@
 		   (mizar-items-param (xuriella:make-parameter "mizar_items" "1")))
 	       (flet ((file-in-dir (uri)
 			(let ((path (puri:uri-path uri)))
-			  (when (scan ".(idx|eno|dfs|eth|esh)$" path)
+			  (when (scan ".(idx|eno|dfs|eth|esh|atr)$" path)
 			    (register-groups-bind (after-root)
 				("^/(.+)" path)
 			      (let ((new-path (merge-pathnames after-root dir)))
