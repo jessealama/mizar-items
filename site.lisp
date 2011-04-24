@@ -1194,13 +1194,14 @@ It may also contain:
      ":"
      (str number))))
 
+(defun earlier-in-tsorted-list (item-1 item-2)
+  (< (position item-1 *items-tsorted* :test #'string=)
+     (position item-2 *items-tsorted* :test #'string=)))
+
 (defun item-requires-tsorted (item)
-  (flet ((item-< (item-1 item-2)
-	   (< (position item-1 *items-tsorted*)
-	      (position item-2 *items-tsorted*))))
-    (let* ((requires (gethash item *item-dependency-graph-forward*))
-	   (sorted (sort (copy-list requires) #'item-<)))
-      sorted)))
+  (let* ((requires (gethash item *item-dependency-graph-forward*))
+	 (sorted (sort (copy-list requires) #'earlier-in-tsorted-list)))
+    sorted))
 
 (defun item-supports-tsorted (item)
   (flet ((item-< (item-1 item-2)
