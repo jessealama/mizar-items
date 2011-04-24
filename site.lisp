@@ -633,7 +633,7 @@ It may also contain:
 
 (defmethod emit-itemized-article-page :around ()
   (register-groups-bind (article)
-      (+article-uri-regexp+ (request-uri*))
+      (+itemized-article-uri-regexp+ (request-uri*))
     (if (member article *mml-lar* :test #'string=)
 	(if (handled-article? article)
 	    (let ((num-items (gethash article *article-num-items*)))
@@ -654,7 +654,7 @@ It may also contain:
 
 (defmethod emit-itemized-article-page ()
   (register-groups-bind (article)
-      (+article-uri-regexp+ (request-uri*))
+      (+itemized-article-uri-regexp+ (request-uri*))
     (let* ((num-items (gethash article *article-num-items*))
 	   (source-uri (format nil "/~a.miz" article))
 	   (mizar-uri (format nil "/~a.html" article))
@@ -1303,7 +1303,7 @@ It may also contain:
 
 (defmethod emit-supports-page :around ()
   (register-groups-bind (article kind number)
-      (+requires-uri-regexp+ (request-uri*))
+      (+supports-uri-regexp+ (request-uri*))
     (if (belongs-to-mml article)
 	(let ((item (item-from-components article kind number)))
 	  (if (known-item? item)
