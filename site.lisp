@@ -589,11 +589,11 @@ It may also contain:
 						    :goal destination)))
       ;; custom successors method: if the current node occurs earler
       ;; in the MML than the destination node, don't expand
-      (defmethod successors :around ((problem (eql search-problem)) node)
-	(let* ((ns (node-state node))
-	       (mml-pos (mml-lar-index ns)))
-	  (when (<= source-mml-pos mml-pos)
-	    (call-next-method))))
+      ;; (defmethod successors :around ((problem (eql search-problem)) node)
+      ;; 	(let* ((ns (node-state node))
+      ;; 	       (mml-pos (mml-lar-index ns)))
+      ;; 	  (when (<= source-mml-pos mml-pos)
+      ;; 	    (call-next-method))))
       (multiple-value-bind (solution-found? solution)
 	  (bounded-depth-first-search search-problem +search-depth+)
 	(cond (solution-found?
