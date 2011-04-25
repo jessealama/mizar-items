@@ -1247,6 +1247,11 @@ It may also contain:
 (defun item-link-title (article kind number)
   (format nil "~:@(~a~):~a:~a" article kind number))
 
+(defun item-link-title-from-string (item-string)
+  (destructuring-bind (article kind number)
+      (split-item-identifier item-string)
+    (item-link-title article kind number)))
+
 (defun item-inline-name (article kind number)
   (with-html-output-to-string (foo)
     (:span
@@ -1255,6 +1260,11 @@ It may also contain:
      (str kind)
      ":"
      (str number))))
+
+(defun pretty-print-item (item)
+  (destructuring-bind (article kind number)
+      (split-item-identifier item)
+    (item-inline-name article kind number)))
 
 (defun earlier-in-tsorted-list (item-1 item-2)
   (< (position item-1 *items-tsorted* :test #'string=)
