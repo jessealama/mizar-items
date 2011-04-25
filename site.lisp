@@ -609,7 +609,7 @@ It may also contain:
 	      (t
 	       (miz-item-html ("there is no path")
 		   nil
-		 (:p "There is no path from " (str source) " to " (str destination) ".."))))))))
+		 (:p "There is no path of dependence from " (str (link-to-item source)) " to " (str (link-to-item destination)) "."))))))))
 
 (defun article-listing ()
   (with-html-output-to-string (foo)
