@@ -65,6 +65,13 @@
       (split-item-identifier item-string)
     (uri-for-item article kind number)))
 
+(defun link-to-item (item)
+  (let ((uri (uri-for-item-as-string item))
+	(title (item-link-title-from-string item)))
+    (with-html-output-to-string (dummy)
+      ((:a :href uri :title title)
+       (str (pretty-print-item item))))))
+
 (define-constant +fragment-uri-regexp+
     (exact-regexp (concat "/" "fragment"
 			  "/" "(" +article-name-regexp+ ")"
