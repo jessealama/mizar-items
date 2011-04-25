@@ -493,6 +493,41 @@ end;"))
 		      ((:tr :class "dependence-path-node")
 		       (:td ((:a :href step-to-uri :title step-to) (str step-to-html))))))))))))))
 
+(defun emit-path-form (source destination &rest intermediates)
+  (declare (ignore intermediates))
+  (with-html-output-to-string (dummy)
+    (:fieldset
+     (:legend "Specify a path of dependence from a source to a destination")
+     ((:form :action "/path"
+	     :method "get"
+	     :enctype "text/plain")
+      (:table
+       (:tr
+	(:td ((:label :for "source-field") "Source"))
+	(:td (if source
+		 (htm ((:input :type "textarea"
+			       :name "from"
+			       :id "from-field"
+			       :value source)))
+		 (htm ((:input :type "textarea"
+			       :id "from-field"
+			       :name "from"))))))
+       
+       (:tr
+	(:td ((:label :for "destination-field") "Destination"))
+	(:td (if destination
+		 (htm ((:input :type "textarea"
+			       :name "to"
+			       :id "to-field"
+			       :value destination)))
+		 (htm ((:input :type "textarea"
+			       :name "to"
+			       :id "to-field"))))))
+       (:tr
+	((:td :colspan "2")
+	 ((:input :type "submit"
+		  :value "Search")))))))))
+
 (defgeneric emit-path-between-items ()
   (:documentation "Display a path that shows a path between two items, possibly with some intermediate items in between."))
 
@@ -508,8 +543,8 @@ It may also contain:
   (let ((source (get-parameter "from"))
 	(destination (get-parameter "to"))
 	(via (get-parameter "via")))
-    (if source
-	(if destination
+    (if (and source (string/= source ""))
+	(if (and destination (string/= destination ""))
 	    (let ((intermediates (split #\; via)))
 	      (multiple-value-bind (all-ok bad-guy)
 		  (every-with-falsifying-witness intermediates #'known-item?)
@@ -519,19 +554,32 @@ It may also contain:
 			    (call-next-method)
 			    (miz-item-html ("invalid item")
 				(:return-code +http-bad-request+)
-			      (:p "The parameter '" (str destination) "' is not the name of a known item.")))
+			      ((:p :class "error-message")
+			       "The given destination, '" (str destination) "', is not the name of a known item.")
+			      (str (apply #'emit-path-form source nil intermediates))))
 			(miz-item-html ("invalid item")
 			    (:return-code +http-bad-request+)
-			  (:p "The parameter '" (str source) "' is not the name of a known item.")))
+			  ((:p :class "error-message") 
+			   "The given source, '" (str source) "', is not the name of a known item.")
+			  (str (apply #'emit-path-form nil destination intermediates))))
 		    (miz-item-html ("invalid item")
 			(:return-code +http-bad-request+)
-		      (:p "The parameter '" (str bad-guy) "' is not the name of a known item.")))))
-	    (miz-item-html ("invalid item")
-		(:return-code +http-bad-request+)
-	      (:p "You must specify a destination item.")))
-	(miz-item-html ("invalid item")
-	    (:return-code +http-bad-request+)
-	  (:p "You must specify a source item.")))))
+		      ((:p :class "error-message") "The given intermediate node '" (str bad-guy) "' is not the name of a known item.")
+		      (str (apply #'emit-path-form source destination nil))))))
+	    (miz-item-html ("specify a destination")
+		nil
+	      ((:p :class "error-message")
+	       "You must specify a destination item.")
+	      (str (apply #'emit-path-form source nil nil))))
+	(if destination
+	    (miz-item-html ("specify a source")
+		nil
+	      ((:p :class "error-message")
+	       "You must specify a source item.")
+	      (str (apply #'emit-path-form nil destination nil)))
+	    (miz-item-html ("specify a source and destination")
+		nil
+	      (str (apply #'emit-path-form nil nil nil)))))))
 
 (defmethod emit-path-between-items ()
   (let* ((source (get-parameter "from"))
