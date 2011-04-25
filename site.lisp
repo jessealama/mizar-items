@@ -749,6 +749,10 @@ It may also contain:
   (let ((article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name)))
     (format nil "~a/~a.xml" article-dir article-name)))
 
+(defun html-path-for-article (article-name)
+  (let ((article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name)))
+    (format nil "~a/~a.html" article-dir article-name)))
+
 (defun html-path-for-item (item-string)
   (destructuring-bind (article-name item-kind item-number)
       (split-item-identifier item-string)
