@@ -821,14 +821,17 @@ It may also contain:
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
 
-;; (defun html-for-item (item-string)
-;;   (file-as-string (html-path-for-item item-string)))
-
 (defun html-for-item (item-string)
-  (mhtml (xml-path-for-item item-string)))
+  (file-as-string (html-path-for-item item-string)))
+
+;; (defun html-for-item (item-string)
+;;   (mhtml (xml-path-for-item item-string)))
 
 (defun html-for-article (article-name)
-  (mhtml (xml-path-for-article article-name)))
+  (file-as-string (html-path-for-article article-name)))
+
+;; (defun html-for-article (article-name)
+;;   (mhtml (xml-path-for-article article-name)))
 
 (defun pretty-item-kind (item-kind)
   (switch (item-kind :test #'string=)
