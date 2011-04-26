@@ -955,7 +955,7 @@ It may also contain:
 		  ((:td :width "25%" :align "left")
 		   ((:table :class "item-info")
 		    ((:tr :class "item-info-row")
-		     ((:td :colspan "2" :class "item-info-heading") "Info"))
+		     ((:td :colspan "2" :class "item-info-heading") "Item Info"))
 		    ((:tr :class "item-info-row")
 		     ((:td :class "item-info-key") "Article")
 		     ((:td :class "item-info-value")
