@@ -75,8 +75,7 @@
 (define-constant +fragment-uri-regexp+
     (exact-regexp (concat "/" "fragment"
 			  "/" "(" +article-name-regexp+ ")"
-			  "/" "(" +number-regexp+ ")"
-			  "/?"))
+			  "/" "(" +number-regexp+ ")"))
   :test #'string=)
 
 (define-constant +itemized-article-uri-regexp+
