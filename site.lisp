@@ -1012,43 +1012,101 @@ It may also contain:
 	    nil
 	  (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later.")))))
 
-(defun emit-fragment-page ()
-  (register-groups-bind (article-name item-number)
+(defun fragment->items (fragment)
+  (loop
+     for v being the hash-values in *item-to-ckb-table*
+     for k being the hash-keys in *item-to-ckb-table*
+     when (string= v fragment) collect k into keys
+     finally (return keys)))
+
+(defgeneric emit-fragment-page ()
+  (:documentation "Emit an HTML representation of a fragment of a Mizar article."))
+
+(defmethod emit-fragment-page :around ()
+  (register-groups-bind (article-name fragment-number-str)
       (+fragment-uri-regexp+ (request-uri*))
-    (let* ((item-key (format nil "~a:~a" article-name item-number))
+    (let ((fragment (fragment-from-components article-name fragment-number-str)))
+      (if (handled-article? article-name)
+	  (if (fragment->items fragment)
+	      (let ((html-path (html-path-for-fragment fragment))
+		    (fragment-name-pretty (fragment-inline-name article-name fragment-number-str)))
+		(if (file-exists-p html-path)
+		    (if (empty-file-p html-path)
+			(miz-item-html ("error")
+			    (:return-code +http-internal-server-error+)
+			  (:p "The HTML file for the fragment " (str fragment-name-pretty) " exists, but has zero size.")
+			  (:p "Please inform the site maintainers about this."))
+			(call-next-method))
+		    (miz-item-html ("error")
+			(:return-code +http-internal-server-error+)
+		      (:p "The HTML file for the fragment " (str fragment-name-pretty) " does not exist.")
+		      (:p "Please inform the site maintainers about this."))))
+	      (miz-item-html ("error")
+		  (:return-code +http-bad-request+)
+		(:p "The identifier")
+		(:blockquote
+		 (str fragment))
+		(:p "is not the name of a known fragment")))
+	  (miz-item-html ("error")
+	      (:return-code +http-bad-request+)
+	    (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later."))))))
+
+(defmethod emit-fragment-page ()
+  (register-groups-bind (article-name fragment-number-str)
+      (+fragment-uri-regexp+ (request-uri*))
+    (let* ((fragment-number (parse-integer fragment-number-str))
+	   (article-uri (uri-for-article article-name))
+	   (num-items-for-article (gethash article-name *article-num-items*))
+	   (fragment (format nil "~a:~d" article-name fragment-number))
+	   (fragment-items (fragment->items fragment))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
-	   (items-for-ckb (gethash item-key *ckb-to-items-table*)))
-      (destructuring-bind (ckb-article-name ckb-number)
-	  (split ":" item-key)
-	(declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
-	(let* ((fragment-path (format nil "~a/ckb~a.html"
-				      article-text-dir
-				      ckb-number))
-	       (item-html (file-as-string fragment-path)))
-	  (miz-item-html (item-key)
-	      nil
-	    (let ((fragment-uri (format nil "/article/~a/#fragment~d" article-name ckb-number))
-		  (article-uri (uri-for-article article-name)))
-	      (htm
-	       (:p (str item-key) " is " ((:a :href fragment-uri) "fragment #" (str ckb-number)) " of article " ((:a :href article-uri :class "article-name") (str article-name)) ".")
-	       (if (null (cdr items-for-ckb))
-		   (let ((item (car items-for-ckb)))
-		     (destructuring-bind (item-article item-kind item-number)
-			 (split ":" item)
-		       (let ((item-uri (format nil "/item/~a/~a/~a" item-article item-kind item-number)))
-			 (htm 
-			  (:p "This fragment generates only one item: " ((:a :href item-uri) (str item)) ".")))))
-		   (htm
-		    (:p "This fragment generates multiple items:")
-		    ((:ul :class "dep-list")
-		     (dolist (other-item items-for-ckb)
-		       (destructuring-bind (other-item-article other-item-kind other-item-number)
-			   (split ":" other-item)
-			 (let ((other-item-uri (format nil "/item/~a/~a/~a" other-item-article other-item-kind other-item-number)))
-			   (htm
-			    (:li ((:a :href other-item-uri) (str other-item))))))))))
-	       (str item-html)))))))))
+	   (article-name-uc (format nil "~:@(~a~)" article-name))
+	   (fragment-path (format nil "~a/ckb~d.html" article-text-dir fragment-number-str))
+	   (fragment-html (file-as-string fragment-path))
+	   (prev-ckb-uri (unless (= fragment-number 1)
+			   (uri-for-fragment article-name (1- fragment-number))))
+	   (prev-ckb-link-title (format nil "Previous fragment in ~:@(~a~)" article-name))
+	   (next-ckb-uri (unless (= fragment-number num-items-for-article)
+			   (uri-for-fragment article-name (1+ fragment-number))))
+	   (next-ckb-link-title (format nil "Next fragment in ~:@(~a~)" article-name)))
+	(miz-item-html (fragment)
+	    nil
+	  ((:table :class "item-table")
+	   (:tr
+	    ((:td :width "25%" :align "left")
+	     ((:table :class "item-info")
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2" :class "item-info-heading") "Fragment Info"))
+	      ((:tr :class "item-info-row")
+	       ((:td :class "item-info-key") "Article")
+	       ((:td :class "item-info-value")
+		((:a :href article-uri :class "article-name" :title article-name-uc)
+		 ((:span :class "article-name") (str article-name)))))
+	      ((:tr :class "item-info-row")
+	       ((:td :class "item-info-key") "Number")
+	       ((:td :class "item-info-value")
+		"[" (if prev-ckb-uri
+			(htm ((:a :href prev-ckb-uri :title prev-ckb-link-title) "&lt;"))
+			(htm "&lt;"))
+		"]"
+		" "
+		(str fragment-number-str)
+		" "
+		"[" (if next-ckb-uri
+			(htm ((:a :href next-ckb-uri :title next-ckb-link-title) "&gt;"))
+			(htm "&gt;"))
+		"]"))
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2" :class "item-info-heading") "Generated Items"))
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2" :class "item-info-value")
+		(:ul
+		 (dolist (gen-item fragment-items)
+		   (let ((gen-item-link (link-to-item gen-item)))
+		     (htm (:li (str gen-item-link))))))))))
+	    ((:td :width "75%" :valign "top")
+	     (str fragment-html))))))))
 
 (defun emit-articles-page ()
   (miz-item-html ("articles from the mml")
@@ -1247,6 +1305,9 @@ It may also contain:
 (defun items-by-mml-order (item-list)
   (sort (copy-list item-list) #'item-<))
 
+(defun fragment-from-components (article-name item-number)
+  (format nil "~a:~a" article-name item-number))
+
 (defun item-from-components (article-name item-kind item-number)
   (format nil "~a:~a:~a" article-name item-kind item-number))
 
@@ -1264,6 +1325,13 @@ It may also contain:
      ((:span :class "article-name") (str article))
      ":"
      (str kind)
+     ":"
+     (str number))))
+
+(defun fragment-inline-name (article number)
+  (with-html-output-to-string (foo)
+    (:span
+     ((:span :class "article-name") (str article))
      ":"
      (str number))))
 
