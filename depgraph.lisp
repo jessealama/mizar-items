@@ -154,6 +154,14 @@ fragment at CKB-PATH-2."
 	       (let ((nr (new-value-of-nr-attribute deftheorem-line)))
 		 (push (format nil "deftheorem:~a" nr)
 		       items)))))
+	  ((scan ":: <NotationBlock " second-line)
+	   (let ((patterns (lines-in-header-matching fragment-path
+						     "<Pattern ")))
+	     (dolist (pattern-line patterns)
+	       (let ((kind (new-value-of-kind-attribute pattern-line))
+		     (nr (new-value-of-nr-attribute pattern-line)))
+		 (push (format nil "~(~a~)pattern:~a" kind nr)
+		       items)))))
 	  ((scan ":: <RegistrationBlock" second-line)
 	   ;; there should never be more than one of any of these
 	   ;; since we have split up registration blocks into
