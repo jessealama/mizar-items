@@ -11,7 +11,6 @@
 (defvar *ckb-dependency-graph-backward* nil)
 (defvar *item-dependency-graph-forward* nil)
 (defvar *item-dependency-graph-backward* nil)
-(defvar *item-to-ckb-table* nil)
 (defvar *ckb-to-items-table* nil)
 (defvar *all-ckb-items* nil)
 (defvar *all-items* nil)
