@@ -182,10 +182,12 @@ fragment at CKB-PATH-2."
 	       (let ((nr (new-value-of-nr-attribute ccluster-line)))
 		 (push (format nil "ccluster:~a" nr)
 		       items)))
+	     ;; fclusters
 	     (dolist (fcluster-line fclusters)
 	       (let ((nr (new-value-of-nr-attribute fcluster-line)))
 		 (push (format nil "fcluster:~a" nr)
 		       items)))
+	     ;; rclusters
 	     (dolist (rcluster-line rclusters)
 	       (let ((nr (new-value-of-nr-attribute rcluster-line)))
 		 (push (format nil "rcluster:~a" nr)
