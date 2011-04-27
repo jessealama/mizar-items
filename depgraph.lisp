@@ -119,6 +119,9 @@ fragment at CKB-PATH-2."
 	   (register-groups-bind (theoremnr)
 	       (":: <JustifiedTheorem.* nr=\"([0-9]+)\"" second-line)
 	     (push (format nil "theorem:~a" theoremnr) items)))
+	  ((scan ":: <Proposition " second-line)
+	   (let ((nr (new-value-of-nr-attribute second-line)))
+	     (push (format nil "lemma:~a" nr) items)))
 	  ((scan ":: <DefinitionBlock " second-line)
 	   (let ((constructors (lines-in-header-matching fragment-path
 							 "<Constructor "))
