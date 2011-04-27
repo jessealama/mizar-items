@@ -174,7 +174,9 @@ fragment at CKB-PATH-2."
 		 (fclusters (lines-in-header-matching fragment-path
 						      "<FCluster "))
 		 (rclusters (lines-in-header-matching fragment-path
-						      "<RCluster ")))
+						      "<RCluster "))
+		 (identifications (lines-in-header-matching fragment-path
+							    "<Identify")))
 	     ;; cclusters
 	     (dolist (ccluster-line cclusters)
 	       (let ((nr (new-value-of-nr-attribute ccluster-line)))
@@ -187,6 +189,12 @@ fragment at CKB-PATH-2."
 	     (dolist (rcluster-line rclusters)
 	       (let ((nr (new-value-of-nr-attribute rcluster-line)))
 		 (push (format nil "rcluster:~a" nr)
+		       items)))
+	     ;; identifications
+	     (dolist (identification-line identifications)
+	       (let ((nr (new-value-of-nr-attribute identification-line))
+		     (kind (new-value-of-constrkind-attribute identification-line)))
+		 (push (format nil "~(~a~)identification:~a" kind nr)
 		       items)))))
 	  (t
 	   nil))
