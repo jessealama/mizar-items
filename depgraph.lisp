@@ -108,6 +108,9 @@ fragment at CKB-PATH-2."
       ((format nil " ~a=\"([^\"]*)\"" attr-name) xml-line)
     attr-value))
 
+(defun new-value-of-aid-attribute (xml-line)
+  (new-value-of-attribute "aid" xml-line))
+
 (defun new-value-of-kind-attribute (xml-line)
   (new-value-of-attribute "kind" xml-line))
 
@@ -120,20 +123,73 @@ fragment at CKB-PATH-2."
 (defun new-value-of-defnr-attribute (xml-line)
   (new-value-of-attribute "defnr" xml-line))
 
+(defun new-value-of-schemenr-attribute (xml-line)
+  (new-value-of-attribute "schemenr" xml-line))
+
+(defun scheme-xml-line->item (scheme-line)
+  (let ((nr (new-value-of-schemenr-attribute scheme-line)))
+    (format nil "scheme:~a" nr)))
+
+(defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
+  (let ((nr (new-value-of-nr-attribute justifiedtheorem-line)))
+    (format nil "theorem:~a" nr)))
+
+(defun proposition-xml-line->item (proposition-line)
+  (let ((nr (new-value-of-nr-attribute proposition-line)))
+    (format nil "lemma:~a" nr)))
+
+(defun constructor-xml-line->item (constructor-line)
+  (let ((kind (new-value-of-kind-attribute constructor-line))
+	(nr (new-value-of-nr-attribute constructor-line)))
+    (format nil "~(~a~)constructor:~a" kind nr)))
+
+(defun pattern-xml-line->item (pattern-line)
+  (let ((kind (new-value-of-kind-attribute pattern-line))
+	(nr (new-value-of-nr-attribute pattern-line)))
+    (format nil "~(~a~)pattern:~a" kind nr)))
+
+(defun definiens-xml-line->item (definiens-line)
+  (let ((kind (new-value-of-constrkind-attribute definiens-line))
+	(nr (new-value-of-defnr-attribute definiens-line)))
+    (format nil "~(~a~)definiens:~a" kind nr)))
+
+(defun deftheorem-xml-line->item (deftheorem-line)
+  (let ((nr (new-value-of-nr-attribute deftheorem-line)))
+    (format nil "deftheorem:~a" nr)))
+
+(defun cluster-xml-line->item (cluster-line)
+  (let* ((nr (new-value-of-nr-attribute cluster-line))
+	 (aid (new-value-of-aid-attribute cluster-line))
+	 (local-aid? (scan "CKB[0-9]+" aid)))
+    (cond ((scan "<CCluster " cluster-line)
+	   (if local-aid?
+	       (format nil "ccluster:~a" nr)
+	       (format nil "~(~a~):ccluster:~a" aid nr)))
+	  ((scan "<FCluster " cluster-line)
+	   (if local-aid?
+	       (format nil "fcluster:~a" nr)
+	       (format nil "~(~a~):fcluster:~a" aid nr)))
+	  ((scan "<RCluster " cluster-line)
+	   (if local-aid?
+	       (format nil "rcluster:~a" nr)
+	       (format nil "~(~a~):rcluster:~a" aid nr)))
+	  (t
+	   (error "Unhandled cluster line '~a'" cluster-line)))))
+
+(defun identification-xml-line->item (identification-line)
+  (let ((nr (new-value-of-nr-attribute identification-line))
+	(kind (new-value-of-constrkind-attribute identification-line)))
+    (format nil "~(~a~)identification:~a" kind nr)))
+
 (defun fragment-path->items (fragment-path)
   (let ((second-line (second-line-of-file fragment-path))
 	(items nil))
     (cond ((scan ":: <SchemeBlock " second-line)
-	   (register-groups-bind (schemenr)
-	      (":: <SchemeBlock.* schemenr=\"([0-9]+)\"" second-line)
-	    (push (format nil "scheme:~a" schemenr) items)))
+	   (push (scheme-xml-line->item second-line) items))
 	  ((scan ":: <JustifiedTheorem " second-line)
-	   (register-groups-bind (theoremnr)
-	       (":: <JustifiedTheorem.* nr=\"([0-9]+)\"" second-line)
-	     (push (format nil "theorem:~a" theoremnr) items)))
+	   (push (justifiedtheorem-xml-line->item second-line) items))
 	  ((scan ":: <Proposition " second-line)
-	   (let ((nr (new-value-of-nr-attribute second-line)))
-	     (push (format nil "lemma:~a" nr) items)))
+	   (push (proposition-xml-line->item second-line) items))
 	  ((scan ":: <DefinitionBlock " second-line)
 	   (let ((constructors (lines-in-header-matching fragment-path
 							 "<Constructor "))
@@ -145,27 +201,16 @@ fragment at CKB-PATH-2."
 							"<DefTheorem ")))
 	     ;; constructors
 	     (dolist (constructor-line constructors)
-	       (let ((kind (new-value-of-kind-attribute constructor-line))
-		      (nr (new-value-of-nr-attribute constructor-line)))
-		 (push (format nil "~(~a~)constructor:~a" kind nr)
-		       items)))
+	       (push (constructor-xml-line->item constructor-line) items))
 	     ;; patterns
 	     (dolist (pattern-line patterns)
-	       (let ((kind (new-value-of-kind-attribute pattern-line))
-		     (nr (new-value-of-nr-attribute pattern-line)))
-		 (push (format nil "~(~a~)pattern:~a" kind nr)
-		       items)))
+	       (push (pattern-xml-line->item pattern-line) items))
 	     ;; definiens
 	     (dolist (definiens-line definientia)
-	       (let ((kind (new-value-of-constrkind-attribute definiens-line))
-		     (nr (new-value-of-defnr-attribute definiens-line)))
-		 (push (format nil "~(~a~)definiens:~a" kind nr)
-		       items)))
+	       (push (definiens-xml-line->item definiens-line) items))
 	     ;; deftheorem
 	     (dolist (deftheorem-line deftheorems)
-	       (let ((nr (new-value-of-nr-attribute deftheorem-line)))
-		 (push (format nil "deftheorem:~a" nr)
-		       items)))))
+	       (push (deftheorem-xml-line->item deftheorem-line) items))))
 	  ((scan ":: <NotationBlock " second-line)
 	   (let ((patterns (lines-in-header-matching fragment-path
 						     "<Pattern ")))
@@ -190,27 +235,14 @@ fragment at CKB-PATH-2."
 		 (identifications (lines-in-header-matching fragment-path
 							    "<Identify")))
 	     ;; cclusters
-	     (dolist (ccluster-line cclusters)
-	       (let ((nr (new-value-of-nr-attribute ccluster-line)))
-		 (push (format nil "ccluster:~a" nr)
-		       items)))
-	     ;; fclusters
-	     (dolist (fcluster-line fclusters)
-	       (let ((nr (new-value-of-nr-attribute fcluster-line)))
-		 (push (format nil "fcluster:~a" nr)
-		       items)))
-	     ;; rclusters
-	     (dolist (rcluster-line rclusters)
-	       (let ((nr (new-value-of-nr-attribute rcluster-line)))
-		 (push (format nil "rcluster:~a" nr)
-		       items)))
+	     (dolist (cluster-line (append cclusters fclusters rclusters))
+	       (push (cluster-xml-line->item cluster-line) items))
 	     ;; identifications
 	     (dolist (identification-line identifications)
-	       (let ((nr (new-value-of-nr-attribute identification-line))
-		     (kind (new-value-of-constrkind-attribute identification-line)))
-		 (push (format nil "~(~a~)identification:~a" kind nr)
-		       items)))))
+	       (push (identification-xml-line->item identification-line)
+		     items))))
 	  (t
+	   (warn "We don't know how to handle the XML fragment '~a', coming from ~a ~%" second-line fragment-path)
 	   nil))
     items))
 
@@ -220,17 +252,154 @@ fragment at CKB-PATH-2."
      for fragment-path in fragment-paths
      for i from 1
      for items = (fragment-path->items fragment-path)
-     collect (cons i items) into article-items
+     collect (list article-name i items) into article-items
      finally
        (return article-items)))
 
+(defun environment-file-for-fragment (article fragment-number extension)
+  (format nil "~a/~a/text/ckb~d.~a"
+	  (mizar-items-config 'itemization-source)
+	  article
+	  fragment-number
+	  extension))
+
+(defun clusters-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "ecl")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<[CFR]Cluster"))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'cluster-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun theorems-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "eth")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<Theorem "))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'justifiedtheorem-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun schemes-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "esh")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<Scheme "))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'scheme-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun definientia-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "dfs")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<Definiens "))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'definiens-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun patterns-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "eno")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<Pattern "))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'pattern-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun identifications-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "eid")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<Identify "))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'identification-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun constructors-needed-for-fragment (article fragment-number)
+  (let* ((env-file-extension "atr.pruned")
+	 (fragment-env-file-path (environment-file-for-fragment article
+								fragment-number
+								env-file-extension))
+	 (regexp "<Constructor "))
+    (flet ((maybe-prepend-article (item)
+	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		 item
+		 (format nil "~a:~a" article item))))
+      (when (file-exists-p fragment-env-file-path)
+	(mapcar #'maybe-prepend-article
+		(mapcar #'constructor-xml-line->item
+			(lines-in-file-matching fragment-env-file-path
+						regexp)))))))
+
+(defun items-needed-for-fragment (article fragment-number)
+  (remove-duplicates
+   (append (clusters-needed-for-fragment article fragment-number)
+	   (theorems-needed-for-fragment article fragment-number)
+	   (schemes-needed-for-fragment article fragment-number)
+	   (definientia-needed-for-fragment article fragment-number)
+	   (patterns-needed-for-fragment article fragment-number)
+	   (identifications-needed-for-fragment article fragment-number)
+	   (constructors-needed-for-fragment article fragment-number))
+   :test #'string=))
+
 (defun make-item-to-fragment-table ()
   (loop
+     with table = (make-hash-table :test #'equal)
      with articles = (articles-present-in-itemization-directory)
      for article in articles
      for mappings = (item-to-fragments-for-article article)
-     appending mappings
-   ))
+     do
+       (dolist (mapping mappings)
+	 (destructuring-bind (article fragment-number items)
+	     mapping
+	   (dolist (item items)
+	     (setf (gethash item table) (cons article fragment-number)))))
+     finally
+       (return table)))
 
 (defun make-dependency-tables ()
   "Construct two tables, returned as two values: one that maps items
@@ -239,9 +408,9 @@ fragment to the list of items needed for it."
   (values (make-hash-table :test #'equal)
 	  (make-hash-table :test #'equal)))
 
-(defun items-needed-for-fragment (fragment)
-  (multiple-value-bind (value present?)
-      (gethash fragment *items-needed-for-fragment*)
-    (if present?
-	value
-	(error "The fragment '~a' is not present in the items-needed-for-fragment table." fragment))))
+;; (defun items-needed-for-fragment (fragment)
+;;   (multiple-value-bind (value present?)
+;;       (gethash fragment *items-needed-for-fragment*)
+;;     (if present?
+;; 	value
+;; 	(error "The fragment '~a' is not present in the items-needed-for-fragment table." fragment))))
