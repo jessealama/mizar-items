@@ -643,10 +643,12 @@ fragment at CKB-PATH-2."
   (loop
      with table = (make-hash-table :test #'equal)
      with articles = (articles-present-in-itemization-directory)
+     with num-articles = (length articles)
      for article in articles
+     for i from 1
      for mappings = (item-to-fragments-for-article article)
      do
-       (format t "~a~%" article)
+       (format t "~a (~d of ~d)~%" article i num-articles)
        (dolist (mapping mappings)
 	 (destructuring-bind (article fragment-number items)
 	     mapping
