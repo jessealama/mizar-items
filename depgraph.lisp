@@ -221,8 +221,11 @@ fragment at CKB-PATH-2."
 	(error "There is nothing in the item-to-fragment table for ~a" deftheorem-item))))
 
 (defun deftheorem-xml-line->item (deftheorem-line)
-  (let ((nr (new-value-of-nr-attribute deftheorem-line)))
-    (format nil "deftheorem:~a" nr)))
+  (let ((nr (new-value-of-nr-attribute deftheorem-line))
+	(aid (new-value-of-aid-attribute deftheorem-line)))
+    (if (scan +fragment-filename-pattern+ aid)
+	(format nil "deftheorem:~a" nr)
+	(format nil "~(~a~):deftheorem:~a" aid nr))))
 
 (defun cluster-xml-line->item (cluster-line)
   (let* ((nr (new-value-of-nr-attribute cluster-line))
