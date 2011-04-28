@@ -651,6 +651,30 @@ fragment at CKB-PATH-2."
 		      (remove-if-not #'cluster-item? needed-items)) into needed
      finally (return needed)))
 
+(defun definiens-item? (item)
+  (scan ":.definiens:" item))
+
+(defun definiens-needed-for-article-by-item (article)
+  (loop
+     with items = (items-for-article article)
+     for item in items
+     for needed-items = (items-needed-for-item item)
+     collecting (cons item
+		      (remove-if-not #'definiens-item? needed-items)) into needed
+     finally (return needed)))
+
+(defun deftheorem-item? (item)
+  (scan ":deftheorem:" item))
+
+(defun deftheorems-needed-for-article-by-item (article)
+  (loop
+     with items = (items-for-article article)
+     for item in items
+     for needed-items = (items-needed-for-item item)
+     collecting (cons item
+		      (remove-if-not #'deftheorem-item? needed-items)) into needed
+     finally (return needed)))
+
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
