@@ -88,10 +88,14 @@ fragment at CKB-PATH-2."
 (defun final-directory-of-directory-path (path)
   (first (last (pathname-directory path))))
 
+(defun directories-in-directory (dir)
+  (remove-if-not #'directory-p
+		 (list-directory (mizar-items-config 'itemization-source))))
+
 (defun articles-present-in-itemization-directory ()
   (let ((directories (intersection *mml-lar*
 				   (mapcar #'final-directory-of-directory-path
-					   (list-directory (mizar-items-config 'itemization-source)))
+					   (directories-in-directory (mizar-items-config 'itemization-source)))
 				   :test #'string=)))
      (mapcar #'final-directory-of-directory-path directories)))
 
