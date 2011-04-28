@@ -711,6 +711,16 @@ fragment at CKB-PATH-2."
      finally
        (return table)))
 
+(defun make-items-needed-for-item-table ()
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for item being the hash-keys in *item-to-fragment-table*
+     for needed-items = (items-needed-for-item item)
+     do
+       (setf (gethash item table) needed-items)
+     finally
+       (return table)))
+
 (defun make-dependency-tables ()
   "Construct two tables, returned as two values: one that maps items
 to the fragments from which they come, and another that maps a
