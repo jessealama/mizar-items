@@ -584,15 +584,13 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "atr.pruned" "<Constructor " #'constructor-xml-line->item))
 
 (defun items-needed-for-fragment (article fragment-number)
-  (remove-duplicates
-   (append (clusters-needed-for-fragment article fragment-number)
-	   (theorems-needed-for-fragment article fragment-number)
-	   (schemes-needed-for-fragment article fragment-number)
-	   (definientia-needed-for-fragment article fragment-number)
-	   (patterns-needed-for-fragment article fragment-number)
-	   (identifications-needed-for-fragment article fragment-number)
-	   (constructors-needed-for-fragment article fragment-number))
-   :test #'string=))
+  (append (clusters-needed-for-fragment article fragment-number)
+	  (theorems-needed-for-fragment article fragment-number)
+	  (schemes-needed-for-fragment article fragment-number)
+	  (definientia-needed-for-fragment article fragment-number)
+	  (patterns-needed-for-fragment article fragment-number)
+	  (identifications-needed-for-fragment article fragment-number)
+	  (constructors-needed-for-fragment article fragment-number)))
 
 (defun make-item-to-fragment-table ()
   (loop
