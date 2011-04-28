@@ -592,12 +592,19 @@ fragment at CKB-PATH-2."
 	  (identifications-needed-for-fragment article fragment-number)
 	  (constructors-needed-for-fragment article fragment-number)))
 
-(defun items-needed-for-article (article)
+(defun items-needed-for-article-by-fragment (article)
   (loop
      with num-fragments = (length (fragments-for-article article))
      for i from 1 upto num-fragments
      collecting (cons i (items-needed-for-fragment article i)) into needed
      finally (return needed)))
+
+(defun items-needed-for-article (article)
+  (remove-duplicates
+   (reduce #'append
+	   (mapcar #'rest
+		   (items-needed-for-article-by-fragment article)))
+   :test #'string=))
 
 (defun make-item-to-fragment-table ()
   (loop
