@@ -619,6 +619,20 @@ fragment at CKB-PATH-2."
 	fragment
       (items-needed-for-fragment fragment-article fragment-number))))
 
+(defun items-for-article (article)
+  (loop
+     with pattern = (format nil "^~a:" article)
+     for k being the hash-keys in *item-to-fragment-table*
+     when (scan pattern k) collect k into items
+     finally (return items)))
+
+(defun items-needed-for-article-by-item (article)
+  (loop
+     with items = (items-for-article article)
+     for item in items
+     collecting (cons item (items-needed-for-item item)) into needed
+     finally (return needed)))
+
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
