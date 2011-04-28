@@ -179,7 +179,7 @@ fragment at CKB-PATH-2."
   (let ((kind (new-value-of-kind-attribute constructor-line))
 	(nr (new-value-of-nr-attribute constructor-line))
 	(aid (new-value-of-aid-attribute constructor-line)))
-    (if (scan +fragment-filename-pattern+ constructor-line)
+    (if (scan +fragment-filename-pattern+ aid)
 	(format nil "~(~a~)constructor:~a" kind nr)
 	(format nil "~(~a~):~(~a~)constructor:~a" aid kind nr))))
 
