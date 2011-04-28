@@ -148,16 +148,16 @@ fragment at CKB-PATH-2."
 (defun new-value-of-schemenr-attribute (xml-line)
   (new-value-of-attribute "schemenr" xml-line))
 
-(defun scheme-xml-line->item (scheme-line)
-  (let ((nr (new-value-of-schemenr-attribute scheme-line))
-	(aid (new-value-of-aid-attribute scheme-line)))
-    (if (scan +fragment-filename-pattern+ aid)
-	(format nil "scheme:~a" nr)
-	(format nil "~(~a~):scheme:~a" aid nr))))
+(defun scheme-xml-line->item (scheme-line article)
+  (let ((nr (new-value-of-schemenr-attribute scheme-line)))
+    (format nil "~(~a~):scheme:~a" article nr)))
 
 (defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
-  (let ((nr (new-value-of-nr-attribute justifiedtheorem-line)))
-    (format nil "theorem:~a" nr)))
+  (let ((nr (new-value-of-nr-attribute justifiedtheorem-line))
+	(aid (new-value-of-aid-attribute justifiedtheorem-line)))
+    (if (scan +fragment-filename-pattern+ justifiedtheorem-line)
+	(format nil "theorem:~a" nr)
+	(format nil "~(~a~):theorem:~a" aid nr))))
 
 (defun theorem-xml-line->item (theorem-line)
   (let* ((nr (new-value-of-nr-attribute theorem-line))
@@ -171,9 +171,9 @@ fragment at CKB-PATH-2."
 	    (format nil "~(~a~):deftheorem:~a" aid nr)
 	    (format nil "~(~a~):theorem:~a" aid nr)))))
 
-(defun proposition-xml-line->item (proposition-line)
+(defun proposition-xml-line->item (proposition-line article)
   (let ((nr (new-value-of-nr-attribute proposition-line)))
-    (format nil "lemma:~a" nr)))
+    (format nil "~(~a~):lemma:~a" article nr)))
 
 (defun constructor-xml-line->item (constructor-line)
   (let ((kind (new-value-of-kind-attribute constructor-line))
@@ -230,15 +230,20 @@ fragment at CKB-PATH-2."
 	(format nil "~(~a~)identification:~a" kind nr)
 	(format nil "~(~a~):~(~a~)identification:~a" aid kind nr))))
 
+(defun article-from-fragment-path (path)
+  (let ((dir (pathname-directory path)))
+    (second (reverse dir))))
+
 (defun fragment-path->items (fragment-path)
   (let ((second-line (second-line-of-file fragment-path))
+	(article (article-from-fragment-path fragment-path))
 	(items nil))
     (cond ((scan ":: <SchemeBlock " second-line)
-	   (push (scheme-xml-line->item second-line) items))
+	   (push (scheme-xml-line->item second-line article) items))
 	  ((scan ":: <JustifiedTheorem " second-line)
 	   (push (justifiedtheorem-xml-line->item second-line) items))
 	  ((scan ":: <Proposition " second-line)
-	   (push (proposition-xml-line->item second-line) items))
+	   (push (proposition-xml-line->item second-line article) items))
 	  ((scan ":: <DefinitionBlock " second-line)
 	   (let ((constructors (lines-in-header-matching fragment-path
 							 "<Constructor "))
@@ -569,7 +574,9 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "eth" "<Theorem " #'theorem-xml-line->item))
 
 (defmethod schemes-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "esh" "<Scheme " #'scheme-xml-line->item))
+  (needed-for-fragment article fragment-number "esh" "<Scheme "
+		       #'(lambda (line)
+			   (scheme-xml-line->item line article))))
 
 (defmethod definientia-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "dfs" "<Definiens " #'definiens-xml-line->item))
