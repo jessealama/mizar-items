@@ -45,7 +45,7 @@ fragment at CKB-PATH-2."
 	(ckbs nil))
     (flet ((ckb-only (path)
 	     (let ((filename (file-namestring path)))
-	       (when (scan "ckb[0-9]+.miz" filename)
+	       (when (scan "ckb[0-9]+.miz$" filename)
 		 (push path ckbs)))))
       (walk-directory text-dir #'ckb-only))
     (let ((ckbs-sorted (sort ckbs #'fragment-<)))
