@@ -89,7 +89,9 @@ fragment at CKB-PATH-2."
   (first (last (pathname-directory path))))
 
 (defun articles-present-in-itemization-directory ()
-  (let ((directories (list-directory (mizar-items-config 'itemization-source))))
+  (let ((directories (intersection *mml-lar*
+				   (list-directory (mizar-items-config 'itemization-source))
+				   :test #'string=)))
      (mapcar #'final-directory-of-directory-path directories)))
 
 (defun lines-in-file-matching (path pattern)
