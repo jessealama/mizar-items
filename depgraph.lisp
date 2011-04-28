@@ -5,6 +5,26 @@
 
 (in-package :mizar)
 
+(define-constant +set-pattern+ "hidden:mpattern:1" :test #'string=)
+(define-constant +set-constructor+ "hidden:mconstructor:1" :test #'string=)
+(define-constant +=-pattern+ "hidden:rpattern:1" :test #'string=)
+(define-constant +=-constructor+ "hidden:rconstructor:1" :test #'string=)
+(define-constant +<>-pattern+ "hidden:rpattern:2" :test #'string=)
+(define-constant +in-pattern+ "hidden:rpattern:3" :test #'string=)
+(define-constant +in-constructor+ "hidden:rconstructor:2" :test #'string=)
+(define-constant +singleton-pattern+ "tarski:kpattern:1" :test #'string=)
+(define-constant +singleton-constructor+ "tarski:kconstructor:1" :test #'string=)
+(define-constant +unordered-pair-pattern+ "tarski:kpattern:2" :test #'string=)
+(define-constant +unordered-pair-constructor+ "tarski:kconstructor:2" :test #'string=)
+(define-constant +subset-pattern+ "tarski:rpattern:1" :test #'string=)
+(define-constant +subset-constructor+ "tarski:rconstructor:1" :test #'string=)
+(define-constant +ordered-pair-pattern+ "tarski:kpattern:2" :test #'string=)
+(define-constant +ordered-pair-constructor+ "tarski:kconstructor:2" :test #'string=)
+(define-constant +union-pattern+ "tarski:kpattern:3" :test #'string=)
+(define-constant +union-constructor+ "tarski:kconstructor:3" :test #'string=)
+(define-constant +are_equipotent-pattern+ "tarski:rpattern:2" :test #'string=)
+(define-constant +are_equipotent-constructor+ "tarski:rconstructor:2" :test #'string=)
+
 (defparameter *items-needed-for-fragment*
   (make-hash-table :test #'equal)
   "A table that maps fragment to lists of items.  The intended
@@ -263,117 +283,276 @@ fragment at CKB-PATH-2."
 	  fragment-number
 	  extension))
 
-(defun clusters-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "ecl")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<[CFR]Cluster"))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'cluster-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+(defgeneric clusters-needed-for-fragment (article fragment-number))
+(defgeneric theorems-needed-for-fragment (article fragment-number))
+(defgeneric schemes-needed-for-fragment (article fragment-number))
+(defgeneric definientia-needed-for-fragment (article fragment-number))
+(defgeneric patterns-needed-for-fragment (article fragment-number))
+(defgeneric identifications-needed-for-fragment (article fragment-number))
+(defgeneric constructors-needed-for-fragment (article fragment-number))
 
-(defun theorems-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "eth")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<Theorem "))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'justifiedtheorem-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+;; remove duplicates
 
-(defun schemes-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "esh")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<Scheme "))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'scheme-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+(defmethod clusters-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
 
-(defun definientia-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "dfs")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<Definiens "))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'definiens-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+(defmethod theorems-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
 
-(defun patterns-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "eno")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<Pattern "))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'pattern-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+(defmethod schemes-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
 
-(defun identifications-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "eid")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<Identify "))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'identification-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+(defmethod definientia-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
 
-(defun constructors-needed-for-fragment (article fragment-number)
-  (let* ((env-file-extension "atr.pruned")
-	 (fragment-env-file-path (environment-file-for-fragment article
-								fragment-number
-								env-file-extension))
-	 (regexp "<Constructor "))
-    (flet ((maybe-prepend-article (item)
-	     (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
-		 item
-		 (format nil "~a:~a" article item))))
-      (when (file-exists-p fragment-env-file-path)
-	(mapcar #'maybe-prepend-article
-		(mapcar #'constructor-xml-line->item
-			(lines-in-file-matching fragment-env-file-path
-						regexp)))))))
+(defmethod patterns-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
+
+(defmethod identifications-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
+
+(defmethod constructors-needed-for-fragment :around (article fragment-number)
+  (let ((needed (call-next-method)))
+    (remove-duplicates needed :test #'string=)))
+
+;; dispatch on strings.  This isn't really possible with normal CLOS
+;; dispatching, so we are going to dispatch on symbols instead.
+;; Thanks to sellout on #lisp on irc.freenode.net for the suggestion.
+
+(defmethod clusters-needed-for-fragment ((article string) fragment-number)
+  (clusters-needed-for-fragment (intern article (find-package :mizar))
+				fragment-number))
+(defmethod theorems-needed-for-fragment ((article string) fragment-number)
+  (theorems-needed-for-fragment (intern article (find-package :mizar))
+				fragment-number))
+(defmethod schemes-needed-for-fragment ((article string) fragment-number)
+  (schemes-needed-for-fragment (intern article (find-package :mizar))
+			       fragment-number))
+(defmethod definientia-needed-for-fragment ((article string) fragment-number)
+  (definientia-needed-for-fragment (intern article (find-package :mizar))
+      fragment-number))
+(defmethod patterns-needed-for-fragment ((article string) fragment-number)
+  (patterns-needed-for-fragment (intern article (find-package :mizar))
+				fragment-number))
+(defmethod identifications-needed-for-fragment ((article string) fragment-number)
+  (identifications-needed-for-fragment (intern article (find-package :mizar))
+				       fragment-number))
+(defmethod constructors-needed-for-fragment ((article string) fragment-number)
+  (constructors-needed-for-fragment (intern article (find-package :mizar))
+				    fragment-number))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Special cases: HIDDEN and TARSKI
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; hidden
+
+(define-constant +hidden-symbol+ (intern "hidden" (find-package :mizar)))
+
+(defmethod clusters-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  nil)
+
+(defmethod theorems-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  nil)
+
+(defmethod schemes-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  nil)
+
+(defmethod definientia-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  nil)
+
+(defmethod patterns-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  (cond ((= fragment-number 1) nil)
+	((= fragment-number 2) (list +set-pattern+))
+	((= fragment-number 3) (list +set-pattern+))
+	((= fragment-number 4) (list +set-pattern+))))
+
+(defmethod identifications-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  nil)
+
+(defmethod constructors-needed-for-fragment ((article (eql +hidden-symbol+)) fragment-number)
+  (cond ((= fragment-number 1)
+	 nil)
+	((= fragment-number 2)
+	 (list +set-constructor+))
+	((= fragment-number 3)
+	 (list +set-constructor+))
+	((= fragment-number 4)
+	 (list +set-constructor+))))
+
+;; tarski
+
+(define-constant +tarski-symbol+ (intern "tarski" (find-package :mizar)))
+
+(defmethod clusters-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  nil)
+
+(defmethod theorems-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  nil)
+
+(defmethod schemes-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  nil)
+
+(defmethod definientia-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  nil)
+
+(defmethod patterns-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  (cond ((= fragment-number 1)
+	 nil)
+	((= fragment-number 2)
+	 (list +set-pattern+
+	       +in-pattern+
+	       +=-pattern+))
+	((= fragment-number 3)
+	 (list +set-pattern+
+	       +in-pattern+
+	       +=-pattern+))
+	((= fragment-number 4)
+	 (list +set-pattern+
+	       +in-pattern+
+	       +=-pattern+))
+	((= fragment-number 5)
+	 nil)
+	((= fragment-number 6)
+	 nil)
+	((= fragment-number 7)
+	 (list +set-pattern+
+	       +in-pattern+))
+	((= fragment-number 8)
+	 (list +set-pattern+
+	       +in-pattern+))
+	((= fragment-number 9)
+	 nil)
+	((= fragment-number 10)
+	 nil)
+	((= fragment-number 11)
+	 (list +set-pattern+
+	       +in-pattern+
+	       ))
+	((= fragment-number 12)
+	 (list +set-pattern+
+	       +in-pattern+
+	       +=-pattern+))
+	((= fragment-number 13)
+	 (list +set-pattern+
+	       +=-pattern+
+	       +singleton-pattern+
+	       +unordered-pair-pattern+))
+	((= fragment-number 14)
+	 nil)
+	((= fragment-number 15)
+	 (list +set-pattern+
+	       +in-pattern+
+	       +ordered-pair-pattern+
+	       +=-pattern+))
+	((= fragment-number 16)
+	 (list +set-pattern+
+	       +in-pattern+
+	       +subset-pattern+
+	       +are_equipotent-pattern+))))
+
+(defmethod identifications-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  nil)
+
+(defmethod constructors-needed-for-fragment ((article (eql +tarski-symbol+)) fragment-number)
+  (cond ((= fragment-number 1)
+	 nil)
+	((= fragment-number 2)
+	 (list +set-constructor+
+	       +in-constructor+
+	       +=-constructor+))
+	((= fragment-number 3)
+	 (list +set-constructor+
+	       +in-constructor+
+	       +=-constructor+))
+	((= fragment-number 4)
+	 (list +set-constructor+
+	       +in-constructor+
+	       +=-constructor+))
+	((= fragment-number 5)
+	 nil)
+	((= fragment-number 6)
+	 nil)
+	((= fragment-number 7)
+	 (list +set-constructor+
+	       +in-constructor+))
+	((= fragment-number 8)
+	 (list +set-constructor+
+	       +in-constructor+))
+	((= fragment-number 9)
+	 nil)
+	((= fragment-number 10)
+	 nil)
+	((= fragment-number 11)
+	 (list +set-constructor+
+	       +in-constructor+
+	       ))
+	((= fragment-number 12)
+	 (list +set-constructor+
+	       +in-constructor+
+	       +=-constructor+))
+	((= fragment-number 13)
+	 (list +set-constructor+
+	       +=-constructor+
+	       +singleton-constructor+
+	       +unordered-pair-constructor+))
+	((= fragment-number 14)
+	 nil)
+	((= fragment-number 15)
+	 (list +set-constructor+
+	       +in-constructor+
+	       +ordered-pair-constructor+
+	       +=-constructor+))
+	((= fragment-number 16)
+	 (list +set-constructor+
+	       +in-constructor+
+	       +subset-constructor+
+	       +are_equipotent-constructor+))))
+
+;; everything else
+
+(defmacro needed-for-fragment (article-symbol fragment-number extension pattern xml-line->item)
+  `(let* ((env-file-extension ,extension)
+	  (article-name (symbol-name ,article-symbol))
+	  (fragment-env-file-path (environment-file-for-fragment article-name
+								 ,fragment-number
+								 env-file-extension)))
+     (flet ((maybe-prepend-article (item)
+	      (if (scan "[^:]+:[^:]+:[^:]+" item) ; fully qualified
+		  item
+		  (format nil "~a:~a" article-name item))))
+       (when (file-exists-p fragment-env-file-path)
+	 (mapcar #'maybe-prepend-article
+		 (mapcar ,xml-line->item
+			 (lines-in-file-matching fragment-env-file-path
+						 ,pattern)))))))
+
+(defmethod clusters-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "ecl" "<[CFR]Cluster " #'cluster-xml-line->item))
+
+(defmethod theorems-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "the" "<Theorem " #'justifiedtheorem-xml-line->item))
+
+(defmethod schemes-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "esh" "<Scheme " #'scheme-xml-line->item))
+
+(defmethod definientia-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "dfs" "<Definiens " #'definiens-xml-line->item))
+
+(defmethod patterns-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "eno" "<Pattern" #'pattern-xml-line->item))
+
+(defmethod identifications-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "eid" "<Identify " #'identification-xml-line->item))
+
+(defmethod constructors-needed-for-fragment (article fragment-number)
+  (needed-for-fragment article fragment-number "atr.pruned" "<Constructor " #'constructor-xml-line->item))
 
 (defun items-needed-for-fragment (article fragment-number)
   (remove-duplicates
