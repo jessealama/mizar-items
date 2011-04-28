@@ -640,6 +640,7 @@ fragment at CKB-PATH-2."
      for article in articles
      for mappings = (item-to-fragments-for-article article)
      do
+       (format t "~a~%" article)
        (dolist (mapping mappings)
 	 (destructuring-bind (article fragment-number items)
 	     mapping
