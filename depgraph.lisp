@@ -201,7 +201,7 @@ fragment at CKB-PATH-2."
   (let ((kind (new-value-of-constrkind-attribute definiens-line))
 	(nr (new-value-of-defnr-attribute definiens-line))
 	(aid (new-value-of-aid-attribute definiens-line)))
-    (if (scan +fragment-filename-pattern+ definiens-line)
+    (if (scan +fragment-filename-pattern+ aid)
 	(format nil "~(~a~)definiens:~a" kind nr)
 	(format nil "~(~a~):~(~a~)definiens:~a" aid kind nr))))
 
