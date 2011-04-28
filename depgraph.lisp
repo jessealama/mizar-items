@@ -70,6 +70,18 @@ fragment at CKB-PATH-2."
   (let ((directories (list-directory (mizar-items-config 'itemization-source))))
      (mapcar #'final-directory-of-directory-path directories)))
 
+(defun lines-in-file-matching (path pattern)
+  (let (matches)
+    (with-open-file (article path
+			     :direction :input
+			     :if-does-not-exist :error)
+      (do ((line (read-line article nil)
+		 (read-line article nil)))
+	  ((null line))
+	(when (scan pattern line)
+	  (push line matches))))
+      (reverse matches)))
+
 (defun lines-in-header-matching (path-to-article pattern)
   (let (matches)
     (with-open-file (article path-to-article
