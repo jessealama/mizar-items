@@ -566,7 +566,7 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "ecl" "<[CFR]Cluster " #'cluster-xml-line->item))
 
 (defmethod theorems-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "the" "<Theorem " #'justifiedtheorem-xml-line->item))
+  (needed-for-fragment article fragment-number "eth" "<Theorem " #'theorem-xml-line->item))
 
 (defmethod schemes-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "esh" "<Scheme " #'scheme-xml-line->item))
