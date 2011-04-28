@@ -25,6 +25,8 @@
 (define-constant +are_equipotent-pattern+ "tarski:rpattern:2" :test #'string=)
 (define-constant +are_equipotent-constructor+ "tarski:rconstructor:2" :test #'string=)
 
+(define-constant +fragment-filename-pattern+ "^CKB[0-9]+$" :test #'string=)
+
 (defparameter *items-needed-for-fragment*
   (make-hash-table :test #'equal)
   "A table that maps fragment to lists of items.  The intended
