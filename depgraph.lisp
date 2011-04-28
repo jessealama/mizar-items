@@ -613,6 +613,12 @@ fragment at CKB-PATH-2."
 		   (items-needed-for-article-by-fragment article)))
    :test #'string=))
 
+(defun items-needed-for-item (item)
+  (let ((fragment (gethash item *item-to-fragment-table*)))
+    (destructuring-bind (fragment-article . fragment-number)
+	fragment
+      (items-needed-for-fragment fragment-article fragment-number))))
+
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
