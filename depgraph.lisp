@@ -90,7 +90,7 @@ fragment at CKB-PATH-2."
 
 (defun directories-in-directory (dir)
   (remove-if-not #'directory-p
-		 (list-directory (mizar-items-config 'itemization-source))))
+		 (list-directory dir)))
 
 (defun articles-present-in-itemization-directory ()
   (intersection *mml-lar*
