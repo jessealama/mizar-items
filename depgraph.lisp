@@ -205,6 +205,21 @@ fragment at CKB-PATH-2."
 	(format nil "~(~a~)definiens:~a" kind nr)
 	(format nil "~(~a~):~(~a~)definiens:~a" aid kind nr))))
 
+(defun deftheorem-from-definiens (deftheorem-item)
+  (let ((fragment (gethash deftheorem-item *item-to-fragment-table*)))
+    (if fragment
+	(destructuring-bind (fragment-article . fragment-number)
+	    fragment
+	  (loop
+	     for k being the hash-keys in *item-to-fragment-table*
+	     for (key-article . key-number) = (gethash k *item-to-fragment-table*)
+	     do
+	       (when (and (string= key-article fragment-article)
+			  (= key-number fragment-number)
+			  (deftheorem-item? k))
+		 (return k))))
+	(error "There is nothing in the item-to-fragment table for ~a" deftheorem-item))))
+
 (defun deftheorem-xml-line->item (deftheorem-line)
   (let ((nr (new-value-of-nr-attribute deftheorem-line)))
     (format nil "deftheorem:~a" nr)))
