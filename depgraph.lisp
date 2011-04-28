@@ -639,6 +639,18 @@ fragment at CKB-PATH-2."
      collecting (cons item (items-needed-for-item item)) into needed
      finally (return needed)))
 
+(defun cluster-item? (item)
+  (scan ":[cfr]cluster:" item))
+
+(defun clusters-needed-for-article-by-item (article)
+  (loop
+     with items = (items-for-article article)
+     for item in items
+     for needed-items = (items-needed-for-item item)
+     collecting (cons item
+		      (remove-if-not #'cluster-item? needed-items)) into needed
+     finally (return needed)))
+
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
