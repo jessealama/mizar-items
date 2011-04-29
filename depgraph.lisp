@@ -161,7 +161,7 @@ fragment at CKB-PATH-2."
 (defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
   (let ((nr (new-value-of-nr-attribute justifiedtheorem-line))
 	(aid (new-value-of-aid-attribute justifiedtheorem-line)))
-    (if (scan +fragment-filename-pattern+ justifiedtheorem-line)
+    (if (scan +fragment-filename-pattern+ aid)
 	(format nil "theorem:~a" nr)
 	(format nil "~(~a~):theorem:~a" aid nr))))
 
