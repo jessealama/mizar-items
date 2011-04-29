@@ -874,8 +874,11 @@ fragment at CKB-PATH-2."
      with table = (make-hash-table :test #'equal)
      for item being the hash-keys in *item-to-fragment-table*
      for needed-items = (items-needed-for-item item)
+     for i from 1
      do
        (setf (gethash item table) needed-items)
+       (when (zerop (mod i 1000))
+	 (format t "Processed ~d items~%" i))
      finally
        (return table)))
 
