@@ -139,6 +139,9 @@ fragment at CKB-PATH-2."
 (defun new-value-of-aid-attribute (xml-line)
   (new-value-of-attribute "aid" xml-line))
 
+(defun new-value-of-constrnr-attribute (xml-line)
+  (new-value-of-attribute "constrnr" xml-line))
+
 (defun new-value-of-kind-attribute (xml-line)
   (new-value-of-attribute "kind" xml-line))
 
