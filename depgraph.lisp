@@ -411,7 +411,7 @@ fragment at CKB-PATH-2."
   (let ((second-line (second-line-of-file fragment-path))
 	(article (article-from-fragment-path fragment-path))
 	(items nil))
-    (cond ((scan ":: <SchemeBlock " second-line)
+    (cond ((scan ":: <SchemeBlock .*>" second-line)
 	   (push (scheme-xml-line->item second-line article) items))
 	  ((scan ":: <JustifiedTheorem " second-line)
 	   (push (justifiedtheorem-xml-line->item second-line) items))
@@ -753,7 +753,7 @@ fragment at CKB-PATH-2."
 	      (lines-in-file-matching fragment-env-file-path "<Theorem ")))))
 
 (defmethod schemes-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "esh" "<Scheme "
+  (needed-for-fragment article fragment-number "esh" "<Scheme .*>"
 		       #'(lambda (line)
 			   (scheme-xml-line->item line article))))
 
