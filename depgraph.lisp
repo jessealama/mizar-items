@@ -106,8 +106,10 @@ fragment at CKB-PATH-2."
       (do ((line (read-line article nil)
 		 (read-line article nil)))
 	  ((null line))
-	(when (scan pattern line)
-	  (push line matches))))
+	(multiple-value-bind (beg end)
+	    (scan pattern line)
+	  (when beg
+	    (push (subseq line beg end) matches)))))
       (reverse matches)))
 
 (defun lines-in-header-matching (path-to-article pattern)
