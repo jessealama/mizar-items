@@ -174,36 +174,138 @@ fragment at CKB-PATH-2."
 	(format nil "theorem:~a" nr)
 	(format nil "~(~a~):theorem:~a" aid nr))))
 
-(defun theorem-xml-line->item (theorem-line)
+(defparameter *propnr-of-article->lemma* (make-hash-table :test #'equal)
+  "A mapping from pairs (ARTICLE-NAME . PROPNR) to positive natural
+  numbers LEMMA-NUMBER.  A mapping represents that the toplevel
+  unexported theorem with the indicated PROPNR attibute is the lemma
+  number LEMMA-NUMBER.")
+
+(defun unexported-theorem-fragment? (fragment-path)
+  (let ((second (second-line-of-file fragment-path)))
+    (scan "^:: <Proposition " second)))
+
+(defun initialize-unexported-toplevel-theorems-for-article (article)
+  (loop
+     initially (format t "Initializing toplevel unexported theorems for article ~a..." article)
+     with lemma-nr = 1
+     with fragments = (fragments-for-article article)
+     for fragment in fragments
+     do
+       (when (unexported-theorem-fragment? fragment)
+	 (let* ((second (second-line-of-file fragment))
+		(propnr-str (new-value-of-propnr-attribute second))
+		(propnr (parse-integer propnr-str)))
+	   (setf (gethash (cons article propnr) *propnr-of-article->lemma*) lemma-nr)
+	   (incf lemma-nr)))
+     finally
+       (format t "done~%")))
+
+(defun theorem-xml-line->item (theorem-line source-article)
   (let* ((nr (new-value-of-nr-attribute theorem-line))
 	 (aid (new-value-of-aid-attribute theorem-line))
 	 (kind (new-value-of-kind-attribute theorem-line)))
     (if (scan +fragment-filename-pattern+ aid)
-	(if (string= kind "D")
-	    (format nil "deftheorem:~a" nr)
-	    (format nil "theorem:~a" nr))
+	(register-groups-bind (ckb-num-str)
+	    ("CKB([0-9]+)" aid)
+	  (let* ((fragment-num (parse-integer ckb-num-str))
+		 (constrnr (new-value-of-constrnr-attribute theorem-line))
+		 (local-ckb-path (path-to-fragment-for-article source-article
+							       fragment-num)))
+	    (if (string= kind "T")
+		(let* ((justifiedtheorem-lines (lines-in-header-matching local-ckb-path
+									"<JustifiedTheorem "))
+		       (proposition-lines (lines-in-header-matching local-ckb-path
+								    "<Proposition ")))
+		  (if justifiedtheorem-lines
+		      (let ((justifiedtheorem-line (first justifiedtheorem-lines)))
+			(justifiedtheorem-xml-line->item justifiedtheorem-line))
+		      (let* ((proposition-line (first proposition-lines)))
+			(proposition-xml-line->item proposition-line source-article))))
+		(let ((deftheorem-lines (lines-in-header-matching local-ckb-path
+							       "<DefTheorem ")))
+		  (loop
+		     for other-deftheorem-line in deftheorem-lines
+		     for deftheorem-constrnr = (new-value-of-constrnr-attribute other-deftheorem-line)
+		     do
+		       (if (string= constrnr deftheorem-constrnr)
+			   (let ((other-aid (new-value-of-aid-attribute other-deftheorem-line))
+				 (other-nr (new-value-of-nr-attribute other-deftheorem-line)))
+			     (return (format nil "~(~a~):deftheorem:~a" other-aid other-nr)))
+			   (warn "This deftheorem line '~a' has a constrnr that doesn't match what we're looking for (~a)" other-deftheorem-line constrnr))
+		     finally
+		       (error "We were unable to resolve the article-local deftheorem line '~a'" theorem-line))))))
 	(if (string= kind "D")
 	    (format nil "~(~a~):deftheorem:~a" aid nr)
 	    (format nil "~(~a~):theorem:~a" aid nr)))))
 
 (defun proposition-xml-line->item (proposition-line article)
-  (let ((nr (new-value-of-nr-attribute proposition-line)))
-    (format nil "~(~a~):lemma:~a" article nr)))
+  (let* ((propnr-str (new-value-of-propnr-attribute proposition-line))
+	 (propnr (parse-integer propnr-str)))
+    (multiple-value-bind (lemma-nr present?)
+	(gethash (cons article propnr) *propnr-of-article->lemma*)
+      (if present?
+	  (format nil "~(~a~):lemma:~d" article lemma-nr)
+	  (progn
+	    (initialize-unexported-toplevel-theorems-for-article article)
+	    (multiple-value-bind (final-lemma-nr present-now?)
+		(gethash (cons article propnr) *propnr-of-article->lemma*)
+	      (if present-now?
+		  (format nil "~(~a~):lemma:~d" article final-lemma-nr)
+		  (error "There is no proposition from article ~a with PROPNR attribute equal to ~a" article propnr)))))))
+)
 
-(defun constructor-xml-line->item (constructor-line)
+(defun constructor-xml-line->item (constructor-line source-article)
   (let ((kind (new-value-of-kind-attribute constructor-line))
 	(nr (new-value-of-nr-attribute constructor-line))
 	(aid (new-value-of-aid-attribute constructor-line)))
     (if (scan +fragment-filename-pattern+ aid)
-	(format nil "~(~a~)constructor:~a" kind nr)
+	(register-groups-bind (ckb-num-str)
+	    ("CKB([0-9]+)" aid)
+	  (let* ((fragment-num (parse-integer ckb-num-str))
+		 (relnr (new-value-of-relnr-attribute constructor-line))
+		 (local-ckb-path (path-to-fragment-for-article source-article
+							       fragment-num)))
+	    (let ((constructor-lines (lines-in-header-matching local-ckb-path
+							       "<Constructor ")))
+	      (loop
+		 for other-constructor-line in constructor-lines
+		 for constructor-relnr = (new-value-of-relnr-attribute other-constructor-line)
+		 do
+		   (when (string= relnr constructor-relnr)
+		     (warn "target: '~a'" other-constructor-line)
+		     (let ((other-aid (new-value-of-aid-attribute other-constructor-line))
+			   (other-kind (new-value-of-kind-attribute other-constructor-line))
+			   (other-nr (new-value-of-nr-attribute other-constructor-line)))
+		       (return (format nil "~(~a~):~(~a~)constructor:~a" other-aid other-kind other-nr))))
+		 finally
+		   (error "We were unable to resolve the article-local constructor line '~a'" constructor-line)))))
 	(format nil "~(~a~):~(~a~)constructor:~a" aid kind nr))))
 
-(defun pattern-xml-line->item (pattern-line)
+(defun pattern-xml-line->item (pattern-line article)
   (let ((kind (new-value-of-kind-attribute pattern-line))
 	(nr (new-value-of-nr-attribute pattern-line))
 	(aid (new-value-of-aid-attribute pattern-line)))
     (if (scan +fragment-filename-pattern+ aid)
-	(format nil "~(~a~)pattern:~a" kind nr)
+	(register-groups-bind (ckb-num-str)
+	    ("CKB([0-9]+)" aid)
+	  (let* ((fragment-num (parse-integer ckb-num-str))
+		 (relnr (new-value-of-relnr-attribute pattern-line))
+		 (local-ckb-path (path-to-fragment-for-article article
+							       fragment-num)))
+	    (let ((pattern-lines (lines-in-header-matching local-ckb-path
+							       "<Pattern ")))
+	      (loop
+		 for other-pattern-line in pattern-lines
+		 for pattern-relnr = (new-value-of-relnr-attribute other-pattern-line)
+		 do
+		   (when (string= relnr pattern-relnr)
+		     (warn "target: '~a'" other-pattern-line)
+		     (let ((other-aid (new-value-of-aid-attribute other-pattern-line))
+			   (other-kind (new-value-of-kind-attribute other-pattern-line))
+			   (other-nr (new-value-of-nr-attribute other-pattern-line)))
+		       (return (format nil "~(~a~):~(~a~)pattern:~a" other-aid other-kind other-nr))))
+		 finally
+		   (error "We were unable to resolve the article-local pattern line '~a'" pattern-line)))))
 	(format nil "~(~a~):~(~a~)pattern:~a" aid kind nr))))
 
 (defun definiens-xml-line->item (definiens-line source-article)
@@ -246,11 +348,29 @@ fragment at CKB-PATH-2."
 			(deftheorem-item? k))
 	       (return k)))))))
 
-(defun deftheorem-xml-line->item (deftheorem-line)
+(defun deftheorem-xml-line->item (deftheorem-line source-article)
   (let ((nr (new-value-of-nr-attribute deftheorem-line))
 	(aid (new-value-of-aid-attribute deftheorem-line)))
     (if (scan +fragment-filename-pattern+ aid)
-	(format nil "deftheorem:~a" nr)
+	(register-groups-bind (ckb-num-str)
+	    ("CKB([0-9]+)" aid)
+	  (let* ((fragment-num (parse-integer ckb-num-str))
+		 (constrnr (new-value-of-constrnr-attribute deftheorem-line))
+		 (local-ckb-path (path-to-fragment-for-article source-article
+							       fragment-num)))
+	    (let ((deftheorem-lines (lines-in-header-matching local-ckb-path
+							      "<DefTheorem ")))
+	      (loop
+		 for other-deftheorem-line in deftheorem-lines
+		 for deftheorem-constrnr = (new-value-of-constrnr-attribute other-deftheorem-line)
+		 do
+		   (if (string= constrnr deftheorem-constrnr)
+		       (let ((other-aid (new-value-of-aid-attribute other-deftheorem-line))
+			     (other-nr (new-value-of-nr-attribute other-deftheorem-line)))
+			 (return (format nil "~(~a~):deftheorem:~a" other-aid other-nr)))
+		       (warn "This deftheorem line '~a' has a constrnr that doesn't match what we're looking for (~a)" other-deftheorem-line constrnr))
+		 finally
+		   (error "We were unable to resolve the article-local deftheorem line '~a'" deftheorem-line)))))
 	(format nil "~(~a~):deftheorem:~a" aid nr))))
 
 (defun cluster-xml-line->item (cluster-line)
@@ -305,23 +425,23 @@ fragment at CKB-PATH-2."
 							"<DefTheorem ")))
 	     ;; constructors
 	     (dolist (constructor-line constructors)
-	       (push (constructor-xml-line->item constructor-line) items))
+	       (push (constructor-xml-line->item constructor-line article) items))
 	     ;; patterns
 	     (dolist (pattern-line patterns)
-	       (push (pattern-xml-line->item pattern-line) items))
+	       (push (pattern-xml-line->item pattern-line article) items))
 	     ;; definiens
 	     (dolist (definiens-line definientia)
 	       (push (definiens-xml-line->item definiens-line article) items))
 	     ;; deftheorem
 	     (dolist (deftheorem-line deftheorems)
-	       (push (deftheorem-xml-line->item deftheorem-line) items))))
+	       (push (deftheorem-xml-line->item deftheorem-line article) items))))
 	  ((scan ":: <NotationBlock " second-line)
 	   (let ((patterns (lines-in-header-matching fragment-path
 						     "<Pattern ")))
 	     (dolist (pattern-line patterns)
 	       (let ((kind (new-value-of-kind-attribute pattern-line))
 		     (nr (new-value-of-nr-attribute pattern-line)))
-		 (push (format nil "~(~a~)pattern:~a" kind nr)
+		 (push (format nil "~(~a~):~(~a~)pattern:~a" article kind nr)
 		       items)))))
 	  ((scan ":: <RegistrationBlock" second-line)
 	   ;; there should never be more than one of any of these
@@ -621,7 +741,13 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "ecl" "<[CFR]Cluster " #'cluster-xml-line->item))
 
 (defmethod theorems-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "eth" "<Theorem " #'theorem-xml-line->item))
+  (let* ((article-name (symbol-name article))
+	 (fragment-env-file-path (environment-file-for-fragment article-name
+								fragment-number
+								"eth")))
+    (when (file-exists-p fragment-env-file-path)
+      (mapcar #'(lambda (line) (theorem-xml-line->item line article))
+	      (lines-in-file-matching fragment-env-file-path "<Theorem ")))))
 
 (defmethod schemes-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "esh" "<Scheme "
@@ -638,13 +764,13 @@ fragment at CKB-PATH-2."
 	      (lines-in-file-matching fragment-env-file-path "<Definiens ")))))
 
 (defmethod patterns-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "eno" "<Pattern" #'pattern-xml-line->item))
+  (needed-for-fragment article fragment-number "eno" "<Pattern" #'(lambda (line) (pattern-xml-line->item line article))))
 
 (defmethod identifications-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "eid" "<Identify " #'identification-xml-line->item))
 
 (defmethod constructors-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "atr.pruned" "<Constructor " #'constructor-xml-line->item))
+  (needed-for-fragment article fragment-number "atr.pruned" "<Constructor " #'(lambda (line) (constructor-xml-line->item line article))))
 
 (defun items-needed-for-fragment (article fragment-number)
   (append (clusters-needed-for-fragment article fragment-number)
@@ -728,7 +854,7 @@ fragment at CKB-PATH-2."
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
-     with articles = (articles-present-in-itemization-directory)
+     with articles = (append '("hidden" "tarski") (articles-present-in-itemization-directory))
      with num-articles = (length articles)
      for article in articles
      for i from 1
