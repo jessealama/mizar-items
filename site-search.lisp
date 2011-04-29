@@ -163,6 +163,19 @@ If there is no such path, return nil."
 	      (values nil nil)
 	      (values nil :cut-off))))))
 
+(defmethod one-path (source destination)
+  "Find one path from SOURCE to DESTINATION that passes through VIA.                                                                                                                                        
+If there is no such path, return nil."
+  (let ((problem (make-item-search-problem :initial-state source
+                                           :goal destination)))
+    (multiple-value-bind (solution-found? solution)
+        (bounded-depth-first-search problem 25)
+      (if solution-found?
+          (values t (explain-solution solution))
+          (if (null solution)
+              (values nil nil)
+              (values nil :cut-off))))))
+
 (defun all-paths-pass-through (source destination via)
   "Determine whether all paths from SOURCE to DESTINATION pass through
 VIA.  Return two values: if all paths from SOURCE to DESTINATION do
