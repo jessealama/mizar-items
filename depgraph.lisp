@@ -726,10 +726,3 @@ to the fragments from which they come, and another that maps a
 fragment to the list of items needed for it."
   (values (make-hash-table :test #'equal)
 	  (make-hash-table :test #'equal)))
-
-;; (defun items-needed-for-fragment (fragment)
-;;   (multiple-value-bind (value present?)
-;;       (gethash fragment *items-needed-for-fragment*)
-;;     (if present?
-;; 	value
-;; 	(error "The fragment '~a' is not present in the items-needed-for-fragment table." fragment))))
