@@ -380,15 +380,15 @@ fragment at CKB-PATH-2."
   (let* ((nr (new-value-of-nr-attribute cluster-line))
 	 (aid (new-value-of-aid-attribute cluster-line))
 	 (local-aid? (scan "CKB[0-9]+" aid)))
-    (cond ((scan "<CCluster " cluster-line)
+    (cond ((scan "<CCluster .*>" cluster-line)
 	   (if local-aid?
 	       (format nil "ccluster:~a" nr)
 	       (format nil "~(~a~):ccluster:~a" aid nr)))
-	  ((scan "<FCluster " cluster-line)
+	  ((scan "<FCluster .*>" cluster-line)
 	   (if local-aid?
 	       (format nil "fcluster:~a" nr)
 	       (format nil "~(~a~):fcluster:~a" aid nr)))
-	  ((scan "<RCluster " cluster-line)
+	  ((scan "<RCluster .*>" cluster-line)
 	   (if local-aid?
 	       (format nil "rcluster:~a" nr)
 	       (format nil "~(~a~):rcluster:~a" aid nr)))
@@ -454,11 +454,11 @@ fragment at CKB-PATH-2."
 	   ;; would handle arbitrarily many of the three kinds of
 	   ;; clusters
 	   (let ((cclusters (lines-in-header-matching fragment-path
-						      "<CCluster "))
+						      "<CCluster .*>"))
 		 (fclusters (lines-in-header-matching fragment-path
-						      "<FCluster "))
+						      "<FCluster .*>"))
 		 (rclusters (lines-in-header-matching fragment-path
-						      "<RCluster "))
+						      "<RCluster .*"))
 		 (identifications (lines-in-header-matching fragment-path
 							    "<Identify")))
 	     ;; cclusters
@@ -741,7 +741,7 @@ fragment at CKB-PATH-2."
 						 ,pattern)))))))
 
 (defmethod clusters-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "ecl" "<[CFR]Cluster " #'cluster-xml-line->item))
+  (needed-for-fragment article fragment-number "ecl" "<[CFR]Cluster .*>" #'cluster-xml-line->item))
 
 (defmethod theorems-needed-for-fragment (article fragment-number)
   (let* ((article-name (symbol-name article))
