@@ -218,7 +218,7 @@ fragment at CKB-PATH-2."
 							       fragment-num)))
 	    (if (string= kind "T")
 		(let* ((justifiedtheorem-lines (lines-in-header-matching local-ckb-path
-									"<JustifiedTheorem "))
+									"<JustifiedTheorem .*>"))
 		       (proposition-lines (lines-in-header-matching local-ckb-path
 								    "<Proposition ")))
 		  (if justifiedtheorem-lines
@@ -413,7 +413,7 @@ fragment at CKB-PATH-2."
 	(items nil))
     (cond ((scan ":: <SchemeBlock .*>" second-line)
 	   (push (scheme-xml-line->item second-line article) items))
-	  ((scan ":: <JustifiedTheorem " second-line)
+	  ((scan ":: <JustifiedTheorem .*>" second-line)
 	   (push (justifiedtheorem-xml-line->item second-line) items))
 	  ((scan ":: <Proposition " second-line)
 	   (push (proposition-xml-line->item second-line article) items))
@@ -750,7 +750,7 @@ fragment at CKB-PATH-2."
 								"eth")))
     (when (file-exists-p fragment-env-file-path)
       (mapcar #'(lambda (line) (theorem-xml-line->item line article))
-	      (lines-in-file-matching fragment-env-file-path "<Theorem ")))))
+	      (lines-in-file-matching fragment-env-file-path "<Theorem .*>")))))
 
 (defmethod schemes-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "esh" "<Scheme .*>"
