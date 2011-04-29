@@ -297,7 +297,7 @@ fragment at CKB-PATH-2."
 		 (local-ckb-path (path-to-fragment-for-article article
 							       fragment-num)))
 	    (let ((pattern-lines (lines-in-header-matching local-ckb-path
-							       "<Pattern ")))
+							       "<Pattern .*>")))
 	      (loop
 		 for other-pattern-line in pattern-lines
 		 for pattern-relnr = (new-value-of-relnr-attribute other-pattern-line)
@@ -421,7 +421,7 @@ fragment at CKB-PATH-2."
 	   (let ((constructors (lines-in-header-matching fragment-path
 							 "<Constructor "))
 		 (patterns (lines-in-header-matching fragment-path
-						     "<Pattern "))
+						     "<Pattern .*>"))
 		 (definientia (lines-in-header-matching fragment-path
 							"<Definiens "))
 		 (deftheorems (lines-in-header-matching fragment-path
@@ -440,7 +440,7 @@ fragment at CKB-PATH-2."
 	       (push (deftheorem-xml-line->item deftheorem-line article) items))))
 	  ((scan ":: <NotationBlock " second-line)
 	   (let ((patterns (lines-in-header-matching fragment-path
-						     "<Pattern ")))
+						     "<Pattern .*>")))
 	     (dolist (pattern-line patterns)
 	       (let ((kind (new-value-of-kind-attribute pattern-line))
 		     (nr (new-value-of-nr-attribute pattern-line)))
@@ -767,7 +767,7 @@ fragment at CKB-PATH-2."
 	      (lines-in-file-matching fragment-env-file-path "<Definiens ")))))
 
 (defmethod patterns-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "eno" "<Pattern" #'(lambda (line) (pattern-xml-line->item line article))))
+  (needed-for-fragment article fragment-number "eno" "<Pattern .*>" #'(lambda (line) (pattern-xml-line->item line article))))
 
 (defmethod identifications-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "eid" "<Identify " #'identification-xml-line->item))
