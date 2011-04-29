@@ -160,6 +160,9 @@ fragment at CKB-PATH-2."
 (defun new-value-of-relnr-attribute (xml-line)
   (new-value-of-attribute "relnr" xml-line))
 
+(defun new-value-of-propnr-attribute (xml-line)
+  (new-value-of-attribute "propnr" xml-line))
+
 (defun scheme-xml-line->item (scheme-line article)
   (let ((nr (new-value-of-schemenr-attribute scheme-line)))
     (format nil "~(~a~):scheme:~a" article nr)))
