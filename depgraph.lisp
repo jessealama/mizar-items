@@ -219,7 +219,7 @@ fragment at CKB-PATH-2."
 		 do
 		   (when (string= relnr definiens-relnr)
 		     (let ((other-aid (new-value-of-aid-attribute other-definiens-line))
-			   (other-kind (new-value-of-kind-attribute other-definiens-line))
+			   (other-kind (new-value-of-constrkind-attribute other-definiens-line))
 			   (other-nr (new-value-of-defnr-attribute other-definiens-line)))
 		       (return (format nil "~(~a~):~(~a~)definiens:~a" other-aid other-kind other-nr))))
 		 finally
