@@ -323,7 +323,7 @@ fragment at CKB-PATH-2."
 		 (local-ckb-path (path-to-fragment-for-article source-article
 							       fragment-num)))
 	    (let ((definiens-lines (lines-in-header-matching local-ckb-path
-							     "<Definiens ")))
+							     "<Definiens .*>")))
 	      (loop
 		 for other-definiens-line in definiens-lines
 		 for definiens-relnr = (new-value-of-relnr-attribute other-definiens-line)
@@ -423,7 +423,7 @@ fragment at CKB-PATH-2."
 		 (patterns (lines-in-header-matching fragment-path
 						     "<Pattern .*>"))
 		 (definientia (lines-in-header-matching fragment-path
-							"<Definiens "))
+							"<Definiens .*>"))
 		 (deftheorems (lines-in-header-matching fragment-path
 							"<DefTheorem ")))
 	     ;; constructors
@@ -764,7 +764,7 @@ fragment at CKB-PATH-2."
 								"dfs")))
     (when (file-exists-p fragment-env-file-path)
       (mapcar #'(lambda (line) (definiens-xml-line->item line article))
-	      (lines-in-file-matching fragment-env-file-path "<Definiens ")))))
+	      (lines-in-file-matching fragment-env-file-path "<Definiens .*>")))))
 
 (defmethod patterns-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "eno" "<Pattern .*>" #'(lambda (line) (pattern-xml-line->item line article))))
