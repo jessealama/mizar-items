@@ -271,7 +271,7 @@ fragment at CKB-PATH-2."
 		 (local-ckb-path (path-to-fragment-for-article source-article
 							       fragment-num)))
 	    (let ((constructor-lines (lines-in-header-matching local-ckb-path
-							       "<Constructor ")))
+							       "<Constructor .*>")))
 	      (loop
 		 for other-constructor-line in constructor-lines
 		 for constructor-relnr = (new-value-of-relnr-attribute other-constructor-line)
@@ -419,7 +419,7 @@ fragment at CKB-PATH-2."
 	   (push (proposition-xml-line->item second-line article) items))
 	  ((scan ":: <DefinitionBlock " second-line)
 	   (let ((constructors (lines-in-header-matching fragment-path
-							 "<Constructor "))
+							 "<Constructor .*>"))
 		 (patterns (lines-in-header-matching fragment-path
 						     "<Pattern .*>"))
 		 (definientia (lines-in-header-matching fragment-path
@@ -773,7 +773,7 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "eid" "<Identify " #'identification-xml-line->item))
 
 (defmethod constructors-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "atr.pruned" "<Constructor " #'(lambda (line) (constructor-xml-line->item line article))))
+  (needed-for-fragment article fragment-number "atr.pruned" "<Constructor .*>" #'(lambda (line) (constructor-xml-line->item line article))))
 
 (defun items-needed-for-fragment (article fragment-number)
   (append (clusters-needed-for-fragment article fragment-number)
