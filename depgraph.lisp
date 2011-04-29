@@ -411,7 +411,7 @@ fragment at CKB-PATH-2."
 	      (if identification-lines
 		  (let ((other-identification-line (first identification-lines)))
 		    (let ((other-aid (new-value-of-aid-attribute other-identification-line))
-			  (other-kind (new-value-of-kind-attribute other-identification-line))
+			  (other-kind (new-value-of-constrkind-attribute other-identification-line))
 			  (other-nr (new-value-of-nr-attribute other-identification-line)))
 		      (format nil "~(~a~):~(~a~)identification:~a" other-aid other-kind other-nr)))
 		  (error "We didn't find any identification lines in the file '~a'" local-ckb-path)))))
