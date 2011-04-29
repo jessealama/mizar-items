@@ -272,7 +272,6 @@ fragment at CKB-PATH-2."
 		 for constructor-relnr = (new-value-of-relnr-attribute other-constructor-line)
 		 do
 		   (when (string= relnr constructor-relnr)
-		     (warn "target: '~a'" other-constructor-line)
 		     (let ((other-aid (new-value-of-aid-attribute other-constructor-line))
 			   (other-kind (new-value-of-kind-attribute other-constructor-line))
 			   (other-nr (new-value-of-nr-attribute other-constructor-line)))
@@ -299,7 +298,6 @@ fragment at CKB-PATH-2."
 		 for pattern-relnr = (new-value-of-relnr-attribute other-pattern-line)
 		 do
 		   (when (string= relnr pattern-relnr)
-		     (warn "target: '~a'" other-pattern-line)
 		     (let ((other-aid (new-value-of-aid-attribute other-pattern-line))
 			   (other-kind (new-value-of-kind-attribute other-pattern-line))
 			   (other-nr (new-value-of-nr-attribute other-pattern-line)))
