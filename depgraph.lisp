@@ -167,10 +167,15 @@ fragment at CKB-PATH-2."
 
 (defun scheme-xml-line->item (scheme-line article)
   (let ((schemenr (new-value-of-schemenr-attribute scheme-line))
-	(nr (new-value-of-nr-attribute scheme-line)))
-    (if schemenr
-	(format nil "~(~a~):scheme:~a" article schemenr)
-	(format nil "~(~a~):scheme:~a" article nr))))
+	(nr (new-value-of-nr-attribute scheme-line))
+	(aid (new-value-of-aid-attribute scheme-line)))
+    (if (scan +fragment-filename-pattern+ aid)
+	(if schemenr
+	    (format nil "~(~a~):scheme:~a" article schemenr)
+	    (format nil "~(~a~):scheme:~a" article nr))
+	(if schemenr
+	    (format nil "~(~a~):scheme:~a" aid schemenr)
+	    (format nil "~(~a~):scheme:~a" aid nr)))))
 
 (defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
   (let ((nr (new-value-of-nr-attribute justifiedtheorem-line))
