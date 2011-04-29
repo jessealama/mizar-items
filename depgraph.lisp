@@ -924,3 +924,18 @@ fragment at CKB-PATH-2."
        (format t "done~%")
      finally
        (return table)))
+
+(defvar *items-needed-for-item* (make-hash-table :test #'equal))
+
+(defun dependencies-generated-by-item (source-item)
+  (loop
+     with table = (make-hash-table :test #'equal)
+     with q = (list source-item)
+     for item = (pop q)
+     do
+       (let ((deps (gethash item *items-needed-for-item*)))
+	 (setf (gethash item table) deps)
+	 (dolist (dep deps)
+	   (pushnew dep q :test #'string=)))
+       (when (null q)
+	 (return table))))
