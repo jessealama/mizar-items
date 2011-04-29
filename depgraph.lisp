@@ -767,9 +767,13 @@ fragment at CKB-PATH-2."
 	      (lines-in-file-matching fragment-env-file-path "<Theorem .*>")))))
 
 (defmethod schemes-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "esh" "<Scheme .*>"
-		       #'(lambda (line)
-			   (scheme-xml-line->item line article))))
+  (let* ((article-name (symbol-name article))
+	 (fragment-env-file-path (environment-file-for-fragment article-name
+								fragment-number
+								"esh")))
+    (when (file-exists-p fragment-env-file-path)
+      (mapcar #'(lambda (line) (scheme-xml-line->item line article))
+	      (lines-in-file-matching fragment-env-file-path "<Scheme .*>")))))
 
 (defmethod definientia-needed-for-fragment (article fragment-number)
   (let* ((article-name (symbol-name article))
@@ -902,9 +906,11 @@ fragment at CKB-PATH-2."
 (defun make-items-needed-for-items-across-articles (article-list)
   (loop
      with table = (make-hash-table :test #'equal)
+     with num-articles = (length article-list)
      for article in article-list
+     for i from 1
      do
-       (format t "Computed needed items for items in ~a..." article)
+       (format t "Computed needed items for items in ~a (~d/~d)..." article i num-articles)
        (loop
 	  for item in (items-for-article article)
 	  for needed-items = (items-needed-for-item item)
