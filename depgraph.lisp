@@ -205,8 +205,8 @@ fragment at CKB-PATH-2."
 	(format nil "~(~a~)definiens:~a" kind nr)
 	(format nil "~(~a~):~(~a~)definiens:~a" aid kind nr))))
 
-(defun deftheorem-from-definiens (deftheorem-item)
-  (let ((fragment (gethash deftheorem-item *item-to-fragment-table*)))
+(defun deftheorem-from-definiens (definiens-item)
+  (let ((fragment (gethash definiens-item *item-to-fragment-table*)))
     (if fragment
 	(destructuring-bind (fragment-article . fragment-number)
 	    fragment
