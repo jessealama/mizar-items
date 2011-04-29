@@ -924,10 +924,3 @@ fragment at CKB-PATH-2."
        (format t "done~%")
      finally
        (return table)))
-
-(defun make-dependency-tables ()
-  "Construct two tables, returned as two values: one that maps items
-to the fragments from which they come, and another that maps a
-fragment to the list of items needed for it."
-  (values (make-hash-table :test #'equal)
-	  (make-hash-table :test #'equal)))
