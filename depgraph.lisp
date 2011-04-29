@@ -166,8 +166,11 @@ fragment at CKB-PATH-2."
   (new-value-of-attribute "propnr" xml-line))
 
 (defun scheme-xml-line->item (scheme-line article)
-  (let ((nr (new-value-of-schemenr-attribute scheme-line)))
-    (format nil "~(~a~):scheme:~a" article nr)))
+  (let ((schemenr (new-value-of-schemenr-attribute scheme-line))
+	(nr (new-value-of-nr-attribute scheme-line)))
+    (if schemenr
+	(format nil "~(~a~):scheme:~a" article schemenr)
+	(format nil "~(~a~):scheme:~a" article nr))))
 
 (defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
   (let ((nr (new-value-of-nr-attribute justifiedtheorem-line))
