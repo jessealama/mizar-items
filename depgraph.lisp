@@ -125,7 +125,7 @@ fragment at CKB-PATH-2."
 	    (setf done? t)))
       (reverse matches))))
 
-(defun path-to-fragment-for-article-and-number (article-name fragment-number)
+(defun path-to-fragment-for-article (article-name fragment-number)
   (format nil "~a/~a/text/ckb~d.miz"
 	  (mizar-items-config 'itemization-source)
 	  article-name
@@ -153,6 +153,9 @@ fragment at CKB-PATH-2."
 
 (defun new-value-of-schemenr-attribute (xml-line)
   (new-value-of-attribute "schemenr" xml-line))
+
+(defun new-value-of-relnr-attribute (xml-line)
+  (new-value-of-attribute "relnr" xml-line))
 
 (defun scheme-xml-line->item (scheme-line article)
   (let ((nr (new-value-of-schemenr-attribute scheme-line)))
@@ -197,12 +200,30 @@ fragment at CKB-PATH-2."
 	(format nil "~(~a~)pattern:~a" kind nr)
 	(format nil "~(~a~):~(~a~)pattern:~a" aid kind nr))))
 
-(defun definiens-xml-line->item (definiens-line)
+(defun definiens-xml-line->item (definiens-line source-article)
   (let ((kind (new-value-of-constrkind-attribute definiens-line))
 	(nr (new-value-of-defnr-attribute definiens-line))
 	(aid (new-value-of-aid-attribute definiens-line)))
     (if (scan +fragment-filename-pattern+ aid)
-	(format nil "~(~a~)definiens:~a" kind nr)
+	(register-groups-bind (ckb-num-str)
+	    ("CKB([0-9]+)" aid)
+	  (let* ((fragment-num (parse-integer ckb-num-str))
+		 (relnr (new-value-of-relnr-attribute definiens-line))
+		 (local-ckb-path (path-to-fragment-for-article source-article
+							       fragment-num)))
+	    (let ((definiens-lines (lines-in-header-matching local-ckb-path
+							     "<Definiens ")))
+	      (loop
+		 for other-definiens-line in definiens-lines
+		 for definiens-relnr = (new-value-of-relnr-attribute other-definiens-line)
+		 do
+		   (when (string= relnr definiens-relnr)
+		     (let ((other-aid (new-value-of-aid-attribute other-definiens-line))
+			   (other-kind (new-value-of-kind-attribute other-definiens-line))
+			   (other-nr (new-value-of-defnr-attribute other-definiens-line)))
+		       (return (format nil "~(~a~):~(~a~)definiens:~a" other-aid other-kind other-nr))))
+		 finally
+		   (error "We were unable to resolve the article-local definiens line '~a'" definiens-line)))))
 	(format nil "~(~a~):~(~a~)definiens:~a" aid kind nr))))
 
 (defun deftheorem-from-definiens (definiens-item)
@@ -284,7 +305,7 @@ fragment at CKB-PATH-2."
 	       (push (pattern-xml-line->item pattern-line) items))
 	     ;; definiens
 	     (dolist (definiens-line definientia)
-	       (push (definiens-xml-line->item definiens-line) items))
+	       (push (definiens-xml-line->item definiens-line article) items))
 	     ;; deftheorem
 	     (dolist (deftheorem-line deftheorems)
 	       (push (deftheorem-xml-line->item deftheorem-line) items))))
@@ -602,7 +623,13 @@ fragment at CKB-PATH-2."
 			   (scheme-xml-line->item line article))))
 
 (defmethod definientia-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "dfs" "<Definiens " #'definiens-xml-line->item))
+  (let* ((article-name (symbol-name article))
+	 (fragment-env-file-path (environment-file-for-fragment article-name
+								fragment-number
+								"dfs")))
+    (when (file-exists-p fragment-env-file-path)
+      (mapcar #'(lambda (line) (definiens-xml-line->item line article))
+	      (lines-in-file-matching fragment-env-file-path "<Definiens ")))))
 
 (defmethod patterns-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "eno" "<Pattern" #'pattern-xml-line->item))
