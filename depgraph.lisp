@@ -218,7 +218,7 @@ fragment at CKB-PATH-2."
 			  (= key-number fragment-number)
 			  (deftheorem-item? k))
 		 (return k))))
-	(error "There is nothing in the item-to-fragment table for ~a" deftheorem-item))))
+	(error "There is nothing in the item-to-fragment table for ~a" definiens-item))))
 
 (defun deftheorem-xml-line->item (deftheorem-line)
   (let ((nr (new-value-of-nr-attribute deftheorem-line))
