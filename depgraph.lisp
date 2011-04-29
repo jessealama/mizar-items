@@ -460,7 +460,7 @@ fragment at CKB-PATH-2."
 		 (rclusters (lines-in-header-matching fragment-path
 						      "<RCluster .*"))
 		 (identifications (lines-in-header-matching fragment-path
-							    "<Identify")))
+							    "<Identify .*>")))
 	     ;; cclusters
 	     (dolist (cluster-line (append cclusters fclusters rclusters))
 	       (push (cluster-xml-line->item cluster-line) items))
@@ -770,7 +770,7 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "eno" "<Pattern .*>" #'(lambda (line) (pattern-xml-line->item line article))))
 
 (defmethod identifications-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "eid" "<Identify " #'identification-xml-line->item))
+  (needed-for-fragment article fragment-number "eid" "<Identify .*>" #'identification-xml-line->item))
 
 (defmethod constructors-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "atr.pruned" "<Constructor .*>" #'(lambda (line) (constructor-xml-line->item line article))))
