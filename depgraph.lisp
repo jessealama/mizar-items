@@ -939,3 +939,54 @@ fragment at CKB-PATH-2."
 	   (pushnew dep q :test #'string=)))
        (when (null q)
 	 (return table))))
+
+(defun export-mml (version mml-lar item-to-fragment-table dependency-graph)
+  (let ((export-path (format nil "~a/~a.lisp"
+			     *mizar-items-data-root*
+			     version)))
+    
+    (if (file-exists-p export-path)
+	(error "There is already a data file at '~a'; refusing to overwrite it." export-path)
+	(with-open-file (mml-export export-path
+				    :direction :output
+				    :if-exists :error
+				    :if-does-not-exist :create)
+	  ;; package
+	  (format mml-export "(in-package :mizar)~%")
+	  ;; mml-version
+	  (format mml-export "(setf *mml-version* \"~a\")~%" version)
+	  ;; mml-lar
+	  (format mml-export "(setf *mml-lar* '(~%")
+	  (dolist (article mml-lar)
+	    (format mml-export "\"~a\"~%" article))
+	  (format mml-export ")~%")
+	  ;; topologically sorted list of all items; just enumerating all fragments should be fine
+	  (warn "We ought to compute a topological sort of all items at this point, but we're too lazy")
+	  ;; articles with bibliographic information
+	  (warn "We ought to compute the bibliographic data of all articles at this point, but we're too lazy")
+	  ;; item-to-fragment-table
+	  (format mml-export "(setf *item-to-fragment-table*~%")
+	  (format mml-export "(keys-with-rest->hash-table '(~%")
+	  (loop
+	     for k being the hash-keys in item-to-fragment-table
+	     do
+	       (destructuring-bind (article . fragment-number)
+		   (gethash k item-to-fragment-table)
+		 (format mml-export "(")
+		 (format mml-export "\"~a\" '(\"~a\" . ~d)" k article fragment-number)
+		 (format mml-export ")")))
+	  ;; dependency graph
+	  (format mml-export "(setf *item-dependency-graph-forward*~%")
+	  (format mml-export "(keys-with-rest->hash-table '(~%")
+	  (loop
+	     for k being the hash-keys in dependency-graph
+	     do
+	       (let ((deps (gethash k dependency-graph)))
+		 (format mml-export "(")
+		 (format mml-export "\"~a\"" k)
+		 (dolist (dep deps)
+		   (format mml-export " \"~a\"" dep))
+		 (format mml-export "~%")))
+	  (format mml-export ")))~%")
+	  ;; dependency graph backward
+	  (warn "We ought to compute the backward dependency graph at this point, but we're too lazy")))))
