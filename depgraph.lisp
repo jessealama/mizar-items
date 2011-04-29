@@ -395,12 +395,26 @@ fragment at CKB-PATH-2."
 	  (t
 	   (error "Unhandled cluster line '~a'" cluster-line)))))
 
-(defun identification-xml-line->item (identification-line)
+(defun identification-xml-line->item (identification-line article)
   (let ((nr (new-value-of-nr-attribute identification-line))
 	(kind (new-value-of-constrkind-attribute identification-line))
 	(aid (new-value-of-aid-attribute identification-line)))
-    (if (scan +fragment-filename-pattern+ identification-line)
-	(format nil "~(~a~)identification:~a" kind nr)
+    (if (scan +fragment-filename-pattern+ aid)
+	(register-groups-bind (ckb-num-str)
+	    ("CKB([0-9]+)" aid)
+	  (let* ((fragment-num (parse-integer ckb-num-str))
+		 (local-ckb-path (path-to-fragment-for-article article
+							       fragment-num)))
+	    (let ((identification-lines (lines-in-header-matching local-ckb-path
+							       "<Identify .*>")))
+	      ;; grab the first
+	      (if identification-lines
+		  (let ((other-identification-line (first identification-lines)))
+		    (let ((other-aid (new-value-of-aid-attribute other-identification-line))
+			  (other-kind (new-value-of-kind-attribute other-identification-line))
+			  (other-nr (new-value-of-nr-attribute other-identification-line)))
+		      (format nil "~(~a~):~(~a~)identification:~a" other-aid other-kind other-nr)))
+		  (error "We didn't find any identification lines in the file '~a'" local-ckb-path)))))
 	(format nil "~(~a~):~(~a~)identification:~a" aid kind nr))))
 
 (defun article-from-fragment-path (path)
@@ -466,7 +480,7 @@ fragment at CKB-PATH-2."
 	       (push (cluster-xml-line->item cluster-line) items))
 	     ;; identifications
 	     (dolist (identification-line identifications)
-	       (push (identification-xml-line->item identification-line)
+	       (push (identification-xml-line->item identification-line article)
 		     items))))
 	  (t
 	   (warn "We don't know how to handle the XML fragment '~a', coming from ~a ~%" second-line fragment-path)
@@ -770,7 +784,7 @@ fragment at CKB-PATH-2."
   (needed-for-fragment article fragment-number "eno" "<Pattern .*>" #'(lambda (line) (pattern-xml-line->item line article))))
 
 (defmethod identifications-needed-for-fragment (article fragment-number)
-  (needed-for-fragment article fragment-number "eid" "<Identify .*>" #'identification-xml-line->item))
+  (needed-for-fragment article fragment-number "eid" "<Identify .*>" #'(lambda (line) (identification-xml-line->item line article))))
 
 (defmethod constructors-needed-for-fragment (article fragment-number)
   (needed-for-fragment article fragment-number "atr.pruned" "<Constructor .*>" #'(lambda (line) (constructor-xml-line->item line article))))
