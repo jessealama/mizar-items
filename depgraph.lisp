@@ -937,6 +937,16 @@ fragment at CKB-PATH-2."
        (when (null q)
 	 (return table))))
 
+(defun invert-dependency-table (dep-table)
+  (loop
+     with inverted = (make-hash-table :test #'equal)
+     for item being the hash-keys in dep-table using (hash-value deps)
+     do
+       (dolist (dep deps)
+	 (push (gethash dep inverted) item))
+     finally
+       (return inverted)))
+
 (defun export-mml (version mml-lar item-to-fragment-table dependency-graph)
   (let ((export-path (format nil "~a/~a.lisp"
 			     *mizar-items-data-root*
