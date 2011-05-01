@@ -142,85 +142,85 @@
 ;;; Emitting XML/HTML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *absrefs-params*
-  (list (xuriella:make-parameter "0" "explainbyfrom")))
+;; (defparameter *absrefs-params*
+;;   (list (xuriella:make-parameter "0" "explainbyfrom")))
 
-(defparameter *absrefs-sylesheet*
-  (xuriella:parse-stylesheet
-   (pathname (mizar-items-config 'absrefs-stylesheet))))
+;; (defparameter *absrefs-sylesheet*
+;;   (xuriella:parse-stylesheet
+;;    (pathname (mizar-items-config 'absrefs-stylesheet))))
 
-(let* ((absrefs-path (mizar-items-config 'absrefs-stylesheet))
-       (orig-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
-       (cache (make-hash-table :test #'equalp)))
-  (labels ((transform (filename)
-	     (xuriella:apply-stylesheet *absrefs-sylesheet*
-					(pathname filename)
-					:parameters *absrefs-params*))
-	   (update-cache (path sha1)
-	     (setf (gethash sha1 cache) (transform path))))
-    (defun absrefs (article-xml-path)
-      (let ((new-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
-	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
-	(cond ((equalp orig-absrefs-sha1 new-absrefs-sha1) ; stylesheet unchanged
-	       (multiple-value-bind (cached present?)
-		   (gethash xml-sha1 cache)
-		 (if present?
-		     cached
-		     (update-cache article-xml-path xml-sha1))))
-	      (t ; the stylesheet has changed
-	       (clrhash cache) ; all old values are now unreliable
-	       (setf orig-absrefs-sha1 new-absrefs-sha1)
-	       (update-cache article-xml-path xml-sha1)))))))
+;; (let* ((absrefs-path (mizar-items-config 'absrefs-stylesheet))
+;;        (orig-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
+;;        (cache (make-hash-table :test #'equalp)))
+;;   (labels ((transform (filename)
+;; 	     (xuriella:apply-stylesheet *absrefs-sylesheet*
+;; 					(pathname filename)
+;; 					:parameters *absrefs-params*))
+;; 	   (update-cache (path sha1)
+;; 	     (setf (gethash sha1 cache) (transform path))))
+;;     (defun absrefs (article-xml-path)
+;;       (let ((new-absrefs-sha1 (ironclad:digest-file :sha1 absrefs-path))
+;; 	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
+;; 	(cond ((equalp orig-absrefs-sha1 new-absrefs-sha1) ; stylesheet unchanged
+;; 	       (multiple-value-bind (cached present?)
+;; 		   (gethash xml-sha1 cache)
+;; 		 (if present?
+;; 		     cached
+;; 		     (update-cache article-xml-path xml-sha1))))
+;; 	      (t ; the stylesheet has changed
+;; 	       (clrhash cache) ; all old values are now unreliable
+;; 	       (setf orig-absrefs-sha1 new-absrefs-sha1)
+;; 	       (update-cache article-xml-path xml-sha1)))))))
 
-(defparameter *mhtml-params*
-  (list (xuriella:make-parameter "1" "colored")
-	(xuriella:make-parameter "1" "proof_links")
-	(xuriella:make-parameter "1" "titles")))
+;; (defparameter *mhtml-params*
+;;   (list (xuriella:make-parameter "1" "colored")
+;; 	(xuriella:make-parameter "1" "proof_links")
+;; 	(xuriella:make-parameter "1" "titles")))
 
-(defparameter *mhtml-stylesheet*
-  (xuriella:parse-stylesheet
-   (pathname (mizar-items-config 'mhtml-stylesheet))))
+;; (defparameter *mhtml-stylesheet*
+;;   (xuriella:parse-stylesheet
+;;    (pathname (mizar-items-config 'mhtml-stylesheet))))
 
-(let* ((mhtml-path (mizar-items-config 'mhtml-stylesheet))
-       (orig-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
-       (cache (make-hash-table :test #'equalp)))
-  (labels ((transform (filename &optional source-article-name)
-	     (let ((dir (directory-namestring filename))
-		   (source-article-param (xuriella:make-parameter "source_article" source-article-name))
-		   (mizar-items-param (xuriella:make-parameter "mizar_items" "1")))
-	       (flet ((file-in-dir (uri)
-			(let ((path (puri:uri-path uri)))
-			  (when (scan ".(idx|eno|dfs|eth|esh|atr)$" path)
-			    (register-groups-bind (after-root)
-				("^/(.+)" path)
-			      (let ((new-path (merge-pathnames after-root dir)))
-				(setf (puri:uri-path uri)
-				      (namestring new-path)))))
-			  uri)))
-		 (xuriella:apply-stylesheet
-		  *mhtml-stylesheet*
-		  (absrefs filename)
-		  :parameters (append
-			       (when source-article-name
-				 (list source-article-param
-				       mizar-items-param))
-			       *mhtml-params*)
-		  :uri-resolver #'file-in-dir))))
-	   (update-cache (path sha1 &optional source-file-name)
-	     (setf (gethash sha1 cache) (transform path source-file-name))))
-    (defun mhtml (article-xml-path &optional source-article-name)
-      (let ((new-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
-	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
-	(cond ((equalp orig-mhtml-sha1 new-mhtml-sha1) ; stylesheet unchanged
-	       (multiple-value-bind (cached present?)
-		   (gethash xml-sha1 cache)
-		 (if present?
-		     cached
-		     (update-cache article-xml-path xml-sha1 source-article-name))))
-	      (t ; the stylesheet has changed
-	       (clrhash cache) ; all old values are now unreliable
-	       (setf orig-mhtml-sha1 new-mhtml-sha1)
-	       (update-cache article-xml-path xml-sha1 source-article-name)))))))
+;; (let* ((mhtml-path (mizar-items-config 'mhtml-stylesheet))
+;;        (orig-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
+;;        (cache (make-hash-table :test #'equalp)))
+;;   (labels ((transform (filename &optional source-article-name)
+;; 	     (let ((dir (directory-namestring filename))
+;; 		   (source-article-param (xuriella:make-parameter "source_article" source-article-name))
+;; 		   (mizar-items-param (xuriella:make-parameter "mizar_items" "1")))
+;; 	       (flet ((file-in-dir (uri)
+;; 			(let ((path (puri:uri-path uri)))
+;; 			  (when (scan ".(idx|eno|dfs|eth|esh|atr)$" path)
+;; 			    (register-groups-bind (after-root)
+;; 				("^/(.+)" path)
+;; 			      (let ((new-path (merge-pathnames after-root dir)))
+;; 				(setf (puri:uri-path uri)
+;; 				      (namestring new-path)))))
+;; 			  uri)))
+;; 		 (xuriella:apply-stylesheet
+;; 		  *mhtml-stylesheet*
+;; 		  (absrefs filename)
+;; 		  :parameters (append
+;; 			       (when source-article-name
+;; 				 (list source-article-param
+;; 				       mizar-items-param))
+;; 			       *mhtml-params*)
+;; 		  :uri-resolver #'file-in-dir))))
+;; 	   (update-cache (path sha1 &optional source-file-name)
+;; 	     (setf (gethash sha1 cache) (transform path source-file-name))))
+;;     (defun mhtml (article-xml-path &optional source-article-name)
+;;       (let ((new-mhtml-sha1 (ironclad:digest-file :sha1 mhtml-path))
+;; 	    (xml-sha1 (ironclad:digest-file :sha1 article-xml-path)))
+;; 	(cond ((equalp orig-mhtml-sha1 new-mhtml-sha1) ; stylesheet unchanged
+;; 	       (multiple-value-bind (cached present?)
+;; 		   (gethash xml-sha1 cache)
+;; 		 (if present?
+;; 		     cached
+;; 		     (update-cache article-xml-path xml-sha1 source-article-name))))
+;; 	      (t ; the stylesheet has changed
+;; 	       (clrhash cache) ; all old values are now unreliable
+;; 	       (setf orig-mhtml-sha1 new-mhtml-sha1)
+;; 	       (update-cache article-xml-path xml-sha1 source-article-name)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Main page
