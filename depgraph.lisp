@@ -318,7 +318,7 @@ fragment at CKB-PATH-2."
 
 (defun definiens-xml-line->item (definiens-line source-article)
   (let ((kind (new-value-of-constrkind-attribute definiens-line))
-	(nr (new-value-of-defnr-attribute definiens-line))
+	(nr (new-value-of-absconstrnr-attribute definiens-line))
 	(aid (new-value-of-aid-attribute definiens-line)))
     (if (scan +fragment-filename-pattern+ aid)
 	(register-groups-bind (ckb-num-str)
@@ -336,7 +336,7 @@ fragment at CKB-PATH-2."
 		   (when (string= relnr definiens-relnr)
 		     (let ((other-aid (new-value-of-aid-attribute other-definiens-line))
 			   (other-kind (new-value-of-constrkind-attribute other-definiens-line))
-			   (other-nr (new-value-of-defnr-attribute other-definiens-line)))
+			   (other-nr (new-value-of-absconstrnr-attribute other-definiens-line)))
 		       (return (format nil "~(~a~):~(~a~)definiens:~a" other-aid other-kind other-nr))))
 		 finally
 		   (error "We were unable to resolve the article-local definiens line '~a'" definiens-line)))))
