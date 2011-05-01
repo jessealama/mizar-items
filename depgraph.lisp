@@ -46,7 +46,7 @@ fragments of the article ARTICLE-NAME can be found."
   (pathname-as-directory
    (format nil "~a/~a/text" (mizar-items-config 'itemization-source) article-name)))
 
-(defun fragment-< (ckb-path-1 ckb-path-2)
+(defun fragment-path-< (ckb-path-1 ckb-path-2)
   "Assuming that CKB-PATH-1 and CKB-PATH-2 are pathnames that point to
 two different article fragments of the same article, return whether
 the number of fragment at CKB-PATH-1 is less than the number of the
@@ -70,7 +70,7 @@ fragment at CKB-PATH-2."
 	       (when (scan "ckb[0-9]+.miz$" filename)
 		 (push path ckbs)))))
       (walk-directory text-dir #'ckb-only))
-    (let ((ckbs-sorted (sort ckbs #'fragment-<)))
+    (let ((ckbs-sorted (sort ckbs #'fragment-path-<)))
       ckbs-sorted)))
 
 (defun second-line-of-file (path)
