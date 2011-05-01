@@ -310,6 +310,13 @@ LIST; otherwise, return T and NIL."
      finally
        (return table)))
 
+(defun random-key-with-value (table)
+  (let ((random-key (random-elt (hash-table-keys table))))
+    (multiple-value-bind (value we-already-know-that-its-present)
+	(gethash random-key table)
+      (declare (ignore we-already-know-that-its-present))
+      (values random-key value))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
