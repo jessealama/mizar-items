@@ -91,8 +91,8 @@ or
 	    (dest-mml-pos (mml-lar-index dest-article)))
 	(if (< source-mml-pos dest-mml-pos)
 	    (values nil nil)
-	    (let ((source-fragment (gethash source *item-to-ckb-table*))
-		  (dest-fragment (gethash destination *item-to-ckb-table*)))
+	    (let ((source-fragment (gethash source *item-to-fragment-table*))
+		  (dest-fragment (gethash destination *item-to-fragment-table*)))
 	      (destructuring-bind (source-fragment-article source-fragment-num-str)
 		  (split ":" source-fragment)
 		(declare (ignore source-fragment-article)) ; should be string= to SOURCE-ARTICLE
@@ -106,14 +106,14 @@ or
 				 (and (<= int-mml-pos dest-mml-pos)
 				      (<= source-mml-pos int-mml-pos))))
 			     (intermediate-same-source-ok (intermediate) ; assumes INTERMEDIATE and SOURCE come from the first article
-			       (let ((int-fragment (gethash intermediate *item-to-ckb-table*)))
+			       (let ((int-fragment (gethash intermediate *item-to-fragment-table*)))
 				 (destructuring-bind (int-fragment-article int-fragment-num-str)
 				     (split ":" int-fragment)
 				   (declare (ignore int-fragment-article)) ; should be string= to INT-ARTICLEh
 				   (let ((int-fragment-num (parse-integer int-fragment-num-str)))
 				     (<= source-fragment-num int-fragment-num)))))
 			     (intermediate-same-dest-ok (intermediate) ; assumes INTERMEDIATE and DESTINATION come from the first article
-			       (let ((int-fragment (gethash intermediate *item-to-ckb-table*)))
+			       (let ((int-fragment (gethash intermediate *item-to-fragment-table*)))
 				 (destructuring-bind (int-fragment-article int-fragment-num-str)
 				     (split ":" int-fragment)
 				   (declare (ignore int-fragment-article)) ; should be string= to INT-ARTICLE
