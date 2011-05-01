@@ -865,9 +865,6 @@ fragment at CKB-PATH-2."
 		      (remove-if-not #'definiens-item? needed-items)) into needed
      finally (return needed)))
 
-(defun deftheorem-item? (item)
-  (scan ":deftheorem:" item))
-
 (defun deftheorems-needed-for-article-by-item (article)
   (loop
      with items = (items-for-article article)
