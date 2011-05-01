@@ -943,7 +943,7 @@ fragment at CKB-PATH-2."
      for item being the hash-keys in dep-table using (hash-value deps)
      do
        (dolist (dep deps)
-	 (push (gethash dep inverted) item))
+	 (push item (gethash dep inverted)))
      finally
        (return inverted)))
 
