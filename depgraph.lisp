@@ -150,6 +150,9 @@ fragment at CKB-PATH-2."
 (defun new-value-of-nr-attribute (xml-line)
   (new-value-of-attribute "nr" xml-line))
 
+(defun new-value-of-absconstrnr-attribute (xml-line)
+  (new-value-of-attribute "absconstrnr" xml-line))
+
 (defun new-value-of-constrkind-attribute (xml-line)
   (new-value-of-attribute "constrkind" xml-line))
 
