@@ -28,7 +28,7 @@
 
 (defun empty-queue? (q)
   "Are there no elements in the queue?"
-  (= (length (q-elements q)) 0))
+  (length= 0 (q-elements q)))
 
 (defun queue-front (q)
   "Return the element at the front of the queue."
