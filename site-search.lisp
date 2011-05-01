@@ -162,9 +162,11 @@ If there is no such path, return nil."
 	      (values nil nil)
 	      (values nil :cut-off))))))
 
-(defgeneric one-path (source destination &optional limit))
+(defgeneric one-path (source destination &optional limit nodes))
 
-(defmethod one-path (source destination &optional (limit +search-depth+))
+(defmethod one-path (source destination
+		     &optional (limit +search-depth+)
+		     (nodes (make-empty-queue)))
   "Find one path from SOURCE to DESTINATION that passes through VIA.                                                                                                                                        
 If there is no such path, return nil."
   (let* ((problem (make-item-search-problem :initial-state source
@@ -183,13 +185,15 @@ If there is no such path, return nil."
       (defmethod successors :around ((problem (eql problem)) node)
 	(let ((candidates (call-next-method)))
 	  (remove-if #'too-far candidates)))
-      (multiple-value-bind (solution-found? solution)
-	  (bounded-depth-first-search problem limit)
+      (when (empty-queue? nodes)
+	(enqueue-at-end nodes (list (make-node :state source))))
+      (multiple-value-bind (solution-found? solution more-nodes)
+	  (bounded-breadth-first-search-with-nodes problem limit nodes)
 	(if solution-found?
-	    (values t (explain-solution solution))
+	    (values t (explain-solution solution) more-nodes)
 	    (if (null solution)
-		(values nil nil)
-		(values nil :cut-off)))))))
+		(values nil nil more-nodes)
+		(values nil :cut-off more-nodes)))))))
 
 (defun all-paths-pass-through (source destination via)
   "Determine whether all paths from SOURCE to DESTINATION pass through
