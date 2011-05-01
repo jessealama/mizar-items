@@ -996,4 +996,15 @@ fragment at CKB-PATH-2."
 		 (format mml-export "~%")))
 	  (format mml-export ")))~%")
 	  ;; dependency graph backward
-	  (warn "We ought to compute the backward dependency graph at this point, but we're too lazy")))))
+	  (format t "Inverting the dependency table...")
+	  (let ((inverted (invert-dependency-table dependency-graph)))
+	    (loop
+	       initially
+		 (format mml-export "(setf *item-dependency-graph-backward*~%")
+		 (format mml-export "(keys-with-rest->hash-table '(~%")
+	       for item being the hash-keys in inverted using (hash-value deps)
+	       do
+		 (format mml-export "(\"~a\" ~{\"~a\"~^ ~})~%" item deps)
+	       finally
+		 (format mml-export ")))")))
+	  (format t "done.~%")))))
