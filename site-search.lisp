@@ -12,9 +12,8 @@
 (defstruct (item-search-problem (:include problem)))
 
 (defmethod successors ((isp item-search-problem) node)
-  (mapcar #'(lambda (item)
-	      (cons item item))
-	  (gethash (node-state node) *item-dependency-graph-forward*)))
+  (let ((deps (gethash (node-state node) *item-dependency-graph-forward*)))
+    (mapcar #'(lambda (item) (cons item item)) deps)))
 
 (defun all-paths (source destination)
   (if (string= source destination)
