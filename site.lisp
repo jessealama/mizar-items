@@ -19,8 +19,14 @@
 
 (define-constant +article-name-regexp+ "[a-z_0-9]+" 
   :test #'string=)
-(define-constant +number-regexp+ "[0-9]+"
-  :test #'string=)
+(define-constant +positive-natural-number-regexp+ "[1-9][0-9]*"
+  :test #'string=
+  :documentation "A regular expression matching positive natural numbers.  Starting with the zero digit 0 is not permitted")
+(define-constant +number-regexp+
+    (regexp-disjoin "0" 
+		    +positive-natural-number-regexp+)
+  :test #'string=
+  :documentation "A regular expression that matches a natural number.  (0 is a natural number.)")
 (define-constant +item-kinds-prefixes+ (list "k" "m" "r" "v")
   :test #'equal)
 (define-constant +cluster-kinds+ (list "c" "f" "r")
@@ -47,9 +53,17 @@
     (reduce #'regexp-disjoin +item-kinds-string+)
   :test #'string=)
 
+(define-constant +item-name-regexp+
+    (concat +article-name-regexp+
+	    ":"
+	    "(" +item-kind-regexp+ ")"
+	    ":"
+	    "(" +positive-natural-number-regexp+ ")")
+  :test #'string=)
+
 (define-constant +item-uri-regexp+
     (exact-regexp (concat "/" "item"
-			  "/" "(" +article-name-regexp+ ")"
+			  "/" "(" +item-kind-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"))
   :test #'string=)
@@ -96,10 +110,20 @@
 (defun uri-for-article (article)
   (format nil "/article/~a" article))
 
+(define-constant +path-between-items-form-regexp+
+    (exact-regexp "/path")
+  :test #'string=)
+
 (define-constant +path-between-items-uri-regexp+
-    (format nil "^/path[?]?")
+    (exact-regexp (concat "/" "path"
+			  "/" "(" +item-name-regexp+ ")"
+			  "/" "(" +item-name-regexp+ ")"
+			  "/" "(" +positive-natural-number-regexp+ ")"))
   :test #'string=
   :documentation "A regular expression that matches the URI (sans query parameters) for searching for paths in the items dependency graph.")
+
+(defun path-between-items-uri (from to path-number)
+  (format nil "/path/~a/~a/~d" from to path-number))
 
 (define-constant +requires-uri-regexp+
     (exact-regexp
@@ -452,13 +476,14 @@ end;"))
       nil
     (:p (:em "(Not implemented yet.)"))))
 
-(defun explain-search-solution (source destination solution)
+(defgeneric explain-search-solution (source destination solution))
+
+(defmethod explain-search-solution (source destination (steps list))
   (destructuring-bind (source-article source-item-kind source-item-number-str)
       (split ":" source)
     (destructuring-bind (dest-article dest-item-kind dest-item-number-str)
 	(split ":" destination)
-      (let ((steps (explain-solution solution))
-	    (source-uri (uri-for-item-as-string source))
+      (let ((source-uri (uri-for-item-as-string source))
 	    (dest-uri (uri-for-item-as-string destination)))
 	(with-html-output-to-string (s nil :indent nil)
 	  ((:table :class "dependence-path")
@@ -475,6 +500,13 @@ end;"))
 		  (htm ((:tr :class "dependence-path-node")
 			(:td (str item-html)))))
 		(loop
+		   initially 
+		     (let* ((first-step (first steps))
+			    (first-step-html (html-for-item first-step))
+			    (first-step-uri (uri-for-item-as-string first-step)))
+		       (htm
+			((:tr :class "dependence-path-node")
+			 (:td ((:a :href first-step-uri :title first-step) (str first-step-html))))))
 		   for step-from in steps
 		   for step-to in (cdr steps)
 		   for step-from-html = (html-for-item step-from)
@@ -485,15 +517,15 @@ end;"))
 		   for dependence-link-title = (dependence-link-title step-from step-to)
 		   do
 		     (htm
-		      ((:tr :class "dependence-path-node")
-		       (:td ((:a :href step-from-uri :title step-from) (str step-from-html))))
 		      ((:tr :class "dependence-path-edge")
 		       ((:td :class "arrow") ((:a :href dependence-uri :title dependence-link-title) (str +downward-arrow-entity+))))
 		      ((:tr :class "dependence-path-node")
 		       (:td ((:a :href step-to-uri :title step-to) (str step-to-html))))))))))))))
 
-(defun emit-path-form (source destination &rest intermediates)
-  (declare (ignore intermediates))
+(defmethod explain-search-solution (source destination (solution node))
+  (explain-search-solution source destination (explain-solution solution)))
+
+(defun path-form-as-string (source destination)
   (with-html-output-to-string (dummy)
     (:fieldset
      (:legend "Specify a path of dependence from a source to a destination")
@@ -527,88 +559,242 @@ end;"))
 	 ((:input :type "submit"
 		  :value "Search")))))))))
 
-(defgeneric emit-path-between-items ()
-  (:documentation "Display a path that shows a path between two items, possibly with some intermediate items in between."))
+(defvar *path-table* (make-hash-table :test #'equal)
+  "A tale mapping pairs (cons cells) (SOURCE . DESTINATION) to pairs (PATHS . MORE-NODES).  The interpretation is that PATHS is a list of all paths computed so far from SOURCE to DESTINATION, and MORE-NODES is a queue representing a 'frozen' search state: the search for all paths from SOURCE to DESTINATION was most recently stopped, but there were MORE-NODES to consider that could lead to more paths being found.")
 
-(defmethod emit-path-between-items :around ()
-  "Validate the query string.  It must contain:
+(defun paths-from-to (source destination)
+  (multiple-value-bind (paths-and-more-paths we-done-been-here-before?)
+      (gethash (cons source destination) *path-table*)
+    (cond (we-done-been-here-before? 
+	   (destructuring-bind (path-list . more-nodes)
+	       paths-and-more-paths
+	     (values path-list more-nodes))) 
+	  (t ;; no one has asked for a path between these two
+	   (values nil (make-initial-queue source))))))
 
-* source ('from')
-* destination ('to')
+(defun register-path-with-nodes (source destination path nodes)
+  (multiple-value-bind (path-list more-nodes)
+      (paths-from-to source destination)
+    (setf (gethash (cons source destination) *path-table*)
+	  (cons (if (member path path-list :test #'equalp)
+		    path-list
+		    (cons path path-list))
+		nodes))
+    more-nodes))
 
-It may also contain:
+(defun update-paths-with-nodes (source destination new-nodes)
+  (multiple-value-bind (paths-and-nodes)
+      (gethash (cons source destination) *path-table*)
+    (destructuring-bind (paths . nodes)
+	paths-and-nodes
+      (setf (gethash (cons source destination) *path-table*)
+	    (cons paths new-nodes))
+      nodes)))
 
-* intermediate steps ('via'), semicolon delimited"
+(defgeneric emit-path-between-items-form ())
+
+(defmethod emit-path-between-items-form ()
   (let ((source (get-parameter "from"))
-	(destination (get-parameter "to"))
-	(via (get-parameter "via")))
+	(destination (get-parameter "to")))
     (if (and source (string/= source ""))
 	(if (and destination (string/= destination ""))
-	    (let ((intermediates (split #\; via)))
-	      (multiple-value-bind (all-ok bad-guy)
-		  (every-with-falsifying-witness intermediates #'known-item?)
-		(if all-ok
-		    (if (known-item? source)
-			(if (known-item? destination)
-			    (call-next-method)
-			    (miz-item-html ("invalid item")
-				(:return-code +http-bad-request+)
-			      ((:p :class "error-message")
-			       "The given destination, '" (str destination) "', is not the name of a known item.")
-			      (str (apply #'emit-path-form source nil intermediates))))
-			(miz-item-html ("invalid item")
-			    (:return-code +http-bad-request+)
-			  ((:p :class "error-message") 
-			   "The given source, '" (str source) "', is not the name of a known item.")
-			  (str (apply #'emit-path-form nil destination intermediates))))
+	    (if (known-item? source)
+		(if (known-item? destination)
+		    (redirect (path-between-items-uri source destination 1)
+			      :code +http-see-other+)
 		    (miz-item-html ("invalid item")
 			(:return-code +http-bad-request+)
-		      ((:p :class "error-message") "The given intermediate node '" (str bad-guy) "' is not the name of a known item.")
-		      (str (apply #'emit-path-form source destination nil))))))
+		      ((:p :class "error-message")
+		       "The given destination, '" (str destination) "', is not the name of a known item.")
+		      (str (path-form-as-string source nil))))
+		(miz-item-html ("invalid item")
+		    (:return-code +http-bad-request+)
+		  ((:p :class "error-message") 
+		   "The given source, '" (str source) "', is not the name of a known item.")
+		  (str (path-form-as-string nil destination))))
 	    (miz-item-html ("specify a destination")
 		nil
 	      ((:p :class "error-message")
 	       "You must specify a destination item.")
-	      (str (apply #'emit-path-form source nil nil))))
+	      (str (path-form-as-string source nil))))
 	(if destination
 	    (miz-item-html ("specify a source")
 		nil
 	      ((:p :class "error-message")
 	       "You must specify a source item.")
-	      (str (apply #'emit-path-form nil destination nil)))
+	      (str (path-form-as-string nil destination)))
 	    (miz-item-html ("specify a source and destination")
 		nil
-	      (str (apply #'emit-path-form nil nil nil)))))))
+	      (str (path-form-as-string nil nil)))))))
+
+(defgeneric emit-path-between-items ()
+  (:documentation "Display a path that shows a path between two items, possibly with some intermediate items in between."))
+
+(defmethod emit-path-between-items :around ()
+  (destructuring-bind (empty path-part source destination path-number-str)
+      (split "/" (request-uri*))
+    (declare (ignore empty path-part))
+    (if (and source (string/= source ""))
+	(if (and destination (string/= destination ""))
+	  (if (known-item? source)
+	      (if (known-item? destination)
+		  ;; now check paths.  Generate an error page only
+		  ;; when we have computed all paths from the source
+		  ;; to the destination, but the given path number
+		  ;; is out-of-bounds.
+		  (let ((path-number (parse-integer path-number-str)))
+		    (multiple-value-bind (paths more-nodes)
+			(paths-from-to source destination)
+		      (let ((num-paths (length paths)))
+			(if (<= path-number num-paths)
+			    (call-next-method)
+			    (if (empty-queue? more-nodes)
+				(miz-item-html ("invalid path request")
+				    (:return-code +http-not-found+)
+				  ((:p :class "error-message")
+				   "There aren't that many paths between"
+				   (str (pretty-print-item source))
+				   " and "
+				   (str (pretty-print-item destination))
+				   "; there are (only) "
+				   (fmt "~d" num-paths)
+				   " such paths.  Please supply a different path number."))
+				(if (> path-number (1+ num-paths))
+				    (let ((next-path-uri (path-between-items-uri source destination (1+ num-paths)))
+					  (next-path-link-title (format nil "Path number #~d from ~a to ~a" (1+ num-paths) source destination)))
+				      (miz-item-html ("search for a path")
+					  (:return-code +http-see-other+)
+					(:p (if (zerop num-paths)
+						(htm "We haven't computed any paths from "
+						     (str (pretty-print-item source))
+						     " to "
+						     (str (pretty-print-item destination)) ".")
+						(htm "We have already computed "
+						     (fmt "~d" num-paths)
+						     " path(s) from "
+						     (str (pretty-print-item source))
+						     " to "
+						     (str (pretty-print-item destination))) ". There may be more paths, but we don't know yet.") 
+					    " You have requested path number " (str path-number-str) ".  Since paths are computed one at a time, we cannot process your request for path number " (str path-number-str) " before computing path number " (fmt "~d" (1+ num-paths)) " (which might not even exist).  To proceed, specify a smaller path number for a path that is known to exist, or "
+					    ((:a :href next-path-uri
+						 :title next-path-link-title) "search for path " (fmt "~d" (1+ num-paths)) "."))))
+				    (call-next-method)))))))
+		  (miz-item-html ("invalid item")
+		      (:return-code +http-bad-request+)
+		    ((:p :class "error-message")
+		     "The given destination, '" (str destination) "', is not the name of a known item.")
+		    (str (path-form-as-string source nil))))
+	      (miz-item-html ("invalid item")
+		  (:return-code +http-bad-request+)
+		((:p :class "error-message") 
+		 "The given source, '" (str source) "', is not the name of a known item.")
+		(str (path-form-as-string nil destination))))
+	  (miz-item-html ("specify a destination")
+	      nil
+	    ((:p :class "error-message")
+	     "You must specify a destination item.")
+	    (str (path-form-as-string source nil))))
+      (if destination
+	  (miz-item-html ("specify a source")
+	      nil
+	    ((:p :class "error-message")
+	     "You must specify a source item.")
+	    (str (path-form-as-string nil destination)))
+	  (miz-item-html ("specify a source and destination")
+	      nil
+	    (str (path-form-as-string nil nil)))))))
+
+(defun render-path-search-solution (source destination path path-number link-to-previous? link-to-next?)
+  (let* ((path-len (length path))
+	 (explanation (explain-search-solution source destination path))
+	 (source-uri (uri-for-article source))
+	 (source-uri-link-title (item-link-title-from-string source))
+	 (dest-uri (uri-for-article destination))
+	 (dest-uri-link-title (item-link-title-from-string destination))
+	 (next-path-uri (when link-to-next? (path-between-items-uri source destination (1+ path-number))))
+	 (next-path-link-title (format nil "Next path from ~a to ~a" source-uri-link-title dest-uri-link-title))
+	 (prev-path-uri (when link-to-previous? (path-between-items-uri source destination (1- path-number))))
+	 (prev-path-link-title (format nil "Previous path from ~a to ~a" source-uri-link-title dest-uri-link-title)))
+    (with-html-output-to-string (dummy)
+      ((:table :class "item-table")
+       (:tr
+	((:td :width "25%" :align "left")
+	 ((:table :class "item-info")
+	  ((:tr :class "item-info-row")
+	   ((:td :colspan "2" :class "item-info-heading") "Path Info"))
+	  ((:tr :class "item-info-row")
+	   ((:td :class "item-info-key") "Source")
+	   ((:td :class "item-info-value")
+	    ((:a :href source-uri :class "item-name" :title source-uri-link-title) (str source-uri-link-title))))
+	  ((:tr :class "item-info-row")
+	   ((:td :class "item-info-key") "Destination")
+	   ((:td :class "item-info-value")
+	    ((:a :href dest-uri :class "item-name" :title dest-uri-link-title) (str dest-uri-link-title))))
+	  ((:tr :class "item-info-row")
+	 ((:td :class "item-info-key") "Length")
+	 ((:td :class "item-info-value") (str path-len)))
+	((:tr :class "item-info-row")
+	 ((:td :class "item-info-key") "Path Number")
+	 ((:td :class "item-info-value")
+	  "[" (if prev-path-uri
+		  (htm ((:a :href prev-path-uri :title prev-path-link-title) "&lt;"))
+		  (htm "&lt;"))
+	  "]"
+	  " "
+	  (fmt "~d" path-number)
+	  " "
+	  "[" (if next-path-uri
+		  (htm ((:a :href next-path-uri :title next-path-link-title) "&gt;"))
+		  (htm "&gt;"))
+	  "]"))))
+      ((:td :width "75%" :valign "top")
+       (str explanation)))))))
 
 (defmethod emit-path-between-items ()
-  (let* ((source (get-parameter "from"))
-	 (destination (get-parameter "to"))
-	 (source-mml-pos (mml-lar-index source)))
-    (let ((search-problem (make-item-search-problem :initial-state source
-						    :goal destination)))
-      ;; custom successors method: if the current node occurs earler
-      ;; in the MML than the destination node, don't expand
-      ;; (defmethod successors :around ((problem (eql search-problem)) node)
-      ;; 	(let* ((ns (node-state node))
-      ;; 	       (mml-pos (mml-lar-index ns)))
-      ;; 	  (when (<= source-mml-pos mml-pos)
-      ;; 	    (call-next-method))))
-      (multiple-value-bind (solution-found? solution)
-	  (bounded-depth-first-search search-problem +search-depth+)
-	(cond (solution-found?
-	       (let ((explanation (explain-search-solution source destination solution)))
-		 (miz-item-html ("seach for paths")
-		     nil
-		   (:p "Here's a solution:")
-		   (str explanation))))
-	      ((eq solution :cut-off)
-	       (miz-item-html ("search cut off")
-		   nil
-		 (:p "There may be a path from " (str source) " to " (str destination) ", but we were unable to find one given the current search limits.")))
-	      (t
-	       (miz-item-html ("there is no path")
-		   nil
-		 (:p "There is no path of dependence from " (str (link-to-item source)) " to " (str (link-to-item destination)) "."))))))))
+  (destructuring-bind (empty path-part source destination path-number-str)
+      (split "/" (request-uri*))
+    (declare (ignore empty path-part))
+    (multiple-value-bind (paths more-nodes)
+	(paths-from-to source destination)
+      (let ((path-number (parse-integer path-number-str))
+	    (num-paths (length paths)))
+      (if (<= path-number num-paths)
+	  (let* ((path (nth (1- path-number) paths))
+		 (html (render-path-search-solution source
+						destination
+						path
+						path-number
+						(> path-number 1)
+						(or (not (empty-queue? more-nodes))
+						    (<= path-number num-paths)))))
+	    (miz-item-html ("path found")
+		nil
+	      (str html)))
+	  (multiple-value-bind (solution-found? solution more-nodes)
+	      (one-path source destination +search-depth+ more-nodes)
+	    (cond (solution-found?
+		   (register-path-with-nodes source destination solution more-nodes)
+		   (miz-item-html ("path found")
+		       nil
+		     (str (render-path-search-solution source
+						       destination
+						       solution
+						       path-number
+						       (> path-number 1)
+						       (or (not (empty-queue? more-nodes))
+							   (<= path-number num-paths))))))
+		  ((eq solution :cut-off)
+		   ;; update the path table
+		   (update-paths-with-nodes source destination more-nodes)
+		   (miz-item-html ("search cut off")
+		       nil
+		     (:p "There may be a path from " (str source) " to " (str destination) ", but we were unable to find one given the current search limits.  (Searches are currenly restricted to not go deeper than depth " (:b (str +search-depth+)))))
+		  (t
+		   ;; update the path table -- we're done with source and destination
+		   (update-paths-with-nodes source destination (make-empty-queue))
+		   (miz-item-html ("there is no path")
+		       nil
+		     (:p "There is no path of dependence from " (str (link-to-item source)) " to " (str (link-to-item destination)) "."))))))))))
 
 (defun article-listing ()
   (with-html-output-to-string (foo)
@@ -790,7 +976,7 @@ It may also contain:
   (destructuring-bind (article-name item-kind item-number)
       (split-item-identifier item-string)
     (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
-	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	   (ckb-for-item (gethash item-key *item-to-fragment-table*))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir)))
       (when ckb-for-item
@@ -818,7 +1004,7 @@ It may also contain:
   (destructuring-bind (article-name item-kind item-number)
       (split-item-identifier item-string)
     (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
-	   (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	   (ckb-for-item (gethash item-key *item-to-fragment-table*))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir)))
       (when ckb-for-item
@@ -916,7 +1102,7 @@ It may also contain:
 	       (article-uri (uri-for-article article-name))
 	       (num-items-for-article (gethash article-name *article-num-items*))
 	       (item-key (format nil "~a:~a:~d" article-name item-kind item-number))
-	       (ckb-for-item (gethash item-key *item-to-ckb-table*))
+	       (ckb-for-item (gethash item-key *item-to-fragment-table*))
 	       (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	       (article-text-dir (format nil "~a/text" article-dir)))
 	  (destructuring-bind (ckb-article-name ckb-number-str)
@@ -1014,8 +1200,8 @@ It may also contain:
 
 (defun fragment->items (fragment)
   (loop
-     for v being the hash-values in *item-to-ckb-table*
-     for k being the hash-keys in *item-to-ckb-table*
+     for v being the hash-values in *item-to-fragment-table*
+     for k being the hash-keys in *item-to-fragment-table*
      when (string= v fragment) collect k into keys
      finally (return keys)))
 
@@ -1680,6 +1866,8 @@ It may also contain:
   (register-regexp-dispatcher +supports-uri-regexp+ #'emit-supports-page)
 
   ;; paths
+  (register-regexp-dispatcher +path-between-items-form-regexp+
+			      #'emit-path-between-items-form)
   (register-regexp-dispatcher +path-between-items-uri-regexp+
 			      #'emit-path-between-items)
 
