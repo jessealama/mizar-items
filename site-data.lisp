@@ -7,6 +7,7 @@
 
 (defvar *mml-version* nil)
 (defvar *item-to-item-dependency-graph* nil)
+(defvar *item-to-fragment-table* nil)
 (defvar *ckb-dependency-graph-forward* nil)
 (defvar *ckb-dependency-graph-backward* nil)
 (defvar *item-dependency-graph-forward* nil)
@@ -26,8 +27,8 @@
 (defun write-full-item-dependency-graph ()
   (loop
      with item-forward-table = (make-hash-table :test #'equal)
-     for item being the hash-keys of *item-to-ckb-table*
-     for ckb = (gethash item *item-to-ckb-table*)
+     for item being the hash-keys of *item-to-fragment-table*
+     for ckb = (gethash item *item-to-fragment-table*)
      for forward-ckb-deps = (gethash ckb *ckb-dependency-graph-forward*)
      for forward-item-deps = (reduce #'append (mapcar #'(lambda (ckb-dep)
 							  (gethash ckb-dep *ckb-to-items-table*))
@@ -82,7 +83,7 @@
 									(gethash dep-ckb *ckb-to-items-table*))
 								    dependent-ckbs))))
 		     (register-deps item dependent-items)))
-	       *item-to-ckb-table*))
+	       *item-to-fragment-table*))
     edges))
 
 (defun dependency-tables-from-edge-list ()
@@ -164,18 +165,18 @@
 (defun load-item-to-fragment-table ()
   (if (file-exists-p (mizar-items-config 'item-to-fragment-path))
       (let ((lines (lines-of-file (mizar-items-config 'item-to-fragment-path)))
-	    (item-to-ckb-table (make-hash-table :test #'equal))
+	    (item-to-fragment-table (make-hash-table :test #'equal))
 	    (ckb-to-items-table (make-hash-table :test #'equal)))
 	(format t "Loading item-to-fragment table...")
 	(dolist (line lines)
 	  (destructuring-bind (item ckb)
 	      (split " " line)
-	    (setf (gethash item item-to-ckb-table) ckb)
+	    (setf (gethash item item-to-fragment-table) ckb)
 	    (pushnew item (gethash ckb ckb-to-items-table) 
 		     :test #'string=)))
 	(format t "done~%")
-	(values item-to-ckb-table ckb-to-items-table))
-      (error "The item-to-fragment table doesn't exist at the expected location '~a'" *item-to-ckb-table*)))
+	(values item-to-fragment-table ckb-to-items-table))
+      (error "The item-to-fragment table doesn't exist at the expected location '~a'" *item-to-fragment-table*)))
 
 (defun load-dependency-graphs (&optional force)
 
@@ -190,9 +191,9 @@
 
   ;; items-to-fragments
   (when (or force
-	    (null *item-to-ckb-table*)
+	    (null *item-to-fragment-table*)
 	    (null *ckb-to-items-table*))
-    (multiple-value-setq (*item-to-ckb-table* *ckb-to-items-table*)
+    (multiple-value-setq (*item-to-fragment-table* *ckb-to-items-table*)
       (load-item-to-fragment-table)))
 
   ;; the fragment dependencies and the item-to-fragment table are the
