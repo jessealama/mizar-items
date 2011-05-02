@@ -193,9 +193,10 @@ QUEUING-FN decides which nodes to look at first."
 solution to a search problem, this function gives a \"printout\" of
 how the node was obtained, starting from an initial node."
   (labels ((explain-backwards (n) 
-	     (when (node-parent n)
-	       (cons (node-action n)
-		     (explain-backwards (node-parent n))))))
+	     (if (node-parent n)
+		 (cons (node-action n)
+		       (explain-backwards (node-parent n)))
+		 (list (node-state n)))))
     (reverse (explain-backwards node))))
 
 (defun breadth-first-search (problem)
