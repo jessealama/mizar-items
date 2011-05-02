@@ -178,7 +178,7 @@ fragment at CKB-PATH-2."
 	    (format nil "~(~a~):scheme:~a" article nr))
 	(if schemenr
 	    (format nil "~(~a~):scheme:~a" aid schemenr)
-	    (format nil "~(~a~):scheme:~a" article nr)))))
+	    (format nil "~(~a~):scheme:~a" aid nr)))))
 
 (defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
   (let ((nr (new-value-of-nr-attribute justifiedtheorem-line))
