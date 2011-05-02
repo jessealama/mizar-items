@@ -1008,7 +1008,7 @@ end;"))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir)))
       (when ckb-for-item
-	(destructuring-bind (ckb-article-name ckb-number)
+	(destructuring-bind (ckb-article-name . ckb-number)
 	    ckb-for-item
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
