@@ -28,6 +28,7 @@
 	       (:file "queue")
 	       (:file "search")
 	       (:file "mml")
+	       (:file "depgraph")
 	       (:file "site-data")
 	       (:file "tc")
 	       (:file "site-search")
