@@ -168,6 +168,10 @@ fragment at CKB-PATH-2."
 (defun new-value-of-propnr-attribute (xml-line)
   (new-value-of-attribute "propnr" xml-line))
 
+(defun schemeblock-xml-line->item (scheme-line article)
+  (let ((schemenr (new-value-of-schemenr-attribute scheme-line)))
+    (format nil "~(~a~):scheme:~a" article schemenr)))
+
 (defun scheme-xml-line->item (scheme-line article)
   (let ((schemenr (new-value-of-schemenr-attribute scheme-line))
 	(nr (new-value-of-nr-attribute scheme-line))
@@ -434,7 +438,7 @@ fragment at CKB-PATH-2."
 	(article (article-from-fragment-path fragment-path))
 	(items nil))
     (cond ((scan ":: <SchemeBlock .*>" second-line)
-	   (push (scheme-xml-line->item second-line article) items))
+	   (push (schemeblock-xml-line->item second-line article) items))
 	  ((scan ":: <JustifiedTheorem .*>" second-line)
 	   (push (justifiedtheorem-xml-line->item second-line) items))
 	  ((scan ":: <Proposition " second-line)
