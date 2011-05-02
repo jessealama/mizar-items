@@ -746,7 +746,17 @@ end;"))
 	  "[" (if next-path-uri
 		  (htm ((:a :href next-path-uri :title next-path-link-title) "&gt;"))
 		  (htm "&gt;"))
-	  "]"))))
+	  "]"))
+	  ((:tr :class "item-info-row")
+	   ((:td :colspan "2" :class "item-info-heading") "Items"))
+	  ((:tr :class "item-info-row")
+	   ((:td :colspan "2" :class "item-info-value")
+	    (:li
+	     (loop
+		for step in path
+		for step-link = (link-to-item step)
+		do
+		  (htm (:li (str step-link)))))))))
       ((:td :width "75%" :valign "top")
        (str explanation)))))))
 
