@@ -1017,11 +1017,12 @@ end;"))
 	   (ckb-for-item (gethash item-key *item-to-fragment-table*))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir)))
-      (when ckb-for-item
-	(destructuring-bind (ckb-article-name . ckb-number)
-	    ckb-for-item
-	  (declare (ignore ckb-article-name)) ;; same as ARTICLE
-	  (format nil "~a/ckb~d.html" article-text-dir ckb-number))))))
+      (if ckb-for-item
+	  (destructuring-bind (ckb-article-name . ckb-number)
+	      ckb-for-item
+	    (declare (ignore ckb-article-name)) ;; same as ARTICLE
+	    (format nil "~a/ckb~d.html" article-text-dir ckb-number))
+	  (error "There is no known fragment for the item '~a'" item-string)))))
 
 (defun html-for-item (item-string)
   (file-as-string (html-path-for-item item-string)))
