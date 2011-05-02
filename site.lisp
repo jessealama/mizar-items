@@ -674,7 +674,7 @@ end;"))
 						     " path(s) from "
 						     (str (pretty-print-item source))
 						     " to "
-						     (str (pretty-print-item destination))) ". There may be more paths, but we don't know yet.") 
+						     (str (pretty-print-item destination)) ". There may be more paths, but we don't know yet.")) 
 					    " You have requested path number " (str path-number-str) ".  Since paths are computed one at a time, we cannot process your request for path number " (str path-number-str) " before computing path number " (fmt "~d" (1+ num-paths)) " (which might not even exist).  To proceed, specify a smaller path number for a path that is known to exist, or "
 					    ((:a :href next-path-uri
 						 :title next-path-link-title) "search for path " (fmt "~d" (1+ num-paths)) "."))))
