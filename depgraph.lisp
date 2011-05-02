@@ -178,7 +178,7 @@ fragment at CKB-PATH-2."
 	    (format nil "~(~a~):scheme:~a" article nr))
 	(if schemenr
 	    (format nil "~(~a~):scheme:~a" aid schemenr)
-	    (format nil "~(~a~):scheme:~a" aid nr)))))
+	    (format nil "~(~a~):scheme:~a" article nr)))))
 
 (defun justifiedtheorem-xml-line->item (justifiedtheorem-line)
   (let ((nr (new-value-of-nr-attribute justifiedtheorem-line))
@@ -867,6 +867,9 @@ fragment at CKB-PATH-2."
      collecting (cons item
 		      (remove-if-not #'definiens-item? needed-items)) into needed
      finally (return needed)))
+
+(defun deftheorem-item? (item)
+  (scan ":deftheorem:" item))
 
 (defun deftheorems-needed-for-article-by-item (article)
   (loop
