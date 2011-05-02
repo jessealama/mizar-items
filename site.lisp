@@ -751,7 +751,7 @@ end;"))
 	   ((:td :colspan "2" :class "item-info-heading") "Items"))
 	  ((:tr :class "item-info-row")
 	   ((:td :colspan "2" :class "item-info-value")
-	    (:li
+	    (:ol
 	     (loop
 		for step in path
 		for step-link = (link-to-item step)
