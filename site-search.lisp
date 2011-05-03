@@ -20,7 +20,7 @@
       (list (list source))
       (let ((source-pos (mml-lar-index-of-item source))
 	    (dest-pos (mml-lar-index-of-item destination)))
-	(if (< dest-pos source-pos)
+	(if (> dest-pos source-pos)
 	    nil
 	    (mapcar #'(lambda (path)
 			(cons source path))
