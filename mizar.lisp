@@ -48,8 +48,15 @@ variable (at load time).")
     (or (string= article-str-lc "tarski")
 	(member article-str-lc *mml-lar* :test #'string=))))
 
-(defun mml-lar-index (article)
-  (position article *mml-lar* :test #'string=))
+
+(let ((table (make-hash-table :test #'equal)))
+  (defun mml-lar-index (article)
+    (multiple-value-bind (position present?)
+	(gethash article table)
+      (if present?
+	  position
+	  (setf (gethash article table)
+		(position thing *mml-lar* :test #'string=))))))
 
 (defun mml-< (article-1 article-2)
   (< (mml-lar-index article-1)
