@@ -15,19 +15,27 @@
   (let ((deps (gethash (node-state node) *item-dependency-graph-forward*)))
     (mapcar #'(lambda (item) (cons item item)) deps)))
 
-(defun all-paths (source destination)
-  (if (string= source destination)
-      (list (list source))
-      (let ((source-pos (mml-lar-index-of-item source))
-	    (dest-pos (mml-lar-index-of-item destination)))
-	(if (> dest-pos source-pos)
-	    nil
-	    (mapcar #'(lambda (path)
-			(cons source path))
-		    (reduce #'append 
-			    (mapcar #'(lambda (successor)
-					(all-paths successor destination))
-				    (gethash source *item-dependency-graph-forward*))))))))
+(let ((table (make-hash-table :test #'equal)))
+  (defun all-paths (source destination)
+    (let ((key (cons source destination)))
+      (multiple-value-bind (old-paths present?)
+	  (gethash key table)
+	(if present?
+	    old-paths
+	    (let ((new-paths
+		   (if (string= source destination)
+		       (list (list source))
+		       (let ((source-pos (mml-lar-index-of-item source))
+			     (dest-pos (mml-lar-index-of-item destination)))
+			 (if (> dest-pos source-pos)
+			     nil
+			     (mapcar #'(lambda (path)
+					 (cons source path))
+				     (reduce #'append 
+					     (mapcar #'(lambda (successor)
+							 (all-paths successor destination))
+						     (gethash source *item-dependency-graph-forward*)))))))))
+	      (setf (gethash key table) new-paths)))))))
 
 (defun all-paths-from-via (source destination via)
   (let ((paths-from-source-to-via (all-paths source via)))
