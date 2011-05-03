@@ -201,12 +201,159 @@ If there is no such path, return nil."
       (when (empty-queue? nodes)
 	(enqueue-at-end nodes (list (make-node :state source))))
       (multiple-value-bind (solution-found? solution more-nodes)
-	  (bounded-breadth-first-search-with-nodes problem limit nodes)
+	  (bounded-breadth-first-search-with-nodes problem
+						   (or limit
+						       +search-depth+)
+						   nodes)
 	(if solution-found?
 	    (values t (explain-solution solution) more-nodes)
 	    (if (null solution)
 		(values nil nil more-nodes)
 		(values nil :cut-off more-nodes)))))))
+
+(defclass path-broker ()
+  ((path-table
+    :type hash-table
+    :initform (make-hash-table :test #'equal)
+    :accessor path-table
+    :documentation "The table that maps pairs (SOURCE . DESTINATION) to information about paths from SOURCE to DESTINATION."))
+  (:documentation "A path broker manages paths from a source to a
+  destination.  It acts as an enumerator of these paths."))
+
+(defvar *path-broker* (make-instance 'path-broker)
+  "A convenient global instance of PATH-BROKER.")
+
+(defmethod search-state (source destination &optional (broker *path-broker*))
+  "The search state, according to BROKER, of the path search from SOURCE to DESTINATION.  The value is a queue."
+  (let ((path-table (path-table broker))
+	(key (cons source destination)))
+    (multiple-value-bind (paths-and-more-nodes present?)
+	(gethash key path-table)
+      (if present?
+	  (destructuring-bind (paths . more-nodes)
+	      paths-and-more-nodes
+	    (declare (ignore paths))
+	    more-nodes)
+	  (let ((initial (make-initial-queue source)))
+	    (setf (gethash key path-table)
+		  (cons nil initial))
+	    initial)))))
+
+(define-condition no-more-paths-error (error)
+  ((source
+    :initarg :source
+    :reader source)
+   (destination
+    :initarg :destination
+    :reader destination)
+   (broker
+    :initarg :broker
+    :reader broker))
+  (:documentation "An error representing the condition that an additional path fro SOURCE to DESTINATION (according to BROKER) has been requested, but there is no such path.")
+  (:report (lambda (condition stream)
+	     (format stream "There are no further paths from ~a to ~a (accoding to ~a)"
+		     (source condition)
+		     (destination condition)
+		     (broker condition)))))
+
+(defun register-path (source destination new-path new-nodes broker)
+  (let ((path-table (path-table broker))
+	(key (cons source destination)))
+    (multiple-value-bind (paths-and-more-nodes present?)
+	(gethash key path-table)
+      (assert present?)
+      (destructuring-bind (paths . more-nodes)
+	  paths-and-more-nodes
+	(declare (ignore more-nodes))
+	(setf (gethash key path-table)
+	      (cons (append paths (list new-path))
+		    new-nodes))))))
+
+(defun terminate-search-session (source destination broker)
+  (let ((path-table (path-table broker))
+	(key (cons source destination)))
+    (multiple-value-bind (paths-and-more-nodes present?)
+	(gethash key path-table)
+      (assert present?)
+      (destructuring-bind (paths . more-nodes)
+	  paths-and-more-nodes
+	(declare (ignore more-nodes))
+	(setf (gethash key path-table)
+	      (cons paths (make-empty-queue)))))))
+
+(defgeneric next-path (source destination &optional broker)
+  (:documentation "The next path from SOURCE to DESTINATION according
+  to the path broker BROKER."))
+
+(defmethod next-path (source destination &optional (broker *path-broker*))
+  (let ((more-nodes (search-state source destination broker)))
+    (if (empty-queue? more-nodes)
+	(error 'no-more-paths-error
+	       :source source
+	       :destination destination
+	       :broker broker
+	       )
+	(multiple-value-bind (solution-found? solution even-more-nodes)
+	    (one-path source destination nil more-nodes)
+	  (if solution-found?
+	      (progn
+		(register-path source destination solution even-more-nodes broker)
+		solution)
+	      (progn
+		(terminate-search-session source destination broker)
+		(error 'no-more-paths-error
+		       :source source
+		       :destination destination
+		       :broker broker)))))))
+
+(defgeneric possibly-more-paths? (source destination &optional broker)
+  (:documentation "Have we computed all possible paths from SOURCE to
+  DESTINATION (according to BROKER)?  If so, return NIL.  Otherwise,
+  return T.  There may in fact not be any more paths from SOURCE to
+  DESTINATION, but we haven't shown that to be so yet."))
+
+(defmethod possibly-more-paths? (source destination &optional (broker *path-broker*))
+  (not (empty-queue? (search-state source destination broker))))
+
+(defun all-known-paths (source destination &optional (broker *path-broker*))
+  (let ((path-table (path-table broker))
+	(key (cons source destination)))
+    (multiple-value-bind (paths-and-more-nodes present?)
+	(gethash key path-table)
+      (if present?
+	  (destructuring-bind (paths . more-nodes)
+	      paths-and-more-nodes
+	    (declare (ignore more-nodes))
+	    paths)
+	  (progn
+	    (setf (gethash key path-table)
+		  (cons nil (make-initial-queue destination)))
+	    nil)))))
+
+(defun num-paths-known (source destination &optional (broker *path-broker*))
+  (length (all-known-paths source destination broker)))
+
+(defun nth-path (source destination n &optional (broker *path-broker*))
+  (let ((num-known-paths (num-paths-known source destination broker)))
+    (if (< n num-known-paths)
+	(nth n (all-known-paths source destination broker))
+	(loop
+	   for i from 0 upto (- n num-known-paths)
+	   do (next-path source destination broker) ; chuga chuga chuga...
+	   finally
+	     (let ((all-paths-now (all-known-paths source destination broker)))
+	       (return (nth n all-paths-now)))))))
+
+(defun all-possible-paths (source destination &optional (broker *path-broker*))
+  (handler-case
+      (loop do (next-path source destination broker)) ; over and over and ...
+
+    (no-more-paths-error () (all-known-paths source destination broker))))
+
+(defgeneric one-path-including-and-excluding (source destination to-be-included to-be-excluded)
+  (:documentation "Find a path from SOURCE to DESTINATION that passes through all the items listed in TO-BE-INCLUDED but passes through none of the items mentioned in TO-BE-EXCLUDED."))
+
+(defmethod one-path-excluding-and-including (source destination to-be-included to-be-excluded))
 
 (defun all-paths-pass-through (source destination via)
   "Determine whether all paths from SOURCE to DESTINATION pass through
