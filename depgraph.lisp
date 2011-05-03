@@ -885,7 +885,7 @@ fragment at CKB-PATH-2."
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
-     with articles = (append '("hidden" "tarski") (articles-present-in-itemization-directory))
+     with articles = (articles-present-in-itemization-directory)
      with num-articles = (length articles)
      for article in articles
      for i from 1
