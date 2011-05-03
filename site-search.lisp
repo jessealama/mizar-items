@@ -162,6 +162,9 @@ If there is no such path, return nil."
 	      (values nil nil)
 	      (values nil :cut-off))))))
 
+(defun mml-lar-index-of-item (item)
+  (mml-lar-index (item-article item)))
+
 (defgeneric one-path (source destination &optional limit nodes))
 
 (defmethod one-path (source destination
@@ -171,14 +174,12 @@ If there is no such path, return nil."
 If there is no such path, return nil."
   (let* ((problem (make-item-search-problem :initial-state source
 					    :goal destination))
-	 (dest-article (item-article destination))
-	 (dest-mml-pos (mml-lar-index dest-article)))
+	 (dest-mml-pos (mml-lar-index-of-item destination)))
     (flet ((too-far (action-item)
 	     (destructuring-bind (action . item)
 		 action-item
 	       (declare (ignore action))
-	       (let* ((node-article (item-article item))
-		      (node-mml-pos (mml-lar-index node-article)))
+	       (let* ((node-mml-pos (mml-lar-index-of-item item)))
 		 (when (null node-mml-pos)
 		   (error "unknown article coming from item '~a'" item))
 		 (< node-mml-pos dest-mml-pos)))))
