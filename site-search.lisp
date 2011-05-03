@@ -18,12 +18,16 @@
 (defun all-paths (source destination)
   (if (string= source destination)
       (list (list source))
-      (mapcar #'(lambda (path)
-		  (cons source path))
-	      (reduce #'append 
-		      (mapcar #'(lambda (successor)
-				  (all-paths successor destination))
-			      (gethash source *item-dependency-graph-forward*))))))
+      (let ((source-pos (mml-lar-index-of-item source))
+	    (dest-pos (mml-lar-index-of-item destination)))
+	(if (< dest-pos source-pos)
+	    nil
+	    (mapcar #'(lambda (path)
+			(cons source path))
+		    (reduce #'append 
+			    (mapcar #'(lambda (successor)
+					(all-paths successor destination))
+				    (gethash source *item-dependency-graph-forward*))))))))
 
 (defun all-paths-from-via (source destination via)
   (let ((paths-from-source-to-via (all-paths source via)))
