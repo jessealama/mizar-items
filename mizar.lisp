@@ -56,7 +56,7 @@ variable (at load time).")
       (if present?
 	  position
 	  (setf (gethash article table)
-		(position thing *mml-lar* :test #'string=))))))
+		(position article *mml-lar* :test #'string=))))))
 
 (defun mml-< (article-1 article-2)
   (< (mml-lar-index article-1)
