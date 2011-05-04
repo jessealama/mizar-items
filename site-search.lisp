@@ -37,6 +37,14 @@
 						     (gethash source *item-dependency-graph-forward*)))))))))
 	      (setf (gethash key table) new-paths)))))))
 
+(defun all-paths-from (source))
+
+(defun all-paths-from-via (source via))
+
+(defun all-paths-to (destination)
+  (let ((*item-dependency-graph-forward* *item-dependency-graph-backward*))
+    (mapcar #'reverse (all-paths-from destination))))
+
 (defun all-paths-from-via (source destination via)
   (let ((paths-from-source-to-via (all-paths source via)))
     (when paths-from-source-to-via
