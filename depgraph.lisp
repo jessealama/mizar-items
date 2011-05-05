@@ -946,7 +946,11 @@ fragment at CKB-PATH-2."
        (let ((deps (gethash item *items-needed-for-item*)))
 	 (setf (gethash item table) deps)
 	 (dolist (dep deps)
-	   (pushnew dep q :test #'string=)))
+	   (multiple-value-bind (dep-deps present?)
+	       (gethash dep table)
+	     (declare (ignore dep-deps))
+	     (unless present?
+	       (pushnew dep q :test #'string=)))))
        (when (null q)
 	 (return table))))
 
