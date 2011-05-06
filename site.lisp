@@ -1014,14 +1014,11 @@ end;"))
   (destructuring-bind (article-name item-kind item-number)
       (split-item-identifier item-string)
     (let* ((item-key (format nil "~a:~a:~a" article-name item-kind item-number))
-	   (ckb-for-item (gethash item-key *item-to-fragment-table*))
+	   (ckb-number (gethash item-key *item-to-fragment-table*))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir)))
-      (if ckb-for-item
-	  (destructuring-bind (ckb-article-name . ckb-number)
-	      ckb-for-item
-	    (declare (ignore ckb-article-name)) ;; same as ARTICLE
-	    (format nil "~a/ckb~d.html" article-text-dir ckb-number))
+      (if ckb-number
+	  (format nil "~a/ckb~d.html" article-text-dir ckb-number)
 	  (error "There is no known fragment for the item '~a'" item-string)))))
 
 (defun html-for-item (item-string)
@@ -1112,12 +1109,9 @@ end;"))
 	     (article-uri (uri-for-article article-name))
 	     (num-items-for-article (gethash article-name *article-num-items*))
 	     (item-key (format nil "~a:~a:~d" article-name item-kind item-number))
-	     (ckb-for-item (gethash item-key *item-to-fragment-table*))
+	     (ckb-number (gethash item-key *item-to-fragment-table*))
 	     (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	     (article-text-dir (format nil "~a/text" article-dir)))
-	(destructuring-bind (ckb-article-name . ckb-number)
-	    ckb-for-item
-	  (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
 	  (let* ((article-name-uc (format nil "~:@(~a~)" article-name))
 		 (fragment-path (format nil "~a/ckb~d.html"
 					article-text-dir
@@ -1202,7 +1196,7 @@ end;"))
 				  (:li ((:a :href requires-uri :title "Items on which this item depends") (:b "requires")))
 				  (:li ((:a :href supports-uri :title "Items that this item supports") (:b "supports"))))))))
 			     ((:td :width "75%" :valign "top")
-			      (str item-html))))))))))
+			      (str item-html)))))))))
 
 (defun fragment->items (fragment)
   (loop
