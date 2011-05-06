@@ -1121,7 +1121,7 @@ end;"))
 	  (let* ((article-name-uc (format nil "~:@(~a~)" article-name))
 		 (fragment-path (format nil "~a/ckb~d.html"
 					article-text-dir
-					ckb-number-str))
+					ckb-number))
 		 (item-html (file-as-string fragment-path))
 		 (prev-ckb-uri (unless (= ckb-number 1)
 				 (uri-for-fragment article-name (1- ckb-number))))
@@ -1164,7 +1164,7 @@ end;"))
 					 (htm "&lt;"))
 				 "]"
 				 " "
-				 (str ckb-number-str)
+				 (str ckb-number)
 				 " "
 				 "[" (if next-ckb-uri
 					 (htm ((:a :href next-ckb-uri :title next-ckb-link-title) "&gt;"))
