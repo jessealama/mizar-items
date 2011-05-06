@@ -1531,8 +1531,20 @@ end;"))
     (item-inline-name article kind number)))
 
 (defun earlier-in-tsorted-list (item-1 item-2)
-  (< (position item-1 *items-tsorted* :test #'string=)
-     (position item-2 *items-tsorted* :test #'string=)))
+  (let ((lar-1 (mml-lar-index-of-item item-1))
+	(lar-2 (mml-lar-index-of-item item-2)))
+    (cond ((< lar-1 lar-2) t)
+	  ((= lar-1 lar-2)
+	   (multiple-value-bind (ckb-1 present-1?)
+	       (gethash item-1 *item-to-fragment-table*)
+	     (if present-1?
+		 (multiple-value-bind (ckb-2 present-2?)
+		     (gethash item-2 *item-to-fragment-table*)
+		   (if present-2?
+		       (< ckb-1 ckb-2)
+		       (error "We cannot determine whether item '~a' is topologically less than item '~a', coming from the same article, because '~a' cannot be found in the item-to-fragment table" item-1 item-2 item-2)))
+		 (error "We cannot determine whether item '~a' is topologically less than item '~a' because '~a', coming from the same article, cannot be found in the item-to-fragment table" item-1 item-2 item-1))))
+	  (t nil))))
 
 (defun item-requires-tsorted (item)
   (let* ((requires (gethash item *item-dependency-graph-forward*))
