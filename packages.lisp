@@ -6,4 +6,7 @@
 
 (defvar *mizar-package* (find-package :mizar))
 
+;; early cl-who configuration of attribute delimit character
+(setf *attribute-quote-char* #\")
+
 ;;; packages.lisp ends here
