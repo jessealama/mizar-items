@@ -151,14 +151,15 @@ returning NIL."
 	request:")
 	(let ((params (get-parameters*)))
 	  (if params
-	      (:dl
-	       (loop
-		  for (param . value) in (get-parameters*)
-		  do
-		    (htm
-		     (:dt param)
-		     (:dd value))))
-	      (:p (:em "(none)")))))
+	      (htm
+	       (:dl
+		(loop
+		   for (param . value) in (get-parameters*)
+		   do
+		     (htm
+		      (:dt param)
+		      (:dd value)))))
+	      (htm (:p (:em "(none)"))))))
       (when (= error-code +http-method-not-allowed+)
 	(let* ((uri (request-uri*))
 	       (method (request-method*))
