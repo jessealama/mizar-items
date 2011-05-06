@@ -63,7 +63,7 @@
 
 (define-constant +item-uri-regexp+
     (exact-regexp (concat "/" "item"
-			  "/" "(" +item-kind-regexp+ ")"
+			  "/" "(" +article-name-regexp+ ")"
 			  "/" "(" +item-kind-regexp+ ")"
 			  "/" "(" +number-regexp+ ")"))
   :test #'string=)
