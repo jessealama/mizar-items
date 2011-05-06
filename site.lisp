@@ -1115,7 +1115,7 @@ end;"))
 	     (ckb-for-item (gethash item-key *item-to-fragment-table*))
 	     (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	     (article-text-dir (format nil "~a/text" article-dir)))
-	(destructuring-bind (ckb-article-name ckb-number-str)
+	(destructuring-bind (ckb-article-name . ckb-number-str)
 	    (split ":" ckb-for-item)
 	  (declare (ignore ckb-article-name)) ;; same as ARTICLE-NAME
 	  (let* ((article-name-uc (format nil "~:@(~a~)" article-name))
