@@ -1692,7 +1692,7 @@ end;"))
 				  (destructuring-bind (dep-article dep-kind dep-num)
 				      (split-item-identifier dep)
 				    (let ((dep-uri (dependence-uri-for-items dep item))
-					  (dep-link-title (dependence-link-title item dep))
+					  (dep-link-title (dependence-link-title dep item))
 					  (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
 				      (htm
 				       (:li ((:a :href dep-uri :title dep-link-title)
