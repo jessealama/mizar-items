@@ -144,14 +144,21 @@ returning NIL."
       (miz-item-html ("not found")
 	  (:return-code +http-not-found+)
 	(:p "I can't find what you're looking for.")
-	(:p "Your request was:")
-	(:dl
-	 (loop
-	    for (param . value) in (get-parameters*)
-	    do
-	      (htm
-	       (:dt param)
-	       (:dd value)))))
+	(:p "You requested the URI:")
+	(:blockquote
+	 (str (request-uri*)))
+	(:p "Here are the GET parameters that you submitted with your
+	request:")
+	(let ((params (get-parameters*)))
+	  (if params
+	      (:dl
+	       (loop
+		  for (param . value) in (get-parameters*)
+		  do
+		    (htm
+		     (:dt param)
+		     (:dd value))))
+	      (:p (:em "(none)")))))
       (when (= error-code +http-method-not-allowed+)
 	(let* ((uri (request-uri*))
 	       (method (request-method*))
