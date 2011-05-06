@@ -882,6 +882,25 @@ fragment at CKB-PATH-2."
 		      (remove-if-not #'deftheorem-item? needed-items)) into needed
      finally (return needed)))
 
+(defun make-item-to-fragment-table-for-article (article)
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for i from 1
+     for mappings = (item-to-fragments-for-article article)
+     do
+       (dolist (mapping mappings)
+	 (destructuring-bind (article fragment-number items)
+	     mapping
+	   (dolist (item items)
+	     (multiple-value-bind (old-item present?)
+		 (gethash item table)
+	       (assert (not present?)
+		       (item)
+		       "We have already registered ~a in the item-to-fragment table as fragment ~d of article ~a" item (cdr old-item) (car old-item)))
+	     (setf (gethash item table) (cons article fragment-number)))))
+     finally
+       (return table)))
+
 (defun make-item-to-fragment-table ()
   (loop
      with table = (make-hash-table :test #'equal)
