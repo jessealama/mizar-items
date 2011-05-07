@@ -37,6 +37,26 @@
 						     (gethash source *item-dependency-graph-forward*)))))))))
 	      (setf (gethash key table) new-paths)))))))
 
+(let ((table (make-hash-table :test #'equal)))
+  (defun count-paths (source destination)
+    (let ((key (cons source destination)))
+      (multiple-value-bind (num-known-paths present?)
+	  (gethash key table)
+	(if present?
+	    num-known-paths
+	    (let ((num-paths
+		   (if (string= source destination)
+		       1
+		       (let ((source-pos (mml-lar-index-of-item source))
+			     (dest-pos (mml-lar-index-of-item destination)))
+			 (if (> dest-pos source-pos)
+			     0
+			     (reduce #'+
+				     (mapcar #'(lambda (successor)
+						 (count-paths successor destination))
+					     (gethash source *item-dependency-graph-forward*))))))))
+	      (setf (gethash key table) num-paths)))))))
+
 (defun all-paths-from (source))
 
 (defun all-paths-from-via (source via))
