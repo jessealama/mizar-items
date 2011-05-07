@@ -1044,3 +1044,23 @@ fragment at CKB-PATH-2."
 	       finally
 		 (format mml-export ")))")))
 	  (format t "done.~%")))))
+
+(defun read-dependency-file (path)
+  "Read a dependency file stored at PATH, which is assumed to be made
+up of lines that look like
+
+ITEM SPACE-SEPARATED-LIST-OF-DEPENDENCIES
+
+The result is a hash table."
+  (let ((table (make-hash-table :test #'equal)))
+    (if (file-exists-p path)
+	(with-open-file (depfile path
+				 :direction :input
+				 :if-does-not-exist :error)
+	  (do ((line (read-line depfile nil) (read-line depfile nil)))
+	      ((null line))
+	    (destructuring-bind (item . deps)
+		(split #\Space line)
+	      (setf (gethash item table) deps)))
+	  table)
+	(error "There is no file at '~a'" path))))
