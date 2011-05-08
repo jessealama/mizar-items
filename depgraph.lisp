@@ -962,7 +962,7 @@ fragment at CKB-PATH-2."
      with q = (list source-item)
      for item = (pop q)
      do
-       (let ((deps (gethash item *items-needed-for-item*)))
+       (let ((deps (gethash item *item-dependency-graph-forward*)))
 	 (setf (gethash item table) deps)
 	 (dolist (dep deps)
 	   (multiple-value-bind (dep-deps present?)
