@@ -20,7 +20,7 @@
 
 (defun known-item? (item)
   (multiple-value-bind (val present)
-      (gethash item *all-items*)
+      (gethash item *item-dependency-graph-forward*)
     (declare (ignore val))
     present))
 
