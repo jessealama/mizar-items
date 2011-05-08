@@ -229,10 +229,10 @@ If there is no such path, return nil."
       (when (empty-queue? nodes)
 	(enqueue-at-end nodes (list (make-node :state source))))
       (multiple-value-bind (solution-found? solution more-nodes)
-	  (bounded-breadth-first-search-with-nodes problem
-						   (or limit
-						       +search-depth+)
-						   nodes)
+	  (bounded-depth-first-search-with-nodes problem
+						 (or limit
+						     +search-depth+)
+						 nodes)
 	(if solution-found?
 	    (values t (explain-solution solution) more-nodes)
 	    (if (null solution)
