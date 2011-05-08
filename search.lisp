@@ -218,6 +218,12 @@ deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of
 nodes.  NIL is a permissible value for QUEUE."
   (general-bounded-search-with-nodes problem #'enqueue-at-end depth queue))
 
+(defun bounded-depth-first-search-with-nodes (problem depth &optional queue)
+  "Search the deepst nodes in the search tree first, but don't go
+deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of
+nodes.  NIL is a permissible value for QUEUE."
+  (general-bounded-search-with-nodes problem #'enqueue-at-front depth queue))
+
 (defun breadth-first-search-for-bottom-with-nodes (problem &optional queue)
   "Search the shallowest nodes in the search tree first."
   (general-search-for-bottom problem #'enqueue-at-end queue))
