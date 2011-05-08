@@ -876,6 +876,48 @@ fragment at CKB-PATH-2."
 (defun deftheorem-item? (item)
   (scan ":deftheorem:" item))
 
+(defun deftheorems-of-article (article)
+  (remove-if-not #'deftheorem-item? (items-for-article article)))
+
+(defun theorem-item? (item)
+  (scan ":theorem:" item))
+
+(defun theorems-of-article (article)
+  (remove-if-not #'theorem-item? (items-for-article article)))
+
+(defun scheme-item? (item)
+  (scan ":scheme:" item))
+
+(defun schemes-of-article (article)
+  (remove-if-not #'scheme-item? (items-for-article article)))
+
+(defun lemma-item? (item)
+  (scan ":lemma:" item))
+
+(defun lemmas-of-article (article)
+  (remove-if-not #'lemma-item? (items-for-article article)))
+
+(defun explicit-items-of-article (article)
+  (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
+		 (items-for-article article)))
+
+(defun explicit-items-needed-for-item (item)
+  (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
+		 (gethash item *item-dependency-graph-forward*)))
+
+(defun notation-item? (article)
+  (scan ":.pattern:" article))
+
+(defun implicit-items-of-article (article)
+  (remove-if #'notation-item? (items-for-article article)))
+
+(defun implicit-items-needed-for-item (item)
+  (remove-if #'notation-item?
+	     (gethash item *item-dependency-graph-forward*)))
+
+(defun contentful-items-needed-for-item (item)
+  (remove-if #'notation-item? (gethash item *item-dependency-graph-forward*)))
+
 (defun deftheorems-needed-for-article-by-item (article)
   (loop
      with items = (items-for-article article)
