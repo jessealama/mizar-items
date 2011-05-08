@@ -1028,6 +1028,10 @@ fragment at CKB-PATH-2."
      finally
        (return inverted)))
 
+(defun items-supported-by-items-of-article (article)
+  (mapcar #'(lambda (item) (cons item (gethash item *item-dependency-graph-backward*)))
+	  (items-for-article article)))
+
 (defun export-mml (version mml-lar item-to-fragment-table dependency-graph)
   (let ((export-path (format nil "~a/~a.lisp"
 			     *mizar-items-data-root*
