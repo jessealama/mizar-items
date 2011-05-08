@@ -313,7 +313,7 @@
 	   (setf (gethash val *all-items*) t)))))
 
 (defun count-dependency-graph-edges ()
-  (count-hash-table-keys *item-dependency-graph-backward*))
+  (count-hash-table-keys *item-dependency-graph-forward*))
 
 (defun items-for-article (article)
   (loop
