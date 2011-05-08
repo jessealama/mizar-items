@@ -1197,11 +1197,15 @@ end;"))
 			      (str item-html)))))))))
 
 (defun fragment->items (fragment)
-  (loop
-     for v being the hash-values in *item-to-fragment-table*
-     for k being the hash-keys in *item-to-fragment-table*
-     when (string= v fragment) collect k into keys
-     finally (return keys)))
+  (destructuring-bind (fragment-article fragment-number-str)
+      (split ":" fragment)
+    (loop
+       with fragment-number = (parse-integer fragment-number-str)
+       for k being the hash-key in *item-to-fragment-table* using (hash-value v)
+       for k-article = (item-article k)
+       when (and (string= fragment-article k-article)
+		 (= v fragment-number)) collect k into keys
+       finally (return keys))))
 
 (defgeneric emit-fragment-page ()
   (:documentation "Emit an HTML representation of a fragment of a Mizar article."))
