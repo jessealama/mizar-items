@@ -832,12 +832,15 @@ fragment at CKB-PATH-2."
 	fragment
       (items-needed-for-fragment fragment-article fragment-number))))
 
-(defun items-for-article (article)
+(defun items-for-article-in-dependency-table (article table)
   (loop
      with pattern = (format nil "^~a:" article)
-     for k being the hash-keys in *item-to-fragment-table*
+     for k being the hash-keys in table
      when (scan pattern k) collect k into items
      finally (return items)))
+
+(defun items-for-article (article)
+  (items-for-article-in-dependency-table article *item-dependency-graph-forward*))
 
 (defun items-needed-for-article-by-item (article)
   (loop
