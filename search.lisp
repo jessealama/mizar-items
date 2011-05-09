@@ -243,7 +243,16 @@ nodes.  NIL is a permissible value for QUEUE."
   "Search the deepst nodes in the search tree first, but don't go
 deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of
 nodes.  NIL is a permissible value for QUEUE."
-  (general-bounded-search-with-nodes problem #'enqueue-at-front depth queue))
+  (let ((nodes (or queue
+		   (make-initial-queue (problem-initial-state problem)
+				       :queueing-function #'enqueue-at-front))))
+    (let (node cutoff)
+      (loop
+	 (if (empty-queue? nodes) (return (values nil (when cutoff :cut-off) nodes)))
+	 (setf node (remove-front nodes))
+	 (if (> (node-depth node) depth) (setf cutoff t))
+	 (if (goal-test problem node) (return (values t node nodes)))
+	 (enqueue-at-front nodes (expand node problem))))))
 
 (defun breadth-first-search-for-bottom-with-nodes (problem &optional queue)
   "Search the shallowest nodes in the search tree first."
