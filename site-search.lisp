@@ -248,6 +248,18 @@ If there is no such path, return nil."
 	  (setf (gethash item table)
 		(mml-lar-index (item-article item)))))))
 
+(defun items-reachable-from-item (item dependency-graph depth)
+  (if (< depth 0)
+      nil
+      (if (zerop depth)
+	  (list item)
+	  (append (list item)
+		  (remove-duplicates (reduce #'append (mapcar #'(lambda (i)
+								  (items-reachable-from-item i dependency-graph (1- depth)))
+							      (gethash item dependency-graph)))
+				     :test #'string=)))))
+  
+
 (defgeneric one-path (source destination &optional limit nodes))
 
 (defmethod one-path (source destination
