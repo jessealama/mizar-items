@@ -420,7 +420,9 @@ state."
 	 (let ((expanded (expand node problem)))
 	   (if expanded
 	       (funcall queueing-function nodes expanded)
-	       (setf (gethash (node-state node) deadends) t)))))))
+	       (progn
+		 (format t "Deadend encountered: ~a~%" (node-state node))
+		 (setf (gethash (node-state node) deadends) t))))))))
 
 (defun greedy-search-w/o-repeated-deadends (problem)
   "Best-first search using H (heuristic distance to goal). [p 93]"
