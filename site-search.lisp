@@ -57,23 +57,60 @@
 					     (gethash source *item-dependency-graph-forward*))))))))
 	      (setf (gethash key table) num-paths)))))))
 
-(defun all-paths-from (source))
+(defgeneric one-path-quick (source destination))
 
-(defun all-paths-from-via (source via))
+(let ((symbol-factory (make-hash-table :test #'equal)))
+  (defmethod one-path-quick ((source string) (destination string))
+    (multiple-value-bind (source-symbol source-present?)
+	(gethash source symbol-factory)
+      (unless source-present?
+	(let ((sym (make-symbol source)))
+	  (setf (gethash source symbol-factory) sym
+		source-symbol sym)))
+      (multiple-value-bind (dest-symbol dest-present?)
+	  (gethash destination symbol-factory)
+	(unless dest-present?
+	  (let ((sym (make-symbol destination)))
+	    (setf (gethash destination symbol-factory) sym
+		  dest-symbol sym)))
+	(one-path-quick source-symbol dest-symbol)))))
 
-(defun all-paths-to (destination)
-  (let ((*item-dependency-graph-forward* *item-dependency-graph-backward*))
-    (mapcar #'reverse (all-paths-from destination))))
+(defmethod one-path-quick ((source symbol) (destination symbol))
+  (let ((dest-pos (mml-lar-index-of-item (symbol-name destination))))
+    (labels ((to-dest (source)
+	       (if (eq source destination)
+		   (list source)
+		   (let ((source-pos (mml-lar-index-of-item (symbol-name source))))
+		     (if (> dest-pos source-pos)
+			 :fail
+			 (loop
+			    for successor in (gethash source *item-dependency-graph-forward*)
+			    for successor-path = (to-dest successor)
+			    do
+			      (break "successor is ~a" successor)
+			      (when (listp successor-path)
+				(return (cons source successor-path)))
+			    finally
+			      (return :fail)))))))
+      (to-dest source)))) 
 
-(defun all-paths-from-via (source destination via)
-  (let ((paths-from-source-to-via (all-paths source via)))
-    (when paths-from-source-to-via
-      (let ((paths-from-via-to-destination (all-paths via destination)))
-	(when paths-from-via-to-destination
-	  (map-product #'(lambda (path-1 path-2)
-			   (append path-1 (cdr path-2)))
-		       paths-from-source-to-via
-		       paths-from-via-to-destination))))))
+;; (defun all-paths-from (source))
+
+;; (defun all-paths-from-via (source via))
+
+;; (defun all-paths-to (destination)
+;;   (let ((*item-dependency-graph-forward* *item-dependency-graph-backward*))
+;;     (mapcar #'reverse (all-paths-from destination))))
+
+;; (defun all-paths-from-via (source destination via)
+;;   (let ((paths-from-source-to-via (all-paths source via)))
+;;     (when paths-from-source-to-via
+;;       (let ((paths-from-via-to-destination (all-paths via destination)))
+;; 	(when paths-from-via-to-destination
+;; 	  (map-product #'(lambda (path-1 path-2)
+;; 			   (append path-1 (cdr path-2)))
+;; 		       paths-from-source-to-via
+;; 		       paths-from-via-to-destination))))))
 
 (defgeneric one-path-via (source destination &rest via)
   (:documentation "Find one path from SOURCE to DESTINATION that passes
@@ -202,8 +239,14 @@ If there is no such path, return nil."
 	      (values nil nil)
 	      (values nil :cut-off))))))
 
-(defun mml-lar-index-of-item (item)
-  (mml-lar-index (item-article item)))
+(let ((table (make-hash-table :test #'equal)))
+  (defun mml-lar-index-of-item (item)
+    (multiple-value-bind (val present?)
+	(gethash item table)
+      (if present?
+	  val
+	  (setf (gethash item table)
+		(mml-lar-index (item-article item)))))))
 
 (defgeneric one-path (source destination &optional limit nodes))
 
