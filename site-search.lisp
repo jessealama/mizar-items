@@ -239,8 +239,14 @@ If there is no such path, return nil."
 	      (values nil nil)
 	      (values nil :cut-off))))))
 
-(defun mml-lar-index-of-item (item)
-  (mml-lar-index (item-article item)))
+(let ((table (make-hash-table :test #'equal)))
+  (defun mml-lar-index-of-item (item)
+    (multiple-value-bind (val present?)
+	(gethash item table)
+      (if present?
+	  val
+	  (setf (gethash item table)
+		(mml-lar-index (item-article item)))))))
 
 (defgeneric one-path (source destination &optional limit nodes))
 
