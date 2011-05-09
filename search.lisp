@@ -405,11 +405,11 @@ state."
 				(enqueue-by-priority old-q nodes eval-fn)))
 	 (nodes (make-initial-queue (problem-initial-state problem)
 				    :queueing-function queueing-function)))
-    (defmethod successors :around ((p (eql problem)))
+    (defmethod successors :around ((p (eql problem)) node)
       (let ((succs (call-next-method)))
 	(remove-if #'(lambda (state) (gethash state deadends))
 		   succs
-		   :key #'node-state)))
+		   :key #'car)))
     (let (node)
       (loop 
 	 (if (empty-queue? nodes) (return nil))
