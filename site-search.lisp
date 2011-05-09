@@ -277,7 +277,7 @@ If there is no such path, return nil."
 	      (- state-mml-pos dest-mml-pos))))
       (when (empty-queue? nodes)
 	(enqueue-at-end nodes (list (make-node :state source))))
-      (let ((solution (greedy-search problem)))
+      (let ((solution (tree-a*-search-w/o-repeated-deadends problem)))
 	(when solution
 	  (explain-solution solution))))))
 
