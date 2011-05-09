@@ -255,6 +255,7 @@ If there is no such path, return nil."
 		     (nodes (make-empty-queue)))
   "Find one path from SOURCE to DESTINATION that passes through VIA.                                                                                                                                        
 If there is no such path, return nil."
+  (declare (ignore limit))
   (let* ((problem (make-item-search-problem :initial-state source
 					    :goal destination))
 	 (dest-mml-pos (mml-lar-index-of-item destination)))
@@ -269,18 +270,16 @@ If there is no such path, return nil."
       (defmethod successors :around ((problem (eql problem)) node)
 	(let ((candidates (call-next-method)))
 	  (remove-if #'too-far candidates)))
+      (defmethod h-cost ((problem (eql problem)) state)
+	(let ((state-mml-pos (mml-lar-index-of-item state)))
+	  (if (< state-mml-pos dest-mml-pos)
+	      most-positive-fixnum
+	      (- state-mml-pos dest-mml-pos))))
       (when (empty-queue? nodes)
 	(enqueue-at-end nodes (list (make-node :state source))))
-      (multiple-value-bind (solution-found? solution more-nodes)
-	  (bounded-depth-first-search-with-nodes problem
-						 (or limit
-						     +search-depth+)
-						 nodes)
-	(if solution-found?
-	    (values t (explain-solution solution) more-nodes)
-	    (if (null solution)
-		(values nil nil more-nodes)
-		(values nil :cut-off more-nodes)))))))
+      (let ((solution (greedy-search problem)))
+	(when solution
+	  (explain-solution solution))))))
 
 (defclass path-broker ()
   ((path-table
