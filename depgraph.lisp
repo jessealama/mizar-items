@@ -885,6 +885,13 @@ fragment at CKB-PATH-2."
 (defun theorems-of-article (article)
   (remove-if-not #'theorem-item? (items-for-article article)))
 
+(defun canceled-theorem? (item)
+  (and (theorem-item? item)
+       (null (gethash item *item-dependency-graph-forward*))))
+
+(defun uncanceled-theorems-of-article (article)
+  (remove-if #'canceled-theorem? (theorems-of-article article)))
+
 (defun scheme-item? (item)
   (scan ":scheme:" item))
 
