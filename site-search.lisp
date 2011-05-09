@@ -258,7 +258,8 @@ If there is no such path, return nil."
   (declare (ignore limit))
   (let* ((problem (make-item-search-problem :initial-state source
 					    :goal destination))
-	 (dest-mml-pos (mml-lar-index-of-item destination)))
+	 (dest-mml-pos (mml-lar-index-of-item destination))
+	 (dest-hash (sxhash destination)))
     (flet ((too-far (action-item)
 	     (destructuring-bind (action . item)
 		 action-item
@@ -267,9 +268,13 @@ If there is no such path, return nil."
 		 (when (null node-mml-pos)
 		   (error "unknown article coming from item '~a'" item))
 		 (< node-mml-pos dest-mml-pos)))))
+      (defmethod goal-test ((p (eql problem)) node)
+	(= (sxhash (node-state node)) dest-hash))
       (defmethod successors :around ((problem (eql problem)) node)
-	(let ((candidates (call-next-method)))
-	  (remove-if #'too-far candidates)))
+	(let* ((candidates (call-next-method))
+	       (trimmed-candidates (remove-if #'too-far candidates)))
+	  ;; (break "trimmed successors of ~a are ~{~a~% ~}" node (mapcar #'car trimmed-candidates))
+	  trimmed-candidates))
       (defmethod h-cost ((problem (eql problem)) state)
 	(let ((state-mml-pos (mml-lar-index-of-item state)))
 	  (if (< state-mml-pos dest-mml-pos)
@@ -277,7 +282,7 @@ If there is no such path, return nil."
 	      (- state-mml-pos dest-mml-pos))))
       (when (empty-queue? nodes)
 	(enqueue-at-end nodes (list (make-node :state source))))
-      (let ((solution (tree-a*-search-w/o-repeated-deadends problem)))
+      (let ((solution (greedy-search-w/o-repeated-deadends problem)))
 	(when solution
 	  (explain-solution solution))))))
 
