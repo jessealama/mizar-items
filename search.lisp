@@ -21,10 +21,11 @@ also contains some bookkeeping information."
   (action nil)              ; the domain action leading to state
   (successors nil)          ; list of successor nodes
   (depth 0)                 ; depth of node in tree (root = 0)
+  (g-cost 0)                ; path cost from root to node
+  (h-cost 0)                ; estimated distance from state to goal
+  (f-cost 0)                ; g-cost + h-cost
   (expanded? nil)           ; any successors examined?
   )
-
-
 
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
@@ -44,6 +45,20 @@ slot.  You will need to define your own method if there are multiple
 goals, or if you need to compare them with something other than
 EQUAL."
   (equal (node-state node) (problem-goal problem)))
+
+(defmethod h-cost ((problem problem) state) 
+  "The estimated cost from state to a goal for this problem.  
+  If you don't overestimate, then A* will always find optimal solutions.
+  The default estimate is always 0, which certainly doesn't overestimate."
+  (declare (ignore state))
+  0)
+
+(defmethod edge-cost ((problem problem) node action state)
+  "The cost of going from one node to the next state by taking action.
+  This default method counts 1 for every action.  Provide a method for this if 
+  your subtype of problem has a different idea of the cost of a step."
+  (declare (ignore node action state))
+  1)
 
 (defun node-ancestors (node)
   "The ancestors of NODE, starting with its most distant
@@ -74,11 +89,17 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	   do
 	     (destructuring-bind (action . state)
 		 successor
-	       (push (make-node :parent node 
-				:action action 
-				:state state
-				:depth (1+ (node-depth node)))
-		     nodes))
+	       (let ((g (+ (node-g-cost node)
+			   (edge-cost problem node action state)))
+		     (h (h-cost problem state)))
+		 (push (make-node :parent node 
+				  :action action 
+				  :state state
+				  :g-cost g
+				  :h-cost h
+				  :f-cost (max (node-f-cost node) (+ g h))
+				  :depth (1+ (node-depth node)))
+		     nodes)))
 	   finally
 	     (setf (node-successors node) nodes)
 	     (return nodes)))))
@@ -342,5 +363,24 @@ state."
 		    #'(lambda (old-q nodes)
 			(enqueue-at-end old-q (eliminate-all-duplicates
 					       nodes table))))))
+
+;; Heuristic search
+
+(defun best-first-search (problem eval-fn)
+  "Search the nodes with the best evaluation first. [p 93]"
+  (general-search problem #'(lambda (old-q nodes) 
+			      (enqueue-by-priority old-q nodes eval-fn))))
+
+(defun greedy-search (problem)
+  "Best-first search using H (heuristic distance to goal). [p 93]"
+  (best-first-search problem #'node-h-cost))
+
+(defun tree-a*-search (problem)
+  "Best-first search using estimated total cost, or (F = G + H). [p 97]"
+  (best-first-search problem #'node-f-cost))
+
+(defun uniform-cost-search (problem)
+  "Best-first search using the node's depth as its cost.  Discussion on [p 75]"
+  (best-first-search problem #'node-depth))
 
 ;;; search.lisp ends here
