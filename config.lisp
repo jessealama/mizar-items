@@ -1,12 +1,12 @@
 
 (in-package :mizar)
 
-(defparameter *mizar-items-root* "/Users/alama/sources/mizar/mizar-items")
+(defparameter *mizar-items-root* "/home/mizar-items/mizar-items")
 
 (defun file-in-mizar-items-dir (filename)
   (concatenate 'string *mizar-items-root* "/" filename))
 
-(defparameter *mizar-items-xsl4mizar-root* "/Users/alama/sources/mizar/xsl4mizar")
+(defparameter *mizar-items-xsl4mizar-root* "/home/mizar-items/xsl4mizar")
 
 (defun file-in-xsl4mizar-dir (filename)
   (concatenate 'string *mizar-items-xsl4mizar-root* "/" filename))
@@ -31,7 +31,7 @@
 (update-mizar-items-config 'expand-canceled-script-path
 			   (file-in-mizar-items-dir "expand-canceled.pl"))
 (update-mizar-items-config 'xsl4mizar-path
-			   "/Users/alama/sources/mizar/xsl4mizar/")
+			   "/home/mizar-items/xsl4mizar/")
 (update-mizar-items-config 'listvoc-script-path
 			   (file-in-mizar-items-dir "listvoc.sh"))
 (update-mizar-items-config 'mhtml-css-path
@@ -47,7 +47,7 @@
 (update-mizar-items-config 'fragment-depdenency-graph
 			   (file-in-mizar-items-dir "ckb-ckb-depgraph"))
 (update-mizar-items-config 'item-to-fragment-path
-			   (file-in-mizar-items-dir "mizar-item-ckb-table"))
+			   (file-in-mizar-items-dir "item-to-fragment-table"))
 (update-mizar-items-config 'full-item-dependency-graph
 			   (file-in-mizar-items-dir "full-item-depgraph"))
 (update-mizar-items-config 'vertex-neighbors-forward-graph-path
@@ -61,9 +61,9 @@
 (update-mizar-items-config 'server-messages-log-file
 			   "/tmp/mizar-items-messages")
 (update-mizar-items-config 'itemization-source
-			   "/Users/alama/sources/mizar/mizar-items/itemization-brutalized")
+			   "/local/data/alama/brutalized-itemizations")
 (update-mizar-items-config 'html-source
-			   "/Users/alama/sources/mizar/mizar-items/itemization-non-brutalized")
+			   "/local/data/alama/non-brutalized-itemizations")
 
 (defun mizar-items-config (key)
   (gethash key *mizar-items-config*))

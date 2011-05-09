@@ -1,6 +1,6 @@
 #!/bin/bash -
 
-html_stylesheet=/Users/alama/sources/mizar/xsl4mizar/MHTML/mhtml_main.xsl
+html_stylesheet=/home/mizar-items/xsl4mizar/MHTML/mhtml_main.xsl
 cwd=`pwd`;
 
 # sanity

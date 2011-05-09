@@ -1207,6 +1207,7 @@ end;"))
        for k-article = (item-article k)
        when (and (string= fragment-article k-article)
 		 (= v fragment-number)) collect k into keys
+       when (= v fragment-number) collect k into keys
        finally (return keys))))
 
 (defgeneric emit-fragment-page ()
