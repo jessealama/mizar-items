@@ -1151,3 +1151,17 @@ The result is a hash table."
 	      (setf (gethash item table) deps)))
 	  table)
 	(error "There is no file at '~a'" path))))
+
+(defun write-dependency-table (dependency-table path)
+  (if (file-exists-p path)
+      (error "Unable to write dependency table to '~a' because there is already a file there")
+      (progn
+	(with-open-file (dep-table path
+				   :direction :output
+				   :if-exists :error
+				   :if-does-not-exist :create)
+	  (loop
+	     for item being the hash-keys in dependency-table using (hash-value deps)
+	     do
+	       (format dep-table "~a ~{~a ~}~%" item deps)))
+	t)))
