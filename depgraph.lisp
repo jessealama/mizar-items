@@ -832,12 +832,15 @@ fragment at CKB-PATH-2."
 	fragment
       (items-needed-for-fragment fragment-article fragment-number))))
 
-(defun items-for-article (article)
+(defun items-for-article-in-dependency-table (article table)
   (loop
      with pattern = (format nil "^~a:" article)
-     for k being the hash-keys in *item-to-fragment-table*
+     for k being the hash-keys in table
      when (scan pattern k) collect k into items
      finally (return items)))
+
+(defun items-for-article (article)
+  (items-for-article-in-dependency-table article *item-dependency-graph-forward*))
 
 (defun items-needed-for-article-by-item (article)
   (loop
@@ -872,6 +875,48 @@ fragment at CKB-PATH-2."
 
 (defun deftheorem-item? (item)
   (scan ":deftheorem:" item))
+
+(defun deftheorems-of-article (article)
+  (remove-if-not #'deftheorem-item? (items-for-article article)))
+
+(defun theorem-item? (item)
+  (scan ":theorem:" item))
+
+(defun theorems-of-article (article)
+  (remove-if-not #'theorem-item? (items-for-article article)))
+
+(defun scheme-item? (item)
+  (scan ":scheme:" item))
+
+(defun schemes-of-article (article)
+  (remove-if-not #'scheme-item? (items-for-article article)))
+
+(defun lemma-item? (item)
+  (scan ":lemma:" item))
+
+(defun lemmas-of-article (article)
+  (remove-if-not #'lemma-item? (items-for-article article)))
+
+(defun explicit-items-of-article (article)
+  (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
+		 (items-for-article article)))
+
+(defun explicit-items-needed-for-item (item)
+  (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
+		 (gethash item *item-dependency-graph-forward*)))
+
+(defun notation-item? (article)
+  (scan ":.pattern:" article))
+
+(defun implicit-items-of-article (article)
+  (remove-if #'notation-item? (items-for-article article)))
+
+(defun implicit-items-needed-for-item (item)
+  (remove-if #'notation-item?
+	     (gethash item *item-dependency-graph-forward*)))
+
+(defun contentful-items-needed-for-item (item)
+  (remove-if #'notation-item? (gethash item *item-dependency-graph-forward*)))
 
 (defun deftheorems-needed-for-article-by-item (article)
   (loop
@@ -982,6 +1027,10 @@ fragment at CKB-PATH-2."
 	 (push item (gethash dep inverted)))
      finally
        (return inverted)))
+
+(defun items-supported-by-items-of-article (article)
+  (mapcar #'(lambda (item) (cons item (gethash item *item-dependency-graph-backward*)))
+	  (items-for-article article)))
 
 (defun export-mml (version mml-lar item-to-fragment-table dependency-graph)
   (let ((export-path (format nil "~a/~a.lisp"

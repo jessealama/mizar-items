@@ -709,6 +709,8 @@ end;"))
 	 (explanation (explain-search-solution source destination path))
 	 (source-link (link-to-item source))
 	 (dest-link (link-to-item destination))
+	 (source-uri-link-title (item-link-title-from-string source))
+	 (dest-uri-link-title (item-link-title-from-string destination))
 	 (next-path-uri (when link-to-next? (path-between-items-uri source destination (1+ path-number))))
 	 (next-path-link-title (format nil "Next path from ~a to ~a" source-uri-link-title dest-uri-link-title))
 	 (prev-path-uri (when link-to-previous? (path-between-items-uri source destination (1- path-number))))
@@ -1197,11 +1199,15 @@ end;"))
 			      (str item-html)))))))))
 
 (defun fragment->items (fragment)
-  (loop
-     for v being the hash-values in *item-to-fragment-table*
-     for k being the hash-keys in *item-to-fragment-table*
-     when (string= v fragment) collect k into keys
-     finally (return keys)))
+  (destructuring-bind (fragment-article fragment-number-str)
+      (split ":" fragment)
+    (loop
+       with fragment-number = (parse-integer fragment-number-str)
+       for k being the hash-key in *item-to-fragment-table* using (hash-value v)
+       for k-article = (item-article k)
+       when (and (string= fragment-article k-article)
+		 (= v fragment-number)) collect k into keys
+       finally (return keys))))
 
 (defgeneric emit-fragment-page ()
   (:documentation "Emit an HTML representation of a fragment of a Mizar article."))
