@@ -1039,6 +1039,37 @@ fragment at CKB-PATH-2."
   (mapcar #'(lambda (item) (cons item (gethash item *item-dependency-graph-backward*)))
 	  (items-for-article article)))
 
+(defun one-path-to-article (source article)
+  (loop
+     with targets = (items-for-article article)
+     with cutoff = nil
+     for target in targets
+     for path = (one-path source target)
+     do
+       (if path
+	   (if (eq path :cut-off)
+	       (progn
+		 (push target cutoff)
+		 (format t "Search from ~a to ~a was cut off~%" source target))
+	       (return (values path t)))
+	   (format t "No path from ~a to ~a~%" source target))
+     finally
+       (return (values nil cutoff))))
+
+(defun one-path-from-article-to-article (source-article destination-article)
+  (let ((sources (items-for-article source-article)))
+    (loop
+       with cutoff = nil
+       for source in sources
+       do
+	 (multiple-value-bind (path cutoff-items)
+	     (one-path-to-article source destination-article)
+	   (if path
+	       (return (values path cutoff))
+	       (setf cutoff (append cutoff cutoff-items))))
+       finally
+	 (return (values nil cutoff)))))
+
 (defun export-mml (version mml-lar item-to-fragment-table dependency-graph)
   (let ((export-path (format nil "~a/~a.lisp"
 			     *mizar-items-data-root*
