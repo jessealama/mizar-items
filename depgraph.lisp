@@ -348,18 +348,18 @@ fragment at CKB-PATH-2."
 	(format nil "~(~a~):definiens:~a" aid nr))))
 
 (defun deftheorem-from-definiens (definiens-item)
-  (let ((fragment (gethash definiens-item *item-to-fragment-table*)))
-    (when fragment
-      (destructuring-bind (fragment-article . fragment-number)
-	  fragment
-	(loop
-	   for k being the hash-keys in *item-to-fragment-table*
-	   for (key-article . key-number) = (gethash k *item-to-fragment-table*)
-	   do
-	     (when (and (string= key-article fragment-article)
-			(= key-number fragment-number)
-			(deftheorem-item? k))
-	       (return k)))))))
+  (let ((fragment-number (gethash definiens-item *item-to-fragment-table*))
+	(fragment-article (item-article definiens-item)))
+    (when fragment-number
+      (loop
+	 for k being the hash-keys in *item-to-fragment-table*
+	 for key-article = (item-article k)
+	 for key-number = (gethash k *item-to-fragment-table*)
+	 do
+	   (when (and (string= key-article fragment-article)
+		      (= key-number fragment-number)
+		      (deftheorem-item? k))
+	     (return k))))))
 
 (defun deftheorem-xml-line->item (deftheorem-line source-article)
   (let ((nr (new-value-of-nr-attribute deftheorem-line))
