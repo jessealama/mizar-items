@@ -827,10 +827,9 @@ fragment at CKB-PATH-2."
    :test #'string=))
 
 (defun items-needed-for-item (item)
-  (let ((fragment (gethash item *item-to-fragment-table*)))
-    (destructuring-bind (fragment-article . fragment-number)
-	fragment
-      (items-needed-for-fragment fragment-article fragment-number))))
+  (let ((fragment-number (gethash item *item-to-fragment-table*))
+	(article (item-article item)))
+      (items-needed-for-fragment article fragment-number)))
 
 (defun items-for-article-in-dependency-table (article table)
   (loop
