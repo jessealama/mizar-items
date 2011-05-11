@@ -827,10 +827,9 @@ fragment at CKB-PATH-2."
    :test #'string=))
 
 (defun items-needed-for-item (item)
-  (let ((fragment (gethash item *item-to-fragment-table*)))
-    (destructuring-bind (fragment-article . fragment-number)
-	fragment
-      (items-needed-for-fragment fragment-article fragment-number))))
+  (let ((fragment-number (gethash item *item-to-fragment-table*))
+	(article (item-article item)))
+      (items-needed-for-fragment article fragment-number)))
 
 (defun items-for-article-in-dependency-table (article table)
   (loop
@@ -839,12 +838,19 @@ fragment at CKB-PATH-2."
      when (scan pattern k) collect k into items
      finally (return items)))
 
-(defun items-for-article (article)
+(defun items-for-article-from-dependency-table (article)
   (items-for-article-in-dependency-table article *item-dependency-graph-forward*))
+
+(defun items-for-article-from-fragments (article)
+  (loop
+     with pattern = (format nil "^~a:" article)
+     for k being the hash-keys in *item-to-fragment-table*
+     when (scan pattern k) collect k into items
+     finally (return items)))
 
 (defun items-needed-for-article-by-item (article)
   (loop
-     with items = (items-for-article article)
+     with items = (items-for-article-from-fragments article)
      for item in items
      collecting (cons item (items-needed-for-item item)) into needed
      finally (return needed)))
@@ -854,7 +860,7 @@ fragment at CKB-PATH-2."
 
 (defun clusters-needed-for-article-by-item (article)
   (loop
-     with items = (items-for-article article)
+     with items = (items-for-article-from-fragments article)
      for item in items
      for needed-items = (items-needed-for-item item)
      collecting (cons item
@@ -866,7 +872,7 @@ fragment at CKB-PATH-2."
 
 (defun definiens-needed-for-article-by-item (article)
   (loop
-     with items = (items-for-article article)
+     with items = (items-for-article-from-fragments article)
      for item in items
      for needed-items = (items-needed-for-item item)
      collecting (cons item
@@ -877,13 +883,13 @@ fragment at CKB-PATH-2."
   (scan ":deftheorem:" item))
 
 (defun deftheorems-of-article (article)
-  (remove-if-not #'deftheorem-item? (items-for-article article)))
+  (remove-if-not #'deftheorem-item? (items-for-article-from-fragments article)))
 
 (defun theorem-item? (item)
   (scan ":theorem:" item))
 
 (defun theorems-of-article (article)
-  (remove-if-not #'theorem-item? (items-for-article article)))
+  (remove-if-not #'theorem-item? (items-for-article-from-fragments article)))
 
 (defun canceled-theorem? (item)
   (and (theorem-item? item)
@@ -896,17 +902,17 @@ fragment at CKB-PATH-2."
   (scan ":scheme:" item))
 
 (defun schemes-of-article (article)
-  (remove-if-not #'scheme-item? (items-for-article article)))
+  (remove-if-not #'scheme-item? (items-for-article-from-fragments article)))
 
 (defun lemma-item? (item)
   (scan ":lemma:" item))
 
 (defun lemmas-of-article (article)
-  (remove-if-not #'lemma-item? (items-for-article article)))
+  (remove-if-not #'lemma-item? (items-for-article-from-fragments article)))
 
 (defun explicit-items-of-article (article)
   (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
-		 (items-for-article article)))
+		 (items-for-article-from-fragments article)))
 
 (defun explicit-items-needed-for-item (item)
   (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
@@ -916,7 +922,7 @@ fragment at CKB-PATH-2."
   (scan ":.pattern:" article))
 
 (defun implicit-items-of-article (article)
-  (remove-if #'notation-item? (items-for-article article)))
+  (remove-if #'notation-item? (items-for-article-from-fragments article)))
 
 (defun implicit-items-needed-for-item (item)
   (remove-if #'notation-item?
@@ -927,7 +933,7 @@ fragment at CKB-PATH-2."
 
 (defun deftheorems-needed-for-article-by-item (article)
   (loop
-     with items = (items-for-article article)
+     with items = (items-for-article-from-fragments article)
      for item in items
      for needed-items = (items-needed-for-item item)
      collecting (cons item
@@ -998,7 +1004,7 @@ fragment at CKB-PATH-2."
      do
        (format t "Computed needed items for items in ~a (~d/~d)..." article i num-articles)
        (loop
-	  for item in (items-for-article article)
+	  for item in (items-for-article-from-fragments article)
 	  for needed-items = (items-needed-for-item item)
 	  do
 	    (setf (gethash item table) needed-items))
@@ -1037,11 +1043,11 @@ fragment at CKB-PATH-2."
 
 (defun items-supported-by-items-of-article (article)
   (mapcar #'(lambda (item) (cons item (gethash item *item-dependency-graph-backward*)))
-	  (items-for-article article)))
+	  (items-for-article-from-fragments article)))
 
 (defun one-path-to-article (source article)
   (loop
-     with targets = (items-for-article article)
+     with targets = (items-for-article-from-fragments article)
      with cutoff = nil
      for target in targets
      for path = (one-path source target)
@@ -1057,7 +1063,7 @@ fragment at CKB-PATH-2."
        (return (values nil cutoff))))
 
 (defun one-path-from-article-to-article (source-article destination-article)
-  (let ((sources (items-for-article source-article)))
+  (let ((sources (items-for-article-from-fragments source-article)))
     (loop
        with cutoff = nil
        for source in sources
