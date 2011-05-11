@@ -117,10 +117,10 @@ the result of exporting the MML to MPTP.")
 				      (cons "FORMULAEProblem"  tptp-formula)
 				      '("System___Paradox---4.0" . "Paradox---4.0")))))
 
-(defun named-formula-as-tptp-axiom (formula name)
+(defun named-formula-as-tptp-axiom (name formula)
   (format nil "fof(~a, axiom, ~a)." name formula))
 
-(defun named-formula-as-tptp-conjecture (formula name)
+(defun named-formula-as-tptp-conjecture (name formula)
   (format nil "fof(~a, conjecture, ~a)." name formula))
 
 (defun verify-immediate-dependence-problem (item mptp-table)
