@@ -948,8 +948,8 @@ fragment at CKB-PATH-2."
 		 (gethash item table)
 	       (assert (not present?)
 		       (item)
-		       "We have already registered ~a in the item-to-fragment table as fragment ~d of article ~a" item (cdr old-item) (car old-item)))
-	     (setf (gethash item table) (cons article fragment-number)))))
+		       "We have already registered ~a in the item-to-fragment table as fragment ~d of article ~a" item (cdr old-item) (car old-item))
+	       (setf (gethash item table) (cons article fragment-number))))))
      finally
        (return table)))
 
