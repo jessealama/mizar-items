@@ -14,7 +14,7 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria" "hunchentoot" "cl-who" "hunchentoot-dir-lister" "hunchentoot-utils" "xuriella" "ironclad")
+  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria" "hunchentoot" "cl-who" "hunchentoot-dir-lister" "hunchentoot-utils" "xuriella" "ironclad" "drakma")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
@@ -29,6 +29,7 @@
 	       (:file "search")
 	       (:file "mml")
 	       (:file "depgraph")
+	       (:file "mptp")
 	       (:file "site-data")
 	       (:file "tc")
 	       (:file "site-search")
