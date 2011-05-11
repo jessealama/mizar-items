@@ -74,18 +74,25 @@ the result of exporting the MML to MPTP.")
       ("^[^:]+:.constructor:([0-9]+)$" constructor-item)
     number))
 
-(defun auxiliary-mptp-items-for-constructor (constructor-item mptp-table)
-  (let ((kind (constructor-kind constructor-item))
-	(number (constructor-number constructor-item))
-	(article (item-article constructor-item)))
-    (loop
-       with extras = nil
-       for item being the hash-keys in mptp-table using (hash-value formula)
-       do
-	 (when (scan (format nil "_~a~a_~a$" kind number article) item)
-	   (push (cons item formula) extras))
-       finally
-	 (return extras))))
+(defun auxiliary-mptp-items-for-item (item mptp-table)
+  (cond ((constructor-item? item)
+	 (let ((kind (constructor-kind item))
+	       (number (constructor-number item))
+	       (article (item-article item)))
+	   (loop
+	      with extras = nil
+	      for item being the hash-keys in mptp-table using (hash-value formula)
+	      do
+		(when (scan (format nil "_~a~a_~a$" kind number article) item)
+		  (push (cons item formula) extras))
+	      finally
+		(return extras))))
+	((definiens-item? item)
+	 (let* ((corresponding-deftheorem (deftheorem-from-definiens item))
+		(corresponding-article (item-article corresponding-deftheorem))
+		(corresponding-number (item-number corresponding-deftheorem)))
+	   (list (format nil "d~a_~a" corresponding-number corresponding-article))))
+	(t nil)))
 
 (defun mptp-formulas-for-item (item mptp-table)
   (let ((mptp-name (mptp-name-of-item item)))
@@ -94,11 +101,9 @@ the result of exporting the MML to MPTP.")
 	    (gethash mptp-name mptp-table)
 	  (if present?
 	      (cons (list mptp-name formula) 
-		    (when (constructor-item? item)
-		      (auxiliary-mptp-items-for-constructor item mptp-table)))
+		    (auxiliary-mptp-items-for-item item mptp-table))
 	      (error "An entry for the key '~a' is not present in the given MPTP table" mptp-name)))
-	(when (constructor-item? item)
-	  (auxiliary-mptp-items-for-constructor item mptp-table)))))
+	(auxiliary-mptp-items-for-item item mptp-table))))
 
 (define-constant +system-on-tptp-form-uri+
   "http://www.cs.miami.edu/~tptp/cgi-bin/SystemOnTPTPFormReply"
