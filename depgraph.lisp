@@ -954,8 +954,8 @@ fragment at CKB-PATH-2."
 		 (gethash item table)
 	       (assert (not present?)
 		       (item)
-		       "We have already registered ~a in the item-to-fragment table as fragment ~d of article ~a" item (cdr old-item) (car old-item)))
-	     (setf (gethash item table) (cons article fragment-number)))))
+		       "We have already registered ~a in the item-to-fragment table as fragment ~d of article ~a" item (cdr old-item) (car old-item))
+	       (setf (gethash item table) (cons article fragment-number))))))
      finally
        (return table)))
 
@@ -1160,7 +1160,7 @@ The result is a hash table."
 
 (defun write-dependency-table (dependency-table path)
   (if (file-exists-p path)
-      (error "Unable to write dependency table to '~a' because there is already a file there")
+      (error "Unable to write dependency table to '~a' because there is already a file there" path)
       (progn
 	(with-open-file (dep-table path
 				   :direction :output
@@ -1171,3 +1171,4 @@ The result is a hash table."
 	     do
 	       (format dep-table "~a ~{~a ~}~%" item deps)))
 	t)))
+
