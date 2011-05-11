@@ -1154,7 +1154,7 @@ The result is a hash table."
 
 (defun write-dependency-table (dependency-table path)
   (if (file-exists-p path)
-      (error "Unable to write dependency table to '~a' because there is already a file there")
+      (error "Unable to write dependency table to '~a' because there is already a file there" path)
       (progn
 	(with-open-file (dep-table path
 				   :direction :output
