@@ -123,7 +123,7 @@ the result of exporting the MML to MPTP.")
 (defun named-formula-as-tptp-conjecture (name formula)
   (format nil "fof(~a, conjecture, ~a)." name formula))
 
-(defun verify-immediate-dependence-problem (item mptp-table)
+(defun dependence-problem (item needed-items mptp-table)
   (flet ((mptp-formula (item)
 	   (mptp-formulas-for-item item mptp-table))
 	 (formula-as-axiom (name-formula-pair)
@@ -134,10 +134,32 @@ the result of exporting the MML to MPTP.")
 	   (destructuring-bind (name . formula)
 	       name-formula-pair
 	     (named-formula-as-tptp-conjecture name formula))))
-    (let* ((deps (gethash item *item-dependency-graph-forward*))
-	   (deps-named-formulas (reduce #'append (mapcar #'mptp-formula deps)))
+    (let* ((deps-named-formulas (reduce #'append (mapcar #'mptp-formula
+							 needed-items)))
 	   (deps-axioms (mapcar #'formula-as-axiom deps-named-formulas))
 	   (conjecture-name (mptp-name-of-item item))
 	   (conjecture-formula (gethash conjecture-name mptp-table))
 	   (conjecture (named-formula-as-tptp-conjecture conjecture-name conjecture-formula)))
       (cons conjecture deps-axioms))))
+
+(defun verify-immediate-dependence-problem (item mptp-table)
+  (dependence-problem item
+		      (gethash item *item-dependency-graph-forward*)
+		      mptp-table))
+
+(defun necessity-of-item-for-item (item needed-item mptp-table)
+  "Generate an ATP problem in which we try to show that NEEDED-ITEM is
+necessary for ITEM.  We do this by simply removing NEEDED-ITEM from
+the list of items on which ITEM immediately depends."
+  (dependence-problem item
+		      (remove needed-item
+			      (gethash item *item-dependency-graph-forward*)
+			      :test #'string=)
+		      mptp-table))
+
+(defun necessity-of-items-for-item (item needed-items mptp-table)
+  (dependence-problem item
+		      (remove-if #'(lambda (thing)
+				     (member thing needed-items :test #'string=))
+				 (gethash item *item-dependency-graph-forward*))
+		      mptp-table))
