@@ -129,11 +129,7 @@ the result of exporting the MML to MPTP.")
 	 (formula-as-axiom (name-formula-pair)
 	   (destructuring-bind (name . formula)
 	       name-formula-pair
-	     (named-formula-as-tptp-axiom name formula)))
-	 (formula-as-conjecture (name-formula-pair)
-	   (destructuring-bind (name . formula)
-	       name-formula-pair
-	     (named-formula-as-tptp-conjecture name formula))))
+	     (named-formula-as-tptp-axiom name formula))))
     (let* ((deps-named-formulas (reduce #'append (mapcar #'mptp-formula
 							 needed-items)))
 	   (deps-axioms (mapcar #'formula-as-axiom deps-named-formulas))
