@@ -470,12 +470,6 @@ end;"))
 	      dep-article dep-kind dep-num
 	      sup-article sup-kind sup-num))))
 
-(defun emit-direct-dependence-page (item-1 item-2)
-  (declare (ignore item-1 item-2))
-  (miz-item-html ("verify a dependence")
-      nil
-    (:p (:em "(Not implemented yet.)"))))
-
 (defgeneric explain-search-solution (source destination solution))
 
 (defmethod explain-search-solution (source destination (steps list))
