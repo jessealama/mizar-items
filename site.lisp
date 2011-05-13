@@ -1558,6 +1558,12 @@ end;"))
     (declare (ignore kind number))
     article))
 
+(defun item-number (item-identifier)
+  (destructuring-bind (article kind number)
+      (split-item-identifier item-identifier)
+    (declare (ignore article kind))
+    number))
+
 (defun items-by-article (item-list)
   (let ((by-article (make-hash-table :test #'equal)))
     (dolist (item item-list)
