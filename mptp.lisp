@@ -137,7 +137,7 @@ the result of exporting the MML to MPTP.")
 	     (named-formula-as-tptp-axiom name formula))))
     (let* ((deps-named-formulas (reduce #'append (mapcar #'mptp-formula
 							 needed-items)))
-	   (deps-axioms (mapcar #'formula-as-axiom deps-named-formulas))
+ 	   (deps-axioms (mapcar #'formula-as-axiom deps-named-formulas))
 	   (conjecture-name (mptp-name-of-item item))
 	   (conjecture-formula (gethash conjecture-name mptp-table))
 	   (conjecture (named-formula-as-tptp-conjecture conjecture-name conjecture-formula)))
