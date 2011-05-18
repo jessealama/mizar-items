@@ -149,9 +149,15 @@ the result of exporting the MML to MPTP.")
 	   (conjecture (named-formula-as-tptp-conjecture conjecture-name conjecture-formula)))
       (cons conjecture deps-axioms))))
 
+(defun item-dependencies (item)
+  (gethash item *item-dependency-graph-forward*))
+
+(defun item-supports (item)
+  (gethash item *item-dependency-graph-backward*))
+
 (defun verify-immediate-dependence-problem (item mptp-table)
   (dependence-problem item
-		      (gethash item *item-dependency-graph-forward*)
+		      (item-dependencies item)
 		      mptp-table))
 
 (defun necessity-of-item-for-item (item needed-item mptp-table)
@@ -160,7 +166,7 @@ necessary for ITEM.  We do this by simply removing NEEDED-ITEM from
 the list of items on which ITEM immediately depends."
   (dependence-problem item
 		      (remove needed-item
-			      (gethash item *item-dependency-graph-forward*)
+			      (item-dependencies item)
 			      :test #'string=)
 		      mptp-table))
 
@@ -168,5 +174,5 @@ the list of items on which ITEM immediately depends."
   (dependence-problem item
 		      (remove-if #'(lambda (thing)
 				     (member thing needed-items :test #'string=))
-				 (gethash item *item-dependency-graph-forward*))
+				 (item-dependencies item))
 		      mptp-table))
