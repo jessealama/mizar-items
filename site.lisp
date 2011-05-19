@@ -165,6 +165,26 @@
   :test #'string=
   :documentation "A regular expression matching URIs associated with displaying the dependence of one item on another.")
 
+(define-constant +sufficiency-uri-regexp+
+    (exact-regexp (concat "/" "dependence"
+			  "/" "(" +item-regexp+ ")"
+			  "/" "sufficiency"))
+  :test #'string=
+  :documentation "A regular expression matching URIs associated with
+  the task of verifying that the set of items claimed to be needed for
+  a given item is sufficient to (re)justify the item.")
+
+(define-constant +minimality-uri-regexp+
+    (exact-regexp (concat "/" "dependence"
+		  "/" "(" +item-regexp+ ")"
+		  "/" "minimality"))
+  :test #'string=
+  :documentation "A regular expression matching URIs associated with
+  the task of verifying that nothing can be removed from the set of
+  items claimed to be needed for a given item without
+  countersatisfiability.  (Actually, we might not always get
+  countersatisfiability.)")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Emitting XML/HTML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1621,9 +1641,35 @@ end;"))
 	   (item-inline-name (item-inline-name article kind number))
 	   (deps (item-requires-tsorted item)))
       (let* ((requires-page-title (format nil "requirements of ~a" item-link-title))
-	     (html (html-for-item item)))
+	     (html (html-for-item item))
+	     (atp-verify-uri (format nil "/dependence/")))	
 	(miz-item-html (requires-page-title)
 	    nil
+	  ((:table :class "item-table")
+	   (:tr
+	    ((:td :width "25%" :align "left")
+	     ((:table :class "item-info")
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2" :class "item-info-heading") "Dependence Info"))
+	      ((:tr :class "item-info-row")
+	       ((:td :class "item-info-key") "Item")
+	       ((:td :class "item-info-value") (str (link-to-item article kind number))))
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2" :class "item-info-heading") "Actions"))
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2") "Verify"
+		((:ul :class "path-options")
+		 (:li ((:a :href search-from-uri :title search-from-link-title) (:b "starting at")))
+		 (:li ((:a :href search-via-uri :title search-via-link-title) (:b "passing through")))
+		 (:li ((:a :href search-to-uri :title search-to-link-title) (:b "ending at"))))
+		"this item."))
+	      ((:tr :class "item-info-row")
+	       ((:td :colspan "2") "See what this item"
+		((:ul :class "item-dep-options")
+		 (:li ((:a :href requires-uri :title "Items on which this item depends") (:b "requires")))
+		 (:li ((:a :href supports-uri :title "Items that this item supports") (:b "supports"))))))))
+		((:td :width "75%" :valign "top")
+		 (str item-html))))
 	  (:p "The item "
 	      ((:a :href item-uri :title item-link-title)
 	       (str item-inline-name)))
@@ -1789,6 +1835,37 @@ end;"))
 	(:blockquote
 	 (:em "(not implemented yet; check back soon)"))))))))
 
+(defvar *mptp-table* (make-hash-table :test #'equal))
+
+(defgeneric emit-sufficiency-page ()
+  (:documentation "A page that represents the task of showing that the
+  set of items that we claim is minimally sufficient for justifying a
+  given item really is sufficient."))
+
+(defmethod emit-sufficiency-page :around ())
+
+(defmethod emit-sufficiency-page ()
+  (register-groups-bind (item)
+      (+sufficiency-uri-regexp+ (request-uri*))
+    (let ((dep-problem (verify-immediate-dependence-problem item *mptp-table*)))
+      (miz-item-html ("verify sufficiency")
+	  nil
+	(:p "To verify the sufficiency of the claimed dependencies for
+	item, we will post the following problem to the SystemOnTPTP site:")
+	(:ul
+	 (dolist (dep-problem-formula dep-problem)
+	   (:li (str dep-problem-formula))))
+	(:p "Does that look right?")))))
+
+(defgeneric emit-minimality-page ()
+  (:documentation "A page that represents the task of showing that the set of items that is claimed to be minimally sufficient to (re)justify a given item really is minimal."))
+
+(defmethod emit-minimality-page :around ())
+
+(defmethod emit-minimality-page ()
+  (register-groups-bind (item)
+      (+minimality-uri-regexp+ (request-uri*))
+    (:p "To verify that...")))
 
 (defun register-proofs-for-article (article)
   (let ((num-items (gethash article *article-num-items*)))
@@ -1891,6 +1968,10 @@ end;"))
 
   ;; dependence between items
   (register-regexp-dispatcher +dependence-uri-regexp+ #'emit-dependence-page)
+
+  ;; sufficiency and minimality
+  (register-regexp-dispatcher +sufficiency-uri-regexp+ #'emit-sufficiency-page)
+  (register-regexp-dispatcher +minimality-uri-regexp+ #'emit-minimality-page)
 
   ;; proofs
   (loop
