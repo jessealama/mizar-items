@@ -1132,65 +1132,65 @@ end;"))
 		 (requires-uri (requires-uri-for-item article-name item-kind item-number))
 		 (supports-uri (supports-uri-for-item article-name item-kind item-number)))
 	    (miz-item-html (item-key)
-			   nil
-			   ((:table :class "item-table")
-			    (:tr
-			     ((:td :width "25%" :align "left")
-			      ((:table :class "item-info")
-			       ((:tr :class "item-info-row")
-				((:td :colspan "2" :class "item-info-heading") "Item Info"))
-			       ((:tr :class "item-info-row")
-				((:td :class "item-info-key") "Article")
-				((:td :class "item-info-value")
-				 ((:a :href article-uri :class "article-name" :title article-name-uc)
-				  ((:span :class "article-name") (str article-name)))))
-			       ((:tr :class "item-info-row")
-				((:td :class "item-info-key") "Fragment")
-				((:td :class "item-info-value")
-				 "[" (if prev-ckb-uri
-					 (htm ((:a :href prev-ckb-uri :title prev-ckb-link-title) "&lt;"))
-					 (htm "&lt;"))
-				 "]"
-				 " "
-				 (str ckb-number)
-				 " "
-				 "[" (if next-ckb-uri
-					 (htm ((:a :href next-ckb-uri :title next-ckb-link-title) "&gt;"))
-					 (htm "&gt;"))
-				 "]"))
-			       ((:tr :class "item-info-row")
-				((:td :class "item-info-key") "Item Kind")
-				((:td :class "item-info-value") (str item-kind-pretty)))
-			       ((:tr :class "item-info-row")
-				((:td :class "item-info-key") "Number")
-				((:td :class "item-info-value")
-				 "[" (if prev-item-kind-uri
-					 (htm ((:a :href prev-item-kind-uri :title prev-item-kind-link-title) "&lt;"))
-					 (htm "&lt"))
-				 "]"
-				 " "
-				 (str item-number-str)
-				 " "
-				 "[" (if next-item-kind-uri
-					 (htm ((:a :href next-item-kind-uri :title next-item-kind-link-title) "&gt;"))
-					 (htm "&gt;"))
-				 "]"))
-			       ((:tr :class "item-info-row")
-				((:td :colspan "2" :class "item-info-heading") "Actions"))
-			       ((:tr :class "item-info-row")
-				((:td :colspan "2") "Search for a path of dependence:"
-				 ((:ul :class "path-options")
-				  (:li ((:a :href search-from-uri :title search-from-link-title) (:b "starting at")))
-				  (:li ((:a :href search-via-uri :title search-via-link-title) (:b "passing through")))
-				  (:li ((:a :href search-to-uri :title search-to-link-title) (:b "ending at"))))
-				 "this item."))
-			       ((:tr :class "item-info-row")
-				((:td :colspan "2") "See what this item"
-				 ((:ul :class "item-dep-options")
-				  (:li ((:a :href requires-uri :title "Items on which this item depends") (:b "requires")))
-				  (:li ((:a :href supports-uri :title "Items that this item supports") (:b "supports"))))))))
-			     ((:td :width "75%" :valign "top")
-			      (str item-html)))))))))
+		nil
+	      ((:table :class "item-table")
+	       (:tr
+		((:td :width "25%" :align "left")
+		 ((:table :class "item-info")
+		  ((:tr :class "item-info-row")
+		   ((:td :colspan "2" :class "item-info-heading") "Item Info"))
+		  ((:tr :class "item-info-row")
+		   ((:td :class "item-info-key") "Article")
+		   ((:td :class "item-info-value")
+		    ((:a :href article-uri :class "article-name" :title article-name-uc)
+		     ((:span :class "article-name") (str article-name)))))
+		  ((:tr :class "item-info-row")
+		   ((:td :class "item-info-key") "Fragment")
+		   ((:td :class "item-info-value")
+		    "[" (if prev-ckb-uri
+			    (htm ((:a :href prev-ckb-uri :title prev-ckb-link-title) "&lt;"))
+			    (htm "&lt;"))
+		    "]"
+		    " "
+		    (str ckb-number)
+		    " "
+		    "[" (if next-ckb-uri
+			    (htm ((:a :href next-ckb-uri :title next-ckb-link-title) "&gt;"))
+			    (htm "&gt;"))
+		    "]"))
+		  ((:tr :class "item-info-row")
+		   ((:td :class "item-info-key") "Item Kind")
+		   ((:td :class "item-info-value") (str item-kind-pretty)))
+		  ((:tr :class "item-info-row")
+		   ((:td :class "item-info-key") "Number")
+		   ((:td :class "item-info-value")
+		    "[" (if prev-item-kind-uri
+			    (htm ((:a :href prev-item-kind-uri :title prev-item-kind-link-title) "&lt;"))
+			    (htm "&lt"))
+		    "]"
+		    " "
+		    (str item-number-str)
+		    " "
+		    "[" (if next-item-kind-uri
+			    (htm ((:a :href next-item-kind-uri :title next-item-kind-link-title) "&gt;"))
+			    (htm "&gt;"))
+		    "]"))
+		  ((:tr :class "item-info-row")
+		   ((:td :colspan "2" :class "item-info-heading") "Actions"))
+		  ((:tr :class "item-info-row")
+		   ((:td :colspan "2") "Search for a path of dependence:"
+		    ((:ul :class "path-options")
+		     (:li ((:a :href search-from-uri :title search-from-link-title) (:b "starting at")))
+		     (:li ((:a :href search-via-uri :title search-via-link-title) (:b "passing through")))
+		     (:li ((:a :href search-to-uri :title search-to-link-title) (:b "ending at"))))
+		    "this item."))
+		  ((:tr :class "item-info-row")
+		   ((:td :colspan "2") "See what this item"
+		    ((:ul :class "item-dep-options")
+		     (:li ((:a :href requires-uri :title "Items on which this item depends") (:b "requires")))
+		     (:li ((:a :href supports-uri :title "Items that this item supports") (:b "supports"))))))))
+		((:td :width "75%" :valign "top")
+		 (str item-html)))))))))
 
 (defun fragment->items (fragment)
   (destructuring-bind (fragment-article fragment-number-str)
