@@ -86,6 +86,9 @@
       ((:a :href uri :title title)
        (str (pretty-print-item item))))))
 
+(defun link-to-item-with-components (article kind number)
+  (link-to-item (item-from-components article kind number)))
+
 (define-constant +fragment-uri-regexp+
     (exact-regexp (concat "/" "fragment"
 			  "/" "(" +article-name-regexp+ ")"
