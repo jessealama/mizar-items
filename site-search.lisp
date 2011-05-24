@@ -303,7 +303,7 @@ If there is no such path, return nil."
 		   (error "unknown article coming from item '~a'" destination))
 		 (< node-mml-pos dest-mml-pos)))))
       (defmethod goal-test ((p (eql problem)) node)
-	(= (sxhash (node-state node)) dest-hash))
+	(gethash (node-state node) (delta problem)))
       (defmethod successors :around ((problem (eql problem)) node)
 	(let* ((candidates (call-next-method))
 	       (trimmed-candidates (remove-if #'too-far candidates)))
