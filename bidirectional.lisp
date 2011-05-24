@@ -1,14 +1,44 @@
 
 (in-package :mizar)
 
-(defmethod predecessors ((problem problem) node)
-  "Return an alist of (action . state) pairs from which this state can be accessed"
-  (declare (ignore node))
-  (error "You need to define a SUCCESSORS method for ~A" problem))
+(defclass bidi-problem (problem)
+  nil)
 
-(defun develop-delta (mouth depth)
-  (declare (ignore mouth depth))
-  (make-hash-table :test #'eq))
+(defgeneric predecessors (problem node))
+
+(defclass delta-bidi-problem (bidi-problem)
+  ((delta 
+    :accessor delta
+    :initform (make-hash-table :test #'eq))))
+
+(defmethod goal-test ((problem delta-bidi-problem) node)
+  (gethash (node-state node) (delta problem)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Bidirectional search with deltas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun develop-delta (mouth depth problem)
+  (loop
+     with delta = (make-hash-table :test #'eq)
+     with q = (make-initial-queue mouth)
+     for node = (remove-front q)
+     do
+       (when (<= (node-depth node) depth)
+	 (loop
+	    with succs = (predecessors problem node)
+	    for (action . succ) in succs
+	    do
+	      (multiple-value-bind (whatever seen-before?)
+		  (gethash succ delta)
+		(declare (ignore whatever))
+		(unless seen-before?
+		  (setf (gethash succ delta) succ)
+		  (enqueue-at-front q (list (make-instance 'node
+							   :state succ
+							   :parent node)))))))
+       (when (empty-queue? q)
+	 (return delta))))
 
 (defun merge-forward-and-backward-nodes (forward-node backward-node)
   "FORWARD-NODE is a node whose ultimate ancestor represents the start
@@ -25,13 +55,15 @@
       ((null b) a)
     (setf (node-parent b) a)))
 
-(defun bidirectional-limited-dfs-with-delta (source destination delta-depth search-depth)
-  (let ((delta (develop-delta destination delta-depth))
-	(limit (if (integerp search-depth) search-depth most-positive-fixnum))
-	(nodes (make-initial-queue source
-				   :queueing-function #'enqueue-at-front))
-	(node nil)
-	(cutoff nil))
+(defun bidirectional-limited-dfs-with-delta (bidi-problem delta-depth search-depth)
+  (let* ((source (problem-initial-state bidi-problem))
+	 (destination (problem-goal bidi-problem))
+	 (delta (develop-delta destination delta-depth bidi-problem))
+	 (limit (if (integerp search-depth) search-depth most-positive-fixnum))
+	 (nodes (make-initial-queue source
+				    :queueing-function #'enqueue-at-front))
+	 (node nil)
+	 (cutoff nil))
     (loop
        (when (empty-queue? nodes)
 	 (return (when cutoff :cut-off)))
@@ -41,4 +73,4 @@
 	   (gethash (node-state node) delta)
 	 (when we-in-the-delta?
 	   (return (merge-forward-and-backward-nodes node node-in-delta))))
-       (enqueue-at-front nodes (expand node problem)))))
+       (enqueue-at-front nodes (expand node bidi-problem)))))
