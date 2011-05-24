@@ -17,14 +17,20 @@
 ;;; and simple and O(log n), but not super efficient.  Consider a Fibonacci
 ;;; heap [Page 420 CL&R] if you really have large queues to deal with.
 
-(defstruct q
-  (key #'identity)
-  (last nil)
-  (elements nil))
+(defclass q ()
+  ((key
+    :accessor q-key
+    :initform #'identity)
+   (last
+    :accessor q-last
+    :initform nil)
+   (elements
+    :accessor q-elements
+    :initform nil)))
 
 ;;;; Basic Operations on Queues
 
-(defun make-empty-queue () (make-q))
+(defun make-empty-queue () (make-instance 'q))
 
 (defun empty-queue? (q)
   "Are there no elements in the queue?"
