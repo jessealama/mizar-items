@@ -40,7 +40,7 @@ variable (at load time).")
 					    :name "mml.lar"))
 (defparameter *mml-lar*
   (if (probe-file *mml-lar-path*)
-      (lines-of-file *mml-lar-path*)
+      (cons "hidden" (cons "tarski" (lines-of-file *mml-lar-path*)))
       (error "Unable to initialize mml.lar: file does not exist under ~A" *mml-lar-path*)))
 
 (defun belongs-to-mml (article-str)
