@@ -252,14 +252,18 @@ If there is no such path, return nil."
 	      (values nil nil)
 	      (values nil :cut-off))))))
 
+(defgeneric mml-lar-index-of-item (item-designator))
+
 (let ((table (make-hash-table :test #'equal)))
-  (defun mml-lar-index-of-item (item)
+  (defmethod mml-lar-index-of-item ((item symbol))
     (multiple-value-bind (val present?)
 	(gethash item table)
       (if present?
 	  val
 	  (setf (gethash item table)
-		(mml-lar-index (item-article item)))))))
+		(mml-lar-index (item-article (symbol-name item)))))))
+  (defmethod mml-lar-index-of-item ((item string))
+    (mml-lar-index-of-item (get-and-maybe-set-item-name item))))
 
 (defun items-reachable-from-item (item dependency-graph depth)
   (if (< depth 0)
