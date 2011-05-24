@@ -1138,13 +1138,24 @@ fragment at CKB-PATH-2."
 		 (format mml-export ")))")))
 	  (format t "done.~%")))))
 
+(defvar *item-name-table* (make-hash-table :test #'equal)
+  "A table that maps item names as strings to symbols whose name is the string.")
+
+(defun get-and-maybe-set-item-name (name)
+  (multiple-value-bind (sym present?)
+      (gethash name *item-name-table*)
+    (if present?
+	sym
+	(setf (gethash name *item-name-table*)
+	      (make-symbol name)))))
+
 (defun read-dependency-file (path)
   "Read a dependency file stored at PATH, which is assumed to be made
 up of lines that look like
 
 ITEM SPACE-SEPARATED-LIST-OF-DEPENDENCIES
 
-The result is a hash table."
+The result is a hash table.  Its keys are symbols, and its values are lists of symbols"
   (let ((table (make-hash-table :test #'equal)))
     (if (file-exists-p path)
 	(with-open-file (depfile path
@@ -1154,7 +1165,8 @@ The result is a hash table."
 	      ((null line))
 	    (destructuring-bind (item . deps)
 		(split #\Space line)
-	      (setf (gethash item table) deps)))
+	      (setf (gethash (get-and-maybe-set-item-name item) table)
+		    (mapcar #'get-and-maybe-set-item-name deps))))
 	  table)
 	(error "There is no file at '~a'" path))))
 
