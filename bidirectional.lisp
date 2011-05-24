@@ -33,10 +33,11 @@
 		  (gethash succ delta)
 		(declare (ignore whatever))
 		(unless seen-before?
-		  (setf (gethash succ delta) succ)
-		  (enqueue-at-front q (list (make-instance 'node
-							   :state succ
-							   :parent node)))))))
+		  (let ((succ-node (make-instance 'node
+						  :state succ
+						  :parent node)))
+		    (setf (gethash succ delta) succ-node)
+		    (enqueue-at-front q (list succ-node)))))))
        (when (empty-queue? q)
 	 (return delta))))
 
