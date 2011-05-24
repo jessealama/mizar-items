@@ -284,12 +284,10 @@ If there is no such path, return nil."
 If there is no such path, return nil."
   (declare (ignore limit))
   (let* ((problem (make-instance 'item-search-problem
-				 :initial-state source
+				 :initial-state (get-and-maybe-set-item-name source)
 				 :goal destination))
-	 (dest-mml-pos (mml-lar-index-of-item destination))
-	 (dest-hash (sxhash destination)))
+	 (dest-mml-pos (mml-lar-index-of-item destination)))
     ;; develop the delta
-    (format t "Building the delta to depth 3...")
     (setf (delta problem)
 	  (develop-delta (get-and-maybe-set-item-name destination)
 			 3
