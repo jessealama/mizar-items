@@ -277,15 +277,19 @@ If there is no such path, return nil."
 				     :test #'string=)))))
   
 
-(defmethod best-first-search-marking-deadends :around ((problem item-search-problem) eval-fn)
+(defmethod best-first-search-marking-deadends :around ((problem item-search-problem) eval-fn &optional nodes)
   (let ((solution-node (call-next-method)))
     ;; if non-nil, our solution is in the delta
-    (when solution-node
-      (multiple-value-bind (node-in-delta we-in-the-delta?)
-	  (gethash (node-state solution-node)
-		   (delta problem))
-	(assert we-in-the-delta?)
-	(merge-forward-and-backward-nodes solution-node node-in-delta)))))
+    (multiple-value-bind (solution-node more-nodes)
+	(call-next-method)
+      (if solution-node
+	  (multiple-value-bind (node-in-delta we-in-the-delta?)
+	      (gethash (node-state solution-node)
+		       (delta problem))
+	    (assert we-in-the-delta?)
+	    (values (merge-forward-and-backward-nodes solution-node node-in-delta)
+		    more-nodes))
+	  (values nil (if (empty-queue? more-nodes) nil more-nodes))))))
 
 (defgeneric one-path (source destination &optional limit nodes))
 
@@ -328,9 +332,8 @@ If there is no such path, return nil."
 	      (- state-mml-pos dest-mml-pos))))
       (when (empty-queue? nodes)
 	(enqueue-at-end nodes (list (make-instance 'node :state (get-and-maybe-set-item-name source)))))
-      (let ((solution (greedy-search-w/o-repeated-deadends problem)))
-	(when solution
-	  (explain-solution solution))))))
+
+      (greedy-search-w/o-repeated-deadends problem nodes))))
 
 (defclass path-broker ()
   ((path-table
