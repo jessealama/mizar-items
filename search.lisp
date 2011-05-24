@@ -442,15 +442,15 @@ state."
   "Best-first search using the node's depth as its cost.  Discussion on [p 75]"
   (best-first-search problem #'node-depth))
 
-(defgeneric best-first-search-marking-deadends (problem eval-fn))
+(defgeneric best-first-search-marking-deadends (problem eval-fn &optional nodes))
 
-(defmethod best-first-search-marking-deadends (problem eval-fn)
-  "Search the nodes with the best evaluation first. [p 93]"
+(defmethod best-first-search-marking-deadends (problem eval-fn &optional nodes)
   (let* ((deadends (make-hash-table :test #'equal))
 	 (queueing-function #'(lambda (old-q nodes) 
 				(enqueue-by-priority old-q nodes eval-fn)))
-	 (nodes (make-initial-queue (problem-initial-state problem)
-				    :queueing-function queueing-function)))
+	 (nodes (or nodes
+		    (make-initial-queue (problem-initial-state problem)
+					:queueing-function queueing-function))))
     (defmethod successors :around ((p (eql problem)) node)
       (let ((succs (call-next-method)))
 	(remove-if #'(lambda (state) (gethash state deadends))
@@ -458,11 +458,11 @@ state."
 		   :key #'car)))
     (let (node)
       (loop 
-	 (if (empty-queue? nodes) (return nil))
+	 (if (empty-queue? nodes) (return (values nil nil)))
 	 (setf node
 	       (do ((n (remove-front nodes) (remove-front nodes)))
 		   ((not (gethash (node-state n) deadends)) n)))
-	 (if (goal-test problem node) (return node))
+	 (if (goal-test problem node) (return (values node nodes)))
 	 (let ((expanded (expand node problem)))
 	   (if expanded
 	       (funcall queueing-function nodes expanded)
@@ -470,9 +470,9 @@ state."
 		 (format t "Deadend encountered: ~a~%" (node-state node))
 		 (setf (gethash (node-state node) deadends) t))))))))
 
-(defun greedy-search-w/o-repeated-deadends (problem)
+(defun greedy-search-w/o-repeated-deadends (problem &optional nodes)
   "Best-first search using H (heuristic distance to goal). [p 93]"
-  (best-first-search-marking-deadends problem #'node-h-cost))
+  (best-first-search-marking-deadends problem #'node-h-cost nodes))
 
 (defun tree-a*-search-w/o-repeated-deadends (problem)
   "Best-first search using estimated total cost, or (F = G + H). [p 97]"
