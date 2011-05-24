@@ -3,29 +3,60 @@
 
 (in-package :mizar)
 
-(defstruct problem
-  "A problem is defined by the initial state, and the type of problem it is.
-We will be defining subtypes of PROBLEM later on.  For bookkeeping, we
-count the number of nodes expanded."
-  (initial-state)  ; A state in the domain.
-  (goal)           ; Optionally store the desired state here.
-  (num-expanded 0) ; Number of nodes expanded in search for solution.
-  )
+(defclass problem ()
+  ((initial-state
+    :initform nil
+    :accessor problem-initial-state
+    :documentation "A state in the domain.")
+   (goal
+    :initform nil
+    :accessor problem-goal
+    :documentation "Optionally store the desired state here.")
+   (num-expanded
+    :initform 0
+    :accessor problem-num-expanded
+    :documentation "Number of nodes expanded in search for solution."))
+  (:documentation "A problem is defined by the initial state, and
+the type of problem it is.  We will be defining subtypes of PROBLEM
+later on.  For bookkeeping, we count the number of nodes expanded."))
 
-(defstruct node
-  "Node for generic search.  A node contains a state, a
-domain-specific representation of a point in the search space.  It
-also contains some bookkeeping information."
-  (state)                   ; a state in the domain
-  (parent nil)              ; the parent node of this node
-  (action nil)              ; the domain action leading to state
-  (successors nil)          ; list of successor nodes
-  (depth 0)                 ; depth of node in tree (root = 0)
-  (g-cost 0)                ; path cost from root to node
-  (h-cost 0)                ; estimated distance from state to goal
-  (f-cost 0)                ; g-cost + h-cost
-  (expanded? nil)           ; any successors examined?
-  )
+(defclass node ()
+  ((state
+    :initform nil
+    :accessor node-state
+    :documentation "A state in the domain.")
+   (parent
+    :initform nil
+    :accessor node-parent
+    :documentation "The parent node of this node")
+   (action
+    :initform nil
+    :accessor node-action
+    :documentation "The domain action leading to state")
+   (successors
+    :initform nil
+    :accessor node-successors
+    :documentation "A list of successor nodes")
+   (depth
+    :initform 0
+    :accessor node-depth
+    :documentation "Depth of node in tree (root = 0)")
+   (g-cost
+    :initform 0
+    :accessor node-g-cost
+    :documentation "Path cost from root to node")
+   (h-cost
+    :initform 0
+    :accessor node-h-cost
+    :documentation "Estimated distance from state to goal")
+   (f-cost
+    :initform 0
+    :accessor node-f-cost
+    :documentation "g-cost + h-cost")
+   (expanded?
+    :initform nil
+    :accessor node-expanded?
+    :documentation "Any successors examined?")))
 
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
@@ -92,13 +123,14 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	       (let ((g (+ (node-g-cost node)
 			   (edge-cost problem node action state)))
 		     (h (h-cost problem state)))
-		 (push (make-node :parent node 
-				  :action action 
-				  :state state
-				  :g-cost g
-				  :h-cost h
-				  :f-cost (max (node-f-cost node) (+ g h))
-				  :depth (1+ (node-depth node)))
+		 (push (make-instance 'node
+				      :parent node 
+				      :action action 
+				      :state state
+				      :g-cost g
+				      :h-cost h
+				      :f-cost (max (node-f-cost node) (+ g h))
+				      :depth (1+ (node-depth node)))
 		     nodes)))
 	   finally
 	     (setf (node-successors node) nodes)
@@ -106,7 +138,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
-  (make-node :state (problem-initial-state problem)))
+  (make-instance 'node :state (problem-initial-state problem)))
 
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
@@ -135,7 +167,8 @@ linear sequence), return NIL."
 (defun make-initial-queue (initial-state 
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
-    (funcall queueing-function q (list (make-node :state initial-state)))
+    (funcall queueing-function q (list (make-instance 'node
+						      :state initial-state)))
     q))
 
 (defun general-search (problem queueing-function)
@@ -398,7 +431,9 @@ state."
   "Best-first search using the node's depth as its cost.  Discussion on [p 75]"
   (best-first-search problem #'node-depth))
 
-(defun best-first-search-marking-deadends (problem eval-fn)
+(defgeneric best-first-search-marking-deadends (problem eval-fn))
+
+(defmethod best-first-search-marking-deadends (problem eval-fn)
   "Search the nodes with the best evaluation first. [p 93]"
   (let* ((deadends (make-hash-table :test #'equal))
 	 (queueing-function #'(lambda (old-q nodes) 
