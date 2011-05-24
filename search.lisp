@@ -7,10 +7,12 @@
   ((initial-state
     :initform nil
     :accessor problem-initial-state
+    :initarg :initial-state
     :documentation "A state in the domain.")
    (goal
     :initform nil
     :accessor problem-goal
+    :initarg :goal
     :documentation "Optionally store the desired state here.")
    (num-expanded
     :initform 0
@@ -24,10 +26,12 @@ later on.  For bookkeeping, we count the number of nodes expanded."))
   ((state
     :initform nil
     :accessor node-state
+    :initarg :state
     :documentation "A state in the domain.")
    (parent
     :initform nil
     :accessor node-parent
+    :initarg :parent
     :documentation "The parent node of this node")
    (action
     :initform nil
