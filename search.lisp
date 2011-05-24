@@ -36,6 +36,7 @@ later on.  For bookkeeping, we count the number of nodes expanded."))
    (action
     :initform nil
     :accessor node-action
+    :initarg :action
     :documentation "The domain action leading to state")
    (successors
     :initform nil
@@ -44,18 +45,22 @@ later on.  For bookkeeping, we count the number of nodes expanded."))
    (depth
     :initform 0
     :accessor node-depth
+    :initarg :depth
     :documentation "Depth of node in tree (root = 0)")
    (g-cost
     :initform 0
     :accessor node-g-cost
+    :initarg :g-cost
     :documentation "Path cost from root to node")
    (h-cost
     :initform 0
     :accessor node-h-cost
+    :initarg :h-cost
     :documentation "Estimated distance from state to goal")
    (f-cost
     :initform 0
     :accessor node-f-cost
+    :initarg :f-cost
     :documentation "g-cost + h-cost")
    (expanded?
     :initform nil
