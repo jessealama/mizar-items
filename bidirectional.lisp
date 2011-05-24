@@ -51,10 +51,18 @@
   solution is thus available.  Return a new node whose state is the
   goal of the search problem, and which merges FORWARD-NODE and
   BACKWARD-NODE into a coherent solution."
-  (do ((a forward-node b)
-       (b (node-parent backward-node) (node-parent b)))
-      ((null b) a)
-    (setf (node-parent b) a)))
+  (let ((backward-parent (node-parent backward-node)))
+    (if (null backward-parent)
+	(make-instance 'node
+		       :state (node-state forward-node)
+		       :action (node-state forward-node)
+		       :parent (node-parent forward-node))
+	(merge-forward-and-backward-nodes
+	 (make-instance 'node
+			:state (node-state backward-parent)
+			:action (node-state backward-parent)
+			:parent forward-node)
+	 backward-parent))))
 
 (defun bidirectional-limited-dfs-with-delta (bidi-problem delta-depth search-depth)
   (let* ((source (problem-initial-state bidi-problem))
