@@ -9,10 +9,15 @@
   :test #'=
   :documentation "The depth limit for doing searches.")
 
-(defstruct (item-search-problem (:include problem)))
+(defclass item-search-problem (delta-bidi-problem)
+  nil)
 
 (defmethod successors ((isp item-search-problem) node)
   (let ((deps (gethash (node-state node) *item-dependency-graph-forward*)))
+    (mapcar #'(lambda (item) (cons item item)) deps)))
+
+(defmethod predecessors ((isp item-search-problem) node)
+  (let ((deps (gethash (node-state node) *item-dependency-graph-backward*)))
     (mapcar #'(lambda (item) (cons item item)) deps)))
 
 (let ((table (make-hash-table :test #'equal)))
@@ -217,12 +222,12 @@ or
 (defmethod one-path-via (source destination &rest via)
   "Find one path from SOURCE to DESTINATION that passes through VIA.
 If there is no such path, return nil." 
-  (let ((source-to-via-problem (make-item-search-problem 
-				:initial-state source
-				:goal via))
-	(via-to-destination-problem (make-item-search-problem
-				     :initial-state via
-				     :goal destination)))
+  (let ((source-to-via-problem (make-instance 'item-search-problem 
+					      :initial-state source
+					      :goal via))
+	(via-to-destination-problem (make-instance 'item-search-problem
+						   :initial-state via
+						   :goal destination)))
     (multiple-value-bind (solution-to-via-found? solution-to-via)
 	(bounded-depth-first-search source-to-via-problem +search-depth+)
       (if solution-to-via-found?
@@ -260,6 +265,15 @@ If there is no such path, return nil."
 				     :test #'string=)))))
   
 
+(defmethod best-first-search-marking-deadends :around ((problem item-search-problem) eval-fn)
+  (let ((solution-node (call-next-method)))
+    ;; if non-nil, our solution is in the delta
+    (multiple-value-bind (node-in-delta we-in-the-delta?)
+	(gethash (node-state solution-node)
+		 (delta problem))
+      (assert we-in-the-delta?)
+      (merge-forward-and-backward-nodes solution-node node-in-delta))))
+
 (defgeneric one-path (source destination &optional limit nodes))
 
 (defmethod one-path (source destination
@@ -268,17 +282,26 @@ If there is no such path, return nil."
   "Find one path from SOURCE to DESTINATION that passes through VIA.                                                                                                                                        
 If there is no such path, return nil."
   (declare (ignore limit))
-  (let* ((problem (make-item-search-problem :initial-state source
-					    :goal destination))
+  (let* ((problem (make-instance 'item-search-problem
+				 :initial-state source
+				 :goal destination))
 	 (dest-mml-pos (mml-lar-index-of-item destination))
 	 (dest-hash (sxhash destination)))
+    ;; develop the delta
+    (format t "Building the delta to depth 3...")
+    (setf (delta problem)
+	  (develop-delta (get-and-maybe-set-item-name destination)
+			 3
+			 problem))
     (flet ((too-far (action-item)
 	     (destructuring-bind (action . item)
 		 action-item
 	       (declare (ignore action))
-	       (let* ((node-mml-pos (mml-lar-index-of-item item)))
+	       (let* ((node-mml-pos (mml-lar-index-of-item (symbol-name item))))
 		 (when (null node-mml-pos)
 		   (error "unknown article coming from item '~a'" item))
+		 (when (null dest-mml-pos)
+		   (error "unknown article coming from item '~a'" destination))
 		 (< node-mml-pos dest-mml-pos)))))
       (defmethod goal-test ((p (eql problem)) node)
 	(= (sxhash (node-state node)) dest-hash))
@@ -288,12 +311,12 @@ If there is no such path, return nil."
 	  ;; (break "trimmed successors of ~a are ~{~a~% ~}" node (mapcar #'car trimmed-candidates))
 	  trimmed-candidates))
       (defmethod h-cost ((problem (eql problem)) state)
-	(let ((state-mml-pos (mml-lar-index-of-item state)))
+	(let ((state-mml-pos (mml-lar-index-of-item (symbol-name state))))
 	  (if (< state-mml-pos dest-mml-pos)
 	      most-positive-fixnum
 	      (- state-mml-pos dest-mml-pos))))
       (when (empty-queue? nodes)
-	(enqueue-at-end nodes (list (make-node :state source))))
+	(enqueue-at-end nodes (list (make-instance 'node :state source))))
       (let ((solution (greedy-search-w/o-repeated-deadends problem)))
 	(when solution
 	  (explain-solution solution))))))
@@ -460,13 +483,15 @@ values: if there is a path from SOURCE to DESTINATION that passes
 through BAD-GUY, return NIL as the first value and that withnessing
 path as the second value; otherwise, return T as the first value and
 NIL as the second value."
-  (let* ((to-bad-guy (make-item-search-problem :goal bad-guy
-					       :initial-state source))
+  (let* ((to-bad-guy (make-instance 'item-search-problem
+				    :goal bad-guy
+				    :initial-state source))
 	 (to-bad-guy-solution (bounded-depth-first-search to-bad-guy
 							  +search-depth+)))
     (if to-bad-guy-solution
-	(let* ((from-bad-guy (make-item-search-problem :goal destination
-						       :initial-state bad-guy))
+	(let* ((from-bad-guy (make-instance 'item-search-problem
+					    :goal destination
+					    :initial-state bad-guy))
 	       (from-bad-guy-solution (bounded-depth-first-search from-bad-guy
 								  +search-depth+)))
 	  (if from-bad-guy-solution
