@@ -71,7 +71,9 @@ later on.  For bookkeeping, we count the number of nodes expanded."))
   (print-unreadable-object (node stream :type t)
     (with-slots (state)
 	node
-      (format stream "~A" state))))
+      (if (node-parent node)
+	  (format stream "~A [parent: ~A]" state (node-state (node-parent node)))
+	  (format stream "~A (root node)" state)))))
 
 (defmethod successors ((problem problem) node)
   "Return an alist of (action . state) pairs, reachable from this state."
