@@ -27,6 +27,7 @@
 	       (:file "itemize")
 	       (:file "queue")
 	       (:file "search")
+	       (:file "bidirectional")
 	       (:file "mml")
 	       (:file "depgraph")
 	       (:file "mptp")
