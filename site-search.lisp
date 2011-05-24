@@ -315,7 +315,7 @@ If there is no such path, return nil."
 	      most-positive-fixnum
 	      (- state-mml-pos dest-mml-pos))))
       (when (empty-queue? nodes)
-	(enqueue-at-end nodes (list (make-instance 'node :state source))))
+	(enqueue-at-end nodes (list (make-instance 'node :state (get-and-maybe-set-item-name source)))))
       (let ((solution (greedy-search-w/o-repeated-deadends problem)))
 	(when solution
 	  (explain-solution solution))))))
