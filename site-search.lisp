@@ -42,15 +42,23 @@
 						     (gethash source *item-dependency-graph-forward*)))))))))
 	      (setf (gethash key table) new-paths)))))))
 
+(defgeneric count-paths (source destination)
+  (:documentation "Count the number of paths from SOURCE to DESTINATION."))
+
+(defmethod count-paths ((source string) destination)
+  (count-paths (get-and-maybe-set-item-name source) destination))
+(defmethod count-paths (source (destination string))
+  (count-paths source (get-and-maybe-set-item-name destination)))
+
 (let ((table (make-hash-table :test #'equal)))
-  (defun count-paths (source destination)
+  (defmethod count-paths ((source symbol) (destination symbol))
     (let ((key (cons source destination)))
       (multiple-value-bind (num-known-paths present?)
 	  (gethash key table)
 	(if present?
 	    num-known-paths
 	    (let ((num-paths
-		   (if (string= source destination)
+		   (if (eq source destination)
 		       1
 		       (let ((source-pos (mml-lar-index-of-item source))
 			     (dest-pos (mml-lar-index-of-item destination)))
