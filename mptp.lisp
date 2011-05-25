@@ -45,7 +45,12 @@ the result of exporting the MML to MPTP.")
 	 (len (length mptp-formula-name)))
     (subseq mptp-formula-name 0 (1- (- len article-len)))))
 
-(defun mptp-name-of-item (item)
+(defgeneric mptp-name-of-item (item))
+
+(defmethod mptp-name-of-item ((item symbol))
+  (mptp-name-of-item (symbol-name item)))
+
+(defmethod mptp-name-of-item ((item string))
   (destructuring-bind (article kind number)
       (split ":" item)
     (cond ((string= kind "theorem") (format nil "t~a_~a" number article))
@@ -65,7 +70,12 @@ the result of exporting the MML to MPTP.")
 
 	  (t (error "Don't know how to map '~a' into the MPTP namespace" item)))))
 
-(defun constructor-item? (item)
+(defgeneric constructor-item? (item))
+
+(defmethod constructor-item? ((item symbol))
+  (constructor-item? (symbol-name item)))
+
+(defmethod constructor-item? ((item string))
   (scan "[^:]+:.constructor:[0-9]+" item))
 
 (defun constructor-kind (constructor-item)
@@ -78,7 +88,12 @@ the result of exporting the MML to MPTP.")
       ("^[^:]+:.constructor:([0-9]+)$" constructor-item)
     number))
 
-(defun auxiliary-mptp-items-for-item (item mptp-table)
+(defgeneric auxiliary-mptp-items-for-item (item mptp-table))
+
+(defmethod auxiliary-mptp-items-for-item ((item symbol) mptp-table)
+  (auxiliary-mptp-items-for-item (symbol-name item) mptp-table))
+
+(defmethod auxiliary-mptp-items-for-item ((item string) mptp-table)
   (cond ((constructor-item? item)
 	 (let ((kind (constructor-kind item))
 	       (number (constructor-number item))
@@ -149,21 +164,57 @@ the result of exporting the MML to MPTP.")
 	   (conjecture (named-formula-as-tptp-conjecture conjecture-name conjecture-formula)))
       (cons conjecture deps-axioms))))
 
-(defun item-dependencies (item)
+(defgeneric item-dependencies (item))
+
+(defmethod item-dependencies ((item symbol))
   (gethash item *item-dependency-graph-forward*))
 
-(defun item-supports (item)
+(defmethod item-dependencies ((item string))
+  (item-dependencies (get-and-maybe-set-item-name item)))
+
+(defgeneric item-supports (item))
+
+(defmethod item-supports ((item symbol))
   (gethash item *item-dependency-graph-backward*))
 
-(defun verify-immediate-dependence-problem (item mptp-table)
+(defmethod item-supports ((item string))
+  (item-supports (get-and-maybe-set-item-name item)))
+
+(defgeneric verify-immediate-dependence-problem (item mptp-table))
+
+(defmethod verify-immediate-dependence-problem ((item symbol) mptp-table)
   (dependence-problem item
 		      (item-dependencies item)
 		      mptp-table))
 
-(defun necessity-of-item-for-item (item needed-item mptp-table)
-  "Generate an ATP problem in which we try to show that NEEDED-ITEM is
+(defmethod verify-immediate-dependence-problem ((item string) mptp-table)
+  (verify-immediate-dependence-problem (get-and-maybe-set-item-name item)
+				       mptp-table))
+
+(defgeneric verify-transitive-dependence-problem (item mptp-table))
+
+(defmethod verify-transitive-dependence-problem ((item string) mptp-table)
+  (verify-transitive-dependence-problem (get-and-maybe-set-item-name item)
+					mptp-table))
+
+(defmethod verify-transitive-dependence-problem ((item symbol) mptp-table)
+  (let ((all-deps-table (dependencies-generated-by-item item)))
+    (dependence-problem item
+			(remove item (hash-table-keys all-deps-table))
+			mptp-table)))
+
+(defgeneric necessity-of-item-for-item (item needed-item mptp-table)
+  (:documentation "Generate an ATP problem in which we try to show that NEEDED-ITEM is
 necessary for ITEM.  We do this by simply removing NEEDED-ITEM from
-the list of items on which ITEM immediately depends."
+the list of items on which ITEM immediately depends."))
+
+(defmethod necessity-of-item-for-item ((item string) needed-item mptp-table)
+  (necessity-of-item-for-item (get-and-maybe-set-item-name item) needed-item mptp-table))
+
+(defmethod necessity-of-item-for-item (item (needed-item string) mptp-table)
+  (necessity-of-item-for-item item (get-and-maybe-set-item-name needed-item) mptp-table))
+
+(defmethod necessity-of-item-for-item ((item symbol) (needed-item symbol) mptp-table)
   (dependence-problem item
 		      (remove needed-item
 			      (item-dependencies item)
