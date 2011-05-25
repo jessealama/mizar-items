@@ -17,6 +17,12 @@
 (defun file-in-data-dir (filename)
   (concatenate 'string *mizar-items-data-root* "/" filename))
 
+(defun mml-data-dir (mml-version)
+  (format nil "~a/~a" *mizar-items-data-root* mml-version))
+
+(defun item-to-fragment-table-for-mml (mml-version)
+  (format nil "~a/item-to-fragment-table" (mml-data-dir mml-version)))
+
 (defvar *mizar-items-config* (make-hash-table))
 
 (defun update-mizar-items-config (key value)
