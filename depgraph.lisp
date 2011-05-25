@@ -1014,7 +1014,12 @@ fragment at CKB-PATH-2."
 
 (defvar *items-needed-for-item* (make-hash-table :test #'equal))
 
-(defun dependencies-generated-by-item (source-item)
+(defgeneric dependencies-generated-by-item (source-item))
+
+(defmethod dependencies-generated-by-item ((source-item string))
+  (dependencies-generated-by-item (get-and-maybe-set-item-name source-item)))
+
+(defmethod dependencies-generated-by-item ((source-item symbol))
   (loop
      with table = (make-hash-table :test #'equal)
      with q = (list source-item)
