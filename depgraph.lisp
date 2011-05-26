@@ -1151,8 +1151,13 @@ fragment at CKB-PATH-2."
       (gethash name *item-name-table*)
     (if present?
 	sym
-	(setf (gethash name *item-name-table*)
-	      (make-symbol name)))))
+	(let ((new-symbol (make-symbol name)))
+	  (destructuring-bind (article kind number-str)
+	      (split #\: name)
+	    (setf (get new-symbol 'article) article
+		  (get new-symbol 'kind) kind
+		  (get new-symbol 'number) (parse-integer number-str))
+	    (setf (gethash name *item-name-table*) new-symbol))))))
 
 (defun read-dependency-file (path)
   "Read a dependency file stored at PATH, which is assumed to be made
