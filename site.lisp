@@ -1578,7 +1578,7 @@ end;"))
 (defgeneric item-article (item-identifier))
 
 (defmethod item-article ((item symbol))
-  (item-article (symbol-name item)))
+  (get item 'article))
 
 (defmethod item-article ((item-identifier string))
   (destructuring-bind (article kind number)
