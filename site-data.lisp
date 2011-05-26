@@ -319,7 +319,9 @@
   (loop
      with items = nil
      for k being the hash-keys of *item-dependency-graph-forward*
-     for (key-article key-kind key-number) = (split ":" k)
+     for key-article = (item-article k)
+     for key-kind = (item-kind k)
+     for key-number = (item-number k)
      do
        (when (string= article key-article)
 	 (pushnew k items :test #'string=))
