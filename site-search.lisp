@@ -280,7 +280,8 @@ If there is no such path, return nil."
 	    (assert we-in-the-delta?)
 	    (values (merge-forward-and-backward-nodes solution-node node-in-delta)
 		    more-nodes))
-	  (values nil (if (empty-queue? more-nodes) nil more-nodes))))))
+	  (values nil (if (and more-nodes
+			       (empty-queue? more-nodes)) nil more-nodes))))))
 
 (defgeneric one-path (source destination &optional limit nodes))
 
