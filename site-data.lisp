@@ -368,3 +368,13 @@
 
 (defun count-items ()
   (length (all-known-items)))
+
+(defun invert-item-to-fragment-table (item-to-fragment-table)
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for item being the hash-keys in item-to-fragment-table using (hash-value fragment-number)
+     for article = (item-article item)
+     do
+       (push item (gethash (cons article fragment-number) table))
+     finally
+       (return table))) 
