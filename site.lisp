@@ -1575,7 +1575,12 @@ end;"))
 	 (sorted (sort (copy-list requires) #'earlier-in-tsorted-list)))
     sorted))
 
-(defun item-article (item-identifier)
+(defgeneric item-article (item-identifier))
+
+(defmethod item-article ((item symbol))
+  (item-article (symbol-name item)))
+
+(defmethod item-article ((item-identifier string))
   (destructuring-bind (article kind number)
       (split-item-identifier item-identifier)
     (declare (ignore kind number))
