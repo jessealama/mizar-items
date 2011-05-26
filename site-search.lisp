@@ -305,10 +305,14 @@ If there is no such path, return nil."
 				 :goal destination))
 	 (dest-mml-pos (mml-lar-index-of-item destination)))
     ;; develop the delta
-    (setf (delta problem)
-	  (develop-delta (get-and-maybe-set-item-name destination)
-			 3
-			 problem))
+    (setf (delta problem) (develop-delta destination 3 problem))
+    (defmethod goal-test ((p (eql problem)) node)
+      (gethash (node-state node) (delta problem)))
+    (defmethod h-cost ((problem (eql problem)) state)
+      (let ((state-mml-pos (mml-lar-index-of-item (symbol-name state))))
+	(if (< state-mml-pos dest-mml-pos)
+	    most-positive-fixnum
+	    (- state-mml-pos dest-mml-pos))))
     (flet ((too-far (action-item)
 	     (destructuring-bind (action . item)
 		 action-item
@@ -319,21 +323,11 @@ If there is no such path, return nil."
 		 (when (null dest-mml-pos)
 		   (error "unknown article coming from item '~a'" destination))
 		 (< node-mml-pos dest-mml-pos)))))
-      (defmethod goal-test ((p (eql problem)) node)
-	(gethash (node-state node) (delta problem)))
       (defmethod successors :around ((problem (eql problem)) node)
 	(let* ((candidates (call-next-method))
 	       (trimmed-candidates (remove-if #'too-far candidates)))
 	  ;; (break "trimmed successors of ~a are ~{~a~% ~}" node (mapcar #'car trimmed-candidates))
 	  trimmed-candidates))
-      (defmethod h-cost ((problem (eql problem)) state)
-	(let ((state-mml-pos (mml-lar-index-of-item (symbol-name state))))
-	  (if (< state-mml-pos dest-mml-pos)
-	      most-positive-fixnum
-	      (- state-mml-pos dest-mml-pos))))
-      (when (empty-queue? nodes)
-	(enqueue-at-end nodes (list (make-instance 'node :state (get-and-maybe-set-item-name source)))))
-
       (greedy-search-w/o-repeated-deadends problem nodes))))
 
 (defclass path-broker ()
