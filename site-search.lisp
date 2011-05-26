@@ -72,21 +72,12 @@
 
 (defgeneric one-path-quick (source destination))
 
-(let ((symbol-factory (make-hash-table :test #'equal)))
-  (defmethod one-path-quick ((source string) (destination string))
-    (multiple-value-bind (source-symbol source-present?)
-	(gethash source symbol-factory)
-      (unless source-present?
-	(let ((sym (make-symbol source)))
-	  (setf (gethash source symbol-factory) sym
-		source-symbol sym)))
-      (multiple-value-bind (dest-symbol dest-present?)
-	  (gethash destination symbol-factory)
-	(unless dest-present?
-	  (let ((sym (make-symbol destination)))
-	    (setf (gethash destination symbol-factory) sym
-		  dest-symbol sym)))
-	(one-path-quick source-symbol dest-symbol)))))
+(defmethod one-path-quick ((source string) destination)
+  (one-path-quick (get-and-maybe-set-item-name source) destination))
+
+(defmethod one-path-quick (source (destination string))
+  (one-path-quick source
+		  (get-and-maybe-set-item-name destination)))
 
 (defmethod one-path-quick ((source symbol) (destination symbol))
   (let ((dest-pos (mml-lar-index-of-item (symbol-name destination))))
@@ -293,14 +284,24 @@ If there is no such path, return nil."
 
 (defgeneric one-path (source destination &optional limit nodes))
 
-(defmethod one-path (source destination
-		     &optional (limit +search-depth+)
-		     (nodes (make-empty-queue)))
+(defmethod one-path ((source string) destination &optional limit nodes)
+  (one-path (get-and-maybe-set-item-name source) destination limit nodes))
+
+(defmethod one-path (source (destination string) &optional limit nodes)
+  (one-path source (get-and-maybe-set-item-name destination) limit nodes))
+
+(defmethod one-path ((source symbol) (destination symbol)
+		     &optional limit  nodes)
   "Find one path from SOURCE to DESTINATION that passes through VIA.                                                                                                                                        
 If there is no such path, return nil."
-  (declare (ignore limit))
+  (when (null nodes)
+    (setf nodes (make-empty-queue)))
+  (when (empty-queue? nodes)
+    (enqueue-at-end nodes (list (make-instance 'node :state source))))
+  (when (null limit)
+    (setf limit +search-depth+))
   (let* ((problem (make-instance 'item-search-problem
-				 :initial-state (get-and-maybe-set-item-name source)
+				 :initial-state source
 				 :goal destination))
 	 (dest-mml-pos (mml-lar-index-of-item destination)))
     ;; develop the delta
