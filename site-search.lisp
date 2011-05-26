@@ -91,7 +91,7 @@
 			    for successor in (gethash source *item-dependency-graph-forward*)
 			    for successor-path = (to-dest successor)
 			    do
-			      (break "successor is ~a" successor)
+			      ;; (break "successor is ~a" successor)
 			      (when (listp successor-path)
 				(return (cons source successor-path)))
 			    finally
