@@ -459,9 +459,16 @@ state."
     (let (node)
       (loop 
 	 (if (empty-queue? nodes) (return (values nil nil)))
-	 (setf node
-	       (do ((n (remove-front nodes) (remove-front nodes)))
-		   ((not (gethash (node-state n) deadends)) n)))
+	 (setf node (loop
+		       named find-viable-node
+		       for n = (remove-front nodes)
+		       do
+			 (unless (gethash (node-state n) deadends)
+			   (return-from find-viable-node n))
+			 (when (empty-queue? nodes)
+			   (return-from find-viable-node nil))))
+	 (when (null node)
+	   (return (values nil nil)))
 	 (if (goal-test problem node) (return (values node nodes)))
 	 (let ((expanded (expand node problem)))
 	   (if expanded
