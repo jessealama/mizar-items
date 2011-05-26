@@ -371,6 +371,8 @@
 (defun count-items ()
   (length (all-known-items)))
 
+(defvar *fragment-to-item-table* (make-hash-table :test #'equal))
+
 (defun invert-item-to-fragment-table (item-to-fragment-table)
   (loop
      with table = (make-hash-table :test #'equal)
