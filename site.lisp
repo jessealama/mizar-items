@@ -1581,16 +1581,29 @@ end;"))
   (get item 'article))
 
 (defmethod item-article ((item-identifier string))
-  (destructuring-bind (article kind number)
-      (split-item-identifier item-identifier)
-    (declare (ignore kind number))
-    article))
+  (item-article (get-and-maybe-set-item-name item-identifier)))
 
-(defun item-number (item-identifier)
+(defgeneric item-number (item-itemtifier))
+
+(defmethod item-number ((item symbol))
+  (get item 'number))
+
+(defmethod item-number ((item-identifier string))
   (destructuring-bind (article kind number)
       (split-item-identifier item-identifier)
     (declare (ignore article kind))
     number))
+
+(defgeneric item-kind (item-itemtifier))
+
+(defmethod item-kind ((item symbol))
+  (get item 'kind))
+
+(defmethod item-kind ((item-identifier string))
+  (destructuring-bind (article kind number)
+      (split-item-identifier item-identifier)
+    (declare (ignore article number))
+    kind))
 
 (defun items-by-article (item-list)
   (let ((by-article (make-hash-table :test #'equal)))
