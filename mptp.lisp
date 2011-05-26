@@ -90,6 +90,16 @@ the result of exporting the MML to MPTP.")
 
 (defgeneric auxiliary-mptp-items-for-item (item mptp-table))
 
+(let ((table (make-hash-table :test #'equal)))
+  (defmethod auxiliary-mptp-items-for-item :around (item mptp-table)
+    (let ((key (cons item mptp-table)))
+      (multiple-value-bind (stored known?)
+	  (gethash key table)
+	(if known?
+	    stored
+	    (let ((val (call-next-method)))
+	      (setf (gethash key table) val)))))))
+
 (defmethod auxiliary-mptp-items-for-item ((item symbol) mptp-table)
   (auxiliary-mptp-items-for-item (symbol-name item) mptp-table))
 
