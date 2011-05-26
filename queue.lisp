@@ -28,6 +28,12 @@
     :accessor q-elements
     :initform nil)))
 
+(defmethod print-object ((q q) stream)
+  (print-unreadable-object (q stream :type t)
+    (with-slots (elements)
+	q
+      (format stream "~d elements" (length elements)))))
+
 ;;;; Basic Operations on Queues
 
 (defun make-empty-queue () (make-instance 'q))
