@@ -241,3 +241,9 @@ the list of items on which ITEM immediately depends."))
 				     (member thing needed-items :test #'string=))
 				 (item-dependencies item))
 		      mptp-table))
+
+(defun mptp-axioms-from-article (article)
+  (loop
+     with article-regexp = (format nil "_~a$" article)
+     for axiom-name being the hash-keys in *mptp-table* using (hash-value axiom)
+     when (scan article-regexp axiom-name) collect (format nil "fof(~a, axiom, ~a)." axiom-name axiom)))
