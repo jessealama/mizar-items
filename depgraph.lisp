@@ -347,7 +347,12 @@ fragment at CKB-PATH-2."
 		   (error "We were unable to resolve the article-local definiens line '~a'" definiens-line)))))
 	(format nil "~(~a~):definiens:~a" aid nr))))
 
-(defun deftheorem-from-definiens (definiens-item)
+(defgeneric deftheorem-from-definiens (definiens-item-identifier))
+
+(defmethod deftheorem-from-definiens ((definiens-item string))
+  (deftheorem-from-definiens (get-and-maybe-set-item-name definiens-item)))
+
+(defmethod deftheorem-from-definiens ((definiens-item symbol))
   (let ((fragment-number (gethash definiens-item *item-to-fragment-table*))
 	(fragment-article (item-article definiens-item)))
     (when fragment-number
@@ -826,7 +831,13 @@ fragment at CKB-PATH-2."
 		   (items-needed-for-article-by-fragment article)))
    :test #'string=))
 
-(defun items-needed-for-item (item)
+(defgeneric items-needed-for-item (item)
+  (:documentation "The minimal set of items needed for the success of ITEM."))
+
+(defmethod items-needed-for-item ((item string))
+  (items-needed-for-item (get-and-maybe-set-item-name item)))
+
+(defmethod items-needed-for-item ((item symbol))
   (let ((fragment-number (gethash item *item-to-fragment-table*))
 	(article (item-article item)))
       (items-needed-for-fragment article fragment-number)))
@@ -879,7 +890,12 @@ fragment at CKB-PATH-2."
 		      (remove-if-not #'definiens-item? needed-items)) into needed
      finally (return needed)))
 
-(defun deftheorem-item? (item)
+(defgeneric deftheorem-item? (item-identifier))
+
+(defmethod deftheorem-item? ((item symbol))
+  (string= (get item 'kind) "deftheorem"))
+
+(defmethod deftheorem-item? ((item string))
   (scan ":deftheorem:" item))
 
 (defun deftheorems-of-article (article)
