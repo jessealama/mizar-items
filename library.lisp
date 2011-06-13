@@ -18,6 +18,18 @@
     :accessor binary-version
     :initarg :binary-version)))
 
+(defmethod print-object ((lib library) stream)
+  (print-unreadable-object (lib stream)
+    (with-slots (articles version binary-version)
+	lib
+      (if (string= version "")
+	  (if (string= binary-version "")
+	      (format stream "(version unset) (binary version unset) with ~d articles" (length articles))
+	      (format stream "(version unset) (binary version ~a) with ~d articles" binary-version (length articles)))
+	  (if (string= binary-version "")
+	      (format stream "version ~a (binary version unset) with ~d articles" version (length articles))
+	      (format stream "version ~a (binary version ~a) with ~d articles" version binary-version (length articles)))))))
+
 (define-condition duplicate-article-error (error)
   ((library
     :initarg :library
