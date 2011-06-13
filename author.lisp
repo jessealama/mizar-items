@@ -19,7 +19,7 @@
 	 condition
        (if (null proposed-name)
 	   (format stream "Authors must have a name, but none was supplied.")
-	   (format stream "Authors must have a name; '~a' doesn't count as one." proposed-name))))))
+	   (format stream "Authors must have a name; '~a' doesn't count as one, because the name must be a string." proposed-name))))))
 
 (defmethod initialize-instance :after ((author author) &rest initargs)
   (declare (ignore initargs))
