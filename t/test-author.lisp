@@ -10,10 +10,20 @@
   (5am:signals nameless-author-error
     (make-instance 'author)))
 
+;; (5am:test (non-numeric-author-error :compile-at :run-time)
+;;   (5am:signals nameless-author-error
+;;     (make-instance 'author :name 5)))
+
+;; SBCL is clever and catches this before a NAMELESS-AUTHOR-ERROR
+;; condition is signaled
 (5am:test (non-numeric-author-error :compile-at :run-time)
-  (5am:signals nameless-author-error
+  (5am:signals simple-type-error
     (make-instance 'author :name 5)))
 
+;; (5am:test (identical-objects :compile-at :run-time)
+;;   (5am:is (eq (make-instance 'author :name "Steve")
+;; 	      (make-instance 'author :name "Steve"))))
+
 (5am:test (identical-objects :compile-at :run-time)
-  (5am:is (eq (make-instance 'author :name "Steve")
-	      (make-instance 'author :name "Steve"))))
+  (5am:is (equal-authors (make-instance 'author :name "Steve")
+			 (make-instance 'author :name "Steve"))))
