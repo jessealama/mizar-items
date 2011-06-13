@@ -52,3 +52,6 @@
     (if (slot-boundp author 'name)
 	(format stream "~a" (name author))
 	(format stream "(anonymous)"))))
+
+(defmethod equal-authors ((author-1 author) (author-2 author))
+  (eq (name author-1) (name author-2)))
