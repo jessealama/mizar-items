@@ -50,4 +50,6 @@
       (error 'duplicate-article-error
 	     :library library
 	     :article article)
-      (push article (articles library))))
+      (prog2
+	  (push article (articles library))
+	  library)))
