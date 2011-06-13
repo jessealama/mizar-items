@@ -19,9 +19,9 @@
   ((library
     :initarg :library
     :reader library)
-   (name
-    :initarg :name
-    :reader name))
+   (article
+    :initarg :article
+    :reader article))
   (:documentation "An error representing the addition to a library of
   an article that already exists under the same name as the proposed article.")
   (:report
