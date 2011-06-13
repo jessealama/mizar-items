@@ -20,15 +20,23 @@
   (let ((deps (gethash (node-state node) *item-dependency-graph-backward*)))
     (mapcar #'(lambda (item) (cons item item)) deps)))
 
+(defgeneric all-paths (source destination))
+
+(defmethod all-paths ((source string) destination)
+  (all-paths (get-and-maybe-set-item-name source) destination))
+
+(defmethod all-paths (source (destination string))
+  (all-paths source (get-and-maybe-set-item-name destination)))
+
 (let ((table (make-hash-table :test #'equal)))
-  (defun all-paths (source destination)
+  (defmethod all-paths ((source symbol) (destination symbol))
     (let ((key (cons source destination)))
       (multiple-value-bind (old-paths present?)
 	  (gethash key table)
 	(if present?
 	    old-paths
 	    (let ((new-paths
-		   (if (string= source destination)
+		   (if (eq source destination)
 		       (list (list source))
 		       (let ((source-pos (mml-lar-index-of-item source))
 			     (dest-pos (mml-lar-index-of-item destination)))
