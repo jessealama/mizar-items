@@ -23,6 +23,9 @@
 (defun item-to-fragment-table-for-mml (mml-version)
   (format nil "~a/item-to-fragment-table" (mml-data-dir mml-version)))
 
+(defun item-dependency-table-for-mml (mml-version)
+  (format nil "~a/item-dependency-table" (mml-data-dir mml-version)))
+
 (defvar *mizar-items-config* (make-hash-table))
 
 (defun update-mizar-items-config (key value)
