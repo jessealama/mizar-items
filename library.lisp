@@ -46,8 +46,7 @@
        (format stream "There is already an article in the library ~a with the name '~a'" library name)))))
 
 (defmethod add-article ((library library) (article article))
-  (if (member article (articles library)
-	      :test #'equal-article)
+  (if (member article (articles library) :test #'string= :key #'name)
       (error 'duplicate-article-error
 	     :library library
 	     :article article)
