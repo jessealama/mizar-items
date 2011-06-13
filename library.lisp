@@ -31,4 +31,10 @@
        (format stream "There is already an article in the library ~a with the name '~a'" library name)))))
 
 (defmethod add-article ((library library) (article article))
-  ())
+  (let ((mem (member article (articles library)
+		     :test #'equal-article)))
+    (if mem
+	(error 'duplicate-article-error
+	       :library library
+	       :article article)
+	(push article (articles library)))))
