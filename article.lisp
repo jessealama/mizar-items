@@ -12,6 +12,11 @@
     :initarg :path
     :accessor path
     :type pathname)
+   (authors
+    :type list
+    :accessor authors
+    :initarg :authors
+    :documentation "A list of authors for an article.")
    (text
     :initarg :text
     :accessor text
