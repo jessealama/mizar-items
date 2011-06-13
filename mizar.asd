@@ -21,6 +21,7 @@
 	       (:file "utils")
 	       (:file "xml-utils")
 	       (:file "file-utils")
+	       (:file "author")
 	       (:file "article")
 	       (:file "mizar")
 	       (:file "item")
