@@ -4,14 +4,17 @@
 (defclass library ()
   ((articles
     :type list
+    :initform nil
     :accessor articles
     :initarg :articles)
    (version
     :type string
+    :initform ""
     :accessor :version
     :initarg :version)
    (binary-version
     :type string
+    :initform ""
     :accessor binary-version
     :initarg :binary-version)))
 
