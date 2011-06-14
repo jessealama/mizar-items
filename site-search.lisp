@@ -20,6 +20,30 @@
   (let ((deps (gethash (node-state node) *item-dependency-graph-backward*)))
     (mapcar #'(lambda (item) (cons item item)) deps)))
 
+(defgeneric exists-path? (source destination))
+
+(defmethod exists-path? ((source string) destination)
+  (exists-path? (get-and-maybe-set-item-name source) destination))
+
+(defmethod exists-path? (source (destination string))
+  (exists-path? source (get-and-maybe-set-item-name destination)))
+
+(let ((table (make-hash-table :test #'equal)))
+  (defmethod exists-path? :around ((source symbol) (destination symbol))
+    (let ((key (cons source destination)))
+      (multiple-value-bind (old present?)
+	  (gethash key table)
+	(if present?
+	    old
+	    (let ((exists (call-next-method)))
+	      (setf (gethash key table) exists)))))))
+
+(defmethod exists-path? ((source symbol) (destination symbol))
+  (or (eq source destination)
+      (some #'(lambda (item)
+		(exists-path? item destination))
+	    (gethash source *item-dependency-graph-forward*))))
+
 (defgeneric all-paths (source destination))
 
 (defmethod all-paths ((source string) destination)
