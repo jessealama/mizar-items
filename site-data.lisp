@@ -116,6 +116,22 @@
 (defvar *mml-version* nil
   "The version of the MML from which our items come.")
 
+(defun load-item-to-fragment-table (mml-version)
+  (let ((table-file (item-to-fragment-table-for-mml mml-version)))
+    (if (file-exists-p table-file)
+	(let ((lines (lines-of-file table-file))
+	      (item-to-fragment-table (make-hash-table :test #'equal)))
+	  (format t "Loading item-to-fragment table...")
+	  (dolist (line lines)
+	    (destructuring-bind (item ckb-number-str)
+		(split " " line)
+	      (setf (gethash (get-and-maybe-set-item-name item)
+			     item-to-fragment-table)
+		    (parse-integer ckb-number-str))))
+	  (format t "done~%")
+	  item-to-fragment-table)
+	(error "The item-to-fragment table doesn't exist at the expected location '~a'" (mizar-items-config 'item-to-fragment-path)))))
+
 (defun initialize-items-data (mml-version)
   (setf *mml-version* mml-version)
   (format t "Loading the dependency data...")
