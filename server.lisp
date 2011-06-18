@@ -103,17 +103,10 @@ returning NIL."
 				  :port 4242
 				  :request-dispatcher #'items-request-dispatcher))
 
-(defun initialize-server (mml-version &optional reload-graphs (articles :all))
+(defun initialize-server (mml-version)
   (unless (hunchentoot::acceptor-listen-socket *acceptor*)
     (hunchentoot:start *acceptor*))
-  (load-mml mml-version)
-  (format t "Loading article item counts...")
-  (load-article-num-items reload-graphs)
-  (format t "done.~%")
-  (multiple-value-setq (*item-to-fragment-table* *ckb-to-items-table*)
-    (load-item-to-fragment-table))
-  ;; (when (or reload-graphs (null *graphs-loaded*))
-  ;;   (load-dependency-graphs reload-graphs))
+  (initialize-items-data mml-version)
   (format t "Initializing URIs...")
   (initialize-uris articles)
   (format t "done~%")
@@ -130,13 +123,13 @@ returning NIL."
 (defun shutdown-server ()
   (stop *acceptor*))
 
-(defun re-initialize-server (mml-version &optional reload-graphs (articles :all))
+(defun re-initialize-server (mml-version)
   (shutdown-server)
   (setf *acceptor* (make-instance 'hunchentoot:acceptor
 				  :port 4242
 				  :acceptor #'items-request-dispatcher))
   (setf items-dispatch-table nil)
-  (initialize-server mml-version reload-graphs articles))
+  (initialize-server mml-version))
 
 (defun handle-http-error (error-code)
   (if (= error-code +http-not-found+)
