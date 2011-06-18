@@ -1086,10 +1086,10 @@ end;"))
 (defun search-via-uri (item)
   (format nil "/path?via=~a" item))
 
-(defgeneric emit-mizar-item-page ()
+(defgeneric emit-item-page ()
   (:documentation "Emit an HTML representation of a single Mizar item."))
 
-(defmethod emit-mizar-item-page :around ()
+(defmethod emit-item-page :around ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
     (if (handled-article? article-name)
@@ -1122,7 +1122,7 @@ end;"))
   "Use *MML-VERSION* to give an absolute location for the item determined by ARTICLE, KIND, and NUMBER."
   (format nil "~a/item/~a/~a/~a" *mml-version* article kind number))
 
-(defmethod emit-mizar-item-page ()
+(defmethod emit-item-page ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
       (let* ((item-number (parse-integer item-number-str))
@@ -1990,7 +1990,7 @@ end;"))
   (register-regexp-dispatcher +fragment-uri-regexp+ #'emit-fragment-page)
 
   ;; items, what they require, and what they support
-  (register-regexp-dispatcher +item-uri-regexp+ #'emit-mizar-item-page)
+  (register-regexp-dispatcher +item-uri-regexp+ #'emit-item-page)
   (register-regexp-dispatcher +requires-uri-regexp+ #'emit-requires-page)
   (register-regexp-dispatcher +supports-uri-regexp+ #'emit-supports-page)
 
