@@ -20,6 +20,12 @@
 (defun mml-data-dir (mml-version)
   (format nil "~a/~a" *mizar-items-data-root* mml-version))
 
+(defun bib-directory-for-mml (mml-version)
+  (format nil "~a/bib" (mml-data-dir mml-version)))
+
+(defun bib-file-for-article (mml-version article-name)
+  (format nil "~a/~a.bib" (bib-directory-for-mml mml-version) article-name))
+
 (defun item-to-fragment-table-for-mml (mml-version)
   (format nil "~a/item-to-fragment-table" (mml-data-dir mml-version)))
 
