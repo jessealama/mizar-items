@@ -108,7 +108,7 @@ returning NIL."
     (hunchentoot:start *acceptor*))
   (initialize-items-data mml-version)
   (format t "Initializing URIs...")
-  (initialize-uris articles)
+  (initialize-uris)
   (format t "done~%")
   (setf *message-log-pathname* (mizar-items-config 'server-messages-log-file)
 	*access-log-pathname* (mizar-items-config 'server-access-log-file)
