@@ -12,13 +12,10 @@
 (defvar *ckb-dependency-graph-backward* nil)
 (defvar *item-dependency-graph-forward* nil)
 (defvar *item-dependency-graph-backward* nil)
-(defvar *ckb-to-items-table* nil)
-(defvar *all-ckb-items* nil)
-(defvar *all-items* nil)
-(defvar *items-tsorted* nil)
-(defvar *graphs-loaded* nil)
 
-(defun known-item? (item)
+(defgeneric known-item? (item-identifier))
+
+(defmethod known-item? ((item symbol))
   (multiple-value-bind (val present)
       (gethash item *item-dependency-graph-forward*)
     (declare (ignore val))
