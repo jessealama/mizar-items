@@ -301,19 +301,20 @@ If there is no such path, return nil."
   
 
 (defmethod best-first-search-marking-deadends :around ((problem item-search-problem) eval-fn &optional nodes)
-  (let ((solution-node (call-next-method)))
-    ;; if non-nil, our solution is in the delta
-    (multiple-value-bind (solution-node more-nodes)
-	(call-next-method)
-      (if solution-node
-	  (multiple-value-bind (node-in-delta we-in-the-delta?)
-	      (gethash (node-state solution-node)
-		       (delta problem))
-	    (assert we-in-the-delta?)
-	    (values (merge-forward-and-backward-nodes solution-node node-in-delta)
-		    more-nodes))
-	  (values nil (if (and more-nodes
-			       (empty-queue? more-nodes)) nil more-nodes))))))
+  (declare (ignorable nodes))
+   (multiple-value-bind (solution-node more-nodes)
+       (call-next-method)
+     (if solution-node
+	 (multiple-value-bind (node-in-delta we-in-the-delta?)
+	     (gethash (node-state solution-node)
+		      (delta problem))
+	   (assert we-in-the-delta?)
+	   (values (merge-forward-and-backward-nodes solution-node node-in-delta)
+		   more-nodes))
+	 (values nil (if (and more-nodes
+			      (empty-queue? more-nodes))
+			 nil
+			 more-nodes)))))
 
 (defgeneric one-path (source destination &optional limit nodes))
 
