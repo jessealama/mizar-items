@@ -403,7 +403,11 @@
        appending (gethash (cons article i) *fragment-to-item-table*) into earlier
        finally (return earlier))))
 
+(defvar *mml-version* nil
+  "The version of the MML from which our items come.")
+
 (defun initialize-items-data (mml-version)
+  (setf *mml-version* mml-version)
   (format t "Loading the dependency data...")
   (setf *item-dependency-graph-forward*
 	(read-dependency-file (item-dependency-table-for-mml mml-version)))
