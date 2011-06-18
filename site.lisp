@@ -966,18 +966,6 @@ end;"))
 	   items-dispatch-table)
      t))
 
-(defmacro register-directory-dispatcher (uri path &optional mime-type)
-  `(progn
-     (unless (file-exists-p ,path)
-       (error "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
-     (unless (directory-p ,path)
-       (error "Can't register URI '~a' to point to directory '~a', because '~a' isn't a directory" ,uri ,path ,path))
-     (unless (scan "/$" ,uri)
-       (error "Can't register URI '~a' to point to directory '~a', because '~a'  doesn't end with a slash '/'" ,uri ,path ,uri))
-     (push (create-folder-dispatcher-and-handler ,uri ,path ,mime-type)
-	   items-dispatch-table)
-     t))
-
 (defmacro register-regexp-dispatcher (uri-regexp dispatcher)
   `(progn
      (push
