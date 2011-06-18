@@ -1896,7 +1896,10 @@ end;"))
 (defmethod emit-minimality-page ()
   (register-groups-bind (item)
       (+minimality-uri-regexp+ (request-uri*))
-    (:p "To verify that...")))
+    (let ((title (format nil "verify the minimality of the set of dependencies for ~a" item)))
+      (miz-item-html (title)
+	  nil
+	(:p "To verify that...")))))
 
 (defun register-proofs-for-article (article)
   (let ((num-items (gethash article *article-num-items*)))
