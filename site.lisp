@@ -451,7 +451,7 @@ end;"))
     (:h1 "getting the data")
     (:p "If you like, you can download the data that this site uses and remix it or verify it your own way (e.g., by making your own visualizations of the data or by checking that the dependency graph is acyclic).")
     (:ul
-     (:li ((:a :href "/mizar-item-ckb-table" :title "Mapping from framents to items") "The fragment-to-item table")
+     (:li ((:a :href "/item-to-fragment-table" :title "Mapping from framents to items") "The fragment-to-item table")
 	  (:p "Mapping between fragments and items.  For some kinds of items, this is a one-to-one mapping.  For definition fragements, though, this is in general a one-to-many relation.")
 	  (:p "The dependency information that is presented on this site has a simple mathematical characterization: viewing this table as a relation " (:em "R") " who domain contains fraements and whose range contains items, and the fragment dependency table above as the relation " (:em "S") " whose domain and range are fragments, the full dependency table is simply the composition of " (:em "R") " convervse with the composition of " (:em "S") " and " (:em "R") ".")
 	  (:p "The file is a list of space-separated lines.  A line")
@@ -1904,7 +1904,7 @@ end;"))
   (register-static-file-dispatcher "/full-item-depgraph"
 				   (mizar-items-config 'full-item-dependency-graph)
 				   "text/plain")
-  (register-static-file-dispatcher "/mizar-item-ckb-table"
+  (register-static-file-dispatcher "/item-to-fragment-table"
 				   (mizar-items-config 'item-to-fragment-path)
 				   "text/plain")
   (register-static-file-dispatcher "/full-vertex-neighbors-depgraph-backward"
