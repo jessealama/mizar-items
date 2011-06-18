@@ -79,6 +79,9 @@
       (split-item-identifier item-string)
     (uri-for-item article kind number)))
 
+(defun uri-for-item-as-symbol (item-symbol)
+  (uri-for-item-as-string (symbol-name item-symbol)))
+
 (defun link-to-item (item)
   (let ((uri (uri-for-item-as-string item))
 	(title (item-link-title-from-string item)))
@@ -958,10 +961,8 @@ end;"))
 			+http-moved-temporarily+))))
 
 (defun emit-random-item ()
-  (let ((random-vertex (random-elt (hash-table-keys *all-items*))))
-    (destructuring-bind (article kind number)
-	(split ":" random-vertex)
-      (http-sensitive-redirect (uri-for-item article kind number)))))
+  (let ((item (random-elt (hash-table-keys *item-dependency-graph-forward*))))
+    (http-sensitive-redirect (uri-for-item-as-symbol item))))
 
 (defmacro register-static-file-dispatcher (uri path &optional mime-type)
   `(progn
