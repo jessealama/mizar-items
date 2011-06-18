@@ -40,12 +40,15 @@ while (my $entry = new Text::BibTeX::Entry $bibfile) {
 	# print $key, "\n";
       } else {
 	print "Warning: entry '$entry' lacks either a title", "\n";
+	exit 1;
       }
     } else {
       print "Warning: entry '$entry' lacks an author", "\n";
+      exit 1;
     }
   } else {
-    print "Warning: entry for file '$path' is unparsable";
+    print "Error: entry for the bib file at '$path' is unparsable", "\n";
+    exit 1;
   }
 }
 
