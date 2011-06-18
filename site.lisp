@@ -1885,7 +1885,7 @@ end;"))
 	item, we will post the following problem to the SystemOnTPTP site:")
 	(:ul
 	 (dolist (dep-problem-formula dep-problem)
-	   (:li (str dep-problem-formula))))
+	   (htm (:li (str dep-problem-formula)))))
 	(:p "Does that look right?")))))
 
 (defgeneric emit-minimality-page ()
