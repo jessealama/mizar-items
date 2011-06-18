@@ -53,8 +53,6 @@
 			   (file-in-xsl4mizar-dir "addabsrefs.xsl"))
 (update-mizar-items-config 'mhtml-stylesheet
 			   (file-in-xsl4mizar-dir "MHTML/mhtml_main.xsl"))
-(update-mizar-items-config 'fragment-depdenency-graph
-			   (file-in-mizar-items-dir "ckb-ckb-depgraph"))
 (update-mizar-items-config 'item-to-fragment-path
 			   (file-in-mizar-items-dir "item-to-fragment-table"))
 (update-mizar-items-config 'full-item-dependency-graph
