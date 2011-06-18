@@ -27,7 +27,7 @@ my $bibfile = new Text::BibTeX::File $path;
 
 while (my $entry = new Text::BibTeX::Entry $bibfile) {
   my $key = $entry->key ();
-  next unless defined $key && $key =~ /\.ABS$/;
+  next unless defined $key && $key =~ /\.MIZ$/;
   if ($entry->parse_ok ()) {
     my $title = $entry->get ('title');
     my @authors = $entry->get ('author');
