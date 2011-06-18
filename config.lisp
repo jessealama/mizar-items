@@ -43,6 +43,8 @@
 			   "/home/mizar-items/xsl4mizar/")
 (update-mizar-items-config 'listvoc-script-path
 			   (file-in-mizar-items-dir "listvoc.sh"))
+(update-mizar-items-config 'author-data-script
+			   (file-in-mizar-items-dir "author-data.pl"))
 (update-mizar-items-config 'mhtml-css-path
 			   (file-in-xsl4mizar-dir "MHTML/mhtml.css"))
 (update-mizar-items-config 'screen-css-path
