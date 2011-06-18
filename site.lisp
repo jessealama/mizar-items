@@ -1201,17 +1201,6 @@ end;"))
 	  ((:td :width "75%" :valign "top")
 	   (str item-html))))))))
 
-(defun fragment->items (fragment)
-  (destructuring-bind (fragment-article fragment-number-str)
-      (split ":" fragment)
-    (loop
-       with fragment-number = (parse-integer fragment-number-str)
-       for k being the hash-key in *item-to-fragment-table* using (hash-value v)
-       for k-article = (item-article k)
-       when (and (string= fragment-article k-article)
-		 (= v fragment-number)) collect k into keys
-       finally (return keys))))
-
 (defgeneric emit-fragment-page ()
   (:documentation "Emit an HTML representation of a fragment of a Mizar article."))
 
