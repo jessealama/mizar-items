@@ -132,6 +132,21 @@
 	  item-to-fragment-table)
 	(error "The item-to-fragment table doesn't exist at the expected location '~a'" (mizar-items-config 'item-to-fragment-path)))))
 
+(defun title-and-author (article-name mml-version)
+  (let ((bib-file (bib-file-for-article mml-version article-name))
+	(author-title-script (mizar-items-config 'author-title-script)))
+    (if (file-exists-p bib-file)
+	(if (file-exists-p author-title-script)
+	    (let ((proc (sb-ext:run-program author-title-script (list bib-file)
+					    :input nil
+					    :output :stream
+					    :search nil)))
+	      (if (zerop (sb-ext:process-exit-code proc))
+		  (sb-ext:process-output proc)
+		  (error (format nil "Something went wrong calling the author-title script on ~a, with respect to MML version ~a; the process exit code was ~d" article-name mml-version (sb-ext:process-exit-code proc)))))
+	    (error "The author-title script could not be found at the expected location '~a'" author-title-script))
+	(error "The bibliography file for the article ~a (with respect to MML version ~a) could not be found at the expected location '~a'" article-name mml-version bib-file))))
+
 (defun initialize-items-data (mml-version)
   (setf *mml-version* mml-version)
   (format t "Loading the dependency data...")
