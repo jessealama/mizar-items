@@ -1118,6 +1118,10 @@ end;"))
 	    (:return-code +http-bad-request+)
 	  (:p ((:span :class "article-name") (str article-name)) " is not known, or not yet suitably processed for this site.  Please try again later.")))))
 
+(defun absolute-uri-for-item (article kind number)
+  "Use *MML-VERSION* to give an absolute location for the item determined by ARTICLE, KIND, and NUMBER."
+  (format nil "~a/item/~a/~a/~a" *mml-version* article kind number))
+
 (defmethod emit-mizar-item-page ()
   (register-groups-bind (article-name item-kind item-number-str)
       (+item-uri-regexp+ (request-uri*))
@@ -1134,6 +1138,7 @@ end;"))
 					article-text-dir
 					ckb-number))
 		 (item-html (file-as-string fragment-path))
+		 (absolute-uri (absolute-uri-for-item article-name item-kind item-number-str))
 		 (prev-ckb-uri (unless (= ckb-number 1)
 				 (uri-for-fragment article-name (1- ckb-number))))
 		 (prev-ckb-link-title (format nil "Previous fragment in ~:@(~a~)" article-name))
@@ -1155,7 +1160,7 @@ end;"))
 		 (requires-uri (requires-uri-for-item article-name item-kind item-number))
 		 (supports-uri (supports-uri-for-item article-name item-kind item-number)))
 	    (miz-item-html (item-key)
-		nil
+		(:content-location absolute-uri)
 	      ((:table :class "item-table")
 	       (:tr
 		((:td :width "25%" :align "left")
