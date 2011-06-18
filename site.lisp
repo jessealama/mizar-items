@@ -919,7 +919,6 @@ end;"))
 		      (format nil "~a" article))))
       (miz-item-html (title)
 	  nil
-	(:p ((:span :class "article-name") (str article)) " ["  ((:a :href mizar-uri) "non-itemized") ", " ((:a :href source-uri) "source") "] has " (:b (str num-items)) " items ")
 	(htm
 	 ((:ol :class "fragment-listing")
 	  (loop
