@@ -1870,7 +1870,7 @@ end;"))
 	  nil
 	(:p "To verify that...")))))
 
-(defun initialize-uris (&optional (articles :all))
+(defun initialize-uris ()
   ;; ecmascript, css
   (register-static-file-dispatcher "/mhtml.css"
 				   (mizar-items-config 'mhtml-css-path)
