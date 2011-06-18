@@ -2008,8 +2008,8 @@ end;"))
   (register-regexp-dispatcher +minimality-uri-regexp+ #'emit-minimality-page)
 
   ;; proofs
-  (loop
-     for article in *handled-articles*
-     do
-       (register-proofs-for-article article))
+  ;; (loop
+  ;;    for article in *handled-articles*
+  ;;    do
+  ;;      (register-proofs-for-article article))
   t)
