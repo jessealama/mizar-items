@@ -94,6 +94,25 @@
 
 ;;; Article construction
 
+(let ((article-table (make-hash-table :test #'equal)))
+  (defmethod make-instance :around ((class (eql 'article)) &rest initargs)
+    (let ((name-tail (member :name initargs)))
+      (if name-tail
+	  (let ((name (second name-tail)))
+	    (let ((mml-tail (member :mml-version initargs)))
+	      (if mml-tail
+		  (let* ((mml-version (second mml-tail))
+			 (key (cons name mml-version)))
+		    (multiple-value-bind (existing present?)
+			(gethash key article-table)
+		      (if present?
+			  existing
+			  (let ((new-article (call-next-method)))
+			    (setf (gethash key article-table) new-article)))))
+		  (call-next-method))))
+	  (error "Articles must have a name!"))))
+  (defun article-table () article-table))
+
 (defun make-article-copying-environment-from (article)
   "Make a new article, and initialize its environment by copying the
 environment of ARTICLE.  If an environment slot of ARTICLE is
