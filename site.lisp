@@ -892,6 +892,16 @@ end;"))
 	  (:p ((:span :class "article-name") (str article)) " is not known.  Here is a list of all known articles:")
 	  (str (article-listing))))))
 
+(defun landmarks-for-article (article)
+  (declare (ignore article))
+  nil)
+
+(defun canonicalize-name (name)
+  (substitute #\- #\Space (format nil "~(~a~)" name)))
+
+(defun uri-for-author (name)
+  (format nil "/author/~a" (canonicalize-name name)))
+
 (defmethod emit-itemized-article-page ()
   (register-groups-bind (article-name)
       (+itemized-article-uri-regexp+ (request-uri*))
