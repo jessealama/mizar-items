@@ -8,6 +8,10 @@
     :accessor name
     :type string
     :documentation "The name of this article, as a string.")
+   (mml-version
+    :initarg :mml-version
+    :accessor mml-version
+    :documentation "The version of the MML that this article comes from")
    (path
     :initarg :path
     :accessor path
