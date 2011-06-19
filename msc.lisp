@@ -685,3 +685,784 @@
     :name "01A99"
     :description "Miscellaneous topics"
     :parent 01Axx)
+
+;; 03-XX
+
+(define-msc-2010-classification 03-00
+    :name "03-00"
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03-01
+    :name "03-01"
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03-02
+    :name "03-02"
+    :description "Research exposition (monographs, survey articles)"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03-03
+    :name "03-03"
+    :description "Historical"
+    :see-also '(01-XX)
+    :parent 03-XX)
+
+(define-msc-2010-classification 03-04
+    :name "03-04"
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03-06
+    :name "03-06"
+    :description "Proceedings, conferences, collections, etc."
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Axx
+    :name "03Axx"
+    :description "Philosophical aspects of logic and foundations"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Bxx
+    :name "03Bxx"
+    :description "General logic"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Cxx
+    :name "03Cxx"
+    :description "Model theory"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Dxx
+    :name "03Dxx"
+    :description "Computability and recursion theory"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Exx
+    :name "03Exx"
+    :description "Set theory"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Fxx
+    :name "03Fxx"
+    :description "Proof theory and constructive mathematics"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Gxx
+    :name "03Gxx"
+    :description "Algebraic logic"
+    :parent 03-XX)
+
+(define-msc-2010-classification 03Hxx
+    :name "03Hxx"
+    :description "Nonstandard models"
+    :see-also '(03C62)
+    :parent 03-XX)
+
+;; 03Axx
+
+(define-msc-2010-classification 03A05
+    :name "03A05"
+    :description "Philosophical and critical"
+    :see-also '(("Philosophy of mathematics" 00A30))
+    :parent 03Axx)
+
+(define-msc-2010-classification 03A10
+    :name "03A10"
+    :description "Logic in the philosophy of science"
+    :parent 03Axx)
+
+(define-msc-2010-classification 03A99
+    :name "03A99"
+    :description "None of the above, but in this section"
+    :parent 03Axx)
+
+;; 03Bxx
+
+(define-msc-2010-classification 03B05
+    :name "03B05"
+    :description "Classical propositional logic"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B10
+    :name "03B10"
+    :description "Classical first-order logic"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B15
+    :name "03B15"
+    :description "Higher-order logic and type theory"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B20
+    :name "03B20"
+    :description "Subsystems of classical logic (including intuitionistic logic)"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B22
+    :name "03B22"
+    :description "Abstract deductive systems"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B25
+    :name "03B25"
+    :description "Decidability of theories and sets of sentences"
+    :see-also '(11U05 12L05 20F10)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B30
+    :name "03B30"
+    :description "Foundations of classical theories (including reverse mathematics)"
+    :see-also '(03F35)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B35
+    :name "03B35"
+    :description "Mechanization of proofs and logical operations"
+    :see-also '(68T15)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B40
+    :name "03B40"
+    :description "Combinatory logic and lambda-calculus"
+    :see-also '(68N18)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B42
+    :name "03B42"
+    :description "Logics of knowledge and belief (including belief change)"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B44
+    :name "03B44"
+    :description "Temporal logic"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B45
+    :name "03B45"
+    :description "Modal logic (including the logic of norms)"
+    :see-also '(("Knowledge and belief" 03B42)
+		("Temporal logic" 03B44)
+		("Provability logic" 03F45))
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B47
+    :name "03B47"
+    :description "Substructural logics (including relevance, entailment, linear logic, Lambek calculus, BCK and BCI logics)"
+    :see-also '(("Proof-theoretic aspects" 03F52))
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B48
+    :name "03B48"
+    :description "Probability and inductive logic"
+    :see-also '(60A05)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B50
+    :name "03B50"
+    :description "Many-valued logic"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B52
+    :name "03B52"
+    :description "Fuzzy logic; logic of vagueness"
+    :see-also '(68T27 68T37 94D05)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B53
+    :name "03B53"
+    :description "Paraconsistent logicsLogics admitting inconsistency (paraconsistent logics, discussive logics, etc.)"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B55
+    :name "03B55"
+    :description "Intermediate logics"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B60
+    :name "03B60"
+    :description "Other nonclassical logic"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B62
+    :name "03B62"
+    :description "Combined logics"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B65
+    :name "03B65"
+    :description "Logic of natural languages"
+    :see-also '(68T50 91F20)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B70
+    :name "03B70"
+    :description "Logic in computer science"
+    :see-also '(68-XX)
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B80
+    :name "03B80"
+    :description "Other applications of logic"
+    :parent 03Bxx)
+
+(define-msc-2010-classification 03B99
+    :name "03B99"
+    :description "None of the above, but in this section"
+    :parent 03Bxx)
+
+;; 03Cxx
+
+(define-msc-2010-classification 03C05
+    :name "03C05"
+    :description "Equational classes, universal algebra"
+    :see-also '(08Axx 08Bxx 18C05)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C07
+    :name "03C07"
+    :description "Basic properties of first-order languages and structures"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C10
+    :name "03C10"
+    :description "Quantifier elimination, model completeness and related topics"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C13
+    :name "03C13"
+    :description "Finite structures"
+    :see-also '(68Q15 68Q19])
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C15
+    :name "03C15"
+    :description "Denumerable structures"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C20
+    :name "03C20"
+    :description "Ultraproducts and related constructions"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C25
+    :name "03C25"
+    :description "Model-theoretic forcing"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C30
+    :name "03C30"
+    :description "Other model constructions"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C35
+    :name "03C35"
+    :description "Categoricity and completeness of theories"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C40
+    :name "03C40"
+    :description "Interpolation, preservation, definability"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C45
+    :name "03C45"
+    :description "Classification theory, stability and related concepts"
+    :see-also '(03C48)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C48
+    :name "03C48"
+    :description "Abstract elementary classes and related topics"
+    :see-also '(03C45)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C50
+    :name "03C50"
+    :description "Models with special properties (saturated, rigid, etc.)"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C52
+    :name "03C52"
+    :description "Properties of classes of models"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C55
+    :name "03C55"
+    :description "Set-theoretic model theory"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C57
+    :name "03C57"
+    :description "Effective and recursion-theoretic model theory"
+    :see-also '(03D45)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C60
+    :name "03C60"
+    :description "Model-theoretic algebra"
+    :see-also '(08C10 12Lxx 13L05)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C62
+    :name "03C62"
+    :description "Models of arithmetic and set theory"
+    :see-also '(03Hxx)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C64
+    :name "03C64"
+    :description "Model theory of ordered structures; o-minimality"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C65
+    :name "03C65"
+    :description "Models of other mathematical theories"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C68
+    :name "03C68"
+    :description "Other classical first-order model theory"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C70
+    :name "03C70"
+    :description "Logic on admissible sets"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C75
+    :name "03C75"
+    :description "Other infinitary logic"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C80
+    :name "03C80"
+    :description "Logic with extra quantifiers and operators"
+    :see-also '(03B42 03B44 03B45 03B48)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C85
+    :name "03C85"
+    :description "Second- and higher-order model theory"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C90
+    :name "03C90"
+    :description "Nonclassical models (Boolean-valued, sheaf, etc.)"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C95
+    :name "03C95"
+    :description "Abstract model theory"
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C98
+    :name "03C98"
+    :description "Applications of model theory"
+    :see-also '(03C60)
+    :parent 03Cxx)
+
+(define-msc-2010-classification 03C99
+    :name "03C99"
+    :description "None of the above, but in this section"
+    :parent 03Cxx)
+
+;; 03Dxx
+
+(define-msc-2010-classification 03D03
+    :name 03D03
+    :description "Thue and Post systems, etc."
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D05
+    :name 03D05
+    :description "Automata and formal grammars in connection with logical questions"
+    :see-also '(68Q45 68Q70 68R15)
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D10
+    :name 03D10
+    :description "Turing machines and related notions"
+    :see-also '(68Q05)
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D15
+    :name 03D15
+    :description "Complexity of computation (including implicit computational complexity)"
+    :see-also '(68Q15 68Q17)
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D20
+    :name 03D20
+    :description "Recursive functions and relations, subrecursive hierarchies"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D25
+    :name 03D25
+    :description "Recursively (computably) enumerable sets and degrees"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D28
+    :name 03D28
+    :description "Other Turing degree structures"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D30
+    :name 03D30
+    :description "Other degrees and reducibilities"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D32
+    :name 03D32
+    :description "Algorithmic randomness and dimension"
+    :see-also '(68Q30)
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D35
+    :name 03D35
+    :description "Undecidability and degrees of sets of sentences"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D40
+    :name 03D40
+    :description "Word problems, etc."
+    :see-also '(06B25 08A50 20F10 68R15)
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D45
+    :name 03D45
+    :description "Theory of numerations, effectively presented structures"
+    :see-also '(("Intuitionistic and similar approaches" 03F55)
+		03C57)
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D50
+    :name 03D50
+    :description "Recursive equivalence types of sets and structures, isols"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D55
+    :name 03D55
+    :description "Hierarchies"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D60
+    :name 03D60
+    :description "Computability and recursion theory on ordinals, admissible sets, etc."
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D65
+    :name 03D65
+    :description "Higher-type and set recursion theory"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D70
+    :name 03D70
+    :description "Inductive definability"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D75
+    :name 03D75
+    :description "Abstract and axiomatic computability and recursion theory"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D78
+    :name 03D78
+    :description "Computation over the reals"
+    :see-also '(("Constructive aspects" 03F60))
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D80
+    :name 03D80
+    :description "Applications of computability and recursion theory"
+    :parent 03Dxx)
+
+(define-msc-2010-classification 03D99
+    :name 03D99
+    :description "None of the above, but in this section"
+    :parent 03Dxx)
+
+;; 03Exx
+
+(define-msc-2010-classification 03E02
+    :name "03E02"
+    :description "Partition relations"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E04
+    :name "03E04"
+    :description "Ordered sets and their cofinalities; pcf theory"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E05
+    :name "03E05"
+    :description "Other combinatorial set theory"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E10
+    :name "03E10"
+    :description "Ordinal and cardinal numbers"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E15
+    :name "03E15"
+    :description "Descriptive set theory"
+    :see-also '(28A05 54H05)
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E17
+    :name "03E17"
+    :description "Cardinal characteristics of the continuum"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E20
+    :name "03E20"
+    :description "Other classical set theory (including functions, relations, and set algebra)"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E25
+    :name "03E25"
+    :description "Axiom of choice and related propositions"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E30
+    :name "03E30"
+    :description "Axiomatics of classical set theory and its fragments"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E35
+    :name "03E35"
+    :description "Consistency and independence results"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E40
+    :name "03E40"
+    :description "Other aspects of forcing and Boolean-valued models"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E45
+    :name "03E45"
+    :description "Inner models, including constructibility, ordinal definability, and core models"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E47
+    :name "03E47"
+    :description "Other notions of set-theoretic definability"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E50
+    :name "03E50"
+    :description "Continuum hypothesis and Martin's axiom"
+    :see-also '(03E57)
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E55
+    :name "03E55"
+    :description "Large cardinals"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E57
+    :name "03E57"
+    :description "Generic absoluteness and forcing axioms"
+    :see-also '(03E50)
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E60
+    :name "03E60"
+    :description "Determinacy principles"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E65
+    :name "03E65"
+    :description "Other hypotheses and axioms"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E70
+    :name "03E70"
+    :description "Nonclassical and second-order set theories"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E72
+    :name "03E72"
+    :description "Fuzzy set theory"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E75
+    :name "03E75"
+    :description "Applications of set theory"
+    :parent 03Exx)
+
+(define-msc-2010-classification 03E99
+    :name "03E99"
+    :description "None of the above, but in this section"
+    :parent 03Exx)
+
+;; 03Fxx
+
+(define-msc-2010-classification 03F03
+    :name "03F03"
+    :description "Proof theory, general"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F05
+    :name "03F05"
+    :description "Cut-elimination and normal-form theorems"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F07
+    :name "03F07"
+    :description "Structure of proofs"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F10
+    :name "03F10"
+    :description "Functionals in proof theory"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F15
+    :name "03F15"
+    :description "Recursive ordinals and ordinal notations"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F20
+    :name "03F20"
+    :description "Complexity of proofs"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F25
+    :name "03F25"
+    :description "Relative consistency and interpretations"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F30
+    :name "03F30"
+    :description "First-order arithmetic and fragments"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F35
+    :name "03F35"
+    :description "Second- and higher-order arithmetic and fragments"
+    :see-also '(03B30)
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F40
+    :name "03F40"
+    :description "Gödel numberings in proof theory and issues of incompleteness"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F45
+    :name "03F45"
+    :description "Provability logics and related algebras (e.g., diagonalizable algebras)"
+    :see-also '(03B45 03G25 06E25)
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F50
+    :name "03F50"
+    :description "Metamathematics of constructive systems"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F52
+    :name "03F52"
+    :description "Linear logic and other substructural logics"
+    :see-also '(03B47)
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F55
+    :name "03F55"
+    :description "Intuitionistic mathematics"
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F60
+    :name "03F60"
+    :description "Constructive and recursive analysis"
+    :see-also '(03B30 03D45 03D78 26E40 46S30 47S30)
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F65
+    :name "03F65"
+    :description "Other constructive mathematics"
+    :see-also '(03D45)
+    :parent 03Fxx)
+
+(define-msc-2010-classification 03F99
+    :name "03F99"
+    :description "None of the above, but in this section"
+    :parent 03Fxx)
+
+;; 03Gxx
+
+(define-msc-2010-classification 03G05
+    :name "03G05"
+    :description "Boolean algebras"
+    :see-also '(06Exx)
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G10
+    :name "03G10"
+    :description "Lattices and related structures"
+    :see-also '(06Bxx)
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G12
+    :name "03G12"
+    :description "Quantum logic"
+    :see-also '(06C15 81P10)
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G15
+    :name "03G15"
+    :description "Cylindric and polyadic algebras; relation algebras"
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G20
+    :name "03G20"
+    :description "Łukasiewicz and Post algebras"
+    :see-also '(06D25 06D30)
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G25
+    :name "03G25"
+    :description "Other algebras related to logic"
+    :see-also '(03F45 06D20 06E25 06F35)
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G27
+    :name "03G27"
+    :description "Abstract algebraic logic"
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G30
+    :name "03G30"
+    :description "Categorical logic, topoi"
+    :see-also '(18B25 18C05 18C10)
+    :parent 03Gxx)
+
+(define-msc-2010-classification 03G99
+    :name "03G99"
+    :description "None of the above, but in this section"
+    :parent 03Gxx)
+
+;; 03Hxx
+
+(define-msc-2010-classification 03H05
+    :name "03H05"
+    :description "Nonstandard models in mathematics"
+    :see-also '(26E35 28E05 30G06 46S20 47S20 54J05)
+    :paent 03Hxx)
+
+(define-msc-2010-classification 03H10
+    :name "03H10"
+    :description "Other applications of nonstandard models (economics, physics, etc.)"
+    :paent 03Hxx)
+
+(define-msc-2010-classification 03H15
+    :name "03H15"
+    :description "Nonstandard models of arithmetic"
+    :see-also '(11U10 12L15 13L05)
+    :paent 03Hxx)
+
+(define-msc-2010-classification 03H99
+    :name "03H99"
+    :description "None of the above, but in this section"
+    :paent 03Hxx)
