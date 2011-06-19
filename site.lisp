@@ -1255,7 +1255,6 @@ end;"))
 (defun emit-articles-page ()
   (miz-item-html ("articles from the mml")
       nil
-    (:p "The following articles from the MML are handled:")
     ((:table :class "article-listing" :rules "rows")
      (:thead
       (:tr
