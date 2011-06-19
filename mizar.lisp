@@ -12,18 +12,16 @@ variable (at load time).")
 (defun article-exists-p (name &optional (library *default-mizar-library*))
   (member name (mml-lar library) :test #'string=))
 
-(defparameter *mml-lar-path* (make-pathname :directory *mizfiles*
-					    :name "mml.lar"))
-(defparameter *mml-lar*
-  (if (probe-file *mml-lar-path*)
-      (cons "hidden" (cons "tarski" (lines-of-file *mml-lar-path*)))
-      (error "Unable to initialize mml.lar: file does not exist under ~A" *mml-lar-path*)))
+(defgeneric belongs-to-mml (article))
 
-(defun belongs-to-mml (article-str)
+(defmethod belongs-to-mml ((article-str string))
   (let ((article-str-lc (lowercase article-str)))
-    (or (string= article-str-lc "tarski")
-	(member article-str-lc *mml-lar* :test #'string=))))
+    (member article-str-lc *mml-lar*
+	    :test #'string=
+	    :key #'name)))
 
+(defmethod belongs-to-mml ((article article))
+  (member article *mml-lar*))
 
 (let ((table (make-hash-table :test #'equal)))
   (defun mml-lar-index (article)
