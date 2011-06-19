@@ -171,6 +171,10 @@
 	  			      (make-article article-name mml-version))
 	  			  mml-lar))
 	  (setf *mml-version* mml-version)
+	  (format t "done.~%")
+	  (format t "Loading fragments for articles in mml.lar...")
+	  ;; do something here
+	  (format t "done.~%")
 	  (format t "Loading the dependency data...")
 	  (setf *item-dependency-graph-forward*
 		(read-dependency-file (item-dependency-table-for-mml mml-version)))
