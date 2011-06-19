@@ -142,15 +142,18 @@
 					    :output :stream
 					    :error :stream
 					    :search nil)))
-	      (if (zerop (sb-ext:process-exit-code proc))
-		  (let ((out (sb-ext:process-output proc)))
-		    (if out
+	      (let ((out (sb-ext:process-output proc))
+		    (err (sb-ext:process-error proc))
+		    (code (sb-ext:process-exit-code proc)))
+		(if (zerop code)
+		    (prog1
 			(stream-lines out)
-			(error "Although the author-title script exited successfully, applied to article ~a of MML ~a, it has no output stream!" article-name mml-version)))
-		  (let ((err (sb-ext:process-error proc)))
-		    (if err
-			(error (format nil "Something went wrong calling the author-title script on ~a, with respect to MML version ~a; the process exit code was ~d.  Here is the error output:~%~{~a~%~}" article-name mml-version (sb-ext:process-exit-code proc) (stream-lines err)))
-			(error (format nil "Something went wrong calling the author-title script on ~a, with respect to MML version ~a; the process exit code was ~d.  Curiously, there was no error output" article-name mml-version (sb-ext:process-exit-code proc)))))))
+		      (close out)
+		      (close err))
+		    (let ((err-lines (stream-lines err)))
+		      (close out)
+		      (close err)
+		      (error (format nil "Something went wrong calling the author-title script on ~a, with respect to MML version ~a; the process exit code was ~d.  Here is the error output:~%~{~a~%~}" article-name mml-version code err-lines))))))
 	    (error "The author-title script could not be found at the expected location '~a'" author-title-script))
 	(error "The bibliography file for the article ~a (with respect to MML version ~a) could not be found at the expected location '~a'" article-name mml-version bib-file))))
 
