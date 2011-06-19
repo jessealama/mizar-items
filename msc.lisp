@@ -11,6 +11,7 @@
     :description "History and biography"
     :see-also nil)
 
+;; should expand this when we know the full list of "-03 in the other sections" 
 (define-msc2010-classification 03-XX
     :name "03-XX"
     :description "Mathematical logic and foundations"
