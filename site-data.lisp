@@ -163,6 +163,7 @@
   (let ((data-dir (mml-data-dir mml-version)))
     (if (file-exists-p data-dir)
 	(let ((mml-lar (mml-lar mml-version)))
+	  (format t "Initializing mml.lar...")
 	  ;; these articles are excluded from mml.lar
 	  (pushnew "tarski" mml-lar :test #'string=)
 	  (pushnew "hidden" mml-lar :test #'string=)
