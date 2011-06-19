@@ -157,6 +157,8 @@
 	    (error "The author-title script could not be found at the expected location '~a'" author-title-script))
 	(error "The bibliography file for the article ~a (with respect to MML version ~a) could not be found at the expected location '~a'" article-name mml-version bib-file))))
 
+(defvar *mml-lar* nil)
+
 (defun initialize-items-data (mml-version)
   (let ((data-dir (mml-data-dir mml-version)))
     (if (file-exists-p data-dir)
