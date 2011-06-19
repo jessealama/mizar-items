@@ -1221,3 +1221,18 @@ The result is a hash table.  Its keys are symbols, and its values are lists of s
 	       (format dep-table "~a ~{~a ~}~%" item deps)))
 	t)))
 
+(defun count-items-of-dependency-graph (depgraph)
+  (loop
+     with items = (make-hash-table :test #'eq)
+     for item being the hash-keys in depgraph using (hash-value dep-items)
+     do
+       (setf (gethash item items) t)
+       (dolist (item dep-items)
+	 (setf (gethash item items) t))
+     finally
+       (return (hash-table-count items))))
+
+(defun count-edges-of-depgraph (depgraph)
+  (loop
+     for item being the hash-keys in depgraph using (hash-value dep-items)
+     summing (length dep-items)))
