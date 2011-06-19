@@ -26,7 +26,7 @@
     :accessors mscs
     :type list
     :initfor nil
-    :documentation "Mathematics Subject Classification (201) tags for this article.")
+    :documentation "Mathematics Subject Classification (2010) tags for this article.")
    (path
     :initarg :path
     :accessor path
