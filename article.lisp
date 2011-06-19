@@ -104,6 +104,7 @@ unbound, it will be bound in the new article and have value NIL."
 	  (schemes new-article) (when (slot-boundp article 'schemes)
 				  (schemes article)))
     new-article))
+
 (defmethod initialize-instance :after ((article article) &key)
   ;; if only a name is given, attempt to fetch the article
   ;; environment, and set the values of the appropriate slots
