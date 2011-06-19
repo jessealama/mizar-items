@@ -200,15 +200,15 @@ unbound, it will be bound in the new article and have value NIL."
       (if name
 	  (if authors
 	      (if mml-version
-		  (format stream "~:@(~a~): \"~a\", by ~{~a,~} (MML version ~a)" name title authors mml-version)
-		  (format stream "~:@(~a~): \"~a\", by ~{~a,~} (MML version unknown)" name title authors))
+		  (format stream "~:@(~a~): \"~a\", by ~{~a~#[~;, and~:;,~]~} (MML version ~a)" name title authors mml-version)
+		  (format stream "~:@(~a~): \"~a\", by ~{~a~#[~;, and~:;,~]~} (MML version unknown)" name title authors))
 	      (if mml-version
 		  (format stream "~:@(~a~): \"~a\" (unknown authors) (MML version ~a)" name title mml-version)
 		  (format stream "~:@(~a~): \"~a\" (unknown authors) (MML version unknown)" name title)))
 	  (if authors
 	      (if mml-version
-		  (format stream "(unknown name): \"~a\", by ~{~a,~} (MML version ~a)" title authors mml-version)
-		  (format stream "(unknown name): \"~a\", by ~{~a,~} (unknown MML version)" title authors))
+		  (format stream "(unknown name): \"~a\", by ~{~a~#[~;, and~:;,~]~} (MML version ~a)" title authors mml-version)
+		  (format stream "(unknown name): \"~a\", by ~{~a~#[~;, and~:;,~]~} (unknown MML version)" title authors))
 	      (if mml-version
 		  (format stream "(unknown name): \"~a\", (unknown authors) (MML version ~a)" title mml-version)
 		  (format stream "(unknown name): \"~a\", (unknown authors) (MML version unknown)" title)))))))
