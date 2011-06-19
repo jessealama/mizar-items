@@ -885,34 +885,32 @@ end;"))
 	  (str (article-listing))))))
 
 (defmethod emit-itemized-article-page ()
-  (register-groups-bind (article)
+  (register-groups-bind (article-name)
       (+itemized-article-uri-regexp+ (request-uri*))
-    (let* ((num-items (gethash article *article-num-items*))
+    (let* ((article (find article-name *mml-lar* :key #'name :test #'string=))
+	   (num-items (length (items article)))
 	   (source-uri (format nil "/~a.miz" article))
 	   (mizar-uri (format nil "/~a.html" article))
-	   (bib-title (article-title article))
-	   (title (if bib-title
-		      (format nil "~a: ~a" article bib-title)
-		      (format nil "~a" article))))
+	   (title (or (title article)
+		      "(title information missing)")))
       (miz-item-html (title)
 	  nil
 	(htm
-	 ((:ol :class "fragment-listing")
-	  (loop
-	     with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
-	     with article-text-dir = (format nil "~a/text" article-dir)
-	     for i from 1 upto num-items
-	     for i-str = (format nil "fragment-~d" i)
-	     for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
-	     for item-html = (file-as-string fragment-path)
-	     for item-uri = (format nil "/fragment/~a/~d" article i)
-	     for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
-	     do
-	       (htm
-		((:li :class "fragment-listing" :id i-str)
-		 
-		 ((:a :href item-uri :title item-link-title))
-		  (str item-html))))))))))
+	 (loop
+	    with article-dir = (format nil "~a/~a" (mizar-items-config 'html-source) article)
+	    with article-text-dir = (format nil "~a/text" article-dir)
+	    for i from 1 upto num-items
+	    for i-str = (format nil "fragment-~d" i)
+	    for fragment-path = (format nil "~a/ckb~d.html" article-text-dir i)
+	    for item-html = (file-as-string fragment-path)
+	    for item-uri = (format nil "/fragment/~a/~d" article i)
+	    for item-link-title = (format nil "Fragment ~d of ~:@(~a~)" i article)
+	    do
+	      (htm
+	       ((:div :class "fragment-listing" :id i-str)
+		
+		((:a :href item-uri :title item-link-title))
+		(str item-html)))))))))
 
 (defun http-sensitive-redirect (new-uri)
   (let ((client-server-protocol (server-protocol*)))	
@@ -1262,32 +1260,27 @@ end;"))
      (:thead
       (:tr
        (:th "MML Name")
-       (:th "Title")))
+       (:th "Title")
+       (:th "Authors")))
      (:tbody
       (loop
-	 for article-name in *handled-articles*
-	 for article-uri = (uri-for-article article-name)
+	 for article in *mml-lar*
 	 do
-	   (let ((bib-entry (member article-name *articles*
-				    :key #'first
-				    :test #'string=)))
-	     (if bib-entry
-		 (destructuring-bind (identifier title author)
-		     (car bib-entry)
-		   (declare (ignore identifier author))
-		   (let ((title-escaped (escape-string title)))
-		     (htm
-		      (:tr
-		       ((:td :class "article-name")
-			((:a :href article-uri :title title-escaped)
-			 (str article-name)))
-		       ((:td :class "article-title") (str title))))))
-		 (htm
-		  (:tr
-		   ((:td :class "article-name")
-		    ((:a :href article-uri :title article-name)
-		     (str article-name)))
-		   ((:td :class "article-title") "(no title was supplied)"))))))))))
+	   (with-slots (name title authors)
+	       article
+	     (let ((title-escaped (escape-string title))
+		   (article-uri (uri-for-article name))
+		   (author-list-pretty (if authors
+					   (format nil "~{~a~#[~;, and~:;,~]~}" authors)
+					   "(author information not known)")))
+	       (htm
+		(:tr
+		 ((:td :class "article-name")
+		  ((:a :href article-uri :title title-escaped)
+		   (str name)))
+		 ((:td :class "article-title") (str title))
+		 ((:td :class "author-list")
+		  (str author-list-pretty)))))))))))
 
 (defun emit-main-page ()
   (miz-item-html ("fine-grained dependencies in mizar")
