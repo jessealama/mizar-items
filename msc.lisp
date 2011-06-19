@@ -490,3 +490,198 @@
     :name "00B99"
     :description "None of the above, but in this section"
     :parent 00Bxx)
+
+;; 01-XX
+
+(define-msc-2010-classification 01-00
+    :name "01-00"
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 01-XX)
+
+(define-msc-2010-classification 01-01
+    :name "01-01"
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 01-XX)
+
+(define-msc-2010-classification 01-02
+    :name "01-02"
+    :description "Research exposition (monographs, survey articles)"
+    :parent 01-XX)
+
+(define-msc-2010-classification 01-06
+    :name "01-06"
+    :description "Proceedings, conferences, collections, etc."
+    :parent 01-XX)
+
+(define-msc-2010-classification 01-08
+    :name "01-08"
+    :description "Computational methods"
+    :parent 01-XX)
+
+(define-msc-2010-classification 01Axx
+    :name "01Axx"
+    :description "History of mathematics and mathematicians"
+    :parent 01-XX)
+
+;; 01Axx
+
+(define-msc-2010-classification 01A05
+    :name "01A05"
+    :description "General histories, source books"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A07
+    :name "01A07"
+    :description "Ethnomathematics, general"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A10
+    :name "01A10"
+    :description "Paleolithic, Neolithic"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A12
+    :name "01A12"
+    :description "Indigenous cultures of the Americas"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A13
+    :name "01A13"
+    :description "Other indigenous cultures (non-European)"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A15
+    :name "01A15"
+    :description "Indigenous European cultures (pre-Greek, etc.)"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A16
+    :name "01A16"
+    :description "Egyptian"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A17
+    :name "01A17"
+    :description "Babylonian"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A20
+    :name "01A20"
+    :description "Greek, Roman"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A25
+    :name "01A25"
+    :description "China"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A27
+    :name "01A27"
+    :description "Japan"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A29
+    :name "01A29"
+    :description "Southeast Asia"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A30
+    :name "01A30"
+    :description "Islam (Medieval)"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A32
+    :name "01A32"
+    :description "India"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A35
+    :name "01A35"
+    :description "Medieval"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A40
+    :name "01A40"
+    :description "15th and 16th centuries, Renaissance"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A45
+    :name "01A45"
+    :description "17th century"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A50
+    :name "01A50"
+    :description "18th century"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A55
+    :name "01A55"
+    :description "19th century"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A60
+    :name "01A60"
+    :description "20th century"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A61
+    :name "01A61"
+    :description "Twenty-first century"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A65
+    :name "01A65"
+    :description "Contemporary"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A67
+    :name "01A67"
+    :description "Future prospectives"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A70
+    :name "01A70"
+    :description "Biographies, obituaries, personalia, bibliographies"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A72
+    :name "01A72"
+    :description "Schools of mathematics"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A73
+    :name "01A73"
+    :description "Universities"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A74
+    :name "01A74"
+    :description "Other institutions and academies"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A75
+    :name "01A75"
+    :description "Collected or selected works; reprintings or translations of classics"
+    :see-also '(00B60)
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A80
+    :name "01A80"
+    :description "Sociology (and profession) of mathematics"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A85
+    :name "01A85"
+    :description "Historiography"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A90
+    :name "01A90"
+    :description "Bibliographic studies"
+    :parent 01Axx)
+
+(define-msc-2010-classification 01A99
+    :name "01A99"
+    :description "Miscellaneous topics"
+    :parent 01Axx)
