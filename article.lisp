@@ -26,6 +26,7 @@
     :type list
     :accessor authors
     :initarg :authors
+    :initform nil
     :documentation "A list of authors for an article.")
    (title
     :type string
