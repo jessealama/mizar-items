@@ -159,6 +159,10 @@
     (if (file-exists-p data-dir)
 	(if (directory-p data-dir)
 	    (progn
+	      (setf *mml-lar* (mml-lar mml-version))
+	      ;; these articles are excluded from mml.lar
+	      (pushnew "tarski" *mml-lar* :test #'string=)
+	      (pushnew "hidden" *mml-lar* :test #'string=)
 	      (setf *mml-version* mml-version)
 	      (format t "Loading the dependency data...")
 	      (setf *item-dependency-graph-forward*

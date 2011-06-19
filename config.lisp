@@ -17,6 +17,15 @@
 (defun file-in-data-dir (filename)
   (concatenate 'string *mizar-items-data-root* "/" filename))
 
+(defun file-in-data-dir-for-mml (filename mml-version)
+  (format nil "~a/~a/~a" *mizar-items-data-root* mml-version filename))
+
+(defun mml-lar-path (mml-version)
+  (file-in-data-dir-for-mml "mml.lar" mml-version))
+
+(defun mml-lar (mml-version)
+  (lines-of-file (mml-lar-path mml-version)))
+
 (defun mml-data-dir (mml-version)
   (format nil "~a/~a" *mizar-items-data-root* mml-version))
 
