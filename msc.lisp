@@ -12,7 +12,8 @@
 
 (define-msc2010-classification 03-XX
     :name "03-XX"
-    :description "Mathematical logic and foundations")
+    :description "Mathematical logic and foundations"
+    :see-also '("See also the classification number -03 in the other sections"))
 
 (define-msc2010-classification 05-XX
     :name "05-XX"
@@ -98,15 +99,22 @@
 
 (define-msc-2010-classification 31-XX
     :name "31-XX"
-    :description "Potential theory {For probabilistic potential theory, see 60J45}")
+    :description "Potential theory"
+    :see-also '(("Probabilistic potential theory" 60J45})))
 
 (define-msc-2010-classification 32-XX
     :name "32-XX"
-    :description "Several complex variables and analytic spaces {For infinite-dimensional holomorphy, see 46G20, 58B12}")
+    :description "Several complex variables and analytic spaces"
+    :see-also '("For infinite-dimensional holomorphy" 46G20 58B12))
 
 (define-msc-2010-classification 33-XX
     :name "33-XX"
-    :description "Special functions (33-XX deals with the properties of functions as functions) {For orthogonal functions, see 42Cxx; for aspects of combinatorics see 05Axx; for number-theoretic aspects see 11-XX; for representation theory see 22Exx}")
+    :description "Special functions"
+    :see-also '(("Properties of functions as functions" 33-XX)
+		("Orthogonal functions" 42Cxx)
+		("Aspects of combinatorics" 05Axx)
+		("Number-theoretic aspects" 11-XX)
+		("Representation theory") 22Exx))
 
 (define-msc-2010-classification 34-XX
     :name "34-XX"
@@ -118,7 +126,8 @@
 
 (define-msc-2010-classification 37-XX
     :name "37-XX"
-    :description "Dynamical systems and ergodic theory [See also 26A18, 28Dxx, 34Cxx, 34Dxx, 35Bxx, 46Lxx, 58Jxx, 70-XX]")
+    :description "Dynamical systems and ergodic theory"
+    :see-also '(26A18 28Dxx 34Cxx 34Dxx 35Bxx 46Lxx 58Jxx 70-XX))
 
 (define-msc-2010-classification 39-XX
     :name "39-XX"
@@ -130,7 +139,10 @@
 
 (define-msc-2010-classification 41-XX
     :name "41-XX"
-    :description "Approximations and expansions {For all approximation theory in the complex domain, see 30E05 and 30E10; for all trigonometric approximation and interpolation, see 42A10 and 42A15; for numerical approximation, see 65Dxx}")
+    :description "Approximations and expansions"
+    :see-also '(("Approximation theory in the complex domain" 30E05 30E10)
+		("Trigonometric approximation and interpolation" 42A10 42A15)
+		("Numerical approximation" 65Dxx)))
 
 (define-msc-2010-classification 42-XX
     :name "42-XX"
@@ -138,11 +150,16 @@
 
 (define-msc-2010-classification 43-XX
     :name "43-XX"
-    :description "Abstract harmonic analysis {For other analysis on topological and Lie groups, see 22Exx}")
+    :description "Abstract harmonic analysis"
+    :see-also '("Other analysis on topological and Lie groups" 22Exx))
 
 (define-msc-2010-classification 44-XX
     :name "44-XX"
-    :description "Integral transforms, operational calculus {For fractional derivatives and integrals, see 26A33. For Fourier transforms, see 42A38, 42B10. For integral transforms in distribution spaces, see 46F12. For numerical methods, see 65R10}")
+    :description "Integral transforms, operational calculus"
+    :see-also '(("For fractional derivatives and integrals" 26A33)
+		("Fourier transforms" 42A38 42B10)
+		("Integral transforms in distribution spaces" 46F12)
+		("Numerical methods" 65R10)))
 
 (define-msc-2010-classification 45-XX
     :name "45-XX"
@@ -150,7 +167,8 @@
 
 (define-msc-2010-classification 46-XX
     :name "46-XX"
-    :description "Functional analysis {For manifolds modeled on topological linear spaces, see 57Nxx, 58Bxx}")
+    :description "Functional analysis"
+    :see-also (("Manifolds modeled on topological linear spaces" 57Nxx 58Bxx)))
 
 (define-msc-2010-classification 47-XX
     :name "47-XX"
@@ -158,11 +176,13 @@
 
 (define-msc-2010-classification 49-XX
     :name "49-XX"
-    :description "Calculus of variations and optimal control; optimization [See also 34H05, 34K35, 65Kxx, 90Cxx, 93-XX]")
+    :description "Calculus of variations and optimal control; optimization"
+    :see-also '(34H05 34K35 65Kxx 90Cxx 93-XX))
 
 (define-msc-2010-classification 51-XX
     :name "51-XX"
-    :description "Geometry {For algebraic geometry, see 14-XX}")
+    :description "Geometry"
+    :see-also '(("Algebraic geometry" 14-XX)))
 
 (define-msc-2010-classification 52-XX
     :name "52-XX"
@@ -170,11 +190,14 @@
 
 (define-msc-2010-classification 53-XX
     :name "53-XX"
-    :description "Differential geometry {For differential topology, see 57Rxx. For foundational questions of differentiable manifolds, see 58Axx}")
+    :description "Differential geometry"
+    :see-also '(("Differential topology" 57Rxx)
+		("Foundational questions of differentiable manifolds" 58Axx)))
 
 (define-msc-2010-classification 54-XX
     :name "54-XX"
-    :description "General topology {For the topology of manifolds of all dimensions, see 57Nxx}")
+    :description "General topology"
+    :see-also (("The topology of manifolds of all dimensions" 57Nxx)))
 
 (define-msc-2010-classification 55-XX
     :name "55-XX"
@@ -182,15 +205,19 @@
 
 (define-msc-2010-classification 57-XX
     :name "57-XX"
-    :description "Manifolds and cell complexes {For complex manifolds, see 32Qxx}")
+    :description "Manifolds and cell complexes"
+    :see-also '(("Complex manifolds" 32Qxx)))
 
 (define-msc-2010-classification 58-XX
     :name "58-XX"
-    :description "Global analysis, analysis on manifolds [See also 32Cxx, 32Fxx, 32Wxx, 46-XX, 47Hxx, 53Cxx] {For geometric integration theory, see 49Q15}")
+    :description "Global analysis, analysis on manifolds"
+    :see-also '(("Geometric integration theory" 49Q15)
+		32Cxx 32Fxx 32Wxx 46-XX 47Hxx 53Cxx))
 
 (define-msc-2010-classification 60-XX
     :name "60-XX"
-    :description "Probability theory and stochastic processes {For additional applications, see 11Kxx, 62-XX, 90-XX, 91-XX, 92-XX, 93-XX, 94-XX}")
+    :description "Probability theory and stochastic processes"
+    :see-also '(("Applications" 11Kxx 62-XX 90-XX 91-XX 92-XX 93-XX 94-XX)))
 
 (define-msc-2010-classification 62-XX
     :name "62-XX"
@@ -200,13 +227,17 @@
     :name "65-XX"
     :description "Numerical analysis")
 
+;; special case: refers to many subareas at once
 (define-msc-2010-classification 68-XX
     :name "68-XX"
-    :description "Computer science {For papers involving machine computations and programs in a specific mathematical area, see Section –04 in that area}")
+    :description "Computer science"
+    :see-also '("Papers involving machine computations and programs in a specific mathematical area, see Section -04 in that area"))
 
 (define-msc-2010-classification 70-XX
     :name "70-XX"
-    :description "Mechanics of particles and systems {For relativistic mechanics, see 83A05 and 83C10; for statistical mechanics, see 82-XX}")
+    :description "Mechanics of particles and systems"
+    :see-also '(("Relativistic mechanics" 83A05 83C10)
+		("Statistical mechanics" 82-XX)))
 
 (define-msc-2010-classification 74-XX
     :name "74-XX"
@@ -214,15 +245,18 @@
 
 (define-msc-2010-classification 76-XX
     :name "76-XX"
-    :description "Fluid mechanics {For general continuum mechanics, see 74Axx, or other parts of 74-XX}")
+    :description "Fluid mechanics"
+    :see-also '(("General continuum mechanics" 74Axx 74-XX)))
 
 (define-msc-2010-classification 78-XX
     :name "78-XX"
-    :description "Optics, electromagnetic theory {For quantum optics, see 81V80}")
+    :description "Optics, electromagnetic theory"
+    :see-also '(("Quantum optics" 81V80)))
 
 (define-msc-2010-classification 80-XX
     :name "80-XX"
-    :description "Classical thermodynamics, heat transfer {For thermodynamics of solids, see 74A15}")
+    :description "Classical thermodynamics, heat transfer"
+    :see-also '(("Thermodynamics of solids" 74A15)))
 
 (define-msc-2010-classification 81-XX
     :name "81-XX"
@@ -238,11 +272,13 @@
 
 (define-msc-2010-classification 85-XX
     :name "85-XX"
-    :description "Astronomy and astrophysics {For celestial mechanics, see 70F15}")
+    :description "Astronomy and astrophysics"
+    :see-also '(("Celestial mechanics" 70F15)))
 
 (define-msc-2010-classification 86-XX
     :name "86-XX"
-    :description "Geophysics [See also 76U05, 76V05]")
+    :description "Geophysics"
+    :see-also '(76U05 76V05))
 
 (define-msc-2010-classification 90-XX
     :name "90-XX"
@@ -258,7 +294,8 @@
 
 (define-msc-2010-classification 93-XX
     :name "93-XX"
-    :description "Systems theory; control {For optimal control, see 49-XX}")
+    :description "Systems theory; control"
+    :see-also '(("Optimal control" 49-XX)))
 
 (define-msc-2010-classification 94-XX
     :name "94-XX"
