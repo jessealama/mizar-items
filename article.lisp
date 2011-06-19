@@ -165,9 +165,19 @@ unbound, it will be bound in the new article and have value NIL."
   article)
 
 (defun make-article (name mml-version)
-  (make-instance 'article
+  (let ((article (make-instance 'article
 		 :name name
-		 :mml-version mml-version))
+		 :mml-version mml-version)))
+    (destructuring-bind (authors title)
+	(handler-case 
+	    (title-and-author name mml-version)
+	  (error (err) (progn
+			 (warn "Error when getting the title and author information for article ~a of MML version ~a.  The error was:~%~a~%Using default values..." name mml-version err)
+		      (list "(no author information was available)"
+			    "(no title information was available)"))))
+      (setf (authors article) (split "and" authors)
+	    (title article) title))
+    article))
 
 (defun copy-article (article)
   (let ((new-article (make-article-copying-environment-from article)))
