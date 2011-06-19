@@ -27,6 +27,12 @@
     :accessor authors
     :initarg :authors
     :documentation "A list of authors for an article.")
+   (title
+    :type :string
+    :accessor title
+    :initform "(no title information was supplied)"
+    :initarg :title
+    :documentation "The title of this article.")
    (text
     :initarg :text
     :accessor text
