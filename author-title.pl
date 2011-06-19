@@ -36,7 +36,7 @@ while (my $entry = new Text::BibTeX::Entry $bibfile) {
 	my $key_lc = lc $key;
 	$key_lc =~ s/\.abs$//;
 	# print 'Key: ', $key_lc, "\n", 'Title: ', $title, "\n", 'Author(s): ', @authors, "\n";
-	print '("', $key_lc, '" "', $title, '" "', @authors, '")', "\n";
+	print @authors, "\n", $title, "\n";
 	# print $key, "\n";
       } else {
 	print "Warning: entry '$entry' lacks either a title", "\n";
