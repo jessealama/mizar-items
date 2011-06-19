@@ -80,6 +80,8 @@
     :initform ""))
   (:documentation "A representation of a mizar article."))
 
+;;; Article construction
+
 (defun make-article-copying-environment-from (article)
   "Make a new article, and initialize its environment by copying the
 environment of ARTICLE.  If an environment slot of ARTICLE is
@@ -102,6 +104,38 @@ unbound, it will be bound in the new article and have value NIL."
 	  (schemes new-article) (when (slot-boundp article 'schemes)
 				  (schemes article)))
     new-article))
+(defmethod initialize-instance :after ((article article) &key)
+  ;; if only a name is given, attempt to fetch the article
+  ;; environment, and set the values of the appropriate slots
+  (when (and (slot-boundp article 'path)
+	     (not (slot-boundp article 'vocabularies))
+	     (not (slot-boundp article 'notations))
+	     (not (slot-boundp article 'requirements))
+	     (not (slot-boundp article 'registrations))
+	     (not (slot-boundp article 'constructors))
+	     (not (slot-boundp article 'definitions))
+	     (not (slot-boundp article 'theorems))
+	     (not (slot-boundp article 'schemes)))
+    (handler-case
+	(refresh-environment article t)
+      (mizar-error () (warn "Unable to call envget on the article under ~A.  Is the directory writable?" (path article)))))
+  (when (and (slot-boundp article 'path)
+	     (not (slot-boundp article 'lines)))
+    (let ((path (path article)))
+      (if (file-exists-p path)
+	  (refresh-text article)
+	  (warn "Although the article has a path, ~A, there is no file (yet) at that location" path))))
+  (when (and (slot-boundp article 'path)
+	     (not (slot-boundp article 'name)))
+    (let* ((filename (file-namestring (path article)))
+	   (basename (pathname-name filename)))
+      (setf (name article) basename)))
+  article)
+
+(defun make-article (name mml-version)
+  (make-instance 'article
+		 :name name
+		 :mml-version mml-version))
 
 (defun copy-article (article)
   (let ((new-article (make-article-copying-environment-from article)))
@@ -253,34 +287,6 @@ unbound, it will be bound in the new article and have value NIL."
 	    						     directive-node)))))))
 	environ)
       (error "No EVL file at ~S" evl-path)))
-
-(defmethod initialize-instance :after ((article article) &key)
-  ;; if only a name is given, attempt to fetch the article
-  ;; environment, and set the values of the appropriate slots
-  (when (and (slot-boundp article 'path)
-	     (not (slot-boundp article 'vocabularies))
-	     (not (slot-boundp article 'notations))
-	     (not (slot-boundp article 'requirements))
-	     (not (slot-boundp article 'registrations))
-	     (not (slot-boundp article 'constructors))
-	     (not (slot-boundp article 'definitions))
-	     (not (slot-boundp article 'theorems))
-	     (not (slot-boundp article 'schemes)))
-    (handler-case
-	(refresh-environment article t)
-      (mizar-error () (warn "Unable to call envget on the article under ~A.  Is the directory writable?" (path article)))))
-  (when (and (slot-boundp article 'path)
-	     (not (slot-boundp article 'lines)))
-    (let ((path (path article)))
-      (if (file-exists-p path)
-	  (refresh-text article)
-	  (warn "Although the article has a path, ~A, there is no file (yet) at that location" path))))
-  (when (and (slot-boundp article 'path)
-	     (not (slot-boundp article 'name)))
-    (let* ((filename (file-namestring (path article)))
-	   (basename (pathname-name filename)))
-      (setf (name article) basename)))
-  article)
 
 (defun article-lines-matching (regex article)
   "Return a list of triples (LINE COLUMN MATCH), where LINE and COLUMN
