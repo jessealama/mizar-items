@@ -6,10 +6,13 @@
   ((name
     :initarg :name
     :accessor name
-    :type string
+    :type (or nil string)
+    :initform nil
     :documentation "The name of this article, as a string.")
    (mml-version
     :initarg :mml-version
+    :initform nil
+    :type (or nil string)
     :accessor mml-version
     :documentation "The version of the MML that this article comes from")
    (items
@@ -29,9 +32,9 @@
     :initform nil
     :documentation "A list of authors for an article.")
    (title
-    :type string
+    :type (or nil string)
     :accessor title
-    :initform "(no title information was supplied)"
+    :initform nil
     :initarg :title
     :documentation "The title of this article.")
    (text
