@@ -15,9 +15,9 @@
     :type (or null string)
     :accessor mml-version
     :documentation "The version of the MML that this article comes from")
-   (items
-    :initarg :items
-    :accessor items
+   (fragments
+    :initarg :fragments
+    :accessor fragments
     :type list
     :initform nil
     :documentation "The items into which this article is divided.")
