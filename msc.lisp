@@ -311,148 +311,182 @@
 
 (define-msc-2010-classification 00-01
     :name "00-01"
-    :description "Instructional exposition (textbooks, tutorial papers, etc.)")
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 00-XX)
 
 (define-msc-2010-classification 00-02
     :name "00-02"
-    :description "Research exposition (monographs, survey articles)")
+    :description "Research exposition (monographs, survey articles)"
+    :parent 00-XX)
 
 (define-msc-2010-classification 00Axx
     :name "00Axx"
     :description "General and miscellaneous specific topics"
-    :contains '(00A05 00A06 00A07 00A08 00A09 00A15 00A17 00A20 00A22 00A30 00A35 00A65 00A66 00A67 00A69 00A71 00A72 00A73 00A79 00A99))
+    :contains '(00A05 00A06 00A07 00A08 00A09 00A15 00A17 00A20 00A22 00A30 00A35 00A65 00A66 00A67 00A69 00A71 00A72 00A73 00A79 00A99)
+    :parent 00-XX)
 
 (define-msc-2010-classification 00Bxx
     :name "00Bxx"
     :description "Conference proceedings and collections of papers"
-    :contains '(00B05 00B10 00B15 00B20 00B25 00B30 00B50 00B55 00B60 00B99))
+    :contains '(00B05 00B10 00B15 00B20 00B25 00B30 00B50 00B55 00B60 00B99)
+    :parent 00-XX)
 
 ;; OOAxx
 
 (define-msc-2010-classification 00A05
     :name "00A05"
-    :description "General mathematics")
+    :description "General mathematics"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A06
     :name "00A06"
-    :description "Mathematics for nonmathematicians (engineering, social sciences, etc.)")
+    :description "Mathematics for nonmathematicians (engineering, social sciences, etc.)"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A07
     :name "00A07"
-    :description "Problem books")
+    :description "Problem books"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A08
     :name "00A08"
     :description "Recreational mathematics"
-    :see-also '(97A20))
+    :see-also '(97A20)
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A09
     :name "00A09"
-    :description "Popularization of mathematics")
+    :description "Popularization of mathematics"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A15
     :name "00A15"
-    :description "Bibliographies")
+    :description "Bibliographies"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A17
     :name "00A17"
-    :description "External book reviews")
+    :description "External book reviews"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A20
     :name "00A20"
-    :description "Dictionaries and other general reference works")
+    :description "Dictionaries and other general reference works"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A22
     :name "00A22"
-    :description "Formularies")
+    :description "Formularies"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A30
     :name "00A30"
     :description "Philosophy of mathematics"
-    :see-also '(03A05))
+    :see-also '(03A05)
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A35
     :name "00A35"
     :description "Methodology of mathematics, didactics"
-    :see-also '(97Cxx 97Dxx))
+    :see-also '(97Cxx 97Dxx)
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A65
     :name "00A65"
-    :description "Mathematics and music")
+    :description "Mathematics and music"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A66
     :name "00A66"
-    :description "Mathematics and visual arts, visualization")
+    :description "Mathematics and visual arts, visualization"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A67
     :name "00A67"
-    :description "Mathematics and architecture")
+    :description "Mathematics and architecture"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A69
     :name "00A69"
     :description "General applied mathematics"
-    :see-also '(("Physics" 00A79 70-XX 74-XX 76-XX 78-XX 80-XX 81-XX 82-XX 83-XX 85-XX 86-XX)))
+    :see-also '(("Physics" 00A79 70-XX 74-XX 76-XX 78-XX 80-XX 81-XX 82-XX 83-XX 85-XX 86-XX))
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A71
     :name "00A71"
-    :description "Theory of mathematical modeling")
+    :description "Theory of mathematical modeling"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A72
     :name "00A72"
-    :description "General methods of simulation")
+    :description "General methods of simulation"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A73
     :name "00A73"
-    :description "Dimensional analysis")
+    :description "Dimensional analysis"
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A79
     :name "00A79"
     :description "Physics"
-    :see-also '((70-XX 74-XX 76-XX 78-XX 80-XX 81-XX 82-XX 83-XX 85-XX 86-XX)))
+    :see-also '((70-XX 74-XX 76-XX 78-XX 80-XX 81-XX 82-XX 83-XX 85-XX 86-XX))
+    :parent 00Axx)
 
 (define-msc-2010-classification 00A99
     :name "00A99"
-    :description "Miscellaneous topics")
+    :description "Miscellaneous topics"
+    :parent 00Axx)
 
 ;; 00Bxx
 
 (define-msc-2010-classification 00B05
     :name "00B05"
-    :description "Collections of abstracts of lectures")
+    :description "Collections of abstracts of lectures"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B10
     :name "00B10"
-    :description "Collections of articles of general interest")
+    :description "Collections of articles of general interest"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B15
     :name "00B15"
-    :description "Collections of articles of miscellaneous specific content")
+    :description "Collections of articles of miscellaneous specific content"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B20
     :name "00B20"
-    :description "Proceedings of conferences of general interest")
+    :description "Proceedings of conferences of general interest"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B25
     :name "00B25"
-    :description "Proceedings of conferences of miscellaneous specific interest")
+    :description "Proceedings of conferences of miscellaneous specific interest"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B30
     :name "00B30"
-    :description "Festschriften")
+    :description "Festschriften"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B50
     :name "00B50"
-    :description "Volumes of selected translations")
+    :description "Volumes of selected translations"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B55
     :name "00B55"
-    :description "Miscellaneous volumes of translations")
+    :description "Miscellaneous volumes of translations"
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B60
     :name "00B60"
     :description "Collections of reprinted articles"
-    :see-also '(01A75))
+    :see-also '(01A75)
+    :parent 00Bxx)
 
 (define-msc-2010-classification 00B99
     :name "00B99"
-    :description "None of the above, but in this section")
+    :description "None of the above, but in this section"
+    :parent 00Bxx)
