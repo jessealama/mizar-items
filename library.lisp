@@ -53,3 +53,27 @@
       (prog2
 	  (push article (articles library))
 	  library)))
+
+(defclass mizar-library ()
+  ((location
+    :initarg :location
+    :accessor location
+    :type string
+    :initform *mizfiles*)
+   (mml-lar
+    :accessor mml-lar
+    :type list))
+  (:documentation "A wrapper around a copy of the MML."))
+
+(defmethod initialize-instance :after ((lib mizar-library) &key)
+  (setf (mml-lar lib) 
+	(lines-of-file (concat *mizfiles* "mml.lar"))))
+
+(defmethod print-object ((lib mizar-library) stream)
+  (with-slots (location mml-lar)
+      lib
+    (print-unreadable-object (lib stream :type nil)
+      (format stream "location ~A, with ~d articles" location (length mml-lar)))))
+
+(defparameter *default-mizar-library* (make-instance 'mizar-library)
+  "A Mizar library using the value of MIZFILES in the environment.")
