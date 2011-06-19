@@ -195,13 +195,23 @@ unbound, it will be bound in the new article and have value NIL."
 
 (defmethod print-object ((article article) stream)
   (print-unreadable-object (article stream)
-    (if (and (slot-boundp article 'name) (name article))
-	(let ((name (name article)))
-	  (if (and (slot-boundp article 'mml-version) (mml-version article))
-	      (let ((mml-version (mml-version article)))
-		(format stream "~:@(~a~) (MML version ~a" name mml-version))
-	      (format stream "~:@(~a~) (MML version unknown)" name)))
-	(format stream "(unknown name, unknown MML version)"))))
+    (with-slots (name title authors mml-version)
+	article
+      (if name
+	  (if authors
+	      (if mml-version
+		  (format stream "~:@(~a~): \"~a\", by ~{~a,~} (MML version ~a)" name title authors mml-version)
+		  (format stream "~:@(~a~): \"~a\", by ~{~a,~} (MML version unknown)" name title authors))
+	      (if mml-version
+		  (format stream "~:@(~a~): \"~a\" (unknown authors) (MML version ~a)" name title mml-version)
+		  (format stream "~:@(~a~): \"~a\" (unknown authors) (MML version unknown)" name title)))
+	  (if authors
+	      (if mml-version
+		  (format stream "(unknown name): \"~a\", by ~{~a,~} (MML version ~a)" title authors mml-version)
+		  (format stream "(unknown name): \"~a\", by ~{~a,~} (unknown MML version)" title authors))
+	      (if mml-version
+		  (format stream "(unknown name): \"~a\", (unknown authors) (MML version ~a)" title mml-version)
+		  (format stream "(unknown name): \"~a\", (unknown authors) (MML version unknown)" title)))))))
 
 (defun file-exists-under-prel (local-db file)
   (let ((prel (concat (namestring (pathname-as-directory local-db))
