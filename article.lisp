@@ -20,7 +20,13 @@
     :accessor fragments
     :type list
     :initform nil
-    :documentation "The items into which this article is divided.")
+    :documentation "The fragments into which this article is divided.")
+   (mscs
+    :initarg :mscs
+    :accessors mscs
+    :type list
+    :initfor nil
+    :documentation "Mathematics Subject Classification (201) tags for this article.")
    (path
     :initarg :path
     :accessor path
