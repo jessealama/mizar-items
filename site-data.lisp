@@ -165,8 +165,8 @@
 	  (pushnew "tarski" mml-lar :test #'string=)
 	  (pushnew "hidden" mml-lar :test #'string=)
 	  (setf *mml-lar* (mapcar #'(lambda (article-name)
-				      (make-article article-name mml-version))
-				  mml-lar))
+	  			      (make-article article-name mml-version))
+	  			  mml-lar))
 	  (setf *mml-version* mml-version)
 	  (format t "Loading the dependency data...")
 	  (setf *item-dependency-graph-forward*
