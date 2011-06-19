@@ -146,6 +146,18 @@ unbound, it will be bound in the new article and have value NIL."
       (setf (full-text new-article) (full-text article)))
     new-article))
 
+;;; Printing articles
+
+(defmethod print-object ((article article) stream)
+  (print-unreadable-object (article stream)
+    (if (and (slot-boundp article 'name) (name article))
+	(let ((name (name article)))
+	  (if (and (slot-boundp article 'mml-version) (mml-version article))
+	      (let ((mml-version (mml-version article)))
+		(format stream "~:@(~a~) (MML version ~a" name mml-version))
+	      (format stream "~:@(~a~) (MML version unknown)" name)))
+	(format stream "(unknown name, unknown MML version)"))))
+
 (defun file-exists-under-prel (local-db file)
   (let ((prel (concat (namestring (pathname-as-directory local-db))
 		      (namestring (pathname-as-directory "prel")))))
