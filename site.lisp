@@ -813,19 +813,27 @@ end;"))
      (:thead
       (:tr
        (:th "MML Name")
-       (:th "Title")))
+       (:th "Title")
+       (:th "Authors")))
      (:tbody
       (loop
-	 for (article-name title author) in *articles*
-	 for article-uri = (uri-for-article article-name)
-	 for title-escaped = (escape-string title)
+	 for article in *mml-lar*
 	 do
-	   (htm
-	    (:tr
-	     ((:td :class "article-name")
-	      ((:a :href article-uri :title title-escaped)
-	       (str article-name)))
-	     ((:td :class "article-title") (str title)))))))))
+	   (with-slots (name title authors)
+	       article
+	     (let ((title-escaped (escape-string title))
+		   (article-uri (uri-for-article name))
+		   (author-list-pretty (if authors
+					   (format nil "~{~a~#[~;, and~:;,~]~}" authors)
+					   "(author information not known)")))
+	       (htm
+		(:tr
+		 ((:td :class "article-name")
+		  ((:a :href article-uri :title title-escaped)
+		   (str name)))
+		 ((:td :class "article-title") (str title))
+		 ((:td :class "author-list")
+		  (str author-list-pretty)))))))))))
 
 (defgeneric emit-article-xml ()
   (:documentation "Emit an XML representation of an article."))
