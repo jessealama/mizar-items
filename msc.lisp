@@ -1475,3 +1475,474 @@
     :name "03H99"
     :description "None of the above, but in this section"
     :paent 03Hxx)
+
+;; 05-XX
+
+(define-msc-2010-classification 05-00
+    :name "05-00"
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 05-XX) 
+
+(define-msc-2010-classification 05-01
+    :name "05-01"
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 05-XX) 
+
+(define-msc-2010-classification 05-02
+    :name "05-02"
+    :description "Research exposition (monographs, survey articles)"
+    :parent 05-XX) 
+
+(define-msc-2010-classification 05-03
+    :name "05-03"
+    :description "Historical (must also be assigned at least one classification number from Section 01)"
+    :parent 05-XX) 
+
+(define-msc-2010-classification 05-04
+    :name "05-04"
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 05-XX) 
+
+(define-msc-2010-classification 05-06
+    :name "05-06"
+    :description "Proceedings, conferences, collections, etc."
+    :parent 05-XX) 
+
+(define-msc-2010-classification 05Axx
+    :name "05Axx"
+    :description "Enumerative combinatorics"
+    :see-also '(("Enumeration in graph theory" 05C30))
+    :parent 05-XX
+    :contains (05A05 05A10 05A15 05A16 05A17 05A18 05A19 05A20 05A30 05A40 05A99)) 
+
+(define-msc-2010-classification 05Bxx
+    :name "05Bxx"
+    :description "Designs and configurations"
+    :see-also (("Applications of design theory" 94C30))
+    :parent 05-XX
+    :contains (05B05 05B07 05B10 05B15 05B20 05B25 05B30 05B35 05B40 05B45 05B50 05B99)) 
+
+(define-msc-2010-classification 05Cxx
+    :name "05Cxx"
+    :description "Graph theory"
+    :see-also (("Applications of graphs" 68R10 81Q30 81T15 82B20 82C20 90C35 92E10 94C15))
+    :parent 05-XX
+    :contains (05C05 05C07 05C10 05C12 05C15 05C17 05C20 05C21 05C22 05C25 05C30 05C31 05C35 05C38 05C40 05C42 05C45 05C50 05C51 05C55 05C57 05C60 05C62 05C63 05C65 05C69 05C70 05C72 05C75 05C76 05C78 05C80 05C81 05C82 05C83 05C85 05C90 05C99)) 
+
+(define-msc-2010-classification 05Dxx
+    :name "05Dxx"
+    :description "Extremal combinatorics"
+    :parent 05-XX
+    :contains (05D05 05D10 05D15 05D40 05D99)) 
+
+(define-msc-2010-classification 05Exx
+    :name "05Exx"
+    :description "Algebraic combinatorics"
+    :parent 05-XX
+    :contains (05E05 05E10 05E15 05E18 05E30 05E40 05E45 05E99)) 
+
+;; 05Axx
+
+(define-msc-2010-classification 05A05
+    :name "05A05"
+    :description "Permutations, words, matrices"
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A10
+    :name "05A10"
+    :description "Factorials, binomial coefficients, combinatorial functions"
+    :see-also (11B65 33Cxx)
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A15
+    :name "05A15"
+    :description "Exact enumeration problems, generating functions"
+    :see-also '(33Cxx 33Dxx)
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A16
+    :name "05A16"
+    :description "Asymptotic enumeration"
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A17
+    :name "05A17"
+    :description "Partitions of integers"
+    :see-also (11P81 11P82 11P83)
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A18
+    :name "05A18"
+    :description "Partitions of sets"
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A19
+    :name "05A19"
+    :description "Bijective combinatorics"
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A20
+    :name "05A20"
+    :description "Combinatorial inequalities"
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A30
+    :name "05A30"
+    :description "$q$-calculus and related topics"
+    :see-also (33Dxx)
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A40
+    :name "05A40"
+    :description "Umbral calculus"
+    :parent 05Axx)
+
+(define-msc-2010-classification 05A99
+    :name "05A99"
+    :description "None of the above, but in this section"
+    :parent 05Axx)
+
+;; 05Bxx
+
+(define-msc-2010-classification 05B05
+    :name "05B05"
+    :description "Block designs"
+    :see-also '(51E05 62K10)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B07
+    :name "05B07"
+    :description "Triple systems"
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B10
+    :name "05B10"
+    :description "Difference sets (number-theoretic, group-theoretic, etc.)"
+    :see-also '(11B13)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B15
+    :name "05B15"
+    :description "Orthogonal arrays, Latin squares, Room squares"
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B20
+    :name "05B20"
+    :description "Matrices (incidence, Hadamard, etc.)"
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B25
+    :name "05B25"
+    :description "Finite geometries"
+    :see-also '(51D20 51Exx)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B30
+    :name "05B30"
+    :description "Other designs, configurations"
+    :see-also '(51E30)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B35
+    :name "05B35"
+    :description "Matroids, geometric lattices"
+    :see-also '(52B40 90C27)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B40
+    :name "05B40"
+    :description "Packing and covering"
+    :see-also '(11H31 52C15 52C17)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B45
+    :name "05B45"
+    :description "Tessellation and tiling problems"
+    :see-also '(52C20 52C22)
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B50
+    :name "05B50"
+    :description "Polyominoes"
+    :parent 05Bxx)
+
+(define-msc-2010-classification 05B99
+    :name "05B99"
+    :description "None of the above, but in this section"
+    :parent 05Bxx)
+
+;; 05Cxx
+
+(define-msc-2010-classification 05C05
+    :name "05C05"
+    :description "Trees"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C07
+    :name "05C07"
+    :description "Vertex degrees"
+    :see-also '(05E30)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C10
+    :name "05C10"
+    :description "Planar graphs; geometric and topological aspects of graph theory"
+    :see-also '(57M15 57M25)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C12
+    :name "05C12"
+    :description "Distance in graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C15
+    :name "05C15"
+    :description "Coloring of graphs and hypergraphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C17
+    :name "05C17"
+    :description "Perfect graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C20
+    :name "05C20"
+    :description "Directed graphs (digraphs), tournaments"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C21
+    :name "05C21"
+    :description "Flows in graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C22
+    :name "05C22"
+    :description "Signed and weighted graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C25
+    :name "05C25"
+    :description "Graphs and abstract algebra (groups, rings, fields, etc.)"
+    :see-also '(20F65)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C30
+    :name "05C30"
+    :description "Enumeration in graph theory"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C31
+    :name "05C31"
+    :description "Graph polynomials"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C35
+    :name "05C35"
+    :description "Extremal problems"
+    :see-also '(90C35)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C38
+    :name "05C38"
+    :description "Paths and cycles"
+    :see-also '(90B10)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C40
+    :name "05C40"
+    :description "Connectivity"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C42
+    :name "05C42"
+    :description "Density (toughness, etc.)"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C45
+    :name "05C45"
+    :description "Eulerian and Hamiltonian graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C50
+    :name "05C50"
+    :description "Graphs and linear algebra (matrices, eigenvalues, etc.)"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C51
+    :name "05C51"
+    :description "Graph designs and isomomorphic decomposition"
+    :see-also '(05B30)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C55
+    :name "05C55"
+    :description "Generalized Ramsey theory"
+    :see-also '(05D10)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C57
+    :name "05C57"
+    :description "Games on graphs"
+    :see-also '(91A43 91A46)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C60
+    :name "05C60"
+    :description "Isomorphism problems (reconstruction conjecture, etc.) and homomorphisms (subgraph embedding, etc.)"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C62
+    :name "05C62"
+    :description "Graph representations (geometric and intersection representations, etc.)"
+    :see-also '(("Graph drawing" 68R10))
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C63
+    :name "05C63"
+    :description "Infinite graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C65
+    :name "05C65"
+    :description "Hypergraphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C69
+    :name "05C69"
+    :description "Dominating sets, independent sets, cliques"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C70
+    :name "05C70"
+    :description "Factorization, matching, partitioning, covering and packing"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C72
+    :name "05C72"
+    :description "Fractional graph theory, fuzzy graph theory"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C75
+    :name "05C75"
+    :description "Structural characterization of families of graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C76
+    :name "05C76"
+    :description "Graph operations (line graphs, products, etc.)"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C78
+    :name "05C78"
+    :description "Graph labelling (graceful graphs, bandwidth, etc.)"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C80
+    :name "05C80"
+    :description "Random graphs [See also 60B20]"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C81
+    :name "05C81"
+    :description "Random walks on graphs"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C82
+    :name "05C82"
+    :description "Small world graphs, complex networks"
+    :see-also '(90Bxx 91D30)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C83
+    :name "05C83"
+    :description "Graph minors"
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C85
+    :name "05C85"
+    :description "Graph algorithms"
+    :see-also '(68R10 68W05)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C90
+    :name "05C90"
+    :description "Applications"
+    :see-also '(68R10 81Q30 81T15 82B20 82C20 90C35 92E10 94C15)
+    :parent 05Cxx)
+
+(define-msc-2010-classification 05C99
+    :name "05C99"
+    :description "None of the above, but in this section"
+    :parent 05Cxx)
+
+;; 05Dxx
+
+(define-msc-2010-classification 05D05
+    :name "05D05"
+    :description "Extremal set theory"
+    :parent 05Dxx) 
+
+(define-msc-2010-classification 05D10
+    :name "05D10"
+    :description "Ramsey theory"
+    :see-also '(05C55)
+    :parent 05Dxx) 
+
+(define-msc-2010-classification 05D15
+    :name "05D15"
+    :description "Transversal (matching) theory"
+    :parent 05Dxx) 
+
+(define-msc-2010-classification 05D40
+    :name "05D40"
+    :description "Probabilistic methods"
+    :parent 05Dxx) 
+
+(define-msc-2010-classification 05D99
+    :name "05D99"
+    :description "None of the above, but in this section"
+    :parent 05Dxx) 
+
+;; 05Exx
+
+(define-msc-2010-classification 05E05
+    :name "05E05"
+    :description "Symmetric functions and generalizations"
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E10
+    :name "05E10"
+    :description "Combinatorial aspects of representation theory"
+    :see-also '(20C30)
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E15
+    :name "05E15"
+    :description "Combinatorial aspects of groups and algebras"
+    :see-also '(14Nxx 22E45 33C80)
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E18
+    :name "05E18"
+    :description "Group actions on combinatorial structures"
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E30
+    :name "05E30"
+    :description "Association schemes, strongly regular graphs"
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E40
+    :name "05E40"
+    :description "Combinatorial aspects of commutative algebra"
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E45
+    :name "05E45"
+    :description "Combinatorial aspects of simplicial complexes"
+    :parent 05Exx)
+
+(define-msc-2010-classification 05E99
+    :name "05E99"
+    :description "None of the above, but in this section"
+    :parent 05Exx)
