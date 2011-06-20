@@ -20,7 +20,8 @@
 (define-msc2010-classification 05-XX
     :name "05-XX"
     :description "Combinatorics"
-    :see-also '(("Finite fields" 11T)))
+    :see-also '(("Finite fields" 11T))
+    :contains (05-00 05-01 05-02 05-03 05-04 05-06 05Axx 05Bxx 05Cxx 05Dxx 05Exx))
 
 (define-msc2010-classification 06-XX
     :name "06-XX"
