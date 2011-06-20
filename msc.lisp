@@ -722,43 +722,51 @@
 (define-msc-2010-classification 03Axx
     :name "03Axx"
     :description "Philosophical aspects of logic and foundations"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03A05 03A10 03A99))
 
 (define-msc-2010-classification 03Bxx
     :name "03Bxx"
     :description "General logic"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03B05 03B10 03B15 03B20 03B22 03B25 03B30 03B35 03B40 03B42 03B44 03B45 03B47 03B48 03B50 03B52 03B53 03B55 03B60 03B62 03B65 03B70 03B80 03B99))
 
 (define-msc-2010-classification 03Cxx
     :name "03Cxx"
     :description "Model theory"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03C05 03C07 03C10 03C13 03C15 03C20 03C25 03C30 03C35 03C40 03C45 03C48 03C50 03C52 03C55 03C57 03C60 03C62 03C64 03C65 03C68 03C70 03C75 03C80 03C85 03C90 03C95 03C98 03C99))
 
 (define-msc-2010-classification 03Dxx
     :name "03Dxx"
     :description "Computability and recursion theory"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03D03 03D05 03D10 03D15 03D20 03D25 03D28 03D30 03D32 03D35 03D40 03D45 03D50 03D55 03D60 03D65 03D70 03D75 03D78 03D80 03D99))
 
 (define-msc-2010-classification 03Exx
     :name "03Exx"
     :description "Set theory"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03E02 03E04 03E05 03E10 03E15 03E17 03E20 03E25 03E30 03E35 03E40 03E45 03E47 03E50 03E55 03E57 03E60 03E65 03E70 03E72 03E75 03E99))
 
 (define-msc-2010-classification 03Fxx
     :name "03Fxx"
     :description "Proof theory and constructive mathematics"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03F03 03F05 03F07 03F10 03F15 03F20 03F25 03F30 03F35 03F40 03F45 03F50 03F52 03F55 03F60 03F65 03F99))
 
 (define-msc-2010-classification 03Gxx
     :name "03Gxx"
     :description "Algebraic logic"
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03G05 03G10 03G12 03G15 03G20 03G25 03G27 03G30 03G99))
 
 (define-msc-2010-classification 03Hxx
     :name "03Hxx"
     :description "Nonstandard models"
     :see-also '(03C62)
-    :parent 03-XX)
+    :parent 03-XX
+    :contains (03H05 03H10 03H15 03H99))
 
 ;; 03Axx
 
