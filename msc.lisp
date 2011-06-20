@@ -1357,7 +1357,7 @@
 
 (define-msc-2010-classification 03F40
     :name "03F40"
-    :description "Gödel numberings in proof theory and issues of incompleteness"
+    :description "Gödel numberings and issues of incompleteness"
     :parent 03Fxx)
 
 (define-msc-2010-classification 03F45
