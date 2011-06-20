@@ -41,7 +41,7 @@
 
 (define-msc-2010-classification 13-XX
     :name "13-XX"
-    :description "Commutative algebra rings and algebras")
+    :description "Commutative algebra")
 
 (define-msc-2010-classification 14-XX
     :name "14-XX"
@@ -880,7 +880,7 @@
 
 (define-msc-2010-classification 03B53
     :name "03B53"
-    :description "Paraconsistent logicsLogics admitting inconsistency (paraconsistent logics, discussive logics, etc.)"
+    :description "Paraconsistent logics"
     :parent 03Bxx)
 
 (define-msc-2010-classification 03B55
