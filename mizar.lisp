@@ -9,9 +9,6 @@
 The default value is the value of the MIZFILES environment
 variable (at load time).")
 
-(defun article-exists-p (name &optional (library *default-mizar-library*))
-  (member name (mml-lar library) :test #'string=))
-
 (defgeneric belongs-to-mml (article))
 
 (defmethod belongs-to-mml ((article-str string))
