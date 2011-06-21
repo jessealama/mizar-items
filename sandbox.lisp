@@ -17,7 +17,7 @@
 (defparameter *sandbox-factory* (make-instance 'sandbox-factory
 					       :home (gethash 'sandbox-location *mizar-items-config*)))
 
-(defun fresh-sandbox (&optional (name-prefix ""))
+(defun fresh-sandbox (&optional (name-prefix "sandbox"))
   (loop
      with home-string = (namestring (home *sandbox-factory*))
      for i from 1
