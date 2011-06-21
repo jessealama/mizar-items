@@ -30,7 +30,8 @@
 
 (define-msc2010-classification 08-XX
     :name "08-XX"
-    :description "General algebraic systems")
+    :description "General algebraic systems"
+    :contains (08-00 08-01 08-02 08-03 08-04 08-06 08Axx 08Bxx 08Cxx))
 
 (define-msc201-classification 11-XX
     :name "11-XX"
@@ -2308,3 +2309,206 @@
     :name "06F99"
     :description "None of the above, but in this section"
     :parent 06Fxx)
+
+;; 08-XX
+
+(define-msc-2010-classification 08-00
+    :name "08-00"
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 08-XX)
+
+(define-msc-2010-classification 08-01
+    :name "08-01"
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 08-XX)
+
+(define-msc-2010-classification 08-02
+    :name "08-02"
+    :description "Research exposition (monographs, survey articles)"
+    :parent 08-XX)
+
+(define-msc-2010-classification 08-03
+    :name "08-03"
+    :description "Historical (must also be assigned at least one classification number from Section 01)"
+    :parent 08-XX)
+
+(define-msc-2010-classification 08-04
+    :name "08-04"
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 08-XX)
+
+(define-msc-2010-classification 08-06
+    :name "08-06"
+    :description "Proceedings, conferences, collections, etc."
+    :parent 08-XX)
+
+(define-msc-2010-classification 08Axx
+    :name "08Axx"
+    :description "Algebraic structures"
+    :see-also '(03C05)
+    :parent 08-XX
+    :contains (08A02 08A05 08A30 08A35 08A40 08A45 08A50 08A55 08A60 08A62 08A65 08A68 08A70 08A72 08A99))
+
+(define-msc-2010-classification 08Bxx
+    :name "08Bxx"
+    :description "Varieties"
+    :see-also '(03C05)
+    :parent 08-XX
+    :contains (08B05 08B10 08B15 08B20 08B25 08B26 08B30 08B99))
+
+(define-msc-2010-classification 08Cxx
+    :name "08Cxx"
+    :description "Other classes of algebras"
+    :parent 08-XX
+    :contains (08C05 08C10 08C15 08C20 08C99))
+
+;; 08Axx
+
+(define-msc-2010-classification 08A02
+    :name "08A02"
+    :description "Relational systems, laws of composition"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A05
+    :name "08A05"
+    :description "Structure theory"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A30
+    :name "08A30"
+    :description "Subalgebras, congruence relations"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A35
+    :name "08A35"
+    :description "Automorphisms, endomorphisms"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A40
+    :name "08A40"
+    :description "Operations, polynomials, primal algebras"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A45
+    :name "08A45"
+    :description "Equational compactness"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A50
+    :name "08A50"
+    :description "Word problems"
+    :see-also '(03D40 06B25 20F10 68R15)
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A55
+    :name "08A55"
+    :description "Partial algebras"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A60
+    :name "08A60"
+    :description "Unary algebras"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A62
+    :name "08A62"
+    :description "Finitary algebras"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A65
+    :name "08A65"
+    :description "Infinitary algebras"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A68
+    :name "08A68"
+    :description "Heterogeneous algebras"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A70
+    :name "08A70"
+    :description "Applications of universal algebra in computer science"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A72
+    :name "08A72"
+    :description "Fuzzy algebraic structures"
+    :parent 08Axx)
+
+(define-msc-2010-classification 08A99
+    :name "08A99"
+    :description "None of the above, but in this section"
+    :parent 08Axx)
+
+;; 08Bxx
+
+(define-msc-2010-classification 08B05
+    :name "08B05"
+    :description "Equational logic, Mal′cev (Mal′tsev) conditions"
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B10
+    :name "08B10"
+    :description "Congruence modularity, congruence distributivity"
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B15
+    :name "08B15"
+    :description "Lattices of varieties"
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B20
+    :name "08B20"
+    :description "Free algebras"
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B25
+    :name "08B25"
+    :description "Products, amalgamated products, and other kinds of limits and colimits"
+    :see-also '(18A30)
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B26
+    :name "08B26"
+    :description "Subdirect products and subdirect irreducibility"
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B30
+    :name "08B30"
+    :description "Injectives, projectives"
+    :parent 08Bxx)
+
+(define-msc-2010-classification 08B99
+    :name "08B99"
+    :description "None of the above, but in this section"
+    :parent 08Bxx)
+
+;; 08Cxx
+
+(define-msc-2010-classification 08C05
+    :name "08C05"
+    :description "Categories of algebras"
+    :see-also '(18C05)
+    :parent 08Cxx)
+
+(define-msc-2010-classification 08C10
+    :name "08C10"
+    :description "Axiomatic model classes"
+    :see-also '(03Cxx 03C60)
+    :parent 08Cxx)
+
+(define-msc-2010-classification 08C15
+    :name "08C15"
+    :description "Quasivarieties"
+    :parent 08Cxx)
+
+(define-msc-2010-classification 08C20
+    :name "08C20"
+    :description "Natural dualities for classes of algebras"
+    :see-also '(06E15 18A40 22A30)
+    :parent 08Cxx)
+
+(define-msc-2010-classification 08C99
+    :name "08C99"
+    :description "None of the above, but in this section"
+    :parent 08Cxx)
