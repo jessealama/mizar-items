@@ -8,7 +8,7 @@
   (constructors-and-properties (pathname atr-file)))
 
 (defmethod constructors-and-properties ((atr-file pathname))
-  (xuriella:apply-stylesheet #p"/Users/alama/sources/mizar/xsl4mizar/propertied-constructors.xsl" atr-file))
+  (xuriella:apply-stylesheet (mizar-items-config 'propertied-constructors-stylesheet) atr-file))
 
 (defgeneric constructors-with-properties (atr-file))
 
@@ -40,7 +40,7 @@
 	  (aid-param (xuriella:make-parameter aid "target_aid"))
 	  (relnr-param (xuriella:make-parameter relnr "target_relnr"))
 	  (property-param (xuriella:make-parameter property "target_property")))
-      (xuriella:apply-stylesheet #p"/Users/alama/sources/mizar/xsl4mizar/strip-prop.xsl"
+      (xuriella:apply-stylesheet (mizar-items-config 'strip-prop-stylesheet)
 				 atr-file
 				 :parameters (list kind-param
 						   nr-param

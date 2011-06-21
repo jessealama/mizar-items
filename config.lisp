@@ -68,6 +68,10 @@
 			   (file-in-xsl4mizar-dir "MHTML/mhtml.js"))
 (update-mizar-items-config 'absrefs-stylesheet
 			   (file-in-xsl4mizar-dir "addabsrefs.xsl"))
+(update-mizar-items-config 'propertied-constructors-stylesheet
+			   "/Users/alama/sources/mizar/xsl4mizar/propertied-constructors.xsl")
+(update-mizar-items-config 'strip-prop-stylesheet
+			   "/Users/alama/sources/mizar/xsl4mizar/strip-prop.xsl")
 (update-mizar-items-config 'mhtml-stylesheet
 			   (file-in-xsl4mizar-dir "MHTML/mhtml_main.xsl"))
 (update-mizar-items-config 'item-to-fragment-path
