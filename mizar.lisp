@@ -111,8 +111,23 @@ variable (at load time).")
 (define-input-transformer expand-canceled (mizar-items-config 'expand-canceled-script-path))
 
 (defun report-mizar-error (mizar-error stream)
-  (declare (ignore mizar-error))
-  (format stream "Mizar error"))
+  (with-slots (tool working-directory argument)
+      mizar-error
+    (if tool
+	(if working-directory
+	    (if argument
+		(format stream "Error applying ~a to ~a in directory ~a" tool argument working-directory)
+		(format stream "Error applying ~a in directory ~a" tool working-directory))
+	    (if argument
+		(format stream "Error applying ~a to ~a (strangely, no working directory was given" tool argument)
+		(format stream "Error applying ~a (strangely, neither a working directory nor an argument to the program was supplied)" tool)))
+	(if working-directory
+	    (if argument
+		(format stream "Weird mizar error: no mizar tool was specified, but the work (?) was carried out in directory ~a, and the argument to the missing tool was ~a" working-directory argument)
+		(format stream "Weird mizar error: no mizar tool was specified, but the work (?) was carried out in directory ~a" working-directory))
+	    (if argument
+		(format stream "Weird mizar error: no mizar tool was specified,  nor was a working directory specified, but an argument was given: ~a" argument)
+		(format stream "Weird mizar error: no mizar tool was specified, no argument was given, and no working directory was supplied"))))))
 
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
