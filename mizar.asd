@@ -32,6 +32,7 @@
 	       (:file "mml")
 	       (:file "depgraph")
 	       (:file "mptp")
+	       (:file "properties")
 	       (:file "site-data")
 	       (:file "tc")
 	       (:file "site-search")
