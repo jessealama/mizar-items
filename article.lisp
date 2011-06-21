@@ -23,9 +23,9 @@
     :documentation "The fragments into which this article is divided.")
    (mscs
     :initarg :mscs
-    :accessors mscs
+    :accessor mscs
     :type list
-    :initfor nil
+    :initform nil
     :documentation "Mathematics Subject Classification (2010) tags for this article.")
    (path
     :initarg :path
