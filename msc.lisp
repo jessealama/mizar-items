@@ -1946,3 +1946,365 @@
     :name "05E99"
     :description "None of the above, but in this section"
     :parent 05Exx)
+
+;; 06-XX
+
+(define-msc-2010-classification 06-00
+    :name "06-00"
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 06-XX)
+
+(define-msc-2010-classification 06-01
+    :name "06-01"
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 06-XX)
+
+(define-msc-2010-classification 06-02
+    :name "06-02"
+    :description "Research exposition (monographs, survey articles)"
+    :parent 06-XX)
+
+(define-msc-2010-classification 06-03
+    :name "06-03"
+    :description "Historical (must also be assigned at least one classification number from Section 01)"
+    :parent 06-XX)
+
+(define-msc-2010-classification 06-04
+    :name "06-04"
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 06-XX)
+
+(define-msc-2010-classification 06-06
+    :name "06-06"
+    :description "Proceedings, conferences, collections, etc."
+    :parent 06-XX)
+
+(define-msc-2010-classification 06Axx
+    :name "06Axx"
+    :description "Ordered sets"
+    :parent 06-XX
+    :contains (06A05 06A06 06A07 06A11 06A12 06A15 06A75 06A99))
+
+(define-msc-2010-classification 06Bxx
+    :name "06Bxx"
+    :description "Lattices"
+    :see-also '(03G10)
+    :parent 06-XX
+    :contains (06B05 06B10 06B15 06B20 06B23 06B25 06B30 06B35 06B75 06B99))
+
+(define-msc-2010-classification 06Cxx
+    :name "06Cxx"
+    :description "Modular lattices, complemented lattices"
+    :parent 06-XX
+    :contains (06C05 06C10 06C15 06C20 06C99))
+
+(define-msc-2010-classification 06Dxx
+    :name "06Dxx"
+    :description "Distributive lattices"
+    :parent 06-XX
+    :contains (06D05 06D10 06D15 06D20 06D22 06D25 06D30 06D35 06D50 06D72 06D75 06D99))
+
+(define-msc-2010-classification 06Exx
+    :name "06Exx"
+    :description "Boolean algebras (Boolean rings)"
+    :see-also '(03G05)
+    :parent 06-XX
+    :contains '(06E05 06E10 06E15 06E20 06E25 06E30 06E75 06E99))
+
+(define-msc-2010-classification 06Fxx
+    :name "06Fxx"
+    :description "Ordered structures"
+    :parent 06-XX
+    :contains (06F05 06F07 06F10 06F15 06F20 06F25 06F30 06F35 06F99))
+
+;; 06Axx
+
+(define-msc-2010-classification 06A05
+    :name "06A05"
+    :description "Total order"
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A06
+    :name "06A06"
+    :description "Partial order, general"
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A07
+    :name "06A07"
+    :description "Combinatorics of partially ordered sets"
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A11
+    :name "06A11"
+    :description "Algebraic aspects of posets"
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A12
+    :name "06A12"
+    :description "Semilattices"
+    :see-also '(20M10
+		("Topological semilattices" 22A26))
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A15
+    :name "06A15"
+    :description "Galois correspondences, closure operators"
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A75
+    :name "06A75"
+    :description "Generalizations of ordered sets"
+    :parent 06Axx)
+
+(define-msc-2010-classification 06A99
+    :name "06A99"
+    :description "None of the above, but in this section"
+    :parent 06Axx)
+
+;; 06Bxx
+
+(define-msc-2010-classification 06B05
+    :name "06B05"
+    :description "Structure theory"
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B10
+    :name "06B10"
+    :description "Ideals, congruence relations"
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B15
+    :name "06B15"
+    :description "Representation theory"
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B20
+    :name "06B20"
+    :description "Varieties of lattices"
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B23
+    :name "06B23"
+    :description "Complete lattices, completions"
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B25
+    :name "06B25"
+    :description "Free lattices, projective lattices, word problems"
+    :see-also '(03D40 08A50 20F10)
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B30
+    :name "06B30"
+    :description "Topological lattices, order topologies"
+    :see-also '(06F30 22A26 54F05 54H12)
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B35
+    :name "06B35"
+    :description "Continuous lattices and posets, applications"
+    :see-also '(06B30 06D10 06F30 18B35 22A26 68Q55)
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B75
+    :name "06B75"
+    :description "Generalizations of lattices"
+    :parent 06Bxx)
+
+(define-msc-2010-classification 06B99
+    :name "06B99"
+    :description "None of the above, but in this section"
+    :parent 06Bxx)
+
+;; 06Cxx
+
+(define-msc-2010-classification 06C05
+    :name "06C05"
+    :description "Modular lattices, Desarguesian lattices"
+    :parent 06Cxx)
+
+(define-msc-2010-classification 06C10
+    :name "06C10"
+    :description "Semimodular lattices, geometric lattices"
+    :parent 06Cxx)
+
+(define-msc-2010-classification 06C15
+    :name "06C15"
+    :description "Complemented lattices, orthocomplemented lattices and posets"
+    :see-also '(03G12 81P10)
+    :parent 06Cxx)
+
+(define-msc-2010-classification 06C20
+    :name "06C20"
+    :description "Complemented modular lattices, continuous geometries"
+    :parent 06Cxx)
+
+(define-msc-2010-classification 06C99
+    :name "06C99"
+    :description "None of the above, but in this section"
+    :parent 06Cxx)
+
+;; 06Dxx
+
+(define-msc-2010-classification 06D05
+    :name "06D05"
+    :description "Structure and representation theory"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D10
+    :name "06D10"
+    :description "Complete distributivity"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D15
+    :name "06D15"
+    :description "Pseudocomplemented lattices"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D20
+    :name "06D20"
+    :description "Heyting algebras"
+    :see-also '(03G25)
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D22
+    :name "06D22"
+    :description "Frames, locales"
+    :see-also '(("Topological questions" 54-XX))
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D25
+    :name "06D25"
+    :description "Post algebras [See also 03G20]"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D30
+    :name "06D30"
+    :description "De Morgan algebras, Łukasiewicz algebras"
+    :see-also '(03G20)
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D35
+    :name "06D35"
+    :description "MV-algebras"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D50
+    :name "06D50"
+    :description "Lattices and duality"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D72
+    :name "06D72"
+    :description "Fuzzy lattices (soft algebras) and related topics"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D75
+    :name "06D75"
+    :description "Other generalizations of distributive lattices"
+    :parent 06Dxx)
+
+(define-msc-2010-classification 06D99
+    :name "06D99"
+    :description "None of the above, but in this section"
+    :parent 06Dxx)
+
+;; 06Exx
+
+(define-msc-2010-classification 06E05
+    :name "06E05"
+    :description "Structure theory"
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E10
+    :name "06E10"
+    :description "Chain conditions, complete algebras"
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E15
+    :name "06E15"
+    :description "Stone spaces (Boolean spaces) and related structures"
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E20
+    :name "06E20"
+    :description "Ring-theoretic properties"
+    :see-also '(16E50 16G30)
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E25
+    :name "06E25"
+    :description "Boolean algebras with additional operations (diagonalizable algebras, etc.)"
+    :see-also '(03G25 03F45)
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E30
+    :name "06E30"
+    :description "Boolean functions"
+    :see-also '(94C10)
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E75
+    :name "06E75"
+    :description "Generalizations of Boolean algebras"
+    :parent 06Exx)
+
+(define-msc-2010-classification 06E99
+    :name "06E99"
+    :description "None of the above, but in this section"
+    :parent 06Exx)
+
+;; 06Fxx
+
+(define-msc-2010-classification 06F05
+    :name "06F05"
+    :description "Ordered semigroups and monoids"
+    :see-also '(20Mxx)
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F07
+    :name "06F07"
+    :description "Quantales"
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F10
+    :name "06F10"
+    :description "Noether lattices"
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F15
+    :name "06F15"
+    :description "Ordered groups"
+    :see-also '(20F60)
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F20
+    :name "06F20"
+    :description "Ordered abelian groups, Riesz groups, ordered linear spaces"
+    :see-also '(46A40)
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F25
+    :name "06F25"
+    :description "Ordered rings, algebras, modules"
+    :see-also '(("Ordered fields" 12J15)
+		13J25
+		16W80)
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F30
+    :name "06F30"
+    :description "Topological lattices, order topologies"
+    :see-also '(06B30 22A26 54F05 54H12)
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F35
+    :name "06F35"
+    :description "BCK-algebras, BCI-algebras"
+    :see-also '([03G25)
+    :parent 06Fxx)
+
+(define-msc-2010-classification 06F99
+    :name "06F99"
+    :description "None of the above, but in this section"
+    :parent 06Fxx)
