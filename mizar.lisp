@@ -33,7 +33,15 @@ variable (at load time).")
   (< (mml-lar-index article-1)
      (mml-lar-index article-2)))
 
-(defun run-in-directory (program directory args &key input output if-output-exists)
+(defgeneric run-in-directory (program directory args &key input output if-output-exists))
+
+(defmethod run-in-directory (program (sandbox sandbox) args &key input output if-output-exists)
+  (run-in-directory program (location sandbox) args
+		    :input input
+		    :output output
+		    :if-output-exists if-output-exists))
+
+(defmethod run-in-directory (program (directory pathname) args &key input output if-output-exists)
   (let ((real-dir-name (file-exists-p directory)))
     (if real-dir-name
 	(if (directory-p real-dir-name)
@@ -112,17 +120,18 @@ variable (at load time).")
 (defmethod run-mizar-tool :around (tool article-path directory ignore-exit-code &rest flags)
   (declare (ignore tool directory flags))
   (if (probe-file article-path)
-      (call-next-method)
+      (let ((real-name (file-exists-p (if (typep directory 'sandbox)
+					  (location directory)
+					  directory))))
+	(if real-name
+	    (if (directory-p real-name)
+		(call-next-method)
+		(error "The specified directory, ~A, in which to apply the mizar tool ~A is not a directory!" directory tool))
+	    (error "It appears that there is no file at the specified work directory path ~A" directory)))
       (error "No such file: ~S" article-path)))
 
-(defmethod run-mizar-tool :around (tool article-path directory ignore-exit-code &rest flags)
-  (declare (ignore tool article-path flags))
-  (let ((real-name (file-exists-p directory)))
-    (if real-name
-	(if (directory-p real-name)
-	    (call-next-method)
-	    (error "The specified directory, ~A, in which to apply the mizar tool ~A is not a directory!" directory tool))
-	(error "It appears that there is no file at the specified work directory path ~A" directory))))
+(defmethod run-mizar-tool (tool article (sandbox sandbox) ignore-exit-code &rest flags)
+  (apply 'run-mizar-tool tool article (location sandbox) ignore-exit-code flags))
 
 (defmethod run-mizar-tool ((tool string) (article-path pathname) directory ignore-exit-code &rest flags)
   (let ((name (namestring article-path)))
@@ -155,6 +164,8 @@ variable (at load time).")
 	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
 	  `(progn
 	     (defgeneric ,tool-as-symbol (article directory &rest flags))
+	     (defmethod ,tool-as-symbol (article (sandbox sandbox) &rest flags)
+	       (apply 'run-mizar-tool ,tool article (location sandbox) nil flags))
 	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
 	       (apply 'run-mizar-tool ,tool article-path directory nil flags))
 	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
