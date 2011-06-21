@@ -111,7 +111,7 @@ variable (at load time).")
 (define-input-transformer expand-canceled (mizar-items-config 'expand-canceled-script-path))
 
 (defun report-mizar-error (mizar-error stream)
-  (with-slots (tool working-directory argument)
+  (with-slots (tool working-directory argument output-stream error-stream exit-code)
       mizar-error
     (if tool
 	(if working-directory
@@ -127,12 +127,30 @@ variable (at load time).")
 		(format stream "Weird mizar error: no mizar tool was specified, but the work (?) was carried out in directory ~a" working-directory))
 	    (if argument
 		(format stream "Weird mizar error: no mizar tool was specified,  nor was a working directory specified, but an argument was given: ~a" argument)
-		(format stream "Weird mizar error: no mizar tool was specified, no argument was given, and no working directory was supplied"))))))
+		(format stream "Weird mizar error: no mizar tool was specified, no argument was given, and no working directory was supplied"))))
+    (terpri stream)
+    (format stream "The exit code was ~d.~%" exit-code)
+    (if output-stream
+	(format stream "The standard output was:~%~{~a~%~}" (stream-lines output-stream))
+	(format stream "(Somehow there was no output stream.)~%"))
+    (if error-stream
+	(format stream "The standard error was:~%~{~a~%~}" (stream-lines error-stream))
+	(format stream "(Somehow there was no error stream.)"))
+    (terpri stream)
+    (let ((err-file (file-in-directory working-directory (format nil "~a.err" argument))))
+      (if (file-exists-p err-file)
+	  (progn
+	    (format stream "Here is the contents of the error file (~a):~%" err-file)
+	    (format stream "~{~a~%~}" (lines-of-file err-file)))
+	  (format stream "We are unable to read the error file at ~a; sorry." err-file)))))
 
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
    (working-directory :initarg :working-directory :accessor working-directory)
-   (argument :initarg :argument :accessor argument))
+   (argument :initarg :argument :accessor argument)
+   (exit-code :initarg :exit-code :accessor exit-code)
+   (output-stream :initarg :output-stream :accessor output-stream)
+   (error-stream :initarg :error-stream :accessor error-stream))
   (:report report-mizar-error)
   (:documentation "An error indicating that the application of a tool of the mizar suite (e.g., makeenv, verifier, envget) did not exit cleanly."))
 
@@ -154,12 +172,12 @@ variable (at load time).")
 (defmethod run-mizar-tool (tool article (sandbox sandbox) ignore-exit-code &rest flags)
   (apply 'run-mizar-tool tool article (location sandbox) ignore-exit-code flags))
 
-(defmethod run-mizar-tool ((tool string) (article-path pathname) directory ignore-exit-code &rest flags)
+(defmethod run-mizar-tool ((tool string) (article-path pathname) (directory pathname) ignore-exit-code &rest flags)
   (let ((name (namestring article-path)))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
       (or ignore-exit-code
 	  (or (zerop (sb-ext:process-exit-code proc))
-	      (error 'mizar-error :tool tool :working-directory directory :argument article-path))))))
+	      (error 'mizar-error :tool tool :working-directory directory :argument article-path :output-stream (sb-ext:process-output proc) :error-stream (sb-ext:process-error proc) :exit-code (sb-ext:process-exit-code proc)))))))
 
 (defmethod run-mizar-tool ((tool string) (article-path string) directory ignore-exit-code &rest flags)
   (apply 'run-mizar-tool tool (pathname article-path) directory ignore-exit-code flags))
