@@ -23,9 +23,9 @@
      for i from 1
      for dir = (concat home-string name-prefix "-" (format nil "~d" i) "/")
      do
-       (when (null (file-exists-p dir))
-	 (ensure-directories-exist dir)
-	 (return (make-instance 'sandbox :location dir)))))
+       (when (null (file-exists-p (pathname dir)))
+	 (ensure-directories-exist (pathname dir))
+	 (return (make-instance 'sandbox :location (pathname dir))))))
 
 (defun copy-file-to-sandbox (file sandbox)
   (let ((file-in-sandbox (file-in-directory (location sandbox) (file-namestring file))))
