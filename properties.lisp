@@ -47,3 +47,13 @@
 						   aid-param
 						   relnr-param
 						   property-param)))))
+
+(defgeneric verify-with-atr-file (article atr)
+  (:documentation "Verify ARTICLE using ATR.  The mizar verifier will be called with the .atr file specified by ATR, which may or may not be equal to the .atr file that the mizar accommodator would have generated when applied to ARTICLE."))
+
+(defmethod verify-with-atr-file ((article pathname) (atr pathname))
+  (let ((sandbox (fresh-sandbox)))
+    (copy-file-to-sandbox article sandbox)
+    (accom article sandbox "-q" "-s" "-l")
+    (copy-file-to-sandbox atr sandbox)
+    (verifier article sandbox "-q" "-s" "-l")))
