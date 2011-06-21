@@ -110,10 +110,16 @@ variable (at load time).")
 (define-input-transformer squeeze-repeated-spaces "tr" "-s" "[:space:]")
 (define-input-transformer expand-canceled (mizar-items-config 'expand-canceled-script-path))
 
+(defun report-mizar-error (mizar-error stream)
+  (declare (ignore mizar-error))
+  (format stream "Mizar error"))
+
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
    (working-directory :initarg :working-directory :accessor working-directory)
-   (argument :initarg :argument :accessor argument)))
+   (argument :initarg :argument :accessor argument))
+  (:report report-mizar-error)
+  (:documentation "An error indicating that the application of a tool of the mizar suite (e.g., makeenv, verifier, envget) did not exit cleanly."))
 
 (defgeneric run-mizar-tool (tool article directory ignore-exit-code &rest flags))
 
