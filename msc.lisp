@@ -35,7 +35,8 @@
 
 (define-msc201-classification 11-XX
     :name "11-XX"
-    :description "Number theory")
+    :description "Number theory"
+    :contains (11-00 11-01 11-02 11-03 11-04 11-06 11Axx 11Bxx 11Cxx 11Dxx 11Exx 11Fxx 11Gxx 11Hxx 11Jxx 11Kxx 11Lxx 11Mxx 11Nxx 11Pxx 11Rxx 11Sxx 11Txx 11Uxx 11Yxx 11Zxx))
 
 (define-msc2010-classification 12-XX
     :name "12-XX"
@@ -2512,3 +2513,638 @@
     :name "08C99"
     :description "None of the above, but in this section"
     :parent 08Cxx)
+
+;; 11-XX
+
+(define-msc-2010-classification 11-00
+    :name "11-00"
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11-01
+    :name "11-01"
+    :description ) Instructional "xposition (textbooks, tutorial papers, etc.)"
+:parent 11-XX
+
+(define-msc-2010-classification 11-02
+    :name "11-02"
+    :description "Research exposition (monographs, survey articles)"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11-03
+    :name "11-03"
+    :description "Historical (must also be assigned at least one classification number from Section 01)"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11-04
+    :name "11-04"
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11-06
+    :name "11-06"
+    :description "Proceedings, conferences, collections, etc."
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Axx
+    :name "11Axx"
+    :description "Elementary number theory {For analogues in number fields, see 11R04}"
+    :parent 11-XX
+    :contains '(11A05 11A07 11A15 11A25 11A41 11A51 11A55 11A63 11A67 11A99))
+
+(define-msc-2010-classification 11Bxx
+    :name "11Bxx"
+    :description "Sequences and sets"
+    :parent 11-XX
+    :contains '(11B05 11B13 11B25 11B30 11B34 11B37 11B39 11B50 11B57 11B65 11B68 11B73 11B75 11B83 11B85 11B99))
+
+(define-msc-2010-classification 11Cxx
+    :name "11Cxx"
+    :description "Polynomials and matrices"
+    :parent 11-XX
+    :contains '(11C08 11C20 11C99))
+
+(define-msc-2010-classification 11Dxx
+    :name "11Dxx"
+    :description "Diophantine equations"
+    :see-also '(11Gxx 14Gxx)
+    :parent 11-XX
+    :contains '(11D04 11D09 11D25 11D41 11D45 11D57 11D59 11D61 11D68 11D72 11D75 11D79 11D85 11D88 11D99))
+
+(define-msc-2010-classification 11Exx
+    :name "11Exx"
+    :description "Forms and linear algebraic groups"
+    :see-also '(19Gxx
+		("Quadratic forms in linear algebra" 15A63))
+    :parent 11-XX
+    :contains (11E04 11E08 11E10 11E12 11E16 11E20 11E25 11E39 11E41 11E45 11E57 11E70 11E72 11E76 11E81 11E88 11E95 11E99)
+
+(define-msc-2010-classification 11Fxx
+    :name "11Fxx"
+    :description "Discontinuous groups and automorphic forms"
+    :see-also '(11R39 11S37 14Gxx 14Kxx 22E50 22E55 30F35 32Nxx
+		("Relations with quadratic forms" 11E45}))
+    :parent 11-XX
+    :contains (11F03 11F06 11F11 11F12 11F20 11F22 11F23 11F25 11F27 11F30 11F32 11F33 11F37 11F41 11F46 11F50 11F52 11F55 11F60 11F66 11F67 11F68 11F70 11F72 11F75 11F80 11F85 11F99))
+
+(define-msc-2010-classification 11Gxx
+    :name "11Gxx"
+    :description "Arithmetic algebraic geometry (Diophantine geometry)"
+    :see-also '(11Dxx 14Gxx 14Kxx)
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Hxx
+    :name "11Hxx"
+    :description "Geometry of numbers"
+    :see-also '(("Applications in coding theory" 94B75))
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Jxx
+    :name "11Jxx"
+    :description "Diophantine approximation, transcendental number theory"
+    :see-also '(11K60)
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Kxx
+    :name "11Kxx"
+    :description "Probabilistic theory: distribution modulo $1$; metric theory of algorithms"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Lxx
+    :name "11Lxx"
+    :description "Exponential sums and character sums"
+    :see-also '(("Finite fields" 11Txx))
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Mxx
+    :name "11Mxx"
+    :description "Zeta and $L$-functions: analytic theory"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Nxx
+    :name "11Nxx"
+    :description "Multiplicative number theory"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Pxx
+    :name "11Pxx"
+    :description "Additive number theory; partitions"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Rxx
+    :name "11Rxx"
+    :description "Algebraic number theory: global fields"
+    :see-also '(("Complex multiplication" 11G15))
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Sxx
+    :name "11Sxx"
+    :description "Algebraic number theory: local and $p$-adic fields"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Txx
+    :name "11Txx"
+    :description ) Finite "ields and commutative rings (number-theoretic aspects)"
+:parent 11-XX
+
+(define-msc-2010-classification 11Uxx
+    :name "11Uxx"
+    :description "Connections with logic"
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Yxx
+    :name "11Yxx"
+    :description "Computational number theory"
+    :see-also '(11-04)
+    :parent 11-XX)
+
+(define-msc-2010-classification 11Zxx
+    :name "11Zxx"
+    :description "Miscellaneous applications of number theory"
+    :parent 11-XX)
+
+;; 11Axx
+
+(define-msc-2010-classification 11A05
+    :name "11A05"
+    :description "Multiplicative structure; Euclidean algorithm; greatest common divisors"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A07
+    :name "11A07"
+    :description "Congruences; primitive roots; residue systems"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A15
+    :name "11A15"
+    :description "Power residues, reciprocity"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A25
+    :name "11A25"
+    :description "Arithmetic functions; related numbers; inversion formulas"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A41
+    :name "11A41"
+    :description "Primes"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A51
+    :name "11A51"
+    :description "Factorization; primality"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A55
+    :name "11A55"
+    :description "Continued fractions"
+    :see-also '(11K50 30B70 40A15
+		("Approximation results" 11J70))
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A63
+    :name "11A63"
+    :description "Radix representation; digital problems"
+    :see-also '(("Metric results" 11K16))
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A67
+    :name "11A67"
+    :description "Other representations"
+    :parent 11Axx)
+
+(define-msc-2010-classification 11A99
+    :name "11A99"
+    :description "None of the above, but in this section"
+    :parent 11Axx)
+
+;; 11Bxx
+
+(define-msc-2010-classification 11B05
+    :name "11B05"
+    :description "Density, gaps, topology"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B13
+    :name "11B13"
+    :description "Additive bases, including sumsets"
+    :see-also '(05B10)
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B25
+    :name "11B25"
+    :description "Arithmetic progressions"
+    :see-also '(11N13)
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B30
+    :name "11B30"
+    :description "Arithmetic combinatorics; higher degree uniformity"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B34
+    :name "11B34"
+    :description "Representation functions"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B37
+    :name "11B37"
+    :description "Recurrences"
+    :see-also (("Applications to special functions" 33-XX))
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B39
+    :name "11B39"
+    :description "Fibonacci and Lucas numbers and polynomials and generalizations"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B50
+    :name "11B50"
+    :description "Sequences (mod $m$)"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B57
+    :name "11B57"
+    :description "Farey sequences; the sequences ${1^k, 2^k, \cdots}$"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B65
+    :name "11B65"
+    :description "Binomial coefficients; factorials; $q$-identities"
+    :see-also '(05A10 05A30)
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B68
+    :name "11B68"
+    :description "Bernoulli and Euler numbers and polynomials"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B73
+    :name "11B73"
+    :description "Bell and Stirling numbers"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B75
+    :name "11B75"
+    :description "Other combinatorial number theory"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B83
+    :name "11B83"
+    :description "Special sequences and polynomials"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B85
+    :name "11B85"
+    :description "Automata sequences"
+    :parent 11Bxx)
+
+(define-msc-2010-classification 11B99
+    :name "11B99"
+    :description "None of the above, but in this section"
+    :parent 11Bxx)
+
+;; 11Cxx
+
+(define-msc-2010-classification 11C08
+    :name "11C08"
+    :description "Polynomials"
+    :see-also '(13F20)
+    :parent 11xx)
+
+(define-msc-2010-classification 11C20
+    :name "11C20"
+    :description "Matrices, determinants"
+    :parent 11xx)
+
+(define-msc-2010-classification 11C99
+    :name "11C99"
+    :description "None of the above, but in this section"
+    :parent 11xx)
+
+;; 11Dxx
+
+(define-msc-2010-classification 11D04
+    :name "11D04"
+    :description "Linear equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D07
+    :name "11D07"
+    :description "The Frobenius problem"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D09
+    :name "11D09"
+    :description "Quadratic and bilinear equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D25
+    :name "11D25"
+    :description "Cubic and quartic equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D41
+    :name "11D41"
+    :description "Higher degree equations; Fermat's equation"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D45
+    :name "11D45"
+    :description "Counting solutions of Diophantine equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D57
+    :name "11D57"
+    :description "Multiplicative and norm form equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D59
+    :name "11D59"
+    :description "Thue-Mahler equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D61
+    :name "11D61"
+    :description "Exponential equations"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D68
+    :name "11D68"
+    :description "Rational numbers as sums of fractions"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D72
+    :name "11D72"
+    :description "Equations in many variables"
+    :see-also '(11P55)
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D75
+    :name "11D75"
+    :description "Diophantine inequalities"
+    :see-also '(11J25)
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D79
+    :name "11D79"
+    :description "Congruences in many variables"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D85
+    :name "11D85"
+    :description "Representation problems"
+    :see-also '(11P55)
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D88
+    :name "11D88"
+    :description "$p$-adic and power series fields"
+    :parent 11Dxx)
+
+(define-msc-2010-classification 11D99
+    :name "11D99"
+    :description "None of the above, but in this section"
+    :parent 11Dxx)
+
+;; 11Exx
+
+(define-msc-2010-classification 11E04
+    :name "11E04"
+    :description "Quadratic forms over general fields"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E08
+    :name "11E08"
+    :description "Quadratic forms over local rings and fields"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E10
+    :name "11E10"
+    :description "Forms over real fields"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E12
+    :name "11E12"
+    :description "Quadratic forms over global rings and fields"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E16
+    :name "11E16"
+    :description "General binary quadratic forms"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E20
+    :name "11E20"
+    :description "General ternary and quaternary quadratic forms; forms of more than two variables"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E25
+    :name "11E25"
+    :description "Sums of squares and representations by other particular quadratic forms"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E39
+    :name "11E39"
+    :description "Bilinear and Hermitian forms"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E41
+    :name "11E41"
+    :description "Class numbers of quadratic and Hermitian forms"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E45
+    :name "11E45"
+    :description "Analytic theory (Epstein zeta functions; relations with automorphic forms and functions)"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E57
+    :name "11E57"
+    :description "Classical groups"
+    :see-also '(14Lxx 20Gxx)
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E70
+    :name "11E70"
+    :description "$K$-theory of quadratic and Hermitian forms"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E72
+    :name "11E72"
+    :description "Galois cohomology of linear algebraic groups"
+    :see-also '(20G10)
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E76
+    :name "11E76"
+    :description "Forms of degree higher than two"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E81
+    :name "11E81"
+    :description "Algebraic theory of quadratic forms; Witt groups and rings"
+    :see-also '(19G12 19G24)
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E88
+    :name "11E88"
+    :description "Quadratic spaces; Clifford algebras"
+    :see-also '(15A63 15A66)
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E95
+    :name "11E95"
+    :description "$p$-adic theory"
+    :parent 11Exx)
+
+(define-msc-2010-classification 11E99
+    :name "11E99"
+    :description "None of the above, but in this section"
+    :parent 11Exx)
+
+;; 11Fxx
+
+(define-msc-2010-classification 11F03
+    :name "11F03"
+    :description "Modular and automorphic functions"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F06
+    :name "11F06"
+    :description "Structure of modular groups and generalizations; arithmetic groups"
+    :see-also '(20H05 20H10 22E40)
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F11
+    :name "11F11"
+    :description "Holomorphic modular forms of integral weight"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F12
+    :name "11F12"
+    :description "Automorphic forms, one variable"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F20
+    :name "11F20"
+    :description "Dedekind eta function, Dedekind sums"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F22
+    :name "11F22"
+    :description "Relationship to Lie algebras and finite simple groups"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F23
+    :name "11F23"
+    :description "Relations with algebraic geometry and topology"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F25
+    :name "11F25"
+    :description "Hecke-Petersson operators, differential operators (one variable)"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F27
+    :name "11F27"
+    :description "Theta series; Weil representation; theta correspondences"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F30
+    :name "11F30"
+    :description "Fourier coefficients of automorphic forms"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F32
+    :name "11F32"
+    :description "Modular correspondences, etc."
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F33
+    :name "11F33"
+    :description "Congruences for modular and $p$-adic modular forms"
+    :see-also '(14G20 22E50)
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F37
+    :name "11F37"
+    :description "Forms of half-integer weight; nonholomorphic modular forms"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F41
+    :name "11F41"
+    :description "Automorphic forms on ${\rm GL}(2)$; Hilbert and Hilbert-Siegel modular groups and their modular and automorphic forms; Hilbert modular surfaces"
+    :see-also '(14J20)
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F46
+    :name "11F46"
+    :description "Siegel modular groups; Siegel and Hilbert-Siegel modular and automorphic forms"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F50
+    :name "11F50"
+    :description "Jacobi forms"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F52
+    :name "11F52"
+    :description "Modular forms associated to Drinfel'd modules"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F55
+    :name "11F55"
+    :description "Other groups and their modular and automorphic forms (several variables)"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F60
+    :name "11F60"
+    :description "Hecke-Petersson operators, differential operators (several variables)"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F66
+    :name "11F66"
+    :description "Langlands $L$-functions; one variable Dirichlet series and functional equations"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F67
+    :name "11F67"
+    :description "Special values of automorphic $L$-series, periods of modular forms, cohomology, modular symbols"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F68
+    :name "11F68"
+    :description "Dirichlet series in several complex variables associated to automorphic forms; Weyl group multiple Dirichlet series"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F70
+    :name "11F70"
+    :description "Representation-theoretic methods; automorphic representations over local and global fields"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F72
+    :name "11F72"
+    :description "Spectral theory; Selberg trace formula"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F75
+    :name "11F75"
+    :description "Cohomology of arithmetic groups"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F80
+    :name "11F80"
+    :description "Galois representations"
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F85
+    :name "11F85"
+    :description "$p$-adic theory, local fields"
+    :see-also '(14G20 22E50)
+    :parent 11Fxx)
+
+(define-msc-2010-classification 11F99
+    :name "11F99"
+    :description "None of the above, but in this section"
+    :parent 11Fxx)
