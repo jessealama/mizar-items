@@ -9,6 +9,52 @@
 The default value is the value of the MIZFILES environment
 variable (at load time).")
 
+(define-constant +needed-mizfiles-files+
+    '("mml.lar" "mml.ini" "mizar.dct" "mizar.msg" "mml.vct")
+  :test #'equalp
+  :documentation "The list of files that are needed in a proper $MIZFILES.")
+
+(define-constant +needed-mizfiles-subdirs+
+    '("prel" "mml")
+  :test #'equalp
+  :documentation "The list of subdirectories that need to be present in a proper $MIZFILES.")
+
+(defun set-mizfiles (new-mizfiles)
+  "Set *MIZFILES* to NEW-MIZFILES, provided NEW-MIZFILES is a suitable
+  for that, viz., NEW-MIZFILES is the name of a directory that
+  contains the files
+
+- mml.lar
+- mml.ini
+- mizar.dct
+- mizar.msg
+- mml.vct
+
+and subdirectories
+
+- prel
+- mml
+
+The presence of these files is, in general, necessary for the mizar
+suite to work correctly."
+  (let ((dir (ensure-directory new-mizfiles)))
+    (flet ((file-ok-in-proposed-mizfiles (file)
+	     (file-exists-p (file-in-directory dir file)))
+	   (directory-ok (some-dir)
+	     (file-exists-p (ensure-directory
+			     (file-in-directory dir some-dir)))))
+      (multiple-value-bind (all-files-ok bad-file)
+	  (every-with-falsifying-witness +needed-mizfiles-files+
+					 #'file-ok-in-proposed-mizfiles)
+	(if all-files-ok
+	    (multiple-value-bind (all-dirs-ok bad-dir)
+		(every-with-falsifying-witness +needed-mizfiles-subdirs+
+					       #'directory-ok)
+	      (if all-dirs-ok
+		  (setf *mizfiles* dir)
+		  (error "Unable to set $MIZFILES to '~a' because the needed directory '~a' is missing" new-mizfiles bad-dir)))
+	    (error "Unable to set $MIZFILES to '~a' because the needed file '~a' does not exist there" new-mizfiles bad-file))))))
+
 (defgeneric belongs-to-mml (article))
 
 (defmethod belongs-to-mml ((article-str string))
