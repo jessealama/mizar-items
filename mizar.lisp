@@ -2,7 +2,7 @@
 
 (in-package :mizar)
 
-(defparameter *mizfiles* 
+(defvar *mizfiles* 
   (ensure-directory (sb-ext:posix-getenv "MIZFILES"))
   "The directory that contains the MML and the mml.lar file.
 
