@@ -224,3 +224,34 @@
 	   (push (cons constructor needed) trimmed-list))
        finally
 	 (return trimmed-list))))
+
+(defgeneric constructors-w/-needed-properties-for-fragmented-article (article-name)
+  (:documentation "Given the name ARTICLE-NAME of an article that has already been
+  divided into fragments, compute, for each fragment, the constructors
+  that need properties."))
+
+(defmethod constructors-w/-needed-properties-for-fragmented-article :around ((article-name string))
+  (if (string= article-name "")
+      (error "The empty string is not the name of any article")
+      (let* ((itemization-store (mizar-items-config 'itemization-source))
+	     (article-dir (format nil "~a/~a"
+				  itemization-store
+				  article-name)))
+	(if (file-exists-p article-dir)
+	    (let ((article-text-subdir (format nil "~a/text" article-dir)))
+	      (if (file-exists-p article-text-subdir)
+		  (let ((first-fragment-name (format nil "~a/ckb1.miz" article-text-subdir)))
+		    (if (file-exists-p first-fragment-name)
+			(call-next-method)
+			(error "The text subdirectory~%~%  ~a~%~%of article~%~%  ~a~%~%does not contain 'ckb1.miz',~%so evidently there are no fragments available"
+			       article-text-subdir article-name)))
+		  (error "The article~%~%  ~a~%~%lacks a text subdirectory at the expected location~%~%~a" article-name article-text-subdir)))
+	    (error "A directory for article~%~%  ~a~%~%cannot be found under the itemization store~%~%  ~a" article-name itemization-store)))))
+
+(defmethod constructors-w/-needed-properties-for-fragmented-article ((article-name string))
+  (loop
+     with fragments = (fragments-for-article article-name)
+     with num-fragments = (length fragments)
+     for i from 1 upto num-fragments
+     for fragment in fragments
+     collect (cons i (constructors-with-needed-properties fragment))))
