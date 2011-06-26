@@ -58,6 +58,10 @@
 		(subseq string 0 (- len 2)))
 	    string))))
 
+(defun non-empty-stringp (thing)
+  (and (stringp thing)
+       (not (string= thing ""))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Lists and sequences
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
