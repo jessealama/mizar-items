@@ -156,7 +156,7 @@
 	    ":"
 	    "(" +item-kind-regexp+ ")"
 	    ":"
-	    +number-regexp+)
+	    "(" +number-regexp+ ")" )
   :test #'string=
   :documentation "A regular expression matching names of items.")
 
