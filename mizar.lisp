@@ -79,27 +79,37 @@ suite to work correctly."
   (< (mml-lar-index article-1)
      (mml-lar-index article-2)))
 
-(defgeneric run-in-directory (program directory args &key input output if-output-exists))
+(defgeneric run-in-directory (program working-directory args))
 
-(defmethod run-in-directory (program (sandbox sandbox) args &key input output if-output-exists)
-  (run-in-directory program (location sandbox) args
-		    :input input
-		    :output output
-		    :if-output-exists if-output-exists))
+(defmethod run-in-directory (program (working-directory sandbox) args)
+  (run-in-directory program (location sandbox) args))
 
-(defmethod run-in-directory (program (directory pathname) args &key input output if-output-exists)
-  (let ((real-dir-name (file-exists-p directory)))
-    (if real-dir-name
-	(if (directory-p real-dir-name)
-	    (let ((dir-as-string (directory-namestring (pathname-as-directory real-dir-name))))
-	      (sb-ext:run-program (mizar-items-config 'exec-in-dir-script-path)
-				  (append (list dir-as-string program) args)
-				  :search t
-				  :input input
-				  :output output
-				  :if-output-exists if-output-exists))
-	    (error "No such directory ~A" directory))
-	(error "No file under the path '~A'" directory))))
+(defmethod run-in-directory :around ((program string) (working-directory pathname) (args list))
+  (when (string= program "")
+    (error "The empty string is not the name of a program!"))
+  (unless (file-exists-p working-directory)
+    (error "The supplied working directory, '~a', doesn't exist!" working-directory))
+  (if (every #'non-empty-stringp args)
+      (call-next-method)
+      (error "The list of arguments is supposed to consist entirely of non-empty strings!")))
+
+(defmethod run-in-directory ((program string) (working-directory null) (args list))
+  (sb-ext:run-program program
+		      args
+		      :search t
+		      :input nil
+		      :output nil
+		      :error nil))
+
+(defmethod run-in-directory ((program string) (working-directory pathname) (args list))
+  (let ((dir-as-string (directory-namestring
+			(pathname-as-directory working-directory))))
+    (sb-ext:run-program (mizar-items-config 'exec-in-dir-script-path)
+			(append (list dir-as-string program) args)
+			:search t
+			:input nil
+			:output nil
+			:error nil)))
 
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
@@ -165,7 +175,7 @@ suite to work correctly."
 		(format stream "Error applying ~a to ~a in directory ~a" tool argument working-directory)
 		(format stream "Error applying ~a in directory ~a" tool working-directory))
 	    (if argument
-		(format stream "Error applying ~a to ~a (strangely, no working directory was given" tool argument)
+		(format stream "Error applying~%~%  ~a~%~%to~%~%  ~a~%~%(No working directory was supplied.)" tool argument)
 		(format stream "Error applying ~a (strangely, neither a working directory nor an argument to the program was supplied)" tool)))
 	(if working-directory
 	    (if argument
@@ -175,19 +185,31 @@ suite to work correctly."
 		(format stream "Weird mizar error: no mizar tool was specified,  nor was a working directory specified, but an argument was given: ~a" argument)
 		(format stream "Weird mizar error: no mizar tool was specified, no argument was given, and no working directory was supplied"))))
     (terpri stream)
-    (format stream "The exit code was ~d.~%" exit-code)
+    (terpri stream)
+    (format stream "The exit code was ~d.~%~%" exit-code)
     (if output-stream
 	(format stream "The standard output was:~%~{~a~%~}" (stream-lines output-stream))
-	(format stream "(Somehow there was no output stream.)~%"))
+	(format stream "(Standard output was not recorded.)~%"))
     (if error-stream
 	(format stream "The standard error was:~%~{~a~%~}" (stream-lines error-stream))
-	(format stream "(Somehow there was no error stream.)"))
+	(format stream "(Standard error was not recorded.)"))
     (terpri stream)
-    (let ((err-file (file-in-directory working-directory (format nil "~a.err" argument))))
+    (terpri stream)
+    (let ((err-file (if working-directory
+			(file-in-directory working-directory
+					   (format nil "~a.err" argument))
+			(when (pathnamep argument)
+			  (let* ((base-sans-extension (pathname-name argument)))
+			    (merge-pathnames (format nil "~a.err"
+						     base-sans-extension)
+					     (directory-namestring argument)))))))
       (if (file-exists-p err-file)
 	  (progn
-	    (format stream "Here is the contents of the error file (~a):~%" err-file)
-	    (format stream "~{~a~%~}" (lines-of-file err-file)))
+	    (format stream "Here is the contents of the error file at~%~%  ~a~%" err-file)
+	    (terpri stream)
+	    (if (zerop (file-size err-file))
+		(format stream "(The error file is empty.)")
+		(format stream "~{~a~%~}" (lines-of-file err-file))))
 	  (format stream "We are unable to read the error file at ~a; sorry." err-file)))))
 
 (define-condition mizar-error (error)
@@ -200,65 +222,135 @@ suite to work correctly."
   (:report report-mizar-error)
   (:documentation "An error indicating that the application of a tool of the mizar suite (e.g., makeenv, verifier, envget) did not exit cleanly."))
 
-(defgeneric run-mizar-tool (tool article directory ignore-exit-code &rest flags))
+(defun atr-file-for-article (article-pathname)
+  (let ((article-base (pathname-name article-pathname))
+	(article-dir (directory-namestring article-pathname)))
+    (merge-pathnames (format nil "~a.atr" article-base)
+		     article-dir)))
 
-(defmethod run-mizar-tool :around (tool article-path directory ignore-exit-code &rest flags)
-  (declare (ignore tool directory flags))
-  (if (probe-file article-path)
-      (let ((real-name (file-exists-p (if (typep directory 'sandbox)
-					  (location directory)
-					  directory))))
-	(if real-name
-	    (if (directory-p real-name)
-		(call-next-method)
-		(error "The specified directory, ~A, in which to apply the mizar tool ~A is not a directory!" directory tool))
-	    (error "It appears that there is no file at the specified work directory path ~A" directory)))
-      (error "No such file: ~S" article-path)))
+(defun err-file-for-article (article-pathname)
+  (let ((article-base (pathname-name article-pathname))
+	(article-dir (directory-namestring article-pathname)))
+    (merge-pathnames (format nil "~a.err" article-base)
+		     article-dir)))
 
-(defmethod run-mizar-tool (tool article (sandbox sandbox) ignore-exit-code &rest flags)
-  (apply 'run-mizar-tool tool article (location sandbox) ignore-exit-code flags))
+(defun mizar-error-lines (mizar-error)
+  (with-slots (working-directory argument)
+      mizar-error
+    (let ((err-file (if working-directory
+			(file-in-directory working-directory
+					   (format nil "~a.err" argument))
+			(err-file-for-article argument))))
+      (when (file-exists-p err-file)
+	(lines-of-file err-file)))))
 
-(defmethod run-mizar-tool ((tool string) (article-path pathname) (directory pathname) ignore-exit-code &rest flags)
+(defun innocent-accomodator-errorp (mizar-error)
+  (flet ((830-error (err-line)
+	   (destructuring-bind (line column err-code)
+	       (split #\Space err-line)
+	     (declare (ignore line column))
+	     (string= err-code "830"))))
+    (every #'830-error (mizar-error-lines mizar-error))))
+
+(defun only-*4-errors (mizar-error)
+  (flet ((4-error (err-line)
+	   (destructuring-bind (line column err-code)
+	       (split #\Space err-line)
+	     (declare (ignore line column))
+	     (string= err-code "4"))))
+    (every #'4-error (mizar-error-lines mizar-error))))
+
+(defgeneric run-mizar-tool (tool article &key directory ignore-exit-code flags))
+
+(defmethod run-mizar-tool :around ((tool string) (article pathname) &key directory ignore-exit-code flags)
+  (declare (ignore ignore-exit-code))
+  (when (string= tool "")
+    (error "A mizar tool to be applied (the empty string doesn't count!)"))
+  (when directory
+    (unless (file-exists-p (ensure-directory directory))
+      (error "The supplied work directory '~a' doesn't exist!" directory)))
+  (if (listp flags)
+      (multiple-value-bind (ok bad-guy)
+	  (every-with-falsifying-witness flags #'non-empty-stringp)
+	(unless ok
+	  (error "The list of flags should contain only non-empty strings; '~a' isn't" bad-guy)))
+      (error "The list of flags '~a' isn't actually a list!" flags))
+  (if (probe-file article)
+      (call-next-method)
+      (error "No such file: ~a" article)))
+
+(defmethod run-mizar-tool (tool (article-path pathname) &key directory ignore-exit-code flags)
+  (let ((article-dir (cond ((typep directory 'sandbox)
+			    (location sandbox))
+			   ((null directory)
+			    (directory-namestring article-path))
+			   ((pathnamep directory)
+			    directory)
+			   ((stringp directory)
+			     (pathname directory))
+			   (t
+			    (error "Unable to handle the supplied working directory '~a'" directory)))))
+    (run-mizar-tool tool article-path
+		    :directory article-dir
+		    :ignore-exit-code ignore-exit-code
+		    :flags flags)))
+
+(defmethod run-mizar-tool ((tool string) (article-path pathname) &key directory ignore-exit-code flags)
   (let ((name (namestring article-path)))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
       (or ignore-exit-code
 	  (or (zerop (sb-ext:process-exit-code proc))
-	      (error 'mizar-error :tool tool :working-directory directory :argument article-path :output-stream (sb-ext:process-output proc) :error-stream (sb-ext:process-error proc) :exit-code (sb-ext:process-exit-code proc)))))))
+	      (error 'mizar-error
+		     :tool tool 
+		     :working-directory directory
+		     :argument article-path 
+		     :output-stream (sb-ext:process-output proc)
+		     :error-stream (sb-ext:process-error proc) 
+		     :exit-code (sb-ext:process-exit-code proc)))))))
 
-(defmethod run-mizar-tool ((tool string) (article-path string) directory ignore-exit-code &rest flags)
-  (apply 'run-mizar-tool tool (pathname article-path) directory ignore-exit-code flags))
+(defmethod run-mizar-tool ((tool string) (article-path string) &key directory ignore-exit-code flags)
+  (run-mizar-tool tool (pathname article-path)
+		  :directory directory
+		  :ignore-exit-code ignore-exit-code
+		  :flags flags))
 
-(defmethod run-mizar-tool ((tool string) (article article) directory ignore-exit-code &rest flags)
+(defmethod run-mizar-tool ((tool string) (article article) &key directory ignore-exit-code flags)
   (if (slot-boundp article 'path)
-      (apply 'run-mizar-tool tool (path article) directory ignore-exit-code flags)
+      (run-mizar-tool tool (path article)
+		      :directory directory
+		      :ignore-exit-code ignore-exit-code
+		      :flags flags)
       (error "Cannot apply ~S to ~S because we don't know its path"
 	     tool article)))
 
-(defmethod run-mizar-tool ((tool symbol) article directory ignore-exit-code &rest flags)
-  (apply 'run-mizar-tool 
-	 (format nil "~(~a~)" (string tool)) ; lowercase: watch out
-	 article
-	 directory
-	 ignore-exit-code
-	 flags))
+(defmethod run-mizar-tool ((tool symbol) article &key directory ignore-exit-code flags)
+  (run-mizar-tool (format nil "~(~a~)" (string tool)) ; lowercase: watch out
+		  article
+		  :directory directory
+		  :ignore-exit-code ignore-exit-code
+		  :flags flags))
 
 (defmacro define-mizar-tool (tool)
   ; check that TOOL is real
-  (let ((check (sb-ext:run-program "which" (list tool) :search t)))
-    (if (zerop (sb-ext:process-exit-code check))
-	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
-	  `(progn
-	     (defgeneric ,tool-as-symbol (article directory &rest flags))
-	     (defmethod ,tool-as-symbol (article (sandbox sandbox) &rest flags)
-	       (apply 'run-mizar-tool ,tool article (location sandbox) nil flags))
-	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
-	       (apply 'run-mizar-tool ,tool article-path directory nil flags))
-	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
-	       (apply 'run-mizar-tool ,tool article-path directory nil flags))
-	     (defmethod ,tool-as-symbol ((article article) directory &rest flags)
-	       (apply 'run-mizar-tool ,tool article directory nil flags)
-	       article)))
-	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
+  (let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
+    `(progn
+       (defgeneric ,tool-as-symbol (article &key working-directory flags))
+       (defmethod ,tool-as-symbol ((article-path pathname) &key working-directory flags)
+	 (run-mizar-tool ,tool article-path
+			 :directory working-directory
+			 :ignore-exit-code nil
+			 :flags flags))
+       (defmethod ,tool-as-symbol ((article-path string) &key working-directory flags)
+	 (run-mizar-tool ,tool article-path
+			 :directory working-directory
+			 :ignore-exit-code nil
+			 :flags flags))
+       (defmethod ,tool-as-symbol ((article article) &key working-directory flags)
+	 (run-mizar-tool ,tool article
+			 :directory directory
+			 :ignore-exit-code nil
+			 :flags flags)
+	 article))))
 
 ;; workhorses
 (define-mizar-tool "edtfile")
@@ -281,7 +373,10 @@ suite to work correctly."
 	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
 	       (let ((edtfile-path (replace-extension article-path
 						      "miz" "$-$")))
-		 (apply 'run-mizar-tool ,tool article-path directory ,ignore-exit-code flags)
+		 (run-mizar-tool ,tool article-path
+				 :directory directory
+				 :ignore-exit-code ,ignore-exit-code
+				 :flags flags)
 		 (edtfile article-path directory "-l")
 		 (rename-file edtfile-path article-path)))
 	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
