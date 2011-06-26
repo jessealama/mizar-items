@@ -65,7 +65,7 @@
   (loop
      with kind-regexp = (format nil "~a:~a:[0-9]+" article kind)
      for k being the hash-keys of *item-dependency-graph-forward*
-     counting (scan kind-regexp k) into num-items
+     counting (scan kind-regexp (symbol-name k)) into num-items
      finally (return num-items)))
 
 (defun article-title (article)
