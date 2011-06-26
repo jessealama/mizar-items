@@ -13,9 +13,11 @@
 	(call-next-method)
 	(error "The stylesheet for listing constructors and their properties doesn't exist at the expected location '~a' " sheet))))
 
+(defparameter *propertied-constructors-stylesheet*
+  (xuriella:parse-stylesheet (pathname (mizar-items-config 'propertied-constructors-stylesheet))))
+
 (defmethod constructors-and-properties ((atr-file pathname))
-  (let ((sheet (pathname (mizar-items-config 'propertied-constructors-stylesheet))))
-    (xuriella:apply-stylesheet sheet atr-file)))
+  (xuriella:apply-stylesheet *propertied-constructors-stylesheet* atr-file))
 
 (defgeneric constructors-with-properties (atr-file))
 
@@ -51,9 +53,8 @@
 	      (nr-param (xuriella:make-parameter nr "target_nr"))
 	      (aid-param (xuriella:make-parameter aid "target_aid"))
 	      (relnr-param (xuriella:make-parameter relnr "target_relnr"))
-	      (property-param (xuriella:make-parameter property "target_property"))
-	      (sheet (pathname (mizar-items-config 'strip-prop-stylesheet))))
-	  (xuriella:apply-stylesheet sheet
+	      (property-param (xuriella:make-parameter property "target_property")))
+	  (xuriella:apply-stylesheet *strip-prop-stylesheet*
 				     atr-file
 				     :parameters (list kind-param
 						       nr-param
@@ -77,9 +78,8 @@
 	  (nr-param (xuriella:make-parameter nr "target_nr"))
 	  (aid-param (xuriella:make-parameter aid "target_aid"))
 	  (relnr-param (xuriella:make-parameter relnr "target_relnr"))
-	  (property-param (xuriella:make-parameter property "target_property"))
-	  (sheet (pathname (mizar-items-config 'strip-prop-stylesheet))))
-      (xuriella:apply-stylesheet sheet
+	  (property-param (xuriella:make-parameter property "target_property")))
+      (xuriella:apply-stylesheet *strip-prop-stylesheet*
 				 atr-file
 				 :parameters (list kind-param
 						   nr-param
@@ -97,31 +97,42 @@
 	(call-next-method)
 	(error "The list-properties XSL stylesheet doesn't exist at the expected location '~a'" sheet))))
 
+(defparameter *list-properties-stylesheet*
+  (xuriella:parse-stylesheet (pathname (mizar-items-config 'list-properties-stylesheet))))
+
 (defmethod properties-for-constructor (constructor-identifier atr-file)
   (destructuring-bind (kind nr aid relnr)
       (split #\- constructor-identifier)
     (let ((kind-param (xuriella:make-parameter kind "target_kind"))
 	  (nr-param (xuriella:make-parameter nr "target_nr"))
 	  (aid-param (xuriella:make-parameter aid "target_aid"))
-	  (relnr-param (xuriella:make-parameter relnr "target_relnr"))
-	  (sheet (pathname (mizar-items-config 'list-properties-stylesheet))))
+	  (relnr-param (xuriella:make-parameter relnr "target_relnr")))
       (split #\Newline
-	     (xuriella:apply-stylesheet sheet
+	     (xuriella:apply-stylesheet *list-properties-stylesheet*
 					atr-file
 					:parameters (list kind-param
 						    nr-param
 						    aid-param
 						    relnr-param))))))
 
+(defparameter *strip-prop-stylesheet*
+  (xuriella:parse-stylesheet (pathname (mizar-items-config 'strip-prop-stylesheet))))
+
 (defun remove-all-properties-from-constructor (constructor-identifier atr-file)
-  (let ((properties (properties-for-constructor constructor-identifier atr-file)))
-    (loop
-       with atr = atr-file
-       for property in properties
-       do
-	 (setf atr (remove-property-from-constructor constructor-identifier property atr))
-       finally
-	 (return atr))))
+  (destructuring-bind (kind nr aid relnr)
+      (split #\- constructor-identifier)
+    (let ((kind-param (xuriella:make-parameter kind "target_kind"))
+	  (nr-param (xuriella:make-parameter nr "target_nr"))
+	  (aid-param (xuriella:make-parameter aid "target_aid"))
+	  (relnr-param (xuriella:make-parameter relnr "target_relnr"))
+	  (property-param (xuriella:make-parameter "all" "target_property")))
+      (xuriella:apply-stylesheet *strip-prop-stylesheet*
+				 atr-file
+				 :parameters (list kind-param
+						   nr-param
+						   aid-param
+						   relnr-param
+						   property-param)))))
 
 (defgeneric verify-with-atr-file (article atr)
   (:documentation "Verify ARTICLE using ATR.  The mizar verifier will be called with the .atr file specified by ATR, which may or may not be equal to the .atr file that the mizar accommodator would have generated when applied to ARTICLE."))
@@ -170,7 +181,6 @@
 	     (replace-atr atr-path fully-stripped-atr)
 	     (when (handler-case (verifier article :flags '("-q" "-l"))
 		     (mizar-error () (replace-atr atr-path original-atr)))
-	       (format t "Heuristic succeeded!~%")
 	       (replace-atr atr-path original-atr)
 	       (return nil)))
 	 for property in property-list
@@ -180,8 +190,8 @@
 	 do
 	   (replace-atr atr-path new-atr)
 	   (handler-case (verifier article :flags '("-q" "-l"))
-	     (mizar-error (err)
-	       (break "We encountered a verifier error when removing~%~%  ~a~%~%from constructor~%~%  ~a;~%~%here are the lines of the error file:~%~%~{~a~%~}" property constructor (mizar-error-lines err))
+	     (mizar-error ()
+	       ;; (break "We encountered a verifier error when removing~%~%  ~a~%~%from constructor~%~%  ~a;~%~%here are the lines of the error file:~%~%~{~a~%~}" property constructor (mizar-error-lines err))
 	       ;; (unless (only-*4-errors err)
 	       ;;   (warn "verifier signaled an error, at least one of which was not *4, when checking whether constructor ~a really needs the property ~a; here are the lines of the error file:~%~%~{~a~%~}" constructor property (mizar-error-lines err)))
 	       (push property needed)))
