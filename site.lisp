@@ -1278,6 +1278,12 @@ one time; later, when we do support multiple MMLs, this will be useful."
 		      (htm ((:a :href next-item-kind-uri :title next-item-kind-link-title) "&gt;"))
 		      (htm "&gt;"))
 	      "]"))
+	    (when (constructor-item? item)
+	      (htm
+	       ((:tr :class "item-info-row")
+		((:td :colspan "2" :class "item-info-heading") "Properties"))
+	       ((:tr :class "item-info-row")
+		((:td :colspan "2") (:em "(none known)")))))
 	    ((:tr :class "item-info-row")
 	     ((:td :colspan "2" :class "item-info-heading") "Actions"))
 	    ((:tr :class "item-info-row")
