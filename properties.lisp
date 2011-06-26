@@ -257,6 +257,17 @@
      collect (cons i (constructors-with-needed-properties fragment))))
 
 (defun dereference-constructor-name (constructor-identifier reference-article)
+  "Given a CONSTRUCTOR-IDENTIFIER of the form
+
+  <kind>-<nr>-<article>-<relnr>,
+
+find the item corresponding to this.  <article> might be a
+\"fragment\" article, i.e., it looks like
+
+  CKB<number>.
+
+In this case, REFERENCE-ARTICLE is used; it is understood that the the
+constructor comes from the result of itemizing REFERENCE-ARTICLE."
   (destructuring-bind (kind nr article relnr)
       (split #\- constructor-identifier)
     (declare (ignore relnr))
