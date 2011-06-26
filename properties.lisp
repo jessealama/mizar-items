@@ -288,3 +288,56 @@ constructor comes from the result of itemizing REFERENCE-ARTICLE."
 		  (error "Unable to find any items corresponding to the fragment~%~%  ~a~%" fragment))))
 	  (get-and-maybe-set-item-name
 	   (format nil "~a:~(~a~)constructor:~a" article-lc kind nr))))))
+
+(defun dereferenced-constructors-w/-needed-properties-for-fragmented-article (article)
+  (mapcar #'(lambda (entry)
+	      (destructuring-bind (fragment-number . needed)
+		  entry
+		(cons fragment-number
+		      (mapcar #'(lambda (prop-entry)
+				  (destructuring-bind (constr . props)
+				      prop-entry
+				    (cons (dereference-constructor-name
+					   constr article)
+					  props)))
+			      needed))))
+	  (constructors-w/-needed-properties-for-fragmented-article article)))
+
+(defun needed-properties-table-for-article (article)
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for entry in (dereferenced-constructors-w/-needed-properties-for-fragmented-article article)
+     do
+       (destructuring-bind (fragment-number . needed)
+	   entry
+	 (loop
+	    with needed-table = (make-hash-table :test #'equal)
+	    for (constructor . properties) in needed
+	    do
+	      (setf (gethash constructor needed-table) properties)
+	    finally
+	      (setf (gethash (cons article fragment-number) table)
+		    needed-table)))
+     finally
+       (return table)))
+
+(defvar *properties-needed-for-fragment* nil
+  "A mapping from pairs
+
+  (<article> . <fragment-number>)
+
+to lists of lists
+
+  ((<constructor-item-1> . <needed-properties-of-constructor-item-1>) ...)")
+
+(defun make-properties-needed-for-fragment-table ()
+  (loop
+     with table = (make-hash-table :test #'equal)
+     for article in *mml-lar*
+     for article-name = (name article)
+     do
+       (format t "Processing ~a..." article-name)
+       (needed-properties-table-for-article article-name)
+       (format t "done~%")
+     finally
+       (return table)))
