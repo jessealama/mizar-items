@@ -70,6 +70,8 @@
 			   (file-in-xsl4mizar-dir "addabsrefs.xsl"))
 (update-mizar-items-config 'propertied-constructors-stylesheet
 			   "/Users/alama/sources/mizar/xsl4mizar/propertied-constructors.xsl")
+(update-mizar-items-config 'list-properties-stylesheet
+			   "/Users/alama/sources/mizar/xsl4mizar/list-properties.xsl")
 (update-mizar-items-config 'strip-prop-stylesheet
 			   "/Users/alama/sources/mizar/xsl4mizar/strip-prop.xsl")
 (update-mizar-items-config 'mhtml-stylesheet
