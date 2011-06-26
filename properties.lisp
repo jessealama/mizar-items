@@ -202,19 +202,22 @@
 (defgeneric constructors-with-needed-properties (article)
   (:documentation "A list of constructors from ARTICLE together with properties that cannot be removed from the constructors."))
 
+(defmethod constructors-with-needed-properties :around ((article pathname))
+  (if (file-exists-p article)
+      (call-next-method)
+      (error "There is no file at the given article path,~%~%  ~a" article)))
+
 (defmethod constructors-with-needed-properties ((article pathname))
   (let* ((atr-path (atr-file-for-article article))
 	 (initial-list (constructors-with-properties atr-path)))
     (loop
        with trimmed-list = nil
-       initially
-	 (format t "About to consider ~d constructors..." (length initial-list))
        for (constructor . properties) in initial-list
+       for needed = (properties-needed-for-constructor constructor
+						       properties
+						       article)
        do
-	 (push (cons constructor
-		     (properties-needed-for-constructor constructor
-							properties
-							article))
-	       trimmed-list) 
+	 (when needed
+	   (push (cons constructor needed) trimmed-list))
        finally
 	 (return trimmed-list))))
