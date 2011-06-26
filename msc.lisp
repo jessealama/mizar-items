@@ -40,11 +40,13 @@
 
 (define-msc2010-classification 12-XX
     :name "12-XX"
-    :description "Field theory and polynomials")
+    :description "Field theory and polynomials"
+    :contains '(12-00 12-01 12-02 12-03 12-04 12-06 12Dxx 12Exx 12Fxx 12Gxx 12Hxx 12Jxx 12Kxx 12Lxx 12Yxx))
 
 (define-msc-2010-classification 13-XX
     :name "13-XX"
-    :description "Commutative algebra")
+    :description "Commutative algebra"
+    :contains (13-00 13-01 13-02 13-03 13-04 13-06 13Axx 13Bxx 13Cxx 13Dxx 13Exx 13Fxx 13Gxx 13Hxx 13Jxx 13K05 13Lxx 13Mxx 13Nxx 13Pxx))
 
 (define-msc-2010-classification 14-XX
     :name "14-XX"
@@ -2523,8 +2525,8 @@
 
 (define-msc-2010-classification 11-01
     :name "11-01"
-    :description ) Instructional "xposition (textbooks, tutorial papers, etc.)"
-:parent 11-XX
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 11-XX)  
 
 (define-msc-2010-classification 11-02
     :name "11-02"
@@ -3952,3 +3954,588 @@
 (define-msc-2010-classification 11Z99
   :description "None of the above, but in this section"
   :parent 11Zxx) 
+
+;; 13-XX
+
+(define-msc-2010-classification 13-00
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13-01
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13-02
+    :description "Research exposition (monographs, survey articles)"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13-03
+    :description "Historical (must also be assigned at least one classification number from Section 01)"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13-04
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13-06
+    :description "Proceedings, conferences, collections, etc."
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Axx
+    :description "General commutative ring theory"
+    :parent 13-XX
+    :contains (13A02 13A05 13A15 13A18 13A30 13A35 13A50 13A99))
+
+(define-msc-2010-classification 13Bxx
+    :description "Ring extensions and related topics"
+    :parent 13-XX
+    :contains '(13B02 13B05 13B10 13B21 13B22 13B25 13B30 13B35 13B40 13B99))
+
+(define-msc-2010-classification 13Cxx
+    :description "Theory of modules and ideals"
+    :parent 13-XX
+    :contains '(13C05 13C10 13C11 13C12 13C13 13C14 13C15 13C20 13C40 13C60 13C99))
+
+(define-msc-2010-classification 13Dxx
+    :description "Homological methods"
+    :see-also '(("Noncommutative rings" 16Exx)
+		(("General categories" 18Gxx)))
+    :parent 13-XX
+    :contains '(13D02 13D03 13D05 13D07 13D09 13D10 13D15 13D22 13D30 13D40 13D45 13D99))
+
+(define-msc-2010-classification 13Exx
+    :description "Chain conditions, finiteness conditions"
+    :parent 13-XX
+    :contains '(13E05 13E10 13E15 13E99))
+
+(define-msc-2010-classification 13Fxx
+    :description "Arithmetic rings and other special rings"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Gxx
+    :description "Integral domains"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Hxx
+    :description "Local rings and semilocal rings"
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Jxx
+    :description "Topological rings and modules"
+    :see-also '(16W60 16W80)
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Lxx
+    :description "Applications of logic to commutative algebra"
+    :see-also '(03Cxx 03Hxx)
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Mxx
+    :description "Finite commutative rings"
+    :see-also '(("Number-theoretic aspects" 11Txx))
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Nxx
+    :description "Differential algebra"
+    :see-also '(12H05 14F10)
+    :parent 13-XX)
+
+(define-msc-2010-classification 13Pxx
+    :description "Computational aspects and applications"
+    :see-also '(14Qxx 68W30)
+    :parent 13-XX)
+
+;; 13Axx
+
+(define-msc-2010-classification 13A02
+    :description "Graded rings"
+    :see-also '(16W50)
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A05
+    :description "Divisibility; factorizations"
+    :see-also '(13F15)
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A15
+    :description "Ideals; multiplicative ideal theory"
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A18
+    :description "Valuations and their generalizations"
+    :see-also '(12J20)
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A30
+    :description "Associated graded rings of ideals (Rees ring, form ring), analytic spread and related topics"
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A35
+    :description "Characteristic $p$ methods (Frobenius endomorphism) and reduction to characteristic $p$; tight closure"
+    :see-also '(13B22)
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A50
+    :description "Actions of groups on commutative rings; invariant theory"
+    :see-also '(14L24)
+    :parent 13Axx)
+
+(define-msc-2010-classification 13A99
+    :description "None of the above, but in this section"
+    :parent 13Axx)
+
+;; 13Bxx
+
+(define-msc-2010-classification 13B02
+    :description "Extension theory"
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B05
+    :description "Galois theory"
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B10
+    :description "Morphisms"
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B21
+    :description "Integral dependence; going up, going down"
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B22
+    :description "Integral closure of rings and ideals; integrally closed rings, related rings (Japanese, etc.)"
+    :see-also '(13A35)
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B25
+    :description "Polynomials over commutative rings"
+    :see-also '(11C08 11T06 13F20 13M10)
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B30
+    :description "QuotientsRings of fractions and localization"
+    :see-also '(16S85)
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B35
+    :description "Completion"
+    :see-also '(13J10)
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B40
+    :description "Étale and flat extensions; Henselization; Artin approximation"
+    :see-also '(13J15 14B12 14B25)
+    :parent 13Bxx)
+
+(define-msc-2010-classification 13B99
+    :description "None of the above, but in this section"
+    :parent 13Bxx)
+
+;; 13Cxx
+
+(define-mcs-2010-classification 13C05
+    :description "Structure, classification theorems"
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C10
+    :description "Projective and free modules and ideals"
+    :see-also '(19A13)
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C11
+    :description "Injective and flat modules and ideals"
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C12
+    :description "Torsion modules and ideals"
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C13
+    :description "Other special types"
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C14
+    :description "Cohen-Macaulay modules"
+    :see-also '(13H10)
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C15
+    :description "Dimension theory, depth, related rings (catenary, etc.)"
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C20
+    :description "Class groups"
+    :see-also '(11R29)
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C40
+    :description "Linkage, complete intersections and determinantal ideals"
+    :see-also '(14M06 14M10 14M12)
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C60
+    :description "Module categories"
+    :parent 13Cxx)
+
+(define-mcs-2010-classification 13C99
+    :description "None of the above, but in this section"
+    :parent 13Cxx)
+
+;; 13Dxx
+
+(define-msc-2010-classification 13D02
+    :description "Syzygies, resolutions, complexes"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D03
+    :description "(Co)homology of commutative rings and algebras (e.g., Hochschild, André-Quillen, cyclic, dihedral, etc.)"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D05
+    :description "Homological dimension"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D07
+    :description "Homological functors on modules (Tor, Ext, etc.)"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D09
+    :description "Derived categories"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D10
+    :description "Deformations and infinitesimal methods"
+    :see-also '(14B10 14B12 14D15 32Gxx)
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D15
+    :description "Grothendieck groups, $K$-theory"
+    :see-also '(14C35 18F30 19Axx 19D50)
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D22
+    :description "Homological conjectures (intersection theorems)"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D30
+    :description "Torsion theory"
+    :see-also '(13C12 18E40)
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D40
+    :description "Hilbert-Samuel and Hilbert-Kunz functions; Poincaré series"
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D45
+    :description "Local cohomology"
+    :see-also '(14B15)
+    :parent 13Dxx)
+
+(define-msc-2010-classification 13D99
+    :description "None of the above, but in this section"
+    :parent 13Dxx)
+
+;; 13Exx
+
+(define-msc-2010-classification 13E05
+    :description "Noetherian rings and modules"
+    :parent 13Exx)
+
+(define-msc-2010-classification 13E10
+    :description "Artinian rings and modules, finite-dimensional algebras"
+    :parent 13Exx)
+
+(define-msc-2010-classification 13E15
+    :description "Rings and modules of finite generation or presentation; number of generators"
+    :parent 13Exx)
+
+(define-msc-2010-classification 13E99
+    :description "None of the above, but in this section"
+    :parent 13Exx)
+
+;; 12-XX
+
+(define-msc-2010-classification 12-00
+    :description "General reference works (handbooks, dictionaries, bibliographies, etc.)"
+    :parent 12-XX)
+
+(define-msc-2010-classification 12-01
+    :description "Instructional exposition (textbooks, tutorial papers, etc.)"
+    :parent 12-XX)
+
+(define-msc-2010-classification 12-02
+    :description "Research exposition (monographs, survey articles)"
+    :parent 12-XX)
+
+(define-msc-2010-classification 12-03
+    :description "Historical (must also be assigned at least one classification number from Section 01)"
+    :parent 12-XX)
+
+(define-msc-2010-classification 12-04
+    :description "Explicit machine computation and programs (not the theory of computation or programming)"
+    :parent 12-XX)
+
+(define-msc-2010-classification 12-06
+    :description "Proceedings, conferences, collections, etc."
+    :parent 12-XX)
+
+(define-msc-2010-classification 12Dxx
+    :description "Real and complex fields"
+    :parent 12-XX
+    :contains '(12D05 12D10 12D15 12D99))
+
+(define-msc-2010-classification 12Exx
+    :description "General field theory"
+    :parent 12-XX
+    :contains '(12E05 12E10 12E12 12E15 12E20 12E25 12E30 12E99))
+
+(define-msc-2010-classification 12Fxx
+    :description "Field extensions"
+    :parent 12-XX
+    :contains '(12F05 12F10 12F12 12F15 12F20 12F99))
+
+(define-msc-2010-classification 12Gxx
+    :description "Homological methods (field theory)"
+    :parent 12-XX
+    :contains '(12G05 12G10 12G99))
+
+(define-msc-2010-classification 12Hxx
+    :description "Differential and difference algebra"
+    :parent 12-XX
+    :contains '(12H05 12H10 12H20 12H25 12H99))
+
+(define-msc-2010-classification 12Jxx
+    :description "Topological fields"
+    :parent 12-XX
+    :contains '(12J05 12J10 12J12 12J15 12J17 12J20 12J25 12J27 12J99))
+
+(define-msc-2010-classification 12Kxx
+    :description "Generalizations of fields"
+    :parent 12-XX
+    :contains '(12K05 12K10 12K99))
+
+(define-msc-2010-classification 12Lxx
+    :description "Connections with logic"
+    :parent 12-XX
+    :contains '(12L05 12L10 12L12 12L15 12L99))
+
+(define-msc-2010-classification 12Yxx
+    :description "Computational aspects of field theory and polynomials"
+    :parent 12-XX
+    :contains (12Y05 12Y99))
+
+;; 12Dxx
+
+(define-msc-2010-classification 12D05
+    :description "Polynomials: factorization"
+    :parent 12Dxx)
+
+(define-msc-2010-classification 12D10
+    :description "Polynomials: location of zeros (algebraic theorems)"
+    :see-also (("The analytic theory" 26C10 30C15))
+    :parent 12Dxx)
+
+(define-msc-2010-classification 12D15
+    :description "Fields related with sums of squares (formally real fields, Pythagorean fields, etc.)"
+    :see-also '(11Exx)
+    :parent 12Dxx)
+
+(define-msc-2010-classification 12D99
+    :description "None of the above, but in this section"
+    :parent 12Dxx)
+
+;; 12Exx
+
+(define-msc-2010-classification 12E05
+    :description "Polynomials (irreducibility, etc.)"
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E10
+    :description "Special polynomials"
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E12
+    :description "Equations"
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E15
+    :description "Skew fields, division rings"
+    :see-also '(11R52 11R54 11S45 16Kxx)
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E20
+    :description "Finite fields (field-theoretic aspects)"
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E25
+    :description "Hilbertian fields; Hilbert's irreducibility theorem"
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E30
+    :description "Field arithmetic"
+    :parent 12Exx)
+
+(define-msc-2010-classification 12E99
+    :description "None of the above, but in this section"
+    :parent 12Exx)
+
+;; 12Fxx
+
+(define-msc-2010-classification 12F05
+    :description "Algebraic extensions"
+    :parent 12Fxx)
+
+(define-msc-2010-classification 12F10
+    :description "Separable extensions, Galois theory"
+    :parent 12Fxx)
+
+(define-msc-2010-classification 12F12
+    :description "Inverse Galois theory"
+    :parent 12Fxx)
+
+(define-msc-2010-classification 12F15
+    :description "Inseparable extensions"
+    :parent 12Fxx)
+
+(define-msc-2010-classification 12F20
+    :description "Transcendental extensions"
+    :parent 12Fxx)
+
+(define-msc-2010-classification 12F99
+    :description "None of the above, but in this section"
+    :parent 12Fxx)
+
+
+;; 12Gxx
+
+(define-msc-2010-classification 12G05
+    :description "Galois cohomology"
+    :see-also '(14F22 16Hxx 16K50)
+    :parent 12Gxx)
+
+(define-msc-2010-classification 12G10
+    :description "Cohomological dimension"
+    :parent 12Gxx)
+
+(define-msc-2010-classification 12G99
+    :description "None of the above, but in this section"
+    :parent 12Gxx)
+
+;; 12Hxx
+
+(define-msc-2010-classification 12H05
+    :description "Differential algebra"
+    :see-also '(13Nxx)
+    :parent 12Hxx)
+
+(define-msc-2010-classification 12H10
+    :description "Difference algebra"
+    :see-also '(39Axx)
+    :parent 12Hxx)
+
+(define-msc-2010-classification 12H20
+    :description "Abstract differential equations"
+    :see-also '(34Mxx)
+    :parent 12Hxx)
+
+(define-msc-2010-classification 12H25
+    :description "$p$-adic differential equations"
+    :see-also '(11S80 14G20)
+    :parent 12Hxx)
+
+(define-msc-2010-classification 12H99
+    :description "None of the above, but in this section"
+    :parent 12Hxx)
+
+;; 12Jxx
+
+(define-msc-2010-classification 12J05
+    :description "Normed fields"
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J10
+    :description "Valued fields"
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J12
+    :description "Formally $p$-adic fields"
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J15
+    :description "Ordered fields"
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J17
+    :description "Topological semifields"
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J20
+    :description "General valuation theory"
+    :see-also '(13A18)
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J25
+    :description "Non-Archimedean valued fields"
+    :see-also '(30G06 32P05 46S10 47S10)
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J27
+    :description "Krasner-Tate algebras"
+    :see-also '(32P05 46S10 47S10)
+    :parent 12Jxx)
+
+(define-msc-2010-classification 12J99
+    :description "None of the above, but in this section"
+    :parent 12Jxx)
+
+;; 12Kxx
+
+(define-msc-2010-classification 12K05
+    :description "Near-fields"
+    :see-also '(16Y30)
+    :parent 12Kxx)
+
+(define-msc-2010-classification 12K10
+    :description "Semifields"
+    :see-also '(16Y60)
+    :parent 12Kxx)
+
+(define-msc-2010-classification 12K99
+    :description "None of the above, but in this section"
+    :parent 12Kxx)
+
+;; 12Lxx
+
+(define-msc-2010-classification 12L05
+    :description "Decidability"
+    :see-also '(03B25)
+    :parent 12Lxx)
+
+(define-msc-2010-classification 12L10
+    :description "Ultraproducts"
+    :see-also '(03C20)
+    :parent 12Lxx)
+
+(define-msc-2010-classification 12L12
+    :description "Model theory"
+    :see-also '(03C60)
+    :parent 12Lxx)
+
+(define-msc-2010-classification 12L15
+    :description "Nonstandard arithmetic"
+    :see-also '(03H15)
+    :parent 12Lxx)
+
+(define-msc-2010-classification 12L99
+    :description "None of the above, but in this section"
+    :parent 12Lxx)
+
+;; 12Yxx
+
+(define-msc-2010-classification 12Y05
+    :description "Computational aspects of field theory and polynomials"
+    :parent 12Yxx)
+
+(define-msc-2010-classification 12Y99
+    :description "None of the above, but in this section"
+    :parent 12Yxx)
