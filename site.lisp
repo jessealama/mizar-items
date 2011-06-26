@@ -1189,8 +1189,11 @@ end;"))
 	    (:p "is not the name of a known item"))))))
 
 (defun absolute-uri-for-item (article kind number)
-  "Use *MML-VERSION* to give an absolute location for the item determined by ARTICLE, KIND, and NUMBER."
-  (format nil "~a/item/~a/~a/~a" *mml-version* article kind number))
+  "Use *MML-VERSION* to give an absolute location for the item determined by ARTICLE, KIND, and NUMBER.
+
+We currently handle only one version of the MML to be around at any
+one time; later, when we do support multiple MMLs, this will be useful."
+  (format nil "/item/~a/~a/~a" article kind number))
 
 (defmethod emit-item-page ()
   (register-groups-bind (article-name item-kind item-number-str)
