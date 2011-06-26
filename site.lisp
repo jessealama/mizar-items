@@ -468,14 +468,16 @@ end;"))
   (format nil "/dependence/~a/~a" item-1 item-2))
 
 (defun dependence-link-title (dependent-item supporting-item)
-  (destructuring-bind (dep-article dep-kind dep-num)
-      (split-item-identifier dependent-item)
-    (destructuring-bind (sup-article sup-kind sup-num)
-	(split-item-identifier supporting-item)
-      (format nil 
-	      "~:@(~a~):~a:~a depends on ~:@(~a~):~a:~a"
-	      dep-article dep-kind dep-num
-	      sup-article sup-kind sup-num))))
+  (let ((dep-article (item-article dependent-item))
+	(dep-kind (item-kind dependent-item))
+	(dep-num (item-number dependent-item))
+	(sup-article (item-article supporting-item))
+	(sup-kind (item-kind supporting-item))
+	(sup-num (item-number supporting-item)))
+    (format nil 
+	    "~:@(~a~):~a:~a depends on ~:@(~a~):~a:~a"
+	    dep-article dep-kind dep-num
+	    sup-article sup-kind sup-num)))
 
 (defgeneric explain-search-solution (source destination solution))
 
@@ -1195,9 +1197,11 @@ end;"))
     (let* ((item-number (parse-integer item-number-str))
 	   (item-kind-pretty (pretty-item-kind item-kind))
 	   (article-uri (uri-for-article article-name))
-	   (num-items-for-article (gethash article-name *article-num-items*))
+	   (article (find article-name *mml-lar* :key #'name :test #'string=))
+	   (num-items-for-article (length (fragments article)))
 	   (item-key (format nil "~a:~a:~d" article-name item-kind item-number))
-	   (ckb-number (gethash item-key *item-to-fragment-table*))
+	   (item (get-and-maybe-set-item-name item-key))
+	   (ckb-number (gethash item *item-to-fragment-table*))
 	   (article-dir (format nil "~a/~a" (mizar-items-config 'html-source) article-name))
 	   (article-text-dir (format nil "~a/text" article-dir))
 	   (article-name-uc (format nil "~:@(~a~)" article-name))
@@ -1684,20 +1688,9 @@ end;"))
       (+requires-uri-regexp+ (request-uri*))
     (let* ((item (item-from-components article kind number))
 	   (item-html (html-for-item item))
-	   (search-from-uri (search-from-uri item))
-	   (search-from-link-title (format nil "Search for paths of dependence starting from ~:@(~a~):~a:~d" article kind number))
-	   (search-to-link-title (format nil "Search for paths of dependence ending at ~:@(~a~):~a:~d" article kind number))
-	   (search-to-uri (search-to-uri item))
-	   (search-via-uri (search-via-uri item))
-	   (search-via-link-title (format nil "Search for paths of dependence passing through ~:@(~a~):~a:~d" article kind number))
-	   (requires-uri (requires-uri-for-item article kind number))
-	   (supports-uri (supports-uri-for-item article kind number))
-	   (item-uri (item-uri item))
 	   (item-link-title (item-link-title article kind number))
-	   (item-inline-name (item-inline-name article kind number))
-	   (deps (item-requires-tsorted item))
-	   (requires-page-title (format nil "requirements of ~a" item-link-title))
-	   (html (html-for-item item)))
+	   (deps (item-requires-tsorted (get-and-maybe-set-item-name item)))
+	   (requires-page-title (format nil "requirements of ~a" item-link-title)))
       (miz-item-html (requires-page-title)
 	  nil
 	((:table :class "item-table")
@@ -1708,31 +1701,13 @@ end;"))
 	     ((:td :colspan "2" :class "item-info-heading") "Dependence Info"))
 	    ((:tr :class "item-info-row")
 	     ((:td :class "item-info-key") "Item")
-	     ((:td :class "item-info-value") (str (link-to-item-with-components article kind number))))
-	    ((:tr :class "item-info-row")
-	     ((:td :colspan "2" :class "item-info-heading") "Actions"))
-	    ((:tr :class "item-info-row")
-	     ((:td :colspan "2") "Verify"
-	      ((:ul :class "path-options")
-	       (:li ((:a :href search-from-uri :title search-from-link-title) (:b "starting at")))
-	       (:li ((:a :href search-via-uri :title search-via-link-title) (:b "passing through")))
-	       (:li ((:a :href search-to-uri :title search-to-link-title) (:b "ending at"))))
-	      "this item."))
-	    ((:tr :class "item-info-row")
-	     ((:td :colspan "2") "See what this item"
-	      ((:ul :class "item-dep-options")
-	       (:li ((:a :href requires-uri :title "Items on which this item depends") (:b "requires")))
-	       (:li ((:a :href supports-uri :title "Items that this item supports") (:b "supports"))))))))
+	     ((:td :class "item-info-value") (str (link-to-item-with-components article kind number))))))
 	  ((:td :width "75%" :valign "top")
-	   (str item-html))))
-	(:p "The item "
-	    ((:a :href item-uri :title item-link-title)
-	     (str item-inline-name)))
-	(str html)
-	(if (null deps)
-	    (htm (:p "requires nothing."))
-	    (htm (:p "requires:")
-		 (:ul
+	   (:div
+	    (str item-html))
+	   (if (null deps)
+	    (htm (:p (:em "(This item requires nothing.)")))
+	    (htm (:ul
 		  (loop
 		     for (article . deps-from-article) in (items-by-article-in-mml-lar-order deps)
 		     do
@@ -1740,14 +1715,15 @@ end;"))
 			(:li ((:span :class "article-name") (str article))
 			     (:ul
 			      (dolist (dep deps-from-article)
-				(destructuring-bind (dep-article dep-kind dep-num)
-				    (split-item-identifier dep)
-				  (let ((dep-uri (dependence-uri-for-items item dep))
-					(dep-link-title (dependence-link-title item dep))
-					(dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
-				    (htm
-				     (:li ((:a :href dep-uri :title dep-link-title)
-					   (str dep-inline-name))))))))))))))))))
+				(let* ((dep-article (item-article dep))
+				       (dep-kind (item-kind dep))
+				       (dep-num (item-number dep))
+				       (dep-uri (dependence-uri-for-items item dep))
+				       (dep-link-title (dependence-link-title item dep))
+				       (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+				  (htm
+				   (:li ((:a :href dep-uri :title dep-link-title)
+					 (str dep-inline-name))))))))))))))))))))
 
 (defgeneric emit-supports-page ()
   (:documentation "An HTML presentation of the items that a given item supports."))
@@ -1779,46 +1755,52 @@ end;"))
   (register-groups-bind (article kind number)
       (+supports-uri-regexp+ (request-uri*))
     (let* ((item (item-from-components article kind number))
-	   (item-uri (item-uri item))
+	   (item-html (html-for-item item))
 	   (item-link-title (item-link-title article kind number))
-	   (item-inline-name (item-inline-name article kind number))
-	   (deps (item-supports-tsorted item)))
-      (let* ((supports-page-title (format nil "what ~a supports" item-link-title))
-	     (html (html-for-item item)))
-	(miz-item-html (supports-page-title)
-	    nil
-	  (:p "The item "
-	      ((:a :href item-uri :title item-link-title)
-	       (str item-inline-name)))
-	  (str html)
-	  (if (null deps)
-	      (htm (:p "supports nothing."))
-	      (htm (:p "supports:")
-		   (:ul
-		    (loop
-		       for (article . deps-from-article) in (items-by-article-in-mml-lar-order deps)
-		       do
-			 (htm
-			  (:li ((:span :class "article-name") (str article))
-			       (:ul
-				(dolist (dep deps-from-article)
-				  (destructuring-bind (dep-article dep-kind dep-num)
-				      (split-item-identifier dep)
-				    (let ((dep-uri (dependence-uri-for-items dep item))
-					  (dep-link-title (dependence-link-title dep item))
-					  (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
-				      (htm
-				       (:li ((:a :href dep-uri :title dep-link-title)
-					     (str dep-inline-name)))))))))))))))))))
+	   (supports (item-supports-tsorted (get-and-maybe-set-item-name item)))
+	   (supports-page-title (format nil "what ~a supports" item-link-title)))
+      (miz-item-html (supports-page-title)
+	  nil
+	((:table :class "item-table")
+	 (:tr
+	  ((:td :width "25%" :align "left")
+	   ((:table :class "item-info")
+	    ((:tr :class "item-info-row")
+	     ((:td :colspan "2" :class "item-info-heading") "Dependence Info"))
+	    ((:tr :class "item-info-row")
+	     ((:td :class "item-info-key") "Item")
+	     ((:td :class "item-info-value") (str (link-to-item-with-components article kind number))))))
+	  ((:td :width "75%" :valign "top")
+	   (:div
+	    (str item-html))
+	   (if (null supports)
+	    (htm (:p (:em "(This item supports nothing.)")))
+	    (htm (:ul
+		  (loop
+		     for (article . supports-from-article) in (items-by-article-in-mml-lar-order supports)
+		     do
+		       (htm
+			(:li ((:span :class "article-name") (str article))
+			     (:ul
+			      (dolist (dep supports-from-article)
+				(let* ((dep-article (item-article dep))
+				       (dep-kind (item-kind dep))
+				       (dep-num (item-number dep))
+				       (dep-uri (dependence-uri-for-items dep item))
+				       (dep-link-title (dependence-link-title dep item))
+				       (dep-inline-name (item-inline-name dep-article dep-kind dep-num)))
+				  (htm
+				   (:li ((:a :href dep-uri :title dep-link-title)
+					 (str dep-inline-name))))))))))))))))))))
 
 (defgeneric emit-dependence-page ()
   (:documentation "Emit an HTML description of the dependence between two items."))
 
 (defmethod emit-dependence-page :around ()
   ;; sanity check
-  (register-groups-bind (supporting-item whatever dependent-item)
+  (register-groups-bind (supporting-item whatever ignoreme dependent-item)
       (+dependence-uri-regexp+ (request-uri*))
-    (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
+    (declare (ignore whatever ignoreme)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
     (if supporting-item
 	(if dependent-item
 	    (if (known-item? supporting-item)
@@ -1860,9 +1842,9 @@ end;"))
 	  (:p (fmt "Something went wrong matching the requested URI, '~a', against the pattern for this page" (request-uri*)))))))
 
 (defmethod emit-dependence-page ()
-  (register-groups-bind (supporting-item whatever dependent-item)
+  (register-groups-bind (supporting-item whatever ignoreme dependent-item)
       (+dependence-uri-regexp+ (request-uri*))
-    (declare (ignore whatever)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
+    (declare (ignore whatever ignoreme)) ;; WHATEVER matches the item kind inside SUPPORTING-ITEM
     (destructuring-bind (supp-article supp-kind supp-num)
 	(split-item-identifier supporting-item)
       (destructuring-bind (dep-article dep-kind dep-num)
@@ -1875,13 +1857,13 @@ end;"))
 	       (supp-name-inline (item-inline-name supp-article supp-kind supp-num))
 	       (dep-name-inline (item-inline-name dep-article dep-kind dep-num))
 	       (supp-uri (item-uri supporting-item))
-	       (dep-uri (item-uri supporting-item)))
+	       (dep-uri (item-uri dependent-item)))
       (miz-item-html (title)
 	  nil
 	(:p "The item " ((:a :href supp-uri :title supp-title) (str supp-name-inline)))
-	(str supp-html)
+	(:div (str supp-html))
 	(:p "depends on " ((:a :href dep-uri :title dep-title) (str dep-name-inline)))
-	(str dep-html)
+	(:div (str dep-html))
 	(:p "because the attempt to verify "
 	    ((:a :href supp-uri :title supp-title) (str supp-name-inline))
 	    " in the absence of "
