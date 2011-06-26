@@ -284,9 +284,10 @@ If there is no such path, return nil."
       (if present?
 	  val
 	  (setf (gethash item table)
-		(mml-lar-index (item-article (symbol-name item)))))))
-  (defmethod mml-lar-index-of-item ((item string))
-    (mml-lar-index-of-item (get-and-maybe-set-item-name item))))
+		(mml-lar-index (item-article (symbol-name item))))))))
+
+(defmethod mml-lar-index-of-item ((item string))
+    (mml-lar-index-of-item (get-and-maybe-set-item-name item)))
 
 (defun items-reachable-from-item (item dependency-graph depth)
   (if (< depth 0)
