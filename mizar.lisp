@@ -228,6 +228,12 @@ suite to work correctly."
     (merge-pathnames (format nil "~a.atr" article-base)
 		     article-dir)))
 
+(defun pruned-atr-file-for-article (article-pathname)
+  (let ((article-base (pathname-name article-pathname))
+	(article-dir (directory-namestring article-pathname)))
+    (merge-pathnames (format nil "~a.atr.pruned" article-base)
+		     article-dir)))
+
 (defun err-file-for-article (article-pathname)
   (let ((article-base (pathname-name article-pathname))
 	(article-dir (directory-namestring article-pathname)))

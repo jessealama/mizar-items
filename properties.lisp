@@ -208,7 +208,10 @@
       (error "There is no file at the given article path,~%~%  ~a" article)))
 
 (defmethod constructors-with-needed-properties ((article pathname))
-  (let* ((atr-path (atr-file-for-article article))
+  (let* ((pruned-atr-path (pruned-atr-file-for-article article))
+	 (atr-path (if (file-exists-p pruned-atr-path)
+		       pruned-atr-path
+		       (atr-file-for-article article)))
 	 (initial-list (constructors-with-properties atr-path)))
     (loop
        with trimmed-list = nil
