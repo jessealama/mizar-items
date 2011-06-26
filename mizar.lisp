@@ -66,14 +66,20 @@ suite to work correctly."
 (defmethod belongs-to-mml ((article article))
   (member article *mml-lar*))
 
+(defgeneric mml-lar-index (thing)
+  (:documentation "Where THINGS sits in the currentl mml.lar ordering."))
+
 (let ((table (make-hash-table :test #'equal)))
-  (defun mml-lar-index (article)
+  (defmethod mml-lar-index ((article-name string))
     (multiple-value-bind (position present?)
-	(gethash article table)
+	(gethash article-name table)
       (if present?
 	  position
-	  (setf (gethash article table)
-		(position article *mml-lar* :test #'string=))))))
+	  (setf (gethash article-name table)
+		(position article-name *mml-lar* :test #'string= :key #'name))))))
+
+(defmethod mml-lar-index ((thing article))
+  (mml-lar-index (name thing)))
 
 (defun mml-< (article-1 article-2)
   (< (mml-lar-index article-1)
