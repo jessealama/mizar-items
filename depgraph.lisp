@@ -1258,5 +1258,4 @@ The result is a hash table.  Its keys are symbols, and its values are lists of s
       (let ((trimmed (remove-if #'(lambda (item)
 				    (member item loners))
 				item-list)))
-	(break "Trimmed has ~d elements:~%~{~a~%~}" (length trimmed) trimmed)
 	(cons (list loners) (stratify trimmed))))))
