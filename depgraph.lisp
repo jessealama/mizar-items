@@ -1061,7 +1061,7 @@ fragment at CKB-PATH-2."
 	     (unless present?
 	       (pushnew dep q :test #'string=)))))
        (when (null q)
-	 (return table))))
+	 (return (hash-table-keys table)))))
 
 (defun invert-dependency-table (dep-table)
   (loop
