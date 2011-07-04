@@ -1246,3 +1246,17 @@ The result is a hash table.  Its keys are symbols, and its values are lists of s
   (loop
      for item being the hash-keys in depgraph using (hash-value dep-items)
      summing (length dep-items)))
+
+(defun stratify (item-list)
+  (when item-list
+    (let ((loners (remove-if #'(lambda (item)
+				 (some #'(lambda (other-item)
+					   (unless (eq item other-item)
+					     (exists-path? item other-item)))
+				       item-list))
+			     item-list)))
+      (let ((trimmed (remove-if #'(lambda (item)
+				    (member item loners))
+				item-list)))
+	(break "Trimmed has ~d elements:~%~{~a~%~}" (length trimmed) trimmed)
+	(cons (list loners) (stratify trimmed))))))
