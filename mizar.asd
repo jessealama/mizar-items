@@ -35,7 +35,6 @@
 	       (:file "properties")
 	       (:file "site-data")
 	       (:file "tc")
-	       (:file "properties")
 	       (:file "site-search")
 	       (:file "server")
 	       (:file "100theorems")
