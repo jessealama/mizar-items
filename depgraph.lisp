@@ -925,8 +925,13 @@ fragment at CKB-PATH-2."
 (defun uncanceled-theorems-of-article (article)
   (remove-if #'canceled-theorem? (theorems-of-article article)))
 
-(defun scheme-item? (item)
-  (scan ":scheme:" item))
+(defgeneric scheme-item? (thing))
+
+(defmethod scheme-item? ((thing string))
+  (scan ":scheme:" thing))
+
+(defmethod scheme-item? ((item symbol))
+  (scan "^scheme$" (item-kind item)))
 
 (defun schemes-of-article (article)
   (remove-if-not #'scheme-item? (items-for-article-from-fragments article)))
@@ -945,8 +950,13 @@ fragment at CKB-PATH-2."
   (remove-if-not (disjoin #'deftheorem-item? #'theorem-item? #'scheme-item? #'lemma-item?)
 		 (gethash item *item-dependency-graph-forward*)))
 
-(defun notation-item? (article)
-  (scan ":.pattern:" article))
+(defgeneric notation-item? (thing))
+
+(defmethod notation-item? ((thing string))
+  (scan ":.pattern:" thing))
+
+(defmethod notation-item? ((thing symbol))
+  (scan "^.pattern$" (item-kind thing)))
 
 (defun implicit-items-of-article (article)
   (remove-if #'notation-item? (items-for-article-from-fragments article)))
