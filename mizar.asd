@@ -39,4 +39,6 @@
 	       (:file "server")
 	       (:file "100theorems")
 	       (:file "piotr")
+	       (:file "site-about")
+	       (:file "site-paths")
 	       (:file "site")))
