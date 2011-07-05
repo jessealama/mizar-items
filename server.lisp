@@ -151,7 +151,7 @@ returning NIL."
 		     (htm
 		      (:dt param)
 		      (:dd value)))))
-	      (htm (:p (:em "(none)"))))))
+	      (htm (:blockquote (:em "(none)"))))))
       (when (= error-code +http-method-not-allowed+)
 	(let* ((uri (request-uri*))
 	       (method (request-method*))
