@@ -97,7 +97,26 @@ returning NIL."
 					       (length response))
 					 (send-headers))
 				       response))
-	      finally (setf (return-code *reply*) +http-not-found+))))))
+	      finally
+		(miz-item-html ("not found")
+		    (:return-code +http-not-found+)
+		  (:p "I can't find what you're looking for.")
+		  (:p "You requested the URI:")
+		  (:blockquote
+		   (:tt (str (request-uri*))))
+		  (:p "Here are the parameters that you submitted with your
+	request:")
+		  (let ((params (get-parameters*)))
+		    (if params
+			(htm
+			 (:dl
+			  (loop
+			     for (param . value) in (get-parameters*)
+			     do
+			       (htm
+				(:dt param)
+				(:dd value)))))
+			(htm (:blockquote (:em "(none)")))))))))))
 
 (defvar *acceptor* (make-instance 'hunchentoot:acceptor 
 				  :port 4242
@@ -112,8 +131,7 @@ returning NIL."
   (format t "done~%")
   (setf *message-log-pathname* (mizar-items-config 'server-messages-log-file)
 	*access-log-pathname* (mizar-items-config 'server-access-log-file)
-	*handle-http-errors-p* t
-	*http-error-handler* #'handle-http-error
+	*handle-http-errors-p* nil
 	*log-lisp-errors-p* t
 	*log-lisp-warnings-p* t
 	*log-lisp-backtraces-p* t
@@ -130,35 +148,3 @@ returning NIL."
 				  :acceptor #'items-request-dispatcher))
   (setf items-dispatch-table nil)
   (initialize-server mml-version))
-
-(defun handle-http-error (error-code)
-  (if (= error-code +http-not-found+)
-      (miz-item-html ("not found")
-	  (:return-code +http-not-found+)
-	(:p "I can't find what you're looking for.")
-	(:p "You requested the URI:")
-	(:blockquote
-	 (:tt (str (request-uri*))))
-	(:p "Here are the parameters that you submitted with your
-	request:")
-	(let ((params (get-parameters*)))
-	  (if params
-	      (htm
-	       (:dl
-		(loop
-		   for (param . value) in (get-parameters*)
-		   do
-		     (htm
-		      (:dt param)
-		      (:dd value)))))
-	      (htm (:blockquote (:em "(none)"))))))
-      (when (= error-code +http-method-not-allowed+)
-	(let* ((uri (request-uri*))
-	       (method (request-method*))
-	       (method-name (symbol-name method)))
-	  (miz-item-html ("unsupported http method")
-	      (:return-code +http-method-not-allowed+)
-	    (:p "The " (str method-name) " HTTP method is not allowed for the resource")
-	    (:blockquote
-	     (:tt (str uri)))
-	    (:p "Perhaps you meant to GET this resource?"))))))
