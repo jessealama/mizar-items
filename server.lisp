@@ -138,8 +138,8 @@ returning NIL."
 	(:p "I can't find what you're looking for.")
 	(:p "You requested the URI:")
 	(:blockquote
-	 (str (request-uri*)))
-	(:p "Here are the GET parameters that you submitted with your
+	 (:tt (str (request-uri*))))
+	(:p "Here are the parameters that you submitted with your
 	request:")
 	(let ((params (get-parameters*)))
 	  (if params
