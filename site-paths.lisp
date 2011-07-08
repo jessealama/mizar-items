@@ -202,42 +202,47 @@
 		  ;; to the destination, but the given path number
 		  ;; is out-of-bounds.
 		  (let ((path-number (parse-integer path-number-str)))
-		    (multiple-value-bind (paths more-nodes)
-			(paths-from-to source destination)
-		      (let ((num-paths (length paths)))
-			(if (<= path-number num-paths)
-			    (call-next-method)
-			    (if (empty-queue? more-nodes)
-				(miz-item-html ("invalid path request")
-				    (:return-code +http-not-found+)
-				  ((:p :class "error-message")
-				   "There aren't that many paths between"
-				   (str (pretty-print-item source))
-				   " and "
-				   (str (pretty-print-item destination))
-				   "; there are (only) "
-				   (fmt "~d" num-paths)
-				   " such paths.  Please supply a different path number."))
-				(if (> path-number (1+ num-paths))
-				    (let ((next-path-uri (path-between-items-uri source destination (1+ num-paths)))
-					  (next-path-link-title (format nil "Path number #~d from ~a to ~a" (1+ num-paths) source destination)))
-				      (miz-item-html ("search for a path")
-					  (:return-code +http-see-other+)
-					(:p (if (zerop num-paths)
-						(htm "We haven't computed any paths from "
-						     (str (pretty-print-item source))
-						     " to "
-						     (str (pretty-print-item destination)) ".")
-						(htm "We have already computed "
-						     (fmt "~d" num-paths)
-						     " path(s) from "
-						     (str (pretty-print-item source))
-						     " to "
-						     (str (pretty-print-item destination)) ". There may be more paths, but we don't know yet.")) 
-					    " You have requested path number " (str path-number-str) ".  Since paths are computed one at a time, we cannot process your request for path number " (str path-number-str) " before computing path number " (fmt "~d" (1+ num-paths)) " (which might not even exist).  To proceed, specify a smaller path number for a path that is known to exist, or "
-					    ((:a :href next-path-uri
-						 :title next-path-link-title) "search for path " (fmt "~d" (1+ num-paths)) "."))))
-				    (call-next-method)))))))
+		    (if (< path-number 1)
+			(miz-item-html ("invalid path request")
+			    (:return-code +http-bad-request+)
+			  ((:p :class "error-message")
+			   "You have asked for path " (str path-number-str) ", but this is an invalid path number: the number of the path must be at least 1."))
+			(multiple-value-bind (paths more-nodes)
+			    (paths-from-to source destination)
+			  (let ((num-paths (length paths)))
+			    (if (<= path-number num-paths)
+				(call-next-method)
+				(if (empty-queue? more-nodes)
+				    (miz-item-html ("invalid path request")
+					(:return-code +http-not-found+)
+				      ((:p :class "error-message")
+				       "There aren't that many paths between"
+				       (str (pretty-print-item source))
+				       " and "
+				       (str (pretty-print-item destination))
+				       "; there are (only) "
+				       (fmt "~d" num-paths)
+				       " such paths.  Please supply a different path number."))
+				    (if (> path-number (1+ num-paths))
+					(let ((next-path-uri (path-between-items-uri source destination (1+ num-paths)))
+					      (next-path-link-title (format nil "Path number #~d from ~a to ~a" (1+ num-paths) source destination)))
+					  (miz-item-html ("search for a path")
+					      (:return-code +http-see-other+)
+					    (:p (if (zerop num-paths)
+						    (htm "We haven't computed any paths from "
+							 (str (pretty-print-item source))
+							 " to "
+							 (str (pretty-print-item destination)) ".")
+						    (htm "We have already computed "
+							 (fmt "~d" num-paths)
+							 " path(s) from "
+							 (str (pretty-print-item source))
+							 " to "
+							 (str (pretty-print-item destination)) ". There may be more paths, but we don't know yet.")) 
+						" You have requested path number " (str path-number-str) ".  Since paths are computed one at a time, we cannot process your request for path number " (str path-number-str) " before computing path number " (fmt "~d" (1+ num-paths)) " (which might not even exist).  To proceed, specify a smaller path number for a path that is known to exist, or "
+						((:a :href next-path-uri
+						     :title next-path-link-title) "search for path " (fmt "~d" (1+ num-paths)) "."))))
+					(call-next-method))))))))
 		  (miz-item-html ("invalid item")
 		      (:return-code +http-bad-request+)
 		    ((:p :class "error-message")
