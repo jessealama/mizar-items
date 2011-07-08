@@ -82,7 +82,12 @@
 (defun uri-for-item-as-symbol (item-symbol)
   (uri-for-item-as-string (symbol-name item-symbol)))
 
-(defun link-to-item (item)
+(defgeneric link-to-item (item))
+
+(defmethod link-to-item ((item symbol))
+  (link-to-item (symbol-name item)))
+
+(defmethod link-to-item ((item string))
   (let ((uri (uri-for-item-as-string item))
 	(title (item-link-title-from-string item)))
     (with-html-output-to-string (dummy)
@@ -624,8 +629,15 @@
 	  (format nil "~a/ckb~d.html" article-text-dir ckb-number)
 	  (error "There is no known fragment for the item '~a'" item-string)))))
 
-(defun html-for-item (item-string)
-  (file-as-string (html-path-for-item item-string)))
+(defgeneric html-for-item (item))
+
+(defmethod html-for-item ((item symbol))
+  (html-for-item (symbol-name item)))
+
+(defmethod html-for-item ((item-string string))
+  (let ((path (html-path-for-item item-string)))
+    (when (file-exists-p path)
+      (file-as-string path))))
 
 ;; (defun html-for-item (item-string)
 ;;   (mhtml (xml-path-for-item item-string)))
