@@ -4,7 +4,13 @@
 
 (defgeneric explain-search-solution (source destination solution))
 
-(defmethod explain-search-solution (source destination (steps list))
+(defmethod explain-search-solution ((source symbol) destination solution)
+  (explain-search-solution (symbol-name source) destination solution))
+
+(defmethod explain-search-solution (source (destination symbol) solution)
+  (explain-search-solution source (symbol-name destination) solution))
+
+(defmethod explain-search-solution ((source string) (destination string) (steps list))
   (destructuring-bind (source-article source-item-kind source-item-number-str)
       (split ":" source)
     (destructuring-bind (dest-article dest-item-kind dest-item-number-str)
@@ -88,7 +94,15 @@
 (defvar *path-table* (make-hash-table :test #'equal)
   "A tale mapping pairs (cons cells) (SOURCE . DESTINATION) to pairs (PATHS . MORE-NODES).  The interpretation is that PATHS is a list of all paths computed so far from SOURCE to DESTINATION, and MORE-NODES is a queue representing a 'frozen' search state: the search for all paths from SOURCE to DESTINATION was most recently stopped, but there were MORE-NODES to consider that could lead to more paths being found.")
 
-(defun paths-from-to (source destination)
+(defgeneric paths-from-to (source destination))
+
+(defmethod paths-from-to ((source string) destination)
+  (paths-from-to (get-and-maybe-set-item-name source) destination))
+
+(defmethod paths-from-to (source (destination string))
+  (paths-from-to source (get-and-maybe-set-item-name destination)))
+
+(defmethod paths-from-to ((source symbol) (destination symbol))
   (multiple-value-bind (paths-and-more-paths we-done-been-here-before?)
       (gethash (cons source destination) *path-table*)
     (cond (we-done-been-here-before? 
@@ -98,7 +112,15 @@
 	  (t ;; no one has asked for a path between these two
 	   (values nil (make-initial-queue source))))))
 
-(defun register-path-with-nodes (source destination path nodes)
+(defgeneric register-path-with-nodes (source destination path nodes))
+
+(defmethod register-path-with-nodes ((source string) destination path nodes)
+  (register-path-with-nodes (get-and-maybe-set-item-name source) destination path nodes))
+
+(defmethod register-path-with-nodes (source (destination string) path nodes)
+  (register-path-with-nodes source (get-and-maybe-set-item-name destination) path nodes))
+
+(defmethod register-path-with-nodes ((source symbol) (destination symbol) path nodes)
   (multiple-value-bind (path-list more-nodes)
       (paths-from-to source destination)
     (setf (gethash (cons source destination) *path-table*)
@@ -108,7 +130,15 @@
 		nodes))
     more-nodes))
 
-(defun update-paths-with-nodes (source destination new-nodes)
+(defgeneric update-paths-with-nodes (source destination new-nodes))
+
+(defmethod update-paths-with-nodes ((source string) destination new-nodes)
+  (update-paths-with-nodes (get-and-maybe-set-item-name source) destination new-nodes))
+
+(defmethod update-paths-with-nodes (source (destination string) new-nodes)
+  (update-paths-with-nodes source (get-and-maybe-set-item-name destination) new-nodes))
+
+(defmethod update-paths-with-nodes ((source symbol) (destination symbol) new-nodes)
   (multiple-value-bind (paths-and-nodes known?)
       (gethash (cons source destination) *path-table*)
     (if known?
@@ -233,13 +263,21 @@
 	      nil
 	    (str (path-form-as-string nil nil)))))))
 
-(defun render-path-search-solution (source destination path path-number link-to-previous? link-to-next?)
-  (let* ((path-len (length path))
-	 (explanation (explain-search-solution source destination path))
+(defgeneric render-path-search-solution (source destination path path-number link-to-previous? link-to-next?))
+
+(defmethod render-path-search-solution ((source string) destination path path-number link-to-previous? link-to-next?)
+  (render-path-search-solution (get-and-maybe-set-item-name source) destination path path-number link-to-previous? link-to-next?))
+
+(defmethod render-path-search-solution (source (destination string) path path-number link-to-previous? link-to-next?)
+  (render-path-search-solution source (get-and-maybe-set-item-name destination) path path-number link-to-previous? link-to-next?))
+
+(defmethod render-path-search-solution ((source symbol) (destination symbol) path path-number link-to-previous? link-to-next?)
+  (let* ((explanation (explain-search-solution source destination path))
+	 (path-len (length explanation))
 	 (source-link (link-to-item source))
 	 (dest-link (link-to-item destination))
-	 (source-uri-link-title (item-link-title-from-string source))
-	 (dest-uri-link-title (item-link-title-from-string destination))
+	 (source-uri-link-title (item-link-title-from-string (symbol-name source)))
+	 (dest-uri-link-title (item-link-title-from-string (symbol-name destination)))
 	 (next-path-uri (when link-to-next? (path-between-items-uri source destination (1+ path-number))))
 	 (next-path-link-title (format nil "Next path from ~a to ~a" source-uri-link-title dest-uri-link-title))
 	 (prev-path-uri (when link-to-previous? (path-between-items-uri source destination (1- path-number))))
