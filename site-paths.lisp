@@ -371,7 +371,7 @@
 		  (t
 		   ;; update the path table -- we're done with source and destination
 		   (update-paths-with-nodes source destination (make-empty-queue))
-		   (miz-item-html ("there is no path")
+		   (miz-item-html ("no path")
 		       nil
 		     (:p "There is no path of dependence from " (str (link-to-item source)) " to " (str (link-to-item destination)) "."))))))))))
 
