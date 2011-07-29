@@ -510,14 +510,14 @@ directive is not consulted."))
 ;;; Trimming the environment to eliminate uneeded parts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun verifiable? (article &optional (directory (sb-posix:getcwd)))
+(defun verifiable? (article &optional (directory (user-homedir-pathname)))
   (write-article article)
   (handler-case (and (accom article directory "-q" "-s" "-l")
 		     (verifier article directory "-q" "-s" "-l")
 		     t)
     (mizar-error () nil)))
 
-(defun verifiable-with-directive (article directive-name directive-contents &optional (directory (sb-posix:getcwd)))
+(defun verifiable-with-directive (article directive-name directive-contents &optional (directory (user-homedir-pathname)))
   (let ((new-article (make-article-copying-environment-from article)))
     (setf (text new-article) (text article))
     (setf (path new-article) (path article))
@@ -542,55 +542,55 @@ directive is not consulted."))
     (write-article new-article)
     (verifiable? new-article directory)))
 
-(defun find-minimal-vocabularies (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-vocabularies (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (vocabularies article)
    #'(lambda (lst)
        (verifiable-with-directive article "vocabularies" lst directory))))
 
-(defun find-minimal-notations (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-notations (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (notations article)
    #'(lambda (lst)
        (verifiable-with-directive article "notations" lst directory))))
 
-(defun find-minimal-constructors (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-constructors (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (constructors article)
    #'(lambda (lst)
        (verifiable-with-directive article "constructors" lst directory))))
 
-(defun find-minimal-requirements (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-requirements (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (requirements article)
    #'(lambda (lst)
        (verifiable-with-directive article "requirements" lst directory))))
 
-(defun find-minimal-registrations (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-registrations (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (registrations article)
    #'(lambda (lst)
        (verifiable-with-directive article "registrations" lst directory))))
 
-(defun find-minimal-definitions (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-definitions (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (definitions article)
    #'(lambda (lst)
        (verifiable-with-directive article "definitions" lst directory))))
 
-(defun find-minimal-theorems (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-theorems (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (theorems article)
    #'(lambda (lst)
        (verifiable-with-directive article "theorems" lst directory))))
 
-(defun find-minimal-schemes (article &optional (directory (sb-posix:getcwd)))
+(defun find-minimal-schemes (article &optional (directory (user-homedir-pathname)))
   (shortest-admissible-final-segment
    (schemes article)
    #'(lambda (lst)
        (verifiable-with-directive article "schemes" lst directory))))
 
-(defun minimize-environment (article &optional (directory (sb-posix:getcwd)))
+(defun minimize-environment (article &optional (directory (user-homedir-pathname)))
   (warn "Minimizing the environment for ~A" article)
   (let ((new-article (copy-article article)))
     (setf (path new-article) (path article))
