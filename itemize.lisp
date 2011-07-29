@@ -952,7 +952,7 @@ of LINE starting from START."
 ;;; Itemization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun preprocess-text (article &optional (directory (sb-posix:getcwd)))
+(defun preprocess-text (article &optional (directory (user-homedir-pathname)))
   (warn "Preprocessing ~S..." article)
   (warn "Stripping comments...")
   (strip-comments article directory)
@@ -1007,7 +1007,7 @@ of LINE starting from START."
   (exporter article directory "-q" "-l" "-s")
   (transfer article directory "-q" "-l" "-s"))
 
-;; (defun minimal-context (item &optional (directory (sb-posix:getcwd)))
+;; (defun minimal-context (item &optional (directory (user-homedir-pathname)))
 ;;   (shortest-admissible-initial-segment
 ;;    (context-items item)
 ;;    #'(lambda (lst)
@@ -1021,7 +1021,7 @@ of LINE starting from START."
 ;; 			    article)
 ;; 		    directory))))
 
-(defun minimal-context (item &optional (directory (sb-posix:getcwd)))
+(defun minimal-context (item &optional (directory (user-homedir-pathname)))
   (flet ((check-item-with-context (new-context)
 	   (verifiable? (let ((article (item->article
 				        (let ((new-item (copy-item item)))
@@ -1043,7 +1043,7 @@ of LINE starting from START."
 	  (remove-unneeded pruned-context-items #'check-item-with-context)
 	  (remove-unneeded (context-items item) #'check-item-with-context)))))
 
-(defun minimize-context (item &optional (directory (sb-posix:getcwd)))
+(defun minimize-context (item &optional (directory (user-homedir-pathname)))
   (warn "Minimizing context for item ~S..." item)
   (let* ((context (context-items item))
 	 (minimal-context (minimal-context item directory)))
