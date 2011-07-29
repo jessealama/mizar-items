@@ -416,7 +416,7 @@ strange; sort if necessary."
 					    (text item)))
       article-for-item)))
 
-(defmethod write-item (item &key (directory (sb-posix:getcwd)))
+(defmethod write-item (item &key (directory (user-homedir-pathname)))
   (let ((article-for-item (item->article item)))
     (setf (path article-for-item)
 	  (pathname-as-file (concat (namestring (pathname-as-directory (pathname directory)))
