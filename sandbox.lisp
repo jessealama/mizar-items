@@ -41,25 +41,25 @@
 (defun sync-from-to (source-sandbox target-sandbox)
   (let* ((source-directory (location source-sandbox))
 	 (target-directory (location target-sandbox))
-	 (rsync-proc (sb-ext:run-program "rsync"
-					 (list source-directory target-directory)
-					 :search t
-					 :input nil
-					 :output nil
-					 :error :stream)))
-    (unless (zerop (sb-ext:process-exit-code rsync-proc))
-      (let ((err (sb-ext:process-error rsync-proc)))
+	 (rsync-proc (run-program "rsync"
+				  (list source-directory target-directory)
+				  :search t
+				  :input nil
+				  :output nil
+				  :error :stream)))
+    (unless (zerop (process-exit-code rsync-proc))
+      (let ((err (process-error rsync-proc)))
 	(error "Something went wrong calling rsync to synchronize ~A with ~A: the error output was: ~A" source-directory target-directory (stream-lines err))))
     t))
 
 (defun trash-sandbox (sandbox)
-  (sb-ext:run-program "rm"
-		      (list "-Rf"
-			    (namestring (location sandbox)))
-		      :search t
-		      :input nil
-		      :output nil
-		      :error nil)
+  (run-program "rm"
+	       (list "-Rf"
+		     (namestring (location sandbox)))
+	       :search t
+	       :input nil
+	       :output nil
+	       :error nil)
   t)
 
 (defun file-exists-in-sandbox (filename sandbox)
