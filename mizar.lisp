@@ -103,43 +103,43 @@ suite to work correctly."
       (error "The list of arguments is supposed to consist entirely of non-empty strings!")))
 
 (defmethod run-in-directory ((program string) (working-directory null) (args list))
-  (sb-ext:run-program program
-		      args
-		      :search t
-		      :input nil
-		      :output nil
-		      :error nil))
+  (run-program program
+	       args
+	       :search t
+	       :input nil
+	       :output nil
+	       :error nil))
 
 (defmethod run-in-directory ((program string) (working-directory pathname) (args list))
   (let ((dir-as-string (directory-namestring
 			(pathname-as-directory working-directory))))
-    (sb-ext:run-program (mizar-items-config 'exec-in-dir-script-path)
-			(append (list dir-as-string program) args)
-			:search t
-			:input nil
-			:output nil
-			:error nil)))
+    (run-program (mizar-items-config 'exec-in-dir-script-path)
+		 (append (list dir-as-string program) args)
+		 :search t
+		 :input nil
+		 :output nil
+		 :error nil)))
 
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
   (let* ((eval-program (eval program))
-	 (check (sb-ext:run-program "which" (list eval-program) :search t)))
-    (if (zerop (sb-ext:process-exit-code check))
+	 (check (run-program "which" (list eval-program) :search t)))
+    (if (zerop (process-exit-code check))
 	`(progn
 	   (defgeneric ,name (file &optional directory))
-	   (defmethod ,name ((miz-path pathname) &optional (directory (sb-posix:getcwd)))
+	   (defmethod ,name ((miz-path pathname) &optional (directory (user-homedir-pathname)))
 	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
 		    (proc (run-in-directory ,eval-program
 					    directory
 					    (append ',arguments (list (namestring miz-path)))
 					    :output tmp-path
 					    :if-output-exists :supersede)))
-	       (if (zerop (sb-ext:process-exit-code proc))
+	       (if (zerop (process-exit-code proc))
 		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (sb-ext:process-exit-code proc)))))
-	     (defmethod ,name ((article-path string) &optional (directory (sb-posix:getcwd)))
+		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (process-exit-code proc)))))
+	     (defmethod ,name ((article-path string) &optional (directory (user-homedir-pathname)))
 	       (,name (pathname article-path) directory))
-	     (defmethod ,name ((article article) &optional (directory (sb-posix:getcwd)))
+	     (defmethod ,name ((article article) &optional (directory (user-homedir-pathname)))
 	       (,name (path article) directory)
 	       (refresh-text article)))
 	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
@@ -147,11 +147,11 @@ suite to work correctly."
 (defmacro define-input-transformer (name program &rest arguments)
   ; check that TOOL is real
   (let* ((eval-program (eval program))
-	 (check (sb-ext:run-program "which" (list eval-program) :search t)))
-    (if (zerop (sb-ext:process-exit-code check))
+	 (check (run-program "which" (list eval-program) :search t)))
+    (if (zerop (process-exit-code check))
 	`(progn
 	   (defgeneric ,name (file &optional directory))
-	   (defmethod ,name ((miz-path pathname) &optional (directory (sb-posix:getcwd)))
+	   (defmethod ,name ((miz-path pathname) &optional (directory (user-homedir-pathname)))
 	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
 		    (proc (run-in-directory ,eval-program
 					    directory
@@ -159,12 +159,12 @@ suite to work correctly."
 					    :input miz-path
 					    :output tmp-path
 					    :if-output-exists :supersede)))
-	       (if (zerop (sb-ext:process-exit-code proc))
+	       (if (zerop (process-exit-code proc))
 		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (sb-ext:process-exit-code proc)))))
-	     (defmethod ,name ((article-path string) &optional (directory (sb-posix:getcwd)))
+		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (process-exit-code proc)))))
+	     (defmethod ,name ((article-path string) &optional (directory (user-homedir-pathname)))
 	       (,name (pathname article-path) directory))
-	     (defmethod ,name ((article article) &optional (directory (sb-posix:getcwd)))
+	     (defmethod ,name ((article article) &optional (directory (user-homedir-pathname)))
 	       (,name (path article) directory)
 	       (refresh-text article)))
 	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
@@ -314,14 +314,14 @@ suite to work correctly."
   (let ((name (namestring article-path)))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
       (or ignore-exit-code
-	  (or (zerop (sb-ext:process-exit-code proc))
+	  (or (zerop (process-exit-code proc))
 	      (error 'mizar-error
 		     :tool tool 
 		     :working-directory directory
 		     :argument article-path 
-		     :output-stream (sb-ext:process-output proc)
-		     :error-stream (sb-ext:process-error proc) 
-		     :exit-code (sb-ext:process-exit-code proc)))))))
+		     :output-stream (process-output proc)
+		     :error-stream (process-error proc) 
+		     :exit-code (process-exit-code proc)))))))
 
 (defmethod run-mizar-tool ((tool string) (article-path string) &key directory ignore-exit-code flags)
   (run-mizar-tool tool (pathname article-path)
@@ -380,8 +380,8 @@ suite to work correctly."
 
 (defmacro define-mizar-text-transformer (tool &optional (ignore-exit-code nil))
   ; check that TOOL is real
-  (let ((check (sb-ext:run-program "which" (list tool) :search t)))
-    (if (zerop (sb-ext:process-exit-code check))
+  (let ((check (run-program "which" (list tool) :search t)))
+    (if (zerop (process-exit-code check))
 	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
 	  `(progn
 	     (defgeneric ,tool-as-symbol (article directory &rest flags))
@@ -425,12 +425,12 @@ suite to work correctly."
 	(new-article-xml-path (replace-extension article-path "miz" "xml1")))
     (if (probe-file article-xml-path)
 	(progn
-	  (sb-ext:run-program "xsltproc"
-			      (list (namestring *addabsrefs-stylesheet*)
-				    (namestring article-xml-path)
-				    "-o"
-				    (namestring new-article-xml-path))
-			      :search t)
+	  (run-program "xsltproc"
+		       (list (namestring *addabsrefs-stylesheet*)
+			     (namestring article-xml-path)
+			     "-o"
+			     (namestring new-article-xml-path))
+		       :search t)
 	  ;; xsltproc returns non-zero error code on most articles,
 	  ;; owing to the bex and fex entities generated by the
 	  ;; verifier.  For now, just assume it was successful
@@ -453,13 +453,13 @@ suite to work correctly."
 (defun listvoc (article-name)
   (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
       nil
-      (let ((proc (sb-ext:run-program (mizar-items-config 'listvoc-script-path)
-				      (list article-name)
-				      :search t
-				      :output :stream)))
-	(let ((exit-code (sb-ext:process-exit-code proc)))
+      (let ((proc (run-program (mizar-items-config 'listvoc-script-path)
+			       (list article-name)
+			       :search t
+			       :output :stream)))
+	(let ((exit-code (process-exit-code proc)))
 	  (if (zerop exit-code)
-	      (stream-lines (sb-ext:process-output proc))
+	      (stream-lines (process-output proc))
 	      (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code))))))
 
 ;;; mizar.lisp ends here
