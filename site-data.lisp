@@ -137,22 +137,22 @@
 	(author-title-script (mizar-items-config 'author-title-script)))
     (if (file-exists-p bib-file)
 	(if (file-exists-p author-title-script)
-	    (let ((proc (sb-ext:run-program author-title-script (list bib-file)
-					    :input nil
-					    :output :stream
-					    :error :stream
-					    :search nil)))
-	      (let ((out (sb-ext:process-output proc))
-		    (err (sb-ext:process-error proc))
-		    (code (sb-ext:process-exit-code proc)))
+	    (let ((proc (run-program author-title-script (list bib-file)
+				     :input nil
+				     :output :stream
+				     :error :stream
+				     :search nil)))
+	      (let ((out (process-output proc))
+		    (err (process-error proc))
+		    (code (process-exit-code proc)))
 		(if (zerop code)
 		    (prog1
 			(stream-lines out)
-		      (close out)
-		      (close err))
+		      (when out (close out))
+		      (when err (close err)))
 		    (let ((err-lines (stream-lines err)))
-		      (close out)
-		      (close err)
+		      (when out (close out))
+		      (when err (close err))
 		      (error (format nil "Something went wrong calling the author-title script on ~a, with respect to MML version ~a; the process exit code was ~d.  Here is the error output:~%~{~a~%~}" article-name mml-version code err-lines))))))
 	    (error "The author-title script could not be found at the expected location '~a'" author-title-script))
 	(error "The bibliography file for the article ~a (with respect to MML version ~a) could not be found at the expected location '~a'" article-name mml-version bib-file))))
