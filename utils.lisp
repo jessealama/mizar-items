@@ -346,13 +346,14 @@ LIST; otherwise, return T and NIL."
 	"")))
 
 (defun stream-lines (stream)
-  (let (lines)
-    (symbol-macrolet
-	(($line (read-line stream nil nil)))
-      (do ((line $line $line))
-	  ((null line))
-	(push line lines)))
-    (reverse lines)))
+  (when stream
+    (let (lines)
+      (symbol-macrolet
+	  (($line (read-line stream nil nil)))
+	(do ((line $line $line))
+	    ((null line))
+	  (push line lines)))
+      (reverse lines))))
 
 (defun empty-file-p (path)
   (with-open-file (s path :direction :input
