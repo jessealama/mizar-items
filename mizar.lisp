@@ -452,6 +452,9 @@ suite to work correctly."
 (defgeneric mhtml (article)
   (:documentation "Compute the HTML representation of an article."))
 
+(defmethod mhtml ((article-path-string string))
+  (mhtml (pathname article-path-string)))
+
 (defmethod mhtml ((article-path pathname))
   (let ((new-article-xml-path (replace-extension article-path "miz" "xml1"))
 	(article-html-path (replace-extension article-path "miz" "html")))
