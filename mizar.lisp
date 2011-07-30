@@ -364,7 +364,7 @@ suite to work correctly."
 			 :flags flags))
        (defmethod ,tool-as-symbol ((article article) &key working-directory flags)
 	 (run-mizar-tool ,tool article
-			 :directory directory
+			 :directory working-directory
 			 :ignore-exit-code nil
 			 :flags flags)
 	 article))))
