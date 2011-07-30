@@ -41,7 +41,9 @@
 	    " | "
 	    ((:a :href "/path") "paths")
 	    " | "
-	    ((:a :href "/random-item") "random item")))))
+	    ((:a :href "/random-item") "random item")
+	    " | "
+	    ((:a :href "/upload") "submit your own article")))))
 	,@body
 	(:hr)
 	((:div :class "footer")
