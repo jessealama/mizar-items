@@ -349,7 +349,6 @@ suite to work correctly."
 		  :flags flags))
 
 (defmacro define-mizar-tool (tool)
-  ; check that TOOL is real
   (let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
     `(progn
        (defgeneric ,tool-as-symbol (article &key working-directory flags))
