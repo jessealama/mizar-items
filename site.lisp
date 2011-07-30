@@ -25,7 +25,7 @@
 ;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-constant +article-name-regexp+ "[a-z_0-9]+" 
+(define-constant +article-name-regexp+ "^[a-z_0-9]{1,8}$" 
   :test #'string=)
 (define-constant +positive-natural-number-regexp+ "[1-9][0-9]*"
   :test #'string=
