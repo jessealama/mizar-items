@@ -207,22 +207,23 @@ suite to work correctly."
 	(format stream "(Standard error was not recorded.)"))
     (terpri stream)
     (terpri stream)
-    (let ((err-file (if working-directory
-			(file-in-directory working-directory
-					   (format nil "~a.err" argument))
-			(when (pathnamep argument)
-			  (let* ((base-sans-extension (pathname-name argument)))
-			    (merge-pathnames (format nil "~a.err"
-						     base-sans-extension)
-					     (directory-namestring argument)))))))
+    (let* ((arg-basename (pathname-name (pathname argument)))
+	   (err-basename (format nil "~a.err" arg-basename))
+	  (err-file
+	   (if working-directory
+	       (file-in-directory working-directory err-basename)
+	       (when (pathnamep argument)
+		 (merge-pathnames err-basename
+				  (directory-namestring argument))))))
       (if (file-exists-p err-file)
-	  (progn
-	    (format stream "Here is the contents of the error file at~%~%  ~a~%" err-file)
-	    (terpri stream)
-	    (if (zerop (file-size err-file))
-		(format stream "(The error file is empty.)")
-		(format stream "~{~a~%~}" (lines-of-file err-file))))
-	  (format stream "We are unable to read the error file at ~a; sorry." err-file)))))
+	  (if (zerop (file-size err-file))
+	      (format stream "(The error file exists, but is empty.)")
+	      (format stream "Here are the lines of the error file:~%~%~{~a~%~}" (lines-of-file err-file)))
+	  (format stream "We expected to find an error file at ~a, but somehow there isn't one." err-file)))))
+
+(defun report-mizar-error-as-string (mizar-error)
+  (with-output-to-string (str)
+    (report-mizar-error mizar-error str)))
 
 (define-condition mizar-error (error)
   ((tool :initarg :tool :accessor tool)
