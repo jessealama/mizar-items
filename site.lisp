@@ -76,6 +76,11 @@
 			  "/" "(" +number-regexp+ ")"))
   :test #'string=)
 
+(define-constant +upload-uri-regexp+
+    (exact-regexp "/upload")
+  :test #'string=
+  :documentation "Regular expression matching the upload URI.")
+
 (defun uri-for-fragment (article fragment-number)
   (format nil "/fragment/~a/~d" article fragment-number))
 
@@ -1448,6 +1453,302 @@ one time; later, when we do support multiple MMLs, this will be useful."
 	  nil
 	(:p "To verify that...")))))
 
+(defun next-available-article-name ()
+  (loop
+     for i from 1 upto 100 ;; upper bound in case of bugs or too many articles
+     for article-name = (format nil "a~d.miz" i)
+     for article-path = (pathname (format nil "~a~a" *tmp-directory* article-name))
+     do
+       (unless (file-exists-p article-path)
+	 (return (format nil "a~d" i)))
+     finally
+       (return nil)))
+
+(defgeneric process-upload ()
+  (:documentation "Given a POST request containing an uploaded article, verify it and break it up into its constituent items."))
+
+(defmethod process-upload :around ()
+  (if (eq (request-method*) :post)
+      (let ((text (post-parameter "text")))
+	(if text
+	    (let ((name (post-parameter "article-name")))
+	      (if name
+		  (if (string= name "")
+		      (call-next-method
+		       ) (let ((name-lc (lowercase name)))
+			   (if (scan +article-name-regexp+ name-lc)
+			       (if (belongs-to-mml name-lc)
+				   (miz-item-html ("unacceptable article name")
+						  (:return-code +http-bad-request+)
+						  ((:p :class "error-message")
+						   "The article name you supplied, " (:tt (str name-lc)) "  is already the name of an article in the " (:tt "MIZAR") " Mathematical Library.  Please submit your article under a different name."))
+				   (call-next-method))
+			       (miz-item-html ("unacceptable article name")
+					      (:return-code +http-bad-request+)
+					      ((:p :class "error-message")
+					       (:tt "MIZAR") " article names must consist of between 1 and 8 alphanumeric characters.  Please submit your article under a different name.")))))
+		  (call-next-method)))
+	    (miz-item-html ("missing article text")
+			   (:return-code +http-bad-request+)
+			   (:p "You must POST an article, using the 'text' parameter, but it seems that you either didn't use POST or you didn't bundle your text under the 'text' parameter."))))
+      (call-next-method)))
+
+(defun report-mizar-error-http (mizar-error)
+  (let ((error-argument (argument mizar-error))
+	(error-directory (working-directory mizar-error)))
+    (miz-item-html ("mizar error")
+      (:return-code +http-bad-request+)
+      (:p "I'm afraid that the article you submitted cannot be propertly handled by mizar.  Please fix the errors and try again.")
+      (:p "Here is a description of the errors:")
+      (:pre
+       (str (report-mizar-error-as-string mizar-error)))
+      (if (pathnamep error-argument)
+	  (if (file-exists-p error-argument)
+	      (htm
+	       (:p "For your reference, here is the article that I worked with:")
+	       (:pre
+		(str (escape-for-html (file-as-string error-argument)))))
+	      (let ((argument-in-working-directory (merge-pathnames error-argument
+								    error-directory)))
+		(if (file-exists-p argument-in-working-directory)
+		    (htm
+		     (:p "For your reference, here is the article that I attempted to work with:")
+		     (:pre
+		      (str (escape-for-html (file-as-string argument-in-working-directory)))))
+		    (htm
+		     (:p "I'm afraid we were somehow unable to locate the mizar file that you supplied; please inform the site maintainers.  We tried looking for " (str error-argument) " in " (str error-directory) ", but didn't find what we're looking for.")))))
+	  (htm
+	   (:p "The argument of the mizar tool, " (str error-argument) ", isn't a pathname.  How did that happen?  Please inform the site maintainers about this."))))))
+
+(defun emit-upload-page ()
+  (miz-item-html ("upload an article")
+    nil
+    ((:form :action "/upload" :method "post")
+     (:fieldset
+      ((:legend :title "Submit your own MIZAR article for analysis.  Input the text of your article, and optionally give it a name, then submit your text with the 'Analyze' button.")
+       "Submit your own " (:tt "MIZAR") " article for analysis")
+      (:table
+       (:tr
+	(:td
+	 ((:label :for "article-name") "Article Name"))
+	(:td 
+	 ((:input :type "text" :id "article-name" :name "article-name" :width "8" :title "The name of your article.  It is acceptable to omit a name; if you do so, a default name for your article will be assigned."))))
+       (:tr
+	(:td
+	 ((:label :for "text") "Article Text"))
+	(:td
+	 ((:textarea :rows "40" :title "Input the text of your article here" :cols "80" :name "text" :id "text"))))
+       (:tr
+	((:td :align "center" :colspan "2")
+	 (:input :type "submit" :value "Analyze"))))))))
+
+(defun process-post-upload ()
+  (let ((text (post-parameter "text")))
+    (let ((next (next-available-article-name)))
+      (if next
+	  (let ((article-path (format nil "~a~a.miz" *tmp-directory* next))
+		(article-html-path (format nil "~a~a.html" *tmp-directory* next))
+		(accom-condition nil)
+		(verifier-condition nil)
+		(inacc-condition nil)
+		(relprem-condition nil)
+		(reliters-condition))
+	    (write-string-into-file text article-path
+				    :if-does-not-exist :create
+				    :if-exists :supersede)
+	    (handler-case (accom article-path
+				 :flags '("-q" "-l")
+				 :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf accom-condition c)))
+	    (handler-case (verifier article-path
+				    :flags '("-q" "-l")
+				    :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf verifier-condition c)))
+	    (handler-case (inacc article-path
+				 :flags '("-q" "-l")
+				 :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf inacc-condition c)))
+	    (handler-case (relprem article-path
+				   :flags '("-q" "-l")
+				   :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf relprem-condition c)))
+	    (handler-case (reliters article-path
+				    :flags '("-q" "-l")
+				    :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf reliters-condition c)))
+	    (when (and (not accom-condition)
+		       (not verifier-condition))
+	      (absrefs article-path)
+	      (mhtml article-path))
+	    (miz-item-html ("your article")
+	      nil
+	      ((:table :rules "all")
+	       (:colgroup
+		(:col :align "center")
+		(:col :align "center")
+		(:col :align "left"))
+	       (:thead
+		(:tr
+		 (:th (:tt "MIZAR")  " Tool")
+		 (:th "Result")
+		 (:th "Comments")))
+	       (:tbody
+		(:tr
+		 ((:td :align "center") (:tt "accom"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm ((:span :class "not-ok") (str +cross-symbol+)))
+		      (htm ((:span :class "ok") (str +checkmark-symbol+)))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm
+		       (:p "Your article could not be accommodated.  The error was:")
+		       (:pre
+			(str (report-mizar-error-as-string accom-condition))))
+		      (htm
+		       "The environment for your article was successfully created."))))
+		(:tr
+		 ((:td :align "center") (:tt "verifier"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm "&mdash;")
+		      (if verifier-condition
+			  (htm ((:span :class "not-ok") (str +cross-symbol+)))
+			  (htm ((:span :class "ok") (str +checkmark-symbol+))))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm "Your article cannot be verified because " (:tt "accom") " failed to construct a sensible environment in which the verifier would operate.")
+		      (if verifier-condition
+			  (htm
+			   (:p "Your article could not be fully verified.  The error was:")
+			   (:pre
+			    (str (report-mizar-error-as-string verifier-condition))))
+			  (htm
+			   "Your article is logically coherent.")))))
+		(:tr
+		 ((:td :align "center") (:tt "inacc"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm "&mdash;")
+		      (if inacc-condition
+			  (htm ((:span :class "not-ok") (str +cross-symbol+)))
+			  (htm ((:span :class "ok") (str +checkmark-symbol+))))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm "We cannot check for inaccessible blocks of inferences because " (:tt "accom") " failed to construct a sensible environment for your article.")
+		      (if verifier-condition
+			  (if inacc-condition
+			      (htm
+			       (:p "We discovered some inaccessible blocks of inferences in your article.  Here is what " (:tt "inacc") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string inacc-condition)))
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "inacc") " may not be wholly reliable.)"))
+			      (htm
+			       (:p "Your article has not inaccessible blocks of inferences.")
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "inacc") " may not be wholly reliable.)")))
+			  (if inacc-condition
+			      (htm
+			       (:p "We discovered some inaccessible blocks of inferences in your article.  Here is what " (:tt "inacc") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string inacc-condition))))
+			      (htm
+			       "Your article has no inaccessible blocks of inferences."))))))
+		(:tr
+		 ((:td :align "center") (:tt "relprem"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm "&mdash;")
+		      (if relprem-condition
+			  (htm ((:span :class "not-ok") (str +cross-symbol+)))
+			  (htm ((:span :class "ok") (str +checkmark-symbol+))))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm "We cannot check for unnecessary premises because " (:tt "accom") " failed to construct a sensible environment for your article.")
+		      (if verifier-condition
+			  (if relprem-condition
+			      (htm
+			       (:p "We discovered some unnecessary premises of inferences in your article.  Here is what " (:tt "relprem") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string relprem-condition)))
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "relprem") " may not be wholly reliable.)"))
+			      (htm
+			       (:p "The inferences of your article have no unnecessary premises.")
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "relprem") " may not be wholly reliable.)")))
+			  (if relprem-condition
+			      (htm
+			       (:p "We discovered some unncessary premises of inferences in your article.  Here is what " (:tt "relprem") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string relprem-condition))))
+			      (htm
+			       "The inferences of your article have no unnecessary premises."))))))
+		(:tr
+		 ((:td :align "center") (:tt "reliters"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm "&mdash;")
+		      (if reliters-condition
+			  (htm ((:span :class "not-ok") (str +cross-symbol+)))
+			  (htm ((:span :class "ok") (str +checkmark-symbol+))))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm "We cannot check for unnecessary iterative equality steps in your article because " (:tt "accom") " failed to construct a sensible environment for it.")
+		      (if verifier-condition
+			  (if reliters-condition
+			      (htm
+			       (:p "We discovered some unnecessary iterative equality steps in your article.  Here is what " (:tt "reliters") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string reliters-condition)))
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "reliters") " may not be wholly reliable.)"))
+			      (htm
+			       (:p "Your article contains no unnecessary iterative equality steps.")
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "reliters") " may not be wholly reliable.)")))
+			  (if reliters-condition
+			      (htm
+			       (:p "We discovered some unncessary iterative equality steps in your article.  Here is what " (:tt "reliters") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string reliters-condition))))
+			      (htm
+			       "Your article contains no unnecessary iterative equality steps."))))))))
+	      (if (file-exists-p article-html-path)
+		  (let ((article-html-str (file-as-string article-html-path)))
+		    (htm
+		     (:p "Here is your transformed article:")
+		     (:div
+		      (str article-html-str))))
+		  (progn
+		    (if accom-condition
+			(htm ((:p :class "error-message") "A semantic HTML presentation of your article is not possible, because we could not construct an environment for verifying it."))
+			(if verifier-condition
+			    (htm
+			     ((:p :class "error-message") "A semantic HTML presentation of your is not possible, because we failed to verify it."))
+			    (htm
+			     ((:p :class "error-message")
+			      "The HTML for your article doesn't exist in the expected location, " (:tt article-html-path) "; please inform the site maintainers."))))
+		    (htm
+		     (:p "Here is the raw text that we tried to work with:")
+		     (:blockquote
+		      ((:table :frame "box" :rules "all" :width "100%")
+		       (:colgroup
+			(:col :width "5%" :align "center")
+			(:col :width "95%" :align "left"))
+		       (loop
+			  for i from 1
+			  for article-line in (lines-of-file article-path)
+			  do
+			    (htm
+			     (:tr
+			      ((:td :class "listing-numeral") (str i))
+			      (:td (:tt (str (escape-for-html article-line))))))))))))))))))
+
+(defmethod process-upload ()
+  (case (request-method*)
+    (:get (emit-upload-page))
+    (:post (process-post-upload))
+    (otherwise (miz-item-html ("unsuported HTTP method")
+	         (:return-code +http-method-not-allowed+)
+		 ((:p :class "error-message")
+		  "The HTTP method " (:tt (str (request-method*))) " for /upload is not supported.")))))
+
 (defun initialize-uris ()
   ;; ecmascript, css
   (register-static-file-dispatcher "/mhtml.css"
@@ -1520,5 +1821,8 @@ one time; later, when we do support multiple MMLs, this will be useful."
   ;; sufficiency and minimality
   (register-regexp-dispatcher +sufficiency-uri-regexp+ #'emit-sufficiency-page)
   (register-regexp-dispatcher +minimality-uri-regexp+ #'emit-minimality-page)
+
+  ;; upload
+  (register-regexp-dispatcher +upload-uri-regexp+ #'process-upload)
 
   t)
