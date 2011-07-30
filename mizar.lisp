@@ -120,6 +120,9 @@ suite to work correctly."
 		 :output nil
 		 :error nil)))
 
+(defmethod run-in-directory (program (working-directory string) args)
+  (run-in-directory program (pathname working-directory) args))
+
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
   (let* ((eval-program (eval program))
