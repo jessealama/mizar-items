@@ -124,7 +124,6 @@ suite to work correctly."
   (run-in-directory program (pathname working-directory) args))
 
 (defmacro define-file-transformer (name program &rest arguments)
-  ; check that TOOL is real
   (let* ((eval-program (eval program))
 	 (check (run-program "which" (list eval-program) :search t)))
     (if (zerop (process-exit-code check))
