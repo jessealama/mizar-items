@@ -379,6 +379,8 @@ suite to work correctly."
 (define-mizar-tool "transfer")
 (define-mizar-tool "irrths")
 (define-mizar-tool "irrvoc")
+(define-mizar-tool "errflag")
+(define-mizar-tool "addfmsg")
 
 (defmacro define-mizar-text-transformer (tool &optional (ignore-exit-code nil))
   ; check that TOOL is real
