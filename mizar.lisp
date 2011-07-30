@@ -62,12 +62,12 @@ suite to work correctly."
 
 (defmethod belongs-to-mml ((article-str string))
   (let ((article-str-lc (lowercase article-str)))
-    (member article-str-lc *mml-lar*
-	    :test #'string=
-	    :key #'name)))
+    (find article-str-lc *mml-lar*
+	  :test #'string=
+	  :key #'name)))
 
 (defmethod belongs-to-mml ((article article))
-  (member article *mml-lar*))
+  (find article *mml-lar*))
 
 (defgeneric mml-lar-index (thing)
   (:documentation "Where THINGS sits in the currentl mml.lar ordering."))
