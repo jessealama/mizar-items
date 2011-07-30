@@ -13,6 +13,14 @@
   :test #'string=
   :documentation "An upward-pointing arrow (see also http://www.blooberry.com/indexdot/html/tagpages/entities/arrow.htm).")
 
+(define-constant +cross-symbol+ "&#10008;"
+  :test #'string=
+  :documentation "A heavy cross symbol (see http://www.danshort.com/HTMLentities/index.php?w=dingb).")
+
+(define-constant +checkmark-symbol+ "&#10004;"
+  :test #'string=
+  :documentation "A heavy checkmark symbol (see http://www.danshort.com/HTMLentities/index.php?w=dingb).")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
