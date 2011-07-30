@@ -448,6 +448,21 @@ suite to work correctly."
   (absrefs (path article))
   (refresh-xml article))
 
+(defgeneric mhtml (article)
+  (:documentation "Compute the HTML representation of an article."))
+
+(defmethod mhtml ((article-path pathname))
+  (let ((new-article-xml-path (replace-extension article-path "miz" "xml1"))
+	(article-html-path (replace-extension article-path "miz" "html")))
+    (if (probe-file new-article-xml-path)
+	(run-program "xsltproc"
+		     (list (namestring (mizar-items-config 'mhtml-stylesheet))
+			   (namestring new-article-xml-path)
+			   "-o"
+			   (namestring article-html-path))
+		     :search t)
+	(error "File does not exist: ~S" new-article-xml-path))))
+
 (defun verify-and-export (article &optional directory)
   (accom article directory "-q" "-s" "-l")
   (verifier article directory "-q" "-s" "-l")
