@@ -63,4 +63,7 @@
   (let ((evl-file (replace-extension article-path "miz" "evl")))
     (apply-stylesheet (mizar-items-config 'env-stylesheet) evl-file)))
 
+(defmethod environment ((article article))
+  (error "Computing the environment for an article isn't supported yet!"))
+
 ;;; mizar-xsl.lisp ends here
