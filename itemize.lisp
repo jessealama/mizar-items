@@ -965,6 +965,36 @@ of LINE starting from START."
 	(format *error-output* "~a: failure~%" article)
 	nil)))
 
+(defgeneric xsl-split-article (article)
+  (:documentation "Divide any 'multi-part' elements of ARTICLE.  This means:
+
+* divide definition blocks that define multiple things into several 'singleton' definition blocks,
+* likewise for notation blocks,
+* divide reservations that reserve multiple variables into 'singleton' reservations"))
+
+(defmethod xsl-split-article ((article article))
+  (error "We haven't yet defined XSL-SPLIT-ARTICLE for objects of class ARTICLE.  Sorry."))
+
+(defmethod xsl-split-article ((article string))
+  "Split an article given as a string.
+
+If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty string, look at its first character.  If the first character is a forward slash '/', then interpret ARTICLE as a path to an article file on disk, and proceed accordingly.  Otherwise, interpret ARTICLE as the string representation of a MIZAR article, save the article to a temporary location on disk, and proceed as if ARTICLE were that file on disk."
+  (if (string= article "")
+      (error "We cannot split an empty article!")
+      (let ((first-char (char article 0)))
+	(if (char= first-char #\/)
+	    (xsl-split-article (pathname article))
+	    (let ((temp-article )))))))
+
+(defun xsl-split-article (article)
+  (let ((article-wsx (replace-extension article "miz" "wsx"))
+	(split-stylesheet (mizar-items-config 'split-stylesheet)))
+    (apply-stylesheet split-stylesheet article-wsx)))
+
+(defun xsl-itemize-article (article)
+  (let ((itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
+    (apply-stylesheet itemize-stylesheet (xsl-split-article article))))
+
 (defgeneric itemize (article))
 
 (defmethod itemize :around ((article-path pathname))
@@ -981,26 +1011,22 @@ of LINE starting from START."
       (newparser article-path :flags '("-q" "-l")))))
 
 (defmethod itemize ((article-path pathname))
-  (let ((article-wsx (replace-extension article-path "miz" "wsx")))
-    (let ((split-wsx (apply-stylesheet (mizar-items-config 'split-stylesheet)
-				       article-wsx)))
-      (let ((bundled-wsx (apply-stylesheet (mizar-items-config 'itemize-stylesheet)
-					   split-wsx)))
-	(xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" funct_1-doc))
-	  (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
-		 (bundle-dir (format nil "/Users/alama/sources/mizar/xsl4mizar/funct_1/~a/" bundlenr)))
-	    (ensure-directories-exist bundle-dir)
-	    (let ((text-proper-set (xpath:evaluate "Text-Proper" bundle)))
-	      (if (xpath:node-set-empty-p text-proper-set)
-		  (error "Empty node set for Text-Proper!")
-		  (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
-			 (doc (rune-dom:create-document text-proper))
-			 (bundle-path (format nil "~a~a.wsi" bundle-dir bundlenr)))
-		    (with-open-file (bundle-xml bundle-path
-						:direction :output
-						:if-does-not-exist :create
-						:if-exists :supersede
-						:element-type '(unsigned-byte 8))
-		      (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))))))
+  (let* ((xml-doc (cxml:parse-octets (xsl-itemize-article article-path))))
+    (xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" xml-doc))
+      (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
+	     (bundle-dir (format nil "/Users/alama/sources/mizar/xsl4mizar/funct_1/~a/" bundlenr)))
+	(ensure-directories-exist bundle-dir)
+	(let ((text-proper-set (xpath:evaluate "Text-Proper" bundle)))
+	  (if (xpath:node-set-empty-p text-proper-set)
+	      (error "Empty node set for Text-Proper!")
+	      (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
+		     (doc (rune-dom:create-document text-proper))
+		     (bundle-path (format nil "~a~a.wsi" bundle-dir bundlenr)))
+		(with-open-file (bundle-xml bundle-path
+					    :direction :output
+					    :if-does-not-exist :create
+					    :if-exists :supersede
+					    :element-type '(unsigned-byte 8))
+		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))))
 
 ;;; itemize.lisp ends here
