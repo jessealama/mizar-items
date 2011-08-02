@@ -23,6 +23,7 @@
 	       (:file "file-utils")
 	       (:file "author")
 	       (:file "article")
+	       (:file "mizar-condition")
 	       (:file "mizar")
 	       (:file "item")
 	       (:file "itemize")
