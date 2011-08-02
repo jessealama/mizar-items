@@ -1030,7 +1030,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	     (bundle-dir (format nil "~a~a/" items-dir bundlenr)))
 ;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
 	(ensure-directories-exist bundle-dir)
-	(let ((text-proper-set (xpath:evaluate "Text-Proper" bundle)))
+	(let ((text-proper-set (xpath:evaluate "Text-Proper[1]" bundle)))
 	  (if (xpath:node-set-empty-p text-proper-set)
 	      (error "Empty node set for Text-Proper!")
 	      (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
