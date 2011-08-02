@@ -1018,11 +1018,17 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       (newparser article-path :flags '("-q" "-l")))))
 
 (defmethod itemize ((article-path pathname))
-  (let* ((xml-doc (cxml:parse-octets (xsl-itemize-article article-path)
-				     (cxml-dom:make-dom-builder))))
+  (let* ((xml-doc (cxml:parse (xsl-itemize-article article-path)
+			      (cxml-dom:make-dom-builder)))
+	 (article-name (pathname-name article-path))
+	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name)))
+;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
+;                                     ^ ensures that the path ends with '/'
+;                                ^ ensures that the path starts with '/'
     (xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" xml-doc))
       (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
-	     (bundle-dir (format nil "/Users/alama/sources/mizar/xsl4mizar/funct_1/~a/" bundlenr)))
+	     (bundle-dir (format nil "~a~a/" items-dir bundlenr)))
+;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
 	(ensure-directories-exist bundle-dir)
 	(let ((text-proper-set (xpath:evaluate "Text-Proper" bundle)))
 	  (if (xpath:node-set-empty-p text-proper-set)
