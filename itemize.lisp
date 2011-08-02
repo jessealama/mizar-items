@@ -993,7 +993,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	      (xsl-split-article temp-article-path)
 	      (delete-file temp-article-path))))))
 
-(defun xsl-split-article (article)
+(defmethod xsl-split-article ((article pathname))
   (let ((article-wsx (replace-extension article "miz" "wsx"))
 	(split-stylesheet (mizar-items-config 'split-stylesheet)))
     (apply-stylesheet split-stylesheet article-wsx)))
