@@ -517,13 +517,21 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
       (error "There is no XML document at ~a" (namestring xml-document))))
 
 (defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname))
-  (let ((xsltproc (run-program "xsltproc"
-			       (list (namestring stylesheet)
-				     (namestring xml-document))
-			       :search t
-			       :output :stream)))
-      (if (zerop (process-exit-code xsltproc))
-	  (format nil "~{~a~%~}" (stream-lines (process-output xsltproc)))
-	  (error "xsltproc did not exit cleanly when applying~%~%  ~a~%~%to~%~%  ~a" (namestring stylesheet) (namestring xml-document)))))
+  (let* ((stylesheet-name (namestring stylesheet))
+	 (document-name (namestring xml-document))
+	 (xsltproc (run-program "xsltproc"
+				(list stylesheet-name
+				      document-name)
+				:search t
+				:input nil
+				:output :stream
+				:error nil
+				:wait nil)))
+    (let* ((out (process-output xsltproc))
+	   (out-lines (stream-lines out))
+	   (exit-code (process-exit-code xsltproc)))
+      (if (and exit-code (zerop exit-code))
+	  (format nil "~{~a~%~}" out-lines)
+	  (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a" stylesheet-name document-name)))))
 
 ;;; utils.lisp ends here
