@@ -481,8 +481,9 @@ If STYLESHEET is the empty string, nothing will be done, and XML-DOCUMENT will b
 				   :if-exists :error
 				   :if-does-not-exist :create)
 		(format xsl "~a" stylesheet))
-	      (apply-stylesheet tmp-xsl-path xml-document)
-	      (delete-file tmp-xsl-path))))))
+	      (prog1
+		  (apply-stylesheet tmp-xsl-path xml-document)
+		(delete-file tmp-xsl-path)))))))
 
 (defmethod apply-stylesheet (stylesheet (xml-document string))
   "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT.
@@ -499,8 +500,9 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 				   :if-exists :error
 				   :if-does-not-exist :create)
 		(format xml "~a" xml-document))
-	      (apply-stylesheet stylesheet tmp-xml-path)
-	      (delete-file tmp-xml-path))))))
+	      (prog1
+		  (apply-stylesheet stylesheet tmp-xml-path)
+		(delete-file tmp-xml-path)))))))
 
 (defmethod apply-stylesheet :around ((stylesheet pathname) xml-document)
   (declare (ignore xml-document))
