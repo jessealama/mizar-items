@@ -958,7 +958,7 @@ of LINE starting from START."
   (handler-case
       (progn
 	(handler-bind ((warning #'muffle-warning))
-	  (itemize article nil))
+	  (itemize article))
 	(format t "~a: success~%" article)
 	t)
       (error ()
