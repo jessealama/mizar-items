@@ -401,9 +401,9 @@ LIST; otherwise, return T and NIL."
   #+ccl
   (ccl:run-program program
 		   args
-		   :input nil
-		   :output nil
-		   :error nil))
+		   :input input
+		   :output output
+		   :error error))
 
 (defun process-exit-code (process)
   #+sbcl
