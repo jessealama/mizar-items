@@ -1552,7 +1552,9 @@ one time; later, when we do support multiple MMLs, this will be useful."
 		(verifier-condition nil)
 		(inacc-condition nil)
 		(relprem-condition nil)
-		(reliters-condition))
+		(reliters-condition nil)
+		(relinfer-condition nil)
+		(trivdemo-condition nil))
 	    (write-string-into-file text article-path
 				    :if-does-not-exist :create
 				    :if-exists :supersede)
@@ -1576,6 +1578,14 @@ one time; later, when we do support multiple MMLs, this will be useful."
 				    :flags '("-q" "-l")
 				    :working-directory *tmp-directory*)
 	      (mizar-error (c) (setf reliters-condition c)))
+	    (handler-case (relinfer article-path
+				    :flags '("-q" "-l")
+				    :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf relinfer-condition c)))
+	    (handler-case (trivdemo article-path
+				    :flags '("-q" "-l")
+				    :working-directory *tmp-directory*)
+	      (mizar-error (c) (setf trivdemo-condition c)))
 	    (when (and (not accom-condition)
 		       (not verifier-condition))
 	      (absrefs article-path)
@@ -1708,7 +1718,63 @@ one time; later, when we do support multiple MMLs, this will be useful."
 			       (:pre
 				(str (report-mizar-error-as-string reliters-condition))))
 			      (htm
-			       "Your article contains no unnecessary iterative equality steps."))))))))
+			       "Your article contains no unnecessary iterative equality steps."))))))
+		(:tr
+		 ((:td :align "center") (:tt "relinfer"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm "&mdash;")
+		      (if relinfer-condition
+			  (htm ((:span :class "not-ok") (str +cross-symbol+)))
+			  (htm ((:span :class "ok") (str +checkmark-symbol+))))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm "We cannot check for unnecessary inferences in your article because " (:tt "accom") " failed to construct a sensible environment for it.")
+		      (if verifier-condition
+			  (if relinfer-condition
+			      (htm
+			       (:p "We discovered some unnecessary inferences in your article.  Here is what " (:tt "relinfer") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string relinfer-condition)))
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "relinfer") " may not be wholly reliable.)"))
+			      (htm
+			       (:p "Your article contains no unnecessary inferences.")
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "relinfer") " may not be wholly reliable.)")))
+			  (if relinfer-condition
+			      (htm
+			       (:p "We discovered some unncessary inferences in your article.  Here is what " (:tt "relinfer") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string relinfer-condition))))
+			      (htm
+			       "Your article contains no unnecessary iterative equality steps.")))))))
+	       (:tr
+		 ((:td :align "center") (:tt "trivdemo"))
+		 ((:td :align "center")
+		  (if accom-condition
+		      (htm "&mdash;")
+		      (if trivdemo-condition
+			  (htm ((:span :class "not-ok") (str +cross-symbol+)))
+			  (htm ((:span :class "ok") (str +checkmark-symbol+))))))
+		 ((:td :align "left")
+		  (if accom-condition
+		      (htm "We cannot check for trivial proofs in your article because " (:tt "accom") " failed to construct a sensible environment for it.")
+		      (if verifier-condition
+			  (if trivdemo-condition
+			      (htm
+			       (:p "We discovered some trivial proofs in your article.  Here is what " (:tt "trivdemo") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string trivdemo-condition)))
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "trivdemo") " may not be wholly reliable.)"))
+			      (htm
+			       (:p "Your article contains no trivial proofs.")
+			       (:p "(Note that since there were verifier errors, the information reported by " (:tt "trivdemo") " may not be wholly reliable.)")))
+			  (if trivdemo-condition
+			      (htm
+			       (:p "We discovered some trivial proofs in your article.  Here is what " (:tt "trivdemo") " reported:")
+			       (:pre
+				(str (report-mizar-error-as-string trivdemo-condition))))
+			      (htm
+			       "Your article contains no trivial proofs.")))))))
 	      (if (file-exists-p article-html-path)
 		  (let ((article-html-str (file-as-string article-html-path)))
 		    (htm
