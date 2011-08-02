@@ -1042,7 +1042,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					    :if-exists :supersede
 					    :element-type '(unsigned-byte 8))
 ;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;                                           Watch out: omitting this can lead to trouble
-		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))))
+;                                           Watch out: omitting this key can lead to trouble
+		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))
+    (xpath:evaluate "count(Items/Item-Bundle)" xml-doc)))
 
 ;;; itemize.lisp ends here
