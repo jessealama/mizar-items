@@ -296,6 +296,10 @@ suite to work correctly."
 (define-mizar-tool "inacc")
 (define-mizar-tool "relprem")
 (define-mizar-tool "reliters")
+(define-mizar-tool "relinfer")
+(define-mizar-tool "trivdemo")
+(define-mizar-tool "chklab")
+(define-mizar-tool "irrths")
 
 (defmacro define-mizar-text-transformer (tool &optional (ignore-exit-code nil))
   ; check that TOOL is real
