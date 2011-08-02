@@ -1041,6 +1041,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					    :if-does-not-exist :create
 					    :if-exists :supersede
 					    :element-type '(unsigned-byte 8))
+;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;                                           Watch out: omitting this can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))))
 
 ;;; itemize.lisp ends here
