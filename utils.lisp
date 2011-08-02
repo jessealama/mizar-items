@@ -463,18 +463,18 @@ LIST; otherwise, return T and NIL."
 ;;; XSL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgeneric apply-stylesheet (stylesheet xml-document)
-  (:documentation "Apply the XSL stylesheet STYLESHEET to XML-DOCUMENT."))
+(defgeneric apply-stylesheet (stylesheet xml-document output)
+  (:documentation "Apply the XSL stylesheet STYLESHEET to XML-DOCUMENT  OUTPUT is either NIL or a string or a pathname; NIL means that the value of APPLY-STYLESHEET will be the output of the XSLT processor as a string.  If OUTPUT is either a string or a pathname, it will be interpreted as the path to a file where the output should be saved.  If there is already a file at the supplied OUTPUT, it will be overwritten.  If the value of OUTPUT is either a string or a pathname, the value of the function will be simply T.  The XSLT processor may signals an error during the application of STYLESHEET to XML-DOCUMENT."))
 
-(defmethod apply-stylesheet ((stylesheet string) xml-document)
-  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT.
+(defmethod apply-stylesheet ((stylesheet string) xml-document output)
+  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT, saving the result in OUTPUT.  (If OUTPUT is NIL, the value of this function will be a string, representing the result of applying STYLESHEET to XML-DOCUMENT.  Otherwise, OUTPUT will be interpreted as a file, and the result of applying the XSLT processor will be stored there.
 
 If STYLESHEET is the empty string, nothing will be done, and XML-DOCUMENT will be returned.  If STYLESHEET is not the empty string, its first character will be consulted.  If it is a forward slash '/', then STYLESHEET will be understood as a path to an XSL file.  If STYLESHEET is not empty and its first character is not a forward slash '/', then STYLESHEET will be understood as a string representation of an XSL stylesheet."
   (if (string= stylesheet "")
       xml-document
       (let ((first-char (char stylesheet 0)))
 	(if (char= first-char #\/)
-	    (apply-stylesheet (pathname stylesheet) xml-document)
+	    (apply-stylesheet (pathname stylesheet) xml-document output)
 	    (let ((tmp-xsl-path (temporary-file)))
 	      (with-open-file (xsl tmp-xsl-path
 				   :direction :output
@@ -482,18 +482,18 @@ If STYLESHEET is the empty string, nothing will be done, and XML-DOCUMENT will b
 				   :if-does-not-exist :create)
 		(format xsl "~a" stylesheet))
 	      (prog1
-		  (apply-stylesheet tmp-xsl-path xml-document)
+		  (apply-stylesheet tmp-xsl-path xml-document output)
 		(delete-file tmp-xsl-path)))))))
 
-(defmethod apply-stylesheet (stylesheet (xml-document string))
-  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT.
+(defmethod apply-stylesheet (stylesheet (xml-document string) output)
+  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT, saving the result in OUTPUT.  (If OUTPUT is NIL, the value of this function will be a string, representing the result of applying STYLESHEET to XML-DOCUMENT.  Otherwise, OUTPUT will be interpreted as a file, and the result of applying the XSLT processor will be stored there.
 
 If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz, the empty string) will be returned.  If XML-DOCUMENT is not the empty string, its first character will be consulted.  If it is a forward slash '/', then XML-DOCUMENT will be understood as a path to an XML file.  If XML-DOCUMENT is not empty and its first character is not a forward slash '/', then XML-DOCUMENT will be understood as a string representation of an XML document."
   (if (string= xml-document "")
       xml-document
       (let ((first-char (char xml-document 0)))
 	(if (char= first-char #\/)
-	    (apply-stylesheet stylesheet (pathname xml-document))
+	    (apply-stylesheet stylesheet (pathname xml-document) output)
 	    (let ((tmp-xml-path (temporary-file)))
 	      (with-open-file (xml tmp-xml-path
 				   :direction :output
@@ -501,22 +501,40 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 				   :if-does-not-exist :create)
 		(format xml "~a" xml-document))
 	      (prog1
-		  (apply-stylesheet stylesheet tmp-xml-path)
+		  (apply-stylesheet stylesheet tmp-xml-path output)
 		(delete-file tmp-xml-path)))))))
 
-(defmethod apply-stylesheet :around ((stylesheet pathname) xml-document)
-  (declare (ignore xml-document))
+(defmethod apply-stylesheet :around ((stylesheet pathname) xml-document output)
+  (declare (ignore xml-document output))
   (if (file-exists-p stylesheet)
       (call-next-method)
       (error "There is no stylesheet at ~a" (namestring stylesheet))))
 
-(defmethod apply-stylesheet :around (stylesheet (xml-document pathname))
-  (declare (ignore stylesheet))
+(defmethod apply-stylesheet :around (stylesheet (xml-document pathname) output)
+  (declare (ignore stylesheet output))
   (if (file-exists-p xml-document)
       (call-next-method)
       (error "There is no XML document at ~a" (namestring xml-document))))
 
-(defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname))
+(defmethod apply-stylesheet :around (stylesheet xml-document (output string))
+  (declare (ignore stylesheet xml-document))
+  (let ((writeable t))
+    (handler-case (ensure-directories-exist output)
+      (error () (setf writeable nil)))
+    (if writeable
+	(call-next-method)
+	(error "Cannot save output to '~a' because we cannot ensure that its directories exist" output))))
+
+(defmethod apply-stylesheet :around (stylesheet xml-document (output pathname))
+  (declare (ignore stylesheet xml-document))
+  (let ((writeable t))
+    (handler-case (ensure-directories-exist output)
+      (error () (setf writeable nil)))
+    (if writeable
+	(call-next-method)
+	(error "Cannot save output to '~a' because we cannot ensure that its directories exist" (namestring output)))))
+
+(defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname) output)
   (let* ((stylesheet-name (namestring stylesheet))
 	 (document-name (namestring xml-document))
 	 (xsltproc (run-program "xsltproc"
@@ -524,14 +542,16 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 				      document-name)
 				:search t
 				:input nil
-				:output :stream
+				:output (or output :stream)
 				:error nil
 				:wait nil)))
     (let* ((out (process-output xsltproc))
 	   (out-lines (stream-lines out))
 	   (exit-code (process-exit-code xsltproc)))
       (if (and exit-code (zerop exit-code))
-	  (format nil "~{~a~%~}" out-lines)
+	  (if output
+	      t
+	      (format nil "~{~a~%~}" out-lines))
 	  (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a" stylesheet-name document-name)))))
 
 ;;; utils.lisp ends here
