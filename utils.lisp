@@ -390,20 +390,22 @@ LIST; otherwise, return T and NIL."
 ;;; Running programs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun run-program (program args &key search input output error)
+(defun run-program (program args &key search input output error wait)
   #+sbcl
   (sb-ext:run-program program
 		      args
 		      :search t
 		      :input nil
 		      :output nil
-		      :error nil)
+		      :error nil
+		      :wait wait)
   #+ccl
   (ccl:run-program program
 		   args
 		   :input input
 		   :output output
-		   :error error))
+		   :error error
+		   :wait wait))
 
 (defun process-exit-code (process)
   #+sbcl
