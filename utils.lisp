@@ -426,4 +426,55 @@ LIST; otherwise, return T and NIL."
   #+ccl
   (ccl:external-process-error-stream process))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; XSL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric apply-stylesheet (stylesheet xml-document)
+  (:documentation "Apply the XSL stylesheet STYLESHEET to XML-DOCUMENT."))
+
+(defmethod apply-stylesheet ((stylesheet string) xml-document)
+  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT.
+
+If STYLESHEET is the empty string, nothing will be done, and XML-DOCUMENT will be returned.  If STYLESHEET is not the empty string, its first character will be consulted.  If it is a forward slash '/', then STYLESHEET will be understood as a path to an XSL file.  If STYLESHEET is not empty and its first character is not a forward slash '/', then STYLESHEET will be understood as a string representation of an XSL stylesheet."
+  (if (string= stylesheet "")
+      xml-document
+      (let ((first-char (char stylesheet 0)))
+	(if (char= first-char #\/)
+	    (apply-stylesheet (pathname stylesheet) xml-document)
+	    (error "Don't know how to handle stylesheets represented as strings, such as~%~%~a" stylesheet)))))
+
+(defmethod apply-stylesheet (stylesheet (xml-document string))
+  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT.
+
+If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz, the empty string) will be returned.  If XML-DOCUMENT is not the empty string, its first character will be consulted.  If it is a forward slash '/', then XML-DOCUMENT will be understood as a path to an XML file.  If XML-DOCUMENT is not empty and its first character is not a forward slash '/', then XML-DOCUMENT will be understood as a string representation of an XML document."
+  (if (string= xml-document "")
+      xml-document
+      (let ((first-char (char xml-document 0)))
+	(if (char= first-char #\/)
+	    (apply-stylesheet stylesheet (pathname xml-document))
+	    (error "Don't know how to handle XML documents represented as strings, such as~%~%~a" xml-document)))))
+
+(defmethod apply-stylesheet :around ((stylesheet pathname) xml-document)
+  (declare (ignore xml-document))
+  (if (file-exists-p stylesheet)
+      (call-next-method)
+      (error "There is no stylesheet at ~a" (namestring stylesheet))))
+
+(defmethod apply-stylesheet :around (stylesheet (xml-document pathname))
+  (declare (ignore stylesheet))
+  (if (file-exists-p xml-document)
+      (call-next-method)
+      (error "There is no XML document at ~a" (namestring xml-document))))
+
+(defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname))
+  (let ((xsltproc (run-program "xsltproc"
+			       (list (namestring stylesheet)
+				     (namestring xml-document))
+			       :search t
+			       :output :stream)))
+      (if (zerop (process-exit-code xsltproc))
+	  (format nil "~{~a~%~}" (stream-lines (process-output xsltproc)))
+	  (error "xsltproc did not exit cleanly when applying~%~%  ~a~%~%to~%~%  ~a" (namestring stylesheet) (namestring xml-document)))))
+
 ;;; utils.lisp ends here
