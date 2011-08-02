@@ -54,25 +54,13 @@
 (defgeneric environment (article))
 
 (defmethod environment :around ((article-path pathname))
-  (let ((env-stylesheet (mizar-items-config 'env-stylesheet)))
-    (if (file-exists-p env-stylesheet)
-	(if (file-exists-p article-path)
-	    (let ((evl-file (replace-extension article-path "miz" "evl")))
-	      (if (file-exists-p evl-file)
-		  (call-next-method)
-		  (error "The .evl file for ~a doesn't exist" (namestring article-path))))
-	    (error "Cannot find the environment of the article at ~a, because there is no file there" (namestring article-path)))
-	(error "The stylesheet for computing the environment of an article cannot be found at the expected location ~a" env-stylesheet))))
+  (let ((evl-file (replace-extension article-path "miz" "evl")))
+    (if (file-exists-p evl-file)
+	(call-next-method)
+	(error "The .evl file for ~a doesn't exist" (namestring article-path)))))
 
 (defmethod environment ((article-path pathname))
   (let ((evl-file (replace-extension article-path "miz" "evl")))
-    (let ((xsltproc (run-program "xsltproc"
-				 (list (mizar-items-config 'env-stylesheet)
-				       (namestring evl-file))
-				 :search t
-				 :output :stream)))
-      (if (zerop (process-exit-code xsltproc))
-	  (stream-lines (process-output xsltproc))
-	  (error "xsltproc did not exit cleanly when applying ~a to ~a" (mizar-items-config 'env-stylesheet) (namestring evl-file))))))
+    (apply-stylesheet (mizar-items-config 'env-stylesheet) evl-file)))
 
 ;;; mizar-xsl.lisp ends here
