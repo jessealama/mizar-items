@@ -984,7 +984,14 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       (let ((first-char (char article 0)))
 	(if (char= first-char #\/)
 	    (xsl-split-article (pathname article))
-	    (let ((temp-article )))))))
+	    (let ((temp-article-path (temporary-file :extension ".miz")))
+	      (with-open-file (temp-article temp-article-path
+					    :direction :output
+					    :if-exists :error
+					    :if-does-not-exist :create)
+		(format temp-article "~a" article))
+	      (xsl-split-article temp-article-path)
+	      (delete-file temp-article-path))))))
 
 (defun xsl-split-article (article)
   (let ((article-wsx (replace-extension article "miz" "wsx"))
