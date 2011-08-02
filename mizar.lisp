@@ -147,31 +147,6 @@ suite to work correctly."
 	       (refresh-text article)))
 	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
 
-(defmacro define-input-transformer (name program &rest arguments)
-  ; check that TOOL is real
-  (let* ((eval-program (eval program))
-	 (check (run-program "which" (list eval-program) :search t)))
-    (if (zerop (process-exit-code check))
-	`(progn
-	   (defgeneric ,name (file &optional directory))
-	   (defmethod ,name ((miz-path pathname) &optional (directory (user-homedir-pathname)))
-	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-		    (proc (run-in-directory ,eval-program
-					    directory
-					    ',arguments 
-					    :input miz-path
-					    :output tmp-path
-					    :if-output-exists :supersede)))
-	       (if (zerop (process-exit-code proc))
-		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (process-exit-code proc)))))
-	     (defmethod ,name ((article-path string) &optional (directory (user-homedir-pathname)))
-	       (,name (pathname article-path) directory))
-	     (defmethod ,name ((article article) &optional (directory (user-homedir-pathname)))
-	       (,name (path article) directory)
-	       (refresh-text article)))
-	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
-
 (defun atr-file-for-article (article-pathname)
   (let ((article-base (pathname-name article-pathname))
 	(article-dir (directory-namestring article-pathname)))
