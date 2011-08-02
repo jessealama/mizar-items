@@ -1018,7 +1018,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       (newparser article-path :flags '("-q" "-l")))))
 
 (defmethod itemize ((article-path pathname))
-  (let* ((xml-doc (cxml:parse-octets (xsl-itemize-article article-path))))
+  (let* ((xml-doc (cxml:parse-octets (xsl-itemize-article article-path)
+				     (cxml-dom:make-dom-builder))))
     (xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" xml-doc))
       (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
 	     (bundle-dir (format nil "/Users/alama/sources/mizar/xsl4mizar/funct_1/~a/" bundlenr)))
