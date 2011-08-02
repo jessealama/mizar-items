@@ -76,6 +76,12 @@
 			   "/Users/alama/sources/mizar/xsl4mizar/strip-prop.xsl")
 (update-mizar-items-config 'mhtml-stylesheet
 			   (file-in-xsl4mizar-dir "MHTML/mhtml_main.xsl"))
+(update-mizar-items-config 'env-stylesheet
+			   (file-in-xsl4mizar-dir "env.xsl"))
+(update-mizar-items-config 'split-stylesheet
+			   (file-in-xsl4mizar-dir "split.xsl"))
+(update-mizar-items-config 'itemize-stylesheet
+			   (file-in-xsl4mizar-dir "itemize.xsl"))
 (update-mizar-items-config 'item-to-fragment-path
 			   (file-in-mizar-items-dir "item-to-fragment-table"))
 (update-mizar-items-config 'full-item-dependency-graph
