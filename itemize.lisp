@@ -996,11 +996,11 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defmethod xsl-split-article ((article pathname))
   (let ((article-wsx (replace-extension article "miz" "wsx"))
 	(split-stylesheet (mizar-items-config 'split-stylesheet)))
-    (apply-stylesheet split-stylesheet article-wsx)))
+    (apply-stylesheet split-stylesheet article-wsx nil)))
 
 (defun xsl-itemize-article (article)
   (let ((itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
-    (apply-stylesheet itemize-stylesheet (xsl-split-article article))))
+    (apply-stylesheet itemize-stylesheet (xsl-split-article article) nil)))
 
 (defgeneric itemize (article))
 
@@ -1021,25 +1021,25 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
   (let* ((xml-doc (cxml:parse (xsl-itemize-article article-path)
 			      (cxml-dom:make-dom-builder)))
 	 (bundle-xpath "Items/Item-Bundle")
+	 (environment (environment article-path))
 	 (article-name (pathname-name article-path))
+	 (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
 	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name)))
 ;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
 ;                                     ^ ensures that the path ends with '/'
 ;                                ^ ensures that the path starts with '/'
     (handler-case
 	(ensure-directories-exist items-dir)
-      (file-error () (error "We cannot ensure that the directory '~a' exists, so we cannot save the items of ~a into their own subdirectories of this directory." items-dir article-name)))
+      (file-error () (error "We cannot ensure that the directory '~a' exists, so we cannot save the items of ~a into directory." items-dir article-name)))
     (xpath:do-node-set (bundle (xpath:evaluate bundle-xpath xml-doc))
-      (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
-	     (bundle-dir (format nil "~a~a/" items-dir bundlenr)))
-;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
-	(ensure-directories-exist bundle-dir)
+      (let* ((bundlenr (dom:get-attribute bundle "bundlenr")))
 	(let ((text-proper-set (xpath:evaluate "Text-Proper[1]" bundle)))
 	  (if (xpath:node-set-empty-p text-proper-set)
 	      (error "Empty node set for Text-Proper!")
 	      (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
 		     (doc (rune-dom:create-document text-proper))
-		     (bundle-path (format nil "~a~a.wsi" bundle-dir bundlenr)))
+		     (bundle-path (format nil "~a~a.wsi" items-dir bundlenr)))
+         ;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
 		(with-open-file (bundle-xml bundle-path
 					    :direction :output
 					    :if-does-not-exist :create
@@ -1047,7 +1047,20 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					    :element-type '(unsigned-byte 8))
 ;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;                                           Watch out: omitting this key can lead to trouble
-		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))
+		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
+		(let ((bundle-miz-path (format nil "~ackb~a.miz" items-dir bundlenr))
+		      (bundle-miz-text-proper (apply-stylesheet wsm-stylesheet bundle-path nil)))
+		  (with-open-file (bundle-miz bundle-miz-path
+					      :direction :output
+					      :if-exists :supersede
+					      :if-does-not-exist :create)
+		    (format bundle-miz "environ")
+		    (terpri bundle-miz)
+		    (format bundle-miz "~a" environment)
+		    (terpri bundle-miz)
+		    (format bundle-miz "begin")
+		    (terpri bundle-miz)
+		    (format bundle-miz "~a" bundle-miz-text-proper))))))))
     (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
 
 ;;; itemize.lisp ends here
