@@ -1026,7 +1026,10 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 ;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
 ;                                     ^ ensures that the path ends with '/'
 ;                                ^ ensures that the path starts with '/'
-    (xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" xml-doc))
+    (handler-case
+	(ensure-directories-exist items-dir)
+      (file-error () (error "We cannot ensure that the directory '~a' exists, so we cannot save the items of ~a into their own subdirectories of this directory." items-dir article-name)))
+    (xpath:do-node-set (bundle (xpath:evaluate bundle-xpath xml-doc))
       (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
 	     (bundle-dir (format nil "~a~a/" items-dir bundlenr)))
 ;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
