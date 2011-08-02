@@ -324,15 +324,6 @@ suite to work correctly."
 	       (refresh-text article))))
 	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
 
-;; our text transformers -- thanks, Karol Pąk et al.! 
-(define-mizar-text-transformer "JA1")
-(define-mizar-text-transformer "unhereby" t)
-(define-mizar-text-transformer "dellink")
-(define-mizar-text-transformer "CutSet")
-(define-mizar-text-transformer "CutReconsider")
-(define-mizar-text-transformer "change") ; clever name...
-(define-mizar-text-transformer "ref") ; clever name...
-
 ;;; absrefs
 
 (defparameter *xsl4mizar-root* 
