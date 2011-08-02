@@ -1077,6 +1077,11 @@ of LINE starting from START."
 
 (defgeneric itemize (article))
 
+(defmethod itemize :around ((article-path pathname))
+  (if (file-exists-p article-path)
+      (call-next-method)
+      (error "There is no article at ~a" article-path)))
+
 (defmethod itemize ((article-path pathname))
   (xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" funct_1-doc))
     (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
