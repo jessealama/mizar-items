@@ -25,6 +25,7 @@
 	       (:file "article")
 	       (:file "mizar-condition")
 	       (:file "mizar")
+	       (:file "mizar-xsl")
 	       (:file "item")
 	       (:file "itemize")
 	       (:file "queue")
