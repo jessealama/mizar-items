@@ -1020,6 +1020,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defmethod itemize ((article-path pathname))
   (let* ((xml-doc (cxml:parse (xsl-itemize-article article-path)
 			      (cxml-dom:make-dom-builder)))
+	 (bundle-xpath "Items/Item-Bundle")
 	 (article-name (pathname-name article-path))
 	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name)))
 ;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
@@ -1044,6 +1045,6 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 ;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;                                           Watch out: omitting this key can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))
-    (xpath:evaluate "count(Items/Item-Bundle)" xml-doc)))
+    (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
 
 ;;; itemize.lisp ends here
