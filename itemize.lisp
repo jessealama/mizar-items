@@ -1082,22 +1082,35 @@ of LINE starting from START."
       (call-next-method)
       (error "There is no article at ~a" article-path)))
 
+(defmethod itemize :before ((article-path pathname))
+  (let ((evl-file (replace-extension article-path "miz" "evl"))
+	(wsx-file (replace-extension article-path "miz" "wsx")))
+    (unless (file-exists-p evl-file)
+      (envget article-path :flags '("-q" "-l")))
+    (unless (file-exists-p wsx-file)
+      (newparser article-path :flags '("-q" "-l")))))
+
 (defmethod itemize ((article-path pathname))
-  (xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" funct_1-doc))
-    (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
-	   (bundle-dir (format nil "/Users/alama/sources/mizar/xsl4mizar/funct_1/~a/" bundlenr)))
-      (ensure-directories-exist bundle-dir)
-      (let ((text-proper-set (xpath:evaluate "Text-Proper" bundle)))
-	(if (xpath:node-set-empty-p text-proper-set)
-	    (error "Empty node set for Text-Proper!")
-	    (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
-		   (doc (rune-dom:create-document text-proper))
-		   (bundle-path (format nil "~a~a.wsi" bundle-dir bundlenr)))
-	      (with-open-file (bundle-xml bundle-path
-					  :direction :output
-					  :if-does-not-exist :create
-					  :if-exists :supersede
-					  :element-type '(unsigned-byte 8))
-		(dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))))))))
+  (let ((article-wsx (replace-extension article-path "miz" "wsx")))
+    (let ((split-wsx (apply-stylesheet (mizar-items-config 'split-stylesheet)
+				       article-wsx)))
+      (let ((bundled-wsx (apply-stylesheet (mizar-items-config 'itemize-stylesheet)
+					   split-wsx)))
+	(xpath:do-node-set (bundle (xpath:evaluate "Items/Item-Bundle" funct_1-doc))
+	  (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
+		 (bundle-dir (format nil "/Users/alama/sources/mizar/xsl4mizar/funct_1/~a/" bundlenr)))
+	    (ensure-directories-exist bundle-dir)
+	    (let ((text-proper-set (xpath:evaluate "Text-Proper" bundle)))
+	      (if (xpath:node-set-empty-p text-proper-set)
+		  (error "Empty node set for Text-Proper!")
+		  (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
+			 (doc (rune-dom:create-document text-proper))
+			 (bundle-path (format nil "~a~a.wsi" bundle-dir bundlenr)))
+		    (with-open-file (bundle-xml bundle-path
+						:direction :output
+						:if-does-not-exist :create
+						:if-exists :supersede
+						:element-type '(unsigned-byte 8))
+		      (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc)))))))))))
 
 ;;; itemize.lisp ends here
