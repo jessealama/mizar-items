@@ -301,29 +301,6 @@ suite to work correctly."
 (define-mizar-tool "chklab")
 (define-mizar-tool "irrths")
 
-(defmacro define-mizar-text-transformer (tool &optional (ignore-exit-code nil))
-  ; check that TOOL is real
-  (let ((check (run-program "which" (list tool) :search t)))
-    (if (zerop (process-exit-code check))
-	(let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
-	  `(progn
-	     (defgeneric ,tool-as-symbol (article directory &rest flags))
-	     (defmethod ,tool-as-symbol ((article-path pathname) directory &rest flags)
-	       (let ((edtfile-path (replace-extension article-path
-						      "miz" "$-$")))
-		 (run-mizar-tool ,tool article-path
-				 :directory directory
-				 :ignore-exit-code ,ignore-exit-code
-				 :flags flags)
-		 (edtfile article-path directory "-l")
-		 (rename-file edtfile-path article-path)))
-	     (defmethod ,tool-as-symbol ((article-path string) directory &rest flags)
-	       (apply ',tool-as-symbol (pathname article-path) directory flags))
-	     (defmethod ,tool-as-symbol ((article article) directory &rest flags)
-	       (apply ',tool-as-symbol (path article) directory flags)
-	       (refresh-text article))))
-	(error "The mizar tool ~S could not be found in your path (or it is not executable)" tool))))
-
 ;;; absrefs
 
 (defparameter *xsl4mizar-root* 
