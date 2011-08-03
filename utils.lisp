@@ -462,7 +462,7 @@ LIST; otherwise, return T and NIL."
 (defgeneric run-in-directory (program working-directory args))
 
 (defmethod run-in-directory (program (working-directory sandbox) args)
-  (run-in-directory program (location sandbox) args))
+  (run-in-directory program (location working-directory) args))
 
 (defmethod run-in-directory :around ((program string) (working-directory pathname) (args list))
   (when (string= program "")
