@@ -151,7 +151,7 @@ suite to work correctly."
 
 (defmethod run-mizar-tool (tool (article-path pathname) &key directory ignore-exit-code flags)
   (let ((article-dir (cond ((typep directory 'sandbox)
-			    (location sandbox))
+			    (location directory))
 			   ((null directory)
 			    (directory-namestring article-path))
 			   ((pathnamep directory)
