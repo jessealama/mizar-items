@@ -599,10 +599,16 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 	(error "Cannot save output to '~a' because we cannot ensure that its directories exist" (namestring output)))))
 
 (defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname) parameters output)
-  (labels ((stringparam-cons (string-string-cons)
-	     (format nil "--stringparam ~a ~a" (car string-string-cons) (cdr string-string-cons)))
-	   (xsltproc-args ()
-	     (mapcar #'stringparam-cons parameters)))
+  (labels ((xsltproc-args ()
+	     (loop
+		with args = nil
+		for (param . value) in parameters
+		do
+		  (push value args)
+		  (push param args)
+		  (push "--stringparam" args)
+		finally
+		  (return args))))
     (let* ((stylesheet-name (namestring stylesheet))
 	   (document-name (namestring xml-document))
 	   (xsltproc (run-program "xsltproc"
