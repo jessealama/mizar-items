@@ -61,7 +61,7 @@
 
 (defmethod environment ((article-path pathname))
   (let ((evl-file (replace-extension article-path "miz" "evl")))
-    (apply-stylesheet (mizar-items-config 'env-stylesheet) evl-file nil)))
+    (apply-stylesheet (mizar-items-config 'env-stylesheet) evl-file nil nil)))
 
 (defmethod environment ((article article))
   (error "Computing the environment for an article isn't supported yet!"))

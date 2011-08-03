@@ -996,11 +996,11 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defmethod xsl-split-article ((article pathname))
   (let ((article-wsx (replace-extension article "miz" "wsx"))
 	(split-stylesheet (mizar-items-config 'split-stylesheet)))
-    (apply-stylesheet split-stylesheet article-wsx nil)))
+    (apply-stylesheet split-stylesheet article-wsx nil nil)))
 
 (defun xsl-itemize-article (article)
   (let ((itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
-    (apply-stylesheet itemize-stylesheet (xsl-split-article article) nil)))
+    (apply-stylesheet itemize-stylesheet (xsl-split-article article) nil nil)))
 
 (defgeneric itemize (article))
 
@@ -1049,7 +1049,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 ;                                           Watch out: omitting this key can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
 		(let ((bundle-miz-path (format nil "~ackb~a.miz" items-dir bundlenr))
-		      (bundle-miz-text-proper (apply-stylesheet wsm-stylesheet bundle-path nil)))
+		      (bundle-miz-text-proper (apply-stylesheet wsm-stylesheet bundle-path nil nil)))
 		  (with-open-file (bundle-miz bundle-miz-path
 					      :direction :output
 					      :if-exists :supersede
