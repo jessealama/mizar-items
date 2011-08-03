@@ -1060,7 +1060,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 		    (terpri bundle-miz)
 		    (format bundle-miz "begin")
 		    (terpri bundle-miz)
-		    (format bundle-miz "~a" bundle-miz-text-proper))))))))
+		    (format bundle-miz "~a" bundle-miz-text-proper))
+		  (accom bundle-miz-path)))))))
     (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
 
 ;;; itemize.lisp ends here
