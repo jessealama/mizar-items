@@ -362,6 +362,37 @@ LIST; otherwise, return T and NIL."
       (when (eq c :end)
 	t))))
 
+(defun temporary-file (&key (base "") (extension "") (tmp-dir "/tmp"))
+  (if (or (stringp tmp-dir)
+	  (pathnamep tmp-dir))
+      (if (stringp extension)
+	  (if (scan "^\.?[a-zA-Z0-9]*$" extension)
+	      (if (stringp base)
+		  (if (scan "^[A-Za-z]*$" base)
+		      (register-groups-bind (real-ext)
+			  ("^\.?([a-zA-Z0-9]*)$" extension)
+			(let ((real-tmp-dir (pathname-as-directory tmp-dir)))
+			  (if (directory-p real-tmp-dir)
+			      (loop
+				 with real-tmp-dir-name = (namestring real-tmp-dir)
+				 for i from 1 upto 1000
+				 for tmp-path = (if (string= real-ext "")
+						    (format nil "~a/~a~d" real-tmp-dir-name base i)
+						    (format nil "~a/~a~d.~a" real-tmp-dir-name base i real-ext))
+				 do
+				   (unless (probe-file tmp-path)
+				     (return (pathname tmp-path)))
+				 finally
+				   (if (string= base "")
+				       (error "We have run out of temporary file names in ~a!" tmp-dir)
+				       (error "We have run out of temporary file names in ~a! with the base name ~a" tmp-dir base)))
+			      (error "We cannot understand '~a' as a directory" tmp-dir))))
+		      (error "BASE must consist of alphanumeric characters only; '~a' is not a suitable argument" base))
+		  (error "BASE must be a string; '~a' is not a suitable argument" base))
+	      (error "EXTENSION must be a string consisting of alphanumeric characters, possibly beginning with a period '.'; '~a' is not a suitable argument" extension))
+	  (error "EXTENSION must be a string (possibly the empty string); '~a' is not a suitable value" extension))
+      (error "TMP-DIR must be either a string or a pathname; '~a' is not a suitable argument" tmp-dir)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Paths
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -427,37 +458,6 @@ LIST; otherwise, return T and NIL."
   (sb-ext:process-error process)
   #+ccl
   (ccl:external-process-error-stream process))
-
-(defun temporary-file (&key (base "") (extension "") (tmp-dir "/tmp"))
-  (if (or (stringp tmp-dir)
-	  (pathnamep tmp-dir))
-      (if (stringp extension)
-	  (if (scan "^\.?[a-zA-Z0-9]*$" extension)
-	      (if (stringp base)
-		  (if (scan "^[A-Za-z]*$" base)
-		      (register-groups-bind (real-ext)
-			  ("^\.?([a-zA-Z0-9]*)$" extension)
-			(let ((real-tmp-dir (pathname-as-directory tmp-dir)))
-			  (if (directory-p real-tmp-dir)
-			      (loop
-				 with real-tmp-dir-name = (namestring real-tmp-dir)
-				 for i from 1 upto 1000
-				 for tmp-path = (if (string= real-ext "")
-						    (format nil "~a/~a~d" real-tmp-dir-name base i)
-						    (format nil "~a/~a~d.~a" real-tmp-dir-name base i real-ext))
-				 do
-				   (unless (probe-file tmp-path)
-				     (return (pathname tmp-path)))
-				 finally
-				   (if (string= base "")
-				       (error "We have run out of temporary file names in ~a!" tmp-dir)
-				       (error "We have run out of temporary file names in ~a! with the base name ~a" tmp-dir base)))
-			      (error "We cannot understand '~a' as a directory" tmp-dir))))
-		      (error "BASE must consist of alphanumeric characters only; '~a' is not a suitable argument" base))
-		  (error "BASE must be a string; '~a' is not a suitable argument" base))
-	      (error "EXTENSION must be a string consisting of alphanumeric characters, possibly beginning with a period '.'; '~a' is not a suitable argument" extension))
-	  (error "EXTENSION must be a string (possibly the empty string); '~a' is not a suitable value" extension))
-      (error "TMP-DIR must be either a string or a pathname; '~a' is not a suitable argument" tmp-dir)))
 
 (defgeneric run-in-directory (program working-directory args))
 
