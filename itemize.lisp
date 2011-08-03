@@ -1139,7 +1139,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 		    (format bundle-miz "begin")
 		    (terpri bundle-miz)
 		    (format bundle-miz "~a" bundle-miz-text-proper))
-		  (accom bundle-miz-path)))))))
+		  (accom bundle-miz-path :working-directory items-dir)))))))
     (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
 
 ;;; itemize.lisp ends here
