@@ -88,41 +88,6 @@ suite to work correctly."
   (< (mml-lar-index article-1)
      (mml-lar-index article-2)))
 
-(defgeneric run-in-directory (program working-directory args))
-
-(defmethod run-in-directory (program (working-directory sandbox) args)
-  (run-in-directory program (location sandbox) args))
-
-(defmethod run-in-directory :around ((program string) (working-directory pathname) (args list))
-  (when (string= program "")
-    (error "The empty string is not the name of a program!"))
-  (unless (file-exists-p working-directory)
-    (error "The supplied working directory, '~a', doesn't exist!" working-directory))
-  (if (every #'non-empty-stringp args)
-      (call-next-method)
-      (error "The list of arguments is supposed to consist entirely of non-empty strings!")))
-
-(defmethod run-in-directory ((program string) (working-directory null) (args list))
-  (run-program program
-	       args
-	       :search t
-	       :input nil
-	       :output nil
-	       :error nil))
-
-(defmethod run-in-directory ((program string) (working-directory pathname) (args list))
-  (let ((dir-as-string (directory-namestring
-			(pathname-as-directory working-directory))))
-    (run-program (mizar-items-config 'exec-in-dir-script-path)
-		 (append (list dir-as-string program) args)
-		 :search t
-		 :input nil
-		 :output nil
-		 :error nil)))
-
-(defmethod run-in-directory (program (working-directory string) args)
-  (run-in-directory program (pathname working-directory) args))
-
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
   (let* ((eval-program (eval program))
