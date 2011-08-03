@@ -226,7 +226,6 @@ suite to work correctly."
 (define-mizar-tool "relinfer")
 (define-mizar-tool "trivdemo")
 (define-mizar-tool "chklab")
-(define-mizar-tool "irrths")
 (define-mizar-tool "newparser")
 
 (defun verify-and-export (article &optional directory)
