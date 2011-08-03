@@ -405,6 +405,21 @@ LIST; otherwise, return T and NIL."
 						    ""
 						    (concat "." extension))))
 
+(defgeneric file-has-extension (file extension)
+  (:documentation "Determine whether FILE has the extension EXTENSION.
+EXTENSION can optionally begin with a full-stop '.'.  This utility does not check whether FILE actually exists; it only checks whether the extension of FILE (whether it exists or not) is equal to the specified extension.  If the file has no extension at all, then this function will return NIL no matter what EXTENSION is.  If the name of FILE ends with a full-stop, then the empty string is the only value of EXTENSION for which this utility will return T."))
+
+(defmethod file-has-extension ((file-string string) extension)
+  (file-has-extension (pathname file-string) extension))
+
+(defmethod file-has-extension ((file pathname) (extension string))
+  (register-groups-bind (extension-sans-period)
+      ("^\\.?(.*)$" extension)
+    (let ((file-ns (file-namestring file)))
+      (register-groups-bind (ext)
+	  ("\\.(.*)$" file-ns)
+	(string= ext extension-sans-period)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
