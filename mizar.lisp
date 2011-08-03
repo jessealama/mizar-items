@@ -202,24 +202,11 @@ suite to work correctly."
 
 (defmacro define-mizar-tool (tool)
   (let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
-    `(progn
-       (defgeneric ,tool-as-symbol (article &key working-directory flags))
-       (defmethod ,tool-as-symbol ((article-path pathname) &key working-directory flags)
-	 (run-mizar-tool ,tool article-path
-			 :directory working-directory
-			 :ignore-exit-code nil
-			 :flags flags))
-       (defmethod ,tool-as-symbol ((article-path string) &key working-directory flags)
-	 (run-mizar-tool ,tool article-path
-			 :directory working-directory
-			 :ignore-exit-code nil
-			 :flags flags))
-       (defmethod ,tool-as-symbol ((article article) &key working-directory flags)
-	 (run-mizar-tool ,tool article
-			 :directory working-directory
-			 :ignore-exit-code nil
-			 :flags flags)
-	 article))))
+    `(defun ,tool-as-symbol (article &key working-directory flags)
+       (run-mizar-tool ,tool article
+		       :directory working-directory
+		       :ignore-exit-code nil
+		       :flags flags))))
 
 ;; workhorses
 (define-mizar-tool "edtfile")
