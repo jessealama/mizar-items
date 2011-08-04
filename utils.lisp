@@ -436,7 +436,7 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 ;;; Running programs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun run-program (program args &key search input output error wait)
+(defun run-program (program args &key search input output error wait if-output-exists)
   #+sbcl
   (sb-ext:run-program program
 		      args
@@ -444,14 +444,16 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 		      :input nil
 		      :output nil
 		      :error nil
-		      :wait wait)
+		      :wait wait
+		      :if-output-exists if-output-exists)
   #+ccl
   (ccl:run-program program
 		   args
 		   :input input
 		   :output output
 		   :error error
-		   :wait wait))
+		   :wait wait
+		   :if-output-exists if-output-exists))
 
 (defun process-exit-code (process)
   #+sbcl
@@ -618,6 +620,7 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 				  :search t
 				  :input nil
 				  :output (or output :stream)
+				  :if-output-exists :supersede
 				  :error :stream
 				  :wait nil)))
       (let* ((out (process-output xsltproc))
