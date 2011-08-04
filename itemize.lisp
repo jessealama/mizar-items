@@ -1087,7 +1087,14 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 			   ((the-file-p path) (add-to-theorems (pathname-name path)))
 			   (t
 			    (error "Don't know how to deal with the prel file '~a'" (namestring path))))))
-	      (walk-directory prel-dir #'dispatch-exported-file))))
+	      (loop
+		 for extension in (list "dno" "dcl" "eid" "sch" "def" "dco" "the")
+		 do
+		   (loop
+		      with files = (files-in-directory-with-extension prel-dir extension)
+		      with sorted-files = (sort files #'ckb-<)
+		      for path in sorted-files 
+		      do (dispatch-exported-file path))))))
 	(apply-stylesheet (mizar-items-config 'extend-evl-stylesheet)
 			  evl-file
 			  (list (cons "notations" more-notations)
