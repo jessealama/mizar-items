@@ -1101,12 +1101,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       (error "There is no article at ~a" article-path)))
 
 (defmethod itemize :before ((article-path pathname))
-  (let ((evl-file (replace-extension article-path "miz" "evl"))
-	(wsx-file (replace-extension article-path "miz" "wsx")))
-    (unless (file-exists-p evl-file)
-      (envget article-path :flags '("-q" "-l")))
-    (unless (file-exists-p wsx-file)
-      (newparser article-path :flags '("-q" "-l")))))
+  (accom article-path :flags '("-q" "-l"))
+  (newparser article-path :flags '("-q" "-l")))
 
 (defmethod itemize ((article-path pathname))
   (let* ((xml-doc (cxml:parse (xsl-itemize-article article-path)
