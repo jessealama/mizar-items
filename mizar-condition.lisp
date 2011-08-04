@@ -2,6 +2,65 @@
 
 (in-package :mizar)
 
+(defun mizar-message-file ()
+  (pathname (format nil "~a/mizar.msg"
+		    #+ccl
+		    (ccl:getenv "MIZFILES")
+		    #+sbcl
+		    (sb-posix:getenv "MIZFILES")
+		    #+(and (not ccl) (not sbcl))
+		    "")))
+
+(let ((error-table (make-hash-table :test #'eql)))
+  (defun explain-error (err-code)
+    (multiple-value-bind (known-value found?)
+	(gethash err-code error-table)
+      (if found?
+	  known-value
+	  (setf (gethash err-code error-table)
+		(let ((message-file (mizar-message-file)))
+		  (if (file-exists-p message-file)
+		      (let (explanation)
+			(with-open-file (messages message-file
+						  :direction :input
+						  :if-does-not-exist :error)
+			  (loop
+			     with pattern = (format nil "^# ~d$" err-code)
+			     for line = (read-line messages nil :eof)
+			     do
+			       (cond ((eq line :eof) (return))
+				     ((null line) (return))
+				     ((scan pattern line)
+				      (let ((explanation-line (read-line messages nil :eof)))
+					(cond ((eq explanation-line :eof) (return))
+					      ((null explanation-line) (return))
+					      (t
+					       (setf explanation explanation-line)
+					       (return))))))))
+			explanation)
+		      (error "The mmizar error message file does not exist at the expected location~%~%  ~a~%" (namestring message-file))))))))
+  (defun error-table ()
+    error-table))
+
+(defun explain-err-file (err-file-path)
+  (if (file-exists-p err-file-path)
+      (loop
+	 with explanations = nil
+	 for err-line in (lines-of-file err-file-path)
+	 do
+	   (register-groups-bind (line-str col-str err-code-str)
+	       ("^([0-9]+) ([0-9]+) ([0-9]+)$" err-line)
+	     (let ((line (parse-integer line-str))
+		   (col (parse-integer col-str))
+		   (err-code (parse-integer err-code-str)))
+	       (let ((explanation (explain-error err-code)))
+		 (push (list line col err-code (or explanation
+						   "(No explanation available.)"))
+		       explanations))))
+	 finally
+	   (return (reverse explanations)))
+      (error "There is no error file at the supplied location '~a'" err-file-path)))
+
 (defun report-mizar-error (mizar-error stream)
   (with-slots (tool working-directory argument output-stream error-stream exit-code)
       mizar-error
@@ -42,7 +101,27 @@
       (if (file-exists-p err-file)
 	  (if (zerop (file-size err-file))
 	      (format stream "(The error file exists, but is empty.)")
-	      (format stream "Here are the lines of the error file:~%~%~{~a~%~}" (lines-of-file err-file)))
+	      (progn
+		(format stream "Here are the lines of the error file:~%~%")
+		(loop
+		   for (line col err-code explanation) in (explain-err-file err-file)
+		   do
+		     (format stream "* Line ~d column ~d: ~a~%" line col (format nil "~a" explanation))
+;                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;
+; This looks redundant, but it ensures that we get a new string object
+; containing EXPLANATION. Because we are memoizing EXPLAIN-ERR, there
+; might be identical string objects occurring in the value of
+; EXPLANATION.  In this case, some Lisps are clever and indicate that
+; there is actually only one object occuring multiple times, thus:
+;
+;   * Line 1 column 1: #1 = Unknown private predicate
+;   * Line 2 column 1: #1
+;   * Line 3 column 1: #1
+;
+; Calling FORMAT here cirumvents such cleverness.          
+		   finally
+		     (terpri stream))))
 	  (format stream "We expected to find an error file at ~a, but somehow there isn't one." err-file)))))
 
 (defun report-mizar-error-as-string (mizar-error)
