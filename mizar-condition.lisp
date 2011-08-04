@@ -67,10 +67,10 @@
     (if tool
 	(if working-directory
 	    (if argument
-		(format stream "Error applying ~a to ~a in directory ~a" tool argument working-directory)
-		(format stream "Error applying ~a in directory ~a" tool working-directory))
+		(format stream "Error applying ~a to~%~%  ~a~%~%in directory~%~%  ~a" tool argument working-directory)
+		(format stream "Error applying ~a in directory~%~%  ~a" tool working-directory))
 	    (if argument
-		(format stream "Error applying~%~%  ~a~%~%to~%~%  ~a~%~%(No working directory was supplied.)" tool argument)
+		(format stream "Error applying ~a to~%~%  ~a~%~%(No working directory was supplied.)" tool argument)
 		(format stream "Error applying ~a (strangely, neither a working directory nor an argument to the program was supplied)" tool)))
 	(if working-directory
 	    (if argument
