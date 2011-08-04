@@ -420,6 +420,10 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 	  ("\\.(.*)$" file-ns)
 	(string= ext extension-sans-period)))))
 
+(defun files-in-directory-with-extension (directory extension)
+  (let ((dir (pathname (pathname-as-directory directory))))
+    (directory (format nil "~a*.~a" dir extension))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
