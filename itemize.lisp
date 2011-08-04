@@ -1032,7 +1032,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	  (if (directory-p prel-dir)
 	      (call-next-method)
 	      (error "The specified prel DB, '~a', isn't actually a directory" (namestring prel-dir)))
-	  (error "The specified prel DB, '~a', doesn't exist" (namestring prel-dir)))
+	  (call-next-method))
       (error "The specified .evl file, '~a', doesn't exist" (namestring evl-file))))
 
 (defmethod extend-evl ((evl-file pathname) (prel-dir pathname))
