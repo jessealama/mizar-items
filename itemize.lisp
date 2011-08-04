@@ -1103,14 +1103,16 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defmethod itemize ((article-path pathname))
   (let* ((xml-doc (cxml:parse (xsl-itemize-article article-path)
 			      (cxml-dom:make-dom-builder)))
+	 (evl-file (replace-extension article-path "miz" "evl"))
 	 (bundle-xpath "Items/Item-Bundle")
-	 (environment (environment article-path))
 	 (article-name (pathname-name article-path))
 	 (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
-	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name)))
+	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name))
 ;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
 ;                                     ^ ensures that the path ends with '/'
 ;                                ^ ensures that the path starts with '/'
+	 (prel-dir (format nil "~aprel/" items-dir)))
+;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
     (handler-case
 	(ensure-directories-exist items-dir)
       (file-error () (error "We cannot ensure that the directory '~a' exists, so we cannot save the items of ~a into directory." items-dir article-name)))
@@ -1131,20 +1133,24 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 ;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;                                           Watch out: omitting this key can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
-		(let ((bundle-miz-path (format nil "~ackb~a.miz" items-dir bundlenr))
-		      (bundle-miz-text-proper (apply-stylesheet wsm-stylesheet bundle-path nil nil)))
-		  (with-open-file (bundle-miz bundle-miz-path
-					      :direction :output
-					      :if-exists :supersede
-					      :if-does-not-exist :create)
-		    (format bundle-miz "environ")
-		    (terpri bundle-miz)
-		    (format bundle-miz "~a" environment)
-		    (terpri bundle-miz)
-		    (format bundle-miz "begin")
-		    (terpri bundle-miz)
-		    (format bundle-miz "~a" bundle-miz-text-proper))
-		  (accom bundle-miz-path :working-directory items-dir)))))))
+		;; create the bundle's new evl
+		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" items-dir bundlenr))
+		      (extended-evl (extend-evl evl-file prel-dir)))
+		  (write-string-into-file extended-evl bundle-temp-evl-path
+					  :if-exists :supersede
+					  :if-does-not-exist :create)
+		  (let ((bundle-miz-path (format nil "~ackb~a.miz" items-dir bundlenr))
+			(bundle-miz-text (apply-stylesheet wsm-stylesheet
+							   bundle-path
+							   (list (cons "evl" (namestring bundle-temp-evl-path)))
+							   nil)))
+		    (write-string-into-file bundle-miz-text bundle-miz-path
+					    :if-exists :supersede
+					    :if-does-not-exist :create)
+		    (accom bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
+		    (verifier bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
+		    (exporter bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
+		  (transfer bundle-miz-path :working-directory items-dir :flags '("-q" "-l")))))))))
     (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
 
 ;;; itemize.lisp ends here
