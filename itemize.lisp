@@ -1023,6 +1023,16 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defun the-file-p (path)
   (file-has-extension path "the"))
 
+(defun ckb-< (ckb-path-1 ckb-path-2)
+  (let ((ckb-pattern "^ckb([0-9]+)$"))
+    (register-groups-bind (ckb-num-1-as-str)
+	(ckb-pattern (pathname-name ckb-path-1))
+      (register-groups-bind (ckb-num-2-as-str)
+	  (ckb-pattern (pathname-name ckb-path-2))
+	(let ((ckb-num-1 (parse-integer ckb-num-1-as-str))
+	      (ckb-num-2 (parse-integer ckb-num-2-as-str)))
+	  (< ckb-num-1 ckb-num-2))))))
+
 (defgeneric extend-evl (evl-file prel-dir)
   (:documentation "Extend the .evl file EVL-FILE with whatever the contents of PREL-DIR.  If, for example, there is a file 'foo.sch' in PREL-DIR, then EVL-FILE will be extended so that, in its Schemes directives, we find 'FOO' as an Ident."))
 
