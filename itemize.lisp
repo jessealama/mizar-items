@@ -1083,7 +1083,6 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 			   ((sch-file-p path) (add-to-schemes (pathname-name path)))
 			   ((dco-file-p path) (add-to-constructors (pathname-name path)))
 			   ((def-file-p path) (add-to-definitions (pathname-name path)))
-			   ((dco-file-p path) (add-to-constructors (pathname-name path)))
 			   ((the-file-p path) (add-to-theorems (pathname-name path)))
 			   (t
 			    (error "Don't know how to deal with the prel file '~a'" (namestring path))))))
