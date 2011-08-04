@@ -1014,6 +1014,9 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defun dno-file-p (path)
   (file-has-extension path "dno"))
 
+(defun dcl-file-p (path)
+  (file-has-extension path "dcl"))
+
 (defun the-file-p (path)
   (file-has-extension path "the"))
 
@@ -1062,6 +1065,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 		   (setf more-requirements (pad-string more-requirements article))))
 	    (flet ((dispatch-exported-file (path)
 		     (cond ((dno-file-p path) (add-to-notations (pathname-name path)))
+			   ((dcl-file-p path) (add-to-registrations (pathname-name path)))
 			   ((sch-file-p path) (add-to-schemes (pathname-name path)))
 			   ((dco-file-p path) (add-to-constructors (pathname-name path)))
 			   ((def-file-p path) (add-to-definitions (pathname-name path)))
