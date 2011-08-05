@@ -1121,18 +1121,19 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
   (newparser article-path :flags '("-q" "-l")))
 
 (defmethod itemize ((article-path pathname))
-  (let* ((xml-doc (cxml:parse (xsl-itemize-article article-path)
-			      (cxml-dom:make-dom-builder)))
+  (let* ((itemized-article (xsl-itemize-article article-path))
+	 (xml-doc (handler-case (cxml:parse itemized-article (cxml-dom:make-dom-builder))
+		    (error (err) (error "There was an error parsing the result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-path err))))
 	 (evl-file (replace-extension article-path "miz" "evl"))
 	 (bundle-xpath "Items/Item-Bundle")
 	 (article-name (pathname-name article-path))
 	 (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
 	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name))
-;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
-;                                     ^ ensures that the path ends with '/'
-;                                ^ ensures that the path starts with '/'
+					;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
+					;                                     ^ ensures that the path ends with '/'
+					;                                ^ ensures that the path starts with '/'
 	 (prel-dir (format nil "~aprel/" items-dir)))
-;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
+					;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
     (handler-case
 	(ensure-directories-exist items-dir)
       (file-error () (error "We cannot ensure that the directory '~a' exists, so we cannot save the items of ~a into directory." items-dir article-name)))
@@ -1144,14 +1145,14 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	      (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
 		     (doc (rune-dom:create-document text-proper))
 		     (bundle-path (format nil "~a~a.wsi" items-dir bundlenr)))
-         ;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
+					;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
 		(with-open-file (bundle-xml bundle-path
 					    :direction :output
 					    :if-does-not-exist :create
 					    :if-exists :supersede
 					    :element-type '(unsigned-byte 8))
-;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;                                           Watch out: omitting this key can lead to trouble
+					;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+					;                                           Watch out: omitting this key can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
 		;; create the bundle's new evl
 		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" items-dir bundlenr))
@@ -1170,7 +1171,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 		    (accom bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
 		    (verifier bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
 		    (exporter bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
-		  (transfer bundle-miz-path :working-directory items-dir :flags '("-q" "-l")))))))))
+		    (transfer bundle-miz-path :working-directory items-dir :flags '("-q" "-l")))))))))
     (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
 
 ;;; itemize.lisp ends here
