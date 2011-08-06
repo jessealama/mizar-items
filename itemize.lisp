@@ -996,7 +996,12 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defmethod xsl-split-article ((article pathname))
   (let ((article-wsx (replace-extension article "miz" "wsx"))
 	(split-stylesheet (mizar-items-config 'split-stylesheet)))
-    (apply-stylesheet split-stylesheet article-wsx nil nil)))
+    (let ((first-one (apply-stylesheet split-stylesheet article-wsx nil nil)))
+      ;; we have to apply this stylesheet twice to ensure that loci
+      ;; are truly sequentually numbered.  One pass isn't enough.
+      ;; Perhaps there should simply be a separate stylesheet to
+      ;; accomplish this.
+      (apply-stylesheet split-stylesheet first-one nil nil))))
 
 (defun xsl-itemize-article (article)
   (let ((itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
