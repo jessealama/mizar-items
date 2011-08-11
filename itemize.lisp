@@ -1004,8 +1004,10 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       (apply-stylesheet split-stylesheet first-one nil nil))))
 
 (defun xsl-itemize-article (article)
-  (let ((itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
-    (apply-stylesheet itemize-stylesheet (xsl-split-article article) nil nil)))
+  (let ((free-variables-stylesheet (mizar-items-config 'free-variables-stylesheet))
+	(itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
+    (let ((free-variables-article (apply-stylesheet free-variables-stylesheet (xsl-split-article article) nil nil)))
+      (apply-stylesheet itemize-stylesheet free-variables-article nil nil))))
 
 (defun sch-file-p (path)
   (file-has-extension path "sch"))
