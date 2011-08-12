@@ -1,0 +1,83 @@
+environ
+vocabularies NUMBERS,SUBSET_1,REAL_1,RELAT_1,ARYTM_3,INT_1,CARD_1,XXREAL_0,SEQ_1,VALUED_0,FUNCT_1,NAT_1,TARSKI,ORDINAL2,ARYTM_1,XBOOLE_0,PARTFUN1,ZFMISC_1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,NUMBERS,XCMPLX_0,REAL_1,NAT_1,NAT_D,RELAT_1,FUNCT_1,RELSET_1,PARTFUN1,FUNCT_2,VALUED_0,SEQ_1,XXREAL_0,RECDEF_1;
+definitions TARSKI,XBOOLE_0;
+theorems ZFMISC_1,NAT_1,FUNCT_1,FUNCT_2,SEQM_3,PARTFUN1,RELSET_1,XBOOLE_1,NAT_D,ORDINAL1,XXREAL_0,CKB1,CKB2,CKB3,CKB4;
+schemes NAT_1,FUNCT_2,RECDEF_1,SUBSET_1,CLASSES1,XBOOLE_0,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15;
+registrations ORDINAL1,RELSET_1,NUMBERS,XXREAL_0,XREAL_0,SEQM_3,VALUED_0;
+constructors PARTFUN1,XXREAL_0,NAT_1,NAT_D,SEQ_1,SEQM_3,RECDEF_1,MEMBERED,RELSET_1;
+requirements NUMERALS,REAL,SUBSET,BOOLE,ARITHM;
+begin
+reserve x for set;
+reserve y for set;
+scheme PartFuncExS2 { X,Y() -> set,P,Q[set],F,G(set) -> set } : (ex f being (PartFunc of X(),Y()) st ((for x holds (x in ( dom f ) iff (x in X() & (P[ x ] or Q[ x ])))) & (for x holds (x in ( dom f ) implies ((P[ x ] implies ( f . x ) = F(x)) & (Q[ x ] implies ( f . x ) = G(x)))))))
+provided
+A1: (for x holds (x in X() implies (P[ x ] implies (not Q[ x ]))))
+and
+A2: (for x holds ((x in X() & P[ x ]) implies F(x) in Y()))
+and
+A3: (for x holds ((x in X() & Q[ x ]) implies G(x) in Y()))
+proof
+defpred X[ set,set ]
+ means
+((P[ $1 ] implies $2 = F($1)) & (Q[ $1 ] implies $2 = G($1)));
+defpred X[ set ]
+ means
+(P[ $1 ] or Q[ $1 ]);
+consider A being set such that A4: (for x holds (x in A iff (x in X() & X[ x ]))) from XBOOLE_0:sch 1;
+A5: (for x holds (x in A implies (ex y st X[ x,y ])))
+proof
+let x;
+assume A6: x in A;
+then A7: x in X() by A4;
+now
+per cases  by A4,A6;
+suppose A8: P[ x ];
+
+take y = F(x);
+(not Q[ x ]) by A1,A7,A8;
+hence thesis;
+end;
+suppose A9: Q[ x ];
+
+take y = G(x);
+(not P[ x ]) by A1,A7,A9;
+hence thesis;
+end;
+end;
+hence thesis;
+end;
+consider f being Function such that A10: (( dom f ) = A & (for x holds (x in A implies X[ x,( f . x ) ]))) from CLASSES1:sch 1(A5);
+A11: A c= X()
+proof
+let x;
+assume x in A;
+hence thesis by A4;
+end;
+( rng f ) c= Y()
+proof
+let x;
+assume x in ( rng f );
+then consider y such that A12: y in ( dom f ) and A13: x = ( f . y ) by FUNCT_1:def 3;
+now
+per cases  by A4,A10,A12;
+suppose A14: P[ y ];
+
+then ( f . y ) = F(y) by A10,A12;
+hence thesis by A2,A11,A10,A12,A13,A14;
+end;
+suppose A15: Q[ y ];
+
+then ( f . y ) = G(y) by A10,A12;
+hence thesis by A3,A11,A10,A12,A13,A15;
+end;
+end;
+hence thesis;
+end;
+then reconsider f as (PartFunc of X(),Y()) by A11,A10,RELSET_1:4;
+take f;
+thus (for x holds (x in ( dom f ) iff (x in X() & (P[ x ] or Q[ x ])))) by A4,A10;
+let x;
+assume x in ( dom f );
+hence thesis by A10;
+end;

@@ -1,0 +1,97 @@
+environ
+vocabularies FUNCT_1,RELAT_1,XBOOLE_0,ZFMISC_1,TARSKI,SUBSET_1,MCART_1,FUNCT_2,PARTFUN1,CARD_1,FUNCOP_1,FUNCT_4,BINOP_1,FUNCT_5;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,RELAT_1,FUNCT_1,WELLORD2,FUNCT_2,MCART_1,BINOP_1,FUNCT_3,CARD_1,PARTFUN1,FUNCOP_1,FUNCT_4;
+definitions TARSKI,FUNCT_1,WELLORD2,XBOOLE_0,BINOP_1,FUNCOP_1;
+theorems TARSKI,ZFMISC_1,FUNCT_1,WELLORD2,FUNCT_2,MCART_1,FUNCT_3,RELAT_1,CARD_1,PARTFUN1,FUNCOP_1,FUNCT_4,ENUMSET1,XBOOLE_0,XBOOLE_1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19;
+schemes FUNCT_1,PARTFUN1,XBOOLE_0,CKB1;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,RELSET_1;
+constructors PARTFUN1,WELLORD2,BINOP_1,FUNCT_3,FUNCOP_1,FUNCT_4,CARD_1,RELSET_1;
+requirements SUBSET,BOOLE;
+begin
+reserve x for set;
+reserve y for set;
+reserve z for set;
+reserve f for Function;
+reserve g for Function;
+reserve g1 for Function;
+reserve g2 for Function;
+definition
+let f;
+func curry f -> Function
+means
+:Def3: (( dom it ) = ( proj1 ( dom f ) ) & (for x holds (x in ( proj1 ( dom f ) ) implies (ex g st ((( it . x ) = g & ( dom g ) = ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) )) & (for y holds (y in ( dom g ) implies ( g . y ) = ( f . (x,y) ))))))));
+existence
+proof
+defpred F[ set,Function ]
+ means
+(( dom $2 ) = ( proj2 ( ( dom f ) /\ [: { $1 },( proj2 ( dom f ) ) :] ) ) & (for y holds (y in ( dom $2 ) implies ( $2 . y ) = ( f . ($1,y) ))));
+defpred P[ set,set ]
+ means
+(ex g st ($2 = g & F[ $1,g ]));
+A1: (for x holds (for y holds (for z holds (((x in ( proj1 ( dom f ) ) & P[ x,y ]) & P[ x,z ]) implies y = z))))
+proof
+let x;
+let y;
+let z;
+assume that
+x in ( proj1 ( dom f ) );
+given g1 being Function such that
+A2: y = g1
+and
+A3: F[ x,g1 ];
+
+given g2 being Function such that
+A4: z = g2
+and
+A5: F[ x,g2 ];
+
+now
+let t being set;
+assume A6: t in ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) );
+then ( g1 . t ) = ( f . (x,t) ) by A3;
+hence ( g1 . t ) = ( g2 . t ) by A5,A6;
+end;
+hence thesis by A2,A3,A4,A5,FUNCT_1:2;
+end;
+A7: (for x holds (x in ( proj1 ( dom f ) ) implies (ex y st P[ x,y ])))
+proof
+let x;
+assume that
+x in ( proj1 ( dom f ) );
+deffunc F(set) = ( f . [ x,$1 ] );
+consider g such that A8: (( dom g ) = ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) ) & (for y holds (y in ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) ) implies ( g . y ) = F(y)))) from FUNCT_1:sch 3;
+reconsider y = g as set;
+take y;
+take g;
+thus thesis by A8;
+end;
+(ex g being Function st (( dom g ) = ( proj1 ( dom f ) ) & (for x holds (x in ( proj1 ( dom f ) ) implies P[ x,( g . x ) ])))) from FUNCT_1:sch 2(A1,A7);
+hence thesis;
+end;
+uniqueness
+proof
+let f1 being Function,f2 being Function;
+assume that
+A9: ( dom f1 ) = ( proj1 ( dom f ) )
+and
+A10: (for x holds (x in ( proj1 ( dom f ) ) implies (ex g st ((( f1 . x ) = g & ( dom g ) = ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) )) & (for y holds (y in ( dom g ) implies ( g . y ) = ( f . (x,y) )))))))
+and
+A11: ( dom f2 ) = ( proj1 ( dom f ) )
+and
+A12: (for x holds (x in ( proj1 ( dom f ) ) implies (ex g st ((( f2 . x ) = g & ( dom g ) = ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) )) & (for y holds (y in ( dom g ) implies ( g . y ) = ( f . (x,y) )))))));
+now
+let x;
+assume A13: x in ( proj1 ( dom f ) );
+then consider g1 being Function such that A14: ( f1 . x ) = g1 and A15: ( dom g1 ) = ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) ) and A16: (for y holds (y in ( dom g1 ) implies ( g1 . y ) = ( f . (x,y) ))) by A10;
+consider g2 being Function such that A17: ( f2 . x ) = g2 and A18: ( dom g2 ) = ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) ) and A19: (for y holds (y in ( dom g2 ) implies ( g2 . y ) = ( f . (x,y) ))) by A12,A13;
+now
+let y;
+assume A20: y in ( proj2 ( ( dom f ) /\ [: { x },( proj2 ( dom f ) ) :] ) );
+then ( g1 . y ) = ( f . (x,y) ) by A15,A16;
+hence ( g1 . y ) = ( g2 . y ) by A18,A19,A20;
+end;
+hence ( f1 . x ) = ( f2 . x ) by A14,A15,A17,A18,FUNCT_1:2;
+end;
+hence thesis by A9,A11,FUNCT_1:2;
+end;
+end;

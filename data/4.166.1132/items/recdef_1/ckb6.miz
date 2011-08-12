@@ -1,0 +1,109 @@
+environ
+vocabularies NUMBERS,SUBSET_1,XBOOLE_0,FINSEQ_1,XXREAL_0,FUNCT_1,RELAT_1,TARSKI,VALUED_0,CARD_1,ARYTM_3,ORDINAL1,CLASSES1,ZFMISC_1,ORDINAL2,FUNCOP_1,MCART_1,NAT_1,ORDINAL4,ARYTM_1,REAL_1,PARTFUN1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,MCART_1,SUBSET_1,NUMBERS,XXREAL_0,REAL_1,NAT_1,RELAT_1,FUNCT_1,PARTFUN1,FUNCOP_1,ORDINAL1,ORDINAL2,CLASSES1,FINSEQ_1,FUNCT_2,BINOP_1,DOMAIN_1,VALUED_0,CKB2;
+definitions TARSKI,BINOP_1;
+theorems TARSKI,NAT_1,FUNCT_1,FINSEQ_1,FUNCT_2,RELAT_1,XBOOLE_1,FUNCOP_1,XREAL_1,XXREAL_0,ORDINAL1,CLASSES1,ORDINAL2,XBOOLE_0,ZFMISC_1,MCART_1,PARTFUN1,CKB1;
+schemes NAT_1,FUNCT_1,FINSEQ_1,BINOP_1,CLASSES1,ORDINAL1,FUNCT_2,CKB3,CKB4,CKB5;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,ORDINAL1,FINSET_1,XXREAL_0,XREAL_0,NAT_1,CARD_1,NUMBERS,RELSET_1,INT_1,XCMPLX_0,FINSEQ_1,VALUED_0;
+constructors BINOP_1,DOMAIN_1,FUNCOP_1,XXREAL_0,REAL_1,NAT_1,FINSEQ_1,VALUED_0,CLASSES1,ORDINAL2,RELSET_1,CKB2;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve n for (Element of ( NAT ));
+reserve x for set;
+reserve y for set;
+scheme FinRecExD { D() -> non empty set,A() -> (Element of D()),N() -> Nat,P[set,set,set] } : (ex p being (FinSequence of D()) st ((( len p ) = N() & (( p . 1 ) = A() or N() = ( 0 ))) & (for n holds ((1 <= n & n < N()) implies P[ n,( p . n ),( p . ( n + 1 ) ) ]))))
+provided
+A1: (for n being (Element of ( NAT )) holds ((1 <= n & n < N()) implies (for x being (Element of D()) holds (ex y being (Element of D()) st P[ n,x,y ]))))
+proof
+set 00 = the (Element of D());
+defpred Z[ (Element of ( NAT )),set,set ]
+ means
+(($1 < ( N() - 1 ) implies P[ ( $1 + 1 ),$2,$3 ]) & ((not $1 < ( N() - 1 )) implies $3 = 00));
+A2: (for n being (Element of ( NAT )) holds (for x being (Element of D()) holds (ex y being (Element of D()) st Z[ n,x,y ])))
+proof
+let n being (Element of ( NAT ));
+let x being (Element of D());
+(n < ( N() - 1 ) implies thesis)
+proof
+assume A3: n < ( N() - 1 );
+then ( n + 1 ) < N() by XREAL_1:20;
+then consider y being (Element of D()) such that A4: P[ ( n + 1 ),x,y ] by A1,NAT_1:11;
+take y;
+thus (n < ( N() - 1 ) implies P[ ( n + 1 ),x,y ]) by A4;
+thus thesis by A3;
+end;
+hence thesis;
+end;
+consider f being (Function of ( NAT ),D()) such that A5: (( f . ( 0 ) ) = A() & (for n being (Element of ( NAT )) holds Z[ n,( f . n ),( f . ( n + 1 ) ) ])) from CKB4:sch 1(A2);
+defpred P[ set,set ]
+ means
+(for r being Real holds (r = $1 implies $2 = ( f . ( r - 1 ) )));
+A6: (for x holds (x in ( REAL ) implies (ex y st P[ x,y ])))
+proof
+let x;
+assume x in ( REAL );
+then reconsider r = x as Real;
+take ( f . ( r - 1 ) );
+thus thesis;
+end;
+consider g being Function such that A7: (( dom g ) = ( REAL ) & (for x holds (x in ( REAL ) implies P[ x,( g . x ) ]))) from CLASSES1:sch 1(A6);
+A8: ( dom ( g | ( Seg N() ) ) ) = ( Seg N() ) by A7,RELAT_1:62,XBOOLE_1:1;
+then reconsider p = ( g | ( Seg N() ) ) as FinSequence by FINSEQ_1:def 2;
+( rng p ) c= D()
+proof
+let x;
+assume x in ( rng p );
+then consider y such that A9: y in ( dom p ) and A10: x = ( p . y ) by FUNCT_1:def 3;
+reconsider y as (Element of ( NAT )) by A9;
+A11: ( f . ( y - 1 ) ) in D()
+proof
+y <> ( 0 ) by A8,A9,FINSEQ_1:1;
+then consider k being Nat such that A12: y = ( k + 1 ) by NAT_1:6;
+reconsider k as (Element of ( NAT )) by ORDINAL1:def 12;
+( f . k ) in D();
+hence thesis by A12;
+end;
+( p . y ) = ( g . y ) by A9,FUNCT_1:47;
+hence thesis by A7,A10,A11;
+end;
+then reconsider p as (FinSequence of D()) by FINSEQ_1:def 4;
+take p;
+N() in ( NAT ) by ORDINAL1:def 12;
+hence ( len p ) = N() by A8,FINSEQ_1:def 3;
+(N() <> ( 0 ) implies (( p . 1 ) = A() or N() = ( 0 )))
+proof
+assume N() <> ( 0 );
+then consider k being Nat such that A13: N() = ( k + 1 ) by NAT_1:6;
+( ( 0 ) + 1 ) <= ( k + 1 ) by XREAL_1:7;
+then 1 in ( Seg N() ) by A13,FINSEQ_1:1;
+then ( p . 1 ) = ( g . 1 ) by FUNCT_1:49
+.= ( f . ( 1 - 1 ) ) by A7
+.= A() by A5;
+hence thesis;
+end;
+hence (( p . 1 ) = A() or N() = ( 0 ));
+let n;
+assume that
+A14: 1 <= n
+and
+A15: n < N();
+( 0 ) <> n by A14;
+then consider k being Nat such that A16: n = ( k + 1 ) by NAT_1:6;
+A17: (for n being (Element of ( NAT )) holds (n < N() implies ( p . ( n + 1 ) ) = ( f . n )))
+proof
+let n being (Element of ( NAT ));
+assume n < N();
+then (1 <= ( n + 1 ) & ( n + 1 ) <= N()) by NAT_1:11,NAT_1:13;
+then A18: ( n + 1 ) in ( Seg N() ) by FINSEQ_1:1;
+( g . ( n + 1 ) ) = ( f . ( ( n + 1 ) - 1 ) ) by A7
+.= ( f . n );
+hence thesis by A18,FUNCT_1:49;
+end;
+reconsider k as (Element of ( NAT )) by ORDINAL1:def 12;
+k <= ( k + 1 ) by NAT_1:11;
+then A19: k < N() by A15,A16,XXREAL_0:2;
+k < ( N() - 1 ) by A15,A16,XREAL_1:20;
+then P[ ( k + 1 ),( f . k ),( f . ( k + 1 ) ) ] by A5;
+then P[ ( k + 1 ),( f . k ),( p . ( ( k + 1 ) + 1 ) ) ] by A17,A15,A16;
+hence thesis by A17,A16,A19;
+end;

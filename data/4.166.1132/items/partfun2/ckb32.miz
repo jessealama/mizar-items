@@ -1,0 +1,52 @@
+environ
+vocabularies XBOOLE_0,SUBSET_1,PARTFUN1,RELAT_1,FUNCT_1,TARSKI,FUNCOP_1;
+notations TARSKI,XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,RELSET_1,PARTFUN1,FUNCT_2,FUNCOP_1,CKB6,CKB12,CKB21;
+definitions TARSKI,XBOOLE_0,FUNCT_1;
+theorems TARSKI,FUNCT_1,FUNCT_2,GRFUNC_1,FUNCOP_1,PARTFUN1,RELAT_1,RELSET_1,XBOOLE_0,CKB1,CKB2,CKB3,CKB4,CKB5,CKB7,CKB8,CKB9,CKB10,CKB11,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB22,CKB23,CKB24,CKB25,CKB26,CKB27,CKB28,CKB29,CKB30,CKB31;
+schemes FUNCT_2,XBOOLE_0;
+registrations FUNCT_1,RELSET_1;
+constructors PARTFUN1,FUNCOP_1,RELSET_1,CKB6,CKB12,CKB21;
+requirements SUBSET,BOOLE;
+begin
+reserve x for set;
+scheme PartFuncExD { D,C() -> non empty set,P[set,set] } : (ex f being (PartFunc of D(),C()) st ((for d being (Element of D()) holds (d in ( dom f ) iff (ex c being (Element of C()) st P[ d,c ]))) & (for d being (Element of D()) holds (d in ( dom f ) implies P[ d,( f /. d ) ]))))
+proof
+defpred R[ set ]
+ means
+(ex c being (Element of C()) st P[ $1,c ]);
+set x = the (Element of C());
+defpred Q[ set,set ]
+ means
+(((ex c being (Element of C()) st P[ $1,c ]) implies P[ $1,$2 ]) & ((for c being (Element of C()) holds (not P[ $1,c ])) implies $2 = x));
+consider X being set such that A1: (for x holds (x in X iff (x in D() & R[ x ]))) from XBOOLE_0:sch 1;
+(for x holds (x in X implies x in D())) by A1;
+then reconsider X as (Subset of D()) by TARSKI:def 3;
+A2: (for d being (Element of D()) holds (ex z being (Element of C()) st Q[ d,z ]))
+proof
+let d being (Element of D());
+((for c being (Element of C()) holds (not P[ d,c ])) implies (ex z being (Element of C()) st (((ex c being (Element of C()) st P[ d,c ]) implies P[ d,z ]) & ((for c being (Element of C()) holds (not P[ d,c ])) implies z = x))));
+hence thesis;
+end;
+consider g being (Function of D(),C()) such that A3: (for d being (Element of D()) holds Q[ d,( g . d ) ]) from FUNCT_2:sch 3(A2);
+reconsider f = ( g | X ) as (PartFunc of D(),C());
+take f;
+A4: ( dom g ) = D() by FUNCT_2:def 1;
+thus (for d being (Element of D()) holds (d in ( dom f ) iff (ex c being (Element of C()) st P[ d,c ])))
+proof
+let d being (Element of D());
+( dom f ) c= X by RELAT_1:58;
+hence (d in ( dom f ) implies (ex c being (Element of C()) st P[ d,c ])) by A1;
+assume (ex c being (Element of C()) st P[ d,c ]);
+then d in X by A1;
+then d in ( ( dom g ) /\ X ) by A4,XBOOLE_0:def 4;
+hence thesis by RELAT_1:61;
+end;
+
+let d being (Element of D());
+assume A5: d in ( dom f );
+( dom f ) c= X by RELAT_1:58;
+then (ex c being (Element of C()) st P[ d,c ]) by A1,A5;
+then P[ d,( g . d ) ] by A3;
+then P[ d,( (f qua Function) . d ) ] by A5,FUNCT_1:47;
+hence thesis by A5,PARTFUN1:def 6;
+end;

@@ -1,0 +1,110 @@
+environ
+vocabularies NUMBERS,SUBSET_1,REAL_1,RELAT_1,ARYTM_3,INT_1,CARD_1,XXREAL_0,SEQ_1,VALUED_0,FUNCT_1,NAT_1,TARSKI,ORDINAL2,ARYTM_1,XBOOLE_0,PARTFUN1,ZFMISC_1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,NUMBERS,XCMPLX_0,REAL_1,NAT_1,NAT_D,RELAT_1,FUNCT_1,RELSET_1,PARTFUN1,FUNCT_2,VALUED_0,SEQ_1,XXREAL_0,RECDEF_1;
+definitions TARSKI,XBOOLE_0;
+theorems ZFMISC_1,NAT_1,FUNCT_1,FUNCT_2,SEQM_3,PARTFUN1,RELSET_1,XBOOLE_1,NAT_D,ORDINAL1,XXREAL_0,CKB1,CKB2,CKB3,CKB4;
+schemes NAT_1,FUNCT_2,RECDEF_1,SUBSET_1,CLASSES1,XBOOLE_0,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18;
+registrations ORDINAL1,RELSET_1,NUMBERS,XXREAL_0,XREAL_0,SEQM_3,VALUED_0;
+constructors PARTFUN1,XXREAL_0,NAT_1,NAT_D,SEQ_1,SEQM_3,RECDEF_1,MEMBERED,RELSET_1;
+requirements NUMERALS,REAL,SUBSET,BOOLE,ARITHM;
+begin
+reserve x for set;
+reserve y for set;
+reserve z for set;
+scheme PartFuncExCD2 { C,D,E() -> non empty set,P,Q[set,set],F,G(set,set) -> (Element of E()) } : (ex f being (PartFunc of [: C(),D() :],E()) st ((for c being (Element of C()) holds (for d being (Element of D()) holds ([ c,d ] in ( dom f ) iff (P[ c,d ] or Q[ c,d ])))) & (for c being (Element of C()) holds (for d being (Element of D()) holds ([ c,d ] in ( dom f ) implies ((P[ c,d ] implies ( f . [ c,d ] ) = F(c,d)) & (Q[ c,d ] implies ( f . [ c,d ] ) = G(c,d))))))))
+provided
+A1: (for c being (Element of C()) holds (for d being (Element of D()) holds (P[ c,d ] implies (not Q[ c,d ]))))
+proof
+defpred X[ set,set ]
+ means
+(for c being (Element of C()) holds (for t being (Element of D()) holds ($1 = [ c,t ] implies ((P[ c,t ] implies $2 = F(c,t)) & (Q[ c,t ] implies $2 = G(c,t))))));
+defpred X[ set ]
+ means
+(for c being (Element of C()) holds (for d being (Element of D()) holds ($1 = [ c,d ] implies (P[ c,d ] or Q[ c,d ]))));
+consider F being set such that A2: (for z holds (z in F iff (z in [: C(),D() :] & X[ z ]))) from XBOOLE_0:sch 1;
+A3: (for x1 being set holds (x1 in F implies (ex z st X[ x1,z ])))
+proof
+let x1 being set;
+assume A4: x1 in F;
+then x1 in [: C(),D() :] by A2;
+then consider f9 being set,g9 being set such that A5: f9 in C() and A6: g9 in D() and A7: x1 = [ f9,g9 ] by ZFMISC_1:def 2;
+reconsider g9 as (Element of D()) by A6;
+reconsider f9 as (Element of C()) by A5;
+now
+per cases  by A2,A4,A7;
+suppose A8: P[ f9,g9 ];
+
+take z = F(f9,g9);
+let p being (Element of C());
+let d being (Element of D());
+assume x1 = [ p,d ];
+then (f9 = p & g9 = d) by A7,ZFMISC_1:27;
+hence ((P[ p,d ] implies z = F(p,d)) & (Q[ p,d ] implies z = G(p,d))) by A1,A8;
+end;
+suppose A9: Q[ f9,g9 ];
+
+take z = G(f9,g9);
+let r being (Element of C());
+let d being (Element of D());
+assume x1 = [ r,d ];
+then (f9 = r & g9 = d) by A7,ZFMISC_1:27;
+hence ((P[ r,d ] implies z = F(r,d)) & (Q[ r,d ] implies z = G(r,d))) by A1,A9;
+end;
+end;
+hence thesis;
+end;
+consider f being Function such that A10: (( dom f ) = F & (for z holds (z in F implies X[ z,( f . z ) ]))) from CLASSES1:sch 1(A3);
+A11: ( rng f ) c= E()
+proof
+let z;
+assume z in ( rng f );
+then consider x1 being set such that A12: x1 in ( dom f ) and A13: z = ( f . x1 ) by FUNCT_1:def 3;
+x1 in [: C(),D() :] by A2,A10,A12;
+then consider x,y such that A14: x in C() and A15: y in D() and A16: x1 = [ x,y ] by ZFMISC_1:def 2;
+reconsider y as (Element of D()) by A15;
+reconsider x as (Element of C()) by A14;
+now
+per cases  by A2,A10,A12,A16;
+suppose P[ x,y ];
+
+then ( f . [ x,y ] ) = F(x,y) by A10,A12,A16;
+hence thesis by A13,A16;
+end;
+suppose Q[ x,y ];
+
+then ( f . [ x,y ] ) = G(x,y) by A10,A12,A16;
+hence thesis by A13,A16;
+end;
+end;
+hence thesis;
+end;
+F c= [: C(),D() :]
+proof
+let z;
+assume z in F;
+hence thesis by A2;
+end;
+then reconsider f as (PartFunc of [: C(),D() :],E()) by A10,A11,RELSET_1:4;
+take f;
+thus (for c being (Element of C()) holds (for h being (Element of D()) holds ([ c,h ] in ( dom f ) iff (P[ c,h ] or Q[ c,h ]))))
+proof
+let c being (Element of C());
+let g being (Element of D());
+thus ([ c,g ] in ( dom f ) implies (P[ c,g ] or Q[ c,g ])) by A2,A10;
+assume A17: (P[ c,g ] or Q[ c,g ]);
+A18:now
+let h9 being (Element of C());
+let j9 being (Element of D());
+assume A19: [ c,g ] = [ h9,j9 ];
+then c = h9 by ZFMISC_1:27;
+hence (P[ h9,j9 ] or Q[ h9,j9 ]) by A17,A19,ZFMISC_1:27;
+end;
+[ c,g ] in [: C(),D() :] by ZFMISC_1:87;
+hence thesis by A2,A10,A18;
+end;
+
+let c being (Element of C());
+let d being (Element of D());
+assume [ c,d ] in ( dom f );
+hence thesis by A10;
+end;

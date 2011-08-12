@@ -1,0 +1,47 @@
+environ
+vocabularies XBOOLE_0,SUBSET_1,TARSKI,FUNCT_1,RELAT_1,FUNCT_2,ZFMISC_1,PARTFUN1,FINSET_1,MCART_1,FINSUB_1,SETWISEO;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,MCART_1,RELAT_1,FINSET_1,FINSUB_1,FUNCT_1,RELSET_1,PARTFUN1,FUNCT_2,BINOP_1,DOMAIN_1,SETWISEO;
+definitions TARSKI,XBOOLE_0,FUNCT_1,BINOP_1;
+theorems FINSET_1,ZFMISC_1,MCART_1,FUNCT_1,FUNCT_2,SETWISEO,FINSUB_1,RELAT_1,RELSET_1,WELLORD2,XBOOLE_0,XBOOLE_1,CKB9,CKB10,CKB11,CKB24,CKB25,CKB30;
+schemes FUNCT_1,FUNCT_2,SETWISEO,DOMAIN_1,PARTFUN1,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB21,CKB22,CKB23,CKB26,CKB27,CKB28,CKB29,CKB32,CKB33,CKB34;
+registrations SUBSET_1,RELAT_1,FINSET_1,FINSUB_1,RELSET_1,CKB31;
+constructors PARTFUN1,BINOP_1,DOMAIN_1,FINSET_1,SETWISEO,RELSET_1;
+requirements BOOLE,SUBSET;
+begin
+reserve x for set;
+scheme FraenkelFin9 { A,B() -> non empty set,X() -> set,P[set,set] } : { x where x is (Element of B()): (ex w being (Element of A()) st (P[ w,x ] & w in X())) } is  finite
+provided
+A1: X() is  finite
+and
+A2: (for w being (Element of A()) holds (for x,y being (Element of B()) holds ((P[ w,x ] & P[ w,y ]) implies x = y)))
+proof
+set M = { x where x is (Element of B()): (ex w being (Element of A()) st (P[ w,x ] & w in X())) };
+defpred Q[ set,set ]
+ means
+((P[ $1,$2 ] & $1 in X()) & $2 in B());
+A3: (for x,y being set holds ((x in A() & Q[ x,y ]) implies y in B()));
+A4: (for x,y1,y2 being set holds (((x in A() & Q[ x,y1 ]) & Q[ x,y2 ]) implies y1 = y2)) by A2;
+consider f being (PartFunc of A(),B()) such that A5: (for x holds (x in ( dom f ) iff (x in A() & (ex y being set st Q[ x,y ])))) and A6: (for x holds (x in ( dom f ) implies Q[ x,( f . x ) ])) from PARTFUN1:sch 2(A3,A4);
+M = ( f .: X() )
+proof
+thus M c= ( f .: X() )
+proof
+let x being set;
+assume x in M;
+then consider u being (Element of B()) such that A7: x = u and A8: (ex w being (Element of A()) st (P[ w,u ] & w in X()));
+consider w being (Element of A()) such that A9: P[ w,u ] and A10: w in X() by A8;
+A11: w in ( dom f ) by A5,A9,A10;
+then Q[ w,( f . w ) ] by A6;
+then ( f . w ) = x by A2,A7,A9;
+hence thesis by A10,A11,FUNCT_1:def 6;
+end;
+
+let x being set;
+assume x in ( f .: X() );
+then consider y being set such that A12: y in ( dom f ) and A13: y in X() and A14: x = ( f . y ) by FUNCT_1:def 6;
+reconsider x as (Element of B()) by A6,A12,A14;
+P[ y,x ] by A6,A12,A14;
+hence thesis by A12,A13;
+end;
+hence thesis by A1;
+end;

@@ -1,0 +1,161 @@
+environ
+vocabularies RELAT_1,ORDINAL1,TARSKI,RELAT_2,WELLORD1,XBOOLE_0,SUBSET_1,ZFMISC_1,FUNCT_1,MCART_1,WELLORD2;
+notations TARSKI,XBOOLE_0,ZFMISC_1,MCART_1,SUBSET_1,RELAT_1,RELAT_2,FUNCT_1,WELLORD1,ORDINAL1,CKB1,CKB15,CKB16;
+definitions TARSKI,XBOOLE_0,FUNCT_1,RELAT_1,RELAT_2,WELLORD1,CKB1,CKB15,CKB16;
+theorems TARSKI,FUNCT_1,RELAT_1,RELAT_2,ZFMISC_1,WELLORD1,ORDINAL1,XBOOLE_0,XBOOLE_1,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17;
+schemes FUNCT_1,RELAT_1,ORDINAL1,XBOOLE_0;
+registrations RELAT_1,FUNCT_1,ORDINAL1;
+constructors RELAT_2,ORDINAL1,WELLORD1,MCART_1,CKB1,CKB15,CKB16;
+requirements SUBSET,BOOLE;
+begin
+reserve X for set;
+reserve Y for set;
+reserve Z for set;
+reserve x for set;
+reserve y for set;
+reserve z for set;
+reserve u for set;
+reserve f for Function;
+definition
+let X;
+let Y;
+redefine pred X,Y are_equipotent 
+means
+(ex f st ((f is  one-to-one & ( dom f ) = X) & ( rng f ) = Y))
+;compatibility
+proof
+thus (X,Y are_equipotent  implies (ex f st ((f is  one-to-one & ( dom f ) = X) & ( rng f ) = Y)))
+proof
+assume X,Y are_equipotent ;
+then consider Z such that A1: (for x holds (x in X implies (ex y st (y in Y & [ x,y ] in Z)))) and A2: (for y holds (y in Y implies (ex x st (x in X & [ x,y ] in Z)))) and A3: (for x holds (for y holds (for z holds (for u holds (([ x,y ] in Z & [ z,u ] in Z) implies (x = z iff y = u)))))) by TARSKI:def 6;
+set F = ( Z /\ [: X,Y :] );
+(for x holds (for y holds (for z holds (([ x,y ] in F & [ x,z ] in F) implies y = z))))
+proof
+let x;
+let y;
+let z;
+assume ([ x,y ] in F & [ x,z ] in F);
+then ([ x,y ] in Z & [ x,z ] in Z) by XBOOLE_0:def 4;
+hence thesis by A3;
+end;
+then reconsider F as Function by FUNCT_1:def 1;
+take f = F;
+thus f is  one-to-one
+proof
+let x;
+let y;
+assume that
+A4: x in ( dom f )
+and
+A5: y in ( dom f )
+and
+A6: ( f . x ) = ( f . y );
+[ y,( f . y ) ] in f by A5,FUNCT_1:1;
+then A7: [ y,( f . y ) ] in Z by XBOOLE_0:def 4;
+[ x,( f . x ) ] in f by A4,FUNCT_1:1;
+then [ x,( f . x ) ] in Z by XBOOLE_0:def 4;
+hence thesis by A3,A6,A7;
+end;
+
+thus ( dom f ) c= X
+proof
+let x;
+assume x in ( dom f );
+then [ x,( f . x ) ] in f by FUNCT_1:1;
+then [ x,( f . x ) ] in [: X,Y :] by XBOOLE_0:def 4;
+hence thesis by ZFMISC_1:87;
+end;
+
+thus X c= ( dom f )
+proof
+let x;
+assume A8: x in X;
+then consider y such that A9: y in Y and A10: [ x,y ] in Z by A1;
+[ x,y ] in [: X,Y :] by A8,A9,ZFMISC_1:87;
+then [ x,y ] in f by A10,XBOOLE_0:def 4;
+hence thesis by FUNCT_1:1;
+end;
+
+thus ( rng f ) c= Y
+proof
+let y;
+assume y in ( rng f );
+then consider x such that A11: (x in ( dom f ) & y = ( f . x )) by FUNCT_1:def 3;
+[ x,y ] in f by A11,FUNCT_1:1;
+then [ x,y ] in [: X,Y :] by XBOOLE_0:def 4;
+hence thesis by ZFMISC_1:87;
+end;
+
+thus Y c= ( rng f )
+proof
+let y;
+assume A12: y in Y;
+then consider x such that A13: x in X and A14: [ x,y ] in Z by A2;
+[ x,y ] in [: X,Y :] by A12,A13,ZFMISC_1:87;
+then [ x,y ] in f by A14,XBOOLE_0:def 4;
+then (x in ( dom f ) & y = ( f . x )) by FUNCT_1:1;
+hence thesis by FUNCT_1:def 3;
+end;
+
+end;
+
+((ex f st ((f is  one-to-one & ( dom f ) = X) & ( rng f ) = Y)) implies (ex Z st (((for x holds (x in X implies (ex y st (y in Y & [ x,y ] in Z)))) & (for y holds (y in Y implies (ex x st (x in X & [ x,y ] in Z))))) & (for x holds (for y holds (for z holds (for u holds (([ x,y ] in Z & [ z,u ] in Z) implies (x = z iff y = u)))))))))
+proof
+given f such that
+A15: f is  one-to-one
+and
+A16: ( dom f ) = X
+and
+A17: ( rng f ) = Y;
+
+take Z = f;
+thus (x in X implies (ex y st (y in Y & [ x,y ] in Z)))
+proof
+assume A18: x in X;
+take ( f . x );
+thus ( f . x ) in Y by A16,A17,A18,FUNCT_1:def 3;
+thus thesis by A16,A18,FUNCT_1:1;
+end;
+
+thus (for y holds (y in Y implies (ex x st (x in X & [ x,y ] in Z))))
+proof
+let y;
+assume that
+A19: y in Y;
+take ( ( f " ) . y );
+A20: ( dom ( f " ) ) = ( rng f ) by A15,FUNCT_1:33;
+then A21: ( ( f " ) . y ) in ( rng ( f " ) ) by A17,A19,FUNCT_1:def 3;
+A22: ( rng ( f " ) ) = ( dom f ) by A15,FUNCT_1:33;
+hence ( ( f " ) . y ) in X by A16,A17,A19,A20,FUNCT_1:def 3;
+y = ( f . ( ( f " ) . y ) ) by A15,A17,A19,FUNCT_1:35;
+hence thesis by A22,A21,FUNCT_1:1;
+end;
+
+let x;
+let y;
+let z;
+let u;
+assume A23: ([ x,y ] in Z & [ z,u ] in Z);
+then A24: (x in ( dom f ) & z in ( dom f )) by FUNCT_1:1;
+(y = ( f . x ) & u = ( f . z )) by A23,FUNCT_1:1;
+hence thesis by A15,A24,FUNCT_1:def 4;
+end;
+hence thesis by TARSKI:def 6;
+end;
+reflexivity
+proof
+let X;
+take ( id X );
+thus thesis by RELAT_1:45;
+end;
+symmetry
+proof
+let X;
+let Y;
+given f such that
+A25: ((f is  one-to-one & ( dom f ) = X) & ( rng f ) = Y);
+
+take ( f " );
+thus thesis by A25,FUNCT_1:33;
+end;
+end;

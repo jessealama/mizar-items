@@ -1,0 +1,140 @@
+environ
+vocabularies ORDINAL2,ORDINAL1,FUNCT_1,XBOOLE_0,RELAT_1,TARSKI,ORDINAL3,SUBSET_1,CLASSES2,ZFMISC_1,CARD_1,ORDINAL4;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,RELAT_1,FUNCT_1,FUNCT_2,ORDINAL1,ORDINAL2,ORDINAL3,CARD_1,CLASSES2,CKB6;
+definitions ORDINAL1,TARSKI,ORDINAL2,XBOOLE_0,RELAT_1,CKB6;
+theorems ZFMISC_1,FUNCT_1,GRFUNC_1,ORDINAL1,ORDINAL2,ORDINAL3,CARD_2,CLASSES2,RELAT_1,CLASSES1,XBOOLE_0,XBOOLE_1,FUNCT_2,RELSET_1,CARD_1,CKB1,CKB2,CKB3,CKB5,CKB6,CKB7,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB21,CKB22,CKB23,CKB24,CKB25,CKB26,CKB27,CKB28,CKB29,CKB30,CKB31,CKB32,CKB33,CKB34,CKB35,CKB36,CKB37,CKB38,CKB39,CKB40,CKB41,CKB42,CKB43;
+schemes ORDINAL1,ORDINAL2,FINSET_1;
+registrations XBOOLE_0,FUNCT_1,ORDINAL1,ORDINAL2,ORDINAL3,CARD_1,CLASSES2,RELSET_1,CKB4,CKB8;
+constructors WELLORD2,FUNCOP_1,ORDINAL3,CARD_1,CLASSES1,CLASSES2,RELSET_1,CKB6;
+requirements SUBSET,BOOLE,NUMERALS;
+begin
+reserve phi for Ordinal-Sequence;
+reserve fi for Ordinal-Sequence;
+reserve A for Ordinal;
+reserve B for Ordinal;
+reserve C for Ordinal;
+reserve x for set;
+reserve y for set;
+reserve z for set;
+scheme CriticalNumber { phi(Ordinal) -> Ordinal } : (ex A st phi(A) = A)
+provided
+A1: (for A holds (for B holds (A in B implies phi(A) in phi(B))))
+and
+A2: (for A holds ((A <> ( {} ) & A is  limit_ordinal) implies (for phi holds ((( dom phi ) = A & (for B holds (B in A implies ( phi . B ) = phi(B)))) implies phi(A) is_limes_of phi))))
+proof
+A3:now
+defpred P[ Ordinal ]
+ means
+(not $1 c= phi($1));
+assume A4: (ex A st P[ A ]);
+consider A such that A5: P[ A ] and A6: (for B holds (P[ B ] implies A c= B)) from ORDINAL1:sch 1(A4);
+phi(phi(A)) in phi(A) by A1,A5,ORDINAL1:16;
+then (not phi(A) c= phi(phi(A))) by ORDINAL1:5;
+hence contradiction by A5,A6;
+end;
+deffunc G(Ordinal,T-Sequence) = ( {} );
+deffunc F(Ordinal,Ordinal) = phi($2);
+consider phi such that A7: ( dom phi ) = ( omega ) and A8: (( {} ) in ( omega ) implies ( phi . ( {} ) ) = phi(( {} ))) and A9: (for A holds (( succ A ) in ( omega ) implies ( phi . ( succ A ) ) = F(A,( phi . A )))) and (for A holds (((A in ( omega ) & A <> ( {} )) & A is  limit_ordinal) implies ( phi . A ) = G(A,( phi | A )))) from ORDINAL2:sch 11;
+assume A10: (not thesis);
+A11:now
+let A;
+A12: A <> phi(A) by A10;
+A c= phi(A) by A3;
+then A c< phi(A) by A12,XBOOLE_0:def 8;
+hence A in phi(A) by ORDINAL1:11;
+end;
+A13: phi is  increasing
+proof
+let A;
+let B;
+assume that
+A14: A in B
+and
+A15: B in ( dom phi );
+defpred R[ Ordinal ]
+ means
+((( A +^ $1 ) in ( omega ) & $1 <> ( {} )) implies ( phi . A ) in ( phi . ( A +^ $1 ) ));
+A16: (for B holds (((B <> ( {} ) & B is  limit_ordinal) & (for C holds (C in B implies R[ C ]))) implies R[ B ]))
+proof
+let B;
+assume that
+A17: B <> ( {} )
+and
+A18: B is  limit_ordinal
+and
+(for C holds (C in B implies ((( A +^ C ) in ( omega ) & C <> ( {} )) implies ( phi . A ) in ( phi . ( A +^ C ) ))))
+and
+A19: ( A +^ B ) in ( omega )
+and
+A20: B <> ( {} );
+( A +^ B ) <> ( {} ) by A20,ORDINAL3:26;
+then A21: ( {} ) in ( A +^ B ) by ORDINAL3:8;
+( A +^ B ) is  limit_ordinal by A17,A18,ORDINAL3:29;
+then ( omega ) c= ( A +^ B ) by A21,ORDINAL1:def 11;
+hence thesis by A19,ORDINAL1:5;
+end;
+A22: (for C holds (R[ C ] implies R[ ( succ C ) ]))
+proof
+let C;
+assume that
+A23: ((( A +^ C ) in ( omega ) & C <> ( {} )) implies ( phi . A ) in ( phi . ( A +^ C ) ))
+and
+A24: ( A +^ ( succ C ) ) in ( omega )
+and
+( succ C ) <> ( {} );
+reconsider D = ( phi . ( A +^ C ) ) as Ordinal;
+A25: ( A +^ C ) in ( succ ( A +^ C ) ) by ORDINAL1:6;
+A26: D in phi(D) by A11;
+A27: ( A +^ ( succ C ) ) = ( succ ( A +^ C ) ) by ORDINAL2:28;
+then ( phi . ( A +^ ( succ C ) ) ) = phi(D) by A9,A24;
+hence thesis by A23,A24,A25,A27,A26,ORDINAL1:10,ORDINAL2:27;
+end;
+A28: R[ ( {} ) ];
+A29: (for C holds R[ C ]) from ORDINAL2:sch 1(A28,A22,A16);
+(ex C st (B = ( A +^ C ) & C <> ( {} ))) by A14,ORDINAL3:28;
+hence thesis by A7,A15,A29;
+end;
+deffunc phi(Ordinal) = phi($1);
+consider fi such that A30: (( dom fi ) = ( sup phi ) & (for A holds (A in ( sup phi ) implies ( fi . A ) = phi(A)))) from ORDINAL2:sch 3;
+phi(( {} )) in ( rng phi ) by A7,A8,CKB1:1,FUNCT_1:def 3;
+then A31: ( sup phi ) <> ( {} ) by ORDINAL2:19;
+then A32: phi(( sup phi )) is_limes_of fi by A2,A7,A13,A30,CKB2:1,CKB23:1;
+A33: ( sup fi ) c= ( sup phi )
+proof
+let x;
+assume A34: x in ( sup fi );
+then reconsider A = x as Ordinal;
+consider B such that A35: B in ( rng fi ) and A36: A c= B by A34,ORDINAL2:21;
+consider y such that A37: y in ( dom fi ) and A38: B = ( fi . y ) by A35,FUNCT_1:def 3;
+reconsider y as Ordinal by A37;
+consider C such that A39: C in ( rng phi ) and A40: y c= C by A30,A37,ORDINAL2:21;
+(y c< C iff (y <> C & y c= C)) by XBOOLE_0:def 8;
+then A41: (phi(y) in phi(C) or y = C) by A1,A40,ORDINAL1:11;
+B = phi(y) by A30,A37,A38;
+then A42: B c= phi(C) by A41,ORDINAL1:def 2;
+consider z such that A43: z in ( dom phi ) and A44: C = ( phi . z ) by A39,FUNCT_1:def 3;
+reconsider z as Ordinal by A43;
+A45: ( succ z ) in ( omega ) by A7,A43,CKB2:1,ORDINAL1:28;
+then A46: ( phi . ( succ z ) ) in ( rng phi ) by A7,FUNCT_1:def 3;
+( phi . ( succ z ) ) = phi(C) by A9,A44,A45;
+then phi(C) in ( sup phi ) by A46,ORDINAL2:19;
+then B in ( sup phi ) by A42,ORDINAL1:12;
+hence thesis by A36,ORDINAL1:12;
+end;
+A47: fi is  increasing
+proof
+let A;
+let B;
+assume that
+A48: A in B
+and
+A49: B in ( dom fi );
+A50: ( fi . B ) = phi(B) by A30,A49;
+( fi . A ) = phi(A) by A30,A48,A49,ORDINAL1:10;
+hence thesis by A1,A48,A50;
+end;
+( sup phi ) is  limit_ordinal by A7,A13,CKB2:1,CKB23:1;
+then ( sup fi ) = ( lim fi ) by A30,A31,A47,CKB15:1
+.= phi(( sup phi )) by A32,ORDINAL2:def 10;
+hence contradiction by A11,A33,ORDINAL1:5;
+end;
