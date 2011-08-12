@@ -1,0 +1,143 @@
+environ
+vocabularies NUMBERS,REAL_1,SUBSET_1,SEQ_1,FDIFF_1,FUNCT_1,RCOMP_1,PARTFUN1,ARYTM_1,VALUED_0,SEQ_2,ORDINAL2,CARD_1,RELAT_1,ARYTM_3,XREAL_0,ORDINAL1,XXREAL_0,COMPLEX1,NAT_1,TARSKI,VALUED_1,FUNCT_2,FUNCOP_1,XXREAL_1,FCONT_1,SQUARE_1,XBOOLE_0,ORDINAL4,LIMFUNC1;
+notations TARSKI,XBOOLE_0,SUBSET_1,ORDINAL1,NUMBERS,XCMPLX_0,XXREAL_0,XREAL_0,COMPLEX1,REAL_1,NAT_1,FUNCT_1,FUNCT_2,VALUED_0,VALUED_1,SEQ_1,RELSET_1,SEQ_2,PARTFUN1,SQUARE_1,PARTFUN2,RFUNCT_1,RCOMP_1,FCONT_1,FDIFF_1,LIMFUNC1,RECDEF_1,CKB1;
+definitions TARSKI,XBOOLE_0,FDIFF_1,SQUARE_1,SUBSET_1,LIMFUNC1,PROB_1,VALUED_0,VALUED_1,SEQM_3;
+theorems TARSKI,FUNCT_1,FUNCT_2,NAT_1,SEQ_1,SEQ_2,SEQM_3,SEQ_4,ABSVALUE,PARTFUN1,PARTFUN2,RCOMP_1,RFUNCT_1,RFUNCT_2,FCONT_1,FDIFF_1,SCHEME1,ROLLE,FCONT_3,FUNCT_3,RELAT_1,RELSET_1,XBOOLE_0,XBOOLE_1,XCMPLX_0,XCMPLX_1,COMPLEX1,FUNCOP_1,XREAL_1,XXREAL_0,ORDINAL1,VALUED_1,XXREAL_1,VALUED_0,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10;
+schemes NAT_1,RECDEF_1,SEQ_1,SCHEME1,FUNCT_2;
+registrations ORDINAL1,RELSET_1,NUMBERS,XCMPLX_0,XXREAL_0,XREAL_0,NAT_1,MEMBERED,SEQM_3,RCOMP_1,RFUNCT_2,FDIFF_1,FCONT_3,VALUED_0,VALUED_1,FUNCT_2,FUNCOP_1,SEQ_4;
+constructors PARTFUN1,REAL_1,SQUARE_1,NAT_1,COMPLEX1,SEQ_2,SEQM_3,PROB_1,RCOMP_1,PARTFUN2,RFUNCT_1,RFUNCT_2,FCONT_1,LIMFUNC1,FDIFF_1,SEQ_1,VALUED_1,RECDEF_1,RELSET_1,BINOP_2,RVSUM_1,CKB1;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve r for Real;
+reserve n for (Element of ( NAT ));
+reserve m for (Element of ( NAT ));
+reserve k for (Element of ( NAT ));
+scheme ExIncSeqofNat { s() -> Real_Sequence,P[set] } : (ex q being  increasing (sequence of ( NAT )) st ((for n holds P[ ( ( s() * q ) . n ) ]) & (for n holds ((for r holds (r = ( s() . n ) implies P[ r ])) implies (ex m st n = ( q . m ))))))
+provided
+A1: (for n holds (ex m st (n <= m & P[ ( s() . m ) ])))
+proof
+defpred P[ Nat,set,set ]
+ means
+(for n holds (for m holds (($2 = n & $3 = m) implies ((n < m & P[ ( s() . m ) ]) & (for k holds ((n < k & P[ ( s() . k ) ]) implies m <= k))))));
+defpred R[ Nat ]
+ means
+P[ ( s() . $1 ) ];
+(ex m1 being (Element of ( NAT )) st (( 0 ) <= m1 & P[ ( s() . m1 ) ])) by A1;
+then A2: (ex m being Nat st R[ m ]);
+consider M being Nat such that A3: (R[ M ] & (for n being Nat holds (R[ n ] implies M <= n))) from NAT_1:sch 5(A2);
+reconsider M9 = M as (Element of ( NAT )) by ORDINAL1:def 12;
+A4:now
+let n;
+consider m such that A5: ( n + 1 ) <= m and A6: P[ ( s() . m ) ] by A1;
+take m;
+thus (n < m & P[ ( s() . m ) ]) by A5,A6,NAT_1:13;
+end;
+A7: (for n holds (for x being (Element of ( NAT )) holds (ex y being (Element of ( NAT )) st P[ n,x,y ])))
+proof
+let n;
+let x being (Element of ( NAT ));
+defpred R[ Nat ]
+ means
+(x < $1 & P[ ( s() . $1 ) ]);
+(ex m st R[ m ]) by A4;
+then A8: (ex m being Nat st R[ m ]);
+consider l being Nat such that A9: (R[ l ] & (for k being Nat holds (R[ k ] implies l <= k))) from NAT_1:sch 5(A8);
+take l;
+l in ( NAT ) by ORDINAL1:def 12;
+hence thesis by A9;
+end;
+consider F being (Function of ( NAT ),( NAT )) such that A10: (( F . ( 0 ) ) = M9 & (for n being (Element of ( NAT )) holds P[ n,( F . n ),( F . ( n + 1 ) ) ])) from RECDEF_1:sch 2(A7);
+A11: ( rng F ) c= ( REAL ) by XBOOLE_1:1;
+A12: ( rng F ) c= ( NAT );
+A13: ( dom F ) = ( NAT ) by FUNCT_2:def 1;
+then reconsider F as Real_Sequence by A11,RELSET_1:4;
+A14:now
+let n;
+( F . n ) in ( rng F ) by A13,FUNCT_1:def 3;
+hence ( F . n ) is (Element of ( NAT )) by A12;
+end;
+now
+let n;
+A15: ( F . ( n + 1 ) ) is (Element of ( NAT )) by A14;
+( F . n ) is (Element of ( NAT )) by A14;
+hence ( F . n ) < ( F . ( n + 1 ) ) by A10,A15;
+end;
+then reconsider F as  increasing (sequence of ( NAT )) by SEQM_3:def 6;
+A16: (for n holds (P[ ( s() . n ) ] implies (ex m st ( F . m ) = n)))
+proof
+defpred R[ Nat ]
+ means
+(P[ ( s() . $1 ) ] & (for m holds ( F . m ) <> $1));
+assume (ex n st R[ n ]);
+then A17: (ex n being Nat st R[ n ]);
+consider M1 being Nat such that A18: (R[ M1 ] & (for n being Nat holds (R[ n ] implies M1 <= n))) from NAT_1:sch 5(A17);
+defpred H[ Nat ]
+ means
+(($1 < M1 & P[ ( s() . $1 ) ]) & (ex m st ( F . m ) = $1));
+A19: (ex n being Nat st H[ n ])
+proof
+take M;
+A20: M <> M1 by A10,A18;
+M <= M1 by A3,A18;
+hence M < M1 by A20,XXREAL_0:1;
+thus P[ ( s() . M ) ] by A3;
+take ( 0 );
+thus thesis by A10;
+end;
+A21: (for n being Nat holds (H[ n ] implies n <= M1));
+consider X being Nat such that A22: (H[ X ] & (for n being Nat holds (H[ n ] implies n <= X))) from NAT_1:sch 6(A21,A19);
+A23: (for k holds ((X < k & k < M1) implies (not P[ ( s() . k ) ])))
+proof
+given k such that
+A24: X < k
+and
+A25: k < M1
+and
+A26: P[ ( s() . k ) ];
+
+now
+per cases ;
+suppose (ex m st ( F . m ) = k);
+
+hence contradiction by A22,A24,A25,A26;
+end;
+suppose (for m holds ( F . m ) <> k);
+
+hence contradiction by A18,A25,A26;
+end;
+end;
+hence contradiction;
+end;
+consider m such that A27: ( F . m ) = X by A22;
+M1 in ( NAT ) by ORDINAL1:def 12;
+then A28: ( F . ( m + 1 ) ) <= M1 by A10,A18,A22,A27;
+A29: P[ ( s() . ( F . ( m + 1 ) ) ) ] by A10,A27;
+A30: X < ( F . ( m + 1 ) ) by A10,A27;
+now
+assume ( F . ( m + 1 ) ) <> M1;
+then ( F . ( m + 1 ) ) < M1 by A28,XXREAL_0:1;
+hence contradiction by A23,A30,A29;
+end;
+hence contradiction by A18;
+end;
+take F;
+set q = ( s() * F );
+defpred S[ Nat ]
+ means
+P[ ( q . $1 ) ];
+A31: (for k holds (S[ k ] implies S[ ( k + 1 ) ]))
+proof
+let k;
+assume P[ ( q . k ) ];
+P[ k,( F . k ),( F . ( k + 1 ) ) ] by A10;
+then P[ ( s() . ( F . ( k + 1 ) ) ) ];
+hence thesis by FUNCT_2:15;
+end;
+A32: S[ ( 0 ) ] by A3,A10,FUNCT_2:15;
+thus (for n holds S[ n ]) from NAT_1:sch 1(A32,A31);
+let n;
+assume (for r holds (r = ( s() . n ) implies P[ r ]));
+then consider m such that A33: ( F . m ) = n by A16;
+take m;
+thus thesis by A33;
+end;
