@@ -97,27 +97,6 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
     (let ((free-variables-article (apply-stylesheet free-variables-stylesheet (xsl-split-article article) nil nil)))
       (apply-stylesheet itemize-stylesheet free-variables-article nil nil))))
 
-(defun sch-file-p (path)
-  (file-has-extension path "sch"))
-
-(defun dco-file-p (path)
-  (file-has-extension path "dco"))
-
-(defun def-file-p (path)
-  (file-has-extension path "def"))
-
-(defun dno-file-p (path)
-  (file-has-extension path "dno"))
-
-(defun dcl-file-p (path)
-  (file-has-extension path "dcl"))
-
-(defun eid-file-p (path)
-  (file-has-extension path "eid"))
-
-(defun the-file-p (path)
-  (file-has-extension path "the"))
-
 (defun ckb-< (ckb-path-1 ckb-path-2)
   (let ((ckb-pattern "^ckb([0-9]+)$"))
     (register-groups-bind (ckb-num-1-as-str)

@@ -246,4 +246,29 @@ suite to work correctly."
 	      (stream-lines (process-output proc))
 	      (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Generated mizar files
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun sch-file-p (path)
+  (file-has-extension path "sch"))
+
+(defun dco-file-p (path)
+  (file-has-extension path "dco"))
+
+(defun def-file-p (path)
+  (file-has-extension path "def"))
+
+(defun dno-file-p (path)
+  (file-has-extension path "dno"))
+
+(defun dcl-file-p (path)
+  (file-has-extension path "dcl"))
+
+(defun eid-file-p (path)
+  (file-has-extension path "eid"))
+
+(defun the-file-p (path)
+  (file-has-extension path "the"))
+
 ;;; mizar.lisp ends here
