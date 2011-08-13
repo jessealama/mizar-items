@@ -1,0 +1,97 @@
+environ
+vocabularies NUMBERS,NAT_1,XBOOLE_0,ALGSTR_0,FINSEQ_1,SUBSET_1,RLVECT_1,RELAT_1,CARD_1,FINSEQ_2,TARSKI,STRUCT_0,TREES_1,XXREAL_0,ZFMISC_1,FUNCT_1,QC_LANG1,INCSP_1,SUPINF_2,MESFUNC1,ARYTM_1,ARYTM_3,VECTSP_1,BINOP_1,MATRIX_1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,NUMBERS,NAT_1,FUNCT_1,FUNCT_2,FINSEQ_1,FINSEQ_2,STRUCT_0,ALGSTR_0,BINOP_1,FINSEQOP,RLVECT_1,VECTSP_1,XXREAL_0,CKB1,CKB12,CKB15,CKB16,CKB17,CKB18,CKB19,CKB30,CKB32,CKB33;
+definitions TARSKI,RLVECT_1,BINOP_1,FINSEQ_2,STRUCT_0,ALGSTR_0,CKB1,CKB15,CKB30,CKB32,CKB33;
+theorems FINSEQ_1,FINSEQ_2,FINSEQ_3,TARSKI,FUNCOP_1,FUNCT_1,FUNCT_2,ZFMISC_1,NAT_1,BINOP_1,RLVECT_1,RELAT_1,ORDINAL1,CARD_1,CARD_2,XXREAL_0,CKB1,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB14,CKB15,CKB20,CKB21,CKB22,CKB23,CKB24,CKB25,CKB26,CKB27,CKB28,CKB29,CKB30,CKB31,CKB32,CKB33,CKB34;
+schemes FINSEQ_1,BINOP_1,FINSEQ_2;
+registrations XBOOLE_0,RELAT_1,FUNCT_1,XREAL_0,FINSEQ_1,FINSEQ_2,STRUCT_0,VECTSP_1,ORDINAL1,CARD_1,CKB2,CKB11,CKB13;
+constructors BINOP_1,XXREAL_0,FINSEQOP,VECTSP_1,RLVECT_1,RELSET_1,CKB1,CKB15,CKB30,CKB32,CKB33;
+requirements NUMERALS,SUBSET,BOOLE,REAL;
+begin
+reserve x for set;
+reserve y for set;
+reserve z for set;
+reserve i for Nat;
+reserve j for Nat;
+reserve n for Nat;
+scheme MatrixLambda { D() -> non empty set,n,m() -> (Element of ( NAT )),f(set,set) -> (Element of D()) } : (ex M being (Matrix of n(),m(),D()) st (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ( M * (i,j) ) = f(i,j)))))
+proof
+defpred P[ set,set ]
+ means
+(ex p being FinSequence st (($2 = p & ( len p ) = m()) & (for i holds (i in ( Seg m() ) implies ( p . i ) = f($1,i)))));
+A1: n() >= ( 0 ) by NAT_1:2;
+A2: (for k being Nat holds (k in ( Seg n() ) implies (ex y st P[ k,y ])))
+proof
+let k being Nat;
+assume k in ( Seg n() );
+deffunc F(Nat) = f(k,$1);
+consider p being FinSequence such that A3: (( len p ) = m() & (for i being Nat holds (i in ( dom p ) implies ( p . i ) = F(i)))) from FINSEQ_1:sch 2;
+take p;
+take p;
+( dom p ) = ( Seg m() ) by A3,FINSEQ_1:def 3;
+hence thesis by A3;
+end;
+consider M being FinSequence such that A4: ( dom M ) = ( Seg n() ) and A5: (for k being Nat holds (k in ( Seg n() ) implies P[ k,( M . k ) ])) from FINSEQ_1:sch 1(A2);
+A6: ( len M ) = n() by A4,FINSEQ_1:def 3;
+( rng M ) c= ( D() * )
+proof
+let x;
+assume x in ( rng M );
+then consider i being Nat such that A7: i in ( dom M ) and A8: ( M . i ) = x by FINSEQ_2:10;
+consider p being FinSequence such that A9: ( M . i ) = p and A10: (( len p ) = m() & (for j holds (j in ( Seg m() ) implies ( p . j ) = f(i,j)))) by A4,A5,A7;
+( rng p ) c= D()
+proof
+let z;
+assume z in ( rng p );
+then consider k being Nat such that A11: k in ( dom p ) and A12: ( p . k ) = z by FINSEQ_2:10;
+k in ( Seg ( len p ) ) by A11,FINSEQ_1:def 3;
+then z = f(i,k) by A10,A12;
+hence thesis;
+end;
+then p is (FinSequence of D()) by FINSEQ_1:def 4;
+hence thesis by A8,A9,FINSEQ_1:def 11;
+end;
+then reconsider M as (FinSequence of ( D() * )) by FINSEQ_1:def 4;
+(ex n st (for x holds (x in ( rng M ) implies (ex p being (FinSequence of D()) st (x = p & ( len p ) = n)))))
+proof
+take m();
+let x;
+assume x in ( rng M );
+then consider i being Nat such that A13: (i in ( dom M ) & ( M . i ) = x) by FINSEQ_2:10;
+consider p being FinSequence such that A14: x = p and A15: ( len p ) = m() and A16: (for j holds (j in ( Seg m() ) implies ( p . j ) = f(i,j))) by A4,A5,A13;
+( rng p ) c= D()
+proof
+let z;
+assume z in ( rng p );
+then consider k being Nat such that A17: k in ( dom p ) and A18: ( p . k ) = z by FINSEQ_2:10;
+k in ( Seg ( len p ) ) by A17,FINSEQ_1:def 3;
+then z = f(i,k) by A15,A16,A18;
+hence thesis;
+end;
+then reconsider p as (FinSequence of D()) by FINSEQ_1:def 4;
+take p;
+thus thesis by A14,A15;
+end;
+then reconsider M as (Matrix of D()) by CKB14:1;
+(for p being (FinSequence of D()) holds (p in ( rng M ) implies ( len p ) = m()))
+proof
+let p being (FinSequence of D());
+assume p in ( rng M );
+then consider i being Nat such that A19: (i in ( dom M ) & ( M . i ) = p) by FINSEQ_2:10;
+P[ i,p ] by A4,A5,A19;
+hence thesis;
+end;
+then reconsider M as (Matrix of n(),m(),D()) by A6,CKB15:def 1;
+take M;
+let i;
+let j;
+assume A20: [ i,j ] in ( Indices M );
+then n() <> ( 0 ) by A4,ZFMISC_1:87;
+then A21: n() > ( 0 ) by A1,XXREAL_0:1;
+i in ( Seg n() ) by A4,A20,ZFMISC_1:87;
+then A22: (ex q being FinSequence st ((( M . i ) = q & ( len q ) = m()) & (for j holds (j in ( Seg m() ) implies ( q . j ) = f(i,j))))) by A5;
+j in ( Seg ( width M ) ) by A20,ZFMISC_1:87;
+then A23: j in ( Seg m() ) by A6,A21,CKB31:1;
+(ex p being (FinSequence of D()) st (p = ( M . i ) & ( M * (i,j) ) = ( p . j ))) by A20,CKB33:def 1;
+hence thesis by A22,A23;
+end;
