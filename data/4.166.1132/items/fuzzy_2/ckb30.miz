@@ -1,0 +1,89 @@
+environ
+vocabularies NUMBERS,XBOOLE_0,SUBSET_1,FUZZY_1,CARD_1,XXREAL_0,FUNCT_1,TARSKI,ARYTM_1,RELAT_1,PARTFUN1,XXREAL_1,INTEGRA1,SEQ_4,MEMBER_1,ARYTM_3,REAL_1,FUNCT_2,ZFMISC_1,FUNCT_3,FUZZY_2,MEASURE5;
+notations TARSKI,XBOOLE_0,SUBSET_1,ZFMISC_1,NUMBERS,XXREAL_0,SQUARE_1,REAL_1,RELSET_1,PARTFUN1,FUNCT_2,FUNCT_3,INTEGRA1,SEQ_1,RCOMP_1,SEQ_4,FUZZY_1,MEASURE5,CKB3,CKB29;
+definitions FUZZY_1,CKB3,CKB29;
+theorems TARSKI,FUNCT_1,PARTFUN1,INTEGRA1,INTEGRA2,FUZZY_1,XBOOLE_0,XREAL_1,XXREAL_0,FUNCT_3,FUNCT_2,RELAT_1,MEASURE5,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB21,CKB22,CKB23,CKB24,CKB25,CKB26,CKB27,CKB28,CKB29;
+schemes PARTFUN1;
+registrations RELSET_1,NUMBERS,MEMBERED,INTEGRA1,XBOOLE_0,SUBSET_1,VALUED_0,MEASURE5;
+constructors REAL_1,SQUARE_1,RFUNCT_1,INTEGRA1,FUZZY_1,SEQ_1,SEQ_4,RELSET_1,CKB3,CKB29;
+requirements NUMERALS,REAL,SUBSET,BOOLE,ARITHM;
+begin
+reserve x for set;
+reserve y for set;
+reserve y1 for set;
+reserve y2 for set;
+definition
+let C being non empty set;
+let h being (Membership_Func of C);
+let g being (Membership_Func of C);
+func h ++ g -> (Membership_Func of C)
+means
+:Def3: (for c being (Element of C) holds ( it . c ) = ( ( ( h . c ) + ( g . c ) ) - ( ( h . c ) * ( g . c ) ) ));
+existence
+proof
+defpred P[ set,set ]
+ means
+$2 = ( ( ( h . $1 ) + ( g . $1 ) ) - ( ( h . $1 ) * ( g . $1 ) ) );
+A1: (for x holds (for y1 holds (for y2 holds (((x in C & P[ x,y1 ]) & P[ x,y2 ]) implies y1 = y2))));
+A2: (for x holds (for y holds ((x in C & P[ x,y ]) implies y in ( REAL ))));
+consider IT being (PartFunc of C,( REAL )) such that A3: ((for x holds (x in ( dom IT ) iff (x in C & (ex y st P[ x,y ])))) & (for x holds (x in ( dom IT ) implies P[ x,( IT . x ) ]))) from PARTFUN1:sch 2(A2,A1);
+(for x being set holds (x in C implies x in ( dom IT )))
+proof
+let x being set;
+A4: (ex y st y = ( ( ( h . x ) + ( g . x ) ) - ( ( h . x ) * ( g . x ) ) ));
+assume x in C;
+hence thesis by A3,A4;
+end;
+then C c= ( dom IT ) by TARSKI:def 3;
+then A5: ( dom IT ) = C by XBOOLE_0:def 10;
+then A6: (for c being (Element of C) holds ( IT . c ) = ( ( ( h . c ) + ( g . c ) ) - ( ( h . c ) * ( g . c ) ) )) by A3;
+(for y being set holds (y in ( rng IT ) implies y in [. ( 0 ),1 .]))
+proof
+reconsider A = [. ( 0 ),1 .] as non empty  closed_interval (Subset of ( REAL )) by MEASURE5:14;
+let y being set;
+assume y in ( rng IT );
+then consider x being (Element of C) such that A7: x in ( dom IT ) and A8: y = ( IT . x ) by PARTFUN1:3;
+( 0 ) <= ( ( 1_minus h ) . x ) by CKB1:1;
+then A9: ( 0 ) <= ( 1 - ( h . x ) ) by FUZZY_1:def 5;
+( ( 1_minus g ) . x ) <= 1 by CKB1:1;
+then A10: ( 1 - ( g . x ) ) <= 1 by FUZZY_1:def 5;
+( ( 1_minus h ) . x ) <= 1 by CKB1:1;
+then ( 1 - ( h . x ) ) <= 1 by FUZZY_1:def 5;
+then ( ( 1 - ( h . x ) ) * ( 1 - ( g . x ) ) ) <= 1 by A9,A10,XREAL_1:160;
+then ( 1 - ( ( 1 - ( h . x ) ) * ( 1 - ( g . x ) ) ) ) >= ( 1 - 1 ) by XREAL_1:10;
+then ( 0 ) <= ( ( ( h . x ) + ( g . x ) ) - ( ( h . x ) * ( g . x ) ) );
+then A11: ( 0 ) <= ( IT . x ) by A3,A7;
+A12: A = [. ( lower_bound A ),( upper_bound A ) .] by INTEGRA1:4;
+then A13: 1 = ( upper_bound A ) by INTEGRA1:5;
+( 0 ) <= ( ( 1_minus g ) . x ) by CKB1:1;
+then ( 0 ) <= ( 1 - ( g . x ) ) by FUZZY_1:def 5;
+then ( 0 ) <= ( ( 1 - ( h . x ) ) * ( 1 - ( g . x ) ) ) by A9,XREAL_1:127;
+then ( 1 - ( 0 ) ) >= ( 1 - ( ( 1 - ( h . x ) ) * ( 1 - ( g . x ) ) ) ) by XREAL_1:10;
+then ( ( ( h . x ) + ( g . x ) ) - ( ( h . x ) * ( g . x ) ) ) <= 1;
+then A14: ( IT . x ) <= 1 by A3,A7;
+( 0 ) = ( lower_bound A ) by A12,INTEGRA1:5;
+hence thesis by A8,A13,A11,A14,INTEGRA2:1;
+end;
+then ( rng IT ) c= [. ( 0 ),1 .] by TARSKI:def 3;
+then IT is (Membership_Func of C) by A5,FUNCT_2:def 1,RELAT_1:def 19;
+hence thesis by A6;
+end;
+uniqueness
+proof
+let F being (Membership_Func of C),G being (Membership_Func of C);
+assume that
+A15: (for c being (Element of C) holds ( F . c ) = ( ( ( h . c ) + ( g . c ) ) - ( ( h . c ) * ( g . c ) ) ))
+and
+A16: (for c being (Element of C) holds ( G . c ) = ( ( ( h . c ) + ( g . c ) ) - ( ( h . c ) * ( g . c ) ) ));
+A17: (for c being (Element of C) holds (c in C implies ( F . c ) = ( G . c )))
+proof
+let c being (Element of C);
+( F . c ) = ( ( ( h . c ) + ( g . c ) ) - ( ( h . c ) * ( g . c ) ) ) by A15;
+hence thesis by A16;
+end;
+A18: C = ( dom G ) by FUNCT_2:def 1;
+C = ( dom F ) by FUNCT_2:def 1;
+hence thesis by A18,A17,PARTFUN1:5;
+end;
+commutativity;
+end;
