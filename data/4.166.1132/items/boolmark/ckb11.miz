@@ -1,0 +1,183 @@
+environ
+vocabularies NUMBERS,XBOOLE_0,FUNCT_1,SUBSET_1,FUNCT_4,FUNCOP_1,RELAT_1,TARSKI,PETRI,FUNCT_2,MARGREL1,ARYTM_3,XBOOLEAN,FINSEQ_1,PARTFUN1,XXREAL_0,CARD_1,ORDINAL4,NAT_1,ARYTM_1,BOOLMARK,STRUCT_0,PNPROC_1;
+notations TARSKI,XBOOLE_0,SUBSET_1,NUMBERS,XCMPLX_0,NAT_1,RELAT_1,FUNCT_1,PARTFUN1,FUNCT_2,DOMAIN_1,FUNCOP_1,FINSEQ_1,FUNCT_4,MARGREL1,PETRI,XXREAL_0,STRUCT_0,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10;
+definitions PETRI,XBOOLE_0,XBOOLEAN,SUBSET_1,STRUCT_0,CKB4,CKB6,CKB8,CKB9;
+theorems SUBSET_1,TARSKI,ZFMISC_1,PETRI,FUNCT_1,FUNCOP_1,FUNCT_2,FUNCT_4,FINSEQ_1,FINSEQ_4,NAT_1,FINSEQ_2,FINSEQ_3,RELAT_1,RELSET_1,XBOOLE_0,XBOOLE_1,XREAL_1,XXREAL_0,ORDINAL1,PARTFUN1,SEQ_4,CKB1,CKB2,CKB3,CKB4,CKB6,CKB8,CKB9;
+schemes FINSEQ_2,NAT_1;
+registrations SUBSET_1,XXREAL_0,XREAL_0,FINSEQ_1,MARGREL1,ORDINAL1,CARD_1,RELSET_1,STRUCT_0,PETRI;
+constructors PARTFUN1,DOMAIN_1,FUNCT_4,XXREAL_0,XREAL_0,NAT_1,MARGREL1,FINSEQ_4,PETRI,RELSET_1,STRUCT_0,CKB4,CKB6,CKB8,CKB9;
+requirements REAL,NUMERALS,BOOLE,SUBSET,ARITHM;
+begin
+definition
+let PTN being Petri_net;
+let M0 being (Boolean_marking of PTN);
+let Q being (FinSequence of (the carrier' of PTN));
+func Firing (Q,M0) -> (Boolean_marking of PTN)
+means
+:Def5: it = M0 if Q = ( {} ) otherwise (ex M being (FinSequence of ( Bool_marks_of PTN )) st (((( len Q ) = ( len M ) & it = ( M /. ( len M ) )) & ( M /. 1 ) = ( Firing (( Q /. 1 ),M0) )) & (for i being (Element of ( NAT )) holds ((i < ( len Q ) & i > ( 0 )) implies ( M /. ( i + 1 ) ) = ( Firing (( Q /. ( i + 1 ) ),( M /. i )) )))));
+existence
+proof
+defpred P2[ (Element of ( NAT )) ]
+ means
+(for Q being (FinSequence of (the carrier' of PTN)) holds ($1 = ( len Q ) implies ((Q = ( {} ) implies (ex M1 being (Boolean_marking of PTN) st M1 = M0)) & (Q <> ( {} ) implies (ex M2 being (Boolean_marking of PTN) st (ex M being (FinSequence of ( Bool_marks_of PTN )) st (((( len Q ) = ( len M ) & M2 = ( M /. ( len M ) )) & ( M /. 1 ) = ( Firing (( Q /. 1 ),M0) )) & (for i being (Element of ( NAT )) holds ((i < ( len Q ) & i > ( 0 )) implies ( M /. ( i + 1 ) ) = ( Firing (( Q /. ( i + 1 ) ),( M /. i )) ))))))))));
+A1:now
+let n being (Element of ( NAT ));
+assume A2: P2[ n ];
+thus P2[ ( n + 1 ) ]
+proof
+let Q being (FinSequence of (the carrier' of PTN));
+assume that
+A3: ( n + 1 ) = ( len Q );
+thus (Q = ( {} ) implies (ex M1 being (Boolean_marking of PTN) st M1 = M0));
+thus (Q <> ( {} ) implies (ex M2 being (Boolean_marking of PTN) st (ex M being (FinSequence of ( Bool_marks_of PTN )) st (((( len Q ) = ( len M ) & M2 = ( M /. ( len M ) )) & ( M /. 1 ) = ( Firing (( Q /. 1 ),M0) )) & (for i being (Element of ( NAT )) holds ((i < ( len Q ) & i > ( 0 )) implies ( M /. ( i + 1 ) ) = ( Firing (( Q /. ( i + 1 ) ),( M /. i )) )))))))
+proof
+assume Q <> ( {} );
+then ( len Q ) <> ( 0 );
+then consider Q1 being (FinSequence of (the carrier' of PTN)),t being (transition of PTN) such that A4: Q = ( Q1 ^ <* t *> ) by FINSEQ_2:19;
+A5: ( n + 1 ) = ( ( len Q1 ) + 1 ) by A3,A4,FINSEQ_2:16;
+per cases ;
+suppose A6: Q1 = ( {} );
+
+take M2 = ( Firing (t,M0) );
+take M = <* M2 *>;
+A7: ( len Q ) = ( ( len Q1 ) + ( len <* t *> ) ) by A4,FINSEQ_1:22
+.= ( ( 0 ) + ( len <* t *> ) ) by A6
+.= ( ( 0 ) + 1 ) by FINSEQ_1:39;
+hence ( len Q ) = ( len M ) by FINSEQ_1:39;
+hence M2 = ( M /. ( len M ) ) by A7,FINSEQ_4:16;
+Q = <* t *> by A4,A6,FINSEQ_1:34;
+then ( Q /. 1 ) = t by FINSEQ_4:16;
+hence ( M /. 1 ) = ( Firing (( Q /. 1 ),M0) ) by FINSEQ_4:16;
+let i being (Element of ( NAT ));
+assume (i < ( len Q ) & i > ( 0 ));
+hence thesis by A7,NAT_1:13;
+end;
+suppose A8: Q1 <> ( {} );
+
+then A9: ( len Q1 ) > ( 0 ) by NAT_1:3;
+then ( ( 0 ) + 1 ) < ( ( len Q1 ) + 1 ) by XREAL_1:6;
+then 1 <= ( len Q1 ) by NAT_1:13;
+then A10: 1 in ( dom Q1 ) by FINSEQ_3:25;
+A11: ( len Q ) = ( ( len Q1 ) + ( len <* t *> ) ) by A4,FINSEQ_1:22
+.= ( ( len Q1 ) + 1 ) by FINSEQ_1:40;
+consider B2 being (Boolean_marking of PTN),B being (FinSequence of ( Bool_marks_of PTN )) such that A12: ( len Q1 ) = ( len B ) and A13: B2 = ( B /. ( len B ) ) and A14: ( B /. 1 ) = ( Firing (( Q1 /. 1 ),M0) ) and A15: (for i being (Element of ( NAT )) holds ((i < ( len Q1 ) & i > ( 0 )) implies ( B /. ( i + 1 ) ) = ( Firing (( Q1 /. ( i + 1 ) ),( B /. i )) ))) by A2,A5,A8;
+take M2 = ( Firing (t,B2) );
+take M = ( B ^ <* M2 *> );
+A16: ( len M ) = ( ( len B ) + ( len <* M2 *> ) ) by FINSEQ_1:22
+.= ( ( len B ) + 1 ) by FINSEQ_1:40;
+hence ( len Q ) = ( len M ) by A12,A11;
+thus M2 = ( M /. ( len M ) ) by A16,FINSEQ_4:67;
+( ( 0 ) + 1 ) < ( ( len B ) + 1 ) by A12,A9,XREAL_1:6;
+then A17: 1 <= ( len B ) by NAT_1:13;
+then 1 in ( dom B ) by FINSEQ_3:25;
+hence ( M /. 1 ) = ( B /. 1 ) by FINSEQ_4:68
+.= ( Firing (( Q /. 1 ),M0) ) by A4,A14,A10,FINSEQ_4:68;
+let i being (Element of ( NAT ));
+assume that
+A18: i < ( len Q )
+and
+A19: i > ( 0 );
+thus ( M /. ( i + 1 ) ) = ( Firing (( Q /. ( i + 1 ) ),( M /. i )) )
+proof
+(1 <= ( i + 1 ) & ( i + 1 ) <= ( ( len Q1 ) + 1 )) by A11,A18,NAT_1:12,NAT_1:13;
+then A20: (( Seg ( ( len Q1 ) + 1 ) ) = ( ( Seg ( len Q1 ) ) \/ { ( ( len Q1 ) + 1 ) } ) & ( i + 1 ) in ( Seg ( ( len Q1 ) + 1 ) )) by FINSEQ_1:1,FINSEQ_1:9;
+per cases  by A20,XBOOLE_0:def 3;
+suppose A21: ( i + 1 ) in ( Seg ( len Q1 ) );
+
+then ( i + 1 ) <= ( len B ) by A12,FINSEQ_1:1;
+then ( i + 1 ) <= ( ( len B ) + 1 ) by NAT_1:12;
+then A22: i <= ( len B ) by XREAL_1:6;
+( ( 0 ) + 1 ) < ( i + 1 ) by A19,XREAL_1:6;
+then 1 <= i by NAT_1:13;
+then A23: i in ( dom B ) by A22,FINSEQ_3:25;
+( i + 1 ) <= ( len Q1 ) by A21,FINSEQ_1:1;
+then i < ( len Q1 ) by NAT_1:13;
+then A24: ( B /. ( i + 1 ) ) = ( Firing (( Q1 /. ( i + 1 ) ),( B /. i )) ) by A15,A19;
+( i + 1 ) in ( dom Q1 ) by A21,FINSEQ_1:def 3;
+then A25: ( Q1 /. ( i + 1 ) ) = ( Q /. ( i + 1 ) ) by A4,FINSEQ_4:68;
+( i + 1 ) in ( dom B ) by A12,A21,FINSEQ_1:def 3;
+then ( B /. ( i + 1 ) ) = ( M /. ( i + 1 ) ) by FINSEQ_4:68;
+hence thesis by A24,A25,A23,FINSEQ_4:68;
+end;
+suppose A26: ( i + 1 ) in { ( ( len Q1 ) + 1 ) };
+
+A27: ( len B ) in ( dom B ) by A17,FINSEQ_3:25;
+A28: ( i + 1 ) = ( ( len Q1 ) + 1 ) by A26,TARSKI:def 1;
+then (( M /. ( i + 1 ) ) = M2 & ( Q /. ( i + 1 ) ) = t) by A4,A12,FINSEQ_4:67;
+hence thesis by A12,A13,A28,A27,FINSEQ_4:68;
+end;
+end;
+
+end;
+end;
+
+end;
+
+end;
+A29: P2[ ( 0 ) ];
+(for n being (Element of ( NAT )) holds P2[ n ]) from NAT_1:sch 1(A29,A1);
+hence thesis;
+end;
+uniqueness
+proof
+let B1 being (Boolean_marking of PTN),B2 being (Boolean_marking of PTN);
+thus (((Q = ( {} ) & B1 = M0) & B2 = M0) implies B1 = B2);
+assume Q <> ( {} );
+given M1 being (FinSequence of ( Bool_marks_of PTN )) such that
+A30: ( len Q ) = ( len M1 )
+and
+A31: B1 = ( M1 /. ( len M1 ) )
+and
+A32: ( M1 /. 1 ) = ( Firing (( Q /. 1 ),M0) )
+and
+A33: (for i being (Element of ( NAT )) holds ((i < ( len Q ) & i > ( 0 )) implies ( M1 /. ( i + 1 ) ) = ( Firing (( Q /. ( i + 1 ) ),( M1 /. i )) )));
+
+A34: ( dom M1 ) = ( Seg ( len Q ) ) by A30,FINSEQ_1:def 3;
+given M2 being (FinSequence of ( Bool_marks_of PTN )) such that
+A35: ( len Q ) = ( len M2 )
+and
+A36: B2 = ( M2 /. ( len M2 ) )
+and
+A37: ( M2 /. 1 ) = ( Firing (( Q /. 1 ),M0) )
+and
+A38: (for i being (Element of ( NAT )) holds ((i < ( len Q ) & i > ( 0 )) implies ( M2 /. ( i + 1 ) ) = ( Firing (( Q /. ( i + 1 ) ),( M2 /. i )) )));
+
+defpred P2[ (Element of ( NAT )) ]
+ means
+($1 in ( Seg ( len Q ) ) implies ( M1 /. $1 ) = ( M2 /. $1 ));
+A39:now
+let j being (Element of ( NAT ));
+assume A40: P2[ j ];
+now
+assume A41: ( j + 1 ) in ( Seg ( len Q ) );
+per cases ;
+suppose j = ( 0 );
+
+hence ( M1 /. ( j + 1 ) ) = ( M2 /. ( j + 1 ) ) by A32,A37;
+end;
+suppose A42: j <> ( 0 );
+
+then A43: j > ( 0 ) by NAT_1:3;
+(( j + 1 ) <= ( len Q ) & j < ( j + 1 )) by A41,FINSEQ_1:1,XREAL_1:29;
+then A44: j < ( len Q ) by XXREAL_0:2;
+1 <= j by A42,NAT_1:14;
+hence ( M1 /. ( j + 1 ) ) = ( Firing (( Q /. ( j + 1 ) ),( M2 /. j )) ) by A33,A40,A44,FINSEQ_1:1
+.= ( M2 /. ( j + 1 ) ) by A38,A43,A44;
+end;
+end;
+hence P2[ ( j + 1 ) ];
+end;
+A45: P2[ ( 0 ) ] by FINSEQ_1:1;
+A46: (for j being (Element of ( NAT )) holds P2[ j ]) from NAT_1:sch 1(A45,A39);
+now
+let j being Nat;
+assume A47: j in ( dom M1 );
+then A48: j in ( dom M2 ) by A35,A34,FINSEQ_1:def 3;
+thus ( M1 . j ) = ( M1 /. j ) by A47,PARTFUN1:def 6
+.= ( M2 /. j ) by A46,A34,A47
+.= ( M2 . j ) by A48,PARTFUN1:def 6;
+end;
+hence B1 = B2 by A30,A31,A35,A36,FINSEQ_2:9;
+end;
+correctness;
+end;
