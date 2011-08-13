@@ -1,0 +1,131 @@
+environ
+vocabularies MSUALG_1,GLIB_000,SUBSET_1,XBOOLE_0,UNIALG_2,STRUCT_0,RELAT_1,TARSKI,FUNCT_1,FUNCOP_1,PBOOLE,CARD_3,FINSEQ_1,MARGREL1,NAT_1,PARTFUN1,PRELAMB,MSAFREE,MSUALG_3,TREES_4,REALSET1,MSUALG_2,FINSET_1,PRALG_1,CARD_1,TREES_2,DTCONSTR,TREES_3,ZFMISC_1,LANG1,TDGROUP,TREES_1,MSAFREE2;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,NAT_1,CARD_1,RELAT_1,FUNCT_1,PARTFUN1,FINSET_1,FINSEQ_1,FUNCT_2,CARD_3,TREES_1,TREES_2,TREES_3,TREES_4,PBOOLE,STRUCT_0,MSUALG_1,FINSEQ_2,MSAFREE,MSUALG_2,FUNCOP_1,DTCONSTR,LANG1,PRE_POLY,RELSET_1,MSUALG_3,CKB1,CKB2,CKB3,CKB4,CKB9,CKB13,CKB14,CKB17,CKB19;
+definitions TARSKI,MSUALG_1,FINSET_1,MSUALG_2,FUNCT_1,STRUCT_0,PBOOLE,FUNCOP_1,CKB2,CKB3,CKB4,CKB9,CKB13,CKB14,CKB17,CKB19;
+theorems TARSKI,ZFMISC_1,FINSEQ_1,FINSEQ_3,FUNCT_1,FUNCT_2,TREES_3,TREES_4,SUBSET_1,CARD_3,FUNCOP_1,PBOOLE,MSUALG_1,MSUALG_2,MSAFREE,CARD_2,CARD_1,DTCONSTR,LANG1,PRE_CIRC,RELAT_1,RELSET_1,XBOOLE_0,XBOOLE_1,FINSET_1,PARTFUN1,FINSEQ_2,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB13,CKB14,CKB17,CKB18,CKB19;
+schemes DOMAIN_1,PBOOLE,MSAFREE1,FUNCT_1;
+registrations XBOOLE_0,FUNCT_1,RELSET_1,FUNCOP_1,FINSET_1,TREES_1,CARD_3,TREES_2,TREES_3,PRE_CIRC,STRUCT_0,DTCONSTR,RELAT_1,MSUALG_1,MSUALG_2,MSAFREE,ORDINAL1,PBOOLE,FINSEQ_1,CKB10,CKB11,CKB12,CKB15,CKB16;
+constructors XXREAL_0,NAT_1,MSUALG_3,MSAFREE,SEQ_4,RELSET_1,PRE_POLY,FINSEQ_2,CKB2,CKB3,CKB4,CKB9,CKB13,CKB14,CKB17,CKB19;
+requirements BOOLE,SUBSET;
+begin
+definition
+let S being non void non empty ManySortedSign;
+let MSA being  non-empty MSAlgebra over S;
+func Eval MSA -> (ManySortedFunction of ( FreeEnv MSA ),MSA)
+means
+(it is_homomorphism ( FreeEnv MSA ),MSA & (for s being (SortSymbol of S) holds (for x,y being set holds (((y in ( FreeSort ((the Sorts of MSA),s) ) & y = ( root-tree [ x,s ] )) & x in ( (the Sorts of MSA) . s )) implies ( ( it . s ) . y ) = x))));
+existence
+proof
+reconsider A = ( FreeGen (the Sorts of MSA) ) as  free (GeneratorSet of ( FreeEnv MSA )) by MSAFREE:16;
+defpred P[ set,set ]
+ means
+(ex s being (SortSymbol of S) st (ex f being (Function of ( A . s ),( (the Sorts of MSA) . s )) st ((f = $2 & s = $1) & (for x,y being set holds (((y in ( A . s ) & y = ( root-tree [ x,s ] )) & x in ( (the Sorts of MSA) . s )) implies ( f . y ) = x)))));
+A1: (for i being set holds (i in (the carrier of S) implies (ex j being set st P[ i,j ])))
+proof
+let i being set;
+assume i in (the carrier of S);
+then reconsider s = i as (SortSymbol of S);
+defpred P[ set,set ]
+ means
+$1 = ( root-tree [ $2,s ] );
+A2: (for e being set holds (e in ( A . s ) implies (ex u being set st (u in ( (the Sorts of MSA) . s ) & P[ e,u ]))))
+proof
+let e being set;
+assume e in ( A . s );
+then e in ( FreeGen (s,(the Sorts of MSA)) ) by MSAFREE:def 16;
+hence thesis by MSAFREE:def 15;
+end;
+consider j being Function such that A3: ((( dom j ) = ( A . s ) & ( rng j ) c= ( (the Sorts of MSA) . s )) & (for e being set holds (e in ( A . s ) implies P[ e,( j . e ) ]))) from FUNCT_1:sch 5(A2);
+reconsider f = j as (Function of ( A . s ),( (the Sorts of MSA) . s )) by A3,FUNCT_2:def 1,RELSET_1:4;
+take j;
+take s;
+take f;
+thus (f = j & s = i);
+let x being set,y being set;
+assume that
+A4: y in ( A . s )
+and
+A5: y = ( root-tree [ x,s ] )
+and
+x in ( (the Sorts of MSA) . s );
+y = ( root-tree [ ( j . y ),s ] ) by A3,A4;
+then [ x,s ] = [ ( j . y ),s ] by A5,TREES_4:4;
+hence thesis by ZFMISC_1:27;
+end;
+consider f being (ManySortedSet of (the carrier of S)) such that A6: (for i being set holds (i in (the carrier of S) implies P[ i,( f . i ) ])) from PBOOLE:sch 3(A1);
+now
+let x being set;
+assume x in ( dom f );
+then x in (the carrier of S) by PARTFUN1:def 2;
+then P[ x,( f . x ) ] by A6;
+hence ( f . x ) is Function;
+end;
+then reconsider f as (ManySortedFunction of (the carrier of S)) by FUNCOP_1:def 6;
+now
+let i being set;
+assume i in (the carrier of S);
+then P[ i,( f . i ) ] by A6;
+hence ( f . i ) is (Function of ( A . i ),( (the Sorts of MSA) . i ));
+end;
+then reconsider f as (ManySortedFunction of A,(the Sorts of MSA)) by PBOOLE:def 15;
+consider IT being (ManySortedFunction of ( FreeEnv MSA ),MSA) such that A7: IT is_homomorphism ( FreeEnv MSA ),MSA and A8: ( IT || A ) = f by MSAFREE:def 5;
+take IT;
+thus IT is_homomorphism ( FreeEnv MSA ),MSA by A7;
+let s being (SortSymbol of S);
+let x being set,y being set;
+A9: (ex t being (SortSymbol of S) st (ex g being (Function of ( A . t ),( (the Sorts of MSA) . t )) st ((g = ( f . s ) & t = s) & (for x,y being set holds (((y in ( A . t ) & y = ( root-tree [ x,t ] )) & x in ( (the Sorts of MSA) . t )) implies ( g . y ) = x))))) by A6;
+assume that
+y in ( FreeSort ((the Sorts of MSA),s) )
+and
+A10: (y = ( root-tree [ x,s ] ) & x in ( (the Sorts of MSA) . s ));
+y in ( FreeGen (s,(the Sorts of MSA)) ) by A10,MSAFREE:def 15;
+then A11: y in ( A . s ) by MSAFREE:def 16;
+hence ( ( IT . s ) . y ) = ( ( ( IT . s ) | ( A . s ) ) . y ) by FUNCT_1:49
+.= ( ( f . s ) . y ) by A8,MSAFREE:def 1
+.= x by A10,A11,A9;
+end;
+uniqueness
+proof
+defpred P[ set,set,set ]
+ means
+$3 = ( root-tree [ $2,$1 ] );
+let IT1 being (ManySortedFunction of ( FreeEnv MSA ),MSA),IT2 being (ManySortedFunction of ( FreeEnv MSA ),MSA);
+reconsider IT19 = IT1,IT29 = IT2 as (ManySortedFunction of ( FreeMSA (the Sorts of MSA) ),MSA);
+assume IT1 is_homomorphism ( FreeEnv MSA ),MSA;
+then A12: IT19 is_homomorphism ( FreeMSA (the Sorts of MSA) ),MSA;
+assume A13: (for s being (SortSymbol of S) holds (for x,y being set holds (((y in ( FreeSort ((the Sorts of MSA),s) ) & y = ( root-tree [ x,s ] )) & x in ( (the Sorts of MSA) . s )) implies ( ( IT1 . s ) . y ) = x)));
+A14: (for s being (SortSymbol of S) holds (for x,y being set holds (y in ( FreeGen (s,(the Sorts of MSA)) ) implies (( ( IT19 . s ) . y ) = x iff P[ s,x,y ]))))
+proof
+let s being (SortSymbol of S);
+let x being set,y being set;
+assume A15: y in ( FreeGen (s,(the Sorts of MSA)) );
+then consider a being set such that A16: a in ( (the Sorts of MSA) . s ) and A17: y = ( root-tree [ a,s ] ) by MSAFREE:def 15;
+y in ( ( FreeSort (the Sorts of MSA) ) . s ) by A15;
+then A18: y in ( FreeSort ((the Sorts of MSA),s) ) by MSAFREE:def 11;
+hence (( ( IT19 . s ) . y ) = x implies y = ( root-tree [ x,s ] )) by A13,A16,A17;
+assume y = ( root-tree [ x,s ] );
+then [ x,s ] = [ a,s ] by A17,TREES_4:4;
+then x = a by ZFMISC_1:27;
+hence thesis by A13,A18,A16,A17;
+end;
+assume IT2 is_homomorphism ( FreeEnv MSA ),MSA;
+then A19: IT29 is_homomorphism ( FreeMSA (the Sorts of MSA) ),MSA;
+assume A20: (for s being (SortSymbol of S) holds (for x,y being set holds (((y in ( FreeSort ((the Sorts of MSA),s) ) & y = ( root-tree [ x,s ] )) & x in ( (the Sorts of MSA) . s )) implies ( ( IT2 . s ) . y ) = x)));
+A21: (for s being (SortSymbol of S) holds (for x,y being set holds (y in ( FreeGen (s,(the Sorts of MSA)) ) implies (( ( IT29 . s ) . y ) = x iff P[ s,x,y ]))))
+proof
+let s being (SortSymbol of S);
+let x being set,y being set;
+assume A22: y in ( FreeGen (s,(the Sorts of MSA)) );
+then consider a being set such that A23: a in ( (the Sorts of MSA) . s ) and A24: y = ( root-tree [ a,s ] ) by MSAFREE:def 15;
+y in ( ( FreeSort (the Sorts of MSA) ) . s ) by A22;
+then A25: y in ( FreeSort ((the Sorts of MSA),s) ) by MSAFREE:def 11;
+hence (( ( IT29 . s ) . y ) = x implies y = ( root-tree [ x,s ] )) by A20,A23,A24;
+assume y = ( root-tree [ x,s ] );
+then [ x,s ] = [ a,s ] by A24,TREES_4:4;
+then x = a by ZFMISC_1:27;
+hence thesis by A20,A25,A23,A24;
+end;
+IT19 = IT29 from MSAFREE1:sch 3(A12,A14,A19,A21);
+hence thesis;
+end;
+end;
