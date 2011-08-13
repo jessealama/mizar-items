@@ -1,0 +1,2176 @@
+:: A theory of partitions, { I }
+::  by Shunichi Kobayashi and Kui Jia
+::
+:: Received October 5, 1998
+:: Copyright (c) 1998-2011 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, XBOOLE_0, EQREL_1, SUBSET_1, TARSKI, SETFAM_1, FUNCT_1,
+      RELAT_1, ZFMISC_1, FINSEQ_1, XXREAL_0, ARYTM_3, CARD_1, ORDINAL4,
+      PARTIT1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, NUMBERS, NAT_1, RELAT_1,
+      FUNCT_1, FUNCT_2, SETFAM_1, FINSEQ_1, FINSEQ_4, EQREL_1, XXREAL_0;
+ constructors SETFAM_1, FUNCT_2, XXREAL_0, XREAL_0, NAT_1, MEMBERED, EQREL_1,
+      FINSEQ_4, RELSET_1, DOMAIN_1;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, PARTFUN1, MEMBERED, EQREL_1;
+ requirements REAL, NUMERALS, BOOLE, SUBSET, ARITHM;
+ definitions TARSKI, RELAT_1, EQREL_1;
+ theorems TARSKI, FUNCT_1, SETFAM_1, EQREL_1, ZFMISC_1, RELAT_1, NAT_1,
+      FINSEQ_1, FINSEQ_2, FUNCT_2, SUBSET_1, RELSET_1, XBOOLE_0, XBOOLE_1,
+      XREAL_1, XXREAL_0;
+ schemes EQREL_1, NAT_1, CLASSES1, DOMAIN_1, XBOOLE_0;
+
+begin
+
+::Chap. 1  Preliminaries
+
+reserve Y,Z for non empty set;
+reserve PA,PB for a_partition of Y;
+reserve A,B for Subset of Y;
+reserve i,j,k for Element of NAT;
+reserve x,y,z,x1,x2,y1,z0,X,V,a,b,d,t,SFX,SFY for set;
+
+theorem Th1:
+  X in PA & V in PA & X c= V implies X=V
+proof
+  assume that
+A1: X in PA and
+A2: V in PA and
+A3: X c= V;
+A4: X=V or X misses V by A1,A2,EQREL_1:def 4;
+  set x = the Element of X;
+ X<>{} by A1,EQREL_1:def 4;
+then  x in X;
+  hence thesis by A3,A4,XBOOLE_0:3;
+end;
+
+notation
+  let SFX,SFY;
+  synonym SFX '<' SFY for SFX is_finer_than SFY;
+  synonym SFY '>' SFX for SFX is_finer_than SFY;
+end;
+
+theorem Th3:
+  union (SFX \ {{}}) = union SFX
+proof
+A1: union (SFX \ {{}}) c= (union SFX)
+  proof
+    let y be set;
+    assume y in union (SFX \ {{}});
+then  ex z being set st y in z & z in (SFX \{{} }) by TARSKI:def 4;
+    hence thesis by TARSKI:def 4;
+  end;
+ union SFX c= union (SFX \ {{}})
+  proof
+    let y be set;
+    assume y in union SFX;
+    then consider X being set such that
+A2: y in X and
+A3: X in SFX by TARSKI:def 4;
+ not X in {{}} by A2,TARSKI:def 1;
+then  X in SFX \ {{}} by A3,XBOOLE_0:def 5;
+    hence thesis by A2,TARSKI:def 4;
+  end;
+  hence thesis by A1,XBOOLE_0:def 10;
+end;
+
+theorem Th4:
+  for PA,PB being a_partition of Y st PA '>' PB & PB '>' PA holds PB c= PA
+proof
+  let PA,PB be a_partition of Y;
+  assume that
+A1: PA '>' PB and
+A2: PB '>' PA;
+  let x be set;
+  assume
+A3: x in PB;
+  then consider V such that
+A4: V in PA and
+A5: x c= V by A1,SETFAM_1:def 2;
+  consider W being set such that
+A6: W in PB and
+A7: V c= W by A2,A4,SETFAM_1:def 2;
+ x=W by A3,A5,A6,A7,Th1,XBOOLE_1:1;
+  hence thesis by A4,A5,A7,XBOOLE_0:def 10;
+end;
+
+theorem Th5:
+  for PA,PB being a_partition of Y st PA '>' PB & PB '>' PA holds PA = PB
+proof
+  let PA,PB be a_partition of Y;
+  assume PA '>' PB & PB '>' PA;
+then  PB c= PA & PA c= PB by Th4;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem Th7:
+  for PA,PB being a_partition of Y st PA '>' PB holds PA is_coarser_than PB
+proof
+  let PA,PB be a_partition of Y;
+  assume
+A1: PA '>' PB;
+ for x being set st x in PA ex y being set st y in PB & y c= x
+  proof
+    let x be set;
+    assume
+A2: x in PA;
+then A3: x<>{} by EQREL_1:def 4;
+    set u = the Element of x;
+A4: u in x by A3;
+ union PB = Y by EQREL_1:def 4;
+    then consider y being set such that
+A5: u in y and
+A6: y in PB by A2,A4,TARSKI:def 4;
+    consider z being set such that
+A7: z in PA and
+A8: y c= z by A1,A6,SETFAM_1:def 2;
+ x=z or x misses z by A2,A7,EQREL_1:def 4;
+    hence thesis by A3,A5,A6,A8,XBOOLE_0:3;
+  end;
+  hence thesis by SETFAM_1:def 3;
+end;
+
+definition
+  let Y;
+  let PA be a_partition of Y,b be set;
+  pred b is_a_dependent_set_of PA means
+  :Def1:
+  ex B being set st B c= PA & B<>{} & b = union B;
+end;
+
+definition
+  let Y;
+  let PA,PB be a_partition of Y,b be set;
+  pred b is_min_depend PA,PB means
+  :Def2:
+  b is_a_dependent_set_of PA &
+  b is_a_dependent_set_of PB & for d being set st d c= b
+  & d is_a_dependent_set_of PA & d is_a_dependent_set_of PB holds d=b;
+end;
+
+theorem Th8:
+  for PA,PB being a_partition of Y
+  st PA '>' PB holds for b being set st b in PA holds
+  b is_a_dependent_set_of PB
+proof
+  let PA,PB be a_partition of Y;
+  assume
+A1: PA '>' PB;
+A2: union PB = Y by EQREL_1:def 4;
+A3: PA is_coarser_than PB by A1,Th7;
+ for b being set st b in PA holds b is_a_dependent_set_of PB
+  proof
+    let b be set;
+    assume
+A4: b in PA;
+    set B0={x8 where x8 is Subset of Y: x8 in PB & x8 c= b};
+    consider xb be set such that
+A5: xb in PB & xb c= b by A3,A4,SETFAM_1:def 3;
+A6: xb in B0 by A5;
+ z in B0 implies z in PB
+    proof
+      assume z in B0;
+then   ex x8 being Subset of Y st x8=z & x8 in PB & x8 c= b;
+      hence thesis;
+    end;
+then A7: B0 c= PB by TARSKI:def 3;
+ z in b implies z in union B0
+    proof
+      assume
+A8:  z in b;
+      then consider x1 such that
+A9:  z in x1 and
+A10:  x1 in PB by A2,A4,TARSKI:def 4;
+      consider y1 such that
+A11:  y1 in PA and
+A12:  x1 c= y1 by A1,A10,SETFAM_1:def 2;
+  b = y1 or b misses y1 by A4,A11,EQREL_1:def 4;
+then   x1 in B0 by A8,A9,A10,A12,XBOOLE_0:3;
+      hence thesis by A9,TARSKI:def 4;
+    end;
+then A13: b c= union B0 by TARSKI:def 3;
+ z in union B0 implies z in b
+    proof
+      assume z in union B0;
+      then consider y such that
+A14:  z in y and
+A15:  y in B0 by TARSKI:def 4;
+  ex x8 being Subset of Y st x8=y & x8 in PB & x8 c= b by A15;
+      hence thesis by A14;
+    end;
+then  union B0 c= b by TARSKI:def 3;
+then  b = union B0 by A13,XBOOLE_0:def 10;
+    hence thesis by A6,A7,Def1;
+  end;
+  hence thesis;
+end;
+
+theorem Th9:
+  for PA being a_partition of Y holds Y is_a_dependent_set_of PA
+proof
+  let PA be a_partition of Y;
+A1: {Y} is Subset-Family of Y by ZFMISC_1:68;
+A2: union {Y} = Y by ZFMISC_1:25;
+   for
+ A st A in {Y} holds A<>{} & for B st B in {Y} holds A = B or A misses B
+  proof
+    let A;
+    assume
+A3: A in {Y};
+then A4: A=Y by TARSKI:def 1;
+    thus A<>{} by A3,TARSKI:def 1;
+    let B;
+    assume B in {Y};
+    hence thesis by A4,TARSKI:def 1;
+  end;
+then A5: {Y} is a_partition of Y by A1,A2,EQREL_1:def 4;
+ for a being set st a in PA ex b being set st b in {Y} & a c= b
+  proof
+    let a be set;
+    assume
+A6: a in PA;
+then A7: a<>{} by EQREL_1:def 4;
+    set x = the Element of a;
+ x in Y by A6,A7,TARSKI:def 3;
+    then consider b being set such that
+    x in b and
+A8: b in {Y} by A2,TARSKI:def 4;
+ b = Y by A8,TARSKI:def 1;
+    hence thesis by A6,A8;
+  end;
+then A9: {Y} '>' PA by SETFAM_1:def 2;
+ Y in {Y} by TARSKI:def 1;
+  hence thesis by A5,A9,Th8;
+end;
+
+theorem Th10:
+  for F being Subset-Family of Y st (Intersect(F)<>{} &
+  for X st X in F holds X is_a_dependent_set_of PA)
+  holds Intersect(F) is_a_dependent_set_of PA
+proof
+  let F be Subset-Family of Y;
+  per cases;
+  suppose
+ F={};
+then  Intersect(F)=Y by SETFAM_1:def 9;
+    hence thesis by Th9;
+  end;
+  suppose
+A1: F<>{};
+    then reconsider F9 = F as non empty Subset-Family of Y;
+    assume that
+A2: Intersect(F)<>{} and
+A3: for X st X in F holds X is_a_dependent_set_of PA;
+    defpred P[set,set] means $2 c= PA & $2<>{} & $1=union $2;
+A4: for X st X in F holds ex B being set st P[X,B]
+    proof
+      let X;
+      assume X in F;
+then    X is_a_dependent_set_of PA by A3;
+      hence thesis by Def1;
+    end;
+    consider f being Function such that
+A5: dom f = F & for X st X in F holds P[X,f.X] from CLASSES1:sch 1(A4);
+ rng f c= bool bool Y
+    proof
+      let y be set;
+      assume y in rng f;
+      then consider x being set such that
+A6:  x in dom f and
+A7:  y = f.x by FUNCT_1:def 3;
+  f.x c= PA by A5,A6;
+then   y c= bool Y by A7,XBOOLE_1:1;
+      hence thesis;
+    end;
+    then reconsider f as Function of F9, bool bool Y
+    by A5,FUNCT_2:def 1,RELSET_1:4;
+    defpred P[set] means $1 in F;
+    deffunc S(Element of F9) = f.$1;
+    reconsider T={S(X) where X is Element of F9:P[X]}
+    as Subset-Family of bool Y from DOMAIN_1:sch 8;
+    reconsider T as Subset-Family of bool Y;
+    take B=Intersect(T);
+    thus B c= PA
+    proof
+      let x;
+      assume
+A8:  x in B;
+      consider X being set such that
+A9:  X in F by A1,XBOOLE_0:def 1;
+  f.X in T by A9;
+then A10:  x in f.X by A8,SETFAM_1:43;
+  f.X c= PA by A5,A9;
+      hence thesis by A10;
+    end;
+    thus B<>{}
+    proof
+      consider X being set such that
+A11:  X in F by A1,XBOOLE_0:def 1;
+A12:  f.X in T by A11;
+      consider A being set such that
+A13:  A in Intersect(F) by A2,XBOOLE_0:def 1;
+      reconsider A as Element of Y by A13;
+      set AA = EqClass(A,PA);
+A14:  A in meet F by A1,A13,SETFAM_1:def 9;
+  for X st X in T holds AA in X
+      proof
+        let X;
+        assume X in T;
+        then consider z being Element of F9 such that
+A15:    X=f.z and z in F;
+A16:    f.z c= PA by A5;
+    z = union (f.z) & A in z by A5,A14,SETFAM_1:def 1;
+then     ex A0 being set st A in A0 & A0 in f.z by TARSKI:def 4;
+        hence thesis by A15,A16,EQREL_1:def 6;
+      end;
+then   EqClass(A,PA) in meet T by A12,SETFAM_1:def 1;
+      hence thesis by SETFAM_1:def 9;
+    end;
+A17: Intersect(F) c= union B
+    proof
+      let x be set;
+      assume
+A18:  x in Intersect(F);
+then A19:  x in meet F by A1,SETFAM_1:def 9;
+      reconsider x as Element of Y by A18;
+      reconsider PA as a_partition of Y;
+      set A = EqClass(x,PA);
+      consider X being set such that
+A20:  X in F by A1,XBOOLE_0:def 1;
+A21:  f.X in T by A20;
+  for X st X in T holds A in X
+      proof
+        let X;
+        assume X in T;
+        then consider z being Element of F9 such that
+A22:    X=f.z and z in F;
+A23:    f.z c= PA by A5;
+    z = union (f.z) by A5;
+then     x in union (f.z) by A19,SETFAM_1:def 1;
+then     ex A0 being set st x in A0 & A0 in f.z by TARSKI:def 4;
+        hence thesis by A22,A23,EQREL_1:def 6;
+      end;
+then   A in meet T by A21,SETFAM_1:def 1;
+      then   x
+ in A & A in Intersect(T) by A21,EQREL_1:def 6,SETFAM_1:def 9;
+      hence thesis by TARSKI:def 4;
+    end;
+ union B c= Intersect(F)
+    proof
+      let x be set;
+      assume
+A24:  x in union B;
+      consider X being set such that
+A25:  X in F by A1,XBOOLE_0:def 1;
+A26:  f.X in T by A25;
+      consider y being set such that
+A27:  x in y and
+A28:  y in B by A24,TARSKI:def 4;
+A29:  y in meet T by A26,A28,SETFAM_1:def 9;
+  for X st X in F holds x in X
+      proof
+        let X;
+        assume
+A30:    X in F;
+then     f.X in T;
+then A31:    y in f.X by A29,SETFAM_1:def 1;
+    X = union (f.X) by A5,A30;
+        hence thesis by A27,A31,TARSKI:def 4;
+      end;
+then   x in meet F by A1,SETFAM_1:def 1;
+      hence thesis by A1,SETFAM_1:def 9;
+    end;
+    hence Intersect(F) = union B by A17,XBOOLE_0:def 10;
+  end;
+end;
+
+theorem Th11:
+  for X0,X1 being Subset of Y st X0 is_a_dependent_set_of PA &
+  X1 is_a_dependent_set_of PA & X0 meets X1
+  holds X0 /\ X1 is_a_dependent_set_of PA
+proof
+  let X0,X1 be Subset of Y;
+  assume that
+A1: X0 is_a_dependent_set_of PA and
+A2: X1 is_a_dependent_set_of PA and
+A3: X0 meets X1;
+  consider A being set such that
+A4: A c= PA and A<>{} and
+A5: X0 = union A by A1,Def1;
+  consider B being set such that
+A6: B c= PA and B<>{} and
+A7: X1 = union B by A2,Def1;
+A8: X0 /\ X1 c= union (A /\ B)
+  proof
+    let x be set;
+    assume
+A9: x in (X0 /\ X1);
+then A10: x in X0 by XBOOLE_0:def 4;
+A11: x in X1 by A9,XBOOLE_0:def 4;
+    consider y being set such that
+A12: x in y and
+A13: y in A by A5,A10,TARSKI:def 4;
+    consider z being set such that
+A14: x in z and
+A15: z in B by A7,A11,TARSKI:def 4;
+A16: y in PA by A4,A13;
+A17: z in PA by A6,A15;
+ y meets z by A12,A14,XBOOLE_0:3;
+then  y = z by A16,A17,EQREL_1:def 4;
+then  y in A /\ B by A13,A15,XBOOLE_0:def 4;
+    hence thesis by A12,TARSKI:def 4;
+  end;
+ union (A /\ B) c= X0 /\ X1
+  proof
+    let x be set;
+    assume x in union (A /\ B);
+    then consider y being set such that
+A18: x in y and
+A19: y in (A /\ B) by TARSKI:def 4;
+A20: y in A by A19,XBOOLE_0:def 4;
+A21: y in B by A19,XBOOLE_0:def 4;
+A22: x in X0 by A5,A18,A20,TARSKI:def 4;
+ x in X1 by A7,A18,A21,TARSKI:def 4;
+    hence thesis by A22,XBOOLE_0:def 4;
+  end;
+then A23: X0 /\ X1 = union (A /\ B) by A8,XBOOLE_0:def 10;
+A24: A \/ B c= PA by A4,A6,XBOOLE_1:8;
+ A /\ B c= A & A c= A \/ B by XBOOLE_1:7,17;
+then  A /\ B c= A \/ B by XBOOLE_1:1;
+then A25: A /\ B c= PA by A24,XBOOLE_1:1;
+ now
+    assume
+A26: A /\ B={};
+ ex y being set st y in X0 & y in X1 by A3,XBOOLE_0:3;
+    hence contradiction by A8,A26,XBOOLE_0:def 4,ZFMISC_1:2;
+  end;
+  hence thesis by A23,A25,Def1;
+end;
+
+theorem Th12:
+  for X being Subset of Y holds X is_a_dependent_set_of PA & X<>Y
+  implies X` is_a_dependent_set_of PA
+proof
+  let X be Subset of Y;
+  assume that
+A1: X is_a_dependent_set_of PA and
+A2: X<>Y;
+  consider B being set such that
+A3: B c= PA and B<>{} and
+A4: X=union B by A1,Def1;
+  take PA \ B;
+A5: union PA = Y by EQREL_1:def 4;
+then A6: X` = union PA \ union B by A4,SUBSET_1:def 4;
+  reconsider B as Subset of PA by A3;
+ now
+    assume PA \ B={};
+then  PA c= B by XBOOLE_1:37;
+    hence contradiction by A2,A4,A5,XBOOLE_0:def 10;
+  end;
+  hence thesis by A6,EQREL_1:43,XBOOLE_1:36;
+end;
+
+theorem Th13:
+  for y being Element of Y
+  ex X being Subset of Y st y in X & X is_min_depend PA,PB
+proof
+  let y be Element of Y;
+A1: union PA = Y by EQREL_1:def 4;
+A2: for A being set st A in PA holds A<>{} & for B being set st B in PA
+  holds A=B or A misses B by EQREL_1:def 4;
+A3: Y is_a_dependent_set_of PA & Y is_a_dependent_set_of PB by Th9;
+  defpred P[set] means
+  y in $1 & $1 is_a_dependent_set_of PA & $1 is_a_dependent_set_of PB;
+  reconsider XX={X where X is Subset of Y:P[X]}
+  as Subset-Family of Y from DOMAIN_1:sch 7;
+  reconsider XX as Subset-Family of Y;
+ Y c= Y;
+then A4: Y in XX by A3;
+ for X1 be set st X1 in XX holds y in X1
+  proof
+    let X1 be set;
+    assume X1 in XX;
+then  ex X be Subset of Y st X=X1 & y in X & X
+    is_a_dependent_set_of PA & X is_a_dependent_set_of PB;
+    hence thesis;
+  end;
+then A5: y in meet XX by A4,SETFAM_1:def 1;
+then A6: Intersect(XX)<>{} by SETFAM_1:def 9;
+  take Intersect(XX);
+ for X1 be set st X1 in XX holds X1 is_a_dependent_set_of PA
+  proof
+    let X1 be set;
+    assume X1 in XX;
+then  ex X be Subset of Y st X=X1 & y in X & X is_a_dependent_set_of PA &
+    X is_a_dependent_set_of PB;
+    hence thesis;
+  end;
+then A7: Intersect(XX) is_a_dependent_set_of PA by A6,Th10;
+ for X1 be set st X1 in XX holds X1 is_a_dependent_set_of PB
+  proof
+    let X1 be set;
+    assume X1 in XX;
+then  ex X be Subset of Y st X=X1 & y in X & X is_a_dependent_set_of PA &
+    X is_a_dependent_set_of PB;
+    hence thesis;
+  end;
+then A8: Intersect(XX) is_a_dependent_set_of PB by A6,Th10;
+ for d being set st d c= Intersect(XX) & d is_a_dependent_set_of PA &
+  d is_a_dependent_set_of PB holds d=Intersect(XX)
+  proof
+    let d be set;
+    assume that
+A9: d c= Intersect(XX) and
+A10: d is_a_dependent_set_of PA and
+A11: d is_a_dependent_set_of PB;
+    consider Ad being set such that
+A12: Ad c= PA and
+A13: Ad<>{} and
+A14: d = union Ad by A10,Def1;
+A15: d c= Y by A1,A12,A14,ZFMISC_1:77;
+    per cases;
+    suppose
+  y in d;
+then A16:  d in XX by A10,A11,A15;
+  Intersect(XX) c= d
+      proof
+        let X1 be set;
+        assume X1 in Intersect(XX);
+then     X1 in meet XX by A4,SETFAM_1:def 9;
+        hence thesis by A16,SETFAM_1:def 1;
+      end;
+      hence thesis by A9,XBOOLE_0:def 10;
+    end;
+    suppose
+A17:  not y in d;
+      reconsider d as Subset of Y by A1,A12,A14,ZFMISC_1:77;
+  d` = Y \ d by SUBSET_1:def 4;
+then A18:  y in d` by A17,XBOOLE_0:def 5;
+  d misses d` by SUBSET_1:24;
+then A19:  d /\ d` = {} by XBOOLE_0:def 7;
+  d <> Y by A17;
+      then   d
+` is_a_dependent_set_of PA & d` is_a_dependent_set_of PB by A10,A11,Th12;
+then A20:  d` in XX by A18;
+  Intersect(XX) c= d`
+      proof
+        let X1 be set;
+        assume X1 in Intersect(XX);
+then     X1 in meet XX by A4,SETFAM_1:def 9;
+        hence thesis by A20,SETFAM_1:def 1;
+      end;
+then A21:  d /\ Intersect(XX) = {} by A19,XBOOLE_1:3,26;
+  d /\ d c= d /\ Intersect(XX) by A9,XBOOLE_1:26;
+then A22:  union Ad = {} by A14,A21;
+      consider ad being set such that
+A23:  ad in Ad by A13,XBOOLE_0:def 1;
+A24:  ad<>{} by A2,A12,A23;
+  ad c= {} by A22,A23,ZFMISC_1:74;
+      hence thesis by A24;
+    end;
+  end;
+  hence thesis by A4,A5,A7,A8,Def2,SETFAM_1:def 9;
+end;
+
+theorem
+  for P being a_partition of Y for y being Element of Y
+  ex A being Subset of Y st y in A & A in P
+proof
+  let P be a_partition of Y;
+  let y be Element of Y;
+  consider R being Equivalence_Relation of Y such that
+A1: P = Class R by EQREL_1:34;
+  take Class(R,y);
+  thus y in Class(R,y) by EQREL_1:20;
+  thus thesis by A1,EQREL_1:def 3;
+end;
+
+definition
+  let Y be set;
+  func PARTITIONS(Y) means
+  :Def3:
+  for x being set holds x in it iff x is a_partition of Y;
+  existence
+  proof
+    defpred P[set] means $1 is a_partition of Y;
+    consider X being set such that
+A1: for x being set holds x in X iff x in bool bool Y & P[x] from
+    XBOOLE_0:sch 1;
+    take X;
+    let x be set;
+    thus x in X implies x is a_partition of Y by A1;
+    assume x is a_partition of Y;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let A1,A2 be set such that
+A2: for x being set holds x in A1 iff x is a_partition of Y and
+A3: for x being set holds x in A2 iff x is a_partition of Y;
+ now
+      let y be set;
+   y in A1 iff y is a_partition of Y by A2;
+      hence y in A1 iff y in A2 by A3;
+    end;
+    hence thesis by TARSKI:1;
+  end;
+end;
+
+registration
+  let Y be set;
+  cluster PARTITIONS(Y) -> non empty;
+  coherence
+  proof
+    per cases;
+    suppose
+   Y={};
+      hence thesis by Def3,EQREL_1:45;
+    end;
+    suppose
+   Y<>{};
+      then reconsider Y as non empty set;
+      A1:   {Y} is Subset-Family of Y & union {Y} = Y by ZFMISC_1:25,68;
+   for A being Subset of Y st A in {Y} holds A<>{} &
+      for B being Subset of Y st B in {Y} holds A = B or A misses B
+      proof
+        let A be Subset of Y;
+        assume
+A2:     A in {Y};
+then A3:     A=Y by TARSKI:def 1;
+        thus A<>{} by A2,TARSKI:def 1;
+        let B be Subset of Y;
+        assume B in {Y};
+        hence thesis by A3,TARSKI:def 1;
+      end;
+then    {Y} is a_partition of Y by A1,EQREL_1:def 4;
+      hence thesis by Def3;
+    end;
+  end;
+end;
+
+begin
+
+::Chap. 2  Join and Meet Operation between Partitions
+
+definition
+  let Y;
+  let PA,PB be a_partition of Y;
+  func PA '/\' PB -> a_partition of Y equals
+  INTERSECTION(PA,PB) \ {{}};
+  correctness
+  proof
+ {} c= Y by XBOOLE_1:2;
+    then reconsider e = {{}} as Subset-Family of Y by ZFMISC_1:31;
+    set a = INTERSECTION(PA,PB);
+ for z being set st z in a holds z in bool Y
+    proof
+      let z be set;
+      assume z in a;
+then    ex M,N being set st M in PA & N in PB & z = M /\ N by SETFAM_1:def 5;
+then    z c= Y by XBOOLE_1:108;
+      hence thesis;
+    end;
+    then
+reconsider a = INTERSECTION(PA,PB) as Subset-Family of Y by TARSKI:def 3
+    ;
+    reconsider ia = a \ e as Subset-Family of Y;
+A1: union PA = Y & union PB = Y by EQREL_1:def 4;
+A2: union ia = union INTERSECTION(PA,PB) by Th3
+      .= union PA /\ union PB by SETFAM_1:28
+      .= Y by A1;
+ for A being Subset of Y st A in ia holds A<>{} &
+    for B being Subset of Y st B in ia holds A = B or A misses B
+    proof
+      let A be Subset of Y;
+      assume
+A3:   A in ia;
+then A4:  not A in {{}} by XBOOLE_0:def 5;
+A5:  A in INTERSECTION(PA,PB) by A3,XBOOLE_0:def 5;
+  for B being Subset of Y st B in ia holds A = B or A misses B
+      proof
+        A6:    for
+ m,n,o,p being set holds (m /\ n) /\ (o /\ p) = m /\ ( n /\ o /\ p)
+        proof
+          let m,n,o,p be set;
+      (m /\ n) /\ (o /\ p) = m /\ ( n /\ (o /\ p) ) by XBOOLE_1:16
+            .= m /\ ( n /\ o /\ p) by XBOOLE_1:16;
+          hence thesis;
+        end;
+        let B be Subset of Y;
+        assume B in ia;
+then     B in INTERSECTION(PA,PB) by XBOOLE_0:def 5;
+        then consider M,N being set such that
+A7:    M in PA & N in PB and
+A8:    B = M /\ N by SETFAM_1:def 5;
+        consider S,T being set such that
+A9:    S in PA & T in PB and
+A10:    A = S /\ T by A5,SETFAM_1:def 5;
+    M /\ N = S /\ T or (not M = S or not N = T );
+then     M /\ N = S /\ T or (M misses S or N misses T)
+        by A7,A9,EQREL_1:def 4;
+then A11:    M /\ N = S /\ T or ( M /\ S = {} or N /\ T = {}) by XBOOLE_0:def 7
+;
+    (M /\ S) /\ (N /\ T) = M /\ ( S /\ N /\ T ) by A6
+          .=( M /\ N ) /\ ( S /\ T ) by A6;
+        hence thesis by A8,A10,A11,XBOOLE_0:def 7;
+      end;
+      hence thesis by A4,TARSKI:def 1;
+    end;
+    hence thesis by A2,EQREL_1:def 4;
+  end;
+  commutativity;
+end;
+
+theorem
+  for PA being a_partition of Y holds PA '/\' PA = PA
+proof
+  let PA be a_partition of Y;
+ for u being set st u in INTERSECTION(PA,PA) \ {{}} ex v being set
+  st v in PA & u c= v
+  proof
+    let u be set;
+    assume u in INTERSECTION(PA,PA) \ {{}};
+    then consider v,u2 being set such that
+A1: v in PA and u2 in PA and
+A2: u = v /\ u2 by SETFAM_1:def 5;
+    take v;
+    thus thesis by A1,A2,XBOOLE_1:17;
+  end;
+then A3: INTERSECTION(PA,PA) \ {{}} '<' PA by SETFAM_1:def 2;
+ for u being set st u in PA
+  ex v being set st v in INTERSECTION(PA,PA) \ {{}} & u c= v
+  proof
+    let u be set;
+    assume
+A4: u in PA;
+then A5: u <> {} by EQREL_1:def 4;
+    set v = u /\ u;
+A6: not v in {{}} by A5,TARSKI:def 1;
+ v in INTERSECTION(PA,PA) by A4,SETFAM_1:def 5;
+then  v in INTERSECTION(PA,PA) \ {{}} by A6,XBOOLE_0:def 5;
+    hence thesis;
+  end;
+then  PA '<' INTERSECTION(PA,PA) \ {{}} by SETFAM_1:def 2;
+  hence thesis by A3,Th5;
+end;
+
+theorem
+  for PA,PB,PC being a_partition of Y holds
+  (PA '/\' PB) '/\' PC = PA '/\' (PB '/\' PC)
+proof
+  let PA,PB,PC be a_partition of Y;
+  consider PD,PE being a_partition of Y such that
+A1: PD = PA '/\' PB and
+A2: PE = PB '/\' PC;
+ for u being set st u in PD '/\' PC
+  ex v being set st v in PA '/\' PE & u c= v
+  proof
+    let u be set;
+    assume
+A3: u in PD '/\' PC;
+    then consider u1, u2 being set such that
+A4: u1 in PD and
+A5: u2 in PC and
+A6: u = u1 /\ u2 by SETFAM_1:def 5;
+    consider u3, u4 being set such that
+A7: u3 in PA and
+A8: u4 in PB and
+A9: u1 = u3 /\ u4 by A1,A4,SETFAM_1:def 5;
+    consider v, v1,v2 being set such that
+A10: v1 = u4 /\ u2 and
+A11: v2 = u3 and
+A12: v = u3 /\ u4 /\ u2;
+A13: v = v2 /\ v1 by A10,A11,A12,XBOOLE_1:16;
+A14: v1 in INTERSECTION(PB,PC) by A5,A8,A10,SETFAM_1:def 5;
+A15: not u in {{}} by A3,XBOOLE_0:def 5;
+ u = u3 /\ v1 by A6,A9,A10,XBOOLE_1:16;
+then  v1 <> {} by A15,TARSKI:def 1;
+then  not v1 in {{}} by TARSKI:def 1;
+then  v1 in INTERSECTION(PB,PC) \ {{}} by A14,XBOOLE_0:def 5;
+then A16: v in INTERSECTION(PA,PE) by A2,A7,A11,A13,SETFAM_1:def 5;
+    take v;
+    thus thesis by A6,A9,A12,A15,A16,XBOOLE_0:def 5;
+  end;
+then A17: PD '/\' PC '<' PA '/\' PE by SETFAM_1:def 2;
+ for u being set st u in PA '/\' PE
+  ex v being set st v in PD '/\' PC & u c= v
+  proof
+    let u be set;
+    assume
+A18: u in PA '/\' PE;
+    then consider u1,u2 being set such that
+A19: u1 in PA and
+A20: u2 in PE and
+A21: u = u1 /\ u2 by SETFAM_1:def 5;
+    consider u3,u4 being set such that
+A22: u3 in PB and
+A23: u4 in PC and
+A24: u2 = u3 /\ u4 by A2,A20,SETFAM_1:def 5;
+A25: u = u1 /\ u3 /\ u4 by A21,A24,XBOOLE_1:16;
+    consider v, v1,v2 being set such that
+A26: v1 = u1 /\ u3 and v2 = u4 and
+A27: v = u1 /\ u3 /\ u4;
+A28: v1 in INTERSECTION(PA,PB) by A19,A22,A26,SETFAM_1:def 5;
+A29: not u in {{}} by A18,XBOOLE_0:def 5;
+then  v1 <> {} by A25,A26,TARSKI:def 1;
+then  not v1 in {{}} by TARSKI:def 1;
+then  v1 in INTERSECTION(PA,PB) \ {{}} by A28,XBOOLE_0:def 5;
+then A30: v in INTERSECTION(PD,PC) by A1,A23,A26,A27,SETFAM_1:def 5;
+    take v;
+    thus thesis by A25,A27,A29,A30,XBOOLE_0:def 5;
+  end;
+then  PA '/\' PE '<' PD '/\' PC by SETFAM_1:def 2;
+  hence thesis by A1,A2,A17,Th5;
+end;
+
+theorem Th17:
+  for PA,PB being a_partition of Y holds PA '>' PA '/\' PB
+proof
+  let PA,PB be a_partition of Y;
+ for u being set st u in PA '/\' PB ex v being set st v in PA & u c= v
+  proof
+    let u be set;
+    assume u in PA '/\' PB;
+    then consider u1,u2 being set such that
+A1: u1 in PA and u2 in PB and
+A2: u = u1 /\ u2 by SETFAM_1:def 5;
+    take u1;
+    thus thesis by A1,A2,XBOOLE_1:17;
+  end;
+  hence PA '>' PA '/\' PB by SETFAM_1:def 2;
+end;
+
+definition
+  let Y;
+  let PA,PB be a_partition of Y;
+  func PA '\/' PB -> a_partition of Y means
+  :Def5:
+  for d holds d in it iff d is_min_depend PA,PB;
+  existence
+  proof
+A1: union PA = Y by EQREL_1:def 4;
+A2: for A being set st A in PA holds A<>{} & for B being set st B in PA
+    holds A=B or A misses B by EQREL_1:def 4;
+    defpred P[set] means $1 is_min_depend PA,PB;
+    consider X being set such that
+A3: for d being set holds d in X iff d in bool Y & P[d] from XBOOLE_0:sch 1;
+A4: for d being set holds d in X iff d is_min_depend PA,PB
+    proof
+      let d be set;
+   for d being set holds d is_min_depend PA,PB implies d in bool Y
+      proof
+        let d be set;
+        assume d is_min_depend PA,PB;
+then      d is_a_dependent_set_of PA by Def2;
+then      ex A being set st A c= PA & A<>{} & d = union A by Def1;
+then      d c= union PA by ZFMISC_1:77;
+        hence thesis by A1;
+      end;
+then
+  d is_min_depend PA,PB implies d is_min_depend PA,PB & d in bool Y;
+      hence thesis by A3;
+    end;
+    take X;
+A5: Y c= union X
+    proof
+      let y be set;
+      assume y in Y;
+      then consider a being Subset of Y such that
+A6:  y in a and
+A7:  a is_min_depend PA,PB by Th13;
+  a in X by A4,A7;
+      hence thesis by A6,TARSKI:def 4;
+    end;
+ union X c= Y
+    proof
+      let y be set;
+      assume y in union X;
+      then consider a being set such that
+A8:  y in a and
+A9:  a in X by TARSKI:def 4;
+  a is_min_depend PA,PB by A4,A9;
+then   a is_a_dependent_set_of PA by Def2;
+then   ex A being set st A c= PA & A<>{} & a = union A by Def1;
+then   a c= Y by A1,ZFMISC_1:77;
+      hence thesis by A8;
+    end;
+then A10: union X = Y by A5,XBOOLE_0:def 10;
+A11: for A being Subset of Y st A in X holds A<>{} &
+    for B being Subset of Y st B in X holds A=B or A misses B
+    proof
+      let A be Subset of Y;
+      assume A in X;
+then A12:  A is_min_depend PA,PB by A4;
+then A13:  A is_a_dependent_set_of PA by Def2;
+A14:  A is_a_dependent_set_of PB by A12,Def2;
+      consider Aa being set such that
+A15:  Aa c= PA and
+A16:  Aa<>{} and
+A17:  A = union Aa by A13,Def1;
+      consider aa being set such that
+A18:  aa in Aa by A16,XBOOLE_0:def 1;
+A19:  aa<>{} by A2,A15,A18;
+  aa c= union Aa by A18,ZFMISC_1:74;
+      hence A<>{} by A17,A19;
+      let B be Subset of Y;
+      assume B in X;
+then A20:  B is_min_depend PA,PB by A4;
+      then
+A21:  B is_a_dependent_set_of PA & B is_a_dependent_set_of PB by Def2
+      ;
+  now
+        assume A meets B;
+        then A22:    A
+ /\ B is_a_dependent_set_of PA & A /\ B is_a_dependent_set_of PB by A13,A14,A21
+,Th11;
+    A /\ B c= A by XBOOLE_1:17;
+then A23:    A /\ B = A by A12,A22,Def2;
+A24:    A c= B
+        proof
+          let x be set;
+          assume x in A;
+          hence thesis by A23,XBOOLE_0:def 4;
+        end;
+    A /\ B c= B by XBOOLE_1:17;
+then A25:    A /\ B = B by A20,A22,Def2;
+    B c= A
+        proof
+          let x be set;
+          assume x in B;
+          hence thesis by A25,XBOOLE_0:def 4;
+        end;
+        hence A=B by A24,XBOOLE_0:def 10;
+      end;
+      hence thesis;
+    end;
+ X c= bool Y
+    proof
+      let x be set;
+      assume x in X;
+then   x is_min_depend PA,PB by A4;
+then   x is_a_dependent_set_of PA by Def2;
+then   ex a being set st a c= PA & a<>{} & x = union a by Def1;
+then   x c= Y by A1,ZFMISC_1:77;
+      hence thesis;
+    end;
+    then reconsider X as Subset-Family of Y;
+ X is a_partition of Y by A10,A11,EQREL_1:def 4;
+    hence thesis by A4;
+  end;
+  uniqueness
+  proof
+    let A1,A2 be a_partition of Y such that
+A26: for x being set holds x in A1 iff x is_min_depend PA,PB and
+A27: for x being set holds x in A2 iff x is_min_depend PA,PB;
+ now
+      let y be set;
+  y in A1 iff y is_min_depend PA,PB by A26;
+      hence y in A1 iff y in A2 by A27;
+    end;
+    hence thesis by TARSKI:1;
+  end;
+  commutativity
+  proof
+    let IT,PA,PB be a_partition of Y;
+A28: now
+      let a be set;
+      assume
+A29:  a is_min_depend PA,PB;
+      then
+A30:  a is_a_dependent_set_of PB & a is_a_dependent_set_of PA by Def2
+      ;
+  for d being set st d c= a & d is_a_dependent_set_of PB & d
+      is_a_dependent_set_of PA holds d=a by A29,Def2;
+      hence a is_min_depend PB,PA by A30,Def2;
+    end;
+A31: now
+      let a be set;
+      assume
+A32:  a is_min_depend PB,PA;
+      then
+A33:  a is_a_dependent_set_of PA & a is_a_dependent_set_of PB by Def2
+      ;
+  for d being set st d c= a & d is_a_dependent_set_of PA & d
+      is_a_dependent_set_of PB holds d=a by A32,Def2;
+      hence a is_min_depend PA,PB by A33,Def2;
+    end;
+ (for d being set holds (d in a) iff (d is_min_depend PA,PB)) implies
+    for d being set holds d in a iff d is_min_depend PB,PA
+    proof
+      assume
+A34:  for d being set holds d in a iff d is_min_depend PA,PB;
+      let d be set;
+A35:  d in a iff d is_min_depend PA,PB by A34;
+      hence d in a implies d is_min_depend PB,PA by A28;
+      assume d is_min_depend PB,PA;
+      hence thesis by A31,A35;
+    end;
+    hence thesis;
+  end;
+end;
+
+theorem Th19:
+  for PA,PB being a_partition of Y holds PA '<' PA '\/' PB
+proof
+  thus PA '<' PA '\/' PB
+  proof
+ for a being set st a in PA ex b being set st b in PA '\/' PB & a c= b
+    proof
+      let a be set;
+      assume
+A1:   a in PA;
+then A2:   a<>{} by EQREL_1:def 4;
+      set x = the Element of a;
+A3:   x in Y by A1,A2,TARSKI:def 3;
+   union (PA '\/' PB) = Y by EQREL_1:def 4;
+      then consider b being set such that
+A4:   x in b and
+A5:   b in PA '\/' PB by A3,TARSKI:def 4;
+   b is_min_depend PA,PB by A5,Def5;
+then    b is_a_dependent_set_of PA by Def2;
+      then consider B being set such that
+A6:  B c= PA and B<>{} and
+A7:  b = union B by Def1;
+  a in B
+      proof
+        consider u being set such that
+A8:    x in u and
+A9:    u in B by A4,A7,TARSKI:def 4;
+    a /\ u <> {} by A2,A8,XBOOLE_0:def 4;
+then A10:    not a misses u by XBOOLE_0:def 7;
+    u in PA by A6,A9;
+        hence thesis by A1,A9,A10,EQREL_1:def 4;
+      end;
+      hence thesis by A5,A7,ZFMISC_1:74;
+    end;
+    hence thesis by SETFAM_1:def 2;
+  end;
+end;
+
+theorem
+  for PA being a_partition of Y holds PA '\/' PA = PA
+proof
+  let PA be a_partition of Y;
+A1: PA '<' PA '\/' PA by Th19;
+ for a being set st a in PA '\/' PA ex b being set st b in PA & a c= b
+  proof
+    let a be set;
+    assume
+A2: a in PA '\/' PA;
+then A3: a is_min_depend PA,PA by Def5;
+then  a is_a_dependent_set_of PA by Def2;
+    then consider B being set such that
+A4: B c= PA and B<>{} and
+A5: a = union B by Def1;
+A6: a <> {} by A2,EQREL_1:def 4;
+    set x = the Element of a;
+ x in a by A6;
+then  x in Y by A2;
+then  x in union PA by EQREL_1:def 4;
+    then consider b being set such that
+A7: x in b and
+A8: b in PA by TARSKI:def 4;
+ b in B
+    proof
+      consider u being set such that
+A9:  x in u and
+A10:  u in B by A5,A6,TARSKI:def 4;
+  b /\ u <> {} by A7,A9,XBOOLE_0:def 4;
+then A11:  not b misses u by XBOOLE_0:def 7;
+  u in PA by A4,A10;
+      hence thesis by A8,A10,A11,EQREL_1:def 4;
+    end;
+then A12: b c= a by A5,ZFMISC_1:74;
+ b is_a_dependent_set_of PA by A8,Th8;
+then  a = b by A3,A12,Def2;
+    hence thesis by A8;
+  end;
+then  PA '\/' PA '<' PA by SETFAM_1:def 2;
+  hence thesis by A1,Th5;
+end;
+
+theorem Th21:
+  for PA,PC being a_partition of Y st
+  PA '<' PC & x in PC & z0 in PA & t in x & t in z0 holds z0 c= x
+proof
+  let PA,PC be a_partition of Y;
+  assume that
+A1: PA '<' PC and
+A2: x in PC and
+A3: z0 in PA and
+A4: t in x & t in z0;
+  consider b such that
+A5: b in PC and
+A6: z0 c= b by A1,A3,SETFAM_1:def 2;
+ x = b or x misses b by A2,A5,EQREL_1:def 4;
+  hence thesis by A4,A6,XBOOLE_0:3;
+end;
+
+theorem
+  for PA,PB being a_partition of Y st
+  x in (PA '\/' PB) & z0 in PA & t in x & t in z0 holds z0 c= x by Th19,Th21;
+
+begin
+
+::Chap. 3  Partitions and Equivalence Relations
+
+definition
+  let Y;
+  let PA be a_partition of Y;
+  func ERl PA -> Equivalence_Relation of Y means
+  :Def6:
+  for x1,x2 being set holds
+  [x1,x2] in it iff ex A st A in PA & x1 in A & x2 in A;
+  existence
+proof
+A1: union PA = Y by EQREL_1:def 4;
+ ex RA being Equivalence_Relation of Y st
+  for x,y holds [x,y] in RA iff ex A st A in PA & x in A & y in A
+  proof
+    defpred P[set,set] means ex A st A in PA & $1 in A & $2 in A;
+A2: for x st x in Y holds P[x,x]
+    proof
+      let x;
+      assume x in Y;
+then    ex Z being set st x in Z & Z in PA by A1,TARSKI:def 4;
+      then consider Z such that
+A3:   x in Z and
+A4:   Z in PA;
+      reconsider A = Z as Subset of Y by A4;
+      take A;
+      thus thesis by A3,A4;
+    end;
+A5: for x,y st P[x,y] holds P[y,x];
+A6: for x,y,z st P[x,y] & P[y,z] holds P[x,z]
+    proof
+      let x,y,z;
+      given A such that
+A7:  A in PA and
+A8:  x in A & y in A;
+      given B such that
+A9:  B in PA and
+A10:  y in B & z in B;
+  A = B or A misses B by A7,A9,EQREL_1:def 4;
+      hence thesis by A7,A8,A10,XBOOLE_0:3;
+    end;
+    consider RA being Equivalence_Relation of Y such that
+A11: for x,y holds [x,y] in RA iff
+    x in Y & y in Y & P[x,y] from EQREL_1:sch 1(A2,A5,A6);
+    take RA;
+    thus thesis by A11;
+  end;
+  hence thesis;
+end;
+  uniqueness
+  proof
+    let f1,f2 be Equivalence_Relation of Y such that
+A1: for x1,x2 being set holds [x1,x2] in f1 iff
+    ex A st A in PA & x1 in A & x2 in A and
+A2: for x1,x2 being set holds [x1,x2] in f2 iff
+    ex A st A in PA & x1 in A & x2 in A;
+    let x1,x2 be set;
+ [x1,x2] in f1 iff ex A st A in PA & x1 in A & x2 in A by A1;
+    hence thesis by A2;
+  end;
+end;
+
+definition
+  let Y;
+  defpred P[set,set] means ex PA st PA = $1 & $2 = ERl PA;
+A1: for x st x in PARTITIONS(Y) ex z st P[x,z]
+  proof
+    let x;
+    assume x in PARTITIONS(Y);
+    then reconsider x as a_partition of Y by Def3;
+    take ERl x;
+    thus thesis;
+  end;
+  func Rel(Y) -> Function means
+  dom it = PARTITIONS(Y) &
+  for x st x in PARTITIONS(Y) ex PA st PA = x & it.x = ERl PA;
+  existence
+  proof
+    thus ex f being Function st dom f = PARTITIONS(Y)
+    & for x st x in PARTITIONS(Y) holds P[x,f.x] from CLASSES1:sch 1(A1);
+  end;
+  uniqueness
+  proof
+    let f1,f2 be Function such that
+A2: dom f1 = PARTITIONS(Y) and
+A3: for x st x in PARTITIONS(Y) ex PA st PA = x & f1.x = ERl PA and
+A4: dom f2 = PARTITIONS(Y) and
+A5: for x st x in PARTITIONS(Y) ex PA st PA = x & f2.x = ERl PA;
+ for z st z in PARTITIONS(Y) holds f1.z = f2.z
+    proof
+      let x;
+      assume x in PARTITIONS(Y);
+      then    (
+ ex PA st PA = x & f1.x = ERl PA)& ex PA st PA = x & f2.x = ERl PA by A3,A5
+      ;
+      hence thesis;
+    end;
+    hence thesis by A2,A4,FUNCT_1:2;
+  end;
+end;
+
+theorem Th24:
+  for PA,PB being a_partition of Y holds PA '<' PB iff ERl(PA) c= ERl(PB)
+proof
+  let PA,PB be a_partition of Y;
+  set RA = ERl PA, RB = ERl PB;
+  hereby
+    assume
+A1: PA '<' PB;
+ for x1,x2 being set holds [x1,x2] in RA implies [x1,x2] in RB
+    proof
+      let x1,x2 be set;
+      assume [x1,x2] in RA;
+      then consider A being Subset of Y such that
+A2:   A in PA and
+A3:   x1 in A & x2 in A by Def6;
+   ex y st y in PB & A c= y by A1,A2,SETFAM_1:def 2;
+      hence thesis by A3,Def6;
+    end;
+    hence ERl(PA) c= ERl(PB) by RELAT_1:def 3;
+  end;
+  assume
+A4: ERl(PA) c= ERl(PB);
+ for x st x in PA ex y st y in PB & x c= y
+  proof
+    let x;
+    assume
+A5: x in PA;
+then A6: x<>{} by EQREL_1:def 4;
+    set x0 = the Element of x;
+    set y={z where z is Element of Y:[x0,z] in ERl(PB)};
+A7: x c= y
+    proof
+      let x1;
+      assume
+A8:  x1 in x;
+then   [x0,x1] in RA by A5,Def6;
+      hence thesis by A4,A5,A8;
+    end;
+    set x1 = the Element of x;
+ [x0,x1] in RA by A5,A6,Def6;
+    then consider B being Subset of Y such that
+A9: B in PB and
+A10: x0 in B and x1 in B by A4,Def6;
+A11: y c= B
+    proof
+      let x2;
+      assume x2 in y;
+then   ex z being Element of Y st z=x2 & [x0,z] in ERl(PB);
+      then consider B2 being Subset of Y such that
+A12:  B2 in PB and
+A13:  x0 in B2 and
+A14:  x2 in B2 by Def6;
+  B2 meets B by A10,A13,XBOOLE_0:3;
+      hence thesis by A9,A12,A14,EQREL_1:def 4;
+    end;
+ B c= y
+    proof
+      let x2;
+      assume
+A15:  x2 in B;
+then   [x0,x2] in RB by A9,A10,Def6;
+      hence thesis by A15;
+    end;
+then  y=B by A11,XBOOLE_0:def 10;
+    hence thesis by A7,A9;
+  end;
+  hence thesis by SETFAM_1:def 2;
+end;
+
+theorem Th25:
+  for PA,PB being a_partition of Y,p0,x,y being set,
+  f being FinSequence of Y st p0 c= Y &
+  x in p0 & f.1=x & f.len f=y & 1 <= len f & (for i st 1<=i & i<len f
+  ex p2,p3,u being set st p2 in PA & p3 in PB &
+  f.i in p2 & u in p2 & u in p3 & f.(i+1) in p3) &
+  p0 is_a_dependent_set_of PA & p0 is_a_dependent_set_of PB holds y in p0
+proof
+  let PA,PB be a_partition of Y, p0,x,y be set, f be FinSequence of Y;
+  assume that
+A1: p0 c= Y and
+A2: x in p0 & f.1=x and
+A3: f.len f=y & 1 <= len f and
+A4: for i st 1<=i & i<len f ex p2,p3,u being set st p2 in PA & p3 in PB
+  & f.i in p2 & u in p2 & u in p3 & f.(i+1) in p3 and
+A5: p0 is_a_dependent_set_of PA and
+A6: p0 is_a_dependent_set_of PB;
+  consider A1 being set such that
+A7: A1 c= PA and A1<>{} and
+A8: p0 = union A1 by A5,Def1;
+  consider B1 being set such that
+A9: B1 c= PB and B1<>{} and
+A10: p0 = union B1 by A6,Def1;
+A11: union PA = Y by EQREL_1:def 4;
+A12: for A being set st A in PA holds A<>{} & for B being set st B in PA
+  holds A=B or A misses B by EQREL_1:def 4;
+A13: for A being set st A in PB holds A<>{} & for B being set st B in PB
+  holds A=B or A misses B by EQREL_1:def 4;
+ for k st 1 <= k & k <= len f holds f.k in p0
+  proof
+    defpred P[Element of NAT] means 1 <= $1 & $1 <= len f implies f.$1 in p0;
+A14: P[0];
+A15: for k st P[k] holds P[k+1]
+    proof
+      let k;
+      assume
+A16:  P[k];
+      assume that
+A17:  1<=k+1 and
+A18:  k+1<=len f;
+A19:  k < len f by A18,NAT_1:13;
+A20:  1 <= k or 1 = k + 1 by A17,NAT_1:8;
+  now per cases by A20;
+        suppose
+A21:      1 <= k;
+          then consider p2,p3,u being set such that
+A22:      p2 in PA and
+A23:      p3 in PB and
+A24:      f.k in p2 and
+A25:      u in p2 and
+A26:      u in p3 and
+A27:      f.(k+1) in p3 by A4,A19;
+          consider A being set such that
+A28:      f.k in A and
+A29:      A in PA by A1,A11,A16,A18,A21,NAT_1:13,TARSKI:def 4;
+A30:      p2=A or p2 misses A by A22,A29,EQREL_1:def 4;
+          consider a being set such that
+A31:      f.k in a and
+A32:      a in A1 by A8,A16,A18,A21,NAT_1:13,TARSKI:def 4;
+      a=p2 or a misses p2 by A7,A12,A22,A32;
+then A33:      A c= p0 by A8,A24,A28,A30,A31,A32,XBOOLE_0:3,ZFMISC_1:74;
+          consider B being set such that
+A34:      u in B and
+A35:      B in PB by A23,A26;
+A36:      p3=B or p3 misses B by A23,A35,EQREL_1:def 4;
+          consider b being set such that
+A37:      u in b and
+A38:      b in B1 by A10,A24,A25,A28,A30,A33,TARSKI:def 4,XBOOLE_0:3;
+      p3=b or p3 misses b by A9,A13,A23,A38;
+then       B c= p0 by A10,A26,A34,A36,A37,A38,XBOOLE_0:3,ZFMISC_1:74;
+          hence thesis by A26,A27,A34,A36,XBOOLE_0:3;
+        end;
+        suppose
+      0 = k;
+          hence thesis by A2;
+        end;
+      end;
+      hence thesis;
+    end;
+    thus P[k] from NAT_1:sch 1(A14,A15);
+  end;
+  hence thesis by A3;
+end;
+
+theorem Th26:
+  for R1,R2 being Equivalence_Relation of Y,f being FinSequence of Y,
+  x,y being set st x in Y &
+  f.1=x & f.len f=y & 1 <= len f &
+  (for i st 1<=i & i<len f
+  ex u being set st u in Y & [f.i,u] in (R1 \/ R2) & [u,f.(i+1)] in (R1 \/
+  R2)) holds [x,y] in (R1 "\/" R2)
+proof
+  let R1,R2 be Equivalence_Relation of Y,f be FinSequence of Y, x,y be set;
+  assume that
+A1: x in Y and
+A2: f.1=x and
+A3: f.len f=y & 1 <= len f and
+A4: for i st 1<=i & i<len f ex u being set st u in Y & [f.i,u] in R1 \/
+  R2 & [u,f.(i+1)] in R1 \/ R2;
+ for i st 1 <= i & i <= len f holds [f.1,f.i] in (R1 "\/" R2)
+  proof
+    defpred P[Element of NAT] means
+    1<=$1 & $1<=len f implies [f.1,f.$1] in R1 "\/" R2;
+A5: P[0];
+A6: for i st P[i] holds P[i+1]
+    proof
+      let i;
+      assume
+A7:   P[i];
+      assume that
+A8:   1 <= i + 1 and
+A9:  i + 1 <= len f;
+A10:  i < len f by A9,NAT_1:13;
+A11:  1 <= i or 1 = i + 1 by A8,NAT_1:8;
+A12:  R1 \/ R2 c= R1 "\/" R2 by EQREL_1:def 2;
+  now per cases by A11;
+        suppose
+A13:      1 <= i;
+          then consider u being set such that
+A14:      u in Y and
+A15:      [f.i,u] in R1 \/ R2 & [u,f.(i+1)] in R1 \/ R2 by A4,A10;
+          reconsider u as Element of Y by A14;
+A16:      dom f = Seg len f by FINSEQ_1:def 3;
+then       i in dom f by A10,A13,FINSEQ_1:1;
+          then reconsider f1=f.i as Element of Y by FINSEQ_2:11;
+      (i+1) in dom f by A8,A9,A16,FINSEQ_1:1;
+          then reconsider f2=f.(i+1) as Element of Y by FINSEQ_2:11;
+          reconsider p = <*f1,u,f2*> as FinSequence of Y;
+A17:      len p = 3 by FINSEQ_1:45;
+A18:      p.1 = f.i & p.3 = f.(i+1) by FINSEQ_1:45;
+      for j st 1 <= j & j < len p holds [p.j,p.(j+1)] in (R1 \/ R2)
+          proof
+            let j;
+            assume that
+A19:        1 <= j and
+A20:        j < len p;
+        j < 2+1 by A20,FINSEQ_1:45;
+then         j <= 2 by NAT_1:13;
+then         j = 0 or j = 1 or j = 2 by NAT_1:26;
+            hence thesis by A15,A18,A19,FINSEQ_1:45;
+          end;
+then       [f.i,f.(i+1)] in R1 "\/" R2 by A17,A18,EQREL_1:28;
+          hence thesis by A7,A9,A13,EQREL_1:7,NAT_1:13;
+        end;
+        suppose
+A21:      0 = i;
+      [f.1,f.1] in R1 by A1,A2,EQREL_1:5;
+then       [f.1,f.1] in R1 \/ R2 by XBOOLE_0:def 3;
+          hence thesis by A12,A21;
+        end;
+      end;
+      hence thesis;
+    end;
+    thus P[i] from NAT_1:sch 1(A5,A6);
+  end;
+  hence thesis by A2,A3;
+end;
+
+theorem Th27:
+  for PA,PB being a_partition of Y holds ERl(PA '\/' PB) = ERl(PA) "\/" ERl(PB)
+proof
+  let PA,PB be a_partition of Y;
+A1: PA is_finer_than (PA '\/' PB) by Th19;
+A2: PB is_finer_than (PA '\/' PB) by Th19;
+A3: union PA = Y by EQREL_1:def 4;
+A4: union PB = Y by EQREL_1:def 4;
+A5: ERl(PA '\/' PB) c= (ERl(PA) "\/" ERl(PB))
+  proof
+    let x,y be set;
+    assume [x,y] in ERl(PA '\/' PB);
+    then consider p0 being Subset of Y such that
+A6: p0 in (PA '\/' PB) and
+A7: x in p0 and
+A8: y in p0 by Def6;
+A9: p0 is_min_depend PA,PB by A6,Def5;
+then A10: p0 is_a_dependent_set_of PA by Def2;
+A11: p0 is_a_dependent_set_of PB by A9,Def2;
+    consider A1 being set such that
+A12: A1 c= PA and A1<>{} and
+A13: p0 = union A1 by A10,Def1;
+    consider a being set such that
+A14: x in a and
+A15: a in A1 by A7,A13,TARSKI:def 4;
+    reconsider Ca={ p where p is Element of PA: ex f being FinSequence of Y st
+    1<=len f & f.1=x & f.len f in p & for i st 1<=i & i<len f holds
+    (ex p1,p2,x0 being set st p1 in PA & p2 in PB
+    & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2) } as set;
+    reconsider pb=union Ca as set;
+    reconsider Cb={ p where p is Element of PB:
+    ex q being set st q in Ca & p /\ q <> {} } as set;
+    reconsider x9 = x as Element of Y by A7;
+    reconsider fx=<*x9*> as FinSequence of Y;
+A16: fx.1=x by FINSEQ_1:def 8;
+then A17: fx.len fx in a by A14,FINSEQ_1:40;
+     1
+<=len fx & for i st 1<=i & i<len fx holds ex p1,p2,x0 being set st p1 in PA
+    & p2 in PB & fx.i in p1 & x0 in (p1 /\ p2) & fx.(i+1) in p2 by FINSEQ_1:40;
+then A18: a in Ca by A12,A15,A16,A17;
+    then consider y5 being set such that
+A19: x in y5 and
+A20: y5 in Ca by A14;
+    consider z5 being set such that
+A21: x9 in z5 and
+A22: z5 in PB by A4,TARSKI:def 4;
+ y5 /\ z5 <> {} by A19,A21,XBOOLE_0:def 4;
+then A23: z5 in Cb by A20,A22;
+ Ca c= PA
+    proof
+      let z be set;
+      assume z in Ca;
+then   ex p being Element of PA st z=p & ex f being FinSequence of Y st
+      1<=len f & f.1=x & f.len f in p & for i st 1<=i & i<len f holds
+      ex p1,p2,x0 being set st p1 in PA & p2 in PB
+      & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2;
+      hence thesis;
+    end;
+then A24: pb is_a_dependent_set_of PA by A18,Def1;
+A25: pb c= union Cb
+    proof
+      let x1 be set;
+      assume x1 in pb;
+      then consider y being set such that
+A26:  x1 in y and
+A27:  y in Ca by TARSKI:def 4;
+  ex p being Element of PA st y=p & ex f being FinSequence
+of Y st 1<=len f & f.1=x & f.len f in p & for i st 1<=i & i<len f holds ex p1,
+p2,x0 being set st p1 in PA & p2 in PB & f. i in p1 & x0 in (p1 /\ p2) & f.(i+1
+      ) in p2 by A27;
+      then consider z being set such that
+A28:  x1 in z and
+A29:  z in PB by A4,A26,TARSKI:def 4;
+  y /\ z <> {} by A26,A28,XBOOLE_0:def 4;
+then   z in Cb by A27,A29;
+      hence thesis by A28,TARSKI:def 4;
+    end;
+ union Cb c= pb
+    proof
+      let x1 be set;
+      assume x1 in union Cb;
+      then consider y1 being set such that
+A30:  x1 in y1 and
+A31:  y1 in Cb by TARSKI:def 4;
+A32:  ex p being Element of PB st y1=p & ex q being set st q
+      in Ca & p /\ q <> {} by A31;
+      then consider q being set such that
+A33:  q in Ca and
+A34:  y1 /\ q <> {};
+      consider pd being set such that
+A35:  x1 in pd and
+A36:  pd in PA by A3,A30,A32,TARSKI:def 4;
+A37:  ex pp being Element of PA st q=pp & ex f being
+FinSequence of Y st 1<=len f & f.1=x & f.len f in pp & for i st 1<=i & i<len f
+holds ex p1,p2,x0 being set st p1 in PA & p2 in PB & f. i in p1 & x0 in (p1 /\
+      p2) & f.(i+1) in p2 by A33;
+      then consider fd being FinSequence of Y such that
+A38:  1<=len fd and
+A39:  fd.1=x and
+A40:  fd.len fd in q and
+A41:  for i st 1<=i & i<len fd holds ex p1,p2,x0 being set st p1 in PA &
+      p2 in PB & fd.i in p1 & x0 in (p1 /\ p2) & fd.(i+1) in p2;
+      reconsider x1 as Element of Y by A30,A32;
+      reconsider f=fd^<*x1*> as FinSequence of Y;
+  len f = len fd + len <*x1*> by FINSEQ_1:22;
+then A42:  len f = len fd + 1 by FINSEQ_1:40;
+  1+1<=len fd + 1 by A38,XREAL_1:6;
+then A43:  1<=len f by A42,XXREAL_0:2;
+A44:  f.(len fd + 1) in y1 by A30,FINSEQ_1:42;
+  y1 meets q by A34,XBOOLE_0:def 7;
+      then consider z0 being set such that
+A45:  z0 in y1 & z0 in q by XBOOLE_0:3;
+A46:  z0 in (y1 /\ q) by A45,XBOOLE_0:def 4;
+A47:  dom fd = Seg len fd by FINSEQ_1:def 3;
+A48:  for k being Element of NAT st 1 <= k & k <= len fd holds f.k=fd.k
+      proof
+        let k be Element of NAT;
+        assume 1 <= k & k <= len fd;
+then     k in dom fd by A47,FINSEQ_1:1;
+        hence thesis by FINSEQ_1:def 7;
+      end;
+      then
+A49:  (fd^<*x1*>).(len fd + 1)=x1 & f.1=x by A38,A39,FINSEQ_1:42;
+A50:  f.len fd in q by A38,A40,A48;
+A51:  for i st 1<=i & i<len fd holds
+      ex p1,p2,x0 being set st p1 in PA & p2 in PB
+      & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2
+      proof
+        let i;
+        assume
+A52:    1<=i & i<len fd;
+then A53:    f.i = fd.i by A48;
+    1<=(i+1) & (i+1)<=len fd by A52,NAT_1:13;
+then     f.(i+1) = fd.(i+1) by A48;
+        hence thesis by A41,A52,A53;
+      end;
+  for i st 1<=i & i<len f holds
+      ex p1,p2,x0 being set st p1 in PA & p2 in PB
+      & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2
+      proof
+        let i;
+        assume that
+A54:    1<=i and
+A55:    i<len f;
+A56:    i<= len fd by A42,A55,NAT_1:13;
+    now per cases by A54,A56,XXREAL_0:1;
+          case
+        1<=i & i<len fd;
+            hence thesis by A51;
+          end;
+          case
+        1<=i & i=len fd;
+            hence thesis by A32,A37,A44,A46,A50;
+          end;
+        end;
+        hence thesis;
+      end;
+then   pd in Ca by A35,A36,A42,A43,A49;
+      hence thesis by A35,TARSKI:def 4;
+    end;
+then A57: pb = union Cb by A25,XBOOLE_0:def 10;
+ Cb c= PB
+    proof
+      let z be set;
+      assume z in Cb;
+then   ex p being Element of PB st z=p &
+      ex q being set st q in Ca & p /\ q <> {};
+      hence thesis;
+    end;
+then A58: pb is_a_dependent_set_of PB by A23,A57,Def1;
+ now
+      assume not pb c= p0;
+then   pb \ p0 <> {} by XBOOLE_1:37;
+      then consider x1 being set such that
+A59:  x1 in (pb \ p0) by XBOOLE_0:def 1;
+A60:  not x1 in p0 by A59,XBOOLE_0:def 5;
+      consider y1 being set such that
+A61:  x1 in y1 and
+A62:  y1 in Cb by A57,A59,TARSKI:def 4;
+A63:  ex p being Element of PB st y1=p & ex q being set st q
+      in Ca & p /\ q <> {} by A62;
+      then consider q being set such that
+A64:  q in Ca and
+A65:  y1 /\ q <> {};
+A66:  ex pp being Element of PA st q=pp & ex f being
+FinSequence of Y st 1<=len f & f.1=x & f.len f in pp & for i st 1<=i & i<len f
+holds ex p1,p2,x0 being set st p1 in PA & p2 in PB & f. i in p1 & x0 in (p1 /\
+      p2) & f.(i+1) in p2 by A64;
+      then consider fd being FinSequence of Y such that
+A67:  1<=len fd and
+A68:  fd.1=x and
+A69:  fd.len fd in q and
+A70: for i st 1<=i & i<len fd holds ex p1,p2,x0 being set st p1 in PA &
+      p2 in PB & fd.i in p1 & x0 in (p1 /\ p2) & fd.(i+1) in p2;
+      reconsider x1 as Element of Y by A61,A63;
+      reconsider f=fd^<*x1*> as FinSequence of Y;
+ len f = len fd + len <*x1*> by FINSEQ_1:22;
+then A71: len f = len fd + 1 by FINSEQ_1:40;
+ 1+1<=len fd + 1 by A67,XREAL_1:6;
+then A72: 1<=len f by A71,XXREAL_0:2;
+A73: f.(len fd + 1) in y1 by A61,FINSEQ_1:42;
+ y1 meets q by A65,XBOOLE_0:def 7;
+      then consider z0 being set such that
+A74: z0 in y1 & z0 in q by XBOOLE_0:3;
+A75: z0 in (y1 /\ q) by A74,XBOOLE_0:def 4;
+A76: dom fd = Seg len fd by FINSEQ_1:def 3;
+A77: for k being Element of NAT st 1 <= k & k <= len fd holds f.k=fd.k
+      proof
+        let k be Element of NAT;
+        assume 1 <= k & k <= len fd;
+then    k in dom fd by A76,FINSEQ_1:1;
+        hence thesis by FINSEQ_1:def 7;
+      end;
+      then
+A78: (fd^<*x1*>).(len fd + 1)=x1 & f.1=x by A67,A68,FINSEQ_1:42;
+A79: f.len fd in q by A67,A69,A77;
+A80: for i st 1<=i & i<len fd holds
+      ex p1,p2,x0 being set st p1 in PA & p2 in PB
+      & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2
+      proof
+        let i;
+        assume
+A81:   1<=i & i<len fd;
+then A82:   f.i = fd.i by A77;
+   1<=(i+1) & (i+1)<=len fd by A81,NAT_1:13;
+then    f.(i+1) = fd.(i+1) by A77;
+        hence thesis by A70,A81,A82;
+      end;
+A83: for i st 1<=i & i<len f holds
+      ex p1,p2,x0 being set st p1 in PA & p2 in PB
+      & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2
+      proof
+        let i;
+        assume that
+A84:   1<=i and
+A85:   i<len f;
+A86:   i<= len fd by A71,A85,NAT_1:13;
+   now per cases by A84,A86,XXREAL_0:1;
+          case
+       1<=i & i<len fd;
+            hence thesis by A80;
+          end;
+          case
+       1<=i & i=len fd;
+            hence thesis by A63,A66,A73,A75,A79;
+          end;
+        end;
+        hence thesis;
+      end;
+ for i st 1<=i & i<len f holds
+      ex p1,p2,x0 being set st p1 in PA & p2 in PB
+      & f.i in p1 & x0 in p1 & x0 in p2 & f.(i+1) in p2
+      proof
+        let i;
+        assume 1<=i & i<len f;
+        then consider p1,p2,x0 being set such that
+A87:   p1 in PA & p2 in PB & f.i in p1 and
+A88:   x0 in (p1 /\ p2) and
+A89:   f.(i+1) in p2 by A83;
+   x0 in p1 & x0 in p2 by A88,XBOOLE_0:def 4;
+        hence thesis by A87,A89;
+      end;
+      hence contradiction by A7,A10,A11,A60,A71,A72,A78,Th25;
+    end;
+then  y in pb by A8,A9,A24,A58,Def2;
+    then consider y1 being set such that
+A90: y in y1 and
+A91: y1 in Cb by A25,TARSKI:def 4;
+A92: ex p being Element of PB st y1=p & ex q being set st q
+    in Ca & p /\ q <> {} by A91;
+    then consider q being set such that
+A93: q in Ca and
+A94: y1 /\ q <> {};
+A95: ex pp being Element of PA st q=pp & ex f being
+FinSequence of Y st 1<=len f & f.1=x & f.len f in pp & for i st 1<=i & i<len f
+holds ex p1,p2,x0 being set st p1 in PA & p2 in PB & f. i in p1 & x0 in (p1 /\
+    p2) & f.(i+1) in p2 by A93;
+    then consider fd being FinSequence of Y such that
+A96: 1<=len fd and
+A97: fd.1=x and
+A98: fd.len fd in q and
+A99: for i st 1<=i & i<len fd holds ex p1,p2,x0 being set st p1 in PA &
+    p2 in PB & fd.i in p1 & x0 in (p1 /\ p2) & fd.(i+1) in p2;
+    reconsider y9 = y as Element of Y by A8;
+    reconsider f=fd^<*y9*> as FinSequence of Y;
+ len f = len fd + len <*y9*> by FINSEQ_1:22;
+then A100: len f = len fd + 1 by FINSEQ_1:40;
+then A101: 1+1<=len f by A96,XREAL_1:6;
+A102: f.(len fd + 1) in y1 by A90,FINSEQ_1:42;
+ y1 meets q by A94,XBOOLE_0:def 7;
+    then consider z0 being set such that
+A103: z0 in y1 & z0 in q by XBOOLE_0:3;
+A104: z0 in (y1 /\ q) by A103,XBOOLE_0:def 4;
+A105: dom fd = Seg len fd by FINSEQ_1:def 3;
+A106: for k being Element of NAT st 1 <= k & k <= len fd holds f.k=fd.k
+    proof
+      let k be Element of NAT;
+      assume 1 <= k & k <= len fd;
+then  k in dom fd by A105,FINSEQ_1:1;
+      hence thesis by FINSEQ_1:def 7;
+    end;
+then A107: f.len fd in q by A96,A98;
+A108: for i st 1<=i & i<len fd holds
+    ex p1,p2,x0 being set st p1 in PA & p2 in PB
+    & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2
+    proof
+      let i;
+      assume
+A109: 1<=i & i<len fd;
+then A110: f.i = fd.i by A106;
+ 1<=(i+1) & (i+1)<=len fd by A109,NAT_1:13;
+then  f.(i+1) = fd.(i+1) by A106;
+      hence thesis by A99,A109,A110;
+    end;
+A111: for i st 1<=i & i<len f holds
+    ex p1,p2,x0 being set st p1 in PA & p2 in PB
+    & f.i in p1 & x0 in (p1 /\ p2) & f.(i+1) in p2
+    proof
+      let i;
+      assume that
+A112: 1<=i and
+A113: i<len f;
+A114: i<= len fd by A100,A113,NAT_1:13;
+ now per cases by A112,A114,XXREAL_0:1;
+        case
+     1<=i & i<len fd;
+          hence thesis by A108;
+        end;
+        case
+     1<=i & i=len fd;
+          hence thesis by A92,A95,A102,A104,A107;
+        end;
+      end;
+      hence thesis;
+    end;
+    A115: (fd^<*y9*>).(len fd + 1)=y & 1<=len f by A101,FINSEQ_1:42,XXREAL_0:2;
+A116: f.1=x by A96,A97,A106;
+ for i st 1<=i & i<len f holds
+    ex u being set st u in Y & [f.i,u] in (ERl(PA) \/ ERl(PB))
+    & [u,f.(i+1)] in (ERl(PA) \/ ERl(PB))
+    proof
+      let i;
+      assume 1<=i & i<len f;
+      then consider p1,p2,u being set such that
+A117: p1 in PA and
+A118: p2 in PB and
+A119: f.i in p1 and
+A120: u in (p1 /\ p2) and
+A121: f.(i+1) in p2 by A111;
+A122: u in p1 by A120,XBOOLE_0:def 4;
+A123: u in p2 by A120,XBOOLE_0:def 4;
+      reconsider x2=f.i as set;
+      reconsider y2=f.(i+1) as set;
+A124: [x2,u] in ERl(PA) by A117,A119,A122,Def6;
+A125: [u,y2] in ERl(PB) by A118,A121,A123,Def6;
+       ERl
+(PA) c= ERl(PA) \/ ERl(PB) & ERl(PB) c= ERl(PA) \/ ERl(PB) by XBOOLE_1:7;
+      hence thesis by A117,A122,A124,A125;
+    end;
+then  [x9,y9] in (ERl(PA) "\/" ERl(PB)) by A100,A115,A116,Th26;
+    hence thesis;
+  end;
+ for x1,x2 being set st [x1,x2] in (ERl(PA) \/ ERl(PB)) holds
+  [x1,x2] in ERl(PA '\/' PB)
+  proof
+    let x1,x2 be set;
+    assume [x1,x2] in (ERl(PA) \/ ERl(PB));
+then  [x1,x2] in ERl(PA) or [x1,x2] in ERl(PB) by XBOOLE_0:def 3;
+then A126: (ex A being Subset of Y st A in PA & x1 in A & x2 in A) or
+    ex B being Subset of Y st B in PB & x1 in B & x2 in B by Def6;
+ now per cases by A126;
+      case
+   x1 in Y & x2 in Y & ex A being Subset of Y
+        st A in PA & x1 in A & x2 in A;
+        then consider A being Subset of Y such that
+A127:   A in PA and
+A128:   x1 in A & x2 in A;
+   ex y st y in (PA '\/' PB) & A c= y by A1,A127,SETFAM_1:def 2;
+        hence thesis by A128,Def6;
+      end;
+      case
+   x1 in Y & x2 in Y & ex B being Subset of Y
+        st B in PB & x1 in B & x2 in B;
+        then consider B being Subset of Y such that
+A129:   B in PB and
+A130:   x1 in B & x2 in B;
+   ex y st y in (PA '\/' PB) & B c= y by A2,A129,SETFAM_1:def 2;
+        hence thesis by A130,Def6;
+      end;
+    end;
+    hence thesis;
+  end;
+then  (ERl(PA) \/ ERl(PB)) c= ERl(PA '\/' PB) by RELAT_1:def 3;
+then  (ERl(PA) "\/" ERl(PB)) c= ERl(PA '\/' PB) by EQREL_1:def 2;
+  hence thesis by A5,XBOOLE_0:def 10;
+end;
+
+theorem Th28:
+  for PA,PB being a_partition of Y holds ERl(PA '/\' PB) = ERl(PA) /\ ERl(PB)
+proof
+  let PA,PB be a_partition of Y;
+A1: PA '>' PA '/\' PB by Th17;
+A2: PB '>' PA '/\' PB by Th17;
+ for x1,x2 being set holds
+  [x1,x2] in ERl(PA '/\' PB) iff [x1,x2] in (ERl(PA) /\ ERl(PB))
+  proof
+    let x1,x2 be set;
+    hereby
+      assume [x1,x2] in ERl(PA '/\' PB);
+      then consider C being Subset of Y such that
+A3:   C in (PA '/\' PB) and
+A4:   x1 in C & x2 in C by Def6;
+A5:   ex A being set st A in PA & C c= A by A1,A3,SETFAM_1:def 2;
+A6:   ex B being set st B in PB & C c= B by A2,A3,SETFAM_1:def 2;
+A7:   [x1,x2] in ERl(PA) by A4,A5,Def6;
+  [x1,x2] in ERl(PB) by A4,A6,Def6;
+      hence [x1,x2] in (ERl(PA) /\ ERl(PB)) by A7,XBOOLE_0:def 4;
+    end;
+    assume
+A8: [x1,x2] in (ERl(PA) /\ ERl(PB));
+then A9: [x1,x2] in ERl(PA) by XBOOLE_0:def 4;
+A10: [x1,x2] in ERl(PB) by A8,XBOOLE_0:def 4;
+    consider A being Subset of Y such that
+A11: A in PA and
+A12: x1 in A and
+A13: x2 in A by A9,Def6;
+    consider B being Subset of Y such that
+A14: B in PB and
+A15: x1 in B and
+A16: x2 in B by A10,Def6;
+A17: A /\ B <> {} by A12,A15,XBOOLE_0:def 4;
+    consider C being Subset of Y such that
+A18: C = A /\ B;
+A19: C in INTERSECTION(PA,PB) by A11,A14,A18,SETFAM_1:def 5;
+ not C in {{}} by A17,A18,TARSKI:def 1;
+then A20: C in INTERSECTION(PA,PB) \ {{}} by A19,XBOOLE_0:def 5;
+     x1 in C & x2 in C by A12,A13,A15,A16,A18,XBOOLE_0:def 4;
+    hence thesis by A20,Def6;
+  end;
+  hence thesis by RELAT_1:def 2;
+end;
+
+theorem Th29:
+  for PA,PB being a_partition of Y st ERl(PA) = ERl(PB) holds PA = PB
+proof
+  let PA,PB be a_partition of Y;
+  assume ERl(PA)=ERl(PB);
+then  PA '<' PB & PB '<' PA by Th24;
+  hence thesis by Th5;
+end;
+
+theorem
+  for PA,PB,PC being a_partition of Y holds
+  (PA '\/' PB) '\/' PC = PA '\/' (PB '\/' PC)
+proof
+  let PA,PB,PC be a_partition of Y;
+ ERl((PA '\/' PB) '\/' PC) = ERl(PA '\/' PB) "\/" ERl(PC) by Th27
+    .= (ERl(PA) "\/" ERl(PB)) "\/" ERl(PC) by Th27
+    .= ERl(PA) "\/" (ERl(PB) "\/" ERl(PC)) by EQREL_1:13
+    .= ERl(PA) "\/" ERl(PB '\/' PC) by Th27
+    .= ERl(PA '\/' (PB '\/' PC)) by Th27;
+  hence thesis by Th29;
+end;
+
+theorem
+  for PA,PB being a_partition of Y holds PA '/\' (PA '\/' PB) = PA
+proof
+  let PA,PB be a_partition of Y;
+   ERl
+(PA '/\' (PA '\/' PB)) = ERl(PA) /\ ERl(PA '\/' PB) & ERl(PA) /\ ERl(PA
+  '\/' PB) = ERl(PA) /\ (ERl(PA) "\/" ERl(PB)) by Th27,Th28;
+  hence thesis by Th29,EQREL_1:16;
+end;
+
+theorem
+  for PA,PB being a_partition of Y holds PA '\/' (PA '/\' PB) = PA
+proof
+  let PA,PB be a_partition of Y;
+   ERl
+(PA '\/' (PA '/\' PB)) = ERl(PA) "\/" ERl(PA '/\' PB) & ERl(PA) "\/" ERl(
+  PA '/\' PB) = ERl(PA) "\/" (ERl(PA) /\ ERl(PB)) by Th27,Th28;
+  hence thesis by Th29,EQREL_1:17;
+end;
+
+theorem Th33:
+  for PA,PB,PC being a_partition of Y st
+  PA '<' PC & PB '<' PC holds PA '\/' PB '<' PC
+proof
+  let PA,PB,PC be a_partition of Y;
+  assume PA '<' PC & PB '<' PC;
+then A1: ERl(PA) c= ERl(PC) & ERl(PB) c= ERl(PC) by Th24;
+A2: ERl(PA '\/' PB) = ERl(PA) "\/" ERl(PB) by Th27;
+ ERl(PA) \/ ERl(PB) c= ERl(PC) by A1,XBOOLE_1:8;
+then  ERl(PA) "\/" ERl(PB) c= ERl(PC) by EQREL_1:def 2;
+  hence thesis by A2,Th24;
+end;
+
+theorem
+  for PA,PB,PC being a_partition of Y st
+  PA '>' PC & PB '>' PC holds PA '/\' PB '>' PC
+proof
+  let PA,PB,PC be a_partition of Y;
+  assume PA '>' PC & PB '>' PC;
+then A1: ERl(PC) c= ERl(PA) & ERl(PC) c= ERl(PB) by Th24;
+ ERl(PA '/\' PB) = ERl(PA) /\ ERl(PB) by Th28;
+then  ERl(PC) c= ERl(PA '/\' PB) by A1,XBOOLE_1:19;
+  hence thesis by Th24;
+end;
+
+notation
+  let Y;
+  synonym %I(Y) for SmallestPartition Y;
+end;
+
+definition
+  let Y;
+
+  func %O(Y) -> a_partition of Y equals
+  {Y};
+  correctness
+  proof
+A1: {Y} is Subset-Family of Y & union {Y} = Y by ZFMISC_1:25,68;
+ for A st A in {Y} holds A<>{} & for B st B in {Y} holds A = B or A misses B
+    proof
+      let A;
+      assume
+A2:   A in {Y};
+then A3:   A=Y by TARSKI:def 1;
+      thus A<>{} by A2,TARSKI:def 1;
+      let B;
+      assume B in {Y};
+      hence thesis by A3,TARSKI:def 1;
+    end;
+    hence thesis by A1,EQREL_1:def 4;
+  end;
+end;
+
+theorem
+  %I(Y)={B:ex x being set st B={x} & x in Y}
+proof
+  set B0={B:ex x being set st B={x} & x in Y};
+A1: %I(Y) c= B0
+  proof
+    let a be set;
+    assume a in %I(Y);
+then
+ a in {{x} where x is Element of Y: not contradiction} by EQREL_1:37;
+    then consider x be Element of Y such that
+A2: a={x};
+    reconsider y=x as Element of Y;
+    reconsider B={y} as Subset of Y by ZFMISC_1:31;
+ a=B by A2;
+    hence thesis;
+  end;
+ B0 c= %I(Y)
+  proof
+    let x1;
+    assume x1 in B0;
+then  ex B st x1=B & ex x being set st B={x} & x in Y;
+then  x1 in {{z} where z is Element of Y: not contradiction};
+    hence thesis by EQREL_1:37;
+  end;
+  hence thesis by A1,XBOOLE_0:def 10;
+end;
+
+theorem Th36:
+  for PA being a_partition of Y holds %O(Y) '>' PA & PA '>' %I(Y)
+proof
+  let PA be a_partition of Y;
+A1: for a being set st a in PA ex b being set st b in %O(Y) & a c= b
+  proof
+    let a be set;
+    assume
+A2: a in PA;
+then A3: a c= Y;
+A4: a<>{} by A2,EQREL_1:def 4;
+    set x = the Element of a;
+A5: x in Y by A2,A4,TARSKI:def 3;
+ union %O(Y) = Y by EQREL_1:def 4;
+    then consider b being set such that
+    x in b and
+A6: b in %O(Y) by A5,TARSKI:def 4;
+ a c= b by A3,A6,TARSKI:def 1;
+    hence thesis by A6;
+  end;
+ for a being set st a in %I(Y) ex b being set st b in PA & a c= b
+  proof
+    let a be set;
+    assume
+A7: a in %I(Y);
+then  a in {{x} where x is Element of Y: not contradiction} by EQREL_1:37;
+    then consider x be Element of Y such that
+A8: a={x};
+A9: a<>{} by A7,EQREL_1:def 4;
+    set u = the Element of a;
+A10: u=x by A8,TARSKI:def 1;
+A11: u in Y by A7,A9,TARSKI:def 3;
+ union PA = Y by EQREL_1:def 4;
+    then consider b being set such that
+A12: u in b and
+A13: b in PA by A11,TARSKI:def 4;
+ a c= b
+    proof
+      let x1;
+      assume x1 in a;
+      hence thesis by A8,A10,A12,TARSKI:def 1;
+    end;
+    hence thesis by A13;
+  end;
+  hence thesis by A1,SETFAM_1:def 2;
+end;
+
+theorem Th37:
+  ERl(%O(Y)) = nabla Y
+proof
+ nabla Y c= ERl(%O(Y))
+  proof
+    let x1,x2 be set;
+    assume
+A1: [x1,x2] in nabla Y;
+A2: Y in %O(Y) by TARSKI:def 1;
+ x1 in Y & x2 in Y by A1,ZFMISC_1:87;
+    hence thesis by A2,Def6;
+  end;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem Th38:
+  ERl(%I(Y)) = id Y
+proof
+A1: union %I(Y)=Y by EQREL_1:def 4;
+A2: ERl(%I(Y)) c= id Y
+  proof
+    let x1,x2 be set;
+    assume [x1,x2] in ERl(%I(Y));
+    then consider a being Subset of Y such that
+A3: a in %I(Y) and
+A4: x1 in a & x2 in a by Def6;
+     %I(Y) = {{x} where x is Element of Y: not contradiction} by EQREL_1:37;
+    then consider x be Element of Y such that
+A5: a={x} by A3;
+ x1=x & x2=x by A4,A5,TARSKI:def 1;
+    hence thesis by RELAT_1:def 10;
+  end;
+ id Y c= ERl(%I(Y))
+  proof
+    let x1,x2 be set;
+    assume
+A6: [x1,x2] in id Y;
+then A7: x1 in Y by RELAT_1:def 10;
+A8: x1=x2 by A6,RELAT_1:def 10;
+ ex y being set st x1 in y & y in %I(Y) by A1,A7,TARSKI:def 4;
+    hence thesis by A8,Def6;
+  end;
+  hence thesis by A2,XBOOLE_0:def 10;
+end;
+
+theorem
+  %I(Y) '<' %O(Y)
+proof
+ ERl(%O(Y)) = nabla Y by Th37
+    .= [:Y,Y:];
+then  ERl(%I(Y)) c= ERl(%O(Y));
+  hence thesis by Th24;
+end;
+
+theorem
+  for PA being a_partition of Y holds
+  %O(Y) '\/' PA = %O(Y) & %O(Y) '/\' PA = PA
+proof
+  let PA be a_partition of Y;
+A1: ERl(%O(Y) '\/' PA) = ERl(%O(Y)) "\/" ERl(PA) by Th27;
+ ERl(%O(Y)) = nabla Y by Th37;
+then  ERl(%O(Y)) \/ ERl(PA) = ERl(%O(Y)) by EQREL_1:1;
+then  ERl(%O(Y)) c= ERl(%O(Y)) "\/" ERl(PA) by EQREL_1:def 2;
+then A2: %O(Y) '<' %O(Y) '\/' PA by A1,Th24;
+ %O(Y) '>' PA '\/' %O(Y) by Th36;
+  hence %O(Y) '\/' PA = %O(Y) by A2,Th5;
+   ERl(%O(Y) '/\' PA) = ERl(%O(Y)) /\ ERl(PA) & ERl(%O(Y)) = nabla Y by Th28
+,Th37;
+  hence %O(Y) '/\' PA = PA by Th29,XBOOLE_1:28;
+end;
+
+theorem
+  for PA being a_partition of Y holds
+  %I(Y) '\/' PA = PA & %I(Y) '/\' PA = %I(Y)
+proof
+  let PA be a_partition of Y;
+A1: ERl(%I(Y)) = id Y by Th38;
+  A2: ERl
+(%I(Y) '\/' PA) = ERl(%I(Y)) "\/" ERl(PA) & ERl(%I(Y)) \/ ERl(PA) c= ERl(
+  %I(Y)) "\/" ERl(PA) by Th27,EQREL_1:def 2;
+A3: ERl(%I(Y)) \/ ERl(PA) = id Y \/ ERl(PA) by Th38;
+ %I(Y) '<' PA by Th36;
+then A4: ERl(%I(Y)) c= ERl(PA) by Th24;
+ for z being set st z in id Y \/ ERl(PA) holds z in ERl PA
+  proof
+    let z be set;
+    assume
+A5: z in id Y \/ ERl(PA);
+ now per cases by A5,XBOOLE_0:def 3;
+      case
+     z in id Y;
+        hence thesis by A1,A4;
+      end;
+      case
+    z in ERl(PA);
+        hence thesis;
+      end;
+    end;
+    hence thesis;
+  end;
+then A6: id Y \/ ERl(PA) c= ERl(PA) by TARSKI:def 3;
+ ERl(PA) c= id Y \/ ERl(PA) by XBOOLE_1:7;
+then  id Y \/ ERl(PA) = ERl(PA) by A6,XBOOLE_0:def 10;
+then A7: PA '<' %I(Y) '\/' PA by A2,A3,Th24;
+ %I(Y) '<' PA by Th36;
+then  %I(Y) '\/' PA '<' PA by Th33;
+  hence %I(Y) '\/' PA = PA by A7,Th5;
+ ERl(%I(Y) '/\' PA) = ERl(%I(Y)) /\ ERl(PA) by Th28
+    .= id Y /\ ERl(PA) by Th38
+    .= id Y by EQREL_1:10
+    .= ERl(%I(Y)) by Th38;
+  hence %I(Y) '/\' PA = %I(Y) by Th29;
+end;
