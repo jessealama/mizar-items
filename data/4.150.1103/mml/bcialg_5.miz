@@ -1,0 +1,1740 @@
+:: General Theory of Quasi-Commutative BCI-algebras
+::  by Tao Sun , Weibo Pan , Chenglong Wu and Xiquan Liang
+::
+:: Received May 13, 2008
+:: Copyright (c) 2008 Association of Mizar Users
+
+environ
+
+ vocabularies NUMBERS, BCIALG_1, SUBSET_1, POLYEQ_1, XBOOLE_0, POWER, ARYTM_3,
+      NAT_1, FUNCT_1, STRUCT_0, XXREAL_0, SUPINF_2, CARD_1, ARYTM_1, ORDINAL1,
+      BINOP_1, TARSKI, CHORD, FILTER_0, BCIALG_3, BCIALG_5;
+ notations TARSKI, XBOOLE_0, SUBSET_1, STRUCT_0, BCIALG_1, NUMBERS, XXREAL_0,
+      REAL_1, FUNCT_2, NAT_1, BCIALG_2, ORDINAL1, BCIALG_3;
+ constructors REAL_1, NAT_1, SQUARE_1, BCIALG_2, BCIALG_3;
+ registrations BCIALG_1, STRUCT_0, ORDINAL1, NUMBERS, XXREAL_0, XREAL_0,
+      BCIALG_3, NAT_1, BCIALG_2;
+ requirements SUBSET, BOOLE, NUMERALS, REAL, ARITHM;
+ definitions TARSKI, XBOOLE_0, BCIALG_1;
+ theorems TARSKI, STRUCT_0, BCIALG_1, XREAL_1, XXREAL_0, XBOOLE_0, BCIALG_3,
+      NAT_1, BCIALG_2;
+ schemes NAT_1;
+
+begin :: The Basics of General Theory of Quasi-Commutative BCI-algebra
+
+definition
+  let X be BCI-algebra;
+  let x,y be Element of X;
+  let m,n be Element of NAT;
+  func Polynom (m,n,x,y) -> Element of X equals
+  (((x,(x\y)) to_power (m+1)),(y
+  \x)) to_power n;
+  coherence;
+end;
+
+reserve X for BCI-algebra;
+reserve x,y,z for Element of X;
+reserve
+  i,j,k,l,m,n for Element of NAT;
+reserve f,g for Function of NAT, the carrier of X;
+
+theorem Th1:
+  x <= y & y <= z implies x <= z
+proof
+  assume x <= y & y <= z;
+  then x\y=0.X & y\z=0.X by BCIALG_1:def 11;
+  hence x\z=0.X by BCIALG_1:3;
+end;
+
+theorem Th2:
+  x <= y & y <= x implies x = y
+proof
+  assume x <= y & y <= x;
+  then x\y=0.X & y\x=0.X by BCIALG_1:def 11;
+  hence thesis by BCIALG_1:def 7;
+end;
+
+theorem Th3:
+  for X being BCK-algebra,x,y being Element of X holds x\y <= x & (
+  x,y) to_power (n+1) <= (x,y) to_power n
+proof
+  let X be BCK-algebra;
+  let x,y be Element of X;
+  ((x,y) to_power n\y)\(x,y) to_power n = ((x,y) to_power n\(x,y) to_power
+  n)\y by BCIALG_1:7
+    .= y` by BCIALG_1:def 5
+    .= 0.X by BCIALG_1:def 8;
+  then
+A1: (x,y) to_power n\y <= (x,y) to_power n by BCIALG_1:def 11;
+  (x\y)\x = (x\x)\y by BCIALG_1:7
+    .= y` by BCIALG_1:def 5
+    .= 0.X by BCIALG_1:def 8;
+  hence thesis by A1,BCIALG_1:def 11,BCIALG_2:4;
+end;
+
+theorem Th4:
+  for X being BCK-algebra,x being Element of X holds (0.X,x) to_power n = 0.X
+proof
+  let X be BCK-algebra;
+  let x be Element of X;
+  defpred P[Element of NAT] means $1<= n implies (0.X,x) to_power $1 = 0.X;
+  now
+    let k;
+    assume
+A1: k<= n implies (0.X,x) to_power k = 0.X;
+    set m = k+1;
+    assume m<=n;
+    then (0.X,x) to_power m = x` by A1,BCIALG_2:4,NAT_1:13
+      .= 0.X by BCIALG_1:def 8;
+    hence (0.X,x) to_power m = 0.X;
+  end;
+  then
+A2: for k st P[k] holds P[k+1];
+A3: P[0] by BCIALG_2:1;
+  for n holds P[n] from NAT_1:sch 1(A3,A2);
+  hence thesis;
+end;
+
+theorem Th5:
+  for X being BCK-algebra,x,y being Element of X st m>=n holds (x,y
+  ) to_power m <= (x,y) to_power n
+proof
+  let X be BCK-algebra;
+  let x,y be Element of X;
+  assume m>=n;
+  then m - n is Element of NAT by NAT_1:21;
+  then consider k being Element of NAT such that
+A1: k=m-n;
+  ((x,y) to_power k)\x = (x\x,y) to_power k by BCIALG_2:7
+    .= (0.X,y) to_power k by BCIALG_1:def 5
+    .= 0.X by Th4;
+  then (x,y) to_power k <= x by BCIALG_1:def 11;
+  then ((x,y) to_power k,y) to_power n <= (x,y) to_power n by BCIALG_2:19;
+  then (x,y) to_power (k+n) <= (x,y) to_power n by BCIALG_2:10;
+  hence thesis by A1;
+end;
+
+theorem Th6:
+  for X being BCK-algebra, x,y being Element of X st m>n & (x,y)
+to_power n = (x,y) to_power m holds for k being Element of NAT st k >=n holds (
+  x,y) to_power n = (x,y) to_power k
+proof
+  let X be BCK-algebra;
+  let x,y be Element of X;
+  assume that
+A1: m>n and
+A2: (x,y) to_power n = (x,y) to_power m;
+  m - n is Element of NAT & m-n>n-n by A1,NAT_1:21,XREAL_1:11;
+  then m-n >=1 by NAT_1:14;
+  then m-n+n >= 1+n by XREAL_1:8;
+  then
+A3: (x,y) to_power n <= (x,y) to_power (n+1) by A2,Th5;
+A4: (x,y) to_power (n+1) <= (x,y) to_power n by Th3;
+  for k being Element of NAT st k >=n holds (x,y) to_power n = (x,y) to_power k
+  proof
+    let k be Element of NAT;
+    assume k >=n;
+    then k - n is Element of NAT by NAT_1:21;
+    then consider k1 being Element of NAT such that
+A5: k1=k-n;
+    (x,y) to_power n = ((x,y) to_power n,y) to_power k1
+    proof
+      defpred P[Element of NAT] means $1<= k1 implies (x,y) to_power n = ((x,y
+      ) to_power n,y) to_power $1;
+      now
+        let k;
+        assume
+A6:     k<= k1 implies (x,y) to_power n = ((x,y) to_power n,y) to_power k;
+        set m=k+1;
+A7:     ((x,y) to_power n,y) to_power m = ((x,y) to_power n,y) to_power k
+        \y by BCIALG_2:4
+          .= ((x,y) to_power n\y,y) to_power k by BCIALG_2:7
+          .= ((x,y) to_power (n+1),y) to_power k by BCIALG_2:4
+          .= ((x,y) to_power n,y) to_power k by A4,A3,Th2;
+        assume m<=k1;
+        hence (x,y) to_power n = ((x,y) to_power n,y) to_power m by A6,A7
+        ,NAT_1:13;
+      end;
+      then
+A8:   for k st P[k] holds P[k+1];
+A9:   P[0] by BCIALG_2:1;
+      for n holds P[n] from NAT_1:sch 1(A9,A8);
+      hence thesis;
+    end;
+    then (x,y) to_power n = (x,y) to_power (n+k1) by BCIALG_2:10;
+    hence thesis by A5;
+  end;
+  hence thesis;
+end;
+
+theorem Th7:
+  Polynom (0,0,x,y) = x\(x\y)
+proof
+  Polynom (0,0,x,y) = (x,(x\y)) to_power (0+1) by BCIALG_2:1
+    .= x\(x\y) by BCIALG_2:2;
+  hence thesis;
+end;
+
+theorem
+  Polynom (m,n,x,y) = (((Polynom (0,0,x,y),(x\y)) to_power m),(y\x)) to_power n
+proof
+  (Polynom (0,0,x,y),(x\y)) to_power m = ((x\(x\y)),(x\y)) to_power m by
+  Th7
+    .= ((x,(x\y)) to_power m) \ (x\y) by BCIALG_2:7
+    .= (x,(x\y)) to_power (m+1) by BCIALG_2:4;
+  hence thesis;
+end;
+
+theorem Th9:
+  Polynom (m+1,n,x,y) = Polynom (m,n,x,y) \ (x\y)
+proof
+  Polynom (m+1,n,x,y) = (((x,(y\x)) to_power n),(x\y)) to_power (m+1+1) by
+  BCIALG_2:11
+    .= ((((x,(y\x)) to_power n),(x\y)) to_power (m+1)) \ (x\y) by BCIALG_2:4
+    .= (((x,(x\y)) to_power (m+1)),(y\x)) to_power n \ (x\y) by BCIALG_2:11;
+  hence thesis;
+end;
+
+theorem Th10:
+  Polynom (m,n+1,x,y) = Polynom (m,n,x,y) \ (y\x)
+proof
+  consider f such that
+A1: ((x,(x\y)) to_power (m+1),(y\x)) to_power (n+1) = f.(n+1) and
+A2: f.0 = (x,(x\y)) to_power (m+1) and
+A3: for k st k < n+1 holds f.(k + 1) = f.k \ (y\x) by BCIALG_2:def 1;
+  consider g such that
+A4: ((x,(x\y)) to_power (m+1),(y\x)) to_power n = g.n and
+A5: g.0 = (x,(x\y)) to_power (m+1) and
+A6: for k st k < n holds g.(k + 1) = g.k \ (y\x) by BCIALG_2:def 1;
+  defpred P[Element of NAT] means $1 <= n implies f.$1=g.$1;
+  now
+    let k;
+    assume
+A7: k<=n implies f.k=g.k;
+    set m=k+1;
+    assume
+A8: m<=n;
+    then k +1 <= n+1 by NAT_1:13;
+    then k<n+1 by NAT_1:13;
+    then
+A9: f.(k + 1) = f.k \(y\x) by A3;
+    k<n by A8,NAT_1:13;
+    hence f.m=g.m by A6,A7,A9;
+  end;
+  then
+A10: for k st P[k] holds P[k+1];
+A11: P[0] by A2,A5;
+  for n holds P[n] from NAT_1:sch 1(A11,A10);
+  then f.n = g.n;
+  hence thesis by A1,A3,A4,XREAL_1:31;
+end;
+
+theorem
+  Polynom (n+1,n+1,y,x) <= Polynom (n,n+1,x,y)
+proof
+  (y\x)\(y\x) = 0.X by BCIALG_1:def 5;
+  then (y\(y\x))\x = 0.X by BCIALG_1:7;
+  then (y\(y\x)) <= x by BCIALG_1:def 11;
+  then ((y\(y\x)),(x\y)) to_power (n+1) <= (x,(x\y)) to_power (n+1) by
+  BCIALG_2:19;
+  then (((y\(y\x)),(x\y)) to_power (n+1),(y\x)) to_power (n+1) <= ((x,(x\y))
+  to_power (n+1),(y\x)) to_power (n+1) by BCIALG_2:19;
+  then (((y\(y\x)),(y\x)) to_power (n+1),(x\y)) to_power (n+1) <= ((x,(x\y))
+  to_power (n+1),(y\x)) to_power (n+1) by BCIALG_2:11;
+  then
+  ((((y,(y\x)) to_power 1),(y\x)) to_power (n+1),(x\y)) to_power (n+1) <=
+  ((x,(x\y)) to_power (n+1),(y\x)) to_power (n+1) by BCIALG_2:2;
+  hence thesis by BCIALG_2:10;
+end;
+
+theorem
+  Polynom (n,n+1,x,y) <= Polynom (n,n,y,x)
+proof
+  (x\y)\(x\y) = 0.X by BCIALG_1:def 5;
+  then (x\(x\y))\y = 0.X by BCIALG_1:7;
+  then (x\(x\y)) <= y by BCIALG_1:def 11;
+  then ((x\(x\y)),(x\y)) to_power n <= (y,(x\y)) to_power n by
+  BCIALG_2:19;
+  then (((x\(x\y)),(x\y)) to_power n,(y\x)) to_power (n+1) <= ((y,(x\y))
+  to_power n,(y\x)) to_power (n+1) by BCIALG_2:19;
+  then
+  ((((x,(x\y)) to_power 1),(x\y)) to_power n,(y\x)) to_power (n+1) <= ((y,
+  (x\y)) to_power n,(y\x)) to_power (n+1) by BCIALG_2:2;
+  then
+  ((x,(x\y)) to_power (n+1),(y\x)) to_power (n+1) <= ((y,(x\y)) to_power n
+  ,(y\x)) to_power (n+1) by BCIALG_2:10;
+  hence thesis by BCIALG_2:11;
+end;
+
+definition
+  let X be BCI-algebra;
+  attr X is quasi-commutative means
+  :Def2:
+  ex i,j,m,n being Element of NAT st
+  for x,y being Element of X holds Polynom (i,j,x,y) = Polynom (m,n,y,x);
+end;
+
+registration
+  cluster BCI-EXAMPLE -> quasi-commutative;
+  coherence
+  proof
+    for x,y being Element of BCI-EXAMPLE holds Polynom (0,0,x,y) = Polynom
+    (0,0,y,x) by STRUCT_0:def 10;
+    hence thesis by Def2;
+  end;
+end;
+
+registration
+  cluster quasi-commutative BCI-algebra;
+  existence
+  proof
+    take BCI-EXAMPLE;
+    thus thesis;
+  end;
+end;
+
+definition
+  let i,j,m,n be Element of NAT;
+  mode BCI-algebra of i,j,m,n -> BCI-algebra means
+    :Def3:
+    for x,y being Element of it holds Polynom (i,j,x,y) = Polynom (m,n,y,x);
+  existence
+  proof
+    for x,y being Element of BCI-EXAMPLE holds Polynom (i,j,x,y) = Polynom
+    (m,n,y,x) by STRUCT_0:def 10;
+    hence thesis;
+  end;
+end;
+
+theorem Th13:
+  X is BCI-algebra of i,j,m,n iff X is BCI-algebra of m,n,i,j
+proof
+  thus X is BCI-algebra of i,j,m,n implies X is BCI-algebra of m,n,i,j
+  proof
+    assume X is BCI-algebra of i,j,m,n;
+    then
+    for x,y being Element of X holds Polynom (m,n,x,y) = Polynom (i,j,y,x)
+    by Def3;
+    hence thesis by Def3;
+  end;
+  assume X is BCI-algebra of m,n,i,j;
+  then for x,y being Element of X holds Polynom (m,n,y,x) = Polynom (i,j,x,y)
+  by Def3;
+  hence thesis by Def3;
+end;
+
+theorem Th14:
+  for X being BCI-algebra of i,j,m,n holds for k being Element of
+  NAT holds X is BCI-algebra of i+k,j,m,n+k
+proof
+  let X be BCI-algebra of i,j,m,n;
+  let k be Element of NAT;
+  for x,y being Element of X holds Polynom (i+k,j,x,y) = Polynom (m,n+k,y, x)
+  proof
+    let x,y be Element of X;
+A1: (Polynom (m,n,y,x),(x\y)) to_power k = Polynom (m,n+k,y,x) by BCIALG_2
+    :10;
+    (Polynom (i,j,x,y),(x\y)) to_power k = ((((x,(x\y)) to_power (i+1)),(x\
+    y)) to_power k,(y\x)) to_power j by BCIALG_2:11
+      .= ((x,(x\y)) to_power (i+1+k),(y\x)) to_power j by BCIALG_2:10
+      .= Polynom (i+k,j,x,y);
+    hence thesis by A1,Def3;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCI-algebra of i,j,m,n holds for k being Element of NAT
+  holds X is BCI-algebra of i,j+k,m+k,n
+proof
+  let X be BCI-algebra of i,j,m,n;
+  let k be Element of NAT;
+  for x,y being Element of X holds Polynom (i,j+k,x,y) = Polynom (m+k,n,y, x)
+  proof
+    let x,y be Element of X;
+A1: (Polynom (m,n,y,x),(y\x)) to_power k = ((((y,(y\x)) to_power (m+1)),(y
+    \x)) to_power k,(x\y)) to_power n by BCIALG_2:11
+      .= (((y,(y\x)) to_power (m+1+k)),(x\y)) to_power n by BCIALG_2:10
+      .= Polynom (m+k,n,y,x);
+    (Polynom (i,j,x,y),(y\x)) to_power k = Polynom (i,j+k,x,y) by BCIALG_2:
+    10;
+    hence thesis by A1,Def3;
+  end;
+  hence thesis by Def3;
+end;
+
+registration
+  cluster quasi-commutative BCK-algebra;
+  existence
+  proof
+    take BCI-EXAMPLE;
+    thus thesis;
+  end;
+end;
+
+registration
+  let i,j,m,n be Element of NAT;
+  cluster being_BCK-5 BCI-algebra of i,j,m,n;
+  existence
+  proof
+    for x,y being Element of BCI-EXAMPLE holds Polynom (i,j,x,y) = Polynom
+    (m,n,y,x) by STRUCT_0:def 10;
+    then reconsider B = BCI-EXAMPLE as BCI-algebra of i,j,m,n by Def3;
+    take B;
+    thus thesis;
+  end;
+end;
+
+definition
+  let i,j,m,n be Element of NAT;
+  mode BCK-algebra of i,j,m,n is being_BCK-5 BCI-algebra of i,j,m,n;
+end;
+
+theorem
+  X is BCK-algebra of i,j,m,n iff X is BCK-algebra of m,n,i,j
+proof
+  thus X is BCK-algebra of i,j,m,n implies X is BCK-algebra of m,n,i,j
+  proof
+    assume
+A1: X is BCK-algebra of i,j,m,n;
+    then
+    for x,y being Element of X holds Polynom (m,n,x,y) = Polynom (i,j,y,x)
+    by Def3;
+    hence thesis by A1,Def3;
+  end;
+  assume
+A2: X is BCK-algebra of m,n,i,j;
+  then for x,y being Element of X holds Polynom (m,n,y,x) = Polynom (i,j,x,y)
+  by Def3;
+  hence thesis by A2,Def3;
+end;
+
+theorem Th17:
+  for X being BCK-algebra of i,j,m,n holds for k being Element of
+  NAT holds X is BCK-algebra of i+k,j,m,n+k
+proof
+  let X be BCK-algebra of i,j,m,n;
+  let k be Element of NAT;
+  for x,y being Element of X holds Polynom (i+k,j,x,y) = Polynom (m,n+k,y, x)
+  proof
+    let x,y be Element of X;
+A1: (Polynom (m,n,y,x),(x\y)) to_power k = Polynom (m,n+k,y,x) by BCIALG_2
+    :10;
+    (Polynom (i,j,x,y),(x\y)) to_power k = ((((x,(x\y)) to_power (i+1)),(x\
+    y)) to_power k,(y\x)) to_power j by BCIALG_2:11
+      .= ((x,(x\y)) to_power (i+1+k),(y\x)) to_power j by BCIALG_2:10
+      .= Polynom (i+k,j,x,y);
+    hence thesis by A1,Def3;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem Th18:
+  for X being BCK-algebra of i,j,m,n holds for k being Element of
+  NAT holds X is BCK-algebra of i,j+k,m+k,n
+proof
+  let X be BCK-algebra of i,j,m,n;
+  let k be Element of NAT;
+  for x,y being Element of X holds Polynom (i,j+k,x,y) = Polynom (m+k,n,y, x)
+  proof
+    let x,y be Element of X;
+A1: (Polynom (m,n,y,x),(y\x)) to_power k = ((((y,(y\x)) to_power (m+1)),(y
+    \x)) to_power k,(x\y)) to_power n by BCIALG_2:11
+      .= (((y,(y\x)) to_power (m+1+k)),(x\y)) to_power n by BCIALG_2:10
+      .= Polynom (m+k,n,y,x);
+    (Polynom (i,j,x,y),(y\x)) to_power k = Polynom (i,j+k,x,y) by BCIALG_2:
+    10;
+    hence thesis by A1,Def3;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem Th19:
+  for X being BCK-algebra of i,j,m,n holds for x,y being Element
+  of X holds (x,y) to_power (i+1) = (x,y) to_power (n+1)
+proof
+  let X be BCK-algebra of i,j,m,n;
+  let x,y be Element of X;
+A1: (x\y)\x = (x\x)\y by BCIALG_1:7
+    .= y` by BCIALG_1:def 5
+    .= 0.X by BCIALG_1:def 8;
+  then
+A2: Polynom (m+1,n,(x\y),x) = ((x\y),(x\(x\y))) to_power n by BCIALG_2:5
+    .= ((x\(x\(x\y))),(x\(x\y))) to_power n by BCIALG_1:8
+    .= (((x,(x\(x\y))) to_power 1),(x\(x\y))) to_power n by BCIALG_2:2
+    .= (x,(x\(x\y))) to_power (n+1) by BCIALG_2:10
+    .= (x,y) to_power (n+1) by BCIALG_2:8;
+  X is BCI-algebra of m,n,i,j by Th13;
+  then
+A3: X is BCI-algebra of m+1,n,i,j+1 by Th14;
+  Polynom (i,j+1,x,(x\y)) = (x,(x\(x\y))) to_power (i+1) by A1,BCIALG_2:5
+    .= (x,y) to_power (i+1) by BCIALG_2:8;
+  hence thesis by A2,A3,Def3;
+end;
+
+theorem Th20:
+  for X being BCK-algebra of i,j,m,n holds for x,y being Element
+  of X holds (x,y) to_power (j+1) = (x,y) to_power (m+1)
+proof
+  let X be BCK-algebra of i,j,m,n;
+  let x,y be Element of X;
+A1: (x\y)\x = (x\x)\y by BCIALG_1:7
+    .= y` by BCIALG_1:def 5
+    .= 0.X by BCIALG_1:def 8;
+  then
+A2: Polynom (i+1,j,(x\y),x) = ((x\y),(x\(x\y))) to_power j by BCIALG_2:5
+    .= ((x\(x\(x\y))),(x\(x\y))) to_power j by BCIALG_1:8
+    .= (((x,(x\(x\y))) to_power 1),(x\(x\y))) to_power j by BCIALG_2:2
+    .= (x,(x\(x\y))) to_power (j+1) by BCIALG_2:10
+    .= (x,y) to_power (j+1) by BCIALG_2:8;
+A3: X is BCI-algebra of i+1,j,m,n+1 by Th14;
+  Polynom (m,n+1,x,(x\y)) = (x,(x\(x\y))) to_power (m+1) by A1,BCIALG_2:5
+    .= (x,y) to_power (m+1) by BCIALG_2:8;
+  hence thesis by A2,A3,Def3;
+end;
+
+theorem Th21:
+  for X being BCK-algebra of i,j,m,n holds X is BCK-algebra of i,j ,j,n
+proof
+  let X be BCK-algebra of i,j,m,n;
+  for x,y being Element of X holds Polynom (i,j,x,y) = Polynom (j,n,y,x)
+  proof
+    let x,y be Element of X;
+    Polynom (i,j,x,y) = Polynom (m,n,y,x) by Def3;
+    hence thesis by Th20;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem Th22:
+  for X being BCK-algebra of i,j,m,n holds X is BCK-algebra of n,j ,m,n
+proof
+  let X be BCK-algebra of i,j,m,n;
+  for x,y being Element of X holds Polynom (n,j,x,y) = Polynom (m,n,y,x)
+  proof
+    let x,y be Element of X;
+    Polynom (i,j,x,y) = Polynom (m,n,y,x) by Def3;
+    hence thesis by Th19;
+  end;
+  hence thesis by Def3;
+end;
+ 
+:: The Reduction of the Type of Quasi-Commutative BCK-algebra
+
+definition
+  let i,j,m,n;
+  func min(i,j,m,n) -> ext-real number equals
+  min(min(i,j),min(m,n));
+  correctness;
+  func max(i,j,m,n) -> ext-real number equals
+  max(max(i,j),max(m,n));
+  correctness;
+end;
+
+theorem
+  min(i,j,m,n) = i or min(i,j,m,n) = j or min(i,j,m,n) = m or min(i,j,m, n) = n
+proof
+A1: min(m,n) = m or min(m,n) = n by XXREAL_0:15;
+  min(i,j) = i or min(i,j) = j by XXREAL_0:15;
+  hence thesis by A1,XXREAL_0:15;
+end;
+
+theorem
+  max(i,j,m,n) = i or max(i,j,m,n) = j or max(i,j,m,n) = m or max(i,j,m, n) = n
+proof
+A1: max(m,n) = m or max(m,n) = n by XXREAL_0:16;
+  max(i,j) = i or max(i,j) = j by XXREAL_0:16;
+  hence thesis by A1,XXREAL_0:16;
+end;
+
+theorem Th25:
+  i = min(i,j,m,n) implies i<=j & i<=m & i<=n
+proof
+A1: min(m,n)<= n by XXREAL_0:17;
+  assume i = min(i,j,m,n);
+  then
+A2: i<= min(i,j) & i<= min(m,n) by XXREAL_0:17;
+  min(i,j) <= j & min(m,n)<= m by XXREAL_0:17;
+  hence thesis by A2,A1,XXREAL_0:2;
+end;
+
+theorem Th26:
+  max(i,j,m,n) >= i & max(i,j,m,n) >= j & max(i,j,m,n) >= m & max(
+  i,j,m,n) >= n
+proof
+A1: max(m,n) >= m & max(m,n) >= n by XXREAL_0:25;
+A2: max(i,j,m,n) >= max(i,j) & max(i,j,m,n) >= max(m,n) by XXREAL_0:25;
+  max(i,j) >= i & max(i,j) >= j by XXREAL_0:25;
+  hence thesis by A1,A2,XXREAL_0:2;
+end;
+
+theorem Th27:
+  for X being BCK-algebra of i,j,m,n st i = min(i,j,m,n) holds ( i
+  = j implies X is BCK-algebra of i,i,i,i )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume
+A1: i = min(i,j,m,n);
+  assume
+A2: i = j;
+A3: for x,y being Element of X holds Polynom (i,i,x,y) <= Polynom (i,i,y,x)
+  proof
+    let x,y be Element of X;
+    i<= n by A1,Th25;
+    then
+A4: ((y,(y\x)) to_power (i+1),(x\y)) to_power n <= ((y,(y\x)) to_power (i+
+    1),(x\y)) to_power i by Th5;
+    i<= m by A1,Th25;
+    then i+1 <= m+1 by XREAL_1:8;
+    then
+A5: ((y,(y\x)) to_power (m+1),(x\y)) to_power n <= ((y,(y\x)) to_power (i+1
+    ),(x\y)) to_power n by Th5,BCIALG_2:19;
+    Polynom (i,j,x,y) = Polynom (m,n,y,x) by Def3;
+    hence thesis by A2,A5,A4,Th1;
+  end;
+  for x,y being Element of X holds Polynom (i,i,y,x) = Polynom (i,i,x,y)
+  proof
+    let x,y be Element of X;
+    Polynom (i,i,x,y) <= Polynom (i,i,y,x) by A3;
+    then
+A6: Polynom (i,i,x,y)\Polynom (i,i,y,x)=0.X by BCIALG_1:def 11;
+    Polynom (i,i,y,x) <= Polynom (i,i,x,y) by A3;
+    then Polynom (i,i,y,x)\Polynom (i,i,x,y)=0.X by BCIALG_1:def 11;
+    hence thesis by A6,BCIALG_1:def 7;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st i = min(i,j,m,n) holds ( i < j &
+  i < n implies X is BCK-algebra of i,i+1,i,i+1 )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume
+A1: i = min(i,j,m,n);
+  assume that
+A2: i < j and
+A3: i < n;
+  for x,y being Element of X holds Polynom (i,i+1,x,y) = Polynom (i,i+1,y, x)
+  proof
+    n - i is Element of NAT & n-i>i-i by A3,NAT_1:21,XREAL_1:11;
+    then n-i >=1 by NAT_1:14;
+    then
+A4: n-i+i >= 1+i by XREAL_1:8;
+    m >= i by A1,Th25;
+    then
+A5: m+1 >= i+1 by XREAL_1:8;
+    j - i is Element of NAT & j-i>i-i by A2,NAT_1:21,XREAL_1:11;
+    then j-i >=1 by NAT_1:14;
+    then
+A6: j-i+i >= 1+i by XREAL_1:8;
+    let x,y be Element of X;
+A7: i+1 < n+1 by A3,XREAL_1:8;
+    (y,(y\x)) to_power (i+1) = (y,(y\x)) to_power (n+1) by Th19;
+    then
+A8: (y,(y\x)) to_power (i+1) = (y,(y\x)) to_power (m+1) by A7,A5,
+    Th6;
+A9: Polynom (i,j,x,y) = Polynom (m,n,y,x) & (((y,(y\x)) to_power (i+1)),(
+    x\y)) to_power (i+1) = (((y,(y\x)) to_power (i+1)),(x\y)) to_power (n+1) by
+    Def3, Th19;
+    (((x,(x\y)) to_power (i+1)),(y\x)) to_power (i+1) = (((x,(x\y))
+    to_power (i+1)),(y\x)) to_power (n+1) by Th19;
+    then (((x,(x\y)) to_power (i+1)),(y\x)) to_power (i+1) = (((x,(x\y))
+    to_power (i+1)),(y\x)) to_power j by A7,A6,Th6;
+    hence thesis by A7,A8,A9,A4,Th6;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st i = min(i,j,m,n) holds ( i = n &
+  i = m implies X is BCK-algebra of i,i,i,i )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume
+A1: i = min(i,j,m,n);
+  assume
+A2: i = n & i = m;
+  then for x,y being Element of X holds Polynom (i,i,x,y) = Polynom (i,j,y,x)
+  by Def3;
+  then
+A3: X is BCK-algebra of i,i,i,j by Def3;
+  i = min(i,i,i,j) by A1,A2;
+  hence thesis by A3,Th27;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st i = n & m < j holds X is
+  BCK-algebra of i,m+1,m,i
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume that
+A1: i = n and
+A2: m < j;
+  for x,y being Element of X holds Polynom (i,m+1,x,y) = Polynom (m,i,y,x)
+  proof
+    j - m is Element of NAT & j-m>m-m by A2,NAT_1:21,XREAL_1:11;
+    then j-m >=1 by NAT_1:14;
+    then
+A3: j-m+m >= 1+m by XREAL_1:8;
+    let x,y be Element of X;
+A4: m+1 < j+1 by A2,XREAL_1:8;
+    Polynom (i,j,x,y) = Polynom (m,n,y,x) & (((x,(x\y)) to_power (i+1)),(y
+\x)) to_power (j+1) = (((x,(x\y)) to_power (i+1)),(y\x)) to_power (m+1) by Def3
+    , Th20;
+    hence thesis by A1,A4,A3,Th6;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st i = n holds X is BCK-algebra of i,j,j,i
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume i = n;
+  then reconsider X as BCK-algebra of i,j,m,i;
+  for x,y being Element of X holds Polynom (i,j,x,y) = Polynom (j,i,y,x)
+  proof
+    let x,y be Element of X;
+    Polynom (i,j,x,y) = Polynom (m,i,y,x) by Def3;
+    hence thesis by Th20;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st l >= j & k >= n holds X is
+  BCK-algebra of k,l,l,k
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume that
+A1: l >= j and
+A2: k >= n;
+  l - j is Element of NAT by A1,NAT_1:21;
+  then consider t being Element of NAT such that
+A3: t=l-j;
+  k - n is Element of NAT by A2,NAT_1:21;
+  then consider t1 being Element of NAT such that
+A4: t1=k-n;
+  X is BCK-algebra of n,j,m,n by Th22;
+  then X is BCK-algebra of n,j,j,n by Th21;
+  then X is BCK-algebra of n+t1,j,j,n+t1 by Th17;
+  then X is BCK-algebra of k,j+t,j+t,k by A4,Th18;
+  hence thesis by A3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st k >= max(i,j,m,n) holds X is
+  BCK-algebra of k,k,k,k
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume
+A1: k >= max(i,j,m,n);
+  max(i,j,m,n) >= n by Th26;
+  then k - n is Element of NAT by A1,NAT_1:21,XXREAL_0:2;
+  then consider t1 being Element of NAT such that
+A2: t1=k-n;
+  max(i,j,m,n) >= j by Th26;
+  then k - j is Element of NAT by A1,NAT_1:21,XXREAL_0:2;
+  then consider t being Element of NAT such that
+A3: t=k-j;
+  X is BCK-algebra of n,j,m,n by Th22;
+  then X is BCK-algebra of n,j,j,n by Th21;
+  then X is BCK-algebra of n+t1,j,j,n+t1 by Th17;
+  then X is BCK-algebra of k,j+t,j+t,k by A2,Th18;
+  hence thesis by A3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n st i <= m & j <= n holds X is
+  BCK-algebra of i,j,i,j
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume that
+A1: i <= m and
+A2: j <= n;
+A3: for x,y being Element of X holds Polynom (i,j,x,y) <= Polynom (i,j,y,x)
+  proof
+    let x,y be Element of X;
+    i+1 <= m+1 by A1,XREAL_1:8;
+    then
+A4: ((y,(y\x)) to_power (m+1),(x\y)) to_power n <= ((y,(y\x)) to_power (i+1
+    ),(x\y)) to_power n by Th5,BCIALG_2:19;
+    Polynom (i,j,x,y) = Polynom (m,n,y,x) & ((y,(y\x)) to_power (i+1),(x\y
+)) to_power n <= ((y,(y\x)) to_power (i+1),(x\y)) to_power j by A2,Def3,Th5;
+    hence thesis by A4,Th1;
+  end;
+  for x,y being Element of X holds Polynom (i,j,y,x) = Polynom (i,j,x,y)
+  proof
+    let x,y be Element of X;
+    Polynom (i,j,x,y) <= Polynom (i,j,y,x) by A3;
+    then
+A5: Polynom (i,j,x,y)\Polynom (i,j,y,x)=0.X by BCIALG_1:def 11;
+    Polynom (i,j,y,x) <= Polynom (i,j,x,y) by A3;
+    then Polynom (i,j,y,x)\Polynom (i,j,x,y)=0.X by BCIALG_1:def 11;
+    hence thesis by A5,BCIALG_1:def 7;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n holds ( i <= m & i < n implies X is
+  BCK-algebra of i,j,i,i+1 )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume that
+A1: i <= m and
+A2: i < n;
+  for x,y being Element of X holds Polynom (i,j,x,y) = Polynom (i,i+1,y,x)
+  proof
+    n - i is Element of NAT & n-i>i-i by A2,NAT_1:21,XREAL_1:11;
+    then n-i >=1 by NAT_1:14;
+    then
+A3: n-i+i >= 1+i by XREAL_1:8;
+    let x,y be Element of X;
+A4: i+1 < n+1 by A2,XREAL_1:8;
+A5: Polynom (i,j,x,y) = Polynom (m,n,y,x) & (((y,(y\x)) to_power (m+1)),(x
+\y)) to_power (i+1) = (((y,(y\x)) to_power (m+1)),(x\y)) to_power (n+1) by Def3
+    , Th19;
+    (y,(y\x)) to_power (i+1) = (y,(y\x)) to_power (n+1) & m+1 >= i+1 by A1
+    ,Th19,XREAL_1:8;
+    then (y,(y\x)) to_power (i+1) = (y,(y\x)) to_power (m+1) by A4,Th6;
+    hence thesis by A4,A5,A3,Th6;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem Th36:
+  X is BCI-algebra of i,j,j+k,i+k implies X is BCK-algebra
+proof
+  assume
+A1: X is BCI-algebra of i,j,j+k,i+k;
+  for y be Element of X holds 0.X\y = 0.X
+  proof
+    let y be Element of X;
+A2: (((y,y) to_power ((j+k)+1)),(0.X\y)) to_power (i+k) = (((y,y) to_power
+    (j+k)\y),(0.X\y)) to_power (i+k) by BCIALG_2:4
+      .= ((y\y,y) to_power (j+k),(0.X\y)) to_power (i+k) by BCIALG_2:7
+      .= ((0.X,y) to_power (j+k),(0.X\y)) to_power (i+k) by BCIALG_1:def 5
+      .= ((0.X,(0.X\y)) to_power (i+k),y) to_power (j+k) by BCIALG_2:11
+      .= (((0.X,0.X) to_power (i+k))\((0.X,y) to_power (i+k)),y) to_power (j
+    +k) by BCIALG_2:18
+      .= ((0.X\((0.X,y) to_power (i+k))),y) to_power (j+k) by BCIALG_2:6
+      .= ((0.X,y) to_power (j+k))\((0.X,y) to_power (i+k)) by BCIALG_2:7
+      .= ((0.X,y) to_power j,y) to_power k \ ((0.X,y) to_power (i+k)) by
+    BCIALG_2:10
+      .= ((0.X,y) to_power j,y) to_power k \ ((0.X,y) to_power i,y) to_power
+    k by BCIALG_2:10;
+A3: ((0.X,y) to_power j,y) to_power k \ ((0.X,y) to_power i,y) to_power k
+    <= (0.X,y) to_power j \ (0.X,y) to_power i by BCIALG_2:21;
+    Polynom (i,j,0.X,y) = Polynom (j+k,i+k,y,0.X) by A1,Def3;
+    then
+    (((0.X,(0.X\y)) to_power (i+1)),y) to_power j = (((y,(y\0.X)) to_power
+    ((j+k)+1)),(0.X\y)) to_power (i+k) by BCIALG_1:2;
+    then
+    (((0.X,(0.X\y)) to_power (i+1)),y) to_power j = (((y,y) to_power ((j+k
+    )+1)),(0.X\y)) to_power (i+k) by BCIALG_1:2;
+    then
+A4: ((0.X,y) to_power j,(0.X\y)) to_power (i+1) = (((y,y) to_power ((j+k)+1
+    )),(0.X\y)) to_power (i+k) by BCIALG_2:11;
+    ((0.X,y) to_power j,(0.X\y)) to_power (i+1) = ((0.X,(0.X\y)) to_power (
+    i+1),y) to_power j by BCIALG_2:11
+      .= (((0.X,0.X) to_power (i+1))\((0.X,y) to_power (i+1)),y) to_power j
+    by BCIALG_2:18
+      .= ((0.X\((0.X,y) to_power (i+1))),y) to_power j by BCIALG_2:6
+      .= ((0.X,y) to_power j)\((0.X,y) to_power (i+1)) by BCIALG_2:7;
+    then
+    ((0.X,y) to_power j \ (0.X,y) to_power (i+1)) \ ((0.X,y) to_power j \
+    (0.X,y) to_power i) = 0.X by A4,A2,A3,BCIALG_1:def 11;
+    then 0.X \ ((0.X,y) to_power i \ (0.X,y) to_power (i+1)) = 0.X by
+    BCIALG_1:11;
+    then
+A5: 0.X <= ((0.X,y) to_power i \ (0.X,y) to_power (i+1)) by BCIALG_1:
+    def 11;
+    ((0.X,y) to_power i \ (0.X,y) to_power (i+1)) = (0.X,y) to_power i \
+    ((0.X,y) to_power i \ y) by BCIALG_2:4
+      .= (0.X,y) to_power i \ (0.X\y,y) to_power i by BCIALG_2:7;
+    then (0.X,y) to_power i \ (0.X,y) to_power (i+1) <= 0.X \ (0.X\y) by
+    BCIALG_2:21;
+    then 0.X <= 0.X \ (0.X\y) by A5,Th1;
+    then 0.X \ (0.X \ (0.X\y)) = 0.X by BCIALG_1:def 11;
+    hence thesis by BCIALG_1:8;
+  end;
+  then for x being Element of X holds x`=0.X;
+  hence thesis by BCIALG_1:def 8;
+end;
+ 
+::Some Special Classes of Quasi-Commutative BCI-algebra
+
+theorem Th37:
+  X is BCI-algebra of 0,0,0,0 iff X is BCK-algebra of 0,0,0,0
+proof
+  thus X is BCI-algebra of 0,0,0,0 implies X is BCK-algebra of 0,0,0,0
+  proof
+    assume
+A1: X is BCI-algebra of 0,0,0,0;
+    then X is BCI-algebra of 0,0,0+0,0+0;
+    then reconsider X as BCK-algebra by Th36;
+    for x,y being Element of X holds Polynom (0,0,x,y) = Polynom (0,0,y,x)
+    by A1,Def3;
+    hence thesis by Def3;
+  end;
+  thus thesis;
+end;
+
+theorem Th38:
+  X is commutative BCK-algebra iff X is BCI-algebra of 0,0,0,0
+proof
+  thus X is commutative BCK-algebra implies X is BCI-algebra of 0,0,0,0
+  proof
+    assume
+A1: X is commutative BCK-algebra;
+    for x,y being Element of X holds Polynom (0,0,x,y) = Polynom (0,0,y,x)
+    proof
+      let x,y be Element of X;
+A2:   x\(x\y) = y\(y\x) by A1,BCIALG_3:def 1;
+      ((x,(x\y)) to_power 1,(y\x)) to_power 0 = (x,(x\y)) to_power 1 by
+      BCIALG_2:1
+        .= y\(y\x) by A2,BCIALG_2:2
+        .= (y,(y\x)) to_power 1 by BCIALG_2:2
+        .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by BCIALG_2:1;
+      hence thesis;
+    end;
+    hence thesis by Def3;
+  end;
+  assume
+A3: X is BCI-algebra of 0,0,0,0;
+  for x,y being Element of X holds x\(x\y) = y\(y\x)
+  proof
+    let x,y be Element of X;
+A4: Polynom (0,0,x,y) = Polynom (0,0,y,x) by A3,Def3;
+    x\(x\y) = (x,(x\y)) to_power 1 by BCIALG_2:2
+      .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by A4,BCIALG_2:1
+      .= (y,(y\x)) to_power 1 by BCIALG_2:1
+      .= y\(y\x) by BCIALG_2:2;
+    hence thesis;
+  end;
+  hence thesis by A3,Th37,BCIALG_3:def 1;
+end;
+
+notation
+  let X be BCI-algebra;
+  synonym p-Semisimple-part(X) for AtomSet(X);
+end;
+
+reserve B,P for non empty Subset of X;
+
+theorem
+  for X being BCI-algebra st B = BCK-part(X) & P = p-Semisimple-part(X)
+  holds B /\ P = {0.X}
+proof
+  let X be BCI-algebra;
+  assume that
+A1: B = BCK-part(X) and
+A2: P = p-Semisimple-part(X);
+  thus B /\ P c= {0.X}
+  proof
+    let x be set;
+    assume
+A3: x in B /\ P;
+    then
+A4: x in P by XBOOLE_0:def 4;
+A5: x in B by A3,XBOOLE_0:def 4;
+    then
+A6: ex x1 being Element of X st x=x1 & 0.X<=x1 by A1;
+    reconsider x as Element of X by A1,A5;
+A7: 0.X\x=0.X by A6,BCIALG_1:def 11;
+    ex x2 being Element of X st x=x2 & x2 is minimal by A2,A4;
+    then x=0.X by A7,BCIALG_1:def 14;
+    hence thesis by TARSKI:def 1;
+  end;
+  0.X in BCK-part(X) & 0.X in p-Semisimple-part(X) by BCIALG_1:19;
+  then 0.X in B /\ P by A1,A2,XBOOLE_0:def 4;
+  then for x being set st x in {0.X} holds x in B /\ P by TARSKI:def 1;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for X being BCI-algebra st P = p-Semisimple-part(X) holds (X is
+  BCK-algebra iff P = {0.X})
+proof
+  let X be BCI-algebra;
+  assume
+A1: P = p-Semisimple-part(X);
+  thus X is BCK-algebra implies P = {0.X}
+  proof
+    assume
+A2: X is BCK-algebra;
+    thus P c= {0.X}
+    proof
+      let x be set;
+      assume
+A3:   x in P;
+      then
+A4:   ex x1 being Element of X st x=x1 & x1 is minimal by A1;
+      reconsider x as Element of X by A1,A3;
+      0.X\x = x` .= 0.X by A2,BCIALG_1:def 8;
+      then x=0.X by A4,BCIALG_1:def 14;
+      hence thesis by TARSKI:def 1;
+    end;
+    0.X in P by A1;
+    then for x being set st x in {0.X} holds x in P by TARSKI:def 1;
+    hence thesis by TARSKI:def 3;
+  end;
+  assume
+A5: P = {0.X};
+  for x being Element of X holds 0.X\x=0.X
+  proof
+    let x be Element of X;
+    0.X in P by A5,TARSKI:def 1;
+    then 0.X\x in P by A1,BCIALG_1:33;
+    hence thesis by A5,TARSKI:def 1;
+  end;
+  then for x being Element of X holds x`=0.X;
+  hence thesis by BCIALG_1:def 8;
+end;
+
+theorem
+  for X being BCI-algebra st B = BCK-part(X) holds (X is p-Semisimple
+  BCI-algebra iff B = {0.X})
+proof
+  let X be BCI-algebra;
+  assume
+A1: B = BCK-part(X);
+  thus X is p-Semisimple BCI-algebra implies B = {0.X}
+  proof
+    assume
+A2: X is p-Semisimple BCI-algebra;
+    thus B c= {0.X}
+    proof
+      let x be set;
+      assume
+A3:   x in B;
+      then
+A4:   ex x1 being Element of X st x=x1 & 0.X<=x1 by A1;
+      reconsider x as Element of X by A1,A3;
+      (x`)`=x by A2,BCIALG_1:def 26;
+      then (0.X)`=x by A4,BCIALG_1:def 11;
+      then x=0.X by BCIALG_1:def 5;
+      hence thesis by TARSKI:def 1;
+    end;
+    let x be set;
+    assume
+A5: x in {0.X};
+    then reconsider x as Element of X by TARSKI:def 1;
+    x=0.X by A5,TARSKI:def 1;
+    then x`=0.X by BCIALG_1:def 5;
+    then 0.X <= x by BCIALG_1:def 11;
+    hence thesis by A1;
+  end;
+  assume
+A6: B = {0.X};
+  for x being Element of X holds x`` = x
+  proof
+    let x be Element of X;
+    0.X\(x\(0.X\(0.X\x))) = (0.X,(x\(0.X\(0.X\x)))) to_power 1 by
+    BCIALG_2:2
+      .= ((0.X,x) to_power 1)\((0.X,(0.X\(0.X\x))) to_power 1) by BCIALG_2:
+    18
+      .= ((0.X,x) to_power 1)\((0.X,x) to_power 1) by BCIALG_2:8
+      .= 0.X by BCIALG_1:def 5;
+    then 0.X <= (x\(0.X\(0.X\x))) by BCIALG_1:def 11;
+    then (x\(0.X\(0.X\x))) in B by A1;
+    then
+A7: x\(0.X\(0.X\x)) = 0.X by A6,TARSKI:def 1;
+    (0.X\(0.X\x))\x = (0.X\x)\(0.X\x) by BCIALG_1:7
+      .= 0.X by BCIALG_1:def 5;
+    hence thesis by A7,BCIALG_1:def 7;
+  end;
+  hence thesis by BCIALG_1:54;
+end;
+
+theorem Th42:
+  X is p-Semisimple BCI-algebra implies X is BCI-algebra of 0,1,0, 0
+proof
+  assume
+A1: X is p-Semisimple BCI-algebra;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (0,0,y,x)
+  proof
+    let x,y be Element of X;
+    ((x,(x\y)) to_power 1,(y\x)) to_power 1 = (x\(x\y),(y\x)) to_power 1
+    by BCIALG_2:2
+      .= (y,(y\x)) to_power 1 by A1,BCIALG_1:def 26
+      .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by BCIALG_2:1;
+    hence thesis;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  X is p-Semisimple BCI-algebra implies X is BCI-algebra of n+j,n,m,m+j+ 1
+proof
+  assume
+A1: X is p-Semisimple BCI-algebra;
+A2: for x,y being Element of X holds Polynom (n,n,x,y) = y
+  proof
+    let x,y be Element of X;
+    defpred P[Element of NAT] means $1 <= n implies Polynom ($1,$1,x,y) = y;
+    now
+      let k;
+      assume
+A3:   k <= n implies Polynom (k,k,x,y) = y;
+      set m=k+1;
+A4:   Polynom (m,m,x,y) = Polynom (k,k+1,x,y)\(x\y) by Th9
+        .= (Polynom (k,k,x,y)\(y\x))\(x\y) by Th10;
+      assume m <= n;
+      then Polynom (m,m,x,y) = x\(x\y) by A1,A3,
+      A4,BCIALG_1:def 26,NAT_1:13;
+      hence Polynom (m,m,x,y) = y by A1,BCIALG_1:def 26;
+    end;
+    then
+A5: for k st P[k] holds P[k+1];
+    Polynom (0,0,x,y) = x\(x\y) by Th7
+      .= y by A1,BCIALG_1:def 26;
+    then
+A6: P[0];
+    for n holds P[n] from NAT_1:sch 1(A6,A5);
+    hence thesis;
+  end;
+A7: for x,y being Element of X holds Polynom (m,m+1,x,y) = x
+  proof
+    let x,y be Element of X;
+    defpred P[Element of NAT] means $1 <= m implies Polynom ($1,$1+1,x,y) = x;
+    now
+      let k;
+      assume
+A8:   k <= m implies Polynom (k,k+1,x,y) = x;
+      set l=k+1;
+A9:   Polynom (l,l+1,x,y) = Polynom (k,(k+1)+1,x,y)\(x\y) by Th9
+        .= (Polynom (k,k+1,x,y)\(y\x))\(x\y) by Th10;
+      assume l <= m;
+      then Polynom (l,l+1,x,y) = (x\(x\y))\(y\x) by A8,A9,BCIALG_1:7 ,
+      NAT_1:13
+        .= y\(y\x) by A1,BCIALG_1:def 26;
+      hence Polynom (l,l+1,x,y) = x by A1,BCIALG_1:def 26;
+    end;
+    then
+A10: for k st P[k] holds P[k+1];
+    Polynom (0,1,x,y) = Polynom (0,0,x,y)\(y\x) by Th10
+      .= (x\(x\y))\(y\x) by Th7
+      .= y\(y\x) by A1,BCIALG_1:def 26
+      .= x by A1,BCIALG_1:def 26;
+    then
+A11: P[0];
+    for m holds P[m] from NAT_1:sch 1(A11,A10);
+    hence thesis;
+  end;
+  for x,y being Element of X holds Polynom (n+j,n,x,y) = Polynom (m,m+j+1 ,y,x)
+  proof
+    let x,y be Element of X;
+    defpred P[Element of NAT] means $1 <= j implies Polynom (n+$1,n,x,y) =
+    Polynom (m,m+$1+1,y,x);
+    now
+      let k;
+      assume
+A12:  k <= j implies Polynom (n+k,n,x,y) = Polynom (m,m+k+1,y,x);
+      set l=k+1;
+      assume l <= j;
+      then Polynom (n+l,n,x,y) = Polynom (m,m+k+1,y,x)\(x\y) by A12,Th9,
+      NAT_1:13
+        .= Polynom (m,m+k+1+1,y,x) by Th10;
+      hence Polynom (n+l,n,x,y) = Polynom (m,m+l+1,y,x);
+    end;
+    then
+A13: for k st P[k] holds P[k+1];
+    Polynom (n+0,n,x,y) = y by A2
+      .= Polynom (m,m+0+1,y,x) by A7;
+    then
+A14: P[0];
+    for j holds P[j] from NAT_1:sch 1(A14,A13);
+    hence thesis;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  X is associative BCI-algebra implies X is BCI-algebra of 0,1,0,0 & X
+  is BCI-algebra of 1,0,0,0
+proof
+  assume
+A1: X is associative BCI-algebra;
+  for x being Element of X holds x`` = x
+  proof
+    let x be Element of X;
+    x` = x by A1,BCIALG_1:47;
+    hence thesis;
+  end;
+  then
+A2: X is p-Semisimple by BCIALG_1:54;
+  for x,y being Element of X holds Polynom (1,0,x,y) = Polynom (0,0,y,x)
+  proof
+    let x,y be Element of X;
+    x\(x\y) = y by A2,BCIALG_1:def 26;
+    then
+A3: (x\(x\y))\(x\y) = y\(y\x) by A1,BCIALG_1:48;
+    ((x,(x\y)) to_power (1+1),(y\x)) to_power 0 = (x,(x\y)) to_power 2 by
+    BCIALG_2:1
+      .= (x\(x\y))\(x\y) by BCIALG_2:3
+      .= (y,(y\x)) to_power 1 by A3,BCIALG_2:2
+      .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by BCIALG_2:1;
+    hence thesis;
+  end;
+  hence thesis by A2,Def3,Th42;
+end;
+
+theorem
+  X is weakly-positive-implicative BCI-algebra implies X is BCI-algebra
+  of 0,1,1,1
+proof
+  assume
+A1: X is weakly-positive-implicative BCI-algebra;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (1,1,y,x)
+  proof
+    let x,y be Element of X;
+A2: (x\(x\y))\(y\x)=((y\(y\x))\(y\x))\(x\y) by A1,BCIALG_1:85;
+    ((x,(x\y)) to_power 1,(y\x)) to_power 1 = (x,(x\y)) to_power 1 \ (y\x)
+    by BCIALG_2:2
+      .= (x\(x\y))\(y\x) by BCIALG_2:2
+      .= (((y\(y\x))\(y\x)),(x\y)) to_power 1 by A2,BCIALG_2:2
+      .= ((y,(y\x)) to_power 2,(x\y)) to_power 1 by BCIALG_2:3;
+    hence thesis;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  X is positive-implicative BCI-algebra implies X is BCI-algebra of 0,1, 1,1
+proof
+  assume
+A1: X is positive-implicative BCI-algebra;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (1,1,y,x)
+  proof
+    let x,y be Element of X;
+A2: (x\(x\y))\(y\x)=((y\(y\x))\(y\x))\(x\y) by A1,BCIALG_1:85;
+    ((x,(x\y)) to_power 1,(y\x)) to_power 1 = (x,(x\y)) to_power 1 \ (y\x)
+    by BCIALG_2:2
+      .= (x\(x\y))\(y\x) by BCIALG_2:2
+      .= (((y\(y\x))\(y\x)),(x\y)) to_power 1 by A2,BCIALG_2:2
+      .= ((y,(y\x)) to_power 2,(x\y)) to_power 1 by BCIALG_2:3;
+    hence thesis;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  X is implicative BCI-algebra implies X is BCI-algebra of 0,1,0,0
+proof
+  assume
+A1: X is implicative BCI-algebra;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (0,0,y,x)
+  proof
+    let x,y be Element of X;
+A2: (x\(x\y))\(y\x)=y\(y\x) by A1,BCIALG_1:def 24;
+    ((x,(x\y)) to_power 1,(y\x)) to_power 1 = (x\(x\y),(y\x)) to_power 1
+    by BCIALG_2:2
+      .= (x\(x\y))\(y\x) by BCIALG_2:2
+      .= (y,(y\x)) to_power 1 by A2,BCIALG_2:2
+      .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by BCIALG_2:1;
+    hence thesis;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  X is alternative BCI-algebra implies X is BCI-algebra of 0,1,0,0
+proof
+  assume
+A1: X is alternative BCI-algebra;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (0,0,y,x)
+  proof
+    let x,y be Element of X;
+A2: (x\(x\y))\(y\x)=y\(y\x) by A1,BCIALG_1:76;
+    ((x,(x\y)) to_power 1,(y\x)) to_power 1 = (x\(x\y),(y\x)) to_power 1
+    by BCIALG_2:2
+      .= (x\(x\y))\(y\x) by BCIALG_2:2
+      .= (y,(y\x)) to_power 1 by A2,BCIALG_2:2
+      .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by BCIALG_2:1;
+    hence thesis;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem Th49:
+  X is BCK-positive-implicative BCK-algebra iff X is BCK-algebra of 0,1,0,1
+proof
+  thus X is BCK-positive-implicative BCK-algebra implies X is BCK-algebra of 0
+  ,1,0,1
+  proof
+    assume
+A1: X is BCK-positive-implicative BCK-algebra;
+    for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (0,1,y,x)
+    proof
+      let x,y be Element of X;
+      (x\y)\(x\y) = 0.X by BCIALG_1:def 5;
+      then (x\(x\y))\y = 0.X by BCIALG_1:7;
+      then
+A2:   x\(x\y) <= y by BCIALG_1:def 11;
+      x\(x\y) = (x\(x\y))\(x\y) by A1,BCIALG_3:28;
+      then x\(x\y) <= y\(x\y) by A2,BCIALG_1:5;
+      then (x\(x\y))\(y\x) <= (y\(x\y))\(y\x) by BCIALG_1:5;
+      then
+A3:   (x\(x\y))\(y\x) <= (y\(y\x))\(x\y) by BCIALG_1:7;
+      (y\x)\(y\x) = 0.X by BCIALG_1:def 5;
+      then (y\(y\x))\x = 0.X by BCIALG_1:7;
+      then y\(y\x) <= x by BCIALG_1:def 11;
+      then
+A4:   (y\(y\x))\(y\x) <= x\(y\x) by BCIALG_1:5;
+      y\(y\x) = (y\(y\x))\(y\x) by A1,BCIALG_3:28;
+      then (y\(y\x))\(x\y) <= (x\(y\x))\(x\y) by A4,BCIALG_1:5;
+      then (y\(y\x))\(x\y) <= (x\(x\y))\(y\x) by BCIALG_1:7;
+      then
+A5:   (x\(x\y))\(y\x) = (y\(y\x))\(x\y) by A3,Th2;
+      ((x,(x\y)) to_power 1,(y\x)) to_power 1 = (x,(x\y)) to_power 1 \ (y
+      \x) by BCIALG_2:2
+        .= (x\(x\y))\(y\x) by BCIALG_2:2
+        .= ((y\(y\x)),(x\y)) to_power 1 by A5,BCIALG_2:2
+        .= ((y,(y\x)) to_power 1,(x\y)) to_power 1 by BCIALG_2:2;
+      hence thesis;
+    end;
+    hence thesis by A1,Def3;
+  end;
+  assume
+A6: X is BCK-algebra of 0,1,0,1;
+  for x,y being Element of X holds x\y = (x\y)\y
+  proof
+    let x,y be Element of X;
+A7: Polynom (0,1,x,(x\y)) = Polynom (0,1,(x\y),x) by A6,Def3;
+A8: (x\y)\x = (x\x)\y by BCIALG_1:7
+      .= y` by BCIALG_1:def 5
+      .= 0.X by A6,BCIALG_1:def 8;
+    then
+A9: ((x\y)\((x\y)\x))\(x\(x\y)) = (x\y)\(x\(x\y)) by BCIALG_1:2
+      .= (x\(x\(x\y)))\y by BCIALG_1:7
+      .= (x\y)\y by BCIALG_1:8;
+A10: (x\(x\(x\y)))\((x\y)\x) = (x\y)\((x\y)\x) by BCIALG_1:8
+      .= x\y by A8,BCIALG_1:2;
+    (x\(x\(x\y)))\((x\y)\x) = (x,(x\(x\y))) to_power 1 \ ((x\y)\x) by
+    BCIALG_2:2
+      .= (((x\y),((x\y)\x)) to_power 1,(x\(x\y))) to_power 1 by A7,BCIALG_2
+    :2
+      .= (((x\y)\((x\y)\x)),(x\(x\y))) to_power 1 by BCIALG_2:2
+      .= ((x\y)\((x\y)\x))\(x\(x\y)) by BCIALG_2:2;
+    hence thesis by A10,A9;
+  end;
+  hence thesis by A6,BCIALG_3:28;
+end;
+
+theorem Th50:
+  X is BCK-implicative BCK-algebra iff X is BCK-algebra of 1,0,0,0
+proof
+  thus X is BCK-implicative BCK-algebra implies X is BCK-algebra of 1,0,0,0
+  proof
+    assume
+A1: X is BCK-implicative BCK-algebra;
+    for x,y being Element of X holds Polynom (1,0,x,y) = Polynom (0,0,y,x)
+    proof
+      let x,y be Element of X;
+A2:   (x\(x\y))\(x\y) = y\(y\x) by A1,BCIALG_3:35;
+      ((x,(x\y)) to_power (1+1),(y\x)) to_power 0 = (x,(x\y)) to_power 2
+      by BCIALG_2:1
+        .= (x\(x\y))\(x\y) by BCIALG_2:3
+        .= (y,(y\x)) to_power 1 by A2,BCIALG_2:2
+        .= ((y,(y\x)) to_power 1,(x\y)) to_power 0 by BCIALG_2:1;
+      hence thesis;
+    end;
+    hence thesis by A1,Def3;
+  end;
+  assume
+A3: X is BCK-algebra of 1,0,0,0;
+  for x,y being Element of X holds (x\(x\y))\(x\y) = y\(y\x)
+  proof
+    let x,y be Element of X;
+A4: Polynom (1,0,x,y) = Polynom (0,0,y,x) by A3,Def3;
+    (x\(x\y))\(x\y) = (x,(x\y)) to_power 2 by BCIALG_2:3
+      .= ((x,(x\y)) to_power (1+1),(y\x)) to_power 0 by BCIALG_2:1
+      .= (y,(y\x)) to_power 1 by A4,BCIALG_2:1
+      .= y\(y\x) by BCIALG_2:2;
+    hence thesis;
+  end;
+  hence thesis by A3,BCIALG_3:35;
+end;
+
+registration
+  cluster BCK-implicative -> commutative BCK-algebra;
+  coherence by BCIALG_3:34;
+  cluster BCK-implicative -> BCK-positive-implicative BCK-algebra;
+  coherence by BCIALG_3:34;
+end;
+
+theorem
+  X is BCK-algebra of 1,0,0,0 iff X is BCK-algebra of 0,0,0,0 & X is
+  BCK-algebra of 0,1,0,1
+proof
+  thus X is BCK-algebra of 1,0,0,0 implies X is BCK-algebra of 0,0,0,0 & X is
+  BCK-algebra of 0,1,0,1
+  proof
+    assume X is BCK-algebra of 1,0,0,0;
+    then X is BCK-implicative BCK-algebra by Th50;
+    hence thesis by Th38,Th49;
+  end;
+  assume X is BCK-algebra of 0,0,0,0 & X is BCK-algebra of 0,1,0,1;
+  then
+  X is commutative BCK-algebra & X is BCK-positive-implicative BCK-algebra
+  by Th38,Th49;
+  then X is BCK-implicative BCK-algebra by BCIALG_3:34;
+  hence thesis by Th50;
+end;
+
+theorem
+  for X being quasi-commutative BCK-algebra holds (X is BCK-algebra of 0
+  ,1,0,1 iff for x,y being Element of X holds x\y = (x\y)\y )
+proof
+  let X be quasi-commutative BCK-algebra;
+  thus X is BCK-algebra of 0,1,0,1 implies for x,y being Element of X holds x\
+  y = (x\y)\y
+  proof
+    assume
+A1: X is BCK-algebra of 0,1,0,1;
+    for x,y being Element of X holds x\y = (x\y)\y
+    proof
+      let x,y be Element of X;
+A2:   (x\y)\x = (x\x)\y by BCIALG_1:7
+        .= y` by BCIALG_1:def 5
+        .= 0.X by BCIALG_1:def 8;
+      then
+A3:   ((x\y)\((x\y)\x))\(x\(x\y)) = (x\y)\(x\(x\y)) by BCIALG_1:2
+        .= (x\(x\(x\y)))\y by BCIALG_1:7
+        .= (x\y)\y by BCIALG_1:8;
+A4:   (x\(x\(x\y)))\((x\y)\x) = (x\y)\((x\y)\x) by BCIALG_1:8
+        .= x\y by A2,BCIALG_1:2;
+A5:   Polynom (0,1,x,(x\y)) = Polynom (0,1,(x\y),x) by A1,Def3;
+      (x\(x\(x\y)))\((x\y)\x) = (x,(x\(x\y))) to_power 1 \ ((x\y)\x) by
+      BCIALG_2:2
+        .= (((x\y),((x\y)\x)) to_power 1,(x\(x\y))) to_power 1 by A5,
+      BCIALG_2:2
+        .= (((x\y)\((x\y)\x)),(x\(x\y))) to_power 1 by BCIALG_2:2
+        .= ((x\y)\((x\y)\x))\(x\(x\y)) by BCIALG_2:2;
+      hence thesis by A4,A3;
+    end;
+    hence thesis;
+  end;
+  assume for x,y being Element of X holds x\y = (x\y)\y;
+  then X is BCK-positive-implicative BCK-algebra by BCIALG_3:28;
+  hence thesis by Th49;
+end;
+
+theorem
+  for X being quasi-commutative BCK-algebra holds (X is BCK-algebra of n
+  ,n+1,n,n+1 iff for x,y being Element of X holds (x,y) to_power (n+1) = (x,y)
+  to_power (n+2) )
+proof
+  let X be quasi-commutative BCK-algebra;
+  thus X is BCK-algebra of n,n+1,n,n+1 implies for x,y being Element of X
+  holds (x,y) to_power (n+1) = (x,y) to_power (n+2)
+  proof
+    assume
+A1: X is BCK-algebra of n,n+1,n,n+1;
+    for x,y being Element of X holds (x,y) to_power (n+1) = (x,y) to_power
+    (n+2)
+    proof
+      let x,y be Element of X;
+A2:   (x\y)\x = (x\x)\y by BCIALG_1:7
+        .= y` by BCIALG_1:def 5
+        .= 0.X by BCIALG_1:def 8;
+      then
+A3:   ((x,(x\(x\y))) to_power (n+1),((x\y)\x)) to_power (n+1) = ((x,y)
+      to_power (n+1),0.X) to_power (n+1) by BCIALG_2:8
+        .= (x,y) to_power (n+1) by BCIALG_2:5;
+A4:   (((x\y),((x\y)\x)) to_power (n+1),(x\(x\y))) to_power (n+1) = ((x\y)
+      ,(x\(x\y))) to_power (n+1) by A2,BCIALG_2:5
+        .= (x,(x\(x\y))) to_power (n+1) \ y by BCIALG_2:7
+        .= (x,y) to_power (n+1) \ y by BCIALG_2:8
+        .= (x,y) to_power ((n+1)+1) by BCIALG_2:4;
+      Polynom (n,n+1,x,(x\y)) = Polynom (n,n+1,(x\y),x) by A1,Def3;
+      hence thesis by A3,A4;
+    end;
+    hence thesis;
+  end;
+  assume
+A5: for x,y being Element of X holds (x,y) to_power (n+1) = (x,y)
+  to_power (n+2);
+  for x,y being Element of X holds Polynom (n,n+1,x,y) = Polynom (n,n+1,y, x)
+  proof
+    let x,y be Element of X;
+    (x\y)\(x\y) = 0.X by BCIALG_1:def 5;
+    then (x\(x\y))\y = 0.X by BCIALG_1:7;
+    then x\(x\y) <= y by BCIALG_1:def 11;
+    then ((x\(x\y)),(x\y)) to_power (n+1) <= (y,(x\y)) to_power (n+1) by
+    BCIALG_2:19;
+    then
+    ((x,(x\y)) to_power 1,(x\y)) to_power (n+1) <= (y,(x\y)) to_power (n+
+    1) by BCIALG_2:2;
+    then
+A6: (x,(x\y)) to_power (1+(n+1)) <= (y,(x\y)) to_power (n+1) by
+    BCIALG_2:10;
+    (y\x)\(y\x) = 0.X by BCIALG_1:def 5;
+    then (y\(y\x))\x = 0.X by BCIALG_1:7;
+    then y\(y\x) <= x by BCIALG_1:def 11;
+    then ((y\(y\x)),(y\x)) to_power (n+1) <= (x,(y\x)) to_power (n+1) by
+    BCIALG_2:19;
+    then
+    ((y,(y\x)) to_power 1,(y\x)) to_power (n+1) <= (x,(y\x)) to_power (n+
+    1) by BCIALG_2:2;
+    then
+A7: (y,(y\x)) to_power (1+(n+1)) <= (x,(y\x)) to_power (n+1) by
+    BCIALG_2:10;
+    (y,(y\x)) to_power (n+1) = (y,(y\x)) to_power (n+2) by A5;
+    then ((y,(y\x)) to_power (n+1),(x\y)) to_power (n+1) <= ((x,(y\x))
+    to_power (n+1),(x\y)) to_power (n+1) by A7,BCIALG_2:19;
+    then
+A8: ((y,(y\x)) to_power (n+1),(x\y)) to_power (n+1) <= ((x,(x\y))
+    to_power (n+1),(y\x)) to_power (n+1) by BCIALG_2:11;
+    (x,(x\y)) to_power (n+1) = (x,(x\y)) to_power (n+2) by A5;
+    then ((x,(x\y)) to_power (n+1),(y\x)) to_power (n+1) <= ((y,(x\y))
+    to_power (n+1),(y\x)) to_power (n+1) by A6,BCIALG_2:19;
+    then
+    ((x,(x\y)) to_power (n+1),(y\x)) to_power (n+1) <= ((y,(y\x)) to_power
+    (n+1),(x\y)) to_power (n+1) by BCIALG_2:11;
+    hence thesis by A8,Th2;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  X is BCI-algebra of 0,1,0,0 implies X is BCI-commutative BCI-algebra
+proof
+  assume
+A1: X is BCI-algebra of 0,1,0,0;
+  for x,y being Element of X st y\x=0.X holds y = x\(x\y)
+  proof
+    let x,y be Element of X;
+    Polynom (0,1,x,y) = Polynom (0,0,y,x) by A1,Def3;
+    then
+    (x,(x\y)) to_power 1 \ (y\x) = ((y,(y\x)) to_power 1,(x\y)) to_power 0
+    by BCIALG_2:2;
+    then (x\(x\y)) \ (y\x) = ((y,(y\x)) to_power 1,(x\y)) to_power 0 by
+    BCIALG_2:2;
+    then
+A2: (x\(x\y)) \ (y\x) = (y,(y\x)) to_power 1 by BCIALG_2:1;
+    assume y\x=0.X;
+    then (x\(x\y)) \ 0.X = y\0.X by A2,BCIALG_2:2;
+    then y = (x\(x\y)) \ 0.X by BCIALG_1:2;
+    hence thesis by BCIALG_1:2;
+  end;
+  then for x,y being Element of X st x\y=0.X holds x = y\(y\x);
+  hence thesis by BCIALG_3:def 4;
+end;
+
+theorem
+  X is BCI-algebra of n,0,m,m implies X is BCI-commutative BCI-algebra
+proof
+A1: for x,y being Element of X st x\y=0.X holds (y,(y\x)) to_power (m+1) <= (
+  y,(y\x)) to_power 1
+  proof
+    let x,y be Element of X;
+    defpred P[Element of NAT] means $1 <= m implies (y,(y\x)) to_power ($1+1)
+    <= (y,(y\x)) to_power 1;
+    assume
+A2: x\y=0.X;
+    now
+      (0.X,y\x) to_power 1 = ((0.X,y) to_power 1)\((0.X,x) to_power 1) by
+      BCIALG_2:18;
+      then 0.X\(y\x) = ((0.X,y) to_power 1)\((0.X,x) to_power 1) by
+      BCIALG_2:2;
+      then
+A3:   0.X\(y\x) = (0.X\y)\((0.X,x) to_power 1) by BCIALG_2:2;
+      let k;
+      assume
+A4:   k<= m implies (y,(y\x)) to_power (k+1) <= (y,(y\x)) to_power 1;
+      ((0.X\y)\(0.X\x))\(x\y) = 0.X by BCIALG_1:1;
+      then (0.X\y)\(0.X\x) = 0.X by A2,BCIALG_1:2;
+      then 0.X\(y\x) = 0.X by A3,BCIALG_2:2;
+      then (y\y)\(y\x) = 0.X by BCIALG_1:def 5;
+      then (y\(y\x))\y = 0.X by BCIALG_1:7;
+      then y\(y\x) <= y by BCIALG_1:def 11;
+      then (y\(y\x),(y\x)) to_power (k+1) <= (y,(y\x)) to_power (k+1) by
+      BCIALG_2:19;
+      then
+      ((y,(y\x)) to_power 1,(y\x)) to_power (k+1) <= (y,(y\x)) to_power (
+      k+1) by BCIALG_2:2;
+      then
+A5:   (y,(y\x)) to_power ((k+1)+1) <= (y,(y\x)) to_power (k+1) by
+      BCIALG_2:10;
+      set m1=k+1;
+      assume m1<=m;
+      hence (y,(y\x)) to_power (m1+1) <= (y,(y\x)) to_power 1 by A4,A5,Th1,
+      NAT_1:13;
+    end;
+    then
+A6: for k st P[k] holds P[k+1];
+    (y,(y\x)) to_power (0+1) \ (y,(y\x)) to_power 1 = 0.X by BCIALG_1:def
+    5;
+    then
+A7: P[0] by BCIALG_1:def 11;
+    for m holds P[m] from NAT_1:sch 1(A7,A6);
+    hence thesis;
+  end;
+  assume
+A8: X is BCI-algebra of n,0,m,m;
+  for x,y being Element of X st x\y=0.X holds x = y\(y\x)
+  proof
+    let x,y be Element of X;
+    assume
+A9: x\y=0.X;
+    Polynom (n,0,x,y) = Polynom (m,m,y,x) by A8,Def3;
+    then (x,(y\x)) to_power 0 = ((y,(y\x)) to_power (m+1),0.X) to_power m by
+    A9,BCIALG_2:5;
+    then
+    (x,(y\x)) to_power 0 = ((y,(y\x)) to_power (m+1),0.X) to_power m \ 0.
+    X by BCIALG_1:2;
+    then (x,(y\x)) to_power 0 = ((y,(y\x)) to_power (m+1),0.X) to_power (m+1)
+    by BCIALG_2:4;
+    then (x,(y\x)) to_power 0 = (y,(y\x)) to_power (m+1) by BCIALG_2:5;
+    then x = (y,(y\x)) to_power (m+1) by BCIALG_2:1;
+    then x <= (y,(y\x)) to_power 1 by A1,A9;
+    then
+A10: x <= y\(y\x) by BCIALG_2:2;
+    (y\(y\x))\x = (y\x)\(y\x) by BCIALG_1:7;
+    then (y\(y\x))\x = 0.X by BCIALG_1:def 5;
+    then y\(y\x) <= x by BCIALG_1:def 11;
+    hence thesis by A10,Th2;
+  end;
+  hence thesis by BCIALG_3:def 4;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n holds ( j = 0 & m > 0 implies X is
+  BCK-algebra of 0,0,0,0 )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume that
+A1: j = 0 and
+A2: m > 0;
+  for x,y being Element of X holds Polynom (0,0,x,y) = Polynom (0,n,y,x)
+  proof
+    let x,y be Element of X;
+A3: Polynom (i,j,x,y) = Polynom (m,n,y,x) by Def3;
+A4: i+1 >= j+1 by A1,XREAL_1:8;
+    (x,(x\y)) to_power (j+1) = (x,(x\y)) to_power (m+1) & j+1 < m+1 by A1,
+    A2, Th20,XREAL_1:8;
+    then (x,(x\y)) to_power (i+1) = (x,(x\y)) to_power (0+1) by A1,A4,Th6;
+    hence thesis by A1,A3,Th20;
+  end;
+  then reconsider X as BCK-algebra of 0,0,0,n by Def3;
+A5: for x,y being Element of X holds Polynom (0,0,x,y) <= Polynom (0,0,y,x)
+  proof
+    let x,y be Element of X;
+    Polynom (0,0,x,y) = Polynom (0,n,y,x) by Def3;
+    hence thesis by Th5;
+  end;
+  for x,y being Element of X holds Polynom (0,0,y,x) = Polynom (0,0,x,y)
+  proof
+    let x,y be Element of X;
+    Polynom (0,0,x,y) <= Polynom (0,0,y,x) by A5;
+    then
+A6: Polynom (0,0,x,y)\Polynom (0,0,y,x)=0.X by BCIALG_1:def 11;
+    Polynom (0,0,y,x) <= Polynom (0,0,x,y) by A5;
+    then Polynom (0,0,y,x)\Polynom (0,0,x,y)=0.X by BCIALG_1:def 11;
+    hence thesis by A6,BCIALG_1:def 7;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n holds ( m = 0 & j > 0 implies X is
+  BCK-algebra of 0,1,0,1 )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  reconsider X as BCK-algebra of i+1,j,m,n+1 by Th17;
+  assume that
+A1: m = 0 and
+A2: j > 0;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (0,1,y,x)
+  proof
+    let x,y be Element of X;
+A3: (i+1)+1 > (m+1)+0 by A1,XREAL_1:10;
+A4: (((x,(x\y)) to_power (0+1)),(y\x)) to_power (j+1) = (((x,(x\y))
+    to_power (0+1)),(y\x)) to_power (m+1) by Th20;
+A5: j+1 > m+1 by A1,A2,XREAL_1:8;
+    n+1 >= m+1 & (((y,(y\x)) to_power (0+1)),(x\y)) to_power (j+1) = (((y,
+    (y\x)) to_power (0+1)),(x\y)) to_power (m+1) by A1,Th20,XREAL_1:8;
+    then
+A6: (((y,(y\x)) to_power (0+1)),(x\y)) to_power (0+1) = (((y,(y\x))
+    to_power (0+1)),(x\y)) to_power (n+1) by A1,A5,Th6;
+    Polynom (i+1,j,x,y) = Polynom (m,n+1,y,x) & (x,(x\y)) to_power (j+1) =
+    (x,(x\ y)) to_power (m+1) by Def3,Th20;
+    then
+    (((x,(x\y)) to_power (0+1)),(y\x)) to_power j = (((y,(y\x)) to_power (0
+    +1)),(x\y)) to_power (n+1) by A1,A5,A3,Th6;
+    hence thesis by A1,A5,A6,A4,Th6,NAT_1:14;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n holds ( n = 0 & i <> 0 implies X is
+  BCK-algebra of 0,0,0,0 )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  assume that
+A1: n = 0 and
+A2: i <> 0;
+  for x,y being Element of X holds Polynom (0,j,x,y) = Polynom (0,0,y,x)
+  proof
+    let x,y be Element of X;
+A3: Polynom (i,j,x,y) = Polynom (m,n,y,x) by Def3;
+A4: m+1 >= n+1 by A1,XREAL_1:8;
+    (y,(y\x)) to_power (n+1) = (y,(y\x)) to_power (i+1) & n+1 < i+1 by A1,
+    A2, Th19,XREAL_1:8;
+    then (y,(y\x)) to_power (m+1) = (y,(y\x)) to_power (0+1) by A1,A4,Th6;
+    hence thesis by A1,A3,Th19;
+  end;
+  then reconsider X as BCK-algebra of 0,j,0,0 by Def3;
+A5: for x,y being Element of X holds Polynom (0,0,y,x) <= Polynom (0,0,x,y)
+  proof
+    let x,y be Element of X;
+    Polynom (0,j,x,y) = Polynom (0,0,y,x) by Def3;
+    hence thesis by Th5;
+  end;
+  for x,y being Element of X holds Polynom (0,0,y,x) = Polynom (0,0,x,y)
+  proof
+    let x,y be Element of X;
+    Polynom (0,0,x,y) <= Polynom (0,0,y,x) by A5;
+    then
+A6: Polynom (0,0,x,y)\Polynom (0,0,y,x)=0.X by BCIALG_1:def 11;
+    Polynom (0,0,y,x) <= Polynom (0,0,x,y) by A5;
+    then Polynom (0,0,y,x)\Polynom (0,0,x,y)=0.X by BCIALG_1:def 11;
+    hence thesis by A6,BCIALG_1:def 7;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem
+  for X being BCK-algebra of i,j,m,n holds ( i = 0 & n <> 0 implies X is
+  BCK-algebra of 0,1,0,1 )
+proof
+  let X be BCK-algebra of i,j,m,n;
+  reconsider X as BCK-algebra of i,j+1,m+1,n by Th18;
+  assume that
+A1: i = 0 and
+A2: n <> 0;
+  for x,y being Element of X holds Polynom (0,1,x,y) = Polynom (0,1,y,x)
+  proof
+    let x,y be Element of X;
+A3: (m+1)+1 > (i+1)+0 by A1,XREAL_1:10;
+A4: (((y,(y\x)) to_power (0+1)),(x\y)) to_power (i+1) = (((y,(y\x))
+    to_power (0+1)),(x\y)) to_power (n+1) by Th19;
+A5: n+1 > i+1 by A1,A2,XREAL_1:8;
+    j+1 >= i+1 & (((x,(x\y)) to_power (0+1)),(y\x)) to_power (n+1) = (((x,
+    (x\y)) to_power (0+1)),(y\x)) to_power (i+1) by A1,Th19,XREAL_1:8;
+    then
+A6: (((x,(x\y)) to_power (0+1)),(y\x)) to_power (0+1) = (((x,(x\y))
+    to_power (0+1)),(y\x)) to_power (j+1) by A1,A5,Th6;
+    Polynom (i,j+1,x,y) = Polynom (m+1,n,y,x) & (y,(y\x)) to_power (n+1) =
+    (y,(y \x)) to_power (i+1) by Def3,Th19;
+    then (((x,(x\y)) to_power (0+1)),(y\x)) to_power (j+1) = (((y,(y\x))
+    to_power (0+1)),(x\y)) to_power n by A1,A5,A3,Th6;
+    hence thesis by A1,A5,A6,A4,Th6,NAT_1:14;
+  end;
+  hence thesis by Def3;
+end;

@@ -1,0 +1,6000 @@
+:: Ring Ideals
+::  by Jonathan Backer , Piotr Rudnicki and Christoph Schwarzweller
+::
+:: Received November 20, 2000
+:: Copyright (c) 2000 Association of Mizar Users
+ 
+environ
+
+ vocabularies NUMBERS, RLVECT_1, ALGSTR_1, XBOOLE_0, ALGSTR_0, STRUCT_0,
+      VECTSP_2, VECTSP_1, BINOP_1, LATTICES, ZFMISC_1, SUBSET_1, CARD_3,
+      FINSEQ_1, ARYTM_3, ORDINAL4, RELAT_1, CARD_FIL, SUPINF_2, TARSKI,
+      ARYTM_1, MESFUNC1, CARD_1, NEWTON, NAT_1, XXREAL_0, REALSET1, FUNCT_1,
+      FUNCT_7, GROUP_1, PARTFUN1, PRELAMB, MCART_1, SETFAM_1, RLVECT_3, GCD_1,
+      LATTICE3, SQUARE_1, FINSET_1, INT_3, XCMPLX_0, ORDINAL1, IDEAL_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, FINSET_1, RELAT_1, FUNCT_1,
+      FINSEQ_1, ORDINAL1, REALSET1, INT_3, CARD_1, NUMBERS, XCMPLX_0, XXREAL_0,
+      NAT_1, RELSET_1, PARTFUN1, FUNCT_2, ALGSTR_1, XXREAL_2, MCART_1,
+      POLYNOM1, SETFAM_1, DOMAIN_1, STRUCT_0, ALGSTR_0, RLVECT_1, VECTSP_1,
+      GROUP_1, BINOP_1, VECTSP_2, FUNCT_7, GCD_1, BINOM;
+ constructors SETFAM_1, BINOP_1, REALSET2, ALGSTR_1, GCD_1, INT_3, POLYNOM1,
+      BINOM, XXREAL_2, RELSET_1, FUNCT_7, FVSUM_1;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_2, FINSET_1, XXREAL_0,
+      XREAL_0, NAT_1, INT_1, MEMBERED, FINSEQ_1, REALSET1, STRUCT_0, VECTSP_1,
+      ALGSTR_1, INT_3, VALUED_0, ALGSTR_0, XXREAL_2, CARD_1, ZFMISC_1;
+ requirements NUMERALS, REAL, SUBSET, BOOLE, ARITHM;
+ definitions CARD_1, TARSKI, XBOOLE_0, BINOP_1, REALSET1, STRUCT_0, ALGSTR_0;
+ theorems INT_3, TARSKI, ZFMISC_1, RLVECT_1, VECTSP_1, GCD_1, FUNCT_1, FUNCT_2,
+      POLYNOM1, RELAT_1, FINSET_1, NAT_1, ALGSTR_1, MCART_1, FINSEQ_1,
+      FINSEQ_2, FINSEQ_3, SETFAM_1, INT_1, FUNCT_7, FINSEQ_4, FINSEQ_5,
+      POLYNOM2, BINOM, XBOOLE_0, XBOOLE_1, ORDINAL1, REALSET1, GROUP_1,
+      XREAL_1, DOMAIN_1, XXREAL_0, PARTFUN1, XXREAL_2, SUBSET_1, CARD_1;
+ schemes NAT_1, RECDEF_1, FUNCT_2, FINSEQ_2, DOMAIN_1, INT_1;
+
+begin :: Preliminaries
+
+registration
+  cluster add-associative left_zeroed right_zeroed (non empty addLoopStr);
+  existence
+  proof
+    consider R being non degenerated comRing;
+    take R;
+    thus thesis;
+  end;
+end;
+
+registration
+  cluster Abelian left_zeroed right_zeroed add-cancelable well-unital
+    add-associative associative commutative distributive non trivial (non empty
+    doubleLoopStr);
+  existence
+  proof
+    consider R being non degenerated comRing;
+    take R;
+    thus thesis;
+  end;
+end;
+
+theorem Th1:
+  for V being add-associative left_zeroed right_zeroed (non empty
+  addLoopStr), v,u being Element of V holds Sum <* v,u *> = v + u
+proof
+  let V be add-associative left_zeroed right_zeroed (non empty addLoopStr), v,
+  u be Element of V;
+  <* v,u *> = <* v *> ^ <* u *> by FINSEQ_1:def 9;
+  then Sum<* v,u *> = Sum<* v *> + Sum<* u *> by RLVECT_1:58
+    .= v + Sum <* u *> by BINOM:3
+    .= v + u by BINOM:3;
+  hence thesis;
+end;
+
+begin :: Ideals
+
+definition
+  let L be non empty addLoopStr, F being Subset of L;
+  attr F is add-closed means
+  :Def1:
+  for x, y being Element of L st x in F & y in F holds x+y in F;
+end;
+
+definition
+  let L be non empty multMagma, F be Subset of L;
+  attr F is left-ideal means
+  :Def2:
+  for p, x being Element of L st x in F holds p*x in F;
+  attr F is right-ideal means
+  :Def3:
+  for p, x being Element of L st x in F holds x*p in F;
+end;
+
+registration
+  let L be non empty addLoopStr;
+  cluster add-closed (non empty Subset of L);
+  existence
+  proof
+    set M = the carrier of L;
+    for u being set holds u in M implies u in the carrier of L;
+    then reconsider M as Subset of L by TARSKI:def 3;
+    reconsider M as non empty Subset of L;
+    take M;
+    for x, y being Element of L st x in M & y in M holds x+y in M;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let L be non empty multMagma;
+  cluster left-ideal (non empty Subset of L);
+  existence
+  proof
+    set M = the carrier of L;
+    for u being set holds u in M implies u in the carrier of L;
+    then reconsider M as Subset of L by TARSKI:def 3;
+    reconsider M as non empty Subset of L;
+    take M;
+    for p, x being Element of L st x in M holds p*x in M;
+    hence thesis by Def2;
+  end;
+  cluster right-ideal (non empty Subset of L);
+  existence
+  proof
+    set M = the carrier of L;
+    for u being set holds u in M implies u in the carrier of L;
+    then reconsider M as Subset of L by TARSKI:def 3;
+    reconsider M as non empty Subset of L;
+    take M;
+    for p, x being Element of L st x in M holds x*p in M;
+    hence thesis by Def3;
+  end;
+end;
+
+registration
+  let L be non empty doubleLoopStr;
+  cluster add-closed left-ideal right-ideal (non empty Subset of L);
+  existence
+  proof
+    set M = the carrier of L;
+    for u being set holds u in M implies u in the carrier of L;
+    then reconsider M as Subset of L by TARSKI:def 3;
+    reconsider M as non empty Subset of L;
+    take M;
+A1: for p, x being Element of L st x in M holds x*p in M;
+    ( for x,y being Element of L st x in M & y in M holds x+y in M)& for p
+    ,x being Element of L st x in M holds p*x in M;
+    hence thesis by A1,Def1,Def2,Def3;
+  end;
+  cluster add-closed right-ideal (non empty Subset of L);
+  existence
+  proof
+    set M = the carrier of L;
+    for u being set holds u in M implies u in the carrier of L;
+    then reconsider M as Subset of L by TARSKI:def 3;
+    reconsider M as non empty Subset of L;
+    take M;
+    ( for x,y being Element of L st x in M & y in M holds x+y in M)& for p
+    , x being Element of L st x in M holds x*p in M;
+    hence thesis by Def1,Def3;
+  end;
+  cluster add-closed left-ideal (non empty Subset of L);
+  existence
+  proof
+    set M = the carrier of L;
+    for u being set holds u in M implies u in the carrier of L;
+    then reconsider M as Subset of L by TARSKI:def 3;
+    reconsider M as non empty Subset of L;
+    take M;
+    ( for x,y being Element of L st x in M & y in M holds x+y in M)& for p
+    , x being Element of L st x in M holds p*x in M;
+    hence thesis by Def1,Def2;
+  end;
+end;
+
+registration
+  let R be commutative (non empty multMagma);
+  cluster left-ideal -> right-ideal (non empty Subset of R);
+  coherence
+  proof
+    let I be non empty Subset of R;
+    assume I is left-ideal;
+    then for p,x being Element of R st x in I holds x*p in I by Def2;
+    hence thesis by Def3;
+  end;
+  cluster right-ideal -> left-ideal (non empty Subset of R);
+  coherence
+  proof
+    let I be non empty Subset of R;
+    assume I is right-ideal;
+    then for p,x being Element of R st x in I holds p*x in I by Def3;
+    hence thesis by Def2;
+  end;
+end;
+
+definition
+  let L be non empty doubleLoopStr;
+  mode Ideal of L is add-closed left-ideal right-ideal (non empty Subset of L);
+end;
+
+definition
+  let L be non empty doubleLoopStr;
+  mode RightIdeal of L is add-closed right-ideal (non empty Subset of L);
+end;
+
+definition
+  let L be non empty doubleLoopStr;
+  mode LeftIdeal of L is add-closed left-ideal (non empty Subset of L);
+end;
+
+theorem Th2:
+  for R being right_zeroed left_add-cancelable left-distributive (
+non empty doubleLoopStr), I being left-ideal (non empty Subset of R) holds 0.R
+  in I
+proof
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr);
+  let I be left-ideal (non empty Subset of R);
+  consider a being Element of I;
+  0.R*a in I by Def2;
+  hence thesis by BINOM:1;
+end;
+
+theorem Th3:
+  for R being left_zeroed right_add-cancelable right-distributive (
+non empty doubleLoopStr), I being right-ideal (non empty Subset of R) holds 0.R
+  in I
+proof
+  let R be left_zeroed right_add-cancelable right-distributive (non empty
+  doubleLoopStr);
+  let I be right-ideal (non empty Subset of R);
+  consider a being Element of I;
+  a*0.R in I by Def3;
+  hence thesis by BINOM:2;
+end;
+
+theorem Th4:
+  for L being right_zeroed (non empty addLoopStr) holds {0.L} is add-closed
+proof
+  let L be right_zeroed (non empty addLoopStr);
+  let x,y be Element of L;
+  assume x in {0.L} & y in {0.L};
+  then x = 0.L & y= 0.L by TARSKI:def 1;
+  then x + y = 0.L by RLVECT_1:def 7;
+  hence thesis by TARSKI:def 1;
+end;
+
+theorem Th5:
+  for L being left_zeroed right_add-cancelable right-distributive (
+  non empty doubleLoopStr) holds {0.L} is left-ideal
+proof
+  let L be left_zeroed right_add-cancelable right-distributive (non empty
+  doubleLoopStr);
+  let p,x be Element of L;
+  reconsider p9 = p as Element of L;
+  assume x in {0.L};
+  then x = 0.L by TARSKI:def 1;
+  then p9*x = 0.L by BINOM:2;
+  hence thesis by TARSKI:def 1;
+end;
+
+theorem Th6:
+  for L being right_zeroed left_add-cancelable left-distributive (
+  non empty doubleLoopStr) holds {0.L} is right-ideal
+proof
+  let L be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr);
+  let p,x be Element of L;
+  reconsider p9 = p as Element of L;
+  assume x in {0.L};
+  then x = 0.L by TARSKI:def 1;
+  then x*p9 = 0.L by BINOM:1;
+  hence thesis by TARSKI:def 1;
+end;
+
+registration
+  let L be right_zeroed (non empty addLoopStr);
+  cluster {0.L} -> add-closed Subset of L;
+  coherence by Th4;
+end;
+
+registration
+  let L be left_zeroed right_add-cancelable right-distributive (non empty
+  doubleLoopStr);
+  cluster {0.L} -> left-ideal Subset of L;
+  coherence by Th5;
+end;
+
+registration
+  let L be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr);
+  cluster {0.L} -> right-ideal Subset of L;
+  coherence by Th6;
+end;
+
+theorem
+  for L being add-associative right_zeroed right_complementable
+  distributive (non empty doubleLoopStr) holds {0.L} is Ideal of L;
+
+theorem
+  for L being add-associative right_zeroed right_complementable
+  right-distributive (non empty doubleLoopStr) holds {0.L} is LeftIdeal of L;
+
+theorem
+  for L being add-associative right_zeroed right_complementable
+  left-distributive (non empty doubleLoopStr) holds {0.L} is RightIdeal of L;
+
+theorem Th10:
+  for L being non empty doubleLoopStr holds the carrier of L is Ideal of L
+proof
+  let L be non empty doubleLoopStr;
+  the carrier of L c= the carrier of L;
+  then reconsider cL = the carrier of L as Subset of L;
+A1: cL is left-ideal
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+A2: cL is right-ideal
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+  cL is add-closed
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+  hence thesis by A1,A2;
+end;
+
+theorem Th11:
+  for L being non empty doubleLoopStr holds the carrier of L is LeftIdeal of L
+proof
+  let L be non empty doubleLoopStr;
+  the carrier of L c= the carrier of L;
+  then reconsider cL = the carrier of L as Subset of L;
+A1: cL is left-ideal
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+  cL is add-closed
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+  hence thesis by A1;
+end;
+
+theorem Th12:
+  for L being non empty doubleLoopStr holds the carrier of L is RightIdeal of L
+proof
+  let L be non empty doubleLoopStr;
+  the carrier of L c= the carrier of L;
+  then reconsider cL = the carrier of L as Subset of L;
+A1: cL is right-ideal
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+  cL is add-closed
+  proof
+    let x, y be Element of L;
+    thus thesis;
+  end;
+  hence thesis by A1;
+end;
+
+definition
+  let R be left_zeroed right_zeroed add-cancelable distributive (non empty
+  doubleLoopStr), I be Ideal of R;
+  redefine attr I is trivial means
+  I = {0.R};
+  compatibility
+  proof
+    now
+      assume I is trivial;
+      then consider x being set such that
+A1:   I = {x} by REALSET1:def 4;
+      0.R in {x} by A1,Th3;
+      hence I = {0.R} by A1,TARSKI:def 1;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be non trivial left_zeroed right_zeroed add-cancelable distributive (
+  non empty doubleLoopStr);
+  cluster proper Ideal of R;
+  existence
+  proof
+    reconsider M = {0.R} as Ideal of R;
+    M is proper by SUBSET_1:def 7;
+    hence thesis;
+  end;
+end;
+
+theorem Th13:
+  for L being add-associative right_zeroed right_complementable
+  left-distributive left_unital (non empty doubleLoopStr), I being left-ideal (
+  non empty Subset of L), x being Element of L st x in I holds -x in I
+proof
+  let L be add-associative right_zeroed right_complementable left-distributive
+  left_unital (non empty doubleLoopStr);
+  let I be left-ideal (non empty Subset of L);
+  let x being Element of L;
+  assume x in I;
+  then
+A1: (- 1.L)*x in I by Def2;
+  0. L = 0.L*x by VECTSP_1:39
+    .= (1.L + (- 1.L))*x by RLVECT_1:def 13
+    .= 1.L*x + (- 1.L)*x by VECTSP_1:def 12
+    .= x + (- 1.L)*x by VECTSP_1:def 19;
+  hence thesis by A1,RLVECT_1:def 13;
+end;
+
+theorem Th14:
+  for L being add-associative right_zeroed right_complementable
+right-distributive right_unital (non empty doubleLoopStr), I being right-ideal
+  (non empty Subset of L), x being Element of L st x in I holds -x in I
+proof
+  let L be add-associative right_zeroed right_complementable
+  right-distributive right_unital (non empty doubleLoopStr);
+  let I be right-ideal (non empty Subset of L);
+  let x being Element of L;
+  assume x in I;
+  then
+A1: x*(- 1.L) in I by Def3;
+  0. L = x*0.L by VECTSP_1:36
+    .= x*(1.L + (- 1.L)) by RLVECT_1:def 13
+    .= x*1.L + x*(- 1.L) by VECTSP_1:def 11
+    .= x + x*(- 1.L) by VECTSP_1:def 13;
+  hence thesis by A1,RLVECT_1:def 13;
+end;
+
+theorem
+  for L being add-associative right_zeroed right_complementable
+left-distributive left_unital (non empty doubleLoopStr), I being LeftIdeal of L
+  , x,y being Element of L st x in I & y in I holds x-y in I
+proof
+  let L being add-associative right_zeroed right_complementable
+  left-distributive left_unital (non empty doubleLoopStr);
+  let I being LeftIdeal of L;
+  let x, y being Element of L;
+  assume that
+A1: x in I and
+A2: y in I;
+  - y in I by A2,Th13;
+  hence thesis by A1,Def1;
+end;
+
+theorem
+  for L being add-associative right_zeroed right_complementable
+  right-distributive right_unital (non empty doubleLoopStr), I being RightIdeal
+  of L, x,y being Element of L st x in I & y in I holds x-y in I
+proof
+  let L being add-associative right_zeroed right_complementable
+  right-distributive right_unital (non empty doubleLoopStr);
+  let I being RightIdeal of L;
+  let x, y being Element of L;
+  assume that
+A1: x in I and
+A2: y in I;
+  - y in I by A2,Th14;
+  hence thesis by A1,Def1;
+end;
+
+theorem Th17:
+  for R being left_zeroed right_zeroed add-cancelable
+  add-associative distributive (non empty doubleLoopStr), I being add-closed
+  right-ideal (non empty Subset of R), a being Element of I, n being Element of
+  NAT holds n*a in I
+proof
+  let R be left_zeroed right_zeroed add-cancelable add-associative
+distributive (non empty doubleLoopStr), I be add-closed right-ideal (non empty
+  Subset of R), a be Element of I, n be Element of NAT;
+  defpred P[Element of NAT] means $1*a in I;
+A1: for n being Element of NAT holds P[n] implies P[n+1]
+  proof
+    let n be Element of NAT;
+A2: (n+1)*a = 1*a + n*a by BINOM:16
+      .= a + n*a by BINOM:14;
+    assume n*a in I;
+    hence thesis by A2,Def1;
+  end;
+  0*a = 0.R by BINOM:13;
+  then
+A3: P[0] by Th3;
+  for n being Element of NAT holds P[n] from NAT_1:sch 1(A3,A1);
+  hence thesis;
+end;
+
+theorem
+  for R being well-unital left_zeroed right_zeroed add-cancelable
+  associative distributive (non empty doubleLoopStr), I being right-ideal (non
+  empty Subset of R), a being Element of I, n being Element of NAT st n <> 0
+  holds a|^n in I
+proof
+  let R be well-unital left_zeroed right_zeroed add-cancelable associative
+distributive (non empty doubleLoopStr), I be right-ideal (non empty Subset of R
+  ), a be Element of I, n be Element of NAT;
+  defpred P[Nat] means a|^$1 in I;
+  assume
+A1: n <> 0;
+A2: for n being Nat st 1 <= n holds P[n] implies P[n+1]
+  proof
+    let n be Nat;
+    assume 1 <= n;
+    n in NAT by ORDINAL1:def 13;
+    then
+A3: a|^(n+1) = (a|^n)*(a|^1) by BINOM:11;
+    assume a|^n in I;
+    hence thesis by A3,Def3;
+  end;
+  a|^1 = a by BINOM:8;
+  then
+A4: P[1];
+  for n being Nat st 1 <= n holds P[n] from NAT_1:sch 8(A4,A2);
+  hence thesis by A1,NAT_1:14;
+end;
+
+definition
+  canceled;
+  let R be non empty addLoopStr, I be add-closed (non empty Subset of R);
+  func add|(I,R) -> BinOp of I equals
+  (the addF of R)||I;
+  coherence
+  proof
+    reconsider f = (the addF of R)||I as Function of [:I,I:],the carrier of R
+    by FUNCT_2:38;
+A1: dom f = [:I,I:] by FUNCT_2:def 1;
+    for x being set st x in [:I,I:] holds f.x in I
+    proof
+      let x be set;
+      assume
+A2:   x in [:I,I:];
+      then consider u,v being set such that
+A3:   u in I & v in I and
+A4:   x = [u,v] by ZFMISC_1:def 2;
+      reconsider u,v as Element of R by A3;
+      reconsider u,v as Element of R;
+      f.x = u + v by A1,A2,A4,FUNCT_1:70;
+      hence thesis by A3,Def1;
+    end;
+    hence thesis by A1,FUNCT_2:5;
+  end;
+end;
+
+definition
+  let R be non empty multMagma, I be right-ideal (non empty Subset of R);
+  func mult|(I,R) -> BinOp of I equals
+  (the multF of R)||I;
+  coherence
+  proof
+    reconsider f = (the multF of R)||I as Function of [:I,I:],the carrier of R
+    by FUNCT_2:38;
+A1: dom f = [:I,I:] by FUNCT_2:def 1;
+    for x being set st x in [:I,I:] holds f.x in I
+    proof
+      let x be set;
+      assume x in [:I,I:];
+      then consider u,v being set such that
+A2:   u in I & v in I and
+A3:   x = [u,v] by ZFMISC_1:def 2;
+      reconsider u,v as Element of I by A2;
+      f.x = (the multF of R).[u,v] by A1,A3,FUNCT_1:70
+        .= u*v;
+      hence thesis by Def3;
+    end;
+    hence thesis by A1,FUNCT_2:5;
+  end;
+end;
+
+definition
+  let R be non empty addLoopStr, I be add-closed (non empty Subset of R);
+  func Gr(I,R) -> non empty addLoopStr equals
+  addLoopStr (#I,add|(I,R),In (0.R
+    ,I)#);
+  coherence;
+end;
+
+registration
+  let R be left_zeroed right_zeroed add-cancelable add-associative
+distributive (non empty doubleLoopStr), I be add-closed (non empty Subset of R)
+  ;
+  cluster Gr(I,R) -> add-associative;
+  coherence
+  proof
+    set M = addLoopStr (#I,add|(I,R),In (0.R,I)#);
+    reconsider M as non empty addLoopStr;
+    now
+      let u be set;
+A1:   dom(the addF of R) = [:the carrier of R,the carrier of R:] by
+FUNCT_2:def 1;
+      assume u in [:I,I:];
+      hence u in dom(the addF of R) by A1;
+    end;
+    then [:I,I:] c= dom(the addF of R) by TARSKI:def 3;
+    then
+A2: dom((the addF of R)||I) = [:I,I:] by RELAT_1:91;
+A3: for a,b being Element of M, a9,b9 being Element of I st a9 = a & b9 =
+    b holds a + b = a9 + b9
+    proof
+      let a,b be Element of M, a9,b9 be Element of I;
+      assume
+A4:   a9 = a & b9 = b;
+      [a9,b9] in dom((the addF of R)||I) by A2;
+      hence thesis by A4,FUNCT_1:70;
+    end;
+    now
+      let a,b,c be Element of M;
+      reconsider a9 = a, b9 = b, c9 = c as Element of I;
+      a9 + b9 in I by Def1;
+      then
+A5:   [a9+b9,c9] in dom((the addF of R)||I) by A2,ZFMISC_1:def 2;
+      b9 + c9 in I by Def1;
+      then
+A6:   [a9,b9+c9] in dom((the addF of R)||I) by A2,ZFMISC_1:def 2;
+      thus (a + b) + c = ((the addF of R)||I).[a9+b9,c9] by A3
+        .= (a9+b9) + c9 by A5,FUNCT_1:70
+        .= a9 + (b9 + c9) by RLVECT_1:def 6
+        .= (add|(I,R)).[a9,b9+c9] by A6,FUNCT_1:70
+        .= a + (b + c) by A3;
+    end;
+    hence thesis by RLVECT_1:def 6;
+  end;
+end;
+
+registration
+  let R be left_zeroed right_zeroed add-cancelable add-associative
+distributive (non empty doubleLoopStr), I be add-closed right-ideal (non empty
+  Subset of R);
+  cluster Gr(I,R) -> right_zeroed;
+  coherence
+  proof
+    set M = addLoopStr (#I,add|(I,R),In (0.R,I)#);
+    reconsider M as non empty addLoopStr;
+    now
+      let u be set;
+A1:   dom(the addF of R) = [:the carrier of R,the carrier of R:] by
+FUNCT_2:def 1;
+      assume u in [:I,I:];
+      hence u in dom(the addF of R) by A1;
+    end;
+    then [:I,I:] c= dom(the addF of R) by TARSKI:def 3;
+    then
+A2: dom((the addF of R)||I) = [:I,I:] by RELAT_1:91;
+    now
+      let a be Element of M;
+      reconsider a9 = a as Element of I;
+      0.R in I by Th3;
+      then
+A3:   [a9,0.R] in dom((the addF of R)||I) by A2,ZFMISC_1:def 2;
+      thus a + 0.M = ((the addF of R)||I).[a9,0.R] by Th3,FUNCT_7:def 1
+        .= a9 + 0.R by A3,FUNCT_1:70
+        .= a by RLVECT_1:def 7;
+    end;
+    hence thesis by RLVECT_1:def 7;
+  end;
+end;
+
+registration
+  let R be Abelian (non empty doubleLoopStr), I be add-closed (non empty
+  Subset of R);
+  cluster Gr(I,R) -> Abelian;
+  coherence
+  proof
+    set M = addLoopStr (#I,add|(I,R),In (0.R,I)#);
+    reconsider M as non empty addLoopStr;
+    now
+      let u be set;
+A1:   dom(the addF of R) = [:the carrier of R,the carrier of R:] by
+FUNCT_2:def 1;
+      assume u in [:I,I:];
+      hence u in dom(the addF of R) by A1;
+    end;
+    then [:I,I:] c= dom(the addF of R) by TARSKI:def 3;
+    then
+A2: dom((the addF of R)||I) = [:I,I:] by RELAT_1:91;
+A3: for a,b being Element of M, a9,b9 being Element of I st a9 = a & b9 =
+    b holds a + b = a9 + b9
+    proof
+      let a,b be Element of M, a9,b9 be Element of I;
+      assume
+A4:   a9 = a & b9 = b;
+      [a9,b9] in dom((the addF of R)||I) by A2;
+      hence thesis by A4,FUNCT_1:70;
+    end;
+    now
+      let a,b be Element of M;
+      reconsider a9 = a, b9 = b as Element of I;
+      thus a + b = a9 + b9 by A3
+        .= b + a by A3;
+    end;
+    hence thesis by RLVECT_1:def 5;
+  end;
+end;
+
+registration
+  let R be Abelian right_unital left_zeroed right_zeroed right_complementable
+  add-associative distributive (non empty doubleLoopStr), I be add-closed
+  right-ideal (non empty Subset of R);
+  cluster Gr(I,R) -> right_complementable;
+  coherence
+  proof
+    set M = addLoopStr (#I,add|(I,R),In (0.R,I)#);
+    reconsider M as non empty addLoopStr;
+    now
+      let u be set;
+A1:   dom(the addF of R) = [:the carrier of R,the carrier of R:] by
+FUNCT_2:def 1;
+      assume u in [:I,I:];
+      hence u in dom(the addF of R) by A1;
+    end;
+    then [:I,I:] c= dom(the addF of R) by TARSKI:def 3;
+    then
+A2: dom((the addF of R)||I) = [:I,I:] by RELAT_1:91;
+A3: for a,b being Element of M, a9,b9 being Element of I st a9 = a & b9 =
+    b holds a + b = a9 + b9
+    proof
+      let a,b be Element of M, a9,b9 be Element of I;
+      assume
+A4:   a9 = a & b9 = b;
+      [a9,b9] in dom((the addF of R)||I) by A2;
+      hence thesis by A4,FUNCT_1:70;
+    end;
+    reconsider I as RightIdeal of R;
+    M is right_complementable
+    proof
+      let a be Element of M;
+      reconsider a9 = a as Element of I;
+      reconsider b = -a9 as Element of M by Th14;
+      a + b = a9 + -a9 by A3
+        .= 0.R by RLVECT_1:16
+        .= 0.M by Th3,FUNCT_7:def 1;
+      hence ex b being Element of M st a + b = 0.M;
+    end;
+    hence thesis;
+  end;
+end;
+
+Lm1: for R being comRing, a being Element of R holds {a*r where r is Element
+of R : not contradiction} is Ideal of R
+proof
+  let R be comRing, a be Element of R;
+  set M = {a*r where r is Element of R : not contradiction};
+A1: now
+    let u be set;
+    assume u in M;
+    then ex r being Element of R st u = a*r;
+    hence u in the carrier of R;
+  end;
+  a*1.R in M;
+  then reconsider M as non empty Subset of R by A1,TARSKI:def 3;
+  reconsider M as non empty Subset of R;
+A2: now
+    let b,c be Element of R;
+    assume that
+A3: b in M and
+A4: c in M;
+    consider r being Element of R such that
+A5: a*r = b by A3;
+    consider s being Element of R such that
+A6: a*s = c by A4;
+    b + c = a*(r + s) by A5,A6,VECTSP_1:def 18;
+    hence b + c in M;
+  end;
+A7: now
+    let s,b be Element of R;
+    assume b in M;
+    then consider r being Element of R such that
+A8: a*r = b;
+    s*b = (s*r)*a by A8,GROUP_1:def 4;
+    hence s*b in M;
+  end;
+  now
+    let s,b be Element of R;
+    assume b in M;
+    then consider r being Element of R such that
+A9: a*r = b;
+    b*s = a*(r*s) by A9,GROUP_1:def 4;
+    hence b*s in M;
+  end;
+  hence thesis by A2,A7,Def1,Def2,Def3;
+end;
+
+theorem Th19:
+  for R being right_unital (non empty doubleLoopStr), I being
+  left-ideal (non empty Subset of R) holds I is proper iff not(1.R in I)
+proof
+  let R be right_unital (non empty doubleLoopStr), I be left-ideal (non empty
+  Subset of R);
+A1: now
+    assume
+A2: I is proper;
+    thus not 1.R in I
+    proof
+      assume
+A3:   1.R in I;
+A4:   now
+        let u be set;
+        assume u in the carrier of R;
+        then reconsider u9 = u as Element of R;
+        u9*1.R = u9 by VECTSP_1:def 13;
+        hence u in I by A3,Def2;
+      end;
+      for u being set holds u in I implies u in the carrier of R;
+      then I = the carrier of R by A4,TARSKI:2;
+      hence thesis by A2,SUBSET_1:def 7;
+    end;
+  end;
+  now
+    assume not 1.R in I;
+    then I <> the carrier of R;
+    hence I is proper by SUBSET_1:def 7;
+  end;
+  hence thesis by A1;
+end;
+
+theorem
+  for R being left_unital right_unital (non empty doubleLoopStr), I
+  being right-ideal (non empty Subset of R) holds I is proper iff for u being
+  Element of R st u is unital holds not(u in I)
+proof
+  let R be left_unital right_unital (non empty doubleLoopStr), I be
+  right-ideal (non empty Subset of R);
+A1: now
+    assume
+A2: I is proper;
+A3: not 1.R in I
+    proof
+      assume
+A4:   1.R in I;
+A5:   now
+        let u be set;
+        assume u in the carrier of R;
+        then reconsider u9 = u as Element of R;
+        1.R*u9 = u9 by VECTSP_1:def 19;
+        hence u in I by A4,Def3;
+      end;
+      for u being set holds u in I implies u in the carrier of R;
+      then I = the carrier of R by A5,TARSKI:2;
+      hence thesis by A2,SUBSET_1:def 7;
+    end;
+    thus for u being Element of R st u is unital holds not u in I
+    proof
+      let u be Element of R;
+      assume u is unital;
+      then u divides 1.R by GCD_1:def 2;
+      then ex b being Element of R st 1.R = u*b by GCD_1:def 1;
+      hence thesis by A3,Def3;
+    end;
+  end;
+  now
+    1.R divides 1.R;
+    then
+A6: 1.R is unital by GCD_1:def 2;
+    assume for u being Element of R st u is unital holds not u in I;
+    then I <> the carrier of R by A6;
+    hence I is proper by SUBSET_1:def 7;
+  end;
+  hence thesis by A1;
+end;
+
+theorem
+  for R being right_unital (non empty doubleLoopStr), I being left-ideal
+  right-ideal (non empty Subset of R) holds I is proper iff for u being Element
+  of R st u is unital holds not(u in I)
+proof
+  let R be right_unital (non empty doubleLoopStr), I be left-ideal right-ideal
+  (non empty Subset of R);
+A1: now
+    assume
+A2: I is proper;
+A3: not 1.R in I
+    proof
+      assume
+A4:   1.R in I;
+A5:   now
+        let u be set;
+        assume u in the carrier of R;
+        then reconsider u9 = u as Element of R;
+        u9*1.R = u9 by VECTSP_1:def 13;
+        hence u in I by A4,Def2;
+      end;
+      for u being set holds u in I implies u in the carrier of R;
+      then I = the carrier of R by A5,TARSKI:2;
+      hence thesis by A2,SUBSET_1:def 7;
+    end;
+    thus for u being Element of R st u is unital holds not u in I
+    proof
+      let u be Element of R;
+      assume u is unital;
+      then u divides 1.R by GCD_1:def 2;
+      then ex b being Element of R st 1.R = u*b by GCD_1:def 1;
+      hence thesis by A3,Def3;
+    end;
+  end;
+  now
+    1.R divides 1.R;
+    then
+A6: 1.R is unital by GCD_1:def 2;
+    assume for u being Element of R st u is unital holds not u in I;
+    then I <> the carrier of R by A6;
+    hence I is proper by SUBSET_1:def 7;
+  end;
+  hence thesis by A1;
+end;
+
+theorem
+  for R being non degenerated comRing holds R is Field iff for I being
+  Ideal of R holds (I = {0.R} or I = the carrier of R)
+proof
+  let R be non degenerated comRing;
+A1: now
+    assume
+A2: R is Field;
+    thus for I being Ideal of R holds (I = {0.R} or I = the carrier of R)
+    proof
+      let I be Ideal of R;
+      assume
+A3:   I <> {0.R};
+      reconsider R as Field by A2;
+      ex a being Element of R st a in I & a <> 0.R
+      proof
+        assume
+A4:     not(ex a being Element of R st a in I & a <> 0.R);
+A5:     now
+          let u be set;
+          assume u in I;
+          then reconsider u9 = u as Element of I;
+          u9 = 0.R by A4;
+          hence u in {0.R} by TARSKI:def 1;
+        end;
+        now
+          let u be set;
+          assume
+A6:       u in {0.R};
+          then reconsider u9 = u as Element of R;
+          u9 = 0.R by A6,TARSKI:def 1;
+          hence u in I by Th3;
+        end;
+        hence thesis by A3,A5,TARSKI:2;
+      end;
+      then consider a being Element of R such that
+A7:   a in I and
+A8:   a <> 0.R;
+      ex b being Element of R st b*a = 1.R by A8,VECTSP_1:def 20;
+      then 1.R in I by A7,Def3;
+      then I is non proper by Th19;
+      hence thesis by SUBSET_1:def 7;
+    end;
+  end;
+  now
+    assume
+A9: for I being Ideal of R holds (I= {0.R} or I = the carrier of R );
+    now
+      let a be Element of R;
+      reconsider a9 = a as Element of R;
+      reconsider M = {a9*r where r is Element of R : not contradiction} as
+      Ideal of R by Lm1;
+      a*1.R = a by VECTSP_1:def 19;
+      then
+A10:  a in M;
+      assume a <> 0.R;
+      then M <> {0.R} by A10,TARSKI:def 1;
+      then M = the carrier of R by A9;
+      then 1.R in M;
+      then ex b being Element of R st a*b = 1.R;
+      hence ex b being Element of R st b*a = 1.R;
+    end;
+    hence R is Field by VECTSP_1:def 20;
+  end;
+  hence thesis by A1;
+end;
+
+begin  :: Linear combinations
+
+definition
+  let R be non empty multLoopStr, A be non empty Subset of R;
+  mode LinearCombination of A -> FinSequence of the carrier of R means
+    :Def9:
+for i being set st i in dom it ex u,v being Element of R, a being Element of A
+    st it/.i = u*a*v;
+  existence
+  proof
+    set p = <*>(the carrier of R);
+    take p;
+    let i be set;
+    assume i in dom p;
+    hence thesis;
+  end;
+  mode LeftLinearCombination of A -> FinSequence of the carrier of R means
+    :
+    Def10: for
+ i being set st i in dom it ex u being Element of R, a being Element
+    of A st it/.i = u*a;
+  existence
+  proof
+    consider a being Element of A;
+    reconsider aR = a as Element of R;
+    reconsider a9 = a*a as Element of R;
+    set p = <*a9*>;
+    take p;
+    let i be set;
+    assume
+A1: i in dom p;
+    take aR, a;
+    dom p = {1} by FINSEQ_1:4,55;
+    then
+A2: i = 1 by A1,TARSKI:def 1;
+    thus p/.i = p.i by A1,PARTFUN1:def 8
+      .= aR*a by A2,FINSEQ_1:57;
+  end;
+  mode RightLinearCombination of A -> FinSequence of the carrier of R means
+    :
+    Def11: for
+ i being set st i in dom it ex u being Element of R, a being Element
+    of A st it/.i = a*u;
+  existence
+  proof
+    consider a being Element of A;
+    reconsider aR = a as Element of R;
+    reconsider a9 = a*a as Element of R;
+    set p = <*a9*>;
+    take p;
+    let i be set;
+    assume
+A3: i in dom p;
+    take aR, a;
+    dom p = {1} by FINSEQ_1:4,55;
+    then
+A4: i = 1 by A3,TARSKI:def 1;
+    thus p/.i = p.i by A3,PARTFUN1:def 8
+      .= a*aR by A4,FINSEQ_1:57;
+  end;
+end;
+
+registration
+  let R be non empty multLoopStr, A be non empty Subset of R;
+  cluster non empty LinearCombination of A;
+  existence
+  proof
+    consider a being Element of A;
+    consider u, v being Element of R;
+    reconsider p = <*u*a*v*> as FinSequence of the carrier of R;
+    take p;
+    now
+      let i be set;
+      assume
+A1:   i in dom p;
+      take u,v, a;
+      i in {1} by A1,FINSEQ_1:4,55;
+      then i = 1 by TARSKI:def 1;
+      hence p/.i = u*a*v by FINSEQ_4:25;
+    end;
+    hence thesis by Def9;
+  end;
+  cluster non empty LeftLinearCombination of A;
+  existence
+  proof
+    consider a being Element of A;
+    consider u being Element of R;
+    reconsider p = <*u*a*> as FinSequence of the carrier of R;
+    take p;
+    now
+      let i be set;
+      assume
+A2:   i in dom p;
+      take u, a;
+      i in {1} by A2,FINSEQ_1:4,55;
+      then i = 1 by TARSKI:def 1;
+      hence p/.i = u*a by FINSEQ_4:25;
+    end;
+    hence thesis by Def10;
+  end;
+  cluster non empty RightLinearCombination of A;
+  existence
+  proof
+    consider a being Element of A;
+    consider v being Element of R;
+    reconsider p = <*a*v*> as FinSequence of the carrier of R;
+    take p;
+    now
+      let i be set;
+      assume
+A3:   i in dom p;
+      take v, a;
+      i in {1} by A3,FINSEQ_1:4,55;
+      then i = 1 by TARSKI:def 1;
+      hence p/.i = a*v by FINSEQ_4:25;
+    end;
+    hence thesis by Def11;
+  end;
+end;
+
+definition
+  let R be non empty multLoopStr, A,B be non empty Subset of R, F be
+  LinearCombination of A, G be LinearCombination of B;
+  redefine func F^G -> LinearCombination of (A \/ B);
+  coherence
+  proof
+    set H = F^G;
+    thus H is LinearCombination of (A \/ B)
+    proof
+      let i be set;
+      assume
+A1:   i in dom H;
+      then reconsider i as Element of NAT;
+      per cases;
+      suppose
+A2:     i in dom F;
+        then
+A3:     F/.i = F.i & F.i = H.i by FINSEQ_1:def 7,PARTFUN1:def 8;
+        consider u,v being Element of R, a being Element of A such that
+A4:     F/.i = u*a*v by A2,Def9;
+        a in A \/ B by XBOOLE_0:def 3;
+        hence thesis by A1,A4,A3,PARTFUN1:def 8;
+      end;
+      suppose
+        not i in dom F;
+        then consider n being Nat such that
+A5:     n in dom G and
+A6:     i=len F + n by A1,FINSEQ_1:38;
+A7:     G/.n = G.n & G.n = H.i by A5,A6,FINSEQ_1:def 7,PARTFUN1:def 8;
+        consider u,v being Element of R, b being Element of B such that
+A8:     G/.n = u*b*v by A5,Def9;
+        b in A \/ B by XBOOLE_0:def 3;
+        hence thesis by A1,A8,A7,PARTFUN1:def 8;
+      end;
+    end;
+  end;
+end;
+
+theorem Th23:
+  for R be associative (non empty multLoopStr), A be non empty
+  Subset of R, a be Element of R, F be LinearCombination of A holds a*F is
+  LinearCombination of A
+proof
+  let R be associative (non empty multLoopStr), A be non empty Subset of R, a
+  be Element of R, F be LinearCombination of A;
+  let i be set;
+  assume i in dom (a*F);
+  then
+A1: i in dom F by POLYNOM1:def 2;
+  then consider u, v being Element of R, b being Element of A such that
+A2: F/.i = u*b*v by Def9;
+  take x = a*u, v, b;
+  thus (a*F)/.i = a*F/.i by A1,POLYNOM1:def 2
+    .= a*(u*b)*v by A2,GROUP_1:def 4
+    .= x*b*v by GROUP_1:def 4;
+end;
+
+theorem Th24:
+  for R be associative (non empty multLoopStr), A be non empty
+  Subset of R, a be Element of R, F be LinearCombination of A holds F*a is
+  LinearCombination of A
+proof
+  let R be associative (non empty multLoopStr), A be non empty Subset of R, a
+  be Element of R, F be LinearCombination of A;
+  let i be set;
+  assume i in dom (F*a);
+  then
+A1: i in dom F by POLYNOM1:def 3;
+  then consider u, v being Element of R, b being Element of A such that
+A2: F/.i = u*b*v by Def9;
+  take u, x = v*a, b;
+  thus (F*a)/.i = (F/.i)*a by A1,POLYNOM1:def 3
+    .= u*(b*v)*a by A2,GROUP_1:def 4
+    .= u*(b*v*a) by GROUP_1:def 4
+    .= u*(b*(v*a)) by GROUP_1:def 4
+    .= u*b*x by GROUP_1:def 4;
+end;
+
+theorem Th25:
+  for R being right_unital (non empty multLoopStr), A being non
+  empty Subset of R, f being LeftLinearCombination of A holds f is
+  LinearCombination of A
+proof
+  let R be right_unital (non empty multLoopStr), A be non empty Subset of R, f
+  be LeftLinearCombination of A;
+  let i be set;
+  assume i in dom f;
+  then consider r being Element of R, a being Element of A such that
+A1: f/.i = r*a by Def10;
+  f/.i = r*a*1.R by A1,VECTSP_1:def 13;
+  hence thesis;
+end;
+
+definition
+  let R be non empty multLoopStr, A,B be non empty Subset of R, F be
+  LeftLinearCombination of A, G be LeftLinearCombination of B;
+  redefine func F^G -> LeftLinearCombination of (A \/ B);
+  coherence
+  proof
+    set H = F^G;
+    thus H is LeftLinearCombination of (A \/ B)
+    proof
+      let i be set;
+      assume
+A1:   i in dom H;
+      then reconsider i as Element of NAT;
+      per cases;
+      suppose
+A2:     i in dom F;
+        then
+A3:     F/.i = F.i & F.i = H.i by FINSEQ_1:def 7,PARTFUN1:def 8;
+        consider u being Element of R, a being Element of A such that
+A4:     F/.i = u*a by A2,Def10;
+        a in A \/ B by XBOOLE_0:def 3;
+        hence thesis by A1,A4,A3,PARTFUN1:def 8;
+      end;
+      suppose
+        not i in dom F;
+        then consider n being Nat such that
+A5:     n in dom G and
+A6:     i=len F + n by A1,FINSEQ_1:38;
+A7:     G/.n = G.n & G.n = H.i by A5,A6,FINSEQ_1:def 7,PARTFUN1:def 8;
+        consider u being Element of R, b being Element of B such that
+A8:     G/.n = u*b by A5,Def10;
+        b in A \/ B by XBOOLE_0:def 3;
+        hence thesis by A1,A8,A7,PARTFUN1:def 8;
+      end;
+    end;
+  end;
+end;
+
+theorem Th26:
+  for R be associative (non empty multLoopStr), A be non empty
+  Subset of R, a be Element of R, F be LeftLinearCombination of A holds a*F is
+  LeftLinearCombination of A
+proof
+  let R be associative (non empty multLoopStr), A be non empty Subset of R, a
+  be Element of R, F be LeftLinearCombination of A;
+  let i be set;
+  assume i in dom (a*F);
+  then
+A1: i in dom F by POLYNOM1:def 2;
+  then consider u being Element of R, b being Element of A such that
+A2: F/.i = u*b by Def10;
+  take x = a*u, b;
+  thus (a*F)/.i = a*F/.i by A1,POLYNOM1:def 2
+    .= x*b by A2,GROUP_1:def 4;
+end;
+
+theorem
+  for R be non empty multLoopStr, A be non empty Subset of R, a be
+Element of R, F be LeftLinearCombination of A holds F*a is LinearCombination of
+  A
+proof
+  let R be non empty multLoopStr, A be non empty Subset of R, a be Element of
+  R, F be LeftLinearCombination of A;
+  let i be set;
+  reconsider c = a as Element of R;
+  assume i in dom (F*a);
+  then
+A1: i in dom F by POLYNOM1:def 3;
+  then consider u being Element of R, b being Element of A such that
+A2: F/.i = u*b by Def10;
+  take u, c, b;
+  thus thesis by A1,A2,POLYNOM1:def 3;
+end;
+
+theorem Th28:
+  for R being left_unital (non empty multLoopStr), A being non
+  empty Subset of R, f being RightLinearCombination of A holds f is
+  LinearCombination of A
+proof
+  let R be left_unital (non empty multLoopStr), A be non empty Subset of R, f
+  be RightLinearCombination of A;
+  let i be set;
+  assume i in dom f;
+  then consider r being Element of R, a being Element of A such that
+A1: f/.i = a*r by Def11;
+  f/.i = 1.R*a*r by A1,VECTSP_1:def 19;
+  hence thesis;
+end;
+
+definition
+  let R be non empty multLoopStr, A,B be non empty Subset of R, F be
+  RightLinearCombination of A, G be RightLinearCombination of B;
+  redefine func F^G -> RightLinearCombination of (A \/ B);
+  coherence
+  proof
+    set H = F^G;
+    thus H is RightLinearCombination of (A \/ B)
+    proof
+      let i be set;
+      assume
+A1:   i in dom H;
+      then reconsider i as Element of NAT;
+      per cases;
+      suppose
+A2:     i in dom F;
+        then
+A3:     F/.i = F.i & F.i = H.i by FINSEQ_1:def 7,PARTFUN1:def 8;
+        consider u being Element of R, a being Element of A such that
+A4:     F/.i = a*u by A2,Def11;
+        a in A \/ B by XBOOLE_0:def 3;
+        hence thesis by A1,A4,A3,PARTFUN1:def 8;
+      end;
+      suppose
+        not i in dom F;
+        then consider n being Nat such that
+A5:     n in dom G and
+A6:     i=len F + n by A1,FINSEQ_1:38;
+A7:     G/.n = G.n & G.n = H.i by A5,A6,FINSEQ_1:def 7,PARTFUN1:def 8;
+        consider u being Element of R, b being Element of B such that
+A8:     G/.n = b*u by A5,Def11;
+        b in A \/ B by XBOOLE_0:def 3;
+        hence thesis by A1,A8,A7,PARTFUN1:def 8;
+      end;
+    end;
+  end;
+end;
+
+theorem Th29:
+  for R be associative (non empty multLoopStr), A be non empty
+  Subset of R, a be Element of R, F be RightLinearCombination of A holds F*a is
+  RightLinearCombination of A
+proof
+  let R be associative (non empty multLoopStr), A be non empty Subset of R, a
+  be Element of R, F be RightLinearCombination of A;
+  let i be set;
+  assume i in dom (F*a);
+  then
+A1: i in dom F by POLYNOM1:def 3;
+  then consider u being Element of R, b being Element of A such that
+A2: F/.i = b*u by Def11;
+  take x = u*a, b;
+  thus (F*a)/.i=(F/.i)*a by A1,POLYNOM1:def 3
+    .= b*x by A2,GROUP_1:def 4;
+end;
+
+theorem
+  for R be associative (non empty multLoopStr), A be non empty Subset of
+  R, a be Element of R, F be RightLinearCombination of A holds a*F is
+  LinearCombination of A
+proof
+  let R be associative (non empty multLoopStr), A be non empty Subset of R, a
+  be Element of R, F be RightLinearCombination of A;
+  let i be set;
+  reconsider c = a as Element of R;
+  assume i in dom (a*F);
+  then
+A1: i in dom F by POLYNOM1:def 2;
+  then consider u being Element of R, b being Element of A such that
+A2: F/.i = b*u by Def11;
+  take c, u, b;
+  thus (a*F)/.i=a*(F/.i) by A1,POLYNOM1:def 2
+    .= c*b*u by A2,GROUP_1:def 4;
+end;
+
+theorem Th31:
+  for R being commutative associative (non empty multLoopStr), A
+  being non empty Subset of R, f being LinearCombination of A holds f is
+  LeftLinearCombination of A & f is RightLinearCombination of A
+proof
+  let R being commutative associative (non empty multLoopStr), A being non
+  empty Subset of R, f being LinearCombination of A;
+  hereby
+    let i be set;
+    assume i in dom f;
+    then consider r,s being Element of R, a being Element of A such that
+A1: f/.i = r*a*s by Def9;
+    f/.i = (r*s)*a by A1,GROUP_1:def 4;
+    hence ex r being Element of R, a being Element of A st f/.i = r*a;
+  end;
+  let i be set;
+  assume i in dom f;
+  then consider r,s being Element of R, a being Element of A such that
+A2: f/.i = r*a*s by Def9;
+  f/.i = a*(r*s) by A2,GROUP_1:def 4;
+  hence ex r being Element of R, a being Element of A st f/.i = a*r;
+end;
+
+theorem Th32:
+  for S being non empty doubleLoopStr, F being non empty Subset of
+S, lc being non empty LinearCombination of F ex p being LinearCombination of F,
+  e being Element of S st lc = p^<* e *> & <*e*> is LinearCombination of F
+proof
+  let S be non empty doubleLoopStr, F be non empty Subset of S, lc be non
+  empty LinearCombination of F;
+  len lc <> 0;
+  then consider
+  p being FinSequence of the carrier of S, e being Element of S such
+  that
+A1: lc = p^<*e*> by FINSEQ_2:22;
+  now
+    let i be set;
+    assume
+A2: i in dom p;
+    then reconsider i1=i as Element of NAT;
+A3: dom p c= dom lc by A1,FINSEQ_1:39;
+    then consider u, v being Element of S, a being Element of F such that
+A4: lc/.i = u*a*v by A2,Def9;
+    take u, v, a;
+    thus p/.i = p.i by A2,PARTFUN1:def 8
+      .= lc.i1 by A1,A2,FINSEQ_1:def 7
+      .= u*a*v by A2,A3,A4,PARTFUN1:def 8;
+  end;
+  then reconsider p as LinearCombination of F by Def9;
+A5: len lc = len p +1 by A1,FINSEQ_2:19;
+  take p;
+  take e;
+  thus lc = p^<* e *> by A1;
+  let i be set such that
+A6: i in dom <*e*>;
+A7: len lc in dom lc by FINSEQ_5:6;
+  then
+A8: lc/.(len lc) = lc.(len lc) by PARTFUN1:def 8;
+  dom <*e*> = {1} by FINSEQ_1:4,55;
+  then
+A9: i = 1 by A6,TARSKI:def 1;
+  consider u, v being Element of S, a being Element of F such that
+A10: lc/.(len lc) = u*a*v by A7,Def9;
+  take u, v, a;
+  thus <*e*>/.i = <*e*>.i by A6,PARTFUN1:def 8
+    .= e by A9,FINSEQ_1:57
+    .= u*a*v by A1,A5,A10,A8,FINSEQ_1:59;
+end;
+
+theorem Th33:
+  for S being non empty doubleLoopStr, F being non empty Subset of
+  S, lc being non empty LeftLinearCombination of F ex p being
+  LeftLinearCombination of F, e being Element of S st lc = p^<* e *> & <*e*> is
+  LeftLinearCombination of F
+proof
+  let S be non empty doubleLoopStr, F be non empty Subset of S, lc be non
+  empty LeftLinearCombination of F;
+  len lc <> 0;
+  then consider
+  p being FinSequence of the carrier of S, e being Element of S such
+  that
+A1: lc = p^<*e*> by FINSEQ_2:22;
+  now
+    let i be set;
+    assume
+A2: i in dom p;
+    then reconsider i1=i as Element of NAT;
+A3: dom p c= dom lc by A1,FINSEQ_1:39;
+    then consider u being Element of S, a being Element of F such that
+A4: lc/.i = u*a by A2,Def10;
+    take u, a;
+    thus p/.i = p.i by A2,PARTFUN1:def 8
+      .= lc.i1 by A1,A2,FINSEQ_1:def 7
+      .= u*a by A2,A3,A4,PARTFUN1:def 8;
+  end;
+  then reconsider p as LeftLinearCombination of F by Def10;
+A5: len lc = len p +1 by A1,FINSEQ_2:19;
+  take p;
+  take e;
+  thus lc = p^<* e *> by A1;
+  let i be set such that
+A6: i in dom <*e*>;
+A7: len lc in dom lc by FINSEQ_5:6;
+  then
+A8: lc/.(len lc) = lc.(len lc) by PARTFUN1:def 8;
+  dom <*e*> = {1} by FINSEQ_1:4,55;
+  then
+A9: i = 1 by A6,TARSKI:def 1;
+  consider u being Element of S, a being Element of F such that
+A10: lc/.(len lc) = u*a by A7,Def10;
+  take u, a;
+  thus <*e*>/.i = <*e*>.i by A6,PARTFUN1:def 8
+    .= e by A9,FINSEQ_1:57
+    .= u*a by A1,A5,A10,A8,FINSEQ_1:59;
+end;
+
+theorem Th34:
+  for S being non empty doubleLoopStr, F being non empty Subset of
+  S, lc being non empty RightLinearCombination of F ex p being
+RightLinearCombination of F, e being Element of S st lc = p^<* e *> & <*e*> is
+  RightLinearCombination of F
+proof
+  let S be non empty doubleLoopStr, F be non empty Subset of S, lc be non
+  empty RightLinearCombination of F;
+  len lc <> 0;
+  then consider
+  p being FinSequence of the carrier of S, e being Element of S such
+  that
+A1: lc = p^<*e*> by FINSEQ_2:22;
+  now
+    let i be set;
+    assume
+A2: i in dom p;
+    then reconsider i1=i as Element of NAT;
+A3: dom p c= dom lc by A1,FINSEQ_1:39;
+    then consider u being Element of S, a being Element of F such that
+A4: lc/.i = a*u by A2,Def11;
+    take u, a;
+    thus p/.i = p.i by A2,PARTFUN1:def 8
+      .= lc.i1 by A1,A2,FINSEQ_1:def 7
+      .= a*u by A2,A3,A4,PARTFUN1:def 8;
+  end;
+  then reconsider p as RightLinearCombination of F by Def11;
+A5: len lc = len p +1 by A1,FINSEQ_2:19;
+  take p;
+  take e;
+  thus lc = p^<* e *> by A1;
+  let i be set such that
+A6: i in dom <*e*>;
+A7: len lc in dom lc by FINSEQ_5:6;
+  then
+A8: lc/.(len lc) = lc.(len lc) by PARTFUN1:def 8;
+  dom <*e*> = {1} by FINSEQ_1:4,55;
+  then
+A9: i = 1 by A6,TARSKI:def 1;
+  consider u being Element of S, a being Element of F such that
+A10: lc/.(len lc) = a*u by A7,Def11;
+  take u, a;
+  thus <*e*>/.i = <*e*>.i by A6,PARTFUN1:def 8
+    .= e by A9,FINSEQ_1:57
+    .= a*u by A1,A5,A10,A8,FINSEQ_1:59;
+end;
+
+definition
+  let R be non empty multLoopStr, A be non empty Subset of R, L be
+LinearCombination of A, E be FinSequence of [:the carrier of R, the carrier of
+  R, the carrier of R:];
+  pred E represents L means
+  :Def12:
+  len E = len L & for i being set st i in
+  dom L holds L.i = ((E/.i)`1)*((E/.i)`2)*((E/.i)`3) & ((E/.i)`2) in A;
+end;
+
+theorem
+  for R being non empty multLoopStr, A being non empty Subset of R, L be
+  LinearCombination of A ex E be FinSequence of [:the carrier of R, the carrier
+  of R, the carrier of R:] st E represents L
+proof
+  let R be non empty multLoopStr,A be non empty Subset of R, L be
+  LinearCombination of A;
+  set D = [:the carrier of R, the carrier of R, the carrier of R:];
+  defpred P[set,set] means ex x, y, z being Element of R st $2 = [x, y, z] & y
+  in A & L/.$1 = x*y*z;
+A1: now
+    let k be Element of NAT;
+    assume k in Seg len L;
+    then k in dom L by FINSEQ_1:def 3;
+    then consider u,v being Element of R, a being Element of A such that
+A2: L/.k = u*a*v by Def9;
+    reconsider b = a as Element of R;
+    reconsider d = [u, b, v] as Element of D;
+    take d;
+    thus P[k, d] by A2;
+  end;
+  consider E being FinSequence of D such that
+A3: dom E = Seg len L and
+A4: for k be Element of NAT st k in Seg len L holds P[k,E/.k] from
+  RECDEF_1:sch 17(A1);
+  take E;
+  thus len E = len L by A3,FINSEQ_1:def 3;
+  let i being set such that
+A5: i in dom L;
+  reconsider k = i as Element of NAT by A5;
+  dom L = Seg len L by FINSEQ_1:def 3;
+  then consider x, y, z being Element of R such that
+A6: E/.k = [x, y, z] and
+A7: y in A and
+A8: L/.k = x*y*z by A4,A5;
+A9: [x,y,z]`3 = z by MCART_1:def 7;
+  [x,y,z]`1 = x & [x,y,z]`2 = y by MCART_1:def 5,def 6;
+  hence L.i = ((E/.i)`1)*((E/.i)`2)*((E/.i)`3) by A5,A6,A8,A9,PARTFUN1:def 8;
+  thus thesis by A6,A7,MCART_1:def 6;
+end;
+
+theorem
+  for R, S being non empty multLoopStr, F being non empty Subset of R,
+  lc being LinearCombination of F, G being non empty Subset of S, P being
+  Function of the carrier of R, the carrier of S, E being FinSequence of [:the
+carrier of R, the carrier of R, the carrier of R:] st P.:F c= G & E represents
+  lc holds ex LC being LinearCombination of G st len lc = len LC & for i being
+  set st i in dom LC holds LC.i = (P.(E/.i)`1)*(P.(E/.i)`2)*(P.(E/.i)`3)
+proof
+  let R, S be non empty multLoopStr, F be non empty Subset of R, lc be
+  LinearCombination of F, G be non empty Subset of S, P be Function of the
+carrier of R, the carrier of S, E being FinSequence of [:the carrier of R, the
+  carrier of R, the carrier of R:];
+  assume
+A1: P.:F c= G;
+  deffunc F(Nat)=(P.(E/.$1)`1)*(P.(E/.$1)`2)*(P.(E/.$1)`3);
+  consider LC being FinSequence of the carrier of S such that
+A2: len LC = len lc and
+A3: for k being Nat st k in dom LC holds LC.k = F(k) from FINSEQ_2:sch 1;
+  assume
+A4: E represents lc;
+  now
+    let i be set such that
+A5: i in dom LC;
+    dom lc = dom LC by A2,FINSEQ_3:31;
+    then dom P = the carrier of R & (E/.i)`2 in F by A4,A5,Def12,FUNCT_2:def 1;
+    then P.((E/.i)`2) in P.:F by FUNCT_1:def 12;
+    then reconsider a = P.(E/.i)`2 as Element of G by A1;
+    reconsider u = P.(E/.i)`1, v = P.(E/.i)`3 as Element of S;
+    take u, v, a;
+    LC.i = LC/.i by A5,PARTFUN1:def 8;
+    hence LC/.i = u*a*v by A3,A5;
+  end;
+  then reconsider LC as LinearCombination of G by Def9;
+  take LC;
+  thus len lc = len LC by A2;
+  let i be set;
+  assume i in dom LC;
+  hence thesis by A3;
+end;
+
+definition
+  let R be non empty multLoopStr, A be non empty Subset of R, L be
+LeftLinearCombination of A, E be FinSequence of [:the carrier of R, the carrier
+  of R:];
+  pred E represents L means
+  :Def13:
+  len E = len L & for i being set st i in
+  dom L holds L.i = ((E/.i)`1)*((E/.i)`2) & ((E/.i)`2) in A;
+end;
+
+theorem
+  for R being non empty multLoopStr, A being non empty Subset of R, L be
+  LeftLinearCombination of A ex E be FinSequence of [:the carrier of R, the
+  carrier of R:] st E represents L
+proof
+  let R be non empty multLoopStr,A be non empty Subset of R, L be
+  LeftLinearCombination of A;
+  set D = [:the carrier of R, the carrier of R:];
+  defpred P[set,set] means ex x, y being Element of R st $2 = [x, y] & y in A
+  & L/.$1 = x*y;
+A1: now
+    let k be Element of NAT;
+    assume k in Seg len L;
+    then k in dom L by FINSEQ_1:def 3;
+    then consider u being Element of R, a being Element of A such that
+A2: L/.k = u*a by Def10;
+    reconsider b = a as Element of R;
+    reconsider d = [u, b] as Element of D;
+    take d;
+    thus P[k, d] by A2;
+  end;
+  consider E being FinSequence of D such that
+A3: dom E = Seg len L and
+A4: for k be Element of NAT st k in Seg len L holds P[k,E/.k] from
+  RECDEF_1:sch 17(A1);
+  take E;
+  thus len E = len L by A3,FINSEQ_1:def 3;
+  let i being set such that
+A5: i in dom L;
+  reconsider k = i as Element of NAT by A5;
+  dom L = Seg len L by FINSEQ_1:def 3;
+  then consider x, y being Element of R such that
+A6: E/.k = [x, y] and
+A7: y in A and
+A8: L/.k = x*y by A4,A5;
+  [x,y]`1 = x & [x,y]`2 = y by MCART_1:def 1,def 2;
+  hence L.i = ((E/.i)`1)*((E/.i)`2) by A5,A6,A8,PARTFUN1:def 8;
+  thus thesis by A6,A7,MCART_1:def 2;
+end;
+
+theorem
+  for R, S being non empty multLoopStr, F being non empty Subset of R,
+  lc being LeftLinearCombination of F, G being non empty Subset of S, P being
+  Function of the carrier of R, the carrier of S, E being FinSequence of [:the
+  carrier of R, the carrier of R:] st P.:F c= G & E represents lc holds ex LC
+  being LeftLinearCombination of G st len lc = len LC & for i being set st i in
+  dom LC holds LC.i = (P.(E/.i)`1)*(P.(E/.i)`2)
+proof
+  let R, S be non empty multLoopStr, F be non empty Subset of R, lc be
+  LeftLinearCombination of F, G be non empty Subset of S, P be Function of the
+carrier of R, the carrier of S, E being FinSequence of [:the carrier of R, the
+  carrier of R:];
+  assume
+A1: P.:F c= G;
+  deffunc F(Nat)=(P.(E/.$1)`1)*(P.(E/.$1)`2);
+  consider LC being FinSequence of the carrier of S such that
+A2: len LC = len lc and
+A3: for k being Nat st k in dom LC holds LC.k = F(k) from FINSEQ_2:sch 1;
+  assume
+A4: E represents lc;
+  now
+    let i be set such that
+A5: i in dom LC;
+    dom lc = dom LC by A2,FINSEQ_3:31;
+    then dom P = the carrier of R & (E/.i)`2 in F by A4,A5,Def13,FUNCT_2:def 1;
+    then P.((E/.i)`2) in P.:F by FUNCT_1:def 12;
+    then reconsider a = P.(E/.i)`2 as Element of G by A1;
+    reconsider u = P.(E/.i)`1 as Element of S;
+    take u, a;
+    LC.i = LC/.i by A5,PARTFUN1:def 8;
+    hence LC/.i = u*a by A3,A5;
+  end;
+  then reconsider LC as LeftLinearCombination of G by Def10;
+  take LC;
+  thus len lc = len LC by A2;
+  let i be set;
+  assume i in dom LC;
+  hence thesis by A3;
+end;
+
+definition
+  let R be non empty multLoopStr, A be non empty Subset of R, L be
+  RightLinearCombination of A, E be FinSequence of [:the carrier of R, the
+  carrier of R:];
+  pred E represents L means
+  :Def14:
+  len E = len L & for i being set st i in
+  dom L holds L.i = ((E/.i)`1)*((E/.i)`2) & ((E/.i)`1) in A;
+end;
+
+theorem
+  for R being non empty multLoopStr, A being non empty Subset of R, L be
+  RightLinearCombination of A ex E be FinSequence of [:the carrier of R, the
+  carrier of R:] st E represents L
+proof
+  let R be non empty multLoopStr,A be non empty Subset of R, L be
+  RightLinearCombination of A;
+  set D = [:the carrier of R, the carrier of R:];
+  defpred P[set,set] means ex x, y being Element of R st $2 = [x, y] & x in A
+  & L/.$1 = x*y;
+A1: now
+    let k be Element of NAT;
+    assume k in Seg len L;
+    then k in dom L by FINSEQ_1:def 3;
+    then consider v being Element of R, a being Element of A such that
+A2: L/.k = a*v by Def11;
+    reconsider b = a as Element of R;
+    reconsider d = [b, v] as Element of D;
+    take d;
+    thus P[k, d] by A2;
+  end;
+  consider E being FinSequence of D such that
+A3: dom E = Seg len L and
+A4: for k be Element of NAT st k in Seg len L holds P[k,E/.k] from
+  RECDEF_1:sch 17(A1);
+  take E;
+  thus len E = len L by A3,FINSEQ_1:def 3;
+  let i being set such that
+A5: i in dom L;
+  reconsider k = i as Element of NAT by A5;
+  dom L = Seg len L by FINSEQ_1:def 3;
+  then consider x, y being Element of R such that
+A6: E/.k = [x, y] and
+A7: x in A and
+A8: L/.k = x*y by A4,A5;
+  [x,y]`1 = x & [x,y]`2 = y by MCART_1:def 1,def 2;
+  hence L.i = ((E/.i)`1)*((E/.i)`2) by A5,A6,A8,PARTFUN1:def 8;
+  thus thesis by A6,A7,MCART_1:def 1;
+end;
+
+theorem
+  for R, S being non empty multLoopStr, F being non empty Subset of R,
+  lc being RightLinearCombination of F, G being non empty Subset of S, P being
+  Function of the carrier of R, the carrier of S, E being FinSequence of [:the
+  carrier of R, the carrier of R:] st P.:F c= G & E represents lc holds ex LC
+being RightLinearCombination of G st len lc = len LC & for i being set st i in
+  dom LC holds LC.i = (P.(E/.i)`1)*(P.(E/.i)`2)
+proof
+  let R, S be non empty multLoopStr, F be non empty Subset of R, lc be
+  RightLinearCombination of F, G be non empty Subset of S, P be Function of the
+carrier of R, the carrier of S, E being FinSequence of [:the carrier of R, the
+  carrier of R:];
+  assume
+A1: P.:F c= G;
+  deffunc F(Nat)=(P.(E/.$1)`1)*(P.(E/.$1)`2);
+  consider LC being FinSequence of the carrier of S such that
+A2: len LC = len lc and
+A3: for k being Nat st k in dom LC holds LC.k = F(k) from FINSEQ_2:sch 1;
+  assume
+A4: E represents lc;
+  now
+    let i be set such that
+A5: i in dom LC;
+    dom lc = dom LC by A2,FINSEQ_3:31;
+    then dom P = the carrier of R & (E/.i)`1 in F by A4,A5,Def14,FUNCT_2:def 1;
+    then P.((E/.i)`1) in P.:F by FUNCT_1:def 12;
+    then reconsider a = P.(E/.i)`1 as Element of G by A1;
+    reconsider v = P.(E/.i)`2 as Element of S;
+    take v, a;
+    LC.i = LC/.i by A5,PARTFUN1:def 8;
+    hence LC/.i = a*v by A3,A5;
+  end;
+  then reconsider LC as RightLinearCombination of G by Def11;
+  take LC;
+  thus len lc = len LC by A2;
+  let i be set;
+  assume i in dom LC;
+  hence thesis by A3;
+end;
+
+theorem
+  for R being non empty multLoopStr, A being non empty Subset of R, l
+  being LinearCombination of A, n being Element of NAT holds l|Seg n is
+  LinearCombination of A
+proof
+  let R be non empty multLoopStr, A be non empty Subset of R, l be
+  LinearCombination of A, n being Element of NAT;
+  reconsider ln = l|Seg n as FinSequence of the carrier of R by FINSEQ_1:23;
+  now
+    let i being set such that
+A1: i in dom ln;
+A2: dom ln c= dom l by RELAT_1:89;
+    then consider u,v being Element of R, a being Element of A such that
+A3: l/.i = u*a*v by A1,Def9;
+    take u, v, a;
+    thus ln/.i = ln.i by A1,PARTFUN1:def 8
+      .= l.i by A1,FUNCT_1:70
+      .= u*a*v by A1,A2,A3,PARTFUN1:def 8;
+  end;
+  hence thesis by Def9;
+end;
+
+theorem
+  for R being non empty multLoopStr, A being non empty Subset of R, l
+  being LeftLinearCombination of A, n being Element of NAT holds l|Seg n is
+  LeftLinearCombination of A
+proof
+  let R be non empty multLoopStr, A be non empty Subset of R, l be
+  LeftLinearCombination of A, n being Element of NAT;
+  reconsider ln = l|Seg n as FinSequence of the carrier of R by FINSEQ_1:23;
+  now
+    let i being set such that
+A1: i in dom ln;
+A2: dom ln c= dom l by RELAT_1:89;
+    then consider u being Element of R, a being Element of A such that
+A3: l/.i = u*a by A1,Def10;
+    take u, a;
+    thus ln/.i = ln.i by A1,PARTFUN1:def 8
+      .= l.i by A1,FUNCT_1:70
+      .= u*a by A1,A2,A3,PARTFUN1:def 8;
+  end;
+  hence thesis by Def10;
+end;
+
+theorem
+  for R being non empty multLoopStr, A being non empty Subset of R, l
+  being RightLinearCombination of A, n being Element of NAT holds l|Seg n is
+  RightLinearCombination of A
+proof
+  let R be non empty multLoopStr, A be non empty Subset of R, l be
+  RightLinearCombination of A, n being Element of NAT;
+  reconsider ln = l|Seg n as FinSequence of the carrier of R by FINSEQ_1:23;
+  now
+    let i being set such that
+A1: i in dom ln;
+A2: dom ln c= dom l by RELAT_1:89;
+    then consider v being Element of R, a being Element of A such that
+A3: l/.i = a*v by A1,Def11;
+    take v, a;
+    thus ln/.i = ln.i by A1,PARTFUN1:def 8
+      .= l.i by A1,FUNCT_1:70
+      .= a*v by A1,A2,A3,PARTFUN1:def 8;
+  end;
+  hence thesis by Def11;
+end;
+
+begin :: Generated ideals
+
+definition
+  let L be non empty doubleLoopStr, F be Subset of L;
+  assume
+A1: F is non empty;
+  func F-Ideal -> Ideal of L means
+  :Def15:
+  F c= it & for I being Ideal of L st F c= I holds it c= I;
+  existence
+  proof
+    set Id = { I where I is Subset of L: F c= I & I is Ideal of L };
+    set I = meet Id;
+    the carrier of L is Ideal of L by Th10;
+    then
+A2: the carrier of L in Id;
+A3: now
+      let X be set;
+      assume X in Id;
+      then ex X9 being Subset of L st X9=X & F c= X9 & X9 is Ideal of L;
+      hence F c= X;
+    end;
+    then F c= I by A2,SETFAM_1:6;
+    then reconsider I as non empty Subset of L by A1,A2,SETFAM_1:4;
+A4: I is add-closed
+    proof
+      let x, y being Element of L;
+      assume
+A5:   x in I & y in I;
+      now
+        let X be set;
+        assume
+A6:     X in Id;
+        then consider X9 being Subset of L such that
+A7:     X9=X and
+        F c= X9 and
+A8:     X9 is Ideal of L;
+        x in X & y in X by A5,A6,SETFAM_1:def 1;
+        then x+y in X9 by A7,A8,Def1;
+        hence {x+y} c= X by A7,ZFMISC_1:37;
+      end;
+      then {x+y} c= I by A2,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+A9: I is left-ideal
+    proof
+      let p, x being Element of L;
+      assume
+A10:  x in I;
+      now
+        let X be set;
+        assume
+A11:    X in Id;
+        then consider X9 being Subset of L such that
+A12:    X9=X and
+        F c= X9 and
+A13:    X9 is Ideal of L;
+        x in X by A10,A11,SETFAM_1:def 1;
+        then p*x in X9 by A12,A13,Def2;
+        hence {p*x} c= X by A12,ZFMISC_1:37;
+      end;
+      then {p*x} c= I by A2,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+    I is right-ideal
+    proof
+      let p, x being Element of L;
+      assume
+A14:  x in I;
+      now
+        let X be set;
+        assume
+A15:    X in Id;
+        then consider X9 being Subset of L such that
+A16:    X9=X and
+        F c= X9 and
+A17:    X9 is Ideal of L;
+        x in X by A14,A15,SETFAM_1:def 1;
+        then x*p in X9 by A16,A17,Def3;
+        hence {x*p} c= X by A16,ZFMISC_1:37;
+      end;
+      then {x*p} c= I by A2,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+    then reconsider I as Ideal of L by A4,A9;
+    take I;
+    now
+      let X be Ideal of L;
+      assume F c= X;
+      then X in Id;
+      hence I c= X by SETFAM_1:4;
+    end;
+    hence thesis by A2,A3,SETFAM_1:6;
+  end;
+  uniqueness
+  proof
+    let X,Y be Ideal of L;
+    assume F c= X & ( for I being Ideal of L st F c= I holds X c= I)& F c= Y
+    & for I being Ideal of L st F c= I holds Y c= I;
+    then X c= Y & Y c= X;
+    hence thesis by XBOOLE_0:def 10;
+  end;
+  func F-LeftIdeal -> LeftIdeal of L means
+  :Def16:
+  F c= it & for I being LeftIdeal of L st F c= I holds it c= I;
+  existence
+  proof
+    set Id = { I where I is Subset of L: F c= I & I is LeftIdeal of L };
+    set I = meet Id;
+    the carrier of L is LeftIdeal of L by Th11;
+    then
+A18: the carrier of L in Id;
+A19: now
+      let X be set;
+      assume X in Id;
+      then ex X9 being Subset of L st X9=X & F c= X9 & X9 is LeftIdeal of L;
+      hence F c= X;
+    end;
+    then F c= I by A18,SETFAM_1:6;
+    then reconsider I as non empty Subset of L by A1,A18,SETFAM_1:4;
+A20: I is add-closed
+    proof
+      let x, y being Element of L;
+      assume
+A21:  x in I & y in I;
+      now
+        let X be set;
+        assume
+A22:    X in Id;
+        then consider X9 being Subset of L such that
+A23:    X9=X and
+        F c= X9 and
+A24:    X9 is LeftIdeal of L;
+        x in X & y in X by A21,A22,SETFAM_1:def 1;
+        then x+y in X9 by A23,A24,Def1;
+        hence {x+y} c= X by A23,ZFMISC_1:37;
+      end;
+      then {x+y} c= I by A18,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+    I is left-ideal
+    proof
+      let p, x being Element of L;
+      assume
+A25:  x in I;
+      now
+        let X be set;
+        assume
+A26:    X in Id;
+        then consider X9 being Subset of L such that
+A27:    X9=X and
+        F c= X9 and
+A28:    X9 is LeftIdeal of L;
+        x in X by A25,A26,SETFAM_1:def 1;
+        then p*x in X9 by A27,A28,Def2;
+        hence {p*x} c= X by A27,ZFMISC_1:37;
+      end;
+      then {p*x} c= I by A18,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+    then reconsider I as LeftIdeal of L by A20;
+    take I;
+    now
+      let X be LeftIdeal of L;
+      assume F c= X;
+      then X in Id;
+      hence I c= X by SETFAM_1:4;
+    end;
+    hence thesis by A18,A19,SETFAM_1:6;
+  end;
+  uniqueness
+  proof
+    let X,Y be LeftIdeal of L;
+    assume F c= X & ( for I being LeftIdeal of L st F c= I holds X c= I)& F
+    c= Y & for I being LeftIdeal of L st F c= I holds Y c= I;
+    then X c= Y & Y c= X;
+    hence thesis by XBOOLE_0:def 10;
+  end;
+  func F-RightIdeal -> RightIdeal of L means
+  :Def17:
+  F c= it & for I being RightIdeal of L st F c= I holds it c= I;
+  existence
+  proof
+    set Id = { I where I is Subset of L: F c= I & I is RightIdeal of L };
+    set I = meet Id;
+    the carrier of L is RightIdeal of L by Th12;
+    then
+A29: the carrier of L in Id;
+A30: now
+      let X be set;
+      assume X in Id;
+      then
+      ex X9 being Subset of L st X9=X & F c= X9 & X9 is RightIdeal of L;
+      hence F c= X;
+    end;
+    then F c= I by A29,SETFAM_1:6;
+    then reconsider I as non empty Subset of L by A1,A29,SETFAM_1:4;
+A31: I is add-closed
+    proof
+      let x, y being Element of L;
+      assume
+A32:  x in I & y in I;
+      now
+        let X be set;
+        assume
+A33:    X in Id;
+        then consider X9 being Subset of L such that
+A34:    X9=X and
+        F c= X9 and
+A35:    X9 is RightIdeal of L;
+        x in X & y in X by A32,A33,SETFAM_1:def 1;
+        then x+y in X9 by A34,A35,Def1;
+        hence {x+y} c= X by A34,ZFMISC_1:37;
+      end;
+      then {x+y} c= I by A29,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+    I is right-ideal
+    proof
+      let p, x being Element of L;
+      assume
+A36:  x in I;
+      now
+        let X be set;
+        assume
+A37:    X in Id;
+        then consider X9 being Subset of L such that
+A38:    X9=X and
+        F c= X9 and
+A39:    X9 is RightIdeal of L;
+        x in X by A36,A37,SETFAM_1:def 1;
+        then x*p in X9 by A38,A39,Def3;
+        hence {x*p} c= X by A38,ZFMISC_1:37;
+      end;
+      then {x*p} c= I by A29,SETFAM_1:6;
+      hence thesis by ZFMISC_1:37;
+    end;
+    then reconsider I as RightIdeal of L by A31;
+    take I;
+    now
+      let X be RightIdeal of L;
+      assume F c= X;
+      then X in Id;
+      hence I c= X by SETFAM_1:4;
+    end;
+    hence thesis by A29,A30,SETFAM_1:6;
+  end;
+  uniqueness
+  proof
+    let X,Y be RightIdeal of L;
+    assume F c= X & ( for I being RightIdeal of L st F c= I holds X c= I)& F
+    c= Y & for I being RightIdeal of L st F c= I holds Y c= I;
+    then X c= Y & Y c= X;
+    hence thesis by XBOOLE_0:def 10;
+  end;
+end;
+
+theorem Th44:
+  for L being non empty doubleLoopStr, I being Ideal of L holds I -Ideal = I
+proof
+  let L be non empty doubleLoopStr, I be Ideal of L;
+  I c= I-Ideal & I-Ideal c= I by Def15;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem Th45:
+  for L being non empty doubleLoopStr, I being LeftIdeal of L
+  holds I-LeftIdeal = I
+proof
+  let L be non empty doubleLoopStr, I be LeftIdeal of L;
+  I c= I-LeftIdeal & I-LeftIdeal c= I by Def16;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem Th46:
+  for L being non empty doubleLoopStr, I being RightIdeal of L
+  holds I-RightIdeal = I
+proof
+  let L be non empty doubleLoopStr, I be RightIdeal of L;
+  I c= I-RightIdeal & I-RightIdeal c= I by Def17;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+definition
+  let L be non empty doubleLoopStr, I be Ideal of L;
+  mode Basis of I -> non empty Subset of L means
+    it-Ideal = I;
+  existence
+  proof
+    take I;
+    thus thesis by Th44;
+  end;
+end;
+
+theorem
+  for L being add-associative right_zeroed right_complementable
+  distributive (non empty doubleLoopStr) holds {0.L}-Ideal = {0.L} by Th44;
+
+theorem
+  for L being left_zeroed right_zeroed add-cancelable distributive (non
+  empty doubleLoopStr) holds {0.L}-Ideal = {0.L} by Th44;
+
+theorem
+  for L being left_zeroed right_zeroed right_add-cancelable
+  right-distributive (non empty doubleLoopStr) holds {0.L}-LeftIdeal = {0.L}
+by Th45;
+
+theorem
+  for L being right_zeroed left_add-cancelable left-distributive (non
+  empty doubleLoopStr) holds {0.L}-RightIdeal = {0.L} by Th46;
+
+theorem
+  for L being well-unital (non empty doubleLoopStr) holds {1.L}-Ideal =
+  the carrier of L
+proof
+  let L be well-unital (non empty doubleLoopStr);
+  the carrier of L c= {1.L}-Ideal
+  proof
+    let x be set;
+    assume x in the carrier of L;
+    then reconsider x9=x as Element of L;
+    1.L in {1.L} & {1.L} c= {1.L}-Ideal by Def15,TARSKI:def 1;
+    then x9*1.L in {1.L}-Ideal by Def2;
+    hence thesis by VECTSP_1:def 16;
+  end;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem
+  for L being right_unital (non empty doubleLoopStr) holds {1.L}
+  -LeftIdeal = the carrier of L
+proof
+  let L be right_unital (non empty doubleLoopStr);
+  the carrier of L c= {1.L}-LeftIdeal
+  proof
+    let x be set;
+    assume x in the carrier of L;
+    then reconsider x9=x as Element of L;
+    1.L in {1.L} & {1.L} c= {1.L}-LeftIdeal by Def16,TARSKI:def 1;
+    then x9*1.L in {1.L}-LeftIdeal by Def2;
+    hence thesis by VECTSP_1:def 13;
+  end;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem
+  for L being left_unital (non empty doubleLoopStr) holds {1.L}
+  -RightIdeal = the carrier of L
+proof
+  let L be left_unital (non empty doubleLoopStr);
+  the carrier of L c= {1.L}-RightIdeal
+  proof
+    let x be set;
+    assume x in the carrier of L;
+    then reconsider x9=x as Element of L;
+    1.L in {1.L} & {1.L} c= {1.L}-RightIdeal by Def17,TARSKI:def 1;
+    then (1.L)*x9 in {1.L}-RightIdeal by Def3;
+    hence thesis by VECTSP_1:def 19;
+  end;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem
+  for L being non empty doubleLoopStr holds ([#] L)-Ideal = the carrier of L
+proof
+  let L be non empty doubleLoopStr;
+  [#] L c= ([#] L)-Ideal by Def15;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem
+  for L being non empty doubleLoopStr holds ([#] L)-LeftIdeal = the
+  carrier of L
+proof
+  let L be non empty doubleLoopStr;
+  [#] L c= ([#] L)-LeftIdeal by Def16;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem
+  for L being non empty doubleLoopStr holds ([#] L)-RightIdeal = the
+  carrier of L
+proof
+  let L be non empty doubleLoopStr;
+  [#] L c= ([#] L)-RightIdeal by Def17;
+  hence thesis by XBOOLE_0:def 10;
+end;
+
+theorem Th57:
+  for L being non empty doubleLoopStr, A, B being non empty Subset
+  of L st A c= B holds A-Ideal c= B-Ideal
+proof
+  let L be non empty doubleLoopStr, A,B be non empty Subset of L;
+  assume
+A1: A c= B;
+  B c= B-Ideal by Def15;
+  then A c= B-Ideal by A1,XBOOLE_1:1;
+  hence thesis by Def15;
+end;
+
+theorem
+  for L being non empty doubleLoopStr, A, B being non empty Subset of L
+  st A c= B holds A-LeftIdeal c= B-LeftIdeal
+proof
+  let L be non empty doubleLoopStr, A,B be non empty Subset of L;
+  assume
+A1: A c= B;
+  B c= B-LeftIdeal by Def16;
+  then A c= B-LeftIdeal by A1,XBOOLE_1:1;
+  hence thesis by Def16;
+end;
+
+theorem
+  for L being non empty doubleLoopStr, A, B being non empty Subset of L
+  st A c= B holds A-RightIdeal c= B-RightIdeal
+proof
+  let L be non empty doubleLoopStr, A,B be non empty Subset of L;
+  assume
+A1: A c= B;
+  B c= B-RightIdeal by Def17;
+  then A c= B-RightIdeal by A1,XBOOLE_1:1;
+  hence thesis by Def17;
+end;
+
+theorem Th60:
+  for L being add-associative left_zeroed right_zeroed
+add-cancelable associative distributive well-unital (non empty doubleLoopStr),
+  F being non empty Subset of L, x being set holds x in F-Ideal iff ex f being
+  LinearCombination of F st x = Sum f
+proof
+  let L be add-associative right_zeroed add-cancelable left_zeroed associative
+distributive well-unital (non empty doubleLoopStr), F be non empty Subset of L;
+  set I = { x where x is Element of L: ex lc being LinearCombination of F st
+  Sum lc = x };
+A1: I c= the carrier of L
+  proof
+    let x be set;
+    assume x in I;
+    then ex x9 being Element of L st x9=x & ex lc being LinearCombination of F
+    st Sum lc = x9;
+    hence thesis;
+  end;
+  let x be set;
+A2: F c= I
+  proof
+    let x be set;
+    assume
+A3: x in F;
+    then reconsider x as Element of L;
+    set lc = <* x *>;
+    now
+      let i be set;
+      assume
+A4:   i in dom lc;
+      dom lc = {1} by FINSEQ_1:4,55;
+      then i = 1 by A4,TARSKI:def 1;
+      then lc.i = x by FINSEQ_1:57
+        .= 1.L*x by VECTSP_1:def 19
+        .= 1.L*x*1.L by VECTSP_1:def 13;
+      hence
+      ex u,v being Element of L, a being Element of F st lc/.i = u*a*v by A3,A4
+,PARTFUN1:def 8;
+    end;
+    then reconsider lc as LinearCombination of F by Def9;
+    Sum lc = x by BINOM:3;
+    hence thesis;
+  end;
+A5: I c= F-Ideal
+  proof
+    defpred P[Nat] means for lc being LinearCombination of F st len lc <= $1
+    holds Sum lc in F-Ideal;
+    let x be set;
+    assume x in I;
+    then consider x9 being Element of L such that
+A6: x9=x and
+A7: ex lc being LinearCombination of F st Sum lc = x9;
+    consider lc being LinearCombination of F such that
+A8: Sum lc = x9 by A7;
+A9: for k being Element of NAT st P[k] holds P[k+1]
+    proof
+      let k be Element of NAT;
+      assume
+A10:  P[k];
+      thus P[k+1]
+      proof
+        let lc be LinearCombination of F;
+        assume
+A11:    len lc <= k+1;
+        per cases by A11,NAT_1:8;
+        suppose
+          len lc <= k;
+          hence thesis by A10;
+        end;
+        suppose
+A12:      len lc = k+1;
+          then lc is non empty;
+          then consider
+          q being LinearCombination of F, r being Element of L such
+          that
+A13:      lc=q^<*r*> and
+A14:      <*r*> is LinearCombination of F by Th32;
+          k+1 = len q + len <*r*> by A12,A13,FINSEQ_1:35
+            .= len q + 1 by FINSEQ_1:56;
+          then
+A15:      Sum q in F-Ideal by A10;
+          dom <*r*> = {1} by FINSEQ_1:4,55;
+          then
+A16:      1 in dom <*r*> by TARSKI:def 1;
+          then consider u,v being Element of L, a being Element of F such that
+A17:      <* r *>/.1 = u*a*v by A14,Def9;
+          F c= F-Ideal by Def15;
+          then a in F-Ideal by TARSKI:def 3;
+          then
+A18:      u*a in F-Ideal by Def2;
+A19:      <*r*>/.1 = <*r*>.1 by A16,PARTFUN1:def 8;
+          Sum <* r *> = r by BINOM:3
+            .= u*a*v by A17,A19,FINSEQ_1:57;
+          then
+A20:      Sum <* r *> in F-Ideal by A18,Def3;
+          Sum lc = Sum q + Sum <* r *> by A13,RLVECT_1:58;
+          hence thesis by A15,A20,Def1;
+        end;
+      end;
+    end;
+A21: P[0]
+    proof
+      consider y being Element of F;
+      let lc be LinearCombination of F;
+      assume len lc <= 0;
+      then lc = <*>(the carrier of L);
+      then
+A22:  Sum lc = 0.L by RLVECT_1:60;
+      F c= F-Ideal by Def15;
+      then
+A23:  y in F-Ideal by TARSKI:def 3;
+      0.L*y = 0.L by BINOM:1;
+      hence thesis by A22,A23,Def2;
+    end;
+    for k being Element of NAT holds P[k] from NAT_1:sch 1(A21,A9);
+    then P[len lc];
+    hence thesis by A6,A8;
+  end;
+  reconsider I as non empty Subset of L by A2,A1;
+  reconsider I9=I as non empty Subset of L;
+A24: I9 is add-closed
+  proof
+    let x, y be Element of L;
+    assume that
+A25: x in I9 and
+A26: y in I9;
+    consider x9 being Element of L such that
+A27: x9=x and
+A28: ex lc being LinearCombination of F st Sum lc = x9 by A25;
+    consider lcx being LinearCombination of F such that
+A29: Sum lcx = x9 by A28;
+    consider y9 being Element of L such that
+A30: y9=y and
+A31: ex lc being LinearCombination of F st Sum lc = y9 by A26;
+    consider lcy being LinearCombination of F such that
+A32: Sum lcy = y9 by A31;
+    Sum (lcx^lcy) = x9 + y9 by A29,A32,RLVECT_1:58;
+    hence thesis by A27,A30;
+  end;
+A33: I9 is right-ideal
+  proof
+    let p, x be Element of L;
+    assume x in I9;
+    then consider x9 being Element of L such that
+A34: x9=x and
+A35: ex lc being LinearCombination of F st Sum lc = x9;
+    consider lcx being LinearCombination of F such that
+A36: Sum lcx = x9 by A35;
+    reconsider lcxp = lcx*p as LinearCombination of F by Th24;
+    x*p = Sum lcxp by A34,A36,BINOM:5;
+    hence thesis;
+  end;
+  I9 is left-ideal
+  proof
+    let p, x be Element of L;
+    assume x in I9;
+    then consider x9 being Element of L such that
+A37: x9=x and
+A38: ex lc being LinearCombination of F st Sum lc = x9;
+    consider lcx being LinearCombination of F such that
+A39: Sum lcx = x9 by A38;
+    reconsider plcx = p*lcx as LinearCombination of F by Th23;
+    p*x = Sum plcx by A37,A39,BINOM:4;
+    hence thesis;
+  end;
+  then F-Ideal c= I by A2,A24,A33,Def15;
+  then
+A40: I = F-Ideal by A5,XBOOLE_0:def 10;
+  hereby
+    assume x in F-Ideal;
+    then ex x9 being Element of L st x9=x & ex lc being LinearCombination of F
+    st Sum lc = x9 by A40;
+    hence ex f being LinearCombination of F st x = Sum f;
+  end;
+  assume ex f being LinearCombination of F st x = Sum f;
+  hence thesis by A40;
+end;
+
+theorem Th61:
+  for L being add-associative left_zeroed right_zeroed
+add-cancelable associative distributive well-unital (non empty doubleLoopStr),
+  F being non empty Subset of L, x being set holds x in F-LeftIdeal iff ex f
+  being LeftLinearCombination of F st x = Sum f
+proof
+  let L be add-associative right_zeroed add-cancelable left_zeroed associative
+distributive well-unital (non empty doubleLoopStr), F be non empty Subset of L;
+  set I = { x where x is Element of L: ex lc being LeftLinearCombination of F
+  st Sum lc = x };
+A1: I c= the carrier of L
+  proof
+    let x be set;
+    assume x in I;
+    then ex x9 being Element of L st x9=x & ex lc being LeftLinearCombination
+    of F st Sum lc = x9;
+    hence thesis;
+  end;
+  let x be set;
+A2: F c= I
+  proof
+    let x be set;
+    assume
+A3: x in F;
+    then reconsider x as Element of L;
+    set lc = <* x *>;
+    now
+      let i be set;
+      assume
+A4:   i in dom lc;
+      dom lc = {1} by FINSEQ_1:4,55;
+      then i = 1 by A4,TARSKI:def 1;
+      then lc.i = x by FINSEQ_1:57
+        .= 1.L*x by VECTSP_1:def 19;
+      hence
+      ex u being Element of L, a being Element of F st lc/.i = u*a by A3,A4,
+PARTFUN1:def 8;
+    end;
+    then reconsider lc as LeftLinearCombination of F by Def10;
+    Sum lc = x by BINOM:3;
+    hence thesis;
+  end;
+A5: I c= F-LeftIdeal
+  proof
+    defpred P[Nat] means for lc being LeftLinearCombination of F st len lc <=
+    $1 holds Sum lc in F-LeftIdeal;
+    let x be set;
+    assume x in I;
+    then consider x9 being Element of L such that
+A6: x9=x and
+A7: ex lc being LeftLinearCombination of F st Sum lc = x9;
+    consider lc being LeftLinearCombination of F such that
+A8: Sum lc = x9 by A7;
+A9: for k being Element of NAT st P[k] holds P[k+1]
+    proof
+      let k be Element of NAT;
+      assume
+A10:  P[k];
+      thus P[k+1]
+      proof
+        let lc be LeftLinearCombination of F;
+        assume
+A11:    len lc <= k+1;
+        per cases by A11,NAT_1:8;
+        suppose
+          len lc <= k;
+          hence thesis by A10;
+        end;
+        suppose
+A12:      len lc = k+1;
+          then lc is non empty;
+          then consider
+          q being LeftLinearCombination of F, r being Element of L
+          such that
+A13:      lc=q^<*r*> and
+A14:      <*r*> is LeftLinearCombination of F by Th33;
+          k+1 = len q + len <*r*> by A12,A13,FINSEQ_1:35
+            .= len q + 1 by FINSEQ_1:56;
+          then
+A15:      Sum q in F-LeftIdeal by A10;
+          dom <*r*> = {1} by FINSEQ_1:4,55;
+          then
+A16:      1 in dom <*r*> by TARSKI:def 1;
+          then consider u being Element of L, a being Element of F such that
+A17:      <* r *>/.1 = u*a by A14,Def10;
+          F c= F-LeftIdeal by Def16;
+          then
+A18:      a in F-LeftIdeal by TARSKI:def 3;
+A19:      <*r*>/.1 = <*r*>.1 by A16,PARTFUN1:def 8;
+          Sum <* r *> = r by BINOM:3
+            .= u*a by A17,A19,FINSEQ_1:57;
+          then
+A20:      Sum <* r *> in F-LeftIdeal by A18,Def2;
+          Sum lc = Sum q + Sum <* r *> by A13,RLVECT_1:58;
+          hence thesis by A15,A20,Def1;
+        end;
+      end;
+    end;
+A21: P[0]
+    proof
+      consider y being Element of F;
+      let lc be LeftLinearCombination of F;
+      assume len lc <= 0;
+      then lc = <*>(the carrier of L);
+      then
+A22:  Sum lc = 0.L by RLVECT_1:60;
+      F c= F-LeftIdeal by Def16;
+      then
+A23:  y in F-LeftIdeal by TARSKI:def 3;
+      0.L*y = 0.L by BINOM:1;
+      hence thesis by A22,A23,Def2;
+    end;
+    for k being Element of NAT holds P[k] from NAT_1:sch 1(A21,A9);
+    then P[len lc];
+    hence thesis by A6,A8;
+  end;
+  reconsider I as non empty Subset of L by A2,A1;
+  reconsider I9=I as non empty Subset of L;
+A24: I9 is add-closed
+  proof
+    let x, y be Element of L;
+    assume that
+A25: x in I9 and
+A26: y in I9;
+    consider x9 being Element of L such that
+A27: x9=x and
+A28: ex lc being LeftLinearCombination of F st Sum lc = x9 by A25;
+    consider lcx being LeftLinearCombination of F such that
+A29: Sum lcx = x9 by A28;
+    consider y9 being Element of L such that
+A30: y9=y and
+A31: ex lc being LeftLinearCombination of F st Sum lc = y9 by A26;
+    consider lcy being LeftLinearCombination of F such that
+A32: Sum lcy = y9 by A31;
+    Sum (lcx^lcy) = x9 + y9 by A29,A32,RLVECT_1:58;
+    hence thesis by A27,A30;
+  end;
+  I9 is left-ideal
+  proof
+    let p, x be Element of L;
+    assume x in I9;
+    then consider x9 being Element of L such that
+A33: x9=x and
+A34: ex lc being LeftLinearCombination of F st Sum lc = x9;
+    consider lcx being LeftLinearCombination of F such that
+A35: Sum lcx = x9 by A34;
+    reconsider plcx = p*lcx as LeftLinearCombination of F by Th26;
+    p*x = Sum plcx by A33,A35,BINOM:4;
+    hence thesis;
+  end;
+  then F-LeftIdeal c= I by A2,A24,Def16;
+  then
+A36: I = F-LeftIdeal by A5,XBOOLE_0:def 10;
+  hereby
+    assume x in F-LeftIdeal;
+    then ex x9 being Element of L st x9=x & ex lc being LeftLinearCombination
+    of F st Sum lc = x9 by A36;
+    hence ex f being LeftLinearCombination of F st x = Sum f;
+  end;
+  assume ex f being LeftLinearCombination of F st x = Sum f;
+  hence thesis by A36;
+end;
+
+theorem Th62:
+  for L being add-associative left_zeroed right_zeroed
+add-cancelable associative distributive well-unital (non empty doubleLoopStr),
+  F being non empty Subset of L, x being set holds x in F-RightIdeal iff ex f
+  being RightLinearCombination of F st x = Sum f
+proof
+  let L be add-associative left_zeroed right_zeroed add-cancelable associative
+distributive well-unital (non empty doubleLoopStr), F be non empty Subset of L;
+  set I = { x where x is Element of L: ex lc being RightLinearCombination of F
+  st Sum lc = x };
+A1: I c= the carrier of L
+  proof
+    let x be set;
+    assume x in I;
+    then ex x9 being Element of L st x9=x & ex lc being RightLinearCombination
+    of F st Sum lc = x9;
+    hence thesis;
+  end;
+  let x be set;
+A2: F c= I
+  proof
+    let x be set;
+    assume
+A3: x in F;
+    then reconsider x as Element of L;
+    set lc = <* x *>;
+    now
+      let i be set;
+      assume
+A4:   i in dom lc;
+      dom lc = {1} by FINSEQ_1:4,55;
+      then i = 1 by A4,TARSKI:def 1;
+      then lc.i = x by FINSEQ_1:57
+        .= x*1.L by VECTSP_1:def 13;
+      hence
+      ex v being Element of L, a being Element of F st lc/.i = a*v by A3,A4,
+PARTFUN1:def 8;
+    end;
+    then reconsider lc as RightLinearCombination of F by Def11;
+    Sum lc = x by BINOM:3;
+    hence thesis;
+  end;
+A5: I c= F-RightIdeal
+  proof
+    defpred P[Nat] means for lc being RightLinearCombination of F st len lc <=
+    $1 holds Sum lc in F-RightIdeal;
+    let x be set;
+    assume x in I;
+    then consider x9 being Element of L such that
+A6: x9=x and
+A7: ex lc being RightLinearCombination of F st Sum lc = x9;
+    consider lc being RightLinearCombination of F such that
+A8: Sum lc = x9 by A7;
+A9: for k being Element of NAT st P[k] holds P[k+1]
+    proof
+      let k be Element of NAT;
+      assume
+A10:  P[k];
+      thus P[k+1]
+      proof
+        let lc be RightLinearCombination of F;
+        assume
+A11:    len lc <= k+1;
+        per cases by A11,NAT_1:8;
+        suppose
+          len lc <= k;
+          hence thesis by A10;
+        end;
+        suppose
+A12:      len lc = k+1;
+          then lc is non empty;
+          then consider
+          q being RightLinearCombination of F, r being Element of L
+          such that
+A13:      lc=q^<*r*> and
+A14:      <*r*> is RightLinearCombination of F by Th34;
+          k+1 = len q + len <*r*> by A12,A13,FINSEQ_1:35
+            .= len q + 1 by FINSEQ_1:56;
+          then
+A15:      Sum q in F-RightIdeal by A10;
+          dom <*r*> = {1} by FINSEQ_1:4,55;
+          then
+A16:      1 in dom <*r*> by TARSKI:def 1;
+          then consider v being Element of L, a being Element of F such that
+A17:      <* r *>/.1 = a*v by A14,Def11;
+          F c= F-RightIdeal by Def17;
+          then
+A18:      a in F-RightIdeal by TARSKI:def 3;
+A19:      <*r*>/.1 = <*r*>.1 by A16,PARTFUN1:def 8;
+          Sum <* r *> = r by BINOM:3
+            .= a*v by A17,A19,FINSEQ_1:57;
+          then
+A20:      Sum <* r *> in F-RightIdeal by A18,Def3;
+          Sum lc = Sum q + Sum <* r *> by A13,RLVECT_1:58;
+          hence thesis by A15,A20,Def1;
+        end;
+      end;
+    end;
+A21: P[0]
+    proof
+      consider y being Element of F;
+      let lc be RightLinearCombination of F;
+      assume len lc <= 0;
+      then lc = <*>(the carrier of L);
+      then
+A22:  Sum lc = 0.L by RLVECT_1:60;
+      F c= F-RightIdeal by Def17;
+      then
+A23:  y in F-RightIdeal by TARSKI:def 3;
+      y*0.L = 0.L by BINOM:2;
+      hence thesis by A22,A23,Def3;
+    end;
+    for k being Element of NAT holds P[k] from NAT_1:sch 1(A21,A9);
+    then P[len lc];
+    hence thesis by A6,A8;
+  end;
+  reconsider I as non empty Subset of L by A2,A1;
+  reconsider I9=I as non empty Subset of L;
+A24: I9 is add-closed
+  proof
+    let x, y be Element of L;
+    assume that
+A25: x in I9 and
+A26: y in I9;
+    consider x9 being Element of L such that
+A27: x9=x and
+A28: ex lc being RightLinearCombination of F st Sum lc = x9 by A25;
+    consider lcx being RightLinearCombination of F such that
+A29: Sum lcx = x9 by A28;
+    consider y9 being Element of L such that
+A30: y9=y and
+A31: ex lc being RightLinearCombination of F st Sum lc = y9 by A26;
+    consider lcy being RightLinearCombination of F such that
+A32: Sum lcy = y9 by A31;
+    Sum (lcx^lcy) = x9 + y9 by A29,A32,RLVECT_1:58;
+    hence thesis by A27,A30;
+  end;
+  I9 is right-ideal
+  proof
+    let p, x be Element of L;
+    assume x in I9;
+    then consider x9 being Element of L such that
+A33: x9=x and
+A34: ex lc being RightLinearCombination of F st Sum lc = x9;
+    consider lcx being RightLinearCombination of F such that
+A35: Sum lcx = x9 by A34;
+    reconsider lcxp = lcx*p as RightLinearCombination of F by Th29;
+    x*p = Sum lcxp by A33,A35,BINOM:5;
+    hence thesis;
+  end;
+  then F-RightIdeal c= I by A2,A24,Def17;
+  then
+A36: I = F-RightIdeal by A5,XBOOLE_0:def 10;
+  hereby
+    assume x in F-RightIdeal;
+    then ex x9 being Element of L st x9=x & ex lc being RightLinearCombination
+    of F st Sum lc = x9 by A36;
+    hence ex f being RightLinearCombination of F st x = Sum f;
+  end;
+  assume ex f being RightLinearCombination of F st x = Sum f;
+  hence thesis by A36;
+end;
+
+theorem Th63:
+  for R being add-associative left_zeroed right_zeroed
+  add-cancelable well-unital associative commutative distributive (non empty
+  doubleLoopStr), F being non empty Subset of R holds F-Ideal = F-LeftIdeal & F
+  -Ideal = F-RightIdeal
+proof
+  let R be add-associative left_zeroed right_zeroed add-cancelable well-unital
+associative commutative distributive (non empty doubleLoopStr), F be non empty
+  Subset of R;
+  now
+    let x be set;
+    hereby
+      assume x in F-Ideal;
+      then consider lc being LinearCombination of F such that
+A1:   x = Sum lc by Th60;
+      lc is LeftLinearCombination of F by Th31;
+      hence x in F-LeftIdeal by A1,Th61;
+    end;
+    assume x in F-LeftIdeal;
+    then consider lc being LeftLinearCombination of F such that
+A2: x = Sum lc by Th61;
+    lc is LinearCombination of F by Th25;
+    hence x in F-Ideal by A2,Th60;
+  end;
+  hence F-Ideal = F-LeftIdeal by TARSKI:2;
+  now
+    let x be set;
+    hereby
+      assume x in F-Ideal;
+      then consider lc being LinearCombination of F such that
+A3:   x = Sum lc by Th60;
+      lc is RightLinearCombination of F by Th31;
+      hence x in F-RightIdeal by A3,Th62;
+    end;
+    assume x in F-RightIdeal;
+    then consider lc being RightLinearCombination of F such that
+A4: x = Sum lc by Th62;
+    lc is LinearCombination of F by Th28;
+    hence x in F-Ideal by A4,Th60;
+  end;
+  hence thesis by TARSKI:2;
+end;
+
+theorem Th64:
+  for R being add-associative left_zeroed right_zeroed
+  add-cancelable well-unital associative commutative distributive (non empty
+doubleLoopStr), a being Element of R holds {a}-Ideal = {a*r where r is Element
+  of R : not contradiction}
+proof
+  let R be add-associative left_zeroed right_zeroed add-cancelable well-unital
+commutative associative distributive (non empty doubleLoopStr), a be Element of
+  R;
+  set A = {a};
+  reconsider a9 = a as Element of A by TARSKI:def 1;
+  set M = {Sum s where s is LinearCombination of A : not contradiction};
+  set N = {a*r where r is Element of R : not contradiction};
+A1: for u being set holds u in M implies u in N
+  proof
+    let u be set;
+    assume u in M;
+    then consider s being LinearCombination of A such that
+A2: u = Sum s;
+    consider f being Function of NAT,the carrier of R such that
+A3: Sum s = f.(len s) and
+A4: f.0 = 0.R and
+A5: for j being Element of NAT,v being Element of R st j < len s & v =
+    s.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means ex r being Element of R st f.($1) = a*r;
+A6: now
+      let j be Element of NAT;
+      assume that
+      0 <= j and
+A7:   j < len s;
+      thus P[j] implies P[j+1]
+      proof
+        assume ex r being Element of R st f.j = a*r;
+        then consider r1 being Element of R such that
+A8:     f.j = a*r1;
+        0 + 1 <= j + 1 & j + 1 <= len s by A7,NAT_1:13;
+        then j + 1 in Seg(len s) by FINSEQ_1:3;
+        then
+A9:     j + 1 in dom s by FINSEQ_1:def 3;
+        then consider
+        r2,r3 being Element of R, a9 being Element of A such that
+A10:    s/.(j+1) = r2*a9*r3 by Def9;
+        s.(j+1) = s/.(j+1) by A9,PARTFUN1:def 8;
+        then f.(j+1) = f.j + s/.(j+1) by A5,A7;
+        then f.(j+1) = a*r1 + r2*a*r3 by A8,A10,TARSKI:def 1
+          .= a*r1 + a*(r2*r3) by GROUP_1:def 4
+          .= a*(r1 + r2*r3) by VECTSP_1:def 18;
+        hence thesis;
+      end;
+    end;
+    f.0 = a*0.R by A4,BINOM:2;
+    then
+A11: P[0];
+    for k being Element of NAT st 0 <= k & k <= len s holds P[k] from
+    INT_1:sch 7 (A11,A6);
+    then ex r being Element of R st Sum s = a*r by A3;
+    hence thesis by A2;
+  end;
+A12: now
+    let x be set;
+    hereby
+      assume x in {a}-Ideal;
+      then x in {a}-RightIdeal by Th63;
+      then consider f being RightLinearCombination of A such that
+A13:  x = Sum f by Th62;
+      f is LinearCombination of A by Th28;
+      hence x in M by A13;
+    end;
+    assume x in M;
+    then ex s being LinearCombination of A st x = Sum s;
+    hence x in {a}-Ideal by Th60;
+  end;
+  for u being set holds u in N implies u in M
+  proof
+    let u be set;
+    assume u in N;
+    then consider r being Element of R such that
+A14: u = a*r;
+    set s = <* a*r *>;
+    for i being set st i in dom s ex r,t being Element of R, a being
+    Element of A st s/.i = r*a*t
+    proof
+      let i be set;
+A15:  len s = 1 by FINSEQ_1:57;
+      assume i in dom s;
+      then i in {1} by A15,FINSEQ_1:4,def 3;
+      then i = 1 by TARSKI:def 1;
+      then s/.i = a*r by FINSEQ_4:25
+        .= (r*a9)*1.R by VECTSP_1:def 13;
+      hence thesis;
+    end;
+    then reconsider s as LinearCombination of A by Def9;
+    Sum s = a*r by BINOM:3;
+    hence thesis by A14;
+  end;
+  then M = N by A1,TARSKI:2;
+  hence thesis by A12,TARSKI:2;
+end;
+
+theorem Th65:
+  for R being Abelian left_zeroed right_zeroed add-cancelable
+  well-unital add-associative associative commutative distributive (non empty
+doubleLoopStr), a,b being Element of R holds {a,b}-Ideal = {a*r + b*s where r,s
+  is Element of R : not contradiction}
+proof
+  let R be Abelian left_zeroed right_zeroed add-cancelable associative
+well-unital add-associative commutative distributive (non empty doubleLoopStr),
+  a,b be Element of R;
+  set A = {a,b};
+  reconsider a9=a, b9=b as Element of A by TARSKI:def 2;
+  set M = {Sum s where s is LinearCombination of A : not contradiction};
+  set N = {a*r + b*s where r,s is Element of R : not contradiction};
+A1: for u being set holds u in M implies u in N
+  proof
+    let u be set;
+    assume u in M;
+    then consider s being LinearCombination of A such that
+A2: u = Sum s;
+    consider f being Function of NAT,the carrier of R such that
+A3: Sum s = f.(len s) and
+A4: f.0 = 0.R and
+A5: for j being Element of NAT,v being Element of R st j < len s & v =
+    s.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means ex r,s being Element of R st f.($1) = a*r
+    + b*s;
+A6: now
+      let j be Element of NAT;
+      assume that
+      0 <= j and
+A7:   j < len s;
+      thus P[j] implies P[j+1]
+      proof
+        0 + 1 <= j + 1 & j + 1 <= len s by A7,NAT_1:13;
+        then j + 1 in Seg(len s) by FINSEQ_1:3;
+        then
+A8:     j + 1 in dom s by FINSEQ_1:def 3;
+        then
+A9:     s/.(j+1) = s.(j+1) by PARTFUN1:def 8;
+        assume ex r,s being Element of R st f.j = a*r + b*s;
+        then consider r1,s1 being Element of R such that
+A10:    f.j = a*r1 + b*s1;
+        consider r2,r3 being Element of R, a9 being Element of A such that
+A11:    s/.(j+1) = r2*a9*r3 by A8,Def9;
+        per cases by TARSKI:def 2;
+        suppose
+          a9 = a;
+          then f.(j+1) = (a*r1 + b*s1) + r2*a*r3 by A5,A7,A10,A11,A9
+            .= (a*r1 + a*r2*r3) + b*s1 by RLVECT_1:def 6
+            .= (a*r1 + a*(r2*r3)) + b*s1 by GROUP_1:def 4
+            .= a*(r1 + r2*r3) + b*s1 by VECTSP_1:def 18;
+          hence thesis;
+        end;
+        suppose
+          a9 = b;
+          then f.(j+1) = (a*r1 + b*s1) + r2*b*r3 by A5,A7,A10,A11,A9
+            .= a*r1 + (b*s1 + b*r2*r3) by RLVECT_1:def 6
+            .= a*r1 + (b*s1 + b*(r2*r3)) by GROUP_1:def 4
+            .= a*r1 + b*(s1 + r2*r3) by VECTSP_1:def 18;
+          hence thesis;
+        end;
+      end;
+    end;
+    f.0 = a*0.R by A4,BINOM:2
+      .= a*0.R + 0.R by RLVECT_1:def 7
+      .= a*0.R + b*0.R by BINOM:2;
+    then
+A12: P[0];
+    for k being Element of NAT st 0 <= k & k <= len s holds P[k] from
+    INT_1:sch 7 (A12,A6);
+    then ex r,t being Element of R st Sum s = a*r + b*t by A3;
+    hence thesis by A2;
+  end;
+A13: now
+    let x be set;
+    hereby
+      assume x in {a,b}-Ideal;
+      then x in {a,b}-RightIdeal by Th63;
+      then consider f being RightLinearCombination of A such that
+A14:  x = Sum f by Th62;
+      f is LinearCombination of A by Th28;
+      hence x in M by A14;
+    end;
+    assume x in M;
+    then ex s being LinearCombination of A st x = Sum s;
+    hence x in {a,b}-Ideal by Th60;
+  end;
+  for u being set holds u in N implies u in M
+  proof
+    let u be set;
+    assume u in N;
+    then consider r,t being Element of R such that
+A15: u = a*r + b*t;
+    set s = <* a*r, b*t *>;
+    for i being set st i in dom s ex r,t being Element of R, a being
+    Element of A st s/.i = r*a*t
+    proof
+      let i be set;
+      assume
+A16:  i in dom s;
+      then i in Seg(len s) by FINSEQ_1:def 3;
+      then
+A17:  i in {1,2} by FINSEQ_1:4,61;
+      per cases by A17,TARSKI:def 2;
+      suppose
+        i = 1;
+        then s/.i = s.1 by A16,PARTFUN1:def 8
+          .= a*r by FINSEQ_1:61
+          .= 1.R*a9*r by VECTSP_1:def 19;
+        hence thesis;
+      end;
+      suppose
+        i = 2;
+        then s/.i = s.2 by A16,PARTFUN1:def 8
+          .= b*t by FINSEQ_1:61
+          .= 1.R*b9*t by VECTSP_1:def 19;
+        hence thesis;
+      end;
+    end;
+    then reconsider s as LinearCombination of A by Def9;
+    Sum s = a*r + b*t by Th1;
+    hence thesis by A15;
+  end;
+  then M = N by A1,TARSKI:2;
+  hence thesis by A13,TARSKI:2;
+end;
+
+theorem Th66:
+  for R being non empty doubleLoopStr, a being Element of R holds
+  a in {a}-Ideal
+proof
+  let R be non empty doubleLoopStr, a be Element of R;
+  a in {a} & {a} c= {a}-Ideal by Def15,TARSKI:def 1;
+  hence thesis;
+end;
+
+theorem
+  for R being Abelian left_zeroed right_zeroed right_complementable
+  add-associative associative commutative distributive well-unital (non empty
+doubleLoopStr), A being non empty Subset of R, a being Element of R holds a in
+  A-Ideal implies {a}-Ideal c= A-Ideal
+proof
+  let R be left_zeroed right_zeroed right_complementable add-associative
+  associative distributive well-unital commutative Abelian (non empty
+  doubleLoopStr), A be non empty Subset of R, a be Element of R;
+  assume a in A-Ideal;
+  then consider s being LinearCombination of A such that
+A1: a = Sum s by Th60;
+  now
+    let u be set;
+    assume u in {a}-Ideal;
+    then u in {a*r where r is Element of R : not contradiction} by Th64;
+    then consider r being Element of R such that
+A2: u = a*r;
+    set t = s*r;
+A3: dom s = dom t by POLYNOM1:def 3;
+    for i being set st i in dom t ex u,v being Element of R, a being
+    Element of A st t/.i = u*a*v
+    proof
+      let i be set;
+      assume
+A4:   i in dom t;
+      then consider u,v being Element of R, b being Element of A such that
+A5:   s/.i = u*b*v by A3,Def9;
+      t/.i = (u*b*v)*r by A3,A4,A5,POLYNOM1:def 3
+        .= u*b*(v*r) by GROUP_1:def 4;
+      hence thesis;
+    end;
+    then
+A6: t is LinearCombination of A by Def9;
+    Sum t = u by A1,A2,BINOM:5;
+    hence u in A-Ideal by A6,Th60;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+Lm2: for a,b being set holds {a} c= {a,b}
+proof
+  let a,b be set;
+  now
+    let u be set;
+    assume u in {a};
+    then u = a by TARSKI:def 1;
+    hence u in {a,b} by TARSKI:def 2;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for R being non empty doubleLoopStr, a,b being Element of R holds a in
+  {a,b}-Ideal & b in {a,b}-Ideal
+proof
+  let R be non empty doubleLoopStr, a,b be Element of R;
+  {a}-Ideal c= { a,b}-Ideal & a in {a}-Ideal by Lm2,Th57,Th66;
+  hence a in {a,b}-Ideal;
+  {b}-Ideal c= {a,b}-Ideal & b in {b}-Ideal by Lm2,Th57,Th66;
+  hence thesis;
+end;
+
+theorem
+  for R being non empty doubleLoopStr, a,b being Element of R holds {a}
+  -Ideal c= {a,b}-Ideal & {b}-Ideal c= {a,b}-Ideal by Lm2,Th57;
+
+begin :: Some Operations on Ideals
+
+definition
+  let R be non empty multMagma, I be Subset of R, a be Element of R;
+  func a*I -> Subset of R equals
+  {a*i where i is Element of R : i in I};
+  coherence
+  proof
+    set M = {a*i where i is Element of R : i in I};
+    M is Subset of R
+    proof
+      per cases;
+      suppose
+A1:     I is empty;
+        M is empty
+        proof
+          assume M is non empty;
+          then reconsider M as non empty set;
+          consider b being Element of M;
+          b in {a*i where i is Element of R : i in I};
+          then ex i being Element of R st b = a*i & i in I;
+          hence thesis by A1;
+        end;
+        then for u being set holds u in M implies u in the carrier of R;
+        hence thesis by TARSKI:def 3;
+      end;
+      suppose
+        I is non empty;
+        then reconsider I as non empty set;
+        consider j9 being Element of I;
+        j9 in I;
+        then reconsider j = j9 as Element of R;
+        a*j in {a*i where i is Element of R : i in I};
+        then reconsider M as non empty set;
+        for x being set holds x in M implies x in the carrier of R
+        proof
+          let x be set;
+          assume x in M;
+          then ex i being Element of R st x = a*i & i in I;
+          hence thesis;
+        end;
+        hence thesis by TARSKI:def 3;
+      end;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be non empty multLoopStr, I be non empty Subset of R, a be Element of
+  R;
+  cluster a*I -> non empty;
+  coherence
+  proof
+    consider j being Element of I;
+    a*j in {a*i where i is Element of R : i in I };
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be distributive (non empty doubleLoopStr), I be add-closed Subset of R
+  , a be Element of R;
+  cluster a*I -> add-closed;
+  coherence
+  proof
+    set M = {a*i where i is Element of R : i in I};
+    for x,y being Element of R st x in M & y in M holds x+y in M
+    proof
+      let x,y be Element of R;
+      assume that
+A1:   x in M and
+A2:   y in M;
+      consider i being Element of R such that
+A3:   x = a*i & i in I by A1;
+      consider j being Element of R such that
+A4:   y = a*j & j in I by A2;
+      reconsider k = i + j as Element of R;
+      k in I & x + y = a*k by A3,A4,Def1,VECTSP_1:def 18;
+      hence thesis;
+    end;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let R be associative (non empty doubleLoopStr), I be right-ideal Subset of R
+  , a be Element of R;
+  cluster a*I -> right-ideal;
+  coherence
+  proof
+    set M = {a*i where i is Element of R : i in I};
+    for y,x being Element of R st x in M holds x*y in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider i being Element of R such that
+A1:   x = a*i & i in I;
+      x*y = a*(i*y) & i*y in I by A1,Def3,GROUP_1:def 4;
+      hence thesis;
+    end;
+    hence thesis by Def3;
+  end;
+end;
+
+theorem Th70:
+  for R being right_zeroed left_add-cancelable left-distributive (
+  non empty doubleLoopStr), I being non empty Subset of R holds 0.R*I = {0.R}
+proof
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr), I be non empty Subset of R;
+A1: now
+    consider j being Element of I;
+    let u be set;
+    assume u in {0.R};
+    then
+A2: u = 0.R by TARSKI:def 1;
+    0.R*j = 0.R by BINOM:1;
+    hence u in 0.R*I by A2;
+  end;
+  now
+    let u be set;
+    assume u in 0.R*I;
+    then ex i being Element of R st u = 0.R*i & i in I;
+    then u = 0.R by BINOM:1;
+    hence u in {0.R} by TARSKI:def 1;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+theorem
+  for R being left_unital (non empty doubleLoopStr), I being Subset of R
+  holds 1.R*I = I
+proof
+  let R be left_unital (non empty doubleLoopStr), I be Subset of R;
+A1: now
+    let u be set;
+    assume
+A2: u in I;
+    then reconsider u9 = u as Element of R;
+    1.R*u9 = u9 by VECTSP_1:def 19;
+    hence u in 1.R*I by A2;
+  end;
+  now
+    let u be set;
+    assume u in 1.R*I;
+    then ex i being Element of R st u = 1.R*i & i in I;
+    hence u in I by VECTSP_1:def 19;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+definition
+  let R be non empty addLoopStr, I,J be Subset of R;
+  func I + J -> Subset of R equals
+  {a + b where a,b is Element of R : a in I &
+  b in J};
+  coherence
+  proof
+    set M = {a + b where a,b is Element of R : a in I & b in J};
+    M is Subset of R
+    proof
+      per cases;
+      suppose
+A1:     I is empty or J is empty;
+        now
+          per cases by A1;
+          case
+A2:         I is empty;
+            M is empty
+            proof
+              assume M is non empty;
+              then reconsider M as non empty set;
+              consider x being Element of M;
+              x in {a + b where a,b is Element of R : a in I & b in J};
+              then ex a,b being Element of R st x = a + b & a in I & b in J;
+              hence thesis by A2;
+            end;
+            then for u being set holds u in M implies u in the carrier of R;
+            hence thesis by TARSKI:def 3;
+          end;
+          case
+A3:         J is empty;
+            M is empty
+            proof
+              assume M is non empty;
+              then reconsider M as non empty set;
+              consider x being Element of M;
+              x in {a + b where a,b is Element of R : a in I & b in J};
+              then ex a,b being Element of R st x = a + b & a in I & b in J;
+              hence thesis by A3;
+            end;
+            then for u being set holds u in M implies u in the carrier of R;
+            hence thesis by TARSKI:def 3;
+          end;
+        end;
+        hence thesis;
+      end;
+      suppose
+A4:     I is non empty & J is non empty;
+        then reconsider J as non empty set;
+        reconsider I as non empty set by A4;
+        consider x9 being Element of I;
+        consider y9 being Element of J;
+        x9 in I & y9 in J;
+        then reconsider x = x9,y = y9 as Element of R;
+        x+y in {a + b where a,b is Element of R : a in I & b in J};
+        then reconsider M as non empty set;
+        for x being set holds x in M implies x in the carrier of R
+        proof
+          let x be set;
+          assume x in M;
+          then ex a,b being Element of R st x = a + b & a in I & b in J;
+          hence thesis;
+        end;
+        hence thesis by TARSKI:def 3;
+      end;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be non empty addLoopStr, I,J be non empty Subset of R;
+  cluster I + J -> non empty;
+  coherence
+  proof
+    {x + y where x,y is Element of R : x in I & y in J} is non empty
+    proof
+      consider y being Element of J;
+      consider x being Element of I;
+      x+y in {a + b where a,b is Element of R : a in I & b in J};
+      hence thesis;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let R be Abelian (non empty addLoopStr), I,J be Subset of R;
+  redefine func I + J;
+  commutativity
+  proof
+    now
+      let I,J be Subset of R;
+A1:   now
+        let u be set;
+        assume u in J+I;
+        then ex a,b being Element of R st u = a + b & a in J & b in I;
+        hence u in I+J;
+      end;
+      now
+        let u be set;
+        assume u in I+J;
+        then ex a,b being Element of R st u = a + b & a in I & b in J;
+        hence u in J+I;
+      end;
+      hence I + J = J + I by A1,TARSKI:2;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be Abelian add-associative (non empty addLoopStr), I,J be add-closed
+  Subset of R;
+  cluster I + J -> add-closed;
+  coherence
+  proof
+    set M = {a + b where a,b is Element of R : a in I & b in J};
+    for x,y being Element of R st x in M & y in M holds x+y in M
+    proof
+      let x,y be Element of R;
+      assume that
+A1:   x in M and
+A2:   y in M;
+      consider a9,b9 being Element of R such that
+A3:   x = a9 + b9 and
+A4:   a9 in I & b9 in J by A1;
+      consider c,d being Element of R such that
+A5:   y = c + d and
+A6:   c in I & d in J by A2;
+A7:   (a9 + c) + (b9 + d) = ((a9 + c) + b9) + d by RLVECT_1:def 6
+        .= (c + x) + d by A3,RLVECT_1:def 6
+        .= x + y by A5,RLVECT_1:def 6;
+      a9 + c in I & b9 + d in J by A4,A6,Def1;
+      hence thesis by A7;
+    end;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let R be left-distributive (non empty doubleLoopStr), I,J be right-ideal
+  Subset of R;
+  cluster I + J -> right-ideal;
+  coherence
+  proof
+    set M = {a + b where a,b is Element of R : a in I & b in J};
+    for y,x being Element of R st x in M holds x*y in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider a9,b9 being Element of R such that
+A1:   x = a9 + b9 and
+A2:   a9 in I & b9 in J;
+A3:   (a9*y) + (b9*y) = x*y by A1,VECTSP_1:def 12;
+      a9*y in I & b9*y in J by A2,Def3;
+      hence thesis by A3;
+    end;
+    hence thesis by Def3;
+  end;
+end;
+
+registration
+  let R be right-distributive (non empty doubleLoopStr), I,J be left-ideal
+  Subset of R;
+  cluster I + J -> left-ideal;
+  coherence
+  proof
+    set M = {a + b where a,b is Element of R : a in I & b in J};
+    for y,x being Element of R st x in M holds y*x in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider a9,b9 being Element of R such that
+A1:   x = a9 + b9 and
+A2:   a9 in I & b9 in J;
+A3:   (y*a9) + (y*b9) = y*x by A1,VECTSP_1:def 11;
+      y*a9 in I & y*b9 in J by A2,Def2;
+      hence thesis by A3;
+    end;
+    hence thesis by Def2;
+  end;
+end;
+
+theorem
+  for R being add-associative (non empty addLoopStr), I,J,K being Subset
+  of R holds I + (J + K) = (I + J) + K
+proof
+  let R be add-associative (non empty addLoopStr), I,J,K be Subset of R;
+A1: now
+    let u be set;
+    assume u in (I + J) + K;
+    then consider a,b being Element of R such that
+A2: u = a + b and
+A3: a in I+J and
+A4: b in K;
+    consider c,d being Element of R such that
+A5: a = c + d and
+A6: c in I and
+A7: d in J by A3;
+    d + b in {a9 + b9 where a9,b9 is Element of R : a9 in J & b9 in K} by A4,A7
+;
+    then
+    c+(d + b) in {a9 + b9 where a9,b9 is Element of R : a9 in I & b9 in J
+    +K} by A6;
+    hence u in I + (J + K) by A2,A5,RLVECT_1:def 6;
+  end;
+  now
+    let u be set;
+    assume u in I + (J + K);
+    then consider a,b being Element of R such that
+A8: u = a + b and
+A9: a in I and
+A10: b in J+K;
+    consider c,d being Element of R such that
+A11: b = c + d and
+A12: c in J and
+A13: d in K by A10;
+    a + c in {a9 + b9 where a9,b9 is Element of R : a9 in I & b9 in J} by A9
+,A12;
+    then (a+ c) + d in {a9 + b9 where a9,b9 is Element of R : a9 in I+J & b9
+    in K}by A13;
+    hence u in (I + J) + K by A8,A11,RLVECT_1:def 6;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+theorem Th73:
+  for R being left_zeroed right_zeroed right_add-cancelable
+right-distributive (non empty doubleLoopStr), I,J being right-ideal (non empty
+  Subset of R) holds I c= I + J
+proof
+  let R be left_zeroed right_add-cancelable right_zeroed right-distributive (
+  non empty doubleLoopStr), I,J be right-ideal (non empty Subset of R);
+  now
+    let u be set;
+    assume u in I;
+    then reconsider u9 = u as Element of I;
+    0.R is Element of J by Th3;
+    then u9 + 0.R in {a + b where a,b is Element of R : a in I & b in J};
+    hence u in I + J by RLVECT_1:def 7;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem Th74:
+  for R being left_zeroed right_add-cancelable right-distributive
+(non empty doubleLoopStr), I,J being right-ideal (non empty Subset of R) holds
+  J c= I + J
+proof
+  let R be left_zeroed right_add-cancelable right-distributive (non empty
+  doubleLoopStr), I,J be right-ideal (non empty Subset of R);
+  now
+    let u be set;
+    assume u in J;
+    then reconsider u9 = u as Element of J;
+    0.R is Element of I by Th3;
+    then 0.R + u9 in {a + b where a,b is Element of R : a in I & b in J};
+    hence u in I + J by ALGSTR_1:def 5;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for R being non empty addLoopStr, I,J being Subset of R, K being
+  add-closed Subset of R st I c= K & J c= K holds I + J c= K
+proof
+  let R be (non empty addLoopStr), I,J be Subset of R, K being add-closed (
+  Subset of R);
+  assume
+A1: I c= K & J c= K;
+  now
+    let u be set;
+    assume u in I + J;
+    then ex i,j being Element of R st u = i + j & i in I & j in J;
+    hence u in K by A1,Def1;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for R being Abelian left_zeroed right_zeroed add-cancelable
+  well-unital add-associative associative commutative distributive (non empty
+  doubleLoopStr), a,b being Element of R holds {a,b}-Ideal = {a}-Ideal + {b}
+  -Ideal
+proof
+  let R be Abelian left_zeroed right_zeroed add-cancelable well-unital
+add-associative associative commutative distributive (non empty doubleLoopStr),
+  a,b be Element of R;
+A1: now
+    let u be set;
+    assume u in {a,b}-Ideal;
+    then u in {a*r + b*s where r,s is Element of R : not contradiction} by Th65
+;
+    then consider r,s being Element of R such that
+A2: u = a*r + b*s;
+    b*s in {b*v where v is Element of R : not contradiction};
+    then reconsider b9 = b*s as Element of {b}-Ideal by Th64;
+    a*r in {a*v where v is Element of R : not contradiction };
+    then reconsider a9 = a*r as Element of {a}-Ideal by Th64;
+    a9 + b9 in {x + y where x,y is Element of R : x in {a}-Ideal & y in {b
+    }-Ideal};
+    hence u in {a}-Ideal + {b}-Ideal by A2;
+  end;
+  now
+    let u be set;
+    assume u in {a}-Ideal + {b}-Ideal;
+    then consider x,y being Element of R such that
+A3: u = x + y and
+A4: x in {a}-Ideal and
+A5: y in {b}-Ideal;
+    y in {b*v where v is Element of R : not contradiction} by A5,Th64;
+    then
+A6: ex s being Element of R st y = b*s;
+    x in {a*v where v is Element of R : not contradiction} by A4,Th64;
+    then ex r being Element of R st x = a*r;
+    then
+    u in {a*v + b*d where v,d is Element of R : not contradiction} by A3,A6;
+    hence u in {a,b}-Ideal by Th65;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+definition
+  let R be non empty 1-sorted, I,J be Subset of R;
+  redefine func I /\ J -> Subset of R equals
+  { x where x is Element of R : x
+  in I & x in J };
+  coherence
+  proof
+    I /\ J is Subset of R;
+    hence thesis;
+  end;
+  compatibility
+  proof
+    defpred Q[set] means $1 in J;
+    defpred P[set] means $1 in I;
+    set X = { x where x is Element of R : P[x] & Q[x] }, Y = { x where x is
+    Element of R : P[x] }, Z = { x where x is Element of R : Q[x] };
+A1: Y = I by DOMAIN_1:52;
+    X = Y /\ Z from DOMAIN_1:sch 10;
+    hence thesis by A1,DOMAIN_1:52;
+  end;
+end;
+
+registration
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr), I,J be left-ideal (non empty Subset of R);
+  cluster I /\ J -> non empty;
+  coherence
+  proof
+    0.R in I & 0.R in J by Th2;
+    then 0.R in { x where x is Element of R : x in I & x in J };
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be non empty addLoopStr, I,J be add-closed Subset of R;
+  cluster I /\ J -> add-closed Subset of R;
+  coherence
+  proof
+    set M = { x where x is Element of R : x in I & x in J };
+    M = I /\ J;
+    then reconsider M as Subset of R;
+    for x,y being Element of R st x in M & y in M holds x+y in M
+    proof
+      let x,y be Element of R;
+      assume that
+A1:   x in M and
+A2:   y in M;
+      consider c being Element of R such that
+A3:   c = y and
+A4:   c in I & c in J by A2;
+      consider a being Element of R such that
+A5:   x = a and
+A6:   a in I & a in J by A1;
+      a + c in I & a + c in J by A6,A4,Def1;
+      hence thesis by A5,A3;
+    end;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let R be non empty multLoopStr, I,J be left-ideal Subset of R;
+  cluster I /\ J -> left-ideal Subset of R;
+  coherence
+  proof
+    set M = { x where x is Element of R : x in I & x in J };
+    M = I /\ J;
+    then reconsider M as Subset of R;
+    for y,x being Element of R st x in M holds y*x in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider a being Element of R such that
+A1:   x = a and
+A2:   a in I & a in J;
+      y*a in I & y*a in J by A2,Def2;
+      hence thesis by A1;
+    end;
+    hence thesis by Def2;
+  end;
+end;
+
+registration
+  let R be non empty multLoopStr, I,J be right-ideal Subset of R;
+  cluster I /\ J -> right-ideal Subset of R;
+  coherence
+  proof
+    set M = { x where x is Element of R : x in I & x in J };
+    M = I /\ J;
+    then reconsider M as Subset of R;
+    for y,x being Element of R st x in M holds x*y in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider a being Element of R such that
+A1:   x = a and
+A2:   a in I & a in J;
+      a*y in I & a*y in J by A2,Def3;
+      hence thesis by A1;
+    end;
+    hence thesis by Def3;
+  end;
+end;
+
+canceled 3;
+
+theorem
+  for R being Abelian left_zeroed right_zeroed right_complementable
+  left_unital add-associative left-distributive (non empty doubleLoopStr), I
+  being add-closed left-ideal (non empty Subset of R), J being Subset of R, K
+  being non empty Subset of R st J c= I holds I /\ (J + K) = J + (I /\ K)
+proof
+  let R be Abelian left_zeroed right_zeroed right_complementable left_unital
+  add-associative left-distributive (non empty doubleLoopStr), I be add-closed
+left-ideal (non empty Subset of R), J be Subset of R, K be non empty Subset of
+  R;
+  assume
+A1: J c= I;
+A2: now
+    let u be set;
+    assume u in J + (I /\ K);
+    then consider j,ik being Element of R such that
+A3: u = j + ik and
+A4: j in J and
+A5: ik in (I /\ K);
+A6: ex z being Element of R st z = ik & z in I & z in K by A5;
+    then reconsider k9 = ik as Element of K;
+    u = j + k9 by A3;
+    then
+A7: u in J + K by A4;
+    reconsider j9 = j as Element of I by A1,A4;
+    reconsider i9 = ik as Element of I by A6;
+    u = j9 + i9 by A3;
+    then u in I by Def1;
+    hence u in I /\ (J + K) by A7;
+  end;
+  now
+    let u be set;
+    assume u in I /\ (J + K);
+    then consider v being Element of R such that
+A8: u = v and
+A9: v in I and
+A10: v in J + K;
+    consider j,k being Element of R such that
+A11: v = j + k and
+A12: j in J and
+A13: k in K by A10;
+    reconsider j9 = j as Element of I by A1,A12;
+    -j9 in I by Th13;
+    then (j9 + k) + -j9 in I by A9,A11,Def1;
+    then (j9 + -j9) + k in I by RLVECT_1:def 6;
+    then 0.R + k in I by RLVECT_1:16;
+    then k in I by ALGSTR_1:def 5;
+    then k in (I /\ K) by A13;
+    hence u in J + (I /\ K) by A8,A11,A12;
+  end;
+  hence thesis by A2,TARSKI:2;
+end;
+
+definition
+  let R be non empty doubleLoopStr, I,J be Subset of R;
+  func I *' J -> Subset of R equals
+  { Sum s where s is FinSequence of the
+  carrier of R : for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+  Element of R st s.i = a*b & a in I & b in J};
+  coherence
+  proof
+    set M = {Sum s where s is FinSequence of the carrier of R : for i being
+Element of NAT st 1 <= i & i <= len s ex a,b being Element of R st s.i = a*b &
+    a in I & b in J};
+    now
+      let u be set;
+      assume u in M;
+      then
+      ex s being FinSequence of the carrier of R st u = Sum s & for i being
+Element of NAT st 1 <= i & i <= len s ex a,b being Element of R st s.i = a*b &
+      a in I & b in J;
+      hence u in the carrier of R;
+    end;
+    then reconsider M as Subset of R by TARSKI:def 3;
+    M is Subset of R;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be non empty doubleLoopStr, I,J be Subset of R;
+  cluster I *' J -> non empty;
+  coherence
+  proof
+    set M = {Sum s where s is FinSequence of the carrier of R : for i being
+Element of NAT st 1 <= i & i <= len s ex a,b being Element of R st s.i = a*b &
+    a in I & b in J};
+    M is non empty
+    proof
+      set p = <*>(the carrier of R);
+      for i being Element of NAT st 1 <= i & i <= len p ex a,b being
+      Element of R st p.i = a*b & a in I & b in J;
+      then Sum p in M;
+      hence thesis;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let R be commutative (non empty doubleLoopStr), I,J be Subset of R;
+  redefine func I *' J;
+  commutativity
+  proof
+    now
+      let I,J be Subset of R;
+A1:   now
+        let u be set;
+        assume u in J*'I;
+        then consider s being FinSequence of the carrier of R such that
+A2:     u = Sum s and
+A3:     for i being Element of NAT st 1 <= i & i <= len s ex a,b
+        being Element of R st s.i = a*b & a in J & b in I;
+        for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+        Element of R st s.i = a*b & a in I & b in J
+        proof
+          let i be Element of NAT;
+          assume 1 <= i & i <= len s;
+          then
+          ex a,b being Element of R st s.i = a*b & a in J & b in I by A3;
+          hence thesis;
+        end;
+        hence u in I*'J by A2;
+      end;
+      now
+        let u be set;
+        assume u in I*'J;
+        then consider s being FinSequence of the carrier of R such that
+A4:     u = Sum s and
+A5:     for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+        Element of R st s.i = a*b & a in I & b in J;
+        for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+        Element of R st s.i = a*b & a in J & b in I
+        proof
+          let i be Element of NAT;
+          assume 1 <= i & i <= len s;
+          then ex a,b being Element of R st s.i = a*b & a in I & b in J by A5;
+          hence thesis;
+        end;
+        hence u in J*'I by A4;
+      end;
+      hence I *' J = J *' I by A1,TARSKI:2;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be right_zeroed add-associative (non empty doubleLoopStr), I,J be
+  Subset of R;
+  cluster I *' J -> add-closed;
+  coherence
+  proof
+    set M = {Sum s where s is FinSequence of the carrier of R : for i being
+Element of NAT st 1 <= i & i <= len s ex a,b being Element of R st s.i = a*b &
+    a in I & b in J};
+    M = I *' J;
+    then reconsider M as non empty Subset of R;
+    for x,y being Element of R st x in M & y in M holds x+y in M
+    proof
+      let x,y be Element of R;
+      assume that
+A1:   x in M and
+A2:   y in M;
+      consider s being FinSequence of the carrier of R such that
+A3:   x = Sum s and
+A4:   for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+      Element of R st s.i = a*b & a in I & b in J by A1;
+      consider t being FinSequence of the carrier of R such that
+A5:   y = Sum t and
+A6:   for i being Element of NAT st 1 <= i & i <= len t ex a,b being
+      Element of R st t.i = a*b & a in I & b in J by A2;
+      set q = s^t;
+A7:   now
+        let i be Element of NAT;
+        assume that
+A8:     1 <= i and
+A9:     i <= len q;
+        thus ex a,r being Element of R st q.i = a*r & a in I & r in J
+        proof
+          per cases;
+          suppose
+A10:        i <= len s;
+            then i in Seg(len s) by A8,FINSEQ_1:3;
+            then i in dom s by FINSEQ_1:def 3;
+            then q.i = s.i by FINSEQ_1:def 7;
+            hence thesis by A4,A8,A10;
+          end;
+          suppose
+A11:        len s < i;
+            then reconsider j = i - len s as Element of NAT by INT_1:18;
+            len s - len s < j by A11,XREAL_1:11;
+            then
+A12:        1 <= j by NAT_1:14;
+            i <= len s + len t by A9,FINSEQ_1:35;
+            then
+A13:        j <= (len s + len t) - len s by XREAL_1:11;
+            t.j = q.i by A9,A11,FINSEQ_1:37;
+            hence thesis by A6,A12,A13;
+          end;
+        end;
+      end;
+      Sum q = x + y by A3,A5,RLVECT_1:58;
+      hence thesis by A7;
+    end;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let R be right_zeroed left_add-cancelable associative left-distributive (non
+  empty doubleLoopStr), I,J be right-ideal Subset of R;
+  cluster I *' J -> right-ideal;
+  coherence
+  proof
+    set M = {Sum s where s is FinSequence of the carrier of R : for i being
+Element of NAT st 1 <= i & i <= len s ex a,b being Element of R st s.i = a*b &
+    a in I & b in J};
+    M = I *' J;
+    then reconsider M as non empty Subset of R;
+    for y,x being Element of R st x in M holds x*y in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider s being FinSequence of the carrier of R such that
+A1:   x = Sum s and
+A2:   for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+      Element of R st s.i = a*b & a in I & b in J;
+      set q = s*y;
+A3:   Seg(len q) = dom q by FINSEQ_1:def 3
+        .= dom s by POLYNOM1:def 3
+        .= Seg(len s) by FINSEQ_1:def 3;
+      then
+A4:   len q = len s by FINSEQ_1:8;
+A5:   now
+        let i be Element of NAT;
+        assume
+A6:     1 <= i & i <= len q;
+        then consider c,r9 being Element of R such that
+A7:     s.i = c*r9 and
+A8:     c in I & r9 in J by A2,A4;
+        i in Seg(len s) by A3,A6,FINSEQ_1:3;
+        then
+A9:     i in dom s by FINSEQ_1:def 3;
+        then
+A10:    s/.i = c*r9 by A7,PARTFUN1:def 8;
+        i in Seg(len q) by A6,FINSEQ_1:3;
+        then i in dom q by FINSEQ_1:def 3;
+        then
+A11:    q.i = q/.i by PARTFUN1:def 8
+          .= (c*r9)*y by A9,A10,POLYNOM1:def 3
+          .= c*(r9*y) by GROUP_1:def 4;
+        thus ex b,r being Element of R st q.i = b*r & b in I & r in J
+        proof
+          take c,r9*y;
+          thus thesis by A8,A11,Def3;
+        end;
+      end;
+      Sum q = Sum s*y by BINOM:5;
+      hence thesis by A1,A5;
+    end;
+    hence thesis by Def3;
+  end;
+end;
+
+registration
+  let R be left_zeroed right_add-cancelable associative right-distributive (
+  non empty doubleLoopStr), I,J be left-ideal Subset of R;
+  cluster I *' J -> left-ideal;
+  coherence
+  proof
+    set M = {Sum s where s is FinSequence of the carrier of R : for i being
+Element of NAT st 1 <= i & i <= len s ex a,b being Element of R st s.i = a*b &
+    a in I & b in J};
+    M = I *' J;
+    then reconsider M as non empty Subset of R;
+    for y,x being Element of R st x in M holds y*x in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider s being FinSequence of the carrier of R such that
+A1:   x = Sum s and
+A2:   for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+      Element of R st s.i = a*b & a in I & b in J;
+      set q = y*s;
+A3:   Seg(len q) = dom q by FINSEQ_1:def 3
+        .= dom s by POLYNOM1:def 2
+        .= Seg(len s) by FINSEQ_1:def 3;
+      then
+A4:   len q = len s by FINSEQ_1:8;
+A5:   now
+        let i be Element of NAT;
+        assume
+A6:     1 <= i & i <= len q;
+        then consider c,r9 being Element of R such that
+A7:     s.i = c*r9 and
+A8:     c in I & r9 in J by A2,A4;
+        i in Seg(len s) by A3,A6,FINSEQ_1:3;
+        then
+A9:     i in dom s by FINSEQ_1:def 3;
+        then
+A10:    s/.i = c*r9 by A7,PARTFUN1:def 8;
+        i in Seg(len q) by A6,FINSEQ_1:3;
+        then i in dom q by FINSEQ_1:def 3;
+        then
+A11:    q.i = q/.i by PARTFUN1:def 8
+          .= y*(c*r9) by A9,A10,POLYNOM1:def 2
+          .= (y*c)*r9 by GROUP_1:def 4;
+        thus ex b,r being Element of R st q.i = b*r & b in I & r in J
+        proof
+          take y*c,r9;
+          thus thesis by A8,A11,Def2;
+        end;
+      end;
+      Sum q = y*Sum s by BINOM:4;
+      hence thesis by A1,A5;
+    end;
+    hence thesis by Def2;
+  end;
+end;
+
+theorem
+  for R being left_zeroed right_zeroed left_add-cancelable
+  left-distributive (non empty doubleLoopStr), I being non empty Subset of R
+  holds {0.R} *' I = {0.R}
+proof
+  let R be left_zeroed right_zeroed left_add-cancelable left-distributive (non
+  empty doubleLoopStr), I be non empty Subset of R;
+A1: now
+    let u be set;
+    assume u in ({0.R}) *' I;
+    then consider s being FinSequence of the carrier of R such that
+A2: Sum s = u and
+A3: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in {0.R} & b in I;
+    now
+      per cases;
+      case
+        len s = 0;
+        then s = <*>(the carrier of R);
+        hence Sum s = 0.R by RLVECT_1:60;
+      end;
+      case
+        len s <> 0;
+        then 1 <= len s by NAT_1:14;
+        then 1 in Seg(len s) by FINSEQ_1:3;
+        then
+A4:     1 in dom s by FINSEQ_1:def 3;
+A5:     for i being Element of NAT st i in dom s holds s/.i = 0.R
+        proof
+          let i be Element of NAT;
+          assume
+A6:       i in dom s;
+          then i in Seg(len s) by FINSEQ_1:def 3;
+          then 1 <= i & i <= len s by FINSEQ_1:3;
+          then consider a,b being Element of R such that
+A7:       s.i = a*b and
+A8:       a in {0.R} and
+          b in I by A3;
+A9:       a = 0.R by A8,TARSKI:def 1;
+          s/.i = a*b by A6,A7,PARTFUN1:def 8;
+          hence thesis by A9,BINOM:1;
+        end;
+        then
+        for i being Element of NAT st i in dom s & i <> 1 holds s/.i = 0. R;
+        hence Sum s = s/.1 by A4,POLYNOM2:5
+          .= 0.R by A4,A5;
+      end;
+    end;
+    hence u in {0.R} by A2,TARSKI:def 1;
+  end;
+  now
+    reconsider o = 0.R as Element of {0.R} by TARSKI:def 1;
+    consider a being Element of I;
+    let u be set;
+    assume
+A10: u in {0.R};
+    set q = <* 0.R*a *>;
+A11: len q = 1 & q.1 = 0.R*a by FINSEQ_1:57;
+A12: for i being Element of NAT st 1 <= i & i <= len q holds ex b,r being
+    Element of R st q.i = b*r & b in {0.R} & r in I
+    proof
+      let i be Element of NAT;
+      assume 1 <= i & i <= len q;
+      then q.i = o*a by A11,XXREAL_0:1;
+      hence thesis;
+    end;
+    Sum q = 0.R*a by BINOM:3
+      .= 0.R by BINOM:1
+      .= u by A10,TARSKI:def 1;
+    hence u in {0.R} *' I by A12;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+theorem Th82:
+  for R being left_zeroed right_zeroed add-cancelable distributive
+(non empty doubleLoopStr), I being add-closed right-ideal (non empty Subset of
+R), J being add-closed left-ideal (non empty Subset of R) holds I *' J c= I /\
+  J
+proof
+  let R be left_zeroed right_zeroed add-cancelable distributive (non empty
+  doubleLoopStr), I be add-closed right-ideal (non empty Subset of R), J be
+  add-closed left-ideal (non empty Subset of R);
+  now
+    let u be set;
+    assume u in I *' J;
+    then consider s being FinSequence of the carrier of R such that
+A1: Sum s = u and
+A2: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I & b in J;
+    consider f being Function of NAT,the carrier of R such that
+A3: Sum s = f.(len s) and
+A4: f.0 = 0.R and
+A5: for j being Element of NAT, v being Element of R st j < len s & v
+    = s.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means f.$1 in I & f.$1 in J;
+A6: now
+      let j be Element of NAT;
+      assume that
+      0 <= j and
+A7:   j < len s;
+      thus P[j] implies P[j+1]
+      proof
+A8:     j + 1 <= len s & 0 + 1 <= j + 1 by A7,NAT_1:13;
+        then j + 1 in Seg(len s) by FINSEQ_1:3;
+        then j + 1 in dom s by FINSEQ_1:def 3;
+        then
+A9:     s.(j+1) = s/.(j+1) by PARTFUN1:def 8;
+        ex a,b being Element of R st s.(j+1) = a*b & a in I & b in J by A2,A8;
+        then
+A10:    s/.(j+1) in I & s/.(j+1) in J by A9,Def2,Def3;
+        assume
+A11:    f.j in I & f.j in J;
+        f.(j+1) = f.j + s/.(j+1) by A5,A7,A9;
+        hence thesis by A11,A10,Def1;
+      end;
+    end;
+A12: P[0] by A4,Th2,Th3;
+    for j being Element of NAT st 0 <= j & j <= len s holds P[j] from
+    INT_1:sch 7(A12,A6);
+    then Sum s in I & Sum s in J by A3;
+    hence u in I /\ J by A1;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem Th83:
+  for R being Abelian left_zeroed right_zeroed add-cancelable
+add-associative associative distributive (non empty doubleLoopStr), I,J,K being
+  right-ideal (non empty Subset of R) holds I *' (J + K) = (I *' J) + (I *' K)
+proof
+  let R be Abelian left_zeroed right_zeroed add-cancelable add-associative
+  associative distributive (non empty doubleLoopStr), I,J,K be right-ideal (non
+  empty Subset of R);
+A1: now
+    let u be set;
+    assume u in I *' (J + K);
+    then consider s being FinSequence of the carrier of R such that
+A2: Sum s = u and
+A3: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I & b in J+K;
+    consider f being Function of NAT,the carrier of R such that
+A4: Sum s = f.(len s) and
+A5: f.0 = 0.R and
+A6: for j being Element of NAT,v being Element of R st j < len s & v =
+    s .(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means ex x,y being Element of R st f.$1=x+y & x
+    in I*'J & y in I*'K;
+A7: now
+      let n be Element of NAT;
+      assume that
+      0 <= n and
+A8:   n < len s;
+      thus P[n] implies P[n+1]
+      proof
+        assume ex x,y being Element of R st f.n = x+y & x in I*'J & y in I*' K;
+        then consider x,y being Element of R such that
+A9:     f.n = x+y and
+A10:    x in I*'J and
+A11:    y in I*'K;
+        consider p being FinSequence of the carrier of R such that
+A12:    Sum p = y and
+A13:    for i being Element of NAT st 1 <= i & i <= len p ex a,b
+        being Element of R st p.i = a*b & a in I & b in K by A11;
+        consider q being FinSequence of the carrier of R such that
+A14:    Sum q = x and
+A15:    for i being Element of NAT st 1 <= i & i <= len q ex a,b
+        being Element of R st q.i = a*b & a in I & b in J by A10;
+A16:    0 + 1 <= n + 1 & n + 1 <= len s by A8,NAT_1:13;
+        then consider a,b being Element of R such that
+A17:    s.(n+1) = a*b and
+A18:    a in I and
+A19:    b in J+K by A3;
+        consider c,d being Element of R such that
+A20:    b = c + d and
+A21:    c in J and
+A22:    d in K by A19;
+        set q1 = q^<*a*c*>, p1 = p^<*a*d*>;
+        n + 1 in Seg(len s) by A16,FINSEQ_1:3;
+        then
+A23:    n + 1 in dom s by FINSEQ_1:def 3;
+        then
+A24:    s.(n+1) = s/.(n+1) by PARTFUN1:def 8;
+A25:    len p1 = len p + len(<*a*d*>) by FINSEQ_1:35
+          .= len p + 1 by FINSEQ_1:57;
+        for i being Element of NAT st 1 <= i & i <= len p1 ex a,b being
+        Element of R st p1.i = a*b & a in I & b in K
+        proof
+          let i be Element of NAT;
+          assume that
+A26:      1 <= i and
+A27:      i <= len p1;
+          per cases;
+          suppose
+            i = len p1;
+            hence thesis by A18,A22,A25,FINSEQ_1:59;
+          end;
+          suppose
+            i <> len p1;
+            then i < len p1 by A27,XXREAL_0:1;
+            then
+A28:        i <= len p by A25,NAT_1:13;
+            then consider a,b being Element of R such that
+A29:        p.i = a*b and
+A30:        a in I & b in K by A13,A26;
+            i in Seg(len p) by A26,A28,FINSEQ_1:3;
+            then i in dom p by FINSEQ_1:def 3;
+            then p1.i = a*b by A29,FINSEQ_1:def 7;
+            hence thesis by A30;
+          end;
+        end;
+        then
+A31:    Sum p1 in I *' K;
+A32:    len q1 = len q + len(<*a*c*>) by FINSEQ_1:35
+          .= len q + 1 by FINSEQ_1:57;
+        for i being Element of NAT st 1 <= i & i <= len q1 ex a,b being
+        Element of R st q1.i = a*b & a in I & b in J
+        proof
+          let i be Element of NAT;
+          assume that
+A33:      1 <= i and
+A34:      i <= len q1;
+          per cases;
+          suppose
+            i = len q1;
+            hence thesis by A18,A21,A32,FINSEQ_1:59;
+          end;
+          suppose
+            i <> len q1;
+            then i < len q1 by A34,XXREAL_0:1;
+            then
+A35:        i <= len q by A32,NAT_1:13;
+            then consider a,b being Element of R such that
+A36:        q.i = a*b and
+A37:        a in I & b in J by A15,A33;
+            i in Seg(len q) by A33,A35,FINSEQ_1:3;
+            then i in dom q by FINSEQ_1:def 3;
+            then q1.i = a*b by A36,FINSEQ_1:def 7;
+            hence thesis by A37;
+          end;
+        end;
+        then
+A38:    Sum q1 in {Sum t where t is FinSequence of the carrier of R: for
+i being Element of NAT st 1 <= i & i <= len t ex a,b being Element of R st t.i
+        = a*b & a in I & b in J};
+A39:    s/.(n+1) = a*(c + d) by A23,A17,A20,PARTFUN1:def 8
+          .= a*c + a*d by VECTSP_1:def 18;
+        Sum q1 + Sum p1 = (Sum q + Sum <*a*c*>) + Sum p1 by RLVECT_1:58
+          .= (Sum q + a*c) + Sum p1 by BINOM:3
+          .= (Sum q + a*c) + (Sum p + Sum <*a*d*>) by RLVECT_1:58
+          .= (Sum q + a*c) + (Sum p + a*d) by BINOM:3
+          .= ((Sum q + a*c) + Sum p) + a*d by RLVECT_1:def 6
+          .= (a*c + (Sum q + Sum p)) + a*d by RLVECT_1:def 6
+          .= f.n + (a*c + a*d) by A9,A14,A12,RLVECT_1:def 6
+          .= f.(n+1) by A6,A8,A24,A39;
+        hence thesis by A38,A31;
+      end;
+    end;
+A40: P[0]
+    proof
+      take 0.R,0.R;
+      thus thesis by A5,Th3,RLVECT_1:def 7;
+    end;
+    for n being Element of NAT st 0 <= n &n <= len s holds P[n] from
+    INT_1:sch 7(A40,A7);
+    then ex x,y being Element of R st Sum s = x+y & x in I*'J & y in I*'K by A4
+;
+    hence u in (I *' J) + (I *' K) by A2;
+  end;
+  now
+    let u be set;
+    assume u in (I *' J) + (I *' K);
+    then consider a,b being Element of R such that
+A41: u = a + b and
+A42: a in I*'J and
+A43: b in I*'K;
+    consider p being FinSequence of the carrier of R such that
+A44: b = Sum p and
+A45: for i being Element of NAT st 1 <= i & i <= len p ex a,b being
+    Element of R st p.i = a*b & a in I & b in K by A43;
+    consider q being FinSequence of the carrier of R such that
+A46: a = Sum q and
+A47: for i being Element of NAT st 1 <= i & i <= len q ex a,b being
+    Element of R st q.i = a*b & a in I & b in J by A42;
+    set s = p^q;
+A48: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I & b in J+K
+    proof
+      let i be Element of NAT;
+      assume that
+A49:  1 <= i and
+A50:  i <= len s;
+      i in Seg(len s) by A49,A50,FINSEQ_1:3;
+      then
+A51:  i in dom s by FINSEQ_1:def 3;
+      now
+        per cases;
+        case
+A52:      i <= len p;
+          then consider a,b being Element of R such that
+A53:      p.i = a*b and
+A54:      a in I and
+A55:      b in K by A45,A49;
+          i in Seg(len p) by A49,A52,FINSEQ_1:3;
+          then i in dom p by FINSEQ_1:def 3;
+          then
+A56:      s.i=a*b by A53,FINSEQ_1:def 7
+            .=a*(0.R + b) by ALGSTR_1:def 5;
+          0.R in J by Th3;
+          then
+          0.R + b in {a9+b9 where a9,b9 is Element of R:a9 in J & b9 in K
+          } by A55;
+          hence thesis by A54,A56;
+        end;
+        case
+          i > len p;
+          then not i in Seg(len p) by FINSEQ_1:3;
+          then not i in dom p by FINSEQ_1:def 3;
+          then consider n being Nat such that
+A57:      n in dom q and
+A58:      i = len p + n by A51,FINSEQ_1:38;
+          n in Seg(len q) by A57,FINSEQ_1:def 3;
+          then 1 <= n & n <= len q by FINSEQ_1:3;
+          then consider a,b being Element of R such that
+A59:      q.n = a*b and
+A60:      a in I and
+A61:      b in J by A47,A57;
+          0.R in K by Th3;
+          then
+A62:      b + 0.R in {a9+b9 where a9,b9 is Element of R:a9 in J & b9 in K
+          } by A61;
+          s.i = q.n by A57,A58,FINSEQ_1:def 7
+            .= a*(b + 0.R) by A59,RLVECT_1:def 7;
+          hence thesis by A60,A62;
+        end;
+      end;
+      hence thesis;
+    end;
+    Sum s = u by A41,A46,A44,RLVECT_1:58;
+    hence u in I *' (J + K) by A48;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+theorem Th84:
+  for R being Abelian left_zeroed right_zeroed add-cancelable
+add-associative commutative associative distributive (non empty doubleLoopStr),
+I,J being right-ideal (non empty Subset of R) holds (I + J) *' (I /\ J) c= I *'
+  J
+proof
+  let R be Abelian left_zeroed right_zeroed add-cancelable add-associative
+  commutative associative distributive (non empty doubleLoopStr), I,J be
+  right-ideal (non empty Subset of R);
+A1: now
+    let u be set;
+    assume u in (I *' (I /\ J)) + (J *' (I /\ J));
+    then consider a,b being Element of R such that
+A2: u = a + b and
+A3: a in (I *' (I /\ J)) and
+A4: b in (J *' (I /\ J));
+    consider s being FinSequence of the carrier of R such that
+A5: b = Sum s and
+A6: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in J & b in (I /\ J) by A4;
+    for i being Element of NAT st 1 <= i & i <= len s ex x,y being
+    Element of R st s.i = x*y & x in I & y in J
+    proof
+      let i be Element of NAT;
+      assume 1 <= i & i <= len s;
+      then
+A7:   ex x,y being Element of R st s.i = x*y & x in J & y in (I /\ J) by A6;
+      I /\ J c= I by XBOOLE_1:17;
+      hence thesis by A7;
+    end;
+    then
+A8: Sum s in {Sum t where t is FinSequence of the carrier of R : for i
+being Element of NAT st 1 <= i & i <= len t ex a,b being Element of R st t.i =
+    a*b & a in I & b in J};
+    consider q being FinSequence of the carrier of R such that
+A9: a = Sum q and
+A10: for i being Element of NAT st 1 <= i & i <= len q ex a,b being
+    Element of R st q.i = a*b & a in I & b in (I /\ J) by A3;
+    for i being Element of NAT st 1 <= i & i <= len q ex x,y being Element
+    of R st q.i = x*y & x in I & y in J
+    proof
+      let i be Element of NAT;
+      assume 1 <= i & i <= len q;
+      then
+A11:  ex x,y being Element of R st q.i = x*y & x in I & y in (I /\ J) by A10;
+      I /\ J c= J by XBOOLE_1:17;
+      hence thesis by A11;
+    end;
+    then Sum q in {Sum t where t is FinSequence of the carrier of R : for i
+being Element of NAT st 1 <= i & i <= len t ex a,b being Element of R st t.i =
+    a*b & a in I & b in J};
+    hence u in I *' J by A2,A9,A5,A8,Def1;
+  end;
+  (I + J) *' (I /\ J) = (I *' (I /\ J)) + (J *' (I /\ J)) by Th83;
+  hence thesis by A1,TARSKI:def 3;
+end;
+
+theorem
+  for R being right_zeroed left_add-cancelable left-distributive (non
+  empty doubleLoopStr), I,J being add-closed left-ideal (non empty Subset of R)
+  holds (I + J) *' (I /\ J) c= I /\ J
+proof
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr), I,J be add-closed left-ideal (non empty Subset of R);
+  now
+    let u be set;
+    assume u in (I + J) *' (I /\ J);
+    then consider s being FinSequence of the carrier of R such that
+A1: u = Sum s and
+A2: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I+J & b in I/\J;
+    consider f being Function of NAT,the carrier of R such that
+A3: Sum s = f.(len s) and
+A4: f.0 = 0.R and
+A5: for j being Element of NAT,v being Element of R st j < len s & v =
+    s .(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means f.$1 in I/\J;
+A6: now
+      let n be Element of NAT;
+      assume that
+      0 <= n and
+A7:   n < len s;
+      thus P[n] implies P[n+1]
+      proof
+A8:     0 + 1 <= n + 1 & n + 1 <= len s by A7,NAT_1:13;
+        then n + 1 in Seg(len s) by FINSEQ_1:3;
+        then n + 1 in dom s by FINSEQ_1:def 3;
+        then
+A9:     s.(n+1) = s/.(n+1) by PARTFUN1:def 8;
+        assume
+A10:    f.n in I /\ J;
+        ex x,y being Element of R st s.(n+1) = x*y & x in I+J & y in I/\J
+        by A2,A8;
+        then s/.(n+1) in I /\ J by A9,Def2;
+        then f.n + s/.(n+1) in I /\ J by A10,Def1;
+        hence thesis by A5,A7,A9;
+      end;
+    end;
+A11: P[0] by A4,Th2;
+    for n being Element of NAT st 0 <= n &n <= len s holds P[n] from
+    INT_1:sch 7 (A11,A6);
+    hence u in I /\ J by A1,A3;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+definition
+  let R be non empty addLoopStr, I,J be Subset of R;
+  pred I,J are_co-prime means
+  :Def23:
+  I + J = the carrier of R;
+end;
+
+theorem Th86:
+  for R being left_zeroed left_unital (non empty doubleLoopStr), I
+,J being non empty Subset of R st I,J are_co-prime holds I /\ J c= (I + J) *' (
+  I /\ J)
+proof
+  let R be left_zeroed left_unital (non empty doubleLoopStr), I,J be non empty
+  Subset of R;
+  assume I,J are_co-prime;
+  then
+A1: I + J = the carrier of R by Def23;
+  now
+    let u be set;
+    assume
+A2: u in I /\ J;
+    then reconsider u9 = u as Element of R;
+    set q = <*1.R*u9*>;
+A3: len q = 1 by FINSEQ_1:56;
+A4: for i being Element of NAT st 1 <= i & i <= len q ex x,y being Element
+    of R st q.i = x*y & x in I+J & y in I/\J
+    proof
+      let i be Element of NAT;
+      assume
+A5:   1 <= i & i <= len q;
+      take 1.R,u9;
+      i = 1 by A3,A5,XXREAL_0:1;
+      hence thesis by A1,A2,FINSEQ_1:57;
+    end;
+    Sum q = 1.R*u9 by BINOM:3
+      .= u9 by VECTSP_1:def 19;
+    hence u in (I + J) *' (I /\ J) by A4;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for R being Abelian left_zeroed right_zeroed add-cancelable
+  add-associative left_unital commutative associative distributive (non empty
+doubleLoopStr), I being add-closed left-ideal right-ideal (non empty Subset of
+  R), J being add-closed left-ideal (non empty Subset of R) st I,J are_co-prime
+  holds I *' J = I /\ J
+proof
+  let R be left_zeroed right_zeroed add-cancelable add-associative Abelian
+  commutative associative distributive left_unital (non empty doubleLoopStr), I
+  be add-closed left-ideal right-ideal (non empty Subset of R), J be add-closed
+  left-ideal (non empty Subset of R);
+A1: I *' J c= I /\ J by Th82;
+  assume I,J are_co-prime;
+  then
+A2: I /\ J c= (I + J) *' (I /\ J) by Th86;
+  (I + J) *' (I /\ J) c= I *' J by Th84;
+  then I /\ J c= I *' J by A2,XBOOLE_1:1;
+  hence thesis by A1,XBOOLE_0:def 10;
+end;
+
+definition
+  let R be non empty multMagma, I,J be Subset of R;
+  func I % J -> Subset of R equals
+  {a where a is Element of R: a*J c= I};
+  coherence
+  proof
+    set M = {a where a is Element of R: a*J c= I};
+    for x being set holds x in M implies x in the carrier of R
+    proof
+      let x be set;
+      assume x in M;
+      then ex a being Element of R st x = a & a*J c= I;
+      hence thesis;
+    end;
+    hence thesis by TARSKI:def 3;
+  end;
+end;
+
+registration
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr), I,J be left-ideal (non empty Subset of R);
+  cluster I % J -> non empty;
+  coherence
+  proof
+    set M = {a where a is Element of R: a*J c= I};
+    0.R in I by Th2;
+    then for u being set holds u in {0.R} implies u in I by TARSKI:def 1;
+    then
+A1: {0.R} c= I by TARSKI:def 3;
+    0.R*J = {0.R} by Th70;
+    then 0.R in M by A1;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+  doubleLoopStr), I,J be add-closed left-ideal (non empty Subset of R);
+  cluster I % J -> add-closed;
+  coherence
+  proof
+    set M = {a where a is Element of R: a*J c= I};
+    M = I % J;
+    then reconsider M as non empty Subset of R;
+    for x,y being Element of R st x in M & y in M holds x+y in M
+    proof
+      let x,y be Element of R;
+      assume that
+A1:   x in M and
+A2:   y in M;
+      consider b being Element of R such that
+A3:   y = b and
+A4:   b*J c= I by A2;
+      consider a being Element of R such that
+A5:   x = a and
+A6:   a*J c= I by A1;
+      now
+        let u be set;
+        assume u in (a+b)*J;
+        then consider c being Element of R such that
+A7:     u = (a + b)*c and
+A8:     c in J;
+A9:     b*c in {b*i where i is Element of R : i in J} by A8;
+        u = a*c + b*c & a*c in a*J by A7,A8,VECTSP_1:def 12;
+        hence u in I by A6,A4,A9,Def1;
+      end;
+      then (a+b)*J c= I by TARSKI:def 3;
+      hence thesis by A5,A3;
+    end;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let R be right_zeroed left_add-cancelable left-distributive associative
+commutative (non empty doubleLoopStr), I,J be left-ideal (non empty Subset of R
+  );
+  cluster I % J -> left-ideal;
+  coherence
+  proof
+    set M = {a where a is Element of R: a*J c= I};
+    M = I % J;
+    then reconsider M as non empty Subset of R;
+    for y,x being Element of R st x in M holds y*x in M
+    proof
+      let y,x be Element of R;
+      assume x in M;
+      then consider a being Element of R such that
+A1:   x = a and
+A2:   a*J c= I;
+      now
+        let u be set;
+        assume u in (y*a)*J;
+        then consider c being Element of R such that
+A3:     u = (y*a)*c and
+A4:     c in J;
+        y*c in J by A4,Def2;
+        then
+A5:     a*(y*c) in {a*i where i is Element of R : i in J};
+        u = a*(y*c) by A3,GROUP_1:def 4;
+        hence u in I by A2,A5;
+      end;
+      then (y*a)*J c= I by TARSKI:def 3;
+      hence thesis by A1;
+    end;
+    hence thesis by Def2;
+  end;
+  cluster I % J -> right-ideal;
+  coherence;
+end;
+
+theorem
+  for R being (non empty multLoopStr), I being right-ideal (non empty
+  Subset of R), J being Subset of R holds I c= I % J
+proof
+  let R be (non empty multLoopStr), I be right-ideal (non empty Subset of R),
+  J be Subset of R;
+  now
+    let u be set;
+    assume
+A1: u in I;
+    then reconsider u9 = u as Element of R;
+    now
+      let v be set;
+      assume v in u9*J;
+      then ex j being Element of R st v = u9*j & j in J;
+      hence v in I by A1,Def3;
+    end;
+    then u9*J c= I by TARSKI:def 3;
+    hence u in (I % J);
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for R being right_zeroed left_add-cancelable left-distributive (non
+empty doubleLoopStr), I being add-closed left-ideal (non empty Subset of R), J
+  being Subset of R holds (I % J) *' J c= I
+proof
+  let R be right_zeroed left_add-cancelable left-distributive (non empty
+doubleLoopStr), I be add-closed left-ideal (non empty Subset of R), J be Subset
+  of R;
+  now
+    let u be set;
+    assume u in (I % J) *' J;
+    then consider s being FinSequence of the carrier of R such that
+A1: Sum s = u and
+A2: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I%J & b in J;
+    consider f being Function of NAT,the carrier of R such that
+A3: Sum s = f.(len s) and
+A4: f.0 = 0.R and
+A5: for j being Element of NAT, v being Element of R st j < len s & v
+    = s.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means f.$1 in I;
+A6: now
+      let j be Element of NAT;
+      assume that
+      0 <= j and
+A7:   j < len s;
+      thus P[j] implies P[j+1]
+      proof
+A8:     j + 1 <= len s & 0 + 1 <= j + 1 by A7,NAT_1:13;
+        then consider a,b being Element of R such that
+A9:     s.(j+1) = a*b and
+A10:    a in I%J and
+A11:    b in J by A2;
+        j + 1 in Seg(len s) by A8,FINSEQ_1:3;
+        then j + 1 in dom s by FINSEQ_1:def 3;
+        then
+A12:    s.(j+1) = s/.(j+1) by PARTFUN1:def 8;
+        then
+A13:    f.(j+1) = f.j + s/.(j+1) by A5,A7;
+        assume
+A14:    f.j in I;
+        consider d being Element of R such that
+A15:    a = d and
+A16:    d*J c= I by A10;
+        a*b in {d*i where i is Element of R : i in J} by A11,A15;
+        hence thesis by A14,A12,A13,A9,A16,Def1;
+      end;
+    end;
+A17: P[0] by A4,Th2;
+    for j being Element of NAT st 0 <= j & j <= len s holds P[j] from
+    INT_1:sch 7(A17,A6);
+    hence u in I by A1,A3;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem Th90:
+  for R being left_zeroed right_add-cancelable right-distributive
+(non empty doubleLoopStr), I being add-closed right-ideal (non empty Subset of
+  R), J being Subset of R holds (I % J) *' J c= I
+proof
+  let R be left_zeroed right_add-cancelable right-distributive (non empty
+  doubleLoopStr), I be add-closed right-ideal (non empty Subset of R), J be
+  Subset of R;
+  now
+    let u be set;
+    assume u in (I % J) *' J;
+    then consider s being FinSequence of the carrier of R such that
+A1: Sum s = u and
+A2: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I%J & b in J;
+    consider f being Function of NAT,the carrier of R such that
+A3: Sum s = f.(len s) and
+A4: f.0 = 0.R and
+A5: for j being Element of NAT, v being Element of R st j < len s & v
+    = s.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means f.$1 in I;
+A6: now
+      let j be Element of NAT;
+      assume that
+      0 <= j and
+A7:   j < len s;
+      thus P[j] implies P[j+1]
+      proof
+A8:     j + 1 <= len s & 0 + 1 <= j + 1 by A7,NAT_1:13;
+        then consider a,b being Element of R such that
+A9:     s.(j+1) = a*b and
+A10:    a in I%J and
+A11:    b in J by A2;
+        j + 1 in Seg(len s) by A8,FINSEQ_1:3;
+        then j + 1 in dom s by FINSEQ_1:def 3;
+        then
+A12:    s.(j+1) = s/.(j+1) by PARTFUN1:def 8;
+        then
+A13:    f.(j+1) = f.j + s/.(j+1) by A5,A7;
+        assume
+A14:    f.j in I;
+        consider d being Element of R such that
+A15:    a = d and
+A16:    d*J c= I by A10;
+        a*b in {d*i where i is Element of R : i in J} by A11,A15;
+        hence thesis by A14,A12,A13,A9,A16,Def1;
+      end;
+    end;
+A17: P[0] by A4,Th3;
+    for j being Element of NAT st 0 <= j & j <= len s holds P[j] from
+    INT_1:sch 7 (A17,A6);
+    hence u in I by A1,A3;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+theorem
+  for R being left_zeroed right_add-cancelable right-distributive
+  commutative associative (non empty doubleLoopStr), I being add-closed
+right-ideal (non empty Subset of R), J,K being Subset of R holds (I % J) % K =
+  I % (J *' K)
+proof
+  let R be left_zeroed right_add-cancelable right-distributive commutative
+  associative (non empty doubleLoopStr), I be add-closed right-ideal (non empty
+  Subset of R), J,K be Subset of R;
+A1: now
+    let u be set;
+    assume u in (I % J) % K;
+    then consider a being Element of R such that
+A2: u = a and
+A3: a*K c= I % J;
+    now
+      let v be set;
+      assume v in a*(J *' K);
+      then consider b being Element of R such that
+A4:   v = a*b and
+A5:   b in J *' K;
+      consider s being FinSequence of the carrier of R such that
+A6:   Sum s = b and
+A7:   for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+      Element of R st s.i = a*b & a in J & b in K by A5;
+      set q = a*s;
+A8:   dom q = dom s by POLYNOM1:def 2;
+A9:   Seg(len q) = dom q by FINSEQ_1:def 3
+        .= dom s by POLYNOM1:def 2
+        .= Seg(len s) by FINSEQ_1:def 3;
+      then
+A10:  len q = len s by FINSEQ_1:8;
+      for j being Element of NAT st 1 <= j & j <= len q holds ex c,d
+      being Element of R st q.j = c*d & c in I%J & d in J
+      proof
+        let j be Element of NAT;
+        assume
+A11:    1 <= j & j <= len q;
+        then consider c,d being Element of R such that
+A12:    s.j = c*d and
+A13:    c in J and
+A14:    d in K by A7,A10;
+A15:    a*d in {a*b9 where b9 is Element of R : b9 in K} by A14;
+        j in Seg(len s) by A9,A11,FINSEQ_1:3;
+        then
+A16:    j in dom s by FINSEQ_1:def 3;
+        then
+A17:    s/.j = c*d by A12,PARTFUN1:def 8;
+        q.j = q/.j by A8,A16,PARTFUN1:def 8
+          .= a*(c*d) by A16,A17,POLYNOM1:def 2
+          .= (a*d)*c by GROUP_1:def 4;
+        hence thesis by A3,A13,A15;
+      end;
+      then
+A18:  Sum q in {Sum t where t is FinSequence of the carrier of R : for i
+being Element of NAT st 1 <= i & i <= len t ex a,b being Element of R st t.i =
+      a*b & a in I%J & b in J};
+A19:  (I % J) *' J c= I by Th90;
+      Sum q = v by A4,A6,BINOM:4;
+      hence v in I by A18,A19;
+    end;
+    then a*(J*'K) c= I by TARSKI:def 3;
+    hence u in I % (J *' K) by A2;
+  end;
+  now
+    let u be set;
+    assume u in I % (J *' K);
+    then consider a being Element of R such that
+A20: u = a and
+A21: a*(J *' K) c= I;
+    now
+      let v be set;
+      assume v in a*K;
+      then consider b being Element of R such that
+A22:  v = a*b and
+A23:  b in K;
+      now
+        let z be set;
+        assume z in (a*b)*J;
+        then consider c being Element of R such that
+A24:    z = (a*b)*c and
+A25:    c in J;
+A26:    z = a*(c*b) by A24,GROUP_1:def 4;
+        set q = <*c*b*>;
+A27:    len q = 1 by FINSEQ_1:57;
+A28:    for i being Element of NAT st 1 <= i & i <= len q ex x,y being
+        Element of R st q.i = x*y & x in J & y in K
+        proof
+          let i be Element of NAT;
+          assume 1 <= i & i <= len q;
+          then q.i = q.1 by A27,XXREAL_0:1
+            .= c*b by FINSEQ_1:57;
+          hence thesis by A23,A25;
+        end;
+        Sum q = c*b by BINOM:3;
+        then c*b in {Sum t where t is FinSequence of the carrier of R : for i
+being Element of NAT st 1 <= i & i <= len t ex a,b being Element of R st t.i =
+        a*b & a in J & b in K} by A28;
+        then z in {a*f where f is Element of R : f in J*'K} by A26;
+        hence z in I by A21;
+      end;
+      then (a*b)*J c= I by TARSKI:def 3;
+      hence v in I % J by A22;
+    end;
+    then a*K c= I % J by TARSKI:def 3;
+    hence u in (I % J) % K by A20;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+theorem
+  for R being non empty multLoopStr, I,J,K being Subset of R holds (J /\
+  K) % I = (J % I) /\ (K % I)
+proof
+  let R be (non empty multLoopStr), I,J,K be Subset of R;
+A1: now
+    let u be set;
+    assume u in (J /\ K) % I;
+    then consider a being Element of R such that
+A2: u = a and
+A3: a*I c= (J /\ K);
+    now
+      let v be set;
+      assume v in a*I;
+      then v in J /\ K by A3;
+      then ex x being Element of R st v = x & x in J & x in K;
+      hence v in K;
+    end;
+    then a*I c= K by TARSKI:def 3;
+    then
+A4: u in (K % I) by A2;
+    now
+      let v be set;
+      assume v in a*I;
+      then v in J /\ K by A3;
+      then ex x being Element of R st v = x & x in J & x in K;
+      hence v in J;
+    end;
+    then a*I c= J by TARSKI:def 3;
+    then u in (J % I) by A2;
+    hence u in (J % I) /\ (K % I) by A4;
+  end;
+  now
+    let u be set;
+    assume u in (J % I) /\ (K % I);
+    then
+A5: ex x being Element of R st x = u & x in (J % I) & x in (K % I);
+    then consider a being Element of R such that
+A6: u = a and
+A7: a*I c= J;
+    ex b being Element of R st u = b & b*I c= K by A5;
+    then for v be set st v in a*I holds v in J /\ K by A6,A7;
+    then a*I c= J /\ K by TARSKI:def 3;
+    hence u in (J /\ K) % I by A6;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+theorem
+  for R being left_zeroed right_zeroed right_add-cancelable
+right-distributive (non empty doubleLoopStr), I being add-closed Subset of R, J
+,K being right-ideal (non empty Subset of R) holds I % (J + K) = (I % J) /\ (I
+  % K)
+proof
+  let R be left_zeroed right_zeroed right_add-cancelable right-distributive (
+non empty doubleLoopStr), I be add-closed Subset of R, J,K be right-ideal (non
+  empty Subset of R);
+A1: now
+    let u be set;
+    assume u in I % (J + K);
+    then consider a being Element of R such that
+A2: u = a and
+A3: a*(J+K) c= I;
+    now
+      let u be set;
+      assume u in a*J;
+      then
+A4:   ex j being Element of R st u = a*j & j in J;
+      J c= J+K by Th73;
+      then u in {a*j9 where j9 is Element of R : j9 in J+K} by A4;
+      hence u in I by A3;
+    end;
+    then a*J c= I by TARSKI:def 3;
+    then
+A5: u in (I % J) by A2;
+    now
+      let u be set;
+      assume u in a*K;
+      then
+A6:   ex j being Element of R st u = a*j & j in K;
+      K c= J+K by Th74;
+      then u in {a*j9 where j9 is Element of R : j9 in J+K} by A6;
+      hence u in I by A3;
+    end;
+    then a*K c= I by TARSKI:def 3;
+    then u in (I % K) by A2;
+    hence u in (I % J) /\ (I % K) by A5;
+  end;
+  now
+    let u be set;
+    assume u in (I % J) /\ (I % K);
+    then
+A7: ex x being Element of R st u = x & x in (I % J) & x in (I % K);
+    then consider a being Element of R such that
+A8: u = a and
+A9: a*J c= I;
+    consider b being Element of R such that
+A10: u = b and
+A11: b*K c= I by A7;
+    now
+      let v be set;
+      assume v in a*(J+K);
+      then consider j being Element of R such that
+A12:  v = a*j and
+A13:  j in J+K;
+      consider x9,y being Element of R such that
+A14:  j = x9 + y and
+A15:  x9 in J & y in K by A13;
+A16:  a*x9 in a*J & b*y in {b*j9 where j9 is Element of R : j9 in K} by A15;
+      v = a*x9 + b*y by A8,A10,A12,A14,VECTSP_1:def 11;
+      hence v in I by A9,A11,A16,Def1;
+    end;
+    then a*(J+K) c= I by TARSKI:def 3;
+    hence u in I % (J + K) by A8;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+definition
+  let R be well-unital (non empty doubleLoopStr), I be Subset of R;
+  func sqrt I -> Subset of R equals
+  {a where a is Element of R: ex n being
+  Element of NAT st a|^n in I};
+  coherence
+  proof
+    set M = {a where a is Element of R:ex n being Element of NAT st a|^n in I};
+    for x being set holds x in M implies x in the carrier of R
+    proof
+      let x be set;
+      assume x in M;
+      then
+      ex a being Element of R st a = x & ex n being Element of NAT st a|^n
+      in I;
+      hence thesis;
+    end;
+    hence thesis by TARSKI:def 3;
+  end;
+end;
+
+registration
+  let R be well-unital (non empty doubleLoopStr), I be non empty Subset of R;
+  cluster sqrt I -> non empty;
+  coherence
+  proof
+    set M ={a where a is Element of R: ex n being Element of NAT st a|^n in I};
+    M is non empty
+    proof
+      consider a being Element of I;
+      a|^1 = a by BINOM:8;
+      then a in M;
+      hence thesis;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be Abelian add-associative left_zeroed right_zeroed commutative
+associative add-cancelable distributive well-unital (non empty doubleLoopStr),
+  I be add-closed right-ideal (non empty Subset of R);
+  cluster sqrt I -> add-closed;
+  coherence
+  proof
+    set M ={a where a is Element of R: ex n being Element of NAT st a|^n in I};
+    M = sqrt I;
+    then reconsider M as non empty Subset of R;
+    for x,y being Element of R st x in M & y in M holds x+y in M
+    proof
+      let x,y be Element of R;
+      assume that
+A1:   x in M and
+A2:   y in M;
+      consider a being Element of R such that
+A3:   x = a and
+A4:   ex n being Element of NAT st a|^n in I by A1;
+      consider n being Element of NAT such that
+A5:   a|^n in I by A4;
+      consider b being Element of R such that
+A6:   y = b and
+A7:   ex m being Element of NAT st b|^m in I by A2;
+      consider m being Element of NAT such that
+A8:   b|^m in I by A7;
+      set p = ((a,b) In_Power (n+m));
+      consider f being Function of NAT,the carrier of R such that
+A9:   Sum p = f.(len p) and
+A10:  f.0 = 0.R and
+A11:  for j being Element of NAT, v being Element of R st j < len p &
+      v = p.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+      defpred P[Element of NAT] means f.$1 in I;
+A12:  for i being Element of NAT st 1 <= i & i <= len p holds p.i in I
+      proof
+        let i be Element of NAT;
+        assume that
+A13:    1 <= i and
+A14:    i <= len p;
+        set r = i - 1;
+        set l = (n+m) - r;
+        1 - 1 <= i - 1 by A13,XREAL_1:11;
+        then reconsider r as Element of NAT by INT_1:16;
+        i <= (n+m) + 1 by A14,BINOM:def 10;
+        then r <= ((n+m) + 1) - 1 by XREAL_1:11;
+        then r - r <= (n+m) - r by XREAL_1:11;
+        then reconsider l as Element of NAT by INT_1:16;
+        i in Seg(len p) by A13,A14,FINSEQ_1:3;
+        then
+A15:    i in dom p by FINSEQ_1:def 3;
+        then
+A16:    p.i = p/.i by PARTFUN1:def 8
+          .= ((n+m) choose r)*a|^l*b|^r by A15,BINOM:def 10;
+        per cases;
+        suppose
+          n <= l;
+          then consider k being Nat such that
+A17:      l = n + k by NAT_1:10;
+          reconsider k as Element of NAT by ORDINAL1:def 13;
+          a|^l = (a|^n)*(a|^k) by A17,BINOM:11;
+          then a|^l in I by A5,Def3;
+          then ((n+m) choose r)*a|^l in I by Th17;
+          hence thesis by A16,Def3;
+        end;
+        suppose
+          l < n;
+          then ((n+m) + -r) + r < n + r by XREAL_1:8;
+          then -n + (n+m) < -n + (n + r) by XREAL_1:8;
+          then consider k being Nat such that
+A18:      r = m + k by NAT_1:10;
+          reconsider k as Element of NAT by ORDINAL1:def 13;
+          b|^r = (b|^m)*(b|^k) by A18,BINOM:11;
+          then b|^r in I by A8,Def3;
+          hence thesis by A16,Def3;
+        end;
+      end;
+A19:  now
+        let j be Element of NAT;
+        assume that
+        0 <= j and
+A20:    j < len p;
+        thus P[j] implies P[j+1]
+        proof
+          assume
+A21:      f.j in I;
+A22:      j + 1 <= len p by A20,NAT_1:13;
+          1 <= j + 1 by NAT_1:11;
+          then j + 1 in Seg(len p) by A22,FINSEQ_1:3;
+          then j + 1 in dom p by FINSEQ_1:def 3;
+          then
+A23:      p/.(j+1) = p.(j+1) by PARTFUN1:def 8;
+          then
+A24:      p/.(j+1) in I by A12,A22,NAT_1:11;
+          f.(j + 1) = f.j + p/.(j+1) by A11,A20,A23;
+          hence thesis by A21,A24,Def1;
+        end;
+      end;
+A25:  (a+b)|^(n+m) = Sum((a,b) In_Power (n+m)) by BINOM:26;
+A26:  P[0] by A10,Th2;
+      for i being Element of NAT st 0 <= i & i <= len p holds P[i] from
+      INT_1:sch 7(A26,A19);
+      then (a+b)|^(n+m) in I by A25,A9;
+      hence thesis by A3,A6;
+    end;
+    hence thesis by Def1;
+  end;
+end;
+
+registration
+  let R be well-unital commutative associative (non empty doubleLoopStr), I be
+  left-ideal (non empty Subset of R);
+  cluster sqrt I -> left-ideal;
+  coherence
+  proof
+    set M ={a where a is Element of R: ex n being Element of NAT st a|^n in I};
+    M = sqrt I;
+    then reconsider M as non empty Subset of R;
+    for y,x being Element of R st x in M holds y*x in M
+    proof
+      let y9,x9 be Element of R;
+      reconsider x = x9,y = y9 as Element of R;
+      assume x9 in M;
+      then consider a being Element of R such that
+A1:   x = a and
+A2:   ex n being Element of NAT st a|^n in I;
+      consider n being Element of NAT such that
+A3:   a|^n in I by A2;
+A4:   (y*a)|^n = (y|^n)*(a|^n) by BINOM:10;
+      (y|^n)*(a|^n) in I by A3,Def2;
+      hence thesis by A1,A4;
+    end;
+    hence thesis by Def2;
+  end;
+  cluster sqrt I -> right-ideal;
+  coherence;
+end;
+
+theorem
+  for R being well-unital associative (non empty doubleLoopStr), I being
+  non empty Subset of R, a being Element of R holds a in sqrt I iff ex n being
+  Element of NAT st a|^n in sqrt I
+proof
+  let R be well-unital associative (non empty doubleLoopStr), I be non empty
+  Subset of R, a be Element of R;
+A1: now
+    assume ex n being Element of NAT st a|^n in sqrt I;
+    then consider n being Element of NAT such that
+A2: a|^n in sqrt I;
+    consider d being Element of R such that
+A3: a|^n = d and
+A4: ex m being Element of NAT st d|^m in I by A2;
+    consider m being Element of NAT such that
+A5: d|^m in I by A4;
+    a|^(n*m) = d|^m by A3,BINOM:12;
+    hence a in sqrt I by A5;
+  end;
+  now
+A6: a|^1 = a by BINOM:8;
+    assume a in sqrt I;
+    hence ex n being Element of NAT st a|^n in sqrt I by A6;
+  end;
+  hence thesis by A1;
+end;
+
+theorem
+  for R being left_zeroed right_zeroed add-cancelable distributive
+  well-unital associative (non empty doubleLoopStr), I being add-closed
+  right-ideal (non empty Subset of R), J being add-closed left-ideal (non empty
+  Subset of R) holds sqrt (I *' J) = sqrt (I /\ J)
+proof
+  let R be left_zeroed right_zeroed associative add-cancelable distributive
+  well-unital (non empty doubleLoopStr), I be add-closed right-ideal (non empty
+  Subset of R), J be add-closed left-ideal(non empty Subset of R);
+A1: now
+    let u be set;
+    assume u in sqrt (I *' J);
+    then consider d being Element of R such that
+A2: u = d and
+A3: ex m being Element of NAT st d|^m in I *' J;
+    consider m being Element of NAT such that
+A4: d|^m in I *' J by A3;
+    consider s being FinSequence of the carrier of R such that
+A5: d|^m = Sum s and
+A6: for i being Element of NAT st 1 <= i & i <= len s ex a,b being
+    Element of R st s.i = a*b & a in I & b in J by A4;
+    consider f being Function of NAT,the carrier of R such that
+A7: Sum s = f.(len s) and
+A8: f.0 = 0.R and
+A9: for j being Element of NAT, v being Element of R st j < len s & v
+    = s.(j + 1) holds f.(j + 1) = f.j + v by RLVECT_1:def 15;
+    defpred P[Element of NAT] means f.$1 in I /\ J;
+A10: now
+      let j be Element of NAT;
+      assume that
+      0 <= j and
+A11:  j < len s;
+      thus P[j] implies P[j+1]
+      proof
+        assume f.j in I /\ J;
+        then
+A12:    ex g being Element of R st g = f.j & g in I & g in J;
+A13:    j + 1 <= len s & 0 + 1 <= j + 1 by A11,NAT_1:13;
+        then
+A14:    ex a,b being Element of R st s.(j+1) = a*b & a in I & b in J by A6;
+        j + 1 in Seg(len s) by A13,FINSEQ_1:3;
+        then j + 1 in dom s by FINSEQ_1:def 3;
+        then
+A15:    s.(j+1) = s/.(j+1) by PARTFUN1:def 8;
+        then
+A16:    f.(j+1) = f.j + s/.(j+1) by A9,A11;
+        s/.(j+1) in J by A15,A14,Def2;
+        then
+A17:    f.(j+1) in J by A12,A16,Def1;
+        s/.(j+1) in I by A15,A14,Def3;
+        then f.(j+1) in I by A12,A16,Def1;
+        hence thesis by A17;
+      end;
+    end;
+    f.0 in I & f.0 in J by A8,Th2,Th3;
+    then
+A18: P[0];
+    for j being Element of NAT st 0 <= j&j<=len s holds P[j] from
+    INT_1:sch 7(A18,A10);
+    then Sum s in I /\ J by A7;
+    hence u in sqrt (I /\ J) by A2,A5;
+  end;
+  now
+    let u be set;
+    assume u in sqrt (I /\ J);
+    then consider d being Element of R such that
+A19: u = d and
+A20: ex m being Element of NAT st d|^m in I /\ J;
+    consider m being Element of NAT such that
+A21: d|^m in I /\ J by A20;
+    set q = <*d|^m*d|^m*>;
+A22: len q = 1 by FINSEQ_1:57;
+A23: ex g being Element of R st d|^m = g & g in I & g in J by A21;
+A24: for i being Element of NAT st 1 <= i & i <= len q ex x,y being
+    Element of R st q.i = x*y & x in I & y in J
+    proof
+      let i be Element of NAT;
+      assume
+A25:  1 <= i & i <= len q;
+      then i in Seg(len q) by FINSEQ_1:3;
+      then i in dom q by FINSEQ_1:def 3;
+      then
+A26:  q.i = q/.i by PARTFUN1:def 8;
+      then q/.i = q.1 by A22,A25,XXREAL_0:1
+        .= d|^m*d|^m by FINSEQ_1:57;
+      hence thesis by A23,A26;
+    end;
+    d|^(m+m) = d|^m*d|^m by BINOM:11
+      .= Sum q by BINOM:3;
+    then d|^(m+m) in I *' J by A24;
+    hence u in sqrt (I *' J) by A19;
+  end;
+  hence thesis by A1,TARSKI:2;
+end;
+
+begin :: Noetherian ideals
+
+definition
+  let L be non empty doubleLoopStr, I be Ideal of L;
+  attr I is finitely_generated means
+  : Def26:
+  ex F being non empty finite Subset of L st I = F-Ideal;
+end;
+
+registration
+  let L be non empty doubleLoopStr;
+  cluster finitely_generated Ideal of L;
+  existence
+  proof
+    consider x being set such that
+A1: x in the carrier of L by XBOOLE_0:def 1;
+    reconsider x as Element of L by A1;
+    take {x}-Ideal;
+    thus thesis by Def26;
+  end;
+end;
+
+registration
+  let L be non empty doubleLoopStr, F be non empty finite Subset of L;
+  cluster F-Ideal -> finitely_generated;
+  coherence by Def26;
+end;
+
+definition
+  let L be non empty doubleLoopStr;
+  attr L is Noetherian means
+  :Def27:
+  for I being Ideal of L holds I is finitely_generated;
+end;
+
+registration
+  cluster Euclidian Abelian add-associative right_zeroed right_complementable
+    well-unital distributive commutative associative non degenerated (non empty
+    doubleLoopStr);
+  existence
+  proof
+    take INT.Ring;
+    thus thesis;
+  end;
+end;
+
+definition
+  let L be non empty doubleLoopStr;
+  let I be Ideal of L;
+  attr I is principal means
+  :Def28:
+  ex e being Element of L st I = {e}-Ideal;
+end;
+
+definition
+  let L be non empty doubleLoopStr;
+  attr L is PID means
+  :Def29:
+  for I being Ideal of L holds I is principal;
+end;
+
+theorem Th96:
+  for L being non empty doubleLoopStr, F being non empty Subset of
+  L st F <> {0.L} ex x being Element of L st x <> 0.L & x in F
+proof
+  let L be non empty doubleLoopStr, F be non empty Subset of L;
+  assume
+A1: F <> {0.L};
+  now
+    assume
+A2: for x being set st x in F holds x = 0.L;
+    for x being set holds x in F iff x = 0.L
+    proof
+      let e be set;
+A3:   ex a being set st a in F by XBOOLE_0:def 1;
+      thus e in F implies e = 0.L by A2;
+      assume e = 0.L;
+      hence thesis by A2,A3;
+    end;
+    hence contradiction by A1,TARSKI:def 1;
+  end;
+  hence thesis;
+end;
+
+theorem Th97:
+  for R being add-associative left_zeroed right_zeroed
+  right_complementable distributive well-unital Euclidian (non empty
+  doubleLoopStr) holds R is PID
+proof
+  let R be add-associative left_zeroed right_zeroed right_complementable
+  distributive well-unital Euclidian (non empty doubleLoopStr);
+  let I be Ideal of R;
+  per cases;
+  suppose
+A1: I = {0.R};
+    set e = 0.R;
+    take e;
+    thus thesis by A1,Th44;
+  end;
+  suppose
+    I <> {0.R};
+    then consider x being Element of R such that
+A2: x <> 0.R & x in I by Th96;
+    set I9 = { y where y is Element of I : y <> 0.R };
+A3: I9 c= the carrier of R
+    proof
+      let x be set;
+      assume x in I9;
+      then ex y being Element of I st x=y & y <> 0.R;
+      hence thesis;
+    end;
+    x in I9 by A2;
+    then reconsider I9 as non empty Subset of R by A3;
+    consider f being Function of the carrier of R, NAT such that
+A4: for a,b being Element of R st b <> 0.R holds ex q,r being Element
+of R st a = q*b + r & (r = 0.R or (f.r qua Element of NAT) < (f.b qua Element
+    of NAT)) by INT_3:def 9;
+    set K = { f.i where i is Element of I9 : not contradiction };
+    consider i being Element of I9;
+A5: f.i in K;
+    K c= NAT
+    proof
+      let x be set;
+      assume x in K;
+      then ex e being Element of I9 st f.e = x;
+      hence thesis;
+    end;
+    then reconsider K as non empty Subset of NAT by A5;
+    set k=min K;
+    k in K by XXREAL_2:def 7;
+    then consider e being Element of I9 such that
+A6: f.e = k;
+    e in I9;
+    then
+A7: ex e9 being Element of I st e9=e & e9 <> 0.R;
+    reconsider e as Element of R;
+    take e;
+    now
+      let x be set;
+      {e} c= I by A7,ZFMISC_1:37;
+      then
+A8:   {e}-Ideal c= I by Def15;
+      hereby
+        assume
+A9:     x in I;
+        then reconsider x9=x as Element of R;
+        consider q,r being Element of R such that
+A10:    x9 = q*e + r and
+A11:    r = 0.R or (f.r qua Element of NAT) < k by A4,A6,A7;
+        now
+          q*e in I by A7,Def2;
+          then
+A12:      -(q*e) in I by Th13;
+          assume
+A13:      r <> 0.R;
+          -(q*e) + x9 = -(q*e) + q*e + r by A10,RLVECT_1:def 6
+            .= 0.R + r by RLVECT_1:16
+            .= r by ALGSTR_1:def 5;
+          then r in I by A9,A12,Def1;
+          then r in I9 by A13;
+          then f.r in K;
+          hence contradiction by A11,A13,XXREAL_2:def 7;
+        end;
+        then
+A14:    x9 = q*e by A10,RLVECT_1:def 7;
+        e in {e} & {e} c= {e}-Ideal by Def15,TARSKI:def 1;
+        hence x in {e}-Ideal by A14,Def2;
+      end;
+      assume x in {e}-Ideal;
+      hence x in I by A8;
+    end;
+    hence thesis by TARSKI:2;
+  end;
+end;
+
+theorem Th98:
+  for L being non empty doubleLoopStr st L is PID holds L is Noetherian
+proof
+  let L be non empty doubleLoopStr;
+  assume
+A1: L is PID;
+  let I being Ideal of L;
+  I is principal by A1,Def29;
+  then consider e being Element of L such that
+A2: I = {e}-Ideal by Def28;
+  take {e};
+  thus thesis by A2;
+end;
+
+registration
+  cluster INT.Ring -> Noetherian;
+  coherence
+  proof
+    INT.Ring is PID by Th97;
+    hence thesis by Th98;
+  end;
+end;
+
+registration
+  cluster Noetherian Abelian add-associative right_zeroed right_complementable
+    well-unital distributive commutative associative non degenerated (non empty
+    doubleLoopStr);
+  existence
+  proof
+    take INT.Ring;
+    thus thesis;
+  end;
+end;
+
+theorem :: Lemma_4_5_i_ii:
+  for R being Noetherian add-associative left_zeroed right_zeroed
+  add-cancelable associative distributive well-unital (non empty doubleLoopStr)
+for B being non empty Subset of R ex C being non empty finite Subset of R st C
+  c= B & C-Ideal = B-Ideal
+proof
+  let R be Noetherian add-associative left_zeroed right_zeroed add-cancelable
+  associative distributive well-unital (non empty doubleLoopStr);
+  let B be non empty Subset of R;
+  defpred P[set,set] means ex cL being non empty LinearCombination of B st $1
+  = Sum cL & ex fsB being FinSequence of B st dom fsB = dom cL & $2 = rng fsB &
+for i being Element of NAT st i in dom cL ex u, v being Element of R st cL/.i =
+  u*((fsB/.i qua Element of B) qua Element of R)*v;
+  B-Ideal is finitely_generated by Def27;
+  then consider D being non empty finite Subset of R such that
+A1: D-Ideal = B-Ideal by Def26;
+A2: D c= B-Ideal by A1,Def15;
+A3: for e being set st e in D ex u being set st u in bool B & P[e,u]
+  proof
+    let e be set;
+    assume e in D;
+    then consider cL being LinearCombination of B such that
+A4: e = Sum cL by A2,Th60;
+    per cases;
+    suppose
+A5:   cL is non empty;
+      defpred P1[set,Element of B] means ex u, v being Element of R st cL/.$1
+      = u*($2 qua Element of R)*v;
+A6:   now
+        let k be Element of NAT;
+        assume k in Seg len cL;
+        then k in dom cL by FINSEQ_1:def 3;
+        then consider u, v being Element of R, a being Element of B such that
+A7:     cL/.k = u*a*v by Def9;
+        take d = a;
+        thus P1[k,d] by A7;
+      end;
+      consider fsB being FinSequence of B such that
+A8:   dom fsB = Seg len cL & for k being Element of NAT st k in Seg
+      len cL holds P1[k,(fsB/.k) qua Element of B] from RECDEF_1:sch 17(A6);
+      take u = rng fsB;
+      thus u in bool B;
+      dom cL = Seg len cL by FINSEQ_1:def 3;
+      hence thesis by A4,A5,A8;
+    end;
+    suppose
+A9:   cL is empty;
+      consider b being Element of B;
+      set kL = <*0.R*b*0.R*>;
+      now
+        let i be set;
+        assume
+A10:    i in dom kL;
+        take u = 0.R, v = 0.R, b;
+        i in Seg len kL by A10,FINSEQ_1:def 3;
+        then i in {1} by FINSEQ_1:4,57;
+        then i = 1 by TARSKI:def 1;
+        hence kL/.i = u*b*v by FINSEQ_4:25;
+      end;
+      then reconsider kL as non empty LinearCombination of B by Def9;
+      cL = <*>the carrier of R by A9;
+      then
+A11:  e = 0.R by A4,RLVECT_1:60
+        .= 0.R*b*0.R by BINOM:2
+        .= Sum kL by BINOM:3;
+      defpred P2[Element of NAT,Element of B] means ex u, v being Element of R
+      st kL/.$1 = u*(($2 qua Element of B) qua Element of R)*v;
+A12:  now
+        let k be Element of NAT;
+        assume
+A13:    k in Seg len kL;
+        take b;
+        k in {1} by A13,FINSEQ_1:4,57;
+        then k = 1 by TARSKI:def 1;
+        hence P2[k,b] by FINSEQ_4:25;
+      end;
+      consider fsB being FinSequence of B such that
+A14:  dom fsB = Seg len kL & for k being Element of NAT st k in Seg
+      len kL holds P2[k,(fsB/.k) qua Element of B] from RECDEF_1:sch 17(A12);
+      take u = rng fsB;
+      thus u in bool B;
+      dom kL = Seg len kL by FINSEQ_1:def 3;
+      hence thesis by A11,A14;
+    end;
+  end;
+  consider f being Function of D, bool B such that
+A15: for e being set st e in D holds P[e,f.e] from FUNCT_2:sch 1(A3);
+A16: now
+    let r be set;
+    assume r in rng f;
+    then consider x being set such that
+A17: x in dom f & r = f.x by FUNCT_1:def 5;
+    ex cL being non empty LinearCombination of B st x = Sum cL & ex fsB
+being FinSequence of B st dom fsB = dom cL & r = rng fsB & for i being Element
+    of NAT st i in dom cL ex u, v being Element of R st cL/.i = u*(( fsB/.i qua
+    Element of B) qua Element of R)*v by A15,A17;
+    hence r is finite;
+  end;
+  reconsider rf = rng f as Subset-Family of B;
+  reconsider C = union rf as Subset of B;
+  consider r being set such that
+A18: r in rng f by XBOOLE_0:def 1;
+  consider x being set such that
+A19: x in dom f & r = f.x by A18,FUNCT_1:def 5;
+  ex cL being non empty LinearCombination of B st x = Sum cL & ex fsB
+being FinSequence of B st dom fsB = dom cL & r = rng fsB & for i being Element
+  of NAT st i in dom cL ex u, v being Element of R st cL/.i = u*(( fsB/.i qua
+  Element of B) qua Element of R)*v by A15,A19;
+  then r is non empty by RELAT_1:65;
+  then ex x being set st x in r by XBOOLE_0:def 1;
+  then reconsider C as non empty finite Subset of R by A18,A16,FINSET_1:25
+,TARSKI:def 4,XBOOLE_1:1;
+  now
+    let d be set;
+    assume
+A20: d in D;
+    then consider cL being non empty LinearCombination of B such that
+A21: d = Sum cL and
+A22: ex fsB being FinSequence of B st dom fsB = dom cL & f.d = rng fsB
+& for i being Element of NAT st i in dom cL ex u, v being Element of R st cL/.i
+    = u*((fsB/.i qua Element of B) qua Element of R)*v by A15;
+    d in dom f by A20,FUNCT_2:def 1;
+    then f.d in rng f by FUNCT_1:def 5;
+    then
+A23: f.d c= C by ZFMISC_1:92;
+    now
+      let i be set;
+      consider fsB being FinSequence of B such that
+A24:  dom fsB = dom cL and
+A25:  f.d = rng fsB and
+A26:  for i being Element of NAT st i in dom cL ex u, v being Element
+      of R st cL/.i = u*((fsB/.i qua Element of B) qua Element of R)*v by A22;
+      assume
+A27:  i in dom cL;
+      then fsB/.i = fsB.i by A24,PARTFUN1:def 8;
+      then
+A28:  fsB/.i in f.d by A27,A24,A25,FUNCT_1:def 5;
+      ex u, v being Element of R st cL/.i = u*((fsB/.i qua Element of B)
+      qua Element of R)*v by A27,A26;
+      hence
+      ex u,v being Element of R, a being Element of C st cL/.i = u*a*v by A23
+,A28;
+    end;
+    then reconsider cL9= cL as LinearCombination of C by Def9;
+    d = Sum cL9 by A21;
+    hence d in C-Ideal by Th60;
+  end;
+  then D c= C-Ideal by TARSKI:def 3;
+  then D-Ideal c= (C-Ideal)-Ideal by Th57;
+  then
+A29: B-Ideal c= C-Ideal by A1,Th44;
+  take C;
+  C-Ideal c= B-Ideal by Th57;
+  hence thesis by A29,XBOOLE_0:def 10;
+end;
+
+theorem :: Lemma_4_5_ii_iii:
+  for R being (non empty doubleLoopStr) st for B being non empty Subset
+of R ex C being non empty finite Subset of R st C c= B & C-Ideal = B-Ideal for
+  a being sequence of R ex m being Element of NAT st a.(m+1) in (rng (a|(m+1)))
+  -Ideal
+proof
+  let R be (non empty doubleLoopStr);
+  assume
+A1: for B being non empty Subset of R ex C being non empty finite Subset
+  of R st C c= B & C-Ideal = B-Ideal;
+  let a being sequence of R;
+  reconsider B = rng a as non empty Subset of R;
+  consider C being non empty finite Subset of R such that
+A2: C c= B and
+A3: C-Ideal = B-Ideal by A1;
+  defpred P[set,set] means $1 = a.$2;
+A4: dom a = NAT by FUNCT_2:def 1;
+A5: for e being set st e in C ex u being set st u in NAT & P[e,u]
+  proof
+    let e be set;
+    assume e in C;
+    then consider u being set such that
+A6: u in dom a and
+A7: e = a.u by A2,FUNCT_1:def 5;
+    take u;
+    thus u in NAT by A6;
+    thus thesis by A7;
+  end;
+  consider f being Function of C, NAT such that
+A8: for e being set st e in C holds P[e,f.e] from FUNCT_2:sch 1(A5);
+  set Rf = rng f;
+  reconsider Rf as non empty finite Subset of NAT;
+  reconsider m = max Rf as Element of NAT by ORDINAL1:def 13;
+  set D = rng (a | Segm(m+1));
+A9: dom f = C by FUNCT_2:def 1;
+A10: C c= D
+  proof
+    let X be set;
+    set fx = f.X;
+    assume
+A11: X in C;
+    then f.X in Rf by A9,FUNCT_1:def 5;
+    then fx <= m by XXREAL_2:def 8;
+    then fx < m+1 by NAT_1:13;
+    then fx in Segm(m+1) by NAT_1:45;
+    then a.fx in rng (a | Segm(m+1)) by A4,FUNCT_1:73;
+    hence thesis by A8,A11;
+  end;
+  then reconsider D as non empty Subset of R;
+A12: D-Ideal c= B-Ideal by Th57,RELAT_1:99;
+  B-Ideal c= D-Ideal by A3,A10,Th57;
+  then
+A13: D-Ideal = B-Ideal by A12,XBOOLE_0:def 10;
+  take m;
+  B c= B-Ideal & a.(m+1) in B by Def15,FUNCT_2:6;
+  hence thesis by A13;
+end;
+
+registration
+  let X, Y be non empty set, f be Function of X, Y, A be non empty Subset of X;
+  cluster f|A -> non empty;
+  coherence
+  proof
+    dom f = X by FUNCT_2:def 1;
+    then (dom f) /\ A is non empty by XBOOLE_1:28;
+    then (dom f) meets A by XBOOLE_0:def 7;
+    hence thesis by RELAT_1:95;
+  end;
+end;
+
+theorem :: Lemma_4_5_iii_iv:
+  for R being (non empty doubleLoopStr) st for a being sequence of R ex
+m being Element of NAT st a.(m+1) in (rng (a|(m+1)))-Ideal holds not ex F being
+Function of NAT, bool (the carrier of R) st (for i being Element of NAT holds F
+  .i is Ideal of R) & (for j,k being Element of NAT st j < k holds F.j c< F.k)
+proof
+  let R being (non empty doubleLoopStr);
+  assume
+A1: for a being sequence of R ex m being Element of NAT st a.(m+1) in (
+  rng (a|(m+1)))-Ideal;
+  given F being Function of NAT, bool (the carrier of R) such that
+A2: for i being Element of NAT holds F.i is Ideal of R and
+A3: for j,k being Element of NAT st j < k holds F.j c< F.k;
+  defpred P[set,set] means ex n being Element of NAT st n = $1 & (n = 0
+  implies $2 in F.0) & (n > 0 implies ex k being Element of NAT st n = k+1 & $2
+  in F.n \ F.k);
+A4: for e being set st e in NAT ex u being set st u in the carrier of R & P[
+  e,u]
+  proof
+    let e be set;
+    assume e in NAT;
+    then reconsider n=e as Element of NAT;
+    per cases;
+    suppose
+A5:   n = 0;
+      F.0 is Ideal of R by A2;
+      then consider u being set such that
+A6:   u in F.0 by XBOOLE_0:def 1;
+      take u;
+      thus u in the carrier of R by A6;
+      take n;
+      thus n=e;
+      thus thesis by A5,A6;
+    end;
+    suppose
+      n > 0;
+      then consider k being Nat such that
+A7:   n=k+1 by NAT_1:6;
+      reconsider k as Element of NAT by ORDINAL1:def 13;
+      n > k by A7,NAT_1:13;
+      then not F.n c= F.k by A3,XBOOLE_1:60;
+      then F.n \ F.k is non empty by XBOOLE_1:37;
+      then consider u being set such that
+A8:   u in F.n \ F.k by XBOOLE_0:def 1;
+      take u;
+      thus u in the carrier of R by A8;
+      take n;
+      thus n=e;
+      thus thesis by A7,A8;
+    end;
+  end;
+  consider f being Function of NAT, the carrier of R such that
+A9: for e being set st e in NAT holds P[e, f.e] from FUNCT_2:sch 1(A4);
+  consider m being Element of NAT such that
+A10: f.(m+1) in (rng (f|(m+1)))-Ideal by A1;
+  reconsider m1 = m+1 as non zero natural number;
+A11: ex n being Element of NAT st n = m+1 &( n = 0 implies f.( m+1) in F.0)&(
+  n > 0 implies ex k being Element of NAT st n = k+1 & f.(m+1) in F.n \ F.k)
+by A9;
+  defpred P[Element of NAT] means rng (f|Segm($1+1)) c= F.$1;
+A12: for k being Element of NAT st P[k] holds P[k+1]
+  proof
+    let k be Element of NAT such that
+A13: rng (f|Segm(k+1)) c= F.k;
+    let y be set;
+    assume y in rng (f|Segm((k+1)+1));
+    then consider x being set such that
+A14: x in dom (f|Segm((k+1)+1)) and
+A15: y = (f|Segm((k+1)+1)).x by FUNCT_1:def 5;
+A16: x in dom f by A14,RELAT_1:86;
+    reconsider nx = x as Element of NAT by A14;
+    x in Segm((k+1)+1) by A14,RELAT_1:86;
+    then nx < (k+1)+1 by NAT_1:45;
+    then
+A17: nx <= k+1 by NAT_1:13;
+    per cases by A17,XXREAL_0:1;
+    suppose
+      nx < k+1;
+      then
+A18:  nx in Segm(k+1) by NAT_1:45;
+      k < k+1 by NAT_1:13;
+      then F.k c< F.(k+1) by A3;
+      then
+A19:  F.k c= F.(k+1) by XBOOLE_0:def 8;
+      y = f.nx by A14,A15,FUNCT_1:70;
+      then y in rng(f|Segm(k+1)) by A16,A18,FUNCT_1:73;
+      then y in F.k by A13;
+      hence thesis by A19;
+    end;
+    suppose
+A20:  nx = k+1;
+      y = f.nx & ex n being Element of NAT st n = nx &( n = 0 implies f.
+nx in F.0 )&( n > 0 implies ex k being Element of NAT st n = k+1 & f.nx in F.n
+      \ F. k) by A9,A14,A15,FUNCT_1:70;
+      hence thesis by A20,XBOOLE_0:def 5;
+    end;
+  end;
+  F.m is Ideal of R by A2;
+  then
+A21: F.m = (F.m)-Ideal by Th44;
+A22: P[0]
+  proof
+    let y be set;
+    assume y in rng (f|Segm(0+1));
+    then consider x being set such that
+A23: x in dom (f|Segm(1)) and
+A24: y = (f|Segm(1)).x by FUNCT_1:def 5;
+    x in Segm(1) & ex n being Element of NAT st n = x & (n = 0 implies f.
+x in F. 0) & (n > 0 implies ex k being Element of NAT st n = k+1 & f.x in F.n \
+    F.k) by A9,A23,RELAT_1:86;
+    hence thesis by A24,CARD_1:87,FUNCT_1:72,TARSKI:def 1;
+  end;
+  for m being Element of NAT holds P[m] from NAT_1:sch 1(A22,A12);
+  then (rng (f|Segm m1))-Ideal c= F.m by A21,Th57;
+  hence contradiction by A10,A11,XBOOLE_0:def 5;
+end;
+
+theorem :: Lemma_4_5_iv_i:
+  for R being (non empty doubleLoopStr) st not ex F being Function of
+NAT, bool (the carrier of R) st (for i being Element of NAT holds F.i is Ideal
+  of R) & (for j,k being Element of NAT st j < k holds F.j c< F.k) holds R is
+  Noetherian
+proof
+  let R being (non empty doubleLoopStr) such that
+A1: not ex F being Function of NAT, bool (the carrier of R) st (for i
+  being Element of NAT holds F.i is Ideal of R) & (for j,k being Element of NAT
+  st j < k holds F.j c< F.k) and
+A2: not R is Noetherian;
+  consider I being Ideal of R such that
+A3: I is not finitely_generated by A2,Def27;
+  set D = { S where S is Subset of R : S is non empty finite Subset of I };
+  consider e being set such that
+A4: e in I by XBOOLE_0:def 1;
+  reconsider e as Element of R by A4;
+  {e} c= I by A4,ZFMISC_1:37;
+  then
+A5: {e} in D;
+  D c= bool the carrier of R
+  proof
+    let x be set;
+    assume x in D;
+    then
+    ex s being Subset of R st x = s & s is non empty finite Subset of I;
+    hence thesis;
+  end;
+  then reconsider D as non empty Subset-Family of R by A5;
+  reconsider e9={e} as Element of D by A5;
+  defpred P[set,Element of D,set] means ex r being Element of R st r in I \ $2
+  -Ideal & $3 = $2 \/ {r};
+A6: for n be Element of NAT for x be Element of D ex y be Element of D st P
+  [n,x,y]
+  proof
+    let n be Element of NAT, x be Element of D;
+    x in D;
+    then consider x9 being Subset of R such that
+A7: x9 = x and
+A8: x9 is non empty finite Subset of I;
+    reconsider x19=x9 as non empty finite Subset of I by A8;
+    x9-Ideal c= I-Ideal by A8,Th57;
+    then x9-Ideal c= I by Th44;
+    then not I c= x9-Ideal by A3,A8,XBOOLE_0:def 10;
+    then consider r being set such that
+A9: r in I and
+A10: not r in x9-Ideal by TARSKI:def 3;
+    set y=x19 \/ {r};
+A11: y c= I
+    proof
+      let x be set;
+      assume x in y;
+      then x in x19 or x in {r} by XBOOLE_0:def 3;
+      hence thesis by A9,TARSKI:def 1;
+    end;
+    then y is Subset of R by XBOOLE_1:1;
+    then
+A12: y in D by A11;
+    reconsider r as Element of R by A9;
+    reconsider y as Element of D by A12;
+    take y;
+    take r;
+    thus thesis by A7,A9,A10,XBOOLE_0:def 5;
+  end;
+  consider f be Function of NAT, D such that
+A13: f.0 = e9 & for n be Element of NAT holds P[n,(f.n) qua Element of D
+  ,f.(n+1)] from RECDEF_1:sch 2(A6);
+  defpred Q[Element of NAT,Subset of R] means ex c being Subset of R st c = f.
+  $1 & $2 = c-Ideal;
+A14: for x being Element of NAT ex y being Subset of R st Q[x,y]
+  proof
+    let x be Element of NAT;
+    f.x in D;
+    then consider c being Subset of R such that
+A15: c = f.x and
+    c is non empty finite Subset of I;
+    reconsider y = c-Ideal as Subset of R;
+    take y;
+    take c;
+    thus thesis by A15;
+  end;
+  consider F being Function of NAT, bool the carrier of R such that
+A16: for x being Element of NAT holds Q[x,F.x] from FUNCT_2:sch 3(A14);
+A17: for j,k being Element of NAT st j < k holds F.j c< F.k
+  proof
+    let j,k be Element of NAT;
+    defpred P[Element of NAT] means F.j c< F.(j+1+$1);
+    assume j < k;
+    then j+1 <= k by NAT_1:13;
+    then consider i being Nat such that
+A18: k = j + 1 + i by NAT_1:10;
+A19: for i being Element of NAT holds F.i c< F.(i+1)
+    proof
+      let i be Element of NAT;
+      consider c being Subset of R such that
+A20:  c = f.i and
+A21:  F.i = c-Ideal by A16;
+      consider c1 being Subset of R such that
+A22:  c1 = f.(i+1) and
+A23:  F.(i+1) = c1-Ideal by A16;
+      c1 in D by A22;
+      then ex c19 being Subset of R st c19 = c1 & c19 is non empty finite
+      Subset of I;
+      then
+A24:  c1 c= c1-Ideal by Def15;
+      consider r being Element of R such that
+A25:  r in I \ c-Ideal and
+A26:  c1 = c \/ {r} by A13,A20,A22;
+      c in D by A20;
+      then
+      ex c9 being Subset of R st c9 = c & c9 is non empty finite Subset of I;
+      hence F.i c= F.(i+1) by A21,A23,A26,Th57,XBOOLE_1:7;
+      r in {r} by TARSKI:def 1;
+      then r in c1 by A26,XBOOLE_0:def 3;
+      hence thesis by A21,A23,A25,A24,XBOOLE_0:def 5;
+    end;
+A27: for i being Element of NAT st P[i] holds P[i+1]
+    proof
+      let i be Element of NAT such that
+A28:  F.j c= F.(j+1+i) and
+      F.j <> F.(j+1+i);
+A29:  F.(j+1+i) c< F.((j+1+i)+1) by A19;
+      then F.(j+1+i) c= F.((j+1+i)+1) by XBOOLE_0:def 8;
+      hence F.j c= F.(j+1+(i+1)) by A28,XBOOLE_1:1;
+      thus thesis by A28,A29,XBOOLE_0:def 8;
+    end;
+A30: P[0] by A19;
+A31: for i being Element of NAT holds P[i] from NAT_1:sch 1(A30, A27);
+    i in NAT by ORDINAL1:def 13;
+    hence thesis by A31,A18;
+  end;
+  for i being Element of NAT holds F.i is Ideal of R
+  proof
+    let i be Element of NAT;
+    ex c being Subset of R st c = f.i & F.i = c-Ideal by A16;
+    hence thesis;
+  end;
+  hence contradiction by A1,A17;
+end;

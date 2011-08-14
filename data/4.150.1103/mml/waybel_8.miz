@@ -1,0 +1,1719 @@
+:: Algebraic Lattices
+::  by Robert Milewski
+::
+:: Received December 1, 1996
+:: Copyright (c) 1996 Association of Mizar Users
+ 
+environ
+
+ vocabularies XBOOLE_0, RELAT_2, ORDERS_2, STRUCT_0, CAT_1, YELLOW_0, SUBSET_1,
+      RCOMP_1, WELLORD1, TARSKI, LATTICES, REWRITE1, WAYBEL_0, XXREAL_0,
+      WAYBEL_3, WAYBEL_6, CARD_FIL, LATTICE3, EQREL_1, ORDINAL2, FINSET_1,
+      ZFMISC_1, WAYBEL_4, MSSUBFAM, WAYBEL_7, INT_2, WAYBEL_1, FUNCT_1,
+      GROUP_6, RELAT_1, BINOP_1, SEQM_3, YELLOW_1, FILTER_1, SETFAM_1,
+      WAYBEL_8;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, SETFAM_1, FINSET_1, RELAT_1,
+      TOLER_1, FUNCT_1, RELSET_1, FUNCT_2, DOMAIN_1, RELAT_2, STRUCT_0,
+      ORDERS_2, LATTICE3, QUANTAL1, YELLOW_0, YELLOW_1, YELLOW_2, WAYBEL_0,
+      WAYBEL_1, WAYBEL_3, WAYBEL_4, WAYBEL_6, WAYBEL_7;
+ constructors DOMAIN_1, TOLER_1, QUANTAL1, ORDERS_3, WAYBEL_1, YELLOW_3,
+      WAYBEL_3, WAYBEL_4, WAYBEL_6, WAYBEL_7, RELSET_1;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, FINSET_1, STRUCT_0, LATTICE3,
+      YELLOW_0, WAYBEL_0, YELLOW_1, YELLOW_2, WAYBEL_1, WAYBEL_2, WAYBEL_3,
+      WAYBEL_4, WAYBEL_6;
+ requirements SUBSET, BOOLE;
+ definitions TARSKI, RELAT_2, ORDERS_2, YELLOW_2, STRUCT_0;
+ theorems TARSKI, STRUCT_0, FINSET_1, FUNCT_1, FUNCT_2, ORDERS_2, LATTICE3,
+      YELLOW_0, YELLOW_1, YELLOW_2, YELLOW_3, YELLOW_5, WAYBEL_0, WAYBEL_1,
+      WAYBEL_3, WAYBEL_4, WAYBEL_6, WAYBEL_7, RELAT_1, YELLOW_7, XBOOLE_0,
+      XBOOLE_1, RELAT_2;
+ schemes SUBSET_1, WELLORD2;
+
+begin :: The Subset of All Compact Elements
+
+definition :: DEFINITION 4.1
+  let L be non empty reflexive RelStr;
+  func CompactSublatt L -> strict full SubRelStr of L means
+  :Def1:
+  for x be Element of L holds x in the carrier of it iff x is compact;
+  existence
+  proof
+    defpred P[set] means ex y be Element of L st y = $1 & y is compact;
+    consider X being Subset of L such that
+A1: for x be set holds x in X iff x in the carrier of L & P[x] from
+    SUBSET_1:sch 1;
+    reconsider S = RelStr(#X, (the InternalRel of L)|_2 X#) as strict full
+    SubRelStr of L by YELLOW_0:57;
+    take S;
+    let x be Element of L;
+    thus x in the carrier of S implies x is compact
+    proof
+      assume x in the carrier of S;
+      then ex y be Element of L st y = x & y is compact by A1;
+      hence thesis;
+    end;
+    thus thesis by A1;
+  end;
+  uniqueness
+  proof
+    let K1,K2 be strict full SubRelStr of L such that
+A2: for x be Element of L holds x in the carrier of K1 iff x is compact and
+A3: for x be Element of L holds x in the carrier of K2 iff x is compact;
+    now
+      let x be set;
+      thus x in the carrier of K1 implies x in the carrier of K2
+      proof
+        assume
+A4:     x in the carrier of K1;
+        the carrier of K1 c= the carrier of L by YELLOW_0:def 13;
+        then reconsider x9 = x as Element of L by A4;
+        x9 is compact by A2,A4;
+        hence thesis by A3;
+      end;
+      thus x in the carrier of K2 implies x in the carrier of K1
+      proof
+        assume
+A5:     x in the carrier of K2;
+        the carrier of K2 c= the carrier of L by YELLOW_0:def 13;
+        then reconsider x9 = x as Element of L by A5;
+        x9 is compact by A3,A5;
+        hence thesis by A2;
+      end;
+    end;
+    then the carrier of K1 = the carrier of K2 by TARSKI:2;
+    hence thesis by YELLOW_0:58;
+  end;
+end;
+
+registration
+  let L be lower-bounded non empty reflexive antisymmetric RelStr;
+  cluster CompactSublatt L -> non empty;
+  coherence
+  proof
+    Bottom L is compact by WAYBEL_3:15;
+    hence thesis by Def1;
+  end;
+end;
+
+theorem
+  for L be complete LATTICE for x,y,k be Element of L holds x <= k & k
+  <= y & k in the carrier of CompactSublatt L implies x << y
+proof
+  let L be complete LATTICE;
+  let x,y,k be Element of L;
+  assume that
+A1: x <= k & k <= y and
+A2: k in the carrier of CompactSublatt L;
+  k is compact by A2,Def1;
+  then k << k by WAYBEL_3:def 2;
+  hence thesis by A1,WAYBEL_3:2;
+end;
+
+theorem :: REMARK 4.2
+  for L be complete LATTICE for x be Element of L holds uparrow x is
+  Open Filter of L iff x is compact
+proof
+  let L be complete LATTICE;
+  let x be Element of L;
+  thus uparrow x is Open Filter of L implies x is compact
+  proof
+    x <= x;
+    then
+A1: x in uparrow x by WAYBEL_0:18;
+    assume uparrow x is Open Filter of L;
+    then consider y be Element of L such that
+A2: y in uparrow x and
+A3: y << x by A1,WAYBEL_6:def 1;
+    x <= y by A2,WAYBEL_0:18;
+    then x << x by A3,WAYBEL_3:2;
+    hence thesis by WAYBEL_3:def 2;
+  end;
+  assume
+A4: x is compact;
+  now
+    let u be Element of L;
+    assume u in uparrow x;
+    then
+A5: x <= u by WAYBEL_0:18;
+    take x2 = x;
+    x <= x2;
+    hence x2 in uparrow x by WAYBEL_0:18;
+    x << x by A4,WAYBEL_3:def 2;
+    hence x2 << u by A5,WAYBEL_3:2;
+  end;
+  hence thesis by WAYBEL_6:def 1;
+end;
+
+theorem :: REMARK 4.3
+  for L be lower-bounded with_suprema non empty Poset holds
+CompactSublatt L is join-inheriting & Bottom L in the carrier of CompactSublatt
+  L
+proof
+  let L be lower-bounded with_suprema non empty Poset;
+  now
+    let x,y be Element of L;
+    assume that
+A1: x in the carrier of CompactSublatt L and
+A2: y in the carrier of CompactSublatt L and
+A3: ex_sup_of {x,y},L;
+    y is compact by A2,Def1;
+    then
+A4: y << y by WAYBEL_3:def 2;
+    x is compact by A1,Def1;
+    then
+A5: x << x by WAYBEL_3:def 2;
+    y <= x "\/" y by A3,YELLOW_0:18;
+    then
+A6: y << x "\/" y by A4,WAYBEL_3:2;
+    x <= x "\/" y by A3,YELLOW_0:18;
+    then x << x "\/" y by A5,WAYBEL_3:2;
+    then x "\/" y << x "\/" y by A6,WAYBEL_3:3;
+    then x "\/" y is compact by WAYBEL_3:def 2;
+    then sup {x,y} is compact by YELLOW_0:41;
+    hence sup {x,y} in the carrier of CompactSublatt L by Def1;
+  end;
+  hence CompactSublatt L is join-inheriting by YELLOW_0:def 17;
+  Bottom L is compact by WAYBEL_3:15;
+  hence thesis by Def1;
+end;
+
+definition
+  let L be non empty reflexive RelStr;
+  let x be Element of L;
+  func compactbelow x -> Subset of L equals
+  {y where y is Element of L: x >= y
+  & y is compact};
+  coherence
+  proof
+    set Z = {y where y is Element of L: x >= y & y is compact};
+    defpred P[Element of L] means x >= $1 & $1 is compact;
+    consider X being Subset of L such that
+A1: for y being Element of L holds y in X iff P[y] from SUBSET_1:sch 3;
+    now
+      let z be set;
+      thus z in X implies z in Z
+      proof
+        assume
+A2:     z in X;
+        then reconsider z1 = z as Element of L;
+        x >= z1 & z1 is compact by A1,A2;
+        hence thesis;
+      end;
+      thus z in Z implies z in X
+      proof
+        assume z in Z;
+        then ex v be Element of L st v = z & x >= v & v is compact;
+        hence thesis by A1;
+      end;
+    end;
+    hence thesis by TARSKI:2;
+  end;
+end;
+
+theorem Th4:
+  for L be non empty reflexive RelStr for x,y be Element of L holds
+  y in compactbelow x iff x >= y & y is compact
+proof
+  let L be non empty reflexive RelStr;
+  let x,y be Element of L;
+  thus y in compactbelow x implies x >= y & y is compact
+  proof
+    assume y in compactbelow x;
+    then ex z be Element of L st z = y & x >= z & z is compact;
+    hence thesis;
+  end;
+  assume x >= y & y is compact;
+  hence thesis;
+end;
+
+theorem Th5:
+  for L be non empty reflexive RelStr for x be Element of L holds
+  compactbelow x = downarrow x /\ the carrier of CompactSublatt L
+proof
+  let L be non empty reflexive RelStr;
+  let x be Element of L;
+  now
+    let y be set;
+    assume
+A1: y in downarrow x /\ the carrier of CompactSublatt L;
+    then reconsider y9 = y as Element of L;
+    y in downarrow x by A1,XBOOLE_0:def 4;
+    then
+A2: y9 <= x by WAYBEL_0:17;
+    y in the carrier of CompactSublatt L by A1,XBOOLE_0:def 4;
+    then y9 is compact by Def1;
+    hence y in compactbelow x by A2;
+  end;
+  then
+A3: downarrow x /\ the carrier of CompactSublatt L c= compactbelow x by
+TARSKI:def 3;
+  now
+    let y be set;
+    assume y in compactbelow x;
+    then consider y9 be Element of L such that
+A4: y9 = y and
+A5: y9 <= x & y9 is compact;
+    y9 in downarrow x & y9 in the carrier of CompactSublatt L by A5,Def1,
+WAYBEL_0:17;
+    hence y in downarrow x /\ the carrier of CompactSublatt L by A4,
+XBOOLE_0:def 4;
+  end;
+  then compactbelow x c= downarrow x /\ the carrier of CompactSublatt L by
+TARSKI:def 3;
+  hence thesis by A3,XBOOLE_0:def 10;
+end;
+
+theorem Th6:
+  for L be non empty reflexive transitive RelStr for x be Element
+  of L holds compactbelow x c= waybelow x
+proof
+  let L be non empty reflexive transitive RelStr;
+  let x be Element of L;
+  now
+    let z be set;
+    assume z in compactbelow x;
+    then consider z9 be Element of L such that
+A1: z9 = z and
+A2: x >= z9 and
+A3: z9 is compact;
+    z9 << z9 by A3,WAYBEL_3:def 2;
+    then z9 << x by A2,WAYBEL_3:2;
+    hence z in waybelow x by A1,WAYBEL_3:7;
+  end;
+  hence thesis by TARSKI:def 3;
+end;
+
+registration
+  let L be non empty lower-bounded reflexive antisymmetric RelStr;
+  let x be Element of L;
+  cluster compactbelow x -> non empty;
+  coherence
+  proof
+    x >= Bottom L & Bottom L is compact by WAYBEL_3:15,YELLOW_0:44;
+    then Bottom L in {y where y is Element of L: x >= y & y is compact};
+    hence thesis;
+  end;
+end;
+
+begin :: Algebraic Lattices
+
+definition
+  let L be non empty reflexive RelStr;
+  attr L is satisfying_axiom_K means
+  :Def3:
+  for x be Element of L holds x = sup compactbelow x;
+end;
+
+definition :: DEFINITION 4.4
+  let L be non empty reflexive RelStr;
+  attr L is algebraic means
+  :Def4:
+  (for x being Element of L holds
+  compactbelow x is non empty directed) & L is up-complete satisfying_axiom_K;
+end;
+
+theorem Th7: :: PROPOSITION 4.5
+  for L be LATTICE holds L is algebraic iff ( L is continuous & for
+  x,y be Element of L st x << y ex k be Element of L st k in the carrier of
+  CompactSublatt L & x <= k & k <= y )
+proof
+  let L be LATTICE;
+  thus L is algebraic implies ( L is continuous & for x,y be Element of L st x
+<< y ex k be Element of L st k in the carrier of CompactSublatt L & x <= k & k
+  <= y )
+  proof
+    assume
+A1: L is algebraic;
+    then
+A2: L is up-complete satisfying_axiom_K by Def4;
+    now
+      let x be Element of L;
+A3:   compactbelow x is non empty directed by A1,Def4;
+      then
+A4:   ex s be set st s in compactbelow x by XBOOLE_0:def 1;
+      compactbelow x c= waybelow x by Th6;
+      then
+A5:   ex_sup_of waybelow x,L by A2,A4,WAYBEL_0:75;
+      ex_sup_of compactbelow x,L by A2,A3,WAYBEL_0:75;
+      then sup compactbelow x <= sup waybelow x by A5,Th6,YELLOW_0:34;
+      then
+A6:   x <= sup waybelow x by A2,Def3;
+      waybelow x is_<=_than x by WAYBEL_3:9;
+      then sup waybelow x <= x by A5,YELLOW_0:def 9;
+      hence x = sup waybelow x by A6,ORDERS_2:25;
+    end;
+    then
+A7: L is satisfying_axiom_of_approximation by WAYBEL_3:def 5;
+    for x be Element of L holds waybelow x is non empty directed
+    proof
+      let x be Element of L;
+      compactbelow x c= waybelow x by Th6;
+      hence thesis by A1,Def4;
+    end;
+    hence L is continuous by A2,A7,WAYBEL_3:def 6;
+    let x,y be Element of L;
+    reconsider D = compactbelow y as non empty directed Subset of L by A1,Def4;
+    assume
+A8: x << y;
+    y = sup D by A2,Def3;
+    then consider d being Element of L such that
+A9: d in D and
+A10: x <= d by A8,WAYBEL_3:def 1;
+    take d;
+    d is compact by A9,Th4;
+    hence d in the carrier of CompactSublatt L by Def1;
+    thus thesis by A9,A10,Th4;
+  end;
+  assume that
+A11: L is continuous and
+A12: for x,y be Element of L st x << y ex k be Element of L st k in the
+  carrier of CompactSublatt L & x <= k & k <= y;
+  now
+    consider s be set;
+    let x be Element of L;
+A13: now
+      let z be Element of L;
+      thus z is_>=_than waybelow x implies z is_>=_than compactbelow x
+      proof
+        assume
+A14:    z is_>=_than waybelow x;
+        now
+          let d be Element of L;
+          assume
+A15:      d in compactbelow x;
+          then d is compact by Th4;
+          then
+A16:      d << d by WAYBEL_3:def 2;
+          d <= x by A15,Th4;
+          then d << x by A16,WAYBEL_3:2;
+          then d in waybelow x by WAYBEL_3:7;
+          hence d <= z by A14,LATTICE3:def 9;
+        end;
+        hence thesis by LATTICE3:def 9;
+      end;
+      thus z is_>=_than compactbelow x implies z is_>=_than waybelow x
+      proof
+        assume
+A17:    z is_>=_than compactbelow x;
+        now
+          let d be Element of L;
+          assume d in waybelow x;
+          then d << x by WAYBEL_3:7;
+          then consider k be Element of L such that
+A18:      k in the carrier of CompactSublatt L and
+A19:      d <= k and
+A20:      k <= x by A12;
+          k is compact by A18,Def1;
+          then k in compactbelow x by A20;
+          then k <= z by A17,LATTICE3:def 9;
+          hence d <= z by A19,ORDERS_2:26;
+        end;
+        hence thesis by LATTICE3:def 9;
+      end;
+    end;
+    x = sup waybelow x & ex_sup_of waybelow x,L by A11,WAYBEL_0:75
+,WAYBEL_3:def 5;
+    hence x = sup compactbelow x by A13,YELLOW_0:47;
+  end;
+  then
+A21: L is satisfying_axiom_K by Def3;
+  for x be Element of L holds compactbelow x is non empty directed
+  proof
+    let x be Element of L;
+    now
+      let Y be finite Subset of compactbelow x;
+      compactbelow x c= waybelow x by Th6;
+      then Y is finite Subset of waybelow x by XBOOLE_1:1;
+      then consider b be Element of L such that
+A22:  b in waybelow x and
+A23:  b is_>=_than Y by A11,WAYBEL_0:1;
+      b << x by A22,WAYBEL_3:7;
+      then consider c be Element of L such that
+A24:  c in the carrier of CompactSublatt L and
+A25:  b <= c and
+A26:  c <= x by A12;
+      take c;
+      c is compact by A24,Def1;
+      hence c in compactbelow x by A26;
+      thus c is_>=_than Y by A23,A25,YELLOW_0:4;
+    end;
+    hence thesis by WAYBEL_0:1;
+  end;
+  hence thesis by A11,A21,Def4;
+end;
+
+registration
+  cluster algebraic -> continuous LATTICE;
+  coherence by Th7;
+end;
+
+registration
+  cluster algebraic -> up-complete satisfying_axiom_K (non empty reflexive
+    RelStr);
+  coherence by Def4;
+end;
+
+registration
+  let L be non empty with_suprema Poset;
+  cluster CompactSublatt L -> join-inheriting;
+  coherence
+  proof
+    now
+      let x,y be Element of L;
+      assume that
+A1:   x in the carrier of CompactSublatt L and
+A2:   y in the carrier of CompactSublatt L and
+A3:   ex_sup_of {x,y},L;
+      y is compact by A2,Def1;
+      then
+A4:   y << y by WAYBEL_3:def 2;
+      x is compact by A1,Def1;
+      then
+A5:   x << x by WAYBEL_3:def 2;
+      y <= x "\/" y by A3,YELLOW_0:18;
+      then
+A6:   y << x "\/" y by A4,WAYBEL_3:2;
+      x <= x "\/" y by A3,YELLOW_0:18;
+      then x << x "\/" y by A5,WAYBEL_3:2;
+      then x "\/" y << x "\/" y by A6,WAYBEL_3:3;
+      then x "\/" y is compact by WAYBEL_3:def 2;
+      then sup {x,y} is compact by YELLOW_0:41;
+      hence sup {x,y} in the carrier of CompactSublatt L by Def1;
+    end;
+    hence thesis by YELLOW_0:def 17;
+  end;
+end;
+
+definition
+  let L be non empty reflexive RelStr;
+  attr L is arithmetic means
+  :Def5:
+  L is algebraic & CompactSublatt L is meet-inheriting;
+end;
+
+begin :: Arithmetic Lattices
+
+registration
+  cluster arithmetic -> algebraic LATTICE;
+  coherence by Def5;
+end;
+
+registration
+  cluster trivial -> arithmetic LATTICE;
+  coherence
+  proof
+    let L be LATTICE;
+    assume L is trivial;
+    then reconsider L9 = L as trivial LATTICE;
+    for x,y be Element of L9 st x << y ex k be Element of L9 st k in the
+    carrier of CompactSublatt L9 & x <= k & k <= y
+    proof
+      let x,y be Element of L9;
+      assume
+A1:   x << y;
+      take k = x;
+      x = y by STRUCT_0:def 10;
+      then k is compact by A1,WAYBEL_3:def 2;
+      hence k in the carrier of CompactSublatt L9 by Def1;
+      thus thesis by STRUCT_0:def 10;
+    end;
+    then
+A2: L9 is algebraic by Th7;
+    for z,v be Element of L9 st z in the carrier of CompactSublatt L9 & v
+in the carrier of CompactSublatt L9 & ex_inf_of {z,v},L9 holds inf {z,v} in the
+    carrier of CompactSublatt L9 by STRUCT_0:def 10;
+    then CompactSublatt L9 is meet-inheriting by YELLOW_0:def 16;
+    hence thesis by A2,Def5;
+  end;
+end;
+
+registration
+  cluster trivial strict LATTICE;
+  existence
+  proof
+    consider B be strict trivial (non empty reflexive RelStr);
+    take B;
+    thus thesis;
+  end;
+end;
+
+theorem Th8:
+  for L1,L2 be non empty reflexive antisymmetric RelStr st the
+RelStr of L1 = the RelStr of L2 & L1 is up-complete for x1,y1 be Element of L1
+  for x2,y2 be Element of L2 st x1 = x2 & y1 = y2 & x1 << y1 holds x2 << y2
+proof
+  let L1,L2 be non empty reflexive antisymmetric RelStr;
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is up-complete;
+  let x1,y1 be Element of L1;
+  let x2,y2 be Element of L2;
+  assume that
+A3: x1 = x2 and
+A4: y1 = y2 and
+A5: x1 << y1;
+  now
+    let D2 be non empty directed Subset of L2;
+    reconsider D1 = D2 as Subset of L1 by A1;
+    reconsider D1 as non empty directed Subset of L1 by A1,WAYBEL_0:3;
+    ex_sup_of D1,L1 by A2,WAYBEL_0:75;
+    then
+A6: sup D1 = sup D2 by A1,YELLOW_0:26;
+    assume y2 <= sup D2;
+    then y1 <= sup D1 by A1,A4,A6,YELLOW_0:1;
+    then consider d1 be Element of L1 such that
+A7: d1 in D1 and
+A8: x1 <= d1 by A5,WAYBEL_3:def 1;
+    reconsider d2 = d1 as Element of L2 by A1;
+    take d2;
+    thus d2 in D2 by A7;
+    thus x2 <= d2 by A1,A3,A8,YELLOW_0:1;
+  end;
+  hence thesis by WAYBEL_3:def 1;
+end;
+
+theorem Th9:
+  for L1,L2 be non empty reflexive antisymmetric RelStr st the
+RelStr of L1 = the RelStr of L2 & L1 is up-complete for x be Element of L1 for
+  y be Element of L2 st x = y & x is compact holds y is compact
+proof
+  let L1,L2 be non empty reflexive antisymmetric RelStr;
+  assume
+A1: the RelStr of L1 = the RelStr of L2 & L1 is up-complete;
+  let x be Element of L1;
+  let y be Element of L2;
+  assume that
+A2: x = y and
+A3: x is compact;
+  x << x by A3,WAYBEL_3:def 2;
+  then y << y by A1,A2,Th8;
+  hence thesis by WAYBEL_3:def 2;
+end;
+
+theorem Th10:
+  for L1,L2 be up-complete (non empty reflexive antisymmetric
+RelStr) st the RelStr of L1 = the RelStr of L2 for x be Element of L1 for y be
+  Element of L2 st x = y holds compactbelow x = compactbelow y
+proof
+  let L1,L2 be up-complete (non empty reflexive antisymmetric RelStr);
+  assume
+A1: the RelStr of L1 = the RelStr of L2;
+  let x be Element of L1;
+  let y be Element of L2;
+  assume
+A2: x = y;
+  now
+    let z be set;
+    assume
+A3: z in compactbelow y;
+    then reconsider z2 = z as Element of L2;
+    reconsider z1 = z2 as Element of L1 by A1;
+    z2 is compact by A3,Th4;
+    then
+A4: z1 is compact by A1,Th9;
+    z2 <= y by A3,Th4;
+    then z1 <= x by A1,A2,YELLOW_0:1;
+    hence z in compactbelow x by A4;
+  end;
+  then
+A5: compactbelow y c= compactbelow x by TARSKI:def 3;
+  now
+    let z be set;
+    assume
+A6: z in compactbelow x;
+    then reconsider z1 = z as Element of L1;
+    reconsider z2 = z1 as Element of L2 by A1;
+    z1 is compact by A6,Th4;
+    then
+A7: z2 is compact by A1,Th9;
+    z1 <= x by A6,Th4;
+    then z2 <= y by A1,A2,YELLOW_0:1;
+    hence z in compactbelow y by A7;
+  end;
+  then compactbelow x c= compactbelow y by TARSKI:def 3;
+  hence thesis by A5,XBOOLE_0:def 10;
+end;
+
+theorem
+  for L1,L2 be RelStr st the RelStr of L1 = the RelStr of L2 & L1 is non
+  empty holds L2 is non empty;
+
+theorem Th12:
+  for L1,L2 be RelStr st the RelStr of L1 = the RelStr of L2 & L1
+  is reflexive holds L2 is reflexive
+proof
+  let L1,L2 be RelStr;
+  assume
+A1: the RelStr of L1 = the RelStr of L2 & the InternalRel of L1
+  is_reflexive_in the carrier of L1;
+  let x be set;
+  assume x in the carrier of L2;
+  hence thesis by A1,RELAT_2:def 1;
+end;
+
+theorem Th13:
+  for L1,L2 be RelStr st the RelStr of L1 = the RelStr of L2 & L1
+  is transitive holds L2 is transitive
+proof
+  let L1,L2 be RelStr;
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is transitive;
+  now
+    let x,y,z be Element of L2;
+    reconsider x9 = x, y9 = y, z9 = z as Element of L1 by A1;
+    assume x <= y & y <= z;
+    then x9 <= y9 & y9 <= z9 by A1,YELLOW_0:1;
+    then x9 <= z9 by A2,YELLOW_0:def 2;
+    hence x <= z by A1,YELLOW_0:1;
+  end;
+  hence thesis by YELLOW_0:def 2;
+end;
+
+theorem Th14:
+  for L1,L2 be RelStr st the RelStr of L1 = the RelStr of L2 & L1
+  is antisymmetric holds L2 is antisymmetric
+proof
+  let L1,L2 be RelStr;
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is antisymmetric;
+  now
+    let x,y be Element of L2;
+    reconsider x9 = x, y9 = y as Element of L1 by A1;
+    assume x <= y & y <= x;
+    then x9 <= y9 & y9 <= x9 by A1,YELLOW_0:1;
+    hence x = y by A2,YELLOW_0:def 3;
+  end;
+  hence thesis by YELLOW_0:def 3;
+end;
+
+theorem Th15:
+  for L1,L2 be non empty reflexive RelStr st the RelStr of L1 =
+  the RelStr of L2 & L1 is up-complete holds L2 is up-complete
+proof
+  let L1,L2 be non empty reflexive RelStr;
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is up-complete;
+  now
+    let X be non empty directed Subset of L2;
+    reconsider X9 = X as Subset of L1 by A1;
+    reconsider X9 as non empty directed Subset of L1 by A1,WAYBEL_0:3;
+    consider x9 be Element of L1 such that
+A3: x9 is_>=_than X9 and
+A4: for y9 be Element of L1 st y9 is_>=_than X9 holds x9 <= y9 by A2,
+WAYBEL_0:def 39;
+    reconsider x = x9 as Element of L2 by A1;
+    take x;
+    thus x is_>=_than X by A1,A3,YELLOW_0:2;
+    let y be Element of L2 such that
+A5: y is_>=_than X;
+    reconsider y9 = y as Element of L1 by A1;
+    x9 <= y9 by A1,A4,A5,YELLOW_0:2;
+    hence x <= y by A1,YELLOW_0:1;
+  end;
+  hence thesis by WAYBEL_0:def 39;
+end;
+
+theorem Th16:
+  for L1,L2 be up-complete (non empty reflexive antisymmetric
+RelStr) st the RelStr of L1 = the RelStr of L2 & L1 is satisfying_axiom_K & for
+  x be Element of L1 holds compactbelow x is non empty directed holds L2 is
+  satisfying_axiom_K
+proof
+  let L1,L2 be up-complete (non empty reflexive antisymmetric RelStr);
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is satisfying_axiom_K and
+A3: for x be Element of L1 holds compactbelow x is non empty directed;
+  now
+    let x be Element of L2;
+    reconsider x9 = x as Element of L1 by A1;
+    compactbelow x9 is non empty directed by A3;
+    then
+A4: ex_sup_of compactbelow x9,L1 by WAYBEL_0:75;
+    x9 = sup compactbelow x9 & compactbelow x = compactbelow x9 by A1,A2,Def3
+,Th10;
+    hence x = sup compactbelow x by A1,A4,YELLOW_0:26;
+  end;
+  hence thesis by Def3;
+end;
+
+theorem Th17:
+  for L1,L2 be non empty reflexive antisymmetric RelStr st the
+  RelStr of L1 = the RelStr of L2 & L1 is algebraic holds L2 is algebraic
+proof
+  let L1,L2 be non empty reflexive antisymmetric RelStr;
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is algebraic;
+A3: L2 is up-complete by A1,A2,Th15;
+A4: for x be Element of L2 holds compactbelow x is non empty directed
+  proof
+    let x be Element of L2;
+    reconsider x9 = x as Element of L1 by A1;
+    compactbelow x9 is non empty directed by A2,Def4;
+    hence thesis by A1,A2,A3,Th10,WAYBEL_0:3;
+  end;
+  for x be Element of L1 holds compactbelow x is non empty directed by A2,Def4;
+  then L2 is satisfying_axiom_K by A1,A2,A3,Th16;
+  hence thesis by A3,A4,Def4;
+end;
+
+theorem Th18:
+  for L1,L2 be LATTICE st the RelStr of L1 = the RelStr of L2 & L1
+  is arithmetic holds L2 is arithmetic
+proof
+  let L1,L2 be LATTICE;
+  assume that
+A1: the RelStr of L1 = the RelStr of L2 and
+A2: L1 is arithmetic;
+A3: L2 is algebraic by A1,A2,Th17;
+A4: CompactSublatt L1 is meet-inheriting by A2,Def5;
+  now
+    let x2,y2 be Element of L2;
+    reconsider x1 = x2, y1 = y2 as Element of L1 by A1;
+    assume that
+A5: x2 in the carrier of CompactSublatt L2 and
+A6: y2 in the carrier of CompactSublatt L2 and
+A7: ex_inf_of {x2,y2},L2;
+    x2 is compact by A5,Def1;
+    then x1 is compact by A1,A3,Th9;
+    then
+A8: x1 in the carrier of CompactSublatt L1 by Def1;
+    y2 is compact by A6,Def1;
+    then y1 is compact by A1,A3,Th9;
+    then
+A9: y1 in the carrier of CompactSublatt L1 by Def1;
+    ex_inf_of {x1,y1},L1 by A1,A7,YELLOW_0:14;
+    then inf {x1,y1} in the carrier of CompactSublatt L1 by A4,A8,A9,
+YELLOW_0:def 16;
+    then
+A10: inf {x1,y1} is compact by Def1;
+    inf {x1,y1} = inf {x2,y2} by A1,A7,YELLOW_0:27;
+    then inf {x2,y2} is compact by A1,A2,A10,Th9;
+    hence inf {x2,y2} in the carrier of CompactSublatt L2 by Def1;
+  end;
+  then CompactSublatt L2 is meet-inheriting by YELLOW_0:def 16;
+  hence thesis by A3,Def5;
+end;
+
+registration
+  let L be non empty RelStr;
+  cluster the RelStr of L -> non empty;
+  coherence;
+end;
+
+registration
+  let L be non empty reflexive RelStr;
+  cluster the RelStr of L -> reflexive;
+  coherence by Th12;
+end;
+
+registration
+  let L be transitive RelStr;
+  cluster the RelStr of L -> transitive;
+  coherence by Th13;
+end;
+
+registration
+  let L be antisymmetric RelStr;
+  cluster the RelStr of L -> antisymmetric;
+  coherence by Th14;
+end;
+
+registration
+  let L be with_infima RelStr;
+  cluster the RelStr of L -> with_infima;
+  coherence by YELLOW_7:14;
+end;
+
+registration
+  let L be with_suprema RelStr;
+  cluster the RelStr of L -> with_suprema;
+  coherence by YELLOW_7:15;
+end;
+
+registration
+  let L be up-complete (non empty reflexive RelStr);
+  cluster the RelStr of L -> up-complete;
+  coherence by Th15;
+end;
+
+registration
+  let L be algebraic (non empty reflexive antisymmetric RelStr);
+  cluster the RelStr of L -> algebraic;
+  coherence by Th17;
+end;
+
+registration
+  let L be arithmetic LATTICE;
+  cluster the RelStr of L -> arithmetic;
+  coherence by Th18;
+end;
+
+canceled 2;
+
+theorem :: PROPOSITION 4.7 a)
+  for L be algebraic LATTICE holds L is arithmetic iff CompactSublatt L
+  is LATTICE
+proof
+  let L be algebraic LATTICE;
+  thus L is arithmetic implies CompactSublatt L is LATTICE
+  proof
+    consider x be Element of L;
+    assume
+A1: L is arithmetic;
+    compactbelow x is non empty by Def4;
+    then consider z be set such that
+A2: z in compactbelow x by XBOOLE_0:def 1;
+    ex z9 be Element of L st z9 = z & x >= z9 & z9 is compact by A2;
+    then CompactSublatt L is non empty join-inheriting meet-inheriting full
+    SubRelStr of L by A1,Def1,Def5;
+    hence thesis;
+  end;
+  assume
+A3: CompactSublatt L is LATTICE;
+  now
+    let x,y be Element of L;
+    assume that
+A4: x in the carrier of CompactSublatt L and
+A5: y in the carrier of CompactSublatt L and
+    ex_inf_of {x,y},L;
+    reconsider L9 = CompactSublatt L as non empty full SubRelStr of L by A4;
+    reconsider x9 = x, y9 = y as Element of L9 by A4,A5;
+    set X = compactbelow inf {x,y};
+    reconsider c = "/\"({x,y},L9) as Element of L by YELLOW_0:59;
+A6: inf {x,y} = sup X by Def3;
+    X is non empty directed by Def4;
+    then
+A7: ex_sup_of X,L by WAYBEL_0:75;
+A8: ex_inf_of {x9,y9},L9 by A3,YELLOW_0:21;
+    then
+A9: "/\"({x,y},L9) is_<=_than {x,y} by YELLOW_0:31;
+    now
+      let z be set;
+      assume z in X;
+      then consider z1 be Element of L such that
+A10:  z = z1 and
+A11:  inf {x,y} >= z1 and
+A12:  z1 is compact;
+A13:  z1 <= x "/\" y by A11,YELLOW_0:40;
+      x "/\" y <= y by YELLOW_0:23;
+      then z1 <= y by A13,ORDERS_2:26;
+      then
+A14:  z in compactbelow y by A10,A12;
+      x "/\" y <= x by YELLOW_0:23;
+      then z1 <= x by A13,ORDERS_2:26;
+      then z in compactbelow x by A10,A12;
+      hence z in compactbelow x /\ compactbelow y by A14,XBOOLE_0:def 4;
+    end;
+    then
+A15: X c= compactbelow x /\ compactbelow y by TARSKI:def 3;
+    now
+      let b9 be Element of L9;
+      reconsider b = b9 as Element of L by YELLOW_0:59;
+      assume
+A16:  b9 in X;
+      then b9 in compactbelow y by A15,XBOOLE_0:def 4;
+      then b <= y by Th4;
+      then
+A17:  b9 <= y9 by YELLOW_0:61;
+      b9 in compactbelow x by A15,A16,XBOOLE_0:def 4;
+      then b <= x by Th4;
+      then b9 <= x9 by YELLOW_0:61;
+      then b9 <= x9 "/\" y9 by A8,A17,YELLOW_0:19;
+      hence b9 <= "/\"({x,y},L9) by A3,YELLOW_0:40;
+    end;
+    then
+A18: X is_<=_than "/\"({x,y},L9) by LATTICE3:def 9;
+    now
+      let d be set;
+      assume d in X;
+      then
+      ex d9 be Element of L st d9 = d & inf {x,y} >= d9 & d9 is compact;
+      hence d in the carrier of L9 by Def1;
+    end;
+    then X c= the carrier of L9 by TARSKI:def 3;
+    then X is_<=_than c by A18,YELLOW_0:63;
+    then
+A19: sup X <= c by A7,YELLOW_0:30;
+    y9 in {x,y} by TARSKI:def 2;
+    then "/\"({x,y},L9) <= y9 by A9,LATTICE3:def 8;
+    then
+A20: c <= y by YELLOW_0:60;
+    x9 in {x,y} by TARSKI:def 2;
+    then "/\"({x,y},L9) <= x9 by A9,LATTICE3:def 8;
+    then c <= x by YELLOW_0:60;
+    then c <= x "/\" y by A20,YELLOW_0:23;
+    then c <= sup X by A6,YELLOW_0:40;
+    then c = sup X by A19,ORDERS_2:25;
+    hence inf {x,y} in the carrier of CompactSublatt L by A6;
+  end;
+  then CompactSublatt L is meet-inheriting by YELLOW_0:def 16;
+  hence thesis by Def5;
+end;
+
+theorem Th22: :: PROPOSITION 4.7 b)
+  for L be algebraic lower-bounded LATTICE holds L is arithmetic
+  iff L-waybelow is multiplicative
+proof
+  let L be algebraic lower-bounded LATTICE;
+  thus L is arithmetic implies L-waybelow is multiplicative
+  proof
+    assume
+A1: L is arithmetic;
+    now
+      reconsider C = CompactSublatt L as meet-inheriting non empty full
+      SubRelStr of L by A1,Def5;
+      let a,x,y be Element of L;
+      assume that
+A2:   [a,x] in L-waybelow and
+A3:   [a,y] in L-waybelow;
+      a << x by A2,WAYBEL_4:def 2;
+      then consider c be Element of L such that
+A4:   c in the carrier of CompactSublatt L and
+A5:   a <= c and
+A6:   c <= x by Th7;
+      a << y by A3,WAYBEL_4:def 2;
+      then consider k be Element of L such that
+A7:   k in the carrier of CompactSublatt L and
+A8:   a <= k and
+A9:   k <= y by Th7;
+A10:  c"/\"k <= x"/\"y by A6,A9,YELLOW_3:2;
+      reconsider c9=c, k9=k as Element of C by A4,A7;
+      c9"/\"k9 in the carrier of CompactSublatt L;
+      then c"/\"k in the carrier of CompactSublatt L by YELLOW_0:70;
+      then c"/\"k is compact by Def1;
+      then
+A11:  c"/\"k << c"/\"k by WAYBEL_3:def 2;
+      a"/\"a = a by YELLOW_5:2;
+      then a <= c"/\"k by A5,A8,YELLOW_3:2;
+      then a << x"/\"y by A10,A11,WAYBEL_3:2;
+      hence [a,x"/\"y] in L-waybelow by WAYBEL_4:def 2;
+    end;
+    hence thesis by WAYBEL_7:def 7;
+  end;
+  assume
+A12: L-waybelow is multiplicative;
+  now
+    let x,y be Element of L;
+    assume that
+A13: x in the carrier of CompactSublatt L and
+A14: y in the carrier of CompactSublatt L and
+    ex_inf_of {x,y},L;
+    y is compact by A14,Def1;
+    then y << y by WAYBEL_3:def 2;
+    then
+A15: [y,y] in L-waybelow by WAYBEL_4:def 2;
+    x is compact by A13,Def1;
+    then x << x by WAYBEL_3:def 2;
+    then [x,x] in L-waybelow by WAYBEL_4:def 2;
+    then [x "/\" y,x "/\" y] in L-waybelow by A12,A15,WAYBEL_7:45;
+    then x "/\" y << x "/\" y by WAYBEL_4:def 2;
+    then x "/\" y is compact by WAYBEL_3:def 2;
+    then x "/\" y in the carrier of CompactSublatt L by Def1;
+    hence inf {x,y} in the carrier of CompactSublatt L by YELLOW_0:40;
+  end;
+  then CompactSublatt L is meet-inheriting by YELLOW_0:def 16;
+  hence thesis by Def5;
+end;
+
+theorem :: COROLLARY 4.8.a)
+  for L be arithmetic lower-bounded LATTICE, p be Element of L holds p
+  is pseudoprime implies p is prime
+proof
+  let L be arithmetic lower-bounded LATTICE;
+  let p be Element of L;
+  L-waybelow is multiplicative by Th22;
+  hence thesis by WAYBEL_7:49;
+end;
+
+theorem :: COROLLARY 4.8.b)
+  for L be algebraic distributive lower-bounded LATTICE st for p being
+  Element of L st p is pseudoprime holds p is prime holds L is arithmetic
+proof
+  let L be algebraic distributive lower-bounded LATTICE;
+  assume for p be Element of L st p is pseudoprime holds p is prime;
+  then L-waybelow is multiplicative by WAYBEL_7:50;
+  hence thesis by Th22;
+end;
+
+registration
+  let L be algebraic LATTICE;
+  let c be closure Function of L,L;
+  cluster non empty directed Subset of Image c;
+  existence
+  proof
+    consider x be Element of Image c;
+    take downarrow x;
+    thus thesis;
+  end;
+end;
+
+theorem Th25:
+  for L be algebraic LATTICE for c be closure Function of L,L st c
+is directed-sups-preserving holds c.:([#]CompactSublatt L) c= [#]CompactSublatt
+  Image c
+proof
+  let L be algebraic LATTICE;
+  let c be closure Function of L,L;
+  assume
+A1: c is directed-sups-preserving;
+  let x be set;
+A2: c is idempotent monotone by WAYBEL_1:def 13;
+  assume x in c.:([#]CompactSublatt L);
+  then consider y be set such that
+A3: y in dom c and
+A4: y in [#]CompactSublatt L and
+A5: x = c.y by FUNCT_1:def 12;
+A6: x in rng c by A3,A5,FUNCT_1:def 5;
+  then reconsider x9 = x as Element of Image c by YELLOW_0:def 15;
+  reconsider x1 = x9 as Element of L by A6;
+  reconsider y9 = y as Element of L by A3;
+  y9 is compact by A4,Def1;
+  then
+A7: y9 << y9 by WAYBEL_3:def 2;
+  now
+    id(L) <= c by WAYBEL_1:def 14;
+    then id(L).y9 <= c.y9 by YELLOW_2:10;
+    then
+A8: y9 <= x1 by A5,FUNCT_1:35;
+    let D be non empty directed Subset of Image c;
+    assume
+A9: x9 <= sup D;
+    D c= the carrier of Image c;
+    then
+A10: D c= rng c by YELLOW_0:def 15;
+    then reconsider D9 = D as (non empty (Subset of L)) by XBOOLE_1:1;
+    reconsider D9 as (non empty (directed (Subset of L))) by YELLOW_2:7;
+A11: ex_sup_of D9,L by WAYBEL_0:75;
+    c preserves_sup_of D9 by A1,WAYBEL_0:def 37;
+    then
+A12: c.sup D9 = sup (c.:D9) by A11,WAYBEL_0:def 31
+      .= sup D9 by A2,A10,YELLOW_2:22;
+    c.sup D9 = sup D by A11,WAYBEL_1:58;
+    then x1 <= sup D9 by A9,A12,YELLOW_0:60;
+    then y9 <= sup D9 by A8,ORDERS_2:26;
+    then consider d9 be Element of L such that
+A13: d9 in D9 and
+A14: y9 <= d9 by A7,WAYBEL_3:def 1;
+    reconsider d = d9 as Element of Image c by A13;
+    take d;
+    thus d in D by A13;
+    d in the carrier of Image c;
+    then d in rng c by YELLOW_0:def 15;
+    then d9 in {z where z is Element of L: z = c.z} by A2,YELLOW_2:21;
+    then
+A15: ex z9 be Element of L st d9 = z9 & z9 = c.z9;
+    c.y9 <= c.d9 by A2,A14,WAYBEL_1:def 2;
+    hence x9 <= d by A5,A15,YELLOW_0:61;
+  end;
+  then x9 << x9 by WAYBEL_3:def 1;
+  then x9 is compact by WAYBEL_3:def 2;
+  hence thesis by Def1;
+end;
+
+theorem :: PROPOSITION 4.9.(i)
+  for L be algebraic lower-bounded LATTICE for c be closure Function of
+  L,L st c is directed-sups-preserving holds Image c is algebraic LATTICE
+proof
+  let L be algebraic lower-bounded LATTICE;
+  let c be closure Function of L,L;
+  assume
+A1: c is directed-sups-preserving;
+  c is idempotent by WAYBEL_1:def 13;
+  then reconsider Imc = Image c as complete LATTICE by A1,YELLOW_2:37;
+A2: now
+    let x be Element of Imc;
+    now
+      let y,z be Element of Imc;
+      assume that
+A3:   y in compactbelow x and
+A4:   z in compactbelow x;
+      y is compact by A3,Th4;
+      then
+A5:   y << y by WAYBEL_3:def 2;
+      z is compact by A4,Th4;
+      then
+A6:   z << z by WAYBEL_3:def 2;
+      take v = y "\/" z;
+      z <= v by YELLOW_0:22;
+      then
+A7:   z << v by A6,WAYBEL_3:2;
+      y <= v by YELLOW_0:22;
+      then y << v by A5,WAYBEL_3:2;
+      then v << v by A7,WAYBEL_3:3;
+      then
+A8:   v is compact by WAYBEL_3:def 2;
+      y <= x & z <= x by A3,A4,Th4;
+      then v <= x by YELLOW_0:22;
+      hence v in compactbelow x & y <= v & z <= v by A8,YELLOW_0:22;
+    end;
+    hence compactbelow x is non empty directed by WAYBEL_0:def 1;
+  end;
+  now
+    let x be Element of Imc;
+    consider y be Element of L such that
+A9: c.y = x by YELLOW_2:12;
+    sup compactbelow y in the carrier of L;
+    then
+A10: sup compactbelow y in dom c by FUNCT_2:def 1;
+    compactbelow y is non empty directed by Def4;
+    then
+A11: c preserves_sup_of compactbelow y & ex_sup_of compactbelow y,L by A1,
+WAYBEL_0:75,def 37;
+    then c.sup compactbelow y = sup (c.:(compactbelow y)) by WAYBEL_0:def 31;
+    then sup (c.:(compactbelow y)) in rng c by A10,FUNCT_1:def 5;
+    then
+A12: ex_sup_of (c.:(compactbelow y)),L & sup (c.:(compactbelow y)) in the
+    carrier of Image c by YELLOW_0:17,def 15;
+    for b be Element of Imc st b in compactbelow x holds b <= x by Th4;
+    then x is_>=_than compactbelow x by LATTICE3:def 9;
+    then
+A13: sup compactbelow x <= x by YELLOW_0:32;
+A14: c.:([#]CompactSublatt L) c= [#]CompactSublatt Image c by A1,Th25;
+A15: c is monotone by A1,YELLOW_2:18;
+    compactbelow y = downarrow y /\ [#]CompactSublatt L by Th5;
+    then
+A16: c.:(compactbelow y) c= c.:(downarrow y) /\ c.: ([#]CompactSublatt L)
+    by RELAT_1:154;
+    now
+      let z be set;
+      assume
+A17:  z in c.:(compactbelow y);
+      then consider v be set such that
+A18:  v in dom c and
+A19:  v in compactbelow y and
+A20:  z = c.v by FUNCT_1:def 12;
+      z in rng c by A18,A20,FUNCT_1:def 5;
+      then reconsider z1 = z as Element of Imc by YELLOW_0:def 15;
+      reconsider v as Element of L by A18;
+      v <= y by A19,Th4;
+      then c.v <= c.y by A15,WAYBEL_1:def 2;
+      then
+A21:  z1 <= x by A9,A20,YELLOW_0:61;
+      z in c.:([#]CompactSublatt L) by A16,A17,XBOOLE_0:def 4;
+      then z1 is compact by A14,Def1;
+      hence z in compactbelow x by A21;
+    end;
+    then
+A22: c.:(compactbelow y) c= compactbelow x by TARSKI:def 3;
+    compactbelow x is directed by A2;
+    then
+A23: ex_sup_of compactbelow x,Imc by WAYBEL_0:75;
+    c.:(compactbelow y) c= rng c by RELAT_1:144;
+    then c.:(compactbelow y) is Subset of Imc by YELLOW_0:def 15;
+    then
+A24: ex_sup_of c.:(compactbelow y),Imc & sup (c.:(compactbelow y)) = "\/"(
+    c.:( compactbelow y),Imc) by A12,YELLOW_0:65;
+    c.y = c.sup compactbelow y by Def3
+      .= sup (c.:(compactbelow y)) by A11,WAYBEL_0:def 31;
+    then x <= sup compactbelow x by A9,A23,A24,A22,YELLOW_0:34;
+    hence x = sup compactbelow x by A13,ORDERS_2:25;
+  end;
+  then Imc is satisfying_axiom_K by Def3;
+  hence thesis by A2,Def4;
+end;
+
+theorem :: PROPOSITION 4.9.(ii)
+  for L be algebraic lower-bounded LATTICE, c be closure Function of L,L
+  st c is directed-sups-preserving holds c.:([#]CompactSublatt L) = [#]
+  CompactSublatt Image c
+proof
+  let L be algebraic lower-bounded LATTICE;
+  let c be closure Function of L,L;
+  assume
+A1: c is directed-sups-preserving;
+  now
+    c is idempotent by WAYBEL_1:def 13;
+    then
+A2: rng c = {x where x is Element of L: x = c.x} by YELLOW_2:21;
+    c is idempotent by WAYBEL_1:def 13;
+    then reconsider Imc = Image c as complete LATTICE by A1,YELLOW_2:37;
+    let a9 be set;
+    assume
+A3: a9 in [#]CompactSublatt Image c;
+A4: the carrier of CompactSublatt Imc c= the carrier of Imc by YELLOW_0:def 13;
+    then reconsider a = a9 as Element of Imc by A3;
+    a is compact by A3,Def1;
+    then
+A5: a << a by WAYBEL_3:def 2;
+    a9 in the carrier of Imc by A3,A4;
+    then a in rng c by YELLOW_0:def 15;
+    then consider a1 be Element of L such that
+A6: a = a1 and
+A7: a1 = c.a1 by A2;
+    compactbelow a1 is non empty directed Subset of L by Def4;
+    then
+A8: c preserves_sup_of compactbelow a1 & ex_sup_of compactbelow a1,L by A1,
+WAYBEL_0:75,def 37;
+A9: c is monotone by A1,YELLOW_2:18;
+    now
+      let z be set;
+      assume z in c.:(compactbelow a1);
+      then consider v be set such that
+A10:  v in dom c and
+A11:  v in compactbelow a1 and
+A12:  z = c.v by FUNCT_1:def 12;
+      reconsider v9 = v as Element of L by A11;
+A13:  v in downarrow a1 /\ the carrier of CompactSublatt L by A11,Th5;
+      then v in downarrow a1 by XBOOLE_0:def 4;
+      then v9 <= a1 by WAYBEL_0:17;
+      then c.v9 <= a1 by A7,A9,WAYBEL_1:def 2;
+      then
+A14:  z in (downarrow a1) by A12,WAYBEL_0:17;
+      v in [#]CompactSublatt L by A13,XBOOLE_0:def 4;
+      then z in c.:([#]CompactSublatt L) by A10,A12,FUNCT_1:def 12;
+      hence z in (downarrow a1) /\ (c.:([#]CompactSublatt L)) by A14,
+XBOOLE_0:def 4;
+    end;
+    then
+A15: c.:(compactbelow a1) c= (downarrow a1) /\ (c.:([#] CompactSublatt L))
+    by TARSKI:def 3;
+    a = sup compactbelow a1 by A6,Def3;
+    then
+A16: a = sup (c.:(compactbelow a1)) by A6,A7,A8,WAYBEL_0:def 31;
+    c.:(compactbelow a1) c= rng c by RELAT_1:144;
+    then
+A17: c.:(compactbelow a1) c= the carrier of Imc by YELLOW_0:def 15;
+A18: downarrow a /\ c.:([#]CompactSublatt L) is non empty directed Subset
+    of Imc
+    proof
+      (c.:[#]CompactSublatt L) /\ downarrow a is Subset of Imc;
+      then reconsider
+      D = downarrow a /\ c.:[#]CompactSublatt L as Subset of Imc;
+A19:  Bottom Imc <= a by YELLOW_0:44;
+A20:  now
+        let x,y be Element of Imc;
+        assume that
+A21:    x in D and
+A22:    y in D;
+        x in c.:([#]CompactSublatt L) by A21,XBOOLE_0:def 4;
+        then consider d be set such that
+A23:    d in dom c and
+A24:    d in [#]CompactSublatt L and
+A25:    x = c.d by FUNCT_1:def 12;
+        y in c.: ([#]CompactSublatt L) by A22,XBOOLE_0:def 4;
+        then consider e be set such that
+A26:    e in dom c and
+A27:    e in [#]CompactSublatt L and
+A28:    y = c.e by FUNCT_1:def 12;
+        reconsider e as Element of L by A26;
+        y in downarrow a by A22,XBOOLE_0:def 4;
+        then y <= a by WAYBEL_0:17;
+        then
+A29:    c.e <= a1 by A6,A28,YELLOW_0:60;
+        reconsider d as Element of L by A23;
+A30:    d <= d "\/" e by YELLOW_0:22;
+        x in downarrow a by A21,XBOOLE_0:def 4;
+        then x <= a by WAYBEL_0:17;
+        then c.d <= a1 by A6,A25,YELLOW_0:60;
+        then
+A31:    c.d "\/" c.e <= a1 by A29,YELLOW_0:22;
+        d "\/" e in the carrier of L;
+        then d "\/" e in dom c by FUNCT_2:def 1;
+        then c.(d "\/" e) in rng c by FUNCT_1:def 5;
+        then reconsider z = c.(d "\/" e) as Element of Imc by YELLOW_0:def 15;
+        take z;
+A32:    id(L) <= c by WAYBEL_1:def 14;
+        then id(L).e <= c.e by YELLOW_2:10;
+        then
+A33:    e <= c.e by FUNCT_1:35;
+        id(L).d <= c.d by A32,YELLOW_2:10;
+        then d <= c.d by FUNCT_1:35;
+        then d "\/" e <= c.d "\/" c.e by A33,YELLOW_3:3;
+        then d "\/" e <= a1 by A31,ORDERS_2:26;
+        then c.(d "\/" e) <= a1 by A7,A9,WAYBEL_1:def 2;
+        then z <= a by A6,YELLOW_0:61;
+        then
+A34:    z in downarrow a by WAYBEL_0:17;
+A35:    e <= d "\/" e by YELLOW_0:22;
+        then
+A36:    c.e <= c.(d "\/" e) by A9,WAYBEL_1:def 2;
+        e is compact by A27,Def1;
+        then e << e by WAYBEL_3:def 2;
+        then
+A37:    e << d "\/" e by A35,WAYBEL_3:2;
+        d is compact by A24,Def1;
+        then d << d by WAYBEL_3:def 2;
+        then d << d "\/" e by A30,WAYBEL_3:2;
+        then d "\/" e << d "\/" e by A37,WAYBEL_3:3;
+        then d "\/" e is compact by WAYBEL_3:def 2;
+        then
+A38:    d "\/" e in [#]CompactSublatt L by Def1;
+        d "\/" e in the carrier of L;
+        then d "\/" e in dom c by FUNCT_2:def 1;
+        then z in c.:([#]CompactSublatt L) by A38,FUNCT_1:def 12;
+        hence z in D by A34,XBOOLE_0:def 4;
+        c.d <= c.(d "\/" e) by A9,A30,WAYBEL_1:def 2;
+        hence x <= z & y <= z by A25,A28,A36,YELLOW_0:61;
+      end;
+      Bottom L is compact by WAYBEL_3:15;
+      then dom c = the carrier of L & Bottom L in [#]CompactSublatt L by Def1,
+FUNCT_2:def 1;
+      then
+A39:  c.Bottom L in c.:([#]CompactSublatt L) by FUNCT_1:def 12;
+A40:  ex_sup_of {},L & {} c= the carrier of L by XBOOLE_1:2,YELLOW_0:42;
+A41:  {} c= the carrier of Imc by XBOOLE_1:2;
+      c.Bottom L = c."\/"({},L) by YELLOW_0:def 11
+        .= "\/"({},Imc) by A40,A41,WAYBEL_1:58
+        .= Bottom Imc by YELLOW_0:def 11;
+      then c.Bottom L in downarrow a by A19,WAYBEL_0:17;
+      hence thesis by A39,A20,WAYBEL_0:def 1,XBOOLE_0:def 4;
+    end;
+A42: c.:([#]CompactSublatt L) c= rng c by RELAT_1:144;
+    now
+      let z be set;
+      assume
+A43:  z in (downarrow a1) /\ (c.:([#]CompactSublatt L));
+      then reconsider z1 = z as Element of L;
+A44:  z in c.:([#] CompactSublatt L) by A43,XBOOLE_0:def 4;
+      then reconsider z2 = z1 as Element of Imc by A42,YELLOW_0:def 15;
+      z in downarrow a1 by A43,XBOOLE_0:def 4;
+      then z1 <= a1 by WAYBEL_0:17;
+      then z2 <= a by A6,YELLOW_0:61;
+      then z in (downarrow a) by WAYBEL_0:17;
+      hence z in (downarrow a) /\ (c.: ([#]CompactSublatt L)) by A44,
+XBOOLE_0:def 4;
+    end;
+    then
+A45: (downarrow a1) /\ (c.:([#]CompactSublatt L)) c= (downarrow a) /\ (c
+    .: ([#]CompactSublatt L)) by TARSKI:def 3;
+    ex_sup_of c.:(compactbelow a1),L by A8,WAYBEL_0:def 31;
+    then
+A46: a = "\/"(c.:(compactbelow a1),Imc) by A6,A7,A17,A16,WAYBEL_1:58;
+    ex_sup_of c.:(compactbelow a1),Imc & ex_sup_of (downarrow a) /\ (c.:(
+    [#] CompactSublatt L)),Imc by YELLOW_0:17;
+    then a <= "\/"((downarrow a) /\ (c.:([#]CompactSublatt L)),Imc) by A46,A15
+,A45,XBOOLE_1:1,YELLOW_0:34;
+    then consider k be Element of Imc such that
+A47: k in ((downarrow a) /\ (c.:([#]CompactSublatt L))) and
+A48: a <= k by A5,A18,WAYBEL_3:def 1;
+    k in downarrow a by A47,XBOOLE_0:def 4;
+    then
+A49: k <= a by WAYBEL_0:17;
+    k in c.:([#]CompactSublatt L) by A47,XBOOLE_0:def 4;
+    hence a9 in c.:([#]CompactSublatt L) by A48,A49,ORDERS_2:25;
+  end;
+  then
+A50: [#]CompactSublatt Image c c= c.:([#]CompactSublatt L) by TARSKI:def 3;
+  c.:([#]CompactSublatt L) c= [#]CompactSublatt Image c by A1,Th25;
+  hence thesis by A50,XBOOLE_0:def 10;
+end;
+
+begin :: Boolean Posets as Algebraic Lattices
+
+theorem Th28:
+  for X,x be set holds x is Element of BoolePoset X iff x c= X
+proof
+  let X,x be set;
+  LattPOSet BooleLatt X = RelStr(#the carrier of BooleLatt X, LattRel (
+    BooleLatt X)#) by LATTICE3:def 2;
+  then
+A1: the carrier of BoolePoset X = the carrier of BooleLatt X by YELLOW_1:def 2
+    .= bool X by LATTICE3:def 1;
+  hence x is Element of BoolePoset X implies x c= X;
+  thus thesis by A1;
+end;
+
+theorem Th29:
+  for X be set for x,y be Element of BoolePoset X holds x << y iff
+for Y be Subset-Family of X st y c= union Y ex Z be finite Subset of Y st x c=
+  union Z
+proof
+  let X be set;
+  let x,y be Element of BoolePoset X;
+  LattPOSet BooleLatt X = RelStr(#the carrier of BooleLatt X, LattRel (
+    BooleLatt X)#) by LATTICE3:def 2;
+  then
+A1: the carrier of BoolePoset X = the carrier of BooleLatt X by YELLOW_1:def 2
+    .= bool X by LATTICE3:def 1;
+  thus x << y implies for Y be Subset-Family of X st y c= union Y ex Z be
+  finite Subset of Y st x c= union Z
+  proof
+    assume
+A2: x << y;
+    let Y be Subset-Family of X;
+    reconsider Y9 = Y as Subset of BoolePoset X by A1;
+    assume y c= union Y;
+    then y c= sup Y9 by YELLOW_1:21;
+    then y <= sup Y9 by YELLOW_1:2;
+    then consider Z be finite Subset of BoolePoset X such that
+A3: Z c= Y and
+A4: x <= sup Z by A2,WAYBEL_3:18;
+    reconsider Z9 = Z as finite Subset of Y by A3;
+    take Z9;
+    x c= sup Z by A4,YELLOW_1:2;
+    hence thesis by YELLOW_1:21;
+  end;
+  thus (for Y be Subset-Family of X st y c= union Y ex Z be finite Subset of Y
+  st x c= union Z) implies x << y
+  proof
+    assume
+A5: for Y be Subset-Family of X st y c= union Y ex Z be finite Subset
+    of Y st x c= union Z;
+    now
+      let Y be Subset of BoolePoset X;
+      reconsider Y9 = Y as Subset-Family of X by A1;
+      assume y <= sup Y;
+      then y c= sup Y by YELLOW_1:2;
+      then y c= union Y9 by YELLOW_1:21;
+      then consider Z9 be finite Subset of Y9 such that
+A6:   x c= union Z9 by A5;
+      reconsider Z = Z9 as finite Subset of BoolePoset X by XBOOLE_1:1;
+      take Z;
+      thus Z c= Y;
+      x c= sup Z by A6,YELLOW_1:21;
+      hence x <= sup Z by YELLOW_1:2;
+    end;
+    hence thesis by WAYBEL_3:19;
+  end;
+end;
+
+theorem Th30:
+  for X be set for x be Element of BoolePoset X holds x is finite
+  iff x is compact
+proof
+  let X be set;
+  let x be Element of BoolePoset X;
+  per cases;
+  suppose
+A1: x is empty;
+    then x = Bottom BoolePoset X by YELLOW_1:18;
+    hence thesis by A1,WAYBEL_3:15;
+  end;
+  suppose
+A2: x is non empty;
+    thus x is finite implies x is compact
+    proof
+      assume
+A3:   x is finite;
+      now
+        defpred P[set,set] means $1 in $2;
+        let Y be Subset-Family of X;
+        assume
+A4:     x c= union Y;
+A5:     for e be set st e in x ex u be set st u in Y & P[e,u]
+        proof
+          let e be set;
+          assume e in x;
+          then ex u be set st e in u & u in Y by A4,TARSKI:def 4;
+          hence thesis;
+        end;
+        consider f be Function such that
+A6:     dom f = x and
+A7:     rng f c= Y and
+A8:     for e be set st e in x holds P[e,f.e] from WELLORD2:sch 1(A5);
+        reconsider Z = rng f as Subset of Y by A7;
+        reconsider Z as finite Subset of Y by A3,A6,FINSET_1:26;
+        take Z;
+        now
+          let z be set;
+          assume z in x;
+          then z in f.z & f.z in Z by A6,A8,FUNCT_1:def 5;
+          hence z in union Z by TARSKI:def 4;
+        end;
+        hence x c= union Z by TARSKI:def 3;
+      end;
+      then x << x by Th29;
+      hence thesis by WAYBEL_3:def 2;
+    end;
+    thus x is compact implies x is finite
+    proof
+      reconsider x9 = x as non empty set by A2;
+      set Y = { {y} where y is Element of x9 : not contradiction };
+      Y c= bool X
+      proof
+        let t be set;
+        assume t in Y;
+        then
+A9:     ex y9 be Element of x9 st t = {y9};
+        now
+          let k be set;
+          assume
+A10:      k in t;
+          x c= X by Th28;
+          hence k in X by A9,A10,TARSKI:def 3;
+        end;
+        then t c= X by TARSKI:def 3;
+        hence thesis;
+      end;
+      then reconsider Y as Subset-Family of X;
+      now
+        let y be set;
+        assume y in x;
+        then
+A11:    {y} in Y;
+        y in {y} by TARSKI:def 1;
+        hence y in union Y by A11,TARSKI:def 4;
+      end;
+      then
+A12:  x c= union Y by TARSKI:def 3;
+      assume x is compact;
+      then x << x by WAYBEL_3:def 2;
+      then consider Z be finite Subset of Y such that
+A13:  x c= union Z by A12,Th29;
+      now
+        let k be set;
+        assume k in Z;
+        then k in Y;
+        then ex y9 be Element of x9 st k = {y9};
+        hence k is finite;
+      end;
+      then union Z is finite by FINSET_1:25;
+      hence thesis by A13;
+    end;
+  end;
+end;
+
+theorem Th31:
+  for X be set for x be Element of BoolePoset X holds compactbelow
+  x = {y where y is finite Subset of x : not contradiction}
+proof
+  let X be set;
+  let x be Element of BoolePoset X;
+  now
+    let z be set;
+    assume z in {y where y is finite Subset of x : not contradiction};
+    then consider z9 be finite Subset of x such that
+A1: z9 = z;
+    x c= X by Th28;
+    then z9 c= X by XBOOLE_1:1;
+    then reconsider z1 = z9 as Element of BoolePoset X by Th28;
+    z1 is compact & z1 <= x by Th30,YELLOW_1:2;
+    hence z in compactbelow x by A1;
+  end;
+  then
+A2: {y where y is finite Subset of x : not contradiction} c= compactbelow x
+  by TARSKI:def 3;
+  now
+    let z be set;
+    assume z in compactbelow x;
+    then consider z9 be Element of BoolePoset X such that
+A3: z9 = z and
+A4: x >= z9 & z9 is compact;
+    z is finite & z9 c= x by A3,A4,Th30,YELLOW_1:2;
+    hence z in {y where y is finite Subset of x : not contradiction} by A3;
+  end;
+  then
+  compactbelow x c= {y where y is finite Subset of x : not contradiction}
+  by TARSKI:def 3;
+  hence thesis by A2,XBOOLE_0:def 10;
+end;
+
+theorem
+  for X be set for F be Subset of X holds F in the carrier of
+  CompactSublatt BoolePoset X iff F is finite
+proof
+  let X be set;
+  let F be Subset of X;
+  reconsider F9 = F as Element of BoolePoset X by Th28;
+A1: F c= F;
+  thus F in the carrier of CompactSublatt BoolePoset X implies F is finite
+  proof
+    assume
+A2: F in the carrier of CompactSublatt BoolePoset X;
+    the carrier of CompactSublatt BoolePoset X c= the carrier of
+    BoolePoset X by YELLOW_0:def 13;
+    then reconsider F9 = F as Element of BoolePoset X by A2;
+    F9 <= F9 & F9 is compact by A2,Def1;
+    then F9 in compactbelow F9;
+    then F9 in {y where y is finite Subset of F9 : not contradiction} by Th31;
+    then ex F1 be finite Subset of F9 st F1 = F9;
+    hence thesis;
+  end;
+  assume F is finite;
+  then F in {y where y is finite Subset of F9 : not contradiction} by A1;
+  then F9 in compactbelow F9 by Th31;
+  then F9 is compact by Th4;
+  hence thesis by Def1;
+end;
+
+registration
+  let X be set;
+  let x be Element of BoolePoset X;
+  cluster compactbelow x -> lower directed;
+  coherence
+  proof
+    now
+      let a,b be set;
+      assume that
+A1:   a c= b and
+A2:   b in compactbelow x;
+      b in {y where y is finite Subset of x : not contradiction} by A2,Th31;
+      then ex b1 be finite Subset of x st b = b1;
+      then a is finite Subset of x by A1,XBOOLE_1:1;
+      then a in {y where y is finite Subset of x : not contradiction};
+      hence a in compactbelow x by Th31;
+    end;
+    hence
+A3: compactbelow x is lower by WAYBEL_7:10;
+    now
+      let a,b be set;
+      assume that
+A4:   a in compactbelow x and
+A5:   b in compactbelow x;
+      b in {y where y is finite Subset of x : not contradiction} by A5,Th31;
+      then
+A6:   ex b1 be finite Subset of x st b = b1;
+      a in {y where y is finite Subset of x : not contradiction} by A4,Th31;
+      then ex a1 be finite Subset of x st a = a1;
+      then a \/ b is finite Subset of x by A6,XBOOLE_1:8;
+      then a \/ b in {y where y is finite Subset of x : not contradiction};
+      hence a \/ b in compactbelow x by Th31;
+    end;
+    hence thesis by A3,WAYBEL_7:12;
+  end;
+end;
+
+theorem Th33: :: EXAMPLES 4.11.(1b)
+  for X be set holds BoolePoset X is algebraic
+proof
+  let X be set;
+  now
+    let x be Element of BoolePoset X;
+A1: now
+      let a be Element of BoolePoset X;
+      assume
+A2:   a is_>=_than compactbelow x;
+      now
+        let t be set;
+        assume
+A3:     t in x;
+A4:     x c= X by Th28;
+        now
+          let k be set;
+          assume k in {t};
+          then k = t by TARSKI:def 1;
+          hence k in X by A3,A4;
+        end;
+        then {t} c= X by TARSKI:def 3;
+        then reconsider t1 = {t} as Element of BoolePoset X by Th28;
+        for k be set st k in {t} holds k in x by A3,TARSKI:def 1;
+        then {t} is finite Subset of x by TARSKI:def 3;
+        then {t} in {y where y is finite Subset of x : not contradiction};
+        then {t} in compactbelow x by Th31;
+        then t1 <= a by A2,LATTICE3:def 9;
+        then t in {t} & {t} c= a by TARSKI:def 1,YELLOW_1:2;
+        hence t in a;
+      end;
+      then x c= a by TARSKI:def 3;
+      hence x <= a by YELLOW_1:2;
+    end;
+    for b be Element of BoolePoset X st b in compactbelow x holds b <= x
+    by Th4;
+    then x is_>=_than compactbelow x by LATTICE3:def 9;
+    hence x = sup compactbelow x by A1,YELLOW_0:32;
+  end;
+  then ( for x be Element of BoolePoset X holds compactbelow x is non empty
+  directed)& BoolePoset X is satisfying_axiom_K by Def3;
+  hence thesis by Def4;
+end;
+
+registration
+  let X be set;
+  cluster BoolePoset X -> algebraic;
+  coherence by Th33;
+end;

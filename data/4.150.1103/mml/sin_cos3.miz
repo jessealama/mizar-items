@@ -1,0 +1,1105 @@
+:: Trigonometric Functions on Complex Space
+::  by Takashi Mitsuishi , Noboru Endou and Keiji Ohkubo
+::
+:: Received October 10, 2002
+:: Copyright (c) 2002 Association of Mizar Users
+ 
+environ
+
+ vocabularies SUBSET_1, NUMBERS, FUNCT_1, ORDINAL2, XCMPLX_0, RELAT_1, ARYTM_1,
+      ARYTM_3, ORDINAL1, PARTFUN1, COMPLEX1, SIN_COS, CARD_1, SIN_COS2,
+      COMSEQ_3, PREPOWER, SIN_COS3;
+ notations SUBSET_1, NUMBERS, ORDINAL1, XCMPLX_0, COMPLEX1, REAL_1, NAT_1,
+      PARTFUN1, FUNCT_2, COMSEQ_3, SIN_COS, SIN_COS2;
+ constructors FUNCT_4, ARYTM_0, REAL_1, NAT_1, BINOP_2, SEQ_1, PARTFUN1,
+      COMSEQ_3, SIN_COS, SIN_COS2, RVSUM_1, XXREAL_0;
+ registrations NUMBERS, XCMPLX_0, MEMBERED, FUNCT_2, RELSET_1;
+ requirements NUMERALS, SUBSET, BOOLE, ARITHM;
+ theorems COMPLEX1, SIN_COS, SIN_COS2, COMSEQ_3, XCMPLX_0, NUMBERS;
+ schemes NAT_1, BINOP_2, FUNCT_2;
+
+begin  :: Definitions of trigonometric functions
+
+reserve x,y for Element of REAL;
+reserve z,z1,z2 for Element of COMPLEX;
+reserve n for Element of NAT;
+
+definition
+  func sin_C -> Function of COMPLEX, COMPLEX means
+  :Def1:
+  it.z = (exp(<i>*z)-( exp(-<i> * z)))/(2 * <i>);
+  existence
+  proof
+    deffunc U(Element of COMPLEX) = (exp(<i>*$1)-(exp(-<i> * $1)))/(2 * <i>);
+    ex f being Function of COMPLEX, COMPLEX st for z holds f.z = U(z) from
+    FUNCT_2:sch 4;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of COMPLEX) = (exp(<i>*$1)-(exp(-<i> * $1)))/(2 * <i>);
+    for f1,f2 being Function of COMPLEX, COMPLEX st (for z holds f1.z = U(
+    z)) & (for z holds f2.z = U(z)) holds f1 = f2 from BINOP_2:sch 1;
+    hence thesis;
+  end;
+end;
+
+definition
+  func cos_C -> Function of COMPLEX,COMPLEX means
+  :Def2:
+  it.z = (exp(<i>*z) + exp(-<i>*z))/2;
+  existence
+  proof
+    deffunc U(Element of COMPLEX) = (exp(<i>*$1) + exp(-<i>*$1))/2;
+    ex f being Function of COMPLEX, COMPLEX st for z holds f.z = U(z) from
+    FUNCT_2:sch 4;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of COMPLEX) = (exp(<i>*$1) + exp(-<i>*$1))/2;
+    for f1,f2 being Function of COMPLEX, COMPLEX st (for z holds f1.z = U(
+    z)) & (for z holds f2.z = U(z)) holds f1 = f2 from BINOP_2:sch 1;
+    hence thesis;
+  end;
+end;
+
+definition
+  func sinh_C -> Function of COMPLEX,COMPLEX means
+  :Def3:
+  it.z = (exp(z) - exp (-z))/2;
+  existence
+  proof
+    deffunc U(Element of COMPLEX) = (exp($1) - exp(-$1))/2;
+    ex f being Function of COMPLEX, COMPLEX st for z holds f.z = U(z) from
+    FUNCT_2:sch 4;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of COMPLEX) = (exp($1) - exp(-$1))/2;
+    for f1,f2 being Function of COMPLEX, COMPLEX st (for z holds f1.z = U(
+    z)) & (for z holds f2.z = U(z)) holds f1 = f2 from BINOP_2:sch 1;
+    hence thesis;
+  end;
+end;
+
+definition
+  func cosh_C -> Function of COMPLEX,COMPLEX means
+  :Def4:
+  it.z = (exp(z) + exp (-z))/2;
+  existence
+  proof
+    deffunc U(Element of COMPLEX) = (exp($1) + exp(-$1))/2;
+    ex f being Function of COMPLEX, COMPLEX st for z holds f.z = U(z) from
+    FUNCT_2:sch 4;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of COMPLEX) = (exp($1) + exp(-$1))/2;
+    for f1,f2 being Function of COMPLEX, COMPLEX st (for z holds f1.z = U(
+    z)) & (for z holds f2.z = U(z)) holds f1 = f2 from BINOP_2:sch 1;
+    hence thesis;
+  end;
+end;
+
+Lm1: for z being complex number holds sinh_C/.z = (exp(z) - exp(-z))/2
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  sinh_C/.z = (exp(z) - exp(-z))/2 by Def3;
+  hence thesis;
+end;
+
+Lm2: for z being complex number holds cosh_C/.z = (exp(z) + exp(-z))/2
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  cosh_C/.z = (exp(z) + exp(-z))/2 by Def4;
+  hence thesis;
+end;
+
+Lm3: for z be Element of COMPLEX holds exp(z)*exp(-z) = 1
+proof
+  let z be Element of COMPLEX;
+  thus exp(z)*exp(-z) = exp(z + -z) by SIN_COS:24
+    .= 1 by SIN_COS:54,56;
+end;
+
+begin  :: Properties of trigonometric functions on complex space
+
+theorem
+  for z being Element of COMPLEX holds (sin_C/.z)*(sin_C/.z) + (cos_C/.z
+  )*(cos_C/.z) = 1
+proof
+  let z be Element of COMPLEX;
+  set z1 = exp(<i>*z), z2 = exp(-<i>*z);
+  (sin_C/.z)*(sin_C/.z) + (cos_C/.z)*(cos_C/.z) =(sin_C/.z)*(sin_C/.z) + (
+  cos_C/.z)*((exp(<i>*z) + exp(-<i>*z))/2) by Def2
+    .=(sin_C/.z)*(sin_C/.z) + ((z1 + z2)/2)*((z1 + z2)/2) by Def2
+    .=(z1 - z2)/(2*<i>)*(sin_C/.z) + ((z1 + z2)/2)*((z1 + z2)/2) by Def1
+    .=((z1 - z2)/(2*<i>))*((z1 - z2)/(2*<i>)) + ((z1 + z2)/2)*((z1 + z2)/2)
+  by Def1
+    .=((z1*z2 + z1*z2) + (z1*z2 + z1*z2))/4
+    .=((1 + z1*exp(-(<i>*z))) + (z1*exp(-(<i>*z)) + z1*exp(-(<i>*z)))) /4 by
+  Lm3
+    .=((1 + 1) + (z1*exp(-(<i>*z)) + z1*exp(-(<i>*z)))) /4 by Lm3
+    .=((1 + 1) + (z1*exp(-(<i>*z)) + 1))/4 by Lm3
+    .=(2 + 2)/4 by Lm3;
+  hence thesis;
+end;
+
+theorem Th2:
+  for z being complex number holds -sin_C/.z = sin_C/.(-z)
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  sin_C/.(-z) = (exp(<i>*(-z)) - exp(-<i>*(-z)))/(2*<i>) by Def1
+    .= -((exp(<i>*z) - exp(-<i>*z))/(2*<i>));
+  then -sin_C/.z = sin_C/.(-z) by Def1;
+  hence thesis;
+end;
+
+theorem Th3:
+  for z being complex number holds cos_C/.z = cos_C/.(-z)
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  cos_C/.(-z) = (exp(<i>*(-z)) + exp(-<i>*(-z)))/2 by Def2
+    .=(exp(-<i>*z) + exp(<i>*z))/2;
+  then cos_C/.z = cos_C/.(-z) by Def2;
+  hence thesis;
+end;
+
+theorem Th4:
+  for z1,z2 being complex number holds sin_C/.(z1+z2) = (sin_C/.z1)
+  *(cos_C/.z2) + (cos_C/.z1)*(sin_C/.z2)
+proof
+  let z1,z2 be complex number;
+  reconsider z1,z2 as Element of COMPLEX by XCMPLX_0:def 2;
+  set e1 = exp(<i>*z1), e2 = exp(-<i>*z1), e3 = exp(<i>*z2), e4 = exp(-<i>*z2);
+  (sin_C/.z1)*(cos_C/.z2) + (cos_C/.z1)*(sin_C/.z2) =((exp(<i>*z1) - exp(-
+  <i>*z1))/(2*<i>))*(cos_C/.z2) + (cos_C/.z1)*(sin_C/.z2) by Def1
+    .=((exp(<i>*z1) - exp(-<i>*z1))/(2*<i>))*(cos_C/.z2) + (cos_C/.z1)*((exp
+  (<i>*z2) - exp(-<i>*z2))/(2*<i>)) by Def1
+    .=((exp(<i>*z1) - exp(-<i>*z1))/(2*<i>))* ((exp(-<i>*z2) + exp(<i>*z2))/
+  2) + (cos_C/.z1)*((exp(<i>*z2) - exp(-<i>*z2))/(2*<i>)) by Def2
+    .=((exp(<i>*z1) - exp(-<i>*z1))*(exp(-<i>*z2) + exp(<i>*z2))) /(2*<i>*2)
+  + ((exp(-<i>*z1) + exp(<i>*z1))/2)* ((exp(<i>*z2) - exp(-<i>*z2))/(2*<i>)) by
+  Def2
+    .=( e1*e3+e1*e3-(e1*e4+e2*e4 - (e1*e4-e2*e4)) ) /(2*<i>*2)
+    .=(Re(e1*e3)+Re(e1*e3)+(Im(e1*e3)+Im(e1*e3))*<i>-(e2*e4 + e2*e4)) /(2*
+  <i>*2) by COMPLEX1:def 9
+    .=((2*Re(e1*e3)+2*Im(e1*e3)*<i>)-(e2*e4 + e2*e4)) /(2*<i>*2)
+    .=((Re(2*(e1*e3))+2*Im(e1*e3)*<i>)-(e2*e4 + e2*e4)) /(2*<i>*2) by
+  COMSEQ_3:17
+    .=((Re(2*(e1*e3))+Im(2*(e1*e3))*<i>)-(e2*e4 + e2*e4)) /(2*<i>*2) by
+  COMSEQ_3:17
+    .=(2*(e1*e3)-(e2*e4 + e2*e4)) /(2*<i>*2) by COMPLEX1:29
+    .=(2*(e1*e3)-(Re(e2*e4)+Re(e2*e4)+(Im(e2*e4)+Im(e2*e4))*<i>)) /(2*<i>*2)
+  by COMPLEX1:def 9
+    .=(2*(e1*e3)-(2*Re(e2*e4)+2*Im(e2*e4)*<i>)) /(2*<i>*2)
+    .=(2*(e1*e3)-(Re(2*(e2*e4))+2*Im(e2*e4)*<i>)) /(2*<i>*2) by COMSEQ_3:17
+    .=(2*(e1*e3)-(Re(2*(e2*e4))+Im(2*(e2*e4))*<i>)) /(2*<i>*2) by COMSEQ_3:
+  17
+    .=(2*(e1*e3)-2*(e2*e4)) /(2*<i>*2) by COMPLEX1:29
+    .=(e1*e3)/(2*<i>) -(2*(e2*e4))/(2*<i>*2)
+    .=exp(<i>*z1+<i>*z2)/(2*<i>)-(e2*e4)/(2*<i>) by SIN_COS:24
+    .=exp(<i>*(z1+z2))/(2*<i>)-exp(-<i>*z1+-<i>*z2)/(2*<i>) by SIN_COS:24
+    .=( exp(<i>*(z1+z2))-exp(-<i>*(z1+z2)) )/(2*<i>);
+  then
+  sin_C/.(z1+z2) = (sin_C/.z1)*(cos_C/.z2) + (cos_C/.z1)*(sin_C/.z2) by Def1;
+  hence thesis;
+end;
+
+theorem
+  sin_C/.(z1-z2) = (sin_C/.z1)*(cos_C/.z2) - (cos_C/.z1)*(sin_C/.z2)
+proof
+  sin_C/.(z1-z2) = sin_C/.(z1 + -z2)
+    .=(sin_C/.z1)*(cos_C/.(-z2)) + (cos_C/.z1)*(sin_C/.(-z2)) by Th4
+    .=(sin_C/.z1)*(cos_C/.z2) + (cos_C/.z1)*(sin_C/.(-z2)) by Th3
+    .=(sin_C/.z1)*(cos_C/.z2) + (cos_C/.z1)*(-sin_C/.z2) by Th2
+    .=(sin_C/.z1)*(cos_C/.z2) + -(cos_C/.z1)*(sin_C/.z2);
+  hence thesis;
+end;
+
+theorem Th6:
+  for z1,z2 being complex number holds cos_C/.(z1+z2) = (cos_C/.z1)
+  *(cos_C/.z2) - (sin_C/.z1)*(sin_C/.z2)
+proof
+  let z1,z2 be complex number;
+  reconsider z1,z2 as Element of COMPLEX by XCMPLX_0:def 2;
+  set e1 = exp(<i>*z1), e2 = exp(-<i>*z1), e3 = exp(<i>*z2), e4 = exp(-<i>*z2);
+  (cos_C/.z1)*(cos_C/.z2) - (sin_C/.z1)*(sin_C/.z2) =(cos_C/.z1)*(cos_C/.
+  z2) - ((exp(<i>*z1) - exp(-<i>*z1))/(2*<i>))*(sin_C/.z2) by Def1
+    .=(cos_C/.z1)*(cos_C/.z2) - ((exp(<i>*z1) - exp(-<i>*z1))/(2*<i>)) *((
+  exp(<i>*z2) - exp(-<i>*z2))/(2*<i>)) by Def1
+    .=(cos_C/.z1)*((exp(<i>*z2) + exp(-<i>*z2))/2) - ((exp(<i>*z1) - exp(-
+  <i>*z1))/(2*<i>)) *((exp(<i>*z2) - exp(-<i>*z2))/(2*<i>)) by Def2
+    .=((e1 + e2)/2)*((e3 + e4)/2) - ((e1 - e2)/(2*<i>))*((e3 - e4)/(2*<i>))
+  by Def2
+    .=( e1*e3+e1*e3 + (e2*e4+e2*e4) )/(2*2)
+    .=(Re(e1*e3)+Re(e1*e3)+(Im(e1*e3)+Im(e1*e3))*<i>+(e2*e4 + e2*e4)) /(2*2)
+  by COMPLEX1:def 9
+    .=((2*Re(e1*e3)+2*Im(e1*e3)*<i>)+(e2*e4 + e2*e4)) /(2*2)
+    .=((Re(2*(e1*e3))+2*Im(e1*e3)*<i>)+(e2*e4 + e2*e4)) /(2*2) by COMSEQ_3:
+  17
+    .=((Re(2*(e1*e3))+Im(2*(e1*e3))*<i>)+(e2*e4 + e2*e4)) /(2*2) by COMSEQ_3
+  :17
+    .=(2*(e1*e3)+(e2*e4 + e2*e4))/(2*2) by COMPLEX1:29
+    .=(2*(e1*e3)+(Re(e2*e4)+Re(e2*e4)+(Im(e2*e4)+Im(e2*e4))*<i>)) /(2*2) by
+  COMPLEX1:def 9
+    .=(2*(e1*e3)+(2*Re(e2*e4)+2*Im(e2*e4)*<i>)) /(2*2)
+    .=(2*(e1*e3)+(Re(2*(e2*e4))+2*Im(e2*e4)*<i>)) /(2*2) by COMSEQ_3:17
+    .=(2*(e1*e3)+(Re(2*(e2*e4))+Im(2*(e2*e4))*<i>)) /(2*2) by COMSEQ_3:17
+    .=(2*(e1*e3)+2*(e2*e4))/(2*2) by COMPLEX1:29
+    .=(e1*e3)/(2)+(2*(e2*e4))/(2*2)
+    .=exp(<i>*z1+<i>*z2)/(2)+(e2*e4)/(2) by SIN_COS:24
+    .=exp(<i>*(z1+z2))/(2)+exp(-<i>*z1+-<i>*z2)/(2) by SIN_COS:24
+    .=( exp(<i>*(z1+z2))+exp(-<i>*(z1+z2)) )/(2);
+  then
+  cos_C/.(z1+z2) = (cos_C/.z1)*(cos_C/.z2) - (sin_C/.z1)*(sin_C/.z2) by Def2;
+  hence thesis;
+end;
+
+theorem
+  cos_C/.(z1-z2) = (cos_C/.z1)*(cos_C/.z2) + (sin_C/.z1)*(sin_C/.z2)
+proof
+  cos_C/.(z1-z2) = cos_C/.(z1+-z2)
+    .=cos_C/.z1*cos_C/.(-z2) - sin_C/.z1*sin_C/.(-z2) by Th6
+    .=cos_C/.z1*cos_C/.z2 - sin_C/.z1*sin_C/.(-z2) by Th3
+    .=cos_C/.z1*cos_C/.z2 - sin_C/.z1*(-sin_C/.z2) by Th2
+    .=cos_C/.z1*cos_C/.z2 - -sin_C/.z1*sin_C/.z2;
+  hence thesis;
+end;
+
+theorem Th8:
+  (cosh_C/.z)*(cosh_C/.z) - (sinh_C/.z)*(sinh_C/.z) = 1
+proof
+  set e1 = exp(z), e2 = exp(-z);
+  (cosh_C/.z)*(cosh_C/.z) - (sinh_C/.z)*(sinh_C/.z) =(cosh_C/.z)*(cosh_C/.
+  z) - ((e1-e2)/2)*(sinh_C/.z) by Def3
+    .=(cosh_C/.z)*(cosh_C/.z) - ((e1-e2)/2)*((e1-e2)/2) by Def3
+    .=((e1+e2)/2)*(cosh_C/.z) - (((e1-e2)*(e1-e2))/(2*2)) by Def4
+    .=((e1+e2)/2)*((e1+e2)/2) - (((e1-e2)*(e1-e2))/(2*2)) by Def4
+    .=(e1*e2 + e1*e2 + (e1*e2 + e1*e2))/(2*2)
+    .=(1 + e1*e2 + (e1*e2 + e1*e2))/(2*2) by Lm3
+    .=(1 + 1 + (e1*e2 + e1*e2))/(2*2) by Lm3
+    .=(1 + 1 + (1 + e1*e2))/(2*2) by Lm3
+    .=(2+2)/(2*2) by Lm3
+    .= 1;
+  hence thesis;
+end;
+
+theorem Th9:
+  -sinh_C/.z = sinh_C/.(-z)
+proof
+  sinh_C/.(-z) = (exp(-z) - exp(-(-z)))/2 by Def3
+    .= -(exp(z) - exp(-z))/2;
+  hence thesis by Def3;
+end;
+
+theorem Th10:
+  cosh_C/.z = cosh_C/.(-z)
+proof
+  cosh_C/.(-z) = (exp(-z) + exp(-(-z)))/2 by Def4
+    .= (exp(-z) + exp(z))/2;
+  hence thesis by Def4;
+end;
+
+theorem Th11:
+  sinh_C/.(z1+z2) = (sinh_C/.z1)*(cosh_C/.z2) + (cosh_C/.z1)*( sinh_C/.z2)
+proof
+  set e1=exp(z1), e2=exp(-z1), e3=exp(z2), e4=exp(-z2);
+  (sinh_C/.z1)*(cosh_C/.z2) + (cosh_C/.z1)*(sinh_C/.z2) =((e1-e2)/2)*(
+  cosh_C/.z2) + (cosh_C/.z1)*(sinh_C/.z2) by Def3
+    .=((e1-e2)/2)*(cosh_C/.z2) + (cosh_C/.z1)*((e3-e4)/2) by Def3
+    .=((e1-e2)/2)*(cosh_C/.z2) + ((e1+e2)/2)*((e3-e4)/2) by Def4
+    .=((e1-e2)/2)*((e3+e4)/2) + ((e1+e2)/2)*((e3-e4)/2) by Def4
+    .=(e1*e3+e1*e3-(e2*e4+e2*e4))/4
+    .=(Re(e1*e3)+Re(e1*e3)+(Im(e1*e3)+Im(e1*e3))*<i>-(e2*e4 + e2*e4)) /4 by
+  COMPLEX1:def 9
+    .=((2*Re(e1*e3)+2*Im(e1*e3)*<i>)-(e2*e4 + e2*e4)) /4
+    .=((Re(2*(e1*e3))+2*Im(e1*e3)*<i>)-(e2*e4 + e2*e4)) /4 by COMSEQ_3:17
+    .=((Re(2*(e1*e3))+Im(2*(e1*e3))*<i>)-(e2*e4 + e2*e4)) /4 by COMSEQ_3:17
+    .=(2*(e1*e3)-(e2*e4 + e2*e4))/4 by COMPLEX1:29
+    .=(2*(e1*e3)-(Re(e2*e4)+Re(e2*e4)+(Im(e2*e4)+Im(e2*e4))*<i>)) /4 by
+  COMPLEX1:def 9
+    .=(2*(e1*e3)-(2*Re(e2*e4)+2*Im(e2*e4)*<i>)) /4
+    .=(2*(e1*e3)-(Re(2*(e2*e4))+2*Im(e2*e4)*<i>)) /4 by COMSEQ_3:17
+    .=(2*(e1*e3)-(Re(2*(e2*e4))+Im(2*(e2*e4))*<i>)) /4 by COMSEQ_3:17
+    .=(2*(e1*e3)-2*(e2*e4))/4 by COMPLEX1:29
+    .=(e1*e3)/(2)-(2*(e2*e4))/(2*2)
+    .=exp(z1+z2)/2-(e2*e4)/(2) by SIN_COS:24
+    .=exp(z1+z2)/2-exp(-z1+-z2)/2 by SIN_COS:24
+    .=(exp(z1+z2)-exp(-(z1+z2)))/2;
+  hence thesis by Def3;
+end;
+
+theorem Th12:
+  sinh_C/.(z1-z2) = (sinh_C/.z1)*(cosh_C/.z2) - (cosh_C/.z1)*( sinh_C/.z2)
+proof
+  sinh_C/.(z1-z2) = sinh_C/.(z1+ -z2)
+    .= (sinh_C/.z1)*cosh_C/.(-z2) + (cosh_C/.z1)*sinh_C/.(-z2) by Th11
+    .= (sinh_C/.z1)*cosh_C/.z2 + (cosh_C/.z1)*sinh_C/.(-z2) by Th10
+    .= (sinh_C/.z1)*cosh_C/.z2 + (cosh_C/.z1)*(-sinh_C/.z2) by Th9
+    .= (sinh_C/.z1)*cosh_C/.z2 + -(cosh_C/.z1)*(sinh_C/.z2);
+  hence thesis;
+end;
+
+theorem Th13:
+  cosh_C/.(z1-z2) = (cosh_C/.z1)*(cosh_C/.z2) - (sinh_C/.z1)*( sinh_C/.z2)
+proof
+  set e1=exp(z1), e2=exp(-z1), e3=exp(z2), e4=exp(-z2);
+  (cosh_C/.z1)*(cosh_C/.z2) - (sinh_C/.z1)*(sinh_C/.z2) =((e1+e2)/2)*(
+  cosh_C/.z2) - (sinh_C/.z1)*(sinh_C/.z2) by Def4
+    .=((e1+e2)/2)*((e3+e4)/2) - (sinh_C/.z1)*(sinh_C/.z2) by Def4
+    .=((e1+e2)*(e3+e4))/(2*2) - ((e1-e2)/2)*(sinh_C/.z2) by Def3
+    .=((e1+e2)*(e3+e4))/(2*2)-((e1-e2)/2)*((e3-e4)/2) by Def3
+    .=(e2*e3+e2*e3+(e1*e4+e2*e4+(e1*e4-e2*e4)))/(2*2)
+    .=(Re(e2*e3)+Re(e2*e3)+(Im(e2*e3)+Im(e2*e3))*<i>+(e1*e4+e1*e4)) /(2*2)
+  by COMPLEX1:def 9
+    .=((2*Re(e2*e3)+2*Im(e2*e3)*<i>)+(e1*e4+e1*e4))/(2*2)
+    .=((Re(2*(e2*e3))+2*Im(e2*e3)*<i>)+(e1*e4+e1*e4)) /(2*2) by COMSEQ_3:17
+    .=((Re(2*(e2*e3))+Im(2*(e2*e3))*<i>)+(e1*e4+e1*e4)) /(2*2) by COMSEQ_3:
+  17
+    .=(2*(e2*e3)+(e1*e4+e1*e4))/(2*2) by COMPLEX1:29
+    .=(2*(e2*e3)+(Re(e1*e4)+Re(e1*e4)+(Im(e1*e4)+Im(e1*e4))*<i>)) /(2*2) by
+  COMPLEX1:def 9
+    .=(2*(e2*e3)+(2*Re(e1*e4)+2*Im(e1*e4)*<i>)) /(2*2)
+    .=(2*(e2*e3)+(Re(2*(e1*e4))+2*Im(e1*e4)*<i>)) /(2*2) by COMSEQ_3:17
+    .=(2*(e2*e3)+(Re(2*(e1*e4))+Im(2*(e1*e4))*<i>)) /(2*2) by COMSEQ_3:17
+    .=(2*(e2*e3)+2*(e1*e4))/(2*2) by COMPLEX1:29
+    .=(e1*e4)/(2)+(2*(e2*e3))/(2*2)
+    .=exp(z1+-z2)/2+(e2*e3)/2 by SIN_COS:24
+    .=exp(z1-z2)/2+exp(-z1+z2)/2 by SIN_COS:24
+    .=(exp(z1-z2)+exp(-(z1-z2)))/2;
+  hence thesis by Def4;
+end;
+
+theorem Th14:
+  cosh_C/.(z1+z2) = (cosh_C/.z1)*(cosh_C/.z2) + (sinh_C/.z1)*( sinh_C/.z2)
+proof
+  cosh_C/.(z1+z2) = cosh_C/.(z1- -z2)
+    .=(cosh_C/.z1)*cosh_C/.(-z2) - (sinh_C/.z1)*sinh_C/.(-z2) by Th13
+    .=(cosh_C/.z1)*cosh_C/.(z2) - (sinh_C/.z1)*sinh_C/.(-z2) by Th10
+    .=(cosh_C/.z1)*cosh_C/.(z2) - (sinh_C/.z1)*(-sinh_C/.z2) by Th9
+    .=(cosh_C/.z1)*cosh_C/.(z2) - -(sinh_C/.z1)*(sinh_C/.z2);
+  hence thesis;
+end;
+
+theorem Th15:
+  for z being complex number holds sin_C/.(<i>*z) = <i>*sinh_C/.z
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  sin_C/.(<i>*z) = (exp(<i>*<i>*z) - exp(-<i>*(<i>*z)))/(<i>*2) by Def1
+    .= <i>*((exp(z) - exp(-z))/2);
+  then sin_C/.(<i>*z) = <i>*sinh_C/.z by Def3;
+  hence thesis;
+end;
+
+theorem Th16:
+  for z being complex number holds cos_C/.(<i>*z) = cosh_C/.z
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  cos_C/.(<i>*z) = (exp(<i>*<i>*z)+exp(-<i>*(<i>*z)))/2 by Def2
+    .= (exp(-z)+exp(z))/2;
+  then cos_C/.(<i>*z) = cosh_C/.z by Def4;
+  hence thesis;
+end;
+
+theorem Th17:
+  for z being complex number holds sinh_C/.(<i>*z) = <i>*sin_C/.z
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  sinh_C/.(<i>*z) = (exp(<i>*z)-exp(-<i>*z))/2 by Def3
+    .= <i>*((exp(<i>*z)-exp(-<i>*z))/(<i>*2));
+  then sinh_C/.(<i>*z) = <i>*sin_C/.z by Def1;
+  hence thesis;
+end;
+
+theorem Th18:
+  for z being complex number holds cosh_C/.(<i>*z) = cos_C/.z
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  cosh_C/.(<i>*z) = (exp(<i>*z) + exp(-<i>*z))/2 by Def4;
+  then cosh_C/.(<i>*z) = cos_C/.z by Def2;
+  hence thesis;
+end;
+
+Lm4: exp(x+y*<i>)=exp_R(x)*(cos(y)+sin(y)*<i>)
+proof
+  exp(x+y*<i>) =exp(x)*exp(y*<i>) by SIN_COS:24
+    .= exp_R(x)*exp(y*<i>) by SIN_COS:54
+    .= exp_R(x)*(cos y+(sin y)*<i>) by SIN_COS:28;
+  hence thesis;
+end;
+
+theorem Th19:
+  for x,y being Element of REAL holds exp(x+y*<i>) = (exp_R.x)*(
+  cos.y)+(exp_R.x)*(sin.y)*<i>
+proof
+  let x,y be Element of REAL;
+  exp(x+y*<i>)=exp_R(x)*(cos(y)+sin(y)*<i>) by Lm4
+    .= exp_R(x)*cos(y)-0*sin(y) + (exp_R(x)*sin(y)+cos(y)*0)*<i>
+    .=exp_R(x)*cos.y+exp_R(x)*sin(y)*<i> by SIN_COS:def 23
+    .=exp_R.x*cos.y+exp_R(x)*sin(y)*<i> by SIN_COS:def 27
+    .=exp_R.x*cos.y+exp_R.x*sin(y)*<i> by SIN_COS:def 27;
+  hence thesis by SIN_COS:def 21;
+end;
+
+theorem
+  exp(0c) = 1 by SIN_COS:54,56;
+
+theorem Th21:
+  sin_C/.0c = 0
+proof
+  sin_C/.0c = (exp(0c)-exp(-<i>*0c))/(<i>*2) by Def1
+    .=0c/(<i>*2);
+  hence thesis;
+end;
+
+theorem
+  sinh_C/.0c = 0
+proof
+  sinh_C/.0c = (exp(0c)-exp(-0c))/2 by Def3
+    .=0c/2;
+  hence thesis;
+end;
+
+theorem Th23:
+  cos_C/.0c = 1
+proof
+  cos_C/.0c = (exp(0c)+exp(-<i>*0c))/2 by Def2
+    .= 1 by SIN_COS:54,56;
+  hence thesis;
+end;
+
+theorem
+  cosh_C/.0c = 1
+proof
+  cosh_C/.0c = (exp 0c + exp(-0c))/2 by Def4
+    .=1 by SIN_COS:54,56;
+  hence thesis;
+end;
+
+theorem
+  exp(z) = cosh_C/.z + sinh_C/.z
+proof
+  cosh_C/.z + sinh_C/.z = (exp(z)+exp(-z))/2 + sinh_C/.z by Def4
+    .= (exp(z)+exp(-z))/2 + (exp(z)-exp(-z))/2 by Def3
+    .= (exp(z)+(exp(-z) + exp(z)-exp(-z)))/2
+    .=(Re(exp(z))+Re(exp(z))+(Im(exp(z))+Im(exp(z)))*<i>)/2 by COMPLEX1:def
+  9
+    .=((2*Re(exp(z))+2*Im(exp(z))*<i>))/2
+    .=((Re(2*exp(z))+2*Im(exp(z))*<i>))/2 by COMSEQ_3:17
+    .=((Re(2*exp(z))+Im(2*exp(z))*<i>))/2 by COMSEQ_3:17
+    .=(2*exp(z))/2 by COMPLEX1:29
+    .=exp(z)*1;
+  hence thesis;
+end;
+
+theorem
+  exp(-z) = cosh_C/.z - sinh_C/.z
+proof
+  cosh_C/.z - sinh_C/.z = (exp(z)+exp(-z))/2 - sinh_C/.z by Def4
+    .= (exp(z)+exp(-z))/2 - (exp(z)-exp(-z))/2 by Def3
+    .= (exp(-z)+exp(-z))/2
+    .= (Re(exp(-z))+Re(exp(-z))+(Im(exp(-z))+Im(exp(-z)))*<i>)/2 by COMPLEX1
+  :def 9
+    .=((2*Re(exp(-z))+2*Im(exp(-z))*<i>))/2
+    .=((Re(2*exp(-z))+2*Im(exp(-z))*<i>))/2 by COMSEQ_3:17
+    .=((Re(2*exp(-z))+Im(2*exp(-z))*<i>))/2 by COMSEQ_3:17
+    .=(2*exp(-z))/2 by COMPLEX1:29
+    .=exp(-z)*1;
+  hence thesis;
+end;
+
+theorem
+  exp(z+2*PI*<i>) = exp(z)
+proof
+  z+2*PI*<i> = (Re z+(Im z)*<i>)+(2*PI+0*<i>)*<i> by COMPLEX1:29
+    .= Re z + 0 + (Im z + 2*PI)*<i>;
+  then
+  exp(z+2*PI*<i>) =exp_R.(Re z)*cos.(Im z + 2*PI*1)+exp_R.(Re z)*sin.(Im z
+  + 2*PI)*<i> by Th19
+    .=exp_R.(Re z)*cos.(Im z)+exp_R.(Re z)*sin.(Im z + 2*PI*1)*<i> by
+  SIN_COS2:11
+    .=exp_R.(Re z)*cos.(Im z)+exp_R.(Re z)*sin.(Im z)*<i> by SIN_COS2:10
+    .=exp(Re z+Im z*<i>) by Th19;
+  hence thesis by COMPLEX1:29;
+end;
+
+theorem Th28:
+  exp(2*PI*n*<i>) = 1
+proof
+  thus exp(2*PI*n*<i>) = cos(0+2*PI*n)+sin(0+2*PI*n)*<i> by SIN_COS:28
+    .=cos.(0+2*PI*n)+sin(0+2*PI*n)*<i> by SIN_COS:def 23
+    .=cos.(0+2*PI*n)+sin.(0+2*PI*n)*<i> by SIN_COS:def 21
+    .=cos.(0+2*PI*n)+sin.(0)*<i> by SIN_COS2:10
+    .= 1 by SIN_COS:33,SIN_COS2:11;
+end;
+
+theorem Th29:
+  exp((-2*PI*n)*<i>) = 1
+proof
+  thus exp((-2*PI*n)*<i>) = cos(-2*PI*n)+sin(-2*PI*n)*<i> by SIN_COS:28
+    .=cos(2*PI*n)+sin(-(2*PI*n))*<i> by SIN_COS:34
+    .=cos(0+2*PI*n)+(-sin(2*PI*n))*<i> by SIN_COS:34
+    .=cos.(0+2*PI*n)+-sin(0+2*PI*n)*<i> by SIN_COS:def 23
+    .=cos.(0+2*PI*n)+-sin.(0+2*PI*n)*<i> by SIN_COS:def 21
+    .=cos.(0+2*PI*n)+-sin.(0)*<i> by SIN_COS2:10
+    .= 1 by SIN_COS:33,SIN_COS2:11;
+end;
+
+theorem
+  exp((2*n+1)*PI*<i>) = -1
+proof
+  exp((2*n+1)*PI*<i>) = cos(PI*2*n+PI)+sin(PI*(2*n)+1*PI)*<i> by SIN_COS:
+  28
+    .= cos.(PI*2*n+PI)+sin(PI*2*n+PI)*<i> by SIN_COS:def 23
+    .= cos.(PI*2*n+PI)+sin.(PI*2*n+PI)*<i> by SIN_COS:def 21
+    .= cos.(PI)+sin.(PI*2*n+PI)*<i>by SIN_COS2:11
+    .= -1+sin.(PI)*<i> by SIN_COS:81,SIN_COS2:10;
+  hence thesis by SIN_COS:81;
+end;
+
+theorem
+  exp((-(2*n+1)*PI)*<i>) = -1
+proof
+  exp((-(2*n+1)*PI)*<i>) = cos(-(2*n+1)*PI)+sin(-(2*n+1)*PI)*<i> by
+  SIN_COS:28
+    .= cos((2*n+1)*PI)+sin(-(2*n+1)*PI)*<i> by SIN_COS:34
+    .= cos(PI*2*n+PI)+(-sin(PI*(2*n)+PI))*<i> by SIN_COS:34
+    .= cos.(PI*2*n+PI)+-sin(PI*2*n+PI)*<i> by SIN_COS:def 23
+    .= cos.(PI*2*n+PI)+-sin.(PI*2*n+PI)*<i> by SIN_COS:def 21
+    .= cos.(PI)+-sin.(PI*2*n+PI)*<i> by SIN_COS2:11
+    .= -1+-sin.(PI)*<i> by SIN_COS:81,SIN_COS2:10;
+  hence thesis by SIN_COS:81;
+end;
+
+theorem
+  exp((2*n + 1/2)*PI*<i>) = <i>
+proof
+  exp((2*n+1/2)*PI*<i>) = cos(PI*2*n+1/2*PI)+sin(PI*(2*n)+1/2*PI)*<i> by
+  SIN_COS:28
+    .= cos.(PI*2*n+1/2*PI)+sin(PI*2*n+1/2*PI)*<i> by SIN_COS:def 23
+    .= cos.(PI*2*n+1/2*PI)+sin.(PI*2*n+1/2*PI)*<i> by SIN_COS:def 21
+    .= cos.(1/2*PI)+sin.(PI*2*n+1/2*PI)*<i>by SIN_COS2:11
+    .= sin.(PI/2)*<i> by SIN_COS:81,SIN_COS2:10;
+  hence thesis by SIN_COS:81;
+end;
+
+theorem
+  exp((-(2*n + 1/2)*PI)*<i>) = -1*<i>
+proof
+  exp((-(2*n+1/2)*PI)*<i>) = cos(-(2*n+1/2)*PI)+sin(-(2*n+1/2)*PI)*<i> by
+  SIN_COS:28
+    .= cos((2*n+1/2)*PI)+sin(-(2*n+1/2)*PI)*<i> by SIN_COS:34
+    .= cos(PI*2*n+1/2*PI)+(-sin(PI*(2*n)+1/2*PI))*<i> by SIN_COS:34
+    .= cos.(PI*2*n+1/2*PI)+-sin(PI*2*n+1/2*PI)*<i> by SIN_COS:def 23
+    .= cos.(PI*2*n+1/2*PI)+-sin.(PI*2*n+1/2*PI)*<i> by SIN_COS:def 21
+    .= cos.(1/2*PI)+(-sin.(PI*2*n+1/2*PI))*<i> by SIN_COS2:11
+    .= (-sin.(PI/2))*<i> by SIN_COS:81,SIN_COS2:10;
+  hence thesis by SIN_COS:81;
+end;
+
+definition
+  let z be Element of COMPLEX, c be complex number;
+  redefine func z + c -> Element of COMPLEX;
+  coherence by XCMPLX_0:def 2;
+end;
+
+theorem
+  sin_C/.(z + 2*n*PI) = sin_C/.z
+proof
+  sin_C/.(z + 2*n*PI) = (exp(<i>*z + <i>*(2*n*PI))-(exp(-<i> * (z + 2*n*PI
+  ))))/(2 * <i>) by Def1
+    .= (exp(<i>*z) * exp(2*PI*n*<i>)-(exp(-<i> * (z + 2*n*PI))))/(2 * <i>)
+  by SIN_COS:24
+    .= (exp(<i>*z) * 1-(exp(-<i> * (z + 2*n*PI))))/(2 * <i>) by Th28
+    .= (exp(<i>*z)-(exp((-<i>)*z + (-<i>)*(2*n*PI))))/(2 * <i>)
+    .= (exp(<i>*z)-(exp((-<i>)*z) * exp((-2*PI*n)*<i>)))/(2 * <i>) by
+  SIN_COS:24
+    .= (exp(<i>*z)-(exp((-<i>)*z) * 1))/(2 * <i>) by Th29
+    .= (exp(<i>*z) - exp(-<i>*z))/(2*<i>);
+  hence thesis by Def1;
+end;
+
+theorem
+  cos_C/.(z + 2*n*PI) = cos_C/.z
+proof
+  cos_C/.(z + 2*n*PI) = (exp(<i>*z + <i>*(2*n*PI)) + exp(-<i>*(z + 2*n*PI)
+  ))/2 by Def2
+    .= (exp(<i>*z) * exp(2*PI*n*<i>) + exp(-<i>*(z + 2*n*PI)))/2 by SIN_COS:
+  24
+    .= (exp(<i>*z) * 1 + exp(-<i>*(z + 2*n*PI)))/2 by Th28
+    .= (exp(<i>*z) + exp((-<i>)*z + (-<i>)*(2*n*PI)))/2
+    .= (exp(<i>*z) + exp((-<i>)*z) * exp((-2*PI*n)*<i>))/2 by SIN_COS:24
+    .= (exp(<i>*z)*1 + exp(-<i>*z)*1)/2 by Th29
+    .= (exp(<i>*z) + exp(-<i>*z))/2;
+  hence thesis by Def2;
+end;
+
+theorem Th36:
+  for z being complex number holds exp(<i>*z) = cos_C/.z + <i>* sin_C/.z
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  cos_C/.z + <i>*sin_C/.z = (exp(<i>*z) + exp(-<i>*z))/2 + <i>*sin_C/.z by
+  Def2
+    .= (exp(<i>*z) + exp(-<i>*z))/2 + <i>*((exp(<i>*z) - exp(-<i>*z))/(2*<i>
+  )) by Def1
+    .= (exp(<i>*z) + (exp(-<i>*z) +exp(<i>*z) - exp(-<i>*z)))/2
+    .= (Re exp(<i>*z) + Re exp(<i>*z)+(Im exp(<i>*z) + Im exp(<i>*z))*<i>)/2
+  by COMPLEX1:def 9
+    .= (2*Re exp(<i>*z)+2*Im exp(<i>*z)*<i>)/2
+    .= (Re(2*exp(<i>*z))+2*Im exp(<i>*z)*<i>)/2 by COMSEQ_3:17
+    .= (Re(2*exp(<i>*z))+Im(2*exp(<i>*z))*<i>)/2 by COMSEQ_3:17
+    .= (2*exp(<i>*z))/2 by COMPLEX1:29;
+  hence thesis;
+end;
+
+theorem Th37:
+  for z being complex number holds exp(-<i>*z) = cos_C/.z - <i>* sin_C/.z
+proof
+  let z be complex number;
+  reconsider z as Element of COMPLEX by XCMPLX_0:def 2;
+  cos_C/.z - <i>*sin_C/.z = (exp(<i>*z) + exp(-<i>*z))/(2) - <i>*sin_C/.z
+  by Def2
+    .= (exp(<i>*z) + exp(-<i>*z))/2 - <i>*((exp(<i>*z) - exp(-<i>*z))/(2*<i>
+  )) by Def1
+    .= (exp(-<i>*z) + exp(-<i>*z))/2
+    .= (Re exp(-<i>*z) + Re exp(-<i>*z)+(Im exp(-<i>*z) + Im exp(-<i>*z))*
+  <i>)/2 by COMPLEX1:def 9
+    .= (2*Re exp(-<i>*z)+2*Im exp(-<i>*z)*<i>)/2
+    .= (Re(2*exp(-<i>*z))+2*Im exp(-<i>*z)*<i>)/2 by COMSEQ_3:17
+    .= (Re(2*exp(-<i>*z))+Im(2*exp(-<i>*z))*<i>)/2 by COMSEQ_3:17
+    .= (2*exp(-<i>*z))/2 by COMPLEX1:29;
+  hence thesis;
+end;
+
+theorem Th38:
+  for x being Element of REAL holds sin_C/.x = sin.x
+proof
+  let x be Element of REAL;
+  x in REAL;
+  then reconsider z = x as Element of COMPLEX by NUMBERS:11;
+  sin_C/.x = sin_C/.z .= (exp(-0+x*<i>) - exp(-<i>*x))/(2*<i>) by Def1
+    .= ((exp_R.0)*(cos.x)+(exp_R.0)*(sin.x)*<i> - exp(-(x*<i>)))/(2*<i>) by
+  Th19
+    .= ((exp_R 0)*(cos.x)+(exp_R.0)*(sin.x)*<i> - exp(-(x*<i>)))/(2*<i>) by
+  SIN_COS:def 27
+    .= ((exp_R 0)*(cos.x)+(exp_R 0)*(sin.x)*<i> - exp(-(x*<i>)))/(2*<i>) by
+  SIN_COS:def 27
+    .= (cos.x+sin.x*<i> - exp(0+(-x)*<i>))/(2*<i>) by SIN_COS:56
+    .= (cos.x+sin.x*<i> - ((exp_R.0)*(cos.-x)+(exp_R.0)*(sin.-x)*<i>))/(2*
+  <i>) by Th19
+    .= (cos.x+sin.x*<i> - ((exp_R 0)*(cos.-x)+(exp_R.0)*(sin.-x)*<i>))/(2*
+  <i>) by SIN_COS:def 27
+    .= (cos.x+sin.x*<i> - (1*(cos.-x)+1*(sin.-x)*<i>))/(2*<i>) by SIN_COS:56
+  ,def 27
+    .= (cos.x+sin.x*<i> - (cos.-x+(-(sin.x))*<i>))/(2*<i>) by SIN_COS:33
+    .= (cos.x+sin.x*<i> - (cos.x+(-(sin.x))*<i>))/(2*<i>) by SIN_COS:33
+    .= sin.x;
+  hence thesis;
+end;
+
+theorem Th39:
+  for x being Element of REAL holds cos_C/.x = cos.x
+proof
+  let x be Element of REAL;
+  x in REAL;
+  then reconsider z = x as Element of COMPLEX by NUMBERS:11;
+  cos_C/.x = cos_C/.z .= (exp(0+<i>*x) + exp(-<i>*x))/2 by Def2
+    .= (((exp_R.0)*(cos.x)+(exp_R.0)*(sin.x)*<i>) + exp(-<i>*x))/2 by Th19
+    .= (((exp_R 0)*(cos.x)+(exp_R.0)*(sin.x)*<i>) + exp(-<i>*x))/2 by
+  SIN_COS:def 27
+    .= ((1*(cos.x)+1*(sin.x)*<i>) + exp(-<i>*x))/2 by SIN_COS:56,def 27
+    .= ((cos.x+sin.x*<i>) + exp(0+(-x)*<i>) )/2
+    .= ((cos.x+sin.x*<i>) + ((exp_R.0)*(cos.(-x))+(exp_R.0)*(sin.(-x))*<i>)
+  )/2 by Th19
+    .= ((cos.x+sin.x*<i>) + ((exp_R 0)*(cos.(-x))+(exp_R.0)*(sin.(-x))*<i>)
+  )/2 by SIN_COS:def 27
+    .= ((cos.x+sin.x*<i>) + (1*(cos.(-x))+1*(sin.(-x))*<i>) )/2 by SIN_COS:
+  56,def 27
+    .= ((cos.x+sin.x*<i>) + (1*(cos.x)+1*(sin.(-x))*<i>) )/2 by SIN_COS:33
+    .= (cos.x+(sin.x)*<i> + (cos.x+(-sin.x)*<i>))/2 by SIN_COS:33
+    .= cos.x;
+  hence thesis;
+end;
+
+theorem Th40:
+  for x being Element of REAL holds sinh_C/.x = sinh.x
+proof
+  let x be Element of REAL;
+A1: (sinh.x)*2 =2*((exp_R.x - exp_R.(-x))/2) by SIN_COS2:def 1
+    .=(exp_R.x - exp_R.(-x))/(2/2);
+  x in REAL;
+  then reconsider z = x as Element of COMPLEX by NUMBERS:11;
+  sinh_C/.x = sinh_C/.z .= (exp(x+0*<i>)-exp(-z))/2 by Def3
+    .= (((exp_R.x)*1+(exp_R.x)*0*<i>)-exp(-z))/2 by Th19,SIN_COS:33
+    .= ((exp_R.x)-exp(-x+0*<i>))/2
+    .= ((exp_R.x)-((exp_R.(-x))*1+(exp_R.(-x))*0*<i>))/2 by Th19,SIN_COS:33
+    .= ((sinh.x)*2)/2 by A1;
+  hence thesis;
+end;
+
+theorem Th41:
+  for x being Element of REAL holds cosh_C/.x = cosh.x
+proof
+  let x be Element of REAL;
+A1: (cosh.x)*2 =2*((exp_R.x + exp_R.(-x))/2) by SIN_COS2:def 3
+    .=(exp_R.x + exp_R.(-x))/(2/2);
+  x in REAL;
+  then reconsider z = x as Element of COMPLEX by NUMBERS:11;
+  cosh_C/.x = cosh_C/.z .= (exp(x+0*<i>) + exp(-z))/2 by Def4
+    .= (( (exp_R.x)*1+(exp_R.x)*0*<i>) + exp(-z))/2 by Th19,SIN_COS:33
+    .= (exp_R.x + exp(-x+0*<i>))/2
+    .= (exp_R.x + ((exp_R.(-x))*1+(exp_R.(-x))*0*<i>))/2 by Th19,SIN_COS:33
+    .= ((cosh.x)*2)/2 by A1;
+  hence thesis;
+end;
+
+canceled;
+
+theorem Th43:
+  sin_C/.(x+y*<i>) = sin.x*cosh.y+cos.x*sinh.y*<i>
+proof
+  sin_C/.(x+y*<i>) = (sin_C/.x)*(cos_C/.(y*<i>)) + (cos_C/.x)*(sin_C/.(y*
+  <i>)) by Th4
+    .= (sin_C/.x)*(cosh_C/.y) + (cos_C/.x)*(sin_C/.(y*<i>)) by Th16
+    .= (sin_C/.x)*(cosh_C/.y) + (cos_C/.x)*((sinh_C/.y)*<i>) by Th15
+    .= (sin.x)*cosh_C/.y + cos_C/.x*(<i>*sinh_C/.y) by Th38
+    .= (sin.x)*cosh_C/.y + (cos.x)*(<i>*sinh_C/.y) by Th39
+    .= (sin.x)*cosh_C/.y + (cos.x)*(<i>*(sinh.y)) by Th40
+    .= sin.x*cosh.y+0*<i>+(0+(cos.x*sinh.y)*<i>) by Th41;
+  hence thesis;
+end;
+
+theorem Th44:
+  sin_C/.(x+(-y)*<i>) = sin.x*cosh.y+(-cos.x*sinh.y)*<i>
+proof
+  sin_C/.(x+(-y)*<i>) = sin.x*cosh.(-y)+cos.x*sinh.(-y)*<i> by Th43
+    .= sin.x*cosh.y+cos.x*sinh.(-y)*<i> by SIN_COS2:19
+    .= sin.x*cosh.y+cos.x*(-sinh.y)*<i> by SIN_COS2:19;
+  hence thesis;
+end;
+
+theorem Th45:
+  cos_C/.(x+y*<i>) = cos.x*cosh.y+(-sin.x*sinh.y)*<i>
+proof
+  cos_C/.(x+y*<i>) = cos_C/.x*cos_C/.(<i>*y)-sin_C/.x*sin_C/.(<i>*y) by
+  Th6
+    .= cos_C/.x*cos_C/.(<i>*y)-sin_C/.x*(sinh_C/.y*<i>) by Th15
+    .= cos_C/.x*cosh_C/.y-sin_C/.x*(sinh_C/.y*<i>) by Th16
+    .= cos_C/.x*cosh_C/.y-(sin.x)*(sinh_C/.y*<i>) by Th38
+    .= (cos.x)*cosh_C/.y-(sin.x)*(sinh_C/.y*<i>) by Th39
+    .= (cos.x)*cosh_C/.y-(sin.x)*((sinh.y)*<i>) by Th40
+    .= (cos.x)*(cosh.y)-(sin.x)*(sinh.y)*<i> by Th41
+    .= cos.x*cosh.y+(-sin.x*sinh.y)*<i>;
+  hence thesis;
+end;
+
+theorem Th46:
+  cos_C/.(x+(-y)*<i>) = cos.x*cosh.y+sin.x*sinh.y*<i>
+proof
+  cos_C/.(x+(-y)*<i>) = cos.x*cosh.-y+(-sin.x*sinh.-y)*<i> by Th45
+    .= cos.x*cosh.y+-sin.x*sinh.(-y)*<i> by SIN_COS2:19
+    .= cos.x*cosh.y+-sin.x*(-sinh.y)*<i> by SIN_COS2:19
+    .= cos.x*cosh.y+--sin.x*sinh.y*<i>;
+  hence thesis;
+end;
+
+theorem Th47:
+  sinh_C/.(x+y*<i>) = sinh.x*cos.y+cosh.x*sin.y*<i>
+proof
+  sinh_C/.(x+y*<i>) = sinh_C/.((y+(-x)*<i>)*<i>)
+    .= <i>*sin_C/.(y+(-x)*<i>) by Th17
+    .= <i>*(sin.y*cosh.x+(-cos.y*sinh.x)*<i>) by Th44
+    .= --sinh.x*cos.y+cosh.x*sin.y*<i>;
+  hence thesis;
+end;
+
+theorem Th48:
+  sinh_C/.(x+(-y)*<i>) = sinh.x*cos.y+(-cosh.x*sin.y)*<i>
+proof
+  sinh_C/.(x+(-y)*<i>) = sinh.x*cos.-y+cosh.x*sin.(-y)*<i> by Th47
+    .= sinh.x*cos.y+cosh.x*sin.(-y)*<i> by SIN_COS:33
+    .= sinh.x*cos.y+cosh.x*(-sin.y)*<i> by SIN_COS:33;
+  hence thesis;
+end;
+
+theorem Th49:
+  cosh_C/.(x+y*<i>) = cosh.x*cos.y+sinh.x*sin.y*<i>
+proof
+  cosh_C/.(<i>*(y+(-x)*<i>)) = cos_C/.(y+(-x)*<i>) by Th18;
+  hence thesis by Th46;
+end;
+
+theorem Th50:
+  cosh_C/.(x+(-y)*<i>) = cosh.x*cos.y+(-sinh.x*sin.y)*<i>
+proof
+  cosh_C/.(x+(-y)*<i>) = cosh.x*cos.-y+sinh.x*sin.(-y)*<i> by Th49
+    .=cosh.x*cos.y+sinh.x*(sin.-y)*<i> by SIN_COS:33
+    .=cosh.x*cos.y+sinh.x*(-sin.y)*<i> by SIN_COS:33;
+  hence thesis;
+end;
+
+theorem Th51:
+  for n being Element of NAT, z being Element of COMPLEX holds (
+  cos_C/.z + <i>*sin_C/.z) #N n = cos_C/.(n*z) + <i>*sin_C/.(n*z)
+proof
+  defpred X[Element of NAT] means for z being Element of COMPLEX holds (cos_C
+  /.z + <i>*sin_C/.z) #N ($1) = cos_C/.($1*z) + <i>*sin_C/.($1*z);
+A1: for n st X[n] holds X[n+1]
+  proof
+    let n be Element of NAT such that
+A2: for z being Element of COMPLEX holds (cos_C/.z + <i>*sin_C/.z) #N
+    n = cos_C/.(n*z) + <i>*sin_C/.(n*z);
+    for z being Element of COMPLEX holds (cos_C/.z + <i>*sin_C/.z) #N (n+1
+    ) = cos_C/.((n+1)*z) + <i>*sin_C/.((n+1)*z)
+    proof
+      let z be Element of COMPLEX;
+      set cn = cos_C/.(n*z), sn = sin_C/.(n*z), c1 = cos_C/.z, s1 = sin_C/.z;
+A3:   (cos_C/.z + <i>*sin_C/.z) #N (n+1) = (cos_C/.z + <i>*sin_C/.z)
+      GeoSeq.(n+1) by COMSEQ_3:def 2
+        .= (cos_C/.z + <i>*sin_C/.z) GeoSeq.n * (cos_C/.z + <i>*sin_C/.z) by
+      COMSEQ_3:def 1
+        .= (cos_C/.z + <i>*sin_C/.z) #N n * (cos_C/.z + <i>*sin_C/.z) by
+      COMSEQ_3:def 2
+        .= (cos_C/.(n*z) + <i>*sin_C/.(n*z)) * (cos_C/.z + <i>*sin_C/.z) by
+      A2
+        .= cn*c1 + <i>*sn*c1 + (<i>*cn*s1 + -sn*s1);
+      cos_C/.((n+1)*z) + <i>*sin_C/.((n+1)*z) = cos_C/.(n*z +1*z) + <i>*(
+      sin_C/.(n*z)*cos_C/.(1*z) + cos_C/.(n*z)*sin_C/.(1*z)) by Th4
+        .= cos_C/.(n*z)*cos_C/.z - sin_C/.(n*z)*sin_C/.z + <i>*(sin_C/.(n*z)
+      *cos_C/.z + cos_C/.(n*z)*sin_C/.z) by Th6
+        .= cn*c1 +( <i>*sn*c1 + (<i>*cn*s1 + -sn*s1) );
+      hence thesis by A3;
+    end;
+    hence thesis;
+  end;
+A4: X[0] by Th21,Th23,COMPLEX1:def 7,COMSEQ_3:11;
+  for n holds X[n] from NAT_1:sch 1(A4,A1);
+  hence thesis;
+end;
+
+theorem Th52:
+  for n being Element of NAT, z being Element of COMPLEX holds (
+  cos_C/.z - <i>*sin_C/.z) #N n = cos_C/.(n*z) - <i>*sin_C/.(n*z)
+proof
+  let n be Element of NAT;
+  let z be Element of COMPLEX;
+  (cos_C/.z - <i>*sin_C/.z) #N n = (cos_C/.z + <i>*-sin_C/.z) #N n
+    .=(cos_C/.z + <i>*sin_C/.-z) #N n by Th2
+    .=(cos_C/.-z + <i>*sin_C/.-z) #N n by Th3
+    .= cos_C/.(-n*z) + <i>*sin_C/.(n*-z) by Th51
+    .= cos_C/.(n*z) + <i>*(sin_C/.(-n*z)) by Th3
+    .= cos_C/.(n*z) + <i>*(-sin_C/.(n*z)) by Th2
+    .= cos_C/.(n*z) + -<i>*sin_C/.(n*z);
+  hence thesis;
+end;
+
+theorem
+  for n being Element of NAT, z being Element of COMPLEX holds exp(<i>*n
+  *z) = (cos_C/.z + <i>*sin_C/.z) #N n
+proof
+  let n be Element of NAT;
+  let z be Element of COMPLEX;
+  exp(<i>*n*z) = exp(<i>*(n*z)) .=cos_C/.(n*z) + <i>*sin_C/.(n*z) by Th36;
+  hence thesis by Th51;
+end;
+
+theorem
+  for n being Element of NAT, z being Element of COMPLEX holds exp(-<i>*
+  n*z) = (cos_C/.z - <i>*sin_C/.z) #N n
+proof
+  let n be Element of NAT;
+  let z be Element of COMPLEX;
+  exp(-<i>*n*z) = exp(-<i>*(n*z)) .=cos_C/.(n*z) - <i>*sin_C/.(n*z) by Th37;
+  hence thesis by Th52;
+end;
+
+theorem
+  for x,y being Element of REAL holds (1+(-1)*<i>)/2*sinh_C/.(x+y*<i>) +
+  (1+<i>)/2*sinh_C/.(x+(-y)*<i>) = sinh.x*cos.y + cosh.x*sin.y
+proof
+  let x,y be Element of REAL;
+  set shx = sinh.x, cy = cos.y, chx = cosh.x, sy = sin.y;
+  (1+(-1)*<i>)/2*sinh_C/.(x+y*<i>) + (1+<i>)/2*sinh_C/.(x+(-y)*<i>) = (1+(
+  -1)*<i>)/2*(shx*cy+(chx*sy)*<i>) + (1+<i>)/2*sinh_C/.(x+(-y)*<i>) by Th47
+    .= (1+(-1)*<i>)/2*(shx*cy+(chx*sy)*<i>) + (1+<i>)/2*(sinh.x*cos.y+(-cosh
+  .x*sin.y)*<i>) by Th48
+    .= 2*(shx*cy+chx*sy+0*<i>)/2;
+  hence thesis;
+end;
+
+theorem
+  for x,y being Element of REAL holds (1+(-1)*<i>)/2*cosh_C/.(x+y*<i>) +
+  (1+<i>)/2*cosh_C/.(x+(-y)*<i>) = sinh.x*sin.y + cosh.x*cos.y
+proof
+  let x,y be Element of REAL;
+  set shx = sinh.x, cy = cos.y, chx = cosh.x, sy = sin.y;
+  (1+(-1)*<i>)/2*cosh_C/.(x+y*<i>) + (1+<i>)/2*cosh_C/.(x+(-y)*<i>) = (1+(
+  -1)*<i>)/2*(chx*cy+(shx*sy)*<i>) + (1+<i>)/2*cosh_C/.(x+(-y)*<i>) by Th49
+    .= (1+(-1)*<i>)*(chx*cy+(shx*sy)*<i>)/2 + (1+<i>)/2*(chx*cy+(-shx*sy)*
+  <i>) by Th50
+    .= 2*(chx*cy+shx*sy+0*<i>)/2;
+  hence thesis;
+end;
+
+theorem
+  sinh_C/.z*sinh_C/.z = (cosh_C/.(2*z) - 1)/2
+proof
+  set e1 = exp(z), e2 = exp(-z);
+  sinh_C/.z*sinh_C/.z = (exp(z) - exp(-z))/2*sinh_C/.z by Def3
+    .= (e1 - e2)/2*((e1 - e2)/2) by Def3
+    .= (e1*e1 + e2*e2 - 2*(e1*e2))/2/2
+    .= (e1*e1 + e2*e2 - 2*1)/2/2 by Lm3
+    .= (exp(z+z) + e2*e2 - 2)/2/2 by SIN_COS:24
+    .= (exp(2*z) + exp(-z+-z) - 2)/2/2 by SIN_COS:24
+    .= (( exp(2*z) + exp(-2*(z)) )/2 - 1)/2;
+  hence thesis by Lm2;
+end;
+
+theorem Th58:
+  cosh_C/.z*cosh_C/.z = (cosh_C/.(2*z) + 1)/2
+proof
+  set e1 = exp(z), e2 = exp(-z);
+  cosh_C/.z*cosh_C/.z = (exp(z) + exp(-z))/2*cosh_C/.z by Def4
+    .= (e1 + e2)/2*((e1 + e2)/2) by Def4
+    .= (e1*e1 + e2*e2 + 2*(e1*e2))/2/2
+    .= (e1*e1 + e2*e2 + 2*1)/2/2 by Lm3
+    .= (exp(z+z) + e2*e2 + 2)/2/2 by SIN_COS:24
+    .= (exp(2*z) + exp(-z+-z) + 2)/2/2 by SIN_COS:24
+    .= (( exp(2*z) + exp(-2*(z)) )/2 + 1)/2;
+  hence thesis by Lm2;
+end;
+
+theorem Th59:
+  sinh_C/.(2*z) = 2*(sinh_C/.z)*(cosh_C/.z) & cosh_C/.(2*z) = 2*(
+  cosh_C/.z)*(cosh_C/.z) - 1
+proof
+  set e1 = exp(z), e2 = exp(-z);
+A1: 2*(cosh_C/.z)*(cosh_C/.z) - 1 = 2*((cosh_C/.z)*(cosh_C/.z)) - 1
+    .= 2*((cosh_C/.(2*z) + 1)/2) - 1 by Th58
+    .= cosh_C/.(2*z) + 1 - 1;
+  2*(sinh_C/.z)*(cosh_C/.z) = 2*((sinh_C/.z)*(cosh_C/.z))
+    .= 2*((sinh_C/.z)*((e1 + e2)/2)) by Def4
+    .= 2*((e1 - e2)/2*((e1 + e2)/2)) by Def3
+    .= (e1*e1 - e2*e2)/2
+    .= (exp(z+z) - e2*e2)/2 by SIN_COS:24
+    .= (exp(2*z) - exp(-z+-z))/2 by SIN_COS:24
+    .= (exp(2*z) - exp(-(2*z)))/2
+    .= sinh_C/.(2*z) by Lm1;
+  hence thesis by A1;
+end;
+
+theorem Th60:
+  (sinh_C/.z1)*(sinh_C/.z1) - (sinh_C/.z2)*(sinh_C/.z2) =(sinh_C/.
+(z1+z2))*(sinh_C/.(z1-z2)) & (cosh_C/.z1)*(cosh_C/.z1) - (cosh_C/.z2)*(cosh_C/.
+z2) =(sinh_C/.(z1+z2))*(sinh_C/.(z1-z2)) & (sinh_C/.z1)*(sinh_C/.z1) - (sinh_C
+  /.z2)*(sinh_C/.z2) =(cosh_C/.z1)*(cosh_C/.z1) - (cosh_C/.z2)*(cosh_C/.z2)
+proof
+  set s1 = sinh_C/.z1, s2 = sinh_C/.z2, c1 = cosh_C/.z1, c2 = cosh_C/.z2;
+A1: (sinh_C/.(z1+z2))*(sinh_C/.(z1-z2)) =(s1*c2+c1*s2)*(sinh_C/.(z1-z2)) by
+  Th11
+    .=(s1*c2+c1*s2)*(s1*c2-c1*s2) by Th12
+    .=(s1*s1)*(c2*c2)-s2*(c1*c1)*s2;
+  then
+A2: (sinh_C/.(z1+z2))*(sinh_C/.(z1-z2)) = (-((c1*c1)-(s1*s1)))*(c2*c2)+(c1*
+  c1)*(c2*c2)-(s2*s2)*(c1*c1)
+    .= (-1)*(c2*c2)+(c1*c1)*(c2*c2)-(s2*s2)*(c1*c1) by Th8
+    .= (-1)*(c2*c2)+(c1*c1)*((c2*c2)-(s2*s2))
+    .= (-1)*(c2*c2)+(c1*c1)*1 by Th8
+    .= -(c2*c2)+c1*c1;
+  (sinh_C/.(z1+z2))*(sinh_C/.(z1-z2)) =(s1*s1)*((c2*c2)-(s2*s2))+(s1*s1)*(
+  s2*s2)-(s2*s2)*(c1*c1) by A1
+    .=(s1*s1)*1+(s1*s1)*(s2*s2)-(s2*s2)*(c1*c1) by Th8
+    .=(s1*s1)*1+(s2*s2)*-((c1*c1)-(s1*s1))
+    .=(s1*s1)*1+(s2*s2)*-1 by Th8
+    .=(s1*s1)*1-(s2*s2);
+  hence thesis by A2;
+end;
+
+theorem Th61:
+  (cosh_C/.(z1+z2))*(cosh_C/.(z1-z2)) =(sinh_C/.z1)*(sinh_C/.z1) +
+(cosh_C/.z2)*(cosh_C/.z2) & (cosh_C/.(z1+z2))*(cosh_C/.(z1-z2)) =(cosh_C/.z1)*(
+cosh_C/.z1) + (sinh_C/.z2)*(sinh_C/.z2) & (sinh_C/.z1)*(sinh_C/.z1) + (cosh_C/.
+  z2)*(cosh_C/.z2) =(cosh_C/.z1)*(cosh_C/.z1) + (sinh_C/.z2)*(sinh_C/.z2)
+proof
+  set s1 = sinh_C/.z1, s2 = sinh_C/.z2, c1 = cosh_C/.z1, c2 = cosh_C/.z2;
+A1: (cosh_C/.(z1+z2))*(cosh_C/.(z1-z2)) = (c1*c2+s1*s2)*(cosh_C/.(z1-z2)) by
+  Th14
+    .= (c1*c2+s1*s2)*(c1*c2-s1*s2) by Th13
+    .= c1*c1*c2*c2-(s1*s1)*s2*s2;
+  then
+A2: (cosh_C/.(z1+z2))*(cosh_C/.(z1-z2)) = c1*c1*(c2*c2 - s2*s2)+(c1*c1-s1*s1
+  )*(s2*s2)
+    .= c1*c1*1+(c1*c1-s1*s1)*(s2*s2) by Th8
+    .= c1*c1+1*(s2*s2) by Th8;
+  (cosh_C/.(z1+z2))*(cosh_C/.(z1-z2)) = (c1*c1 - s1*s1)*(c2*c2) + s1*s1*(
+  c2*c2-s2*s2) by A1
+    .= 1*(c2*c2) + s1*s1*(c2*c2-s2*s2) by Th8
+    .= (c2*c2) + s1*s1*1 by Th8;
+  hence thesis by A2;
+end;
+
+theorem
+  sinh_C/.(2*z1) + sinh_C/.(2*z2) = 2*sinh_C/.(z1+z2)*cosh_C/.(z1-z2) &
+  sinh_C/.(2*z1) - sinh_C/.(2*z2) = 2*sinh_C/.(z1-z2)*cosh_C/.(z1+z2)
+proof
+  set c1 = cosh_C/.z1, c2 = cosh_C/.z2, s1=sinh_C/.z1, s2=sinh_C/.z2;
+A1: 2*sinh_C/.(z1-z2)*cosh_C/.(z1+z2) = 2*(s1*c2-c1*s2)*cosh_C/.(z1+z2) by
+  Th12
+    .= 2*(s1*c2-c1*s2)*(c1*c2+s1*s2) by Th14
+    .= 2*(s1*c1*(c2*c2-s2*s2)-(s2*c2*(c1*c1)-s2*c2*(s1*s1)) )
+    .= 2*(s1*c1*1-(s2*c2*(c1*c1-s1*s1))) by Th8
+    .= 2*(s1*c1*1-(s2*c2*1)) by Th8
+    .= 2*s1*c1-2*(s2*c2)
+    .= sinh_C/.(2*z1)-2*s2*c2 by Th59;
+  2*sinh_C/.(z1+z2)*cosh_C/.(z1-z2) = 2*(s1*c2+c1*s2)*cosh_C/.(z1-z2) by
+  Th11
+    .= 2*(s1*c2+c1*s2)*(c1*c2-s1*s2) by Th13
+    .= 2*((c2*c2-s2*s2)*(c1*s1)+(c1*c1*(s2*c2)-s1*s1*(c2*s2)))
+    .= 2*(1*(c1*s1)+(c1*c1-s1*s1)*(c2*s2)) by Th8
+    .= 2*(1*(c1*s1)+1*(c2*s2)) by Th8
+    .= 2*s1*c1+2*(c2*s2)
+    .= sinh_C/.(2*z1) + 2*s2*c2 by Th59
+    .= sinh_C/.(2*z1) + sinh_C/.(2*z2) by Th59;
+  hence thesis by A1,Th59;
+end;
+
+Lm5: for z1 holds (sinh_C/.z1)*(sinh_C/.z1) = (cosh_C/.z1)*(cosh_C/.z1) - 1
+proof
+  let z1;
+  (cosh_C/.z1)*(cosh_C/.z1) - 1 = (cosh_C/.z1)*(cosh_C/.z1) - ((cosh_C/.z1
+  )*(cosh_C/.z1) - (sinh_C/.z1)*(sinh_C/.z1)) by Th8
+    .= (sinh_C/.z1)*(sinh_C/.z1)+ (cosh_C/.z1)*(cosh_C/.z1) - (cosh_C/.z1)*(
+  cosh_C/.z1);
+  hence thesis;
+end;
+
+theorem
+  cosh_C/.(2*z1) + cosh_C/.(2*z2) = 2*cosh_C/.(z1+z2)*cosh_C/.(z1-z2) &
+  cosh_C/.(2*z1) - cosh_C/.(2*z2) = 2*sinh_C/.(z1+z2)*sinh_C/.(z1-z2)
+proof
+A1: 2*sinh_C/.(z1+z2)*sinh_C/.(z1-z2) = 2*(sinh_C/.(z1+z2)*sinh_C/.(z1-z2))
+    .= 2*((cosh_C/.z1)*(cosh_C/.z1) - (cosh_C/.z2)*(cosh_C/.z2)) by Th60
+    .= 2*(cosh_C/.z1)*(cosh_C/.z1) -1 +1- 2*((cosh_C/.z2)*(cosh_C/.z2))
+    .= cosh_C/.(2*z1)+1- 2*((cosh_C/.z2)*(cosh_C/.z2)) by Th59
+    .= cosh_C/.(2*z1)-(2*(cosh_C/.z2)*(cosh_C/.z2)-1);
+  2*cosh_C/.(z1+z2)*cosh_C/.(z1-z2) =2*(cosh_C/.(z1+z2)*cosh_C/.(z1-z2 ))
+    .=2*((sinh_C/.z1)*(sinh_C/.z1) + (cosh_C/.z2)*(cosh_C/.z2)) by Th61
+    .=2*((cosh_C/.z1)*(cosh_C/.z1) - 1 + (cosh_C/.z2)*(cosh_C/.z2)) by Lm5
+    .=2*(cosh_C/.z1)*(cosh_C/.z1) - 1+ (2*(cosh_C/.z2)*(cosh_C/.z2) - 1)
+    .=cosh_C/.(2*z1)+ (2*(cosh_C/.z2)*(cosh_C/.z2) - 1) by Th59
+    .=cosh_C/.(2*z1)+cosh_C/.(2*z2) by Th59;
+  hence thesis by A1,Th59;
+end;

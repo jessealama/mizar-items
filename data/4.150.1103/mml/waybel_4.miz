@@ -1,0 +1,3818 @@
+:: Auxiliary and Approximating Relations
+::  by Adam Grabowski
+::
+:: Received October 21, 1996
+:: Copyright (c) 1996 Association of Mizar Users
+ 
+environ
+
+ vocabularies XBOOLE_0, RELAT_2, ORDERS_2, RELAT_1, SUBSET_1, WAYBEL_3,
+      STRUCT_0, XXREAL_0, EQREL_1, LATTICES, LATTICE3, WAYBEL_0, TARSKI,
+      ZFMISC_1, YELLOW_1, SETFAM_1, REWRITE1, YELLOW_0, FUNCT_1, CARD_FIL,
+      SEQM_3, PARTFUN1, CAT_1, NEWTON, FUNCOP_1, FUNCT_2, CARD_3, RLVECT_2,
+      WELLORD1, YELLOW_2, WELLORD2, ORDINAL2, WAYBEL_2, ARYTM_3, ORDERS_1,
+      WAYBEL_4;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, SETFAM_1, RELAT_1, RELAT_2,
+      FUNCT_1, RELSET_1, PARTFUN1, FUNCT_2, DOMAIN_1, STRUCT_0, ORDERS_2,
+      LATTICE3, WELLORD1, YELLOW_0, FUNCOP_1, CARD_3, PRALG_1, YELLOW_1, ALG_1,
+      YELLOW_2, YELLOW_4, WAYBEL_0, WAYBEL_1, WAYBEL_2, WAYBEL_3;
+ constructors SETFAM_1, DOMAIN_1, TOLER_1, PRALG_1, ORDERS_3, WAYBEL_1,
+      YELLOW_4, WAYBEL_2, WAYBEL_3, RELSET_1;
+ registrations SUBSET_1, RELAT_1, FUNCT_1, FUNCT_2, STRUCT_0, LATTICE3,
+      YELLOW_0, WAYBEL_0, YELLOW_1, YELLOW_2, WAYBEL_2, WAYBEL_3, PRE_CIRC,
+      FUNCOP_1;
+ requirements SUBSET, BOOLE;
+ definitions LATTICE3, XBOOLE_0, TARSKI, YELLOW_0, WAYBEL_0, RELAT_1, YELLOW_2,
+      ORDERS_3, WELLORD1, STRUCT_0;
+ theorems FUNCOP_1, FUNCT_1, FUNCT_2, LATTICE3, ORDERS_2, ORDERS_3, PARTFUN1,
+      RELAT_1, RELAT_2, RELSET_1, SETFAM_1, TARSKI, WAYBEL_0, WAYBEL_3,
+      WAYBEL_2, WELLORD2, YELLOW_0, YELLOW_1, YELLOW_2, YELLOW_4, ZFMISC_1,
+      XBOOLE_0, XBOOLE_1;
+ schemes FUNCT_2, PARTFUN1, RELSET_1, XBOOLE_0;
+
+begin :: Auxiliary Relations
+
+definition
+  let L be non empty reflexive RelStr;
+  canceled;
+  func L-waybelow -> Relation of L means
+  :Def2:
+  for x,y being Element of L holds [x,y] in it iff x << y;
+  existence
+  proof
+    defpred P[set,set] means
+    ex x9, y9 be Element of L st x9 = $1 & y9 = $2 & x9 << y9;
+    consider R being Relation of the carrier of L, the carrier of L such that
+A1: for x,y being set holds [x,y] in R iff x in the carrier of L &
+    y in the carrier of L & P[x,y] from RELSET_1:sch 1;
+    reconsider R as Relation of L;
+    take R;
+    let x,y be Element of L;
+    hereby
+      assume [x,y] in R;
+      then ex x9, y9 being Element of L st ( x9 = x)&( y9 = y)&( x9 <<
+      y9) by A1;
+      hence x << y;
+    end;
+    assume x << y;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let A1,A2 be Relation of L;
+    assume
+A2: for x,y being Element of L holds [x,y] in A1 iff x << y;
+    assume
+A3: for x,y being Element of L holds [x,y] in A2 iff x << y;
+    thus A1 = A2
+    proof
+      let a,b be set;
+      hereby
+        assume
+A4:     [a,b] in A1;
+        then reconsider a9 = a, b9 = b as Element of L by ZFMISC_1:106;
+        a9 << b9 by A2,A4;
+        hence [a,b] in A2 by A3;
+      end;
+      assume
+A5:   [a,b] in A2;
+      then reconsider a9 = a, b9 = b as Element of L by ZFMISC_1:106;
+      a9 << b9 by A3,A5;
+      hence thesis by A2;
+    end;
+  end;
+end;
+
+definition
+  let L be RelStr;
+  func IntRel L -> Relation of L equals
+  the InternalRel of L;
+  coherence;
+  correctness;
+end;
+
+definition
+  let L be RelStr, R be Relation of L;
+  attr R is auxiliary(i) means
+  :Def4:
+  for x, y being Element of L holds [x,y] in R implies x <= y;
+  attr R is auxiliary(ii) means
+  :Def5:
+  for x, y, z, u being Element of L holds
+  ( u <= x & [x,y] in R & y <= z implies [u,z] in R );
+end;
+
+definition
+  let L be non empty RelStr, R be Relation of L;
+  attr R is auxiliary(iii) means
+  :Def6:
+  for x, y, z being Element of L holds
+  ( [x,z] in R & [y,z] in R implies [(x "\/" y),z] in R );
+  attr R is auxiliary(iv) means
+  :Def7:
+  for x being Element of L holds [Bottom L,x] in R;
+end;
+ 
+:: Definition 1.9 p.43
+
+definition
+  let L be non empty RelStr, R be Relation of L;
+  attr R is auxiliary means
+  :Def8:
+  R is auxiliary(i) auxiliary(ii) auxiliary(iii) auxiliary(iv);
+end;
+
+registration
+  let L be non empty RelStr;
+  cluster auxiliary ->
+    auxiliary(i) auxiliary(ii) auxiliary(iii) auxiliary(iv) Relation of L;
+  coherence by Def8;
+  cluster auxiliary(i) auxiliary(ii) auxiliary(iii) auxiliary(iv) ->
+    auxiliary Relation of L;
+  coherence by Def8;
+end;
+
+registration
+  let L be lower-bounded with_suprema transitive antisymmetric RelStr;
+  cluster auxiliary Relation of L;
+  existence
+  proof
+    set A = IntRel L;
+    take A;
+    thus A is auxiliary(i)
+    proof
+      let x, y be Element of L;
+      assume [x,y] in A;
+      hence thesis by ORDERS_2:def 9;
+    end;
+    thus A is auxiliary(ii)
+    proof
+      let x, y, z, u be Element of L;
+      assume that
+A1:   u <= x and
+A2:   [x,y] in A and
+A3:   y <= z;
+      x <= y by A2,ORDERS_2:def 9;
+      then u <= y by A1,ORDERS_2:26;
+      then u <= z by A3,ORDERS_2:26;
+      hence thesis by ORDERS_2:def 9;
+    end;
+    thus A is auxiliary(iii)
+    proof
+      let x, y, z be Element of L;
+      assume that
+A4:   [x,z] in A and
+A5:   [y,z] in A;
+A6:   x <= z by A4,ORDERS_2:def 9;
+A7:   y <= z by A5,ORDERS_2:def 9;
+      ex q being Element of L st x <= q & y <= q &
+      for c being Element of L st x <= c & y <= c holds q <= c
+      by LATTICE3:def 10;
+      then (x "\/" y) <= z by A6,A7,LATTICE3:def 13;
+      hence thesis by ORDERS_2:def 9;
+    end;
+    thus A is auxiliary(iv)
+    proof
+      let x be Element of L;
+      Bottom L <= x by YELLOW_0:44;
+      hence thesis by ORDERS_2:def 9;
+    end;
+  end;
+end;
+
+theorem Th1:
+  for L being lower-bounded sup-Semilattice
+  for AR being auxiliary(ii) auxiliary(iii) Relation of L
+  for x, y, z, u being Element of L holds
+  [x, z] in AR & [y, u] in AR implies [x "\/" y, z "\/" u] in AR
+proof
+  let L be lower-bounded sup-Semilattice;
+  let AR be auxiliary(ii) auxiliary(iii) Relation of L;
+  let x,y,z,u be Element of L;
+  assume that
+A1: [x, z] in AR and
+A2: [y, u] in AR;
+A3: x <= x;
+A4: y <= y;
+A5: z <= z "\/" u by YELLOW_0:22;
+A6: u <= z "\/" u by YELLOW_0:22;
+A7: [x, z "\/" u] in AR by A1,A3,A5,Def5;
+  [y, z "\/" u] in AR by A2,A4,A6,Def5;
+  hence thesis by A7,Def6;
+end;
+
+Lm1: for L be lower-bounded sup-Semilattice
+for AR be auxiliary(i) auxiliary(ii) Relation of L holds AR is transitive
+proof
+  let L be lower-bounded sup-Semilattice;
+  let AR be auxiliary(i) auxiliary(ii) Relation of L;
+A1: field AR c= (the carrier of L) \/ (the carrier of L) by RELSET_1:19;
+  now
+    let x,y,z be set;
+    assume that
+A2: x in field AR and
+A3: y in field AR and
+A4: z in field AR and
+A5: [x,y] in AR and
+A6: [y,z] in AR;
+    reconsider x9=x, y9=y, z9=z as Element of L by A1,A2,A3,A4;
+    reconsider x9, y9, z9 as Element of L;
+A7: x9 <= y9 by A5,Def4;
+    z9 <= z9;
+    hence [x,z] in AR by A6,A7,Def5;
+  end;
+  then AR is_transitive_in field AR by RELAT_2:def 8;
+  hence thesis by RELAT_2:def 16;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster auxiliary(i) auxiliary(ii) -> transitive Relation of L;
+  coherence by Lm1;
+end;
+
+registration
+  let L be RelStr;
+  cluster IntRel L -> auxiliary(i);
+  coherence
+  proof
+    let x, y be Element of L;
+    assume [x, y] in IntRel L;
+    hence thesis by ORDERS_2:def 9;
+  end;
+end;
+
+registration
+  let L be transitive RelStr;
+  cluster IntRel L -> auxiliary(ii);
+  coherence
+  proof
+    set A = IntRel L;
+    let x,y,z,u be Element of L;
+    assume that
+A1: u <= x and
+A2: [x,y] in A and
+A3: y <= z;
+    x <= y by A2,ORDERS_2:def 9;
+    then u <= y by A1,ORDERS_2:26;
+    then u <= z by A3,ORDERS_2:26;
+    hence thesis by ORDERS_2:def 9;
+  end;
+end;
+
+registration
+  let L be with_suprema antisymmetric RelStr;
+  cluster IntRel L -> auxiliary(iii);
+  coherence
+  proof
+    set A = IntRel L;
+    let x,y,z be Element of L;
+    assume that
+A1: [x,z] in A and
+A2: [y,z] in A;
+A3: x <= z by A1,ORDERS_2:def 9;
+A4: y <= z by A2,ORDERS_2:def 9;
+    ex q being Element of L st x <= q & y <= q &
+    for c being Element of L st x <= c & y <= c holds q <= c
+    by LATTICE3:def 10;
+    then x "\/" y <= z by A3,A4,LATTICE3:def 13;
+    hence thesis by ORDERS_2:def 9;
+  end;
+end;
+
+registration
+  let L be lower-bounded antisymmetric non empty RelStr;
+  cluster IntRel L -> auxiliary(iv);
+  coherence
+  proof
+    set A = IntRel L;
+    for x be Element of L holds [Bottom L,x] in A
+    proof
+      let x be Element of L;
+      Bottom L <= x by YELLOW_0:44;
+      hence thesis by ORDERS_2:def 9;
+    end;
+    hence thesis by Def7;
+  end;
+end;
+
+reserve a for set;
+
+definition
+  let L be lower-bounded sup-Semilattice;
+  func Aux L means
+  :Def9:
+  a in it iff a is auxiliary Relation of L;
+  existence
+  proof
+    defpred P[set] means $1 is auxiliary Relation of L;
+    consider X be set such that
+A1: for a holds a in X
+    iff a in bool [:the carrier of L,the carrier of L:] & P[a]
+    from XBOOLE_0:sch 1;
+    take X;
+    thus thesis by A1;
+  end;
+  uniqueness
+  proof
+    let A1,A2 be set such that
+A2: a in A1 iff a is auxiliary Relation of L and
+A3: a in A2 iff a is auxiliary Relation of L;
+    thus A1 = A2
+    proof
+      thus A1 c= A2
+      proof
+        let a;
+        assume a in A1;
+        then a is auxiliary Relation of L by A2;
+        hence thesis by A3;
+      end;
+      let a;
+      assume a in A2;
+      then a is auxiliary Relation of L by A3;
+      hence thesis by A2;
+    end;
+  end;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster Aux L -> non empty;
+  coherence
+  proof
+    IntRel L is auxiliary Relation of L;
+    hence thesis by Def9;
+  end;
+end;
+
+Lm2: for L being lower-bounded sup-Semilattice
+for AR being auxiliary(i) Relation of L
+for a,b being set st [a,b] in AR holds [a,b] in IntRel L
+proof
+  let L be lower-bounded sup-Semilattice;
+  let AR be auxiliary(i) Relation of L;
+  let a,b be set;
+  assume
+A1: [a,b] in AR;
+  then reconsider a9 = a, b9 = b as Element of L by ZFMISC_1:106;
+  a9 <= b9 by A1,Def4;
+  hence thesis by ORDERS_2:def 9;
+end;
+
+theorem Th2:
+  for L being lower-bounded sup-Semilattice
+  for AR being auxiliary(i) Relation of L holds AR c= IntRel L
+proof
+  let L be lower-bounded sup-Semilattice;
+  let AR be auxiliary(i) Relation of L;
+  let a,b be set;
+  assume [a,b] in AR;
+  hence thesis by Lm2;
+end;
+
+theorem
+  for L being lower-bounded sup-Semilattice holds
+  Top InclPoset Aux L = IntRel L
+proof
+  let L be lower-bounded sup-Semilattice;
+  IntRel L = "/\"({},InclPoset Aux L)
+  proof
+    set P = InclPoset Aux L;
+    set I = IntRel L;
+    I in Aux L by Def9;
+    then reconsider I as Element of P by YELLOW_1:1;
+A1: I is_<=_than {} by YELLOW_0:6;
+    for b being Element of P st b is_<=_than {} holds I >= b
+    proof
+      let b be Element of P;
+      b in the carrier of InclPoset Aux L;
+      then b in Aux L by YELLOW_1:1;
+      then reconsider b9 = b as auxiliary Relation of L by Def9;
+      assume b is_<=_than {};
+      b9 c= I by Th2;
+      hence thesis by YELLOW_1:3;
+    end;
+    hence thesis by A1,YELLOW_0:31;
+  end;
+  hence thesis;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster InclPoset Aux L -> upper-bounded;
+  coherence
+  proof
+    set I = IntRel L;
+    I in Aux L by Def9;
+    then reconsider I as Element of InclPoset Aux L by YELLOW_1:1;
+    take I;
+    I is_>=_than the carrier of InclPoset Aux L
+    proof
+      let b be Element of InclPoset Aux L;
+      assume b in the carrier of InclPoset Aux L;
+      then b in Aux L by YELLOW_1:1;
+      then reconsider b9 = b as auxiliary Relation of L by Def9;
+      b9 c= I by Th2;
+      hence thesis by YELLOW_1:3;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let L be non empty RelStr;
+  func AuxBottom L -> Relation of L means
+  :Def10:
+  for x,y be Element of L holds [x,y] in it iff x = Bottom L;
+  existence
+  proof
+    defpred P[set,set] means $1 = Bottom L;
+    consider R being Relation of the carrier of L, the carrier of L such that
+A1: for a,b be set holds [a,b] in R iff a in the carrier of L &
+    b in the carrier of L & P[a,b] from RELSET_1:sch 1;
+    reconsider R as Relation of L;
+    take R;
+    let x,y be Element of L;
+    thus [x,y] in R implies x = Bottom L by A1;
+    assume x = Bottom L;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let A1,A2 be Relation of L;
+    assume
+A2: for x,y be Element of L holds [x,y] in A1 iff x = Bottom L;
+    assume
+A3: for x,y be Element of L holds [x,y] in A2 iff x = Bottom L;
+    thus A1 = A2
+    proof
+      let a,b be set;
+      hereby
+        assume
+A4:     [a,b] in A1;
+        then reconsider a9 = a, b9 = b as Element of L by ZFMISC_1:106;
+        [a9,b9] in A1 by A4;
+        then a9 = Bottom L by A2;
+        then [a9,b9] in A2 by A3;
+        hence [a,b] in A2;
+      end;
+      assume
+A5:   [a,b] in A2;
+      then reconsider a9 = a, b9 = b as Element of L by ZFMISC_1:106;
+      [a9,b9] in A2 by A5;
+      then a9 = Bottom L by A3;
+      then [a9,b9] in A1 by A2;
+      hence thesis;
+    end;
+  end;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster AuxBottom L -> auxiliary;
+  coherence
+  proof
+    set A = AuxBottom L;
+A1: A is auxiliary(i)
+    proof
+      let x, y be Element of L;
+      assume [x,y] in A;
+      then x = Bottom L by Def10;
+      hence thesis by YELLOW_0:44;
+    end;
+A2: A is auxiliary(ii)
+    proof
+      let x, y, z, u be Element of L;
+      assume that
+A3:   u <= x and
+A4:   [x,y] in A and y <= z;
+A5:   x = Bottom L by A4,Def10;
+      Bottom L <= u by YELLOW_0:44;
+      then u = Bottom L by A3,A5,ORDERS_2:25;
+      hence thesis by Def10;
+    end;
+A6: A is auxiliary(iii)
+    proof
+      let x, y, z be Element of L;
+      assume that
+A7:   [x,z] in A and
+A8:   [y,z] in A;
+A9:   y = Bottom L by A8,Def10;
+      then x <= y by A7,Def10;
+      then x "\/" y = Bottom L by A9,YELLOW_0:24;
+      hence thesis by Def10;
+    end;
+    for x be Element of L holds [Bottom L,x] in A by Def10;
+    then A is auxiliary(iv) by Def7;
+    hence thesis by A1,A2,A6;
+  end;
+end;
+
+theorem Th4:
+  for L being lower-bounded sup-Semilattice
+  for AR being auxiliary(iv) Relation of L holds AuxBottom L c= AR
+proof
+  let L be with_suprema lower-bounded Poset;
+  let AR be auxiliary(iv) Relation of L;
+  let a,b be set;
+  assume
+A1: [a,b] in AuxBottom L;
+  then reconsider a9 = a, b9 = b as Element of L by ZFMISC_1:106;
+  [a9,b9] in AuxBottom L by A1;
+  then a9 = Bottom L by Def10;
+  then [a9,b9] in AR by Def7;
+  hence thesis;
+end;
+
+theorem
+  for L being lower-bounded sup-Semilattice holds
+  Bottom InclPoset Aux L = AuxBottom L
+proof
+  let L be with_suprema lower-bounded Poset;
+  AuxBottom L in Aux L by Def9;
+  then reconsider N = AuxBottom L as Element of InclPoset Aux L by YELLOW_1:1;
+A1: N is_>=_than {} by YELLOW_0:6;
+  for b being Element of InclPoset Aux L st b is_>=_than {} holds N <= b
+  proof
+    let b be Element of InclPoset Aux L;
+    assume b is_>=_than {};
+    b in the carrier of InclPoset Aux L;
+    then b in Aux L by YELLOW_1:1;
+    then reconsider b9 = b as auxiliary Relation of L by Def9;
+    N c= b9 by Th4;
+    hence thesis by YELLOW_1:3;
+  end;
+  hence thesis by A1,YELLOW_0:30;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster InclPoset Aux L -> lower-bounded;
+  coherence
+  proof
+    set I = AuxBottom L;
+    I in Aux L by Def9;
+    then reconsider I as Element of InclPoset Aux L by YELLOW_1:1;
+    take I;
+    I is_<=_than the carrier of InclPoset Aux L
+    proof
+      let b be Element of InclPoset Aux L;
+      assume b in the carrier of InclPoset Aux L;
+      then b in Aux L by YELLOW_1:1;
+      then reconsider b9 = b as auxiliary Relation of L by Def9;
+      I c= b9 by Th4;
+      hence thesis by YELLOW_1:3;
+    end;
+    hence thesis;
+  end;
+end;
+
+theorem Th6:
+  for L being lower-bounded sup-Semilattice
+  for a,b being auxiliary(i) Relation of L holds
+  a /\ b is auxiliary(i) Relation of L
+proof
+  let L be with_suprema lower-bounded Poset;
+  let a,b be auxiliary(i) Relation of L;
+  reconsider ab = a /\ b as Relation of L;
+  for x, y be Element of L holds [x,y] in ab implies x <= y
+  proof
+    let x, y be Element of L;
+    assume [x,y] in ab;
+    then [x,y] in a by XBOOLE_0:def 4;
+    hence thesis by Def4;
+  end;
+  hence thesis by Def4;
+end;
+
+theorem Th7:
+  for L being lower-bounded sup-Semilattice
+  for a,b being auxiliary(ii) Relation of L holds
+  a /\ b is auxiliary(ii) Relation of L
+proof
+  let L be with_suprema lower-bounded Poset;
+  let a,b be auxiliary(ii) Relation of L;
+  reconsider ab = a /\ b as Relation of L;
+  for x, y, z, u be Element of L holds
+  u <= x & [x,y] in ab & y <= z implies [u,z] in ab
+  proof
+    let x, y, z, u be Element of L;
+    assume that
+A1: u <= x and
+A2: [x,y] in ab and
+A3: y <= z;
+A4: [x,y] in a by A2,XBOOLE_0:def 4;
+A5: [x,y] in b by A2,XBOOLE_0:def 4;
+A6: [u,z] in a by A1,A3,A4,Def5;
+    [u,z] in b by A1,A3,A5,Def5;
+    hence thesis by A6,XBOOLE_0:def 4;
+  end;
+  hence thesis by Def5;
+end;
+
+theorem Th8:
+  for L being lower-bounded sup-Semilattice
+  for a,b being auxiliary(iii) Relation of L holds
+  a /\ b is auxiliary(iii) Relation of L
+proof
+  let L be with_suprema lower-bounded Poset;
+  let a,b be auxiliary(iii) Relation of L;
+  reconsider ab = a /\ b as Relation of L;
+  for x, y, z be Element of L holds
+  [x,z] in ab & [y,z] in ab implies [(x "\/" y),z] in ab
+  proof
+    let x, y, z be Element of L;
+    assume that
+A1: [x,z] in ab and
+A2: [y,z] in ab;
+A3: [x,z] in a by A1,XBOOLE_0:def 4;
+A4: [x,z] in b by A1,XBOOLE_0:def 4;
+A5: [y,z] in a by A2,XBOOLE_0:def 4;
+A6: [y,z] in b by A2,XBOOLE_0:def 4;
+A7: [(x "\/" y),z] in a by A3,A5,Def6;
+    [(x "\/" y),z] in b by A4,A6,Def6;
+    hence thesis by A7,XBOOLE_0:def 4;
+  end;
+  hence thesis by Def6;
+end;
+
+theorem Th9:
+  for L being lower-bounded sup-Semilattice
+  for a,b being auxiliary(iv) Relation of L holds
+  a /\ b is auxiliary(iv) Relation of L
+proof
+  let L be with_suprema lower-bounded Poset;
+  let a,b be auxiliary(iv) Relation of L;
+  reconsider ab = a /\ b as Relation of L;
+  for x be Element of L holds [Bottom L,x] in ab
+  proof
+    let x be Element of L;
+A1: [Bottom L,x] in a by Def7;
+    [Bottom L,x] in b by Def7;
+    hence thesis by A1,XBOOLE_0:def 4;
+  end;
+  hence thesis by Def7;
+end;
+
+theorem Th10:
+  for L being lower-bounded sup-Semilattice
+  for a,b being auxiliary Relation of L holds
+  a /\ b is auxiliary Relation of L
+proof
+  let L be with_suprema lower-bounded Poset;
+  let a,b be auxiliary Relation of L;
+  reconsider ab = a /\ b as Relation of L;
+  ab is auxiliary(i) auxiliary(ii) auxiliary(iii) auxiliary(iv)
+  by Th6,Th7,Th8,Th9;
+  hence thesis;
+end;
+
+theorem Th11:
+  for L being lower-bounded sup-Semilattice
+  for X being non empty Subset of InclPoset Aux L holds
+  meet X is auxiliary Relation of L
+proof
+  let L be with_suprema lower-bounded Poset;
+  let X be non empty Subset of InclPoset Aux L;
+  X c= the carrier of InclPoset Aux L;
+  then
+A1: X c= Aux L by YELLOW_1:1;
+  consider a be Element of X;
+  a in X;
+  then a is auxiliary Relation of L by A1,Def9;
+  then reconsider ab = meet X as Relation of L by SETFAM_1:8;
+A2: ab is auxiliary(i)
+  proof
+    let x, y be Element of L;
+    assume
+A3: [x,y] in ab;
+    consider V be Element of X;
+A4: V in X;
+A5: [x,y] in V by A3,SETFAM_1:def 1;
+    V is auxiliary Relation of L by A1,A4,Def9;
+    hence x <= y by A5,Def4;
+  end;
+A6: ab is auxiliary(ii)
+  proof
+    let x, y, z, u be Element of L;
+    assume that
+A7: u <= x and
+A8: [x,y] in ab and
+A9: y <= z;
+    for Y be set st Y in X holds [u,z] in Y
+    proof
+      let Y be set;
+      assume
+A10:  Y in X;
+      then
+A11:  Y is auxiliary Relation of L by A1,Def9;
+      [x,y] in Y by A8,A10,SETFAM_1:def 1;
+      hence thesis by A7,A9,A11,Def5;
+    end;
+    hence thesis by SETFAM_1:def 1;
+  end;
+A12: ab is auxiliary(iii)
+  proof
+    let x, y, z be Element of L;
+    assume that
+A13: [x,z] in ab and
+A14: [y,z] in ab;
+    for Y be set st Y in X holds [(x "\/" y),z] in Y
+    proof
+      let Y be set;
+      assume
+A15:  Y in X;
+      then
+A16:  Y is auxiliary Relation of L by A1,Def9;
+A17:  [x,z] in Y by A13,A15,SETFAM_1:def 1;
+      [y,z] in Y by A14,A15,SETFAM_1:def 1;
+      hence thesis by A16,A17,Def6;
+    end;
+    hence thesis by SETFAM_1:def 1;
+  end;
+  ab is auxiliary(iv)
+  proof
+    let x be Element of L;
+    for Y be set st Y in X holds [Bottom L,x] in Y
+    proof
+      let Y be set;
+      assume Y in X;
+      then Y is auxiliary Relation of L by A1,Def9;
+      hence thesis by Def7;
+    end;
+    hence thesis by SETFAM_1:def 1;
+  end;
+  hence thesis by A2,A6,A12;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster InclPoset Aux L -> with_infima;
+  coherence
+  proof
+    for x, y be set st x in Aux L & y in Aux L holds x /\ y in Aux L
+    proof
+      let x, y be set;
+      assume that
+A1:   x in Aux L and
+A2:   y in Aux L;
+A3:   x is auxiliary Relation of L by A1,Def9;
+      y is auxiliary Relation of L by A2,Def9;
+      then x /\ y is auxiliary Relation of L by A3,Th10;
+      hence thesis by Def9;
+    end;
+    hence thesis by YELLOW_1:12;
+  end;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster InclPoset Aux L -> complete;
+  coherence
+  proof
+    for X be Subset of InclPoset Aux L holds ex_inf_of X, InclPoset Aux L
+    proof
+      let X be Subset of InclPoset Aux L;
+      set N = meet X;
+      per cases;
+      suppose
+A1:     X <> {};
+        then N is auxiliary Relation of L by Th11;
+        then N in Aux L by Def9;
+        then reconsider N as Element of InclPoset Aux L by YELLOW_1:1;
+A2:     X is_>=_than N
+        proof
+          let b be Element of InclPoset Aux L;
+          assume b in X;
+          then N c= b by SETFAM_1:4;
+          hence N <= b by YELLOW_1:3;
+        end;
+        for b being Element of InclPoset Aux L st X is_>=_than b holds N >= b
+        proof
+          let b be Element of InclPoset Aux L;
+          assume
+A3:       X is_>=_than b;
+          for Z1 be set st Z1 in X holds b c= Z1
+          proof
+            let Z1 be set;
+            assume
+A4:         Z1 in X;
+            then reconsider Z19 = Z1 as Element of InclPoset Aux L;
+            b <= Z19 by A3,A4,LATTICE3:def 8;
+            hence thesis by YELLOW_1:3;
+          end;
+          then b c= meet X by A1,SETFAM_1:6;
+          hence thesis by YELLOW_1:3;
+        end;
+        hence thesis by A2,YELLOW_0:16;
+      end;
+      suppose X = {};
+        hence thesis by YELLOW_0:43;
+      end;
+    end;
+    hence thesis by YELLOW_2:30;
+  end;
+end;
+
+definition
+  let L be non empty RelStr, x be Element of L;
+  let AR be Relation of the carrier of L;
+A1: {y where y is Element of L : [y,x] in AR} c= the carrier of L
+  proof
+    let z be set;
+    assume z in {y where y is Element of L: [y,x] in AR};
+    then ex y being Element of L st z = y & [y,x] in AR;
+    hence thesis;
+  end;
+  func AR-below x -> Subset of L equals
+  {y where y is Element of L: [y,x] in AR};
+  correctness by A1;
+A2: {y where y is Element of L: [x,y] in AR} c= the carrier of L
+  proof
+    let z be set;
+    assume z in {y where y is Element of L: [x,y] in AR};
+    then ex y being Element of L st z = y & [x,y] in AR;
+    hence thesis;
+  end;
+  func AR-above x -> Subset of L equals
+  {y where y is Element of L: [x,y] in AR};
+  correctness by A2;
+end;
+
+theorem Th12:
+  for L being lower-bounded sup-Semilattice, x being Element of L
+  for AR being auxiliary(i) Relation of L holds AR-below x c= downarrow x
+proof
+  let L be lower-bounded sup-Semilattice, x be Element of L,
+  AR be auxiliary(i) Relation of L;
+  let a;
+  assume a in AR-below x;
+  then consider y1 be Element of L such that
+A1: y1 = a and
+A2: [y1,x] in AR;
+  y1 <= x by A2,Def4;
+  hence thesis by A1,WAYBEL_0:17;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice, x be Element of L;
+  let AR be auxiliary(iv) Relation of L;
+  cluster AR-below x -> non empty;
+  coherence
+  proof
+    set I = AR-below x;
+    [Bottom L,x] in AR by Def7;
+    then Bottom L in I;
+    hence thesis;
+  end;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice, x be Element of L;
+  let AR be auxiliary(ii) Relation of L;
+  cluster AR-below x -> lower;
+  coherence
+  proof
+    set I = AR-below x;
+    let x1, y1 be Element of L;
+    assume that
+A1: x1 in I and
+A2: y1 <= x1;
+A3: ex v1 be Element of L st ( v1 = x1)&( [v1, x] in AR) by A1;
+    x <= x;
+    then [y1, x] in AR by A2,A3,Def5;
+    hence thesis;
+  end;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice, x be Element of L;
+  let AR be auxiliary(iii) Relation of L;
+  cluster AR-below x -> directed;
+  coherence
+  proof
+    set I = AR-below x;
+    let u1,u2 be Element of L;
+    assume that
+A1: u1 in I and
+A2: u2 in I;
+A3: ex v1 be Element of L st ( v1 = u1)&( [v1,x] in AR) by A1;
+A4: ex v2 be Element of L st ( v2 = u2)&( [v2,x] in AR) by A2;
+    take u12 = u1 "\/" u2;
+    [u12,x] in AR by A3,A4,Def6;
+    hence thesis by YELLOW_0:22;
+  end;
+end;
+
+definition
+  let L be lower-bounded sup-Semilattice;
+  let AR be auxiliary(ii) auxiliary(iii) auxiliary(iv) Relation of L;
+  func AR-below -> Function of L, InclPoset Ids L means
+  :Def13:
+  for x be Element of L holds it.x = AR-below x;
+  existence
+  proof
+    deffunc F(Element of L) = AR-below $1;
+A1: for x being Element of L holds F(x) is Element of InclPoset Ids L
+    proof
+      let x be Element of L;
+      reconsider I = F(x) as Ideal of L;
+      I in Ids L;
+      hence thesis by YELLOW_1:1;
+    end;
+    consider f being Function of L, InclPoset Ids L such that
+A2: for x being Element of L holds f.x = F(x) from FUNCT_2:sch 9(A1);
+    take f;
+    thus thesis by A2;
+  end;
+  uniqueness
+  proof
+    let M1, M2 be Function of L, InclPoset Ids L;
+    assume
+A3: for x be Element of L holds M1.x = AR-below x;
+    assume
+A4: for x be Element of L holds M2.x = AR-below x;
+    for x be set st x in the carrier of L holds M1.x = M2.x
+    proof
+      let x be set;
+      assume x in the carrier of L;
+      then reconsider x9 = x as Element of L;
+      thus M1.x = AR-below x9 by A3
+        .= M2.x by A4;
+    end;
+    hence thesis by FUNCT_2:18;
+  end;
+end;
+
+theorem Th13:
+  for L being non empty RelStr, AR being Relation of L
+  for a being set, y being Element of L holds a in AR-below y iff [a,y] in AR
+proof
+  let L be non empty RelStr, AR be Relation of L;
+  let a be set, y be Element of L;
+  a in AR-below y iff [a,y] in AR
+  proof
+    hereby
+      assume a in AR-below y;
+      then ex z being Element of L st ( a = z)&( [z,y] in AR);
+      hence [a,y] in AR;
+    end;
+    assume
+A1: [a,y] in AR;
+    then reconsider x9 = a as Element of L by ZFMISC_1:106;
+    ex z being Element of L st a = z & [z,y] in AR
+    proof
+      take x9;
+      thus thesis by A1;
+    end;
+    hence thesis;
+  end;
+  hence thesis;
+end;
+
+theorem
+  for L being sup-Semilattice, AR being Relation of L
+  for y being Element of L holds a in AR-above y iff [y,a] in AR
+proof
+  let L be with_suprema Poset, AR be Relation of L;
+  let y be Element of L;
+  a in AR-above y iff [y,a] in AR
+  proof
+    hereby
+      assume a in AR-above y;
+      then ex z being Element of L st ( a = z)&( [y,z] in AR);
+      hence [y,a] in AR;
+    end;
+    assume
+A1: [y,a] in AR;
+    then reconsider x9 = a as Element of L by ZFMISC_1:106;
+    ex z being Element of L st a = z & [y,z] in AR
+    proof
+      take x9;
+      thus thesis by A1;
+    end;
+    hence thesis;
+  end;
+  hence thesis;
+end;
+
+Lm3: for L be with_suprema lower-bounded Poset, AR be Relation of L
+for a be set, y be Element of L holds
+a in downarrow y iff [a,y] in the InternalRel of L
+proof
+  let L be with_suprema lower-bounded Poset, AR be Relation of L;
+  let a be set, y be Element of L;
+  hereby
+    assume
+A1: a in downarrow y;
+    then reconsider a9 = a as Element of L;
+    a9 <= y by A1,WAYBEL_0:17;
+    hence [a,y] in the InternalRel of L by ORDERS_2:def 9;
+  end;
+  assume
+A2: [a,y] in the InternalRel of L;
+  then reconsider a9 = a as Element of L by ZFMISC_1:106;
+  a9 <= y by A2,ORDERS_2:def 9;
+  hence thesis by WAYBEL_0:17;
+end;
+
+theorem
+  for L being lower-bounded sup-Semilattice,
+  AR being auxiliary(i) Relation of L for x being Element of L holds
+  AR = the InternalRel of L implies AR-below x = downarrow x
+proof
+  let L be lower-bounded sup-Semilattice, AR be auxiliary(i) Relation of L;
+  let x be Element of L;
+  assume
+A1: AR = the InternalRel of L;
+  thus AR-below x c= downarrow x by Th12;
+  thus downarrow x c= AR-below x
+  proof
+    let a;
+    assume a in downarrow x;
+    then [a,x] in AR by A1,Lm3;
+    hence thesis by Th13;
+  end;
+end;
+
+definition
+  let L be non empty Poset;
+  func MonSet L -> strict RelStr means
+  :Def14:
+  ( a in the carrier of it iff
+  ex s be Function of L, InclPoset Ids L st a = s & s is monotone &
+  for x be Element of L holds s.x c= downarrow x ) &
+  for c, d be set holds [c,d] in the InternalRel of it iff
+  ex f,g be Function of L, InclPoset Ids L st c = f & d = g &
+  c in the carrier of it & d in the carrier of it & f <= g;
+  existence
+  proof
+    defpred P[set] means ex s be Function of L, InclPoset Ids L st $1 = s &
+    s is monotone & for x be Element of L holds s.x c= downarrow x;
+    consider S be set such that
+A1: a in S iff a in PFuncs (the carrier of L, the carrier of
+    InclPoset Ids L) & P[a] from XBOOLE_0:sch 1;
+A2: a in S iff ex s be Function of L, InclPoset Ids L st a = s &
+    s is monotone & for x be Element of L holds s.x c= downarrow x
+    proof
+      thus
+      a in S implies ex s be Function of L, InclPoset Ids L st a = s &
+      s is monotone & for x be Element of L holds s.x c= downarrow x by A1;
+      given s be Function of L, InclPoset Ids L such that
+A3:   a = s and
+A4:   s is monotone and
+A5:   for x be Element of L holds s.x c= downarrow x;
+      s in PFuncs (the carrier of L, the carrier of
+      InclPoset Ids L) by PARTFUN1:119;
+      hence thesis by A1,A3,A4,A5;
+    end;
+    defpred P[set,set] means
+    ex f,g be Function of L, InclPoset Ids L st $1 = f & $2 = g & f <= g;
+    consider R be Relation of S, S such that
+A6: for c, d be set holds [c,d] in R iff c in S & d in S & P[c,d]
+    from RELSET_1:sch 1;
+A7: for c, d be set holds [c,d] in R iff ex f,g be Function of L,
+    InclPoset Ids L st c = f & d = g & c in S & d in S & f <= g
+    proof
+      let c,d be set;
+      hereby
+        assume
+A8:     [c,d] in R;
+        then
+A9:     c in S by A6;
+A10:    d in S by A6,A8;
+        ex f,g be Function of L, InclPoset Ids L st ( c = f)&( d = g
+        )&( f <= g) by A6,A8;
+        hence ex f,g be Function of L, InclPoset Ids L st
+        c = f & d = g & c in S & d in S & f <= g by A9,A10;
+      end;
+      given f,g be Function of L, InclPoset Ids L such that
+A11:  c = f and
+A12:  d = g and
+A13:  c in S and
+A14:  d in S and
+A15:  f <= g;
+      thus thesis by A6,A11,A12,A13,A14,A15;
+    end;
+    take RelStr (#S,R#);
+    thus thesis by A2,A7;
+  end;
+  uniqueness
+  proof
+    let R1, R2 be strict RelStr;
+    assume
+A16: ( a in the carrier of R1 iff
+    ex s be Function of L, InclPoset Ids L st a = s & s is monotone &
+    for x be Element of L holds s.x c= downarrow x ) &
+    for c, d be set holds [c,d] in the InternalRel of R1 iff
+    ex f,g be Function of L, InclPoset Ids L st
+    c = f & d = g & c in the carrier of R1 & d in the carrier of R1 & f <= g;
+    assume
+A17: ( a in the carrier of R2 iff
+    ex s be Function of L, InclPoset Ids L st a = s & s is monotone &
+    for x be Element of L holds s.x c= downarrow x ) &
+    for c, d be set holds [c,d] in the InternalRel of R2 iff
+    ex f,g be Function of L, InclPoset Ids L st
+    c = f & d = g & c in the carrier of R2 & d in the carrier of R2 & f <= g;
+A18: the carrier of R1 c= the carrier of R2
+    proof
+      let b be set;
+      assume b in the carrier of R1;
+      then ex s be Function of L, InclPoset Ids L st ( b = s)&( s is
+      monotone)&( for x be Element of L holds s.x c= downarrow x) by A16;
+      hence thesis by A17;
+    end;
+A19: the carrier of R2 c= the carrier of R1
+    proof
+      let b be set;
+      assume b in the carrier of R2;
+      then ex s be Function of L, InclPoset Ids L st ( b = s)&( s is
+      monotone)&( for x be Element of L holds s.x c= downarrow x) by A17;
+      hence thesis by A16;
+    end;
+    the InternalRel of R1 = the InternalRel of R2
+    proof
+      let c,d be set;
+A20:  now
+        assume [c,d] in the InternalRel of R1;
+        then ex f,g be Function of L, InclPoset Ids L st ( c = f)&( d = g
+        )&( c in the carrier of R1)&( d in the carrier of R1)&( f <= g) by A16;
+        hence [c,d] in the InternalRel of R2 by A17,A18;
+      end;
+      now
+        assume [c,d] in the InternalRel of R2;
+        then ex f,g be Function of L, InclPoset Ids L st ( c = f)&( d = g
+        )&( c in the carrier of R2)&( d in the carrier of R2)&( f <= g) by A17;
+        hence [c,d] in the InternalRel of R1 by A16,A19;
+      end;
+      hence thesis by A20;
+    end;
+    hence thesis by A18,A19,XBOOLE_0:def 10;
+  end;
+end;
+
+theorem
+  for L being lower-bounded sup-Semilattice holds
+  MonSet L is full SubRelStr of (InclPoset Ids L)|^(the carrier of L)
+proof
+  let L be lower-bounded sup-Semilattice;
+  set J = ((the carrier of L) --> InclPoset Ids L);
+A1: the carrier of MonSet L c=
+  the carrier of (InclPoset Ids L)|^(the carrier of L)
+  proof
+    let a be set;
+    assume a in the carrier of MonSet L;
+    then consider s be Function of L, InclPoset Ids L such that
+A2: a = s and s is monotone
+    and for x be Element of L holds s.x c= downarrow x by Def14;
+    s in Funcs (the carrier of L, the carrier of InclPoset Ids L)
+    by FUNCT_2:11;
+    hence thesis by A2,YELLOW_1:28;
+  end;
+A3: the InternalRel of MonSet L c=
+  the InternalRel of (InclPoset Ids L)|^(the carrier of L)
+  proof
+    let a,b be set;
+    assume [a,b] in the InternalRel of MonSet L;
+    then consider f,g be Function of L, InclPoset Ids L such that
+A4: a = f and
+A5: b = g and a in the carrier of MonSet L
+    and b in the carrier of MonSet L and
+A6: f <= g by Def14;
+    set AG = product ((the carrier of L) --> InclPoset Ids L);
+A7: AG = ((InclPoset Ids L) |^ the carrier of L) by YELLOW_1:def 5;
+A8: f in Funcs (the carrier of L, the carrier of InclPoset Ids L) by
+    FUNCT_2:11;
+A9: g in Funcs (the carrier of L, the carrier of InclPoset Ids L) by
+    FUNCT_2:11;
+A10: f in the carrier of AG by A7,A8,YELLOW_1:28;
+    reconsider f9 = f, g9 = g as Element of AG by A7,A8,A9,YELLOW_1:28;
+A11: f9 in product Carrier ((the carrier of L) --> InclPoset Ids L)
+    by A10,YELLOW_1:def 4;
+    ex ff,gg being Function st ff = f9 & gg = g9 &
+    for i be set st i in the carrier of L
+    ex R being RelStr, xi,yi being Element of R
+    st R = J.i & xi = ff.i & yi = gg.i & xi <= yi
+    proof
+      take f,g;
+      thus f = f9 & g = g9;
+      let i be set;
+      assume
+A12:  i in the carrier of L;
+      then reconsider i9 = i as Element of L;
+      take R = InclPoset Ids L;
+      reconsider xi = f.i9, yi = g.i9 as Element of R;
+      take xi, yi;
+      thus R = J.i & xi = f.i & yi = g.i by A12,FUNCOP_1:13;
+      reconsider i9 = i as Element of L by A12;
+      ex a, b be Element of InclPoset Ids L st ( a = f.i9)&( b = g
+      .i9)&( a <= b) by A6,YELLOW_2:def 1;
+      hence thesis;
+    end;
+    then f9 <= g9 by A11,YELLOW_1:def 4;
+    then [a,b] in the InternalRel of
+    product ((the carrier of L) --> InclPoset Ids L) by A4,A5,
+    ORDERS_2:def 9;
+    hence thesis by YELLOW_1:def 5;
+  end;
+  set J = ((the carrier of L) --> InclPoset Ids L);
+  the InternalRel of MonSet L =
+  (the InternalRel of (InclPoset Ids L)|^(the carrier of L) )|_2
+  the carrier of MonSet L
+  proof
+    let a,b be set;
+    thus [a,b] in the InternalRel of MonSet L implies
+    [a,b] in (the InternalRel of (InclPoset Ids L)|^(the carrier of L))|_2
+    the carrier of MonSet L by A3,XBOOLE_0:def 4;
+    assume
+A13: [a,b] in (the InternalRel of (InclPoset Ids L)|^
+    (the carrier of L) )|_2 the carrier of MonSet L;
+    then
+A14: [a,b] in (the InternalRel of (InclPoset Ids L)|^ (the carrier of L) )
+    by XBOOLE_0:def 4;
+A15: [a,b] in [:the carrier of MonSet L, the carrier of MonSet L:] by A13,
+    XBOOLE_0:def 4;
+A16: a in the carrier of (InclPoset Ids L)|^(the carrier of L) by A14,
+    ZFMISC_1:106;
+A17: b in the carrier of (InclPoset Ids L)|^(the carrier of L) by A14,
+    ZFMISC_1:106;
+A18: a in the carrier of product J by A16,YELLOW_1:def 5;
+    reconsider a9 = a, b9 = b as Element of product J by A16,A17,YELLOW_1:def 5
+    ;
+    [a9,b9] in (the InternalRel of product J) by A14,YELLOW_1:def 5;
+    then
+A19: a9 <= b9 by ORDERS_2:def 9;
+    a9 in product Carrier J by A18,YELLOW_1:def 4;
+    then consider f,g being Function such that
+A20: f = a9 and
+A21: g = b9 and
+A22: for i be set st i in the carrier of L ex R being RelStr, xi,yi
+being Element of R st R = ((the carrier of L) --> InclPoset Ids L).i & xi = f.i
+    & yi = g.i & xi <= yi
+    by A19,YELLOW_1:def 4;
+A23: f in Funcs (the carrier of L, the carrier of InclPoset Ids L) by A16,A20
+    ,YELLOW_1:28;
+    g in Funcs (the carrier of L, the carrier of InclPoset Ids L) by A17,A21
+    ,YELLOW_1:28;
+    then reconsider f, g as Function of the carrier of L,
+    the carrier of InclPoset Ids L by A23,FUNCT_2:121;
+    reconsider f, g as Function of L, InclPoset Ids L;
+    now
+      take f, g;
+      f <= g
+      proof
+        let j be set;
+        assume j in the carrier of L;
+        then reconsider j9 = j as Element of L;
+        take f.j9, g.j9;
+        ex R being RelStr, xi,yi being Element of R st ( R = ((the
+carrier of L) --> InclPoset Ids L).j9)&( xi = f.j9)&( yi = g.j9)&( xi <= yi)
+        by A22;
+        hence thesis by FUNCOP_1:13;
+      end;
+      hence a9 = f & b9 = g & a9 in the carrier of MonSet L &
+      b9 in the carrier of MonSet L & f <= g by A15,A20,A21,ZFMISC_1:106;
+    end;
+    hence thesis by Def14;
+  end;
+  hence thesis by A1,A3,YELLOW_0:def 13,def 14;
+end;
+
+theorem Th17:
+  for L being lower-bounded sup-Semilattice,
+  AR being auxiliary(ii) Relation of L for x, y being Element of L holds
+  x <= y implies AR-below x c= AR-below y
+proof
+  let L be lower-bounded sup-Semilattice, AR be auxiliary(ii) Relation of L;
+  let x, y be Element of L;
+  assume
+A1: x <= y;
+  let a;
+  assume a in AR-below x;
+  then consider y2 be Element of L such that
+A2: y2 = a and
+A3: [y2,x] in AR;
+  y2 <= y2;
+  then [y2,y] in AR by A1,A3,Def5;
+  hence thesis by A2;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  let AR be auxiliary(ii) auxiliary(iii) auxiliary(iv) Relation of L;
+  cluster AR-below -> monotone;
+  coherence
+  proof
+    set s = AR-below;
+    let x, y be Element of L;
+A1: s.x = AR-below x by Def13;
+A2: s.y = AR-below y by Def13;
+    assume x <= y;
+    then AR-below x c= AR-below y by Th17;
+    hence thesis by A1,A2,YELLOW_1:3;
+  end;
+end;
+
+theorem Th18:
+  for L being lower-bounded sup-Semilattice, AR being auxiliary Relation of L
+  holds AR-below in the carrier of MonSet L
+proof
+  let L be lower-bounded sup-Semilattice, AR be auxiliary Relation of L;
+  set s = AR-below;
+  ex s be Function of L, InclPoset Ids L st AR-below = s & s is monotone &
+  for x be Element of L holds s.x c= downarrow x
+  proof
+    take s;
+    for x be Element of L holds s.x c= downarrow x
+    proof
+      let x be Element of L;
+      s.x = AR-below x by Def13;
+      hence thesis by Th12;
+    end;
+    hence thesis;
+  end;
+  hence thesis by Def14;
+end;
+
+registration
+  let L be lower-bounded sup-Semilattice;
+  cluster MonSet L -> non empty;
+  coherence by Th18;
+end;
+
+theorem Th19:
+  for L being lower-bounded sup-Semilattice holds
+  IdsMap L in the carrier of MonSet L
+proof
+  let L be lower-bounded sup-Semilattice;
+  set s = IdsMap L;
+  ex s9 be Function of L, InclPoset Ids L st
+  s = s9 & s9 is monotone & for x be Element of L holds s9.x c= downarrow x
+  proof
+    take s;
+    thus thesis by YELLOW_2:def 4;
+  end;
+  hence thesis by Def14;
+end;
+
+theorem
+  for L being lower-bounded sup-Semilattice, AR being auxiliary Relation of L
+  holds AR-below <= IdsMap L
+proof
+  let L be lower-bounded sup-Semilattice, AR be auxiliary Relation of L;
+  let x be set;
+  assume x in the carrier of L;
+  then reconsider x9 = x as Element of L;
+A1: (AR-below).x9 = AR-below x9 by Def13;
+  (IdsMap L).x9 = downarrow x9 by YELLOW_2:def 4;
+  then
+A2: (AR-below).x c= (IdsMap L).x by A1,Th12;
+  reconsider a = (AR-below).x9,
+  b = (IdsMap L).x9 as Element of InclPoset Ids L;
+  take a, b;
+  thus thesis by A2,YELLOW_1:3;
+end;
+
+theorem Th21:
+  for L being lower-bounded non empty Poset
+  for I being Ideal of L holds Bottom L in I
+proof
+  let L be lower-bounded non empty Poset;
+  let I be Ideal of L;
+  consider x be Element of I;
+  Bottom L <= x by YELLOW_0:44;
+  hence thesis by WAYBEL_0:def 19;
+end;
+
+theorem
+  for L being upper-bounded non empty Poset
+  for F being Filter of L holds Top L in F
+proof
+  let L be upper-bounded non empty Poset;
+  let F be Filter of L;
+  consider x be Element of F;
+  Top L >= x by YELLOW_0:45;
+  hence thesis by WAYBEL_0:def 20;
+end;
+
+theorem Th23:
+  for L being lower-bounded non empty Poset holds
+  downarrow Bottom L = {Bottom L}
+proof
+  let L be lower-bounded non empty Poset;
+  thus downarrow Bottom L c= {Bottom L}
+  proof
+    let a;
+    assume a in downarrow Bottom L;
+    then a in {x where x is Element of L : ex y being Element of L st x <= y &
+    y in {Bottom L}} by WAYBEL_0:14;
+    then consider a9 be Element of L such that
+A1: a9 = a and
+A2: ex y being Element of L st a9 <= y & y in {Bottom L};
+    consider y being Element of L such that
+A3: a9 <= y and
+A4: y in {Bottom L} by A2;
+A5: Bottom L <= a9 by YELLOW_0:44;
+    y = Bottom L by A4,TARSKI:def 1;
+    hence thesis by A1,A3,A4,A5,ORDERS_2:25;
+  end;
+  let a;
+  assume a in {Bottom L};
+  then
+A6: a = Bottom L by TARSKI:def 1;
+  Bottom L <= Bottom L;
+  hence thesis by A6,WAYBEL_0:17;
+end;
+
+theorem
+  for L being upper-bounded non empty Poset holds uparrow Top L = {Top L}
+proof
+  let L be upper-bounded non empty Poset;
+  thus uparrow Top L c= {Top L}
+  proof
+    let x be set;
+    assume
+A1: x in uparrow Top L;
+    then reconsider x as Element of L;
+A2: x >= Top L by A1,WAYBEL_0:18;
+    x <= Top L by YELLOW_0:45;
+    then x = Top L by A2,ORDERS_2:25;
+    hence thesis by TARSKI:def 1;
+  end;
+  let x be set;
+  assume x in {Top L};
+  then
+A3: x = Top L by TARSKI:def 1;
+  Top L <= Top L;
+  hence thesis by A3,WAYBEL_0:18;
+end;
+
+Lm4: for L being lower-bounded sup-Semilattice, I being Ideal of L holds
+{Bottom L} c= I
+proof
+  let L be lower-bounded sup-Semilattice;
+  let I be Ideal of L;
+  let a;
+  assume a in {Bottom L};
+  then a = Bottom L by TARSKI:def 1;
+  hence thesis by Th21;
+end;
+
+reserve L for lower-bounded sup-Semilattice;
+reserve x for Element of L;
+
+theorem Th25:
+  (the carrier of L) --> {Bottom L} is Function of L, InclPoset Ids L
+proof
+  {Bottom L} = downarrow Bottom L by Th23;
+  then {Bottom L} in {X where X is Ideal of L: not contradiction};
+  then {Bottom L} in the carrier of InclPoset Ids L by YELLOW_1:1;
+  hence thesis by FUNCOP_1:57;
+end;
+
+Lm5: for f be Function
+of L, InclPoset Ids L st f = (the carrier of L) --> {Bottom L}
+holds f is monotone
+proof
+  let f be Function of L, InclPoset Ids L;
+  assume
+A1: f = (the carrier of L) --> {Bottom L};
+  let x,y be Element of L;
+A2: f.x = {Bottom L} by A1,FUNCOP_1:13;
+  f.y = {Bottom L} by A1,FUNCOP_1:13;
+  hence thesis by A2,YELLOW_1:3;
+end;
+
+theorem Th26:
+  (the carrier of L) --> {Bottom L} in the carrier of MonSet L
+proof
+  set s = (the carrier of L) --> {Bottom L};
+  ex s9 be Function of L, InclPoset Ids L st s = s9 & s9 is monotone &
+  for x be Element of L holds s9.x c= downarrow x
+  proof
+    reconsider s as Function of L, InclPoset Ids L by Th25;
+    take s;
+    for x holds s.x c= downarrow x
+    proof
+      let x be Element of L;
+      s.x = {Bottom L} by FUNCOP_1:13;
+      hence thesis by Lm4;
+    end;
+    hence thesis by Lm5;
+  end;
+  hence thesis by Def14;
+end;
+
+theorem
+  for AR being auxiliary Relation of L holds
+  [(the carrier of L) --> {Bottom L} , AR-below] in the InternalRel of MonSet L
+proof
+  let AR be auxiliary Relation of L;
+  set c = (the carrier of L) --> {Bottom L}, d = AR-below;
+  ex f,g be Function of L, InclPoset Ids L st c = f & d = g &
+  c in the carrier of MonSet L & d in the carrier of MonSet L & f <= g
+  proof
+    reconsider c as Function of L, InclPoset Ids L by Th25;
+    take c,d;
+    c <= d
+    proof
+      let x be set;
+      assume x in the carrier of L;
+      then reconsider x9 = x as Element of L;
+      d.x = AR-below x9 by Def13;
+      then reconsider dx = d.x9 as Ideal of L;
+      reconsider dx9 = dx as Element of InclPoset Ids L;
+      c.x9 = {Bottom L} by FUNCOP_1:13;
+      then
+A1:   c.x c= dx by Lm4;
+      take c.x9, dx9;
+      thus thesis by A1,YELLOW_1:3;
+    end;
+    hence thesis by Th18,Th26;
+  end;
+  hence thesis by Def14;
+end;
+
+Lm6: for L ex x be Element of MonSet L st x is_>=_than the carrier of MonSet L
+proof
+  let L;
+  set x = IdsMap L;
+  reconsider x as Element of MonSet L by Th19;
+  x is_>=_than the carrier of MonSet L
+  proof
+    let b be Element of MonSet L;
+    assume b in the carrier of MonSet L;
+    consider s be Function of L, InclPoset Ids L such that
+A1: b = s and s is monotone and
+A2: for x be Element of L holds s.x c= downarrow x by Def14;
+    IdsMap L >= s
+    proof
+      let a be set;
+      assume a in the carrier of L;
+      then reconsider a9 = a as Element of L;
+A3:   (IdsMap L).a = downarrow a9 by YELLOW_2:def 4;
+A4:   s.a c= downarrow a9 by A2;
+      reconsider A = s.a9, B = (IdsMap L).a9 as Element of InclPoset Ids L;
+      take A, B;
+      thus thesis by A3,A4,YELLOW_1:3;
+    end;
+    then [b,x] in the InternalRel of MonSet L by A1,Def14;
+    hence thesis by ORDERS_2:def 9;
+  end;
+  hence thesis;
+end;
+
+registration
+  let L;
+  cluster MonSet L -> upper-bounded;
+  coherence
+  proof
+    consider x be Element of MonSet L such that
+A1: x is_>=_than the carrier of MonSet L by Lm6;
+    take x;
+    thus thesis by A1;
+  end;
+end;
+
+definition
+  let L;
+  func Rel2Map L -> Function of InclPoset Aux L, MonSet L means
+  :Def15:
+  for AR being auxiliary Relation of L holds it.AR = AR-below;
+  existence
+  proof
+    defpred P[set,set] means
+    ex AR be auxiliary Relation of L st AR = $1 & $2 = AR-below;
+A1: for a st a in the carrier of InclPoset Aux L
+    ex y be set st y in the carrier of MonSet L & P[a,y]
+    proof
+      let a;
+      assume a in the carrier of InclPoset Aux L;
+      then a in Aux L by YELLOW_1:1;
+      then reconsider AR = a as auxiliary Relation of L by Def9;
+      take AR-below;
+      thus thesis by Th18;
+    end;
+    consider f being Function of the carrier of InclPoset Aux L,
+    the carrier of MonSet L such that
+A2: for a st a in the carrier of InclPoset Aux L holds P[a,f.a]
+    from FUNCT_2:sch 1(A1);
+    take f;
+    now
+      let AR be auxiliary Relation of L;
+      AR in Aux L by Def9;
+      then AR in the carrier of InclPoset Aux L by YELLOW_1:1;
+      then P[AR,f.AR] by A2;
+      hence f.AR = AR-below;
+    end;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let I1, I2 be Function of InclPoset Aux L, MonSet L;
+    assume
+A3: for AR be auxiliary Relation of L holds I1.AR = AR-below;
+    assume
+A4: for AR be auxiliary Relation of L holds I2.AR = AR-below;
+    dom I1 = the carrier of InclPoset Aux L by FUNCT_2:def 1;
+    then
+A5: dom I1 = Aux L by YELLOW_1:1;
+    dom I2 = the carrier of InclPoset Aux L by FUNCT_2:def 1;
+    then
+A6: dom I2 = Aux L by YELLOW_1:1;
+    now
+      let a;
+      assume a in Aux L;
+      then reconsider AR = a as auxiliary Relation of L by Def9;
+      I1.AR = AR-below by A3
+        .= I2.AR by A4;
+      hence I1.a = I2.a;
+    end;
+    hence thesis by A5,A6,FUNCT_1:9;
+  end;
+end;
+
+theorem
+  for R1, R2 being auxiliary Relation of L st R1 c= R2 holds
+  R1-below <= R2-below
+proof
+  let R1, R2 be auxiliary Relation of L;
+  assume
+A1: R1 c= R2;
+  let x be set;
+  assume x in the carrier of L;
+  then reconsider x9 = x as Element of L;
+A2: R1-below x9 c= R2-below x9
+  proof
+    let a;
+    assume a in R1-below x9;
+    then ex b be Element of L st ( b = a)&( [b,x9] in R1);
+    hence thesis by A1;
+  end;
+  reconsider A1 = (R1-below).x9, A2 = (R2-below).x9
+  as Element of InclPoset Ids L;
+  take A1, A2;
+A3: (R1-below).x = R1-below x9 by Def13;
+  (R2-below).x = R2-below x9 by Def13;
+  hence thesis by A2,A3,YELLOW_1:3;
+end;
+
+theorem Th29:
+  for R1, R2 being Relation of L st R1 c= R2 holds R1-below x c= R2-below x
+proof
+  let R1, R2 be Relation of L;
+  assume
+A1: R1 c= R2;
+  let a;
+  assume a in R1-below x;
+  then ex b be Element of L st ( b = a)&( [b,x] in R1);
+  hence thesis by A1;
+end;
+
+Lm7: Rel2Map L is monotone
+proof
+  let x,y be Element of InclPoset Aux L;
+A1: x in the carrier of InclPoset Aux L;
+A2: y in the carrier of InclPoset Aux L;
+A3: x in Aux L by A1,YELLOW_1:1;
+  y in Aux L by A2,YELLOW_1:1;
+  then reconsider R1 = x, R2 = y as auxiliary Relation of L by A3,Def9;
+  assume x <= y;
+  then
+A4: x c= y by YELLOW_1:3;
+  let a, b be Element of MonSet L;
+  assume that
+A5: a = (Rel2Map L).x and
+A6: b = (Rel2Map L).y;
+  thus a <= b
+  proof
+A7: (Rel2Map L).x = R1-below by Def15;
+A8: (Rel2Map L).y = R2-below by Def15;
+    consider s be Function of L, InclPoset Ids L such that
+A9: (Rel2Map L).x = s and s is monotone
+    and for x be Element of L holds s.x c= downarrow x by Def14;
+    consider t be Function of L, InclPoset Ids L such that
+A10: (Rel2Map L).y = t and t is monotone
+    and for x be Element of L holds t.x c= downarrow x by Def14;
+    s <= t
+    proof
+      let q be set;
+      assume q in the carrier of L;
+      then reconsider q9 = q as Element of L;
+A11:  s.q = R1-below q9 by A7,A9,Def13;
+A12:  t.q = R2-below q9 by A8,A10,Def13;
+A13:  R1-below q9 c= R2-below q9 by A4,Th29;
+      reconsider sq = s.q9, tq = t.q9 as Element of InclPoset Ids L;
+      sq <= tq by A11,A12,A13,YELLOW_1:3;
+      hence thesis;
+    end;
+    then [R1-below, R2-below] in the InternalRel of MonSet L
+    by A7,A8,A9,A10,Def14;
+    hence thesis by A5,A6,A7,A8,ORDERS_2:def 9;
+  end;
+end;
+
+registration
+  let L;
+  cluster Rel2Map L -> monotone;
+  coherence by Lm7;
+end;
+
+definition
+  let L;
+  func Map2Rel L -> Function of MonSet L, InclPoset Aux L means
+  :Def16:
+  for s be set st s in the carrier of MonSet L
+  ex AR be auxiliary Relation of L st AR = it.s & for x,y be set holds
+  [x,y] in AR iff ex x9,y9 be Element of L,
+  s9 be Function of L, InclPoset Ids L st
+  x9 = x & y9 = y & s9 = s & x9 in s9.y9;
+  existence
+  proof
+    defpred P[set, set] means
+    ex AR be auxiliary Relation of L st AR = $2 & for x,y be set holds
+    [x,y] in AR iff ex x9,y9 be Element of L,
+    s9 be Function of L, InclPoset Ids L st
+    x9 = x & y9 = y & s9 = $1 & x9 in s9.y9;
+A1: for a st a in the carrier of MonSet L ex b be set st b in the carrier of
+    InclPoset Aux L & P[a,b]
+    proof
+      let a;
+      assume
+A2:   a in the carrier of MonSet L;
+      defpred Q[set,set] means
+      ex x9, y9 be Element of L, s9 be Function of L, InclPoset Ids L st
+      x9 = $1 & y9 = $2 & s9 = a & x9 in s9.y9;
+      consider R being Relation of the carrier of L, the carrier of L such that
+A3:   for x,y be set holds [x,y] in R iff
+      x in the carrier of L & y in the carrier of L & Q[x,y]
+      from RELSET_1:sch 1;
+      reconsider R as Relation of L;
+A4:   R is auxiliary(i)
+      proof
+        let x, y be Element of L;
+        assume [x,y] in R;
+        then consider x9, y9 be Element of L,
+        s9 be Function of L, InclPoset Ids L such that
+A5:     x9 = x and
+A6:     y9 = y and
+A7:     s9 = a and
+A8:     x9 in s9.y9 by A3;
+        ex s be Function of L, InclPoset Ids L st ( a = s)&( s is
+        monotone)&( for x be Element of L holds s.x c= downarrow x) by A2,Def14
+        ;
+        then s9.y c= downarrow y by A7;
+        hence x <= y by A5,A6,A8,WAYBEL_0:17;
+      end;
+A9:   R is auxiliary(ii)
+      proof
+        let x, y, z, u be Element of L;
+        assume that
+A10:    u <= x and
+A11:    [x,y] in R and
+A12:    y <= z;
+A13:    ex x9, y9 be Element of L, s9 be Function of L, InclPoset
+        Ids L st ( x9 = x)&( y9 = y)&( s9 = a)&( x9 in s9.y9) by A3,A11;
+        consider s be Function of L, InclPoset Ids L such that
+A14:    a = s and
+A15:    s is monotone
+        and for x be Element of L holds s.x c= downarrow x by A2,Def14;
+        reconsider sy = s.y, sz = s.z as Element of InclPoset Ids L;
+        sy <= sz by A12,A15,ORDERS_3:def 5;
+        then
+A16:    s.y c= s.z by YELLOW_1:3;
+        s.z in the carrier of InclPoset Ids L;
+        then s.z in Ids L by YELLOW_1:1;
+        then consider sz be Ideal of L such that
+A17:    s.z = sz;
+        u in sz by A10,A13,A14,A16,A17,WAYBEL_0:def 19;
+        hence thesis by A3,A14,A17;
+      end;
+A18:  R is auxiliary(iii)
+      proof
+        let x, y, z be Element of L;
+        assume that
+A19:    [x,z] in R and
+A20:    [y,z] in R;
+        consider x1, z1 be Element of L,
+        s1 be Function of L, InclPoset Ids L such that
+A21:    x1 = x and
+A22:    z1 = z and
+A23:    s1 = a and
+A24:    x1 in s1.z1 by A3,A19;
+A25:    ex y2, z2 be Element of L, s2 be Function of L, InclPoset
+        Ids L st ( y2 = y)&( z2 = z)&( s2 = a)&( y2 in s2.z2) by A3,A20;
+        s1.z in the carrier of InclPoset Ids L;
+        then s1.z in Ids L by YELLOW_1:1;
+        then consider sz be Ideal of L such that
+A26:    s1.z = sz;
+        consider z3 be Element of L such that
+A27:    z3 in sz and
+A28:    x <= z3 and
+A29:    y <= z3 by A21,A22,A23,A24,A25,A26,WAYBEL_0:def 1;
+        ex q being Element of L st x <= q & y <= q &
+        for c being Element of L st x <= c & y <= c holds q <= c
+        by LATTICE3:def 10;
+        then x "\/" y <= z3 by A28,A29,LATTICE3:def 13;
+        then x "\/" y in sz by A27,WAYBEL_0:def 19;
+        hence thesis by A3,A23,A26;
+      end;
+      R is auxiliary(iv)
+      proof
+        let x be Element of L;
+        reconsider x9 = Bottom L, y9 = x as Element of L;
+        consider s9 be Function of L, InclPoset Ids L such that
+A30:    a = s9 and s9 is monotone
+        and for x be Element of L holds s9.x c= downarrow x by A2,Def14;
+        s9.y9 in the carrier of InclPoset Ids L;
+        then s9.y9 in Ids L by YELLOW_1:1;
+        then consider sy be Ideal of L such that
+A31:    sy = s9.y9;
+        x9 in sy by Th21;
+        hence thesis by A3,A30,A31;
+      end;
+      then reconsider R as auxiliary Relation of L by A4,A9,A18;
+A32:  for x,y be set holds [x,y] in R iff
+      ex x9,y9 be Element of L, s9 be Function of L, InclPoset Ids L st
+      x9 = x & y9 = y & s9 = a & x9 in s9.y9 by A3;
+      take b = R;
+      b in Aux L by Def9;
+      hence thesis by A32,YELLOW_1:1;
+    end;
+    consider f being Function of the carrier of MonSet L, the carrier of
+    InclPoset Aux L such that
+A33: for a st a in
+    the carrier of MonSet L holds P[a,f.a] from FUNCT_2:sch 1 (A1);
+    reconsider f9 = f as Function of MonSet L, InclPoset Aux L;
+    take f9;
+    let s be set;
+    assume
+A34: s in the carrier of MonSet L;
+    then reconsider s9 = s as Element of MonSet L;
+    f9.s9 in the carrier of InclPoset Aux L;
+    then f9.s9 in Aux L by YELLOW_1:1;
+    then reconsider fs = f9.s9 as auxiliary Relation of L by Def9;
+    take fs;
+    ex AR be auxiliary Relation of L st AR = f9.s & for x,y be set holds
+    [x,y] in AR iff ex x9,y9 be Element of L,
+    s9 be Function of L, InclPoset Ids L st
+    x9 = x & y9 = y & s9 = s & x9 in s9.y9 by A33,A34;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let M1, M2 be Function of MonSet L, InclPoset Aux L;
+    assume
+A35: for s be set st s in the carrier of MonSet L
+    ex AR be auxiliary Relation of L st AR = M1.s & for x,y be set holds
+    [x,y] in AR iff ex x9,y9 be Element of L,
+    s9 be Function of L, InclPoset Ids L st
+    x9 = x & y9 = y & s9 = s & x9 in s9.y9;
+    assume
+A36: for s be set st s in the carrier of MonSet L
+    ex AR be auxiliary Relation of L st AR = M2.s & for x,y be set holds
+    [x,y] in AR iff ex x9,y9 be Element of L,
+    s9 be Function of L, InclPoset Ids L st
+    x9 = x & y9 = y & s9 = s & x9 in s9.y9;
+A37: dom M1 = the carrier of MonSet L by FUNCT_2:def 1;
+A38: dom M2 = the carrier of MonSet L by FUNCT_2:def 1;
+    for s be set st s in the carrier of MonSet L holds M1.s = M2.s
+    proof
+      let s be set;
+      assume
+A39:  s in the carrier of MonSet L;
+      then consider AR1 be auxiliary Relation of L such that
+A40:  AR1 = M1.s and
+A41:  for x,y be set holds [x,y] in AR1 iff ex x9,y9 be Element of L, s9
+be Function of L, InclPoset Ids L st x9 = x & y9 = y & s9 = s & x9 in s9.y9
+      by A35;
+      consider AR2 be auxiliary Relation of L such that
+A42:  AR2 = M2.s and
+A43:  for x,y be set holds [x,y] in AR2 iff ex x9,y9 be Element of L, s9
+be Function of L, InclPoset Ids L st x9 = x & y9 = y & s9 = s & x9 in s9.y9
+      by A36,A39;
+      AR1 = AR2
+      proof
+        let x,y be set;
+        hereby
+          assume [x,y] in AR1;
+          then ex x9,y9 be Element of L, s9 be Function of L, InclPoset
+          Ids L st ( x9 = x)&( y9 = y)&( s9 = s)&( x9 in s9.y9) by A41;
+          hence [x,y] in AR2 by A43;
+        end;
+        assume [x,y] in AR2;
+        then ex x9,y9 be Element of L, s9 be Function of L, InclPoset
+        Ids L st ( x9 = x)&( y9 = y)&( s9 = s)&( x9 in s9.y9) by A43;
+        hence thesis by A41;
+      end;
+      hence thesis by A40,A42;
+    end;
+    hence thesis by A37,A38,FUNCT_1:9;
+  end;
+end;
+
+Lm8: Map2Rel L is monotone
+proof
+  set f = Map2Rel L;
+A1: InclPoset Aux L = RelStr (#Aux L, RelIncl Aux L#) by YELLOW_1:def 1;
+  let x,y be Element of MonSet L;
+  assume x <= y;
+  then [x,y] in the InternalRel of MonSet L by ORDERS_2:def 9;
+  then consider s,t be Function of L, InclPoset Ids L such that
+A2: x = s and
+A3: y = t and x in the carrier of MonSet L
+  and y in the carrier of MonSet L and
+A4: s <= t by Def14;
+A5: f.s in the carrier of InclPoset Aux L by A2,FUNCT_2:7;
+A6: f.t in the carrier of InclPoset Aux L by A3,FUNCT_2:7;
+A7: f.s in Aux L by A5,YELLOW_1:1;
+A8: f.t in Aux L by A6,YELLOW_1:1;
+  then reconsider AS = f.s, AT = f.t as auxiliary Relation of L by A7,Def9;
+  reconsider AS9 = AS, AT9 = AT as Element of InclPoset Aux L by A2,A3,
+  FUNCT_2:7;
+  for a,b be set st [a,b] in AS holds [a,b] in AT
+  proof
+    let a,b be set;
+    assume
+A9: [a,b] in AS;
+    then
+A10: b in the carrier of L by ZFMISC_1:106;
+    reconsider a9 = a, b9 = b as Element of L by A9,ZFMISC_1:106;
+    reconsider sb = s.b9, tb = t.b9 as Element of InclPoset Ids L;
+    ex a1, b1 being Element of InclPoset Ids L st ( a1 = s.b)&(
+    b1 = t.b)&( a1 <= b1) by A4,A10,YELLOW_2:def 1;
+    then
+A11: sb c= tb by YELLOW_1:3;
+    ex AR be auxiliary Relation of L st ( AR = f.x)&( for a9,b9
+be set holds [a9,b9] in AR iff ex x9,y9 be Element of L, s9 be Function of L,
+    InclPoset Ids L st x9 = a9 & y9 = b9 & s9 = x & x9 in s9. y9) by Def16;
+    then
+A12: ex x9,y9 be Element of L, s9 be Function of L, InclPoset
+    Ids L st ( x9 = a9)&( y9 = b9)&( s9 = s)&( x9 in s9.y9) by A2,A9;
+    ex AR1 be auxiliary Relation of L st ( AR1 = f.y)&( for a9,
+b9 be set holds [a9,b9] in AR1 iff ex x9,y9 be Element of L, s9 be Function of
+    L, InclPoset Ids L st x9 = a9 & y9 = b9 & s9 = y & x9 in s9. y9) by Def16;
+    hence thesis by A3,A11,A12;
+  end;
+  then AS9 c= AT9 by RELAT_1:def 3;
+  then [AS9,AT9] in RelIncl Aux L by A7,A8,WELLORD2:def 1;
+  hence thesis by A1,A2,A3,ORDERS_2:def 9;
+end;
+
+registration
+  let L;
+  cluster Map2Rel L -> monotone;
+  coherence by Lm8;
+end;
+
+theorem Th30:
+  (Map2Rel L) * (Rel2Map L) = id dom (Rel2Map L)
+proof
+  set LS = (Map2Rel L) * (Rel2Map L);
+  set R = id dom (Rel2Map L);
+  dom LS = the carrier of InclPoset Aux L by FUNCT_2:def 1;
+  then
+A1: dom LS = Aux L by YELLOW_1:1;
+  dom R = dom (Rel2Map L) by FUNCT_1:34;
+  then dom R = the carrier of InclPoset Aux L by FUNCT_2:def 1;
+  then
+A2: dom R = Aux L by YELLOW_1:1;
+  for a st a in Aux L holds LS.a = R.a
+  proof
+    let a;
+    assume
+A3: a in Aux L;
+    then reconsider AR = a as auxiliary Relation of L by Def9;
+A4: a in the carrier of InclPoset Aux L by A3,YELLOW_1:1;
+    then
+A5: a in dom (Rel2Map L) by FUNCT_2:def 1;
+    then LS.a = (Map2Rel L).((Rel2Map L).AR) by FUNCT_1:23;
+    then
+A6: LS.a = (Map2Rel L).(AR-below) by Def15;
+    LS.a in the carrier of InclPoset Aux L by A4,FUNCT_2:7;
+    then LS.a in Aux L by YELLOW_1:1;
+    then reconsider La = LS.a as auxiliary Relation of L by Def9;
+A7: AR-below in the carrier of MonSet L by Th18;
+    for c,b be set holds [c,b] in La iff [c,b] in AR
+    proof
+      let c,b be set;
+      hereby
+        assume
+A8:     [c,b] in La;
+        ex AR9 be auxiliary Relation of L st ( AR9 = (Map2Rel L).(
+AR-below))&( for c,b be set holds [c,b] in AR9 iff ex c9,b9 be Element of L, s9
+be Function of L, InclPoset Ids L st c9 = c & b9 = b & s9 = AR-below & c9 in s9
+        .b9) by A7,Def16;
+        then consider c9,b9 be Element of L,
+        s9 be Function of L, InclPoset Ids L such that
+A9:     c9 = c and
+A10:    b9 = b and
+A11:    s9 = AR-below and
+A12:    c9 in s9.b9 by A6,A8;
+        c9 in AR-below b9 by A11,A12,Def13;
+        hence [c,b] in AR by A9,A10,Th13;
+      end;
+      assume
+A13:  [c,b] in AR;
+      then reconsider c9 = c, b9 = b as Element of L by ZFMISC_1:106;
+      c9 in AR-below b9 by A13;
+      then
+A14:  c9 in (AR-below).b9 by Def13;
+      ex AR9 be auxiliary Relation of L st ( AR9 = (Map2Rel L).(
+AR-below))&( for c,b be set holds [c,b] in AR9 iff ex c9,b9 be Element of L, s9
+be Function of L, InclPoset Ids L st c9 = c & b9 = b & s9 = AR-below & c9 in s9
+      .b9) by A7,Def16;
+      hence thesis by A6,A14;
+    end;
+    then La = AR by RELAT_1:def 2;
+    hence thesis by A5,FUNCT_1:35;
+  end;
+  hence thesis by A1,A2,FUNCT_1:9;
+end;
+
+theorem Th31:
+  (Rel2Map L) * (Map2Rel L) = id (the carrier of MonSet L)
+proof
+  set LS = (Rel2Map L) * (Map2Rel L);
+  set R = id (the carrier of MonSet L);
+A1: dom LS = the carrier of MonSet L by FUNCT_2:def 1;
+A2: dom R = the carrier of MonSet L by FUNCT_1:34;
+  for a st a in the carrier of MonSet L holds LS.a = R.a
+  proof
+    let a;
+    assume
+A3: a in the carrier of MonSet L;
+    then consider s be Function of L, InclPoset Ids L such that
+A4: a = s and s is monotone
+    and for x be Element of L holds s.x c= downarrow x by Def14;
+    LS.s in the carrier of MonSet L by A3,A4,FUNCT_2:7;
+    then consider Ls be Function of L, InclPoset Ids L such that
+A5: LS.s = Ls and Ls is monotone
+    and for x be Element of L holds Ls.x c= downarrow x by Def14;
+    set AR = (Map2Rel L).s;
+    AR in the carrier of InclPoset Aux L by A3,A4,FUNCT_2:7;
+    then AR in Aux L by YELLOW_1:1;
+    then reconsider AR as auxiliary Relation of L by Def9;
+    dom (Map2Rel L) = the carrier of MonSet L by FUNCT_2:def 1;
+    then Ls = (Rel2Map L).AR by A3,A4,A5,FUNCT_1:23;
+    then
+A6: Ls = AR-below by Def15;
+A7: dom Ls = the carrier of L by FUNCT_2:def 1;
+A8: dom s = the carrier of L by FUNCT_2:def 1;
+    now
+      let b be set;
+      assume
+A9:   b in the carrier of L;
+      then reconsider b9 = b as Element of L;
+A10:  Ls.b c= s.b
+      proof
+        let d be set;
+        assume d in Ls.b;
+        then d in AR-below b9 by A6,Def13;
+        then
+A11:    [d,b9] in AR by Th13;
+        ex AR9 be auxiliary Relation of L st ( AR9 = (Map2Rel L).s)
+&( for d,b9 be set holds [d,b9] in AR9 iff ex d9,b99 be Element of L, s9 be
+Function of L, InclPoset Ids L st d9 = d & b99 = b9 & s9 = s & d9 in s9. b99)
+        by A3,A4,Def16;
+        then ex d9,b99 be Element of L, s9 be Function of L, InclPoset
+        Ids L st ( d9 = d)&( b99 = b9)&( s9 = s)&( d9 in s9.b99) by A11;
+        hence thesis;
+      end;
+      s.b c= Ls.b
+      proof
+        let d be set;
+        assume
+A12:    d in s.b;
+        s.b in the carrier of InclPoset Ids L by A9,FUNCT_2:7;
+        then s.b in Ids L by YELLOW_1:1;
+        then ex X be Ideal of L st ( s.b = X);
+        then reconsider d9 = d as Element of L by A12;
+        ex AR9 be auxiliary Relation of L st ( AR9 = (Map2Rel L).s)
+&( for d,b9 be set holds [d,b9] in AR9 iff ex d9,b99 be Element of L, s9 be
+Function of L, InclPoset Ids L st d9 = d & b99 = b9 & s9 = s & d9 in s9. b99)
+        by A3,A4,Def16;
+        then [d9,b9] in AR by A12;
+        then d9 in AR-below b9;
+        hence thesis by A6,Def13;
+      end;
+      hence Ls.b = s.b by A10,XBOOLE_0:def 10;
+    end;
+    then Ls = s by A7,A8,FUNCT_1:9;
+    hence thesis by A3,A4,A5,FUNCT_1:35;
+  end;
+  hence thesis by A1,A2,FUNCT_1:9;
+end;
+
+registration
+  let L;
+  cluster Rel2Map L -> one-to-one;
+  coherence
+  proof
+    ex g be Function st g*(Rel2Map L) = id dom (Rel2Map L)
+    proof
+      take Map2Rel L;
+      thus thesis by Th30;
+    end;
+    hence thesis by FUNCT_1:53;
+  end;
+end;
+ 
+:: Proposition 1.10 (i) p.43
+
+theorem Th32:
+  (Rel2Map L)" = Map2Rel L
+proof
+  (Rel2Map L)*(Map2Rel L) = id (the carrier of MonSet L) implies
+  rng (Rel2Map L) = the carrier of MonSet L by FUNCT_2:24;
+  then
+A1: rng (Rel2Map L) = dom (Map2Rel L) by Th31,FUNCT_2:def 1;
+  (Map2Rel L)*(Rel2Map L) = id dom (Rel2Map L) by Th30;
+  hence thesis by A1,FUNCT_1:63;
+end;
+ 
+:: Proposition 1.10 (ii) p.43
+
+theorem
+  Rel2Map L is isomorphic
+proof
+  ex g being Function of MonSet L, InclPoset Aux L st
+  g = (Rel2Map L)" & g is monotone
+  proof
+    reconsider g = Map2Rel L as Function of MonSet L, InclPoset Aux L;
+    take g;
+    thus thesis by Th32;
+  end;
+  hence thesis by WAYBEL_0:def 38;
+end;
+
+theorem Th34:
+  for L being complete LATTICE, x being Element of L holds
+  meet { I where I is Ideal of L : x <= sup I } = waybelow x
+proof
+  let L be complete LATTICE, x be Element of L;
+  set X = { I where I is Ideal of L : x <= sup I };
+  X c= bool the carrier of L
+  proof
+    let a;
+    assume a in X;
+    then ex I be Ideal of L st ( a = I)&( x <= sup I);
+    hence thesis;
+  end;
+  then reconsider X9 = X as Subset-Family of L;
+  sup downarrow x = x by WAYBEL_0:34;
+  then
+A1: downarrow x in X;
+  thus meet X c= waybelow x
+  proof
+    let a;
+    assume
+A2: a in meet X;
+    then a in meet X9;
+    then reconsider y = a as Element of L;
+    now
+      let I be Ideal of L;
+      assume x <= sup I;
+      then I in X;
+      hence y in I by A2,SETFAM_1:def 1;
+    end;
+    then y << x by WAYBEL_3:21;
+    hence thesis by WAYBEL_3:7;
+  end;
+  thus waybelow x c= meet X
+  proof
+    let a;
+    assume a in waybelow x;
+    then a in {y where y is Element of L: y << x} by WAYBEL_3:def 3;
+    then
+A3: ex a9 be Element of L st ( a9 = a)&( a9 << x);
+    for Y be set holds Y in X implies a in Y
+    proof
+      let Y be set;
+      assume Y in X;
+      then ex I be Ideal of L st ( Y = I)&( x <= sup I);
+      hence thesis by A3,WAYBEL_3:20;
+    end;
+    hence thesis by A1,SETFAM_1:def 1;
+  end;
+end;
+
+definition
+  let L be Semilattice, I be Ideal of L;
+  func DownMap I -> Function of L, InclPoset Ids L means
+  :Def17:
+  for x be Element of L holds
+  ( x <= sup I implies it.x = ( downarrow x ) /\ I ) &
+  ( not x <= sup I implies it.x = downarrow x );
+  existence
+  proof
+    defpred P[set,set] means for x be Element of L st x = $1 holds
+    ( x <= sup I implies $2 = ( downarrow x ) /\ I ) &
+    ( not x <= sup I implies $2 = downarrow x );
+    defpred C[Element of L] means $1 <= sup I;
+    deffunc F(Element of L) = ( downarrow $1 ) /\ I;
+    deffunc G(Element of L) = downarrow $1;
+    consider f being Function such that
+A1: dom f = the carrier of L & for x be Element of L holds
+    ( C[x] implies f.x = F(x) ) &
+    ( not C[x] implies f.x = G(x) ) from PARTFUN1:sch 4;
+A2: for a be set st a in the carrier of L ex y be set st y in
+    the carrier of InclPoset Ids L & P[a,y]
+    proof
+      let a;
+      assume a in the carrier of L;
+      then reconsider x = a as Element of L;
+      take y = f.x;
+      thus y in the carrier of InclPoset Ids L
+      proof
+        per cases;
+        suppose x <= sup I;
+          then y = ( downarrow x ) /\ I by A1;
+          then y is Ideal of L by YELLOW_2:42;
+          then y in {X where X is Ideal of L: not contradiction};
+          hence thesis by YELLOW_1:1;
+        end;
+        suppose not x <= sup I;
+          then y = downarrow x by A1;
+          then y in {X where X is Ideal of L: not contradiction};
+          hence thesis by YELLOW_1:1;
+        end;
+      end;
+      thus thesis by A1;
+    end;
+    consider f being Function of the carrier of L,
+    the carrier of InclPoset Ids L such that
+A3: for a st a in the carrier of L holds P[a,f.a] from FUNCT_2:sch 1(A2);
+    reconsider f as Function of L, InclPoset Ids L;
+    for x be Element of L holds
+    ( x <= sup I implies f.x = ( downarrow x ) /\ I ) &
+    ( not x <= sup I implies f.x = downarrow x ) by A3;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let M1, M2 be Function of L, InclPoset Ids L;
+    assume
+A4: for x be Element of L holds
+    ( x <= sup I implies M1.x = ( downarrow x ) /\ I ) &
+    ( not x <= sup I implies M1.x = downarrow x );
+    assume
+A5: for x be Element of L holds
+    ( x <= sup I implies M2.x = ( downarrow x ) /\ I ) &
+    ( not x <= sup I implies M2.x = downarrow x );
+A6: dom M1 = the carrier of L by FUNCT_2:def 1;
+A7: dom M2 = the carrier of L by FUNCT_2:def 1;
+    now
+      let x be set;
+      assume x in the carrier of L;
+      then reconsider x9 = x as Element of L;
+A8:   now
+        assume
+A9:     x9 <= sup I;
+        then M1.x9 = ( downarrow x9 ) /\ I by A4;
+        hence M1.x9 = M2.x9 by A5,A9;
+      end;
+      now
+        assume
+A10:    not x9 <= sup I;
+        then M1.x9 = downarrow x9 by A4;
+        hence M1.x9 = M2.x9 by A5,A10;
+      end;
+      hence M1.x = M2.x by A8;
+    end;
+    hence thesis by A6,A7,FUNCT_1:9;
+  end;
+end;
+
+Lm9: for L be Semilattice, I be Ideal of L holds DownMap I is monotone
+proof
+  let L be Semilattice, I be Ideal of L;
+  let x,y be Element of L;
+  assume
+A1: x <= y;
+  per cases;
+  suppose
+A2: x <= sup I & y <= sup I;
+    then
+A3: (DownMap I).x = (downarrow x) /\ I by Def17;
+    (DownMap I).y = (downarrow y) /\ I by A2,Def17;
+    then (DownMap I).x c= (DownMap I).y by A1,A3,WAYBEL_0:21,XBOOLE_1:26;
+    hence thesis by YELLOW_1:3;
+  end;
+  suppose
+A4: x <= sup I & not y <= sup I;
+    then
+A5: (DownMap I).x = (downarrow x) /\ I by Def17;
+A6: (DownMap I).y = downarrow y by A4,Def17;
+A7: downarrow x c= downarrow y by A1,WAYBEL_0:21;
+    (downarrow x) /\ I c= downarrow x by XBOOLE_1:17;
+    then (DownMap I).x c= (DownMap I).y by A5,A6,A7,XBOOLE_1:1;
+    hence thesis by YELLOW_1:3;
+  end;
+  suppose not x <= sup I & y <= sup I;
+    hence thesis by A1,ORDERS_2:26;
+  end;
+  suppose
+A8: not x <= sup I & not y <= sup I;
+    then
+A9: (DownMap I).x = downarrow x by Def17;
+    (DownMap I).y = downarrow y by A8,Def17;
+    then (DownMap I).x c= (DownMap I).y by A1,A9,WAYBEL_0:21;
+    hence thesis by YELLOW_1:3;
+  end;
+end;
+
+Lm10: for L be Semilattice, x be Element of L
+for I be Ideal of L holds (DownMap I).x c= downarrow x
+proof
+  let L be Semilattice, x be Element of L;
+  let I be Ideal of L;
+  per cases;
+  suppose x <= sup I;
+    then (DownMap I).x = (downarrow x) /\ I by Def17;
+    hence thesis by XBOOLE_1:17;
+  end;
+  suppose not x <= sup I;
+    hence thesis by Def17;
+  end;
+end;
+
+theorem Th35:
+  for L being Semilattice, I being Ideal of L holds
+  DownMap I in the carrier of MonSet L
+proof
+  let L be Semilattice, I be Ideal of L;
+  reconsider mI = DownMap I as Function of L, InclPoset Ids L;
+  ex s be Function of L, InclPoset Ids L st mI = s & s is monotone &
+  for x be Element of L holds s.x c= downarrow x
+  proof
+    take mI;
+    thus thesis by Lm9,Lm10;
+  end;
+  hence thesis by Def14;
+end;
+
+theorem Th36:
+  for L being with_infima antisymmetric reflexive RelStr, x being Element of L
+  for D being non empty lower Subset of L holds
+  {x} "/\" D = (downarrow x) /\ D
+proof
+  let L be with_infima antisymmetric reflexive RelStr, x be Element of L;
+  let D be non empty lower Subset of L;
+  A1: {
+x} "/\" D = { x9 "/\" y where x9, y is Element of L : x9 in {x} & y in D }
+  by YELLOW_4:def 4;
+  thus {x} "/\" D c= (downarrow x) /\ D
+  proof
+    let a;
+    assume a in {x} "/\" D;
+    then a in { x9 "/\" y where x9, y is Element of L : x9 in {x} & y in D }
+    by YELLOW_4:def 4;
+    then consider x9, y be Element of L such that
+A2: a = x9 "/\" y and
+A3: x9 in {x} and
+A4: y in D;
+    reconsider a9 = a as Element of L by A2;
+A5: x9 = x by A3,TARSKI:def 1;
+A6: ex v being Element of L st x9 >= v & y >= v &
+    for c being Element of L st x9 >= c & y >= c holds v >= c
+    by LATTICE3:def 11;
+    then
+A7: x9 "/\" y <= x9 by LATTICE3:def 14;
+A8: x9 "/\" y <= y by A6,LATTICE3:def 14;
+A9: a in downarrow x by A2,A5,A7,WAYBEL_0:17;
+    a9 in D by A2,A4,A8,WAYBEL_0:def 19;
+    hence thesis by A9,XBOOLE_0:def 4;
+  end;
+  thus (downarrow x) /\ D c= {x} "/\" D
+  proof
+    let a;
+    assume
+A10: a in (downarrow x) /\ D;
+    then
+A11: a in downarrow x by XBOOLE_0:def 4;
+    reconsider a9 = a as Element of D by A10,XBOOLE_0:def 4;
+A12: x in {x} by TARSKI:def 1;
+    a9 <= x by A11,WAYBEL_0:17;
+    then a9 = a9 "/\" x by YELLOW_0:25;
+    hence thesis by A1,A12;
+  end;
+end;
+
+begin  :: Approximating Relations
+:: Definition 1.11 p.44
+
+definition
+  let L be non empty RelStr, AR be Relation of L;
+  attr AR is approximating means
+  :Def18:
+  for x be Element of L holds x = sup (AR-below x);
+end;
+
+definition
+  let L be non empty Poset;
+  let mp be Function of L, InclPoset Ids L;
+  attr mp is approximating means
+  :Def19:
+  for x be Element of L ex ii be Subset of L st ii = mp.x & x = sup ii;
+end;
+ 
+:: Lemma 1.12 (i) p.44
+
+theorem Th37:
+  for L being lower-bounded meet-continuous Semilattice, I being Ideal of L
+  holds DownMap I is approximating
+proof
+  let L be lower-bounded meet-continuous Semilattice;
+  let I be Ideal of L;
+  for x be Element of L ex ii be Subset of L st ii = (DownMap I).x & x = sup ii
+  proof
+    let x be Element of L;
+    set ii = (DownMap I).x;
+    ii in the carrier of InclPoset Ids L;
+    then ii in Ids L by YELLOW_1:1;
+    then consider ii9 be Ideal of L such that
+A1: ii9 = ii;
+    reconsider dI = ( downarrow x ) /\ I as Subset of L;
+    per cases;
+    suppose
+A2:   x <= sup I;
+      then sup ii9 = sup dI by A1,Def17
+        .= sup ({x} "/\" I) by Th36
+        .= x "/\" sup I by WAYBEL_2:def 6
+        .= x by A2,YELLOW_0:25;
+      hence thesis by A1;
+    end;
+    suppose not x <= sup I;
+      then sup ii9 = sup downarrow x by A1,Def17
+        .= x by WAYBEL_0:34;
+      hence thesis by A1;
+    end;
+  end;
+  hence thesis by Def19;
+end;
+
+Lm11: for L be complete LATTICE, x be Element of L
+for D be directed Subset of L holds sup ({x} "/\" D) <= x
+proof
+  let L be complete LATTICE, x be Element of L;
+  let D be directed Subset of L;
+A1: {x} "/\" D = { a "/\" b where a, b is Element of L : a in {x} & b in D }
+  by YELLOW_4:def 4;
+A2: ex_sup_of ({x} "/\" D),L by YELLOW_0:17;
+  for c being Element of L st c in ({x} "/\" D) holds c <= x
+  proof
+    let c be Element of L;
+    assume c in ({x} "/\" D);
+    then consider a, b be Element of L such that
+A3: c = a "/\" b and
+A4: a in {x} and b in D by A1;
+    a = x by A4,TARSKI:def 1;
+    hence thesis by A3,YELLOW_0:23;
+  end;
+  then x is_>=_than ({x} "/\" D) by LATTICE3:def 9;
+  hence thesis by A2,YELLOW_0:30;
+end;
+ 
+:: Lemma 1.12 (ii) p.44
+
+theorem Th38:
+  for L being lower-bounded continuous LATTICE holds L is meet-continuous
+proof
+  let L be lower-bounded continuous LATTICE;
+  now
+    let D be non empty directed Subset of L;
+    let x be Element of L;
+    assume
+A1: x <= sup D;
+A2: ex_sup_of waybelow x,L by YELLOW_0:17;
+A3: ex_sup_of downarrow (sup ({x} "/\" D)),L by YELLOW_0:17;
+    waybelow x c= downarrow (sup ({x} "/\" D))
+    proof
+      let q be set;
+      assume q in waybelow x;
+      then q in {y where y is Element of L: y << x} by WAYBEL_3:def 3;
+      then consider q9 be Element of L such that
+A4:   q9 = q and
+A5:   q9 << x;
+A6:   q9 <= x by A5,WAYBEL_3:1;
+      consider d be Element of L such that
+A7:   d in D and
+A8:   q9 <= d by A1,A5,WAYBEL_3:def 1;
+      x in {x} by TARSKI:def 1;
+      then x "/\" d in { a "/\" b where a, b is Element of L : a in {x} & b in
+      D } by A7;
+      then
+A9:   x "/\" d in {x} "/\" D by YELLOW_4:def 4;
+      ex_inf_of {x,d},L by YELLOW_0:17;
+      then
+A10:  q9 <= x "/\" d by A6,A8,YELLOW_0:19;
+      sup ({x} "/\" D) is_>=_than {x} "/\" D by YELLOW_0:32;
+      then x "/\" d <= sup ({x} "/\" D) by A9,LATTICE3:def 9;
+      then q9 <= sup ({x} "/\" D) by A10,ORDERS_2:26;
+      hence thesis by A4,WAYBEL_0:17;
+    end;
+    then sup waybelow x <= sup downarrow (sup ({x} "/\" D)) by A2,A3,
+    YELLOW_0:34;
+    then sup waybelow x <= sup ({x} "/\" D) by WAYBEL_0:34;
+    then
+A11: x <= sup ({x} "/\" D) by WAYBEL_3:def 5;
+    sup ({x} "/\" D) <= x by Lm11;
+    hence x = sup ({x} "/\" D) by A11,ORDERS_2:25;
+  end;
+  then for x being Element of L, D being non empty directed Subset of L
+  st x <= sup D holds x = sup ({x} "/\" D);
+  hence thesis by WAYBEL_2:52;
+end;
+
+registration
+  cluster continuous -> meet-continuous (lower-bounded LATTICE);
+  coherence by Th38;
+end;
+ 
+:: Lemma 1.12 (iii) p.44
+
+theorem
+  for L being lower-bounded continuous LATTICE,
+  I being Ideal of L holds DownMap I is approximating by Th37;
+
+registration
+  let L be non empty reflexive antisymmetric RelStr;
+  cluster L-waybelow -> auxiliary(i);
+  coherence
+  proof
+    let x, y be Element of L;
+    assume [x,y] in L-waybelow;
+    then x << y by Def2;
+    hence thesis by WAYBEL_3:1;
+  end;
+end;
+
+registration
+  let L be non empty reflexive transitive RelStr;
+  cluster L-waybelow -> auxiliary(ii);
+  coherence
+  proof
+    set AR = L-waybelow;
+    let x, y, z, u be Element of L;
+    assume that
+A1: u <= x and
+A2: [x,y] in AR and
+A3: y <= z;
+    x << y by A2,Def2;
+    then u << z by A1,A3,WAYBEL_3:2;
+    hence [u,z] in AR by Def2;
+  end;
+end;
+
+registration
+  let L be with_suprema Poset;
+  cluster L-waybelow -> auxiliary(iii);
+  coherence
+  proof
+    set AR = L-waybelow;
+    let x, y, z be Element of L;
+    assume that
+A1: [x,z] in AR and
+A2: [y,z] in AR;
+A3: x << z by A1,Def2;
+    y << z by A2,Def2;
+    then (x "\/" y) << z by A3,WAYBEL_3:3;
+    hence [(x "\/" y),z] in AR by Def2;
+  end;
+end;
+
+registration
+  let L be /\-complete (non empty Poset);
+  cluster L-waybelow -> auxiliary(iii);
+  coherence
+  proof
+    set AR = L-waybelow;
+    let x, y, z be Element of L;
+    assume that
+A1: [x,z] in AR and
+A2: [y,z] in AR;
+A3: x << z by A1,Def2;
+    y << z by A2,Def2;
+    then (x "\/" y) << z by A3,WAYBEL_3:3;
+    hence thesis by Def2;
+  end;
+end;
+
+registration
+  let L be lower-bounded antisymmetric reflexive non empty RelStr;
+  cluster L-waybelow -> auxiliary(iv);
+  coherence
+  proof
+    let x be Element of L;
+    Bottom L << x by WAYBEL_3:4;
+    hence thesis by Def2;
+  end;
+end;
+
+theorem Th40:
+  for L being complete LATTICE, x being Element of L holds
+  (L-waybelow)-below x = waybelow x
+proof
+  let L be complete LATTICE, x be Element of L;
+  set AR = L-waybelow;
+  set A = {y where y is Element of L: [y,x] in AR};
+  set B = {y where y is Element of L: y << x};
+A1: A c= B
+  proof
+    let a be set;
+    assume a in A;
+    then consider v being Element of L such that
+A2: a = v and
+A3: [v,x] in AR;
+    v << x by A3,Def2;
+    hence thesis by A2;
+  end;
+  B c= A
+  proof
+    let a be set;
+    assume a in B;
+    then consider v being Element of L such that
+A4: a = v and
+A5: v << x;
+    [v,x] in AR by A5,Def2;
+    hence thesis by A4;
+  end;
+  then A = B by A1,XBOOLE_0:def 10;
+  hence thesis by WAYBEL_3:def 3;
+end;
+
+theorem Th41:
+  for L being LATTICE holds IntRel L is approximating
+proof
+  let L be LATTICE;
+  set AR = IntRel L;
+  let x be Element of L;
+  set A = {y where y is Element of L: [y,x] in AR};
+  set E = { u where u is Element of L : u <= x };
+A1: A c= E
+  proof
+    let a be set;
+    assume a in A;
+    then consider v being Element of L such that
+A2: a = v and
+A3: [v,x] in AR;
+    v <= x by A3,ORDERS_2:def 9;
+    hence thesis by A2;
+  end;
+  E c= A
+  proof
+    let a be set;
+    assume a in E;
+    then consider v being Element of L such that
+A4: a = v and
+A5: v <= x;
+    [v,x] in AR by A5,ORDERS_2:def 9;
+    hence thesis by A4;
+  end;
+  then
+A6: {y where y is Element of L: [y,x] in AR} = E by A1,XBOOLE_0:def 10;
+  {y where y is Element of L: y <= x } c= the carrier of L
+  proof
+    let z be set;
+    assume z in {y where y is Element of L: y <= x };
+    then ex y being Element of L st z = y & y <= x;
+    hence thesis;
+  end;
+  then reconsider E as Subset of L;
+A7: x is_>=_than E
+  proof
+    let b be Element of L;
+    assume b in E;
+    then ex b9 be Element of L st ( b9 = b)&( b9 <= x);
+    hence b <= x;
+  end;
+  now
+    let b be Element of L;
+    assume
+A8: b is_>=_than E;
+    x in E;
+    hence x <= b by A8,LATTICE3:def 9;
+  end;
+  hence thesis by A6,A7,YELLOW_0:30;
+end;
+
+Lm12: for L be lower-bounded continuous LATTICE holds
+L-waybelow is approximating
+proof
+  let L be lower-bounded continuous LATTICE;
+  let x be Element of L;
+  x = sup waybelow x by WAYBEL_3:def 5;
+  hence thesis by Th40;
+end;
+
+registration
+  let L be lower-bounded continuous LATTICE;
+  cluster L-waybelow -> approximating;
+  coherence by Lm12;
+end;
+
+registration
+  let L be complete LATTICE;
+  cluster approximating auxiliary Relation of L;
+  existence
+  proof
+    reconsider A = IntRel L as auxiliary Relation of L;
+    A is approximating by Th41;
+    hence thesis;
+  end;
+end;
+
+definition
+  let L be complete LATTICE;
+  defpred P[set] means $1 is approximating auxiliary Relation of L;
+  func App L means
+  :Def20:
+  a in it iff a is approximating auxiliary Relation of L;
+  existence
+  proof
+    consider X be set such that
+A1: for a holds a in X iff a in Aux L & P[a] from XBOOLE_0:sch 1;
+    take X;
+    a is approximating auxiliary Relation of L implies a in X
+    proof
+      assume
+A2:   a is approximating auxiliary Relation of L;
+      then a in Aux L by Def9;
+      hence thesis by A1,A2;
+    end;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    thus
+    for X1,X2 being set st (for x being set holds x in X1 iff P[x]) &
+    (for x being set holds x in X2 iff P[x]) holds X1 = X2 from
+    XBOOLE_0:sch 3;
+  end;
+end;
+
+registration
+  let L be complete LATTICE;
+  cluster App L -> non empty;
+  coherence
+  proof
+    consider a be approximating auxiliary Relation of L;
+    a in App L by Def20;
+    hence thesis;
+  end;
+end;
+
+theorem Th42:
+  for L being complete LATTICE for mp being Function of L, InclPoset Ids L st
+  mp is approximating & mp in the carrier of MonSet L
+  ex AR being approximating auxiliary Relation of L st AR = (Map2Rel L).mp
+proof
+  let L be complete LATTICE;
+  let mp be Function of L, InclPoset Ids L;
+  assume that
+A1: mp is approximating and
+A2: mp in the carrier of MonSet L;
+  consider AR be auxiliary Relation of L such that
+A3: AR = (Map2Rel L).mp and
+A4: for x,y be set holds [x,y] in AR iff ex x9,y9 be Element of L, s9 be
+  Function of L, InclPoset Ids L st x9 = x & y9 = y & s9 = mp & x9 in s9.y9
+  by A2,Def16;
+  now
+    let x be Element of L;
+A5: ex ii be Subset of L st ( ii = mp.x)&( x = sup ii) by A1,Def19;
+A6: AR-below x c= mp.x
+    proof
+      let a;
+      assume a in AR-below x;
+      then [a,x] in AR by Th13;
+      then ex x9,y9 be Element of L, s9 be Function of L, InclPoset
+      Ids L st ( x9 = a)&( y9 = x)&( s9 = mp)&( x9 in s9.y9) by A4;
+      hence thesis;
+    end;
+    mp.x c= AR-below x
+    proof
+      let a;
+      assume
+A7:   a in mp.x;
+      then reconsider a9 = a as Element of L by A5;
+      [a9,x] in AR by A4,A7;
+      hence thesis;
+    end;
+    hence x = sup (AR-below x) by A5,A6,XBOOLE_0:def 10;
+  end;
+  then reconsider AR as approximating auxiliary Relation of L by Def18;
+  take AR;
+  thus thesis by A3;
+end;
+
+theorem Th43:
+  for L being complete LATTICE, x being Element of L holds
+  meet { (DownMap I).x where I is Ideal of L : not contradiction} = waybelow x
+proof
+  let L be complete LATTICE, x be Element of L;
+  set A = { (DownMap I).x where I is Ideal of L : not contradiction};
+  set A1 = { (DownMap I).x where I is Ideal of L : x <= sup I};
+A1: A1 c= { (downarrow x) /\ I where I is Ideal of L : x <= sup I}
+  proof
+    let a;
+    assume a in A1;
+    then consider I1 be Ideal of L such that
+A2: a = (DownMap I1).x and
+A3: x <= sup I1;
+    a = (downarrow x) /\ I1 by A2,A3,Def17;
+    hence thesis by A3;
+  end;
+  { (downarrow x) /\ I where I is Ideal of L : x <= sup I} c= A1
+  proof
+    let a;
+    assume a in { (downarrow x) /\ I where I is Ideal of L : x <= sup I};
+    then consider I1 be Ideal of L such that
+A4: a = (downarrow x) /\ I1 and
+A5: x <= sup I1;
+    a = (DownMap I1).x by A4,A5,Def17;
+    hence thesis by A5;
+  end;
+  then
+A6: A1 = { (downarrow x) /\ I where I is Ideal of L : x <= sup I} by A1,
+  XBOOLE_0:def 10;
+  set A2 = { (DownMap I).x where I is Ideal of L : not x <= sup I};
+A7: A2 c= { downarrow x where I is Ideal of L : not x <= sup I}
+  proof
+    let a;
+    assume a in A2;
+    then
+A8: ex I1 be Ideal of L st ( a = (DownMap I1).x)&( not x <= sup I1);
+    then a = (downarrow x) by Def17;
+    hence thesis by A8;
+  end;
+  { (downarrow x) where I is Ideal of L : not x <= sup I} c= A2
+  proof
+    let a;
+    assume a in { (downarrow x) where I is Ideal of L : not x <= sup I};
+    then consider I1 be Ideal of L such that
+A9: a = (downarrow x) and
+A10: not x <= sup I1;
+    a = (DownMap I1).x by A9,A10,Def17;
+    hence thesis by A10;
+  end;
+  then
+A11: A2 = { downarrow x where I is Ideal of L : not x <= sup I} by A7,
+  XBOOLE_0:def 10;
+A12: A c= A1 \/ A2
+  proof
+    let a;
+    assume a in A;
+    then consider I2 be Ideal of L such that
+A13: a = (DownMap I2).x;
+    x <= sup I2 or not x <= sup I2;
+    then a in A1 or a in A2 by A13;
+    hence thesis by XBOOLE_0:def 3;
+  end;
+  A1 \/ A2 c= A
+  proof
+    let a;
+    assume a in A1 \/ A2;
+    then a in A1 or a in A2 by XBOOLE_0:def 3;
+    then consider I2,I3 be Ideal of L such that
+A14: a = (DownMap I2).x & x <= sup I2 or a = (DownMap I3).x & not x <= sup I3;
+    per cases by A14;
+    suppose a = (DownMap I2).x & x <= sup I2;
+      hence thesis;
+    end;
+    suppose a = (DownMap I3).x & not x <= sup I3;
+      hence thesis;
+    end;
+  end;
+  then
+A15: A = A1 \/ A2 by A12,XBOOLE_0:def 10;
+  per cases;
+  suppose
+A16: x = Bottom L;
+A17: A2 = {}
+    proof
+      assume A2 <> {};
+      then reconsider A29 = A2 as non empty set;
+      consider a be Element of A29;
+      a in A29;
+      then ex I1 be Ideal of L st ( a = downarrow x)&( not x <= sup I1
+      ) by A11;
+      hence contradiction by A16,YELLOW_0:44;
+    end;
+    set Dx = downarrow x;
+    x <= sup Dx by A16,YELLOW_0:44;
+    then
+A18: Dx /\ Dx in A1 by A6;
+    A1 c= { K where K is Ideal of L : x <= sup K}
+    proof
+      let a;
+      assume a in A1;
+      then ex H be Ideal of L st ( a = (downarrow x) /\ H)&( x <= sup H) by A6;
+      then reconsider a9 = a as Ideal of L by YELLOW_2:42;
+      x <= sup a9 by A16,YELLOW_0:44;
+      hence thesis;
+    end;
+    then
+A19: meet { K where K is Ideal of L : x <= sup K} c= meet A1 by A18,
+    SETFAM_1:7;
+A20: meet A1 = {x}
+    proof
+      reconsider I9 = downarrow x as Ideal of L;
+      x <= sup I9 by A16,YELLOW_0:44;
+      then (downarrow x) /\ I9 in A1 by A6;
+      then {x} in A1 by A16,Th23;
+      hence meet A1 c= {x} by SETFAM_1:4;
+      for Z1 be set st Z1 in A1 holds {x} c= Z1
+      proof
+        let Z1 be set;
+        assume Z1 in A1;
+        then consider Z19 be Ideal of L such that
+A21:    Z1 = (downarrow x) /\ Z19 and x <= sup Z19 by A6;
+A22:    {x} c= Z19 by A16,Lm4;
+        {x} c= downarrow x by A16,Th23;
+        hence thesis by A21,A22,XBOOLE_1:19;
+      end;
+      hence thesis by A18,SETFAM_1:6;
+    end;
+    consider E be Ideal of L;
+    x <= sup E by A16,YELLOW_0:44;
+    then
+A23: E in { K where K is Ideal of L : x <= sup K};
+    for Z1 be set st Z1 in { K where K is Ideal of L : x <= sup K}
+    holds meet A1 c= Z1
+    proof
+      let Z1 be set;
+      assume Z1 in { K where K is Ideal of L : x <= sup K};
+      then ex K1 be Ideal of L st ( K1 = Z1)&( x <= sup K1);
+      hence thesis by A16,A20,Lm4;
+    end;
+    then meet A1 c= meet { K where K is Ideal of L : x <= sup K} by A23,
+    SETFAM_1:6;
+    then meet A1 = meet { K where K is Ideal of L : x <= sup K} by A19,
+    XBOOLE_0:def 10;
+    hence thesis by A15,A17,Th34;
+  end;
+  suppose
+A24: Bottom L <> x;
+    set O = downarrow Bottom L;
+A25: sup O = Bottom L by WAYBEL_0:34;
+    then not x < sup O by ORDERS_2:30,YELLOW_0:44;
+    then not x <= sup O by A24,A25,ORDERS_2:def 10;
+    then
+A26: downarrow x in A2 by A11;
+    reconsider O1 = downarrow x as Ideal of L;
+A27: x <= sup O1 by WAYBEL_0:34;
+    downarrow x = downarrow x /\ O1;
+    then
+A28: downarrow x in A1 by A6,A27;
+A29: meet A2 c= downarrow x by A26,SETFAM_1:4;
+    now
+      let Z1 be set;
+      assume Z1 in A2;
+      then ex L1 be Ideal of L st ( Z1 = downarrow x)&( not x <= sup
+      L1) by A11;
+      hence downarrow x c= Z1;
+    end;
+    then
+    downarrow x c= meet A2 by A26,SETFAM_1:6;
+    then
+A30: meet A2 = downarrow x by A29,XBOOLE_0:def 10;
+A31: meet A = (meet A1) /\ (meet A2) by A15,A26,A28,SETFAM_1:10;
+A32: meet A1 c= downarrow x by A28,SETFAM_1:4;
+A33: meet A = meet A1 by A28,A30,A31,SETFAM_1:4,XBOOLE_1:28;
+A34: meet A1 c= (downarrow x) /\ meet { I where I is Ideal of L : x <= sup I}
+    proof
+      let a;
+      assume
+A35:  a in meet A1;
+      thus
+      a in (downarrow x) /\ meet { I where I is Ideal of L : x <= sup I}
+      proof
+        reconsider L9 = [#]L as Subset of L;
+        ex_sup_of L9,L by YELLOW_0:17;
+        then L9 is_<=_than sup L9 by YELLOW_0:def 9;
+        then x <= sup L9 by LATTICE3:def 9;
+        then
+A36:    L9 in { I where I is Ideal of L : x <= sup I};
+        now
+          let Y1 be set;
+          assume Y1 in { I where I is Ideal of L : x <= sup I};
+          then consider Y19 be Ideal of L such that
+A37:      Y1 = Y19 and
+A38:      x <= sup Y19;
+A39:      (downarrow x) /\ Y19 c= Y19 by XBOOLE_1:17;
+          (downarrow x) /\ Y19 in A1 by A6,A38;
+          then a in (downarrow x) /\ Y19 by A35,SETFAM_1:def 1;
+          hence a in Y1 by A37,A39;
+        end;
+        then a in meet { I where I is Ideal of L : x <= sup I} by A36,
+        SETFAM_1:def 1;
+        hence thesis by A32,A35,XBOOLE_0:def 4;
+      end;
+    end;
+    (downarrow x) /\ meet { I where I is Ideal of L : x <= sup I} c= meet A1
+    proof
+      let a;
+      assume
+A40:  a in (downarrow x) /\ meet { I where I is Ideal of L : x <= sup I};
+      then
+A41:  a in downarrow x by XBOOLE_0:def 4;
+A42:  a in meet { I where I is Ideal of L : x <= sup I} by A40,XBOOLE_0:def 4;
+      now
+        let Y1 be set;
+        assume Y1 in { (downarrow x) /\ I where I is Ideal of L : x <= sup I};
+        then consider I1 be Ideal of L such that
+A43:    Y1 = (downarrow x) /\ I1 and
+A44:    x <= sup I1;
+        I1 in { I where I is Ideal of L : x <= sup I} by A44;
+        then a in I1 by A42,SETFAM_1:def 1;
+        hence a in Y1 by A41,A43,XBOOLE_0:def 4;
+      end;
+      hence a in meet A1 by A6,A28,SETFAM_1:def 1;
+    end;
+    then (downarrow x) /\ meet { I where I is Ideal of L : x <= sup I} = meet
+    A1 by A34,XBOOLE_0:def 10;
+    then (downarrow x) /\ waybelow x = meet A1 by Th34;
+    hence thesis by A33,WAYBEL_3:11,XBOOLE_1:28;
+  end;
+end;
+ 
+:: Proposition 1.13 p.45
+
+theorem Th44:
+  for L being lower-bounded meet-continuous LATTICE, x being Element of L holds
+  meet {AR-below x where AR is auxiliary Relation of L : AR in App L}
+  = waybelow x
+proof
+  let L be lower-bounded meet-continuous LATTICE, x be Element of L;
+  set A = {AR-below x where AR is auxiliary Relation of L : AR in App L};
+  consider AA be approximating auxiliary Relation of L;
+  AA in App L by Def20;
+  then
+A1: AA-below x in A;
+A2: meet { I where I is Ideal of L : x <= sup I } = waybelow x by Th34;
+A3: meet { (DownMap I).x where I is Ideal of L : not contradiction } =
+  waybelow x by Th43;
+  consider I1 be Ideal of L;
+A4: (DownMap I1).x in { (DownMap I).x where I is Ideal of L :
+  not contradiction };
+  { (DownMap I).x where I is Ideal of L : not contradiction } c= A
+  proof
+    let a be set;
+    assume a in { (DownMap I).x where I is Ideal of L : not contradiction };
+    then consider I be Ideal of L such that
+A5: a = (DownMap I).x;
+A6: DownMap I is approximating by Th37;
+    DownMap I in the carrier of MonSet L by Th35;
+    then consider AR be auxiliary Relation of L such that
+A7: AR = (Map2Rel L).(DownMap I) and
+A8: for x,y be set holds [x,y] in AR iff ex x9,y9 be Element of L, s9
+be Function of L, InclPoset Ids L st x9 = x & y9 = y & s9 = DownMap I & x9 in
+    s9.y9
+    by Def16;
+A9: ex AR1 be approximating auxiliary Relation of L st ( AR1 =
+    (Map2Rel L).(DownMap I)) by A6,Th35,Th42;
+A10: ex ii be Subset of L st ( ii = (DownMap I).x)&( x = sup ii) by A6,Def19;
+A11: AR-below x c= (DownMap I).x
+    proof
+      let a;
+      assume a in AR-below x;
+      then [a,x] in AR by Th13;
+      then ex x9,y9 be Element of L, s9 be Function of L, InclPoset
+      Ids L st ( x9 = a)&( y9 = x)&( s9 = DownMap I)&( x9 in s9.y9) by A8;
+      hence thesis;
+    end;
+    (DownMap I).x c= AR-below x
+    proof
+      let a;
+      assume
+A12:  a in (DownMap I).x;
+      then reconsider a9 = a as Element of L by A10;
+      [a9,x] in AR by A8,A12;
+      hence thesis;
+    end;
+    then
+A13: AR-below x = (DownMap I).x by A11,XBOOLE_0:def 10;
+    AR in App L by A7,A9,Def20;
+    hence thesis by A5,A13;
+  end;
+  hence meet A c= waybelow x by A3,A4,SETFAM_1:7;
+  A c= { I where I is Ideal of L : x <= sup I }
+  proof
+    let a;
+    assume a in A;
+    then consider AR be auxiliary Relation of L such that
+A14: a = AR-below x and
+A15: AR in App L;
+    reconsider AR as approximating auxiliary Relation of L by A15,Def20;
+    sup (AR-below x) = x by Def18;
+    hence thesis by A14;
+  end;
+  hence waybelow x c= meet A by A1,A2,SETFAM_1:7;
+end;
+
+reserve L for complete LATTICE;
+ 
+:: Proposition 1.14 p.45   ( 1 <=> 2 )
+
+theorem Th45:
+  L is continuous iff for R being approximating auxiliary Relation of L holds
+  L-waybelow c= R & L-waybelow is approximating
+proof
+  set AR = L-waybelow;
+  hereby
+    assume
+A1: L is continuous;
+    then reconsider L9 = L as lower-bounded meet-continuous LATTICE;
+    thus for R be approximating auxiliary Relation of L holds AR c= R
+    & AR is approximating
+    proof
+      let R be approximating auxiliary Relation of L;
+      reconsider R9 = R as approximating auxiliary Relation of L9;
+      for a,b be set st [a,b] in AR holds [a,b] in R
+      proof
+        let a,b be set;
+        assume
+A2:     [a,b] in AR;
+        then reconsider a9 = a, b9 = b as Element of L9 by ZFMISC_1:106;
+        a9 << b9 by A2,Def2;
+        then
+A3:     a9 in waybelow b9 by WAYBEL_3:7;
+A4:     meet { A1-below b9 where A1 is auxiliary Relation of L9 :
+        A1 in App L9 } = waybelow b9 by Th44;
+        R9 in App L9 by Def20;
+        then R9-below b9 in
+        { A1-below b9 where A1 is auxiliary Relation of L9 : A1 in App L9 };
+        then waybelow b9 c= R9-below b9 by A4,SETFAM_1:4;
+        hence thesis by A3,Th13;
+      end;
+      hence AR c= R by RELAT_1:def 3;
+      thus thesis by A1;
+    end;
+  end;
+  assume
+A5: for R be approximating auxiliary Relation of L holds AR c= R
+  & AR is approximating;
+  for x being Element of L holds x = sup waybelow x
+  proof
+    let x be Element of L;
+    x = sup (AR-below x) by A5,Def18;
+    hence thesis by Th40;
+  end;
+  then L is satisfying_axiom_of_approximation by WAYBEL_3:def 5;
+  hence thesis;
+end;
+ 
+:: Proposition 1.14 p.45   ( 1 <=> 3 )
+
+theorem
+  L is continuous iff (L is meet-continuous &
+  ex R being approximating auxiliary Relation of L st
+  for R9 being approximating auxiliary Relation of L holds R c= R9)
+proof
+  hereby
+    assume
+A1: L is continuous;
+    hence L is meet-continuous;
+    reconsider R = L-waybelow as approximating auxiliary Relation of L
+    by A1;
+    take R;
+    thus for R9 be approximating auxiliary Relation of L holds R c= R9
+    by A1,Th45;
+  end;
+  assume
+A2: L is meet-continuous;
+  given R be approximating auxiliary Relation of L such that
+A3: for R9 be approximating auxiliary Relation of L holds R c= R9;
+  for x being Element of L holds x = sup waybelow x
+  proof
+    let x be Element of L;
+    set K = {AR-below x where AR is auxiliary Relation of L : AR in App L};
+A4: meet K = waybelow x by A2,Th44;
+    R in App L by Def20;
+    then
+A5: R-below x in K;
+    then
+A6: waybelow x c= R-below x by A4,SETFAM_1:4;
+A7: sup (R-below x) = x by Def18;
+    for a st a in K holds R-below x c= a
+    proof
+      let a;
+      assume a in K;
+      then consider AA be auxiliary Relation of L such that
+A8:   a = AA-below x and
+A9:   AA in App L;
+      reconsider AA as approximating auxiliary Relation of L by A9,Def20;
+      let b be set;
+      assume
+A10:  b in R-below x;
+      R-below x c= AA-below x by A3,Th29;
+      hence thesis by A8,A10;
+    end;
+    then R-below x c= meet K by A5,SETFAM_1:6;
+    hence thesis by A4,A6,A7,XBOOLE_0:def 10;
+  end;
+  then L is satisfying_axiom_of_approximation by WAYBEL_3:def 5;
+  hence thesis;
+end;
+ 
+:: Definition 1.15 (SI) p.46
+
+definition
+  let L be RelStr, AR be Relation of L;
+  attr AR is satisfying_SI means
+  :Def21:
+  for x, z be Element of L holds ( [x,z] in AR & x <> z implies
+  ex y be Element of L st [x,y] in AR & [y,z] in AR & x <> y );
+end;
+ 
+:: Definition 1.15 (INT) p.46
+
+definition
+  let L be RelStr, AR be Relation of L;
+  attr AR is satisfying_INT means
+  :Def22:
+  for x, z be Element of L holds ( [x,z] in AR implies
+  ex y be Element of L st [x,y] in AR & [y,z] in AR );
+end;
+
+canceled;
+
+theorem Th48:
+  for L being RelStr, AR being Relation of L
+  holds AR is satisfying_SI implies AR is satisfying_INT
+proof
+  let L be RelStr, AR be Relation of L;
+  assume
+A1: AR is satisfying_SI;
+  let x, z be Element of L;
+  [x,z] in AR implies ex y be Element of L st [x,y] in AR & [y,z] in AR
+  proof
+    assume
+A2: [x,z] in AR;
+    per cases;
+    suppose x <> z;
+      then ex y be Element of L st ( [x,y] in AR)&( [y,z] in AR)&( x
+      <> y) by A1,A2,Def21;
+      hence thesis;
+    end;
+    suppose x = z;
+      hence thesis by A2;
+    end;
+  end;
+  hence thesis;
+end;
+
+registration
+  let L be non empty RelStr;
+  cluster satisfying_SI -> satisfying_INT Relation of L;
+  coherence by Th48;
+end;
+
+reserve AR for Relation of L;
+reserve x, y, z for Element of L;
+
+theorem Th49:
+  for AR being approximating Relation of L st
+  not x <= y holds ex u being Element of L st [u,x] in AR & not u <= y
+proof
+  let AR be approximating Relation of L;
+  assume
+A1: not x <= y;
+A2: x = sup (AR-below x) by Def18;
+  ex_sup_of (AR-below x),L by YELLOW_0:17;
+  then y is_>=_than (AR-below x) implies y >= x by A2,YELLOW_0:def 9;
+  then consider u being Element of L such that
+A3: u in AR-below x and
+A4: not u <= y by A1,LATTICE3:def 9;
+  take u;
+  thus thesis by A3,A4,Th13;
+end;
+ 
+:: Lemma 1.16 p.46
+
+theorem Th50:
+  for R being approximating auxiliary(i) auxiliary(iii) Relation of L holds
+  [x,z] in R & x <> z implies ex y st x <= y & [y,z] in R & x <> y
+proof
+  let R be approximating auxiliary(i) auxiliary(iii) Relation of L;
+  assume that
+A1: [x,z] in R and
+A2: x <> z;
+  x <= z by A1,Def4;
+  then x < z by A2,ORDERS_2:def 10;
+  then not z < x by ORDERS_2:28;
+  then not z <= x by A2,ORDERS_2:def 10;
+  then consider u be Element of L such that
+A3: [u,z] in R and
+A4: not u <= x by Th49;
+  take y = x "\/" u;
+  thus x <= y by YELLOW_0:22;
+  thus [y,z] in R by A1,A3,Def6;
+  thus thesis by A4,YELLOW_0:24;
+end;
+ 
+:: Lemma 1.17 p.46
+
+theorem Th51:
+  for R being approximating auxiliary Relation of L holds
+  x << z & x <> z implies
+  ex y being Element of L st [x,y] in R & [y,z] in R & x <> y
+proof
+  let R be approximating auxiliary Relation of L;
+  assume that
+A1: x << z and
+A2: x <> z;
+  set I = {u where u is Element of L : ex y be Element of L st
+  [u,y] in R & [y,z] in R };
+A3: [Bottom L,Bottom L] in R by Def7;
+  [Bottom L,z] in R by Def7;
+  then
+A4: Bottom L in I by A3;
+  I c= the carrier of L
+  proof
+    let v be set;
+    assume v in I;
+    then ex u1 being Element of L st v = u1 & ex y be Element of L st
+    [u1,y] in R & [y,z] in R;
+    hence thesis;
+  end;
+  then reconsider I as non empty Subset of L by A4;
+A5: I is lower
+  proof
+    let x1,y1 be Element of L;
+    assume that
+A6: x1 in I and
+A7: y1 <= x1;
+    consider v1 be Element of L such that
+A8: v1 = x1 and
+A9: ex s1 be Element of L st [v1,s1] in R & [s1,z] in R by A6;
+    consider s1 be Element of L such that
+A10: [v1,s1] in R and
+A11: [s1,z] in R by A9;
+    s1 <= s1;
+    then [y1, s1] in R by A7,A8,A10,Def5;
+    hence thesis by A11;
+  end;
+  I is directed
+  proof
+    let u1,u2 be Element of L;
+    assume that
+A12: u1 in I and
+A13: u2 in I;
+    consider v1 be Element of L such that
+A14: v1 = u1 and
+A15: ex y1 be Element of L st [v1,y1] in R & [y1,z] in R by A12;
+    consider v2 be Element of L such that
+A16: v2 = u2 and
+A17: ex y2 be Element of L st [v2,y2] in R & [y2,z] in R by A13;
+    consider y1 be Element of L such that
+A18: [v1,y1] in R and
+A19: [y1,z] in R by A15;
+    consider y2 be Element of L such that
+A20: [v2,y2] in R and
+A21: [y2,z] in R by A17;
+    take u1 "\/" u2;
+A22: [u1 "\/" u2, y1 "\/" y2] in R by A14,A16,A18,A20,Th1;
+    [y1 "\/" y2, z] in R by A19,A21,Def6;
+    hence thesis by A22,YELLOW_0:22;
+  end;
+  then reconsider I as Ideal of L by A5;
+  sup I = z
+  proof
+    set z9 = sup I;
+    assume
+A23: z9 <> z;
+A24: I c= R-below z
+    proof
+      let a be set;
+      assume a in I;
+      then consider u be Element of L such that
+A25:  a = u and
+A26:  ex y2 be Element of L st [u,y2] in R & [y2,z] in R;
+      consider y2 be Element of L such that
+A27:  [u,y2] in R and
+A28:  [y2,z] in R by A26;
+A29:  u <= y2 by A27,Def4;
+      z <= z;
+      then [u,z] in R by A28,A29,Def5;
+      hence thesis by A25;
+    end;
+A30: ex_sup_of I,L by YELLOW_0:17;
+    ex_sup_of (R-below z),L by YELLOW_0:17;
+    then
+A31: sup I <= sup (R-below z) by A24,A30,YELLOW_0:34;
+    z = sup (R-below z) by Def18;
+    then z9 < z by A23,A31,ORDERS_2:def 10;
+    then not z <= z9 by ORDERS_2:30;
+    then consider y be Element of L such that
+A32: [y, z] in R and
+A33: not y <= z9 by Th49;
+    consider u be Element of L such that
+A34: [u, y] in R and
+A35: not u <= z9 by A33,Th49;
+A36: u in I by A32,A34;
+    z9 = "\/"(I,L) & ex_sup_of I,L iff z9 is_>=_than I &
+    for b being Element of L st b is_>=_than I holds z9 <= b by YELLOW_0:30;
+    hence contradiction by A35,A36,LATTICE3:def 9,YELLOW_0:17;
+  end;
+  then x in I by A1,WAYBEL_3:20;
+  then consider v be Element of L such that
+A37: v = x and
+A38: ex y9 be Element of L st [v,y9] in R & [y9,z] in R;
+  consider y9 be Element of L such that
+A39: [v,y9] in R and
+A40: [y9,z] in R by A38;
+A41: x <= y9 by A37,A39,Def4;
+  z <= z;
+  then [x,z] in R by A40,A41,Def5;
+  then consider y99 be Element of L such that
+A42: x <= y99 and
+A43: [y99,z] in R and
+A44: x <> y99 by A2,Th50;
+A45: x < y99 by A42,A44,ORDERS_2:def 10;
+  set Y = y9 "\/" y99;
+A46: y9 <= Y by YELLOW_0:22;
+  y99 <= Y by YELLOW_0:22;
+  then
+A47: x <> Y by A45,ORDERS_2:32;
+  x <= x;
+  then
+A48: [x,Y] in R by A37,A39,A46,Def5;
+  [Y,z] in R by A40,A43,Def6;
+  hence thesis by A47,A48;
+end;
+ 
+:: Theorem 1.18 p.47
+
+theorem Th52:
+  for L being lower-bounded continuous LATTICE
+  holds L-waybelow is satisfying_SI
+proof
+  let L be lower-bounded continuous LATTICE;
+  set R = L-waybelow;
+  thus R is satisfying_SI
+  proof
+    let x,z be Element of L;
+    assume that
+A1: [x,z] in R and
+A2: x <> z;
+    x << z by A1,Def2;
+    hence thesis by A2,Th51;
+  end;
+end;
+
+registration
+  let L be lower-bounded continuous LATTICE;
+  cluster L-waybelow -> satisfying_SI;
+  coherence by Th52;
+end;
+
+theorem Th53:
+  for L being lower-bounded continuous LATTICE,
+  x,y being Element of L st x << y
+  ex x9 being Element of L st x << x9 & x9 << y
+proof
+  let L be lower-bounded continuous LATTICE;
+  let x,y be Element of L;
+  set R = L-waybelow;
+  assume x << y;
+  then [x,y] in R by Def2;
+  then consider x9 be Element of L such that
+A1: [x,x9] in R and
+A2: [x9,y] in R by Def22;
+A3: x << x9 by A1,Def2;
+  x9 << y by A2,Def2;
+  hence thesis by A3;
+end;
+ 
+:: Corollary 1.19 p.47
+
+theorem
+  for L being lower-bounded continuous LATTICE holds
+  for x,y being Element of L holds ( x << y iff
+  for D being non empty directed Subset of L st y <= sup D
+  ex d being Element of L st d in D & x << d )
+proof
+  let L be lower-bounded continuous LATTICE;
+  let x,y be Element of L;
+  hereby
+    assume
+A1: x << y;
+    let D be non empty directed Subset of L;
+    assume
+A2: y <= sup D;
+    consider x9 be Element of L such that
+A3: x << x9 and
+A4: x9 << y by A1,Th53;
+    ex d be Element of L st ( d in D)&( x9 <= d) by A2,A4,WAYBEL_3:def 1;
+    hence ex d be Element of L st d in D & x << d by A3,WAYBEL_3:2;
+  end;
+  assume
+A5: for D be non empty directed Subset of L st y <= sup D
+  ex d be Element of L st d in D & x << d;
+  for D being non empty directed Subset of L st y <= sup D
+  ex d being Element of L st d in D & x <= d
+  proof
+    let D be non empty directed Subset of L;
+    assume y <= sup D;
+    then ex d be Element of L st ( d in D)&( x << d) by A5;
+    hence thesis by WAYBEL_3:1;
+  end;
+  hence thesis by WAYBEL_3:def 1;
+end;
+
+begin :: Exercises
+
+definition
+  let L be RelStr, X be Subset of L, R be Relation of the carrier of L;
+  pred X is_directed_wrt R means
+  :Def23:
+  for x,y being Element of L st x in X & y in X
+  ex z being Element of L st z in X & [x,z] in R & [y,z] in R;
+end;
+
+theorem
+  for L being RelStr, X being Subset of L st
+  X is_directed_wrt (the InternalRel of L) holds X is directed
+proof
+  let L be RelStr, X be Subset of L;
+  assume
+A1: X is_directed_wrt (the InternalRel of L);
+  let x,y be Element of L;
+  assume that
+A2: x in X and
+A3: y in X;
+  consider z being Element of L such that
+A4: z in X and
+A5: [x,z] in the InternalRel of L and
+A6: [y,z] in the InternalRel of L by A1,A2,A3,Def23;
+  take z;
+  thus z in X by A4;
+  thus thesis by A5,A6,ORDERS_2:def 9;
+end;
+
+definition
+  let X, x be set;
+  let R be Relation;
+  pred x is_maximal_wrt X,R means
+  :Def24:
+  x in X & not ex y being set st y in X & y <> x & [x,y] in R;
+end;
+
+definition
+  let L be RelStr, X be set, x be Element of L;
+  pred x is_maximal_in X means
+  :Def25:
+  x is_maximal_wrt X, the InternalRel of L;
+end;
+
+theorem
+  for L being RelStr, X being set, x being Element of L holds
+  x is_maximal_in X iff x in X & not ex y being Element of L st y in X & x < y
+proof
+  let L be RelStr, X be set, x be Element of L;
+  hereby
+    assume x is_maximal_in X;
+    then
+A1: x is_maximal_wrt X, the InternalRel of L by Def25;
+    hence x in X by Def24;
+    let y be Element of L;
+    per cases by A1,Def24;
+    suppose not y in X;
+      hence not y in X or not x < y;
+    end;
+    suppose y = x;
+      hence not y in X or not x < y;
+    end;
+    suppose not [x,y] in the InternalRel of L;
+      then not x <= y by ORDERS_2:def 9;
+      hence not y in X or not x < y by ORDERS_2:def 10;
+    end;
+  end;
+  assume that
+A2: x in X and
+A3: not ex y be Element of L st y in X & x < y;
+  assume not x is_maximal_in X;
+  then not x is_maximal_wrt X, the InternalRel of L by Def25;
+  then consider y be set such that
+A4: y in X and
+A5: y <> x and
+A6: [x,y] in the InternalRel of L by A2,Def24;
+  reconsider y as Element of L by A6,ZFMISC_1:106;
+  x <= y by A6,ORDERS_2:def 9;
+  then x < y by A5,ORDERS_2:def 10;
+  hence thesis by A3,A4;
+end;
+
+definition
+  let X, x be set;
+  let R be Relation;
+  pred x is_minimal_wrt X,R means
+  :Def26:
+  x in X & not ex y being set st y in X & y <> x & [y,x] in R;
+end;
+
+definition
+  let L be RelStr, X be set, x be Element of L;
+  pred x is_minimal_in X means
+  :Def27:
+  x is_minimal_wrt X, the InternalRel of L;
+end;
+
+theorem
+  for L being RelStr, X being set, x being Element of L holds
+  x is_minimal_in X iff x in X & not ex y being Element of L st y in X & x > y
+proof
+  let L be RelStr, X be set, x be Element of L;
+  hereby
+    assume x is_minimal_in X;
+    then
+A1: x is_minimal_wrt X, the InternalRel of L by Def27;
+    hence x in X by Def26;
+    let y be Element of L;
+    per cases by A1,Def26;
+    suppose not y in X;
+      hence not y in X or not x > y;
+    end;
+    suppose y = x;
+      hence not y in X or not x > y;
+    end;
+    suppose not [y,x] in the InternalRel of L;
+      then not y <= x by ORDERS_2:def 9;
+      hence not y in X or not y < x by ORDERS_2:def 10;
+    end;
+  end;
+  assume that
+A2: x in X and
+A3: not ex y be Element of L st y in X & x > y;
+  assume not x is_minimal_in X;
+  then not x is_minimal_wrt X, the InternalRel of L by Def27;
+  then consider y be set such that
+A4: y in X and
+A5: y <> x and
+A6: [y,x] in the InternalRel of L by A2,Def26;
+  reconsider y as Element of L by A6,ZFMISC_1:106;
+  y <= x by A6,ORDERS_2:def 9;
+  then y < x by A5,ORDERS_2:def 10;
+  hence thesis by A3,A4;
+end;
+ 
+:: Exercise 1.23 (i)    ( 1 => 2 )
+
+theorem
+  AR is satisfying_SI implies
+  for x holds ( ex y st y is_maximal_wrt (AR-below x), AR )
+  implies [x,x] in AR
+proof
+  assume
+A1: AR is satisfying_SI;
+  let x;
+  given y such that
+A2: y is_maximal_wrt (AR-below x), AR;
+A3: y in AR-below x by A2,Def24;
+  assume
+A4: not [x,x] in AR;
+A5: [y,x] in AR by A3,Th13;
+  per cases;
+  suppose x = y;
+    hence contradiction by A3,A4,Th13;
+  end;
+  suppose x <> y;
+    then consider z such that
+A6: [y,z] in AR and
+A7: [z,x] in AR and
+A8: z <> y by A1,A5,Def21;
+    z in AR-below x by A7;
+    hence contradiction by A2,A6,A8,Def24;
+  end;
+end;
+ 
+:: Exercise 1.23 (i)    ( 2 => 1 )
+
+theorem
+  ( for x holds ( ex y st y is_maximal_wrt (AR-below x), AR )
+  implies [x,x] in AR ) implies AR is satisfying_SI
+proof
+  assume
+A1: for x holds ( ex y st y is_maximal_wrt (AR-below x), AR )
+  implies [x,x] in AR;
+  now
+    let z,x;
+    assume that
+A2: [z,x] in AR and
+A3: z <> x;
+A4: z in AR-below x by A2;
+    per cases;
+    suppose [x,x] in AR;
+      hence ex y st [z,y] in AR & [y,x] in AR & z <> y by A2,A3;
+    end;
+    suppose not [x,x] in AR;
+      then not z is_maximal_wrt (AR-below x), AR by A1;
+      then consider y being set such that
+A5:   y in AR-below x and
+A6:   y <> z and
+A7:   [z,y] in AR by A4,Def24;
+      [y,x] in AR by A5,Th13;
+      hence ex y st [z,y] in AR & [y,x] in AR & z <> y by A5,A6,A7;
+    end;
+  end;
+  hence thesis by Def21;
+end;
+ 
+:: Exercise 1.23 (ii)    ( 3 => 4 )
+
+theorem
+  for AR being auxiliary(ii) auxiliary(iii) Relation of L holds
+  AR is satisfying_INT implies for x holds AR-below x is_directed_wrt AR
+proof
+  let AR be auxiliary(ii) auxiliary(iii) Relation of L;
+  assume
+A1: AR is satisfying_INT;
+  let x,y,z;
+  assume that
+A2: y in AR-below x and
+A3: z in AR-below x;
+A4: [y,x] in AR by A2,Th13;
+A5: [z,x] in AR by A3,Th13;
+  consider y9 be Element of L such that
+A6: [y,y9] in AR and
+A7: [y9,x] in AR by A1,A4,Def22;
+  consider z9 be Element of L such that
+A8: [z,z9] in AR and
+A9: [z9,x] in AR by A1,A5,Def22;
+  take u = y9 "\/" z9;
+  [u,x] in AR by A7,A9,Def6;
+  hence u in AR-below x;
+A10: y <= y;
+  y9 <= u by YELLOW_0:22;
+  hence [y,u] in AR by A6,A10,Def5;
+A11: z <= z;
+  z9 <= u by YELLOW_0:22;
+  hence [z,u] in AR by A8,A11,Def5;
+end;
+ 
+:: Exercise 1.23 (ii)    ( 4 => 3 )
+
+theorem
+  ( for x holds AR-below x is_directed_wrt AR) implies AR is satisfying_INT
+proof
+  assume
+A1: for x holds AR-below x is_directed_wrt AR;
+  let X,Z be Element of L;
+  assume [X,Z] in AR;
+  then
+A2: X in AR-below Z;
+  AR-below Z is_directed_wrt AR by A1;
+  then consider u be Element of L such that
+A3: u in AR-below Z and
+A4: [X,u] in AR and [X,u] in AR by A2,Def23;
+  take u;
+  thus [X,u] in AR by A4;
+  thus [u,Z] in AR by A3,Th13;
+end;
+ 
+:: Exercise 1.23 (iii) p.51
+
+theorem Th62:
+  for R being approximating auxiliary(i) auxiliary(ii) auxiliary(iii)
+  Relation of L st R is satisfying_INT holds R is satisfying_SI
+proof
+  let R be approximating auxiliary(i) auxiliary(ii) auxiliary(iii)
+  Relation of L;
+  assume
+A1: R is satisfying_INT;
+  let x, z;
+  assume that
+A2: [x,z] in R and
+A3: x <> z;
+  consider y such that
+A4: [x,y] in R and
+A5: [y,z] in R by A1,A2,Def22;
+  consider y9 be Element of L such that
+A6: x <= y9 and
+A7: [y9,z] in R and
+A8: x <> y9 by A2,A3,Th50;
+A9: x < y9 by A6,A8,ORDERS_2:def 10;
+  take Y = y "\/" y9;
+A10: x <= y by A4,Def4;
+A11: x <= x;
+A12: y <= Y by YELLOW_0:22;
+  per cases;
+  suppose y9 <= y;
+    then x < y by A9,ORDERS_2:32;
+    hence thesis by A4,A5,A7,A11,A12,Def5,Def6,ORDERS_2:32;
+  end;
+  suppose not y9 <= y;
+    then y <> Y by YELLOW_0:24;
+    then y < Y by A12,ORDERS_2:def 10;
+    hence thesis by A4,A5,A7,A10,A11,A12,Def5,Def6,ORDERS_2:32;
+  end;
+end;
+
+registration
+  let L;
+  cluster satisfying_INT ->
+    satisfying_SI (approximating auxiliary Relation of L);
+  coherence by Th62;
+end;

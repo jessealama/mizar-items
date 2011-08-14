@@ -1,0 +1,2983 @@
+:: Partially Ordered Sets
+::  by Wojciech A. Trybulec
+::
+:: Received August 30, 1989
+:: Copyright (c) 1990 Association of Mizar Users
+
+environ
+
+ vocabularies FUNCT_1, XBOOLE_0, TARSKI, SUBSET_1, MCART_1, ZFMISC_1, RELAT_1,
+      PARTFUN1, RELAT_2, ORDINAL1, WELLORD1, WELLORD2, SETFAM_1, FINSET_1,
+      ORDERS_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELAT_1, RELAT_2, FUNCT_1,
+      RELSET_1, PARTFUN1, FUNCT_2, MCART_1, ORDINAL1, WELLORD1, SETFAM_1,
+      WELLORD2, FINSET_1;
+ constructors SETFAM_1, RELAT_2, WELLORD1, PARTFUN1, WELLORD2, FUNCT_2,
+      FINSET_1, RELSET_1;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, ORDINAL1, PARTFUN1, FUNCT_2,
+      FINSET_1, RELSET_1, WELLORD2, FUNCT_1;
+ requirements BOOLE, SUBSET;
+ definitions RELAT_2, TARSKI, WELLORD1, RELAT_1, ORDINAL1, XBOOLE_0;
+ theorems FUNCT_1, FUNCT_2, MCART_1, RELAT_1, RELAT_2, RELSET_1, TARSKI,
+      WELLORD1, WELLORD2, ZFMISC_1, XBOOLE_0, XBOOLE_1, PARTFUN1, ORDINAL1,
+      SETFAM_1;
+ schemes FUNCT_1, XBOOLE_0, ORDINAL1, TARSKI, RELSET_1, RELAT_1;
+
+begin
+
+reserve X,Y for set,
+  x,x1,x2,y,y1,y2,z for set,
+  f,g,h for Function;
+
+Lm1: (ex X st X <> {} & X in Y) iff union Y <> {}
+proof
+  thus (ex X st X <> {} & X in Y) implies union Y <> {}
+  proof
+    given X such that
+A1: X <> {} and
+A2: X in Y;
+    consider x being Element of X;
+    x in X by A1;
+    hence thesis by A2,TARSKI:def 4;
+  end;
+  consider x being Element of union Y;
+  assume union Y <> {};
+  then consider X such that
+A3: x in X and
+A4: X in Y by TARSKI:def 4;
+  take X;
+  thus thesis by A3,A4;
+end;
+
+::
+::  Choice function.
+::
+
+reserve M for non empty set;
+
+definition
+  let M;
+  assume
+A1: not {} in M;
+  mode Choice_Function of M -> Function of M, union M means
+    :Def1:
+    for X st X in M holds it.X in X;
+  existence
+  proof
+    deffunc FF(set)=$1`2;
+    consider x being Element of M;
+    deffunc F(set)=[:{$1},$1:];
+    consider f such that
+A2: dom f = M and
+A3: for X st X in M holds f.X = F(X) from FUNCT_1:sch 3;
+A4: x in M;
+    then reconsider N = rng f as non empty set by A2,FUNCT_1:12;
+A5: now
+      let X,Y;
+      assume that
+A6:   X in N and
+A7:   Y in N and
+A8:   X <> Y;
+      consider y such that
+A9:   y in dom f and
+A10:  f.y = Y by A7,FUNCT_1:def 5;
+A11:  Y = [:{y},y:] by A2,A3,A9,A10;
+      consider z being Element of X /\ Y;
+      assume X meets Y;
+      then
+A12:  X /\ Y <> {} by XBOOLE_0:def 7;
+      consider x such that
+A13:  x in dom f and
+A14:  f.x = X by A6,FUNCT_1:def 5;
+      X = [:{x},x:] by A2,A3,A13,A14;
+      then consider x1,x2 such that
+      z = [x1,x2] and
+A15:  x1 in {x} /\ {y} and
+      x2 in x /\ y by A11,A12,ZFMISC_1:104;
+      x1 in {x} by A15,XBOOLE_0:def 4;
+      then
+A16:  x1 = x by TARSKI:def 1;
+      x1 in{y} by A15,XBOOLE_0:def 4;
+      hence contradiction by A8,A14,A10,A16,TARSKI:def 1;
+    end;
+    now
+      let X;
+      assume X in N;
+      then consider y such that
+A17:  y in dom f and
+A18:  f.y = X by FUNCT_1:def 5;
+A19:  y <> {} by A1,A2,A17;
+      X = [:{y},y:] by A2,A3,A17,A18;
+      hence X <> {} by A19;
+    end;
+    then consider Choice being set such that
+A20: for X st X in N ex x st Choice /\ X = {x} by A5,WELLORD2:27;
+    defpred P[set,set] means $2 in $1 /\ Choice;
+A21: for X st X in N ex y st P[X,y]
+    proof
+      let X;
+      assume X in N;
+      then consider x such that
+A22:  Choice /\ X = {x} by A20;
+      take x;
+      thus thesis by A22,TARSKI:def 1;
+    end;
+A23: for X,y1,y2 st X in N & P[X,y1] & P[X,y2] holds y1 = y2
+    proof
+      let X,y1,y2;
+      assume that
+A24:  X in N and
+A25:  y1 in X /\ Choice and
+A26:  y2 in X /\ Choice;
+      consider x such that
+A27:  {x} = Choice /\ X by A20,A24;
+      x = y1 by A25,A27,TARSKI:def 1;
+      hence thesis by A26,A27,TARSKI:def 1;
+    end;
+    consider g such that
+A28: dom g = N and
+A29: for X st X in N holds P[X,g.X] from FUNCT_1:sch 2 (A23,A21);
+A30: rng g c= union N
+    proof
+      let x;
+      assume x in rng g;
+      then consider y such that
+A31:  y in dom g and
+A32:  g.y = x by FUNCT_1:def 5;
+      x in y /\ Choice by A28,A29,A31,A32;
+      then x in y by XBOOLE_0:def 4;
+      hence thesis by A28,A31,TARSKI:def 4;
+    end;
+    f.x in rng f by A2,FUNCT_1:def 5;
+    then consider x1 such that
+A33: x1 in N;
+    consider x2 such that
+A34: x2 in dom f and
+A35: f.x2 = x1 by A33,FUNCT_1:def 5;
+A36: x2 <> {} by A1,A2,A34;
+    reconsider f as Function of M,N by A2,FUNCT_2:def 1,RELSET_1:11;
+    consider h such that
+A37: dom h = union N and
+A38: for x st x in union N holds h.x = FF(x) from FUNCT_1:sch 3;
+A39: rng h c= union M
+    proof
+      let x;
+      assume x in rng h;
+      then consider y such that
+A40:  y in dom h and
+A41:  h.y = x by FUNCT_1:def 5;
+      consider Y such that
+A42:  y in Y and
+A43:  Y in N by A37,A40,TARSKI:def 4;
+      consider z such that
+A44:  z in dom f and
+A45:  f.z = Y by A43,FUNCT_1:def 5;
+A46:  Y = [:{z},z:] by A3,A44,A45;
+      then consider x1,x2 such that
+A47:  y = [x1,x2] by A42,RELAT_1:def 1;
+A48:  x2 in z by A42,A46,A47,ZFMISC_1:106;
+      x = [x1,x2]`2 by A37,A38,A40,A41,A47;
+      then x in z by A48,MCART_1:7;
+      hence thesis by A44,TARSKI:def 4;
+    end;
+    x1 = [:{x2},x2:] by A2,A3,A34,A35;
+    then
+A49: union N <> {} by A33,A36,Lm1;
+    then reconsider g as Function of N, union N by A28,A30,FUNCT_2:def 1 ,
+    RELSET_1:11;
+    union M <> {} by A1,A4,Lm1;
+    then reconsider h as Function of union N, union M by A37,A39,FUNCT_2:def 1
+    ,RELSET_1:11;
+A50: dom(g * f) = M by A49,FUNCT_2:def 1;
+    reconsider F = h * (g * f) as Function of M, union M by A49;
+    take F;
+    let X;
+    assume
+A51: X in M;
+    then
+A52: f.X = [:{X},X:] by A3;
+    set fX = f.X;
+A53: f.X in N by A2,A51,FUNCT_1:def 5;
+    then g.(fX) in rng g by A28,FUNCT_1:def 5;
+    then
+A54: h.(g.fX) = (g.fX)`2 by A38;
+A55: g.(fX) in fX /\ Choice by A29,A53;
+    then consider x1,x2 such that
+A56: [x1,x2] = g.(fX) by A52,RELAT_1:def 1;
+    g.(fX) in fX by A55,XBOOLE_0:def 4;
+    then x2 in X by A52,A56,ZFMISC_1:106;
+    then
+A57: h.(g.fX) in X by A56,A54,MCART_1:7;
+    (g * f).X = g.fX by A2,A51,FUNCT_1:23;
+    hence thesis by A50,A51,A57,FUNCT_1:23;
+  end;
+end;
+
+reserve D for non empty set;
+
+definition
+  let D be set;
+  func BOOL D -> set equals
+  bool D \ {{}};
+  coherence;
+end;
+
+registration
+  let D;
+  cluster BOOL D -> non empty;
+  coherence
+  proof
+A1: not D in {{}} by TARSKI:def 1;
+    D in bool D by ZFMISC_1:def 1;
+    hence thesis by A1,XBOOLE_0:def 5;
+  end;
+end;
+
+canceled 3;
+
+theorem
+  not {} in BOOL D
+proof
+  assume not thesis;
+  then not {} in {{}} by XBOOLE_0:def 5;
+  hence thesis by TARSKI:def 1;
+end;
+
+theorem
+  D c= X iff D in BOOL X
+proof
+  thus D c= X implies D in BOOL X
+  proof
+A1: not D in {{}} by TARSKI:def 1;
+    assume D c= X;
+    hence thesis by A1,XBOOLE_0:def 5;
+  end;
+  assume D in BOOL X;
+  hence thesis;
+end;
+
+reserve P for Relation;
+ 
+::
+::  Orders.
+::
+
+definition
+  let X;
+  mode Order of X is total reflexive antisymmetric transitive Relation of X;
+end;
+
+reserve O for Order of X;
+
+Lm2: for R being total Relation of X holds field R = X
+proof
+  let R be total Relation of X;
+  thus field R = X \/ rng R by PARTFUN1:def 4
+    .= X by XBOOLE_1:12;
+end;
+
+canceled 6;
+
+theorem Th12:
+  x in X implies [x,x] in O
+proof
+  field O = X by Lm2;
+  then O is_reflexive_in X by RELAT_2:def 9;
+  hence thesis by RELAT_2:def 1;
+end;
+
+theorem
+  x in X & y in X & [x,y] in O & [y,x] in O implies x = y
+proof
+  field O = X by Lm2;
+  then O is_antisymmetric_in X by RELAT_2:def 12;
+  hence thesis by RELAT_2:def 4;
+end;
+
+theorem
+  x in X & y in X & z in X & [x,y] in O & [y,z] in O implies [x,z] in O
+proof
+  field O = X by Lm2;
+  then O is_transitive_in X by RELAT_2:def 16;
+  hence thesis by RELAT_2:def 8;
+end;
+
+canceled 76;
+
+theorem
+  (ex X st X <> {} & X in Y) iff union Y <> {} by Lm1;
+
+theorem
+  P is_strongly_connected_in X iff P is_reflexive_in X & P is_connected_in X
+proof
+  thus P is_strongly_connected_in X implies P is_reflexive_in X & P
+  is_connected_in X
+  proof
+    assume
+A1: P is_strongly_connected_in X;
+    thus P is_reflexive_in X
+    proof
+      let x;
+      assume x in X;
+      hence thesis by A1,RELAT_2:def 7;
+    end;
+    let x,y;
+    assume that
+A2: x in X and
+A3: y in X;
+    thus thesis by A1,A2,A3,RELAT_2:def 7;
+  end;
+  assume that
+A4: P is_reflexive_in X and
+A5: P is_connected_in X;
+  let x,y;
+  assume that
+A6: x in X and
+A7: y in X;
+  x = y implies thesis by A4,A6,RELAT_2:def 1;
+  hence thesis by A5,A6,A7,RELAT_2:def 6;
+end;
+
+theorem Th93:
+  P is_reflexive_in X & Y c= X implies P is_reflexive_in Y
+proof
+  assume that
+A1: P is_reflexive_in X and
+A2: Y c= X;
+  let x;
+  assume x in Y;
+  hence thesis by A1,A2,RELAT_2:def 1;
+end;
+
+theorem Th94:
+  P is_antisymmetric_in X & Y c= X implies P is_antisymmetric_in Y
+proof
+  assume that
+A1: P is_antisymmetric_in X and
+A2: Y c= X;
+  let x,y;
+  assume that
+A3: x in Y and
+A4: y in Y;
+  thus thesis by A1,A2,A3,A4,RELAT_2:def 4;
+end;
+
+theorem Th95:
+  P is_transitive_in X & Y c= X implies P is_transitive_in Y
+proof
+  assume that
+A1: P is_transitive_in X and
+A2: Y c= X;
+  let x,y,z;
+  assume that
+A3: x in Y and
+A4: y in Y and
+A5: z in Y;
+  thus thesis by A1,A2,A3,A4,A5,RELAT_2:def 8;
+end;
+
+theorem
+  P is_strongly_connected_in X & Y c= X implies P is_strongly_connected_in Y
+proof
+  assume that
+A1: P is_strongly_connected_in X and
+A2: Y c= X;
+  let x,y;
+  assume that
+A3: x in Y and
+A4: y in Y;
+  thus thesis by A1,A2,A3,A4,RELAT_2:def 7;
+end;
+
+theorem
+  for R being total Relation of X holds field R = X by Lm2;
+
+theorem Th98:
+  for A being set, R being Relation of A st R is_reflexive_in A
+  holds dom R = A & field R = A
+proof
+  let A be set, R be Relation of A such that
+A1: R is_reflexive_in A;
+A2: A c= dom R
+  proof
+    let x;
+    assume x in A;
+    then [x,x] in R by A1,RELAT_2:def 1;
+    hence thesis by RELAT_1:def 4;
+  end;
+  hence dom R = A by XBOOLE_0:def 10;
+  thus field R = A \/ rng R by A2,XBOOLE_0:def 10
+    .= A by XBOOLE_1:12;
+end;
+
+begin :: Originally ORDERS_2
+
+reserve R,P for Relation,
+  X,X1,X2,Y,Z,x,y,z,u for set,
+  g,h for Function,
+  O for Order of X,
+  D for non empty set,
+  d,d1,d2 for Element of D,
+  A1,A2,B for Ordinal,
+  L,L1,L2 for T-Sequence;
+ 
+::
+::  Orders.
+::
+
+theorem Th99:
+  dom O = X & rng O = X
+proof
+  thus dom O = X
+  proof
+    thus dom O c= X;
+    let x;
+    assume x in X;
+    then [x,x] in O by Th12;
+    hence thesis by RELAT_1:def 4;
+  end;
+  thus rng O c= X;
+  let x;
+  assume x in X;
+  then [x,x] in O by Th12;
+  hence thesis by RELAT_1:def 5;
+end;
+
+theorem
+  field O = X
+proof
+  thus X = X \/ X .= dom O \/ X by Th99
+    .= field O by Th99;
+end;
+
+definition
+  let R;
+  attr R is being_quasi-order means
+  R is reflexive transitive;
+  attr R is being_partial-order means
+  :Def4:
+  R is reflexive transitive antisymmetric;
+  attr R is being_linear-order means
+  :Def5:
+  R is reflexive transitive antisymmetric connected;
+end;
+
+canceled 3;
+
+theorem
+  R is being_quasi-order implies R~ is being_quasi-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive;
+  thus R~ is reflexive & R~ is transitive by A1,A2,RELAT_2:27,42;
+end;
+
+theorem
+  R is being_partial-order implies R~ is being_partial-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+A3: R is antisymmetric;
+  thus R~ is reflexive & R~ is transitive & R~ is antisymmetric by A1,A2,A3,
+  RELAT_2:27,40,42;
+end;
+
+Lm3: R is connected implies R~ is connected
+proof
+  assume
+A1: x in field R & y in field R & x <> y implies [x,y] in R or [y,x] in R;
+  let x,y;
+  assume that
+A2: x in field(R~) and
+A3: y in field(R~) and
+A4: x <> y;
+  field R = field(R~) by RELAT_1:38;
+  then [x,y] in R or [y,x] in R by A1,A2,A3,A4;
+  hence thesis by RELAT_1:def 7;
+end;
+
+theorem Th106:
+  R is being_linear-order implies R~ is being_linear-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+A3: R is antisymmetric and
+A4: R is connected;
+  thus R~ is reflexive & R~ is transitive & R~ is antisymmetric & R~ is
+  connected by A1,A2,A3,A4,Lm3,RELAT_2:27,40,42;
+end;
+
+theorem
+  R is well-ordering implies R is being_quasi-order & R is
+  being_partial-order & R is being_linear-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+A3: R is antisymmetric and
+A4: R is connected and
+  R is well_founded;
+  thus R is reflexive & R is transitive & R is reflexive & R is transitive & R
+is antisymmetric & R is reflexive & R is transitive & R is antisymmetric & R is
+  connected by A1,A2,A3,A4;
+end;
+
+theorem
+  R is being_linear-order implies R is being_quasi-order & R is
+  being_partial-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+A3: R is antisymmetric and
+  R is connected;
+  thus R is reflexive & R is transitive & R is reflexive & R is transitive & R
+  is antisymmetric by A1,A2,A3;
+end;
+
+theorem Th109:
+  R is being_partial-order implies R is being_quasi-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+  R is antisymmetric;
+  thus R is reflexive & R is transitive by A1,A2;
+end;
+
+theorem
+  O is being_partial-order by Def4;
+
+theorem
+  O is being_quasi-order
+proof
+  O is being_partial-order by Def4;
+  hence thesis by Th109;
+end;
+
+theorem
+  O is connected implies O is being_linear-order by Def5;
+
+Lm4: R c= [:field R,field R:]
+proof
+  let y,z;
+  assume
+A1: [y,z] in R;
+  then
+A2: z in field R by RELAT_1:30;
+  y in field R by A1,RELAT_1:30;
+  hence thesis by A2,ZFMISC_1:106;
+end;
+
+Lm5: R is reflexive & X c= field R implies field(R|_2 X) = X
+proof
+  assume that
+A1: x in field R implies [x,x] in R and
+A2: X c= field R;
+  thus field(R|_2 X) c= X
+  proof
+    let y;
+    thus thesis by WELLORD1:19;
+  end;
+  let y;
+  assume
+A3: y in X;
+  then
+A4: [y,y] in [:X,X:] by ZFMISC_1:106;
+  [y,y] in R by A1,A2,A3;
+  then [y,y] in R|_2 X by A4,XBOOLE_0:def 4;
+  hence thesis by RELAT_1:30;
+end;
+
+theorem
+  R is being_quasi-order implies R|_2 X is being_quasi-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive;
+  thus R|_2 X is reflexive & R|_2 X is transitive by A1,A2,WELLORD1:22,24;
+end;
+
+theorem
+  R is being_partial-order implies R|_2 X is being_partial-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+A3: R is antisymmetric;
+  thus R|_2 X is reflexive & R|_2 X is transitive & R|_2 X is antisymmetric by
+  A1,A2,A3,WELLORD1:22,24,25;
+end;
+
+theorem
+  R is being_linear-order implies R|_2 X is being_linear-order
+proof
+  assume that
+A1: R is reflexive and
+A2: R is transitive and
+A3: R is antisymmetric and
+A4: R is connected;
+  thus R|_2 X is reflexive & R|_2 X is transitive & R|_2 X is antisymmetric &
+  R|_2 X is connected by A1,A2,A3,A4,WELLORD1:22,23,24,25;
+end;
+
+registration let R be empty Relation;
+ cluster field R -> empty;
+ coherence;
+end;
+
+registration
+ cluster empty ->  being_quasi-order being_partial-order
+         being_linear-order well-ordering Relation;
+ coherence
+proof
+ let R be Relation such that
+Z: R is empty;
+  thus
+A1: R is reflexive
+  proof
+    let x;
+    assume x in field R;
+    hence thesis by Z;
+  end;
+  thus
+A2: R is transitive
+  proof
+    let x,y,z such that
+    x in field R;
+    thus thesis by Z;
+  end;
+  hence R is reflexive & R is transitive by A1;
+  thus
+A3: R is antisymmetric
+  proof
+    let x,y such that
+    x in field R;
+    thus thesis by Z;
+  end;
+  hence R is reflexive & R is transitive & R is antisymmetric by A1,A2;
+  thus R is connected
+  proof
+    let x,y such that
+    x in field R;
+    thus thesis by Z;
+  end;
+  hence R is reflexive & R is transitive & R is antisymmetric & R is
+  connected by A1,A2,A3;
+  let Y;
+  assume that
+A4: Y c= field R and
+A5: Y <> {};
+  thus thesis by A4,A5,Z;
+end;
+end;
+
+registration let X;
+ cluster id X -> being_quasi-order being_partial-order;
+ coherence
+proof
+  thus id X is reflexive & id X is transitive & id X is reflexive & id X is
+  transitive & id X is antisymmetric;
+end;
+end;
+
+definition
+  let R,X;
+  pred R quasi_orders X means
+  :Def6:
+  R is_reflexive_in X & R is_transitive_in X;
+  pred R partially_orders X means
+  :Def7:
+  R is_reflexive_in X & R is_transitive_in X & R is_antisymmetric_in X;
+  pred R linearly_orders X means
+  R is_reflexive_in X & R is_transitive_in X &
+  R is_antisymmetric_in X & R is_connected_in X;
+end;
+
+canceled 8;
+
+theorem Th124:
+  R well_orders X implies R quasi_orders X & R partially_orders X
+  & R linearly_orders X
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+A3: R is_antisymmetric_in X and
+A4: R is_connected_in X and
+  R is_well_founded_in X;
+  thus R is_reflexive_in X & R is_transitive_in X & R is_reflexive_in X & R
+  is_transitive_in X & R is_antisymmetric_in X & R is_reflexive_in X & R
+is_transitive_in X & R is_antisymmetric_in X & R is_connected_in X by A1,A2,A3,
+  A4;
+end;
+
+theorem Th125:
+  R linearly_orders X implies R quasi_orders X & R partially_orders X
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+A3: R is_antisymmetric_in X and
+  R is_connected_in X;
+  thus R is_reflexive_in X & R is_transitive_in X & R is_reflexive_in X & R
+  is_transitive_in X & R is_antisymmetric_in X by A1,A2,A3;
+end;
+
+theorem
+  R partially_orders X implies R quasi_orders X
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+  R is_antisymmetric_in X;
+  thus R is_reflexive_in X & R is_transitive_in X by A1,A2;
+end;
+
+theorem Th127:
+  R is being_quasi-order implies R quasi_orders field R
+proof
+  assume that
+A1: R is_reflexive_in field R and
+A2: R is_transitive_in field R;
+  thus R is_reflexive_in field R & R is_transitive_in field R by A1,A2;
+end;
+
+theorem
+  R quasi_orders Y & X c= Y implies R quasi_orders X
+proof
+  assume that
+A1: R is_reflexive_in Y and
+A2: R is_transitive_in Y and
+A3: X c= Y;
+  thus R is_reflexive_in X & R is_transitive_in X by A1,A2,A3,Th93,Th95;
+end;
+
+Lm6: R is_reflexive_in X implies R|_2 X is reflexive
+proof
+  assume
+A1: x in X implies [x,x] in R;
+  let x;
+  assume
+A2: x in field(R|_2 X);
+  then x in X by WELLORD1:19;
+  then
+A3: [x,x] in [:X,X:] by ZFMISC_1:106;
+  [x,x] in R by A1,A2,WELLORD1:19;
+  hence thesis by A3,XBOOLE_0:def 4;
+end;
+
+Lm7: R is_transitive_in X implies R|_2 X is transitive
+proof
+  assume
+A1: x in X & y in X & z in X & [x,y] in R & [y,z] in R implies [x,z] in R;
+  let x,y,z;
+  assume that
+A2: x in field(R|_2 X) and
+A3: y in field(R|_2 X) and
+A4: z in field(R|_2 X);
+A5: z in X by A4,WELLORD1:19;
+A6: x in X by A2,WELLORD1:19;
+  then
+A7: [x,z] in [:X,X:] by A5,ZFMISC_1:106;
+  assume that
+A8: [x,y] in R|_2 X and
+A9: [y,z] in R|_2 X;
+A10: [x,y] in R by A8,XBOOLE_0:def 4;
+A11: [y,z] in R by A9,XBOOLE_0:def 4;
+  y in X by A3,WELLORD1:19;
+  then [x,z] in R by A1,A6,A5,A10,A11;
+  hence thesis by A7,XBOOLE_0:def 4;
+end;
+
+Lm8: R is_antisymmetric_in X implies R|_2 X is antisymmetric
+proof
+  assume
+A1: x in X & y in X & [x,y] in R & [y,x] in R implies x = y;
+  let x,y;
+  assume that
+A2: x in field(R|_2 X) and
+A3: y in field(R|_2 X);
+A4: y in X by A3,WELLORD1:19;
+  assume that
+A5: [x,y] in R|_2 X and
+A6: [y,x] in R|_2 X;
+A7: [x,y] in R by A5,XBOOLE_0:def 4;
+A8: [y,x] in R by A6,XBOOLE_0:def 4;
+  x in X by A2,WELLORD1:19;
+  hence thesis by A1,A4,A7,A8;
+end;
+
+Lm9: R is_connected_in X implies R|_2 X is connected
+proof
+  assume
+A1: x in X & y in X & x <> y implies [x,y] in R or [y,x] in R;
+  let x,y;
+  assume that
+A2: x in field(R|_2 X) and
+A3: y in field(R|_2 X) and
+A4: x <> y;
+A5: y in X by A3,WELLORD1:19;
+A6: x in X by A2,WELLORD1:19;
+  then
+A7: [x,y] in [:X,X:] by A5,ZFMISC_1:106;
+A8: [y,x] in [:X,X:] by A6,A5,ZFMISC_1:106;
+  [x,y] in R or [y,x] in R by A1,A4,A6,A5;
+  hence thesis by A7,A8,XBOOLE_0:def 4;
+end;
+
+theorem
+  R quasi_orders X implies R|_2 X is being_quasi-order
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X;
+  thus R|_2 X is reflexive & R|_2 X is transitive by A1,A2,Lm6,Lm7;
+end;
+
+theorem Th130:
+  R is being_partial-order implies R partially_orders field R
+proof
+  assume that
+A1: R is_reflexive_in field R and
+A2: R is_transitive_in field R and
+A3: R is_antisymmetric_in field R;
+  thus R is_reflexive_in field R & R is_transitive_in field R & R
+  is_antisymmetric_in field R by A1,A2,A3;
+end;
+
+theorem
+  R partially_orders Y & X c= Y implies R partially_orders X
+proof
+  assume that
+A1: R is_reflexive_in Y and
+A2: R is_transitive_in Y and
+A3: R is_antisymmetric_in Y and
+A4: X c= Y;
+  thus R is_reflexive_in X & R is_transitive_in X & R is_antisymmetric_in X by
+  A1,A2,A3,A4,Th93,Th94,Th95;
+end;
+
+theorem
+  R partially_orders X implies R|_2 X is being_partial-order
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+A3: R is_antisymmetric_in X;
+  thus R|_2 X is reflexive & R|_2 X is transitive & R|_2 X is antisymmetric by
+  A1,A2,A3,Lm6,Lm7,Lm8;
+end;
+
+Lm10: R is_connected_in X & Y c= X implies R is_connected_in Y
+proof
+  assume that
+A1: R is_connected_in X and
+A2: Y c= X;
+  let x,y;
+  assume that
+A3: x in Y and
+A4: y in Y;
+  thus thesis by A1,A2,A3,A4,RELAT_2:def 6;
+end;
+
+theorem
+  R is being_linear-order implies R linearly_orders field R
+proof
+  assume that
+A1: R is_reflexive_in field R and
+A2: R is_transitive_in field R and
+A3: R is_antisymmetric_in field R and
+A4: R is_connected_in field R;
+  thus R is_reflexive_in field R & R is_transitive_in field R & R
+  is_antisymmetric_in field R & R is_connected_in field R by A1,A2,A3,A4;
+end;
+
+theorem
+  R linearly_orders Y & X c= Y implies R linearly_orders X
+proof
+  assume that
+A1: R is_reflexive_in Y and
+A2: R is_transitive_in Y and
+A3: R is_antisymmetric_in Y and
+A4: R is_connected_in Y and
+A5: X c= Y;
+  thus R is_reflexive_in X & R is_transitive_in X & R is_antisymmetric_in X &
+  R is_connected_in X by A1,A2,A3,A4,A5,Lm10,Th93,Th94,Th95;
+end;
+
+theorem
+  R linearly_orders X implies R|_2 X is being_linear-order
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+A3: R is_antisymmetric_in X and
+A4: R is_connected_in X;
+  thus R|_2 X is reflexive & R|_2 X is transitive & R|_2 X is antisymmetric &
+  R|_2 X is connected by A1,A2,A3,A4,Lm6,Lm7,Lm8,Lm9;
+end;
+
+Lm11: R is_reflexive_in X implies R~ is_reflexive_in X
+proof
+  assume
+A1: x in X implies [x,x] in R;
+  let x;
+  assume x in X;
+  then [x,x] in R by A1;
+  hence thesis by RELAT_1:def 7;
+end;
+
+Lm12: R is_transitive_in X implies R~ is_transitive_in X
+proof
+  assume
+A1: x in X & y in X & z in X & [x,y] in R & [y,z] in R implies [x,z] in R;
+  let x,y,z;
+  assume that
+A2: x in X and
+A3: y in X and
+A4: z in X and
+A5: [x,y] in R~ and
+A6: [y,z] in R~;
+A7: [z,y] in R by A6,RELAT_1:def 7;
+  [y,x] in R by A5,RELAT_1:def 7;
+  then [z,x] in R by A1,A2,A3,A4,A7;
+  hence thesis by RELAT_1:def 7;
+end;
+
+Lm13: R is_antisymmetric_in X implies R~ is_antisymmetric_in X
+proof
+  assume
+A1: x in X & y in X & [x,y] in R & [y,x] in R implies x = y;
+  let x,y;
+  assume that
+A2: x in X and
+A3: y in X and
+A4: [x,y] in R~ and
+A5: [y,x] in R~;
+A6: [y,x] in R by A4,RELAT_1:def 7;
+  [x,y] in R by A5,RELAT_1:def 7;
+  hence thesis by A1,A2,A3,A6;
+end;
+
+Lm14: R is_connected_in X implies R~ is_connected_in X
+proof
+  assume
+A1: x in X & y in X & x <> y implies [x,y] in R or [y,x] in R;
+  let x,y;
+  assume that
+A2: x in X and
+A3: y in X and
+A4: x <> y;
+  [x,y] in R or [y,x] in R by A1,A2,A3,A4;
+  hence thesis by RELAT_1:def 7;
+end;
+
+theorem
+  R quasi_orders X implies R~ quasi_orders X
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X;
+  thus R~ is_reflexive_in X & R~ is_transitive_in X by A1,A2,Lm11,Lm12;
+end;
+
+theorem Th137:
+  R partially_orders X implies R~ partially_orders X
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+A3: R is_antisymmetric_in X;
+  thus R~ is_reflexive_in X & R~ is_transitive_in X & R~ is_antisymmetric_in X
+  by A1,A2,A3,Lm11,Lm12,Lm13;
+end;
+
+theorem
+  R linearly_orders X implies R~ linearly_orders X
+proof
+  assume that
+A1: R is_reflexive_in X and
+A2: R is_transitive_in X and
+A3: R is_antisymmetric_in X and
+A4: R is_connected_in X;
+  thus R~ is_reflexive_in X & R~ is_transitive_in X & R~ is_antisymmetric_in X
+  & R~ is_connected_in X by A1,A2,A3,A4,Lm11,Lm12,Lm13,Lm14;
+end;
+
+theorem
+  O quasi_orders X
+proof
+A1: field O = X by Lm2;
+  then
+A2: O is_transitive_in X by RELAT_2:def 16;
+  O is_reflexive_in X by A1,RELAT_2:def 9;
+  hence thesis by A2,Def6;
+end;
+
+theorem
+  O partially_orders X
+proof
+A1: field O = X by Lm2;
+  then
+A2: O is_antisymmetric_in X by RELAT_2:def 12;
+A3: O is_transitive_in X by A1,RELAT_2:def 16;
+  O is_reflexive_in X by A1,RELAT_2:def 9;
+  hence thesis by A2,A3,Def7;
+end;
+
+theorem Th141:
+  R partially_orders X implies R |_2 X is Order of X
+proof
+  set S = R |_2 X;
+A1: field S c= X by WELLORD1:20;
+  rng S c= field S by XBOOLE_1:7;
+  then
+A2: rng S c= X by A1,XBOOLE_1:1;
+  dom S c= field S by XBOOLE_1:7;
+  then dom S c= X by A1,XBOOLE_1:1;
+  then reconsider S as Relation of X by A2,RELSET_1:11;
+  assume
+A3: R partially_orders X;
+A4: R |_2 X is_antisymmetric_in X
+  proof
+A5: R is_antisymmetric_in X by A3,Def7;
+    let x,y;
+    assume that
+A6: x in X and
+A7: y in X and
+A8: [x,y] in R |_2 X and
+A9: [y,x] in R |_2 X;
+A10: [y,x] in R by A9,XBOOLE_0:def 4;
+    [x,y] in R by A8,XBOOLE_0:def 4;
+    hence thesis by A6,A7,A10,A5,RELAT_2:def 4;
+  end;
+A11: R |_2 X is_transitive_in X
+  proof
+A12: R is_transitive_in X by A3,Def7;
+    let x,y,z;
+    assume that
+A13: x in X and
+A14: y in X and
+A15: z in X and
+A16: [x,y] in R |_2 X and
+A17: [y,z] in R |_2 X;
+A18: [x,z] in [:X,X:] by A13,A15,ZFMISC_1:106;
+A19: [y,z] in R by A17,XBOOLE_0:def 4;
+    [x,y] in R by A16,XBOOLE_0:def 4;
+    then [x,z] in R by A13,A14,A15,A19,A12,RELAT_2:def 8;
+    hence thesis by A18,XBOOLE_0:def 4;
+  end;
+A20: R is_reflexive_in X by A3,Def7;
+A21: R |_2 X is_reflexive_in X
+  proof
+    let x;
+    assume
+A22: x in X;
+    then
+A23: [x,x] in [:X,X:] by ZFMISC_1:106;
+    [x,x] in R by A20,A22,RELAT_2:def 1;
+    hence thesis by A23,XBOOLE_0:def 4;
+  end;
+  then
+A24: field S = X by Th98;
+  dom S = X by A21,Th98;
+  hence thesis by A21,A24,A4,A11,PARTFUN1:def 4,RELAT_2:def 9,def 12,def 16;
+end;
+
+theorem
+  R linearly_orders X implies R |_2 X is Order of X by Th125,Th141;
+
+theorem
+  R well_orders X implies R |_2 X is Order of X by Th124,Th141;
+
+canceled 2;
+
+theorem
+  id X quasi_orders X & id X partially_orders X
+proof
+    field id X = X \/ rng id X by RELAT_1:71
+    .= X \/ X by RELAT_1:71
+    .= X;
+ hence thesis by Th127,Th130;
+end;
+
+definition
+  let R,X;
+  pred X has_upper_Zorn_property_wrt R means
+  :Def9:
+  for Y st Y c= X & R|_2 Y
+  is being_linear-order ex x st x in X & for y st y in Y holds [y,x] in R;
+  pred X has_lower_Zorn_property_wrt R means
+  for Y st Y c= X & R|_2 Y is
+  being_linear-order ex x st x in X & for y st y in Y holds [x,y] in R;
+end;
+
+Lm15: (R|_2 X)~ = R~|_2 X
+proof
+  now
+    let x,y;
+    thus [x,y] in R~|_2 X implies [y,x] in R|_2 X
+    proof
+      assume
+A1:   [x,y] in R~|_2 X;
+      then [x,y] in [:X,X:] by XBOOLE_0:def 4;
+      then
+A2:   [y,x] in [:X,X:] by ZFMISC_1:107;
+      [x,y] in R~ by A1,XBOOLE_0:def 4;
+      then [y,x] in R by RELAT_1:def 7;
+      hence thesis by A2,XBOOLE_0:def 4;
+    end;
+    assume
+A3: [y,x] in R|_2 X;
+    then [y,x] in [:X,X:] by XBOOLE_0:def 4;
+    then
+A4: [x,y] in [:X,X:] by ZFMISC_1:107;
+    [y,x] in R by A3,XBOOLE_0:def 4;
+    then [x,y] in R~ by RELAT_1:def 7;
+    hence [x,y] in R~|_2 X by A4,XBOOLE_0:def 4;
+  end;
+  hence thesis by RELAT_1:def 7;
+end;
+
+Lm16: now
+  let R;
+  thus R|_2 {} = {}|R|({} qua set) by WELLORD1:17
+    .= {};
+end;
+
+canceled 2;
+
+theorem Th149:
+  X has_upper_Zorn_property_wrt R implies X <> {}
+proof
+  assume
+A1: for Y st Y c= X & R|_2 Y is being_linear-order ex x st x in X & for
+  y st y in Y holds [y,x] in R;
+  R|_2 {} is being_linear-order by Lm16;
+  then ex x st x in X & for y st y in {} holds [y,x] in R by A1,
+  XBOOLE_1:2;
+  hence thesis;
+end;
+
+theorem
+  X has_lower_Zorn_property_wrt R implies X <> {}
+proof
+  assume
+A1: for Y st Y c= X & R|_2 Y is being_linear-order ex x st x in X & for
+  y st y in Y holds [x,y] in R;
+  R|_2 {} is being_linear-order by Lm16;
+  then ex x st x in X & for y st y in {} holds [x,y] in R by A1,
+  XBOOLE_1:2;
+  hence thesis;
+end;
+
+theorem Th151:
+  X has_upper_Zorn_property_wrt R iff X has_lower_Zorn_property_wrt R~
+proof
+  thus X has_upper_Zorn_property_wrt R implies X has_lower_Zorn_property_wrt R
+  ~
+  proof
+    assume
+A1: for Y st Y c= X & R|_2 Y is being_linear-order ex x st x in X &
+    for y st y in Y holds [y,x] in R;
+    let Y;
+A2: (R|_2 Y)~~ = R|_2 Y;
+    assume that
+A3: Y c= X and
+A4: R~|_2 Y is being_linear-order;
+    R~|_2 Y = (R|_2 Y)~ by Lm15;
+    then consider x such that
+A5: x in X and
+A6: for y st y in Y holds [y,x] in R by A1,A2,A3,A4,Th106;
+    take x;
+    thus x in X by A5;
+    let y;
+    assume y in Y;
+    then [y,x] in R by A6;
+    hence thesis by RELAT_1:def 7;
+  end;
+  assume
+A7: for Y st Y c= X & R~|_2 Y is being_linear-order ex x st x in X &
+  for y st y in Y holds [x,y] in R~;
+  let Y;
+  assume that
+A8: Y c= X and
+A9: R|_2 Y is being_linear-order;
+  R~|_2 Y = (R|_2 Y)~ by Lm15;
+  then consider x such that
+A10: x in X and
+A11: for y st y in Y holds [x,y] in R~ by A7,A8,A9,Th106;
+  take x;
+  thus x in X by A10;
+  let y;
+  assume y in Y;
+  then [x,y] in R~ by A11;
+  hence thesis by RELAT_1:def 7;
+end;
+
+theorem
+  X has_upper_Zorn_property_wrt R~ iff X has_lower_Zorn_property_wrt R
+proof
+  R~~ = R;
+  hence thesis by Th151;
+end;
+
+definition
+  let R,x;
+  pred x is_maximal_in R means
+  :Def11:
+  x in field R & not ex y st y in field R & y <> x & [x,y] in R;
+  pred x is_minimal_in R means
+  :Def12:
+  x in field R & not ex y st y in field R & y <> x & [y,x] in R;
+  pred x is_superior_of R means
+  :Def13:
+  x in field R & for y st y in field R & y <> x holds [y,x] in R;
+  pred x is_inferior_of R means
+  :Def14:
+  x in field R & for y st y in field R & y <> x holds [x,y] in R;
+end;
+
+canceled 4;
+
+theorem
+  x is_inferior_of R & R is antisymmetric implies x is_minimal_in R
+proof
+  assume that
+A1: x is_inferior_of R and
+A2: R is antisymmetric;
+A3: R is_antisymmetric_in field R by A2,RELAT_2:def 12;
+  thus
+A4: x in field R by A1,Def14;
+  let y;
+  assume that
+A5: y in field R and
+A6: y <> x and
+A7: [y,x] in R;
+  [x,y] in R by A1,A5,A6,Def14;
+  hence thesis by A4,A5,A6,A7,A3,RELAT_2:def 4;
+end;
+
+theorem
+  x is_superior_of R & R is antisymmetric implies x is_maximal_in R
+proof
+  assume that
+A1: x is_superior_of R and
+A2: R is antisymmetric;
+A3: R is_antisymmetric_in field R by A2,RELAT_2:def 12;
+  thus
+A4: x in field R by A1,Def13;
+  let y;
+  assume that
+A5: y in field R and
+A6: y <> x and
+A7: [x,y] in R;
+  [y,x] in R by A1,A5,A6,Def13;
+  hence thesis by A4,A5,A6,A7,A3,RELAT_2:def 4;
+end;
+
+theorem
+  x is_minimal_in R & R is connected implies x is_inferior_of R
+proof
+  assume that
+A1: x is_minimal_in R and
+A2: R is connected;
+  thus
+A3: x in field R by A1,Def12;
+  let y;
+  assume that
+A4: y in field R and
+A5: y <> x;
+  R is_connected_in field R by A2,RELAT_2:def 14;
+  then [x,y] in R or [y,x] in R by A3,A4,A5,RELAT_2:def 6;
+  hence thesis by A1,A4,Def12;
+end;
+
+theorem
+  x is_maximal_in R & R is connected implies x is_superior_of R
+proof
+  assume that
+A1: x is_maximal_in R and
+A2: R is connected;
+  thus
+A3: x in field R by A1,Def11;
+  let y;
+  assume that
+A4: y in field R and
+A5: y <> x;
+  R is_connected_in field R by A2,RELAT_2:def 14;
+  then [x,y] in R or [y,x] in R by A3,A4,A5,RELAT_2:def 6;
+  hence thesis by A1,A4,Def11;
+end;
+
+theorem
+  x in X & x is_superior_of R & X c= field R & R is reflexive implies X
+  has_upper_Zorn_property_wrt R
+proof
+  assume that
+A1: x in X and
+A2: x is_superior_of R and
+A3: X c= field R and
+A4: R is_reflexive_in field R;
+  let Y such that
+A5: Y c= X and
+  R|_2 Y is being_linear-order;
+  take x;
+  thus x in X by A1;
+  let y;
+  assume y in Y;
+  then
+A6: y in X by A5;
+  y = x or y <> x;
+  hence thesis by A2,A3,A4,A6,Def13,RELAT_2:def 1;
+end;
+
+theorem
+  x in X & x is_inferior_of R & X c= field R & R is reflexive implies X
+  has_lower_Zorn_property_wrt R
+proof
+  assume that
+A1: x in X and
+A2: x is_inferior_of R and
+A3: X c= field R and
+A4: R is_reflexive_in field R;
+  let Y such that
+A5: Y c= X and
+  R|_2 Y is being_linear-order;
+  take x;
+  thus x in X by A1;
+  let y;
+  assume y in Y;
+  then
+A6: y in X by A5;
+  y = x or y <> x;
+  hence thesis by A2,A3,A4,A6,Def14,RELAT_2:def 1;
+end;
+
+theorem Th163:
+  x is_minimal_in R iff x is_maximal_in R~
+proof
+A1: field R = field(R~) by RELAT_1:38;
+  thus x is_minimal_in R implies x is_maximal_in R~
+  proof
+    assume that
+A2: x in field R and
+A3: not ex y st y in field R & y <> x & [y,x] in R;
+    thus x in field(R~) by A2,RELAT_1:38;
+    let y;
+    assume that
+A4: y in field(R~) and
+A5: y <> x;
+    not [y,x] in R by A1,A3,A4,A5;
+    hence thesis by RELAT_1:def 7;
+  end;
+  assume that
+A6: x in field(R~) and
+A7: not ex y st y in field(R~) & y <> x & [x,y] in R~;
+  thus x in field R by A6,RELAT_1:38;
+  let y;
+  assume that
+A8: y in field R and
+A9: y <> x;
+  not [x,y] in R~ by A1,A7,A8,A9;
+  hence thesis by RELAT_1:def 7;
+end;
+
+theorem
+  x is_minimal_in R~ iff x is_maximal_in R
+proof
+A1: field R = field(R~) by RELAT_1:38;
+  thus x is_minimal_in R~ implies x is_maximal_in R
+  proof
+    assume that
+A2: x in field(R~) and
+A3: not ex y st y in field(R~) & y <> x & [y,x] in R~;
+    thus x in field R by A2,RELAT_1:38;
+    let y;
+    assume that
+A4: y in field R and
+A5: y <> x;
+    not [y,x] in R~ by A1,A3,A4,A5;
+    hence thesis by RELAT_1:def 7;
+  end;
+  assume that
+A6: x in field R and
+A7: not ex y st y in field R & y <> x & [x,y] in R;
+  thus x in field(R~) by A6,RELAT_1:38;
+  let y;
+  assume that
+A8: y in field(R~) and
+A9: y <> x;
+  not [x,y] in R by A1,A7,A8,A9;
+  hence thesis by RELAT_1:def 7;
+end;
+
+theorem
+  x is_inferior_of R iff x is_superior_of R~
+proof
+A1: field R = field(R~) by RELAT_1:38;
+  thus x is_inferior_of R implies x is_superior_of R~
+  proof
+    assume that
+A2: x in field R and
+A3: for y st y in field R & y <> x holds [x,y] in R;
+    thus x in field(R~) by A2,RELAT_1:38;
+    let y;
+    assume that
+A4: y in field(R~) and
+A5: y <> x;
+    [x,y] in R by A1,A3,A4,A5;
+    hence thesis by RELAT_1:def 7;
+  end;
+  assume that
+A6: x in field(R~) and
+A7: for y st y in field(R~) & y <> x holds [y,x] in R~;
+  thus x in field R by A6,RELAT_1:38;
+  let y;
+  assume that
+A8: y in field R and
+A9: y <> x;
+  [y,x] in R~ by A1,A7,A8,A9;
+  hence thesis by RELAT_1:def 7;
+end;
+
+theorem
+  x is_inferior_of R~ iff x is_superior_of R
+proof
+A1: field R = field(R~) by RELAT_1:38;
+  thus x is_inferior_of R~ implies x is_superior_of R
+  proof
+    assume that
+A2: x in field(R~) and
+A3: for y st y in field(R~) & y <> x holds [x,y] in R~;
+    thus x in field R by A2,RELAT_1:38;
+    let y;
+    assume that
+A4: y in field R and
+A5: y <> x;
+    [x,y] in R~ by A1,A3,A4,A5;
+    hence thesis by RELAT_1:def 7;
+  end;
+  assume that
+A6: x in field R and
+A7: for y st y in field R & y <> x holds [y,x] in R;
+  thus x in field(R~) by A6,RELAT_1:38;
+  let y;
+  assume that
+A8: y in field(R~) and
+A9: y <> x;
+  [y,x] in R by A1,A7,A8,A9;
+  hence thesis by RELAT_1:def 7;
+end;
+
+Lm17: R well_orders X & Y c= X implies R well_orders Y
+proof
+  assume that
+A1: R well_orders X and
+A2: Y c= X;
+A3: R is_transitive_in X by A1,WELLORD1:def 5;
+A4: R is_connected_in X by A1,WELLORD1:def 5;
+A5: R is_antisymmetric_in X by A1,WELLORD1:def 5;
+A6: R is_well_founded_in X by A1,WELLORD1:def 5;
+  R is_reflexive_in X by A1,WELLORD1:def 5;
+  hence R is_reflexive_in Y & R is_transitive_in Y & R is_antisymmetric_in Y &
+  R is_connected_in Y by A2,A3,A5,A4,Lm10,Th93,Th94,Th95;
+  let Z;
+  assume that
+A7: Z c= Y and
+A8: Z <> {};
+  Z c= X by A2,A7,XBOOLE_1:1;
+  hence thesis by A8,A6,WELLORD1:def 3;
+end;
+ 
+::
+::  Kuratowski - Zorn Lemma.
+::
+
+reserve A,C for Ordinal;
+
+canceled 6;
+
+theorem Th173:
+  for R,X st R partially_orders X & field R = X & X
+  has_upper_Zorn_property_wrt R ex x st x is_maximal_in R
+proof
+  let R;
+  let FIELD be set;
+  assume that
+A1: R is_reflexive_in FIELD and
+A2: R is_transitive_in FIELD and
+A3: R is_antisymmetric_in FIELD and
+A4: field R = FIELD and
+A5: FIELD has_upper_Zorn_property_wrt R;
+  reconsider XD = FIELD as non empty set by A5,Th149;
+  consider D such that
+A6: D = XD;
+A7: D in bool D by ZFMISC_1:def 1;
+  not D in {{}} by TARSKI:def 1;
+  then reconsider M = (bool D) \ {{}} as non empty set by A7,XBOOLE_0:def 5;
+  consider f being Choice_Function of M;
+  defpred P[set,set] means $1 <> {} & $2 = f.$1 or $1 = {} & $2 = D;
+A8: for x st x in bool D ex y st P[x,y]
+  proof
+    let x such that
+    x in bool D;
+    x = {} implies thesis;
+    hence thesis;
+  end;
+A9: for x,y,z st x in bool D & P[x,y] & P[x,z] holds y = z;
+  consider g such that
+A10: dom g = bool D & for x st x in bool D holds P[x,g.x] from FUNCT_1:
+  sch 2 (A9,A8);
+  defpred ON[Ordinal,set] means ex L st $2 = g.{ d : for x st x in rng L holds
+x <> d & [x,d] in R } & dom L = $1 & for A,L1 st A in $1 & L1 = L|A holds L.A =
+  g.{ d1 : for x st x in rng L1 holds x <> d1 & [x,d1] in R };
+A11: ON[A,x] & ON[A,y] implies x = y
+  proof
+    given L1 such that
+A12: x = g.{ d1 : for x st x in rng L1 holds x <> d1 & [x,d1] in R } and
+A13: dom L1 = A & for C,L st C in A & L = L1|C holds L1.C = g.{ d2 :
+    for x st x in rng L holds x <> d2 & [x,d2] in R };
+A14: L1 = L1|A by A13,RELAT_1:97;
+    given L2 such that
+A15: y = g.{ d1 : for x st x in rng L2 holds x <> d1 & [x,d1] in R } and
+A16: dom L2 = A & for C,L st C in A & L = L2|C holds L2.C = g.{ d2 :
+    for x st x in rng L holds x <> d2 & [x,d2] in R };
+    defpred P[Ordinal] means $1 c= A implies L1|$1 = L2|$1;
+A17: for A1 st for A2 st A2 in A1 holds P[A2] holds P[A1]
+    proof
+      let A1 such that
+A18:  for A2 st A2 in A1 holds A2 c= A implies L1|A2 = L2|A2 and
+A19:  A1 c= A;
+A20:  dom(L2|A1) = A1 by A16,A19,RELAT_1:91;
+A21:  now
+        let x;
+        assume
+A22:    x in A1;
+        then reconsider A3 = x as Ordinal;
+A23:    L1.x = L1|A1.x by A22,FUNCT_1:72;
+        A3 c= A by A19,A22,ORDINAL1:def 2;
+        then
+A24:    L1|A3 = L2|A3 by A18,A22;
+A25:    L2.A3 = g.{ d2 : for x st x in rng(L2|A3) holds x <> d2 & [x,d2]
+        in R } by A16,A19,A22;
+        L1.A3 = g.{ d1 : for x st x in rng(L1|A3) holds x <> d1 & [x,d1]
+        in R } by A13,A19,A22;
+        hence L1|A1.x = L2|A1.x by A22,A24,A23,A25,FUNCT_1:72;
+      end;
+      dom(L1|A1) = A1 by A13,A19,RELAT_1:91;
+      hence thesis by A20,A21,FUNCT_1:9;
+    end;
+    for A1 holds P[A1] from ORDINAL1:sch 2(A17);
+    then
+A26: L1|A = L2|A;
+    L2 = L2|A by A16,RELAT_1:97;
+    hence thesis by A12,A15,A26,A14;
+  end;
+  {} in {{}} by TARSKI:def 1;
+  then
+A27: not {} in M by XBOOLE_0:def 5;
+A28: X in bool D & X <> {} implies g.X in X
+  proof
+    assume that
+A29: X in bool D and
+A30: X <> {};
+    not X in {{}} by A30,TARSKI:def 1;
+    then
+A31: X in M by A29,XBOOLE_0:def 5;
+    f.X = g.X by A10,A29,A30;
+    hence thesis by A27,A31,Def1;
+  end;
+  defpred OM[Ordinal] means ON[$1,D];
+  {} c= D by XBOOLE_1:2;
+  then
+A32: g.{} = D by A10;
+A33: now
+    let A,B,L1,L2;
+    assume that
+A34: dom L1 = A & for C,L st C in A & L = L1|C holds L1.C = g.{ d2 :
+    for x st x in rng L holds x <> d2 & [x,d2] in R } and
+A35: dom L2 = B & for C,L st C in B & L = L2|C holds L2.C = g.{ d2 :
+    for x st x in rng L holds x <> d2 & [x,d2] in R };
+    let C such that
+A36: C c= A and
+A37: C c= B;
+    defpred P[Ordinal] means $1 c= C implies L1|$1 = L2|$1;
+A38: for A1 st for A2 st A2 in A1 holds P[A2] holds P[A1]
+    proof
+      let A1 such that
+A39:  for A2 st A2 in A1 holds A2 c= C implies L1|A2 = L2|A2 and
+A40:  A1 c= C;
+A41:  dom(L2|A1) = A1 by A35,A37,A40,RELAT_1:91,XBOOLE_1:1;
+A42:  now
+        let x;
+        assume
+A43:    x in A1;
+        then reconsider A3 = x as Ordinal;
+A44:    L1.x = L1|A1.x by A43,FUNCT_1:72;
+        A3 c= C by A40,A43,ORDINAL1:def 2;
+        then
+A45:    L1|A3 = L2|A3 by A39,A43;
+A46:    A3 in C by A40,A43;
+        then
+A47:    L2.A3 = g.{ d2 : for x st x in rng(L2|A3) holds x <> d2 & [x,d2]
+        in R } by A35,A37;
+        L1.A3 = g.{ d1 : for x st x in rng(L1|A3) holds x <> d1 & [x,d1]
+        in R } by A34,A36,A46;
+        hence L1|A1.x = L2|A1.x by A43,A45,A44,A47,FUNCT_1:72;
+      end;
+      dom(L1|A1) = A1 by A34,A36,A40,RELAT_1:91,XBOOLE_1:1;
+      hence thesis by A41,A42,FUNCT_1:9;
+    end;
+    for A1 holds P[A1] from ORDINAL1:sch 2(A38);
+    hence L1|C = L2|C;
+  end;
+A48: for d,A,B st ON[A,d] & ON[B,d] holds A = B
+  proof
+    let d,A,B;
+    given L1 such that
+A49: d = g.{ d1 : for x st x in rng L1 holds x <> d1 & [x,d1] in R } and
+A50: dom L1 = A & for C,L st C in A & L = L1|C holds L1.C = g.{ d2 :
+    for x st x in rng L holds x <> d2 & [x,d2] in R };
+    given L2 such that
+A51: d = g.{ d1 : for x st x in rng L2 holds x <> d1 & [x,d1] in R } and
+A52: dom L2 = B & for C,L st C in B & L = L2|C holds L2.C = g.{ d2 :
+    for x st x in rng L holds x <> d2 & [x,d2] in R };
+A53: now
+      set Y = { d1 : for x st x in rng L1 holds x <> d1 & [x,d1] in R };
+      set X = { d1 : for x st x in rng(L1|B) holds x <> d1 & [x,d1] in R };
+A54:  Y c= D
+      proof
+        let x;
+        assume x in Y;
+        then ex d1 st x = d1 & for x st x in rng L1 holds x <> d1 & [x,d1] in
+        R;
+        hence thesis;
+      end;
+      assume
+A55:  B in A;
+      then B c= A by ORDINAL1:def 2;
+      then
+A56:  L1|B = L2|B by A33,A50,A52
+        .= L2 by A52,RELAT_1:97;
+      L1.B = g.X by A50,A55;
+      then
+A57:  d in rng L1 by A50,A51,A55,A56,FUNCT_1:def 5;
+A58:  now
+        assume
+A59:    Y <> {};
+        then not Y in {{}} by TARSKI:def 1;
+        then
+A60:    Y in M by A54,XBOOLE_0:def 5;
+        g.Y = f.Y by A10,A54,A59;
+        then d in Y by A27,A49,A60,Def1;
+        then ex d1 st d = d1 & for x st x in rng L1 holds x <> d1 & [x,d1] in
+        R;
+        hence contradiction by A57;
+      end;
+A61:  not d in d;
+      P[Y,g.Y] by A10,A54;
+      hence contradiction by A49,A61,A58;
+    end;
+    now
+      set Y = { d1 : for x st x in rng L2 holds x <> d1 & [x,d1] in R };
+      set X = { d1 : for x st x in rng(L2|A) holds x <> d1 & [x,d1] in R };
+A62:  Y c= D
+      proof
+        let x;
+        assume x in Y;
+        then ex d1 st x = d1 & for x st x in rng L2 holds x <> d1 & [x,d1] in
+        R;
+        hence thesis;
+      end;
+      assume
+A63:  A in B;
+      then A c= B by ORDINAL1:def 2;
+      then
+A64:  L2|A = L1|A by A33,A50,A52
+        .= L1 by A50,RELAT_1:97;
+      L2.A = g.X by A52,A63;
+      then
+A65:  d in rng L2 by A49,A52,A63,A64,FUNCT_1:def 5;
+A66:  now
+        assume
+A67:    Y <> {};
+        then not Y in {{}} by TARSKI:def 1;
+        then
+A68:    Y in M by A62,XBOOLE_0:def 5;
+        g.Y = f.Y by A10,A62,A67;
+        then d in Y by A27,A51,A68,Def1;
+        then ex d1 st d = d1 & for x st x in rng L2 holds x <> d1 & [x,d1] in
+        R;
+        hence contradiction by A65;
+      end;
+A69:  not d in d;
+      P[Y,g.Y] by A10,A62;
+      hence contradiction by A51,A69,A66;
+    end;
+    hence thesis by A53,ORDINAL1:24;
+  end;
+A70: ex A st OM[A]
+  proof
+    defpred P[set,set] means ex A st $2 = A & ON[A,$1];
+    defpred OO[Ordinal] means ex d st ON[$1,d];
+    assume
+A71: for A holds not ON[A,D];
+A72: for A st for B st B in A holds OO[B] holds OO[A]
+    proof
+      defpred P[set,set] means ex C st $1 = C & ON[C,$2];
+      let A such that
+A73:  for B st B in A ex d st ON[B,d];
+A74:  for x st x in A ex y st P[x,y]
+      proof
+        let x;
+        assume
+A75:    x in A;
+        then reconsider C = x as Ordinal;
+        consider d such that
+A76:    ON[C,d] by A73,A75;
+        reconsider y = d as set;
+        take y,C;
+        thus thesis by A76;
+      end;
+A77:  for x,y,z st x in A & P[x,y] & P[x,z] holds y = z by A11;
+      consider h such that
+A78:  dom h = A & for x st x in A holds P[x,h.x] from FUNCT_1:sch 2(
+      A77,A74 );
+      reconsider h as T-Sequence by A78,ORDINAL1:def 7;
+      set X = { d1 : for x st x in rng h holds x <> d1 & [x,d1] in R };
+A79:  X c= D
+      proof
+        let x;
+        assume x in X;
+        then ex d1 st x = d1 & for x st x in rng h holds x <> d1 & [x,d1] in R;
+        hence thesis;
+      end;
+A80:  ON[A,g.X]
+      proof
+        take h;
+        thus g.X = g.{ d1 : for x st x in rng h holds x <> d1 & [x,d1] in R }
+        & dom h = A by A78;
+        let B,L;
+        assume that
+A81:    B in A and
+A82:    L = h|B;
+        ex C st B = C & ON[C,h.B] by A78,A81;
+        then consider L1 such that
+A83:    h.B = g.{d1: for x st x in rng L1 holds x <> d1 & [x,d1] in R } and
+A84:    dom L1 = B & for C,L st C in B & L = L1|C holds L1.C = g.{
+d1:     for x st x in rng L holds x <> d1 & [x,d1] in R };
+A85:    for x st x in B holds L1.x = h|B.x
+        proof
+          let x;
+          assume
+A86:      x in B;
+          then reconsider A1 = x as Ordinal;
+A87:      h|B.x = h.x by A86,FUNCT_1:72;
+A88:      ON[A1,L1.x]
+          proof
+            reconsider K = L1|A1 as T-Sequence;
+            take K;
+            thus L1.x = g.{d1: for x st x in rng K holds x <> d1 & [x,d1] in R
+            } by A84,A86;
+            A1 c= B by A86,ORDINAL1:def 2;
+            hence dom K = A1 by A84,RELAT_1:91;
+            let A2,L2;
+            assume that
+A89:        A2 in A1 and
+A90:        L2 = K|A2;
+            A2 c= A1 by A89,ORDINAL1:def 2;
+            then
+A91:        L2 = L1|A2 by A90,FUNCT_1:82;
+            K.A2 = L1.A2 by A89,FUNCT_1:72;
+            hence thesis by A84,A86,A89,A91,ORDINAL1:19;
+          end;
+          ex A2 st x = A2 & ON[A2,h.x] by A78,A81,A86,ORDINAL1:19;
+          hence thesis by A11,A88,A87;
+        end;
+        B c= A by A81,ORDINAL1:def 2;
+        then dom(h|B) = B by A78,RELAT_1:91;
+        then h|B = L1 by A84,A85,FUNCT_1:9;
+        hence thesis by A82,A83;
+      end;
+      then X <> {} by A32,A71;
+      then g.X in X by A28,A79;
+      then reconsider d = g.X as Element of D by A79;
+      take d;
+      thus thesis by A80;
+    end;
+A92: for A holds OO[A] from ORDINAL1:sch 2(A72);
+A93: for x,y,z st P[x,y] & P[x,z] holds y = z
+    proof
+      let x,y,z;
+      given A1 such that
+A94:  y = A1 and
+A95:  ON[A1,x];
+      consider d1 such that
+A96:  ON[A1,d1] by A92;
+      given A2 such that
+A97:  z = A2 and
+A98:  ON[A2,x];
+      d1 = x by A11,A95,A96;
+      hence thesis by A48,A94,A95,A97,A98;
+    end;
+    consider X such that
+A99: x in X iff ex y st y in D & P[y,x] from TARSKI:sch 1(A93);
+    for A holds A in X
+    proof
+      let A;
+      ex d st ON[A,d] by A92;
+      hence thesis by A99;
+    end;
+    hence contradiction by ORDINAL1:38;
+  end;
+  consider A such that
+A100: OM[A] & for B st OM[B] holds A c= B from ORDINAL1:sch 1(A70);
+A101: for L holds { d : for x st x in rng L holds x <> d & [x,d] in R } c= D
+  proof
+    let L,x;
+    assume x in { d : for x st x in rng L holds x <> d & [x,d] in R };
+    then ex d1 st x = d1 & for x st x in rng L holds x <> d1 & [x,d1] in R;
+    hence thesis;
+  end;
+  D in bool D by ZFMISC_1:def 1;
+  then reconsider d = g.D as Element of D by A28;
+A102: d in D & ON[{},d]
+  proof
+    deffunc H(set) = {};
+    thus d in D;
+    consider L such that
+A103: dom L = {} & for B,L1 st B in {} & L1 = L|B holds L.B = H(L1)
+    from ORDINAL1:sch 4;
+    take L;
+A104: D c= { d1 : for x st x in rng L holds x <> d1 & [x,d1] in R }
+    proof
+      let x;
+      assume x in D;
+      then reconsider d = x as Element of D;
+      for x st x in rng L holds x <> d & [x,d] in R by A103,RELAT_1:65;
+      hence thesis;
+    end;
+    { d1 : for x st x in rng L holds x <> d1 & [x,d1] in R } c= D by A101;
+    hence d = g.{ d1 : for x st x in rng L holds x <> d1 & [x,d1] in R } by
+    A104,XBOOLE_0:def 10;
+    thus dom L = {} by A103;
+    thus thesis;
+  end;
+A105: {} c= A;
+  defpred P[set] means ex B st B in A & ON[B,$1];
+  consider X such that
+A106: x in X iff x in D & P[x] from XBOOLE_0:sch 1;
+  not Y in Y;
+  then d <> D;
+  then {} <> A by A11,A100,A102;
+  then {} c< A by A105,XBOOLE_0:def 8;
+  then {} in A by ORDINAL1:21;
+  then reconsider X as non empty set by A106,A102;
+  consider L such that
+A107: D = g.{ d1 : for x st x in rng L holds x <> d1 & [x,d1] in R } and
+A108: dom L = A & for B,L1 st B in A & L1 = L|B holds L.B = g.{ d2 : for
+  x st x in rng L1 holds x <> d2 & [x,d2] in R } by A100;
+  R is transitive by A2,A4,RELAT_2:def 16;
+  then
+A109: R|_2 X is transitive by WELLORD1:24;
+A110: rng L c= X
+  proof
+    let z;
+    assume z in rng L;
+    then consider y such that
+A111: y in dom L and
+A112: z = L.y by FUNCT_1:def 5;
+    reconsider y as Ordinal by A111;
+    set Z = { d2 : for x st x in rng(L|y) holds x <> d2 & [x,d2] in R };
+A113: Z c= D by A101;
+A114: ON[y,z]
+    proof
+      reconsider K = L|y as T-Sequence;
+      take K;
+      thus z = g.{ d2 : for x st x in rng K holds x <> d2 & [x,d2] in R } by
+      A108,A111,A112;
+      y c= dom L by A111,ORDINAL1:def 2;
+      hence
+A115: dom K = y by RELAT_1:91;
+      let B,L1;
+      assume that
+A116: B in y and
+A117: L1 = K|B;
+      B c= y by A116,ORDINAL1:def 2;
+      then
+A118: L1 = L|B by A117,FUNCT_1:82;
+      K.B = L.B by A115,A116,FUNCT_1:70;
+      hence thesis by A108,A111,A116,A118,ORDINAL1:19;
+    end;
+    now
+      assume Z = {};
+      then z = D by A32,A108,A111,A112;
+      then dom L c= y by A100,A108,A114;
+      hence contradiction by A111,ORDINAL1:7;
+    end;
+    then g.Z in Z by A28,A113;
+    then z in Z by A108,A111,A112;
+    hence thesis by A106,A108,A111,A114,A113;
+  end;
+A119: R|_2 X is connected
+  proof
+    let x,y;
+    assume that
+A120: x in field(R|_2 X) and
+A121: y in field(R|_2 X);
+A122: x in X by A120,WELLORD1:19;
+    then consider A1 such that
+    A1 in A and
+A123: ON[A1,x] by A106;
+A124: y in X by A121,WELLORD1:19;
+    then consider A2 such that
+    A2 in A and
+A125: ON[A2,y] by A106;
+    reconsider x9 = x, y9 = y as Element of D by A106,A122,A124;
+    consider L1 such that
+A126: x9 = g.{ d1 : for x st x in rng L1 holds x <> d1 & [x,d1] in R } and
+A127: dom L1 = A1 & for C,L st C in A1 & L = L1|C holds L1.C = g.{ d2
+    : for x st x in rng L holds x <> d2 & [x,d2] in R } by A123;
+    consider L2 such that
+A128: y9 = g.{ d1 : for x st x in rng L2 holds x <> d1 & [x,d1] in R } and
+A129: dom L2 = A2 & for C,L st C in A2 & L = L2|C holds L2.C = g.{ d2
+    : for x st x in rng L holds x <> d2 & [x,d2] in R } by A125;
+A130: [x,y] in [:X,X:] by A122,A124,ZFMISC_1:106;
+A131: now
+      set Y = { d1 : for x st x in rng L2 holds x <> d1 & [x,d1] in R };
+      set Z = { d1 : for x st x in rng(L2|A1) holds x <> d1 & [x,d1] in R };
+      not y9 in y9;
+      then
+A132: Y <> {} by A32,A128;
+      Y c= D by A101;
+      then y9 in Y by A28,A128,A132;
+      then
+A133: ex d1 st y9 = d1 & for x st x in rng L2 holds x <> d1 & [x,d1] in R;
+      assume
+A134: A1 in A2;
+      then A1 c= A2 by ORDINAL1:def 2;
+      then
+A135: L2|A1 = L1|A1 by A33,A127,A129
+        .= L1 by A127,RELAT_1:97;
+      L2.A1 = g.Z by A129,A134;
+      then x9 in rng L2 by A126,A129,A134,A135,FUNCT_1:def 5;
+      then [x,y] in R by A133;
+      hence thesis by A130,XBOOLE_0:def 4;
+    end;
+A136: [y,x] in [:X,X:] by A122,A124,ZFMISC_1:106;
+A137: now
+      set Y = { d1 : for x st x in rng L1 holds x <> d1 & [x,d1] in R };
+      set Z = { d1 : for x st x in rng(L1|A2) holds x <> d1 & [x,d1] in R };
+      not d1 in d1;
+      then
+A138: Y <> {} by A32,A126;
+      Y c= D by A101;
+      then x9 in Y by A28,A126,A138;
+      then
+A139: ex d1 st x9 = d1 & for x st x in rng L1 holds x <> d1 & [x,d1] in R;
+      assume
+A140: A2 in A1;
+      then A2 c= A1 by ORDINAL1:def 2;
+      then
+A141: L1|A2 = L2|A2 by A33,A127,A129
+        .= L2 by A129,RELAT_1:97;
+      L1.A2 = g.Z by A127,A140;
+      then y9 in rng L1 by A127,A128,A140,A141,FUNCT_1:def 5;
+      then [y,x] in R by A139;
+      hence thesis by A136,XBOOLE_0:def 4;
+    end;
+    A1 = A2 implies thesis by A11,A123,A125;
+    hence thesis by A131,A137,ORDINAL1:24;
+  end;
+  R is antisymmetric by A3,A4,RELAT_2:def 12;
+  then
+A142: R|_2 X is antisymmetric by WELLORD1:25;
+  set Z = { d1 : for x st x in rng L holds x <> d1 & [x,d1] in R };
+A143: X c= D
+  proof
+    let x;
+    thus thesis by A106;
+  end;
+  R is reflexive by A1,A4,RELAT_2:def 9;
+  then R|_2 X is reflexive by WELLORD1:22;
+  then R|_2 X is being_linear-order by A109,A142,A119,Def5;
+  then consider x such that
+A144: x in D and
+A145: for y st y in X holds [y,x] in R by A5,A6,A143,Def9;
+  take x;
+  thus x in field R by A4,A6,A144;
+  let y such that
+A146: y in field R and
+A147: y <> x and
+A148: [x,y] in R;
+  reconsider y9 = y as Element of D by A4,A6,A146;
+A149: now
+    assume y in X;
+    then [y,x] in R by A145;
+    hence contradiction by A3,A4,A6,A144,A146,A147,A148,RELAT_2:def 4;
+  end;
+  now
+    let z;
+    assume
+A150: z in rng L;
+    then reconsider z9 = z as Element of X by A110;
+    thus z <> y9 by A110,A149,A150;
+A151: [z9,x] in R by A145;
+    z in D by A106,A110,A150;
+    hence [z,y] in R by A2,A4,A6,A144,A146,A148,A151,RELAT_2:def 8;
+  end;
+  then
+A152: y in Z;
+  Z c= D by A101;
+  hence contradiction by A28,A107,A152,ORDINAL1:7;
+end;
+
+theorem Th174:
+  for R,X st R partially_orders X & field R = X & X
+  has_lower_Zorn_property_wrt R ex x st x is_minimal_in R
+proof
+  let R,X such that
+A1: R partially_orders X and
+A2: field R = X and
+A3: X has_lower_Zorn_property_wrt R;
+  R = R~~;
+  then
+A4: X has_upper_Zorn_property_wrt R~ by A3,Th151;
+  field(R~) = X by A2,RELAT_1:38;
+  then consider x such that
+A5: x is_maximal_in R~ by A1,A4,Th137,Th173;
+  take x;
+  thus thesis by A5,Th163;
+end;
+
+theorem Th175:
+  for X st X <> {} & for Z st Z c= X & Z is c=-linear ex Y st Y
+in X & for X1 st X1 in Z holds X1 c= Y ex Y st Y in X & for Z st Z in X & Z <>
+  Y holds not Y c= Z
+proof
+  let X;
+  assume that
+A1: X <> {} and
+A2: for Z st Z c= X & Z is c=-linear ex Y st Y in X & for X1 st X1 in Z
+  holds X1 c= Y;
+  reconsider D = X as non empty set by A1;
+  set R = RelIncl D;
+A3: D has_upper_Zorn_property_wrt R
+  proof
+    let Z;
+    assume that
+A4: Z c= D and
+A5: R|_2 Z is being_linear-order;
+    set Q = R|_2 Z;
+A6: Z c= field(R|_2 Z)
+    proof
+      let x;
+      assume
+A7:   x in Z;
+      then
+A8:   [x,x] in [:Z,Z:] by ZFMISC_1:106;
+      [x,x] in R by A4,A7,WELLORD2:def 1;
+      then [x,x] in R|_2 Z by A8,XBOOLE_0:def 4;
+      hence thesis by RELAT_1:30;
+    end;
+    R|_2 Z is connected by A5,Def5;
+    then
+A9: R|_2 Z is_connected_in field(R|_2 Z) by RELAT_2:def 14;
+    Z is c=-linear
+    proof
+      let X1,X2;
+      assume that
+A10:  X1 in Z and
+A11:  X2 in Z;
+      X1 <> X2 implies [X1,X2] in Q or [X2,X1] in Q by A9,A6,A10,A11,
+      RELAT_2:def 6;
+      then X1 <> X2 implies [X1,X2] in R or [X2,X1] in R by
+      XBOOLE_0:def 4;
+      hence X1 c= X2 or X2 c= X1 by A4,A10,A11,WELLORD2:def 1;
+    end;
+    then consider Y such that
+A12: Y in X and
+A13: for X1 st X1 in Z holds X1 c= Y by A2,A4;
+    take x = Y;
+    thus x in D by A12;
+    let y;
+    assume
+A14: y in Z;
+    then y c= Y by A13;
+    hence thesis by A4,A12,A14,WELLORD2:def 1;
+  end;
+A15: field R = D by WELLORD2:def 1;
+  R is antisymmetric by WELLORD2:5;
+  then
+A16: R is_antisymmetric_in D by A15,RELAT_2:def 12;
+  R is transitive by WELLORD2:3;
+  then
+A17: R is_transitive_in D by A15,RELAT_2:def 16;
+  R is reflexive by WELLORD2:2;
+  then R is_reflexive_in D by A15,RELAT_2:def 9;
+  then R partially_orders D by A17,A16,Def7;
+  then consider x such that
+A18: x is_maximal_in R by A15,A3,Th173;
+  take Y = x;
+A19: Y in field R by A18,Def11;
+  thus Y in X by A15,A18,Def11;
+  let Z;
+  assume that
+A20: Z in X and
+A21: Z <> Y;
+  not [Y,Z] in R by A15,A18,A20,A21,Def11;
+  hence thesis by A15,A19,A20,WELLORD2:def 1;
+end;
+
+theorem Th176:
+  for X st X <> {} & for Z st Z c= X & Z is c=-linear ex Y st Y
+in X & for X1 st X1 in Z holds Y c= X1 ex Y st Y in X & for Z st Z in X & Z <>
+  Y holds not Z c= Y
+proof
+  let X;
+  assume that
+A1: X <> {} and
+A2: for Z st Z c= X & Z is c=-linear ex Y st Y in X & for X1 st X1 in Z
+  holds Y c= X1;
+  reconsider D = X as non empty set by A1;
+  set R = (RelIncl D)~;
+A3: x in D implies [x,x] in R
+  proof
+    x in D implies [x,x] in RelIncl D by WELLORD2:def 1;
+    hence thesis by RELAT_1:def 7;
+  end;
+A4: D has_upper_Zorn_property_wrt R
+  proof
+    let Z;
+    assume that
+A5: Z c= D and
+A6: R|_2 Z is being_linear-order;
+    set Q = R|_2 Z;
+A7: Z c= field(R|_2 Z)
+    proof
+      let x;
+      assume
+A8:   x in Z;
+      then
+A9:   [x,x] in [:Z,Z:] by ZFMISC_1:106;
+      [x,x] in R by A3,A5,A8;
+      then [x,x] in R|_2 Z by A9,XBOOLE_0:def 4;
+      hence thesis by RELAT_1:30;
+    end;
+    R|_2 Z is connected by A6,Def5;
+    then
+A10: R|_2 Z is_connected_in field(R|_2 Z) by RELAT_2:def 14;
+    Z is c=-linear
+    proof
+      let X1,X2;
+      assume that
+A11:  X1 in Z and
+A12:  X2 in Z;
+      X1 <> X2 implies [X1,X2] in Q or [X2,X1] in Q by A10,A7,A11,A12,
+      RELAT_2:def 6;
+      then X1 <> X2 implies [X1,X2] in R or [X2,X1] in R by
+      XBOOLE_0:def 4;
+      then X1 <> X2 implies [X1,X2] in RelIncl D or [X2,X1] in RelIncl D by
+      RELAT_1:def 7;
+      hence X1 c= X2 or X2 c= X1 by A5,A11,A12,WELLORD2:def 1;
+    end;
+    then consider Y such that
+A13: Y in X and
+A14: for X1 st X1 in Z holds Y c= X1 by A2,A5;
+    take x = Y;
+    thus x in D by A13;
+    let y;
+    assume
+A15: y in Z;
+    then Y c= y by A14;
+    then [Y,y] in RelIncl D by A5,A13,A15,WELLORD2:def 1;
+    hence thesis by RELAT_1:def 7;
+  end;
+A16: field R = field RelIncl D by RELAT_1:38
+    .= D by WELLORD2:def 1;
+A17: field RelIncl D = D by WELLORD2:def 1;
+  RelIncl D is antisymmetric by WELLORD2:5;
+  then RelIncl D is_antisymmetric_in D by A17,RELAT_2:def 12;
+  then
+A18: R is_antisymmetric_in D by Lm13;
+  RelIncl D is transitive by WELLORD2:3;
+  then RelIncl D is_transitive_in D by A17,RELAT_2:def 16;
+  then
+A19: R is_transitive_in D by Lm12;
+  RelIncl D is reflexive by WELLORD2:2;
+  then RelIncl D is_reflexive_in D by A17,RELAT_2:def 9;
+  then R is_reflexive_in D by Lm11;
+  then R partially_orders D by A19,A18,Def7;
+  then consider x such that
+A20: x is_maximal_in R by A16,A4,Th173;
+  take Y = x;
+A21: Y in field R by A20,Def11;
+  thus Y in X by A16,A20,Def11;
+  let Z;
+  assume that
+A22: Z in X and
+A23: Z <> Y;
+  not [Y,Z] in R by A16,A20,A22,A23,Def11;
+  then not [Z,Y] in RelIncl D by RELAT_1:def 7;
+  hence thesis by A16,A21,A22,WELLORD2:def 1;
+end;
+
+theorem Th177:
+  for X st X <> {} & for Z st Z <> {} & Z c= X & Z is c=-linear
+  holds union Z in X ex Y st Y in X & for Z st Z in X & Z <> Y holds not Y c= Z
+proof
+  let X such that
+A1: X <> {} and
+A2: for Z st Z <> {} & Z c= X & Z is c=-linear holds union Z in X;
+  for Z st Z c= X & Z is c=-linear ex Y st Y in X & for X1 st X1 in Z
+  holds X1 c= Y
+  proof
+    consider x being Element of X;
+    let Z such that
+A3: Z c= X and
+A4: Z is c=-linear;
+    Z <> {} or Z = {};
+    then consider Y such that
+A5: Y = union Z & Z <> {} or Y = x & Z = {};
+    take Y;
+    thus thesis by A1,A2,A3,A4,A5,ZFMISC_1:92;
+  end;
+  hence thesis by A1,Th175;
+end;
+
+theorem
+  for X st X <> {} & for Z st Z <> {} & Z c= X & Z is c=-linear holds
+  meet Z in X ex Y st Y in X & for Z st Z in X & Z <> Y holds not Z c= Y
+proof
+  let X such that
+A1: X <> {} and
+A2: for Z st Z <> {} & Z c= X & Z is c=-linear holds meet Z in X;
+  for Z st Z c= X & Z is c=-linear ex Y st Y in X & for X1 st X1 in Z
+  holds Y c= X1
+  proof
+    consider x being Element of X;
+    let Z such that
+A3: Z c= X and
+A4: Z is c=-linear;
+    Z <> {} or Z = {};
+    then consider Y such that
+A5: Y = meet Z & Z <> {} or Y = x & Z = {};
+    take Y;
+    thus thesis by A1,A2,A3,A4,A5,SETFAM_1:4;
+  end;
+  hence thesis by A1,Th176;
+end;
+
+scheme
+  ZornMax{A() -> non empty set, P[set,set]}: ex x being Element of A() st for
+  y being Element of A() st x <> y holds not P[x,y]
+provided
+A1: for x being Element of A() holds P[x,x] and
+A2: for x,y being Element of A() st P[x,y] & P[y,x] holds x = y and
+A3: for x,y,z being Element of A() st P[x,y] & P[y,z] holds P[x,z] and
+A4: for X st X c= A() & (for x,y being Element of A() st x in X & y in X
+holds P[x,y] or P[y,x]) holds ex y being Element of A() st for x being Element
+of A() st x in X holds P[x,y]
+proof
+  consider R being Relation of A() such that
+A5: for x,y being Element of A() holds [x,y] in R iff P[x,y] from
+  RELSET_1:sch 2;
+A6: R is_transitive_in A()
+  proof
+    let x,y,z;
+    assume that
+A7: x in A() and
+A8: y in A() and
+A9: z in A();
+    reconsider x9 = x, y9 = y, z9 = z as Element of A() by A7,A8,A9;
+    assume that
+A10: [x,y] in R and
+A11: [y,z] in R;
+A12: P[y9,z9] by A5,A11;
+    P[x9,y9] by A5,A10;
+    then P[x9,z9] by A3,A12;
+    hence thesis by A5;
+  end;
+  A() c= dom R
+  proof
+    let x;
+    assume x in A();
+    then reconsider x9 = x as Element of A();
+    P[x9,x9] by A1;
+    then [x,x] in R by A5;
+    hence thesis by RELAT_1:def 4;
+  end;
+  then dom R = A() by XBOOLE_0:def 10;
+  then
+A13: A() c= field R by XBOOLE_1:7;
+  field R = dom R \/ rng R;
+  then
+A14: field R = A() by A13,XBOOLE_0:def 10;
+A15: R is_reflexive_in A()
+  proof
+    let x;
+    assume x in A();
+    then reconsider x9 = x as Element of A();
+    P[x9,x9] by A1;
+    hence thesis by A5;
+  end;
+A16: A() has_upper_Zorn_property_wrt R
+  proof
+    let Y such that
+A17: Y c= A() and
+A18: R|_2 Y is being_linear-order;
+    for x,y being Element of A() st x in Y & y in Y holds P[x,y] or P[y,x ]
+    proof
+      let x,y be Element of A() such that
+A19:  x in Y and
+A20:  y in Y;
+A21:  R|_2 Y is reflexive connected by A18,Def5;
+      Y c= field(R|_2 Y)
+      proof
+        let x;
+        assume
+A22:    x in Y;
+        then
+A23:    [x,x] in [:Y,Y:] by ZFMISC_1:106;
+        [x,x] in R by A15,A17,A22,RELAT_2:def 1;
+        then [x,x] in R|_2 Y by A23,XBOOLE_0:def 4;
+        hence thesis by RELAT_1:30;
+      end;
+      then
+A24:  Y = field(R|_2 Y|_2 Y) by A21,Lm5
+        .= field(R|_2 Y) by WELLORD1:28;
+      then
+A25:  R|_2 Y is_connected_in Y by A21,RELAT_2:def 14;
+A26:  R|_2 Y is_reflexive_in Y by A21,A24,RELAT_2:def 9;
+      x = y or x <> y;
+      then [x,y] in R|_2 Y or [y,x] in R|_2 Y by A19,A20,A25,A26,
+      RELAT_2:
+      def 1,def 6;
+      then [x,y] in R or [y,x] in R by XBOOLE_0:def 4;
+      hence thesis by A5;
+    end;
+    then consider y being Element of A() such that
+A27: for x being Element of A() st x in Y holds P[x,y] by A4,A17;
+    take y;
+    thus y in A();
+    let x;
+    assume
+A28: x in Y;
+    then P[x,y] by A17,A27;
+    hence thesis by A5,A17,A28;
+  end;
+  R is_antisymmetric_in A()
+  proof
+    let x,y;
+    assume that
+A29: x in A() and
+A30: y in A();
+    reconsider x9 = x, y9 = y as Element of A() by A29,A30;
+    assume that
+A31: [x,y] in R and
+A32: [y,x] in R;
+A33: P[y9,x9] by A5,A32;
+    P[x9,y9] by A5,A31;
+    hence thesis by A2,A33;
+  end;
+  then R partially_orders A() by A15,A6,Def7;
+  then consider x such that
+A34: x is_maximal_in R by A14,A16,Th173;
+  take x;
+  thus x is Element of A() by A14,A34,Def11;
+  let y being Element of A();
+  assume x <> y;
+  then
+A35: not [x,y] in R by A14,A34,Def11;
+  x in A() by A14,A34,Def11;
+  hence thesis by A5,A35;
+end;
+
+scheme
+  ZornMin{A() -> non empty set, P[set,set]}: ex x being Element of A() st for
+  y being Element of A() st x <> y holds not P[y,x]
+provided
+A1: for x being Element of A() holds P[x,x] and
+A2: for x,y being Element of A() st P[x,y] & P[y,x] holds x = y and
+A3: for x,y,z being Element of A() st P[x,y] & P[y,z] holds P[x,z] and
+A4: for X st X c= A() & (for x,y being Element of A() st x in X & y in X
+holds P[x,y] or P[y,x]) holds ex y being Element of A() st for x being Element
+of A() st x in X holds P[y,x]
+proof
+  consider R being Relation of A() such that
+A5: for x,y being Element of A() holds [x,y] in R iff P[x,y] from
+  RELSET_1:sch 2;
+A6: R is_transitive_in A()
+  proof
+    let x,y,z;
+    assume that
+A7: x in A() and
+A8: y in A() and
+A9: z in A();
+    reconsider x9 = x, y9 = y, z9 = z as Element of A() by A7,A8,A9;
+    assume that
+A10: [x,y] in R and
+A11: [y,z] in R;
+A12: P[y9,z9] by A5,A11;
+    P[x9,y9] by A5,A10;
+    then P[x9,z9] by A3,A12;
+    hence thesis by A5;
+  end;
+  A() c= dom R
+  proof
+    let x;
+    assume x in A();
+    then reconsider x9 = x as Element of A();
+    P[x9,x9] by A1;
+    then [x,x] in R by A5;
+    hence thesis by RELAT_1:def 4;
+  end;
+  then dom R = A() by XBOOLE_0:def 10;
+  then
+A13: A() c= field R by XBOOLE_1:7;
+  field R = dom R \/ rng R;
+  then
+A14: field R = A() by A13,XBOOLE_0:def 10;
+A15: R is_reflexive_in A()
+  proof
+    let x;
+    assume x in A();
+    then reconsider x9 = x as Element of A();
+    P[x9,x9] by A1;
+    hence thesis by A5;
+  end;
+A16: A() has_lower_Zorn_property_wrt R
+  proof
+    let Y such that
+A17: Y c= A() and
+A18: R|_2 Y is being_linear-order;
+    for x,y being Element of A() st x in Y & y in Y holds P[x,y] or P[y,x ]
+    proof
+      let x,y be Element of A() such that
+A19:  x in Y and
+A20:  y in Y;
+A21:  R|_2 Y is reflexive connected by A18,Def5;
+      Y c= field(R|_2 Y)
+      proof
+        let x;
+        assume
+A22:    x in Y;
+        then
+A23:    [x,x] in [:Y,Y:] by ZFMISC_1:106;
+        [x,x] in R by A15,A17,A22,RELAT_2:def 1;
+        then [x,x] in R|_2 Y by A23,XBOOLE_0:def 4;
+        hence thesis by RELAT_1:30;
+      end;
+      then
+A24:  Y = field(R|_2 Y|_2 Y) by A21,Lm5
+        .= field(R|_2 Y) by WELLORD1:28;
+      then
+A25:  R|_2 Y is_connected_in Y by A21,RELAT_2:def 14;
+A26:  R|_2 Y is_reflexive_in Y by A21,A24,RELAT_2:def 9;
+      x = y or x <> y;
+      then [x,y] in R|_2 Y or [y,x] in R|_2 Y by A19,A20,A25,A26,
+      RELAT_2:
+      def 1,def 6;
+      then [x,y] in R or [y,x] in R by XBOOLE_0:def 4;
+      hence thesis by A5;
+    end;
+    then consider y being Element of A() such that
+A27: for x being Element of A() st x in Y holds P[y,x] by A4,A17;
+    take y;
+    thus y in A();
+    let x;
+    assume
+A28: x in Y;
+    then P[y,x] by A17,A27;
+    hence thesis by A5,A17,A28;
+  end;
+  R is_antisymmetric_in A()
+  proof
+    let x,y;
+    assume that
+A29: x in A() and
+A30: y in A();
+    reconsider x9 = x, y9 = y as Element of A() by A29,A30;
+    assume that
+A31: [x,y] in R and
+A32: [y,x] in R;
+A33: P[y9,x9] by A5,A32;
+    P[x9,y9] by A5,A31;
+    hence thesis by A2,A33;
+  end;
+  then R partially_orders A() by A15,A6,Def7;
+  then consider x such that
+A34: x is_minimal_in R by A14,A16,Th174;
+  take x;
+  thus x is Element of A() by A14,A34,Def12;
+  let y being Element of A();
+  assume x <> y;
+  then
+A35: not [y,x] in R by A14,A34,Def12;
+  x in A() by A14,A34,Def12;
+  hence thesis by A5,A35;
+end;
+ 
+::
+::  Orders - continuation.
+::
+
+theorem
+  R partially_orders X & field R = X implies ex P st R c= P & P
+  linearly_orders X & field P = X
+proof
+  assume that
+A1: R partially_orders X and
+A2: field R = X;
+  defpred P[set] means ex P st $1 = P & R c= P & P partially_orders X & field
+  P = X;
+  consider Rel being set such that
+A3: x in Rel iff x in bool [:X,X:] & P[x] from XBOOLE_0:sch 1;
+A4: for Z st Z <> {} & Z c= Rel & Z is c=-linear holds union Z in Rel
+  proof
+    reconsider T = [:X,X:] as Relation;
+    let Z;
+    assume that
+A5: Z <> {} and
+A6: Z c= Rel and
+A7: Z is c=-linear;
+A8: union bool [:X,X:] = T by ZFMISC_1:99;
+    Z c= bool [:X,X:]
+    proof
+      let x;
+      assume x in Z;
+      hence thesis by A3,A6;
+    end;
+    then
+A9: union Z c= union bool [:X,X:] by ZFMISC_1:95;
+    then reconsider S = union Z as Relation;
+    consider y being Element of Z;
+    y in Rel by A5,A6,TARSKI:def 3;
+    then consider P such that
+A10: y = P and
+A11: R c= P and
+A12: P partially_orders X and
+    field P = X by A3;
+A13: S is_antisymmetric_in X
+    proof
+      let x,y;
+      assume that
+A14:  x in X and
+A15:  y in X and
+A16:  [x,y] in S and
+A17:  [y,x] in S;
+      consider X1 such that
+A18:  [x,y] in X1 and
+A19:  X1 in Z by A16,TARSKI:def 4;
+      consider P1 being Relation such that
+A20:  X1 = P1 and
+      R c= P1 and
+A21:  P1 partially_orders X and
+      field P1 = X by A3,A6,A19;
+      consider X2 such that
+A22:  [y,x] in X2 and
+A23:  X2 in Z by A17,TARSKI:def 4;
+      X1,X2 are_c=-comparable by A7,A19,A23,ORDINAL1:def 9;
+      then
+A24:  X1 c= X2 or X2 c= X1 by XBOOLE_0:def 9;
+      consider P2 being Relation such that
+A25:  X2 = P2 and
+      R c= P2 and
+A26:  P2 partially_orders X and
+      field P2 = X by A3,A6,A23;
+A27:  P2 is_antisymmetric_in X by A26,Def7;
+      P1 is_antisymmetric_in X by A21,Def7;
+      hence thesis by A14,A15,A18,A22,A24,A20,A25,A27,RELAT_2:def 4;
+    end;
+A28: S is_transitive_in X
+    proof
+      let x,y,z;
+      assume that
+A29:  x in X and
+A30:  y in X and
+A31:  z in X and
+A32:  [x,y] in S and
+A33:  [y,z] in S;
+      consider X1 such that
+A34:  [x,y] in X1 and
+A35:  X1 in Z by A32,TARSKI:def 4;
+      consider P1 being Relation such that
+A36:  X1 = P1 and
+      R c= P1 and
+A37:  P1 partially_orders X and
+      field P1 = X by A3,A6,A35;
+      consider X2 such that
+A38:  [y,z] in X2 and
+A39:  X2 in Z by A33,TARSKI:def 4;
+      X1,X2 are_c=-comparable by A7,A35,A39,ORDINAL1:def 9;
+      then
+A40:  X1 c= X2 or X2 c= X1 by XBOOLE_0:def 9;
+      consider P2 being Relation such that
+A41:  X2 = P2 and
+      R c= P2 and
+A42:  P2 partially_orders X and
+      field P2 = X by A3,A6,A39;
+A43:  P2 is_transitive_in X by A42,Def7;
+      P1 is_transitive_in X by A37,Def7;
+      then [x,z] in P1 or [x,z] in P2 by A29,A30,A31,A34,A38,A40,A36,A41,
+      A43,RELAT_2:def 8;
+      hence thesis by A35,A39,A36,A41,TARSKI:def 4;
+    end;
+A44: P is_reflexive_in X by A12,Def7;
+    S is_reflexive_in X
+    proof
+      let x;
+      assume x in X;
+      then [x,x] in P by A44,RELAT_2:def 1;
+      hence thesis by A5,A10,TARSKI:def 4;
+    end;
+    then
+A45: S partially_orders X by A28,A13,Def7;
+A46: field S c= X
+    proof
+      let x;
+A47:  now
+        assume x in dom S;
+        then consider y such that
+A48:    [x,y] in S by RELAT_1:def 4;
+        consider Y such that
+A49:    [x,y] in Y and
+A50:    Y in Z by A48,TARSKI:def 4;
+        ex P st Y = P & R c= P & P partially_orders X & field P = X by A3
+        ,A6,A50;
+        hence thesis by A49,RELAT_1:30;
+      end;
+A51:  now
+        assume x in rng S;
+        then consider y such that
+A52:    [y,x] in S by RELAT_1:def 5;
+        consider Y such that
+A53:    [y,x] in Y and
+A54:    Y in Z by A52,TARSKI:def 4;
+        ex P st Y = P & R c= P & P partially_orders X & field P = X by A3
+        ,A6,A54;
+        hence thesis by A53,RELAT_1:30;
+      end;
+      assume x in field S;
+      hence thesis by A47,A51,XBOOLE_0:def 3;
+    end;
+A55: R c= S
+    proof
+      let x,y;
+      assume [x,y] in R;
+      hence thesis by A5,A10,A11,TARSKI:def 4;
+    end;
+    then X c= field S by A2,RELAT_1:31;
+    then field S = X by A46,XBOOLE_0:def 10;
+    hence thesis by A3,A9,A8,A55,A45;
+  end;
+  R c= [:X,X:] by A2,Lm4;
+  then Rel <> {} by A1,A2,A3;
+  then consider Y such that
+A56: Y in Rel and
+A57: for Z st Z in Rel & Z <> Y holds not Y c= Z by A4,Th177;
+  consider P such that
+A58: Y = P and
+A59: R c= P and
+A60: P partially_orders X and
+A61: field P = X by A3,A56;
+  take P;
+  thus R c= P by A59;
+  thus
+A62: P is_reflexive_in X & P is_transitive_in X & P is_antisymmetric_in
+  X by A60,Def7;
+  thus P is_connected_in X
+  proof
+    let x,y such that
+A63: x in X and
+A64: y in X and
+    x <> y and
+A65: not [x,y] in P and
+A66: not [y,x] in P;
+    defpred Q[set,set] means [$1,$2] in P or [$1,x] in P & [y,$2] in P;
+    consider Q being Relation such that
+A67: [z,u] in Q iff z in X & u in X & Q[z,u] from RELAT_1:sch 1;
+A68: field Q c= X
+    proof
+      let z;
+A69:  now
+        assume z in dom Q;
+        then ex u st [z,u] in Q by RELAT_1:def 4;
+        hence thesis by A67;
+      end;
+A70:  now
+        assume z in rng Q;
+        then ex u st [u,z] in Q by RELAT_1:def 5;
+        hence thesis by A67;
+      end;
+      assume z in field Q;
+      hence thesis by A69,A70,XBOOLE_0:def 3;
+    end;
+A71: P c= Q
+    proof
+      let z,u;
+      assume
+A72:  [z,u] in P;
+      then
+A73:  u in field P by RELAT_1:30;
+      z in field P by A72,RELAT_1:30;
+      hence thesis by A61,A67,A72,A73;
+    end;
+    then X c= field Q by A61,RELAT_1:31;
+    then
+A74: field Q = X by A68,XBOOLE_0:def 10;
+A75: Q is_transitive_in X
+    proof
+      let a,b,c be set;
+      assume that
+A76:  a in X and
+A77:  b in X and
+A78:  c in X and
+A79:  [a,b] in Q and
+A80:  [b,c] in Q;
+A81:  [b,c] in P or [b,x] in P & [y,c] in P by A67,A80;
+      [a,b] in P or [a,x] in P & [y,b] in P by A67,A79;
+      then [a,c] in P or [a,x] in P & [y,c] in P or [a,x] in P & [y,c] in P
+      or [y,x] in P by A62,A63,A64,A76,A77,A78,A81,RELAT_2:def 8;
+      hence thesis by A66,A67,A76,A78;
+    end;
+A82: Q is_antisymmetric_in X
+    proof
+      let a,b be set;
+      assume that
+A83:  a in X and
+A84:  b in X and
+A85:  [a,b] in Q and
+A86:  [b,a] in Q;
+A87:  [b,a] in P or [b,x] in P & [y,a] in P by A67,A86;
+      [a,b] in P or [a,x] in P & [y,b] in P by A67,A85;
+      then a = b or [a,x] in P & [y,a] in P or [y,x] in P by A62,A63,A64,A83
+      ,A84,A87,RELAT_2:def 4,def 8;
+      hence thesis by A62,A63,A64,A66,A83,RELAT_2:def 8;
+    end;
+    Q is_reflexive_in X
+    proof
+      let z;
+      assume
+A88:  z in X;
+      then [z,z] in P by A62,RELAT_2:def 1;
+      hence thesis by A67,A88;
+    end;
+    then
+A89: Q partially_orders X by A75,A82,Def7;
+A90: Q c= [:X,X:]
+    proof
+      let y,z;
+      assume
+A91:  [y,z] in Q;
+      then
+A92:  z in X by A67;
+      y in X by A67,A91;
+      hence thesis by A92,ZFMISC_1:106;
+    end;
+    R c= Q by A59,A71,XBOOLE_1:1;
+    then Q in Rel by A3,A90,A74,A89;
+    then
+A93: Q = P by A57,A58,A71;
+A94: [y,y] in P by A62,A64,RELAT_2:def 1;
+    [x,x] in P by A62,A63,RELAT_2:def 1;
+    hence contradiction by A63,A64,A65,A67,A93,A94;
+  end;
+  thus thesis by A61;
+end;
+ 
+::
+::  Auxiliary theorems.
+::
+
+theorem
+  R c= [:field R,field R:] by Lm4;
+
+theorem
+  R is reflexive & X c= field R implies field(R|_2 X) = X by Lm5;
+
+theorem
+  R is_reflexive_in X implies R|_2 X is reflexive by Lm6;
+
+theorem
+  R is_transitive_in X implies R|_2 X is transitive by Lm7;
+
+theorem
+  R is_antisymmetric_in X implies R|_2 X is antisymmetric by Lm8;
+
+theorem
+  R is_connected_in X implies R|_2 X is connected by Lm9;
+
+theorem
+  R is_connected_in X & Y c= X implies R is_connected_in Y by Lm10;
+
+theorem
+  R well_orders X & Y c= X implies R well_orders Y by Lm17;
+
+theorem
+  R is connected implies R~ is connected by Lm3;
+
+theorem
+  R is_reflexive_in X implies R~ is_reflexive_in X by Lm11;
+
+theorem
+  R is_transitive_in X implies R~ is_transitive_in X by Lm12;
+
+theorem
+  R is_antisymmetric_in X implies R~ is_antisymmetric_in X by Lm13;
+
+theorem
+  R is_connected_in X implies R~ is_connected_in X by Lm14;
+
+theorem
+  (R|_2 X)~ = R~|_2 X by Lm15;
+
+theorem
+  R|_2 {} = {} by Lm16;
+
+begin :: Addenda
+:: from COMPTS_1
+
+theorem
+  Z is finite & Z c= rng f implies ex Y st Y c= dom f & Y is finite & f .:Y = Z
+proof
+  assume that
+A1: Z is finite and
+A2: Z c= rng f;
+  per cases;
+  suppose
+A3: Z = {};
+    take Y = {};
+    thus Y c= dom f & Y is finite by XBOOLE_1:2;
+    thus thesis by A3,RELAT_1:149;
+  end;
+  suppose
+A4: Z <> {};
+    deffunc F(set) = f"{$1};
+    consider g being Function such that
+A5: dom g = Z and
+A6: for x st x in Z holds g.x = F(x) from FUNCT_1:sch 3;
+    reconsider AA = rng g as non empty set by A4,A5,RELAT_1:65;
+    consider ff being Choice_Function of AA;
+    take Y = ff.:AA;
+A7: for X being set st X in AA holds X <> {}
+    proof
+      let X be set;
+      assume X in AA;
+      then consider x such that
+A8:   x in dom g and
+A9:   g.x=X by FUNCT_1:def 5;
+      g.x = f"{x} by A5,A6,A8;
+      hence thesis by A2,A5,A8,A9,FUNCT_1:142;
+    end;
+    then
+A10: not {} in AA;
+    thus
+A11: Y c= dom f
+    proof
+      let x;
+      assume x in Y;
+      then consider y such that
+      y in dom ff and
+A12:  y in AA and
+A13:  ff.y=x by FUNCT_1:def 12;
+      y in g.:Z by A5,A12,RELAT_1:146;
+      then consider z such that
+      z in dom g and
+A14:  z in Z and
+A15:  g.z=y by FUNCT_1:def 12;
+A16:  g.z = f"{z} by A6,A14;
+      x in g.z by A10,A12,A13,A15,Def1;
+      hence thesis by A16,FUNCT_1:def 13;
+    end;
+    AA = g.:Z by A5,RELAT_1:146;
+    hence Y is finite by A1;
+    consider z being Element of AA;
+    consider y being Element of z;
+    z <> {} by A7;
+    then y in z;
+    then reconsider AA9=union AA as non empty set by TARSKI:def 4;
+    reconsider f9= ff as Function of AA,AA9;
+A17: dom f9 = AA by FUNCT_2:def 1;
+    x in f.:Y iff x in Z
+    proof
+      thus x in f.:Y implies x in Z
+      proof
+        assume x in f.:(Y);
+        then consider y such that
+        y in dom f and
+A18:    y in Y and
+A19:    f.y = x by FUNCT_1:def 12;
+        consider z such that
+A20:    z in dom ff and
+        z in AA and
+A21:    ff.z=y by A18,FUNCT_1:def 12;
+        consider a being set such that
+A22:    a in dom g and
+A23:    g.a=z by A20,FUNCT_1:def 5;
+        g.a = f"{a} by A5,A6,A22;
+        then y in f"{a} by A10,A20,A21,A23,Def1;
+        then f.y in {a} by FUNCT_1:def 13;
+        hence thesis by A5,A19,A22,TARSKI:def 1;
+      end;
+      set y=ff.(g.x);
+      assume
+A24:  x in Z;
+      then
+A25:  g.x in AA by A5,FUNCT_1:def 5;
+      g.x = f"{x} by A6,A24;
+      then y in f"{x} by A10,A25,Def1;
+      then f.y in {x} by FUNCT_1:def 13;
+      then
+A26:  f.y = x by TARSKI:def 1;
+      ff.(g.x) in rng ff by A17,A25,FUNCT_1:def 5;
+      then y in Y by A17,RELAT_1:146;
+      hence thesis by A11,A26,FUNCT_1:def 12;
+    end;
+    hence thesis by TARSKI:2;
+  end;
+end;
+ 
+:: from AMISTD_3, 2006.03.26, A.T.
+
+theorem Th196:
+  field R is finite implies R is finite
+proof
+  assume field R is finite;
+  then reconsider A = field R as finite set;
+  R c= [:A,A:] by Lm4;
+  hence thesis;
+end;
+
+theorem
+  dom R is finite & rng R is finite implies R is finite
+proof
+  assume that
+A1: dom R is finite and
+A2: rng R is finite;
+  field R is finite by A1,A2;
+  hence thesis by Th196;
+end;
+ 
+:: from AMISTD_3, 2010.01.10, A.T
+
+registration
+  cluster order_type_of {} -> empty;
+  coherence
+  proof
+    {},RelIncl {} are_isomorphic by WELLORD1:48;
+    hence thesis by WELLORD2:def 2;
+  end;
+end;
+
+theorem
+ for O being Ordinal holds order_type_of RelIncl O = O proof let O be Ordinal;
+  RelIncl O is well-ordering & RelIncl O,RelIncl O are_isomorphic by
+  WELLORD1:48,WELLORD2:7;
+  hence thesis by WELLORD2:def 2;
+end;

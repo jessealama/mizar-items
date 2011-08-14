@@ -1,0 +1,1439 @@
+:: Finite Sets
+::  by Agata Darmochwa\l
+::
+:: Received April 6, 1989
+:: Copyright (c) 1990 Association of Mizar Users
+
+environ
+
+ vocabularies FUNCT_1, RELAT_1, ORDINAL1, XBOOLE_0, FUNCOP_1, ORDINAL3,
+      ORDINAL2, TARSKI, SUBSET_1, SETFAM_1, ZFMISC_1, MCART_1, FUNCT_4,
+      FINSET_1;
+ notations TARSKI, XBOOLE_0, ENUMSET1, ZFMISC_1, RELAT_1, FUNCT_1, FUNCOP_1,
+      MCART_1, SETFAM_1, ORDINAL1, ORDINAL2, ORDINAL3, SUBSET_1, DOMAIN_1,
+      RELSET_1, FUNCT_2, FUNCT_3, FUNCT_4;
+ constructors DOMAIN_1, FUNCT_3, FUNCOP_1, ORDINAL3, FUNCT_4, SETFAM_1,
+      RELSET_1;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_1, ORDINAL1, ORDINAL2;
+ requirements SUBSET, BOOLE, NUMERALS;
+ definitions TARSKI, XBOOLE_0, FUNCOP_1, RELAT_1;
+ theorems FUNCT_1, ENUMSET1, MCART_1, ZFMISC_1, TARSKI, RELAT_1, ORDINAL3,
+      ORDINAL1, XBOOLE_0, XBOOLE_1, FUNCT_3, FUNCOP_1, FUNCT_4;
+ schemes FUNCT_1, PARTFUN1, ORDINAL2, XBOOLE_0;
+
+begin
+
+definition
+  let IT be set;
+  attr IT is finite means
+  :Def1:
+  ex p being Function st rng p = IT & dom p in omega;
+end;
+
+notation
+  let IT be set;
+  antonym IT is infinite for IT is finite;
+end;
+
+reserve A, B, X, Y, Z, x, y for set;
+reserve f for Function;
+
+Lm1: {x} is finite
+proof
+  set p = {{}} --> x;
+A1: dom p = {{}} by FUNCOP_1:19;
+  take p;
+  for y holds y in {x} iff ex x st x in dom p & y = p.x
+  proof
+    let y;
+    thus y in {x} implies ex x st x in dom p & y = p.x
+    proof
+      assume y in {x};
+      then
+A2:   y = x by TARSKI:def 1;
+      take {};
+      thus {} in dom p by A1,TARSKI:def 1;
+      {} in {{}} by TARSKI:def 1;
+      hence thesis by A2,FUNCOP_1:13;
+    end;
+    assume ex z be set st z in dom p & y = p.z;
+    then y = x by FUNCOP_1:13;
+    hence thesis by TARSKI:def 1;
+  end;
+  hence rng p = {x} by FUNCT_1:def 5;
+  thus thesis by A1,ORDINAL3:18;
+end;
+
+registration
+  cluster non empty finite set;
+  existence
+  proof
+    {the set} is finite by Lm1;
+    hence thesis;
+  end;
+end;
+
+registration
+  cluster empty -> finite set;
+  coherence
+  proof
+    let A be set;
+    assume
+A1: A is empty;
+    take {};
+    thus rng {} = A by A1;
+    thus thesis by ORDINAL1:def 12;
+  end;
+end;
+
+scheme OLambdaC{A()->set,C[set],F(set)->set,G(set)->set}:
+  ex f being Function st dom f = A() & for x being Ordinal st x in A() holds
+  (C[x] implies f.x = F(x)) & (not C[x] implies f.x = G(x))
+proof
+  consider f being Function such that
+A1: dom f = A() & for x being set st x in A() holds
+  (C[x] implies f.x = F(x)) & (not C[x] implies f.x = G(x))
+  from PARTFUN1:sch 1;
+  take f;
+  thus thesis by A1;
+end;
+
+Lm2: A is finite & B is finite implies A \/ B is finite
+proof
+  given p be Function such that
+A1: rng p = A and
+A2: dom p in omega;
+  given q be Function such that
+A3: rng q = B and
+A4: dom q in omega;
+  reconsider domp = dom p, domq = dom q as Ordinal by A2,A4;
+  deffunc F(Ordinal) = p.$1;
+  deffunc G(Ordinal) = q.($1-^domp);
+  defpred P[set] means $1 in domp;
+  consider f such that
+A5: dom f = domp+^domq and
+A6: for x being Ordinal st x in domp+^domq holds
+  (P[x] implies f.x = F(x)) & (not P[x] implies f.x = G(x)) from OLambdaC;
+  take f;
+  reconsider domp, domq as natural Ordinal by A2,A4;
+  thus rng f = A \/ B
+  proof
+    thus rng f c= A \/ B
+    proof
+      let y;
+      assume y in rng f;
+      then consider x such that
+A7:   x in dom f and
+A8:   y = f.x by FUNCT_1:def 5;
+      reconsider x as Ordinal by A5,A7;
+      per cases;
+      suppose
+A9:     x in domp;
+        then
+A10:    y = p.x by A5,A6,A7,A8;
+        p.x in rng p by A9,FUNCT_1:def 5;
+        hence thesis by A1,A10,XBOOLE_0:def 3;
+      end;
+      suppose
+A11:    not x in domp;
+        then
+A12:    domp c= x by ORDINAL1:26;
+A13:    y = q.(x-^domp) by A5,A6,A7,A8,A11;
+        (domp)+^(x-^domp) = x by A12,ORDINAL3:def 6;
+        then x-^domp in dom q by A5,A7,ORDINAL3:25;
+        then y in B by A3,A13,FUNCT_1:def 5;
+        hence thesis by XBOOLE_0:def 3;
+      end;
+    end;
+    let x;
+    assume
+A14: x in A \/ B;
+    per cases by A1,A3,A14,XBOOLE_0:def 3;
+    suppose x in rng p;
+      then consider y such that
+A15:  y in dom p and
+A16:  x = p.y by FUNCT_1:def 5;
+A17:  dom p c= dom f by A5,ORDINAL3:27;
+      then x = f.y by A5,A6,A15,A16;
+      hence thesis by A15,A17,FUNCT_1:def 5;
+    end;
+    suppose x in rng q;
+      then consider y such that
+A18:  y in domq and
+A19:  x = q.y by FUNCT_1:def 5;
+      reconsider y as Ordinal by A18;
+      set z = domp +^ y;
+      domp c= z by ORDINAL3:27;
+      then
+A20:  not z in domp by ORDINAL1:7;
+A21:  z in dom f by A5,A18,ORDINAL3:20;
+      x = q.(z-^domp) by A19,ORDINAL3:65
+        .= f.z by A5,A6,A20,A21;
+      hence thesis by A21,FUNCT_1:def 5;
+    end;
+  end;
+  domp+^domq is natural;
+  hence thesis by A5,ORDINAL1:def 13;
+end;
+
+registration
+  let x be set;
+  cluster {x} -> finite;
+  coherence by Lm1;
+end;
+
+registration
+  let x,y be set;
+  cluster {x,y} -> finite;
+  coherence
+  proof
+    {x,y} = {x} \/ {y} by ENUMSET1:41;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let x,y,z be set;
+  cluster {x,y,z} -> finite;
+  coherence
+  proof
+    {x,y,z} = {x} \/ {y,z} by ENUMSET1:42;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let x1,x2,x3,x4 be set;
+  cluster {x1,x2,x3,x4} -> finite;
+  coherence
+  proof
+    {x1,x2,x3,x4} = {x1} \/ {x2,x3,x4} by ENUMSET1:44;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let x1,x2,x3,x4,x5 be set;
+  cluster {x1,x2,x3,x4,x5} -> finite;
+  coherence
+  proof
+    {x1,x2,x3,x4,x5} = {x1} \/ {x2,x3,x4,x5} by ENUMSET1:47;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let x1,x2,x3,x4,x5,x6 be set;
+  cluster {x1,x2,x3,x4,x5,x6} -> finite;
+  coherence
+  proof
+    {x1,x2,x3,x4,x5,x6} = {x1} \/ {x2,x3,x4,x5,x6} by ENUMSET1:51;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let x1,x2,x3,x4,x5,x6,x7 be set;
+  cluster {x1,x2,x3,x4,x5,x6,x7} -> finite;
+  coherence
+  proof
+    {x1,x2,x3,x4,x5,x6,x7} = {x1} \/ {x2,x3,x4,x5,x6,x7} by ENUMSET1:56;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let x1,x2,x3,x4,x5,x6,x7,x8 be set;
+  cluster {x1,x2,x3,x4,x5,x6,x7,x8} -> finite;
+  coherence
+  proof
+    {x1,x2,x3,x4,x5,x6,x7,x8} = {x1} \/ {x2,x3,x4,x5,x6,x7,x8} by ENUMSET1:62;
+    hence thesis by Lm2;
+  end;
+end;
+
+registration
+  let B be finite set;
+  cluster -> finite Subset of B;
+  coherence
+  proof
+    let A be Subset of B;
+    per cases;
+    suppose A is empty;
+      hence thesis;
+    end;
+    suppose A is non empty;
+      then consider x1 be set such that
+A1:   x1 in A by XBOOLE_0:def 1;
+      consider p be Function such that
+A2:   rng p = B and
+A3:   dom p in omega by Def1;
+      deffunc F(set) = p.$1;
+      deffunc G(set) = x1;
+      defpred P[set] means p.$1 in A;
+      consider q be Function such that
+A4:   dom q = dom p and
+A5:   for x st x in dom p holds (P[x] implies q.x = F(x)) &
+      (not P[x] implies q.x = G(x)) from PARTFUN1:sch 1;
+      now
+        let y;
+        thus y in A implies ex x st x in dom q & y = q.x
+        proof
+          assume
+A6:       y in A;
+          then consider x such that
+A7:       x in dom p and
+A8:       p.x = y by A2,FUNCT_1:def 5;
+          take x;
+          thus x in dom q by A4,A7;
+          thus thesis by A5,A6,A7,A8;
+        end;
+        given x such that
+A9:     x in dom q and
+A10:    y = q.x;
+        per cases;
+        suppose p.x in A;
+          hence y in A by A4,A5,A9,A10;
+        end;
+        suppose not p.x in A;
+          hence y in A by A1,A4,A5,A9,A10;
+        end;
+      end;
+      then rng q = A by FUNCT_1:def 5;
+      hence thesis by A3,A4,Def1;
+    end;
+  end;
+end;
+
+registration
+  let X,Y be finite set;
+  cluster X \/ Y -> finite;
+  coherence by Lm2;
+end;
+
+canceled 12;
+
+theorem
+  A c= B & B is finite implies A is finite;
+
+theorem
+  A is finite & B is finite implies A \/ B is finite;
+
+registration
+  let A be set, B be finite set;
+  cluster A /\ B -> finite;
+  coherence
+  proof
+    A /\ B c= B by XBOOLE_1:17;
+    hence thesis;
+  end;
+end;
+
+registration
+  let A be finite set, B be set;
+  cluster A /\ B -> finite;
+  coherence;
+  cluster A \ B -> finite;
+  coherence;
+end;
+
+theorem
+  A is finite implies A /\ B is finite;
+
+theorem
+  A is finite implies A \ B is finite;
+
+registration
+  let f be Function, A be finite set;
+  cluster f.:A -> finite;
+  coherence 
+proof
+  set B = dom f /\ A;
+  consider p be Function such that
+A1: rng p=B and
+A2: dom p in omega by Def1;
+  take f*p;
+  rng (f*p) = f.:B by A1,RELAT_1:160;
+  hence rng (f*p) = f.:A by RELAT_1:145;
+  thus thesis by A1,A2,RELAT_1:46,XBOOLE_1:17;
+end;
+end;
+
+theorem
+  A is finite implies f.:A is finite;
+
+reserve O for Ordinal;
+
+theorem Th18:
+  A is finite implies for X being Subset-Family of A st X <> {}
+  ex x being set st x in X &
+    for B being set st B in X holds x c= B implies B = x
+proof
+  assume
+A1: A is finite;
+  let X be Subset-Family of A such that
+A2: X <> {};
+  consider p be Function such that
+A3: rng p = A and
+A4: dom p in omega by A1,Def1;
+  defpred P[set] means p.:$1 in X;
+  consider G being set such that
+A5: for x holds x in G iff x in bool dom p & P[x] from XBOOLE_0:sch 1;
+  G c= bool dom p
+  proof
+    let x;
+    assume x in G;
+    hence thesis by A5;
+  end;
+  then reconsider GX=G as Subset-Family of dom p;
+  consider x being Element of X;
+  x is Subset of A by A2,TARSKI:def 3;
+  then
+A6: p.:(p"x) = x by A3,FUNCT_1:147;
+  p"x c= dom p by RELAT_1:167;
+  then
+A7: GX <> {} by A2,A5,A6;
+  defpred P[set] means
+  $1 in omega implies for X being Subset-Family of $1 st X <> {}
+  ex x being set st
+  x in X & for B being set st B in X holds x c= B implies B = x;
+A8: P[{}]
+  proof
+    assume {} in omega;
+    let X be Subset-Family of {};
+    assume X <> {};
+    then
+A9: X = {{}} by ZFMISC_1:1,39;
+    take {};
+    thus thesis by A9,TARSKI:def 1;
+  end;
+A10: P[O] implies P[succ O]
+  proof
+    assume
+A11: O in omega implies for X being Subset-Family of O st X <> {}
+    ex x being set st
+    x in X & for B being set st B in X holds x c= B implies B = x;
+    thus succ O in omega implies
+    for X being Subset-Family of succ O st X <> {} ex x being set st
+    x in X & for B being set st B in X holds x c= B implies B = x
+    proof
+      assume succ O in omega;
+      then
+A12:  succ O c= omega by ORDINAL1:def 2;
+      let X be Subset-Family of succ O such that
+A13:  X <> {};
+      defpred P[set] means ex A st A in X & $1 = A \ {O};
+      consider X1 being set such that
+A14:  for x holds x in X1 iff x in bool O & P[x] from XBOOLE_0:sch 1;
+      X1 c= bool O
+      proof
+        let x;
+        assume x in X1;
+        hence thesis by A14;
+      end;
+      then reconsider X2=X1 as Subset-Family of O;
+      consider y being Element of X;
+A15:  succ O = O \/ {O} by ORDINAL1:def 1;
+      y is Subset of succ O by A13,TARSKI:def 3;
+      then y \ {O} c= (O \/ {O}) \ {O} by A15,XBOOLE_1:33;
+      then
+A16:  y \ {O} c= O \ {O} by XBOOLE_1:40;
+A17:  O in succ O by ORDINAL1:10;
+A18:  not O in O;
+      then y \ {O} c= O by A16,ZFMISC_1:65;
+      then X2 <> {} by A13,A14;
+      then consider Z such that
+A19:  Z in X2 and
+A20:  for B being set st B in X2 holds Z c= B implies B = Z by A11,A12,A17;
+      consider X1 being set such that
+A21:  X1 in X and
+A22:  Z=X1 \ {O} by A14,A19;
+A23:  O in {O} by TARSKI:def 1;
+      then
+A24:  not O in Z by A22,XBOOLE_0:def 5;
+A25:  now
+        assume
+A26:    Z \/ {O} in X;
+        take A=Z \/ {O};
+        for B being set st B in X holds A c= B implies B = A
+        proof
+          let B such that
+A27:      B in X;
+          assume
+A28:      A c= B;
+A29:      now
+            assume
+A30:        O in B;
+            set Y = B \ {O};
+            {O} c= B by A30,ZFMISC_1:37;
+            then
+A31:        B = Y \/ {O} by XBOOLE_1:45;
+            A \ {O} c= Y by A28,XBOOLE_1:33;
+            then
+A32:        Z \ {O} c= Y by XBOOLE_1:40;
+            not O in Z by A22,A23,XBOOLE_0:def 5;
+            then
+A33:        Z c= Y by A32,ZFMISC_1:65;
+            Y c= (O \/ {O}) \ {O} by A15,A27,XBOOLE_1:33;
+            then Y c= O \ {O} by XBOOLE_1:40;
+            then Y c= O by A18,ZFMISC_1:65;
+            then Y in X2 by A14,A27;
+            hence thesis by A20,A31,A33;
+          end;
+          now
+            assume
+A34:        not O in B;
+            O in {O} by TARSKI:def 1;
+            then O in A by XBOOLE_0:def 3;
+            hence contradiction by A28,A34;
+          end;
+          hence thesis by A29;
+        end;
+        hence thesis by A26;
+      end;
+      now
+        assume
+A35:    not Z \/ {O} in X;
+        take A=Z;
+        now
+          assume O in X1;
+          then X1 = X1 \/ {O} by ZFMISC_1:46
+            .= Z \/ {O} by A22,XBOOLE_1:39;
+          hence contradiction by A21,A35;
+        end;
+        then
+A36:    A in X by A21,A22,ZFMISC_1:65;
+        for B being set st B in X holds A c= B implies B = A
+        proof
+          let B;
+          assume
+A37:      B in X;
+          then B \ {O} c= (O \/ {O}) \ {O} by A15,XBOOLE_1:33;
+          then B \ {O} c= O \ {O} by XBOOLE_1:40;
+          then B \ {O} c= O by A18,ZFMISC_1:65;
+          then
+A38:      B \ {O} in X2 by A14,A37;
+          assume
+A39:      A c= B;
+          then A \ {O} c= B \ {O} by XBOOLE_1:33;
+          then
+A40:      A c= B \ {O} by A24,ZFMISC_1:65;
+A41:      now
+            assume
+A42:        O in B;
+            A \/ {O} = (B \ {O}) \/ {O} by A20,A38,A40
+              .= B \/ {O} by XBOOLE_1:39
+              .= B by A42,ZFMISC_1:46;
+            hence contradiction by A35,A37;
+          end;
+A43:      B c= O
+          proof
+            let x such that
+A44:        x in B;
+            x in O or x in {O} by A15,A37,A44,XBOOLE_0:def 3;
+            hence thesis by A41,A44,TARSKI:def 1;
+          end;
+          B \ {O} = B by A41,ZFMISC_1:65;
+          then B in X2 by A14,A37,A43;
+          hence thesis by A20,A39;
+        end;
+        hence thesis by A36;
+      end;
+      hence thesis by A25;
+    end;
+  end;
+A45: O <> {} & O is limit_ordinal & (for B being Ordinal st B in O holds P[B])
+  implies P[O]
+  proof
+    assume that
+A46: O <> {} and
+A47: O is limit_ordinal and for B being Ordinal st B in O holds P[B] and
+A48: O in omega;
+    {} in O by A46,ORDINAL1:24;
+    then omega c= O by A47,ORDINAL1:def 12;
+    then O in O by A48;
+    hence thesis;
+  end;
+  P[O] from ORDINAL2:sch 1(A8,A10,A45);
+  then consider g being set such that
+A49: g in GX and
+A50: for B being set st B in GX holds g c= B implies B=g by A4,A7;
+  take p.:g;
+  for B st B in X holds p.:g c= B implies B = p.:g
+  proof
+    let B;
+    assume
+A51: B in X;
+    assume p.:g c= B;
+    then
+A52: p"(p.:g) c= p"B by RELAT_1:178;
+A53: g c= p"(p.:g) by A49,FUNCT_1:146;
+A54: p.:(p"B) = B by A3,A51,FUNCT_1:147;
+    p"B c= dom p by RELAT_1:167;
+    then p"B in GX by A5,A51,A54;
+    hence thesis by A50,A52,A53,A54,XBOOLE_1:1;
+  end;
+  hence thesis by A5,A49;
+end;
+
+scheme Finite{A()->set,P[set]} : P[A()]
+provided
+A1: A() is finite and
+A2: P[{}] and
+A3: for x,B being set st x in A() & B c= A() & P[B] holds P[B \/ {x}]
+proof
+  now
+    assume A() <> {};
+    defpred R[set] means ex B st B=$1 & P[B];
+    consider G being set such that
+A4: for x holds x in G iff x in bool A() & R[x] from XBOOLE_0:sch 1;
+    G c= bool A()
+    proof
+      let x;
+      assume x in G;
+      hence thesis by A4;
+    end;
+    then reconsider GA=G as Subset-Family of A();
+    {} c= A() by XBOOLE_1:2;
+    then GA <> {} by A2,A4;
+    then consider B such that
+A5: B in GA and
+A6: for X being set st X in GA holds B c= X implies B=X by A1,Th18;
+A7: ex A st A = B & P[A] by A4,A5;
+    now consider x being Element of A() \ B;
+      assume B <> A();
+      then not A() c= B by A5,XBOOLE_0:def 10;
+      then
+A8:   A() \ B <> {} by XBOOLE_1:37;
+      then
+A9:   x in A() by XBOOLE_0:def 5;
+      then
+A10:  P[B \/ {x}] by A3,A5,A7;
+      {x} c= A() by A9,ZFMISC_1:37;
+      then B \/ {x} c= A() by A5,XBOOLE_1:8;
+      then
+A11:  B \/ {x} in GA by A4,A10;
+      not x in B by A8,XBOOLE_0:def 5;
+      then not {x} c= B by ZFMISC_1:37;
+      then B \/ {x} <> B by XBOOLE_1:7;
+      hence contradiction by A6,A11,XBOOLE_1:7;
+    end;
+    hence thesis by A7;
+  end;
+  hence thesis by A2;
+end;
+
+Lm3: A
+is finite & (for X st X in A holds X is finite) implies union A is finite
+proof
+  assume that
+A1: A is finite and
+A2: for X st X in A holds X is finite;
+  defpred P[set] means ex B st B=$1 & union B is finite;
+  consider G being set such that
+A3: for x holds x in G iff x in bool A & P[x] from XBOOLE_0:sch 1;
+  defpred P[set] means $1 in G;
+  {} c= A by XBOOLE_1:2;
+  then
+A4: P[{}] by A3,ZFMISC_1:2;
+A5: for x,B being set st x in A & B c= A & P[B] holds P[B \/ {x}]
+  proof
+    let x,B be set;
+    assume that
+A6: x in A and B c= A and
+A7: B in G;
+A8: ex X st X=B & union X is finite by A3,A7;
+A9: x is finite by A2,A6;
+A10: union (B \/ {x}) = union B \/ union {x} by ZFMISC_1:96
+      .= union B \/ x by ZFMISC_1:31;
+A11: {x} c= A by A6,ZFMISC_1:37;
+    B in bool A by A3,A7;
+    then B \/ {x} c= A by A11,XBOOLE_1:8;
+    hence thesis by A3,A8,A9,A10;
+  end;
+  P[A] from Finite(A1,A4,A5);
+  then ex X st X=A & union X is finite by A3;
+  hence thesis;
+end;
+
+registration
+  let A,B be finite set;
+  cluster [:A,B:] -> finite;
+  coherence
+  proof
+A1: for y holds [:A,{y}:] is finite
+    proof
+      let y;
+      deffunc F(set) = [$1,y];
+      consider f such that
+A2:   dom f=A & for x st x in A holds f.x=F(x) from FUNCT_1:sch 3;
+      for x holds x in rng f iff x in [:A,{y}:]
+      proof
+        let x;
+        thus x in rng f implies x in [:A,{y}:]
+        proof
+          assume x in rng f;
+          then consider z be set such that
+A3:       z in dom f and
+A4:       f.z = x by FUNCT_1:def 5;
+          x = [z,y] by A2,A3,A4;
+          hence thesis by A2,A3,ZFMISC_1:129;
+        end;
+        thus x in [:A,{y}:] implies x in rng f
+        proof
+          assume x in [:A,{y}:];
+          then consider x1,x2 be set such that
+A5:       x1 in A and
+A6:       x2 in {y} and
+A7:       x=[x1,x2] by ZFMISC_1:def 2;
+          x2=y by A6,TARSKI:def 1;
+          then x = f.x1 by A2,A5,A7;
+          hence thesis by A2,A5,FUNCT_1:def 5;
+        end;
+      end;
+      then rng f = [:A,{y}:] by TARSKI:2;
+      then f.:A=[:A,{y}:] by A2,RELAT_1:146;
+      hence thesis;
+    end;
+    defpred P[set] means ex y st y in B & $1 = [:A,{y}:];
+    consider G being set such that
+A8: for x holds x in G iff x in bool [:A,B:] & P[x] from XBOOLE_0:sch 1;
+    for x holds x in union G iff x in [:A,B:]
+    proof
+      let x;
+      thus x in union G implies x in [:A,B:]
+      proof
+        assume x in union G;
+        then consider X such that
+A9:     x in X and
+A10:    X in G by TARSKI:def 4;
+        X in bool [:A,B:]by A8,A10;
+        hence thesis by A9;
+      end;
+      assume x in [:A,B:];
+      then consider y,z be set such that
+A11:  y in A and
+A12:  z in B and
+A13:  x=[y,z] by ZFMISC_1:def 2;
+A14:  [y,z] in [:A,{z}:] by A11,ZFMISC_1:129;
+      {z} c= B by A12,ZFMISC_1:37;
+      then [:A,{z}:] c= [:A,B:] by ZFMISC_1:118;
+      then [:A,{z}:] in G by A8,A12;
+      hence thesis by A13,A14,TARSKI:def 4;
+    end;
+    then
+A15: union G = [:A,B:] by TARSKI:2;
+    deffunc F(set) = [:A,{$1}:];
+    consider g being Function such that
+A16: dom g = B & for x st x in B holds g.x = F(x) from FUNCT_1:sch 3;
+    for x holds x in rng g iff x in G
+    proof
+      let x;
+      thus x in rng g implies x in G
+      proof
+        assume x in rng g;
+        then consider y such that
+A17:    y in dom g and
+A18:    g.y = x by FUNCT_1:def 5;
+A19:    x = [:A,{y}:] by A16,A17,A18;
+        {y} c= B by A16,A17,ZFMISC_1:37;
+        then x c= [:A,B:] by A19,ZFMISC_1:118;
+        hence thesis by A8,A16,A17,A19;
+      end;
+      assume x in G;
+      then consider y such that
+A20:  y in B and
+A21:  x = [:A,{y}:] by A8;
+      x = g.y by A16,A20,A21;
+      hence thesis by A16,A20,FUNCT_1:def 5;
+    end;
+    then rng g = G by TARSKI:2;
+    then
+A22: g.:B = G by A16,RELAT_1:146;
+    for X st X in G holds X is finite
+    proof
+      let X;
+      assume X in G;
+      then ex y st y in B & X=[:A,{y}:] by A8;
+      hence thesis by A1;
+    end;
+    hence thesis by A15,A22,Lm3;
+  end;
+end;
+
+registration
+  let A,B,C be finite set;
+  cluster [:A,B,C:] -> finite;
+  coherence
+  proof
+    [:[:A,B:],C:] is finite;
+    hence thesis by ZFMISC_1:def 3;
+  end;
+end;
+
+registration
+  let A,B,C,D be finite set;
+  cluster [:A,B,C,D:] -> finite;
+  coherence
+  proof
+    [:[:A,B,C:],D:] is finite;
+    hence thesis by ZFMISC_1:def 4;
+  end;
+end;
+
+registration
+  let A be finite set;
+  cluster bool A -> finite;
+  coherence
+  proof
+A1: A is finite;
+    defpred P[set] means bool $1 is finite;
+    consider G being set such that
+A2: for x holds x in G iff x in bool A & P[x] from XBOOLE_0:sch 1;
+    defpred P[set] means $1 in G;
+X:  bool{} is finite by ZFMISC_1:1;
+    {} c= A by XBOOLE_1:2;
+    then
+A3: P[{}] by X,A2;
+A4: for x,B being set st x in A & B c= A & P[B] holds P[B \/ {x}]
+    proof
+      let x,B be set;
+      assume that
+A5:   x in A and B c= A and
+A6:   B in G;
+A7:   now
+        assume x in B;
+        then {x} c= B by ZFMISC_1:37;
+        hence thesis by A6,XBOOLE_1:12;
+      end;
+      now
+        assume
+A8:     not x in B;
+        defpred P[set,set] means ex Y st Y=$1 & $2=Y \/ {x};
+A9:     for y,y1,y2 be set st y in bool B & P[y,y1] & P[y,y2] holds y1 = y2;
+A10:    for y st y in bool B ex z be set st P[y,z]
+        proof
+          let y such that y in bool B;
+          ex Y st Y=y & y \/ {x} = Y \/ {x};
+          hence thesis;
+        end;
+        consider f such that
+A11:    dom f = bool B and
+A12:    for y st y in bool B holds P[y,f.y] from FUNCT_1:sch 2(A9,A10);
+A13:    bool B is finite by A2,A6;
+        y in rng f iff y in bool(B \/ {x}) \ bool B
+        proof
+          thus y in rng f implies y in bool(B \/ {x}) \ bool B
+          proof
+            assume y in rng f;
+            then consider x1 be set such that
+A14:        x1 in dom f and
+A15:        f.x1=y by FUNCT_1:def 5;
+            consider X1 being set such that
+A16:        X1=x1 and
+A17:        f.x1= X1 \/ {x} by A11,A12,A14;
+A18:        X1 \/ {x} c= B \/ {x} by A11,A14,A16,XBOOLE_1:13;
+            x in {x} by TARSKI:def 1;
+            then x in y by A15,A17,XBOOLE_0:def 3;
+            then not y in bool B by A8;
+            hence thesis by A15,A17,A18,XBOOLE_0:def 5;
+          end;
+          assume
+A19:      y in bool(B \/ {x}) \ bool B;
+          set Z=y \ {x};
+A20:      now
+            assume
+A21:        not x in y;
+            y c= B
+            proof
+              let z be set;
+              assume
+A22:          z in y;
+              then not z in {x} by A21,TARSKI:def 1;
+              hence thesis by A19,A22,XBOOLE_0:def 3;
+            end;
+            hence contradiction by A19,XBOOLE_0:def 5;
+          end;
+A23:      Z c= B by A19,XBOOLE_1:43;
+          then consider X such that
+A24:      X=Z and
+A25:      f.Z = X \/ {x} by A12;
+          X \/ {x} = y \/ {x} by A24,XBOOLE_1:39
+            .= y by A20,ZFMISC_1:46;
+          hence thesis by A11,A23,A25,FUNCT_1:def 5;
+        end;
+        then rng f = bool(B \/ {x}) \ bool B by TARSKI:2;
+        then
+A26:    f.:(bool B) = bool(B \/ {x}) \ bool B by A11,RELAT_1:146;
+A27:    bool B c= bool(B \/ {x}) by XBOOLE_1:7,ZFMISC_1:79;
+A28:    (bool(B \/ {x}) \ bool B) \/ bool B = bool(B \/ {x}) \/
+        bool B by XBOOLE_1:39
+          .= bool(B \/ {x}) by A27,XBOOLE_1:12;
+A29:    {x} c= A by A5,ZFMISC_1:37;
+        B in bool A by A2,A6;
+        then B \/ {x} c= A by A29,XBOOLE_1:8;
+        hence thesis by A2,A13,A26,A28;
+      end;
+      hence thesis by A7;
+    end;
+    P[A] from Finite(A1,A3,A4);
+    hence thesis by A2;
+  end;
+end;
+
+canceled 6;
+
+theorem
+  A is finite & (for X st X in A holds X is finite) iff union A is finite
+proof
+  thus A is finite & (for X st X in A holds X is finite) implies
+  union A is finite by Lm3;
+  thus union A is finite implies
+  A is finite & for X st X in A holds X is finite
+  proof
+    assume
+A1: union A is finite;
+    A c= bool union A by ZFMISC_1:100;
+    hence A is finite by A1;
+    let X;
+    assume X in A;
+    then X c= union A by ZFMISC_1:92;
+    hence thesis by A1;
+  end;
+end;
+
+theorem Th26:
+  dom f is finite implies rng f is finite
+proof
+  assume dom f is finite;
+  then f.:(dom f) is finite;
+  hence thesis by RELAT_1:146;
+end;
+
+theorem
+  Y c= rng f & f"Y is finite implies Y is finite
+proof
+  assume Y c= rng f;
+  then f.:(f"Y) = Y by FUNCT_1:147;
+  hence thesis;
+end;
+
+registration
+  let X, Y be finite set;
+  cluster X \+\ Y -> finite;
+  coherence;
+end;
+
+registration
+  let X be non empty set;
+  cluster finite non empty Subset of X;
+  existence
+  proof
+    take {the Element of X};
+    thus thesis;
+  end;
+end;
+
+begin :: Addenda
+:: from AMI_1
+
+canceled;
+
+theorem Th29:
+  for f being Function holds dom f is finite iff f is finite
+proof
+  let f be Function;
+  thus dom f is finite implies f is finite
+  proof
+    assume
+A1: dom f is finite;
+    then
+A2: rng f is finite by Th26;
+    f c= [:dom f, rng f:] by RELAT_1:21;    
+    hence thesis by A1,A2;
+  end;
+  pr1(dom f,rng f).:f = dom f by FUNCT_3:100;
+  hence thesis;
+end;
+ 
+:: from ALI2
+
+theorem
+  for F being set st F is finite & F <> {} & F is c=-linear
+  ex m being set st m in F & for C being set st C in F holds m c= C
+proof
+  defpred P[set] means $1 <> {} implies
+  ex m being set st m in $1 & for C being set st C in $1 holds m c= C;
+  let F be set such that
+A1: F is finite and
+A2: F <> {} and
+A3: F is c=-linear;
+A4: P[{}];
+A5: now
+    let x,B be set such that
+A6: x in F and
+A7: B c= F and
+A8: P[B];
+    now per cases;
+      suppose
+A9:     not ex y being set st y in B & y c=x;
+        assume B \/ {x} <> {};
+        take m = x;
+        x in {x} by TARSKI:def 1;
+        hence m in B \/ {x} by XBOOLE_0:def 3;
+        let C be set;
+        assume C in B \/ {x};
+        then
+A10:    C in B or C in {x} by XBOOLE_0:def 3;
+        then C,x are_c=-comparable by A3,A6,A7,
+        ORDINAL1:def 9,TARSKI:def 1;
+        then C c= x or x c= C by XBOOLE_0:def 9;
+        hence m c= C by A9,A10,TARSKI:def 1;
+      end;
+      suppose ex y being set st y in B & y c=x;
+        then consider y being set such that
+A11:    y in B and
+A12:    y c=x;
+        assume B \/ {x} <> {};
+        consider m being set such that
+A13:    m in B and
+A14:    for C being set st C in B holds m c= C by A8,A11;
+        m c= y by A11,A14;
+        then
+A15:    m c= x by A12,XBOOLE_1:1;
+        take m;
+        thus m in B \/ {x} by A13,XBOOLE_0:def 3;
+        let C be set;
+        assume C in B \/ {x};
+        then C in B or C in {x} by XBOOLE_0:def 3;
+        hence m c= C by A14,A15,TARSKI:def 1;
+      end;
+    end;
+    hence P[B \/ {x}];
+  end;
+  P[F] from Finite(A1,A4,A5);
+  hence thesis by A2;
+end;
+ 
+:: from FIN_TOPO
+
+theorem
+  for F being set st F is finite & F <> {} & F is c=-linear
+  ex m being set st m in F & for C being set st C in F holds C c= m
+proof
+  defpred P[set] means $1 <> {} implies
+  ex m being set st m in $1 & for C being set st C in $1 holds C c= m;
+  let F be set such that
+A1: F is finite and
+A2: F <> {} and
+A3: F is c=-linear;
+A4: P[{}];
+A5: now
+    let x,B be set such that
+A6: x in F and
+A7: B c= F and
+A8: P[B];
+    now per cases;
+      suppose
+A9:     not ex y being set st y in B & x c= y;
+        assume B \/ {x} <> {};
+        take m = x;
+        x in {x} by TARSKI:def 1;
+        hence m in B \/ {x} by XBOOLE_0:def 3;
+        let C be set;
+        assume C in B \/ {x};
+        then
+A10:    C in B or C in {x} by XBOOLE_0:def 3;
+        then C,x are_c=-comparable by A3,A6,A7,
+        ORDINAL1:def 9,TARSKI:def 1;
+        then C c= x or x c= C by XBOOLE_0:def 9;
+        hence C c= m by A9,A10,TARSKI:def 1;
+      end;
+      suppose ex y being set st y in B & x c= y;
+        then consider y being set such that
+A11:    y in B and
+A12:    x c= y;
+        assume B \/ {x} <> {};
+        consider m being set such that
+A13:    m in B and
+A14:    for C being set st C in B holds C c= m by A8,A11;
+        y c= m by A11,A14;
+        then
+A15:    x c= m by A12,XBOOLE_1:1;
+        take m;
+        thus m in B \/ {x} by A13,XBOOLE_0:def 3;
+        let C be set;
+        assume C in B \/ {x};
+        then C in B or C in {x} by XBOOLE_0:def 3;
+        hence C c= m by A14,A15,TARSKI:def 1;
+      end;
+    end;
+    hence P[B \/ {x}];
+  end;
+  P[F] from Finite(A1,A4,A5);
+  hence thesis by A2;
+end;
+ 
+:: 2006.08.25, A.T.
+
+definition
+  let R be Relation;
+  attr R is finite-yielding means
+  :Def2:
+  for x st x in rng R holds x is finite;
+end;
+ 
+:: from CQC_THE1, 2007.03.15, A.T.
+
+reserve a for set;
+
+deffunc F(set) = $1`1;
+
+theorem
+  X is finite & X c= [:Y,Z:] implies
+  ex A,B being set st A is finite & A c= Y & B is finite & B c= Z &
+  X c= [:A,B:]
+proof
+  deffunc G(set) = $1`2;
+  assume that
+A1: X is finite and
+A2: X c= [:Y,Z:];
+  consider f being Function such that
+A3: dom f = X and
+A4: for a st a in X holds f.a = F(a) from FUNCT_1:sch 3;
+  consider g being Function such that
+A5: dom g = X and
+A6: for a st a in X holds g.a = G(a) from FUNCT_1:sch 3;
+  take A = rng f, B = rng g;
+  thus A is finite by A1,A3,Th26;
+  thus A c= Y
+  proof
+    let a;
+    assume a in A;
+    then consider x being set such that
+A7: x in dom f and
+A8: f.x = a by FUNCT_1:def 5;
+    consider y,z being set such that
+A9: y in Y and z in Z and
+A10: x = [y,z] by A2,A3,A7,ZFMISC_1:def 2;
+    f.x = x`1 by A3,A4,A7
+      .= y by A10,MCART_1:7;
+    hence thesis by A8,A9;
+  end;
+  thus B is finite by A1,A5,Th26;
+  thus B c= Z
+  proof
+    let a;
+    assume a in B;
+    then consider x being set such that
+A11: x in dom g and
+A12: g.x = a by FUNCT_1:def 5;
+    consider y,z being set such that
+    y in Y and
+A13: z in Z and
+A14: x = [y,z] by A2,A5,A11,ZFMISC_1:def 2;
+    g.x = x`2 by A5,A6,A11
+      .= z by A14,MCART_1:7;
+    hence thesis by A12,A13;
+  end;
+  thus X c= [:A,B:]
+  proof
+    let a;
+    assume
+A15: a in X;
+    then consider x,y being set such that
+    x in Y and y in Z and
+A16: a=[x,y] by A2,ZFMISC_1:def 2;
+A17: g.a = a`2 by A6,A15
+      .= y by A16,MCART_1:7;
+    f.a = a`1 by A4,A15
+      .= x by A16,MCART_1:7;
+    then
+A18: x in A by A3,A15,FUNCT_1:def 5;
+    y in B by A5,A15,A17,FUNCT_1:def 5;
+    hence thesis by A16,A18,ZFMISC_1:106;
+  end;
+end;
+
+theorem
+  X is finite & X c= [:Y,Z:] implies
+  ex A being set st A is finite & A c= Y & X c= [:A,Z:]
+proof
+  assume that
+A1: X is finite and
+A2: X c= [:Y,Z:];
+  consider f being Function such that
+A3: dom f = X and
+A4: for a st a in X holds f.a = F(a) from FUNCT_1:sch 3;
+  take A = rng f;
+  thus A is finite by A1,A3,Th26;
+  thus A c= Y
+  proof
+    let a;
+    assume a in A;
+    then consider x being set such that
+A5: x in dom f and
+A6: f.x = a by FUNCT_1:def 5;
+    consider y,z being set such that
+A7: y in Y and z in Z and
+A8: x = [y,z] by A2,A3,A5,ZFMISC_1:def 2;
+    f.x = x`1 by A3,A4,A5
+      .= y by A8,MCART_1:7;
+    hence thesis by A6,A7;
+  end;
+  thus X c= [:A,Z:]
+  proof
+    let a;
+    assume
+A9: a in X;
+    then consider x,y being set such that
+    x in Y and
+A10: y in Z and
+A11: a=[x,y] by A2,ZFMISC_1:def 2;
+    f.a = a`1 by A4,A9
+      .= x by A11,MCART_1:7;
+    then x in A by A3,A9,FUNCT_1:def 5;
+    hence thesis by A10,A11,ZFMISC_1:106;
+  end;
+end;
+ 
+:: restored, 2007.07.22, A.T.
+
+registration
+  cluster finite non empty Function;
+  existence
+  proof
+    {[{},{}]} is Function;
+    hence thesis;
+  end;
+end;
+
+registration
+  let R be finite Relation;
+  cluster dom R -> finite;
+  coherence
+  proof
+    consider f being Function such that
+A1: dom f = R and
+A2: for x st x in R holds f.x = x`1 from FUNCT_1:sch 3;
+    now
+      let x;
+      thus x in rng f implies ex y st [x,y] in R
+      proof
+        assume x in rng f;
+        then consider a such that
+A3:     a in dom f and
+A4:     f.a = x by FUNCT_1:def 5;
+        take a`2;
+A5:     ex x,y st a = [x,y] by A1,A3,RELAT_1:def 1;
+        x = a`1 by A1,A2,A3,A4;
+        hence thesis by A1,A3,A5,MCART_1:8;
+      end;
+      given y such that
+A6:   [x,y] in R;
+      f.[x,y] = [x,y]`1 by A2,A6
+        .= x by MCART_1:7;
+      hence x in rng f by A1,A6,FUNCT_1:12;
+    end;
+    then rng f = dom R by RELAT_1:def 4;
+    hence thesis by A1,Th26;
+  end;
+end;
+ 
+:: from SCMFSA_4, 2007.07.22, A.T.
+
+registration
+  let f be Function, g be finite Function;
+  cluster f*g -> finite;
+  coherence
+  proof dom(f*g) c= dom g by RELAT_1:44;
+    hence thesis by Th29;
+  end;
+end;
+ 
+:: from SF_MASTR, 2007.07.25, A.T.
+
+registration
+  let A be finite set, B be set;
+  cluster -> finite Function of A, B;
+  coherence
+  proof
+    let f be Function of A, B;
+    dom f is finite;
+    hence thesis by Th29;
+  end;
+end;
+ 
+:: from GLIB_000, 2007.10.24, A.T.
+
+registration
+  let x,y be set;
+  cluster x .--> y -> finite;
+  coherence;
+end;
+ 
+:: from FINSEQ_1, 2008.02.19, A.T.
+
+registration
+  let R be finite Relation;
+  cluster rng R -> finite;
+  coherence
+  proof
+    consider f being Function such that
+A1: dom f = R and
+A2: for x st x in R holds f.x = x`2 from FUNCT_1:sch 3;
+    now
+      let y;
+      thus y in rng f implies ex x st [x,y] in R
+      proof
+        assume y in rng f;
+        then consider a such that
+A3:     a in dom f and
+A4:     f.a = y by FUNCT_1:def 5;
+        take a`1;
+A5:     ex x,y st a = [x,y] by A1,A3,RELAT_1:def 1;
+        y = a`2 by A1,A2,A3,A4;
+        hence thesis by A1,A3,A5,MCART_1:8;
+      end;
+      given x such that
+A6:   [x,y] in R;
+      f.[x,y] = [x,y]`2 by A2,A6
+        .= y by MCART_1:7;
+      hence y in rng f by A1,A6,FUNCT_1:12;
+    end;
+    then rng f = rng R by RELAT_1:def 5;
+    hence thesis by A1,Th26;
+  end;
+end;
+ 
+:: from FINSEQ_1, 2008.05.06, A.T.
+
+registration
+  let f be finite Function, x be set;
+  cluster f"x -> finite;
+  coherence
+  proof
+    f"x c= dom f by RELAT_1:167;
+    hence thesis;
+  end;
+end;
+
+registration
+  let f, g be finite Function;
+  cluster f +* g -> finite;
+  coherence
+  proof
+    dom (f+*g) = dom f \/ dom g by FUNCT_4:def 1;
+    hence thesis by Th29;
+  end;
+end;
+ 
+:: from COMPTS_1, 2008.07.16, A.T
+
+definition
+  let F be set;
+  attr F is centered means
+  F <> {} &
+  for G being set st G <> {} & G c= F & G is finite holds meet G <> {};
+end;
+ 
+:: from PRE_CIRC, 2009.03.04, A.T.
+
+definition
+  let I be set;
+  let IT be I-defined Function;
+  redefine attr IT is finite-yielding means
+  for i being set st i in I holds IT.i is finite;
+  compatibility
+  proof
+A1: dom IT c= I by RELAT_1:def 18;
+    hereby
+      assume
+A2:   IT is finite-yielding;
+      let i be set such that i in I;
+      per cases;
+      suppose i in dom IT;
+        then IT.i in rng IT by FUNCT_1:12;
+        hence IT.i is finite by A2,Def2;
+      end;
+      suppose not i in dom IT;
+        hence IT.i is finite by FUNCT_1:def 4;
+      end;
+    end;
+    assume
+A3: for i being set st i in I holds IT.i is finite;
+    let i be set;
+    assume i in rng IT;
+    then ex x st x in dom IT & i = IT.x by FUNCT_1:def 5;
+    hence thesis by A1,A3;
+  end;
+end;
+ 
+:: new, 2009.08.26, A.T
+
+theorem
+  B is infinite implies not B in [:A,B:]
+  proof assume that
+Z1: B is infinite and
+Z2: B in [:A,B:];
+  ex x st x in A & B = [x,{x}] by Z2,ZFMISC_1:154;
+ hence thesis by Z1;
+end;
+ 
+:: new, 2009.09.30, A.T.
+
+registration
+ let I be set, f be I-defined Function;
+ cluster finite I-defined f-compatible Function;
+ existence
+  proof
+   take {};
+   thus thesis by FUNCT_1:174,RELAT_1:206;
+  end;
+end;
+
+registration
+ let X,Y be set;
+ cluster finite X-defined Y-valued Function;
+ existence
+  proof
+   take {};
+   thus thesis by RELAT_1:206;
+  end;
+end;
+
+registration
+  let A be set, F be finite Relation;
+  cluster A|F -> finite;
+  coherence
+  proof
+    A|F c= F by RELAT_1:117;
+    hence thesis;
+  end;
+end;
+
+registration
+  let A be set, F be finite Relation;
+  cluster F|A -> finite;
+  coherence
+  proof
+    F|A c= F by RELAT_1:88;
+    hence thesis;
+  end;
+end;
+
+registration
+  let A be finite set, F be Function;
+  cluster F|A -> finite;
+  coherence
+  proof
+    dom(F|A) c= A by RELAT_1:87;
+    hence thesis by Th29;
+  end;
+end;
+
+registration
+  let R be finite Relation;
+  cluster field R -> finite;
+  coherence;
+end;

@@ -1,0 +1,1008 @@
+:: On the concept of the triangulation
+::  by Beata Madras
+::
+:: Received October 28, 1995
+:: Copyright (c) 1995 Association of Mizar Users
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, XBOOLE_0, ORDERS_1, ORDERS_2, WELLORD1,
+      FINSET_1, XXREAL_0, TARSKI, STRUCT_0, FINSUB_1, SETFAM_1, RELAT_2,
+      RELAT_1, CARD_1, PRE_POLY, FINSEQ_1, PROB_1, PBOOLE, NAT_1, FUNCT_1,
+      ARYTM_3, FUNCOP_1, FUNCT_2, QC_LANG1, ORDINAL2, FINSEQ_2, PARTFUN1,
+      TRIANG_1;
+ notations TARSKI, XBOOLE_0, SUBSET_1, CARD_1, NUMBERS, RELAT_1, RELAT_2,
+      SETFAM_1, ORDERS_1, DOMAIN_1, NAT_1, FUNCT_1, PARTFUN1, FUNCT_2,
+      FINSET_1, FINSEQ_1, FINSEQ_2, FINSUB_1, STRUCT_0, WELLORD1, SEQM_3,
+      PBOOLE, ORDERS_2, FINSEQOP, FUNCOP_1, XXREAL_0, PRE_POLY;
+ constructors SETFAM_1, WELLORD2, DOMAIN_1, FUNCT_3, FINSUB_1, XXREAL_0, NAT_1,
+      TOLER_1, FINSEQOP, PBOOLE, ORDERS_2, SEQM_3, SEQ_1, XREAL_0, MEMBERED,
+      RELSET_1, PRE_POLY;
+ registrations XBOOLE_0, SUBSET_1, SETFAM_1, RELAT_1, ORDINAL1, FINSET_1,
+      FINSUB_1, NUMBERS, XXREAL_0, NAT_1, FINSEQ_1, STRUCT_0, ORDERS_2,
+      MEMBERED, VALUED_0, CARD_1, RELSET_1, FUNCT_1, FUNCT_2, PRE_POLY;
+ requirements REAL, NUMERALS, BOOLE, SUBSET, ARITHM;
+ definitions RELAT_2, TARSKI, SETFAM_1, FUNCT_1, SEQM_3, WELLORD1, ORDERS_2,
+      FINSEQ_2, SUBSET_1;
+ theorems RELAT_1, ORDERS_2, RELAT_2, ZFMISC_1, TARSKI, SUBSET_1, ORDERS_1,
+      FINSUB_1, NAT_1, FUNCT_2, PBOOLE, FUNCT_1, FINSEQ_1, CARD_2, FINSEQ_4,
+      FINSEQ_2, FUNCOP_1, SEQM_3, SETFAM_1, XBOOLE_0, XBOOLE_1, XXREAL_0,
+      ORDINAL1, PARTFUN1, PRE_POLY;
+ schemes PBOOLE, CLASSES1, MSSUBFAM, PRE_POLY;
+
+begin
+
+reserve A,x,y,z,u for set,
+  m,n for Element of NAT;
+
+registration
+  let X be non empty set, R be Order of X;
+  cluster RelStr (#X,R#) -> non empty;
+  coherence;
+end;
+
+theorem
+  {}|_2 A = {};
+
+theorem
+  for F being non empty Poset, A be Subset of F st A is finite & A <> {}
+  & for B,C being Element of F st B in A & C in A holds B <= C or C <= B ex m
+being Element of F st m in A & for C being Element of F st C in A holds m <= C
+proof
+  let F be non empty Poset;
+  defpred P[set] means $1 <> {} implies ex m being Element of F st m in $1 &
+  for C being Element of F st C in $1 holds m <= C;
+  let A be Subset of F such that
+A1: A is finite and
+A2: A <> {} and
+A3: for B,C being Element of F st B in A & C in A holds B <= C or C <= B;
+A4: now
+    let x be Element of F, B be Subset of F such that
+A5: x in A and
+A6: B c= A and
+A7: P[B];
+    reconsider x9 = x as Element of F;
+    now
+      per cases;
+      suppose
+A8:     not ex y being Element of F st y in B & y <=x9;
+        assume B \/ {x} <> {};
+        take m = x9;
+        x in {x} by TARSKI:def 1;
+        hence m in B \/ {x} by XBOOLE_0:def 3;
+        let C be Element of F;
+        assume C in B \/ {x};
+        then
+A9:     C in B or C in {x} by XBOOLE_0:def 3;
+        then not C <=x9 or C=x by A8,TARSKI:def 1;
+        hence m <= C by A3,A5,A6,A9,TARSKI:def 1;
+      end;
+      suppose
+A10:    ex y being Element of F st y in B & y <=x9;
+        assume B \/ {x} <> {};
+        consider y being Element of F such that
+A11:    y in B and
+A12:    y <=x9 by A10;
+        consider m being Element of F such that
+A13:    m in B and
+A14:    for C being Element of F st C in B holds m <= C by A7,A11;
+        take m;
+        thus m in B \/ {x} by A13,XBOOLE_0:def 3;
+        let C be Element of F;
+        assume C in B \/ {x};
+        then
+A15:    C in B or C in {x} by XBOOLE_0:def 3;
+        m <= y by A11,A14;
+        then m <= x9 by A12,ORDERS_2:26;
+        hence m <= C by A14,A15,TARSKI:def 1;
+      end;
+    end;
+    hence P[B \/ {x}];
+  end;
+A16: P[{}(the carrier of F)];
+  P[A] from PRE_POLY:sch 2(A1,A16,A4);
+  hence thesis by A2;
+end;
+
+registration
+  let P be non empty Poset, A be non empty finite Subset of P, x be Element of
+  P;
+  cluster InitSegm(A,x) -> finite;
+  coherence;
+end;
+
+begin :: Abstract Complexes
+
+definition
+ canceled;
+  let C be non empty Poset;
+  func symplexes(C) -> Subset of Fin the carrier of C equals
+  {A where A is
+  Element of Fin the carrier of C : the InternalRel of C linearly_orders A};
+  coherence
+  proof
+    set S = {A where A is Element of Fin the carrier of C : the InternalRel of
+    C linearly_orders A};
+    S c= Fin the carrier of C
+    proof
+      let x;
+      assume x in S;
+      then ex a be Element of Fin the carrier of C st x = a & the InternalRel
+      of C linearly_orders a;
+      hence thesis;
+    end;
+    hence thesis;
+  end;
+end;
+
+registration
+  let C be non empty Poset;
+  cluster symplexes(C) -> with_non-empty_element;
+  coherence
+  proof
+    consider x be Element of C;
+    reconsider a = {x} as Element of Fin the carrier of C by FINSUB_1:def 5;
+A1: the InternalRel of C is_connected_in a
+    proof
+      let k,l be set;
+      assume that
+A2:   k in a and
+A3:   l in a and
+A4:   k <> l;
+      k = x by A2,TARSKI:def 1;
+      hence thesis by A3,A4,TARSKI:def 1;
+    end;
+A5: field the InternalRel of C = the carrier of C by ORDERS_1:97;
+    then the InternalRel of C is_antisymmetric_in the carrier of C by
+    RELAT_2:def 12;
+    then
+A6: the InternalRel of C is_antisymmetric_in a by ORDERS_1:94;
+    the InternalRel of C is_transitive_in the carrier of C by A5, RELAT_2:
+    def 16;
+    then
+A7: the InternalRel of C is_transitive_in a by ORDERS_1:95;
+    the InternalRel of C is_reflexive_in the carrier of C by A5,RELAT_2:
+    def 9;
+    then the InternalRel of C is_reflexive_in a by ORDERS_1:93;
+    then the InternalRel of C linearly_orders a by
+    A6,A7,A1,ORDERS_1:def 8;
+    then a in {A where A is Element of Fin the carrier of C : the InternalRel
+    of C linearly_orders A};
+    hence thesis by SETFAM_1:def 11;
+  end;
+end;
+
+reserve C for non empty Poset;
+
+canceled 2;
+
+theorem Th5:
+  for x be Element of C holds {x} in symplexes(C)
+proof
+  let x be Element of C;
+  reconsider a = {x} as Element of Fin the carrier of C by FINSUB_1:def 5;
+A1: the InternalRel of C is_connected_in a
+  proof
+    let k,l be set;
+    assume that
+A2: k in a and
+A3: l in a and
+A4: k <> l;
+    k = x by A2,TARSKI:def 1;
+    hence thesis by A3,A4,TARSKI:def 1;
+  end;
+A5: field the InternalRel of C = the carrier of C by ORDERS_1:97;
+  then the InternalRel of C is_antisymmetric_in the carrier of C by
+  RELAT_2
+  :def 12;
+  then
+A6: the InternalRel of C is_antisymmetric_in a by ORDERS_1:94;
+  the InternalRel of C is_transitive_in the carrier of C by A5, RELAT_2:
+  def 16;
+  then
+A7: the InternalRel of C is_transitive_in a by ORDERS_1:95;
+  the InternalRel of C is_reflexive_in the carrier of C by A5,RELAT_2:def
+  9;
+  then the InternalRel of C is_reflexive_in a by ORDERS_1:93;
+  then the InternalRel of C linearly_orders a by A6,A7,A1,ORDERS_1:def 8;
+  hence thesis;
+end;
+
+theorem
+  {} in symplexes(C)
+proof
+A1: {} is Subset of C by SUBSET_1:4;
+  then reconsider a = {} as Element of Fin the carrier of C by FINSUB_1:def 5;
+A2: field the InternalRel of C = the carrier of C by ORDERS_1:97;
+  then the InternalRel of C is_antisymmetric_in the carrier of C by
+  RELAT_2
+  :def 12;
+  then
+A3: the InternalRel of C is_antisymmetric_in a by A1,ORDERS_1:94;
+A4: the InternalRel of C is_connected_in a
+  proof
+    let k,l be set;
+    assume that
+A5: k in a and
+    l in a and
+    k <> l;
+    thus thesis by A5;
+  end;
+  the InternalRel of C is_transitive_in the carrier of C by A2, RELAT_2:
+  def 16;
+  then
+A6: the InternalRel of C is_transitive_in a by A1,ORDERS_1:95;
+  the InternalRel of C is_reflexive_in the carrier of C by A2,RELAT_2:def
+  9;
+  then the InternalRel of C is_reflexive_in a by A1,ORDERS_1:93;
+  then the InternalRel of C linearly_orders a by A3,A6,A4,ORDERS_1:def 8;
+  hence thesis;
+end;
+
+theorem Th7:
+  for x, s be set st x c= s & s in symplexes(C) holds x in symplexes(C)
+proof
+  let x, s be set;
+  assume that
+A1: x c= s and
+A2: s in symplexes(C);
+  consider s1 be Element of Fin the carrier of C such that
+A3: s1 = s and
+A4: the InternalRel of C linearly_orders s1 by A2;
+  s1 c= the carrier of C by FINSUB_1:def 5;
+  then x c= the carrier of C by A1,A3,XBOOLE_1:1;
+  then reconsider x1 = x as Element of Fin the carrier of C by A1,A2,
+  FINSUB_1:
+  def 5;
+  the InternalRel of C linearly_orders x by A1,A3,A4,ORDERS_1:134;
+  then
+  x1 in {A where A is Element of Fin the carrier of C : the InternalRel of
+  C linearly_orders A};
+  hence thesis;
+end;
+
+canceled 2;
+
+theorem Th10:
+  for C be non empty Poset, A being non empty Element of symplexes
+  (C) st card A = n holds dom(SgmX(the InternalRel of C, A)) = Seg n
+proof
+  let C be non empty Poset, A be non empty Element of symplexes(C);
+  set f = SgmX(the InternalRel of C, A);
+  A in {A1 where A1 is Element of Fin the carrier of C : the InternalRel
+  of C linearly_orders A1};
+  then
+A1: ex A1 being Element of Fin the carrier of C st A1 = A & the InternalRel
+  of C linearly_orders A1;
+  assume card A = n;
+  then len f = n by A1,PRE_POLY:11;
+  hence thesis by FINSEQ_1:def 3;
+end;
+
+registration
+  let C be non empty Poset;
+  cluster non empty Element of symplexes(C);
+  existence
+  proof
+    consider x be Element of C;
+    {x} in symplexes(C) by Th5;
+    hence thesis;
+  end;
+end;
+
+begin :: Triangulations
+
+definition
+  mode SetSequence is ManySortedSet of NAT;
+end;
+
+definition
+  let IT be SetSequence;
+  attr IT is lower_non-empty means
+  :Def4:
+  for n be Nat st IT.n is non empty
+  holds for m be Nat st m < n holds IT.m is non empty;
+end;
+
+registration
+  cluster lower_non-empty SetSequence;
+  existence
+  proof
+    set f = NAT --> 1;
+    reconsider f as ManySortedSet of NAT;
+    take f;
+    for n be Nat st f.n is non empty holds for m be Nat st m < n holds f.m
+    is non empty
+    proof
+      let n be Nat;
+      assume f.n is non empty;
+      let m be Nat;
+      assume m < n;
+      m in NAT by ORDINAL1:def 13;
+      hence thesis by FUNCOP_1:13;
+    end;
+    hence thesis by Def4;
+  end;
+end;
+
+definition
+  let X be SetSequence;
+  func FuncsSeq X -> SetSequence means
+  :Def5:
+  for n be Nat holds it.n = Funcs( X.(n+1),X.n);
+  existence
+  proof
+    deffunc U(Element of NAT) = Funcs(X.($1+1),X.$1);
+    consider f be ManySortedSet of NAT such that
+A1: for n being Element of NAT holds f.n = U(n) from PBOOLE:sch 5;
+    reconsider f as SetSequence;
+    take f;
+    let n be Nat;
+    n in NAT by ORDINAL1:def 13;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let a,b be SetSequence;
+    assume that
+A2: for n be Nat holds a.n = Funcs(X.(n+1),X.n) and
+A3: for n be Nat holds b.n = Funcs(X.(n+1),X.n);
+    now
+      let n be set;
+      assume n in NAT;
+      then reconsider n1 = n as Element of NAT;
+      a.n1 = Funcs(X.(n1+1),X.n1) by A2;
+      hence b.n c= a.n by A3;
+    end;
+    then
+A4: b c= a by PBOOLE:def 5;
+    now
+      let n be set;
+      assume n in NAT;
+      then reconsider n1 = n as Element of NAT;
+      a.n1 = Funcs(X.(n1+1),X.n1) by A2;
+      hence a.n c= b.n by A3;
+    end;
+    then a c= b by PBOOLE:def 5;
+    hence thesis by A4,PBOOLE:def 13;
+  end;
+end;
+
+registration
+  let X be lower_non-empty SetSequence;
+  let n be Nat;
+  cluster (FuncsSeq X).n -> non empty;
+  coherence
+  proof
+    n < n + 1 by NAT_1:13;
+    then
+A1: X.(n+1) = {} or X.n <> {} by Def4;
+    (FuncsSeq X).n = Funcs(X.(n+1),X.n) by Def5;
+    hence thesis by A1,FUNCT_2:11;
+  end;
+end;
+
+definition
+  let n be Nat;
+  let f be Element of Funcs(Seg n,Seg(n+1));
+  func @ f -> FinSequence of REAL equals
+  f;
+  coherence
+  proof
+    consider x be Function such that
+A1: x = f and
+    dom x = Seg n and
+    rng x c= Seg(n+1) by FUNCT_2:def 2;
+    reconsider x as FinSequence of Seg(n+1) by A1,FINSEQ_2:28;
+    Seg(n+1) c= REAL by XBOOLE_1:1;
+    then x is FinSequence of REAL by FINSEQ_2:27;
+    hence thesis by A1;
+  end;
+end;
+
+definition
+  func NatEmbSeq -> SetSequence means
+  :Def7:
+  for n be Nat holds it.n = {f
+  where f is Element of Funcs(Seg n,Seg(n+1)) : @ f is increasing};
+  existence
+  proof
+    deffunc U(Element of NAT) = {f where f is Element of Funcs(Seg $1,Seg($1+1
+    )) : @ f is increasing};
+    consider F be ManySortedSet of NAT such that
+A1: for n being Element of NAT holds F.n = U(n) from PBOOLE:sch 5;
+    reconsider F as SetSequence;
+    take F;
+    let n be Nat;
+    n in NAT by ORDINAL1:def 13;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let a,b be SetSequence;
+    assume that
+A2: for n be Nat holds a.n = {f where f is Element of Funcs(Seg n,Seg(
+    n+1)) : @ f is increasing} and
+A3: for n be Nat holds b.n = {f where f is Element of Funcs(Seg n,Seg(
+    n+ 1)) : @ f is increasing};
+    now
+      let n be set;
+      assume n in NAT;
+      then reconsider n1 = n as Element of NAT;
+      a.n1 = {f where f is Element of Funcs(Seg n1,Seg(n1+1)) : @ f is
+      increasing} by A2;
+      hence b.n c= a.n by A3;
+    end;
+    then
+A4: b c= a by PBOOLE:def 5;
+    now
+      let n be set;
+      assume n in NAT;
+      then reconsider n1 = n as Element of NAT;
+      a.n1 = {f where f is Element of Funcs(Seg n1,Seg(n1+1)) : @ f is
+      increasing } by A2;
+      hence a.n c= b.n by A3;
+    end;
+    then a c= b by PBOOLE:def 5;
+    hence thesis by A4,PBOOLE:def 13;
+  end;
+end;
+
+registration
+  let n be Nat;
+  cluster NatEmbSeq.n -> non empty;
+  coherence
+  proof
+    n <= n + 1 by NAT_1:11;
+    then
+A1: Seg n c= Seg(n+1) by FINSEQ_1:7;
+A2: rng id Seg n = Seg n by RELAT_1:71;
+    dom id Seg n = Seg n by RELAT_1:71;
+    then reconsider n1 = (idseq n) as Element of Funcs(Seg n,Seg(n+1)) by A1,
+    A2,
+    FUNCT_2:def 2;
+    @ n1 is increasing;
+    then n1 in {f where f is Element of Funcs(Seg n,Seg(n+1)) : @ f is
+    increasing};
+    hence thesis by Def7;
+  end;
+end;
+
+registration
+  let n be Nat;
+  cluster -> Function-like Relation-like Element of NatEmbSeq.n;
+  coherence
+  proof
+    reconsider n9 = n as Element of NAT by ORDINAL1:def 13;
+    let x be Element of NatEmbSeq.n;
+A1: x in NatEmbSeq.n9;
+    NatEmbSeq.n = {f where f is Element of Funcs(Seg n,Seg(n+1)) : @ f is
+    increasing} by Def7;
+    then ex f being Element of Funcs(Seg n,Seg(n+1)) st x = f & @ f is
+    increasing by A1;
+    hence thesis;
+  end;
+end;
+
+definition
+  let X be SetSequence;
+  mode triangulation of X is ManySortedFunction of NatEmbSeq, FuncsSeq(X);
+end;
+
+definition
+  struct TriangStr (# SkeletonSeq -> SetSequence, FacesAssign ->
+    ManySortedFunction of NatEmbSeq, FuncsSeq(the SkeletonSeq) #);
+end;
+
+definition
+  let T be TriangStr;
+  canceled;
+  attr T is lower_non-empty means
+  :Def9:
+  the SkeletonSeq of T is lower_non-empty;
+end;
+
+registration
+  cluster lower_non-empty strict TriangStr;
+  existence
+  proof
+    set Sk = NAT --> {};
+    reconsider Sk as ManySortedSet of NAT;
+    consider A be ManySortedFunction of NatEmbSeq, FuncsSeq(Sk);
+    take TriangStr (# Sk,A #);
+    for n be Nat st Sk.n is non empty holds for m be Nat st m < n holds Sk
+    .m is non empty
+    proof
+      let n be Nat;
+      assume
+A1:   Sk.n is non empty;
+      n in NAT by ORDINAL1:def 13;
+      hence thesis by A1,FUNCOP_1:13;
+    end;
+    then Sk is lower_non-empty by Def4;
+    hence thesis by Def9;
+  end;
+end;
+
+registration
+  let T be lower_non-empty TriangStr;
+  cluster the SkeletonSeq of T -> lower_non-empty;
+  coherence by Def9;
+end;
+
+registration
+  let S be lower_non-empty SetSequence, F be ManySortedFunction of NatEmbSeq,
+  FuncsSeq S;
+  cluster TriangStr (#S,F#) -> lower_non-empty;
+  coherence by Def9;
+end;
+
+begin :: Relationship between Abstract Complexes and Triangulations
+
+definition
+  let T be TriangStr;
+  let n be Nat;
+  mode Symplex of T,n is Element of (the SkeletonSeq of T).n;
+end;
+
+definition
+  let n be Nat;
+  mode Face of n is Element of NatEmbSeq.n;
+end;
+
+definition
+  let T be lower_non-empty TriangStr, n be Nat, x be Symplex of T,n+1, f be
+  Face of n;
+  assume
+A1: (the SkeletonSeq of T).(n+1) <> {};
+  func face (x,f) -> Symplex of T,n means
+  :Def10:
+  for F,G be Function st F = (
+  the FacesAssign of T).n & G = F.f holds it = G.x;
+  existence
+  proof
+    reconsider n9 = n as Element of NAT by ORDINAL1:def 13;
+    reconsider F = (the FacesAssign of T).n9 as Function of NatEmbSeq.n9, (
+    FuncsSeq(the SkeletonSeq of T)).n9 by PBOOLE:def 18;
+    F.f in (FuncsSeq(the SkeletonSeq of T)).n9 by FUNCT_2:7;
+    then
+    F.f in Funcs((the SkeletonSeq of T).(n+1),(the SkeletonSeq of T).n) by
+    Def5;
+    then consider G be Function such that
+A2: G = F.f and
+A3: dom G = (the SkeletonSeq of T).(n+1) and
+A4: rng G c= (the SkeletonSeq of T).n by FUNCT_2:def 2;
+    G.x in rng G by A1,A3,FUNCT_1:def 5;
+    then reconsider S = G.x as Symplex of T,n by A4;
+    take S;
+    let F1,G1 be Function;
+    assume that
+A5: F1 = (the FacesAssign of T).n and
+A6: G1 = F1.f;
+    thus thesis by A2,A5,A6;
+  end;
+  uniqueness
+  proof
+    reconsider n9 = n as Element of NAT by ORDINAL1:def 13;
+    let S1,S2 be Symplex of T,n;
+    assume that
+A7: for F,G be Function st F = (the FacesAssign of T).n & G = F.f
+    holds S1 = G.x and
+A8: for F,G be Function st F = (the FacesAssign of T).n & G = F.f
+    holds S2 = G.x;
+    reconsider F = (the FacesAssign of T).n9 as Function of NatEmbSeq.n9, (
+    FuncsSeq(the SkeletonSeq of T)).n9 by PBOOLE:def 18;
+    F.f in (FuncsSeq(the SkeletonSeq of T)).n9 by FUNCT_2:7;
+    then F.f in Funcs((the SkeletonSeq of T).(n+1),(the SkeletonSeq of T).n)
+    by Def5;
+    then consider G be Function such that
+A9: G = F.f and
+    dom G = (the SkeletonSeq of T).(n+1) and
+    rng G c= (the SkeletonSeq of T).n by FUNCT_2:def 2;
+    S1 = G.x by A7,A9;
+    hence thesis by A8,A9;
+  end;
+end;
+
+definition
+  let C be non empty Poset;
+  func Triang C -> lower_non-empty strict TriangStr means
+  (the SkeletonSeq of
+  it).0 = { {} } & (for n be Nat st n > 0 holds (the SkeletonSeq of it).n = {
+  SgmX(the InternalRel of C, A) where A is non empty Element of symplexes(C) :
+card A = n }) & for n be Nat, f be Face of n, s be Element of (the SkeletonSeq
+  of it).(n+1) st s in (the SkeletonSeq of it).(n+1) for A be non empty Element
+of symplexes(C) st SgmX(the InternalRel of C, A) = s holds face (s,f) = (SgmX(
+  the InternalRel of C, A)) * f;
+  existence
+  proof
+    deffunc U(Element of NAT) = IFEQ($1,0,{{}},{ SgmX(the InternalRel of C, s)
+    where s is non empty Element of symplexes(C) : card s = $1});
+    consider Sk being SetSequence such that
+A1: for n holds Sk.n = U(n) from PBOOLE:sch 5;
+A2: now
+      let n be Nat;
+      assume
+A3:   n <> 0;
+      n in NAT by ORDINAL1:def 13;
+      hence
+      Sk.n = IFEQ(n,0,{{}},{ SgmX(the InternalRel of C, s) where s is non
+      empty Element of symplexes(C) : card s = n}) by A1
+        .= {SgmX(the InternalRel of C, s) where s is non empty Element of
+      symplexes(C) : card s = n} by A3,FUNCOP_1:def 8;
+    end;
+A4: Sk.0 = IFEQ(0,0,{{}},{ SgmX(the InternalRel of C, s) where s is non
+    empty Element of symplexes(C) : card s = 0}) by A1
+      .= { {} } by FUNCOP_1:def 8;
+    Sk is lower_non-empty
+    proof
+      defpred X[Nat] means Sk.$1 is non empty;
+      let n be Nat;
+A5:   for m st m < n & X[m+1] holds X[m]
+      proof
+        let m;
+        assume that
+        m < n and
+A6:     Sk.(m+1) is non empty;
+        consider g be set such that
+A7:     g in Sk.(m+1) by A6,XBOOLE_0:def 1;
+        Sk.(m+1) = {SgmX(the InternalRel of C, s) where s is non empty
+        Element of symplexes(C) : card s = m+1} by A2;
+        then consider s be non empty Element of symplexes(C) such that
+        g = SgmX(the InternalRel of C, s) and
+A8:     card s = m+1 by A7;
+        consider x be Element of s;
+        reconsider sx = s \ {x} as finite set;
+        sx \/ {x} = s \/ {x} by XBOOLE_1:39;
+        then
+A9:     sx \/ {x} = s by XBOOLE_1:12;
+        not x in sx by ZFMISC_1:64;
+        then
+A10:    m + 1 = card sx + 1 by A8,A9,CARD_2:54;
+        per cases;
+        suppose
+          m = 0;
+          hence thesis by A4;
+        end;
+        suppose
+A11:      m <> 0;
+          then reconsider sx as non empty Element of symplexes(C) by A10,Th7,
+          XBOOLE_1:36;
+          SgmX(the InternalRel of C, sx) in {SgmX(the InternalRel of C,
+s1) where s1 is non empty Element of symplexes(C) : card s1 = m} by A10;
+          hence thesis by A2,A11;
+        end;
+      end;
+      assume
+A12:  X[n];
+A13:  for m be Element of NAT st m <= n holds X[m] from PRE_POLY:sch 1(A12,A5);
+      let m be Nat;
+      assume
+A14:  m < n;
+      m in NAT by ORDINAL1:def 13;
+      hence thesis by A13,A14;
+    end;
+    then reconsider Sk as lower_non-empty SetSequence;
+    defpred X[set,set,set] means ex n being Nat, y being Face of n st $2 = y &
+    $3 = n & for s be Element of Sk.(n+1) st s in Sk.(n+1) for A be non empty
+    Element of symplexes(C) st SgmX(the InternalRel of C, A) = s for g1 being
+    Function st g1 = $1 holds g1.s = (SgmX(the InternalRel of C, A)) * y;
+A15: for i be set st i in NAT holds for x be set st x in NatEmbSeq.i ex y
+    be set st y in (FuncsSeq Sk).i & X[y,x,i]
+    proof
+      let i be set;
+      assume i in NAT;
+      then reconsider n = i as Element of NAT;
+      let x be set;
+      assume
+A16:  x in NatEmbSeq.i;
+      then reconsider y = x as Face of n;
+      reconsider y1 = y as Function;
+      x in {f where f is Element of Funcs(Seg n,Seg(n+1)) : @ f is
+      increasing} by A16,Def7;
+      then
+A17:  ex f be Element of Funcs(Seg n,Seg(n+1)) st f = x & @ f is increasing;
+      then consider y2 be Function such that
+A18:  y2 = y1 and
+A19:  dom y2 = Seg n and
+A20:  rng y2 c= Seg(n+1) by FUNCT_2:def 2;
+      reconsider y2 as FinSequence by A19,FINSEQ_1:def 2;
+A21:  len y2 = n by A19,FINSEQ_1:def 3;
+      defpred X[set,set] means ex f being Function st f = $1 & $2 = f * y1;
+A22:  for s being set st s in Sk.(n+1) ex u st X[s,u]
+      proof
+        let s be set;
+        assume s in Sk.(n+1);
+        then s in { SgmX(the InternalRel of C, s9) where s9 is non empty
+        Element of symplexes(C) : card s9 = n+1} by A2;
+        then consider A be non empty Element of symplexes(C) such that
+A23:    SgmX(the InternalRel of C, A) = s and
+        card A = n+1;
+        reconsider u = (SgmX(the InternalRel of C, A)) * y as set;
+        consider f be Function such that
+A24:    f = s by A23;
+        take u, f;
+        thus thesis by A23,A24;
+      end;
+      consider g being Function such that
+A25:  dom g = Sk.(n+1) and
+A26:  for s being set st s in Sk.(n+1) holds X[s,g.s] from CLASSES1:
+      sch 1(A22);
+      reconsider y2 as FinSequence of Seg(n+1) by A20,FINSEQ_1:def 4;
+      reconsider g9 = g as set;
+      take g9;
+A27:  y2 is one-to-one
+      proof
+        let a,b be set;
+        assume that
+A28:    a in dom y2 and
+A29:    b in dom y2 and
+A30:    y2.a = y2.b;
+        reconsider a,b as Element of NAT by A28,A29;
+        now
+          assume
+A31:      a <> b;
+          per cases by A31,XXREAL_0:1;
+          suppose
+            a < b;
+            hence contradiction by A17,A18,A28,A29,A30,SEQM_3:def 1;
+          end;
+          suppose
+            b < a;
+            hence contradiction by A17,A18,A28,A29,A30,SEQM_3:def 1;
+          end;
+        end;
+        hence thesis;
+      end;
+      rng g c= Sk.n
+      proof
+        reconsider F = symplexes(C) as with_non-empty_element Subset of Fin
+        the carrier of C;
+        let z;
+        assume z in rng g;
+        then consider a be set such that
+A32:    a in dom g and
+A33:    z = g.a by FUNCT_1:def 5;
+        consider f being Function such that
+A34:    f = a and
+A35:    g.a = f * y2 by A18,A25,A26,A32;
+        per cases;
+        suppose
+A36:      n = 0;
+          then Seg n = {};
+          then dom (f * y1) = {} by A18,A19,RELAT_1:44 ,
+          XBOOLE_1:3;
+          then z = {} by A18,A33,A35;
+          hence thesis by A4,A36,TARSKI:def 1;
+        end;
+        suppose
+A37:      n <> 0;
+          f in { SgmX(the InternalRel of C, s1) where s1 is non empty
+          Element of symplexes(C) : card s1 = n+1} by A2,A25,A32,A34;
+          then consider s1 be non empty Element of symplexes(C) such that
+A38:      SgmX(the InternalRel of C, s1) = f and
+A39:      card s1 = n+1;
+          s1 in { A where A is Element of Fin the carrier of C : the
+          InternalRel of C linearly_orders A};
+          then
+A40:      ex s19 be Element of Fin the carrier of C st s19 = s1 & the
+          InternalRel of C linearly_orders s19;
+          then rng f = s1 by A38,PRE_POLY:def 2;
+          then reconsider f as FinSequence of s1 by A38,FINSEQ_1:def 4;
+          reconsider f as FinSequence of RelStr (#s1,(the InternalRel of C)|_2
+            s1#);
+A41:      f is one-to-one by A38,A40,PRE_POLY:10;
+A42:      dom f = Seg(n+1) by A38,A39,Th10;
+A43:      f is Function of dom f, s1 by FINSEQ_2:30;
+          then f is Function of Seg(n+1), the carrier of C by A42,
+          FUNCT_2:
+          9;
+          then reconsider
+          z1 = z as FinSequence of RelStr (#the carrier of C, the
+            InternalRel of C#) by A33,A35,FINSEQ_2:36;
+          reconsider f as Function of Seg(n+1), the carrier of C by A42,A43,
+          FUNCT_2:9;
+A44:      dom (f * y2) = Seg n by A19,A20,A42,RELAT_1:46;
+          rng(f * y2) c= the carrier of C by FINSEQ_1:def 4;
+          then reconsider
+          r = rng(f * y2) as Element of Fin the carrier of C by FINSUB_1:def 5;
+          rng(f * y2) c= s1 by RELAT_1:def 19;
+          then reconsider s9 = r as non empty Element of F by A37,A44,Th7,
+          RELAT_1:65;
+          for n1,m1 be Nat st n1 in dom z1 & m1 in dom z1 & n1 < m1 holds
+          z1/.n1 <> z1/.m1 & [z1/.n1,z1/.m1] in the InternalRel of C
+          proof
+            let n1, m1 be Nat;
+            assume that
+A45:        n1 in dom z1 and
+A46:        m1 in dom z1 and
+A47:        n1 < m1;
+            y2.m1 in Seg(n+1) by A19,A33,A35,A44,A46,FINSEQ_2:13;
+            then reconsider ym = y2.m1 as Element of NAT;
+            y2.n1 in Seg(n+1) by A19,A33,A35,A44,A45,FINSEQ_2:13;
+            then reconsider yn = y2.n1 as Element of NAT;
+A48:        yn < ym by A17,A18,A19,A33,A35,A44,A45,A46,A47,SEQM_3:def 1;
+A49:        ym in rng y2 by A19,A33,A35,A44,A46,FUNCT_1:def 5;
+            then reconsider
+            fm = f.ym as Element of RelStr (#s1,(the InternalRel of
+              C)|_2 s1#) by A20,A42, FINSEQ_2:13;
+A50:        fm = f/.ym by A20,A42,A49,PARTFUN1:def 8;
+            z1.m1 = fm by A33,A35,A46,FUNCT_1:22;
+            then reconsider
+            zm = z1.m1 as Element of RelStr (#s1,(the InternalRel
+              of C)|_2 s1#);
+A51:        zm = z1/.m1 by A46,PARTFUN1:def 8;
+A52:        z1.m1 = f.(y2.m1) by A33,A35,A46,FUNCT_1:22;
+A53:        z1.n1 = f.(y2.n1) by A33,A35,A45,FUNCT_1:22;
+A54:        yn in rng y2 by A19,A33,A35,A44,A45,FUNCT_1:def 5;
+            then reconsider
+            fn = f.yn as Element of RelStr (#s1,(the InternalRel of
+              C)|_2 s1#) by A20,A42, FINSEQ_2:13;
+            z1.n1 = fn by A33,A35,A45,FUNCT_1:22;
+            then reconsider
+            zn = z1.n1 as Element of RelStr (#s1,(the InternalRel
+              of C)|_2 s1#);
+A55:        zn = z1/.n1 by A45,PARTFUN1:def 8;
+            fn = f/.yn by A20,A42,A54,PARTFUN1:def 8;
+            hence thesis by A20,A38,A40,A42,A53,A52,A48,A54,A49,A50,A55,A51
+            ,PRE_POLY:def 2;
+          end;
+          then
+A56:      z1 = SgmX(the InternalRel of C, s9) by A33,A35,PRE_POLY:9;
+          len(f * y2) = n by A20,A21,A42,FINSEQ_2:33;
+          then card s9 = n by A27,A41,FINSEQ_4:77;
+          then z in {SgmX(the InternalRel of C, s) where s is non empty
+          Element of symplexes(C) : card s = n} by A56;
+          hence thesis by A2,A37;
+        end;
+      end;
+      then g9 in Funcs(Sk.(n+1),Sk.n) by A25,FUNCT_2:def 2;
+      hence g9 in (FuncsSeq Sk).i by Def5;
+      reconsider y = x as Face of n by A16;
+      take n;
+      take y;
+      thus x = y & i = n;
+      let s be Element of Sk.(n+1);
+      assume s in Sk.(n+1);
+      then
+A57:  ex f being Function st f = s & g.s = f * y1 by A26;
+      let A be non empty Element of symplexes(C) such that
+A58:  SgmX(the InternalRel of C, A) = s;
+      let g1 be Function;
+      assume g1 = g9;
+      hence thesis by A58,A57;
+    end;
+    consider F being ManySortedFunction of NatEmbSeq, FuncsSeq Sk such that
+A59: for i being set st i in NAT ex f being Function of NatEmbSeq.i, (
+FuncsSeq Sk).i st f = F.i & for x being set st x in NatEmbSeq.i holds X[f.x,x,i
+    ] from MSSUBFAM:sch 1 (A15);
+    take TriangStr(#Sk,F#);
+    thus (the SkeletonSeq of TriangStr(#Sk,F#)).0 = { {} } by A4;
+    thus for n be Nat st n > 0 holds (the SkeletonSeq of TriangStr(#Sk,F#)).n
+= { SgmX(the InternalRel of C, s) where s is non empty Element of symplexes(C)
+    : card s = n} by A2;
+    let n be Nat;
+    n in NAT by ORDINAL1:def 13;
+    then consider f1 be Function of NatEmbSeq.n, (FuncsSeq Sk).n such that
+A60: f1 = F.n and
+A61: for x being set st x in NatEmbSeq.n ex m being Nat, y being Face
+of m st x = y & n = m & for s be Element of Sk.(m+1) st s in Sk.(m+1) for A be
+non empty Element of symplexes(C) st SgmX(the InternalRel of C, A) = s for g1
+being Function st g1 = f1.x holds g1.s = (SgmX(the InternalRel of C, A)) * y by
+    A59;
+    let x be Face of n;
+    let s be Element of (the SkeletonSeq of TriangStr(#Sk,F#)).(n+1);
+    assume
+A62: s in (the SkeletonSeq of TriangStr(#Sk,F#)).(n+1);
+    let A be non empty Element of symplexes(C);
+    assume
+A63: SgmX(the InternalRel of C, A) = s;
+A64: ex m being Nat, y being Face of m st x = y & n = m & for s be
+Element of Sk.(m+1) st s in Sk.(m+1) for A be non empty Element of symplexes(C)
+st SgmX(the InternalRel of C, A) = s for g1 being Function st g1 = f1.x holds
+    g1.s = (SgmX(the InternalRel of C, A)) * y by A61;
+    f1.x in (FuncsSeq Sk).n;
+    then f1.x in Funcs(Sk.(n+1),Sk.n) by Def5;
+    then consider G be Function such that
+A65: f1.x = G and
+    dom G = Sk.(n+1) and
+    rng G c= Sk.n by FUNCT_2:def 2;
+    face (s,x) = G.s by A60,A62,A65,Def10;
+    hence thesis by A62,A63,A64,A65;
+  end;
+  uniqueness
+  proof
+    let T1,T2 be lower_non-empty strict TriangStr such that
+A66: (the SkeletonSeq of T1).0 = { {} } and
+A67: for n be Nat st n > 0 holds (the SkeletonSeq of T1).n = { SgmX(
+the InternalRel of C, A) where A is non empty Element of symplexes(C) : card A
+    = n } and
+A68: for n be Nat, f be Face of n, s be Element of (the SkeletonSeq
+of T1).(n+1) st s in (the SkeletonSeq of T1).(n+1) for A be non empty Element
+of symplexes(C) st SgmX(the InternalRel of C, A) = s holds face (s,f) = (SgmX(
+    the InternalRel of C, A)) * f and
+A69: (the SkeletonSeq of T2).0 = { {} } and
+A70: for n be Nat st n > 0 holds (the SkeletonSeq of T2).n = { SgmX(
+the InternalRel of C, A) where A is non empty Element of symplexes(C) : card A
+    = n } and
+A71: for n be Nat, f be Face of n, s be Element of (the SkeletonSeq
+of T2).(n+1) st s in (the SkeletonSeq of T2).(n+1) for A be non empty Element
+of symplexes(C) st SgmX(the InternalRel of C, A) = s holds face (s,f) = (SgmX(
+    the InternalRel of C, A)) * f;
+A72: for x be set st x in NAT holds (the SkeletonSeq of T1).x = (the
+    SkeletonSeq of T2).x
+    proof
+      let x be set;
+      assume x in NAT;
+      then reconsider n = x as Element of NAT;
+      now
+        per cases;
+        suppose
+          n = 0;
+          hence (the SkeletonSeq of T1).n = (the SkeletonSeq of T2).n by A66,
+          A69;
+        end;
+        suppose
+A73:      n <> 0;
+          then (the SkeletonSeq of T1).n = {SgmX(the InternalRel of C, s)
+          where s is non empty Element of symplexes(C) : card s = n} by A67;
+          hence (the SkeletonSeq of T1).n = (the SkeletonSeq of T2).n by A70,
+          A73;
+        end;
+      end;
+      hence thesis;
+    end;
+    then
+A74: the SkeletonSeq of T1 = the SkeletonSeq of T2 by PBOOLE:3;
+    now
+      let i be set;
+      assume i in NAT;
+      then reconsider n=i as Element of NAT;
+      reconsider F1n = (the FacesAssign of T1).n, F2n = (the FacesAssign of T2
+).n as Function of NatEmbSeq.n, (FuncsSeq(the SkeletonSeq of T1)).n by A74,
+      PBOOLE:def 18;
+A75:  dom F2n = NatEmbSeq.n by FUNCT_2:def 1;
+A76:  now
+        let x;
+        assume x in NatEmbSeq.n;
+        then reconsider x1 = x as Face of n;
+        F1n.x1 in (FuncsSeq(the SkeletonSeq of T1)).n;
+        then F1n.x1 in Funcs((the SkeletonSeq of T1).(n+1),(the SkeletonSeq
+        of T1). n) by Def5;
+        then consider F1nx be Function such that
+A77:    F1nx = F1n.x1 and
+A78:    dom F1nx = (the SkeletonSeq of T1).(n+1) and
+        rng F1nx c= (the SkeletonSeq of T1).n by FUNCT_2:def 2;
+        F2n.x1 in (FuncsSeq(the SkeletonSeq of T1)).n;
+        then F2n.x1 in Funcs((the SkeletonSeq of T1).(n+1),(the SkeletonSeq
+        of T1). n) by Def5;
+        then consider F2nx be Function such that
+A79:    F2nx = F2n.x1 and
+A80:    dom F2nx = (the SkeletonSeq of T1).(n+1) and
+        rng F2nx c= (the SkeletonSeq of T1).n by FUNCT_2:def 2;
+        now
+          let y;
+          assume
+A81:      y in (the SkeletonSeq of T1).(n+1);
+          then reconsider y1 = y as Symplex of T1,(n+1);
+A82:      F1nx.y1 = face (y1,x1) by A77,A81,Def10;
+          reconsider y2 = y as Symplex of T2,(n+1) by A72,A81;
+A83:      F2nx.y2 = face (y2,x1) by A74,A79,A81,Def10;
+          y1 in {SgmX(the InternalRel of C, s) where s is non empty
+          Element of symplexes(C) : card s = n+1} by A67,A81;
+          then consider A be non empty Element of symplexes(C) such that
+A84:      SgmX(the InternalRel of C, A) = y1 and
+          card A = n+1;
+          face (y1,x1) = (SgmX(the InternalRel of C, A)) * x1 by A68,
+          A81,A84;
+          hence F1nx.y = F2nx.y by A71,A74,A81,A82,A83,A84;
+        end;
+        hence F1n.x = F2n.x by A77,A78,A79,A80,FUNCT_1:9;
+      end;
+      dom F1n = NatEmbSeq.n by FUNCT_2:def 1;
+      hence (the FacesAssign of T1).i = (the FacesAssign of T2).i by A75,
+      A76,FUNCT_1:9;
+    end;
+    hence thesis by A74,PBOOLE:3;
+  end;
+end;

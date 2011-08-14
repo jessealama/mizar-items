@@ -1,0 +1,3535 @@
+:: The Field of Quotients over an Integral Domain
+::  by Christoph Schwarzweller
+::
+:: Received May 4, 1998
+:: Copyright (c) 1998 Association of Mizar Users
+ 
+environ
+
+ vocabularies XBOOLE_0, STRUCT_0, SUBSET_1, ZFMISC_1, SUPINF_2, ALGSTR_0,
+      MESFUNC1, MCART_1, VECTSP_2, RELAT_1, ARYTM_3, BINOP_1, RLVECT_1,
+      LATTICES, SETFAM_1, FUNCSDOM, GROUP_1, ARYTM_1, FUNCT_1, VECTSP_1,
+      MSSUBFAM, TARSKI, QUOFIELD;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELAT_1, MCART_1, FUNCT_1,
+      RELSET_1, PARTFUN1, FUNCT_2, SETFAM_1, BINOP_1, DOMAIN_1, STRUCT_0,
+      ALGSTR_0, RLVECT_1, GROUP_1, VECTSP_2, VECTSP_1, TOPS_2, FUNCSDOM,
+      GRCAT_1, GCD_1, GROUP_6;
+ constructors PARTFUN1, DOMAIN_1, TOPS_2, GRCAT_1, GROUP_6, GCD_1, ALGSTR_1,
+      RELSET_1;
+ registrations SUBSET_1, RELSET_1, FUNCT_2, STRUCT_0, VECTSP_1, ALGSTR_1,
+      GCD_1;
+ requirements SUBSET, BOOLE;
+ definitions VECTSP_1, VECTSP_2, STRUCT_0, XBOOLE_0, ALGSTR_0;
+ theorems TARSKI, MCART_1, VECTSP_1, VECTSP_2, SUBSET_1, BINOP_1, RLVECT_1,
+      FUNCT_1, FUNCT_2, GCD_1, RELAT_1, RELSET_1, GRCAT_1, TOPS_2, XBOOLE_0,
+      GROUP_1, GROUP_6, STRUCT_0;
+ schemes SUBSET_1, BINOP_1, FUNCT_2;
+
+begin :: Definition of Pairs
+
+definition
+  let I be non empty ZeroStr;
+  func Q.I -> Subset of [:the carrier of I,the carrier of I:] means
+  :Def1:
+  for
+u being set holds u in it iff ex a,b being Element of I st u = [a,b] & b <> 0.I
+  ;
+  existence
+  proof
+    set M = {[a,b] where a,b is Element of I: b <> 0.I };
+    for u being set holds u in M implies u in [:the carrier of I,the
+    carrier of I:]
+    proof
+      let u be set;
+      assume u in M;
+      then ex a,b being Element of I st u = [a,b] & b <> 0.I;
+      hence thesis;
+    end;
+    then
+A1: M is Subset of [:the carrier of I,the carrier of I:] by TARSKI:def 3;
+    for u being set holds u in M iff ex a,b being Element of I st u = [a,b
+    ] & b <> 0.I;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Subset of [:the carrier of I,the carrier of I:];
+    assume
+A2: for u being set holds u in M1 iff ex a,b being Element of I st u =
+    [a,b] & b <> 0.I;
+    assume
+A3: for u being set holds u in M2 iff ex a,b being Element of I st u =
+    [a,b] & b <> 0.I;
+A4: for u being set holds u in M2 implies u in M1
+    proof
+      let u be set;
+      assume u in M2;
+      then ex a,b being Element of I st u = [a,b] & b <> 0.I by A3;
+      hence thesis by A2;
+    end;
+    for u being set holds u in M1 implies u in M2
+    proof
+      let u be set;
+      assume u in M1;
+      then ex a,b being Element of I st u = [a,b] & b <> 0.I by A2;
+      hence thesis by A3;
+    end;
+    hence thesis by A4,TARSKI:2;
+  end;
+end;
+
+theorem Th1:
+  for I being non degenerated (non empty multLoopStr_0) holds Q.I is non empty
+proof
+  let I be non degenerated (non empty multLoopStr_0);
+  1.I <> 0.I;
+  then [1.I,1.I] in Q.I by Def1;
+  hence thesis;
+end;
+
+registration
+  let I be non degenerated (non empty multLoopStr_0);
+  cluster Q.I -> non empty;
+  coherence by Th1;
+end;
+
+theorem Th2:
+  for I being non degenerated (non empty multLoopStr_0) for u being
+  Element of Q.I holds u`2 <> 0.I
+proof
+  let I be non degenerated (non empty multLoopStr_0);
+  let u be Element of Q.I;
+  ex a,b being Element of I st u = [a,b] & b <> 0.I by Def1;
+  hence thesis by MCART_1:7;
+end;
+
+Lm1: for I being non degenerated (non empty multLoopStr_0) for u being Element
+of Q.I holds u`1 is Element of I & u`2 is Element of I;
+
+definition
+  let I be non degenerated (non empty multLoopStr_0);
+  let u be Element of Q.I;
+  redefine func u`1 -> Element of I;
+  coherence by Lm1;
+  redefine func u`2 -> Element of I;
+  coherence by Lm1;
+end;
+ 
+:: Definition and some Properties of Pair Addition and Multiplication
+
+definition
+  let I be non degenerated domRing-like (non empty doubleLoopStr);
+  let u,v be Element of Q.I;
+  func padd(u,v) -> Element of Q.I equals
+  [u`1 * v`2 + v`1 * u`2, u`2 * v`2];
+  coherence
+  proof
+    u`2 <> 0.I & v`2 <> 0.I by Th2;
+    then u`2 * v`2 <> 0.I by VECTSP_2:def 5;
+    hence thesis by Def1;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like (non empty doubleLoopStr);
+  let u,v be Element of Q.I;
+  func pmult(u,v) -> Element of Q.I equals
+  [u`1 * v`1, u`2 * v`2];
+  coherence
+  proof
+    u`2 <> 0.I & v`2 <> 0.I by Th2;
+    then u`2 * v`2 <> 0.I by VECTSP_2:def 5;
+    hence thesis by Def1;
+  end;
+end;
+
+canceled;
+
+theorem Th4:
+  for I being non degenerated domRing-like associative commutative
+Abelian add-associative distributive (non empty doubleLoopStr) for u,v,w being
+Element of Q.I holds padd(u,padd(v,w)) = padd(padd(u,v),w)
+proof
+  let I be non degenerated domRing-like associative add-associative Abelian
+  distributive commutative(non empty doubleLoopStr);
+  let u,v,w be Element of Q.I;
+A1: u`1 * (v`2 * w`2) + (v`1 * w`2 + w`1 * v`2) * u`2 = u`1 * (v`2 * w`2) +
+  ((v`1 * w`2) * u`2 + (w`1 * v`2) * u`2) by VECTSP_1:def 12
+    .= (u`1 * (v`2 * w`2) + (v`1 * w`2) * u`2) + (w`1 * v`2) * u`2 by
+RLVECT_1:def 6
+    .= (u`1 * (v`2 * w`2) + (v`1 * w`2) * u`2) + w`1 * (v`2 * u`2) by
+GROUP_1:def 4
+    .= ((u`1 * v`2) * w`2 + (v`1 * w`2) * u`2) + w`1 * (v`2 * u`2) by
+GROUP_1:def 4
+    .= ((u`1 * v`2) * w`2 + (v`1 * u`2) * w`2) + w`1 * (v`2 * u`2) by
+GROUP_1:def 4
+    .= (((u`1 * v`2) + (v`1 * u`2)) * w`2) + w`1 * (v`2 * u`2) by
+VECTSP_1:def 12;
+A2: v`2 <> 0.I by Th2;
+  u`2 <> 0.I by Th2;
+  then u`2 * v`2 <> 0.I by A2,VECTSP_2:def 5;
+  then reconsider s = [u`1 * v`2 + v`1 * u`2, u`2 * v`2] as Element of Q.I by
+Def1;
+  w`2 <> 0.I by Th2;
+  then v`2 * w`2 <> 0.I by A2,VECTSP_2:def 5;
+  then reconsider t = [v`1 * w`2 + w`1 * v`2, v`2 * w`2] as Element of Q.I by
+Def1;
+  padd(u,padd(v,w)) = [u`1 * t`2 + (v`1 * w`2 + w`1 * v`2) * u`2, u`2 * t
+  `2] by MCART_1:def 1
+    .= [u`1 * (v`2 * w`2) + (v`1 * w`2 + w`1 * v`2) * u`2, u`2 * t`2] by
+MCART_1:def 2
+    .= [u`1 * (v`2 * w`2) + (v`1 * w`2 + w`1 * v`2) * u`2, u`2 * (v`2 * w`2)
+  ] by MCART_1:def 2
+    .= [u`1 * (v`2 * w`2) + (v`1 * w`2 + w`1 * v`2) * u`2, (u`2 * v`2) * w`2
+  ] by GROUP_1:def 4;
+  then padd(u,padd(v,w)) = [s`1 * w`2 + w`1 * (v`2 * u`2), (u`2 * v`2) * w`2]
+  by A1,MCART_1:def 1
+    .= [s`1 * w`2 + w`1 * s`2, (u`2 * v`2) * w`2] by MCART_1:def 2
+    .= padd(padd(u,v),w) by MCART_1:def 2;
+  hence thesis;
+end;
+
+theorem Th5:
+  for I being non degenerated domRing-like associative commutative
+Abelian (non empty doubleLoopStr) for u,v,w being Element of Q.I holds pmult(u,
+  pmult(v,w)) = pmult(pmult(u,v),w)
+proof
+  let I be non degenerated domRing-like associative commutative Abelian (non
+  empty doubleLoopStr);
+  let u,v,w be Element of Q.I;
+A2: v`2 <> 0.I by Th2;
+  w`2 <> 0.I by Th2;
+  then v`2 * w`2 <> 0.I by A2,VECTSP_2:def 5;
+  then reconsider t = [v`1 * w`1, v`2 * w`2] as Element of Q.I by Def1;
+  u`2 <> 0.I by Th2;
+  then u`2 * v`2 <> 0.I by A2,VECTSP_2:def 5;
+  then reconsider s = [u`1 * v`1, u`2 * v`2] as Element of Q.I by Def1;
+  pmult(u,pmult(v,w)) = [u`1 * (v`1 * w`1), u`2 * t`2] by MCART_1:def 1
+    .= [u`1 * (v`1 * w`1), u`2 * (v`2 * w`2)] by MCART_1:def 2
+    .= [(u`1 * v`1) * w`1, u`2 * (v`2 * w`2)] by GROUP_1:def 4
+    .= [(u`1 * v`1) * w`1, (u`2 * v`2) * w`2] by GROUP_1:def 4
+    .= [s`1 * w`1, (u`2 * v`2) * w`2] by MCART_1:def 1
+    .= pmult(pmult(u,v),w) by MCART_1:def 2;
+  hence thesis;
+end;
+
+definition
+  let I be non degenerated domRing-like associative commutative Abelian
+  add-associative distributive (non empty doubleLoopStr);
+  let u, v be Element of Q.I;
+  redefine func padd(u,v);
+  commutativity
+proof
+  let u,v be Element of Q.I;
+  thus padd(u,v) = [u`1 * v`2 + v`1 * u`2, u`2 * v`2] .= padd(v,u);
+end;
+end;
+
+definition
+  let I be non degenerated domRing-like associative commutative Abelian (non
+  empty doubleLoopStr);
+  let u, v be Element of Q.I;
+  redefine func pmult(u,v);
+  commutativity
+proof
+  let u,v be Element of Q.I;
+  thus pmult(u,v) = [u`1 * v`1, u`2 * v`2] .= pmult(v,u);
+end;
+end;
+ 
+:: Definition of Classes of Pairs
+
+definition
+  let I be non degenerated (non empty multLoopStr_0);
+  let u be Element of Q.I;
+  func QClass.u -> Subset of Q.I means
+  :Def4:
+  for z being Element of Q.I holds z in it iff z`1 * u`2 = z`2 * u`1;
+  existence
+  proof
+    set M = {z where z is Element of Q.I: z`1 * u`2 = z`2 * u`1 };
+    for x being Element of Q.I holds x in M implies x`1 * u`2 = x`2 * u`1
+    proof
+      let x be Element of Q.I;
+      assume x in M;
+      then ex z being Element of Q.I st x = z & z`1 * u`2 = z`2 * u `1;
+      hence thesis;
+    end;
+    then
+A1: for x being Element of Q.I holds x in M iff x`1 * u`2 = x`2 * u`1;
+    for x being set holds x in M implies x in Q.I
+    proof
+      let x be set;
+      assume x in M;
+      then ex z being Element of Q.I st x = z & z`1 * u`2 = z`2 * u `1;
+      hence thesis;
+    end;
+    then M is Subset of Q.I by TARSKI:def 3;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Subset of Q.I;
+    assume
+A2: for z being Element of Q.I holds z in M1 iff z`1 * u`2 = z`2 * u`1;
+    assume
+A3: for z being Element of Q.I holds z in M2 iff z`1 * u`2 = z`2 * u `1;
+A4: for x being set holds x in M2 implies x in M1
+    proof
+      let x be set;
+      assume
+A5:   x in M2;
+      then reconsider x as Element of Q.I;
+      x`1 * u`2 = x`2 * u`1 by A3,A5;
+      hence thesis by A2;
+    end;
+    for x being set holds x in M1 implies x in M2
+    proof
+      let x be set;
+      assume
+A6:   x in M1;
+      then reconsider x as Element of Q.I;
+      x`1 * u`2 = x`2 * u`1 by A2,A6;
+      hence thesis by A3;
+    end;
+    hence thesis by A4,TARSKI:2;
+  end;
+end;
+
+theorem Th6:
+  for I being non degenerated commutative (non empty multLoopStr_0)
+  for u being Element of Q.I holds u in QClass.u
+proof
+  let I be non degenerated commutative (non empty multLoopStr_0);
+  let u be Element of Q.I;
+  u`1 * u`2 = u`1 * u`2;
+  hence thesis by Def4;
+end;
+
+registration
+  let I be non degenerated commutative (non empty multLoopStr_0);
+  let u be Element of Q.I;
+  cluster QClass.u -> non empty;
+  coherence by Th6;
+end;
+
+definition
+  let I be non degenerated (non empty multLoopStr_0);
+  func Quot.I -> Subset-Family of Q.I means
+  :Def5:
+  for A being Subset of Q.I
+  holds A in it iff ex u being Element of Q.I st A = QClass.u;
+  existence
+  proof
+    defpred P[set] means ex u being Element of Q.I st $1 = QClass.u;
+    thus ex S be Subset-Family of Q.I st for A being Subset of Q.I holds A in
+    S iff P[A] from SUBSET_1:sch 3;
+  end;
+  uniqueness
+  proof
+    defpred P[set] means ex a being Element of Q.I st $1 = QClass.a;
+    let F1,F2 be Subset-Family of Q.I;
+    assume
+A1: for A being Subset of Q.I holds A in F1 iff P[A];
+    assume
+A2: for A being Subset of Q.I holds A in F2 iff P[A];
+    thus thesis from SUBSET_1:sch 4(A1,A2);
+  end;
+end;
+
+theorem Th7:
+  for I being non degenerated (non empty multLoopStr_0) holds Quot.
+  I is non empty
+proof
+  let I be non degenerated (non empty multLoopStr_0);
+  1.I <> 0.I;
+  then reconsider u = [1.I,1.I] as Element of Q.I by Def1;
+  QClass.u in Quot.I by Def5;
+  hence thesis;
+end;
+
+registration
+  let I be non degenerated (non empty multLoopStr_0);
+  cluster Quot.I -> non empty;
+  coherence by Th7;
+end;
+
+theorem Th8:
+  for I being non degenerated domRing-like commutative Ring for u,v
+  being Element of Q.I holds (ex w being Element of Quot.I st u in w & v in w)
+  implies u`1 * v`2 = v`1 * u`2
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Q.I;
+  given w being Element of Quot.I such that
+A1: u in w and
+A2: v in w;
+  consider z being Element of Q.I such that
+A3: w = QClass.z by Def5;
+A4: u`1 * z`2 = z`1 * u`2 by A1,A3,Def4;
+  z`2 divides z`2;
+  then
+A5: z`2 divides (v`2 * u`1) * z`2 by GCD_1:7;
+A6: v`1 * z`2 = z`1 * v`2 by A2,A3,Def4;
+  then
+A7: z`2 divides z`1 * v`2 by GCD_1:def 1;
+  then
+A8: z`2 divides (z`1 * v`2) * u`2 by GCD_1:7;
+A9: z`2 <> 0.I by Th2;
+  hence v`1 * u`2 = ((z`1 * v`2)/z`2) * u`2 by A6,A7,GCD_1:def 4
+    .= ((z`1 * v`2) * u`2) / z`2 by A7,A8,A9,GCD_1:11
+    .= (v`2 * (u`1 * z`2)) / z`2 by A4,GROUP_1:def 4
+    .= ((v`2 * u`1) * z`2) / z`2 by GROUP_1:def 4
+    .= (v`2 * u`1) * (z`2/z`2) by A5,A9,GCD_1:11
+    .= (u`1 * v`2) * 1_I by A9,GCD_1:9
+    .= u`1 * v`2 by VECTSP_1:def 13;
+end;
+
+theorem Th9:
+  for I being non degenerated domRing-like commutative Ring for u,v
+  being Element of Quot.I holds u meets v implies u = v
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: u = QClass.x by Def5;
+  assume u /\ v <> {};
+  then u meets v by XBOOLE_0:def 7;
+  then consider w being set such that
+A2: w in u and
+A3: w in v by XBOOLE_0:3;
+  consider y being Element of Q.I such that
+A4: v = QClass.y by Def5;
+  reconsider w as Element of Q.I by A2;
+A5: w`1 * y`2 = w`2 * y`1 by A4,A3,Def4;
+A6: for z being Element of Q.I holds z in QClass.x implies z in QClass.y
+  proof
+    let z be Element of Q.I;
+    w`2 divides w`2;
+    then
+A7: w`2 divides (z`2 * y`1) * w`2 by GCD_1:7;
+    assume z in QClass.x;
+    then
+A8: z`1 * w`2 = z`2 * w`1 by A1,A2,Th8;
+    then
+A9: w`2 divides z`2 * w`1 by GCD_1:def 1;
+    then
+A10: w`2 divides (z`2 * w`1) * y`2 by GCD_1:7;
+A11: w`2 <> 0.I by Th2;
+    then z`1 * y`2 = ((z`2 * w`1)/w`2) * y`2 by A8,A9,GCD_1:def 4
+      .= ((z`2 * w`1) * y`2) / w`2 by A9,A10,A11,GCD_1:11
+      .= (z`2 * (w`2 * y`1)) / w`2 by A5,GROUP_1:def 4
+      .= ((z`2 * y`1) * w`2) / w`2 by GROUP_1:def 4
+      .= (z`2 * y`1) * (w`2/w`2) by A7,A11,GCD_1:11
+      .= (z`2 * y`1) * 1_I by A11,GCD_1:9
+      .= z`2 * y`1 by VECTSP_1:def 13;
+    hence thesis by Def4;
+  end;
+A12: w`1 * x`2 = w`2 * x`1 by A1,A2,Def4;
+  for z being Element of Q.I holds z in QClass.y implies z in QClass.x
+  proof
+    let z be Element of Q.I;
+    w`2 divides w`2;
+    then
+A13: w`2 divides (z`2 * x`1) * w`2 by GCD_1:7;
+    assume z in QClass.y;
+    then
+A14: z`1 * w`2 = z`2 * w`1 by A4,A3,Th8;
+    then
+A15: w`2 divides z`2 * w`1 by GCD_1:def 1;
+    then
+A16: w`2 divides (z`2 * w`1) * x`2 by GCD_1:7;
+A17: w`2 <> 0.I by Th2;
+    then z`1 * x`2 = ((z`2 * w`1)/w`2) * x`2 by A14,A15,GCD_1:def 4
+      .= ((z`2 * w`1) * x`2) / w`2 by A15,A16,A17,GCD_1:11
+      .= (z`2 * (w`2 * x`1)) / w`2 by A12,GROUP_1:def 4
+      .= ((z`2 * x`1) * w`2) / w`2 by GROUP_1:def 4
+      .= (z`2 * x`1) * (w`2/w`2) by A13,A17,GCD_1:11
+      .= (z`2 * x`1) * 1_I by A17,GCD_1:9
+      .= z`2 * x`1 by VECTSP_1:def 13;
+    hence thesis by Def4;
+  end;
+  hence thesis by A1,A4,A6,SUBSET_1:8;
+end;
+
+begin :: Definition of Quotient Field Addition and Multiplication
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Quot.I;
+  func qadd(u,v) -> Element of Quot.I means
+  :Def6:
+  for z being Element of Q.I
+holds z in it iff ex a,b being Element of Q.I st a in u & b in v & z`1 * (a`2 *
+  b`2) = z`2 * (a`1 * b`2 + b`1 * a`2);
+  existence
+  proof
+    consider y being Element of Q.I such that
+A1: v = QClass.y by Def5;
+    consider x being Element of Q.I such that
+A2: u = QClass.x by Def5;
+    x`2 <> 0.I & y`2 <> 0.I by Th2;
+    then x`2 * y`2 <> 0.I by VECTSP_2:def 5;
+    then reconsider
+    t = [x`1 * y`2 + y`1 * x`2, x`2 * y`2] as Element of Q.I by Def1;
+    set M = QClass.t;
+A3: for z being Element of Q.I holds z in M implies ex a,b being Element
+of Q.I st a in u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`2 + b`1 * a`2)
+    proof
+      let z be Element of Q.I;
+      assume z in M;
+      then z`1 * t`2 = z`2 * t`1 by Def4;
+      then z`1 * t`2 = z`2 * (x`1 * y`2 + y`1 * x`2) by MCART_1:def 1;
+      then
+A4:   z`1 * (x`2 * y`2) = z`2 * (x`1 * y`2 + y`1 * x`2) by MCART_1:def 2;
+      x in u by A2,Th6;
+      hence thesis by A1,A4,Th6;
+    end;
+A5: for z being Element of Q.I holds (ex a,b being Element of Q.I st a in
+u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`2 + b`1 * a`2)) implies z in M
+    proof
+      let z be Element of Q.I;
+      given a,b being Element of Q.I such that
+A6:   a in u and
+A7:   b in v and
+A8:   z`1 * (a`2 * b`2) = z`2 * (a`1 * b`2 + b`1 * a`2);
+A9:   b`1 * y`2 = b`2 * y`1 by A1,A7,Def4;
+      a`2 <> 0.I & b`2 <> 0.I by Th2;
+      then
+A10:  a`2 * b`2 <> 0.I by VECTSP_2:def 5;
+A11:  a`1 * x`2 = a`2 * x`1 by A2,A6,Def4;
+      now
+        per cases;
+        case
+A12:      a`1 * b`2 + b`1 * a`2 = 0.I;
+          then 0.I = (a`1 * b`2 + b`1 * a`2) * (x`2 * y`2) by VECTSP_1:39
+            .= ((a`1 * b`2 + b`1 * a`2) * x`2) * y`2 by GROUP_1:def 4
+            .= ((a`1 * b`2) * x`2 + (b`1 * a`2) * x`2) * y`2 by VECTSP_1:def 12
+            .= ((a`1 * b`2) * x`2) * y`2 + ((b`1 * a`2) * x`2) * y`2 by
+VECTSP_1:def 12
+            .= ((a`1 * x`2) * b`2) * y`2 + (x`2 * (a`2 * b`1)) * y`2 by
+GROUP_1:def 4
+            .= ((a`1 * x`2) * b`2) * y`2 + x`2 * ((a`2 * b`1) * y`2) by
+GROUP_1:def 4
+            .= ((a`2 * x`1) * b`2) * y`2 + x`2 * (a`2 * (b`1 * y`2)) by A11,
+GROUP_1:def 4
+            .= ((a`2 * x`1) * b`2) * y`2 + x`2 * ((a`2 * b`2) * y`1) by A9,
+GROUP_1:def 4
+            .= ((a`2 * x`1) * b`2) * y`2 + (x`2 * y`1) * (a`2 * b`2) by
+GROUP_1:def 4
+            .= y`2 * (x`1 * (a`2 * b`2)) + (x`2 * y`1) * (a`2 * b`2) by
+GROUP_1:def 4
+            .= (y`2 * x`1) * (a`2 * b`2) + (x`2 * y`1) * (a`2 * b`2) by
+GROUP_1:def 4
+            .= (y`2 * x`1 + x`2 * y`1) * (a`2 * b`2) by VECTSP_1:def 12;
+          then
+A13:      y`2 * x`1 + x`2 * y`1 = 0.I by A10,VECTSP_2:def 5;
+          z`2 * (a`1 * b`2 + b`1 * a`2) = 0.I by A12,VECTSP_1:39;
+          then z`1 = 0.I by A8,A10,VECTSP_2:def 5;
+          then z`1 * t`2 = 0.I by VECTSP_1:39
+            .= z`2 * (y`2 * x`1 + x`2 * y`1) by A13,VECTSP_1:39
+            .= z`2 * t`1 by MCART_1:def 1;
+          hence thesis by Def4;
+        end;
+        case
+A14:      a`1 * b`2 + b`1 * a`2 <> 0.I;
+          a`1 * b`2 + b`1 * a`2 divides (a`1 * b`2) + (b`1 * a`2);
+          then
+A15:      a`1 * b`2 + b`1 * a`2 divides (z`1 * (y`2 * x`2)) * ((a`1 * b`2
+          ) + (b`1 * a`2)) by GCD_1:7;
+A16:      (z`1 * ((y`2 * x`2) * ((a`1 * b`2) + (b`1 * a`2)))) / (a`1 * b
+`2 + b`1 * a`2) = ((z`1 * (y`2 * x`2)) * ((a`1 * b`2) + (b`1 * a`2))) / (a`1 *
+          b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * (y`2 * x`2)) * ((a`1 * b`2 + b`1 * a`2) / (a`1 * b`2 +
+          b`1 * a`2)) by A14,A15,GCD_1:11
+            .= (z`1 * (y`2 * x`2)) * 1_I by A14,GCD_1:9
+            .= z`1 * (x`2 * y`2) by VECTSP_1:def 13;
+A17:      a`1 * b`2 + b`1 * a`2 divides z`1 * (a`2 * b`2) by A8,GCD_1:def 1;
+          then
+A18:      a`1 * b`2 + b`1 * a`2 divides (z`1 * (a`2 * b`2)) * (x`1 * y`2
+          + y`1 * x`2) by GCD_1:7;
+          (z`1 * (a`2 * b`2)) / (a`1 * b`2 + b`1 * a`2) = z`2 by A8,A14,A17,
+GCD_1:def 4;
+          then
+          z`2 * (x`1 * y`2 + y`1 * x`2) = ((z`1 * (a`2 * b`2)) * (x`1 * y
+          `2 + y`1 * x`2)) / (a`1 * b`2 + b`1 * a`2) by A14,A17,A18,GCD_1:11
+            .= (((z`1 * a`2) * b`2) * (x`1 * y`2 + y`1 * x`2)) / (a`1 * b`2
+          + b`1 * a`2) by GROUP_1:def 4
+            .= ((z`1 * a`2) * (b`2 * (x`1 * y`2 + y`1 * x`2))) / (a`1 * b`2
+          + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * (a`2 * (b`2 * (x`1 * y`2 + y`1 * x`2)))) / (a`1 * b`2
+          + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * (a`2 * (b`2 * (x`1 * y`2) + b`2 * (y`1 * x`2)))) / (a
+          `1 * b`2 + b`1 * a`2) by VECTSP_1:def 11
+            .= (z`1 * (a`2 * (b`2 * (x`1 * y`2)) + a`2 * (b`2 * (y`1 * x`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by VECTSP_1:def 11
+            .= (z`1 * (a`2 * ((b`2 * x`1) * y`2) + a`2 * (b`2 * (y`1 * x`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * ((a`2 * (x`1 * b`2)) * y`2 + a`2 * (b`2 * (y`1 * x`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * (((a`1 * x`2) * b`2) * y`2 + a`2 * (b`2 * (y`1 * x`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by A11,GROUP_1:def 4
+            .= (z`1 * (((a`1 * x`2) * b`2) * y`2 + a`2 * ((b`1 * y`2) * x`2)
+          )) / (a`1 * b`2 + b`1 * a`2) by A9,GROUP_1:def 4
+            .= (z`1 * (y`2 * (x`2 * (a`1 * b`2)) + a`2 * ((b`1 * y`2) * x`2)
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * (y`2 * (x`2 * (a`1 * b`2)) + x`2 * (a`2 * (b`1 * y`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * (y`2 * (x`2 * (a`1 * b`2)) + x`2 * (y`2 * (b`1 * a`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * ((y`2 * x`2) * (a`1 * b`2) + x`2 * (y`2 * (b`1 * a`2))
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * ((y`2 * x`2) * (a`1 * b`2) + (y`2 * x`2) * (b`1 * a`2)
+          )) / (a`1 * b`2 + b`1 * a`2) by GROUP_1:def 4
+            .= (z`1 * ((y`2 * x`2) * ((a`1 * b`2) + (b`1 * a`2)))) / (a`1 *
+          b`2 + b`1 * a`2) by VECTSP_1:def 11;
+          then z`1 * t`2 = z`2 * (y`2 * x`1 + x`2 * y`1) by A16,MCART_1:def 2
+            .= z`2 * t`1 by MCART_1:def 1;
+          hence thesis by Def4;
+        end;
+      end;
+      hence thesis;
+    end;
+    M is Element of Quot.I by Def5;
+    hence thesis by A5,A3;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Element of Quot.I;
+    assume
+A19: for z being Element of Q.I holds z in M1 iff ex a,b being Element
+of Q.I st a in u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`2 + b`1 * a`2);
+    assume
+A20: for z being Element of Q.I holds z in M2 iff ex a,b being Element
+of Q.I st a in u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`2 + b`1 * a`2);
+A21: for x being set holds x in M2 implies x in M1
+    proof
+      let x be set;
+      assume
+A22:  x in M2;
+      then reconsider x as Element of Q.I;
+      ex a,b being Element of Q.I st a in u & b in v & x`1 * (a`2 * b`2)
+      = x`2 * (a`1 * b`2 + b`1 * a`2) by A20,A22;
+      hence thesis by A19;
+    end;
+    for x being set holds x in M1 implies x in M2
+    proof
+      let x be set;
+      assume
+A23:  x in M1;
+      then reconsider x as Element of Q.I;
+      ex a,b being Element of Q.I st a in u & b in v & x`1 * (a`2 * b`2)
+      = x`2 * (a`1 * b`2 + b`1 * a`2) by A19,A23;
+      hence thesis by A20;
+    end;
+    hence thesis by A21,TARSKI:2;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Quot.I;
+  func qmult(u,v) -> Element of Quot.I means
+  :Def7:
+  for z being Element of Q.I
+holds z in it iff ex a,b being Element of Q.I st a in u & b in v & z`1 * (a`2 *
+  b`2) = z`2 * (a`1 * b`1);
+  existence
+  proof
+    consider y being Element of Q.I such that
+A1: v = QClass.y by Def5;
+    consider x being Element of Q.I such that
+A2: u = QClass.x by Def5;
+    x`2 <> 0.I & y`2 <> 0.I by Th2;
+    then x`2 * y`2 <> 0.I by VECTSP_2:def 5;
+    then reconsider t = [x`1 * y`1, x`2 * y`2] as Element of Q.I by Def1;
+    set M = QClass.t;
+A3: for z being Element of Q.I holds z in M implies ex a,b being Element
+    of Q.I st a in u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`1)
+    proof
+      let z be Element of Q.I;
+      assume z in M;
+      then z`1 * t`2 = z`2 * t`1 by Def4;
+      then z`1 * t`2 = z`2 * (x`1 * y`1) by MCART_1:def 1;
+      then
+A4:   z`1 * (x`2 * y`2) = z`2 * (x`1 * y`1) by MCART_1:def 2;
+      x in u by A2,Th6;
+      hence thesis by A1,A4,Th6;
+    end;
+A5: for z being Element of Q.I holds (ex a,b being Element of Q.I st a in
+    u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`1)) implies z in M
+    proof
+      let z be Element of Q.I;
+      given a,b being Element of Q.I such that
+A6:   a in u and
+A7:   b in v and
+A8:   z`1 * (a`2 * b`2) = z`2 * (a`1 * b`1);
+A9:   a`1 * x`2 = a`2 * x`1 by A2,A6,Def4;
+A10:  b`1 * y`2 = b`2 * y`1 by A1,A7,Def4;
+      a`2 <> 0.I & b`2 <> 0.I by Th2;
+      then
+A11:  a`2 * b`2 <> 0.I by VECTSP_2:def 5;
+A12:  a`2 * b`2 divides z`2 * (a`1 * b`1) by A8,GCD_1:def 1;
+      then
+A13:  a`2 * b`2 divides (z`2 * (a`1 * b`1)) * (x`2 * y`2) by GCD_1:7;
+      a`2 * b`2 divides a`2 * b`2;
+      then (a`2 * b`2) divides (z`2 * (x`1 * y`1)) * (a`2 * b`2) by GCD_1:7;
+      then
+A14:  ((z`2 * (x`1 * y`1)) * (a`2 * b`2)) / (a`2 * b`2) = (z`2 * (x`1 * y
+      `1)) * ((a`2 * b`2) / (a`2 * b`2)) by A11,GCD_1:11
+        .= (z`2 * (x`1 * y`1)) * 1_I by A11,GCD_1:9
+        .= z`2 * (x`1 * y`1) by VECTSP_1:def 13;
+      (z`2 * (a`1 * b`1)) / (a`2 * b`2) = z`1 by A8,A12,A11,GCD_1:def 4;
+      then z`1 * (x`2 * y`2) = ((z`2 * (a`1 * b`1)) * (x`2 * y`2)) / (a`2 * b
+      `2) by A12,A11,A13,GCD_1:11
+        .= (z`2 * ((a`1 * b`1) * (x`2 * y`2))) / (a`2 * b`2) by GROUP_1:def 4
+        .= (z`2 * (a`1 * (b`1 * (x`2 * y`2)))) / (a`2 * b`2) by GROUP_1:def 4
+        .= (z`2 * (a`1 * (x`2 * (b`1 * y`2)))) / (a`2 * b`2) by GROUP_1:def 4
+        .= (z`2 * ((a`2 * x`1) * (b`1 * y`2))) / (a`2 * b`2) by A9,
+GROUP_1:def 4
+        .= (z`2 * (x`1 * (a`2 * (b`2 * y`1)))) / (a`2 * b`2) by A10,
+GROUP_1:def 4
+        .= (z`2 * (x`1 * (y`1 * (a`2 * b`2)))) / (a`2 * b`2) by GROUP_1:def 4
+        .= (z`2 * ((x`1 * y`1) * (a`2 * b`2))) / (a`2 * b`2) by GROUP_1:def 4
+        .= ((z`2 * (x`1 * y`1)) * (a`2 * b`2)) / (a`2 * b`2) by GROUP_1:def 4;
+      then z`1 * t`2 = z`2 * (x`1 * y`1) by A14,MCART_1:def 2
+        .= z`2 * t`1 by MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    M is Element of Quot.I by Def5;
+    hence thesis by A5,A3;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Element of Quot.I;
+    assume
+A15: for z being Element of Q.I holds z in M1 iff ex a,b being Element
+    of Q.I st a in u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`1);
+    assume
+A16: for z being Element of Q.I holds z in M2 iff ex a,b being Element
+    of Q.I st a in u & b in v & z`1 * (a`2 * b`2) = z`2 * (a`1 * b`1);
+A17: for x being set holds x in M2 implies x in M1
+    proof
+      let x be set;
+      assume
+A18:  x in M2;
+      then reconsider x as Element of Q.I;
+      ex a,b being Element of Q.I st a in u & b in v & x`1 * (a`2 * b`2)
+      = x`2 * (a`1 * b`1) by A16,A18;
+      hence thesis by A15;
+    end;
+    for x being set holds x in M1 implies x in M2
+    proof
+      let x be set;
+      assume
+A19:  x in M1;
+      then reconsider x as Element of Q.I;
+      ex a,b being Element of Q.I st a in u & b in v & x`1 * (a`2 * b`2)
+      = x`2 * (a`1 * b`1) by A15,A19;
+      hence thesis by A16;
+    end;
+    hence thesis by A17,TARSKI:2;
+  end;
+end;
+
+definition
+  let I be non degenerated (non empty multLoopStr_0);
+  let u be Element of Q.I;
+  redefine func QClass.u -> Element of Quot.I;
+  coherence by Def5;
+end;
+
+canceled;
+
+theorem Th11:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v being Element of Q.I holds qadd(QClass.u,QClass.v) = QClass.(padd(u,v))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Q.I;
+  u`2 <> 0.I & v`2 <> 0.I by Th2;
+  then u`2 * v`2 <> 0.I by VECTSP_2:def 5;
+  then reconsider w = [u`1 * v`2 + v`1 * u`2, u`2 * v`2] as Element of Q.I by
+Def1;
+A1: w`1 = u`1 * v`2 + v`1 * u`2 & w`2 = u`2 * v`2 by MCART_1:def 1,def 2;
+A2: for z being Element of Q.I holds z in qadd(QClass.u,QClass.v) implies z
+  in QClass.(padd(u,v))
+  proof
+    let z be Element of Q.I;
+    assume z in qadd(QClass.u,QClass.v);
+    then consider a,b being Element of Q.I such that
+A3: a in QClass.u and
+A4: b in QClass.v and
+A5: z`1 * (a`2 * b`2) = z`2 * (a`1 * b`2 + b`1 * a`2) by Def6;
+A6: a`1 * u`2 = a`2 * u`1 by A3,Def4;
+A7: b`1 * v`2 = b`2 * v`1 by A4,Def4;
+    a`2 * b`2 divides a`2 * b`2;
+    then
+A8: a`2 * b`2 divides (z`2 * ((u`1 * v`2)+(v`1 * u`2))) * (a`2 * b`2) by
+GCD_1:7;
+A9: a`2 * b`2 divides z`2 * (a`1 * b`2 + b`1 * a`2) by A5,GCD_1:def 1;
+    then
+A10: a`2 * b`2 divides (z`2 * (a`1 * b`2 + b`1 * a`2)) * (u`2 * v`2) by GCD_1:7
+;
+    a`2 <> 0.I & b`2 <> 0.I by Th2;
+    then
+A11: a`2 * b`2 <> 0.I by VECTSP_2:def 5;
+    then z`1 = (z`2 * (a`1 * b`2 + b`1 * a`2)) / (a`2 * b`2) by A5,A9,
+GCD_1:def 4;
+    then
+    z`1 * (u`2 * v`2) = ((z`2 * (a`1 * b`2 + b`1 * a`2)) * (u`2 * v`2)) /
+    (a`2 * b`2) by A11,A9,A10,GCD_1:11
+      .= (z`2 * ((a`1 * b`2 + b`1 * a`2) * (u`2 * v`2))) / (a`2 * b`2) by
+GROUP_1:def 4
+      .= (z`2 * ((a`1 * b`2) * (u`2 * v`2) + (b`1 * a`2) * (u`2 * v`2))) / (
+    a`2 * b`2) by VECTSP_1:def 12
+      .= (z`2 * (b`2 * (a`1 * (u`2 * v`2)) + (b`1 * a`2) * (u`2 * v`2))) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * (b`2 * ((a`2 * u`1) * v`2) + (b`1 * a`2) * (u`2 * v`2))) / (
+    a`2 * b`2) by A6,GROUP_1:def 4
+      .= (z`2 * (b`2 * ((a`2 * u`1) * v`2) + a`2 * (b`1 * (v`2 * u`2)))) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * (b`2 * ((a`2 * u`1) * v`2) + a`2 * ((b`2 * v`1) * u`2))) / (
+    a`2 * b`2) by A7,GROUP_1:def 4
+      .= (z`2 * ((b`2 * (a`2 * u`1)) * v`2 + a`2 * ((b`2 * v`1) * u`2))) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * ((u`1 * (b`2 * a`2)) * v`2 + a`2 * ((b`2 * v`1) * u`2))) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * ((u`1 * v`2) * (b`2 * a`2) + a`2 * ((b`2 * v`1) * u`2))) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * ((u`1 * v`2) * (b`2 * a`2) + (a`2 * (b`2 * v`1)) * u`2)) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * ((u`1 * v`2) * (a`2 * b`2) + (v`1 * (a`2 * b`2)) * u`2)) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * ((u`1 * v`2) * (a`2 * b`2) + (v`1 * u`2) * (a`2 * b`2))) / (
+    a`2 * b`2) by GROUP_1:def 4
+      .= (z`2 * (((u`1 * v`2) + (v`1 * u`2)) * (a`2 * b`2))) / (a`2 * b`2)
+    by VECTSP_1:def 12
+      .= ((z`2 * ((u`1 * v`2) + (v`1 * u`2))) * (a`2 * b`2)) / (a`2 * b`2)
+    by GROUP_1:def 4
+      .= (z`2 * ((u`1 * v`2) + (v`1 * u`2))) * ((a`2 * b`2)/(a`2 * b`2)) by A11
+,A8,GCD_1:11
+      .= (z`2 * ((u`1 * v`2) + (v`1 * u`2))) * 1_I by A11,GCD_1:9
+      .= z`2 * ((u`1 * v`2) + (v`1 * u`2)) by VECTSP_1:def 13;
+    hence thesis by A1,Def4;
+  end;
+  for z being Element of Q.I holds z in QClass.(padd(u,v)) implies z in
+  qadd(QClass.u,QClass.v)
+  proof
+    let z be Element of Q.I;
+    assume z in QClass.(padd(u,v));
+    then
+A12: z`1 * (u`2 * v`2) = z`2 * (u`1 * v`2 + v`1 * u`2) by A1,Def4;
+    u in QClass.u & v in QClass.v by Th6;
+    hence thesis by A12,Def6;
+  end;
+  hence thesis by A2,SUBSET_1:8;
+end;
+
+theorem Th12:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v being Element of Q.I holds qmult(QClass.u,QClass.v) = QClass.(pmult(u,v))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Q.I;
+  u`2 <> 0.I & v`2 <> 0.I by Th2;
+  then u`2 * v`2 <> 0.I by VECTSP_2:def 5;
+  then reconsider w = [u`1 * v`1, u`2 * v`2] as Element of Q.I by Def1;
+A1: w`1 = u`1 * v`1 & w`2 = u`2 * v`2 by MCART_1:def 1,def 2;
+A2: for z being Element of Q.I holds z in qmult(QClass.u,QClass.v) implies z
+  in QClass.(pmult(u,v))
+  proof
+    let z be Element of Q.I;
+    assume z in qmult(QClass.u,QClass.v);
+    then consider a,b being Element of Q.I such that
+A3: a in QClass.u and
+A4: b in QClass.v and
+A5: z`1 * (a`2 * b`2) = z`2 * (a`1 * b`1) by Def7;
+A6: b`1 * v`2 = b`2 * v`1 by A4,Def4;
+A7: a`1 * u`2 = a`2 * u`1 by A3,Def4;
+    now
+      per cases;
+      case
+A8:     a`1 = 0.I;
+        then a`1 * b`1 = 0.I by VECTSP_1:39;
+        then
+A9:     z`2 * (a`1 * b`1) = 0.I by VECTSP_1:39;
+A10:    a`2 <> 0.I by Th2;
+        b`2 <> 0.I by Th2;
+        then a`2 * b`2 <> 0.I by A10,VECTSP_2:def 5;
+        then
+A11:    z`1 = 0.I by A5,A9,VECTSP_2:def 5;
+        a`1 * u`2 = 0.I by A8,VECTSP_1:39;
+        then u`1 = 0.I by A7,A10,VECTSP_2:def 5;
+        then z`2 * (u`1 * v`1) = z`2 * 0.I by VECTSP_1:39
+          .= 0.I by VECTSP_1:39
+          .= z`1 * (u`2 * v`2) by A11,VECTSP_1:39;
+        hence thesis by A1,Def4;
+      end;
+      case
+A12:    b`1 = 0.I;
+        then a`1 * b`1 = 0.I by VECTSP_1:39;
+        then
+A13:    z`2 * (a`1 * b`1) = 0.I by VECTSP_1:39;
+A14:    b`2 <> 0.I by Th2;
+        a`2 <> 0.I by Th2;
+        then a`2 * b`2 <> 0.I by A14,VECTSP_2:def 5;
+        then
+A15:    z`1 = 0.I by A5,A13,VECTSP_2:def 5;
+        b`1 * v`2 = 0.I by A12,VECTSP_1:39;
+        then v`1 = 0.I by A6,A14,VECTSP_2:def 5;
+        then z`2 * (u`1 * v`1) = z`2 * 0.I by VECTSP_1:39
+          .= 0.I by VECTSP_1:39
+          .= z`1 * (u`2 * v`2) by A15,VECTSP_1:39;
+        hence thesis by A1,Def4;
+      end;
+      case
+A16:    a`1 <> 0.I & b`1 <> 0.I;
+        a`1 * b`1 divides a`1 * b`1;
+        then
+A17:    a`1 * b`1 divides ((z`2 * u`1) * v`1) * (a`1 * b`1) by GCD_1:7;
+A18:    a`1 * b`1 <> 0.I by A16,VECTSP_2:def 5;
+A19:    b`1 divides b`2 * v`1 by A6,GCD_1:def 1;
+        then
+A20:    v`2 = (b`2 * v`1) / b`1 by A6,A16,GCD_1:def 4;
+A21:    a`1 divides a`2 * u`1 by A7,GCD_1:def 1;
+        then
+A22:    a`1 * b`1 divides (a`2 * u`1) * (b`2 * v`1) by A19,GCD_1:3;
+        then
+A23:    a`1 * b`1 divides z`1 * ((a`2 * u`1) * (b`2 * v`1)) by GCD_1:7;
+        u`2 = (a`2 * u`1) / a`1 by A7,A16,A21,GCD_1:def 4;
+        then
+        z`1 * (u`2 * v`2) = z`1 * (((a`2 * u`1) * (b`2 * v`1)) / (a`1 * b
+        `1)) by A16,A21,A19,A20,GCD_1:14
+          .= (z`1 * ((a`2 * u`1) * (b`2 * v`1))) / (a`1 * b`1) by A18,A22,A23,
+GCD_1:11
+          .= (z`1 * (((u`1 * a`2) * b`2) * v`1)) / (a`1 * b`1) by GROUP_1:def 4
+          .= (z`1 * (((a`2 * b`2) * u`1) * v`1)) / (a`1 * b`1) by GROUP_1:def 4
+          .= ((z`1 * ((a`2 * b`2) * u`1)) * v`1) / (a`1 * b`1) by GROUP_1:def 4
+          .= (((z`2 * (a`1 * b`1)) * u`1) * v`1) / (a`1 * b`1) by A5,
+GROUP_1:def 4
+          .= (((z`2 * u`1) * (a`1 * b`1)) * v`1) / (a`1 * b`1) by GROUP_1:def 4
+          .= (((z`2 * u`1) * v`1) * (a`1 * b`1)) / (a`1 * b`1) by GROUP_1:def 4
+          .= ((z`2 * u`1) * v`1) * ((a`1 * b`1) / (a`1 * b`1)) by A18,A17,
+GCD_1:11
+          .= ((z`2 * u`1) * v`1) * 1_I by A18,GCD_1:9
+          .= (z`2 * u`1) * v`1 by VECTSP_1:def 13
+          .= z`2 * (u`1 * v`1) by GROUP_1:def 4;
+        hence thesis by A1,Def4;
+      end;
+    end;
+    hence thesis;
+  end;
+  for z being Element of Q.I holds z in QClass.(pmult(u,v)) implies z in
+  qmult(QClass.u,QClass.v)
+  proof
+    let z be Element of Q.I;
+    assume z in QClass.(pmult(u,v));
+    then
+A24: z`1 * (u`2 * v`2) = z`2 * (u`1 * v`1) by A1,Def4;
+    u in QClass.u & v in QClass.v by Th6;
+    hence thesis by A24,Def7;
+  end;
+  hence thesis by A2,SUBSET_1:8;
+end;
+ 
+:: Properties of Quotient Field Addition and Multiplication
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func q0.I -> Element of Quot.I means
+  :Def8:
+  for z being Element of Q.I holds z in it iff z`1 = 0.I;
+  existence
+  proof
+    reconsider t = [0.I,1_I] as Element of Q.I by Def1;
+    set M = QClass.t;
+A1: for z being Element of Q.I holds z in M implies z`1 = 0.I
+    proof
+      let z be Element of Q.I;
+      assume z in M;
+      then
+A2:   z`1 * t`2 = z`2 * t`1 by Def4
+        .= z`2 * 0.I by MCART_1:def 1
+        .= 0.I by VECTSP_1:39;
+      t`2 <> 0.I by Th2;
+      hence thesis by A2,VECTSP_2:def 5;
+    end;
+    for z being Element of Q.I holds z`1 = 0.I implies z in M
+    proof
+      let z be Element of Q.I;
+      assume z`1 = 0.I;
+      then z`1 * t`2 = 0.I by VECTSP_1:39
+        .= z`2 * 0.I by VECTSP_1:39
+        .= z`2 * t`1 by MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Element of Quot.I;
+    assume
+A3: for z being Element of Q.I holds z in M1 iff z`1 = 0.I;
+    assume
+A4: for z being Element of Q.I holds z in M2 iff z`1 = 0.I;
+A5: for z being Element of Q.I holds z in M2 implies z in M1
+    proof
+      let z be Element of Q.I;
+      assume z in M2;
+      then z`1 = 0.I by A4;
+      hence thesis by A3;
+    end;
+    for z being Element of Q.I holds z in M1 implies z in M2
+    proof
+      let z be Element of Q.I;
+      assume z in M1;
+      then z`1 = 0.I by A3;
+      hence thesis by A4;
+    end;
+    hence thesis by A5,SUBSET_1:8;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func q1.I -> Element of Quot.I means
+  :Def9:
+  for z being Element of Q.I holds z in it iff z`1 = z`2;
+  existence
+  proof
+    1_I <> 0.I;
+    then reconsider t = [1_I,1_I] as Element of Q.I by Def1;
+    set M = QClass.t;
+A1: for z being Element of Q.I holds z in M implies z`1 = z`2
+    proof
+      let z be Element of Q.I;
+      assume z in M;
+      then
+A2:   z`1 * t`2 = z`2 * t`1 by Def4;
+      z`1 = z`1 * 1_I by VECTSP_1:def 13
+        .= z`2 * t`1 by A2,MCART_1:def 2
+        .= z`2 * 1_I by MCART_1:def 1
+        .= z`2 by VECTSP_1:def 13;
+      hence thesis;
+    end;
+    for z being Element of Q.I holds z`1 = z`2 implies z in M
+    proof
+      let z be Element of Q.I;
+      assume z`1 = z`2;
+      then z`1 * t`2 = z`2 * 1_I by MCART_1:def 2
+        .= z`2 * t`1 by MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    hence thesis by A1;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Element of Quot.I;
+    assume
+A3: for z being Element of Q.I holds z in M1 iff z`1 = z`2;
+    assume
+A4: for z being Element of Q.I holds z in M2 iff z`1 = z`2;
+A5: for z being Element of Q.I holds z in M2 implies z in M1
+    proof
+      let z be Element of Q.I;
+      assume z in M2;
+      then z`1 = z`2 by A4;
+      hence thesis by A3;
+    end;
+    for z being Element of Q.I holds z in M1 implies z in M2
+    proof
+      let z be Element of Q.I;
+      assume z in M1;
+      then z`1 = z`2 by A3;
+      hence thesis by A4;
+    end;
+    hence thesis by A5,SUBSET_1:8;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  func qaddinv(u) -> Element of Quot.I means
+  :Def10:
+  for z being Element of Q.
+I holds z in it iff ex a being Element of Q.I st a in u & z`1 * a`2 = z`2 * (-(
+  a`1));
+  existence
+  proof
+    consider x being Element of Q.I such that
+A1: u = QClass.x by Def5;
+    x`2 <> 0.I by Th2;
+    then reconsider t = [(-(x`1)), x`2] as Element of Q.I by Def1;
+    set M = QClass.t;
+A2: for z being Element of Q.I holds (ex a being Element of Q.I st (a in u
+    & z`1 * a`2 = z`2 * (-(a`1)))) implies z in M
+    proof
+      let z be Element of Q.I;
+      given a being Element of Q.I such that
+A3:   a in u and
+A4:   z`1 * a`2 = z`2 * (-(a`1));
+A5:   a`1 * x`2 = a`2 * x`1 by A1,A3,Def4;
+A6:   (z`1 * x`2) * a`2 = (z`2 * (-(a`1))) * x`2 by A4,GROUP_1:def 4
+        .= (-(z`2 * a`1)) * x`2 by GCD_1:51
+        .= ((-(z`2)) * a`1) * x`2 by GCD_1:51
+        .= (-(z`2)) * (a`2 * x`1) by A5,GROUP_1:def 4
+        .= ((-(z`2)) * x`1) * a`2 by GROUP_1:def 4
+        .= (-(z`2 * x`1)) * a`2 by GCD_1:51
+        .= (z`2 * (-(x`1))) * a`2 by GCD_1:51;
+A7:   a`2 <> 0.I by Th2;
+      a`2 divides a`2;
+      then
+A8:   a`2 divides (z`2 * (-(x`1))) * a`2 by GCD_1:7;
+      a`2 divides a`2;
+      then
+A9:   a`2 divides (z`1 * x`2) * a`2 by GCD_1:7;
+      z`1 * t`2 = z`1 * x`2 by MCART_1:def 2
+        .= (z`1 * x`2) * 1_I by VECTSP_1:def 13
+        .= (z`1 * x`2) * (a`2/a`2) by A7,GCD_1:9
+        .= ((z`2 * (-(x`1))) * a`2) / a`2 by A7,A6,A9,GCD_1:11
+        .= (z`2 * (-(x`1))) * (a`2/a`2) by A7,A8,GCD_1:11
+        .= (z`2 * (-(x`1))) * 1_I by A7,GCD_1:9
+        .= z`2 * (-(x`1)) by VECTSP_1:def 13
+        .= z`2 * t`1 by MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    for z being Element of Q.I holds z in M implies ex a being Element of
+    Q.I st a in u & z`1 * a`2 = z`2 * (-(a`1))
+    proof
+      let z be Element of Q.I;
+      assume z in M;
+      then z`1 * t`2 = z`2 * t`1 by Def4;
+      then z`1 * x`2 = z`2 * t`1 by MCART_1:def 2
+        .= z`2 * (-(x`1)) by MCART_1:def 1;
+      hence thesis by A1,Th6;
+    end;
+    hence thesis by A2;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Element of Quot.I;
+    assume
+A10: for z being Element of Q.I holds z in M1 iff ex a being Element
+    of Q.I st a in u & z`1 * a`2 = z`2 * (-(a`1));
+    assume
+A11: for z being Element of Q.I holds z in M2 iff ex a being Element
+    of Q.I st a in u & z`1 * a`2 = z`2 * (-(a`1));
+A12: for z being Element of Q.I holds z in M2 implies z in M1
+    proof
+      let z be Element of Q.I;
+      assume z in M2;
+      then
+      ex a being Element of Q.I st a in u & z`1 * a`2 = z`2 * (-(a`1)) by A11;
+      hence thesis by A10;
+    end;
+    for z being Element of Q.I holds z in M1 implies z in M2
+    proof
+      let z be Element of Q.I;
+      assume z in M1;
+      then
+      ex a being Element of Q.I st a in u & z`1 * a`2 = z`2 * (-(a`1)) by A10;
+      hence thesis by A11;
+    end;
+    hence thesis by A12,SUBSET_1:8;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  assume
+A1: u <> q0.I;
+  func qmultinv(u) -> Element of Quot.I means
+  :Def11:
+  for z being Element of
+Q.I holds z in it iff ex a being Element of Q.I st a in u & z`1 * a`1 = z`2 * a
+  `2;
+  existence
+  proof
+    consider x being Element of Q.I such that
+A2: u = QClass.x by Def5;
+    x`1 <> 0.I
+    proof
+      assume x`1 = 0.I;
+      then
+A3:   x in q0.I by Def8;
+      x in u by A2,Th6;
+      then u meets q0.I by A3,XBOOLE_0:3;
+      hence contradiction by A1,Th9;
+    end;
+    then reconsider t = [x`2,x`1] as Element of Q.I by Def1;
+    set M = QClass.t;
+A4: for z being Element of Q.I holds (ex a being Element of Q.I st (a in
+    u & z`1 * a`1 = z`2 * a`2)) implies z in M
+    proof
+      let z be Element of Q.I;
+      given a being Element of Q.I such that
+A5:   a in u and
+A6:   z`1 * a`1 = z`2 * a`2;
+A7:   a`1 * x`2 = a`2 * x`1 by A2,A5,Def4;
+A8:   (z`1 * t`2) * a`2 = (z`1 * x`1) * a`2 by MCART_1:def 2
+        .= z`1 * (a`1 * x`2) by A7,GROUP_1:def 4
+        .= (z`2 * a`2) * x`2 by A6,GROUP_1:def 4
+        .= (z`2 * a`2) * t`1 by MCART_1:def 1
+        .= (z`2 * t`1) * a`2 by GROUP_1:def 4;
+A9:   a`2 <> 0.I by Th2;
+      a`2 divides a`2;
+      then
+A10:  a`2 divides (z`2 * t`1) * a`2 by GCD_1:7;
+      a`2 divides a`2;
+      then
+A11:  a`2 divides (z`1 * t`2) * a`2 by GCD_1:7;
+      z`1 * t`2 = (z`1 * t`2) * 1_I by VECTSP_1:def 13
+        .= (z`1 * t`2) * (a`2/a`2) by A9,GCD_1:9
+        .= ((z`2 * t`1) * a`2) / a`2 by A9,A8,A11,GCD_1:11
+        .= (z`2 * t`1) * (a`2/a`2) by A9,A10,GCD_1:11
+        .= (z`2 * t`1) * 1_I by A9,GCD_1:9
+        .= z`2 * t`1 by VECTSP_1:def 13;
+      hence thesis by Def4;
+    end;
+    for z being Element of Q.I holds z in M implies ex a being Element of
+    Q.I st a in u & z`1 * a`1 = z`2 * a`2
+    proof
+      let z be Element of Q.I;
+      assume z in M;
+      then z`1 * t`2 = z`2 * t`1 by Def4;
+      then z`1 * x`1 = z`2 * t`1 by MCART_1:def 2
+        .= z`2 * x`2 by MCART_1:def 1;
+      hence thesis by A2,Th6;
+    end;
+    hence thesis by A4;
+  end;
+  uniqueness
+  proof
+    let M1,M2 be Element of Quot.I;
+    assume
+A12: for z being Element of Q.I holds z in M1 iff ex a being Element
+    of Q.I st a in u & z`1 * a`1 = z`2 * a`2;
+    assume
+A13: for z being Element of Q.I holds z in M2 iff ex a being Element
+    of Q.I st a in u & z`1 * a`1 = z`2 * a`2;
+A14: for z being Element of Q.I holds z in M2 implies z in M1
+    proof
+      let z be Element of Q.I;
+      assume z in M2;
+      then
+      ex a being Element of Q.I st a in u & z`1 * a`1 = z`2 * a`2 by A13;
+      hence thesis by A12;
+    end;
+    for z being Element of Q.I holds z in M1 implies z in M2
+    proof
+      let z be Element of Q.I;
+      assume z in M1;
+      then
+      ex a being Element of Q.I st a in u & z`1 * a`1 = z`2 * a`2 by A12;
+      hence thesis by A13;
+    end;
+    hence thesis by A14,SUBSET_1:8;
+  end;
+end;
+
+theorem Th13:
+  for I being non degenerated domRing-like commutative Ring for u,
+v,w being Element of Quot.I holds qadd(u,qadd(v,w)) = qadd(qadd(u,v),w) & qadd(
+  u,v) = qadd(v,u)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: u = QClass.x by Def5;
+  consider z being Element of Q.I such that
+A2: w = QClass.z by Def5;
+  consider y being Element of Q.I such that
+A3: v = QClass.y by Def5;
+A4: qadd(u,v) = QClass.(padd(x,y)) by A1,A3,Th11
+    .= qadd(v,u) by A1,A3,Th11;
+  qadd(u,qadd(v,w)) = qadd(QClass.x,QClass.(padd(y,z))) by A1,A3,A2,Th11
+    .= QClass.(padd(x,padd(y,z))) by Th11
+    .= QClass.(padd(padd(x,y),z)) by Th4
+    .= qadd(QClass.(padd(x,y)),QClass.z) by Th11
+    .= qadd(qadd(u,v),w) by A1,A3,A2,Th11;
+  hence thesis by A4;
+end;
+
+theorem Th14:
+  for I being non degenerated domRing-like commutative Ring for u
+  being Element of Quot.I holds qadd(u,q0.I) = u & qadd(q0.I,u) = u
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: q0.I = QClass.x by Def5;
+  consider y being Element of Q.I such that
+A2: u = QClass.y by Def5;
+A3: x`2 <> 0.I by Th2;
+  y`2 <> 0.I by Th2;
+  then x`2 * y`2 <> 0.I by A3,VECTSP_2:def 5;
+  then reconsider t = [y`1 * x`2 + x`1 * y`2, x`2 * y`2] as Element of Q.I by
+Def1;
+  x in q0.I by A1,Th6;
+  then
+A4: x`1 = 0.I by Def8;
+A5: for z being Element of Q.I holds z in QClass.y implies z in QClass.t
+  proof
+    let z be Element of Q.I;
+    assume z in QClass.y;
+    then
+A6: z`1 * y`2 = z`2 * y`1 by Def4;
+    z`1 * t`2 = z`1 * (x`2 * y`2) by MCART_1:def 2
+      .= (z`2 * y`1) * x`2 by A6,GROUP_1:def 4
+      .= z`2 * (y`1 * x`2) by GROUP_1:def 4
+      .= z`2 * (y`1 * x`2 + 0.I) by RLVECT_1:10
+      .= z`2 * (y`1 * x`2 + x`1 * y`2) by A4,VECTSP_1:39
+      .= z`2 * t`1 by MCART_1:def 1;
+    hence thesis by Def4;
+  end;
+A7: for z being Element of Q.I holds z in QClass.t implies z in QClass.y
+  proof
+    let z be Element of Q.I;
+    x`2 divides x`2;
+    then
+A8: x`2 divides (z`1 * y`2) * x`2 by GCD_1:7;
+    x`2 divides x`2;
+    then
+A9: x`2 divides (z`2 * y`1) * x`2 by GCD_1:7;
+    assume z in QClass.t;
+    then z`1 * t`2 = z`2 * t`1 by Def4;
+    then
+A10: z`1 * (x`2 * y`2) = z`2 * t`1 by MCART_1:def 2;
+A11: (z`1 * y`2) * x`2 = z`1 * (x`2 * y`2) by GROUP_1:def 4
+      .= z`2 * (y`1 * x`2 + 0.I * y`2) by A4,A10,MCART_1:def 1
+      .= z`2 * (y`1 * x`2 + 0.I) by VECTSP_1:39
+      .= z`2 * (y`1 * x`2) by RLVECT_1:10
+      .= (z`2 * y`1) * x`2 by GROUP_1:def 4;
+    z`1 * y`2 = (z`1 * y`2) * 1_I by VECTSP_1:def 13
+      .= (z`1 * y`2) * (x`2/x`2) by A3,GCD_1:9
+      .= ((z`2 * y`1) * x`2) / x`2 by A3,A11,A8,GCD_1:11
+      .= (z`2 * y`1) * (x`2/x`2) by A3,A9,GCD_1:11
+      .= (z`2 * y`1) * 1_I by A3,GCD_1:9
+      .= z`2 * y`1 by VECTSP_1:def 13;
+    hence thesis by Def4;
+  end;
+  qadd(u,q0.I) = QClass.(padd(y,x)) & qadd(q0.I,u) = QClass.(padd(x,y))
+  by A1,A2,Th11;
+  hence thesis by A2,A5,A7,SUBSET_1:8;
+end;
+
+theorem Th15:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v,w being Element of Quot.I holds qmult(u,qmult(v,w)) = qmult(qmult(u,v),w) &
+  qmult(u,v) = qmult(v,u)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: u = QClass.x by Def5;
+  consider z being Element of Q.I such that
+A2: w = QClass.z by Def5;
+  consider y being Element of Q.I such that
+A3: v = QClass.y by Def5;
+A4: qmult(u,v) = QClass.(pmult(x,y)) by A1,A3,Th12
+    .= qmult(v,u) by A1,A3,Th12;
+  qmult(u,qmult(v,w)) = qmult(QClass.x,QClass.(pmult(y,z))) by A1,A3,A2,Th12
+    .= QClass.(pmult(x,pmult(y,z))) by Th12
+    .= QClass.(pmult(pmult(x,y),z)) by Th5
+    .= qmult(QClass.(pmult(x,y)),QClass.z) by Th12
+    .= qmult(qmult(u,v),w) by A1,A3,A2,Th12;
+  hence thesis by A4;
+end;
+
+theorem Th16:
+  for I being non degenerated domRing-like commutative Ring for u
+  being Element of Quot.I holds qmult(u,q1.I) = u & qmult(q1.I,u) = u
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: q1.I = QClass.x by Def5;
+  consider y being Element of Q.I such that
+A2: u = QClass.y by Def5;
+A3: x`2 <> 0.I by Th2;
+  y`2 <> 0.I by Th2;
+  then x`2 * y`2 <> 0.I by A3,VECTSP_2:def 5;
+  then reconsider t = [x`1 * y`1, x`2 * y`2] as Element of Q.I by Def1;
+  x in q1.I by A1,Th6;
+  then
+A4: x`1 = x`2 by Def9;
+A5: for z being Element of Q.I holds z in QClass.y implies z in QClass.t
+  proof
+    let z be Element of Q.I;
+    assume z in QClass.y;
+    then
+A6: z`1 * y`2 = z`2 * y`1 by Def4;
+    z`1 * t`2 = z`1 * (x`2 * y`2) by MCART_1:def 2
+      .= (z`2 * y`1) * x`2 by A6,GROUP_1:def 4
+      .= z`2 * (x`1 * y`1) by A4,GROUP_1:def 4
+      .= z`2 * t`1 by MCART_1:def 1;
+    hence thesis by Def4;
+  end;
+A7: for z being Element of Q.I holds z in QClass.t implies z in QClass.y
+  proof
+    let z be Element of Q.I;
+    x`2 divides x`2;
+    then
+A8: x`2 divides (z`1 * y`2) * x`2 by GCD_1:7;
+    x`2 divides x`2;
+    then
+A9: x`2 divides (z`2 * y`1) * x`2 by GCD_1:7;
+    assume z in QClass.t;
+    then z`1 * t`2 = z`2 * t`1 by Def4;
+    then
+A10: z`1 * (x`2 * y`2) = z`2 * t`1 by MCART_1:def 2;
+A11: (z`1 * y`2) * x`2 = z`1 * (x`2 * y`2) by GROUP_1:def 4
+      .= z`2 * (x`2 * y`1) by A4,A10,MCART_1:def 1
+      .= (z`2 * y`1) * x`2 by GROUP_1:def 4;
+    z`1 * y`2 = (z`1 * y`2) * 1_I by VECTSP_1:def 13
+      .= (z`1 * y`2) * (x`2/x`2) by A3,GCD_1:9
+      .= ((z`2 * y`1) * x`2) / x`2 by A3,A11,A8,GCD_1:11
+      .= (z`2 * y`1) * (x`2/x`2) by A3,A9,GCD_1:11
+      .= (z`2 * y`1) * 1_I by A3,GCD_1:9
+      .= z`2 * y`1 by VECTSP_1:def 13;
+    hence thesis by Def4;
+  end;
+  qmult(u,q1.I) = QClass.(pmult(y,x)) & qmult(q1.I,u) = QClass.(pmult(x,y
+  )) by A1,A2,Th12;
+  hence thesis by A2,A5,A7,SUBSET_1:8;
+end;
+
+theorem Th17:
+  for I being non degenerated domRing-like commutative Ring for u,
+v,w being Element of Quot.I holds qmult(qadd(u,v),w) = qadd(qmult(u,w),qmult(v,
+  w))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: u = QClass.x by Def5;
+  consider y being Element of Q.I such that
+A2: v = QClass.y by Def5;
+  consider z being Element of Q.I such that
+A3: w = QClass.z by Def5;
+A4: qmult(qadd(u,v),w) = qmult(QClass.(padd(x,y)),QClass.z) by A1,A2,A3,Th11
+    .= QClass.(pmult(padd(x,y),z)) by Th12;
+A5: z`2 <> 0.I by Th2;
+A6: y`2 <> 0.I by Th2;
+  then
+A7: y`2 * z`2 <> 0.I by A5,VECTSP_2:def 5;
+  then reconsider s2 = [y`1 * z`1, y`2 * z`2] as Element of Q.I by Def1;
+A8: x`2 <> 0.I by Th2;
+  then
+A9: x`2 * y`2 <> 0.I by A6,VECTSP_2:def 5;
+  then reconsider s = [x`1 * y`2 + y`1 * x`2, x`2 * y`2] as Element of Q.I by
+Def1;
+A10: x`2 * z`2 <> 0.I by A8,A5,VECTSP_2:def 5;
+  then reconsider s1 = [x`1 * z`1, x`2 * z`2] as Element of Q.I by Def1;
+  (x`2 * z`2) * (y`2 * z`2) <> 0.I by A7,A10,VECTSP_2:def 5;
+  then reconsider
+  s3 = [(x`1 * z`1) * (y`2 * z`2) + (y`1 * z`1) * (x`2 * z`2), (x`2
+  * z`2) * (y`2 * z`2)] as Element of Q.I by Def1;
+  (x`2 * y`2) * z`2 <> 0.I by A5,A9,VECTSP_2:def 5;
+  then reconsider
+  r = [(x`1 * y`2 + y`1 * x`2) * z`1, (x`2 * y`2) * z`2] as Element
+  of Q.I by Def1;
+A11: padd(pmult(x,z),pmult(y,z)) = [(x`1 * z`1) * s2`2 + s2`1 * s1`2, s1`2 *
+  s2`2] by MCART_1:def 1
+    .= [(x`1 * z`1) * (y`2 * z`2) + s2`1 * s1`2, s1`2 * s2`2] by MCART_1:def 2
+    .= [(x`1 * z`1) * (y`2 * z`2) + s2`1 * s1`2, s1`2 * (y`2 * z`2)] by
+MCART_1:def 2
+    .= [(x`1 * z`1) * (y`2 * z`2) + (y`1 * z`1) * s1`2, s1`2 * (y`2 * z`2)]
+  by MCART_1:def 1
+    .= [(x`1 * z`1) * (y`2 * z`2) + (y`1 * z`1) * (x`2 * z`2), s1`2 * (y`2 *
+  z`2)] by MCART_1:def 2
+    .= [(x`1 * z`1) * (y`2 * z`2) + (y`1 * z`1) * (x`2 * z`2), (x`2 * z`2) *
+  (y`2 * z`2)] by MCART_1:def 2;
+A12: pmult(padd(x,y),z) = [(x`1 * y`2 + y`1 * x`2) * z`1, s`2 * z`2] by
+MCART_1:def 1
+    .= [(x`1 * y`2 + y`1 * x`2) * z`1, (x`2 * y`2) * z`2] by MCART_1:def 2;
+A13: for t being Element of Q.I holds t in QClass.(padd(pmult(x,z),pmult(y,z
+  ))) implies t in QClass.(pmult(padd(x,y),z))
+  proof
+    let t be Element of Q.I;
+    assume t in QClass.(padd(pmult(x,z),pmult(y,z)));
+    then t`1 * s3`2 = t`2 * s3`1 by A11,Def4;
+    then t`1 * ((x`2 * z`2) * (y`2 * z`2)) = t`2 * s3`1 by MCART_1:def 2;
+    then
+A14: t`1 * ((x`2 * z`2) * (y`2 * z`2)) = t`2 * ((x`1 * z`1) * (y`2 * z`2)
+    + (y`1 * z`1) * (x`2 * z`2)) by MCART_1:def 1;
+    (t`1 * ((x`2 * y`2) * z`2)) * z`2 = t`1 * (((x`2 * y`2) * z`2) * z`2)
+    by GROUP_1:def 4
+      .= t`1 * ((x`2 * (y`2 * z`2)) * z`2) by GROUP_1:def 4
+      .= t`2 * ((x`1 * z`1) * (y`2 * z`2) + (y`1 * z`1) * (x`2 * z`2)) by A14,
+GROUP_1:def 4
+      .= t`2 * (((x`1 * z`1) * y`2) * z`2 + (y`1 * z`1) * (x`2 * z`2)) by
+GROUP_1:def 4
+      .= t`2 * (((x`1 * z`1) * y`2) * z`2 + ((y`1 * z`1) * x`2) * z`2) by
+GROUP_1:def 4
+      .= t`2 * ((((x`1 * z`1) * y`2) + ((y`1 * z`1) * x`2)) * z`2) by
+VECTSP_1:def 12
+      .= t`2 * (((z`1 * (x`1 * y`2)) + ((y`1 * z`1) * x`2)) * z`2) by
+GROUP_1:def 4
+      .= t`2 * (((z`1 * (x`1 * y`2)) + (z`1 * (y`1 * x`2))) * z`2) by
+GROUP_1:def 4
+      .= t`2 * ((z`1 * ((x`1 * y`2) + (y`1 * x`2))) * z`2) by VECTSP_1:def 11
+      .= (t`2 * ((x`1 * y`2 + y`1 * x`2) * z`1)) * z`2 by GROUP_1:def 4;
+    then t`1 * ((x`2 * y`2) * z`2) = t`2 * ((x`1 * y`2 + y`1 * x`2) * z`1) by
+A5,GCD_1:1;
+    then t`1 * r`2 = t`2 * ((x`1 * y`2 + y`1 * x`2) * z`1) by MCART_1:def 2
+      .= t`2 * r`1 by MCART_1:def 1;
+    hence thesis by A12,Def4;
+  end;
+A15: for t being Element of Q.I holds t in QClass.(pmult(padd(x,y),z))
+  implies t in QClass.(padd(pmult(x,z),pmult(y,z)))
+  proof
+    let t be Element of Q.I;
+    assume t in QClass.(pmult(padd(x,y),z));
+    then t`1 * r`2 = t`2 * r`1 by A12,Def4;
+    then t`1 * ((x`2 * y`2) * z`2) = t`2 * r`1 by MCART_1:def 2;
+    then
+A16: t`1 * ((x`2 * y`2) * z`2) = t`2 * ((x`1 * y`2 + y`1 * x`2) * z`1) by
+MCART_1:def 1;
+    t`1 * s3`2 = t`1 * ((x`2 * z`2) * (y`2 * z`2)) by MCART_1:def 2
+      .= t`1 * (((x`2 * z`2) * y`2) * z`2) by GROUP_1:def 4
+      .= (t`1 * ((x`2 * z`2) * y`2)) * z`2 by GROUP_1:def 4
+      .= (t`1 * ((x`2 * y`2) * z`2)) * z`2 by GROUP_1:def 4
+      .= t`2 * (((x`1 * y`2 + y`1 * x`2) * z`1) * z`2) by A16,GROUP_1:def 4
+      .= t`2 * (((x`1 * y`2) * z`1 + (y`1 * x`2) * z`1) * z`2) by
+VECTSP_1:def 12
+      .= t`2 * (((x`1 * y`2) * z`1) * z`2 + ((y`1 * x`2) * z`1) * z`2) by
+VECTSP_1:def 12
+      .= t`2 * ((y`2 * (x`1 * z`1)) * z`2 + ((y`1 * x`2) * z`1) * z`2) by
+GROUP_1:def 4
+      .= t`2 * ((x`1 * z`1) * (y`2 * z`2) + ((y`1 * x`2) * z`1) * z`2) by
+GROUP_1:def 4
+      .= t`2 * (((x`1 * z`1) * (y`2 * z`2)) + ((y`1 * z`1) * x`2) * z`2) by
+GROUP_1:def 4
+      .= t`2 * ((x`1 * z`1) * (y`2 * z`2) + (y`1 * z`1) * (x`2 * z`2)) by
+GROUP_1:def 4
+      .= t`2 * s3`1 by MCART_1:def 1;
+    hence thesis by A11,Def4;
+  end;
+  qadd(qmult(u,w),qmult(v,w)) = qadd(QClass.(pmult(x,z)),qmult(QClass.y,
+  QClass.z)) by A1,A2,A3,Th12
+    .= qadd(QClass.(pmult(x,z)),QClass.(pmult(y,z))) by Th12
+    .= QClass.(padd(pmult(x,z),pmult(y,z))) by Th11;
+  hence thesis by A4,A15,A13,SUBSET_1:8;
+end;
+
+theorem Th18:
+  for I being non degenerated domRing-like commutative Ring for u,
+v,w being Element of Quot.I holds qmult(u,qadd(v,w)) = qadd(qmult(u,v),qmult(u,
+  w))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: u = QClass.x by Def5;
+  consider y being Element of Q.I such that
+A2: v = QClass.y by Def5;
+  consider z being Element of Q.I such that
+A3: w = QClass.z by Def5;
+A4: x`2 <> 0.I by Th2;
+A5: z`2 <> 0.I by Th2;
+  then
+A6: x`2 * z`2 <> 0.I by A4,VECTSP_2:def 5;
+  then reconsider s2 = [x`1 * z`1, x`2 * z`2] as Element of Q.I by Def1;
+A7: y`2 <> 0.I by Th2;
+  then
+A8: y`2 * z`2 <> 0.I by A5,VECTSP_2:def 5;
+  then reconsider s = [y`1 * z`2 + z`1 * y`2, y`2 * z`2] as Element of Q.I by
+Def1;
+A9: x`2 * y`2 <> 0.I by A4,A7,VECTSP_2:def 5;
+  then reconsider s1 = [x`1 * y`1, x`2 * y`2] as Element of Q.I by Def1;
+  (x`2 * y`2) * (x`2 * z`2) <> 0.I by A9,A6,VECTSP_2:def 5;
+  then reconsider
+  s3 = [(x`1 * y`1) * (x`2 * z`2) + (x`1 * z`1) * (x`2 * y`2), (x`2
+  * y`2) * (x`2 * z`2)] as Element of Q.I by Def1;
+  x`2 * (y`2 * z`2) <> 0.I by A4,A8,VECTSP_2:def 5;
+  then reconsider
+  r = [x`1 * (y`1 * z`2 + z`1 * y`2), x`2 * (y`2 * z`2)] as Element
+  of Q.I by Def1;
+A10: padd(pmult(x,y),pmult(x,z)) = [(x`1 * y`1) * s2`2 + s2`1 * s1`2, s1`2 *
+  s2`2] by MCART_1:def 1
+    .= [(x`1 * y`1) * (x`2 * z`2) + s2`1 * s1`2, s1`2 * s2`2] by MCART_1:def 2
+    .= [(x`1 * y`1) * (x`2 * z`2) + s2`1 * s1`2, s1`2 * (x`2 * z`2)] by
+MCART_1:def 2
+    .= [(x`1 * y`1) * (x`2 * z`2) + (x`1 * z`1) * s1`2, s1`2 * (x`2 * z`2)]
+  by MCART_1:def 1
+    .= [(x`1 * y`1) * (x`2 * z`2) + (x`1 * z`1) * (x`2 * y`2), s1`2 * (x`2 *
+  z`2)] by MCART_1:def 2
+    .= [(x`1 * y`1) * (x`2 * z`2) + (x`1 * z`1) * (x`2 * y`2), (x`2 * y`2) *
+  (x`2 * z`2)] by MCART_1:def 2;
+A11: pmult(x,padd(y,z)) = [x`1 * (y`1 * z`2 + z`1 * y`2), x`2 * s`2] by
+MCART_1:def 1
+    .= [x`1 * (y`1 * z`2 + z`1 * y`2), x`2 * (y`2 * z`2)] by MCART_1:def 2;
+A12: for t being Element of Q.I holds t in QClass.(padd(pmult(x,y),pmult(x,z
+  ))) implies t in QClass.(pmult(x,padd(y,z)))
+  proof
+    let t be Element of Q.I;
+    assume t in QClass.(padd(pmult(x,y),pmult(x,z)));
+    then t`1 * s3`2 = t`2 * s3`1 by A10,Def4;
+    then t`1 * ((x`2 * y`2) * (x`2 * z`2)) = t`2 * s3`1 by MCART_1:def 2;
+    then
+A13: t`1 * ((x`2 * y`2) * (x`2 * z`2)) = t`2 * ((x`1 * y`1) * (x`2 * z`2)
+    + (x`1 * z`1) * (x`2 * y`2)) by MCART_1:def 1;
+    (t`1 * (x`2 * (y`2 * z`2))) * x`2 = (t`1 * ((x`2 * y`2) * z`2)) * x`2
+    by GROUP_1:def 4
+      .= t`1 * (((x`2 * y`2) * z`2) * x`2) by GROUP_1:def 4
+      .= t`2 * ((x`1 * y`1) * (x`2 * z`2) + (x`1 * z`1) * (x`2 * y`2)) by A13,
+GROUP_1:def 4
+      .= t`2 * (((x`1 * y`1) * z`2) * x`2 + (x`1 * z`1) * (x`2 * y`2)) by
+GROUP_1:def 4
+      .= t`2 * (((x`1 * y`1) * z`2) * x`2 + ((x`1 * z`1) * y`2) * x`2) by
+GROUP_1:def 4
+      .= t`2 * ((((x`1 * y`1) * z`2) + ((x`1 * z`1) * y`2)) * x`2) by
+VECTSP_1:def 12
+      .= t`2 * (((x`1 * (y`1 * z`2)) + ((x`1 * z`1) * y`2)) * x`2) by
+GROUP_1:def 4
+      .= t`2 * (((x`1 * (y`1 * z`2)) + (x`1 * (z`1 * y`2))) * x`2) by
+GROUP_1:def 4
+      .= t`2 * ((x`1 * ((y`1 * z`2) + (z`1 * y`2))) * x`2) by VECTSP_1:def 11
+      .= (t`2 * (x`1 * ((y`1 * z`2) + (z`1 * y`2)))) * x`2 by GROUP_1:def 4;
+    then
+    t`1 * (x`2 * (y`2 * z`2)) = t`2 * (x`1 * ((y`1 * z`2) + (z`1 * y`2)))
+    by A4,GCD_1:1;
+    then t`1 * r`2 = t`2 * (x`1 * ((y`1 * z`2) + (z`1 * y`2))) by MCART_1:def 2
+      .= t`2 * r`1 by MCART_1:def 1;
+    hence thesis by A11,Def4;
+  end;
+A14: for t being Element of Q.I holds t in QClass.(pmult(x,padd(y,z)))
+  implies t in QClass.(padd(pmult(x,y),pmult(x,z)))
+  proof
+    let t be Element of Q.I;
+    assume t in QClass.(pmult(x,padd(y,z)));
+    then t`1 * r`2 = t`2 * r`1 by A11,Def4;
+    then t`1 * (x`2 * (y`2 * z`2)) = t`2 * r`1 by MCART_1:def 2;
+    then
+A15: t`1 * (x`2 * (y`2 * z`2)) = t`2 * (x`1 * (y`1 * z`2 + z`1 * y`2)) by
+MCART_1:def 1;
+    t`1 * s3`2 = t`1 * ((x`2 * y`2) * (x`2 * z`2)) by MCART_1:def 2
+      .= t`1 * (((x`2 * y`2) * z`2) * x`2) by GROUP_1:def 4
+      .= (t`1 * ((x`2 * y`2) * z`2)) * x`2 by GROUP_1:def 4
+      .= (t`2 * (x`1 * (y`1 * z`2 + z`1 * y`2))) * x`2 by A15,GROUP_1:def 4
+      .= t`2 * ((x`1 * (y`1 * z`2 + z`1 * y`2)) * x`2) by GROUP_1:def 4
+      .= t`2 * ((x`1 * (y`1 * z`2) + x`1 * (z`1 * y`2)) * x`2) by
+VECTSP_1:def 11
+      .= t`2 * ((x`1 * (y`1 * z`2)) * x`2 + (x`1 * (z`1 * y`2)) * x`2) by
+VECTSP_1:def 12
+      .= t`2 * ((((x`1 * y`1) * z`2) * x`2) + (x`1 * (z`1 * y`2)) * x`2) by
+GROUP_1:def 4
+      .= t`2 * (((x`1 * y`1) * (z`2 * x`2)) + (x`1 * (z`1 * y`2)) * x`2) by
+GROUP_1:def 4
+      .= t`2 * (((x`1 * y`1) * (z`2 * x`2)) + ((x`1 * z`1) * y`2) * x`2) by
+GROUP_1:def 4
+      .= t`2 * ((x`1 * y`1) * (z`2 * x`2) + (x`1 * z`1) * (y`2 * x`2)) by
+GROUP_1:def 4
+      .= t`2 * s3`1 by MCART_1:def 1;
+    hence thesis by A10,Def4;
+  end;
+A16: qmult(u,qadd(v,w)) = qmult(QClass.x,QClass.(padd(y,z))) by A1,A2,A3,Th11
+    .= QClass.(pmult(x,padd(y,z))) by Th12;
+  qadd(qmult(u,v),qmult(u,w)) = qadd(QClass.(pmult(x,y)),qmult(QClass.x,
+  QClass.z)) by A1,A2,A3,Th12
+    .= qadd(QClass.(pmult(x,y)),QClass.(pmult(x,z))) by Th12
+    .= QClass.(padd(pmult(x,y),pmult(x,z))) by Th11;
+  hence thesis by A16,A14,A12,SUBSET_1:8;
+end;
+
+theorem Th19:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of Quot.I holds qadd(u,qaddinv(u)) = q0.I & qadd(qaddinv(u),u) =
+  q0.I
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  consider x being Element of Q.I such that
+A1: qaddinv(u) = QClass.x by Def5;
+  x in qaddinv(u) by A1,Th6;
+  then consider a being Element of Q.I such that
+A2: a in u and
+A3: x`1 * a`2 = x`2 * (-(a`1)) by Def10;
+  consider y being Element of Q.I such that
+A4: u = QClass.y by Def5;
+  x`2 <> 0.I & y`2 <> 0.I by Th2;
+  then x`2 * y`2 <> 0.I by VECTSP_2:def 5;
+  then reconsider t = [y`1 * x`2 + x`1 * y`2, x`2 * y`2] as Element of Q.I by
+Def1;
+A5: a`2 <> 0.I by Th2;
+  y in u by A4,Th6;
+  then
+A6: y`1 * a`2 = a`1 * y`2 by A2,Th8;
+  t`1 * a`2 = (y`1 * x`2 + x`1 * y`2) * a`2 by MCART_1:def 1
+    .= (y`1 * x`2) * a`2 + (x`1 * y`2) * a`2 by VECTSP_1:def 12
+    .= x`2 * (a`1 * y`2) + (x`1 * y`2) * a`2 by A6,GROUP_1:def 4
+    .= x`2 * (a`1 * y`2) + (x`2 * (-(a`1))) * y`2 by A3,GROUP_1:def 4
+    .= x`2 * (a`1 * y`2) + (-(x`2 * a`1)) * y`2 by GCD_1:51
+    .= x`2 * (a`1 * y`2) + (-(x`2 * a`1) * y`2) by GCD_1:51
+    .= (x`2 * a`1) * y`2 + (-(x`2 * a`1 * y`2)) by GROUP_1:def 4
+    .= 0.I by RLVECT_1:def 13;
+  then
+A7: t`1 = 0.I by A5,VECTSP_2:def 5;
+A8: for z being Element of Q.I holds z in q0.I implies z in QClass.t
+  proof
+    let z be Element of Q.I;
+    assume z in q0.I;
+    then z`1 = 0.I by Def8;
+    then
+A9: z`1 * t`2 = 0.I by VECTSP_1:39;
+    z`2 * t`1 = 0.I by A7,VECTSP_1:39;
+    hence thesis by A9,Def4;
+  end;
+A10: t`2 <> 0.I by Th2;
+A11: for z being Element of Q.I holds z in QClass.t implies z in q0.I
+  proof
+    let z be Element of Q.I;
+    assume z in QClass.t;
+    then
+A12: z`1 * t`2 = z`2 * t`1 by Def4;
+    z`2 * t`1 = 0.I by A7,VECTSP_1:39;
+    then z`1 = 0.I by A10,A12,VECTSP_2:def 5;
+    hence thesis by Def8;
+  end;
+  qadd(u,qaddinv(u)) = QClass.(padd(y,x)) & qadd(qaddinv(u),u) = QClass.(
+  padd( x,y)) by A1,A4,Th11;
+  hence thesis by A11,A8,SUBSET_1:8;
+end;
+
+theorem Th20:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of Quot.I st u <> q0.I holds qmult(u,qmultinv(u)) = q1.I & qmult(
+  qmultinv(u),u) = q1.I
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  assume
+A1: u <> q0.I;
+  consider x being Element of Q.I such that
+A2: qmultinv(u) = QClass.x by Def5;
+  consider y being Element of Q.I such that
+A3: u = QClass.y by Def5;
+  x`2 <> 0.I & y`2 <> 0.I by Th2;
+  then
+A4: x`2 * y`2 <> 0.I by VECTSP_2:def 5;
+  then reconsider t = [x`1 * y`1, x`2 * y`2] as Element of Q.I by Def1;
+  x in qmultinv(u) by A2,Th6;
+  then consider a being Element of Q.I such that
+A5: a in u and
+A6: x`1 * a`1 = x`2 * a`2 by A1,Def11;
+  y in u by A3,Th6;
+  then
+A7: y`1 * a`2 = a`1 * y`2 by A5,Th8;
+A8: a`1 <> 0.I
+  proof
+    assume a`1 = 0.I;
+    then a in q0.I by Def8;
+    then a in q0.I /\ u by A5,XBOOLE_0:def 4;
+    then q0.I meets u by XBOOLE_0:4;
+    hence contradiction by A1,Th9;
+  end;
+A9: a`2 <> 0.I by Th2;
+A10: for z being Element of Q.I holds z in q1.I implies z in QClass.t
+  proof
+    let z be Element of Q.I;
+    assume z in q1.I;
+    then z`1 = z`2 by Def9;
+    then
+A11: (z`1 * t`2) * (a`1 * a`2) = (z`2 * (x`2 * y`2)) * (a`1 * a`2) by
+MCART_1:def 2
+      .= z`2 * ((x`2 * y`2) * (a`1 * a`2)) by GROUP_1:def 4
+      .= z`2 * (x`2 * (y`2 * (a`1 * a`2))) by GROUP_1:def 4
+      .= z`2 * (x`2 * ((y`1 * a`2) * a`2)) by A7,GROUP_1:def 4
+      .= z`2 * ((x`1 * a`1) * (y`1 * a`2)) by A6,GROUP_1:def 4
+      .= z`2 * (x`1 * (a`1 * (y`1 * a`2))) by GROUP_1:def 4
+      .= z`2 * (x`1 * (y`1 * (a`1 * a`2))) by GROUP_1:def 4
+      .= z`2 * ((x`1 * y`1) * (a`1 * a`2)) by GROUP_1:def 4
+      .= (z`2 * (x`1 * y`1)) * (a`1 * a`2) by GROUP_1:def 4
+      .= (z`2 * t`1) * (a`1 * a`2) by MCART_1:def 1;
+    a`1 * a`2 <> 0.I by A8,A9,VECTSP_2:def 5;
+    then z`1 * t`2 = z`2 * t`1 by A11,GCD_1:1;
+    hence thesis by Def4;
+  end;
+A12: for z being Element of Q.I holds z in QClass.t implies z in q1.I
+  proof
+    let z be Element of Q.I;
+    assume z in QClass.t;
+    then
+A13: z`1 * t`2 = z`2 * t`1 by Def4;
+    a`2 * a`1 <> 0.I by A8,A9,VECTSP_2:def 5;
+    then
+A14: (x`2 * y`2) * (a`2 * a`1) <> 0.I by A4,VECTSP_2:def 5;
+    z`1 * ((x`2 * y`2) * (a`1 * a`2)) = (z`1 * (x`2 * y`2)) * (a`1 * a`2)
+    by GROUP_1:def 4
+      .= (z`2 * t`1) * (a`1 * a`2) by A13,MCART_1:def 2
+      .= (z`2 * (x`1 * y`1)) * (a`1 * a`2) by MCART_1:def 1
+      .= z`2 * ((x`1 * y`1) * (a`1 * a`2)) by GROUP_1:def 4
+      .= z`2 * (((y`1 * x`1) * a`1) * a`2) by GROUP_1:def 4
+      .= z`2 * ((y`1 * (x`2 * a`2)) * a`2) by A6,GROUP_1:def 4
+      .= z`2 * ((x`2 * a`2) * (a`1 * y`2)) by A7,GROUP_1:def 4
+      .= z`2 * (x`2 * (a`2 * (a`1 * y`2))) by GROUP_1:def 4
+      .= z`2 * (x`2 * (y`2 * (a`2 * a`1))) by GROUP_1:def 4
+      .= z`2 * ((x`2 * y`2) * (a`2 * a`1)) by GROUP_1:def 4;
+    then z`1 = z`2 by A14,GCD_1:1;
+    hence thesis by Def9;
+  end;
+  qmult(u,qmultinv(u)) = QClass.(pmult(y,x)) & qmult(qmultinv(u),u) =
+  QClass.( pmult(x,y)) by A2,A3,Th12;
+  hence thesis by A12,A10,SUBSET_1:8;
+end;
+
+theorem Th21:
+  for I being non degenerated domRing-like commutative Ring holds q1.I <> q0.I
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  reconsider t = [0.I,1_I] as Element of Q.I by Def1;
+  assume
+A1: q1.I = q0.I;
+A2: t`1 = 0.I by MCART_1:def 1;
+  then t in q0.I by Def8;
+  then t`1 = t`2 by A1,Def9;
+  hence contradiction by A2,MCART_1:def 2;
+end;
+ 
+:: Redefinition of the Operations' Types
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func quotadd(I) -> BinOp of Quot.I means
+  :Def12:
+  for u,v being Element of Quot.I holds it.(u,v) = qadd(u,v);
+  existence
+  proof
+    deffunc O(Element of Quot.I,Element of Quot.I) = qadd($1,$2);
+    consider F being BinOp of Quot.I such that
+A1: for u,v being Element of Quot.I holds F.(u,v) = O(u,v) from
+    BINOP_1:sch 4;
+    take F;
+    let u,v be Element of Quot.I;
+    thus thesis by A1;
+  end;
+  uniqueness
+  proof
+    let F1,F2 be BinOp of Quot.I such that
+A2: for u,v being Element of Quot.I holds F1.(u,v) = qadd(u,v) and
+A3: for u,v being Element of Quot.I holds F2.(u,v) = qadd(u,v);
+    now
+      let u,v be Element of Quot.I;
+      thus F1.(u,v) = qadd(u,v) by A2
+        .= F2.(u,v) by A3;
+    end;
+    hence thesis by BINOP_1:2;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func quotmult(I) -> BinOp of Quot.I means
+  :Def13:
+  for u,v being Element of Quot.I holds it.(u,v) = qmult(u,v);
+  existence
+  proof
+    deffunc O(Element of Quot.I,Element of Quot.I) = qmult($1,$2);
+    consider F being BinOp of Quot.I such that
+A1: for u,v being Element of Quot.I holds F.(u,v) = O(u,v) from
+    BINOP_1:sch 4;
+    take F;
+    let u,v be Element of Quot.I;
+    thus thesis by A1;
+  end;
+  uniqueness
+  proof
+    let F1,F2 be BinOp of Quot.I such that
+A2: for u,v being Element of Quot.I holds F1.(u,v) = qmult(u,v) and
+A3: for u,v being Element of Quot.I holds F2.(u,v) = qmult(u,v);
+    now
+      let u,v be Element of Quot.I;
+      thus F1.(u,v) = qmult(u,v) by A2
+        .= F2.(u,v) by A3;
+    end;
+    hence thesis by BINOP_1:2;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func quotaddinv(I) -> UnOp of Quot.I means
+  :Def14:
+  for u being Element of Quot.I holds it.(u) = qaddinv(u);
+  existence
+  proof
+    deffunc O(Element of Quot.I) = qaddinv($1);
+    consider F being UnOp of Quot.I such that
+A1: for u being Element of Quot.I holds F.(u) = O(u) from FUNCT_2:sch
+    4;
+    take F;
+    let u be Element of Quot.I;
+    thus thesis by A1;
+  end;
+  uniqueness
+  proof
+    let F1,F2 be UnOp of Quot.I such that
+A2: for u being Element of Quot.I holds F1.(u) = qaddinv(u) and
+A3: for u being Element of Quot.I holds F2.(u) = qaddinv(u);
+    now
+      let u be Element of Quot.I;
+A4:   for u being set st u in Quot.I holds F1.(u) = F2.(u)
+      proof
+        let u be set;
+        assume u in Quot.I;
+        then reconsider u as Element of Quot.I;
+        F1.(u) = qaddinv(u) by A2
+          .= F2.(u) by A3;
+        hence thesis;
+      end;
+      Quot.I = dom F1 & Quot.I = dom F2 by FUNCT_2:def 1;
+      hence thesis by A4,FUNCT_1:9;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func quotmultinv(I) -> UnOp of Quot.I means
+  :Def15:
+  for u being Element of Quot.I holds it.(u) = qmultinv(u);
+  existence
+  proof
+    deffunc O(Element of Quot.I) = qmultinv($1);
+    consider F being UnOp of Quot.I such that
+A1: for u being Element of Quot.I holds F.(u) = O(u) from FUNCT_2:sch
+    4;
+    take F;
+    let u be Element of Quot.I;
+    thus thesis by A1;
+  end;
+  uniqueness
+  proof
+    let F1,F2 be UnOp of Quot.I such that
+A2: for u being Element of Quot.I holds F1.(u) = qmultinv(u) and
+A3: for u being Element of Quot.I holds F2.(u) = qmultinv(u);
+    now
+      let u be Element of Quot.I;
+A4:   for u being set st u in Quot.I holds F1.(u) = F2.(u)
+      proof
+        let u be set;
+        assume u in Quot.I;
+        then reconsider u as Element of Quot.I;
+        F1.(u) = qmultinv(u) by A2
+          .= F2.(u) by A3;
+        hence thesis;
+      end;
+      Quot.I = dom F1 & Quot.I = dom F2 by FUNCT_2:def 1;
+      hence thesis by A4,FUNCT_1:9;
+    end;
+    hence thesis;
+  end;
+end;
+
+theorem Th22:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v,w being Element of Quot.I holds (quotadd(I)).((quotadd(I)).(u,v),w) = (
+  quotadd(I)).(u,(quotadd(I)).(v,w))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  (quotadd(I)).((quotadd(I)).(u,v),w) = (quotadd(I)).(qadd(u,v),w) by Def12
+    .= qadd(qadd(u,v),w) by Def12
+    .= qadd(u,qadd(v,w)) by Th13
+    .= qadd(u,(quotadd(I)).(v,w)) by Def12
+    .= (quotadd(I)).(u,(quotadd(I)).(v,w)) by Def12;
+  hence thesis;
+end;
+
+theorem Th23:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v being Element of Quot.I holds (quotadd(I)).(u,v) = (quotadd(I)).(v,u)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Quot.I;
+  (quotadd(I)).(u,v) = qadd(u,v) by Def12
+    .= qadd(v,u) by Th13
+    .= (quotadd(I)).(v,u) by Def12;
+  hence thesis;
+end;
+
+theorem Th24:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of Quot.I holds (quotadd(I)).(u,q0.I) = u & (quotadd(I)).(q0.I,u)
+  = u
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+A1: (quotadd(I)).(q0.I,u) = qadd(q0.I,u) by Def12
+    .= u by Th14;
+  (quotadd(I)).(u,q0.I) = qadd(u,q0.I) by Def12
+    .= u by Th14;
+  hence thesis by A1;
+end;
+
+theorem Th25:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v,w being Element of Quot.I holds (quotmult(I)).((quotmult(I)).(u,v),w) = (
+  quotmult(I)).(u,(quotmult(I)).(v,w))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  (quotmult(I)).((quotmult(I)).(u,v),w) = (quotmult(I)).(qmult(u,v),w) by Def13
+    .= qmult(qmult(u,v),w) by Def13
+    .= qmult(u,qmult(v,w)) by Th15
+    .= qmult(u,(quotmult(I)).(v,w)) by Def13
+    .= (quotmult(I)).(u,(quotmult(I)).(v,w)) by Def13;
+  hence thesis;
+end;
+
+theorem Th26:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v being Element of Quot.I holds (quotmult(I)).(u,v)=(quotmult(I)).(v,u)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of Quot.I;
+  (quotmult(I)).(u,v) = qmult(u,v) by Def13
+    .= qmult(v,u) by Th15
+    .= (quotmult(I)).(v,u) by Def13;
+  hence thesis;
+end;
+
+theorem Th27:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of Quot.I holds (quotmult(I)).(u,q1.I) = u & (quotmult(I)).(q1.I,
+  u) = u
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+A1: (quotmult(I)).(q1.I,u) = qmult(q1.I,u) by Def13
+    .= u by Th16;
+  (quotmult(I)).(u,q1.I) = qmult(u,q1.I) by Def13
+    .= u by Th16;
+  hence thesis by A1;
+end;
+
+theorem Th28:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v,w being Element of Quot.I holds (quotmult(I)).((quotadd(I)).(u,v),w) = (
+  quotadd(I)).((quotmult(I)).(u,w),(quotmult(I)).(v,w))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  (quotmult(I)).((quotadd(I)).(u,v),w) = (quotmult(I)).(qadd(u,v),w) by Def12
+    .= qmult(qadd(u,v),w) by Def13
+    .= qadd(qmult(u,w),qmult(v,w)) by Th17
+    .= qadd((quotmult(I)).(u,w),qmult(v,w)) by Def13
+    .= qadd((quotmult(I)).(u,w),(quotmult(I)).(v,w)) by Def13
+    .= (quotadd(I)).((quotmult(I)).(u,w),(quotmult(I)).(v,w)) by Def12;
+  hence thesis;
+end;
+
+theorem Th29:
+  for I being non degenerated domRing-like commutative Ring for u,
+  v,w being Element of Quot.I holds (quotmult(I)).(u,(quotadd(I)).(v,w)) = (
+  quotadd(I)).((quotmult(I)).(u,v),(quotmult(I)).(u,w))
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v,w be Element of Quot.I;
+  (quotmult(I)).(u,(quotadd(I)).(v,w)) = (quotmult(I)).(u,qadd(v,w)) by Def12
+    .= qmult(u,qadd(v,w)) by Def13
+    .= qadd(qmult(u,v),qmult(u,w)) by Th18
+    .= qadd((quotmult(I)).(u,v),qmult(u,w)) by Def13
+    .= qadd((quotmult(I)).(u,v),(quotmult(I)).(u,w)) by Def13
+    .= (quotadd(I)).((quotmult(I)).(u,v),(quotmult(I)).(u,w)) by Def12;
+  hence thesis;
+end;
+
+theorem Th30:
+  for I being non degenerated domRing-like commutative Ring for u
+  being Element of Quot.I holds (quotadd(I)).(u,(quotaddinv(I)).(u)) = q0.I & (
+  quotadd(I)).((quotaddinv(I)).(u),u) = q0.I
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+A1: (quotadd(I)).((quotaddinv(I)).(u),u) = (quotadd(I)).(qaddinv(u),u) by Def14
+    .= qadd(qaddinv(u),u) by Def12
+    .= q0.I by Th19;
+  (quotadd(I)).(u,(quotaddinv(I)).(u)) = (quotadd(I)).(u,qaddinv(u)) by Def14
+    .= qadd(u,qaddinv(u)) by Def12
+    .= q0.I by Th19;
+  hence thesis by A1;
+end;
+
+theorem Th31:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of Quot.I st u <> q0.I holds (quotmult(I)).(u,(quotmultinv(I)).(u
+  )) = q1.I & (quotmult(I)).((quotmultinv(I)).(u),u) = q1.I
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of Quot.I;
+  assume
+A1: u <> q0.I;
+A2: (quotmult(I)).((quotmultinv(I)).(u),u) = (quotmult(I)).(qmultinv(u),u)
+  by Def15
+    .= qmult(qmultinv(u),u) by Def13
+    .= q1.I by A1,Th20;
+  (quotmult(I)).(u,(quotmultinv(I)).(u)) = (quotmult(I)).(u,qmultinv(u))
+  by Def15
+    .= qmult(u,qmultinv(u)) by Def13
+    .= q1.I by A1,Th20;
+  hence thesis by A2;
+end;
+
+begin :: Definition of Quotient Field
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func the_Field_of_Quotients(I) -> strict doubleLoopStr equals
+  doubleLoopStr
+  (# Quot.I,quotadd(I),quotmult(I),q1.I,q0.I #);
+  correctness;
+end;
+
+registration
+  let I be non degenerated domRing-like commutative Ring;
+  cluster the_Field_of_Quotients(I) -> non empty;
+  coherence;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring holds the
+  carrier of the_Field_of_Quotients(I) = Quot.I & the addF of
+the_Field_of_Quotients(I) = quotadd(I) & the multF of the_Field_of_Quotients(I)
+= quotmult(I) & 0.the_Field_of_Quotients(I) = q0.I & 1.the_Field_of_Quotients(I
+  ) = q1.I;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v
+being Element of the_Field_of_Quotients(I) holds (quotadd(I)).(u,v) is Element
+  of the_Field_of_Quotients(I)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of the_Field_of_Quotients(I);
+  reconsider s = u, t = v as Element of Quot.I;
+  (quotadd(I)).(u,v) = qadd(s,t) by Def12;
+  hence thesis;
+end;
+
+theorem Th34:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of the_Field_of_Quotients(I) holds (quotaddinv(I)).(u) is Element
+  of the_Field_of_Quotients(I)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of the_Field_of_Quotients(I);
+  reconsider s = u as Element of Quot.I;
+  (quotaddinv(I)).(u) = qaddinv(s) by Def14;
+  hence thesis;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v
+being Element of the_Field_of_Quotients(I) holds (quotmult(I)).(u,v) is Element
+  of the_Field_of_Quotients(I)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u,v be Element of the_Field_of_Quotients(I);
+  reconsider s = u as Element of Quot.I;
+  reconsider t = v as Element of Quot.I;
+  (quotmult(I)).(u,v) = qmult(s,t) by Def13;
+  hence thesis;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u being
+  Element of the_Field_of_Quotients(I) holds (quotmultinv(I)).(u) is Element of
+  the_Field_of_Quotients(I)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of the_Field_of_Quotients(I);
+  reconsider s = u as Element of Quot.I;
+  (quotmultinv(I)).(u) = qmultinv(s) by Def15;
+  hence thesis;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v
+  being Element of the_Field_of_Quotients(I) holds u + v = (quotadd(I)).(u,v);
+
+Lm2: for I being non degenerated domRing-like commutative Ring holds
+the_Field_of_Quotients(I) is add-associative right_zeroed right_complementable
+proof
+  let I be non degenerated domRing-like commutative Ring;
+A1: the_Field_of_Quotients(I) is right_complementable
+  proof
+    let v be Element of the_Field_of_Quotients(I);
+    reconsider m = v as Element of Quot.I;
+    reconsider n = (quotaddinv(I)).m as Element of the_Field_of_Quotients(I);
+    take n;
+    thus thesis by Th30;
+  end;
+  ( for u,v,w being Element of the_Field_of_Quotients(I)
+holds (u + v) + w = u + (v + w))& for v being Element of the_Field_of_Quotients
+  (I) holds v + 0.the_Field_of_Quotients(I) = v by Th22,Th24;
+  hence thesis by A1,RLVECT_1:def 6,def 7;
+end;
+
+registration
+  let I be non degenerated domRing-like commutative Ring;
+  cluster the_Field_of_Quotients(I) -> add-associative right_zeroed
+    right_complementable;
+  coherence by Lm2;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u being
+  Element of the_Field_of_Quotients(I) holds -u = (quotaddinv(I)).(u)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of the_Field_of_Quotients(I);
+  reconsider z = (quotaddinv(I)).u as Element of the_Field_of_Quotients(I) by
+Th34;
+  z + u = 0.the_Field_of_Quotients(I) by Th30;
+  hence thesis by RLVECT_1:19;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v
+  being Element of the_Field_of_Quotients(I) holds u * v = (quotmult(I)).(u,v);
+
+Lm3: for I being non degenerated domRing-like commutative Ring holds
+the_Field_of_Quotients(I) is commutative (non empty doubleLoopStr)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  for x,y being Element of the_Field_of_Quotients(I) holds x * y = y * x
+  by Th26;
+  hence thesis by GROUP_1:def 16;
+end;
+
+registration
+  let I be non degenerated domRing-like commutative Ring;
+  cluster the_Field_of_Quotients(I) -> commutative;
+  coherence by Lm3;
+end;
+
+Lm4: for I being non degenerated domRing-like commutative Ring holds
+the_Field_of_Quotients(I) is well-unital
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let x be Element of the_Field_of_Quotients(I);
+  thus thesis by Th27;
+end;
+
+registration
+  let I be non degenerated domRing-like commutative Ring;
+  cluster the_Field_of_Quotients(I) -> well-unital;
+  coherence by Lm4;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring holds 1.
+  the_Field_of_Quotients(I) = q1.I & 0.the_Field_of_Quotients(I) = q0.I;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v,w
+  being Element of the_Field_of_Quotients(I) holds (u + v) + w = u + (v + w)
+by Th22;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v
+  being Element of the_Field_of_Quotients(I) holds u + v = v + u by Th23;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u being
+Element of the_Field_of_Quotients(I) holds u + 0.the_Field_of_Quotients(I) = u
+  by Th24;
+
+canceled;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u being
+Element of the_Field_of_Quotients(I) holds 1.the_Field_of_Quotients(I) * u = u
+  by Th27;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v
+  being Element of the_Field_of_Quotients(I) holds u * v = v * u;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring for u,v,w
+  being Element of the_Field_of_Quotients(I) holds (u * v) * w = u * (v * w)
+by Th25;
+
+theorem Th48:
+  for I being non degenerated domRing-like commutative Ring for u
+being Element of the_Field_of_Quotients(I) st u <> 0.the_Field_of_Quotients(I)
+  ex v being Element of the_Field_of_Quotients(I) st u * v = 1.
+  the_Field_of_Quotients(I)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let u be Element of the_Field_of_Quotients(I);
+  assume
+A1: u <> 0.the_Field_of_Quotients(I);
+  reconsider u as Element of Quot.I;
+  reconsider v = (quotmultinv(I)).(u) as Element of the_Field_of_Quotients(I);
+  reconsider u as Element of the_Field_of_Quotients(I);
+  u * v = 1.the_Field_of_Quotients(I) by A1,Th31;
+  hence thesis;
+end;
+
+theorem Th49:
+  for I being non degenerated domRing-like commutative Ring holds
+the_Field_of_Quotients(I) is add-associative right_zeroed right_complementable
+Abelian associative unital distributive almost_left_invertible non degenerated
+  (non empty doubleLoopStr)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+A1: the_Field_of_Quotients(I) is almost_left_invertible
+  proof
+    let x be Element of the_Field_of_Quotients I;
+    assume x <> 0.the_Field_of_Quotients I;
+    then consider y being Element of the_Field_of_Quotients I such that
+A2: x * y = 1.the_Field_of_Quotients I by Th48;
+    take y;
+    thus y * x = 1.the_Field_of_Quotients I by A2;
+  end;
+A3: q0.I <> q1.I & 0.the_Field_of_Quotients(I) = q0.I by Th21;
+A4: 1.the_Field_of_Quotients(I) = q1.I & for x,y,z being Element
+ of the_Field_of_Quotients(I) holds x * (y+z) = x*y + x*z & (y+z) * x =
+  y*x + z* x by Th28,Th29;
+  ( for x,y,z being Element of the_Field_of_Quotients(I)
+  holds (x * y) * z = x * (y * z))& for u,v being Element of
+  the_Field_of_Quotients(I) holds u + v = v + u by Th23,Th25;
+  hence thesis by A1,A3,A4,GROUP_1:def 4,RLVECT_1:def 5,STRUCT_0:def 8
+,VECTSP_1:def 18;
+end;
+
+registration
+  let I be non degenerated domRing-like commutative Ring;
+  cluster the_Field_of_Quotients(I) -> Abelian associative distributive
+    almost_left_invertible non degenerated;
+  coherence by Th49;
+end;
+
+theorem Th50:
+  for I being non degenerated domRing-like commutative Ring for x
+being Element of the_Field_of_Quotients(I) st x <> 0.the_Field_of_Quotients(I)
+for a being Element of I st a <> 0.I for u being Element of Q.I st x = QClass.u
+  & u = [a,1.I] for v being Element of Q.I st v = [1.I,a] holds x" = QClass.v
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  let x be Element of the_Field_of_Quotients(I);
+  assume
+A1: x <> 0.the_Field_of_Quotients(I);
+  let a be Element of I;
+  assume
+A2: a <> 0.I;
+  then reconsider res = [a,a] as Element of Q.I by Def1;
+A3: for u being set holds u in QClass.res implies u in q1.I
+  proof
+    let u be set;
+    assume
+A4: u in QClass.res;
+    then reconsider u as Element of Q.I;
+    u`1 * a = u`1 * res`2 by MCART_1:def 2
+      .= u`2 * res`1 by A4,Def4
+      .= u`2 * a by MCART_1:def 1;
+    then u`1 = u`2 by A2,GCD_1:1;
+    hence thesis by Def9;
+  end;
+  for u being set holds u in q1.I implies u in QClass.res
+  proof
+    let u be set;
+    assume
+A5: u in q1.I;
+    then reconsider u as Element of Q.I;
+    u`1 * res`2 = u`1 * a by MCART_1:def 2
+      .= u`2 * a by A5,Def9
+      .= u`2 * res`1 by MCART_1:def 1;
+    hence thesis by Def4;
+  end;
+  then
+A6: q1.I = QClass.res by A3,TARSKI:2;
+  let u be Element of Q.I;
+  assume that
+A7: x = QClass.u and
+A8: u = [a,1.I];
+  let v be Element of Q.I;
+  assume
+A9: v = [1.I,a];
+  pmult(u,v) = [a * v`1, u`2 * v`2] by A8,MCART_1:def 1
+    .= [a * 1.I, u`2 * v`2] by A9,MCART_1:def 1
+    .= [a * 1.I, 1.I * v`2] by A8,MCART_1:def 2
+    .= [a * 1.I, 1.I * a] by A9,MCART_1:def 2
+    .= [a, 1.I * a] by VECTSP_1:def 16
+    .= [a, a] by VECTSP_1:def 16;
+  then
+A10: qmult(QClass.u,QClass.v) = 1.the_Field_of_Quotients(I) by A6,Th12;
+  reconsider y = QClass.v as Element of the_Field_of_Quotients(I);
+  reconsider y as Element of the_Field_of_Quotients(I);
+  qmult(QClass.u,QClass.v) = x * y by A7,Def13;
+  hence thesis by A1,A10,VECTSP_1:def 22;
+end;
+ 
+:: Field is Integral Domain
+
+registration
+  cluster -> domRing-like right_unital (add-associative right_zeroed
+    right_complementable commutative associative well-unital distributive
+    almost_left_invertible (non empty doubleLoopStr));
+  coherence
+  proof
+    let R be add-associative right_zeroed right_complementable commutative
+    associative well-unital distributive almost_left_invertible (non empty
+    doubleLoopStr);
+    thus R is domRing-like
+    proof
+      let x,y be Element of R such that
+A1:   x*y = 0.R and
+A2:   x <> 0.R;
+      x*y = x*0.R by A1,VECTSP_1:39;
+      hence thesis by A2,VECTSP_1:33;
+    end;
+    let x be Element of R;
+    x*(1_R) = x by VECTSP_1:def 19;
+    hence thesis;
+  end;
+end;
+
+registration
+  cluster add-associative right_zeroed right_complementable Abelian
+    commutative associative left_unital distributive almost_left_invertible non
+    degenerated (non empty doubleLoopStr);
+  existence
+  proof
+    consider R being add-associative right_zeroed right_complementable Abelian
+    commutative associative left_unital distributive almost_left_invertible non
+    degenerated (non empty doubleLoopStr);
+    take R;
+    thus thesis;
+  end;
+end;
+
+definition
+  let F be commutative associative well-unital distributive
+  almost_left_invertible (non empty doubleLoopStr);
+  let x, y be Element of F;
+  func x/y -> Element of F equals
+  x * y";
+  correctness;
+end;
+
+theorem Th51:
+  for F being non degenerated almost_left_invertible commutative
+Ring for a,b,c,d being Element of F st b <> 0.F & d <> 0.F holds (a/b) * (c/d)
+  = (a * c) / (b * d)
+proof
+  let F be non degenerated almost_left_invertible commutative Ring;
+  let a,b,c,d be Element of F;
+  assume
+A1: b <> 0.F & d <> 0.F;
+  (a/b) * (c/d) = (a * (b" * (c * d"))) by GROUP_1:def 4
+    .= (a * ((b" * d") * c)) by GROUP_1:def 4
+    .= (a * c) * (b" * d") by GROUP_1:def 4
+    .= (a * c) / (d * b) by A1,GCD_1:53;
+  hence thesis;
+end;
+
+theorem Th52:
+  for F being non degenerated almost_left_invertible commutative
+Ring for a,b,c,d being Element of F st b <> 0.F & d <> 0.F holds (a/b) + (c/d)
+  = (a*d + c*b) / (b * d)
+proof
+  let F be non degenerated almost_left_invertible commutative Ring;
+  let a,b,c,d be Element of F;
+  assume that
+A1: b <> 0.F and
+A2: d <> 0.F;
+  (a*d + c*b) / (b * d) = (a*d + c*b) * (b" * d") by A1,A2,GCD_1:53
+    .= ((a*d + c*b) * b") * d" by GROUP_1:def 4
+    .= (((a*d) * b") + ((c*b) * b")) * d" by VECTSP_1:def 12
+    .= (((a*d) * b") + (c* (b*b"))) * d" by GROUP_1:def 4
+    .= (((a*d) * b") + (c*1.F)) * d" by A1,VECTSP_1:def 22
+    .= (((a*d) * b") + c) * d" by VECTSP_1:def 16
+    .= ((a*d) * b") * d" + c * d" by VECTSP_1:def 12
+    .= b" * ((a*d) * d") + c * d" by GROUP_1:def 4
+    .= b" * (a * (d*d")) + c * d" by GROUP_1:def 4
+    .= b" * (a * 1.F) + c * d" by A2,VECTSP_1:def 22
+    .= b" * a + c * d" by VECTSP_1:def 16;
+  hence thesis;
+end;
+
+begin :: Definition of Ring Homomorphism
+
+definition
+  let R,S be non empty doubleLoopStr;
+  let f be Function of R, S;
+  canceled 3;
+  attr f is RingHomomorphism means
+  :Def21:
+  f is additive multiplicative unity-preserving;
+end;
+
+registration
+  let R,S be non empty doubleLoopStr;
+  cluster RingHomomorphism -> additive multiplicative unity-preserving
+    Function of R, S;
+  coherence by Def21;
+  cluster additive multiplicative unity-preserving -> RingHomomorphism
+    Function of R, S;
+  coherence by Def21;
+end;
+
+definition
+  let R,S be non empty doubleLoopStr;
+  let f be Function of R, S;
+  attr f is RingEpimorphism means
+  :Def22:
+  f is RingHomomorphism & rng f = the carrier of S;
+  attr f is RingMonomorphism means
+  :Def23:
+  f is RingHomomorphism & f is one-to-one;
+end;
+
+notation
+  let R,S be non empty doubleLoopStr;
+  let f be Function of R, S;
+  synonym f is embedding for f is RingMonomorphism;
+end;
+
+definition
+  let R,S be non empty doubleLoopStr;
+  let f be Function of R, S;
+  attr f is RingIsomorphism means
+  :Def24:
+  f is RingMonomorphism RingEpimorphism;
+end;
+
+registration
+  let R,S be non empty doubleLoopStr;
+  cluster RingIsomorphism -> RingMonomorphism RingEpimorphism Function of R, S;
+  coherence by Def24;
+  cluster RingMonomorphism RingEpimorphism -> RingIsomorphism Function of R, S;
+  coherence by Def24;
+end;
+
+theorem Th53:
+  for R,S being Ring for f being Function of R, S st f is
+  RingHomomorphism holds f.(0.R) = 0.S
+proof
+  let R,S be Ring;
+  let f be Function of R, S;
+  assume
+A1: f is RingHomomorphism;
+  f.(0.R) = f.(0.R+0.R) by RLVECT_1:10
+    .= f.(0.R) + f.(0.R) by A1,GRCAT_1:def 13;
+  then 0.S = (f.(0.R) + f.(0.R)) + (-f.(0.R)) by RLVECT_1:def 13
+    .= f.(0.R) + (f.(0.R) + (-f.(0.R))) by RLVECT_1:def 6
+    .= f.(0.R) + 0.S by RLVECT_1:def 13
+    .= f.(0.R) by RLVECT_1:10;
+  hence thesis;
+end;
+
+theorem Th54:
+  for R,S being Ring for f being Function of R, S st f is
+  RingMonomorphism for x being Element of R holds f.x = 0.S iff x = 0.R
+proof
+  let R,S be Ring;
+  let f be Function of R, S;
+  assume
+A1: f is RingMonomorphism;
+  then
+A2: f is RingHomomorphism by Def23;
+  let x be Element of R;
+A3: f is one-to-one by A1,Def23;
+  f.x = 0.S implies x = 0.R
+  proof
+    assume
+A4: f.x = 0.S;
+    f.(0.R) = 0.S by A2,Th53;
+    hence thesis by A3,A4,FUNCT_2:25;
+  end;
+  hence thesis by A2,Th53;
+end;
+
+theorem Th55:
+  for R,S being non degenerated almost_left_invertible commutative
+Ring for f being Function of R, S st f is RingHomomorphism for x being Element
+  of R st x <> 0.R holds f.(x") = (f.x)"
+proof
+  let R,S be non degenerated almost_left_invertible commutative Ring;
+  let f be Function of R, S;
+  assume
+A1: f is RingHomomorphism;
+  let x be Element of R;
+  assume
+A2: x <> 0.R;
+A3: f.x * f.(x") = f.(x"*x) by A1,GROUP_6:def 7
+    .= f.(1_R) by A2,VECTSP_1:def 22
+    .= 1_S by A1,GROUP_1:def 17;
+  then f.x <> 0.S by VECTSP_1:39;
+  hence thesis by A3,VECTSP_1:def 22;
+end;
+
+theorem Th56:
+  for R,S being non degenerated almost_left_invertible commutative
+  Ring for f being Function of R, S st f is RingHomomorphism for x,y being
+  Element of R st y <> 0.R holds f.(x * y") = f.x * (f.y)"
+proof
+  let R,S be non degenerated almost_left_invertible commutative Ring;
+  let f be Function of R, S;
+  assume
+A1: f is RingHomomorphism;
+  let x,y be Element of R;
+  assume
+A2: y <> 0.R;
+  thus f.(x * y") = f.x * f.(y") by A1,GROUP_6:def 7
+    .= f.x * (f.y)" by A1,A2,Th55;
+end;
+
+theorem Th57:
+  for R,S,T being Ring for f being Function of R, S st f is
+RingHomomorphism for g being Function of S, T st g is RingHomomorphism holds g*
+  f is RingHomomorphism
+proof
+  let R,S,T be Ring;
+  let f be Function of R, S;
+  assume
+A1: f is RingHomomorphism;
+  let g be Function of S, T;
+  assume
+A2: g is RingHomomorphism;
+  then
+A3: for x,y being Element of S holds g.(x+y) = g.x + g.y & g.(x*y) = g.x * g
+  .y & g.(1_S) = 1_T by GRCAT_1:def 13,GROUP_1:def 17,GROUP_6:def 7;
+A4: for x,y being Element of R holds (g*f).(x*y) = (g*f).x * (g*f).y
+  proof
+    let x,y be Element of R;
+    thus (g*f).(x*y) = g.(f.(x*y)) by FUNCT_2:21
+      .= g.(f.x*f.y) by A1,GROUP_6:def 7
+      .= g.(f.x)*g.(f.y) by A2,GROUP_6:def 7
+      .= (g*f).x*g.(f.y) by FUNCT_2:21
+      .= (g*f).x*(g*f).y by FUNCT_2:21;
+  end;
+A5: for x,y being Element of R holds (g*f).(x+y) = (g*f).x + (g*f).y
+  proof
+    let x,y be Element of R;
+    thus (g*f).(x+y) = g.(f.(x+y)) by FUNCT_2:21
+      .= g.(f.x+f.y) by A1,GRCAT_1:def 13
+      .= g.(f.x)+g.(f.y) by A2,GRCAT_1:def 13
+      .= (g*f).x+g.(f.y) by FUNCT_2:21
+      .= (g*f).x+(g*f).y by FUNCT_2:21;
+  end;
+  for x,y being Element of R holds f.(x+y) = f.x + f.y & f.(x*y) = f.x * f
+  .y & f.(1_R) = 1_S by A1,GRCAT_1:def 13,GROUP_1:def 17,GROUP_6:def 7;
+  then
+A6: (g*f).(1.R) = 1.T by A3,FUNCT_2:21;
+  1_R = 1.R & 1_T = 1.T;
+  then (g*f) is additive multiplicative unity-preserving by A6,A5,A4,
+GRCAT_1:def 13,GROUP_1:def 17,GROUP_6:def 7;
+  hence thesis;
+end;
+
+theorem Th58:
+  for R being non empty doubleLoopStr holds id R is RingHomomorphism
+proof
+  let R be non empty doubleLoopStr;
+A1: for x,y being Element of R holds (id R).(x+y) = (id R).x + (id R).y
+  proof
+    let x,y be Element of R;
+    thus (id R).x + (id R).y = x + (id R).y by FUNCT_1:35
+      .= x + y by FUNCT_1:35
+      .= (id R).(x+y) by FUNCT_1:35;
+  end;
+A2: for x,y being Element of R holds (id R).(x*y) = (id R).x * (id R).y
+  proof
+    let x,y be Element of R;
+    thus (id R).x * (id R).y = x * (id R).y by FUNCT_1:35
+      .= x * y by FUNCT_1:35
+      .= (id R).(x*y) by FUNCT_1:35;
+  end;
+  (id R).(1_R) = 1_R by FUNCT_1:35;
+  then id R is additive multiplicative unity-preserving by A1,A2,GRCAT_1:def 13
+,GROUP_1:def 17,GROUP_6:def 7;
+  hence thesis;
+end;
+
+registration
+  let R be non empty doubleLoopStr;
+  cluster id R -> RingHomomorphism;
+  coherence by Th58;
+end;
+
+definition
+  let R,S be non empty doubleLoopStr;
+  pred R is_embedded_in S means
+  :Def25:
+  ex f being Function of R, S st f is RingMonomorphism;
+end;
+
+definition
+  let R,S be non empty doubleLoopStr;
+  pred R is_ringisomorph_to S means
+  :Def26:
+  ex f being Function of R, S st f is RingIsomorphism;
+  symmetry
+  proof
+    let R,S be non empty doubleLoopStr;
+    given f being Function of R, S such that
+A1: f is RingIsomorphism;
+A2: rng f = the carrier of S by A1,Def22;
+    set g = f";
+A3: f is one-to-one by A1,Def23;
+A4: f is RingHomomorphism by A1,Def22;
+    for x,y being Element of S holds g.(x+y) = g.x + g.y & g.(x*y) = g.x *
+    g.y & g.(1_S) = 1_R
+    proof
+      let x,y be Element of S;
+      consider x9 being set such that
+A5:   x9 in the carrier of R and
+A6:   f.(x9) = x by A2,FUNCT_2:17;
+      reconsider x9 as Element of R by A5;
+A7:   x9 = ((f qua Function)").(f.(x9)) by A3,FUNCT_2:32
+        .= g.x by A3,A2,A6,TOPS_2:def 4;
+      consider y9 being set such that
+A8:   y9 in the carrier of R and
+A9:   f.(y9) = y by A2,FUNCT_2:17;
+      reconsider y9 as Element of R by A8;
+A10:  y9 = ((f qua Function)").(f.(y9)) by A3,FUNCT_2:32
+        .= g.y by A3,A2,A9,TOPS_2:def 4;
+      thus g.(x+y) = g.(f.(x9+y9)) by A4,A6,A9,GRCAT_1:def 13
+        .= ((f qua Function)").(f.(x9+y9)) by A3,A2,TOPS_2:def 4
+        .= g.x + g.y by A3,A7,A10,FUNCT_2:32;
+      thus g.(x*y) = g.(f.(x9*y9)) by A4,A6,A9,GROUP_6:def 7
+        .= ((f qua Function)").(f.(x9*y9)) by A3,A2,TOPS_2:def 4
+        .= g.x * g.y by A3,A7,A10,FUNCT_2:32;
+      thus g.(1_S) = g.(f.(1_R)) by A4,GROUP_1:def 17
+        .= ((f qua Function)").(f.(1_R)) by A3,A2,TOPS_2:def 4
+        .= 1_R by A3,FUNCT_2:32;
+    end;
+    then
+A11: g is additive multiplicative unity-preserving by GRCAT_1:def 13
+,GROUP_1:def 17,GROUP_6:def 7;
+A12: rng f = [#]S by A1,Def22;
+    then rng g = [#]R by A3,TOPS_2:62
+      .= the carrier of R;
+    then
+A13: g is RingEpimorphism by A11,Def22;
+    g is one-to-one by A3,A12,TOPS_2:63;
+    then g is RingMonomorphism by A11,Def23;
+    hence thesis by A13;
+  end;
+end;
+
+begin :: Properties of the Field of Quotients
+
+definition
+  let I be non empty ZeroStr;
+  let x, y be Element of I;
+  assume
+A1: y <> 0.I;
+  func quotient(x,y) -> Element of Q.I equals
+  :Def27:
+  [x,y];
+  coherence by A1,Def1;
+end;
+
+definition
+  let I be non degenerated domRing-like commutative Ring;
+  func canHom(I) -> Function of I, the_Field_of_Quotients(I) means
+  :Def28:
+  for x being Element of I holds it.x = QClass.(quotient(x,1.I));
+  existence
+  proof
+    set f = { [x,QClass.(quotient(x,y))] where x,y is Element of I : y = 1.I};
+A1: for u being set holds u in f implies ex a,b being set st u = [a,b]
+    proof
+      let u be set;
+      assume u in f;
+      then
+      ex a,b being Element of I st u = [a,QClass.(quotient(a,b))] & b = 1. I;
+      hence thesis;
+    end;
+    for a,b1,b2 being set st [a,b1] in f & [a,b2] in f holds b1 = b2
+    proof
+      let a,b1,b2 be set;
+      assume that
+A2:   [a,b1] in f and
+A3:   [a,b2] in f;
+      consider x1,x2 being Element of I such that
+A4:   [a,b1] = [x1,QClass.(quotient(x1,x2))] and
+A5:   x2 = 1.I by A2;
+A6:   a = [x1,QClass.(quotient(x1,x2))]`1 by A4,MCART_1:def 1
+        .= x1 by MCART_1:def 1;
+      consider y1,y2 being Element of I such that
+A7:   [a,b2] = [y1,QClass.(quotient(y1,y2))] and
+A8:   y2 = 1.I by A3;
+A9:   a = [y1,QClass.(quotient(y1,y2))]`1 by A7,MCART_1:def 1
+        .= y1 by MCART_1:def 1;
+      reconsider a as Element of I by A6;
+      b1 = [a,b2]`2 by A4,A5,A7,A8,A6,A9,MCART_1:def 2
+        .= b2 by MCART_1:def 2;
+      hence thesis;
+    end;
+    then reconsider f as Function by A1,FUNCT_1:def 1,RELAT_1:def 1;
+A10: for x being set holds x in dom f implies x in the carrier of I
+    proof
+      let x be set;
+      assume x in dom f;
+      then consider y being set such that
+A11:  [x,y] in f by RELAT_1:def 4;
+      consider a,b being Element of I such that
+A12:  [x,y] = [a,QClass.(quotient(a,b))] and
+      b = 1.I by A11;
+      x = [a,QClass.(quotient(a,b))]`1 by A12,MCART_1:def 1
+        .= a by MCART_1:def 1;
+      hence thesis;
+    end;
+    for x being set holds x in the carrier of I implies x in dom f
+    proof
+      let x be set;
+      assume x in the carrier of I;
+      then reconsider x as Element of I;
+      [x,QClass.(quotient(x,1.I))] in f;
+      hence thesis by RELAT_1:def 4;
+    end;
+    then
+A13: dom f = the carrier of I by A10,TARSKI:2;
+    for y being set holds y in rng f implies y in the carrier of (
+    the_Field_of_Quotients(I))
+    proof
+      let y be set;
+      assume y in rng f;
+      then consider x being set such that
+A14:  [x,y] in f by RELAT_1:def 5;
+      consider a,b being Element of I such that
+A15:  [x,y] = [a,QClass.(quotient(a,b))] and
+      b = 1.I by A14;
+      y = [a,QClass.(quotient(a,b))]`2 by A15,MCART_1:def 2
+        .= QClass.(quotient(a,b)) by MCART_1:def 2;
+      hence thesis;
+    end;
+    then rng f c= the carrier of (the_Field_of_Quotients(I)) by TARSKI:def 3;
+    then reconsider f as Function of I, the_Field_of_Quotients(I) by A13,
+FUNCT_2:def 1,RELSET_1:11;
+    for x being Element of I holds f.x = QClass.(quotient(x,1.I))
+    proof
+      let x be Element of I;
+      [x,QClass.(quotient(x,1.I))] in f;
+      hence thesis by A13,FUNCT_1:def 4;
+    end;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let f1,f2 be Function of I, the_Field_of_Quotients(I);
+    assume
+A16: for x being Element of I holds f1.x = QClass.(quotient(x,1.I));
+    assume
+A17: for x being Element of I holds f2.x = QClass.(quotient(x,1.I));
+A18: for x being set st x in the carrier of I holds f1.x = f2.x
+    proof
+      let x be set;
+      assume x in the carrier of I;
+      then reconsider x as Element of I;
+      f1.x = QClass.(quotient(x,1.I)) by A16
+        .= f2.x by A17;
+      hence thesis;
+    end;
+    dom f1 = the carrier of I & dom f2 = the carrier of I by FUNCT_2:def 1;
+    hence thesis by A18,FUNCT_1:9;
+  end;
+end;
+
+theorem Th59:
+  for I being non degenerated domRing-like commutative Ring holds
+  canHom(I) is RingHomomorphism
+proof
+  let I be non degenerated domRing-like commutative Ring;
+A1: 0.I <> 1.I;
+  for x,y being Element of I holds (canHom(I)).(x+y) = (canHom(I)).x + (
+canHom(I)).y & (canHom(I)).(x*y) = (canHom(I)).x * (canHom(I)).y & (canHom(I)).
+  (1_I) = 1_the_Field_of_Quotients(I)
+  proof
+    reconsider res3 = [1.I,1.I] as Element of Q.I by A1,Def1;
+    let x,y be Element of I;
+    reconsider t1 = (quotient(x,1.I)), t2 = (quotient(y,1.I)) as Element of Q.
+    I;
+A2: t1`2 = [x,1.I]`2 by A1,Def27
+      .= 1.I by MCART_1:def 2;
+    t1`2 <> 0.I & t2`2 <> 0.I by Th2;
+    then
+A3: t1`2 * t2`2 <> 0.I by VECTSP_2:def 5;
+    then reconsider
+    sum = [t1`1*t2`2+t2`1*t1`2,t1`2*t2`2] as Element of Q.I by Def1;
+A4: t2`1 = [y,1.I]`1 by A1,Def27
+      .= y by MCART_1:def 1;
+    reconsider prod = [t1`1*t2`1,t1`2*t2`2] as Element of Q.I by A3,Def1;
+A5: QClass.t1 = (canHom(I)).x & QClass.t2 = (canHom(I)).y by Def28;
+A6: (quotadd(I)).(QClass.t1,QClass.t2) = qadd(QClass.t1,QClass.t2) by Def12
+      .= QClass.(padd(t1,t2)) by Th11
+      .= QClass.sum;
+A7: t1`1 = [x,1.I]`1 by A1,Def27
+      .= x by MCART_1:def 1;
+A8: t2`2 = [y,1.I]`2 by A1,Def27
+      .= 1.I by MCART_1:def 2;
+    then
+A9: sum = [t1`1+t2`1*1.I,1.I*1.I] by A2,VECTSP_1:def 16
+      .= [t1`1+t2`1,1.I*1.I] by VECTSP_1:def 16
+      .= [x+y,1.I] by A4,A7,VECTSP_1:def 16;
+    thus (canHom(I)).(x+y) = QClass.(quotient(x+y,1.I)) by Def28
+      .= (canHom(I)).x + (canHom(I)).y by A1,A5,A6,A9,Def27;
+A10: (quotmult(I)).(QClass.t1,QClass.t2) = qmult(QClass.t1,QClass.t2) by Def13
+      .= QClass.(pmult(t1,t2)) by Th12
+      .= QClass.prod;
+A11: prod = [x*y,1.I] by A8,A2,A4,A7,VECTSP_1:def 16;
+    thus (canHom(I)).(x*y) = QClass.(quotient(x*y,1.I)) by Def28
+      .= (canHom(I)).x * (canHom(I)).y by A1,A5,A10,A11,Def27;
+A12: for u being set holds u in QClass.res3 implies u in q1.I
+    proof
+      let u be set;
+      assume
+A13:  u in QClass.res3;
+      then reconsider u as Element of Q.I;
+      u`1 = u`1 * 1.I by VECTSP_1:def 16
+        .= u`1 * res3`2 by MCART_1:def 2
+        .= u`2 * res3`1 by A13,Def4
+        .= u`2 * 1.I by MCART_1:def 1
+        .= u`2 by VECTSP_1:def 16;
+      hence thesis by Def9;
+    end;
+    for u being set holds u in q1.I implies u in QClass.res3
+    proof
+      let u be set;
+      assume
+A14:  u in q1.I;
+      then reconsider u as Element of Q.I;
+      u`1 * res3`2 = u`1 * 1.I by MCART_1:def 2
+        .= u`1 by VECTSP_1:def 16
+        .= u`2 by A14,Def9
+        .= u`2 * 1.I by VECTSP_1:def 16
+        .= u`2 * res3`1 by MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    then
+A15: q1.I = QClass.res3 by A12,TARSKI:2;
+    thus (canHom(I)).(1_I) = QClass.(quotient(1.I,1.I)) by Def28
+      .= 1_the_Field_of_Quotients(I) by A1,A15,Def27;
+  end;
+  then canHom(I) is additive multiplicative unity-preserving by GRCAT_1:def 13
+,GROUP_1:def 17,GROUP_6:def 7;
+  hence thesis;
+end;
+
+theorem Th60:
+  for I being non degenerated domRing-like commutative Ring holds
+  canHom(I) is embedding
+proof
+  let I be non degenerated domRing-like commutative Ring;
+A1: 0.I <> 1.I;
+  for x1,x2 being set st x1 in dom canHom(I) & x2 in dom canHom(I) & (
+  canHom(I)).x1 = (canHom(I)).x2 holds x1 = x2
+  proof
+    let x1,x2 be set;
+    assume that
+A2: x1 in dom canHom(I) & x2 in dom canHom(I) and
+A3: (canHom(I)).x1 = (canHom(I)).x2;
+    reconsider x1,x2 as Element of I by A2;
+    reconsider t1 = quotient(x1,1.I), t2 = quotient(x2,1.I) as Element of Q.I;
+A4: t1 in QClass.t1 by Th6;
+    QClass.t1 = (canHom(I)).x2 by A3,Def28
+      .= QClass.t2 by Def28;
+    then
+A5: t1`1 * t2`2 = t1`2 * t2`1 by A4,Def4;
+A6: t1`2 = [x1,1.I]`2 by A1,Def27
+      .= 1.I by MCART_1:def 2;
+A7: t1`1 = [x1,1.I]`1 by A1,Def27
+      .= x1 by MCART_1:def 1;
+A8: t2`1 = [x2,1.I]`1 by A1,Def27
+      .= x2 by MCART_1:def 1;
+    t2`2 = [x2,1.I]`2 by A1,Def27
+      .= 1.I by MCART_1:def 2;
+    then x1 = t1`2 * t2`1 by A5,A7,VECTSP_1:def 16
+      .= x2 by A6,A8,VECTSP_1:def 16;
+    hence thesis;
+  end;
+  then
+A9: (canHom(I)) is one-to-one by FUNCT_1:def 8;
+  (canHom(I)) is RingHomomorphism by Th59;
+  hence thesis by A9,Def23;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring holds I
+  is_embedded_in the_Field_of_Quotients(I)
+proof
+  let I be non degenerated domRing-like commutative Ring;
+  canHom(I) is embedding by Th60;
+  hence thesis by Def25;
+end;
+
+theorem Th62:
+  for F being non degenerated almost_left_invertible domRing-like
+  commutative Ring holds F is_ringisomorph_to the_Field_of_Quotients(F)
+proof
+  let F be non degenerated almost_left_invertible domRing-like commutative
+  Ring;
+A1: 0.F <> 1.F;
+A2: dom canHom(F) = the carrier of F by FUNCT_2:def 1;
+A3: for x being set holds x in the carrier of the_Field_of_Quotients(F)
+  implies x in rng canHom(F)
+  proof
+    let x be set;
+    assume x in the carrier of the_Field_of_Quotients(F);
+    then reconsider x as Element of Quot.F;
+    consider u being Element of Q.F such that
+A4: x = QClass.u by Def5;
+    consider a,b being Element of F such that
+A5: u = [a,b] and
+A6: b <> 0.F by Def1;
+    consider z being Element of F such that
+A7: z * b = 1.F by A6,VECTSP_1:def 20;
+    reconsider t = [a*z,1.F] as Element of Q.F by A1,Def1;
+A8: for x being set holds x in QClass.t implies x in QClass.u
+    proof
+      let x be set;
+      assume
+A9:   x in QClass.t;
+      then reconsider x as Element of Q.F;
+      x`1 = x`1 * 1.F by VECTSP_1:def 16
+        .= x`1 * t`2 by MCART_1:def 2
+        .= x`2 * t`1 by A9,Def4
+        .= x`2 * (a * z) by MCART_1:def 1;
+      then x`1 * u`2 = (x`2 * (a * z)) * b by A5,MCART_1:def 2
+        .= x`2 * ((a * z) * b) by GROUP_1:def 4
+        .= x`2 * (a * 1.F) by A7,GROUP_1:def 4
+        .= x`2 * a by VECTSP_1:def 16
+        .= x`2 * u`1 by A5,MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    for x being set holds x in QClass.u implies x in QClass.t
+    proof
+      let x be set;
+      assume
+A10:  x in QClass.u;
+      then reconsider x as Element of Q.F;
+      x`1 * t`2 = x`1 * (b * z) by A7,MCART_1:def 2
+        .= (x`1 * b) * z by GROUP_1:def 4
+        .= (x`1 * u`2) * z by A5,MCART_1:def 2
+        .= (x`2 * u`1) * z by A10,Def4
+        .= (x`2 * a) * z by A5,MCART_1:def 1
+        .= (x`2 * (a * z)) by GROUP_1:def 4
+        .= x`2 * t`1 by MCART_1:def 1;
+      hence thesis by Def4;
+    end;
+    then
+A11: QClass.t = QClass.u by A8,TARSKI:2;
+    (canHom(F)).(a*z) = QClass.(quotient(a*z,1.F)) by Def28
+      .= x by A1,A4,A11,Def27;
+    hence thesis by A2,FUNCT_1:def 5;
+  end;
+  for x being set holds x in rng canHom(F) implies x in the carrier of
+  the_Field_of_Quotients(F);
+  then
+A12: rng canHom(F) = the carrier of the_Field_of_Quotients(F) by A3,TARSKI:2;
+A13: canHom(F) is embedding by Th60;
+  then canHom(F) is RingHomomorphism by Def23;
+  then canHom(F) is RingEpimorphism by A12,Def22;
+  hence thesis by A13,Def26;
+end;
+
+registration
+  let I be non degenerated domRing-like commutative Ring;
+  cluster the_Field_of_Quotients(I) -> domRing-like right_unital
+    right-distributive;
+  coherence;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring holds
+  the_Field_of_Quotients(the_Field_of_Quotients(I)) is_ringisomorph_to
+  the_Field_of_Quotients(I) by Th62;
+ 
+:: Universal Property of Fields of Quotients
+
+definition
+  let I, F be non empty doubleLoopStr;
+  let f be Function of I, F;
+  pred I has_Field_of_Quotients_Pair F,f means
+  :Def29:
+  f is RingMonomorphism &
+  for F9 being add-associative right_zeroed right_complementable Abelian
+  commutative associative well-unital distributive almost_left_invertible non
+  degenerated (non empty doubleLoopStr) for f9 being Function of I, F9 st f9 is
+RingMonomorphism holds ex h being Function of F, F9 st h is RingHomomorphism &
+h*f = f9 & for h9 being Function of F, F9 st h9 is RingHomomorphism & h9*f = f9
+  holds h9 = h;
+end;
+
+theorem
+  for I being non degenerated domRing-like commutative Ring holds ex F
+  being add-associative right_zeroed right_complementable Abelian commutative
+  associative well-unital distributive almost_left_invertible non degenerated (
+  non empty doubleLoopStr) st ex f being Function of I, F st I
+  has_Field_of_Quotients_Pair F,f
+proof
+  let I be non degenerated domRing-like commutative Ring;
+A1: now
+    let F9 be add-associative right_zeroed right_complementable Abelian
+    commutative associative well-unital distributive almost_left_invertible non
+    degenerated (non empty doubleLoopStr);
+    let f9 be Function of I, F9;
+    set hh = { [[a,b], f9.a * (f9.b)"] where a,b is Element of I : b <> 0.I };
+A2: for u being set holds u in hh implies ex a,b being set st u = [a,b]
+    proof
+      let u be set;
+      assume u in hh;
+      then
+      ex a,b being Element of I st u = [[a,b], f9.a * (f9.b)"] & b <> 0.I;
+      hence thesis;
+    end;
+    for a,b1,b2 being set st [a,b1] in hh & [a,b2] in hh holds b1 = b2
+    proof
+      let a,b1,b2 be set;
+      assume that
+A3:   [a,b1] in hh and
+A4:   [a,b2] in hh;
+      consider x1,x2 being Element of I such that
+A5:   [a,b1] = [[x1,x2], f9.x1 * (f9.x2)"] and
+      x2 <> 0.I by A3;
+      consider y1,y2 being Element of I such that
+A6:   [a,b2] = [[y1,y2], f9.y1 * (f9.y2)"] and
+      y2 <> 0.I by A4;
+A7:   a = [[y1,y2], f9.y1 * (f9.y2)"]`1 by A6,MCART_1:def 1
+        .= [y1,y2] by MCART_1:def 1;
+A8:   a = [[x1,x2], f9.x1 * (f9.x2)"]`1 by A5,MCART_1:def 1
+        .= [x1,x2] by MCART_1:def 1;
+      then
+A9:   x2 = a`2 by MCART_1:def 2
+        .= y2 by A7,MCART_1:def 2;
+      x1 = a`1 by A8,MCART_1:def 1
+        .= y1 by A7,MCART_1:def 1;
+      then b1 = [a,b2]`2 by A5,A6,A9,MCART_1:def 2
+        .= b2 by MCART_1:def 2;
+      hence thesis;
+    end;
+    then reconsider hh as Function by A2,FUNCT_1:def 1,RELAT_1:def 1;
+A10: for x being set holds x in dom hh implies x in Q.I
+    proof
+      let x be set;
+      assume x in dom hh;
+      then consider y being set such that
+A11:  [x,y] in hh by RELAT_1:def 4;
+      consider a,b being Element of I such that
+A12:  [x,y] = [[a,b],f9.a * (f9.b)"] and
+A13:  b <> 0.I by A11;
+      x = [[a,b],f9.a * (f9.b)"]`1 by A12,MCART_1:def 1
+        .= [a,b] by MCART_1:def 1;
+      hence thesis by A13,Def1;
+    end;
+    for x being set holds x in Q.I implies x in dom hh
+    proof
+      let x be set;
+      assume x in Q.I;
+      then consider a,b being Element of I such that
+A14:  x = [a,b] and
+A15:  b <> 0.I by Def1;
+      [[a,b],f9.a * (f9.b)"] in hh by A15;
+      hence thesis by A14,RELAT_1:def 4;
+    end;
+    then
+A16: dom hh = Q.I by A10,TARSKI:2;
+    for y being set holds y in rng hh implies y in the carrier of F9
+    proof
+      let y be set;
+      assume y in rng hh;
+      then consider x being set such that
+A17:  [x,y] in hh by RELAT_1:def 5;
+      consider a,b being Element of I such that
+A18:  [x,y] = [[a,b],f9.a * (f9.b)"] and
+      b <> 0.I by A17;
+      y = [[a,b],f9.a * (f9.b)"]`2 by A18,MCART_1:def 2
+        .= f9.a * (f9.b)" by MCART_1:def 2;
+      hence thesis;
+    end;
+    then rng hh c= the carrier of F9 by TARSKI:def 3;
+    then reconsider hh as Function of Q.I, the carrier of F9 by A16,
+FUNCT_2:def 1,RELSET_1:11;
+    set h = { [QClass.u, hh.u] where u is Element of Q.I : 1.I = 1.I };
+    0.F9 <> 1.F9 & 1.F9 * 1.F9 = 1.F9 by VECTSP_1:def 16;
+    then
+A19: (1.F9)" = 1.F9 by VECTSP_1:def 22;
+    assume
+A20: f9 is RingMonomorphism;
+    then
+A21: f9 is RingHomomorphism by Def23;
+A22: for v being set holds v in h implies ex a,b being set st v = [a,b]
+    proof
+      let v be set;
+      assume v in h;
+      then ex u being Element of Q.I st v = [QClass.u, hh.u] & 1.I = 1.I;
+      hence thesis;
+    end;
+A23: for x being Element of Q.I holds hh.x = f9.(x`1) * (f9.(x`2))"
+    proof
+      let x be Element of Q.I;
+      consider a,b being Element of I such that
+A24:  x = [a,b] and
+A25:  b <> 0.I by Def1;
+A26:  [[a,b],f9.a * (f9.b)"] in hh by A25;
+      x`1 = a & x`2 = b by A24,MCART_1:def 1,def 2;
+      hence thesis by A16,A24,A26,FUNCT_1:def 4;
+    end;
+    for a,b1,b2 being set st [a,b1] in h & [a,b2] in h holds b1 = b2
+    proof
+      let a,b1,b2 be set;
+      assume that
+A27:  [a,b1] in h and
+A28:  [a,b2] in h;
+      consider u1 being Element of Q.I such that
+A29:  [a,b1] = [QClass.u1, hh.u1] and
+      1.I = 1.I by A27;
+      consider u2 being Element of Q.I such that
+A30:  [a,b2] = [QClass.u2, hh.u2] and
+      1.I = 1.I by A28;
+A31:  a = [QClass.u2, hh.u2]`1 by A30,MCART_1:def 1
+        .= QClass.u2 by MCART_1:def 1;
+      a = [QClass.u1, hh.u1]`1 by A29,MCART_1:def 1
+        .= QClass.u1 by MCART_1:def 1;
+      then u1 in QClass.u2 by A31,Th6;
+      then
+A32:  u1`1 * u2`2 = u1`2 * u2`1 by Def4;
+      u1`2 <> 0.I by Th2;
+      then
+A33:  f9.(u1`2) <> 0.F9 by A20,Th54;
+      u2`2 <> 0.I by Th2;
+      then
+A34:  f9.(u2`2) <> 0.F9 by A20,Th54;
+A35:  f9 is RingHomomorphism by A20,Def23;
+A36:  hh.u1 = f9.(u1`1)/f9.(u1`2) by A23
+        .= (f9.(u1`1)/f9.(u1`2)) * 1.F9 by VECTSP_1:def 16
+        .= (f9.(u1`1)/f9.(u1`2)) * (f9.(u2`2)/f9.(u2`2)) by A34,VECTSP_1:def 22
+        .= (f9.(u1`1)*f9.(u2`2)) / (f9.(u1`2)*f9.(u2`2)) by A33,A34,Th51
+        .= (f9.(u1`2 * u2`1)) / (f9.(u1`2)*f9.(u2`2)) by A32,A35,GROUP_6:def 7
+        .= (f9.(u1`2)*f9.(u2`1)) / (f9.(u1`2)*f9.(u2`2)) by A35,GROUP_6:def 7
+        .= (f9.(u1`2)/f9.(u1`2)) * (f9.(u2`1)/f9.(u2`2)) by A33,A34,Th51
+        .= 1.F9 * (f9.(u2`1)*(f9.(u2`2))") by A33,VECTSP_1:def 22
+        .= (f9.(u2`1)*(f9.(u2`2))") by VECTSP_1:def 16
+        .= hh.u2 by A23;
+      b1 = [QClass.u1, hh.u1]`2 by A29,MCART_1:def 2
+        .= hh.u2 by A36,MCART_1:def 2
+        .= [a,b2]`2 by A30,MCART_1:def 2
+        .= b2 by MCART_1:def 2;
+      hence thesis;
+    end;
+    then reconsider h as Function by A22,FUNCT_1:def 1,RELAT_1:def 1;
+A37: for x being set holds x in dom h implies x in Quot.I
+    proof
+      let x be set;
+      assume x in dom h;
+      then consider y being set such that
+A38:  [x,y] in h by RELAT_1:def 4;
+      consider u being Element of Q.I such that
+A39:  [x,y] = [QClass.u, hh.u] and
+      1.I = 1.I by A38;
+      x = [QClass.u, hh.u]`1 by A39,MCART_1:def 1
+        .= QClass.u by MCART_1:def 1;
+      hence thesis;
+    end;
+    for x being set holds x in Quot.I implies x in dom h
+    proof
+      let x be set;
+      assume x in Quot.I;
+      then consider u being Element of Q.I such that
+A40:  x = QClass.u by Def5;
+      [QClass.u, hh.u] in h;
+      hence thesis by A40,RELAT_1:def 4;
+    end;
+    then
+A41: dom h = Quot.I by A37,TARSKI:2;
+    for y being set holds y in rng h implies y in the carrier of F9
+    proof
+      let y be set;
+      assume y in rng h;
+      then consider x being set such that
+A42:  [x,y] in h by RELAT_1:def 5;
+      consider u being Element of Q.I such that
+A43:  [x,y] = [QClass.u, hh.u] and
+      1.I = 1.I by A42;
+      y = [QClass.u, hh.u]`2 by A43,MCART_1:def 2
+        .= hh.u by MCART_1:def 2;
+      hence thesis;
+    end;
+    then rng h c= the carrier of F9 by TARSKI:def 3;
+    then reconsider h as Function of Quot.I, the carrier of F9 by A41,
+FUNCT_2:def 1,RELSET_1:11;
+    reconsider h as Function of the_Field_of_Quotients(I), F9;
+A44: for x being Element of the_Field_of_Quotients(I) for u being Element
+    of Q.I st x = QClass.u holds h.x = hh.u
+    proof
+      let x be Element of the_Field_of_Quotients(I);
+      let u be Element of Q.I;
+A45:  [QClass.u, hh.u] in h;
+      assume x = QClass.u;
+      hence thesis by A41,A45,FUNCT_1:def 4;
+    end;
+A46: now
+      let h9 be Function of the_Field_of_Quotients(I), F9;
+      assume that
+A47:  h9 is RingHomomorphism and
+A48:  h9*canHom(I) = f9;
+A49:  0.I <> 1.I;
+      for x being set st x in the carrier of the_Field_of_Quotients(I)
+      holds h9.x = h.x
+      proof
+        let x be set;
+        assume x in the carrier of the_Field_of_Quotients(I);
+        then reconsider x as Element of the_Field_of_Quotients( I);
+        reconsider x9 = x as Element of Quot.I;
+        consider u being Element of Q.I such that
+A50:    x9 = QClass.u by Def5;
+        consider a,b being Element of I such that
+A51:    u = [a,b] and
+A52:    b <> 0.I by Def1;
+        reconsider a9 = [a,1.I], b9 = [b,1.I] as Element of Q.I by A49,Def1;
+        reconsider a99 = QClass.(a9), b99 = QClass.(b9) as Element of
+        the_Field_of_Quotients(I);
+        reconsider bi = [1.I,b] as Element of Q.I by A52,Def1;
+        reconsider aa = QClass.(quotient(a,1.I)) as Element of
+        the_Field_of_Quotients(I);
+        reconsider bb = QClass.(quotient(b,1.I)) as Element of
+        the_Field_of_Quotients(I);
+        reconsider bi9 = QClass.bi as Element of the_Field_of_Quotients(I);
+A53:    pmult(a9,bi) = [a * bi`1, (a9)`2 * bi`2] by MCART_1:def 1
+          .= [a * 1.I, (a9)`2 * bi`2] by MCART_1:def 1
+          .= [a * 1.I, 1.I * bi`2] by MCART_1:def 2
+          .= [a * 1.I, 1.I * b] by MCART_1:def 2
+          .= [a, 1.I * b] by VECTSP_1:def 16
+          .= [a, b] by VECTSP_1:def 16;
+A54:    b99 <> 0.the_Field_of_Quotients(I)
+        proof
+A55:      b9 in b99 by Th6;
+          assume
+A56:      b99 = 0.the_Field_of_Quotients(I);
+          b = (b9)`1 by MCART_1:def 1
+            .= 0.I by A56,A55,Def8;
+          hence contradiction by A52;
+        end;
+A57:    h.x = hh.u by A44,A50
+          .= (h9*canHom(I)).(u`1) * (f9.(u`2))" by A23,A48
+          .= h9.((canHom(I)).(u`1)) * ((h9*canHom(I)).(u`2))" by A48,FUNCT_2:21
+          .= h9.((canHom(I)).(u`1)) * (h9.((canHom(I)).(u`2)))" by FUNCT_2:21;
+A58:    h9.((quotmult(I)).(a99,bi9)) = h9.(qmult(QClass.(a9),QClass.bi))
+        by Def13
+          .= h9.(QClass.(pmult(a9,bi))) by Th12;
+        h9.((canHom(I)).(u`1)) * (h9.((canHom(I)).(u`2)))" = h9.((canHom
+        (I)).a) * (h9.((canHom(I)).(u`2)))" by A51,MCART_1:def 1
+          .= h9.aa * (h9.((canHom(I)).(u`2)))" by Def28
+          .= h9.(a99) * (h9.((canHom(I)).(u`2)))" by A49,Def27
+          .= h9.(a99) * (h9.((canHom(I)).b))" by A51,MCART_1:def 2
+          .= h9.(a99) * (h9.(bb))" by Def28
+          .= h9.(a99) * (h9.(b99))" by A49,Def27
+          .= h9.(a99 * (b99)") by A47,A54,Th56;
+        hence thesis by A50,A51,A52,A57,A54,A58,A53,Th50;
+      end;
+      hence h9 = h by FUNCT_2:18;
+    end;
+A59: 1_F9 = 1.F9;
+    for x,y being Element of the_Field_of_Quotients(I) holds h.(x+y) = h.
+    x + h.y & h.(x*y) = h.x * h.y & h.(1_the_Field_of_Quotients(I)) = 1_F9
+    proof
+      let x,y be Element of the_Field_of_Quotients(I);
+      reconsider x,y as Element of Quot.I;
+A60:  0.F9 <> 1.F9;
+      consider u being Element of Q.I such that
+A61:  x = QClass.u by Def5;
+A62:  u`2 <> 0.I by Th2;
+      then
+A63:  f9.(u`2) <> 0.F9 by A20,Th54;
+      consider v being Element of Q.I such that
+A64:  y = QClass.v by Def5;
+A65:  v`2 <> 0.I by Th2;
+      then
+A66:  f9.(v`2) <> 0.F9 by A20,Th54;
+A67:  u`2 * v`2 <> 0.I by A62,A65,VECTSP_2:def 5;
+      then reconsider
+      t = [u`1 * v`2 + v`1 * u`2, u`2 * v`2] as Element of Q.I by Def1;
+      reconsider x,y as Element of the_Field_of_Quotients(I);
+      reconsider x9 = x, y9 = y as Element of Quot.I;
+A68:  h.(qadd(x9,y9)) = h.(QClass.(padd(u,v))) by A61,A64,Th11
+        .= h.(QClass.t);
+A69:  h.x + h.y = hh.u + h.y by A44,A61
+        .= hh.u + hh.v by A44,A64
+        .= (f9.(u`1) * (f9.(u`2))") + hh.v by A23
+        .= (f9.(u`1) / f9.(u`2)) + (f9.(v`1) / f9.(v`2)) by A23
+        .= (f9.(u`1) * f9.(v`2) + f9.(v`1) * f9.(u`2)) / (f9.(u`2) * f9.(v`2
+      )) by A63,A66,Th52
+        .= (f9.(u`1 * v`2) + f9.(v`1) * f9.(u`2)) / (f9.(u`2) * f9.(v`2)) by
+A21,GROUP_6:def 7
+        .= (f9.(u`1 * v`2) + f9.(v`1 * u`2)) / (f9.(u`2) * f9.(v`2)) by A21,
+GROUP_6:def 7
+        .= (f9.(u`1 * v`2) + f9.(v`1 * u`2)) * (f9.(u`2 * v`2))" by A21,
+GROUP_6:def 7
+        .= (f9.(u`1 * v`2 + v`1 * u`2))*(f9.(u`2 * v`2))" by A21,GRCAT_1:def 13
+        .= f9.(t`1) * (f9.(u`2 * v`2))" by MCART_1:def 1
+        .= f9.(t`1) * (f9.(t`2))" by MCART_1:def 2
+        .= hh.t by A23;
+A70:  h.(QClass.t) = hh.t by A44;
+      reconsider t = [u`1 * v`1, u`2 * v`2] as Element of Q.I by A67,Def1;
+A71:  h.x * h.y = hh.u * h.y by A44,A61
+        .= hh.u * hh.v by A44,A64
+        .= (f9.(u`1) * (f9.(u`2))") * hh.v by A23
+        .= (f9.(u`1) / f9.(u`2)) * (f9.(v`1) / f9.(v`2)) by A23
+        .= (f9.(u`1) * f9.(v`1)) / (f9.(u`2) * f9.(v`2)) by A63,A66,Th51
+        .= (f9.(u`1 * v`1)) / (f9.(u`2) * f9.(v`2)) by A21,GROUP_6:def 7
+        .= (f9.(u`1 * v`1)) * (f9.(u`2 * v`2))" by A21,GROUP_6:def 7
+        .= f9.(t`1) * (f9.(u`2 * v`2))" by MCART_1:def 1
+        .= f9.(t`1) * (f9.(t`2))" by MCART_1:def 2
+        .= hh.t by A23;
+      reconsider x9 = x, y9 = y as Element of Quot.I;
+A72:  h.(qmult(x9,y9)) = h.(QClass.(pmult(u,v))) by A61,A64,Th12
+        .= h.(QClass.t);
+A73:  h.(QClass.t) = hh.t by A44;
+      0.I <> 1.I;
+      then reconsider t = [1.I,1.I] as Element of Q.I by Def1;
+A74:  for u being set holds u in QClass.t implies u in q1.I
+      proof
+        let u be set;
+        assume
+A75:    u in QClass.t;
+        then reconsider u as Element of Q.I;
+        u`1 = u`1 * 1.I by VECTSP_1:def 16
+          .= u`1 * t`2 by MCART_1:def 2
+          .= u`2 * t`1 by A75,Def4
+          .= u`2 * 1.I by MCART_1:def 1
+          .= u`2 by VECTSP_1:def 16;
+        hence thesis by Def9;
+      end;
+      for u being set holds u in q1.I implies u in QClass.t
+      proof
+        let u be set;
+        assume
+A76:    u in q1.I;
+        then reconsider u as Element of Q.I;
+        u`1 * t`2 = u`1 * 1.I by MCART_1:def 2
+          .= u`1 by VECTSP_1:def 16
+          .= u`2 by A76,Def9
+          .= u`2 * 1.I by VECTSP_1:def 16
+          .= u`2 * t`1 by MCART_1:def 1;
+        hence thesis by Def4;
+      end;
+      then q1.I = QClass.t by A74,TARSKI:2;
+      then h.(1_the_Field_of_Quotients(I)) = hh.t by A44
+        .= f9.(t`1) * (f9.(t`2))" by A23
+        .= f9.(1.I) * (f9.(t`2))" by MCART_1:def 1
+        .= f9.(1.I) * (f9.(1.I))" by MCART_1:def 2
+        .= 1.F9 * (f9.(1_I))" by A21,A59,GROUP_1:def 17
+        .= 1.F9 * (1_F9)" by A21,GROUP_1:def 17
+        .= 1_F9 by A60,VECTSP_1:def 22;
+      hence thesis by A69,A68,A70,A71,A72,A73,Def12,Def13;
+    end;
+    then
+A77: h is additive multiplicative unity-preserving by GRCAT_1:def 13
+,GROUP_1:def 17,GROUP_6:def 7;
+A78: for x being set holds x in dom f9 implies x in dom canHom(I) & (
+    canHom(I)).x in dom h
+    proof
+      let x be set;
+      assume x in dom f9;
+      then reconsider x as Element of I;
+      dom h = the carrier of the_Field_of_Quotients(I) by FUNCT_2:def 1;
+      then x in the carrier of I & (canHom(I)).x in dom h;
+      hence thesis by FUNCT_2:def 1;
+    end;
+A79: 0.I <> 1.I;
+A80: for x being set st x in dom f9 holds f9.x = h.((canHom(I)).x)
+    proof
+      let x be set;
+      assume x in dom f9;
+      then reconsider x as Element of I;
+      reconsider u = [x,1.I] as Element of Q.I by A79,Def1;
+      reconsider u9 = QClass.u as Element of the_Field_of_Quotients(I);
+      h.((canHom(I)).x) = h.(QClass.(quotient(x,1.I)))by Def28
+        .= h.u9 by Def27
+        .= hh.u by A44
+        .= f9.(u`1) * (f9.(u`2))" by A23
+        .= f9.(u`1) * (f9.(1_I))" by MCART_1:def 2
+        .= f9.(u`1) * 1_F9 by A21,A19,GROUP_1:def 17
+        .= f9.(u`1) by VECTSP_1:def 16
+        .= f9.(x) by MCART_1:def 1;
+      hence thesis;
+    end;
+    for x being set holds x in dom canHom(I) & (canHom(I)).x in dom h
+    implies x in dom f9
+    proof
+      let x be set;
+      assume that
+A81:  x in dom canHom(I) and
+      (canHom(I)).x in dom h;
+      reconsider x as Element of I by A81;
+      x in the carrier of I;
+      hence thesis by FUNCT_2:def 1;
+    end;
+    then h * canHom(I) = f9 by A78,A80,FUNCT_1:20;
+    hence ex h being Function of the_Field_of_Quotients(I), F9 st h is
+    RingHomomorphism & h*canHom(I) = f9 & for h9 being Function of
+    the_Field_of_Quotients(I), F9 st h9 is RingHomomorphism & h9*canHom(I) = f9
+    holds h9 = h by A77,A46;
+  end;
+  canHom(I) is embedding by Th60;
+  then I has_Field_of_Quotients_Pair the_Field_of_Quotients(I),canHom(I) by A1
+,Def29;
+  hence thesis;
+end;
+
+theorem
+  for I being domRing-like commutative Ring for F,F9 being
+  add-associative right_zeroed right_complementable Abelian commutative
+  associative well-unital distributive almost_left_invertible non degenerated (
+non empty doubleLoopStr) for f being Function of I, F for f9 being Function of
+I, F9 st I has_Field_of_Quotients_Pair F,f & I has_Field_of_Quotients_Pair F9,
+  f9 holds F is_ringisomorph_to F9
+proof
+  let I be domRing-like commutative Ring;
+  let F,F9 be add-associative right_zeroed right_complementable Abelian
+  commutative associative well-unital distributive almost_left_invertible non
+  degenerated (non empty doubleLoopStr);
+  let f be Function of I, F;
+  let f9 be Function of I, F9;
+  assume that
+A1: I has_Field_of_Quotients_Pair F,f and
+A2: I has_Field_of_Quotients_Pair F9,f9;
+A3: (id F9) * f9 = f9 by FUNCT_2:23;
+A4: f is RingMonomorphism by A1,Def29;
+  then consider h2 being Function of F9, F such that
+A5: h2 is RingHomomorphism & h2*f9 = f and
+  for h9 being Function of F9, F st h9 is RingHomomorphism & h9*f9 = f
+  holds h9 = h2 by A2,Def29;
+  consider h3 being Function of F, F such that
+  h3 is RingHomomorphism and
+  h3*f = f and
+A6: for h9 being Function of F, F st h9 is RingHomomorphism & h9*f = f
+  holds h9 = h3 by A1,A4,Def29;
+A7: id F * f = f by FUNCT_2:23;
+A8: f9 is RingMonomorphism by A2,Def29;
+  then consider h1 being Function of F, F9 such that
+A9: h1 is RingHomomorphism and
+A10: h1*f = f9 and
+  for h9 being Function of F, F9 st h9 is RingHomomorphism & h9*f = f9
+  holds h9 = h1 by A1,Def29;
+  (h2 * h1) * f = f & h2 * h1 is RingHomomorphism by A9,A10,A5,Th57,RELAT_1:55;
+  then
+A11: (h2 * h1) = h3 by A6
+    .= id the carrier of F by A7,A6;
+  consider h3 being Function of F9, F9 such that
+  h3 is RingHomomorphism and
+  h3*f9 = f9 and
+A12: for h9 being Function of F9, F9 st h9 is RingHomomorphism & h9*f9 =
+  f9 holds h9 = h3 by A2,A8,Def29;
+  (h1 * h2) * f9 = f9 & h1 * h2 is RingHomomorphism by A9,A10,A5,Th57,
+RELAT_1:55;
+  then h1 * h2 = h3 by A12
+    .= id the carrier of F9 by A3,A12;
+  then rng h1 = the carrier of F9 by FUNCT_2:24;
+  then
+A13: h1 is RingEpimorphism by A9,Def22;
+  h1 is one-to-one by A11,FUNCT_2:37;
+  then h1 is RingMonomorphism by A9,Def23;
+  hence thesis by A13,Def26;
+end;

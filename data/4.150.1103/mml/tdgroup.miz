@@ -1,0 +1,481 @@
+:: A Construction of an Abstract Space of Congruence of Vectors
+::  by Grzegorz Lewandowski and Krzysztof Pra\.zmowski
+::
+:: Received May 23, 1990
+:: Copyright (c) 1990 Association of Mizar Users
+ 
+environ
+
+ vocabularies SUBSET_1, VECTSP_1, ARYTM_3, NUMBERS, REAL_1, SUPINF_2, XBOOLE_0,
+      ALGSTR_0, STRUCT_0, RLVECT_1, PBOOLE, RELAT_1, ZFMISC_1, ANALOAF, CARD_1,
+      ARYTM_1, TDGROUP;
+ notations TARSKI, ZFMISC_1, SUBSET_1, NUMBERS, REAL_1, STRUCT_0, ALGSTR_0,
+      ANALOAF, RELSET_1, BINOP_2, RLVECT_1, VECTSP_1;
+ constructors BINOP_2, REALSET2, ANALOAF, REAL_1;
+ registrations RELSET_1, STRUCT_0, VECTSP_1, ANALOAF, REAL_1;
+ requirements NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions VECTSP_1, STRUCT_0;
+ theorems VECTSP_1, RELAT_1, ZFMISC_1, DOMAIN_1, RLVECT_1, ANALOAF, STRUCT_0;
+ schemes RELSET_1;
+
+begin
+
+canceled;
+
+theorem Th2:
+  for a being Element of G_Real holds ex b being Element of G_Real st b + b = a
+proof
+  set G = G_Real;
+  let a be Element of G;
+  reconsider a as Element of REAL;
+  reconsider b9 = a/2 as Real;
+  consider b being Element of G such that
+A1: b = b9;
+  b + b = a by A1;
+  hence thesis;
+end;
+
+theorem
+  for a being Element of G_Real st a + a = 0.G_Real holds a = 0.G_Real;
+
+definition
+  let IT be non empty addLoopStr;
+  attr IT is Two_Divisible means
+  :Def1:
+  for a being Element of IT holds ex b being Element of IT st b + b = a;
+end;
+
+Lm1: G_Real is Fanoian
+proof
+  let a be Element of G_Real;
+  assume a + a = 0.G_Real;
+  hence thesis;
+end;
+
+registration
+  cluster G_Real -> Fanoian Two_Divisible;
+  coherence by Def1,Lm1,Th2;
+end;
+
+registration
+  cluster strict Fanoian Two_Divisible add-associative right_zeroed
+    right_complementable Abelian (non empty addLoopStr);
+  existence by Lm1;
+end;
+
+definition
+  mode Two_Divisible_Group is Two_Divisible add-associative right_zeroed
+    right_complementable Abelian (non empty addLoopStr);
+end;
+
+definition
+  mode Uniquely_Two_Divisible_Group is Fanoian Two_Divisible add-associative
+    right_zeroed right_complementable Abelian (non empty addLoopStr);
+end;
+
+canceled 3;
+
+theorem
+  for AG being add-associative right_zeroed right_complementable Abelian
+  (non empty addLoopStr) holds (AG is Uniquely_Two_Divisible_Group iff (for a
+  being Element of AG holds (ex b being Element of AG st b + b = a)) & (for a
+  being Element of AG st a + a = 0.AG holds a = 0.AG)) by Def1,VECTSP_1:def 30;
+
+reserve ADG for Uniquely_Two_Divisible_Group;
+reserve a,b,c,d,a9,b9,c9,p,q for Element of ADG;
+reserve x,y for set;
+
+notation
+  let ADG be non empty addLoopStr;
+  let a,b be Element of ADG;
+  synonym a # b for a+b;
+end;
+
+definition
+  let ADG be non empty addLoopStr;
+  canceled 2;
+  func CONGRD(ADG) -> Relation of [:the carrier of ADG,the carrier of ADG:]
+  means
+  :Def4:
+  for a,b,c,d being Element of ADG holds [[a,b],[c,d]] in it iff a # d = b # c;
+  existence
+  proof
+    set X = the carrier of ADG;
+    set XX = [:X,X:];
+    defpred X[set,set] means ex a,b,c,d being Element of X st $1=[a,b] & $2=[c
+    ,d] & a # d = b # c;
+    consider P being Relation of XX,XX such that
+A1: for x,y holds [x,y] in P iff x in XX & y in XX & X[x,y] from
+    RELSET_1:sch 1;
+    take P;
+    let a,b,c,d be Element of X;
+A2: [[a,b],[c,d]] in P implies a # d = b # c
+    proof
+      assume [[a,b],[c,d]] in P;
+      then consider a9,b9,c9,d9 being Element of X such that
+A3:   [a,b]=[a9,b9] and
+A4:   [c,d]=[c9,d9] and
+A5:   a9 # d9 = b9 # c9 by A1;
+A6:   c = c9 by A4,ZFMISC_1:33;
+      a=a9 & b=b9 by A3,ZFMISC_1:33;
+      hence thesis by A4,A5,A6,ZFMISC_1:33;
+    end;
+    [a,b] in XX & [c,d] in XX by ZFMISC_1:def 2;
+    hence thesis by A1,A2;
+  end;
+  uniqueness
+  proof
+    set X = the carrier of ADG;
+    set XX = [:X,X:];
+    let P,Q be Relation of [:X,X:] such that
+A7: for a,b,c,d being Element of X holds [[a,b],[c,d]] in P iff a # d
+    = b # c and
+A8: for a,b,c,d being Element of X holds [[a,b],[c,d]] in Q iff a # d = b # c;
+    for x,y being set holds [x,y] in P iff [x,y] in Q
+    proof
+      let x,y;
+A9:   now
+        assume
+A10:    [x,y] in Q;
+        then x in XX by ZFMISC_1:106;
+        then consider a,b being Element of ADG such that
+A11:    x=[a,b] by DOMAIN_1:9;
+        y in XX by A10,ZFMISC_1:106;
+        then consider c,d being Element of ADG such that
+A12:    y=[c,d] by DOMAIN_1:9;
+        [x,y] in Q iff a # d = b # c by A8,A11,A12;
+        hence [x,y] in P by A7,A10,A11,A12;
+      end;
+      now
+        assume
+A13:    [x,y] in P;
+        then x in XX by ZFMISC_1:106;
+        then consider a,b being Element of ADG such that
+A14:    x=[a,b] by DOMAIN_1:9;
+        y in XX by A13,ZFMISC_1:106;
+        then consider c,d being Element of ADG such that
+A15:    y=[c,d] by DOMAIN_1:9;
+        [x,y] in P iff a # d = b # c by A7,A14,A15;
+        hence [x,y] in Q by A8,A13,A14,A15;
+      end;
+      hence thesis by A9;
+    end;
+    hence thesis by RELAT_1:def 2;
+  end;
+end;
+
+definition
+  let ADG be non empty addLoopStr;
+  func AV(ADG) -> strict AffinStruct equals
+  AffinStruct(#the carrier of ADG,
+    CONGRD(ADG)#);
+  coherence;
+end;
+
+registration
+  let ADG be non empty addLoopStr;
+  cluster AV ADG -> non empty;
+  coherence;
+end;
+
+canceled;
+
+theorem
+  the carrier of AV(ADG) = the carrier of ADG & the CONGR of AV(ADG) =
+  CONGRD(ADG);
+
+definition
+  let ADG;
+  let a,b,c,d;
+  pred a,b ==> c,d means
+  :Def6:
+  [[a,b],[c,d]] in the CONGR of AV(ADG);
+end;
+
+theorem Th10:
+  a,b ==> c,d iff a # d = b # c
+proof
+A1: the CONGR of AV(ADG) = CONGRD(ADG);
+A2: now
+    assume a,b ==> c,d;
+    then [[a,b],[c,d]] in CONGRD(ADG) by A1,Def6;
+    hence a # d = b # c by Def4;
+  end;
+  now
+    assume a # d = b # c;
+    then [[a,b],[c,d]] in the CONGR of AV(ADG) by Def4;
+    hence a,b ==> c,d by Def6;
+  end;
+  hence thesis by A2;
+end;
+
+theorem Th11:
+  ex a,b being Element of G_Real st a<>b
+proof
+  0<>1;
+  hence thesis;
+end;
+
+theorem
+  ex ADG st ex a,b st a<>b by Th11;
+
+theorem Th13:
+  a,b ==> c,c implies a=b
+proof
+  assume a,b ==> c,c;
+  then a # c = b # c by Th10;
+  hence thesis by RLVECT_1:21;
+end;
+
+theorem Th14:
+  a,b ==> p,q & c,d ==> p,q implies a,b ==> c,d
+proof
+  assume that
+A1: a,b ==> p,q and
+A2: c,d ==> p,q;
+  a # q = b # p by A1,Th10;
+  then a + (q + d) = (b + p) + d by RLVECT_1:def 6
+    .= b + (p + d) by RLVECT_1:def 6
+    .= b + (c + q) by A2,Th10;
+  then (a + d) + q = b + (c + q) by RLVECT_1:def 6
+    .= (b + c) + q by RLVECT_1:def 6;
+  then a + d = b + c by RLVECT_1:21;
+  hence thesis by Th10;
+end;
+
+theorem Th15:
+  ex d st a,b ==> c,d
+proof
+  set d9 = (-a) + (b + c);
+  take d9;
+  a + d9 = (a + (-a)) + (b + c) by RLVECT_1:def 6
+    .= 0.ADG + (b + c) by RLVECT_1:16
+    .= b + c by RLVECT_1:10;
+  hence thesis by Th10;
+end;
+
+theorem Th16:
+  a,b ==> a9,b9 & a,c ==> a9,c9 implies b,c ==> b9,c9
+proof
+  assume a,b ==> a9,b9 & a,c ==> a9,c9;
+  then a + b9 = b + a9 & a + c9= c + a9 by Th10;
+  then b + (a9 + (a + c9)) = (c + a9) + (a + b9) by RLVECT_1:def 6
+    .= c + (a9 + (a + b9)) by RLVECT_1:def 6;
+  then b + ((a9 + a) + c9) = c + (a9 + (a + b9)) by RLVECT_1:def 6
+    .= c + ((a9 + a) + b9) by RLVECT_1:def 6;
+  then (b + c9) + (a9 + a) = c + (b9 + (a9 + a)) by RLVECT_1:def 6
+    .= (c + b9) + (a9 + a) by RLVECT_1:def 6;
+  then b + c9 = c + b9 by RLVECT_1:21;
+  hence thesis by Th10;
+end;
+
+theorem Th17:
+  ex b st a,b ==> b,c
+proof
+  consider b being Element of ADG such that
+A1: b + b = a + c by Def1;
+  take b;
+  thus thesis by A1,Th10;
+end;
+
+theorem Th18:
+  a,b ==> b,c & a,b9 ==> b9,c implies b=b9
+proof
+  assume a,b ==> b,c & a,b9 ==> b9,c;
+  then a + c = b + b & a + c = b9 + b9 by Th10;
+  then (b+(-b9))+b = (b9+b9)+(-b9) by RLVECT_1:def 6
+    .= b9 +(b9 +(-b9)) by RLVECT_1:def 6
+    .= b9 + 0.ADG by RLVECT_1:16
+    .= b9 by RLVECT_1:10;
+  then
+A1: (b+(-b9)) + (b+(-b9)) = b9+ (-b9) by RLVECT_1:def 6
+    .= 0.ADG by RLVECT_1:16;
+  b9 = 0.ADG + b9 by RLVECT_1:10
+    .= (b+(-b9))+b9 by A1,VECTSP_1:def 30
+    .= b+((-b9)+b9) by RLVECT_1:def 6
+    .= b+0.ADG by RLVECT_1:16
+    .= b by RLVECT_1:10;
+  hence thesis;
+end;
+
+theorem Th19:
+  a,b ==> c,d implies a,c ==> b,d
+proof
+  assume a,b ==> c,d;
+  then a + d = b + c by Th10;
+  hence thesis by Th10;
+end;
+
+reserve AS for non empty AffinStruct;
+
+theorem Th20:
+  (ex a,b being Element of ADG st a<>b) implies (ex a,b being
+Element of AV(ADG) st a<>b) & (for a,b,c being Element of AV(ADG) st a,b // c,c
+holds a=b) & (for a,b,c,d,p,q being Element of AV(ADG) st a,b // p,q & c,d // p
+  ,q holds a,b // c,d) & (for a,b,c being Element of AV(ADG) ex d being Element
+of AV(ADG) st a,b // c,d) & (for a,b,c,a9,b9,c9 being Element of AV(ADG) st a,b
+// a9,b9 & a,c // a9,c9 holds b,c // b9,c9) & (for a,c being Element of AV(ADG)
+  ex b being Element of AV(ADG) st a,b // b,c) & (for a,b,c,b9 being Element of
+AV(ADG) st a,b // b,c & a,b9 // b9,c holds b = b9) & for a,b,c,d being Element
+  of AV(ADG) st a,b // c,d holds a,c // b,d
+proof
+  set A = AV(ADG);
+  assume ex a,b being Element of ADG st a<>b;
+  hence ex a,b being Element of A st a<>b;
+A1: A = AffinStruct(#the carrier of ADG,CONGRD(ADG)#);
+A2: for a9,b9,c9,d9 being Element of A for a,b,c,d st a=a9 & b=b9 & c = c9 &
+  d=d9 holds (a,b ==> c,d iff a9,b9 // c9,d9)
+  proof
+    let a9,b9,c9,d9 be Element of A;
+    let a,b,c,d such that
+A3: a=a9 & b=b9 & c = c9 & d=d9;
+A4: now
+      assume a9,b9 // c9,d9;
+      then [[a,b],[c,d]] in CONGRD(ADG) by A3,ANALOAF:def 2;
+      hence a,b ==> c,d by A1,Def6;
+    end;
+    now
+      assume a,b ==> c,d;
+      then [[a,b],[c,d]] in CONGRD(ADG) by A1,Def6;
+      hence a9,b9 // c9,d9 by A3,ANALOAF:def 2;
+    end;
+    hence thesis by A4;
+  end;
+  thus for a,b,c being Element of A st a,b // c,c holds a=b
+  proof
+    let a,b,c be Element of A such that
+A5: a,b // c,c;
+    reconsider a9=a,b9=b,c9 = c as Element of ADG;
+    a9,b9 ==> c9,c9 by A2,A5;
+    hence thesis by Th13;
+  end;
+  thus for a,b,c,d,p,q being Element of A st a,b // p,q & c,d // p,q holds a,b
+  // c,d
+  proof
+    let a,b,c,d,p,q be Element of A;
+    reconsider a9=a,b9=b,c9 = c,d9=d,p9=p,q9=q as Element of ADG;
+    assume a,b // p,q & c,d // p,q;
+    then a9,b9 ==> p9,q9 & c9,d9 ==> p9,q9 by A2;
+    then a9,b9 ==> c9,d9 by Th14;
+    hence thesis by A2;
+  end;
+  thus for a,b,c being Element of A ex d being Element of A st a,b // c,d
+  proof
+    let a,b,c be Element of A;
+    reconsider a9=a,b9=b,c9 = c as Element of ADG;
+    consider d9 being Element of ADG such that
+A6: a9,b9 ==> c9,d9 by Th15;
+    reconsider d = d9 as Element of A;
+    take d;
+    thus thesis by A2,A6;
+  end;
+  thus for a,b,c,a9,b9,c9 being Element of A st a,b // a9,b9 & a,c // a9,c9
+  holds b,c // b9,c9
+  proof
+    let a,b,c,a9,b9,c9 be Element of A;
+    reconsider p=a,q=b,r=c,p9=a9,q9=b9,r9=c9 as Element of ADG;
+    assume a,b // a9,b9 & a,c // a9,c9;
+    then p,q ==> p9,q9 & p,r ==> p9,r9 by A2;
+    then q,r ==> q9,r9 by Th16;
+    hence thesis by A2;
+  end;
+  thus for a,c being Element of A ex b being Element of A st a,b // b,c
+  proof
+    let a,c be Element of A;
+    reconsider a9=a,c9=c as Element of ADG;
+    consider b9 being Element of ADG such that
+A7: a9,b9 ==> b9,c9 by Th17;
+    reconsider b=b9 as Element of A;
+    take b;
+    thus thesis by A2,A7;
+  end;
+  thus for a,b,c,b9 being Element of A st a,b // b,c & a,b9 // b9,c holds b =
+  b9
+  proof
+    let a,b,c,b9 be Element of A;
+    reconsider a9=a,p=b,c9=c,p9=b9 as Element of ADG;
+    assume a,b // b,c & a,b9 // b9,c;
+    then a9,p ==> p,c9 & a9,p9 ==> p9,c9 by A2;
+    hence thesis by Th18;
+  end;
+  thus for a,b,c,d being Element of A st a,b // c,d holds a,c // b,d
+  proof
+    let a,b,c,d be Element of A;
+    reconsider a9=a,b9=b,c9=c,d9=d as Element of ADG;
+    assume a,b // c,d;
+    then a9,b9 ==> c9,d9 by A2;
+    then a9,c9 ==> b9,d9 by Th19;
+    hence thesis by A2;
+  end;
+end;
+
+definition
+  let IT be non empty AffinStruct;
+  canceled;
+  attr IT is AffVect-like means
+  :Def8:
+  (for a,b,c being Element of IT st a,b
+// c,c holds a=b) & (for a,b,c,d,p,q being Element of IT st a,b // p,q & c,d //
+p,q holds a,b // c,d) & (for a,b,c being Element of IT ex d being Element of IT
+st a,b // c,d) & (for a,b,c,a9,b9,c9 being Element of IT st a,b // a9,b9 & a,c
+// a9,c9 holds b,c // b9,c9) & (for a,c being Element of IT ex b being Element
+  of IT st a,b // b,c) & (for a,b,c,b9 being Element of IT st a,b // b,c & a,b9
+// b9,c holds b = b9) & for a,b,c,d being Element of IT st a,b // c,d holds a,c
+  // b,d;
+end;
+
+registration
+  cluster strict non trivial AffVect-like (non empty AffinStruct);
+  existence
+  proof
+    consider ADG such that
+A1: ex a,b st a<>b by Th11;
+A2: ( for a,b,c,a9,b9,c9 being Element of AV(ADG) st a,b // a9,b9 & a,c //
+a9,c9 holds b,c // b9,c9)& for a,c being Element of AV(ADG) ex b being Element
+    of AV (ADG) st a,b // b,c by A1,Th20;
+A3: ( for a,b,c being Element of AV(ADG) st a,b // c,c holds a=b)& for a,b
+    ,c,b9 being Element of AV(ADG) st a,b // b,c & a,b9 // b9,c holds b = b9
+by Th20;
+A4: for a,b,c,d being Element of AV(ADG) st a,b // c,d holds a,c // b,d by A1
+,Th20;
+    ( for a,b,c,d,p,q being Element of AV(ADG) st a,b // p,q & c,d // p,q
+holds a,b // c,d)& for a,b,c being Element of AV(ADG) ex d being Element of AV(
+    ADG) st a,b // c,d by A1,Th20;
+    then AV(ADG) is non trivial AffVect-like by A1,A2,A3,A4,Def8,
+STRUCT_0:def 10;
+    hence thesis;
+  end;
+end;
+
+definition
+  mode AffVect is non trivial AffVect-like (non empty AffinStruct);
+end;
+
+theorem
+  for AS holds (ex a,b being Element of AS st a<>b) & (for a,b,c being
+  Element of AS st a,b // c,c holds a=b) & (for a,b,c,d,p,q being Element of AS
+  st a,b // p,q & c,d // p,q holds a,b // c,d) & (for a,b,c being Element of AS
+ex d being Element of AS st a,b // c,d) & (for a,b,c,a9,b9,c9 being Element of
+AS st a,b // a9,b9 & a,c // a9,c9 holds b,c // b9,c9) & (for a,c being Element
+of AS ex b being Element of AS st a,b // b,c) & (for a,b,c,b9 being Element of
+  AS st a,b // b,c & a,b9 // b9,c holds b = b9) & (for a,b,c,d being Element of
+  AS st a,b // c,d holds a,c // b,d) iff AS is AffVect by Def8,STRUCT_0:def 10;
+
+theorem
+  (ex a,b being Element of ADG st a<>b) implies AV(ADG) is AffVect
+proof
+A1: ( for a,b,c being Element of AV(ADG) st a,b // c,c holds a=b)& for a,b,c
+,b9 being Element of AV(ADG) st a,b // b,c & a,b9 // b9,c holds b = b9 by Th20;
+  assume
+A2: ex a,b being Element of ADG st a<>b;
+  then
+A3: ( for a,b,c,a9,b9,c9 being Element of AV(ADG) st a,b // a9,b9 & a,c //
+a9,c9 holds b,c // b9,c9)& for a,c being Element of AV(ADG) ex b being Element
+  of AV (ADG) st a,b // b,c by Th20;
+A4: for a,b,c,d being Element of AV(ADG) st a,b // c,d holds a,c // b,d by A2
+,Th20;
+  ( for a,b,c,d,p,q being Element of AV(ADG) st a,b // p,q & c,d // p,q
+holds a,b // c,d)& for a,b,c being Element of AV(ADG) ex d being Element of AV(
+  ADG) st a,b // c,d by A2,Th20;
+  hence thesis by A2,A3,A1,A4,Def8,STRUCT_0:def 10;
+end;

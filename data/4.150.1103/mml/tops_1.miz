@@ -1,0 +1,1576 @@
+:: Subsets of Topological Spaces
+::  by Miros{\l}aw Wysocki and Agata Darmochwa\l
+::
+:: Received April 28, 1989
+:: Copyright (c) 1990 Association of Mizar Users
+ 
+environ
+
+ vocabularies STRUCT_0, SUBSET_1, PRE_TOPC, XBOOLE_0, RCOMP_1, TARSKI, TOPS_1;
+ notations TARSKI, XBOOLE_0, SUBSET_1, STRUCT_0, PRE_TOPC;
+ constructors SETFAM_1, PRE_TOPC;
+ registrations XBOOLE_0, SUBSET_1, STRUCT_0, PRE_TOPC;
+ requirements BOOLE, SUBSET;
+ definitions TARSKI, XBOOLE_0, PRE_TOPC, SUBSET_1, STRUCT_0;
+ theorems PRE_TOPC, TARSKI, SUBSET_1, XBOOLE_0, XBOOLE_1;
+
+begin
+
+reserve TS for 1-sorted,
+  K, Q for Subset of TS;
+
+canceled 20;
+
+theorem
+  K` = Q` implies K = Q by SUBSET_1:64;
+ 
+::
+::    CLOSED AND OPEN SETS, CLOSURE OF SET
+::
+
+reserve TS for TopSpace,
+  GX for TopStruct,
+  x for set,
+  P, Q for Subset of TS,
+  K , L for Subset of TS,
+  R, S for Subset of GX,
+  T, W for Subset of GX;
+
+canceled 5;
+
+theorem Th27:
+  Cl([#] GX) = [#] GX
+proof
+  thus Cl([#] GX) c= [#] GX;
+  thus thesis by PRE_TOPC:48;
+end;
+
+registration
+  let T be TopSpace, P be Subset of T;
+  cluster Cl P -> closed;
+  coherence
+  proof
+    Cl Cl P = Cl P;
+    hence thesis by PRE_TOPC:52;
+  end;
+end;
+
+canceled;
+
+theorem Th29:
+  R is closed iff R` is open
+proof
+  R is closed iff [#] GX \ R is open by PRE_TOPC:def 6;
+  hence thesis;
+end;
+
+registration
+  let T be TopSpace, R be closed Subset of T;
+  cluster R` -> open;
+  coherence by Th29;
+end;
+
+theorem Th30:
+  R is open iff R` is closed
+proof
+  R` is closed iff R`` is open by Th29;
+  hence thesis;
+end;
+
+registration
+  let T be TopSpace;
+  cluster open Subset of T;
+  existence
+  proof
+    take ({}T)`;
+    thus thesis;
+  end;
+end;
+
+registration
+  let T be TopSpace, R be open Subset of T;
+  cluster R` -> closed;
+  coherence by Th30;
+end;
+
+theorem
+  S is closed & T c= S implies Cl T c= S
+proof
+  assume that
+A1: S is closed and
+A2: T c= S;
+  Cl S = S by A1,PRE_TOPC:52;
+  hence thesis by A2,PRE_TOPC:49;
+end;
+
+theorem Th32:
+  Cl K \ Cl L c= Cl(K \ L)
+proof
+  let x;
+  Cl K \/ Cl L = Cl (K \/ L) by PRE_TOPC:50
+    .= Cl((K \ L) \/ L) by XBOOLE_1:39
+    .= Cl(K \ L) \/ Cl L by PRE_TOPC:50;
+  then
+A1: x in Cl K \/ Cl L iff x in Cl(K \ L) or x in Cl L by
+  XBOOLE_0:def 3;
+  assume
+A2: x in (Cl K \ Cl L);
+  then x in Cl K by XBOOLE_0:def 5;
+  hence thesis by A2,A1,XBOOLE_0:def 3,def 5;
+end;
+
+canceled;
+
+theorem Th34:
+  R is closed & S is closed implies Cl(R /\ S) = Cl R /\ Cl S
+proof
+  assume that
+A1: R is closed and
+A2: S is closed;
+A3: S = Cl S by A2,PRE_TOPC:52;
+A4: Cl(R /\ S) c= Cl R /\ Cl S by PRE_TOPC:51;
+  R = Cl R by A1,PRE_TOPC:52;
+  then Cl R /\ Cl S c= Cl(R /\ S) by A3,PRE_TOPC:48;
+  hence thesis by A4,XBOOLE_0:def 10;
+end;
+
+registration
+  let TS;
+  let P,Q be closed Subset of TS;
+  cluster P /\ Q -> closed Subset of TS;
+  coherence
+  proof
+A1: Q = Cl Q by PRE_TOPC:52;
+    P = Cl P by PRE_TOPC:52;
+    then Cl(P /\ Q) = P /\ Q by A1,Th34;
+    hence thesis;
+  end;
+  cluster P \/ Q -> closed Subset of TS;
+  coherence
+  proof
+A2: Q = Cl Q by PRE_TOPC:52;
+    P = Cl P by PRE_TOPC:52;
+    then Cl(P \/ Q) = P \/ Q by A2,PRE_TOPC:50;
+    hence thesis;
+  end;
+end;
+
+theorem
+  P is closed & Q is closed implies P /\ Q is closed;
+
+theorem
+  P is closed & Q is closed implies P \/ Q is closed;
+
+registration
+  let TS;
+  let P,Q be open Subset of TS;
+  cluster P /\ Q -> open Subset of TS;
+  coherence
+  proof
+    (P`) \/ Q` = (P /\ Q)` by XBOOLE_1:54;
+    hence thesis by Th30;
+  end;
+  cluster P \/ Q -> open Subset of TS;
+  coherence
+  proof
+    (P`) /\ Q` = (P \/ Q)` by XBOOLE_1:53;
+    hence thesis by Th30;
+  end;
+end;
+
+theorem
+  P is open & Q is open implies P \/ Q is open;
+
+theorem
+  P is open & Q is open implies P /\ Q is open;
+
+theorem Th39:
+  for GX being non empty TopSpace, R being Subset of GX, p being
+Point of GX holds p in Cl R iff for T being Subset of GX st T is open & p in T
+  holds R meets T
+proof
+  let GX be non empty TopSpace, R be Subset of GX, p be Point of GX;
+  hereby
+    assume
+A1: p in Cl R;
+    given T being Subset of GX such that
+A2: T is open and
+A3: p in T and
+A4: R misses T;
+A5: (R`) \/ T` = (R /\ T)` by XBOOLE_1:54;
+A6: R /\ T = {} GX by A4,XBOOLE_0:def 7;
+A7: R c= T`
+    proof
+      let x;
+      assume
+A8:   x in R;
+      then x in R` or x in T` by A5,A6,XBOOLE_0:def 3;
+      hence thesis by A8,XBOOLE_0:def 5;
+    end;
+    Cl(T`) = T` by A2,PRE_TOPC:52;
+    then Cl R c= T` by A7,PRE_TOPC:49;
+    hence contradiction by A1,A3,XBOOLE_0:def 5;
+  end;
+  assume
+A9: for T being Subset of GX st T is open & p in T holds R meets T;
+  assume not p in Cl R;
+  then p in (Cl R)` by SUBSET_1:50;
+  then
+A10: R meets (Cl R)` by A9;
+  R misses R` by XBOOLE_1:79;
+  then
+A11: R /\ R` = {} by XBOOLE_0:def 7;
+  R c= Cl R by PRE_TOPC:48;
+  then (Cl R)` c= R` by SUBSET_1:31;
+  then R /\ (Cl R)` = {} by A11,XBOOLE_1:3,26;
+  hence contradiction by A10,XBOOLE_0:def 7;
+end;
+
+theorem Th40:
+  Q is open implies Q /\ Cl K c= Cl(Q /\ K)
+proof
+  assume
+A1: Q is open;
+  let x;
+  assume
+A2: x in Q /\ Cl K;
+  then
+A3: x in Cl K by XBOOLE_0:def 4;
+  reconsider p99= x as Point of TS by A2;
+A4: TS is non empty by A2;
+A5: x in Q by A2,XBOOLE_0:def 4;
+  for Q1 being Subset of TS holds Q1 is open implies (p99 in Q1 implies (Q
+  /\ K) meets Q1)
+  proof
+    let Q1 be Subset of TS;
+    assume
+A6: Q1 is open;
+    assume p99 in Q1;
+    then p99 in Q1 /\ Q by A5,XBOOLE_0:def 4;
+    then K meets (Q1 /\ Q) by A1,A3,A4,A6,Th39;
+    then
+A7: K /\ (Q1 /\ Q) <> {} by XBOOLE_0:def 7;
+    K /\ (Q1 /\ Q) = (Q /\ K) /\ Q1 by XBOOLE_1:16;
+    hence thesis by A7,XBOOLE_0:def 7;
+  end;
+  hence thesis by A4,Th39;
+end;
+
+theorem
+  Q is open implies Cl(Q /\ Cl K) = Cl(Q /\ K)
+proof
+A1: Cl (Q /\ K) c= Cl(Q /\ Cl K)
+  proof
+    let x;
+    assume
+A2: x in Cl(Q /\ K);
+    then reconsider p99= x as Point of TS;
+A3: TS is non empty by A2;
+    for Q1 being Subset of TS holds Q1 is open implies (p99 in Q1 implies
+    (Q /\ Cl K) meets Q1)
+    proof
+      let Q1 be Subset of TS;
+      assume
+A4:   Q1 is open;
+      assume p99 in Q1;
+      then (Q /\ K) meets Q1 by A2,A3,A4,Th39;
+      then
+A5:   (Q /\ K) /\ Q1 <> {} by XBOOLE_0:def 7;
+      Q /\ K c= Q /\ Cl K by PRE_TOPC:48,XBOOLE_1:26;
+      then (Q /\ Cl K) /\ Q1 <> {} by A5,XBOOLE_1:3,26;
+      hence thesis by XBOOLE_0:def 7;
+    end;
+    hence thesis by A3,Th39;
+  end;
+  assume Q is open;
+  then Cl(Q /\ Cl K) c= Cl(Cl(Q /\ K)) by Th40,PRE_TOPC:49;
+  hence thesis by A1,XBOOLE_0:def 10;
+end;
+ 
+::
+::    INTERIOR OF A SET
+::
+
+definition
+  let GX be TopStruct, R be Subset of GX;
+  func Int R -> Subset of GX equals
+  (Cl R`)`;
+  coherence;
+  projectivity;
+end;
+
+canceled;
+
+theorem Th43:
+  Int([#] TS) = [#] TS
+proof
+  Int ([#] TS) = ({} TS)` by PRE_TOPC:52;
+  hence thesis;
+end;
+
+theorem Th44:
+  Int T c= T
+proof
+  let x;
+  assume
+A1: x in Int T;
+  then reconsider x99= x as Point of GX;
+  T` c= Cl T` by PRE_TOPC:48;
+  then not x99 in T` by A1,XBOOLE_0:def 5;
+  hence thesis by A1,XBOOLE_0:def 5;
+end;
+
+canceled;
+
+theorem Th46:
+  Int K /\ Int L = Int(K /\ L)
+proof
+  Int K /\ Int L = (Cl K` \/ Cl L`)` by XBOOLE_1:53
+    .= (Cl(K` \/ L`))` by PRE_TOPC:50
+    .= (Cl (K /\ L)`)` by XBOOLE_1:54;
+  hence thesis;
+end;
+
+registration
+  let GX;
+  cluster Int {}GX -> empty;
+  coherence
+  proof
+    {} GX = ([#] GX)` by XBOOLE_1:37
+    .= (Cl ({}GX)`)` by Th27;
+    hence thesis;
+  end;
+end;
+
+theorem
+  Int({} GX) = {} GX;
+
+theorem Th48:
+  T c= W implies Int T c= Int W
+proof
+  assume T c= W;
+  then W` c= T` by SUBSET_1:31;
+  then Cl W` c= Cl T` by PRE_TOPC:49;
+  hence thesis by SUBSET_1:31;
+end;
+
+theorem Th49:
+  Int T \/ Int W c= Int(T \/ W)
+proof
+A1: Cl(T` /\ W`) c= Cl T` /\ Cl W` by PRE_TOPC:51;
+  Int T \/ Int W = ((Cl T`) /\ Cl W`)` by XBOOLE_1:54;
+  then Int T \/ Int W c= (Cl(T` /\ W`))` by A1,SUBSET_1:31;
+  hence thesis by XBOOLE_1:53;
+end;
+
+theorem
+  Int(K \ L) c= Int K \ Int L
+proof
+A1: Int(K \ L) = (Cl (K /\ L`)`)` by SUBSET_1:32
+    .= (Cl((K`) \/ L``))` by XBOOLE_1:54
+    .= ((Cl K` \/ Cl L))` by PRE_TOPC:50
+    .= ((Cl L)`) /\ Int K by XBOOLE_1:53;
+  L c= Cl L by PRE_TOPC:48;
+  then
+A2: (Cl L)` c= L` by SUBSET_1:31;
+  Int L c= L by Th44;
+  then L` c= (Int L)` by SUBSET_1:31;
+  then ((Cl L)`) c= (Int L)` by A2,XBOOLE_1:1;
+  then Int(K \ L) c= Int K /\ (Int L)` by A1,XBOOLE_1:26;
+  hence thesis by SUBSET_1:32;
+end;
+
+registration
+  let T be TopSpace, K be Subset of T;
+  cluster Int K -> open;
+  coherence;
+end;
+
+canceled 3;
+
+registration
+  let T be TopSpace;
+  cluster empty -> open Subset of T;
+  coherence
+  proof
+    let S be Subset of T;
+    Int {}T = {}T;
+    hence thesis;
+  end;
+  cluster [#]T -> open;
+  coherence
+  proof
+    Int [#]T = [#]T by Th43;
+    hence thesis;
+  end;
+end;
+
+registration
+  let T be TopSpace;
+  cluster open closed Subset of T;
+  existence
+  proof
+    take [#]T;
+    thus thesis;
+  end;
+end;
+
+registration
+  let T be non empty TopSpace;
+  cluster non empty open closed Subset of T;
+  existence
+  proof
+    take [#]T;
+    thus thesis;
+  end;
+end;
+
+theorem Th54:
+  x in Int K iff ex Q st Q is open & Q c= K & x in Q
+proof
+  thus x in Int K implies ex Q st Q is open & Q c= K & x in Q by Th44;
+  given Q such that
+A1: Q is open and
+A2: Q c= K and
+A3: x in Q;
+  K` c= Q` by A2,SUBSET_1:31;
+  then Cl K` c= Cl Q` by PRE_TOPC:49;
+  then Cl K` c= Q` by A1,PRE_TOPC:52;
+  then Q`` c= (Cl K`)` by SUBSET_1:31;
+  hence thesis by A3;
+end;
+
+theorem Th55:
+  (R is open implies Int R = R) & (Int P = P implies P is open)
+proof
+  hereby
+    assume R is open;
+    then R` is closed by Th30;
+    then Cl R` = R` by PRE_TOPC:52;
+    hence Int R = R;
+  end;
+  thus thesis;
+end;
+
+theorem
+  S is open & S c= T implies S c= Int T
+proof
+  assume that
+A1: S is open and
+A2: S c= T;
+  Int S = S by A1,Th55;
+  hence thesis by A2,Th48;
+end;
+
+theorem
+  P is open iff for x holds x in P iff ex Q st Q is open & Q c= P & x in Q
+proof
+  thus P is open implies for x holds x in P iff ex Q st Q is open & Q c= P & x
+  in Q;
+  assume
+A1: for x holds x in P iff ex Q st Q is open & Q c= P & x in Q;
+  now
+    let x;
+    x in P iff ex Q st Q is open & Q c= P & x in Q by A1;
+    hence x in P iff x in Int P by Th54;
+  end;
+  hence thesis by TARSKI:2;
+end;
+
+theorem Th58:
+  Cl Int T = Cl Int Cl Int T
+proof
+  Int Int T c= Int Cl Int T by Th48,PRE_TOPC:48;
+  then
+A1: Cl Int T c= Cl Int Cl Int T by PRE_TOPC:49;
+  Cl Int Cl Int T c= Cl Cl Int T by Th44,PRE_TOPC:49;
+  hence thesis by A1,XBOOLE_0:def 10;
+end;
+
+theorem
+  R is open implies Cl Int Cl R = Cl R
+proof
+  assume
+A1: R is open;
+  then Cl Int Cl R = Cl Int Cl Int R by Th55
+    .= Cl Int R by Th58
+    .= Cl R by A1,Th55;
+  hence thesis;
+end;
+ 
+::
+::    FRONTIER OF A SET
+::
+
+definition
+  let GX be TopStruct, R be Subset of GX;
+  func Fr R -> Subset of GX equals
+  Cl R /\ Cl R`;
+  coherence;
+end;
+
+canceled;
+
+registration
+  let T be TopSpace, A be Subset of T;
+  cluster Fr A -> closed;
+  coherence;
+end;
+
+theorem Th61:
+  for GX being non empty TopSpace, R being Subset of GX, p being
+Point of GX holds p in Fr R iff for S being Subset of GX st S is open & p in S
+  holds R meets S & R` meets S
+proof
+  let GX be non empty TopSpace, R be Subset of GX, p be Point of GX;
+  hereby
+    assume
+A1: p in Fr R;
+    then
+A2: p in Cl R` by XBOOLE_0:def 4;
+    let S be Subset of GX;
+    assume that
+A3: S is open and
+A4: p in S;
+    p in Cl R by A1,XBOOLE_0:def 4;
+    hence R meets S & R` meets S by A3,A4,A2,Th39;
+  end;
+  assume
+A5: for S being Subset of GX st S is open & p in S holds R meets S & R`
+  meets S;
+  then for S being Subset of GX st S is open & p in S holds R` meets S;
+  then
+A6: p in Cl R` by Th39;
+  for S being Subset of GX st S is open & p in S holds R meets S by A5;
+  then p in Cl R by Th39;
+  hence thesis by A6,XBOOLE_0:def 4;
+end;
+
+theorem
+  Fr T = Fr T`;
+
+canceled;
+
+theorem
+  Fr T = Cl(T`) /\ T \/ (Cl T \ T)
+proof
+  for x holds x in Fr T iff x in ((Cl(T`) /\ T) \/ (Cl T\T))
+  proof
+    let x;
+A1: T` c= Cl(T`) by PRE_TOPC:48;
+    thus x in Fr T implies x in ((Cl(T`) /\ T) \/ (Cl T \ T))
+    proof
+      assume
+A2:   x in Fr T;
+      then reconsider x99= x as Point of GX;
+      x99 in Cl T & x99 in Cl(T`) & x99 in T or x99 in Cl T & x99 in Cl(T`
+      ) & x99 in T` by A2,SUBSET_1:50,XBOOLE_0:def 4;
+      then x99 in Cl(T`) /\ T or not x99 in T & x99 in Cl T by
+      XBOOLE_0:def
+      4;
+      then x99 in (Cl(T`) /\ T) or x99 in (Cl T \ T) by XBOOLE_0:def 5;
+      hence thesis by XBOOLE_0:def 3;
+    end;
+A3: T c= Cl T by PRE_TOPC:48;
+    thus x in ((Cl(T`) /\ T) \/ (Cl T \ T)) implies x in Fr T
+    proof
+      assume
+A4:   x in (Cl(T`) /\ T) \/ (Cl T \ T);
+      then reconsider x99= x as Point of GX;
+      x99 in (Cl(T`) /\ T) or x99 in (Cl T \ T) by A4,XBOOLE_0:def 3;
+      then x99 in Cl(T`) & x99 in T or x99 in Cl T & not x99 in T by
+      XBOOLE_0:def 4,def 5;
+      then x99 in Cl(T`) & x99 in T or x99 in Cl T & x99 in T` by
+      SUBSET_1:50;
+      hence thesis by A3,A1,XBOOLE_0:def 4;
+    end;
+  end;
+  hence thesis by TARSKI:2;
+end;
+
+theorem Th65:
+  Cl T = T \/ Fr T
+proof
+A1: (T \/ Cl T) /\ (T \/ Cl(T`)) = Cl T /\ (T \/ Cl(T`)) by PRE_TOPC:48 ,
+  XBOOLE_1:12;
+  T \/ (Cl T \ T) c= T \/ (Cl T /\ Cl(T`))
+  proof
+    let x;
+    assume
+A2: x in T \/ (Cl T \ T);
+    then reconsider x99=x as Point of GX;
+    x99 in T or x99 in Cl T \ T by A2,XBOOLE_0:def 3;
+    then
+A3: x99 in T or x99 in Cl T & x99 in T` by XBOOLE_0:def 5;
+    T` c= Cl(T`) by PRE_TOPC:48;
+    then x99 in T or x99 in (Cl T /\ Cl (T`)) by A3,XBOOLE_0:def 4;
+    hence thesis by XBOOLE_0:def 3;
+  end;
+  then
+A4: Cl T c= T \/ Fr T by PRE_TOPC:48,XBOOLE_1:45;
+  T \/ Fr T = (T \/ Cl T) /\ (T \/ Cl (T`)) by XBOOLE_1:24;
+  then T \/ Fr T c= Cl T by A1,XBOOLE_1:17;
+  hence thesis by A4,XBOOLE_0:def 10;
+end;
+
+theorem Th66:
+  Fr(K /\ L) c= Fr K \/ Fr L
+proof
+  Cl(K /\ L) c= Cl K by PRE_TOPC:49,XBOOLE_1:17;
+  then
+A1: Cl(K /\ L) /\ Cl(K`) c= Cl K /\ Cl(K`) by XBOOLE_1:26;
+  Cl(K /\ L) c= Cl L by PRE_TOPC:49,XBOOLE_1:17;
+  then
+A2: Cl(K /\ L) /\ Cl(L`) c= Cl L /\ Cl(L`) by XBOOLE_1:26;
+  Fr(K /\ L) = Cl(K /\ L) /\ Cl((K`) \/ L`) by XBOOLE_1:54
+    .= Cl(K /\ L) /\ (Cl(K`) \/ Cl L`) by PRE_TOPC:50
+    .=(Cl(K /\ L) /\ Cl(K`)) \/ (Cl(K /\ L) /\ Cl(L`)) by XBOOLE_1:23;
+  hence thesis by A1,A2,XBOOLE_1:13;
+end;
+
+theorem Th67:
+  Fr(K \/ L) c= Fr K \/ Fr L
+proof
+  Cl((K`) /\ L`) c= Cl K` by PRE_TOPC:49,XBOOLE_1:17;
+  then
+A1: Cl((K`) /\ L`) /\ Cl K c= Cl(K`) /\ Cl K by XBOOLE_1:26;
+  Cl((K`) /\ L`) c= Cl L` by PRE_TOPC:49,XBOOLE_1:17;
+  then
+A2: Cl((K`) /\ L`) /\ Cl L c= Cl(L`) /\ Cl L by XBOOLE_1:26;
+  Fr(K \/ L) = (Cl K \/ Cl L) /\ Cl((K \/ L)`) by PRE_TOPC:50
+    .= Cl((K`) /\ L`) /\ (Cl K \/ Cl L) by XBOOLE_1:53
+    .= (Cl((K`) /\ L`) /\ Cl K) \/ (Cl((K`) /\ L`) /\ Cl L) by XBOOLE_1:23;
+  hence thesis by A1,A2,XBOOLE_1:13;
+end;
+
+theorem Th68:
+  Fr Fr T c= Fr T
+proof
+  let x;
+  assume x in Fr(Fr T);
+  then
+A1: x in Cl(Cl T /\ Cl(T`)) by XBOOLE_0:def 4;
+  Cl(Cl T /\ Cl(T`)) c= Cl(Cl T) /\ Cl(Cl(T`)) by PRE_TOPC:51;
+  hence thesis by A1;
+end;
+
+theorem
+  R is closed implies Fr R c= R
+proof
+  assume
+A1: R is closed;
+  let x;
+  Cl R = R by A1,PRE_TOPC:52;
+  hence thesis by XBOOLE_0:def 4;
+end;
+
+Lm1: Fr K c= Fr(K \/ L) \/ Fr(K /\ L) \/ (Fr K /\ Fr L)
+proof
+  let x;
+A1: (L`) /\ (K`) = (K \/ L)` by XBOOLE_1:53;
+  assume
+A2: x in Fr K;
+  then reconsider x99= x as Point of TS;
+A3: TS is non empty by A2;
+  assume
+A4: not x in (Fr(K \/ L) \/ Fr(K /\ L)) \/ (Fr K /\ Fr L);
+  then
+A5: not x99 in (Fr(K \/ L) \/ Fr(K /\ L)) by XBOOLE_0:def 3;
+  then not x99 in Fr(K \/ L) by XBOOLE_0:def 3;
+  then consider Q1 being Subset of TS such that
+A6: Q1 is open and
+A7: x99 in Q1 and
+A8: (K \/ L) misses Q1 or ((K \/ L)`) misses Q1 by A3,Th61;
+  (K \/ L) /\ Q1 = {} or ((K \/ L)`) /\ Q1 = {} by A8,XBOOLE_0:def 7;
+  then
+A9: (K /\ Q1) \/ (Q1 /\ L)={} or (L`) /\ ((K`) /\ Q1)={} by A1,
+  XBOOLE_1:16,23;
+  not x99 in (Fr K /\ Fr L) by A4,XBOOLE_0:def 3;
+  then not x99 in Fr L by A2,XBOOLE_0:def 4;
+  then consider Q3 being Subset of TS such that
+A10: Q3 is open and
+A11: x99 in Q3 and
+A12: L misses Q3 or (L`) misses Q3 by A3,Th61;
+  K meets Q1 by A2,A3,A6,A7,Th61;
+  then
+A13: K /\ Q1 <> {} by XBOOLE_0:def 7;
+A14: now
+    assume L /\ Q3 = {};
+    then Q3 misses L`` by XBOOLE_0:def 7;
+    then
+A15: Q3 c= L` by SUBSET_1:44;
+    ((K`) /\ Q1) /\ ((L`) /\ Q3) = {} /\ Q3 by A9,A13,XBOOLE_1:16;
+    then ((K`) /\ Q1) /\ Q3 = {} by A15,XBOOLE_1:28;
+    hence (K`) /\ (Q1 /\ Q3) = {} by XBOOLE_1:16;
+  end;
+A16: (L`) \/ (K`) = (K /\ L)` by XBOOLE_1:54;
+  not x99 in Fr(K /\ L) by A5,XBOOLE_0:def 3;
+  then consider Q2 being Subset of TS such that
+A17: Q2 is open and
+A18: x99 in Q2 and
+A19: (K /\ L) misses Q2 or ((K /\ L)`) misses Q2 by A3,Th61;
+  (K /\ L) /\ Q2 = {} or ((K /\ L)`) /\ Q2 = {} by A19,XBOOLE_0:def 7;
+  then
+A20: (K /\ Q2) /\ L={} or ((K`) /\ Q2) \/ (Q2 /\ (L`))={} by A16,
+  XBOOLE_1:16,23;
+  x99 in Q1 /\ Q3 by A7,A11,XBOOLE_0:def 4;
+  then (K`) meets (Q1 /\ Q3) by A2,A3,A6,A10,Th61;
+  then
+A21: Q3 c= L by A12,A14,SUBSET_1:44,XBOOLE_0:def 7;
+  (K`) meets Q2 by A2,A3,A17,A18,Th61;
+  then (K`) /\ Q2 <> {} by XBOOLE_0:def 7;
+  then (K /\ (Q2 /\ L)) /\ Q3 = {} /\ Q3 by A20,XBOOLE_1:16;
+  then K /\ ((Q2 /\ L) /\ Q3) = {} by XBOOLE_1:16;
+  then K /\ (Q2 /\ (L /\ Q3)) = {} by XBOOLE_1:16;
+  then K /\ (Q2 /\ Q3) = {} by A21,XBOOLE_1:28;
+  then
+A22: K misses (Q2 /\ Q3) by XBOOLE_0:def 7;
+  x99 in Q2 /\ Q3 by A18,A11,XBOOLE_0:def 4;
+  hence contradiction by A2,A3,A17,A10,A22,Th61;
+end;
+
+theorem
+  Fr K \/ Fr L = Fr(K \/ L) \/ Fr(K /\ L) \/ (Fr K /\ Fr L)
+proof
+A1: Fr L c= Fr(K \/ L) \/ Fr(K /\ L) \/ (Fr K /\ Fr L) by Lm1;
+A2: Fr(K \/ L) \/ Fr(K /\ L) \/ (Fr K /\ Fr L) c= Fr K \/ Fr L
+  proof
+    let x;
+A3: now
+      assume x in (Fr K /\ Fr L);
+      then x in Fr K by XBOOLE_0:def 4;
+      hence thesis by XBOOLE_0:def 3;
+    end;
+A4: now
+      assume
+A5:   x in Fr(K \/ L);
+      Fr(K \/ L) c= (Fr K \/ Fr L) by Th67;
+      hence thesis by A5;
+    end;
+A6: now
+      assume
+A7:   x in Fr(K /\ L);
+      Fr(K /\ L) c= (Fr K \/ Fr L) by Th66;
+      hence thesis by A7;
+    end;
+    assume x in (Fr(K \/ L) \/ Fr(K /\ L)) \/ (Fr K /\ Fr L);
+    then x in (Fr(K \/ L) \/ Fr(K /\ L)) or x in (Fr K /\ Fr L) by
+    XBOOLE_0
+    :def 3;
+    hence thesis by A4,A6,A3,XBOOLE_0:def 3;
+  end;
+  Fr K c= Fr(K \/ L) \/ Fr(K /\ L) \/ (Fr K /\ Fr L) by Lm1;
+  then Fr K \/ Fr L c= Fr(K \/ L) \/ Fr(K /\ L) \/ (Fr K /\ Fr L) by A1,
+  XBOOLE_1:8;
+  hence thesis by A2,XBOOLE_0:def 10;
+end;
+
+theorem
+  Fr Int T c= Fr T
+proof
+  let x;
+  assume
+A1: x in Fr(Int T);
+  then
+A2: x in Cl(T`) by XBOOLE_0:def 4;
+  Int T = (Cl T`)`;
+  then
+A3: Cl((Cl T`)`) c= Cl T by Th44,PRE_TOPC:49;
+  x in Cl((Cl T`)`) by A1,XBOOLE_0:def 4;
+  hence thesis by A2,A3,XBOOLE_0:def 4;
+end;
+
+theorem
+  Fr Cl T c= Fr T
+proof
+  T c= Cl T by PRE_TOPC:48;
+  then (Cl T)` c= T` by SUBSET_1:31;
+  then Cl((Cl T)`) c= Cl(T`) by PRE_TOPC:49;
+  hence thesis by XBOOLE_1:26;
+end;
+
+theorem Th73:
+  Int T misses Fr T
+proof
+  Fr T = Cl T /\ (((Cl T`)`)`) .= Cl T \ ((Cl T`)`) by SUBSET_1:32;
+  hence thesis by XBOOLE_1:79;
+end;
+
+theorem Th74:
+  Int T = T \ Fr T
+proof
+  (Cl T`)` \/ (Cl T)` = (Cl T /\ Cl T`)` by XBOOLE_1:54;
+  then
+A1: T \ Fr T = T /\ ((Cl T`)` \/ (Cl T)`) by SUBSET_1:32
+    .= (T /\ (Cl T)`) \/ (T /\ Int T) by XBOOLE_1:23;
+  T c= Cl T by PRE_TOPC:48;
+  then
+A2: T misses (Cl T)` by SUBSET_1:44;
+  Int T = T /\ Int T by Th44,XBOOLE_1:28;
+  then T \ Fr T = {} \/ Int T by A1,A2,XBOOLE_0:def 7;
+  hence thesis;
+end;
+
+Lm2: Fr T = Cl T \ Int T
+proof
+  Fr T = Cl T /\ (Int T)` .= Cl T \ Int T by SUBSET_1:32;
+  hence thesis;
+end;
+
+Lm3: Cl Fr K = Fr K
+proof
+A1: Cl Cl K` = Cl K`;
+  Cl Cl K = Cl K;
+  hence thesis by A1,Th34;
+end;
+
+Lm4: Int Fr Fr K = {}
+proof
+  consider x9 being Element of Int(Fr(Fr K));
+  assume
+A1: Int Fr Fr K <> {};
+  then reconsider x = x9 as Point of TS by TARSKI:def 3;
+A2: TS is non empty by A1;
+A3: Int(Fr(Fr K)) c= Fr(Fr K) by Th44;
+  then x in Fr(Fr K) by A1,TARSKI:def 3;
+  then (Fr K)` meets Int(Fr(Fr K)) by A1,A2,Th61;
+  then
+A4: (Fr K)` /\ Int(Fr(Fr K)) <> {} by XBOOLE_0:def 7;
+  Fr(Fr K) c= Fr K by Th68;
+  then Int(Fr(Fr K)) c= Fr K by A3,XBOOLE_1:1;
+  then
+A5: (Fr K)` /\ Fr K <> {} by A4,XBOOLE_1:3,26;
+  Fr K misses (Fr K)` by XBOOLE_1:79;
+  hence contradiction by A5,XBOOLE_0:def 7;
+end;
+
+theorem
+  Fr Fr Fr K = Fr Fr K
+proof
+A1: Int Fr Fr K = {} by Lm4;
+  Fr Fr Fr K = Cl(Fr(Fr K)) \ Int(Fr(Fr K)) by Lm2
+    .= Fr Fr K by A1,Lm3;
+  hence thesis;
+end;
+
+Lm5: for X, Y, Z being set holds X c= Z & Y = Z \ X implies X c= Z \ Y
+proof
+  let X, Y, Z be set;
+  assume that
+A1: X c= Z and
+A2: Y = Z \ X;
+  let x;
+  assume
+A3: x in X;
+  then not x in Y by A2,XBOOLE_0:def 5;
+  hence thesis by A1,A3,XBOOLE_0:def 5;
+end;
+
+theorem Th76:
+  P is open iff Fr P = Cl P \ P
+proof
+A1: Fr P misses (Fr P)` by XBOOLE_1:79;
+A2: Int P c= P by Th44;
+  hereby
+    assume P is open;
+    then P = Int P by Th55;
+    hence Fr P = Cl P \ P by Lm2;
+  end;
+  assume
+A3: Fr P = Cl P \ P;
+  Cl P \ Fr P = (P \/ Fr P) \ Fr P by Th65
+    .= (Fr P)` /\ (P \/ Fr P) by SUBSET_1:32
+    .= (P /\ (Fr P)`) \/ ((Fr P)` /\ (Fr P)) by XBOOLE_1:23
+    .= (P \ Fr P) \/ (Fr P /\ (Fr P)`) by SUBSET_1:32
+    .= Int P \/ (Fr P /\ (Fr P)`) by Th74
+    .= Int P \/ {} TS by A1,XBOOLE_0:def 7
+    .= Int P;
+  then P c= Int P by A3,Lm5,PRE_TOPC:48;
+  hence thesis by A2,XBOOLE_0:def 10;
+end;
+
+theorem Th77:
+  P is closed iff Fr P = P \ Int P
+proof
+A1: (P`) misses P by XBOOLE_1:79;
+  (P`) /\ Int P c= (P`) /\ P by Th44,XBOOLE_1:26;
+  then
+A2: (P`) /\ Int P c= {} TS by A1,XBOOLE_0:def 7;
+  thus P is closed implies Fr P = P \ Int P
+  proof
+    assume P is closed;
+    then P = Cl P by PRE_TOPC:52;
+    hence thesis by Lm2;
+  end;
+A3: (P``) \/ (Int P)` = ((P`) /\ Int P)` by XBOOLE_1:54;
+  assume Fr P = P \ Int P;
+  then Cl P = P \/ (P \ Int P) by Th65
+    .= P \/ ((Int P)` /\ P) by SUBSET_1:32
+    .= (P \/ (Int P)`) /\ (P \/ P) by XBOOLE_1:24
+    .= ({} TS)` /\ P by A2,A3
+    .= P by XBOOLE_1:28;
+  hence thesis;
+end;
+ 
+::
+::    DENSE, BOUNDARY AND NOWHEREDENSE SETS
+::
+
+definition
+  let GX be TopStruct, R be Subset of GX;
+  attr R is dense means
+  :Def3:
+  Cl R = [#] GX;
+end;
+
+registration
+  let GX;
+  cluster [#]GX -> dense;
+  coherence
+  proof
+    thus Cl [#]GX = [#]GX by Th27;
+  end;
+end;
+
+canceled;
+
+theorem
+  R is dense & R c= S implies S is dense
+proof
+  assume that
+A1: R is dense and
+A2: R c= S;
+  Cl R = [#] GX by A1,Def3;
+  then [#] GX c= Cl S by A2,PRE_TOPC:49;
+  then [#] GX = Cl S by XBOOLE_0:def 10;
+  hence thesis by Def3;
+end;
+
+theorem Th80:
+  P is dense iff for Q st Q <> {} & Q is open holds P meets Q
+proof
+  hereby
+    assume P is dense;
+    then
+A1: Cl P = [#] TS by Def3;
+    let Q;
+    assume that
+A2: Q<>{} and
+A3: Q is open;
+    consider x being Element of Q;
+    x in Q by A2;
+    then
+A4: TS is non empty;
+    x in Cl P by A2,A1,TARSKI:def 3;
+    hence P meets Q by A2,A3,A4,Th39;
+  end;
+  assume
+A5: for Q st Q <> {} & Q is open holds P meets Q;
+  [#] TS c= Cl P
+  proof
+    let x be set;
+A6: for C be Subset of TS st C is open & x in C holds P meets C by A5;
+    assume
+A7: x in [#] TS;
+    then TS is non empty;
+    hence thesis by A7,A6,Th39;
+  end;
+  then Cl P = [#] TS by XBOOLE_0:def 10;
+  hence thesis by Def3;
+end;
+
+theorem Th81:
+  P is dense implies for Q holds Q is open implies Cl Q = Cl(Q /\ P)
+proof
+  assume
+A1: P is dense;
+  let Q;
+  assume
+A2: Q is open;
+  thus Cl Q c= Cl(Q /\ P)
+  proof
+    let x be set;
+    assume
+A3: x in Cl Q;
+    then
+A4: TS is non empty;
+    now
+      let Q1 be Subset of TS;
+      assume
+A5:   Q1 is open;
+      assume x in Q1;
+      then Q meets Q1 by A3,A4,A5,Th39;
+      then Q /\ Q1 <> {} by XBOOLE_0:def 7;
+      then P meets (Q /\ Q1) by A1,A2,A5,Th80;
+      then
+A6:   P /\ (Q /\ Q1) <> {} by XBOOLE_0:def 7;
+      P /\ (Q /\ Q1) = (Q /\ P) /\ Q1 by XBOOLE_1:16;
+      hence (Q /\ P) meets Q1 by A6,XBOOLE_0:def 7;
+    end;
+    hence thesis by A3,A4,Th39;
+  end;
+  thus thesis by PRE_TOPC:49,XBOOLE_1:17;
+end;
+
+theorem
+  P is dense & Q is dense & Q is open implies P /\ Q is dense
+proof
+  assume that
+A1: P is dense and
+A2: Cl Q = [#]TS and
+A3: Q is open;
+  thus Cl(P /\ Q) = [#]TS by A1,A2,A3,Th81;
+end;
+
+definition
+  let GX be TopStruct, R be Subset of GX;
+  attr R is boundary means
+  :Def4:
+  R` is dense;
+end;
+
+registration
+  let GX;
+  cluster empty -> boundary Subset of GX;
+  coherence
+  proof
+    let A be Subset of GX;
+    assume A is empty;
+    hence Cl A` = [#]GX by Th27;
+  end;
+end;
+
+canceled;
+
+theorem Th84:
+  R is boundary iff Int R = {}
+proof
+  R is boundary iff R` is dense by Def4;
+  then R is boundary iff Cl(R`) = [#] GX by Def3;
+  then R is boundary iff (Cl R`)` = ([#] GX)` by SUBSET_1:64;
+  hence thesis by XBOOLE_1:37;
+end;
+
+registration
+  let GX;
+  cluster boundary Subset of GX;
+  existence
+  proof
+    take {}GX;
+    thus thesis;
+  end;
+end;
+
+registration
+  let GX;
+  let R be boundary Subset of GX;
+  cluster Int R -> empty;
+  coherence by Th84;
+end;
+
+theorem Th85:
+  P is boundary & Q is boundary & Q is closed implies P \/ Q is boundary
+proof
+  assume that
+A1: P is boundary and
+A2: Q is boundary and
+A3: Q is closed;
+A4: Cl((P`) \ Q) = Cl(((P`) /\ Q`)) by SUBSET_1:32;
+  P` is dense by A1,Def4;
+  then
+A5: [#] TS \ Q = Cl(P`) \ Q by Def3;
+A6: Cl(P`) \ Cl Q c= Cl((P`) \ Q) by Th32;
+  Q` is dense by A2,Def4;
+  then
+A7: Cl(Q`) = [#] TS by Def3;
+  Cl(P`) \ Q = Cl(P`) \ Cl Q by A3,PRE_TOPC:52;
+  then [#] TS \ Q c= Cl((P \/ Q)`) by A5,A6,A4,XBOOLE_1:53;
+  then Cl(Q`) c= Cl(Cl((P \/ Q)`)) by PRE_TOPC:49;
+  then [#] TS = Cl((P \/ Q)`) by A7,XBOOLE_0:def 10;
+  then (P \/ Q)` is dense by Def3;
+  hence thesis by Def4;
+end;
+
+theorem
+  P is boundary iff for Q st Q c= P & Q is open holds Q = {}
+proof
+  hereby
+    assume P is boundary;
+    then
+A1: P` is dense by Def4;
+    let Q;
+    assume that
+A2: Q c= P and
+A3: Q is open and
+A4: Q <> {};
+    Q meets P` by A1,A3,A4,Th80;
+    hence contradiction by A2,SUBSET_1:44;
+  end;
+  assume
+A5: for Q st Q c= P & Q is open holds Q={};
+  assume not P is boundary;
+  then not P` is dense by Def4;
+  then consider C being Subset of TS such that
+A6: C <> {} and
+A7: C is open and
+A8: (P`) misses C by Th80;
+  C c= P by A8,SUBSET_1:44;
+  hence contradiction by A5,A6,A7;
+end;
+
+theorem
+  P is closed implies (P is boundary iff for Q st Q <> {} & Q is open ex
+  G being Subset of TS st G c= Q & G <> {} & G is open & P misses G)
+proof
+  assume
+A1: P is closed;
+  hereby
+    assume P is boundary;
+    then
+A2: P` is dense by Def4;
+A3: P misses (P`) by XBOOLE_1:79;
+    let Q such that
+A4: Q <> {} and
+A5: Q is open;
+    P /\ ((P`) /\ Q) = (P /\ (P`)) /\ Q by XBOOLE_1:16
+      .= {} TS /\ Q by A3,XBOOLE_0:def 7
+      .= {};
+    then
+A6: P misses ((P`) /\ Q) by XBOOLE_0:def 7;
+    (P`) meets Q by A2,A4,A5,Th80;
+    then (P`) /\ Q <> {} by XBOOLE_0:def 7;
+    hence ex G being Subset of TS st G c= Q & G <> {} & G is open & P misses G
+    by A1,A5,A6,XBOOLE_1:17;
+  end;
+  assume
+A7: for Q st Q <> {} & Q is open ex G being Subset of TS st G c= Q & G
+  <> {} & G is open & P misses G;
+  now
+    let Q such that
+A8: Q <> {} and
+A9: Q is open;
+    consider G being Subset of TS such that
+A10: G c= Q and
+A11: G <> {} and
+    G is open and
+A12: P misses G by A7,A8,A9;
+    G misses (P``) by A12;
+    then G c= P` by SUBSET_1:44;
+    hence (P`) meets Q by A10,A11,XBOOLE_1:67;
+  end;
+  then P` is dense by Th80;
+  hence thesis by Def4;
+end;
+
+theorem
+  R is boundary iff R c= Fr R
+proof
+A1: Cl R /\ Cl(R`) c= Cl(R`) by XBOOLE_1:17;
+  hereby
+    assume R is boundary;
+    then R` is dense by Def4;
+    then Cl R /\ Cl R` = Cl R /\ ([#] GX) by Def3;
+    then Cl R = Cl R /\ Cl R` by XBOOLE_1:28;
+    hence R c= Fr R by PRE_TOPC:48;
+  end;
+A2: R` c= Cl(R`) by PRE_TOPC:48;
+  assume R c= Fr R;
+  then R c= Cl(R`) by A1,XBOOLE_1:1;
+  then R \/ (R`) c= Cl(R`) by A2,XBOOLE_1:8;
+  then [#] GX c= Cl(R`) by PRE_TOPC:18;
+  then [#] GX = Cl(R`) by XBOOLE_0:def 10;
+  then R` is dense by Def3;
+  hence thesis by Def4;
+end;
+
+definition
+  let GX be TopStruct, R be Subset of GX;
+  attr R is nowhere_dense means
+  :Def5:
+  Cl R is boundary;
+end;
+
+registration
+  let TS;
+  cluster empty -> nowhere_dense Subset of TS;
+  coherence
+  proof
+    let A be Subset of TS;
+A1: (Cl {}TS)` = ({}TS)` by PRE_TOPC:52
+      .= [#]TS;
+    assume A is empty;
+    hence (Cl A)` is dense by A1;
+  end;
+end;
+
+registration
+  let TS;
+  cluster nowhere_dense Subset of TS;
+  existence
+  proof
+    take {}TS;
+    thus thesis;
+  end;
+end;
+
+canceled;
+
+theorem
+  P is nowhere_dense & Q is nowhere_dense implies P \/ Q is nowhere_dense
+proof
+  assume that
+A1: P is nowhere_dense and
+A2: Q is nowhere_dense;
+A3: Cl Q is boundary by A2,Def5;
+  Cl P is boundary by A1,Def5;
+  then Cl P \/ Cl Q is boundary by A3,Th85;
+  then Cl(P \/ Q) is boundary by PRE_TOPC:50;
+  hence thesis by Def5;
+end;
+
+theorem Th91:
+  R is nowhere_dense implies R` is dense
+proof
+  assume R is nowhere_dense;
+  then Cl R is boundary by Def5;
+  then (Cl R)` is dense by Def4;
+  then
+A1: Cl((Cl R)`) = [#] GX by Def3;
+  R c= Cl R by PRE_TOPC:48;
+  then (Cl R)` c= R` by SUBSET_1:31;
+  then [#] GX c= Cl(R`) by A1,PRE_TOPC:49;
+  then [#] GX= Cl(R`) by XBOOLE_0:def 10;
+  hence thesis by Def3;
+end;
+
+registration
+  let TS;
+  let R be nowhere_dense Subset of TS;
+  cluster R` -> dense;
+  coherence by Th91;
+end;
+
+theorem Th92:
+  R is nowhere_dense implies R is boundary
+proof
+  assume R is nowhere_dense;
+  then R` is dense by Th91;
+  hence thesis by Def4;
+end;
+
+registration
+  let TS;
+  cluster nowhere_dense -> boundary Subset of TS;
+  coherence by Th92;
+end;
+
+theorem Th93:
+  S is boundary & S is closed implies S is nowhere_dense
+proof
+  assume that
+A1: S is boundary and
+A2: S is closed;
+  Cl S is boundary by A1,A2,PRE_TOPC:52;
+  hence thesis by Def5;
+end;
+
+registration
+  let TS;
+  cluster boundary closed -> nowhere_dense Subset of TS;
+  coherence by Th93;
+end;
+
+theorem
+  R is closed implies (R is nowhere_dense iff R = Fr R)
+proof
+  assume R is closed;
+  then
+A1: R = Cl R by PRE_TOPC:52;
+  hereby
+    assume R is nowhere_dense;
+    then Cl R is boundary by Def5;
+    then (Cl R)` is dense by Def4;
+    then Fr R = R /\ [#] GX by A1,Def3;
+    hence R = Fr R by XBOOLE_1:28;
+  end;
+  assume R = Fr R;
+  then R = R \ Int R by A1,Lm2;
+  then Int(Cl R) = {} by A1,Th44,XBOOLE_1:38;
+  then Cl R is boundary by Th84;
+  hence thesis by Def5;
+end;
+
+theorem Th95:
+  P is open implies Fr P is nowhere_dense
+proof
+A1: Int(Cl P) c= Cl P by Th44;
+  assume P is open;
+  then
+A2: Int P = P by Th55;
+  then P misses Fr P by Th73;
+  then
+A3: P /\ Fr P = {} TS by XBOOLE_0:def 7;
+  Int (P /\ Fr P) = P /\ Int(Fr P) by A2,Th46;
+  then P /\ Int(Fr P) = {} by A3;
+  then
+A4: P misses Int(Fr P) by XBOOLE_0:def 7;
+  Int(Fr P) c= Int(Cl P) by Th48,XBOOLE_1:17;
+  then
+A5: Int(Fr P) c= Cl P by A1,XBOOLE_1:1;
+  Fr P is boundary
+  proof
+    consider x being Element of Int(Fr P);
+    assume
+A6: not Fr P is boundary;
+    then
+A7: TS is non empty;
+A8: Int (Fr P) <> {} by A6,Th84;
+    then x in Cl P by A5,TARSKI:def 3;
+    hence contradiction by A4,A8,A7,Th39;
+  end;
+  hence thesis;
+end;
+
+registration
+  let TS;
+  let P be open Subset of TS;
+  cluster Fr P -> nowhere_dense;
+  coherence by Th95;
+end;
+
+theorem Th96:
+  P is closed implies Fr P is nowhere_dense
+proof
+  assume P is closed;
+  then Fr P` is nowhere_dense;
+  hence thesis;
+end;
+
+registration
+  let TS;
+  let P be closed Subset of TS;
+  cluster Fr P -> nowhere_dense;
+  coherence by Th96;
+end;
+
+theorem Th97:
+  P is open & P is nowhere_dense implies P = {}
+proof
+  assume that
+A1: P is open and
+A2: P is nowhere_dense and
+A3: P <> {};
+  P meets P` by A1,A2,A3,Th80;
+  hence contradiction by XBOOLE_1:79;
+end;
+
+registration
+  let TS;
+  cluster open nowhere_dense -> empty Subset of TS;
+  coherence by Th97;
+end;
+ 
+::
+::    CLOSED AND OPEN DOMAIN, DOMAIN
+::
+
+definition
+  let GX be TopStruct, R be Subset of GX;
+  attr R is condensed means
+  :Def6:
+  Int Cl R c= R & R c= Cl Int R;
+  attr R is closed_condensed means
+  :Def7:
+  R = Cl Int R;
+  attr R is open_condensed means
+  :Def8:
+  R = Int Cl R;
+end;
+
+canceled 3;
+
+theorem Th101:
+  R is open_condensed iff R` is closed_condensed
+proof
+  R is open_condensed iff R = Int(Cl R) by Def8;
+  then R is open_condensed iff R` = (Cl(Int(R`)));
+  hence thesis by Def7;
+end;
+
+theorem Th102:
+  R is closed_condensed implies Fr Int R = Fr R
+proof
+  assume R is closed_condensed;
+  then R = Cl(Int R) by Def7;
+  hence thesis;
+end;
+
+theorem
+  R is closed_condensed implies Fr R c= Cl Int R
+proof
+  assume R is closed_condensed;
+  then R = Cl(Int R) by Def7;
+  hence thesis by XBOOLE_1:17;
+end;
+
+theorem Th104:
+  R is open_condensed implies Fr R = Fr Cl R & Fr Cl R = Cl R \ R
+proof
+  assume R is open_condensed;
+  then R = Int(Cl R) by Def8;
+  hence thesis by Lm2;
+end;
+
+theorem
+  R is open & R is closed implies (R is closed_condensed iff R is
+  open_condensed)
+proof
+  assume that
+A1: R is open and
+A2: R is closed;
+A3: R = Cl R by A2,PRE_TOPC:52;
+  R = Int R by A1,Th55;
+  hence R is closed_condensed iff R is open_condensed by A3,Def7,Def8;
+end;
+
+theorem Th106:
+  (R is closed & R is condensed implies R is closed_condensed) &
+  (P is closed_condensed implies P is closed & P is condensed)
+proof
+  hereby
+    assume that
+A1: R is closed and
+A2: R is condensed;
+A3: R = Cl R by A1,PRE_TOPC:52;
+    then Int R c= R by A2,Def6;
+    then
+A4: Cl(Int R) c= R by A3,PRE_TOPC:49;
+    R c= Cl(Int R) by A2,Def6;
+    then Cl(Int R) = R by A4,XBOOLE_0:def 10;
+    hence R is closed_condensed by Def7;
+  end;
+  assume
+A5: P is closed_condensed;
+  Fr(Int P) = Cl(Int P) \ Int(Int P) by Lm2;
+  then Fr P = Cl(Int P) \ Int(Int P) by A5,Th102
+    .= P \ Int P by A5,Def7;
+  then P is closed by Th77;
+  then Cl P = P by PRE_TOPC:52;
+  then
+A6: Int Cl P c= P by Th44;
+  Cl Int P = P by A5,Def7;
+  hence thesis by A6,Def6;
+end;
+
+theorem
+  (R is open & R is condensed implies R is open_condensed) & (P is
+  open_condensed implies P is open & P is condensed)
+proof
+  hereby
+    assume that
+A1: R is open and
+A2: R is condensed;
+    R = Int R by A1,Th55;
+    then
+A3: R c= Int(Cl R) by Th48,PRE_TOPC:48;
+    Int Cl R c= R by A2,Def6;
+    then Int Cl R = R by A3,XBOOLE_0:def 10;
+    hence R is open_condensed by Def8;
+  end;
+  assume
+A4: P is open_condensed;
+  then
+A5: Fr Cl P = Cl P \ P by Th104;
+  Fr P = Fr Cl P by A4,Th104;
+  then P is open by A5,Th76;
+  then Int P = P by Th55;
+  then
+A6: P c= Cl Int P by PRE_TOPC:48;
+  P = Int(Cl P) by A4,Def8;
+  hence thesis by A6,Def6;
+end;
+
+theorem Th108:
+  P is closed_condensed & Q is closed_condensed implies P \/ Q is
+  closed_condensed
+proof
+  assume that
+A1: P is closed_condensed and
+A2: Q is closed_condensed;
+A3: Q = Cl(Int Q) by A2,Def7;
+  P = Cl(Int P) by A1,Def7;
+  then P \/ Q = Cl(Int P \/ Int Q) by A3,PRE_TOPC:50;
+  then
+A4: P \/ Q c= Cl(Int(P \/ Q)) by Th49,PRE_TOPC:49;
+A5: Cl(Int(P \/ Q)) c= Cl(P \/ Q) by Th44,PRE_TOPC:49;
+A6: Q is closed by A2,Th106;
+  P is closed by A1,Th106;
+  then Cl(Int(P \/ Q)) c= P \/ Q by A5,A6,PRE_TOPC:52;
+  then P \/ Q = Cl(Int(P \/ Q)) by A4,XBOOLE_0:def 10;
+  hence thesis by Def7;
+end;
+
+theorem
+  P is open_condensed & Q is open_condensed implies P /\ Q is open_condensed
+proof
+A1: P` \/ Q` = (P /\ Q)` by XBOOLE_1:54;
+  assume that
+A2: P is open_condensed and
+A3: Q is open_condensed;
+A4: Q` is closed_condensed by A3,Th101;
+  P` is closed_condensed by A2,Th101;
+  then P` \/ Q` is closed_condensed by A4,Th108;
+  hence thesis by A1,Th101;
+end;
+
+theorem
+  P is condensed implies Int Fr P = {}
+proof
+  consider x being Element of Int(Fr P);
+  assume
+A1: P is condensed;
+  then P c= Cl(Int P) by Def6;
+  then
+A2: (Cl(Int P))` c= P` by SUBSET_1:31;
+  assume
+A3: Int(Fr P) <> {};
+  then reconsider x99= x as Point of TS by TARSKI:def 3;
+A4: Int(Fr P) = (Cl(((Cl P)`) \/ (Cl P`)`))` by XBOOLE_1:54
+    .= (Cl(((Cl P)`)) \/ Cl((Cl P`))`)` by PRE_TOPC:50
+    .= Int(Cl P) /\ (Cl(Int P))` by XBOOLE_1:53;
+  then
+A5: x99 in Int(Cl P) by A3,XBOOLE_0:def 4;
+A6: x99 in (Cl(Int P))` by A4,A3,XBOOLE_0:def 4;
+  Int(Cl P) c= P by A1,Def6;
+  hence contradiction by A2,A5,A6,XBOOLE_0:def 5;
+end;
+
+theorem
+  R is condensed implies Int R is condensed & Cl R is condensed
+proof
+  Cl(Int R) c= Cl R by Th44,PRE_TOPC:49;
+  then
+A1: Int(Cl(Int R)) c= Int(Cl R) by Th48;
+A2: R c= Cl R by PRE_TOPC:48;
+  then (Cl R)` c= R` by SUBSET_1:31;
+  then Cl((Cl R)`) c= Cl(R`) by PRE_TOPC:49;
+  then (Cl R`)` c= (Cl(((Cl R)`)))` by SUBSET_1:31;
+  then
+A3: Cl(Int R) c= Cl((Cl((Cl R)`))`) by PRE_TOPC:49;
+  assume
+A4: R is condensed;
+  then
+A5: R c= Cl(Int R) by Def6;
+  then Cl R c= Cl(Cl(Int R)) by PRE_TOPC:49;
+  then
+A6: Cl R c= Cl(Int(Cl R)) by A3,XBOOLE_1:1;
+A7: Int(Cl R) c= R by A4,Def6;
+  then Int(Int(Cl R)) c= Int R by Th48;
+  then
+A8: Int(Cl(Int R)) c= Int R by A1,XBOOLE_1:1;
+  Int R c= R by Th44;
+  then
+A9: Int R c= Cl(Int(Int R)) by A5,XBOOLE_1:1;
+  (Int(Cl(Cl R))) c= Cl R by A7,A2,XBOOLE_1:1;
+  hence thesis by A9,A6,A8,Def6;
+end;

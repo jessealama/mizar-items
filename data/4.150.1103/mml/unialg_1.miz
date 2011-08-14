@@ -1,0 +1,200 @@
+:: Basic Notation of Universal Algebra
+::  by Jaros{\l}aw Kotowicz, Beata Madras and Ma{\l}gorzata Korolkiewicz
+::
+:: Received December 29, 1992
+:: Copyright (c) 1992 Association of Mizar Users
+
+environ
+
+ vocabularies FINSEQ_1, PARTFUN1, RELAT_1, NAT_1, FUNCT_2, TARSKI, XBOOLE_0,
+      SUBSET_1, FUNCOP_1, FUNCT_1, STRUCT_0, NUMBERS, INCPROJ, XXREAL_0,
+      UNIALG_1;
+ notations TARSKI, XBOOLE_0, SUBSET_1, NUMBERS, NAT_1, RELAT_1, FUNCT_1,
+      CARD_3, FINSEQ_1, FINSEQ_2, FUNCOP_1, STRUCT_0, PARTFUN1, XXREAL_0,
+      MARGREL1;
+ constructors PARTFUN1, FUNCOP_1, XXREAL_0, FINSEQ_2, STRUCT_0, CARD_3,
+      MARGREL1;
+ registrations XBOOLE_0, ORDINAL1, RELSET_1, PARTFUN1, FUNCOP_1, XXREAL_0,
+      STRUCT_0, FINSEQ_2, FUNCT_1, CARD_1, FINSEQ_1, CARD_3, MARGREL1;
+ requirements NUMERALS, BOOLE, SUBSET;
+ definitions TARSKI, STRUCT_0, FUNCT_1, FUNCOP_1, CARD_3, MARGREL1;
+ theorems FUNCT_1, PARTFUN1, FINSEQ_1, MARGREL1;
+ schemes FINSEQ_1;
+
+begin
+
+reserve
+
+
+  n for Nat;
+
+definition
+  struct (1-sorted) UAStr (# carrier -> set, charact -> PFuncFinSequence of
+    the carrier #);
+end;
+
+registration
+  cluster non empty strict UAStr;
+  existence
+  proof
+    consider D being non empty set, c being PFuncFinSequence of D;
+    take UAStr (#D,c #);
+    thus the carrier of UAStr (#D,c #) is non empty;
+    thus thesis;
+  end;
+end;
+
+registration
+  let D be non empty set, c be PFuncFinSequence of D;
+  cluster UAStr (#D,c #) -> non empty;
+  coherence;
+end;
+
+definition
+  let IT be UAStr;
+  canceled 6;
+  attr IT is partial means
+  :Def7:
+  the charact of IT is homogeneous;
+  attr IT is quasi_total means
+  :Def8:
+  the charact of IT is quasi_total;
+  attr IT is non-empty means
+  :Def9:
+  the charact of IT <> {} & the charact of IT is non-empty;
+end;
+
+
+
+registration
+  cluster quasi_total partial non-empty strict non empty UAStr;
+  existence
+  proof
+    consider A be non empty set;
+    consider a be Element of A;
+    reconsider w = <*>A .--> a as Element of PFuncs(A*,A) by MARGREL1:55;
+    set U1 = UAStr (# A, <*w*> #);
+    take U1;
+A1: the charact of U1 is non-empty & the charact of U1 <> {} by MARGREL1:56;
+    the charact of U1 is quasi_total & the charact of U1 is homogeneous by
+    MARGREL1:56;
+    hence thesis by A1,Def7,Def8,Def9;
+  end;
+end;
+
+registration
+  let U1 be partial UAStr;
+  cluster the charact of U1 -> homogeneous;
+  coherence by Def7;
+end;
+
+registration
+  let U1 be quasi_total UAStr;
+  cluster the charact of U1 -> quasi_total;
+  coherence by Def8;
+end;
+
+registration
+  let U1 be non-empty UAStr;
+  cluster the charact of U1 -> non-empty non empty;
+  coherence by Def9;
+end;
+
+definition
+  mode Universal_Algebra is quasi_total partial non-empty non empty UAStr;
+end;
+
+reserve U1 for partial non-empty non empty UAStr;
+
+canceled 4;
+
+theorem Th5:
+  n in dom the charact of U1 implies (the charact of U1).n is
+  PartFunc of (the carrier of U1)*,the carrier of U1
+proof
+  set o = the charact of U1;
+  assume n in dom o;
+  then
+A1: o.n in rng o by FUNCT_1:def 5;
+  rng o c= PFuncs((the carrier of U1)*, the carrier of U1) by FINSEQ_1:def
+  4;
+  hence thesis by A1,PARTFUN1:121;
+end;
+
+definition
+ canceled;
+  let U1;
+  func signature U1 ->FinSequence of NAT means
+  len it = len the charact of U1
+  & for n st n in dom it holds for h be homogeneous non empty PartFunc of (the
+  carrier of U1 )*,the carrier of U1 st h = (the charact of U1).n holds it.n =
+  arity(h);
+  existence
+  proof
+    defpred P[Nat,set] means for h be homogeneous non empty PartFunc of (the
+    carrier of U1)*,the carrier of U1 st h = (the charact of U1).$1 holds $2 =
+    arity(h);
+A1: now
+      let m be Nat;
+      assume m in Seg len the charact of U1;
+      then m in dom the charact of U1 by FINSEQ_1:def 3;
+      then reconsider
+      H=(the charact of U1).m as homogeneous non empty PartFunc of
+      (the carrier of U1 )*,the carrier of U1 by Th5;
+      reconsider n=arity(H) as Element of NAT;
+      take n;
+      thus P[m,n];
+    end;
+    consider p be FinSequence of NAT such that
+A2: dom p = Seg(len the charact of U1) and
+A3: for m being Nat st m in Seg(len the charact of U1) holds P[m,p.m]
+    from FINSEQ_1:sch 5(A1);
+    take p;
+    thus len p = len the charact of U1 by A2,FINSEQ_1:def 3;
+    let n;
+    assume
+A4: n in dom p;
+    let h be homogeneous non empty PartFunc of (the carrier of U1 )*,the
+    carrier of U1;
+    assume h = (the charact of U1).n;
+    hence thesis by A2,A3,A4;
+  end;
+  uniqueness
+  proof
+    let x,y be FinSequence of NAT;
+    assume that
+A5: len x = len the charact of U1 and
+A6: for n st n in dom x holds for h be homogeneous non empty PartFunc
+of (the carrier of U1 )*,the carrier of U1 st h = (the charact of U1).n holds x
+    .n = arity(h) and
+A7: len y = len the charact of U1 and
+A8: for n st n in dom y holds for h be homogeneous non empty PartFunc
+of (the carrier of U1 )*,the carrier of U1 st h = (the charact of U1).n holds y
+    .n = arity(h);
+    now
+      let m be Nat;
+      assume 1<=m & m<=len x;
+      then
+A9:   m in Seg len x by FINSEQ_1:3;
+      then m in dom the charact of U1 by A5,FINSEQ_1:def 3;
+      then reconsider
+      h=(the charact of U1).m as homogeneous non empty PartFunc of
+      (the carrier of U1 )*,the carrier of U1 by Th5;
+      m in dom x by A9,FINSEQ_1:def 3;
+      then
+A10:  x.m=arity(h) by A6;
+      m in dom y by A5,A7,A9,FINSEQ_1:def 3;
+      hence x.m=y.m by A8,A10;
+    end;
+    hence thesis by A5,A7,FINSEQ_1:18;
+  end;
+end;
+
+begin :: Addenda
+:: from MSSUBLAT, 2007.05.13, A.T.
+
+registration
+  let U0 be Universal_Algebra;
+  cluster the charact of U0 -> Function-yielding;
+  coherence;
+end;

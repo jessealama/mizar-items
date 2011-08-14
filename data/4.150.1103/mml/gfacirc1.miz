@@ -1,0 +1,4776 @@
+:: Generalized Full Adder Circuits (GFAs). {P}art {I}
+::  by Shin'nosuke Yamaguchi , Katsumi Wasaki and Nobuhiro Shimoi
+::
+:: Received December 7, 2005
+:: Copyright (c) 2005 Association of Mizar Users
+ 
+environ
+
+ vocabularies NUMBERS, SUBSET_1, MARGREL1, FUNCT_1, FINSEQ_2, FINSEQ_1,
+      XBOOLEAN, TWOSCOMP, CARD_1, RELAT_1, ORDINAL4, TARSKI, XBOOLE_0,
+      CLASSES1, FSM_1, FACIRC_1, CIRCUIT2, MSAFREE2, CIRCCOMB, STRUCT_0,
+      GLIB_000, MSUALG_1, FUNCT_4, LATTICES, CIRCUIT1, PARTFUN1, ARYTM_3,
+      GFACIRC1;
+ notations TARSKI, XBOOLE_0, ENUMSET1, SUBSET_1, NAT_1, RELAT_1, NUMBERS,
+      STRUCT_0, FUNCT_1, FUNCT_2, FINSEQ_1, FINSEQ_2, MARGREL1, CLASSES1,
+      BINARITH, MSUALG_1, MSAFREE2, CIRCUIT1, CIRCUIT2, CIRCCOMB, FACIRC_1,
+      TWOSCOMP;
+ constructors ENUMSET1, XXREAL_0, CLASSES1, BINARITH, CIRCUIT1, CIRCUIT2,
+      FACIRC_1, TWOSCOMP, NAT_1, RELSET_1;
+ registrations RELAT_1, MARGREL1, FINSEQ_2, CARD_3, STRUCT_0, CIRCCOMB,
+      FACIRC_1, ORDINAL1, FINSEQ_1, FUNCT_1, MSAFREE2;
+ requirements NUMERALS, REAL, BOOLE, SUBSET, ARITHM;
+ definitions TARSKI, XBOOLE_0, CIRCUIT2, FACIRC_1, MSAFREE2, XBOOLEAN;
+ theorems TARSKI, XBOOLE_0, XBOOLE_1, ZFMISC_1, ENUMSET1, RELAT_1, ORDINAL1,
+      FUNCT_1, FUNCT_2, FINSEQ_1, FINSEQ_2, FINSEQ_3, FINSEQ_6, BINARITH,
+      CIRCUIT1, CIRCUIT2, CIRCCOMB, FACIRC_1, TWOSCOMP, CIRCCMB2, FACIRC_2,
+      XBOOLEAN, CLASSES1;
+ schemes FUNCT_2, FACIRC_1;
+
+begin :: Preliminaries
+::========================================================================
+::------------------------------------------
+:: schemes for Boolean Operations (1 input)
+
+scheme
+  1AryBooleEx {F(set) -> Element of BOOLEAN}: ex f being Function of 1
+-tuples_on BOOLEAN, BOOLEAN st for x being Element of BOOLEAN holds f.<*x*> = F
+  (x) proof
+  deffunc G(Tuple of 1, BOOLEAN) = F($1.1);
+  consider f being Function of 1-tuples_on BOOLEAN, BOOLEAN such that
+A1: for a being Element of 1-tuples_on BOOLEAN holds f.a = G(a)
+ from FUNCT_2:sch 4;
+  hereby
+    take f;
+    let x be Element of BOOLEAN;
+    reconsider a = <*x*> as Element of 1-tuples_on BOOLEAN by FINSEQ_2:118;
+    thus f.<*x*> = F(a.1) by A1
+      .= F(x) by FINSEQ_1:def 8;
+  end;
+end;
+
+scheme
+  1AryBooleUniq {F(set) -> Element of BOOLEAN}: for f1,f2 being Function of 1
+-tuples_on BOOLEAN, BOOLEAN st (for x being Element of BOOLEAN holds f1.<*x*> =
+  F(x)) & (for x being Element of BOOLEAN holds f2.<*x*> = F(x)) holds f1 = f2
+proof
+  let f1,f2 be Function of 1-tuples_on BOOLEAN, BOOLEAN such that
+A1: for x being Element of BOOLEAN holds f1.<*x*> = F(x) and
+A2: for x being Element of BOOLEAN holds f2.<*x*> = F(x);
+  now
+    let a be Tuple of 1, BOOLEAN;
+    consider x being Element of BOOLEAN such that
+A3: a = <*x*> by FINSEQ_2:117;
+    thus f1.a = F(x) by A1,A3
+      .= f2.a by A2,A3;
+  end;
+  hence thesis by FUNCT_2:113;
+end;
+
+scheme
+  1AryBooleDef {F(set) -> Element of BOOLEAN}: (ex f being Function of 1
+-tuples_on BOOLEAN, BOOLEAN st for x being Element of BOOLEAN holds f.<*x*> = F
+(x)) & for f1,f2 being Function of 1-tuples_on BOOLEAN, BOOLEAN st (for x being
+  Element of BOOLEAN holds f1.<*x*> = F(x)) & (for x being Element of BOOLEAN
+  holds f2.<*x*> = F(x)) holds f1 = f2 proof
+  deffunc G(Tuple of 1, BOOLEAN) = F($1.1);
+  consider f being Function of 1-tuples_on BOOLEAN, BOOLEAN such that
+A1: for a being Tuple of 1, BOOLEAN holds f.a = G(a) from FUNCT_2:sch 4;
+  hereby
+    take f;
+    let x be Element of BOOLEAN;
+    reconsider a = <*x*> as Element of 1-tuples_on BOOLEAN by FINSEQ_2:118;
+    thus f.<*x*> = F(a.1) by A1
+      .= F(x) by FINSEQ_1:def 8;
+  end;
+  let f1,f2 be Function of 1-tuples_on BOOLEAN, BOOLEAN such that
+A2: for x being Element of BOOLEAN holds f1.<*x*> = F(x) and
+A3: for x being Element of BOOLEAN holds f2.<*x*> = F(x);
+  now
+    let a be Tuple of 1, BOOLEAN;
+    consider x being Element of BOOLEAN such that
+A4: a = <*x*> by FINSEQ_2:117;
+    thus f1.a = F(x) by A2,A4
+      .= f2.a by A3,A4;
+  end;
+  hence thesis by FUNCT_2:113;
+end;
+ 
+::-------------------------------------
+:: 1-Input Operators (inv1, buf1)
+
+definition
+  func inv1 -> Function of 1-tuples_on BOOLEAN, BOOLEAN means
+  :Def1:
+  for x being Element of BOOLEAN holds it.<*x*> = 'not' x;
+  existence
+  proof
+    deffunc U(Element of BOOLEAN) = 'not' $1;
+    thus ex t being Function of 1-tuples_on BOOLEAN, BOOLEAN st for x being
+    Element of BOOLEAN holds t.<*x*> = U(x) from 1AryBooleEx;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of BOOLEAN) = 'not' $1;
+    thus for t1,t2 being Function of 1-tuples_on BOOLEAN, BOOLEAN st (for x
+    being Element of BOOLEAN holds t1.<*x*> = U(x)) & (for x being Element of
+    BOOLEAN holds t2.<*x*> = U(x)) holds t1 = t2 from 1AryBooleUniq;
+  end;
+end;
+
+theorem Th1:
+  for x being Element of BOOLEAN holds inv1.<*x*> = 'not' x & inv1.
+  <*x*> = nand2.<*x,x*> & inv1.<*0*> = 1 & inv1.<*1*> = 0
+proof
+  let x be Element of BOOLEAN;
+  thus inv1.<*x*> = 'not' x by Def1;
+  thus inv1.<*x*> = 'not' ( x '&' x ) by Def1
+    .= nand2.<*x,x*> by TWOSCOMP:def 4;
+  thus inv1.<*0*> = 'not' FALSE by Def1
+    .= 1;
+  thus inv1.<*1*> = 'not' TRUE by Def1
+    .= 0;
+end;
+
+definition
+  func buf1 -> Function of 1-tuples_on BOOLEAN, BOOLEAN means
+  :Def2:
+  for x being Element of BOOLEAN holds it.<*x*> = x;
+  existence
+  proof
+    deffunc U(Element of BOOLEAN) = $1;
+    thus ex t being Function of 1-tuples_on BOOLEAN, BOOLEAN st for x being
+    Element of BOOLEAN holds t.<*x*> = U(x) from 1AryBooleEx;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of BOOLEAN) = $1;
+    thus for t1,t2 being Function of 1-tuples_on BOOLEAN, BOOLEAN st (for x
+    being Element of BOOLEAN holds t1.<*x*> = U(x)) & (for x being Element of
+    BOOLEAN holds t2.<*x*> = U(x)) holds t1 = t2 from 1AryBooleUniq;
+  end;
+end;
+
+theorem
+  for x being Element of BOOLEAN holds buf1.<*x*> = x & buf1.<*x*> =
+  and2.<*x,x*> & buf1.<*0*> = 0 & buf1.<*1*> = 1
+proof
+  let x be Element of BOOLEAN;
+  thus buf1.<*x*> = x by Def2;
+  thus buf1.<*x*> = x '&' x by Def2
+    .= and2.<*x,x*> by TWOSCOMP:def 1;
+  thus buf1.<*0*> = FALSE by Def2
+    .= 0;
+  thus buf1.<*1*> = TRUE by Def2
+    .= 1;
+end;
+ 
+::-------------------------------------
+:: 2-Input Operators (and2c, xor2c)
+
+definition
+  func and2c -> Function of 2-tuples_on BOOLEAN, BOOLEAN means
+  :Def3:
+  for x,y being Element of BOOLEAN holds it.<*x,y*> = x '&' 'not' y;
+  existence
+  proof
+    deffunc U(Element of BOOLEAN,Element of BOOLEAN) = $1 '&' 'not' $2;
+    thus ex t being Function of 2-tuples_on BOOLEAN, BOOLEAN st for x,y being
+    Element of BOOLEAN holds t.<*x,y*> = U(x,y) from FACIRC_1:sch 1;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of BOOLEAN,Element of BOOLEAN) = $1 '&' 'not' $2;
+    thus for t1,t2 being Function of 2-tuples_on BOOLEAN, BOOLEAN st (for x,y
+being Element of BOOLEAN holds t1.<*x,y*> = U(x,y)) & (for x,y being Element of
+    BOOLEAN holds t2.<*x,y*> = U(x,y)) holds t1 = t2 from FACIRC_1:sch 2;
+  end;
+end;
+
+theorem
+  for x,y being Element of BOOLEAN holds and2c.<*x,y*> = x '&' 'not' y &
+and2c.<*x,y*> = and2a.<*y,x*> & and2c.<*x,y*> = nor2a.<*x,y*> & and2c.<*0,0*>=0
+  & and2c.<*0,1*>=0 & and2c.<*1,0*>=1 & and2c.<*1,1*>=0
+proof
+  let x,y be Element of BOOLEAN;
+  thus and2c.<*x,y*> = x '&' 'not' y by Def3;
+  thus and2c.<*x,y*> = x '&' 'not' y by Def3
+    .=and2a.<*y,x*> by TWOSCOMP:def 2;
+  thus and2c.<*x,y*> = 'not' ('not' x 'or' 'not' 'not' y) by Def3
+    .= nor2a.<*x,y*> by TWOSCOMP:def 11;
+  thus and2c.<*0,0*> = FALSE '&' 'not' FALSE by Def3
+    .= 0;
+  thus and2c.<*0,1*> = FALSE '&' 'not' TRUE by Def3
+    .= 0;
+  thus and2c.<*1,0*> = TRUE '&' 'not' FALSE by Def3
+    .= 1;
+  thus and2c.<*1,1*> = TRUE '&' 'not' TRUE by Def3
+    .= 0;
+end;
+
+definition
+  func xor2c -> Function of 2-tuples_on BOOLEAN, BOOLEAN means
+  :Def4:
+  for x,y being Element of BOOLEAN holds it.<*x,y*> = x 'xor' 'not' y;
+  existence
+  proof
+    deffunc U(Element of BOOLEAN,Element of BOOLEAN) = $1 'xor' 'not' $2;
+    thus ex t being Function of 2-tuples_on BOOLEAN, BOOLEAN st for x,y being
+    Element of BOOLEAN holds t.<*x,y*> = U(x,y) from FACIRC_1:sch 1;
+  end;
+  uniqueness
+  proof
+    deffunc U(Element of BOOLEAN,Element of BOOLEAN) = $1 'xor' 'not' $2;
+    thus for t1,t2 being Function of 2-tuples_on BOOLEAN, BOOLEAN st (for x,y
+being Element of BOOLEAN holds t1.<*x,y*> = U(x,y)) & (for x,y being Element of
+    BOOLEAN holds t2.<*x,y*> = U(x,y)) holds t1 = t2 from FACIRC_1:sch 2;
+  end;
+end;
+
+theorem Th4:
+  for x,y being Element of BOOLEAN holds xor2c.<*x,y*> = x 'xor'
+'not' y & xor2c.<*x,y*> = xor2a.<*x,y*> & xor2c.<*x,y*> = or2.<*and2b.<*x,y*>,
+and2.<*x,y*> *> & xor2c.<*0,0*>=1 & xor2c.<*0,1*>=0 & xor2c.<*1,0*>=0 & xor2c.
+  <*1,1*>=1
+proof
+  let x,y be Element of BOOLEAN;
+  thus xor2c.<*x,y*> = x 'xor' 'not' y by Def4;
+  thus xor2c.<*x,y*> = x 'xor' 'not' y by Def4
+    .= 'not' x 'xor' y
+    .= xor2a.<*x,y*> by TWOSCOMP:def 14;
+  thus xor2c.<*x,y*> = x 'xor' 'not' y by Def4
+    .= ('not' x '&' 'not' y) 'or' (x '&' 'not' 'not' y)
+    .= or2.<*('not' x '&' 'not' y), (x '&' y) *> by TWOSCOMP:def 7
+    .= or2.<*and2b.<*x,y*>, (x '&' y) *> by TWOSCOMP:def 3
+    .= or2.<*and2b.<*x,y*>,and2.<*x,y*> *> by TWOSCOMP:def 1;
+  thus xor2c.<*0,0*> = FALSE 'xor' 'not' FALSE by Def4
+    .= 1 by XBOOLEAN:102;
+  thus xor2c.<*0,1*> = FALSE 'xor' 'not' TRUE by Def4
+    .= 0;
+  thus xor2c.<*1,0*> = TRUE 'xor' 'not' FALSE by Def4
+    .= 0;
+  thus xor2c.<*1,1*> = TRUE 'xor' 'not' TRUE by Def4
+    .= 1 by BINARITH:13;
+end;
+
+canceled;
+
+theorem
+  for x,y being Element of BOOLEAN holds inv1.<* xor2.<*x,y*> *> = xor2a
+.<*x,y*> & inv1.<* xor2.<*x,y*> *> = xor2c.<*x,y*> & xor2.<* inv1.<*x*>, inv1.
+  <*y*> *> = xor2.<*x,y*>
+proof
+  let x,y be Element of BOOLEAN;
+  thus inv1.<* xor2.<*x,y*> *> = inv1.<* x 'xor' y *> by TWOSCOMP:def 13
+    .= 'not' (x 'xor' y) by Def1
+    .= 'not' x 'xor' y by XBOOLEAN:74
+    .= xor2a.<*x,y*> by TWOSCOMP:def 14;
+  hence inv1.<* xor2.<*x,y*> *> = xor2c.<*x,y*> by Th4;
+  thus xor2.<* inv1.<*x*>, inv1.<*y*> *> = xor2.<* 'not' x, inv1.<*y*> *> by
+  Th1
+    .= xor2.<* 'not' x, 'not' y *> by Th1
+    .= 'not' x 'xor' 'not' y by TWOSCOMP:def 13
+    .= x 'xor' y
+    .= xor2.<*x,y*> by TWOSCOMP:def 13;
+end;
+
+canceled;
+
+theorem
+  for x,y,z being Element of BOOLEAN holds inv1.<* xor2.<* xor2c.<*x,y*>
+  , z*> *> = xor2c.<* xor2c.<*x,y*>, z*>
+proof
+  let x,y,z be Element of BOOLEAN;
+  thus inv1.<* xor2.<* xor2c.<*x,y*>, z*> *> = inv1.<* xor2.<* x 'xor' 'not' y
+  , z *> *> by Def4
+    .= inv1.<* ( x 'xor' 'not' y ) 'xor' z *> by TWOSCOMP:def 13
+    .= 'not' ( ( x 'xor' 'not' y ) 'xor' z ) by Def1
+    .= ( x 'xor' 'not' y ) 'xor' 'not' z by XBOOLEAN:74
+    .= xor2c.<* x 'xor' 'not' y, z *> by Def4
+    .= xor2c.<* xor2c.<*x,y*>, z *> by Def4;
+end;
+
+theorem
+  for x,y,z being Element of BOOLEAN holds ( 'not' x 'xor' y ) 'xor'
+  'not' z = ( x 'xor' 'not' y ) 'xor' 'not' z;
+
+theorem
+  for x,y,z being Element of BOOLEAN holds xor2c.<* xor2a.<*x,y*>, z *>
+  = xor2c.<* xor2c.<*x,y*>, z *> by Th4;
+
+canceled;
+
+theorem
+  for x,y,z being Element of BOOLEAN holds inv1.<* xor2c.<* xor2b.<*x,y
+  *>, z*> *> = xor2.<* xor2.<*x,y*>, z*>
+proof
+  let x,y,z be Element of BOOLEAN;
+  thus inv1.<* xor2c.<* xor2b.<*x,y*>, z*> *> = inv1.<* xor2c.<* 'not' x 'xor'
+  'not' y, z *> *> by TWOSCOMP:def 15
+    .= inv1.<* ( 'not' x 'xor' 'not' y ) 'xor' 'not' z *> by Def4
+    .= 'not' ( ( 'not' x 'xor' 'not' y ) 'xor' 'not' z ) by Def1
+    .= ( x 'xor' y ) 'xor' z by XBOOLEAN:74
+    .= xor2.<* x 'xor' y, z *> by TWOSCOMP:def 13
+    .= xor2.<* xor2.<*x,y*>, z *> by TWOSCOMP:def 13;
+end;
+
+Lm1: for f1,f2,f3 being Function of 2-tuples_on BOOLEAN, BOOLEAN for x,y,z
+being set st x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1] holds
+not [<*x,y*>,f1] in {y,z} & not z in {[<*x,y*>,f1], [<*y,z*>,f2]} & not x in {[
+<*x,y*>,f1], [<*y,z*>,f2]} & not [<*z,x*>,f3] in {x,y,z}
+proof
+  let f1,f2,f3 be Function of 2-tuples_on BOOLEAN, BOOLEAN;
+  let x,y,z be set;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  assume that
+A1: x <> yz and
+A2: y <> zx and
+A3: z <> xy;
+A4: <*x,y*> in {<*x,y*>} & {<*x,y*>} in xy by TARSKI:def 1,def 2;
+  dom<*x,y*> = Seg 2 by FINSEQ_3:29;
+  then
+A5: 2 in dom <*x,y*> by FINSEQ_1:3;
+  <*x,y*>.2 = y by FINSEQ_1:61;
+  then
+A6: [2,y] in <*x,y*> by A5,FUNCT_1:8;
+  y in {2,y} & {2,y} in [2,y] by TARSKI:def 2;
+  then y <> xy by A6,A4,ORDINAL1:5;
+  hence not xy in {y,z} by A3,TARSKI:def 2;
+A7: z in {2,z} & {2,z} in [2,z] by TARSKI:def 2;
+A8: <*x,y*> in {<*x,y*>} & {<*x,y*>} in xy by TARSKI:def 1,def 2;
+  <*z*> = {[1,z]} by FINSEQ_1:def 5;
+  then
+A9: [1,z] in <*z*> by TARSKI:def 1;
+  <*x*> = {[1,x]} by FINSEQ_1:def 5;
+  then
+A10: [1,x] in <*x*> by TARSKI:def 1;
+  dom<*z,x*> = Seg 2 by FINSEQ_3:29;
+  then
+A11: 2 in dom <*z,x*> by FINSEQ_1:3;
+  <*z,x*>.2 = x by FINSEQ_1:61;
+  then
+A12: [2,x] in <*z,x*> by A11,FUNCT_1:8;
+  <*z,x*> = <*z*>^<*x*> by FINSEQ_1:def 9;
+  then
+A13: <*z*> c= <*z,x*> by FINSEQ_6:12;
+  dom<*y,z*> = Seg 2 by FINSEQ_3:29;
+  then
+A14: 2 in dom <*y,z*> by FINSEQ_1:3;
+  <*y,z*>.2 = z by FINSEQ_1:61;
+  then
+A15: [2,z] in <*y,z*> by A14,FUNCT_1:8;
+  <*x,y*> = <*x*>^<*y*> by FINSEQ_1:def 9;
+  then
+A16: <*x*> c= <*x,y*> by FINSEQ_6:12;
+  <*y,z*> in {<*y,z*>} & {<*y,z*>} in yz by TARSKI:def 1,def 2;
+  then
+A17: z <> yz by A7,A15,ORDINAL1:5;
+  x in {1,x} & {1,x} in [1,x] by TARSKI:def 2;
+  then x <> xy by A16,A10,A8,ORDINAL1:5;
+  hence not z in {xy, yz} & not x in {xy, yz} by A1,A3,A17,TARSKI:def 2;
+A18: <*z,x*> in {<*z,x*>} & {<*z,x*>} in zx by TARSKI:def 1,def 2;
+A19: <*z,x*> in {<*z,x*>} & {<*z,x*>} in zx by TARSKI:def 1,def 2;
+  x in {2,x} & {2,x} in [2,x] by TARSKI:def 2;
+  then
+A20: x <> zx by A12,A18,ORDINAL1:5;
+  z in {1,z} & {1,z} in [1,z] by TARSKI:def 2;
+  then z <> zx by A13,A9,A19,ORDINAL1:5;
+  hence thesis by A2,A20,ENUMSET1:def 1;
+end;
+
+Lm2: for f1,f2,f3 being Function of 2-tuples_on BOOLEAN, BOOLEAN for f4 being
+Function of 3-tuples_on BOOLEAN, BOOLEAN for x,y,z being set holds {x, y, z} \
+{[<*[<*x,y*>,f1], [<*y,z*>,f2], [<*z,x*>,f3]*>,f4]} = {x, y, z}
+proof
+  let f1,f2,f3 be Function of 2-tuples_on BOOLEAN, BOOLEAN;
+  let f4 be Function of 3-tuples_on BOOLEAN, BOOLEAN;
+  let x,y,z be set;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+A1: <*xy, yz, zx*>.3 = zx by FINSEQ_1:62;
+  len <*xy, yz, zx*> = 3 by FINSEQ_1:62;
+  then
+A2: Seg 3 = dom <*xy, yz, zx*> by FINSEQ_1:def 3;
+  then 3 in dom <*xy, yz, zx*> by FINSEQ_1:3;
+  then [3,zx] in <*xy, yz, zx*> by A1,FUNCT_1:8;
+  then zx in rng <*xy, yz, zx*> by RELAT_1:def 5;
+  then
+A3: the_rank_of zx in the_rank_of xyz by CLASSES1:90;
+  rng <*y,z*> = {y,z} by FINSEQ_2:147;
+  then
+A4: z in rng <*y,z*> by TARSKI:def 2;
+  thus {x,y,z} \ {xyz} c= {x,y,z};
+A5: <*xy, yz, zx*>.2 = yz by FINSEQ_1:62;
+  let a be set;
+A6: <*xy, yz, zx*>.1 = xy by FINSEQ_1:62;
+  1 in dom <*xy, yz, zx*> by A2,FINSEQ_1:3;
+  then [1,xy] in <*xy, yz, zx*> by A6,FUNCT_1:8;
+  then xy in rng <*xy, yz, zx*> by RELAT_1:def 5;
+  then
+A7: the_rank_of xy in the_rank_of xyz by CLASSES1:90;
+  rng <*z,x*> = {z,x} by FINSEQ_2:147;
+  then
+A8: x in rng <*z,x*> by TARSKI:def 2;
+  2 in dom <*xy, yz, zx*> by A2,FINSEQ_1:3;
+  then [2,yz] in <*xy, yz, zx*> by A5,FUNCT_1:8;
+  then yz in rng <*xy, yz, zx*> by RELAT_1:def 5;
+  then
+A9: the_rank_of yz in the_rank_of xyz by CLASSES1:90;
+  rng <*x,y*> = {x,y} by FINSEQ_2:147;
+  then
+A10: y in rng <*x,y*> by TARSKI:def 2;
+  assume
+A11: a in {x,y,z};
+  then a = x or a = y or a = z by ENUMSET1:def 1;
+  then a <> xyz by A8,A3,A10,A7,A4,A9,CLASSES1:90;
+  then not a in {xyz} by TARSKI:def 1;
+  hence thesis by A11,XBOOLE_0:def 5;
+end;
+
+Lm3: for f being Function of 2-tuples_on BOOLEAN, BOOLEAN for x,y,c being set
+st c <> [<*x,y*>,f] for s being State of 2GatesCircuit(x,y,c,f) holds (
+Following s).2GatesCircOutput(x,y,c,f) = f.<*s.[<*x,y*>,f],s.c*> & (Following s
+).[<*x,y*>,f] = f.<*s.x, s.y*> & (Following s).x = s.x & (Following s).y = s.y
+& (Following s).c = s.c
+proof
+  let f be Function of 2-tuples_on BOOLEAN, BOOLEAN;
+  let x,y,c be set such that
+A1: c <> [<*x,y*>, f];
+  set S = 2GatesCircStr(x,y,c,f);
+A2: InputVertices S = {x,y,c} by A1,FACIRC_1:57;
+  then
+A3: c in InputVertices S by ENUMSET1:def 1;
+  set xyf = [<*x,y*>,f];
+  set p = <*xyf, c*>;
+  set S2 = 1GateCircStr(p,f), A2 = 1GateCircuit(xyf,c,f);
+  InnerVertices S = {xyf, 2GatesCircOutput(x,y,c,f)} by FACIRC_1:56;
+  then reconsider xyf as Element of InnerVertices S by TARSKI:def 2;
+  set A = 2GatesCircuit(x,y,c,f);
+  let s be State of A;
+  set S1 = 1GateCircStr(<*x,y*>,f), A1 = 1GateCircuit(x,y,f);
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+A4: dom s2 = the carrier of S2 by CIRCUIT1:4;
+A5: rng p = {xyf, c} by FINSEQ_2:147;
+  then c in rng p by TARSKI:def 2;
+  then
+A6: c in InputVertices S2 by CIRCCOMB:49;
+  xyf in rng p by A5,TARSKI:def 2;
+  then xyf in InputVertices S2 by CIRCCOMB:49;
+  then reconsider xyf9 = xyf, c9 = c as Vertex of S2 by A6;
+  reconsider v2 = [p,f] as Element of InnerVertices S2 by FACIRC_1:47;
+  reconsider xyf1 = xyf as Element of InnerVertices S1 by FACIRC_1:47;
+  reconsider vx = x, vy = y as Vertex of S1 by FACIRC_1:43;
+A7: dom s1 = the carrier of S1 by CIRCUIT1:4;
+  thus (Following s).2GatesCircOutput(x,y,c,f) = (Following s2).v2 by CIRCCOMB
+  :72
+    .= f.<*s2.xyf9, s2.c9*> by FACIRC_1:50
+    .= f.<*s.[<*x,y*>,f], s2.c9*> by A4,FUNCT_1:70
+    .= f.<*s.[<*x,y*>,f], s.c*> by A4,FUNCT_1:70;
+  thus (Following s).[<*x,y*>,f] = (Following s1).xyf1 by CIRCCOMB:72
+    .= f.<*s1.vx, s1.vy*> by FACIRC_1:50
+    .= f.<*s.x, s1.vy*> by A7,FUNCT_1:70
+    .= f.<*s.x, s.y*> by A7,FUNCT_1:70;
+  x in InputVertices S & y in InputVertices S by A2,ENUMSET1:def 1;
+  hence thesis by A3,CIRCUIT2:def 5;
+end;
+ 
+::========================================================================
+:: Generalized Full Adder (GFA) Circuit (TYPE-0)
+::========================================================================
+
+begin :: Generalized Full Adder (GFA) Circuit (TYPE-0)
+::========================================================================
+:: << GFA TYPE-0 >>
+::------------------------------------------------------------------------
+::   Name     : Generalized Full Adder Type-0 (GFA0)
+::   Function : x + y + z = 2 * c + s
+::
+::   Logic Symbol :      x      y      Combined : GFA0CarryIStr(x,y,z)
+::                       |     /                  GFA0CarryStr(x,y,z)
+::                       |    /                   GFA0AdderStr(x,y,z)
+::                   +---*---*                  --->
+::                   |  GFA  *-----z              BitGFA0Str(x,y,z)
+::                   | TYPE0 |
+::                   *---*---+          Outputs : BitGFA0CarryOutput(x,y,z)
+::                  /    |                        BitGFA0AdderOutput(x,y,z)
+::                 /     |
+::                c      s          Calculation : Following(s,2) is stable.
+::=========================================================================
+::-------------------------------------------------
+:: GFA0 Carry : Circuit Definition of Carry Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA0CarryIStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  1GateCircStr(<*x,y*>,and2) +*
+  1GateCircStr(<*y,z*>,and2) +* 1GateCircStr(<*z,x*>,and2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA0CarryICirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA0CarryIStr(x,y,z) equals
+  1GateCircuit(x,y,and2) +* 1GateCircuit(y,z,and2) +*
+  1GateCircuit(z,x,and2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA0CarryStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA0CarryIStr(x,y,z) +* 1GateCircStr(<*[
+  <*x,y*>,and2], [<*y,z*>,and2], [<*z,x*>,and2]*>,or3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA0CarryCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA0CarryStr(x,y,z) equals
+  GFA0CarryICirc(x,y,z) +* 1GateCircuit([<*x,y*>,and2]
+  ,[<*y,z*>,and2],[<*z,x*>,and2],or3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA0CarryOutput(x,y,z) -> Element of InnerVertices GFA0CarryStr(x,y,z)
+  equals
+  [<*[<*x,y*>,and2],[<*y,z*>,and2],[<*z,x*>,and2]*>,or3];
+  coherence
+  proof
+    [<*[<*x,y*>,and2],[<*y,z*>,and2],[<*z,x*>,and2]*>,or3] in
+InnerVertices 1GateCircStr(<*[<*x,y*>,and2],[<*y,z*>,and2], [<*z,x*>,and2]*>,
+    or3) by FACIRC_1:47;
+    hence thesis by FACIRC_1:21;
+  end;
+end;
+ 
+::-------------------------------------------------------
+:: GFA0 Carry : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th13:
+  for x,y,z being set holds InnerVertices GFA0CarryIStr(x,y,z) = {
+  [<*x,y*>,and2], [<*y,z*>,and2], [<*z,x*>,and2]}
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+A1: Cxy tolerates Cyz by CIRCCOMB:55;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices GFA0CarryIStr(x,y,z) = InnerVertices(Cxy +* Cyz) \/
+  InnerVertices(Czx) by CIRCCOMB:15
+    .= InnerVertices(Cxy) \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by A1,
+  CIRCCOMB:15
+    .= {xy} \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ {zx} by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  hence thesis;
+end;
+
+theorem Th14:
+  for x,y,z being set holds InnerVertices GFA0CarryStr(x,y,z) = {[
+  <*x,y*>,and2], [<*y,z*>,and2], [<*z,x*>,and2]} \/ {GFA0CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+A1: Cxy tolerates (Cyz +* Czx +* Cxyz) by CIRCCOMB:55;
+  Cyz tolerates (Czx +* Cxyz) by CIRCCOMB:55;
+  then
+A2: InnerVertices (Cyz +* (Czx +* Cxyz)) = InnerVertices Cyz \/
+  InnerVertices (Czx +* Cxyz) by CIRCCOMB:15;
+  Czx tolerates Cxyz by CIRCCOMB:55;
+  then
+A3: InnerVertices (Czx +* Cxyz) = InnerVertices Czx \/ InnerVertices Cxyz by
+  CIRCCOMB:15;
+  thus InnerVertices GFA0CarryStr(x,y,z) = InnerVertices (Cxy +* (Cyz +* Czx)
+  +* Cxyz) by CIRCCOMB:10
+    .= InnerVertices (Cxy +* (Cyz +* Czx +* Cxyz)) by CIRCCOMB:10
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* Czx +* Cxyz) by A1,
+  CIRCCOMB:15
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* (Czx +* Cxyz)) by CIRCCOMB
+  :10
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ (InnerVertices Czx \/
+  InnerVertices Cxyz) by A2,A3,XBOOLE_1:4
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ InnerVertices Czx \/
+  InnerVertices Cxyz by XBOOLE_1:4
+    .= {xy} \/ InnerVertices Cyz \/ InnerVertices Czx \/ InnerVertices Cxyz
+  by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices Czx \/ InnerVertices Cxyz by CIRCCOMB:
+  49
+    .= {xy} \/ {yz} \/ {zx} \/ InnerVertices Cxyz by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} \/ InnerVertices Cxyz by ENUMSET1:41
+    .= {xy, yz, zx} \/ InnerVertices Cxyz by ENUMSET1:43
+    .= {xy, yz, zx} \/ {GFA0CarryOutput(x,y,z)} by CIRCCOMB:49;
+end;
+
+theorem Th15:
+  for x,y,z being set holds InnerVertices GFA0CarryStr(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  InnerVertices Cxy is Relation & InnerVertices Cyz is Relation by
+  FACIRC_1:38;
+  then InnerVertices Czx is Relation & InnerVertices (Cxy +* Cyz) is Relation
+  by FACIRC_1:3,38;
+  then InnerVertices Cxyz is Relation & InnerVertices GFA0CarryIStr(x,y,z) is
+  Relation by FACIRC_1:3,38;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th16:
+  for x,y,z being set st x <> [<*y,z*>,and2] & y <> [<*z,x*>,and2]
+  & z <> [<*x,y*>,and2] holds InputVertices GFA0CarryIStr(x,y,z) = {x,y,z}
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  assume that
+A1: x <> yz and
+A2: y <> zx & z <> xy;
+A3: not xy in {y,z} by A1,A2,Lm1;
+A4: not zx in {x,y,z} by A1,A2,Lm1;
+A5: y <> [<*y,z*>,f2] by FACIRC_2:3;
+A6: ( not z in {xy, yz})& not x in {xy, yz} by A1,A2,Lm1;
+A7: Cxy tolerates Cyz by CIRCCOMB:55;
+  InputVertices GFA0CarryIStr(x,y,z) = (InputVertices(Cxy +* Cyz) \
+  InnerVertices(Czx)) \/ (InputVertices(Czx) \ InnerVertices(Cxy +* Cyz)) by
+  CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \
+  InnerVertices(Cxy +* Cyz)) by CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (
+  InnerVertices(Cxy) \/ InnerVertices(Cyz))) by A7,CIRCCOMB:15
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ InnerVertices(
+  Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \
+  InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/ InnerVertices(Cyz))) by
+  CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ {yz})) by CIRCCOMB:49
+    .= (({x,y} \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx} \/ (
+  InputVertices(Czx) \ ({xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ (InputVertices(Czx) \ ({
+  xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ ({xy} \/ {yz}))
+  by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ {xy,yz}) by
+  ENUMSET1:41
+    .= (({x,y} \/ ({y,z} \ {xy})) \ {zx}) \/ ({z,x} \ {xy,yz}) by A1,A5,
+  FACIRC_2:1
+    .= ({x,y} \/ {y,z}) \ {zx} \/ ({z,x} \ {xy,yz}) by A3,ZFMISC_1:65
+    .= ({x,y} \/ {y,z}) \ {zx} \/ {z,x} by A6,ZFMISC_1:72
+    .= {x,y,y,z} \ {zx} \/ {z,x} by ENUMSET1:45
+    .= {y,y,x,z} \ {zx} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \ {zx} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \ {zx} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ {z,x} by A4,ZFMISC_1:65
+    .= {x,y,z,z,x} by ENUMSET1:49
+    .= {x,y,z,z} \/ {x} by ENUMSET1:50
+    .= {z,z,x,y} \/ {x} by ENUMSET1:118
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {z,x,y,x} by ENUMSET1:46
+    .= {x,x,y,z} by ENUMSET1:113
+    .= {x,y,z} by ENUMSET1:71;
+  hence thesis;
+end;
+
+theorem Th17:
+  for x,y,z being set st x <> [<*y,z*>,and2] & y <> [<*z,x*>,and2]
+  & z <> [<*x,y*>,and2] holds InputVertices GFA0CarryStr(x,y,z) = {x,y,z}
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set MI = GFA0CarryIStr(x,y,z);
+  assume
+A1: x <> yz & y <> zx & z <> xy;
+A2: InputVertices S = rng <*xy, yz, zx*> by CIRCCOMB:49
+    .= {xy, yz, zx} by FINSEQ_2:148;
+A3: InnerVertices S = {xyz} & {x, y, z} \ {xyz} = {x, y, z} by Lm2,CIRCCOMB:
+  49;
+A4: {xy, yz, zx} \ {xy, yz, zx} = {} by XBOOLE_1:37;
+  thus InputVertices GFA0CarryStr(x,y,z) = ((InputVertices MI) \ InnerVertices
+  S) \/ ((InputVertices S) \ InnerVertices MI) by CIRCCMB2:6,CIRCCOMB:55
+    .= {x,y,z} \/ ({xy, yz, zx} \ InnerVertices MI) by A1,A2,A3,Th16
+    .= {x,y,z} \/ {} by A4,Th13
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices GFA0CarryStr(x,y,z)
+  is without_pairs
+proof
+  let x,y,z be non pair set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set M = GFA0CarryStr(x,y,z);
+  set MI = GFA0CarryIStr(x,y,z);
+  given xx being pair set such that
+A1: xx in InputVertices M;
+A2: Cxy tolerates Cyz by CIRCCOMB:55;
+A3: InnerVertices Czx = {zx} & Cxy +* Cyz tolerates Czx by CIRCCOMB:49,55;
+  InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  then InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by A2,CIRCCOMB:15;
+  then
+A4: InnerVertices MI = {xy} \/ {yz} \/ {zx} by A3,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+  then
+A5: InputVertices S \ InnerVertices MI = {} by A4,XBOOLE_1:37;
+  InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then
+A6: InputVertices MI is without_pairs by FACIRC_1:9;
+  InnerVertices S is Relation by FACIRC_1:38;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A6,FACIRC_1:6;
+  hence thesis by A6,A1,A5,FACIRC_1:def 2;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem Th19:
+  for x,y,z being set holds x in the carrier of GFA0CarryStr(x,y,z
+) & y in the carrier of GFA0CarryStr(x,y,z) & z in the carrier of GFA0CarryStr(
+x,y,z) & [<*x,y*>,and2] in the carrier of GFA0CarryStr(x,y,z) & [<*y,z*>,and2]
+  in the carrier of GFA0CarryStr(x,y,z) & [<*z,x*>,and2] in the carrier of
+GFA0CarryStr(x,y,z) & [<*[<*x,y*>,and2],[<*y,z*>,and2],[<*z,x*>,and2]*>,or3] in
+  the carrier of GFA0CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set p = <*xy,yz,zx*>;
+  z in the carrier of Czx by FACIRC_1:43;
+  then
+A1: z in the carrier of GFA0CarryIStr(x,y,z) by FACIRC_1:20;
+  zx in the carrier of Czx by FACIRC_1:43;
+  then
+A2: zx in the carrier of GFA0CarryIStr(x,y,z) by FACIRC_1:20;
+  y in the carrier of Cxy by FACIRC_1:43;
+  then y in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A3: y in the carrier of GFA0CarryIStr(x,y,z) by FACIRC_1:20;
+  the carrier of Cxyz = rng p \/ {xyz} & [p,f4] in {[p,f4]} by CIRCCOMB:
+  def 6 ,TARSKI:def 1;
+  then
+A4: xyz in the carrier of Cxyz by XBOOLE_0:def 3;
+  yz in the carrier of Cyz by FACIRC_1:43;
+  then yz in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A5: yz in the carrier of GFA0CarryIStr(x,y,z) by FACIRC_1:20;
+  xy in the carrier of Cxy by FACIRC_1:43;
+  then xy in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A6: xy in the carrier of GFA0CarryIStr(x,y,z) by FACIRC_1:20;
+  x in the carrier of Czx by FACIRC_1:43;
+  then x in the carrier of GFA0CarryIStr(x,y,z) by FACIRC_1:20;
+  hence thesis by A3,A1,A6,A5,A2,A4,FACIRC_1:20;
+end;
+
+theorem Th20:
+  for x,y,z being set holds [<*x,y*>,and2] in InnerVertices
+GFA0CarryStr(x,y,z) & [<*y,z*>,and2] in InnerVertices GFA0CarryStr(x,y,z) & [<*
+  z,x*>,and2] in InnerVertices GFA0CarryStr(x,y,z) & GFA0CarryOutput(x,y,z) in
+  InnerVertices GFA0CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  InnerVertices GFA0CarryStr(x,y,z) = {xy,yz,zx} \/ {GFA0CarryOutput(x,y,z
+  )} by Th14
+    .= {xy,yz,zx,GFA0CarryOutput(x,y,z)} by ENUMSET1:46;
+  hence thesis by ENUMSET1:def 2;
+end;
+
+theorem Th21:
+  for x,y,z being set st x <> [<*y,z*>,and2] & y <> [<*z,x*>,and2]
+  & z <> [<*x,y*>,and2] holds x in InputVertices GFA0CarryStr(x,y,z) & y in
+  InputVertices GFA0CarryStr(x,y,z) & z in InputVertices GFA0CarryStr(x,y,z)
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  let x,y,z be set;
+  assume x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  then InputVertices GFA0CarryStr(x,y,z) = {x,y,z} by Th17;
+  hence thesis by ENUMSET1:def 1;
+end;
+
+theorem Th22:
+  for x,y,z being non pair set holds InputVertices GFA0CarryStr(x,
+  y,z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set M = GFA0CarryStr(x,y,z);
+  set MI = GFA0CarryIStr(x,y,z);
+  set S = 1GateCircStr(<*xy,yz,zx*>,f4);
+A1: InputVertices Cxy = {x,y} & InputVertices Cyz = {y,z} by FACIRC_1:40;
+A2: InputVertices Czx = {z,x} by FACIRC_1:40;
+A3: InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+A4: InnerVertices S is Relation by FACIRC_1:38;
+A5: InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  Cxy tolerates Cyz by CIRCCOMB:55;
+  then
+A6: InnerVertices Czx = {zx} & InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by
+  A5,CIRCCOMB:15,49;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices MI = {xy} \/ {yz} \/ {zx} by A6,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  then
+A7: InputVertices S \ InnerVertices MI = {} by A3,XBOOLE_1:37;
+A8: InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then
+A9: InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then InputVertices MI is without_pairs by FACIRC_1:9;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A4, FACIRC_1:6;
+  hence
+  InputVertices M = (InputVertices(Cxy+*Cyz)) \/ InputVertices Czx by A9,
+  A6,A7,FACIRC_1:7
+    .= (InputVertices Cxy) \/ (InputVertices Cyz) \/ (InputVertices Czx) by
+  A8,A5,FACIRC_1:7
+    .= {x,y,y,z} \/ {z,x} by A1,A2,ENUMSET1:45
+    .= {y,y,x,z} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ ({z}\/{x}) by ENUMSET1:41
+    .= {x,y,z} \/ {z} \/ {x} by XBOOLE_1:4
+    .= {z,x,y} \/ {z} \/ {x} by ENUMSET1:100
+    .= {z,z,x,y} \/ {x} by ENUMSET1:44
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {x,y,z} \/ {x} by ENUMSET1:100
+    .= {x,x,y,z} by ENUMSET1:44
+    .= {x,y,z} by ENUMSET1:71;
+end;
+ 
+::----------------------------------------------------
+:: GFA0 Carry : Stability of the Carry Output Circuit
+::----------------------------------------------------
+
+theorem Th23:
+  for x,y,z being set for s being State of GFA0CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds (
+Following s).[<*x,y*>,and2] = a1 '&' a2 & (Following s).[<*y,z*>,and2] = a2 '&'
+  a3 & (Following s).[<*z,x*>,and2] = a3 '&' a1
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2;
+  let s be State of GFA0CarryCirc(x,y,z);
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.x and
+A2: a2 = s.y and
+A3: a3 = s.z;
+  set S = GFA0CarryStr(x,y,z);
+A4: InnerVertices S = the carrier' of S by FACIRC_1:37;
+A5: y in the carrier of S by Th19;
+A6: x in the carrier of S by Th19;
+A7: dom s = the carrier of S by CIRCUIT1:4;
+  xy in InnerVertices GFA0CarryStr(x,y,z) by Th20;
+  hence (Following s).[<*x,y*>,f1] = f1.(s*<*x,y*>) by A4,FACIRC_1:35
+    .= f1.<*a1,a2*> by A1,A2,A7,A6,A5,FINSEQ_2:145
+    .= a1 '&' a2 by TWOSCOMP:def 1;
+A8: z in the carrier of S by Th19;
+  yz in InnerVertices GFA0CarryStr(x,y,z) by Th20;
+  hence (Following s).[<*y,z*>,f2] = f2.(s*<*y,z*>) by A4,FACIRC_1:35
+    .= f2.<*a2,a3*> by A2,A3,A7,A5,A8,FINSEQ_2:145
+    .= a2 '&' a3 by TWOSCOMP:def 1;
+  zx in InnerVertices GFA0CarryStr(x,y,z) by Th20;
+  hence (Following s).[<*z,x*>,f3] = f3.(s*<*z,x*>) by A4,FACIRC_1:35
+    .= f3.<*a3,a1*> by A1,A3,A7,A6,A8,FINSEQ_2:145
+    .= a3 '&' a1 by TWOSCOMP:def 1;
+end;
+
+theorem Th24:
+  for x,y,z being set for s being State of GFA0CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.[<*x,y*>,and2] & a2 = s.[<*y,z
+  *>,and2] & a3 = s.[<*z,x*>,and2] holds (Following s).GFA0CarryOutput(x,y,z) =
+  a1 'or' a2 'or' a3
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  let s be State of GFA0CarryCirc(x,y,z);
+  set xy =[<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.xy & a2 = s.yz & a3 = s.zx;
+  set S = GFA0CarryStr(x,y,z);
+  reconsider xy, yz, zx as Element of InnerVertices S by Th20;
+A2: dom s = the carrier of S by CIRCUIT1:4;
+  InnerVertices S = the carrier' of S by FACIRC_1:37;
+  hence (Following s).GFA0CarryOutput(x,y,z) = f4.(s*<*xy, yz, zx*>) by
+  FACIRC_1:35
+    .= f4.<*a1,a2,a3*> by A1,A2,FINSEQ_2:146
+    .= a1 'or' a2 'or' a3 by TWOSCOMP:16;
+end;
+
+theorem Th25:
+  for x,y,z being set st x <> [<*y,z*>,and2] & y <> [<*z,x*>,and2]
+  & z <> [<*x,y*>,and2] for s being State of GFA0CarryCirc(x,y,z) for a1,a2,a3
+being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds Following(s,2)
+  .GFA0CarryOutput(x,y,z) = (a1 '&' a2) 'or' (a2 '&' a3) 'or' (a3 '&' a1) &
+Following(s,2).[<*x,y*>,and2] = a1 '&' a2 & Following(s,2).[<*y,z*>,and2] = a2
+  '&' a3 & Following(s,2).[<*z,x*>,and2] = a3 '&' a1
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA0CarryStr(x,y,z);
+  reconsider x9 = x, y9 = y, z9 = z as Vertex of S by Th19;
+  let s be State of GFA0CarryCirc(x,y,z);
+  y in InputVertices S by A1,Th21;
+  then
+A2: (Following s).y9 = s.y by CIRCUIT2:def 5;
+  z in InputVertices S by A1,Th21;
+  then
+A3: (Following s).z9 = s.z by CIRCUIT2:def 5;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A4: Following(s,2) = Following Following s by FACIRC_1:15;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A5: a1 = s.x & a2 = s.y & a3 = s.z;
+A6: (Following s).zx = a3 '&' a1 by A5,Th23;
+  (Following s).xy = a1 '&' a2 & (Following s).yz = a2 '&' a3 by A5,Th23;
+  hence Following(s,2).GFA0CarryOutput(x,y,z) = (a1 '&' a2) 'or' (a2 '&' a3)
+  'or' (a3 '&' a1) by A4,A6,Th24;
+  x in InputVertices S by A1,Th21;
+  then (Following s).x9 = s.x by CIRCUIT2:def 5;
+  hence thesis by A5,A2,A3,A4,Th23;
+end;
+
+theorem Th26:
+  for x,y,z being set st x <> [<*y,z*>,and2] & y <> [<*z,x*>,and2]
+& z <> [<*x,y*>,and2] for s being State of GFA0CarryCirc(x,y,z) holds Following
+  (s,2) is stable
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA0CarryStr(x,y,z);
+  reconsider xx = x, yy = y, zz = z as Vertex of S by Th19;
+  let s be State of GFA0CarryCirc(x,y,z);
+  set a1 = s.xx, a2 = s.yy, a3 = s.zz;
+  set ffs = Following(s,2), fffs = Following ffs;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A2: ffs = Following Following s by FACIRC_1:15;
+A3: z in InputVertices S by A1,Th21;
+  then (Following s).z = a3 by CIRCUIT2:def 5;
+  then
+A4: ffs.z = a3 by A2,A3,CIRCUIT2:def 5;
+A5: y in InputVertices S by A1,Th21;
+  then (Following s).y = a2 by CIRCUIT2:def 5;
+  then
+A6: ffs.y = a2 by A2,A5,CIRCUIT2:def 5;
+A7: x in InputVertices S by A1,Th21;
+  then (Following s).x = a1 by CIRCUIT2:def 5;
+  then
+A8: ffs.x = a1 by A2,A7,CIRCUIT2:def 5;
+  a3 = s.z;
+  then
+A9: ffs.xy = a1 '&' a2 by A1,Th25;
+  a2 = s.y;
+  then
+A10: ffs.zx = a1 '&' a3 by A1,Th25;
+  a1 = s.x;
+  then
+A11: ffs.yz = a2 '&' a3 by A1,Th25;
+A12: ffs.GFA0CarryOutput(x,y,z) = a1 '&' a2 'or' a2 '&' a3 'or' a3 '&' a1 by
+  A1,Th25;
+A13: now
+    let a be set;
+    assume
+A14: a in the carrier of S;
+    then reconsider v = a as Vertex of S;
+A15: v in InputVertices S \/ InnerVertices S by A14,XBOOLE_1:45;
+    thus ffs.a = (fffs).a
+    proof
+      per cases by A15,XBOOLE_0:def 3;
+      suppose
+        v in InputVertices S;
+        hence thesis by CIRCUIT2:def 5;
+      end;
+      suppose
+        v in InnerVertices S;
+        then v in {xy, yz, zx} \/ {GFA0CarryOutput(x,y,z)} by Th14;
+        then v in {xy, yz, zx} or v in {GFA0CarryOutput(x,y,z)} by
+        XBOOLE_0:def 3;
+        then v = xy or v = yz or v = zx or v = GFA0CarryOutput(x,y,z) by
+        ENUMSET1:def 1,TARSKI:def 1;
+        hence thesis by A12,A9,A11,A10,A8,A6,A4,Th23,Th24;
+      end;
+    end;
+  end;
+  dom Following Following(s,2) = the carrier of S & dom Following(s,2) =
+  the carrier of S by CIRCUIT1:4;
+  hence ffs = fffs by A13,FUNCT_1:9;
+end;
+ 
+::=========================================================================
+::-------------------------------------------------
+:: GFA0 Adder : Circuit Definition of Adder Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA0AdderStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  2GatesCircStr(x,y,z, xor2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA0AdderCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA0AdderStr(x,y,z) equals
+  2GatesCircuit(x,y,z, xor2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA0AdderOutput(x,y,z) -> Element of InnerVertices GFA0AdderStr(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2);
+  coherence;
+end;
+ 
+::-------------------------------------------------------
+:: GFA0 Adder : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th27:
+  for x,y,z being set holds InnerVertices GFA0AdderStr(x,y,z) = {[
+  <*x,y*>,xor2]} \/ {GFA0AdderOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f = xor2;
+  set xy = [<*x,y*>,f];
+  set S = GFA0AdderStr(x,y,z);
+  thus InnerVertices S = {xy, GFA0AdderOutput(x,y,z)} by FACIRC_1:56
+    .= {xy} \/ {GFA0AdderOutput(x,y,z)} by ENUMSET1:41;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+canceled 3;
+
+theorem
+  for x,y,z being set holds x in the carrier of GFA0AdderStr(x,y,z) & y
+in the carrier of GFA0AdderStr(x,y,z) & z in the carrier of GFA0AdderStr(x,y,z)
+& [<*x,y*>,xor2] in the carrier of GFA0AdderStr(x,y,z) & [<*[<*x,y*>,xor2], z*>
+  , xor2] in the carrier of GFA0AdderStr(x,y,z) by FACIRC_1:60,61;
+
+theorem Th32:
+  for x,y,z being set holds [<*x,y*>,xor2] in InnerVertices
+GFA0AdderStr(x,y,z) & GFA0AdderOutput(x,y,z) in InnerVertices GFA0AdderStr(x,y,
+  z)
+proof
+  let x,y,z be set;
+  set f = xor2;
+  set S = GFA0AdderStr(x,y,z);
+  InnerVertices S = {[<*x,y*>,f]} \/ {GFA0AdderOutput(x,y,z)} by Th27
+    .= {[<*x,y*>,f],GFA0AdderOutput(x,y,z)} by ENUMSET1:41;
+  hence thesis by TARSKI:def 2;
+end;
+
+theorem Th33:
+  for x,y,z being set st z <> [<*x,y*>, xor2] holds x in
+InputVertices GFA0AdderStr(x,y,z) & y in InputVertices GFA0AdderStr(x,y,z) & z
+  in InputVertices GFA0AdderStr(x,y,z)
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set S = GFA0AdderStr(x,y,z);
+  InputVertices S = {x,y,z} by A1,FACIRC_1:57;
+  hence thesis by ENUMSET1:def 1;
+end;
+ 
+::----------------------------------------------------
+:: GFA0 Adder : Stability of the Adder Output Circuit
+::----------------------------------------------------
+
+canceled;
+
+theorem Th35:
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State of
+GFA0AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s
+.y & a3 = s.z holds (Following s).[<*x,y*>,xor2] = a1 'xor' a2 & (Following s).
+  x = a1 & (Following s).y = a2 & (Following s).z = a3
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA0AdderCirc(x,y,z);
+  set xy = [<*x,y*>,f];
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A2: a1 = s.x & a2 = s.y and
+A3: a3 = s.z;
+  (Following s).xy = f.<*a1, a2*> by A1,A2,Lm3;
+  hence (Following s).xy = a1 'xor' a2 by TWOSCOMP:def 13;
+  thus thesis by A1,A2,A3,Lm3;
+end;
+
+theorem Th36:
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State of
+GFA0AdderCirc(x,y,z) for a1a2,a1,a2,a3 being Element of BOOLEAN st a1a2 = s.[<*
+x,y*>,xor2] & a3 = s.z holds (Following s).GFA0AdderOutput(x,y,z) = a1a2 'xor'
+  a3
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA0AdderCirc(x,y,z);
+  set xy = [<*x,y*>,f];
+  let s be State of A;
+  let a1a2,a1,a2,a3 be Element of BOOLEAN such that
+A2: a1a2 = s.xy & a3 = s.z;
+  thus (Following s).GFA0AdderOutput(x,y,z) = f.<*s.xy, s.z*> by A1,Lm3
+    .= a1a2 'xor' a3 by A2,TWOSCOMP:def 13;
+end;
+
+theorem Th37:
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State of
+GFA0AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s
+  .y & a3 = s.z holds Following(s,2).GFA0AdderOutput(x,y,z) = a1 'xor' a2 'xor'
+  a3 & Following(s,2).[<*x,y*>,xor2] = a1 'xor' a2 & Following(s,2).x = a1 &
+  Following(s,2).y = a2 & Following(s,2).z = a3
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set xy = [<*x,y*>,f];
+  set A = GFA0AdderCirc(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A2: a1 = s.x & a2 = s.y and
+A3: a3 = s.z;
+  thus (Following(s,2)).GFA0AdderOutput(x,y,z) = f.<* f.<*a1, a2*>, a3*> by A1
+  ,A2,A3,FACIRC_1:62
+    .= f.<*a1 'xor' a2, a3*> by TWOSCOMP:def 13
+    .= a1 'xor' a2 'xor' a3 by TWOSCOMP:def 13;
+  (Following(s,2)).xy = f.<*a1, a2*> by A1,A2,FACIRC_1:62;
+  hence (Following(s,2)).xy = a1 'xor' a2 by TWOSCOMP:def 13;
+  thus thesis by A1,A2,A3,FACIRC_1:62;
+end;
+ 
+::=====================================================================
+::---------------------------------------------------
+:: GFA0 : Circuit Definition of GFA Combined Circuit
+::---------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA0Str(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA0AdderStr(x,y,z) +* GFA0CarryStr(x,y,
+  z);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA0Circ(x,y,z) -> strict Boolean gate`2=den Circuit of BitGFA0Str(x
+  ,y,z) equals
+  GFA0AdderCirc(x,y,z) +* GFA0CarryCirc(x,y,z);
+  coherence;
+end;
+ 
+::----------------------------------------------------------
+:: GFA0 Combined : Carrier, InnerVertices and InputVertices
+::----------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+canceled;
+
+theorem Th39:
+  for x,y,z being set holds InnerVertices BitGFA0Str(x,y,z) = {[<*
+x,y*>,xor2]} \/ {GFA0AdderOutput(x,y,z)} \/ {[<*x,y*>,and2], [<*y,z*>,and2], [
+  <*z,x*>,and2]} \/ {GFA0CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2;
+  set f0 = xor2;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA0Str(x,y,z);
+  set S1 = GFA0AdderStr(x,y,z);
+  set S2 = GFA0CarryStr(x,y,z);
+  set A1 = GFA0AdderOutput(x,y,z);
+  set A2 = GFA0CarryOutput(x,y,z);
+  thus InnerVertices S = (InnerVertices S1) \/ InnerVertices S2 by FACIRC_1:27
+    .= {xyf0} \/ {A1} \/ InnerVertices S2 by Th27
+    .= {xyf0} \/ {A1} \/ ({xyf1, yzf2, zxf3} \/ {A2}) by Th14
+    .= {xyf0} \/ {A1} \/ {xyf1, yzf2, zxf3} \/ {A2} by XBOOLE_1:4;
+end;
+
+theorem
+  for x,y,z being set holds InnerVertices BitGFA0Str(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set S1 = GFA0AdderStr(x,y,z);
+  set S2 = GFA0CarryStr(x,y,z);
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th15,
+  FACIRC_1:58;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th41:
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2]
+& y <> [<*z,x*>,and2] & z <> [<*x,y*>,and2] holds InputVertices BitGFA0Str(x,y,
+  z) = {x,y,z}
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y *>,f1];
+  set S2 = GFA0CarryStr(x,y,z);
+  set S1 = GFA0AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by A1,Th17,
+  FACIRC_1:57;
+  hence thesis by CIRCCOMB:55,FACIRC_2:22;
+end;
+
+theorem Th42:
+  for x,y,z being non pair set holds InputVertices BitGFA0Str(x,y, z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set S = BitGFA0Str(x,y,z);
+  set S1 = GFA0AdderStr(x,y,z);
+  set S2 = GFA0CarryStr(x,y,z);
+A1: InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by Th22,FACIRC_1
+  :57;
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th15,
+  FACIRC_1:58;
+  hence InputVertices S = {x,y,z} \/ {x,y,z} by A1,FACIRC_1:7
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices BitGFA0Str(x,y,z) is
+  without_pairs
+proof
+  let x,y,z be non pair set;
+  InputVertices BitGFA0Str(x,y,z) = {x,y,z} by Th42;
+  hence thesis;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem
+  for x,y,z being set holds x in the carrier of BitGFA0Str(x,y,z) & y in
+the carrier of BitGFA0Str(x,y,z) & z in the carrier of BitGFA0Str(x,y,z) & [<*x
+,y*>,xor2] in the carrier of BitGFA0Str(x,y,z) & [<*[<*x,y*>,xor2],z*>,xor2] in
+the carrier of BitGFA0Str(x,y,z) & [<*x,y*>,and2] in the carrier of BitGFA0Str(
+x,y,z) & [<*y,z*>,and2] in the carrier of BitGFA0Str(x,y,z) & [<*z,x*>,and2] in
+  the carrier of BitGFA0Str(x,y,z) & [<*[<*x,y*>,and2],[<*y,z*>,and2],[<*z,x*>,
+  and2]*>,or3] in the carrier of BitGFA0Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2, f4 = or3;
+  set f0 = xor2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S1 = GFA0AdderStr(x,y,z);
+  set S2 = GFA0CarryStr(x,y,z);
+A1: x in the carrier of S1 & y in the carrier of S1 by FACIRC_1:60;
+A2: z in the carrier of S1 & [<*x,y*>,f0] in the carrier of S1 by FACIRC_1:
+  60 ,61;
+A3: xyz in the carrier of S2 by Th19;
+A4: yz in the carrier of S2 & zx in the carrier of S2 by Th19;
+  [<*[<*x,y*>,f0],z*>,f0] in the carrier of S1 & xy in the carrier of S2
+  by Th19,FACIRC_1:61;
+  hence thesis by A1,A2,A4,A3,FACIRC_1:20;
+end;
+
+theorem Th45:
+  for x,y,z being set holds [<*x,y*>,xor2] in InnerVertices
+BitGFA0Str(x,y,z) & GFA0AdderOutput(x,y,z) in InnerVertices BitGFA0Str(x,y,z) &
+  [<*x,y*>,and2] in InnerVertices BitGFA0Str(x,y,z) & [<*y,z*>,and2] in
+InnerVertices BitGFA0Str(x,y,z) & [<*z,x*>,and2] in InnerVertices BitGFA0Str(x,
+  y,z) & GFA0CarryOutput(x,y,z) in InnerVertices BitGFA0Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2, f2 = and2, f3 = and2;
+  set f0 = xor2;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA0Str(x,y,z);
+  set A1 = GFA0AdderOutput(x,y,z);
+  set A2 = GFA0CarryOutput(x,y,z);
+  InnerVertices S = {xyf0} \/ {A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by Th39
+    .= {xyf0,A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:41
+    .= {xyf0,A1,xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:48
+    .= {xyf0,A1,xyf1,yzf2,zxf3,A2} by ENUMSET1:55;
+  hence thesis by ENUMSET1:def 4;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2] & y
+<> [<*z,x*>,and2] & z <> [<*x,y*>,and2] holds x in InputVertices BitGFA0Str(x,y
+,z) & y in InputVertices BitGFA0Str(x,y,z) & z in InputVertices BitGFA0Str(x,y,
+  z)
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y*>,f1];
+  set S = BitGFA0Str(x,y,z);
+  InputVertices S = {x,y,z} by A1,Th41;
+  hence thesis by ENUMSET1:def 1;
+end;
+ 
+::------------------------------------------------------------------
+:: GFA0 : Carry and Adder Output Definition of GFA Combined Circuit
+::------------------------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA0CarryOutput(x,y,z) -> Element of InnerVertices BitGFA0Str(x,y,z)
+  equals
+  [<*[<*x,y*>,and2],[<*y,z*>,and2],[<*z,x*>,and2]*>,or3];
+  coherence
+  proof
+    GFA0CarryOutput(x,y,z) in InnerVertices BitGFA0Str(x,y,z) by Th45;
+    hence thesis;
+  end;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA0AdderOutput(x,y,z) -> Element of InnerVertices BitGFA0Str(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2);
+  coherence
+  proof
+    GFA0AdderOutput(x,y,z) in InnerVertices BitGFA0Str(x,y,z) by Th45;
+    hence thesis;
+  end;
+end;
+ 
+::-------------------------------------------------------------
+:: GFA0 Combined : Stability of the Adder/Carry Output Circuit
+::-------------------------------------------------------------
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2] & y
+<> [<*z,x*>,and2] & z <> [<*x,y*>,and2] for s being State of BitGFA0Circ(x,y,z)
+  for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds
+Following(s,2).GFA0AdderOutput(x,y,z) = a1 'xor' a2 'xor' a3 & Following(s,2).
+  GFA0CarryOutput(x,y,z) = a1 '&' a2 'or' a2 '&' a3 'or' a3 '&' a1
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S2 = GFA0CarryStr(x,y,z);
+  set S1 = GFA0AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th17;
+  set A2 = GFA0CarryCirc(x,y,z);
+  set A1 = GFA0AdderCirc(x,y,z);
+  set A = BitGFA0Circ(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume that
+A4: a1 = s.x and
+A5: a2 = s.y and
+A6: a3 = s.z;
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+A7: dom s1 = the carrier of S1 by CIRCUIT1:4;
+  z in the carrier of S1 by FACIRC_1:60;
+  then
+A8: a3 = s1.z by A6,A7,FUNCT_1:70;
+  y in the carrier of S1 by FACIRC_1:60;
+  then
+A9: a2 = s1.y by A5,A7,FUNCT_1:70;
+  reconsider t = s as State of A1+*A2;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A10: Following(t,2).GFA0AdderOutput(x,y,z) = Following(s1,2).GFA0AdderOutput
+  (x,y,z) by A3,FACIRC_1:32;
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+A11: dom s2 = the carrier of S2 by CIRCUIT1:4;
+  x in the carrier of S1 by FACIRC_1:60;
+  then a1 = s1.x by A4,A7,FUNCT_1:70;
+  hence Following(s,2).GFA0AdderOutput(x,y,z) = a1 'xor' a2 'xor' a3 by A1,
+  A9,A8,A10,Th37;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A12: Following(t,2).GFA0CarryOutput(x,y,z) = Following(s2,2).GFA0CarryOutput
+  (x,y,z) by A3,FACIRC_1:33;
+  z in the carrier of S2 by Th19;
+  then
+A13: a3 = s2.z by A6,A11,FUNCT_1:70;
+  y in the carrier of S2 by Th19;
+  then
+A14: a2 = s2.y by A5,A11,FUNCT_1:70;
+  x in the carrier of S2 by Th19;
+  then a1 = s2.x by A4,A11,FUNCT_1:70;
+  hence thesis by A2,A14,A13,A12,Th25;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2] & y
+<> [<*z,x*>,and2] & z <> [<*x,y*>,and2] for s being State of BitGFA0Circ(x,y,z)
+  holds Following(s,2) is stable
+proof
+  set f1 = and2, f2 = and2, f3 = and2;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set A = BitGFA0Circ(x,y,z);
+  let s be State of A;
+  set S2 = GFA0CarryStr(x,y,z);
+  set S1 = GFA0AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th17;
+  set A1 = GFA0AdderCirc(x,y,z);
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+  Following(s1,2) is stable by A1,FACIRC_1:63;
+  then
+A4: Following(s1,2) = Following Following(s1,2) by CIRCUIT2:def 6
+    .= Following(s1,2+1) by FACIRC_1:12;
+  set A2 = GFA0CarryCirc(x,y,z);
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+  Following(s2,2) is stable by A2,Th26;
+  then
+A5: Following(s2,2) = Following Following(s2,2) by CIRCUIT2:def 6
+    .= Following(s2,2+1) by FACIRC_1:12;
+  reconsider t = s as State of A1+*A2;
+  set S = BitGFA0Str(x,y,z);
+A6: dom Following(s,3) = the carrier of S by CIRCUIT1:4;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A7: Following(s1,2) = Following(t,2)|the carrier of S1 & Following(s1,3) =
+  Following(t,3)|the carrier of S1 by A3,FACIRC_1:30;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A8: Following(s2,2) = Following(t,2)|the carrier of S2 & Following(s2,3) =
+  Following(t,3)|the carrier of S2 by A3,FACIRC_1:31;
+A9: the carrier of S = (the carrier of S1) \/ the carrier of S2 by CIRCCOMB
+  :def 2;
+A10: dom Following(s1,2) = the carrier of S1 & dom Following(s2,2) = the
+  carrier of S2 by CIRCUIT1:4;
+A11: now
+    let a be set;
+    assume a in the carrier of S;
+    then a in the carrier of S1 or a in the carrier of S2 by A9,
+    XBOOLE_0:
+    def 3;
+    then (Following(s,2)).a = (Following(s1,2)).a & (Following(s,3)).a = (
+Following(s1,3)).a or (Following(s,2)).a = (Following(s2,2)).a & (Following(s,3
+    )).a = (Following(s2,3)).a by A7,A8,A4,A5,A10, FUNCT_1:70;
+    hence (Following(s,2)).a = (Following Following(s,2)).a by A4,A5,
+    FACIRC_1:12;
+  end;
+  Following(s,2+1) = Following Following(s,2) & dom Following(s,2) = the
+  carrier of S by CIRCUIT1:4,FACIRC_1:12;
+  hence Following(s,2) = Following Following(s,2) by A6,A11,FUNCT_1:9;
+end;
+ 
+::========================================================================
+:: Generalized Full Adder (GFA) Circuit (TYPE-1)
+::========================================================================
+
+begin :: Generalized Full Adder (GFA) Circuit (TYPE-1)
+::========================================================================
+:: << GFA TYPE-1 >>
+::------------------------------------------------------------------------
+::   Name     : Generalized Full Adder Type-1 (GFA1)
+::   Function : x - y + z = 2 * c - s
+::
+::   Logic Symbol :      x     -y      Combined : GFA1CarryIStr(x,y,z)
+::                       |     /                  GFA1CarryStr(x,y,z)
+::                       |    /                   GFA1AdderStr(x,y,z)
+::                   +---*---O                  --->
+::                   |  GFA  *-----z              BitGFA1Str(x,y,z)
+::                   | TYPE1 |
+::                   *---O---+          Outputs : BitGFA1CarryOutput(x,y,z)
+::                  /    |                        BitGFA1AdderOutput(x,y,z)
+::                 /     |
+::                c     -s          Calculation : Following(s,2) is stable.
+::=========================================================================
+::-------------------------------------------------
+:: GFA1 Carry : Circuit Definition of Carry Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA1CarryIStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  1GateCircStr(<*x,y*>,and2c) +*
+  1GateCircStr(<*y,z*>,and2a) +* 1GateCircStr(<*z,x*>,and2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA1CarryICirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA1CarryIStr(x,y,z) equals
+  1GateCircuit(x,y,and2c) +* 1GateCircuit(y,z,and2a)
+  +* 1GateCircuit(z,x,and2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA1CarryStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA1CarryIStr(x,y,z) +* 1GateCircStr(<*[
+  <*x,y*>,and2c], [<*y,z*>,and2a], [<*z,x*>,and2]*>,or3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA1CarryCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA1CarryStr(x,y,z) equals
+  GFA1CarryICirc(x,y,z) +* 1GateCircuit([<*x,y*>,and2c
+  ],[<*y,z*>,and2a],[<*z,x*>,and2],or3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA1CarryOutput(x,y,z) -> Element of InnerVertices GFA1CarryStr(x,y,z)
+  equals
+  [<*[<*x,y*>,and2c],[<*y,z*>,and2a],[<*z,x*>,and2]*>,or3];
+  coherence
+  proof
+    [<*[<*x,y*>,and2c],[<*y,z*>,and2a],[<*z,x*>,and2]*>,or3] in
+InnerVertices 1GateCircStr(<*[<*x,y*>,and2c],[<*y,z*>,and2a], [<*z,x*>,and2]*>,
+    or3) by FACIRC_1:47;
+    hence thesis by FACIRC_1:21;
+  end;
+end;
+ 
+::-------------------------------------------------------
+:: GFA1 Carry : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th49:
+  for x,y,z being set holds InnerVertices GFA1CarryIStr(x,y,z) = {
+  [<*x,y*>,and2c], [<*y,z*>,and2a], [<*z,x*>,and2]}
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+A1: Cxy tolerates Cyz by CIRCCOMB:55;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices GFA1CarryIStr(x,y,z) = InnerVertices(Cxy +* Cyz) \/
+  InnerVertices(Czx) by CIRCCOMB:15
+    .= InnerVertices(Cxy) \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by A1,
+  CIRCCOMB:15
+    .= {xy} \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ {zx} by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  hence thesis;
+end;
+
+theorem Th50:
+  for x,y,z being set holds InnerVertices GFA1CarryStr(x,y,z) = {[
+  <*x,y*>,and2c], [<*y,z*>,and2a], [<*z,x*>,and2]} \/ {GFA1CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+A1: Cxy tolerates (Cyz +* Czx +* Cxyz) by CIRCCOMB:55;
+  Cyz tolerates (Czx +* Cxyz) by CIRCCOMB:55;
+  then
+A2: InnerVertices (Cyz +* (Czx +* Cxyz)) = InnerVertices Cyz \/
+  InnerVertices (Czx +* Cxyz) by CIRCCOMB:15;
+  Czx tolerates Cxyz by CIRCCOMB:55;
+  then
+A3: InnerVertices (Czx +* Cxyz) = InnerVertices Czx \/ InnerVertices Cxyz by
+  CIRCCOMB:15;
+  thus InnerVertices GFA1CarryStr(x,y,z) = InnerVertices (Cxy +* (Cyz +* Czx)
+  +* Cxyz) by CIRCCOMB:10
+    .= InnerVertices (Cxy +* (Cyz +* Czx +* Cxyz)) by CIRCCOMB:10
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* Czx +* Cxyz) by A1,
+  CIRCCOMB:15
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* (Czx +* Cxyz)) by CIRCCOMB
+  :10
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ (InnerVertices Czx \/
+  InnerVertices Cxyz) by A2,A3,XBOOLE_1:4
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ InnerVertices Czx \/
+  InnerVertices Cxyz by XBOOLE_1:4
+    .= {xy} \/ InnerVertices Cyz \/ InnerVertices Czx \/ InnerVertices Cxyz
+  by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices Czx \/ InnerVertices Cxyz by CIRCCOMB:
+  49
+    .= {xy} \/ {yz} \/ {zx} \/ InnerVertices Cxyz by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} \/ InnerVertices Cxyz by ENUMSET1:41
+    .= {xy, yz, zx} \/ InnerVertices Cxyz by ENUMSET1:43
+    .= {xy, yz, zx} \/ {GFA1CarryOutput(x,y,z)} by CIRCCOMB:49;
+end;
+
+theorem Th51:
+  for x,y,z being set holds InnerVertices GFA1CarryStr(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  InnerVertices Cxy is Relation & InnerVertices Cyz is Relation by
+  FACIRC_1:38;
+  then InnerVertices Czx is Relation & InnerVertices (Cxy +* Cyz) is Relation
+  by FACIRC_1:3,38;
+  then InnerVertices Cxyz is Relation & InnerVertices GFA1CarryIStr(x,y,z) is
+  Relation by FACIRC_1:3,38;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th52:
+  for x,y,z being set st x <> [<*y,z*>,and2a] & y <> [<*z,x*>,and2
+  ] & z <> [<*x,y*>,and2c] holds InputVertices GFA1CarryIStr(x,y,z) = {x,y,z}
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  assume that
+A1: x <> yz and
+A2: y <> zx & z <> xy;
+A3: not xy in {y,z} by A1,A2,Lm1;
+A4: not zx in {x,y,z} by A1,A2,Lm1;
+A5: y <> yz by FACIRC_2:3;
+A6: ( not z in {xy, yz})& not x in {xy, yz} by A1,A2,Lm1;
+A7: Cxy tolerates Cyz by CIRCCOMB:55;
+  InputVertices GFA1CarryIStr(x,y,z) = (InputVertices(Cxy +* Cyz) \
+  InnerVertices(Czx)) \/ (InputVertices(Czx) \ InnerVertices(Cxy +* Cyz)) by
+  CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \
+  InnerVertices(Cxy +* Cyz)) by CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (
+  InnerVertices(Cxy) \/ InnerVertices(Cyz))) by A7,CIRCCOMB:15
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ InnerVertices(
+  Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \
+  InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/ InnerVertices(Cyz))) by
+  CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ {yz})) by CIRCCOMB:49
+    .= (({x,y} \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx} \/ (
+  InputVertices(Czx) \ ({xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ (InputVertices(Czx) \ ({
+  xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ ({xy} \/ {yz}))
+  by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ {xy,yz}) by
+  ENUMSET1:41
+    .= (({x,y} \/ ({y,z} \ {xy})) \ {zx}) \/ ({z,x} \ {xy,yz}) by A1,A5,
+  FACIRC_2:1
+    .= ({x,y} \/ {y,z}) \ {zx} \/ ({z,x} \ {xy,yz}) by A3,ZFMISC_1:65
+    .= ({x,y} \/ {y,z}) \ {zx} \/ {z,x} by A6,ZFMISC_1:72
+    .= {x,y,y,z} \ {zx} \/ {z,x} by ENUMSET1:45
+    .= {y,y,x,z} \ {zx} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \ {zx} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \ {zx} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ {z,x} by A4,ZFMISC_1:65
+    .= {x,y,z,z,x} by ENUMSET1:49
+    .= {x,y,z,z} \/ {x} by ENUMSET1:50
+    .= {z,z,x,y} \/ {x} by ENUMSET1:118
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {z,x,y,x} by ENUMSET1:46
+    .= {x,x,y,z} by ENUMSET1:113
+    .= {x,y,z} by ENUMSET1:71;
+  hence thesis;
+end;
+
+theorem Th53:
+  for x,y,z being set st x <> [<*y,z*>,and2a] & y <> [<*z,x*>,and2
+  ] & z <> [<*x,y*>,and2c] holds InputVertices GFA1CarryStr(x,y,z) = {x,y,z}
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set MI = GFA1CarryIStr(x,y,z);
+A1: InputVertices S = rng <*xy, yz, zx*> by CIRCCOMB:49
+    .= {xy, yz, zx} by FINSEQ_2:148;
+  assume
+A2: x <> yz & y <> zx & z <> xy;
+A3: InnerVertices S = {xyz} & {x, y, z} \ {xyz} = {x, y, z} by Lm2,CIRCCOMB:
+  49;
+A4: {xy, yz, zx} \ {xy, yz, zx} = {} by XBOOLE_1:37;
+  thus InputVertices GFA1CarryStr(x,y,z) = ((InputVertices MI) \ InnerVertices
+  S) \/ ((InputVertices S) \ InnerVertices MI) by CIRCCMB2:6,CIRCCOMB:55
+    .= {x,y,z} \/ ({xy, yz, zx} \ InnerVertices MI) by A1,A2,A3,Th52
+    .= {x,y,z} \/ {} by A4,Th49
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices GFA1CarryStr(x,y,z)
+  is without_pairs
+proof
+  let x,y,z be non pair set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set M = GFA1CarryStr(x,y,z);
+  set MI = GFA1CarryIStr(x,y,z);
+  given xx being pair set such that
+A1: xx in InputVertices M;
+A2: Cxy tolerates Cyz by CIRCCOMB:55;
+A3: InnerVertices Czx = {zx} & Cxy +* Cyz tolerates Czx by CIRCCOMB:49,55;
+  InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  then InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by A2,CIRCCOMB:15;
+  then
+A4: InnerVertices MI = {xy} \/ {yz} \/ {zx} by A3,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+  then
+A5: InputVertices S \ InnerVertices MI = {} by A4,XBOOLE_1:37;
+  InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then
+A6: InputVertices MI is without_pairs by FACIRC_1:9;
+  InnerVertices S is Relation by FACIRC_1:38;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A6,FACIRC_1:6;
+  hence thesis by A6,A1,A5,FACIRC_1:def 2;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem Th55:
+  for x,y,z being set holds x in the carrier of GFA1CarryStr(x,y,z
+) & y in the carrier of GFA1CarryStr(x,y,z) & z in the carrier of GFA1CarryStr(
+x,y,z) & [<*x,y*>,and2c] in the carrier of GFA1CarryStr(x,y,z) & [<*y,z*>,and2a
+  ] in the carrier of GFA1CarryStr(x,y,z) & [<*z,x*>,and2] in the carrier of
+GFA1CarryStr(x,y,z) & [<*[<*x,y*>,and2c],[<*y,z*>,and2a],[<*z,x*>,and2]*>,or3]
+  in the carrier of GFA1CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set p = <*xy,yz,zx*>;
+  z in the carrier of Czx by FACIRC_1:43;
+  then
+A1: z in the carrier of GFA1CarryIStr(x,y,z) by FACIRC_1:20;
+  zx in the carrier of Czx by FACIRC_1:43;
+  then
+A2: zx in the carrier of GFA1CarryIStr(x,y,z) by FACIRC_1:20;
+  y in the carrier of Cxy by FACIRC_1:43;
+  then y in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A3: y in the carrier of GFA1CarryIStr(x,y,z) by FACIRC_1:20;
+  the carrier of Cxyz = rng p \/ {xyz} & [p,f4] in {[p,f4]} by CIRCCOMB:
+  def 6 ,TARSKI:def 1;
+  then
+A4: xyz in the carrier of Cxyz by XBOOLE_0:def 3;
+  yz in the carrier of Cyz by FACIRC_1:43;
+  then yz in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A5: yz in the carrier of GFA1CarryIStr(x,y,z) by FACIRC_1:20;
+  xy in the carrier of Cxy by FACIRC_1:43;
+  then xy in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A6: xy in the carrier of GFA1CarryIStr(x,y,z) by FACIRC_1:20;
+  x in the carrier of Czx by FACIRC_1:43;
+  then x in the carrier of GFA1CarryIStr(x,y,z) by FACIRC_1:20;
+  hence thesis by A3,A1,A6,A5,A2,A4,FACIRC_1:20;
+end;
+
+theorem Th56:
+  for x,y,z being set holds [<*x,y*>,and2c] in InnerVertices
+GFA1CarryStr(x,y,z) & [<*y,z*>,and2a] in InnerVertices GFA1CarryStr(x,y,z) & [
+<*z,x*>,and2] in InnerVertices GFA1CarryStr(x,y,z) & GFA1CarryOutput(x,y,z) in
+  InnerVertices GFA1CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  InnerVertices GFA1CarryStr(x,y,z) = {xy,yz,zx} \/ {GFA1CarryOutput(x,y,z
+  )} by Th50
+    .= {xy,yz,zx,GFA1CarryOutput(x,y,z)} by ENUMSET1:46;
+  hence thesis by ENUMSET1:def 2;
+end;
+
+theorem Th57:
+  for x,y,z being set st x <> [<*y,z*>,and2a] & y <> [<*z,x*>,and2
+  ] & z <> [<*x,y*>,and2c] holds x in InputVertices GFA1CarryStr(x,y,z) & y in
+  InputVertices GFA1CarryStr(x,y,z) & z in InputVertices GFA1CarryStr(x,y,z)
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  let x,y,z be set;
+  assume x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  then InputVertices GFA1CarryStr(x,y,z) = {x,y,z} by Th53;
+  hence thesis by ENUMSET1:def 1;
+end;
+
+theorem Th58:
+  for x,y,z being non pair set holds InputVertices GFA1CarryStr(x,
+  y,z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set M = GFA1CarryStr(x,y,z);
+  set MI = GFA1CarryIStr(x,y,z);
+  set S = 1GateCircStr(<*xy,yz,zx*>,f4);
+A1: InputVertices Cxy = {x,y} & InputVertices Cyz = {y,z} by FACIRC_1:40;
+A2: InputVertices Czx = {z,x} by FACIRC_1:40;
+A3: InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+A4: InnerVertices S is Relation by FACIRC_1:38;
+A5: InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  Cxy tolerates Cyz by CIRCCOMB:55;
+  then
+A6: InnerVertices Czx = {zx} & InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by
+  A5,CIRCCOMB:15,49;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices MI = {xy} \/ {yz} \/ {zx} by A6,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  then
+A7: InputVertices S \ InnerVertices MI = {} by A3,XBOOLE_1:37;
+A8: InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then
+A9: InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then InputVertices MI is without_pairs by FACIRC_1:9;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A4, FACIRC_1:6;
+  hence
+  InputVertices M = (InputVertices(Cxy+*Cyz)) \/ InputVertices Czx by A9,
+  A6,A7,FACIRC_1:7
+    .= (InputVertices Cxy) \/ (InputVertices Cyz) \/ (InputVertices Czx) by
+  A8,A5,FACIRC_1:7
+    .= {x,y,y,z} \/ {z,x} by A1,A2,ENUMSET1:45
+    .= {y,y,x,z} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ ({z}\/{x}) by ENUMSET1:41
+    .= {x,y,z} \/ {z} \/ {x} by XBOOLE_1:4
+    .= {z,x,y} \/ {z} \/ {x} by ENUMSET1:100
+    .= {z,z,x,y} \/ {x} by ENUMSET1:44
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {x,y,z} \/ {x} by ENUMSET1:100
+    .= {x,x,y,z} by ENUMSET1:44
+    .= {x,y,z} by ENUMSET1:71;
+end;
+ 
+::----------------------------------------------------
+:: GFA1 Carry : Stability of the Carry Output Circuit
+::----------------------------------------------------
+
+theorem Th59:
+  for x,y,z being set for s being State of GFA1CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds (
+Following s).[<*x,y*>,and2c] = a1 '&' 'not' a2 & (Following s).[<*y,z*>,and2a]
+  = 'not' a2 '&' a3 & (Following s).[<*z,x*>,and2] = a3 '&' a1
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  let s be State of GFA1CarryCirc(x,y,z);
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.x and
+A2: a2 = s.y and
+A3: a3 = s.z;
+  set S = GFA1CarryStr(x,y,z);
+A4: InnerVertices S = the carrier' of S by FACIRC_1:37;
+A5: y in the carrier of S by Th55;
+A6: x in the carrier of S by Th55;
+A7: dom s = the carrier of S by CIRCUIT1:4;
+  xy in InnerVertices GFA1CarryStr(x,y,z) by Th56;
+  hence (Following s).[<*x,y*>,f1] = f1.(s*<*x,y*>) by A4,FACIRC_1:35
+    .= f1.<*a1,a2*> by A1,A2,A7,A6,A5,FINSEQ_2:145
+    .= a1 '&' 'not' a2 by Def3;
+A8: z in the carrier of S by Th55;
+  yz in InnerVertices GFA1CarryStr(x,y,z) by Th56;
+  hence (Following s).[<*y,z*>,f2] = f2.(s*<*y,z*>) by A4,FACIRC_1:35
+    .= f2.<*a2,a3*> by A2,A3,A7,A5,A8,FINSEQ_2:145
+    .= 'not' a2 '&' a3 by TWOSCOMP:def 2;
+  zx in InnerVertices GFA1CarryStr(x,y,z) by Th56;
+  hence (Following s).[<*z,x*>,f3] = f3.(s*<*z,x*>) by A4,FACIRC_1:35
+    .= f3.<*a3,a1*> by A1,A3,A7,A6,A8,FINSEQ_2:145
+    .= a3 '&' a1 by TWOSCOMP:def 1;
+end;
+
+theorem Th60:
+  for x,y,z being set for s being State of GFA1CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.[<*x,y*>,and2c] & a2 = s.[<*y,z
+*>,and2a] & a3 = s.[<*z,x*>,and2] holds (Following s).GFA1CarryOutput(x,y,z) =
+  a1 'or' a2 'or' a3
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  let s be State of GFA1CarryCirc(x,y,z);
+  set xy =[<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.xy & a2 = s.yz & a3 = s.zx;
+  set S = GFA1CarryStr(x,y,z);
+  reconsider xy, yz, zx as Element of InnerVertices S by Th56;
+A2: dom s = the carrier of S by CIRCUIT1:4;
+  InnerVertices S = the carrier' of S by FACIRC_1:37;
+  hence (Following s).GFA1CarryOutput(x,y,z) = f4.(s*<*xy, yz, zx*>) by
+  FACIRC_1:35
+    .= f4.<*a1,a2,a3*> by A1,A2,FINSEQ_2:146
+    .= a1 'or' a2 'or' a3 by TWOSCOMP:16;
+end;
+
+theorem Th61:
+  for x,y,z being set st x <> [<*y,z*>,and2a] & y <> [<*z,x*>,and2
+] & z <> [<*x,y*>,and2c] for s being State of GFA1CarryCirc(x,y,z) for a1,a2,a3
+being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds Following(s,2)
+.GFA1CarryOutput(x,y,z) = (a1 '&' 'not' a2) 'or' ('not' a2 '&' a3) 'or' (a3 '&'
+a1) & Following(s,2).[<*x,y*>,and2c] = a1 '&' 'not' a2 & Following(s,2).[<*y,z
+  *>,and2a] = 'not' a2 '&' a3 & Following(s,2).[<*z,x*>,and2] = a3 '&' a1
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA1CarryStr(x,y,z);
+  reconsider x9 = x, y9 = y, z9 = z as Vertex of S by Th55;
+  let s be State of GFA1CarryCirc(x,y,z);
+  y in InputVertices S by A1,Th57;
+  then
+A2: (Following s).y9 = s.y by CIRCUIT2:def 5;
+  z in InputVertices S by A1,Th57;
+  then
+A3: (Following s).z9 = s.z by CIRCUIT2:def 5;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A4: Following(s,2) = Following Following s by FACIRC_1:15;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A5: a1 = s.x & a2 = s.y & a3 = s.z;
+A6: (Following s).zx = a3 '&' a1 by A5,Th59;
+  (Following s).xy = a1 '&' 'not' a2 & (Following s).yz = 'not' a2 '&' a3
+  by A5,Th59;
+  hence Following(s,2).GFA1CarryOutput(x,y,z) = (a1 '&' 'not' a2) 'or' ('not'
+  a2 '&' a3) 'or' (a3 '&' a1) by A4,A6,Th60;
+  x in InputVertices S by A1,Th57;
+  then (Following s).x9 = s.x by CIRCUIT2:def 5;
+  hence thesis by A5,A2,A3,A4,Th59;
+end;
+
+theorem Th62:
+  for x,y,z being set st x <> [<*y,z*>,and2a] & y <> [<*z,x*>,and2
+  ] & z <> [<*x,y*>,and2c] for s being State of GFA1CarryCirc(x,y,z) holds
+  Following(s,2) is stable
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA1CarryStr(x,y,z);
+  reconsider xx = x, yy = y, zz = z as Vertex of S by Th55;
+  let s be State of GFA1CarryCirc(x,y,z);
+  set a1 = s.xx, a2 = s.yy, a3 = s.zz;
+  set ffs = Following(s,2), fffs = Following ffs;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A2: ffs = Following Following s by FACIRC_1:15;
+A3: z in InputVertices S by A1,Th57;
+  then (Following s).z = a3 by CIRCUIT2:def 5;
+  then
+A4: ffs.z = a3 by A2,A3,CIRCUIT2:def 5;
+A5: y in InputVertices S by A1,Th57;
+  then (Following s).y = a2 by CIRCUIT2:def 5;
+  then
+A6: ffs.y = a2 by A2,A5,CIRCUIT2:def 5;
+A7: x in InputVertices S by A1,Th57;
+  then (Following s).x = a1 by CIRCUIT2:def 5;
+  then
+A8: ffs.x = a1 by A2,A7,CIRCUIT2:def 5;
+  a3 = s.z;
+  then
+A9: ffs.xy = a1 '&' 'not' a2 by A1,Th61;
+  a2 = s.y;
+  then
+A10: ffs.zx = a1 '&' a3 by A1,Th61;
+  a1 = s.x;
+  then
+A11: ffs.yz = 'not' a2 '&' a3 by A1,Th61;
+A12: ffs.GFA1CarryOutput(x,y,z) = (a1 '&' 'not' a2) 'or' ('not' a2 '&' a3)
+  'or' (a3 '&' a1) by A1,Th61;
+A13: now
+    let a be set;
+    assume
+A14: a in the carrier of S;
+    then reconsider v = a as Vertex of S;
+A15: v in InputVertices S \/ InnerVertices S by A14,XBOOLE_1:45;
+    thus ffs.a = (fffs).a
+    proof
+      per cases by A15,XBOOLE_0:def 3;
+      suppose
+        v in InputVertices S;
+        hence thesis by CIRCUIT2:def 5;
+      end;
+      suppose
+        v in InnerVertices S;
+        then v in {xy, yz, zx} \/ {GFA1CarryOutput(x,y,z)} by Th50;
+        then v in {xy, yz, zx} or v in {GFA1CarryOutput(x,y,z)} by
+        XBOOLE_0:def 3;
+        then v = xy or v = yz or v = zx or v = GFA1CarryOutput(x,y,z) by
+        ENUMSET1:def 1,TARSKI:def 1;
+        hence thesis by A12,A9,A11,A10,A8,A6,A4,Th59,Th60;
+      end;
+    end;
+  end;
+  dom Following Following(s,2) = the carrier of S & dom Following(s,2) =
+  the carrier of S by CIRCUIT1:4;
+  hence ffs = fffs by A13,FUNCT_1:9;
+end;
+ 
+::=========================================================================
+::-------------------------------------------------
+:: GFA1 Adder : Circuit Definition of Adder Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA1AdderStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  2GatesCircStr(x,y,z, xor2c);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA1AdderCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA1AdderStr(x,y,z) equals
+  2GatesCircuit(x,y,z, xor2c);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA1AdderOutput(x,y,z) -> Element of InnerVertices GFA1AdderStr(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2c);
+  coherence;
+end;
+ 
+::-------------------------------------------------------
+:: GFA1 Adder : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th63:
+  for x,y,z being set holds InnerVertices GFA1AdderStr(x,y,z) = {[
+  <*x,y*>,xor2c]} \/ {GFA1AdderOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f = xor2c;
+  set xy = [<*x,y*>,f];
+  set S = GFA1AdderStr(x,y,z);
+  thus InnerVertices S = {xy, GFA1AdderOutput(x,y,z)} by FACIRC_1:56
+    .= {xy} \/ {GFA1AdderOutput(x,y,z)} by ENUMSET1:41;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+canceled 3;
+
+theorem
+  for x,y,z being set holds x in the carrier of GFA1AdderStr(x,y,z) & y
+in the carrier of GFA1AdderStr(x,y,z) & z in the carrier of GFA1AdderStr(x,y,z)
+& [<*x,y*>,xor2c] in the carrier of GFA1AdderStr(x,y,z) & [<*[<*x,y*>,xor2c], z
+  *>, xor2c] in the carrier of GFA1AdderStr(x,y,z) by FACIRC_1:60,61;
+
+theorem Th68:
+  for x,y,z being set holds [<*x,y*>,xor2c] in InnerVertices
+GFA1AdderStr(x,y,z) & GFA1AdderOutput(x,y,z) in InnerVertices GFA1AdderStr(x,y,
+  z)
+proof
+  let x,y,z be set;
+  set f = xor2c;
+  set S = GFA1AdderStr(x,y,z);
+  InnerVertices S = {[<*x,y*>,f]} \/ {GFA1AdderOutput(x,y,z)} by Th63
+    .= {[<*x,y*>,f],GFA1AdderOutput(x,y,z)} by ENUMSET1:41;
+  hence thesis by TARSKI:def 2;
+end;
+
+theorem Th69:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] holds x in
+InputVertices GFA1AdderStr(x,y,z) & y in InputVertices GFA1AdderStr(x,y,z) & z
+  in InputVertices GFA1AdderStr(x,y,z)
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set S = GFA1AdderStr(x,y,z);
+  InputVertices S = {x,y,z} by A1,FACIRC_1:57;
+  hence thesis by ENUMSET1:def 1;
+end;
+ 
+::----------------------------------------------------
+:: GFA1 Adder : Stability of the Adder Output Circuit
+::----------------------------------------------------
+
+canceled;
+
+theorem Th71:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State
+of GFA1AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+  = s.y & a3 = s.z holds (Following s).[<*x,y*>,xor2c] = a1 'xor' 'not' a2 & (
+  Following s).x = a1 & (Following s).y = a2 & (Following s).z = a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA1AdderCirc(x,y,z);
+  set xy = [<*x,y*>,f];
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A2: a1 = s.x & a2 = s.y and
+A3: a3 = s.z;
+  (Following s).xy = f.<*a1, a2*> by A1,A2,Lm3;
+  hence (Following s).xy = a1 'xor' 'not' a2 by Def4;
+  thus thesis by A1,A2,A3,Lm3;
+end;
+
+theorem Th72:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State
+of GFA1AdderCirc(x,y,z) for a1a2,a1,a2,a3 being Element of BOOLEAN st a1a2 = s.
+  [<*x,y*>,xor2c] & a3 = s.z holds (Following s).GFA1AdderOutput(x,y,z) = a1a2
+  'xor' 'not' a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA1AdderCirc(x,y,z);
+  set xy = [<*x,y*>,f];
+  let s be State of A;
+  let a1a2,a1,a2,a3 be Element of BOOLEAN such that
+A2: a1a2 = s.xy & a3 = s.z;
+  thus (Following s).GFA1AdderOutput(x,y,z) = f.<*s.xy, s.z*> by A1,Lm3
+    .= a1a2 'xor' 'not' a3 by A2,Def4;
+end;
+
+theorem Th73:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State
+of GFA1AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+  = s.y & a3 = s.z holds Following(s,2).GFA1AdderOutput(x,y,z) = a1 'xor' 'not'
+  a2 'xor' 'not' a3 & Following(s,2).[<*x,y*>,xor2c] = a1 'xor' 'not' a2 &
+  Following(s,2).x = a1 & Following(s,2).y = a2 & Following(s,2).z = a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set xy = [<*x,y*>,f];
+  set A = GFA1AdderCirc(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A2: a1 = s.x & a2 = s.y and
+A3: a3 = s.z;
+  thus (Following(s,2)).GFA1AdderOutput(x,y,z) = f.<* f.<*a1, a2*>, a3*> by A1
+  ,A2,A3,FACIRC_1:62
+    .= f.<*a1 'xor' 'not' a2, a3*> by Def4
+    .= a1 'xor' 'not' a2 'xor' 'not' a3 by Def4;
+  (Following(s,2)).xy = f.<*a1, a2*> by A1,A2,FACIRC_1:62;
+  hence (Following(s,2)).xy = a1 'xor' 'not' a2 by Def4;
+  thus thesis by A1,A2,A3,FACIRC_1:62;
+end;
+
+theorem Th74:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State
+of GFA1AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+= s.y & a3 = s.z holds Following(s,2).GFA1AdderOutput(x,y,z) = 'not' (a1 'xor'
+  'not' a2 'xor' a3)
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA1AdderCirc(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume a1 = s.x & a2 = s.y & a3 = s.z;
+  hence
+  (Following(s,2)).GFA1AdderOutput(x,y,z) = a1 'xor' 'not' a2 'xor' 'not'
+  a3 by A1,Th73
+    .= 'not' (a1 'xor' 'not' a2 'xor' a3) by XBOOLEAN:74;
+end;
+ 
+::=====================================================================
+::---------------------------------------------------
+:: GFA1 : Circuit Definition of GFA Combined Circuit
+::---------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA1Str(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA1AdderStr(x,y,z) +* GFA1CarryStr(x,y,
+  z);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA1Circ(x,y,z) -> strict Boolean gate`2=den Circuit of BitGFA1Str(x
+  ,y,z) equals
+  GFA1AdderCirc(x,y,z) +* GFA1CarryCirc(x,y,z);
+  coherence;
+end;
+ 
+::----------------------------------------------------------
+:: GFA1 Combined : Carrier, InnerVertices and InputVertices
+::----------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+canceled;
+
+theorem Th76:
+  for x,y,z being set holds InnerVertices BitGFA1Str(x,y,z) = {[<*
+x,y*>,xor2c]} \/ {GFA1AdderOutput(x,y,z)} \/ {[<*x,y*>,and2c], [<*y,z*>,and2a],
+  [<*z,x*>,and2]} \/ {GFA1CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set f0 = xor2c;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA1Str(x,y,z);
+  set S1 = GFA1AdderStr(x,y,z);
+  set S2 = GFA1CarryStr(x,y,z);
+  set A1 = GFA1AdderOutput(x,y,z);
+  set A2 = GFA1CarryOutput(x,y,z);
+  thus InnerVertices S = (InnerVertices S1) \/ InnerVertices S2 by FACIRC_1:27
+    .= {xyf0} \/ {A1} \/ InnerVertices S2 by Th63
+    .= {xyf0} \/ {A1} \/ ({xyf1, yzf2, zxf3} \/ {A2}) by Th50
+    .= {xyf0} \/ {A1} \/ {xyf1, yzf2, zxf3} \/ {A2} by XBOOLE_1:4;
+end;
+
+theorem
+  for x,y,z being set holds InnerVertices BitGFA1Str(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set S1 = GFA1AdderStr(x,y,z);
+  set S2 = GFA1CarryStr(x,y,z);
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th51,
+  FACIRC_1:58;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th78:
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,
+  and2a] & y <> [<*z,x*>,and2] & z <> [<*x,y*>,and2c] holds InputVertices
+  BitGFA1Str(x,y,z) = {x,y,z}
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y *>,f1];
+  set S2 = GFA1CarryStr(x,y,z);
+  set S1 = GFA1AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by A1,Th53,
+  FACIRC_1:57;
+  hence thesis by CIRCCOMB:55,FACIRC_2:22;
+end;
+
+theorem Th79:
+  for x,y,z being non pair set holds InputVertices BitGFA1Str(x,y, z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set S = BitGFA1Str(x,y,z);
+  set S1 = GFA1AdderStr(x,y,z);
+  set S2 = GFA1CarryStr(x,y,z);
+A1: InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by Th58,FACIRC_1
+  :57;
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th51,
+  FACIRC_1:58;
+  hence InputVertices S = {x,y,z} \/ {x,y,z} by A1,FACIRC_1:7
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices BitGFA1Str(x,y,z) is
+  without_pairs
+proof
+  let x,y,z be non pair set;
+  InputVertices BitGFA1Str(x,y,z) = {x,y,z} by Th79;
+  hence thesis;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem
+  for x,y,z being set holds x in the carrier of BitGFA1Str(x,y,z) & y in
+the carrier of BitGFA1Str(x,y,z) & z in the carrier of BitGFA1Str(x,y,z) & [<*x
+,y*>,xor2c] in the carrier of BitGFA1Str(x,y,z) & [<*[<*x,y*>,xor2c],z*>,xor2c]
+  in the carrier of BitGFA1Str(x,y,z) & [<*x,y*>,and2c] in the carrier of
+BitGFA1Str(x,y,z) & [<*y,z*>,and2a] in the carrier of BitGFA1Str(x,y,z) & [<*z,
+  x*>,and2] in the carrier of BitGFA1Str(x,y,z) & [<*[<*x,y*>,and2c],[<*y,z*>,
+  and2a],[<*z,x*>,and2]*>,or3] in the carrier of BitGFA1Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2, f4 = or3;
+  set f0 = xor2c;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S1 = GFA1AdderStr(x,y,z);
+  set S2 = GFA1CarryStr(x,y,z);
+A1: x in the carrier of S1 & y in the carrier of S1 by FACIRC_1:60;
+A2: z in the carrier of S1 & [<*x,y*>,f0] in the carrier of S1 by FACIRC_1:
+  60 ,61;
+A3: xyz in the carrier of S2 by Th55;
+A4: yz in the carrier of S2 & zx in the carrier of S2 by Th55;
+  [<*[<*x,y*>,f0],z*>,f0] in the carrier of S1 & xy in the carrier of S2
+  by Th55,FACIRC_1:61;
+  hence thesis by A1,A2,A4,A3,FACIRC_1:20;
+end;
+
+theorem Th82:
+  for x,y,z being set holds [<*x,y*>,xor2c] in InnerVertices
+BitGFA1Str(x,y,z) & GFA1AdderOutput(x,y,z) in InnerVertices BitGFA1Str(x,y,z) &
+  [<*x,y*>,and2c] in InnerVertices BitGFA1Str(x,y,z) & [<*y,z*>,and2a] in
+InnerVertices BitGFA1Str(x,y,z) & [<*z,x*>,and2] in InnerVertices BitGFA1Str(x,
+  y,z) & GFA1CarryOutput(x,y,z) in InnerVertices BitGFA1Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set f0 = xor2c;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA1Str(x,y,z);
+  set A1 = GFA1AdderOutput(x,y,z);
+  set A2 = GFA1CarryOutput(x,y,z);
+  InnerVertices S = {xyf0} \/ {A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by Th76
+    .= {xyf0,A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:41
+    .= {xyf0,A1,xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:48
+    .= {xyf0,A1,xyf1,yzf2,zxf3,A2} by ENUMSET1:55;
+  hence thesis by ENUMSET1:def 4;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,and2a] & y
+<> [<*z,x*>,and2] & z <> [<*x,y*>,and2c] holds x in InputVertices BitGFA1Str(x,
+y,z) & y in InputVertices BitGFA1Str(x,y,z) & z in InputVertices BitGFA1Str(x,y
+  ,z)
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y*>,f1];
+  set S = BitGFA1Str(x,y,z);
+  InputVertices S = {x,y,z} by A1,Th78;
+  hence thesis by ENUMSET1:def 1;
+end;
+ 
+::------------------------------------------------------------------
+:: GFA1 : Carry and Adder Output Definition of GFA Combined Circuit
+::------------------------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA1CarryOutput(x,y,z) -> Element of InnerVertices BitGFA1Str(x,y,z)
+  equals
+  [<*[<*x,y*>,and2c],[<*y,z*>,and2a],[<*z,x*>,and2]*>,or3];
+  coherence
+  proof
+    GFA1CarryOutput(x,y,z) in InnerVertices BitGFA1Str(x,y,z) by Th82;
+    hence thesis;
+  end;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA1AdderOutput(x,y,z) -> Element of InnerVertices BitGFA1Str(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2c);
+  coherence
+  proof
+    GFA1AdderOutput(x,y,z) in InnerVertices BitGFA1Str(x,y,z) by Th82;
+    hence thesis;
+  end;
+end;
+ 
+::-------------------------------------------------------------
+:: GFA1 Combined : Stability of the Adder/Carry Output Circuit
+::-------------------------------------------------------------
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,and2a] & y
+<> [<*z,x*>,and2] & z <> [<*x,y*>,and2c] for s being State of BitGFA1Circ(x,y,z
+) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds
+  Following(s,2).GFA1AdderOutput(x,y,z) = 'not' (a1 'xor' 'not' a2 'xor' a3) &
+Following(s,2).GFA1CarryOutput(x,y,z) = (a1 '&' 'not' a2) 'or' ('not' a2 '&' a3
+  ) 'or' (a3 '&' a1)
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S2 = GFA1CarryStr(x,y,z);
+  set S1 = GFA1AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th53;
+  set A2 = GFA1CarryCirc(x,y,z);
+  set A1 = GFA1AdderCirc(x,y,z);
+  set A = BitGFA1Circ(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume that
+A4: a1 = s.x and
+A5: a2 = s.y and
+A6: a3 = s.z;
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+A7: dom s1 = the carrier of S1 by CIRCUIT1:4;
+  z in the carrier of S1 by FACIRC_1:60;
+  then
+A8: a3 = s1.z by A6,A7,FUNCT_1:70;
+  y in the carrier of S1 by FACIRC_1:60;
+  then
+A9: a2 = s1.y by A5,A7,FUNCT_1:70;
+  reconsider t = s as State of A1+*A2;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A10: Following(t,2).GFA1AdderOutput(x,y,z) = Following(s1,2).GFA1AdderOutput
+  (x,y,z) by A3,FACIRC_1:32;
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+A11: dom s2 = the carrier of S2 by CIRCUIT1:4;
+  x in the carrier of S1 by FACIRC_1:60;
+  then a1 = s1.x by A4,A7,FUNCT_1:70;
+  hence Following(s,2).GFA1AdderOutput(x,y,z) = 'not' (a1 'xor' 'not' a2 'xor'
+  a3) by A1,A9,A8,A10,Th74;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A12: Following(t,2).GFA1CarryOutput(x,y,z) = Following(s2,2).GFA1CarryOutput
+  (x,y,z) by A3,FACIRC_1:33;
+  z in the carrier of S2 by Th55;
+  then
+A13: a3 = s2.z by A6,A11,FUNCT_1:70;
+  y in the carrier of S2 by Th55;
+  then
+A14: a2 = s2.y by A5,A11,FUNCT_1:70;
+  x in the carrier of S2 by Th55;
+  then a1 = s2.x by A4,A11,FUNCT_1:70;
+  hence thesis by A2,A14,A13,A12,Th61;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,and2a] & y
+<> [<*z,x*>,and2] & z <> [<*x,y*>,and2c] for s being State of BitGFA1Circ(x,y,z
+  ) holds Following(s,2) is stable
+proof
+  set f1 = and2c, f2 = and2a, f3 = and2;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set A = BitGFA1Circ(x,y,z);
+  let s be State of A;
+  set S2 = GFA1CarryStr(x,y,z);
+  set S1 = GFA1AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th53;
+  set A1 = GFA1AdderCirc(x,y,z);
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+  Following(s1,2) is stable by A1,FACIRC_1:63;
+  then
+A4: Following(s1,2) = Following Following(s1,2) by CIRCUIT2:def 6
+    .= Following(s1,2+1) by FACIRC_1:12;
+  set A2 = GFA1CarryCirc(x,y,z);
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+  Following(s2,2) is stable by A2,Th62;
+  then
+A5: Following(s2,2) = Following Following(s2,2) by CIRCUIT2:def 6
+    .= Following(s2,2+1) by FACIRC_1:12;
+  reconsider t = s as State of A1+*A2;
+  set S = BitGFA1Str(x,y,z);
+A6: dom Following(s,3) = the carrier of S by CIRCUIT1:4;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A7: Following(s1,2) = Following(t,2)|the carrier of S1 & Following(s1,3) =
+  Following(t,3)|the carrier of S1 by A3,FACIRC_1:30;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A8: Following(s2,2) = Following(t,2)|the carrier of S2 & Following(s2,3) =
+  Following(t,3)|the carrier of S2 by A3,FACIRC_1:31;
+A9: the carrier of S = (the carrier of S1) \/ the carrier of S2 by CIRCCOMB
+  :def 2;
+A10: dom Following(s1,2) = the carrier of S1 & dom Following(s2,2) = the
+  carrier of S2 by CIRCUIT1:4;
+A11: now
+    let a be set;
+    assume a in the carrier of S;
+    then a in the carrier of S1 or a in the carrier of S2 by A9,
+    XBOOLE_0:
+    def 3;
+    then (Following(s,2)).a = (Following(s1,2)).a & (Following(s,3)).a = (
+Following(s1,3)).a or (Following(s,2)).a = (Following(s2,2)).a & (Following(s,3
+    )).a = (Following(s2,3)).a by A7,A8,A4,A5,A10, FUNCT_1:70;
+    hence (Following(s,2)).a = (Following Following(s,2)).a by A4,A5,
+    FACIRC_1:12;
+  end;
+  Following(s,2+1) = Following Following(s,2) & dom Following(s,2) = the
+  carrier of S by CIRCUIT1:4,FACIRC_1:12;
+  hence Following(s,2) = Following Following(s,2) by A6,A11,FUNCT_1:9;
+end;
+ 
+::========================================================================
+:: Generalized Full Adder (GFA) Circuit (TYPE-2)
+::========================================================================
+
+begin :: Generalized Full Adder (GFA) Circuit (TYPE-2)
+::========================================================================
+:: << GFA TYPE-2 >>
+::------------------------------------------------------------------------
+::   Name     : Generalized Full Adder Type-2 (GFA2)
+::   Function : - x + y - z = - 2 * c + s
+::
+::   Logic Symbol :     -x      y      Combined : GFA2CarryIStr(x,y,z)
+::                       |     /                  GFA2CarryStr(x,y,z)
+::                       |    /                   GFA2AdderStr(x,y,z)
+::                   +---O---*                  --->
+::                   |  GFA  O---- -z             BitGFA2Str(x,y,z)
+::                   | TYPE2 |
+::                   O---*---+          Outputs : BitGFA2CarryOutput(x,y,z)
+::                  /    |                        BitGFA2AdderOutput(x,y,z)
+::                 /     |
+::               -c      s          Calculation : Following(s,2) is stable.
+::=========================================================================
+::-------------------------------------------------
+:: GFA2 Carry : Circuit Definition of Carry Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA2CarryIStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  1GateCircStr(<*x,y*>,and2a) +*
+  1GateCircStr(<*y,z*>,and2c) +* 1GateCircStr(<*z,x*>,and2b);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA2CarryICirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA2CarryIStr(x,y,z) equals
+  1GateCircuit(x,y,and2a) +* 1GateCircuit(y,z,and2c)
+  +* 1GateCircuit(z,x,and2b);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA2CarryStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA2CarryIStr(x,y,z) +* 1GateCircStr(<*[
+  <*x,y*>,and2a], [<*y,z*>,and2c], [<*z,x*>,and2b]*>,nor3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA2CarryCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA2CarryStr(x,y,z) equals
+  GFA2CarryICirc(x,y,z) +* 1GateCircuit([<*x,y*>,and2a
+  ],[<*y,z*>,and2c],[<*z,x*>,and2b],nor3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA2CarryOutput(x,y,z) -> Element of InnerVertices GFA2CarryStr(x,y,z)
+  equals
+  [<*[<*x,y*>,and2a],[<*y,z*>,and2c],[<*z,x*>,and2b]*>,nor3];
+  coherence
+  proof
+    [<*[<*x,y*>,and2a],[<*y,z*>,and2c],[<*z,x*>,and2b]*>,nor3] in
+InnerVertices 1GateCircStr(<*[<*x,y*>,and2a],[<*y,z*>,and2c], [<*z,x*>,and2b]*>
+    ,nor3) by FACIRC_1:47;
+    hence thesis by FACIRC_1:21;
+  end;
+end;
+ 
+::-------------------------------------------------------
+:: GFA2 Carry : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th86:
+  for x,y,z being set holds InnerVertices GFA2CarryIStr(x,y,z) = {
+  [<*x,y*>,and2a], [<*y,z*>,and2c], [<*z,x*>,and2b]}
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+A1: Cxy tolerates Cyz by CIRCCOMB:55;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices GFA2CarryIStr(x,y,z) = InnerVertices(Cxy +* Cyz) \/
+  InnerVertices(Czx) by CIRCCOMB:15
+    .= InnerVertices(Cxy) \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by A1,
+  CIRCCOMB:15
+    .= {xy} \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ {zx} by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  hence thesis;
+end;
+
+theorem Th87:
+  for x,y,z being set holds InnerVertices GFA2CarryStr(x,y,z) = {[
+  <*x,y*>,and2a], [<*y,z*>,and2c], [<*z,x*>,and2b]} \/ {GFA2CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+A1: Cxy tolerates (Cyz +* Czx +* Cxyz) by CIRCCOMB:55;
+  Cyz tolerates (Czx +* Cxyz) by CIRCCOMB:55;
+  then
+A2: InnerVertices (Cyz +* (Czx +* Cxyz)) = InnerVertices Cyz \/
+  InnerVertices (Czx +* Cxyz) by CIRCCOMB:15;
+  Czx tolerates Cxyz by CIRCCOMB:55;
+  then
+A3: InnerVertices (Czx +* Cxyz) = InnerVertices Czx \/ InnerVertices Cxyz by
+  CIRCCOMB:15;
+  thus InnerVertices GFA2CarryStr(x,y,z) = InnerVertices (Cxy +* (Cyz +* Czx)
+  +* Cxyz) by CIRCCOMB:10
+    .= InnerVertices (Cxy +* (Cyz +* Czx +* Cxyz)) by CIRCCOMB:10
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* Czx +* Cxyz) by A1,
+  CIRCCOMB:15
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* (Czx +* Cxyz)) by CIRCCOMB
+  :10
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ (InnerVertices Czx \/
+  InnerVertices Cxyz) by A2,A3,XBOOLE_1:4
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ InnerVertices Czx \/
+  InnerVertices Cxyz by XBOOLE_1:4
+    .= {xy} \/ InnerVertices Cyz \/ InnerVertices Czx \/ InnerVertices Cxyz
+  by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices Czx \/ InnerVertices Cxyz by CIRCCOMB:
+  49
+    .= {xy} \/ {yz} \/ {zx} \/ InnerVertices Cxyz by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} \/ InnerVertices Cxyz by ENUMSET1:41
+    .= {xy, yz, zx} \/ InnerVertices Cxyz by ENUMSET1:43
+    .= {xy, yz, zx} \/ {GFA2CarryOutput(x,y,z)} by CIRCCOMB:49;
+end;
+
+theorem Th88:
+  for x,y,z being set holds InnerVertices GFA2CarryStr(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  InnerVertices Cxy is Relation & InnerVertices Cyz is Relation by
+  FACIRC_1:38;
+  then InnerVertices Czx is Relation & InnerVertices (Cxy +* Cyz) is Relation
+  by FACIRC_1:3,38;
+  then InnerVertices Cxyz is Relation & InnerVertices GFA2CarryIStr(x,y,z) is
+  Relation by FACIRC_1:3,38;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th89:
+  for x,y,z being set st x <> [<*y,z*>,and2c] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2a] holds InputVertices GFA2CarryIStr(x,y,z) = {x,y,z
+  }
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  assume that
+A1: x <> yz and
+A2: y <> zx & z <> xy;
+A3: not xy in {y,z} by A1,A2,Lm1;
+A4: not zx in {x,y,z} by A1,A2,Lm1;
+A5: y <> yz by FACIRC_2:3;
+A6: ( not z in {xy, yz})& not x in {xy, yz} by A1,A2,Lm1;
+A7: Cxy tolerates Cyz by CIRCCOMB:55;
+  InputVertices GFA2CarryIStr(x,y,z) = (InputVertices(Cxy +* Cyz) \
+  InnerVertices(Czx)) \/ (InputVertices(Czx) \ InnerVertices(Cxy +* Cyz)) by
+  CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \
+  InnerVertices(Cxy +* Cyz)) by CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (
+  InnerVertices(Cxy) \/ InnerVertices(Cyz))) by A7,CIRCCOMB:15
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ InnerVertices(
+  Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \
+  InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/ InnerVertices(Cyz))) by
+  CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ {yz})) by CIRCCOMB:49
+    .= (({x,y} \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx} \/ (
+  InputVertices(Czx) \ ({xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ (InputVertices(Czx) \ ({
+  xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ ({xy} \/ {yz}))
+  by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ {xy,yz}) by
+  ENUMSET1:41
+    .= (({x,y} \/ ({y,z} \ {xy})) \ {zx}) \/ ({z,x} \ {xy,yz}) by A1,A5,
+  FACIRC_2:1
+    .= ({x,y} \/ {y,z}) \ {zx} \/ ({z,x} \ {xy,yz}) by A3,ZFMISC_1:65
+    .= ({x,y} \/ {y,z}) \ {zx} \/ {z,x} by A6,ZFMISC_1:72
+    .= {x,y,y,z} \ {zx} \/ {z,x} by ENUMSET1:45
+    .= {y,y,x,z} \ {zx} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \ {zx} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \ {zx} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ {z,x} by A4,ZFMISC_1:65
+    .= {x,y,z,z,x} by ENUMSET1:49
+    .= {x,y,z,z} \/ {x} by ENUMSET1:50
+    .= {z,z,x,y} \/ {x} by ENUMSET1:118
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {z,x,y,x} by ENUMSET1:46
+    .= {x,x,y,z} by ENUMSET1:113
+    .= {x,y,z} by ENUMSET1:71;
+  hence thesis;
+end;
+
+theorem Th90:
+  for x,y,z being set st x <> [<*y,z*>,and2c] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2a] holds InputVertices GFA2CarryStr(x,y,z) = {x,y,z}
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set MI = GFA2CarryIStr(x,y,z);
+A1: InputVertices S = rng <*xy, yz, zx*> by CIRCCOMB:49
+    .= {xy, yz, zx} by FINSEQ_2:148;
+  assume
+A2: x <> yz & y <> zx & z <> xy;
+A3: InnerVertices S = {xyz} & {x, y, z} \ {xyz} = {x, y, z} by Lm2,CIRCCOMB:
+  49;
+A4: {xy, yz, zx} \ {xy, yz, zx} = {} by XBOOLE_1:37;
+  thus InputVertices GFA2CarryStr(x,y,z) = ((InputVertices MI) \ InnerVertices
+  S) \/ ((InputVertices S) \ InnerVertices MI) by CIRCCMB2:6,CIRCCOMB:55
+    .= {x,y,z} \/ ({xy, yz, zx} \ InnerVertices MI) by A1,A2,A3,Th89
+    .= {x,y,z} \/ {} by A4,Th86
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices GFA2CarryStr(x,y,z)
+  is without_pairs
+proof
+  let x,y,z be non pair set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set M = GFA2CarryStr(x,y,z);
+  set MI = GFA2CarryIStr(x,y,z);
+  given xx being pair set such that
+A1: xx in InputVertices M;
+A2: Cxy tolerates Cyz by CIRCCOMB:55;
+A3: InnerVertices Czx = {zx} & Cxy +* Cyz tolerates Czx by CIRCCOMB:49,55;
+  InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  then InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by A2,CIRCCOMB:15;
+  then
+A4: InnerVertices MI = {xy} \/ {yz} \/ {zx} by A3,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+  then
+A5: InputVertices S \ InnerVertices MI = {} by A4,XBOOLE_1:37;
+  InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then
+A6: InputVertices MI is without_pairs by FACIRC_1:9;
+  InnerVertices S is Relation by FACIRC_1:38;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A6,FACIRC_1:6;
+  hence thesis by A6,A1,A5,FACIRC_1:def 2;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem Th92:
+  for x,y,z being set holds x in the carrier of GFA2CarryStr(x,y,z
+) & y in the carrier of GFA2CarryStr(x,y,z) & z in the carrier of GFA2CarryStr(
+x,y,z) & [<*x,y*>,and2a] in the carrier of GFA2CarryStr(x,y,z) & [<*y,z*>,and2c
+  ] in the carrier of GFA2CarryStr(x,y,z) & [<*z,x*>,and2b] in the carrier of
+GFA2CarryStr(x,y,z) & [<*[<*x,y*>,and2a],[<*y,z*>,and2c],[<*z,x*>,and2b]*>,nor3
+  ] in the carrier of GFA2CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set p = <*xy,yz,zx*>;
+  z in the carrier of Czx by FACIRC_1:43;
+  then
+A1: z in the carrier of GFA2CarryIStr(x,y,z) by FACIRC_1:20;
+  zx in the carrier of Czx by FACIRC_1:43;
+  then
+A2: zx in the carrier of GFA2CarryIStr(x,y,z) by FACIRC_1:20;
+  y in the carrier of Cxy by FACIRC_1:43;
+  then y in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A3: y in the carrier of GFA2CarryIStr(x,y,z) by FACIRC_1:20;
+  the carrier of Cxyz = rng p \/ {xyz} & [p,f4] in {[p,f4]} by CIRCCOMB:
+  def 6 ,TARSKI:def 1;
+  then
+A4: xyz in the carrier of Cxyz by XBOOLE_0:def 3;
+  yz in the carrier of Cyz by FACIRC_1:43;
+  then yz in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A5: yz in the carrier of GFA2CarryIStr(x,y,z) by FACIRC_1:20;
+  xy in the carrier of Cxy by FACIRC_1:43;
+  then xy in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A6: xy in the carrier of GFA2CarryIStr(x,y,z) by FACIRC_1:20;
+  x in the carrier of Czx by FACIRC_1:43;
+  then x in the carrier of GFA2CarryIStr(x,y,z) by FACIRC_1:20;
+  hence thesis by A3,A1,A6,A5,A2,A4,FACIRC_1:20;
+end;
+
+theorem Th93:
+  for x,y,z being set holds [<*x,y*>,and2a] in InnerVertices
+GFA2CarryStr(x,y,z) & [<*y,z*>,and2c] in InnerVertices GFA2CarryStr(x,y,z) & [
+<*z,x*>,and2b] in InnerVertices GFA2CarryStr(x,y,z) & GFA2CarryOutput(x,y,z) in
+  InnerVertices GFA2CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  InnerVertices GFA2CarryStr(x,y,z) = {xy,yz,zx} \/ {GFA2CarryOutput(x,y,z
+  )} by Th87
+    .= {xy,yz,zx,GFA2CarryOutput(x,y,z)} by ENUMSET1:46;
+  hence thesis by ENUMSET1:def 2;
+end;
+
+theorem Th94:
+  for x,y,z being set st x <> [<*y,z*>,and2c] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2a] holds x in InputVertices GFA2CarryStr(x,y,z) & y
+  in InputVertices GFA2CarryStr(x,y,z) & z in InputVertices GFA2CarryStr(x,y,z)
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  let x,y,z be set;
+  assume x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  then InputVertices GFA2CarryStr(x,y,z) = {x,y,z} by Th90;
+  hence thesis by ENUMSET1:def 1;
+end;
+
+theorem Th95:
+  for x,y,z being non pair set holds InputVertices GFA2CarryStr(x,
+  y,z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set M = GFA2CarryStr(x,y,z);
+  set MI = GFA2CarryIStr(x,y,z);
+  set S = 1GateCircStr(<*xy,yz,zx*>,f4);
+A1: InputVertices Cxy = {x,y} & InputVertices Cyz = {y,z} by FACIRC_1:40;
+A2: InputVertices Czx = {z,x} by FACIRC_1:40;
+A3: InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+A4: InnerVertices S is Relation by FACIRC_1:38;
+A5: InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  Cxy tolerates Cyz by CIRCCOMB:55;
+  then
+A6: InnerVertices Czx = {zx} & InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by
+  A5,CIRCCOMB:15,49;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices MI = {xy} \/ {yz} \/ {zx} by A6,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  then
+A7: InputVertices S \ InnerVertices MI = {} by A3,XBOOLE_1:37;
+A8: InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then
+A9: InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then InputVertices MI is without_pairs by FACIRC_1:9;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A4, FACIRC_1:6;
+  hence
+  InputVertices M = (InputVertices(Cxy+*Cyz)) \/ InputVertices Czx by A9,
+  A6,A7,FACIRC_1:7
+    .= (InputVertices Cxy) \/ (InputVertices Cyz) \/ (InputVertices Czx) by
+  A8,A5,FACIRC_1:7
+    .= {x,y,y,z} \/ {z,x} by A1,A2,ENUMSET1:45
+    .= {y,y,x,z} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ ({z}\/{x}) by ENUMSET1:41
+    .= {x,y,z} \/ {z} \/ {x} by XBOOLE_1:4
+    .= {z,x,y} \/ {z} \/ {x} by ENUMSET1:100
+    .= {z,z,x,y} \/ {x} by ENUMSET1:44
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {x,y,z} \/ {x} by ENUMSET1:100
+    .= {x,x,y,z} by ENUMSET1:44
+    .= {x,y,z} by ENUMSET1:71;
+end;
+ 
+::----------------------------------------------------
+:: GFA2 Carry : Stability of the Carry Output Circuit
+::----------------------------------------------------
+
+theorem Th96:
+  for x,y,z being set for s being State of GFA2CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds (
+Following s).[<*x,y*>,and2a] = 'not' a1 '&' a2 & (Following s).[<*y,z*>,and2c]
+  = a2 '&' 'not' a3 & (Following s).[<*z,x*>,and2b] = 'not' a3 '&' 'not' a1
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  let s be State of GFA2CarryCirc(x,y,z);
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.x and
+A2: a2 = s.y and
+A3: a3 = s.z;
+  set S = GFA2CarryStr(x,y,z);
+A4: InnerVertices S = the carrier' of S by FACIRC_1:37;
+A5: y in the carrier of S by Th92;
+A6: x in the carrier of S by Th92;
+A7: dom s = the carrier of S by CIRCUIT1:4;
+  xy in InnerVertices GFA2CarryStr(x,y,z) by Th93;
+  hence (Following s).[<*x,y*>,f1] = f1.(s*<*x,y*>) by A4,FACIRC_1:35
+    .= f1.<*a1,a2*> by A1,A2,A7,A6,A5,FINSEQ_2:145
+    .= 'not' a1 '&' a2 by TWOSCOMP:def 2;
+A8: z in the carrier of S by Th92;
+  yz in InnerVertices GFA2CarryStr(x,y,z) by Th93;
+  hence (Following s).[<*y,z*>,f2] = f2.(s*<*y,z*>) by A4,FACIRC_1:35
+    .= f2.<*a2,a3*> by A2,A3,A7,A5,A8,FINSEQ_2:145
+    .= a2 '&' 'not' a3 by Def3;
+  zx in InnerVertices GFA2CarryStr(x,y,z) by Th93;
+  hence (Following s).[<*z,x*>,f3] = f3.(s*<*z,x*>) by A4,FACIRC_1:35
+    .= f3.<*a3,a1*> by A1,A3,A7,A6,A8,FINSEQ_2:145
+    .= 'not' a3 '&' 'not' a1 by TWOSCOMP:def 3;
+end;
+
+theorem Th97:
+  for x,y,z being set for s being State of GFA2CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.[<*x,y*>,and2a] & a2 = s.[<*y,z
+*>,and2c] & a3 = s.[<*z,x*>,and2b] holds (Following s).GFA2CarryOutput(x,y,z) =
+  'not' (a1 'or' a2 'or' a3)
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  let s be State of GFA2CarryCirc(x,y,z);
+  set xy =[<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.xy & a2 = s.yz & a3 = s.zx;
+  set S = GFA2CarryStr(x,y,z);
+  reconsider xy, yz, zx as Element of InnerVertices S by Th93;
+A2: dom s = the carrier of S by CIRCUIT1:4;
+  InnerVertices S = the carrier' of S by FACIRC_1:37;
+  hence (Following s).GFA2CarryOutput(x,y,z) = f4.(s*<*xy, yz, zx*>) by
+  FACIRC_1:35
+    .= f4.<*a1,a2,a3*> by A1,A2,FINSEQ_2:146
+    .= 'not' (a1 'or' a2 'or' a3) by TWOSCOMP:def 28;
+end;
+
+theorem Th98:
+  for x,y,z being set st x <> [<*y,z*>,and2c] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2a] for s being State of GFA2CarryCirc(x,y,z) for a1,
+  a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds
+  Following(s,2).GFA2CarryOutput(x,y,z) = 'not' (('not' a1 '&' a2) 'or' (a2 '&'
+  'not' a3) 'or' ('not' a3 '&' 'not' a1)) & Following(s,2).[<*x,y*>,and2a] =
+'not' a1 '&' a2 & Following(s,2).[<*y,z*>,and2c] = a2 '&' 'not' a3 & Following(
+  s,2).[<*z,x*>,and2b] = 'not' a3 '&' 'not' a1
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA2CarryStr(x,y,z);
+  reconsider x9 = x, y9 = y, z9 = z as Vertex of S by Th92;
+  let s be State of GFA2CarryCirc(x,y,z);
+  y in InputVertices S by A1,Th94;
+  then
+A2: (Following s).y9 = s.y by CIRCUIT2:def 5;
+  z in InputVertices S by A1,Th94;
+  then
+A3: (Following s).z9 = s.z by CIRCUIT2:def 5;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A4: Following(s,2) = Following Following s by FACIRC_1:15;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A5: a1 = s.x & a2 = s.y & a3 = s.z;
+A6: (Following s).zx = 'not' a3 '&' 'not' a1 by A5,Th96;
+  (Following s).xy = 'not' a1 '&' a2 & (Following s).yz = a2 '&' 'not' a3
+  by A5,Th96;
+  hence Following(s,2).GFA2CarryOutput(x,y,z) = 'not'(('not' a1 '&' a2) 'or' (
+  a2 '&' 'not' a3) 'or' ('not' a3 '&' 'not' a1)) by A4,A6,Th97;
+  x in InputVertices S by A1,Th94;
+  then (Following s).x9 = s.x by CIRCUIT2:def 5;
+  hence thesis by A5,A2,A3,A4,Th96;
+end;
+
+theorem Th99:
+  for x,y,z being set st x <> [<*y,z*>,and2c] & y <> [<*z,x*>,
+  and2b] & z <> [<*x,y*>,and2a] for s being State of GFA2CarryCirc(x,y,z) holds
+  Following(s,2) is stable
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA2CarryStr(x,y,z);
+  reconsider xx = x, yy = y, zz = z as Vertex of S by Th92;
+  let s be State of GFA2CarryCirc(x,y,z);
+  set a1 = s.xx, a2 = s.yy, a3 = s.zz;
+  set ffs = Following(s,2), fffs = Following ffs;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A2: ffs = Following Following s by FACIRC_1:15;
+A3: z in InputVertices S by A1,Th94;
+  then (Following s).z = a3 by CIRCUIT2:def 5;
+  then
+A4: ffs.z = a3 by A2,A3,CIRCUIT2:def 5;
+A5: y in InputVertices S by A1,Th94;
+  then (Following s).y = a2 by CIRCUIT2:def 5;
+  then
+A6: ffs.y = a2 by A2,A5,CIRCUIT2:def 5;
+A7: x in InputVertices S by A1,Th94;
+  then (Following s).x = a1 by CIRCUIT2:def 5;
+  then
+A8: ffs.x = a1 by A2,A7,CIRCUIT2:def 5;
+  a3 = s.z;
+  then
+A9: ffs.xy = 'not' a1 '&' a2 by A1,Th98;
+  a2 = s.y;
+  then
+A10: ffs.zx = 'not' a1 '&' 'not' a3 by A1,Th98;
+  a1 = s.x;
+  then
+A11: ffs.yz = a2 '&' 'not' a3 by A1,Th98;
+A12: ffs.GFA2CarryOutput(x,y,z) = 'not'(('not' a1 '&' a2) 'or' (a2 '&' 'not'
+  a3) 'or' ('not' a3 '&' 'not' a1)) by A1,Th98;
+A13: now
+    let a be set;
+    assume
+A14: a in the carrier of S;
+    then reconsider v = a as Vertex of S;
+A15: v in InputVertices S \/ InnerVertices S by A14,XBOOLE_1:45;
+    thus ffs.a = (fffs).a
+    proof
+      per cases by A15,XBOOLE_0:def 3;
+      suppose
+        v in InputVertices S;
+        hence thesis by CIRCUIT2:def 5;
+      end;
+      suppose
+        v in InnerVertices S;
+        then v in {xy, yz, zx} \/ {GFA2CarryOutput(x,y,z)} by Th87;
+        then v in {xy, yz, zx} or v in {GFA2CarryOutput(x,y,z)} by
+        XBOOLE_0:def 3;
+        then v = xy or v = yz or v = zx or v = GFA2CarryOutput(x,y,z) by
+        ENUMSET1:def 1,TARSKI:def 1;
+        hence thesis by A12,A9,A11,A10,A8,A6,A4,Th96,Th97;
+      end;
+    end;
+  end;
+  dom Following Following(s,2) = the carrier of S & dom Following(s,2) =
+  the carrier of S by CIRCUIT1:4;
+  hence ffs = fffs by A13,FUNCT_1:9;
+end;
+ 
+::=========================================================================
+::-------------------------------------------------
+:: GFA2 Adder : Circuit Definition of Adder Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA2AdderStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  2GatesCircStr(x,y,z, xor2c);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA2AdderCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA2AdderStr(x,y,z) equals
+  2GatesCircuit(x,y,z, xor2c);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA2AdderOutput(x,y,z) -> Element of InnerVertices GFA2AdderStr(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2c);
+  coherence;
+end;
+ 
+::-------------------------------------------------------
+:: GFA2 Adder : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th100:
+  for x,y,z being set holds InnerVertices GFA2AdderStr(x,y,z) = {
+  [<*x,y*>,xor2c]} \/ {GFA2AdderOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  GFA2AdderOutput(x,y,z) = GFA1AdderOutput(x,y,z);
+  hence thesis by Th63;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+canceled 3;
+
+theorem
+  for x,y,z being set holds x in the carrier of GFA2AdderStr(x,y,z) & y
+in the carrier of GFA2AdderStr(x,y,z) & z in the carrier of GFA2AdderStr(x,y,z)
+& [<*x,y*>,xor2c] in the carrier of GFA2AdderStr(x,y,z) & [<*[<*x,y*>,xor2c], z
+  *>, xor2c] in the carrier of GFA2AdderStr(x,y,z) by FACIRC_1:60,61;
+
+theorem
+  for x,y,z being set holds [<*x,y*>,xor2c] in InnerVertices
+GFA2AdderStr(x,y,z) & GFA2AdderOutput(x,y,z) in InnerVertices GFA2AdderStr(x,y,
+  z)
+proof
+  let x,y,z be set;
+  set S1 = GFA1AdderStr(x,y,z);
+  GFA2AdderStr(x,y,z) = S1;
+  hence thesis by Th68;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>, xor2c] holds x in InputVertices
+  GFA2AdderStr(x,y,z) & y in InputVertices GFA2AdderStr(x,y,z) & z in
+  InputVertices GFA2AdderStr(x,y,z)
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set S1 = GFA1AdderStr(x,y,z);
+  GFA2AdderStr(x,y,z) = S1;
+  hence thesis by A1,Th69;
+end;
+ 
+::----------------------------------------------------
+:: GFA2 Adder : Stability of the Adder Output Circuit
+::----------------------------------------------------
+
+canceled;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State of
+GFA2AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s
+  .y & a3 = s.z holds (Following s).[<*x,y*>,xor2c] = a1 'xor' 'not' a2 & (
+  Following s).x = a1 & (Following s).y = a2 & (Following s).z = a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A1 = GFA1AdderCirc(x,y,z);
+  GFA2AdderCirc(x,y,z) = A1;
+  hence thesis by A1,Th71;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State of
+GFA2AdderCirc(x,y,z) for a1a2,a1,a2,a3 being Element of BOOLEAN st a1a2 = s.[<*
+  x,y*>,xor2c] & a1 = s.x & a2 = s.y & a3 = s.z holds (Following s).
+  GFA2AdderOutput(x,y,z) = a1a2 'xor' 'not' a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set O1 = GFA1AdderOutput(x,y,z);
+  set O2 = GFA2AdderOutput(x,y,z);
+  set A1 = GFA1AdderCirc(x,y,z);
+  set A2 = GFA2AdderCirc(x,y,z);
+  A2 = A1 & O2 = O1;
+  hence thesis by A1,Th72;
+end;
+
+theorem Th110:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State
+of GFA2AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+  = s.y & a3 = s.z holds Following(s,2).GFA2AdderOutput(x,y,z) = a1 'xor' 'not'
+  a2 'xor' 'not' a3 & Following(s,2).[<*x,y*>,xor2c] = a1 'xor' 'not' a2 &
+  Following(s,2).x = a1 & Following(s,2).y = a2 & Following(s,2).z = a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set O1 = GFA1AdderOutput(x,y,z);
+  set O2 = GFA2AdderOutput(x,y,z);
+  set A1 = GFA1AdderCirc(x,y,z);
+  set A2 = GFA2AdderCirc(x,y,z);
+  A2 = A1 & O2 = O1;
+  hence thesis by A1,Th73;
+end;
+
+theorem Th111:
+  for x,y,z being set st z <> [<*x,y*>, xor2c] for s being State
+of GFA2AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+  = s.y & a3 = s.z holds Following(s,2).GFA2AdderOutput(x,y,z) = 'not' a1 'xor'
+  a2 'xor' 'not' a3
+proof
+  set f = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA2AdderCirc(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume a1 = s.x & a2 = s.y & a3 = s.z;
+  hence
+  (Following(s,2)).GFA2AdderOutput(x,y,z) = a1 'xor' 'not' a2 'xor' 'not'
+  a3 by A1,Th110
+    .= 'not' a1 'xor' a2 'xor' 'not' a3;
+end;
+ 
+::=====================================================================
+::---------------------------------------------------
+:: GFA2 : Circuit Definition of GFA Combined Circuit
+::---------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA2Str(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA2AdderStr(x,y,z) +* GFA2CarryStr(x,y,
+  z);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA2Circ(x,y,z) -> strict Boolean gate`2=den Circuit of BitGFA2Str(x
+  ,y,z) equals
+  GFA2AdderCirc(x,y,z) +* GFA2CarryCirc(x,y,z);
+  coherence;
+end;
+ 
+::----------------------------------------------------------
+:: GFA2 Combined : Carrier, InnerVertices and InputVertices
+::----------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+canceled;
+
+theorem Th113:
+  for x,y,z being set holds InnerVertices BitGFA2Str(x,y,z) = {[
+<*x,y*>,xor2c]} \/ {GFA2AdderOutput(x,y,z)} \/ {[<*x,y*>,and2a], [<*y,z*>,and2c
+  ], [<*z,x*>,and2b]} \/ {GFA2CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set f0 = xor2c;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA2Str(x,y,z);
+  set S1 = GFA2AdderStr(x,y,z);
+  set S2 = GFA2CarryStr(x,y,z);
+  set A1 = GFA2AdderOutput(x,y,z);
+  set A2 = GFA2CarryOutput(x,y,z);
+  thus InnerVertices S = (InnerVertices S1) \/ InnerVertices S2 by FACIRC_1:27
+    .= {xyf0} \/ {A1} \/ InnerVertices S2 by Th100
+    .= {xyf0} \/ {A1} \/ ({xyf1, yzf2, zxf3} \/ {A2}) by Th87
+    .= {xyf0} \/ {A1} \/ {xyf1, yzf2, zxf3} \/ {A2} by XBOOLE_1:4;
+end;
+
+theorem
+  for x,y,z being set holds InnerVertices BitGFA2Str(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set S1 = GFA2AdderStr(x,y,z);
+  set S2 = GFA2CarryStr(x,y,z);
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th88,
+  FACIRC_1:58;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th115:
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,
+  and2c] & y <> [<*z,x*>,and2b] & z <> [<*x,y*>,and2a] holds InputVertices
+  BitGFA2Str(x,y,z) = {x,y,z}
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y *>,f1];
+  set S2 = GFA2CarryStr(x,y,z);
+  set S1 = GFA2AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by A1,Th90,
+  FACIRC_1:57;
+  hence thesis by CIRCCOMB:55,FACIRC_2:22;
+end;
+
+theorem Th116:
+  for x,y,z being non pair set holds InputVertices BitGFA2Str(x,y ,z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set S = BitGFA2Str(x,y,z);
+  set S1 = GFA2AdderStr(x,y,z);
+  set S2 = GFA2CarryStr(x,y,z);
+A1: InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by Th95,FACIRC_1
+  :57;
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th88,
+  FACIRC_1:58;
+  hence InputVertices S = {x,y,z} \/ {x,y,z} by A1,FACIRC_1:7
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices BitGFA2Str(x,y,z) is
+  without_pairs
+proof
+  let x,y,z be non pair set;
+  InputVertices BitGFA2Str(x,y,z) = {x,y,z} by Th116;
+  hence thesis;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem
+  for x,y,z being set holds x in the carrier of BitGFA2Str(x,y,z) & y in
+the carrier of BitGFA2Str(x,y,z) & z in the carrier of BitGFA2Str(x,y,z) & [<*x
+,y*>,xor2c] in the carrier of BitGFA2Str(x,y,z) & [<*[<*x,y*>,xor2c],z*>,xor2c]
+  in the carrier of BitGFA2Str(x,y,z) & [<*x,y*>,and2a] in the carrier of
+BitGFA2Str(x,y,z) & [<*y,z*>,and2c] in the carrier of BitGFA2Str(x,y,z) & [<*z,
+  x*>,and2b] in the carrier of BitGFA2Str(x,y,z) & [<*[<*x,y*>,and2a],[<*y,z*>,
+  and2c],[<*z,x*>,and2b]*>,nor3] in the carrier of BitGFA2Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b, f4 = nor3;
+  set f0 = xor2c;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S1 = GFA2AdderStr(x,y,z);
+  set S2 = GFA2CarryStr(x,y,z);
+A1: x in the carrier of S1 & y in the carrier of S1 by FACIRC_1:60;
+A2: z in the carrier of S1 & [<*x,y*>,f0] in the carrier of S1 by FACIRC_1:
+  60 ,61;
+A3: xyz in the carrier of S2 by Th92;
+A4: yz in the carrier of S2 & zx in the carrier of S2 by Th92;
+  [<*[<*x,y*>,f0],z*>,f0] in the carrier of S1 & xy in the carrier of S2
+  by Th92,FACIRC_1:61;
+  hence thesis by A1,A2,A4,A3,FACIRC_1:20;
+end;
+
+theorem Th119:
+  for x,y,z being set holds [<*x,y*>,xor2c] in InnerVertices
+BitGFA2Str(x,y,z) & GFA2AdderOutput(x,y,z) in InnerVertices BitGFA2Str(x,y,z) &
+  [<*x,y*>,and2a] in InnerVertices BitGFA2Str(x,y,z) & [<*y,z*>,and2c] in
+InnerVertices BitGFA2Str(x,y,z) & [<*z,x*>,and2b] in InnerVertices BitGFA2Str(x
+  ,y,z) & GFA2CarryOutput(x,y,z) in InnerVertices BitGFA2Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set f0 = xor2c;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA2Str(x,y,z);
+  set A1 = GFA2AdderOutput(x,y,z);
+  set A2 = GFA2CarryOutput(x,y,z);
+  InnerVertices S = {xyf0} \/ {A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by Th113
+    .= {xyf0,A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:41
+    .= {xyf0,A1,xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:48
+    .= {xyf0,A1,xyf1,yzf2,zxf3,A2} by ENUMSET1:55;
+  hence thesis by ENUMSET1:def 4;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,and2c] & y
+<> [<*z,x*>,and2b] & z <> [<*x,y*>,and2a] holds x in InputVertices BitGFA2Str(x
+,y,z) & y in InputVertices BitGFA2Str(x,y,z) & z in InputVertices BitGFA2Str(x,
+  y,z)
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y*>,f1];
+  set S = BitGFA2Str(x,y,z);
+  InputVertices S = {x,y,z} by A1,Th115;
+  hence thesis by ENUMSET1:def 1;
+end;
+ 
+::------------------------------------------------------------------
+:: GFA2 : Carry and Adder Output Definition of GFA Combined Circuit
+::------------------------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA2CarryOutput(x,y,z) -> Element of InnerVertices BitGFA2Str(x,y,z)
+  equals
+  [<*[<*x,y*>,and2a],[<*y,z*>,and2c],[<*z,x*>,and2b]*>,nor3];
+  coherence
+  proof
+    GFA2CarryOutput(x,y,z) in InnerVertices BitGFA2Str(x,y,z) by Th119;
+    hence thesis;
+  end;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA2AdderOutput(x,y,z) -> Element of InnerVertices BitGFA2Str(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2c);
+  coherence
+  proof
+    GFA2AdderOutput(x,y,z) in InnerVertices BitGFA2Str(x,y,z) by Th119;
+    hence thesis;
+  end;
+end;
+ 
+::-------------------------------------------------------------
+:: GFA2 Combined : Stability of the Adder/Carry Output Circuit
+::-------------------------------------------------------------
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,and2c] & y
+<> [<*z,x*>,and2b] & z <> [<*x,y*>,and2a] for s being State of BitGFA2Circ(x,y,
+  z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z
+holds Following(s,2).GFA2AdderOutput(x,y,z) = 'not' a1 'xor' a2 'xor' 'not' a3
+& Following(s,2).GFA2CarryOutput(x,y,z) = 'not' (('not' a1 '&' a2) 'or' (a2 '&'
+  'not' a3) 'or' ('not' a3 '&' 'not' a1))
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S2 = GFA2CarryStr(x,y,z);
+  set S1 = GFA2AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th90;
+  set A2 = GFA2CarryCirc(x,y,z);
+  set A1 = GFA2AdderCirc(x,y,z);
+  set A = BitGFA2Circ(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume that
+A4: a1 = s.x and
+A5: a2 = s.y and
+A6: a3 = s.z;
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+A7: dom s1 = the carrier of S1 by CIRCUIT1:4;
+  z in the carrier of S1 by FACIRC_1:60;
+  then
+A8: a3 = s1.z by A6,A7,FUNCT_1:70;
+  y in the carrier of S1 by FACIRC_1:60;
+  then
+A9: a2 = s1.y by A5,A7,FUNCT_1:70;
+  reconsider t = s as State of A1+*A2;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A10: Following(t,2).GFA2AdderOutput(x,y,z) = Following(s1,2).GFA2AdderOutput
+  (x,y,z) by A3,FACIRC_1:32;
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+A11: dom s2 = the carrier of S2 by CIRCUIT1:4;
+  x in the carrier of S1 by FACIRC_1:60;
+  then a1 = s1.x by A4,A7,FUNCT_1:70;
+  hence Following(s,2).GFA2AdderOutput(x,y,z) = 'not' a1 'xor' a2 'xor' 'not'
+  a3 by A1,A9,A8,A10,Th111;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A12: Following(t,2).GFA2CarryOutput(x,y,z) = Following(s2,2).GFA2CarryOutput
+  (x,y,z) by A3,FACIRC_1:33;
+  z in the carrier of S2 by Th92;
+  then
+A13: a3 = s2.z by A6,A11,FUNCT_1:70;
+  y in the carrier of S2 by Th92;
+  then
+A14: a2 = s2.y by A5,A11,FUNCT_1:70;
+  x in the carrier of S2 by Th92;
+  then a1 = s2.x by A4,A11,FUNCT_1:70;
+  hence thesis by A2,A14,A13,A12,Th98;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2c] & x <> [<*y,z*>,and2c] & y
+<> [<*z,x*>,and2b] & z <> [<*x,y*>,and2a] for s being State of BitGFA2Circ(x,y,
+  z) holds Following(s,2) is stable
+proof
+  set f1 = and2a, f2 = and2c, f3 = and2b;
+  set f0 = xor2c;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set A = BitGFA2Circ(x,y,z);
+  let s be State of A;
+  set S2 = GFA2CarryStr(x,y,z);
+  set S1 = GFA2AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th90;
+  set A1 = GFA2AdderCirc(x,y,z);
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+  Following(s1,2) is stable by A1,FACIRC_1:63;
+  then
+A4: Following(s1,2) = Following Following(s1,2) by CIRCUIT2:def 6
+    .= Following(s1,2+1) by FACIRC_1:12;
+  set A2 = GFA2CarryCirc(x,y,z);
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+  Following(s2,2) is stable by A2,Th99;
+  then
+A5: Following(s2,2) = Following Following(s2,2) by CIRCUIT2:def 6
+    .= Following(s2,2+1) by FACIRC_1:12;
+  reconsider t = s as State of A1+*A2;
+  set S = BitGFA2Str(x,y,z);
+A6: dom Following(s,3) = the carrier of S by CIRCUIT1:4;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A7: Following(s1,2) = Following(t,2)|the carrier of S1 & Following(s1,3) =
+  Following(t,3)|the carrier of S1 by A3,FACIRC_1:30;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A8: Following(s2,2) = Following(t,2)|the carrier of S2 & Following(s2,3) =
+  Following(t,3)|the carrier of S2 by A3,FACIRC_1:31;
+A9: the carrier of S = (the carrier of S1) \/ the carrier of S2 by CIRCCOMB
+  :def 2;
+A10: dom Following(s1,2) = the carrier of S1 & dom Following(s2,2) = the
+  carrier of S2 by CIRCUIT1:4;
+A11: now
+    let a be set;
+    assume a in the carrier of S;
+    then a in the carrier of S1 or a in the carrier of S2 by A9,
+    XBOOLE_0:
+    def 3;
+    then (Following(s,2)).a = (Following(s1,2)).a & (Following(s,3)).a = (
+Following(s1,3)).a or (Following(s,2)).a = (Following(s2,2)).a & (Following(s,3
+    )).a = (Following(s2,3)).a by A7,A8,A4,A5,A10, FUNCT_1:70;
+    hence (Following(s,2)).a = (Following Following(s,2)).a by A4,A5,
+    FACIRC_1:12;
+  end;
+  Following(s,2+1) = Following Following(s,2) & dom Following(s,2) = the
+  carrier of S by CIRCUIT1:4,FACIRC_1:12;
+  hence Following(s,2) = Following Following(s,2) by A6,A11,FUNCT_1:9;
+end;
+ 
+::========================================================================
+:: Generalized Full Adder (GFA) Circuit (TYPE-3)
+::========================================================================
+
+begin :: Generalized Full Adder (GFA) Circuit (TYPE-3)
+::========================================================================
+:: << GFA TYPE-3 >>
+::------------------------------------------------------------------------
+::   Name     : Generalized Full Adder Type-3 (GFA3)
+::   Function : - x - y - z = - 2 * c - s
+::
+::   Logic Symbol :     -x     -y      Combined : GFA3CarryIStr(x,y,z)
+::                       |     /                  GFA3CarryStr(x,y,z)
+::                       |    /                   GFA3AdderStr(x,y,z)
+::                   +---O---O                  --->
+::                   |  GFA  O---- -z             BitGFA3Str(x,y,z)
+::                   | TYPE3 |
+::                   O---O---+          Outputs : BitGFA3CarryOutput(x,y,z)
+::                  /    |                        BitGFA3AdderOutput(x,y,z)
+::                 /     |
+::               -c     -s          Calculation : Following(s,2) is stable.
+::=========================================================================
+::-------------------------------------------------
+:: GFA3 Carry : Circuit Definition of Carry Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA3CarryIStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  1GateCircStr(<*x,y*>,and2b) +*
+  1GateCircStr(<*y,z*>,and2b) +* 1GateCircStr(<*z,x*>,and2b);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA3CarryICirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA3CarryIStr(x,y,z) equals
+  1GateCircuit(x,y,and2b) +* 1GateCircuit(y,z,and2b)
+  +* 1GateCircuit(z,x,and2b);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA3CarryStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA3CarryIStr(x,y,z) +* 1GateCircStr(<*[
+  <*x,y*>,and2b], [<*y,z*>,and2b], [<*z,x*>,and2b]*>,nor3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA3CarryCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA3CarryStr(x,y,z) equals
+  GFA3CarryICirc(x,y,z) +* 1GateCircuit([<*x,y*>,and2b
+  ],[<*y,z*>,and2b],[<*z,x*>,and2b],nor3);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA3CarryOutput(x,y,z) -> Element of InnerVertices GFA3CarryStr(x,y,z)
+  equals
+  [<*[<*x,y*>,and2b],[<*y,z*>,and2b],[<*z,x*>,and2b]*>,nor3];
+  coherence
+  proof
+    [<*[<*x,y*>,and2b],[<*y,z*>,and2b],[<*z,x*>,and2b]*>,nor3] in
+InnerVertices 1GateCircStr(<*[<*x,y*>,and2b],[<*y,z*>,and2b], [<*z,x*>,and2b]*>
+    ,nor3) by FACIRC_1:47;
+    hence thesis by FACIRC_1:21;
+  end;
+end;
+ 
+::-------------------------------------------------------
+:: GFA3 Carry : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th123:
+  for x,y,z being set holds InnerVertices GFA3CarryIStr(x,y,z) =
+  {[<*x,y*>,and2b], [<*y,z*>,and2b], [<*z,x*>,and2b]}
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+A1: Cxy tolerates Cyz by CIRCCOMB:55;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices GFA3CarryIStr(x,y,z) = InnerVertices(Cxy +* Cyz) \/
+  InnerVertices(Czx) by CIRCCOMB:15
+    .= InnerVertices(Cxy) \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by A1,
+  CIRCCOMB:15
+    .= {xy} \/ InnerVertices(Cyz) \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices(Czx) by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ {zx} by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  hence thesis;
+end;
+
+theorem Th124:
+  for x,y,z being set holds InnerVertices GFA3CarryStr(x,y,z) = {
+[<*x,y*>,and2b], [<*y,z*>,and2b], [<*z,x*>,and2b]} \/ {GFA3CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+A1: Cxy tolerates (Cyz +* Czx +* Cxyz) by CIRCCOMB:55;
+  Cyz tolerates (Czx +* Cxyz) by CIRCCOMB:55;
+  then
+A2: InnerVertices (Cyz +* (Czx +* Cxyz)) = InnerVertices Cyz \/
+  InnerVertices (Czx +* Cxyz) by CIRCCOMB:15;
+  Czx tolerates Cxyz by CIRCCOMB:55;
+  then
+A3: InnerVertices (Czx +* Cxyz) = InnerVertices Czx \/ InnerVertices Cxyz by
+  CIRCCOMB:15;
+  thus InnerVertices GFA3CarryStr(x,y,z) = InnerVertices (Cxy +* (Cyz +* Czx)
+  +* Cxyz) by CIRCCOMB:10
+    .= InnerVertices (Cxy +* (Cyz +* Czx +* Cxyz)) by CIRCCOMB:10
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* Czx +* Cxyz) by A1,
+  CIRCCOMB:15
+    .= InnerVertices Cxy \/ InnerVertices (Cyz +* (Czx +* Cxyz)) by CIRCCOMB
+  :10
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ (InnerVertices Czx \/
+  InnerVertices Cxyz) by A2,A3,XBOOLE_1:4
+    .= InnerVertices Cxy \/ InnerVertices Cyz \/ InnerVertices Czx \/
+  InnerVertices Cxyz by XBOOLE_1:4
+    .= {xy} \/ InnerVertices Cyz \/ InnerVertices Czx \/ InnerVertices Cxyz
+  by CIRCCOMB:49
+    .= {xy} \/ {yz} \/ InnerVertices Czx \/ InnerVertices Cxyz by CIRCCOMB:
+  49
+    .= {xy} \/ {yz} \/ {zx} \/ InnerVertices Cxyz by CIRCCOMB:49
+    .= {xy, yz} \/ {zx} \/ InnerVertices Cxyz by ENUMSET1:41
+    .= {xy, yz, zx} \/ InnerVertices Cxyz by ENUMSET1:43
+    .= {xy, yz, zx} \/ {GFA3CarryOutput(x,y,z)} by CIRCCOMB:49;
+end;
+
+theorem Th125:
+  for x,y,z being set holds InnerVertices GFA3CarryStr(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  InnerVertices Cxy is Relation & InnerVertices Cyz is Relation by
+  FACIRC_1:38;
+  then InnerVertices Czx is Relation & InnerVertices (Cxy +* Cyz) is Relation
+  by FACIRC_1:3,38;
+  then InnerVertices Cxyz is Relation & InnerVertices GFA3CarryIStr(x,y,z) is
+  Relation by FACIRC_1:3,38;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th126:
+  for x,y,z being set st x <> [<*y,z*>,and2b] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2b] holds InputVertices GFA3CarryIStr(x,y,z) = {x,y,z
+  }
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  assume that
+A1: x <> yz and
+A2: y <> zx & z <> xy;
+A3: not xy in {y,z} by A1,A2,Lm1;
+A4: not zx in {x,y,z} by A1,A2,Lm1;
+A5: y <> yz by FACIRC_2:3;
+A6: ( not z in {xy, yz})& not x in {xy, yz} by A1,A2,Lm1;
+A7: Cxy tolerates Cyz by CIRCCOMB:55;
+  InputVertices GFA3CarryIStr(x,y,z) = (InputVertices(Cxy +* Cyz) \
+  InnerVertices(Czx)) \/ (InputVertices(Czx) \ InnerVertices(Cxy +* Cyz)) by
+  CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \
+  InnerVertices(Cxy +* Cyz)) by CIRCCMB2:6,CIRCCOMB:55
+    .= ((InputVertices(Cxy) \ InnerVertices(Cyz)) \/ (InputVertices(Cyz) \
+  InnerVertices(Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (
+  InnerVertices(Cxy) \/ InnerVertices(Cyz))) by A7,CIRCCOMB:15
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ InnerVertices(
+  Cxy))) \ InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \
+  InnerVertices(Czx) \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/
+  InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ (InnerVertices(Cxy) \/ InnerVertices(Cyz))) by
+  CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ InnerVertices(Cyz))) by CIRCCOMB:49
+    .= ((InputVertices(Cxy) \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx}
+  \/ (InputVertices(Czx) \ ({xy} \/ {yz})) by CIRCCOMB:49
+    .= (({x,y} \ {yz}) \/ (InputVertices(Cyz) \ {xy})) \ {zx} \/ (
+  InputVertices(Czx) \ ({xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ (InputVertices(Czx) \ ({
+  xy} \/ {yz})) by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ ({xy} \/ {yz}))
+  by FACIRC_1:40
+    .= (({x,y} \ {yz}) \/ ({y,z} \ {xy})) \ {zx} \/ ({z,x} \ {xy,yz}) by
+  ENUMSET1:41
+    .= (({x,y} \/ ({y,z} \ {xy})) \ {zx}) \/ ({z,x} \ {xy,yz}) by A1,A5,
+  FACIRC_2:1
+    .= ({x,y} \/ {y,z}) \ {zx} \/ ({z,x} \ {xy,yz}) by A3,ZFMISC_1:65
+    .= ({x,y} \/ {y,z}) \ {zx} \/ {z,x} by A6,ZFMISC_1:72
+    .= {x,y,y,z} \ {zx} \/ {z,x} by ENUMSET1:45
+    .= {y,y,x,z} \ {zx} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \ {zx} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \ {zx} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ {z,x} by A4,ZFMISC_1:65
+    .= {x,y,z,z,x} by ENUMSET1:49
+    .= {x,y,z,z} \/ {x} by ENUMSET1:50
+    .= {z,z,x,y} \/ {x} by ENUMSET1:118
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {z,x,y,x} by ENUMSET1:46
+    .= {x,x,y,z} by ENUMSET1:113
+    .= {x,y,z} by ENUMSET1:71;
+  hence thesis;
+end;
+
+theorem Th127:
+  for x,y,z being set st x <> [<*y,z*>,and2b] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2b] holds InputVertices GFA3CarryStr(x,y,z) = {x,y,z}
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set MI = GFA3CarryIStr(x,y,z);
+A1: InputVertices S = rng <*xy, yz, zx*> by CIRCCOMB:49
+    .= {xy, yz, zx} by FINSEQ_2:148;
+  assume
+A2: x <> yz & y <> zx & z <> xy;
+A3: InnerVertices S = {xyz} & {x, y, z} \ {xyz} = {x, y, z} by Lm2,CIRCCOMB:
+  49;
+A4: {xy, yz, zx} \ {xy, yz, zx} = {} by XBOOLE_1:37;
+  thus InputVertices GFA3CarryStr(x,y,z) = ((InputVertices MI) \ InnerVertices
+  S) \/ ((InputVertices S) \ InnerVertices MI) by CIRCCMB2:6,CIRCCOMB:55
+    .= {x,y,z} \/ ({xy, yz, zx} \ InnerVertices MI) by A1,A2,A3,Th126
+    .= {x,y,z} \/ {} by A4,Th123
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices GFA3CarryStr(x,y,z)
+  is without_pairs
+proof
+  let x,y,z be non pair set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set S = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set M = GFA3CarryStr(x,y,z);
+  set MI = GFA3CarryIStr(x,y,z);
+  given xx being pair set such that
+A1: xx in InputVertices M;
+A2: Cxy tolerates Cyz by CIRCCOMB:55;
+A3: InnerVertices Czx = {zx} & Cxy +* Cyz tolerates Czx by CIRCCOMB:49,55;
+  InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  then InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by A2,CIRCCOMB:15;
+  then
+A4: InnerVertices MI = {xy} \/ {yz} \/ {zx} by A3,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+  then
+A5: InputVertices S \ InnerVertices MI = {} by A4,XBOOLE_1:37;
+  InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then
+A6: InputVertices MI is without_pairs by FACIRC_1:9;
+  InnerVertices S is Relation by FACIRC_1:38;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A6,FACIRC_1:6;
+  hence thesis by A6,A1,A5,FACIRC_1:def 2;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem Th129:
+  for x,y,z being set holds x in the carrier of GFA3CarryStr(x,y,
+z) & y in the carrier of GFA3CarryStr(x,y,z) & z in the carrier of GFA3CarryStr
+  (x,y,z) & [<*x,y*>,and2b] in the carrier of GFA3CarryStr(x,y,z) & [<*y,z*>,
+  and2b] in the carrier of GFA3CarryStr(x,y,z) & [<*z,x*>,and2b] in the carrier
+of GFA3CarryStr(x,y,z) & [<*[<*x,y*>,and2b],[<*y,z*>,and2b],[<*z,x*>,and2b]*>,
+  nor3] in the carrier of GFA3CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set Cxyz = 1GateCircStr(<*xy, yz, zx*>,f4);
+  set p = <*xy,yz,zx*>;
+  z in the carrier of Czx by FACIRC_1:43;
+  then
+A1: z in the carrier of GFA3CarryIStr(x,y,z) by FACIRC_1:20;
+  zx in the carrier of Czx by FACIRC_1:43;
+  then
+A2: zx in the carrier of GFA3CarryIStr(x,y,z) by FACIRC_1:20;
+  y in the carrier of Cxy by FACIRC_1:43;
+  then y in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A3: y in the carrier of GFA3CarryIStr(x,y,z) by FACIRC_1:20;
+  the carrier of Cxyz = rng p \/ {xyz} & [p,f4] in {[p,f4]} by CIRCCOMB:
+  def 6 ,TARSKI:def 1;
+  then
+A4: xyz in the carrier of Cxyz by XBOOLE_0:def 3;
+  yz in the carrier of Cyz by FACIRC_1:43;
+  then yz in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A5: yz in the carrier of GFA3CarryIStr(x,y,z) by FACIRC_1:20;
+  xy in the carrier of Cxy by FACIRC_1:43;
+  then xy in the carrier of Cxy +* Cyz by FACIRC_1:20;
+  then
+A6: xy in the carrier of GFA3CarryIStr(x,y,z) by FACIRC_1:20;
+  x in the carrier of Czx by FACIRC_1:43;
+  then x in the carrier of GFA3CarryIStr(x,y,z) by FACIRC_1:20;
+  hence thesis by A3,A1,A6,A5,A2,A4,FACIRC_1:20;
+end;
+
+theorem Th130:
+  for x,y,z being set holds [<*x,y*>,and2b] in InnerVertices
+GFA3CarryStr(x,y,z) & [<*y,z*>,and2b] in InnerVertices GFA3CarryStr(x,y,z) & [
+<*z,x*>,and2b] in InnerVertices GFA3CarryStr(x,y,z) & GFA3CarryOutput(x,y,z) in
+  InnerVertices GFA3CarryStr(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  InnerVertices GFA3CarryStr(x,y,z) = {xy,yz,zx} \/ {GFA3CarryOutput(x,y,z
+  )} by Th124
+    .= {xy,yz,zx,GFA3CarryOutput(x,y,z)} by ENUMSET1:46;
+  hence thesis by ENUMSET1:def 2;
+end;
+
+theorem Th131:
+  for x,y,z being set st x <> [<*y,z*>,and2b] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2b] holds x in InputVertices GFA3CarryStr(x,y,z) & y
+  in InputVertices GFA3CarryStr(x,y,z) & z in InputVertices GFA3CarryStr(x,y,z)
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  let x,y,z be set;
+  assume x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  then InputVertices GFA3CarryStr(x,y,z) = {x,y,z} by Th127;
+  hence thesis by ENUMSET1:def 1;
+end;
+
+theorem Th132:
+  for x,y,z being non pair set holds InputVertices GFA3CarryStr(x
+  ,y,z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set Cxy = 1GateCircStr(<*x,y*>,f1);
+  set Cyz = 1GateCircStr(<*y,z*>,f2);
+  set Czx = 1GateCircStr(<*z,x*>,f3);
+  set M = GFA3CarryStr(x,y,z);
+  set MI = GFA3CarryIStr(x,y,z);
+  set S = 1GateCircStr(<*xy,yz,zx*>,f4);
+A1: InputVertices Cxy = {x,y} & InputVertices Cyz = {y,z} by FACIRC_1:40;
+A2: InputVertices Czx = {z,x} by FACIRC_1:40;
+A3: InputVertices S = {xy, yz, zx} by FACIRC_1:42;
+A4: InnerVertices S is Relation by FACIRC_1:38;
+A5: InnerVertices Cxy = {xy} & InnerVertices Cyz = {yz} by CIRCCOMB:49;
+  Cxy tolerates Cyz by CIRCCOMB:55;
+  then
+A6: InnerVertices Czx = {zx} & InnerVertices (Cxy +* Cyz) = {xy} \/ {yz} by
+  A5,CIRCCOMB:15,49;
+  Cxy +* Cyz tolerates Czx by CIRCCOMB:55;
+  then InnerVertices MI = {xy} \/ {yz} \/ {zx} by A6,CIRCCOMB:15
+    .= {xy, yz} \/ {zx} by ENUMSET1:41
+    .= {xy, yz, zx} by ENUMSET1:43;
+  then
+A7: InputVertices S \ InnerVertices MI = {} by A3,XBOOLE_1:37;
+A8: InputVertices Cxy is without_pairs & InputVertices Cyz is without_pairs
+  by FACIRC_1:41;
+  then
+A9: InputVertices Czx is without_pairs & InputVertices (Cxy+*Cyz) is
+  without_pairs by FACIRC_1:9,41;
+  then InputVertices MI is without_pairs by FACIRC_1:9;
+  then
+  InputVertices M = (InputVertices MI) \/ (InputVertices S \ InnerVertices
+  MI) by A4, FACIRC_1:6;
+  hence
+  InputVertices M = (InputVertices(Cxy+*Cyz)) \/ InputVertices Czx by A9,
+  A6,A7,FACIRC_1:7
+    .= (InputVertices Cxy) \/ (InputVertices Cyz) \/ (InputVertices Czx) by
+  A8,A5,FACIRC_1:7
+    .= {x,y,y,z} \/ {z,x} by A1,A2,ENUMSET1:45
+    .= {y,y,x,z} \/ {z,x} by ENUMSET1:110
+    .= {y,x,z} \/ {z,x} by ENUMSET1:71
+    .= {x,y,z} \/ {z,x} by ENUMSET1:99
+    .= {x,y,z} \/ ({z}\/{x}) by ENUMSET1:41
+    .= {x,y,z} \/ {z} \/ {x} by XBOOLE_1:4
+    .= {z,x,y} \/ {z} \/ {x} by ENUMSET1:100
+    .= {z,z,x,y} \/ {x} by ENUMSET1:44
+    .= {z,x,y} \/ {x} by ENUMSET1:71
+    .= {x,y,z} \/ {x} by ENUMSET1:100
+    .= {x,x,y,z} by ENUMSET1:44
+    .= {x,y,z} by ENUMSET1:71;
+end;
+ 
+::----------------------------------------------------
+:: GFA3 Carry : Stability of the Carry Output Circuit
+::----------------------------------------------------
+
+theorem Th133:
+  for x,y,z being set for s being State of GFA3CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds (
+Following s).[<*x,y*>,and2b] = 'not' a1 '&' 'not' a2 & (Following s).[<*y,z*>,
+  and2b] = 'not' a2 '&' 'not' a3 & (Following s).[<*z,x*>,and2b] = 'not' a3 '&'
+  'not' a1
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  let s be State of GFA3CarryCirc(x,y,z);
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.x and
+A2: a2 = s.y and
+A3: a3 = s.z;
+  set S = GFA3CarryStr(x,y,z);
+A4: InnerVertices S = the carrier' of S by FACIRC_1:37;
+A5: y in the carrier of S by Th129;
+A6: x in the carrier of S by Th129;
+A7: dom s = the carrier of S by CIRCUIT1:4;
+  xy in InnerVertices GFA3CarryStr(x,y,z) by Th130;
+  hence (Following s).[<*x,y*>,f1] = f1.(s*<*x,y*>) by A4,FACIRC_1:35
+    .= f1.<*a1,a2*> by A1,A2,A7,A6,A5,FINSEQ_2:145
+    .= 'not' a1 '&' 'not' a2 by TWOSCOMP:def 3;
+A8: z in the carrier of S by Th129;
+  yz in InnerVertices GFA3CarryStr(x,y,z) by Th130;
+  hence (Following s).[<*y,z*>,f2] = f2.(s*<*y,z*>) by A4,FACIRC_1:35
+    .= f2.<*a2,a3*> by A2,A3,A7,A5,A8,FINSEQ_2:145
+    .= 'not' a2 '&' 'not' a3 by TWOSCOMP:def 3;
+  zx in InnerVertices GFA3CarryStr(x,y,z) by Th130;
+  hence (Following s).[<*z,x*>,f3] = f3.(s*<*z,x*>) by A4,FACIRC_1:35
+    .= f3.<*a3,a1*> by A1,A3,A7,A6,A8,FINSEQ_2:145
+    .= 'not' a3 '&' 'not' a1 by TWOSCOMP:def 3;
+end;
+
+theorem Th134:
+  for x,y,z being set for s being State of GFA3CarryCirc(x,y,z)
+for a1,a2,a3 being Element of BOOLEAN st a1 = s.[<*x,y*>,and2b] & a2 = s.[<*y,z
+*>,and2b] & a3 = s.[<*z,x*>,and2b] holds (Following s).GFA3CarryOutput(x,y,z) =
+  'not' (a1 'or' a2 'or' a3)
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  let s be State of GFA3CarryCirc(x,y,z);
+  set xy =[<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  let a1,a2,a3 be Element of BOOLEAN such that
+A1: a1 = s.xy & a2 = s.yz & a3 = s.zx;
+  set S = GFA3CarryStr(x,y,z);
+  reconsider xy, yz, zx as Element of InnerVertices S by Th130;
+A2: dom s = the carrier of S by CIRCUIT1:4;
+  InnerVertices S = the carrier' of S by FACIRC_1:37;
+  hence (Following s).GFA3CarryOutput(x,y,z) = f4.(s*<*xy, yz, zx*>) by
+  FACIRC_1:35
+    .= f4.<*a1,a2,a3*> by A1,A2,FINSEQ_2:146
+    .= 'not' (a1 'or' a2 'or' a3) by TWOSCOMP:def 28;
+end;
+
+theorem Th135:
+  for x,y,z being set st x <> [<*y,z*>,and2b] & y <> [<*z,x*>,
+and2b] & z <> [<*x,y*>,and2b] for s being State of GFA3CarryCirc(x,y,z) for a1,
+  a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z holds
+  Following(s,2).GFA3CarryOutput(x,y,z) = 'not' (('not' a1 '&' 'not' a2) 'or' (
+'not' a2 '&' 'not' a3) 'or' ('not' a3 '&' 'not' a1)) & Following(s,2).[<*x,y*>,
+and2b] = 'not' a1 '&' 'not' a2 & Following(s,2).[<*y,z*>,and2b] = 'not' a2 '&'
+  'not' a3 & Following(s,2).[<*z,x*>,and2b] = 'not' a3 '&' 'not' a1
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA3CarryStr(x,y,z);
+  reconsider x9 = x, y9 = y, z9 = z as Vertex of S by Th129;
+  let s be State of GFA3CarryCirc(x,y,z);
+  y in InputVertices S by A1,Th131;
+  then
+A2: (Following s).y9 = s.y by CIRCUIT2:def 5;
+  z in InputVertices S by A1,Th131;
+  then
+A3: (Following s).z9 = s.z by CIRCUIT2:def 5;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A4: Following(s,2) = Following Following s by FACIRC_1:15;
+  let a1,a2,a3 be Element of BOOLEAN such that
+A5: a1 = s.x & a2 = s.y & a3 = s.z;
+A6: (Following s).zx = 'not' a3 '&' 'not' a1 by A5,Th133;
+  (Following s).xy = 'not' a1 '&' 'not' a2 & (Following s).yz = 'not' a2
+  '&' 'not' a3 by A5,Th133;
+  hence Following(s,2).GFA3CarryOutput(x,y,z) = 'not'(('not' a1 '&' 'not' a2)
+  'or' ('not' a2 '&' 'not' a3) 'or' ('not' a3 '&' 'not' a1)) by A4,A6,Th134;
+  x in InputVertices S by A1,Th131;
+  then (Following s).x9 = s.x by CIRCUIT2:def 5;
+  hence thesis by A5,A2,A3,A4,Th133;
+end;
+
+theorem Th136:
+  for x,y,z being set st x <> [<*y,z*>,and2b] & y <> [<*z,x*>,
+  and2b] & z <> [<*x,y*>,and2b] for s being State of GFA3CarryCirc(x,y,z) holds
+  Following(s,2) is stable
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  let x,y,z be set such that
+A1: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S = GFA3CarryStr(x,y,z);
+  reconsider xx = x, yy = y, zz = z as Vertex of S by Th129;
+  let s be State of GFA3CarryCirc(x,y,z);
+  set a1 = s.xx, a2 = s.yy, a3 = s.zz;
+  set ffs = Following(s,2), fffs = Following ffs;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+A2: ffs = Following Following s by FACIRC_1:15;
+A3: z in InputVertices S by A1,Th131;
+  then (Following s).z = a3 by CIRCUIT2:def 5;
+  then
+A4: ffs.z = a3 by A2,A3,CIRCUIT2:def 5;
+A5: y in InputVertices S by A1,Th131;
+  then (Following s).y = a2 by CIRCUIT2:def 5;
+  then
+A6: ffs.y = a2 by A2,A5,CIRCUIT2:def 5;
+A7: x in InputVertices S by A1,Th131;
+  then (Following s).x = a1 by CIRCUIT2:def 5;
+  then
+A8: ffs.x = a1 by A2,A7,CIRCUIT2:def 5;
+  a3 = s.z;
+  then
+A9: ffs.xy = 'not' a1 '&' 'not' a2 by A1,Th135;
+  a2 = s.y;
+  then
+A10: ffs.zx = 'not' a1 '&' 'not' a3 by A1,Th135;
+  a1 = s.x;
+  then
+A11: ffs.yz = 'not' a2 '&' 'not' a3 by A1,Th135;
+A12: ffs.GFA3CarryOutput(x,y,z) = 'not'(('not' a1 '&' 'not' a2) 'or' ('not'
+  a2 '&' 'not' a3) 'or' ('not' a3 '&' 'not' a1)) by A1,Th135;
+A13: now
+    let a be set;
+    assume
+A14: a in the carrier of S;
+    then reconsider v = a as Vertex of S;
+A15: v in InputVertices S \/ InnerVertices S by A14,XBOOLE_1:45;
+    thus ffs.a = (fffs).a
+    proof
+      per cases by A15,XBOOLE_0:def 3;
+      suppose
+        v in InputVertices S;
+        hence thesis by CIRCUIT2:def 5;
+      end;
+      suppose
+        v in InnerVertices S;
+        then v in {xy, yz, zx} \/ {GFA3CarryOutput(x,y,z)} by Th124;
+        then v in {xy, yz, zx} or v in {GFA3CarryOutput(x,y,z)} by
+        XBOOLE_0:def 3;
+        then v = xy or v = yz or v = zx or v = GFA3CarryOutput(x,y,z) by
+        ENUMSET1:def 1,TARSKI:def 1;
+        hence thesis by A12,A9,A11,A10,A8,A6,A4,Th133,Th134;
+      end;
+    end;
+  end;
+  dom Following Following(s,2) = the carrier of S & dom Following(s,2) =
+  the carrier of S by CIRCUIT1:4;
+  hence ffs = fffs by A13,FUNCT_1:9;
+end;
+ 
+::=========================================================================
+::-------------------------------------------------
+:: GFA3 Adder : Circuit Definition of Adder Output
+::-------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func GFA3AdderStr(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  2GatesCircStr(x,y,z, xor2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA3AdderCirc(x,y,z) -> strict Boolean gate`2=den Circuit of
+  GFA3AdderStr(x,y,z) equals
+  2GatesCircuit(x,y,z, xor2);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func GFA3AdderOutput(x,y,z) -> Element of InnerVertices GFA3AdderStr(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2);
+  coherence;
+end;
+ 
+::-------------------------------------------------------
+:: GFA3 Adder : Carrier, InnerVertices and InputVertices
+::-------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+theorem Th137:
+  for x,y,z being set holds InnerVertices GFA3AdderStr(x,y,z) = {
+  [<*x,y*>,xor2]} \/ {GFA3AdderOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  GFA3AdderOutput(x,y,z) = GFA0AdderOutput(x,y,z);
+  hence thesis by Th27;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+canceled 3;
+
+theorem
+  for x,y,z being set holds x in the carrier of GFA3AdderStr(x,y,z) & y
+in the carrier of GFA3AdderStr(x,y,z) & z in the carrier of GFA3AdderStr(x,y,z)
+& [<*x,y*>,xor2] in the carrier of GFA3AdderStr(x,y,z) & [<*[<*x,y*>,xor2], z*>
+  , xor2] in the carrier of GFA3AdderStr(x,y,z) by FACIRC_1:60,61;
+
+theorem
+  for x,y,z being set holds [<*x,y*>,xor2] in InnerVertices GFA3AdderStr
+  (x,y,z) & GFA3AdderOutput(x,y,z) in InnerVertices GFA3AdderStr(x,y,z)
+proof
+  let x,y,z be set;
+  set S0 = GFA0AdderStr(x,y,z);
+  GFA3AdderStr(x,y,z) = S0;
+  hence thesis by Th32;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>, xor2] holds x in InputVertices
+  GFA3AdderStr(x,y,z) & y in InputVertices GFA3AdderStr(x,y,z) & z in
+  InputVertices GFA3AdderStr(x,y,z)
+proof
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,xor2];
+  set S0 = GFA0AdderStr(x,y,z);
+  GFA3AdderStr(x,y,z) = S0;
+  hence thesis by A1,Th33;
+end;
+ 
+::----------------------------------------------------
+:: GFA3 Adder : Stability of the Adder Output Circuit
+::----------------------------------------------------
+
+canceled;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State of
+GFA3AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s
+.y & a3 = s.z holds (Following s).[<*x,y*>,xor2] = a1 'xor' a2 & (Following s).
+  x = a1 & (Following s).y = a2 & (Following s).z = a3
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A0 = GFA0AdderCirc(x,y,z);
+  set A3 = GFA3AdderCirc(x,y,z);
+  A3 = A0;
+  hence thesis by A1,Th35;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State of
+GFA3AdderCirc(x,y,z) for a1a2,a1,a2,a3 being Element of BOOLEAN st a1a2 = s.[<*
+  x,y*>,xor2] & a1 = s.x & a2 = s.y & a3 = s.z holds (Following s).
+  GFA3AdderOutput(x,y,z) = a1a2 'xor' a3
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set O0 = GFA0AdderOutput(x,y,z);
+  set O3 = GFA3AdderOutput(x,y,z);
+  set A0 = GFA0AdderCirc(x,y,z);
+  set A3 = GFA3AdderCirc(x,y,z);
+  A3 = A0 & O3 = O0;
+  hence thesis by A1,Th36;
+end;
+
+theorem Th147:
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State
+of GFA3AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+  = s.y & a3 = s.z holds Following(s,2).GFA3AdderOutput(x,y,z) = a1 'xor' a2
+'xor' a3 & Following(s,2).[<*x,y*>,xor2] = a1 'xor' a2 & Following(s,2).x = a1
+  & Following(s,2).y = a2 & Following(s,2).z = a3
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set O0 = GFA0AdderOutput(x,y,z);
+  set O3 = GFA3AdderOutput(x,y,z);
+  set A0 = GFA0AdderCirc(x,y,z);
+  set A3 = GFA3AdderCirc(x,y,z);
+  A3 = A0 & O3 = O0;
+  hence thesis by A1,Th37;
+end;
+
+theorem Th148:
+  for x,y,z being set st z <> [<*x,y*>, xor2] for s being State
+of GFA3AdderCirc(x,y,z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2
+= s.y & a3 = s.z holds Following(s,2).GFA3AdderOutput(x,y,z) = 'not' ('not' a1
+  'xor' 'not' a2 'xor' 'not' a3)
+proof
+  set f = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f];
+  set A = GFA3AdderCirc(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume a1 = s.x & a2 = s.y & a3 = s.z;
+  hence (Following(s,2)).GFA3AdderOutput(x,y,z) = a1 'xor' a2 'xor' a3 by A1,
+  Th147
+    .= 'not' ('not' a1 'xor' 'not' a2 'xor' 'not' a3) by XBOOLEAN:74;
+end;
+ 
+::=====================================================================
+::---------------------------------------------------
+:: GFA3 : Circuit Definition of GFA Combined Circuit
+::---------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA3Str(x,y,z) -> unsplit gate`1=arity gate`2isBoolean non void
+  strict non empty ManySortedSign equals
+  GFA3AdderStr(x,y,z) +* GFA3CarryStr(x,y,
+  z);
+  coherence;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA3Circ(x,y,z) -> strict Boolean gate`2=den Circuit of BitGFA3Str(x
+  ,y,z) equals
+  GFA3AdderCirc(x,y,z) +* GFA3CarryCirc(x,y,z);
+  coherence;
+end;
+ 
+::----------------------------------------------------------
+:: GFA3 Combined : Carrier, InnerVertices and InputVertices
+::----------------------------------------------------------
+::-------------------------------------------------------
+:: InnerVertices
+
+canceled;
+
+theorem Th150:
+  for x,y,z being set holds InnerVertices BitGFA3Str(x,y,z) = {[
+<*x,y*>,xor2]} \/ {GFA3AdderOutput(x,y,z)} \/ {[<*x,y*>,and2b], [<*y,z*>,and2b]
+  , [<*z,x*>,and2b]} \/ {GFA3CarryOutput(x,y,z)}
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set f0 = xor2;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA3Str(x,y,z);
+  set S1 = GFA3AdderStr(x,y,z);
+  set S2 = GFA3CarryStr(x,y,z);
+  set A1 = GFA3AdderOutput(x,y,z);
+  set A2 = GFA3CarryOutput(x,y,z);
+  thus InnerVertices S = (InnerVertices S1) \/ InnerVertices S2 by FACIRC_1:27
+    .= {xyf0} \/ {A1} \/ InnerVertices S2 by Th137
+    .= {xyf0} \/ {A1} \/ ({xyf1, yzf2, zxf3} \/ {A2}) by Th124
+    .= {xyf0} \/ {A1} \/ {xyf1, yzf2, zxf3} \/ {A2} by XBOOLE_1:4;
+end;
+
+theorem
+  for x,y,z being set holds InnerVertices BitGFA3Str(x,y,z) is Relation
+proof
+  let x,y,z be set;
+  set S1 = GFA3AdderStr(x,y,z);
+  set S2 = GFA3CarryStr(x,y,z);
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th125,
+  FACIRC_1:58;
+  hence thesis by FACIRC_1:3;
+end;
+ 
+::-------------------------------------------------------
+:: InputVertices
+
+theorem Th152:
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,
+  and2b] & y <> [<*z,x*>,and2b] & z <> [<*x,y*>,and2b] holds InputVertices
+  BitGFA3Str(x,y,z) = {x,y,z}
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y *>,f1];
+  set S2 = GFA3CarryStr(x,y,z);
+  set S1 = GFA3AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by A1,Th127,
+  FACIRC_1:57;
+  hence thesis by CIRCCOMB:55,FACIRC_2:22;
+end;
+
+theorem Th153:
+  for x,y,z being non pair set holds InputVertices BitGFA3Str(x,y ,z) = {x,y,z}
+proof
+  let x,y,z be non pair set;
+  set S = BitGFA3Str(x,y,z);
+  set S1 = GFA3AdderStr(x,y,z);
+  set S2 = GFA3CarryStr(x,y,z);
+A1: InputVertices S1 = {x,y,z} & InputVertices S2 = {x,y,z} by Th132,
+  FACIRC_1:57;
+  InnerVertices S1 is Relation & InnerVertices S2 is Relation by Th125,
+  FACIRC_1:58;
+  hence InputVertices S = {x,y,z} \/ {x,y,z} by A1,FACIRC_1:7
+    .= {x,y,z};
+end;
+
+theorem
+  for x,y,z being non pair set holds InputVertices BitGFA3Str(x,y,z) is
+  without_pairs
+proof
+  let x,y,z be non pair set;
+  InputVertices BitGFA3Str(x,y,z) = {x,y,z} by Th153;
+  hence thesis;
+end;
+ 
+::-------------------------------------------------------
+:: Carrier and misc.
+
+theorem
+  for x,y,z being set holds x in the carrier of BitGFA3Str(x,y,z) & y in
+the carrier of BitGFA3Str(x,y,z) & z in the carrier of BitGFA3Str(x,y,z) & [<*x
+,y*>,xor2] in the carrier of BitGFA3Str(x,y,z) & [<*[<*x,y*>,xor2],z*>,xor2] in
+the carrier of BitGFA3Str(x,y,z) & [<*x,y*>,and2b] in the carrier of BitGFA3Str
+(x,y,z) & [<*y,z*>,and2b] in the carrier of BitGFA3Str(x,y,z) & [<*z,x*>,and2b]
+in the carrier of BitGFA3Str(x,y,z) & [<*[<*x,y*>,and2b],[<*y,z*>,and2b],[<*z,x
+  *>,and2b]*>,nor3] in the carrier of BitGFA3Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b, f4 = nor3;
+  set f0 = xor2;
+  set xy = [<*x,y*>,f1], yz = [<*y,z*>,f2], zx = [<*z,x*>,f3];
+  set xyz = [<*xy, yz, zx*>,f4];
+  set S1 = GFA3AdderStr(x,y,z);
+  set S2 = GFA3CarryStr(x,y,z);
+A1: x in the carrier of S1 & y in the carrier of S1 by FACIRC_1:60;
+A2: z in the carrier of S1 & [<*x,y*>,f0] in the carrier of S1 by FACIRC_1:
+  60 ,61;
+A3: xyz in the carrier of S2 by Th129;
+A4: yz in the carrier of S2 & zx in the carrier of S2 by Th129;
+  [<*[<*x,y*>,f0],z*>,f0] in the carrier of S1 & xy in the carrier of S2
+  by Th129,FACIRC_1:61;
+  hence thesis by A1,A2,A4,A3,FACIRC_1:20;
+end;
+
+theorem Th156:
+  for x,y,z being set holds [<*x,y*>,xor2] in InnerVertices
+BitGFA3Str(x,y,z) & GFA3AdderOutput(x,y,z) in InnerVertices BitGFA3Str(x,y,z) &
+  [<*x,y*>,and2b] in InnerVertices BitGFA3Str(x,y,z) & [<*y,z*>,and2b] in
+InnerVertices BitGFA3Str(x,y,z) & [<*z,x*>,and2b] in InnerVertices BitGFA3Str(x
+  ,y,z) & GFA3CarryOutput(x,y,z) in InnerVertices BitGFA3Str(x,y,z)
+proof
+  let x,y,z be set;
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set f0 = xor2;
+  set xyf0 = [<*x,y*>,f0];
+  set xyf1 = [<*x,y*>,f1], yzf2 = [<*y,z*>,f2], zxf3 = [<*z,x*>,f3];
+  set S = BitGFA3Str(x,y,z);
+  set A1 = GFA3AdderOutput(x,y,z);
+  set A2 = GFA3CarryOutput(x,y,z);
+  InnerVertices S = {xyf0} \/ {A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by Th150
+    .= {xyf0,A1} \/ {xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:41
+    .= {xyf0,A1,xyf1,yzf2,zxf3} \/ {A2} by ENUMSET1:48
+    .= {xyf0,A1,xyf1,yzf2,zxf3,A2} by ENUMSET1:55;
+  hence thesis by ENUMSET1:def 4;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2b] & y
+<> [<*z,x*>,and2b] & z <> [<*x,y*>,and2b] holds x in InputVertices BitGFA3Str(x
+,y,z) & y in InputVertices BitGFA3Str(x,y,z) & z in InputVertices BitGFA3Str(x,
+  y,z)
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] & x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*
+  x,y*>,f1];
+  set S = BitGFA3Str(x,y,z);
+  InputVertices S = {x,y,z} by A1,Th152;
+  hence thesis by ENUMSET1:def 1;
+end;
+ 
+::------------------------------------------------------------------
+:: GFA3 : Carry and Adder Output Definition of GFA Combined Circuit
+::------------------------------------------------------------------
+
+definition
+  let x,y,z be set;
+  func BitGFA3CarryOutput(x,y,z) -> Element of InnerVertices BitGFA3Str(x,y,z)
+  equals
+  [<*[<*x,y*>,and2b],[<*y,z*>,and2b],[<*z,x*>,and2b]*>,nor3];
+  coherence
+  proof
+    GFA3CarryOutput(x,y,z) in InnerVertices BitGFA3Str(x,y,z) by Th156;
+    hence thesis;
+  end;
+end;
+
+definition
+  let x,y,z be set;
+  func BitGFA3AdderOutput(x,y,z) -> Element of InnerVertices BitGFA3Str(x,y,z)
+  equals
+  2GatesCircOutput(x,y,z, xor2);
+  coherence
+  proof
+    GFA3AdderOutput(x,y,z) in InnerVertices BitGFA3Str(x,y,z) by Th156;
+    hence thesis;
+  end;
+end;
+ 
+::-------------------------------------------------------------
+:: GFA3 Combined : Stability of the Adder/Carry Output Circuit
+::-------------------------------------------------------------
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2b] & y
+<> [<*z,x*>,and2b] & z <> [<*x,y*>,and2b] for s being State of BitGFA3Circ(x,y,
+  z) for a1,a2,a3 being Element of BOOLEAN st a1 = s.x & a2 = s.y & a3 = s.z
+  holds Following(s,2).GFA3AdderOutput(x,y,z) = 'not' ('not' a1 'xor' 'not' a2
+'xor' 'not' a3) & Following(s,2).GFA3CarryOutput(x,y,z) = 'not' (('not' a1 '&'
+  'not' a2) 'or' ('not' a2 '&' 'not' a3) 'or' ('not' a3 '&' 'not' a1))
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set S2 = GFA3CarryStr(x,y,z);
+  set S1 = GFA3AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th127;
+  set A2 = GFA3CarryCirc(x,y,z);
+  set A1 = GFA3AdderCirc(x,y,z);
+  set A = BitGFA3Circ(x,y,z);
+  let s be State of A;
+  let a1,a2,a3 be Element of BOOLEAN;
+  assume that
+A4: a1 = s.x and
+A5: a2 = s.y and
+A6: a3 = s.z;
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+A7: dom s1 = the carrier of S1 by CIRCUIT1:4;
+  z in the carrier of S1 by FACIRC_1:60;
+  then
+A8: a3 = s1.z by A6,A7,FUNCT_1:70;
+  y in the carrier of S1 by FACIRC_1:60;
+  then
+A9: a2 = s1.y by A5,A7,FUNCT_1:70;
+  reconsider t = s as State of A1+*A2;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A10: Following(t,2).GFA3AdderOutput(x,y,z) = Following(s1,2).GFA3AdderOutput
+  (x,y,z) by A3,FACIRC_1:32;
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+A11: dom s2 = the carrier of S2 by CIRCUIT1:4;
+  x in the carrier of S1 by FACIRC_1:60;
+  then a1 = s1.x by A4,A7,FUNCT_1:70;
+  hence Following(s,2).GFA3AdderOutput(x,y,z) = 'not' ('not' a1 'xor' 'not' a2
+  'xor' 'not' a3) by A1,A9,A8,A10,Th148;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A12: Following(t,2).GFA3CarryOutput(x,y,z) = Following(s2,2).GFA3CarryOutput
+  (x,y,z) by A3,FACIRC_1:33;
+  z in the carrier of S2 by Th129;
+  then
+A13: a3 = s2.z by A6,A11,FUNCT_1:70;
+  y in the carrier of S2 by Th129;
+  then
+A14: a2 = s2.y by A5,A11,FUNCT_1:70;
+  x in the carrier of S2 by Th129;
+  then a1 = s2.x by A4,A11,FUNCT_1:70;
+  hence thesis by A2,A14,A13,A12,Th135;
+end;
+
+theorem
+  for x,y,z being set st z <> [<*x,y*>,xor2] & x <> [<*y,z*>,and2b] & y
+<> [<*z,x*>,and2b] & z <> [<*x,y*>,and2b] for s being State of BitGFA3Circ(x,y,
+  z) holds Following(s,2) is stable
+proof
+  set f1 = and2b, f2 = and2b, f3 = and2b;
+  set f0 = xor2;
+  let x,y,z be set such that
+A1: z <> [<*x,y*>,f0] and
+A2: x <> [<*y,z*>,f2] & y <> [<*z,x*>,f3] & z <> [<*x,y*>,f1];
+  set A = BitGFA3Circ(x,y,z);
+  let s be State of A;
+  set S2 = GFA3CarryStr(x,y,z);
+  set S1 = GFA3AdderStr(x,y,z);
+  InputVertices S1 = {x,y,z} by A1,FACIRC_1:57;
+  then
+A3: InputVertices S1 = InputVertices S2 by A2,Th127;
+  set A1 = GFA3AdderCirc(x,y,z);
+  reconsider s1 = s|the carrier of S1 as State of A1 by FACIRC_1:26;
+  Following(s1,2) is stable by A1,FACIRC_1:63;
+  then
+A4: Following(s1,2) = Following Following(s1,2) by CIRCUIT2:def 6
+    .= Following(s1,2+1) by FACIRC_1:12;
+  set A2 = GFA3CarryCirc(x,y,z);
+  reconsider s2 = s|the carrier of S2 as State of A2 by FACIRC_1:26;
+  Following(s2,2) is stable by A2,Th136;
+  then
+A5: Following(s2,2) = Following Following(s2,2) by CIRCUIT2:def 6
+    .= Following(s2,2+1) by FACIRC_1:12;
+  reconsider t = s as State of A1+*A2;
+  set S = BitGFA3Str(x,y,z);
+A6: dom Following(s,3) = the carrier of S by CIRCUIT1:4;
+  InnerVertices S2 misses InputVertices S2 by XBOOLE_1:79;
+  then
+A7: Following(s1,2) = Following(t,2)|the carrier of S1 & Following(s1,3) =
+  Following(t,3)|the carrier of S1 by A3,FACIRC_1:30;
+  InnerVertices S1 misses InputVertices S1 by XBOOLE_1:79;
+  then
+A8: Following(s2,2) = Following(t,2)|the carrier of S2 & Following(s2,3) =
+  Following(t,3)|the carrier of S2 by A3,FACIRC_1:31;
+A9: the carrier of S = (the carrier of S1) \/ the carrier of S2 by CIRCCOMB
+  :def 2;
+A10: dom Following(s1,2) = the carrier of S1 & dom Following(s2,2) = the
+  carrier of S2 by CIRCUIT1:4;
+A11: now
+    let a be set;
+    assume a in the carrier of S;
+    then a in the carrier of S1 or a in the carrier of S2 by A9,
+    XBOOLE_0:
+    def 3;
+    then (Following(s,2)).a = (Following(s1,2)).a & (Following(s,3)).a = (
+Following(s1,3)).a or (Following(s,2)).a = (Following(s2,2)).a & (Following(s,3
+    )).a = (Following(s2,3)).a by A7,A8,A4,A5,A10, FUNCT_1:70;
+    hence (Following(s,2)).a = (Following Following(s,2)).a by A4,A5,
+    FACIRC_1:12;
+  end;
+  Following(s,2+1) = Following Following(s,2) & dom Following(s,2) = the
+  carrier of S by CIRCUIT1:4,FACIRC_1:12;
+  hence Following(s,2) = Following Following(s,2) by A6,A11,FUNCT_1:9;
+end;

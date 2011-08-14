@@ -1,0 +1,1619 @@
+:: Sum and Product of Finite Sequences of Elements of a Field
+::  by Katarzyna Zawadzka
+::
+:: Received December 29, 1992
+:: Copyright (c) 1992 Association of Mizar Users
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, RLVECT_1, XBOOLE_0, ALGSTR_0, BINOP_1,
+      FUNCT_1, ARYTM_3, RELAT_1, VECTSP_1, MESFUNC1, ALGSTR_1, SUPINF_2,
+      SETWISEO, LATTICES, STRUCT_0, FUNCOP_1, ARYTM_1, FINSEQOP, FINSEQ_1,
+      FINSEQ_2, TARSKI, RVSUM_1, ORDINAL4, XXREAL_0, NAT_1, CARD_3, FINSUB_1,
+      FINSEQ_4, SETWOP_2, FINSET_1, CARD_1, ORDINAL1, PARTFUN1, FINSOP_1,
+      GROUP_1, FVSUM_1;
+ notations TARSKI, XBOOLE_0, SUBSET_1, CARD_1, NUMBERS, ORDINAL1, NAT_1,
+      RELAT_1, FUNCT_1, STRUCT_0, ALGSTR_0, PARTFUN1, FUNCT_2, FINSEQ_1,
+      FINSEQ_4, BINOP_1, FUNCOP_1, RLVECT_1, SETWISEO, FINSOP_1, FINSEQ_2,
+      FINSEQOP, SETWOP_2, GROUP_1, ALGSTR_1, GROUP_4, VECTSP_1, FINSET_1,
+      FINSUB_1, MATRIX_2, XXREAL_0;
+ constructors PARTFUN1, BINOP_1, SETWISEO, SQUARE_1, NAT_1, FINSEQOP, FINSEQ_4,
+      FINSOP_1, SETWOP_2, ALGSTR_1, GROUP_4, MATRIX_2, RELSET_1;
+ registrations XBOOLE_0, RELAT_1, FUNCT_1, ORDINAL1, FUNCT_2, FINSET_1,
+      FINSUB_1, XREAL_0, NAT_1, FINSEQ_1, FINSEQ_2, STRUCT_0, VECTSP_1,
+      ALGSTR_1, CARD_1, GROUP_1;
+ requirements NUMERALS, REAL, BOOLE, SUBSET;
+ definitions SETWISEO, ALGSTR_1, GROUP_4, RLVECT_1, ALGSTR_0;
+ theorems FINSEQ_1, FINSEQ_2, TARSKI, FUNCT_1, FUNCT_2, NAT_1, BINOP_1,
+      FINSEQOP, VECTSP_1, FUNCOP_1, SETWOP_2, RLVECT_1, RELAT_1, SETWISEO,
+      FINSEQ_3, ZFMISC_1, FINSEQ_4, ALGSTR_1, FINSOP_1, GROUP_1, XBOOLE_0,
+      XBOOLE_1, XCMPLX_1, ORDINAL1, GROUP_4, XXREAL_0, PARTFUN1;
+ schemes NAT_1, FUNCT_2;
+
+begin :: Auxiliary theorems
+
+reserve i,j,k for Element of NAT;
+
+canceled;
+
+theorem Th2:
+  for K being Abelian (non empty addLoopStr) holds the addF of K is commutative
+proof
+  let K be Abelian (non empty addLoopStr);
+  now
+    let a,b be Element of K;
+    thus (the addF of K).(a,b)=a+b .=(the addF of K).(b,a) by RLVECT_1:5;
+  end;
+  hence thesis by BINOP_1:def 2;
+end;
+
+theorem Th3:
+  for K being add-associative (non empty addLoopStr) holds the addF
+  of K is associative
+proof
+  let K be add-associative (non empty addLoopStr);
+  now
+    let a,b,c be Element of K;
+    thus (the addF of K).(a,(the addF of K).(b,c))=a+(b+c)
+      .=(a+b)+c by RLVECT_1:def 6
+      .=(the addF of K).((the addF of K).(a,b),c);
+  end;
+  hence thesis by BINOP_1:def 3;
+end;
+
+theorem Th4:
+  for K being commutative (non empty multMagma) holds the multF of
+  K is commutative
+proof
+  let K be commutative (non empty multMagma);
+  now
+    let a,b be Element of K;
+    thus (the multF of K).(a,b)=a*b .= b*a
+      .=(the multF of K).(b,a);
+  end;
+  hence thesis by BINOP_1:def 2;
+end;
+
+registration
+  let K be Abelian (non empty addLoopStr);
+  cluster the addF of K -> commutative;
+  coherence by Th2;
+end;
+
+registration
+  let K be add-associative (non empty addLoopStr);
+  cluster the addF of K -> associative;
+  coherence by Th3;
+end;
+
+registration
+  let K be commutative (non empty multMagma);
+  cluster the multF of K -> commutative;
+  coherence by Th4;
+end;
+
+canceled;
+
+theorem Th6:
+  for K being commutative left_unital (non empty multLoopStr) holds
+  1.K is_a_unity_wrt the multF of K
+proof
+  let K be commutative left_unital (non empty multLoopStr);
+  set o = the multF of K;
+  now
+    let h be Element of K;
+    thus o.(1.K,h) = 1.K * h .= h by VECTSP_1:def 19;
+    thus o.(h,1.K) = h * 1.K .= h by VECTSP_1:def 19;
+  end;
+  hence thesis by BINOP_1:11;
+end;
+
+theorem Th7:
+  for K being commutative left_unital (non empty multLoopStr) holds
+  the_unity_wrt the multF of K = 1.K
+proof
+  let K be commutative left_unital (non empty multLoopStr);
+  reconsider e=1.K as Element of K;
+  e is_a_unity_wrt the multF of K by Th6;
+  hence thesis by BINOP_1:def 8;
+end;
+
+theorem Th8:
+  for K being left_zeroed right_zeroed (non empty addLoopStr) holds
+  0.K is_a_unity_wrt the addF of K
+proof
+  let K be left_zeroed right_zeroed (non empty addLoopStr);
+  now
+    let a be Element of K;
+    thus (the addF of K).(0.K,a) = 0.K + a .= a by ALGSTR_1:def 5;
+    thus (the addF of K).(a,0.K) = a + 0.K .= a by RLVECT_1:def 7;
+  end;
+  hence thesis by BINOP_1:11;
+end;
+
+theorem Th9:
+  for K being left_zeroed right_zeroed (non empty addLoopStr) holds
+  the_unity_wrt the addF of K = 0.K
+proof
+  let K be left_zeroed right_zeroed (non empty addLoopStr);
+  reconsider e=0.K as Element of K;
+  e is_a_unity_wrt the addF of K by Th8;
+  hence thesis by BINOP_1:def 8;
+end;
+
+theorem Th10:
+  for K being left_zeroed right_zeroed (non empty addLoopStr)
+  holds the addF of K is having_a_unity
+proof
+  let K be left_zeroed right_zeroed (non empty addLoopStr);
+  take 0.K;
+  thus thesis by Th8;
+end;
+
+theorem Th11:
+  for K being commutative left_unital (non empty multLoopStr)
+  holds the multF of K is having_a_unity
+proof
+  let K be commutative left_unital (non empty multLoopStr);
+  take 1.K;
+  thus thesis by Th6;
+end;
+
+theorem Th12:
+  for K being distributive (non empty doubleLoopStr) holds the
+  multF of K is_distributive_wrt the addF of K
+proof
+  let K be distributive (non empty doubleLoopStr);
+  now
+    let a1,a2,a3 be Element of K;
+    thus (the multF of K).(a1,(the addF of K).(a2,a3)) = a1*(a2+a3)
+      .= a1*a2+a1*a3 by VECTSP_1:def 18
+      .= (the addF of K).((the multF of K).(a1,a2),(the multF of K).(a1,a3));
+    thus (the multF of K).((the addF of K).(a1,a2),a3) = (a1+a2)*a3
+      .= a1*a3+a2*a3 by VECTSP_1:def 18
+      .= (the addF of K).((the multF of K).(a1,a3),(the multF of K).(a2,a3));
+  end;
+  hence thesis by BINOP_1:23;
+end;
+
+definition
+  let K be non empty multMagma;
+  let a be Element of K;
+  func a multfield -> UnOp of the carrier of K equals
+  (the multF of K)[;](a,id
+  (the carrier of K));
+  coherence;
+end;
+
+definition
+  let K be non empty addLoopStr;
+  func diffield(K) -> BinOp of the carrier of K equals
+  (the addF of K)*(id the
+  carrier of K,comp K);
+  correctness;
+end;
+
+canceled;
+
+theorem Th14:
+  for K being non empty addLoopStr, a1,a2 being Element of K holds
+  (diffield(K)).(a1,a2) = a1 - a2
+proof
+  let K be non empty addLoopStr, a1,a2 be Element of K;
+  thus (diffield(K)).(a1,a2) = (the addF of K).(a1,(comp K).a2) by FINSEQOP:87
+    .= a1 - a2 by VECTSP_1:def 25;
+end;
+
+Lm1: for K being non empty multMagma, a,b being Element of K holds (the multF
+of K)[;](b,id (the carrier of K)).a = b*a
+proof
+  let K be non empty multMagma, a,b be Element of K;
+  thus (the multF of K)[;](b,id (the carrier of K)).a = (the multF of K).(b,(
+  id (the carrier of K).a)) by FUNCOP_1:66
+    .= b*a by FUNCT_1:35;
+end;
+
+theorem Th15:
+  for K being distributive (non empty doubleLoopStr), a being
+  Element of K holds a multfield is_distributive_wrt the addF of K by Th12,
+FINSEQOP:55;
+
+theorem Th16:
+  for K being left_zeroed right_zeroed add-associative
+  right_complementable (non empty addLoopStr) holds comp K is_an_inverseOp_wrt
+  the addF of K
+proof
+  let K be left_zeroed right_zeroed add-associative right_complementable (non
+  empty addLoopStr);
+  now
+    let a be Element of K;
+    thus (the addF of K).(a,((comp K)).a) = a+ -a by VECTSP_1:def 25
+      .= 0.K by RLVECT_1:16
+      .= the_unity_wrt the addF of K by Th9;
+    thus (the addF of K).(((comp K)).a,a) = -a+a by VECTSP_1:def 25
+      .= 0.K by RLVECT_1:16
+      .= the_unity_wrt the addF of K by Th9;
+  end;
+  hence thesis by FINSEQOP:def 1;
+end;
+
+theorem Th17:
+  for K being left_zeroed right_zeroed add-associative
+  right_complementable (non empty addLoopStr) holds the addF of K is
+  having_an_inverseOp
+proof
+  let K be left_zeroed right_zeroed add-associative right_complementable (non
+  empty addLoopStr);
+  comp K is_an_inverseOp_wrt the addF of K by Th16;
+  hence thesis by FINSEQOP:def 2;
+end;
+
+theorem Th18:
+  for K being left_zeroed right_zeroed add-associative
+right_complementable (non empty addLoopStr) holds the_inverseOp_wrt the addF of
+  K = comp K
+proof
+  let K be left_zeroed right_zeroed add-associative right_complementable (non
+  empty addLoopStr);
+A1: comp K is_an_inverseOp_wrt the addF of K by Th16;
+  the addF of K is having_a_unity & the addF of K is having_an_inverseOp
+  by Th10,Th17;
+  hence thesis by A1,FINSEQOP:def 3;
+end;
+
+theorem
+  for K being right_zeroed add-associative right_complementable Abelian
+  (non empty addLoopStr) holds comp K is_distributive_wrt the addF of K
+proof
+  let K be right_zeroed add-associative right_complementable Abelian (non
+  empty addLoopStr);
+  the addF of K is having_a_unity by Th10;
+  then (the_inverseOp_wrt the addF of K) is_distributive_wrt the addF of K by
+Th17,FINSEQOP:67;
+  hence thesis by Th18;
+end;
+
+begin
+
+::
+:: Some Operations on the i-tuples on Element of K
+::
+
+definition
+  let K be non empty addLoopStr;
+  let p1,p2 be FinSequence of the carrier of K;
+  func p1 + p2 -> FinSequence of the carrier of K equals
+  (the addF of K).:(p1,
+  p2);
+  correctness;
+end;
+
+canceled;
+
+theorem
+  for K being non empty addLoopStr, p1, p2 be FinSequence of the carrier
+  of K, a1, a2 being Element of K, i being Element of NAT st i in dom (p1+p2) &
+  a1 = p1.i & a2 = p2.i holds (p1+p2).i = a1 + a2 by FUNCOP_1:28;
+
+definition
+  let i;
+  let K be non empty addLoopStr;
+  let R1,R2 be Element of i-tuples_on the carrier of K;
+  redefine func R1 + R2 -> Element of i-tuples_on the carrier of K;
+  coherence by FINSEQ_2:140;
+end;
+
+theorem
+  for K being non empty addLoopStr, a1,a2 being Element of K, R1,R2
+being Element of i-tuples_on the carrier of K holds j in Seg i & a1 = R1.j & a2
+  = R2.j implies (R1+R2).j = a1 + a2
+proof
+  let K be non empty addLoopStr, a1,a2 be Element of K, R1,R2 be Element of i
+  -tuples_on the carrier of K;
+  assume j in Seg i;
+  then j in Seg len (R1 + R2) by FINSEQ_1:def 18;
+  then j in dom (R1 + R2) by FINSEQ_1:def 3;
+  hence thesis by FUNCOP_1:28;
+end;
+
+canceled;
+
+theorem
+  for K being non empty addLoopStr, a1,a2 being Element of K holds <*a1
+  *> + <*a2*> = <*a1+a2*> by FINSEQ_2:88;
+
+theorem
+  for K being non empty addLoopStr, a1,a2 being Element of K holds (i|->
+  a1) + (i|->a2) = i|->(a1+a2) by FINSEQOP:18;
+
+Lm2: for K be left_zeroed right_zeroed (non empty addLoopStr), R be Element of
+i-tuples_on the carrier of K holds R + (i|->(0.K)) = R
+proof
+  let K be left_zeroed right_zeroed (non empty addLoopStr), R be Element of i
+  -tuples_on the carrier of K;
+  the_unity_wrt the addF of K = 0.K & the addF of K is having_a_unity by Th9
+,Th10;
+  hence thesis by FINSEQOP:57;
+end;
+
+canceled 2;
+
+theorem Th28:
+  for K being Abelian left_zeroed right_zeroed (non empty
+addLoopStr), R being Element of i-tuples_on the carrier of K holds R + (i|->(0.
+  K)) = R & R = (i|->(0.K)) + R
+proof
+  let K be Abelian left_zeroed right_zeroed (non empty addLoopStr), R be
+  Element of i-tuples_on the carrier of K;
+  thus R + (i|->(0.K)) = R by Lm2;
+  hence thesis by FINSEQOP:34;
+end;
+
+definition
+  let K be non empty addLoopStr;
+  let p be FinSequence of the carrier of K;
+  func -p -> FinSequence of the carrier of K equals
+  (comp K)*p;
+  correctness;
+end;
+
+reserve K for non empty addLoopStr,
+  a for Element of K,
+  p for FinSequence of the carrier of K,
+  R for Element of i-tuples_on the carrier of K;
+
+canceled;
+
+theorem Th30:
+  i in dom -p & a = p.i implies (-p).i = -a
+proof
+  assume i in dom -p & a = p.i;
+  then (-p).i = (comp K).a by FUNCT_1:22;
+  hence thesis by VECTSP_1:def 25;
+end;
+
+definition
+  let i;
+  let K be non empty addLoopStr;
+  let R be Element of i-tuples_on the carrier of K;
+  redefine func -R -> Element of i-tuples_on the carrier of K;
+  coherence by FINSEQ_2:133;
+end;
+
+theorem
+  j in Seg i & a = R.j implies (-R).j = -a
+proof
+  assume j in Seg i;
+  then j in Seg len -R by FINSEQ_1:def 18;
+  then j in dom -R by FINSEQ_1:def 3;
+  hence thesis by Th30;
+end;
+
+canceled;
+
+theorem
+  -<*a*> = <*-a*>
+proof
+  thus -<*a*> = <*(comp K).a*> by FINSEQ_2:39
+    .= <*-a*> by VECTSP_1:def 25;
+end;
+
+theorem Th34:
+  -(i|->a) = i|->-a
+proof
+  thus -(i|->a) = i|->((comp K).a) by FINSEQOP:17
+    .= i|->-a by VECTSP_1:def 25;
+end;
+
+Lm3: for K be left_zeroed right_zeroed add-associative right_complementable (
+non empty addLoopStr), R be Element of i-tuples_on the carrier of K holds R + -
+R = (i|->0.K)
+proof
+  let K be left_zeroed right_zeroed add-associative right_complementable (non
+  empty addLoopStr), R be Element of i-tuples_on the carrier of K;
+A1: the addF of K is having_an_inverseOp & the addF of K is having_a_unity
+  by Th10,Th17;
+  thus R + -R = (the addF of K).: (R,(the_inverseOp_wrt (the addF of K)*R)) by
+Th18
+    .= i|->the_unity_wrt the addF of K by A1,FINSEQOP:77
+    .= i|->0.K by Th9;
+end;
+
+theorem Th35:
+  for K being Abelian right_zeroed add-associative
+right_complementable (non empty addLoopStr), R being Element of i-tuples_on the
+  carrier of K holds R + -R = (i|->0.K) & -R + R = (i|->0.K)
+proof
+  let K be Abelian right_zeroed add-associative right_complementable (non
+  empty addLoopStr), R be Element of i-tuples_on the carrier of K;
+  thus R + -R = (i|->0.K) by Lm3;
+  hence thesis by FINSEQOP:34;
+end;
+
+reserve K for left_zeroed right_zeroed add-associative right_complementable (
+  non empty addLoopStr),
+  R,R1,R2 for Element of i-tuples_on the carrier of K;
+
+theorem Th36:
+  R1 + R2 = (i|->0.K) implies R1 = -R2 & R2 = -R1
+proof
+A1: the addF of K is having_an_inverseOp & the_inverseOp_wrt the addF of K =
+  ( comp K) by Th17,Th18;
+  the_unity_wrt the addF of K = 0.K & the addF of K is having_a_unity by Th9
+,Th10;
+  hence thesis by A1,FINSEQOP:78;
+end;
+
+theorem Th37:
+  --R = R
+proof
+  R + -R = (i|->0.K) by Lm3;
+  hence thesis by Th36;
+end;
+
+theorem
+  -R1 = -R2 implies R1 = R2
+proof
+  assume -R1 = -R2;
+  hence R1 = --R2 by Th37
+    .= R2 by Th37;
+end;
+
+Lm4: R1 + R = R2 + R implies R1 = R2
+proof
+  assume R1 + R = R2 + R;
+  then R1 + (R + -R)= (R2 + R)+-R by FINSEQOP:29;
+  then
+A1: R1 + (R + -R)= R2 + (R + -R) by FINSEQOP:29;
+  R + -R = (i|->0.K) by Lm3;
+  then R1 = R2 + (i|->(0.K)) by A1,Lm2;
+  hence thesis by Lm2;
+end;
+
+theorem
+  for K being Abelian right_zeroed add-associative right_complementable
+  (non empty addLoopStr), R,R1,R2 being Element of i-tuples_on the carrier of K
+  holds R1 + R = R2 + R or R1 + R = R + R2 implies R1 = R2
+proof
+  let K be Abelian right_zeroed add-associative right_complementable (non
+  empty addLoopStr), R,R1,R2 be Element of i-tuples_on the carrier of K;
+  R1 + R = R2 + R iff R1 + R = R + R2 by FINSEQOP:34;
+  hence thesis by Lm4;
+end;
+
+theorem Th40:
+  for K being Abelian right_zeroed add-associative
+right_complementable (non empty addLoopStr), R1,R2 being Element of i-tuples_on
+  the carrier of K holds -(R1 + R2) = -R1 + -R2
+proof
+  let K be Abelian right_zeroed add-associative right_complementable (non
+  empty addLoopStr), R1,R2 be Element of i-tuples_on the carrier of K;
+  (R1 + R2) + (-R1 + -R2) = R1 + R2 + -R1 + -R2 by FINSEQOP:29
+    .= R2 + R1 + -R1 + -R2 by FINSEQOP:34
+    .= R2 + (R1 + -R1) + -R2 by FINSEQOP:29
+    .= R2 + (i|->(0.K)) + -R2 by Lm3
+    .= R2 + -R2 by Lm2
+    .= (i|->0.K) by Lm3;
+  hence thesis by Th36;
+end;
+
+definition
+  let K be non empty addLoopStr;
+  let p1,p2 be FinSequence of the carrier of K;
+  func p1 - p2 -> FinSequence of the carrier of K equals
+  (diffield(K)).:(p1,p2
+  );
+  correctness;
+end;
+
+reserve K for non empty addLoopStr,
+  a1,a2 for Element of K,
+  p1,p2 for FinSequence of the carrier of K,
+  R1,R2 for Element of i-tuples_on the carrier of K;
+
+canceled;
+
+theorem Th42:
+  i in dom (p1-p2) & a1 = p1.i & a2 = p2.i implies (p1-p2).i = a1 - a2
+proof
+  assume i in dom (p1-p2) & a1 = p1.i & a2 = p2.i;
+  then (p1 - p2).i = (diffield(K)).(a1,a2) by FUNCOP_1:28;
+  hence thesis by Th14;
+end;
+
+definition
+  let i;
+  let K be non empty addLoopStr;
+  let R1,R2 be Element of i-tuples_on the carrier of K;
+  redefine func R1 - R2 -> Element of i-tuples_on the carrier of K;
+  coherence by FINSEQ_2:140;
+end;
+
+theorem
+  j in Seg i & a1 = R1.j & a2 = R2.j implies (R1-R2).j = a1 - a2
+proof
+  assume j in Seg i;
+  then j in Seg len (R1-R2) by FINSEQ_1:def 18;
+  then j in dom (R1-R2) by FINSEQ_1:def 3;
+  hence thesis by Th42;
+end;
+
+canceled;
+
+theorem
+  <*a1*> - <*a2*> = <*a1-a2*>
+proof
+  thus <*a1*> - <*a2*> = <*(diffield(K)).(a1,a2)*> by FINSEQ_2:88
+    .= <*a1-a2*> by Th14;
+end;
+
+theorem
+  (i|->a1) - (i|->a2) = i|->(a1-a2)
+proof
+  thus (i|->a1) - (i|->a2) = i|->((diffield(K)).(a1,a2)) by FINSEQOP:18
+    .= i|->(a1-a2) by Th14;
+end;
+
+canceled;
+
+theorem
+  for K being add-associative right_complementable left_zeroed
+right_zeroed (non empty addLoopStr), R being Element of i-tuples_on the carrier
+  of K holds R - (i|->(0.K)) = R
+proof
+  let K be add-associative right_complementable left_zeroed right_zeroed (non
+  empty addLoopStr), R be Element of i-tuples_on the carrier of K;
+  thus R - (i|->(0.K)) = R + - (i|->(0.K)) by FINSEQOP:89
+    .= R + (i|->(-0.K)) by Th34
+    .= R + (i|->(0.K)) by RLVECT_1:25
+    .= R by Lm2;
+end;
+
+theorem
+  for K being Abelian left_zeroed right_zeroed (non empty addLoopStr), R
+  being Element of i-tuples_on the carrier of K holds (i|->(0.K)) - R = -R
+proof
+  let K be Abelian left_zeroed right_zeroed (non empty addLoopStr), R be
+  Element of i-tuples_on the carrier of K;
+  thus (i|->(0.K)) - R = (i|->(0.K)) + -R by FINSEQOP:89
+    .= - R by Th28;
+end;
+
+theorem
+  for K being left_zeroed right_zeroed add-associative
+right_complementable (non empty addLoopStr), R1,R2 being Element of i-tuples_on
+  the carrier of K holds R1 - -R2 = R1 + R2
+proof
+  let K be left_zeroed right_zeroed add-associative right_complementable (non
+  empty addLoopStr), R1,R2 be Element of i-tuples_on the carrier of K;
+  thus R1 - -R2 = R1 + --R2 by FINSEQOP:89
+    .= R1 + R2 by Th37;
+end;
+
+reserve K for Abelian right_zeroed add-associative right_complementable (non
+  empty addLoopStr),
+  R,R1,R2,R3 for Element of i-tuples_on the carrier of K;
+
+theorem
+  -(R1 - R2) = R2 - R1
+proof
+  thus -(R1 - R2) = -(R1 + -R2) by FINSEQOP:89
+    .= -R1 + --R2 by Th40
+    .= -R1 + R2 by Th37
+    .= R2 + -R1 by FINSEQOP:34
+    .= R2 - R1 by FINSEQOP:89;
+end;
+
+theorem Th52:
+  -(R1 - R2) = -R1 + R2
+proof
+  thus -(R1 - R2) = -(R1+ -R2) by FINSEQOP:89
+    .= -R1 +--R2 by Th40
+    .= -R1 + R2 by Th37;
+end;
+
+theorem Th53:
+  R - R = (i|->0.K)
+proof
+  thus R - R = R + - R by FINSEQOP:89
+    .= (i|->0.K) by Lm3;
+end;
+
+theorem
+  R1 - R2 = (i|->0.K) implies R1 = R2
+proof
+  assume R1 - R2 = (i|->0.K);
+  then R1 + - R2 = (i|->0.K) by FINSEQOP:89;
+  then R1 = --R2 by Th36;
+  hence thesis by Th37;
+end;
+
+theorem
+  R1 - R2 - R3 = R1 - (R2 + R3)
+proof
+  thus R1 - R2 - R3 = R1 - R2 + - R3 by FINSEQOP:89
+    .= R1 + - R2 + - R3 by FINSEQOP:89
+    .= R1 + (- R2 + - R3) by FINSEQOP:29
+    .= R1 + -(R2 + R3) by Th40
+    .= R1 - (R2 + R3) by FINSEQOP:89;
+end;
+
+theorem Th56:
+  R1 + (R2 - R3) = R1 + R2 - R3
+proof
+  thus R1 + (R2 - R3) = R1 + (R2 + - R3) by FINSEQOP:89
+    .= R1 + R2 + - R3 by FINSEQOP:29
+    .= R1 + R2 - R3 by FINSEQOP:89;
+end;
+
+theorem
+  R1 - (R2 - R3) = R1 - R2 + R3
+proof
+  thus R1 - (R2 - R3) = R1 + - (R2 - R3) by FINSEQOP:89
+    .= R1 + (- R2 + R3) by Th52
+    .= R1 + - R2 + R3 by FINSEQOP:29
+    .= R1 - R2 + R3 by FINSEQOP:89;
+end;
+
+theorem
+  R1 = R1 + R - R
+proof
+  thus R1 = R1 + (i|->(0.K)) by Lm2
+    .= R1 + (R - R) by Th53
+    .= R1 + R - R by Th56;
+end;
+
+theorem
+  R1 = R1 - R + R
+proof
+  thus R1 = R1 + (i|->(0.K)) by Lm2
+    .= R1 + (-R + R) by Th35
+    .= R1 + -R + R by FINSEQOP:29
+    .= R1 - R + R by FINSEQOP:89;
+end;
+
+reserve K for non empty multMagma,
+  a,a9,a1,a2 for Element of K,
+  p for FinSequence of the carrier of K,
+  R for Element of i-tuples_on the carrier of K;
+
+theorem Th60:
+  for a,b being Element of K holds ((the multF of K)[;](a,id the
+  carrier of K)).b = a*b
+proof
+  let a,b be Element of K;
+  thus ((the multF of K)[;](a,id (the carrier of K))).b = (the multF of K).(a,
+  (id (the carrier of K)).b) by FUNCOP_1:66
+    .= a*b by FUNCT_1:35;
+end;
+
+theorem
+  for a,b being Element of K holds (a multfield).b = a*b by Th60;
+
+definition
+  let K be non empty multMagma;
+  let p be FinSequence of the carrier of K;
+  let a be Element of K;
+  func a*p -> FinSequence of the carrier of K equals
+  (a multfield)*p;
+  correctness;
+end;
+
+theorem Th62:
+  i in dom (a*p) & a9 = p.i implies (a*p).i = a*a9
+proof
+  assume
+A1: i in dom (a*p) & a9 = p.i;
+  then
+A2: a9 in dom((the multF of K)[;](a,id the carrier of K)) by FUNCT_1:21;
+  thus (a*p).i = ((the multF of K)[;](a,id the carrier of K)).a9 by A1,
+FUNCT_1:22
+    .=(the multF of K).(a,(id the carrier of K).a9) by A2,FUNCOP_1:42
+    .= a*a9 by FUNCT_1:35;
+end;
+
+definition
+  let i;
+  let K be non empty multMagma;
+  let R be Element of i-tuples_on the carrier of K;
+  let a be Element of K;
+  redefine func a*R -> Element of i-tuples_on the carrier of K;
+  coherence by FINSEQ_2:133;
+end;
+
+theorem
+  j in Seg i & a9 = R.j implies (a*R).j = a*a9
+proof
+  assume j in Seg i;
+  then j in Seg len (a*R) by FINSEQ_1:def 18;
+  then j in dom (a*R) by FINSEQ_1:def 3;
+  hence thesis by Th62;
+end;
+
+canceled;
+
+theorem
+  a*<*a1*> = <*a*a1*>
+proof
+  thus a*<*a1*> = <*((the multF of K)[;](a,id the carrier of K)).a1*> by
+FINSEQ_2:39
+    .= <*a*a1*> by Th60;
+end;
+
+theorem Th66:
+  a1*(i|->a2) = i|->(a1*a2)
+proof
+  thus a1*(i|->a2) = i|->(((the multF of K)[;](a1,id the carrier of K)).a2) by
+FINSEQOP:17
+    .= i|->(a1*a2) by Th60;
+end;
+
+theorem
+  for K being associative (non empty multMagma), a1,a2 being Element of
+K, R being Element of i-tuples_on the carrier of K holds (a1*a2)*R = a1*(a2*R)
+proof
+  let K be associative (non empty multMagma), a1,a2 be Element of K, R be
+  Element of i-tuples_on the carrier of K;
+  set F=the multF of K;
+  set f=id the carrier of K;
+  thus (a1*a2)*R = (F[;](a1,F[;](a2,f)))*R by FUNCOP_1:77
+    .= ((the multF of K)[;](a1,id the carrier of K)* (the multF of K)[;](a2,
+  id the carrier of K))*R by FUNCOP_1:69
+    .= a1*(a2*R) by RELAT_1:55;
+end;
+
+reserve K for distributive (non empty doubleLoopStr),
+  a,a1,a2 for Element of K ,
+  R,R1,R2 for Element of i-tuples_on the carrier of K;
+
+theorem
+  (a1 + a2)*R = a1*R + a2*R
+proof
+  thus (a1 + a2)*R = (the addF of K).:((the multF of K)[;](a1,id the carrier
+  of K), (the multF of K)[;](a2,id the carrier of K))*R by Th12,FINSEQOP:36
+    .= a1*R + a2*R by FUNCOP_1:31;
+end;
+
+theorem
+  a*(R1+R2) = a*R1 + a*R2 by Th15,FINSEQOP:52;
+
+theorem
+  for K being distributive commutative left_unital (non empty
+doubleLoopStr), R being Element of i-tuples_on the carrier of K holds 1.K * R =
+  R
+proof
+  let K be distributive commutative left_unital (non empty doubleLoopStr), R
+  be Element of i-tuples_on the carrier of K;
+A1: rng R c= the carrier of K by FINSEQ_1:def 4;
+  the_unity_wrt the multF of K = 1.K by Th7;
+  hence 1.K * R = (id the carrier of K)*R by FINSEQOP:45
+    .= R by A1,RELAT_1:79;
+end;
+
+theorem
+  for K being add-associative right_zeroed right_complementable
+  distributive (non empty doubleLoopStr), R being Element of i-tuples_on the
+  carrier of K holds 0.K*R = i|->0.K
+proof
+  let K be add-associative right_zeroed right_complementable distributive (non
+  empty doubleLoopStr), R be Element of i-tuples_on the carrier of K;
+A1: rng R c= (the carrier of K) by FINSEQ_1:def 4;
+A2: the addF of K is having_an_inverseOp by Th17;
+A3: the_unity_wrt the addF of K = 0.K & the addF of K is having_a_unity by Th9
+,Th10;
+  thus 0.K*R = (the multF of K)[;](0.K,(id the carrier of K)*R) by FUNCOP_1:44
+    .= (the multF of K)[;](0.K,R) by A1,RELAT_1:79
+    .= i|->0.K by A3,A2,Th12,FINSEQOP:80;
+end;
+
+theorem
+  for K being add-associative right_zeroed right_complementable
+commutative left_unital distributive (non empty doubleLoopStr), R being Element
+  of i-tuples_on the carrier of K holds (-1.K) * R = -R
+proof
+  let K be add-associative right_zeroed right_complementable commutative
+left_unital distributive (non empty doubleLoopStr), R be Element of i-tuples_on
+  the carrier of K;
+A1: (comp K).(1.K) = -1.K & the_unity_wrt the multF of K = 1.K by Th7,
+VECTSP_1:def 25;
+A2: the addF of K is having_an_inverseOp & the_inverseOp_wrt the addF of K =
+  ( comp K) by Th17,Th18;
+  the multF of K is having_a_unity & the addF of K is having_a_unity by Th10;
+  hence thesis by A1,A2,Th12,FINSEQOP:72;
+end;
+
+definition
+  let M be non empty multMagma, p1, p2 be FinSequence of the carrier of M;
+  func mlt(p1,p2) -> FinSequence of the carrier of M equals
+  (the multF of M).:
+  (p1,p2);
+  correctness;
+end;
+
+reserve K for non empty multMagma,
+  a1,a2,b1,b2 for Element of K,
+  p1,p2 for FinSequence of the carrier of K,
+  R1,R2 for Element of i-tuples_on the carrier of K;
+
+theorem
+  i in dom mlt(p1,p2) & a1 = p1.i & a2 = p2.i implies mlt(p1,p2).i = a1
+  * a2 by FUNCOP_1:28;
+
+definition
+  let i;
+  let K be non empty multMagma;
+  let R1,R2 be Element of i-tuples_on the carrier of K;
+  redefine func mlt(R1,R2) -> Element of i-tuples_on the carrier of K;
+  coherence by FINSEQ_2:140;
+end;
+
+theorem
+  j in Seg i & a1 = R1.j & a2 = R2.j implies mlt(R1,R2).j = a1 * a2
+proof
+  assume j in Seg i;
+  then j in Seg len mlt(R1,R2) by FINSEQ_1:def 18;
+  then j in dom mlt(R1,R2) by FINSEQ_1:def 3;
+  hence thesis by FUNCOP_1:28;
+end;
+
+canceled;
+
+theorem
+  mlt(<*a1*>,<*a2*>) = <*a1*a2*> by FINSEQ_2:88;
+
+Lm5: mlt(<*a1,a2*>,<*b1,b2*>)=<*a1*b1,a2*b2*>
+proof
+  <*a1,a2*>=<*a1*>^<*a2*> & <*b1,b2*>=<*b1*>^<*b2*> by FINSEQ_1:def 9;
+  hence mlt(<*a1,a2*>,<*b1,b2*>)=mlt(<*a1*>,<*b1*>)^<*a2*b2*> by FINSEQOP:11
+    .=<*a1*b1*>^<*a2*b2*> by FINSEQ_2:88
+    .=<*a1*b1,a2*b2*> by FINSEQ_1:def 9;
+end;
+
+reserve K for commutative (non empty multMagma),
+  p,q for FinSequence of the carrier of K,
+  R1,R2 for Element of i-tuples_on the carrier of K;
+
+theorem
+  mlt(R1,R2) = mlt(R2,R1) by FINSEQOP:34;
+
+theorem Th78:
+  mlt(p,q)=mlt(q,p)
+proof
+  reconsider r=mlt(p,q) as FinSequence of the carrier of K;
+  reconsider s=mlt(q,p) as FinSequence of the carrier of K;
+  reconsider k=min(len p,len q) as Element of NAT by XXREAL_0:15;
+A1: len r =min(len p,len q) by FINSEQ_2:85;
+  then
+A2: dom r = Seg k by FINSEQ_1:def 3;
+  min(len p,len q)<=len q by XXREAL_0:17;
+  then Seg k c= Seg len q by FINSEQ_1:7;
+  then
+A3: Seg k c= dom q by FINSEQ_1:def 3;
+  min(len p,len q)<= len p by XXREAL_0:17;
+  then Seg k c= Seg len p by FINSEQ_1:7;
+  then
+A4: Seg k c= dom p by FINSEQ_1:def 3;
+A5: len s=min(len q,len p) by FINSEQ_2:85;
+  then
+A6: dom s=Seg k by FINSEQ_1:def 3;
+A7: dom r=Seg k by A1,FINSEQ_1:def 3;
+  now
+    let i be Nat;
+    assume
+A8: i in dom r;
+    then reconsider d1=(p.i),d2=(q.i) as Element of K by A4,A3,A2,FINSEQ_2:13;
+    thus r.i=d1*d2 by A8,FUNCOP_1:28
+      .= d2*d1
+      .=s.i by A7,A6,A8,FUNCOP_1:28;
+  end;
+  hence thesis by A1,A5,FINSEQ_2:10;
+end;
+
+theorem
+  for K being associative (non empty multMagma), R1,R2,R3 being Element
+  of i-tuples_on the carrier of K holds mlt(R1,mlt(R2,R3)) = mlt(mlt(R1,R2),R3)
+  by FINSEQOP:29;
+
+reserve K for commutative associative (non empty multMagma),
+  a,a1,a2 for Element of K,
+  R for Element of i-tuples_on the carrier of K;
+
+theorem Th80:
+  mlt(i|->a,R) = a*R & mlt(R,i|->a) = a*R
+proof
+  thus mlt(i|->a,R) = (the multF of K)[;](a,R) by FINSEQOP:21
+    .= a*R by FINSEQOP:23;
+  hence thesis by FINSEQOP:34;
+end;
+
+theorem
+  mlt(i|->a1,i|->a2) = i|->(a1*a2)
+proof
+  thus mlt(i|->a1,i|->a2) = a1*(i|->a2) by Th80
+    .= i|->(a1*a2) by Th66;
+end;
+
+theorem
+  for K being associative (non empty multMagma), a being Element of K,
+R1,R2 being Element of i-tuples_on the carrier of K holds a*mlt(R1,R2) = mlt(a*
+  R1,R2) by FINSEQOP:27;
+
+reserve K for commutative associative (non empty multMagma),
+  a for Element of K,
+  R,R1,R2 for Element of i-tuples_on the carrier of K;
+
+theorem
+  a*mlt(R1,R2) = mlt(a*R1,R2) & a*mlt(R1,R2) = mlt(R1,a*R2)
+proof
+  thus a*mlt(R1,R2) = mlt(a*R1,R2) by FINSEQOP:27;
+  thus a*mlt(R1,R2) = a*mlt(R2,R1) by FINSEQOP:34
+    .= mlt(a*R2,R1) by FINSEQOP:27
+    .= mlt(R1,a*R2) by FINSEQOP:34;
+end;
+
+theorem
+  a*R = mlt(i|->a,R) by Th80;
+
+begin
+
+::
+::The Sum of Finite Number of Elements
+::
+
+registration
+  cluster Abelian right_zeroed -> left_zeroed (non empty addLoopStr);
+  coherence
+  proof
+    let L be non empty addLoopStr such that
+A1: L is Abelian and
+A2: L is right_zeroed;
+    let x be Element of L;
+    thus 0.L + x = x + 0.L by A1,RLVECT_1:def 5
+      .= x by A2,RLVECT_1:def 7;
+  end;
+end;
+
+definition
+  let K be Abelian add-associative right_zeroed right_complementable (non
+  empty addLoopStr);
+  let p be FinSequence of the carrier of K;
+  redefine func Sum(p) equals
+  (the addF of K) $$ p;
+  compatibility
+  proof
+    set q = <*> (the carrier of K);
+    deffunc F(Element of NAT) = (the addF of K) $$ (p|$1);
+    let s be Element of K;
+    consider f being Function of NAT, the carrier of K such that
+A1: for i holds f.i = F(i) from FUNCT_2:sch 4;
+    hereby
+      defpred P[set,set] means ex q being FinSequence of the carrier of K st q
+      = p*Sgm dom(p|$1) & $2 = Sum q;
+      assume
+A2:   s = Sum(p);
+A4:   for x being Element of Fin NAT ex y being Element of K st P[x,y]
+      proof
+        let B be Element of Fin NAT;
+        per cases;
+        suppose
+A5:       dom p = {};
+          reconsider u = Sum<*>the carrier of K as Element of K;
+          reconsider q = <*>the carrier of K as FinSequence of the carrier of
+          K;
+          take u, q;
+          p = {} by A5;
+          hence q = p*Sgm dom(p|B);
+          thus thesis;
+        end;
+        suppose
+          dom p <> {};
+          then reconsider domp = dom p as non empty set;
+          reconsider p9 = p as Function of domp, the carrier of K by
+FINSEQ_2:30;
+A6:       dom(p|B) c= dom p by RELAT_1:89;
+          reconsider pB = p|B as FinSubsequence;
+          rng Sgm dom pB = dom pB by FINSEQ_1:71;
+          then reconsider p99 = Sgm dom(p|B) as FinSequence of domp by A6,
+FINSEQ_1:def 4;
+          reconsider q = p9*p99 as FinSequence of the carrier of K;
+          reconsider u = Sum q as Element of K;
+          take u, q;
+          thus thesis;
+        end;
+      end;
+      consider G being Function of Fin NAT, the carrier of K such that
+A7:   for B being Element of Fin NAT holds P[B,G.B] from FUNCT_2:sch
+      3(A4);
+A8:   now
+        let B9 be Element of Fin NAT such that
+        B9 c= dom p and
+        B9 <> {};
+        let x be Element of NAT;
+        set f2 = Sgm dom(p| (B9 \/ {x})), f3 = f2 -| x, f4 = f2 |-- x;
+        reconsider Y = finSeg(len f2) \ f2 " {x} as finite set;
+A9:     Seg(len f2) = dom f2 by FINSEQ_1:def 3;
+        set R = rng (f2|Y);
+        set M = f2*(Sgm Y);
+A10:    rng Sgm Y = Y by FINSEQ_1:def 13;
+        dom Sgm Y = finSeg card Y by FINSEQ_3:45;
+        then dom M = Seg card Y by A9,A10,RELAT_1:46;
+        then reconsider M as FinSequence by FINSEQ_1:def 2;
+        rng f2 c= NAT & rng M c= rng f2 by FINSEQ_1:def 4,RELAT_1:45;
+        then rng M c= NAT by XBOOLE_1:1;
+        then reconsider L = f2*(Sgm Y) as FinSequence of NAT by FINSEQ_1:def 4;
+        now
+          let y be set;
+          hereby
+            assume y in rng L;
+            then consider x be set such that
+A11:        x in dom L and
+A12:        y = L.x by FUNCT_1:def 5;
+            x in dom Sgm Y by A11,FUNCT_1:21;
+            then
+A13:        (Sgm Y).x in Y by A10,FUNCT_1:def 5;
+            y = f2.((Sgm Y).x) by A11,A12,FUNCT_1:22;
+            hence y in R by A9,A13,FUNCT_1:73;
+          end;
+          assume y in R;
+          then consider x be set such that
+A14:      x in dom (f2|Y) and
+A15:      y = (f2|Y).x by FUNCT_1:def 5;
+A16:      x in (dom f2)/\Y by A14,RELAT_1:90;
+          then
+A17:      x in Y by XBOOLE_0:def 4;
+          then consider z being set such that
+A18:      z in dom Sgm Y and
+A19:      x = (Sgm Y).z by A10,FUNCT_1:def 5;
+          x in dom f2 by A16,XBOOLE_0:def 4;
+          then
+A20:      z in dom(f2*(Sgm Y)) by A18,A19,FUNCT_1:21;
+          then L.z = f2.((Sgm Y).z) by FUNCT_1:22
+            .= y by A15,A17,A19,FUNCT_1:72;
+          hence y in rng L by A20,FUNCT_1:def 5;
+        end;
+        then
+A21:    rng L = R by TARSKI:2;
+        x in {x} by TARSKI:def 1;
+        then
+A22:    x in B9 \/ {x} by XBOOLE_0:def 3;
+        dom(p| (B9 \/ {x})) = dom p /\ (B9 \/ {x}) by RELAT_1:90;
+        then dom(p| (B9 \/ {x})) c= dom p by XBOOLE_1:17;
+        then
+A23:    dom(p| (B9 \/ {x})) c= Seg len p by FINSEQ_1:def 3;
+        reconsider pB9x = p| (B9 \/ {x}) as FinSubsequence;
+        rng f2 c= Seg len p by A23,FINSEQ_1:def 13;
+        then
+A24:    rng f2 c= dom p by FINSEQ_1:def 3;
+        R c= rng f2 by RELAT_1:99;
+        then R c= dom p by A24,XBOOLE_1:1;
+        then
+A25:    R c= Seg len p by FINSEQ_1:def 3;
+        reconsider pp = p| (B9 \/ {x}) as FinSubsequence;
+A26:    dom(p|B9) = dom p /\ B9 by RELAT_1:90;
+A27:    now
+          let l,m,k1,k2 be natural number;
+          assume that
+A28:      1 <= l and
+A29:      l < m and
+A30:      m <= len L and
+A31:      k1=L.l & k2=L.m;
+          l <= len L by A29,A30,XXREAL_0:2;
+          then
+A32:      l in dom L by A28,FINSEQ_3:27;
+          then
+A33:      L.l = f2.((Sgm Y).l) by FUNCT_1:22;
+A34:      (Sgm Y).l in dom f2 by A32,FUNCT_1:21;
+          1<=m by A28,A29,XXREAL_0:2;
+          then
+A35:      m in dom L by A30,FINSEQ_3:27;
+          then
+A36:      L.m = f2.((Sgm Y).m) by FUNCT_1:22;
+          m in dom Sgm Y by A35,FUNCT_1:21;
+          then
+A37:      m<=len Sgm Y by FINSEQ_3:27;
+A38:      (Sgm Y).m in dom f2 by A35,FUNCT_1:21;
+          reconsider l,m as Element of NAT by ORDINAL1:def 13;
+          reconsider K1 = (Sgm Y).l, K2 = (Sgm Y).m as Element of NAT by A34
+,A38;
+A39:      1<=K1 by A34,FINSEQ_3:27;
+A40:      K2<=len f2 by A38,FINSEQ_3:27;
+          K1 < K2 by A28,A29,A37,FINSEQ_1:def 13;
+          hence k1 < k2 by A23,A31,A33,A36,A39,A40,FINSEQ_1:def 13;
+        end;
+        assume
+A41:    x in dom p \ B9;
+        then
+A42:    x in dom p by XBOOLE_0:def 5;
+        then reconsider D = dom p, E = rng p as non empty set by RELAT_1:65;
+        x in dom p by A41,XBOOLE_0:def 5;
+        then
+A43:    {x} c= dom p by ZFMISC_1:37;
+        p.x = p/.x by A42,PARTFUN1:def 8;
+        then reconsider px = p.x as Element of K;
+A44:    dom<*px*> = Seg 1 by FINSEQ_1:55;
+        rng<*x*> = { x } by FINSEQ_1:55;
+        then dom<*x*> = Seg 1 & rng<*x*> c= dom p by A42,FINSEQ_1:55
+,ZFMISC_1:37;
+        then
+A45:    dom(p*<*x*>) = dom<*px*> by A44,RELAT_1:46;
+A46:    now
+          let e be set;
+          assume
+A47:      e in dom<*px*>;
+          then
+A48:      e = 1 by A44,FINSEQ_1:4,TARSKI:def 1;
+          thus (p*<*x*>).e = p.(<*x*>.e) by A45,A47,FUNCT_1:22
+            .= p.x by A48,FINSEQ_1:57
+            .= <*px*>.e by A48,FINSEQ_1:57;
+        end;
+        reconsider x9 = x as Element of D by A41,XBOOLE_0:def 5;
+        reconsider p9 = p as Function of D, E by FUNCT_2:3;
+A49:    E c= the carrier of K by FINSEQ_1:def 4;
+        not x in B9 by A41,XBOOLE_0:def 5;
+        then
+A50:    not x in dom(p|B9) by A26,XBOOLE_0:def 4;
+A51:    rng Sgm dom pp = dom pp by FINSEQ_1:71;
+        then
+A52:    rng f2 c= dom p by RELAT_1:89;
+        dom pp = dom p /\ (B9 \/ {x}) by RELAT_1:90;
+        then
+A53:    x in rng f2 by A51,A42,A22,XBOOLE_0:def 4;
+        then rng f4 c= rng f2 by FINSEQ_4:59;
+        then
+A54:    rng f4 c= D by A52,XBOOLE_1:1;
+        rng f3 c= rng f2 by A53,FINSEQ_4:51;
+        then rng f3 c= D by A52,XBOOLE_1:1;
+        then reconsider f39 = f3, f49 = f4 as FinSequence of D by A54,
+FINSEQ_1:def 4;
+        consider q2 being FinSequence of the carrier of K such that
+A55:    q2 = p*Sgm dom(p| (B9 \/ {x})) and
+A56:    G.(B9 \/ {.x.}) = Sum q2 by A7;
+        reconsider p3 = p9*f39, p4 = p9*f49 as FinSequence of E;
+        rng p3 c= E by FINSEQ_1:def 4;
+        then
+A57:    rng p3 c= the carrier of K by A49,XBOOLE_1:1;
+        rng p4 c= E by FINSEQ_1:def 4;
+        then rng p4 c= the carrier of K by A49,XBOOLE_1:1;
+        then reconsider p3, p4 as FinSequence of the carrier of K by A57,
+FINSEQ_1:def 4;
+        consider q1 being FinSequence of the carrier of K such that
+A58:    q1 = p*Sgm dom(p|B9) and
+A59:    G.B9 = Sum q1 by A7;
+A60:    f2 is one-to-one by A23,FINSEQ_3:99;
+        rng ((Sgm (dom(p| (B9 \/ {x})))) | (Seg(len f2) \ f2 " {x})) = (Sgm
+        (dom(p| (B9 \/ {x})))).:(Seg(len f2) \ f2 " {x}) by RELAT_1:148
+          .= (Sgm (dom(p| (B9 \/ {x})))).:(dom f2 \ f2 " {x}) by FINSEQ_1:def 3
+          .= (Sgm (dom(p| (B9 \/ {x})))).:(dom f2) \ {x} by SETWISEO:11
+          .= rng Sgm dom pB9x \ {x} by RELAT_1:146
+          .= dom(p| (B9 \/ {x})) \ {x} by FINSEQ_1:71
+          .= (dom p /\ (B9 \/ {x})) \ {x} by RELAT_1:90
+          .= (dom p /\ B9 \/ dom p /\ {x}) \ {x} by XBOOLE_1:23
+          .= dom p /\ B9 \/ {x} \ {x} by A43,XBOOLE_1:28
+          .= dom(p|B9) \ {x} by A26,XBOOLE_1:40
+          .= dom(p|B9) by A50,ZFMISC_1:65;
+        then Sgm dom(p|B9) = f2*Sgm(Seg(len f2) \ f2 " {x}) by A25,A21,A27,
+FINSEQ_1:def 13
+          .= f2*Sgm(dom f2 \ f2 " {x}) by FINSEQ_1:def 3
+          .= f2 - {x} by FINSEQ_3:def 1
+          .= f3^f4 by A53,A60,FINSEQ_4:70;
+        then
+A61:    q1 = p3^p4 by A58,FINSEQOP:10;
+        q2 = p9*(f39^<*x9*>^f49) by A55,A53,FINSEQ_4:66
+          .= (p9*(f39^<*x9*>))^(p9*f49) by FINSEQOP:10
+          .= (p9*f39)^(p9*<*x9*>)^(p9*f49) by FINSEQOP:10
+          .= p3^<*px*>^p4 by A45,A46,FUNCT_1:9;
+        hence G.(B9 \/ {x}) = Sum(p3^<*px*>) + Sum p4 by A56,RLVECT_1:58
+          .= Sum p3 + Sum<*px*> + Sum p4 by RLVECT_1:58
+          .= Sum p3 + Sum p4 + Sum<*px*> by RLVECT_1:def 6
+          .= Sum q1 + Sum<*px*> by A61,RLVECT_1:58
+          .= (the addF of K).(Sum q1,px) by RLVECT_1:61
+          .= (the addF of K).(G.B9,[#](p,the_unity_wrt the addF of K).x) by A59
+,A42,SETWOP_2:22;
+      end;
+A62:  now
+        let x be Element of NAT;
+        consider q being FinSequence of the carrier of K such that
+A63:    q = p*Sgm dom(p|{x}) and
+A64:    G.{.x.} = Sum q by A7;
+X:      {} c= Seg 0;
+        per cases;
+        suppose
+A65:      not x in dom p;
+          then dom p misses {x} by ZFMISC_1:56;
+          then dom p /\ {x} = {} by XBOOLE_0:def 7;
+          then q = p*Sgm {} by A63,RELAT_1:90
+            .= p*{} by X,FINSEQ_1:72
+            .= <*>the carrier of K;
+          hence G.{x} = 0.K by A64,RLVECT_1:60
+            .= the_unity_wrt the addF of K by Th9
+            .= [#](p,the_unity_wrt the addF of K).x by A65,SETWOP_2:22;
+        end;
+        suppose
+A66:      x in dom p;
+          then p.x = p/.x by PARTFUN1:def 8;
+          then reconsider px = p.x as Element of K;
+A67:      dom<*px*> = Seg 1 by FINSEQ_1:55;
+          rng<*x*> = { x } by FINSEQ_1:55;
+          then dom<*x*> = Seg 1 & rng<*x*> c= dom p by A66,FINSEQ_1:55
+,ZFMISC_1:37;
+          then
+A68:      dom(p*<*x*>) = dom<*px*> by A67,RELAT_1:46;
+A69:      now
+            let e be set;
+            assume
+A70:        e in dom<*px*>;
+            then
+A71:        e = 1 by A67,FINSEQ_1:4,TARSKI:def 1;
+            thus (p*<*x*>).e = p.(<*x*>.e) by A68,A70,FUNCT_1:22
+              .= p.x by A71,FINSEQ_1:57
+              .= <*px*>.e by A71,FINSEQ_1:57;
+          end;
+A72:      x <> 0 by A66,FINSEQ_3:27;
+          q = p*Sgm(dom p /\ {x}) by A63,RELAT_1:90
+            .= p*Sgm{x} by A66,ZFMISC_1:52
+            .= p*<*x*> by A72,FINSEQ_3:50
+            .= <*px*> by A68,A69,FUNCT_1:9;
+          hence G.{x} = px by A64,RLVECT_1:61
+            .= [#](p,the_unity_wrt the addF of K).x by A66,SETWOP_2:22;
+        end;
+      end;
+A73:  now
+        let e be Element of K;
+        assume
+A74:    e is_a_unity_wrt the addF of K;
+        0.K is_a_unity_wrt the addF of K by Th8;
+        then
+A75:    e = 0.K by A74,BINOP_1:18;
+X:      {} c= Seg 0;
+        consider q being FinSequence of the carrier of K such that
+A76:    q = p*Sgm dom(p| ({}.NAT qua set)) and
+A77:    G.{}.NAT = Sum q by A7;
+        q = p*Sgm dom {} by A76
+          .= p*{} by X,FINSEQ_1:72
+          .= <*>the carrier of K;
+        hence e = G.{} by A77,A75,RLVECT_1:60;
+      end;
+      consider q1 being FinSequence of the carrier of K such that
+A78:  q1 = p*Sgm dom(p|dom p) and
+A79:  G.findom p = Sum q1 by A7;
+A80:  the addF of K is having_a_unity by Th10;
+      q1 = p*Sgm dom p by A78,RELAT_1:98
+        .= p*Sgm Seg len p by FINSEQ_1:def 3
+        .= p*idseq len p by FINSEQ_3:54
+        .= p by FINSEQ_2:64;
+      hence s = (the addF of K)$$(findom p,[#](p,the_unity_wrt the addF of K))
+      by A2,A80,A79,A73,A62,A8,SETWISEO:def 3
+        .= (the addF of K) $$ p by Th10,SETWOP_2:def 2;
+    end;
+A81: p|len p = p|Seg len p by FINSEQ_1:def 15
+      .= p|dom p by FINSEQ_1:def 3
+      .= p by RELAT_1:98;
+A82: now
+      let j;
+      let a be Element of K;
+      assume that
+A83:  j < len p and
+A84:  a = p.(j + 1);
+A85:  j+1 <= len p by A83,NAT_1:13;
+      then
+A86:  len(p| (j+1)) = j + 1 by FINSEQ_1:80;
+      j <= j+1 by NAT_1:11;
+      then
+A87:  Seg j c= Seg(j+1) by FINSEQ_1:7;
+A88:  p|j = p|Seg j by FINSEQ_1:def 15
+        .= (p|Seg(j+1)) |Seg j by A87,RELAT_1:103
+        .= (p| (j+1)) |Seg j by FINSEQ_1:def 15;
+A89:  1 <= j+1 by NAT_1:11;
+      then
+A90:  j+1 in dom(p| (j+1)) by A86,FINSEQ_3:27;
+      j+1 in dom p by A85,A89,FINSEQ_3:27;
+      then a = p/.(j+1) by A84,PARTFUN1:def 8
+        .= (p| (j+1))/.(j+1) by A90,FINSEQ_4:85
+        .= (p| (j+1)).(j + 1) by A90,PARTFUN1:def 8;
+      then p| (j+1) = (p|j)^<*a*> by A86,A88,FINSEQ_3:61;
+      hence f.(j + 1) = (the addF of K) $$ ((p|j)^<*a*>) by A1
+        .= (the addF of K).((the addF of K) $$ (p|j),a) by Th10,FINSOP_1:5
+        .= f.j + a by A1;
+    end;
+    p|0 = q;
+    then
+A91: f.0 = (the addF of K) $$ q by A1
+      .=the_unity_wrt the addF of K by Th10,FINSOP_1:11
+      .= 0.K by Th9;
+    assume s = (the addF of K) $$ p;
+    then s = f.(len p) by A1,A81;
+    hence thesis by A91,A82,RLVECT_1:def 15;
+  end;
+end;
+
+reserve K for add-associative right_zeroed right_complementable (non empty
+  addLoopStr),
+  a for Element of K,
+  p for FinSequence of the carrier of K;
+
+canceled 2;
+
+theorem
+  Sum(p^<*a*>) = Sum p + a
+proof
+  thus Sum(p^<*a*>) = Sum p + Sum <*a*> by RLVECT_1:58
+    .= Sum p + a by RLVECT_1:61;
+end;
+
+canceled;
+
+theorem
+  Sum(<*a*>^p) = a + Sum p
+proof
+  thus Sum(<*a*>^p) = Sum <*a*> + Sum p by RLVECT_1:58
+    .= a + Sum p by RLVECT_1:61;
+end;
+
+canceled 2;
+
+theorem
+  for K being Abelian add-associative right_zeroed right_complementable
+  distributive(non empty doubleLoopStr), a being Element of K, p being
+  FinSequence of the carrier of K holds Sum(a*p) = a*(Sum p)
+proof
+  let K be Abelian add-associative right_zeroed distributive
+  right_complementable (non empty doubleLoopStr), a be Element of K, p be
+  FinSequence of the carrier of K;
+  set rM = (the multF of K)[;](a,id the carrier of K);
+  the addF of K is having_a_unity & the multF of K is_distributive_wrt the
+  addF of K by Th10,Th12;
+  hence Sum (a*p) = rM.(Sum p) by Th17,SETWOP_2:41
+    .= a*(Sum p) by Lm1;
+end;
+
+theorem
+  for K being non empty addLoopStr for R being Element of 0-tuples_on
+  the carrier of K holds Sum R = 0.K
+proof
+  let K be non empty addLoopStr, R be Element of 0-tuples_on (the carrier of K
+  );
+  R=<*>(the carrier of K);
+  hence thesis by RLVECT_1:60;
+end;
+
+reserve K for Abelian add-associative right_zeroed right_complementable (non
+  empty addLoopStr),
+  p for FinSequence of the carrier of K,
+  R1,R2 for Element of i-tuples_on the carrier of K;
+
+theorem
+  Sum -p = -(Sum p)
+proof
+  the addF of K is having_an_inverseOp & the_inverseOp_wrt the addF of K =
+  ( comp K) by Th17,Th18;
+  hence Sum -p = (comp K).(Sum p) by Th10,SETWOP_2:42
+    .= -(Sum p) by VECTSP_1:def 25;
+end;
+
+theorem
+  Sum(R1 + R2) = Sum R1 + Sum R2 by Th10,SETWOP_2:46;
+
+theorem
+  Sum(R1 - R2) = Sum R1 - Sum R2
+proof
+  the addF of K is having_an_inverseOp & the_inverseOp_wrt the addF of K =
+  ( comp K) by Th17,Th18;
+  hence Sum(R1 - R2) = (diffield(K)).(Sum R1,(the addF of K)$$R2) by Th10,
+SETWOP_2:48
+    .= Sum R1 - Sum R2 by Th14;
+end;
+
+begin
+
+Lm6: for K being commutative well-unital (non empty multLoopStr) holds Product
+(<*> (the carrier of K)) = 1.K
+proof
+  let K be commutative well-unital (non empty multLoopStr);
+  1.K = 1_K;
+  hence thesis by GROUP_4:11;
+end;
+
+reserve K for commutative associative well-unital (non empty doubleLoopStr),
+  a ,a1,a2,a3 for Element of K,
+  p1 for FinSequence of the carrier of K,
+  R1,R2 for Element of i-tuples_on the carrier of K;
+
+canceled 5;
+
+theorem
+  Product(<*a*>^p1) = a * Product p1
+proof
+  thus Product(<*a*>^p1) = Product <*a*> * Product p1 by GROUP_4:8
+    .= a * Product p1 by FINSOP_1:12;
+end;
+
+canceled;
+
+theorem
+  Product<*a1,a2,a3*> = a1 * a2 * a3
+proof
+  thus Product<*a1,a2,a3*> = Product(<*a1,a2*>^<*a3*>) by FINSEQ_1:60
+    .= Product<*a1,a2*> * a3 by GROUP_4:9
+    .= a1 * a2 * a3 by FINSOP_1:13;
+end;
+
+theorem
+  for R being Element of 0-tuples_on the carrier of K holds Product R = 1.K
+proof
+  let R be Element of 0-tuples_on (the carrier of K);
+  R =<*>(the carrier of K);
+  hence thesis by Lm6;
+end;
+
+theorem
+  Product(i|->(1_K)) = 1_K
+proof
+  the_unity_wrt the multF of K = 1_K by Th7;
+  hence thesis by SETWOP_2:35;
+end;
+
+theorem
+  for K being add-associative right_zeroed right_complementable Abelian
+  commutative associative well-unital distributive almost_left_invertible non
+degenerated (non empty doubleLoopStr) for p being FinSequence of the carrier of
+  K holds (ex k st k in dom p & p.k = 0.K) iff Product p = 0.K
+proof
+  let K be add-associative right_zeroed right_complementable Abelian
+  commutative associative well-unital distributive almost_left_invertible non
+  degenerated (non empty doubleLoopStr);
+  let p be FinSequence of the carrier of K;
+  defpred P[Element of NAT] means for p be FinSequence of the carrier of K st
+  len p = $1 holds (ex k st k in Seg $1 & p.k = 0.K) iff Product p = 0.K;
+A1: for i st P[i] holds P[i+1]
+  proof
+    let i such that
+A2: for p be FinSequence of the carrier of K st len p = i holds (ex k
+    st k in Seg i & p.k =0.K) iff Product p = 0.K;
+    let p be FinSequence of the carrier of K;
+    assume
+A3: len p = i+1;
+    then consider
+    p9 be FinSequence of the carrier of K, a be Element of K such
+    that
+A4: p = p9^<*a*> by FINSEQ_2:22;
+A5: i+ 1= len p9+ 1 by A3,A4,FINSEQ_2:19;
+    then
+A6: i=len p9 by XCMPLX_1:2;
+A7: Product p = Product p9 * a by A4,GROUP_4:9;
+    thus (ex k st k in Seg (i+1) & p.k = 0.K) implies Product p = 0.K
+    proof
+      given k such that
+A8:   k in Seg (i+1) and
+A9:   p.k = 0.K;
+      now
+        per cases by A8,FINSEQ_2:8;
+        suppose
+A10:      k in Seg i;
+          then k in dom p9 by A6,FINSEQ_1:def 3;
+          then p9.k = p.k by A4,FINSEQ_1:def 7;
+          then Product p9 = 0.K by A2,A6,A9,A10;
+          hence thesis by A7,VECTSP_1:39;
+        end;
+        suppose
+          k = i+1;
+          then a = 0.K by A4,A5,A9,FINSEQ_1:59;
+          hence thesis by A7,VECTSP_1:39;
+        end;
+      end;
+      hence thesis;
+    end;
+    assume
+A11: Product p = 0.K;
+    per cases by A7,A11,VECTSP_1:44;
+    suppose
+      Product p9 = 0.K;
+      then consider k such that
+A12:  k in Seg i and
+A13:  p9.k = 0.K by A2,A6;
+      k in dom p9 by A6,A12,FINSEQ_1:def 3;
+      then p.k = 0.K by A4,A13,FINSEQ_1:def 7;
+      hence thesis by A12,FINSEQ_2:9;
+    end;
+    suppose
+      a = 0.K;
+      then p.(i+1) = 0.K by A4,A5,FINSEQ_1:59;
+      hence thesis by FINSEQ_1:6;
+    end;
+  end;
+A14: Seg len p = dom p by FINSEQ_1:def 3;
+A15: P[0]
+  proof
+    let p be FinSequence of the carrier of K;
+    assume len p = 0;
+    then p=<*>(the carrier of K);
+    then
+A16: Product p = 1.K by Lm6;
+    thus (ex k st k in Seg 0 & p.k=0.K) implies Product p=0.K;
+    assume Product p=0.K;
+    hence thesis by A16;
+  end;
+  for i holds P[i] from NAT_1:sch 1(A15,A1);
+  hence thesis by A14;
+end;
+
+theorem
+  Product((i+j) |-> a) = (Product(i|->a))*(Product(j|->a))
+proof
+  the multF of K is commutative associative;
+  hence thesis by SETWOP_2:37;
+end;
+
+theorem
+  Product((i*j) |-> a) = Product(j|->(Product(i|->a)))
+proof
+  the multF of K is commutative associative;
+  hence thesis by SETWOP_2:38;
+end;
+
+theorem
+  Product(i|->(a1*a2)) = (Product(i|->a1))*(Product(i|->a2))
+proof
+  the multF of K is having_a_unity;
+  hence thesis by SETWOP_2:47;
+end;
+
+theorem Th111:
+  Product mlt(R1,R2) = Product R1 * Product R2
+proof
+  thus thesis by SETWOP_2:46;
+end;
+
+theorem
+  Product(a*R1) = Product (i|->a) * Product R1
+proof
+  thus Product(a*R1) = Product mlt(i|->a,R1) by Th80
+    .= Product (i|->a) * Product R1 by Th111;
+end;
+
+begin
+ 
+::
+::The Product of Vectors
+::
+
+definition
+  let K be non empty doubleLoopStr;
+  let p,q be FinSequence of the carrier of K;
+  canceled;
+  func p "*" q -> Element of K equals
+  Sum(mlt(p,q));
+  coherence;
+end;
+
+theorem
+  for K being commutative associative left_unital Abelian
+add-associative right_zeroed right_complementable (non empty doubleLoopStr) for
+  a,b being Element of K holds <*a*> "*" <*b*>= a * b
+proof
+  let K be commutative associative left_unital Abelian add-associative
+  right_zeroed right_complementable (non empty doubleLoopStr);
+  let a,b be Element of K;
+  set p=<*a*>, q=<*b*>;
+  set m=mlt(p,q);
+  m=<*a*b*> by FINSEQ_2:88;
+  then m=1|-> (a*b) by FINSEQ_2:73;
+  hence thesis by FINSOP_1:17;
+end;
+
+theorem
+  for K being commutative associative left_unital Abelian
+add-associative right_zeroed right_complementable (non empty doubleLoopStr) for
+  a1,a2,b1,b2 being Element of K holds <*a1,a2*> "*" <*b1,b2*>= a1*b1 + a2*b2
+proof
+  let K be commutative associative left_unital Abelian add-associative
+  right_zeroed right_complementable (non empty doubleLoopStr);
+  let a1,a2,b1,b2 be Element of K;
+  set p=<*a1,a2*>;
+  set q=<*b1,b2*>;
+  (the addF of K)$$(mlt(p,q))=(the addF of K)$$<*a1*b1,a2*b2*> by Lm5
+    .=a1*b1 + a2*b2 by FINSOP_1:13;
+  hence thesis;
+end;
+
+theorem
+  for p,q be FinSequence of the carrier of K holds p "*" q = q "*" p by Th78;

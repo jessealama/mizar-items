@@ -1,0 +1,3106 @@
+:: K\"onig's Lemma
+::  by Grzegorz Bancerek
+::
+:: Received January 10, 1991
+:: Copyright (c) 1991 Association of Mizar Users
+
+environ
+
+ vocabularies NUMBERS, TREES_1, SUBSET_1, FUNCT_1, XBOOLE_0, FINSEQ_1,
+      ORDINAL4, XXREAL_0, ARYTM_3, RELAT_1, TARSKI, CARD_1, NAT_1, ORDINAL1,
+      FINSET_1, REAL_1, ARYTM_1, ZFMISC_1, FUNCOP_1, TREES_2, AMISTD_3,
+      FINSEQ_2;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, ORDINAL1, RELAT_1, XCMPLX_0,
+      FUNCT_1, REAL_1, NAT_1, CARD_1, NUMBERS, FINSEQ_1, FINSEQ_2, FINSET_1,
+      RELSET_1, BINOP_1, FUNCT_2, FUNCOP_1, TREES_1, XXREAL_0;
+ constructors WELLORD2, BINOP_1, FUNCOP_1, XXREAL_0, REAL_1, NAT_1, TREES_1,
+      RELSET_1, FINSEQ_2;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_1, ORDINAL1, FUNCOP_1,
+      FINSET_1, NUMBERS, XXREAL_0, XREAL_0, NAT_1, FINSEQ_1, TREES_1, CARD_1,
+      RELSET_1, FINSEQ_2;
+ requirements NUMERALS, REAL, BOOLE, SUBSET, ARITHM;
+ definitions RELAT_1, TARSKI, FUNCT_1, TREES_1, ORDINAL1, XBOOLE_0, BINOP_1;
+ theorems FUNCT_1, NAT_1, FINSEQ_1, TREES_1, TARSKI, ORDERS_1, ZFMISC_1,
+      FINSET_1, CARD_1, CARD_2, WELLORD2, FUNCOP_1, FUNCT_2, RELAT_1, FINSEQ_2,
+      ORDINAL1, XBOOLE_0, XBOOLE_1, XREAL_1, XXREAL_0;
+ schemes FUNCT_1, FRAENKEL, NAT_1, CARD_3, CLASSES1, DOMAIN_1, XBOOLE_0;
+
+begin
+
+reserve x,y,z,a,b,c,X,X1,X2,Y,Z for set,
+  W,W1,W2 for Tree,
+  w,w9 for Element of W,
+  f for Function,
+  D,D9 for non empty set,
+  i,k,k1,k2,l,m,n for Element of NAT,
+  v,v1,v2 for FinSequence,
+  p,q,r,r1,r2 for FinSequence of NAT;
+
+theorem Th1:
+  for v1,v2,v st v1 is_a_prefix_of v & v2 is_a_prefix_of v
+  holds v1,v2 are_c=-comparable
+proof
+  let p,q,r be FinSequence;
+  assume p is_a_prefix_of r;
+then A2: ex p9 being FinSequence st r = p^p9 by TREES_1:8;
+  assume q is_a_prefix_of r;
+then A4: ex q9 being FinSequence st r = q^q9 by TREES_1:8;
+ len p <= len q or len q <= len p;
+then  (ex t being FinSequence st p^t = q) or
+  ex t being FinSequence st q^t = p by A2,A4,FINSEQ_1:64;
+  hence p is_a_prefix_of q or q is_a_prefix_of p by TREES_1:8;
+end;
+
+theorem Th2:
+  for v1,v2,v st v1 is_a_proper_prefix_of v & v2 is_a_prefix_of v holds
+  v1,v2 are_c=-comparable
+proof
+  let p,q,r be FinSequence;
+  assume p is_a_proper_prefix_of r;
+then  p is_a_prefix_of r by XBOOLE_0:def 8;
+  hence thesis by Th1;
+end;
+
+canceled;
+
+theorem Th4:
+  len v1 = k+1 implies ex v2,x st v1 = v2^<*x*> & len v2 = k
+proof
+  assume
+A1: len v1 = k+1;
+  reconsider v2 = v1|Seg k as FinSequence by FINSEQ_1:19;
+ v2 is_a_prefix_of v1 by TREES_1:def 1;
+  then consider v such that
+A3: v1 = v2^v by TREES_1:8;
+  take v2, v.1;
+A4: k <= k+1 by NAT_1:11;
+then  len v2 = k by A1,FINSEQ_1:21;
+then  k + len v = k+1 by A1,A3,FINSEQ_1:35;
+  hence thesis by A1,A3,A4,FINSEQ_1:21,57;
+end;
+
+canceled;
+
+theorem Th6:
+  ProperPrefixes (v^<*x*>) = ProperPrefixes v \/ {v}
+proof
+  thus ProperPrefixes (v^<*x*>) c= ProperPrefixes v \/ {v}
+  proof
+    let y;
+    assume y in ProperPrefixes (v^<*x*>);
+    then consider v1 such that
+A2: y = v1 and
+A3: v1 is_a_proper_prefix_of v^<*x*> by TREES_1:def 4;
+ v1 is_a_prefix_of v & v1 <> v or v1 = v by A3,TREES_1:32;
+then
+ v1 is_a_proper_prefix_of v or v1 in {v} by TARSKI:def 1,XBOOLE_0:def 8;
+then  y in ProperPrefixes v or y in {v} by A2,TREES_1:def 4;
+    hence thesis by XBOOLE_0:def 3;
+  end;
+  let y;
+  assume y in ProperPrefixes v \/ {v};
+then A8: y in ProperPrefixes v or y in {v} by XBOOLE_0:def 3;
+A9: now
+    assume y in ProperPrefixes v;
+    then consider v1 such that
+A11: y = v1 and
+A12: v1 is_a_proper_prefix_of v by TREES_1:def 4;
+ v is_a_prefix_of v^<*x*> by TREES_1:8;
+then  v1 is_a_proper_prefix_of v^<*x*> by A12,XBOOLE_1:58;
+    hence thesis by A11,TREES_1:def 4;
+  end;
+ v^{} = v by FINSEQ_1:47;
+  then
+ v is_a_prefix_of v^<*x*> & v <> v^<*x*> by FINSEQ_1:46,TREES_1:8;
+then  v is_a_proper_prefix_of v^<*x*> by XBOOLE_0:def 8;
+then  y in ProperPrefixes v or y = v & v in ProperPrefixes (v^<*x*>)
+  by A8,TARSKI:def 1,TREES_1:def 4;
+  hence thesis by A9;
+end;
+
+scheme TreeStructInd { T()->Tree, P[set] }:
+  for t being Element of T() holds P[t]
+provided
+A1: P[{}] and
+A2: for t being Element of T(), n st P[t] & t^<*n*> in T() holds P[t^<*n*>]
+proof
+  defpred X[set] means for t being Element of T() st len t = $1 holds P[t];
+ card x = 0 implies x = {};
+then A4: X[0] by A1;
+A5: X[k] implies X[k+1]
+  proof
+    assume
+A6: for t being Element of T() st len t = k holds P[t];
+    let t be Element of T();
+    assume len t = k+1;
+    then consider v, x such that
+A8: t = v^<*x*> and
+A9: len v = k by Th4;
+    reconsider v as FinSequence of NAT by A8,FINSEQ_1:50;
+    reconsider v as Element of T() by A8,TREES_1:46;
+ rng <*x*> c= rng t by A8,FINSEQ_1:43;
+then  rng <*x*> = {x} & rng <*x*> c= NAT by FINSEQ_1:56,XBOOLE_1:1;
+    then reconsider x as Element of NAT by ZFMISC_1:37;
+A12: P[v] by A6,A9;
+ x = x;
+    hence thesis by A2,A8,A12;
+  end;
+A14: X[k] from NAT_1:sch 1(A4,A5);
+  let t be Element of T();
+ len t = len t;
+  hence thesis by A14;
+end;
+
+theorem Th7:
+  (for p holds p in W1 iff p in W2) implies W1 = W2
+proof
+  assume
+A1: for p holds p in W1 iff p in W2;
+  thus W1 c= W2
+  proof
+    let x;
+    assume x in W1;
+    then reconsider p = x as Element of W1;
+ p in W2 by A1;
+    hence thesis;
+  end;
+  let x;
+  assume x in W2;
+  then reconsider p = x as Element of W2;
+ p in W1 by A1;
+  hence thesis;
+end;
+
+definition
+  let W1,W2;
+  redefine pred W1 = W2 means
+  for p holds p in W1 iff p in W2;
+  compatibility by Th7;
+end;
+
+theorem
+  p in W implies W = W with-replacement (p,W|p)
+proof
+  assume
+A1: p in W;
+ now
+    let q;
+    thus q in W implies q in W with-replacement (p,W|p)
+    proof
+      assume
+A3:   q in W;
+   now
+        assume p is_a_proper_prefix_of q;
+then      p is_a_prefix_of q by XBOOLE_0:def 8;
+        then consider r being FinSequence such that
+A7:     q = p^r by TREES_1:8;
+     rng r c= rng q by A7,FINSEQ_1:43;
+then      rng r c= NAT by XBOOLE_1:1;
+        then reconsider r as FinSequence of NAT by FINSEQ_1:def 4;
+        take r;
+        thus r in W|p & q = p^r by A1,A3,A7,TREES_1:def 9;
+      end;
+      hence thesis by A1,A3,TREES_1:def 12;
+    end;
+    assume that
+A10: q in W with-replacement (p,W|p) and
+A11: not q in W;
+ ex r st r in W|p & q = p^r by A1,A10,A11,TREES_1:def 12;
+    hence contradiction by A1,A11,TREES_1:def 9;
+  end;
+  hence thesis by Th7;
+end;
+
+theorem Th9:
+  p in W & q in W & not p is_a_prefix_of q implies
+  q in W with-replacement (p,W1)
+proof
+ not p is_a_prefix_of q implies not p is_a_proper_prefix_of q
+  by XBOOLE_0:def 8;
+  hence thesis by TREES_1:def 12;
+end;
+
+theorem
+  p in W & q in W & not p,q are_c=-comparable implies
+  (W with-replacement (p,W1)) with-replacement (q,W2) =
+  (W with-replacement (q,W2)) with-replacement (p,W1)
+proof
+  assume that
+A1: p in W and
+A2: q in W and
+A3: not p,q are_c=-comparable;
+A4: not p is_a_prefix_of q by A3,XBOOLE_0:def 9;
+ not q is_a_prefix_of p by A3,XBOOLE_0:def 9;
+then A6: p in W with-replacement (q,W2) by A1,A2,Th9;
+A7: q in W with-replacement (p,W1) by A1,A2,A4,Th9;
+  let r;
+  thus r in (W with-replacement (p,W1)) with-replacement (q,W2) implies
+  r in (W with-replacement (q,W2)) with-replacement (p,W1)
+  proof
+    assume r in (W with-replacement (p,W1)) with-replacement (q,W2);
+then  r in W with-replacement (p,W1) & not q is_a_proper_prefix_of r or
+    ex r1 st r1 in W2 & r = q^r1 by A7,TREES_1:def 12;
+then
+ r in W & not p is_a_proper_prefix_of r & not q is_a_proper_prefix_of r or
+    (ex r2 st r2 in W1 & r = p^r2) & not q is_a_proper_prefix_of r or
+    q is_a_prefix_of r & ex r1 st r1 in W2 & r = q^r1 by A1,TREES_1:8,def 12
+    ;
+then  r in W with-replacement (q,W2) & not p is_a_proper_prefix_of r or
+    ex r1 st r1 in W1 & r = p^r1 by A2,A3,Th2,TREES_1:def 12;
+    hence thesis by A6,TREES_1:def 12;
+  end;
+  assume r in (W with-replacement (q,W2)) with-replacement (p,W1);
+then  r in W with-replacement (q,W2) & not p is_a_proper_prefix_of r or
+  ex r1 st r1 in W1 & r = p^r1 by A6,TREES_1:def 12;
+then
+ r in W & not q is_a_proper_prefix_of r & not p is_a_proper_prefix_of r or
+  (ex r2 st r2 in W2 & r = q^r2) & not p is_a_proper_prefix_of r or
+  p is_a_prefix_of r & ex r1 st r1 in W1 & r = p^r1 by A2,TREES_1:8,def 12;
+then  r in W with-replacement (p,W1) & not q is_a_proper_prefix_of r or
+  ex r1 st r1 in W2 & r = q^r1 by A1,A3,Th2,TREES_1:def 12;
+  hence thesis by A7,TREES_1:def 12;
+end;
+
+definition
+  let IT be Tree;
+  attr IT is finite-order means
+  ex n st for t being Element of IT holds not t^<*n*> in IT;
+end;
+
+registration
+  cluster finite-order Tree;
+  existence
+  proof reconsider T = {{}} as Tree by TREES_1:48;
+    take T,0;
+    let t be Element of T;
+    thus thesis by TARSKI:def 1;
+  end;
+end;
+
+definition
+  let W;
+  mode Chain of W -> Subset of W means
+    :
+    Def3: for p,q st p in it & q in it holds p,q are_c=-comparable;
+  existence
+  proof reconsider S = {} as Subset of W by XBOOLE_1:2;
+    take S;
+    let p,q;
+    thus thesis;
+  end;
+  mode Level of W -> Subset of W means
+    : Def4:
+    ex n being Nat st it = { w: len w = n};
+  existence
+  proof
+ {} in W by TREES_1:47;
+    then reconsider L = {{}} as Subset of W by ZFMISC_1:37;
+    take L,0;
+    thus L c= { w: len w = 0}
+    proof
+      let x;
+      assume
+A2:   x in L;
+then A3:   x = {} by TARSKI:def 1;
+   len {} = 0;
+      hence thesis by A2,A3;
+    end;
+    let x;
+    assume x in { w: len w = 0};
+then  ex w st x = w & len w = 0;
+then  x = {};
+    hence thesis by TARSKI:def 1;
+  end;
+  let w;
+  func succ w -> Subset of W equals
+  { w^<*n*>: w^<*n*> in W };
+  coherence
+  proof
+ { w^<*n*>: w^<*n*> in W } c= W
+    proof
+      let x;
+      assume x in { w^<*n*>: w^<*n*> in W };
+then   ex n st x = w^<*n*> & w^<*n*> in W;
+      hence thesis;
+    end;
+    hence thesis;
+  end;
+end;
+
+theorem
+  for L being Level of W holds L is AntiChain_of_Prefixes of W
+proof
+  let L be Level of W;
+  consider n being Nat such that
+A1: L = { w: len w = n } by Def4;
+ L is AntiChain_of_Prefixes-like
+  proof
+    thus for x st x in L holds x is FinSequence
+    proof
+      let x;
+      assume x in L;
+then    x is Element of W;
+      hence thesis;
+    end;
+    let v1,v2;
+    assume v1 in L;
+then A6: ex w1 be Element of W st v1 = w1 & len w1 = n by A1;
+    assume v2 in L;
+then  ex w2 be Element of W st v2 = w2 & len w2 = n by A1;
+    hence thesis by A6,TREES_1:19;
+  end;
+  hence thesis by TREES_1:def 14;
+end;
+
+theorem
+  succ w is AntiChain_of_Prefixes of W
+proof
+ succ w is AntiChain_of_Prefixes-like
+  proof
+    thus for x st x in succ w holds x is FinSequence
+    proof
+      let x;
+      assume x in succ w;
+then    ex i st x = w^<*i*> & w^<*i*> in W;
+      hence thesis;
+    end;
+    let v1,v2;
+    assume v1 in succ w;
+then A5: ex k1 st v1 = w^<*k1*> & w^<*k1*> in W;
+    assume v2 in succ w;
+then A7: ex k2 st v2 = w^<*k2*> & w^<*k2*> in W;
+A8: len v1 = len w + 1 by A5,FINSEQ_2:19;
+ len v2 = len w + 1 by A7,FINSEQ_2:19;
+    hence thesis by A8,TREES_1:19;
+  end;
+  hence thesis by TREES_1:def 14;
+end;
+
+theorem
+  for A being AntiChain_of_Prefixes of W, C being Chain of W
+  ex w st A /\ C c= {w}
+proof
+  let A be AntiChain_of_Prefixes of W, C be Chain of W;
+A1: now
+    let p,q;
+    assume
+A2: p in A /\ C & q in A /\ C;
+then A3: p in A & q in A by XBOOLE_0:def 4;
+ p in C & q in C by A2,XBOOLE_0:def 4;
+then  p,q are_c=-comparable by Def3;
+    hence p = q by A3,TREES_1:def 13;
+  end;
+  consider w;
+ now per cases;
+    suppose
+   A /\ C = {};
+then    A /\ C c= {w} by XBOOLE_1:2;
+      hence thesis;
+    end;
+    suppose
+A9:   A /\ C <> {};
+      consider x being Element of A /\ C;
+  x in C by A9,XBOOLE_0:def 4;
+      then reconsider x as Element of W;
+      take x;
+      thus A /\ C c= {x}
+      proof
+        let y;
+        assume
+A11:    y in A /\ C;
+then     y is Element of W;
+        then reconsider y9 = y as FinSequence of NAT;
+    x = y9 by A1,A11;
+        hence thesis by TARSKI:def 1;
+      end;
+    end;
+  end;
+  hence thesis;
+end;
+
+definition
+  let W;
+  let n be Nat;
+  func W-level n -> Level of W equals
+  { w: len w = n };
+  coherence
+  proof
+    defpred X[Element of W] means len $1 = n;
+ { w: X[w] } is Subset of W from DOMAIN_1:sch 7;
+    hence thesis by Def4;
+  end;
+end;
+
+theorem
+  w^<*n*> in succ w iff w^<*n*> in W;
+
+theorem
+  w = {} implies W-level 1 = succ w
+proof
+  assume
+A1: w = {};
+  thus W-level 1 c= succ w
+  proof
+    let x;
+    assume x in W-level 1;
+    then consider w9 such that
+A3: x = w9 and
+A4: len w9 = 1;
+A5: w9 = <*w9.1*> by A4,FINSEQ_1:57;
+then  rng w9 = {w9.1} by FINSEQ_1:56;
+    then reconsider n = w9.1 as Element of NAT by ZFMISC_1:37;
+ w9 = w^<*n*> by A1,A5,FINSEQ_1:47;
+    hence thesis by A3;
+  end;
+  let x;
+  assume x in succ w;
+  then consider i such that
+A9: x = w^<*i*> and
+A10: w^<*i*> in W;
+  reconsider w9 = w^<*i*> as Element of W by A10;
+ len <*i*> = 1 & w9 = <*i*> by A1,FINSEQ_1:47,56;
+  hence thesis by A9;
+end;
+
+theorem Th16:
+  W = union { W-level n: not contradiction }
+proof
+  thus W c= union { W-level n: not contradiction }
+  proof
+    let x;
+    assume x in W;
+    then reconsider w = x as Element of W;
+A2: x in W-level len w;
+ W-level len w in { W-level n: not contradiction };
+    hence thesis by A2,TARSKI:def 4;
+  end;
+  let x;
+  assume x in union { W-level n: not contradiction };
+  then consider X such that
+A5: x in X & X in { W-level n: not contradiction } by TARSKI:def 4;
+ ex n st X = W-level n by A5;
+  hence thesis by A5;
+end;
+
+theorem
+  for W being finite Tree holds W = union { W-level n: n <= height W }
+proof
+  let W be finite Tree;
+  thus W c= union { W-level n: n <= height W }
+  proof
+    let x;
+    assume x in W;
+    then reconsider w = x as Element of W;
+A2: len w <= height W by TREES_1:def 15;
+A3: w in W-level len w;
+ W-level len w in { W-level n: n <= height W } by A2;
+    hence thesis by A3,TARSKI:def 4;
+  end;
+  let x;
+  assume x in union { W-level n: n <= height W };
+  then consider X such that
+A6: x in X & X in { W-level n: n <= height W } by TARSKI:def 4;
+ ex n st X = W-level n & n <= height W by A6;
+  hence thesis by A6;
+end;
+
+theorem
+  for L being Level of W ex n st L = W-level n
+proof
+  let L be Level of W;
+  consider n being Nat such that
+A1: L = { w: len w = n} by Def4;
+  reconsider n as Element of NAT by ORDINAL1:def 13;
+  take n;
+  thus thesis by A1;
+end;
+
+scheme FraenkelCard { A() ->non empty set, X() -> set, F(set) -> set }:
+  card { F(w) where w is Element of A(): w in X() } c= card X()
+proof
+  consider f such that
+A1: dom f = X() & for x st x in X() holds f.x = F(x) from FUNCT_1:sch 3;
+ { F(w) where w is Element of A(): w in X() } c= rng f
+  proof
+    let x;
+    assume x in { F(w) where w is Element of A(): w in X() };
+    then consider w being Element of A() such that
+A4: x = F(w) and
+A5: w in X();
+ f.w = x by A1,A4,A5;
+    hence thesis by A1,A5,FUNCT_1:def 5;
+  end;
+  hence thesis by A1,CARD_1:28;
+end;
+
+scheme FraenkelFinCard { A() ->non empty set,
+  X,Y() -> finite set, F(set) -> set }: card Y() <= card X()
+provided
+A1: Y() = { F(w) where w is Element of A(): w in X() }
+proof
+ card { F(w) where w is Element of A(): w in X() } c= card X()
+  from FraenkelCard;
+  hence thesis by A1,NAT_1:40;
+end;
+
+theorem Th19:
+  W is finite-order implies ex n st for w holds
+  ex B being finite set st B = succ w & card B <= n
+proof
+  given n such that
+A1: for w holds not w^<*n*> in W;
+A2: Seg n is finite;
+  take n;
+  let w;
+  deffunc U(Real) = w^<*$1-1*>;
+A3: { U(r) where r is Real: r in Seg n } is finite from FRAENKEL:sch 21(A2
+  );
+A4: succ w c= { w^<*r-1*> where r is Real: r in Seg n }
+  proof
+    let x;
+    assume x in succ w;
+    then consider k such that
+A6: x = w^<*k*> and
+A7: w^<*k*> in W;
+ not w^<*n*> in W by A1;
+then  k < n by A7,TREES_1:def 5;
+then A10: k+1 <= n by NAT_1:13;
+ 1 <= k+1 by NAT_1:11;
+then A12: k+1 in Seg n by A10,FINSEQ_1:3;
+ (k+1)-1 = k;
+    hence thesis by A6,A12;
+  end;
+  then reconsider B = succ w as finite set by A3;
+  take B;
+  thus B = succ w;
+  set C = { U(r) where r is Real: r in Seg n };
+ C is finite from FRAENKEL:sch 21(A2);
+  then reconsider C as finite set;
+A15: C = { U(r) where r is Real: r in Seg n };
+ card C <= card Seg n from FraenkelFinCard(A15);
+then A17: card C <= n by FINSEQ_1:78;
+ card B <= card C by A4,NAT_1:44;
+  hence thesis by A17,XXREAL_0:2;
+end;
+
+theorem Th20:
+  W is finite-order implies succ w is finite
+proof
+  assume W is finite-order;
+  then consider n such that
+A2: for w holds ex B being finite set st B = succ w & card B <= n by Th19;
+ ex B being finite set st B = succ w & card B <= n by A2;
+  hence thesis;
+end;
+
+registration
+  let W be finite-order Tree;
+  let w be Element of W;
+  cluster succ w -> finite;
+  coherence by Th20;
+end;
+
+theorem Th21:
+  {} is Chain of W proof reconsider S = {} as Subset of W by XBOOLE_1:2;
+ S is Chain of W
+  proof
+    let p,q;
+    thus thesis;
+  end;
+  hence thesis;
+end;
+
+theorem Th22:
+  {{}} is Chain of W
+proof
+ {} in W by TREES_1:47;
+  then reconsider S = {{}} as Subset of W by ZFMISC_1:37;
+ S is Chain of W
+  proof
+    let p,q;
+    assume that
+A3: p in S and
+A4: q in S;
+ p = {} by A3,TARSKI:def 1;
+    hence thesis by A4,TARSKI:def 1;
+  end;
+  hence thesis;
+end;
+
+registration
+  let W;
+  cluster non empty Chain of W;
+  existence
+  proof
+ {{}} is Chain of W by Th22;
+    hence thesis;
+  end;
+end;
+
+definition
+  let W;
+  let IT be Chain of W;
+  attr IT is Branch-like means
+  :
+  Def7: (for p st p in IT holds ProperPrefixes p c= IT) &
+  not ex p st p in W & for q st q in IT holds q is_a_proper_prefix_of p;
+end;
+
+registration
+  let W;
+  cluster Branch-like Chain of W;
+  existence
+  proof
+    defpred X[set] means $1 is Chain of W &
+    for p st p in $1 holds ProperPrefixes p c= $1;
+    consider X such that
+A1: Y in X iff Y in bool W & X[Y] from XBOOLE_0:sch 1;
+     {}
+ is Chain of W & for p st p in {} holds ProperPrefixes p c= {} by Th21;
+then A3: X <> {} by A1;
+ now
+      let Z;
+      assume that
+      Z <> {} and
+A5:   Z c= X and
+A6:   Z is c=-linear;
+   union Z c= W
+      proof
+        let x;
+        assume x in union Z;
+        then consider Y such that
+A9:     x in Y and
+A10:    Y in Z by TARSKI:def 4;
+    Y in bool W by A1,A5,A10;
+        hence thesis by A9;
+      end;
+      then reconsider Z9 = union Z as Subset of W;
+A12:  Z9 is Chain of W
+      proof
+        let p,q;
+        assume p in Z9;
+        then consider X1 such that
+A14:    p in X1 and
+A15:    X1 in Z by TARSKI:def 4;
+        assume q in Z9;
+        then consider X2 such that
+A17:    q in X2 and
+A18:    X2 in Z by TARSKI:def 4;
+    X1,X2 are_c=-comparable by A6,A15,A18,ORDINAL1:def 9;
+then A20:    X1 c= X2 or X2 c= X1 by XBOOLE_0:def 9;
+A21:    X1 is Chain of W by A1,A5,A15;
+    X2 is Chain of W by A1,A5,A18;
+        hence thesis by A14,A17,A20,A21,Def3;
+      end;
+  now
+        let p;
+        assume p in union Z;
+        then consider X1 such that
+A25:    p in X1 & X1 in Z by TARSKI:def 4;
+            ProperPrefixes
+ p c= X1 & X1 c= union Z by A1,A5,A25,ZFMISC_1:92;
+        hence ProperPrefixes p c= union Z by XBOOLE_1:1;
+      end;
+      hence union Z in X by A1,A12;
+    end;
+    then consider Y such that
+A27: Y in X and
+A28: Z in X & Z <> Y implies not Y c= Z by A3,ORDERS_1:177;
+    reconsider Y as Chain of W by A1,A27;
+    take Y;
+    thus for p st p in Y holds ProperPrefixes p c= Y by A1,A27;
+    given p such that
+A29: p in W and
+A30: for q st q in Y holds q is_a_proper_prefix_of p;
+    set Z = (ProperPrefixes p) \/ {p};
+     ProperPrefixes p c= W & {p} c= W by A29,TREES_1:def 5,ZFMISC_1:37;
+    then reconsider Z9 = Z as Subset of W by XBOOLE_1:8;
+A32: Z9 is Chain of W
+    proof
+      let q,r;
+      assume that
+A33:  q in Z9 and
+A34:  r in Z9;
+A35:  q in ProperPrefixes p or q in {p} by A33,XBOOLE_0:def 3;
+A36:  r in ProperPrefixes p or r in {p} by A34,XBOOLE_0:def 3;
+A37:  q is_a_proper_prefix_of p or q = p by A35,TARSKI:def 1,TREES_1:36;
+A38:  r is_a_proper_prefix_of p or r = p by A36,TARSKI:def 1,TREES_1:36;
+A39:  q is_a_prefix_of p by A37,XBOOLE_0:def 8;
+  r is_a_prefix_of p by A38,XBOOLE_0:def 8;
+      hence thesis by A39,Th1;
+    end;
+ now
+      let q;
+      assume q in Z;
+then   q in ProperPrefixes p or q in {p} by XBOOLE_0:def 3;
+then   q is_a_proper_prefix_of p or q = p by TARSKI:def 1,TREES_1:36;
+then   q is_a_prefix_of p by XBOOLE_0:def 8;
+then A46:  ProperPrefixes q c= ProperPrefixes p by TREES_1:41;
+  ProperPrefixes p c= Z by XBOOLE_1:7;
+      hence ProperPrefixes q c= Z by A46,XBOOLE_1:1;
+    end;
+then A48: Z in X by A1,A32;
+A49: p in {p} by TARSKI:def 1;
+A50: not p in Y by A30;
+A51: p in Z by A49,XBOOLE_0:def 3;
+ Y c= Z
+    proof
+      let x;
+      assume
+A53:  x in Y;
+      then reconsider t = x as Element of W;
+  t is_a_proper_prefix_of p by A30,A53;
+then   t in ProperPrefixes p by TREES_1:36;
+      hence thesis by XBOOLE_0:def 3;
+    end;
+    hence thesis by A28,A48,A50,A51;
+  end;
+end;
+
+definition
+  let W;
+  mode Branch of W is Branch-like Chain of W;
+end;
+
+registration
+  let W;
+  cluster Branch-like -> non empty Chain of W;
+  coherence
+  proof
+    let B be Chain of W such that
+A1: B is Branch-like empty;
+    consider t being Element of W;
+ for q st q in B holds q is_a_proper_prefix_of t by A1;
+    hence contradiction by A1,Def7;
+  end;
+end;
+
+reserve C for Chain of W,
+  B for Branch of W;
+
+theorem Th23:
+  v1 in C & v2 in C implies v1 in ProperPrefixes v2 or v2 is_a_prefix_of v1
+proof
+  assume
+A1: v1 in C & v2 in C;
+  then reconsider p = v1, q = v2 as Element of W;
+  assume
+A2: not v1 in ProperPrefixes v2;
+A3: p,q are_c=-comparable by A1,Def3;
+A4: not v1 is_a_proper_prefix_of v2 by A2,TREES_1:36;
+ v1 is_a_prefix_of v2 or v2 is_a_prefix_of v1 by A3,XBOOLE_0:def 9;
+  hence thesis by A4,XBOOLE_0:def 8;
+end;
+
+theorem Th24:
+  v1 in C & v2 in C & v is_a_prefix_of v2 implies
+  v1 in ProperPrefixes v or v is_a_prefix_of v1
+proof
+  assume that
+A1: v1 in C & v2 in C and
+A2: v is_a_prefix_of v2;
+ v1 in ProperPrefixes v2 or v2 is_a_prefix_of v1 by A1,Th23;
+then  v1 is_a_proper_prefix_of v2 or v is_a_prefix_of v1
+  by A2,TREES_1:36,XBOOLE_1:1;
+then  v,v1 are_c=-comparable by A2,Th2,XBOOLE_0:def 9;
+then  v is_a_proper_prefix_of v1 or v = v1 or v1 is_a_proper_prefix_of v
+  by XBOOLE_1:104;
+  hence thesis by TREES_1:36,XBOOLE_0:def 8;
+end;
+
+registration
+  let W;
+  cluster finite Chain of W;
+  existence
+  proof reconsider C = {} as Chain of W by Th21;
+    take C;
+    thus thesis;
+  end;
+end;
+
+theorem Th25:
+  for C being finite Chain of W st card C > n ex p st p in C & len p >= n
+proof
+  let C be finite Chain of W;
+  defpred X[Element of NAT] means
+  $1 < card C implies ex p st p in C & len p >= $1;
+A1: X[0]
+  proof
+    assume
+A2: 0 < card C;
+then A3: C <> {};
+    consider x being Element of C;
+    reconsider x as Element of W by A2,CARD_1:47,TARSKI:def 3;
+    reconsider x as FinSequence of NAT;
+    take x;
+    thus thesis by A3;
+  end;
+A4: X[k] implies X[k+1]
+  proof
+    assume that
+A5: k < card C implies ex p st p in C & len p >= k and
+A6: k+1 < card C;
+A7: k <= k+1 by NAT_1:11;
+then A8: k < card C by A6,XXREAL_0:2;
+    consider p such that
+A9: p in C and
+A10: len p >= k by A5,A6,A7,XXREAL_0:2;
+    reconsider q = p|Seg k as FinSequence by FINSEQ_1:19;
+A11: len q = k by A10,FINSEQ_1:21;
+then A12: card ProperPrefixes q = k by TREES_1:68;
+then  card ProperPrefixes q in card C by A8,NAT_1:45;
+then A14: C \ ProperPrefixes q <> {} by CARD_2:4;
+    consider x being Element of C \ ProperPrefixes q;
+A15: x in C by A14,XBOOLE_0:def 5;
+A16: not x in ProperPrefixes q by A14,XBOOLE_0:def 5;
+    reconsider x as Element of W by A15;
+ card (ProperPrefixes q \/ {x}) = k+1 by A12,A16,CARD_2:54;
+then  card (ProperPrefixes q \/ {x}) in card C by A6,NAT_1:45;
+then A19: C \ (ProperPrefixes q \/ {x}) <> {} by CARD_2:4;
+    consider y being Element of C \ (ProperPrefixes q \/ {x});
+A20: y in C by A19,XBOOLE_0:def 5;
+A21: not y in ProperPrefixes q \/ {x} by A19,XBOOLE_0:def 5;
+    reconsider y as Element of W by A20;
+A22: not y in ProperPrefixes q by A21,XBOOLE_0:def 3;
+A23: not y in {x} by A21,XBOOLE_0:def 3;
+A24: q is_a_prefix_of p by TREES_1:def 1;
+then A25: q is_a_prefix_of x by A9,A15,A16,Th24;
+A26: q is_a_prefix_of y by A9,A20,A22,A24,Th24;
+A27: x <> y by A23,TARSKI:def 1;
+ x = q or x <> q;
+then  q is_a_proper_prefix_of y or q is_a_proper_prefix_of x
+    by A25,A26,A27,XBOOLE_0:def 8;
+then  k < len x or k < len y by A11,TREES_1:24;
+then  k+1 <= len x or k+1 <= len y by NAT_1:13;
+    hence thesis by A15,A20;
+  end;
+ X[k] from NAT_1:sch 1(A1,A4);
+  hence thesis;
+end;
+
+theorem Th26:
+  for C holds { w: ex p st p in C & w is_a_prefix_of p } is Chain of W
+proof
+  let C;
+ { w: ex p st p in C & w is_a_prefix_of p } c= W
+  proof
+    let x;
+    assume x in { w: ex p st p in C & w is_a_prefix_of p };
+then  ex w st x = w & ex p st p in C & w is_a_prefix_of p;
+    hence thesis;
+  end;
+  then reconsider Z = { w: ex p st p in C & w is_a_prefix_of p } as Subset of
+  W;
+ Z is Chain of W
+  proof
+    let p,q;
+    assume p in Z;
+then  ex w st p = w & ex p st p in C & w is_a_prefix_of p;
+    then consider r1 such that
+A7: r1 in C and
+A8: p is_a_prefix_of r1;
+    assume q in Z;
+then  ex w9 st q = w9 & ex p st p in C & w9 is_a_prefix_of p;
+    then consider r2 such that
+A11: r2 in C and
+A12: q is_a_prefix_of r2;
+ r1,r2 are_c=-comparable by A7,A11,Def3;
+then  r1 is_a_prefix_of r2 or r2 is_a_prefix_of r1 by XBOOLE_0:def 9;
+then  p is_a_prefix_of r2 or q is_a_prefix_of r1 by A8,A12,XBOOLE_1:1;
+    hence thesis by A8,A12,Th1;
+  end;
+  hence thesis;
+end;
+
+theorem Th27:
+  p is_a_prefix_of q & q in B implies p in B
+proof
+  assume p is_a_prefix_of q;
+then  p is_a_proper_prefix_of q or p = q by XBOOLE_0:def 8;
+then A3: p in ProperPrefixes q or p = q by TREES_1:def 4;
+  assume
+A4: q in B;
+then  ProperPrefixes q c= B by Def7;
+  hence thesis by A3,A4;
+end;
+
+theorem Th28:
+  {} in B
+proof
+  consider x being Element of B;
+  reconsider x as Element of W;
+ <*> NAT is_a_prefix_of x by XBOOLE_1:2;
+  hence thesis by Th27;
+end;
+
+theorem Th29:
+  p in C & q in C & len p <= len q implies p is_a_prefix_of q
+proof
+  assume p in C & q in C & len p <= len q & not p is_a_prefix_of q;
+  then  q
+ in ProperPrefixes p & not q is_a_proper_prefix_of p by Th23,TREES_1:24;
+  hence contradiction by TREES_1:36;
+end;
+
+theorem Th30:
+  ex B st C c= B
+proof
+  defpred X[set] means $1 is Chain of W & C c= $1 &
+  for p st p in $1 holds ProperPrefixes p c= $1;
+  consider X such that
+A1: Y in X iff Y in bool W & X[Y] from XBOOLE_0:sch 1;
+  set Z = { w: ex p st p in C & w is_a_prefix_of p };
+A2: Z is Chain of W by Th26;
+A3: C c= Z
+  proof
+    let x;
+    assume
+A4: x in C;
+    then reconsider w = x as Element of W;
+ w is_a_prefix_of w;
+    hence thesis by A4;
+  end;
+ now
+    let p;
+    assume p in Z;
+then A8: ex w st p = w & ex p st p in C & w is_a_prefix_of p;
+    then consider q such that
+A9: q in C and
+A10: p is_a_prefix_of q;
+    thus ProperPrefixes p c= Z
+    proof
+      let x;
+      assume x in ProperPrefixes p;
+      then consider r being FinSequence such that
+A12:  x = r and
+A13:  r is_a_proper_prefix_of p by TREES_1:def 4;
+  r is_a_prefix_of p by A13,XBOOLE_0:def 8;
+then   r is_a_prefix_of q & r in W by A8,A10,TREES_1:45,XBOOLE_1:1;
+      hence thesis by A9,A12;
+    end;
+  end;
+then A16: X <> {} by A1,A2,A3;
+ now
+    let Z;
+    assume that
+A18: Z <> {} and
+A19: Z c= X and
+A20: Z is c=-linear;
+ union Z c= W
+    proof
+      let x;
+      assume x in union Z;
+      then consider Y such that
+A23:  x in Y and
+A24:  Y in Z by TARSKI:def 4;
+  Y in bool W by A1,A19,A24;
+      hence thesis by A23;
+    end;
+    then reconsider Z9 = union Z as Subset of W;
+A26: Z9 is Chain of W
+    proof
+      let p,q;
+      assume p in Z9;
+      then consider X1 such that
+A28:  p in X1 and
+A29:  X1 in Z by TARSKI:def 4;
+      assume q in Z9;
+      then consider X2 such that
+A31:  q in X2 and
+A32:  X2 in Z by TARSKI:def 4;
+  X1,X2 are_c=-comparable by A20,A29,A32,ORDINAL1:def 9;
+then A34:  X1 c= X2 or X2 c= X1 by XBOOLE_0:def 9;
+A35:  X1 is Chain of W by A1,A19,A29;
+  X2 is Chain of W by A1,A19,A32;
+      hence thesis by A28,A31,A34,A35,Def3;
+    end;
+A37: now
+      let p;
+      assume p in union Z;
+      then consider X1 such that
+A39:  p in X1 & X1 in Z by TARSKI:def 4;
+        ProperPrefixes p c= X1 & X1 c= union Z by A1,A19,A39,ZFMISC_1:92;
+      hence ProperPrefixes p c= union Z by XBOOLE_1:1;
+    end;
+    consider x being Element of Z;
+ x in X by A18,A19,TARSKI:def 3;
+then A42: C c= x by A1;
+ x c= union Z by A18,ZFMISC_1:92;
+then  C c= union Z by A42,XBOOLE_1:1;
+    hence union Z in X by A1,A26,A37;
+  end;
+  then consider Y such that
+A45: Y in X and
+A46: for Z st Z in X & Z <> Y holds not Y c= Z by A16,ORDERS_1:177;
+  reconsider Y as Chain of W by A1,A45;
+ now
+    thus for p st p in Y holds ProperPrefixes p c= Y by A1,A45;
+    given p such that
+A48: p in W and
+A49: for q st q in Y holds q is_a_proper_prefix_of p;
+    set Z = (ProperPrefixes p) \/ {p};
+     ProperPrefixes p c= W & {p} c= W by A48,TREES_1:def 5,ZFMISC_1:37;
+    then reconsider Z9 = Z as Subset of W by XBOOLE_1:8;
+A51: Z9 is Chain of W
+    proof
+      let q,r;
+      assume that
+A52:  q in Z9 and
+A53:  r in Z9;
+A54:  q in ProperPrefixes p or q in {p} by A52,XBOOLE_0:def 3;
+A55:  r in ProperPrefixes p or r in {p} by A53,XBOOLE_0:def 3;
+A56:  q is_a_proper_prefix_of p or q = p by A54,TARSKI:def 1,TREES_1:36;
+A57:  r is_a_proper_prefix_of p or r = p by A55,TARSKI:def 1,TREES_1:36;
+A58:  q is_a_prefix_of p by A56,XBOOLE_0:def 8;
+  r is_a_prefix_of p by A57,XBOOLE_0:def 8;
+      hence thesis by A58,Th1;
+    end;
+A60: now
+      let q;
+      assume q in Z;
+then   q in ProperPrefixes p or q in {p} by XBOOLE_0:def 3;
+then   q is_a_proper_prefix_of p or q = p by TARSKI:def 1,TREES_1:36;
+then   q is_a_prefix_of p by XBOOLE_0:def 8;
+then A65:  ProperPrefixes q c= ProperPrefixes p by TREES_1:41;
+  ProperPrefixes p c= Z by XBOOLE_1:7;
+      hence ProperPrefixes q c= Z by A65,XBOOLE_1:1;
+    end;
+A67: Y c= Z
+    proof
+      let x;
+      assume
+A68:  x in Y;
+      then reconsider t = x as Element of W;
+  t is_a_proper_prefix_of p by A49,A68;
+then   t in ProperPrefixes p by TREES_1:36;
+      hence thesis by XBOOLE_0:def 3;
+    end;
+ C c= Y by A1,A45;
+then  C c= Z by A67,XBOOLE_1:1;
+then A73: Z in X by A1,A51,A60;
+A74: p in {p} by TARSKI:def 1;
+A75: not p in Y by A49;
+ p in Z by A74,XBOOLE_0:def 3;
+    hence contradiction by A46,A67,A73,A75;
+  end;
+  then reconsider Y as Branch of W by Def7;
+  take Y;
+  thus thesis by A1,A45;
+end;
+
+scheme FuncExOfMinNat { P[set,Nat], X()->set }:
+  ex f st dom f = X() & for x st x in X() ex n st f.x = n & P[x,n] &
+  for m st P[x,m] holds n <= m
+provided
+A1: for x st x in X() ex n st P[x,n]
+proof
+  defpred Q[set,set] means
+  ex n st $2 = n & P[$1,n] & for m st P[$1,m] holds n <= m;
+A2: for x st x in X() ex y st Q[x,y]
+  proof
+    let x;
+    defpred X[Nat] means P[x,$1];
+    assume x in X();
+then  ex n st X[n] by A1;
+then A5: ex n be Nat st X[n];
+    consider n be Nat such that
+A6: X[n] & for m be Nat st X[m] holds n <= m from NAT_1:sch 5(A5);
+    take n;
+ n in NAT & for m st X[m] holds n <= m by A6,ORDINAL1:def 13;
+    hence thesis by A6;
+  end;
+  thus ex f st dom f = X() & for x st x in X() holds Q[x,f.x]
+  from CLASSES1:sch 1(A2);
+end;
+
+Lm1: X is finite implies ex n st for k st k in X holds k <= n
+proof
+  assume
+A1: X is finite;
+  defpred P[set,set] means
+  ex k1,k2 being Element of NAT st $1 = k1 & $2 = k2 & k1 >= k2;
+ now per cases;
+    suppose
+A3:   X /\ NAT = {};
+      thus thesis
+      proof
+        take 0;
+        let k;
+        assume k in X;
+        hence thesis by A3,XBOOLE_0:def 4;
+      end;
+    end;
+    suppose
+A5:   X /\ NAT <> {};
+      reconsider XN = X /\ NAT as finite set by A1;
+A6:   XN <> {} by A5;
+A7:   for x,y holds P[x,y] & P[y,x] implies x = y by XXREAL_0:1;
+A8:   for x,y,z st P[x,y] & P[y,z] holds P[x,z] by XXREAL_0:2;
+      consider x such that
+A9:   x in XN & for y st y in XN & y <> x holds not P[y,x]
+      from CARD_3:sch 2(A6,A7,A8);
+      reconsider n = x as Element of NAT by A9,XBOOLE_0:def 4;
+      take n;
+      let k;
+      assume k in X;
+then   k in X /\ NAT by XBOOLE_0:def 4;
+      hence k <= n by A9;
+    end;
+  end;
+  hence thesis;
+end;
+
+scheme InfiniteChain { X()->set, a()->set, Q[set], P[set,set] }:
+  ex f st dom f = NAT & rng f c= X() & f.0 = a() &
+  for k holds P[f.k,f.(k+1)] & Q[f.k]
+provided
+A1: a() in X() & Q[a()] and
+A2: for x st x in X() & Q[x] ex y st y in X() & P[x,y] & Q[y]
+proof
+  consider Y such that
+A3: x in Y iff x in X() & Q[x] from XBOOLE_0:sch 1;
+  defpred Q[set,set] means $2 in Y & P[$1,$2];
+A4: for x st x in Y ex y st Q[x,y]
+  proof
+    let x;
+    assume x in Y;
+then  x in X() & Q[x] by A3;
+    then consider y such that
+A7: y in X() & P[x,y] & Q[y] by A2;
+    take y;
+    thus thesis by A3,A7;
+  end;
+  consider g be Function such that
+A8: dom g = Y & for x st x in Y holds Q[x,g.x] from CLASSES1:sch 1(A4);
+  deffunc U(set,set) = g.$2;
+  consider f such that
+A9: dom f = NAT & f.0 = a() & for n being Nat holds f.(n+1) = U(n,f.n)
+  from NAT_1:sch 11;
+  take f;
+  thus dom f = NAT by A9;
+  defpred X[Element of NAT] means f.$1 in Y;
+A10: X[0] by A1,A3,A9;
+A11: X[k] implies X[k+1]
+  proof
+    assume f.k in Y;
+then  g.(f.k) in Y by A8;
+    hence thesis by A9;
+  end;
+A14: X[k] from NAT_1:sch 1(A10,A11);
+  thus rng f c= X()
+  proof
+    let x;
+    assume x in rng f;
+    then consider y such that
+A16: y in dom f and
+A17: x = f.y by FUNCT_1:def 5;
+    reconsider y as Element of NAT by A9,A16;
+ f.y in Y by A14;
+    hence thesis by A3,A17;
+  end;
+  thus f.0 = a() by A9;
+  let k;
+A19: f.k in Y by A14;
+then  P[f.k,g.(f.k)] by A8;
+  hence thesis by A3,A9,A19;
+end;
+
+theorem Th31:
+  for T being Tree st (for n ex C being finite Chain of T st card C = n) &
+  for t being Element of T holds succ t is finite
+  ex B being Chain of T st not B is finite
+proof
+  let T be Tree;
+  assume that
+A1: for n ex X being finite Chain of T st card X = n and
+A2: for t being Element of T holds succ t is finite;
+  defpred P[FinSequence] means for n ex B being Branch of T st
+  $1 in B & ex p st p in B & len p >= len $1 + n;
+A3: for x being Element of T st P[x] ex n st x^<*n*> in T & P[x^<*n*>]
+  proof
+    let x be Element of T such that
+A4: P[x] and
+A5: for n st x^<*n*> in T holds not P[x^<*n*>];
+A6: succ x is finite by A2;
+    defpred X[set,Element of NAT] means for B being Branch of T,p,q st
+    p = $1 & $1 in B & q in B holds len p + $2 > len q;
+A7: for y st y in succ x ex n st X[y,n]
+    proof
+      let y;
+      assume y in succ x;
+      then consider k such that
+A9:   y = x^<*k*> and
+A10:  x^<*k*> in T;
+      consider n such that
+A11:  for B being Branch of T st x^<*k*> in B for p st p in B holds
+      len p < len (x^<*k*>) + n by A5,A10;
+      take n;
+      thus thesis by A9,A11;
+    end;
+    consider f such that
+A12: dom f = succ x and
+A13: for y st y in succ x ex n st f.y = n & X[y,n] &
+    for m st X[y,m] holds n <= m from FuncExOfMinNat(A7);
+    consider k such that
+A14: for m st m in rng f holds m <= k by A6,A12,Lm1,FINSET_1:26;
+    consider B being Branch of T such that
+A15: x in B and
+A16: ex p st p in B & len p >= len x + (k+1) by A4;
+    consider p such that
+A17: p in B and
+A18: len p >= len x + (k+1) by A16;
+    reconsider r = p|Seg(len x + 1) as FinSequence of NAT by FINSEQ_1:23;
+ len x + 1 <= len x + 1 + k by NAT_1:11;
+then A20: len p >= len x + 1 by A18,XXREAL_0:2;
+A21: r is_a_prefix_of p by TREES_1:def 1;
+A22: len r = len x + 1 by A20,FINSEQ_1:21;
+A23: r in B by A17,A21,Th27;
+then  x is_a_prefix_of r by A15,A22,Th29,NAT_1:11;
+    then consider j being FinSequence such that
+A25: r = x^j by TREES_1:8;
+ len x + len j = len r by A25,FINSEQ_1:35;
+then A27: j = <*j.1*> by A22,FINSEQ_1:57;
+A28: dom r = Seg len r & 1 <= 1+len x by FINSEQ_1:def 3,NAT_1:11;
+ len x+1 <= len r by A20,FINSEQ_1:21;
+    then  (
+x^<*j.1*>).(len x+1) = j.1 & len x + 1 in dom r by A28,FINSEQ_1:3,59;
+then  j.1 in rng r by A25,A27,FUNCT_1:def 5;
+    then reconsider l = j.1 as Element of NAT;
+A32: x^<*l*> in succ x by A23,A25,A27;
+    then consider n such that
+A33: f.(x^<*l*>) = n and
+A34: for B being Branch of T,p,q st p = x^<*l*> & x^<*l*> in B & q in B
+    holds len p + n > len q
+    and for m st for B being Branch of T,p,q st p = x^<*l*> & x^<*l*> in B
+    & q in B holds len p + m > len q holds n <= m
+    by A13;
+ n in rng f by A12,A32,A33,FUNCT_1:def 5;
+then  n <= k by A14;
+then  len r + n <= len x + 1 + k by A22,XREAL_1:9;
+    hence contradiction by A17,A18,A23,A25,A27,A34,XXREAL_0:2;
+  end;
+  reconsider e = {} as Element of T by TREES_1:47;
+A38: P[e]
+  proof
+    given n such that
+A39: for B being Branch of T st e in B for p st p in B holds len p < len e + n;
+    consider C being finite Chain of T such that
+A40: card C = n+1 by A1;
+    consider B being Branch of T such that
+A41: C c= B by Th30;
+ n+0 < n+1 by XREAL_1:8;
+then A43: ex p st p in C & len p >= n by A40,Th25;
+ e in B & len e = 0 by Th28;
+    hence contradiction by A39,A41,A43;
+  end;
+  defpred QQ[set] means ex t being Element of T st t = $1 & P[t];
+  defpred PP[set,set] means ex p,n st $1 = p & p^<*n*> in T & $2 = p^<*n*>;
+A45: e in T & QQ[e] by A38;
+A46: for x st x in T & QQ[x] ex y st y in T & PP[x,y] & QQ[y]
+  proof
+    let x such that x in T;
+    given t being Element of T such that
+A47: t = x and
+A48: P[t];
+    consider n such that
+A49: t^<*n*> in T and
+A50: P[t^<*n*>] by A3,A48;
+    reconsider y = t^<*n*> as set;
+    take y;
+    thus y in T & PP[x,y] by A47,A49;
+    reconsider t1 = t^<*n*> as Element of T by A49;
+    take t1;
+    thus thesis by A50;
+  end;
+ ex f st dom f = NAT & rng f c= T & f.0 = e &
+  for k holds PP[f.k,f.(k+1)] & QQ[f.k] from InfiniteChain(A45,A46);
+  then consider f such that
+A52: dom f = NAT and
+A53: rng f c= T and
+A54: f.0 = e and
+A55: for k holds (ex p,n st f.k = p & p^<*n*> in T & f.(k+1) = p^<*n*>) &
+  ex t being Element of T st t = f.k & P[t];
+  reconsider C = rng f as Subset of T by A53;
+A56: now
+    let k be Nat;
+    defpred X[Nat] means
+    for p,q st p = f.k & q = f.(k+$1) holds p is_a_prefix_of q;
+A57: X[0];
+A58: for n be Nat st X[n] holds X[n+1]
+    proof
+      let n be Nat;
+      assume
+A59:  for p,q st p = f.k & q = f.(k+n) holds p is_a_prefix_of q;
+      let p,q such that
+A60:  p = f.k and
+A61:  q = f.(k+(n+1));
+      reconsider k,n as Element of NAT by ORDINAL1:def 13;
+      consider r,l such that
+A62:  f.(k+n) = r and r^<*l*> in T and
+A63:  f.((k+n)+1) = r^<*l*> by A55;
+A64:  p is_a_prefix_of r by A59,A60,A62;
+  r is_a_prefix_of r^<*l*> by TREES_1:8;
+      hence thesis by A61,A63,A64,XBOOLE_1:1;
+    end;
+    thus for n be Nat holds X[n] from NAT_1:sch 2(A57,A58);
+  end;
+A66: now
+    let k,l;
+    assume k <= l;
+then  ex n be Nat st l = k+n by NAT_1:10;
+    hence for p,q st p = f.k & q = f.l holds p is_a_prefix_of q by A56;
+  end;
+ C is Chain of T
+  proof
+    let p,q;
+    assume that
+A70: p in C and
+A71: q in C;
+    consider x such that
+A72: x in NAT and
+A73: p = f.x by A52,A70,FUNCT_1:def 5;
+    consider y such that
+A74: y in NAT and
+A75: q = f.y by A52,A71,FUNCT_1:def 5;
+    reconsider x, y as Element of NAT by A72,A74;
+ x <= y or y <= x;
+    hence p is_a_prefix_of q or q is_a_prefix_of p by A66,A73,A75;
+  end;
+  then reconsider C as Chain of T;
+  take C;
+  defpred X[Element of NAT] means for p st p = f.$1 holds len p = $1;
+A77: X[0] by A54;
+A78: X[k] implies X[k+1]
+  proof
+    assume
+A79: for p st p = f.k holds len p = k;
+    let p such that
+A80: p = f.(k+1);
+    consider q,n such that
+A81: f.k = q and q^<*n*> in T and
+A82: f.(k+1) = q^<*n*> by A55;
+    thus len p = len q + len <*n*> by A80,A82,FINSEQ_1:35
+      .= len q + 1 by FINSEQ_1:56
+      .= k+1 by A79,A81;
+  end;
+A83: X[k] from NAT_1:sch 1(A77,A78);
+ f is one-to-one
+  proof
+    let x,y;
+    assume x in dom f & y in dom f;
+    then reconsider x9 = x, y9 = y as Element of NAT by A52;
+    consider p,n such that
+A86: f.x9 = p and p^<*n*> in T
+    and f.(x9+1) = p^<*n*> by A55;
+A87: ex q,k st f.y9 = q & q^<*k*> in T & f.(y9+1) = q^<*k*> by A55;
+ len p = x9 by A83,A86;
+    hence thesis by A83,A86,A87;
+  end;
+then  NAT,C are_equipotent by A52,WELLORD2:def 4;
+  hence thesis by CARD_1:68;
+end;
+
+theorem
+  for T being finite-order Tree st
+  for n ex C being finite Chain of T st card C = n
+  ex B being Chain of T st not B is finite
+proof
+  let T be finite-order Tree;
+ for t being Element of T holds succ t is finite;
+  hence thesis by Th31;
+end;
+
+definition
+  let IT be Relation;
+  attr IT is DecoratedTree-like means
+  :Def8:
+  dom IT is Tree;
+end;
+
+registration
+  cluster DecoratedTree-like Function;
+  existence
+  proof consider W;
+    take f = W --> 0;
+    thus dom f is Tree by FUNCOP_1:19;
+  end;
+end;
+
+definition
+  mode DecoratedTree is DecoratedTree-like Function;
+end;
+
+reserve T,T1,T2 for DecoratedTree;
+
+registration
+  let T;
+  cluster dom T -> non empty Tree-like;
+  coherence by Def8;
+end;
+
+registration
+  let D;
+  cluster DecoratedTree-like D-valued Function;
+  existence
+  proof consider W;
+    consider d being Element of D;
+    set f = W --> d;
+ dom f = W by FUNCOP_1:19;
+    then reconsider f as DecoratedTree by Def8;
+ f is D-valued;
+    hence thesis;
+  end;
+end;
+
+definition
+  let D;
+  mode DecoratedTree of D is D-valued DecoratedTree;
+end;
+
+definition
+  let D be non empty set, T be DecoratedTree of D, t be Element of dom T;
+  redefine func T.t -> Element of D;
+  coherence
+  proof
+ T.t in rng T & rng T c= D by FUNCT_1:def 5,RELAT_1:def 19;
+    hence thesis;
+  end;
+end;
+
+theorem Th33:
+  dom T1 = dom T2 & (for p st p in dom T1 holds T1.p = T2.p) implies T1 = T2
+proof
+  assume that
+A1: dom T1 = dom T2 and
+A2: for p st p in dom T1 holds T1.p = T2.p;
+ now
+    let x;
+    assume x in dom T1;
+    then reconsider p = x as Element of dom T1;
+ T1.p = T2.p by A2;
+    hence T1.x = T2.x;
+  end;
+  hence thesis by A1,FUNCT_1:9;
+end;
+
+scheme DTreeEx { T() -> Tree, P[set,set] }:
+  ex T st dom T = T() & for p st p in T() holds P[p,T.p]
+provided
+A1: for p st p in T() ex x st P[p,x]
+proof
+A2: for x st x in T() ex y st P[x,y]
+  proof
+    let x;
+    assume x in T();
+    then reconsider p = x as Element of T();
+ ex y st P[p,y] by A1;
+    hence thesis;
+  end;
+  consider f such that
+A5: dom f = T() & for x st x in T() holds P[x,f.x] from CLASSES1:sch 1(A2);
+  reconsider T = f as DecoratedTree by A5,Def8;
+  take T;
+  thus thesis by A5;
+end;
+
+scheme DTreeLambda { T() -> Tree, f(set) -> set }:
+  ex T st dom T = T() & for p st p in T() holds T.p = f(p)
+proof
+  consider f such that
+A1: dom f = T() & for x st x in T() holds f.x = f(x) from FUNCT_1:sch 3;
+  reconsider T = f as DecoratedTree by A1,Def8;
+  take T;
+  thus thesis by A1;
+end;
+
+definition
+  canceled;
+  let T;
+  func Leaves T -> set equals
+  T.:Leaves dom T;
+  correctness;
+  let p;
+  func T|p -> DecoratedTree means
+  :
+  Def11: dom it = (dom T)|p & for q st q in (dom T)|p holds it.q = T.(p^q);
+  existence
+  proof
+    deffunc U(FinSequence) = T.(p^$1);
+    thus ex t being DecoratedTree st
+    dom t = (dom T)|p & for q st q in (dom T)|p holds t.q = U(q)
+    from DTreeLambda;
+  end;
+  uniqueness
+  proof
+    let T1,T2 such that
+A1: dom T1 = (dom T)|p and
+A2: for q st q in (dom T)|p holds T1.q = T.(p^q) and
+A3: dom T2 = (dom T)|p and
+A4: for q st q in (dom T)|p holds T2.q = T.(p^q);
+ now
+      let q;
+      assume
+A6:   q in (dom T)|p;
+then    T1.q = T.(p^q) by A2;
+      hence T1.q = T2.q by A4,A6;
+    end;
+    hence thesis by A1,A3,Th33;
+  end;
+end;
+
+theorem Th34:
+  p in dom T implies rng (T|p) c= rng T
+proof
+  assume
+A1: p in dom T;
+  let x;
+  assume x in rng (T|p);
+  then consider y such that
+A3: y in dom (T|p) and
+A4: x = (T|p).y by FUNCT_1:def 5;
+  reconsider y as Element of dom (T|p) by A3;
+A5: dom (T|p) = (dom T)|p by Def11;
+then A6: p^y in dom T by A1,TREES_1:def 9;
+ x = T.(p^y) by A4,A5,Def11;
+  hence thesis by A6,FUNCT_1:def 5;
+end;
+
+definition
+  let D;
+  let T be DecoratedTree of D;
+  redefine func Leaves T -> Subset of D;
+  coherence
+  proof
+ T.:Leaves dom T c= rng T & rng T c= D by RELAT_1:144,def 19;
+    hence thesis by XBOOLE_1:1;
+  end;
+end;
+
+registration
+  let D;
+  let T be DecoratedTree of D;
+  let p be Element of dom T;
+  cluster T|p -> D-valued;
+  coherence
+  proof
+ rng (T|p) c= rng T & rng T c= D by Th34,RELAT_1:def 19;
+then  rng (T|p) c= D by XBOOLE_1:1;
+    hence thesis by RELAT_1:def 19;
+  end;
+end;
+
+definition
+  let T,p,T1;
+  assume
+A1: p in dom T;
+  func T with-replacement (p,T1) -> DecoratedTree means
+  dom it = dom T with-replacement (p,dom T1) &
+  for q st q in dom T with-replacement (p,dom T1) holds
+  not p is_a_prefix_of q & it.q = T.q or
+  ex r st r in dom T1 & q = p^r & it.q = T1.r;
+  existence
+  proof
+    defpred X[FinSequence,set] means not p is_a_prefix_of $1 & $2 = T.$1 or
+    ex r st r in dom T1 & $1 = p^r & $2 = T1.r;
+A2: for q st q in dom T with-replacement (p,dom T1) ex x st X[q,x]
+    proof
+      let q such that
+A3:   q in dom T with-replacement (p,dom T1);
+   now per cases by XBOOLE_0:def 8;
+        suppose
+       p is_a_proper_prefix_of q;
+          then consider r such that
+A6:       r in dom T1 & q = p^r by A1,A3,TREES_1:def 12;
+          thus thesis
+          proof
+            take T1.r;
+            thus thesis by A6;
+          end;
+        end;
+        suppose
+A7:       p = q;
+          thus thesis
+          proof
+            take T1.({} NAT);
+         {} NAT in dom T1 & q = p^(<*> NAT) by A7,FINSEQ_1:47,TREES_1:47;
+            hence thesis;
+          end;
+        end;
+        suppose
+       not p is_a_prefix_of q;
+          hence thesis;
+        end;
+      end;
+      hence thesis;
+    end;
+    thus ex TT being DecoratedTree st
+    dom TT = dom T with-replacement (p,dom T1) &
+    for q st q in dom T with-replacement (p,dom T1) holds X[q,TT.q]
+    from DTreeEx(A2);
+  end;
+  uniqueness
+  proof
+    let D1,D2 be DecoratedTree such that
+A10: dom D1 = dom T with-replacement (p,dom T1) and
+A11: for q st q in dom T with-replacement (p,dom T1) holds
+    not p is_a_prefix_of q & D1.q = T.q or
+    ex r st r in dom T1 & q = p^r & D1.q = T1.r and
+A12: dom D2 = dom T with-replacement (p,dom T1) and
+A13: for q st q in dom T with-replacement (p,dom T1) holds
+    not p is_a_prefix_of q & D2.q = T.q or
+    ex r st r in dom T1 & q = p^r & D2.q = T1.r;
+ now
+      let q;
+      assume that
+A15:  q in dom D1 and
+A16:  D1.q <> D2.q;
+A17:  not p is_a_prefix_of q & D1.q = T.q or
+      ex r st r in dom T1 & q = p^r & D1.q = T1.r by A10,A11,A15;
+  not p is_a_prefix_of q & D2.q = T.q or
+      ex r st r in dom T1 & q = p^r & D2.q = T1.r by A10,A13,A15;
+      hence contradiction by A16,A17,FINSEQ_1:46,TREES_1:8;
+    end;
+    hence thesis by A10,A12,Th33;
+  end;
+end;
+
+registration
+  let W,x;
+  cluster W --> x -> DecoratedTree-like;
+  coherence
+  proof
+ dom (W --> x) = W by FUNCOP_1:19;
+    hence thesis by Def8;
+  end;
+end;
+
+theorem Th35:
+  (for x st x in D holds x is Tree) implies union D is Tree
+proof
+  assume
+A1: for x st x in D holds x is Tree;
+  then reconsider x = the Element of D as Tree;
+  consider y being Element of x;
+ x c= union D by ZFMISC_1:92;
+  then reconsider T = union D as non empty set;
+ T is Tree-like
+  proof
+ for X st X in D holds X c= NAT*
+    proof
+      let X;
+      assume X in D;
+then    X is Tree by A1;
+      hence thesis by TREES_1:def 5;
+    end;
+    hence T c= NAT* by ZFMISC_1:94;
+    thus for p st p in T holds ProperPrefixes p c= T
+    proof
+      let p;
+      assume p in T;
+      then consider X such that
+A8:   p in X and
+A9:   X in D by TARSKI:def 4;
+      reconsider X as Tree by A1,A9;
+  ProperPrefixes p c= X & X c= T by A8,A9,TREES_1:def 5,ZFMISC_1:92;
+      hence thesis by XBOOLE_1:1;
+    end;
+    let p,k,n;
+    assume that
+A11: p^<*k*> in T and
+A12: n <= k;
+    consider X such that
+A13: p^<*k*> in X and
+A14: X in D by A11,TARSKI:def 4;
+    reconsider X as Tree by A1,A14;
+ p^<*n*> in X by A12,A13,TREES_1:def 5;
+    hence thesis by A14,TARSKI:def 4;
+  end;
+  hence thesis;
+end;
+
+theorem Th36:
+  (for x st x in X holds x is Function) & X is c=-linear implies
+  union X is Relation-like Function-like
+proof
+  assume that
+A1: for x st x in X holds x is Function and
+A2: X is c=-linear;
+  thus a in union X implies ex b,c st [b,c] = a
+  proof
+    assume a in union X;
+    then consider x be set such that
+A4: a in x and
+A5: x in X by TARSKI:def 4;
+    reconsider x as Function by A1,A5;
+ x = x;
+    hence thesis by A4,RELAT_1:def 1;
+  end;
+  let a,b,c;
+  assume that
+A7: [a,b] in union X and
+A8: [a,c] in union X;
+  consider x be set such that
+A9: [a,b] in x and
+A10: x in X by A7,TARSKI:def 4;
+  consider y be set such that
+A11: [a,c] in y and
+A12: y in X by A8,TARSKI:def 4;
+  reconsider x as Function by A1,A10;
+  reconsider y as Function by A1,A12;
+ x,y are_c=-comparable by A2,A10,A12,ORDINAL1:def 9;
+then  x c= y or y c= x by XBOOLE_0:def 9;
+  hence thesis by A9,A11,FUNCT_1:def 1;
+end;
+
+theorem Th37:
+  (for x st x in D holds x is DecoratedTree) & D is c=-linear
+  implies union D is DecoratedTree
+proof
+  assume that
+A1: for x st x in D holds x is DecoratedTree and
+A2: D is c=-linear;
+ for x holds x in D implies x is Function by A1;
+  then reconsider T = union D as Function by A2,Th36;
+  defpred X[set,set] means ex T1 st $1 = T1 & dom T1 = $2;
+A4: for x st x in D ex y st X[x,y]
+  proof
+    let x;
+    assume x in D;
+    then reconsider T1 = x as DecoratedTree by A1;
+ dom T1 = dom T1;
+    hence thesis;
+  end;
+  consider f such that
+A7: dom f = D & for x st x in D holds X[x,f.x] from CLASSES1:sch 1(A4);
+  reconsider E = rng f as non empty set by A7,RELAT_1:65;
+ now
+    let x;
+    assume x in E;
+    then consider y such that
+A10: y in dom f & x = f.y by FUNCT_1:def 5;
+ ex T1 st y = T1 & dom T1 = x by A7,A10;
+    hence x is Tree;
+  end;
+then A12: union E is Tree by Th35;
+ dom T = union E
+  proof
+    thus dom T c= union E
+    proof
+      let x;
+      assume x in dom T;
+      then consider y such that
+A15:  [x,y] in T by RELAT_1:def 4;
+      consider X such that
+A16:  [x,y] in X and
+A17:  X in D by A15,TARSKI:def 4;
+      consider T1 such that
+A18:  X = T1 and
+A19:  dom T1 = f.X by A7,A17;
+A20:  dom T1 in rng f by A7,A17,A19,FUNCT_1:def 5;
+A21:  x in dom T1 by A16,A18,RELAT_1:def 4;
+  dom T1 c= union E by A20,ZFMISC_1:92;
+      hence thesis by A21;
+    end;
+    let x;
+    assume x in union E;
+    then consider X such that
+A24: x in X and
+A25: X in E by TARSKI:def 4;
+    consider y such that
+A26: y in dom f and
+A27: X = f.y by A25,FUNCT_1:def 5;
+    consider T1 such that
+A28: y = T1 and
+A29: dom T1 = X by A7,A26,A27;
+ [x,T1.x] in T1 by A24,A29,FUNCT_1:8;
+then  [x,T1.x] in union D by A7,A26,A28,TARSKI:def 4;
+    hence thesis by RELAT_1:def 4;
+  end;
+  hence thesis by A12,Def8;
+end;
+
+theorem Th38:
+  (for x st x in D9 holds x is DecoratedTree of D) & D9 is c=-linear implies
+  union D9 is DecoratedTree of D
+proof
+  assume that
+A1: for x st x in D9 holds x is DecoratedTree of D and
+A2: D9 is c=-linear;
+ for x st x in D9 holds x is DecoratedTree by A1;
+  then reconsider T = union D9 as DecoratedTree by A2,Th37;
+ rng T c= D
+  proof
+    let x;
+    assume x in rng T;
+    then consider y such that
+A6: y in dom T & x = T.y by FUNCT_1:def 5;
+ [y,x] in T by A6,FUNCT_1:8;
+    then consider X such that
+A8: [y,x] in X and
+A9: X in D9 by TARSKI:def 4;
+    reconsider X as DecoratedTree of D by A1,A9;
+ y in dom X & x = X.y by A8,FUNCT_1:8;
+then A11: x in rng X by FUNCT_1:def 5;
+ rng X c= D by RELAT_1:def 19;
+    hence thesis by A11;
+  end;
+  hence thesis by RELAT_1:def 19;
+end;
+
+scheme DTreeStructEx
+  { D() -> non empty set, d() -> Element of D(), F(set) -> set,
+  S() -> Function of [:D(),NAT:],D()}:
+  ex T being DecoratedTree of D() st T.{} = d() &
+  for t being Element of dom T holds succ t = { t^<*k*>: k in F(T.t)} &
+  for n st n in F(T.t) holds T.(t^<*n*>) = S().(T.t,n)
+provided
+A1: for d being Element of D(), k1,k2 st k1 <= k2 & k2 in F(d) holds k1 in F(d)
+proof
+  defpred P[Element of NAT] means
+  ex T being DecoratedTree of D() st T.{} = d() &
+  for t being Element of dom T holds len t <= $1 &
+  (len t < $1 implies succ t = { t^<*k*>: k in F(T.t)} &
+  for n,x st x = T.t & n in F(x) holds T.(t^<*n*>) = S().(x,n));
+A2: P[0] proof reconsider W = {{}} as Tree by TREES_1:48;
+    take T = W --> d();
+ {} in W by TREES_1:47;
+    hence T.{} = d() by FUNCOP_1:13;
+    let t be Element of dom T;
+ dom T = W by FUNCOP_1:19;
+then  t = {} by TARSKI:def 1;
+    hence len t <= 0;
+    assume len t < 0;
+    hence thesis;
+  end;
+A7: P[k] implies P[k+1]
+  proof
+    given T be DecoratedTree of D() such that
+A8: T.{} = d() & for t being Element of dom T holds len t <= k &
+    (len t < k implies succ t = { t^<*m*>: m in F(T.t)} &
+    for n,x st x = T.t & n in F(x) holds T.(t^<*n*>) = S().(x,n));
+    reconsider M
+    = { t^<*n*> where t is Element of dom T: n in F(T.t) } \/ dom T
+    as non empty set;
+ M is Tree-like
+    proof
+      thus M c= NAT*
+      proof
+        let x;
+        assume x in M;
+then A11:    x in { t^<*n*> where t is Element of dom T: n in F(T.t) } or
+        x in dom T & dom T c= NAT* by TREES_1:def 5,XBOOLE_0:def 3;
+        assume
+A12:    not x in NAT*;
+then     ex n be Element of NAT,t being Element of dom T
+        st x = t^<*n*> & n in F (T.t) by A11;
+        hence thesis by A12,FINSEQ_1:def 11;
+      end;
+      thus for p st p in M holds ProperPrefixes p c= M
+      proof
+        let p;
+        assume p in M;
+then A15:    p in { t^<*n*> where t is Element of dom T: n in F(T.t) } or
+        p in dom T by XBOOLE_0:def 3;
+    now
+          assume p in { t^<*n*> where t is Element of dom T: n in F(T.t) };
+          then consider n be Element of NAT, t be Element of dom T such that
+A18:      p = t^<*n*> and n in F(T.t);
+A19:      ProperPrefixes t c= dom T by TREES_1:def 5;
+A20:      dom T c= M by XBOOLE_1:7;
+A21:      t in dom T;
+A22:      ProperPrefixes t c= M by A19,A20,XBOOLE_1:1;
+A23:      {t} c= M by A20,A21,ZFMISC_1:37;
+      ProperPrefixes p = ProperPrefixes t \/ {t} by A18,Th6;
+          hence thesis by A22,A23,XBOOLE_1:8;
+        end;
+then     ProperPrefixes p c= M or ProperPrefixes p c= dom T & dom T c= M
+        by A15,TREES_1:def 5,XBOOLE_1:7;
+        hence thesis by XBOOLE_1:1;
+      end;
+      let p,m,n;
+      assume p^<*m*> in M;
+then A27:  p^<*m*> in { t^<*l*> where t is Element of dom T: l in F(T.t) } or
+      p^<*m*> in dom T by XBOOLE_0:def 3;
+      assume that
+A28:  n <= m and
+A29:  not p^<*n*> in M;
+  not p^<*n*> in dom T by A29,XBOOLE_0:def 3;
+      then consider l be Element of NAT, t be Element of dom T such that
+A31:  p^<*m*> = t^<*l*> and
+A32:  l in F(T.t) by A27,A28,TREES_1:def 5;
+      A33:  len (p^<*m*>) = len p + len <*m*> & len <*m*> = 1 by FINSEQ_1:35,57
+      ;
+      A34:  len (t^<*l*>) = len t + len <*l*> & len <*l*> = 1 by FINSEQ_1:35,57
+      ;
+      A35:  (
+p^<*m*>).(len p + 1) = m & (t^<*l*>).(len t + 1) = l by FINSEQ_1:59;
+then A36:  p = t by A31,A33,A34,FINSEQ_1:46;
+  n in F(T.t) by A1,A28,A31,A32,A33,A34,A35;
+then   p^<*n*> in { s^<*i*> where s is Element of dom T: i in F(T.s) }
+      by A36;
+      hence thesis by A29,XBOOLE_0:def 3;
+    end;
+    then reconsider M as Tree;
+    defpred P[FinSequence,set] means $1 in dom T & $2 = T.$1 or
+    not $1 in dom T & ex n,q st $1 = q^<*n*> & $2 = S().(T.q,n);
+A39: for p st p in M ex x st P[p,x]
+    proof
+      let p;
+      assume p in M;
+then A41:  p in { t^<*l*> where t is Element of dom T: l in F(T.t) } or
+      p in dom T by XBOOLE_0:def 3;
+  now
+        assume
+A43:    not p in dom T;
+        then consider l be Element of NAT, t be Element of dom T such that
+A44:    p = t^<*l*> and l in F(T.t) by A41;
+        take x = S().(T.t,l);
+        thus p in dom T & x = T.p or
+        not p in dom T & ex n,q st p = q^<*n*> & x = S().(T.q,n) by A43,A44;
+      end;
+      hence thesis;
+    end;
+    consider T9 be DecoratedTree such that
+A45: dom T9 = M & for p st p in M holds P[p,T9.p] from DTreeEx(A39);
+ rng T9 c= D()
+    proof
+      let x;
+      assume x in rng T9;
+      then consider y such that
+A48:  y in dom T9 and
+A49:  x = T9.y by FUNCT_1:def 5;
+      reconsider y as Element of dom T9 by A48;
+A50:  now
+        assume y in dom T;
+        then reconsider t = y as Element of dom T;
+    T.t in D();
+        hence thesis by A45,A49;
+      end;
+  now
+        assume
+A54:    not y in dom T;
+        then consider n,q such that
+A55:    y = q^<*n*> and
+A56:    T9.y = S().(T.q,n) by A45;
+    y in { t^<*l*> where t is Element of dom T: l in F(T.t) }
+        by A45,A54,XBOOLE_0:def 3;
+        then consider l be Element of NAT, t be Element of dom T such that
+A58:    y = t^<*l*> and l in F(T.t);
+A59:    len <*n*> = 1 by FINSEQ_1:56;
+A60:    len <*l*> = 1 by FINSEQ_1:56;
+A61:    len (q^<*n*>) = len q + 1 by A59,FINSEQ_1:35;
+A62:    len (t^<*l*>) = len t + 1 by A60,FINSEQ_1:35;
+            (
+q^<*n*>).(len q + 1) = n & (t^<*l*>).(len t + 1) = l by FINSEQ_1:59;
+then A64:    q = t by A55,A58,A61,A62,FINSEQ_1:46;
+    T.t in D();
+then     [T.q,n] in [:D(),NAT:] by A64,ZFMISC_1:106;
+        hence thesis by A49,A56,FUNCT_2:7;
+      end;
+      hence thesis by A50;
+    end;
+    then reconsider T9 as DecoratedTree of D() by RELAT_1:def 19;
+    take T9;
+ <*> NAT in M & <*> NAT in dom T by TREES_1:47;
+    hence T9. {} = d() by A8,A45;
+    let t be Element of dom T9;
+A68: now
+      assume t in { s^<*l*> where s is Element of dom T: l in F(T.s) };
+      then consider l be Element of NAT, s being Element of dom T such that
+A70:  t = s^<*l*> and l in F(T.s);
+  len s <= k by A8;
+then   len <*l*> = 1 & len s + 1 <= k+1 by FINSEQ_1:56,XREAL_1:9;
+      hence len t <= k+1 by A70,FINSEQ_1:35;
+    end;
+ now
+      assume t in dom T;
+      then reconsider s = t as Element of dom T;
+  len s <= k & k <= k+1 by A8,NAT_1:11;
+      hence len t <= k+1 by XXREAL_0:2;
+    end;
+    hence len t <= k+1 by A45,A68,XBOOLE_0:def 3;
+    assume
+A76: len t < k+1;
+A77: now
+      assume
+A78:  not t in dom T;
+then   t in { s^<*l*> where s is Element of dom T: l in F(T.s) }
+      by A45,XBOOLE_0:def 3;
+      then consider l be Element of NAT, s be Element of dom T such that
+A80:  t = s^<*l*> and
+A81:  l in F(T.s);
+A82:  len t = len s + len <*l*> by A80,FINSEQ_1:35;
+  len <*l*> = 1 & len t <= k by A76,FINSEQ_1:56,NAT_1:13;
+then   len s < k by A82,NAT_1:13;
+then   succ s = { s^<*m*>: m in F(T.s)} by A8;
+then   t in succ s by A80,A81;
+      hence contradiction by A78;
+    end;
+then A87: T9.t = T.t by A45;
+    reconsider t9 = t as Element of dom T by A77;
+    thus succ t c= { t^<*i*>: i in F(T9.t)}
+    proof
+      let x;
+      assume x in succ t;
+      then consider n such that
+A89:  x = t^<*n*> and
+A90:  t^<*n*> in dom T9;
+  now per cases;
+        suppose
+A92:      t^<*n*> in dom T;
+          then
+reconsider s = t^<*n*>, t9 = t as Element of dom T by TREES_1:46;
+      len s <= k & len s = len t + 1 by A8,FINSEQ_2:19;
+then       len t < k by NAT_1:13;
+then       succ t9 = { t9^<*m*>: m in F(T.t9) } by A8;
+          hence thesis by A87,A89,A92;
+        end;
+        suppose
+      not t^<*n*> in dom T;
+then       t^<*n*> in { s^<*l*> where s is Element of dom T: l in F(T.s
+          ) } by A45,A90,XBOOLE_0:def 3;
+          then consider l be Element of NAT, s be Element of dom T such that
+A98:      t^<*n*> = s^<*l*> and
+A99:      l in F(T.s);
+     t = s by A98,FINSEQ_2:20;
+          hence thesis by A87,A89,A98,A99;
+        end;
+      end;
+      hence thesis;
+    end;
+    thus
+A101: { t^<*i*>: i in F(T9.t)} c= succ t
+    proof
+      let x;
+      assume x in { t^<*i*>: i in F(T9.t)};
+      then consider n such that
+A103: x = t^<*n*> and
+A104: n in F(T9.t);
+ x = t9^<*n*> by A103;
+then  x in { s^<*l*> where s is Element of dom T: l in F(T.s) }
+      by A87,A104;
+then  x in dom T9 by A45,XBOOLE_0:def 3;
+      hence thesis by A103;
+    end;
+    let n,x;
+    assume that
+A108: x = T9.t and
+A109: n in F(x);
+ t^<*n*> in { t^<*i*>: i in F(T9.t)} by A108,A109;
+then A111: t^<*n*> in succ t by A101;
+ now per cases;
+      suppose
+A113:   t^<*n*> in dom T;
+        then reconsider s = t^<*n*> as Element of dom T;
+   len s <= k & len s = len t + 1 by A8,FINSEQ_2:19;
+then    len t9 < k by NAT_1:13;
+then    T.(t9^<*n*>) = S().(x,n) by A8,A87,A108,A109;
+        hence thesis by A45,A111,A113;
+      end;
+      suppose
+   not t^<*n*> in dom T;
+        then consider l,q such that
+A118:   t^<*n*> = q^<*l*> and
+A119:   T9.(t^<*n*>) = S().(T.q,l) by A45,A111;
+   t = q & n = l by A118,FINSEQ_2:20;
+        hence thesis by A45,A77,A108,A119;
+      end;
+    end;
+    hence thesis;
+  end;
+A121: P[k] from NAT_1:sch 1(A2,A7);
+  defpred P[set,set] means ex T being DecoratedTree of D(), k st
+  $1 = k & $2 = T & T.{} = d() &
+  for t being Element of dom T holds len t <= k &
+  (len t < k implies succ t = { t^<*i*>: i in F(T.t)} &
+  for n,x st x = T.t & n in F(x) holds T.(t^<*n*>) = S().(x,n));
+A122: for x st x in NAT ex y st P[x,y]
+  proof
+    let x;
+    assume x in NAT;
+    then reconsider n = x as Element of NAT;
+    consider T being DecoratedTree of D() such that
+A124: T.{} = d() & for t being Element of dom T holds len t <= n &
+    (len t < n implies succ t = { t^<*k*>: k in F(T.t)} &
+    for n,x st x = T.t & n in F(x) holds T.(t^<*n*>) = S().(x,n)) by A121;
+    reconsider y = T as set;
+    take y,T,n;
+    thus thesis by A124;
+  end;
+  consider f such that
+A125: dom f = NAT & for x st x in NAT holds P[x,f.x] from CLASSES1:sch 1(A122);
+  reconsider E = rng f as non empty set by A125,RELAT_1:65;
+A126: for x st x in E holds x is DecoratedTree of D()
+  proof
+    let x;
+    assume x in E;
+    then consider y such that
+A128: y in dom f and
+A129: x = f.y by FUNCT_1:def 5;
+ ex T being DecoratedTree of D(), k st y = k & f.y = T & T.{} = d() &
+    for t being Element of dom T holds len t <= k &
+    (len t < k implies succ t = { t^<*i*>: i in F(T.t)} &
+    for n,x st x = T.t & n in F(x) holds T.(t^<*n*>) = S().(x,n)) by A125,A128;
+    hence thesis by A129;
+  end;
+A131: for T1,T2,k1,k2 st T1 = f.k1 & T2 = f.k2 & k1 <= k2 holds T1 c= T2
+  proof
+    let T1,T2;
+    let x,y be Element of NAT such that
+A132: T1 = f.x and
+A133: T2 = f.y and
+A134: x <= y;
+    consider T19 being DecoratedTree of D(), k1 such that
+A135: x = k1 & f.x = T19 & T19.{} = d() &
+    for t being Element of dom T19 holds len t <= k1 &
+    (len t < k1 implies succ t = { t^<*i*>: i in F(T19.t)} &
+    for n,x st x = T19.t & n in F(x) holds T19.(t^<*n*>) = S().(x,n)) by A125;
+    consider T29 being DecoratedTree of D(), k2 such that
+A136: y = k2 & f.y = T29 & T29.{} = d() &
+    for t being Element of dom T29 holds len t <= k2 &
+    (len t < k2 implies succ t = { t^<*i*>: i in F(T29.t)} &
+    for n,x st x = T29.t & n in F(x) holds T29.(t^<*n*>) = S().(x,n)) by A125;
+    defpred I[Element of NAT] means
+    for t being Element of dom T1 st len t <= $1 holds
+    t in dom T2 & T1.t = T2.t;
+A137: I[0]
+    proof
+      let t be Element of dom T1 such that
+A138: len t <= 0;
+ t = {} by A138;
+      hence thesis by A132,A133,A135,A136,TREES_1:47;
+    end;
+A140: I[k] implies I[k+1]
+    proof
+      assume
+A141: for t being Element of dom T1 st len t <= k holds
+      t in dom T2 & T1.t = T2.t;
+      let t be Element of dom T1;
+      assume len t <= k+1;
+then A143: len t <= k or len t = k+1 by NAT_1:8;
+ now
+        assume
+A145:   len t = k+1;
+        reconsider p = t|Seg k as FinSequence of NAT by FINSEQ_1:23;
+   p is_a_prefix_of t by TREES_1:def 1;
+        then reconsider p as Element of dom T1 by TREES_1:45;
+A147:   k <= k+1 by NAT_1:11;
+A148:   k+1 <= k1 by A132,A135,A145;
+A149:   len p = k by A145,A147,FINSEQ_1:21;
+A150:   k < k1 by A148,NAT_1:13;
+A151:   T1.p = T2.p by A141,A149;
+        reconsider p9 = p as Element of dom T2 by A141,A149;
+   t <> {} by A145;
+        then consider q being FinSequence, x being set such that
+A153:   t = q^<*x*> by FINSEQ_1:63;
+        A154:   p
+ is_a_prefix_of t & q is_a_prefix_of t by A153,TREES_1:8,def 1;
+   k+1 = len q + 1 by A145,A153,FINSEQ_2:19;
+then A156:   p = q by A149,A154,Th1,TREES_1:19;
+   <*x*> is FinSequence of NAT by A153,FINSEQ_1:50;
+then A158:   rng <*x*> c= NAT by FINSEQ_1:def 4;
+   rng <*x*> = {x} & x in {x} by FINSEQ_1:55,TARSKI:def 1;
+        then reconsider x as Element of NAT by A158;
+A160:   p^<*x*> in succ p by A153,A156;
+   succ p = { p^<*i*>: i in F(T1.p)} by A132,A135,A149,A150;
+        then consider i such that
+A162:   p^<*x*> = p^<*i*> and
+A163:   i in F(T1.p) by A160;
+A164:   k < k2 by A134,A135,A136,A150,XXREAL_0:2;
+then A165:   succ p9 = { p9^<*l*>: l in F(T2.p9) } by A133,A136,A149;
+A166:   x = i by A162,FINSEQ_2:20;
+A167:   t in succ p9 by A151,A153,A156,A162,A163,A165;
+   T19.t = S().(T19.p,x) by A132,A135,A149,A150,A153,A156,A163,A166;
+        hence
+thesis by A132,A133,A135,A136,A149,A151,A153,A156,A163,A164,A166
+        ,A167;
+      end;
+      hence thesis by A141,A143;
+    end;
+A169: I[k] from NAT_1:sch 1(A137,A140);
+    let x;
+    assume
+A170: x in T1;
+    then consider y,z such that
+A171: [y,z] = x by RELAT_1:def 1;
+A172: T1.y = z by A170,A171,FUNCT_1:8;
+    reconsider y as Element of dom T1 by A170,A171,FUNCT_1:8;
+ len y <= len y;
+then  y in dom T2 & T1.y = T2.y by A169;
+    hence thesis by A171,A172,FUNCT_1:8;
+  end;
+ E is c=-linear
+  proof
+    let T1,T2 be set;
+    assume
+A176: T1 in E;
+    then consider x such that
+A177: x in dom f and
+A178: T1 = f.x by FUNCT_1:def 5;
+    assume
+A179: T2 in E;
+    then consider y such that
+A180: y in dom f and
+A181: T2 = f.y by FUNCT_1:def 5;
+A182: T1 is DecoratedTree by A126,A176;
+A183: T2 is DecoratedTree by A126,A179;
+    reconsider x,y as Element of NAT by A125,A177,A180;
+ x <= y or y <= x;
+    hence T1 c= T2 or T2 c= T1 by A131,A178,A181,A182,A183;
+  end;
+  then reconsider T = union rng f as DecoratedTree of D() by A126,Th38;
+  take T;
+  consider T9 being DecoratedTree of D(), k such that
+A185: 0 = k & f.0 = T9 & T9.{} = d() &
+  for t being Element of dom T9 holds len t <= k &
+  (len t < k implies succ t = { t^<*i*>: i in F(T9.t)} &
+  for n,x st x = T9.t & n in F(x) holds T9.(t^<*n*>) = S().(x,n)) by A125;
+ {} in dom T9 by TREES_1:47;
+then A187: [{},d()] in T9 by A185,FUNCT_1:8;
+ T9 in rng f by A125,A185,FUNCT_1:def 5;
+then  [{},d()] in T by A187,TARSKI:def 4;
+  hence T.{} = d() by FUNCT_1:8;
+A190: for T1,x st T1 in E & x in dom T1 holds x in dom T & T1.x = T.x
+  proof
+    let T1,x;
+    assume that
+A191: T1 in E and
+A192: x in dom T1;
+ [x,T1.x] in T1 by A192,FUNCT_1:8;
+then  [x,T1.x] in T by A191,TARSKI:def 4;
+    hence thesis by FUNCT_1:8;
+  end;
+  let t be Element of dom T;
+  thus succ t c= { t^<*i*>: i in F(T.t)}
+  proof
+    let x;
+    assume x in succ t;
+    then consider l such that
+A196: x = t^<*l*> and
+A197: t^<*l*> in dom T;
+ [x,T.x] in T by A196,A197,FUNCT_1:8;
+    then consider X such that
+A199: [x,T.x] in X and
+A200: X in rng f by TARSKI:def 4;
+    consider y such that
+A201: y in NAT and
+A202: X = f.y by A125,A200,FUNCT_1:def 5;
+    consider T1 being DecoratedTree of D(), k1 such that
+A203: y = k1 & f.y = T1 & T1.{} = d() &
+    for t being Element of dom T1 holds len t <= k1 &
+    (len t < k1 implies succ t = { t^<*i*>: i in F(T1.t)} &
+    for n,x st x = T1.t & n in F(x) holds T1.(t^<*n*>) = S().(x,n))
+    by A125,A201;
+A204: t^<*l*> in dom T1 by A196,A199,A202,A203,FUNCT_1:8;
+    then
+reconsider t9 = t, p = t^<*l*> as Element of dom T1 by TREES_1:46;
+ len p <= k1 by A203;
+then  len t + 1 <= k1 by FINSEQ_2:19;
+then A207: len t9 < k1 by NAT_1:13;
+then A208: succ t9 = { t9^<*i*>: i in F(T1.t9)} by A203;
+ T1.t = T.t by A190,A200,A202,A203,A207;
+    hence thesis by A196,A204,A208;
+  end;
+ [t,T.t] in T by FUNCT_1:8;
+  then consider X such that
+A211: [t,T.t] in X and
+A212: X in E by TARSKI:def 4;
+  consider y such that
+A213: y in NAT and
+A214: X = f.y by A125,A212,FUNCT_1:def 5;
+  reconsider y as Element of NAT by A213;
+  consider T1 being DecoratedTree of D(), k1 such that
+A215: y = k1 & f.y = T1 & T1.{} = d() &
+  for t being Element of dom T1 holds len t <= k1 &
+  (len t < k1 implies succ t = { t^<*i*>: i in F(T1.t)} &
+  for n,x st x = T1.t & n in F(x) holds T1.(t^<*n*>) = S().(x,n)) by A125;
+  consider T2 being DecoratedTree of D(), k2 such that
+A216: y+1 = k2 & f.(y+1) = T2 & T2.{} = d() &
+  for t being Element of dom T2 holds len t <= k2 &
+  (len t < k2 implies succ t = { t^<*i*>: i in F(T2.t)} &
+  for n,x st x = T2.t & n in F(x) holds T2.(t^<*n*>) = S().(x,n)) by A125;
+ y <= y+1 by NAT_1:11;
+then A218: T1 c= T2 by A131,A215,A216;
+  reconsider t1 = t as Element of dom T1 by A211,A214,A215,FUNCT_1:8;
+A219: len t1 <= y by A215;
+A220: T2.t = T.t by A211,A214,A215,A218,FUNCT_1:8;
+  reconsider t2 = t as Element of dom T2 by A211,A214,A215,A218,FUNCT_1:8;
+A221: len t2 < y+1 by A219,NAT_1:13;
+then A222: succ t2 = { t2^<*i*>: i in F(T2.t2)} by A216;
+  thus { t^<*i*>: i in F(T.t)} c= succ t
+  proof
+    let x;
+    assume
+A223: x in { t^<*i*>: i in F(T.t)};
+then A224: ex l st x = t^<*l*> & l in F(T.t);
+A225: x in succ t2 by A216,A220,A221,A223;
+ T2 in E by A125,A216,FUNCT_1:def 5;
+then  x in dom T by A190,A225;
+    hence thesis by A224;
+  end;
+  let n;
+  assume
+A228: n in F(T.t);
+then A229: t^<*n*> in succ t2 by A220,A222;
+ T2 in E by A125,A216,FUNCT_1:def 5;
+then  T2.(t^<*n*>) = T.(t^<*n*>) by A190,A229;
+  hence thesis by A216,A220,A221,A228;
+end;
+
+scheme DTreeStructFinEx
+  { D() -> non empty set, d() -> Element of D(), F(set) -> Element of NAT,
+  S() -> Function of [:D(),NAT:],D()}:
+  ex T being DecoratedTree of D() st T.{} = d() &
+  for t being Element of dom T holds succ t = { t^<*k*>: k < F(T.t)} &
+  for n st n < F(T.t) holds T.(t^<*n*>) = S().(T.t,n)
+proof
+  deffunc FF(Element of NAT) = { i: i < $1};
+  deffunc U(set) = FF(F($1));
+A1: for d being Element of D(), k1,k2 st k1 <= k2 & k2 in U(d) holds k1 in U(d)
+  proof
+    let d be Element of D(), k1,k2;
+    assume
+A2: k1 <= k2 & k2 in { i: i < F(d)};
+then  ex i st k2 = i & i < F(d);
+then  k1 < F(d) by A2,XXREAL_0:2;
+    hence thesis;
+  end;
+  consider T being DecoratedTree of D() such that
+A5: T.{} = d() &
+  for t being Element of dom T holds succ t = { t^<*k*>: k in U(T.t)} &
+  for n st n in U(T.t) holds T.(t^<*n*>) = S().(T.t,n) from DTreeStructEx(A1
+  );
+  take T;
+  thus T.{} = d() by A5;
+  let t be Element of dom T;
+A6: succ t = { t^<*k*>: k in FF(F(T.t))} by A5;
+  thus succ t c= { t^<*i*>: i < F(T.t)}
+  proof
+    let x;
+    assume x in succ t;
+    then consider l such that
+A8: x = t^<*l*> and
+A9: l in FF(F(T.t)) by A6;
+ ex i st l = i & i < F(T.t) by A9;
+    hence thesis by A8;
+  end;
+  thus { t^<*i*>: i < F(T.t)} c= succ t
+  proof
+    let x;
+    assume x in { t^<*i*>: i < F(T.t)};
+    then consider l such that
+A12: x = t^<*l*> and
+A13: l < F(T.t);
+ l in FF(F(T.t)) by A13;
+    hence thesis by A6,A12;
+  end;
+  let n;
+  assume n < F(T.t);
+then  n in FF(F(T.t));
+  hence thesis by A5;
+end;
+
+begin :: Addenda
+:: from PRELAMB
+
+registration
+  let Tr be finite Tree, v be Element of Tr;
+  cluster succ v -> finite;
+  coherence;
+end;
+
+definition
+  let Tr be finite Tree, v be Element of Tr;
+  func branchdeg v equals
+  card succ v;
+  correctness;
+end;
+
+registration
+  cluster finite DecoratedTree;
+  existence
+  proof
+    reconsider T = { {} } as Tree by TREES_1:48;
+    take T --> {};
+    thus thesis;
+  end;
+end;
+
+registration
+  let D be non empty set;
+  cluster finite DecoratedTree of D;
+  existence
+  proof consider d being Element of D;
+    reconsider T = { {} } as Tree by TREES_1:48;
+    take T --> d;
+    thus thesis;
+  end;
+end;
+
+registration
+  let a,b be non empty set;
+  cluster non empty Relation of a,b;
+  existence
+  proof
+ [:a,b:] c= [:a,b:];
+    hence thesis;
+  end;
+end;
+
+:: from MODAL_1, 2007.03.14, A.T.
+
+reserve x1,x2 for set,
+  w for FinSequence of NAT;
+
+theorem
+  for Z1,Z2 being Tree,p being FinSequence of NAT st p in Z1 holds
+  for v being Element of Z1 with-replacement (p,Z2),w being Element of Z2
+  st v = p^w holds succ v,succ w are_equipotent
+proof
+  let Z1,Z2 be Tree,p be FinSequence of NAT such that
+A1: p in Z1;
+  set T = Z1 with-replacement (p,Z2);
+  let t be Element of Z1 with-replacement (p,Z2), t2 be Element of Z2;
+  assume
+A2: t = p^t2;
+then A3: p is_a_prefix_of t by TREES_1:8;
+A4: for n holds t^<*n*> in T iff t2^<*n*> in Z2
+  proof
+    let n;
+A5: p is_a_proper_prefix_of t^<*n*> by A3,TREES_1:31;
+A6: t^<*n*> = p^(t2^<*n*>) by A2,FINSEQ_1:45;
+    thus t^<*n*> in T implies t2^<*n*> in Z2
+    proof
+      assume t^<*n*> in T;
+then    ex w st w in Z2 & t^<*n*> = p^w by A1,A5,TREES_1:def 12;
+      hence thesis by A6,FINSEQ_1:46;
+    end;
+    assume t2^<*n*> in Z2;
+    hence thesis by A1,A6,TREES_1:def 12;
+  end;
+  defpred P[set,set] means for n st $1 = t^<*n*> holds $2 = t2^<*n*>;
+A10: for x st x in succ t ex y st P[x,y]
+  proof
+    let x;
+    assume x in succ t;
+    then consider n such that
+A12: x = t^<*n*> and t^<*n*> in T;
+    take t2^<*n*>;
+    let m;
+    assume x = t^<*m*>;
+    hence thesis by A12,FINSEQ_1:46;
+  end;
+  consider f being Function such that
+A14: dom f = succ t & for x st x in
+  succ t holds P[x,f.x] from CLASSES1:sch 1(A10);
+ now
+    let x;
+    thus x in rng f implies x in succ t2
+    proof
+      assume x in rng f;
+      then consider y such that
+A17:  y in dom f and
+A18:  x = f.y by FUNCT_1:def 5;
+      consider n such that
+A19:  y = t^<*n*> and
+A20:  t^<*n*> in T by A14,A17;
+A21:  x = t2^<*n*> by A14,A17,A18,A19;
+  t2^<*n*> in Z2 by A4,A20;
+      hence thesis by A21;
+    end;
+    assume x in succ t2;
+    then consider n such that
+A24: x = t2^<*n*> and
+A25: t2^<*n*> in Z2;
+ t^<*n*> in T by A4,A25;
+then A27: t^<*n*> in dom f by A14;
+then  f.(t^<*n*>) = x by A14,A24;
+    hence x in rng f by A27,FUNCT_1:def 5;
+  end;
+then A29: rng f = succ t2 by TARSKI:2;
+ f is one-to-one
+  proof
+    let x1,x2;
+    assume that
+A31: x1 in dom f and
+A32: x2 in dom f and
+A33: f.x1 = f.x2;
+    consider m such that
+A34: x1 = t^<*m*> and t^<*m*> in T by A14,A31;
+    consider k such that
+A35: x2 = t^<*k*> and t^<*k*> in T by A14,A32;
+ t2^<*m*> = f.x1 by A14,A31,A34
+      .= t2^<*k*> by A14,A32,A33,A35;
+    hence thesis by A34,A35,FINSEQ_1:46;
+  end;
+  hence thesis by A14,A29,WELLORD2:def 4;
+end;
+
+scheme DTreeStructEx
+  { D() -> non empty set, d() -> Element of D(), Q[set,set],
+  S() -> Function of [:D(),NAT:],D()}:
+  ex T being DecoratedTree of D() st T.{} = d() &
+  for t being Element of dom T holds succ t = { t^<*k*>: Q[k,T.t]} &
+  for n st Q[n,T.t] holds T.(t^<*n*>) = S().(T.t,n)
+provided
+A1: for d being Element of D(), k1,k2 st k1 <= k2 & Q[k2,d] holds Q[k1,d]
+proof
+  defpred P[Element of NAT] means
+  ex T being DecoratedTree of D() st T.{} = d() &
+  for t being Element of dom T holds len t <= $1 &
+  (len t < $1 implies succ t = { t^<*k*>: Q[k,T.t]} &
+  for n,x st x = T.t & Q[n,x] holds T.(t^<*n*>) = S().(x,n));
+A2: P[0] proof reconsider W = {{}} as Tree by TREES_1:48;
+    take T = W --> d();
+ {} in W by TREES_1:47;
+    hence T.{} = d() by FUNCOP_1:13;
+    let t be Element of dom T;
+ dom T = W by FUNCOP_1:19;
+then  t = {} by TARSKI:def 1;
+    hence len t <= 0;
+    assume len t < 0;
+    hence thesis;
+  end;
+A7: P[k] implies P[k+1]
+  proof
+    given T be DecoratedTree of D() such that
+A8: T.{} = d() & for t being Element of dom T holds len t <= k &
+    (len t < k implies succ t = { t^<*m*>: Q[m,T.t]} &
+    for n,x st x = T.t & Q[n,x] holds T.(t^<*n*>) = S().(x,n));
+    reconsider M = { t^<*n*> where t is Element of dom T: Q[n,T.t] } \/ dom T
+    as non empty set;
+ M is Tree-like
+    proof
+      thus M c= NAT*
+      proof
+        let x;
+        assume x in M;
+then A11:    x in { t^<*n*> where t is Element of dom T: Q[n,T.t] } or
+        x in dom T & dom T c= NAT* by TREES_1:def 5,XBOOLE_0:def 3;
+        assume
+A12:    not x in NAT*;
+then     ex n be Element of NAT,t being Element of dom T
+        st x = t^<*n*> & Q[n,T.t] by A11;
+        hence thesis by A12,FINSEQ_1:def 11;
+      end;
+      thus for p st p in M holds ProperPrefixes p c= M
+      proof
+        let p;
+        assume p in M;
+then A15:    p in { t^<*n*> where t is Element of dom T: Q[n,T.t] } or
+        p in dom T by XBOOLE_0:def 3;
+    now
+          assume p in { t^<*n*> where t is Element of dom T: Q[n,T.t] };
+          then consider n be Element of NAT, t be Element of dom T such that
+A18:      p = t^<*n*> and Q[n,T.t];
+A19:      ProperPrefixes t c= dom T by TREES_1:def 5;
+A20:      dom T c= M by XBOOLE_1:7;
+A21:      t in dom T;
+A22:      ProperPrefixes t c= M by A19,A20,XBOOLE_1:1;
+A23:      {t} c= M by A20,A21,ZFMISC_1:37;
+      ProperPrefixes p = ProperPrefixes t \/ {t} by A18,Th6;
+          hence thesis by A22,A23,XBOOLE_1:8;
+        end;
+then     ProperPrefixes p c= M or ProperPrefixes p c= dom T & dom T c= M
+        by A15,TREES_1:def 5,XBOOLE_1:7;
+        hence thesis by XBOOLE_1:1;
+      end;
+      let p,m,n;
+      assume p^<*m*> in M;
+then A27:  p^<*m*> in { t^<*l*> where t is Element of dom T: Q[l,T.t] } or
+      p^<*m*> in dom T by XBOOLE_0:def 3;
+      assume that
+A28:  n <= m and
+A29:  not p^<*n*> in M;
+  not p^<*n*> in dom T by A29,XBOOLE_0:def 3;
+      then consider l be Element of NAT, t be Element of dom T such that
+A31:  p^<*m*> = t^<*l*> and
+A32:  Q[l,T.t] by A27,A28,TREES_1:def 5;
+      A33:  len (p^<*m*>) = len p + len <*m*> & len <*m*> = 1 by FINSEQ_1:35,57
+      ;
+      A34:  len (t^<*l*>) = len t + len <*l*> & len <*l*> = 1 by FINSEQ_1:35,57
+      ;
+      A35:  (
+p^<*m*>).(len p + 1) = m & (t^<*l*>).(len t + 1) = l by FINSEQ_1:59;
+then A36:  p = t by A31,A33,A34,FINSEQ_1:46;
+  Q[n,T.t] by A1,A28,A31,A32,A33,A34,A35;
+then
+  p^<*n*> in { s^<*i*> where s is Element of dom T: Q[i,T.s] } by A36;
+      hence thesis by A29,XBOOLE_0:def 3;
+    end;
+    then reconsider M as Tree;
+    defpred P[FinSequence,set] means $1 in dom T & $2 = T.$1 or
+    not $1 in dom T & ex n,q st $1 = q^<*n*> & $2 = S().(T.q,n);
+A39: for p st p in M ex x st P[p,x]
+    proof
+      let p;
+      assume p in M;
+then A41:  p in { t^<*l*> where t is Element of dom T: Q[l,T.t] } or
+      p in dom T by XBOOLE_0:def 3;
+  now
+        assume
+A43:    not p in dom T;
+        then consider l be Element of NAT, t be Element of dom T such that
+A44:    p = t^<*l*> and Q[l,T.t] by A41;
+        take x = S().(T.t,l);
+        thus p in dom T & x = T.p or
+        not p in dom T & ex n,q st p = q^<*n*> & x = S().(T.q,n) by A43,A44;
+      end;
+      hence thesis;
+    end;
+    consider T9 be DecoratedTree such that
+A45: dom T9 = M & for p st p in M holds P[p,T9.p] from DTreeEx(A39);
+ rng T9 c= D()
+    proof
+      let x;
+      assume x in rng T9;
+      then consider y such that
+A48:  y in dom T9 and
+A49:  x = T9.y by FUNCT_1:def 5;
+      reconsider y as Element of dom T9 by A48;
+A50:  now
+        assume y in dom T;
+        then reconsider t = y as Element of dom T;
+    T.t in D();
+        hence thesis by A45,A49;
+      end;
+  now
+        assume
+A54:    not y in dom T;
+        then consider n,q such that
+A55:    y = q^<*n*> and
+A56:    T9.y = S().(T.q,n) by A45;
+    y in { t^<*l*> where t is Element of dom T: Q[l,T.t] }
+        by A45,A54,XBOOLE_0:def 3;
+        then consider l be Element of NAT, t be Element of dom T such that
+A58:    y = t^<*l*> and Q[l,T.t];
+A59:    len <*n*> = 1 by FINSEQ_1:56;
+A60:    len <*l*> = 1 by FINSEQ_1:56;
+A61:    len (q^<*n*>) = len q + 1 by A59,FINSEQ_1:35;
+A62:    len (t^<*l*>) = len t + 1 by A60,FINSEQ_1:35;
+            (
+q^<*n*>).(len q + 1) = n & (t^<*l*>).(len t + 1) = l by FINSEQ_1:59;
+then A64:    q = t by A55,A58,A61,A62,FINSEQ_1:46;
+    T.t in D();
+then     [T.q,n] in [:D(),NAT:] by A64,ZFMISC_1:106;
+        hence thesis by A49,A56,FUNCT_2:7;
+      end;
+      hence thesis by A50;
+    end;
+    then reconsider T9 as DecoratedTree of D() by RELAT_1:def 19;
+    take T9;
+ <*> NAT in M & <*> NAT in dom T by TREES_1:47;
+    hence T9. {} = d() by A8,A45;
+    let t be Element of dom T9;
+A68: now
+      assume t in { s^<*l*> where s is Element of dom T: Q[l,T.s] };
+      then consider l be Element of NAT, s being Element of dom T such that
+A70:  t = s^<*l*> and Q[l,T.s];
+  len s <= k by A8;
+then   len <*l*> = 1 & len s + 1 <= k+1 by FINSEQ_1:56,XREAL_1:9;
+      hence len t <= k+1 by A70,FINSEQ_1:35;
+    end;
+ now
+      assume t in dom T;
+      then reconsider s = t as Element of dom T;
+  len s <= k & k <= k+1 by A8,NAT_1:11;
+      hence len t <= k+1 by XXREAL_0:2;
+    end;
+    hence len t <= k+1 by A45,A68,XBOOLE_0:def 3;
+    assume
+A76: len t < k+1;
+A77: now
+      assume
+A78:  not t in dom T;
+then   t in { s^<*l*> where s is Element of dom T: Q[l,T.s] }
+      by A45,XBOOLE_0:def 3;
+      then consider l be Element of NAT, s be Element of dom T such that
+A80:  t = s^<*l*> and
+A81:  Q[l,T.s];
+A82:  len t = len s + len <*l*> by A80,FINSEQ_1:35;
+  len <*l*> = 1 & len t <= k by A76,FINSEQ_1:56,NAT_1:13;
+then   len s < k by A82,NAT_1:13;
+then   succ s = { s^<*m*>: Q[m,T.s]} by A8;
+then   t in succ s by A80,A81;
+      hence contradiction by A78;
+    end;
+then A87: T9.t = T.t by A45;
+    reconsider t9 = t as Element of dom T by A77;
+    thus succ t c= { t^<*i*>: Q[i,T9.t]}
+    proof
+      let x;
+      assume x in succ t;
+      then consider n such that
+A89:  x = t^<*n*> and
+A90:  t^<*n*> in dom T9;
+  now per cases;
+        suppose
+A92:      t^<*n*> in dom T;
+          then
+reconsider s = t^<*n*>, t9 = t as Element of dom T by TREES_1:46;
+      len s <= k & len s = len t + 1 by A8,FINSEQ_2:19;
+then       len t < k by NAT_1:13;
+then       succ t9 = { t9^<*m*>: Q[m,T.t9] } by A8;
+          hence thesis by A87,A89,A92;
+        end;
+        suppose
+      not t^<*n*> in dom T;
+then       t^<*n*> in { s^<*l*> where s is Element of dom T: Q[l,T.s] }
+          by A45,A90,XBOOLE_0:def 3;
+          then consider l be Element of NAT, s be Element of dom T such that
+A98:      t^<*n*> = s^<*l*> and
+A99:      Q[l,T.s];
+     t = s by A98,FINSEQ_2:20;
+          hence thesis by A87,A89,A98,A99;
+        end;
+      end;
+      hence thesis;
+    end;
+    thus
+A101: { t^<*i*>: Q[i,T9.t]} c= succ t
+    proof
+      let x;
+      assume x in { t^<*i*>: Q[i,T9.t]};
+      then consider n such that
+A103: x = t^<*n*> and
+A104: Q[n,T9.t];
+ x = t9^<*n*> by A103;
+then  x in { s^<*l*> where s is Element of dom T: Q[l,T.s] } by A87,A104
+      ;
+then  x in dom T9 by A45,XBOOLE_0:def 3;
+      hence thesis by A103;
+    end;
+    let n,x;
+    assume that
+A108: x = T9.t and
+A109: Q[n,x];
+ t^<*n*> in { t^<*i*>: Q[i,T9.t]} by A108,A109;
+then A111: t^<*n*> in succ t by A101;
+ now per cases;
+      suppose
+A113:   t^<*n*> in dom T;
+        then reconsider s = t^<*n*> as Element of dom T;
+   len s <= k & len s = len t + 1 by A8,FINSEQ_2:19;
+then    len t9 < k by NAT_1:13;
+then    T.(t9^<*n*>) = S().(x,n) by A8,A87,A108,A109;
+        hence thesis by A45,A111,A113;
+      end;
+      suppose
+   not t^<*n*> in dom T;
+        then consider l,q such that
+A118:   t^<*n*> = q^<*l*> and
+A119:   T9.(t^<*n*>) = S().(T.q,l) by A45,A111;
+   t = q & n = l by A118,FINSEQ_2:20;
+        hence thesis by A45,A77,A108,A119;
+      end;
+    end;
+    hence thesis;
+  end;
+A121: P[k] from NAT_1:sch 1(A2,A7);
+  defpred P[set,set] means ex T being DecoratedTree of D(), k st
+  $1 = k & $2 = T & T.{} = d() &
+  for t being Element of dom T holds len t <= k &
+  (len t < k implies succ t = { t^<*i*>: Q[i,T.t]} &
+  for n,x st x = T.t & Q[n,x] holds T.(t^<*n*>) = S().(x,n));
+A122: for x st x in NAT ex y st P[x,y]
+  proof
+    let x;
+    assume x in NAT;
+    then reconsider n = x as Element of NAT;
+    consider T being DecoratedTree of D() such that
+A124: T.{} = d() & for t being Element of dom T holds len t <= n &
+    (len t < n implies succ t = { t^<*k*>: Q[k,T.t]} &
+    for n,x st x = T.t & Q[n,x] holds T.(t^<*n*>) = S().(x,n)) by A121;
+    reconsider y = T as set;
+    take y,T,n;
+    thus thesis by A124;
+  end;
+  consider f such that
+A125: dom f = NAT & for x st x in NAT holds P[x,f.x] from CLASSES1:sch 1(A122
+  );
+  reconsider E = rng f as non empty set by A125,RELAT_1:65;
+A126: for x st x in E holds x is DecoratedTree of D()
+  proof
+    let x;
+    assume x in E;
+    then consider y such that
+A128: y in dom f and
+A129: x = f.y by FUNCT_1:def 5;
+ ex T being DecoratedTree of D(), k st y = k & f.y = T & T.{} = d() &
+    for t being Element of dom T holds len t <= k &
+    (len t < k implies succ t = { t^<*i*>: Q[i,T.t]} &
+    for n,x st x = T.t & Q[n,x] holds T.(t^<*n*>) = S().(x,n)) by A125,A128;
+    hence thesis by A129;
+  end;
+A131: for T1,T2,k1,k2 st T1 = f.k1 & T2 = f.k2 & k1 <= k2 holds T1 c= T2
+  proof
+    let T1,T2;
+    let x,y be Element of NAT such that
+A132: T1 = f.x and
+A133: T2 = f.y and
+A134: x <= y;
+    consider T19 being DecoratedTree of D(), k1 such that
+A135: x = k1 & f.x = T19 & T19.{} = d() &
+    for t being Element of dom T19 holds len t <= k1 &
+    (len t < k1 implies succ t = { t^<*i*>: Q[i,T19.t]} &
+    for n,x st x = T19.t & Q[n,x] holds T19.(t^<*n*>) = S().(x,n)) by A125;
+    consider T29 being DecoratedTree of D(), k2 such that
+A136: y = k2 & f.y = T29 & T29.{} = d() &
+    for t being Element of dom T29 holds len t <= k2 &
+    (len t < k2 implies succ t = { t^<*i*>: Q[i,T29.t]} &
+    for n,x st x = T29.t & Q[n,x] holds T29.(t^<*n*>) = S().(x,n)) by A125;
+    defpred I[Element of NAT] means
+    for t being Element of dom T1 st len t <= $1 holds
+    t in dom T2 & T1.t = T2.t;
+A137: I[0]
+    proof
+      let t be Element of dom T1 such that
+A138: len t <= 0;
+ t = {} by A138;
+      hence thesis by A132,A133,A135,A136,TREES_1:47;
+    end;
+A140: I[k] implies I[k+1]
+    proof
+      assume
+A141: for t being Element of dom T1 st len t <= k holds
+      t in dom T2 & T1.t = T2.t;
+      let t be Element of dom T1;
+      assume len t <= k+1;
+then A143: len t <= k or len t = k+1 by NAT_1:8;
+ now
+        assume
+A145:   len t = k+1;
+        reconsider p = t|Seg k as FinSequence of NAT by FINSEQ_1:23;
+   p is_a_prefix_of t by TREES_1:def 1;
+        then reconsider p as Element of dom T1 by TREES_1:45;
+A147:   k <= k+1 by NAT_1:11;
+A148:   k+1 <= k1 by A132,A135,A145;
+A149:   len p = k by A145,A147,FINSEQ_1:21;
+A150:   k < k1 by A148,NAT_1:13;
+A151:   T1.p = T2.p by A141,A149;
+        reconsider p9 = p as Element of dom T2 by A141,A149;
+   t <> {} by A145;
+        then consider q being FinSequence, x being set such that
+A153:   t = q^<*x*> by FINSEQ_1:63;
+        A154:   p
+ is_a_prefix_of t & q is_a_prefix_of t by A153,TREES_1:8,def 1;
+   k+1 = len q + 1 by A145,A153,FINSEQ_2:19;
+then A156:   p = q by A149,A154,Th1,TREES_1:19;
+   <*x*> is FinSequence of NAT by A153,FINSEQ_1:50;
+then A158:   rng <*x*> c= NAT by FINSEQ_1:def 4;
+   rng <*x*> = {x} & x in {x} by FINSEQ_1:55,TARSKI:def 1;
+        then reconsider x as Element of NAT by A158;
+A160:   p^<*x*> in succ p by A153,A156;
+   succ p = { p^<*i*>: Q[i,T1.p]} by A132,A135,A149,A150;
+        then consider i such that
+A162:   p^<*x*> = p^<*i*> and
+A163:   Q[i,T1.p] by A160;
+A164:   k < k2 by A134,A135,A136,A150,XXREAL_0:2;
+then A165:   succ p9 = { p9^<*l*>: Q[l,T2.p9] } by A133,A136,A149;
+A166:   x = i by A162,FINSEQ_2:20;
+A167:   t in succ p9 by A151,A153,A156,A162,A163,A165;
+   T19.t = S().(T19.p,x) by A132,A135,A149,A150,A153,A156,A163,A166;
+        hence
+thesis by A132,A133,A135,A136,A149,A151,A153,A156,A163,A164,A166
+        ,A167;
+      end;
+      hence thesis by A141,A143;
+    end;
+A169: I[k] from NAT_1:sch 1(A137,A140);
+    let x;
+    assume
+A170: x in T1;
+    then consider y,z such that
+A171: [y,z] = x by RELAT_1:def 1;
+A172: T1.y = z by A170,A171,FUNCT_1:8;
+    reconsider y as Element of dom T1 by A170,A171,FUNCT_1:8;
+ len y <= len y;
+then  y in dom T2 & T1.y = T2.y by A169;
+    hence thesis by A171,A172,FUNCT_1:8;
+  end;
+ E is c=-linear
+  proof
+    let T1,T2 be set;
+    assume
+A176: T1 in E;
+    then consider x such that
+A177: x in dom f and
+A178: T1 = f.x by FUNCT_1:def 5;
+    assume
+A179: T2 in E;
+    then consider y such that
+A180: y in dom f and
+A181: T2 = f.y by FUNCT_1:def 5;
+A182: T1 is DecoratedTree by A126,A176;
+A183: T2 is DecoratedTree by A126,A179;
+    reconsider x,y as Element of NAT by A125,A177,A180;
+ x <= y or y <= x;
+    hence T1 c= T2 or T2 c= T1 by A131,A178,A181,A182,A183;
+  end;
+  then reconsider T = union rng f as DecoratedTree of D() by A126,Th38;
+  take T;
+  consider T9 being DecoratedTree of D(), k such that
+A185: 0 = k & f.0 = T9 & T9.{} = d() &
+  for t being Element of dom T9 holds len t <= k &
+  (len t < k implies succ t = { t^<*i*>: Q[i,T9.t]} &
+  for n,x st x = T9.t & Q[n,x] holds T9.(t^<*n*>) = S().(x,n)) by A125;
+ {} in dom T9 by TREES_1:47;
+then A187: [{},d()] in T9 by A185,FUNCT_1:8;
+ T9 in rng f by A125,A185,FUNCT_1:def 5;
+then  [{},d()] in T by A187,TARSKI:def 4;
+  hence T.{} = d() by FUNCT_1:8;
+A190: for T1,x st T1 in E & x in dom T1 holds x in dom T & T1.x = T.x
+  proof
+    let T1,x;
+    assume that
+A191: T1 in E and
+A192: x in dom T1;
+ [x,T1.x] in T1 by A192,FUNCT_1:8;
+then  [x,T1.x] in T by A191,TARSKI:def 4;
+    hence thesis by FUNCT_1:8;
+  end;
+  let t be Element of dom T;
+  thus succ t c= { t^<*i*>: Q[i,T.t]}
+  proof
+    let x;
+    assume x in succ t;
+    then consider l such that
+A196: x = t^<*l*> and
+A197: t^<*l*> in dom T;
+ [x,T.x] in T by A196,A197,FUNCT_1:8;
+    then consider X such that
+A199: [x,T.x] in X and
+A200: X in rng f by TARSKI:def 4;
+    consider y such that
+A201: y in NAT and
+A202: X = f.y by A125,A200,FUNCT_1:def 5;
+    consider T1 being DecoratedTree of D(), k1 such that
+A203: y = k1 & f.y = T1 & T1.{} = d() &
+    for t being Element of dom T1 holds len t <= k1 &
+    (len t < k1 implies succ t = { t^<*i*>: Q[i,T1.t]} &
+    for n,x st x = T1.t & Q[n,x] holds T1.(t^<*n*>) = S().(x,n)) by A125,A201;
+A204: t^<*l*> in dom T1 by A196,A199,A202,A203,FUNCT_1:8;
+    then
+reconsider t9 = t, p = t^<*l*> as Element of dom T1 by TREES_1:46;
+ len p <= k1 by A203;
+then  len t + 1 <= k1 by FINSEQ_2:19;
+then A207: len t9 < k1 by NAT_1:13;
+then A208: succ t9 = { t9^<*i*>: Q[i,T1.t9]} by A203;
+ T1.t = T.t by A190,A200,A202,A203,A207;
+    hence thesis by A196,A204,A208;
+  end;
+ [t,T.t] in T by FUNCT_1:8;
+  then consider X such that
+A211: [t,T.t] in X and
+A212: X in E by TARSKI:def 4;
+  consider y such that
+A213: y in NAT and
+A214: X = f.y by A125,A212,FUNCT_1:def 5;
+  reconsider y as Element of NAT by A213;
+  consider T1 being DecoratedTree of D(), k1 such that
+A215: y = k1 & f.y = T1 & T1.{} = d() &
+  for t being Element of dom T1 holds len t <= k1 &
+  (len t < k1 implies succ t = { t^<*i*>: Q[i,T1.t]} &
+  for n,x st x = T1.t & Q[n,x] holds T1.(t^<*n*>) = S().(x,n)) by A125;
+  consider T2 being DecoratedTree of D(), k2 such that
+A216: y+1 = k2 & f.(y+1) = T2 & T2.{} = d() &
+  for t being Element of dom T2 holds len t <= k2 &
+  (len t < k2 implies succ t = { t^<*i*>: Q[i,T2.t]} &
+  for n,x st x = T2.t & Q[n,x] holds T2.(t^<*n*>) = S().(x,n)) by A125;
+ y <= y+1 by NAT_1:11;
+then A218: T1 c= T2 by A131,A215,A216;
+  reconsider t1 = t as Element of dom T1 by A211,A214,A215,FUNCT_1:8;
+A219: len t1 <= y by A215;
+A220: T2.t = T.t by A211,A214,A215,A218,FUNCT_1:8;
+  reconsider t2 = t as Element of dom T2 by A211,A214,A215,A218,FUNCT_1:8;
+A221: len t2 < y+1 by A219,NAT_1:13;
+then A222: succ t2 = { t2^<*i*>: Q[i,T2.t2]} by A216;
+  thus { t^<*i*>: Q[i,T.t]} c= succ t
+  proof
+    let x;
+    assume
+A223: x in { t^<*i*>: Q[i,T.t]};
+then A224: ex l st x = t^<*l*> & Q[l,T.t];
+A225: x in succ t2 by A216,A220,A221,A223;
+ T2 in E by A125,A216,FUNCT_1:def 5;
+then  x in dom T by A190,A225;
+    hence thesis by A224;
+  end;
+  let n;
+  assume
+A228: Q[n,T.t];
+then A229: t^<*n*> in succ t2 by A220,A222;
+ T2 in E by A125,A216,FUNCT_1:def 5;
+then  T2.(t^<*n*>) = T.(t^<*n*>) by A190,A229;
+  hence thesis by A216,A220,A221,A228;
+end;
+ 
+:: from AMISTD_3, 2010.01.10, A.T.
+
+theorem
+  for T1, T2 being Tree st
+     for n being Element of NAT holds T1-level n = T2-level n
+   holds T1 = T2
+proof
+  let T1, T2 be Tree such that
+A1: for n being Element of NAT holds T1-level n = T2-level n;
+  for p being FinSequence of NAT holds p in T1 iff p in T2
+  proof
+    let p be FinSequence of NAT;
+A2: T1 = union { T1-level n where n is Element of NAT: not contradiction }
+    by Th16;
+    hereby
+      assume p in T1;
+      then consider Y being set such that
+A3:   p in Y and
+A4:   Y in { T1-level n where n is Element of NAT: not contradiction }
+      by A2,TARSKI:def 4;
+      consider n being Element of NAT such that
+A5:   Y = T1-level n by A4;
+      Y = T2-level n by A1,A5;
+      hence p in T2 by A3;
+    end;
+    assume
+A6: p in T2;
+    T2 = union { T2-level n where n is Element of NAT: not contradiction }
+    by Th16;
+    then consider Y being set such that
+A7: p in Y and
+A8: Y in { T2-level n where n is Element of NAT: not contradiction }
+    by A6,TARSKI:def 4;
+    consider n being Element of NAT such that
+A9: Y = T2-level n by A8;
+    Y = T1-level n by A1,A9;
+    hence thesis by A7;
+  end;
+  hence thesis by Th7;
+end;
+
+theorem
+  for n being Element of NAT holds TrivialInfiniteTree-level n = { n |-> 0 }
+proof
+  set T = TrivialInfiniteTree;
+  let n be Element of NAT;
+  set L = { w where w is Element of T: len w = n };
+  set f = n |-> 0;
+  {f} = L
+  proof
+    hereby
+      let a be set;
+      assume a in {f};
+      then
+A1:   a = f by TARSKI:def 1;
+      f in T & len f = n by FINSEQ_1:def 18;
+      hence a in L by A1;
+    end;
+    let a be set;
+    assume a in L;
+    then consider w being Element of T such that
+A2: a = w & len w = n;
+    w in T;
+    then ex k being Element of NAT st w = k |-> 0;
+    then a = f by A2,FINSEQ_1:def 18;
+    hence thesis by TARSKI:def 1;
+  end;
+  hence thesis;
+end;

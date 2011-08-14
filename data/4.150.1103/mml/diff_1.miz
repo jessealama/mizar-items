@@ -1,0 +1,1646 @@
+:: Difference and Difference Quotient
+::  by Bo Li , Yan Zhang and Xiquan Liang
+::
+:: Received September 29, 2006
+:: Copyright (c) 2006 Association of Mizar Users
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, REAL_1, PARTFUN1, SEQFUNC, XREAL_0, ORDINAL1,
+      VALUED_1, RELAT_1, ARYTM_1, MEMBER_1, FUNCT_1, ARYTM_3, TARSKI, XBOOLE_0,
+      CARD_1, NAT_1, VALUED_0, ZFMISC_1, SEQ_1, FUNCOP_1, XXREAL_0, CARD_3,
+      SERIES_1, DIFF_1, FUNCT_2;
+ notations ORDINAL1, XCMPLX_0, XREAL_0, REAL_1, NAT_1, SERIES_1, XXREAL_0,
+      TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, NUMBERS, FUNCT_1, PARTFUN1,
+      VALUED_0, VALUED_1, SEQ_1, FUNCOP_1, NAT_D, NEWTON, MEASURE6, FUNCT_2,
+      RELSET_1, SEQFUNC;
+ constructors REAL_1, SEQFUNC, NEWTON, SERIES_1, MEASURE6, NAT_D, PARTFUN3,
+      SEQ_1, FUNCOP_1, RELSET_1;
+ registrations XBOOLE_0, RELAT_1, ORDINAL1, PARTFUN1, NUMBERS, XREAL_0,
+      MEMBERED, VALUED_0, VALUED_1, FUNCT_2;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions VALUED_1;
+ theorems FUNCT_2, PARTFUN1, SEQFUNC, ORDINAL1, FUNCT_1, SEQ_1, XBOOLE_0,
+      XCMPLX_1, NEWTON, FUNCOP_1, SERIES_1, TARSKI, MEASURE6, RFUNCT_1,
+      ZFMISC_1, VALUED_1, XREAL_1, RELSET_1;
+ schemes NAT_1, RECDEF_1, SEQ_1;
+
+begin
+
+reserve n,m,k,i for Element of NAT,
+  h,r,r1,r2,x0,x1,x2,x for Real,
+  S for Functional_Sequence of REAL,REAL,
+  y for set;
+
+definition
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  func Shift(f,h) -> PartFunc of REAL,REAL means
+  :Def1:
+  dom it = -h ++ dom f & for x st x in (-h ++ dom f) holds it.x = f.(x+h);
+  existence
+  proof
+    deffunc F(Real) = f.($1+h);
+    set X = -h ++ dom f;
+    defpred P[set] means $1 in X;
+    consider F being PartFunc of REAL,REAL such that
+A1: (for x be Element of REAL holds x in dom F iff P[x]) & for x be
+    Element of REAL st x in dom F holds F.x = F(x) from SEQ_1:sch 3;
+    take F;
+    for y st y in X holds y in dom F by A1;
+    then
+A2: X c= dom F by TARSKI:def 3;
+    for y st y in dom F holds y in X by A1;
+    then dom F c= X by TARSKI:def 3;
+    hence dom F = X by A2,XBOOLE_0:def 10;
+    now
+      let x;
+      assume x in X;
+      then x in dom F by A1;
+      hence F.x = f.(x+h) by A1;
+    end;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let f1,f2 be PartFunc of REAL,REAL;
+    set X = -h ++ dom f;
+    assume that
+A3: dom f1 = X and
+A4: for x st x in X holds f1.x = f.(x+h) and
+A5: dom f2 = X and
+A6: for x st x in X holds f2.x = f.(x+h);
+    for x being Element of REAL st x in dom f1 holds f1.x = f2.x
+    proof
+      let x being Element of REAL;
+      assume
+A7:   x in dom f1;
+      then f1.x = f.(x+h) by A3,A4;
+      hence thesis by A3,A6,A7;
+    end;
+    hence f1 = f2 by A3,A5,PARTFUN1:34;
+  end;
+end;
+
+definition
+  let f be Function of REAL,REAL;
+  let h be real number;
+  redefine func Shift(f,h) -> Function of REAL,REAL means
+  :Def2:
+  for x holds it.x = f.(x+h);
+  coherence
+  proof
+    dom Shift(f,h) = -h ++ dom f & dom f = REAL by Def1,FUNCT_2:def 1;
+    then dom Shift(f,h) = REAL by MEASURE6:60;
+    hence thesis by FUNCT_2:def 1;
+  end;
+  compatibility
+  proof
+    for IT being Function of REAL,REAL holds IT = Shift(f,h) iff for x
+    holds IT.x = f.(x+h)
+    proof
+      let IT be Function of REAL,REAL;
+      hereby
+        assume
+A1:     IT = Shift(f,h);
+        let x;
+        dom Shift(f,h) = REAL by A1,FUNCT_2:def 1;
+        then x in dom Shift(f,h);
+        then x in (-h ++ dom f) by Def1;
+        hence IT.x = f.(x+h) by A1,Def1;
+      end;
+      dom Shift(f,h) = -h ++ dom f & dom f = REAL by Def1,FUNCT_2:def 1;
+      then dom Shift(f,h) = REAL by MEASURE6:60;
+      then
+A2:   dom IT = dom Shift(f,h) by FUNCT_2:def 1;
+      assume
+A3:   for x holds IT.x = f.(x+h);
+      for x being Element of REAL st x in dom IT holds IT.x = Shift(f,h).x
+      proof
+        let x be Element of REAL;
+        assume x in dom IT; then
+A4:     x in (-h ++ dom f) by A2,Def1;
+        IT.x = f.(x+h) by A3;
+        hence thesis by A4,Def1;
+      end;
+      hence thesis by A2,PARTFUN1:34;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let f be PartFunc of REAL,REAL, h be real number;
+  func fD(f,h) -> PartFunc of REAL,REAL equals
+  Shift(f,h) - f;
+  coherence;
+end;
+
+registration
+  let f be Function of REAL,REAL, h be real number;
+  cluster fD(f,h) -> quasi_total;
+  coherence
+  proof
+    dom fD(f,h) = dom Shift(f,h) /\ dom f by VALUED_1:12
+      .= REAL /\ dom f by FUNCT_2:def 1
+      .= REAL /\ REAL by FUNCT_2:def 1
+      .= REAL;
+    hence thesis by FUNCT_2:def 1;
+  end;
+end;
+
+definition
+  let f be PartFunc of REAL,REAL, h be real number;
+  func bD(f,h) -> PartFunc of REAL,REAL equals
+  f - Shift(f,-h);
+  coherence;
+end;
+
+registration
+  let f be Function of REAL,REAL, h be real number;
+  cluster bD(f,h) -> quasi_total;
+  coherence
+  proof
+    dom bD(f,h) = dom Shift(f,-h) /\ dom f by VALUED_1:12
+      .= REAL /\ dom f by FUNCT_2:def 1
+      .= REAL /\ REAL by FUNCT_2:def 1
+      .= REAL;
+    hence thesis by FUNCT_2:def 1;
+  end;
+end;
+
+definition
+  let f be PartFunc of REAL,REAL, h be real number;
+  func cD(f,h) -> PartFunc of REAL,REAL equals
+  Shift(f,h/2) - Shift(f,-h/2);
+  coherence;
+end;
+
+registration
+  let f be Function of REAL,REAL, h be real number;
+  cluster cD(f,h) -> quasi_total;
+  coherence
+  proof
+    dom cD(f,h) = dom Shift(f,h/2) /\ dom Shift(f,-h/2) by VALUED_1:12
+      .= REAL /\ dom Shift(f,-h/2) by FUNCT_2:def 1
+      .= REAL /\ REAL by FUNCT_2:def 1
+      .= REAL;
+    hence thesis by FUNCT_2:def 1;
+  end;
+end;
+
+definition
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  func forward_difference(f,h) -> Functional_Sequence of REAL,REAL means
+  :Def6:
+  it.0=f & for n being Nat holds it.(n+1)=fD(it.n,h);
+  existence
+  proof
+    reconsider fZ = f as Element of PFuncs(REAL,REAL) by PARTFUN1:119;
+    defpred R[set,set,set] means ex g being PartFunc of REAL, REAL st $2 = g &
+    $3 = fD(g,h);
+A1: for n be Element of NAT
+    for x being Element of PFuncs(REAL,REAL) ex y being Element of
+    PFuncs(REAL,REAL) st R[n,x,y]
+    proof
+      let n;
+      let x be Element of PFuncs (REAL,REAL);
+      reconsider x9 = x as PartFunc of REAL,REAL by PARTFUN1:120;
+      reconsider y = fD(x9,h) as Element of PFuncs (REAL,REAL) by PARTFUN1:119;
+      ex w being PartFunc of REAL, REAL st x = w & y = fD(w,h);
+      hence thesis;
+    end;
+    consider g be Function of NAT, PFuncs (REAL,REAL) such that
+A2: g.0 = fZ & for n being Element of NAT holds R[n,g.n,g.(n+1)] from
+    RECDEF_1:sch 2(A1);
+    reconsider g as Functional_Sequence of REAL,REAL;
+    take g;
+    thus g.0 = f by A2;
+    let i be natural number;
+    i in NAT by ORDINAL1:def 13;
+    then R[i,g.i,g.(i+1)] by A2;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let seq1,seq2 be Functional_Sequence of REAL,REAL;
+    assume that
+A3: seq1.0=f and
+A4: for n be Nat holds seq1.(n+1)=fD(seq1.n,h) and
+A5: seq2.0=f and
+A6: for n be Nat holds seq2.(n+1)=fD(seq2.n,h);
+    defpred P[Nat] means seq1.$1 = seq2.$1;
+A7: for k st P[k] holds P[k+1]
+    proof
+      let k;
+      assume
+A8:   P[k];
+      thus seq1.(k+1) = fD(seq1.k,h) by A4
+        .= seq2.(k+1) by A6,A8;
+    end;
+A9: P[0] by A3,A5;
+    for n holds P[n] from NAT_1:sch 1(A9,A7);
+    hence seq1 = seq2 by FUNCT_2:113;
+  end;
+end;
+
+notation
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  synonym fdif(f,h) for forward_difference(f,h);
+end;
+
+reserve f,f1,f2 for Function of REAL,REAL;
+
+theorem
+  for f being PartFunc of REAL, REAL st x in dom f & x+h in dom f holds
+    fD(f,h).x = f.(x+h) - f.x
+proof
+  let f be PartFunc of REAL, REAL;
+  assume
+A0: x in dom f & x+h in dom f;
+A3: dom Shift(f,h) = -h ++ dom f by Def1;
+A4: (-h) + (x + h) in ((-h) ++ dom f) by A0,MEASURE6:82; then
+A2: Shift(f,h).x = f.(x+h) by Def1;
+  x in (dom Shift(f,h)) /\ dom f by XBOOLE_0:def 4,A4,A3,A0; then
+  x in dom fD(f,h) by VALUED_1:12;
+  hence fD(f,h).x = f.(x+h) - f.x by A2,VALUED_1:13;
+end;
+
+theorem Th2:
+  for n be Nat holds fdif(f,h).n is Function of REAL,REAL
+proof
+  defpred X[Nat] means fdif(f,h).$1 is Function of REAL,REAL;
+A1: for k be Nat st X[k] holds X[k+1]
+  proof
+    let k be Nat;
+    assume fdif(f,h).k is Function of REAL,REAL;
+    then fD(fdif(f,h).k,h) is Function of REAL,REAL;
+    hence thesis by Def6;
+  end;
+A2: X[0] by Def6;
+  for n be Nat holds X[n] from NAT_1:sch 2(A2,A1);
+  hence thesis;
+end;
+
+theorem Th3:
+  fD(f,h).x = f.(x+h) - f.x
+proof
+  dom (Shift(f,h) - f) = REAL by FUNCT_2:def 1;
+  hence fD(f,h).x = Shift(f,h).x - f.x by VALUED_1:13
+    .= f.(x+h) - f.x by Def2;
+end;
+
+theorem Th4:
+  bD(f,h).x = f.x - f.(x-h)
+proof
+  thus bD(f,h).x = (-fD(f,-h)).x by RFUNCT_1:31
+    .= - fD(f,-h).x by VALUED_1:8
+    .= - (f.(x+-h) - f.x) by Th3
+    .= f.x - f.(x-h);
+end;
+
+theorem Th5:
+  cD(f,h).x = f.(x+h/2) - f.(x-h/2)
+proof
+  dom (Shift(f,h/2) - Shift(f,-h/2)) = REAL by FUNCT_2:def 1;
+  hence cD(f,h).x = Shift(f,h/2).x - Shift(f,-h/2).x by VALUED_1:13
+    .= f.(x+h/2) - Shift(f,-h/2).x by Def2
+    .= f.(x+h/2) - f.(x+-h/2) by Def2
+    .= f.(x+h/2) - f.(x-h/2);
+end;
+
+theorem
+  f is constant implies for x holds fdif(f,h).(n+1).x=0
+proof
+  assume
+A1: f is constant;
+A2: for x holds f.(x+h) - f.x = 0
+  proof
+    let x;
+    x+h in REAL; then
+A3: x+h in dom f by FUNCT_2:def 1;
+    x in REAL;
+    then x in dom f by FUNCT_2:def 1;
+    then f.x = f.(x+h) by A1,A3,FUNCT_1:def 16;
+    hence thesis;
+  end;
+  for x holds fdif(f,h).(n+1).x=0
+  proof
+    defpred X[Element of NAT] means for x holds fdif(f,h).($1+1).x=0;
+A4: for k st X[k] holds X[k+1]
+    proof
+      let k;
+      assume
+A5:   for x holds fdif(f,h).(k+1).x=0;
+      let x;
+A6:   fdif(f,h).(k+1).(x+h)=0 by A5;
+A7:   fdif(f,h).(k+1) is Function of REAL,REAL by Th2;
+      (fdif(f,h).(k+2)).x = (fdif(f,h).(k+1+1)).x
+        .= fD(fdif(f,h).(k+1),h).x by Def6
+        .= fdif(f,h).(k+1).(x+h) - fdif(f,h).(k+1).x by A7,Th3
+        .= 0 - 0 by A5,A6
+        .= 0;
+      hence thesis;
+    end;
+A8: X[0]
+    proof
+      let x;
+      thus fdif(f,h).(0+1).x = fD(fdif(f,h).0,h).x by Def6
+        .= fD(f,h).x by Def6
+        .= f.(x+h) - f.x by Th3
+        .= 0 by A2;
+    end;
+    for n holds X[n] from NAT_1:sch 1(A8,A4);
+    hence thesis;
+  end;
+  hence thesis;
+end;
+
+theorem Th7:
+  fdif(r(#)f,h).(n+1).x = r* fdif(f,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds fdif(r(#)f,h).($1+1).x = r* fdif
+  (f,h).($1+1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds fdif(r(#)f,h).(k+1).x = r* fdif(f,h).(k+1).x;
+    let x;
+A3: fdif(r(#)f,h).(k+1).x = r* fdif(f,h).(k+1).x & fdif(r(#)f,h).(k+1).(x+
+    h) = r * fdif(f,h).(k+1).(x+h) by A2;
+A4: fdif(r(#)f,h).(k+1) is Function of REAL,REAL by Th2;
+A5: fdif(f,h).(k+1) is Function of REAL,REAL by Th2;
+    fdif(r(#)f,h).(k+1+1).x = fD(fdif(r(#)f,h).(k+1),h).x by Def6
+      .= r * fdif(f,h).(k+1).(x+h) - r * fdif(f,h).(k+1).x by A3,A4,Th3
+      .= r * (fdif(f,h).(k+1).(x+h) - fdif(f,h).(k+1).x)
+      .= r * fD(fdif(f,h).(k+1),h).x by A5,Th3
+      .= r * fdif(f,h).(k+1+1).x by Def6;
+    hence thesis;
+  end;
+A6: X[0]
+  proof
+    let x;
+    x in REAL; then
+A7: x in dom (r(#)f) by FUNCT_2:def 1;
+    x+h in REAL; then
+A8: x+h in dom (r(#)f) by FUNCT_2:def 1;
+    fdif(r(#)f,h).(0+1).x = fD(fdif(r(#)f,h).0,h).x by Def6
+      .= fD(r(#)f,h).x by Def6
+      .= (r(#)f).(x+h) - (r(#)f).x by Th3
+      .= r * f.(x+h) - (r(#)f).x by A8,VALUED_1:def 5
+      .= r * f.(x+h) - r * f.x by A7,VALUED_1:def 5
+      .= r * (f.(x+h) - f.x)
+      .= r * fD(f,h).x by Th3
+      .= r * fD(fdif(f,h).0,h).x by Def6
+      .= r * fdif(f,h).(0+1).x by Def6;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A6,A1);
+  hence thesis;
+end;
+
+theorem Th8:
+  fdif(f1+f2,h).(n+1).x = fdif(f1,h).(n+1).x + fdif(f2,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds fdif(f1+f2,h).($1+1).x = fdif(f1
+  ,h).($1+1).x + fdif(f2,h).($1+1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds fdif(f1+f2,h).(k+1).x = fdif(f1,h).(k+1).x + fdif(f2,h
+    ).(k+1).x;
+    let x;
+A3: fdif(f1+f2,h).(k+1).x = fdif(f1,h).(k+1).x + fdif(f2,h).(k+1).x & fdif
+(f1+f2,h).(k+1).(x+h) = fdif(f1,h).(k+1).(x+h) + fdif(f2,h).(k+1).(x+h) by A2;
+A4: fdif(f1+f2,h).(k+1) is Function of REAL,REAL by Th2;
+A5: fdif(f2,h).(k+1) is Function of REAL,REAL by Th2;
+A6: fdif(f1,h).(k+1) is Function of REAL,REAL by Th2;
+    fdif(f1+f2,h).(k+1+1).x = fD(fdif(f1+f2,h).(k+1),h).x by Def6
+      .= fdif(f1+f2,h).(k+1).(x+h) - fdif(f1+f2,h).(k+1).x by A4,Th3
+      .= (fdif(f1,h).(k+1).(x+h) - fdif(f1,h).(k+1).x) + (fdif(f2,h).(k+1).(
+    x+h) - fdif(f2,h).(k+1).x) by A3
+      .= fD(fdif(f1,h).(k+1),h).x + (fdif(f2,h).(k+1).(x+h) - fdif(f2,h).(k+
+    1).x) by A6,Th3
+      .= fD(fdif(f1,h).(k+1),h).x + fD(fdif(f2,h).(k+1),h).x by A5,Th3
+      .= fdif(f1,h).(k+1+1).x + fD(fdif(f2,h).(k+1),h).x by Def6
+      .= fdif(f1,h).(k+1+1).x + fdif(f2,h).(k+1+1).x by Def6;
+    hence thesis;
+  end;
+A7: X[0]
+  proof
+    let x;
+    fdif(f1+f2,h).(0+1).x = fD(fdif(f1+f2,h).0,h).x by Def6
+      .= fD(f1+f2,h).x by Def6
+      .= (f1+f2).(x+h) - (f1+f2).x by Th3
+      .= f1.(x+h) + f2.(x+h) - (f1+f2).x by VALUED_1:1
+      .= f1.(x+h) + f2.(x+h) - (f1.x + f2.x) by VALUED_1:1
+      .= (f1.(x+h) - f1.x) + (f2.(x+h) - f2.x)
+      .= fD(f1,h).x + (f2.(x+h) - f2.x) by Th3
+      .= fD(f1,h).x + fD(f2,h).x by Th3
+      .= fD(fdif(f1,h).0,h).x + fD(f2,h).x by Def6
+      .= fD(fdif(f1,h).0,h).x + fD(fdif(f2,h).0,h).x by Def6
+      .= fdif(f1,h).(0+1).x + fD(fdif(f2,h).0,h).x by Def6
+      .= fdif(f1,h).(0+1).x + fdif(f2,h).(0+1).x by Def6;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A7,A1);
+  hence thesis;
+end;
+
+theorem
+  fdif(f1-f2,h).(n+1).x = fdif(f1,h).(n+1).x - fdif(f2,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds fdif(f1-f2,h).($1+1).x = fdif(f1
+  ,h).($1+1).x - fdif(f2,h).($1+1).x;
+A1: X[0]
+  proof
+    let x;
+    x in REAL;
+    then x in dom f1 & x in dom f2 by FUNCT_2:def 1;
+    then x in dom f1 /\ dom f2 by XBOOLE_0:def 4;
+    then
+A2: x in dom (f1-f2) by VALUED_1:12;
+    x+h in REAL;
+    then x+h in dom f1 & x+h in dom f2 by FUNCT_2:def 1;
+    then x+h in dom f1 /\ dom f2 by XBOOLE_0:def 4;
+    then
+A3: x+h in dom (f1-f2) by VALUED_1:12;
+    fdif(f1-f2,h).(0+1).x = fD(fdif(f1-f2,h).0,h).x by Def6
+      .= fD(f1-f2,h).x by Def6
+      .= (f1-f2).(x+h) - (f1-f2).x by Th3
+      .= f1.(x+h) - f2.(x+h) - (f1-f2).x by A3,VALUED_1:13
+      .= f1.(x+h) - f2.(x+h) - (f1.x - f2.x) by A2,VALUED_1:13
+      .= (f1.(x+h) - f1.x) - (f2.(x+h) - f2.x)
+      .= fD(f1,h).x - (f2.(x+h) - f2.x) by Th3
+      .= fD(f1,h).x - fD(f2,h).x by Th3
+      .= fD(fdif(f1,h).0,h).x - fD(f2,h).x by Def6
+      .= fD(fdif(f1,h).0,h).x - fD(fdif(f2,h).0,h).x by Def6
+      .= fdif(f1,h).(0+1).x - fD(fdif(f2,h).0,h).x by Def6
+      .= fdif(f1,h).(0+1).x - fdif(f2,h).(0+1).x by Def6;
+    hence thesis;
+  end;
+A4: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A5: for x holds fdif(f1-f2,h).(k+1).x = fdif(f1,h).(k+1).x - fdif(f2,
+    h).(k+1).x;
+    let x;
+A6: fdif(f1-f2,h).(k+1).x = fdif(f1,h).(k+1).x - fdif(f2,h).(k+1).x &
+fdif(f1-f2,h).(k+1).(x+h) = fdif(f1,h).(k+1).(x+h) - fdif(f2,h).(k+1).(x+h) by
+    A5;
+A7: fdif(f1-f2,h).(k+1) is Function of REAL,REAL by Th2;
+A8: fdif(f2,h).(k+1) is Function of REAL,REAL by Th2;
+A9: fdif(f1,h).(k+1) is Function of REAL,REAL by Th2;
+    fdif(f1-f2,h).(k+1+1).x = fD(fdif(f1-f2,h).(k+1),h).x by Def6
+      .= fdif(f1-f2,h).(k+1).(x+h) - fdif(f1-f2,h).(k+1).x by A7,Th3
+      .= (fdif(f1,h).(k+1).(x+h) - fdif(f1,h).(k+1).x) - (fdif(f2,h).(k+1).(
+    x+h) - fdif(f2,h).(k+1).x) by A6
+      .= fD(fdif(f1,h).(k+1),h).x - (fdif(f2,h).(k+1).(x+h) - fdif(f2,h).(k+
+    1).x) by A9,Th3
+      .= fD(fdif(f1,h).(k+1),h).x - fD(fdif(f2,h).(k+1),h).x by A8,Th3
+      .= fdif(f1,h).(k+1+1).x - fD(fdif(f2,h).(k+1),h).x by Def6
+      .= fdif(f1,h).(k+1+1).x - fdif(f2,h).(k+1+1).x by Def6;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A1,A4);
+  hence thesis;
+end;
+
+theorem
+  fdif(r1(#)f1+r2(#)f2,h).(n+1).x = r1* fdif(f1,h).(n+1).x + r2* fdif(f2
+  ,h).(n+1).x
+proof
+  set g1=r1(#)f1;
+  set g2=r2(#)f2;
+  fdif(r1(#)f1+r2(#)f2,h).(n+1).x = fdif(g1,h).(n+1).x + fdif(g2,h).(n+1).
+  x by Th8
+    .= r1* fdif(f1,h).(n+1).x + fdif(g2,h).(n+1).x by Th7
+    .= r1* fdif(f1,h).(n+1).x + r2* fdif(f2,h).(n+1).x by Th7;
+  hence thesis;
+end;
+
+theorem
+  (fdif(f,h).1).x = Shift(f,h).x - f.x
+proof
+  set f1 = Shift(f,h);
+  (fdif(f,h).1).x = fdif(f,h).(0+1).x .= fD(fdif(f,h).0,h).x by Def6
+    .= fD(f,h).x by Def6
+    .= f.(x+h) - f.x by Th3
+    .= f1.x - f.x by Def2;
+  hence thesis;
+end;
+
+definition
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  func backward_difference(f,h) -> Functional_Sequence of REAL,REAL means
+  :Def7: it.0=f & for n being Nat holds it.(n+1)=bD(it.n,h);
+  existence
+  proof
+    reconsider fZ = f as Element of PFuncs(REAL,REAL) by PARTFUN1:119;
+    defpred R[set,set,set] means ex g being PartFunc of REAL, REAL st $2 = g &
+    $3 = bD(g,h);
+A1: for n for x being Element of PFuncs(REAL,REAL) ex y being Element of
+    PFuncs(REAL,REAL) st R[n,x,y]
+    proof
+      let n;
+      let x be Element of PFuncs (REAL,REAL);
+      reconsider x9 = x as PartFunc of REAL,REAL by PARTFUN1:120;
+      reconsider y = bD(x9,h) as Element of PFuncs (REAL,REAL) by PARTFUN1:119;
+      ex w being PartFunc of REAL, REAL st x = w & y = bD(w,h);
+      hence thesis;
+    end;
+    consider g be Function of NAT, PFuncs (REAL,REAL) such that
+A2: g.0 = fZ & for n being Element of NAT holds R[n,g.n,g.(n+1)] from
+    RECDEF_1:sch 2(A1);
+    reconsider g as Functional_Sequence of REAL,REAL;
+    take g;
+    thus g.0 = f by A2;
+    let i be natural number;
+    i in NAT by ORDINAL1:def 13;
+    then R[i,g.i,g.(i+1)] by A2;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let seq1,seq2 be Functional_Sequence of REAL,REAL;
+    assume that
+A3: seq1.0=f and
+A4: for n be Nat holds seq1.(n+1)=bD(seq1.n,h) and
+A5: seq2.0=f and
+A6: for n be Nat holds seq2.(n+1)=bD(seq2.n,h);
+    defpred P[Nat] means seq1.$1 = seq2.$1;
+A7: for k st P[k] holds P[k+1]
+    proof
+      let k;
+      assume
+A8:   P[k];
+      thus seq1.(k+1) = bD(seq1.k,h) by A4
+        .= seq2.(k+1) by A6,A8;
+    end;
+A9: P[0] by A3,A5;
+    for n holds P[n] from NAT_1:sch 1(A9,A7);
+    hence seq1 = seq2 by FUNCT_2:113;
+  end;
+end;
+
+notation
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  synonym bdif(f,h) for backward_difference(f,h);
+end;
+
+theorem Th12:
+  for n be Nat holds bdif(f,h).n is Function of REAL,REAL
+proof
+  defpred X[Nat] means bdif(f,h).$1 is Function of REAL,REAL;
+A1: for k be Nat st X[k] holds X[k+1]
+  proof
+    let k be Nat;
+    assume bdif(f,h).k is Function of REAL,REAL;
+    then bD(bdif(f,h).k,h) is Function of REAL,REAL;
+    hence thesis by Def7;
+  end;
+A2: X[0] by Def7;
+  for n be Nat holds X[n] from NAT_1:sch 2(A2,A1);
+  hence thesis;
+end;
+
+theorem
+  f is constant implies for x holds bdif(f,h).(n+1).x=0
+proof
+  assume
+A1: f is constant;
+A2: for x holds f.x - f.(x-h) = 0
+  proof
+    let x;
+    x-h in REAL;
+    then
+A3: x-h in dom f by FUNCT_2:def 1;
+    x in REAL;
+    then x in dom f by FUNCT_2:def 1;
+    then f.x = f.(x-h) by A1,A3,FUNCT_1:def 16;
+    hence thesis;
+  end;
+  for x holds bdif(f,h).(n+1).x=0
+  proof
+    defpred X[Element of NAT] means for x holds bdif(f,h).($1+1).x=0;
+A4: for k st X[k] holds X[k+1]
+    proof
+      let k;
+      assume
+A5:   for x holds bdif(f,h).(k+1).x=0;
+      let x;
+A6:   bdif(f,h).(k+1).(x-h)=0 by A5;
+A7:   bdif(f,h).(k+1) is Function of REAL,REAL by Th12;
+      (bdif(f,h).(k+2)).x = (bdif(f,h).(k+1+1)).x
+        .= bD(bdif(f,h).(k+1),h).x by Def7
+        .= bdif(f,h).(k+1).x - bdif(f,h).(k+1).(x-h) by A7,Th4
+        .= 0 by A5,A6;
+      hence thesis;
+    end;
+A8: X[0]
+    proof
+      let x;
+      thus bdif(f,h).(0+1).x = bD(bdif(f,h).0,h).x by Def7
+        .= bD(f,h).x by Def7
+        .= f.x - f.(x-h) by Th4
+        .= 0 by A2;
+    end;
+    for n holds X[n] from NAT_1:sch 1(A8,A4);
+    hence thesis;
+  end;
+  hence thesis;
+end;
+
+theorem Th14:
+  bdif(r(#)f,h).(n+1).x = r* bdif(f,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds bdif(r(#)f,h).($1+1).x = r* bdif
+  (f,h).($1+1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds bdif(r(#)f,h).(k+1).x = r* bdif(f,h).(k+1).x;
+    let x;
+A3: bdif(r(#)f,h).(k+1).x = r* bdif(f,h).(k+1).x & bdif(r(#)f,h).(k+1).(x-
+    h) = r * bdif(f,h).(k+1).(x-h) by A2;
+A4: bdif(r(#)f,h).(k+1) is Function of REAL,REAL by Th12;
+A5: bdif(f,h).(k+1) is Function of REAL,REAL by Th12;
+    bdif(r(#)f,h).(k+1+1).x = bD(bdif(r(#)f,h).(k+1),h).x by Def7
+      .= bdif(r(#)f,h).(k+1).x - bdif(r(#)f,h).(k+1).(x-h) by A4,Th4
+      .= r * (bdif(f,h).(k+1).x - bdif(f,h).(k+1).(x-h)) by A3
+      .= r * bD(bdif(f,h).(k+1),h).x by A5,Th4
+      .= r * bdif(f,h).(k+1+1).x by Def7;
+    hence thesis;
+  end;
+A6: X[0]
+  proof
+    let x;
+    x in REAL;
+    then
+A7: x in dom (r(#)f) by FUNCT_2:def 1;
+    x-h in REAL;
+    then
+A8: x-h in dom (r(#)f) by FUNCT_2:def 1;
+    bdif(r(#)f,h).(0+1).x = bD(bdif(r(#)f,h).0,h).x by Def7
+      .= bD(r(#)f,h).x by Def7
+      .= (r(#)f).x - (r(#)f).(x-h) by Th4
+      .= (r(#)f).x - r * f.(x-h) by A8,VALUED_1:def 5
+      .= r * f.x - r * f.(x-h) by A7,VALUED_1:def 5
+      .= r * (f.x - f.(x-h))
+      .= r * bD(f,h).x by Th4
+      .= r * bD(bdif(f,h).0,h).x by Def7
+      .= r * bdif(f,h).(0+1).x by Def7;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A6,A1);
+  hence thesis;
+end;
+
+theorem Th15:
+  bdif(f1+f2,h).(n+1).x = bdif(f1,h).(n+1).x + bdif(f2,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds bdif(f1+f2,h).($1+1).x = bdif(f1
+  ,h).($1+1).x + bdif(f2,h).($1+1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds bdif(f1+f2,h).(k+1).x = bdif(f1,h).(k+1).x + bdif(f2,h
+    ).(k+1).x;
+    let x;
+A3: bdif(f1+f2,h).(k+1).x = bdif(f1,h).(k+1).x + bdif(f2,h).(k+1).x & bdif
+(f1+f2,h).(k+1).(x-h) = bdif(f1,h).(k+1).(x-h) + bdif(f2,h).(k+1).(x-h) by A2;
+A4: bdif(f1+f2,h).(k+1) is Function of REAL,REAL by Th12;
+A5: bdif(f2,h).(k+1) is Function of REAL,REAL by Th12;
+A6: bdif(f1,h).(k+1) is Function of REAL,REAL by Th12;
+    bdif(f1+f2,h).(k+1+1).x = bD(bdif(f1+f2,h).(k+1),h).x by Def7
+      .= bdif(f1+f2,h).(k+1).x - bdif(f1+f2,h).(k+1).(x-h) by A4,Th4
+      .= (bdif(f1,h).(k+1).x - bdif(f1,h).(k+1).(x-h)) + (bdif(f2,h).(k+1).x
+    - bdif(f2,h).(k+1).(x-h)) by A3
+      .= bD(bdif(f1,h).(k+1),h).x + (bdif(f2,h).(k+1).x - bdif(f2,h).(k+1).(
+    x-h)) by A6,Th4
+      .= bD(bdif(f1,h).(k+1),h).x + bD(bdif(f2,h).(k+1),h).x by A5,Th4
+      .= bdif(f1,h).(k+1+1).x + bD(bdif(f2,h).(k+1),h).x by Def7
+      .= bdif(f1,h).(k+1+1).x + bdif(f2,h).(k+1+1).x by Def7;
+    hence thesis;
+  end;
+A7: X[0]
+  proof
+    let x;
+    bdif(f1+f2,h).(0+1).x = bD(bdif(f1+f2,h).0,h).x by Def7
+      .= bD(f1+f2,h).x by Def7
+      .= (f1+f2).x - (f1+f2).(x-h) by Th4
+      .= f1.x + f2.x - (f1+f2).(x-h) by VALUED_1:1
+      .= f1.x + f2.x - (f1.(x-h) + f2.(x-h)) by VALUED_1:1
+      .= (f1.x - f1.(x-h)) + (f2.x - f2.(x-h))
+      .= bD(f1,h).x + (f2.x - f2.(x-h)) by Th4
+      .= bD(f1,h).x + bD(f2,h).x by Th4
+      .= bD(bdif(f1,h).0,h).x + bD(f2,h).x by Def7
+      .= bD(bdif(f1,h).0,h).x + bD(bdif(f2,h).0,h).x by Def7
+      .= bdif(f1,h).(0+1).x + bD(bdif(f2,h).0,h).x by Def7
+      .= bdif(f1,h).(0+1).x + bdif(f2,h).(0+1).x by Def7;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A7,A1);
+  hence thesis;
+end;
+
+theorem
+  bdif(f1-f2,h).(n+1).x = bdif(f1,h).(n+1).x - bdif(f2,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds bdif(f1-f2,h).($1+1).x = bdif(f1
+  ,h).($1+1).x - bdif(f2,h).($1+1).x;
+A1: X[0]
+  proof
+    let x;
+    x in REAL;
+    then x in dom f1 & x in dom f2 by FUNCT_2:def 1;
+    then x in dom f1 /\ dom f2 by XBOOLE_0:def 4;
+    then
+A2: x in dom (f1-f2) by VALUED_1:12;
+    x-h in REAL;
+    then x-h in dom f1 & x-h in dom f2 by FUNCT_2:def 1;
+    then x-h in dom f1 /\ dom f2 by XBOOLE_0:def 4;
+    then
+A3: x-h in dom (f1-f2) by VALUED_1:12;
+    bdif(f1-f2,h).(0+1).x = bD(bdif(f1-f2,h).0,h).x by Def7
+      .= bD(f1-f2,h).x by Def7
+      .= (f1-f2).x - (f1-f2).(x-h) by Th4
+      .= f1.x - f2.x - (f1-f2).(x-h) by A2,VALUED_1:13
+      .= f1.x - f2.x - (f1.(x-h) - f2.(x-h)) by A3,VALUED_1:13
+      .= (f1.x - f1.(x-h)) - (f2.x - f2.(x-h))
+      .= bD(f1,h).x - (f2.x - f2.(x-h)) by Th4
+      .= bD(f1,h).x - bD(f2,h).x by Th4
+      .= bD(bdif(f1,h).0,h).x - bD(f2,h).x by Def7
+      .= bD(bdif(f1,h).0,h).x - bD(bdif(f2,h).0,h).x by Def7
+      .= bdif(f1,h).(0+1).x - bD(bdif(f2,h).0,h).x by Def7
+      .= bdif(f1,h).(0+1).x - bdif(f2,h).(0+1).x by Def7;
+    hence thesis;
+  end;
+A4: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A5: for x holds bdif(f1-f2,h).(k+1).x = bdif(f1,h).(k+1).x - bdif(f2,
+    h).(k+1).x;
+    let x;
+A6: bdif(f1-f2,h).(k+1).x = bdif(f1,h).(k+1).x - bdif(f2,h).(k+1).x &
+bdif(f1-f2,h).(k+1).(x-h) = bdif(f1,h).(k+1).(x-h) - bdif(f2,h).(k+1).(x-h) by
+    A5;
+A7: bdif(f1-f2,h).(k+1) is Function of REAL,REAL by Th12;
+A8: bdif(f2,h).(k+1) is Function of REAL,REAL by Th12;
+A9: bdif(f1,h).(k+1) is Function of REAL,REAL by Th12;
+    bdif(f1-f2,h).(k+1+1).x = bD(bdif(f1-f2,h).(k+1),h).x by Def7
+      .= bdif(f1-f2,h).(k+1).x - bdif(f1-f2,h).(k+1).(x-h) by A7,Th4
+      .= (bdif(f1,h).(k+1).x - bdif(f1,h).(k+1).(x-h)) - (bdif(f2,h).(k+1).x
+    - bdif(f2,h).(k+1).(x-h)) by A6
+      .= bD(bdif(f1,h).(k+1),h).x - (bdif(f2,h).(k+1).x - bdif(f2,h).(k+1).(
+    x-h)) by A9,Th4
+      .= bD(bdif(f1,h).(k+1),h).x - bD(bdif(f2,h).(k+1),h).x by A8,Th4
+      .= bdif(f1,h).(k+1+1).x - bD(bdif(f2,h).(k+1),h).x by Def7
+      .= bdif(f1,h).(k+1+1).x - bdif(f2,h).(k+1+1).x by Def7;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A1,A4);
+  hence thesis;
+end;
+
+theorem
+  bdif(r1(#)f1+r2(#)f2,h).(n+1).x = r1* bdif(f1,h).(n+1).x + r2* bdif(f2
+  ,h).(n+1).x
+proof
+  set g1=r1(#)f1;
+  set g2=r2(#)f2;
+  bdif(r1(#)f1+r2(#)f2,h).(n+1).x = bdif(g1,h).(n+1).x + bdif(g2,h).(n+1).
+  x by Th15
+    .= r1* bdif(f1,h).(n+1).x + bdif(g2,h).(n+1).x by Th14
+    .= r1* bdif(f1,h).(n+1).x + r2* bdif(f2,h).(n+1).x by Th14;
+  hence thesis;
+end;
+
+theorem
+  (bdif(f,h).1).x = f.x - Shift(f,-h).x
+proof
+  set f2 = Shift(f,-h);
+  (bdif(f,h).1).x = bdif(f,h).(0+1).x .= bD(bdif(f,h).0,h).x by Def7
+    .= bD(f,h).x by Def7
+    .= f.x - f.(x-h) by Th4
+    .= f.x - f.(x+-h)
+    .= f.x - f2.x by Def2;
+  hence thesis;
+end;
+
+definition
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  func central_difference(f,h) -> Functional_Sequence of REAL,REAL means
+  :Def8:
+  it.0=f & for n be Nat holds it.(n+1)=cD(it.n,h);
+  existence
+  proof
+    reconsider fZ = f as Element of PFuncs(REAL,REAL) by PARTFUN1:119;
+    defpred R[set,set,set] means ex g being PartFunc of REAL, REAL st $2 = g &
+    $3 = cD(g,h);
+A1: for n for x being Element of PFuncs(REAL,REAL) ex y being Element of
+    PFuncs(REAL,REAL) st R[n,x,y]
+    proof
+      let n;
+      let x be Element of PFuncs (REAL,REAL);
+      reconsider x9 = x as PartFunc of REAL,REAL by PARTFUN1:120;
+      reconsider y = cD(x9,h) as Element of PFuncs (REAL,REAL) by PARTFUN1:119;
+      ex w being PartFunc of REAL, REAL st x = w & y = cD(w,h);
+      hence thesis;
+    end;
+    consider g be Function of NAT, PFuncs (REAL,REAL) such that
+A2: g.0 = fZ & for n being Element of NAT holds R[n,g.n,g.(n+1)] from
+    RECDEF_1:sch 2(A1);
+    reconsider g as Functional_Sequence of REAL,REAL;
+    take g;
+    thus g.0 = f by A2;
+    let i be natural number;
+    i in NAT by ORDINAL1:def 13;
+    then R[i,g.i,g.(i+1)] by A2;
+    hence thesis;
+  end;
+  uniqueness
+  proof
+    let seq1,seq2 be Functional_Sequence of REAL,REAL;
+    assume that
+A3: seq1.0=f and
+A4: for n be Nat holds seq1.(n+1)=cD(seq1.n,h) and
+A5: seq2.0=f and
+A6: for n be Nat holds seq2.(n+1)=cD(seq2.n,h);
+    defpred P[Nat] means seq1.$1 = seq2.$1;
+A7: for k st P[k] holds P[k+1]
+    proof
+      let k;
+      assume
+A8:   P[k];
+      thus seq1.(k+1) = cD(seq1.k,h) by A4
+        .= seq2.(k+1) by A6,A8;
+    end;
+A9: P[0] by A3,A5;
+    for n holds P[n] from NAT_1:sch 1(A9,A7);
+    hence seq1 = seq2 by FUNCT_2:113;
+  end;
+end;
+
+notation
+  let f be PartFunc of REAL,REAL;
+  let h be real number;
+  synonym cdif(f,h) for central_difference(f,h);
+end;
+
+theorem Th19:
+  for n being Nat holds cdif(f,h).n is Function of REAL,REAL
+proof
+  defpred X[Nat] means cdif(f,h).$1 is Function of REAL,REAL;
+A1: for k be Nat st X[k] holds X[k+1]
+  proof
+    let k be Nat;
+    assume cdif(f,h).k is Function of REAL,REAL;
+    then cD(cdif(f,h).k,h) is Function of REAL,REAL;
+    hence thesis by Def8;
+  end;
+A2: X[0] by Def8;
+  for n be Nat holds X[n] from NAT_1:sch 2(A2,A1);
+  hence thesis;
+end;
+
+theorem
+  f is constant implies for x holds cdif(f,h).(n+1).x=0
+proof
+  defpred X[Element of NAT] means for x holds cdif(f,h).($1+1).x=0;
+  assume
+A1: f is constant;
+A2: for x holds f.(x+h/2) - f.(x-h/2) = 0
+  proof
+    let x;
+    x-h/2 in REAL;
+    then
+A3: x-h/2 in dom f by FUNCT_2:def 1;
+    x+h/2 in REAL;
+    then x+h/2 in dom f by FUNCT_2:def 1;
+    then f.(x+h/2) = f.(x-h/2) by A1,A3,FUNCT_1:def 16;
+    hence thesis;
+  end;
+A4: X[0]
+  proof
+    let x;
+    thus cdif(f,h).(0+1).x = cD(cdif(f,h).0,h).x by Def8
+      .= cD(f,h).x by Def8
+      .= f.(x+h/2) - f.(x-h/2) by Th5
+      .= 0 by A2;
+  end;
+A5: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A6: for x holds cdif(f,h).(k+1).x=0;
+    let x;
+A7: cdif(f,h).(k+1).(x-h/2)=0 by A6;
+A8: cdif(f,h).(k+1) is Function of REAL,REAL by Th19;
+    (cdif(f,h).(k+2)).x = (cdif(f,h).(k+1+1)).x
+      .= cD(cdif(f,h).(k+1),h).x by Def8
+      .= cdif(f,h).(k+1).(x+h/2) - cdif(f,h).(k+1).(x-h/2) by A8,Th5
+      .= 0 by A6,A7;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A4,A5);
+  hence thesis;
+end;
+
+theorem Th21:
+  cdif(r(#)f,h).(n+1).x = r* cdif(f,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds cdif(r(#)f,h).($1+1).x = r* cdif
+  (f,h).($1+1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds cdif(r(#)f,h).(k+1).x = r* cdif(f,h).(k+1).x;
+    let x;
+A3: cdif(r(#)f,h).(k+1).(x-h/2) = r* cdif(f,h).(k+1).(x-h/2) & cdif(r(#)f,
+    h).(k+ 1).(x+h/2) = r* cdif(f,h).(k+1).(x+h/2) by A2;
+A4: cdif(r(#)f,h).(k+1) is Function of REAL,REAL by Th19;
+A5: cdif(f,h).(k+1) is Function of REAL,REAL by Th19;
+    cdif(r(#)f,h).(k+1+1).x = cD(cdif(r(#)f,h).(k+1),h).x by Def8
+      .= cdif(r(#)f,h).(k+1).(x+h/2) - cdif(r(#)f,h).(k+1).(x-h/2) by A4,
+    Th5
+      .= r * (cdif(f,h).(k+1).(x+h/2) - cdif(f,h).(k+1).(x-h/2)) by A3
+      .= r * cD(cdif(f,h).(k+1),h).x by A5,Th5
+      .= r * cdif(f,h).(k+1+1).x by Def8;
+    hence thesis;
+  end;
+A6: X[0]
+  proof
+    let x;
+    x+h/2 in REAL;
+    then
+A7: x+h/2 in dom (r(#)f) by FUNCT_2:def 1;
+    x-h/2 in REAL;
+    then
+A8: x-h/2 in dom (r(#)f) by FUNCT_2:def 1;
+    cdif(r(#)f,h).(0+1).x = cD(cdif(r(#)f,h).0,h).x by Def8
+      .= cD(r(#)f,h).x by Def8
+      .= (r(#)f).(x+h/2) - (r(#)f).(x-h/2) by Th5
+      .= r * f.(x+h/2) - (r(#)f).(x-h/2) by A7,VALUED_1:def 5
+      .= r * f.(x+h/2) - r * f.(x-h/2) by A8,VALUED_1:def 5
+      .= r * (f.(x+h/2) - f.(x-h/2))
+      .= r * cD(f,h).x by Th5
+      .= r * cD(cdif(f,h).0,h).x by Def8
+      .= r * cdif(f,h).(0+1).x by Def8;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A6,A1);
+  hence thesis;
+end;
+
+theorem Th22:
+  cdif(f1+f2,h).(n+1).x = cdif(f1,h).(n+1).x + cdif(f2,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds cdif(f1+f2,h).($1+1).x = cdif(f1
+  ,h).($1+1).x + cdif(f2,h).($1+1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds cdif(f1+f2,h).(k+1).x = cdif(f1,h).(k+1).x + cdif(f2,h
+    ).(k+1).x;
+    let x;
+A3: cdif(f1+f2,h).(k+1).(x-h/2) = cdif(f1,h).(k+1).(x-h/2) + cdif(f2,h).(k
++1).(x- h/2) & cdif(f1+f2,h).(k+1).(x+h/2) = cdif(f1,h).(k+1).(x+h/2) + cdif(f2
+    ,h).(k+ 1).(x+h/2) by A2;
+A4: cdif(f1+f2,h).(k+1) is Function of REAL,REAL by Th19;
+A5: cdif(f2,h).(k+1) is Function of REAL,REAL by Th19;
+A6: cdif(f1,h).(k+1) is Function of REAL,REAL by Th19;
+    cdif(f1+f2,h).(k+1+1).x = cD(cdif(f1+f2,h).(k+1),h).x by Def8
+      .= cdif(f1+f2,h).(k+1).(x+h/2) - cdif(f1+f2,h).(k+1).(x-h/2) by A4,Th5
+      .= (cdif(f1,h).(k+1).(x+h/2) - cdif(f1,h).(k+1).(x-h/2)) + (cdif(f2,h)
+    .(k+1).(x+h/2) - cdif(f2,h).(k+1).(x-h/2)) by A3
+      .= cD(cdif(f1,h).(k+1),h).x + (cdif(f2,h).(k+1).(x+h/2) - cdif(f2,h).(
+    k+1).(x-h/2)) by A6,Th5
+      .= cD(cdif(f1,h).(k+1),h).x + cD(cdif(f2,h).(k+1),h).x by A5,Th5
+      .= cdif(f1,h).(k+1+1).x + cD(cdif(f2,h).(k+1),h).x by Def8
+      .= cdif(f1,h).(k+1+1).x + cdif(f2,h).(k+1+1).x by Def8;
+    hence thesis;
+  end;
+A7: X[0]
+  proof
+    let x;
+    cdif(f1+f2,h).(0+1).x = cD(cdif(f1+f2,h).0,h).x by Def8
+      .= cD(f1+f2,h).x by Def8
+      .= (f1+f2).(x+h/2) - (f1+f2).(x-h/2) by Th5
+      .= f1.(x+h/2) + f2.(x+h/2) - (f1+f2).(x-h/2) by VALUED_1:1
+      .= f1.(x+h/2) + f2.(x+h/2) - (f1.(x-h/2) + f2.(x-h/2)) by VALUED_1:1
+      .= (f1.(x+h/2) - f1.(x-h/2)) + (f2.(x+h/2) - f2.(x-h/2))
+      .= cD(f1,h).x + (f2.(x+h/2) - f2.(x-h/2)) by Th5
+      .= cD(f1,h).x + cD(f2,h).x by Th5
+      .= cD(cdif(f1,h).0,h).x + cD(f2,h).x by Def8
+      .= cD(cdif(f1,h).0,h).x + cD(cdif(f2,h).0,h).x by Def8
+      .= cdif(f1,h).(0+1).x + cD(cdif(f2,h).0,h).x by Def8
+      .= cdif(f1,h).(0+1).x + cdif(f2,h).(0+1).x by Def8;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A7,A1);
+  hence thesis;
+end;
+
+theorem
+  cdif(f1-f2,h).(n+1).x = cdif(f1,h).(n+1).x - cdif(f2,h).(n+1).x
+proof
+  defpred X[Element of NAT] means for x holds cdif(f1-f2,h).($1+1).x = cdif(f1
+  ,h).($1+1).x - cdif(f2,h).($1+1).x;
+A1: X[0]
+  proof
+    let x;
+    x-h/2 in REAL;
+    then x-h/2 in dom f1 & x-h/2 in dom f2 by FUNCT_2:def 1;
+    then x-h/2 in dom f1 /\ dom f2 by XBOOLE_0:def 4;
+    then
+A2: x-h/2 in dom (f1-f2) by VALUED_1:12;
+    x+h/2 in REAL;
+    then x+h/2 in dom f1 & x+h/2 in dom f2 by FUNCT_2:def 1;
+    then x+h/2 in dom f1 /\ dom f2 by XBOOLE_0:def 4;
+    then
+A3: x+h/2 in dom (f1-f2) by VALUED_1:12;
+    cdif(f1-f2,h).(0+1).x = cD(cdif(f1-f2,h).0,h).x by Def8
+      .= cD(f1-f2,h).x by Def8
+      .= (f1-f2).(x+h/2) - (f1-f2).(x-h/2) by Th5
+      .= f1.(x+h/2) - f2.(x+h/2) - (f1-f2).(x-h/2) by A3,VALUED_1:13
+      .= f1.(x+h/2) - f2.(x+h/2) - (f1.(x-h/2) - f2.(x-h/2)) by A2,VALUED_1:
+    13
+      .= (f1.(x+h/2) - f1.(x-h/2)) - (f2.(x+h/2) - f2.(x-h/2))
+      .= cD(f1,h).x - (f2.(x+h/2) - f2.(x-h/2)) by Th5
+      .= cD(f1,h).x - cD(f2,h).x by Th5
+      .= cD(cdif(f1,h).0,h).x - cD(f2,h).x by Def8
+      .= cD(cdif(f1,h).0,h).x - cD(cdif(f2,h).0,h).x by Def8
+      .= cdif(f1,h).(0+1).x - cD(cdif(f2,h).0,h).x by Def8
+      .= cdif(f1,h).(0+1).x - cdif(f2,h).(0+1).x by Def8;
+    hence thesis;
+  end;
+A4: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A5: for x holds cdif(f1-f2,h).(k+1).x = cdif(f1,h).(k+1).x - cdif(f2,
+    h).(k+1).x;
+    let x;
+A6: cdif(f1-f2,h).(k+1).(x-h/2) = cdif(f1,h).(k+1).(x-h/2) - cdif(f2,h).(
+k+1).(x- h/2) & cdif(f1-f2,h).(k+1).(x+h/2) = cdif(f1,h).(k+1).(x+h/2) - cdif(
+    f2,h).(k+ 1).(x+h/2) by A5;
+A7: cdif(f1-f2,h).(k+1) is Function of REAL,REAL by Th19;
+A8: cdif(f2,h).(k+1) is Function of REAL,REAL by Th19;
+A9: cdif(f1,h).(k+1) is Function of REAL,REAL by Th19;
+    cdif(f1-f2,h).(k+1+1).x = cD(cdif(f1-f2,h).(k+1),h).x by Def8
+      .= cdif(f1-f2,h).(k+1).(x+h/2) - cdif(f1-f2,h).(k+1).(x-h/2) by A7,
+    Th5
+      .= (cdif(f1,h).(k+1).(x+h/2) - cdif(f1,h).(k+1).(x-h/2)) - (cdif(f2,h)
+    .(k+1).(x+h/2) - cdif(f2,h).(k+1).(x-h/2)) by A6
+      .= cD(cdif(f1,h).(k+1),h).x - (cdif(f2,h).(k+1).(x+h/2) - cdif(f2,h).(
+    k+1).(x-h/2)) by A9,Th5
+      .= cD(cdif(f1,h).(k+1),h).x - cD(cdif(f2,h).(k+1),h).x by A8,Th5
+      .= cdif(f1,h).(k+1+1).x - cD(cdif(f2,h).(k+1),h).x by Def8
+      .= cdif(f1,h).(k+1+1).x - cdif(f2,h).(k+1+1).x by Def8;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A1,A4);
+  hence thesis;
+end;
+
+theorem
+  cdif(r1(#)f1+r2(#)f2,h).(n+1).x = r1* cdif(f1,h).(n+1).x + r2* cdif(f2
+  ,h).(n+1).x
+proof
+  set g1=r1(#)f1;
+  set g2=r2(#)f2;
+  cdif(r1(#)f1+r2(#)f2,h).(n+1).x = cdif(g1,h).(n+1).x + cdif(g2,h).(n+1).
+  x by Th22
+    .= r1* cdif(f1,h).(n+1).x + cdif(g2,h).(n+1).x by Th21
+    .= r1* cdif(f1,h).(n+1).x + r2* cdif(f2,h).(n+1).x by Th21;
+  hence thesis;
+end;
+
+theorem
+  (cdif(f,h).1).x = Shift(f,h/2).x - Shift(f,-h/2).x
+proof
+  set f2 = Shift(f,-h/2);
+  set f1 = Shift(f,h/2);
+  (cdif(f,h).1).x = cdif(f,h).(0+1).x .= cD(cdif(f,h).0,h).x by Def8
+    .= cD(f,h).x by Def8
+    .= f.(x+h/2) - f.(x-h/2) by Th5
+    .= f1.x - f.(x+-h/2) by Def2
+    .= f1.x - f2.x by Def2;
+  hence thesis;
+end;
+
+theorem
+  (fdif(f,h).n).x = (bdif(f,h).n).(x+n*h)
+proof
+  defpred X[Nat] means for x holds (fdif(f,h).$1).x = (bdif(f,h).$1).(x+$1*h);
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds (fdif(f,h).k).x = (bdif(f,h).k).(x+k*h);
+    let x;
+A3: (fdif(f,h).k).(x+h) = (bdif(f,h).k).(x+h+k*h) by A2;
+A4: fdif(f,h).k is Function of REAL,REAL by Th2;
+A5: bdif(f,h).k is Function of REAL,REAL by Th12;
+    (fdif(f,h).(k+1)).x = fD(fdif(f,h).k,h).x by Def6
+      .= (fdif(f,h).k).(x+h) - (fdif(f,h).k).x by A4,Th3
+      .= (bdif(f,h).k).(x+h+k*h) - (bdif(f,h).k).(x+k*h) by A2,A3
+      .= (bdif(f,h).k).(x+(k+1)*h) - (bdif(f,h).k).((x+(k+1)*h)-h)
+      .= bD(bdif(f,h).k,h).(x+(k+1)*h) by A5,Th4
+      .= (bdif(f,h).(k+1)).(x+(k+1)*h) by Def7;
+    hence thesis;
+  end;
+A6: X[0]
+  proof
+    let x;
+    (fdif(f,h).0).x = f.x by Def6
+      .= (bdif(f,h).0).(x+0*h) by Def7;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A6,A1);
+  hence thesis;
+end;
+
+theorem
+  (fdif(f,h).(2*n)).x = (cdif(f,h).(2*n)).(x+n*h)
+proof
+  defpred X[Element of NAT] means for x holds (fdif(f,h).(2*$1)).x = (cdif(f,h
+  ).(2*$1)).(x+$1*h);
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds (fdif(f,h).(2*k)).x = cdif(f,h).(2*k).(x+k*h);
+    let x;
+A3: fdif(f,h).(2*k).(x+h+h) = cdif(f,h).(2*k).(x+h+h+k*h) by A2
+      .= cdif(f,h).(2*k).(x+(k+2)*h);
+A4: fdif(f,h).(2*k).(x+h) = cdif(f,h).(2*k).(x+h+k*h) by A2
+      .= cdif(f,h).(2*k).(x+(k+1)*h);
+    set r3 = cdif(f,h).(2*k).(x+k*h);
+    set r2 = cdif(f,h).(2*k).(x+(k+1)*h);
+    set r1 = cdif(f,h).(2*k).(x+(k+2)*h);
+A5: fdif(f,h).(2*k+1) is Function of REAL,REAL by Th2;
+A6: cdif(f,h).(2*k) is Function of REAL,REAL by Th19;
+A7: cdif(f,h).(2*k+1) is Function of REAL,REAL by Th19;
+A8: fdif(f,h).(2*k) is Function of REAL,REAL by Th2;
+A9: cdif(f,h).(2*k+1).(x+(k+1)*h-h/2) = cD(cdif(f,h).(2*k),h).(x+(k+1)*h-
+    h/2) by Def8
+      .= cdif(f,h).(2*k).(x+(k+1)*h-h/2+h/2) - cdif(f,h).(2*k).(x+(k+1)*h-h/
+    2-h/2) by A6,Th5
+      .= cdif(f,h).(2*k).(x+(k+1)*h) - cdif(f,h).(2*k).(x+k*h);
+A10: cdif(f,h).(2*k+1).(x+(k+1)*h+h/2) = cD(cdif(f,h).(2*k),h).(x+(k+1)*h+
+    h/2) by Def8
+      .= cdif(f,h).(2*k).(x+(k+1)*h+h/2+h/2) - cdif(f,h).(2*k).(x+(k+1)*h+h/
+    2-h/2) by A6,Th5
+      .= cdif(f,h).(2*k).(x+(k+2)*h) - cdif(f,h).(2*k).(x+(k+1)*h);
+A11: cdif(f,h).(2*(k+1)).(x+(k+1)*h) = cdif(f,h).(2*k+1+1).(x+(k+1)*h)
+      .= cD(cdif(f,h).(2*k+1),h).(x+(k+1)*h) by Def8
+      .= (r1 - r2) - (r2 - r3) by A7,A10,A9,Th5;
+    fdif(f,h).(2*(k+1)).x = fdif(f,h).(2*k+1+1).x
+      .= fD(fdif(f,h).(2*k+1),h).x by Def6
+      .= (fdif(f,h).(2*k+1)).(x+h) - (fdif(f,h).(2*k+1)).x by A5,Th3
+      .= fD(fdif(f,h).(2*k),h).(x+h) - (fdif(f,h).(2*k+1)).x by Def6
+      .= fD(fdif(f,h).(2*k),h).(x+h) - fD(fdif(f,h).(2*k),h).x by Def6
+      .= fdif(f,h).(2*k).(x+h+h) - fdif(f,h).(2*k).(x+h) - fD(fdif(f,h).(2*k
+    ),h).x by A8,Th3
+      .= fdif(f,h).(2*k).(x+h+h) - fdif(f,h).(2*k).(x+h) - (fdif(f,h).(2*k).
+    (x+h) - fdif(f,h).(2*k).x) by A8,Th3
+      .= cdif(f,h).(2*k).(x+(k+2)*h) - cdif(f,h).(2*k).(x+(k+1)*h) - (cdif(f
+    ,h).(2*k).(x+(k+1)*h) - cdif(f,h).(2*k).(x+k*h)) by A2,A3,A4;
+    hence thesis by A11;
+  end;
+A12: X[0]
+  proof
+    let x;
+    (fdif(f,h).(2*0)).x = f.x by Def6
+      .= (cdif(f,h).(2*0)).(x+0*h) by Def8;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A12,A1);
+  hence thesis;
+end;
+
+theorem
+  (fdif(f,h).(2*n+1)).x = (cdif(f,h).(2*n+1)).(x+n*h+h/2)
+proof
+  defpred X[Element of NAT] means for x holds (fdif(f,h).(2*$1+1)).x = (cdif(f
+  ,h).(2*$1+1)).(x+$1*h+h/2);
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds (fdif(f,h).(2*k+1)).x = (cdif(f,h).(2*k+1)).(x+k*h+h/2);
+    let x;
+A3: fdif(f,h).(2*k+1).(x+h+h) = cdif(f,h).(2*k+1).(x+h+h+k*h+h/2) by A2
+      .= cdif(f,h).(2*k+1).(x+(k+2)*h+h/2);
+A4: fdif(f,h).(2*k+1).(x+h) = cdif(f,h).(2*k+1).(x+h+k*h+h/2) by A2
+      .= cdif(f,h).(2*k+1).(x+(k+1)*h+h/2);
+    set r3 = cdif(f,h).(2*k+1).(x+k*h+h/2);
+    set r2 = cdif(f,h).(2*k+1).(x+(k+1)*h+h/2);
+    set r1 = cdif(f,h).(2*k+1).(x+(k+2)*h+h/2);
+A5: fdif(f,h).(2*(k+1)) is Function of REAL,REAL by Th2;
+A6: cdif(f,h).(2*k+1) is Function of REAL,REAL by Th19;
+A7: cdif(f,h).(2*(k+1)) is Function of REAL,REAL by Th19;
+A8: fdif(f,h).(2*k+1) is Function of REAL,REAL by Th2;
+A9: cdif(f,h).(2*(k+1)).(x+(k+1)*h) = cdif(f,h).(2*k+1+1).(x+(k+1)*h)
+      .= cD(cdif(f,h).(2*k+1),h).(x+(k+1)*h) by Def8
+      .= cdif(f,h).(2*k+1).(x+(k+1)*h+h/2) - cdif(f,h).(2*k+1).(x+(k+1)*h-h/
+    2) by A6,Th5
+      .= cdif(f,h).(2*k+1).(x+(k+1)*h+h/2) - cdif(f,h).(2*k+1).(x+k*h+h/2);
+A10: cdif(f,h).(2*(k+1)).(x+(k+2)*h) = cdif(f,h).(2*k+1+1).(x+(k+2)*h)
+      .= cD(cdif(f,h).(2*k+1),h).(x+(k+2)*h) by Def8
+      .= cdif(f,h).(2*k+1).(x+(k+2)*h+h/2) - cdif(f,h).(2*k+1).(x+(k+2)*h-h/
+    2) by A6,Th5
+      .= cdif(f,h).(2*k+1).(x+(k+2)*h+h/2) - cdif(f,h).(2*k+1).(x+(k+1)*h+h/
+    2);
+A11: cdif(f,h).(2*(k+1)+1).(x+(k+1)*h+h/2) = cD(cdif(f,h).(2*(k+1)),h).(x+
+    (k+1)*h+h/2) by Def8
+      .= cdif(f,h).(2*(k+1)).(x+(k+1)*h+h/2+h/2) - cdif(f,h).(2*(k+1)).(x+(k
+    +1)*h+h/2-h/2) by A7,Th5
+      .= (r1 - r2) - (r2 - r3) by A10,A9;
+    fdif(f,h).(2*(k+1)+1).x = fD(fdif(f,h).(2*(k+1)),h).x by Def6
+      .= fdif(f,h).(2*(k+1)).(x+h) - fdif(f,h).(2*(k+1)).x by A5,Th3
+      .= fD(fdif(f,h).(2*k+1),h).(x+h) - fdif(f,h).((2*k+1)+1).x by Def6
+      .= fD(fdif(f,h).(2*k+1),h).(x+h) - fD(fdif(f,h).(2*k+1),h).x by Def6
+      .= (fdif(f,h).(2*k+1).(x+h+h) - fdif(f,h).(2*k+1).(x+h)) - fD(fdif(f,h
+    ).(2*k+1),h).x by A8,Th3
+      .= (fdif(f,h).(2*k+1).(x+h+h) - fdif(f,h).(2*k+1).(x+h)) - (fdif(f,h).
+    (2*k+1).(x+h) - fdif(f,h).(2*k+1).x) by A8,Th3
+      .= (r1 - r2) - (r2 - r3) by A2,A3,A4;
+    hence thesis by A11;
+  end;
+A12: X[0]
+  proof
+    let x;
+    (fdif(f,h).(2*0+1)).x = fD(fdif(f,h).0,h).x by Def6
+      .= fD(f,h).x by Def6
+      .= f.(x+h) - f.x by Th3
+      .= f.(x+h/2+h/2) - f.(x+h/2-h/2)
+      .= cD(f,h).(x+h/2) by Th5
+      .= cD(cdif(f,h).0,h).(x+h/2) by Def8
+      .= (cdif(f,h).(2*0+1)).(x+0*h+h/2) by Def8;
+    hence thesis;
+  end;
+  for n holds X[n] from NAT_1:sch 1(A12,A1);
+  hence thesis;
+end;
+
+definition :: Forward difference quotient
+  let f be real-valued Function;
+  let x0,x1 be real number;
+  func [!f,x0,x1!] -> Real equals
+  (f.x0-f.x1)/(x0-x1);
+  correctness;
+end;
+
+definition :: Forward difference quotient of the second order
+  let f be real-valued Function;
+  let x0,x1,x2 be real number;
+  func [!f,x0,x1,x2!] -> Real equals
+  ([!f,x0,x1!] - [!f,x1,x2!])/(x0-x2);
+  correctness;
+end;
+
+definition :: Forward difference quotient of the third order
+  let f be real-valued Function;
+  let x0,x1,x2,x3 be real number;
+  func [!f,x0,x1,x2,x3!] -> Real equals
+  ([!f,x0,x1,x2!] - [!f,x1,x2,x3!])/(x0-x3);
+  correctness;
+end;
+
+theorem
+  [!f,x0,x1!] = [!f,x1,x0!]
+proof
+  thus [!f,x0,x1!] = (-(f.x1-f.x0))/(-(x1-x0)) .= [!f,x1,x0!] by XCMPLX_1:192;
+end;
+
+theorem
+  f is constant implies [!f,x0,x1!] = 0
+proof
+  x0 in REAL;
+  then
+A1: x0 in dom f by FUNCT_2:def 1;
+  x1 in REAL;
+  then
+A2: x1 in dom f by FUNCT_2:def 1;
+  assume f is constant;
+  then f.x0 = f.x1 by A1,A2,FUNCT_1:def 16;
+  hence thesis;
+end;
+
+theorem Th31:
+  [!(r(#)f),x0,x1!] = r*[!f,x0,x1!]
+proof
+  x1 in REAL;
+  then
+A1: x1 in dom (r(#)f) by FUNCT_2:def 1;
+  x0 in REAL;
+  then x0 in dom (r(#)f) by FUNCT_2:def 1;
+  then [!(r(#)f),x0,x1!] = (r*f.x0-(r(#)f).x1)/(x0-x1) by VALUED_1:def 5
+    .= (r*f.x0-r*f.x1)/(x0-x1) by A1,VALUED_1:def 5
+    .= r*(f.x0-f.x1)/(x0-x1)
+    .= r*[!f,x0,x1!] by XCMPLX_1:75;
+  hence thesis;
+end;
+
+theorem Th32:
+  [!(f1+f2),x0,x1!] = [!f1,x0,x1!] + [!f2,x0,x1!]
+proof
+  [!(f1+f2),x0,x1!] = (f1.x0+f2.x0-(f1+f2).x1)/(x0-x1) by VALUED_1:1
+    .= (f1.x0+f2.x0-(f1.x1+f2.x1))/(x0-x1) by VALUED_1:1
+    .= ((f1.x0-f1.x1)+(f2.x0-f2.x1))/(x0-x1)
+    .= [!f1,x0,x1!]+[!f2,x0,x1!] by XCMPLX_1:63;
+  hence thesis;
+end;
+
+theorem
+  [!(r1(#)f1+r2(#)f2),x0,x1!] = r1*[!f1,x0,x1!] + r2*[!f2,x0,x1!]
+proof
+  [!(r1(#)f1+r2(#)f2),x0,x1!] = [!(r1(#)f1),x0,x1!]+[!(r2(#)f2),x0,x1!] by
+  Th32
+    .= r1*[!f1,x0,x1!]+[!(r2(#)f2),x0,x1!] by Th31
+    .= r1*[!f1,x0,x1!]+r2*[!f2,x0,x1!] by Th31;
+  hence thesis;
+end;
+
+theorem Th34:
+  x0,x1,x2 are_mutually_different implies [!f,x0,x1,x2!] = [!f,x1,
+  x2,x0!] & [!f,x0,x1,x2!] = [!f,x2,x1,x0!]
+proof
+  set x10 = x1-x0;
+  set x20 = x2-x0;
+  set x12 = x1-x2;
+  assume
+A1: x0,x1,x2 are_mutually_different;
+  then
+A2: x1-x2<>0 by ZFMISC_1:def 5;
+A3: x1-x0<>0 by A1,ZFMISC_1:def 5;
+A4: [!f,x0,x1,x2!] = ((f.x0-f.x1)/(-(x1-x0)) - (f.x1-f.x2)/(x1-x2))/(-(x2-x0 ))
+    .= (-(f.x0-f.x1)/(x1-x0) - (f.x1-f.x2)/(x1-x2))/(-(x2-x0)) by XCMPLX_1:
+  189
+    .= (-((f.x0-f.x1)/(x1-x0) + (f.x1-f.x2)/(x1-x2)))/(-(x2-x0))
+    .= ((f.x0-f.x1)/(x1-x0) + (f.x1-f.x2)/(x1-x2))/(x2-x0) by XCMPLX_1:192
+    .= (((f.x0-f.x1)*x12 + (f.x1-f.x2)*x10)/(x10*x12))/x20 by A2,A3,
+  XCMPLX_1:117
+    .= (f.x0*x12 + f.x1*x20 - f.x2*x10)/(x10*x12*x20) by XCMPLX_1:79;
+A5: [!f,x2,x1,x0!] = ((-(f.x1-f.x2))/(-(x1-x2)) - (f.x1-f.x0)/(x1-x0))/(x2- x0)
+    .= ((f.x1-f.x2)/(x1-x2) - (f.x1-f.x0)/(x1-x0))/(x2-x0) by XCMPLX_1:192
+    .= (((f.x1-f.x2)*x10 - (f.x1-f.x0)*x12)/(x12*x10))/x20 by A2,A3,
+  XCMPLX_1:131
+    .= [!f,x0,x1,x2!] by A4,XCMPLX_1:79;
+  x2-x0<>0 by A1,ZFMISC_1:def 5;
+  then
+  [!f,x1,x2,x0!] = (((f.x1-f.x2)*x20 - (f.x2-f.x0)*x12)/(x12*x20))/x10 by
+  A2,XCMPLX_1:131
+    .= (f.x0*x12 + f.x1*x20 - f.x2*x10)/(x12*x20*x10) by XCMPLX_1:79
+    .= [!f,x0,x1,x2!] by A4;
+  hence thesis by A5;
+end;
+
+theorem
+  x0,x1,x2 are_mutually_different implies
+  [!f,x0,x1,x2!] = [!f,x2,x0,x1!] & [!f,x0,x1,x2!] = [!f,x1,x0,x2!]
+proof
+  assume
+A1: x0,x1,x2 are_mutually_different;
+  then
+A2: x1<>x2 by ZFMISC_1:def 5;
+  x0<>x1 & x0<>x2 by A1,ZFMISC_1:def 5;
+  then
+A3: x2,x0,x1 are_mutually_different by A2,ZFMISC_1:def 5;
+  then [!f,x0,x1,x2!] = [!f,x2,x0,x1!] by Th34;
+  hence thesis by A3,Th34;
+end;
+
+theorem
+  (fdif(fdif(f,h).m,h).n).x = fdif(f,h).(m+n).x
+proof
+  defpred X[Element of NAT] means for x holds (fdif(fdif(f,h).m,h).$1).x =
+  fdif(f,h).(m+$1).x;
+A1: for k st X[k] holds X[k+1]
+  proof
+    let k;
+    assume
+A2: for x holds (fdif(fdif(f,h).m,h).k).x = fdif(f,h).(m+k).x;
+    let x;
+A3: fdif(f,h).(m+k) is Function of REAL,REAL by Th2;
+    fdif(f,h).m is Function of REAL,REAL by Th2;
+    then
+A4: fdif(fdif(f,h).m,h).k is Function of REAL,REAL by Th2;
+    fdif(fdif(f,h).m,h).(k+1).x = fD(fdif(fdif(f,h).m,h).k,h).x by Def6
+      .= fdif(fdif(f,h).m,h).k.(x+h) - fdif(fdif(f,h).m,h).k.x by A4,Th3
+      .= fdif(f,h).(m+k).(x+h) - fdif(fdif(f,h).m,h).k.x by A2
+      .= fdif(f,h).(m+k).(x+h) - fdif(f,h).(m+k).x by A2
+      .= fD(fdif(f,h).(m+k),h).x by A3,Th3
+      .= fdif(f,h).(m+k+1).x by Def6;
+    hence thesis;
+  end;
+A5: X[0] by Def6;
+  for n holds X[n] from NAT_1:sch 1(A5,A1);
+  hence thesis;
+end;
+
+definition
+  let S;
+  attr S is Sequence-yielding means
+  :Def12:
+  for n holds S.n is Real_Sequence;
+end;
+
+Lm4: ex S being Functional_Sequence of REAL,REAL st for n holds S.n is
+Real_Sequence
+proof
+  consider s1 being Real_Sequence;
+  consider S being Functional_Sequence of REAL,REAL;
+  set s1 = NAT --> 1;
+  set S = NAT --> s1;
+  s1 is PartFunc of REAL,REAL by RELSET_1:17;
+  then dom S = NAT & for n holds S.n is PartFunc of REAL,REAL by
+  FUNCOP_1:13,19;
+  then reconsider S as Functional_Sequence of REAL,REAL by SEQFUNC:1;
+  dom s1 = NAT & for n holds s1.n is real by FUNCOP_1:19;
+  then s1 is Real_Sequence by SEQ_1:4;
+  then for n holds S.n is Real_Sequence by FUNCOP_1:13;
+  hence thesis;
+end;
+
+registration
+  cluster Sequence-yielding Functional_Sequence of REAL,REAL;
+  existence
+  proof
+    consider S being Functional_Sequence of REAL,REAL such that
+A1: for n holds S.n is Real_Sequence by Lm4;
+    take S;
+    thus thesis by A1,Def12;
+  end;
+end;
+
+definition
+  mode Seq_Sequence is Sequence-yielding Functional_Sequence of REAL,REAL;
+end;
+
+definition
+  let S be Seq_Sequence;
+  let n;
+  redefine func S.n -> Real_Sequence;
+  coherence by Def12;
+end;
+
+reserve S for Seq_Sequence;
+
+Lm5: (fdif(f1(#)f2,h).1).x = f1.x * fdif(f2,h).1.x + fdif(f1,h).1.x * f2.(x+h)
+proof
+  (fdif(f1(#)f2,h).1).x = fdif(f1(#)f2,h).(0+1).x
+    .= fD(fdif(f1(#)f2,h).0,h).x by Def6
+    .= fD(f1(#)f2,h).x by Def6
+    .= (f1(#)f2).(x+h) - (f1(#)f2).x by Th3
+    .= f1.(x+h) * f2.(x+h) - (f1(#)f2).x by VALUED_1:5
+    .= f1.(x+h) * f2.(x+h) - f1.x * f2.x by VALUED_1:5
+    .= f1.x * (f2.(x+h) - f2.x) + (f1.(x+h) - f1.x) * f2.(x+h)
+    .= f1.x * fD(f2,h).x + (f1.(x+h) - f1.x) * f2.(x+h) by Th3
+    .= f1.x * fD(f2,h).x + fD(f1,h).x * f2.(x+h) by Th3
+    .= f1.x * fD(fdif(f2,h).0,h).x + fD(f1,h).x * f2.(x+h) by Def6
+    .= f1.x * fD(fdif(f2,h).0,h).x + fD(fdif(f1,h).0,h).x * f2.(x+h) by Def6
+    .= f1.x * fdif(f2,h).(0+1).x + fD(fdif(f1,h).0,h).x * f2.(x+h) by Def6
+    .= f1.x * fdif(f2,h).1.x + fdif(f1,h).1.x * f2.(x+h) by Def6;
+  hence thesis;
+end;
+
+theorem
+  (for n for i st i<=n holds (S.n).i=(n choose i) * fdif(f1,h).i.x *
+fdif(f2,h).(n-'i).(x+i*h)) implies fdif(f1(#)f2,h).1.x = Sum(S.1, 1) & fdif(f1
+  (#)f2,h).2.x = Sum(S.2, 2)
+proof
+A1: 1-'0 = 1-0 by XREAL_1:235
+    .= 1;
+A2: 1-'1 = 1-1 by XREAL_1:235
+    .= 0;
+A3: fdif(f1(#)f2,h).1 is Function of REAL,REAL by Th2;
+A4: 2-'1 = 2-1 by XREAL_1:235
+    .= 1;
+A5: fdif(f2,h).1 is Function of REAL,REAL by Th2;
+A6: 2-'2 = 2-2 by XREAL_1:235
+    .= 0;
+  assume
+A7: for n for i st i<=n holds S.n.i=(n choose i) * fdif(f1,h).i.x * fdif
+  (f2,h).(n-'i).(x+i*h);
+  then
+A8: (S.2).1 = (2 choose 1) * (fdif(f1,h).1).x * fdif(f2,h).(2-'1).(x+1*h)
+    .= 2 * (fdif(f1,h).1).x * fdif(f2,h).1.(x+h) by A4,NEWTON:33;
+A9: (S.1).1 = (1 choose 1) * (fdif(f1,h).1).x * fdif(f2,h).(1-'1).(x+1*h) by
+  A7
+    .= 1 * (fdif(f1,h).1).x * fdif(f2,h).(1-'1).(x+1*h) by NEWTON:31
+    .= fdif(f1,h).1.x * f2.(x+h) by A2,Def6;
+A10: (S.1).0 = (1 choose 0) * (fdif(f1,h).0).x * fdif(f2,h).(1-'0).(x+0*h) by
+  A7
+    .= 1 * (fdif(f1,h).0).x * fdif(f2,h).(1-'0).(x+0*h) by NEWTON:29
+    .= f1.x * fdif(f2,h).1.x by A1,Def6;
+A11: Sum(S.1, 1) = Partial_Sums(S.1).(0+1) by SERIES_1:def 6
+    .= Partial_Sums(S.1).0 + S.1.1 by SERIES_1:def 1
+    .= (S.1).0 + (S.1).1 by SERIES_1:def 1
+    .= (fdif(f1(#)f2,h).1).x by A10,A9,Lm5;
+A12: fdif(f1,h).1 is Function of REAL,REAL by Th2;
+A13: fdif(f1(#)f2,h).2.x = fdif(f1(#)f2,h).(1+1).x
+    .= fD(fdif(f1(#)f2,h).1,h).x by Def6
+    .= fdif(f1(#)f2,h).1.(x+h) - fdif(f1(#)f2,h).1.x by A3,Th3
+    .= f1.(x+h) * fdif(f2,h).1.(x+h) + fdif(f1,h).1.(x+h) * f2.(x+h+h) -
+  fdif(f1(#)f2,h).1.x by Lm5
+    .= f1.(x+h) * fdif(f2,h).1.(x+h) + fdif(f1,h).1.(x+h) * f2.(x+h+h) - (f1
+  .x * fdif(f2,h).1.x + fdif(f1,h).1.x * f2.(x+h)) by Lm5
+    .= f1.x * (fdif(f2,h).1.(x+h) - fdif(f2,h).1.x) + (f1.(x+h) - f1.x) *
+fdif(f2,h).1.(x+h) + (fdif(f1,h).1.(x+h) - fdif(f1,h).1.x) * f2.(x+h+h) + fdif(
+  f1,h).1.x * (f2.(x+h+h) - f2.(x+h))
+    .= f1.x * fD(fdif(f2,h).1,h).x + (f1.(x+h) - f1.x) * fdif(f2,h).1.(x+h)
++ (fdif(f1,h).1.(x+h) - fdif(f1,h).1.x) * f2.(x+h+h) + fdif(f1,h).1.x * (f2.(x+
+  h+h) - f2.(x+h)) by A5,Th3
+    .= f1.x * fD(fdif(f2,h).1,h).x + fD(f1,h).x * fdif(f2,h).1.(x+h) + (fdif
+(f1,h).1.(x+h) - fdif(f1,h).1.x) * f2.(x+h+h) + fdif(f1,h).1.x * (f2.(x+h+h) -
+  f2.(x+h)) by Th3
+    .= (f1.x * fD(fdif(f2,h).1,h).x + fD(f1,h).x * fdif(f2,h).1.(x+h)) + fD(
+  fdif(f1,h).1,h).x * f2.(x+h+h) + fdif(f1,h).1.x * (f2.(x+h+h) - f2.(x+h)) by
+  A12
+  ,Th3
+    .= (f1.x * fD(fdif(f2,h).1,h).x + fD(f1,h).x * fdif(f2,h).1.(x+h)) + fD(
+  fdif(f1,h).1,h).x * f2.(x+h+h) + fdif(f1,h).1.x * fD(f2,h).(x+h) by Th3
+    .= (f1.x * fdif(f2,h).(1+1).x + fD(f1,h).x * fdif(f2,h).1.(x+h)) + fD(
+  fdif(f1,h).1,h).x * f2.(x+h+h) + fdif(f1,h).1.x * fD(f2,h).(x+h) by Def6
+    .= (f1.x * fdif(f2,h).(1+1).x + fD(fdif(f1,h).0,h).x * fdif(f2,h).1.(x+h
+  )) + fD(fdif(f1,h).1,h).x * f2.(x+h+h) + fdif(f1,h).1.x * fD(f2,h).(x+h) by
+  Def6
+    .= (f1.x * fdif(f2,h).2.x + fD(fdif(f1,h).0,h).x * fdif(f2,h).1.(x+h)) +
+  fdif(f1,h).2.x * f2.(x+2*h) + fdif(f1,h).1.x * fD(f2,h).(x+h) by Def6
+    .= (f1.x * fdif(f2,h).2.x + fdif(f1,h).(0+1).x * fdif(f2,h).1.(x+h)) +
+  fdif(f1,h).2.x * f2.(x+2*h) + fdif(f1,h).1.x * fD(f2,h).(x+h) by Def6
+    .= (f1.x * fdif(f2,h).2.x + fdif(f1,h).1.x * fdif(f2,h).1.(x+h)) + fdif(
+  f1,h).2.x * f2.(x+2*h) + fdif(f1,h).1.x * fD(fdif(f2,h).0,h).(x+h) by Def6
+    .= (f1.x * fdif(f2,h).2.x + fdif(f1,h).1.x * fdif(f2,h).1.(x+h)) + fdif(
+  f1,h).2.x * f2.(x+2*h) + fdif(f1,h).1.x * fdif(f2,h).(0+1).(x+h) by Def6
+    .= f1.x * fdif(f2,h).2.x + 2 * (fdif(f1,h).1.x * fdif(f2,h).1.(x+h)) +
+  fdif(f1,h).2.x * f2.(x+2*h);
+A14: 2-'0 = 2-0 by XREAL_1:235
+    .= 2;
+A15: (S.2).2 = (2 choose 2) * (fdif(f1,h).2).x * fdif(f2,h).(2-'2).(x+2*h)
+  by A7
+    .= 1 * (fdif(f1,h).2).x * fdif(f2,h).(2-'2).(x+2*h) by NEWTON:31
+    .= fdif(f1,h).2.x * f2.(x+2*h) by A6,Def6;
+A16: (S.2).0 = (2 choose 0) * (fdif(f1,h).0).x * fdif(f2,h).(2-'0).(x+0*h)
+  by A7
+    .= 1 * (fdif(f1,h).0).x * fdif(f2,h).(2-'0).(x+0*h) by NEWTON:29
+    .= f1.x * fdif(f2,h).2.x by A14,Def6;
+  Sum(S.2, 2) = Partial_Sums(S.2).(1+1) by SERIES_1:def 6
+    .= Partial_Sums(S.2).(0+1) + S.2.2 by SERIES_1:def 1
+    .= Partial_Sums(S.2).0 + S.2.1 + S.2.2 by SERIES_1:def 1
+    .= fdif(f1(#)f2,h).2.x by A13,A16,A8,A15,SERIES_1:def 1;
+  hence thesis by A11;
+end;
+
+theorem
+  for f being PartFunc of REAL, REAL st x in dom f & x-h in dom f holds
+  bD(f,h).x = f.x - f.(x-h)
+proof
+  let f be PartFunc of REAL, REAL;
+  assume
+A0: x in dom f & x-h in dom f;
+A3: dom Shift(f,-h) = - -h ++ dom f by Def1;
+A4: h + (x - - -h) in (- -h ++ dom f) by A0,MEASURE6:82; then
+A2: Shift(f,-h).x = f.(x+-h) by Def1;
+  x in (dom Shift(f,-h)) /\ dom f by XBOOLE_0:def 4,A4,A3,A0; then
+  x in dom bD(f,h) by VALUED_1:12;
+  hence thesis by A2,VALUED_1:13;
+end;
+
+theorem
+  for f being PartFunc of REAL, REAL st x+h/2 in dom f & x-h/2 in dom f holds
+  cD(f,h).x = f.(x+h/2) - f.(x-h/2)
+proof
+  let f be PartFunc of REAL, REAL;
+  assume
+A0: x+h/2 in dom f & x-h/2 in dom f;
+A3: dom Shift(f,-h/2) = - -(h/2) ++ dom f by Def1;
+a3: dom Shift(f,h/2) = - (h/2) ++ dom f by Def1;
+K:  -(h/2) in REAL & h/2 in REAL;
+aa: -(h/2) + (x + (h/2)) in (-(h/2) ++ dom f) by A0,MEASURE6:82; then
+a2: Shift(f,h/2).x = f.(x+h/2) by Def1;
+A4: h/2 + (x - (h/2)) in (- -(h/2) ++ dom f) by A0,MEASURE6:82; then
+A2: Shift(f,-h/2).x = f.(x+-h/2) by Def1;
+  x in (dom Shift(f,h/2)) /\ (dom Shift(f,-h/2))
+    by XBOOLE_0:def 4,aa,A4,a3,A3; then
+  x in dom cD(f,h) by VALUED_1:12;
+  hence thesis by A2,a2,VALUED_1:13;
+end;
+

@@ -1,0 +1,520 @@
+:: Correctness of the High Speed Array Multiplier Circuits
+::  by Hiroshi Yamazaki and Katsumi Wasaki
+::
+:: Received August 28, 2000
+:: Copyright (c) 2000 Association of Mizar Users
+ 
+environ
+
+ vocabularies GATE_1, XBOOLE_0, GATE_5;
+ notations XBOOLE_0, GATE_1;
+ constructors XBOOLE_0, GATE_1;
+ registrations XBOOLE_0, GATE_1;
+ theorems GATE_1;
+
+begin
+ 
+::The following 4 definitions are for normal 2-by-2 bit multiplier.
+
+definition
+  let x0,x1,y0,y1 be set;
+  func MULT210(x1,y1,x0,y0) -> set equals
+  AND2(x0,y0);
+  correctness;
+  func MULT211(x1,y1,x0,y0) -> set equals
+  ADD1(AND2(x1,y0),AND2(x0,y1),{});
+  correctness;
+  func MULT212(x1,y1,x0,y0) -> set equals
+  ADD2({},AND2(x1,y1),AND2(x1,y0),AND2
+  (x0,y1),{});
+  correctness;
+  func MULT213(x1,y1,x0,y0) -> set equals
+  CARR2({},AND2(x1,y1),AND2(x1,y0),
+  AND2(x0,y1),{});
+  correctness;
+end;
+ 
+::
+:: Logical Equivalence of 2-by-2 bit Plain Array Multiplier.
+::
+::The following theorem shows that
+:: outputs of '2-by-2 bit plain Array Multiplier' are equivalent to
+:: outputs of '2-by-2 normal Multiplier'
+:: We assume that there is no feedback loop in multiplier.
+
+theorem
+  for x0,x1,y0,y1,z0,z1,z2,z3,q00,q01,c01,q11,c11 being set holds (q00
+is not empty iff AND2(x0,y0) is not empty)& (q01 is not empty iff XOR3(AND2(x1,
+y0),AND2(x0,y1),{} ) is not empty)& (c01 is not empty iff MAJ3(AND2(x1,y0),AND2
+(x0,y1),{} ) is not empty)& (q11 is not empty iff XOR3(AND2(x1,y1),{} ,c01) is
+not empty)& (c11 is not empty iff MAJ3(AND2(x1,y1),{} ,c01) is not empty)& (z0
+is not empty iff q00 is not empty)& (z1 is not empty iff q01 is not empty)& (z2
+  is not empty iff q11 is not empty)& (z3 is not empty iff c11 is not empty)
+  implies (z0 is not empty iff MULT210(x1,y1,x0,y0) is not empty)& (z1 is not
+empty iff MULT211(x1,y1,x0,y0) is not empty)& (z2 is not empty iff MULT212(x1,
+y1,x0,y0) is not empty)& (z3 is not empty iff MULT213(x1,y1,x0,y0) is not empty
+  )
+proof
+  let x0,x1,y0,y1,z0,z1,z2,z3,q00,q01,c01,q11,c11 be set;
+  assume that
+A1: q00 is not empty iff AND2(x0,y0) is not empty and
+A2: q01 is not empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{} ) is not empty and
+A3: c01 is not empty iff MAJ3(AND2(x1,y0),AND2(x0,y1),{} ) is not empty and
+A4: q11 is not empty iff XOR3(AND2(x1,y1),{} ,c01) is not empty and
+A5: c11 is not empty iff MAJ3(AND2(x1,y1),{} ,c01) is not empty and
+A6: z0 is not empty iff q00 is not empty and
+A7: z1 is not empty iff q01 is not empty and
+A8: z2 is not empty iff q11 is not empty and
+A9: z3 is not empty iff c11 is not empty;
+  thus z0 is not empty iff MULT210(x1,y1,x0,y0) is not empty by A1,A6;
+  thus z1 is not empty iff MULT211(x1,y1,x0,y0) is not empty by A2,A7;
+  set m212 = MULT212(x1,y1,x0,y0);
+  set x1y1 = AND2(x1,y1);
+  set x0y1 = AND2(x0,y1);
+  set x1y0 = AND2(x1,y0);
+  m212 = XOR3({},x1y1,MAJ3(x1y0,x0y1,{})) by GATE_1:def 37;
+  then
+  m212 is not empty iff x1y1 is not empty & not MAJ3(x1y0,x0y1,{}) is not
+  empty or not x1y1 is not empty & MAJ3(x1y0,x0y1,{}) is not empty;
+  hence z2 is not empty iff MULT212(x1,y1,x0,y0) is not empty by A3,A4,A8;
+  set m213 = MULT213(x1,y1,x0,y0);
+  m213 = MAJ3({},x1y1,MAJ3(x1y0,x0y1,{})) by GATE_1:def 38;
+  then m213 is not empty iff x1y1 is not empty & MAJ3(x1y0,x0y1,{}) is not
+  empty;
+  hence thesis by A3,A5,A9;
+end;
+ 
+::
+:: Logical Equivalence of 3-by-3 bit Plain Array Multiplier.
+::
+::[sequence 1]
+::The following 5 definitions are for normal 3-by-2 bit multiplier.
+
+definition
+  let x0,x1,x2,y0,y1 be set;
+  func MULT310(x2,x1,y1,x0,y0) -> set equals
+  AND2(x0,y0);
+  correctness;
+  func MULT311(x2,x1,y1,x0,y0) -> set equals
+  ADD1(AND2(x1,y0),AND2(x0,y1),{});
+  correctness;
+  func MULT312(x2,x1,y1,x0,y0) -> set equals
+  ADD2(AND2(x2,y0),AND2(x1,y1),
+  AND2(x1,y0),AND2(x0,y1),{});
+  correctness;
+  func MULT313(x2,x1,y1,x0,y0) -> set equals
+  ADD3({} ,AND2(x2,y1), AND2(x2,y0)
+  ,AND2(x1,y1), AND2(x1,y0),AND2(x0,y1),{});
+  correctness;
+  func MULT314(x2,x1,y1,x0,y0) -> set equals
+  CARR3({} ,AND2(x2,y1), AND2(x2,y0
+  ),AND2(x1,y1), AND2(x1,y0),AND2(x0,y1),{});
+  correctness;
+end;
+ 
+::[sequence 2]
+::The following 4 definitions are for normal 3-by-3 bit multiplier.
+
+definition
+  let x0,x1,x2,y0,y1,y2 be set;
+  func MULT321(x2,y2,x1,y1,x0,y0) -> set equals
+  ADD1(MULT312(x2,x1,y1,x0,y0),
+  AND2(x0,y2),{});
+  correctness;
+  func MULT322(x2,y2,x1,y1,x0,y0) -> set equals
+  ADD2(MULT313(x2,x1,y1,x0,y0),
+  AND2(x1,y2), MULT312(x2,x1,y1,x0,y0),AND2(x0,y2),{});
+  correctness;
+  func MULT323(x2,y2,x1,y1,x0,y0) -> set equals
+  ADD3(MULT314(x2,x1,y1,x0,y0),
+AND2(x2,y2), MULT313(x2,x1,y1,x0,y0),AND2(x1,y2), MULT312(x2,x1,y1,x0,y0),AND2(
+  x0,y2),{});
+  correctness;
+  func MULT324(x2,y2,x1,y1,x0,y0) -> set equals
+  CARR3(MULT314(x2,x1,y1,x0,y0),
+AND2(x2,y2), MULT313(x2,x1,y1,x0,y0),AND2(x1,y2), MULT312(x2,x1,y1,x0,y0),AND2(
+  x0,y2),{});
+  correctness;
+end;
+ 
+::The following theorem shows that
+:: outputs of '3-by-3 bit plain Array Multiplier' are equivalent to
+:: outputs of '3-by-3 normal (sequencial) Multiplier'
+:: We assume that there is no feedback loop in multiplier.
+
+theorem ::3AM:
+  for x0,x1,x2,y0,y1,y2,z0,z1,z2,z3,z4,z5, q00,q01,q02,c01,c02,q11,q12,
+  c11,c12,q21,q22,c21,c22 being set holds (q00 is not empty iff AND2(x0,y0) is
+  not empty)& (q01 is not empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{} ) is not
+empty)& (c01 is not empty iff MAJ3(AND2(x1,y0),AND2(x0,y1),{} ) is not empty)&
+(q02 is not empty iff XOR3(AND2(x2,y0),AND2(x1,y1),{} ) is not empty)& (c02 is
+  not empty iff MAJ3(AND2(x2,y0),AND2(x1,y1),{} ) is not empty)& (q11 is not
+empty iff XOR3(q02,AND2(x0,y2),c01) is not empty)& (c11 is not empty iff MAJ3(
+q02,AND2(x0,y2),c01) is not empty)& (q12 is not empty iff XOR3(AND2(x2,y1),AND2
+(x1,y2),c02) is not empty)& (c12 is not empty iff MAJ3(AND2(x2,y1),AND2(x1,y2),
+c02) is not empty)& (q21 is not empty iff XOR3(q12,{} ,c11) is not empty)& (c21
+  is not empty iff MAJ3(q12,{} ,c11) is not empty)& (q22 is not empty iff XOR3(
+AND2(x2,y2),c21,c12) is not empty)& (c22 is not empty iff MAJ3(AND2(x2,y2),c21,
+  c12) is not empty)& (z0 is not empty iff q00 is not empty)& (z1 is not empty
+iff q01 is not empty)& (z2 is not empty iff q11 is not empty)& (z3 is not empty
+iff q21 is not empty)& (z4 is not empty iff q22 is not empty)& (z5 is not empty
+iff c22 is not empty) implies (z0 is not empty iff MULT310(x2, x1,y1,x0,y0) is
+not empty)& (z1 is not empty iff MULT311(x2, x1,y1,x0,y0) is not empty)& (z2 is
+  not empty iff MULT321(x2,y2,x1,y1,x0,y0) is not empty)& (z3 is not empty iff
+MULT322(x2,y2,x1,y1,x0,y0) is not empty)& (z4 is not empty iff MULT323(x2,y2,x1
+  ,y1,x0,y0) is not empty)& (z5 is not empty iff MULT324(x2,y2,x1,y1,x0,y0) is
+  not empty)
+proof
+  let x0,x1,x2,y0,y1,y2,z0,z1,z2,z3,z4,z5, q00,q01,q02,c01,c02,q11,q12,c11,c12
+  ,q21,q22,c21,c22 be set;
+  assume that
+A1: q00 is not empty iff AND2(x0,y0) is not empty and
+A2: q01 is not empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{} ) is not empty and
+A3: ( c01 is not empty iff MAJ3(AND2(x1,y0),AND2(x0,y1),{} ) is not
+  empty)&( q02 is not empty iff XOR3(AND2(x2,y0),AND2(x1,y1),{} ) is not empty)
+  and
+A4: c02 is not empty iff MAJ3(AND2(x2,y0),AND2(x1,y1),{} ) is not empty and
+A5: q11 is not empty iff XOR3(q02,AND2(x0,y2),c01) is not empty and
+A6: c11 is not empty iff MAJ3(q02,AND2(x0,y2),c01) is not empty and
+A7: q12 is not empty iff XOR3(AND2(x2,y1),AND2(x1,y2),c02) is not empty and
+A8: c12 is not empty iff MAJ3(AND2(x2,y1),AND2(x1,y2),c02) is not empty and
+A9: q21 is not empty iff XOR3(q12,{} ,c11) is not empty and
+A10: c21 is not empty iff MAJ3(q12,{} ,c11) is not empty and
+A11: q22 is not empty iff XOR3(AND2(x2,y2),c21,c12) is not empty and
+A12: c22 is not empty iff MAJ3(AND2(x2,y2),c21,c12) is not empty and
+A13: z0 is not empty iff q00 is not empty and
+A14: z1 is not empty iff q01 is not empty and
+A15: z2 is not empty iff q11 is not empty and
+A16: z3 is not empty iff q21 is not empty and
+A17: z4 is not empty iff q22 is not empty and
+A18: z5 is not empty iff c22 is not empty;
+  set x0y2 = AND2(x0,y2);
+A19: c11 is not empty iff q02 is not empty & x0y2 is not empty or x0y2 is
+  not empty & c01 is not empty or c01 is not empty & q02 is not empty by A6;
+  thus z0 is not empty iff MULT310(x2,x1,y1,x0,y0) is not empty by A1,A13;
+  thus z1 is not empty iff MULT311(x2,x1,y1,x0,y0) is not empty by A2,A14;
+  set m312 = MULT312(x2,x1,y1,x0,y0);
+  set x1y1 = AND2(x1,y1);
+  set x0y1 = AND2(x0,y1);
+  set x2y0 = AND2(x2,y0);
+  set x1y0 = AND2(x1,y0);
+A20: m312 = XOR3(x2y0,x1y1,MAJ3(x1y0,x0y1,{})) by GATE_1:def 37;
+  then
+A21: m312 is not empty iff ( x2y0 is not empty & not x1y1 is not empty or
+  not x2y0 is not empty & x1y1 is not empty ) & not MAJ3(x1y0,x0y1,{}) is not
+  empty or not ( x2y0 is not empty & not x1y1 is not empty or not x2y0 is not
+  empty & x1y1 is not empty ) & MAJ3(x1y0,x0y1,{}) is not empty;
+A22: m312 is not empty iff ( x2y0 is not empty & not x1y1 is not empty or
+not x2y0 is not empty & x1y1 is not empty ) & not (x1y0 is not empty & x0y1 is
+  not empty) or not ( x2y0 is not empty & not x1y1 is not empty or not x2y0 is
+not empty & x1y1 is not empty ) & x1y0 is not empty & x0y1 is not empty by A20;
+  q11 is not empty iff ( q02 is not empty & not x0y2 is not empty or not
+  q02 is not empty & x0y2 is not empty ) & not c01 is not empty or not ( q02 is
+not empty & not x0y2 is not empty or not q02 is not empty & x0y2 is not empty )
+  & c01 is not empty by A5;
+  hence z2 is not empty iff MULT321(x2,y2,x1,y1,x0,y0) is not empty by A3,A15,
+  A21;
+  set x1y2 = AND2(x1,y2);
+  set x2y1 = AND2(x2,y1);
+A23: q12 is not empty iff ( x2y1 is not empty & not x1y2 is not empty or not
+x2y1 is not empty & x1y2 is not empty ) & not c02 is not empty or not ( x2y1 is
+not empty & not x1y2 is not empty or not x2y1 is not empty & x1y2 is not empty
+  ) & c02 is not empty by A7;
+  set m324 = MULT324(x2,y2,x1,y1,x0,y0);
+  set m323 = MULT323(x2,y2,x1,y1,x0,y0);
+  set m314 = MULT314(x2,x1,y1,x0,y0);
+  set x2y2 = AND2(x2,y2);
+A24: m314 = MAJ3({},x2y1,CARR2(x2y0,x1y1,x1y0,x0y1,{})) by GATE_1:def 40
+    .= MAJ3({},x2y1,MAJ3(x2y0,x1y1,MAJ3(x1y0,x0y1,{}))) by GATE_1:def 38;
+  set m322 = MULT322(x2,y2,x1,y1,x0,y0);
+  set m313 = MULT313(x2,x1,y1,x0,y0);
+A25: m313 = XOR3({},x2y1,CARR2(x2y0,x1y1,x1y0,x0y1,{})) by GATE_1:def 39
+    .= XOR3({},x2y1,MAJ3(x2y0,x1y1,MAJ3(x1y0,x0y1,{}))) by GATE_1:def 38;
+  m322 = XOR3(m313,x1y2,MAJ3(m312,x0y2,{})) by GATE_1:def 37;
+  hence z3 is not empty iff MULT322(x2,y2,x1,y1,x0,y0) is not empty by A3,A4,
+  A9,A16,A19,A23,A22,A25;
+A26: m323 = XOR3(m314,x2y2,CARR2(m313,x1y2,m312,x0y2,{})) by GATE_1:def 39
+    .= XOR3(m314,x2y2,MAJ3(m313,x1y2,MAJ3(m312,x0y2,{}))) by GATE_1:def 38;
+  q22 is not empty iff ( x2y2 is not empty & not c21 is not empty or not
+x2y2 is not empty & c21 is not empty ) & not c12 is not empty or not ( x2y2 is
+not empty & not c21 is not empty or not x2y2 is not empty & c21 is not empty )
+  & c12 is not empty by A11;
+  hence
+  z4 is not empty iff MULT323(x2,y2,x1,y1,x0,y0) is not empty by A3,A4,A8
+  ,A10,A17,A19,A23,A22,A25,A24,A26;
+A27: m324 = MAJ3(m314,x2y2,CARR2(m313,x1y2,m312,x0y2,{})) by GATE_1:def 40
+    .= MAJ3(m314,x2y2,MAJ3(m313,x1y2,MAJ3(m312,x0y2,{}))) by GATE_1:def 38;
+  c22 is not empty iff x2y2 is not empty & c21 is not empty or c21 is not
+  empty & c12 is not empty or c12 is not empty & x2y2 is not empty by A12;
+  hence thesis by A3,A4,A8,A10,A18,A19,A23,A22,A25,A24,A27;
+end;
+
+begin :: Logical Equivalence of Wallace tree Multiplier.
+::
+:: Logical Equivalence of 3-by-3 bit Wallace tree Multiplier.
+::
+::The following theorem shows that
+:: outputs of '3-by-3 bit Wallace tree Multiplier' are equivalent to
+:: outputs of '3-by-3 normal (sequencial) Multiplier'
+:: We assume that there is no feedback loop in multiplier.
+
+theorem
+  for x0,x1,x2,y0,y1,y2,z0,z1,z2,z3,z4,z5, q00,q01,q02,q03,c01,c02,c03,
+  q11,q12,q13,c11,c12,c13 being set holds (q00 is not empty iff AND2(x0,y0) is
+not empty)& (q01 is not empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{}) is not empty
+  )& (c01 is not empty iff MAJ3(AND2(x1,y0),AND2(x0,y1),{}) is not empty)& (q02
+is not empty iff XOR3(AND2(x2,y0),AND2(x1,y1),AND2(x0,y2)) is not empty)& (c02
+is not empty iff MAJ3(AND2(x2,y0),AND2(x1,y1),AND2(x0,y2)) is not empty)& (q03
+  is not empty iff XOR3(AND2(x2,y1),AND2(x1,y2),{}) is not empty)& (c03 is not
+empty iff MAJ3(AND2(x2,y1),AND2(x1,y2),{}) is not empty)& (q11 is not empty iff
+  XOR3(q02,c01,{}) is not empty)& (c11 is not empty iff MAJ3(q02,c01,{}) is not
+  empty)& (q12 is not empty iff XOR3(q03,c02,c11) is not empty)& (c12 is not
+empty iff MAJ3(q03,c02,c11) is not empty)& (q13 is not empty iff XOR3(AND2(x2,
+y2),c03,c12) is not empty)& (c13 is not empty iff MAJ3(AND2(x2,y2),c03,c12) is
+not empty)& (z0 is not empty iff q00 is not empty)& (z1 is not empty iff q01 is
+not empty)& (z2 is not empty iff q11 is not empty)& (z3 is not empty iff q12 is
+not empty)& (z4 is not empty iff q13 is not empty)& (z5 is not empty iff c13 is
+not empty) implies (z0 is not empty iff MULT310(x2, x1,y1,x0,y0) is not empty)&
+  (z1 is not empty iff MULT311(x2, x1,y1,x0,y0) is not empty)& (z2 is not empty
+iff MULT321(x2,y2,x1,y1,x0,y0) is not empty)& (z3 is not empty iff MULT322(x2,
+y2,x1,y1,x0,y0) is not empty)& (z4 is not empty iff MULT323(x2,y2,x1,y1,x0,y0)
+  is not empty)& (z5 is not empty iff MULT324(x2,y2,x1,y1,x0,y0) is not empty)
+proof
+  let x0,x1,x2,y0,y1,y2,z0,z1,z2,z3,z4,z5, q00,q01,q02,q03,c01,c02,c03,q11,q12
+  ,q13,c11,c12,c13 be set;
+  assume that
+A1: q00 is not empty iff AND2(x0,y0) is not empty and
+A2: q01 is not empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{}) is not empty and
+A3: c01 is not empty iff MAJ3(AND2(x1,y0),AND2(x0,y1),{}) is not empty and
+A4: q02 is not empty iff XOR3(AND2(x2,y0),AND2(x1,y1),AND2(x0,y2)) is
+  not empty and
+A5: c02 is not empty iff MAJ3(AND2(x2,y0),AND2(x1,y1),AND2(x0,y2)) is
+  not empty and
+A6: q03 is not empty iff XOR3(AND2(x2,y1),AND2(x1,y2),{}) is not empty and
+A7: c03 is not empty iff MAJ3(AND2(x2,y1),AND2(x1,y2),{}) is not empty and
+A8: q11 is not empty iff XOR3(q02,c01,{}) is not empty and
+A9: c11 is not empty iff MAJ3(q02,c01,{}) is not empty and
+A10: q12 is not empty iff XOR3(q03,c02,c11) is not empty and
+A11: c12 is not empty iff MAJ3(q03,c02,c11) is not empty and
+A12: q13 is not empty iff XOR3(AND2(x2,y2),c03,c12) is not empty and
+A13: c13 is not empty iff MAJ3(AND2(x2,y2),c03,c12) is not empty and
+A14: z0 is not empty iff q00 is not empty and
+A15: z1 is not empty iff q01 is not empty and
+A16: z2 is not empty iff q11 is not empty and
+A17: z3 is not empty iff q12 is not empty and
+A18: z4 is not empty iff q13 is not empty and
+A19: z5 is not empty iff c13 is not empty;
+  thus z0 is not empty iff MULT310(x2,x1,y1,x0,y0) is not empty by A1,A14;
+  thus z1 is not empty iff MULT311(x2,x1,y1,x0,y0) is not empty by A2,A15;
+  set m312 = MULT312(x2,x1,y1,x0,y0);
+  set x0y2 = AND2(x0,y2);
+  set x1y1 = AND2(x1,y1);
+  set x0y1 = AND2(x0,y1);
+  set x2y0 = AND2(x2,y0);
+  set x1y0 = AND2(x1,y0);
+A20: m312 = XOR3(x2y0,x1y1,MAJ3(x1y0,x0y1,{})) by GATE_1:def 37;
+  set m323 = MULT323(x2,y2,x1,y1,x0,y0);
+  set m314 = MULT314(x2,x1,y1,x0,y0);
+  set x2y2 = AND2(x2,y2);
+  set m322 = MULT322(x2,y2,x1,y1,x0,y0);
+  set m313 = MULT313(x2,x1,y1,x0,y0);
+  set x1y2 = AND2(x1,y2);
+  set x2y1 = AND2(x2,y1);
+A21: q03 is not empty iff x2y1 is not empty & not x1y2 is not empty or not
+  x2y1 is not empty & x1y2 is not empty by A6;
+A22: q02 is not empty iff ( x2y0 is not empty & not x1y1 is not empty or not
+  x2y0 is not empty & x1y1 is not empty ) & not x0y2 is not empty or not ( x2y0
+  is not empty & not x1y1 is not empty or not x2y0 is not empty & x1y1 is not
+  empty ) & x0y2 is not empty by A4;
+  hence z2 is not empty iff MULT321(x2,y2,x1,y1,x0,y0) is not empty by A3,A8,
+  A16,A20;
+A23: m313 = XOR3({},x2y1,CARR2(x2y0,x1y1,x1y0,x0y1,{})) by GATE_1:def 39
+    .= XOR3({},x2y1,MAJ3(x2y0,x1y1,MAJ3(x1y0,x0y1,{}))) by GATE_1:def 38;
+  m322 = XOR3(m313,x1y2,MAJ3(m312,x0y2,{})) by GATE_1:def 37;
+  hence
+  z3 is not empty iff MULT322(x2,y2,x1,y1,x0,y0) is not empty by A3,A5,A9
+  ,A10,A17,A22,A21,A20,A23;
+A24: m314 = MAJ3({},x2y1,CARR2(x2y0,x1y1,x1y0,x0y1,{})) by GATE_1:def 40
+    .= MAJ3({},x2y1,MAJ3(x2y0,x1y1,MAJ3(x1y0,x0y1,{}))) by GATE_1:def 38;
+  set m324 = MULT324(x2,y2,x1,y1,x0,y0);
+A25: m324 = MAJ3(m314,x2y2,CARR2(m313,x1y2,m312,x0y2,{})) by GATE_1:def 40
+    .= MAJ3(m314,x2y2,MAJ3(m313,x1y2,MAJ3(m312,x0y2,{}))) by GATE_1:def 38;
+A26: m323 = XOR3(m314,x2y2,CARR2(m313,x1y2,m312,x0y2,{})) by GATE_1:def 39
+    .= XOR3(m314,x2y2,MAJ3(m313,x1y2,MAJ3(m312,x0y2,{}))) by GATE_1:def 38;
+  q13 is not empty iff ( x2y2 is not empty & not c03 is not empty or not
+x2y2 is not empty & c03 is not empty ) & not c12 is not empty or not ( x2y2 is
+not empty & not c03 is not empty or not x2y2 is not empty & c03 is not empty )
+  & c12 is not empty by A12;
+  hence
+  z4 is not empty iff MULT323(x2,y2,x1,y1,x0,y0) is not empty by A3,A5,A7
+  ,A9,A11,A18,A22,A21,A20,A23,A24,A26;
+  c13 is not empty iff x2y2 is not empty & c03 is not empty or c03 is not
+  empty & c12 is not empty or c12 is not empty & x2y2 is not empty by A13;
+  hence thesis by A3,A5,A7,A9,A11,A19,A22,A21,A20,A23,A24,A25;
+end;
+ 
+::
+:: Carry Look-up Ahead (CLA) Adder
+:: (This eqivalency has been checked out by the theorem GATE_1:44.)
+::
+::The following two definitions are for CLA 1 bit adder.
+
+notation
+  let a1,b1,c be set;
+  synonym CLAADD1(a1,b1,c) for XOR3(a1,b1,c);
+  synonym CLACARR1(a1,b1,c) for MAJ3(a1,b1,c);
+end;
+ 
+::The following two definitions are for CLA 2 bit adder.
+
+definition
+  let a1,b1,a2,b2,c be set;
+  canceled 2;
+  func CLAADD2(a2,b2,a1,b1,c) -> set equals
+  XOR3(a2,b2,MAJ3(a1,b1,c));
+  correctness;
+  func CLACARR2(a2,b2,a1,b1,c) -> set equals
+  OR2(AND2(a2,b2),AND2(OR2(a2,b2),
+  MAJ3(a1,b1,c)));
+  correctness;
+end;
+ 
+::The following two definitions are for CLA 3 bit adder.
+
+definition
+  let a1,b1,a2,b2,a3,b3,c be set;
+  func CLAADD3(a3,b3,a2,b2,a1,b1,c) -> set equals
+  XOR3(a3,b3,CLACARR2(a2,b2,a1
+  ,b1,c));
+  correctness;
+  func CLACARR3(a3,b3,a2,b2,a1,b1,c) -> set equals
+  OR3(AND2(a3,b3),AND2(OR2(a3
+  ,b3),AND2(a2,b2)), AND3(OR2(a3,b3),OR2(a2,b2),MAJ3(a1,b1,c)));
+  correctness;
+end;
+ 
+::The following two definitions are for CLA 4 bit adder.
+
+definition
+  let a1,b1,a2,b2,a3,b3,a4,b4,c be set;
+  func CLAADD4(a4,b4,a3,b3,a2,b2,a1,b1,c) -> set equals
+  XOR3(a4,b4,CLACARR3(a3
+  ,b3,a2,b2,a1,b1,c));
+  correctness;
+  func CLACARR4(a4,b4,a3,b3,a2,b2,a1,b1,c) -> set equals
+  OR4(AND2(a4,b4),AND2(
+OR2(a4,b4),AND2(a3,b3)), AND3(OR2(a4,b4),OR2(a3,b3),AND2(a2,b2)), AND4(OR2(a4,
+  b4),OR2(a3,b3),OR2(a2,b2),MAJ3(a1,b1,c)));
+  correctness;
+end;
+ 
+::The following theorem shows that
+:: outputs of '3-by-3 bit Wallace tree Multiplier' by using Carry Look-up
+:: Ahead Adder are equivalent to outputs of '3-by-3 normal (sequencial)
+:: Multiplier'.
+:: We assume that there is no feedback loop in multiplier.
+
+theorem ::3WTMCLA:
+  for x0,x1,x2,y0,y1,y2,z0,z1,z2,z3,z4,z5, q00,q01,q02,q03,c01,c02,c03
+  being set holds (q00 is not empty iff AND2(x0,y0) is not empty)& (q01 is not
+empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{}) is not empty)& (c01 is not empty iff
+MAJ3(AND2(x1,y0),AND2(x0,y1),{}) is not empty)& (q02 is not empty iff XOR3(AND2
+(x2,y0),AND2(x1,y1),AND2(x0,y2)) is not empty)& (c02 is not empty iff MAJ3(AND2
+(x2,y0),AND2(x1,y1),AND2(x0,y2)) is not empty)& (q03 is not empty iff XOR3(AND2
+(x2,y1),AND2(x1,y2),{}) is not empty)& (c03 is not empty iff MAJ3(AND2(x2,y1),
+  AND2(x1,y2),{}) is not empty)& (z0 is not empty iff q00 is not empty)& (z1 is
+  not empty iff q01 is not empty)& (z2 is not empty iff CLAADD1( q02,c01,{}) is
+not empty)& (z3 is not empty iff CLAADD2( q03,c02,q02,c01,{}) is not empty)& (
+z4 is not empty iff CLAADD3(AND2(x2,y2),c03,q03,c02,q02,c01,{}) is not empty)&
+(z5 is not empty iff CLACARR3(AND2(x2,y2),c03,q03,c02,q02,c01,{}) is not empty)
+implies (z0 is not empty iff MULT310(x2, x1,y1,x0,y0) is not empty)& (z1 is not
+empty iff MULT311(x2, x1,y1,x0,y0) is not empty)& (z2 is not empty iff MULT321(
+x2,y2,x1,y1,x0,y0) is not empty)& (z3 is not empty iff MULT322(x2,y2,x1,y1,x0,
+y0) is not empty)& (z4 is not empty iff MULT323(x2,y2,x1,y1,x0,y0) is not empty
+  )& (z5 is not empty iff MULT324(x2,y2,x1,y1,x0,y0) is not empty)
+proof
+  let x0,x1,x2,y0,y1,y2,z0,z1,z2,z3,z4,z5, q00,q01,q02,q03,c01,c02,c03 be set;
+  assume that
+A1: q00 is not empty iff AND2(x0,y0) is not empty and
+A2: q01 is not empty iff XOR3(AND2(x1,y0),AND2(x0,y1),{}) is not empty and
+A3: c01 is not empty iff MAJ3(AND2(x1,y0),AND2(x0,y1),{}) is not empty and
+A4: q02 is not empty iff XOR3(AND2(x2,y0),AND2(x1,y1),AND2(x0,y2)) is
+  not empty and
+A5: c02 is not empty iff MAJ3(AND2(x2,y0),AND2(x1,y1),AND2(x0,y2)) is
+  not empty and
+A6: q03 is not empty iff XOR3(AND2(x2,y1),AND2(x1,y2),{}) is not empty and
+A7: c03 is not empty iff MAJ3(AND2(x2,y1),AND2(x1,y2),{}) is not empty and
+A8: z0 is not empty iff q00 is not empty and
+A9: z1 is not empty iff q01 is not empty and
+A10: z2 is not empty iff CLAADD1( q02,c01,{}) is not empty and
+A11: z3 is not empty iff CLAADD2( q03,c02,q02,c01,{}) is not empty and
+A12: z4 is not empty iff CLAADD3(AND2(x2,y2),c03,q03,c02,q02,c01,{}) is
+  not empty and
+A13: z5 is not empty iff CLACARR3(AND2(x2,y2),c03,q03,c02,q02,c01,{}) is
+  not empty;
+  set x0y2 = AND2(x0,y2);
+  set x1y1 = AND2(x1,y1);
+  set x2y0 = AND2(x2,y0);
+  thus z0 is not empty iff MULT310(x2,x1,y1,x0,y0) is not empty by A1,A8;
+  thus z1 is not empty iff MULT311(x2,x1,y1,x0,y0) is not empty by A2,A9;
+  set m312 = MULT312(x2,x1,y1,x0,y0);
+  set x0y1 = AND2(x0,y1);
+  set x1y0 = AND2(x1,y0);
+A14: m312 = XOR3(x2y0,x1y1,MAJ3(x1y0,x0y1,{})) by GATE_1:def 37;
+  then
+A15: m312 is not empty iff ( x2y0 is not empty & not x1y1 is not empty or
+not x2y0 is not empty & x1y1 is not empty ) & not (x1y0 is not empty & x0y1 is
+  not empty) or not ( x2y0 is not empty & not x1y1 is not empty or not x2y0 is
+  not empty & x1y1 is not empty ) & x1y0 is not empty & x0y1 is not empty;
+  set x1y2 = AND2(x1,y2);
+  set x2y1 = AND2(x2,y1);
+A16: q03 is not empty iff x2y1 is not empty & not x1y2 is not empty or not
+  x2y1 is not empty & x1y2 is not empty by A6;
+  set m324 = MULT324(x2,y2,x1,y1,x0,y0);
+  set m323 = MULT323(x2,y2,x1,y1,x0,y0);
+  set m314 = MULT314(x2,x1,y1,x0,y0);
+  set x2y2 = AND2(x2,y2);
+A17: m314 = MAJ3({},x2y1,CARR2(x2y0,x1y1,x1y0,x0y1,{})) by GATE_1:def 40
+    .= MAJ3({},x2y1,MAJ3(x2y0,x1y1,MAJ3(x1y0,x0y1,{}))) by GATE_1:def 38;
+  set m322 = MULT322(x2,y2,x1,y1,x0,y0);
+  set m313 = MULT313(x2,x1,y1,x0,y0);
+A18: m313 = XOR3({},x2y1,CARR2(x2y0,x1y1,x1y0,x0y1,{})) by GATE_1:def 39
+    .= XOR3({},x2y1,MAJ3(x2y0,x1y1,MAJ3(x1y0,x0y1,{}))) by GATE_1:def 38;
+  q02 is not empty iff ( x2y0 is not empty & not x1y1 is not empty or not
+  x2y0 is not empty & x1y1 is not empty ) & not x0y2 is not empty or not ( x2y0
+  is not empty & not x1y1 is not empty or not x2y0 is not empty & x1y1 is not
+  empty ) & x0y2 is not empty by A4;
+  hence z2 is not empty iff MULT321(x2,y2,x1,y1,x0,y0) is not empty by A3,A10,
+  A14;
+A19: c02 is not empty iff x2y0 is not empty & x1y1 is not empty or x1y1 is
+  not empty & x0y2 is not empty or x0y2 is not empty & x2y0 is not empty by A5;
+  m322 = XOR3(m313,x1y2,MAJ3(m312,x0y2,{})) by GATE_1:def 37;
+  then m322 is not empty iff ( m313 is not empty & not x1y2 is not empty or
+not m313 is not empty & x1y2 is not empty ) & not (m312 is not empty & x0y2 is
+  not empty) or not ( m313 is not empty & not x1y2 is not empty or not m313 is
+  not empty & x1y2 is not empty ) & m312 is not empty & x0y2 is not empty;
+  hence z3 is not empty iff MULT322(x2,y2,x1,y1,x0,y0) is not empty by A3,A4,
+  A11,A19,A16,A15,A18;
+  m323 = XOR3(m314,x2y2,CARR2(m313,x1y2,m312,x0y2,{})) by GATE_1:def 39
+    .= XOR3(m314,x2y2,MAJ3(m313,x1y2,MAJ3(m312,x0y2,{}))) by GATE_1:def 38;
+  then m323 is not empty iff ( m314 is not empty & not x2y2 is not empty or
+not m314 is not empty & x2y2 is not empty ) & not ( m313 is not empty & x1y2 is
+not empty or x1y2 is not empty & m312 is not empty & x0y2 is not empty or m312
+  is not empty & x0y2 is not empty & m313 is not empty ) or not ( m314 is not
+empty & not x2y2 is not empty or not m314 is not empty & x2y2 is not empty ) &
+  ( m313 is not empty & x1y2 is not empty or x1y2 is not empty & m312 is not
+  empty & x0y2 is not empty or m312 is not empty & x0y2 is not empty & m313 is
+  not empty );
+  hence
+  z4 is not empty iff MULT323(x2,y2,x1,y1,x0,y0) is not empty by A3,A4,A7
+  ,A12,A19,A16,A15,A18,A17;
+  m324 = MAJ3(m314,x2y2,CARR2(m313,x1y2,m312,x0y2,{})) by GATE_1:def 40
+    .= MAJ3(m314,x2y2,MAJ3(m313,x1y2,MAJ3(m312,x0y2,{}))) by GATE_1:def 38;
+  then m324 is not empty iff m314 is not empty & x2y2 is not empty or x2y2 is
+not empty & ( m313 is not empty & x1y2 is not empty or x1y2 is not empty & m312
+  is not empty & x0y2 is not empty or m312 is not empty & x0y2 is not empty &
+  m313 is not empty ) or ( m313 is not empty & x1y2 is not empty or x1y2 is not
+  empty & m312 is not empty & x0y2 is not empty or m312 is not empty & x0y2 is
+  not empty & m313 is not empty ) & m314 is not empty;
+  hence thesis by A3,A4,A7,A13,A19,A16,A15,A18,A17;
+end;
