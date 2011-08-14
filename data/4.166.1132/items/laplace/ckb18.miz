@@ -1,0 +1,120 @@
+environ
+vocabularies NUMBERS,SUBSET_1,NAT_1,XBOOLE_0,MATRIX11,FINSEQ_1,ARYTM_3,MATRIX_2,VECTSP_1,MATRIX_1,RELAT_1,FINSEQ_3,ARYTM_1,TREES_1,CARD_1,XXREAL_0,FUNCT_1,INCSP_1,TARSKI,ALGSTR_0,ZFMISC_1,STRUCT_0,REALSET1,SETWOP_2,FUNCT_2,FINSUB_1,GROUP_1,SETWISEO,INT_1,FINSET_1,ABIAN,FINSEQ_2,BINOP_1,QC_LANG1,AFINSQ_1,ABSVALUE,MATRIX_3,SUPINF_2,CARD_3,FINSOP_1,RVSUM_1,FVSUM_1,MESFUNC1,MATRIX_6,LAPLACE;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,NUMBERS,XCMPLX_0,XXREAL_0,FINSET_1,RELAT_1,RELSET_1,FUNCT_1,PARTFUN1,FUNCT_2,FINSEQ_1,BINOP_1,STRUCT_0,ALGSTR_0,GROUP_1,VECTSP_1,SETWISEO,SETWOP_2,FINSEQ_2,MATRIX_1,FINSUB_1,MATRIX_2,NAT_1,FVSUM_1,FINSOP_1,MATRIX_3,CARD_1,FINSEQ_7,NEWTON,MATRIX_7,FINSEQ_3,MATRIX11,MATRIX_6,NAT_D,CKB6,CKB14;
+definitions FINSEQ_2,FINSEQ_1,TARSKI,MATRIX_1,MATRIX_3,FVSUM_1,MATRIX_2,MATRIX_7,MATRIX11,RELAT_1,ALGSTR_0,CKB14;
+theorems FINSEQ_1,FINSEQ_2,TARSKI,FUNCT_2,NAT_1,FUNCT_1,SETWISEO,VECTSP_1,ZFMISC_1,FVSUM_1,SETWOP_2,MATRIX_1,MATRIX_2,FINSUB_1,FINSEQ_3,RELAT_1,FINSOP_1,XBOOLE_0,XBOOLE_1,MATRIX_3,XREAL_1,MATRIX_7,ORDINAL1,CARD_1,CARD_2,MATRIX_9,STIRL2_1,SGRAPH1,CARD_FIN,HURWITZ,NEWTON,COMPUT_1,MATRIX11,GROUP_1,MATRIX_4,MATRIX_6,MATRIXR1,NAT_D,XXREAL_0,MATRIXR2,XREAL_0,CKB1,CKB2,CKB3,CKB4,CKB5,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17;
+schemes FUNCT_2,NAT_1,FINSEQ_1,FUNCT_1,SETWISEO,MATRIX_1;
+registrations FUNCT_1,FINSUB_1,FINSET_1,STRUCT_0,FVSUM_1,MATRIX_2,VECTSP_1,FUNCT_2,PARTFUN1,XBOOLE_0,ORDINAL1,XXREAL_0,NAT_1,INT_1,RELAT_1,CARD_1,MATRIX11,XCMPLX_0,RELSET_1,FINSEQ_2,FINSEQ_1;
+constructors RELAT_2,SETWISEO,FINSOP_1,SETWOP_2,ALGSTR_1,FVSUM_1,BINOP_1,XXREAL_0,FINSEQ_4,FINSEQ_7,WELLORD2,NEWTON,MATRIX_6,MATRIX_7,MATRIX11,NAT_D,BINOP_2,RELSET_1,CKB6,CKB14;
+requirements ARITHM,NUMERALS,REAL,BOOLE,SUBSET;
+begin
+reserve c for Nat;
+reserve i for Nat;
+reserve j for Nat;
+reserve m for Nat;
+reserve n for Nat;
+reserve D for non empty set;
+definition
+let c;
+let n;
+let m;
+let D;
+let M being (Matrix of n,m,D);
+let pD being (FinSequence of D);
+func ReplaceCol (M,c,pD) -> (Matrix of n,m,D)
+means
+:Def2: ((( len it ) = ( len M ) & ( width it ) = ( width M )) & (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ((j <> c implies ( it * (i,j) ) = ( M * (i,j) )) & (j = c implies ( it * (i,c) ) = ( pD . i ))))))) if ( len pD ) = ( len M ) otherwise it = M;
+consistency;
+existence
+proof
+thus (( len pD ) = ( len M ) implies (ex M1 being (Matrix of n,m,D) st ((( len M1 ) = ( len M ) & ( width M1 ) = ( width M )) & (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ((j <> c implies ( M1 * (i,j) ) = ( M * (i,j) )) & (j = c implies ( M1 * (i,c) ) = ( pD . i )))))))))
+proof
+reconsider M9 = M as (Matrix of ( len M ),( width M ),D) by MATRIX_2:7;
+reconsider V = n,U = m as (Element of ( NAT )) by ORDINAL1:def 12;
+defpred P[ set,set,set ]
+ means
+(for i holds (for j holds ((i = $1 & j = $2) implies ((j <> c implies $3 = ( M * (i,j) )) & (j = c implies $3 = ( pD . i ))))));
+assume A1: ( len pD ) = ( len M );
+A2: (for i,j being Nat holds ([ i,j ] in [: ( Seg V ),( Seg U ) :] implies (ex x being (Element of D) st P[ i,j,x ])))
+proof
+let i being Nat,j being Nat;
+assume that
+A3: [ i,j ] in [: ( Seg V ),( Seg U ) :];
+now
+per cases ;
+case A4: j = c;
+A5: ( rng pD ) c= D by FINSEQ_1:def 4;
+( len M ) = n by MATRIX_1:def 2;
+then i in ( Seg ( len pD ) ) by A1,A3,ZFMISC_1:87;
+then i in ( dom pD ) by FINSEQ_1:def 3;
+then A6: ( pD . i ) in ( rng pD ) by FUNCT_1:def 3;
+P[ i,j,( pD . i ) ] by A4;
+hence thesis by A6,A5;
+end;
+case j <> c;
+then P[ i,j,( M * (i,j) ) ];
+hence thesis;
+end;
+end;
+hence thesis;
+end;
+consider M1 being (Matrix of V,U,D) such that A11: (for i,j being Nat holds ([ i,j ] in ( Indices M1 ) implies P[ i,j,( M1 * (i,j) ) ])) from MATRIX_1:sch 2(A2);
+reconsider M1 as (Matrix of n,m,D);
+take M1;
+A12:now
+per cases ;
+suppose A13: n = ( 0 );
+
+then ( len M1 ) = ( 0 ) by MATRIX_1:def 2;
+then A14: ( width M1 ) = ( 0 ) by MATRIX_1:def 3;
+( len M ) = ( 0 ) by A13,MATRIX_1:def 2;
+hence (( len M ) = ( len M1 ) & ( width M1 ) = ( width M )) by A13,A14,MATRIX_1:def 2,MATRIX_1:def 3;
+end;
+suppose A15: n > ( 0 );
+
+then A16: ( width M ) = m by MATRIX_1:23;
+( len M ) = n by A15,MATRIX_1:23;
+hence (( len M ) = ( len M1 ) & ( width M ) = ( width M1 )) by A15,A16,MATRIX_1:23;
+end;
+end;
+( Indices M9 ) = ( Indices M1 ) by MATRIX_1:26;
+hence thesis by A11,A12;
+end;
+
+thus thesis;
+end;
+uniqueness
+proof
+let M1 being (Matrix of n,m,D),M2 being (Matrix of n,m,D);
+thus (((( len pD ) = ( len M ) & ((( len M1 ) = ( len M ) & ( width M1 ) = ( width M )) & (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ((j <> c implies ( M1 * (i,j) ) = ( M * (i,j) )) & (j = c implies ( M1 * (i,c) ) = ( pD . i )))))))) & ((( len M2 ) = ( len M ) & ( width M2 ) = ( width M )) & (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ((j <> c implies ( M2 * (i,j) ) = ( M * (i,j) )) & (j = c implies ( M2 * (i,c) ) = ( pD . i )))))))) implies M1 = M2)
+proof
+assume ( len pD ) = ( len M );
+assume that
+A17: ( len M1 ) = ( len M )
+and
+A18: ( width M1 ) = ( width M )
+and
+A19: (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ((j <> c implies ( M1 * (i,j) ) = ( M * (i,j) )) & (j = c implies ( M1 * (i,c) ) = ( pD . i ))))));
+assume that
+( len M2 ) = ( len M )
+and
+( width M2 ) = ( width M )
+and
+A20: (for i holds (for j holds ([ i,j ] in ( Indices M ) implies ((j <> c implies ( M2 * (i,j) ) = ( M * (i,j) )) & (j = c implies ( M2 * (i,c) ) = ( pD . i ))))));
+(for i,j being Nat holds ([ i,j ] in ( Indices M1 ) implies ( M1 * (i,j) ) = ( M2 * (i,j) )))
+proof
+let i being Nat,j being Nat;
+assume [ i,j ] in ( Indices M1 );
+then A21: [ i,j ] in ( Indices M ) by A17,A18,MATRIX_4:55;
+reconsider I = i,J = j as (Element of ( NAT )) by ORDINAL1:def 12;
+A22: (J = c implies ( M1 * (I,c) ) = ( pD . I )) by A19,A21;
+A23: (J <> c implies ( M2 * (I,J) ) = ( M * (I,J) )) by A20,A21;
+(J <> c implies ( M1 * (I,J) ) = ( M * (I,J) )) by A19,A21;
+hence thesis by A20,A21,A22,A23;
+end;
+hence thesis by MATRIX_1:27;
+end;
+
+thus thesis;
+end;
+end;
