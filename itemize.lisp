@@ -42,17 +42,6 @@
 	 finally
 	   (return symbol-table)))))
 
-(defun itemize-no-errors (article)
-  (handler-case
-      (progn
-	(handler-bind ((warning #'muffle-warning))
-	  (itemize article))
-	(format t "~a: success~%" article)
-	t)
-      (error ()
-	(format *error-output* "~a: failure~%" article)
-	nil)))
-
 (defgeneric xsl-split-article (article)
   (:documentation "Divide any 'multi-part' elements of ARTICLE.  This means:
 
@@ -262,5 +251,16 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 		    (exporter bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
 		    (transfer bundle-miz-path :working-directory items-dir :flags '("-q" "-l")))))))))
     (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
+
+(defun itemize-no-errors (article)
+  (handler-case
+      (progn
+	(handler-bind ((warning #'muffle-warning))
+	  (itemize article))
+	(format t "~a: success~%" article)
+	t)
+      (error ()
+	(format *error-output* "~a: failure~%" article)
+	nil)))
 
 ;;; itemize.lisp ends here
