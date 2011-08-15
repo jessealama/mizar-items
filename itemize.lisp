@@ -191,6 +191,20 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       (call-next-method)
       (error "There is no article at ~a" article-path)))
 
+(defmethod itemize ((article-string string))
+  (if (string= article-string "")
+      0
+      (let ((first-char (char article-string 0)))
+	(if (char= first-char #\/)
+	    (itemize (pathname article-string))
+	    (let ((temp-article (temporary-file :base "a" :extension "miz")))
+	      (write-string-into-file article-string temp-article
+				      :if-exists :error
+				      :if-does-not-exist :create)
+	      (prog1
+		  (itemize temp-article)
+		(delete-file temp-article)))))))
+
 (defmethod itemize :before ((article-path pathname))
   (accom article-path :flags '("-q" "-l"))
   (newparser article-path :flags '("-q" "-l")))
