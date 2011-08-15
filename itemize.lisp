@@ -89,7 +89,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
       ;; are truly sequentually numbered.  One pass isn't enough.
       ;; Perhaps there should simply be a separate stylesheet to
       ;; accomplish this.
-      (apply-stylesheet split-stylesheet first-one nil nil))))
+      (let ((second-one (apply-stylesheet split-stylesheet first-one nil nil)))
+	(apply-stylesheet split-stylesheet second-one nil nil)))))
 
 (defun xsl-itemize-article (article)
   (let ((free-variables-stylesheet (mizar-items-config 'free-variables-stylesheet))
