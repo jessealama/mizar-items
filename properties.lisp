@@ -1,3 +1,4 @@
+;;; properties.lisp --- Work with properties attached to mizar constructors
 
 (in-package :mizar)
 
@@ -341,3 +342,5 @@ to lists of lists
        (format t "done~%")
      finally
        (return table)))
+
+;;; properties.lisp ends here
