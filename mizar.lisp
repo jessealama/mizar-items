@@ -2,11 +2,12 @@
 
 (in-package :mizar)
 
-(defvar *mizfiles* 
-  #+sbcl
-  (ensure-directory (sb-ext:posix-getenv "MIZFILES"))
-  #+ccl
-  (ensure-directory (ccl:getenv "MIZFILES"))
+(defvar *mizfiles*
+  (let ((mizfiles
+	 #+sbcl (sb-ext:posix-getenv "MIZFILES")
+	 #+ccl (ccl:getenv "MIZFILES")))
+    (when mizfiles
+      (ensure-directory mizfiles)))
   "The directory that contains the MML and the mml.lar file.
 
 The default value is the value of the MIZFILES environment
