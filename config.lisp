@@ -69,11 +69,11 @@
 (update-mizar-items-config 'absrefs-stylesheet
 			   (file-in-xsl4mizar-dir "addabsrefs.xsl"))
 (update-mizar-items-config 'propertied-constructors-stylesheet
-			   "/Users/alama/sources/mizar/xsl4mizar/propertied-constructors.xsl")
+			   (file-in-xsl4mizar-dir "propertied-constructors.xsl"))
 (update-mizar-items-config 'list-properties-stylesheet
-			   "/Users/alama/sources/mizar/xsl4mizar/list-properties.xsl")
+			   (file-in-xsl4mizar-dir "list-properties.xsl"))
 (update-mizar-items-config 'strip-prop-stylesheet
-			   "/Users/alama/sources/mizar/xsl4mizar/strip-prop.xsl")
+			   (file-in-xsl4mizar-dir "strip-prop.xsl"))
 (update-mizar-items-config 'mhtml-stylesheet
 			   (file-in-xsl4mizar-dir "MHTML/mhtml_main.xsl"))
 (update-mizar-items-config 'env-stylesheet
