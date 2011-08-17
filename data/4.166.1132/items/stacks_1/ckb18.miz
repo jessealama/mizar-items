@@ -1,0 +1,154 @@
+environ
+vocabularies STACKS_1,XBOOLE_0,STRUCT_0,ZFMISC_1,SUBSET_1,FUNCT_1,NUMBERS,NAT_1,TARSKI,ARYTM_3,RELAT_1,FINSEQ_1,FINSEQ_3,ORDINAL4,FUNCOP_1,PARTFUN1,CARD_1,XXREAL_0,COMPLEX1,GLIB_000,RELAT_2,EQREL_1,FILTER_1,BINOP_1,MCART_1,ORDERS_1,WELLORD1,ARYTM_1,SETFAM_1,FUNCT_2,AOFA_000,PBOOLE,FUNCT_4,MATRIX_7,REWRITE1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,SETFAM_1,RELAT_1,FUNCT_1,RELAT_2,RELSET_1,PARTFUN1,FUNCT_2,BINOP_1,DOMAIN_1,FUNCT_3,FUNCOP_1,ORDERS_1,FUNCT_4,NUMBERS,XXREAL_0,NAT_1,NAT_D,FINSEQ_1,FINSEQ_2,EQREL_1,FINSEQ_3,PBOOLE,FUNCT_7,STRUCT_0,FILTER_1,REWRITE1,ABCMIZ_1,AOFA_000,CKB1,CKB2,CKB5,CKB7,CKB8,CKB9,CKB13,CKB14,CKB15,CKB16,CKB17;
+definitions TARSKI,XBOOLE_0,RELAT_1,FUNCT_1,RELAT_2,PARTFUN1,FUNCT_2,FINSEQ_1,BINOP_1,FILTER_1,REWRITE1,CKB5,CKB7,CKB14,CKB15,CKB16,CKB17;
+theorems TARSKI,XBOOLE_1,FINSEQ_1,FINSEQ_3,FINSEQ_5,NAT_1,NAT_D,FUNCT_1,PARTFUN1,FUNCT_2,FUNCT_3,FUNCOP_1,WSIERP_1,BINOP_1,POLYALG1,EQREL_1,WELLORD2,RELSET_1,ORDINAL1,XREAL_1,NAT_2,ZFMISC_1,SETFAM_1,RELAT_1,XBOOLE_0,ORDERS_1,MATRIX_7,FUNCT_7,FILTER_1,FUNCT_4,REWRITE1,XXREAL_0,MSUALG_8,HILBERT2,RLVECT_3,FINSEQOP,FINSEQ_2,CKB3,CKB5,CKB7,CKB14,CKB15,CKB16,CKB17;
+schemes XBOOLE_0,RELSET_1,NAT_1,FUNCT_2,BINOP_1,RECDEF_1,ALTCAT_1,FUNCT_1,FINSEQ_1,FINSEQ_2,CKB4,CKB6;
+registrations XBOOLE_0,RELSET_1,STRUCT_0,RELAT_1,FUNCT_1,FINSEQ_1,PARTFUN1,FUNCT_2,NAT_1,ORDINAL1,XXREAL_0,XREAL_0,CARD_1,EQREL_1,SUBSET_1,REWRITE1,CKB9,CKB10,CKB11,CKB12;
+constructors BINOP_1,DOMAIN_1,XXREAL_0,RELSET_1,FILTER_1,FUNCT_7,REWRITE1,ABCMIZ_1,POLYNOM3,NAT_D,CKB1,CKB2,CKB5,CKB7,CKB8,CKB9,CKB14,CKB15,CKB16,CKB17;
+requirements BOOLE,SUBSET,NUMERALS,ARITHM,REAL;
+begin
+definition
+let A being non empty set;
+func StandardStackSystem A -> non empty non void  strict StackSystem
+means
+:EXAM: (((the carrier of it) = A & (the carrier' of it) = ( A * )) & (for s being (stack of it) holds (( emp s iff s is  empty) & (for g being FinSequence holds (g = s implies ((((not  emp s) implies (( top s ) = ( g . 1 ) & ( pop s ) = ( Del (g,1) ))) & ( emp s implies (( top s ) = the (Element of it) & ( pop s ) = ( {} )))) & (for e being (Element of it) holds ( push (e,s) ) = ( <* e *> ^ g ))))))));
+existence
+proof
+reconsider s0 = ( <*> A ) as (Element of ( A * )) by FINSEQ_1:def 11;
+set E = { s0 };
+deffunc F((Element of A),(Element of ( A * ))) = ( <* $1 *> ^ $2 );
+deffunc G((Element of ( A * ))) = ( Del ($1,1) );
+deffunc H((Element of ( A * ))) = ( IFEQ ($1,( {} ),the (Element of A),( $1 /. 1 )) );
+consider psh being (Function of [: A,( A * ) :],( A * )) such that F1: (for a being (Element of A) holds (for s being (Element of ( A * )) holds ( psh . (a,s) ) = F(a,s))) from BINOP_1:sch 4;
+consider pp being (Function of ( A * ),( A * )) such that F2: (for s being (Element of ( A * )) holds ( pp . s ) = G(s)) from FUNCT_2:sch 4;
+consider tp being (Function of ( A * ),A) such that F3: (for s being (Element of ( A * )) holds ( tp . s ) = H(s)) from FUNCT_2:sch 4;
+take X = StackSystem (# A,( A * ),E,psh,pp,tp #);
+thus ((the carrier of X) = A & (the carrier' of X) = ( A * ));
+let s being (stack of X);
+( emp s iff s in E) by CKB14:def 1;
+hence A0: ( emp s iff s is  empty) by TARSKI:def 1;
+let g being FinSequence;
+assume A1: g = s;
+then reconsider h = g as (Element of ( A * ));
+hereby
+assume A5: (not  emp s);
+then A3: 1 in ( dom h ) by A0,A1,FINSEQ_5:6;
+thus ( top s ) = ( IFEQ (s,( {} ),the (Element of A),( h /. 1 )) ) by F3,A1
+.= ( h /. 1 ) by A0,A5,FUNCOP_1:def 8
+.= ( g . 1 ) by A3,PARTFUN1:def 6;
+thus ( pop s ) = ( Del (g,1) ) by A1,F2;
+end;
+hereby
+assume A4:  emp s;
+thus ( top s ) = ( IFEQ (s,( {} ),the (Element of A),( h /. 1 )) ) by F3,A1
+.= the (Element of X) by A0,A4,FUNCOP_1:def 8;
+thus ( pop s ) = ( Del (g,1) ) by A1,F2
+.= ( {} ) by A0,A1,A4,CKB3:1;
+end;
+let e being (Element of X);
+thus ( push (e,s) ) = ( <* e *> ^ g ) by F1,A1;
+end;
+uniqueness
+proof
+let X1 being non empty non void  strict StackSystem,X2 being non empty non void  strict StackSystem;
+assume that
+A1: (the carrier of X1) = A
+and
+B1: (the carrier' of X1) = ( A * )
+and
+C1: (for s being (stack of X1) holds (( emp s iff s is  empty) & (for g being FinSequence holds (g = s implies ((((not  emp s) implies (( top s ) = ( g . 1 ) & ( pop s ) = ( Del (g,1) ))) & ( emp s implies (( top s ) = the (Element of X1) & ( pop s ) = ( {} )))) & (for e being (Element of X1) holds ( push (e,s) ) = ( <* e *> ^ g )))))))
+and
+A2: (the carrier of X2) = A
+and
+B2: (the carrier' of X2) = ( A * )
+and
+C2: (for s being (stack of X2) holds (( emp s iff s is  empty) & (for g being FinSequence holds (g = s implies ((((not  emp s) implies (( top s ) = ( g . 1 ) & ( pop s ) = ( Del (g,1) ))) & ( emp s implies (( top s ) = the (Element of X2) & ( pop s ) = ( {} )))) & (for e being (Element of X2) holds ( push (e,s) ) = ( <* e *> ^ g )))))));
+now
+let x being (Element of A);
+reconsider e1 = x as (Element of X1) by A1;
+reconsider e2 = x as (Element of X2) by A2;
+let y being (Element of ( A * ));
+reconsider s1 = y as (stack of X1) by B1;
+reconsider s2 = y as (stack of X2) by B2;
+thus ( (the s_push of X1) . (x,y) ) = ( push (e1,s1) )
+.= ( <* x *> ^ y ) by C1
+.= ( push (e2,s2) ) by C2
+.= ( (the s_push of X2) . (x,y) );
+end;
+then A3: (the s_push of X1) = (the s_push of X2) by A1,B1,A2,B2,BINOP_1:2;
+now
+let x being (Element of ( A * ));
+reconsider s1 = x as (stack of X1) by B1;
+reconsider s2 = x as (stack of X2) by B2;
+per cases ;
+suppose D1: (not  emp s1);
+
+then s1 is non empty by C1;
+then D2: (not  emp s2) by C2;
+thus ( (the s_pop of X1) . x ) = ( pop s1 )
+.= ( Del (x,1) ) by D1,C1
+.= ( pop s2 ) by D2,C2
+.= ( (the s_pop of X2) . x );
+end;
+suppose D1:  emp s1;
+
+then s1 is  empty by C1;
+then D2:  emp s2 by C2;
+thus ( (the s_pop of X1) . x ) = ( pop s1 )
+.= ( {} ) by D1,C1
+.= ( pop s2 ) by D2,C2
+.= ( (the s_pop of X2) . x );
+end;
+end;
+then A4: (the s_pop of X1) = (the s_pop of X2) by B1,B2,FUNCT_2:63;
+K1:now
+let x being (Element of ( A * ));
+reconsider s1 = x as (stack of X1) by B1;
+reconsider s2 = x as (stack of X2) by B2;
+per cases ;
+suppose D1: (not  emp s1);
+
+then s1 is non empty by C1;
+then D2: (not  emp s2) by C2;
+thus ( (the s_top of X1) . x ) = ( top s1 )
+.= ( x . 1 ) by D1,C1
+.= ( top s2 ) by D2,C2
+.= ( (the s_top of X2) . x );
+end;
+suppose D1:  emp s1;
+
+then s1 is  empty by C1;
+then D2:  emp s2 by C2;
+thus ( (the s_top of X1) . x ) = ( top s1 )
+.= the (Element of A) by A1,D1,C1
+.= ( top s2 ) by A2,D2,C2
+.= ( (the s_top of X2) . x );
+end;
+end;
+(the s_empty of X1) = (the s_empty of X2)
+proof
+thus (the s_empty of X1) c= (the s_empty of X2)
+proof
+let x being set;
+assume A6: x in (the s_empty of X1);
+then reconsider s1 = x as (stack of X1);
+reconsider s2 = s1 as (stack of X2) by B1,B2;
+ emp s1 by A6,CKB14:def 1;
+then s1 is  empty by C1;
+then  emp s2 by C2;
+hence thesis by CKB14:def 1;
+end;
+
+let x being set;
+assume A6: x in (the s_empty of X2);
+then reconsider s2 = x as (stack of X2);
+reconsider s1 = s2 as (stack of X1) by B1,B2;
+ emp s2 by A6,CKB14:def 1;
+then s2 is  empty by C2;
+then  emp s1 by C1;
+hence thesis by CKB14:def 1;
+end;
+hence thesis by A1,B1,A2,B2,A3,A4,K1,FUNCT_2:63;
+end;
+end;
