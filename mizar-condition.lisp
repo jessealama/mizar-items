@@ -94,7 +94,7 @@
 	   (err-basename (format nil "~a.err" arg-basename))
 	  (err-file
 	   (if working-directory
-	       (file-in-directory working-directory err-basename)
+	       (merge-pathnames (replace-extension argument "miz" "err") working-directory)
 	       (when (pathnamep argument)
 		 (merge-pathnames err-basename
 				  (directory-namestring argument))))))
