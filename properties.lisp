@@ -55,7 +55,7 @@
 	      (aid-param (xuriella:make-parameter aid "target_aid"))
 	      (relnr-param (xuriella:make-parameter relnr "target_relnr"))
 	      (property-param (xuriella:make-parameter property "target_property")))
-	  (xuriella:apply-stylesheet *strip-prop-stylesheet*
+	  (xuriella:apply-stylesheet (mizar-items-config 'strip-prop-stylesheet)
 				     atr-file
 				     :parameters (list kind-param
 						       nr-param
