@@ -395,7 +395,13 @@ is that the item I requires from constructor-1 each of the properties listed in 
        finally
 	 (return needed-table))))
 
-(defun fragment-of-item (item)
+(defgeneric fragment-of-item (item)
+  (:documentation "The fragment from which ITEM comes (if any)."))
+
+(defmethod fragment-of-item ((item string))
+  (fragment-of-item (get-and-maybe-set-item-name item)))
+
+(defmethod fragment-of-item ((item symbol))
   (multiple-value-bind (fragment-number present?)
       (gethash item *item-to-fragment-table*)
     (when present?
