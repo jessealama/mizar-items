@@ -638,7 +638,7 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 	      (let* ((err (process-error xsltproc))
 		     (err-lines (stream-lines err)))
 		(if err-lines
-		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~{  ~a~%~}" stylesheet-name document-name exit-code (stream-lines err))
+		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~{  ~a~%~}" stylesheet-name document-name exit-code err-lines)
 		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%(There was no output on standard error.)" stylesheet-name document-name exit-code)))))))))
 
 ;;; utils.lisp ends here
