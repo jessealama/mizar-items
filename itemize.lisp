@@ -71,15 +71,17 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	      (delete-file temp-article-path))))))
 
 (defmethod xsl-split-article ((article pathname))
-  (let ((article-wsx (replace-extension article "miz" "wsx"))
-	(split-stylesheet (mizar-items-config 'split-stylesheet)))
-    (let ((first-one (apply-stylesheet split-stylesheet article-wsx nil nil)))
-      ;; we have to apply this stylesheet twice to ensure that loci
-      ;; are truly sequentually numbered.  One pass isn't enough.
-      ;; Perhaps there should simply be a separate stylesheet to
-      ;; accomplish this.
-      (let ((second-one (apply-stylesheet split-stylesheet first-one nil nil)))
-	(apply-stylesheet split-stylesheet second-one nil nil)))))
+  (loop
+     with toplevel-dellink-stylesheet = (mizar-items-config 'toplevel-dellink-stylesheet)
+     with toplevel-choice-stylesheet = (mizar-items-config 'toplevel-choice-stylesheet)
+     with split-stylesheet = (mizar-items-config 'split-stylesheet)
+     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet split-stylesheet split-stylesheet toplevel-choice-stylesheet split-stylesheet)
+     with xml = (replace-extension article "miz" "wsx")
+     for sheet in schedule
+     do
+       (setf xml (apply-stylesheet sheet xml nil nil))
+     finally
+       (return xml)))
 
 (defun xsl-itemize-article (article)
   (let ((free-variables-stylesheet (mizar-items-config 'free-variables-stylesheet))
