@@ -119,7 +119,7 @@
 ;   * Line 2 column 1: #1
 ;   * Line 3 column 1: #1
 ;
-; Calling FORMAT here cirumvents such cleverness.          
+; Calling FORMAT here cirumvents such cleverness.
 		   finally
 		     (terpri stream))))
 	  (format stream "We expected to find an error file at ~a, but somehow there isn't one." err-file)))))
