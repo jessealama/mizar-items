@@ -433,12 +433,9 @@ is that the item I requires from constructor-1 each of the properties listed in 
 	(needs nil))
     (multiple-value-bind (all-needs any-needs?)
 	(gethash fragment *property-table*)
-      (break "fragment is: ~a~%" fragment)
       (when any-needs?
-	(break "the fragment does have at least one needed property of at least one constructor")
 	(let ((needed-properties-of-constructor (assoc constructor all-needs :test #'string=)))
 	  (when needed-properties-of-constructor
-	    (break "the constructor needs at least one property of the constructor ~a;~%the needed properties are~%~a" constructor needed-properties-of-constructor)
 	    (when (member property needed-properties-of-constructor :test #'string=)
 	      (setf needs t))))))
     (or needs
