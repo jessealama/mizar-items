@@ -172,11 +172,11 @@ suite to work correctly."
       (or ignore-exit-code
 	  (or (zerop (process-exit-code proc))
 	      (error 'mizar-error
-		     :tool tool 
+		     :tool tool
 		     :working-directory directory
-		     :argument article-path 
+		     :argument article-path
 		     :output-stream (process-output proc)
-		     :error-stream (process-error proc) 
+		     :error-stream (process-error proc)
 		     :exit-code (process-exit-code proc)))))))
 
 (defmethod run-mizar-tool ((tool string) (article-path string) &key directory ignore-exit-code flags)
