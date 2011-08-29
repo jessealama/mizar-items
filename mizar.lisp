@@ -251,6 +251,9 @@ suite to work correctly."
 ;;; Generated mizar files
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun voc-file-p (path)
+  (file-has-extension path "voc"))
+
 (defun sch-file-p (path)
   (file-has-extension path "sch"))
 
