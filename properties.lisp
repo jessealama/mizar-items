@@ -343,4 +343,107 @@ to lists of lists
      finally
        (return table)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Property data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar *property-table* nil
+  "A mapping from items to association lists of the form.  The members
+  of the association lists have the form
+
+\\(constructuctor . properties)
+
+The interpretation of a mapping from an item I to an association list
+
+  ((constructor-1 . properties-1) (constructor-2 . properties-2) ...)
+
+is that the item I requires from constructor-1 each of the properties listed in properties-1, from constructor-2 each of the properties listed in properties-2, etc.")
+
+(defgeneric load-needed-properties (mml-version)
+  (:documentation "Load the table of properties needed for each constructor for the
+  MML version MML-VERSION."))
+
+(defmethod load-needed-properties :around (mml-version)
+  (let ((needed-file (needed-property-file-for-mml mml-version)))
+    (if (file-exists-p needed-file)
+      (call-next-method)
+      (error "The needed property file does not exist at the expected location~%~%  ~a~%" (namestring needed-file)))))
+
+(defmethod load-needed-properties (mml-version)
+  (let ((needed-path (needed-property-file-for-mml mml-version))
+	(needed-table (make-hash-table :test #'equal)))
+    (loop
+       for line in (lines-of-file needed-path)
+       for i from 1
+       do
+	 (destructuring-bind (fragment property constructor-item-str)
+	     (split #\Space line)
+	   (let ((constructor-item (get-and-maybe-set-item-name constructor-item-str)))
+	     (multiple-value-bind (old-value present?)
+		 (gethash fragment needed-table)
+	       (if present?
+		   (let ((ass (assoc constructor-item old-value)))
+		     (if ass
+			 (rplacd ass
+				 (cons property (cdr ass)))
+			 (setf (gethash fragment needed-table)
+			     (acons constructor-item
+				    (list property)
+				    old-value))))
+		   (setf (gethash fragment needed-table)
+			 (acons constructor-item (list property) nil))))))
+       finally
+	 (return needed-table))))
+
+(defun fragment-of-item (item)
+  (multiple-value-bind (fragment-number present?)
+      (gethash item *item-to-fragment-table*)
+    (when present?
+      (format nil "~a:~d" (item-article item) fragment-number))))
+
+(defgeneric item-needs-constructor-property (item property constructor)
+  (:documentation "Does ITEM need PROPERTY of CONSTRUCTOR?"))
+
+(defmethod item-needs-constructor-property ((item string) property constructor)
+  (item-needs-constructor-property (get-and-maybe-set-item-name item)
+				   property
+				   constructor))
+
+(defmethod item-needs-constructor-property (item property (constructor string))
+  (item-needs-constructor-property item
+				   property
+				   (get-and-maybe-set-item-name constructor)))
+
+(let ((needs-table (make-hash-table :test #'equal)))
+  (defmethod item-needs-constructor-property :around ((item symbol) property (constructor symbol))
+    (let ((key (list item property constructor)))
+      (multiple-value-bind (needed seen-before?)
+	  (gethash key needs-table)
+	(if seen-before?
+	    needed
+	    (let ((needed (call-next-method)))
+	      (setf (gethash key needs-table)
+		    needed))))))
+  (defun clear-needed-constructors-table ()
+    (setf needs-table (make-hash-table :test #'equal))))
+
+(defmethod item-needs-constructor-property ((item symbol) property (constructor symbol))
+  ;; do a simple depth-first search
+  (let ((fragment (fragment-of-item item))
+	(needs nil))
+    (multiple-value-bind (all-needs any-needs?)
+	(gethash fragment *property-table*)
+      (break "fragment is: ~a~%" fragment)
+      (when any-needs?
+	(break "the fragment does have at least one needed property of at least one constructor")
+	(let ((needed-properties-of-constructor (assoc constructor all-needs :test #'string=)))
+	  (when needed-properties-of-constructor
+	    (break "the constructor needs at least one property of the constructor ~a;~%the needed properties are~%~a" constructor needed-properties-of-constructor)
+	    (when (member property needed-properties-of-constructor :test #'string=)
+	      (setf needs t))))))
+    (or needs
+	(some #'(lambda (item)
+		  (item-needs-constructor-property item property constructor))
+	      (gethash item *item-dependency-graph-forward*)))))
+
 ;;; properties.lisp ends here
