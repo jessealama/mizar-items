@@ -88,6 +88,10 @@
 			   (file-in-xsl4mizar-dir "extend-evl.xsl"))
 (update-mizar-items-config 'free-variables-stylesheet
 			   (file-in-xsl4mizar-dir "free-variables.xsl"))
+(update-mizar-items-config 'toplevel-dellink-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-dellink.xsl"))
+(update-mizar-items-config 'toplevel-choice-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-choice.xsl"))
 (update-mizar-items-config 'item-to-fragment-path
 			   (file-in-mizar-items-dir "item-to-fragment-table"))
 (update-mizar-items-config 'full-item-dependency-graph
