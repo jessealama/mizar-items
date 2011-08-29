@@ -67,7 +67,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun first-n (lst n)
-  (loop 
+  (loop
      for i from 1 upto n
      for elt in lst
      collecting elt into items
@@ -214,7 +214,7 @@ from the beginning of the list."
 
 (defun numbers-from-to (start end)
   (loop
-     for i from start upto end 
+     for i from start upto end
      collecting i into nums
      finally (return nums)))
 
@@ -267,7 +267,7 @@ LIST; otherwise, return T and NIL."
     result))
 
 (defun keys (table)
-  (loop 
+  (loop
      for k being the hash-keys in table
      collecting k into keys
      finally (return keys)))
@@ -295,7 +295,7 @@ LIST; otherwise, return T and NIL."
      for (key . val) in keys
      do
        (setf (gethash key table) val)
-     finally 
+     finally
        (return table)))
 
 (defun count-hash-table-keys (table)
