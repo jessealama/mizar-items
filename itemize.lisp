@@ -71,15 +71,17 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	      (delete-file temp-article-path))))))
 
 (defmethod xsl-split-article ((article pathname))
-  (let ((article-wsx (replace-extension article "miz" "wsx"))
-	(split-stylesheet (mizar-items-config 'split-stylesheet)))
-    (let ((first-one (apply-stylesheet split-stylesheet article-wsx nil nil)))
-      ;; we have to apply this stylesheet twice to ensure that loci
-      ;; are truly sequentually numbered.  One pass isn't enough.
-      ;; Perhaps there should simply be a separate stylesheet to
-      ;; accomplish this.
-      (let ((second-one (apply-stylesheet split-stylesheet first-one nil nil)))
-	(apply-stylesheet split-stylesheet second-one nil nil)))))
+  (loop
+     with toplevel-dellink-stylesheet = (mizar-items-config 'toplevel-dellink-stylesheet)
+     with toplevel-choice-stylesheet = (mizar-items-config 'toplevel-choice-stylesheet)
+     with split-stylesheet = (mizar-items-config 'split-stylesheet)
+     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet split-stylesheet split-stylesheet toplevel-choice-stylesheet split-stylesheet)
+     with xml = (replace-extension article "miz" "wsx")
+     for sheet in schedule
+     do
+       (setf xml (apply-stylesheet sheet xml nil nil))
+     finally
+       (return xml)))
 
 (defun xsl-itemize-article (article)
   (let ((free-variables-stylesheet (mizar-items-config 'free-variables-stylesheet))
@@ -97,27 +99,34 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	      (ckb-num-2 (parse-integer ckb-num-2-as-str)))
 	  (< ckb-num-1 ckb-num-2))))))
 
-(defgeneric extend-evl (evl-file prel-dir)
-  (:documentation "Extend the .evl file EVL-FILE with whatever the contents of PREL-DIR.  If, for example, there is a file 'foo.sch' in PREL-DIR, then EVL-FILE will be extended so that, in its Schemes directives, we find 'FOO' as an Ident."))
+(defgeneric extend-evl (evl-file prel-dir dict-dir)
+  (:documentation "Extend the .evl file EVL-FILE with whatever the contents of PREL-DIR and DICT-DIR are.  If, for example, there is a file 'foo.sch' in PREL-DIR, then EVL-FILE will be extended so that, in its Schemes directives, we find 'FOO' as an Ident.  If there is a .voc file in DICT-DIR, it will be added to the Vocabularies directive as well."))
 
-(defmethod extend-evl ((evl-file string) prel-dir)
-  (extend-evl (pathname evl-file) prel-dir))
+(defmethod extend-evl ((evl-file string) prel-dir dict-dir)
+  (extend-evl (pathname evl-file) prel-dir dict-dir))
 
-(defmethod extend-evl (evl-file (prel-dir string))
-  (extend-evl evl-file (pathname prel-dir)))
+(defmethod extend-evl (evl-file (prel-dir string) dict-dir)
+  (extend-evl evl-file (pathname prel-dir) dict-dir))
 
-(defmethod extend-evl :around ((evl-file pathname) (prel-dir pathname))
+(defmethod extend-evl (evl-file prel-dir (dict-dir string))
+  (extend-evl evl-file prel-dir (pathname dict-dir)))
+
+(defmethod extend-evl :around ((evl-file pathname) (prel-dir pathname) (dict-dir pathname))
   (if (file-exists-p evl-file)
-      (if (file-exists-p prel-dir)
-	  (if (directory-p prel-dir)
-	      (call-next-method)
-	      (error "The specified prel DB, '~a', isn't actually a directory" (namestring prel-dir)))
-	  (call-next-method))
+      (when (file-exists-p prel-dir)
+	(if (directory-p prel-dir)
+	    (when (file-exists-p prel-dir)
+	      (if (directory-p prel-dir)
+		  (call-next-method)
+		  (error "The specified dict directory, '~a', isn't actually a directory" (namestring dict-dir))))
+	    (error "The specified prel DB, '~a', isn't actually a directory" (namestring prel-dir)))
+	(call-next-method))
       (error "The specified .evl file, '~a', doesn't exist" (namestring evl-file))))
 
-(defmethod extend-evl ((evl-file pathname) (prel-dir pathname))
+(defmethod extend-evl ((evl-file pathname) (prel-dir pathname) (dict-dir pathname))
   (if (file-exists-p prel-dir)
-      (let ((more-notations "")
+      (let ((more-vocabularies "")
+	    (more-notations "")
 	    (more-definitions "")
 	    (more-theorems "")
 	    (more-schemes "")
@@ -126,7 +135,9 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	    (more-requirements ""))
 	(flet ((pad-string (string new-bit)
 		 (format nil "~a~a," string (uppercase new-bit))))
-	  (flet ((add-to-notations (article)
+	  (flet ((add-to-vocabularies (article)
+		   (setf more-vocabularies (pad-string more-vocabularies article)))
+		 (add-to-notations (article)
 		   (setf more-notations (pad-string more-notations article)))
 		 (add-to-definitions (article)
 		   (setf more-definitions (pad-string more-definitions article)))
@@ -141,7 +152,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 		 (add-to-requirements (article)
 		   (setf more-requirements (pad-string more-requirements article))))
 	    (flet ((dispatch-exported-file (path)
-		     (cond ((dno-file-p path) (add-to-notations (pathname-name path)))
+		     (cond ((voc-file-p path) (add-to-vocabularies (pathname-name path)))
+			   ((dno-file-p path) (add-to-notations (pathname-name path)))
 			   ((dcl-file-p path) (add-to-registrations (pathname-name path)))
 			   ((eid-file-p path) (add-to-registrations (pathname-name path)))
 			   ((sch-file-p path) (add-to-schemes (pathname-name path)))
@@ -149,18 +161,26 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 			   ((def-file-p path) (add-to-definitions (pathname-name path)))
 			   ((the-file-p path) (add-to-theorems (pathname-name path)))
 			   (t
-			    (error "Don't know how to deal with the prel file '~a'" (namestring path))))))
+			    (error "Don't know how to deal with the file '~a'" (namestring path))))))
+	      ;; prel
 	      (loop
 		 for extension in (list "dno" "dcl" "eid" "sch" "def" "dco" "the")
 		 do
 		   (loop
 		      with files = (files-in-directory-with-extension prel-dir extension)
 		      with sorted-files = (sort files #'ckb-<)
-		      for path in sorted-files 
-		      do (dispatch-exported-file path))))))
+		      for path in sorted-files
+		      do (dispatch-exported-file path)))
+	      ;; voc
+	      (loop
+		 with files = (files-in-directory-with-extension dict-dir "voc")
+		 with sorted-files = (sort files #'ckb-<)
+		 for path in sorted-files
+		 do (dispatch-exported-file path)))))
 	(apply-stylesheet (mizar-items-config 'extend-evl-stylesheet)
 			  evl-file
-			  (list (cons "notations" more-notations)
+			  (list (cons "vocabularies" more-vocabularies)
+				(cons "notations" more-notations)
 				(cons "definitions" more-definitions)
 				(cons "theorems" more-theorems)
 				(cons "schemes" more-schemes)
@@ -210,13 +230,20 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
 					;                                     ^ ensures that the path ends with '/'
 					;                                ^ ensures that the path starts with '/'
-	 (prel-dir (format nil "~aprel/" items-dir)))
+	 (prel-dir (format nil "~aprel/" items-dir))
+	 (dict-dir (format nil "~adict/" items-dir))
+	 (text-dir (format nil "~atext/" items-dir)))
 					;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
     (handler-case
-	(ensure-directories-exist items-dir)
-      (file-error () (error "We cannot ensure that the directory '~a' exists, so we cannot save the items of ~a into directory." items-dir article-name)))
+	(and (ensure-directories-exist items-dir)
+	     (ensure-directories-exist prel-dir)
+	     (ensure-directories-exist dict-dir)
+	     (ensure-directories-exist text-dir))
+      (file-error () (error "We cannot ensure that the directories~%  * ~a~%  * ~a~%  * ~a~%  * ~a~%~%exist, so we cannot proceed." items-dir prel-dir dict-dir text-dir)))
     (xpath:do-node-set (bundle (xpath:evaluate bundle-xpath xml-doc))
-      (let* ((bundlenr (dom:get-attribute bundle "bundlenr")))
+      (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
+	     (promoted (dom:get-attribute bundle "promoted"))
+	     (spelling (dom:get-attribute bundle "spelling")))
 	(let ((text-proper-set (xpath:evaluate "Text-Proper[1]" bundle)))
 	  (if (xpath:node-set-empty-p text-proper-set)
 	      (error "Empty node set for Text-Proper!")
@@ -232,13 +259,28 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 					;                                           Watch out: omitting this key can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
+		;; if this is a toplevel constant definition, we need to write a new vocabulary file
+		(when (and promoted
+			   (or (string= promoted "constant-definition")
+			       (string= promoted "type-changing-statement")
+			       (string= promoted "choice-statement-mode")
+			       (string= promoted "choice-statement-functor"))
+			   spelling)
+		  (let ((voc-path (format nil "~ackb~a.voc" dict-dir bundlenr)))
+		    (with-open-file (voc voc-path
+					 :direction :output
+					 :if-exists :error
+					 :if-does-not-exist :create)
+		      (if (string= promoted "choice-statement-mode")
+			  (format voc "M~a~%" spelling)
+			  (format voc "O~a~%" spelling)))))
 		;; create the bundle's new evl
-		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" items-dir bundlenr))
-		      (extended-evl (extend-evl evl-file prel-dir)))
+		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" text-dir bundlenr))
+		      (extended-evl (extend-evl evl-file prel-dir dict-dir)))
 		  (write-string-into-file extended-evl bundle-temp-evl-path
 					  :if-exists :supersede
 					  :if-does-not-exist :create)
-		  (let ((bundle-miz-path (format nil "~ackb~a.miz" items-dir bundlenr))
+		  (let ((bundle-miz-path (format nil "~ackb~a.miz" text-dir bundlenr))
 			(bundle-miz-text (apply-stylesheet wsm-stylesheet
 							   bundle-path
 							   (list (cons "evl" (namestring bundle-temp-evl-path)))

@@ -94,7 +94,7 @@
 	   (err-basename (format nil "~a.err" arg-basename))
 	  (err-file
 	   (if working-directory
-	       (file-in-directory working-directory err-basename)
+	       (merge-pathnames (replace-extension argument "miz" "err") working-directory)
 	       (when (pathnamep argument)
 		 (merge-pathnames err-basename
 				  (directory-namestring argument))))))
@@ -119,7 +119,7 @@
 ;   * Line 2 column 1: #1
 ;   * Line 3 column 1: #1
 ;
-; Calling FORMAT here cirumvents such cleverness.          
+; Calling FORMAT here cirumvents such cleverness.
 		   finally
 		     (terpri stream))))
 	  (format stream "We expected to find an error file at ~a, but somehow there isn't one." err-file)))))

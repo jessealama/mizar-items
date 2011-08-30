@@ -67,7 +67,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun first-n (lst n)
-  (loop 
+  (loop
      for i from 1 upto n
      for elt in lst
      collecting elt into items
@@ -214,7 +214,7 @@ from the beginning of the list."
 
 (defun numbers-from-to (start end)
   (loop
-     for i from start upto end 
+     for i from start upto end
      collecting i into nums
      finally (return nums)))
 
@@ -267,7 +267,7 @@ LIST; otherwise, return T and NIL."
     result))
 
 (defun keys (table)
-  (loop 
+  (loop
      for k being the hash-keys in table
      collecting k into keys
      finally (return keys)))
@@ -295,7 +295,7 @@ LIST; otherwise, return T and NIL."
      for (key . val) in keys
      do
        (setf (gethash key table) val)
-     finally 
+     finally
        (return table)))
 
 (defun count-hash-table-keys (table)
@@ -638,7 +638,7 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 	      (let* ((err (process-error xsltproc))
 		     (err-lines (stream-lines err)))
 		(if err-lines
-		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~{  ~a~%~}" stylesheet-name document-name exit-code (stream-lines err))
+		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~{  ~a~%~}" stylesheet-name document-name exit-code err-lines)
 		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%(There was no output on standard error.)" stylesheet-name document-name exit-code)))))))))
 
 ;;; utils.lisp ends here
