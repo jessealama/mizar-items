@@ -1272,3 +1272,51 @@ The result is a hash table.  Its keys are symbols, and its values are lists of s
 				    (member item loners))
 				item-list)))
 	(cons (list loners) (stratify trimmed))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Flexible interface for requires and supports
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric requirements (item))
+
+(defmethod requirements ((item symbol))
+  (gethash item *item-dependency-graph-forward*))
+
+(defmethod requirements ((item cons))
+  "Read ITEM as a fragment: a cons cell whose car is an article name
+  and whose cdr is a positive natural number."
+  (let ((generated-item (first (gethash item *fragment-to-item-table*))))
+    (requirements generated-item)))
+
+(defmethod requirements ((item string))
+  "Try to interpret STRING first as an item identifier (two colons), then as a fragment identifier (one colon)."
+  (cond ((scan "^[^:]+:[^:]+:[^:]+$" item)
+	 (requirements (get-and-maybe-set-item-name item)))
+	((scan "^[^:]+:[^:]+$" item)
+	 (register-groups-bind (article fragment-number-str)
+	     ("^([^:]+):([^:])+$" item)
+	   (requirements (cons article (parse-integer fragment-number-str)))))
+	(t
+	 (error "Unable to make sense of the item identifier '~a'" item))))
+
+(defgeneric dependents (item))
+
+(defmethod dependents ((item symbol))
+  (gethash item *item-dependency-graph-backward*))
+
+(defmethod dependents ((item cons))
+  "Read ITEM as a fragment: a cons cell whose car is an article name
+  and whose cdr is a positive natural number."
+  (let ((generated-item (first (gethash item *fragment-to-item-table*))))
+    (dependents generated-item)))
+
+(defmethod dependents ((item string))
+  "Try to interpret STRING first as an item identifier (two colons), then as a fragment identifier (one colon)."
+  (cond ((scan "^[^:]+:[^:]+:[^:]+$" item)
+	 (dependents (get-and-maybe-set-item-name item)))
+	((scan "^[^:]+:[^:]+$" item)
+	 (register-groups-bind (article fragment-number-str)
+	     ("^([^:]+):([^:])+$" item)
+	   (dependents (cons article (parse-integer fragment-number-str)))))
+	(t
+	 (error "Unable to make sense of the item identifier '~a'" item))))
