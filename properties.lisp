@@ -369,31 +369,39 @@ is that the item I requires from constructor-1 each of the properties listed in 
       (call-next-method)
       (error "The needed property file does not exist at the expected location~%~%  ~a~%" (namestring needed-file)))))
 
+(defun update-needed-property (fragment property constructor table)
+  (flet ((update-property-alist (alist property)
+	     (rplacd alist
+		     (cons property (cdr alist)))))
+    (multiple-value-bind (current-entry present?)
+	(gethash fragment table)
+      (if present?
+	  (let ((ass (assoc constructor current-entry)))
+	    (if ass
+		(update-property-alist ass property)
+		(setf (gethash fragment table)
+		      (acons constructor
+			     (list property)
+			     current-entry))))
+	(setf (gethash fragment table)
+	      (acons constructor (list property) nil)))))
+  table)
+
 (defmethod load-needed-properties (mml-version)
   (let ((needed-path (needed-property-file-for-mml mml-version))
 	(needed-table (make-hash-table :test #'equal)))
-    (loop
-       for line in (lines-of-file needed-path)
-       for i from 1
-       do
-	 (destructuring-bind (fragment property constructor-item-str)
-	     (split #\Space line)
-	   (let ((constructor-item (get-and-maybe-set-item-name constructor-item-str)))
-	     (multiple-value-bind (old-value present?)
-		 (gethash fragment needed-table)
-	       (if present?
-		   (let ((ass (assoc constructor-item old-value)))
-		     (if ass
-			 (rplacd ass
-				 (cons property (cdr ass)))
-			 (setf (gethash fragment needed-table)
-			     (acons constructor-item
-				    (list property)
-				    old-value))))
-		   (setf (gethash fragment needed-table)
-			 (acons constructor-item (list property) nil))))))
-       finally
-	 (return needed-table))))
+    (flet ((update-property-alist (alist property)
+	     (rplacd alist
+		     (cons property (cdr alist)))))
+      (loop
+	 for line in (lines-of-file needed-path)
+	 for i from 1
+	 do
+	   (destructuring-bind (fragment property constructor-item-str)
+	       (split #\Space line)
+	     (update-needed-property fragment property (get-and-maybe-set-item-name constructor-item-str) needed-table))
+	 finally
+	   (return needed-table)))))
 
 (defgeneric fragment-of-item (item)
   (:documentation "The fragment from which ITEM comes (if any)."))
@@ -448,5 +456,56 @@ is that the item I requires from constructor-1 each of the properties listed in 
 	(some #'(lambda (item)
 		  (item-needs-constructor-property item property constructor))
 	      (gethash item *item-dependency-graph-forward*)))))
+
+(defun fragment-table-to-item-table (fragment-table)
+  "Make a copy of FRAGMENT-TABLE, whose keys are assumed to be
+  fragments (i.e., cons cells whose car is a string [article name] and
+  whose cdr is a positive natural number).  The keys of the new table
+  will be items, and the value of an item I will be identical (in the
+  sense of EQ) to the value in FRAGMENT-TABLE for the fragment that
+  generates I.
+
+Warning: since the values in the new hash table will be EQ to the
+values in FRAGMENT-TABLE, modifying them will modify both tables."
+  (loop
+     with new-table = (make-hash-table :test #'eq)
+     for fragment being the hash-keys in fragment-table using (hash-value val)
+     for i from 1
+     do
+       (when (zerop (mod i 1000))
+	 (format t "Done with ~d items" i)
+	 (terpri))
+       (destructuring-bind (article fragment-number-str)
+	   (split #\: fragment)
+	 (let ((fragment-pair (cons article (parse-integer fragment-number-str))))
+	   (dolist (item (gethash fragment-pair *fragment-to-item-table*))
+	     (setf (gethash item new-table) val))))
+     finally
+       (return new-table)))
+
+(defun expand-property-table ()
+  (flet ((present-in-table (item constructor property)
+	   (multiple-value-bind (alist present?)
+	       (gethash item *property-table*)
+	     (when present?
+	       (member property (cdr (assoc constructor alist)) :test #'string=)))))
+    (loop
+       with num-expanded = 0
+       for item being the hash-keys in *property-table* using (hash-value needed-properties)
+       for i from 1
+       do
+	 (when (zerop (mod i 1000))
+	   (format t "Done with ~d items" i)
+	   (terpri))
+	 (dolist (needed-property needed-properties)
+	   (destructuring-bind (constructor . properties)
+	       needed-property
+	     (dolist (dependent-item (dependents item))
+	       (dolist (property properties)
+		 (unless (present-in-table dependent-item constructor property)
+		   (update-needed-property dependent-item property constructor *property-table*)
+		   (incf num-expanded))))))
+       finally
+	 (return num-expanded))))
 
 ;;; properties.lisp ends here
