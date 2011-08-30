@@ -1858,9 +1858,7 @@ one time; later, when we do support multiple MMLs, this will be useful."
 	      (text-dir-uri (format nil "/~a/text" article-name))
 	      (text-dir-path (format nil "~a/text/" article-dir)))
 	 ;; static files for the whole article
-	 (register-static-file-dispatcher miz-uri miz-path "text/plain")
-	 (hunchentoot-dir-lister:add-simple-lister prel-dir-uri prel-dir-path)
-	 (hunchentoot-dir-lister:add-simple-lister text-dir-uri text-dir-path)))
+	 (register-static-file-dispatcher miz-uri miz-path "text/plain")))
 
   ;; three presentations of an article: itemized HTML, unitemized HTML, raw XML
   (register-regexp-dispatcher +itemized-article-uri-regexp+ #'emit-itemized-article-page)
