@@ -25,13 +25,13 @@
 ;;; URI regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-constant +article-name-regexp+ "^[a-z_0-9]{1,8}$" 
+(define-constant +article-name-regexp+ "^[a-z_0-9]{1,8}$"
   :test #'string=)
 (define-constant +positive-natural-number-regexp+ "[1-9][0-9]*"
   :test #'string=
   :documentation "A regular expression matching positive natural numbers.  Starting with the zero digit 0 is not permitted")
 (define-constant +number-regexp+
-    (regexp-disjoin "0" 
+    (regexp-disjoin "0"
 		    +positive-natural-number-regexp+)
   :test #'string=
   :documentation "A regular expression that matches a natural number.  (0 is a natural number.)")
@@ -39,7 +39,7 @@
   :test #'equal)
 (define-constant +cluster-kinds+ (list "c" "f" "r")
   :test #'equal)
-(define-constant +item-kinds-string+ 
+(define-constant +item-kinds-string+
   (append (mapcar #'(lambda (sym)
 		      (concat sym "constructor"))
 		  +item-kinds-prefixes+)
@@ -57,7 +57,7 @@
 		  +cluster-kinds+))
   :test #'equal)
 
-(define-constant +item-kind-regexp+ 
+(define-constant +item-kind-regexp+
     (reduce #'regexp-disjoin +item-kinds-string+)
   :test #'string=)
 
@@ -334,7 +334,7 @@
 	(sup-article (item-article supporting-item))
 	(sup-kind (item-kind supporting-item))
 	(sup-num (item-number supporting-item)))
-    (format nil 
+    (format nil
 	    "~:@(~a~):~a:~a depends on ~:@(~a~):~a:~a"
 	    dep-article dep-kind dep-num
 	    sup-article sup-kind sup-num)))
@@ -563,12 +563,12 @@
 		  do
 		    (htm
 		     ((:div :class "fragment-listing" :id i-str)
-		      
+
 		      ((:a :href item-uri :title item-link-title))
 		      (str item-html)))))))))))))))
 
 (defun http-sensitive-redirect (new-uri)
-  (let ((client-server-protocol (server-protocol*)))	
+  (let ((client-server-protocol (server-protocol*)))
     (redirect new-uri
 	      :code (if (string= client-server-protocol "HTTP/1.1")
 			+http-temporary-redirect+
@@ -582,7 +582,7 @@
   `(progn
      (unless (file-exists-p ,path)
        (warn "Can't register URI '~a' to point to '~a', because there's no file at that path" ,uri ,path))
-     (push (create-static-file-dispatcher-and-handler ,uri 
+     (push (create-static-file-dispatcher-and-handler ,uri
 						      ,path
 						      ,mime-type)
 	   items-dispatch-table)
@@ -937,12 +937,12 @@ one time; later, when we do support multiple MMLs, this will be useful."
     (:h1 "welcome")
     (:p "Interested in learning more about the " ((:a :href "http://www.mizar.org/") (:tt "MIZAR") " Mathematical Library") " (MML), the largest corpus of formalized mathematics in the world?  This site provides a way to
     get a handle on the large contents of the MML. This site presents the MML by showing its " (:b "items") " and showing, for each item, what it " (:b "depends")  " upon and conversely (what items depend on the item).")
-    (:p "The dependency graph that this site lets you explore has " 
+    (:p "The dependency graph that this site lets you explore has "
 	(:b (str (count-items-of-dependency-graph *item-dependency-graph-forward*))) " nodes (items) and "
 	(:b (str (count-edges-of-depgraph *item-dependency-graph-forward*))) " edges.")
     (:h1 "getting started")
     (:p "One can visit " ((:a :href "/articles") "the complete list of articles") ".  Alternatively, one can visit " ((:a :href "/random-item") " a random item") " or " ((:a :href "/random-path") "search for a path between two random items") ".")
-    (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.") 
+    (:p "You might want to visit the " ((:a :href "/landmarks") "landmarks") " page to get acquainted with how this site provides fine-grained dependency information for some notable results of mathematics.")
     (:h1 "learning more about " (:tt "MIZAR"))
     (:p "The " (:tt "MIZAR") " system and its library, the MML, are rather complex.  To learn more about the system, see the excellent overview article")
     (:blockquote
@@ -959,7 +959,7 @@ one time; later, when we do support multiple MMLs, this will be useful."
 
 (defun item-uri (item-identifier)
   (format nil "/item/~a" (substitute #\/ #\: item-identifier)))
-     
+
 (defun emit-landmarks-page ()
   (miz-item-html ("landmarks")
       nil
@@ -984,7 +984,7 @@ one time; later, when we do support multiple MMLs, this will be useful."
 			(let ((primary-alternative (first items))
 			      (remaining-alternatives (rest items)))
 			  (htm
-			   (:li 
+			   (:li
 			    ((:a :href primary-alternative :title entry) (str entry))
 			    "["
 			    (let ((second-alternative (car remaining-alternatives))
@@ -1022,10 +1022,10 @@ one time; later, when we do support multiple MMLs, this will be useful."
 			   (destructuring-bind (name uri)
 			       item
 			     (let ((alternative-name (format nil "~a (~a)"
-							     entry 
+							     entry
 							     name)))
 			       (htm
-				(:li ((:a :href uri 
+				(:li ((:a :href uri
 					  :title alternative-name)
 				      (str name))))))))))))))
     ((:h1 :id "100theorems")
@@ -1531,7 +1531,7 @@ one time; later, when we do support multiple MMLs, this will be useful."
        (:tr
 	(:td
 	 ((:label :for "article-name") "Article Name"))
-	(:td 
+	(:td
 	 ((:input :type "text" :id "article-name" :name "article-name" :width "8" :title "The name of your article.  It is acceptable to omit a name; if you do so, a default name for your article will be assigned."))))
        (:tr
 	(:td
