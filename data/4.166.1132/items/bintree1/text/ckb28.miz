@@ -1,0 +1,71 @@
+environ
+vocabularies NUMBERS,XBOOLE_0,TREES_2,SUBSET_1,FUNCT_1,TREES_4,TREES_3,FINSEQ_1,TREES_1,ORDINAL1,ORDINAL4,CARD_1,XXREAL_0,ARYTM_3,FINSET_1,RELAT_1,TARSKI,TREES_A,LANG1,TDGROUP,DTCONSTR,STRUCT_0,ZFMISC_1,FUNCT_2,BINTREE1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,NUMBERS,NAT_1,RELAT_1,STRUCT_0,MCART_1,FUNCT_1,RELSET_1,FUNCT_2,FINSEQ_1,FINSET_1,LANG1,TREES_1,TREES_2,TREES_3,TREES_4,DTCONSTR,PRE_POLY,XXREAL_0,CKB1,CKB4,CKB11,CKB20,CKB27;
+definitions DTCONSTR,CKB1,CKB4,CKB11,CKB20;
+theorems TARSKI,NAT_1,MCART_1,ZFMISC_1,ENUMSET1,MODAL_1,RELSET_1,FUNCT_1,FUNCT_2,FINSEQ_1,FINSEQ_2,FINSEQ_3,LANG1,TREES_1,TREES_2,TREES_3,TREES_4,DTCONSTR,FINSET_1,RELAT_1,CKB1,CKB2,CKB3,CKB4,CKB5,CKB8,CKB9,CKB11,CKB15,CKB16,CKB17,CKB18,CKB20,CKB23;
+schemes FUNCT_2,DTCONSTR,MULTOP_1,CKB22,CKB24,CKB25,CKB26;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,MEMBERED,FINSEQ_1,TREES_2,TREES_3,STRUCT_0,DTCONSTR,FINSET_1,PRE_POLY,TREES_4,TREES_1,RELSET_1,CKB6,CKB7,CKB10,CKB12,CKB13,CKB14,CKB19,CKB21;
+constructors DOMAIN_1,XXREAL_0,NAT_1,MEMBERED,FINSEQOP,DTCONSTR,RELSET_1,PRE_POLY,CKB1,CKB4,CKB11,CKB20,CKB27;
+requirements NUMERALS,REAL,SUBSET,BOOLE,ARITHM;
+begin
+scheme BinDTCDefLambda { G() ->  binary  with_terminals  with_nonterminals  with_useful_nonterminals non empty DTConstrStr,A,B() -> non empty set,F(set,set) -> (Element of B()),H(set,set,set,set) -> (Element of B()) } : (ex f being (Function of ( TS G() ),( Funcs (A(),B()) )) st ((for t being (Terminal of G()) holds (ex g being (Function of A(),B()) st (g = ( f . ( root-tree t ) ) & (for a being (Element of A()) holds ( g . a ) = F(t,a))))) & (for nt being (NonTerminal of G()) holds (for t1,t2 being (Element of ( TS G() )) holds (for rtl,rtr being (Symbol of G()) holds (((rtl = ( root-label t1 ) & rtr = ( root-label t2 )) & nt ==> <* rtl,rtr *>) implies (ex g,f1,f2 being (Function of A(),B()) st (((g = ( f . ( nt -tree (t1,t2) ) ) & f1 = ( f . t1 )) & f2 = ( f . t2 )) & (for a being (Element of A()) holds ( g . a ) = H(nt,f1,f2,a))))))))))
+proof
+defpred P[ set,set,set,set ]
+ means
+(for a being (Element of A()) holds (for ntv being (Function of A(),B()) holds (ntv = $4 implies ( ntv . a ) = H($1,$2,$3,a))));
+defpred P[ set,set ]
+ means
+(for tv being (Function of A(),B()) holds (tv = $2 implies (for a being (Element of A()) holds ( tv . a ) = F($1,a))));
+reconsider FAB = ( Funcs (A(),B()) ) as non empty set;
+A1:now
+let x being (Element of ( Terminals G() ));
+deffunc F(set) = F(x,$1);
+consider y being (Function of A(),B()) such that A2: (for a being (Element of A()) holds ( y . a ) = F(a)) from FUNCT_2:sch 4;
+(A() = ( dom y ) & ( rng y ) c= B()) by FUNCT_2:def 1;
+then reconsider y as (Element of FAB) by FUNCT_2:def 2;
+take y;
+thus P[ x,y ] by A2;
+end;
+consider TV being (Function of ( Terminals G() ),FAB) such that A3: (for e being (Element of ( Terminals G() )) holds P[ e,( TV . e ) ]) from FUNCT_2:sch 3(A1);
+deffunc TermVal((Terminal of G())) = ( TV . $1 );
+A4:now
+let x being (Element of ( NonTerminals G() ));
+let y being (Element of FAB),z being (Element of FAB);
+deffunc F(set) = H(x,y,z,$1);
+consider fab being (Function of A(),B()) such that A5: (for a being (Element of A()) holds ( fab . a ) = F(a)) from FUNCT_2:sch 4;
+(A() = ( dom fab ) & ( rng fab ) c= B()) by FUNCT_2:def 1;
+then reconsider fab as (Element of FAB) by FUNCT_2:def 2;
+take fab;
+thus P[ x,y,z,fab ] by A5;
+end;
+consider NTV being (Function of [: ( NonTerminals G() ),FAB,FAB :],FAB) such that A6: (for x being (Element of ( NonTerminals G() )) holds (for y,z being (Element of FAB) holds P[ x,y,z,( NTV . [ x,y,z ] ) ])) from MULTOP_1:sch 1(A4);
+deffunc NTermVal((Element of ( NonTerminals G() )),set,set,(Element of FAB),(Element of FAB)) = ( NTV . [ $1,$4,$5 ] );
+consider f being (Function of ( TS G() ),FAB) such that A7: ((for t being (Terminal of G()) holds ( f . ( root-tree t ) ) = TermVal(t)) & (for nt being (NonTerminal of G()) holds (for tl,tr being (Element of ( TS G() )) holds (for rtl,rtr being (Symbol of G()) holds (((rtl = ( root-label tl ) & rtr = ( root-label tr )) & nt ==> <* rtl,rtr *>) implies (for xl,xr being (Element of FAB) holds ((xl = ( f . tl ) & xr = ( f . tr )) implies ( f . ( nt -tree (tl,tr) ) ) = NTermVal(nt,rtl,rtr,xl,xr)))))))) from CKB25:sch 1;
+reconsider f9 = f as (Function of ( TS G() ),( Funcs (A(),B()) ));
+take f9;
+hereby
+let t being (Terminal of G());
+consider TVt being Function such that A8: ( TV . t ) = TVt and A9: (( dom TVt ) = A() & ( rng TVt ) c= B()) by FUNCT_2:def 2;
+reconsider TVt as (Function of A(),B()) by A9,FUNCT_2:def 1,RELSET_1:4;
+take TVt;
+thus TVt = ( f9 . ( root-tree t ) ) by A7,A8;
+let a being (Element of A());
+thus ( TVt . a ) = F(t,a) by A3,A8;
+end;
+let nt being (NonTerminal of G());
+let t1 being (Element of ( TS G() )),t2 being (Element of ( TS G() ));
+let rtl being (Symbol of G()),rtr being (Symbol of G());
+assume A10: ((rtl = ( root-label t1 ) & rtr = ( root-label t2 )) & nt ==> <* rtl,rtr *>);
+(ex f2 being Function st ((( f . t2 ) = f2 & ( dom f2 ) = A()) & ( rng f2 ) c= B())) by FUNCT_2:def 2;
+then reconsider f2 = ( f . t2 ) as (Function of A(),B()) by FUNCT_2:def 1,RELSET_1:4;
+(ex f1 being Function st ((( f . t1 ) = f1 & ( dom f1 ) = A()) & ( rng f1 ) c= B())) by FUNCT_2:def 2;
+then reconsider f1 = ( f . t1 ) as (Function of A(),B()) by FUNCT_2:def 1,RELSET_1:4;
+( NTV . [ nt,( f . t1 ),( f . t2 ) ] ) in FAB;
+then consider ntvval being Function such that A11: ntvval = ( NTV . [ nt,f1,f2 ] ) and A12: (( dom ntvval ) = A() & ( rng ntvval ) c= B()) by FUNCT_2:def 2;
+reconsider ntvval as (Function of A(),B()) by A12,FUNCT_2:def 1,RELSET_1:4;
+take ntvval;
+take f1;
+take f2;
+thus ((ntvval = ( f9 . ( nt -tree (t1,t2) ) ) & f1 = ( f9 . t1 )) & f2 = ( f9 . t2 )) by A7,A10,A11;
+thus thesis by A6,A11;
+end;

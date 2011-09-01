@@ -1,0 +1,79 @@
+environ
+vocabularies NUMBERS,XBOOLE_0,SUBSET_1,NAT_1,REAL_1,FINSEQ_1,MATRIX_1,CARD_1,ARYTM_3,XXREAL_0,INT_1,ARYTM_1,RELAT_1,TAYLOR_1,FUNCT_1,XXREAL_1,LIMFUNC1,POWER,PARTFUN1,FDIFF_1,ORDINAL2,TARSKI,CARD_3,SEQ_1,SUPINF_2,PARTFUN3,XREAL_0,ORDINAL1,RVSUM_1,ORDINAL4,FINSEQ_2,MATRPROB,MATRIXC1,TREES_1,INCSP_1,MATRIXR1,FVSUM_1,ZFMISC_1,FUNCOP_1,ENTROPY1;
+notations TARSKI,SUBSET_1,XBOOLE_0,XXREAL_0,XREAL_0,REAL_1,NAT_1,NAT_D,ORDINAL1,NUMBERS,RELAT_1,FUNCT_1,VALUED_1,SEQ_1,ZFMISC_1,PARTFUN1,FUNCOP_1,RVSUM_1,FINSEQ_1,FINSEQ_2,NEWTON,MATRIXR1,MATRIX_1,PARTFUN3,POWER,LIMFUNC1,RCOMP_1,MATRPROB,FDIFF_1,TAYLOR_1,FCONT_1,CKB10,CKB11,CKB14,CKB31;
+definitions TARSKI,PARTFUN3,FINSEQ_2,LIMFUNC1,RCOMP_1,VALUED_1,XCMPLX_0,TAYLOR_1,CKB11,CKB14,CKB31;
+theorems FUNCT_1,NAT_1,MATRIX_2,XREAL_1,NAT_2,MATRIXR1,GOBOARD1,XBOOLE_0,PROB_3,INTEGRA5,FINSEQ_1,MATRIX_1,GOBRD13,FINSEQ_2,PARTFUN3,FINSEQ_3,RVSUM_1,POWER,FDIFF_1,TREES_1,XBOOLE_1,TAYLOR_1,RELAT_1,ROLLE,FCONT_1,XCMPLX_1,INTEGRA1,XXREAL_0,ORDINAL1,MATRPROB,FUNCOP_1,PEPIN,NAT_D,PARTFUN1,VALUED_1,XXREAL_1,XXREAL_2,CARD_1,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB11,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB20,CKB21,CKB24,CKB25,CKB26,CKB27,CKB28,CKB29,CKB30,CKB31,CKB33;
+schemes FINSEQ_2,SEQ_1,NAT_1,RECDEF_1,FINSEQ_1,MATRIX_1;
+registrations MATRPROB,RELSET_1,NAT_1,MEMBERED,ORDINAL1,XREAL_0,FCONT_3,RCOMP_1,XXREAL_0,NUMBERS,XBOOLE_0,VALUED_0,FINSEQ_1,CARD_1,XXREAL_2,FINSEQ_2,CKB12,CKB19,CKB22,CKB23,CKB32;
+constructors REAL_1,NAT_D,BINOP_2,MATRIX_3,MATRIXR1,MATRLIN,MATRPROB,PARTFUN3,PARTFUN2,FDIFF_1,FCONT_1,POWER,LIMFUNC1,SIN_COS,TAYLOR_1,INTEGRA1,SEQ_1,XXREAL_2,RVSUM_1,RELSET_1,NEWTON,CKB14,CKB31;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve i for (Element of ( NAT ));
+reserve j for (Element of ( NAT ));
+reserve p for (FinSequence of ( REAL ));
+definition
+let p;
+func Vec2DiagMx p ->  diagonal (Matrix of ( len p ),( REAL ))
+means
+:Def4: (for j holds (j in ( dom p ) implies ( it * (j,j) ) = ( p . j )));
+existence
+proof
+defpred P[ Nat,Nat,(Element of ( REAL )) ]
+ means
+(($1 = $2 implies $3 = ( p . $1 )) & ($1 <> $2 implies $3 = ( 0 )));
+A1: (for i,j being Nat holds ([ i,j ] in [: ( Seg ( len p ) ),( Seg ( len p ) ) :] implies (ex x being (Element of ( REAL )) st P[ i,j,x ])))
+proof
+let i being Nat,j being Nat;
+assume [ i,j ] in [: ( Seg ( len p ) ),( Seg ( len p ) ) :];
+(i = j implies P[ i,j,( p . i ) ]);
+hence thesis;
+end;
+consider M being (Matrix of ( len p ),( REAL )) such that A3: (for i,j being Nat holds ([ i,j ] in ( Indices M ) implies P[ i,j,( M * (i,j) ) ])) from MATRIX_1:sch 2(A1);
+(for i holds (for j holds (([ i,j ] in ( Indices M ) & ( M * (i,j) ) <> ( 0 )) implies i = j))) by A3;
+then reconsider M1 = M as  diagonal (Matrix of ( len p ),( REAL )) by CKB31:def 1;
+take M1;
+( len M ) = ( len p ) by MATRIX_1:24;
+then A4: ( Seg ( len M1 ) ) = ( dom p ) by FINSEQ_1:def 3;
+( width M ) = ( len p ) by MATRIX_1:24;
+then A5: ( Seg ( width M1 ) ) = ( dom p ) by FINSEQ_1:def 3;
+(for j holds (j in ( dom p ) implies ( M1 * (j,j) ) = ( p . j )))
+proof
+let j;
+assume j in ( dom p );
+then [ j,j ] in ( Indices M1 ) by A5,A4,MATRPROB:12;
+hence thesis by A3;
+end;
+hence thesis;
+end;
+uniqueness
+proof
+let M1 being  diagonal (Matrix of ( len p ),( REAL )),M2 being  diagonal (Matrix of ( len p ),( REAL ));
+assume that
+A6: (for j holds (j in ( dom p ) implies ( M1 * (j,j) ) = ( p . j )))
+and
+A7: (for j holds (j in ( dom p ) implies ( M2 * (j,j) ) = ( p . j )));
+( width M1 ) = ( len p ) by MATRIX_1:24;
+then A8: ( Seg ( width M1 ) ) = ( dom p ) by FINSEQ_1:def 3;
+A9: ( Indices M1 ) = ( Indices M2 ) by MATRIX_1:26;
+now
+let i being Nat,j being Nat;
+assume that
+A10: [ i,j ] in ( Indices M1 );
+reconsider i1 = i,j1 = j as (Element of ( NAT )) by ORDINAL1:def 12;
+A11: [ i1,j1 ] in ( Indices M1 ) by A10;
+then A12: j1 in ( Seg ( width M1 ) ) by MATRPROB:12;
+per cases ;
+suppose A13: i = j;
+
+hence ( M1 * (i,j) ) = ( p . j ) by A6,A8,A12
+.= ( M2 * (i,j) ) by A7,A8,A12,A13;
+end;
+suppose A14: i <> j;
+
+hence ( M1 * (i,j) ) = ( 0 ) by A11,CKB31:def 1
+.= ( M2 * (i,j) ) by A9,A11,A14,CKB31:def 1;
+end;
+end;
+hence thesis by MATRIX_1:27;
+end;
+end;

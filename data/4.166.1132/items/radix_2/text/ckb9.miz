@@ -1,0 +1,75 @@
+environ
+vocabularies NUMBERS,NAT_1,INT_1,CARD_1,RELAT_1,ARYTM_3,XXREAL_0,ARYTM_1,NEWTON,FINSEQ_1,RADIX_1,POWER,FINSEQ_2,PARTFUN1,FUNCT_1,CARD_3,ORDINAL4,SUBSET_1,TARSKI,REAL_1,RADIX_2;
+notations TARSKI,NUMBERS,XCMPLX_0,XXREAL_0,REAL_1,INT_1,NAT_1,NAT_D,FUNCT_1,POWER,PARTFUN1,FINSEQ_1,FINSEQ_2,SEQ_1,NEWTON,BINARITH,RVSUM_1,GR_CY_1,WSIERP_1,RADIX_1,SUBSET_1,RECDEF_1;
+definitions TARSKI;
+theorems NAT_1,NAT_2,INT_1,FINSEQ_1,PREPOWER,POWER,RVSUM_1,FINSEQ_2,TARSKI,FUNCT_1,PEPIN,RADIX_1,EULER_2,INT_3,NEWTON,INT_2,XCMPLX_1,XREAL_1,XXREAL_0,XREAL_0,NAT_D,ORDINAL1,PARTFUN1,CARD_1,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8;
+schemes NAT_1,FINSEQ_2,RECDEF_1;
+registrations ORDINAL1,RELSET_1,NUMBERS,XXREAL_0,XREAL_0,NAT_1,INT_1,MEMBERED,NEWTON,XBOOLE_0,VALUED_0,FINSEQ_2,CARD_1,FINSEQ_1;
+constructors REAL_1,NAT_D,NEWTON,POWER,BINARITH,WSIERP_1,GR_CY_1,RADIX_1,SEQ_1,RECDEF_1;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve k for Nat;
+theorem
+Th9: (for n being Nat holds (for x being (Tuple of ( n + 1 ),( k -SD )) holds (for xn being (Tuple of n,( k -SD )) holds ((for i being Nat holds (i in ( Seg n ) implies ( x . i ) = ( xn . i ))) implies ( Sum ( DigitSD x ) ) = ( Sum ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) )))))
+proof
+let n being Nat;
+let x being (Tuple of ( n + 1 ),( k -SD ));
+let xn being (Tuple of n,( k -SD ));
+A1: ( len ( DigitSD x ) ) = ( n + 1 ) by CARD_1:def 7;
+assume A2: (for i being Nat holds (i in ( Seg n ) implies ( x . i ) = ( xn . i )));
+A3: (for i being (Element of ( NAT )) holds (i in ( Seg n ) implies ( DigA (x,i) ) = ( DigA (xn,i) )))
+proof
+let i being (Element of ( NAT ));
+assume A4: i in ( Seg n );
+then i in ( Seg ( n + 1 ) ) by FINSEQ_2:8;
+then ( DigA (x,i) ) = ( x . i ) by RADIX_1:def 3
+.= ( xn . i ) by A2,A4;
+hence thesis by A4,RADIX_1:def 3;
+end;
+A5: ( len ( DigitSD xn ) ) = n by CARD_1:def 7;
+A6: (for i being Nat holds ((1 <= i & i <= ( len ( DigitSD x ) )) implies ( ( DigitSD x ) . i ) = ( ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) . i )))
+proof
+let i being Nat;
+assume that
+A7: 1 <= i
+and
+A8: i <= ( len ( DigitSD x ) );
+A9: ( n + 1 ) in ( Seg ( n + 1 ) ) by FINSEQ_1:3;
+i <= ( n + 1 ) by A8,CARD_1:def 7;
+then A10: i in ( Seg ( n + 1 ) ) by A7,FINSEQ_1:1;
+now
+per cases  by A10,FINSEQ_2:7;
+suppose A11: i in ( Seg n );
+
+then A12: i in ( Seg ( n + 1 ) ) by FINSEQ_2:8;
+then A13: i in ( dom ( DigitSD x ) ) by A1,FINSEQ_1:def 3;
+A14: i in ( dom ( DigitSD xn ) ) by A5,A11,FINSEQ_1:def 3;
+then ( ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) . i ) = ( ( DigitSD xn ) . i ) by FINSEQ_1:def 7
+.= ( ( DigitSD xn ) /. i ) by A14,PARTFUN1:def 6
+.= ( SubDigit (xn,i,k) ) by A11,RADIX_1:def 6
+.= ( ( ( Radix k ) |^ ( i -' 1 ) ) * ( DigB (xn,i) ) ) by RADIX_1:def 5
+.= ( ( ( Radix k ) |^ ( i -' 1 ) ) * ( DigA (xn,i) ) ) by RADIX_1:def 4
+.= ( ( ( Radix k ) |^ ( i -' 1 ) ) * ( DigA (x,i) ) ) by A3,A11
+.= ( ( ( Radix k ) |^ ( i -' 1 ) ) * ( DigB (x,i) ) ) by RADIX_1:def 4
+.= ( SubDigit (x,i,k) ) by RADIX_1:def 5
+.= ( ( DigitSD x ) /. i ) by A12,RADIX_1:def 6;
+hence thesis by A13,PARTFUN1:def 6;
+end;
+suppose A15: i = ( n + 1 );
+
+then A16: i in ( dom ( DigitSD x ) ) by A1,A9,FINSEQ_1:def 3;
+( ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) . i ) = ( ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) . ( ( len ( DigitSD xn ) ) + 1 ) ) by A15,CARD_1:def 7
+.= ( SubDigit (x,( n + 1 ),k) ) by FINSEQ_1:42
+.= ( ( DigitSD x ) /. ( n + 1 ) ) by A9,RADIX_1:def 6
+.= ( ( DigitSD x ) . ( n + 1 ) ) by A15,A16,PARTFUN1:def 6;
+hence thesis by A15;
+end;
+end;
+hence thesis;
+end;
+A17: ( len <* ( SubDigit (x,( n + 1 ),k) ) *> ) = 1 by FINSEQ_1:39;
+( len ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) ) = ( ( len ( DigitSD xn ) ) + ( len <* ( SubDigit (x,( n + 1 ),k) ) *> ) ) by FINSEQ_1:22
+.= ( n + 1 ) by A17,CARD_1:def 7;
+then ( len ( DigitSD x ) ) = ( len ( ( DigitSD xn ) ^ <* ( SubDigit (x,( n + 1 ),k) ) *> ) ) by CARD_1:def 7;
+hence thesis by A6,FINSEQ_1:14;
+end;

@@ -1,0 +1,73 @@
+environ
+vocabularies NUMBERS,NAT_1,XXREAL_0,ARYTM_3,RADIX_1,RADIX_5,FINSEQ_1,CARD_1,FUNCT_1,NEWTON,RELAT_1,PARTFUN1,ARYTM_1,CARD_3,FINSEQ_2,SUBSET_1,INT_1,RADIX_6;
+notations SUBSET_1,NUMBERS,XCMPLX_0,XXREAL_0,INT_1,NAT_1,NAT_D,NEWTON,RADIX_1,FINSEQ_1,FINSEQ_2,FUNCT_1,RELSET_1,PARTFUN1,GR_CY_1,RADIX_5;
+theorems RADIX_1,RADIX_2,RADIX_4,RADIX_5,INT_1,NAT_1,NAT_2,FINSEQ_1,FINSEQ_2,RVSUM_1,NEWTON,PREPOWER,FUNCT_1,FINSEQ_3,XREAL_1,XXREAL_0,NAT_D,CARD_1,CKB1;
+schemes FINSEQ_2,NAT_1;
+registrations RELSET_1,XXREAL_0,XREAL_0,NAT_1,INT_1,ORDINAL1,NEWTON,XBOOLE_0,FINSEQ_2,CARD_1;
+constructors REAL_1,NAT_D,NEWTON,GR_CY_1,RADIX_5,SEQ_1,RELSET_1;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+theorem
+Th1: (for n being Nat holds (n >= 1 implies (for m,k being Nat holds ((m >= 1 & k >= 2) implies ( SDDec ( Fmin (( m + n ),m,k) ) ) = ( SDDec ( Fmin (m,m,k) ) )))))
+proof
+defpred P[ Nat ]
+ means
+(for m,k being Nat holds ((m >= 1 & k >= 2) implies ( SDDec ( Fmin (( m + $1 ),m,k) ) ) = ( SDDec ( Fmin (m,m,k) ) )));
+A1: (for n being Nat holds ((n >= 1 & P[ n ]) implies P[ ( n + 1 ) ]))
+proof
+let n being Nat;
+assume that
+n >= 1
+and
+A2: P[ n ];
+let m being Nat,k being Nat;
+assume that
+A3: m >= 1
+and
+A4: k >= 2;
+( m + n ) >= m by NAT_1:11;
+then A5: ( ( m + n ) + 1 ) > m by NAT_1:13;
+( ( m + n ) + 1 ) in ( Seg ( ( m + n ) + 1 ) ) by FINSEQ_1:4;
+then A6: ( DigA (( Fmin (( ( m + n ) + 1 ),m,k) ),( ( m + n ) + 1 )) ) = ( FminDigit (m,k,( ( m + n ) + 1 )) ) by RADIX_5:def 6
+.= ( 0 ) by A4,A5,RADIX_5:def 5;
+(for i being Nat holds (i in ( Seg ( m + n ) ) implies ( ( Fmin (( ( m + n ) + 1 ),m,k) ) . i ) = ( ( Fmin (( m + n ),m,k) ) . i )))
+proof
+let i being Nat;
+assume A7: i in ( Seg ( m + n ) );
+then A8: i in ( Seg ( ( m + n ) + 1 ) ) by FINSEQ_2:8;
+then ( ( Fmin (( ( m + n ) + 1 ),m,k) ) . i ) = ( DigA (( Fmin (( ( m + n ) + 1 ),m,k) ),i) ) by RADIX_1:def 3
+.= ( FminDigit (m,k,i) ) by A8,RADIX_5:def 6
+.= ( DigA (( Fmin (( m + n ),m,k) ),i) ) by A7,RADIX_5:def 6;
+hence thesis by A7,RADIX_1:def 3;
+end;
+then ( SDDec ( Fmin (( m + ( n + 1 ) ),m,k) ) ) = ( ( SDDec ( Fmin (( m + n ),m,k) ) ) + ( ( ( Radix k ) |^ ( m + n ) ) * ( DigA (( Fmin (( ( m + n ) + 1 ),m,k) ),( ( m + n ) + 1 )) ) ) ) by RADIX_2:10
+.= ( SDDec ( Fmin (m,m,k) ) ) by A2,A3,A4,A6;
+hence thesis;
+end;
+A9: P[ 1 ]
+proof
+let m being Nat,k being Nat;
+assume that
+m >= 1
+and
+A10: k >= 2;
+A11: ( m + 1 ) > m by NAT_1:13;
+(for i being Nat holds (i in ( Seg m ) implies ( ( Fmin (( m + 1 ),m,k) ) . i ) = ( ( Fmin (m,m,k) ) . i )))
+proof
+let i being Nat;
+assume A12: i in ( Seg m );
+then A13: i in ( Seg ( m + 1 ) ) by FINSEQ_2:8;
+then ( ( Fmin (( m + 1 ),m,k) ) . i ) = ( DigA (( Fmin (( m + 1 ),m,k) ),i) ) by RADIX_1:def 3
+.= ( FminDigit (m,k,i) ) by A13,RADIX_5:def 6
+.= ( DigA (( Fmin (m,m,k) ),i) ) by A12,RADIX_5:def 6;
+hence thesis by A12,RADIX_1:def 3;
+end;
+then A14: ( SDDec ( Fmin (( m + 1 ),m,k) ) ) = ( ( SDDec ( Fmin (m,m,k) ) ) + ( ( ( Radix k ) |^ m ) * ( DigA (( Fmin (( m + 1 ),m,k) ),( m + 1 )) ) ) ) by RADIX_2:10;
+( m + 1 ) in ( Seg ( m + 1 ) ) by FINSEQ_1:4;
+then ( DigA (( Fmin (( m + 1 ),m,k) ),( m + 1 )) ) = ( FminDigit (m,k,( m + 1 )) ) by RADIX_5:def 6
+.= ( 0 ) by A10,A11,RADIX_5:def 5;
+hence thesis by A14;
+end;
+(for n being Nat holds (n >= 1 implies P[ n ])) from NAT_1:sch 8(A9,A1);
+hence thesis;
+end;

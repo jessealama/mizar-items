@@ -1,0 +1,71 @@
+environ
+vocabularies NUMBERS,FSM_1,SCMFSA_2,SF_MASTR,AMI_1,SCMFSA7B,SUBSET_1,UNIALG_2,SCMFSA6C,SCMFSA6B,FUNCT_1,XBOOLE_0,FUNCT_4,CARD_1,AMISTD_2,RELAT_1,GRAPHSP,AMI_3,PARTFUN1,COMPLEX1,SCMFSA8B,TURING_1,SCMFSA_9,ARYTM_3,FUNCOP_1,SCMFSA8A,CARD_3,SFMASTR1,ARYTM_1,XXREAL_0,SCMFSA6A,TARSKI,SCMFSA9A,FINSEQ_1,GRAPH_2,AOFA_I00,FUNCT_2,FINSEQ_2,SFMASTR3,NAT_1,SCMNORM,PBOOLE,COMPOS_1;
+notations TARSKI,XBOOLE_0,SUBSET_1,CARD_1,NUMBERS,XCMPLX_0,CARD_3,INT_2,RELAT_1,FUNCT_1,PARTFUN1,FUNCT_2,FUNCT_4,FUNCT_7,PBOOLE,FUNCOP_1,GRAPH_2,FINSEQ_1,FINSEQ_2,MEMSTR_0,COMPOS_1,EXTPRO_1,AMISTD_1,SCMFSA_2,SCMFSA6A,SCMFSA6B,SF_MASTR,SCMFSA6C,SCMFSA7B,SCMFSA8A,SCMFSA8B,SCMFSA_9,SFMASTR1,SCMFSA9A,XXREAL_0,NAT_1,CKB11,CKB19;
+definitions TARSKI,SCMFSA7B,SCMFSA9A,GRAPH_2,SCMFSA6A,COMPOS_1,EXTPRO_1,MEMSTR_0,CKB11,CKB19;
+theorems TARSKI,ZFMISC_1,ENUMSET1,ABSVALUE,NAT_1,INT_1,RELAT_1,FUNCT_7,FINSEQ_1,FINSEQ_2,FINSEQ_3,FINSEQ_4,GRAPH_2,SCMFSA_2,MEMSTR_0,SCMFSA6A,SCMFSA6B,SF_MASTR,SCMFSA6C,SCMFSA7B,SCMFSA8A,SCMFSA8B,SCMFSA8C,SCMFSA_9,SFMASTR1,SCMFSA9A,SFMASTR2,XBOOLE_0,XBOOLE_1,XREAL_1,XXREAL_0,PARTFUN1,AFINSQ_1,PBOOLE,EXTPRO_1,CARD_3,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB21,CKB22;
+schemes FUNCT_2,NAT_1;
+registrations SUBSET_1,SETFAM_1,FUNCT_1,ORDINAL1,RELSET_1,FUNCT_2,FINSET_1,NUMBERS,XXREAL_0,XREAL_0,NAT_1,INT_1,CARD_3,SCMFSA_2,SF_MASTR,SCMFSA6B,SCMFSA6C,SCMFSA7B,SCMFSA8A,SCMFSA8B,SCMFSA_9,SFMASTR1,XBOOLE_0,VALUED_0,AFINSQ_1,FUNCOP_1,COMPOS_1,EXTPRO_1,PBOOLE,FUNCT_4,MEMSTR_0,SCMFSA6A,CKB7;
+constructors SETWISEO,REAL_1,INT_2,MESFUNC1,SCMFSA6A,SCMFSA6B,SCMFSA6C,SCMFSA8A,SCMFSA8B,SCMFSA_9,SFMASTR1,SCMFSA9A,RELSET_1,FUNCT_4,PBOOLE,GRAPH_2,SCMFSA7B,MEMSTR_0,AMISTD_1,CKB11,CKB19;
+requirements REAL,NUMERALS,BOOLE,SUBSET,ARITHM;
+begin
+reserve s for (State of ( SCM+FSA ));
+reserve a for  read-write Int-Location;
+reserve bb for Int-Location;
+reserve cc for Int-Location;
+reserve Ig for  good (Program of ( SCM+FSA ));
+reserve k for (Element of ( NAT ));
+reserve p for (Instruction-Sequence of ( SCM+FSA ));
+theorem
+Th26: ((( s . ( intloc ( 0 ) ) ) = 1 &  ProperForUpBody a,bb,cc,Ig,s,p) implies (for k holds (( ( ( StepForUp (a,bb,cc,Ig,p,s) ) . k ) . ( 1 -stRWNotIn ( { a,bb,cc } \/ ( UsedIntLoc Ig ) ) ) ) > ( 0 ) iff k < ( ( ( s . cc ) - ( s . bb ) ) + 1 ))))
+proof
+set I = Ig;
+set SF = ( StepForUp (a,bb,cc,I,p,s) );
+set aux = ( 1 -stRWNotIn ( { a,bb,cc } \/ ( UsedIntLoc I ) ) );
+set s2 = ( ( s +* (aux,( ( ( s . cc ) - ( s . bb ) ) + 1 )) ) +* (a,( s . bb )) );
+set p2 = p;
+set IB = ( ( I ';' ( AddTo (a,( intloc ( 0 ) )) ) ) ';' ( SubFrom (aux,( intloc ( 0 ) )) ) );
+set SW2 = ( StepWhile>0 (aux,IB,p2,s2) );
+set scb1 = ( ( ( s . cc ) - ( s . bb ) ) + 1 );
+defpred P[ Nat ]
+ means
+(( ( SF . $1 ) . aux ) > ( 0 ) implies $1 < scb1);
+assume A1: (( s . ( intloc ( 0 ) ) ) = 1 &  ProperForUpBody a,bb,cc,I,s,p);
+A2: (for k holds (P[ k ] implies P[ ( k + 1 ) ]))
+proof
+let k;
+assume that
+A3: P[ k ]
+and
+A4: ( ( SF . ( k + 1 ) ) . aux ) > ( 0 );
+A5: ( ( SF . k ) . aux ) > ( 0 )
+proof
+assume A6: ( ( SF . k ) . aux ) <= ( 0 );
+then ( DataPart ( SF . ( k + 1 ) ) ) = ( DataPart ( SF . k ) ) by SCMFSA9A:31;
+hence contradiction by A4,A6,SCMFSA6A:7;
+end;
+then reconsider scb1 as (Element of ( NAT )) by A3,INT_1:3;
+assume ( k + 1 ) >= ( ( ( s . cc ) - ( s . bb ) ) + 1 );
+then A7: ( ( ( SF . ( k + 1 ) ) . aux ) + ( k + 1 ) ) > ( ( 0 ) + scb1 ) by A4,XREAL_1:8;
+( k + 1 ) <= scb1 by A3,A5,NAT_1:13;
+hence contradiction by A1,A7,CKB22:1;
+end;
+let k;
+a in { a,bb,cc } by ENUMSET1:def 1;
+then a in ( { a,bb,cc } \/ ( UsedIntLoc I ) ) by XBOOLE_0:def 3;
+then A8: aux <> a by SFMASTR1:20;
+A9: aux in ( dom s ) by SCMFSA_2:42;
+A10: P[ ( 0 ) ]
+proof
+( SW2 . ( 0 ) ) = s2 by SCMFSA_9:def 5;
+then A11: ( ( SF . ( 0 ) ) . aux ) = ( ( s +* (aux,( ( ( s . cc ) - ( s . bb ) ) + 1 )) ) . aux ) by A8,FUNCT_7:32
+.= scb1 by A9,FUNCT_7:31;
+assume ( ( SF . ( 0 ) ) . aux ) > ( 0 );
+hence thesis by A11;
+end;
+(for k holds P[ k ]) from NAT_1:sch 1(A10,A2);
+hence P[ k ];
+assume A12: k < scb1;
+then A13: ( k - k ) < ( scb1 - k ) by XREAL_1:9;
+( ( ( SF . k ) . aux ) + k ) = scb1 by A1,A12,CKB22:1;
+hence thesis by A13;
+end;

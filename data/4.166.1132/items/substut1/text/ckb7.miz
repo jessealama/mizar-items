@@ -1,0 +1,90 @@
+environ
+vocabularies NUMBERS,SUBSET_1,QC_LANG1,CQC_LANG,FINSEQ_1,PARTFUN1,XBOOLE_0,FUNCT_1,RELAT_1,XXREAL_0,NAT_1,TARSKI,FINSET_1,ZFMISC_1,ZF_LANG,CLASSES2,CARD_1,BVFUNC_2,ORDINAL4,REALSET1,XBOOLEAN,MARGREL1,MCART_1,ARYTM_3,SUBSTUT1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,RELAT_1,FUNCT_1,CARD_1,NUMBERS,FINSEQ_1,NAT_1,QC_LANG1,QC_LANG3,PARTFUN1,SEQ_4,CQC_LANG,FINSET_1,RELSET_1,FUNCT_2,DOMAIN_1,MCART_1,XXREAL_0,CKB1,CKB3,CKB5;
+definitions TARSKI,FUNCT_1,QC_LANG1,QC_LANG3,CKB1,CKB5;
+theorems TARSKI,FINSEQ_1,FUNCT_1,MCART_1,CQC_SIM1,XBOOLE_0,CQC_LANG,QC_LANG1,ZFMISC_1,RELAT_1,XBOOLE_1,CARD_2,CARD_3,FUNCT_2,PARTFUN1,RELSET_1,NAT_1,QC_LANG2,FINSEQ_3,CARD_1,XXREAL_0,ORDINAL1,CKB1,CKB5,CKB6;
+schemes FUNCT_1,FUNCT_2,QC_LANG1,QC_LANG3,NAT_1,XBOOLE_0,FRAENKEL,FINSEQ_1,CLASSES1;
+registrations XBOOLE_0,SUBSET_1,FUNCT_1,ORDINAL1,RELSET_1,PARTFUN1,FINSET_1,MEMBERED,FINSEQ_1,RFINSEQ,QC_LANG1,CQC_LANG,XXREAL_0,CARD_1,CKB2,CKB4;
+constructors PARTFUN1,DOMAIN_1,XXREAL_0,NAT_1,SEQ_4,QC_LANG3,CQC_SIM1,RELSET_1,CKB1,CKB5;
+requirements REAL,NUMERALS,SUBSET,BOOLE;
+begin
+reserve k for (Element of ( NAT ));
+reserve l1 for (FinSequence of ( QC-variables ));
+reserve l2 for (FinSequence of ( QC-variables ));
+reserve Sub for CQC_Substitution;
+definition
+let l being (FinSequence of ( QC-variables ));
+let Sub;
+func CQC_Subst (l,Sub) -> (FinSequence of ( QC-variables ))
+means
+:Def3: (( len it ) = ( len l ) & (for k holds ((1 <= k & k <= ( len l )) implies ((( l . k ) in ( dom Sub ) implies ( it . k ) = ( Sub . ( l . k ) )) & ((not ( l . k ) in ( dom Sub )) implies ( it . k ) = ( l . k ))))));
+existence
+proof
+defpred P[ set,set ]
+ means
+((( l . $1 ) in ( dom Sub ) implies $2 = ( Sub . ( l . $1 ) )) & ((not ( l . $1 ) in ( dom Sub )) implies $2 = ( l . $1 )));
+A1: (for k being Nat holds (k in ( Seg ( len l ) ) implies (ex y being set st P[ k,y ])))
+proof
+let k being Nat;
+assume k in ( Seg ( len l ) );
+(( l . k ) in ( dom Sub ) implies thesis);
+hence thesis;
+end;
+consider s being FinSequence such that A2: ( dom s ) = ( Seg ( len l ) ) and A3: (for k being Nat holds (k in ( Seg ( len l ) ) implies P[ k,( s . k ) ])) from FINSEQ_1:sch 1(A1);
+( rng s ) c= ( QC-variables )
+proof
+let y being set;
+assume y in ( rng s );
+then consider x being set such that A4: x in ( dom s ) and A5: ( s . x ) = y by FUNCT_1:def 3;
+reconsider x as (Element of ( NAT )) by A4;
+now
+per cases ;
+case A6: ( l . x ) in ( dom Sub );
+then ( s . x ) = ( Sub . ( l . x ) ) by A2,A3,A4;
+hence ( s . x ) in ( bound_QC-variables ) by A6,CKB6:1;
+end;
+case A7: (not ( l . x ) in ( dom Sub ));
+x in ( dom l ) by A2,A4,FINSEQ_1:def 3;
+then A8: ( l . x ) in ( rng l ) by FUNCT_1:3;
+( s . x ) = ( l . x ) by A2,A3,A4,A7;
+hence ( s . x ) in ( QC-variables ) by A8;
+end;
+end;
+hence thesis by A5;
+end;
+then reconsider s as (FinSequence of ( QC-variables )) by FINSEQ_1:def 4;
+take s;
+thus ( len s ) = ( len l ) by A2,FINSEQ_1:def 3;
+thus (for k holds ((1 <= k & k <= ( len l )) implies ((( l . k ) in ( dom Sub ) implies ( s . k ) = ( Sub . ( l . k ) )) & ((not ( l . k ) in ( dom Sub )) implies ( s . k ) = ( l . k )))))
+proof
+let k;
+assume (1 <= k & k <= ( len l ));
+then k in ( dom l ) by FINSEQ_3:25;
+then k in ( Seg ( len l ) ) by FINSEQ_1:def 3;
+hence thesis by A3;
+end;
+
+end;
+uniqueness
+proof
+let l1;
+let l2;
+assume that
+A9: ( len l1 ) = ( len l )
+and
+A10: (for k holds ((1 <= k & k <= ( len l )) implies ((( l . k ) in ( dom Sub ) implies ( l1 . k ) = ( Sub . ( l . k ) )) & ((not ( l . k ) in ( dom Sub )) implies ( l1 . k ) = ( l . k )))))
+and
+A11: ( len l2 ) = ( len l )
+and
+A12: (for k holds ((1 <= k & k <= ( len l )) implies ((( l . k ) in ( dom Sub ) implies ( l2 . k ) = ( Sub . ( l . k ) )) & ((not ( l . k ) in ( dom Sub )) implies ( l2 . k ) = ( l . k )))));
+now
+let k being Nat;
+assume A13: (1 <= k & k <= ( len l ));
+A14: k in ( NAT ) by ORDINAL1:def 12;
+then A15: ((not ( l . k ) in ( dom Sub )) implies ( l1 . k ) = ( l . k )) by A10,A13;
+(( l . k ) in ( dom Sub ) implies ( l1 . k ) = ( Sub . ( l . k ) )) by A10,A14,A13;
+hence ( l1 . k ) = ( l2 . k ) by A12,A14,A13,A15;
+end;
+hence thesis by A9,A11,FINSEQ_1:14;
+end;
+end;

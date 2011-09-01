@@ -1,0 +1,47 @@
+environ
+vocabularies NUMBERS,SUBSET_1,XBOOLE_0,FINSEQ_1,XXREAL_0,FUNCT_1,RELAT_1,TARSKI,VALUED_0,CARD_1,ARYTM_3,ORDINAL1,CLASSES1,ZFMISC_1,ORDINAL2,FUNCOP_1,MCART_1,NAT_1,ORDINAL4,ARYTM_1,REAL_1,PARTFUN1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,MCART_1,SUBSET_1,NUMBERS,XXREAL_0,REAL_1,NAT_1,RELAT_1,FUNCT_1,PARTFUN1,FUNCOP_1,ORDINAL1,ORDINAL2,CLASSES1,FINSEQ_1,FUNCT_2,BINOP_1,DOMAIN_1,VALUED_0,CKB2;
+definitions TARSKI,BINOP_1;
+theorems TARSKI,NAT_1,FUNCT_1,FINSEQ_1,FUNCT_2,RELAT_1,XBOOLE_1,FUNCOP_1,XREAL_1,XXREAL_0,ORDINAL1,CLASSES1,ORDINAL2,XBOOLE_0,ZFMISC_1,MCART_1,PARTFUN1,CKB1;
+schemes NAT_1,FUNCT_1,FINSEQ_1,BINOP_1,CLASSES1,ORDINAL1,FUNCT_2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,ORDINAL1,FINSET_1,XXREAL_0,XREAL_0,NAT_1,CARD_1,NUMBERS,RELSET_1,INT_1,XCMPLX_0,FINSEQ_1,VALUED_0;
+constructors BINOP_1,DOMAIN_1,FUNCOP_1,XXREAL_0,REAL_1,NAT_1,FINSEQ_1,VALUED_0,CLASSES1,ORDINAL2,RELSET_1,CKB2;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve n for (Element of ( NAT ));
+reserve x for set;
+scheme FinRecUn { A() -> set,N() -> Nat,F,G() -> FinSequence,P[set,set,set] } : F() = G()
+provided
+A1: (for n holds ((1 <= n & n < N()) implies (for x,y1,y2 being set holds ((P[ n,x,y1 ] & P[ n,x,y2 ]) implies y1 = y2))))
+and
+A2: ((( len F() ) = N() & (( F() . 1 ) = A() or N() = ( 0 ))) & (for n holds ((1 <= n & n < N()) implies P[ n,( F() . n ),( F() . ( n + 1 ) ) ])))
+and
+A3: ((( len G() ) = N() & (( G() . 1 ) = A() or N() = ( 0 ))) & (for n holds ((1 <= n & n < N()) implies P[ n,( G() . n ),( G() . ( n + 1 ) ) ])))
+proof
+defpred P[ Nat ]
+ means
+((1 <= $1 & $1 <= N()) & ( F() . $1 ) <> ( G() . $1 ));
+assume A4: F() <> G();
+( dom F() ) = ( Seg ( len G() ) ) by A2,A3,FINSEQ_1:def 3
+.= ( dom G() ) by FINSEQ_1:def 3;
+then consider x such that A5: x in ( dom F() ) and A6: ( F() . x ) <> ( G() . x ) by A4,FUNCT_1:2;
+A7: x in ( Seg ( len F() ) ) by A5,FINSEQ_1:def 3;
+reconsider x as (Element of ( NAT )) by A5;
+A8: 1 <= x by A7,FINSEQ_1:1;
+x <= N() by A2,A7,FINSEQ_1:1;
+then A9: (ex n being Nat st P[ n ]) by A6,A8;
+consider n being Nat such that A10: (P[ n ] & (for k being Nat holds (P[ k ] implies n <= k))) from NAT_1:sch 5(A9);
+( 0 ) <> n by A10;
+then consider k being Nat such that A11: n = ( k + 1 ) by NAT_1:6;
+reconsider k as (Element of ( NAT )) by ORDINAL1:def 12;
+n <> 1 by A2,A3,A10;
+then 1 < n by A10,XXREAL_0:1;
+then A12: 1 <= k by A11,NAT_1:13;
+k < n by A11,XREAL_1:29;
+then A13: k < N() by A10,XXREAL_0:2;
+n > k by A11,NAT_1:13;
+then ( F() . k ) = ( G() . k ) by A10,A12,A13;
+then A14: P[ k,( F() . k ),( G() . ( k + 1 ) ) ] by A3,A12,A13;
+P[ k,( F() . k ),( F() . ( k + 1 ) ) ] by A2,A12,A13;
+hence contradiction by A1,A10,A11,A12,A13,A14;
+end;

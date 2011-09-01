@@ -1,0 +1,306 @@
+environ
+vocabularies NUMBERS,NAT_1,INT_1,XXREAL_0,ARYTM_3,RADIX_1,POWER,RELAT_1,RADIX_3,ARYTM_1,SUBSET_1,FINSEQ_1,NEWTON,CARD_1,FINSEQ_2,TARSKI,FUNCT_1,ORDINAL4,PARTFUN1,CARD_3,RADIX_4;
+notations TARSKI,SUBSET_1,NUMBERS,XCMPLX_0,INT_1,NAT_1,NAT_D,FUNCT_1,PARTFUN1,NEWTON,POWER,XXREAL_0,FINSEQ_1,FINSEQ_2,GR_CY_1,RADIX_1,RADIX_3,CKB11,CKB12;
+definitions RADIX_1,CKB11,CKB12;
+theorems RADIX_1,POWER,NAT_1,INT_1,FINSEQ_1,FINSEQ_2,NEWTON,RVSUM_1,PREPOWER,JORDAN12,EULER_2,RADIX_3,XREAL_1,XXREAL_0,NAT_D,ORDINAL1,PARTFUN1,XREAL_0,CARD_1,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13;
+schemes FINSEQ_2,NAT_1;
+registrations RELSET_1,NUMBERS,XREAL_0,NAT_1,INT_1,MEMBERED,NEWTON,XBOOLE_0,VALUED_0,FINSEQ_2,CARD_1;
+constructors REAL_1,NAT_D,NEWTON,POWER,BINARITH,GR_CY_1,RADIX_3,CKB11,CKB12;
+requirements REAL,SUBSET,BOOLE,NUMERALS,ARITHM;
+begin
+reserve n for Nat;
+reserve k for Nat;
+reserve x for Nat;
+reserve y for Nat;
+theorem
+(for n holds (n >= 1 implies (for k holds (for x holds (for y holds (((k >= 3 & x is_represented_by n,k) & y is_represented_by n,k) implies ( x + y ) = ( SDSub2IntOut ( ( SD2SDSub ( DecSD (x,n,k) ) ) '+' ( SD2SDSub ( DecSD (y,n,k) ) ) ) )))))))
+proof
+defpred P[ Nat ]
+ means
+(for k,x,y being Nat holds (((k >= 3 & x is_represented_by $1,k) & y is_represented_by $1,k) implies ( x + y ) = ( SDSub2IntOut ( ( SD2SDSub ( DecSD (x,$1,k) ) ) '+' ( SD2SDSub ( DecSD (y,$1,k) ) ) ) )));
+let n;
+assume A1: n >= 1;
+A2: (for n being Nat holds ((n >= 1 & P[ n ]) implies P[ ( n + 1 ) ]))
+proof
+let n being Nat;
+assume that
+A3: n >= 1
+and
+A4: P[ n ];
+let k being Nat,x being Nat,y being Nat;
+assume that
+A5: k >= 3
+and
+A6: x is_represented_by ( n + 1 ),k
+and
+A7: y is_represented_by ( n + 1 ),k;
+reconsider k,x,y as (Element of ( NAT )) by ORDINAL1:def 12;
+A8: ( ( n + 1 ) + 1 ) in ( Seg ( ( n + 1 ) + 1 ) ) by FINSEQ_1:3;
+then A9: ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) = ( SD2SDSubDigitS (( DecSD (x,( n + 1 ),k) ),( ( n + 1 ) + 1 ),k) ) by RADIX_3:def 8
+.= ( SD2SDSubDigit (( DecSD (x,( n + 1 ),k) ),( ( n + 1 ) + 1 ),k) ) by A5,A8,RADIX_3:def 7,XXREAL_0:2
+.= ( SDSub_Add_Carry (( DigA (( DecSD (x,( n + 1 ),k) ),( ( ( n + 1 ) + 1 ) -' 1 )) ),k) ) by RADIX_3:def 6
+.= ( SDSub_Add_Carry (( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ),k) ) by NAT_D:34;
+A10: ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) = ( SD2SDSubDigitS (( DecSD (y,( n + 1 ),k) ),( ( n + 1 ) + 1 ),k) ) by A8,RADIX_3:def 8
+.= ( SD2SDSubDigit (( DecSD (y,( n + 1 ),k) ),( ( n + 1 ) + 1 ),k) ) by A5,A8,RADIX_3:def 7,XXREAL_0:2
+.= ( SDSub_Add_Carry (( DigA (( DecSD (y,( n + 1 ),k) ),( ( ( n + 1 ) + 1 ) -' 1 )) ),k) ) by RADIX_3:def 6
+.= ( SDSub_Add_Carry (( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ),k) ) by NAT_D:34;
+set yn = ( y mod ( ( Radix k ) |^ n ) );
+set xn = ( x mod ( ( Radix k ) |^ n ) );
+set zn = ( ( SD2SDSub ( DecSD (xn,n,k) ) ) '+' ( SD2SDSub ( DecSD (yn,n,k) ) ) );
+deffunc GF(Nat) = ( SDSub2INTDigit (zn,$1,k) );
+consider znpp being (FinSequence of ( INT )) such that A11: ( len znpp ) = n and A12: (for i being Nat holds (i in ( dom znpp ) implies ( znpp . i ) = GF(i))) from FINSEQ_2:sch 1;
+A13: ( len ( SDSub2INT zn ) ) = ( n + 1 ) by CARD_1:def 7;
+A14: ( dom znpp ) = ( Seg n ) by A11,FINSEQ_1:def 3;
+A15: (for j being Nat holds ((1 <= j & j <= ( len ( SDSub2INT zn ) )) implies ( ( SDSub2INT zn ) . j ) = ( ( znpp ^ <* ( SDSub2INTDigit (zn,( n + 1 ),k) ) *> ) . j )))
+proof
+let j being Nat;
+assume (1 <= j & j <= ( len ( SDSub2INT zn ) ));
+then A16: j in ( Seg ( n + 1 ) ) by A13,FINSEQ_1:1;
+then A17: j in ( dom ( SDSub2INT zn ) ) by A13,FINSEQ_1:def 3;
+now
+per cases  by A16,FINSEQ_2:7;
+suppose A18: j in ( Seg n );
+
+then j in ( dom znpp ) by A11,FINSEQ_1:def 3;
+then ( ( znpp ^ <* ( SDSub2INTDigit (zn,( n + 1 ),k) ) *> ) . j ) = ( znpp . j ) by FINSEQ_1:def 7
+.= ( SDSub2INTDigit (zn,j,k) ) by A12,A14,A18
+.= ( ( SDSub2INT zn ) /. j ) by A16,RADIX_3:def 11
+.= ( ( SDSub2INT zn ) . j ) by A17,PARTFUN1:def 6;
+hence thesis;
+end;
+suppose A19: j = ( n + 1 );
+
+A20: j in ( dom ( SDSub2INT zn ) ) by A13,A16,FINSEQ_1:def 3;
+( ( znpp ^ <* ( SDSub2INTDigit (zn,( n + 1 ),k) ) *> ) . j ) = ( SDSub2INTDigit (zn,( n + 1 ),k) ) by A11,A19,FINSEQ_1:42
+.= ( ( SDSub2INT zn ) /. ( n + 1 ) ) by A16,A19,RADIX_3:def 11
+.= ( ( SDSub2INT zn ) . j ) by A19,A20,PARTFUN1:def 6;
+hence thesis;
+end;
+end;
+hence thesis;
+end;
+( len ( znpp ^ <* ( SDSub2INTDigit (zn,( n + 1 ),k) ) *> ) ) = ( n + 1 ) by A11,FINSEQ_2:16;
+then A21: ( SDSub2INT zn ) = ( znpp ^ <* ( SDSub2INTDigit (zn,( n + 1 ),k) ) *> ) by A13,A15,FINSEQ_1:14;
+A22: ( Radix k ) > ( 0 ) by POWER:34;
+then yn < ( ( Radix k ) |^ n ) by NAT_D:1,PREPOWER:6;
+then A23: yn is_represented_by n,k by RADIX_1:def 12;
+set SDN1 = ( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( n + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( n + 1 )) ) );
+set z = ( ( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ) '+' ( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ) );
+deffunc G(Nat) = ( SDSub2INTDigit (z,$1,k) );
+consider zpp being (FinSequence of ( INT )) such that A24: ( len zpp ) = n and A25: (for i being Nat holds (i in ( dom zpp ) implies ( zpp . i ) = G(i))) from FINSEQ_2:sch 1;
+consider zp being (FinSequence of ( INT )) such that A26: ( len zp ) = ( n + 1 ) and A27: (for i being Nat holds (i in ( dom zp ) implies ( zp . i ) = G(i))) from FINSEQ_2:sch 1;
+A28: ( dom zpp ) = ( Seg n ) by A24,FINSEQ_1:def 3;
+(for j being Nat holds ((1 <= j & j <= ( len znpp )) implies ( znpp . j ) = ( zpp . j )))
+proof
+let j being Nat;
+assume that
+A29: 1 <= j
+and
+A30: j <= ( len znpp );
+A31: j <= ( n + 1 ) by A11,A30,NAT_1:12;
+then A32: j in ( Seg ( n + 1 ) ) by A29,FINSEQ_1:1;
+j <= ( ( n + 1 ) + 1 ) by A31,NAT_1:12;
+then A33: j in ( Seg ( ( n + 1 ) + 1 ) ) by A29,FINSEQ_1:1;
+A34: j in ( Seg n ) by A11,A29,A30,FINSEQ_1:1;
+then ( zpp . j ) = ( SDSub2INTDigit (z,j,k) ) by A25,A28
+.= ( ( ( Radix k ) |^ ( j -' 1 ) ) * ( DigB_SDSub (z,j) ) ) by RADIX_3:def 10
+.= ( ( ( Radix k ) |^ ( j -' 1 ) ) * ( DigA_SDSub (z,j) ) ) by RADIX_3:def 9
+.= ( ( ( Radix k ) |^ ( j -' 1 ) ) * ( SDSubAddDigit (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),j,k) ) ) by A33,CKB12:def 1
+.= ( ( ( Radix k ) |^ ( j -' 1 ) ) * ( SDSubAddDigit (( SD2SDSub ( DecSD (xn,n,k) ) ),( SD2SDSub ( DecSD (yn,n,k) ) ),j,k) ) ) by A5,A34,CKB13:1,XXREAL_0:2
+.= ( ( ( Radix k ) |^ ( j -' 1 ) ) * ( DigA_SDSub (zn,j) ) ) by A32,CKB12:def 1
+.= ( ( ( Radix k ) |^ ( j -' 1 ) ) * ( DigB_SDSub (zn,j) ) ) by RADIX_3:def 9
+.= ( SDSub2INTDigit (zn,j,k) ) by RADIX_3:def 10
+.= ( znpp . j ) by A12,A14,A34;
+hence thesis;
+end;
+then A35: zpp = znpp by A24,A11,FINSEQ_1:14;
+set RN1 = ( ( Radix k ) |^ ( n + 1 ) );
+set SDN11 = ( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) );
+set RN1SD11 = ( RN1 * ( SDSub_Add_Data (SDN11,k) ) );
+set RN = ( ( Radix k ) |^ n );
+reconsider RNDx11 = ( RN * ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( n + 1 )) ) ),RNDy11 = ( RN * ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( n + 1 )) ) ),RN1Cx11 = ( RN1 * ( SDSub_Add_Carry (( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ),k) ) ),RN1Cy11 = ( RN1 * ( SDSub_Add_Carry (( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ),k) ) ),RNCx1 = ( RN * ( SDSub_Add_Carry (( DigA (( DecSD (x,( n + 1 ),k) ),n) ),k) ) ),RNCy1 = ( RN * ( SDSub_Add_Carry (( DigA (( DecSD (y,( n + 1 ),k) ),n) ),k) ) ),RNCx = ( RN * ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) ) ),RNCy = ( RN * ( SDSub_Add_Carry (( DigA (( DecSD (y,n,k) ),n) ),k) ) ) as Integer;
+set SDN = ( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),n) ) );
+set RNSC = ( RN * ( SDSub_Add_Carry (SDN,k) ) );
+A36: ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) = ( ( ( Radix k ) |^ ( ( ( n + 1 ) + 1 ) -' 1 ) ) * ( DigB_SDSub (z,( ( n + 1 ) + 1 )) ) ) by RADIX_3:def 10
+.= ( ( ( Radix k ) |^ ( ( ( n + 1 ) + 1 ) -' 1 ) ) * ( DigA_SDSub (z,( ( n + 1 ) + 1 )) ) ) by RADIX_3:def 9
+.= ( ( ( Radix k ) |^ ( n + 1 ) ) * ( DigA_SDSub (z,( ( n + 1 ) + 1 )) ) ) by NAT_D:34
+.= ( RN1 * ( SDSubAddDigit (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) + 1 ),k) ) ) by A8,CKB12:def 1
+.= ( RN1 * ( ( SDSub_Add_Data (SDN11,k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( ( n + 1 ) + 1 ) -' 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( ( n + 1 ) + 1 ) -' 1 )) ) ),k) ) ) ) by A5,A8,CKB11:def 1,XXREAL_0:2
+.= ( RN1 * ( ( SDSub_Add_Data (SDN11,k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( n + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( ( n + 1 ) + 1 ) -' 1 )) ) ),k) ) ) ) by NAT_D:34
+.= ( RN1 * ( ( ( SDSub_Add_Data (SDN11,k) ) + ( SDSub_Add_Carry (SDN1,k) ) ) + ( 0 ) ) ) by NAT_D:34
+.= ( ( RN1 * ( SDSub_Add_Data (SDN11,k) ) ) + ( RN1 * ( SDSub_Add_Carry (SDN1,k) ) ) );
+RN1SD11 = ( RN1 * ( ( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) ) - ( ( Radix k ) * ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) ),k) ) ) ) ) by RADIX_3:def 4;
+then A37: RN1SD11 = ( RN1 * ( ( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) + 1 )) ) ) - ( ( Radix k ) * ( 0 ) ) ) ) by A5,A9,A10,CKB5:1
+.= ( RN1 * ( ( SDSub_Add_Carry (( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ),k) ) + ( SDSub_Add_Carry (( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ),k) ) ) ) by A9,A10;
+A38: ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) = ( RN * ( x div ( ( Radix k ) |^ n ) ) ) by A6,RADIX_1:24;
+xn < ( ( Radix k ) |^ n ) by A22,NAT_D:1,PREPOWER:6;
+then xn is_represented_by n,k by RADIX_1:def 12;
+then ( xn + yn ) = ( SDSub2IntOut zn ) by A4,A5,A23
+.= ( Sum ( SDSub2INT zn ) ) by RADIX_3:def 12;
+then A39: ( ( xn + yn ) + ( 0 ) ) = ( ( Sum znpp ) + ( SDSub2INTDigit (zn,( n + 1 ),k) ) ) by A21,RVSUM_1:74;
+set SDACy = ( SDSub_Add_Carry (( DigA (( DecSD (y,n,k) ),n) ),k) );
+set SDACx = ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) );
+A40: ( SDSub_Add_Data (( SDACx + SDACy ),k) ) = ( ( SDACx + SDACy ) - ( ( Radix k ) * ( SDSub_Add_Carry (( SDACx + SDACy ),k) ) ) ) by RADIX_3:def 4
+.= ( ( SDACx + SDACy ) - ( ( Radix k ) * ( 0 ) ) ) by A5,CKB5:1;
+n <> ( 0 ) by A3;
+then A41: n in ( Seg n ) by FINSEQ_1:3;
+A42: ( dom zp ) = ( Seg ( n + 1 ) ) by A26,FINSEQ_1:def 3;
+A43: (for j being Nat holds ((1 <= j & j <= ( len zp )) implies ( zp . j ) = ( ( zpp ^ <* ( SDSub2INTDigit (z,( n + 1 ),k) ) *> ) . j )))
+proof
+let j being Nat;
+assume (1 <= j & j <= ( len zp ));
+then A44: j in ( Seg ( n + 1 ) ) by A26,FINSEQ_1:1;
+now
+per cases  by A44,FINSEQ_2:7;
+suppose A45: j in ( Seg n );
+
+then j in ( dom zpp ) by A24,FINSEQ_1:def 3;
+then ( ( zpp ^ <* ( SDSub2INTDigit (z,( n + 1 ),k) ) *> ) . j ) = ( zpp . j ) by FINSEQ_1:def 7
+.= ( SDSub2INTDigit (z,j,k) ) by A25,A28,A45
+.= ( zp . j ) by A27,A42,A44;
+hence thesis;
+end;
+suppose A46: j = ( n + 1 );
+
+then ( ( zpp ^ <* ( SDSub2INTDigit (z,( n + 1 ),k) ) *> ) . j ) = ( SDSub2INTDigit (z,( n + 1 ),k) ) by A24,FINSEQ_1:42
+.= ( zp . j ) by A27,A42,A44,A46;
+hence thesis;
+end;
+end;
+hence thesis;
+end;
+A47: ( len ( SDSub2INT z ) ) = ( ( n + 1 ) + 1 ) by CARD_1:def 7;
+A48: (for j being Nat holds ((1 <= j & j <= ( len ( SDSub2INT z ) )) implies ( ( SDSub2INT z ) . j ) = ( ( zp ^ <* ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) *> ) . j )))
+proof
+let j being Nat;
+assume (1 <= j & j <= ( len ( SDSub2INT z ) ));
+then A49: j in ( Seg ( ( n + 1 ) + 1 ) ) by A47,FINSEQ_1:1;
+then A50: j in ( dom ( SDSub2INT z ) ) by A47,FINSEQ_1:def 3;
+now
+per cases  by A49,FINSEQ_2:7;
+suppose A51: j in ( Seg ( n + 1 ) );
+
+then j in ( dom zp ) by A26,FINSEQ_1:def 3;
+then ( ( zp ^ <* ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) *> ) . j ) = ( zp . j ) by FINSEQ_1:def 7
+.= ( SDSub2INTDigit (z,j,k) ) by A27,A42,A51
+.= ( ( SDSub2INT z ) /. j ) by A49,RADIX_3:def 11
+.= ( ( SDSub2INT z ) . j ) by A50,PARTFUN1:def 6;
+hence thesis;
+end;
+suppose A52: j = ( ( n + 1 ) + 1 );
+
+A53: j in ( dom ( SDSub2INT z ) ) by A47,A49,FINSEQ_1:def 3;
+( ( zp ^ <* ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) *> ) . j ) = ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) by A26,A52,FINSEQ_1:42
+.= ( ( SDSub2INT z ) /. ( ( n + 1 ) + 1 ) ) by A49,A52,RADIX_3:def 11
+.= ( ( SDSub2INT z ) . j ) by A52,A53,PARTFUN1:def 6;
+hence thesis;
+end;
+end;
+hence thesis;
+end;
+( len ( zpp ^ <* ( SDSub2INTDigit (z,( n + 1 ),k) ) *> ) ) = ( n + 1 ) by A24,FINSEQ_2:16;
+then A54: zp = ( zpp ^ <* ( SDSub2INTDigit (z,( n + 1 ),k) ) *> ) by A26,A43,FINSEQ_1:14;
+( len ( zp ^ <* ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) *> ) ) = ( ( n + 1 ) + 1 ) by A26,FINSEQ_2:16;
+then ( SDSub2INT z ) = ( zp ^ <* ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) *> ) by A47,A48,FINSEQ_1:14;
+then A55: ( Sum ( SDSub2INT z ) ) = ( ( Sum zp ) + ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) ) by RVSUM_1:74
+.= ( ( ( Sum znpp ) + ( SDSub2INTDigit (z,( n + 1 ),k) ) ) + ( SDSub2INTDigit (z,( ( n + 1 ) + 1 ),k) ) ) by A54,A35,RVSUM_1:74;
+A56: ( n + 1 ) in ( Seg ( n + 1 ) ) by FINSEQ_1:3;
+then A57: ( n + 1 ) in ( Seg ( ( n + 1 ) + 1 ) ) by FINSEQ_2:8;
+( SDSub2INTDigit (z,( n + 1 ),k) ) = ( ( ( Radix k ) |^ ( ( n + 1 ) -' 1 ) ) * ( DigB_SDSub (z,( n + 1 )) ) ) by RADIX_3:def 10
+.= ( ( ( Radix k ) |^ ( ( n + 1 ) -' 1 ) ) * ( DigA_SDSub (z,( n + 1 )) ) ) by RADIX_3:def 9
+.= ( RN * ( DigA_SDSub (z,( n + 1 )) ) ) by NAT_D:34
+.= ( RN * ( SDSubAddDigit (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( n + 1 ),k) ) ) by A57,CKB12:def 1
+.= ( RN * ( ( SDSub_Add_Data (SDN1,k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),( ( n + 1 ) -' 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) -' 1 )) ) ),k) ) ) ) by A5,A57,CKB11:def 1,XXREAL_0:2
+.= ( RN * ( ( SDSub_Add_Data (SDN1,k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (y,( n + 1 ),k) ) ),( ( n + 1 ) -' 1 )) ) ),k) ) ) ) by NAT_D:34
+.= ( RN * ( ( ( SDSub_Add_Data (SDN1,k) ) + ( SDSub_Add_Carry (SDN,k) ) ) + ( 0 ) ) ) by NAT_D:34
+.= ( ( RN * ( SDSub_Add_Data (SDN1,k) ) ) + ( RN * ( SDSub_Add_Carry (SDN,k) ) ) )
+.= ( ( RN * ( SDN1 - ( ( Radix k ) * ( SDSub_Add_Carry (SDN1,k) ) ) ) ) + ( RN * ( SDSub_Add_Carry (SDN,k) ) ) ) by RADIX_3:def 4
+.= ( ( ( RN * SDN1 ) - ( ( RN * ( Radix k ) ) * ( SDSub_Add_Carry (SDN1,k) ) ) ) + ( RN * ( SDSub_Add_Carry (SDN,k) ) ) )
+.= ( ( ( RN * SDN1 ) - ( ( ( Radix k ) |^ ( n + 1 ) ) * ( SDSub_Add_Carry (SDN1,k) ) ) ) + ( RN * ( SDSub_Add_Carry (SDN,k) ) ) ) by NEWTON:6
+.= ( ( ( RN * SDN1 ) + ( - ( ( ( Radix k ) |^ ( n + 1 ) ) * ( SDSub_Add_Carry (SDN1,k) ) ) ) ) + ( RN * ( SDSub_Add_Carry (SDN,k) ) ) );
+then A58: ( Sum ( SDSub2INT z ) ) = ( ( ( ( xn + yn ) + ( RN * SDN1 ) ) + ( ( - ( SDSub2INTDigit (zn,( n + 1 ),k) ) ) + RNSC ) ) + RN1SD11 ) by A55,A39,A36;
+( SDSub2INTDigit (zn,( n + 1 ),k) ) = ( ( ( Radix k ) |^ ( ( n + 1 ) -' 1 ) ) * ( DigB_SDSub (zn,( n + 1 )) ) ) by RADIX_3:def 10
+.= ( ( ( Radix k ) |^ ( ( n + 1 ) -' 1 ) ) * ( DigA_SDSub (zn,( n + 1 )) ) ) by RADIX_3:def 9
+.= ( RN * ( DigA_SDSub (zn,( n + 1 )) ) ) by NAT_D:34
+.= ( RN * ( SDSubAddDigit (( SD2SDSub ( DecSD (xn,n,k) ) ),( SD2SDSub ( DecSD (yn,n,k) ) ),( n + 1 ),k) ) ) by A56,CKB12:def 1
+.= ( RN * ( ( SDSub_Add_Data (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),( n + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),( n + 1 )) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),( ( n + 1 ) -' 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),( ( n + 1 ) -' 1 )) ) ),k) ) ) ) by A56,A5,CKB11:def 1,XXREAL_0:2
+.= ( RN * ( ( SDSub_Add_Data (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),( n + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),( n + 1 )) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),( ( n + 1 ) -' 1 )) ) ),k) ) ) ) by NAT_D:34
+.= ( RN * ( ( SDSub_Add_Data (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),( n + 1 )) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),( n + 1 )) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),n) ) ),k) ) ) ) by NAT_D:34
+.= ( RN * ( ( SDSub_Add_Data (( ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),( n + 1 )) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),n) ) ),k) ) ) ) by A3,A5,A6,CKB8:1
+.= ( RN * ( ( SDSub_Add_Data (( ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) ) + ( SDSub_Add_Carry (( DigA (( DecSD (y,n,k) ),n) ),k) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (xn,n,k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),n) ) ),k) ) ) ) by A3,A5,A7,CKB8:1
+.= ( RN * ( ( SDSub_Add_Data (( ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) ) + ( SDSub_Add_Carry (( DigA (( DecSD (y,n,k) ),n) ),k) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (( SD2SDSub ( DecSD (x,( n + 1 ),k) ) ),n) ) + ( DigA_SDSub (( SD2SDSub ( DecSD (yn,n,k) ) ),n) ) ),k) ) ) ) by A41,A5,RADIX_3:20,XXREAL_0:2
+.= ( RN * ( ( SDSub_Add_Data (( ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) ) + ( SDSub_Add_Carry (( DigA (( DecSD (y,n,k) ),n) ),k) ) ),k) ) + ( SDSub_Add_Carry (SDN,k) ) ) ) by A41,A5,RADIX_3:20,XXREAL_0:2
+.= ( ( RN * ( SDSub_Add_Data (( ( SDSub_Add_Carry (( DigA (( DecSD (x,n,k) ),n) ),k) ) + ( SDSub_Add_Carry (( DigA (( DecSD (y,n,k) ),n) ),k) ) ),k) ) ) + ( RN * ( SDSub_Add_Carry (SDN,k) ) ) );
+then A59: ( Sum ( SDSub2INT z ) ) = ( ( ( ( ( xn + yn ) + RNDx11 ) + RNDy11 ) + ( - ( RNCx + RNCy ) ) ) + ( RN1Cx11 + RN1Cy11 ) ) by A40,A58,A37
+.= ( ( ( ( ( xn + yn ) + ( ( ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) - RN1Cx11 ) + RNCx1 ) ) + RNDy11 ) + ( - ( RNCx + RNCy ) ) ) + ( RN1Cx11 + RN1Cy11 ) ) by A5,CKB10:1,XXREAL_0:2
+.= ( ( ( ( ( ( xn + yn ) + ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCx1 ) + RNDy11 ) + RN1Cy11 ) - ( RNCx + RNCy ) )
+.= ( ( ( ( ( ( xn + yn ) + ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCx1 ) + ( ( ( RN * ( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ) ) - RN1Cy11 ) + RNCy1 ) ) + RN1Cy11 ) - ( RNCx + RNCy ) ) by A5,CKB10:1,XXREAL_0:2
+.= ( ( ( ( ( ( ( ( xn + yn ) + ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCx1 ) + ( RN * ( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ) ) ) + ( - RN1Cy11 ) ) + RNCy1 ) + RN1Cy11 ) + ( - ( RNCx + RNCy ) ) )
+.= ( ( ( ( ( ( xn + yn ) + ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCx1 ) + ( RN * ( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCy1 ) + ( - ( RNCx1 + RNCy ) ) ) by A41,CKB3:1
+.= ( ( ( ( ( ( xn + yn ) + ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCx1 ) + ( RN * ( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ) ) ) + RNCy1 ) + ( - ( RNCx1 + RNCy1 ) ) ) by A41,CKB3:1
+.= ( ( ( ( xn + yn ) + ( RN * ( DigA (( DecSD (x,( n + 1 ),k) ),( n + 1 )) ) ) ) + ( 0 ) ) + ( RN * ( DigA (( DecSD (y,( n + 1 ),k) ),( n + 1 )) ) ) );
+A60: y = ( ( ( y div ( ( Radix k ) |^ n ) ) * ( ( Radix k ) |^ n ) ) + ( y mod ( ( Radix k ) |^ n ) ) ) by A22,NAT_D:2,PREPOWER:6;
+x = ( ( ( x div ( ( Radix k ) |^ n ) ) * ( ( Radix k ) |^ n ) ) + ( x mod ( ( Radix k ) |^ n ) ) ) by A22,NAT_D:2,PREPOWER:6;
+then ( Sum ( SDSub2INT z ) ) = ( ( yn + x ) + ( RN * ( y div ( ( Radix k ) |^ n ) ) ) ) by A7,A59,A38,RADIX_1:24;
+hence thesis by A60,RADIX_3:def 12;
+end;
+A61: P[ 1 ]
+proof
+let k being Nat,x being Nat,y being Nat;
+assume that
+A62: k >= 3
+and
+A63: x is_represented_by 1,k
+and
+A64: y is_represented_by 1,k;
+reconsider k,x,y as (Element of ( NAT )) by ORDINAL1:def 12;
+set X = ( SD2SDSub ( DecSD (x,1,k) ) );
+set Y = ( SD2SDSub ( DecSD (y,1,k) ) );
+reconsider CRY1 = ( SDSub_Add_Carry (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) as Integer;
+reconsider DIG1 = ( DigA_SDSub (( X '+' Y ),1) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider RSDCX = ( ( Radix k ) * ( SDSub_Add_Carry (x,k) ) ),RSDCY = ( ( Radix k ) * ( SDSub_Add_Carry (y,k) ) ) as Integer;
+reconsider RCRY1 = ( ( Radix k ) * ( SDSub_Add_Carry (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) ) as Integer;
+A65: 1 in ( Seg ( 1 + 1 ) ) by FINSEQ_1:1;
+then A66: ( ( SDSub2INT ( X '+' Y ) ) /. 1 ) = ( SDSub2INTDigit (( X '+' Y ),1,k) ) by RADIX_3:def 11
+.= ( ( ( Radix k ) |^ ( 1 -' 1 ) ) * ( DigB_SDSub (( X '+' Y ),1) ) ) by RADIX_3:def 10
+.= ( ( ( Radix k ) |^ ( 0 ) ) * ( DigB_SDSub (( X '+' Y ),1) ) ) by XREAL_1:232
+.= ( 1 * ( DigB_SDSub (( X '+' Y ),1) ) ) by NEWTON:4
+.= ( DigA_SDSub (( X '+' Y ),1) ) by RADIX_3:def 9;
+A67: ( len ( SDSub2INT ( X '+' Y ) ) ) = ( 1 + 1 ) by CARD_1:def 7;
+then 1 in ( dom ( SDSub2INT ( X '+' Y ) ) ) by A65,FINSEQ_1:def 3;
+then A68: ( ( SDSub2INT ( X '+' Y ) ) . 1 ) = DIG1 by A66,PARTFUN1:def 6;
+( 2 - 1 ) = 1;
+then A69: ( 2 -' 1 ) = 1 by XREAL_0:def 2;
+( DigA_SDSub (( X '+' Y ),1) ) = ( SDSubAddDigit (X,Y,1,k) ) by A65,CKB12:def 1
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (X,( 1 -' 1 )) ) + ( DigA_SDSub (Y,( 1 -' 1 )) ) ),k) ) ) by A62,A65,CKB11:def 1,XXREAL_0:2
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (X,( 0 )) ) + ( DigA_SDSub (Y,( 1 -' 1 )) ) ),k) ) ) by XREAL_1:232
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (X,( 0 )) ) + ( DigA_SDSub (Y,( 0 )) ) ),k) ) ) by XREAL_1:232
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) + ( SDSub_Add_Carry (( ( 0 ) + ( DigA_SDSub (Y,( 0 )) ) ),k) ) ) by RADIX_3:def 5
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) + ( SDSub_Add_Carry (( ( 0 ) + ( 0 ) ),k) ) ) by RADIX_3:def 5
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ),k) ) + ( 0 ) ) by RADIX_3:16
+.= ( ( ( DigA_SDSub (X,1) ) + ( DigA_SDSub (Y,1) ) ) - ( ( Radix k ) * CRY1 ) ) by RADIX_3:def 4;
+then A70: DIG1 = ( ( ( x - RSDCX ) + ( DigA_SDSub (Y,1) ) ) - RCRY1 ) by A62,A63,CKB9:1,XXREAL_0:2
+.= ( ( ( x - RSDCX ) + ( y - RSDCY ) ) - RCRY1 ) by A62,A64,CKB9:1,XXREAL_0:2
+.= ( ( ( ( x + y ) - RSDCX ) - RSDCY ) - RCRY1 );
+reconsider DIG2 = ( ( Radix k ) * ( DigA_SDSub (( X '+' Y ),2) ) ) as (Element of ( INT )) by INT_1:def 2;
+A71: 2 in ( Seg ( 1 + 1 ) ) by FINSEQ_1:1;
+then A72: ( ( SDSub2INT ( X '+' Y ) ) /. 2 ) = ( SDSub2INTDigit (( X '+' Y ),2,k) ) by RADIX_3:def 11
+.= ( ( ( Radix k ) |^ ( 2 -' 1 ) ) * ( DigB_SDSub (( X '+' Y ),2) ) ) by RADIX_3:def 10
+.= ( ( Radix k ) * ( DigB_SDSub (( X '+' Y ),2) ) ) by A69,NEWTON:5
+.= ( ( Radix k ) * ( DigA_SDSub (( X '+' Y ),2) ) ) by RADIX_3:def 9;
+2 in ( dom ( SDSub2INT ( X '+' Y ) ) ) by A71,A67,FINSEQ_1:def 3;
+then ( ( SDSub2INT ( X '+' Y ) ) . 2 ) = DIG2 by A72,PARTFUN1:def 6;
+then ( SDSub2INT ( X '+' Y ) ) = <* DIG1,DIG2 *> by A67,A68,FINSEQ_1:44;
+then A73: ( Sum ( SDSub2INT ( X '+' Y ) ) ) = ( DIG1 + DIG2 ) by RVSUM_1:77;
+( DigA_SDSub (( X '+' Y ),2) ) = ( SDSubAddDigit (X,Y,2,k) ) by A71,CKB12:def 1
+.= ( ( SDSub_Add_Data (( ( DigA_SDSub (X,2) ) + ( DigA_SDSub (Y,2) ) ),k) ) + ( SDSub_Add_Carry (( ( DigA_SDSub (X,( 2 -' 1 )) ) + ( DigA_SDSub (Y,( 2 -' 1 )) ) ),k) ) ) by A62,A71,CKB11:def 1,XXREAL_0:2
+.= ( ( SDSub_Add_Data (( ( SDSub_Add_Carry (x,k) ) + ( DigA_SDSub (Y,2) ) ),k) ) + CRY1 ) by A62,A63,A69,CKB7:1,XXREAL_0:2
+.= ( ( SDSub_Add_Data (( ( SDSub_Add_Carry (x,k) ) + ( SDSub_Add_Carry (y,k) ) ),k) ) + CRY1 ) by A62,A64,CKB7:1,XXREAL_0:2
+.= ( ( ( ( SDSub_Add_Carry (x,k) ) + ( SDSub_Add_Carry (y,k) ) ) - ( ( Radix k ) * ( SDSub_Add_Carry (( ( SDSub_Add_Carry (x,k) ) + ( SDSub_Add_Carry (y,k) ) ),k) ) ) ) + CRY1 ) by RADIX_3:def 4
+.= ( ( ( ( SDSub_Add_Carry (x,k) ) + ( SDSub_Add_Carry (y,k) ) ) - ( ( Radix k ) * ( 0 ) ) ) + CRY1 ) by A62,CKB5:1
+.= ( ( ( ( SDSub_Add_Carry (x,k) ) + ( SDSub_Add_Carry (y,k) ) ) - ( 0 ) ) + CRY1 );
+hence thesis by A73,A70,RADIX_3:def 12;
+end;
+(for n being Nat holds (n >= 1 implies P[ n ])) from NAT_1:sch 8(A61,A2);
+hence thesis by A1;
+end;

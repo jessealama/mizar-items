@@ -1,0 +1,67 @@
+environ
+vocabularies NUMBERS,SUBSET_1,XBOOLE_0,FINSEQ_1,XXREAL_0,FUNCT_1,RELAT_1,TARSKI,VALUED_0,CARD_1,ARYTM_3,ORDINAL1,CLASSES1,ZFMISC_1,ORDINAL2,FUNCOP_1,MCART_1,NAT_1,ORDINAL4,ARYTM_1,REAL_1,PARTFUN1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,MCART_1,SUBSET_1,NUMBERS,XXREAL_0,REAL_1,NAT_1,RELAT_1,FUNCT_1,PARTFUN1,FUNCOP_1,ORDINAL1,ORDINAL2,CLASSES1,FINSEQ_1,FUNCT_2,BINOP_1,DOMAIN_1,VALUED_0,CKB2;
+definitions TARSKI,BINOP_1;
+theorems TARSKI,NAT_1,FUNCT_1,FINSEQ_1,FUNCT_2,RELAT_1,XBOOLE_1,FUNCOP_1,XREAL_1,XXREAL_0,ORDINAL1,CLASSES1,ORDINAL2,XBOOLE_0,ZFMISC_1,MCART_1,PARTFUN1,CKB1;
+schemes NAT_1,FUNCT_1,FINSEQ_1,BINOP_1,CLASSES1,ORDINAL1,FUNCT_2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11,CKB12,CKB13;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,ORDINAL1,FINSET_1,XXREAL_0,XREAL_0,NAT_1,CARD_1,NUMBERS,RELSET_1,INT_1,XCMPLX_0,FINSEQ_1,VALUED_0;
+constructors BINOP_1,DOMAIN_1,FUNCOP_1,XXREAL_0,REAL_1,NAT_1,FINSEQ_1,VALUED_0,CLASSES1,ORDINAL2,RELSET_1,CKB2;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve n for (Element of ( NAT ));
+reserve x for set;
+reserve y for set;
+reserve z for set;
+reserve y1 for set;
+reserve y2 for set;
+scheme LambdaDefRec { A() -> set,n() -> Nat,RecFun(set,set) -> set } : ((ex y being set st (ex f being Function st (((y = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds ( f . ( n + 1 ) ) = RecFun(n,( f . n )))))) & (for y1,y2 being set holds (((ex f being Function st (((y1 = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds ( f . ( n + 1 ) ) = RecFun(n,( f . n ))))) & (ex f being Function st (((y2 = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds ( f . ( n + 1 ) ) = RecFun(n,( f . n )))))) implies y1 = y2)))
+proof
+defpred P[ set,set,set ]
+ means
+(for z holds (z = $2 implies $3 = RecFun($1,z)));
+A1: (for n holds (for x holds (ex y st P[ n,x,y ])))
+proof
+let n;
+let x;
+take RecFun(n,x);
+let z;
+assume z = x;
+hence thesis;
+end;
+A2: (for n holds (for x holds (for y1 holds (for y2 holds ((P[ n,x,y1 ] & P[ n,x,y2 ]) implies y1 = y2)))))
+proof
+let n;
+let x;
+let y1;
+let y2;
+assume that
+A3: (for z holds (z = x implies y1 = RecFun(n,z)))
+and
+A4: (for z holds (z = x implies y2 = RecFun(n,z)));
+thus y1 = RecFun(n,x) by A3
+.= y2 by A4;
+end;
+A5: ((ex y being set st (ex f being Function st (((y = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds P[ n,( f . n ),( f . ( n + 1 ) ) ])))) & (for y1,y2 being set holds (((ex f being Function st (((y1 = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds P[ n,( f . n ),( f . ( n + 1 ) ) ]))) & (ex f being Function st (((y2 = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds P[ n,( f . n ),( f . ( n + 1 ) ) ])))) implies y1 = y2))) from CKB13:sch 1(A1,A2);
+then consider y being set,f being Function such that A6: ((y = ( f . n() ) & ( dom f ) = ( NAT )) & (( f . ( 0 ) ) = A() & (for n holds P[ n,( f . n ),( f . ( n + 1 ) ) ])));
+thus (ex y being set st (ex f being Function st (((y = ( f . n() ) & ( dom f ) = ( NAT )) & ( f . ( 0 ) ) = A()) & (for n holds ( f . ( n + 1 ) ) = RecFun(n,( f . n ))))))
+proof
+take y;
+take f;
+thus thesis by A6;
+end;
+
+let y1 being set,y2 being set;
+given f1 being Function such that
+A7: ((y1 = ( f1 . n() ) & ( dom f1 ) = ( NAT )) & ( f1 . ( 0 ) ) = A())
+and
+A8: (for n holds ( f1 . ( n + 1 ) ) = RecFun(n,( f1 . n )));
+
+A9: (for n holds P[ n,( f1 . n ),( f1 . ( n + 1 ) ) ]) by A8;
+given f2 being Function such that
+A10: ((y2 = ( f2 . n() ) & ( dom f2 ) = ( NAT )) & ( f2 . ( 0 ) ) = A())
+and
+A11: (for n holds ( f2 . ( n + 1 ) ) = RecFun(n,( f2 . n )));
+
+(for n holds P[ n,( f2 . n ),( f2 . ( n + 1 ) ) ]) by A11;
+hence thesis by A5,A7,A10,A9;
+end;

@@ -1,0 +1,141 @@
+environ
+vocabularies UNIALG_1,NAT_1,XBOOLE_0,FINSEQ_1,ZFMISC_1,MCART_1,RELAT_1,FUNCT_1,FUNCT_2,PARTFUN1,FINSEQ_2,SUBSET_1,TARSKI,NUMBERS,STRUCT_0,CQC_SIM1,UNIALG_2,ORDINAL1,PBOOLE,FUNCOP_1,RLVECT_2,CARD_3,CARD_1,FINSEQ_4,FUNCT_5,PRALG_1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,ORDINAL1,NUMBERS,NAT_1,STRUCT_0,RELAT_1,FUNCT_1,FINSEQ_1,FUNCT_2,BINOP_1,FUNCOP_1,MCART_1,DOMAIN_1,PARTFUN1,FINSEQ_2,FUNCT_4,FUNCT_5,CARD_3,MARGREL1,DTCONSTR,UNIALG_1,UNIALG_2,PBOOLE,CKB1,CKB2;
+definitions TARSKI,UNIALG_1,UNIALG_2,FUNCT_1,PBOOLE,XBOOLE_0,BINOP_1,FINSEQ_2,FUNCOP_1,PARTFUN1,MARGREL1,CKB1,CKB2;
+theorems TARSKI,FUNCT_1,PARTFUN1,FINSEQ_1,FINSEQ_2,FUNCOP_1,UNIALG_1,DOMAIN_1,ZFMISC_1,MCART_1,UNIALG_2,FUNCT_2,PBOOLE,FUNCT_5,CARD_3,FUNCT_4,FINSEQ_3,RELAT_1,RELSET_1,ORDINAL1,XBOOLE_0,XBOOLE_1,MARGREL1,CARD_1,CKB1,CKB2;
+schemes FINSEQ_1,PARTFUN1,FUNCT_2,FUNCT_1,CLASSES1;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,ORDINAL1,PARTFUN1,FUNCOP_1,FINSEQ_1,FINSEQ_2,CARD_3,PBOOLE,STRUCT_0,UNIALG_1,CARD_1,RELSET_1,MARGREL1;
+constructors BINOP_1,DOMAIN_1,FUNCT_4,FUNCT_5,CARD_3,PBOOLE,UNIALG_2,DTCONSTR,STRUCT_0,RELSET_1,CKB1,CKB2;
+requirements BOOLE,SUBSET;
+begin
+reserve x for set;
+reserve y for set;
+reserve z for set;
+reserve A for non empty set;
+reserve B for non empty set;
+definition
+let A;
+let B;
+let f1 being  homogeneous  quasi_total non empty (PartFunc of ( A * ),A);
+let f2 being  homogeneous  quasi_total non empty (PartFunc of ( B * ),B);
+assume A1: ( arity f1 ) = ( arity f2 );
+func [[:f1,f2 :]] ->  homogeneous  quasi_total non empty (PartFunc of ( [: A,B :] * ),[: A,B :])
+means
+:Def3: (( dom it ) = ( ( arity f1 ) -tuples_on [: A,B :] ) & (for h being (FinSequence of [: A,B :]) holds (h in ( dom it ) implies ( it . h ) = [ ( f1 . ( pr1 h ) ),( f2 . ( pr2 h ) ) ])));
+existence
+proof
+set ar = ( ( arity f1 ) -tuples_on [: A,B :] );
+set ab = { s where s is (Element of ( [: A,B :] * )): ( len s ) = ( arity f1 ) };
+defpred P[ set,set ]
+ means
+(for h being (FinSequence of [: A,B :]) holds ($1 = h implies $2 = [ ( f1 . ( pr1 h ) ),( f2 . ( pr2 h ) ) ]));
+A2: ( dom f2 ) = ( ( arity f2 ) -tuples_on B ) by MARGREL1:22;
+A3: (( rng f1 ) c= A & ( rng f2 ) c= B) by RELAT_1:def 19;
+A4: ( dom f1 ) = ( ( arity f1 ) -tuples_on A ) by MARGREL1:22;
+A5: (for x holds (for y holds ((x in ar & P[ x,y ]) implies y in [: A,B :])))
+proof
+let x;
+let y;
+assume that
+A6: x in ar
+and
+A7: P[ x,y ];
+consider s being (Element of ( [: A,B :] * )) such that A8: x = s and A9: ( len s ) = ( arity f1 ) by A6;
+reconsider s1 = ( pr1 s ) as (Element of ( A * )) by FINSEQ_1:def 11;
+( len ( pr1 s ) ) = ( len s ) by CKB1:def 1;
+then s1 in { s3 where s3 is (Element of ( A * )): ( len s3 ) = ( arity f1 ) } by A9;
+then A10: ( f1 . s1 ) in ( rng f1 ) by A4,FUNCT_1:def 3;
+reconsider s2 = ( pr2 s ) as (Element of ( B * )) by FINSEQ_1:def 11;
+( len ( pr2 s ) ) = ( len s ) by CKB2:def 1;
+then s2 in { s3 where s3 is (Element of ( B * )): ( len s3 ) = ( arity f2 ) } by A1,A9;
+then A11: ( f2 . s2 ) in ( rng f2 ) by A2,FUNCT_1:def 3;
+y = [ ( f1 . ( pr1 s ) ),( f2 . ( pr2 s ) ) ] by A7,A8;
+hence thesis by A3,A10,A11,ZFMISC_1:87;
+end;
+A12: (for x holds (for y holds (for z holds (((x in ar & P[ x,y ]) & P[ x,z ]) implies y = z))))
+proof
+let x;
+let y;
+let z;
+assume that
+A13: x in ar
+and
+A14: P[ x,y ]
+and
+A15: P[ x,z ];
+consider s being (Element of ( [: A,B :] * )) such that A16: x = s and ( len s ) = ( arity f1 ) by A13;
+y = [ ( f1 . ( pr1 s ) ),( f2 . ( pr2 s ) ) ] by A14,A16;
+hence thesis by A15,A16;
+end;
+consider f being (PartFunc of ar,[: A,B :]) such that A17: (for x holds (x in ( dom f ) iff (x in ar & (ex y st P[ x,y ])))) and A18: (for x holds (x in ( dom f ) implies P[ x,( f . x ) ])) from PARTFUN1:sch 2(A5,A12);
+A19: ( dom f ) = ar
+proof
+thus ( dom f ) c= ar
+proof
+let x;
+assume x in ( dom f );
+hence thesis by A17;
+end;
+
+let x;
+assume A20: x in ar;
+then consider s being (Element of ( [: A,B :] * )) such that A21: x = s and ( len s ) = ( arity f1 );
+now
+take y = [ ( f1 . ( pr1 s ) ),( f2 . ( pr2 s ) ) ];
+let h being (FinSequence of [: A,B :]);
+assume h = x;
+hence y = [ ( f1 . ( pr1 h ) ),( f2 . ( pr2 h ) ) ] by A21;
+end;
+hence thesis by A17,A20;
+end;
+ar in { ( i -tuples_on [: A,B :] ) where i is (Element of ( NAT )): (not contradiction) };
+then ar c= ( union { ( i -tuples_on [: A,B :] ) where i is (Element of ( NAT )): (not contradiction) } ) by ZFMISC_1:74;
+then ar c= ( [: A,B :] * ) by FINSEQ_2:108;
+then reconsider f as (PartFunc of ( [: A,B :] * ),[: A,B :]) by RELSET_1:7;
+A22: f is  quasi_total
+proof
+let x being (FinSequence of [: A,B :]),y being (FinSequence of [: A,B :]);
+assume that
+A23: ( len x ) = ( len y )
+and
+A24: x in ( dom f );
+reconsider y9 = y as (Element of ( [: A,B :] * )) by FINSEQ_1:def 11;
+(ex s1 being (Element of ( [: A,B :] * )) st (s1 = x & ( len s1 ) = ( arity f1 ))) by A19,A24;
+then y9 in ab by A23;
+hence thesis by A19;
+end;
+f is  homogeneous
+proof
+let x being FinSequence,y being FinSequence;
+assume (x in ( dom f ) & y in ( dom f ));
+then ((ex s1 being (Element of ( [: A,B :] * )) st (s1 = x & ( len s1 ) = ( arity f1 ))) & (ex s2 being (Element of ( [: A,B :] * )) st (s2 = y & ( len s2 ) = ( arity f1 )))) by A19;
+hence thesis;
+end;
+then reconsider f as  homogeneous  quasi_total non empty (PartFunc of ( [: A,B :] * ),[: A,B :]) by A19,A22;
+take f;
+thus ( dom f ) = ar by A19;
+let h being (FinSequence of [: A,B :]);
+assume h in ( dom f );
+hence thesis by A18;
+end;
+uniqueness
+proof
+let x being  homogeneous  quasi_total non empty (PartFunc of ( [: A,B :] * ),[: A,B :]),y being  homogeneous  quasi_total non empty (PartFunc of ( [: A,B :] * ),[: A,B :]);
+assume that
+A25: ( dom x ) = ( ( arity f1 ) -tuples_on [: A,B :] )
+and
+A26: (for h being (FinSequence of [: A,B :]) holds (h in ( dom x ) implies ( x . h ) = [ ( f1 . ( pr1 h ) ),( f2 . ( pr2 h ) ) ]))
+and
+A27: ( dom y ) = ( ( arity f1 ) -tuples_on [: A,B :] )
+and
+A28: (for h being (FinSequence of [: A,B :]) holds (h in ( dom y ) implies ( y . h ) = [ ( f1 . ( pr1 h ) ),( f2 . ( pr2 h ) ) ]));
+now
+let c being (Element of ( [: A,B :] * ));
+reconsider c9 = c as (FinSequence of [: A,B :]);
+assume A29: c in ( dom x );
+then ( x . c9 ) = [ ( f1 . ( pr1 c9 ) ),( f2 . ( pr2 c9 ) ) ] by A26;
+hence ( x . c ) = ( y . c ) by A25,A27,A28,A29;
+end;
+hence thesis by A25,A27,PARTFUN1:5;
+end;
+end;

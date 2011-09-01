@@ -1,0 +1,387 @@
+environ
+vocabularies NUMBERS,SUBSET_1,XBOOLE_0,FINSEQ_1,XXREAL_0,FUNCT_1,RELAT_1,TARSKI,VALUED_0,CARD_1,ARYTM_3,ORDINAL1,CLASSES1,ZFMISC_1,ORDINAL2,FUNCOP_1,MCART_1,NAT_1,ORDINAL4,ARYTM_1,REAL_1,PARTFUN1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,MCART_1,SUBSET_1,NUMBERS,XXREAL_0,REAL_1,NAT_1,RELAT_1,FUNCT_1,PARTFUN1,FUNCOP_1,ORDINAL1,ORDINAL2,CLASSES1,FINSEQ_1,FUNCT_2,BINOP_1,DOMAIN_1,VALUED_0,CKB2;
+definitions TARSKI,BINOP_1;
+theorems TARSKI,NAT_1,FUNCT_1,FINSEQ_1,FUNCT_2,RELAT_1,XBOOLE_1,FUNCOP_1,XREAL_1,XXREAL_0,ORDINAL1,CLASSES1,ORDINAL2,XBOOLE_0,ZFMISC_1,MCART_1,PARTFUN1,CKB1;
+schemes NAT_1,FUNCT_1,FINSEQ_1,BINOP_1,CLASSES1,ORDINAL1,FUNCT_2,CKB3;
+registrations XBOOLE_0,SUBSET_1,RELAT_1,FUNCT_1,ORDINAL1,FINSET_1,XXREAL_0,XREAL_0,NAT_1,CARD_1,NUMBERS,RELSET_1,INT_1,XCMPLX_0,FINSEQ_1,VALUED_0;
+constructors BINOP_1,DOMAIN_1,FUNCOP_1,XXREAL_0,REAL_1,NAT_1,FINSEQ_1,VALUED_0,CLASSES1,ORDINAL2,RELSET_1,CKB2;
+requirements REAL,NUMERALS,SUBSET,BOOLE,ARITHM;
+begin
+reserve n for (Element of ( NAT ));
+reserve m for (Element of ( NAT ));
+reserve k for (Element of ( NAT ));
+reserve Z for set;
+reserve x for set;
+reserve y for set;
+reserve z for set;
+reserve p for FinSequence;
+reserve q for FinSequence;
+scheme RecExD { D() -> non empty set,A() -> (Element of D()),P[set,set,set] } : (ex f being (Function of ( NAT ),D()) st (( f . ( 0 ) ) = A() & (for n being (Element of ( NAT )) holds P[ n,( f . n ),( f . ( n + 1 ) ) ])))
+provided
+A1: (for n being (Element of ( NAT )) holds (for x being (Element of D()) holds (ex y being (Element of D()) st P[ n,x,y ])))
+proof
+defpred Q[ (Element of (( NAT ) qua non empty set)),set,set ]
+ means
+P[ $1,$2,$3 ];
+A2: (for x being (Element of (( NAT ) qua non empty set)) holds (for y being (Element of D()) holds (ex z being (Element of D()) st Q[ x,y,z ]))) by A1;
+consider f being (Function of [: (( NAT ) qua non empty set),D() :],D()) such that A3: (for x being (Element of (( NAT ) qua non empty set)) holds (for y being (Element of D()) holds Q[ x,y,( f . (x,y) ) ])) from BINOP_1:sch 3(A2);
+defpred P[ FinSequence ]
+ means
+(( $1 . 1 ) = A() & (for n holds (( n + 2 ) <= ( len $1 ) implies ( $1 . ( n + 2 ) ) = ( f . [ n,( $1 . ( n + 1 ) ) ] ))));
+consider X being set such that A4: (for x holds (x in X iff (ex p st ((p in ( D() * ) & P[ p ]) & x = p)))) from FINSEQ_1:sch 4;
+set Y = ( union X );
+A5: (x in X implies x in ( D() * ))
+proof
+assume x in X;
+then (ex p st ((p in ( D() * ) & (( p . 1 ) = A() & (for n holds (( n + 2 ) <= ( len p ) implies ( p . ( n + 2 ) ) = ( f . [ n,( p . ( n + 1 ) ) ] ))))) & x = p)) by A4;
+hence thesis;
+end;
+A6: (for p holds (for q holds (((p in X & q in X) & ( len p ) <= ( len q )) implies p c= q)))
+proof
+let p;
+let q;
+assume that
+A7: p in X
+and
+A8: q in X
+and
+A9: ( len p ) <= ( len q );
+A10: (ex q9 being FinSequence st ((q9 in ( D() * ) & (( q9 . 1 ) = A() & (for n holds (( n + 2 ) <= ( len q9 ) implies ( q9 . ( n + 2 ) ) = ( f . [ n,( q9 . ( n + 1 ) ) ] ))))) & q = q9)) by A4,A8;
+A11: (ex p9 being FinSequence st ((p9 in ( D() * ) & (( p9 . 1 ) = A() & (for n holds (( n + 2 ) <= ( len p9 ) implies ( p9 . ( n + 2 ) ) = ( f . [ n,( p9 . ( n + 1 ) ) ] ))))) & p = p9)) by A4,A7;
+A12: (for n holds ((1 <= n & n <= ( len p )) implies ( p . n ) = ( q . n )))
+proof
+defpred P[ Nat ]
+ means
+((1 <= $1 & $1 <= ( len p )) & ( p . $1 ) <> ( q . $1 ));
+assume (ex n st P[ n ]);
+then A13: (ex n being Nat st P[ n ]);
+consider k being Nat such that A14: (P[ k ] & (for n being Nat holds (P[ n ] implies k <= n))) from NAT_1:sch 5(A13);
+k = 1
+proof
+( 0 ) <> k by A14;
+then consider n being Nat such that A15: k = ( n + 1 ) by NAT_1:6;
+( n + ( 0 ) ) <= ( n + 1 ) by XREAL_1:7;
+then A16: n <= ( len p ) by A14,A15,XXREAL_0:2;
+A17: ( n + ( 0 ) ) < ( n + 1 ) by XREAL_1:6;
+assume A18: k <> 1;
+then 1 < ( n + 1 ) by A14,A15,XXREAL_0:1;
+then A19: 1 <= n by NAT_1:13;
+n <> ( 0 ) by A18,A15;
+then consider m being Nat such that A20: n = ( m + 1 ) by NAT_1:6;
+reconsider m as (Element of ( NAT )) by ORDINAL1:def 12;
+A21: ( m + 2 ) <= ( len q ) by A9,A14,A15,A20,XXREAL_0:2;
+( p . k ) = ( p . ( m + ( 1 + 1 ) ) ) by A15,A20
+.= ( f . [ m,( p . n ) ] ) by A11,A14,A15,A20
+.= ( f . [ m,( q . ( m + 1 ) ) ] ) by A14,A15,A19,A16,A17,A20
+.= ( q . k ) by A10,A15,A20,A21;
+hence thesis by A14;
+end;
+hence contradiction by A11,A10,A14;
+end;
+now
+let x;
+assume x in p;
+then consider n being Nat such that A22: n in ( dom p ) and A23: x = [ n,( p . n ) ] by FINSEQ_1:12;
+A24: n in ( Seg ( len p ) ) by A22,FINSEQ_1:def 3;
+then A25: 1 <= n by FINSEQ_1:1;
+A26: n <= ( len p ) by A24,FINSEQ_1:1;
+then n <= ( len q ) by A9,XXREAL_0:2;
+then n in ( Seg ( len q ) ) by A25,FINSEQ_1:1;
+then A27: n in ( dom q ) by FINSEQ_1:def 3;
+x = [ n,( q . n ) ] by A12,A22,A23,A25,A26;
+hence x in q by A27,FUNCT_1:1;
+end;
+hence thesis by TARSKI:def 3;
+end;
+(ex f being Function st f = Y)
+proof
+defpred Z[ set,set ]
+ means
+[ $1,$2 ] in Y;
+A28: (for x holds (for y holds (for z holds ((Z[ x,y ] & Z[ x,z ]) implies y = z))))
+proof
+let x;
+let y;
+let z;
+assume that
+A29: [ x,y ] in Y
+and
+A30: [ x,z ] in Y;
+consider Z2 being set such that A31: [ x,z ] in Z2 and A32: Z2 in X by A30,TARSKI:def 4;
+Z2 in ( D() * ) by A5,A32;
+then reconsider q = Z2 as (FinSequence of D()) by FINSEQ_1:def 11;
+consider Z1 being set such that A33: [ x,y ] in Z1 and A34: Z1 in X by A29,TARSKI:def 4;
+Z1 in ( D() * ) by A5,A34;
+then reconsider p = Z1 as (FinSequence of D()) by FINSEQ_1:def 11;
+A35:now
+assume ( len q ) <= ( len p );
+then A36: q c= Z1 by A6,A34,A32;
+[ x,y ] in p by A33;
+hence thesis by A31,A36,FUNCT_1:def 1;
+end;
+now
+assume ( len p ) <= ( len q );
+then p c= Z2 by A6,A34,A32;
+then [ x,y ] in q by A33;
+hence thesis by A31,FUNCT_1:def 1;
+end;
+hence thesis by A35;
+end;
+consider h being Function such that A37: (for x holds (for y holds ([ x,y ] in h iff (x in ( NAT ) & Z[ x,y ])))) from FUNCT_1:sch 1(A28);
+take h;
+A38: (for x holds (for y holds ([ x,y ] in h iff [ x,y ] in Y)))
+proof
+let x;
+let y;
+thus ([ x,y ] in h implies [ x,y ] in Y) by A37;
+thus ([ x,y ] in Y implies [ x,y ] in h)
+proof
+assume A39: [ x,y ] in Y;
+then consider Z such that A40: [ x,y ] in Z and A41: Z in X by TARSKI:def 4;
+Z in ( D() * ) by A5,A41;
+then reconsider p = Z as (FinSequence of D()) by FINSEQ_1:def 11;
+x in ( dom p ) by A40,RELAT_1:def 4;
+hence thesis by A37,A39;
+end;
+
+end;
+(for x holds (x in h iff x in Y))
+proof
+let x;
+thus (x in h implies x in Y)
+proof
+assume A42: x in h;
+then (ex y st (ex z st [ y,z ] = x)) by RELAT_1:def 1;
+hence thesis by A38,A42;
+end;
+
+assume A43: x in Y;
+then consider Z such that A44: x in Z and A45: Z in X by TARSKI:def 4;
+Z in ( D() * ) by A5,A45;
+then reconsider p = Z as (FinSequence of D()) by FINSEQ_1:def 11;
+x in p by A44;
+then (ex y st (ex z st [ y,z ] = x)) by RELAT_1:def 1;
+hence thesis by A38,A43;
+end;
+hence thesis by TARSKI:1;
+end;
+then consider g being Function such that A46: g = Y;
+A47: (for x holds (x in ( rng g ) implies x in D()))
+proof
+let x;
+assume x in ( rng g );
+then consider y such that A48: (y in ( dom g ) & x = ( g . y )) by FUNCT_1:def 3;
+[ y,x ] in Y by A46,A48,FUNCT_1:1;
+then consider Z such that A49: [ y,x ] in Z and A50: Z in X by TARSKI:def 4;
+Z in ( D() * ) by A5,A50;
+then reconsider p = Z as (FinSequence of D()) by FINSEQ_1:def 11;
+(y in ( dom p ) & x = ( p . y )) by A49,FUNCT_1:1;
+then A51: x in ( rng p ) by FUNCT_1:def 3;
+( rng p ) c= D() by FINSEQ_1:def 4;
+hence thesis by A51;
+end;
+then ( rng g ) c= D() by TARSKI:def 3;
+then reconsider h = g as (Function of ( dom g ),D()) by FUNCT_2:2;
+A52: (for n holds ( n + 1 ) in ( dom h ))
+proof
+defpred P[ (Element of ( NAT )) ]
+ means
+( $1 + 1 ) in ( dom h );
+A53: (for n holds (( n + 2 ) <= ( len <* A() *> ) implies ( <* A() *> . ( n + 2 ) ) = ( f . [ n,( <* A() *> . ( n + 1 ) ) ] )))
+proof
+let n;
+assume ( n + 2 ) <= ( len <* A() *> );
+then ( n + 2 ) <= 1 by FINSEQ_1:39;
+then ( n + ( 1 + 1 ) ) <= ( n + 1 ) by NAT_1:12;
+hence thesis by XREAL_1:6;
+end;
+(( <* A() *> . 1 ) = A() & <* A() *> in ( D() * )) by FINSEQ_1:def 8,FINSEQ_1:def 11;
+then <* A() *> in X by A4,A53;
+then A54: { [ 1,A() ] } in X by FINSEQ_1:37;
+A55: (for k holds (P[ k ] implies P[ ( k + 1 ) ]))
+proof
+let k;
+assume ( k + 1 ) in ( dom h );
+then [ ( k + 1 ),( h . ( k + 1 ) ) ] in Y by A46,FUNCT_1:1;
+then consider Z such that A56: [ ( k + 1 ),( h . ( k + 1 ) ) ] in Z and A57: Z in X by TARSKI:def 4;
+Z in ( D() * ) by A5,A57;
+then reconsider Z as (FinSequence of D()) by FINSEQ_1:def 11;
+A58: (( k + 1 ) = ( len Z ) implies thesis)
+proof
+set p = ( Z ^ <* ( f . [ k,( Z . ( k + 1 ) ) ] ) *> );
+A59: 1 <= ( ( k + 1 ) + 1 ) by NAT_1:12;
+assume A60: ( k + 1 ) = ( len Z );
+then 1 <= ( len Z ) by NAT_1:12;
+then 1 in ( Seg ( len Z ) ) by FINSEQ_1:1;
+then A61: 1 in ( dom Z ) by FINSEQ_1:def 3;
+A62: (for n holds (( n + 2 ) <= ( len p ) implies ( p . ( n + 2 ) ) = ( f . [ n,( p . ( n + 1 ) ) ] )))
+proof
+let n;
+assume ( n + 2 ) <= ( len p );
+then A63: ( n + 2 ) <= ( ( len Z ) + ( len <* ( f . [ k,( Z . ( k + 1 ) ) ] ) *> ) ) by FINSEQ_1:22;
+then A64: ( n + 2 ) <= ( ( len Z ) + 1 ) by FINSEQ_1:40;
+A65: (( n + 2 ) <> ( ( len Z ) + 1 ) implies thesis)
+proof
+( ( n + 1 ) + 1 ) <= ( ( len Z ) + 1 ) by A63,FINSEQ_1:40;
+then (1 <= ( n + 1 ) & ( n + 1 ) <= ( len Z )) by NAT_1:12,XREAL_1:6;
+then ( n + 1 ) in ( Seg ( len Z ) ) by FINSEQ_1:1;
+then A66: ( n + 1 ) in ( dom Z ) by FINSEQ_1:def 3;
+A67: 1 <= ( n + ( 1 + 1 ) ) by NAT_1:12;
+assume A68: ( n + 2 ) <> ( ( len Z ) + 1 );
+then ( n + 2 ) <= ( len Z ) by A64,NAT_1:8;
+then ( n + 2 ) in ( Seg ( len Z ) ) by A67,FINSEQ_1:1;
+then A69: ( n + 2 ) in ( dom Z ) by FINSEQ_1:def 3;
+(ex q st (((q in ( D() * ) & ( q . 1 ) = A()) & (for n holds (( n + 2 ) <= ( len q ) implies ( q . ( n + 2 ) ) = ( f . [ n,( q . ( n + 1 ) ) ] )))) & Z = q)) by A4,A57;
+then ( Z . ( n + 2 ) ) = ( f . [ n,( Z . ( n + 1 ) ) ] ) by A64,A68,NAT_1:8;
+then ( p . ( n + 2 ) ) = ( f . [ n,( Z . ( n + 1 ) ) ] ) by A69,FINSEQ_1:def 7;
+hence thesis by A66,FINSEQ_1:def 7;
+end;
+(( n + 2 ) = ( ( len Z ) + 1 ) implies thesis)
+proof
+( ( n + 1 ) + 1 ) <= ( ( len Z ) + 1 ) by A63,FINSEQ_1:40;
+then (1 <= ( n + 1 ) & ( n + 1 ) <= ( len Z )) by NAT_1:12,XREAL_1:6;
+then ( n + 1 ) in ( Seg ( len Z ) ) by FINSEQ_1:1;
+then A70: ( n + 1 ) in ( dom Z ) by FINSEQ_1:def 3;
+assume A71: ( n + 2 ) = ( ( len Z ) + 1 );
+then ( p . ( n + 2 ) ) = ( <* ( f . [ k,( Z . ( k + 1 ) ) ] ) *> . ( ( n + 2 ) - ( ( n + 2 ) - 1 ) ) ) by A63,FINSEQ_1:23
+.= ( f . [ n,( Z . ( n + 1 ) ) ] ) by A60,A71,FINSEQ_1:40;
+hence thesis by A70,FINSEQ_1:def 7;
+end;
+hence thesis by A65;
+end;
+A72: p in ( D() * )
+proof
+1 <= ( k + 1 ) by NAT_1:12;
+then ( k + 1 ) in ( Seg ( len Z ) ) by A60,FINSEQ_1:1;
+then ( k + 1 ) in ( dom Z ) by FINSEQ_1:def 3;
+then A73: ( Z . ( k + 1 ) ) in ( rng Z ) by FUNCT_1:def 3;
+( rng Z ) c= D() by FINSEQ_1:def 4;
+then reconsider z = ( Z . ( k + 1 ) ) as (Element of D()) by A73;
+reconsider n = k as (Element of (( NAT ) qua non empty set));
+p = ( Z ^ <* ( f . [ n,z ] ) *> );
+hence thesis by FINSEQ_1:def 11;
+end;
+( len p ) = ( ( len Z ) + ( len <* ( f . [ k,( Z . ( k + 1 ) ) ] ) *> ) ) by FINSEQ_1:22
+.= ( ( k + 1 ) + 1 ) by A60,FINSEQ_1:39;
+then ( ( k + 1 ) + 1 ) in ( Seg ( len p ) ) by A59,FINSEQ_1:1;
+then ( ( k + 1 ) + 1 ) in ( dom p ) by FINSEQ_1:def 3;
+then A74: [ ( ( k + 1 ) + 1 ),( p . ( ( k + 1 ) + 1 ) ) ] in p by FUNCT_1:1;
+(ex p being FinSequence st (((p in ( D() * ) & ( p . 1 ) = A()) & (for n holds (( n + 2 ) <= ( len p ) implies ( p . ( n + 2 ) ) = ( f . [ n,( p . ( n + 1 ) ) ] )))) & Z = p)) by A4,A57;
+then ( p . 1 ) = A() by A61,FINSEQ_1:def 7;
+then p in X by A4,A72,A62;
+then [ ( ( k + 1 ) + 1 ),( p . ( ( k + 1 ) + 1 ) ) ] in h by A46,A74,TARSKI:def 4;
+hence thesis by FUNCT_1:1;
+end;
+(( k + 1 ) <> ( len Z ) implies thesis)
+proof
+( k + 1 ) in ( dom Z ) by A56,FUNCT_1:1;
+then ( k + 1 ) in ( Seg ( len Z ) ) by FINSEQ_1:def 3;
+then A75: ( k + 1 ) <= ( len Z ) by FINSEQ_1:1;
+assume ( k + 1 ) <> ( len Z );
+then ( k + 1 ) < ( len Z ) by A75,XXREAL_0:1;
+then A76: ( ( k + 1 ) + 1 ) <= ( len Z ) by NAT_1:13;
+1 <= ( ( k + 1 ) + 1 ) by NAT_1:12;
+then ( ( k + 1 ) + 1 ) in ( Seg ( len Z ) ) by A76,FINSEQ_1:1;
+then ( ( k + 1 ) + 1 ) in ( dom Z ) by FINSEQ_1:def 3;
+then [ ( ( k + 1 ) + 1 ),( Z . ( ( k + 1 ) + 1 ) ) ] in Z by FUNCT_1:1;
+then [ ( ( k + 1 ) + 1 ),( Z . ( ( k + 1 ) + 1 ) ) ] in h by A46,A57,TARSKI:def 4;
+hence thesis by FUNCT_1:1;
+end;
+hence thesis by A58;
+end;
+[ 1,A() ] in { [ 1,A() ] } by TARSKI:def 1;
+then [ 1,A() ] in h by A46,A54,TARSKI:def 4;
+then A77: P[ ( 0 ) ] by FUNCT_1:1;
+thus (for k holds P[ k ]) from NAT_1:sch 1(A77,A55);
+end;
+A78: (for n holds ( h . ( n + 2 ) ) = ( f . [ n,( h . ( n + 1 ) ) ] ))
+proof
+let n;
+( ( n + 1 ) + 1 ) in ( dom h ) by A52;
+then [ ( n + 2 ),( h . ( n + 2 ) ) ] in h by FUNCT_1:def 2;
+then consider Z being set such that A79: [ ( n + 2 ),( h . ( n + 2 ) ) ] in Z and A80: Z in X by A46,TARSKI:def 4;
+A81: (ex p st ((p in ( D() * ) & (( p . 1 ) = A() & (for n holds (( n + 2 ) <= ( len p ) implies ( p . ( n + 2 ) ) = ( f . [ n,( p . ( n + 1 ) ) ] ))))) & Z = p)) by A4,A80;
+Z in ( D() * ) by A5,A80;
+then reconsider Z as (FinSequence of D()) by FINSEQ_1:def 11;
+( n + 2 ) in ( dom Z ) by A79,FUNCT_1:1;
+then ( n + 2 ) in ( Seg ( len Z ) ) by FINSEQ_1:def 3;
+then A82: ( n + 2 ) <= ( len Z ) by FINSEQ_1:1;
+( n + 1 ) <= ( n + 2 ) by XREAL_1:7;
+then (1 <= ( n + 1 ) & ( n + 1 ) <= ( len Z )) by A82,NAT_1:12,XXREAL_0:2;
+then ( n + 1 ) in ( Seg ( len Z ) ) by FINSEQ_1:1;
+then ( n + 1 ) in ( dom Z ) by FINSEQ_1:def 3;
+then [ ( n + 1 ),( Z . ( n + 1 ) ) ] in Z by FUNCT_1:1;
+then A83: [ ( n + 1 ),( Z . ( n + 1 ) ) ] in h by A46,A80,TARSKI:def 4;
+thus ( h . ( n + 2 ) ) = ( Z . ( n + 2 ) ) by A79,FUNCT_1:1
+.= ( f . [ n,( Z . ( n + 1 ) ) ] ) by A81,A82
+.= ( f . [ n,( h . ( n + 1 ) ) ] ) by A83,FUNCT_1:1;
+end;
+(ex g being (Function of ( NAT ),D()) st (for n holds ( g . n ) = ( h . ( n + 1 ) )))
+proof
+(ex g being Function st (( dom g ) = ( NAT ) & (for n holds ( g . n ) = ( h . ( n + 1 ) ))))
+proof
+defpred P[ set,set ]
+ means
+(ex n st (n = $1 & $2 = ( h . ( n + 1 ) )));
+A84: (for x holds (x in ( NAT ) implies (ex y st P[ x,y ])))
+proof
+let x;
+assume x in ( NAT );
+then reconsider n = x as (Element of ( NAT ));
+take ( h . ( n + 1 ) );
+take n;
+thus thesis;
+end;
+consider g being Function such that A85: (( dom g ) = ( NAT ) & (for x holds (x in ( NAT ) implies P[ x,( g . x ) ]))) from CLASSES1:sch 1(A84);
+take g;
+thus ( dom g ) = ( NAT ) by A85;
+thus (for n holds ( g . n ) = ( h . ( n + 1 ) ))
+proof
+let n;
+(ex m st (m = n & ( g . n ) = ( h . ( m + 1 ) ))) by A85;
+hence thesis;
+end;
+
+end;
+then consider g being Function such that A86: ( dom g ) = ( NAT ) and A87: (for n holds ( g . n ) = ( h . ( n + 1 ) ));
+( rng g ) c= D()
+proof
+let x;
+assume x in ( rng g );
+then consider y such that A88: y in ( dom g ) and A89: x = ( g . y ) by FUNCT_1:def 3;
+reconsider k = y as (Element of ( NAT )) by A86,A88;
+( k + 1 ) in ( dom h ) by A52;
+then A90: ( h . ( k + 1 ) ) in ( rng h ) by FUNCT_1:def 3;
+x = ( h . ( k + 1 ) ) by A87,A89;
+hence thesis by A47,A90;
+end;
+then reconsider g as (Function of ( NAT ),D()) by A86,FUNCT_2:2;
+take g;
+thus thesis by A87;
+end;
+then consider g being (Function of ( NAT ),D()) such that A91: (for n holds ( g . n ) = ( h . ( n + 1 ) ));
+A92: (for n holds (( n + 2 ) <= ( len <* A() *> ) implies ( <* A() *> . ( n + 2 ) ) = ( f . [ n,( <* A() *> . ( n + 1 ) ) ] )))
+proof
+let n;
+assume ( n + 2 ) <= ( len <* A() *> );
+then ( ( n + 1 ) + 1 ) <= ( ( 0 ) + 1 ) by FINSEQ_1:39;
+then ( n + 1 ) <= ( 0 ) by XREAL_1:6;
+then ( n + 1 ) <= ( ( 0 ) + n );
+hence thesis by XREAL_1:6;
+end;
+(<* A() *> in ( D() * ) & ( <* A() *> . 1 ) = A()) by FINSEQ_1:def 8,FINSEQ_1:def 11;
+then <* A() *> in X by A4,A92;
+then A93: { [ 1,A() ] } in X by FINSEQ_1:37;
+take g;
+[ 1,A() ] in { [ 1,A() ] } by TARSKI:def 1;
+then [ 1,A() ] in h by A46,A93,TARSKI:def 4;
+then A() = ( h . ( ( 0 ) + 1 ) ) by FUNCT_1:1
+.= ( g . ( 0 ) ) by A91;
+hence ( g . ( 0 ) ) = A();
+let n being (Element of ( NAT ));
+A94: ( h . ( n + ( 1 + 1 ) ) ) = ( f . (n,( h . ( n + 1 ) )) ) by A78;
+P[ n,( g . n ),( f . (n,( g . n )) ) ] by A3;
+then P[ n,( g . n ),( h . ( ( n + 1 ) + 1 ) ) ] by A91,A94;
+hence thesis by A91;
+end;

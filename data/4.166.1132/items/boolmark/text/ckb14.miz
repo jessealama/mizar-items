@@ -1,0 +1,70 @@
+environ
+vocabularies NUMBERS,XBOOLE_0,FUNCT_1,SUBSET_1,FUNCT_4,FUNCOP_1,RELAT_1,TARSKI,PETRI,FUNCT_2,MARGREL1,ARYTM_3,XBOOLEAN,FINSEQ_1,PARTFUN1,XXREAL_0,CARD_1,ORDINAL4,NAT_1,ARYTM_1,BOOLMARK,STRUCT_0,PNPROC_1;
+notations TARSKI,XBOOLE_0,SUBSET_1,NUMBERS,XCMPLX_0,NAT_1,RELAT_1,FUNCT_1,PARTFUN1,FUNCT_2,DOMAIN_1,FUNCOP_1,FINSEQ_1,FUNCT_4,MARGREL1,PETRI,XXREAL_0,STRUCT_0,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB11;
+definitions PETRI,XBOOLE_0,XBOOLEAN,SUBSET_1,STRUCT_0,CKB4,CKB6,CKB8,CKB9,CKB11;
+theorems SUBSET_1,TARSKI,ZFMISC_1,PETRI,FUNCT_1,FUNCOP_1,FUNCT_2,FUNCT_4,FINSEQ_1,FINSEQ_4,NAT_1,FINSEQ_2,FINSEQ_3,RELAT_1,RELSET_1,XBOOLE_0,XBOOLE_1,XREAL_1,XXREAL_0,ORDINAL1,PARTFUN1,SEQ_4,CKB1,CKB2,CKB3,CKB4,CKB6,CKB8,CKB9,CKB11,CKB12,CKB13;
+schemes FINSEQ_2,NAT_1;
+registrations SUBSET_1,XXREAL_0,XREAL_0,FINSEQ_1,MARGREL1,ORDINAL1,CARD_1,RELSET_1,STRUCT_0,PETRI;
+constructors PARTFUN1,DOMAIN_1,FUNCT_4,XXREAL_0,XREAL_0,NAT_1,MARGREL1,FINSEQ_4,PETRI,RELSET_1,STRUCT_0,CKB4,CKB6,CKB8,CKB9,CKB11;
+requirements REAL,NUMERALS,BOOLE,SUBSET,ARITHM;
+begin
+Lm1:now
+let PTN being Petri_net;
+let Sd being non empty (Subset of (the carrier of PTN));
+set M0 = ( (( (the carrier of PTN) --> ( TRUE ) ) qua Function) +* ( Sd --> ( FALSE ) ) );
+A1: ( [#] (the carrier of PTN) ) = (the carrier of PTN);
+(( dom (( (the carrier of PTN) --> ( TRUE ) ) qua Function) ) = (the carrier of PTN) & ( dom ( Sd --> ( FALSE ) ) ) = Sd) by FUNCOP_1:13;
+then A2: ( dom M0 ) = ( (the carrier of PTN) \/ Sd ) by FUNCT_4:def 1
+.= (the carrier of PTN) by A1,SUBSET_1:11;
+A3: ( rng M0 ) c= ( ( rng ( (the carrier of PTN) --> ( TRUE ) ) ) \/ ( rng ( Sd --> ( FALSE ) ) ) ) by FUNCT_4:17;
+( rng ( Sd --> ( FALSE ) ) ) c= { ( FALSE ) } by FUNCOP_1:13;
+then A4: ( rng ( Sd --> ( FALSE ) ) ) c= ( BOOLEAN ) by XBOOLE_1:1;
+( rng ( (the carrier of PTN) --> ( TRUE ) ) ) c= { ( TRUE ) } by FUNCOP_1:13;
+then ( rng ( (the carrier of PTN) --> ( TRUE ) ) ) c= ( BOOLEAN ) by XBOOLE_1:1;
+then ( ( rng ( (the carrier of PTN) --> ( TRUE ) ) ) \/ ( rng ( Sd --> ( FALSE ) ) ) ) c= ( BOOLEAN ) by A4,XBOOLE_1:8;
+then ( rng M0 ) c= ( BOOLEAN ) by A3,XBOOLE_1:1;
+then reconsider M0 as (Boolean_marking of PTN) by A2,FUNCT_2:def 2;
+assume A5: (for M0 being (Boolean_marking of PTN) holds (( M0 .: Sd ) = { ( FALSE ) } implies (for t being (transition of PTN) holds (t is_firable_on M0 implies ( ( Firing (t,M0) ) .: Sd ) = { ( FALSE ) }))));
+assume (not Sd is  Deadlock-like);
+then (not ( *' Sd ) c= ( Sd *' )) by PETRI:def 8;
+then consider t being (transition of PTN) such that A6: t in ( *' Sd ) and A7: (not t in ( Sd *' )) by SUBSET_1:2;
+( { t } *' ) meets Sd by A6,PETRI:20;
+then consider s being set such that A8: s in ( ( { t } *' ) /\ Sd ) by XBOOLE_0:4;
+s in ( { t } *' ) by A8,XBOOLE_0:def 4;
+then A9: ( ( Firing (t,M0) ) . s ) = ( TRUE ) by CKB13:1;
+s in Sd by A8,XBOOLE_0:def 4;
+then ( TRUE ) in ( ( Firing (t,M0) ) .: Sd ) by A9,FUNCT_2:35;
+then A10: ( ( Firing (t,M0) ) .: Sd ) <> { ( FALSE ) } by TARSKI:def 1;
+Sd misses ( *' { t } ) by A7,PETRI:19;
+then A11: ( (( (the carrier of PTN) --> ( TRUE ) ) qua Function) .: ( *' { t } ) ) = ( M0 .: ( *' { t } ) ) by CKB3:1;
+(( rng ( (the carrier of PTN) --> ( TRUE ) ) ) c= { ( TRUE ) } & ( ( (the carrier of PTN) --> ( TRUE ) ) .: ( *' { t } ) ) c= ( rng ( (the carrier of PTN) --> ( TRUE ) ) )) by FUNCOP_1:13,RELAT_1:111;
+then ( M0 .: ( *' { t } ) ) c= { ( TRUE ) } by A11,XBOOLE_1:1;
+then A12: t is_firable_on M0 by CKB6:def 1;
+( M0 .: Sd ) = { (( FALSE ) qua set) } by CKB12:1;
+hence contradiction by A5,A12,A10;
+end;
+theorem
+(for PTN being Petri_net holds (for Sd being non empty (Subset of (the carrier of PTN)) holds (Sd is  Deadlock-like iff (for M0 being (Boolean_marking of PTN) holds (( M0 .: Sd ) = { ( FALSE ) } implies (for t being (transition of PTN) holds (t is_firable_on M0 implies ( ( Firing (t,M0) ) .: Sd ) = { ( FALSE ) })))))))
+proof
+let PTN being Petri_net;
+let Sd being non empty (Subset of (the carrier of PTN));
+thus (Sd is  Deadlock-like implies (for M0 being (Boolean_marking of PTN) holds (( M0 .: Sd ) = { ( FALSE ) } implies (for t being (transition of PTN) holds (t is_firable_on M0 implies ( ( Firing (t,M0) ) .: Sd ) = { ( FALSE ) })))))
+proof
+assume Sd is  Deadlock-like;
+then A1: ( *' Sd ) is (Subset of ( Sd *' )) by PETRI:def 8;
+let M0 being (Boolean_marking of PTN);
+assume that
+A2: ( M0 .: Sd ) = { ( FALSE ) };
+let t being (transition of PTN);
+assume t is_firable_on M0;
+then ( M0 .: ( *' { t } ) ) c= { ( TRUE ) } by CKB6:def 1;
+then A3: ( M0 .: ( *' { t } ) ) misses { ( FALSE ) } by XBOOLE_1:63,ZFMISC_1:11;
+then ( *' { t } ) misses Sd by A2,CKB2:1;
+then (not t in ( *' Sd )) by A1,PETRI:19;
+then ( { t } *' ) misses Sd by PETRI:20;
+hence ( ( Firing (t,M0) ) .: Sd ) = ( ( M0 +* ( ( *' { t } ) --> ( FALSE ) ) ) .: Sd ) by CKB3:1
+.= { ( FALSE ) } by A2,A3,CKB2:1,CKB3:1;
+end;
+
+thus thesis by Lm1;
+end;

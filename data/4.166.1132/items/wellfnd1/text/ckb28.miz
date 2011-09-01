@@ -1,0 +1,72 @@
+environ
+vocabularies FUNCT_1,PARTFUN1,TARSKI,RELAT_1,SUBSET_1,CARD_1,XBOOLE_0,CARD_5,ORDINAL2,ORDERS_2,WELLORD1,STRUCT_0,WAYBEL_0,XXREAL_0,ZFMISC_1,SETFAM_1,ORDINAL1,CARD_2,FINSET_1,FUNCOP_1,FUNCT_4,NAT_1,ARYTM_3,NUMBERS,WELLFND1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,CARD_1,NUMBERS,RELAT_1,FUNCT_1,BINOP_1,SETFAM_1,DOMAIN_1,NAT_1,STRUCT_0,RELSET_1,PARTFUN1,FUNCT_2,FUNCT_4,FUNCOP_1,ORDINAL1,WELLORD1,ORDINAL2,FINSET_1,CARD_2,ORDERS_2,CARD_5,RFUNCT_3,WAYBEL_0,CKB7,CKB10,CKB12,CKB14,CKB23,CKB27;
+definitions TARSKI,RELAT_1,FUNCT_1,WELLORD1,WAYBEL_0,XBOOLE_0,BINOP_1,FUNCOP_1,CKB7,CKB10,CKB12,CKB14,CKB23,CKB27;
+theorems TARSKI,ENUMSET1,ZFMISC_1,RELAT_1,RELSET_1,FUNCT_1,ORDINAL1,WELLORD1,GRFUNC_1,PARTFUN1,FUNCT_2,ORDINAL2,FUNCOP_1,CARD_1,ORDERS_2,FUNCT_4,CARD_5,WAYBEL_0,XBOOLE_0,XBOOLE_1,REALSET1,BINOP_1,CARD_2,CKB1,CKB5,CKB6,CKB7,CKB8,CKB9,CKB10,CKB12,CKB14,CKB16,CKB17,CKB18,CKB19,CKB21,CKB23,CKB24,CKB25,CKB26,CKB27;
+schemes NAT_1,SUBSET_1,DOMAIN_1,FUNCT_7,BINOP_1,CKB2,CKB20,CKB22;
+registrations XBOOLE_0,SUBSET_1,ORDINAL1,RELSET_1,PARTFUN1,FUNCOP_1,CARD_1,REALSET1,CARD_5,STRUCT_0,WAYBEL_0,FUNCT_1,ZFMISC_1,CKB3,CKB4,CKB11,CKB13,CKB15;
+constructors SETFAM_1,WELLORD1,BINOP_1,FUNCT_4,ORDINAL2,NAT_1,CARD_2,REALSET1,CARD_5,RFUNCT_3,WAYBEL_0,RELSET_1,CKB10,CKB12,CKB14,CKB23,CKB27;
+requirements NUMERALS,SUBSET,BOOLE;
+begin
+theorem
+(for R being non empty RelStr holds (R is  well_founded iff (not (ex f being (sequence of R) st f is  descending))))
+proof
+let R being non empty RelStr;
+set c = (the carrier of R);
+set r = (the InternalRel of R);
+hereby
+assume R is  well_founded;
+then A1: r is_well_founded_in c by CKB10:def 1;
+given f being (sequence of R) such that
+A2: f is  descending;
+
+A3: ( dom f ) = ( NAT ) by FUNCT_2:def 1;
+then ( rng f ) <> ( {} ) by RELAT_1:42;
+then consider a being set such that A4: a in ( rng f ) and A5: ( r -Seg a ) misses ( rng f ) by A1,WELLORD1:def 3;
+consider n being set such that A6: n in ( dom f ) and A7: a = ( f . n ) by A4,FUNCT_1:def 3;
+reconsider n as (Element of ( NAT )) by A6;
+(( f . ( n + 1 ) ) <> ( f . n ) & [ ( f . ( n + 1 ) ),( f . n ) ] in (the InternalRel of R)) by A2,CKB27:def 1;
+then A8: ( f . ( n + 1 ) ) in ( r -Seg ( f . n ) ) by WELLORD1:1;
+( f . ( n + 1 ) ) in ( rng f ) by A3,FUNCT_1:def 3;
+hence contradiction by A5,A7,A8,XBOOLE_0:3;
+end;
+assume A9: (not (ex f being (sequence of R) st f is  descending));
+assume (not R is  well_founded);
+then (not r is_well_founded_in c) by CKB10:def 1;
+then consider Y being set such that A10: Y c= c and A11: Y <> ( {} ) and A12: (for a being set holds ((not a in Y) or ( r -Seg a ) meets Y)) by WELLORD1:def 3;
+deffunc G(set,set) = ( choose ( ( r -Seg $2 ) /\ Y ) );
+consider f being Function such that A13: ( dom f ) = ( NAT ) and A14: ( f . ( 0 ) ) = ( choose Y ) and A15: (for n being Nat holds ( f . ( n + 1 ) ) = G(n,( f . n ))) from NAT_1:sch 11;
+defpred P[ Nat ]
+ means
+( f . $1 ) in Y;
+A16:now
+let n being Nat;
+assume P[ n ];
+then ( r -Seg ( f . n ) ) meets Y by A12;
+then A17: ( ( r -Seg ( f . n ) ) /\ Y ) <> ( {} ) by XBOOLE_0:def 7;
+( f . ( n + 1 ) ) = ( choose ( ( r -Seg ( f . n ) ) /\ Y ) ) by A15;
+hence P[ ( n + 1 ) ] by A17,XBOOLE_0:def 4;
+end;
+A18: P[ ( 0 ) ] by A11,A14;
+A19: (for n being Nat holds P[ n ]) from NAT_1:sch 2(A18,A16);
+( rng f ) c= c
+proof
+let y being set;
+assume y in ( rng f );
+then consider x being set such that A20: x in ( dom f ) and A21: y = ( f . x ) by FUNCT_1:def 3;
+reconsider n = x as (Element of ( NAT )) by A13,A20;
+( f . n ) in Y by A19;
+hence thesis by A10,A21;
+end;
+then reconsider f as (sequence of R) by A13,FUNCT_2:2;
+now
+let n being Nat;
+( r -Seg ( f . n ) ) meets Y by A12,A19;
+then A22: ( ( r -Seg ( f . n ) ) /\ Y ) <> ( {} ) by XBOOLE_0:def 7;
+( f . ( n + 1 ) ) = ( choose ( ( r -Seg ( f . n ) ) /\ Y ) ) by A15;
+then ( f . ( n + 1 ) ) in ( r -Seg ( f . n ) ) by A22,XBOOLE_0:def 4;
+hence (( f . ( n + 1 ) ) <> ( f . n ) & [ ( f . ( n + 1 ) ),( f . n ) ] in r) by WELLORD1:1;
+end;
+then f is  descending by CKB27:def 1;
+hence contradiction by A9;
+end;
