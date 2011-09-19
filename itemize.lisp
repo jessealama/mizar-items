@@ -72,10 +72,22 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 
 (defmethod xsl-split-article ((article pathname))
   (loop
+     with free-variables-stylesheet = (mizar-items-config 'free-variables-stylesheet)
+     with toplevel-private-functions-stylesheet = (mizar-items-config 'toplevel-private-functions-stylesheet)
+     with toplevel-constant-definition-stylesheet = (mizar-items-config 'toplevel-constant-definition-stylesheet)
+     with toplevel-type-changing-statements-stylesheet = (mizar-items-config 'toplevel-type-changing-statements-stylesheet)
      with toplevel-dellink-stylesheet = (mizar-items-config 'toplevel-dellink-stylesheet)
      with toplevel-choice-stylesheet = (mizar-items-config 'toplevel-choice-stylesheet)
      with split-stylesheet = (mizar-items-config 'split-stylesheet)
-     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet split-stylesheet split-stylesheet toplevel-choice-stylesheet split-stylesheet)
+     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet
+			   ;; toplevel-private-functions-stylesheet
+			   ;; toplevel-constant-definition-stylesheet
+			   ;; toplevel-type-changing-statements-stylesheet
+			   split-stylesheet split-stylesheet
+			   free-variables-stylesheet
+			   ;; toplevel-choice-stylesheet
+			   ;; split-stylesheet
+			   )
      with xml = (replace-extension article "miz" "wsx")
      for sheet in schedule
      do
