@@ -41,6 +41,12 @@
 (defun item-dependency-table-for-mml (mml-version)
   (format nil "~a/item-dependency-table" (mml-data-dir mml-version)))
 
+(defun property-directory-for-mml (mml-version)
+  (format nil "~a/properties" (mml-data-dir mml-version)))
+
+(defun needed-property-file-for-mml (mml-version)
+  (format nil "~a/needed" (property-directory-for-mml mml-version)))
+
 (defvar *mizar-items-config* (make-hash-table))
 
 (defun update-mizar-items-config (key value)
