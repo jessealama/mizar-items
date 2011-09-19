@@ -96,6 +96,14 @@
 			   (file-in-xsl4mizar-dir "free-variables.xsl"))
 (update-mizar-items-config 'toplevel-dellink-stylesheet
 			   (file-in-xsl4mizar-dir "toplevel-dellink.xsl"))
+(update-mizar-items-config 'toplevel-private-functions-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-private-functions.xsl"))
+(update-mizar-items-config 'toplevel-constant-definition-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-constant-definition.xsl"))
+(update-mizar-items-config 'toplevel-type-changing-statements-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-type-changing-statements.xsl"))
+(update-mizar-items-config 'toplevel-private-predicates-and-functions-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-private-predicates-and-functions.xsl"))
 (update-mizar-items-config 'toplevel-choice-stylesheet
 			   (file-in-xsl4mizar-dir "toplevel-choice.xsl"))
 (update-mizar-items-config 'item-to-fragment-path
