@@ -72,10 +72,22 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 
 (defmethod xsl-split-article ((article pathname))
   (loop
+     with free-variables-stylesheet = (mizar-items-config 'free-variables-stylesheet)
+     with toplevel-private-functions-stylesheet = (mizar-items-config 'toplevel-private-functions-stylesheet)
+     with toplevel-constant-definition-stylesheet = (mizar-items-config 'toplevel-constant-definition-stylesheet)
+     with toplevel-type-changing-statements-stylesheet = (mizar-items-config 'toplevel-type-changing-statements-stylesheet)
      with toplevel-dellink-stylesheet = (mizar-items-config 'toplevel-dellink-stylesheet)
      with toplevel-choice-stylesheet = (mizar-items-config 'toplevel-choice-stylesheet)
      with split-stylesheet = (mizar-items-config 'split-stylesheet)
-     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet split-stylesheet split-stylesheet toplevel-choice-stylesheet split-stylesheet)
+     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet
+			   ;; toplevel-private-functions-stylesheet
+			   ;; toplevel-constant-definition-stylesheet
+			   ;; toplevel-type-changing-statements-stylesheet
+			   split-stylesheet split-stylesheet
+			   free-variables-stylesheet
+			   ;; toplevel-choice-stylesheet
+			   ;; split-stylesheet
+			   )
      with xml = (replace-extension article "miz" "wsx")
      for sheet in schedule
      do
@@ -227,13 +239,13 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	 (article-name (pathname-name article-path))
 	 (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
 	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name))
-					;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
-					;                                     ^ ensures that the path ends with '/'
-					;                                ^ ensures that the path starts with '/'
+;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
+;                                     ^ ensures that the path ends with '/'
+;                                ^ ensures that the path starts with '/'
 	 (prel-dir (format nil "~aprel/" items-dir))
 	 (dict-dir (format nil "~adict/" items-dir))
 	 (text-dir (format nil "~atext/" items-dir)))
-					;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
+;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
     (handler-case
 	(and (ensure-directories-exist items-dir)
 	     (ensure-directories-exist prel-dir)
@@ -250,21 +262,22 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 	      (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
 		     (doc (rune-dom:create-document text-proper))
 		     (bundle-path (format nil "~a~a.wsi" items-dir bundlenr)))
-					;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
+;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
 		(with-open-file (bundle-xml bundle-path
 					    :direction :output
 					    :if-does-not-exist :create
 					    :if-exists :supersede
 					    :element-type '(unsigned-byte 8))
-					;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-					;                                           Watch out: omitting this key can lead to trouble
+;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;                                           Watch out: omitting this key can lead to trouble
 		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
 		;; if this is a toplevel constant definition, we need to write a new vocabulary file
 		(when (and promoted
 			   (or (string= promoted "constant-definition")
 			       (string= promoted "type-changing-statement")
 			       (string= promoted "choice-statement-mode")
-			       (string= promoted "choice-statement-functor"))
+			       (string= promoted "choice-statement-functor")
+			       (string= promoted "private-functor-definition"))
 			   spelling)
 		  (let ((voc-path (format nil "~ackb~a.voc" dict-dir bundlenr)))
 		    (with-open-file (voc voc-path
@@ -273,7 +286,9 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					 :if-does-not-exist :create)
 		      (if (string= promoted "choice-statement-mode")
 			  (format voc "M~a~%" spelling)
-			  (format voc "O~a~%" spelling)))))
+			  (if (string= promoted "private-predicate-definition")
+			      (format voc "R~a~%" spelling)
+			      (format voc "O~a~%" spelling))))))
 		;; create the bundle's new evl
 		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" text-dir bundlenr))
 		      (extended-evl (extend-evl evl-file prel-dir dict-dir)))

@@ -41,6 +41,12 @@
 (defun item-dependency-table-for-mml (mml-version)
   (format nil "~a/item-dependency-table" (mml-data-dir mml-version)))
 
+(defun property-directory-for-mml (mml-version)
+  (format nil "~a/properties" (mml-data-dir mml-version)))
+
+(defun needed-property-file-for-mml (mml-version)
+  (format nil "~a/needed" (property-directory-for-mml mml-version)))
+
 (defvar *mizar-items-config* (make-hash-table))
 
 (defun update-mizar-items-config (key value)
@@ -90,6 +96,14 @@
 			   (file-in-xsl4mizar-dir "free-variables.xsl"))
 (update-mizar-items-config 'toplevel-dellink-stylesheet
 			   (file-in-xsl4mizar-dir "toplevel-dellink.xsl"))
+(update-mizar-items-config 'toplevel-private-functions-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-private-functions.xsl"))
+(update-mizar-items-config 'toplevel-constant-definition-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-constant-definition.xsl"))
+(update-mizar-items-config 'toplevel-type-changing-statements-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-type-changing-statements.xsl"))
+(update-mizar-items-config 'toplevel-private-predicates-and-functions-stylesheet
+			   (file-in-xsl4mizar-dir "toplevel-private-predicates-and-functions.xsl"))
 (update-mizar-items-config 'toplevel-choice-stylesheet
 			   (file-in-xsl4mizar-dir "toplevel-choice.xsl"))
 (update-mizar-items-config 'item-to-fragment-path
