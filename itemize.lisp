@@ -276,7 +276,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 			   (or (string= promoted "constant-definition")
 			       (string= promoted "type-changing-statement")
 			       (string= promoted "choice-statement-mode")
-			       (string= promoted "choice-statement-functor"))
+			       (string= promoted "choice-statement-functor")
+			       (string= promoted "private-functor-definition"))
 			   spelling)
 		  (let ((voc-path (format nil "~ackb~a.voc" dict-dir bundlenr)))
 		    (with-open-file (voc voc-path
@@ -285,7 +286,9 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 					 :if-does-not-exist :create)
 		      (if (string= promoted "choice-statement-mode")
 			  (format voc "M~a~%" spelling)
-			  (format voc "O~a~%" spelling)))))
+			  (if (string= promoted "private-predicate-definition")
+			      (format voc "R~a~%" spelling)
+			      (format voc "O~a~%" spelling))))))
 		;; create the bundle's new evl
 		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" text-dir bundlenr))
 		      (extended-evl (extend-evl evl-file prel-dir dict-dir)))
