@@ -168,6 +168,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 			   ((dno-file-p path) (add-to-notations (pathname-name path)))
 			   ((dcl-file-p path) (add-to-registrations (pathname-name path)))
 			   ((eid-file-p path) (add-to-registrations (pathname-name path)))
+			   ((did-file-p path) (add-to-registrations (pathname-name path)))
 			   ((sch-file-p path) (add-to-schemes (pathname-name path)))
 			   ((dco-file-p path) (add-to-constructors (pathname-name path)))
 			   ((def-file-p path) (add-to-definitions (pathname-name path)))
@@ -176,7 +177,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 			    (error "Don't know how to deal with the file '~a'" (namestring path))))))
 	      ;; prel
 	      (loop
-		 for extension in (list "dno" "dcl" "eid" "sch" "def" "dco" "the")
+		 for extension in (list "dno" "dcl" "eid" "did" "sch" "def" "dco" "the")
 		 do
 		   (loop
 		      with files = (files-in-directory-with-extension prel-dir extension)
