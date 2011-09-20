@@ -272,6 +272,9 @@ suite to work correctly."
 (defun eid-file-p (path)
   (file-has-extension path "eid"))
 
+(defun did-file-p (path)
+  (file-has-extension path "did"))
+
 (defun the-file-p (path)
   (file-has-extension path "the"))
 
