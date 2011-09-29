@@ -64,7 +64,7 @@ while (defined (my $article = <STDIN>)) {
   push (@articles, $article);
 }
 
-# sanity: all the articles exist
+# sanity: all the articles exist and have the expected parts
 foreach my $article (@articles) {
   my $article_on_harddisk = article_on_harddisk ($article);
   unless (-e $article_on_harddisk) {
@@ -96,7 +96,18 @@ foreach my $article (@articles) {
     die "The dict subdirectory '$article_dict_dir' for article '$article' is not actually a directory!";
   }
   unless (-r $article_dict_dir) {
-    die "The dict  subdirectory '$article_dict_dir' for article '$article' is not readable!";
+    die "The dict subdirectory '$article_dict_dir' for article '$article' is not readable!";
+  }
+  # check the prel subdirectory
+  my $article_prel_dir = $article_on_harddisk . '/prel';
+  unless (-e $article_prel_dir) {
+    die "The prel subdirectory '$article_prel_dir' for article '$article' doesn't exist!";
+  }
+  unless (-d $article_prel_dir) {
+    die "The prel subdirectory '$article_prel_dir' for article '$article' is not actually a directory!";
+  }
+  unless (-r $article_prel_dir) {
+    die "The prel subdirectory '$article_prel_dir' for article '$article' is not readable!";
   }
   my @one_item = `find $article_text_dir -name 'ckb1.miz' | head -n 1`;
   if (@one_item == 0) {
