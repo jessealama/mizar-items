@@ -76,6 +76,7 @@ foreach my $article (@articles) {
   unless (-r $article_on_harddisk) {
     die "The directory '$article_on_harddisk' for article '$article' is not readable!";
   }
+  # check the text subdirectory
   my $article_text_dir = $article_on_harddisk . '/text';
   unless (-e $article_text_dir) {
     die "The text subdirectory '$article_text_dir' for article '$article' doesn't exist!";
@@ -85,6 +86,17 @@ foreach my $article (@articles) {
   }
   unless (-r $article_text_dir) {
     die "The text subdirectory '$article_text_dir' for article '$article' is not readable!";
+  }
+  # check the dict subdirectory
+  my $article_dict_dir = $article_on_harddisk . '/dict';
+  unless (-e $article_dict_dir) {
+    die "The dict subdirectory '$article_dict_dir' for article '$article' doesn't exist!";
+  }
+  unless (-d $article_dict_dir) {
+    die "The dict subdirectory '$article_dict_dir' for article '$article' is not actually a directory!";
+  }
+  unless (-r $article_dict_dir) {
+    die "The dict  subdirectory '$article_dict_dir' for article '$article' is not readable!";
   }
   my @one_item = `find $article_text_dir -name 'ckb1.miz' | head -n 1`;
   if (@one_item == 0) {
