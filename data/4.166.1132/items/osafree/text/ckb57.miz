@@ -8,6 +8,11 @@ registrations XBOOLE_0,SUBSET_1,RELAT_1,ORDINAL1,PARTFUN1,FUNCOP_1,FUNCT_1,PBOOL
 constructors XXREAL_0,NAT_1,FINSEQOP,FUNCT_7,MSUALG_3,MSAFREE,ORDERS_3,OSALG_2,OSALG_3,OSALG_4,RELSET_1,CKB1,CKB3,CKB4,CKB5,CKB7,CKB12,CKB13,CKB15,CKB21,CKB22,CKB23,CKB25,CKB31,CKB38,CKB41,CKB42,CKB43,CKB44,CKB45,CKB46,CKB47,CKB48,CKB53;
 requirements BOOLE,SUBSET;
 begin
+reserve S for OrderSortedSign;
+reserve X for (ManySortedSet of S);
+reserve o for (OperSymbol of S);
+reserve b for (Element of ( ( [: (the carrier' of S),{ (the carrier of S) } :] \/ ( Union ( coprod X ) ) ) * ));
+reserve x for set;
 theorem
 Th27: (for S being  locally_directed OrderSortedSign holds (for X being  non-empty (ManySortedSet of S) holds (for R being (ManySortedRelation of ( ParsedTermsOSA X )) holds (R = ( PTCongruence X ) iff ((for s1,s2 being (Element of S) holds (for x being set holds (x in ( X . s1 ) implies ((s1 <= s2 implies [ ( root-tree [ x,s1 ] ),( root-tree [ x,s1 ] ) ] in ( R . s2 )) & (for y being set holds (([ ( root-tree [ x,s1 ] ),y ] in ( R . s2 ) or [ y,( root-tree [ x,s1 ] ) ] in ( R . s2 )) implies (s1 <= s2 & y = ( root-tree [ x,s1 ] )))))))) & (for o1,o2 being (OperSymbol of S) holds (for x1 being (Element of ( Args (o1,( ParsedTermsOSA X )) )) holds (for x2 being (Element of ( Args (o2,( ParsedTermsOSA X )) )) holds (for s3 being (Element of S) holds ([ ( ( Den (o1,( ParsedTermsOSA X )) ) . x1 ),( ( Den (o2,( ParsedTermsOSA X )) ) . x2 ) ] in ( R . s3 ) iff ((((o1 ~= o2 & ( len ( the_arity_of o1 ) ) = ( len ( the_arity_of o2 ) )) & ( the_result_sort_of o1 ) <= s3) & ( the_result_sort_of o2 ) <= s3) & (ex w3 being (Element of ( (the carrier of S) * )) st (( dom w3 ) = ( dom x1 ) & (for y being Nat holds (y in ( dom w3 ) implies [ ( x1 . y ),( x2 . y ) ] in ( R . ( w3 /. y ) ))))))))))))))))
 proof
@@ -29,7 +34,8 @@ defpred NT[ (ManySortedSet of (the carrier of S)) ]
 set P = ( PTCongruence X );
 A1: (for R1,R2 being (ManySortedRelation of PTA) holds ((((T[ R1 ] & NT[ R1 ]) & T[ R2 ]) & NT[ R2 ]) implies R1 = R2))
 proof
-let R1 being (ManySortedRelation of PTA),R2 being (ManySortedRelation of PTA);
+let R1 being (ManySortedRelation of PTA);
+let R2 being (ManySortedRelation of PTA);
 assume that
 A2: T[ R1 ]
 and
@@ -174,7 +180,8 @@ assume i in (the carrier of S);
 then reconsider s = i as (Element of S);
 (for a,b being set holds ([ a,b ] in ( R1 . s ) iff [ a,b ] in ( R2 . s )))
 proof
-let a being set,b being set;
+let a being set;
+let b being set;
 A62: ( (the Sorts of PTA) . s ) = ( ParsedTerms (X,s) ) by CKB15:def 1
 .= { a1 where a1 is (Element of ( TS ( DTConOSA X ) )): ((ex s1 being (Element of S) st (ex x being set st ((s1 <= s & x in ( X . s1 )) & a1 = ( root-tree [ x,s1 ] )))) or (ex o being (OperSymbol of S) st ([ o,(the carrier of S) ] = ( a1 . ( {} ) ) & ( the_result_sort_of o ) <= s))) };
 hereby
@@ -194,7 +201,8 @@ hence thesis by PBOOLE:3;
 end;
 A65: NT[ ( PTCongruence X ) ]
 proof
-let o1 being (OperSymbol of S),o2 being (OperSymbol of S);
+let o1 being (OperSymbol of S);
+let o2 being (OperSymbol of S);
 let x1 being (Element of ( Args (o1,( ParsedTermsOSA X )) ));
 let x2 being (Element of ( Args (o2,( ParsedTermsOSA X )) ));
 let s3 being (Element of S);
@@ -222,7 +230,7 @@ A76: ( ( Den (o1,PTA) ) . x1 ) = ( ( ( PTOper X ) . o1 ) . x1 ) by MSUALG_1:def 
 A77: ( rng ts2 ) c= ( TS D ) by FINSEQ_1:def 4;
 hereby
 assume [ ( ( Den (o1,PTA) ) . x1 ),( ( Den (o2,PTA) ) . x2 ) ] in ( P . s3 );
-then consider t1 being (Element of ( TS D )),t2 being (Element of ( TS D )) such that A78: [ ( ( Den (o1,PTA) ) . x1 ),( ( Den (o2,PTA) ) . x2 ) ] = [ t1,t2 ] and A79: [ t1,s3 ] in ( F . t2 ) by A67;
+then consider t1,t2 being (Element of ( TS D )) such that A78: [ ( ( Den (o1,PTA) ) . x1 ),( ( Den (o2,PTA) ) . x2 ) ] = [ t1,t2 ] and A79: [ t1,s3 ] in ( F . t2 ) by A67;
 A80: ( ( Den (o1,PTA) ) . x1 ) = t1 by A78,ZFMISC_1:27;
 A81: ( ( Den (o2,PTA) ) . x2 ) = t2 by A78,ZFMISC_1:27;
 [ t2,s3 ] in ( F . t1 ) by A79,CKB49:1;
@@ -274,7 +282,7 @@ assume that
 A108: y in ( dom x );
 A109: ( P . ( w3 /. y ) ) = { [ x5,y5 ] where x5 is (Element of ( TS ( DTConOSA X ) )),y5 is (Element of ( TS ( DTConOSA X ) )): [ x5,( w3 /. y ) ] in ( F . y5 ) } by CKB53:def 1;
 [ ( x1 . y ),( x2 . y ) ] in ( P . ( w3 /. y ) ) by A71,A106,A107,A108;
-then consider x5 being (Element of ( TS ( DTConOSA X ) )),y5 being (Element of ( TS ( DTConOSA X ) )) such that A110: [ ( x1 . y ),( x2 . y ) ] = [ x5,y5 ] and A111: [ x5,( w3 /. y ) ] in ( F . y5 ) by A109;
+then consider x5,y5 being (Element of ( TS ( DTConOSA X ) )) such that A110: [ ( x1 . y ),( x2 . y ) ] = [ x5,y5 ] and A111: [ x5,( w3 /. y ) ] in ( F . y5 ) by A109;
 A112: ( x1 . y ) = x5 by A110,ZFMISC_1:27;
 A113: ( x2 . y ) = y5 by A110,ZFMISC_1:27;
 [ y5,( w3 /. y ) ] in ( F . x5 ) by A111,CKB49:1;
@@ -286,7 +294,8 @@ hence [ ( ( Den (o1,PTA) ) . x1 ),( ( Den (o2,PTA) ) . x2 ) ] in ( P . s3 ) by A
 end;
 T[ P ]
 proof
-let s1 being (Element of S),s2 being (Element of S);
+let s1 being (Element of S);
+let s2 being (Element of S);
 let x being set;
 assume that
 A114: x in ( X . s1 );
@@ -308,7 +317,7 @@ A121: ( F . ( root-tree sy ) ) = ( @ sy ) by CKB48:def 1
 .= { [ ( root-tree sy ),s3 ] where s3 is (Element of S): (ex s4 being (Element of S) st (ex x being set st ((x in ( X . s4 ) & sy = [ x,s4 ]) & s4 <= s3))) };
 y in ( SPTA . s2 ) by A118,ZFMISC_1:87;
 then [ y,( root-tree sy ) ] in ( P . s2 ) by A120,A118,A119,RELAT_2:def 3;
-then consider y1 being (Element of ( TS D )),r1 being (Element of ( TS D )) such that A122: [ y,( root-tree sy ) ] = [ y1,r1 ] and A123: [ y1,s2 ] in ( F . r1 ) by A115;
+then consider y1,r1 being (Element of ( TS D )) such that A122: [ y,( root-tree sy ) ] = [ y1,r1 ] and A123: [ y1,s2 ] in ( F . r1 ) by A115;
 A124: y = y1 by A122,ZFMISC_1:27;
 ( root-tree sy ) = r1 by A122,ZFMISC_1:27;
 then consider s3 being (Element of S) such that A125: [ y1,s2 ] = [ ( root-tree sy ),s3 ] and A126: (ex s4 being (Element of S) st (ex x being set st ((x in ( X . s4 ) & sy = [ x,s4 ]) & s4 <= s3))) by A121,A123;

@@ -1,0 +1,133 @@
+environ
+vocabularies TARSKI,QC_LANG3,PBOOLE,MSUALG_1,CATALG_1,FINSEQ_1,XBOOLE_0,ZFMISC_1,ARYTM_3,CARD_1,NAT_1,NUMBERS,XXREAL_0,ZF_LANG1,ORDINAL1,TREES_A,ABIAN,CARD_3,MEMBER_1,FINSET_1,FUNCOP_1,FUNCT_1,TREES_4,TREES_2,MSATERM,RELAT_1,MCART_1,MSAFREE,ZF_MODEL,AOFA_000,FINSEQ_2,PARTFUN1,QC_LANG1,FUNCT_2,ORDINAL4,CAT_3,TREES_3,ABCMIZ_0,ABCMIZ_1,ABCMIZ_A,STRUCT_0,FACIRC_1,INSTALG1,MSUALG_2,COMPUT_1,BINTREE1,TREES_9,ARYTM_1,FUNCT_6,SUBSET_1,MARGREL1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,DOMAIN_1,RELAT_1,FUNCT_1,RELSET_1,PARTFUN1,FACIRC_1,ENUMSET1,FUNCOP_1,XCMPLX_0,XXREAL_0,NAT_1,NAT_D,MCART_1,FINSET_1,CARD_1,NUMBERS,CARD_3,FINSEQ_1,FINSEQ_2,FINSEQ_4,FUNCT_6,TREES_1,TREES_2,TREES_3,TREES_4,TREES_9,PBOOLE,STRUCT_0,ORDINAL1,MSUALG_1,MSUALG_2,MSAFREE,EQUATION,MSATERM,INSTALG1,CATALG_1,MSAFREE3,AOFA_000,ABCMIZ_1;
+definitions TARSKI,XBOOLE_0,RELAT_1,FUNCT_1,SUBSET_1,FINSEQ_1,MSAFREE,MSAFREE3,PBOOLE,MSUALG_1,ABCMIZ_1;
+theorems TARSKI,XBOOLE_0,XBOOLE_1,TREES_1,XXREAL_0,XREAL_1,ZFMISC_1,FUNCT_1,FUNCT_2,FINSEQ_1,FINSEQ_2,ENUMSET1,FUNCT_6,INSTALG1,NAT_1,MCART_1,PBOOLE,RELAT_1,RELSET_1,CARD_1,CARD_5,ORDINAL1,MSUALG_2,TREES_3,TREES_4,FINSEQ_3,FUNCOP_1,MSAFREE,MSATERM,MSAFREE3,YELLOW11,PARTFUN1,WELLORD2,ABCMIZ_1,TREES_9,FACIRC_1,REALSET1,CKB1;
+schemes FUNCT_1,NAT_1,RECDEF_1,CLASSES1,FINSEQ_1;
+registrations XBOOLE_0,SUBSET_1,XREAL_0,ORDINAL1,FUNCT_1,FINSET_1,STRUCT_0,PBOOLE,MSUALG_2,FINSEQ_1,NAT_1,CARD_1,MSAFREE,TREES_3,TREES_2,FUNCOP_1,RELAT_1,INDEX_1,INSTALG1,MSAFREE3,WAYBEL26,FACIRC_1,ABCMIZ_1,REALSET1,MSATERM,ZFMISC_1,RELSET_1;
+constructors RELSET_1,DOMAIN_1,WELLORD2,MSAFREE1,TREES_9,EQUATION,NAT_D,FINSEQ_4,CATALG_1,FACIRC_1,ABCMIZ_1,PRE_POLY;
+requirements BOOLE,SUBSET,NUMERALS,ARITHM,REAL;
+begin
+reserve i for Nat;
+reserve j for Nat;
+scheme MinimalElement { X() ->  finite non  empty set,R[set,set] } : (ex x being set st (x in X() & (for y being set holds (y in X() implies (not R[ y,x ])))))
+provided
+A1: (for x,y being set holds (((x in X() & y in X()) & R[ x,y ]) implies (not R[ y,x ])))
+and
+A2: (for x,y,z being set holds (((((x in X() & y in X()) & z in X()) & R[ x,y ]) & R[ y,z ]) implies R[ x,z ]))
+proof
+assume A3: (for x being set holds (x in X() implies (ex y being set st (y in X() & R[ y,x ]))));
+set n = ( card X() );
+set x0 = the (Element of X());
+defpred P[ Nat,set,set ]
+ means
+($2 in X() implies ($3 in X() & R[ $3,$2 ]));
+A4: (for m being (Element of ( NAT )) holds ((1 <= m & m < ( n + 1 )) implies (for x being set holds (ex y being set st P[ m,x,y ]))))
+proof
+let m being (Element of ( NAT ));
+assume (1 <= m & m < ( n + 1 ));
+let x being set;
+per cases ;
+suppose A5: x nin X();
+
+set y = the set;
+take y;
+thus P[ m,x,y ] by A5;
+end;
+suppose x in X();
+
+then consider y being set such that A6: (y in X() & R[ y,x ]) by A3;
+take y;
+thus thesis by A6;
+end;
+end;
+consider p being FinSequence such that A7: ( len p ) = ( n + 1 ) and A8: (( p . 1 ) = x0 or ( n + 1 ) = ( 0 )) and A9: (for i being (Element of ( NAT )) holds ((1 <= i & i < ( n + 1 )) implies P[ i,( p . i ),( p . ( i + 1 ) ) ])) from RECDEF_1:sch 3(A4);
+defpred Q[ Nat ]
+ means
+($1 in ( dom p ) implies ( p . $1 ) in X());
+A10: Q[ ( 0 ) ] by FINSEQ_3:25;
+A11:now
+let i being Nat;
+assume A12: Q[ i ];
+thus Q[ ( i + 1 ) ]
+proof
+assume ( i + 1 ) in ( dom p );
+then ( i + 1 ) <= ( n + 1 ) by A7,FINSEQ_3:25;
+then A13: i < ( n + 1 ) by NAT_1:13;
+per cases  by NAT_1:3;
+suppose i = ( 0 );
+
+hence thesis by A8;
+end;
+suppose i > ( 0 );
+
+then (i >= ( ( 0 ) + 1 ) & i is (Element of ( NAT ))) by NAT_1:13,ORDINAL1:def 12;
+hence thesis by A12,A7,A9,A13,FINSEQ_3:25;
+end;
+end;
+
+end;
+A14: (for i being Nat holds Q[ i ]) from NAT_1:sch 2(A10,A11);
+A15: ( rng p ) c= X()
+proof
+let x being set;
+assume x in ( rng p );
+then (ex i being set st (i in ( dom p ) & x = ( p . i ))) by FUNCT_1:def 3;
+hence thesis by A14;
+end;
+A16: (for i,j being Nat holds (((1 <= i & i < j) & j <= ( n + 1 )) implies R[ ( p . j ),( p . i ) ]))
+proof
+let i being Nat;
+let j being Nat;
+assume A17: 1 <= i;
+assume A18: i < j;
+then ( i + 1 ) <= j by NAT_1:13;
+then consider k being Nat such that A19: j = ( ( i + 1 ) + k ) by NAT_1:10;
+assume A20: j <= ( n + 1 );
+then i <= ( n + 1 ) by A18,XXREAL_0:2;
+then A21: i in ( dom p ) by A17,A7,FINSEQ_3:25;
+defpred S[ Nat ]
+ means
+(( ( i + 1 ) + $1 ) <= ( n + 1 ) implies R[ ( p . ( ( i + 1 ) + $1 ) ),( p . i ) ]);
+A22: S[ ( 0 ) ]
+proof
+assume ( ( i + 1 ) + ( 0 ) ) <= ( n + 1 );
+then A23: i < ( n + 1 ) by NAT_1:13;
+(( p . i ) in X() & i is (Element of ( NAT ))) by A14,A21;
+hence R[ ( p . ( ( i + 1 ) + ( 0 ) ) ),( p . i ) ] by A9,A17,A23;
+end;
+A24:now
+let k being Nat;
+assume A25: S[ k ];
+thus S[ ( k + 1 ) ]
+proof
+assume A26: ( ( i + 1 ) + ( k + 1 ) ) <= ( n + 1 );
+A27: ( ( i + 1 ) + ( k + 1 ) ) = ( ( ( i + 1 ) + k ) + 1 );
+then A28: ( ( i + 1 ) + k ) < ( n + 1 ) by A26,NAT_1:13;
+A29: ( p . i ) in X() by A14,A21;
+( ( i + 1 ) + k ) = ( 1 + ( i + k ) );
+then A30: 1 <= ( ( i + 1 ) + k ) by NAT_1:11;
+then ( ( i + 1 ) + k ) in ( dom p ) by A7,A28,FINSEQ_3:25;
+then A31: (( p . ( ( i + 1 ) + k ) ) in X() & ( ( i + 1 ) + k ) is (Element of ( NAT ))) by A14;
+then (( p . ( ( i + 1 ) + ( k + 1 ) ) ) in X() & R[ ( p . ( ( i + 1 ) + ( k + 1 ) ) ),( p . ( ( i + 1 ) + k ) ) ]) by A9,A28,A27,A30;
+hence R[ ( p . ( ( i + 1 ) + ( k + 1 ) ) ),( p . i ) ] by A2,A28,A25,A31,A29;
+end;
+
+end;
+(for k being Nat holds S[ k ]) from NAT_1:sch 2(A22,A24);
+hence R[ ( p . j ),( p . i ) ] by A19,A20;
+end;
+A32: (( dom p ) = ( Seg ( n + 1 ) ) & ( card ( Seg ( n + 1 ) ) ) = ( n + 1 )) by A7,FINSEQ_1:57,FINSEQ_1:def 3;
+( card ( rng p ) ) c= ( card X() ) by A15,CARD_1:11;
+then (( card ( rng p ) ) <= n & n < ( n + 1 )) by NAT_1:19,NAT_1:39;
+then (not ( dom p ),( rng p ) are_equipotent ) by A32,CARD_1:5;
+then (not p is  one-to-one) by WELLORD2:def 4;
+then consider i,j being set such that A33: (((i in ( dom p ) & j in ( dom p )) & ( p . i ) = ( p . j )) & i <> j) by FUNCT_1:def 4;
+reconsider i,j as Nat by A33;
+A34: (((1 <= i & 1 <= j) & i <= ( n + 1 )) & j <= ( n + 1 )) by A7,A33,FINSEQ_3:25;
+( p . i ) in ( rng p ) by A33,FUNCT_1:def 3;
+then A35: ( p . i ) in X() by A15;
+(i < j or j < i) by A33,XXREAL_0:1;
+then R[ ( p . i ),( p . i ) ] by A16,A33,A34;
+hence contradiction by A1,A35;
+end;

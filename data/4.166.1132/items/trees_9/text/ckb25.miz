@@ -1,0 +1,136 @@
+environ
+vocabularies XBOOLE_0,TREES_3,SUBSET_1,FINSET_1,TREES_2,TREES_1,CARD_1,ARYTM_3,NAT_1,ORDINAL4,FINSEQ_1,ARYTM_1,RELAT_1,FUNCT_1,TARSKI,ORDINAL1,NUMBERS,XXREAL_0,ZFMISC_1,TREES_4,FUNCT_6,TREES_A,TREES_9,MCART_1;
+notations TARSKI,XBOOLE_0,ZFMISC_1,SUBSET_1,CARD_1,NUMBERS,XCMPLX_0,RELAT_1,FUNCT_1,RELSET_1,FUNCT_2,FUNCT_6,NAT_1,BINOP_1,FINSET_1,FINSEQ_1,FINSEQ_2,TREES_1,TREES_2,TREES_3,TREES_4,MCART_1,XXREAL_0,CKB1,CKB8,CKB9,CKB16,CKB18,CKB19;
+definitions TARSKI,XBOOLE_0,FUNCT_1,TREES_2,TREES_3,TREES_4,BINOP_1,CKB9,CKB16,CKB18,CKB19;
+theorems TARSKI,AXIOMS,ZFMISC_1,NAT_1,WELLORD2,FUNCT_1,FUNCT_2,FINSEQ_1,FINSEQ_3,CARD_1,CARD_2,FUNCT_6,TREES_1,TREES_2,TREES_3,TREES_4,RELSET_1,RELAT_1,XBOOLE_0,XBOOLE_1,FINSET_1,XREAL_1,XXREAL_0,ORDINAL1,FINSEQ_2,REALSET1,TREES_A,MCART_1,FINSEQ_6,CKB3,CKB4,CKB5,CKB6,CKB7,CKB9,CKB10,CKB11,CKB12,CKB16,CKB18,CKB19;
+schemes NAT_1,FUNCT_1,FINSEQ_1,CLASSES1,FUNCT_2,TREES_2;
+registrations XBOOLE_0,RELAT_1,FUNCT_1,ORDINAL1,FINSET_1,XREAL_0,FINSEQ_1,TREES_1,TREES_2,TREES_3,PRE_CIRC,CARD_1,ZFMISC_1,REALSET1,BINOP_1,SUBSET_1,RELSET_1,NAT_1,TREES_A,CKB2,CKB13,CKB14,CKB15,CKB17,CKB20,CKB21,CKB22,CKB23,CKB24;
+constructors WELLORD2,XXREAL_0,XREAL_0,NAT_1,FINSEQ_2,TREES_4,RELSET_1,BINOP_1,FINSEQ_4,CKB1,CKB16,CKB18,CKB19;
+requirements NUMERALS,BOOLE,SUBSET,ARITHM,REAL;
+begin
+scheme FinOrdSet { f(set) -> set,X() ->  finite set } : (for n being (Element of ( NAT )) holds (f(n) in X() iff n < ( card X() )))
+provided
+A1: (for x being set holds (x in X() implies (ex n being (Element of ( NAT )) st x = f(n))))
+and
+A2: (for i,j being (Element of ( NAT )) holds ((i < j & f(j) in X()) implies f(i) in X()))
+and
+A3: (for i,j being (Element of ( NAT )) holds (f(i) = f(j) implies i = j))
+proof
+consider f being Function such that A4: (( dom f ) = ( card X() ) & (for x being set holds (x in ( card X() ) implies ( f . x ) = f(x)))) from FUNCT_1:sch 3;
+defpred X[ (Element of ( NAT )) ]
+ means
+($1 < ( card X() ) implies f($1) in X());
+A5: (for n being (Element of ( NAT )) holds (X[ n ] implies X[ ( n + 1 ) ]))
+proof
+let n being (Element of ( NAT ));
+assume that
+A6: (n < ( card X() ) implies f(n) in X())
+and
+A7: ( n + 1 ) < ( card X() )
+and
+A8: (not f(( n + 1 )) in X());
+consider f being Function such that A9: (( dom f ) = ( n + 1 ) & (for x being set holds (x in ( n + 1 ) implies ( f . x ) = f(x)))) from FUNCT_1:sch 3;
+A10: ( n + 1 ) = { k where k is (Element of ( NAT )): k < ( n + 1 ) } by AXIOMS:4;
+A11: n <= ( n + 1 ) by NAT_1:11;
+A12: ( rng f ) = X()
+proof
+hereby
+let x being set;
+assume x in ( rng f );
+then consider y being set such that A13: y in ( n + 1 ) and A14: x = ( f . y ) by A9,FUNCT_1:def 3;
+consider k being (Element of ( NAT )) such that A15: y = k and A16: k < ( n + 1 ) by A10,A13;
+k <= n by A16,NAT_1:13;
+then (k = n or k < n) by XXREAL_0:1;
+then f(k) in X() by A2,A6,A7,A11,XXREAL_0:2;
+hence x in X() by A9,A13,A14,A15;
+end;
+let x being set;
+assume A17: x in X();
+then consider k being (Element of ( NAT )) such that A18: x = f(k) by A1;
+now
+assume k >= ( n + 1 );
+then (k = ( n + 1 ) or k > ( n + 1 )) by XXREAL_0:1;
+hence contradiction by A2,A8,A17,A18;
+end;
+then A19: k in ( n + 1 ) by A10;
+then x = ( f . k ) by A9,A18;
+hence thesis by A9,A19,FUNCT_1:def 3;
+end;
+f is  one-to-one
+proof
+let x1 being set;
+let x2 being set;
+assume that
+A20: x1 in ( dom f )
+and
+A21: x2 in ( dom f )
+and
+A22: ( f . x1 ) = ( f . x2 );
+((ex k being (Element of ( NAT )) st (x1 = k & k < ( n + 1 ))) & (ex k being (Element of ( NAT )) st (x2 = k & k < ( n + 1 )))) by A9,A10,A20,A21;
+then A23: (f(x1) = f(x2) implies x1 = x2) by A3;
+f(x1) = ( f . x1 ) by A9,A20;
+hence thesis by A9,A21,A22,A23;
+end;
+then ( n + 1 ),X() are_equipotent  by A9,A12,WELLORD2:def 4;
+hence thesis by A7,CARD_1:def 2;
+end;
+A24: ( card X() ) = { n where n is (Element of ( NAT )): n < ( card X() ) } by AXIOMS:4;
+f is  one-to-one
+proof
+let x1 being set;
+let x2 being set;
+assume that
+A25: x1 in ( dom f )
+and
+A26: x2 in ( dom f );
+((ex k being (Element of ( NAT )) st (x1 = k & k < ( card X() ))) & (ex k being (Element of ( NAT )) st (x2 = k & k < ( card X() )))) by A4,A24,A25,A26;
+then A27: (f(x1) = f(x2) implies x1 = x2) by A3;
+f(x1) = ( f . x1 ) by A4,A25;
+hence thesis by A4,A26,A27;
+end;
+then A28: ( dom f ),( rng f ) are_equipotent  by WELLORD2:def 4;
+then reconsider Y = ( rng f ) as  finite set by A4,CARD_1:38;
+A29: ( card ( rng f ) ) = ( card ( card X() ) ) by A4,A28,CARD_1:5
+.= ( card X() );
+A30:now
+given i being (Element of ( NAT )) such that
+A31: i >= ( card X() )
+and
+A32: f(i) in X();
+
+(( card X() ) < i or ( card X() ) = i) by A31,XXREAL_0:1;
+then A33: f(( card X() )) in X() by A2,A32;
+( rng f ) c= ( X() \ { f(( card X() )) } )
+proof
+let x being set;
+assume x in ( rng f );
+then consider y being set such that A34: y in ( card X() ) and A35: x = ( f . y ) by A4,FUNCT_1:def 3;
+consider k being (Element of ( NAT )) such that A36: y = k and A37: k < ( card X() ) by A24,A34;
+A38: f(k) = x by A4,A34,A35,A36;
+A39:now
+assume x in { f(( card X() )) };
+then f(k) = f(( card X() )) by A38,TARSKI:def 1;
+hence contradiction by A3,A37;
+end;
+f(k) in X() by A2,A33,A37;
+hence thesis by A38,A39,XBOOLE_0:def 5;
+end;
+then A40: ( card Y ) <= ( card ( X() \ { f(( card X() )) } ) ) by NAT_1:43;
+{ f(( card X() )) } c= X() by A33,ZFMISC_1:31;
+then ( card Y ) <= ( ( card X() ) - ( card { f(( card X() )) } ) ) by A40,CARD_2:44;
+then ( card Y ) <= ( ( card Y ) - 1 ) by A29,CARD_2:42;
+then ( ( card Y ) + 1 ) <= ( ( ( card Y ) - 1 ) + 1 ) by XREAL_1:7;
+hence contradiction by NAT_1:13;
+end;
+A41: X[ ( 0 ) ]
+proof
+assume ( 0 ) < ( card X() );
+then reconsider X = X() as non  empty set;
+set x = the (Element of X);
+consider n being (Element of ( NAT )) such that A42: x = f(n) by A1;
+(n = ( 0 ) or n > ( 0 )) by NAT_1:3;
+hence thesis by A2,A42;
+end;
+(for n being (Element of ( NAT )) holds X[ n ]) from NAT_1:sch 1(A41,A5);
+hence thesis by A30;
+end;

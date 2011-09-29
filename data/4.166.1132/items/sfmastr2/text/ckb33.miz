@@ -1,0 +1,115 @@
+environ
+vocabularies NUMBERS,FSM_1,SCMFSA_2,SF_MASTR,AMI_1,SCMFSA7B,SUBSET_1,XBOOLE_0,CARD_1,UNIALG_2,SCMFSA6B,FUNCT_1,FUNCT_4,SCMFSA6A,TARSKI,RELAT_1,ARYTM_3,GRAPHSP,MSUALG_1,SFMASTR1,TURING_1,SCMFSA_9,AMI_3,CARD_3,XXREAL_0,ARYTM_1,SCMFSA9A,COMPLEX1,AOFA_I00,PRE_FF,SFMASTR2,NAT_1,SCMNORM,SCMFSA6C,FUNCOP_1,COMPOS_1;
+notations TARSKI,XBOOLE_0,SUBSET_1,NUMBERS,XCMPLX_0,INT_2,XXREAL_0,RELAT_1,FUNCT_1,FUNCT_2,FUNCT_4,PBOOLE,PRE_FF,CARD_3,FUNCOP_1,STRUCT_0,MEMSTR_0,AMISTD_1,COMPOS_1,EXTPRO_1,SCMFSA_2,SCMFSA6A,SCMFSA6B,SF_MASTR,SCMFSA6C,SCMFSA7B,SCMFSA_9,SFMASTR1,SCMFSA9A,NAT_1,CKB8,CKB9,CKB10,CKB14,CKB20,CKB31;
+definitions SCMFSA9A,SUBSET_1,SCMFSA6A,COMPOS_1,EXTPRO_1,MEMSTR_0,CKB8,CKB9,CKB14,CKB20,CKB31;
+theorems TARSKI,ZFMISC_1,ABSVALUE,NAT_1,INT_1,FUNCT_4,PRE_FF,SCMFSA_2,SCMFSA6A,SCMFSA6B,SF_MASTR,SCMFSA6C,SCMFSA7B,SCMFSA8A,SCMFSA8B,SCMFSA8C,SCMFSA_9,SFMASTR1,SCMFSA9A,XBOOLE_0,XBOOLE_1,XREAL_1,RELAT_1,XXREAL_0,FUNCT_1,PBOOLE,COMPOS_1,EXTPRO_1,PARTFUN1,MEMSTR_0,CARD_3,CKB1,CKB2,CKB3,CKB4,CKB5,CKB6,CKB7,CKB8,CKB9,CKB11,CKB12,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB21,CKB22,CKB23,CKB24,CKB25,CKB26,CKB27,CKB28,CKB29,CKB30,CKB31,CKB32;
+schemes FUNCT_2,NAT_1;
+registrations SETFAM_1,FUNCT_1,ORDINAL1,RELSET_1,FINSET_1,NUMBERS,XXREAL_0,XREAL_0,NAT_1,INT_1,CARD_3,SCMFSA_2,SF_MASTR,SCMFSA6B,SCMFSA6C,SCMFSA7B,SCMFSA8A,SCMFSA_9,SFMASTR1,XBOOLE_0,RELAT_1,FUNCT_2,COMPOS_1,EXTPRO_1,PBOOLE,FUNCT_4,FUNCOP_1,STRUCT_0,SCMFSA6A,MEMSTR_0,CKB13;
+constructors XXREAL_0,INT_2,PRE_FF,SCMFSA6A,SCMFSA6B,SCMFSA6C,SCMFSA_9,SFMASTR1,SCMFSA9A,RELSET_1,PRE_POLY,PBOOLE,SCMFSA8A,SCMFSA7B,AMISTD_2,AMISTD_1,SCMFSA_7,FUNCT_4,MEMSTR_0,CKB8,CKB9,CKB14,CKB20,CKB31;
+requirements NUMERALS,REAL,SUBSET,BOOLE,ARITHM;
+begin
+reserve s for (State of ( SCM+FSA ));
+reserve p for (Instruction-Sequence of ( SCM+FSA ));
+reserve d for  read-write Int-Location;
+reserve k for (Element of ( NAT ));
+theorem
+(( 0 ) <= ( s . d ) implies ( ( IExec (( triv-times d ),p,s) ) . d ) = ( 0 ))
+proof
+set a = d;
+set I1 = ( while=0 (a,( Macro ( a := a ) )) );
+set i2 = ( SubFrom (a,( intloc ( 0 ) )) );
+set I = ( I1 ';' i2 );
+set au = ( 1 -stRWNotIn ( { a } \/ ( UsedIntLoc I ) ) );
+set ST = ( StepTimes (a,I,p,s) );
+defpred X[ Nat ]
+ means
+(($1 < ( s . a ) implies ((I is_closed_on ( ST . $1 ),( p +* ( times* (a,I) ) ) & I is_halting_on ( ST . $1 ),( p +* ( times* (a,I) ) )) & ( ( ST . $1 ) . ( intloc ( 0 ) ) ) = 1)) & ($1 <= ( s . a ) implies (( ( ( ST . $1 ) . a ) + $1 ) = ( s . a ) & ( ( ST . $1 ) . au ) = ( ( ST . $1 ) . a ))));
+a in { a,( intloc ( 0 ) ) } by TARSKI:def 2;
+then a in ( UsedIntLoc ( SubFrom (a,( intloc ( 0 ) )) ) ) by SF_MASTR:14;
+then a in ( ( UsedIntLoc ( while=0 (a,( Macro ( a := a ) )) ) ) \/ ( UsedIntLoc ( SubFrom (a,( intloc ( 0 ) )) ) ) ) by XBOOLE_0:def 3;
+then A1: a in ( UsedIntLoc I ) by SF_MASTR:30;
+A2: (for k holds (X[ k ] implies X[ ( k + 1 ) ]))
+proof
+let k;
+assume that
+A3: (k < ( s . a ) implies ((I is_closed_on ( ST . k ),( p +* ( times* (a,I) ) ) & I is_halting_on ( ST . k ),( p +* ( times* (a,I) ) )) & ( ( ST . k ) . ( intloc ( 0 ) ) ) = 1))
+and
+A4: (k <= ( s . a ) implies (( ( ( ST . k ) . a ) + k ) = ( s . a ) & ( ( ST . k ) . au ) = ( ( ST . k ) . a )));
+A5:now
+assume A6: k < ( s . a );
+then A7: ( ( ST . k ) . a ) <> ( 0 ) by A4;
+then A8: ( DataPart ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . k )) ) ) = ( DataPart ( ST . k ) ) by A3,A6,SCMFSA9A:22;
+A9: I1 is_closed_on ( ST . k ),( p +* ( times* (a,I) ) ) by A7,SCMFSA_9:18;
+then A10: I1 is_closed_on ( Initialized ( ST . k ) ),( p +* ( times* (a,I) ) ) by A3,A6,CKB4:1;
+I1 is_halting_on ( ST . k ),( p +* ( times* (a,I) ) ) by A7,SCMFSA_9:18;
+then A11: I1 is_halting_on ( Initialized ( ST . k ) ),( p +* ( times* (a,I) ) ) by A3,A6,A9,CKB5:1;
+A12: ( k - k ) < ( ( s . a ) - k ) by A6,XREAL_1:9;
+hence ( ( ST . k ) . au ) > ( 0 ) by A4,A6;
+(I is_closed_on ( Initialized ( ST . k ) ),( p +* ( times* (a,I) ) ) & I is_halting_on ( Initialized ( ST . k ) ),( p +* ( times* (a,I) ) )) by A3,A6,CKB5:1;
+then ( ( ST . ( k + 1 ) ) | ( ( UsedIntLoc I ) \/ ( FinSeq-Locations ) ) ) = ( ( IExec (I,( p +* ( times* (a,I) ) ),( ST . k )) ) | ( ( UsedIntLoc I ) \/ ( FinSeq-Locations ) ) ) by A3,A4,A6,A12,CKB26:1;
+then ( ( ST . ( k + 1 ) ) . a ) = ( ( IExec (I,( p +* ( times* (a,I) ) ),( ST . k )) ) . a ) by A1,CKB7:1
+.= ( ( Exec (i2,( IExec (I1,( p +* ( times* (a,I) ) ),( ST . k )) )) ) . a ) by A10,A11,SFMASTR1:11
+.= ( ( ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . k )) ) . a ) - ( ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . k )) ) . ( intloc ( 0 ) ) ) ) by SCMFSA_2:65
+.= ( ( ( ST . k ) . a ) - ( ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . k )) ) . ( intloc ( 0 ) ) ) ) by A8,SCMFSA6A:7
+.= ( ( ( ST . k ) . a ) - 1 ) by A3,A6,A8,SCMFSA6A:7;
+hence ( ( ( ST . ( k + 1 ) ) . a ) + ( k + 1 ) ) = ( s . a ) by A4,A6;
+end;
+hereby
+assume A13: ( k + 1 ) < ( s . a );
+then reconsider sa = ( s . a ) as (Element of ( NAT )) by INT_1:3;
+A14: k < sa by A13,NAT_1:12;
+then A15: ( ( ST . ( k + 1 ) ) . ( intloc ( 0 ) ) ) = 1 by A3,CKB17:1;
+A16: ( ( ST . ( k + 1 ) ) . a ) <> ( 0 ) by A5,A13,A14;
+then A17: I1 is_closed_on ( ST . ( k + 1 ) ),( p +* ( times* (a,I) ) ) by SCMFSA_9:18;
+A18: ( Macro i2 ) is_closed_on ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . ( k + 1 ) )) ),( p +* ( times* (a,I) ) ) by SCMFSA7B:18;
+I1 is_halting_on ( ST . ( k + 1 ) ),( p +* ( times* (a,I) ) ) by A16,SCMFSA_9:18;
+then A19: I1 is_halting_on ( Initialized ( ST . ( k + 1 ) ) ),( p +* ( times* (a,I) ) ) by A15,A17,CKB5:1;
+A20: I1 is_closed_on ( Initialized ( ST . ( k + 1 ) ) ),( p +* ( times* (a,I) ) ) by A15,A17,CKB4:1;
+then A21: I is_closed_on ( Initialized ( ST . ( k + 1 ) ) ),( p +* ( times* (a,I) ) ) by A19,A18,SFMASTR1:2;
+hence I is_closed_on ( ST . ( k + 1 ) ),( p +* ( times* (a,I) ) ) by A15,CKB4:1;
+( Macro i2 ) is_halting_on ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . ( k + 1 ) )) ),( p +* ( times* (a,I) ) ) by SCMFSA7B:19;
+then I is_halting_on ( Initialized ( ST . ( k + 1 ) ) ),( p +* ( times* (a,I) ) ) by A19,A20,A18,SFMASTR1:3;
+hence I is_halting_on ( ST . ( k + 1 ) ),( p +* ( times* (a,I) ) ) by A15,A21,CKB5:1;
+thus ( ( ST . ( k + 1 ) ) . ( intloc ( 0 ) ) ) = 1 by A3,A14,CKB17:1;
+end;
+A22: k < ( k + 1 ) by NAT_1:13;
+assume A23: ( k + 1 ) <= ( s . a );
+hence ( ( ( ST . ( k + 1 ) ) . a ) + ( k + 1 ) ) = ( s . a ) by A5,A22,XXREAL_0:2;
+( ( ST . ( k + 1 ) ) . au ) = ( ( ( ST . k ) . a ) - 1 ) by A3,A4,A5,A23,A22,CKB17:1,XXREAL_0:2;
+hence thesis by A4,A5,A23,A22,XXREAL_0:2;
+end;
+A24: X[ ( 0 ) ]
+proof
+hereby
+assume ( 0 ) < ( s . a );
+then A25: ( ( ST . ( 0 ) ) . a ) <> ( 0 ) by CKB18:1;
+then A26: I1 is_closed_on ( ST . ( 0 ) ),( p +* ( times* (a,I) ) ) by SCMFSA_9:18;
+A27: ( Macro i2 ) is_closed_on ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . ( 0 ) )) ),( p +* ( times* (a,I) ) ) by SCMFSA7B:18;
+A28: ( ( ST . ( 0 ) ) . ( intloc ( 0 ) ) ) = 1 by CKB15:1;
+I1 is_halting_on ( ST . ( 0 ) ),( p +* ( times* (a,I) ) ) by A25,SCMFSA_9:18;
+then A29: I1 is_halting_on ( Initialized ( ST . ( 0 ) ) ),( p +* ( times* (a,I) ) ) by A28,A26,CKB5:1;
+A30: I1 is_closed_on ( Initialized ( ST . ( 0 ) ) ),( p +* ( times* (a,I) ) ) by A28,A26,CKB4:1;
+then A31: I is_closed_on ( Initialized ( ST . ( 0 ) ) ),( p +* ( times* (a,I) ) ) by A29,A27,SFMASTR1:2;
+hence I is_closed_on ( ST . ( 0 ) ),( p +* ( times* (a,I) ) ) by A28,CKB4:1;
+( Macro i2 ) is_halting_on ( IExec (I1,( p +* ( times* (a,I) ) ),( ST . ( 0 ) )) ),( p +* ( times* (a,I) ) ) by SCMFSA7B:19;
+then I is_halting_on ( Initialized ( ST . ( 0 ) ) ),( p +* ( times* (a,I) ) ) by A29,A30,A27,SFMASTR1:3;
+hence I is_halting_on ( ST . ( 0 ) ),( p +* ( times* (a,I) ) ) by A28,A31,CKB5:1;
+thus ( ( ST . ( 0 ) ) . ( intloc ( 0 ) ) ) = 1 by CKB15:1;
+end;
+assume ( 0 ) <= ( s . a );
+thus ( ( ( ST . ( 0 ) ) . a ) + ( 0 ) ) = ( s . a ) by CKB18:1;
+( ( ST . ( 0 ) ) . a ) = ( s . a ) by CKB18:1;
+hence thesis by CKB16:1;
+end;
+A32: (for k holds X[ k ]) from NAT_1:sch 1(A24,A2);
+A33:  ProperTimesBody a,I,s,p
+proof
+let k;
+thus thesis by A32;
+end;
+assume ( 0 ) <= ( s . a );
+then reconsider k = ( s . a ) as (Element of ( NAT )) by INT_1:3;
+A34: ( ( ( ( StepTimes (a,I,p,s) ) . k ) . a ) + k ) = ( s . a ) by A32;
+( DataPart ( IExec (( times (a,I) ),p,s) ) ) = ( DataPart ( ( StepTimes (a,I,p,s) ) . k ) ) by A33,CKB29:1;
+hence thesis by A34,SCMFSA6A:7;
+end;
