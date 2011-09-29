@@ -1,0 +1,141 @@
+environ
+vocabularies NUMBERS,SUBSET_1,AMI_1,SCMPDS_2,TURING_1,FUNCT_1,CARD_1,SCMFSA_7,RELAT_1,ARYTM_3,CARD_3,FSM_1,XXREAL_0,COMPLEX1,ARYTM_1,AMI_2,SCMPDS_5,SCMPDS_4,INT_1,SCMPDS_8,SCMFSA6B,SCMFSA_9,UNIALG_2,SCMFSA7B,SCMP_GCD,SEMI_AF1,GRAPHSP,AMI_3,FINSEQ_1,SCPISORT,NAT_1,ORDINAL4,SFMASTR2,PRE_FF,FUNCT_4,CIRCUIT2,TARSKI,PBOOLE,MSUALG_1,STRUCT_0,VALUED_1,SCMFSA8B,INT_2,SCPINVAR,ORDINAL1,PARTFUN1,SCMNORM,SCMFSA6C,COMPOS_1;
+notations XBOOLE_0,SUBSET_1,CARD_1,NUMBERS,RELAT_1,FUNCT_1,PARTFUN1,VALUED_1,XCMPLX_0,FUNCT_4,PBOOLE,INT_1,INT_2,NAT_1,STRUCT_0,MEMSTR_0,COMPOS_1,EXTPRO_1,AMI_2,SCMPDS_2,SCMPDS_4,SCMPDS_6,SCMP_GCD,SCMPDS_5,SCMPDS_8,FUNCT_2,CARD_3,DOMAIN_1,FINSEQ_1,GR_CY_1,PRE_FF,SCPISORT,XXREAL_0,CKB5,CKB6,CKB10,CKB13;
+definitions FUNCOP_1,COMPOS_1,EXTPRO_1,AMI_3,SCMPDS_2,SCMP_GCD,SCPISORT,MEMSTR_0,CKB5,CKB10,CKB13;
+theorems AMI_3,NAT_1,TARSKI,FUNCT_4,INT_1,SCMPDS_2,ABSVALUE,GRFUNC_1,SCMPDS_4,SCMPDS_5,SCMPDS_6,ENUMSET1,INT_2,SCMPDS_8,SCMP_GCD,SCMPDS_7,FUNCT_1,FINSEQ_1,RVSUM_1,FINSEQ_2,MEMSTR_0,PRE_FF,SCPISORT,XBOOLE_1,XREAL_1,COMPLEX1,XXREAL_0,PREPOWER,ORDINAL1,FUNCOP_1,ZFMISC_1,NAT_D,FINSEQ_3,PBOOLE,PARTFUN1,AFINSQ_1,COMPOS_1,EXTPRO_1,CARD_3,CKB1,CKB2,CKB3,CKB5,CKB7,CKB8,CKB10,CKB11,CKB12,CKB13,CKB14,CKB15,CKB16,CKB17,CKB18,CKB19,CKB20,CKB21,CKB22,CKB23,CKB24;
+schemes NAT_1,SCMPDS_8,FUNCT_2,CKB4,CKB9,CKB27;
+registrations SETFAM_1,FUNCT_1,ORDINAL1,RELSET_1,NUMBERS,XREAL_0,NAT_1,INT_1,CARD_3,STRUCT_0,SCMPDS_2,SCMPDS_4,SCMPDS_5,SCMPDS_6,SCMPDS_8,XBOOLE_0,FINSEQ_1,CARD_1,VALUED_1,VALUED_0,MEMSTR_0,RELAT_1,FUNCT_2,COMPOS_1,AFINSQ_1,EXTPRO_1,PBOOLE,FUNCT_4,CKB25,CKB26;
+constructors DOMAIN_1,REAL_1,NAT_D,RECDEF_1,PRE_FF,MESFUNC1,GR_CY_1,SCM_1,SCMPDS_4,SCMPDS_5,SCMPDS_6,SCMP_GCD,SCMPDS_8,SCPISORT,BINOP_2,AMI_2,MEMSTR_0,RELSET_1,CKB5,CKB6,CKB10,CKB13;
+requirements NUMERALS,REAL,SUBSET,ARITHM,BOOLE;
+begin
+reserve i for (Instruction of ( SCMPDS ));
+reserve I for (Program of ( SCMPDS ));
+reserve a for Int_position;
+reserve Q for (Instruction-Sequence of ( SCMPDS ));
+reserve P for (Instruction-Sequence of ( SCMPDS ));
+scheme WhileNExec { F((State of ( SCMPDS ))) -> (Element of ( NAT )),s() -> ( 0 ) -started (State of ( SCMPDS )),P() -> (Instruction-Sequence of ( SCMPDS )),I() ->  halt-free  shiftable (Program of ( SCMPDS )),a() -> Int_position,i() -> Integer,P[set] } : ( IExec (( while<>0 (a(),i(),I()) ),P(),s()) ) = ( IExec (( while<>0 (a(),i(),I()) ),P(),( Initialize ( IExec (I(),P(),s()) ) )) )
+provided
+A2: ( s() . ( DataLoc (( s() . a() ),i()) ) ) <> ( 0 )
+and
+A3: (for t being ( 0 ) -started (State of ( SCMPDS )) holds ((P[ t ] & F(t) = ( 0 )) implies ( t . ( DataLoc (( s() . a() ),i()) ) ) = ( 0 )))
+and
+A4: P[ s() ]
+and
+A5: (for t being ( 0 ) -started (State of ( SCMPDS )) holds (for Q holds (((P[ t ] & ( t . a() ) = ( s() . a() )) & ( t . ( DataLoc (( s() . a() ),i()) ) ) <> ( 0 )) implies ((((( ( IExec (I(),Q,t) ) . a() ) = ( t . a() ) & I() is_closed_on t,Q) & I() is_halting_on t,Q) & F(( Initialize ( IExec (I(),Q,t) ) )) < F(t)) & P[ ( Initialize ( IExec (I(),Q,t) ) ) ]))))
+proof
+I: ( Initialize s() ) = s() by MEMSTR_0:44;
+set WHL = ( while<>0 (a(),i(),I()) );
+set s1 = s();
+set P1 = ( P() +* ( stop WHL ) );
+set sI = s();
+set PI = ( P() +* ( stop I() ) );
+set m1 = ( ( LifeSpan (PI,sI) ) + 2 );
+set s2 = ( Initialize ( IExec (I(),P(),s()) ) );
+set m2 = ( LifeSpan (P1,s2) );
+A9: ( stop I() ) c= PI by FUNCT_4:25;
+I() is_closed_on s(),P() by A2,A4,A5;
+then A10: I() is_closed_on sI,PI by I,SCMPDS_6:24;
+I() is_halting_on s(),P() by A2,A4,A5;
+then A11: PI halts_on sI by I,SCMPDS_6:def 3;
+PI = ( PI +* ( stop I() ) ) by A9,FUNCT_4:98;
+then ( PI +* ( stop I() ) ) halts_on ( Initialize sI ) by A11,I;
+then A13: I() is_halting_on sI,PI by SCMPDS_6:def 3;
+set s4 = ( Comput (P1,s1,1) );
+set P4 = P1;
+set i1 = ( (a(),i()) <>0_goto 2 );
+set i2 = ( goto ( ( card I() ) + 2 ) );
+set i3 = ( goto ( - ( ( card I() ) + 2 ) ) );
+set b = ( DataLoc (( s() . a() ),i()) );
+A14: ( IC s1 ) = ( 0 ) by I,MEMSTR_0:47;
+set mI = ( LifeSpan (PI,sI) );
+set s5 = ( Comput (P4,s4,mI) );
+set P5 = P4;
+set l2 = ( ( card I() ) + 2 );
+A15: WHL = ( i1 ';' ( ( i2 ';' I() ) ';' i3 ) ) by CKB19:1;
+set m3 = ( mI + 1 );
+set s6 = ( Comput (P1,s1,m3) );
+set P6 = P1;
+( ( card I() ) + 2 ) < ( ( card I() ) + 3 ) by XREAL_1:6;
+then A16: l2 in ( dom WHL ) by CKB16:1;
+set s7 = ( Comput (P1,s1,( m3 + 1 )) );
+set P7 = P1;
+A17: ( IExec (I(),P(),s()) ) = ( Result (PI,sI) ) by SCMPDS_4:def 5;
+QQ: ( stop WHL ) c= P1 by FUNCT_4:25;
+WHL c= ( stop WHL ) by AFINSQ_1:74;
+then A19: WHL c= P1 by QQ,XBOOLE_1:1;
+deffunc F((State of ( SCMPDS ))) = F($1);
+A20: (for t being ( 0 ) -started (State of ( SCMPDS )) holds ((P[ t ] & F(t) = ( 0 )) implies ( t . ( DataLoc (( s() . a() ),i()) ) ) = ( 0 ))) by A3;
+A21: (for t being ( 0 ) -started (State of ( SCMPDS )) holds (for Q holds (((P[ t ] & ( t . a() ) = ( s() . a() )) & ( t . ( DataLoc (( s() . a() ),i()) ) ) <> ( 0 )) implies ((((( ( IExec (I(),Q,t) ) . a() ) = ( t . a() ) & I() is_closed_on t,Q) & I() is_halting_on t,Q) & F(( Initialize ( IExec (I(),Q,t) ) )) < F(t)) & P[ ( Initialize ( IExec (I(),Q,t) ) ) ])))) by A5;
+A22: ( Comput (P1,s1,( ( 0 ) + 1 )) ) = ( Following (P1,( Comput (P1,s1,( 0 )) )) ) by EXTPRO_1:3
+.= ( Following (P1,s1) ) by EXTPRO_1:2
+.= ( Exec (i1,s1) ) by A15,I,SCMPDS_6:11;
+( Shift (I(),2) ) c= WHL by CKB24:1;
+then ( Shift (I(),2) ) c= P1 by A19,XBOOLE_1:1;
+then A23: ( Shift (I(),2) ) c= P4;
+(for a holds ( sI . a ) = ( s4 . a )) by A22,SCMPDS_2:55;
+then A25: ( DataPart sI ) = ( DataPart s4 ) by SCMPDS_4:8;
+A26: ( IC s4 ) = ( ICplusConst (s1,2) ) by A2,A22,SCMPDS_2:55
+.= ( ( 0 ) + 2 ) by A14,SCMPDS_6:12;
+then A27: ( IC s5 ) = l2 by A9,A13,A10,A25,A23,SCMPDS_7:18;
+A28: ( P6 /. ( IC s6 ) ) = ( P6 . ( IC s6 ) ) by PBOOLE:143;
+A29: s6 = s5 by EXTPRO_1:4;
+then A30: ( CurInstr (P6,s6) ) = ( P5 . l2 ) by A9,A13,A10,A26,A25,A23,A28,SCMPDS_7:18
+.= ( P4 . l2 )
+.= ( P1 . l2 )
+.= ( WHL . l2 ) by A16,A19,GRFUNC_1:2
+.= i3 by CKB18:1;
+A32: s7 = ( Following (P1,s6) ) by EXTPRO_1:3
+.= ( Exec (i3,s6) ) by A30;
+then ( IC s7 ) = ( ICplusConst (s6,( ( 0 ) - ( ( card I() ) + 2 ) )) ) by SCMPDS_2:54
+.= ( 0 ) by A27,A29,SCMPDS_7:1;
+then A33: ( IC s2 ) = ( IC ( Comput (P1,s1,m1) ) ) by MEMSTR_0:47;
+A34: ( DataPart ( Comput (PI,sI,mI) ) ) = ( DataPart s5 ) by A9,A13,A10,A26,A25,A23,SCMPDS_7:18;
+now
+let x being Int_position;
+A35: (not x in ( dom ( Start-At (( 0 ),( SCMPDS )) ) )) by SCMPDS_4:18;
+( s5 . x ) = ( ( Comput (PI,sI,mI) ) . x ) by A34,SCMPDS_4:8
+.= ( ( Result (PI,sI) ) . x ) by A11,EXTPRO_1:23
+.= ( ( IExec (I(),P(),s()) ) . x ) by A17;
+hence ( s7 . x ) = ( ( IExec (I(),P(),s()) ) . x ) by A29,A32,SCMPDS_2:54
+.= ( s2 . x ) by A35,FUNCT_4:11;
+end;
+then A37: ( DataPart s7 ) = ( DataPart s2 ) by SCMPDS_4:8;
+set m0 = ( LifeSpan (P1,s1) );
+A40: P[ s() ] by A4;
+(WHL is_closed_on s(),P() & WHL is_halting_on s(),P()) from CKB27:sch 1(A20,A40,A21);
+then A41: P1 halts_on s1 by I,SCMPDS_6:def 3;
+deffunc F((State of ( SCMPDS ))) = F($1);
+set Es = ( IExec (I(),P(),s()) );
+set bj = ( DataLoc (( Es . a() ),i()) );
+set EP = P();
+A42: ( ( IExec (I(),P(),s()) ) . a() ) = ( s() . a() ) by A2,A4,A5;
+U1: ( ( Initialize Es ) . a() ) = ( Es . a() ) by SCMPDS_5:15;
+A43: (for t being ( 0 ) -started (State of ( SCMPDS )) holds ((P[ t ] & F(t) = ( 0 )) implies ( t . ( DataLoc (( ( Initialize Es ) . a() ),i()) ) ) = ( 0 ))) by A3,A42,U1;
+A45: P[ ( Initialize Es ) ] by A2,A4,A5;
+A44: (for t being ( 0 ) -started (State of ( SCMPDS )) holds (for Q holds (((P[ t ] & ( t . a() ) = ( ( Initialize Es ) . a() )) & ( t . ( DataLoc (( ( Initialize Es ) . a() ),i()) ) ) <> ( 0 )) implies ((((( ( IExec (I(),Q,t) ) . a() ) = ( t . a() ) & I() is_closed_on t,Q) & I() is_halting_on t,Q) & F(( Initialize ( IExec (I(),Q,t) ) )) < F(t)) & P[ ( Initialize ( IExec (I(),Q,t) ) ) ])))) by A5,A42,U1;
+XXX: (WHL is_closed_on ( Initialize Es ),P() & WHL is_halting_on ( Initialize Es ),P()) from CKB27:sch 1(A43,A45,A44);
+WHL is_halting_on Es,P()
+proof
+( P() +* ( stop WHL ) ) halts_on ( Initialize ( Initialize Es ) ) by XXX,SCMPDS_6:def 3;
+hence thesis by SCMPDS_6:def 3;
+end;
+then A46: P1 halts_on s2 by SCMPDS_6:def 3;
+A48: ( Comput (P1,s1,m1) ) = s2 by A37,A33,MEMSTR_0:78;
+then ( CurInstr (P1,( Comput (P1,s1,m1) )) ) = i1 by A15,SCMPDS_6:11;
+then m0 > m1 by A41,EXTPRO_1:36,SCMPDS_6:16;
+then consider nn being Nat such that A49: m0 = ( m1 + nn ) by NAT_1:10;
+reconsider nn as (Element of ( NAT )) by ORDINAL1:def 12;
+( IC ( Comput (P1,s1,( m1 + m2 )) ) ) = ( IC ( Comput (P1,s2,m2) ) ) by A48,EXTPRO_1:4;
+then ( CurInstr (P1,( Comput (P1,s1,( m1 + m2 )) )) ) = ( CurInstr (P1,( Comput (P1,s2,m2) )) )
+.= ( halt ( SCMPDS ) ) by A46,EXTPRO_1:def 15;
+then ( m1 + m2 ) >= m0 by A41,EXTPRO_1:def 15;
+then A51: m2 >= nn by A49,XREAL_1:6;
+A52: ( Comput (P1,s1,m0) ) = ( Comput (P1,s2,nn) ) by A48,A49,EXTPRO_1:4;
+then ( CurInstr (P1,( Comput (P1,s2,nn) )) ) = ( halt ( SCMPDS ) ) by A41,EXTPRO_1:def 15;
+then nn >= m2 by A46,EXTPRO_1:def 15;
+then nn = m2 by A51,XXREAL_0:1;
+then ( Result (P1,s1) ) = ( Comput (P1,s2,m2) ) by A41,A52,EXTPRO_1:23;
+hence ( IExec (WHL,P(),s()) ) = ( Comput (P1,s2,m2) ) by SCMPDS_4:def 5
+.= ( Result (P1,s2) ) by A46,EXTPRO_1:23
+.= ( IExec (WHL,P(),( Initialize ( IExec (I(),P(),s()) ) )) ) by SCMPDS_4:def 5;
+end;

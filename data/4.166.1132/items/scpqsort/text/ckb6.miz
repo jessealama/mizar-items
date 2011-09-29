@@ -1,0 +1,57 @@
+environ
+vocabularies NUMBERS,SCMPDS_2,SUBSET_1,FSM_1,SCMPDS_4,AMI_1,TURING_1,SCMFSA8A,SCMFSA_7,AMI_3,INT_1,SCMFSA8B,CARD_1,ARYTM_3,FUNCT_1,XXREAL_0,UNIALG_2,SCMFSA7B,SCMFSA6B,RELAT_1,FUNCT_4,AMI_2,SCMFSA_9,ARYTM_1,VALUED_1,TARSKI,GRAPHSP,CIRCUIT2,MSUALG_1,NAT_1,FUNCOP_1,CARD_3,FINSEQ_1,GRAPH_2,SCPISORT,SCMP_GCD,CLASSES1,SCPQSORT,ORDINAL1,SCMNORM,SCMFSA6C,COMPOS_1;
+notations TARSKI,XBOOLE_0,FUNCT_2,SUBSET_1,CARD_1,NUMBERS,XXREAL_0,RELAT_1,FUNCT_1,PARTFUN1,FUNCT_4,PBOOLE,VALUED_1,XCMPLX_0,RECDEF_1,INT_1,NAT_1,STRUCT_0,MEMSTR_0,EXTPRO_1,AMI_2,FUNCT_7,SCMPDS_2,SCMPDS_4,SCMPDS_5,SCMPDS_6,SCMP_GCD,CARD_3,FINSEQ_1,SCMPDS_8,GRAPH_2,CLASSES1,COMPOS_1,SCPISORT;
+definitions SCMPDS_2,SCMP_GCD,COMPOS_1,EXTPRO_1,SCPISORT,MEMSTR_0,TARSKI,FUNCT_7,XBOOLE_0,FUNCOP_1,NAT_1,AFINSQ_1,FUNCT_4;
+theorems AMI_3,NAT_1,TARSKI,FUNCT_4,SCMPDS_2,FUNCT_7,GRFUNC_1,SCMPDS_4,SCMPDS_5,SCMPDS_7,SCMPDS_8,FINSEQ_1,FINSEQ_2,RFINSEQ,SCPISORT,XBOOLE_1,XREAL_1,XXREAL_0,GRAPH_2,MEMSTR_0,ORDINAL1,CLASSES1,SCMPDS_6,SCMP_GCD,INT_1,COMPOS_1,AFINSQ_1,EXTPRO_1,PBOOLE,CKB2,CKB3,CKB4,CKB5;
+schemes NAT_1,SCMPDS_8;
+registrations XBOOLE_0,SETFAM_1,FUNCT_1,RELSET_1,NUMBERS,XXREAL_0,XREAL_0,NAT_1,INT_1,SCMPDS_2,SCMPDS_4,SCMPDS_5,SCMPDS_6,SCMPDS_8,ORDINAL1,VALUED_0,VALUED_1,RELAT_1,COMPOS_1,AFINSQ_1,MEMSTR_0,EXTPRO_1,FUNCT_4,FUNCT_7,FUNCOP_1,PRE_POLY,PBOOLE,SCMPDS_3,CKB1;
+constructors REAL_1,RECDEF_1,NEWTON,MESFUNC1,SCM_1,SCMPDS_4,SCMPDS_5,SCMPDS_6,SCMP_GCD,SCMPDS_8,SCPISORT,CLASSES1,GRAPH_2,VALUED_1,AMI_2,SCMPDS_1,PRE_POLY,AMISTD_1,AMISTD_2,SCMPDS_7,PBOOLE,AMISTD_5,MEMSTR_0;
+requirements NUMERALS,REAL,SUBSET,BOOLE,ARITHM;
+begin
+reserve n for (Element of ( NAT ));
+reserve P for (Instruction-Sequence of ( SCMPDS ));
+reserve Q for (Instruction-Sequence of ( SCMPDS ));
+theorem
+Th3: (for s being (State of ( SCMPDS )) holds (for I being (Program of ( SCMPDS )) holds ((for t being ( 0 ) -started (State of ( SCMPDS )) holds (for Q holds (( DataPart t ) = ( DataPart s ) implies I is_halting_on t,Q))) implies I is_closed_on s,P)))
+proof
+let s being (State of ( SCMPDS ));
+let I being (Program of ( SCMPDS ));
+assume A1: (for t being ( 0 ) -started (State of ( SCMPDS )) holds (for Q holds (( DataPart t ) = ( DataPart s ) implies I is_halting_on t,Q)));
+set pI = ( stop I );
+set sI = ( Initialize s );
+set PI = ( P +* pI );
+defpred X[ Nat ]
+ means
+(not ( IC ( Comput (PI,sI,$1) ) ) in ( dom pI ));
+A2: (for a being Int_position holds ( s . a ) = ( sI . a ))
+proof
+let a being Int_position;
+(not a in ( dom ( Start-At (( 0 ),( SCMPDS )) ) )) by SCMPDS_4:18;
+hence thesis by FUNCT_4:11;
+end;
+assume (not I is_closed_on s,P);
+then (ex k being (Element of ( NAT )) st X[ k ]) by SCMPDS_6:def 2;
+then A4: (ex k being Nat st X[ k ]);
+consider n being Nat such that A5: X[ n ] and A6: (for m being Nat holds (X[ m ] implies n <= m)) from NAT_1:sch 5(A4);
+reconsider n as (Element of ( NAT )) by ORDINAL1:def 12;
+set s2 = ( Comput (PI,sI,n) );
+set P2 = PI;
+set Ig = ( (( IC s2 ),( succ ( IC s2 ) )) --> (( goto 1 ),( goto ( - 1 ) )) );
+reconsider P0 = ( PI +* Ig ) as (Instruction-Sequence of ( SCMPDS ));
+reconsider P1 = ( P2 +* Ig ) as (Instruction-Sequence of ( SCMPDS ));
+reconsider P3 = ( PI +* (( IC s2 ),( goto 1 )) ) as (Instruction-Sequence of ( SCMPDS ));
+reconsider P4 = ( P3 +* (( succ ( IC s2 ) ),( goto ( - 1 ) )) ) as (Instruction-Sequence of ( SCMPDS ));
+U: P0 = P4 by FUNCT_7:139;
+A13: (for m being (Element of ( NAT )) holds (m < n implies ( IC ( Comput (PI,sI,m) ) ) in ( dom pI ))) by A6;
+A17: ( stop I ) c= PI by FUNCT_4:25;
+pI c= P3 by A5,FUNCT_4:25,FUNCT_7:89;
+then A18: ( stop I ) c= P0 by U,A5,AFINSQ_1:73,FUNCT_7:89;
+then XX: ( Comput (P0,sI,n) ) = s2 by A17,A13,SCMPDS_4:21;
+( DataPart sI ) = ( DataPart sI )
+.= ( DataPart s ) by A2,SCMPDS_4:8;
+then I is_halting_on sI,P0 by A1;
+then A20: ( P0 +* pI ) halts_on ( Initialize sI ) by SCMPDS_6:def 3;
+A21: (not P0 halts_on s2) by SCMPDS_4:20;
+( P0 +* pI ) = P0 by A18,FUNCT_4:98;
+hence contradiction by A21,XX,A20,EXTPRO_1:22;
+end;
