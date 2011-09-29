@@ -184,7 +184,7 @@ sub parse_xml {
       close(XML);
     }
 
-    my ($xmlbeg,$xmlnodes,$xmlend) 
+    my ($xmlbeg,$xmlnodes,$xmlend)
       = $_ =~ m/(.*?)([<]$xml_elem\b.*[<]\/$xml_elem>)(.*)/s; # multiline match
     return ($xmlbeg,$xmlnodes,$xmlend);
   }
@@ -225,7 +225,7 @@ foreach my $i (1 .. scalar @articles) {
   }
 }
 
-my $parallel_exit_code 
+my $parallel_exit_code
   = system ("parallel --jobs +0 --eta --progress --halt-on-error=1 '$reduce_item_script {} > /dev/null 2>&1' ::: $parallel_items");
 $parallel_exit_code = $parallel_exit_code >> 8;
 unless ($parallel_exit_code == 0) {
