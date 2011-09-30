@@ -41,9 +41,9 @@ e.g., constructor environment, notation environment, etc."))
 (defmethod minimize ((article pathname))
   ())
 
-(defgeneric minimize-requirements (article)
+(defgeneric minimize-requirements (article &optional working-directory)
   (:documentation "From the explicitly required set of requirements
-  for ARTICLE, compute the smallest subset with respect to which the article is still verifiable."))
+  for ARTICLE, compute the smallest subset with respect to which the article is still verifiable.  Verification will take place in WORKING-DIRECTORY, if supplied."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Minimizing requirements
@@ -68,25 +68,48 @@ e.g., constructor environment, notation environment, etc."))
 	     (xpath:evaluate "/Environ/Directive[@name = 'Requirements']/Ident/@name"
 			     doc)))))
 
-(defgeneric update-requirements (article new-requirements)
-  (:documentation "Force the requirements directive of ARTICLE to have the contents NEW-REQUIREMENTS."))
+(defgeneric update-requirements (article new-requirements &optional working-directory)
+  (:documentation "Force the requirements directive of ARTICLE to have the contents NEW-REQUIREMENTS.  Any invocations of mizar tools will be carried out in WORKING-DIRECTORY."))
 
-(defmethod update-requirements ((article-path pathname) (new-requirements list))
+(defmethod update-requirements ((article-path pathname) (new-requirements list) &optional working-directory)
   (let ((token-string-requirements (if new-requirements
 				       (format nil "~{,~a~}," new-requirements)
 				       ""))
-	(evl-file (replace-extension article-path "miz" "evl")))
+	(evl-file (replace-extension article-path "miz" "evl"))
+	(wsx-file (replace-extension article-path "miz" "wsx")))
+    (handler-case
+	(newparser article-path
+		   :flags '("-q" "-s" "-l")
+		   :working-directory working-directory)
+      (mizar-error () (error "Something went wrong generating the .wsx for~%~%  ~a" article-path)))
     (let ((new-evl-as-string (apply-stylesheet (mizar-items-config 'update-requirements-stylesheet) evl-file (list (cons "new-requirements" token-string-requirements)) nil)))
       (write-string-into-file new-evl-as-string evl-file
 			      :if-does-not-exist :error
-			      :if-exists :supersede))))
+			      :if-exists :supersede)
+      ;; now regenerate the text of the article
+      (let ((new-article-text (apply-stylesheet (mizar-items-config 'wsm-stylesheet)
+						wsx-file
+						nil
+						nil)))
+	(write-string-into-file new-article-text
+				article-path
+				:if-exists :supersede
+				:if-does-not-exist :error))
+      ;; re-accommodate (effectively generating a new .ere using the trimmed requirements directive)
+      (accom article-path
+	     :flags '("-q" "-s" "-l")
+	     :working-directory working-directory))))
 
-(defmethod minimize-requirements :around ((article-path pathname))
+(defmethod minimize-requirements :around ((article-path pathname) &optional working-directory)
   (if (file-exists-p article-path)
-      (call-next-method)
+      (if working-directory
+	  (if (directory-p working-directory)
+	      (call-next-method)
+	      (error "The supplied working directory,~%~%  ~a~%~%is not a directory!" working-directory))
+	  (call-next-method))
       (error "There is no file at~%~%  ~a~%" article-path)))
 
-(defmethod minimize-requirements ((article-path pathname))
+(defmethod minimize-requirements ((article-path pathname) &optional working-directory)
   (loop
      with requirements = (remove "HIDDEN" (requirements-of-article article-path)
 				 :test #'string=)
@@ -94,16 +117,18 @@ e.g., constructor environment, notation environment, etc."))
      for requirement in requirements
      do
        (let ((trimmed-requirements (remove requirement final-trimmed-requirements)))
-	 (update-requirements article-path trimmed-requirements)
+	 (update-requirements article-path trimmed-requirements working-directory)
 	 (handler-case
 	     (progn
-	       (verifier article-path :flags '("-q" "-s" "-l"))
+	       (verifier article-path
+			 :flags '("-q" "-s" "-l")
+			 :working-directory working-directory)
 	       (setf final-trimmed-requirements trimmed-requirements)
 	       (format t "We don't need the requirement ~a~%" requirement))
 	   (mizar-error ()
 	     (progn
 	       (push requirement trimmed-requirements)
-	       (update-requirements article-path trimmed-requirements)
+	       (update-requirements article-path trimmed-requirements working-directory)
 	       (format t "We do need the requirement ~a~%" requirement)))))
      finally
        (return final-trimmed-requirements)))
