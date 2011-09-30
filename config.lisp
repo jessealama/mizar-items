@@ -74,6 +74,8 @@
 			   (file-in-xsl4mizar-dir "MHTML/mhtml.js"))
 (update-mizar-items-config 'absrefs-stylesheet
 			   (file-in-xsl4mizar-dir "addabsrefs.xsl"))
+(update-mizar-items-config 'update-requirements-stylesheet
+			   (file-in-xsl4mizar-dir "update-requirements.xsl"))
 (update-mizar-items-config 'propertied-constructors-stylesheet
 			   (file-in-xsl4mizar-dir "propertied-constructors.xsl"))
 (update-mizar-items-config 'list-properties-stylesheet
