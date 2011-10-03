@@ -204,4 +204,15 @@ e.g., constructor environment, notation environment, etc."))
      finally
        (return t)))
 
+(defun minimize-requirements-of-itemized-db-no-errors (miz-db-path)
+  (handler-case
+      (progn
+	(handler-bind ((warning #'muffle-warning))
+	  (minimize-requirements-of-itemized-db miz-db-path))
+	(format t "~a: success~%" article)
+	t)
+      (error ()
+	(format *error-output* "~a: failure~%" miz-db-path)
+	nil)))
+
 ;;; minimize.lisp ends here
