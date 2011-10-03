@@ -181,4 +181,27 @@ e.g., constructor environment, notation environment, etc."))
      finally
        (return final-trimmed-requirements)))
 
+(defgeneric minimize-requirements-of-itemized-db (miz-db)
+  (:documentation "Minimize the requirements of every article fragment appearing under MIZ-DB."))
+
+(defmethod minimize-requirements-of-itemized-db :around ((miz-db-path pathname))
+  (if (file-exists-p miz-db-path)
+      (if (directory-p miz-db-path)
+	  (let ((text-subdir (merge-pathnames "text/" miz-db-path)))
+	    (if (file-exists-p text-subdir)
+		(call-next-method)
+		(error "The supplied mizar database directory,~%~%  ~a~%~%lacks a text subdirectory!~%" miz-db-path)))
+	  (error "The supplied mizar database directory,~%~%  ~a~%~%is not actually a directory!~%" miz-db-path))
+      (error "The mizar database directory~%~%  ~a~%~%does not exist!~%" miz-db-path)))
+
+(defmethod minimize-requirements-of-itemized-db ((miz-db-path pathname))
+  (loop
+     with text-subdir = (merge-pathnames "text/" miz-db-path)
+     with ckbs = (directory (merge-pathnames "ckb*.miz" text-subdir))
+     for ckb in ckbs
+     do
+       (minimize-requirements ckb miz-db-path)
+     finally
+       (return t)))
+
 ;;; minimize.lisp ends here
