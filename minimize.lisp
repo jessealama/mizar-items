@@ -71,34 +71,82 @@ e.g., constructor environment, notation environment, etc."))
 (defgeneric update-requirements (article new-requirements &optional working-directory)
   (:documentation "Force the requirements directive of ARTICLE to have the contents NEW-REQUIREMENTS.  Any invocations of mizar tools will be carried out in WORKING-DIRECTORY."))
 
+(defmethod update-requirements :around ((article-path pathname) (new-requirements list) &optional working-directory)
+  (if (file-exists-p article-path)
+      (if working-directory
+	  (if (file-exists-p working-directory)
+	      (if (directory-p working-directory)
+		  (call-next-method)
+		  (error "The supplied working directory,~%~%  ~a~%~%is not actually a directory!~%" working-directory))
+	      (error "The supplied working directory,~%~%  ~a~%~%does not exist~%" working-directory))
+	  (call-next-method))
+      (error "The given article path,~%~%  ~a~%~%does not exist!~%" article-path)))
+
+(defparameter *requirements-regexp* "requirements ([^;]+);")
+
+(defun split-requirements-line (requirements-line)
+  (if (scan *requirements-regexp* requirements-line)
+      (register-groups-bind (comma-delimited-list)
+	  (*requirements-regexp* requirements-line)
+	(mapcar #'delete-space
+		(split #\, comma-delimited-list)))
+      (error "The supplied requirements line~%~%  ~a~%~%does not match the regular expressio~%~%  ~a~%" requirements-line *requirements-regexp*)))
+
 (defmethod update-requirements ((article-path pathname) (new-requirements list) &optional working-directory)
-  (let ((token-string-requirements (if new-requirements
-				       (format nil "~{,~a~}," new-requirements)
-				       ""))
-	(evl-file (replace-extension article-path "miz" "evl"))
-	(wsx-file (replace-extension article-path "miz" "wsx")))
-    (handler-case
-	(newparser article-path
-		   :flags '("-q" "-s" "-l")
-		   :working-directory working-directory)
-      (mizar-error () (error "Something went wrong generating the .wsx for~%~%  ~a" article-path)))
-    (let ((new-evl-as-string (apply-stylesheet (mizar-items-config 'update-requirements-stylesheet) evl-file (list (cons "new-requirements" token-string-requirements)) nil)))
-      (write-string-into-file new-evl-as-string evl-file
-			      :if-does-not-exist :error
-			      :if-exists :supersede)
-      ;; now regenerate the text of the article
-      (let ((new-article-text (apply-stylesheet (mizar-items-config 'wsm-stylesheet)
-						wsx-file
-						nil
-						nil)))
-	(write-string-into-file new-article-text
-				article-path
-				:if-exists :supersede
-				:if-does-not-exist :error))
-      ;; re-accommodate (effectively generating a new .ere using the trimmed requirements directive)
-      (accom article-path
-	     :flags '("-q" "-s" "-l")
-	     :working-directory working-directory))))
+  (let ((new-miz-text
+	 (with-open-file (miz article-path
+			      :direction :input
+			      :if-does-not-exist :error)
+	   (with-output-to-string (s)
+	     (loop
+		for line = (read-line miz nil nil)
+		do
+		  (if line
+		      (if (cl-ppcre:scan *requirements-regexp* line)
+			  (when new-requirements
+			    (format s "requirements ~{~a~#[~:;,~]~};~%" new-requirements))
+			  (format s "~a~%" line))
+		      (return)))))))
+    (with-open-file (new-miz article-path
+			     :direction :output
+			     :if-exists :supersede)
+      (format new-miz new-miz-text))
+    (accom article-path
+	   :flags '("-q" "-s" "-l")
+	   :working-directory working-directory)))
+
+;; This method works by using the .wsx file output by Czeslaw's
+;; newparser.  For libraries where newparser is unavailable, a more
+;; brutish method is required.
+;;
+;; (defmethod update-requirements ((article-path pathname) (new-requirements list) &optional working-directory)
+;;   (let ((token-string-requirements (if new-requirements
+;; 				       (format nil "~{,~a~}," new-requirements)
+;; 				       ""))
+;; 	(evl-file (replace-extension article-path "miz" "evl"))
+;; 	(wsx-file (replace-extension article-path "miz" "wsx")))
+;;     (handler-case
+;; 	(newparser article-path
+;; 		   :flags '("-q" "-s" "-l")
+;; 		   :working-directory working-directory)
+;;       (mizar-error () (error "Something went wrong generating the .wsx for~%~%  ~a" article-path)))
+;;     (let ((new-evl-as-string (apply-stylesheet (mizar-items-config 'update-requirements-stylesheet) evl-file (list (cons "new-requirements" token-string-requirements)) nil)))
+;;       (write-string-into-file new-evl-as-string evl-file
+;; 			      :if-does-not-exist :error
+;; 			      :if-exists :supersede)
+;;       ;; now regenerate the text of the article
+;;       (let ((new-article-text (apply-stylesheet (mizar-items-config 'wsm-stylesheet)
+;; 						wsx-file
+;; 						nil
+;; 						nil)))
+;; 	(write-string-into-file new-article-text
+;; 				article-path
+;; 				:if-exists :supersede
+;; 				:if-does-not-exist :error))
+;;       ;; re-accommodate (effectively generating a new .ere using the trimmed requirements directive)
+;;       (accom article-path
+;; 	     :flags '("-q" "-s" "-l")
+;; 	     :working-directory working-directory))))
 
 (defmethod minimize-requirements :around ((article-path pathname) &optional working-directory)
   (if (file-exists-p article-path)
