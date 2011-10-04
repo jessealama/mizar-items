@@ -110,7 +110,7 @@ e.g., constructor environment, notation environment, etc."))
     (with-open-file (new-miz article-path
 			     :direction :output
 			     :if-exists :supersede)
-      (format new-miz new-miz-text))
+      (format new-miz "~a" new-miz-text))
     (handler-case
 	(accom article-path
 	       :flags '("-q" "-s" "-l")
