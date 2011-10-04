@@ -209,7 +209,7 @@ e.g., constructor environment, notation environment, etc."))
       (progn
 	(handler-bind ((warning #'muffle-warning))
 	  (minimize-requirements-of-itemized-db miz-db-path))
-	(format t "~a: success~%" article)
+	(format t "~a: success~%" miz-db-path)
 	t)
       (error ()
 	(format *error-output* "~a: failure~%" miz-db-path)
