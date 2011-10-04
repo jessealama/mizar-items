@@ -43,4 +43,5 @@
 	       (:file "piotr")
 	       (:file "site-about")
 	       (:file "site-paths")
-	       (:file "site")))
+	       (:file "site")
+	       (:file "minimize")))
