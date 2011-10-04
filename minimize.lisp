@@ -111,9 +111,13 @@ e.g., constructor environment, notation environment, etc."))
 			     :direction :output
 			     :if-exists :supersede)
       (format new-miz new-miz-text))
-    (accom article-path
-	   :flags '("-q" "-s" "-l")
-	   :working-directory working-directory)))
+    (handler-case
+	(accom article-path
+	       :flags '("-q" "-s" "-l")
+	       :working-directory working-directory)
+      (mizar-error (miz-err)
+	(unless (innocent-accomodator-errorp miz-err)
+	  (error "While accommodating~%~%  ~a~%~%we encountered a non-innocent accommodator error!~%" article-path))))))
 
 ;; This method works by using the .wsx file output by Czeslaw's
 ;; newparser.  For libraries where newparser is unavailable, a more
@@ -212,7 +216,6 @@ e.g., constructor environment, notation environment, etc."))
 	(format t "~a: success~%" miz-db-path)
 	t)
       (error ()
-	(format *error-output* "~a: failure~%" miz-db-path)
-	nil)))
+	(format *error-output* "~a: failure~%" miz-db-path))))
 
 ;;; minimize.lisp ends here
