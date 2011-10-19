@@ -218,4 +218,54 @@ e.g., constructor environment, notation environment, etc."))
       (error ()
 	(format *error-output* "~a: failure~%" miz-db-path))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Brute-force computation of a fragment's minimal environment
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric minimize-clusters (article)
+  (:documentation "Rewrite the .ecl file associated with ARTICLE to find the smallest set of clusters needed for it."))
+
+(defmethod minimize-clusters ((article-path string))
+  (minimize-clusters (pathname article-path)))
+
+(defmethod minimize-clusters :around ((article-path pathname))
+  (if (file-exists-p article-path)
+      (let ((ecl-path (replace-extension article-path "miz" "ecl")))
+	(if (file-exists-p ecl-path)
+	    (call-next-method)
+	    (error "The .ecl file for~%~%  ~a~%~%does not exist at the expected location~%~%  ~a~%" (namestring article-path) (namestring ecl-path))))
+      (error "The article~%~%  ~a~%~%does not exist!" (namestring article-path))))
+
+(defun replace-ecl-file (ecl-path new-clusters aid mizfiles)
+  (with-open-file (ecl ecl-path
+		       :direction :output
+		       :if-exists :supersede
+		       :if-does-not-exist :create)
+    (format ecl "<?xml version=\"1.0\" ?>")
+    (terpri ecl)
+    (format ecl "<Registrations aid=\"~a\" mizfiles=\"~a\"" aid mizfiles)
+    (terpri ecl)
+    (dolist (node new-clusters)
+      (format ecl "~a" node)
+      (terpri ecl))
+    (format ecl "</Registrations>")
+    (terpri ecl)))
+
+(defmethod minimize-clusters ((article-path pathname))
+  (let* ((ecl-path (replace-extension article-path "miz" "ecl"))
+	 (ecl-doc (cxml:parse-file ecl-path (cxml-dom:make-dom-builder)))
+	 (nodes (xpath:all-nodes
+		    (xpath:evaluate "/Registrations/CCluster | /Registrations/FCluster | /Registrations/RCluster" ecl-doc))))
+    (first-n nodes 5)))
+
+;; HEre's how to write XML
+;;
+;; (with-open-file (element #p"/tmp/junk"
+;; 				:direction :output
+;; 				:if-does-not-exist :create
+;; 				:if-exists :supersede
+;; 				:element-type '(unsigned-byte 8))
+;; 	 (dom:map-document (cxml:make-octet-stream-sink element) *))
+
+
 ;;; minimize.lisp ends here
