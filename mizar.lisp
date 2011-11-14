@@ -92,44 +92,44 @@ suite to work correctly."
 (defmacro define-file-transformer (name program &rest arguments)
   ; check that TOOL is real
   (let* ((eval-program (eval program))
-	 (check (run-program "which" (list eval-program) :search t)))
+         (check (run-program "which" (list eval-program) :search t)))
     (if (zerop (process-exit-code check))
-	`(progn
-	   (defgeneric ,name (file &optional directory))
-	   (defmethod ,name ((miz-path pathname) &optional (directory (user-homedir-pathname)))
-	     (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-		    (proc (run-in-directory ,eval-program
-					    directory
-					    (append ',arguments (list (namestring miz-path)))
-					    :output tmp-path
-					    :if-output-exists :supersede)))
-	       (if (zerop (process-exit-code proc))
-		   (rename-file tmp-path miz-path)
-		   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (process-exit-code proc)))))
-	     (defmethod ,name ((article-path string) &optional (directory (user-homedir-pathname)))
-	       (,name (pathname article-path) directory))
-	     (defmethod ,name ((article article) &optional (directory (user-homedir-pathname)))
-	       (,name (path article) directory)
-	       (refresh-text article)))
-	(error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
+        `(progn
+           (defgeneric ,name (file &optional directory))
+           (defmethod ,name ((miz-path pathname) &optional (directory (user-homedir-pathname)))
+             (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
+                    (proc (run-in-directory ,eval-program
+                                            directory
+                                            (append ',arguments (list (namestring miz-path)))
+                                            :output tmp-path
+                                            :if-output-exists :supersede)))
+               (if (zerop (process-exit-code proc))
+                   (rename-file tmp-path miz-path)
+                   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (process-exit-code proc)))))
+             (defmethod ,name ((article-path string) &optional (directory (user-homedir-pathname)))
+               (,name (pathname article-path) directory))
+             (defmethod ,name ((article article) &optional (directory (user-homedir-pathname)))
+               (,name (path article) directory)
+               (refresh-text article)))
+        (error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
 
 (defun atr-file-for-article (article-pathname)
   (let ((article-base (pathname-name article-pathname))
-	(article-dir (directory-namestring article-pathname)))
+        (article-dir (directory-namestring article-pathname)))
     (merge-pathnames (format nil "~a.atr" article-base)
-		     article-dir)))
+                     article-dir)))
 
 (defun pruned-atr-file-for-article (article-pathname)
   (let ((article-base (pathname-name article-pathname))
-	(article-dir (directory-namestring article-pathname)))
+        (article-dir (directory-namestring article-pathname)))
     (merge-pathnames (format nil "~a.atr.pruned" article-base)
-		     article-dir)))
+                     article-dir)))
 
 (defun err-file-for-article (article-pathname)
   (let ((article-base (pathname-name article-pathname))
-	(article-dir (directory-namestring article-pathname)))
+        (article-dir (directory-namestring article-pathname)))
     (merge-pathnames (format nil "~a.err" article-base)
-		     article-dir)))
+                     article-dir)))
 
 (defgeneric run-mizar-tool (tool article &key directory ignore-exit-code flags))
 
@@ -152,62 +152,62 @@ suite to work correctly."
 
 (defmethod run-mizar-tool (tool (article-path pathname) &key directory ignore-exit-code flags)
   (let ((article-dir (cond ((typep directory 'sandbox)
-			    (location directory))
-			   ((null directory)
-			    (directory-namestring article-path))
-			   ((pathnamep directory)
-			    directory)
-			   ((stringp directory)
-			     (pathname directory))
-			   (t
-			    (error "Unable to handle the supplied working directory '~a'" directory)))))
+                            (location directory))
+                           ((null directory)
+                            (directory-namestring article-path))
+                           ((pathnamep directory)
+                            directory)
+                           ((stringp directory)
+                             (pathname directory))
+                           (t
+                            (error "Unable to handle the supplied working directory '~a'" directory)))))
     (run-mizar-tool tool article-path
-		    :directory article-dir
-		    :ignore-exit-code ignore-exit-code
-		    :flags flags)))
+                    :directory article-dir
+                    :ignore-exit-code ignore-exit-code
+                    :flags flags)))
 
 (defmethod run-mizar-tool ((tool string) (article-path pathname) &key directory ignore-exit-code flags)
   (let ((name (namestring article-path)))
     (let ((proc (run-in-directory tool directory (append flags (list name)))))
       (or ignore-exit-code
-	  (or (zerop (process-exit-code proc))
-	      (error 'mizar-error
-		     :tool tool
-		     :working-directory directory
-		     :argument article-path
-		     :output-stream (process-output proc)
-		     :error-stream (process-error proc)
-		     :exit-code (process-exit-code proc)))))))
+          (or (zerop (process-exit-code proc))
+              (error 'mizar-error
+                     :tool tool
+                     :working-directory directory
+                     :argument article-path
+                     :output-stream (process-output proc)
+                     :error-stream (process-error proc)
+                     :exit-code (process-exit-code proc)))))))
 
 (defmethod run-mizar-tool ((tool string) (article-path string) &key directory ignore-exit-code flags)
   (run-mizar-tool tool (pathname article-path)
-		  :directory directory
-		  :ignore-exit-code ignore-exit-code
-		  :flags flags))
+                  :directory directory
+                  :ignore-exit-code ignore-exit-code
+                  :flags flags))
 
 (defmethod run-mizar-tool ((tool string) (article article) &key directory ignore-exit-code flags)
   (if (slot-boundp article 'path)
       (run-mizar-tool tool (path article)
-		      :directory directory
-		      :ignore-exit-code ignore-exit-code
-		      :flags flags)
+                      :directory directory
+                      :ignore-exit-code ignore-exit-code
+                      :flags flags)
       (error "Cannot apply ~S to ~S because we don't know its path"
-	     tool article)))
+             tool article)))
 
 (defmethod run-mizar-tool ((tool symbol) article &key directory ignore-exit-code flags)
   (run-mizar-tool (format nil "~(~a~)" (string tool)) ; lowercase: watch out
-		  article
-		  :directory directory
-		  :ignore-exit-code ignore-exit-code
-		  :flags flags))
+                  article
+                  :directory directory
+                  :ignore-exit-code ignore-exit-code
+                  :flags flags))
 
 (defmacro define-mizar-tool (tool)
   (let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
     `(defun ,tool-as-symbol (article &key working-directory flags)
        (run-mizar-tool ,tool article
-		       :directory working-directory
-		       :ignore-exit-code nil
-		       :flags flags))))
+                       :directory working-directory
+                       :ignore-exit-code nil
+                       :flags flags))))
 
 ;; workhorses
 (define-mizar-tool "edtfile")
@@ -239,13 +239,13 @@ suite to work correctly."
   (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
       nil
       (let ((proc (run-program (mizar-items-config 'listvoc-script-path)
-			       (list article-name)
-			       :search t
-			       :output :stream)))
-	(let ((exit-code (process-exit-code proc)))
-	  (if (zerop exit-code)
-	      (stream-lines (process-output proc))
-	      (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code))))))
+                               (list article-name)
+                               :search t
+                               :output :stream)))
+        (let ((exit-code (process-exit-code proc)))
+          (if (zerop exit-code)
+              (stream-lines (process-output proc))
+              (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Generated mizar files
