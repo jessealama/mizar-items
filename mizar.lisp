@@ -142,9 +142,9 @@ suite to work correctly."
       (error "The supplied work directory '~a' doesn't exist!" directory)))
   (if (listp flags)
       (multiple-value-bind (ok bad-guy)
-	  (every-with-falsifying-witness flags #'non-empty-stringp)
-	(unless ok
-	  (error "The list of flags should contain only non-empty strings; '~a' isn't" bad-guy)))
+          (every-with-falsifying-witness flags #'non-empty-stringp)
+        (unless ok
+          (error "The list of flags should contain only non-empty strings; '~a' isn't" bad-guy)))
       (error "The list of flags '~a' isn't actually a list!" flags))
   (if (probe-file article)
       (call-next-method)
