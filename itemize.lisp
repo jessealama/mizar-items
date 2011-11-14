@@ -317,7 +317,7 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
            ;; now minimize the set of context nodes.  trivial
            ;; algorithm: delete items from the end
            (loop
-              initially (format t "Minimizing item ~d...~%" i)
+              ;; initially (format t "Minimizing item ~d...~%" i)
               for context-node in (reverse (remove item-node context-nodes))
               do
                 (let ((trimmed (remove context-node needed-context)))
