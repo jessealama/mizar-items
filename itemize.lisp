@@ -6,42 +6,6 @@
 ;;; Itemization
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun verify-and-export (article directory)
-  (accom article directory "-q" "-l" "-s")
-  (verifier article directory "-q" "-l" "-s")
-  (exporter article directory "-q" "-l" "-s")
-  (transfer article directory "-q" "-l" "-s"))
-
-(defun write-new-symbols (symbols symbol-table directory)
-  "For each symbol (actually, a string) in SYMBOLS that is not already
-  accounted for in SYMBOL-TABLE (i.e., appearing as a key in the
-  table), write a vocabulary file under DIRECTORY.  The filenames will
-  all have the form SYM<n>.voc, where <n> is a natural number.  Since
-  the values of SYMBOL-TABLE are assumed to be numbers, we look at the
-  maximum of these numbers, add 1, and start <n> there, increasing it
-  by one as we go through the list of symbols in SYMBOLS that do not
-  appear as keys in SYMBOL-TABLE.  SYMBOL-TABLE will be modified: any
-  symbol in SYMBOLS not appearing in SYMBOL-TABLE as a key will be put
-  into SYMBOL-TABLE as a key, with the value corresponding to whatever
-  <n> is for the symbol.  The (potentially) modified SYMBOL-TABLE is the final value."
-  (let ((vals (values-of-table symbol-table))
-	(keys (keys symbol-table))
-	(next-symbol-number 1))
-    (unless (null vals)
-      (setf next-symbol-number (1+ (apply 'max vals))))
-    (let ((new-symbols (set-difference symbols keys :test #'string=)))
-      (loop
-	 for sym in new-symbols
-	 for i from next-symbol-number
-	 for voc-filename = (format nil "sym~d.voc" i)
-	 for voc-path = (concat directory voc-filename)
-	 do
-	   (with-open-file (sym-file voc-path :direction :output)
-	     (format sym-file "~A~%" sym))
-	   (setf (gethash sym symbol-table) i)
-	 finally
-	   (return symbol-table)))))
-
 (defgeneric xsl-split-article (article)
   (:documentation "Divide any 'multi-part' elements of ARTICLE.  This means:
 
@@ -59,57 +23,52 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
   (if (string= article "")
       (error "We cannot split an empty article!")
       (let ((first-char (char article 0)))
-	(if (char= first-char #\/)
-	    (xsl-split-article (pathname article))
-	    (let ((temp-article-path (temporary-file :extension ".miz")))
-	      (with-open-file (temp-article temp-article-path
-					    :direction :output
-					    :if-exists :error
-					    :if-does-not-exist :create)
-		(format temp-article "~a" article))
-	      (xsl-split-article temp-article-path)
-	      (delete-file temp-article-path))))))
+        (if (char= first-char #\/)
+            (xsl-split-article (pathname article))
+            (let ((temp-article-path (temporary-file :extension ".miz")))
+              (with-open-file (temp-article temp-article-path
+                                            :direction :output
+                                            :if-exists :error
+                                            :if-does-not-exist :create)
+                (format temp-article "~a" article))
+              (xsl-split-article temp-article-path)
+              (delete-file temp-article-path))))))
 
 (defmethod xsl-split-article ((article pathname))
   (loop
-     with free-variables-stylesheet = (mizar-items-config 'free-variables-stylesheet)
-     with toplevel-private-functions-stylesheet = (mizar-items-config 'toplevel-private-functions-stylesheet)
-     with toplevel-constant-definition-stylesheet = (mizar-items-config 'toplevel-constant-definition-stylesheet)
-     with toplevel-type-changing-statements-stylesheet = (mizar-items-config 'toplevel-type-changing-statements-stylesheet)
      with toplevel-dellink-stylesheet = (mizar-items-config 'toplevel-dellink-stylesheet)
-     with toplevel-choice-stylesheet = (mizar-items-config 'toplevel-choice-stylesheet)
      with split-stylesheet = (mizar-items-config 'split-stylesheet)
-     with schedule = (list toplevel-dellink-stylesheet toplevel-dellink-stylesheet
-			   ;; toplevel-private-functions-stylesheet
-			   ;; toplevel-constant-definition-stylesheet
-			   ;; toplevel-type-changing-statements-stylesheet
-			   split-stylesheet split-stylesheet
-			   free-variables-stylesheet
-			   ;; toplevel-choice-stylesheet
-			   ;; split-stylesheet
-			   )
+     with schedule = (list toplevel-dellink-stylesheet
+                           toplevel-dellink-stylesheet ;; need to do
+                                                       ;; this twice,
+                                                       ;; if there are
+                                                       ;; toplevel
+                                                       ;; links
+                           split-stylesheet)
      with xml = (replace-extension article "miz" "wsx")
      for sheet in schedule
      do
+       (format t "Applying ~a...~%" sheet)
        (setf xml (apply-stylesheet sheet xml nil nil))
      finally
        (return xml)))
 
 (defun xsl-itemize-article (article)
-  (let ((free-variables-stylesheet (mizar-items-config 'free-variables-stylesheet))
-	(itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
-    (let ((free-variables-article (apply-stylesheet free-variables-stylesheet (xsl-split-article article) nil nil)))
-      (apply-stylesheet itemize-stylesheet free-variables-article nil nil))))
+  (let ((itemize-stylesheet (mizar-items-config 'itemize-stylesheet)))
+    (apply-stylesheet itemize-stylesheet
+                      (xsl-split-article article)
+                      nil
+                      nil)))
 
 (defun ckb-< (ckb-path-1 ckb-path-2)
   (let ((ckb-pattern "^ckb([0-9]+)$"))
     (register-groups-bind (ckb-num-1-as-str)
-	(ckb-pattern (pathname-name ckb-path-1))
+        (ckb-pattern (pathname-name ckb-path-1))
       (register-groups-bind (ckb-num-2-as-str)
-	  (ckb-pattern (pathname-name ckb-path-2))
-	(let ((ckb-num-1 (parse-integer ckb-num-1-as-str))
-	      (ckb-num-2 (parse-integer ckb-num-2-as-str)))
-	  (< ckb-num-1 ckb-num-2))))))
+          (ckb-pattern (pathname-name ckb-path-2))
+        (let ((ckb-num-1 (parse-integer ckb-num-1-as-str))
+              (ckb-num-2 (parse-integer ckb-num-2-as-str)))
+          (< ckb-num-1 ckb-num-2))))))
 
 (defgeneric extend-evl (evl-file prel-dir dict-dir)
   (:documentation "Extend the .evl file EVL-FILE with whatever the contents of PREL-DIR and DICT-DIR are.  If, for example, there is a file 'foo.sch' in PREL-DIR, then EVL-FILE will be extended so that, in its Schemes directives, we find 'FOO' as an Ident.  If there is a .voc file in DICT-DIR, it will be added to the Vocabularies directive as well."))
@@ -126,85 +85,96 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
 (defmethod extend-evl :around ((evl-file pathname) (prel-dir pathname) (dict-dir pathname))
   (if (file-exists-p evl-file)
       (when (file-exists-p prel-dir)
-	(if (directory-p prel-dir)
-	    (when (file-exists-p prel-dir)
-	      (if (directory-p prel-dir)
-		  (call-next-method)
-		  (error "The specified dict directory, '~a', isn't actually a directory" (namestring dict-dir))))
-	    (error "The specified prel DB, '~a', isn't actually a directory" (namestring prel-dir)))
-	(call-next-method))
+        (if (directory-p prel-dir)
+            (when (file-exists-p prel-dir)
+              (if (directory-p prel-dir)
+                  (call-next-method)
+                  (error "The specified dict directory, '~a', isn't actually a directory" (namestring dict-dir))))
+            (error "The specified prel DB, '~a', isn't actually a directory" (namestring prel-dir)))
+        (call-next-method))
       (error "The specified .evl file, '~a', doesn't exist" (namestring evl-file))))
 
 (defmethod extend-evl ((evl-file pathname) (prel-dir pathname) (dict-dir pathname))
   (if (file-exists-p prel-dir)
       (let ((more-vocabularies "")
-	    (more-notations "")
-	    (more-definitions "")
-	    (more-theorems "")
-	    (more-schemes "")
-	    (more-registrations "")
-	    (more-constructors "")
-	    (more-requirements ""))
-	(flet ((pad-string (string new-bit)
-		 (format nil "~a~a," string (uppercase new-bit))))
-	  (flet ((add-to-vocabularies (article)
-		   (setf more-vocabularies (pad-string more-vocabularies article)))
-		 (add-to-notations (article)
-		   (setf more-notations (pad-string more-notations article)))
-		 (add-to-definitions (article)
-		   (setf more-definitions (pad-string more-definitions article)))
-		 (add-to-theorems (article)
-		   (setf more-theorems (pad-string more-theorems article)))
-		 (add-to-schemes (article)
-		   (setf more-schemes (pad-string more-schemes article)))
-		 (add-to-registrations (article)
-		   (setf more-registrations (pad-string more-registrations article)))
-		 (add-to-constructors (article)
-		   (setf more-constructors (pad-string more-constructors article)))
-		 (add-to-requirements (article)
-		   (setf more-requirements (pad-string more-requirements article))))
-	    (flet ((dispatch-exported-file (path)
-		     (cond ((voc-file-p path) (add-to-vocabularies (pathname-name path)))
-			   ((dno-file-p path) (add-to-notations (pathname-name path)))
-			   ((dcl-file-p path) (add-to-registrations (pathname-name path)))
-			   ((eid-file-p path) (add-to-registrations (pathname-name path)))
-			   ((did-file-p path) (add-to-registrations (pathname-name path)))
-			   ((sch-file-p path) (add-to-schemes (pathname-name path)))
-			   ((dco-file-p path) (add-to-constructors (pathname-name path)))
-			   ((def-file-p path) (add-to-definitions (pathname-name path)))
-			   ((the-file-p path) (add-to-theorems (pathname-name path)))
-			   (t
-			    (error "Don't know how to deal with the file '~a'" (namestring path))))))
-	      ;; prel
-	      (loop
-		 for extension in (list "dno" "dcl" "eid" "did" "sch" "def" "dco" "the")
-		 do
-		   (loop
-		      with files = (files-in-directory-with-extension prel-dir extension)
-		      with sorted-files = (sort files #'ckb-<)
-		      for path in sorted-files
-		      do (dispatch-exported-file path)))
-	      ;; voc
-	      (loop
-		 with files = (files-in-directory-with-extension dict-dir "voc")
-		 with sorted-files = (sort files #'ckb-<)
-		 for path in sorted-files
-		 do (dispatch-exported-file path)))))
-	(apply-stylesheet (mizar-items-config 'extend-evl-stylesheet)
-			  evl-file
-			  (list (cons "vocabularies" more-vocabularies)
-				(cons "notations" more-notations)
-				(cons "definitions" more-definitions)
-				(cons "theorems" more-theorems)
-				(cons "schemes" more-schemes)
-				(cons "registrations" more-registrations)
-				(cons "constructors" more-constructors)
-				(cons "requirements" more-requirements))
-			  nil))
+            (more-notations "")
+            (more-definitions "")
+            (more-theorems "")
+            (more-schemes "")
+            (more-registrations "")
+            (more-constructors "")
+            (more-requirements ""))
+        (flet ((pad-string (string new-bit)
+                 (format nil "~a~a," string (uppercase new-bit))))
+          (flet ((add-to-vocabularies (article)
+                   (setf more-vocabularies (pad-string more-vocabularies article)))
+                 (add-to-notations (article)
+                   (setf more-notations (pad-string more-notations article)))
+                 (add-to-definitions (article)
+                   (setf more-definitions (pad-string more-definitions article)))
+                 (add-to-theorems (article)
+                   (setf more-theorems (pad-string more-theorems article)))
+                 (add-to-schemes (article)
+                   (setf more-schemes (pad-string more-schemes article)))
+                 (add-to-registrations (article)
+                   (setf more-registrations (pad-string more-registrations article)))
+                 (add-to-constructors (article)
+                   (setf more-constructors (pad-string more-constructors article)))
+                 (add-to-requirements (article)
+                   (setf more-requirements (pad-string more-requirements article))))
+            (flet ((dispatch-exported-file (path)
+                     (cond ((voc-file-p path) (add-to-vocabularies (pathname-name path)))
+                           ((dno-file-p path) (add-to-notations (pathname-name path)))
+                           ((dcl-file-p path) (add-to-registrations (pathname-name path)))
+                           ((eid-file-p path) (add-to-registrations (pathname-name path)))
+                           ((did-file-p path) (add-to-registrations (pathname-name path)))
+                           ((sch-file-p path) (add-to-schemes (pathname-name path)))
+                           ((dco-file-p path) (add-to-constructors (pathname-name path)))
+                           ((def-file-p path) (add-to-definitions (pathname-name path)))
+                           ((the-file-p path) (add-to-theorems (pathname-name path)))
+                           (t
+                            (error "Don't know how to deal with the file '~a'" (namestring path))))))
+              ;; prel
+              (loop
+                 for extension in (list "dno" "dcl" "eid" "did" "sch" "def" "dco" "the")
+                 do
+                   (loop
+                      with files = (files-in-directory-with-extension prel-dir extension)
+                      with sorted-files = (sort files #'ckb-<)
+                      for path in sorted-files
+                      do (dispatch-exported-file path)))
+              ;; voc
+              (loop
+                 with files = (files-in-directory-with-extension dict-dir "voc")
+                 with sorted-files = (sort files #'ckb-<)
+                 for path in sorted-files
+                 do (dispatch-exported-file path)))))
+        (apply-stylesheet (mizar-items-config 'extend-evl-stylesheet)
+                          evl-file
+                          (list (cons "vocabularies" more-vocabularies)
+                                (cons "notations" more-notations)
+                                (cons "definitions" more-definitions)
+                                (cons "theorems" more-theorems)
+                                (cons "schemes" more-schemes)
+                                (cons "registrations" more-registrations)
+                                (cons "constructors" more-constructors)
+                                (cons "requirements" more-requirements))
+                          nil))
       (apply-stylesheet (mizar-items-config 'extend-evl-stylesheet)
-		      evl-file
-		      nil
-		      nil)))
+                      evl-file
+                      nil
+                      nil)))
+
+(defun write-xml-node-to-file (xml-node path)
+  (with-open-file (xml-out path
+                           :direction :output
+                           :if-does-not-exist :create
+                           :if-exists :supersede
+                           :element-type '(unsigned-byte 8))
+;;                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;;                         Watch out: omitting this key can lead to trouble
+    (dom:map-document (cxml:make-octet-stream-sink xml-out)
+                      xml-node)))
 
 (defgeneric itemize (article))
 
@@ -217,108 +187,193 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
   (if (string= article-string "")
       0
       (let ((first-char (char article-string 0)))
-	(if (char= first-char #\/)
-	    (itemize (pathname article-string))
-	    (let ((temp-article (temporary-file :base "a" :extension "miz")))
-	      (write-string-into-file article-string temp-article
-				      :if-exists :error
-				      :if-does-not-exist :create)
-	      (prog1
-		  (itemize temp-article)
-		(delete-file temp-article)))))))
+        (if (char= first-char #\/)
+            (itemize (pathname article-string))
+            (let ((temp-article (temporary-file :base "a" :extension "miz")))
+              (write-string-into-file article-string temp-article
+                                      :if-exists :error
+                                      :if-does-not-exist :create)
+              (prog1
+                  (itemize temp-article)
+                (delete-file temp-article)))))))
 
 (defmethod itemize :before ((article-path pathname))
-  (accom article-path :flags '("-q" "-l"))
-  (newparser article-path :flags '("-q" "-l")))
+  (let* ((article-name (pathname-name article-path))
+         (items-dir (format nil "/~{~a/~}~a/"
+                            (cdr (pathname-directory article-path))
+                            article-name))
+         (prel-dir (format nil "~aprel/" items-dir))
+         (dict-dir (format nil "~adict/" items-dir))
+         (text-dir (format nil "~atext/" items-dir))
+         (evl2environ-stylesheet (mizar-items-config 'evl2environ-stylesheet))
+         (article-in-items-dir (format nil "~a~a.miz" items-dir article-name))
+         (evl-file (format nil "~a~a.evl" items-dir article-name))
+         (msm-article (format nil "~a~a.msm" items-dir article-name)))
+    (handler-case (progn (ensure-directories-exist items-dir)
+                         (ensure-directories-exist prel-dir)
+                         (ensure-directories-exist dict-dir)
+                         (ensure-directories-exist text-dir))
+      (file-error () (error "We cannot ensure that the directories~%
+* ~a~%  * ~a~%  * ~a~%  * ~a~%~%exist,
+so we cannot proceed." items-dir prel-dir dict-dir text-dir)))
+    (copy-file article-path article-in-items-dir)
+    (accom article-in-items-dir :flags '("-q" "-l"))
+    (let ((environ (apply-stylesheet evl2environ-stylesheet
+                                    evl-file
+                                    nil
+                                    nil)))
+      (wsmparser article-in-items-dir :flags '("-q" "-l"))
+      (msmprocessor article-in-items-dir :flags '("-q" "-l"))
+      (with-open-file (new-miz article-in-items-dir
+                               :direction :output
+                               :if-exists :supersede
+                               :if-does-not-exist :error)
+        (format new-miz "~a" environ)
+        (terpri new-miz)
+        (with-open-file (msm-miz msm-article
+                                 :direction :input
+                                 :if-does-not-exist :error)
+          (loop
+             for line = (read-line msm-miz nil nil)
+             do
+               (if line
+                   (format new-miz "~a~%" line)
+                   (return)))))
+      (accom article-in-items-dir :flags '("-q" "-l"))
+      (wsmparser article-in-items-dir :flags '("-q" "-l")))))
 
 (defmethod itemize ((article-path pathname))
-  (let* ((itemized-article (xsl-itemize-article article-path))
-	 (xml-doc (handler-case (cxml:parse itemized-article (cxml-dom:make-dom-builder))
-		    (error (err) (error "There was an error parsing the result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-path err))))
-	 (evl-file (replace-extension article-path "miz" "evl"))
-	 (bundle-xpath "Items/Item-Bundle")
-	 (article-name (pathname-name article-path))
-	 (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
-	 (items-dir (format nil "/~{~a/~}~a/" (cdr (pathname-directory article-path)) article-name))
-;                                              ^^^ PATHNAME-DIRECTORY gives a list with a useless first component
-;                                     ^ ensures that the path ends with '/'
-;                                ^ ensures that the path starts with '/'
-	 (prel-dir (format nil "~aprel/" items-dir))
-	 (dict-dir (format nil "~adict/" items-dir))
-	 (text-dir (format nil "~atext/" items-dir)))
-;                               ^^^ squishing these together is OK because ITEMS-DIR ends with a '/'
-    (handler-case
-	(and (ensure-directories-exist items-dir)
-	     (ensure-directories-exist prel-dir)
-	     (ensure-directories-exist dict-dir)
-	     (ensure-directories-exist text-dir))
-      (file-error () (error "We cannot ensure that the directories~%  * ~a~%  * ~a~%  * ~a~%  * ~a~%~%exist, so we cannot proceed." items-dir prel-dir dict-dir text-dir)))
-    (xpath:do-node-set (bundle (xpath:evaluate bundle-xpath xml-doc))
-      (let* ((bundlenr (dom:get-attribute bundle "bundlenr"))
-	     (promoted (dom:get-attribute bundle "promoted"))
-	     (spelling (dom:get-attribute bundle "spelling")))
-	(let ((text-proper-set (xpath:evaluate "Text-Proper[1]" bundle)))
-	  (if (xpath:node-set-empty-p text-proper-set)
-	      (error "Empty node set for Text-Proper!")
-	      (let* ((text-proper (first (xpath:all-nodes text-proper-set)))
-		     (doc (rune-dom:create-document text-proper))
-		     (bundle-path (format nil "~a~a.wsi" items-dir bundlenr)))
-;                                     ^^^^ we can squash these together like this because ITEMs-DIR starts and ends with a '/'
-		(with-open-file (bundle-xml bundle-path
-					    :direction :output
-					    :if-does-not-exist :create
-					    :if-exists :supersede
-					    :element-type '(unsigned-byte 8))
-;                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;                                           Watch out: omitting this key can lead to trouble
-		  (dom:map-document (cxml:make-octet-stream-sink bundle-xml) doc))
-		;; if this is a toplevel constant definition, we need to write a new vocabulary file
-		(when (and promoted
-			   (or (string= promoted "constant-definition")
-			       (string= promoted "type-changing-statement")
-			       (string= promoted "choice-statement-mode")
-			       (string= promoted "choice-statement-functor")
-			       (string= promoted "private-functor-definition"))
-			   spelling)
-		  (let ((voc-path (format nil "~ackb~a.voc" dict-dir bundlenr)))
-		    (with-open-file (voc voc-path
-					 :direction :output
-					 :if-exists :error
-					 :if-does-not-exist :create)
-		      (if (string= promoted "choice-statement-mode")
-			  (format voc "M~a~%" spelling)
-			  (if (string= promoted "private-predicate-definition")
-			      (format voc "R~a~%" spelling)
-			      (format voc "O~a~%" spelling))))))
-		;; create the bundle's new evl
-		(let ((bundle-temp-evl-path (format nil "~ackb~a.evl1" text-dir bundlenr))
-		      (extended-evl (extend-evl evl-file prel-dir dict-dir)))
-		  (write-string-into-file extended-evl bundle-temp-evl-path
-					  :if-exists :supersede
-					  :if-does-not-exist :create)
-		  (let ((bundle-miz-path (format nil "~ackb~a.miz" text-dir bundlenr))
-			(bundle-miz-text (apply-stylesheet wsm-stylesheet
-							   bundle-path
-							   (list (cons "evl" (namestring bundle-temp-evl-path)))
-							   nil)))
-		    (write-string-into-file bundle-miz-text bundle-miz-path
-					    :if-exists :supersede
-					    :if-does-not-exist :create)
-		    (accom bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
-		    (verifier bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
-		    (exporter bundle-miz-path :working-directory items-dir :flags '("-q" "-l"))
-		    (transfer bundle-miz-path :working-directory items-dir :flags '("-q" "-l")))))))))
-    (xpath:evaluate (format nil "count(~a)" bundle-xpath) xml-doc)))
+  (let* ((article-name (pathname-name article-path))
+         (items-dir (format nil "/~{~a/~}~a/"
+                            (cdr (pathname-directory article-path))
+                            article-name))
+         (article-in-items-dir (format nil "~a~a.miz" items-dir article-name))
+         (itemized-article (xsl-itemize-article article-in-items-dir))
+         (xml-doc (handler-case (cxml:parse itemized-article
+                                            (cxml-dom:make-dom-builder))
+                    (error (err) (error "There was an error parsing the
+result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-items-dir err))))
+         (evl-file (replace-extension article-in-items-dir "miz" "evl"))
+         (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
+         (evl2environ-stylesheet (mizar-items-config 'evl2environ-stylesheet))
+         (prel-dir (format nil "~aprel/" items-dir))
+         (dict-dir (format nil "~adict/" items-dir))
+         (text-dir (format nil "~atext/" items-dir)))
+    (loop
+       with all-nodes = (xpath:all-nodes (xpath:evaluate "Fragments/Text-Proper" xml-doc))
+       with context-nodes = nil
+       for i from 1
+       for needed-context = (copy-list context-nodes)
+       for item-node in all-nodes
+       for doc = (rune-dom:create-document item-node)
+       for item-path = (format nil "~a~d.wsi" items-dir i)
+       for fragment-miz-path = (format nil "~ackb~d.miz" text-dir i)
+       for fragment-evl-path = (format nil "~a~d.evl" items-dir i)
+       for extended-evl = (extend-evl evl-file prel-dir dict-dir)
+       do
+         ;; first record whether this is a "context" node that might
+         ;; need to be prepended to some later item
+         (when (not (xpath:node-set-empty-p (xpath:evaluate "Item[@kind = \"Reservation\" or @kind = \"Constant-Definition\" or @kind = \"Regular-Statement\" or @kind = \"Type-Changing-Statement\" or @kind = \"Choice-Statement\"]" item-node)))
+           (setf context-nodes (append context-nodes (list item-node))))
+         (write-xml-node-to-file doc item-path)
+         (write-string-into-file extended-evl fragment-evl-path
+                                 :if-exists :supersede
+                                 :if-does-not-exist :create)
+         (let ((bundle-miz-environ (apply-stylesheet evl2environ-stylesheet
+                                                     fragment-evl-path
+                                                     nil
+                                                     nil))
+               (bundle-miz-text (apply-stylesheet wsm-stylesheet
+                                                  item-path
+                                                  (list
+                                                   (cons "suppress-environment" "1")
+                                                   (cons "evl" (namestring fragment-evl-path)))
+                                                  nil)))
+
+           (with-open-file (bundle-miz fragment-miz-path
+                                       :direction :output
+                                       :if-exists :supersede
+                                       :if-does-not-exist :create)
+             (format bundle-miz "~a" bundle-miz-environ)
+             (terpri bundle-miz)
+             (loop
+                for context-node in context-nodes
+                for pos = (position context-node all-nodes)
+                for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+                for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+                                                               previous-fragment-path
+                                                               (list (cons "suppress-environment" "1"))
+                                                               nil)
+                do
+                  (format bundle-miz "~a" previous-fragment-text)
+                  (terpri bundle-miz))
+             (format bundle-miz "~a" bundle-miz-text))
+           (accom fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+           (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+           (handler-case (progn (exporter fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+                                (transfer fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))
+             (mizar-error ()
+               (setf context-nodes (append context-nodes (list item-node)))))
+           ;; now minimize the set of context nodes.  trivial
+           ;; algorithm: delete items from the end
+           (loop
+              initially (format t "Minimizing item ~d...~%" i)
+              for context-node in (reverse (remove item-node context-nodes))
+              do
+                (let ((trimmed (remove context-node needed-context)))
+                  (with-open-file (bundle-miz fragment-miz-path
+                                              :direction :output
+                                              :if-exists :supersede
+                                              :if-does-not-exist :create)
+                    (format bundle-miz "~a" bundle-miz-environ)
+                    (terpri bundle-miz)
+                    (loop
+                       for context-node in trimmed
+                       for pos = (position context-node all-nodes)
+                       for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+                       for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+                                                                      previous-fragment-path
+                                                                      (list (cons "suppress-environment" "1"))
+                                                                      nil)
+                       do
+                         (format bundle-miz "~a" previous-fragment-text)
+                         (terpri bundle-miz))
+                    (format bundle-miz "~a" bundle-miz-text))
+                  (handler-case (progn (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+                                       (setf needed-context trimmed))
+                    (mizar-error () nil)))
+              finally
+                ;; ensure that at the end we write the minimized
+                ;; context
+                (with-open-file (bundle-miz fragment-miz-path
+                                              :direction :output
+                                              :if-exists :supersede
+                                              :if-does-not-exist :create)
+                    (format bundle-miz "~a" bundle-miz-environ)
+                    (terpri bundle-miz)
+                    (loop
+                       for context-node in needed-context
+                       for pos = (position context-node all-nodes)
+                       for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+                       for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+                                                                      previous-fragment-path
+                                                                      (list (cons "suppress-environment" "1"))
+                                                                      nil)
+                       do
+                         (format bundle-miz "~a" previous-fragment-text)
+                         (terpri bundle-miz))
+                    (format bundle-miz "~a" bundle-miz-text)))))
+    t))
 
 (defun itemize-no-errors (article)
   (handler-case
       (progn
-	(handler-bind ((warning #'muffle-warning))
-	  (itemize article))
-	(format t "~a: success~%" article)
-	t)
+        (handler-bind ((warning #'muffle-warning))
+          (itemize article))
+        (format t "~a: success~%" article)
+        t)
       (error ()
-	(format *error-output* "~a: failure~%" article)
-	nil)))
+        (format *error-output* "~a: failure~%" article)
+        nil)))
 
 ;;; itemize.lisp ends here
