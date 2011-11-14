@@ -76,11 +76,11 @@ suite to work correctly."
 (let ((table (make-hash-table :test #'equal)))
   (defmethod mml-lar-index ((article-name string))
     (multiple-value-bind (position present?)
-	(gethash article-name table)
+        (gethash article-name table)
       (if present?
-	  position
-	  (setf (gethash article-name table)
-		(position article-name *mml-lar* :test #'string= :key #'name))))))
+          position
+          (setf (gethash article-name table)
+                (position article-name *mml-lar* :test #'string= :key #'name))))))
 
 (defmethod mml-lar-index ((thing article))
   (mml-lar-index (name thing)))
