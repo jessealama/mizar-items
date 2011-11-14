@@ -273,7 +273,7 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
        do
          ;; first record whether this is a "context" node that might
          ;; need to be prepended to some later item
-         (when (not (xpath:node-set-empty-p (xpath:evaluate "Item[@kind = \"Reservation\" or @kind = \"Constant-Definition\" or @kind = \"Regular-Statement\" or @kind = \"Type-Changing-Statement\" or @kind = \"Choice-Statement\"]" item-node)))
+         (when (not (xpath:node-set-empty-p (xpath:evaluate "Item[@kind = \"Reservation\" or @kind = \"Constant-Definition\" or @kind = \"Regular-Statement\" or @kind = \"Type-Changing-Statement\" or @kind = \"Choice-Statement\" or @kind = \"Private-Predicate-Definition\" or @kind = \"Private-Functor-Definition\"]" item-node)))
            (setf context-nodes (append context-nodes (list item-node))))
          (write-xml-node-to-file doc item-path)
          (write-string-into-file extended-evl fragment-evl-path
