@@ -44,4 +44,5 @@
 	       (:file "site-about")
 	       (:file "site-paths")
 	       (:file "site")
-	       (:file "minimize")))
+	       (:file "minimize")
+	       (:file "ivy-nd")))
