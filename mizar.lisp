@@ -216,6 +216,8 @@ suite to work correctly."
 (define-mizar-tool "verifier")
 (define-mizar-tool "envget")
 (define-mizar-tool "exporter")
+(define-mizar-tool "wsmparser")
+(define-mizar-tool "msmprocessor")
 (define-mizar-tool "transfer")
 (define-mizar-tool "irrths")
 (define-mizar-tool "irrvoc")
