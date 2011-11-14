@@ -43,29 +43,29 @@ The presence of these files is, in general, necessary for the mizar
 suite to work correctly."
   (let ((dir (ensure-directory new-mizfiles)))
     (flet ((file-ok-in-proposed-mizfiles (file)
-	     (file-exists-p (file-in-directory dir file)))
-	   (directory-ok (some-dir)
-	     (file-exists-p (ensure-directory
-			     (file-in-directory dir some-dir)))))
+             (file-exists-p (file-in-directory dir file)))
+           (directory-ok (some-dir)
+             (file-exists-p (ensure-directory
+                             (file-in-directory dir some-dir)))))
       (multiple-value-bind (all-files-ok bad-file)
-	  (every-with-falsifying-witness +needed-mizfiles-files+
-					 #'file-ok-in-proposed-mizfiles)
-	(if all-files-ok
-	    (multiple-value-bind (all-dirs-ok bad-dir)
-		(every-with-falsifying-witness +needed-mizfiles-subdirs+
-					       #'directory-ok)
-	      (if all-dirs-ok
-		  (setf *mizfiles* dir)
-		  (error "Unable to set $MIZFILES to '~a' because the needed directory '~a' is missing" new-mizfiles bad-dir)))
-	    (error "Unable to set $MIZFILES to '~a' because the needed file '~a' does not exist there" new-mizfiles bad-file))))))
+          (every-with-falsifying-witness +needed-mizfiles-files+
+                                         #'file-ok-in-proposed-mizfiles)
+        (if all-files-ok
+            (multiple-value-bind (all-dirs-ok bad-dir)
+                (every-with-falsifying-witness +needed-mizfiles-subdirs+
+                                               #'directory-ok)
+              (if all-dirs-ok
+                  (setf *mizfiles* dir)
+                  (error "Unable to set $MIZFILES to '~a' because the needed directory '~a' is missing" new-mizfiles bad-dir)))
+            (error "Unable to set $MIZFILES to '~a' because the needed file '~a' does not exist there" new-mizfiles bad-file))))))
 
 (defgeneric belongs-to-mml (article))
 
 (defmethod belongs-to-mml ((article-str string))
   (let ((article-str-lc (lowercase article-str)))
     (find article-str-lc *mml-lar*
-	  :test #'string=
-	  :key #'name)))
+          :test #'string=
+          :key #'name)))
 
 (defmethod belongs-to-mml ((article article))
   (find article *mml-lar*))
