@@ -4,8 +4,8 @@
 
 (defvar *mizfiles*
   (let ((mizfiles
-	 #+sbcl (sb-ext:posix-getenv "MIZFILES")
-	 #+ccl (ccl:getenv "MIZFILES")))
+         #+sbcl (sb-ext:posix-getenv "MIZFILES")
+         #+ccl (ccl:getenv "MIZFILES")))
     (when mizfiles
       (ensure-directory mizfiles)))
   "The directory that contains the MML and the mml.lar file.
