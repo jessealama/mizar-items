@@ -136,7 +136,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
                             (error "Don't know how to deal with the file '~a'" (namestring path))))))
               ;; prel
               (loop
-                 for extension in (list "dno" "dcl" "eid" "did" "sch" "def" "dco" "the")
+                 for extension in (list "dno" "dcl" "eid" "did" "drd" "sch" "def" "dco" "the")
                  do
                    (loop
                       with files = (files-in-directory-with-extension prel-dir extension)
