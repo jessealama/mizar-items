@@ -48,7 +48,6 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
      with xml = (replace-extension article "miz" "wsx")
      for sheet in schedule
      do
-       (format t "Applying ~a...~%" sheet)
        (setf xml (apply-stylesheet sheet xml nil nil))
      finally
        (return xml)))
