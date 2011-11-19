@@ -271,6 +271,9 @@ suite to work correctly."
 (defun dcl-file-p (path)
   (file-has-extension path "dcl"))
 
+(defun drd-file-p (path)
+  (file-has-extension path "drd"))
+
 (defun eid-file-p (path)
   (file-has-extension path "eid"))
 
