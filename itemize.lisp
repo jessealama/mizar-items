@@ -125,6 +125,7 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
             (flet ((dispatch-exported-file (path)
                      (cond ((voc-file-p path) (add-to-vocabularies (pathname-name path)))
                            ((dno-file-p path) (add-to-notations (pathname-name path)))
+                           ((drd-file-p path) (add-to-registrations (pathname-name path)))
                            ((dcl-file-p path) (add-to-registrations (pathname-name path)))
                            ((eid-file-p path) (add-to-registrations (pathname-name path)))
                            ((did-file-p path) (add-to-registrations (pathname-name path)))
