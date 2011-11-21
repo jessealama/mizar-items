@@ -363,7 +363,8 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
                        do
                          (format bundle-miz "~a" previous-fragment-text)
                          (terpri bundle-miz))
-                    (format bundle-miz "~a" bundle-miz-text)))))
+                    (format bundle-miz "~a" bundle-miz-text))
+                (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))))
     t))
 
 (defun itemize-no-errors (article)
