@@ -378,4 +378,10 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
         (format *error-output* "~a: failure~%" article)
         nil)))
 
+(defun itemize-and-quit (article)
+  (handler-case (handler-bind ((warning #'muffle-warning))
+                  (itemize article))
+    (mizar-error () (ccl:quit 1))
+    (error () (ccl:quit 2))))
+
 ;;; itemize.lisp ends here
