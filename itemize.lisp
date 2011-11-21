@@ -380,7 +380,8 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
 
 (defun itemize-and-quit (article)
   (handler-case (handler-bind ((warning #'muffle-warning))
-                  (itemize article))
+                  (itemize article)
+                  (ccl:quit 0))
     (mizar-error () (ccl:quit 1))
     (error () (ccl:quit 2))))
 
