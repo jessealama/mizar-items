@@ -2,7 +2,7 @@
 
 use strict;
 use XML::LibXML;
-use File::Basename qw(basename);
+use File::Basename qw(basename dirname);
 
 unless (scalar @ARGV == 1) {
   print 'Usage: brutalize.pl ARTICLE', "\n";
@@ -12,9 +12,11 @@ unless (scalar @ARGV == 1) {
 my $article = $ARGV[0];
 
 my $article_basename = basename ($article, '.miz');
-my $article_miz = "${article_basename}.miz";
-my $article_xml = "${article_basename}.xml";
-my $article_absolute_xml = "${article_basename}.xml1";
+my $article_dirname = dirname ($article);
+my $article_miz = "${article_dirname}/${article_basename}.miz";
+my $article_sans_extension = "${article_dirname}/${article_basename}";
+my $article_xml = "${article_dirname}/${article_basename}.xml";
+my $article_absolute_xml = "${article_dirname}/${article_basename}.xml1";
 
 unless (-e $article_miz) {
   print 'Error: the .miz for ', $article_basename, ' does not exist.', "\n";
@@ -67,16 +69,6 @@ if (! -e $article_absolute_xml) {
   }
 
   print 'done.', "\n";
-}
-
-unless (-e $article_absolute_xml) {
-  print 'Error: the absolute form of the article ', $article_basename, ' does not exist.', "\n";
-  exit 1;
-}
-
-unless (-r $article_absolute_xml) {
-  print 'Error: the absolute form of the article ', $article_basename, ' is unreadable.', "\n";
-  exit 1;
 }
 
 my @gitem_kinds = ('Property', 'Reduction', 'Definiens', 'Identify', '[RCF]Cluster');
@@ -207,9 +199,9 @@ my $item_xml_parser = XML::LibXML->new();
 my $item_xml_doc = $item_xml_parser->parse_file ("$article_absolute_xml");
 
 # take care of theorems and schemes first
-my $parsed_ref = ParseRef ($article);
-PruneRefXML ('Scheme', '.esh', $article, $parsed_ref);
-PruneRefXML ('Theorem', '.eth', $article, $parsed_ref);
+my $parsed_ref = ParseRef ($article_sans_extension);
+PruneRefXML ('Scheme', '.esh', $article_sans_extension, $parsed_ref);
+PruneRefXML ('Theorem', '.eth', $article_sans_extension, $parsed_ref);
 
 my $brutalizer_script = '/Users/alama/sources/mizar/mizar-items/miz_item_deps_bf.pl';
 
@@ -228,7 +220,7 @@ foreach my $item_kind (@item_kinds) {
 
   my $extension = $item_to_extension{$item_kind};
 
-  if (-e "${article_basename}.${extension}") {
+  if (-e "${article_sans_extension}.${extension}") {
     my $exit_code = system ($brutalizer_script, $item_kind, $extension, $article);
 
     $exit_code = $exit_code >> 8;
@@ -279,7 +271,7 @@ foreach my $pattern_node (@patterns) {
   $constr_table{"$constrkind:$constrnr"} = 0;
 }
 
-my $xitemfile = "${article_basename}.aco";
+my $xitemfile = "${article_sans_extension}.aco";
 {
   open(XML, $xitemfile)
     or die "Unable to open an output filehandle for $xitemfile in directory !";
@@ -289,7 +281,7 @@ my $xitemfile = "${article_basename}.aco";
 
 my ($xmlbeg,$xmlnodes,$xmlend) = $_ =~ m/(.*?)([<]Constructor\b.*[<]\/Constructor>)(.*)/s;
 
-open(XML1,'>', "${article_basename}.atr.pruned")
+open(XML1,'>', "${article_sans_extension}.atr.pruned")
   or die "Unable to open an output filehandle for ${article_basename}.atr.pruned in directory  !";
 print XML1 $xmlbeg;
 
