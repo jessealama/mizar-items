@@ -262,9 +262,7 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
          (text-dir (format nil "~atext/" items-dir)))
     (loop
        with all-nodes = (xpath:all-nodes (xpath:evaluate "Fragments/Text-Proper" xml-doc))
-       with context-nodes = nil
        for i from 1
-       for needed-context = (copy-list context-nodes)
        for item-node in all-nodes
        for doc = (rune-dom:create-document item-node)
        for item-path = (format nil "~a~d.wsi" items-dir i)
@@ -274,8 +272,8 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
        do
          ;; first record whether this is a "context" node that might
          ;; need to be prepended to some later item
-         (when (not (xpath:node-set-empty-p (xpath:evaluate "Item[@kind = \"Reservation\" or @kind = \"Constant-Definition\" or @kind = \"Regular-Statement\" or @kind = \"Type-Changing-Statement\" or @kind = \"Choice-Statement\" or @kind = \"Private-Predicate-Definition\" or @kind = \"Private-Functor-Definition\"]" item-node)))
-           (setf context-nodes (append context-nodes (list item-node))))
+         ;; (when (not (xpath:node-set-empty-p (xpath:evaluate "Item[@kind = \"Reservation\" or @kind = \"Constant-Definition\" or @kind = \"Regular-Statement\" or @kind = \"Type-Changing-Statement\" or @kind = \"Choice-Statement\" or @kind = \"Private-Predicate-Definition\" or @kind = \"Private-Functor-Definition\"]" item-node)))
+         ;;   (setf context-nodes (append context-nodes (list item-node))))
          (write-xml-node-to-file doc item-path)
          (write-string-into-file extended-evl fragment-evl-path
                                  :if-exists :supersede
@@ -297,75 +295,201 @@ result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-ite
                                        :if-does-not-exist :create)
              (format bundle-miz "~a" bundle-miz-environ)
              (terpri bundle-miz)
-             (loop
-                for context-node in context-nodes
-                for pos = (position context-node all-nodes)
-                for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
-                for previous-fragment-text = (apply-stylesheet wsm-stylesheet
-                                                               previous-fragment-path
-                                                               (list (cons "suppress-environment" "1"))
-                                                               nil)
-                do
-                  (format bundle-miz "~a" previous-fragment-text)
-                  (terpri bundle-miz))
+             ;; (loop
+             ;;    for context-node in context-nodes
+             ;;    for pos = (position context-node all-nodes)
+             ;;    for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+             ;;    for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+             ;;                                                   previous-fragment-path
+             ;;                                                   (list (cons "suppress-environment" "1"))
+             ;;                                                   nil)
+             ;;    do
+             ;;      (format bundle-miz "~a" previous-fragment-text)
+             ;;      (terpri bundle-miz))
              (format bundle-miz "~a" bundle-miz-text))
            (accom fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
-           (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+           (verifier fragment-miz-path :working-directory items-dir :flags '("-a" "-q" "-l"))
            (handler-case (progn (exporter fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
                                 (transfer fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))
-             (mizar-error ()
-               (setf context-nodes (append context-nodes (list item-node)))))
+             (mizar-error () t
+               ;; (setf context-nodes (append context-nodes (list item-node)))
+               ))
            ;; now minimize the set of context nodes.  trivial
            ;; algorithm: delete items from the end
-           (loop
-              ;; initially (format t "Minimizing item ~d...~%" i)
-              for context-node in (reverse (remove item-node context-nodes))
-              do
-                (let ((trimmed (remove context-node needed-context)))
-                  (with-open-file (bundle-miz fragment-miz-path
-                                              :direction :output
-                                              :if-exists :supersede
-                                              :if-does-not-exist :create)
-                    (format bundle-miz "~a" bundle-miz-environ)
-                    (terpri bundle-miz)
-                    (loop
-                       for context-node in trimmed
-                       for pos = (position context-node all-nodes)
-                       for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
-                       for previous-fragment-text = (apply-stylesheet wsm-stylesheet
-                                                                      previous-fragment-path
-                                                                      (list (cons "suppress-environment" "1"))
-                                                                      nil)
-                       do
-                         (format bundle-miz "~a" previous-fragment-text)
-                         (terpri bundle-miz))
-                    (format bundle-miz "~a" bundle-miz-text))
-                  (handler-case (progn (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
-                                       (setf needed-context trimmed))
-                    (mizar-error () nil)))
-              finally
-                ;; ensure that at the end we write the minimized
-                ;; context
-                (with-open-file (bundle-miz fragment-miz-path
-                                              :direction :output
-                                              :if-exists :supersede
-                                              :if-does-not-exist :create)
-                    (format bundle-miz "~a" bundle-miz-environ)
-                    (terpri bundle-miz)
-                    (loop
-                       for context-node in needed-context
-                       for pos = (position context-node all-nodes)
-                       for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
-                       for previous-fragment-text = (apply-stylesheet wsm-stylesheet
-                                                                      previous-fragment-path
-                                                                      (list (cons "suppress-environment" "1"))
-                                                                      nil)
-                       do
-                         (format bundle-miz "~a" previous-fragment-text)
-                         (terpri bundle-miz))
-                    (format bundle-miz "~a" bundle-miz-text))
-                (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))))
+           ;; (loop
+           ;;    ;; initially (format t "Minimizing item ~d...~%" i)
+           ;;    for context-node in (reverse (remove item-node context-nodes))
+           ;;    do
+           ;;      (let ((trimmed (remove context-node needed-context)))
+           ;;        (with-open-file (bundle-miz fragment-miz-path
+           ;;                                    :direction :output
+           ;;                                    :if-exists :supersede
+           ;;                                    :if-does-not-exist :create)
+           ;;          (format bundle-miz "~a" bundle-miz-environ)
+           ;;          (terpri bundle-miz)
+           ;;          (loop
+           ;;             for context-node in trimmed
+           ;;             for pos = (position context-node all-nodes)
+           ;;             for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+           ;;             for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+           ;;                                                            previous-fragment-path
+           ;;                                                            (list (cons "suppress-environment" "1"))
+           ;;                                                            nil)
+           ;;             do
+           ;;               (format bundle-miz "~a" previous-fragment-text)
+           ;;               (terpri bundle-miz))
+           ;;          (format bundle-miz "~a" bundle-miz-text))
+           ;;        (handler-case (progn (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+           ;;                             (setf needed-context trimmed))
+           ;;          (mizar-error () nil)))
+           ;;    finally
+           ;;      ;; ensure that at the end we write the minimized
+           ;;      ;; context
+           ;;      (with-open-file (bundle-miz fragment-miz-path
+           ;;                                    :direction :output
+           ;;                                    :if-exists :supersede
+           ;;                                    :if-does-not-exist :create)
+           ;;          (format bundle-miz "~a" bundle-miz-environ)
+           ;;          (terpri bundle-miz)
+           ;;          (loop
+           ;;             for context-node in needed-context
+           ;;             for pos = (position context-node all-nodes)
+           ;;             for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+           ;;             for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+           ;;                                                            previous-fragment-path
+           ;;                                                            (list (cons "suppress-environment" "1"))
+           ;;                                                            nil)
+           ;;             do
+           ;;               (format bundle-miz "~a" previous-fragment-text)
+           ;;               (terpri bundle-miz))
+           ;;          (format bundle-miz "~a" bundle-miz-text))
+           ;;      (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))
+           ))
     t))
+
+;; (defmethod itemize ((article-path pathname))
+;;   (let* ((article-name (pathname-name article-path))
+;;          (items-dir (format nil "/~{~a/~}~a/"
+;;                             (cdr (pathname-directory article-path))
+;;                             article-name))
+;;          (article-in-items-dir (format nil "~a~a.miz" items-dir article-name))
+;;          (itemized-article (xsl-itemize-article article-in-items-dir))
+;;          (xml-doc (handler-case (cxml:parse itemized-article
+;;                                             (cxml-dom:make-dom-builder))
+;;                     (error (err) (error "There was an error parsing the
+;; result of itemizing the article at~%~%  ~a;~%~%The error was: ~a" article-in-items-dir err))))
+;;          (evl-file (replace-extension article-in-items-dir "miz" "evl"))
+;;          (wsm-stylesheet (mizar-items-config 'wsm-stylesheet))
+;;          (evl2environ-stylesheet (mizar-items-config 'evl2environ-stylesheet))
+;;          (prel-dir (format nil "~aprel/" items-dir))
+;;          (dict-dir (format nil "~adict/" items-dir))
+;;          (text-dir (format nil "~atext/" items-dir)))
+;;     (loop
+;;        with all-nodes = (xpath:all-nodes (xpath:evaluate "Fragments/Text-Proper" xml-doc))
+;;        with context-nodes = nil
+;;        for i from 1
+;;        for needed-context = (copy-list context-nodes)
+;;        for item-node in all-nodes
+;;        for doc = (rune-dom:create-document item-node)
+;;        for item-path = (format nil "~a~d.wsi" items-dir i)
+;;        for fragment-miz-path = (format nil "~ackb~d.miz" text-dir i)
+;;        for fragment-evl-path = (format nil "~a~d.evl" items-dir i)
+;;        for extended-evl = (extend-evl evl-file prel-dir dict-dir)
+;;        do
+;;          ;; first record whether this is a "context" node that might
+;;          ;; need to be prepended to some later item
+;;          (when (not (xpath:node-set-empty-p (xpath:evaluate "Item[@kind = \"Reservation\" or @kind = \"Constant-Definition\" or @kind = \"Regular-Statement\" or @kind = \"Type-Changing-Statement\" or @kind = \"Choice-Statement\" or @kind = \"Private-Predicate-Definition\" or @kind = \"Private-Functor-Definition\"]" item-node)))
+;;            (setf context-nodes (append context-nodes (list item-node))))
+;;          (write-xml-node-to-file doc item-path)
+;;          (write-string-into-file extended-evl fragment-evl-path
+;;                                  :if-exists :supersede
+;;                                  :if-does-not-exist :create)
+;;          (let ((bundle-miz-environ (apply-stylesheet evl2environ-stylesheet
+;;                                                      fragment-evl-path
+;;                                                      nil
+;;                                                      nil))
+;;                (bundle-miz-text (apply-stylesheet wsm-stylesheet
+;;                                                   item-path
+;;                                                   (list
+;;                                                    (cons "suppress-environment" "1")
+;;                                                    (cons "evl" (namestring fragment-evl-path)))
+;;                                                   nil)))
+
+;;            (with-open-file (bundle-miz fragment-miz-path
+;;                                        :direction :output
+;;                                        :if-exists :supersede
+;;                                        :if-does-not-exist :create)
+;;              (format bundle-miz "~a" bundle-miz-environ)
+;;              (terpri bundle-miz)
+;;              (loop
+;;                 for context-node in context-nodes
+;;                 for pos = (position context-node all-nodes)
+;;                 for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+;;                 for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+;;                                                                previous-fragment-path
+;;                                                                (list (cons "suppress-environment" "1"))
+;;                                                                nil)
+;;                 do
+;;                   (format bundle-miz "~a" previous-fragment-text)
+;;                   (terpri bundle-miz))
+;;              (format bundle-miz "~a" bundle-miz-text))
+;;            (accom fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+;;            (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+;;            (handler-case (progn (exporter fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+;;                                 (transfer fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))
+;;              (mizar-error ()
+;;                (setf context-nodes (append context-nodes (list item-node)))))
+;;            ;; now minimize the set of context nodes.  trivial
+;;            ;; algorithm: delete items from the end
+;;            (loop
+;;               ;; initially (format t "Minimizing item ~d...~%" i)
+;;               for context-node in (reverse (remove item-node context-nodes))
+;;               do
+;;                 (let ((trimmed (remove context-node needed-context)))
+;;                   (with-open-file (bundle-miz fragment-miz-path
+;;                                               :direction :output
+;;                                               :if-exists :supersede
+;;                                               :if-does-not-exist :create)
+;;                     (format bundle-miz "~a" bundle-miz-environ)
+;;                     (terpri bundle-miz)
+;;                     (loop
+;;                        for context-node in trimmed
+;;                        for pos = (position context-node all-nodes)
+;;                        for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+;;                        for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+;;                                                                       previous-fragment-path
+;;                                                                       (list (cons "suppress-environment" "1"))
+;;                                                                       nil)
+;;                        do
+;;                          (format bundle-miz "~a" previous-fragment-text)
+;;                          (terpri bundle-miz))
+;;                     (format bundle-miz "~a" bundle-miz-text))
+;;                   (handler-case (progn (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l"))
+;;                                        (setf needed-context trimmed))
+;;                     (mizar-error () nil)))
+;;               finally
+;;                 ;; ensure that at the end we write the minimized
+;;                 ;; context
+;;                 (with-open-file (bundle-miz fragment-miz-path
+;;                                               :direction :output
+;;                                               :if-exists :supersede
+;;                                               :if-does-not-exist :create)
+;;                     (format bundle-miz "~a" bundle-miz-environ)
+;;                     (terpri bundle-miz)
+;;                     (loop
+;;                        for context-node in needed-context
+;;                        for pos = (position context-node all-nodes)
+;;                        for previous-fragment-path = (format nil "~a~d.wsi" items-dir (1+ pos))
+;;                        for previous-fragment-text = (apply-stylesheet wsm-stylesheet
+;;                                                                       previous-fragment-path
+;;                                                                       (list (cons "suppress-environment" "1"))
+;;                                                                       nil)
+;;                        do
+;;                          (format bundle-miz "~a" previous-fragment-text)
+;;                          (terpri bundle-miz))
+;;                     (format bundle-miz "~a" bundle-miz-text))
+;;                 (verifier fragment-miz-path :working-directory items-dir :flags '("-q" "-l")))))
+;;     t))
 
 (defun itemize-no-errors (article)
   (handler-case
