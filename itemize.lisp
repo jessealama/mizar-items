@@ -38,8 +38,8 @@ If ARTICLE is the empty string, signal an error.  If ARTICLE is not the empty st
   (loop
      with toplevel-dellink-stylesheet = (mizar-items-config 'toplevel-dellink-stylesheet)
      with split-stylesheet = (mizar-items-config 'split-stylesheet)
-     with schedule = (list toplevel-dellink-stylesheet
-                           toplevel-dellink-stylesheet ;; need to do
+     with schedule = (list ;; toplevel-dellink-stylesheet
+                           ;; toplevel-dellink-stylesheet ;; need to do
                                                        ;; this twice,
                                                        ;; if there are
                                                        ;; toplevel
