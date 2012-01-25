@@ -1,0 +1,1477 @@
+:: Isomorphisms of Categories
+::  by Andrzej Trybulec
+::
+:: Received November 22, 1991
+:: Copyright (c) 1991-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies CAT_1, FUNCT_1, ZFMISC_1, RELAT_1, MCART_1, STRUCT_0, ALGSTR_0,
+      GRAPH_1, PZFMISC1, NATTRA_1, XBOOLE_0, WELLORD1, TARSKI, PARTFUN1,
+      VALUED_1, REWRITE1, ISOCAT_1, MONOID_0;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, RELAT_1, FUNCT_1, RELSET_1, PARTFUN1,
+      FUNCT_2, BINOP_1, FUNCT_3, STRUCT_0, GRAPH_1, CAT_1, CAT_2, CAT_3,
+      NATTRA_1;
+ constructors NATTRA_1, FUNCOP_1, RELSET_1, CAT_3;
+ registrations RELSET_1, FUNCT_2, STRUCT_0, CAT_1, FUNCT_3;
+ requirements SUBSET, BOOLE;
+ definitions TARSKI, CAT_1, FUNCT_1, NATTRA_1, XBOOLE_0, CAT_2, BINOP_1;
+ theorems FUNCT_2, CAT_1, ZFMISC_1, FUNCT_1, FUNCT_3, NATTRA_1, RELAT_1,
+      TARSKI, CAT_3, XTUPLE_0;
+
+begin
+
+:: Auxiliary theorems
+
+reserve A,B,C,D for Category,
+  F for Functor of A,B,
+  G for Functor of B,C;
+
+canceled 2;
+
+theorem Th3:
+ for a,b being Object of A
+  for f being Morphism of a,b st f is invertible holds F/.f is invertible
+proof let a,b be Object of A;
+  let f be Morphism of a,b  such that
+Z: Hom(a,b) <> {} & Hom(b,a) <> {};
+  given g being Morphism of b,a such that
+G1: f*g = id b and
+G2: g*f = id a;
+A1: dom g = b by Z,CAT_1:5 .= cod f by Z,CAT_1:5;
+A2: cod g = a by Z,CAT_1:5 .= dom f by Z,CAT_1:5;
+X1: cod f = b by Z,CAT_1:5;
+X2: dom f = a by Z,CAT_1:5;
+B3: f(*)g = id cod f by G1,Z,X1,CAT_1:def 13;
+B4: g(*)f = id dom f by G2,Z,X2,CAT_1:def 13;
+  thus
+K: Hom(F.a,F.b) <> {} & Hom(F.b,F.a) <> {} by Z,CAT_1:84;
+  take F/.g;
+I1: F/.f = F.f by Z,CAT_3:def 10;
+I2: F/.g = F.g by Z,CAT_3:def 10;
+  thus (F/.f)*(F/.g) = (F.f)(*)(F.g) by K,I1,I2,CAT_1:def 13
+    .= F.(f(*)g) by A2,CAT_1:64
+    .= id cod(F/.f) by B3,I1,CAT_1:63
+    .= id(F.b) by K,CAT_1:5;
+  thus (F/.g)*(F/.f) = (F.g)(*)(F.f) by K,I1,I2,CAT_1:def 13
+    .= F.(g(*)f) by A1,CAT_1:64
+    .= id dom(F/.f) by B4,I1,CAT_1:63
+    .= id(F.a) by K,CAT_1:5;
+end;
+
+theorem Th4:
+  for F1,F2 being Functor of A,B st F1 is_transformable_to F2 for t
+being transformation of F1,F2, a being Object of A holds t.a in Hom(F1.a,F2.a)
+proof
+  let F1,F2 be Functor of A,B such that
+A1: F1 is_transformable_to F2;
+  let t be transformation of F1,F2, a be Object of A;
+  Hom(F1.a,F2.a)<>{} by A1,NATTRA_1:def 2;
+  hence thesis by CAT_1:def 5;
+end;
+
+theorem Th5:
+  for F1,F2 being Functor of A,B, G1,G2 being Functor of B,C st F1
+  is_transformable_to F2 & G1 is_transformable_to G2 holds G1*F1
+  is_transformable_to G2*F2
+proof
+  let F1,F2 be Functor of A,B, G1,G2 be Functor of B,C such that
+A1: F1 is_transformable_to F2 and
+A2: G1 is_transformable_to G2;
+  let a be Object of A;
+  Hom(F1.a,F2.a) <> {} by A1,NATTRA_1:def 2;
+  then
+A3: Hom(G1.(F1.a),G1.(F2.a)) <> {} by CAT_1:84;
+A4: G1.(F1.a) = (G1*F1).a & G2.(F2.a) = (G2*F2).a by CAT_1:76;
+  Hom(G1.(F2.a),G2.(F2.a)) <> {} by A2,NATTRA_1:def 2;
+  hence thesis by A4,A3,CAT_1:24;
+end;
+
+theorem Th6:
+  for F1,F2 being Functor of A,B st F1 is_transformable_to F2 for t
+being transformation of F1,F2 st t is invertible for a being Object of A holds
+  F1.a, F2.a are_isomorphic
+proof
+  let F1,F2 be Functor of A,B such that
+ F1 is_transformable_to F2;
+  let t be transformation of F1,F2 such that
+A2: t is invertible;
+  let a be Object of A;
+  take t.a;
+  thus thesis by A2,NATTRA_1:def 10;
+end;
+
+definition
+  let C,D;
+  redefine mode Functor of C,D means
+    (for c being Object of C ex d being
+Object of D st it.id c = id d) & (for f being Morphism of C holds it.id dom f =
+id dom(it.f) & it.id cod f = id cod(it.f)) & for f,g being Morphism of C st dom
+    g = cod f holds it.(g(*)f) = (it.g)(*)(it.f);
+  compatibility by CAT_1:61,62,63,64;
+end;
+
+reserve o,m for set;
+
+theorem Th7:
+  F is isomorphic implies for g being Morphism of B ex f being
+  Morphism of A st F.f = g
+proof
+  assume
+A1: F is isomorphic;
+  let g be Morphism of B;
+  rng F = the carrier' of B by A1,CAT_1:def 25;
+  then consider f being set such that
+A2: f in dom F and
+A3: F.f = g by FUNCT_1:def 3;
+  reconsider f as Morphism of A by A2;
+  take f;
+  thus thesis by A3;
+end;
+
+theorem Th8:
+  F is isomorphic implies for b being Object of B ex a being
+  Object of A st F.a = b
+proof
+  assume
+A1: F is isomorphic;
+  let b be Object of B;
+  rng Obj F = the carrier of B by A1,CAT_1:def 25;
+  then consider a being set such that
+A2: a in dom Obj F and
+A3: (Obj F).a = b by FUNCT_1:def 3;
+  reconsider a as Object of A by A2;
+  take a;
+  thus thesis by A3;
+end;
+
+theorem Th9:
+  F is one-to-one implies Obj F is one-to-one
+proof
+  assume
+A1: F is one-to-one;
+  let x1,x2 be set;
+  assume x1 in dom Obj F & x2 in dom Obj F;
+  then reconsider a1 = x1, a2 = x2 as Object of A;
+  assume (Obj F).x1 = (Obj F).x2;
+  then F.a1 = F.a2;
+  then
+A2: F.(id a1 qua Morphism of A) = id(F.a2) by CAT_1:71
+    .= F.(id a2 qua Morphism of A)by CAT_1:71;
+  dom F = the carrier' of A by FUNCT_2:def 1;
+  then id a1 = id a2 by A1,A2,FUNCT_1:def 4;
+  hence thesis by CAT_1:59;
+end;
+
+definition
+  let A,B,F;
+  assume
+A1: F is isomorphic;
+  func F" -> Functor of B,A equals
+  :Def2:
+  F";
+  coherence
+  proof
+A2: F is one-to-one by A1,CAT_1:def 25;
+    rng F = the carrier' of B by A1,CAT_1:def 25;
+    then reconsider
+    G = F" as Function of the carrier' of B, the carrier' of A by A2,FUNCT_2:25
+;
+A3: dom F = the carrier' of A by FUNCT_2:def 1;
+A4: Obj F is one-to-one by A2,Th9;
+    G is Functor of B,A
+    proof
+      thus for c being Object of B ex d being Object of A st G.(id c) = id d
+      proof
+        let b be Object of B;
+        consider a being Object of A such that
+A5:     F.a = b by A1,Th8;
+        take a;
+        thus G.(id b) = G.(F.(id a qua Morphism of A)) by A5,CAT_1:71
+          .=id a by A2,A3,FUNCT_1:34;
+      end;
+      thus for f being Morphism of B holds G.(id dom f) = id dom(G.f) & G.(id
+      cod f) = id cod(G.f)
+      proof
+        let f be Morphism of B;
+        consider g being Morphism of A such that
+A6:     f = F.g by A1,Th7;
+        thus G.(id dom f) = G.(id(F.dom g)) by A6,CAT_1:72
+          .= G.(F.(id dom g qua Morphism of A)) by CAT_1:71
+          .= id dom g by A2,A3,FUNCT_1:34
+          .= id dom(G.f) by A2,A3,A6,FUNCT_1:34;
+        thus G.(id cod f) = G.(id(F.cod g)) by A6,CAT_1:72
+          .= G.(F.(id cod g qua Morphism of A)) by CAT_1:71
+          .= id cod g by A2,A3,FUNCT_1:34
+          .= id cod(G.f) by A2,A3,A6,FUNCT_1:34;
+      end;
+      let f,g be Morphism of B;
+A7:   dom Obj F = the carrier of A by FUNCT_2:def 1;
+      assume
+A8:   dom g = cod f;
+      consider f9 being Morphism of A such that
+A9:   f = F.f9 by A1,Th7;
+      consider g9 being Morphism of A such that
+A10:  g = F.g9 by A1,Th7;
+      (Obj F).dom g9 = F.dom g9 .= cod f by A10,A8,CAT_1:72
+        .= F.cod f9 by A9,CAT_1:72
+        .= (Obj F).cod f9;
+      then dom g9 = cod f9 by A4,A7,FUNCT_1:def 4;
+      hence G.(g(*)f) = G.(F.(g9(*)f9)) by A9,A10,CAT_1:64
+        .= g9(*)f9 by A2,A3,FUNCT_1:34
+        .= g9(*)(G.f) by A2,A3,A9,FUNCT_1:34
+        .= (G.g)(*)(G.f) by A2,A3,A10,FUNCT_1:34;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let A,B,F;
+  redefine attr F is isomorphic means
+  :Def3:
+  F is one-to-one & rng F = the carrier' of B;
+  compatibility
+  proof
+    thus F is isomorphic implies F is one-to-one & rng F = the carrier' of B
+    by CAT_1:def 25;
+    assume that
+A1: F is one-to-one and
+A2: rng F = the carrier' of B;
+    thus F is one-to-one & rng F = the carrier' of B by A1,A2;
+    thus rng Obj F c= the carrier of B;
+    let x be set;
+    assume x in the carrier of B;
+    then reconsider d = x as Object of B;
+    consider f being set such that
+A3: f in dom F and
+A4: id d = F.f by A2,FUNCT_1:def 3;
+    reconsider f as Morphism of A by A3;
+    reconsider c = id dom f as Morphism of A;
+    F.c = id dom(id d) by A4,CAT_1:63
+      .= id d by CAT_1:58;
+    then dom Obj F = the carrier of A & (Obj F).(dom f) = d by CAT_1:67
+,FUNCT_2:def 1;
+    hence x in rng Obj F by FUNCT_1:def 3;
+  end;
+end;
+
+theorem Th10:
+  F is isomorphic implies F" is isomorphic
+proof
+  assume F is isomorphic;
+  then
+A1: F is one-to-one & F" = (F qua Function of the carrier' of A, the
+  carrier' of B)" by Def2,CAT_1:def 25;
+  hence F" is one-to-one by FUNCT_1:40;
+  thus rng(F") = dom F by A1,FUNCT_1:33
+    .= the carrier' of A by FUNCT_2:def 1;
+end;
+
+theorem
+  F is isomorphic implies (Obj F)" = Obj F"
+proof
+  assume
+A1: F is isomorphic;
+  then
+A2: F is one-to-one by Def3;
+A3: rng Obj F = the carrier of B by A1,CAT_1:def 25;
+  then reconsider
+  G = (Obj F)" as Function of the carrier of B, the carrier of A by A2,Th9,
+FUNCT_2:25;
+A4: Obj F is one-to-one by A2,Th9;
+  now
+    let b be Object of B;
+    F.(id(G.b) qua Morphism of A) = id((Obj F).(G.b)) by CAT_1:68
+      .= id b by A3,A4,FUNCT_1:35;
+    then
+    id(G.b) = (F qua Function of the carrier' of A, the carrier' of B)".id
+    b by A2,FUNCT_2:26
+      .= F".(id b qua Morphism of B) by A1,Def2;
+    hence G.b = (Obj F").b by CAT_1:67;
+  end;
+  hence thesis by FUNCT_2:63;
+end;
+
+theorem
+  F is isomorphic implies F"" = F
+proof
+  reconsider f = F as Function of the carrier' of A, the carrier' of B;
+  reconsider g = F" as Function of the carrier' of B, the carrier' of A;
+  assume
+A1: F is isomorphic;
+  then
+A2: F is one-to-one by CAT_1:def 25;
+  thus F"" = g" by A1,Def2,Th10
+    .= f"" by A1,Def2
+    .= F by A2,FUNCT_1:43;
+end;
+
+theorem Th13:
+  F is isomorphic implies F*F" = id B & F"*F = id A
+proof
+  reconsider f = F as Function of the carrier' of A, the carrier' of B;
+A1: dom f = the carrier' of A by FUNCT_2:def 1;
+  assume
+A2: F is isomorphic;
+  then
+A3: F is one-to-one by Def3;
+A4: rng f = the carrier' of B by A2,Def3;
+  thus F*F" = f*f" by A2,Def2
+    .= id B by A3,A4,FUNCT_1:39;
+  thus F"*F = f"*f by A2,Def2
+    .= id A by A3,A1,FUNCT_1:39;
+end;
+
+theorem Th14:
+  F is isomorphic & G is isomorphic implies G*F is isomorphic
+proof
+  assume that
+A1: F is one-to-one and
+A2: rng F = the carrier' of B and
+A3: G is one-to-one and
+A4: rng G = the carrier' of C;
+  thus G*F is one-to-one by A1,A3,FUNCT_1:24;
+  dom G = the carrier' of B by FUNCT_2:def 1;
+  hence thesis by A2,A4,RELAT_1:28;
+end;
+
+:: Isomorphism of categories
+
+definition
+  let A,B;
+  pred A,B are_isomorphic means
+  ex F being Functor of A,B st F is isomorphic;
+  reflexivity
+  proof
+    let A;
+    id A is isomorphic by CAT_1:80;
+    hence thesis;
+  end;
+  symmetry
+  proof
+    let A,B;
+    given F being Functor of A,B such that
+A1: F is isomorphic;
+    take F";
+    thus thesis by A1,Th10;
+  end;
+end;
+
+notation
+  let A,B;
+  synonym A ~= B for A,B are_isomorphic;
+end;
+
+theorem
+  A ~= B & B ~= C implies A ~= C
+proof
+  given F1 being Functor of A,B such that
+A1: F1 is isomorphic;
+  given F2 being Functor of B,C such that
+A2: F2 is isomorphic;
+  take F2*F1;
+  thus thesis by A1,A2,Th14;
+end;
+
+theorem
+  [:1Cat(o,m),A:] ~= A
+proof
+  take F = pr2(1Cat(o,m),A);
+  set X = [:the carrier' of 1Cat(o,m), the carrier' of A:];
+  now
+    let x1,x2 be set;
+    assume x1 in X;
+    then consider x11,x12 being set such that
+A1: x11 in the carrier' of 1Cat(o,m) and
+A2: x12 in the carrier' of A and
+A3: x1 = [x11,x12] by ZFMISC_1:def 2;
+    assume x2 in X;
+    then consider x21,x22 being set such that
+A4: x21 in the carrier' of 1Cat(o,m) and
+A5: x22 in the carrier' of A and
+A6: x2 = [x21,x22] by ZFMISC_1:def 2;
+    reconsider f11 = x11, f21 = x21 as Morphism of 1Cat(o,m) by A1,A4;
+    assume
+A7: F.x1 = F.x2;
+    reconsider f12 = x12, f22 = x22 as Morphism of A by A2,A5;
+A8: f11 = m by TARSKI:def 1
+      .= f21 by TARSKI:def 1;
+    f12 = F.(f11,f12) by FUNCT_3:def 5
+      .= F.(f21,f22) by A3,A6,A7
+      .= f22 by FUNCT_3:def 5;
+    hence x1 = x2 by A3,A6,A8;
+  end;
+  hence F is one-to-one by FUNCT_2:19;
+  thus thesis by FUNCT_3:46;
+end;
+
+theorem
+  [:A,B:] ~= [:B,A:]
+proof
+  take F = <:pr2(A,B),pr1(A,B):>;
+A1: dom pr1(A,B) = the carrier' of [:A,B:] & dom pr2(A,B) = the carrier' of
+  [:A, B:] by FUNCT_2:def 1;
+  now
+    let x1,x2 be set;
+    assume x1 in [:the carrier' of A,the carrier' of B:];
+    then consider x11,x12 being set such that
+A2: x11 in the carrier' of A and
+A3: x12 in the carrier' of B and
+A4: x1 = [x11,x12] by ZFMISC_1:def 2;
+    assume x2 in [:the carrier' of A,the carrier' of B:];
+    then consider x21,x22 being set such that
+A5: x21 in the carrier' of A and
+A6: x22 in the carrier' of B and
+A7: x2 = [x21,x22] by ZFMISC_1:def 2;
+    reconsider f12 = x12, f22 = x22 as Morphism of B by A3,A6;
+    reconsider f11 = x11, f21 = x21 as Morphism of A by A2,A5;
+A8: [f21,f22] in the carrier' of [:A,B:];
+    assume
+A9: F.x1 = F.x2;
+A10: [f11,f12] in the carrier' of [:A,B:];
+A11: [f12,f11] = [f12,pr1(A,B).(f11,f12)] by FUNCT_3:def 4
+      .= [pr2(A,B).(f11,f12),pr1(A,B).(f11,f12)] by FUNCT_3:def 5
+      .= F.(f21,f22) by A1,A4,A7,A10,A9,FUNCT_3:49
+      .= [pr2(A,B).(f21,f22),pr1(A,B).(f21,f22)]by A1,A8,FUNCT_3:49
+      .= [f22,pr1(A,B).(f21,f22)]by FUNCT_3:def 5
+      .= [f22,f21] by FUNCT_3:def 4;
+    then x12 = x22 by XTUPLE_0:1;
+    hence x1 = x2 by A4,A7,A11,XTUPLE_0:1;
+  end;
+  hence F is one-to-one by FUNCT_2:19;
+  thus rng F c= the carrier' of [:B,A:];
+  let x be set;
+  assume x in the carrier' of [:B,A:];
+  then consider x1,x2 being set such that
+A12: x1 in the carrier' of B and
+A13: x2 in the carrier' of A and
+A14: x = [x1,x2] by ZFMISC_1:def 2;
+  reconsider x2 as Morphism of A by A13;
+  reconsider x1 as Morphism of B by A12;
+  F.[x2,x1] = [pr2(A,B).(x2,x1),pr1(A,B).(x2,x1)] by A1,FUNCT_3:49
+    .= [x1,pr1(A,B).(x2,x1)] by FUNCT_3:def 5
+    .= [x1,x2] by FUNCT_3:def 4;
+  hence thesis by A14,FUNCT_2:4;
+end;
+
+theorem
+  [:[:A,B:],C:] ~= [:A,[:B,C:]:]
+proof
+  set X = pr1(A,B)*pr1([:A,B:],C);
+  set Y = <:pr2(A,B)*pr1([:A,B:],C),pr2([:A,B:],C):>;
+  take F = <:X, Y:>;
+A1: dom pr2([:A,B:],C) = the carrier' of [:[:A,B:],C:] & dom(pr2(A,B)*pr1([:
+  A,B :],C)) = the carrier' of [:[:A,B:],C:] by FUNCT_2:def 1;
+A2: dom X = the carrier' of [:[:A,B:],C:] & dom Y = the carrier' of [:[:A,B
+  :],C :] by FUNCT_2:def 1;
+  now
+    let x,y be set;
+    assume x in [:[:the carrier' of A,the carrier' of B:],the carrier' of C:];
+    then consider x1,x2 being set such that
+A3: x1 in [:the carrier' of A,the carrier' of B:] and
+A4: x2 in the carrier' of C and
+A5: x = [x1,x2] by ZFMISC_1:def 2;
+    assume y in [:[:the carrier' of A,the carrier' of B:],the carrier' of C :];
+    then consider y1,y2 being set such that
+A6: y1 in [:the carrier' of A,the carrier' of B:] and
+A7: y2 in the carrier' of C and
+A8: y = [y1,y2] by ZFMISC_1:def 2;
+    reconsider f2 = x2, g2 = y2 as Morphism of C by A4,A7;
+    assume
+A9: F.x = F.y;
+    consider x11,x12 being set such that
+A10: x11 in the carrier' of A and
+A11: x12 in the carrier' of B and
+A12: x1 = [x11,x12] by A3,ZFMISC_1:def 2;
+    consider y11,y12 being set such that
+A13: y11 in the carrier' of A and
+A14: y12 in the carrier' of B and
+A15: y1 = [y11,y12] by A6,ZFMISC_1:def 2;
+    reconsider f12 = x12, g12 = y12 as Morphism of B by A11,A14;
+    reconsider f11 = x11, g11 = y11 as Morphism of A by A10,A13;
+A16: [f11,[f12,f2]] = [pr1(A,B).(f11,f12),[f12,f2]] by FUNCT_3:def 4
+      .= [pr1(A,B).(pr1([:A,B:],C).([f11,f12],f2)),[f12,f2]] by FUNCT_3:def 4
+      .= [pr1(A,B).(pr1([:A,B:],C).[[f11,f12],f2]),[f12,f2]]
+      .= [X.([f11,f12],f2),[f12,f2]] by FUNCT_2:15
+      .= [X.[[f11,f12],f2],[pr2(A,B).(f11,f12),f2]] by FUNCT_3:def 5
+      .= [X.[[f11,f12],f2],[pr2(A,B).(pr1([:A,B:],C).([f11,f12],f2)),f2]] by
+FUNCT_3:def 4
+      .= [X.[[f11,f12],f2],[(pr2(A,B)*pr1([:A,B:],C)).[[f11,f12],f2],f2]] by
+FUNCT_2:15
+      .= [X.[[f11,f12],f2],[(pr2(A,B)*pr1([:A,B:],C)).[[f11,f12],f2], pr2([:
+    A,B:],C).([f11,f12],f2)]] by FUNCT_3:def 5
+      .= [X.[[f11,f12],f2],Y.[[f11,f12],f2]] by A1,FUNCT_3:49
+      .= F.[[g11,g12],g2] by A2,A5,A12,A8,A15,A9,FUNCT_3:49
+      .= [X.[[g11,g12],g2],Y.[[g11,g12],g2]] by A2,FUNCT_3:49
+      .= [X.[[g11,g12],g2],[(pr2(A,B)*pr1([:A,B:],C)).[[g11,g12],g2], pr2([:
+    A,B:],C).([g11,g12],g2)]] by A1,FUNCT_3:49
+      .= [X.[[g11,g12],g2],[(pr2(A,B)*pr1([:A,B:],C)).[[g11,g12],g2],g2]] by
+FUNCT_3:def 5
+      .= [X.[[g11,g12],g2],[pr2(A,B).(pr1([:A,B:],C).([g11,g12],g2)),g2]] by
+FUNCT_2:15
+      .= [X.[[g11,g12],g2],[pr2(A,B).(g11,g12),g2]]by FUNCT_3:def 4
+      .= [X.[[g11,g12],g2],[g12,g2]]by FUNCT_3:def 5
+      .= [pr1(A,B).(pr1([:A,B:],C).([g11,g12],g2)),[g12,g2]]by FUNCT_2:15
+      .= [pr1(A,B).(g11,g12),[g12,g2]]by FUNCT_3:def 4
+      .= [g11,[g12,g2]] by FUNCT_3:def 4;
+    then [x12,x2] = [y12,y2] by XTUPLE_0:1;
+    then x12 = y12 & x2 = y2 by XTUPLE_0:1;
+    hence x = y by A5,A12,A8,A15,A16,XTUPLE_0:1;
+  end;
+  hence F is one-to-one by FUNCT_2:19;
+  thus rng F c= the carrier' of [:A,[:B,C:]:];
+  let x be set;
+  assume x in the carrier' of [:A,[:B,C:]:];
+  then consider x1,x2 being set such that
+A17: x1 in the carrier' of A and
+A18: x2 in the carrier' of [:B,C:] and
+A19: x = [x1,x2] by ZFMISC_1:def 2;
+  reconsider x1 as Morphism of A by A17;
+  consider x21,x22 being set such that
+A20: x21 in the carrier' of B and
+A21: x22 in the carrier' of C and
+A22: x2 = [x21,x22] by A18,ZFMISC_1:def 2;
+  reconsider x22 as Morphism of C by A21;
+  reconsider x21 as Morphism of B by A20;
+  F.[[x1,x21],x22] = [X.[[x1,x21],x22],Y.[[x1,x21],x22]] by A2,FUNCT_3:49
+    .= [pr1(A,B).(pr1([:A,B:],C).([x1,x21],x22)),Y.[[x1,x21],x22]] by
+FUNCT_2:15
+    .= [pr1(A,B).(x1,x21),Y.[[x1,x21],x22]] by FUNCT_3:def 4
+    .= [x1,Y.[[x1,x21],x22]] by FUNCT_3:def 4
+    .= [x1,[(pr2(A,B)*pr1([:A,B:],C)).[[x1,x21],x22], pr2([:A,B:],C).[[x1,
+  x21],x22]]] by A1,FUNCT_3:49
+    .= [x1,[pr2(A,B).(pr1([:A,B:],C).([x1,x21],x22)), pr2([:A,B:],C).[[x1,
+  x21],x22]]] by FUNCT_2:15
+    .= [x1,[pr2(A,B).(x1,x21),pr2([:A,B:],C).([x1,x21],x22)]] by FUNCT_3:def 4
+    .= [x1,[x21,pr2([:A,B:],C).([x1,x21],x22)]] by FUNCT_3:def 5
+    .= [x1,[x21,x22]] by FUNCT_3:def 5;
+  hence thesis by A19,A22,FUNCT_2:4;
+end;
+
+theorem
+  A ~= B & C ~= D implies [:A,C:] ~= [:B,D:]
+proof
+  given F being Functor of A,B such that
+A1: F is isomorphic;
+A2: F is one-to-one by A1,Def3;
+  given G being Functor of C,D such that
+A3: G is isomorphic;
+  take [:F,G:];
+  G is one-to-one by A3,Def3;
+  hence [:F,G:] is one-to-one by A2;
+  thus rng [:F,G:] = [:rng F, rng G:] by FUNCT_3:67
+    .= [: the carrier' of B, rng G:] by A1,Def3
+    .= the carrier' of [:B,D:] by A3,Def3;
+end;
+
+definition
+  let A,B,C;
+  let F1,F2 be Functor of A,B such that
+B1: F1 is_transformable_to F2;
+  let t be transformation of F1,F2;
+  let G be Functor of B,C;
+  func G*t -> transformation of G*F1,G*F2 equals
+  :Def5:
+  G*t;
+  coherence
+  proof
+    reconsider Gt = G*t as Function of the carrier of A, the carrier' of C;
+    Gt is transformation of G*F1, G*F2
+    proof
+      thus G*F1 is_transformable_to G*F2 by B1,Th5;
+      let a be Object of A;
+A1:   G.(F1.a) = (G*F1).a & G.(F2.a) = (G*F2).a by CAT_1:76;
+      t.a in Hom(F1.a,F2.a) by B1,Th4;
+      then
+A2:   G.(t.a qua Morphism of B) in Hom((G*F1).a,(G*F2).a) by A1,CAT_1:81;
+      Gt.a = G.((t qua Function of the carrier of A, the carrier' of B).a)
+      by FUNCT_2:15
+        .= G.(t.a qua Morphism of B) by B1,NATTRA_1:def 5;
+      hence thesis by A2,CAT_1:def 5;
+    end;
+    hence thesis;
+  end;
+  correctness;
+end;
+
+definition
+  let A,B,C;
+  let G1,G2 be Functor of B,C such that
+B1: G1 is_transformable_to G2;
+  let F be Functor of A,B;
+  let t be transformation of G1,G2;
+  func t*F -> transformation of G1*F,G2*F equals
+  :Def6:
+  t*Obj F;
+  coherence
+  proof
+    reconsider tF = t*Obj F as Function of the carrier of A, the carrier' of C;
+    tF is transformation of G1*F, G2*F
+    proof
+      thus G1*F is_transformable_to G2*F by B1,Th5;
+      let a be Object of A;
+A1:   G1.(F.a) = (G1*F).a by CAT_1:76;
+      tF.a = t.((Obj F).a qua set) by FUNCT_2:15
+        .= t.(F.a) by B1,NATTRA_1:def 5;
+      hence thesis by A1,CAT_1:76;
+    end;
+    hence thesis;
+  end;
+  correctness;
+end;
+
+theorem Th20:
+  for G1,G2 be Functor of B,C st G1 is_transformable_to G2 for F
+be Functor of A,B, t be transformation of G1,G2, a be Object of A holds (t*F).a
+  = t.(F.a)
+proof
+  let G1,G2 be Functor of B,C such that
+A1: G1 is_transformable_to G2;
+  let F be Functor of A,B, t be transformation of G1,G2, a be Object of A;
+  thus (t*F).a = (t*F).(a qua set) by A1,Th5,NATTRA_1:def 5
+    .= ((t qua Function of the carrier of B, the carrier' of C)*Obj F).a by A1
+,Def6
+    .= t.((Obj F).a qua set) by FUNCT_2:15
+    .= t.(F.a) by A1,NATTRA_1:def 5;
+end;
+
+theorem Th21:
+  for F1,F2 be Functor of A,B st F1 is_transformable_to F2 for t
+be transformation of F1,F2, G be Functor of B,C, a being Object of A
+  holds (G*t).a = G/.(t.a)
+proof
+  let F1,F2 be Functor of A,B such that
+A1: F1 is_transformable_to F2;
+  let t be transformation of F1,F2, G be Functor of B,C, a be Object of A;
+A2: Hom(F1.a,F2.a) <> {} by A1,NATTRA_1:def 2;
+  thus (G*t).a = (G*t).(a qua set) by A1,Th5,NATTRA_1:def 5
+    .= ((G qua Function of the carrier' of B, the carrier' of C)* (t qua
+  Function of the carrier of A, the carrier' of B)).a by A1,Def5
+    .= G.(t.(a qua set)) by FUNCT_2:15
+    .= G.(t.a qua Morphism of B) by A1,NATTRA_1:def 5
+    .= G/.(t.a) by A2,CAT_3:def 10;
+end;
+
+theorem Th22:
+  for F1,F2 being Functor of A,B, G1,G2 being Functor of B,C st F1
+is_naturally_transformable_to F2 & G1 is_naturally_transformable_to G2 holds G1
+  *F1 is_naturally_transformable_to G2*F2
+proof
+  let F1,F2 be Functor of A,B, G1,G2 be Functor of B,C such that
+A1: F1 is_naturally_transformable_to F2 and
+A2: G1 is_naturally_transformable_to G2;
+
+set t1 = the natural_transformation of F1,F2,t2 = the natural_transformation of
+G1,G2;
+A3: G1 is_transformable_to G2 by A2,NATTRA_1:def 7;
+A4: F1 is_transformable_to F2 by A1,NATTRA_1:def 7;
+  hence
+A5: G1*F1 is_transformable_to G2*F2 by A3,Th5;
+  take t = (t2*F2)`*`(G1*t1);
+  let a,b be Object of A;
+A6: Hom(G1.(F2.b),G2.(F2.b)) <> {} by A3,NATTRA_1:def 2;
+A7: Hom((G1*F1).a,(G2*F2).a) <> {} by A5,NATTRA_1:def 2;
+A8: G1*F1 is_transformable_to G1*F2 by A4,Th5;
+  then
+A9: Hom((G1*F1).b,(G1*F2).b) <> {} by NATTRA_1:def 2;
+A10: Hom((G1*F1).b,(G2*F2).b) <> {} by A5,NATTRA_1:def 2;
+  assume
+A11: Hom(a,b) <> {};
+  then
+A12: Hom((G2*F2).a,(G2*F2).b) <> {} by CAT_1:84;
+A13: Hom(F1.b,F2.b) <> {} by A4,NATTRA_1:def 2;
+  then
+A14: Hom(G1.(F1.b),G1.(F2.b)) <> {} by CAT_1:84;
+  then
+A15: Hom(G1.(F1.b),G2.(F2.b)) <> {} by A6,CAT_1:24;
+A16: G1*F2 is_transformable_to G2*F2 by A3,Th5;
+  then
+A17: Hom((G1*F2).b,(G2*F2).b) <> {} by NATTRA_1:def 2;
+A18: Hom((G1*F1).a,(G1*F2).a) <> {} by A8,NATTRA_1:def 2;
+A19: Hom((G1*F2).a,(G2*F2).a) <> {} by A16,NATTRA_1:def 2;
+A20: Hom(F1.a,F2.a) <> {} by A4,NATTRA_1:def 2;
+  then
+A21: Hom(G1.(F1.a),G1.(F2.a)) <> {} by CAT_1:84;
+  let f be Morphism of a,b;
+A22: Hom(F2.a,F2.b) <> {} by A11,CAT_1:84;
+  then
+A23: Hom(G1.(F2.a),G1.(F2.b)) <> {} by CAT_1:84;
+A24: Hom(F1.a,F1.b) <> {} by A11,CAT_1:84;
+  then
+A25: Hom(G1.(F1.a),G1.(F1.b)) <> {} by CAT_1:84;
+A26: Hom(G1.(F2.a),G2.(F2.a)) <> {} by A3,NATTRA_1:def 2;
+  then
+A27: Hom(G1.(F1.a),G2.(F2.a)) <> {} by A21,CAT_1:24;
+A28: Hom(G2.(F2.a),G2.(F2.b)) <> {} by A22,CAT_1:84;
+  Hom((G1*F1).a,(G1*F1).b) <> {} by A11,CAT_1:84;
+  hence t.b*(G1*F1)/.f = (t.b)(*)((G1*F1)/.f qua Morphism of C)
+                  by A10,CAT_1:def 13
+    .= (t.b)(*)(G1/.(F1/.f) qua Morphism of C) by A11,NATTRA_1:11
+    .= ((t2*F2).b*(G1*t1).b)(*)(G1/.(F1/.f)) by A8,A16,NATTRA_1:def 6
+    .= ((t2*F2).b qua Morphism of C)(*)((G1*t1).b)(*)(G1/.(F1/.f))
+      by A17,A9,CAT_1:def 13
+    .= ((t2*F2).b)(*)(G1/.(t1.b))(*)(G1/.(F1/.f)) by A4,Th21
+    .= (t2.(F2.b) qua Morphism of C)(*)(G1/.(t1.b))(*)(G1/.(F1/.f)) by A3,Th20
+    .= (t2.(F2.b)*G1/.(t1.b) qua Morphism of C)(*)(G1/.(F1/.f))
+                    by A6,A14,CAT_1:def 13
+    .= t2.(F2.b)*G1/.(t1.b)*G1/.(F1/.f) by A25,A15,CAT_1:def 13
+    .= t2.(F2.b)*(G1/.(t1.b)*G1/.(F1/.f)) by A6,A14,A25,CAT_1:25
+    .= t2.(F2.b)*(G1/.(t1.b*F1/.f)) by A13,A24,NATTRA_1:13
+    .= t2.(F2.b)*(G1/.(F2/.f*t1.a)) by A1,A11,NATTRA_1:def 8
+    .= t2.(F2.b)*(G1/.(F2/.f)*G1/.(t1.a)) by A22,A20,NATTRA_1:13
+    .= t2.(F2.b)*G1/.(F2/.f)*G1/.(t1.a) by A6,A23,A21,CAT_1:25
+    .= G2/.(F2/.f)*t2.(F2.a)*G1/.(t1.a) by A2,A22,NATTRA_1:def 8
+    .= G2/.(F2/.f)*(t2.(F2.a)*G1/.(t1.a)) by A21,A28,A26,CAT_1:25
+    .= (G2/.(F2/.f))(*)(t2.(F2.a)*G1/.(t1.a) qua Morphism of C) by A28,A27,
+CAT_1:def 13
+    .= (G2/.(F2/.f))(*)((t2.(F2.a) qua Morphism of C)(*)(G1/.(t1.a)))
+             by A21,A26,CAT_1:def 13
+    .= (G2/.(F2/.f))(*)(((t2*F2).a)(*)(G1/.(t1.a))) by A3,Th20
+    .= (G2/.(F2/.f))(*)(((t2*F2).a qua Morphism of C)(*)((G1*t1).a)) by A4,Th21
+    .= (G2/.(F2/.f))(*)((t2*F2).a*(G1*t1).a) by A19,A18,CAT_1:def 13
+    .= (G2/.(F2/.f))(*)(t.a) by A8,A16,NATTRA_1:def 6
+    .= ((G2*F2)/.f qua Morphism of C)(*)(t.a) by A11,NATTRA_1:11
+    .= (G2*F2)/.f*t.a by A7,A12,CAT_1:def 13;
+end;
+
+definition
+  let A,B,C;
+  let F1,F2 be Functor of A,B such that
+B1: F1 is_naturally_transformable_to F2;
+  let t be natural_transformation of F1,F2;
+  let G be Functor of B,C;
+  func G*t -> natural_transformation of G*F1,G*F2 equals
+  :Def7:
+  G*t;
+  coherence
+  proof
+A1: F1 is_transformable_to F2 by B1,NATTRA_1:def 7;
+    G*t is natural_transformation of G*F1, G*F2
+    proof
+      thus G*F1 is_naturally_transformable_to G*F2 by B1,Th22;
+      then
+A2:   G*F1 is_transformable_to G*F2 by NATTRA_1:def 7;
+      let a,b be Object of A such that
+A3:   Hom(a,b) <> {};
+A4:   Hom((G*F1).a,(G*F1).b) <> {} by A3,CAT_1:84;
+A5:   Hom((G*F2).a,(G*F2).b) <> {} by A3,CAT_1:84;
+A6:   Hom((G*F1).a,(G*F2).a) <> {} by A2,NATTRA_1:def 2;
+      let f be Morphism of a,b;
+A7:   Hom(F1.b,F2.b) <> {} by A1,NATTRA_1:def 2;
+      then
+A8:   Hom(G.(F1.b),G.(F2.b)) <> {} by CAT_1:84;
+A9:  Hom(F1.a,F2.a) <> {} by A1,NATTRA_1:def 2;
+      then
+A10:  Hom(G.(F1.a),G.(F2.a)) <> {} by CAT_1:84;
+A11:  Hom(F2.a,F2.b) <> {} by A3,CAT_1:84;
+      then
+A12:  Hom(G.(F2.a),G.(F2.b)) <> {} by CAT_1:84;
+A13:  Hom(F1.a,F1.b) <> {} by A3,CAT_1:84;
+      then
+A14:  Hom(G.(F1.a),G.(F1.b)) <> {} by CAT_1:84;
+      Hom((G*F1).b,(G*F2).b) <> {} by A2,NATTRA_1:def 2;
+      hence (G*t).b*(G*F1)/.f = ((G*t).b)(*)((G*F1)/.f qua Morphism of C)
+                by A4,CAT_1:def 13
+        .= ((G*t).b)(*)(G/.(F1/.f)) by A3,NATTRA_1:11
+        .= (G/.(t.b) qua Morphism of C)(*)(G/.(F1/.f)) by A1,Th21
+        .= G/.(t.b)*G/.(F1/.f) by A8,A14,CAT_1:def 13
+        .= G/.(t.b*F1/.f) by A7,A13,NATTRA_1:13
+        .= G/.(F2/.f*t.a) by B1,A3,NATTRA_1:def 8
+        .= G/.(F2/.f)*G/.(t.a)by A9,A11,NATTRA_1:13
+        .= (G/.(F2/.f))(*)(G/.(t.a) qua Morphism of C)by A12,A10,CAT_1:def 13
+        .= (G/.(F2/.f))(*)((G*t).a) by A1,Th21
+        .= ((G*F2)/.f qua Morphism of C)(*)((G*t).a) by A3,NATTRA_1:11
+        .= (G*F2)/.f*(G*t).a by A6,A5,CAT_1:def 13;
+    end;
+    hence thesis;
+  end;
+  correctness;
+end;
+
+theorem Th23:
+  for F1,F2 be Functor of A,B st F1 is_naturally_transformable_to
+  F2 for t be natural_transformation of F1,F2, G be Functor of B,C, a being
+  Object of A holds (G*t).a = G/.(t.a)
+proof
+  let F1,F2 be Functor of A,B;
+  assume
+A1: F1 is_naturally_transformable_to F2;
+  then
+A2: F1 is_transformable_to F2 by NATTRA_1:def 7;
+  let t be natural_transformation of F1,F2, G be Functor of B,C, a be Object
+  of A;
+  thus (G*t).a = (G*(t qua transformation of F1,F2)).a by A1,Def7
+    .= G/.(t.a) by A2,Th21;
+end;
+
+definition
+  let A,B,C;
+  let G1,G2 be Functor of B,C such that
+B1: G1 is_naturally_transformable_to G2;
+  let F be Functor of A,B;
+  let t be natural_transformation of G1,G2;
+  func t*F -> natural_transformation of G1*F,G2*F equals
+  :Def8:
+  t*F;
+  coherence
+  proof
+A1: G1 is_transformable_to G2 by B1,NATTRA_1:def 7;
+    t*F is natural_transformation of G1*F, G2*F
+    proof
+      thus G1*F is_naturally_transformable_to G2*F by B1,Th22;
+      then
+A2:   G1*F is_transformable_to G2*F by NATTRA_1:def 7;
+      let a,b be Object of A;
+A3:   Hom((G1*F).b,(G2*F).b) <> {} by A2,NATTRA_1:def 2;
+A4:   Hom((G1*F).a,(G2*F).a) <> {} by A2,NATTRA_1:def 2;
+      assume
+A5:   Hom(a,b) <> {};
+      then
+A6:   Hom((G2*F).a,(G2*F).b) <> {} by CAT_1:84;
+      let f be Morphism of a,b;
+A7:   Hom(F.a,F.b) <> {} by A5,CAT_1:84;
+      then
+A8:   Hom(G1.(F.a),G1.(F.b)) <> {} by CAT_1:84;
+A9:  Hom(G1.(F.a),G2.(F.a)) <> {} by A1,NATTRA_1:def 2;
+A10:  Hom(G1.(F.b),G2.(F.b)) <> {} by A1,NATTRA_1:def 2;
+A11:  Hom(G2.(F.a),G2.(F.b)) <> {} by A7,CAT_1:84;
+      Hom((G1*F).a,(G1*F).b) <> {} by A5,CAT_1:84;
+      hence (t*F).b*(G1*F)/.f
+         = ((t*F).b)(*)((G1*F)/.f qua Morphism of C) by A3,CAT_1:def 13
+        .= ((t*F).b)(*)(G1/.(F/.f)) by A5,NATTRA_1:11
+        .= (t.(F.b) qua Morphism of C)(*)(G1/.(F/.f)) by A1,Th20
+        .= t.(F.b)*G1/.(F/.f) by A10,A8,CAT_1:def 13
+        .= G2/.(F/.f)*t.(F.a) by B1,A7,NATTRA_1:def 8
+        .= (G2/.(F/.f))(*)(t.(F.a) qua Morphism of C) by A11,A9,CAT_1:def 13
+        .= (G2/.(F/.f))(*)((t*F).a) by A1,Th20
+        .= ((G2*F)/.f qua Morphism of C)(*)((t*F).a) by A5,NATTRA_1:11
+        .= (G2*F)/.f*(t*F).a by A6,A4,CAT_1:def 13;
+    end;
+    hence thesis;
+  end;
+  correctness;
+end;
+
+theorem Th24:
+  for G1,G2 be Functor of B,C st G1 is_naturally_transformable_to
+  G2 for F be Functor of A,B, t be natural_transformation of G1,G2, a be Object
+  of A holds (t*F).a = t.(F.a)
+proof
+  let G1,G2 be Functor of B,C;
+  assume
+A1: G1 is_naturally_transformable_to G2;
+  then
+A2: G1 is_transformable_to G2 by NATTRA_1:def 7;
+  let F be Functor of A,B, t be natural_transformation of G1,G2, a be Object
+  of A;
+  thus (t*F).a = ((t qua transformation of G1,G2)*F).a by A1,Def8
+    .= t.(F.a) by A2,Th20;
+end;
+
+reserve F,F1,F2,F3 for Functor of A,B,
+  G,G1,G2,G3 for Functor of B,C,
+  H,H1,H2 for Functor of C,D,
+  s for natural_transformation of F1,F2,
+  s9 for natural_transformation of F2,F3,
+  t for natural_transformation of G1,G2,
+  t9 for natural_transformation of G2,G3,
+  u for natural_transformation of H1,H2;
+
+theorem Th25:
+  F1 is_naturally_transformable_to F2 implies for a being Object
+  of A holds Hom(F1.a,F2.a) <> {}
+proof
+  assume
+A1: F1 is_naturally_transformable_to F2;
+  let a be Object of A;
+  F1 is_transformable_to F2 by A1,NATTRA_1:def 7;
+  hence thesis by NATTRA_1:def 2;
+end;
+
+theorem Th26:
+  F1 is_naturally_transformable_to F2 implies for t1,t2 being
+  natural_transformation of F1,F2 st for a being Object of A holds t1.a = t2.a
+  holds t1 = t2
+proof
+  assume F1 is_naturally_transformable_to F2;
+  then F1 is_transformable_to F2 by NATTRA_1:def 7;
+  hence thesis by NATTRA_1:19;
+end;
+
+theorem Th27:
+  F1 is_naturally_transformable_to F2 & F2
+  is_naturally_transformable_to F3 implies G*(s9`*`s) = (G*s9)`*`(G*s)
+proof
+  assume
+A1: F1 is_naturally_transformable_to F2 & F2 is_naturally_transformable_to F3;
+  then
+A2: G*F1 is_naturally_transformable_to G*F2 & G*F2
+  is_naturally_transformable_to G*F3 by Th22;
+  now
+    let a be Object of A;
+A3: G.(F1.a) = (G*F1).a & G.(F2.a) = (G*F2).a by CAT_1:76;
+A4: G.(F3.a) = (G*F3).a by CAT_1:76;
+A5: Hom(F1.a,F2.a) <> {} & Hom(F2.a,F3.a) <> {} by A1,Th25;
+A6: G/.(s9.a) = (G*s9).a & G/.(s.a) = (G*s).a by A1,Th23;
+    thus (G*(s9`*`s)).a = G/.((s9`*`s).a) by A1,Th23,NATTRA_1:23
+      .= G/.((s9.a)*(s.a)) by A1,NATTRA_1:25
+      .= G/.(s9.a)*G/.(s.a) by A5,NATTRA_1:13
+      .= ((G*s9)`*`(G*s)).a by A2,A6,A3,A4,NATTRA_1:25;
+  end;
+  hence thesis by A2,Th26,NATTRA_1:23;
+end;
+
+theorem Th28:
+  G1 is_naturally_transformable_to G2 & G2
+  is_naturally_transformable_to G3 implies (t9`*`t)*F = (t9*F)`*`(t*F)
+proof
+  assume
+A1: G1 is_naturally_transformable_to G2 & G2 is_naturally_transformable_to G3;
+  then
+A2: G1*F is_naturally_transformable_to G2*F & G2*F
+  is_naturally_transformable_to G3*F by Th22;
+  now
+    let a be Object of A;
+A3: G1.(F.a) = (G1*F).a & G2.(F.a) = (G2*F).a by CAT_1:76;
+A4: G3.(F.a) = (G3*F).a by CAT_1:76;
+A5: t9.(F.a) = (t9*F).a & t.(F.a) = (t*F).a by A1,Th24;
+    thus ((t9`*`t)*F).a = (t9`*`t).(F.a) by A1,Th24,NATTRA_1:23
+      .= (t9.(F.a))*(t.(F.a)) by A1,NATTRA_1:25
+      .= ((t9*F)`*`(t*F)).a by A2,A5,A3,A4,NATTRA_1:25;
+  end;
+  hence thesis by A2,Th26,NATTRA_1:23;
+end;
+
+theorem Th29:
+  H1 is_naturally_transformable_to H2 implies u*G*F = u*(G*F)
+proof
+  assume
+A1: H1 is_naturally_transformable_to H2;
+A2: H1*(G*F) = H1*G*F by RELAT_1:36;
+  then reconsider v = u*(G*F) as natural_transformation of H1*G*F, H2*G*F by
+RELAT_1:36;
+A3: H2*(G*F) = H2*G*F by RELAT_1:36;
+A4: now
+    let a be Object of A;
+    thus (u*G*F).a = (u*G).(F.a) by A1,Th22,Th24
+      .= u.(G.(F.a)) by A1,Th24
+      .= u.((G*F).a) by CAT_1:76
+      .= v.a by A1,A2,A3,Th24;
+  end;
+  H1*G is_naturally_transformable_to H2*G by A1,Th22;
+  hence thesis by A4,Th22,Th26;
+end;
+
+theorem Th30:
+  G1 is_naturally_transformable_to G2 implies H*t*F = H*(t*F)
+proof
+  assume
+A1: G1 is_naturally_transformable_to G2;
+A2: H*(G1*F) = H*G1*F by RELAT_1:36;
+  then reconsider v = H*(t*F) as natural_transformation of H*G1*F, H*G2*F by
+RELAT_1:36;
+A3: H*(G2*F) = H*G2*F by RELAT_1:36;
+A4: now
+    let a be Object of A;
+A5: G1.(F.a) = (G1*F).a & G2.(F.a) = (G2*F).a by CAT_1:76;
+    thus (H*t*F).a = (H*t).(F.a) by A1,Th22,Th24
+      .= H/.(t.(F.a)) by A1,Th23
+      .= H/.((t*F).a) by A1,A5,Th24
+      .= v.a by A1,A2,A3,Th22,Th23;
+  end;
+  H*G1 is_naturally_transformable_to H*G2 by A1,Th22;
+  hence thesis by A4,Th22,Th26;
+end;
+
+theorem Th31:
+  F1 is_naturally_transformable_to F2 implies H*G*s = H*(G*s)
+proof
+  assume
+A1: F1 is_naturally_transformable_to F2;
+A2: H*(G*F1) = H*G*F1 by RELAT_1:36;
+  then reconsider v = H*(G*s) as natural_transformation of H*G*F1, H*G*F2 by
+RELAT_1:36;
+A3: H*(G*F2) = H*G*F2 by RELAT_1:36;
+  now
+    let a be Object of A;
+A4: G.(F1.a) = (G*F1).a & G.(F2.a) = (G*F2).a by CAT_1:76;
+A5: Hom(F1.a,F2.a) <> {} by A1,Th25;
+    thus (H*G*s).a = (H*G)/.(s.a) by A1,Th23
+      .= H/.(G/.(s.a)) by A5,NATTRA_1:11
+      .= H/.((G*s).a) by A1,A4,Th23
+      .= v.a by A1,A2,A3,Th22,Th23;
+  end;
+  hence thesis by A1,Th22,Th26;
+end;
+
+theorem Th32:
+  (id G)*F = id(G*F)
+proof
+  now
+    let a be Object of A;
+    thus ((id G)*F).a = id G.(F.a) by Th24
+      .= id(G.(F.a)) by NATTRA_1:20
+      .= id((G*F).a) by CAT_1:76
+      .= id(G*F).a by NATTRA_1:20;
+  end;
+  hence thesis by Th26;
+end;
+
+theorem Th33:
+  G*id F = id(G*F)
+proof
+  now
+    let a be Object of A;
+    thus (G*id F).a = G/.(id F.a) by Th23
+      .= G/.id(F.a) by NATTRA_1:20
+      .= id(G.(F.a)) by NATTRA_1:15
+      .= id((G*F).a) by CAT_1:76
+      .= (id(G*F)).a by NATTRA_1:20;
+  end;
+  hence thesis by Th26;
+end;
+
+theorem Th34:
+  G1 is_naturally_transformable_to G2 implies t*id B = t
+proof
+  assume
+A1: G1 is_naturally_transformable_to G2;
+A2: G1*id B = G1 by FUNCT_2:17;
+  then reconsider s = t*id B as natural_transformation of G1,G2 by FUNCT_2:17;
+A3: G2*id B = G2 by FUNCT_2:17;
+  now
+    let b be Object of B;
+    thus s.b = t.((id B).b) by A1,A2,A3,Th24
+      .= t.b by CAT_1:79;
+  end;
+  hence thesis by A1,Th26;
+end;
+
+theorem Th35:
+  F1 is_naturally_transformable_to F2 implies (id B)*s = s
+proof
+  assume
+A1: F1 is_naturally_transformable_to F2;
+A2: (id B)*F1 = F1 by FUNCT_2:17;
+  then reconsider t = (id B)*s as natural_transformation of F1,F2 by FUNCT_2:17
+;
+A3: (id B)*F2 = F2 by FUNCT_2:17;
+  now
+    let a be Object of A;
+A4: Hom(F1.a,F2.a) <> {} by A1,Th25;
+    thus t.a = (id B)/.(s.a) by A1,A2,A3,Th23
+      .= (id B).(s.a qua Morphism of B) by A4,CAT_3:def 10
+      .= s.a by FUNCT_1:18;
+  end;
+  hence thesis by A1,Th26;
+end;
+
+definition
+  let A,B,C,F1,F2,G1,G2;
+  let s,t;
+  func t(#)s -> natural_transformation of G1*F1,G2*F2 equals
+  (t*F2)`*`(G1*s);
+  correctness;
+end;
+
+theorem Th36:
+  F1 is_naturally_transformable_to F2 & G1
+  is_naturally_transformable_to G2 implies t(#)s = (G2*s)`*`(t*F1)
+proof
+  assume that
+A1: F1 is_naturally_transformable_to F2 and
+A2: G1 is_naturally_transformable_to G2;
+A3: G1*F1 is_naturally_transformable_to G1*F2 & G1*F2
+  is_naturally_transformable_to G2*F2 by A1,A2,Th22;
+A4: G2*F1 is_naturally_transformable_to G2*F2 & G1*F1
+  is_naturally_transformable_to G2*F1 by A1,A2,Th22;
+  now
+    let a be Object of A;
+A5: (G1*F1).a = G1.(F1.a) & (G1*F2).a = G1.(F2.a) by CAT_1:76;
+A6: (G2*F2).a = G2.(F2.a) by CAT_1:76;
+A7: (G2*s).a = G2/.(s.a) & (G1*F1).a = G1.(F1.a) by A1,Th23,CAT_1:76;
+A8: Hom(F1.a,F2.a) <> {} & (t*F1).a = t.(F1.a) by A1,A2,Th24,Th25;
+A9: (G2*F1).a = G2.(F1.a) & (G2*F2).a = G2.(F2.a) by CAT_1:76;
+    (t*F2).a = t.(F2.a) & (G1*s).a = G1/.(s.a) by A1,A2,Th23,Th24;
+    hence ((t*F2)`*`(G1*s)).a = t.(F2.a)*G1/.(s.a) by A3,A5,A6,NATTRA_1:25
+      .= (G2*s).a*(t*F1).a by A2,A8,A7,A9,NATTRA_1:def 8
+      .= ((G2*s)`*`(t*F1)).a by A4,NATTRA_1:25;
+  end;
+  hence thesis by A3,Th26,NATTRA_1:23;
+end;
+
+theorem
+  F1 is_naturally_transformable_to F2 implies (id id B)(#)s = s
+proof
+  assume
+A1: F1 is_naturally_transformable_to F2;
+  then
+A2: (id B)*F1 is_naturally_transformable_to (id B)*F2 by Th22;
+  thus (id id B)(#)s = (id((id B)*F2))`*`((id B)*s) by Th32
+    .= (id B)*s by A2,NATTRA_1:24
+    .= s by A1,Th35;
+end;
+
+theorem
+  G1 is_naturally_transformable_to G2 implies t(#)(id id B) = t
+proof
+  assume
+A1: G1 is_naturally_transformable_to G2;
+  then
+A2: G1*id B is_naturally_transformable_to G2*id B by Th22;
+  thus t(#)(id id B) = (t*id B)`*`id(G1*id B) by Th33
+    .= t*id B by A2,NATTRA_1:24
+    .= t by A1,Th34;
+end;
+
+theorem
+  F1 is_naturally_transformable_to F2 & G1 is_naturally_transformable_to
+  G2 & H1 is_naturally_transformable_to H2 implies u(#)(t(#)s) = (u(#)t)(#)s
+proof
+  assume that
+A1: F1 is_naturally_transformable_to F2 and
+A2: G1 is_naturally_transformable_to G2 and
+A3: H1 is_naturally_transformable_to H2;
+A4: u*(G2*F2) = u*G2*F2 & H1*(t*F2) = H1*t*F2 by A2,A3,Th29,Th30;
+A5: H1*G1 is_naturally_transformable_to H1*G2 by A2,Th22;
+  then
+A6: H1*G1*F2 is_naturally_transformable_to H1*G2*F2 by Th22;
+A7: H1*(G1*s) = H1*G1*s & H1*G1*F1 is_naturally_transformable_to H1*G1*F2 by A1
+,Th22,Th31;
+A8: H1*G1*F1 = H1*(G1*F1) & H1*G1*F2 = H1*(G1*F2) by RELAT_1:36;
+A9: H1*G2 is_naturally_transformable_to H2*G2 by A3,Th22;
+  then
+A10: H1*G2*F2 is_naturally_transformable_to H2*G2*F2 by Th22;
+A11: H1*G2*F2 = H1*(G2*F2) & H2*G2*F2 = H2*(G2*F2) by RELAT_1:36;
+  G1*F2 is_naturally_transformable_to G2*F2 & G1*F1
+  is_naturally_transformable_to G1*F2 by A1,A2,Th22;
+  hence u(#)(t(#)s) = (u*(G2*F2))`*`((H1*(t*F2))`*`(H1*(G1*s))) by Th27
+    .= (u*G2*F2)`*`(H1*t*F2)`*`((H1*G1)*s) by A8,A11,A4,A7,A6,A10,NATTRA_1:26
+    .= u(#)t(#)s by A5,A9,Th28;
+end;
+
+theorem
+  G1 is_naturally_transformable_to G2 implies t*F = t(#)id F
+proof
+  assume G1 is_naturally_transformable_to G2;
+  then G1*F is_naturally_transformable_to G2*F by Th22;
+  hence t*F = (t*F)`*`id(G1*F) by NATTRA_1:24
+    .= t(#)id F by Th33;
+end;
+
+theorem
+  F1 is_naturally_transformable_to F2 implies G*s = (id G)(#)s
+proof
+  assume F1 is_naturally_transformable_to F2;
+  then G*F1 is_naturally_transformable_to G*F2 by Th22;
+  hence G*s = id(G*F2)`*`(G*s) by NATTRA_1:24
+    .= (id G)(#)s by Th32;
+end;
+
+theorem
+  F1 is_naturally_transformable_to F2 & F2 is_naturally_transformable_to
+F3 & G1 is_naturally_transformable_to G2 & G2 is_naturally_transformable_to G3
+  implies (t9`*`t)(#)(s9`*`s) = (t9(#)s9)`*`(t(#)s)
+proof
+  assume that
+A1: F1 is_naturally_transformable_to F2 and
+A2: F2 is_naturally_transformable_to F3 and
+A3: G1 is_naturally_transformable_to G2 and
+A4: G2 is_naturally_transformable_to G3;
+A5: t9(#)s9 = (G3*s9)`*`(t9*F2) & t(#)s = (G2*s)`*`(t*F1) by A1,A2,A3,A4,Th36;
+A6: G1*F1 is_naturally_transformable_to G2*F1 by A3,Th22;
+A7: G2*F1 is_naturally_transformable_to G2*F2 by A1,Th22;
+  then
+A8: G1*F1 is_naturally_transformable_to G2*F2 by A6,NATTRA_1:23;
+A9: G2*F2 is_naturally_transformable_to G3*F2 by A4,Th22;
+A10: G1 is_naturally_transformable_to G3 by A3,A4,NATTRA_1:23;
+  then
+A11: G1*F1 is_naturally_transformable_to G3*F1 by Th22;
+A12: G3*F1 is_naturally_transformable_to G3*F2 by A1,Th22;
+A13: G2*F1 is_naturally_transformable_to G3*F1 by A4,Th22;
+A14: G3*F2 is_naturally_transformable_to G3*F3 by A2,Th22;
+  F1 is_naturally_transformable_to F3 by A1,A2,NATTRA_1:23;
+  hence (t9`*`t)(#)(s9`*`s) = (G3*(s9`*`s))`*`((t9`*`t)*F1) by A10,Th36
+    .= (G3*s9)`*`(G3*s)`*`((t9`*`t)*F1) by A1,A2,Th27
+    .= (G3*s9)`*`(G3*s)`*`((t9*F1)`*`(t*F1)) by A3,A4,Th28
+    .= (G3*s9)`*`((G3*s)`*`((t9*F1)`*`(t*F1))) by A14,A12,A11,NATTRA_1:26
+    .= (G3*s9)`*`((G3*s)`*`(t9*F1)`*`(t*F1)) by A12,A6,A13,NATTRA_1:26
+    .= (G3*s9)`*`((t9(#)s)`*`(t*F1)) by A1,A4,Th36
+    .= (G3*s9)`*`((t9*F2)`*`((G2*s)`*`(t*F1))) by A6,A9,A7,NATTRA_1:26
+    .= (t9(#)s9)`*`(t(#)s) by A14,A9,A8,A5,NATTRA_1:26;
+end;
+
+theorem Th43:
+  for F being Functor of A,B, G being Functor of C,D for I,J being
+  Functor of B,C st I ~= J holds G*I ~= G*J & I*F ~= J*F
+proof
+  let F be Functor of A,B, G be Functor of C,D;
+  let I,J be Functor of B,C;
+  assume
+A1: I is_naturally_transformable_to J;
+  given t being natural_transformation of I,J such that
+A2: t is invertible;
+  thus G*I ~= G*J
+  proof
+    thus G*I is_naturally_transformable_to G*J by A1,Th22;
+    take G*t;
+    let b be Object of B;
+A3: t.b is invertible by A2,NATTRA_1:def 10;
+Y:  G.(I.b) = (G*I).b & G.(J.b) = (G*J).b by CAT_1:76;
+  (G*t).b = G/.(t.b) by A1,Th23;
+    hence (G*t).b is invertible by A3,Th3,Y;
+  end;
+  thus I*F is_naturally_transformable_to J*F by A1,Th22;
+  take t*F;
+  let a be Object of A;
+Y:  I.(F.a) = (I*F).a & J.(F.a) = (J*F).a by CAT_1:76;
+ (t*F).a = t.(F.a) by A1,Th24;
+  hence (t*F).a is invertible by A2,Y,NATTRA_1:def 10;
+end;
+
+theorem Th44:
+  for F being Functor of A,B, G being Functor of B,A for I being
+  Functor of A,A st I ~= id A holds F*I ~= F & I*G ~= G
+proof
+  let F be Functor of A,B, G be Functor of B,A;
+  let I be Functor of A,A;
+  F*id A = F & id A*G = G by FUNCT_2:17;
+  hence thesis by Th43;
+end;
+
+definition
+  let A,B be Category;
+  pred A is_equivalent_with B means
+  :Def10:
+  ex F being Functor of A,B, G being
+  Functor of B,A st G*F ~= id A & F*G ~= id B;
+  reflexivity
+  proof
+    let A;
+    take id A, id A;
+    thus thesis by FUNCT_2:17;
+  end;
+  symmetry;
+end;
+
+notation
+  let A,B be Category;
+  synonym A,B are_equivalent for A is_equivalent_with B;
+end;
+
+theorem
+  A ~= B implies A is_equivalent_with B
+proof
+  given F being Functor of A,B such that
+A1: F is isomorphic;
+  take F,F";
+  thus thesis by A1,Th13;
+end;
+
+theorem Th46:
+  A,B are_equivalent & B,C are_equivalent implies A,C are_equivalent
+proof
+  given F1 being Functor of A,B, G1 being Functor of B,A such that
+A1: G1*F1 ~= id A and
+A2: F1*G1 ~= id B;
+  given F2 being Functor of B,C, G2 being Functor of C,B such that
+A3: G2*F2 ~= id B and
+A4: F2*G2 ~= id C;
+  take F2*F1,G1*G2;
+  (G1*G2)*F2 = G1*(G2*F2) by RELAT_1:36;
+  then
+A5: (G1*G2)*F2 ~= G1 by A3,Th44;
+  (G1*G2)*(F2*F1) = ((G1*G2)*F2)*F1 by RELAT_1:36;
+  then (G1*G2)*(F2*F1) ~= G1*F1 by A5,Th43;
+  hence (G1*G2)*(F2*F1) ~= id A by A1,NATTRA_1:29;
+  (F2*F1)*G1 = F2*(F1*G1) by RELAT_1:36;
+  then
+A6: (F2*F1)*G1 ~= F2 by A2,Th44;
+  (F2*F1)*(G1*G2) = ((F2*F1)*G1)*G2 by RELAT_1:36;
+  then (F2*F1)*(G1*G2) ~= F2*G2 by A6,Th43;
+  hence thesis by A4,NATTRA_1:29;
+end;
+
+definition
+  let A,B;
+  assume
+A1: A,B are_equivalent;
+  mode Equivalence of A,B -> Functor of A,B means
+    :Def11:
+    ex G being Functor of B,A st G*it ~= id A & it*G ~= id B;
+  existence by A1,Def10;
+end;
+
+theorem
+  id A is Equivalence of A,A
+proof
+  thus A is_equivalent_with A;
+  take id A;
+  thus thesis by FUNCT_2:17;
+end;
+
+theorem
+  A,B are_equivalent & B,C are_equivalent implies for F being
+Equivalence of A,B, G being Equivalence of B,C holds G*F is Equivalence of A,C
+proof
+  assume that
+A1: A,B are_equivalent and
+A2: B,C are_equivalent;
+  let F be Equivalence of A,B, G be Equivalence of B,C;
+  thus A,C are_equivalent by A1,A2,Th46;
+  consider F9 being Functor of B,A such that
+A3: F9*F ~= id A and
+A4: F*F9 ~= id B by A1,Def11;
+  (G*F)*F9 = G*(F*F9) by RELAT_1:36;
+  then
+A5: (G*F)*F9 ~= G by A4,Th44;
+  consider G9 being Functor of C,B such that
+A6: G9*G ~= id B and
+A7: G*G9 ~= id C by A2,Def11;
+  take F9*G9;
+  (F9*G9)*G = F9*(G9*G) by RELAT_1:36;
+  then
+A8: (F9*G9)*G ~= F9 by A6,Th44;
+  (F9*G9)*(G*F) = ((F9*G9)*G)*F by RELAT_1:36;
+  then (F9*G9)*(G*F) ~= F9*F by A8,Th43;
+  hence (F9*G9)*(G*F) ~= id A by A3,NATTRA_1:29;
+  (G*F)*(F9*G9) = ((G*F)*F9)*G9 by RELAT_1:36;
+  then (G*F)*(F9*G9) ~= G*G9 by A5,Th43;
+  hence thesis by A7,NATTRA_1:29;
+end;
+
+theorem Th49:
+  A,B are_equivalent implies for F being Equivalence of A,B ex G
+  being Equivalence of B,A st G*F ~= id A & F*G ~= id B
+proof
+  assume
+A1: A,B are_equivalent;
+  let F be Equivalence of A,B;
+  consider G be Functor of B,A such that
+A2: G*F ~= id A & F*G ~= id B by A1,Def11;
+  G is Equivalence of B,A
+  proof
+    thus B,A are_equivalent by A1;
+    take F;
+    thus thesis by A2;
+  end;
+  hence thesis by A2;
+end;
+
+theorem Th50:
+  for F being Functor of A,B, G being Functor of B,A st G*F ~= id
+  A holds F is faithful
+proof
+  let F be Functor of A,B, G be Functor of B,A;
+  assume G*F ~= id A;
+  then
+A1: id A ~= G*F by NATTRA_1:28;
+  then
+A2: id A is_naturally_transformable_to G*F by NATTRA_1:def 11;
+  consider s being natural_transformation of id A, G*F such that
+A3: s is invertible by A1,NATTRA_1:def 11;
+  thus F is faithful
+  proof
+    let a,a9 be Object of A;
+    assume
+A4: Hom(a,a9) <> {};
+    then
+A5: Hom((id A).a,(id A).a9) <> {} by CAT_1:84;
+    let f1,f2 be Morphism of a,a9;
+    assume
+A6: F.(f1 qua Morphism of A) = F.(f2 qua Morphism of A);
+A7: (G*F)/.f1 = (G*F).(f1 qua Morphism of A) by A4,CAT_3:def 10
+      .= G.(F.(f2 qua Morphism of A)) by A6,FUNCT_2:15
+      .= (G*F).(f2 qua Morphism of A) by FUNCT_2:15
+      .= (G*F)/.f2 by A4,CAT_3:def 10;
+A8: s.a9*(id A)/.f1 = (G*F)/.f1*s.a by A2,A4,NATTRA_1:def 8
+      .= s.a9*(id A)/.f2 by A2,A4,A7,NATTRA_1:def 8;
+A9: Hom((id A).a9,(G*F).a9) <> {} by A2,Th25;
+    s.a9 is invertible by A3,NATTRA_1:def 10;
+    then
+A10: s.a9 is monic by CAT_1:43;
+    thus f1 = (id A)/.f1 by A4,NATTRA_1:16
+      .= (id A)/.f2 by A5,A9,A10,A8,CAT_1:31
+      .= f2 by A4,NATTRA_1:16;
+  end;
+end;
+
+theorem
+  A,B are_equivalent implies for F being Equivalence of A,B holds F is
+full & F is faithful & for b being Object of B ex a being Object of A st b, F.a
+  are_isomorphic
+proof
+  assume
+A1: A,B are_equivalent;
+  let F be Equivalence of A,B;
+  consider G being Equivalence of B,A such that
+A2: G*F ~= id A and
+A3: F*G ~= id B by A1,Th49;
+A4: id A ~= G*F by A2,NATTRA_1:28;
+  then
+A5: id A is_naturally_transformable_to G*F by NATTRA_1:def 11;
+  consider s being natural_transformation of id A, G*F such that
+A6: s is invertible by A4,NATTRA_1:def 11;
+A7: G is faithful by A3,Th50;
+  thus F is full
+  proof
+    let a,a9 be Object of A such that
+A8: Hom(F.a,F.a9) <> {};
+    reconsider f2 = s.a9 as Morphism of a9, (G*F).a9 by CAT_1:79;
+    reconsider f1 = s.a as Morphism of a, (G*F).a by CAT_1:79;
+A9: s.a9 is invertible by A6,NATTRA_1:def 10;
+A10: Hom((id A).a9,(G*F).a9) <> {} by A5,Th25;
+    let g be Morphism of F.a,F.a9;
+A11: (G*F).a = G.(F.a) by CAT_1:76;
+    then reconsider h = G/.g as Morphism of (G*F).a, (G*F).a9 by CAT_1:76;
+A12: Hom((id A).a,(G*F).a) <> {} by A5,Th25;
+    (G*F).a9 = G.(F.a9) by CAT_1:76;
+    then
+A13: Hom((G*F).a,(G*F).a9) <> {} by A8,A11,CAT_1:84;
+    then
+A14: Hom((id A).a,(G*F).a9) <> {} by A12,CAT_1:24;
+    s.a is invertible by A6,NATTRA_1:def 10;
+    then
+A15: s.a is epi by CAT_1:43;
+    (G*F) is_naturally_transformable_to id A by A2,NATTRA_1:def 11;
+    then
+A16: Hom((G*F).a9,(id A).a9) <> {} by Th25;
+A17: (id A).a = a & (id A).a9 = a9 by CAT_1:79;
+    hence
+A18: Hom(a,a9) <> {} by A16,A14,CAT_1:24;
+    take f = f2"*(h*f1);
+A19: (id A)/.f = ((s.a9)"*(h*(s.a))) by A17,A18,NATTRA_1:16;
+    h*s.a = id((G*F).a9)*(h*(s.a)) by A14,CAT_1:28
+      .= s.a9*(s.a9)"*(h*(s.a)) by A9,CAT_1:def 17
+      .= s.a9*(id A)/.f by A16,A14,A10,A19,CAT_1:25
+      .= (G*F)/.f*s.a by A5,A18,NATTRA_1:def 8;
+    then
+A20: h = (G*F)/.f by A12,A13,A15,CAT_1:36;
+    G.(g qua Morphism of B) = G/.g by A8,CAT_3:def 10
+      .= (G*F).(f qua Morphism of A) by A18,A20,CAT_3:def 10
+      .= G.(F.(f qua Morphism of A)) by FUNCT_2:15
+      .= G.(F/.f qua Morphism of B) by A18,CAT_3:def 10;
+    hence g = F/.f by A7,A8,CAT_1:def 27
+      .= F.(f qua Morphism of A) by A18,CAT_3:def 10;
+  end;
+  thus F is faithful by A2,Th50;
+  let b be Object of B;
+  take G.b;
+A21: F.(G.b) = (F*G).b & (id B).b = b by CAT_1:76,79;
+A22: id B ~= F*G by A3,NATTRA_1:28;
+  then id B is_naturally_transformable_to F*G by NATTRA_1:def 11;
+  then
+A23: id B is_transformable_to F*G by NATTRA_1:def 7;
+  ex t being natural_transformation of id B, F*G st t is invertible by A22,
+NATTRA_1:def 11;
+  hence thesis by A21,A23,Th6;
+end;

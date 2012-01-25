@@ -1,0 +1,502 @@
+:: On a Mathematical Model of Programs
+::  by Yatsuka Nakamura and Andrzej Trybulec
+::
+:: Received December 29, 1992
+:: Copyright (c) 1992-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, XBOOLE_0, CARD_1, ZFMISC_1, FINSEQ_1, FUNCT_1,
+      CARD_3, RELAT_1, AMI_1, NAT_1, FUNCT_4, FUNCOP_1, INT_1, ORDINAL1,
+      ARYTM_3, ARYTM_1, XXREAL_0, FUNCT_5, TARSKI, AMI_2, GROUP_9, PBOOLE,
+      AFINSQ_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1,
+      XTUPLE_0, SUBSET_1, ORDINAL1, CARD_1, NUMBERS,
+      XCMPLX_0, CARD_3, RELAT_1, FUNCT_1, FUNCT_2, PBOOLE, AFINSQ_1, XXREAL_0,
+      BINOP_1, MCART_1, INT_1, FUNCOP_1, FUNCT_4, CAT_2, FINSEQ_1,
+      FUNCT_5, SCM_INST;
+ constructors DOMAIN_1, CAT_2, CARD_3, ABIAN, RELSET_1, AFINSQ_1, VALUED_1,
+      SCM_INST, FUNCT_5, XTUPLE_0;
+ registrations XBOOLE_0, FUNCOP_1, NUMBERS, XXREAL_0, XREAL_0, INT_1, CARD_3,
+      FINSET_1, ORDINAL2, CARD_1, FUNCT_1, RELSET_1, FUNCT_2, AFINSQ_1,
+      SCM_INST, XTUPLE_0;
+ requirements NUMERALS, SUBSET, BOOLE;
+ definitions TARSKI, FUNCT_1, FUNCOP_1, SCM_INST, XTUPLE_0;
+ theorems ZFMISC_1, FUNCT_2, TARSKI, CAT_2, FUNCOP_1, ENUMSET1, INT_1, CARD_3,
+      MCART_1, FUNCT_4, XBOOLE_0, XBOOLE_1, ORDINAL1, RELAT_1, NUMBERS, CARD_1,
+      AFINSQ_1, PARTFUN1, FUNCT_1, FUNCT_5, XTUPLE_0;
+ schemes FUNCT_2, BINOP_1;
+
+begin :: A small concrete machine
+
+reserve x,y,z for set;
+
+:: Na razie potrzebny w SCM_INST
+::definition
+::  func SCM-Data-Loc equals
+::  [:{1},NAT:];
+::  coherence;
+::end;
+
+definition
+  func SCM-Memory equals
+  {NAT} \/ SCM-Data-Loc;
+  coherence;
+end;
+
+registration
+  cluster SCM-Memory -> non empty;
+  coherence;
+end;
+
+definition
+  redefine func SCM-Data-Loc -> Subset of SCM-Memory;
+  coherence by XBOOLE_1:7;
+end;
+
+::registration
+::  cluster SCM-Data-Loc -> non empty;
+::  coherence;
+::end;
+
+reserve I,J,K for Element of Segm 9,
+  i,a,a1,a2 for Element of NAT,
+  b,b1,b2,c,c1 for Element of SCM-Data-Loc;
+
+Lm1: now
+  let k be Element of SCM-Memory;
+  k in {NAT} or k in SCM-Data-Loc by XBOOLE_0:def 3;
+  hence k = NAT or k in SCM-Data-Loc by TARSKI:def 1;
+end;
+
+Lm2: not NAT in SCM-Data-Loc
+proof
+  assume NAT in SCM-Data-Loc;
+  then ex x,y st NAT = [x,y] by RELAT_1:def 1;
+  hence contradiction;
+end;
+
+definition
+ canceled 2;
+  func SCM-OK -> Function of SCM-Memory, 2 means
+:Def4: for k being Element of SCM-Memory
+   holds (k = NAT implies it.k = 0) &
+         (k in SCM-Data-Loc implies it.k = 1);
+  existence
+  proof
+    defpred P[set,set] means
+     $1 = NAT & $2 = 0 or $1 in SCM-Data-Loc & $2 = 1;
+A1: now
+      let k be Element of SCM-Memory;
+A2:   {0} \/ { 1 } = {0, 1} by ENUMSET1:1;
+      then
+A3:  0 in {1} \/ { 0 } by TARSKI:def 2;
+A4:   P[k,0] or P[k,1] by Lm1;
+      1 in {1} \/ { 0 } by A2,TARSKI:def 2;
+      hence ex b being Element of 2 st P[k,b] by A2,A3,A4,CARD_1:50;
+    end;
+    consider h being Function of SCM-Memory, 2 such
+    that
+A5: for a being Element of SCM-Memory holds P[a,h.a] from FUNCT_2:sch 3(A1);
+    take h;
+    let k be Element of SCM-Memory;
+    thus k = NAT implies h.k = 0 by A5,Lm2;
+    thus k in SCM-Data-Loc implies h.k = 1 by A5,Lm2;
+    thus thesis;
+  end;
+  uniqueness
+  proof
+    let f,g be Function of SCM-Memory, 2 such that
+A6: for k being Element of SCM-Memory holds
+    (k = NAT implies f.k = 0) & (k in SCM-Data-Loc implies f.k = 1)
+    and
+A7: for k being Element of SCM-Memory holds
+    (k = NAT implies g.k = 0) & (k in SCM-Data-Loc implies g.k = 1);
+    now
+      let k be Element of SCM-Memory;
+      now
+        per cases by Lm1;
+        suppose
+A8:       k = NAT;
+          hence f.k = 0 by A6
+            .= g.k by A7,A8;
+        end;
+        suppose
+A9:      k in SCM-Data-Loc;
+          hence f.k = 1 by A6
+            .= g.k by A7,A9;
+        end;
+      end;
+      hence f.k = g.k;
+    end;
+    hence thesis by FUNCT_2:63;
+  end;
+end;
+
+canceled;
+
+definition
+ func SCM-VAL -> ManySortedSet of 2 equals
+  <%NAT,INT%>;
+ coherence;
+end;
+
+Lm3: NAT in SCM-Memory
+proof
+  NAT in {NAT} by TARSKI:def 1;
+  hence thesis by XBOOLE_0:def 3;
+end;
+
+canceled 4;
+
+theorem Th6:
+   (SCM-VAL*SCM-OK).NAT = NAT
+proof
+   NAT in dom SCM-OK by Lm3,PARTFUN1:def 2;
+   then
+A1: (SCM-VAL*SCM-OK).NAT = SCM-VAL.(SCM-OK.NAT) by FUNCT_1:13;
+   (SCM-VAL*SCM-OK).NAT = SCM-VAL.0 by A1,Def4,Lm3;
+  hence thesis by AFINSQ_1:38;
+end;
+
+theorem Th7:
+  for i being Element of SCM-Memory
+   holds i in SCM-Data-Loc implies (SCM-VAL*SCM-OK).i = INT
+proof
+  let i be Element of SCM-Memory;
+   i in SCM-Memory;
+   then i in dom SCM-OK by PARTFUN1:def 2;
+   then
+A1: (SCM-VAL*SCM-OK).i = SCM-VAL.(SCM-OK.i) by FUNCT_1:13;
+  assume i in SCM-Data-Loc;
+   then (SCM-VAL*SCM-OK).i = SCM-VAL.1 by A1,Def4;
+  hence thesis by AFINSQ_1:38;
+end;
+
+Lm4:  dom SCM-OK = SCM-Memory by PARTFUN1:def 2;
+    len <%NAT,INT%> = 2 by AFINSQ_1:38;
+    then rng SCM-OK c= dom SCM-VAL by RELAT_1:def 19;
+    then
+Lm5:
+ dom(SCM-VAL*SCM-OK) = SCM-Memory by Lm4,RELAT_1:27;
+
+registration
+ cluster SCM-VAL*SCM-OK -> non-empty;
+ coherence
+  proof set F = SCM-VAL*SCM-OK;
+   let n be set;
+   assume
+A1:   n in dom F;
+   per cases by A1,Lm1,Lm5;
+   suppose n = NAT;
+   hence F.n is non empty by Th6;
+   end;
+   suppose n in SCM-Data-Loc;
+   hence F.n is non empty by Th7;
+   end;
+  end;
+end;
+
+definition
+  mode SCM-State is Element of product(SCM-VAL*SCM-OK);
+end;
+
+theorem
+  for a being Element of SCM-Data-Loc
+      holds (SCM-VAL*SCM-OK).a = INT by Th7;
+
+theorem Th9:
+  pi(product(SCM-VAL*SCM-OK),NAT) = NAT by Th6,Lm5,Lm3,CARD_3:12;
+
+theorem Th10:
+  for a being Element of SCM-Data-Loc
+   holds pi(product(SCM-VAL*SCM-OK),a) = INT
+proof
+  let a be Element of SCM-Data-Loc;
+  thus pi(product(SCM-VAL*SCM-OK),a) = (SCM-VAL*SCM-OK).a by Lm5,CARD_3:12
+    .= INT by Th7;
+end;
+
+definition
+  let s be SCM-State;
+  func IC(s) -> Element of NAT equals
+  s.NAT;
+  coherence by Th9,CARD_3:def 6;
+end;
+
+definition
+  let s be SCM-State, u be Nat;
+  func SCM-Chg(s,u) -> SCM-State equals
+  s +* (NAT .--> u);
+  coherence
+  proof
+A1: now
+      let x be set;
+      assume
+A2:   x in dom(SCM-VAL*SCM-OK);
+        per cases;
+        suppose
+A3:       x = NAT;
+          {NAT} = dom(NAT .--> u) by FUNCOP_1:13;
+          then NAT in dom(NAT .--> u) by TARSKI:def 1;
+          then (s +* (NAT .--> u)).NAT = (NAT .--> u).NAT by FUNCT_4:13
+            .= u by FUNCOP_1:72;
+          hence (s +* (NAT .--> u)).x in (SCM-VAL*SCM-OK).x
+           by A3,Th6,ORDINAL1:def 12;
+        end;
+        suppose
+A4:       x <> NAT;
+          {NAT} = dom(NAT .--> u) by FUNCOP_1:13;
+          then not x in dom(NAT .--> u) by A4,TARSKI:def 1;
+          then (s +* (NAT .--> u)).x = s.x by FUNCT_4:11;
+          hence (s +* (NAT .--> u)).x in (SCM-VAL*SCM-OK).x by A2,CARD_3:9;
+        end;
+    end;
+    dom s = SCM-Memory by Lm5,CARD_3:9;
+    then dom(s +* (NAT .--> u)) = SCM-Memory \/ dom(NAT .--> u) by
+FUNCT_4:def 1
+      .= SCM-Memory \/ {NAT} by FUNCOP_1:13
+      .= dom(SCM-VAL*SCM-OK) by Lm5,Lm3,ZFMISC_1:40;
+    hence thesis by A1,CARD_3:9;
+  end;
+end;
+
+theorem
+  for s being SCM-State, u being Nat holds SCM-Chg(s,u).NAT = u
+proof
+  let s be SCM-State, u be Nat;
+  {NAT} = dom(NAT .--> u) by FUNCOP_1:13;
+  then NAT in dom(NAT .--> u) by TARSKI:def 1;
+  hence SCM-Chg(s,u).NAT = (NAT .--> u).NAT by FUNCT_4:13
+    .= u by FUNCOP_1:72;
+end;
+
+theorem
+  for s being SCM-State, u being Nat, mk being Element of SCM-Data-Loc
+  holds SCM-Chg(s,u).mk = s.mk
+proof
+  let s be SCM-State, u be Nat, mk be Element of SCM-Data-Loc;
+A1: {NAT} = dom(NAT .--> u) by FUNCOP_1:13;
+  (SCM-VAL*SCM-OK).NAT = NAT & (SCM-VAL*SCM-OK).mk = INT by Th6,Th7;
+  then not mk in dom(NAT .--> u) by A1,NUMBERS:27,TARSKI:def 1;
+  hence thesis by FUNCT_4:11;
+end;
+
+theorem
+  for s being SCM-State, u,v being Nat holds SCM-Chg(s,u).v = s.v
+proof
+  let s be SCM-State, u,v be Nat;
+  {NAT} = dom(NAT .--> u) by FUNCOP_1:13;
+  then not v in dom(NAT .--> u) by TARSKI:def 1;
+  hence thesis by FUNCT_4:11;
+end;
+
+definition
+  let s be SCM-State, t be Element of SCM-Data-Loc, u be Integer;
+  func SCM-Chg(s,t,u) -> SCM-State equals
+  s +* (t .--> u);
+  coherence
+  proof
+A1: now
+      let x be set;
+      assume
+A2:   x in dom(SCM-VAL*SCM-OK);
+        per cases;
+        suppose
+A3:       x = t;
+          {t} = dom(t .--> u) by FUNCOP_1:13;
+          then t in dom(t .--> u) by TARSKI:def 1;
+          then (s +* (t .--> u)).t = (t .--> u).t by FUNCT_4:13
+            .= u by FUNCOP_1:72;
+          then (s +* (t .--> u)).t in INT by INT_1:def 2;
+          hence (s +* (t .--> u)).x in (SCM-VAL*SCM-OK).x by A3,Th7;
+        end;
+        suppose
+A4:       x <> t;
+          {t} = dom(t .--> u) by FUNCOP_1:13;
+          then not x in dom(t .--> u) by A4,TARSKI:def 1;
+          then (s +* (t .--> u)).x = s.x by FUNCT_4:11;
+          hence (s +* (t .--> u)).x in (SCM-VAL*SCM-OK).x by A2,CARD_3:9;
+        end;
+    end;
+    dom s = SCM-Memory by Lm5,CARD_3:9;
+    then dom(s +* (t .--> u)) = SCM-Memory \/ dom(t .--> u) by FUNCT_4:def 1
+      .= SCM-Memory \/ {t} by FUNCOP_1:13
+      .= dom(SCM-VAL*SCM-OK) by Lm5,ZFMISC_1:40;
+    hence thesis by A1,CARD_3:9;
+  end;
+end;
+
+theorem
+  for s being SCM-State, t being Element of SCM-Data-Loc, u being
+  Integer holds SCM-Chg(s,t,u).NAT = s.NAT
+proof
+  let s be SCM-State, t be Element of SCM-Data-Loc, u be Integer;
+A1: {t} = dom(t .--> u) by FUNCOP_1:13;
+  (SCM-VAL*SCM-OK).NAT = NAT & (SCM-VAL*SCM-OK).t = INT by Th6,Th7;
+  then not NAT in dom(t .--> u) by A1,NUMBERS:27,TARSKI:def 1;
+  hence thesis by FUNCT_4:11;
+end;
+
+theorem
+  for s being SCM-State, t being Element of SCM-Data-Loc, u being
+  Integer holds SCM-Chg(s,t,u).t = u
+proof
+  let s be SCM-State, t be Element of SCM-Data-Loc, u be Integer;
+  {t} = dom(t .--> u) by FUNCOP_1:13;
+  then t in dom(t .--> u) by TARSKI:def 1;
+  hence SCM-Chg(s,t,u).t = (t .--> u).t by FUNCT_4:13
+    .= u by FUNCOP_1:72;
+end;
+
+theorem
+  for s being SCM-State, t being Element of SCM-Data-Loc, u being
+Integer, mk being Element of SCM-Data-Loc st mk <> t holds SCM-Chg(s,t,u).mk =
+  s.mk
+proof
+  let s be SCM-State, t be Element of SCM-Data-Loc, u be Integer, mk be
+  Element of SCM-Data-Loc such that
+A1: mk <> t;
+  {t} = dom(t .--> u) by FUNCOP_1:13;
+  then not mk in dom(t .--> u) by A1,TARSKI:def 1;
+  hence thesis by FUNCT_4:11;
+end;
+
+registration
+  let s be SCM-State, a be Element of SCM-Data-Loc;
+  cluster s.a -> integer;
+  coherence
+  proof
+    s.a in pi(product(SCM-VAL*SCM-OK),a) by CARD_3:def 6;
+    then s.a in INT by Th10;
+    hence thesis;
+  end;
+end;
+
+definition
+ canceled 5;
+  let x be Element of SCM-Instr, s be SCM-State;
+  func SCM-Exec-Res(x,s) -> SCM-State equals
+  SCM-Chg(SCM-Chg(s, x address_1,s.(x address_2)), succ IC s)
+   if ex mk, ml being Element of SCM-Data-Loc st x = [1, {}, <*mk, ml*>],
+  SCM-Chg(SCM-Chg(s,x address_1, s.(x address_1)+s.(x address_2)),succ IC s)
+   if ex mk, ml being Element of SCM-Data-Loc st x = [ 2, {}, <*mk, ml*>],
+  SCM-Chg(SCM-Chg(s,x address_1, s.(x address_1)-s.(x address_2)),succ IC s)
+  if ex mk, ml being Element of SCM-Data-Loc st x = [ 3, {}, <*mk, ml*>],
+  SCM-Chg(SCM-Chg(s,x address_1, s.(x address_1)*s.(x address_2)),succ IC s)
+  if ex mk, ml being Element of SCM-Data-Loc st x = [ 4, {}, <*mk, ml*>],
+  SCM-Chg(SCM-Chg( SCM-Chg(s,
+    x address_1, s.(x address_1) div s.(x address_2)),
+    x address_2, s.(x address_1) mod s.(x address_2)),succ IC s)
+  if ex mk, ml being Element of SCM-Data-Loc st x = [ 5, {}, <*mk, ml*>],
+  SCM-Chg(s,x jump_address)
+  if ex mk being Element of NAT st x = [ 6, <*mk*>, {}],
+  SCM-Chg(s,IFEQ(s.(x cond_address),0,x cjump_address,succ IC s))
+  if ex mk being Element of NAT, ml being Element of SCM-Data-Loc st
+   x = [7, <*mk*>, <*ml*>],
+  SCM-Chg(s,IFGT(s.(x cond_address),0,x cjump_address,succ IC s))
+  if ex mk being Element of NAT, ml being Element of SCM-Data-Loc st
+   x = [ 8, <*mk*>, <*ml*>]
+  otherwise s;
+  consistency by XTUPLE_0:3;
+  coherence;
+end;
+
+definition
+  func SCM-Exec -> Action of SCM-Instr, product(SCM-VAL*SCM-OK) means
+  for x being Element of SCM-Instr, y being SCM-State holds (it.x).y =
+  SCM-Exec-Res(x,y);
+  existence
+  proof
+    consider f being
+     Function of [:SCM-Instr,product(SCM-VAL*SCM-OK):], product(SCM-VAL*SCM-OK)
+    such that
+A1: for x being Element of SCM-Instr, y being SCM-State holds f.(x,y)
+    = SCM-Exec-Res(x,y) from BINOP_1:sch 4;
+    take curry f;
+    let x be Element of SCM-Instr, y be SCM-State;
+    thus (curry f).x.y = f.(x,y) by FUNCT_5:69
+      .= SCM-Exec-Res(x,y) by A1;
+  end;
+  uniqueness
+  proof
+    let f,g be Action of SCM-Instr, product(SCM-VAL*SCM-OK) such that
+A2: for x being Element of SCM-Instr, y being SCM-State holds (f.x).y
+    = SCM-Exec-Res(x,y) and
+A3: for x being Element of SCM-Instr, y being SCM-State holds (g.x).y
+    = SCM-Exec-Res(x,y);
+    now
+      let x be Element of SCM-Instr;
+      reconsider gx=g.x, fx=f.x
+       as Function of product(SCM-VAL*SCM-OK), product(SCM-VAL*SCM-OK)
+      by FUNCT_2:66;
+      now
+        let y be SCM-State;
+        thus fx.y = SCM-Exec-Res(x,y) by A2
+          .= gx.y by A3;
+      end;
+      hence f.x = g.x by FUNCT_2:63;
+    end;
+    hence f = g by FUNCT_2:63;
+  end;
+end;
+
+begin :: Addenda
+:: missing, 2007.07.27, A.T.
+
+canceled 3;
+
+theorem
+  not NAT in SCM-Data-Loc by Lm2;
+
+canceled;
+
+theorem
+  NAT in SCM-Memory by Lm3;
+
+theorem
+  x in SCM-Data-Loc implies ex k being Element of NAT st x = [1,k]
+proof
+  assume x in SCM-Data-Loc;
+  then consider y,z such that
+A1: y in {1} and
+A2: z in NAT and
+A3: x = [y,z] by ZFMISC_1:84;
+  reconsider k = z as Element of NAT by A2;
+  take k;
+  thus thesis by A1,A3,TARSKI:def 1;
+end;
+
+theorem
+  for k being Nat holds [1,k] in SCM-Data-Loc
+proof
+  let k be Nat;
+  1 in {1} & k in NAT by ORDINAL1:def 12,TARSKI:def 1;
+  hence thesis by ZFMISC_1:87;
+end;
+
+canceled;
+
+theorem
+  for k being Element of SCM-Memory
+   holds k = NAT or k in SCM-Data-Loc by Lm1;
+
+theorem
+  dom(SCM-VAL*SCM-OK) = SCM-Memory by Lm5;
+
+theorem
+ for s being SCM-State holds dom s = SCM-Memory by Lm5,CARD_3:9;
+
+definition let x be set;
+ attr x is Int-like means
+  x in SCM-Data-Loc;
+end;
+

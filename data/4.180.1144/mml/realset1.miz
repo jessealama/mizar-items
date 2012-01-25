@@ -1,0 +1,290 @@
+:: Group and Field Definitions
+::  by J\'ozef Bia{\l}as
+::
+:: Received October 27, 1989
+:: Copyright (c) 1990-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, FUNCT_1, ZFMISC_1, XBOOLE_0, RELAT_1, TARSKI, BINOP_1,
+      SUBSET_1, CARD_1, MCART_1, REALSET1, BSPACE;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELAT_1, FUNCT_1, FUNCT_2,
+      BINOP_1, DOMAIN_1, FUNCOP_1, FUNCT_3, CARD_1, XXREAL_0;
+ constructors BINOP_1, DOMAIN_1, FUNCT_3, FUNCOP_1, XXREAL_0, CARD_1, MEMBERED,
+      NUMBERS, RELSET_1;
+ registrations XBOOLE_0, FUNCT_1, RELSET_1, FINSET_1, MEMBERED, CARD_1,
+      ZFMISC_1, SUBSET_1;
+ requirements SUBSET, BOOLE, NUMERALS, REAL;
+ definitions BINOP_1, ZFMISC_1, SUBSET_1;
+ theorems TARSKI, FUNCT_1, FUNCT_2, FUNCT_3, ZFMISC_1, XBOOLE_0, RELAT_1,
+      CARD_1;
+
+begin
+
+theorem Th1:
+  for X,x being set holds for F being Function of [:X,X:],X holds x
+  in [:X,X:] implies F.x in X
+proof
+  let X,x be set;
+  let F be Function of [:X,X:],X;
+  X={} implies [:X,X:]={};
+  then
+A1: dom F = [:X,X:] by FUNCT_2:def 1;
+  assume x in [:X,X:];
+  then rng F c= X & F.x in rng F by A1,FUNCT_1:def 3,RELAT_1:def 19;
+  hence thesis;
+end;
+
+definition
+
+  let X be set;
+  let F be BinOp of X;
+  mode Preserv of F -> Subset of X means
+    :Def1:
+    for x being set holds x in [: it,it:] implies F.x in it;
+  existence
+  proof
+    X c= X;
+    then reconsider Z = X as Subset of X;
+    take Z;
+    thus thesis by Th1;
+  end;
+end;
+
+definition
+  let R be Relation;
+  let A be set;
+  func R||A equals
+  R | [:A,A:];
+  coherence;
+end;
+
+registration
+  let R be Relation;
+  let A be set;
+  cluster R||A -> Relation-like;
+  coherence;
+end;
+
+registration
+  let R be Function;
+  let A be set;
+  cluster R||A -> Function-like;
+  coherence;
+end;
+
+theorem Th2:
+  for X being set, F being BinOp of X, A being Preserv of F holds F
+  ||A is BinOp of A
+proof
+  let X be set, F be BinOp of X, A be Preserv of F;
+  X={} implies [:X,X:]={};
+  then dom F = [:X,X:] by FUNCT_2:def 1;
+  then
+A1: dom (F||A) = [:A,A:] by RELAT_1:62,ZFMISC_1:96;
+  for x being set holds x in [:A,A:] implies F||A.x in A
+  proof
+    let x be set;
+    assume
+A2: x in [:A,A:];
+    then F||A.x=F.x by A1,FUNCT_1:47;
+    hence thesis by A2,Def1;
+  end;
+  hence thesis by A1,FUNCT_2:3;
+end;
+
+definition
+  let X be set;
+  let F be BinOp of X;
+  let A be Preserv of F;
+  redefine func F||A -> BinOp of A;
+  coherence by Th2;
+end;
+
+theorem Th3:
+  for X being set holds X is non trivial iff for x being
+  set holds X\{x} is non empty set
+proof
+  let X be set;
+  hereby
+    assume
+A1: X is non trivial;
+    let x be set;
+    X <> {x} by A1;
+    then consider y being set such that
+A2: y in X and
+A3: x <> y by A1,ZFMISC_1:35;
+    not y in {x} by A3,TARSKI:def 1;
+    hence X\{x} is non empty set by A2,XBOOLE_0:def 5;
+  end;
+  assume
+A4: for x being set holds X\{x} is non empty set;
+   X\{{}} c= X;
+   then X is non empty by A4;
+   then consider x being set such that
+A5:  x in X by XBOOLE_0:def 1;
+   X\{x} is non empty by A4;
+   then consider y being set such that
+A6:  y in X\{x} by XBOOLE_0:def 1;
+  take x,y;
+  thus x in X by A5;
+  thus y in X by A6;
+   x in {x} by TARSKI:def 1;
+   then not x in X\{x} by XBOOLE_0:def 5;
+  hence x <> y by A6;
+end;
+
+theorem
+  ex A being non empty set st for z being Element of A holds A \ {z} is
+  non empty set
+proof
+  set B = {0,1};
+  take B;
+  for z being Element of B holds B\{z} is non empty set
+  proof
+    let z be Element of B;
+    0 in B & not 0 in {1} by TARSKI:def 1,def 2;
+    then
+A1: B\{1} is non empty set by XBOOLE_0:def 5;
+    1 in B & not 1 in {0} by TARSKI:def 1,def 2;
+    then B\{0} is non empty set by XBOOLE_0:def 5;
+    hence thesis by A1,TARSKI:def 2;
+  end;
+  hence thesis;
+end;
+
+definition
+
+  let X be non trivial set;
+  let F be BinOp of X;
+  let x be Element of X;
+  pred F is_Bin_Op_Preserv x means
+  X\{x} is Preserv of F & F||X\{x} is BinOp of X\{x};
+  correctness;
+end;
+
+theorem Th5:
+  for X being set holds for A being Subset of X holds ex F being
+  BinOp of X st for x being set holds x in [:A,A:] implies F.x in A
+proof
+  let X be set;
+  let A be Subset of X;
+  set S = pr1(X,X);
+  take S;
+  for x being set holds x in [:A,A:] implies S.x in A
+  proof
+    let x be set;
+    assume x in [:A,A:];
+    then consider p,q being set such that
+A1: p in A & q in A and
+A2: x = [p,q] by ZFMISC_1:def 2;
+    S.x = S.(p,q) by A2;
+    hence thesis by A1,FUNCT_3:def 4;
+  end;
+  hence thesis;
+end;
+
+definition
+  let X be set;
+  let A be Subset of X;
+  mode Presv of X,A -> BinOp of X means
+    :Def4:
+    for x being set holds x in [:A, A:] implies it.x in A;
+  existence by Th5;
+end;
+
+theorem Th6:
+  for X being set, A being Subset of X, F being Presv of X,A holds
+  F||A is BinOp of A
+proof
+  let X be set;
+  let A be Subset of X;
+  let F be Presv of X,A;
+  X={} implies [:X,X:]={};
+  then dom F = [:X,X:] by FUNCT_2:def 1;
+  then
+A1: dom (F||A) = [:A,A:] by RELAT_1:62,ZFMISC_1:96;
+  for x being set holds x in [:A,A:] implies F||A.x in A
+  proof
+    let x be set;
+    assume
+A2: x in [:A,A:];
+    then F||A.x=F.x by A1,FUNCT_1:47;
+    hence thesis by A2,Def4;
+  end;
+  hence thesis by A1,FUNCT_2:3;
+end;
+
+definition
+  let X be set;
+  let A be Subset of X;
+  let F be Presv of X,A;
+  func F|||A -> BinOp of A equals
+  F||A;
+  coherence by Th6;
+end;
+
+definition
+  let A be set;
+  let x be Element of A;
+  mode DnT of x,A -> BinOp of A means
+    :Def6:
+    for y being set holds y in [:A\{x },A\{x}:] implies it.y in A\{x};
+  existence by Th5;
+end;
+
+theorem Th7:
+  for A being non trivial set holds for x being Element of A holds
+  for F being DnT of x,A holds F||(A\{x}) is BinOp of A\{x}
+proof
+  let A be non trivial set;
+  let x be Element of A;
+  let F be DnT of x,A;
+  dom F = [:A,A:] by FUNCT_2:def 1;
+  then
+A1: dom(F||(A\{x})) = [:A\{x},A\{x}:] by RELAT_1:62,ZFMISC_1:96;
+  for y being set holds y in [:A\{x},A\{x}:] implies F||(A\{x}).y in A\{x}
+  proof
+    let y be set;
+    assume
+A2: y in [:A\{x},A\{x}:];
+    then F||(A\{x}).y=F.y by A1,FUNCT_1:47;
+    hence thesis by A2,Def6;
+  end;
+  hence thesis by A1,FUNCT_2:3;
+end;
+
+definition
+  let A be non trivial set;
+  let x be Element of A;
+  let F be DnT of x,A;
+  func F!(A,x) -> BinOp of A\{x} equals
+  F||(A\{x});
+  coherence by Th7;
+end;
+
+theorem Th8:
+  for F being non trivial set holds for A being Singleton of F
+  holds F\A is non empty set
+proof
+  let F be non trivial set;
+  let A be Singleton of F;
+  ex x being Element of F st A = {x} by CARD_1:65;
+  hence thesis by Th3;
+end;
+
+registration
+  let F be non trivial set;
+  let A be Singleton of F;
+  cluster F\A -> non empty;
+  coherence by Th8;
+end;
+

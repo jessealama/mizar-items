@@ -1,0 +1,2617 @@
+:: A Model of Mizar Concepts -- Unification
+::  by Grzegorz Bancerek
+::
+:: Received November 20, 2009
+:: Copyright (c) 2009-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies TARSKI, QC_LANG3, PBOOLE, MSUALG_1, CATALG_1, FINSEQ_1, XBOOLE_0,
+      ZFMISC_1, ARYTM_3, CARD_1, NAT_1, NUMBERS, XXREAL_0, ZF_LANG1, ORDINAL1,
+      TREES_A, ABIAN, CARD_3, MEMBER_1, FINSET_1, FUNCOP_1, FUNCT_1, TREES_4,
+      TREES_2, MSATERM, RELAT_1, MCART_1, MSAFREE, ZF_MODEL, AOFA_000,
+      FINSEQ_2, PARTFUN1, QC_LANG1, FUNCT_2, ORDINAL4, CAT_3, TREES_3,
+      ABCMIZ_0, ABCMIZ_1, ABCMIZ_A, STRUCT_0, FACIRC_1, INSTALG1, MSUALG_2,
+      COMPUT_1, BINTREE1, TREES_9, ARYTM_1, FUNCT_6, SUBSET_1, MARGREL1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1,
+      XTUPLE_0, SUBSET_1, DOMAIN_1, RELAT_1, FUNCT_1,
+      RELSET_1, PARTFUN1, FACIRC_1, ENUMSET1, FUNCOP_1, XCMPLX_0, XXREAL_0,
+      ORDINAL1, NAT_D, MCART_1, FINSET_1, CARD_1, NUMBERS, CARD_3, FINSEQ_1,
+      FINSEQ_2, FINSEQ_4, FUNCT_6, TREES_1, TREES_2, TREES_3, TREES_4, TREES_9,
+      PBOOLE, STRUCT_0, MSUALG_1, MSUALG_2, MSAFREE, EQUATION, MSATERM,
+      INSTALG1, CATALG_1, MSAFREE3, AOFA_000, ABCMIZ_1;
+ constructors RELSET_1, DOMAIN_1, WELLORD2, TREES_9, EQUATION, NAT_D, FINSEQ_4,
+      CATALG_1, FACIRC_1, ABCMIZ_1, PRE_POLY, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, XREAL_0, ORDINAL1, FUNCT_1, FINSET_1,
+      STRUCT_0, PBOOLE, MSUALG_2, FINSEQ_1, NAT_1, CARD_1, TREES_3, TREES_2,
+      FUNCOP_1, RELAT_1, INDEX_1, INSTALG1, MSAFREE3, WAYBEL26, FACIRC_1,
+      ABCMIZ_1, MSATERM, ZFMISC_1, RELSET_1, XTUPLE_0;
+ requirements BOOLE, SUBSET, NUMERALS, ARITHM, REAL;
+ definitions TARSKI, XBOOLE_0, RELAT_1, FUNCT_1, SUBSET_1, FINSEQ_1, MSAFREE,
+      MSAFREE3, PBOOLE, MSUALG_1, ABCMIZ_1, XTUPLE_0;
+ theorems TARSKI, XBOOLE_0, XBOOLE_1, TREES_1, XXREAL_0, XREAL_1, ZFMISC_1,
+      FUNCT_1, FUNCT_2, FINSEQ_1, FINSEQ_2, ENUMSET1, FUNCT_6, INSTALG1, NAT_1,
+      MCART_1, PBOOLE, RELAT_1, RELSET_1, CARD_1, CARD_5, ORDINAL1, MSUALG_2,
+      TREES_3, TREES_4, FINSEQ_3, FUNCOP_1, MSAFREE, MSATERM, MSAFREE3,
+      YELLOW11, PARTFUN1, WELLORD2, ABCMIZ_1, TREES_9, FACIRC_1, XTUPLE_0;
+ schemes FUNCT_1, NAT_1, RECDEF_1, CLASSES1, FINSEQ_1;
+
+begin :: Preliminary
+
+reserve i,j for Nat;
+
+theorem Th1:
+ for x being pair set holds x = [x`1, x`2];
+
+scheme MinimalElement{X() -> finite non empty set, R[set,set]}:
+  ex x being set st x in X() &
+  for y being set st y in X() holds not R[y,x]
+  provided
+A1: for x,y being set st x in X() & y in X() & R[x,y] holds not R[y,x] and
+A2: for x,y,z being set st x in X() & y in X() & z in X() & R[x,y] & R[y,z]
+    holds R[x,z]
+  proof
+    assume
+A3: for x being set st x in X() ex y being set st y in X() & R[y,x];
+    set n = card X();
+    set x0 = the Element of X();
+    defpred P[Nat,set,set] means $2 in X() implies $3 in X() & R[ $3,$2];
+A4: for m being Element of NAT st 1 <= m & m < n+1
+    for x being set ex y being set st P[m,x,y]
+    proof
+      let m be Element of NAT; assume 1 <= m & m < n+1;
+      let x be set;
+      per cases;
+      suppose
+A5:     x nin X();
+        set y = the set;
+        take y;
+        thus P[m,x,y] by A5;
+      end;
+      suppose
+        x in X(); then
+        consider y being set such that
+A6:     y in X() & R[y,x] by A3;
+        take y; thus thesis by A6;
+      end;
+    end;
+    consider p being FinSequence such that
+A7: len p = n+1 and
+A8: p.1 = x0 or n+1 = 0 and
+A9: for i being Element of NAT st 1 <= i & i < n+1 holds P[i, p.i, p.(i+1)]
+    from RECDEF_1:sch 3(A4);
+    defpred Q[Nat] means $1 in dom p implies p.$1 in X();
+A10: Q[ 0] by FINSEQ_3:25;
+A11: now let i be Nat; assume
+A12:   Q[i];
+      thus Q[i+1] proof assume
+        i+1 in dom p; then i+1 <= n+1 by A7,FINSEQ_3:25; then
+A13:     i < n+1 by NAT_1:13;
+        per cases by NAT_1:3;
+        suppose i = 0;
+          hence thesis by A8;
+        end;
+        suppose i > 0; then
+          i >= 0+1 & i is Element of NAT by NAT_1:13,ORDINAL1:def 12;
+          hence thesis by A12,A7,A9,A13,FINSEQ_3:25;
+        end;
+      end;
+    end;
+A14: for i being Nat holds Q[i] from NAT_1:sch 2(A10,A11);
+A15: rng p c= X()
+    proof
+      let x be set; assume x in rng p; then
+      ex i being set st i in dom p & x = p.i by FUNCT_1:def 3;
+      hence thesis by A14;
+    end;
+A16: for i,j being Nat st 1 <= i & i < j & j <= n+1 holds R[p.j, p.i]
+    proof
+      let i,j be Nat; assume
+A17:   1 <= i;
+      assume
+A18:   i < j; then
+      i+1 <= j by NAT_1:13; then
+      consider k being Nat such that
+A19:   j = i+1+k by NAT_1:10;
+      assume
+A20:   j <= n+1; then i <= n+1 by A18,XXREAL_0:2; then
+A21:   i in dom p by A17,A7,FINSEQ_3:25;
+      defpred S[Nat] means i+1+$1 <= n+1 implies R[p.(i+1+$1), p.i];
+A22:   S[ 0] proof assume i+1+0 <= n+1; then
+A23:     i < n+1 by NAT_1:13;
+        p.i in X() & i is Element of NAT by A14,A21;
+        hence R[p.(i+1+0), p.i] by A9,A17,A23;
+      end;
+A24:   now let k be Nat; assume
+A25:     S[k];
+        thus S[k+1] proof assume
+A26:       i+1+(k+1) <= n+1;
+A27:       i+1+(k+1) = i+1+k+1; then
+A28:       i+1+k < n+1 by A26,NAT_1:13;
+A29:       p.i in X() by A14,A21;
+          i+1+k = 1+(i+k); then
+A30:       1 <= i+1+k by NAT_1:11; then
+          i+1+k in dom p by A7,A28,FINSEQ_3:25; then
+A31:       p.(i+1+k) in X() & i+1+k is Element of NAT by A14; then
+          p.(i+1+(k+1)) in X() & R[p.(i+1+(k+1)), p.(i+1+k)] by A9,A28,A27,A30;
+          hence R[p.(i+1+(k+1)), p.i] by A2,A28,A25,A31,A29;
+        end;
+      end;
+      for k being Nat holds S[k] from NAT_1:sch 2(A22,A24);
+      hence R[p.j, p.i] by A19,A20;
+    end;
+A32: dom p = Seg(n+1) & card Seg(n+1) = n+1 by A7,FINSEQ_1:57,def 3;
+    card rng p c= card X() by A15,CARD_1:11; then
+    card rng p <= n & n < n+1 by NAT_1:19,39; then
+    not dom p, rng p are_equipotent by A32,CARD_1:5; then
+    p is not one-to-one by WELLORD2:def 4; then
+    consider i,j being set such that
+A33: i in dom p & j in dom p & p.i = p.j & i <> j by FUNCT_1:def 4;
+    reconsider i,j as Nat by A33;
+A34: 1 <= i & 1 <= j & i <= n+1 & j <= n+1 by A7,A33,FINSEQ_3:25;
+    p.i in rng p by A33,FUNCT_1:def 3; then
+A35: p.i in X() by A15;
+    i < j or j < i by A33,XXREAL_0:1; then
+    R[p.i,p.i] by A16,A33,A34;
+    hence contradiction by A1,A35;
+  end;
+
+scheme FiniteC{X() -> finite set, P[set]}:
+  P[X()]
+  provided
+A1
+: for A being Subset of X() st for B being set st B c< A holds P[B] holds P[A]
+  proof
+    defpred Q[Nat] means for A being Subset of X() st card A = $1 holds P[A];
+A2: for n being Nat st for i being Nat st i < n holds Q[i] holds Q[n]
+    proof
+      let n be Nat such that
+A3:   for i being Nat st i < n holds Q[i];
+      let A be Subset of X() such that
+A4:   card A = n;
+      now
+        let B be set such that
+A5:     B c< A;
+        B c= A by A5,XBOOLE_0:def 8; then
+        reconsider B9 = B as Subset of X() by XBOOLE_1:1;
+        card B9 < n by A4,A5,TREES_1:6;
+        hence P[B] by A3;
+      end;
+      hence thesis by A1;
+    end;
+    for n being Nat holds Q[n] from NAT_1:sch 4(A2); then
+    Q[card X()] & [#]X() = X();
+    hence thesis;
+  end;
+
+scheme Numeration{X() -> finite set, R[set, set]}:
+  ex s being one-to-one FinSequence st rng s = X() &
+  for i,j st i in dom s & j in dom s & R[s.i, s.j] holds i < j
+  provided
+A1: for x,y being set st x in X() & y in X() & R[x,y] holds not R[y,x] and
+A2: for x,y,z being set st x in X() & y in X() & z in X() & R[x,y] & R[y,z]
+    holds R[x,z]
+  proof
+    defpred P[set] means
+    ex s being one-to-one FinSequence st rng s = $1 &
+    for i,j st i in dom s & j in dom s & R[s.i, s.j] holds i < j;
+A3: P[{}]
+    proof
+      reconsider s = {} as one-to-one FinSequence;
+      take s; thus thesis;
+    end;
+A4: for A being Subset of X() st for B being set st B c< A holds P[B]
+    holds P[A]
+    proof
+      let A be Subset of X() such that
+A5:   for B being set st B c< A holds P[B];
+      per cases;
+      suppose A is empty;
+        hence P[A] by A3;
+      end;
+      suppose A is non empty; then
+        reconsider A9 = A as non empty finite set;
+A6:     for x,y being set st x in A9 & y in A9 & R[x,y] holds not R[y,x] by A1;
+A7:     for x,y,z being set st x in A9 & y in A9 & z in A9 & R[x,y] & R[y,z]
+        holds R[x,z] by A2;
+        consider x being set such that
+A8:     x in A9 & for y being set st y in A9 holds not R[y,x]
+        from MinimalElement(A6,A7);
+        set B = A\{x};
+A9:     x nin B & B c= A by XBOOLE_1:36,ZFMISC_1:56; then
+        B c< A by A8,XBOOLE_0:def 8; then
+        consider s being one-to-one FinSequence such that
+A10:     rng s = B and
+A11:     for i,j st i in dom s & j in dom s & R[s.i, s.j] holds i < j by A5;
+        <*x*> is one-to-one & rng <*x*> = {x} & {x} misses B
+        by FINSEQ_1:39,FINSEQ_3:93,XBOOLE_1:79; then
+        reconsider s9 = <*x*>^s as one-to-one FinSequence by A10,FINSEQ_3:91;
+A12:     {x} c= A by A8,ZFMISC_1:31;
+A13:     len <*x*> = 1 by FINSEQ_1:40;
+        thus P[A]
+        proof
+          take s9;
+          thus
+          rng s9 = (rng <*x*>)\/ rng s by FINSEQ_1:31
+          .= {x} \/ B by A10,FINSEQ_1:38 .= A by A12,XBOOLE_1:45;
+          let i,j such that
+A14:       i in dom s9 & j in dom s9 & R[s9.i, s9.j];
+A15:       dom <*x*> = Seg 1 by FINSEQ_1:38;
+          per cases by A13,A14,FINSEQ_1:25;
+          suppose i in dom <*x*> & j in dom <*x*>; then
+            i = 1 & j = 1 by A15,FINSEQ_1:2,TARSKI:def 1; then
+            s9.i = x & s9.j = x by FINSEQ_1:41;
+            hence i < j by A8,A14;
+          end;
+          suppose
+A16:         i in dom <*x*> & ex n being Nat st n in dom s & j = 1 + n; then
+A17:         i = 1 by A15,FINSEQ_1:2,TARSKI:def 1;
+            consider n being Nat such that
+A18:         n in dom s & j = 1+n by A16;
+            1 <= n by A18,FINSEQ_3:25;
+            hence i < j by A17,A18,NAT_1:13;
+          end;
+          suppose
+A19:         j in dom <*x*> & ex n being Nat st n in dom s & i = 1 + n; then
+            j = 1 by A15,FINSEQ_1:2,TARSKI:def 1; then
+A20:         s9.j = x by FINSEQ_1:41;
+            consider n being Nat such that
+A21:         n in dom s & i = 1+n by A19;
+            s9.i = s.n by A13,A21,FINSEQ_1:def 7; then
+            s9.i in rng s by A21,FUNCT_1:def 3;
+            hence i < j by A8,A14,A20,A9,A10;
+          end;
+          suppose (ex n being Nat st n in dom s & i = 1 + n) &
+            ex n being Nat st n in dom s & j = 1 + n; then
+            consider ni,nj being Nat such that
+A22:         ni in dom s & i = 1+ni & nj in dom s & j = 1+nj;
+            s9.i = s.ni & s9.j = s.nj by A13,A22,FINSEQ_1:def 7; then
+            ni < nj by A11,A14,A22;
+            hence i < j by A22,XREAL_1:6;
+          end;
+        end;
+      end;
+    end;
+    thus P[X()] from FiniteC(A4);
+  end;
+
+theorem Th2:
+  for x being variable holds varcl vars x = vars x
+  proof
+    let x be variable; x in Vars; then
+    consider A being Subset of Vars, j being Element of NAT such that
+A1: x = [varcl A,j] & A is finite by ABCMIZ_1:18;
+    vars x = varcl A by A1,MCART_1:7;
+    hence thesis;
+  end;
+
+theorem Th3:
+ for C being initialized ConstructorSignature for e being expression of C holds
+  e is compound iff not ex x being Element of Vars st e = x-term C
+  proof let C be initialized ConstructorSignature;
+    let e be expression of C;
+    (ex x being variable st e = x-term C) or
+    (ex c being constructor OperSymbol of C st
+    ex p being FinSequence of QuasiTerms C st
+    len p = len the_arity_of c & e = c-trm p) or
+    (ex a being expression of C, an_Adj C st e = (non_op C)term a) or
+    (ex a being expression of C, an_Adj C st
+    ex t being expression of C, a_Type C st
+    e = (ast C)term(a,t)) by ABCMIZ_1:53;
+    hence thesis;
+  end;
+
+begin :: Standardized Constructor Signature
+
+registration
+  cluster empty for quasi-loci;
+  existence by ABCMIZ_1:29;
+end;
+
+definition
+ let C be ConstructorSignature;
+ attr C is standardized means:
+Def1:
+  for o being OperSymbol of C st o is constructor holds o in Constructors &
+    o`1 = the_result_sort_of o &
+    card o`2`1 = len the_arity_of o;
+end;
+
+theorem Th4:
+  for C being ConstructorSignature st C is standardized
+  for o being OperSymbol of C
+  holds o is constructor iff o in Constructors
+  proof
+    let C be ConstructorSignature such that
+A1: C is standardized;
+    let o be OperSymbol of C;
+    thus o is constructor implies o in Constructors by A1,Def1;
+    assume o in Constructors; then
+    not o in {*, non_op} by ABCMIZ_1:39,XBOOLE_0:3;
+    hence o <> * & o <> non_op by TARSKI:def 2;
+  end;
+
+registration
+ cluster MaxConstrSign -> standardized;
+ coherence
+  proof let o be OperSymbol of MaxConstrSign;
+A1: the carrier' of MaxConstrSign = {*, non_op} \/ Constructors
+     by ABCMIZ_1:def 24;
+   assume
+A2: o is constructor; then
+A3: (the ResultSort of MaxConstrSign).o = o`1 &
+    card ((the Arity of MaxConstrSign).o) = card o`2`1
+     by ABCMIZ_1:def 24;
+    o <> * & o <> non_op by A2,ABCMIZ_1:def 11; then
+    not o in {*, non_op} by TARSKI:def 2;
+   hence thesis by A3,A1,XBOOLE_0:def 3;
+  end;
+end;
+
+registration
+ cluster initialized standardized strict for ConstructorSignature;
+ existence
+  proof take MaxConstrSign;
+   thus thesis;
+  end;
+end;
+
+definition
+  let C be initialized standardized ConstructorSignature;
+  let c be constructor OperSymbol of C;
+  func loci_of c -> quasi-loci equals c`2`1;
+  coherence
+  proof
+    reconsider c as Element of Constructors by Th4;
+    loci_of c is quasi-loci;
+    hence thesis;
+  end;
+end;
+
+registration
+ let C be ConstructorSignature;
+ cluster constructor for Subsignature of C;
+ existence
+  proof reconsider S = C as Subsignature of C by INSTALG1:15;
+    take S; thus thesis;
+  end;
+end;
+
+registration
+ let C be initialized ConstructorSignature;
+ cluster initialized for constructor Subsignature of C;
+ existence
+  proof reconsider S = C as constructor Subsignature of C by INSTALG1:15;
+    take S; thus thesis;
+  end;
+end;
+
+registration
+ let C be standardized ConstructorSignature;
+ cluster -> standardized for constructor Subsignature of C;
+ coherence
+  proof let S be constructor Subsignature of C;
+   let o be OperSymbol of S such that
+A1: o <> * & o <> non_op;
+A2: the carrier' of S c= the carrier' of C by INSTALG1:10;
+    o in the carrier' of S; then
+   reconsider c = o as OperSymbol of C by A2;
+A3: c is constructor by A1,ABCMIZ_1:def 11;
+    the Arity of S = (the Arity of C)|the carrier' of S &
+    the ResultSort of S = (the ResultSort of C)|the carrier' of S
+     by INSTALG1:12; then
+    the_result_sort_of c = the_result_sort_of o &
+    the_arity_of c = the_arity_of o by FUNCT_1:49;
+   hence thesis by A3,Def1;
+  end;
+end;
+
+theorem
+ for S1,S2 being standardized ConstructorSignature
+  st the carrier' of S1 = the carrier' of S2
+  holds the ManySortedSign of S1 = the ManySortedSign of S2
+  proof let S1,S2 be standardized ConstructorSignature such that
+A1: the carrier' of S1 = the carrier' of S2;
+A2: the carrier of S1 = 3 & the carrier of S2 = 3 by ABCMIZ_1:def 9,YELLOW11:1;
+    now let o be OperSymbol of S1;
+     reconsider o2 = o as OperSymbol of S2 by A1;
+     per cases by ABCMIZ_1:def 11;
+     suppose o = * or o = non_op; then
+       (the Arity of S1).o = <*an_Adj*> & (the Arity of S2).o = <*an_Adj*> or
+       (the Arity of S1).o = <*an_Adj,a_Type*> &
+       (the Arity of S2).o = <*an_Adj,a_Type*> by ABCMIZ_1:def 9;
+      hence (the Arity of S1).o = (the Arity of S2).o;
+     end;
+     suppose o is constructor & o2 is constructor; then
+      card o`2`1 = len the_arity_of o & card o`2`1 = len the_arity_of o2 &
+      the_arity_of o = (len the_arity_of o) |-> a_Term &
+      the_arity_of o2 = (len the_arity_of o2) |-> a_Term
+       by Def1,ABCMIZ_1:37;
+      hence (the Arity of S1).o = the_arity_of o2 .= (the Arity of S2).o;
+     end;
+    end; then
+A3: the Arity of S1 = the Arity of S2 by A1,A2,FUNCT_2:63;
+    now let o be OperSymbol of S1;
+     reconsider o2 = o as OperSymbol of S2 by A1;
+     per cases by ABCMIZ_1:def 11;
+     suppose o = * or o = non_op; then
+       (the ResultSort of S1).o = a_Type & (the ResultSort of S2).o = a_Type or
+       (the ResultSort of S1).o = an_Adj &
+       (the ResultSort of S2).o = an_Adj by ABCMIZ_1:def 9;
+      hence (the ResultSort of S1).o = (the ResultSort of S2).o;
+     end;
+     suppose o is constructor & o2 is constructor; then
+       the_result_sort_of o = o`1 & the_result_sort_of o2 = o`1
+       by Def1;
+      hence (the ResultSort of S1).o = the_result_sort_of o2
+         .= (the ResultSort of S2).o;
+     end;
+    end;
+   hence thesis by A1,A2,A3,FUNCT_2:63;
+  end;
+
+theorem
+ for C being ConstructorSignature holds
+   C is standardized iff C is Subsignature of MaxConstrSign
+  proof let C be ConstructorSignature;
+A1: the carrier' of MaxConstrSign = {*, non_op} \/ Constructors
+     by ABCMIZ_1:def 24;
+A2: dom the Arity of MaxConstrSign = the carrier' of MaxConstrSign
+     by FUNCT_2:def 1;
+A3: dom the ResultSort of MaxConstrSign = the carrier' of MaxConstrSign
+     by FUNCT_2:def 1;
+   thus C is standardized implies C is Subsignature of MaxConstrSign
+     proof assume
+A4:    for o being OperSymbol of C st o is constructor
+        holds o in Constructors &
+         o`1 = the_result_sort_of o &
+         card o`2`1 = len the_arity_of o;
+A5:    the carrier of C = 3 & the carrier of MaxConstrSign = 3
+        by ABCMIZ_1:def 9,YELLOW11:1;
+A6:    the Arity of C c= the Arity of MaxConstrSign
+        proof let x,y be set; assume
+A7:       [x,y] in the Arity of C; then
+         reconsider x as OperSymbol of C by ZFMISC_1:87;
+          x = * or x = non_op or x is constructor by ABCMIZ_1:def 11; then
+          x in {*, non_op} or x in Constructors by A4,TARSKI:def 2; then
+         reconsider c = x as OperSymbol of MaxConstrSign by A1,XBOOLE_0:def 3;
+A8:       y = (the Arity of C).x by A7,FUNCT_1:1;
+         per cases by ABCMIZ_1:def 11;
+         suppose x = * or x = non_op; then
+           c = * & y = <*an_Adj,a_Type*> or c = non_op & y = <*an_Adj*>
+            by A8,ABCMIZ_1:def 9; then
+           y = (the Arity of MaxConstrSign).c by ABCMIZ_1:def 9;
+          hence thesis by A2,FUNCT_1:def 2;
+         end;
+         suppose
+A9:        x is constructor; then
+A10:        x <> * & x <> non_op by ABCMIZ_1:def 11; then
+A11:        c is constructor by ABCMIZ_1:def 11;
+           card x`2`1 = len the_arity_of x by A4,A9
+                     .= card y by A7,FUNCT_1:1; then
+A12:        card y = card ((the Arity of MaxConstrSign).c)
+            by A11,ABCMIZ_1:def 24;
+           y in {a_Term}* & (the Arity of MaxConstrSign).c in {a_Term}*
+            by A8,A10,ABCMIZ_1:def 9; then
+           y = (the Arity of MaxConstrSign).c by A12,ABCMIZ_1:6;
+          hence thesis by A2,FUNCT_1:def 2;
+         end;
+        end;
+       the ResultSort of C c= the ResultSort of MaxConstrSign
+        proof let x,y be set; assume
+A13:       [x,y] in the ResultSort of C; then
+         reconsider x as OperSymbol of C by ZFMISC_1:87;
+          x is constructor or x = * or x = non_op by ABCMIZ_1:def 11; then
+          x in {*, non_op} or x in Constructors by A4,TARSKI:def 2; then
+         reconsider c = x as OperSymbol of MaxConstrSign by A1,XBOOLE_0:def 3;
+A14:       y = (the ResultSort of C).x by A13,FUNCT_1:1;
+         per cases by ABCMIZ_1:def 11;
+         suppose x = * or x = non_op; then
+           c = * & y = a_Type or c = non_op & y = an_Adj
+            by A14,ABCMIZ_1:def 9; then
+           y = (the ResultSort of MaxConstrSign).c by ABCMIZ_1:def 9;
+          hence thesis by A3,FUNCT_1:def 2;
+         end;
+         suppose
+A15:        x is constructor & c is constructor; then
+           x`1 = the_result_sort_of x by A4
+              .= y by A13,FUNCT_1:1; then
+           y = the_result_sort_of c by A15,Def1
+            .= (the ResultSort of MaxConstrSign).c;
+          hence thesis by A3,FUNCT_1:def 2;
+         end;
+        end;
+      hence thesis by A5,A6,INSTALG1:13;
+     end;
+   assume
+A16: C is Subsignature of MaxConstrSign;
+   let o be OperSymbol of C such that
+A17: o <> * & o <> non_op;
+    the carrier' of C c= the carrier' of MaxConstrSign &
+    o in the carrier' of C by A16,INSTALG1:10; then
+   reconsider c = o as OperSymbol of MaxConstrSign;
+A18: c is constructor by A17,ABCMIZ_1:def 11;
+    not c in {*, non_op} by A17,TARSKI:def 2;
+   hence o in Constructors by A1,XBOOLE_0:def 3;
+   thus o`1 = (the ResultSort of MaxConstrSign).c by A18,ABCMIZ_1:def 24
+           .= ((the ResultSort of MaxConstrSign)|the carrier' of C).o
+             by FUNCT_1:49
+           .= (the ResultSort of C).o by A16,INSTALG1:12
+           .= the_result_sort_of o;
+   thus card o`2`1 = card ((the Arity of MaxConstrSign).c)
+         by A18,ABCMIZ_1:def 24
+           .= card (((the Arity of MaxConstrSign)|the carrier' of C).o)
+             by FUNCT_1:49
+           .= card ((the Arity of C).o) by A16,INSTALG1:12
+           .= len the_arity_of o;
+  end;
+
+registration
+ let C be initialized ConstructorSignature;
+ cluster non compound for quasi-term of C;
+ existence
+  proof set x = the Element of Vars;
+   take x-term C; thus thesis;
+  end;
+end;
+
+registration
+ cluster -> pair for Element of Vars;
+ coherence
+  proof let x be Element of Vars;
+    Vars = {[varcl A, j] where A is Subset of Vars, j is Element of NAT:
+    A is finite} & x in Vars by ABCMIZ_1:18; then
+    ex A being Subset of Vars, j being Element of NAT st
+    x = [varcl A, j] & A is finite;
+   hence thesis;
+  end;
+end;
+
+theorem Th7:
+ for x being Element of Vars st vars x is natural holds vars x = 0
+  proof let x be Element of Vars;
+   assume x`1 is natural; then
+   reconsider n = x`1 as Element of NAT by ORDINAL1:def 12;
+    Vars = {[varcl A, j] where A is Subset of Vars, j is Element of NAT:
+    A is finite} & x in Vars by ABCMIZ_1:18; then
+   consider A being Subset of Vars, j being Element of NAT such that
+A1: x = [varcl A, j] & A is finite;
+   set i = the Element of n;
+   assume A2: x`1 <> 0; then
+A3: i in n;
+   reconsider i as Element of NAT by A2,ORDINAL1:10;
+    n = varcl A & vars x c= Vars by A1,MCART_1:7; then
+    i in Vars by A3;
+   hence thesis;
+  end;
+
+theorem Th8:
+ Vars misses Constructors proof assume Vars meets Constructors; then
+   consider x being set such that
+A1: x in Vars & x in Constructors by XBOOLE_0:3;
+   reconsider x as Element of Vars by A1;
+   consider A being Subset of Vars, j being Element of NAT such that
+A2: x = [varcl A, j] & A is finite by A1,ABCMIZ_1:18;
+    x in Modes \/ Attrs or x in Funcs by A1,XBOOLE_0:def 3; then
+    x in Modes or x in Attrs or x in Funcs by XBOOLE_0:def 3; then
+    x`2 in [:QuasiLoci,NAT:] & x`2 = j by A2,MCART_1:7,10; then
+    ex a,b being set st a in QuasiLoci & b in NAT & [a,b] = j
+     by ZFMISC_1:def 2;
+   hence thesis;
+  end;
+
+theorem
+ for x being Element of Vars holds x <> * & x <> non_op;
+
+theorem Th10:
+ for C being standardized ConstructorSignature holds
+   Vars misses the carrier' of C
+  proof let C be standardized ConstructorSignature;
+   assume Vars meets the carrier' of C; then
+   consider x being set such that
+A1: x in Vars & x in the carrier' of C by XBOOLE_0:3;
+   reconsider x as Element of Vars by A1;
+   reconsider c = x as OperSymbol of C by A1;
+   x = * or x = non_op or c is constructor by ABCMIZ_1:def 11; then
+    x = * or x = non_op or x in Constructors & Vars misses Constructors
+     by Th8,Def1;
+   hence thesis by XBOOLE_0:3;
+  end;
+
+theorem Th11: :: see ABCMIZ_1:51
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  holds
+   (ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term]) or
+   (ex o being OperSymbol of C st e.{} = [o, the carrier of C] &
+    ( o in Constructors or o = * or o = non_op ))
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C;
+   set X = MSVars C;
+   set Y = X \/ ((the carrier of C) --> {0});
+   reconsider q = e as Term of C,Y by MSAFREE3:8;
+   per cases by MSATERM:2;
+   suppose
+     ex s being SortSymbol of C, v being Element of Y.s st q.{} = [v,s]; then
+    consider s being SortSymbol of C, v being Element of Y.s such that
+A1:  q.{} = [v,s];
+    consider z being set such that
+A2:  z in dom the Sorts of Free(C,X) & e in (the Sorts of Free(C, X)).z
+      by CARD_5:2;
+    reconsider z as SortSymbol of C by A2;
+     the carrier of C = {a_Type, an_Adj, a_Term} by ABCMIZ_1:def 9; then
+A3:  z = a_Type or z = an_Adj or z = a_Term by ENUMSET1:def 1;
+A4:  q = root-tree [v,s] by A1,MSATERM:5; then
+A5:  the_sort_of q = s by MSATERM:14;
+A6:  the Sorts of Free(C, X) = C-Terms(X,Y) by MSAFREE3:24; then
+     the Sorts of Free(C, X) c= the Sorts of FreeMSA Y by PBOOLE:def 18; then
+     (the Sorts of Free(C, X)).z c= (the Sorts of FreeMSA Y).z &
+     FreeMSA Y = MSAlgebra(#FreeSort Y, FreeOper Y#)
+      by PBOOLE:def 2; then
+     q in (the Sorts of FreeMSA Y).z &
+     (the Sorts of FreeMSA Y).z = FreeSort(Y, z) by A2,MSAFREE:def 11; then
+A7:  s = z by A5,MSATERM:def 5; then
+     v in (MSVars C).z by A4,A2,A6,MSAFREE3:18; then
+A8:  v in Vars & z = a_Term by A3,ABCMIZ_1:def 25; then
+    reconsider x = v as Element of Vars;
+     e = x-term C by A1,A7,A8,MSATERM:5;
+    hence thesis by A1,A7,A8;
+   end;
+   suppose
+     q.{} in [:the carrier' of C,{the carrier of C}:]; then
+    consider o,s being set such that
+A9:  o in the carrier' of C & s in {the carrier of C} & q.{} = [o,s]
+      by ZFMISC_1:def 2;
+    reconsider o as OperSymbol of C by A9;
+     o is constructor iff o <> * & o <> non_op by ABCMIZ_1:def 11; then
+     s = the carrier of C & (o in Constructors or o = * or o = non_op)
+      by A9,Def1,TARSKI:def 1;
+    hence thesis by A9;
+   end;
+  end;
+
+registration
+ let C be initialized standardized ConstructorSignature;
+ let e be expression of C;
+ cluster e.{} -> pair;
+ coherence
+  proof
+    (ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term]) or
+    (ex o being OperSymbol of C st e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op )) by Th11;
+   hence thesis;
+  end;
+end;
+
+theorem Th12:
+ for C being initialized ConstructorSignature for e being expression of C
+ for o being OperSymbol of C st e.{} = [o, the carrier of C]
+  holds
+    e is expression of C, the_result_sort_of o
+  proof let C be initialized ConstructorSignature;
+   let e be expression of C;
+   let o be OperSymbol of C such that
+A1: e.{} = [o, the carrier of C];
+   set X = MSVars C, Y = X \/ ((the carrier of C) --> {0});
+   reconsider t = e as Term of C, Y by MSAFREE3:8;
+    variables_in t c= X by MSAFREE3:27; then
+    e in {t1 where t1 is Term of C, Y:
+          the_sort_of t1 = the_sort_of t & variables_in t1 c= X}; then
+    e in C-Terms(X,Y).the_sort_of t by MSAFREE3:def 5; then
+A2: e in (the Sorts of Free(C, X)).the_sort_of t by MSAFREE3:24;
+    the_sort_of t = the_result_sort_of o by A1,MSATERM:17;
+   hence thesis by A2,ABCMIZ_1:def 28;
+  end;
+
+theorem Th13:
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  holds
+    ( (e.{})`1 = * implies e is expression of C, a_Type C ) &
+    ( (e.{})`1 = non_op implies e is expression of C, an_Adj C )
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C;
+   per cases by Th11;
+   suppose
+     ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term]; then
+    consider x being Element of Vars such that
+A1:  e = x-term C & e.{} = [x, a_Term];
+    thus thesis by A1,MCART_1:7;
+   end;
+   suppose
+     (ex o being OperSymbol of C st e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op )); then
+    consider o being OperSymbol of C such that
+A2:  e.{} = [o, the carrier of C];
+    set X = MSVars C, Y = X \/ ((the carrier of C) --> {0});
+    reconsider t = e as Term of C, Y by MSAFREE3:8;
+     variables_in t c= X by MSAFREE3:27; then
+     e in {t1 where t1 is Term of C, Y:
+           the_sort_of t1 = the_sort_of t & variables_in t1 c= X}; then
+     e in C-Terms(X,Y).the_sort_of t by MSAFREE3:def 5; then
+A3:  e in (the Sorts of Free(C, X)).the_sort_of t by MSAFREE3:24;
+A4:  the_result_sort_of non_op C = an_Adj C &
+     the_result_sort_of ast C = a_Type C by ABCMIZ_1:38;
+A5:  (e.{})`1 = o & non_op C = non_op & ast C = * by A2,MCART_1:7;
+     the_sort_of t = the_result_sort_of o by A2,MSATERM:17;
+    hence thesis by A3,A4,A5,ABCMIZ_1:def 28;
+   end;
+  end;
+
+theorem Th14:
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  holds
+   (e.{})`1 in Vars & (e.{})`2 = a_Term & e is quasi-term of C or
+   (e.{})`2 = the carrier of C &
+    ( (e.{})`1 in Constructors & (e.{})`1 in the carrier' of C or
+      (e.{})`1 = * or (e.{})`1 = non_op )
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C;
+   per cases by Th11;
+   suppose ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term];
+    then consider x being Element of Vars such that
+A1:  e = x-term C & e.{} = [x, a_Term];
+     (e.{})`1 = x & (e.{})`2 = a_Term by A1,MCART_1:7;
+    hence thesis by A1;
+   end;
+   suppose ex o being OperSymbol of C st e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op ); then
+    consider o being OperSymbol of C such that
+A2:  e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op );
+     (e.{})`1 = o & (e.{})`2 = the carrier of C by A2,MCART_1:7;
+    hence thesis by A2;
+   end;
+  end;
+
+theorem
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  st (e.{})`1 in Constructors
+  holds e in (the Sorts of Free(C, MSVars C)).(e.{})`1`1
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C;
+   assume
+A1: (e.{})`1 in Constructors;
+   per cases by Th11;
+   suppose
+     ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term]; then
+    consider x being Element of Vars such that
+A2:  e = x-term C & e.{} = [x, a_Term];
+     (e.{})`1 = x by A2,MCART_1:7;
+    hence thesis by A1,Th8,XBOOLE_0:3;
+   end;
+   suppose
+     ex o being OperSymbol of C st e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op ); then
+    consider o being OperSymbol of C such that
+A3:  e.{} = [o, the carrier of C];
+A4:  (e.{})`1 = o by A3,MCART_1:7;
+     * in {*, non_op} & non_op in {*, non_op} by TARSKI:def 2; then
+     o <> * & o <> non_op by A1,A4,ABCMIZ_1:39,XBOOLE_0:3; then
+A5:  o is constructor by ABCMIZ_1:def 11;
+    set X = MSVars C;
+    reconsider t = e as Term of C, X \/ ((the carrier of C) --> {0})
+      by MSAFREE3:8;
+A6:  the_sort_of t = the_result_sort_of o by A3,MSATERM:17
+         .= o`1 by A5,Def1;
+     variables_in t c= X by MSAFREE3:27; then
+     e in {t1 where t1 is Term of C, X \/ ((the carrier of C) --> {0}):
+           the_sort_of t1 = the_sort_of t & variables_in t1 c= X}; then
+     e in C-Terms(X, X \/ ((the carrier of C)-->{0})).the_sort_of t
+       by MSAFREE3:def 5;
+    hence e in (the Sorts of Free(C, MSVars C)).(e.{})`1`1
+      by A4,A6,MSAFREE3:23;
+   end;
+  end;
+
+theorem
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  holds not (e.{})`1 in Vars iff (e.{})`1 is OperSymbol of C
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C;
+A1:  (e.{})`1 in Vars or (e.{})`1 in the carrier' of C or
+     (e.{})`1 = ast C or (e.{})`1 = non_op C by Th14;
+     Vars misses the carrier' of C by Th10;
+    hence not (e.{})`1 in Vars iff (e.{})`1 is OperSymbol of C
+     by A1,XBOOLE_0:3;
+  end;
+
+theorem Th17:
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  st (e.{})`1 in Vars
+ ex x being Element of Vars st x = (e.{})`1 & e = x-term C
+  proof let C be initialized standardized ConstructorSignature;
+   let t be expression of C such that
+A1: (t.{})`1 in Vars;
+   set X = MSVars C;
+   set V = X \/ ((the carrier of C) --> {0});
+   reconsider q = t as Term of C, V by MSAFREE3:8;
+   per cases by MSATERM:2;
+   suppose q.{} in [:the carrier' of C, {the carrier of C}:]; then
+     (q.{})`1 in the carrier' of C &
+     the carrier' of C misses Vars by Th10,MCART_1:10;
+    hence thesis by A1,XBOOLE_0:3;
+   end;
+   suppose
+     ex s being SortSymbol of C, v being Element of V.s st q.{} = [v,s]; then
+    consider s being SortSymbol of C, v being Element of V.s such that
+A2:  t.{} = [v,s];
+A3:  q = root-tree [v,s] by A2,MSATERM:5;
+    reconsider x = v as Element of Vars by A1,A2,MCART_1:7;
+    take x;
+     the carrier of C = {a_Type, an_Adj, a_Term} by ABCMIZ_1:def 9; then
+A4:  s = a_Term or s = a_Type or s = an_Adj by ENUMSET1:def 1;
+     ((the carrier of C) --> {0}).s = {0} by FUNCOP_1:7; then
+     V.s = X.s \/ {0} by PBOOLE:def 4; then
+A5:  s = a_Term or V.s = {} \/ {0} by A4,ABCMIZ_1:def 25;
+     v in V.s & x <> 0;
+    hence thesis by A2,A3,A5,MCART_1:7;
+   end;
+  end;
+
+theorem Th18:
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  st (e.{})`1 = *
+ ex a being expression of C, an_Adj C, q being expression of C, a_Type C st
+  e = [*,3]-tree(a,q)
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C such that
+A1: (e.{})`1 = *;
+    not ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term]
+       by A1,MCART_1:7;
+   then consider o being OperSymbol of C such that
+A2: e.{} = [o, the carrier of C] and
+    o in Constructors or o = * or o = non_op by Th11;
+   set Y = (MSVars C) \/ ((the carrier of C) --> {0});
+   reconsider t = e as Term of C, (MSVars C) \/ ((the carrier of C) --> {0})
+     by MSAFREE3:8;
+   consider aa being ArgumentSeq of
+      Sym(o, (MSVars C) \/ ((the carrier of C) --> {0})) such that
+A3: t = [o, the carrier of C]-tree aa by A2,MSATERM:10;
+A4: * = [o, the carrier of C]`1 by A1,A3,TREES_4:def 4 .= o;
+A5: the_arity_of ast C = <*an_Adj C, a_Type C*> by ABCMIZ_1:38;
+A6: len aa = len the_arity_of o by MSATERM:22
+          .= 2 by A4,A5,FINSEQ_1:44; then
+    dom aa = Seg 2 by FINSEQ_1:def 3; then
+A7: 1 in dom aa & 2 in dom aa; then
+   reconsider t1 = aa.1, t2 = aa.2 as Term of C,
+      (MSVars C) \/ ((the carrier of C) --> {0}) by MSATERM:22;
+A8: len doms aa = len aa by TREES_3:38;
+    (doms aa).1 = dom t1 & (doms aa).2 = dom t2 by A7,FUNCT_6:22; then
+A9: 0 < 2 & 0+1 = 1 & 1 < 2 & 1+1 = 2 & {} in (doms aa).1 & {} in (doms aa).2 &
+    <* 0*>^<*>NAT = <* 0*> & <* 1*>^<*>NAT = <* 1*>
+     by FINSEQ_1:34,TREES_1:22;
+    dom t = tree doms aa by A3,TREES_4:10; then
+   reconsider 00 = <* 0*>, 01 = <* 1*> as Element of dom t
+     by A6,A8,A9,TREES_3:def 15;
+    0 < 2 & 1 = 0+1 & 1 < 2 & 2 = 1+1 & aa is DTree-yielding; then
+    t1 = t|00 & t2 = t|01 by A3,A6,TREES_4:def 4; then
+A10: t1 is expression of C & t2 is expression of C &
+    variables_in t1 c= variables_in t & variables_in t2 c= variables_in t
+     by MSAFREE3:32,33; then
+A11: variables_in t1 c= MSVars C & variables_in t2 c= MSVars C by MSAFREE3:27;
+    the_sort_of t1 = (the_arity_of o).1 by A7,MSATERM:23
+                  .= an_Adj C by A4,A5,FINSEQ_1:44; then
+    t1 in {s where s is Term of C,Y: the_sort_of s = an_Adj C &
+           variables_in s c= MSVars C} by A11; then
+    t1 in (C-Terms(MSVars C, Y)).an_Adj C by MSAFREE3:def 5; then
+    t1 in (the Sorts of Free(C, MSVars C)).an_Adj C by MSAFREE3:24; then
+   reconsider a = t1 as expression of C, an_Adj C by A10,ABCMIZ_1:def 28;
+    the_sort_of t2 = (the_arity_of o).2 by A7,MSATERM:23
+                  .= a_Type C by A4,A5,FINSEQ_1:44; then
+    t2 in {s where s is Term of C,Y: the_sort_of s = a_Type C &
+           variables_in s c= MSVars C} by A11; then
+    t2 in (C-Terms(MSVars C, Y)).a_Type C by MSAFREE3:def 5; then
+    t2 in (the Sorts of Free(C, MSVars C)).a_Type C by MSAFREE3:24; then
+   reconsider q = t2 as expression of C, a_Type C by A10,ABCMIZ_1:def 28;
+   take a,q;
+A12: the carrier of C = 3 by ABCMIZ_1:def 9,YELLOW11:1;
+    aa = <*a,q*> by A6,FINSEQ_1:44;
+   hence thesis by A3,A4,A12,TREES_4:def 6;
+  end;
+
+theorem Th19:
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  st (e.{})`1 = non_op
+ ex a being expression of C, an_Adj C st e = [non_op,3]-tree a
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C such that
+A1: (e.{})`1 = non_op;
+   not ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term]
+    by A1,MCART_1:7;
+   then consider o being OperSymbol of C such that
+A2: e.{} = [o, the carrier of C] and
+    o in Constructors or o = * or o = non_op by Th11;
+   set Y = (MSVars C) \/ ((the carrier of C) --> {0});
+   reconsider t = e as Term of C, (MSVars C) \/ ((the carrier of C) --> {0})
+     by MSAFREE3:8;
+   consider aa being ArgumentSeq of
+      Sym(o, (MSVars C) \/ ((the carrier of C) --> {0})) such that
+A3: t = [o, the carrier of C]-tree aa by A2,MSATERM:10;
+A4: non_op = [o, the carrier of C]`1 by A1,A3,TREES_4:def 4 .= o;
+A5: the_arity_of non_op C = <*an_Adj C*> by ABCMIZ_1:38;
+A6: len aa = len the_arity_of o by MSATERM:22
+          .= 1 by A4,A5,FINSEQ_1:40; then
+    dom aa = Seg 1 by FINSEQ_1:def 3; then
+A7: 1 in dom aa; then
+   reconsider t1 = aa.1 as Term of C,
+      (MSVars C) \/ ((the carrier of C) --> {0}) by MSATERM:22;
+A8: len doms aa = len aa by TREES_3:38;
+    (doms aa).1 = dom t1 by A7,FUNCT_6:22; then
+A9: 0 < 1 & 0+1 = 1 & {} in (doms aa).1 & <* 0*>^<*>NAT = <* 0*>
+     by FINSEQ_1:34,TREES_1:22;
+    dom t = tree doms aa by A3,TREES_4:10; then
+   reconsider 00 = <* 0*> as Element of dom t by A6,A8,A9,TREES_3:def 15;
+    t1 = t|00 by A3,A6,A9,TREES_4:def 4; then
+A10: t1 is expression of C & variables_in t1 c= variables_in t
+     by MSAFREE3:32,33; then
+A11: variables_in t1 c= MSVars C by MSAFREE3:27;
+    the_sort_of t1 = (the_arity_of o).1 by A7,MSATERM:23
+                  .= an_Adj C by A4,A5,FINSEQ_1:40; then
+    t1 in {s where s is Term of C,Y: the_sort_of s = an_Adj C &
+           variables_in s c= MSVars C} by A11; then
+    t1 in (C-Terms(MSVars C, Y)).an_Adj C by MSAFREE3:def 5; then
+    t1 in (the Sorts of Free(C, MSVars C)).an_Adj C by MSAFREE3:24; then
+   reconsider a = t1 as expression of C, an_Adj C by A10,ABCMIZ_1:def 28;
+   take a;
+A12: the carrier of C = 3 by ABCMIZ_1:def 9,YELLOW11:1;
+    aa = <*a*> by A6,FINSEQ_1:40;
+   hence thesis by A3,A4,A12,TREES_4:def 5;
+  end;
+
+theorem Th20:
+ for C being initialized standardized ConstructorSignature
+ for e being expression of C
+  st (e.{})`1 in Constructors
+ ex o being OperSymbol of C st o = (e.{})`1 & the_result_sort_of o = o`1 &
+   e is expression of C, the_result_sort_of o
+  proof let C be initialized standardized ConstructorSignature;
+   let e be expression of C such that
+A1: (e.{})`1 in Constructors;
+   per cases by Th11;
+   suppose ex x being Element of Vars st e = x-term C & e.{} = [x, a_Term];
+    then consider x being Element of Vars such that
+A2:  e = x-term C & e.{} = [x, a_Term];
+     (e.{})`1 = x & x in Vars by A2,MCART_1:7;
+    hence thesis by A1,Th8,XBOOLE_0:3;
+   end;
+   suppose ex o being OperSymbol of C st e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op ); then
+    consider o being OperSymbol of C such that
+A3:  e.{} = [o, the carrier of C] &
+     ( o in Constructors or o = * or o = non_op );
+    take o;
+A4:  (e.{})`1 = o & (e.{})`2 = the carrier of C by A3,MCART_1:7;
+     * in {*, non_op} & non_op in {*, non_op} by TARSKI:def 2; then
+     o <> * & o <> non_op by A1,A4,ABCMIZ_1:39,XBOOLE_0:3; then
+     o is constructor by ABCMIZ_1:def 11;
+    hence o = (e.{})`1 & the_result_sort_of o = o`1
+      by A3,Def1,MCART_1:7;
+    set X = MSVars C;
+    set V = X \/ ((the carrier of C) --> {0});
+    reconsider q = e as Term of C,V by MSAFREE3:8;
+A5:  variables_in q c= X by MSAFREE3:27;
+A6:  the_sort_of q = the_result_sort_of o by A3,MSATERM:17;
+     (the Sorts of Free(C, MSVars C)).the_result_sort_of o
+      = C-Terms(X,V).the_result_sort_of o by MSAFREE3:24
+     .= {a where a is Term of C,V: the_sort_of a = the_result_sort_of o &
+         variables_in a c= X} by MSAFREE3:def 5;
+    hence
+     e in (the Sorts of Free(C, MSVars C)).the_result_sort_of o by A5,A6;
+   end;
+  end;
+
+theorem Th21:
+ for C being initialized standardized ConstructorSignature
+ for t being quasi-term of C holds
+   t is compound iff (t.{})`1 in Constructors & (t.{})`1`1 = a_Term
+  proof let C be initialized standardized ConstructorSignature;
+   set X = MSVars C;
+   set V = X \/ ((the carrier of C) --> {0});
+   let t be quasi-term of C;
+    C-Terms(X, V) c= the Sorts of FreeMSA V &
+    the Sorts of Free(C, X) = C-Terms(X, V) by MSAFREE3:24,PBOOLE:def 18; then
+A1: FreeMSA V = MSAlgebra(#FreeSort V, FreeOper V#) &
+    (C-Terms(X, V)).a_Term C c= (the Sorts of FreeMSA V).a_Term C &
+     t in C-Terms(X,V).a_Term C
+     by ABCMIZ_1:def 28,PBOOLE:def 2; then
+    t in (FreeSort V).a_Term C; then
+A2: t in FreeSort(V,a_Term C) by MSAFREE:def 11;
+A3: (MSVars C).a_Term = Vars & a_Term C = a_Term & a_Term = 2
+     by ABCMIZ_1:def 25;
+   reconsider q = t as Term of C, V by MSAFREE3:8;
+   per cases by MSATERM:2;
+   suppose
+     ex s being SortSymbol of C, v being Element of V.s st q.{} = [v,s]; then
+    consider s being SortSymbol of C, v being Element of V.s such that
+A4:  t.{} = [v,s];
+A5:  q = root-tree [v,s] & the_sort_of q = a_Term C
+      by A2,A4,MSATERM:5,def 5; then
+A6:  a_Term C = s & (t.{})`1 = v by A4,MCART_1:7,MSATERM:14; then
+    reconsider x = v as Element of Vars by A3,A5,A1,MSAFREE3:18;
+     q = x-term C & vars x <> 2 by A5,A6,Th7;
+    hence thesis by A6;
+   end;
+   suppose
+     q.{} in [:the carrier' of C,{the carrier of C}:]; then
+    consider o, k being set such that
+A7:  o in the carrier' of C & k in {the carrier of C} & q.{} = [o,k]
+      by ZFMISC_1:def 2;
+    reconsider o as OperSymbol of C by A7;
+     k = the carrier of C by A7,TARSKI:def 1; then
+A8:  the_result_sort_of o = the_sort_of q by A7,MSATERM:17
+       .= a_Term C by A1,MSAFREE3:17; then
+     o <> ast C & o <> non_op C by ABCMIZ_1:38; then
+A9:  o is constructor by ABCMIZ_1:def 11; then
+A10:  a_Term C = o`1 by A8,Def1 .= (q.{})`1`1 by A7,MCART_1:7;
+A11:  (q.{})`1 = o by A7,MCART_1:7;
+     now given x being Element of Vars such that
+A12:    q = x-term C;
+       q.{} = [x,a_Term] by A12,TREES_4:3; then
+       k = a_Term by A7,XTUPLE_0:1; then
+       2 = the carrier of C by A7,TARSKI:def 1;
+      hence contradiction by ABCMIZ_1:def 9,YELLOW11:1;
+     end;
+    hence thesis by A9,A10,A11,Th3,Def1;
+   end;
+  end;
+
+theorem Th22:
+ for C being initialized standardized ConstructorSignature
+ for t being expression of C holds
+   t is non compound quasi-term of C iff (t.{})`1 in Vars
+  proof let C be initialized standardized ConstructorSignature;
+   let t be expression of C;
+   thus
+    now assume t is non compound quasi-term of C; then
+     consider x being Element of Vars such that
+A1:   t = x-term C by Th3;
+      t.{} = [x,a_Term] & x in Vars by A1,TREES_4:3;
+     hence (t.{})`1 in Vars by MCART_1:7;
+    end;
+   assume (t.{})`1 in Vars; then
+    ex x being Element of Vars st x = (t.{})`1 & t = x-term C by Th17;
+   hence thesis;
+  end;
+
+theorem
+ for C being initialized standardized ConstructorSignature
+ for t being expression of C holds
+   t is quasi-term of C iff
+      (t.{})`1 in Constructors & (t.{})`1`1 = a_Term or (t.{})`1 in Vars
+  proof let C be initialized standardized ConstructorSignature;
+   let t be expression of C;
+   hereby assume t is quasi-term of C; then
+     reconsider tr = t as quasi-term of C;
+     tr is compound or tr is non compound;
+     hence (t.{})`1 in Constructors & (t.{})`1`1 = a_Term or
+           (t.{})`1 in Vars by Th21,Th22;
+    end;
+   assume that
+A1: (t.{})`1 in Constructors & (t.{})`1`1 = a_Term or (t.{})`1 in Vars and
+A2: t is not quasi-term of C;
+A3: (t.{})`1 in Vars implies
+      ex x being Element of Vars st x = (t.{})`1 & t = x-term C by Th17; then
+    (t.{})`1 in Constructors & (t.{})`1`1 = a_Term by A1,A2; then
+    ex o being OperSymbol of C st o = (t.{})`1 & the_result_sort_of o = o`1 &
+     t is expression of C, the_result_sort_of o by Th20;
+   hence thesis by A2,A3,A1;
+  end;
+
+theorem Th24:
+ for C being initialized standardized ConstructorSignature
+ for a being expression of C holds
+   a is positive quasi-adjective of C iff
+    (a .{})`1 in Constructors & (a .{})`1`1 = an_Adj
+  proof let C be initialized standardized ConstructorSignature;
+   set X = MSVars C;
+   set V = X \/ ((the carrier of C) --> {0});
+   let t be expression of C;
+   consider A being MSSubset of FreeMSA V such that
+A1: Free(C, X) = GenMSAlg A & A = (Reverse V)""X by MSAFREE3:def 1;
+    the Sorts of Free(C, X) is MSSubset of FreeMSA V
+     by A1,MSUALG_2:def 9; then
+    the Sorts of Free(C, X) c= the Sorts of FreeMSA V by PBOOLE:def 18; then
+A2: (the Sorts of Free(C, MSVars C)).an_Adj C c=
+    (the Sorts of FreeMSA V).an_Adj C by PBOOLE:def 2;
+   per cases by Th14;
+   suppose (t.{})`1 in Vars & (t.{})`2 = a_Term & t is quasi-term of C;
+    hence thesis by Th8,ABCMIZ_1:77,XBOOLE_0:3;
+   end;
+   suppose that
+A3:  (t.{})`2 = the carrier of C and
+A4:  (t.{})`1 in Constructors and
+A5:  (t.{})`1 in the carrier' of C;
+    reconsider o = (t.{})`1 as OperSymbol of C by A5;
+    reconsider tt = t as Term of C, V by MSAFREE3:8;
+     not o in {*, non_op} by A4,ABCMIZ_1:39,XBOOLE_0:3; then
+     o <> * & o <> non_op by TARSKI:def 2; then
+     o is constructor by ABCMIZ_1:def 11; then
+A6:  o`1 = the_result_sort_of o by Def1;
+A7:  t.{} = [o, (t.{})`2] by Th1; then
+A8:  the_sort_of tt = the_result_sort_of o by A3,MSATERM:17;
+    hereby assume t is positive quasi-adjective of C; then
+A9:    t in (the Sorts of Free(C, MSVars C)).an_Adj C by ABCMIZ_1:def 28;
+      thus (t.{})`1 in Constructors by A4;
+      assume (t.{})`1`1 <> an_Adj;
+      hence contradiction by A2,A9,A6,A8,MSAFREE3:7;
+     end;
+    assume (t.{})`1 in Constructors;
+    assume (t.{})`1`1 = an_Adj; then
+    reconsider t as expression of C, an_Adj C by A3,A6,A7,Th12;
+     t is positive proof given a being expression of C, an_Adj C such that
+A10:     t = (non_op C)term a;
+        t = [non_op, the carrier of C]-tree <*a*> by A10,ABCMIZ_1:43; then
+        t.{} = [non_op, the carrier of C] by TREES_4:def 4; then
+        (t.{})`1 = non_op by MCART_1:7; then
+        (t.{})`1 in {*, non_op} by TARSKI:def 2;
+       hence thesis by A4,ABCMIZ_1:39,XBOOLE_0:3;
+      end;
+    hence thesis;
+   end;
+   suppose
+A11:  (t.{})`1 = *; then
+     (t.{})`1 in {*, non_op} by TARSKI:def 2; then
+A12:  not (t.{})`1 in Constructors by ABCMIZ_1:39,XBOOLE_0:3;
+    consider a being expression of C, an_Adj C,
+    q being expression of C, a_Type C such that
+A13:  t = [*,3]-tree(a,q) by A11,Th18;
+     t = [*,3]-tree<*a,q*> by A13,TREES_4:def 6; then
+     t.{} = [*, 3] by TREES_4:def 4; then
+     (t.{})`1 = * by MCART_1:7; then
+     t is expression of C, a_Type C & a_Type C = a_Type & a_Type = 0 &
+     an_Adj C = an_Adj & an_Adj = 1 by Th13;
+    hence thesis by A12,ABCMIZ_1:48;
+   end;
+   suppose
+A14:  (t.{})`1 = non_op; then
+     (t.{})`1 in {*, non_op} by TARSKI:def 2; then
+A15:  not (t.{})`1 in Constructors by ABCMIZ_1:39,XBOOLE_0:3;
+    consider a being expression of C, an_Adj C such that
+A16:  t = [non_op,3]-tree a by A14,Th19;
+     t = [non_op,3]-tree <*a*> by A16,TREES_4:def 5
+      .= [non_op, the carrier of C]-tree <*a*> by ABCMIZ_1:def 9,YELLOW11:1
+      .= (non_op C)term a by ABCMIZ_1:43;
+    hence thesis by A15,ABCMIZ_1:def 37;
+   end;
+  end;
+
+theorem
+ for C being initialized standardized ConstructorSignature
+ for a being quasi-adjective of C holds
+   a is negative iff (a .{})`1 = non_op
+  proof let C be initialized standardized ConstructorSignature;
+   let t be quasi-adjective of C;
+   per cases;
+   suppose
+A1:  t is positive expression of C, an_Adj C; then
+     (t.{})`1 in Constructors & non_op in {*, non_op} by Th24,TARSKI:def 2;
+    hence thesis by A1,ABCMIZ_1:39,XBOOLE_0:3;
+   end;
+   suppose
+A2:  t is negative expression of C, an_Adj C; then
+    consider a being expression of C, an_Adj C such that
+A3:  a is positive & t = (non_op C)term a by ABCMIZ_1:def 38;
+     t = [non_op, the carrier of C]-tree <*a*> by A3,ABCMIZ_1:43; then
+     t.{} = [non_op, the carrier of C] by TREES_4:def 4;
+    hence thesis by A2,MCART_1:7;
+   end;
+  end;
+
+theorem
+ for C being initialized standardized ConstructorSignature
+ for t being expression of C holds
+   t is pure expression of C, a_Type C iff
+    (t.{})`1 in Constructors & (t.{})`1`1 = a_Type
+  proof let C be initialized standardized ConstructorSignature;
+   set X = MSVars C;
+   set V = X \/ ((the carrier of C) --> {0});
+   let t be expression of C;
+   consider A being MSSubset of FreeMSA V such that
+A1: Free(C, X) = GenMSAlg A & A = (Reverse V)""X by MSAFREE3:def 1;
+    the Sorts of Free(C, X) is MSSubset of FreeMSA V
+     by A1,MSUALG_2:def 9; then
+    the Sorts of Free(C, X) c= the Sorts of FreeMSA V by PBOOLE:def 18; then
+A2: (the Sorts of Free(C, MSVars C)).a_Type C c=
+    (the Sorts of FreeMSA V).a_Type C by PBOOLE:def 2;
+   per cases by Th14;
+   suppose (t.{})`1 in Vars & (t.{})`2 = a_Term & t is quasi-term of C;
+    hence thesis by Th8,ABCMIZ_1:48,XBOOLE_0:3;
+   end;
+   suppose that
+A3:  (t.{})`2 = the carrier of C and
+A4:  (t.{})`1 in Constructors and
+A5:  (t.{})`1 in the carrier' of C;
+    reconsider o = (t.{})`1 as OperSymbol of C by A5;
+    reconsider tt = t as Term of C, V by MSAFREE3:8;
+     not o in {*, non_op} by A4,ABCMIZ_1:39,XBOOLE_0:3; then
+     o <> * & o <> non_op by TARSKI:def 2; then
+     o is constructor by ABCMIZ_1:def 11; then
+A6:  o`1 = the_result_sort_of o by Def1;
+A7:  t.{} = [o, (t.{})`2] by Th1; then
+A8:  the_sort_of tt = the_result_sort_of o by A3,MSATERM:17;
+    thus
+     now assume t is pure expression of C, a_Type C; then
+A9:    t in (the Sorts of Free(C, MSVars C)).a_Type C by ABCMIZ_1:def 28;
+      thus (t.{})`1 in Constructors by A4;
+      assume (t.{})`1`1 <> a_Type;
+      hence contradiction by A2,A9,A6,A8,MSAFREE3:7;
+     end;
+    assume (t.{})`1 in Constructors;
+    assume (t.{})`1`1 = a_Type; then
+    reconsider t as expression of C, a_Type C by A3,A7,Th12,A6;
+     t is pure proof given a being expression of C, an_Adj C,
+                  q being expression of C, a_Type C such that
+A10:     t = (ast C)term(a,q);
+        t = [*, the carrier of C]-tree <*a,q*> by A10,ABCMIZ_1:46; then
+        t.{} = [*, the carrier of C] by TREES_4:def 4; then
+        (t.{})`1 = * by MCART_1:7; then
+        (t.{})`1 in {*, non_op} by TARSKI:def 2;
+       hence thesis by A4,ABCMIZ_1:39,XBOOLE_0:3;
+      end;
+    hence thesis;
+   end;
+   suppose
+A11:  (t.{})`1 = *; then
+     (t.{})`1 in {*, non_op} by TARSKI:def 2; then
+A12:  not (t.{})`1 in Constructors by ABCMIZ_1:39,XBOOLE_0:3;
+    consider a being expression of C, an_Adj C,
+    q being expression of C, a_Type C
+    such that
+A13:  t = [*,3]-tree(a,q) by A11,Th18;
+     t = [*,3]-tree<*a,q*> by A13,TREES_4:def 6
+      .= [*, the carrier of C]-tree <*a,q*> by ABCMIZ_1:def 9,YELLOW11:1
+      .= (ast C)term(a,q) by ABCMIZ_1:46;
+    hence thesis by A12,ABCMIZ_1:def 41;
+   end;
+   suppose
+A14:  (t.{})`1 = non_op; then
+     (t.{})`1 in {*, non_op} by TARSKI:def 2; then
+A15:  not (t.{})`1 in Constructors by ABCMIZ_1:39,XBOOLE_0:3;
+    consider a being expression of C, an_Adj C such that
+A16:  t = [non_op,3]-tree a by A14,Th19;
+     t = [non_op,3]-tree <*a*> by A16,TREES_4:def 5; then
+     t.{} = [non_op,3] by TREES_4:def 4; then
+     (t.{})`1 = non_op by MCART_1:7; then
+     t is expression of C, an_Adj C by Th13;
+    hence thesis by A15,ABCMIZ_1:48;
+   end;
+  end;
+
+begin :: Expressions
+
+reserve i,j for Nat,
+  x for variable,
+  l for quasi-loci;
+
+set MC = MaxConstrSign;
+
+definition
+  mode expression is expression of MaxConstrSign;
+  mode valuation is valuation of MaxConstrSign;
+  mode quasi-adjective is quasi-adjective of MaxConstrSign;
+  func QuasiAdjs -> Subset of Free(MaxConstrSign, MSVars MaxConstrSign) equals
+  QuasiAdjs MaxConstrSign; coherence;
+  mode quasi-term is quasi-term of MaxConstrSign;
+  func QuasiTerms -> Subset of Free(MaxConstrSign, MSVars MaxConstrSign) equals
+  QuasiTerms MaxConstrSign; coherence;
+  mode quasi-type is quasi-type of MaxConstrSign;
+  func QuasiTypes equals QuasiTypes MaxConstrSign; coherence;
+end;
+
+registration
+  cluster QuasiAdjs -> non empty; coherence;
+  cluster QuasiTerms -> non empty; coherence;
+  cluster QuasiTypes -> non empty; coherence;
+end;
+
+definition
+  redefine func Modes -> non empty Subset of Constructors;
+  coherence
+  proof
+    Modes c= Modes \/ Attrs & Modes \/ Attrs c= Constructors by XBOOLE_1:7;
+    hence thesis by XBOOLE_1:1;
+  end;
+  redefine func Attrs -> non empty Subset of Constructors;
+  coherence
+  proof
+    Attrs c= Modes \/ Attrs & Modes \/ Attrs c= Constructors by XBOOLE_1:7;
+    hence thesis by XBOOLE_1:1;
+  end;
+  redefine func Funcs -> non empty Subset of Constructors;
+  coherence by XBOOLE_1:7;
+end;
+
+reserve C for initialized ConstructorSignature,
+  c for constructor OperSymbol of C;
+
+definition
+  func set-constr -> Element of Modes equals [a_Type,[{},0]];
+  coherence
+  proof
+    a_Type in {a_Type} & [{},0] in [:QuasiLoci,NAT:]
+    by ABCMIZ_1:29,TARSKI:def 1,ZFMISC_1:def 2;
+    hence thesis by ZFMISC_1:def 2;
+  end;
+end;
+
+theorem
+  kind_of set-constr = a_Type & loci_of set-constr = {} &
+  index_of set-constr = 0
+  proof
+    set-constr `2 = [{},0] by MCART_1:7;
+    hence thesis by MCART_1:7;
+  end;
+
+theorem Th28:
+ Constructors = [:{a_Type, an_Adj, a_Term}, [:QuasiLoci, NAT:]:]
+  proof
+   thus Constructors = [:{a_Type},[:QuasiLoci,NAT:]:] \/
+         [:{an_Adj},[:QuasiLoci,NAT:]:] \/ Funcs
+      .= [:{a_Type} \/ {an_Adj}, [:QuasiLoci,NAT:]:] \/ Funcs by ZFMISC_1:97
+      .= [:{a_Type, an_Adj}, [:QuasiLoci,NAT:]:] \/ Funcs by ENUMSET1:1
+      .= [:{a_Type, an_Adj} \/ {a_Term}, [:QuasiLoci,NAT:]:] by ZFMISC_1:97
+      .= [:{a_Type, an_Adj, a_Term}, [:QuasiLoci, NAT:]:] by ENUMSET1:3;
+  end;
+
+theorem Th29:
+  [rng l, i] in Vars & l^<*[rng l,i]*> is quasi-loci
+  proof
+    varcl rng l = rng l by ABCMIZ_1:33;
+    hence [rng l, i] in Vars by ABCMIZ_1:17; then
+    reconsider x = [rng l, i] as variable;
+    rng l in {rng l, i} & {rng l, i} in x by TARSKI:def 2; then
+    vars x = rng l & x nin rng l by MCART_1:7,ORDINAL1:1;
+    hence thesis by ABCMIZ_1:31;
+  end;
+
+theorem Th30:
+  ex l st len l = i
+  proof
+    defpred P[Nat] means ex l st len l = $1;
+    <*>Vars is quasi-loci & len <*>Vars = 0 by ABCMIZ_1:29; then
+A1: P[ 0 ];
+A2: P[j] implies P[j+1] proof given l such that
+A3:   len l = j;
+      reconsider l1 = l^<*[rng l, 1]*> as quasi-loci by Th29;
+      take l1; thus thesis by A3,FINSEQ_2:16;
+    end;
+    P[j] from NAT_1:sch 2(A1,A2);
+    hence thesis;
+  end;
+
+theorem Th31:
+  for X being finite Subset of Vars ex l st rng l = varcl X
+  proof
+    let X be finite Subset of Vars;
+    reconsider Y = varcl X as finite Subset of Vars by ABCMIZ_1:24;
+    defpred R[set, set] means $1 in $2`1;
+A1: for x,y being set st x in Y & y in Y & R[x,y] holds not R[y,x]
+    proof
+      let x,y be set such that
+A2:   x in Y & y in Y & R[x,y] & R[y,x];
+      x in Vars by A2; then
+      consider A being Subset of Vars, j being Element of NAT such that
+A3:   x = [varcl A, j] & A is finite by ABCMIZ_1:18;
+      y in Vars by A2; then
+      consider B being Subset of Vars, k being Element of NAT such that
+A4:   y = [varcl B, k] & B is finite by ABCMIZ_1:18;
+A5:   y in varcl A & x in varcl B by A2,A3,A4,MCART_1:7;
+A6:   varcl A in {varcl A} & varcl B in {varcl B} by TARSKI:def 1;
+      {varcl A} in x & {varcl B} in y by A4,A3,TARSKI:def 2;
+      hence thesis by A5,A6,ORDINAL1:4;
+    end;
+A7: for x,y,z being set st x in Y & y in Y & z in Y & R[x,y] & R[y,z]
+    holds R[x,z]
+    proof
+      let x,y,z be set such that
+A8:   x in Y & y in Y & z in Y & R[x,y] & R[y,z];
+      y in Vars by A8; then
+      consider B being Subset of Vars, k being Element of NAT such that
+A9:   y = [varcl B, k] & B is finite by ABCMIZ_1:18;
+      z in Vars by A8; then
+      consider C being Subset of Vars, j being Element of NAT such that
+A10:   z = [varcl C, j] & C is finite by ABCMIZ_1:18;
+A11:   z`1 = varcl C & y`1 = varcl B by A10,A9,MCART_1:7; then
+      varcl B c= varcl C by A8,A9,ABCMIZ_1:def 1;
+      hence R[x,z] by A11,A8;
+    end;
+    consider l being one-to-one FinSequence such that
+A12: rng l = Y and
+A13: for i,j st i in dom l & j in dom l & R[l.i, l.j] holds i < j
+    from Numeration(A1,A7);
+    reconsider l as one-to-one FinSequence of Vars by A12,FINSEQ_1:def 4;
+    now let i be Nat, x be variable; assume
+A14:   i in dom l & x = l.i;
+      let y be variable; assume
+A15:   y in vars x;
+      x in Vars; then
+      consider A being Subset of Vars, j being Element of NAT such that
+A16:   x = [varcl A, j] & A is finite by ABCMIZ_1:18;
+      x in rng l & vars x = varcl A by A14,A16,FUNCT_1:def 3,MCART_1:7; then
+      vars x c= Y by A12,A16,ABCMIZ_1:def 1; then
+      consider a being set such that
+A17:   a in dom l & y = l.a by A12,A15,FUNCT_1:def 3;
+      reconsider a as Nat by A17;
+      take a;
+      thus a in dom l & a < i & y = l.a by A13,A14,A15,A17;
+    end; then
+    reconsider l as quasi-loci by ABCMIZ_1:30;
+    take l;
+    thus rng l = varcl X by A12;
+  end;
+
+theorem Th32:  :: to mozna uogolnic na X zamkniety na poddrzewa
+               :: (troche dodatkowych pojec i twierdzen)
+  for X,o being set, p being DTree-yielding FinSequence
+  st ex C st X = Union the Sorts of Free(C, MSVars C)
+  holds o-tree p in X implies p is FinSequence of X
+  proof
+    let X,o be set;
+    let p be DTree-yielding FinSequence;
+    given C such that
+A1: X = Union the Sorts of Free(C, MSVars C);
+    assume o-tree p in X; then
+    reconsider e = o-tree p as expression of C by A1;
+    rng p c= X
+    proof
+      let z be set; assume z in rng p; then
+      consider i being set such that
+A2:   i in dom p & z = p.i by FUNCT_1:def 3;
+      reconsider i as Nat by A2;
+      reconsider ppi = p.i as DecoratedTree by A2,TREES_3:24;
+A3:   1 <= i & i <= len p by A2,FINSEQ_3:25; then
+A4:   (i-'1)+1 = i by XREAL_1:235;
+then A5:   i-'1 < len p by A3,NAT_1:13;
+A6:   len doms p = len p by TREES_3:38;
+A7:   (doms p).i = dom ppi by A2,FUNCT_6:22;
+A8:   dom e = tree doms p by TREES_4:10;
+      <*i-'1*>^<*>NAT = <*i-'1*> & <*>NAT in dom ppi
+      by FINSEQ_1:34,TREES_1:22; then
+      reconsider q = <*i-'1*> as Element of dom e
+      by A4,A5,A6,A7,A8,TREES_3:def 15;
+      e|q = z by A2,A4,A5,TREES_4:def 4; then
+      z is Element of Free(C, MSVars C) by MSAFREE3:33;
+      hence thesis by A1;
+    end;
+    hence p is FinSequence of X by FINSEQ_1:def 4;
+  end;
+
+definition
+  let C;
+  let e be expression of C;
+  mode subexpression of e -> expression of C means
+  it in Subtrees e;
+  existence by TREES_9:11;
+  func constrs e equals
+  (proj1 rng e)/\{o where o is constructor OperSymbol of C: not contradiction};
+  coherence;
+  func main-constr e equals:   :: dobre dla zestandaryzowanych (nie ma def)
+Def9:
+  (e.{})`1 if e is compound otherwise {};
+
+:: x-term C = [x, a_Term]-tree {}
+:: (ast C)term(a,t) = [*, the carrier of C]-tree<*a,t*>
+:: (non_op C)term a = [non_op, the carrier of C]-tree<*a*>
+:: c-trm p = [c, the carrier of C]-tree p
+::   problem gdy '{}' moze byc 'c'
+  correctness;
+  func args e -> FinSequence of Free(C, MSVars C) means
+  e = (e.{})-tree it;
+  existence
+  proof
+    consider v being set, p being DTree-yielding FinSequence such that
+A1: e = v-tree p by TREES_9:8;
+A2: v = e.{} by A1,TREES_4:def 4;
+    p is FinSequence of Free(C, MSVars C) by A1,Th32;
+    hence thesis by A1,A2;
+  end;
+  uniqueness by TREES_4:15;
+end;
+
+theorem Th33:
+  for C for e being expression of C holds e is subexpression of e
+  proof
+    let C be initialized ConstructorSignature;
+    let e be expression of C;
+    thus e in Subtrees e by TREES_9:11;
+  end;
+
+theorem
+  main-constr (x -term C) = {} by Def9;
+
+theorem Th35:
+  for c being constructor OperSymbol of C
+  for p being FinSequence of QuasiTerms C st len p = len the_arity_of c
+  holds main-constr (c-trm p) = c
+  proof
+    let c be constructor OperSymbol of C;
+    let p be FinSequence of QuasiTerms C;
+    assume len p = len the_arity_of c; then
+    c-trm p = [c, the carrier of C]-tree p by ABCMIZ_1:def 35; then
+    (c-trm p).{} = [c, the carrier of C] by TREES_4:def 4;
+    hence main-constr (c-trm p) = [c, the carrier of C]`1 by Def9
+    .= c;
+  end;
+
+definition
+  let C;
+  let e be expression of C;
+  attr e is constructor means:
+Def11:
+  e is compound & main-constr e is constructor OperSymbol of C;
+end;
+
+registration
+  let C;
+  cluster constructor -> compound for expression of C;
+  coherence by Def11;
+end;
+
+registration
+  let C;
+  cluster constructor for expression of C;
+  existence
+  proof
+    consider m, a being OperSymbol of C such that
+A1: the_result_sort_of m = a_Type & the_arity_of m = {} &
+    the_result_sort_of a = an_Adj & the_arity_of a = {} by ABCMIZ_1:def 12;
+    the_arity_of ast C = <*an_Adj C, a_Type C*> &
+    the_arity_of non_op C = <*an_Adj C*> by ABCMIZ_1:38; then
+    reconsider m as constructor OperSymbol of C by A1,ABCMIZ_1:def 11;
+    set p = <*>QuasiTerms C;
+    take e = m-trm p; thus e is compound;
+    len p = len the_arity_of m by A1;
+    hence thesis by Th35;
+  end;
+end;
+
+registration
+  let C;
+  let e be constructor expression of C;
+  cluster constructor for subexpression of e;
+  existence
+  proof
+    e is subexpression of e by Th33;
+    hence thesis;
+  end;
+end;
+
+registration
+  let S be non void Signature;
+  let X be non empty-yielding ManySortedSet of S;
+  let t be Element of Free(S,X);
+  cluster rng t -> Relation-like;
+  coherence
+  proof
+    set Z = (the carrier of S)-->{0};
+    set Y = X \/ Z;
+    t is Term of S,Y by MSAFREE3:8; then
+    rng t c= the carrier of DTConMSA Y by RELAT_1:def 19;
+    hence thesis;
+  end;
+end;
+
+theorem
+  for e being constructor expression of C holds main-constr e in constrs e
+  proof
+    let e be constructor expression of C;
+A1: main-constr e = (e.{})`1 by Def9;
+    {} in dom e by TREES_1:22; then
+    e.{} in rng e by FUNCT_1:def 3; then
+A2: main-constr e in proj1 rng e by A1,MCART_1:86;
+    main-constr e is constructor OperSymbol of C by Def11; then
+    main-constr e in {c: not contradiction};
+    hence main-constr e in constrs e by A2,XBOOLE_0:def 4;
+  end;
+
+begin :: Arity
+
+reserve a,a9 for quasi-adjective,
+  t,t1,t2 for quasi-term,
+  T for quasi-type,
+
+  c for Element of Constructors;
+
+definition
+  let C be non void Signature;
+  attr C is arity-rich means: Def12:
+  for n being Nat, s being SortSymbol of C holds
+  {o where o is OperSymbol of C: the_result_sort_of o = s &
+        len the_arity_of o = n} is infinite;
+  let o be OperSymbol of C;
+  attr o is nullary means: Def13: the_arity_of o = {};
+  attr o is unary means: Def14: len the_arity_of o = 1;
+  attr o is binary means: Def15: len the_arity_of o = 2;
+end;
+
+theorem Th37:
+  for C being non void Signature for o being OperSymbol of C holds
+  (o is nullary implies o is not unary) &
+  (o is nullary implies o is not binary) &
+  (o is unary implies o is not binary)
+  proof
+    let C be non void Signature;
+    let o be OperSymbol of C;
+    thus (o is nullary implies o is not unary)
+    proof
+      assume the_arity_of o = {};
+      hence len the_arity_of o <> 1;
+    end;
+    thus (o is nullary implies o is not binary)
+    proof
+      assume the_arity_of o = {};
+      hence len the_arity_of o <> 2;
+    end;
+    assume len the_arity_of o = 1;
+    hence len the_arity_of o <> 2;
+  end;
+
+registration
+  let C be ConstructorSignature;
+  cluster non_op C -> unary;
+  coherence
+  proof
+    the_arity_of non_op C = <*an_Adj C*> by ABCMIZ_1:38;
+    hence len the_arity_of non_op C = 1 by FINSEQ_1:39;
+  end;
+  cluster ast C -> binary;
+  coherence
+  proof
+    the_arity_of ast C = <*an_Adj C, a_Type C*> by ABCMIZ_1:38;
+    hence len the_arity_of ast C = 2 by FINSEQ_1:44;
+  end;
+end;
+
+registration
+  let C be ConstructorSignature;
+  cluster nullary -> constructor for OperSymbol of C;
+  coherence
+  proof
+    let o be OperSymbol of C such that
+A1: the_arity_of o = {};
+    the_arity_of ast C = <*an_Adj C, a_Type C*> &
+    the_arity_of non_op C = <*an_Adj C*> by ABCMIZ_1:38;
+    hence o <> * & o <> non_op by A1;
+  end;
+end;
+
+theorem Th38:
+  for C being ConstructorSignature holds C is initialized iff
+  ex m being OperSymbol of a_Type C, a being OperSymbol of an_Adj C st
+  m is nullary & a is nullary
+  proof
+    let C be ConstructorSignature;
+    hereby assume C is initialized; then
+      consider m, a being OperSymbol of C such that
+A1:   the_result_sort_of m = a_Type & the_arity_of m = {} &
+      the_result_sort_of a = an_Adj & the_arity_of a = {}
+      by ABCMIZ_1:def 12;
+      reconsider m as OperSymbol of a_Type C by A1,ABCMIZ_1:def 32;
+      reconsider a as OperSymbol of an_Adj C by A1,ABCMIZ_1:def 32;
+      take m, a;
+      thus m is nullary proof thus the_arity_of m = {} by A1; end;
+      thus a is nullary proof thus the_arity_of a = {} by A1; end;
+    end;
+    given m being OperSymbol of a_Type C, a being OperSymbol of an_Adj C
+    such that
+A2: m is nullary & a is nullary;
+    take m,a;
+    the_result_sort_of non_op C = an_Adj C &
+    the_result_sort_of ast C = a_Type C by ABCMIZ_1:38;
+    hence thesis by A2,Def13,ABCMIZ_1:def 32;
+  end;
+
+registration
+  let C be initialized ConstructorSignature;
+  cluster nullary constructor for OperSymbol of a_Type C;
+  existence
+  proof
+    consider m being OperSymbol of a_Type C, a being OperSymbol of an_Adj C
+    such that
+A1: m is nullary & a is nullary by Th38;
+    take m; thus thesis by A1;
+  end;
+  cluster nullary constructor for OperSymbol of an_Adj C;
+  existence
+  proof
+    consider m being OperSymbol of a_Type C, a being OperSymbol of an_Adj C
+    such that
+A2: m is nullary & a is nullary by Th38;
+    take a; thus thesis by A2;
+  end;
+end;
+
+registration
+  let C be initialized ConstructorSignature;
+  cluster nullary constructor for OperSymbol of C;
+  existence
+  proof
+    set o = the nullary constructor OperSymbol of a_Type C;
+    take o; thus thesis;
+  end;
+end;
+
+registration
+  cluster arity-rich -> with_an_operation_for_each_sort for
+non void Signature;
+  coherence
+  proof
+    let S be non void Signature such that
+A1: for n being Nat, s being SortSymbol of S holds
+    {o where o is OperSymbol of S: the_result_sort_of o = s &
+        len the_arity_of o = n} is infinite;
+    let v be set;
+    assume v in the carrier of S; then
+    reconsider v as SortSymbol of S;
+    set A = {o where o is OperSymbol of S: the_result_sort_of o = v &
+    len the_arity_of o = 0};
+    reconsider A as infinite set by A1;
+    set a = the Element of A;
+    a in A; then
+    consider o being OperSymbol of S such that
+A2: a = o & the_result_sort_of o = v & len the_arity_of o = 0;
+    thus thesis by A2,FUNCT_2:4;
+  end;
+  cluster arity-rich -> initialized for ConstructorSignature;
+  coherence
+  proof
+    let C be ConstructorSignature such that
+A3: C is arity-rich;
+    set Xt = {o where o is OperSymbol of C: the_result_sort_of o = a_Type C &
+    len the_arity_of o = 0};
+    set x = the Element of Xt;
+    Xt is infinite set by A3,Def12; then
+    x in Xt; then
+    consider m being OperSymbol of C such that
+A4: x = m & the_result_sort_of m = a_Type C & len the_arity_of m = 0;
+    set Xa = {o where o is OperSymbol of C: the_result_sort_of o = an_Adj C &
+    len the_arity_of o = 0};
+    set x = the Element of Xa;
+    Xa is infinite set by A3,Def12; then
+    x in Xa; then
+    consider a being OperSymbol of C such that
+A5: x = a & the_result_sort_of a = an_Adj C & len the_arity_of a = 0;
+    take m, a; thus thesis by A4,A5;
+  end;
+end;
+
+registration
+  cluster MaxConstrSign -> arity-rich;
+  coherence
+  proof set C = MaxConstrSign;
+    let n be Nat, s be SortSymbol of C;
+A1: the carrier of C = {0,1,2} by ABCMIZ_1:def 9;
+    set X = {o where o is OperSymbol of C: the_result_sort_of o = s &
+    len the_arity_of o = n};
+    consider l being quasi-loci such that
+A2: len l = n by Th30;
+    deffunc F(set) = [s,[l,$1]];
+    consider f being Function such that
+A3: dom f = NAT & for i being set st i in NAT holds f.i = F(i)
+    from FUNCT_1:sch 3;
+    f is one-to-one
+    proof
+      let i,j be set; assume i in dom f & j in dom f; then
+      reconsider i,j as Element of NAT by A3;
+      f.i = F(i) & f.j = F(j) by A3; then
+      f.i = f.j implies [l,i] = [l,j] by XTUPLE_0:1;
+      hence thesis by XTUPLE_0:1;
+    end; then
+A4: rng f is infinite by A3,CARD_1:59;
+    rng f c= X
+    proof
+      let y be set; assume y in rng f; then
+      consider x being set such that
+A5:   x in dom f & y = f.x by FUNCT_1:def 3;
+      reconsider x as Element of NAT by A3,A5;
+A6:   [l,x] in [:QuasiLoci, NAT:] & y = F(x) by A3,A5; then
+      y in Constructors by A1,Th28,ZFMISC_1:def 2; then
+      y in {*,non_op}\/Constructors by XBOOLE_0:def 3; then
+      reconsider y as OperSymbol of C by ABCMIZ_1:def 24;
+A7:   y is constructor by A6,ABCMIZ_1:def 11; then
+A8:   the_result_sort_of y = y`1 by ABCMIZ_1:def 24 .= s by A6,MCART_1:7;
+      len the_arity_of y = card y`2`1 by A7,ABCMIZ_1:def 24
+      .= card [l,x]`1 by A6,MCART_1:7
+      .= len l;
+      hence thesis by A2,A8;
+    end;
+    hence X is infinite by A4;
+  end;
+end;
+
+registration
+  cluster arity-rich initialized for ConstructorSignature;
+  existence
+  proof
+    take MaxConstrSign; thus thesis;
+  end;
+end;
+
+registration
+  let C be arity-rich ConstructorSignature;
+  let s be SortSymbol of C;
+  cluster nullary constructor for OperSymbol of s;
+  existence
+  proof
+    set X = {o where o is OperSymbol of C: the_result_sort_of o = s &
+    len the_arity_of o = 0};
+    X is infinite by Def12; then
+    consider m1,m2 being set such that
+A1: m1 in X & m2 in X & m1 <> m2 by ZFMISC_1:def 10;
+    consider o1 being OperSymbol of C such that
+A2: m1 = o1 & the_result_sort_of o1 = s & len the_arity_of o1 = 0 by A1;
+    reconsider m1 as OperSymbol of s by A2,ABCMIZ_1:def 32;
+    the_arity_of m1 = {} by A2; then
+ m1 is nullary by Def13;
+    hence thesis;
+  end;
+  cluster unary constructor for OperSymbol of s;
+  existence
+  proof
+    set X = {o where o is OperSymbol of C: the_result_sort_of o = s &
+    len the_arity_of o = 1};
+    X is infinite by Def12; then
+    consider m1,m2 being set such that
+A3: m1 in X & m2 in X & m1 <> m2 by ZFMISC_1:def 10;
+    consider o1 being OperSymbol of C such that
+A4: m1 = o1 & the_result_sort_of o1 = s & len the_arity_of o1 = 1 by A3;
+    consider o2 being OperSymbol of C such that
+A5: m2 = o2 & the_result_sort_of o2 = s & len the_arity_of o2 = 1 by A3;
+    reconsider m1,m2 as OperSymbol of s by A4,A5,ABCMIZ_1:def 32;
+A6: m1 is unary & m2 is unary by A4,A5,Def14; then
+A7: m1 <> ast C & m2 <> ast C by Th37;
+    m1 <> non_op or m2 <> non_op by A3; then
+    m1 is constructor or m2 is constructor by A7,ABCMIZ_1:def 11;
+    hence thesis by A6;
+  end;
+  cluster binary constructor for OperSymbol of s;
+  existence
+  proof
+    set X = {o where o is OperSymbol of C: the_result_sort_of o = s &
+    len the_arity_of o = 2};
+    X is infinite by Def12; then
+    consider m1,m2 being set such that
+A8: m1 in X & m2 in X & m1 <> m2 by ZFMISC_1:def 10;
+    consider o1 being OperSymbol of C such that
+A9: m1 = o1 & the_result_sort_of o1 = s & len the_arity_of o1 = 2 by A8;
+    consider o2 being OperSymbol of C such that
+A10: m2 = o2 & the_result_sort_of o2 = s & len the_arity_of o2 = 2 by A8;
+    reconsider m1,m2 as OperSymbol of s by A9,A10,ABCMIZ_1:def 32;
+A11: m1 is binary & m2 is binary by A9,A10,Def15; then
+A12: m1 <> non_op C & m2 <> non_op C by Th37;
+    m1 <> * or m2 <> * by A8; then
+    m1 is constructor or m2 is constructor by A12,ABCMIZ_1:def 11;
+    hence thesis by A11;
+  end;
+end;
+
+registration
+  let C be arity-rich ConstructorSignature;
+  cluster unary constructor for OperSymbol of C;
+  existence
+  proof
+    set o = the unary constructor OperSymbol of a_Type C;
+    take o; thus thesis;
+  end;
+  cluster binary constructor for OperSymbol of C;
+  existence
+  proof
+    set o = the binary constructor OperSymbol of a_Type C;
+    take o; thus thesis;
+  end;
+end;
+
+theorem Th39:
+ for o being nullary OperSymbol of C holds
+   [o, the carrier of C]-tree {} is expression of C, the_result_sort_of o
+  proof
+   let o be nullary OperSymbol of C;
+   set X = MSVars C;
+   set Z = (the carrier of C)-->{0};
+   set Y = X \/ Z;
+A1: the_arity_of o = {} by Def13;
+A2: the Sorts of Free(C, X) = C-Terms(X, Y) by MSAFREE3:24;
+    for i being Nat st i in dom {} ex t being Term of C,Y st t = {}.i &
+    the_sort_of t = (the_arity_of o).i; then
+   reconsider p = {} as ArgumentSeq of Sym(o, Y) by A1,MSATERM:24;
+A3: variables_in (Sym(o, Y)-tree p) c= X
+     proof let s be set; assume s in the carrier of C; then
+      reconsider s9 = s as SortSymbol of C;
+      let x be set; assume x in (variables_in (Sym(o, Y)-tree p)).s; then
+       ex t being DecoratedTree st t in rng p & x in (C variables_in t).s9
+       by MSAFREE3:11;
+      hence thesis;
+     end;
+   set s9 = the_result_sort_of o;
+A4: the_sort_of (Sym(o, Y)-tree p) = the_result_sort_of o by MSATERM:20;
+    (the Sorts of Free(C, X)).s9 =
+     {t where t is Term of C,Y: the_sort_of t = s9 & variables_in t c= X}
+      by A2,MSAFREE3:def 5; then
+    [o, the carrier of C]-tree {} in (the Sorts of Free(C, X)).s9 by A3,A4;
+   hence thesis by ABCMIZ_1:41;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let m be nullary constructor OperSymbol of a_Type C;
+  redefine func m term -> pure expression of C, a_Type C;
+  coherence
+  proof
+    set T = m term;
+    the_arity_of m = 0 by Def13; then
+    len the_arity_of m = 0; then
+A1: T = [m, the carrier of C]-tree {} by ABCMIZ_1:def 29;
+    ex m, a being OperSymbol of C st
+    the_result_sort_of m = a_Type & the_arity_of m = {} &
+    the_result_sort_of a = an_Adj & the_arity_of a = {}
+    by ABCMIZ_1:def 12; then
+    the_result_sort_of m = a_Type C by ABCMIZ_1:def 32; then
+    reconsider T as expression of C, a_Type C by A1,Th39;
+    T is pure
+    proof
+      given a being expression of C, an_Adj C,
+      t being expression of C, a_Type C such that
+A2:   T = (ast C)term(a,t);
+      T = [ *, the carrier of C]-tree <*a,t*> by A2,ABCMIZ_1:46;
+      hence thesis by A1,TREES_4:15;
+    end;
+    hence thesis;
+  end;
+end;
+
+definition
+  let c be Element of Constructors;
+  func @c -> constructor OperSymbol of MaxConstrSign equals c;
+  coherence
+  proof
+    * in {*, non_op} & non_op in {*, non_op} &
+    the carrier' of MC = {*, non_op} \/ Constructors
+    by ABCMIZ_1:def 24,TARSKI:def 2; then
+    c <> * & c <> non_op & c in the carrier' of MC
+    by ABCMIZ_1:39,XBOOLE_0:3,def 3;
+    hence thesis by ABCMIZ_1:def 11;
+  end;
+end;
+
+definition
+  let m be Element of Modes;
+  redefine func @m -> constructor OperSymbol of a_Type MaxConstrSign;
+  coherence
+  proof
+A1: m`1 in {a_Type} by MCART_1:10;
+    the_result_sort_of @m = m`1 by ABCMIZ_1:def 24
+    .= a_Type by A1,TARSKI:def 1;
+    hence thesis by ABCMIZ_1:def 32;
+  end;
+end;
+
+registration
+  cluster @set-constr -> nullary;
+  coherence
+  proof
+    len the_arity_of @set-constr = card set-constr`2`1 by ABCMIZ_1:def 24
+    .= card [{},0]`1 by MCART_1:7 .= card 0;
+    hence the_arity_of @set-constr = {};
+  end;
+end;
+
+theorem
+  the_arity_of @set-constr = {} by Def13;
+
+definition
+  func set-type -> quasi-type equals
+  ({}QuasiAdjs MaxConstrSign) ast ((@set-constr) term);
+  coherence;
+end;
+
+theorem
+  adjs set-type = {} & the_base_of set-type = (@set-constr) term by MCART_1:7;
+
+definition
+  let l be FinSequence of Vars;
+  func args l -> FinSequence of QuasiTerms MaxConstrSign means:
+Def18:
+  len it = len l & for i st i in dom l holds it.i = (l/.i)-term MaxConstrSign;
+  existence
+  proof
+    deffunc F(Nat) = (l/.$1)-term MaxConstrSign;
+    consider g being FinSequence such that
+A1: len g = len l and
+A2: for i st i in dom g holds g.i = F(i) from FINSEQ_1:sch 2;
+A3: dom g = dom l by A1,FINSEQ_3:29;
+    rng g c= QuasiTerms MaxConstrSign
+    proof
+      let j be set; assume j in rng g; then
+      consider z being set such that
+A4:   z in dom g & j = g.z by FUNCT_1:def 3;
+      reconsider z as Nat by A4;
+      j = F(z) by A2,A4;
+      hence thesis by ABCMIZ_1:49;
+    end; then
+    reconsider g as FinSequence of QuasiTerms MaxConstrSign by FINSEQ_1:def 4;
+    take g;
+    thus thesis by A1,A2,A3;
+  end;
+  uniqueness
+  proof
+    let a1,a2 be FinSequence of QuasiTerms MaxConstrSign such that
+A5: len a1 = len l and
+A6: for i st i in dom l holds a1.i = (l/.i)-term MaxConstrSign and
+A7: len a2 = len l and
+A8: for i st i in dom l holds a2.i = (l/.i)-term MaxConstrSign;
+A9: dom a1 = dom l & dom a2 = dom l by A5,A7,FINSEQ_3:29;
+    now let i;
+      assume i in dom a1; then
+      a1.i = (l/.i)-term MaxConstrSign & a2.i = (l/.i)-term MaxConstrSign
+      by A6,A8,A9;
+      hence a1.i = a2.i;
+    end;
+    hence thesis by A9,FINSEQ_1:13;
+  end;
+end;
+
+definition
+  let c;
+  func base_exp_of c -> expression equals (@c)-trm args loci_of c;
+  coherence;
+end;
+
+theorem Th42:
+  for o being OperSymbol of MaxConstrSign holds
+  o is constructor iff o in Constructors
+  proof
+    let o be OperSymbol of MaxConstrSign;
+A1: the carrier' of MaxConstrSign = {*, non_op} \/ Constructors
+    by ABCMIZ_1:def 24;
+    o is constructor iff o <> * & o <> non_op by ABCMIZ_1:def 11; then
+    o is constructor iff o nin {*,non_op} by TARSKI:def 2;
+    hence thesis by A1,ABCMIZ_1:39,XBOOLE_0:3,def 3;
+  end;
+
+theorem
+  for m being nullary OperSymbol of MaxConstrSign holds
+  main-constr (m term) = m
+  proof set C = MaxConstrSign;
+    let m be nullary OperSymbol of C;
+    the_arity_of m = 0 by Def13; then
+    len the_arity_of m = 0 & len {} = 0; then
+A1: m term = [m, the carrier of C]-tree {} &
+    m-trm(<*>QuasiTerms C) = [m, the carrier of C]-tree {}
+    by ABCMIZ_1:def 29,def 35;
+    hence main-constr (m term) = ((m term).{})`1 by Def9
+    .= [m, the carrier of C]`1 by A1,TREES_4:def 4
+    .= m;
+  end;
+
+theorem
+  for m being unary constructor OperSymbol of MaxConstrSign
+  for t holds main-constr (m term t) = m
+  proof set C = MaxConstrSign;
+    let m be unary constructor OperSymbol of C;
+    let t;
+    reconsider w = t as Element of QuasiTerms C by ABCMIZ_1:49;
+    reconsider p = <*w*> as FinSequence of QuasiTerms C;
+A1: len the_arity_of m = 1 by Def14; then
+    the_arity_of m = 1 |-> a_Term by ABCMIZ_1:37
+    .= <*a_Term*> by FINSEQ_2:59; then
+    len p = 1 & (the_arity_of m).1 = a_Term C by FINSEQ_1:40; then
+A2: m term t = [m, the carrier of C]-tree <*t*> &
+    m-trm p = [m, the carrier of C]-tree <*t*> by A1,ABCMIZ_1:def 30,def 35;
+    hence main-constr (m term t) = ((m term t).{})`1 by Def9
+    .= [m, the carrier of C]`1 by A2,TREES_4:def 4
+    .= m;
+  end;
+
+theorem
+  for a holds main-constr ((non_op MaxConstrSign)term a) = non_op
+  proof set C = MaxConstrSign;
+    set m = non_op C;
+    let a;
+A1: len the_arity_of m = 1 by Def14;
+    the_arity_of m = <*an_Adj*> by ABCMIZ_1:38; then
+    (the_arity_of m).1 = an_Adj C by FINSEQ_1:40; then
+A2: m term a = [m, the carrier of C]-tree <*a*> by A1,ABCMIZ_1:def 30;
+    thus main-constr (m term a) = ((m term a).{})`1 by Def9
+    .= [m, the carrier of C]`1 by A2,TREES_4:def 4
+    .= non_op;
+  end;
+
+theorem
+  for m being binary constructor OperSymbol of MaxConstrSign
+  for t1,t2 holds main-constr (m term(t1,t2)) = m
+  proof set C = MaxConstrSign;
+    let m be binary constructor OperSymbol of C;
+    let t1,t2;
+    reconsider w1 = t1, w2 = t2 as Element of QuasiTerms C by ABCMIZ_1:49;
+    reconsider p = <*w1,w2*> as FinSequence of QuasiTerms C;
+A1: len the_arity_of m = 2 by Def15; then
+    the_arity_of m = 2 |-> a_Term by ABCMIZ_1:37
+    .= <*a_Term,a_Term*> by FINSEQ_2:61; then
+    (the_arity_of m).1 = a_Term C & (the_arity_of m).2 = a_Term C & len p = 2
+    by FINSEQ_1:44; then
+A2: m term(t1,t2) = [m, the carrier of C]-tree <*t1,t2*> &
+    m-trm p = [m, the carrier of C]-tree p by A1,ABCMIZ_1:def 31,def 35;
+    hence main-constr (m term(t1,t2)) = ((m term(t1,t2)).{})`1 by Def9
+    .= [m, the carrier of C]`1 by A2,TREES_4:def 4
+    .= m;
+  end;
+
+theorem
+  for q being expression of MaxConstrSign, a_Type MaxConstrSign
+  for a holds main-constr ((ast MaxConstrSign)term(a,q)) = *
+  proof set C = MaxConstrSign;
+    set m = ast C;
+    let q be expression of MaxConstrSign, a_Type MaxConstrSign;
+    let a;
+A1: len the_arity_of m = 2 by Def15;
+    the_arity_of m = <*an_Adj C,a_Type C*> by ABCMIZ_1:38; then
+    (the_arity_of m).1 = an_Adj C & (the_arity_of m).2 = a_Type C
+    by FINSEQ_1:44; then
+A2: m term(a,q) = [m, the carrier of C]-tree <*a,q*> by A1,ABCMIZ_1:def 31;
+    thus main-constr (m term(a,q)) = ((m term(a,q)).{})`1 by Def9
+    .= [m, the carrier of C]`1 by A2,TREES_4:def 4
+    .= *;
+  end;
+
+definition
+  let T be quasi-type;
+  func constrs T equals
+  (constrs the_base_of T) \/ union {constrs a: a in adjs T};
+  coherence;
+end;
+
+theorem
+  for q being pure expression of MaxConstrSign, a_Type MaxConstrSign
+  for A being finite Subset of QuasiAdjs MaxConstrSign holds
+  constrs(A ast q) = (constrs q) \/ union {constrs a: a in A};
+
+theorem
+  constrs(a ast T) = (constrs a) \/ (constrs T)
+  proof
+    set A = {constrs a9: a9 in {a} \/ adjs T};
+    set B = {constrs a9: a9 in adjs T};
+A1: A = B \/{constrs a}
+    proof
+      thus A c= B \/{constrs a} proof let z be set;
+        assume z in A; then
+        consider a9 such that
+A2:     z = constrs a9 & a9 in {a} \/ adjs T;
+        a9 in {a} or a9 in adjs T by A2,XBOOLE_0:def 3; then
+        a9 = a or a9 in adjs T by TARSKI:def 1; then
+        z in {constrs a} or z in B by A2,TARSKI:def 1;
+        hence thesis by XBOOLE_0:def 3;
+      end;
+      let z be set; assume
+A3:   z in B\/{constrs a};
+A4:   a in {a} by TARSKI:def 1;
+      per cases by A3,XBOOLE_0:def 3;
+      suppose z in B; then
+        consider a9 such that
+A5:     z = constrs a9 & a9 in adjs T;
+        a9 in {a} \/ adjs T by A5,XBOOLE_0:def 3;
+        hence thesis by A5;
+      end;
+      suppose z in {constrs a}; then
+        z = constrs a & a in {a} \/ adjs T by A4,TARSKI:def 1,XBOOLE_0:def 3;
+        hence thesis;
+      end;
+    end;
+    adjs (a ast T) = {a} \/ adjs T by ABCMIZ_1:82;
+    hence constrs(a ast T) = (constrs the_base_of (a ast T)) \/ union A
+    .= (constrs the_base_of T) \/ union A by ABCMIZ_1:82
+    .= (constrs the_base_of T) \/ ((union {constrs a}) \/ union B)
+    by A1,ZFMISC_1:78
+    .= (constrs the_base_of T) \/ ((constrs a) \/ union B) by ZFMISC_1:25
+    .= (constrs the_base_of T) \/ (constrs a) \/ union B by XBOOLE_1:4
+    .= (constrs a) \/ ((constrs the_base_of T) \/ union B) by XBOOLE_1:4
+    .= (constrs a) \/ (constrs T);
+  end;
+
+begin :: Unification
+
+definition
+  let C be initialized ConstructorSignature;
+  let t,p be expression of C;
+  pred t matches_with p means
+  ex f being valuation of C st t = p at f;
+  reflexivity
+  proof let t be expression of C;
+    take f = the empty valuation of C;
+    thus t at f = t by ABCMIZ_1:139;
+  end;
+end;
+
+theorem
+ for t1,t2,t3 being expression of C st t1 matches_with t2 & t2 matches_with t3
+  holds t1 matches_with t3
+  proof
+    let t1,t2,t3 be expression of C;
+    given f1 being valuation of C such that
+A1: t1 = t2 at f1;
+    given f2 being valuation of C such that
+A2: t2 = t3 at f2;
+    take f2 at f1;
+    thus thesis by A1,A2,ABCMIZ_1:149;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let A,B be Subset of QuasiAdjs C;
+  pred A matches_with B means
+  ex f being valuation of C st B at f c= A;
+  reflexivity
+  proof let t be Subset of QuasiAdjs C;
+    take f = the empty valuation of C;
+    let x be set; assume x in t at f; then
+    ex a being quasi-adjective of C st x = a at f & a in t;
+    hence x in t by ABCMIZ_1:139;
+  end;
+end;
+
+theorem
+ for A1,A2,A3 being Subset of QuasiAdjs C
+  st A1 matches_with A2 & A2 matches_with A3
+  holds A1 matches_with A3
+  proof
+    let t1,t2,t3 be Subset of QuasiAdjs C;
+    given f1 being valuation of C such that
+A1: t2 at f1 c= t1;
+    given f2 being valuation of C such that
+A2: t3 at f2 c= t2;
+    take f2 at f1;
+    (t3 at f2) at f1 c= t2 at f1 by A2,ABCMIZ_1:146; then
+    (t3 at f2) at f1 c= t1 by A1,XBOOLE_1:1;
+    hence thesis by ABCMIZ_1:150;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let T,P be quasi-type of C;
+  pred T matches_with P means
+  ex f being valuation of C st
+   (adjs P) at f c= adjs T & (the_base_of P) at f = the_base_of T;
+  reflexivity
+  proof let t be quasi-type of C;
+    take f = the empty valuation of C;
+    thus (adjs t) at f c= adjs t
+    proof let x be set; assume x in (adjs t) at f; then
+      ex a being quasi-adjective of C st x = a at f & a in adjs t;
+      hence x in adjs t by ABCMIZ_1:139;
+    end;
+    thus thesis by ABCMIZ_1:139;
+  end;
+end;
+
+theorem
+ for T1,T2,T3 being quasi-type of C st T1 matches_with T2 & T2 matches_with T3
+  holds T1 matches_with T3
+  proof
+    let t1,t2,t3 be quasi-type of C;
+    given f1 being valuation of C such that
+A1: (adjs t2) at f1 c= adjs t1 & (the_base_of t2) at f1 = the_base_of t1;
+    given f2 being valuation of C such that
+A2: (adjs t3) at f2 c= adjs t2 & (the_base_of t3) at f2 = the_base_of t2;
+    take f2 at f1;
+    ((adjs t3) at f2) at f1 c= (adjs t2) at f1 by A2,ABCMIZ_1:146; then
+    ((adjs t3) at f2) at f1 c= adjs t1 by A1,XBOOLE_1:1;
+    hence thesis by A1,A2,ABCMIZ_1:149,150;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let t1,t2 be expression of C;
+  let f be valuation of C;
+::$N Unification of Mizar terms
+  pred f unifies t1,t2 means :Def24:
+  t1 at f = t2 at f;
+end;
+
+theorem Th53:
+ for t1,t2 being expression of C for f being valuation of C st f unifies t1,t2
+  holds f unifies t2,t1
+  proof
+   let t1,t2 be expression of C;
+   let f be valuation of C;
+   assume t1 at f = t2 at f;
+   hence t2 at f = t1 at f;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let t1,t2 be expression of C;
+  pred t1,t2 are_unifiable means
+  ex f being valuation of C st f unifies t1,t2;
+  reflexivity
+  proof
+    let t be expression of C;
+    set f = the valuation of C;
+    take f; thus t at f = t at f;
+  end;
+  symmetry
+  proof
+    let t1,t2 be expression of C;
+    given f being valuation of C such that
+A1: f unifies t1,t2;
+    take f;
+    thus t2 at f = t1 at f by A1,Def24;
+  end;
+end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let t1,t2 be expression of C;
+  pred t1,t2 are_weakly-unifiable means
+  ex g being irrelevant one-to-one valuation of C
+  st variables_in t2 c= dom g & t1,t2 at g are_unifiable;
+  reflexivity
+  proof
+    let t be expression of C;
+    take C idval variables_in t;
+    thus thesis by ABCMIZ_1:131,137;
+  end;
+
+::  symmetry;
+end;
+
+:: theorem
+::  for t1,t2 being expression of C st t1 matches_with t2
+::   holds t1,t2 are_weakly-unifiable;
+
+theorem
+ for t1,t2 being expression of C st t1,t2 are_unifiable
+  holds t1,t2 are_weakly-unifiable
+  proof
+   let t1,t2 be expression of C;
+   given f being valuation of C such that
+A1: f unifies t1,t2;
+   take g = C idval variables_in t2;
+   thus variables_in t2 c= dom g by ABCMIZ_1:131;
+   take f; thus f unifies t1,t2 at g by A1,ABCMIZ_1:137;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let t,t1,t2 be expression of C;
+  pred t is_a_unification_of t1,t2 means
+  ex f being valuation of C st f unifies t1,t2 & t = t1 at f;
+end;
+
+theorem
+ for t1,t2,t being expression of C st t is_a_unification_of t1,t2
+  holds t is_a_unification_of t2,t1
+  proof
+   let t1,t2,t be expression of C;
+   given f being valuation of C such that
+A1: f unifies t1,t2 & t = t1 at f;
+   take f;
+   thus f unifies t2,t1 & t = t2 at f by A1,Def24,Th53;
+  end;
+
+theorem
+ for t1,t2,t being expression of C st t is_a_unification_of t1,t2
+  holds t matches_with t1 & t matches_with t2
+  proof
+   let t1,t2,t be expression of C;
+   given f being valuation of C such that
+A1: f unifies t1,t2 & t = t1 at f;
+   thus ex f being valuation of C st t = t1 at f by A1;
+   take f; thus t = t2 at f by A1,Def24;
+  end;
+
+definition
+  let C be initialized ConstructorSignature;
+  let t,t1,t2 be expression of C;
+  pred t is_a_general-unification_of t1,t2 means
+  t is_a_unification_of t1,t2 &
+  for u being expression of C st u is_a_unification_of t1,t2
+  holds u matches_with t;
+end;
+
+:: theorem
+::  for t1,t2 being expression of C st t1,t2 are_unifiable
+::  ex t being expression of C st t is_a_general-unification_of t1,t2;
+
+begin :: Type distribution
+
+theorem Th57:
+  for n being Nat for s being SortSymbol of MaxConstrSign
+  ex m being constructor OperSymbol of s
+  st len the_arity_of m = n
+  proof set C = MaxConstrSign;
+    let n be Nat;
+    let s be SortSymbol of C;
+    deffunc F(Nat) = [{},$1];
+    consider l being FinSequence such that
+A1: len l = n and
+A2: for i st i in dom l holds l.i = F(i) from FINSEQ_1:sch 2;
+A3: l is one-to-one
+    proof
+      let i,j be set such that
+A4:   i in dom l & j in dom l & l.i = l.j;
+      reconsider i,j as Nat by A4;
+      l.i = F(i) & l.i = F(j) by A2,A4; then
+      i = F(j)`2 by MCART_1:7;
+      hence thesis;
+    end;
+    rng l c= Vars
+    proof
+      let z be set; assume z in rng l; then
+      consider a being set such that
+A5:   a in dom l & z = l.a by FUNCT_1:def 3;
+      reconsider a as Nat by A5;
+      z = F(a) by A2,A5;
+      hence thesis by ABCMIZ_1:25;
+    end; then
+    reconsider l as one-to-one FinSequence of Vars by A3,FINSEQ_1:def 4;
+    for i being Nat, x being variable st i in dom l & x = l.i
+    for y being variable st y in vars x
+    ex j being Nat st j in dom l & j < i & y = l.j
+    proof
+      let i,x; assume i in dom l & x = l.i; then
+      x = F(i) by A2;
+      hence thesis by MCART_1:7;
+    end; then
+    reconsider l as quasi-loci by ABCMIZ_1:30;
+    set m = [s,[l,0]];
+ the carrier of C = {a_Type, an_Adj, a_Term} by ABCMIZ_1:def 9;
+then A6: m in Constructors by Th28; then
+    m in {*,non_op}\/Constructors by XBOOLE_0:def 3; then
+    reconsider m as constructor OperSymbol of C by A6,Th42,ABCMIZ_1:def 24;
+    the_result_sort_of m = m`1 by ABCMIZ_1:def 24 .= s by MCART_1:7; then
+    reconsider m as constructor OperSymbol of s by ABCMIZ_1:def 32;
+    take m;
+    thus len the_arity_of m = card m`2`1 by ABCMIZ_1:def 24
+      .= card [l,0]`1 by MCART_1:7
+      .= card l
+      .= n by A1;
+  end;
+
+theorem Th58:
+  for l for s being SortSymbol of MaxConstrSign
+  for m being constructor OperSymbol of s st len the_arity_of m = len l
+  holds variables_in (m-trm args l) = rng l
+  proof
+    let l; set X = rng l;
+    set n = len l;
+    set C = MaxConstrSign;
+    let s be SortSymbol of C;
+    let m be constructor OperSymbol of s such that
+A1: len the_arity_of m = n;
+    set p = args l;
+    set Y = {variables_in t where t is quasi-term of C: t in rng p};
+A2: len p = len the_arity_of m by A1,Def18; then
+A3: variables_in (m-trm p) = union Y by ABCMIZ_1:90;
+A4: dom p = dom l by A1,A2,FINSEQ_3:29;
+    thus variables_in (m-trm p) c= X
+    proof
+      let s be set; assume s in variables_in (m-trm p); then
+      consider A being set such that
+A5:   s in A & A in Y by A3,TARSKI:def 4;
+      consider t being quasi-term of C such that
+A6:   A = variables_in t & t in rng p by A5;
+      consider z being set such that
+A7:   z in dom p & t = p.z by A6,FUNCT_1:def 3;
+      reconsider z as Element of NAT by A7;
+      l.z = l/.z by A4,A7,PARTFUN1:def 6; then
+A8:   l/.z in X by A4,A7,FUNCT_1:def 3;
+      p.z = (l/.z)-term C by A4,A7,Def18; then
+      A = {l/.z} by A6,A7,ABCMIZ_1:86;
+      hence thesis by A5,A8,TARSKI:def 1;
+    end;
+    let s be set; assume s in X; then
+    consider z being set such that
+A9: z in dom l & s = l.z by FUNCT_1:def 3;
+    reconsider z as Element of NAT by A9;
+    set t = (l/.z)-term C;
+    p.z = t & l.z = l/.z by A9,Def18,PARTFUN1:def 6; then
+    variables_in t = {s} & t in rng p by A4,A9,ABCMIZ_1:86,FUNCT_1:def 3; then
+    s in {s} & {s} in Y by TARSKI:def 1;
+    hence thesis by A3,TARSKI:def 4;
+  end;
+
+theorem Th59:
+  for X being finite Subset of Vars st varcl X = X
+  for s being SortSymbol of MaxConstrSign
+  ex m being constructor OperSymbol of s st ::a_Type MaxConstrSign
+  ex p being FinSequence of QuasiTerms MaxConstrSign
+  st len p = len the_arity_of m & vars (m-trm p) = X
+  proof
+    let X be finite Subset of Vars;
+    assume
+A1: varcl X = X; then
+    consider l such that
+A2: rng l = X by Th31;
+    set n = len l;
+    set C = MaxConstrSign;
+    let s be SortSymbol of C;
+    consider m being constructor OperSymbol of s such that
+A3: len the_arity_of m = n by Th57;
+    take m;
+    set p = args l;
+    take p;
+    thus len p = len the_arity_of m by A3,Def18;
+    thus thesis by A1,A2,A3,Th58;
+  end;
+
+definition
+  let d be PartFunc of Vars, QuasiTypes;
+  attr d is even means: :: rowny,rownomierny
+Def29:
+  for x,T st x in dom d & T = d.x holds vars T = vars x;
+end;
+
+definition
+  let l be quasi-loci;
+  mode type-distribution of l -> PartFunc of Vars, QuasiTypes means:
+Def30:
+  dom it = rng l & it is even;
+  existence
+  proof
+    defpred P[set,set] means ex x,T st $1 = x & $2 = T & vars T = vars x;
+A1: for z being set st z in rng l ex y being set st P[z,y]
+    proof
+      set C = MaxConstrSign;
+      let z be set; assume z in rng l; then
+      reconsider x = z as variable;
+      varcl vars x = vars x by Th2; then
+      consider m being constructor OperSymbol of a_Type C,
+      p being FinSequence of QuasiTerms C such that
+A2:   len p = len the_arity_of m & vars (m-trm p) = vars x by Th59;
+      a_Type C in the carrier of C &
+      the carrier of C c= rng the ResultSort of C by ABCMIZ_1:def 54; then
+      consider o being set such that
+A3:   o in dom the ResultSort of C & a_Type C = (the ResultSort of C).o
+      by FUNCT_1:def 3;
+      reconsider o as OperSymbol of C by A3;
+      the_result_sort_of o = a_Type C by A3; then
+      the_result_sort_of m = a_Type C by ABCMIZ_1:def 32; then
+      reconsider q = m-trm p as pure expression of C, a_Type C
+      by A2,ABCMIZ_1:75;
+      set B = {} QuasiAdjs C;
+      reconsider T = B ast q as quasi-type;
+      take T, x, T;
+      thus thesis by A2,ABCMIZ_1:106;
+    end;
+    consider f being Function such that
+A4: dom f = rng l and
+A5: for z being set st z in rng l holds P[z,f.z] from CLASSES1:sch 1(A1);
+    rng f c= QuasiTypes
+    proof
+      let y be set; assume y in rng f; then
+      consider z being set such that
+A6:   z in dom f & y = f.z by FUNCT_1:def 3;
+      P[z,y] by A4,A5,A6;
+      hence thesis by ABCMIZ_1:def 43;
+    end; then
+    reconsider f as PartFunc of Vars, QuasiTypes by A4,RELSET_1:4;
+    take f; thus dom f = rng l by A4;
+    let x,T; assume x in dom f & T = f.x; then
+    P[x,T] by A4,A5;
+    hence thesis;
+  end;
+end;
+
+theorem
+  for l being empty quasi-loci holds {} is type-distribution of l
+  proof
+    let l be empty quasi-loci;
+    reconsider d = {} as PartFunc of Vars, QuasiTypes by RELSET_1:12;
+    for x,T st x in dom d & T = d.x holds vars T = vars x; then
+    dom d = rng l & d is even by Def29;
+    hence thesis by Def30;
+  end;
