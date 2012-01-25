@@ -1,1 +1,1 @@
-to-mizar-ns.pl
+perl/bin/to-mizar-ns.pl

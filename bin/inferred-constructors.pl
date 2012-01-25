@@ -1,1 +1,1 @@
-inferred-constructors.pl
+perl/bin/inferred-constructors.pl

@@ -1,1 +1,1 @@
-reduce-tarski.pl
+perl/bin/reduce-tarski.pl

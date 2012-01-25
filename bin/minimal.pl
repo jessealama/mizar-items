@@ -1,1 +1,1 @@
-minimal.pl
+perl/bin/minimal.pl

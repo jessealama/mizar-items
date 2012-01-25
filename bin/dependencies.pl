@@ -1,1 +1,1 @@
-dependencies.pl
+perl/bin/dependencies.pl

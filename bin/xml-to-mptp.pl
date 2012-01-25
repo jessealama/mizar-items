@@ -1,1 +1,1 @@
-xml-to-mptp.pl
+perl/bin/xml-to-mptp.pl

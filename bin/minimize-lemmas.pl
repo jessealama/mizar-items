@@ -1,1 +1,1 @@
-minimize-lemmas.pl
+perl/bin/minimize-lemmas.pl

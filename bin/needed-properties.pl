@@ -1,1 +1,1 @@
-needed-properties.pl
+perl/bin/needed-properties.pl

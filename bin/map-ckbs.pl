@@ -1,1 +1,1 @@
-map-ckbs.pl
+perl/bin/map-ckbs.pl

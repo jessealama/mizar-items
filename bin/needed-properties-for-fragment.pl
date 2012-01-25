@@ -1,1 +1,1 @@
-needed-properties-for-fragment.pl
+perl/bin/needed-properties-for-fragment.pl

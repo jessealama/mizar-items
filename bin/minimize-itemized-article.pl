@@ -1,1 +1,1 @@
-minimize-itemized-article.pl
+perl/bin/minimize-itemized-article.pl

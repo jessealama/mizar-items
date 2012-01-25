@@ -1,1 +1,1 @@
-xml-fancy.pl
+perl/bin/xml-fancy.pl

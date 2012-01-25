@@ -1,1 +1,1 @@
-miz_item_deps_bf.pl
+perl/bin/miz_item_deps_bf.pl

@@ -1,1 +1,1 @@
-reduce-sketchy.pl
+perl/bin/reduce-sketchy.pl

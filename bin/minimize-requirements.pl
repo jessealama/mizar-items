@@ -1,1 +1,1 @@
-minimize-requirements.pl
+perl/bin/minimize-requirements.pl

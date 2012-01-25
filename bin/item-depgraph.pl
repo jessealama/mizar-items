@@ -1,1 +1,1 @@
-item-depgraph.pl
+perl/bin/item-depgraph.pl

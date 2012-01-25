@@ -1,1 +1,1 @@
-reduce.pl
+perl/bin/reduce.pl

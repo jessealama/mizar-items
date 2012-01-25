@@ -1,1 +1,1 @@
-minimize-internally.pl
+perl/bin/minimize-internally.pl

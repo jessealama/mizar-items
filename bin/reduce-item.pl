@@ -1,1 +1,1 @@
-reduce-item.pl
+perl/bin/reduce-item.pl

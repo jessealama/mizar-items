@@ -1,1 +1,1 @@
-tc.pl
+perl/bin/tc.pl

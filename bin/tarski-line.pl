@@ -1,1 +1,1 @@
-tarski-line.pl
+perl/bin/tarski-line.pl

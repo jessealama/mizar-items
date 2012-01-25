@@ -1,1 +1,1 @@
-itemized-article-dependencies.pl
+perl/bin/itemized-article-dependencies.pl

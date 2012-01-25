@@ -1,1 +1,1 @@
-minimize-properties.pl
+perl/bin/minimize-properties.pl

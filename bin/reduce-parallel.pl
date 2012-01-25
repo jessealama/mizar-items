@@ -1,1 +1,1 @@
-reduce-parallel.pl
+perl/bin/reduce-parallel.pl

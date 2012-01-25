@@ -1,1 +1,1 @@
-table-info.pl
+perl/bin/table-info.pl

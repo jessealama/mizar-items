@@ -1,1 +1,1 @@
-itemize.pl
+perl/bin/itemize.pl

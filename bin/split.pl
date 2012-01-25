@@ -1,1 +1,1 @@
-split.pl
+perl/bin/split.pl

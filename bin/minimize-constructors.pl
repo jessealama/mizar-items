@@ -1,1 +1,1 @@
-minimize-constructors.pl
+perl/bin/minimize-constructors.pl

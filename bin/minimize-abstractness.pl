@@ -1,1 +1,1 @@
-minimize-abstractness.pl
+perl/bin/minimize-abstractness.pl

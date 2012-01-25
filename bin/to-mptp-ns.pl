@@ -1,1 +1,1 @@
-to-mptp-ns.pl
+perl/bin/to-mptp-ns.pl

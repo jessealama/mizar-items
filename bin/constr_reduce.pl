@@ -1,1 +1,1 @@
-constr_reduce.pl
+perl/bin/constr_reduce.pl

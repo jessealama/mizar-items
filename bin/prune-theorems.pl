@@ -1,1 +1,1 @@
-prune-theorems.pl
+perl/bin/prune-theorems.pl

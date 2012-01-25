@@ -1,1 +1,1 @@
-article-mptp.pl
+perl/bin/article-mptp.pl
