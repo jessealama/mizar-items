@@ -17,7 +17,7 @@ use File::Basename qw(basename dirname);
 #  use Perl6::Slurp;
 #  use Perl6::Say;
 
-our @EXPORT_OK = qw(verify);
+our @EXPORT_OK = qw(verify ensure_sensible_mizar_environment);
 
 # Module implementation here
 
@@ -87,18 +87,17 @@ my %mizar_tool_path
        'JA1' => which_chomp ('JA1'));
 my @mizar_tools = keys %mizar_tool_path;
 
-# verify that these are all executable
-foreach my $tool (@mizar_tools) {
-    my $tool_path = $mizar_tool_path{$tool};
-    unless (-e $tool_path) {
-	die "The path '$tool_path' for the mizar tool '$tool' doesn't exist";
-    }
-    if (-d $tool_path) {
-	die "The path '$tool_path' for the mizar tool '$tool' is actually a directory!";
-    }
-    unless (-x $tool_path) {
-	die "The path '$tool_path' for the mizar tool '$tool' is not executable";
-    }
+sub ensure_sensible_mizar_environment {
+  my $mizfiles = $ENV{'MIZFILES'};
+  if (! defined $mizfiles) {
+    croak ('Error: the MIZFILES environment variable is unset.');
+  }
+  if (! -e $mizfiles) {
+    croak ('Error: the value of the MIZFILES environment variable, ', "\n", "\n", '  ', $mizfiles, "\n", "\n", 'does not exist.');
+  }
+  if (! -d $mizfiles) {
+    croak ('Error: the value of the MIZFILES environment variable, ', "\n", "\n", '  ', $mizfiles, "\n", "\n", 'is not a directory.');
+  }
 }
 
 sub get_mizfiles { return $mizfiles; }
