@@ -7,3 +7,7 @@ use_ok( 'Mizar' );
 }
 
 diag( "Testing Mizar $Mizar::VERSION" );
+
+### Local Variables: ***
+### mode:perl ***
+### End: ***
