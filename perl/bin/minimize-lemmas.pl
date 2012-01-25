@@ -9,6 +9,11 @@ use Cwd qw(cwd);
 use File::Copy qw(copy move);
 use Carp qw(croak);
 
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use Mizar qw(ensure_sensible_mizar_environment);
+
 my $paranoid = 0;
 my $verbose = 0;
 my $debug = 0;
@@ -81,19 +86,6 @@ sub ensure_directory {
   }
 
   return 1;
-}
-
-sub ensure_sensible_mizar_environment {
-  my $mizfiles = $ENV{'MIZFILES'};
-  if (! defined $mizfiles) {
-    croak ('Error: the MIZFILES environment variable is unset.');
-  }
-  if (! -e $mizfiles) {
-    croak ('Error: the value of the MIZFILES environment variable, ', "\n", "\n", '  ', $mizfiles, "\n", "\n", 'does not exist.');
-  }
-  if (! -d $mizfiles) {
-    croak ('Error: the value of the MIZFILES environment variable, ', "\n", "\n", '  ', $mizfiles, "\n", "\n", 'is not a directory.');
-  }
 }
 
 sub ensure_sensible_commandline_arguments {
