@@ -1,0 +1,1 @@
+prune-theorems.pl

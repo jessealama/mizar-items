@@ -1,0 +1,1 @@
+needed-properties-for-fragment.pl

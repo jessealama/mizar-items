@@ -1,0 +1,1 @@
+reduce-tarski.pl
