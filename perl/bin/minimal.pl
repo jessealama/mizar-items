@@ -54,18 +54,19 @@ my $article = $ARGV[0];
 my $article_basename = basename ($article, '.miz');
 my $article_dirname = dirname ($article);
 my $article_sans_extension = "${article_dirname}/${article_basename}";
-my $article_miz = "${article_dirname}/${article_basename}.miz";
-my $article_err = "${article_dirname}/${article_basename}.err";
-my $article_eno = "${article_dirname}/${article_basename}.eno";
-my $article_refx = "${article_dirname}/${article_basename}.refx";
-my $article_esh = "${article_dirname}/${article_basename}.esh";
-my $article_eth = "${article_dirname}/${article_basename}.eth";
-my $article_xml = "${article_dirname}/${article_basename}.xml";
 
-foreach my $extension ('miz', 'refx', 'eno') {
-  my $article_with_extension = "${article_sans_extension}.${extension}";
-  ensure_readable_file ($article_with_extension);
+sub article_file_with_extension {
+    my $extension = shift;
+    return "${article_dirname}/${article_basename}.${extension}";
 }
+
+my $article_miz = article_file_with_extension ('miz');
+my $article_err = article_file_with_extension ('err');
+my $article_eno = article_file_with_extension ('eno');;
+my $article_refx = article_file_with_extension ('refx');;
+my $article_esh = article_file_with_extension ('esh');;
+my $article_eth = article_file_with_extension ('eth');;
+my $article_xml = article_file_with_extension ('xml');;
 
 my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfs', 'eid', 'ecl');
 my %extension_to_element_table = ('eno' => 'Notations',
