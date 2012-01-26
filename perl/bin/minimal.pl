@@ -14,7 +14,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
-use Mizar qw(verify);
+use Mizar qw(verifier);
 
 my $paranoid = 0;
 my $verbose = 0;
