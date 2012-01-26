@@ -41,14 +41,34 @@ my $empty_article = <<"END_EMPTY_ARTICLE";
 environ begin
 END_EMPTY_ARTICLE
 
-ok (my $empty_article_fh = File::Temp->new (), 'can we make a temporary file?')
+my $dir_for_empty_article = File::Temp->newdir ();
+
+ok (defined $dir_for_empty_article,
+    'we made a temporary directory')
     or BAIL_OUT ('We cannot create a temporary file in which to save a Mizar article; no point in continuing.');
 
-ok (print {$empty_article_fh} ($empty_article),
-    'write the shortest possible Mizar article to disk')
-    or BAIL_OUT ('If we cannot save an article to disk, we cannot proceed.');
+ok (defined $dir_for_empty_article, 'we have a directory for the shortest article')
+    or BAIL_OUT ('Unable to create temporary directory.');
 
-my @minimal_call = ($minimal_script, $empty_article_fh->filename);
+my $shortest_miz_path = "${dir_for_empty_article}/shortest.miz";
+
+diag ('shortest article path: ', $shortest_miz_path);
+
+ok ((open (my $miz_fh, '>', $shortest_miz_path)),
+    'open output filehandle for saving the shortest miz');
+ok ((print {$miz_fh} ($empty_article)),
+    'print shortest miz to the output filehandle');
+ok ((close $miz_fh),
+    'close the output filehandle');
+
+diag ('shortest article path: ', $shortest_miz_path);
+
+ok (accom ($shortest_miz_path), 'empty article can be accomodated')
+    or BAIL_OUT ('Unable to accommodate minimal article (??)');
+ok (verifier ($shortest_miz_path), 'empty article is verifiable')
+    or BAIL_OUT ('Unable to verify minimal article (??)');
+
+my @minimal_call = ($minimal_script, $shortest_miz_path);
 ok (run (\@minimal_call, '>', '/dev/null'),
     'minimize the shortest possible Mizar article');
 
