@@ -9,42 +9,19 @@ use Carp qw(croak);
 use XML::LibXML;
 use File::Copy qw(copy move);
 
-sub ensure_directory {
-  my $dir = shift;
-  if (! -e $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist.';
-  }
+# Set up our path
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 
-  if (! -d $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist (as a directory).';
-  }
-  return 1;
-}
-
-sub ensure_readable_file {
-  my $file = shift;
-
-  if (! -e $file) {
-    croak ('Error: ', $file, ' does not exist.');
-  }
-  if (! -f $file) {
-    croak ('Error: ', $file, ' is not a file.');
-  }
-
-  if (! -r $file) {
-    croak ('Error: ', $file, ' is unreadable.');
-  }
-
-  return 1;
-}
+use Utils qw(ensure_directory ensure_readable_file);
 
 my $help = 0;
 my $man = 0;
 my $verbose = 0;
 my $checker_only = 0;
 my $debug = 0;
-my $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
-my $script_home = '/Users/alama/sources/mizar/xsl4mizar/items';
+my $stylesheet_home = "$FindBin::Bin/../../xsl";
+my $script_home = $FindBin::Bin;
 
 GetOptions('help|?' => \$help,
            'man' => \$man,
