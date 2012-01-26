@@ -128,7 +128,7 @@ sub our_verify {
 	    'long-lines' => 1,
 	    'checker-only' => $checker_only,
 	);
-    return verify ($article_miz, \%verifier_parameters);
+    return verifier ($article_miz, \%verifier_parameters);
 }
 
 sub prune_theorems {
