@@ -11,7 +11,7 @@ use Carp qw(croak);
 use IPC::Run qw(run);
 
 use FindBin;
-use lib "$FindBin::Bin";
+use lib "$FindBin::Bin/../lib";
 
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 use Mizar qw(verify);
