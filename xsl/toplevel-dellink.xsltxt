@@ -1,0 +1,104 @@
+// New stylesheet for doing toplevel dellink: invent labels for
+// unlabeled statements that are linked.
+
+// Two passes are required: one to assign the new labels to the
+// relevant items, and another to change the Link elements into the
+// correct Local-Reference elements.
+
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+tpl die(#message) {
+  if [@line and @col] {
+    $line = `@line`;
+    $col = `@col`;
+    $final_message = `concat ($message, " (line ", $line, ", column ", $col, ")")`;
+    msg terminate="yes" $final_message;
+  } else {
+    $final_message = `concat ($message, " (unable to determine line and column information)")`;
+    msg terminate="yes" $final_message;
+  }
+}
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl new-spelling-based-on (#base, #try) {
+  $candidate = `concat ($base, $try)`;
+  if [key ("spelling", $candidate)] {
+    new-spelling-based-on (#base = $base,
+                           #try = `$try + 1`);
+  } else {
+    $candidate;
+  }
+}
+
+tpl fresh-idnr (#start) {
+  if [key ("idnr", $start)] {
+    fresh-idnr (#start = `$start + 1`);
+  } else {
+    $start;
+  }
+}
+
+tpl new-label {
+  new-spelling-based-on (#base = "InducedLemma", #try = "1");
+}
+
+key "labels" [//Label] `@spelling`;
+key "idnrs" [//*] `@idnr`;
+
+tpl [Text-Proper/Item[@kind = "Regular-Statement" and not(child::Proposition/Label) and following-sibling::*/Straightforward-Justification/Link]] {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    $num-previous = `count (preceding-sibling::*)`;
+    $plus-one = `$num-previous + 1`;
+    $base = `concat ("InducedLemma", $plus-one)`;
+    $new-label = new-spelling-based-on (#base = $base, #try = "1");
+    @induced-label = $new-label;
+    $num-preceding-idnrs = `count (preceding::*[@idnr])`;
+    $idnr = fresh-idnr (#start = $num-preceding-idnrs);
+    if [not($idnr)] {
+      die (#message = "We were not able to compute a fresh idnr attribute for a toplevel Regular-Statement item that lacks a label.");
+    }
+    @idnr = $idnr;
+    <Proposition {
+      <Label {
+        @spelling = $new-label;
+        @idnr = $idnr;
+      }
+      apply [Proposition/*];
+    }
+    for-each [Proposition] {
+      apply [following-sibling::*];
+    }
+  }
+}
+
+tpl [Text-Proper/Item/Straightforward-Justification/Link] {
+  $link = `.`;
+  for-each [../..] {
+    if [preceding-sibling::*[position() = 1 and @induced-label]] {
+      $preceding-item = `preceding-sibling::*[1]`;
+      $induced-label = `$preceding-item/@induced-label`;
+      $idnr = `$preceding-item/@idnr`;
+      <Local-Reference {
+        for-each [$link/@*] { copy-of `.`; }
+        @spelling = $induced-label;
+        @idnr = $idnr;
+        apply [$link/*];
+      }
+    } else {
+      <Link {
+        for-each [$link/@*] { copy-of `.`; }
+        apply [$link/*];
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+stylesheet 1.0;
+
+output method="xml" indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [/] {
+  apply [Text-Proper];
+}
+
+tpl implicitly-qualified-variables {
+  make-token-string-no-duplicates (#elements = `descendant::Implicitly-Qualified-Segment/Variable[@idnr]/@idnr`);
+}
+
+tpl simple-terms {
+  make-token-string-no-duplicates (#elements = `descendant::Simple-Term[@idnr]/@idnr`);
+}
+
+tpl [Item[parent::Text-Proper]] {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    $implicitly-qualified = implicitly-qualified-variables ();
+    $simple-terms = simple-terms ();
+    @implicitly-qualified-variables = $implicitly-qualified;
+    @simple-terms = $simple-terms;
+    apply [*];
+  }
+}

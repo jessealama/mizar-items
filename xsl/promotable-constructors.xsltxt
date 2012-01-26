@@ -1,0 +1,232 @@
+// promotable-constructors.xsl : List promotable constructors in an .atr file
+
+stylesheet 1.0;
+
+output method="text";
+
+// This stylesheet operates on .atr files output by the mizar
+// accommodator. The result is a listing of the constructors in the
+// .atr file, in the mizar-items format:
+//
+// <article ID>:<kind>constructor:<nr>
+//
+// The stylesheet lists those constructors that are "promotable",
+// which means that they are not already maximally general, e.g., if
+// they are a mode, they are not the topmost mode 'set'; if they are a
+// function, they are not a function that takes a list of sets and
+// returns a set value, etc.
+
+// What kind of constructors to print.  Four values are recognized:
+//
+// * '' (empty string): only promotable constructors will be printed
+// * 'promotable': only promotable constructors will be printed
+// * 'unpromotable': only unpromotable constructor will be printed
+// * 'all': all constructors will be printed
+#kind = { ""; }
+
+tpl [/] {
+  choose {
+    when [$kind = ""] {
+      apply [Constructors] mode="promotable";
+    }
+    when [$kind = "all"] {
+      apply [Constructors] mode="all";
+    }
+    when [$kind = "promotable"] {
+      apply [Constructors] mode="promotable";
+    }
+    when [$kind = "unpromotable"] {
+      apply [Constructors] mode="unpromotable";
+    }
+    otherwise {
+      msg terminate="yes" "Error: the 'kind' stylesheet parameter must be either unset/the empty string, 'promotable', 'unpromotable', or 'all'.";
+    }
+  }
+}
+
+tpl [Constructors] mode="all" {
+  for-each [Constructor] {
+    apply [.] mode="print";
+  }
+}
+
+tpl [Constructors] mode="promotable" {
+  for-each [Constructor] {
+    apply [.] mode="promotable";
+  }
+}
+
+tpl [Constructors] mode="unpromotable" {
+  for-each [Constructor] {
+    apply [.] mode="unpromotable";
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Promotable constructors
+//////////////////////////////////////////////////////////////////////
+
+tpl [Constructor] mode="promotable" {
+  apply [.] mode="print";
+}
+
+tpl [Constructor[@kind = "V" and ArgTypes and Typ]] mode="promotable" {
+  choose {
+    when [count(ArgTypes/*) > 0] {
+      apply [.] mode="print";
+    }
+    when [Typ[@kind = "M" and @nr = "1" and Cluster]] {
+      if [count(Typ/Cluster/*) > 0] {
+        apply [.] mode="print";
+      }
+    }
+  }
+}
+
+tpl [Constructor[@kind = "M" and ArgTypes and Typ]] mode="promotable" {
+  choose {
+    when [count(ArgTypes/*) > 0] {
+      apply [.] mode="print";
+    }
+    when [Typ[@kind = "M" and @nr = "1" and Cluster]] {
+      if [count(Typ/Cluster/*) > 0] {
+        apply [.] mode="print";
+      }
+    }
+  }
+}
+
+tpl [Constructor[@kind = "K" and ArgTypes and Typ]] mode="promotable" {
+  $context = `.`;
+  choose {
+    when [Properties] {
+      apply [$context] mode="print";
+    }
+    when [Typ[not(@kind = "M" and @nr = "1" and Cluster and not(Cluster/*))]] {
+      apply [$context] mode="print";
+    }
+    otherwise {
+      for-each [ArgTypes] {
+        if [Typ[not(@kind = "M" and @nr = "1" and count(Cluster/*) = 0)]] {
+          apply [$context] mode="print";
+        }
+      }
+    }
+  }
+}
+
+tpl [Constructor[@kind = "R" and ArgTypes]] mode="promotable" {
+  $context = `.`;
+  for-each [ArgTypes] {
+    if [Typ[not(@kind = "M" and @nr = "1" and Cluster and count (Cluster/*) = 0)]] {
+      apply [$context] mode="print";
+    }
+  }
+}
+
+tpl [Constructor[not(@aid and @kind and @nr)]] mode="print" {
+  msg terminate="yes" "We require that every Constructor item have an aid, kind, and nr attribute.";
+}
+
+tpl [Constructor[@aid and @kind and @nr]] mode="print" {
+  `@aid`; ":"; `@kind`; "constructor"; ":"; `@nr`; "\n";
+}
+
+//////////////////////////////////////////////////////////////////////
+// Unpromotable constructors
+//////////////////////////////////////////////////////////////////////
+
+// Unless we have a template for determining whether a constructor is
+// unpromotable, don't say that it is promotable
+tpl [Constructor] mode="unpromotable" {
+  "";
+}
+
+tpl [Constructor[@kind = "V" and ArgTypes and Typ]] mode="unpromotable" {
+  $context = `.`;
+  if [Typ[not(@kind = "M" and @nr = "1" and count(Cluster/*) = 0)]] {
+    "";
+  } else {
+    for-each [ArgTypes] {
+      choose {
+        when [Typ[not(@kind = "M" and @nr = "1")]] {
+          "";
+        }
+        when [Typ[count(Cluster/*) > 0]] {
+          "";
+        }
+        otherwise {
+          apply [$context] mode="print";
+        }
+      }
+    }
+  }
+}
+
+tpl [Constructor[@kind = "M" and ArgTypes and Typ]] mode="unpromotable" {
+  $context = `.`;
+  choose {
+    when [Properties] {
+      ""; // the topmost type 'set' has no properties
+    }
+    when [Typ[not(@kind = "M" and @nr = "1" and count(Cluster/*) = 0)]] {
+      "";
+    }
+    otherwise {
+      for-each [ArgTypes] {
+        choose {
+          when [Typ[not(@kind = "M" and @nr = "1")]] {
+            "";
+          }
+          when [Typ[count(Cluster/*) > 0]] {
+            "";
+          }
+          otherwise {
+            apply [$context] mode="print";
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl [Constructor[@kind = "K" and ArgTypes and Typ]] mode="unpromotable" {
+  $context = `.`;
+  choose {
+    when [Properties] {
+      "";
+    }
+    when [Typ[not(@kind = "M" and @nr = "1" and count (Cluster/*) = 0)]] {
+      // the value type is not 'set'
+      "";
+    }
+    otherwise {
+      for-each [ArgTypes] {
+        if [Typ[not(@kind = "M" and @nr = "1" and count (Cluster/*) = 0)]] {
+          ""; // do nothing
+        } else {
+          apply [$context] mode="print";
+        }
+      }
+    }
+  }
+}
+
+tpl [Constructor[@kind = "R" and ArgTypes]] mode="unpromotable" {
+  $context = `.`;
+  for-each [ArgTypes] {
+    if [Typ[not(@kind = "M" and @nr = "1" and Cluster and count (Cluster/*) = 0)]] {
+      // do nothing
+    } else {
+      apply [$context] mode="print";
+    }
+  }
+}
+
+tpl [Constructor[not(@aid and @kind and @nr)]] mode="print" {
+  msg terminate="yes" "We require that every Constructor item have an aid, kind, and nr attribute.";
+}
+
+tpl [Constructor[@aid and @kind and @nr]] mode="print" {
+  `@aid`; ":"; `@kind`; ":"; `@nr`; "\n";
+}

@@ -1,0 +1,57 @@
+// skip-non-ultimate-proofs.xsl : Remove proofs from all elements except the final one
+
+stylesheet "1.0";
+
+output method="xml" indent="no";
+
+tpl [*] mode="copy" {
+  $n = `local-name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="copy";
+  }
+}
+
+tpl [*] mode="skip-proofs" {
+  $n = `local-name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="skip-proofs";
+  }
+}
+
+tpl [Proof] mode="skip-proofs" {
+  <SkippedProof;
+}
+
+tpl [By] mode="skip-proofs" {
+  <SkippedProof;
+}
+
+tpl [From] mode="skip-proofs" {
+  <SkippedProof;
+}
+
+tpl [/] {
+  if [not(Article)] {
+    msg terminate="yes" "Error: the required Article document element is missing.";
+  }
+  apply [Article];
+}
+
+tpl [Article[not(@aid)]] {
+  msg terminate="yes" "Error: the Article element must have an aid attribute.";
+}
+
+tpl [Article[@aid]] {
+  <Article {
+    @aid = `@aid`;
+    for-each [*] {
+      if [position() = last()] {
+        apply [.] mode="skip-proofs";
+      } else {
+        apply [.] mode="copy";
+      }
+    }
+  }
+}

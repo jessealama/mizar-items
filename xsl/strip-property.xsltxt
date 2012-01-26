@@ -1,0 +1,146 @@
+stylesheet 1.0;
+output method="xml" indent="no";
+
+//////////////////////////////////////////////////////////////////////
+// Identifying a constructor and a property of it
+//////////////////////////////////////////////////////////////////////
+
+#kind = { ""; }
+#nr = { ""; }
+#aid = { ""; }
+#property = { ""; }
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+
+// By default, just copy
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+      for-each [*] {
+        apply [.];
+      }
+    }
+  }
+  "\n";
+}
+
+// Ugh, a new mode that does exactly what the previous template
+// accomplishes.
+tpl [*] mode="copy"{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+      for-each [*] {
+        apply [.] mode="copy";
+      }
+    }
+  }
+  "\n";
+}
+
+tpl [/] {
+  choose {
+    when [$aid = ""] {
+      msg terminate="yes" "Error: please supply a value for the aid attribute of the constructor to target.";
+    }
+    when [$nr = ""] {
+      msg terminate="yes" "Error: please supply a value for the nr attribute of the constructor to target.";
+    }
+    when [$kind = ""] {
+      msg terminate="yes" "Error: please supply a value for the kind attribute of the constructor to target.";
+    }
+    when [$property = ""] {
+      msg terminate="yes" "Error: please supply a value for the property attribute of the constructor to target.";
+    }
+    when [Constructors] {
+      $kind-lc = lowercase (#string = $kind);
+      $aid-lc = lowercase (#string = $aid);
+      $property-lc = lowercase (#string = $property);
+      apply [Constructors] (#target-aid = $aid-lc,
+       	    		    #target-nr = $nr,
+			    #target-kind = $kind-lc,
+			    #target-property = $property-lc);
+    }
+    otherwise {
+      msg terminate="yes" "Error: the Constructors root element is missing.  (Are you applying this stylesheet to a .atr file?)";
+    }
+  }
+}
+
+tpl [Constructors] (#target-kind, #target-aid, #target-nr, #target-property) {
+  <Constructors {
+    "\n";
+    for-each [Constructor] {
+      apply [.] (#target-kind = $target-kind,
+    	         #target-aid = $target-aid,
+	         #target-nr = $target-nr,
+	         #target-property = $target-property);
+    }
+  }
+}
+
+tpl [Constructor[not(@aid)]] (#target-kind, #target-aid, #target-nr, #target-property) {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an aid attribute.";
+}
+
+tpl [Constructor[not(@kind)]] (#target-kind, #target-aid, #target-nr, #target-property) {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks a kind attribute.";
+}
+
+tpl [Constructor[not(@nr)]] (#target-kind, #target-aid, #target-nr, #target-property) {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an nr attribute.";
+}
+
+tpl [Constructor[@aid and @nr and @kind and Properties]] (#target-kind, #target-aid, #target-nr, #target-property) {
+  $this-nr = `@nr`;
+  $this-aid = lowercase (#string = `@aid`);
+  $this-kind = lowercase (#string = `@kind`);
+  if [$this-kind = $target-kind and $this-nr = $target-nr and $this-aid = $target-aid] {
+    <Constructor {
+      for-each [@*] { copy-of `.`; }
+      "\n";
+      apply [Properties] (#property-to-strip = $target-property);
+      for-each [*[not(self::Properties)]] {
+        apply [.];
+      }
+    }
+    "\n";
+  } else {
+    apply [.] mode="copy";
+  }
+}
+
+tpl [Properties] (#property-to-strip) {
+  <Properties {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      for-each [*] {
+        $n = `name (.)`;
+        $n-lc = lowercase (#string = $n);
+        if [$n-lc = $property-to-strip] {
+          // ignore
+        } else {
+          apply [.];
+        }
+      }
+    }
+  }
+  "\n";
+}

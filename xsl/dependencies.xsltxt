@@ -1,0 +1,284 @@
+// dependencies.xsl : Print the dependencies of a mizar article (sans its constructor dependencies)
+
+stylesheet 1.0;
+
+output method="text";
+
+//////////////////////////////////////////////////////////////////////
+// Stylesheet parameters
+//////////////////////////////////////////////////////////////////////
+
+// The directory in which to look for the given article's environment.
+// If unset, we will look in whatever direcory the XSLT processor is
+// working in.
+#article-directory = { ""; }
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+tpl [/] {
+  if [Article] {
+    apply [Article];
+  } else {
+    msg terminate="yes" "Error: no Article root element was found.";
+  }
+}
+
+tpl [Article[not(@aid)]] {
+  msg terminate="yes" "Error: we don't know how to handle an article that lacks an aid attribute.";
+}
+
+tpl [Article[@aid]] {
+  $aid-lc = lowercase (#string = `@aid`);
+
+  // deftheorems
+  for-each [descendant::Ref[@kind = "D" and @absnr and @aid]] {
+    apply [.]; "\n";
+  }
+
+  // theorems
+  for-each [descendant::Ref[@kind = "T"]] {
+    apply [.]; "\n";
+  }
+
+  // schemes
+  $esh = `concat ($aid-lc, ".esh1")`;
+  $full-esh = `concat ($article-directory, $esh)`;
+  for-each [document ($full-esh, /)] {
+    apply [Schemes];
+  }
+
+  // needed definientia
+  $dfs = `concat ($aid-lc, ".dfs1")`;
+  $full-dfs = `concat ($article-directory, $dfs)`;
+  for-each [document ($full-dfs, /)] {
+    apply [Definientia];
+  }
+
+  // needed clusters
+  $ecl = `concat ($aid-lc, ".ecl1")`;
+  $full-ecl = `concat ($article-directory, $ecl)`;
+  for-each [document ($full-ecl, /)] {
+    apply [Clusters];
+  }
+
+  // needed identifications
+  $eid = `concat ($aid-lc, ".eid1")`;
+  $full-eid = `concat ($article-directory, $eid)`;
+  for-each [document ($full-eid, /)] {
+    apply [IdentifyRegistrations];
+  }
+
+  // needed reductions
+  $erd = `concat ($aid-lc, ".erd1")`;
+  $full-erd = `concat ($article-directory, $erd)`;
+  for-each [document ($full-erd, /)] {
+    apply [ReductionRegistrations];
+  }
+
+  // needed patterns
+  $eno = `concat ($aid-lc, ".eno1")`;
+  $full-eno = `concat ($article-directory, $eno)`;
+  for-each [document ($full-eno, /)] {
+    apply [Notations];
+  }
+
+  // needed property registrations
+  $epr = `concat ($aid-lc, ".epr1")`;
+  $full-epr = `concat ($article-directory, $epr)`;
+  for-each [document ($full-epr, /)] {
+    apply [PropertyRegistrations];
+  }
+}
+
+tpl [Ref[not(@aid) or not(@absnr)]] {
+  msg terminate="yes" "Error: to handle references, we require that aid and absnr information be present.";
+}
+
+tpl [Ref[@kind = "T" and @aid and @absnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $aid-lc; ":"; "theorem"; ":"; `@absnr`;
+}
+
+tpl [Ref[@kind = "D" and @aid and @absnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $aid-lc; ":"; "deftheorem"; ":"; `@absnr`;
+}
+
+tpl [Notations] {
+  for-each [Pattern] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Pattern[@aid and @kind and not(@absconstrnr) and @constrnr = "0" and @relnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "pattern"; ":"; `@relnr`;
+}
+
+tpl [Pattern[@aid and @kind and @absconstrnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "pattern"; ":"; `@absconstrnr`;
+}
+
+tpl [Schemes] {
+  for-each [Scheme] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Scheme[@aid and @nr]] {
+   $aid-lc = lowercase (#string = `@aid`);
+   $aid-lc; ":"; "scheme"; ":"; `@nr`;
+}
+
+tpl [Definientia] {
+  for-each [Definiens] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Definiens[not(@aid)]] {
+  msg terminate="yes" "Error: unable to deal with a Definiens element that lacks an aid attribute.";
+}
+
+tpl [Definiens[not(@constrkind)]] {
+  msg terminate="yes" "Error: unable to deal with a Definiens element that lacks a constrkind attribute.";
+}
+
+tpl [Definiens[not(@absconstrnr)]] {
+  msg terminate="yes" "Error: unable to deal with a Definiens element that lacks an absconstrnr attribute.";
+}
+
+tpl [Definiens[@aid and @constrkind and @absconstrnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@constrkind`);
+  $aid-lc; ":"; $kind-lc; "definiens"; ":"; `@absconstrnr`;
+}
+
+tpl [Registrations] {
+  for-each [CCluster | FCluster | RCluster] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [CCluster[not(@aid)]] {
+  msg terminate="yes" "Error: unable to handle a CCluster element that lacks an aid attribute.";
+}
+
+tpl [CCluster[not(@nr)]] {
+  msg terminate="yes" "Error: unable to handle a CCluster element that lacks an nr attribute.";
+}
+
+tpl [CCluster[@aid and @nr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $aid-lc; ":"; "ccluster"; ":"; `@nr`;
+}
+
+tpl [FCluster[not(@aid)]] {
+  msg terminate="yes" "Error: unable to handle a FCluster element that lacks an aid attribute.";
+}
+
+tpl [FCluster[not(@nr)]] {
+  msg terminate="yes" "Error: unable to handle a FCluster element that lacks an nr attribute.";
+}
+
+tpl [FCluster[@aid and @nr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $aid-lc; ":"; "fcluster"; ":"; `@nr`;
+}
+
+tpl [RCluster[not(@aid)]] {
+  msg terminate="yes" "Error: unable to handle a RCluster element that lacks an aid attribute.";
+}
+
+tpl [RCluster[not(@nr)]] {
+  msg terminate="yes" "Error: unable to handle a RCluster element that lacks an nr attribute.";
+}
+
+tpl [RCluster[@aid and @nr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $aid-lc; ":"; "rcluster"; ":"; `@nr`;
+}
+
+tpl [IdentifyRegistrations] {
+  for-each [Identify] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Identify[not(@constrkind)]] {
+  msg terminate="yes" "Error: unable to handle an Identify element that lacks a constrkind attribute.";
+}
+
+tpl [Identify[not(@aid)]] {
+  msg terminate="yes" "Error: unable to handle an Identify element that lacks an aid attribute.";
+}
+
+tpl [Identify[not(@nr)]] {
+  msg terminate="yes" "Error: unable to handle an Identify element that lacks an nr attribute.";
+}
+
+tpl [Identify[@constrkind and @aid and @nr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@constrkind`);
+  `$aid-lc`; ":"; `$kind-lc`; "identification"; ":"; `@nr`;
+}
+
+tpl [ReductionRegistrations] {
+  for-each [Reduction] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Reduction[not(@aid)]] {
+  msg terminate="yes" "Error: unable to handle a Reduction element that lacks an aid attribute.";
+}
+
+tpl [Reduction[not(@nr)]] {
+  msg terminate="yes" "Error: unable to handle a Reduction element that lacks an nr attribute.";
+}
+
+tpl [Reduction[@aid and @nr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  `$aid-lc`; ":"; "reduction"; ":"; `@nr`;
+}
+
+tpl [PropertyRegistrations] {
+  for-each [Property] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Property[not(@aid)]] {
+  msg terminate="yes" "Error: unable to handle a Property element that lacks an aid attibute.";
+}
+
+tpl [Property[not(@nr)]] {
+  msg terminate="yes" "Error: unable to handle a Property element that lacks an nr attibute.";
+}
+
+tpl [Property[not(@x)]] {
+  msg terminate="yes" "Error: unable to handle a Property element that lacks an x attibute.";
+}
+
+tpl [Property[@aid and @nr and @x]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $nr = `@nr`;
+  $x = `@x`;
+  $message = `concat ("Warning: Don't yet know how to handle Property items [aid = ", $aid-lc, ", nr = ", $nr, "x = ", $x, "]")`;
+  msg $message;
+}

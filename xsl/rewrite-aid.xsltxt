@@ -1,0 +1,44 @@
+stylesheet "1.0";
+
+output method="xml" indent="no";
+
+#new-aid = { ""; }
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+tpl [*] (#aid, #update-aid) {
+  $n = `local-name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [@aid] {
+      $this-aid = `@aid`;
+      if [$this-aid = $aid] {
+        @aid = $update-aid;
+      }
+    }
+    if [*] {
+      "\n"; apply [*] (#aid = $aid, #update-aid = $update-aid);
+    }
+  }
+  "\n";
+}
+
+tpl [/] {
+  apply [Article];
+}
+
+tpl [Article[@aid]] {
+  $aid = `@aid`;
+  $new-aid-uc = uppercase (#string = $new-aid);
+  <Article {
+    for-each [@*] { copy-of `.`; }
+    @aid = $new-aid-uc;
+    "\n";
+    for-each [*] {
+      apply [.] (#aid = $aid, #update-aid = $new-aid-uc); "\n";
+    }
+  }
+}

@@ -1,0 +1,50 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+tpl die(#message) {
+  if [@line and @col] {
+    $line = `@line`;
+    $col = `@col`;
+    $final_message = `concat ($message, " (line ", $line, ", column ", $col, ")")`;
+    msg terminate="yes" $final_message;
+  } else {
+    $final_message = `concat ($message, " (unable to determine line and column information)")`;
+    msg terminate="yes" $final_message;
+  }
+}
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    if [@spelling] { @spelling = `@spelling`; }
+    if [@idnr] { @idnr = `@idnr`; }
+    if [@nr] { @nr = `@nr`; }
+    if [@number] { @"number" = `@number`; }
+    if [@articleid] { @articleid = `@articleid`; }
+    if [@kind] { @kind = `@kind`; }
+    apply [*];
+  }
+}
+
+tpl split-reservation (#variables, #type) {
+  if [$variables] {
+    $variable = `$variables[1]`;
+    <Item {
+      @kind = "Reservation";
+      @idnr = $variable/@idnr;
+      apply [$variable];
+      apply [$type];
+
+    }
+    split-reservation (#variables = `$variables[position() > 1]`,
+                       #type = $type);
+  }
+}
+
+tpl [Item[@kind="Reservation"]] {
+  split-reservation (#variables = `Variable`,
+                     #type = `*[position() = last()]`);
+}

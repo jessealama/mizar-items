@@ -1,0 +1,37 @@
+stylesheet "1.0";
+
+output method="text";
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+tpl [/] {
+  if [Constructors] {
+    apply [Constructors];
+  } else {
+    msg terminate="yes" "Error: the required Constructors document element is missing.  (Are you applying this stylesheet to an .atr file?)";
+  }
+}
+
+tpl [Constructors] {
+  for-each [Constructor[Properties/Abstractness]] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Constructor[@aid and @kind and @nr]] {
+  $aid = lowercase (#string = `@aid`);
+  $kind = lowercase (#string = `@kind`);
+  $aid; ":"; $kind; "constructor"; ":"; `@nr`;
+}

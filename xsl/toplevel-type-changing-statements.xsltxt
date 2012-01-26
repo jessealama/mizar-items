@@ -1,0 +1,439 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and child::Equality[not(child::Variable)]]] {
+  die (#message = "We expected to find a Variable child of the Equality child of the current Type-Changing-Statement that we are handling, but we found none.");
+}
+
+tpl copy-attributes {
+  for-each [@*] { copy-of `.`; }
+}
+
+tpl [*] (#formula) mode="maybe-generalize" {
+  // We're done doing any potential generalizations.  Just deal with
+  // $formula now.
+  apply [$formula];
+}
+
+// Rewriting a proof of a toplevel unexported theorem according to the terms appearing in it coming from toplevel type-changing statement
+
+tpl new-spelling-based-on (#base, #try) {
+  $candidate = `concat ($base, $try)`;
+  if [key ("spelling", $candidate)] {
+    new-spelling-based-on (#base = $base,
+                           #try = `$try + 1`);
+  } else {
+    $candidate;
+  }
+}
+
+tpl fresh-idnr (#start) {
+  if [key ("idnr", $start)] {
+    fresh-idnr (#start = `$start + 1`);
+  } else {
+    $start;
+  }
+}
+
+tpl new-label {
+  new-spelling-based-on (#base = "InducedLemma", #try = "1");
+}
+
+key "idnr" [//*] `@idnr`;
+key "spelling" [//*] `@spelling`;
+
+//////////////////////////////////////////////////////////////////////
+// Existence of paths from toplevel type-changing statements
+//////////////////////////////////////////////////////////////////////
+
+tpl needed-later (#candidates, #item) {
+
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement"]] (#item, #variable) mode="exists-path-with-variable" {
+  if [not($variable/@idnr)] {
+    die (#message = "We require that Variable elements have an idnr attribute, but we found one that lacks this attribute");
+  }
+  $variable-idnr = `$variable/@idnr`;
+  $next-type-changing-statement = `following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $item][1]`;
+  choose {
+    // Later type-changing statements and constant definitions might clobber the variable introduced here.
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $item]/Equality/Variable/@idnr = $variable-idnr] {
+      "0";
+    }
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $item]/Variable/@idnr = $variable-idnr] {
+      "0";
+    }
+    when [following-sibling::Item[@kind = "Constant-Definition" and following::* = $item]/Variable/@idnr = $variable-idnr] {
+      "0";
+    }
+    // The base case: the variable introduced here directly in the
+    // item.
+    when [$item//Simple-Term[@idnr = $variable-idnr]] {
+      "1";
+    }
+    // The recursive cases: $variable occurs in some later
+    // type-changing statement that is needed
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $item]/Equality/*[position() = last()]//Simple-Term[@idnr = $variable-idnr]] {
+      ...
+    }
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $item]/*[position() = last()]//Simple-Term[@idnr = $variable-idnr]] {
+      "1";
+    }
+    otherwise {
+      "0";
+    }
+  }
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and not(child::Variable) and child::Equality[child::Variable]]] (#formula) mode="exists-path" {
+  apply [.] (#formula = $formula,
+             #variable = `Equality/Variable`) mode="exists-path";
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and child::Variable and not(child::Equality[child::Variable])]] (#formula) mode="exists-path" {
+  $variable = `Variable`;
+  $variable-idnr = `$variable/@idnr`;
+  apply [.] (#formula = $formula,
+             #variable = `Variable`) mode="exists-path";
+}
+
+//////////////////////////////////////////////////////////////////////
+// Instantiating variables in a proof that were universally
+// generalized in a toplevel unexported theorem
+//////////////////////////////////////////////////////////////////////
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement"]] (#formula, #proof, #variable, #definiens) mode="maybe-instantiate-with-variable" {
+  if [not($variable/@idnr)] {
+    die (#message = "We require that Variable elements have an idnr attribute, but we found one that lacks this attribute");
+  }
+  $variable-idnr = `$variable/@idnr`;
+  $next-type-changing-statement = `following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula][1]`;
+  choose {
+    // Later type-changing statements and constant definitions might clobber the variable introduced here.
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula]/Equality/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula, #proof = $proof) mode="maybe-instantiate"; // move along
+    }
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula]/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula, #proof = $proof) mode="maybe-instantiate"; // move along
+    }
+    when [following-sibling::Item[@kind = "Constant-Definition" and following::* = $formula]/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula, #proof = $proof) mode="maybe-instantiate"; // move along
+    }
+    when [$formula//Simple-Term[@idnr = $variable-idnr]] {
+      $variable-spelling = `$variable/@spelling`;
+      $type = `*[position() = last() - 1]`;
+      <Item {
+        @kind = "Generalization";
+        <Explicitly-Qualified-Segment {
+          apply [$variable];
+          apply [$type];
+        }
+      }
+      <Item {
+        @kind = "Assumption";
+        <Collective-Assumption {
+          <Proposition {
+            $num-previous = `count (preceding-sibling::*)`;
+            $plus-one = `$num-previous + 1`;
+            $base = `concat ("InducedLabel", $plus-one)`;
+            $new-label-spelling = new-spelling-based-on (#base = $base, #try = "1");
+            $num-preceding-idnrs = `count (preceding::*[@idnr])`;
+            $offset = `$num-preceding-idnrs + $num-previous`;
+            $idnr = fresh-idnr (#start = $offset);
+            <Label {
+              @idnr = $idnr;
+              @spelling = $new-label-spelling;
+            }
+            <Predicative-Formula {
+              @spelling = "=";
+              @nr = "1"; // ?
+              <Arguments {
+                <Simple-Term {
+                  @idnr = $variable-idnr;
+                  @spelling = $variable-spelling;
+                }
+              }
+              <Arguments {
+                apply [$definiens];
+              }
+            }
+          }
+        }
+      }
+      if [$next-type-changing-statement] {
+        apply [$next-type-changing-statement] (#formula = $formula, #proof = $proof) mode="maybe-instantiate";
+      } else {
+        apply [$proof/*];
+      }
+    }
+    otherwise {
+      if [$next-type-changing-statement] {
+        apply [$next-type-changing-statement] (#formula = $formula, #proof = $proof) mode="maybe-instantiate"; // move along
+      } else {
+        apply [$proof/*];
+      }
+    }
+  }
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and not(child::Variable) and child::Equality[child::Variable]]] (#formula, #proof) mode="maybe-instantiate" {
+  apply [.] (#formula = $formula,
+             #proof = $proof,
+             #variable = `Equality/Variable`,
+             #definiens = `Equality/*[position() = last()]`)
+    mode="maybe-instantiate-with-variable";
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and child::Variable and not(child::Equality[child::Variable])]] (#formula, #proof) mode="maybe-instantiate" {
+  $variable = `Variable`;
+  $variable-idnr = `$variable/@idnr`;
+  if [not(preceding-sibling::Item[@kind = "Constant-Definition"]/Variable[@idnr = $variable-idnr])] {
+    die (#message = "Unable to infer the definiens for a variable introduced by a type-changing statement that does not have the form of an equation");
+  }
+  apply [.] (#formula = $formula,
+             #proof = $proof,
+             #variable = `Variable`,
+             #definiens = `(preceding-sibling::Item[@kind = "Constant-Definition" and child::Variable[@idnr = $variable-idnr]]/*[position() = last()])[1]`)
+   mode="maybe-instantiate-with-variable";
+}
+
+// Emitting local references
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement"]] (#formula, #variable) mode="maybe-emit-local-reference-with-variable" {
+  if [not($variable/@idnr)] {
+    die (#message = "We require that Variable elements have an idnr attribute, but we found one that lacks this attribute");
+  }
+  $variable-idnr = `$variable/@idnr`;
+  $next-type-changing-statement = `following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula][1]`;
+  choose {
+    // Later type-changing statements and constant definitions might clobber the variable introduced here.
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula]/Equality/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-emit-local-reference"; // move along
+    }
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula]/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-emit-local-reference"; // move along
+    }
+    when [following-sibling::Item[@kind = "Constant-Definition" and following::* = $formula]/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-emit-local-reference"; // move along
+    }
+    when [$formula//Simple-Term[@idnr = $variable-idnr]] {
+      $variable-spelling = `$variable/@spelling`;
+      $type = `*[position() = last() - 1]`;
+      $num-previous = `count (preceding-sibling::*)`;
+      $plus-one = `$num-previous + 1`;
+      $base = `concat ("InducedLabel", $plus-one)`;
+      $new-label-spelling = new-spelling-based-on (#base = $base, #try = "1");
+      $num-preceding-idnrs = `count (preceding::*[@idnr])`;
+      $offset = `$num-preceding-idnrs + $num-previous`;
+      $idnr = fresh-idnr (#start = $offset);
+      <Local-Reference {
+        @idnr = $idnr;
+        @spelling = $new-label-spelling;
+      }
+      if [$next-type-changing-statement] {
+        apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-emit-local-reference";
+      }
+    }
+    when [$next-type-changing-statement] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-emit-local-reference"; // move along
+    }
+  }
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and not(child::Variable) and child::Equality[child::Variable]]] (#formula) mode="maybe-emit-local-reference" {
+  apply [.] (#formula = $formula,
+             #variable = `Equality/Variable`)
+    mode="maybe-emit-local-reference-with-variable";
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and child::Variable and not(child::Equality[child::Variable])]] (#formula) mode="maybe-emit-local-reference" {
+  $variable = `Variable`;
+  $variable-idnr = `$variable/@idnr`;
+  if [not(preceding-sibling::Item[@kind = "Constant-Definition"]/Variable[@idnr = $variable-idnr])] {
+    die (#message = "Unable to infer the definiens for a variable introduced by a type-changing statement that does not have the form of an equation");
+  }
+  apply [.] (#formula = $formula,
+             #variable = `Variable`)
+   mode="maybe-emit-local-reference-with-variable";
+}
+
+// Rewriting a formula by generalizing it according to the terms appearing it coming from toplevel type-changing statements
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement"]] (#formula, #variable, #definiens) mode="maybe-generalize-with-variable" {
+  if [not($variable/@idnr)] {
+    die (#message = "We require that Variable elements have an idnr attribute, but we found one that lacks this attribute");
+  }
+  $variable-idnr = `$variable/@idnr`;
+  $next-type-changing-statement = `following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula][1]`;
+  choose {
+    // Later type-changing statements and constant definitions might clobber the variable introduced here.
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula]/Equality/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-generalize"; // move along
+    }
+    when [following-sibling::Item[@kind = "Type-Changing-Statement" and following::* = $formula]/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-generalize"; // move along
+    }
+    when [following-sibling::Item[@kind = "Constant-Definition" and following::* = $formula]/Variable/@idnr = $variable-idnr] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-generalize"; // move along
+    }
+    when [$formula//Simple-Term[@idnr = $variable-idnr]] {
+      $variable-spelling = `$variable/@spelling`;
+      $type = `*[position() = last() - 1]`;
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          apply [$variable];
+          apply [$type];
+        }
+        <Conditional-Formula {
+          // The antecedent will be the equation of the type-changing statement
+          <Predicative-Formula {
+            @spelling = "=";
+            @nr = "1"; // ?
+            <Arguments {
+              <Simple-Term {
+                @idnr = $variable-idnr;
+                @spelling = $variable-spelling;
+              }
+            }
+            <Arguments {
+              apply [$definiens];
+            }
+          }
+          if [$next-type-changing-statement] {
+            apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-generalize";
+          } else {
+            apply [$formula];
+          }
+        }
+      }
+    }
+    when [$next-type-changing-statement] {
+      apply [$next-type-changing-statement] (#formula = $formula) mode="maybe-generalize"; // move along
+    }
+    otherwise {
+      apply [$formula];
+    }
+  }
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and not(child::Variable) and child::Equality[child::Variable]]] (#formula) mode="maybe-generalize" {
+  apply [.] (#formula = $formula,
+             #variable = `Equality/Variable`,
+             #definiens = `Equality/*[position() = last()]`)
+    mode="maybe-generalize-with-variable";
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement" and child::Variable and not(child::Equality[child::Variable])]] (#formula) mode="maybe-generalize" {
+  $variable = `Variable`;
+  $variable-idnr = `$variable/@idnr`;
+  if [not(preceding-sibling::Item[@kind = "Constant-Definition"]/Variable[@idnr = $variable-idnr])] {
+    die (#message = "Unable to infer the definiens for a variable introduced by a type-changing statement that does not have the form of an equation");
+  }
+  apply [.] (#formula = $formula,
+             #variable = `Variable`,
+             #definiens = `(preceding-sibling::Item[@kind = "Constant-Definition" and child::Variable[@idnr = $variable-idnr]]/*[position() = last()])[1]`)
+   mode="maybe-generalize-with-variable";
+}
+
+tpl [Proposition[parent::Item[parent::Text-Proper and @kind = "Regular-Statement"]]] {
+  <Proposition {
+    copy-attributes ();
+    $formula = `*[position() = last()]`;
+    if [preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]] {
+      apply [Label];
+      apply [preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"][position() = last()]] (#formula = $formula) mode="maybe-generalize";
+    } else {
+      // Nothing to do: this proposition doesn't follow a toplevel type-changing statement
+      apply [*];
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Rewriting proofs of toplevel unexported theorems whose statements
+// use terms introdced by toplevel type-changing statements
+//////////////////////////////////////////////////////////////////////
+
+// The idea is that in a situation such as
+//
+// ===============================================================================
+// reconsider Z as non empty set by ENUMSET1:def 1;
+// reconsider RR as Relation3 of Z by Def1,Lm4;
+// reconsider CLS = CollStr (# Z, RR #) as non empty CollStr;
+//
+// Lm5: for a,b,c be Point of CLS holds [a,b,c] in RR iff (a=b or b=c or c =a) &
+// a in Z & b in Z & c in Z
+// proof
+//   for a,b,c be Point of CLS holds [a,b,c] in RR iff (a=b or b=c or c =a) &
+// a in Z & b in Z & c in Z
+// ...
+// ===============================================================================
+//
+// (taken from COLLSP), we want to rewrite this as:
+//
+// ===============================================================================
+// Lm5: for Z being non empty set st ...
+// for a,b,c be Point of CLS holds [a,b,c] in RR iff (a=b or b=c or c =a) &
+// a in Z & b in Z & c in Z
+// proof
+//   let Z be non empty set such that
+//     C0: Z = {1,2,3};
+//   let RR be Relation3 of Z such that
+//     C1: RR = { [i,j,k]: (i=j or j=k or k=i) & i in Z & j in Z & k in Z };
+//   let CLS being non empty CollStr such that
+//     C2: CLS = CollStr (# Z, RR #);
+//   for a,b,c be Point of CLS holds [a,b,c] in RR iff (a=b or b=c or c =a) &
+// a in Z & b in Z & c in Z
+// ...
+// ===============================================================================
+//
+// We have introduce new labels, such as C0, C1, and C2 above.  We
+// also need to append these labels to whatever justifications appear
+// in the proof.
+
+
+// This humongous pattern matches proofs of toplevel unexported
+// theorems whose proposition uses a term introduced by a toplevel
+// type-changing statement
+tpl [Block[@kind = "Proof" and parent::Item[parent::Text-Proper and @kind = "Regular-Statement"] and preceding-sibling::Proposition[descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]/Equality/Variable/@idnr or descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]/Variable/@idnr]]] {
+  <Block {
+    copy-attributes ();
+    apply [preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"][position() = last()]] (#proof = `.`,
+                                                                                                             #formula = `preceding-sibling::Proposition/*[position() = last()]`)
+      mode="maybe-instantiate";
+  }
+}
+
+// This humongous pattern matches straightforward justification
+// elements appearing in proofs of toplevel unexported theorems whose
+// proposition uses a term introduced by a toplevel type-changing
+// statement.  We need to append to such Straightforward-Justification
+// elements local references to the labels we introduced earlier.
+tpl [Straightforward-Justification[ancestor::Block[@kind = "Proof" and parent::Item[parent::Text-Proper and @kind = "Regular-Statement"] and preceding-sibling::Proposition[descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]/Equality/Variable/@idnr or descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]/Variable/@idnr]]]] {
+  // $line = `@line`;
+  // $col = `@col`;
+  // $message = `concat ("we're in (line ", $line, ", column ", $col)`;
+  // msg $message;
+  <Straightforward-Justification {
+    copy-attributes ();
+    for-each [*] { apply [.]; }
+    for-each [ancestor::Block[@kind = "Proof" and parent::Item[parent::Text-Proper and @kind = "Regular-Statement"]]] {
+      for-each [preceding-sibling::Proposition] {
+        apply [preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"][position() = last()]] (#formula = `*[position() = last()]`) mode="maybe-emit-local-reference";
+      }
+    }
+  }
+}

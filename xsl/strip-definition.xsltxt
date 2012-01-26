@@ -1,0 +1,97 @@
+stylesheet 1.0;
+output method="xml" indent="no";
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+// By default, just copy
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+      for-each [*] {
+        apply [.];
+      }
+    }
+  }
+  "\n";
+}
+
+// Ugh, a new mode that does exactly what the previous template
+// accomplishes.
+tpl [*] mode="copy"{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+      for-each [*] {
+        apply [.] mode="copy";
+      }
+    }
+  }
+  "\n";
+}
+
+tpl [/] {
+  choose {
+    when [Constructors] {
+      apply [Constructors];
+    }
+    otherwise {
+      msg terminate="yes" "Error: the Constructors root element is missing.  (Are you applying this stylesheet to a .atr file?)";
+    }
+  }
+}
+
+tpl [Constructors] {
+  <Constructors {
+    "\n";
+    for-each [Constructor] {
+      apply [.];
+    }
+  }
+}
+
+tpl [Constructor[not(@aid)]] {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an aid attribute.";
+}
+
+tpl [Constructor[not(@kind)]] {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks a kind attribute.";
+}
+
+tpl [Constructor[not(@nr)]] {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an nr attribute.";
+}
+
+tpl [Constructor[@aid and @nr and @kind and Properties/Abstractness]] {
+  $this-nr = `@nr`;
+  $this-aid = lowercase (#string = `@aid`);
+  $this-kind = lowercase (#string = `@kind`);
+  $token = `concat (",", $this-aid, ":", $this-kind, ":", $this-nr, ",")`;
+  if [contains ($constructors, $token)] {
+    <Constructor {
+      for-each [@*] { copy-of `.`; }
+      "\n";
+      for-each [*[not(self::Properties)]] {
+        apply [.];
+      }
+    }
+    "\n";
+  } else {
+    apply [.] mode="copy";
+  }
+}

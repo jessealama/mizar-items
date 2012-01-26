@@ -1,0 +1,348 @@
+stylesheet "1.0";
+
+output method="xml" indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [*] mode="copy" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="copy";
+  }
+}
+
+tpl [/] {
+  apply [Text-Proper];
+}
+
+tpl [Text-Proper] {
+  <Text-Proper {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Eliciting correctness conditions from definitions
+//////////////////////////////////////////////////////////////////////
+
+// By default, if we don't explicitly handle a correctness condition,
+// die.
+tpl [Item[@kind = "Correctness-Condition" and @line and @col]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition" {
+  $line = `@line`;
+  $col = `@col`;
+  $message = `concat ("Error: we do not know how to handle the correctness condition starting at line ", $line, " and column ", $col, ".")`;
+  msg terminate="yes" $message;
+}
+
+tpl universally-generalize-from-definition (#locus-variables,
+    					    #original-variables,
+					    #context,
+					    #result-type,
+					    #definiens) {
+  if [$locus-variables] {
+    if [$original-variables] {
+      $locus-variable = `$locus-variables[1]`;
+      $remaining-variables = `$locus-variables[position() > 1]`;
+      for-each [$locus-variable] {
+        $idnr = `@idnr`;
+        $message = `concat ("idnr = ", $idnr)`;
+        msg $message;
+        $spelling = `@spelling`;
+        for-each [ancestor::Item[@kind = "Functor-Definition"]] {
+          for-each [preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment[Variables/Variable[@idnr = $idnr]]] {
+            $type = `*[position() = last()]`;
+            <Universal-Quantifier-Formula {
+              <Explicitly-Qualified-Segment {
+                <Variables {
+                  <Variable {
+                    @idnr = $idnr;
+  		  @spelling = $spelling;
+                  }
+                }
+                apply [$type];
+              }
+              universally-generalize-from-definition (#locus-variables = $remaining-variables,
+	      					      #original-variables = $original-variables,
+  	    					    #context = $context,
+  						    #result-type = $result-type,
+  						    #definiens = $definiens);
+            }
+          }
+        }
+      }
+    } else {
+      universally-generalize-from-definition (#locus-variables = $locus-variables,
+     					      #original-variables = $locus-variables,
+ 	    			              #context = $context,
+ 					      #result-type = $result-type,
+  					      #definiens = $definiens);
+    }
+  } else {
+    apply [$context] (#variables = $original-variables,
+    	  	      #result-type = $result-type,
+      	  	      #definiens = $definiens) mode="elicit-correctness-condition-done-generalizing";
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "coherence"]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition" {
+  $num-variables = `count ($variables)`;
+  $message = `concat ("In a coherence condition; we have ", $num-variables, " variables.")`;
+  msg $message;
+  <Item {
+    @kind = "Theorem-Item";
+    @elicited-condition = "coherence";
+    <Proposition {
+      universally-generalize-from-definition (#locus-variables = $variables,
+      					      #context = `.`,
+					      #result-type = $result-type,
+					      #definiens = $definiens);
+    }
+    apply [*] (#variables = $variables) mode="maybe-prepend-variable-intros";
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "coherence"]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition-done-generalizing" {
+  <Qualifying-Formula {
+    apply [$definiens];
+    apply [$result-type];
+  }
+}
+
+tpl some-variable-has-spelling (#variables, #spelling) {
+  if [$variables] {
+    $variable = `$variables[1]`;
+    $variable-spelling = `$variable/@spelling`;
+    if [$variable-spelling = $spelling] {
+      "1";
+    } else {
+      some-variable-has-spelling (#variables = `$variables[position() > 1]`,
+      				  #spelling = $spelling);
+    }
+  } else {
+    "0";
+  }
+}
+
+tpl variable-distinct-from (#variables, #prefix, #try) {
+  $m = `concat ("Variables: ", $variables)`;
+  msg $m;
+  if [$variables] {
+    msg "We need to inspect some variables.";
+    choose {
+      when [$try = ""] {
+        variable-distinct-from (#variables = $variables,
+      	  	                #prefix = $prefix,
+			        #try = "0");
+      }
+      when [$try = "0"] {
+        if [$prefix = ""] {
+          variable-distinct-from (#variables = $variables,
+    	    	                  #prefix = "X",
+			          #try = "0");
+        } else {
+          $some-has-name = some-variable-has-spelling (#variables = $variables,
+	  		   			       #spelling = $prefix);
+          if [$some-has-name = "1"] {
+            variable-distinct-from (#variables = $variables,
+      	    	                    #prefix = $prefix,
+			            #try = "1");
+          } else {
+            msg "Inner success case 1";
+            <Variable {
+              @idnr = "0";
+              @spelling = $prefix;
+            }
+          }
+        }
+      }
+      when [$prefix = ""] {
+        variable-distinct-from (#variables = $variables,
+  	    	                #prefix = "X",
+			        #try = $try);
+      }
+      otherwise {
+        $proposed-spelling = `concat ($prefix, $try)`;
+        $some-has-name = some-variable-has-spelling (#variables = $variables,
+		       	 			     #spelling = $proposed-spelling);
+        if [$some-has-name = "1"] {
+          variable-distinct-from (#variables = $variables,
+    	    	                  #prefix = $prefix,
+			          #try = `$try + 1`);
+        } else {
+	  msg "Inner success case 2";
+          msg $proposed-spelling;
+          <Variable {
+            @idnr = "0";
+            @spelling = $proposed-spelling;
+          }
+        }
+      }
+    }
+  } else {
+    msg "Inner success case 3";
+    <Variable {
+      @idnr = "0";
+      @spelling = "X";
+    }
+  }
+}
+
+tpl [*] (#variables) mode="plug-it-term" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#variables = $variables) mode="plug-it-term";
+  }
+}
+
+tpl [it-Term] (#variables) mode="plug-it-term" {
+  variable-distinct-from (#variables = $variables);
+}
+
+tpl [*] (#variables) mode="maybe-prepend-variable-intros" {
+  $n = `name (.)`;
+  $message = `concat ("Error: Don't know how to (maybe) invert variables in a(n) ", $n, "element.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Block[@kind = "Proof"]] (#variables) mode="maybe-prepend-variable-intros" {
+  <Block {
+    for-each [@*] { copy-of `.`; }
+    for-each [$variables] {
+      $idnr = `@idnr`;
+      $spelling = `@spelling`;
+      for-each [ancestor::Item[@kind = "Functor-Definition"]] {
+        for-each [preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment[Variables/Variable[@idnr = $idnr]]] {
+          $type = `*[position() = last()]`;
+          <Item {
+            @kind = "Generalization";
+            <Explicitly-Qualified-Segment {
+              <Variables {
+                <Variable {
+                  @idnr = $idnr;
+                    @spelling = $spelling;
+                }
+              }
+              apply [$type];
+            }
+          }
+        }
+      }
+    }
+    apply [*];
+  }
+}
+
+tpl [Straightforward-Justification] (#variables) mode="maybe-prepend-variable-intros" {
+  apply [.];  // nothing to do
+}
+
+tpl [Scheme-Justification] (#variables) mode="maybe-prepend-variable-intros" {
+  apply [.]; // nothing to do
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "existence"]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition" {
+  $context = `.`;
+  $num-variables = `count ($variables)`;
+  $message = `concat ("In an existence condition; we have ", $num-variables, " variables.")`;
+  msg $message;
+  <Item {
+    @kind = "Theorem-Item";
+    @elicited-condition = "existence";
+    <Proposition {
+      universally-generalize-from-definition (#locus-variables = $variables,
+      					      #context = `.`,
+					      #result-type = $result-type,
+					      #definiens = $definiens);
+    }
+    apply [*] (#variables = $variables) mode="maybe-prepend-variable-intros";
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "existence"]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition-done-generalizing" {
+  $num-variables = `count ($variables)`;
+  $message = `concat ("Dealing with existence; we have ", $num-variables, " variables.")`;
+  msg $message;
+  <Existential-Quantifier-Formula {
+    <Explicitly-Qualified-Segment {
+      <Variables {
+        variable-distinct-from (#variables = $variables,
+			        #context = `.`,
+				#result-type = $result-type,
+				#definiens = $definiens);
+      }
+      apply [$result-type];
+    }
+    apply [$definiens] (#variables = $variables) mode="plug-it-term";
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "uniqueness"]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition" {
+  msg "Warning: Don't know how to properly handle uniqueness";
+  <Item {
+    @kind = "Theorem-Item";
+    @elicited-condition = "uniqueness";
+    <Proposition {
+      universally-generalize-from-definition (#locus-variables = $variables,
+      					      #context = `.`,
+					      #result-type = $result-type,
+					      #definiens = $definiens);
+    }
+    apply [*] (#variables = $variables) mode="maybe-prepend-variable-intros";
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "uniqueness"]] (#variables, #result-type, #definiens) mode="elicit-correctness-condition-done-generalizing" {
+  msg "Warning: Don't know how to properly handle uniqueness";
+  <Conditional-Formula {
+    apply [$definiens];
+    apply [$definiens];
+  }
+}
+
+tpl [Item[@kind = "Definition-Item" and Block[@kind = "Definitional-Block"]/Item[@kind = "Functor-Definition" and Operation-Functor-Pattern and Type-Specification and Definiens]]] {
+  for-each [Block[@kind = "Definitional-Block"]] {
+    msg "hey block";
+    $block = `.`;
+    for-each [Item[@kind = "Functor-Definition"]] {
+      msg "hey functor definition";
+      $definition = `.`;
+      for-each [Operation-Functor-Pattern] {
+        msg "hey operation-functor-pattern";
+        $pattern = `.`;
+        $variables = `descendant::Locus`;
+        $num-variables = `count ($variables)`;
+        $message = `concat ("We found ", $num-variables, " variables.")`;
+	// msg $message;
+        for-each [$definition/Type-Specification] {
+          msg "hey type-specification";
+          $type-specification = `.`;
+          $result-type = `*`;
+          for-each [$definition/Definiens] {
+            msg "hey definiens";
+            $definiens = `.`;
+            $definiens-formula = `*[position() = last()]`;
+            for-each [$block/Item[@kind = "Correctness-Condition"]] {
+              msg "hey correctness-condition";
+              apply [.] (#variables = $variables,
+ 	                 #result-type = $result-type,
+                         #definiens = $definiens-formula) mode="elicit-correctness-condition";
+            }
+          }
+        }
+      }
+    }
+  }
+  apply [.] mode="copy";
+}

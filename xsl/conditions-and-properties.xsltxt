@@ -1,0 +1,241 @@
+stylesheet "1.0";
+
+output method="text";
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+tpl [/] {
+  if [Article] {
+    apply [Article];
+  } else {
+    msg terminate="yes" "Error: the required Article document element is missing.";
+  }
+}
+
+tpl [Article] {
+  $num-definition-blocks = `count (DefinitionBlock)`;
+  $num-notation-blocks = `count (NotationBlock)`;
+  choose {
+    when [$num-definition-blocks > 1] {
+      msg terminate="yes" "Error: we require that there be at most one definition block in the article.";
+    }
+    when [$num-notation-blocks > 1] {
+      msg terminate="yes" "Error: we require that there be at most one notation block in the article.";
+    }
+    when [$num-definition-blocks = 1] {
+      for-each [DefinitionBlock] {
+        apply [.];
+      }
+    }
+    when [$num-notation-blocks = 1] {
+      for-each [NotationBlock] {
+        apply [.];
+      }
+    }
+    otherwise {
+      // nothing to do
+    }
+  }
+}
+
+tpl [DefinitionBlock] {
+
+  $num-definitions = `count (Definition)`;
+  if [$num-definitions > 1] {
+    msg terminate="yes" "Error: we are unable to process a definition block that contains multiple definitions.";
+  }
+
+  apply [Definition];
+
+  if [count (following-sibling::DefTheorem) > 1] {
+    msg terminate="yes" "Error: the current definition block generates multiple definitional theorems.";
+  }
+
+  if [following-sibling::DefTheorem] {
+    "deftheorem"; "\n";
+  }
+
+  if [count (following-sibling::Definiens) > 1] {
+    msg terminate="yes" "Error: the current definition block generates multiple definientia.";
+  }
+
+  if [following-sibling::Definiens[@constrkind]] {
+    for-each [following-sibling::Definiens[@constrkind]] {
+      $kind = lowercase (#string = `@constrkind`);
+      `concat ($kind, "definiens")`; "\n";
+    }
+  }
+
+}
+
+tpl [NotationBlock] {
+
+  $num-patterns = `count (Pattern)`;
+  if [$num-patterns > 1] {
+    msg terminate="yes" "Error: we are unable to process a notation block that contains multiple patterns.";
+  }
+
+  apply [Pattern];
+
+}
+
+tpl [Definition] {
+
+  // Sanity check: there aren't multiple patterns here
+  //
+  // With structures, there can be multiple patterns.
+
+  // if [count (Pattern) > 1] {
+  //   msg terminate="yes" "Error: there are multiple Pattern children of the current Definition node.  Why?";
+  // }
+
+  for-each [Pattern] {
+    apply [.]; "\n";
+  }
+
+  // Sanity check: there aren't multiple constructors
+  //
+  // With structure definitions, there can be multiple constructors.
+
+  // if [count (Constructor) > 1] {
+  //   msg terminate="yes" "Error: there are multiple Constructor children of the current Definition node.  Why?";
+  // }
+
+  for-each [Constructor] {
+    apply [.]; "\n";
+  }
+
+  for-each [Correctness] {
+    if [Coherence] {
+      apply [Coherence]; "\n";
+    } else {
+      apply [.]; "\n";
+    }
+  }
+
+  if [Coherence] {
+    "coherence"; "\n";
+  }
+
+  for-each [Existence | Uniqueness | Compatibility ] {
+    apply [.]; "\n";
+  }
+  for-each [Constructor/Properties/Abstractness] {
+    apply [.];
+  }
+  for-each [JustifiedProperty/Reflexivity
+  	    | JustifiedProperty/Irreflexivity
+	    | JustifiedProperty/Symmetry
+	    | JustifiedProperty/Antisymmetry
+	    | JustifiedProperty/Connectedness
+	    | JustifiedProperty/Involutiveness
+	    | JustifiedProperty/Projectivity
+	    | JustifiedProperty/Idempotence
+	    | JustifiedProperty/Commutativity
+	    | JustifiedProperty/Sethood] {
+    apply [.]; "\n";
+  }
+
+  // if [@kind = "K" and not(Existence)] {
+  //   "existence"; "\n";
+  // }
+  // if [@kind = "K" and not(Uniqueness)] {
+  //   "uniqueness"; "\n";
+  // }
+
+}
+
+tpl [Abstractness] {
+  "abstractness";
+}
+
+tpl [Coherence] {
+  "coherence";
+}
+
+tpl [Correctness] {
+  "correctness";
+}
+
+tpl [Existence] {
+  "existence";
+}
+
+tpl [Uniqueness] {
+  "uniqueness";
+}
+
+tpl [Compatibility] {
+  "compatibility";
+}
+
+tpl [Reflexivity] {
+  "reflexivity";
+}
+
+tpl [Irreflexivity] {
+  "irreflexivity";
+}
+
+tpl [Symmetry] {
+  "symmetry";
+}
+
+// bug in the XML
+tpl [Antisymmetry] {
+  "asymmetry";
+}
+
+tpl [Asymmetry] {
+  "asymmetry";
+}
+
+tpl [Connectedness] {
+  "connectedness";
+}
+
+tpl [Involutiveness] {
+  "involutiveness";
+}
+
+tpl [Projectivity] {
+  "projectivity";
+}
+
+tpl [Idempotence] {
+  "idempotence";
+}
+
+tpl [Commutativity] {
+  "commutativity";
+}
+
+tpl [Sethood] {
+  "sethood";
+}
+
+tpl [Pattern[not(@kind)]] {
+  msg terminate="yes" "Error: we encountered a Pattern element that lacks a kind attribute.";
+}
+
+tpl [Pattern[@kind]] {
+  $kind = lowercase (#string = `@kind`);
+  `concat ($kind, "pattern")`;
+}
+
+tpl [Constructor[@kind]] {
+  $kind = lowercase (#string = `@kind`);
+  `concat ($kind, "constructor")`;
+}

@@ -1,0 +1,430 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [*] (#target-idnr, #earlier-idnrs) mode="idnr-hunting" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#target-idnr = $target-idnr, #earlier-idnrs = $earlier-idnrs) mode="idnr-hunting";
+  }
+}
+
+tpl [Simple-Term] (#target-idnr, #earlier-idnrs) mode="idnr-hunting" {
+  $our-idnr = `@idnr`;
+  $token = `concat (",", $our-idnr, ",")`;
+  choose {
+    when [$our-idnr = $target-idnr] {
+      <it-Term {
+        @induced = "induced";
+      }
+    }
+    when [contains ($earlier-idnrs, $token)] {
+      $pos = position-of-item (#item = $our-idnr,
+                               #token-string = $earlier-idnrs);
+      if [$pos = "0"] {
+        $message = `concat ("We expected to find that the position of the item '", $our-idnr, "' in the token string '", $earlier-idnrs, "' would be non-zero, but we somehow did get zero")`;
+        die (#message = $message);
+      }
+      $earlier-mode-name = new-spelling-based-on (#base = "DummyMode", #try = $pos);
+      <Global-Choice-Term {
+        @induced = "global-choice-term";
+        <Standard-Type {
+          @spelling = $earlier-mode-name;
+        }
+      }
+    }
+    otherwise {
+      apply [.];
+    }
+  }
+}
+
+tpl [Item[@kind = "Choice-Statement"]] (#earlier-idnrs, #target-idnr) mode="idnr-hunting" {
+  $variables = `Variable | Explicitly-Qualified-Segment/Variable`;
+  $variable-idnrs = idnr-items-to-token-string (#items = $variables);
+  $difference = token-string-difference (#token-string = $earlier-idnrs,
+                                         #to-remove = $variable-idnrs);
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#earlier-idnrs = $difference, #target-idnr = $target-idnr);
+  }
+}
+
+tpl [Item[@kind = "Type-Changing-Statement"]] (#earlier-idnrs, #target-idnr) mode="idnr-hunting" {
+  $variables = `Equality/Variable`;
+  $variable-idnrs = idnr-items-to-token-string (#items = $variables);
+  $difference = token-string-difference (#token-string = $earlier-idnrs,
+                                         #to-remove = $variable-idnrs);
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#earlier-idnrs = $difference, #target-idnr = $target-idnr);
+  }
+}
+
+tpl [Item[preceding-sibling::Item[@kind = "Choice-Statement"]]] (#earlier-idnrs, #target-idnr) mode="idnr-hunting" {
+  $variables = `Variable | Explicitly-Qualified-Segment/Variable`;
+  $variable-idnrs = idnr-items-to-token-string (#items = $variables);
+  $difference = token-string-difference (#token-string = $earlier-idnrs,
+                                         #to-remove = $variable-idnrs);
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#earlier-idnrs = $difference, #target-idnr = $target-idnr);
+  }
+}
+
+tpl [Item[preceding-sibling::Item[@kind = "Type-Changing-Statement"]]] (#earlier-idnrs, #target-idnr) mode="idnr-hunting" {
+  $variables = `Equality/Variable`;
+  $variable-idnrs = idnr-items-to-token-string (#items = $variables);
+  $difference = token-string-difference (#token-string = $earlier-idnrs,
+                                         #to-remove = $variable-idnrs);
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#earlier-idnrs = $difference, #target-idnr = $target-idnr);
+  }
+}
+
+tpl count-preceding-toplevel-items {
+  `count (preceding::Item[parent::Text-Proper and not(@kind = "Reservation") and not(@kind = "Private-Functor-Definition") and not(@kind = "Private-Predicate-Definition")])`;
+}
+
+tpl idnr-items-to-token-string (#items) {
+  if [$items] {
+    $item = `$items[1]`;
+    if [$item/@idnr] {
+      $toplevel-item-number = `$item/@idnr`;
+      $token = `concat (",", $toplevel-item-number, ",")`;
+      $tail-token-string = idnr-items-to-token-string (#items = `$items[position() > 1]`);
+      append-token-strings (#token-string-a = $token,
+                            #token-string-b = $tail-token-string);
+    } else {
+      for-each [$item] {
+        die (#message = "In converting a nodeset of items into a token string, we assumed that all items have an idnr attribute, but there is an item that lacks this attribute");
+      }
+    }
+  } else {
+    "";
+  }
+}
+
+// Given a nodeset of propositions and a nodeset of
+// explicitly/implicitly qualified segments, form the existential
+// generalization of the conjunction of $propositions over those
+// segments
+tpl existentially-generalize (#variables, #starting-after, #idnr-to-it-term, #earlier-idnrs, #type, #propositions) {
+  $starting-index = `$starting-after + 1`;
+  $variable = `$variables[$starting-index]`;
+  if [$variable] {
+    <Existential-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        apply [$variable];
+        apply [$type];
+      }
+      existentially-generalize (#variables = $variables,
+                                #starting-after = $starting-index,
+                                #idnr-to-it-term = $idnr-to-it-term,
+                                #earlier-idnrs = $earlier-idnrs,
+                                #type = $type,
+                                #propositions = $propositions);
+    }
+  } else {
+    if [$propositions] {
+      $proposition = `$propositions[1]`;
+      $formula = `$proposition/*[position() = last()]`; // skip the label, if there is one
+      if [$propositions[2]] {
+        <Conjunctive-Formula {
+          apply [$formula] (#target-idnr = $idnr-to-it-term, #earlier-idnrs = $earlier-idnrs) mode="idnr-hunting";
+          existentially-generalize (#variables = $variables,
+                                    #type = $type,
+                                    #starting-after = $starting-after,
+                                    #earlier-idnrs = $earlier-idnrs,
+                                    #idnr-to-it-term = $idnr-to-it-term,
+                                    #propositions = `$propositions[position() > 1]`);
+        }
+      } else {
+        apply [$formula] (#target-idnr = $idnr-to-it-term, #earlier-idnrs = $earlier-idnrs) mode="idnr-hunting";
+      }
+    }
+  }
+}
+
+tpl existentially-instantiate (#variables, #starting-after, #type, #propositions) {
+  $starting-index = `$starting-after + 1`;
+  $variable = `$variables[$starting-index]`;
+  $variables-to-generalize = `$variables[position() >= $starting-after]`;
+  <Explicitly-Qualified-Segment {
+    for-each [$variables-to-generalize] {
+      apply [.];
+    }
+    apply [$type];
+  }
+  apply [$propositions];
+}
+
+tpl conjoin-propositions (#propositions, #earlier-idnrs) {
+  if [$propositions] {
+    $proposition = `$propositions[1]`;
+    $formula = `$proposition/*[position() = last()]`; // skip the label, if there is one
+    if [$propositions[2]] {
+      <Conjunctive-Formula {
+        apply [$formula] (#earlier-idnrs = $earlier-idnrs) mode="idnr-hunting";
+        conjoin-propositions (#propositions = `$propositions[position() > 1]`,
+                              #earlier-idnrs = $earlier-idnrs);
+      }
+    } else {
+      apply [$formula] (#earlier-idnrs = $earlier-idnrs) mode="idnr-hunting";
+    }
+  }
+}
+
+key "spelling" [//*] `@spelling`;
+
+tpl new-spelling-based-on (#base, #try) {
+  $candidate = `concat ($base, $try)`;
+  if [key ("spelling", $candidate)] {
+    new-spelling-based-on (#base = $base,
+                           #try = `$try + 1`);
+  } else {
+    $candidate;
+  }
+}
+
+tpl new-dummy-mode-name {
+  new-spelling-based-on (#base = "DummyMode", #try = "1");
+}
+
+tpl [Text-Proper/Item[@kind = "Choice-Statement"]] {
+
+  if [not (Explicitly-Qualified-Segment | Implicitly-Qualified-Segment)] {
+    die (#message = "We expect a Choice-Statement to have either an Explicitly-Qualified-Segment or an Implicitly-Qualified-Segment child, but this choice statement lacks both");
+  }
+
+  // treat first the case of one variable in a consider
+  if [not(Explicitly-Qualified-Segment)] {
+    die (#message = "We don't yet know how to deal with a choice statement that lacks an explicit type for the variables it introduces.");
+  }
+  if [Explicitly-Qualified-Segment[2]] {
+    die (#message = "We don't know yet how to deal with toplevel choice statements that involve binding variables of different types");
+  }
+
+  $context = `.`;
+  $num-previous = count-preceding-toplevel-items ();
+  $justification = `$context/*[position() = last()]`;
+  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
+  $segment = `Explicitly-Qualified-Segment`;
+  $num-variables = `count (Explicitly-Qualified-Segment/Variable)`;
+  $variables = `$segment/Variable`;
+  $all-idnrs = idnr-items-to-token-string (#items = $variables);
+
+  for-each [$variables] {
+
+    if [not(@idnr)] {
+      die (#message = "We encountered a Variable element that lacks an idnr attribute!");
+    }
+    if [not(@spelling)] {
+      die (#message = "We encountered a Variable element that lacks a spelling attribute!");
+    }
+
+    $variable = `.`;
+    $variable-idnr = `@idnr`;
+    $variable-spelling = `@spelling`;
+    $position = `position ()`;
+    $earlier-variables = `$variables[position() < $position]`;
+    $earlier-idnrs = idnr-items-to-token-string (#items = $earlier-variables);
+
+    // dummy mode
+    $mode-name = new-spelling-based-on (#base = "DummyMode", #try = $position);
+    <Item {
+      @kind = "Definition-Item";
+      @promoted = "choice-statement-mode";
+      @spelling = $mode-name;
+      @idnr = $variable-idnr;
+      @variable-spelling = $variable-spelling;
+      <Block {
+        @kind = "Definitional-Block";
+        for-each [$earlier-variables] {
+          $earlier-variable-position = `position ()`;
+          $earlier-mode-name = new-spelling-based-on (#base = "DummyMode", #try = $earlier-variable-position);
+          <Item {
+            @kind = "Constant-Definition";
+            @idnr = `@idnr`;
+            apply [.];
+            <Global-Choice-Term {
+              @induced = "global-choice-term";
+              <Standard-Type {
+                @spelling = $earlier-mode-name;
+              }
+            }
+          }
+        }
+        <Item {
+          @kind = "Mode-Definition";
+          <Mode-Pattern {
+            @spelling = $mode-name;
+            <Loci;
+          }
+          <Standard-Mode {
+            @kind = "Simple-Definiens";
+            if [$type] {
+              <Type-Specification {
+                apply [$type];
+              }
+            }
+            <Definiens {
+              <Formula-Expression;
+              existentially-generalize (#variables = $variables,
+                                        #starting-after = $position,
+                                        #idnr-to-it-term = $variable-idnr,
+                                        #earlier-idnrs = $earlier-idnrs,
+                                        #type = $type,
+                                        #propositions = `$context/Proposition`);
+            }
+          }
+        }
+        <Item {
+          @kind = "Correctness-Condition";
+          <Existence;
+          <Block {
+            @kind = "Proof";
+            <Item {
+              @kind = "Choice-Statement";
+              <Explicitly-Qualified-Segment {
+                for-each [$variables[position() >= $position]] {
+                  apply [.];
+                }
+                apply [$type];
+              }
+              apply [$context/Proposition] (#earlier-idnrs = $earlier-idnrs) mode="idnr-hunting";
+              if [$position = 1] {
+                apply [$justification];
+              } else {
+                <Straightforward-Justification {
+                  <Definition-Reference {
+                    $minus-one = `$num-previous + $position - 1`;
+                    @spelling = `concat ("CKB", $minus-one)`;
+                    @"number" = "1";
+                  }
+                }
+              }
+            }
+            <Item {
+              @kind = "Exemplification";
+              apply [$variable];
+            }
+            <Item {
+              @kind = "Conclusion";
+              <Compact-Statement;
+              <Proposition {
+                <Thesis;
+              }
+              <Straightforward-Justification {
+                for-each [$context/Proposition/Label] {
+                  <Local-Reference {
+                    for-each [@*] { copy-of `.`; }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+  }
+
+  // conjunction of the propositions
+  <Item {
+    @kind = "Theorem-Item";
+    @promoted = "choice-statement-conditions";
+    <Proposition {
+      conjoin-propositions (#propositions = `Proposition`,
+                            #earlier-idnrs = $all-idnrs);
+    }
+    $last-mode-name = new-spelling-based-on (#base = "DummyMode", #try = $num-variables);
+    <Block {
+      @kind = "Proof";
+      <Item {
+        @kind = "Regular-Statement";
+        <Compact-Statement;
+        <Proposition {
+          <Predicative-Formula {
+            @nr = "1";
+            @spelling = "=";
+            <Arguments {
+              <Global-Choice-Term {
+                <Standard-Type {
+                  @spelling = $last-mode-name;
+                }
+              }
+            }
+            <Arguments {
+              <Global-Choice-Term {
+                <Standard-Type {
+                  @spelling = $last-mode-name;
+                }
+              }
+            }
+          }
+        }
+        <Straightforward-Justification;
+      }
+      <Item {
+        @kind = "Conclusion";
+        <Compact-Statement;
+        <Proposition {
+          <Thesis;
+        }
+        <Straightforward-Justification {
+          <Link;
+          $last-mode = `$num-previous + $num-variables`;
+          <Definition-Reference {
+            @spelling = `concat ("CKB", $last-mode)`;
+            @"number" = "1";
+          }
+        }
+      }
+    }
+  }
+
+  if [Proposition[2]] {
+    for-each [Proposition] {
+      <Item {
+        @kind = "Regular-Statement";
+        @promoted = "choice-statement-condition";
+        <Compact-Statement;
+        apply [.] (#earlier-idnrs = $all-idnrs) mode="idnr-hunting";
+        <Straightforward-Justification {
+          $conjunction-position = `$num-previous + $num-variables + 1`;
+          <Theorem-Reference {
+            @spelling = `concat ("CKB", $conjunction-position)`;
+            @"number" = "1";
+          }
+        }
+      }
+    }
+  }
+
+}
+
+tpl [Text-Proper/Item[preceding-sibling::Item[@kind = "Choice-Statement"]]] {
+  $choice-statement = `preceding-sibling::Item[@kind = "Choice-Statement"][1]`;
+  $choice-variables = `$choice-statement/Explicitly-Qualified-Segment/Variable`;
+  $choice-variable-list = idnr-items-to-token-string (#items = $choice-variables);
+  $message = `concat ("choice-variable-list = ", $choice-variable-list)`;
+  msg $message;
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#earlier-idnrs = $choice-variable-list) mode="idnr-hunting";
+  }
+}

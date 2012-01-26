@@ -1,0 +1,35 @@
+// unpromoted-constructors.xsl : List unpromoted constructors in an "promoted" .atr file
+
+stylesheet 1.0;
+
+output method="text";
+
+// This stylesheet operates on .atr files output by the mizar
+// accommodator. The result is a listing of the constructors in the
+// .atr file, in the format:
+//
+// <article ID>:<kind>:<nr>
+//
+// The stylesheet lists those constructors that are "promotable",
+// which means that they are not already maximally general, e.g., if
+// they are a mode, they are not the topmost mode 'set'; if they are a
+// function, they are not a function that takes a list of sets and
+// returns a set value, etc.
+
+tpl [/] {
+  apply [Constructors];
+}
+
+tpl [Constructors] {
+  for-each [Constructor[@promoted = "no"]] {
+    apply [.] mode="print";
+  }
+}
+
+tpl [Constructor[not(@aid and @kind and @nr)]] mode="print" {
+  msg terminate="yes" "We require that every Constructor item have an aid, kind, nr, and relnr attribute.";
+}
+
+tpl [Constructor[@aid and @kind and @nr]] mode="print" {
+  `@aid`; ":"; `@kind`; ":"; `@nr`; "\n";
+}

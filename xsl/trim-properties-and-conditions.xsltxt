@@ -1,0 +1,554 @@
+	stylesheet "1.0";
+
+output method="xml" indent="no";
+
+//////////////////////////////////////////////////////////////////////
+// Identifying a property
+//////////////////////////////////////////////////////////////////////
+
+// The property or condition to which the definition will be trimmed.
+// Everything else will be dumped.
+#target-condition-or-property = { ""; }
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+// tpl [*] {
+//   $n = `name (.)`;
+//   <$n {
+//     for-each [@*] { copy-of `.`; }
+//     if [*] {
+//       "\n";
+//       for-each [*] {
+//         apply [.];
+//       }
+//     }
+//   }
+//   "\n";
+// }
+
+
+// By default, ignore things
+tpl [*] { }
+
+tpl [*] mode="copy" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+      for-each [*] {
+        apply [.] mode="copy";
+      }
+    }
+  }
+  "\n";
+}
+
+tpl [/] {
+
+  // Sanity check to make sure that $target-condition-or-property has
+  // a sensible value
+
+  if [not($target-condition-or-property = "")] {
+    // Explicitly enumerate the kinds of patterns/conditions we accept
+    choose {
+
+      //////////////////////////////////////////////////
+      // Patterns
+      //////////////////////////////////////////////////
+      when [$target-condition-or-property = "gpattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "jpattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "kpattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "lpattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "mpattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "rpattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "upattern"] {
+        // OK
+      }
+      when [$target-condition-or-property = "vpattern"] {
+        // OK
+      }
+
+      //////////////////////////////////////////////////
+      // Constructors
+      //////////////////////////////////////////////////
+      when [$target-condition-or-property = "gconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "jconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "kconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "lconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "mconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "rconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "uconstructor"] {
+        // OK
+      }
+      when [$target-condition-or-property = "vconstructor"] {
+        // OK
+      }
+
+      //////////////////////////////////////////////////
+      // Conditions
+      //////////////////////////////////////////////////
+      when [$target-condition-or-property = "existence"] {
+        // OK
+      }
+      when [$target-condition-or-property = "uniqueness"] {
+        // OK
+      }
+      when [$target-condition-or-property = "coherence"] {
+        // OK
+      }
+      when [$target-condition-or-property = "compatibility"] {
+        // OK
+      }
+      when [$target-condition-or-property = "correctness"] {
+        // OK
+      }
+
+      //////////////////////////////////////////////////
+      // Definitional theorems/definientia
+      //////////////////////////////////////////////////
+      when [$target-condition-or-property = "deftheorem"] {
+        // OK
+      }
+      when [$target-condition-or-property = "kdefiniens"] {
+        // OK
+      }
+      when [$target-condition-or-property = "mdefiniens"] {
+        // OK
+      }
+      when [$target-condition-or-property = "rdefiniens"] {
+        // OK
+      }
+      when [$target-condition-or-property = "vdefiniens"] {
+        // OK
+      }
+
+      //////////////////////////////////////////////////
+      // Constructor properties
+      //////////////////////////////////////////////////
+
+      ////////////////////////////////////////
+      // Function properties
+      ////////////////////////////////////////
+      when [$target-condition-or-property = "commutativity"] {
+        // OK
+      }
+      when [$target-condition-or-property = "idempotence"] {
+        // OK
+      }
+      when [$target-condition-or-property = "involutiveness"] {
+        // OK
+      }
+      when [$target-condition-or-property = "projectivity"] {
+        // OK
+      }
+
+
+      ////////////////////////////////////////
+      // Relation properties
+      ////////////////////////////////////////
+      when [$target-condition-or-property = "symmetry"] {
+        // OK
+      }
+      when [$target-condition-or-property = "asymmetry"] {
+        // OK
+      }
+      when [$target-condition-or-property = "connectedness"] {
+        // OK
+      }
+      when [$target-condition-or-property = "reflexivity"] {
+        // OK
+      }
+      when [$target-condition-or-property = "irreflexivity"] {
+        // OK
+      }
+
+      ////////////////////////////////////////
+      // Mode properties
+      ////////////////////////////////////////
+      when [$target-condition-or-property = "sethood"] {
+        // OK
+      }
+
+      ////////////////////////////////////////
+      // 'strict'
+      ////////////////////////////////////////
+      when [$target-condition-or-property = "abstractness"] {
+        // OK
+      }
+
+      otherwise {
+        $message = `concat ("Error: the string '", $target-condition-or-property, "' is not an acceptable value for the target-condition-or-property stylesheet parameter.")`;
+        msg terminate="yes" $message;
+      }
+    }
+  }
+
+  if [Article] {
+    apply [Article];
+  } else {
+    msg terminate="yes" "Error: the required Article document element is missing.";
+  }
+}
+
+tpl [Article] {
+  $num-definition-blocks = `count (DefinitionBlock)`;
+  if [$num-definition-blocks > 1] {
+    msg terminate="yes" "Error: this stylesheet assumes that we are working with an article that has at most on definition block.";
+  } else {
+    <Article {
+      @aid = `@aid`;
+      "\n";
+      apply [*];
+    }
+  }
+}
+
+tpl [DefTheorem] {
+  if [$target-condition-or-property = "deftheorem"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Definiens] {
+  if [$target-condition-or-property = "rdefiniens"
+      or $target-condition-or-property = "kdefiniens"
+      or $target-condition-or-property = "vdefiniens"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [DefinitionBlock] {
+  <DefinitionBlock {
+    for-each [@*] { copy-of `.`; }
+    "\n";
+
+    // In the case of justified properties and correctness conditions,
+    // we may need to include some of the "toplevel" stuff in the
+    // definition block preceding the property.
+    //
+    // This introduces some potential false positive dependencies: it
+    // may be that not all of the definition's toplevel items are
+    // needed.
+    if [$target-condition-or-property = "commutativity"
+        or $target-condition-or-property = "idempotence"
+        or $target-condition-or-property = "involutiveness"
+	or $target-condition-or-property = "projectivity"
+	or $target-condition-or-property = "symmetry"
+	or $target-condition-or-property = "asymmetry"
+	or $target-condition-or-property = "connectedness"
+	or $target-condition-or-property = "reflexivity"
+	or $target-condition-or-property = "irreflexivity"
+	or $target-condition-or-property = "existence"
+	or $target-condition-or-property = "uniqueness"
+	or $target-condition-or-property = "coherence"] {
+      for-each [Definition] {
+        for-each [preceding-sibling::*] {
+          apply [.] mode="copy";
+        }
+      }
+    }
+
+    apply [Definition];
+    apply [EndPosition] mode="copy";
+
+  }
+  "\n";
+}
+
+tpl [NotationBlock] {
+  <NotationBlock {
+    for-each [@*] { copy-of `.`; }
+    "\n";
+    apply [Pattern];
+    apply [EndPosition] mode="copy";
+  }
+  "\n";
+}
+
+tpl [Definition] {
+  choose {
+    when [$target-condition-or-property = "gpattern"
+    	  or $target-condition-or-property = "jpattern"
+    	  or $target-condition-or-property = "kpattern"
+    	  or $target-condition-or-property = "lpattern"
+	  or $target-condition-or-property = "mpattern"
+          or $target-condition-or-property = "rpattern"
+          or $target-condition-or-property = "upattern"
+          or $target-condition-or-property = "vpattern"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+
+        // weird case: the rcluster preceding patterns needs to be
+	// present when dealing with structure definitions.
+	// Otherwise, the verifier (7.12.01) dies.  I don't know why.
+	// Including the cluster might introduce some false positive
+	// dependencies.
+        if [$target-condition-or-property = "gpattern"
+	    or $target-condition-or-property = "jpattern"
+	    or $target-condition-or-property = "lpattern"
+	    or $target-condition-or-property = "upattern"
+	    or $target-condition-or-property = "vpattern"] {
+          if [Registration] {
+            apply [Registration] mode="copy";
+          }
+        }
+
+        for-each [Pattern] {
+          apply [.];
+        }
+      }
+      "\n";
+    }
+
+
+    when [$target-condition-or-property = "gconstructor"
+          or $target-condition-or-property = "kconstructor"
+          or $target-condition-or-property = "lconstructor"
+	  or $target-condition-or-property = "mconstructor"
+          or $target-condition-or-property = "rconstructor"
+	  or $target-condition-or-property = "uconstructor"
+          or $target-condition-or-property = "vconstructor"
+	  or $target-condition-or-property = "deftheorem"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+        for-each [Constructor] {
+          apply [.];
+        }
+
+        // weird case: the rcluster following a constructor needs to
+        // be present when dealing with structure definitions.
+        // Otherwise, the verifier (7.12.01) dies.  I don't know why.
+        // Including the cluster might introduce some false positive
+        // dependencies.
+        if [$target-condition-or-property = "gconstructor"
+	    or $target-condition-or-property = "lconstructor"
+	    or $target-condition-or-property = "uconstructor"
+	    or $target-condition-or-property = "vconstructor"] {
+          if [Registration] {
+            apply [Registration] mode="copy";
+          }
+        }
+
+      }
+      "\n";
+    }
+
+    when [$target-condition-or-property = "coherence"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+        apply [Coherence] mode="copy";
+      }
+      "\n";
+    }
+
+    when [$target-condition-or-property = "existence"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+        apply [Existence] mode="copy";
+      }
+      "\n";
+    }
+
+    when [$target-condition-or-property = "uniqueness"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+        apply [Uniqueness] mode="copy";
+      }
+      "\n";
+    }
+
+    when [$target-condition-or-property = "abstractness"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+        apply [Constructor[Properties/Abstractness]] mode="copy";
+
+        // weird case: the rcluster following a constructor with the
+        // abstractness property needs to be present when dealing with
+        // structure definitions.  Otherwise, the verifier (7.12.01)
+        // dies.  I don't know why.  Including the cluster might
+        // introduce some false positive dependencies.
+        if [Registration] {
+          apply [Registration] mode="copy";
+        }
+
+      }
+      "\n";
+    }
+
+    when [$target-condition-or-property = "commutativity"
+          or $target-condition-or-property = "idempotence"
+	  or $target-condition-or-property = "involutiveness"
+	  or $target-condition-or-property = "projectivity"
+	  or $target-condition-or-property = "symmetry"
+	  or $target-condition-or-property = "asymmetry"
+	  or $target-condition-or-property = "connectedness"
+	  or $target-condition-or-property = "reflexivity"
+	  or $target-condition-or-property = "irreflexivity"] {
+      <Definition {
+        for-each [@*] { copy-of `.`; }
+        "\n";
+        // for justified properties we may need to copy some toplevel stuff
+        for-each [JustifiedProperty] {
+          apply [.];
+        }
+      }
+      "\n";
+    }
+
+    otherwise {
+      // dump
+    }
+  }
+}
+
+tpl [Pattern[not(@kind)]] {
+  msg terminate="yes" "Error: we found a Pattern element that lacks a kind attribute!";
+}
+
+tpl [Pattern[@kind]] {
+  $kind = lowercase (#string = `@kind`);
+  $match = `concat ($kind, "pattern")`;
+  if [$match = $target-condition-or-property] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Constructor[not(@kind)]] {
+  msg terminate="yes" "Error: we found a Constructor node that lacks a kind attribute; don't know how to proceed.";
+}
+
+tpl [Constructor[@kind]] {
+  if [contains ($target-condition-or-property, "constructor")] {
+    $target-kind = `substring-before ($target-condition-or-property, "constructor")`;
+    $this-kind = lowercase (#string = `@kind`);
+    if [$target-kind = $this-kind] {
+      apply [.] mode="copy";
+    } else {
+      // skip
+    }
+  } else {
+    // dump
+  }
+}
+
+tpl [Existence] {
+  if [$target-condition-or-property = "existence"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Abstractness] {
+  if [$target-condition-or-property = "abstractness"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Uniqueness] {
+  if [$target-condition-or-property = "uniqueness"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Coherence] {
+  if [$target-condition-or-property = "coherence"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Correctness] {
+  if [$target-condition-or-property = "correctness"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [Compatibility] {
+  if [$target-condition-or-property = "compatibility"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}
+
+tpl [JustifiedProperty] {
+  $prop-name = `name(*[1])`;
+  $prop-name-lc = lowercase (#string = $prop-name);
+  choose {
+    when [$prop-name-lc = "antisymmetry"
+          and $target-condition-or-property = "asymmetry"] {
+      apply [.] mode="copy";
+    }
+    when [$prop-name-lc = $target-condition-or-property] {
+      apply [.] mode="copy";
+    }
+    otherwise {
+      // dump
+    }
+  }
+}
+
+tpl [Registration] {
+  if [$target-condition-or-property = "abstractness"] {
+    apply [.] mode="copy";
+  } else {
+    // dump
+  }
+}

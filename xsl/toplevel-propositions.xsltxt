@@ -1,0 +1,109 @@
+stylesheet "1.0";
+
+output method="text";
+
+tpl [/] {
+  apply [Article];
+}
+
+tpl [Article[not(@aid)]] {
+  msg terminate="yes" "Error: we encountered an Article element that lacks an aid attribute.";
+}
+
+tpl [Article[@aid]] {
+  for-each [Proposition] {
+    apply [.]; "\n";
+  }
+  for-each [Now] {
+    apply [.]; "\n";
+  }
+  for-each [IterEquality] {
+    apply [.]; "\n";
+  }
+  for-each [Consider] {
+    apply [.];
+  }
+  for-each [Reconsider] {
+    apply [.];
+  }
+  for-each [DefinitionBlock] {
+    apply [.];
+  }
+}
+
+tpl [Proposition[not(@propnr)]] {
+  msg terminate="yes" "Error: we found a Proposition element that lacks a propnr attribute.";
+}
+
+tpl [Proposition[@propnr]] {
+  // ' + 1' would be the index of the Proposition node; the '+ 2'
+  // grabs whatever justification the Proposition has (Proof, By,
+  // From)
+  `count (preceding-sibling::*) + 2`; " "; "l"; `@propnr`;
+}
+
+tpl [Now[not(@propnr)]] {
+  msg terminate="yes" "Error: we found a Now element that lacks a propnr attribute.";
+}
+
+tpl [Now[@propnr]] {
+  `count (preceding-sibling::*) + 1`; " "; "l"; `@propnr`;
+}
+
+tpl [IterEquality[not(@propnr)]] {
+  msg terminate="yes" "Error: we found an IterEquality element that lacks a propnr attribute.";
+}
+
+tpl [IterEquality[@propnr]] {
+  `count (preceding-sibling::*) + 1`; " "; "l"; `@propnr`;
+}
+
+tpl [Consider] {
+  if [Proposition] {
+    if [Proposition[@propnr]] {
+      `count (preceding-sibling::*) + 1`;
+      for-each [Proposition[@propnr]] {
+        " "; "l"; `@propnr`;
+      }
+    } else {
+      msg terminate="yes" "Error: we found a Proposition element that lacks a propnr attribute.";
+    }
+    "\n";
+  }
+}
+
+tpl [Reconsider] {
+  if [Proposition] {
+    if [Proposition[@propnr]] {
+      `count (preceding-sibling::*) + 1`;
+      for-each [Proposition[@propnr]] {
+        " "; "l"; `@propnr`;
+      }
+    } else {
+      msg terminate="yes" "Error: we found a Proposition element that lacks a propnr attribute.";
+    }
+    "\n";
+  }
+}
+
+tpl [DefinitionBlock] {
+  $context = `.`;
+  $pos = `count (preceding-sibling::*) + 1`;
+  if [Definition/Constructor[@kind and @nr]] {
+    for-each [Definition/Constructor[@kind and @nr]] {
+      $kind = `@kind`;
+      $nr = `@nr`;
+      for-each [$context] {
+        for-each [following-sibling::DefTheorem[@constrkind = $kind and @nr = $nr]] {
+          if [Proposition[@propnr]] {
+            for-each [Proposition[@propnr]] {
+              `$pos`; " "; "l"; `@propnr`; "\n";
+            }
+          } else {
+            msg terminate="yes" "Error: we found a DefTheorem element that lacks a Proposition child with a propnr attribute.";
+          }
+        }
+      }
+    }
+  }
+}

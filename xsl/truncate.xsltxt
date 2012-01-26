@@ -1,0 +1,50 @@
+stylesheet "1.0";
+
+output method="xml" indent="yes";
+
+// The index of the toplevel element after which we truncate the
+// article.
+#after = { ""; }
+
+tpl [*] mode="copy" {
+  $n = `local-name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="copy";
+  }
+}
+
+tpl [*] mode="toplevel" {
+  $position = `count (preceding-sibling::*) + 1`;
+  if [$position <= $after] {
+    $n = `local-name (.)`;
+    <$n {
+      for-each [@*] { copy-of `.`; }
+      apply [*] mode="copy";
+    }
+  }
+}
+
+tpl [/] {
+  if [$after = ""] {
+    msg terminate="yes" "Error: illegal value of the after stylesheet parameter.";
+  }
+  if [$after < 1] {
+    msg terminate="yes" "Error: illegal value of the after stylesheet parameter.";
+  }
+  if [not(Article)] {
+    msg terminate="yes" "Error: the required Article document element is missing.";
+  }
+  apply [Article];
+}
+
+tpl [Article[not(@aid)]] {
+  msg terminate="yes" "Error: the Article element must have an aid attribute.";
+}
+
+tpl [Article[@aid]] {
+  <Article {
+    @aid = `@aid`;
+    apply [*] mode="toplevel";
+  }
+}

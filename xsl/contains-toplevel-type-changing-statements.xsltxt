@@ -1,0 +1,28 @@
+stylesheet 1.0;
+
+output method=text;
+
+// Detect whether there are any toplevel type-changing statements.  If
+// there are any, simply terminate the processor.  Otherwise, do
+// nothing.
+
+tpl [Text-Proper] {
+  // apply [Item[@kind = "Type-Changing-Statement"]];
+  apply [Item[@kind = "Regular-Statement"]];
+}
+
+tpl [Text-Proper/Item[@kind = "Type-Changing-Statement"]] {
+  msg terminate="yes" "";
+}
+
+tpl [Item[@kind = "Regular-Statement"]] {
+  apply [Proposition];
+}
+
+// Die if we find a Simple-Term that comes from a toplevel
+// type-changing-Statement
+tpl [Proposition] {
+  if [descendant::Simple-Term[@idnr = preceding::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]//Variable/@idnr]] {
+    msg terminate="yes" "";
+  }
+}

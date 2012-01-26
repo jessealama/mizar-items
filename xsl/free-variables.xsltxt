@@ -1,0 +1,437 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl bound-in-items (#items, #bound-so-far) {
+  if [$items] {
+    $item = `$items[1]`;
+    $free-in-item = free-variables (#element = $item);
+    for-each [$item] {
+      $still-free = bind-variables (#variables = `preceding-sibling::Item[@kind = "Reservation"]/Variable | preceding-sibling::Item[@kind = "Loci-Declaration"]/*/Variable | preceding-sibling::Item[@kind = "Generalization"]/*/Variable | preceding-sibling::Item[@kind = "Type-Changing-Statement"]/Equality/Variable | preceding-sibling::Item[@kind = "Constant-Definition"]/Variable | preceding-sibling::Item[@kind = "Choice-Statement"]/*/Variable | preceding-sibling::Item[@kind = "Private-Predicate-Definition"]/Variable | preceding-sibling::Item[@kind = "Private-Functor-Definition"]/Variable | preceding-sibling::Functor-Segment/Variable | preceding-sibling::Predicate-Segment/Variable | preceding-sibling::Frankel-Term/*/Variable`,
+                                    #free-variables = $free-in-item);
+      $newly-bound = append-token-strings (#token-string-a = $bound-so-far,
+                                           #token-string-b = $still-free);
+      $newly-bound-no-duplicates = remove-duplicate-tokens (#string = $newly-bound);
+      bound-in-items (#items = `$items[position() > 1]`, #bound-so-far = $newly-bound-no-duplicates);
+    }
+  } else {
+    $bound-so-far;
+  }
+}
+
+tpl [Text-Proper] mode="free-variables" {
+  bound-in-items (#items = `*`, #bound-so-far = "");
+}
+
+tpl [*] (#upper-bound) {
+  $element = `local-name ()`;
+  $free = free-variables-with-bound (#element = `.`, #upper-bound = $upper-bound);
+  $unique-free = remove-duplicate-tokens (#string = $free);
+  <$element {
+    for-each [@*] {
+      copy-of `.`;
+    }
+    @free-variables = $unique-free;
+    apply [*](#upper-bound = $upper-bound);
+  }
+}
+
+// tpl [Text-Proper] mode="free-variables" {
+//   "";
+// }
+
+// Computing free variables
+
+
+// Given a string that looks like
+//
+// ,56,13,193,13,13,
+//
+// remove any duplicate "tokens".  (In this example, the token "13"
+// appears three times.)
+//
+// It is permitted for the string to be empty.
+tpl remove-duplicate-tokens (#string) {
+  choose {
+    when [$string = ""] { ""; }
+    when [starts-with ($string, ",")] {
+      $after-first-comma = `substring-after ($string, ",")`;
+      choose {
+        when [contains ($after-first-comma, ",")] {
+          $between-first-and-second-comma = `substring-before ($after-first-comma, ",")`;
+          $initially-commaless-tail = `substring-after ($after-first-comma, ",")`;
+          $token = `concat (",", $between-first-and-second-comma, ",")`;
+          $tail = `concat (",", $initially-commaless-tail)`;
+          choose {
+            when [$initially-commaless-tail = ""] { $token; }
+            when [starts-with ($initially-commaless-tail, ",")] {
+              $message = `concat ("We expected to find that the tail, '", $initially-commaless-tail, "' of our token string does not begin with a comma, but somehow it does")`;
+              die (#message = $message);
+            }
+            when [contains ($tail, $token)] { remove-duplicate-tokens (#string = $tail); }
+            otherwise {
+              $duplicate-free-tail = remove-duplicate-tokens (#string = $tail);
+              choose {
+                when [$duplicate-free-tail = ""] { $token; }
+                when [starts-with ($duplicate-free-tail, ",")] {
+                  $duplicate-free-tail-after-first-comma = `substring-after ($duplicate-free-tail, ",")`;
+                  `concat ($token, $duplicate-free-tail-after-first-comma)`;
+                }
+                otherwise {
+                  $message = `concat ("When removing duplicates from the string '", $string, "', we removed duplicates from its tail, '", $tail, "'; somehow we obtained '", $duplicate-free-tail, "', which doesn't begin with a comma.  This is not the expected format for a token string, so we can't proceed.")`;
+                  die (#message = $message);
+                }
+              }
+            }
+          }
+        }
+        otherwise {
+          $message = `concat ("Cannot remove duplicate elements from a token string that doesn't start with a comma and contain at least one more comma!  (We were given '", $string, "'.")`;
+          die (#message = $message);
+        }
+      }
+    }
+    otherwise {
+      $message = `concat ("Cannot remove duplicate elements from a token string that doesn't start with a comma!  (We were given '", $string, "'.")`;
+      die (#message = $message);
+    }
+  }
+}
+
+tpl free-variables (#element) {
+  apply [$element] mode="free-variables";
+}
+
+tpl free-variables-with-bound (#element, #upper-bound) {
+  apply [$element](#upper-bound = $upper-bound) mode="free-variables";
+}
+
+tpl append-free-variables (#elements, #upper-bound) {
+  if [$elements] {
+    $element = `$elements[1]`;
+    $free-variables = free-variables-with-bound (#element = $element, #upper-bound = $upper-bound);
+    choose {
+      when [$free-variables = ""] { append-free-variables (#elements = `$elements[position() > 1]`, #upper-bound = $upper-bound); }
+      when [starts-with ($free-variables, ",")] {
+        $free-in-tail = append-free-variables (#elements = `$elements[position() > 1]`, #upper-bound = $upper-bound);
+        choose {
+          when [$free-in-tail = ""] { $free-variables; }
+          when [starts-with ($free-in-tail, ",")] {
+            $free-in-tail-minus-initial-comma = `substring-after ($free-in-tail, ",")`;
+            if [starts-with ($free-in-tail-minus-initial-comma, ",")] {
+              $message = `concat ("When looking at the tail '", $free-in-tail-minus-initial-comma, "', we expected to find a string that does not start with a comma; but it does!")`;
+              die (#message = $message);
+            } else {
+               // $message-one = `concat ("free-variables: ", $free-variables)`;
+               // $message-two = `concat ("free-in-tail-minus-initial-comma: ", $free-in-tail-minus-initial-comma)`;
+               // $message-three = `concat ("result: ", $free-variables, $free-in-tail-minus-initial-comma)`;
+               // msg $message-one;
+               // msg $message-two;
+               // msg $message-three;
+               `concat ($free-variables, $free-in-tail-minus-initial-comma)`;
+            }
+          }
+          otherwise {
+            $message = `concat ("While computing the list of free variables of a list of elements, we found that the list of free variables for the tail of the list is a string ('", $free-in-tail, "') that doesn't start with a comma (,) as we expected.")`;
+            die (#message = $message);
+          }
+        }
+      }
+      otherwise {
+        $element-line = { if [$element/@line] { `$element/@line`; } else { ""; } }
+        $element-col = { if [$element/@col] { `$element/@col`; } else { ""; } }
+        $message = `concat ("While computing the list of free variables of a list of elements, we found that the list of free variables for one of its terms (starting at line ", $element-line, " and column ", $element-col, ") is a string ('", $free-variables, "') that doesn't start with a comma (,) as we expected.")`;
+        die (#message = $message);
+      }
+    }
+  } else {
+    "";
+  }
+}
+
+tpl append-variable-idnrs (#variables, #token-string) {
+  if [$variables] {
+    $variable = `$variables[1]`;
+    $idnr = `$variable/@idnr`;
+    if [$token-string = ""] {
+      append-variable-idnrs (#variables = `$variables[position() > 1]`,
+                             #token-string = `concat (",", $idnr, ",")`);
+    } else {
+      // assume that $token-string starts with a comma
+      append-variable-idnrs (#variables = `$variables[position() > 1]`,
+                             #token-string = `concat (",", $idnr, $token-string)`);
+    }
+  } else {
+    $token-string;
+  }
+}
+
+tpl append-variables-bound-by-binders (#loci-declarations, #bound-variables) {
+  if [$loci-declarations] {
+    $loci-declaration = `$loci-declarations[1]`;
+    $newly-bound = append-variable-idnrs (#variables = `$loci-declaration/Implicitly-Qualified-Segment/Variable | $loci-declaration/Explicitly-Qualified-Segment/Variables/Variable`,
+                                          #token-string = $bound-variables);
+    append-variables-bound-by-binders (#loci-declarations = `$loci-declarations[position() > 1]`,
+                                       #bound-variables = $newly-bound);
+  } else {
+    $bound-variables;
+  }
+}
+
+// #variables is a list of Variable elements that are somehow bound
+// (by a reservation, by a universal quantifier, etc.).
+// #free-variables is a list of id numbers of variables that are free
+// inside the matrix of whatever is binding #variables.  The task is
+// simply walk through this list and remove id numbers that are equal
+// to the id numbers of variables in #variables
+tpl bind-variables (#variables, #free-variables) {
+  if [$variables] {
+    $variable = `$variables[1]`;
+    if [$variable/@idnr] {
+      $idnr = `$variable/@idnr`;
+      $token = `concat (",", $idnr, ",")`;
+      if [contains ($free-variables, $token)] {
+        $before-token = `substring-before ($free-variables, $token)`; // might be empty; does not end with a comma
+        $after-token = `substring-after ($free-variables, $token)`; // might be empty; does not start with a comma
+        // we will call this template again *without* taking a subset
+        // of #variables, to deal with the case where the idnr of
+        // $variable occurs multiple times in #free-variables
+        if [$after-token = ""] {
+          if [$before-token = ""] {
+            "";
+          } else {
+            $trimmed-free-variables = `concat ($before-token, ",")`;
+            bind-variables (#variables = $variables, #free-variables = $trimmed-free-variables);
+          }
+        } else {
+          $trimmed-free-variables = `concat ($before-token, ",", $after-token)`;
+          bind-variables (#variables = $variables, #free-variables = $trimmed-free-variables);
+        }
+      } else {
+        bind-variables (#variables = `$variables[position() > 1]`,
+                        #free-variables = $free-variables);
+      }
+    } else {
+      die (#message = "We cannot bind a variable that lacks an idnr attribute!");
+    }
+  } else {
+    $free-variables;
+  }
+}
+
+// Binding variables in blocks
+
+// find all Loci-Declaration and Generalization items that precede $node in document order, but which are descendants of $upper-bound
+tpl loci-declarations-preceding-but-below (#node, #upper-bound, #bound-vars) {
+  if [$node = $upper-bound] {
+    $message = `concat ("We are done computing the loci declarations; the result is: ", $bound-vars)`;
+    // msg $message;
+    $bound-vars;
+  } else {
+    for-each [$node] {
+      $bound-previously = append-variables-bound-by-binders (#loci-declarations = `preceding-sibling::Item[@kind = "Loci-Declaration" or @kind = "Generalization"]`,
+                                                             #bound-variables = $bound-vars);
+      loci-declarations-preceding-but-below (#node = `..`,
+                                             #upper-bound = $upper-bound,
+                                             #bound-vars = $bound-previously);
+    }
+  }
+}
+
+// Binders
+
+tpl [Text-Proper/Item[@kind = "Reservation"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Variables/Variable`, #free-variables = $all-free);
+}
+
+tpl [Item[@kind = "Loci-Declaration"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Implicitly-Qualified-Segment/Variable | Explicitly-Qualified-Segment/Variables/Variable`, #free-variables = $all-free);
+}
+
+tpl [Item[@kind = "Generalization"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Implicitly-Qualified-Segment/Variable | Explicitly-Qualified-Segment/Variables/Variable`, #free-variables = $all-free);
+}
+
+tpl [Item[@kind = "Type-Changing-Statement"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Equality/Variable`, #free-variables = $all-free);
+}
+
+tpl [Item[@kind = "Constant-Definition"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Variable`, #free-variables = $all-free);
+}
+
+tpl [Item[@kind = "Choice-Statement"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Implicitly-Qualified-Segment/Variable | Explicitly-Qualified-Segment/Variables/Variable`, #free-variables = $all-free);
+}
+
+// tpl [Item[@kind = "Exemplification"]](#upper-bound) mode="free-variables" {
+//   $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+//   bind-variables (#variables = `Variable`, #free-variables = $all-free);
+// }
+
+tpl [Item[@kind = "Functor-Segment"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Variable`, #free-variables = $all-free);
+}
+
+tpl [Item[@kind = "Predicate-Segment"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Variable`, #free-variables = $all-free);
+}
+
+tpl [Fraenkel-Term] (#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Implicitly-Qualified-Segment/Variable | Explicitly-Qualified-Segment/Variables/Variable`, #free-variables = $all-free);
+}
+
+// Private predicate definitions introduce free second-order variables, which I don't care about
+
+tpl [Item[@kind = "Private-Predicate-Definition" or @kind = "Private-Functor-Definition"]](#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Variable`, #free-variables = $all-free);
+}
+
+tpl [Schematic-Variables] (#upper-bound) mode="free-variables" {
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = `Functor-Segment/Variable | Predicate-Segment/Variable`, #free-variables = $all-free);
+}
+
+// Terms
+
+tpl free-variables-of-idnr-bearing-context {
+  if [@idnr] {
+    $idnr = `@idnr`;
+    `concat (",", $idnr, ",")`;
+  } else {
+    die (#message = "We expected an element to have an idnr attribute, but it doesn't");
+  }
+}
+
+tpl free-variables-of-nr-bearing-context {
+  if [@nr] {
+    $nr = `@nr`;
+    `concat (",", $nr, ",")`;
+  } else {
+    die (#message = "We expected an element to have an nr attribute, but it doesn't");
+  }
+}
+
+tpl [Simple-Term] mode="free-variables" {
+  free-variables-of-idnr-bearing-context ();
+}
+
+tpl [Variable] mode="free-variables" {
+  free-variables-of-idnr-bearing-context ();
+}
+
+tpl [Locus] mode="free-variables" {
+  free-variables-of-nr-bearing-context ();
+}
+
+// default aggregation of free-variables
+
+tpl remove-one-token (#token, #string) {
+  if [contains ($string, $token)] {
+    $string-before-token = `substring-before ($string, $token)`;
+    $string-after-token = `substring-after ($string, $token)`;
+    if [$string-before-token = ""] {
+      if [$string-after-token = ""] {
+        "";
+      } else {
+        `concat (",", $string-after-token)`;
+      }
+    } else {
+      if [$string-after-token = ""] {
+        `concat ($string-before-token, ",")`;
+      } else {
+        `concat ($string-before-token, ",", $string-after-token)`;
+      }
+    }
+  } else {
+    $string;
+  }
+}
+
+tpl remove-tokens (#string, #tokens-to-delete) {
+  $message = `concat ("Trying to remove the tokens in '", $tokens-to-delete, "' from the token string '", $string, "'")`;
+  // msg $message;
+  if [$tokens-to-delete = ""] {
+    $string;
+  } else {
+    if [starts-with ($tokens-to-delete, ",")] {
+      $after-first-comma = `substring-after ($tokens-to-delete, ",")`;
+      if [contains ($after-first-comma, ",")] {
+        $between-first-and-second-comma = `substring-before ($after-first-comma, ",")`;
+        $after-second-comma = `substring-after ($after-first-comma, ",")`;
+        if [$between-first-and-second-comma = ""] {
+          $message = `concat ("In the given string of tokens to delete, '", $tokens-to-delete, "', we found two commas, but there's nothing between the first and the second.  We expected to find something there.")`;
+          die (#message = $message);
+        } else {
+          $token = `concat (",", $between-first-and-second-comma, ",")`;
+          $tail = { if [$after-second-comma = ""] { ""; } else { `concat (",", $after-second-comma)`; } }
+          if [contains ($string, $token)] {
+            $trimmed-string = remove-one-token (#token = $token, #string = $string);
+            remove-tokens (#string = $trimmed-string, #tokens-to-delete = $tokens-to-delete);
+          } else {
+            remove-tokens (#string = $string,
+                           #tokens-to-delete = $tail);
+          }
+        }
+      } else {
+        $message = `concat ("We were asked to delete the tokens '", $tokens-to-delete, "', but we cannot make sense of this token string because although it starts with a comma, it does not contain any other commas.  A valid token string contains at least two commas.")`;
+        die (#message = $message);
+      }
+    } else {
+      $message = `concat ("We were asked to delete the tokens '", $tokens-to-delete, "', but we cannot make sense of this token string because it does not begin with a comma")`;
+      die (#message = $message);
+    }
+  }
+}
+
+tpl [*](#upper-bound) mode="free-variables" {
+  // $free-inside = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  // $loci-declarations = loci-declarations-preceding-but-below (#node = `.`,
+  //                                                             #upper-bound = $upper-bound,
+  //                                                             #bound-vars = "");
+  // $trimmed = remove-tokens (#string = $free-inside, #tokens-to-delete = $loci-declarations);
+  // $message = `concat ("Removing the tokens in '", $loci-declarations, "' from the token string '", $free-inside, "', we obtained '", $trimmed, "'")`;
+  // // msg $message;
+  // $trimmed;
+  bound-in-items (#items = `*`, #bound-so-far = "");
+}
+
+// Formulas
+
+tpl [Universal-Quantifier-Formula](#upper-bound) mode="free-variables" {
+  $variables = `Implicitly-Qualified-Segment/Variable | Explicitly-Qualified-Segment/Variables/Variable`;
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  bind-variables (#variables = $variables,
+                  #free-variables = $all-free);
+}
+
+tpl [Existential-Quantifier-Formula](#upper-bound) mode="free-variables" {
+  $line = `@line`;
+  $col = `@col`;
+  $variables = `Implicitly-Qualified-Segment/Variable | Explicitly-Qualified-Segment/Variables/Variable`;
+  $all-free = append-free-variables (#elements = `*`, #upper-bound = $upper-bound);
+  $message-all-free = `concat ("Inside an existential formula at line ", $line, " and column ", $col, ", the following variable (id numbers) occur freely: ", $all-free)`;
+  // msg $message-all-free;
+  // for-each [$variables] {
+  //   $idnr = `@idnr`;
+  //   $message-var = `concat ("* Variable ", $idnr, " is bound by this existential quantifier")`;
+  //   msg $message-var;
+  // }
+  $not-free-anymore = bind-variables (#variables = $variables, #free-variables = $all-free);
+  $message-not-free = `concat ("The result is that only these variables are free inside the existential quantifier: ", $not-free-anymore)`;
+  // msg $message-not-free;
+  $not-free-anymore;
+}

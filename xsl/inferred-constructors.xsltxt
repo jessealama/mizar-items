@@ -1,0 +1,146 @@
+// inferred-constructors.xsl : Infer the set of constructors needed for a mizar article
+
+stylesheet 1.0;
+
+output method="text";
+
+//////////////////////////////////////////////////////////////////////
+// Stylesheet parameters
+//////////////////////////////////////////////////////////////////////
+
+// The directory in which to look for the given article's environment.
+// If unset, we will look in whatever direcory the XSLT processor is
+// working in.
+#article-directory = { ""; }
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lc (#s) { `translate($s, $ucletters, $lcletters)`; }
+tpl uc (#s) { `translate($s, $lcletters, $ucletters)`; }
+
+tpl [/] {
+  apply [Article];
+}
+
+tpl print-everything (#except) {
+  for-each [descendant::Pred[@aid and @kind and @absnr and not(@aid = $except)]] {
+    apply [.]; "\n";
+  }
+  for-each [descendant::Func[@aid and @kind and @absnr and not(@aid = $except)]] {
+    apply [.]; "\n";
+  }
+  for-each [descendant::Adjective[@aid and @kind and @absnr and not(@aid = $except)]] {
+    apply [.]; "\n";
+  }
+  for-each [descendant::Typ[@aid and @kind and @absnr and not(@aid = $except)]] {
+    apply [.]; "\n";
+  }
+  for-each [descendant::Field[@aid and @kind and @absnr and not(@aid = $except)]] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Article[@aid]] {
+  $aid = `@aid`;
+  $aid-lc = lc (#s = $aid);
+  $aid-uc = uc (#s = $aid);
+  print-everything (#except = $aid);
+
+  // grab the patterns from the xml
+  // apply [descendant::Pattern[not(@aid = $aid)]];
+
+  // inspect the .eno
+  $eno = `concat ($aid-lc, ".eno1")`;
+  $full-eno = `concat ($article-directory, $eno)`;
+  for-each [document ($full-eno, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .dfs
+  $dfs = `concat ($aid-lc, ".dfs1")`;
+  $full-dfs = `concat ($article-directory, $dfs)`;
+  for-each [document ($full-dfs, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .ecl
+  $ecl = `concat ($aid-lc, ".ecl1")`;
+  $full-ecl = `concat ($article-directory, $ecl)`;
+  for-each [document ($full-ecl, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .eid
+  $eid = `concat ($aid-lc, ".eid1")`;
+  $full-eid = `concat ($article-directory, $eid)`;
+  for-each [document ($full-eid, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .epr
+  $epr = `concat ($aid-lc, ".epr1")`;
+  $full-epr = `concat ($article-directory, $epr)`;
+  for-each [document ($full-epr, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .erd
+  $erd = `concat ($aid-lc, ".erd1")`;
+  $full-erd = `concat ($article-directory, $erd)`;
+  for-each [document ($full-erd, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .esh
+  $esh = `concat ($aid-lc, ".esh1")`;
+  $full-esh = `concat ($article-directory, $esh)`;
+  for-each [document ($full-esh, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // inspect the .eth
+  $eth = `concat ($aid-lc, ".eth1")`;
+  $full-eth = `concat ($article-directory, $eth)`;
+  for-each [document ($full-eth, /)] {
+    print-everything (#except = $aid);
+  }
+
+  // grab constructor with an abstractness property from the atr
+  $atr = `concat ($aid-lc, ".atr")`;
+  for-each [document ($atr, /)] {
+    for-each [Constructors] {
+      for-each [Constructor[@kind and @nr and @aid and Properties/Abstractness]] {
+        $this-aid = `@aid`;
+        if [not($this-aid = $aid)] {
+          $this-kind-lc = lc (#s = `@kind`);
+          $this-aid-lc = lc (#s = `@aid`);
+          $this-nr = `@nr`;
+          $this-aid-lc; ":"; $this-kind-lc; "constructor"; ":"; $this-nr; "\n";
+        }
+      }
+    }
+  }
+
+}
+
+tpl [*[@aid and @kind and @absnr]] {
+  $aid-lc = lc (#s = `@aid`);
+  $kind-lc = lc (#s = `@kind`);
+  $aid-lc; ":"; $kind-lc; "constructor"; ":"; `@absnr`;
+}
+
+
+// Used only to fish out constructors that have an abstractness property
+tpl [Constructors] {
+  for-each [Constructor[@kind and @nr and @aid and Properties/Abstractness]] {
+    $kind = lowercase (#string = `@kind`);
+    $aid = lowercase (#string = `@aid`);
+    $nr = `@nr`;
+    $aid; ":"; $kind-lc; "constructor"; ":"; $nr; "\n";
+  }
+}

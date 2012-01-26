@@ -1,0 +1,317 @@
+stylesheet "1.0";
+
+output method="text";
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+
+tpl [/] {
+  apply [Article];
+}
+
+tpl [Article[@aid]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  apply [*[position() = last()]] (#aid = $aid-lc) mode="find-deps";
+}
+
+tpl [*] (#aid) mode="find-deps" {
+  $n = `local-name (.)`;
+  $message = `concat ("Error: we can't begine extracting dependency information because we don't know the propnr attribute of the current element (which is a ", $n, " node).")`;
+  msg terminate="yes" $message;
+}
+
+// Compute the propnr of the current node
+tpl propnr (#node) {
+
+}
+
+tpl [Reconsider] (#aid) mode="find-deps" {
+  $context = `.`;
+  if [Proposition] {
+    for-each [Proposition] {
+      for-each [$context] {
+        for-each [preceding-sibling::*[not(self::JustifiedTheorem) and not(self::DefTheorem) and not(self::Proposition)]] {
+          apply [.] (#aid = $aid) mode="print-dep";
+          if [position() < last()] { "\n"; }
+        }
+      }
+    }
+  }
+}
+
+tpl [Consider] (#aid) mode="find-deps" {
+  $context = `.`;
+  if [Proposition] {
+    for-each [Proposition] {
+      for-each [$context] {
+        for-each [preceding-sibling::*[not(self::JustifiedTheorem) and not(self::DefTheorem) and not(self::Proposition)]] {
+          apply [.] (#aid = $aid) mode="print-dep";
+          if [position() < last()] { "\n"; }
+        }
+      }
+    }
+  }
+}
+
+tpl [*] (#aid) mode="find-deps" {
+  for-each [preceding-sibling::*[not(self::JustifiedTheorem) and not(self::DefTheorem) and not(self::Proposition)]] {
+    apply [.] (#aid = $aid) mode="print-dep"; "\n";
+  }
+  if [following-sibling::*] {
+    for-each [following-sibling::*] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+}
+
+tpl [Proof] (#aid) mode="find-deps" {
+  if [preceding-sibling::*[1][self::Proposition]] {
+    apply [preceding-sibling::*[1][self::Proposition]] (#aid = $aid) mode="find-deps";
+  } else {
+    msg terminate="yes" "Error: the final node in this article is a Proof element, but it is not immediately preceded by a Proposition element.";
+  }
+}
+
+tpl [SkippedProof] (#aid) mode="find-deps" {
+  if [preceding-sibling::*[1][self::Proposition]] {
+    apply [preceding-sibling::*[1][self::Proposition]] (#aid = $aid) mode="find-deps";
+  } else {
+    msg terminate="yes" "Error: the final node in this article is a SkippedProof element, but it is not immediately preceded by a Proposition element.";
+  }
+}
+
+tpl [By] (#aid) mode="find-deps" {
+  choose {
+    when [preceding-sibling::*[1][self::Proposition]] {
+      apply [preceding-sibling::*[1][self::Proposition]] (#aid = $aid) mode="find-deps";
+    }
+    when [preceding-sibling::*[1][self::Consider]] {
+      apply [preceding-sibling::*[1][self::Consider]] (#aid = $aid) mode="find-deps";
+    }
+    otherwise {
+      msg terminate="yes" "Error: the final node in this article is a By element, but it is not immediately preceded by a Proposition element.";
+    }
+  }
+}
+
+tpl [From] (#aid) mode="find-deps" {
+  choose {
+    when [preceding-sibling::*[1][self::Proposition]] {
+      apply [preceding-sibling::*[1][self::Proposition]] (#aid = $aid) mode="find-deps";
+    }
+    when [preceding-sibling::*[1][self::Consider]] {
+      apply [preceding-sibling::*[1][self::Consider]] (#aid = $aid) mode="find-deps";
+    }
+    otherwise {
+      msg terminate="yes" "Error: the final node in this article is a By element, but it is not immediately preceded by a Proposition element.";
+    }
+  }
+}
+
+tpl [*] (#aid) mode="print-dep" {
+  $n = `local-name (.)`;
+  $message = `concat ("Error: we don't know how to extract dependency information from a(n) ", $n, " element.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [By] (#aid) mode="print-dep" {
+  if [following-sibling::*[1][self::Ref[@nr and not(@articlenr)]]] {
+    for-each [following-sibling::*[1][self::Ref[@nr and not(@articlenr)]]] {
+      apply [.] (#aid = $aid) mode="print-dep";
+    }
+  }
+}
+
+tpl [From] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: there appears to be a From element preceding the final node of interest.  But we assume that all justifications (except those involved in the final element) are skipped!";
+}
+
+tpl [Section] (#aid) mode="print-dep" {
+  // ignore
+}
+
+tpl [Set] (#aid) mode="print-dep" {
+  // ignore
+}
+
+tpl [SkippedProof] (#aid) mode="print-dep" {
+  // ignore
+}
+
+tpl [Reservation] (#aid) mode="print-dep" {
+  // ignore
+}
+
+tpl [Constructor[not(@kind) or not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from a Constructor element that lacks a kind or nr attribute.";
+}
+
+tpl [Constructor[@kind and @nr]] (#aid) mode="print-dep" {
+  $kind-lc = lowercase (#string = `@kind`);
+  `$aid`; ":"; `$kind-lc`; "constructor"; ":"; `@nr`;
+}
+
+tpl [Pattern[not(@kind) or not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from a Pattern element that lacks a kind or nr attribute.";
+}
+
+tpl [Pattern[@kind and @nr]] (#aid) mode="print-dep" {
+  $kind-lc = lowercase (#string = `@kind`);
+  `$aid`; ":"; `$kind-lc`; "pattern"; ":"; `@nr`;
+}
+
+tpl [Definiens[not(@constrkind) or not(@constrnr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from a Definiens element that lacks either a constrkind or a constrnr attribute.";
+}
+
+tpl [Definiens[@constrkind and @constrnr]] (#aid) mode="print-dep" {
+  $kind-lc = lowercase (#string = `@constrkind`);
+  `$aid`; ":"; `$kind-lc`; "definiens"; ":"; `@constrnr`;
+}
+
+tpl [DefTheorem[@nr]] (#aid) mode="print-dep" {
+  `$aid`; ":"; "deftheorem"; ":"; `@nr`;
+}
+
+tpl [JustifiedTheorem[not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: we don't know how to extract dependency information from a JustifiedTheorem element that lacks an nr attribute.";
+}
+
+tpl [JustifiedTheorem[@nr]] (#aid) mode="print-dep" {
+  `$aid`; ":"; "theorem"; ":"; `@nr`;
+}
+
+tpl [SchemeBlock[not(@schemenr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: we don't know how to extract depdenency information from a SchemeBlock element that lacks a schemenr attribute.";
+}
+
+tpl [SchemeBlock[@schemenr]] (#aid) mode="print-dep" {
+  `$aid`; ":"; "scheme"; ":"; `@schemenr`;
+}
+
+tpl [DefinitionBlock] (#aid) mode="print-dep" {
+  if [descendant::Constructor] {
+    for-each [descendant::Constructor] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+  if [descendant::Pattern] {
+    for-each [descendant::Pattern] {
+      apply [.] (#aid = $aid) mode="print-dep";
+      if [position() < last()] { "\n"; }
+    }
+  }
+}
+
+tpl [CCluster[not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from a CCluster element that lacks an nr attribute.";
+}
+
+tpl [CCluster[@nr]] (#aid) mode="print-dep" {
+  `$aid`; ":"; "ccluster"; ":"; `@nr`;
+}
+
+tpl [FCluster[not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from a FCluster element that lacks an nr attribute.";
+}
+
+tpl [FCluster[@nr]] (#aid) mode="print-dep" {
+  `$aid`; ":"; "fcluster"; ":"; `@nr`;
+}
+
+tpl [RCluster[not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from a RCluster element that lacks an nr attribute.";
+}
+
+tpl [RCluster[@nr]] (#aid) mode="print-dep" {
+  `$aid`; ":"; "rcluster"; ":"; `@nr`;
+}
+
+tpl [Identify[not(@kind) or not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: don't know how to extract dependency information from an Identify element that lacks either a kind or an nr attribute.";
+}
+
+tpl [Identify[@kind and @nr]] (#aid) mode="print-dep" {
+  $kind-lc = lowercase (#string = `@kind`);
+  `$aid`; ":"; `$kind-lc`; "identification"; ":"; `@nr`;
+}
+
+tpl [RegistrationBlock] (#aid) mode="print-dep" {
+  if [descendant::CCluster] {
+    for-each [descendant::CCluster] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+  if [descendant::FCluster] {
+    for-each [descendant::FCluster] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+  if [descendant::RCluster] {
+    for-each [descendant::FCluster] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+  if [descendant::Identify] {
+    for-each [descendant::Identify] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+}
+
+tpl [NotationBlock] (#aid) mode="print-dep" {
+  if [descendant::Pattern] {
+    for-each [descendant::Pattern] {
+      apply [.] (#aid = $aid) mode="print-dep";
+      if [position() < last()] { "\n"; }
+    }
+  }
+}
+
+// tpl [Proposition[not(@propnr)]] (#aid) mode="print-dep" {
+//   msg terminate="yes" "Error: we don't know how to extract dependency information from a Proposition element that lacks a propnr attribute.";
+// }
+
+tpl [Proposition] (#aid) mode="print-dep" {
+  $propnr = propnr (#node = `.`);
+  "l"; `$propnr`; "_"; `$aid`;
+}
+
+tpl [Reconsider] (#aid) mode="print-dep" {
+  if [Proposition] {
+    for-each [Proposition] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+}
+
+tpl [Consider] (#aid) mode="print-dep" {
+  if [Proposition] {
+    for-each [Proposition] {
+      apply [.] (#aid = $aid) mode="print-dep"; "\n";
+    }
+  }
+}
+
+tpl [Ref[not(@nr)]] (#aid) mode="print-dep" {
+  msg terminate="yes" "Error: unable to extract dependency information from Ref elements that lack an nr attriute.";
+}
+
+tpl [Ref[@nr]] (#aid) mode="print-dep" {
+  $nr = `@nr`;
+  for-each [preceding::JustifiedTheorem/Proposition[@propnr = $nr]] {
+    apply [.] (#aid = $aid) mode="print-dep";
+  }
+  for-each [preceding::DefTheorem[Proposition[@propnr = $nr]]] {
+    apply [.] (#aid = $aid) mode="print-dep"; "\n";
+  }
+}
+
+tpl [Proof] (#aid) mode="print-dep" {
+  $context = `.`;
+  for-each [descendant::Ref[@nr and not(@articlenr)]] {
+    apply [.] (#aid = $aid) mode="print-dep"; "\n";
+  }
+}

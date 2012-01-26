@@ -1,0 +1,106 @@
+stylesheet 1.0;
+output method=xml;
+
+// Applied to a .evl file, reprint the .evl file with some extra
+// content.  The stylesheet parameters
+//
+// #vocabularies
+// #notations
+// #definitions
+// #theorems
+// #registrations
+// #constructors
+// #requirements
+// #schemes
+//
+// express extra articles that should be added to the relevant .evl
+// file parts.  The purpose of this stylesheet is to fake the addition
+// of content to the directives of a .miz file without actually
+// editing the .miz (a hairy prospect indeed).
+
+// The main application that I (Jesse Alama) have in mind for this
+// stylesheet comes from the "itemization" of an article.  I divide a
+// given mizar article into its constituent items, ITEM1, ITEM2, ... I
+// want to verify, say, ITEM<n> with an environment that includes the
+// exported content of ITEM1, ITEM2, ..., ITEM<n-1>.  Given the .evl
+// file for the original .miz, I simply add ITEM1, ITEM2, ...,
+// ITEM<n-1> to that .evl file using this stylesheet, and voila:
+// without modifying the .miz file, I have effectively added ITEM1,
+// ITEM2, ..., ITEM<n-1> to the environment for ITEM<n>.
+
+// The values of the following parameters are supposed to be
+// comma-delimited lists of article names, e.g.,
+//
+//  FOO1,BAR,BA5_4
+
+// TODO:
+//
+// * At present, there is no sanity checking of the supplied
+//   parameters.  One should check:
+//
+//   - that every parameter is a valid comma-delimited token list
+//
+//   - that there are no repetitions (this is bad because MIZAR will
+//     complain if there are duplicate entries in a directive)
+
+#vocabularies = { ""; }
+#notations = { ""; }
+#definitions = { ""; }
+#theorems = { ""; }
+#registrations = { ""; }
+#constructors = { ""; }
+#requirements = { ""; }
+#schemes = { ""; }
+
+tpl list(#separ,#elems) { 
+ for-each [$elems] {
+  apply[.]; if [not(position()=last())] { copy-of $separ; } }
+}
+
+tpl [Environ] {
+  <Environ {
+    @aid = `@aid`;
+    "\n"; apply [Directive[@name="Vocabularies"]](#extras = $vocabularies);
+    "\n"; apply [Directive[@name="Notations"]](#extras = $notations);
+    "\n"; apply [Directive[@name="Definitions"]](#extras = $definitions);
+    "\n"; apply [Directive[@name="Theorems"]](#extras = $theorems);
+    "\n"; apply [Directive[@name="Schemes"]](#extras = $schemes);
+    "\n"; apply [Directive[@name="Registrations"]](#extras = $registrations);
+    "\n"; apply [Directive[@name="Constructors"]](#extras = $constructors);
+    "\n"; apply [Directive[@name="Requirements"]](#extras = $requirements);
+    "\n";
+  }
+}
+
+tpl [Ident] {
+  <Ident {
+    @"name" = `@name`;
+  }
+}
+
+tpl write-extras (#extras) {
+  if [contains ($extras, ",")] {
+    $extra = `substring-before ($extras, ",")`;
+    <Ident {
+      @"name" = $extra;
+    }
+    "\n";
+    write-extras (#extras = `substring-after ($extras, ",")`);
+  }
+}
+
+tpl [Directive](#extras) {
+  <Directive {
+    @"name" = `@name`;
+    for-each [Ident] {
+      if [position() = 1] {
+        "\n";
+      }
+      apply [.]; "\n";
+    }
+    if [$extras and count (Ident) = "0"] {
+      "\n";
+    }
+    write-extras (#extras = $extras);
+  }
+}

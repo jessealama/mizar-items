@@ -1,0 +1,52 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+// Substitute the definiens of a constant definition where the
+// constant is used.
+
+tpl [Text-Proper/Item[@kind = "Constant-Definition"]] {
+  // do nothing
+}
+
+tpl [Simple-Term[@idnr = preceding::Item[@kind = "Constant-Definition" and parent::Text-Proper]/Variable/@idnr]] {
+  // Don't carry out the substitution when this simple term occurs as a bound varible previously
+  $idnr = `@idnr`;
+  $toplevel-ancestor = `ancestor::*[parent::Text-Proper]`;
+  $potential-binders = `preceding::Item[@kind = "Loci-Declaration" and child::Explicitly-Qualified-Segment/Variable[@idnr = $idnr]]`;
+  if [$potential-binders[ancestor::*[parent::Text-Proper] = $toplevel-ancestor]] {
+    // don't do the substitution: this Simple-Term was bound earlier
+    <Simple-Term {
+      for-each [@*] { copy-of `.`; }
+      apply [*];
+    }
+  } else {
+    $arguments = `*`;
+    $toplevel-definition = `preceding::Item[@kind = "Constant-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr][1]/..`;
+    for-each [$toplevel-definition] {
+      $definiens = `*[position() = last()]`;
+      apply [$definiens];
+    }
+  }
+}
+
+tpl [Variable[not(parent::Explicitly-Qualified-Segment) and @idnr = preceding::Item[@kind = "Constant-Definition" and parent::Text-Proper]/Variable[@spelling]/@idnr]] {
+  $idnr = `@idnr`;
+  $arguments = `*`;
+  $toplevel-definition = `preceding::Item[@kind = "Constant-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr][1]/..`;
+  for-each [$toplevel-definition] {
+    $definiens = `*[position() = last()]`;
+    apply [$definiens];
+  }
+}

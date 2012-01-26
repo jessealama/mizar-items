@@ -1,0 +1,238 @@
+stylesheet 1.0;
+output method=xml;
+
+#target_kind = { "X"; }
+#target_nr = { "0"; }
+#target_aid = { "NOTHING"; }
+#target_property = { "Whatever"; }
+
+tpl escape-backslash(#str) {
+  if [contains ($str, '/')] {
+    $before = `substring-before ($str, '/')`;
+    $after = `substring-after ($str, '/')`;
+    $tail = escape-backslash (#str = $after);
+    `concat ($before, "&amp;#47;", $tail)`;
+  } else {
+    $str;
+  }
+}
+
+tpl [*] {
+  $element-name = `local-name (.)`;
+  <$element-name {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+    }
+    for-each [*] {
+      apply [.];
+    }
+  }
+  "\n";
+}
+
+tpl [Constructors] {
+  <Constructors { @aid=`@aid`; @mizfiles = escape-backslash (#str = `@mizfiles`);
+  "\n";
+  apply [Constructor];
+  }
+}
+
+tpl [LocusVar] {
+  <LocusVar { @nr=`@nr`; }
+  "\n";
+}
+
+tpl [Func] {
+  <Func { @kind=`@kind`; @nr=`@nr`;
+    if [*[1]] {
+      "\n";
+      apply [*];
+    }
+  }
+  "\n";
+}
+
+// structures
+tpl [Abstractness](#ignore) {
+  if [$target_property = "Abstractness" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Abstractness;
+    "\n";
+  }
+}
+
+// predicates
+tpl [Symmetry](#ignore) {
+  if [$target_property = "Symmetry" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Symmetry;
+    "\n";
+  }
+}
+
+tpl [Reflexivity](#ignore) {
+  if [$target_property = "Reflexivity" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Reflexivity;
+    "\n";
+  }
+}
+
+tpl [Irreflexivity](#ignore) {
+  if [$target_property = "Irreflexivity" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Irreflexivity;
+    "\n";
+  }
+}
+
+tpl [Antisymmetry](#ignore) {
+  if [$target_property = "Antisymmetry" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Antisymmetry;
+    "\n";
+  }
+}
+
+tpl [Connectedness](#ignore) {
+  if [$target_property = "Connectedness" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Connectedness;
+    "\n";
+  }
+}
+
+// functions
+tpl [Commutativity](#ignore) {
+  if [$target_property = "Commutativity" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Commutativity;
+    "\n";
+  }
+}
+
+tpl [Idempotence](#ignore) {
+  if [$target_property = "Idempotence" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Idempotence;
+    "\n";
+  }
+}
+
+tpl [Involutiveness](#ignore) {
+  if [$target_property = "Involutiveness" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Involutiveness;
+    "\n";
+  }
+}
+
+tpl [Projectivity](#ignore) {
+  if [$target_property = "Projectivity" and $ignore = "1"] {
+    // do nothing
+  } else {
+    <Projectivity;
+    "\n";
+  }
+}
+
+tpl [Properties](#ignore) {
+
+  if [$ignore = "all"] {
+    // do nothing
+  } else {
+    <Properties {
+      @propertyarg1=`@propertyarg1`;
+      @propertyarg2=`@propertyarg2`;
+      "\n";
+      apply [*](#ignore = $ignore);
+    }
+    "\n";
+  }
+}
+
+tpl [Constructor] {
+  $kind = { `@kind`; }
+  $nr = { `@nr`; }
+  $aid = { `@aid`; }
+
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    "\n";
+    if [$kind = $target_kind and $nr = $target_nr and $aid = $target_aid] {
+      if [$target_property = "all"] {
+        apply [*](#ignore = "all");
+      } else {
+        apply [*](#ignore = "1");
+      }
+    } else {
+      apply [*];
+    }
+  }
+  "\n";
+}
+
+tpl [Cluster] {
+  if [*[1]] {
+    <Cluster {
+      "\n";
+      apply [*];
+    }
+  } else {
+    <Cluster;
+  }
+  "\n";
+}
+
+tpl [Num] {
+  <Num { @nr=`@nr`; } "\n";
+}
+
+tpl [ArgTypes] {
+  if [*[1]] {
+    <ArgTypes {
+      "\n";
+      apply [*];
+    }
+  } else {
+    <ArgTypes;
+  }
+  "\n";
+}
+
+tpl [Adjective] {
+  if [*[1]] {
+    <Adjective {
+      @nr=`@nr`;
+      if [@value] { @"value" = `@value`; }
+      "\n";
+      apply [*];
+    }
+  } else {
+    <Adjective {
+      @nr=`@nr`;
+      if [@value] { @"value" = `@value`; }
+    }
+  }
+
+  "\n";
+}
+
+tpl [Typ] {
+  <Typ {
+    for-each [@*] { copy-of `.`; }
+    "\n";
+    apply [*];
+  }
+  "\n";
+}

@@ -1,0 +1,251 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [*] (#arguments) mode="plug-placeholders" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#arguments = $arguments) mode="plug-placeholders";
+  }
+}
+
+tpl [*] mode="rewrite-placeholder-terms" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="rewrite-placeholder-terms";
+  }
+}
+
+tpl [Placeholder-Term] (#arguments) mode="plug-placeholders" {
+  if [not(@nr)] {
+    die (#message = "We found a placeholder term that lacks an nr attribute!");
+  }
+  $nr = `@nr`;
+  $num-arguments = `count ($arguments)`;
+  if [$num-arguments < $nr] {
+    $message = `concat ("We are asked to plug in an expression for position #", $nr, ", but we have only ", $num-arguments, " available")`;
+    die (#message = $message);
+  }
+  $argument = `$arguments[position() = $nr]`;
+  if [$argument] {
+    apply [$argument];
+  } else {
+    $message = `concat ("We somehow failed to access argument number ", $nr, " from our list of ", $num-arguments, " arguments")`;
+    die (#message = $message);
+  }
+}
+
+tpl [Placeholder-Term[not(@nr)]] mode="rewrite-placeholder-terms" {
+  die (#message = "We found a placeholder term that lacks an nr attribute!");
+}
+
+tpl [Placeholder-Term[@nr]] mode="rewrite-placeholder-terms" {
+  $nr = `@nr`;
+  <Simple-Term {
+    @idnr = "0";
+    $stub-variable-spelling = `concat ("x", $nr)`;
+    @spelling = $stub-variable-spelling;
+  }
+}
+
+// An approach to toplevel private functions, forcing them to be
+// public.  This doesn't work, in general, because terms made up from
+// the new function symbol don't get the types that are available to
+// terms built from the private functor symbol, which is essentially
+// just a macro.
+
+// key "idnr" [//*] `@idnr`;
+
+// tpl fresh-idnr (#start) {
+//   if [key ("idnr", $start)] {
+//     fresh-idnr (#start = `$start + 1`);
+//   } else {
+//     $start;
+//   }
+// }
+
+// tpl [Text-Proper/Item[@kind = "Private-Functor-Definition"]] {
+
+//   // sanity checks
+//   if [not(Variable)] {
+//     die (#message = "A Private-Functor-Definition item is supposed to have a Variable child!");
+//   }
+//   $variable = `Variable[1]`;
+//   if [not($variable/@spelling)] {
+//     die (#message = "We found a Variable that lacks a spelling!");
+//   }
+//   if [not($variable/@idnr)] {
+//     die (#message = "We found a Variable that lacks an nr attribute!");
+//   }
+//   if [not(Type-List)] {
+//     die (#message = "A Private-Functor-Definition item is supposed to have a Type-List child!");
+//   }
+
+//   $variable-nr = `$variable/@idnr`;
+//   $variable-spelling = `$variable/@spelling`;
+//   $type-list = `Type-List[1]`;
+//   $definiens = `*[position() = last()]`;
+
+//   // emit the new non-private definition
+//   <Item {
+//     @kind = "Definition-Item";
+//     @promoted = "private-functor-definition";
+//     @spelling = $variable-spelling;
+//     <Block {
+//       @kind = "Definitional-Block";
+//       $num-preceding-idnrs = `count (preceding::*[@idnr])`;
+//       for-each [$type-list/*] {
+//         $pos = `position ()`;
+//         $stub-variable-spelling = `concat ("x", $pos)`;
+//         $idnr = fresh-idnr (#start = `$num-preceding-idnrs + $pos`);
+//         <Item {
+//           @kind = "Loci-Declaration";
+//           <Explicitly-Qualified-Segment {
+//             <Variable {
+//               @idnr = "0";
+//               @spelling = $stub-variable-spelling;
+//             }
+//             apply [.];
+//           }
+//         }
+//       }
+//       <Item {
+//         @kind = "Functor-Definition";
+//         <Operation-Functor-Pattern {
+//           @spelling = $variable-spelling;
+//           @nr = $variable-nr;
+//           <Loci; // empty left-hand side; arguments will be on the right-hand side
+//           <Loci {
+//             for-each [$type-list/*] {
+//               $pos = `position ()`;
+//               $stub-variable-spelling = `concat ("x", $pos)`;
+//               <Locus {
+//                 @spelling = $stub-variable-spelling;
+// 		// In other stylesheets we insist that Locus elements
+// 		// have an nr attribute.  I don't know what to put
+// 		// here at the moment, so for now just put in a
+// 		// constant dummy value.
+//                 @nr = "0";
+//               }
+//             }
+//           }
+//         }
+//         <Equals;
+//         <Definiens {
+//           <Term-Expression;
+//           apply [$definiens] mode="rewrite-placeholder-terms";
+//         }
+//       }
+//       <Item {
+//         @kind = "Correctness";
+//         <Straightforward-Justification;
+//       }
+//     }
+//   }
+// }
+
+// A second approach to dealing with toplevel private functors:
+// substitute their instances in place.  We thus ignore the definition
+// of the toplevel functors, and instead transform the
+// Private-Functor-Terms using the definition
+//
+// This can fail because sometimes scheme justifications can fail if,
+// syntactically, a term is not given by a private functor.
+
+// A third approach: detect whether a proof uses a private functor
+// whose definition was introduced at the toplevel.  In such a case,
+// simply insert the private predicate definition at the beginning of
+// the proof, then carry on.
+
+tpl [Text-Proper/Item[@kind = "Private-Functor-Definition"]] {
+  // do nothing when we encounter these in the default processing
+  // mode.
+}
+
+tpl [*] (#arguments) mode="plug-placeholders" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#arguments = $arguments) mode="plug-placeholders";
+  }
+}
+
+tpl [Placeholder-Term[not(@nr)]] mode="plug-placeholders" {
+  die (#message = "We found a placeholder term that lacks an nr attribute!");
+}
+
+tpl [Placeholder-Term[@nr]] (#arguments) mode="plug-placeholders" {
+  $nr = `@nr`;
+  $num-arguments = `count ($arguments)`;
+  if [$num-arguments < $nr] {
+    $message = `concat ("We are asked to plug in an expression for position #", $nr, ", but we have only ", $num-arguments, " available")`;
+    die (#message = $message);
+  }
+  $argument = `$arguments[position() = $nr]`;
+  if [$argument] {
+    apply [$argument];
+  } else {
+    $message = `concat ("We somehow failed to access argument number ", $nr, " from our list of ", $num-arguments, " arguments")`;
+    die (#message = $message);
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" or @kind = "Correctness" or @kind = "Theorem-Item" or (@kind = "Regular-Statement" and parent::Text-Proper)]/Block[(@kind = "Proof" or @kind = "Now-Reasoning") and descendant::Private-Functor-Term[@idnr = preceding::Item[@kind = "Private-Functor-Definition" and parent::Text-Proper]/Variable/@idnr]]] {
+  $context = `.`;
+  <Block {
+    for-each [@*] { copy-of `.`; }
+    for-each [preceding::Item[@kind = "Private-Functor-Definition" and parent::Text-Proper and child::Variable and Variable/@idnr]] {
+      $toplevel-private-functor-definition = `.`;
+      $idnr = `Variable/@idnr`;
+      if [$context//Private-Functor-Term[@idnr = $idnr]] {
+        copy-of `$toplevel-private-functor-definition`;
+      }
+    }
+    apply [*];
+  }
+}
+
+tpl [*] (#arguments) mode="substitute-private-functor-terms" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#arguments = $arguments) mode="substitute-private-functor-terms";
+  }
+}
+
+tpl [Private-Functor-Term[not(@idnr)]] mode="substitute-private-functor-terms" {
+  die (#message = "We expected to find a value for the nr attribute of a Private-Functor-Term, but we found one that lacks an nr attribute");
+}
+
+tpl [Private-Functor-Term[@idnr = preceding::Item[@kind = "Private-Functor-Definition" and parent::Text-Proper]/Variable/@idnr]] mode="substitute-private-functor-terms" {
+  $idnr = `@idnr`;
+  $arguments = `*`;
+  $private-functor-definition = `(preceding::Item[@kind = "Private-Functor-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr]/..)[1]`;
+  $definiens = `$private-functor-definition/*[position() = last()]`;
+  if [not($definiens)] {
+    die (#message = "We can't find a definiens");
+  }
+  apply [$definiens] (#arguments = $arguments) mode="plug-placeholders";
+}
+
+// The case of an unexported lemma whose statement (Proposition) uses
+// a private functor term that was defined earlier on the toplevel.
+// We deal with this case by substituting the definiens of the private
+// functor definition directly into the statement
+tpl [Proposition[parent::Item[@kind = "Regular-Statement" and parent::Text-Proper] and descendant::Private-Functor-Term[@idnr = preceding::Item[@kind = "Private-Functor-Definition" and parent::Text-Proper]/Variable/@idnr]]] {
+  $arguments = `*`;
+  apply [.] (#arguments = $arguments) mode="substitute-private-functor-terms";
+}

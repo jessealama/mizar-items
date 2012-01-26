@@ -1,0 +1,50 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+tpl die(#message) {
+  if [@line and @col] {
+    $line = `@line`;
+    $col = `@col`;
+    $final_message = `concat ($message, " (line ", $line, ", column ", $col, ")")`;
+    msg terminate="yes" $final_message;
+  } else {
+    $final_message = `concat ($message, " (unable to determine line and column information)")`;
+    msg terminate="yes" $final_message;
+  }
+}
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    if [@spelling] { @spelling = `@spelling`; }
+    if [@idnr] { @idnr = `@idnr`; }
+    if [@nr] { @nr = `@nr`; }
+    if [@number] { @"number" = `@number`; }
+    if [@articleid] { @articleid = `@articleid`; }
+    if [@kind] { @kind = `@kind`; }
+    apply [*];
+  }
+}
+
+tpl [Item[@kind = "Reservation"]] {
+  // do nothing
+}
+
+tpl [Implicitly-Qualified-Segment] {
+  <Explicitly-Qualified-Segment {
+    apply [Variable[1]];
+    for-each [Variable[1]] {
+      $idnr = `@idnr`;
+      $spelling = `@spelling`;
+      if [preceding::Item[@kind = "Reservation"]/Variable[@idnr = $idnr]] {
+        apply [preceding::Item[@kind = "Reservation"]/Variable[@idnr = $idnr]/../*[position() = last()]];
+      } else {
+        $message = `concat ("We could not find a type for the implicitly qualified variable ", $spelling)`;
+        die (#message = $message);
+      }
+    }
+  }
+}

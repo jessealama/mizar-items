@@ -1,0 +1,392 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [Text-Proper/Item[@kind = "Reservation" and not(Variables)]] {
+  die (#message = "We require that a Reservation item have a Variables child!");
+}
+
+tpl [Text-Proper/Item[@kind = "Reservation"]] {
+  $context = `.`;
+  $type = `*[position() = last()]`;
+  // sanity check: all Variable descendants have an idnr attribute
+  for-each [Variables/Variable[not(@idnr)]] {
+    die (#message = "We found a variable that lacks an idnr attribute; unable to proceed.");
+  }
+  for-each [Variables/Variable] {
+    <Item {
+      for-each [$context/@*] { copy-of `.`; }
+      @idnr = `@idnr`;
+      <Variables {
+        apply [.];
+      }
+      apply [$type];
+    }
+  }
+}
+
+tpl [Item[@kind = "Loci-Declaration" and Explicitly-Qualified-Segment]] {
+  $loci = `.`;
+  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
+  for-each [Explicitly-Qualified-Segment/Variables/Variable] {
+    $pos = `position ()`;
+    <Item {
+      for-each [$loci/@*] { copy-of `.`; }
+      @idnr = `@idnr`;
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          apply [.]; // variable
+        }
+        apply [$type]; // the type of the variable
+      }
+    }
+  }
+}
+
+tpl [Item[@kind = "Loci-Declaration" and Implicitly-Qualified-Segment]] {
+  $loci = `.`;
+  $variable = `Implicitly-Qualified-Segment/Variable[1]`;
+  $variable-idnr = `$variable/@idnr`;
+  <Item {
+    for-each [$loci/@*] { copy-of `.`; }
+    @idnr = $variable-idnr;
+    <Implicitly-Qualified-Segment {
+      apply [$variable];
+    }
+  }
+}
+
+tpl [Item[@kind="Definition-Item"]] {
+  $context = `.`;
+  apply [Block] (#context = $context);
+}
+
+tpl [Block[@kind="Definitional-Block"]] (#context) {
+  apply [Item[@kind = "Attribute-Definition"
+              or @kind = "Functor-Definition"
+              or @kind = "Predicate-Definition"
+              or @kind = "Mode-Definition"
+              or @kind = "Structure-Definition"]](#context = $context);
+}
+
+tpl [Block[@kind = "Registration-Block" and Item[@kind = "Cluster"]]] {
+  apply [Item[@kind = "Cluster"]];
+}
+
+tpl [Block[@kind = "Registration-Block" and Item[@kind = "Identify"]]] {
+  apply [Item[@kind = "Identify"]];
+}
+
+tpl [Block[@kind = "Registration-Block" and Item[@kind = "Reduction"]]] {
+  apply [Item[@kind = "Reduction"]];
+}
+
+tpl [Block[@kind = "Notation-Block"]] {
+  apply [Item[@kind = "Pred-Antonym" or @kind = "Pred-Synonym"
+              or @kind = "Attr-Antonym"
+              or @kind = "Attr-Synonym"
+              or @kind = "Func-Synonym"
+              or @kind = "Func-Antonym"
+              or @kind = "Mode-Synonym"
+              or @kind = "Mode-Antonym"]];
+}
+
+tpl [Item[@kind = "Cluster"]] {
+  <Item {
+    @kind = "Definition-Item";
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    <Block {
+      @kind = "Registration-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"
+                                        or @kind = "Type-Changing-Statement"
+                                        or @kind = "Constant-Definition"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Cluster";
+        apply [*];
+      }
+      correctness-conditions (#candidates = `following-sibling::*`);
+    }
+  }
+}
+
+tpl [Item[@kind = "Identify"]] {
+  <Item {
+    @kind = "Definition-Item";
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    <Block {
+      @kind = "Registration-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Identify";
+        apply [*];
+      }
+      correctness-conditions (#candidates = `following-sibling::*`);
+    }
+  }
+}
+
+tpl [Item[@kind = "Reduction"]] {
+  <Item {
+    @kind = "Definition-Item";
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    <Block {
+      @kind = "Registration-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Reduction";
+        apply [*];
+      }
+      correctness-conditions (#candidates = `following-sibling::*`);
+    }
+  }
+}
+
+tpl correctness-conditions (#candidates, #definitions, #stop) {
+  if [not($stop = "1")] {
+    if [$candidates] {
+      $candidate = `$candidates[1]`;
+      for-each [$candidate] {
+        $candidate_name = `local-name(.)`;
+        $candidate_kind = `$candidate/@kind`;
+        if [$candidate_name = "Item" and ($candidate_kind = "Correctness-Condition"
+                                          or $candidate_kind = "Property"
+                                          or $candidate_kind = "Correctness")] {
+          apply [$candidate](#definitions = $definitions);
+          correctness-conditions (#candidates = `$candidates[position() > 1]`,
+                                  #definitions = $definitions);
+        } else {
+          correctness-conditions (#stop = "1");
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition"
+          or @kind = "Property"
+          or @kind = "Correctness"]](#definitions) {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*](#definitions = $definitions);
+  }
+}
+
+tpl [Block[@kind = "Proof"]](#definitions) {
+  $context = `.`;
+  <Block {
+    @kind = "Proof";
+    if [$definitions] {
+      for-each [$definitions] {
+        if [Variable] {
+          $idnr = `Variable[1]/@idnr`;
+          if [$context//Private-Predicate-Formula[@idnr = $idnr] or $context//Private-Functor-Term[@idnr = $idnr]] {
+            copy-of `.`;
+          }
+        } else {
+          die (#message = "While determining whether to possibly include some local definitions into a proof, we encountered a local definition that lacks a Variable child");
+        }
+      }
+    }
+    apply [*];
+  }
+}
+
+tpl [Item[@kind = "Functor-Definition"
+          or @kind = "Attribute-Definition"
+          or @kind = "Predicate-Definition"
+          or @kind = "Mode-Definition"
+          or @kind = "Structure-Definition"]](#definitions, #context) {
+  <Item {
+    for-each [$context/@*] { copy-of `.`; }
+    @kind = "Definition-Item";
+    <Block {
+      @kind = "Definitional-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"
+                                        or @kind = "Assumption"
+                                        or @kind = "Existential-Assumption"
+                                        or @kind = "Constant-Definition"
+                                        or @kind = "Regular-Statement"
+                                        or @kind = "Choice-Statement"
+                                        or @kind = "Private-Functor-Definition"
+                                        or @kind = "Private-Predicate-Definition"]] {
+        apply [.];
+      }
+      <Item {
+        for-each [@*] { copy-of `.`; }
+        apply [*];
+      }
+      correctness-conditions (#candidates = `following-sibling::*`, #definitions = $definitions);
+    }
+  }
+}
+
+tpl [Item[@kind = "Pred-Synonym"
+          or @kind = "Pred-Antonym"
+          or @kind = "Attr-Synonym"
+          or @kind = "Attr-Antonym"
+          or @kind = "Func-Synonym"
+          or @kind = "Func-Antonym"
+          or @kind = "Mode-Synonym"
+          or @kind = "Mode-Antonym"]] {
+  <Item {
+    @kind = "Definition-Item";
+    <Block {
+      @kind = "Notation-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = `@kind`;
+        if [@line] { @line = `@line`; }
+        if [@col] { @col = `@col`; }
+        apply [*];
+      }
+      correctness-conditions (#candidates = `following-sibling::*`);
+    }
+  }
+}
+
+tpl split-explicitly-qualified-segment (#variables, #type) {
+  if [$variables] {
+    $variable = `$variables[1]`;
+    <Explicitly-Qualified-Segment {
+      <Variables {
+        apply [$variable];
+      }
+      apply [$type];
+    }
+    split-explicitly-qualified-segment (#variables = `$variables[position() > 1]`,
+                                        #type = $type);
+  }
+}
+
+tpl [Item[@kind = "Generalization" and Explicitly-Qualified-Segment]] {
+  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
+  for-each [Explicitly-Qualified-Segment/Variables/Variable] {
+    <Item {
+      for-each [@*] { copy-of `.`; }
+      @kind = "Generalization";
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          apply [.];
+        }
+        apply [$type];
+      }
+    }
+  }
+}
+
+tpl [Explicitly-Qualified-Segment[not(parent::Item[@kind = "Choice-Statement"])]] {
+  split-explicitly-qualified-segment (#variables = `Variables/Variable`,
+                                      #type = `*[position() = last()]`);
+}
+
+// don't break up explicitly qualified segments inside universal formulas...yet
+tpl [Universal-Quantifier-Formula/Explicitly-Qualified-Segment] {
+  <Explicitly-Qualified-Segment {
+    apply [*];
+  }
+}
+
+tpl [Existential-Quantifier-Formula/Explicitly-Qualified-Segment] {
+  <Explicitly-Qualified-Segment {
+    apply [*];
+  }
+}
+
+tpl [Item[@kind = "Canceled-Pragma" and not(@number)]] {
+  die (#message = "Don't know how to deal with a 'canceled' pragma that lacks a number! ");
+}
+
+tpl emit-canceled-theorem (#times, #line, #col) {
+  if [$times > "0"] {
+    <Item {
+      @kind = "Canceled-Pragma";
+      @line = `@line`;
+      @col = `@col`;
+      @"number" = "1";
+    }
+    emit-canceled-theorem (#times = `$times - 1`,
+                           #line = $line,
+                           #col = $col);
+  }
+}
+
+tpl [Item[@kind = "Canceled-Pragma" and @number]] {
+  emit-canceled-theorem (#times = `@number`,
+                         #line = `@line`,
+                         #col = `@col`);
+}
+
+// Mark whether a toplevel unexported theorem is exportable
+
+tpl bad-term-hunting (#candidates) {
+  if [$candidates] {
+    $candidate = `$candidates[1]`;
+    if [not($candidate/@spelling)] {
+      die (#message = "To determine whether there is a bad term in the current item, we require that all terms have a spelling, but we just found a term that lacks one.");
+    }
+    $spelling = `$candidate/@spelling`;
+    $n = `local-name ($candidate)`;
+    choose {
+      when [$n = "Schematic-Variable"] {
+        "1";
+      }
+      when [starts-with ($spelling, "D")] {
+        "1";
+      }
+      when [starts-with ($spelling, "C")] {
+        "1";
+      }
+      otherwise {
+        bad-term-hunting (#candidates = `$candidates[position() > 1]`);
+      }
+    }
+  } else {
+    "0";
+  }
+}
+
+tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and @shape = "Compact-Statement"]] {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    for-each [Proposition] {
+      $bad = bad-term-hunting (#candidates = `descendant::Simple-Term`);
+      if [$bad = "1"
+          or descendant::Private-Functor-Term
+          or descendant::Private-Predicate-Formula] {
+        @exportable = "no";
+      } else {
+        @exportable = "yes";
+      }
+    }
+    apply [*];
+  }
+}
+
+tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and not(@shape = "Compact-Statement")]] {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    @exportable = "no";
+    apply [*];
+  }
+}

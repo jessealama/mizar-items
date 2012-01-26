@@ -1,0 +1,380 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl count-preceding-toplevel-items {
+  `count (preceding-sibling::Item[not(@kind = "Reservation") and not(@kind = "Regular-Statement" and child::Diffuse-Statement) and not(@kind = "Private-Predicate-Definition") and not(@kind = "Private-Functor-Definition")])`;
+}
+
+tpl [*] (#arguments) mode="plug-placeholders" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#arguments = $arguments) mode="plug-placeholders";
+  }
+}
+
+tpl [*] mode="rewrite-placeholder-terms" {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="rewrite-placeholder-terms";
+  }
+}
+
+tpl [Placeholder-Term] (#arguments) mode="plug-placeholders" {
+  if [not(@nr)] {
+    die (#message = "We found a placeholder term that lacks an nr attribute!");
+  }
+  $nr = `@nr`;
+  $num-arguments = `count ($arguments)`;
+  if [$num-arguments < $nr] {
+    $message = `concat ("We are asked to plug in an expression for position #", $nr, ", but we have only ", $num-arguments, " available")`;
+    die (#message = $message);
+  }
+  $argument = `$arguments[position() = $nr]`;
+  if [$argument] {
+    apply [$argument];
+  } else {
+    $message = `concat ("We somehow failed to access argument number ", $nr, " from our list of ", $num-arguments, " arguments")`;
+    die (#message = $message);
+  }
+}
+
+tpl [Placeholder-Term] mode="rewrite-placeholder-terms" {
+  if [not(@nr)] {
+    die (#message = "We found a placeholder term that lacks an nr attribute!");
+  }
+  $nr = `@nr`;
+  <Variable {
+    @idnr = "0";
+    $stub-variable-spelling = `concat ("x", $nr)`;
+    @spelling = $stub-variable-spelling;
+  }
+}
+
+key "idnr" [//*] `@idnr`;
+
+tpl fresh-idnr (#start) {
+  if [key ("idnr", $start)] {
+    fresh-idnr (#start = `$start + 1`);
+  } else {
+    $start;
+  }
+}
+
+// tpl [Text-Proper/Item[@kind = "Private-Predicate-Definition"]] {
+//   // do nothing
+// }
+
+// tpl [Private-Predicate-Formula] {
+//   if [not (@idnr)] {
+//     die (#message = "We found a Private-Predicate-Formula that lacks an idnr attribute");
+//   }
+//   $idnr = `@idnr`;
+//   $arguments = `*`;
+//   if [preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr]] {
+//     for-each [preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr][1]/..] {
+//       $definiens = `*[position () = last ()]`;
+//       apply [$definiens] (#arguments = $arguments); // mode="plug-placeholders";
+//     }
+//   }
+// }
+
+tpl [Text-Proper/Item[@kind = "Private-Predicate-Definition"]] {
+
+  // sanity checks
+  if [not(Variable)] {
+    die (#message = "A Private-Predicate-Definition item is supposed to have a Variable child!");
+  }
+  $variable = `Variable[1]`;
+  if [not($variable/@spelling)] {
+    die (#message = "We found a variable that lacks a spelling!");
+  }
+  if [not($variable/@idnr)] {
+    die (#message = "We found a variable that lacks an nr attribute!");
+  }
+  if [not(Type-List)] {
+    die (#message = "A Private-Predicate-Definition item is supposed to have a Type-List child!");
+  }
+
+  $variable-nr = `$variable/@idnr`;
+  $variable-spelling = `$variable/@spelling`;
+  $type-list = `Type-List[1]`;
+  $definiens = `*[position() = last()]`;
+
+  // emit the new non-private definition
+  <Item {
+    @kind = "Definition-Item";
+    @promoted = "private-predicate-definition";
+    @spelling = $variable-spelling;
+    <Block {
+      @kind = "Definitional-Block";
+      $num-preceding-idnrs = `count (preceding::*[@idnr])`;
+      for-each [$type-list/*] {
+        $pos = `position ()`;
+        $stub-variable-spelling = `concat ("x", $pos)`;
+        $idnr = fresh-idnr (#start = `$num-preceding-idnrs + $pos`);
+        <Item {
+          @kind = "Loci-Declaration";
+          <Explicitly-Qualified-Segment {
+            <Variable {
+              @idnr = "0";
+              @spelling = $stub-variable-spelling;
+            }
+            apply [.];
+          }
+        }
+      }
+      <Item {
+        @kind = "Predicate-Definition";
+        <Predicate-Pattern {
+          @spelling = $variable-spelling;
+          @nr = $variable-nr;
+          <Loci; // empty left-hand side; arguments will be on the right-hand side
+          <Loci {
+            for-each [$type-list/*] {
+              $pos = `position ()`;
+              $stub-variable-spelling = `concat ("x", $pos)`;
+              <Locus {
+                @spelling = $stub-variable-spelling;
+		// In other stylesheets we insist that Locus elements
+		// have an nr attribute.  I don't know what to put
+		// here at the moment, so for now just put in a
+		// constant dummy value.
+                @nr = "0";
+              }
+            }
+          }
+        }
+        <Definiens {
+          <Formula-Expression;
+          apply [$definiens] mode="rewrite-placeholder-terms";
+        }
+      }
+    }
+  }
+}
+
+
+
+tpl [Private-Predicate-Formula] {
+  if [not(@idnr)] {
+    die (#message = "A Private-Predicate-Formula element lacks an idnr attribute!");
+  }
+  $idnr = `@idnr`;
+  if [preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr]] {
+    $toplevel-definition = `preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr]/..`;
+    $toplevel-definition-variable = `$toplevel-definition/Variable`;
+    if [not($toplevel-definition-variable/@spelling)] {
+      die (#message = "We found a Variable element that lacks a spelling!");
+    }
+    $spelling = `$toplevel-definition-variable/@spelling`;
+    <Predicative-Formula {
+      @nr = $idnr;
+      @spelling = $spelling;
+      <Arguments;
+      <Arguments {
+        apply [*];
+      }
+    }
+  } else {
+    <Private-Predicate-Formula {
+      for-each [@*] { copy-of `.`; }
+      apply [*];
+    }
+  }
+}
+
+// Create a universal formula that universally generalizes $formula.
+// There will be as many universal quantifiers as there are elements
+// of $types.  The types of the introduced universally quantified
+// variables will be taken from $types.
+tpl universally-generalize (#formula, #types, #variable-number, #free-variables, #arguments) {
+  if [$variable-number] {
+    $empty = token-string-is-empty (#token-string = $free-variables);
+    if [$empty = "1"] {
+      if [$types] {
+        $type = `$types[1]`;
+        $variable-spelling = `concat ("x", $variable-number)`;
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variable {
+              @idnr = "0";
+              @spelling = $variable-spelling;
+            }
+            apply [$type];
+          }
+          universally-generalize (#formula = $formula,
+                                  #free-variables = $free-variables,
+                                  #types = `$types[position() > 1]`,
+                                  #variable-number = `$variable-number + 1`,
+                                  #arguments = $arguments);
+        }
+      } else {
+        apply [$formula] (#arguments = $arguments) mode="plug-placeholders";
+      }
+    } else {
+      $free-variable-idnr = first-item (#token-string = $free-variables);
+      $free-variables-tail = token-string-tail (#token-string = $free-variables);
+      if [preceding::Item[parent::Text-Proper and @kind = "Reservation"]/Variable[@idnr = $free-variable-idnr]] {
+        $reservation = `preceding::Item[@kind = "Reservation"]/Variable[@idnr = $free-variable-idnr][1]/..`;
+        $variable = `$reservation/Variable`;
+        $type = `$reservation/*[position() = last()]`;
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            apply [$variable];
+            apply [$type];
+          }
+          universally-generalize (#formula = $formula,
+                                  #types = $types,
+                                  #variable-number = $variable-number,
+                                  #free-variables = $free-variables-tail,
+                                  #arguments = $arguments);
+        }
+      } else {
+        $message = `concat ("We were unable to find a reservation that binds the varible whose idnr is '", $free-variable-idnr, "'")`;
+        die (#message = $message);
+      }
+    }
+  } else {
+    universally-generalize (#formula = $formula,
+                            #types = $types,
+                            #free-variables = $free-variables,
+                            #variable-number = "1",
+                            #arguments = $arguments);
+  }
+}
+
+tpl [Straightforward-Justification[preceding-sibling::Proposition/Private-Predicate-Formula[@idnr = preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable/@idnr]]] {
+  $context = `.`;
+  $proposition = `preceding-sibling::Proposition[1]`;
+  $formula = `$proposition/*[position() = last()]`;
+  for-each [$formula] {
+    $idnr = `@idnr`;
+    $arguments = `*`;
+    for-each [preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $idnr][1]/..] {
+      $private-predicate-definition = `.`;
+      $type-list = `$private-predicate-definition/Type-List`;
+      $definiens = `$private-predicate-definition/*[position() = last()]`;
+      $num-previous = count-preceding-toplevel-items ();
+      $num-previous-plus-one = `$num-previous + 1`;
+      $ckb = `concat ("CKB", $num-previous-plus-one)`;
+      $instance-label = "Instance";
+      if [not($definiens/@free-variables)] {
+        die (#message = "To universally generalize the free variables of an item, we need to know what variables occur freely in the item; this element lacks a free-variables attribute, though, so we cannot poceed");
+      }
+      $free-vars = `$definiens/@free-variables`;
+      <Block {
+        @kind = "Proof";
+        <Item {
+          @kind = "Regular-Statement";
+          <Compact-Statement;
+          <Proposition {
+            <Label {
+              @spelling = $instance-label;
+            }
+            <Biconditional-Formula {
+              apply [$formula];
+              universally-generalize (#formula = $definiens, #free-variables = $free-vars, #arguments = $arguments);
+            }
+          }
+          <Straightforward-Justification {
+            <Definition-Reference {
+              @"number" = "1";
+              @spelling = $ckb;
+            }
+          }
+        }
+        <Item {
+          @kind = "Regular-Statement";
+          <Compact-Statement;
+          <Proposition {
+            apply [$definiens] (#arguments = $arguments) mode="plug-placeholders";
+          }
+          <Straightforward-Justification {
+            apply [$context/*];
+          }
+        }
+        <Item {
+          @kind = "Conclusion";
+          <Compact-Statement;
+          <Proposition {
+            <Thesis;
+          }
+          <Straightforward-Justification {
+            <Link;
+            <Local-Reference {
+              @idnr = "0";
+              @line = "0";
+              @col = "0";
+              @spelling = $instance-label;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+tpl [Straightforward-Justification/Local-Reference] {
+
+  // We are about to go check whether this local reference refers to a
+  // private predicate formula whose definition was a toplevel item
+  // (that is, a toplevel defpred).  If this is such a label, we will
+  // add an extra label referring to the exportable definition that we
+  // created earlier.  In any case, we have to copy the current label
+  // anyway.  So:
+
+  <Local-Reference {
+    for-each [@*] { copy-of `.`; }
+      apply [*];
+  }
+
+  // Now that we've copied this local reference, go hunting.
+
+  $idnr = `@idnr`;
+  $proposition = `preceding::Proposition/Label[@idnr = $idnr][1]/..`;
+  if [not($proposition)] {
+    $message = `concat ("We couldn't find a Proposition node whose label is equal to the label we are looking for (", $idnr, ")")`;
+    die (#message = $message);
+  }
+  if [$proposition/Private-Predicate-Formula] {
+    msg "Private-predicate-formula...";
+    $private-predicate-formula = `$proposition/Private-Predicate-Formula`;
+    if [not($private-predicate-formula/@idnr)] {
+      die (#message = "We require that a Private-Predicate-Formula have an idnr attribute, but we found one that lacks this attribute");
+    }
+    $priv-pred-idnr = `$private-predicate-formula/@idnr`;
+    if [preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $priv-pred-idnr]] {
+      msg "found one!";
+      // this is precisely the kind of label we're looking for: the
+      // label refers to a private predicate formula, whose definition
+      // was a toplevel item
+      for-each [preceding::Item[@kind = "Private-Predicate-Definition" and parent::Text-Proper]/Variable[@idnr = $priv-pred-idnr][1]/..] {
+        $num-previous = count-preceding-toplevel-items ();
+        $num-previous-plus-one = `$num-previous + 1`;
+        $ckb = `concat ("CKB", $num-previous-plus-one)`;
+        <Definition-Reference {
+          @nr = "0";
+          @"number" = "1";
+          @spelling = $ckb;
+        }
+      }
+    } else {
+      msg "swing and a miss";
+    }
+  }
+}

@@ -1,0 +1,41 @@
+stylesheet 1.0;
+output method=xml indent="yes";
+
+// Comma-delimited list of positive natural numbers representing
+// indices of elements of the root element that are to be omitted.
+
+#to-delete = { ""; }
+
+tpl [/] {
+  apply [*] mode="root";
+}
+
+tpl [*] mode="root" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    for-each [*] {
+      apply [.] mode="toplevel";
+    }
+  }
+}
+
+tpl [*] mode="copy" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    for-each [*] {
+      apply [.] mode="copy";
+    }
+  }
+}
+
+tpl [*] mode="toplevel" {
+  $pos = `count (preceding-sibling::*) + 1`;
+  $token = `concat (",", $pos, ",")`;
+  if [contains ($to-delete, $token)] {
+    // ignore
+  } else {
+    apply [.] mode="copy";
+  }
+}

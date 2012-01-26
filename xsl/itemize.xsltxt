@@ -1,0 +1,746 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+include ../utils/die.xsl;
+include ../utils/tokens.xsl;
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [/] {
+  apply [Text-Proper];
+}
+
+tpl enumerate-items (#items, #users, #non-users) {
+  if [$items] {
+    $item = `$items[1]`;
+    for-each [$item] {
+      $needed-new-users-and-non-users = prepend-context-for-item (#item = $item, #users = $users, #non-users = $non-users);
+      $needed = `substring-before ($needed-new-users-and-non-users, ":")`;
+      $new-users-and-non-users = `substring-after ($needed-new-users-and-non-users, ":")`;
+      $new-users = `substring-before ($new-users-and-non-users, ":")`;
+      $new-non-users = `substring-after ($new-users-and-non-users, ":")`;
+      choose {
+        when [self::Item[@kind = "Regular-Statement" and @exportable = "yes"]] {
+        for-each [Proposition] {
+          <Text-Proper {
+            <Item { @kind = "Section-Pragma"; }
+            emit-needed (#needed = $needed);
+            <Item {
+              @kind = "Theorem-Item";
+              @promoted-lemma = "yes";
+              @lemma-number = `count (preceding::Item[parent::Text-Proper and @kind = "Regular-Statement"]) + 1`;
+              apply [.];
+              for-each [following-sibling::*] {
+                apply [.];
+              }
+            }
+          }
+        }
+      }
+      when [self::Item[@kind = "Regular-Statement" and @exportable = "no"]] {
+        <Text-Proper {
+          <Item { @kind = "Section-Pragma"; }
+          emit-needed (#needed = $needed);
+          <Item {
+            for-each [@*] { copy-of `.`; }
+            @promoted-lemma = "no";
+            @lemma-number = `count (preceding::Item[parent::Text-Proper and @kind = "Regular-Statement"]) + 1`;
+            apply [*];
+          }
+        }
+      }
+      when [self::Item[@kind = "Theorem-Item"]] {
+        <Text-Proper {
+          <Item { @kind = "Section-Pragma"; }
+          emit-needed (#needed = $needed);
+          <Item {
+            for-each [@*] { copy-of `.`; }
+            @promoted-lemma = "no";
+            @theorem-number = `count (preceding-sibling::Item[@kind = "Theorem-Item"]) + 1`;
+            @lemma-number = `count (preceding::Item[parent::Text-Proper and @kind = "Regular-Statement"]) + 1`;
+            apply [*];
+          }
+        }
+      }
+      otherwise {
+        <Text-Proper {
+          <Item { @kind = "Section-Pragma"; }
+          emit-needed (#needed = $needed);
+          apply [$item];
+        }
+      }
+    }
+    enumerate-items (#items = `$items[position() > 1]`,
+                     #users = $new-users,
+                     #non-users = $new-non-users);
+    }
+  }
+}
+
+tpl [Text-Proper] {
+  <Fragments {
+    enumerate-items (#items = `Item`, #users = "", #non-users = "");
+  }
+}
+
+tpl toplevel-position (#toplevel-item) {
+  for-each [$toplevel-item] {
+    `count (preceding-sibling::Item) + 1`;
+  }
+}
+
+tpl term-with-idnr-occurs-in-context (#idnr) {
+  choose {
+    when [descendant::Variable[@idnr = $idnr]] {
+      "1";
+    }
+    when [descendant::Simple-Term[@idnr = $idnr]] {
+      "1";
+    }
+    otherwise {
+      "0";
+    }
+  }
+}
+
+// tpl reserved-variable-with-idnr-in-context (#idnr) {
+//   if [@implicitly-qualified-variables and @simple-terms] {
+//     $implicitly-qualified = `@implicitly-qualified-variables`;
+//     $simple-terms = `@simple-terms`;
+//     $idnr-token = `concat (",", $idnr, ",")`;
+//     choose {
+//       when [contains ($implicitly-qualified, $idnr-token)] {
+//         "1";
+//       }
+//       when [contains ($simple-terms, $idnr-token)] {
+//         "1";
+//       }
+//       otherwise {
+//         "0";
+//       }
+//     }
+//   } else {
+//     if [descendant::Implicitly-Qualified-Segment/Variable[@idnr = $idnr] | descendant::Simple-Term[@idnr = $idnr]] {
+//       "1";
+//     } else {
+//       "0";
+//     }
+//   }
+// }
+
+tpl idnr-belongs-to-idnr-nodeset (#idnr, #idnr-nodeset) {
+  if [$idnr-nodeset] {
+    $item = `$idnr-nodeset[1]`;
+    $item-idnr = `$item/@idnr`;
+    if [$idnr = $item-idnr] {
+      "1";
+    } else {
+      idnr-belongs-to-idnr-nodeset (#idnr = $idnr, #idnr-nodeset = `$idnr-nodeset[position() > 1]`);
+    }
+  } else {
+    "0";
+  }
+}
+
+// tpl reserved-variable-with-idnr-in-context (#idnr) {
+//   $context = `.`;
+//   $idnrs = `key ("simple-terms", $context)`;
+//   $num-idnrs = `count ($idnrs)`;
+//   $message = `concat ("The value of the simple-terms table for the current context is a nodeset that has ", $num-idnrs, " items")`;
+//   msg $message;
+//   $belongs = idnr-belongs-to-idnr-nodeset (#idnr = $idnr, #idnr-nodeset = $idnrs);
+//   if [$belongs = "1"] {
+//     msg "belongs!";
+//     "1";
+//   } else {
+//     if [descendant::Simple-Term[@idnr = $idnr]] {
+//       msg "Doesn't belong, but occurs as a simple term";
+//       "1";
+//     } else {
+//       "0";
+//     }
+//   }
+// }
+
+tpl reserved-variable-with-idnr-in-context (#idnr) {
+  choose {
+    when [descendant::Implicitly-Qualified-Segment/Variable[@idnr = $idnr]] {
+      "1";
+    }
+    when [descendant::Simple-Term[@idnr = $idnr]] {
+      "1";
+    }
+    otherwise {
+      "0";
+    }
+  }
+}
+
+tpl private-functor-term-with-idnr-occurs-in-context (#idnr) {
+  if [descendant::Private-Functor-Term[@idnr = $idnr]] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl private-predicate-formula-with-idnr-occurs-in-context (#idnr) {
+  if [descendant::Private-Predicate-Formula[@idnr = $idnr]] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl some-variable-used-in-context (#variables) {
+  if [$variables] {
+    $variable = `$variables[1]`;
+    $remaining-variables = `$variables[position() > 1]`;
+    $variable-idnr = `$variable/@idnr`;
+    if [not($variable-idnr)] {
+      die (#message = "We found a variable that lacks and idnr attribute!");
+    }
+    $occurs = term-with-idnr-occurs-in-context (#idnr = $variable-idnr);
+    if [$occurs = "1"] {
+      "1";
+    } else {
+      some-variable-used-in-context (#variables = $remaining-variables);
+    }
+  } else {
+    "0";
+  }
+}
+
+tpl reference-to-label-in-context (#label-idnr) {
+  if [descendant::Local-Reference[@idnr = $label-idnr]] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl item-uses-item (#item, #user) {
+  for-each [$item] {
+    choose {
+      when [self::Item[@kind = "Reservation"]] {
+        $idnr = `Variables/Variable[@idnr]/@idnr`;
+        if [not($idnr)] {
+          die (#message = "A reservation has a variable that lacks an idnr attribute!");
+        }
+        for-each [$user] {
+          reserved-variable-with-idnr-in-context (#idnr = $idnr);
+        }
+      }
+      when [self::Item[@kind = "Private-Predicate-Definition"]] {
+        $idnr = `Variable[@idnr]/@idnr`;
+        if [not($idnr)] {
+          die (#message = "A private predicate definition has a variable that lacks an idnr attribute!");
+        }
+        for-each [$user] {
+          private-predicate-formula-with-idnr-occurs-in-context (#idnr = $idnr);
+        }
+      }
+      when [self::Item[@kind = "Private-Functor-Definition"]] {
+        $idnr = `Variable[@idnr]/@idnr`;
+        if [not($idnr)] {
+          die (#message = "A private predicate definition has a variable that lacks an idnr attribute!");
+        }
+        for-each [$user] {
+          private-functor-term-with-idnr-occurs-in-context (#idnr = $idnr);
+        }
+      }
+      when [self::Item[@kind = "Type-Changing-Statement"]] {
+        $idnr = `Equality/Variable[@idnr]/@idnr`;
+        if [not($idnr)] {
+          die (#message = "A type-changing statement having the shape of an equality has a variable that lacks an idnr attribute!");
+        }
+        for-each [$user] {
+          term-with-idnr-occurs-in-context (#idnr = $idnr);
+        }
+      }
+      when [self::Item[@kind = "Choice-Statement" and Explicitly-Qualified-Segment]] {
+        $variables = `Explicitly-Qualified-Segment/Variables/Variable`;
+        for-each [$user] {
+          some-variable-used-in-context (#variables = $variables);
+        }
+      }
+      when [self::Item[@kind = "Constant-Definition" and Variable]] {
+        $idnr = `Variable[@idnr]/@idnr`;
+        if [not($idnr)] {
+          die (#message = "A constant definition has a variable that lacks an idnr attribute!");
+        }
+        for-each [$user] {
+          term-with-idnr-occurs-in-context (#idnr = $idnr);
+        }
+      }
+      when [self::Item[@kind = "Regular-Statement" and Proposition and @exportable = "no"]] {
+        $label-idnr = `Proposition/Label[@idnr]/@idnr`;
+        if [$label-idnr] {
+          for-each [$user] {
+            reference-to-label-in-context (#label-idnr = $label-idnr);
+          }
+        }
+      }
+      when [self::Item[@kind = "Regular-Statement" and not(Proposition) and @exportable = "no"]] {
+        $label-idnr = `Label[@idnr]/@idnr`;
+        if [$label-idnr] {
+          for-each [$user] {
+            reference-to-label-in-context (#label-idnr = $label-idnr);
+          }
+        }
+      }
+      otherwise {
+        $k = `@kind`;
+        $message = `concat ("Don't know how to determine whether an element of type ", $k, " is needed.")`;
+        die (#message = $message);
+      }
+    }
+  }
+}
+
+tpl positions (#items) {
+  if [$items] {
+    $item = `$items[1]`;
+    $item-pos = toplevel-position (#toplevel-item = $item);
+    $remainder-rendered = positions (#items = `$items[position() > 1]`);
+    cons-token-string (#item = $item-pos, #token-string = $remainder-rendered);
+  } else {
+    "";
+  }
+}
+
+// Find a path from $start to $end, possibly via the items in
+// $between.  The result is either the empty string (indicating that
+// there is no path from $start to $end via $beteen), or a token list
+// of numbers ',num-1,num-2,...,num-N,'.  The interpretation is that
+// item num-1 is item num-1 in the document; it is used by item num-2,
+// ..., until we get to item num-N.  $dead-ends is a token list that
+// records the nodes from which we know that there is no path to $end.
+// $non-users is a token list of colon-separated pairs
+// item-num-A:item-num-B with the interpretation: the toplevel item at
+// position item-num-A does not immediately use the toplevel item at
+// position item-num-B.
+tpl path-from-to (#start, #end, #between, #path-so-far, #dead-ends, #users, #non-users) {
+  $position-of-start = toplevel-position (#toplevel-item = $start);
+  $position-of-end = toplevel-position (#toplevel-item = $end);
+  $between-positions = positions (#items = $between);
+  if [$between-positions = ""] {
+    $message = `concat ("Searching for a path from ", $position-of-start, " to ", $position-of-end, " in one step")`;
+    // msg $message;
+  } else {
+    $message = `concat ("Searching for a path from ", $position-of-start, " to ", $position-of-end, " via ", $between-positions)`;
+    // msg $message;
+  }
+  $start-token = `concat (",", $position-of-start, ",")`;
+  if [contains ($dead-ends, $start-token)] {
+    $dead-end-message = `concat ("We won't even start the search because ", $position-of-start, " is a known dead-end to ", $position-of-end)`;
+    // msg $dead-end-message;
+    `concat ("", ":", $dead-ends, ":", $users, ":", $non-users)`;
+  } else {
+    $user-pair = `concat ($position-of-end, "#", $position-of-start)`;
+    $user-token = `concat (",", $user-pair, ",")`;
+    if [contains ($users, $user-token)] {
+      $path = cons-token-string-at-end (#item = $position-of-end, #token-string = $path-so-far);
+      $solution = `concat ($path, ":", $dead-ends, ":", $users, ":", $non-users)`;
+      $message = `concat ("Solution [1] is '", $path, "'")`;
+      // msg $message;
+      $solution;
+    } else {
+      if [contains ($non-users, $user-token)] {
+        if [$between] {
+          $later-candidates = `$between[position() > 1]`;
+          $candidate = `$between[1]`;
+          $candidate-position = toplevel-position (#toplevel-item = $candidate);
+          $candidate-token = `concat (",", $candidate-position, ",")`;
+          if [contains ($dead-ends, $candidate-token)] {
+            $dead-end-message = `concat ("Candidate ", $candidate-position, " is a known dead-end to ", $position-of-end)`;
+            // msg $dead-end-message;
+            path-from-to (#start = $start,
+                          #end = $end,
+                          #between = $later-candidates,
+                          #path-so-far = $path-so-far,
+                          #dead-ends = $dead-ends,
+                          #users = $users,
+                          #non-users = $non-users);
+          } else {
+            $candidate-user-pair = `concat ($candidate-position, "#", $position-of-start)`;
+            $candidate-user-token = `concat (",", $candidate-user-pair, ",")`;
+            if [contains ($users, $candidate-user-token)] {
+              $user-message = `concat ("We know that candidate ", $candidate-position, " uses item ", $position-of-start, ", so it makes sense to continue this search.")`;
+              // msg $non-user-message;
+              $solution-from-candidate = path-from-to (#start = $candidate,
+                                                       #end = $end,
+                                                       #between = $later-candidates,
+                                                       #path-so-far = $path-so-far,
+                                                       #dead-ends = $dead-ends,
+                                                       #users = $users,
+                                                       #non-users = $non-users);
+              $path-from-candidate = `substring-before ($solution-from-candidate, ":")`;
+              $after-path = `substring-after ($solution-from-candidate, ":")`;
+              $more-dead-ends = `substring-before ($after-path, ":")`;
+              $after-dead-ends = `substring-after ($after-path, ":")`;
+              $more-users = `substring-before ($after-dead-ends, ":")`;
+              $more-non-users = `substring-after ($after-dead-ends, ":")`;
+              if [$path-from-candidate = ""] { // there is no path
+                $new-dead-ends = cons-token-string-at-end (#item = $candidate-position, #token-string = $more-dead-ends);
+                path-from-to (#start = $start,
+                              #end = $end,
+                              #between = $later-candidates,
+                              #path-so-far = $path-so-far,
+                              #dead-ends = $new-dead-ends,
+                              #users = $more-users,
+                              #non-users = $more-non-users);
+              } else {
+                $path-with-candidate-at-end = cons-token-string-at-end (#item = $candidate-position,
+                                                                        #token-string = $path-so-far);
+                $end-position = toplevel-position (#toplevel-item = $end);
+                $solution-path = cons-token-string-at-end (#item = $end-position, #token-string = $path-with-candidate-at-end);
+                $solution = `concat ($solution-path, ":", $dead-ends, ":", $more-users, ":", $more-non-users)`;
+                $message = `concat ("Solution [2] is '", $solution-path, "'")`;
+                // msg $message;
+                $solution;
+              }
+            } else {
+              if [contains ($non-users, $candidate-user-token)] {
+                $non-user-message = `concat ("We know that candidate ", $candidate-position, " does not use item ", $position-of-start, ", so we are aborting this search for a path from ", $position-of-start, " to ", $position-of-end, " via ", $candidate-position)`;
+                // msg $non-user-message;
+                path-from-to (#start = $start,
+                              #end = $end,
+                              #between = $later-candidates,
+                              #path-so-far = $path-so-far,
+                              #dead-ends = $dead-ends,
+                              #users = $users,
+                              #non-users = $non-users);
+              } else {
+                $user-message = `concat ("We don't know yet whether item ", $position-of-start, " is used by item ", $candidate-position, "; computing...")`;
+                $uses = item-uses-item (#user = $candidate, #item = $start);
+                if [$uses = "1"] {
+                  $new-users = cons-token-string-at-end (#item = $candidate-user-pair, #token-string = $users);
+                  path-from-to (#start = $start,
+                                #end = $end,
+                                #dead-ends = $dead-ends,
+                                #users = $new-users,
+                                #non-users = $non-users);
+                } else {
+                  $new-non-users = cons-token-string-at-end (#item = $candidate-user-pair, #token-string = $non-users);
+                  path-from-to (#start = $start,
+                                #end = $end,
+                                #dead-ends = $dead-ends,
+                                #users = $users,
+                                #non-users = $new-non-users);
+                }
+              }
+            }
+          }
+        } else {
+          $new-dead-ends = cons-token-string-at-end (#item = $position-of-start, #token-string = $dead-ends);
+          $solution = `concat ("", ":", $new-dead-ends, ":", $users, ":", $non-users)`;
+          $message = `concat ("Solution (dead end) [3] is '", $solution, "'")`;
+          // msg $message;
+          $solution;
+        }
+      } else {
+        $user-message = `concat ("We don't know whether item ", $position-of-start, " is used by item ", $position-of-end, "; computing...")`;
+        // msg $user-message;
+        $occurs-in-item = item-uses-item (#item = $start, #user = $end);
+        if [$occurs-in-item = "1"] {
+          $new-users = cons-token-string (#item = $user-pair, #token-string = $users);
+          path-from-to (#start = $start,
+                        #end = $end,
+                        #between = $between,
+                        #path-so-far = $path-so-far,
+                        #dead-ends = $dead-ends,
+                        #users = $new-users,
+                        #non-users = $non-users);
+        } else {
+          $new-non-users = cons-token-string (#item = $user-pair, #token-string = $non-users);
+          path-from-to (#start = $start,
+                        #end = $end,
+                        #between = $between,
+                        #path-so-far = $path-so-far,
+                        #dead-ends = $dead-ends,
+                        #users = $users,
+                        #non-users = $new-non-users);
+        }
+      }
+    }
+  }
+}
+
+tpl needed-for-item (#item, #candidates, #registered-paths, #users, #non-users, #needed) {
+  $users-message = `concat ("Known users so far: ", $users)`;
+  $non-users-message = `concat ("Known non-users so far: ", $non-users)`;
+  // msg $users-message;
+  // msg $non-users-message;
+  if [$candidates] {
+    $candidate = `$candidates[1]`;
+    $later-candidates = `$candidates[position() > 1]`;
+    $candidate-num = toplevel-position (#toplevel-item = $candidate);
+    $token = `concat (",", $candidate-num, ",")`;
+    if [contains ($registered-paths, $token)] {
+      // $message = "We already know about this path";
+      // msg $message;
+
+
+      // $message = `concat ("We would have included item ", $candidate-num, " in the current context")`;
+      // msg $message;
+
+      $new-needed = cons-token-string-at-end (#item = $candidate-num, #token-string = $needed);
+
+      needed-for-item (#item = $item,
+                       #candidates = $later-candidates,
+                       #registered-paths = $registered-paths,
+                       #users = $users,
+                       #non-users = $non-users,
+                       #needed = $new-needed);
+    } else {
+      $path-solution = path-from-to (#start = $candidate,
+                                     #end = $item,
+                                     #between = $later-candidates,
+                                     #users = $users,
+                                     #non-users = $non-users);
+      $path = `substring-before ($path-solution, ":")`;
+      $after-path = `substring-after ($path-solution, ":")`;
+      $dead-ends = `substring-before ($after-path, ":")`;
+      $after-dead-ends = `substring-after ($after-path, ":")`;
+      $more-users = `substring-before ($after-dead-ends, ":")`;
+      $more-non-users = `substring-after ($after-dead-ends, ":")`;
+      $item-position = toplevel-position (#toplevel-item = $item);
+      if [$path = ""] { // there is no path
+        $message = `concat ("There is no path from ", $candidate-num, " to ", $item-position)`;
+        // msg $message;
+        needed-for-item (#item = $item,
+                         #candidates = $later-candidates,
+                         #registered-paths = $registered-paths,
+                         #users = $more-users,
+                         #non-users = $more-non-users,
+                         #needed = $needed);
+      } else {
+        $message = `concat ("We found a path from ", $candidate-num, " to ", $item-position, ": ", $path)`;
+        // msg $message;
+
+        // $message = `concat ("We would have included item ", $candidate-num, " in the current context")`;
+        // msg $message;
+
+        $new-needed = cons-token-string-at-end (#item = $candidate-num, #token-string = $needed);
+
+        $new-registered-paths = append-token-strings (#token-string-a = $registered-paths,
+                                                      #token-string-b = $path);
+        needed-for-item (#item = $item,
+                         #candidates = $later-candidates,
+                         #registered-paths = $new-registered-paths,
+                         #users = $more-users,
+                         #non-users = $more-non-users,
+                         #needed = $new-needed);
+      }
+    }
+  } else {
+    `concat ($needed, ":", $users, ":", $non-users)`;
+  }
+}
+
+tpl emit-needed (#needed) {
+  if [not($needed = "")] {
+    $first-item-position = first-item (#token-string = $needed);
+    for-each [/Text-Proper/Item[position() = $first-item-position]] {
+      apply [.];
+    }
+    $needed-tail = token-string-tail (#token-string = $needed);
+    emit-needed (#needed = $needed-tail);
+  }
+}
+
+tpl prepend-context-for-item (#item, #users, #non-users) {
+  $num-prev = toplevel-position (#toplevel-item = $item);
+  $message = `concat ("Computing needed for item ", $num-prev)`;
+  // msg $message;
+  $stuff = needed-for-item (#item = $item,
+                   #candidates = `preceding::Item[parent::Text-Proper
+                                                  and (@kind = "Reservation"
+                                                       or @kind = "Type-Changing-Statement"
+                                                       or (@kind = "Regular-Statement" and @exportable = "no")
+                                                       or @kind = "Choice-Statement"
+                                                       or @kind = "Constant-Definition"
+                                                       or @kind = "Private-Predicate-Definition"
+                                                       or @kind = "Private-Functor-Definition")]`,
+                   #registered-paths = "",
+                   #users = $users,
+                   #non-users = $non-users,
+                   #val = "");
+  $stuff;
+}
+
+tpl bad-term-hunting (#candidates) {
+  if [$candidates] {
+    $candidate = `$candidates[1]`;
+    if [not($candidate/@spelling)] {
+      die (#message = "To determine whether there is a bad term in the current item, we require that all terms have a spelling, but we just found a term that lacks one.");
+    }
+    $spelling = `$candidate/@spelling`;
+    $n = `local-name ($candidate)`;
+    choose {
+      when [$n = "Schematic-Variable"] {
+        "1";
+      }
+      when [starts-with ($spelling, "D")] {
+        "1";
+      }
+      when [starts-with ($spelling, "C")] {
+        "1";
+      }
+      otherwise {
+        bad-term-hunting (#candidates = `$candidates[position() > 1]`);
+      }
+    }
+  } else {
+    "0";
+  }
+}
+
+// tpl [Text-Proper/*/Straightforward-Justification/Link] {
+//   for-each [../..] {
+//     $num-previous = `count (preceding::Item[parent::Text-Proper])`;
+//     $label = `concat ("CKB", $num-previous)`;
+//     <Theorem-Reference {
+//       @spelling = $label;
+//       @"number" = "1";
+//     }
+//   }
+// }
+
+//////////////////////////////////////////////////////////////////////
+// Resolving article-local references
+//////////////////////////////////////////////////////////////////////
+
+// Resolving scheme references
+
+tpl [Scheme-Justification[@idnr and @nr = "0"]] {
+  $context = `.`;
+  $idnr = `@idnr`;
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    if [$idnr = preceding-sibling::Item[@kind = "Scheme-Block-Item"]/Block[@kind = "Scheme-Block"]/Item[@kind = "Scheme-Head"]/Scheme[@idnr]/@idnr] {
+      for-each [preceding-sibling::Item[@kind = "Scheme-Block-Item" and descendant::Scheme[@idnr = $idnr]][1]] {
+        $num-previous = `count (preceding-sibling::Item)`;
+        $position = `$num-previous + 1`;
+        $spelling = `concat ("CKB", $position)`;
+        <Scheme-Justification {
+          @spelling = $spelling;
+          @idnr = "1";
+          @nr = "1"; // might not be right
+          @promoted = "promoted";
+          apply [`$context/*`];
+        }
+      }
+    } else {
+      die (#message = "Unable to resolve an article-local Scheme-Justification");
+    }
+  }
+}
+
+// tpl [Scheme-Justification[@nr = "0"
+//                           and @idnr = preceding::Item[parent::Text-Proper
+//                                                       and @kind = "Scheme-Block-Item"]/Block[@kind = "Scheme-Block"]/Item[@kind = "Scheme-Head"]/Scheme[@idnr]/@idnr]] {
+//   $context = `.`;
+//   $idnr = `@idnr`;
+//   for-each [preceding::Item[parent::Text-Proper and @kind = "Scheme-Block-Item" and descendant::Scheme[@idnr = $idnr]][1]] {
+//     $num-previous = `count (preceding::Item[parent::Text-Proper])`;
+//     $position = `$num-previous + 1`;
+//     $spelling = `concat ("CKB", $position)`;
+//     <Scheme-Justification {
+//       @spelling = $spelling;
+//       @idnr = "1";
+//       @nr = "1"; // might not be right
+//       @promoted = "promoted";
+//       apply [`$context/*`];
+//     }
+//   }
+// }
+
+// Non-scheme references
+
+// By default, we don't know how to resolve; just copy.
+// tpl [Local-Reference] {
+//   copy-of `.`;
+// }
+
+// TODO: make a table for local refernce idnrs.  This could speed things up a lot.
+//
+tpl [Local-Reference[@idnr]] {
+  $context = `.`;
+  $idnr = `@idnr`;
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    choose {
+      when [$idnr = preceding-sibling::Item[@kind = "Regular-Statement"
+                                            and @shape = "Compact-Statement"
+                                            and @exportable = "yes"]/Proposition/Label[@idnr]/@idnr] {
+        for-each [preceding-sibling::Item[@kind = "Regular-Statement"
+                                          and @shape = "Compact-Statement"
+                                          and @exportable = "yes"
+                                          and Proposition/Label[@idnr = $idnr]][1]] {
+          $num-previous = `count (preceding-sibling::Item)`;
+          $position = `$num-previous + 1`;
+          $new_spelling = `concat ("CKB", $position)`;
+          <Theorem-Reference {
+            @spelling = $new_spelling;
+            @promoted = "promoted";
+            @"number" = "1";
+          }
+        }
+      }
+      when [$idnr = preceding-sibling::Item[parent::Text-Proper
+                                            and @kind = "Theorem-Item"]/Proposition/Label[@idnr]/@idnr] {
+        for-each [preceding-sibling::Item[@kind = "Theorem-Item" and Proposition/Label[@idnr = $idnr]]] {
+          $num-previous = `count (preceding-sibling::Item)`;
+          $position = `$num-previous + 1`;
+          $new_spelling = `concat ("CKB", $position)`;
+          <Theorem-Reference {
+            @spelling = $new_spelling;
+            @promoted = "promoted";
+            @"number" = "1";
+          }
+        }
+      }
+      when [$idnr = preceding-sibling::Item[@kind = "Definition-Item"]/Block[@kind = "Definitional-Block"]/Item[@kind = "Functor-Definition"
+                                                                                                                or @kind = "Attribute-Definition"
+                                                                                                                or @kind = "Predicate-Definition"
+                                                                                                                or @kind = "Structure-Definition"]/Definiens/Label[@idnr]/@idnr] {
+
+        for-each [preceding-sibling::Item[@kind = "Definition-Item" and Block[@kind = "Definitional-Block"]/Item[@kind = "Functor-Definition"
+                                                                                                                 or @kind = "Attribute-Definition"
+                                                                                                                 or @kind = "Predicate-Definition"
+                                                                                                                 or @kind = "Structure-Definition"]/Definiens/Label[@idnr = $idnr]]] {
+          $num-previous = `count (preceding-sibling::Item)`;
+          $position = `$num-previous + 1`;
+          $new_spelling = `concat ("CKB", $position)`;
+          <Definition-Reference {
+            @spelling = $new_spelling;
+            @promoted = "promoted";
+            @"number" = "1";
+          }
+        }
+      }
+      when [$idnr = preceding-sibling::Item[@kind = "Definition-Item"]/Block[@kind = "Definitional-Block"]/Item[@kind = "Mode-Definition"]/*/Definiens/Label/@idnr] {
+        for-each [preceding-sibling::Item[@kind = "Definition-Item" and Block[@kind = "Definitional-Block"]/Item[@kind = "Mode-Definition"]/*/Definiens/Label[@idnr = $idnr]]] {
+          $num-previous = `count (preceding-sibling::Item)`;
+          $position = `$num-previous + 1`;
+          $new_spelling = `concat ("CKB", $position)`;
+          <Definition-Reference {
+            @spelling = $new_spelling;
+            @promoted = "promoted";
+            @"number" = "1";
+          }
+        }
+      }
+      otherwise {
+        copy-of `$context`;
+      }
+    }
+  }
+}

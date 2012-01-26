@@ -1,0 +1,45 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+tpl die(#message) {
+  if [@line and @col] {
+    $line = `@line`;
+    $col = `@col`;
+    $final_message = `concat ($message, " (line ", $line, ", column ", $col, ")")`;
+    msg terminate="yes" $final_message;
+  } else {
+    $final_message = `concat ($message, " (unable to determine line and column information)")`;
+    msg terminate="yes" $final_message;
+  }
+}
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    if [@spelling] { @spelling = `@spelling`; }
+    if [@idnr] { @idnr = `@idnr`; }
+    if [@nr] { @nr = `@nr`; }
+    if [@number] { @"number" = `@number`; }
+    if [@articleid] { @articleid = `@articleid`; }
+    if [@kind] { @kind = `@kind`; }
+    apply [*];
+  }
+}
+
+tpl [Text-Proper/Item[@kind="Regular-Statement"]] {
+  <Item {
+    @kind = "Theorem-Item";
+    @line = `@line`;
+    @col = `@col`;
+    apply [Proposition];
+    if [Block[@kind = "Proof"]] {
+      apply [Block[@kind = "Proof"]];
+    }
+    if [Straightforward-Justification] {
+      apply [Straightforward-Justification];
+    }
+  }
+}

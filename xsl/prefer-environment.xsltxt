@@ -1,0 +1,74 @@
+stylesheet 1.0;
+
+output method="xml" indent="yes";
+
+// This stylesheet constructs an environment XML that is intended to
+// override the environment of an "itemized" article.  We supply
+//
+// The intended application is that we want to minimize the result of
+// "itemizing" an article.  To do that, it is smart to first minimize
+// the original article.  Then, that article's environment serves as
+// an initial part of each item.
+
+// A path telling us where to look for the original environment
+#original-environment = { ""; }
+
+// The name of the root element we are looking for
+#root-name = { ""; }
+
+tpl [*] {
+  $element = `local-name ()`;
+  if [*] {
+    <$element {
+      for-each [@*] { copy-of `.`; }
+      apply [*];
+    }
+  } else {
+    <$element {
+      for-each [@*] { copy-of `.`; }
+    }
+  }
+}
+
+tpl [/] {
+  choose {
+    when [$root-name = ""] {
+      msg terminate="yes" "Error: the root-name parameter is empty.";
+    }
+    when [contains ($root-name, " ")] {
+      msg terminate="yes" "Error: the value of the root-name stylesheet parameter contains a space, which is illegal.";
+    }
+    otherwise {
+      <$root-name {
+        if [not(*/@aid)] {
+          msg terminate="yes" "Error: the root element of the current environment file does not have an aid attribute.";
+        }
+        @aid = `*/@aid`;
+        for-each [document ($original-environment, /)] {
+          apply [*] mode="original-root";
+        }
+        apply [*] mode="local-root";
+      }
+    }
+  }
+}
+
+tpl [*] mode="original-root" {
+  for-each [*] {
+    apply [.];
+  }
+}
+
+tpl [*] mode="local-root" {
+  for-each [*] {
+    if [@aid] {
+      $aid = `@aid`;
+      if [starts-with ($aid, "CKB")] {
+        apply [.];
+      }
+    } else {
+      msg terminate="yes" "Error: we found a toplevel element in the fragment environment that lacks an aid attribute.";
+      apply [.];
+    }
+  }
+}

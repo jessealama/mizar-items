@@ -1,0 +1,43 @@
+// constructors.xsl : List constructors appearing in an .atr file
+
+stylesheet 1.0;
+
+output method="text";
+
+// This stylesheet operates on .atr files output by the mizar
+// accommodator. The result is a listing of the constructors in the
+// .atr file, in the format:
+//
+// <article ID>:<kind>:<nr>:<relnr>
+
+tpl [*] {
+  $element = `local-name ()`;
+  if [*] {
+    <$element {
+      for-each [@*] { copy-of `.`; }
+      apply [*];
+    }
+  } else {
+    <$element {
+      for-each [@*] { copy-of `.`; }
+    }
+  }
+}
+
+tpl [/] {
+  apply [Constructors];
+}
+
+tpl [Constructors] {
+  for-each [Constructor] {
+    apply [.]; "\n";
+  }
+}
+
+tpl [Constructor[not(@aid and @kind and @nr and @relnr)]] {
+  msg terminate="yes" "We require that every Constructor item have an aid, kind, nr, and relnr attribute.";
+}
+
+tpl [Constructor[@aid and @kind and @nr]] {
+  `@aid`; ":"; `@kind`; ":"; `@nr`;
+}

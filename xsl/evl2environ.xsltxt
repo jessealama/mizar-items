@@ -1,0 +1,33 @@
+stylesheet 1.0;
+output method=text;
+
+include ../utils/die.xsl;
+
+tpl list(#separ,#elems) {
+ for-each [$elems] {
+  apply[.]; if [not(position()=last())] { copy-of $separ; } }
+}
+
+// Environment
+
+$lcletters= { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters= { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lc(#s) { `translate($s, $ucletters, $lcletters)`; }
+tpl uc(#s) { `translate($s, $lcletters, $ucletters)`; }
+
+tpl [Environ] {
+  "environ"; "\n";
+  apply [*];
+}
+
+tpl [Ident] {
+  `@name`;
+}
+
+tpl [Directive] {
+  $name_lc = lc (#s = `@name`);
+  if [Ident[not(@name = "HIDDEN")]] {
+    $name_lc; " "; list (#separ = ",", #elems = `Ident[not(@name = "HIDDEN")]`); ";"; "\n";
+  }
+}

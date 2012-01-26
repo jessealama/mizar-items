@@ -1,0 +1,124 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+tpl die(#message) {
+  if [@line and @col] {
+    $line = `@line`;
+    $col = `@col`;
+    $final_message = `concat ($message, " (line ", $line, ", column ", $col, ")")`;
+    msg terminate="yes" $final_message;
+  } else {
+    $final_message = `concat ($message, " (unable to determine line and column information)")`;
+    msg terminate="yes" $final_message;
+  }
+}
+
+tpl [*](#toplevel-diffuse-items) {
+  $element = `local-name ()`;
+  <$element {
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    if [@spelling] { @spelling = `@spelling`; }
+    if [@idnr] { @idnr = `@idnr`; }
+    if [@nr] { @nr = `@nr`; }
+    if [@number] { @"number" = `@number`; }
+    if [@articleid] { @articleid = `@articleid`; }
+    if [@reservation-number] { @reservation-number = `@reservation-number`; }
+    if [@loci-number] { @loci-number = `@loci-number`; }
+    if [@kind] { @kind = `@kind`; }
+    apply [*](#toplevel-diffuse-items = $toplevel-diffuse-items);
+  }
+}
+
+tpl emit-needed-toplevel-diffuse-items (#toplevel-diffuse-items, #context) {
+  if [not($toplevel-diffuse-items = "")] {
+    if [starts-with ($toplevel-diffuse-items, ",")] {
+      $after_first_comma = `substring-after ($toplevel-diffuse-items, ",")`;
+      if [contains ($toplevel-diffuse-items, ",")] {
+        $between_first_and_second_commas = `substring-before ($after_first_comma, ",")`;
+        $after_second_comma = `substring-after ($after_first_comma, ",")`;
+        if [$context//Local-Reference[@idnr = $between_first_and_second_commas]] {
+          for-each [$context] {
+            if [preceding::Item[@kind = "Regular-Statement"]/Diffuse-Statement/../Label[@idnr = $between_first_and_second_commas]] {
+              apply [preceding::Item[@kind = "Regular-Statement"]/Diffuse-Statement/../Label[@idnr = $between_first_and_second_commas]/..];
+              if [not($after_second_comma = "")] {
+                emit-needed-toplevel-diffuse-items (#toplevel-diffuse-items = `concat (",", $after_second_comma)`,
+                                                    #context = $context);
+              }
+            } else {
+              $message = `concat ("We earlier came across a piece of toplevel reasoning whose label had the id number ", $between_first_and_second_commas, ", but now we can't find that piece of reasoning any more.  Why not?")`;
+              die (#message = $message);
+            }
+          }
+        } else {
+          if [not($after_second_comma = "")] {
+            emit-needed-toplevel-diffuse-items (#toplevel-diffuse-items = `concat (",", $after_second_comma)`,
+                                                #context = $context);
+          }
+        }
+      } else {
+        $message = `concat ("We cannot decode the string '", $toplevel-diffuse-items, "': there should be at least two commas, but there is only one!")`;
+        die (#message = $message);
+      }
+    } else {
+      $message = `concat ("We cannot decode the string '", $toplevel-diffuse-items, "': it is not empty, and does not begin with a comma!")`;
+      die (#message = $message);
+    }
+  }
+}
+
+tpl [Block[@kind = "Proof"]](#toplevel-diffuse-items) {
+  $block = `.`;
+  <Block {
+    @kind = "Proof";
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    emit-needed-toplevel-diffuse-items (#toplevel-diffuse-items = $toplevel-diffuse-items, #context = `.`);
+    for-each [$block] {
+      apply [*];
+    }
+  }
+}
+
+tpl [Item[@kind = "Scheme-Head"]](#toplevel-diffuse-items) {
+  copy-of `.`;
+  if [following-sibling::*] { // the scheme has some kind of justification
+    emit-needed-toplevel-diffuse-items (#toplevel-diffuse-items = $toplevel-diffuse-items, #context = `following-sibling::*`);
+  }
+}
+
+tpl enumerate-items (#candidates, #bundlenr, #articleid, #toplevel-diffuse-items) {
+  if [$candidates] {
+    $candidate = `$candidates[1]`;
+    $candidate-kind = `$candidate/@kind`;
+    if [$candidate-kind = "Regular-Statement" and $candidate/Diffuse-Statement and $candidate/Label] {
+      $idnr = `$candidate/Label/@idnr`;
+      $token = `concat (",", $idnr, ",")`;
+      enumerate-items (#candidates = `$candidates[position () > 1]`,
+                       #toplevel-diffuse-items = `concat ($toplevel-diffuse-items, $token)`,
+                       #bundlenr = `$bundlenr`,
+                       #articleid = $articleid);
+    } else {
+      apply [$candidate](#bundlenr = $bundlenr, #articleid = $articleid, #toplevel-diffuse-items = $toplevel-diffuse-items);
+      for-each [$candidate] {
+        if [position() != last()] {
+          "\n";
+        }
+      }
+      enumerate-items (#candidates = `$candidates[position () > 1]`,
+                       #bundlenr = `$bundlenr + 1`,
+                       #articleid = $articleid,
+                       #toplevel-diffuse-items = $toplevel-diffuse-items);
+    }
+  }
+}
+
+tpl [Text-Proper] {
+  <Text-Proper {
+    @articleid = `@articleid`;
+    enumerate-items (#candidates = `Item`,
+                     #bundlenr = "1",
+                     #articleid = `@articleid`);
+  }
+}

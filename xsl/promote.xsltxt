@@ -1,0 +1,226 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+// This stylesheet operates on .atr files output by the mizar
+// accommodator. The result is another .atr file. There is one
+// parameter:
+//
+// * constructors
+//
+// which should be a comma-delimited list (starting and ending with a
+// comma, if not empty).  The format of each constructor should be in
+// the mizar-items notation for constructors:
+//
+// <article-ID>:<kind>constructor:<nr>
+//
+// Any constructor that matches this pattern in the .atr will be
+// "promoted" in the sense that its arguments (if there are any) will
+// be assumed to take terms of type 'set', and the "result value", if
+// any, will also be promoted to the type 'set'. (There is an
+// exception to this rule: structure constructors will be promoted to
+// have the "result type" of a 'mere structure', and not the type
+// 'set'.)
+
+// The constructors for which we will hunt.
+#constructors = { ""; }
+
+tpl [*] {
+  $element = `local-name ()`;
+  if [*] {
+    <$element {
+      for-each [@*] { copy-of `.`; }
+      apply [*];
+    }
+  } else {
+    <$element {
+      for-each [@*] { copy-of `.`; }
+    }
+  }
+}
+
+tpl [/] {
+  apply [Constructors];
+}
+
+tpl escape-backslash (#str) {
+  if [contains ($str, '/')] {
+    $before = `substring-before ($str, '/')`;
+    $after = `substring-after ($str, '/')`;
+    $tail = escape-backslash (#str = $after);
+    `concat ($before, "&amp;#47;", $tail)`;
+  } else {
+    $str;
+  }
+}
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+
+tpl found (#kind, #nr, #aid) {
+  $kind-lc = lowercase (#string = $kind);
+  $aid-lc = lowercase (#string = $aid);
+  $token = `concat ($aid-lc, ":", $kind-lc, "constructor", ":", $nr)`;
+  if [contains ($constructors, $token)] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl [Constructors] {
+  <Constructors {
+    @aid = `@aid`;
+    @mizfiles = escape-backslash (#str = `@mizfiles`);
+    apply [Constructor];
+  }
+}
+
+// Promote a bundle of argument types to a bundle of 'set' types
+tpl [ArgTypes] mode="promote" {
+  <ArgTypes {
+    for-each [*] {
+      apply [.] mode="promote";
+    }
+  }
+}
+
+// Promote a type to the topmost type 'set'
+tpl [Typ] mode="promote" {
+  <Typ {
+    @kind = "M";
+    @nr = "1";
+    <Cluster;
+  }
+}
+
+tpl [Constructor[@kind = "M" and not(@promoted = "yes")]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "M", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      // apply [Properties]
+      apply [ArgTypes] mode="promote"; // argument types
+      apply [Typ] mode="promote";
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "L" and not(Typ)]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "G", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [ArgTypes] mode="promote"; // argument types
+      apply [Fields]; // nothing to do here
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "L" and Typ]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "G", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [ArgTypes] mode="promote"; // argument types
+      apply [Typ]; // not sure how to promote this
+      apply [Fields]; // nothing to do here
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "G" and not(@promoted = "yes")]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "G", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [ArgTypes] mode="promote"; // argument types
+      // result type: "mere structure".  We might also experiment with making the return type 'set'.  But this might screw up too much.
+      <Typ {
+        @kind = "G";
+        @nr = "1";
+        <Cluster;
+      }
+      apply [Fields]; // nothing to do here
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "U" and not(@promoted = "yes")]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "U", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [ArgTypes] mode="promote"; // argument types
+      apply [Typ] mode="promote"; // result type
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "V" and not(@promoted = "yes")]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "V", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [ArgTypes] mode="promote"; // argument types
+      apply [Typ] mode="promote"; // result type (?)
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "R" and not(@promoted = "yes")]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "R", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [Properties]; // preserve properties
+      apply [ArgTypes] mode="promote"; // argument types
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}
+
+tpl [Constructor[@kind = "K" and not(@promoted = "yes")]] {
+  <Constructor {
+    for-each [@*] { copy-of `.`; }
+    $found = found (#kind = "K", #nr = `@nr`, #aid = `@aid`);
+    if [$found = "1"] {
+      @promoted = "yes";
+      apply [Properties]; // preseve properties
+      apply [ArgTypes] mode="promote"; // argument types
+      apply [Typ] mode="promote"; // result type
+    } else {
+      @promoted = "no";
+      apply [*];
+    }
+  }
+}

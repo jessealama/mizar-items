@@ -1,0 +1,122 @@
+stylesheet 1.0;
+
+output method=xml indent="yes";
+
+// include ../utils/die.xsl;
+// include ../utils/tokens.xsl;
+
+//////////////////////////////////////////////////////////////////////
+// Resolving article-local references
+//////////////////////////////////////////////////////////////////////
+
+// Resolving scheme references
+
+tpl [Scheme-Justification[@nr = "0" and not(@idnr)]] {
+  die (#message = "We found an article-local Scheme-Justification that lacks an idnr attribute!");
+}
+
+tpl [Scheme-Justification[@nr = "0" and not(@idnr = ancestor::Text-Proper/Item[parent::Text-Proper and @kind = "Scheme-Block-Item"]/Block[@kind = "Scheme-Block"]/Item[@kind = "Scheme-Head"]/Scheme/@idnr)]] {
+  die (#message = "Unable to resolve a reference to an article-local scheme because we are unable to find a previous scheme under the same name");
+}
+
+tpl [Scheme-Justification[@nr = "0" and @idnr = ancestor::Text-Proper/Item[parent::Text-Proper and @kind = "Scheme-Block-Item"]/Block[@kind = "Scheme-Block"]/Item[@kind = "Scheme-Head"]/Scheme/@idnr]] {
+  $context = `.`;
+  $idnr = `@idnr`;
+  for-each [preceding::Item[parent::Text-Proper and @kind = "Scheme-Block-Item" and descendant::Scheme[@idnr = $idnr]]] {
+    $num-previous = count-preceding-toplevel-items ();
+    $position = `$num-previous + 1`;
+    $spelling = `concat ("CKB", $position)`;
+    <Scheme-Justification {
+      @spelling = $spelling;
+      @idnr = "1";
+      @nr = "1"; // might not be right
+      @promoted = "promoted";
+      apply [`$context/*`];
+    }
+  }
+}
+
+// Non-scheme references
+
+// By default, we don't know how to resolve; just copy.
+tpl [Local-Reference] {
+  copy-of `.`;
+}
+
+// look for a previous unexported-but-exportable toplevel theorem (lemma)
+tpl [Local-Reference[@idnr = preceding::Item[parent::Text-Proper
+                                             and @kind = "Regular-Statement"
+                                             and @shape = "Compact-Statement"
+                                             and not(Proposition[descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper
+                                                                                                                 and @kind = "Constant-Definition"]/Variable/@idnr
+                                                     or descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper
+                                                                                                        and @kind = "Type-Changing-Statement"]/Equality/Variable/@idnr
+                                                     or descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper
+                                                                                                        and @kind = "Type-Changing-Statement"]/Variable/@idnr
+                                                     or descendant::Private-Predicate-Formula])]/Proposition/Label/@idnr]] {
+  $idnr = `@idnr`;
+  for-each [preceding::Item[parent::Text-Proper
+                            and @kind = "Regular-Statement"
+                            and @shape = "Compact-Statement"
+                            and not(Proposition[descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper
+                                                                                                and @kind = "Constant-Definition"]/Variable/@idnr
+                                                or descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper
+                                                                                                   and @kind = "Type-Changing-Statement"]/Equality/Variable/@idnr
+                                                or descendant::Simple-Term/@idnr = preceding::Item[parent::Text-Proper
+                                                                                                   and @kind = "Type-Changing-Statement"]/Variable/@idnr
+                                                or descendant::Private-Predicate-Formula])]/Proposition/Label[@idnr = $idnr]] {
+    $num-previous = count-preceding-toplevel-items ();
+    $position = `$num-previous + 1`;
+    $new_spelling = `concat ("CKB", $position)`;
+    <Theorem-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
+
+// look for a previous exported toplevel theorem
+tpl [Local-Reference[@idnr = preceding::Item[parent::Text-Proper and @kind = "Theorem-Item"]/Proposition/Label/@idnr]] {
+  $idnr = `@idnr`;
+  for-each [(preceding::Item[@kind = "Theorem-Item"]/Proposition/Label[@idnr = $idnr]/../..)[position() = last()]] {
+    $num-previous = count-preceding-toplevel-items ();
+    $position = `$num-previous + 1`;
+    $new_spelling = `concat ("CKB", $position)`;
+    <Theorem-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
+
+// look for a previous non-mode definition
+tpl [Local-Reference[@idnr = preceding::Item[parent::Text-Proper and @kind = "Definition-Item"]/Block[@kind = "Definitional-Block"]/Item[@kind = "Functor-Definition" or @kind = "Attribute-Definition" or @kind = "Predicate-Definition" or @kind = "Structure-Definition"]/Definiens/Label/@idnr]] {
+  $idnr = `@idnr`;
+  for-each [preceding::Item[parent::Text-Proper and @kind = "Definition-Item"]/Block[@kind = "Definitional-Block"]/Item[@kind = "Functor-Definition" or @kind = "Attribute-Definition" or @kind = "Predicate-Definition" or @kind = "Structure-Definition"]/Definiens/Label[@idnr = $idnr]] {
+    $num-previous = count-preceding-toplevel-items ();
+    $position = `$num-previous + 1`;
+    $new_spelling = `concat ("CKB", $position)`;
+    <Definition-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
+
+// look for a previous mode definition
+tpl [Local-Reference[@idnr = preceding::Item[parent::Text-Proper and @kind = "Definition-Item"]/Block[@kind = "Definitional-Block"]/Item[@kind = "Mode-Definition"]/*/Definiens/Label/@idnr]] {
+  $idnr = `@idnr`;
+  for-each [(preceding::Item[@kind = "Definition-Item"]/Block[@kind = "Definitional-Block"]/Item[@kind = "Mode-Definition"]/*/Definiens/Label[@idnr = $idnr]/../../../../..)[position() = last()]] {
+    $num-previous = count-preceding-toplevel-items ();
+    $position = `$num-previous + 1`;
+    $new_spelling = `concat ("CKB", $position)`;
+    <Definition-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
