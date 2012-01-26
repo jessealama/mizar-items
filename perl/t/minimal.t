@@ -1,4 +1,5 @@
-use Test::More tests => 10;
+use Test::More qw(no_plan);
+use strict;
 
 # Try to load our module
 BEGIN {
