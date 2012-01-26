@@ -17,11 +17,13 @@ use File::Basename qw(basename dirname);
 #  use Perl6::Slurp;
 #  use Perl6::Say;
 
-our @EXPORT_OK = qw(verify ensure_sensible_mizar_environment);
+our @EXPORT_OK = qw(accom verifier ensure_sensible_mizar_environment);
 
 # Module implementation here
 
-sub verify {
+sub run_mizar_tool {
+
+    my $tool = shift;
     my $article_name = shift;
     my $parameters_ref = shift;
 
@@ -31,7 +33,7 @@ sub verify {
     my $article_basename = basename ($article_name, '.miz');
     my $article_err = "${article_dirname}/${article_basename}.err";
 
-    my @verifier_call = ('verifier');
+    my @tool_call = ($tool);
 
     my $long_lines = $parameters{'long-lines'};
     my $checker_only = $parameters{'checker-only'};
@@ -39,24 +41,24 @@ sub verify {
     my $stop_on_error = $parameters{'stop-on-error'};
 
     if (defined $long_lines && $long_lines) {
-	push (@verifier_call, '-l');
+	push (@tool_call, '-l');
     }
 
     if (defined $checker_only && $checker_only) {
-	push (@verifier_call, '-c');
+	push (@tool_call, '-c');
     }
 
     if (defined $quiet && $quiet) {
-	push (@verifier_call, '-q');
+	push (@tool_call, '-q');
     }
 
     if (defined $stop_on_error && $stop_on_error) {
-	push (@verifier_call, '-s');
+	push (@tool_call, '-s');
     }
 
-    push (@verifier_call, $article_name);
+    push (@tool_call, $article_name);
 
-    my $harness = start (\@verifier_call,
+    my $harness = start (\@tool_call,
 			 '>', '/dev/null',
 			 '2>', '/dev/null');
 
@@ -65,6 +67,29 @@ sub verify {
 
     ($exit_code == 0) && (-r $article_err) && (-z $article_err) ? return 1 : return 0;
 
+}
+
+sub accom {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    if (defined $parameters_ref) {
+	return (run_mizar_tool ('accom', $article_name, $parameters_ref));
+    } else {
+	return (run_mizar_tool ('accom', $article_name));
+    }
+}
+
+sub verifier {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    if (not defined $article_name) {
+	croak ('Error: bogus call to verifier.');
+    }
+    if (defined $parameters_ref) {
+	return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
+    } else {
+	return (run_mizar_tool ('verifier', $article_name));
+    }
 }
 
 my @mml_lar = ();
