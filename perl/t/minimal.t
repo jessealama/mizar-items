@@ -2,7 +2,7 @@ use Test::More tests => 10;
 
 # Try to load our module
 BEGIN {
-    use_ok( 'Mizar')
+    use_ok( 'Mizar', qw(accom verifier))
 	or BAIL_OUT ('Unable to load the Mizar module; no point in continuing.');
 }
 
