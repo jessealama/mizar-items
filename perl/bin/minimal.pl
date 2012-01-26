@@ -23,7 +23,7 @@ my $man = 0;
 my $help = 0;
 my $confirm_only = 0;
 my $checker_only = 0;
-my $script_home = '/Users/alama/sources/mizar/xsl4mizar/items';
+my $script_home = "$FindBin::Bin";
 my $fast_theorems = 0;
 my $fast_schemes = 0;
 
