@@ -82,16 +82,18 @@ my $xml_parser = XML::LibXML->new (suppress_errors => 1,
 				   suppress_warnings => 1);
 my $xml_doc = undef;
 
-if (! defined eval { $xml_doc = $xml_parser->parse_file ($article_eno) } ) {
-    croak ('Error: the .eno file of ', $article_basename, ' is not well-formed XML.');
+ensure_readable_file ($article_xml)
+    or croak ('Error: the .xml file for ', $article_basename, ' does not exist.');
+
+if (! defined eval { $xml_doc = $xml_parser->parse_file ($article_xml) } ) {
+    croak ('Error: the .xml file for ', $article_basename, ' is not well-formed XML.');
 }
 
-my $aid;
-if ($xml_doc->exists ('/Notations[@aid]')) {
-  $aid = $xml_doc->findvalue ('/Notations/@aid')
+my $aid = undef;
+if ($xml_doc->exists ('/Article[@aid]')) {
+    $aid = $xml_doc->findvalue ('/Article[@aid]');
 } else {
-  print 'Error: the patterns file at ', $article_eno, ' does not have a root Notations element with an aid attribute.', "\n";
-  exit 1;
+    croak ('Error: ', $article_xml, ' does not have a root Article element with an aid attribute.');
 }
 
 sub write_element_table {
