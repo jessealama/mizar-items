@@ -15,7 +15,7 @@ use Carp qw(croak);
 use IPC::Cmd qw(can_run);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
-use Utils qw(ensure_directory ensure_readable_file extension);
+use Utils qw(ensure_directory ensure_readable_file extension strip_extension);
 use Mizar;
 use Article;
 use LocalDatabase;
@@ -249,53 +249,18 @@ foreach my $i (1 .. scalar @fragments) {
 
   # Extend the evl of the initial article by inspecting the contents
   # of the prel subdirectory
-  opendir (PREL_DIR, $target_prel_subdir)
-    or croak ('Error: unable to open the directory at ', $target_prel_subdir, '.', "\n");
-  my @prel_files = readdir (PREL_DIR);
-  closedir PREL_DIR
-    or croak ('Error: unable to close the directory filehandle for ', $target_prel_subdir, '.', "\n");
-
-  my @new_notations = ();
-  my @new_registrations = ();
-  my @new_definitions = ();
-  my @new_theorems = ();
-  my @new_schemes = ();
-  my @new_constructors = ();
-
-  foreach my $prel_file (@prel_files) {
-    my $prel_path = "${target_prel_subdir}/${prel_file}";
-    if (-f $prel_path) {
-      my $fragment_number = fragment_number ($prel_file);
-      my $fragment_article_name_uc = 'CKB' . $fragment_number;
-      if ($prel_file =~ / [.]dno \z /x) {
-	push (@new_notations, $fragment_article_name_uc);
-      }
-      if ($prel_file =~ / [.]drd \z /x) {
-	push (@new_registrations, $fragment_article_name_uc);
-      }
-      if ($prel_file =~ / [.]dcl \z /x) {
-	push (@new_registrations, $fragment_article_name_uc)
-      }
-      if ($prel_file =~ / [.]eid \z /x) {
-	push (@new_registrations, $fragment_article_name_uc)
-      }
-      if ($prel_file =~ / [.]did \z /x) {
-	push (@new_registrations, $fragment_article_name_uc)
-      }
-      if ($prel_file =~ / [.]sch \z /x) {
-	push (@new_schemes, $fragment_article_name_uc)
-      }
-      if ($prel_file =~ / [.]dco \z /x) {
-	push (@new_constructors, $fragment_article_name_uc)
-      }
-      if ($prel_file =~ / [.]def \z /x) {
-	push (@new_definitions, $fragment_article_name_uc)
-      }
-      if ($prel_file =~ / [.]the \z /x) {
-	push (@new_theorems, $fragment_article_name_uc)
-      }
-    }
-  }
+  my @new_notations
+      = map { uc strip_extension ($_) } $local_db->notations_in_prel ();
+  my @new_registrations
+      = map { uc strip_extension ($_) } $local_db->registrations_in_prel ();
+  my @new_definitions
+      = map { uc strip_extension ($_) } $local_db->definitions_in_prel ();
+  my @new_theorems
+      = map { uc strip_extension ($_) } $local_db->theorems_in_prel ();
+  my @new_schemes
+      = map { uc strip_extension ($_) } $local_db->schemes_in_prel ();
+  my @new_constructors =
+      map { uc strip_extension ($_) } $local_db->constructors_in_prel ();
 
   apply_stylesheet ($extend_evl_stylesheet,
 		    $article_evl_in_target_dir,
@@ -317,13 +282,16 @@ foreach my $i (1 .. scalar @fragments) {
 		    { 'evl' => $fragment_evl })
       or croak ('Error: xsltproc did not exit cleanly when applying the WSM stylesheet to ', $fragment_path, '.', "\n");
 
+  my $fragment_article = Article->new (path => $fragment_miz)
+      or croak ('Error: unable to create a new Article object for ', $fragment_miz, ':', $!);
+
   # Now export and transfer the fragment
 
   if (run_mizar_tool ('accom', $fragment_miz)) {
     if (run_mizar_tool ('verifier', $fragment_miz)) {
       # Save a copy of the XML -- exporter can modify it!
-      copy ($fragment_xml, $fragment_xml_orig)
-	or croak ('Error: unable to save a copy of ', $fragment_xml, ' to ', $fragment_xml_orig, '.', "\n");
+	copy ($fragment_xml, $fragment_xml_orig)
+	or croak ('Error: unable to save a copy of ', $fragment_xml, ' to ', $fragment_xml_orig, ': ', $!);
       if (run_mizar_tool ('exporter', $fragment_miz)) {
 	copy ($fragment_xml, $fragment_xml_exported)
 	  or croak ('Error: unable to save a copy of the exported XML ', $fragment_xml, ' to ', $fragment_xml_exported, '.', "\n");
