@@ -12,7 +12,7 @@ use IPC::Cmd qw(can_run);
 use Carp qw(croak);
 use File::Basename qw(basename dirname);
 
-use Utils qw(ensure_readable_file);
+use Utils qw(ensure_readable_file ensure_directory);
 
 # Other recommended modules (uncomment to use):
 #  use IO::Prompt;
