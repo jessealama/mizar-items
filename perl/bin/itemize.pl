@@ -13,22 +13,7 @@ use File::Copy qw(copy move);
 use Carp qw(croak);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
-
 use Utils qw(ensure_directory ensure_readable_file);
-
-sub tmpfile_path {
-  # File::Temp's tempfile function returns a list of two values.  We
-  # want the second (the path of the temprary file) and don't care
-  # about the first (a filehandle for the temporary file).  See
-  # http://search.cpan.org/~tjenness/File-Temp-0.22/Temp.pm for more
-  (undef, my $path) = eval { tempfile (); };
-  my $tempfile_err = $@;
-  if (defined $path) {
-    return $path;
-  } else {
-    croak ('Error: we could not create a temporary file!  The error message was:', "\n", "\n", '  ', $tempfile_err);
-  }
-}
 
 my $paranoid = 0;
 my $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
@@ -560,23 +545,9 @@ foreach my $fragment (@fragment_files) {
 
   ensure_readable_file ($fragment_xml);
 
-  my $xsltproc_errors = tmpfile_path ();
-  my $xsltproc_output = tmpfile_path ();
-  my $xsltproc_status = system ("xsltproc $conditions_and_properties_stylesheet $fragment_xml > $xsltproc_output 2> $xsltproc_errors");
-  my $xsltproc_exit_code = $xsltproc_status >> 8;
-  if ($xsltproc_exit_code != 0) {
-    if (-e $xsltproc_errors && -z $xsltproc_errors) {
-      my @xsltproc_errors = `cat $xsltproc_errors`;
-      croak ('Error: xsltproc did not exit cleanly when applying the correctness-conditions-and-properties stylesheet to ', $fragment_xml, '.  The error output was:', "\n", @xsltproc_errors);
-    } else {
-      croak ('Error: xsltproc did not exit cleanly when applying the correctness-conditions-and-properties stylesheet to ', $fragment_xml, '.', "\n");
-    }
-  }
-
-  ensure_readable_file ($xsltproc_output);
-
-  my @correctness_conditions_and_properties = `cat $xsltproc_output`;
-  chomp @correctness_conditions_and_properties;
+  my @correctness_conditions_and_properties
+      = apply_stylesheet ($conditions_and_properties_stylesheet,
+			  $fragment_xml);
 
   if ($debug) {
     print {*STDERR} 'Fragment ', $fragment_basename, ' contains ', scalar @correctness_conditions_and_properties, ' correctness conditions and properties:', "\n", join ("\n", @correctness_conditions_and_properties), "\n";
