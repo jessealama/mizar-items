@@ -25,8 +25,6 @@ our @EXPORT_OK = qw(accom
 		    ensure_sensible_mizar_environment
 		    path_for_stylesheet);
 
-# Module implementation here
-
 sub run_mizar_tool {
 
     my $tool = shift;
