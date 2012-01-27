@@ -1104,7 +1104,7 @@ sub files {
     my $self = shift;
 
     my $article_dir = dirname ($self->get_path ());
-    my $article_base = basename ($self->get_path ());
+    my $article_base = basename ($self->get_path (), '.miz');
 
     my @files;
 
@@ -1142,6 +1142,7 @@ sub copy {
     }
 
     my @files = $self->files ();
+
     foreach my $file (@files) {
 	my $current_file_path = "${current_dir}/${file}";
 	File::Copy::copy ($current_file_path,
