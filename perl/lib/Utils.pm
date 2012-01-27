@@ -3,6 +3,7 @@ package Utils;
 use base qw(Exporter);
 use warnings;
 use strict;
+use Regexp::DefaultFlags;
 
 our @EXPORT_OK = qw(ensure_readable_file
 		    ensure_directory
