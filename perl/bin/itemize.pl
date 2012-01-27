@@ -17,6 +17,7 @@ use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 use Utils qw(ensure_directory ensure_readable_file extension);
 use Mizar;
 use Article;
+use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
 
 my $paranoid = 0;
@@ -79,34 +80,21 @@ my $conditions_and_properties_stylesheet = Mizar::path_for_stylesheet ('conditio
 my $trim_properties_and_conditions_stylesheet = Mizar::path_for_stylesheet ('trim-properties-and-conditions');
 
 if (defined $target_directory) {
-  if (-e $target_directory) {
-    croak ('Error: the supplied target directory, ', $target_directory, ' already exists.  Please move it out of the way.', "\n");
-  } else {
-    mkdir $target_directory
-      or croak ('Error: unable to make the directory \'', $target_directory, '\'.', "\n");
-  }
+    if (-e $target_directory) {
+	croak ('Error: the supplied target directory, ', $target_directory, ' already exists.  Please move it out of the way.', "\n");
+    }
 } else {
-  my $cwd = cwd ();
-  $target_directory = "${cwd}/${article_basename}";
-  if (-e $target_directory) {
-    croak ('Error: since the target-directory option was not used, we are to save our wok in \'', $article_basename, '\'; but there is already a directory by that name in the current working directory.  Please move it out of the way.', "\n");
-  }
-  mkdir $target_directory
-    or croak ('Error: unable to make the directory \'', $article_basename, '\' in the current working directory.', "\n");
+    my $cwd = cwd ();
+    $target_directory = "${cwd}/${article_basename}";
+    if (-e $target_directory) {
+	croak ('Error: since the target-directory option was not used, we are to save our wok in \'', $article_basename, '\'; but there is already a directory by that name in the current working directory.  Please move it out of the way.', "\n");
+    }
 }
 
 # Populate the directory with what we'll eventually need
 
-foreach my $subdir_basename ('dict', 'prel', 'text') {
-  my $subdir = "${target_directory}/${subdir_basename}";
-  if (-e $subdir) {
-    croak ('Error: there is already a \'', $subdir_basename, '\' subdirectory of the target directory ', $target_directory, '.', "\n");
-  }
-  mkdir $subdir
-    or croak ('Error: unable to make the \'', $subdir_basename, '\' subdirectory of ', $target_directory, '.', "\n");
-}
+my $local_db = LocalDatabase->new (location => $target_directory);
 
-my $target_dict_subdir = "${target_directory}/dict";
 my $target_text_subdir = "${target_directory}/text";
 my $target_prel_subdir = "${target_directory}/prel";
 
