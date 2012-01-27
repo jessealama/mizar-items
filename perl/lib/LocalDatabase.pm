@@ -2,6 +2,7 @@ package LocalDatabase;
 
 use Moose;
 use File::Basename qw(basename dirname);
+use File::Spec;
 use Carp qw(croak);
 
 # Our stuff
@@ -17,7 +18,7 @@ sub BUILD {
 
     my $path = $self->get_location ();
 
-    my $path_dirname = dirname ($path);
+    my $path_dirname = File::Spec->catdir ($path);
 
     if ( ensure_directory ($path)) {
 
@@ -49,6 +50,30 @@ sub BUILD {
 		or croak ('Error: unable to make the \'', $subdir_name, '\' subdirectory of ', $path, '.', "\n");
 	}
     }
+}
+
+sub get_text_subdir {
+    my $self = shift;
+
+    my $loc = $self->get_location ();
+    my $loc_dir = File::Spec->catdir ($loc);
+    return "${loc_dir}/text";
+}
+
+sub get_prel_subdir {
+    my $self = shift;
+
+    my $loc = $self->get_location ();
+    my $loc_dir = File::Spec->catdir ($loc);
+    return "${loc_dir}/prel";
+}
+
+sub get_dict_subdir {
+    my $self = shift;
+
+    my $loc = $self->get_location ();
+    my $loc_dir = File::Spec->catdir ($loc);
+    return "${loc_dir}/dict";
 }
 
 1;
