@@ -1,1 +1,0 @@
-perl/bin/constr_reduce.pl

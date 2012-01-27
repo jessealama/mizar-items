@@ -1,1 +1,0 @@
-perl/bin/minimize-itemized-article.pl

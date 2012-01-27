@@ -1,1 +1,0 @@
-perl/bin/table-info.pl

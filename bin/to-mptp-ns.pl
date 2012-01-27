@@ -1,1 +1,0 @@
-perl/bin/to-mptp-ns.pl

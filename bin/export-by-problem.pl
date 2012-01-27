@@ -1,1 +1,0 @@
-perl/bin/export-by-problem.pl
