@@ -1155,7 +1155,7 @@ sub copy {
 
     my $new_path_miz = "${new_path_dir}/${new_path_basename}.miz";
 
-    my $new_article = $self->new (path => $new_path_miz);
+    my $new_article = Article->new (path => $new_path_miz);
 
     return $new_article;
 
