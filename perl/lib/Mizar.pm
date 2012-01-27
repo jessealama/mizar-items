@@ -25,6 +25,25 @@ our @EXPORT_OK = qw(accom
 		    ensure_sensible_mizar_environment
 		    path_for_stylesheet);
 
+my %default_tool_parameters = (
+    'long-lines' => 1,
+    'quiet' => 1,
+);
+
+sub set_default_tool_parameter {
+    my $parameter = shift;
+    my $value = shift;
+    if (defined $parameter) {
+	if (defined $value) {
+	    $default_tool_parameters{$parameter} = $value;
+	} else {
+	    croak ('Error: please supply a value for the parameter ', $parameter, '.');
+	}
+    } else {
+	croak ('Error: please supply a parameter.');
+    }
+}
+
 sub run_mizar_tool {
 
     my $tool = shift;
@@ -33,31 +52,45 @@ sub run_mizar_tool {
 
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
+    # Merge the supplied parameters with the default parameters.
+    # Prefer the parameters that were given as part of the invovation.
+
+    my %full_parameters = ();
+    foreach my $param (keys %default_tool_parameters) {
+	$full_parameters{$param} = $default_tool_parameters{$param};
+    }
+    foreach my $param (keys %parameters) {
+	$full_parameters{$param} = $parameters{$param};
+    }
+
     my $article_dirname = dirname ($article_name);
     my $article_basename = basename ($article_name, '.miz');
     my $article_err = "${article_dirname}/${article_basename}.err";
 
     my @tool_call = ($tool);
 
-    my $long_lines = $parameters{'long-lines'};
-    my $checker_only = $parameters{'checker-only'};
-    my $quiet = $parameters{'quiet'};
-    my $stop_on_error = $parameters{'stop-on-error'};
-
-    if (defined $long_lines && $long_lines) {
-	push (@tool_call, '-l');
-    }
-
-    if (defined $checker_only && $checker_only) {
-	push (@tool_call, '-c');
-    }
-
-    if (defined $quiet && $quiet) {
-	push (@tool_call, '-q');
-    }
-
-    if (defined $stop_on_error && $stop_on_error) {
-	push (@tool_call, '-s');
+    # Interpret the parameters, warning if we encounter one we don't
+    # know how to handle.
+    foreach my $param (keys %full_parameters) {
+	if ($param eq 'long-lines') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-l');
+	    }
+	} elsif ($param eq 'checker-only') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-c');
+	    }
+	} elsif ($param eq 'quiet') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-q');
+	    }
+	} elsif ($param eq 'stop-on-error') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-s');
+	    }
+	} else {
+	    carp ('Warning: unknown flag ', $param, '.');
+	}
     }
 
     push (@tool_call, $article_name);
