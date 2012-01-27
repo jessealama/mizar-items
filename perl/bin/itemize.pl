@@ -100,12 +100,7 @@ my $target_prel_subdir = $local_db->get_prel_subdir ();
 
 # Copy the article miz to the new subdirectory
 
-my $article_miz_in_target_dir = "${target_directory}/${article_basename}.miz";
-my $article_miz_orig_in_target_dir = "${target_directory}/${article_basename}.miz.orig";
-my $article_err_in_target_dir = "${target_directory}/${article_basename}.err";
-
-my $article_in_target_dir = $article->copy ($article_miz_in_target_dir);
-# my $article_orig_in_target_dir = $article->copy ($article_miz_orig_in_target_dir);
+my $article_in_target_dir = $article->copy ($target_directory);
 
 # Transform the new miz
 
