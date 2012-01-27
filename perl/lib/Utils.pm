@@ -4,7 +4,10 @@ use base qw(Exporter);
 use warnings;
 use strict;
 
-our @EXPORT_OK = qw(ensure_readable_file ensure_directory ensure_executable);
+our @EXPORT_OK = qw(ensure_readable_file
+		    ensure_directory
+		    ensure_executable
+	            write_string_to_file);
 
 sub ensure_readable_file {
   my $file = shift;
