@@ -8,6 +8,7 @@ use version; our $VERSION = qv('0.0.3');
 
 use base qw(Exporter);
 use IPC::Run qw(start);
+use IPC::Cmd qw(can_run);
 use Carp qw(croak);
 use File::Basename qw(basename dirname);
 
@@ -158,21 +159,15 @@ my @mml_lar = ();
 
 my $mizfiles;
 
-sub which_chomp {
-    my $thing = shift;
-    my $which = `which $thing`;
-    chomp $which;
-    return $which;
-}
-
-# mizar tools
-my %mizar_tool_path
-    = ('makeenv' => which_chomp ('makeenv'),
-       'accom' => which_chomp ('accom'),
-       'verifier' => which_chomp ('verifier'),
-       'dellink' => which_chomp ('dellink'),
-       'JA1' => which_chomp ('JA1'));
-my @mizar_tools = keys %mizar_tool_path;
+my @mizar_tools = ('verifier',
+		   'accom',
+		   'makeenv',
+		   'exporter',
+		   'transfer',
+		   'msmprocessor',
+		   'wsmparser',
+		   'msplit',
+		   'mglue');
 
 sub ensure_sensible_mizar_environment {
   my $mizfiles = $ENV{'MIZFILES'};
