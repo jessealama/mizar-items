@@ -1135,10 +1135,6 @@ sub copy {
 
     my $current_path = $self->get_path ();
     my $current_dir = dirname ($current_path);
-
-    # File::Copy::copy ($current_path, $new_path)
-    # 	or croak ('Error: unable to copy ', $current_path, ' to ', $new_path, '.');
-
     my $new_path_dir = dirname ($new_path);
 
     if (! ensure_directory ($new_path_dir)) {
