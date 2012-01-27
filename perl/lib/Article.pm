@@ -1161,4 +1161,102 @@ sub copy {
 
 }
 
+sub msmify {
+    my $self = shift;
+
+    $self->accom ()
+	or croak ('Error: unable to accom ', $self->name (), '.');
+    $self->wsmparser ()
+	or croak ('Error: msmprocessor failed on ', $self->name (), '.');
+    $self->msmprocessor ()
+	or croak ('Error: msmprocessor failed on ', $self->name (), '.');
+    $self->msplit ()
+	or croak ('Error: msplit failed on ', $self->name (), '.');
+
+    my $msm_path = $self->file_with_extension ('msm');
+    my $tpr_path = $self->file_with_extension ('tpr');
+
+    File::Copy::copy ($msm_path, $tpr_path)
+	  or croak ('Error: we are unable to copy ', $msm_path, ' to ', $tpr_path, ': ', $!);
+
+    $self->mglue ()
+	or croak ('Error: mglue failed on ', $self->name (), '.');
+    $self->wsmparser ()
+	or croak ('Error: wsmparser failed on the WSMified ', $self->name (), '.');
+
+    return $self;
+
+}
+
+sub evl_nodes_with_name {
+    my $self = shift;
+    my $name = shift;
+
+    my $evl = $self->file_with_extension ('evl');
+
+    if (ensure_readable_file ($evl)) {
+	my $evl_doc = eval { $xml_parser->parse_file ($evl) };
+	if (defined $evl_doc) {
+	    my $xpath = 'Environ/Directive[@name = "' . $name . '"]/Ident[@name]';
+	    my @nodes
+		= $evl_doc->findnodes ($xpath);
+	    if (wantarray) {
+		return @nodes;
+	    } else {
+		return join (' ', @nodes);
+	    }
+	} else {
+	    croak ('Error: the .evl file for ', $self->name, ' is not a valid XML file.');
+	}
+    } else {
+	croak ('Error: the .evl file for ', $self->name(), ' does not exist (or is unreadable).');
+    }
+
+}
+
+sub evl_idents_under_name {
+    my $self = shift;
+    my $name = shift;
+
+    my @nodes = $self->evl_nodes_with_name ($name);
+    my @names = map { $_->getAttribute ('name') } @nodes;
+
+    if (wantarray) {
+	return @names;
+    } else {
+	return join (' ', @names);
+    }
+
+}
+
+sub notations {
+    my $self = shift;
+    return $self->evl_idents_under_name ('Notations');
+}
+
+sub registrations {
+    my $self = shift;
+    return $self->evl_idents_under_name ('Registrations');
+}
+
+sub definitions {
+    my $self = shift;
+    return $self->evl_idents_under_name ('Definitions');
+}
+
+sub theorems {
+    my $self = shift;
+    return $self->evl_idents_under_name ('Theorems');
+}
+
+sub schemes {
+    my $self = shift;
+    return $self->evl_idents_under_name ('Schemes');
+}
+
+sub constructors {
+    my $self = shift;
+    return $self->evl_idents_under_name ('Constructors');
+}
+
 1;
