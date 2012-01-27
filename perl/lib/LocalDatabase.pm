@@ -22,9 +22,6 @@ sub BUILD {
 
     if ( ensure_directory ($path)) {
 
-	# DEBUG
-	warn 'Directory ', $path, ' already exists; ensuring needed subdirectories exist...';
-
 	# Make sure that the required subdirectories exist
 	foreach my $dir ('dict', 'prel', 'text') {
 	    my $subdir = "${path_dirname}/${dir}";
@@ -35,17 +32,11 @@ sub BUILD {
 	}
     } else {
 
-	warn 'Directory ', $path, ' does not exist; ensure it and its needed subdirectories exist...';
-
 	# Make the local db directory if it doesn't yet exist
 	mkdir $path
 	    or croak ('Error: unable to make a directory at ', $path, '.');
 	foreach my $subdir_name ('dict', 'prel', 'text') {
 	    my $subdir = "${path}/${subdir_name}";
-
-	    # DEBUG
-	    warn 'Making subdir ', $subdir;
-
 	    mkdir $subdir
 		or croak ('Error: unable to make the \'', $subdir_name, '\' subdirectory of ', $path, '.', "\n");
 	}
