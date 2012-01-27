@@ -119,14 +119,31 @@ sub accom {
 sub verifier {
     my $article_name = shift;
     my $parameters_ref = shift;
-    if (not defined $article_name) {
-	croak ('Error: bogus call to verifier.');
-    }
-    if (defined $parameters_ref) {
-	return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
-    } else {
-	return (run_mizar_tool ('verifier', $article_name));
-    }
+    return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
+}
+
+sub wsmparser {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('wsmparser', $article_name, $parameters_ref));
+}
+
+sub msmprocessor {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('msmprocessor', $article_name, $parameters_ref));
+}
+
+sub msplit {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('msplit', $article_name, $parameters_ref));
+}
+
+sub mglue {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('mglue', $article_name, $parameters_ref));
 }
 
 my %stylesheets = ();
