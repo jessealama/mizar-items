@@ -14,6 +14,7 @@ use Carp qw(croak);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 use Utils qw(ensure_directory ensure_readable_file);
+use Mizar;
 
 my $paranoid = 0;
 my $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
@@ -74,21 +75,14 @@ my $article_evl = "${article_dirname}/${article_basename}.evl";
 ensure_readable_file ($article_miz);
 ensure_directory ($stylesheet_home);
 
-my $absrefs_stylesheet = "${stylesheet_home}/addabsrefs.xsl";
-my $rewrite_aid_stylesheet = "${stylesheet_home}/rewrite-aid.xsl";
-my $split_stylesheet = "${stylesheet_home}/split.xsl";
-my $itemize_stylesheet = "${stylesheet_home}/itemize.xsl";
-my $wsm_stylesheet = "${stylesheet_home}/wsm.xsl";
-my $extend_evl_stylesheet = "${stylesheet_home}/extend-evl.xsl";
-my $conditions_and_properties_stylesheet = "${stylesheet_home}/conditions-and-properties.xsl";
-my $trim_properties_and_conditions_stylesheet = "${stylesheet_home}/trim-properties-and-conditions.xsl";
-
-my @stylesheets = ('split', 'itemize', 'wsm', 'extend-evl', 'conditions-and-properties', 'trim-properties-and-conditions', 'rewrite-aid');
-
-foreach my $stylesheet (@stylesheets) {
-  my $stylesheet_path = "${stylesheet_home}/${stylesheet}.xsl";
-  ensure_readable_file ($stylesheet_path);
-}
+my $absrefs_stylesheet = Mizar::path_for_stylesheet ('addabsrefs');
+my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
+my $split_stylesheet = Mizar::path_for_stylesheet ('split');
+my $itemize_stylesheet = Mizar::path_for_stylesheet ('itemize');
+my $wsm_stylesheet = Mizar::path_for_stylesheet ('wsm');
+my $extend_evl_stylesheet = Mizar::path_for_stylesheet ('extend-evl');
+my $conditions_and_properties_stylesheet = Mizar::path_for_stylesheet ('conditions-and-properties');
+my $trim_properties_and_conditions_stylesheet = Mizar::path_for_stylesheet ('trim-properties-and-conditions');
 
 if (defined $target_directory) {
   if (-e $target_directory) {
