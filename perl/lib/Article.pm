@@ -1100,6 +1100,35 @@ sub itemize {
     return 1;
 }
 
+sub files {
+    my $self = shift;
+
+    my $article_dir = dirname ($self->get_path ());
+    my $article_base = basename ($self->get_path ());
+
+    my @files;
+
+    opendir (my $dir_fh, $article_dir)
+	or croak ('Error: unable to open the directory ', $article_dir, ' under which ', $self->name (), ' is located.');
+
+    foreach my $file (readdir $dir_fh) {
+	if (-f $file) {
+	    if ($file =~ /\A ${article_base} [.] .+ \z/) {
+		push (@files, $file);
+	    }
+	}
+    }
+
+    closedir $dir_fh
+	or croak ('Error: unable to close the directory filehandle!');
+
+    if (wantarray) {
+	return @files;
+    } else {
+	return join (' ', @files);
+    }
+}
+
 sub copy {
     my $self = shift;
     my $new_path = shift;
