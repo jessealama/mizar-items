@@ -1,0 +1,54 @@
+/// strings.xsl : utilities for working with strings
+
+stylesheet "1.0";
+
+output method="xml" encoding="utf-8" indent="yes";
+
+include die.xsl;
+
+$lcletters= { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters= { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+tpl first-numeral-helper (#string) {
+  if [$string = ""] {
+    die (#message = "We cannot determine the first numeral of the empty string!");
+  } else {
+    $first-char-as-string = `substring ($string, 1, 1)`;
+    if [$first-char-as-string = "0"
+        or $first-char-as-string = "1"
+        or $first-char-as-string = "2"
+        or $first-char-as-string = "3"
+        or $first-char-as-string = "4"
+        or $first-char-as-string = "5"
+        or $first-char-as-string = "6"
+        or $first-char-as-string = "7"
+        or $first-char-as-string = "8"
+        or $first-char-as-string = "9"] {
+      $first-char-as-string;
+    } else {
+      first-numeral-helper (#string = `substring-after ($string, $first-char-as-string)`);
+    }
+  }
+}
+
+// the position of the first numeral in a string
+tpl first-numeral (#string) {
+  // sanity check: $string does contain a numeral
+  if [contains ($string, "0")
+      or contains ($string, "1")
+      or contains ($string, "2")
+      or contains ($string, "3")
+      or contains ($string, "4")
+      or contains ($string, "5")
+      or contains ($string, "6")
+      or contains ($string, "7")
+      or contains ($string, "8")
+      or contains ($string, "9")] {
+    first-numeral-helper (#string = $string);
+  } else {
+    $message = `concat ("We cannot determine the first numeral of the string '", $string, "', because it contains no numerals")`;
+    die (#message = $message);
+  }
+}
