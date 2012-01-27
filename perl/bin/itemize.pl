@@ -11,10 +11,13 @@ use XML::LibXML;
 use Cwd qw(cwd);
 use File::Copy qw(copy move);
 use Carp qw(croak);
+use IPC::Cmd qw(can_run);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 use Utils qw(ensure_directory ensure_readable_file);
 use Mizar;
+use Article;
+use Xsltproc qw(apply_stylesheet);
 
 my $paranoid = 0;
 my $stylesheet_home = '/Users/alama/sources/mizar/mizar-items';
@@ -38,33 +41,31 @@ pod2usage(1) unless (scalar @ARGV == 1);
 
 # Look for the required programs
 
-my @mizar_programs = ('verifier',
-		      'accom',
-		      'exporter',
-		      'transfer',
-		      'msmprocessor',
-		      'wsmparser',
-		      'msplit',
-		      'mglue',
-		      'xsltproc');
+Mizar::ensure_sensible_mizar_environment ();
 
-foreach my $program (@mizar_programs) {
-  my $which_status = system ("which $program > /dev/null 2>&1");
-  my $which_exit_code = $which_status >> 8;
-  if ($which_exit_code != 0) {
-    croak ('Error: the required program ', $program, ' cannot be found (or is not executable)', "\n");
-  }
+if (! can_run ('xsltproc')) {
+    print 'Error: xsltproc appears to be unavailable.';
+    exit 1;
 }
 
-my $article = $ARGV[0];
-my $article_basename = basename ($article, '.miz');
-my $article_dirname = dirname ($article);
+if (! can_run ('parallel')) {
+    print 'Error: GNU parallel appears to be unavailable.';
+    exit 1;
+}
+
+my $article_path = $ARGV[0];
+my $article_basename = basename ($article_path, '.miz');
+my $article_dirname = dirname ($article_path);
 my $article_sans_extension = "${article_dirname}/${article_basename}";
 my $article_miz = "${article_dirname}/${article_basename}.miz";
 my $article_err = "${article_dirname}/${article_basename}.err";
 my $article_evl = "${article_dirname}/${article_basename}.evl";
 
-ensure_readable_file ($article_miz);
+if (! ensure_readable_file ($article_miz)) {
+    croak ('Error: ', $article_miz, ' does not exist (as a file) or is not readable.');
+}
+
+my $article = Article->new (path => $article_miz);
 
 Mizar::set_stylesheet_home ($stylesheet_home);
 
@@ -115,10 +116,8 @@ my $article_miz_in_target_dir = "${target_directory}/${article_basename}.miz";
 my $article_miz_orig_in_target_dir = "${target_directory}/${article_basename}.miz.orig";
 my $article_err_in_target_dir = "${target_directory}/${article_basename}.err";
 
-copy ($article_miz, $article_miz_in_target_dir)
-  or croak ('Error: unable to copy the article at ', $article_miz, ' to ', $article_miz_in_target_dir, '.', "\n");
-copy ($article_miz, $article_miz_orig_in_target_dir)
-  or croak ('Error: unable to copy the article at ', $article_miz, ' to ', $article_miz_orig_in_target_dir, '.', "\n");
+my $article_in_target_dir = $article->copy ($article_miz_in_target_dir);
+# my $article_orig_in_target_dir = $article->copy ($article_miz_orig_in_target_dir);
 
 # Transform the new miz
 
@@ -144,57 +143,23 @@ my $article_tpr_in_target_dir = "${target_directory}/${article_basename}.tpr";
 
 print 'Rewriting the text of ', $article_basename, ': ';
 
-my $accom_ok = run_mizar_tool ('accom', $article_miz_in_target_dir);
-if ($accom_ok == 0) {
-  croak ('Error: the initial article did not could not be accom\'d.');
-}
-
-print '.';
-
-my $verifier_ok = run_mizar_tool ('verifier', $article_miz_in_target_dir);
-if ($verifier_ok == 0) {
-  croak ('Error: the initial article could not be verified.');
-}
-
-print '.';
-
-my $wsmparser_ok = run_mizar_tool ('wsmparser', $article_miz_in_target_dir);
-if ($wsmparser_ok == 0) {
-  croak ('Error: wsmparser failed on the initial article.');
-}
-
-print '.';
-
-my $msmprocessor_ok = run_mizar_tool ('msmprocessor', $article_miz_in_target_dir);
-if ($msmprocessor_ok == 0) {
-  croak ('Error: msmprocessor failed on the initial article.');
-}
-
-print '.';
-
-my $msplit_ok = run_mizar_tool ('msplit', $article_miz_in_target_dir);
-if ($msplit_ok == 0) {
-  croak ('Error: msplit failed on the initial article.');
-}
-
-print '.';
+$article_in_target_dir->accom ()
+    or croak ('Error: the initial article did not could not be accom\'d.');
+$article_in_target_dir->verify ()
+    or croak ('Error: the initial article could not be verified.');
+$article_in_target_dir->wsmparser ()
+    or croak ('Error: wsmparser failed on the initial article.');
+$article_in_target_dir->msmprocessor ()
+    or croak ('Error: msmprocessor failed on the initial article.');
+$article_in_target_dir->msplit ()
+    or croak ('Error: msplit failed on the initial article.');
 
 copy ($article_msm_in_target_dir, $article_tpr_in_target_dir)
   or croak ('Error: we are unable to copy ', $article_msm_in_target_dir, ' to ', $article_tpr_in_target_dir, '.', "\n");
 
-print '.';
-
-my $mglue_ok = run_mizar_tool ('mglue', $article_miz_in_target_dir);
-if ($mglue_ok == 0) {
-  croak ('Error: mglue failed on the initial article.');
-}
-
-print '.';
-
-$wsmparser_ok = run_mizar_tool ('wsmparser', $article_miz_in_target_dir);
-if ($wsmparser_ok == 0) {
-  croak ('Error: wsmparser failed on the WSMified article.');
-}
+$article_in_target_dir->mglue ();
+$article_in_target_dir->wsmparser ()
+    or croak ('Error: wsmparser failed on the WSMified article.');
 
 print 'done.', "\n";
 
@@ -205,25 +170,19 @@ my $article_itemized_wsx_in_target_dir = "${article_split_wsx_in_target_dir}.ite
 ensure_readable_file ($article_wsx_in_target_dir);
 
 print 'Split ', $article_basename, ': ';
-my $xsltproc_split_status = system ("xsltproc --output $article_split_wsx_in_target_dir $split_stylesheet $article_wsx_in_target_dir 2>/dev/null");
-
-my $xsltproc_split_exit_code = $xsltproc_split_status >> 8;
-
-if ($xsltproc_split_exit_code != 0) {
-  croak ('Error: xsltproc did not exit cleanly when applying the split stylesheet at ', $split_stylesheet, ' to ', $article_wsx_in_target_dir, '.', "\n");
-}
-
-ensure_readable_file ($article_split_wsx_in_target_dir);
+apply_stylesheet ($split_stylesheet,
+		  $article_wsx_in_target_dir,
+		  $article_split_wsx_in_target_dir)
+    or
+    croak ('Error: xsltproc did not exit cleanly when applying the split stylesheet at ', $split_stylesheet, ' to ', $article_wsx_in_target_dir, '.', "\n");
 
 print 'done.', "\n";
 
 print 'Itemize ', $article_basename, ': ';
-my $xsltproc_itemize_status = system ("xsltproc --output $article_itemized_wsx_in_target_dir $itemize_stylesheet $article_split_wsx_in_target_dir 2>/dev/null");
-
-my $xsltproc_itemize_exit_code = $xsltproc_itemize_status >> 8;
-if ($xsltproc_itemize_exit_code != 0) {
-  croak ('Error: xsltproc did not exit cleanly when applying the itemize stylesheet at ', $itemize_stylesheet, ' to ', $article_split_wsx_in_target_dir, '.', "\n");
-}
+apply_stylesheet ($itemize_stylesheet,
+		  $article_split_wsx_in_target_dir,
+		  $article_itemized_wsx_in_target_dir)
+    or croak ('Error: xsltproc did not exit cleanly when applying the itemize stylesheet at ', $itemize_stylesheet, ' to ', $article_split_wsx_in_target_dir, '.', "\n");
 
 print 'done.', "\n";
 
@@ -389,27 +348,25 @@ foreach my $i (1 .. scalar @fragments) {
     }
   }
 
-  my $all_notations_token_string = list_as_token_string (\@new_notations);
-  my $all_definitions_token_string = list_as_token_string (\@new_definitions);
-  my $all_theorems_token_string = list_as_token_string (\@new_theorems);
-  my $all_registrations_token_string = list_as_token_string (\@new_registrations);
-  my $all_constructors_token_string = list_as_token_string (\@new_constructors);
-  my $all_schemes_token_string = list_as_token_string (\@new_schemes);
-
-  my $xsltproc_extend_evl_status
-    = system ("xsltproc --output $fragment_evl --stringparam notations '$all_notations_token_string' --stringparam definitions '$all_definitions_token_string' --stringparam theorems '$all_theorems_token_string' --stringparam registrations '$all_registrations_token_string' --stringparam constructors '$all_constructors_token_string' --stringparam schemes '$all_schemes_token_string' $extend_evl_stylesheet $article_evl_in_target_dir 2>/dev/null");
-  my $xsltproc_extend_evl_exit_code = $xsltproc_extend_evl_status >> 8;
-  if ($xsltproc_extend_evl_exit_code != 0) {
-    croak ('Error: xsltproc did not exit cleanly when applying the extend-evl stylesheet to ', $article_evl_in_target_dir, '.', "\n");
-  }
+  apply_stylesheet ($extend_evl_stylesheet,
+		    $article_evl_in_target_dir,
+		    $fragment_evl,
+		    {
+			'notations' => list_as_token_string (\@new_notations),
+			'definitions' => list_as_token_string (\@new_definitions),
+			'theorems' => list_as_token_string (\@new_theorems),
+			'registrations' => list_as_token_string (\@new_registrations),
+			'constructors' => list_as_token_string (\@new_constructors),
+			'schemes' => list_as_token_string (\@new_constructors),
+		    })
+      or croak ('Error: xsltproc did not exit cleanly when applying the extend-evl stylesheet to ', $article_evl_in_target_dir, '.', "\n");
 
   # Now render the fragment's XML as a mizar article
-  my $xsltproc_wsm_status
-    = system ("xsltproc --output $fragment_miz --stringparam evl '$fragment_evl' $wsm_stylesheet $fragment_path 2>/dev/null");
-  my $xsltproc_wsm_exit_code = $xsltproc_wsm_status >> 8;
-  if ($xsltproc_wsm_exit_code != 0) {
-    croak ('Error: xsltproc did not exit cleanly when applying the WSM stylesheet to ', $fragment_path, '.', "\n");
-  }
+  apply_stylesheet ($wsm_stylesheet,
+		    $fragment_path,
+		    $fragment_miz,
+		    { 'evl' => $fragment_evl })
+      or croak ('Error: xsltproc did not exit cleanly when applying the WSM stylesheet to ', $fragment_path, '.', "\n");
 
   # Now export and transfer the fragment
 
