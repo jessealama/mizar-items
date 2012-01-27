@@ -1135,7 +1135,7 @@ sub copy {
 
     my $current_path = $self->get_path ();
     my $current_dir = dirname ($current_path);
-    my $new_path_dir = dirname ($new_path);
+    my $new_path_dir = File::Spec->catdir ($new_path);
 
     if (! ensure_directory ($new_path_dir)) {
 	croak ('Error: the directory name, ', $new_path_dir, ' of the target ', $new_path, ' is not a directory.');
@@ -1145,6 +1145,7 @@ sub copy {
 
     foreach my $file (@files) {
 	my $current_file_path = "${current_dir}/${file}";
+
 	File::Copy::copy ($current_file_path,
 			  $new_path_dir)
 	      or croak ('Error: unable to copy ', $current_file_path, ' to ', $new_path_dir, '.');
