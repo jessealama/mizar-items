@@ -36,14 +36,6 @@ pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 pod2usage(1) unless (scalar @ARGV == 1);
 
-unless (defined $ENV{"MIZFILES"}) {
-  croak ('Error: the MIZFILES environment variable is not set.');
-}
-
-my $mizfiles = $ENV{"MIZFILES"};
-
-ensure_directory ($mizfiles);
-
 # Look for the required programs
 
 my @mizar_programs = ('verifier',
