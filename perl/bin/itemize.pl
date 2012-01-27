@@ -12,6 +12,10 @@ use Cwd qw(cwd);
 use File::Copy qw(copy move);
 use Carp qw(croak);
 
+use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+
+use Utils qw(ensure_directory ensure_readable_file);
+
 sub tmpfile_path {
   # File::Temp's tempfile function returns a list of two values.  We
   # want the second (the path of the temprary file) and don't care
@@ -24,35 +28,6 @@ sub tmpfile_path {
   } else {
     croak ('Error: we could not create a temporary file!  The error message was:', "\n", "\n", '  ', $tempfile_err);
   }
-}
-
-sub ensure_directory {
-  my $dir = shift;
-  if (! -e $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist.';
-  }
-
-  if (! -d $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist (as a directory).';
-  }
-  return 1;
-}
-
-sub ensure_readable_file {
-  my $file = shift;
-
-  if (! -e $file) {
-    croak ('Error: ', $file, ' does not exist.');
-  }
-  if (! -f $file) {
-    croak ('Error: ', $file, ' is not a file.');
-  }
-
-  if (! -r $file) {
-    croak ('Error: ', $file, ' is unreadable.');
-  }
-
-  return 1;
 }
 
 my $paranoid = 0;
