@@ -17,7 +17,7 @@ use Utils qw(ensure_directory ensure_readable_file);
 use Mizar;
 
 my $paranoid = 0;
-my $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
+my $stylesheet_home = '/Users/alama/sources/mizar/mizar-items';
 my $verbose = 0;
 my $debug = 0;
 my $man = 0;
@@ -73,7 +73,8 @@ my $article_err = "${article_dirname}/${article_basename}.err";
 my $article_evl = "${article_dirname}/${article_basename}.evl";
 
 ensure_readable_file ($article_miz);
-ensure_directory ($stylesheet_home);
+
+Mizar::set_stylesheet_home ($stylesheet_home);
 
 my $absrefs_stylesheet = Mizar::path_for_stylesheet ('addabsrefs');
 my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
