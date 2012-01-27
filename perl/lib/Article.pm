@@ -1074,4 +1074,10 @@ sub needed_items {
 
 }
 
+sub itemize {
+    my $self = shift;
+
+    return 1;
+}
+
 1;
