@@ -67,5 +67,69 @@ sub get_dict_subdir {
     return "${loc_dir}/dict";
 }
 
+sub prel_files {
+    my $self = shift;
+
+    my $prel = $self->get_prel_subdir ();
+
+    return glob "${prel}/*.*";
+}
+
+sub files_in_prel_with_extension {
+    my $self = shift;
+    my $extension = shift;
+    if (defined $extension) {
+	my $prel = $self->get_prel_subdir ();
+	my @files = glob "${prel}/*.${extension}";
+	my @basename_files = map { basename ($_) } @files;
+	return @basename_files;
+    } else {
+	croak ('Error: please supply an extension.');
+    }
+}
+
+sub notations_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('dno');
+}
+
+sub registrations_in_prel {
+    my $self = shift;
+    my @reductions = $self->files_in_prel_with_extension ('drd');
+    my @clusters = $self->files_in_prel_with_extension ('dcl');
+    my @identifications = $self->files_in_prel_with_extension ('did');
+
+    my @answer = ();
+    push (@answer, @reductions);
+    push (@answer, @clusters);
+    push (@answer, @identifications);
+
+    if (wantarray) {
+	return @answer;
+    } else {
+	return join (' ', @answer);
+    }
+}
+
+sub schemes_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('sch');
+}
+
+sub constructors_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('dco');
+}
+
+sub definitions_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('def');
+}
+
+sub theorems_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('the');
+}
+
 1;
 __END__
