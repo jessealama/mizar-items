@@ -98,6 +98,7 @@ sub verifier {
 }
 
 my %stylesheets = ();
+my $stylesheet_home = "/Users/alama/sources/mizar/mizar-items/xsl/${sheet}.xsl";
 
 foreach my $sheet ('inferred-constructors',
 		   'addabsrefs',
@@ -112,7 +113,7 @@ foreach my $sheet ('inferred-constructors',
 	           'conditions-and-properties',
 	           'trim-properties-and-conditions',
 	           'rewrite-aid') {
-    my $stylesheet_path = "/Users/alama/sources/mizar/mizar-items/xsl/${sheet}.xsl";
+    my $stylesheet_path = "${stylesheet_home}/${sheet}.xsl";
     $stylesheets{$sheet} = $stylesheet_path;
 }
 
