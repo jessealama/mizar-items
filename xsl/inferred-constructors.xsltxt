@@ -59,6 +59,11 @@ tpl [Article[@aid]] {
   $full-eno = `concat ($article-directory, $eno)`;
   for-each [document ($full-eno, /)] {
     print-everything (#except = $aid);
+    for-each [Notations] {
+      for-each [Pattern] {
+        apply [.]; "\n";
+      }
+    }
   }
 
   // inspect the .dfs
@@ -88,7 +93,6 @@ tpl [Article[@aid]] {
   for-each [document ($full-epr, /)] {
     print-everything (#except = $aid);
   }
-
   // inspect the .erd
   $erd = `concat ($aid-lc, ".erd1")`;
   $full-erd = `concat ($article-directory, $erd)`;
@@ -138,9 +142,28 @@ tpl [*[@aid and @kind and @absnr]] {
 // Used only to fish out constructors that have an abstractness property
 tpl [Constructors] {
   for-each [Constructor[@kind and @nr and @aid and Properties/Abstractness]] {
-    $kind = lowercase (#string = `@kind`);
-    $aid = lowercase (#string = `@aid`);
+    $kind = lc (#s = `@kind`);
+    $aid = lc (#s = `@aid`);
     $nr = `@nr`;
     $aid; ":"; $kind-lc; "constructor"; ":"; $nr; "\n";
   }
+}
+
+tpl [Pattern[not(@aid)]] {
+  msg terminate="yes" "Error: we cannot handle a Pattern element that lacks an aid attribute.";
+}
+
+tpl [Pattern[not(@constrkind)]] {
+  msg terminate="yes" "Error: we cannot handle a Pattern element that lacks a constrkind attribute.";
+}
+
+tpl [Pattern[not(@constrnr)]] {
+  msg terminate="yes" "Error: we cannot handle a Pattern element that lacks a constrnr attribute.";
+}
+
+tpl [Pattern[@aid and @constrkind and @constrnr]] {
+  $aid = lc (#s = `@aid`);
+  $kind = lc (#s = `@constrkind`);
+  $nr = `@constrnr`;
+  $aid; ":"; $kind; "constructor"; ":"; $nr;
 }
