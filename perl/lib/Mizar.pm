@@ -11,6 +11,8 @@ use IPC::Run qw(start);
 use Carp qw(croak);
 use File::Basename qw(basename dirname);
 
+use Utils qw(ensure_readable_file);
+
 # Other recommended modules (uncomment to use):
 #  use IO::Prompt;
 #  use Perl6::Export;
