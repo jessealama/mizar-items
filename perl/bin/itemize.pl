@@ -95,8 +95,8 @@ if (defined $target_directory) {
 
 my $local_db = LocalDatabase->new (location => $target_directory);
 
-my $target_text_subdir = "${target_directory}/text";
-my $target_prel_subdir = "${target_directory}/prel";
+my $target_text_subdir = $local_db->get_text_subdir ();
+my $target_prel_subdir = $local_db->get_prel_subdir ();
 
 # Copy the article miz to the new subdirectory
 
