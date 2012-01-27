@@ -9,7 +9,8 @@ our @EXPORT_OK = qw(ensure_readable_file
 		    ensure_directory
 		    ensure_executable
 	            write_string_to_file
-	            extension);
+	            extension
+		    strip_extension);
 
 sub ensure_readable_file {
   my $file = shift;
@@ -64,6 +65,20 @@ sub extension {
   } else {
     croak ('Error: the path \'', $path, '\' does not have an extension.');
   }
+}
+
+sub strip_extension {
+    my $path = shift;
+
+    if ($path =~ /\A (.+) [.] [^.]* \z/) {
+	return $1;
+    } elsif ($path =~ / [^.]+ /) {
+	return $path;
+    } else {
+	# Seems logically impossible
+	croak ('Error: the path \'', $path, '\' is too weird.');
+    }
+
 }
 
 1;
