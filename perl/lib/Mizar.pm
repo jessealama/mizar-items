@@ -98,7 +98,24 @@ sub verifier {
 }
 
 my %stylesheets = ();
-my $stylesheet_home = "/Users/alama/sources/mizar/mizar-items/xsl/${sheet}.xsl";
+my $stylesheet_home = "/Users/alama/sources/mizar/mizar-items/xsl";
+
+sub set_stylesheet_home {
+    my $new_home = shift;
+
+    if (defined $new_home) {
+	if (ensure_directory ($new_home)) {
+	    my $old_home = $stylesheet_home;
+	    $stylesheet_home = $new_home;
+	    return $old_home;
+	} else {
+	    croak ('Error: cannot set ', $new_home, ' to be the new stylesheet home because that is not a directory.');
+	}
+    } else {
+	croak ('Error: please supply a directory.');
+    }
+
+}
 
 foreach my $sheet ('inferred-constructors',
 		   'addabsrefs',
