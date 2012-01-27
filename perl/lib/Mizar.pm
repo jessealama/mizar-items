@@ -19,7 +19,10 @@ use Utils qw(ensure_readable_file);
 #  use Perl6::Slurp;
 #  use Perl6::Say;
 
-our @EXPORT_OK = qw(accom verifier ensure_sensible_mizar_environment);
+our @EXPORT_OK = qw(accom
+		    verifier
+		    ensure_sensible_mizar_environment
+		    path_for_stylesheet);
 
 # Module implementation here
 
@@ -91,6 +94,38 @@ sub verifier {
 	return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
     } else {
 	return (run_mizar_tool ('verifier', $article_name));
+    }
+}
+
+my %stylesheets = ();
+
+foreach my $sheet ('inferred-constructors',
+		   'addabsrefs',
+	           'properties-of-constructors',
+	           'strip-property',
+	           'properties-of-constructor',
+	           'dependencies') {
+    my $stylesheet_path = "/Users/alama/sources/mizar/mizar-items/xsl/${sheet}.xsl";
+    $stylesheets{$sheet} = $stylesheet_path;
+}
+
+sub path_for_stylesheet {
+    my $sheet = shift;
+
+    if (! defined $sheet) {
+	croak ('Error: please supply the name of a stylesheet.');
+    }
+
+    my $path = $stylesheets{$sheet};
+
+    if (defined $path) {
+	if (ensure_readable_file ($path)) {
+	    return $path;
+	} else {
+	    croak ('Error: the path for the ', $sheet, ' stylesheet is ', $path, ', but there is no file there (or the file is unreadable).');
+	}
+    } else {
+	croak ('Error: the ', $sheet, ' stylesheet has no known path.');
     }
 }
 
