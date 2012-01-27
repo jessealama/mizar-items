@@ -104,7 +104,14 @@ foreach my $sheet ('inferred-constructors',
 	           'properties-of-constructors',
 	           'strip-property',
 	           'properties-of-constructor',
-	           'dependencies') {
+	           'dependencies',
+	           'split',
+	           'itemize',
+	           'wsm',
+	           'extend-evl',
+	           'conditions-and-properties',
+	           'trim-properties-and-conditions',
+	           'rewrite-aid') {
     my $stylesheet_path = "/Users/alama/sources/mizar/mizar-items/xsl/${sheet}.xsl";
     $stylesheets{$sheet} = $stylesheet_path;
 }
