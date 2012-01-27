@@ -3,16 +3,29 @@ package Xsltproc;
 use base qw(Exporter);
 use warnings;
 use strict;
-use Carp qw(croak);
-use IPC::Run qw(run);
+use Carp qw(croak carp);
+use IPC::Run qw(start);
+
+use Utils qw(ensure_readable_file);
 
 our @EXPORT_OK = qw(apply_stylesheet);
 
 sub apply_stylesheet {
-    my $stylesheet = shift;
-    my $document = shift;
-    my $result_path = shift;
-    my $parameters_ref = shift;
+
+    my ($stylesheet, $document, $result_path, $parameters_ref) = @_;
+
+
+    if (! defined $stylesheet) {
+	croak ('Error: please supply a stylesheet.');
+    }
+
+    if (! defined $document) {
+	croak ('Error: please supply a document.');
+    }
+
+    if (! ensure_readable_file ($document)) {
+	croak ('Error: there is no file at ', $document, '.');
+    }
 
     my %parameters = defined $parameters_ref ? %{$parameters_ref}
 	                                     : ()
