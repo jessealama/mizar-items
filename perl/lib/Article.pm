@@ -11,7 +11,7 @@ use POSIX qw(floor ceil);
 # Our libraries
 use FindBin;
 use lib $FindBin::Bin;
-use Utils qw(ensure_readable_file);
+use Utils qw(ensure_readable_file ensure_directory);
 use Mizar;
 use Xsltproc qw(apply_stylesheet);
 
