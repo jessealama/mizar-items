@@ -8,8 +8,8 @@ our @EXPORT_OK = qw(ensure_readable_file ensure_directory ensure_executable);
 
 sub ensure_readable_file {
   my $file = shift;
-  (-e $file && -r $file) ? return 1
-                         : return 0;
+  (-e $file && ! -d $file && -r $file) ? return 1
+                                       : return 0;
 }
 
 sub ensure_executable {
