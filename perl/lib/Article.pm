@@ -3,7 +3,7 @@ package Article;
 use Moose;
 use Carp qw(croak carp);
 use File::Basename qw(basename dirname);
-use File::Copy qw(copy move);
+use File::Copy qw(); # import nothing; we define our own 'copy' subroutine
 use Regexp::DefaultFlags;
 use XML::LibXML;
 use POSIX qw(floor ceil);
@@ -344,6 +344,26 @@ sub is_verifiable {
     return $self->verify ();
 }
 
+sub wsmparser {
+    my $self = shift;
+    return Mizar::wsmparser ($self->get_path ());
+}
+
+sub msmprocessor {
+    my $self = shift;
+    return Mizar::msmprocessor ($self->get_path ());
+}
+
+sub msplit {
+    my $self = shift;
+    return Mizar::msplit ($self->get_path ());
+}
+
+sub mglue {
+    my $self = shift;
+    return Mizar::mglue ($self->get_path ());
+}
+
 sub minimize_properties {
     my $self = shift;
 
@@ -362,7 +382,7 @@ sub minimize_properties {
     my $atr_tmp = $self->file_with_extension ('atr.tmp');
 
     # Save a copy of the atr before proceeding
-    copy ($atr, $atr_orig)
+    File::Copy::copy ($atr, $atr_orig)
 	or croak ('Error: Unable to save a copy of ', $atr, ' to ', $atr_orig, '.');
 
     my $strip_property_stylesheet = Mizar::path_for_stylesheet ('strip-property');
@@ -384,16 +404,16 @@ sub minimize_properties {
 				  $atr_tmp,
 				  \%params)
 		    or croak ('Error: unable to apply the strip-property stylesheet to ', $atr);
-		move ($atr_tmp, $atr);
+		File::Copy::move ($atr_tmp, $atr);
 
 
 		if ($self->verify ($miz, \%parameters)) {
 		    $unneeded_properties{"${constructor}[${property}]"} = 0;
-		    copy ($atr, $atr_orig)
+		    File::Copy::copy ($atr, $atr_orig)
 			or croak ('Error: we were unable to update the .atr for ', $self->name (), ' to reflect its independence from the property ', $property, ' of constructor ', $constructor, '.', "\n");
 		} else {
 		    $needed_properties{"${constructor}[${property}]"} = 0;
-		    copy ($atr_orig, $atr)
+		    File::Copy::copy ($atr_orig, $atr)
 			or croak ('Error: we are unable to restore the original article .atr from ', $atr_orig, '.', "\n");
 		}
 	    }
@@ -1078,6 +1098,26 @@ sub itemize {
     my $self = shift;
 
     return 1;
+}
+
+sub copy {
+    my $self = shift;
+    my $new_path = shift;
+
+    my $current_path = $self->get_path ();
+
+    File::Copy::copy ($current_path, $new_path)
+	or croak ('Error: unable to copy ', $current_path, ' to ', $new_path, '.');
+
+    my $new_path_dirname = dirname ($new_path);
+    my $new_path_basename = basename ($new_path, '.miz');
+
+    my $new_path_miz = "${new_path_dirname}/${new_path_basename}.miz";
+
+    my $new_article = $self->new (path => $new_path_miz);
+
+    return $new_article;
+
 }
 
 1;
