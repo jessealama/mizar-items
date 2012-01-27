@@ -7,6 +7,7 @@ use warnings;
 use Getopt::Long;
 use File::Temp qw(tempfile);
 use File::Basename qw(basename dirname);
+use File::Spec;
 use XML::LibXML;
 use Cwd qw(cwd);
 use File::Copy qw(copy move);
