@@ -7,7 +7,8 @@ use strict;
 our @EXPORT_OK = qw(ensure_readable_file
 		    ensure_directory
 		    ensure_executable
-	            write_string_to_file);
+	            write_string_to_file
+	            extension);
 
 sub ensure_readable_file {
   my $file = shift;
@@ -53,6 +54,15 @@ sub write_string_to_file {
 	or croak ('Error: unable to close the output filehandle to ', $path, ': ', $!);
 
     return 1;
+}
+
+sub extension {
+  my $path = shift;
+  if ($path =~ /[.]([^.]+)$/) {
+    return $1;
+  } else {
+    croak ('Error: the path \'', $path, '\' does not have an extension.');
+  }
 }
 
 1;
