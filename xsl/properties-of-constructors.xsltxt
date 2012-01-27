@@ -1,0 +1,74 @@
+stylesheet "1.0";
+
+output method="text";
+
+//////////////////////////////////////////////////////////////////////
+// Identifying a list of constructors
+//////////////////////////////////////////////////////////////////////
+
+#constructors = { ""; }
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+tpl [/] {
+  choose {
+    when [Constructors] {
+      apply [Constructors];
+    }
+    otherwise {
+      msg terminate="yes" "Error: the Constructors root element is missing.  (Are you applying this stylesheet to a .atr file?)";
+    }
+  }
+}
+
+tpl [Constructors] {
+  for-each [Constructor] {
+    apply [.];
+  }
+}
+
+tpl [Constructor[not(@aid)]] {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an aid attribute.";
+}
+
+tpl [Constructor[not(@kind)]] {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks a kind attribute.";
+}
+
+tpl [Constructor[not(@nr)]] {
+  msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an nr attribute.";
+}
+
+tpl [Constructor[@aid and @nr and @kind]] {
+  $this-nr = `@nr`;
+  $this-aid = lowercase (#string = `@aid`);
+  $this-kind = lowercase (#string = `@kind`);
+  $token = `concat (",",
+                    $this-aid, ":", $this-kind, "constructor", ":", $this-nr,
+		    ",")`;
+  if [contains ($constructors, $token)] {
+    apply [Properties] (#aid = $this-aid,
+                        #kind = $this-kind,
+			#nr = $this-nr);
+  }
+}
+
+tpl [Properties] (#aid, #kind, #nr) {
+  for-each [*] {
+    $name-lc = lowercase (#string = `name (.)`);
+    $prop = { if [$name-lc = "antisymmetry"] { "asymmetry"; } else { $name-lc; } }
+    $aid; ":"; $kind; "constructor"; ":"; $nr; "["; $prop; "]"; "\n";
+  }
+}
