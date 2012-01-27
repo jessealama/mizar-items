@@ -180,6 +180,11 @@ sub ensure_sensible_mizar_environment {
   if (! -d $mizfiles) {
     croak ('Error: the value of the MIZFILES environment variable, ', "\n", "\n", '  ', $mizfiles, "\n", "\n", 'is not a directory.');
   }
+  foreach my $tool (@mizar_tools) {
+      if (! can_run ($tool)) {
+	  croak ('Error: the needed Mizar tool ', $tool, ' seems to be unavailable.');
+      }
+  }
 }
 
 sub get_mizfiles { return $mizfiles; }
