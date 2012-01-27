@@ -14,7 +14,7 @@ use Carp qw(croak);
 use IPC::Cmd qw(can_run);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
-use Utils qw(ensure_directory ensure_readable_file);
+use Utils qw(ensure_directory ensure_readable_file extension);
 use Mizar;
 use Article;
 use Xsltproc qw(apply_stylesheet);
@@ -448,15 +448,6 @@ my %conditions_and_properties_shortcuts
      'mdefiniens' => 'mf',
      'rdefiniens' => 'rf',
      'vdefiniens' => 'vf');
-
-sub extension {
-  my $path = shift;
-  if ($path =~ /[.]([^.]+)$/) {
-    return $1;
-  } else {
-    croak ('Error: the path \'', $path, '\' does not have an extension.');
-  }
-}
 
 sub copy_fragment_to_new_prefix {
   my $fragment_basename = shift;
