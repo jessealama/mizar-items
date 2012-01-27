@@ -100,9 +100,7 @@ my $target_prel_subdir = $local_db->get_prel_subdir ();
 
 # Copy the article miz to the new subdirectory
 
-my $article_in_target_dir = $article->copy ($target_directory);
-
-# Transform the new miz
+my $article_in_target_dir = $article->copy (File::Spec->catdir ($target_directory));
 
 sub run_mizar_tool {
   my $tool = shift;
@@ -120,35 +118,24 @@ sub run_mizar_tool {
   return 1;
 }
 
-my $article_evl_in_target_dir = "${target_directory}/${article_basename}.evl";
-my $article_msm_in_target_dir = "${target_directory}/${article_basename}.msm";
-my $article_tpr_in_target_dir = "${target_directory}/${article_basename}.tpr";
+my $article_evl_in_target_dir = $article_in_target_dir->file_with_extension ('evl');
+my $article_msm_in_target_dir = $article_in_target_dir->file_with_extension ('msm');
+my $article_tpr_in_target_dir = $article_in_target_dir->file_with_extension ('tpr');
 
+# Transform the new miz
 print 'Rewriting the text of ', $article_basename, ': ';
 
-$article_in_target_dir->accom ()
-    or croak ('Error: the initial article did not could not be accom\'d.');
-$article_in_target_dir->verify ()
-    or croak ('Error: the initial article could not be verified.');
-$article_in_target_dir->wsmparser ()
-    or croak ('Error: wsmparser failed on the initial article.');
-$article_in_target_dir->msmprocessor ()
-    or croak ('Error: msmprocessor failed on the initial article.');
-$article_in_target_dir->msplit ()
-    or croak ('Error: msplit failed on the initial article.');
-
-copy ($article_msm_in_target_dir, $article_tpr_in_target_dir)
-  or croak ('Error: we are unable to copy ', $article_msm_in_target_dir, ' to ', $article_tpr_in_target_dir, '.', "\n");
-
-$article_in_target_dir->mglue ();
-$article_in_target_dir->wsmparser ()
-    or croak ('Error: wsmparser failed on the WSMified article.');
+$article_in_target_dir->msmify ()
+    or croak ('Error: ', $article_basename, ' cannot be MSMified.');
 
 print 'done.', "\n";
 
-my $article_wsx_in_target_dir = "${target_directory}/${article_basename}.wsx";
-my $article_split_wsx_in_target_dir = "${article_wsx_in_target_dir}.split";
-my $article_itemized_wsx_in_target_dir = "${article_split_wsx_in_target_dir}.itemized";
+my $article_wsx_in_target_dir
+    = $article_in_target_dir->file_with_extension ('wsx');
+my $article_split_wsx_in_target_dir
+    = $article_in_target_dir->file_with_extension ('wsx.split');
+my $article_itemized_wsx_in_target_dir
+    = $article_in_target_dir->file_with_extension ('wsx.split.itemized');
 
 ensure_readable_file ($article_wsx_in_target_dir);
 
@@ -176,34 +163,12 @@ ensure_readable_file ($article_evl_in_target_dir);
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1,
 				   suppress_errors => 1);
 
-my $article_evl_doc = undef;
-unless ($article_evl_doc = eval { $xml_parser->parse_file ($article_evl_in_target_dir)  } ) {
-  croak ('Error: ', $article_evl_in_target_dir, ' is not well-formed XML.', "\n");
-}
-
-sub ident_name {
-  my $ident_node = shift;
-  return ($ident_node->getAttribute ('name'));
-}
-
-my @notations_nodes
-  = $article_evl_doc->findnodes ('Environ/Directive[@name = "Notations"]/Ident[@name]');
-my @notations = map { ident_name($_) } @notations_nodes;
-my @registrations_nodes
-  = $article_evl_doc->findnodes ('Environ/Directive[@name = "Registrations"]/Ident[@name]');
-my @registrations = map { ident_name($_) } @registrations_nodes;
-my @definitions_nodes
-  = $article_evl_doc->findnodes ('Environ/Directive[@name = "Definitions"]/Ident[@name]');
-my @definitions = map { ident_name($_) } @definitions_nodes;
-my @theorems_nodes
-  = $article_evl_doc->findnodes ('Environ/Directive[@name = "Theorems"]/Ident[@name]');
-my @theorems = map { ident_name($_) } @theorems_nodes;
-my @schemes_nodes
-  = $article_evl_doc->findnodes ('Environ/Directive[@name = "Schemes"]/Ident[@name]');
-my @schemes = map { ident_name($_) } @schemes_nodes;
-my @constructors_nodes
-  = $article_evl_doc->findnodes ('Environ/Directive[@name = "Constructors"]/Ident[@name]');
-my @constructors = map { ident_name($_) } @constructors_nodes;
+my @notations = $article_in_target_dir->notations ();
+my @registrations = $article_in_target_dir->registrations ();
+my @definitions = $article_in_target_dir->definitions ();
+my @theorems = $article_in_target_dir->theorems ();
+my @schemes = $article_in_target_dir->schemes ();
+my @constructors = $article_in_target_dir->constructors ();
 
 # Now print the items
 
