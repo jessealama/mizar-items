@@ -1134,14 +1134,28 @@ sub copy {
     my $new_path = shift;
 
     my $current_path = $self->get_path ();
+    my $current_dir = dirname ($current_path);
 
-    File::Copy::copy ($current_path, $new_path)
-	or croak ('Error: unable to copy ', $current_path, ' to ', $new_path, '.');
+    # File::Copy::copy ($current_path, $new_path)
+    # 	or croak ('Error: unable to copy ', $current_path, ' to ', $new_path, '.');
 
-    my $new_path_dirname = dirname ($new_path);
+    my $new_path_dir = dirname ($new_path);
+
+    if (! ensure_directory ($new_path_dir)) {
+	croak ('Error: the directory name, ', $new_path_dir, ' of the target ', $new_path, ' is not a directory.');
+    }
+
+    my @files = $self->files ();
+    foreach my $file (@files) {
+	my $current_file_path = "${current_dir}/${file}";
+	File::Copy::copy ($current_file_path,
+			  $new_path_dir)
+	      or croak ('Error: unable to copy ', $current_file_path, ' to ', $new_path_dir, '.');
+    }
+
     my $new_path_basename = basename ($new_path, '.miz');
 
-    my $new_path_miz = "${new_path_dirname}/${new_path_basename}.miz";
+    my $new_path_miz = "${new_path_dir}/${new_path_basename}.miz";
 
     my $new_article = $self->new (path => $new_path_miz);
 
