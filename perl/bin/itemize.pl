@@ -11,7 +11,7 @@ use File::Spec;
 use XML::LibXML;
 use Cwd qw(cwd);
 use File::Copy qw(copy move);
-use Carp qw(croak);
+use Carp qw(croak carp);
 use IPC::Cmd qw(can_run);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
