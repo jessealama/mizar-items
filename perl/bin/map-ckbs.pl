@@ -14,15 +14,6 @@ use Utils qw(ensure_directory);
 
 my $xml_parser = XML::LibXML->new(); # for our XML processing needs
 
-sub ensure_valid_xml_file {
-  my $xml_path = shift;
-  if (defined eval { $xml_parser->parse_file ($xml_path) }) {
-    return 1;
-  } else {
-    croak ('Error: ', $xml_path, ' is not a well-formed XML file.');
-  }
-}
-
 my $help = 0;
 my $man = 0;
 my $verbose = 0;
