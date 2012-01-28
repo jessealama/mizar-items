@@ -8,6 +8,10 @@ use Getopt::Long;
 use Pod::Usage;
 use Carp qw(croak carp);
 
+use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+
+use Utils qw(ensure_directory);
+
 my $xml_parser = XML::LibXML->new(); # for our XML processing needs
 
 sub ensure_valid_xml_file {
