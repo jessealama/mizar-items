@@ -255,7 +255,7 @@ foreach my $i (1 .. scalar @fragments) {
     # Extend the evl of the initial article by inspecting the contents
     # of the prel subdirectory
     my @new_notations
-	= map { uc_mizar_name ($_ } $local_db->notations_in_prel ();
+	= map { uc_mizar_name ($_) } $local_db->notations_in_prel ();
     my @new_registrations
 	= map { uc_mizar_name ($_) } $local_db->registrations_in_prel ();
     my @new_definitions
@@ -363,6 +363,7 @@ sub copy_fragment_to_new_prefix {
     copy ($file, $new_path)
       or croak ('Error: unable to copy ', $file, ' to ', $new_path, '.', "\n");
   }
+
   return 1;
 }
 
