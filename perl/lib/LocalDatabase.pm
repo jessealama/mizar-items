@@ -5,6 +5,7 @@ use File::Basename qw(basename dirname);
 use File::Spec;
 use Carp qw(croak);
 use Cwd;
+use IPC::Run qw(run);
 
 # Our stuff
 use Utils qw(ensure_directory);
@@ -199,6 +200,29 @@ sub transfer {
 					      $article,
 					      $parameters_ref);
 
+}
+
+sub absolutize {
+    my $self = shift;
+
+    my $text_subdir = $self->get_text_subdir ();
+
+    my @fragment_xmls = glob "${text_subdir}/*.xml";
+    my $fragment_xmls_with_space = join (' ', @fragment_xmls);
+
+    my @parallel_call = ('parallel',
+			 'xsltproc',
+			 '--output', '{.}.xml1',
+			 Mizar::path_for_stylesheet ('addabsrefs'),
+			 '{}',
+			 ':::');
+    foreach my $fragment_xml (@fragment_xmls) {
+	push (@parallel_call, $fragment_xml);
+    }
+
+    return run (\@parallel_call,
+		'>', '/dev/null',
+		'2>', '/dev/null');
 }
 
 1;
