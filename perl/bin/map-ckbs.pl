@@ -201,85 +201,85 @@ sub print_constructors {
     }
 }
 
-    sub print_notations {
+sub print_notations {
 
-	my @dnos = `find $prel_subdir -name "*.dno" -exec basename {} .dno ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-	chomp @dnos;
+    my @dnos = `find $prel_subdir -name "*.dno" -exec basename {} .dno ';' | sed -e 's/ckb//' | sort --numeric-sort`;
+    chomp @dnos;
 
-	my %patterns = ();
-	my %fragments_to_patterns = ();
+    my %patterns = ();
+    my %fragments_to_patterns = ();
 
-	foreach my $i (1 .. scalar @dnos) {
-	    my $dno = $dnos[$i - 1];
-	    my $dno_path = "$prel_subdir/ckb${dno}.dno";
-	    my $dno_doc = $xml_parser->parse_file ($dno_path);
-	    my @patterns = $dno_doc->findnodes ('Notations/Pattern');
-	    foreach my $pattern (@patterns) {
-		if ($pattern->exists ('@constrkind') &&
-			$pattern->exists ('@constrnr') &&
-			    $pattern->exists ('@aid')) {
-		    my $constrkind = $pattern->findvalue ('@constrkind');
-		    my $constrkind_lc = lc $constrkind;
-		    my $constrnr = $pattern->findvalue ('@constrnr');
-		    my $aid = $pattern->findvalue ('@aid');
-		    my $aid_lc = lc $aid;
+    foreach my $i (1 .. scalar @dnos) {
+	my $dno = $dnos[$i - 1];
+	my $dno_path = "$prel_subdir/ckb${dno}.dno";
+	my $dno_doc = $xml_parser->parse_file ($dno_path);
+	my @patterns = $dno_doc->findnodes ('Notations/Pattern');
+	foreach my $pattern (@patterns) {
+	    if ($pattern->exists ('@constrkind') &&
+		    $pattern->exists ('@constrnr') &&
+			$pattern->exists ('@aid')) {
+		my $constrkind = $pattern->findvalue ('@constrkind');
+		my $constrkind_lc = lc $constrkind;
+		my $constrnr = $pattern->findvalue ('@constrnr');
+		my $aid = $pattern->findvalue ('@aid');
+		my $aid_lc = lc $aid;
 
-		    my $num = undef;
-		    if (defined $patterns{$constrkind}) {
-			$num = $patterns{$constrkind};
-			$patterns{$constrkind} = $num + 1;
-		    } else {
-			$num = 1;
-			$patterns{$constrkind} = 2;
-		    }
-
-		    my $pattern_key = "${article_basename}:${constrkind_lc}pattern:${num}";
-		    my $fragment_number = $dno;
-		    $fragments_to_patterns{$fragment_number} = $pattern_key;
-
-		    print $article_basename, ':', $constrkind_lc, 'pattern', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $dno, '[', $constrkind_lc, 'p', ']', "\n";
-
+		my $num = undef;
+		if (defined $patterns{$constrkind}) {
+		    $num = $patterns{$constrkind};
+		    $patterns{$constrkind} = $num + 1;
 		} else {
-		    croak ('Error: Unable to make sense of a Pattern node in an eno file that does not have a constrkind, constrnr, and aid attribute.');
+		    $num = 1;
+		    $patterns{$constrkind} = 2;
 		}
 
+		my $pattern_key = "${article_basename}:${constrkind_lc}pattern:${num}";
+		my $fragment_number = $dno;
+		$fragments_to_patterns{$fragment_number} = $pattern_key;
+
+		print $article_basename, ':', $constrkind_lc, 'pattern', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $dno, '[', $constrkind_lc, 'p', ']', "\n";
+
+	    } else {
+		croak ('Error: Unable to make sense of a Pattern node in an eno file that does not have a constrkind, constrnr, and aid attribute.');
 	    }
 
 	}
 
     }
 
-    sub print_definientia {
+}
 
-	my @defs = `find $prel_subdir -name "*.def" -exec basename {} .def ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-	chomp @defs;
+sub print_definientia {
 
-	my %definiens = ();
-	my %fragments_to_definientia = ();
+    my @defs = `find $prel_subdir -name "*.def" -exec basename {} .def ';' | sed -e 's/ckb//' | sort --numeric-sort`;
+    chomp @defs;
 
-	foreach my $i (1 .. scalar @defs) {
-	    my $def = $defs[$i - 1];
-	    my $def_path = "$prel_subdir/ckb${def}.def";
-	    my $def_doc = undef;
+    my %definiens = ();
+    my %fragments_to_definientia = ();
 
-	    if (! eval { $def_doc = $xml_parser->parse_file ($def_path) } ) {
-		print STDERR 'Error: the .def file at ', $def_path, ' is not well-formed XML.';
-	    }
-	    my @definientia = $def_doc->findnodes ('Definientia/Definiens');
-	    if (scalar @definientia == 0) {
-		print STDERR ('Error: we found no Definiens nodes in ', $def_path, '.');
-	    }
-	    if (scalar @definientia > 1) {
-		print STDERR ('Error: we found multiple Definiens nodes in ', $def_path, '.');
-	    }
-	    my $definiens = $definientia[0];
-	    if (! $definiens->exists ('@constrkind')) {
-		print STDERR ('Error: we failed to extract a constrkind attribute from a Definiens XML element in ', $def_path, '.', "\n");
-		next;
-	    }
-	    my $constrkind = $definiens->findvalue ('@constrkind');
-	    my $constrkind_lc = lc $constrkind;
-	    my $num;
+    foreach my $i (1 .. scalar @defs) {
+	my $def = $defs[$i - 1];
+	my $def_path = "$prel_subdir/ckb${def}.def";
+	my $def_doc = undef;
+
+	if (! eval { $def_doc = $xml_parser->parse_file ($def_path) } ) {
+	    print STDERR 'Error: the .def file at ', $def_path, ' is not well-formed XML.';
+	}
+	my @definientia = $def_doc->findnodes ('Definientia/Definiens');
+	if (scalar @definientia == 0) {
+	    print STDERR ('Error: we found no Definiens nodes in ', $def_path, '.');
+	}
+	if (scalar @definientia > 1) {
+	    print STDERR ('Error: we found multiple Definiens nodes in ', $def_path, '.');
+	}
+	my $definiens = $definientia[0];
+	if (! $definiens->exists ('@constrkind')) {
+	    print STDERR ('Error: we failed to extract a constrkind attribute from a Definiens XML element in ', $def_path, '.', "\n");
+	    next;
+	}
+	my $constrkind = $definiens->findvalue ('@constrkind');
+	my $constrkind_lc = lc $constrkind;
+	my $num;
 	    if (defined $definiens{$constrkind}) {
 		$num = $definiens{$constrkind};
 		$definiens{$constrkind} = $num + 1;
@@ -288,13 +288,13 @@ sub print_constructors {
 		$definiens{$constrkind} = 2;
 	    }
 
-	    print $article_basename, ':', $constrkind_lc, 'definiens', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $def, '[', $constrkind_lc, 'f', ']', "\n";
+	print $article_basename, ':', $constrkind_lc, 'definiens', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $def, '[', $constrkind_lc, 'f', ']', "\n";
 
-	    my $definiens_key = "${article_basename}:${constrkind_lc}definiens:${num}";
-	    $fragments_to_definientia{$def} = $definiens_key;
-	}
-
+	my $definiens_key = "${article_basename}:${constrkind_lc}definiens:${num}";
+	$fragments_to_definientia{$def} = $definiens_key;
     }
+
+}
 
     # Constructor properties and definition correctness conditions
 
@@ -324,16 +324,17 @@ foreach my $p_or_c_file (@properties_and_conditions) {
     }
 }
 
-# Deftheorems
+sub print_deftheorems {
 
-my @thes = `grep --with-filename '<Theorem kind="D"' $prel_subdir/*.the | cut -f 1 -d ':' | parallel basename {} .the | sed -e 's/ckb//' | sort --numeric-sort`;
-chomp @thes;
+    my @thes = `grep --with-filename '<Theorem kind="D"' $prel_subdir/*.the | cut -f 1 -d ':' | parallel basename {} .the | sed -e 's/ckb//' | sort --numeric-sort`;
+    chomp @thes;
 
-my %deftheorems = ();
+    my %deftheorems = ();
 
-foreach my $i (1 .. scalar @thes) {
-    my $the = $thes[$i - 1];
-    print $article_basename, ':', 'deftheorem' , ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $the, '[dt]', "\n";
+    foreach my $i (1 .. scalar @thes) {
+	my $the = $thes[$i - 1];
+	print $article_basename, ':', 'deftheorem' , ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $the, '[dt]', "\n";
+    }
 }
 
 sub print_schemes {
@@ -488,6 +489,7 @@ print_constructor_properties ();
 print_constructors ();
 print_notations ();
 print_definientia ();
+print_deftheorems ();
 print_schemes ();
 print_reductions ();
 print_clusters ();
