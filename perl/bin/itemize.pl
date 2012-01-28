@@ -234,91 +234,77 @@ chdir $target_directory
 
 print 'Generating ', scalar @fragments, ' Mizar fragments from ', $article_basename, ': ';
 
+sub uc_mizar_name {
+    my $name = shift;
+    return uc strip_extension ($name);
+}
+
 foreach my $i (1 .. scalar @fragments) {
 
-  print '.';
+    print '.';
 
-  my $fragment = $fragments[$i - 1];
+    my $fragment = $fragments[$i - 1];
 
-  my $fragment_path = "${target_directory}/fragment-${i}.wsx";
-  my $fragment_evl = "${target_directory}/fragment-${i}.evl";
-  my $fragment_miz = "${target_text_subdir}/ckb${i}.miz";
-  my $fragment_xml = "${target_text_subdir}/ckb${i}.xml";
-  my $fragment_xml_orig = "${target_text_subdir}/ckb${i}.xml.orig";
-  my $fragment_xml_exported = "${target_text_subdir}/ckb${i}.xml.exported";
+    my $fragment_path = "${target_directory}/fragment-${i}.wsx";
+    my $fragment_evl = "${target_directory}/fragment-${i}.evl";
+    my $fragment_miz = "${target_text_subdir}/ckb${i}.miz";
+    my $fragment_xml = "${target_text_subdir}/ckb${i}.xml";
+    my $fragment_xml_orig = "${target_text_subdir}/ckb${i}.xml.orig";
+    my $fragment_xml_exported = "${target_text_subdir}/ckb${i}.xml.exported";
 
-  # Extend the evl of the initial article by inspecting the contents
-  # of the prel subdirectory
-  my @new_notations
-      = map { uc strip_extension ($_) } $local_db->notations_in_prel ();
-  my @new_registrations
-      = map { uc strip_extension ($_) } $local_db->registrations_in_prel ();
-  my @new_definitions
-      = map { uc strip_extension ($_) } $local_db->definitions_in_prel ();
-  my @new_theorems
-      = map { uc strip_extension ($_) } $local_db->theorems_in_prel ();
-  my @new_schemes
-      = map { uc strip_extension ($_) } $local_db->schemes_in_prel ();
-  my @new_constructors =
-      map { uc strip_extension ($_) } $local_db->constructors_in_prel ();
+    # Extend the evl of the initial article by inspecting the contents
+    # of the prel subdirectory
+    my @new_notations
+	= map { uc_mizar_name ($_ } $local_db->notations_in_prel ();
+    my @new_registrations
+	= map { uc_mizar_name ($_) } $local_db->registrations_in_prel ();
+    my @new_definitions
+	= map { uc_mizar_name ($_) } $local_db->definitions_in_prel ();
+    my @new_theorems
+	= map { uc_mizar_name ($_) } $local_db->theorems_in_prel ();
+    my @new_schemes
+	= map { uc_mizar_name ($_) } $local_db->schemes_in_prel ();
+    my @new_constructors =
+	map { uc_mizar_name ($_) } $local_db->constructors_in_prel ();
 
-  apply_stylesheet ($extend_evl_stylesheet,
-		    $article_evl_in_target_dir,
-		    $fragment_evl,
-		    {
-			'notations' => list_as_token_string (\@new_notations),
-			'definitions' => list_as_token_string (\@new_definitions),
-			'theorems' => list_as_token_string (\@new_theorems),
-			'registrations' => list_as_token_string (\@new_registrations),
-			'constructors' => list_as_token_string (\@new_constructors),
-			'schemes' => list_as_token_string (\@new_constructors),
-		    })
-      or croak ('Error: xsltproc did not exit cleanly when applying the extend-evl stylesheet to ', $article_evl_in_target_dir, '.', "\n");
+    apply_stylesheet ($extend_evl_stylesheet,
+		      $article_evl_in_target_dir,
+		      $fragment_evl,
+		      {
+			  'notations' => list_as_token_string (\@new_notations),
+			  'definitions' => list_as_token_string (\@new_definitions),
+			  'theorems' => list_as_token_string (\@new_theorems),
+			  'registrations' => list_as_token_string (\@new_registrations),
+			  'constructors' => list_as_token_string (\@new_constructors),
+			  'schemes' => list_as_token_string (\@new_schemes),
+		      })
+	or croak ('Error: xsltproc did not exit cleanly when applying the extend-evl stylesheet to ', $article_evl_in_target_dir, '.', "\n");
 
-  # Now render the fragment's XML as a mizar article
-  apply_stylesheet ($wsm_stylesheet,
-		    $fragment_path,
-		    $fragment_miz,
-		    { 'evl' => $fragment_evl })
-      or croak ('Error: xsltproc did not exit cleanly when applying the WSM stylesheet to ', $fragment_path, '.', "\n");
+    # Now render the fragment's XML as a mizar article
+    apply_stylesheet ($wsm_stylesheet,
+		      $fragment_path,
+		      $fragment_miz,
+		      { 'evl' => $fragment_evl })
+	or croak ('Error: xsltproc did not exit cleanly when applying the WSM stylesheet to ', $fragment_path, '.', "\n");
 
-  my $fragment_article = Article->new (path => $fragment_miz)
-      or croak ('Error: unable to create a new Article object for ', $fragment_miz, ':', $!);
+    # Now export and transfer the fragment
 
-  # Now export and transfer the fragment
+    my $fragment_basename = "ckb${i}";
+    $local_db->accom ($fragment_basename)
+	or croak ('Warning: accom did not exit cleanly when applied to fragment number ', $i, ' of ', $article_basename, '.');
 
-  if (run_mizar_tool ('accom', $fragment_miz)) {
-    if (run_mizar_tool ('verifier', $fragment_miz)) {
-      # Save a copy of the XML -- exporter can modify it!
+    if ($local_db->verify ($fragment_basename)) {
 	copy ($fragment_xml, $fragment_xml_orig)
-	or croak ('Error: unable to save a copy of ', $fragment_xml, ' to ', $fragment_xml_orig, ': ', $!);
-      if (run_mizar_tool ('exporter', $fragment_miz)) {
-	copy ($fragment_xml, $fragment_xml_exported)
-	  or croak ('Error: unable to save a copy of the exported XML ', $fragment_xml, ' to ', $fragment_xml_exported, '.', "\n");
-	if (run_mizar_tool ('transfer', $fragment_miz)) {
-	  # nothing to do
+	    or croak ('Error: unable to save a copy of ', $fragment_xml, ' to ', $fragment_xml_orig, ': ', $!);
+	if ($local_db->export ($fragment_basename)) {
+	    $local_db->transfer ($fragment_basename)
+		or carp ('Warning: fragment number ', $i, ' of ', $article_basename, ' is verifiable and exportable, but there was a problem with the call to transfer.');
 	} else {
-	  if ($verbose) {
-	    print 'Warning: fragment number ', $i, ' of ', $article_basename, ' is not transferrable.', "\n";
-	  }
+	    carp ('Warning: fragment number ', $i, ' of ', $article_basename, ' is verifiable but not exportable.');
 	}
-      } else {
-	if ($verbose) {
-	  print 'Warning: fragment number ', $i, ' of ', $article_basename, ' is not expotable.', "\n";
-	}
-      }
-      copy ($fragment_xml_orig, $fragment_xml)
-	or croak ('Error: unable to restore the pre-exporter version of the XML at ', $fragment_xml_orig, ' to ', $fragment_xml, '.', "\n");
     } else {
-      if ($verbose) {
-	print 'Warning: verifier did not exit cleanly when applied to fragment number ', $i, ' of ', $article_basename, '.', "\n";
-      }
+	carp ('Warning: fragment number ', $i, ' of ', $article_basename, ' is not verifiable.');
     }
-  } else {
-    if ($verbose) {
-      print 'Warning: accom did not exit cleanly when applied to fragment number ', $i, ' of ', $article_basename, '.', "\n";
-    }
-  }
 }
 
 print 'done.', "\n";
