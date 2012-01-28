@@ -4,6 +4,7 @@ use Moose;
 use File::Basename qw(basename dirname);
 use File::Spec;
 use Carp qw(croak);
+use Cwd;
 
 # Our stuff
 use Utils qw(ensure_directory);
