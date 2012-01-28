@@ -306,6 +306,86 @@ sub theorems_in_prel_of_kind {
 
 }
 
+sub constructors_in_prel_of_kind {
+
+    my $self = shift;
+    my $kind = shift;
+
+    my $prel_subdir = $self->get_prel_subdir ();
+
+    my @dcos = $self->files_in_prel_with_extension ('dco');
+
+    my @answers = ();
+
+    foreach my $dco (@dcos) {
+
+	my $dco_path = "${prel_subdir}/$dco";
+	if (ensure_readable_file ($dco_path)) {
+	    my $dco_doc = eval { $xml_parser->parse_file ($dco_path) };
+	    if (defined $dco_doc) {
+
+		my $xpath = '/Constructors/Constructor[@kind = "' . (uc $kind) . '"]';
+		if ($dco_doc->exists ($xpath)) {
+		    push (@answers, $dco);
+		}
+
+	    } else {
+		croak ('Error: the XML file at ', $dco_doc, ' is not well-formed.');
+	    }
+	} else {
+	    croak ('Error: the constructor file ', $dco, ' does not exist at the expected location (', $dco_path, ').');
+	}
+    }
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+
+
+}
+
+sub patterns_in_prel_of_kind {
+
+    my $self = shift;
+    my $kind = shift;
+
+    my $prel_subdir = $self->get_prel_subdir ();
+
+    my @dnos = $self->files_in_prel_with_extension ('dno');
+
+    my @answers = ();
+
+    foreach my $dno (@dnos) {
+
+	my $dno_path = "${prel_subdir}/$dno";
+	if (ensure_readable_file ($dno_path)) {
+	    my $dno_doc = eval { $xml_parser->parse_file ($dno_path) };
+	    if (defined $dno_doc) {
+
+		my $xpath = '/Notations/Pattern[@kind = "' . (uc $kind) . '"]';
+		if ($dno_doc->exists ($xpath)) {
+		    push (@answers, $dno);
+		}
+
+	    } else {
+		croak ('Error: the XML file at ', $dno_doc, ' is not well-formed.');
+	    }
+	} else {
+	    croak ('Error: the constructor file ', $dno, ' does not exist at the expected location (', $dno_path, ').');
+	}
+    }
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+
+
+}
+
 sub deftheorems_in_prel {
     my $self = shift;
     return $self->theorems_in_prel_of_kind ('D');
