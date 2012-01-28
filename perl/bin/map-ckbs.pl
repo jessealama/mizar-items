@@ -436,7 +436,7 @@ sub print_identifications {
 }
 
 sub print_theorems {
-    my @thes = `find $prel_subdir -name "*.sch" -exec basename {} .the ';' | sed -e 's/ckb//' | sort --numeric-sort`;
+    my @thes = `find $prel_subdir -name "*.the" -exec basename {} .the ';' | sed -e 's/ckb//' | sort --numeric-sort`;
     chomp @thes;
 
     foreach my $i (1 .. scalar @thes) {
