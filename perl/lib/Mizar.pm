@@ -3,6 +3,7 @@ package Mizar;
 use warnings;
 use strict;
 use Carp;
+use Cwd;
 
 use version; our $VERSION = qv('0.0.3');
 
@@ -109,17 +110,25 @@ sub run_mizar_tool {
 sub accom {
     my $article_name = shift;
     my $parameters_ref = shift;
-    if (defined $parameters_ref) {
-	return (run_mizar_tool ('accom', $article_name, $parameters_ref));
-    } else {
-	return (run_mizar_tool ('accom', $article_name));
-    }
+    return (run_mizar_tool ('accom', $article_name, $parameters_ref));
 }
 
 sub verifier {
     my $article_name = shift;
     my $parameters_ref = shift;
     return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
+}
+
+sub exporter {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('exporter', $article_name, $parameters_ref));
+}
+
+sub transfer {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('transfer', $article_name, $parameters_ref));
 }
 
 sub wsmparser {
