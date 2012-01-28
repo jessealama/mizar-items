@@ -162,7 +162,7 @@ sub list_as_token_string {
 
 sub fragment_number {
   my $fragment_path = shift;
-  if ($fragment_path =~ m{ \A ckb ([0-9]+) ( $ | [.] ) }x) {
+  if ($fragment_path =~ m{ \A [Cc][Kk][Bb] ([0-9]+) ( $ | [.] ) }x) {
     my $fragment_number = $1;
     return $fragment_number;
   } else {
