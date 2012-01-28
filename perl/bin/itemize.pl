@@ -141,13 +141,6 @@ ensure_readable_file ($article_evl_in_target_dir);
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1,
 				   suppress_errors => 1);
 
-my @notations = $article_in_target_dir->notations ();
-my @registrations = $article_in_target_dir->registrations ();
-my @definitions = $article_in_target_dir->definitions ();
-my @theorems = $article_in_target_dir->theorems ();
-my @schemes = $article_in_target_dir->schemes ();
-my @constructors = $article_in_target_dir->constructors ();
-
 # Now print the items
 
 my $itemized_article_doc = undef;
