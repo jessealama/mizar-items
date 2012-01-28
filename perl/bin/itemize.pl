@@ -229,9 +229,6 @@ foreach my $i (1 .. scalar @fragments) {
   $fragment_doc->toFile ($fragment_path);
 }
 
-chdir $target_directory
-  or croak ('Error: unable to change directory to ', $target_directory, '.', "\n");
-
 print 'Generating ', scalar @fragments, ' Mizar fragments from ', $article_basename, ': ';
 
 sub uc_mizar_name {
