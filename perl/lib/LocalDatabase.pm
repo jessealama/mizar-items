@@ -131,5 +131,74 @@ sub theorems_in_prel {
     return $self->files_in_prel_with_extension ('the');
 }
 
+sub run_tool_in_local_database {
+    my $self = shift;
+    my $tool = shift;
+    my $article = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my $article_base = basename ($article, '.miz');
+
+    my $location = $self->get_location ();
+    my $article_path_in_text_dir = "text/${article_base}.miz";
+
+    my $cwd = getcwd ();
+
+    chdir $location
+	or croak ('Error: unable to change directory to ', $location, ': ', $!);
+    my $tool_results = Mizar::run_mizar_tool ($tool,
+					      $article_path_in_text_dir,
+					      \%parameters);
+    chdir $cwd;
+
+    return $tool_results;
+}
+
+sub accom {
+    my $self = shift;
+    my $article = shift;
+    my $parameters_ref = shift;
+
+    return $self->run_tool_in_local_database ('accom',
+					      $article,
+					      $parameters_ref);
+
+}
+
+sub verify {
+    my $self = shift;
+    my $article = shift;
+    my $parameters_ref = shift;
+
+    return $self->run_tool_in_local_database ('verifier',
+					      $article,
+					      $parameters_ref);
+
+}
+
+sub export {
+    my $self = shift;
+    my $article = shift;
+    my $parameters_ref = shift;
+
+    return $self->run_tool_in_local_database ('exporter',
+					      $article,
+					      $parameters_ref);
+
+}
+
+sub transfer {
+    my $self = shift;
+    my $article = shift;
+    my $parameters_ref = shift;
+
+    return $self->run_tool_in_local_database ('transfer',
+					      $article,
+					      $parameters_ref);
+
+}
+
 1;
 __END__
