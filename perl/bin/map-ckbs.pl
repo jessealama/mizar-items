@@ -276,7 +276,7 @@ sub print_deftheorems {
 
 sub fragment_number {
     my $fragment = shift;
-    if ($fragment =~ /\A ckb ([0-9]+)/) {
+    if ($fragment =~ / ckb ([0-9]+) /) {
 	return $1;
     } else {
 	croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
