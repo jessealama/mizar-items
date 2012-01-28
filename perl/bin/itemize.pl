@@ -206,6 +206,18 @@ sub uc_mizar_name {
     return uc strip_extension ($name);
 }
 
+sub fragment_less_than {
+    my $a_num = fragment_number ($a);
+    my $b_num = fragment_number ($b);
+    if ($a_num < $b_num) {
+	return -1;
+    } elsif ($a_num == $b_num) {
+	return 0;
+    } else {
+	return 1;
+    }
+}
+
 foreach my $i (1 .. scalar @fragments) {
 
     print '.';
