@@ -266,9 +266,54 @@ sub definitions_in_prel {
     return $self->files_in_prel_with_extension ('def');
 }
 
+sub theorems_in_prel_of_kind {
+
+    my $self = shift;
+    my $kind = shift;
+
+    my $prel_subdir = $self->get_prel_subdir ();
+
+    my @thes = $self->files_in_prel_with_extension ('the');
+
+    my @answers = ();
+
+    foreach my $the (@thes) {
+
+	my $the_path = "${prel_subdir}/$the";
+	if (ensure_readable_file ($the_path)) {
+	    my $the_doc = eval { $xml_parser->parse_file ($the_path) };
+	    if (defined $the_doc) {
+
+		my $xpath = '/Theorems/Theorem[@kind = "' . (uc $kind) . '"]';
+		if ($the_doc->exists ($xpath)) {
+		    push (@answers, $the);
+		}
+
+	    } else {
+		croak ('Error: the XML file at ', $the_doc, ' is not well-formed.');
+	    }
+	} else {
+	    croak ('Error: the theorem file ', $the, ' does not exist at the expected location (', $the_path, ').');
+	}
+    }
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+
+
+}
+
+sub deftheorems_in_prel {
+    my $self = shift;
+    return $self->theorems_in_prel_of_kind ('D');
+}
+
 sub theorems_in_prel {
     my $self = shift;
-    return $self->files_in_prel_with_extension ('the');
+    return $self->theorems_in_prel_of_kind ('T');
 }
 
 sub run_tool_in_local_database {
