@@ -316,6 +316,22 @@ sub theorems_in_prel {
     return $self->theorems_in_prel_of_kind ('T');
 }
 
+sub theorems_and_deftheorems_in_prel {
+    my $self = shift;
+    my @theorems = $self->theorems_in_prel ();
+    my @deftheorems = $self->deftheorems_in_prel ();
+
+    my @answers = ();
+    push (@answers, @theorems);
+    push (@answers, @deftheorems);
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+}
+
 sub run_tool_in_local_database {
     my $self = shift;
     my $tool = shift;
