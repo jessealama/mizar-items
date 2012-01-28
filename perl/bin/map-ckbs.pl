@@ -201,27 +201,11 @@ sub print_notations {
     }
 }
 
-sub print_functor_definientia {
-    print_definientia_of_type ('k');
-}
+sub print_definientia_of_kind {
 
-sub print_mode_definientia {
-    print_definientia_of_type ('m');
-}
+    my $kind = shift;
 
-sub print_relation_definientia {
-    print_definientia_of_type ('r');
-}
-
-sub print_attribute_definientia {
-    print_definientia_of_type ('v');
-}
-
-sub print_definientia_of_type {
-
-    my $type = shift;
-
-    my @definientia = $local_db->definientia_in_prel_with_type ($type);
+    my @definientia = $local_db->definientia_in_prel_of_kind ($kind);
     my @definientia_no_extension = map { strip_extension ($_) } @definientia;
     my @sorted_definientia
 	= sort { fragment_less_than ($a, $b) } @definientia_no_extension;
@@ -229,16 +213,15 @@ sub print_definientia_of_type {
     foreach my $i (1 .. scalar @sorted_definientia) {
 	my $fragment_of_ccluster = $sorted_definientia[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_ccluster);
-	print $article_basename, ':', $type . 'definiens', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
+	print $article_basename, ':', $kind . 'definiens', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
 }
 
 sub print_definientia {
-    print_functor_definientia ();
-    print_mode_definientia ();
-    print_relation_definientia ();
-    print_attribute_definientia ();
+    foreach my $kind ('k', 'm', 'r', 'v') {
+	print_definientia_of_kind ($kind);
+    }
 }
 
 sub print_correctness_conditions {
@@ -378,10 +361,27 @@ sub print_existential_clusters {
 
 }
 
+sub print_clusters_of_kind {
+
+    my $kind = shift;
+
+    my @clusters = $local_db->clusters_in_prel_of_kind ($kind);
+    my @clusters_no_extension = map { strip_extension ($_) } @clusters;
+    my @sorted_clusters
+	= sort { fragment_less_than ($a, $b) } @clusters_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_clusters) {
+	my $fragment_of_cluster = $sorted_clusters[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_cluster);
+	print $article_basename, ':', $kind, 'cluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
+    }
+
+}
+
 sub print_clusters {
-    print_conditional_clusters ();
-    print_functorial_clusters ();
-    print_existential_clusters ();
+    foreach my $kind ('c', 'f', 'r') {
+	print_clusters_of_kind ($kind);
+    }
 }
 
 sub print_identifications {
@@ -432,7 +432,6 @@ sub print_theorems {
 # sub print_lemmas {
 
 #     # Exported lemmas that were originally unexported
-
 #     my @lemmas = $wsx_doc->findnodes ('Fragments/Text-Proper/Item[@kind = "Theorem-Item" and @promoted-lemma = "yes"]');
 
 #     # DEBUG
