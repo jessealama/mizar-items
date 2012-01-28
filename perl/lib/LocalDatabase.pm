@@ -77,6 +77,16 @@ sub prel_files {
     return glob "${prel}/*.*";
 }
 
+sub articles {
+    my $self = shift;
+
+    my $text = $self->get_text_subdir ();
+
+    my @miz_paths = glob "${text}/*.miz";
+    my @basenames = map { basename ($_, '.miz') } @miz_paths;
+    return @basenames;
+}
+
 sub files_in_prel_with_extension {
     my $self = shift;
     my $extension = shift;
