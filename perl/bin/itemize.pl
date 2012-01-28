@@ -58,10 +58,7 @@ if (! can_run ('parallel')) {
 my $article_path = $ARGV[0];
 my $article_basename = basename ($article_path, '.miz');
 my $article_dirname = dirname ($article_path);
-my $article_sans_extension = "${article_dirname}/${article_basename}";
 my $article_miz = "${article_dirname}/${article_basename}.miz";
-my $article_err = "${article_dirname}/${article_basename}.err";
-my $article_evl = "${article_dirname}/${article_basename}.evl";
 
 if (! ensure_readable_file ($article_miz)) {
     croak ('Error: ', $article_miz, ' does not exist (as a file) or is not readable.');
@@ -71,8 +68,6 @@ my $article = Article->new (path => $article_miz);
 
 Mizar::set_stylesheet_home ($stylesheet_home);
 
-my $absrefs_stylesheet = Mizar::path_for_stylesheet ('addabsrefs');
-my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
 my $split_stylesheet = Mizar::path_for_stylesheet ('split');
 my $itemize_stylesheet = Mizar::path_for_stylesheet ('itemize');
 my $wsm_stylesheet = Mizar::path_for_stylesheet ('wsm');
@@ -102,9 +97,8 @@ my $target_prel_subdir = $local_db->get_prel_subdir ();
 # Copy the article miz to the new subdirectory
 
 my $article_in_target_dir = $article->copy (File::Spec->catdir ($target_directory));
+
 my $article_evl_in_target_dir = $article_in_target_dir->file_with_extension ('evl');
-my $article_msm_in_target_dir = $article_in_target_dir->file_with_extension ('msm');
-my $article_tpr_in_target_dir = $article_in_target_dir->file_with_extension ('tpr');
 
 # Transform the new miz
 print 'Rewriting the text of ', $article_basename, ': ';
