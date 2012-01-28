@@ -349,6 +349,21 @@ sub wsmparser {
     return Mizar::wsmparser ($self->get_path ());
 }
 
+sub export {
+    my $self = shift;
+    return Mizar::exporter ($self->get_path ());
+}
+
+sub is_exportable {
+    my $self = shift;
+    return $self->export ();
+}
+
+sub transfer {
+    my $self = shift;
+    return Mizar::transfer ($self->get_path ());
+}
+
 sub msmprocessor {
     my $self = shift;
     return Mizar::msmprocessor ($self->get_path ());
