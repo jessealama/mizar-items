@@ -102,23 +102,6 @@ my $target_prel_subdir = $local_db->get_prel_subdir ();
 # Copy the article miz to the new subdirectory
 
 my $article_in_target_dir = $article->copy (File::Spec->catdir ($target_directory));
-
-sub run_mizar_tool {
-  my $tool = shift;
-  my $article_file = shift;
-  my $article_base = basename ($article_file, '.miz');
-  my $article_err_file = "${article_base}.err";
-  my $tool_status = system ("$tool -l -q $article_file > /dev/null 2>&1");
-  my $tool_exit_code = $tool_status >> 8;
-  if ($tool_exit_code != 0 && -s $article_err_file) {
-    if ($verbose) {
-      print 'Error: the ', $tool, ' Mizar tool did not exit cleanly when applied to ', $article_file, ' (or the .err file is non-empty).', "\n";
-    }
-    return 0;
-  }
-  return 1;
-}
-
 my $article_evl_in_target_dir = $article_in_target_dir->file_with_extension ('evl');
 my $article_msm_in_target_dir = $article_in_target_dir->file_with_extension ('msm');
 my $article_tpr_in_target_dir = $article_in_target_dir->file_with_extension ('tpr');
