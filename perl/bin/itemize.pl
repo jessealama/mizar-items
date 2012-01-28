@@ -356,12 +356,7 @@ sub copy_fragment_to_new_prefix {
   my $fragment_basename = shift;
   my $new_prefix = shift;
   my @old_files = glob "${target_text_subdir}/${fragment_basename}.*";
-  # if ($debug) {
-  #   print {*STDERR} 'Files matching the name \'', $fragment_basename, '\':';
-  #   foreach my $file (@old_files) {
-  #     print {*STDERR} $file, "\n";
-  #    }
-  # }
+
   foreach my $file (@old_files) {
     my $extension = extension ($file);
     my $new_path = "${target_text_subdir}/${new_prefix}.${extension}";
