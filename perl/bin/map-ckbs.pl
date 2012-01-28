@@ -11,7 +11,7 @@ use Carp qw(croak carp);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 
-use Utils qw(ensure_directory);
+use Utils qw(ensure_directory strip_extension);
 use Xsltproc qw(apply_stylesheet);
 use LocalDatabase;
 
@@ -250,51 +250,44 @@ sub print_notations {
 
 }
 
-sub print_definientia {
+sub print_functor_definientia {
+    print_definientia_of_type ('k');
+}
 
-    my @defs = `find $prel_subdir -name "*.def" -exec basename {} .def ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @defs;
+sub print_mode_definientia {
+    print_definientia_of_type ('m');
+}
 
-    my %definiens = ();
-    my %fragments_to_definientia = ();
+sub print_relation_definientia {
+    print_definientia_of_type ('r');
+}
 
-    foreach my $i (1 .. scalar @defs) {
-	my $def = $defs[$i - 1];
-	my $def_path = "$prel_subdir/ckb${def}.def";
-	my $def_doc = undef;
+sub print_attribute_definientia {
+    print_definientia_of_type ('v');
+}
 
-	if (! eval { $def_doc = $xml_parser->parse_file ($def_path) } ) {
-	    print STDERR 'Error: the .def file at ', $def_path, ' is not well-formed XML.';
-	}
-	my @definientia = $def_doc->findnodes ('Definientia/Definiens');
-	if (scalar @definientia == 0) {
-	    print STDERR ('Error: we found no Definiens nodes in ', $def_path, '.');
-	}
-	if (scalar @definientia > 1) {
-	    print STDERR ('Error: we found multiple Definiens nodes in ', $def_path, '.');
-	}
-	my $definiens = $definientia[0];
-	if (! $definiens->exists ('@constrkind')) {
-	    print STDERR ('Error: we failed to extract a constrkind attribute from a Definiens XML element in ', $def_path, '.', "\n");
-	    next;
-	}
-	my $constrkind = $definiens->findvalue ('@constrkind');
-	my $constrkind_lc = lc $constrkind;
-	my $num;
-	    if (defined $definiens{$constrkind}) {
-		$num = $definiens{$constrkind};
-		$definiens{$constrkind} = $num + 1;
-	    } else {
-		$num = 1;
-		$definiens{$constrkind} = 2;
-	    }
+sub print_definientia_of_type {
 
-	print $article_basename, ':', $constrkind_lc, 'definiens', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $def, '[', $constrkind_lc, 'f', ']', "\n";
+    my $type = shift;
 
-	my $definiens_key = "${article_basename}:${constrkind_lc}definiens:${num}";
-	$fragments_to_definientia{$def} = $definiens_key;
+    my @definientia = $local_db->definientia_in_prel_with_type ($type);
+    my @definientia_no_extension = map { strip_extension ($_) } @definientia;
+    my @sorted_definientia
+	= sort { fragment_less_than ($a, $b) } @definientia_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_definientia) {
+	my $fragment_of_ccluster = $sorted_definientia[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_ccluster);
+	print $article_basename, ':', $type . 'definiens', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
+}
+
+sub print_definientia {
+    print_functor_definientia ();
+    print_mode_definientia ();
+    print_relation_definientia ();
+    print_attribute_definientia ();
 }
 
     # Constructor properties and definition correctness conditions
@@ -338,71 +331,105 @@ sub print_deftheorems {
     }
 }
 
+sub fragment_number {
+    my $fragment = shift;
+    if ($fragment =~ /\A ckb ([0-9]+)/) {
+	return $1;
+    } else {
+	croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
+    }
+}
+
+sub fragment_less_than {
+    my $a_num = fragment_number ($a);
+    my $b_num = fragment_number ($b);
+    if ($a_num < $b_num) {
+	return -1;
+    } elsif ($a_num == $b_num) {
+	return 0;
+    } else {
+	return 1;
+    }
+}
+
 sub print_schemes {
 
-    # Schemes
+    my @schemes = $local_db->schemes_in_prel ();
+    my @schemes_no_extension = map { strip_extension ($_) } @schemes;
+    my @sorted_schemes = sort { fragment_less_than ($a, $b) } @schemes_no_extension;
 
-    my @schs = `find $prel_subdir -name "*.sch" -exec basename {} .sch ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @schs;
-
-    my %schemes = ();
-
-    foreach my $i (1 .. scalar @schs) {
-	my $sch = $schs[$i - 1];
-	my $sch_path = "$prel_subdir/ckb${sch}.sch";
-	print $article_basename, ':', 'scheme', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $sch, "\n";
+    foreach my $i (1 .. scalar @sorted_schemes) {
+	my $fragment_of_scheme = $sorted_schemes[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_scheme);
+	print $article_basename, ':', 'scheme', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
 }
 
 sub print_reductions {
 
-    # Reductions
+    my @reductions = $local_db->reductions_in_prel ();
+    my @reductions_no_extension = map { strip_extension ($_) } @reductions;
+    my @sorted_reductions
+	= sort { fragment_less_than ($a, $b) } @reductions_no_extension;
 
-    my @drds = `find $prel_subdir -name "*.drd" -exec basename {} .drd ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @drds;
+    foreach my $i (1 .. scalar @sorted_reductions) {
+	my $fragment_of_reduction = $sorted_reductions[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_reduction);
+	print $article_basename, ':', 'reduction', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
+    }
 
-    my %reductions = ();
+}
 
-    foreach my $i (1 .. scalar @drds) {
-	my $drd = $drds[$i - 1];
-	my $drd_path = "$prel_subdir/ckb${drd}.drd";
-	print $article_basename, ':', 'reduction', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $drd, "\n";
+sub print_conditional_clusters {
+
+    my @cclusters = $local_db->conditional_clusters_in_prel ();
+    my @cclusters_no_extension = map { strip_extension ($_) } @cclusters;
+    my @sorted_cclusters
+	= sort { fragment_less_than ($a, $b) } @cclusters_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_cclusters) {
+	my $fragment_of_ccluster = $sorted_cclusters[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_ccluster);
+	print $article_basename, ':', 'ccluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
+    }
+
+}
+
+sub print_functorial_clusters {
+
+    my @fclusters = $local_db->functorial_clusters_in_prel ();
+    my @fclusters_no_extension = map { strip_extension ($_) } @fclusters;
+    my @sorted_fclusters
+	= sort { fragment_less_than ($a, $b) } @fclusters_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_fclusters) {
+	my $fragment_of_fcluster = $sorted_fclusters[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_fcluster);
+	print $article_basename, ':', 'fcluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
+    }
+
+}
+
+sub print_existential_clusters {
+
+    my @rclusters = $local_db->existential_clusters_in_prel ();
+    my @rclusters_no_extension = map { strip_extension ($_) } @rclusters;
+    my @sorted_rclusters
+	= sort { fragment_less_than ($a, $b) } @rclusters_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_rclusters) {
+	my $fragment_of_rcluster = $sorted_rclusters[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_rcluster);
+	print $article_basename, ':', 'rcluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
 }
 
 sub print_clusters {
-
-    # Clusters
-
-    my @dcls = `find $prel_subdir -name "*.dcl" -exec basename {} .dcl ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @dcls;
-
-    my %clusters = ();
-
-    foreach my $i (1 .. scalar @dcls) {
-	my $dcl = $dcls[$i - 1];
-	my $dcl_path = "$prel_subdir/ckb${dcl}.dcl";
-	my $cluster_line = `grep '<[CFR]Cluster ' $dcl_path`;
-	chomp $cluster_line;
-	$cluster_line =~ m/([CFR])Cluster /;
-	my $kind = $1;
-	if (! defined $kind) {
-	    print STDERR ('Error: we failed to extract the cluster kind from the XML element', "\n", "\n", '  ', $cluster_line, "\n");
-	}
-	my $kind_lc = lc $kind;
-	my $num;
-	if (defined $clusters{$kind}) {
-	    $num = $clusters{$kind};
-	    $clusters{$kind} = $num + 1;
-	} else {
-	    $num = 1;
-	    $clusters{$kind} = 2;
-	}
-	print $article_basename, ':', $kind_lc, 'cluster', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $dcl, "\n";
-    }
-
+    print_conditional_clusters ();
+    print_functorial_clusters ();
+    print_existential_clusters ();
 }
 
 sub print_identifications {
@@ -437,13 +464,15 @@ sub print_identifications {
 }
 
 sub print_theorems {
-    my @thes = `find $prel_subdir -name "*.the" -exec basename {} .the ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @thes;
 
-    foreach my $i (1 .. scalar @thes) {
-	my $the = $thes[$i - 1];
-	my $the_path = "$prel_subdir/ckb${the}.the";
-	print $article_basename, ':', 'theorem', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $the, "\n";
+    my @theorems = $local_db->theorems_in_prel ();
+    my @theorems_no_extension = map { strip_extension ($_) } @theorems;
+    my @sorted_theorems = sort { fragment_less_than ($a, $b) } @theorems_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_theorems) {
+	my $fragment_of_theorem = $sorted_theorems[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_theorem);
+	print $article_basename, ':', 'theorem', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
 }
