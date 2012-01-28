@@ -166,7 +166,16 @@ sub print_constructors_of_kind {
     foreach my $i (1 .. scalar @sorted_dcos) {
 	my $fragment_of_ccluster = $sorted_dcos[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_ccluster);
-	print $article_basename, ':', $kind . 'constructor', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
+	my $item = "${article_basename}:${kind}constructor:${i}";
+	my $fragment = "${article_basename}:fragment:${fragment_number}";
+	print $item, ' => ', $fragment, "\n";
+
+	# Record that this fragment number generates this constructor.
+	# Later, when computing correctness conditions, we'll need
+	# this information.
+
+	$fragments_to_constructors{$fragment_number} = $item;
+
     }
 
 }
