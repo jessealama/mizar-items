@@ -240,7 +240,7 @@ foreach my $i (1 .. scalar @fragments) {
     my @new_definitions
 	= map { uc_mizar_name ($_) } $local_db->definitions_in_prel ();
     my @new_theorems
-	= map { uc_mizar_name ($_) } $local_db->theorems_in_prel ();
+	= map { uc_mizar_name ($_) } $local_db->theorems_and_deftheorems_in_prel ();
     my @new_schemes
 	= map { uc_mizar_name ($_) } $local_db->schemes_in_prel ();
     my @new_constructors =
