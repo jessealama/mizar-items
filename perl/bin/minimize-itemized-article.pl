@@ -10,43 +10,8 @@ use Pod::Usage;
 use File::Temp qw(tempdir);
 use Carp qw(croak);
 
-sub ensure_directory {
-  my $dir = shift;
-  if (! -e $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist.';
-  }
-
-  if (! -d $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist (as a directory).';
-  }
-  return 1;
-}
-
-sub ensure_readable_file {
-  my $file = shift;
-
-  if (! -e $file) {
-    croak ('Error: ', $file, ' does not exist.');
-  }
-  if (! -f $file) {
-    croak ('Error: ', $file, ' is not a file.');
-  }
-
-  if (! -r $file) {
-    croak ('Error: ', $file, ' is unreadable.');
-  }
-
-  return 1;
-}
-
-sub ensure_executable_file {
-  my $path = shift;
-  ensure_readable_file ($path);
-  if (! -x $path) {
-    croak ('Error: ', $path, ' should be executable, but it is not.');
-  }
-  return 1;
-}
+use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 
 my $verbose = 0;
 my $debug = 0;
@@ -54,8 +19,8 @@ my $man = 0;
 my $help = 0;
 my $paranoid = 0;
 my $minimize_whole_article = 0;
-my $script_home = '/Users/alama/sources/mizar/xsl4mizar/items';
-my $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
+my $script_home = '/Users/alama/sources/mizar/mizar-items/bin';
+my $stylesheet_home = '/Users/alama/sources/mizar-items/xsl';
 my $nice = 0;
 my $num_jobs = undef;
 my $workdir = undef;
@@ -81,20 +46,22 @@ if (defined $num_jobs) {
   }
 }
 
-if (defined $workdir) {
-  ensure_directory ($workdir);
+if (scalar @ARGV != 1) {
+    pod2usage (1);
 }
 
-if (scalar @ARGV != 1) {
-  print 'Usage: minimize-itemized-article.pl ITEMIZED-ARTICLE-DIRECTORY', "\n";
-  exit 1;
+if (defined $workdir) {
+  ensure_directory ($workdir)
+      or croak ('Error: the work directory does not exist.');
 }
 
 my $article_dir = $ARGV[0];
 my $article_text_dir = "${article_dir}/text";
 
-ensure_directory ($article_dir);
-ensure_directory ($article_text_dir);
+ensure_directory ($article_dir)
+    or croak ('Error: the supplied article directory ', $article_dir, ' does not exist.');
+ensure_directory ($article_text_dir)
+    or croak ('Ouch');
 
 my @miz_candidates = `find $article_dir -maxdepth 1 -mindepth 1 -type f -name "*.miz"`;
 chomp @miz_candidates;
@@ -118,10 +85,10 @@ ensure_directory ($script_home);
 my $minimize_script = "${script_home}/minimal.pl";
 my $minimize_internally_script = "${script_home}/minimize-internally.pl";
 
-ensure_readable_file ($minimize_script);
-ensure_executable_file ($minimize_script);
-ensure_readable_file ($minimize_internally_script);
-ensure_executable_file ($minimize_internally_script);
+ensure_executable ($minimize_script)
+    or croak ('Error: the minimize script could not be found at the expected location (', $minimize_script, ').');
+ensure_executable ($minimize_internally_script)
+    or croak ('Error: the minimize-internally script could not be found at the expected location (', $minimize_internally_script, ').');
 
 ensure_directory ($stylesheet_home);
 
