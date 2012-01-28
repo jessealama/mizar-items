@@ -12,6 +12,7 @@ use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 
 use Utils qw(ensure_directory);
 use Xsltproc qw(apply_stylesheet);
+use LocalDatabase;
 
 my $xml_parser = XML::LibXML->new(); # for our XML processing needs
 
@@ -33,11 +34,10 @@ if (! ensure_directory ($article_dir)) {
     croak ('Error: the supplied directory ', $article_dir, ' does not exist.');
 }
 
-my $prel_subdir = "${article_dir}/prel";
-my $text_subdir = "${article_dir}/text";
+my $local_db = LocalDatabase->new (location => $article_dir);
 
-ensure_directory ($prel_subdir);
-ensure_directory ($text_subdir);
+my $prel_subdir = $local_db->get_prel_subdir ();
+my $text_subdir = $local_db->get_text_subdir ();
 
 my $article_basename = basename ($article_dir);
 
