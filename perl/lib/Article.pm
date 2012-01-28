@@ -1176,6 +1176,32 @@ sub copy {
 
 }
 
+sub copy_with_new_name {
+    my $self = shift;
+    my $new_basename = shift;
+
+    my $current_path = $self->get_path ();
+    my $current_dir = dirname ($current_path);
+
+    my @files = $self->files ();
+
+    foreach my $file (@files) {
+	my $current_file_path = "${current_dir}/${file}";
+	my $current_file_extension = extension ($file);
+	my $new_path = "${current_dir}/${new_basename}.${current_file_extension}";
+	File::Copy::copy ($current_file_path,
+			  $new_path)
+	      or croak ('Error: unable to copy ', $current_file_path, ' to ', $new_path, '.');
+    }
+
+    my $new_path_miz = "${current_dir}/${new_basename}.miz";
+
+    my $new_article = Article->new (path => $new_path_miz);
+
+    return $new_article;
+
+}
+
 sub msmify {
     my $self = shift;
 
