@@ -474,9 +474,9 @@ sub print_theorems {
 
 # }
 
-print_correctness_conditions ();
-print_constructor_properties ();
 print_constructors ();
+print_constructor_properties ();
+print_correctness_conditions ();
 print_notations ();
 print_definientia ();
 print_deftheorems ();
@@ -486,7 +486,8 @@ print_clusters ();
 print_identifications ();
 print_theorems ();
 
-#print_lemmas ();
+
+# print_lemmas ();
 
 __END__
 
