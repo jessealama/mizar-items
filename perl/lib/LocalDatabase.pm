@@ -6,9 +6,10 @@ use File::Spec;
 use Carp qw(croak);
 use Cwd;
 use IPC::Run qw(run);
+use XML::LibXML;
 
 # Our stuff
-use Utils qw(ensure_directory);
+use Utils qw(ensure_directory ensure_readable_file);
 
 has 'location' => (
     is => 'ro',
@@ -44,6 +45,9 @@ sub BUILD {
 	}
     }
 }
+
+my $xml_parser = XML::LibXML->new (suppress_warnings => 1,
+				   suppress_errors => 1);
 
 sub get_text_subdir {
     my $self = shift;
@@ -123,9 +127,133 @@ sub registrations_in_prel {
     }
 }
 
+sub definientia_in_prel_with_type {
+    my $self = shift;
+    my $type = shift;
+
+    my $prel_subdir = $self->get_prel_subdir ();
+
+    my @answers = ();
+
+    my @definientia = $self->files_in_prel_with_extension ('def');
+
+    foreach my $definiens (@definientia) {
+	my $definiens_path = "${prel_subdir}/${definiens}";
+	if (ensure_readable_file ($definiens_path)) {
+	    my $definiens_doc = eval { $xml_parser->parse_file ($definiens_path) };
+	    if (defined $definiens_doc) {
+
+		my $xpath = '/Definientia/Definiens[@constrkind = "' . (uc $type) . '"]';
+
+		if ($definiens_doc->exists ($xpath)) {
+		    push (@answers, $definiens);
+		}
+
+	    } else {
+		croak ('Error: the XML file at ', $definiens_doc, ' is not well-formed.');
+	    }
+	} else {
+	    croak ('Error: the definiens file ', $definiens, ' does not exist at the expected location (', $definiens_path, ').');
+	}
+    }
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+}
+
+sub functor_definientia_in_prel {
+    my $self = shift;
+    return $self->definientia_in_prel_with_type ('k');
+}
+
+sub mode_definientia_in_prel {
+    my $self = shift;
+    return $self->definientia_in_prel_with_type ('m');
+}
+
+sub relation_definientia_in_prel {
+    my $self = shift;
+    return $self->definientia_in_prel_with_type ('r');
+}
+
+sub attribute_definientia_in_prel {
+    my $self = shift;
+    return $self->definientia_in_prel_with_type ('v');
+}
+
+sub clusters_in_prel_of_type {
+    my $self = shift;
+    my $type = shift;
+
+    my $prel_subdir = $self->get_prel_subdir ();
+
+    my @answers = ();
+
+    my @clusters = $self->files_in_prel_with_extension ('dcl');
+
+    foreach my $cluster (@clusters) {
+	my $cluster_path = "${prel_subdir}/$cluster";
+	if (ensure_readable_file ($cluster_path)) {
+	    my $cluster_doc = eval { $xml_parser->parse_file ($cluster_path) };
+	    if (defined $cluster_doc) {
+
+		my $xpath = '/Registrations/' . (uc $type) . 'Cluster';
+
+		if ($cluster_doc->exists ($xpath)) {
+		    push (@answers, $cluster);
+		}
+
+	    } else {
+		croak ('Error: the XML file at ', $cluster_doc, ' is not well-formed.');
+	    }
+	} else {
+	    croak ('Error: the cluster file ', $cluster, ' does not exist at the expected location (', $cluster_path, ').');
+	}
+    }
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+}
+
+sub conditional_clusters_in_prel {
+    my $self = shift;
+    return $self->clusters_in_prel_of_type ('c');
+}
+
+sub functorial_clusters_in_prel {
+    my $self = shift;
+    return $self->clusters_in_prel_of_type ('f');
+}
+
+sub existential_clusters_in_prel {
+    my $self = shift;
+    return $self->clusters_in_prel_of_type ('r');
+}
+
+sub clusters_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('dcl');
+}
+
 sub schemes_in_prel {
     my $self = shift;
     return $self->files_in_prel_with_extension ('sch');
+}
+
+sub identifications_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('did');
+}
+
+sub reductions_in_prel {
+    my $self = shift;
+    return $self->files_in_prel_with_extension ('drd');
 }
 
 sub constructors_in_prel {
