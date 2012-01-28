@@ -320,15 +320,16 @@ foreach my $p_or_c_file (@properties_and_conditions) {
 
 sub print_deftheorems {
 
-    my @thes = `grep --with-filename '<Theorem kind="D"' $prel_subdir/*.the | cut -f 1 -d ':' | parallel basename {} .the | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @thes;
+    my @theorems = $local_db->deftheorems_in_prel ();
+    my @theorems_no_extension = map { strip_extension ($_) } @theorems;
+    my @sorted_theorems = sort { fragment_less_than ($a, $b) } @theorems_no_extension;
 
-    my %deftheorems = ();
-
-    foreach my $i (1 .. scalar @thes) {
-	my $the = $thes[$i - 1];
-	print $article_basename, ':', 'deftheorem' , ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $the, '[dt]', "\n";
+    foreach my $i (1 .. scalar @sorted_theorems) {
+	my $fragment_of_theorem = $sorted_theorems[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_theorem);
+	print $article_basename, ':', 'deftheorem', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
+
 }
 
 sub fragment_number {
