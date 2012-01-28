@@ -6,6 +6,7 @@ use File::Basename qw(basename);
 use XML::LibXML;
 use Getopt::Long;
 use Pod::Usage;
+use Regexp::DefaultFlags;
 use Carp qw(croak carp);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
