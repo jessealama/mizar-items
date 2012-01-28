@@ -80,7 +80,6 @@ foreach my $condition (keys %conditions) {
 }
 
 my %fragments_to_constructors = ();
-my %handled_constructor_properties = (); # to prevent printing duplicates
 
 sub print_properties_of_constructors_of_kind {
     my $kind = shift;
