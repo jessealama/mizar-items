@@ -23,18 +23,6 @@ sub ensure_valid_xml_file {
   }
 }
 
-sub ensure_directory {
-  my $dir = shift;
-  if (! -e $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist.';
-  }
-
-  if (! -d $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist (as a directory).';
-  }
-  return 1;
-}
-
 my $help = 0;
 my $man = 0;
 my $verbose = 0;
