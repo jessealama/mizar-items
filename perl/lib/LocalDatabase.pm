@@ -127,9 +127,9 @@ sub registrations_in_prel {
     }
 }
 
-sub definientia_in_prel_with_type {
+sub definientia_in_prel_of_kind {
     my $self = shift;
-    my $type = shift;
+    my $kind = shift;
 
     my $prel_subdir = $self->get_prel_subdir ();
 
@@ -143,7 +143,7 @@ sub definientia_in_prel_with_type {
 	    my $definiens_doc = eval { $xml_parser->parse_file ($definiens_path) };
 	    if (defined $definiens_doc) {
 
-		my $xpath = '/Definientia/Definiens[@constrkind = "' . (uc $type) . '"]';
+		my $xpath = '/Definientia/Definiens[@constrkind = "' . (uc $kind) . '"]';
 
 		if ($definiens_doc->exists ($xpath)) {
 		    push (@answers, $definiens);
@@ -166,27 +166,27 @@ sub definientia_in_prel_with_type {
 
 sub functor_definientia_in_prel {
     my $self = shift;
-    return $self->definientia_in_prel_with_type ('k');
+    return $self->definientia_in_prel_of_kind ('k');
 }
 
 sub mode_definientia_in_prel {
     my $self = shift;
-    return $self->definientia_in_prel_with_type ('m');
+    return $self->definientia_in_prel_of_kind ('m');
 }
 
 sub relation_definientia_in_prel {
     my $self = shift;
-    return $self->definientia_in_prel_with_type ('r');
+    return $self->definientia_in_prel_of_kind ('r');
 }
 
 sub attribute_definientia_in_prel {
     my $self = shift;
-    return $self->definientia_in_prel_with_type ('v');
+    return $self->definientia_in_prel_of_kind ('v');
 }
 
-sub clusters_in_prel_of_type {
+sub clusters_in_prel_of_kind {
     my $self = shift;
-    my $type = shift;
+    my $kind = shift;
 
     my $prel_subdir = $self->get_prel_subdir ();
 
@@ -200,7 +200,7 @@ sub clusters_in_prel_of_type {
 	    my $cluster_doc = eval { $xml_parser->parse_file ($cluster_path) };
 	    if (defined $cluster_doc) {
 
-		my $xpath = '/Registrations/' . (uc $type) . 'Cluster';
+		my $xpath = '/Registrations/' . (uc $kind) . 'Cluster';
 
 		if ($cluster_doc->exists ($xpath)) {
 		    push (@answers, $cluster);
