@@ -11,7 +11,7 @@ use Carp qw(croak carp);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 
-use Utils qw(ensure_directory strip_extension);
+use Utils qw(ensure_directory strip_extension ensure_readable_file);
 use Xsltproc qw(apply_stylesheet);
 use LocalDatabase;
 
@@ -81,173 +81,123 @@ foreach my $condition (keys %conditions) {
 my %fragments_to_constructors = ();
 my %handled_constructor_properties = (); # to prevent printing duplicates
 
-sub print_constructor_properties {
+sub print_properties_of_constructors_of_kind {
+    my $kind = shift;
 
-    my @dcos = `find $prel_subdir -name "*.dco" -exec basename {} .dco ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @dcos;
+    my $kind_uc = uc $kind;
 
-    my %constructors = ();
+    my @dcos = $local_db->constructors_in_prel_of_kind ($kind);
+    my @dcos_no_extension = map { strip_extension ($_) } @dcos;
+    my @sorted_dcos
+	= sort { fragment_less_than ($a, $b) } @dcos_no_extension;
 
-    foreach my $i (1 .. scalar @dcos) {
-	my $dco = $dcos[$i - 1];
-	my $dco_path = "$prel_subdir/ckb${dco}.dco";
-	my $dco_doc = undef;
-	if (! defined eval { $dco_doc = $xml_parser->parse_file ($dco_path) } ) {
-	    print STDERR 'Error: the .dco file at ', $dco_path, ' is not well-formed XML.';
-	}
-	my @constructors = $dco_doc->findnodes ('Constructors/Constructor');
-	if (scalar @constructors == 0) {
-	    print STDERR ('Error: we found no Constructor nodes in ', $dco_path, '.');
-	}
-	foreach my $constructor (@constructors) {
-	    if (! $constructor->exists ('@kind')) {
-		print STDERR ('Error: we failed to extract a kind attribute from a Constructor XML element in ', $dco_path, '.', "\n");
-		next;
-	    }
-	    my $kind = $constructor->findvalue ('@kind');
-	    my $kind_lc = lc $kind;
-	    my $num;
-	    if (defined $constructors{$kind}) {
-		$num = $constructors{$kind};
-		$constructors{$kind} = $num + 1;
-	    } else {
-		$num = 1;
-		$constructors{$kind} = 2;
-	    }
-	    my $constructor_key = "${article_basename}:${kind_lc}constructor:${num}";
-	    my $fragment_number = $dco;
+    foreach my $i (1 .. scalar @sorted_dcos) {
+	my $dco = $sorted_dcos[$i - 1];
+	my $fragment_number = fragment_number ($dco);
+	my $fragment = "${article_basename}:fragment:${fragment_number}";
+	my $dco_path = "${prel_subdir}/${dco}.dco";
+	if (ensure_readable_file ($dco_path)) {
+	    my $dco_doc = eval { $xml_parser->parse_file ($dco_path) };
+	    if (defined $dco_doc) {
+		my $xpath = '/Constructors/Constructor[@kind = "' . $kind_uc . '"]/Properties/*';
+		my @property_nodes = $dco_doc->findnodes ($xpath);
+		foreach my $property_node (@property_nodes) {
+		    my $property = lc $property_node->nodeName ();
 
-	    $fragments_to_constructors{$fragment_number} = $constructor_key;
+		    if ($property eq 'antisymmetry') {
+			$property = 'asymmetry';
+		    }
 
-	    my @properties = $constructor->findnodes ('Properties/*');
-	    foreach my $property (@properties) {
-		my $property_name = $property->nodeName ();
-		my $property_name_lc = lc $property_name;
+		    my $item = "${article_basename}:${kind}constructor:${i}[${property}]";
 
-		# I wish this would be fixed
-		if ($property_name_lc eq 'antisymmetry') {
-		    $property_name_lc = 'asymmetry';
+		    my $property_code = $code_of_property{$property};
+
+		    if (defined $property_code) {
+			my $pseudo_fragment = "${fragment}[$property_code]";
+			print $item, ' => ', $pseudo_fragment, "\n";
+		    } else {
+			croak ('Error: what is the short form of \'', $property, '\'?');
+		    }
+
+
 		}
-
-		my $property_code = $code_of_property{$property_name_lc};
-
-		my $property_key = "${article_basename}:${kind_lc}constructor:${num}[${property_name_lc}]";
-
-		print $property_key, ' => ', $article_basename, ':', 'fragment', ':', $dco, '[', $property_code, ']', "\n";
-		$handled_constructor_properties{$property_key} = 0;
+	    } else {
+		croak ('Error: the .dco file at ', $dco_path, ' is not a well-formed XML file.');
 	    }
+	} else {
+	    croak ('Error: the dco file ', $dco, ' does not exist at the expected location (', $dco_path, ').');
 	}
+    }
+
+}
+
+sub print_functor_properties {
+    print_properties_of_constructors_of_kind ('k');
+}
+
+sub print_relation_properties {
+    print_properties_of_constructors_of_kind ('r');
+}
+
+sub print_mode_properties {
+    print_properties_of_constructors_of_kind ('m');
+}
+
+sub print_attribute_properties {
+    print_properties_of_constructors_of_kind ('v');
+}
+
+sub print_constructor_properties {
+    print_functor_properties ();
+    print_relation_properties ();
+    print_mode_properties ();
+    print_attribute_properties ();
+}
+
+sub print_constructors_of_kind {
+
+    my $kind = shift;
+
+    my @dcos = $local_db->constructors_in_prel_of_kind ($kind);
+    my @dcos_no_extension = map { strip_extension ($_) } @dcos;
+    my @sorted_dcos
+	= sort { fragment_less_than ($a, $b) } @dcos_no_extension;
+
+    foreach my $i (1 .. scalar @sorted_dcos) {
+	my $fragment_of_ccluster = $sorted_dcos[$i - 1];
+	my $fragment_number = fragment_number ($fragment_of_ccluster);
+	print $article_basename, ':', $kind . 'constructor', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
 }
 
 sub print_constructors {
-    my @dcos = `find $prel_subdir -name "*.dco" -exec basename {} .dco ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @dcos;
-
-    my %constructors = ();
-    my %handled_constructor_properties = (); # to prevent printing duplicates
-    my %fragments_to_constructors = ();
-
-    foreach my $i (1 .. scalar @dcos) {
-	my $dco = $dcos[$i - 1];
-	my $dco_path = "$prel_subdir/ckb${dco}.dco";
-	my $dco_doc = undef;
-	if (! eval { $dco_doc = $xml_parser->parse_file ($dco_path) } ) {
-	    print STDERR 'Error: the .dco file at ', $dco_path, ' is not well-formed XML.';
-	}
-	my @constructors = $dco_doc->findnodes ('Constructors/Constructor');
-	if (scalar @constructors == 0) {
-	    print STDERR ('Error: we found no Constructor nodes in ', $dco_path, '.');
-	}
-	foreach my $constructor (@constructors) {
-	    if (! $constructor->exists ('@kind')) {
-		print STDERR ('Error: we failed to extract a kind attribute from a Constructor XML element in ', $dco_path, '.', "\n");
-		next;
-	    }
-	    my $kind = $constructor->findvalue ('@kind');
-	    my $kind_lc = lc $kind;
-	    my $num;
-	    if (defined $constructors{$kind}) {
-		$num = $constructors{$kind};
-		$constructors{$kind} = $num + 1;
-	    } else {
-		$num = 1;
-		$constructors{$kind} = 2;
-	    }
-	    my $constructor_key = "${article_basename}:${kind_lc}constructor:${num}";
-	    my $fragment_number = $dco;
-	    print $article_basename, ':', $kind_lc, 'constructor', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $dco, '[', $kind_lc, 'c', ']', "\n";
-
-	    $fragments_to_constructors{$fragment_number} = $constructor_key;
-
-	    my @properties = $constructor->findnodes ('Properties/*');
-	    foreach my $property (@properties) {
-		my $property_name = $property->nodeName ();
-		my $property_name_lc = lc $property_name;
-
-		# I wish this would be fixed
-		if ($property_name_lc eq 'antisymmetry') {
-		    $property_name_lc = 'asymmetry';
-		}
-
-		my $property_code = $code_of_property{$property_name_lc};
-
-		my $property_key = "${article_basename}:${kind_lc}constructor:${num}[${property_name_lc}]";
-
-		print $property_key, ' => ', $article_basename, ':', 'fragment', ':', $dco, '[', $property_code, ']', "\n";
-		$handled_constructor_properties{$property_key} = 0;
-	    }
-	}
+    foreach my $kind ('g', 'k', 'l', 'm', 'r', 'u', 'v') {
+	print_constructors_of_kind ($kind);
     }
 }
 
-sub print_notations {
+sub print_patterns_of_kind {
 
-    my @dnos = `find $prel_subdir -name "*.dno" -exec basename {} .dno ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-    chomp @dnos;
+    my $kind = shift;
 
-    my %patterns = ();
-    my %fragments_to_patterns = ();
+    my @dnos = $local_db->patterns_in_prel_of_kind ($kind);
+    my @dnos_no_extension = map { strip_extension ($_) } @dnos;
+    my @sorted_dnos
+	= sort { fragment_less_than ($a, $b) } @dnos_no_extension;
 
-    foreach my $i (1 .. scalar @dnos) {
-	my $dno = $dnos[$i - 1];
-	my $dno_path = "$prel_subdir/ckb${dno}.dno";
-	my $dno_doc = $xml_parser->parse_file ($dno_path);
-	my @patterns = $dno_doc->findnodes ('Notations/Pattern');
-	foreach my $pattern (@patterns) {
-	    if ($pattern->exists ('@constrkind') &&
-		    $pattern->exists ('@constrnr') &&
-			$pattern->exists ('@aid')) {
-		my $constrkind = $pattern->findvalue ('@constrkind');
-		my $constrkind_lc = lc $constrkind;
-		my $constrnr = $pattern->findvalue ('@constrnr');
-		my $aid = $pattern->findvalue ('@aid');
-		my $aid_lc = lc $aid;
-
-		my $num = undef;
-		if (defined $patterns{$constrkind}) {
-		    $num = $patterns{$constrkind};
-		    $patterns{$constrkind} = $num + 1;
-		} else {
-		    $num = 1;
-		    $patterns{$constrkind} = 2;
-		}
-
-		my $pattern_key = "${article_basename}:${constrkind_lc}pattern:${num}";
-		my $fragment_number = $dno;
-		$fragments_to_patterns{$fragment_number} = $pattern_key;
-
-		print $article_basename, ':', $constrkind_lc, 'pattern', ':', $num, ' => ', $article_basename, ':', 'fragment', ':', $dno, '[', $constrkind_lc, 'p', ']', "\n";
-
-	    } else {
-		croak ('Error: Unable to make sense of a Pattern node in an eno file that does not have a constrkind, constrnr, and aid attribute.');
-	    }
-
-	}
-
+    foreach my $i (1 .. scalar @sorted_dnos) {
+	my $fragment = $sorted_dnos[$i - 1];
+	my $fragment_number = fragment_number ($fragment);
+	print $article_basename, ':', $kind . 'pattern', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
     }
 
+}
+
+sub print_notations {
+    foreach my $kind ('g', 'j', 'k', 'l', 'm', 'r', 'u', 'v') {
+	print_patterns_of_kind ($kind);
+    }
 }
 
 sub print_functor_definientia {
@@ -290,29 +240,30 @@ sub print_definientia {
     print_attribute_definientia ();
 }
 
-    # Constructor properties and definition correctness conditions
+sub print_correctness_conditions {
 
     my @properties_and_conditions = `find ${text_subdir} -maxdepth 1 -mindepth 1 -type f -name "ckb[0-9]*[a-z][a-z].miz" -exec basename {} .miz ';'`;
 chomp @properties_and_conditions;
 
-foreach my $p_or_c_file (@properties_and_conditions) {
-    if ($p_or_c_file =~ / \A ckb ([1-9][0-9]*) ([a-z]{2}) \z/x) {
-	(my $fragment_number, my $condition_code) = ($1, $2);
-	if ($condition_code !~ /\A . c \z/x
-		&& $condition_code !~ /\A . p \z/x
-		    && $condition_code !~ /\A . f \z/x
-			&& $condition_code ne 'ab') {
-	    my $resolved_condition = $conditions{$condition_code};
-	    if (defined $resolved_condition) {
-		if (defined $fragments_to_constructors{$fragment_number}) {
-		    my $constructor = $fragments_to_constructors{$fragment_number};
-		    my $property_key = "${constructor}[${resolved_condition}]";
-		    if (! defined $handled_constructor_properties{$property_key}) {
-			print $property_key, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, '[', $condition_code, ']', "\n";
+    foreach my $p_or_c_file (@properties_and_conditions) {
+	if ($p_or_c_file =~ / \A ckb ([1-9][0-9]*) ([a-z]{2}) \z/x) {
+	    (my $fragment_number, my $condition_code) = ($1, $2);
+	    if ($condition_code !~ /\A . c \z/x
+		    && $condition_code !~ /\A . p \z/x
+			&& $condition_code !~ /\A . f \z/x
+			    && $condition_code ne 'ab') {
+		my $resolved_condition = $conditions{$condition_code};
+		if (defined $resolved_condition) {
+		    if (defined $fragments_to_constructors{$fragment_number}) {
+			my $constructor = $fragments_to_constructors{$fragment_number};
+			my $property_key = "${constructor}[${resolved_condition}]";
+			if (! defined $handled_constructor_properties{$property_key}) {
+			    print $property_key, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, '[', $condition_code, ']', "\n";
+			}
 		    }
+		} else {
+		    carp ('Warning: unable to make sense of the condition code \'', $condition_code, '\'.', "\n");
 		}
-	    } else {
-		carp ('Warning: unable to make sense of the condition code \'', $condition_code, '\'.', "\n");
 	    }
 	}
     }
@@ -516,6 +467,7 @@ sub print_theorems {
 
 # }
 
+print_correctness_conditions ();
 print_constructor_properties ();
 print_constructors ();
 print_notations ();
