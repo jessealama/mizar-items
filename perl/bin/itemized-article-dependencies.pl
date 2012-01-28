@@ -13,16 +13,15 @@ use Regexp::DefaultFlags;
 use IPC::Run qw(run);
 use charnames qw( :full ); # for referring to characters in regular expressions
 
-use FindBin;
-use lib "$FindBin::Bin";
+use lib '/Users/alama/sources/mizar/mizar-items/perl/lib'
 
 use Utils qw(ensure_readable_file ensure_directory ensure_executable);
 
 # Set up an XML parser that we might use
 my $xml_parser = XML::LibXML->new ();
 
-my $stylesheet_home = undef;
-my $script_home = undef;
+my $stylesheet_home = '/Users/alama/sources/mizar/mizar-items/xsl';
+my $script_home = '/Users/alama/sources/mizar/mizar-items/bin';
 my $verbose = 0;
 my $man = 0;
 my $help = 0;
