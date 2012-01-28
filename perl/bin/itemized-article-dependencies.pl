@@ -37,14 +37,6 @@ pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 pod2usage(1) if (scalar @ARGV != 1);
 
 
-if (! defined $stylesheet_home) {
-    $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
-}
-
-if (! defined $script_home) {
-    $script_home = '/Users/alama/sources/mizar/xsl4mizar/items';
-}
-
 my $article_dir = $ARGV[0];
 
 sub ensure_sensible_commandline {
