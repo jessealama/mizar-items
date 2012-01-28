@@ -246,16 +246,29 @@ foreach my $i (1 .. scalar @fragments) {
     my @new_constructors =
 	map { uc_mizar_name ($_) } $local_db->constructors_in_prel ();
 
+    my @sorted_new_notations
+	= sort { fragment_less_than ($a, $b) } @new_notations;
+    my @sorted_new_registrations
+	= sort { fragment_less_than ($a, $b) } @new_registrations;
+    my @sorted_new_definitions
+	= sort { fragment_less_than ($a, $b) } @new_definitions;
+    my @sorted_new_theorems
+	= sort { fragment_less_than ($a, $b) } @new_theorems;
+    my @sorted_new_schemes
+	= sort { fragment_less_than ($a, $b) } @new_schemes;
+    my @sorted_new_constructors =
+	sort { fragment_less_than ($a, $b) } @new_constructors;
+
     apply_stylesheet ($extend_evl_stylesheet,
 		      $article_evl_in_target_dir,
 		      $fragment_evl,
 		      {
-			  'notations' => list_as_token_string (\@new_notations),
-			  'definitions' => list_as_token_string (\@new_definitions),
-			  'theorems' => list_as_token_string (\@new_theorems),
-			  'registrations' => list_as_token_string (\@new_registrations),
-			  'constructors' => list_as_token_string (\@new_constructors),
-			  'schemes' => list_as_token_string (\@new_schemes),
+			  'notations' => list_as_token_string (\@sorted_new_notations),
+			  'definitions' => list_as_token_string (\@sorted_new_definitions),
+			  'theorems' => list_as_token_string (\@sorted_new_theorems),
+			  'registrations' => list_as_token_string (\@sorted_new_registrations),
+			  'constructors' => list_as_token_string (\@sorted_new_constructors),
+			  'schemes' => list_as_token_string (\@sorted_new_schemes),
 		      })
 	or croak ('Error: xsltproc did not exit cleanly when applying the extend-evl stylesheet to ', $article_evl_in_target_dir, '.', "\n");
 
