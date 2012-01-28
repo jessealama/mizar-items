@@ -289,8 +289,15 @@ foreach my $i (1 .. scalar @fragments) {
 	copy ($fragment_xml, $fragment_xml_orig)
 	    or croak ('Error: unable to save a copy of ', $fragment_xml, ' to ', $fragment_xml_orig, ': ', $!);
 	if ($local_db->export ($fragment_basename)) {
-	    $local_db->transfer ($fragment_basename)
-		or carp ('Warning: fragment number ', $i, ' of ', $article_basename, ' is verifiable and exportable, but there was a problem with the call to transfer.');
+	    copy ($fragment_xml, $fragment_xml_exported)
+		or croak ('Error: unable to copy ', $fragment_xml, ' to ', $fragment_xml_exported, ': ', $!);
+	    if ($local_db->transfer ($fragment_basename)) {
+		# Restore the non-exported XML
+		copy ($fragment_xml_orig, $fragment_xml)
+		    or croak ('Error: unable to restore the original XML at ', $fragment_xml_orig, ' to ', $fragment_xml, ': ', $!);
+	    } else {
+		carp ('Warning: fragment number ', $i, ' of ', $article_basename, ' is verifiable and exportable, but there was a problem with the call to transfer.');
+	    }
 	} else {
 	    carp ('Warning: fragment number ', $i, ' of ', $article_basename, ' is verifiable but not exportable.');
 	}
