@@ -7,9 +7,12 @@ use Data::Dumper;
 use File::Basename qw(basename);
 use Regexp::DefaultFlags;
 use XML::LibXML;
+use charnames qw(:full);
 
 # Local stuff
 use Utils qw(ensure_directory strip_extension ensure_readable_file);
+use Mizar;
+use Xsltproc qw(apply_stylesheet);
 
 has 'local_database' => (
     is => 'ro',
@@ -890,7 +893,39 @@ sub load_identifications {
 
 sub load_lemmas {
 
-    # Nothing yet
+    my $self = shift;
+
+    my $local_db = $self->get_local_database ();
+    my $local_db_location = $local_db->get_location ();
+    my $article_name = $self->get_article_name ();
+    my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
+
+    my $article_itemized_wsx
+	= "${local_db_location}/${article_name}.wsx.split.itemized";
+
+    if (! ensure_readable_file ($article_itemized_wsx)) {
+	croak ('Error: the split-and-itemized .wsx for ', $article_name, ' does not exist at the expected location (', $article_itemized_wsx, '.');
+    }
+
+    my $fragments_of_lemma_stylesheet
+	= Mizar::path_for_stylesheet ('fragments-of-lemmas');
+
+    my @fragments_of_lemmas = apply_stylesheet ($fragments_of_lemma_stylesheet,
+						$article_itemized_wsx);
+    chomp @fragments_of_lemmas;
+
+    foreach my $fragment_of_lemma (@fragments_of_lemmas) {
+	if ($fragment_of_lemma =~ /\A ([0-9]+) \N{SPACE} ([0-9]+) \z/) {
+	    (my $lemma_number, my $fragment_number) = ($1, $2);
+	    my $item = "${article_name}:lemma:${lemma_number}";
+	    my $fragment = "${article_name}:fragment:${fragment_number}";
+	    $item_to_fragment_table{$item} = $fragment;
+	} else {
+	    croak ('Error: unable to make sense of the output line \'', $fragment_of_lemma, '\'.');
+	}
+    }
+
+    $self->_set_item_to_fragment_table (\%item_to_fragment_table);
 
     return 1;
 
