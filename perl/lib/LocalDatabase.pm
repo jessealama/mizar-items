@@ -246,6 +246,45 @@ sub schemes_in_prel {
     return $self->files_in_prel_with_extension ('sch');
 }
 
+sub identifications_in_prel_of_kind {
+
+    my $self = shift;
+    my $kind = shift;
+
+    my $prel_subdir = $self->get_prel_subdir ();
+
+    my @dids = $self->files_in_prel_with_extension ('did');
+
+    my @answers = ();
+
+    foreach my $did (@dids) {
+
+	my $did_path = "${prel_subdir}/$did";
+	if (ensure_readable_file ($did_path)) {
+	    my $did_doc = eval { $xml_parser->parse_file ($did_path) };
+	    if (defined $did_doc) {
+
+		my $xpath = '/IdentifyRegistrations/Identify[@constrkind = "' . (uc $kind) . '"]';
+		if ($did_doc->exists ($xpath)) {
+		    push (@answers, $did);
+		}
+
+	    } else {
+		croak ('Error: the XML file at ', $did_doc, ' is not well-formed.');
+	    }
+	} else {
+	    croak ('Error: the theorem file ', $did, ' does not exist at the expected location (', $did_path, ').');
+	}
+    }
+
+    if (wantarray) {
+	return @answers;
+    } else {
+	return join (' ', @answers);
+    }
+
+}
+
 sub identifications_in_prel {
     my $self = shift;
     return $self->files_in_prel_with_extension ('did');
