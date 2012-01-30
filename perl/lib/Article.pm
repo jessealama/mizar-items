@@ -13,6 +13,8 @@ use FindBin;
 use lib $FindBin::Bin;
 use Utils qw(ensure_readable_file ensure_directory strip_extension extension);
 use Mizar;
+use ItemizedArticle;
+use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
 
 has 'path' => (
