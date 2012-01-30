@@ -119,7 +119,7 @@ sub _set_article_name {
     }
 
     my $location_as_dir = File::Spec->catdir ($location);
-    my @candidates = glob "${location_as_dir}*.miz";
+    my @candidates = glob "${location_as_dir}/*.miz";
 
     if (scalar @candidates == 0) {
 	croak ('Error: we found no .miz files under ', $location_as_dir, '.');
