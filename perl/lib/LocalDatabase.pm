@@ -543,5 +543,30 @@ sub absolutize {
 		'2>', '/dev/null');
 }
 
+sub dependencies_of {
+    my $self = shift;
+    my $article_name = shift;
+
+    # Check that there really is an article here with the given name
+
+    my $text_subdir = $self->get_text_subdir ();
+
+    my $article_miz = "${text_subdir}/${article_name}.miz";
+
+    if (! ensure_readable_file ($article_miz)) {
+	croak ('Error: there is no article by the name \'', $article_miz, '\' under ', $self->get_location (), '.');
+    }
+
+    my $article = Article->new (path => $article_miz);
+
+    my @deps = $article->needed_items ();
+
+    if (wantarray) {
+	return @deps;
+    } else {
+	\@deps;
+    }
+}
+
 1;
 __END__
