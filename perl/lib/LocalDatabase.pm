@@ -5,8 +5,9 @@ use File::Basename qw(basename dirname);
 use File::Spec;
 use Carp qw(croak);
 use Cwd;
-use IPC::Run qw(run);
+use IPC::Run qw(run start);
 use XML::LibXML;
+use Data::Dumper;
 
 # Our stuff
 use Utils qw(ensure_directory ensure_readable_file);
@@ -567,6 +568,78 @@ sub dependencies_of {
     } else {
 	\@deps;
     }
+}
+
+sub minimize_articles {
+    my $self = shift;
+    my $articles_ref = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my @article_names = defined $articles_ref ? @{$articles_ref} : ();
+
+    my $progress = Term::ProgressBar->new ({ count => scalar @proper_articles });
+
+    my $location = $self->get_location ();
+    my $text_dir = $self->get_text_subdir ();
+
+    my @article_paths = map { "${text_dir}/${_}.miz" } @article_names;
+
+    if (scalar @article_paths == 0) {
+	return 1; # nothing to do
+    } else {
+
+	# Sanity check: all these paths exist
+
+	foreach my $path (@article_paths) {
+	    if (! ensure_readable_file ($path)) {
+		croak ('Error: there is no file at ', $path, '.');
+	    }
+	}
+
+	# Build a call to GNU parallel
+	my $minimizer_script = Mizar::path_for_script ('minimal.pl');
+
+	my @parallel_call = ('parallel',
+			     $minimizer_script);
+
+	if (defined $parameters{'checker-only'} && $parameters{'checker-only'}) {
+	    push (@parallel_call, '--checker-only');
+	}
+
+	push (@parallel_call, '{}', ':::');
+	foreach my $path (@article_paths) {
+	    push (@parallel_call, $path);
+	}
+
+	my $h = start (\@parallel_call,
+		       '>', '/dev/null',
+		       '2>', '/dev/null');
+
+	$h->finish ();
+
+	my $parallel_exit_code = $h->result (0);
+
+	if ($parallel_exit_code != 0) {
+	    croak ('Error: parallel did not exit cleanly when minimizing some articles; the exit code was ', $parallel_exit_code, '.');
+	} else {
+	    return 1;
+	}
+
+    }
+
+}
+
+sub minimize {
+    my $self = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my @article_names = $self->articles ();
+
+    return $self->minimize_articles (\@article_names, \%parameters);
 }
 
 1;
