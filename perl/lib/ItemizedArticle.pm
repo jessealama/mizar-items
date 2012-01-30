@@ -1,7 +1,7 @@
 package ItemizedArticle;
 
 use Moose;
-use Carp qw(croak);
+use Carp qw(croak carp);
 use File::Spec;
 use Data::Dumper;
 use File::Basename qw(basename);
