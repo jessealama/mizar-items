@@ -7,6 +7,7 @@ use File::Copy qw(); # import nothing; we define our own 'copy' subroutine
 use Regexp::DefaultFlags;
 use XML::LibXML;
 use POSIX qw(floor ceil);
+use Data::Dumper;
 
 # Our libraries
 use FindBin;
@@ -226,11 +227,19 @@ sub needed_constructors {
     $self->absolutize ();
     $self->absolutize_environment ();
 
+    # warn 'Computing needed constructors; looking in ', $abs_xml_path;
+
+    if (! ensure_readable_file ($abs_xml_path)) {
+	croak ('Error: the absolute XML does not exist (or is unreadable).');
+    }
+
     my $inferred_constructors_stylesheet
 	= Mizar::path_for_stylesheet ('inferred-constructors');
 
     my @all_constructors = apply_stylesheet ($inferred_constructors_stylesheet,
 					     $abs_xml_path);
+
+    # warn 'Results of the inferred-constructors stylesheet:', Dumper (@all_constructors);
 
     my %constructors = ();
     foreach my $constructor (@all_constructors) {
@@ -338,12 +347,19 @@ sub is_accomable {
 
 sub verify {
     my $self = shift;
-    return Mizar::verifier ($self->get_path ());
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    return Mizar::verifier ($self->get_path (),
+			    \%parameters);
 }
 
 sub is_verifiable {
     my $self = shift;
-    return $self->verify ();
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    return $self->verify (\%parameters);
 }
 
 sub wsmparser {
@@ -383,12 +399,14 @@ sub mglue {
 
 sub minimize_properties {
     my $self = shift;
-
     my $parameters_hash_ref = shift;
+
     my %parameters = defined $parameters_hash_ref ? %{$parameters_hash_ref} : ();
 
     # Delete all properties of all constructors that are not needed
     my @needed_constructors = $self->needed_constructors ();
+
+    # warn 'Needed constructors:', "\n", Dumper (@needed_constructors);
 
     my %needed_properties = ();
     my %unneeded_properties = ();
@@ -406,25 +424,28 @@ sub minimize_properties {
 
     foreach my $constructor (@needed_constructors) {
 	my @properties = $self->properties_of_constructor ($constructor);
+
+	# warn 'Properties of ', $constructor, ':', "\n", Dumper (@properties);
+
 	if ($constructor =~ /\A ([a-z0-9_]+) : (.) constructor : ([0-9]+) \z/x) {
 	    (my $aid, my $kind, my $nr) = ($1, $2, $3);
 
 	    foreach my $property (@properties) {
-		my %params = (
-		    'kind' => $kind,
-		    'nr' => $nr,
-		    'aid' => $aid,
-		    'property' => $property,
-		);
 		apply_stylesheet ($strip_property_stylesheet,
 				  $atr,
 				  $atr_tmp,
-				  \%params)
+				  {
+				      'kind' => $kind,
+				      'nr' => $nr,
+				      'aid' => $aid,
+				      'property' => $property,
+				  }
+			      )
 		    or croak ('Error: unable to apply the strip-property stylesheet to ', $atr);
 		File::Copy::move ($atr_tmp, $atr);
 
 
-		if ($self->verify ($miz, \%parameters)) {
+		if ($self->verify (\%parameters)) {
 		    $unneeded_properties{"${constructor}[${property}]"} = 0;
 		    File::Copy::copy ($atr, $atr_orig)
 			or croak ('Error: we were unable to update the .atr for ', $self->name (), ' to reflect its independence from the property ', $property, ' of constructor ', $constructor, '.', "\n");
@@ -1038,6 +1059,9 @@ sub minimize_extension {
 					    scalar @articles - 1,
 					    \%parameters)};
 
+	# Restore
+	$self->verify (\%parameters);
+
 	my $num_elements_post_whole_article_deletion
 	    = scalar keys %minimized_by_article_table;
 
@@ -1048,6 +1072,9 @@ sub minimize_extension {
 					  0,
 					  scalar @elements - 1,
 					  \%parameters)};
+
+	# Restore
+	$self->verify (\%parameters);
 
 	return keys %minimized_table;
 
@@ -1098,6 +1125,10 @@ sub needed_items {
     my @needed = ();
 
     my @non_constructor_dependencies = $self->needed_non_constructors ();
+
+    my $name = $self->name ();
+    # warn 'Needed non-constructors:', "\n", Dumper (@non_constructor_dependencies);
+
     my @constructor_dependencies = $self->needed_constructors ();
     my @property_dependencies = $self->properties_of_needed_constructors ();
 
@@ -1189,23 +1220,6 @@ my %conditions_and_properties_shortcuts
      'mdefiniens' => 'mf',
      'rdefiniens' => 'rf',
      'vdefiniens' => 'vf');
-
-# sub copy_fragment_to_new_prefix {
-
-#   my $fragment_basename = shift;
-#   my $new_prefix = shift;
-
-#   my @old_files = glob "${target_text_subdir}/${fragment_basename}.*";
-
-#   foreach my $file (@old_files) {
-#     my $extension = extension ($file);
-#     my $new_path = "${target_text_subdir}/${new_prefix}.${extension}";
-#     copy ($file, $new_path)
-#       or croak ('Error: unable to copy ', $file, ' to ', $new_path, '.', "\n");
-#   }
-
-#   return 1;
-# }
 
 sub itemize {
     my $self = shift;
@@ -1419,7 +1433,6 @@ sub itemize {
 	    my $new_prefix = "ckb${fragment_number}${cc_or_p_code}";
 
 	    $fragment_article->copy_with_new_name ($new_prefix);
-	    # copy_fragment_to_new_prefix ($fragment, $new_prefix);
 
 	    my $new_miz = "${target_text_subdir}/${new_prefix}.miz";
 	    my $new_err = "${target_text_subdir}/${new_prefix}.err";
@@ -1455,7 +1468,15 @@ sub itemize {
 
     print 'done.', "\n";
 
-    return ItemizedArticle->new (local_database => $local_db);
+    my $itemized_article = ItemizedArticle->new (local_database => $local_db);
+
+    print 'Rewriting aid attributes...';
+
+    $itemized_article->rewrite_pseudo_fragment_aids ();
+
+    print 'done.', "\n";
+
+    return $itemized_article;
 
 }
 
