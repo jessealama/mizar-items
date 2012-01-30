@@ -15,7 +15,6 @@ sub apply_stylesheet {
 
     my ($stylesheet, $document, $result_path, $parameters_ref) = @_;
 
-
     if (! defined $stylesheet) {
 	croak ('Error: please supply a stylesheet.');
     }
@@ -38,23 +37,29 @@ sub apply_stylesheet {
 	my $value = $parameters{$parameter};
 	push (@xsltproc_call, '--stringparam', $parameter, $value);
     }
+    if (defined $result_path) {
+	push (@xsltproc_call, '--output', $result_path);
+    }
+
     push (@xsltproc_call, $stylesheet);
     push (@xsltproc_call, $document);
+
+    # warn 'xsltproc_call = ', Dumper (@xsltproc_call);
 
     my $xsltproc_out = '';
     my $xsltproc_err = '';
 
     my $xsltproc_harness = start (\@xsltproc_call,
-				  '>', defined $result_path ? $result_path
-				                            : \$xsltproc_out
-							    ,
+				  '>', \$xsltproc_out,
 				  '2>', \$xsltproc_err);
 
     $xsltproc_harness->finish ();
     my $xsltproc_result = $xsltproc_harness->result (0);
 
     if ($xsltproc_result != 0) {
-	croak ('Error: xsltproc did not exit cleanly when applying the stylesheet', "\n", "\n", '  ', $stylesheet, "\n", "\n", 'to', "\n", "\n", '  ', $document, ' .  Its exit code was ', $xsltproc_result, '.', "\n", "\n",  'Here is the error output: ', "\n", $xsltproc_err)
+	croak ('Error: xsltproc did not exit cleanly when applying the stylesheet', "\n", "\n", '  ', $stylesheet, "\n", "\n", 'to', "\n", "\n", '  ', $document, ' .  Its exit code was ', $xsltproc_result, '.', "\n", "\n",  'Here is the error output: ', "\n", $xsltproc_err);
+    }
+
     } elsif (defined $result_path) {
 	return 1;
     } elsif (wantarray) {
