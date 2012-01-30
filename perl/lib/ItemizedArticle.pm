@@ -1024,5 +1024,91 @@ sub get_lemmas {
 
 }
 
+sub item_kind {
+    my $item = shift;
+
+    if ($item =~ /\A [a-z0-9_]+ : ([^:]+) : /) {
+	return $1;
+    } else {
+	croak ('Error: unable to extract the kind from \'', $item, '\'.');
+    }
+}
+
+sub resolve_local_item {
+    my $self = shift;
+    my $item = shift;
+
+    my $article_name = $self->get_article_name ();
+    my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
+
+    if ($item =~ /\A ckb ([0-9]+) : ([^:]+) : [0-9]+ /) {
+	(my $fragment_number, my $item_kind) = ($1, $2);
+	my $fragment = "${article_name}:fragment:${fragment_number}";
+	if (! defined $fragment_to_item_table{$fragment}) {
+	    croak ('Error: what in the world is \'', $fragment, '\'?');
+	}
+	my @generated_items = @{$fragment_to_item_table{$fragment}};
+	my $answer = undef;
+	foreach my $item (@generated_items) {
+	    my $this_kind = item_kind ($item);
+	    if ($this_kind = $item_kind) {
+		$answer = $item;
+	    }
+	}
+
+	if (defined $answer) {
+	    return $answer;
+	} else {
+	    croak ('Error: we failed to find an item among ', join (', ', @generated_items), ' congruent with the item ', $item, '.');
+	}
+
+    } else {
+	return $item;
+    }
+
+}
+
+sub dependencies {
+
+    my $self = shift;
+
+    my $local_db = $self->get_local_database ();
+    my $location = $local_db->get_location ();
+    my $article_name = $self->get_article_name ();
+    my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
+    my @items = @{$self->get_all_items ()};
+
+    my %dependencies = ();
+
+    foreach my $item (@items) {
+	if (! defined $item_to_fragment_table{$item}) {
+	    croak ('Error: ', $item, ' is not present in the item-to-fragment table.');
+	}
+
+	my $fragment = $item_to_fragment_table{$item};
+
+	# Pseudo fragments like 'ckb5[ch]' need to be changed: dump
+	# their brackets '[' and ']' to recover the basename of the
+	# .miz we are now after
+
+	if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) (\[ ([a-z]{2}) \])? /) {
+	    (my $fragment_number, my $tag) = ($1, $3);
+	    my $fragment_basename
+		= defined $tag ? "ckb${fragment_number}${tag}"
+		               : "ckb${fragment_number}";
+	    my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
+	    my @resolved_deps = map { $self->resolve_local_item ($_) } @fragment_deps;
+	    $dependencies{$item} = \@resolved_deps;
+	} else {
+	    croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
+	}
+
+
+    }
+
+    return \%dependencies;
+
+}
+
 1;
 __END__
