@@ -180,6 +180,12 @@ sub BUILD {
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1, # quiet, please
 				   suppress_errors => 1);
 
+sub get_text_subdir {
+    my $self = shift;
+    my $local_db = $self->get_local_database ();
+    return $local_db->get_text_subdir ();
+}
+
 sub fragment_number {
     my $fragment = shift;
     if ($fragment =~ / ckb ([0-9]+) /) {
