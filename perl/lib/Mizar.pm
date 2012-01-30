@@ -12,8 +12,9 @@ use IPC::Run qw(start);
 use IPC::Cmd qw(can_run);
 use Carp qw(croak);
 use File::Basename qw(basename dirname);
+use Data::Dumper;
 
-use Utils qw(ensure_readable_file ensure_directory);
+use Utils qw(ensure_readable_file ensure_directory ensure_executable);
 
 # Other recommended modules (uncomment to use):
 #  use IO::Prompt;
@@ -95,6 +96,8 @@ sub run_mizar_tool {
     }
 
     push (@tool_call, $article_name);
+
+    # warn 'Mizar tool call: ', Dumper (@tool_call);
 
     my $harness = start (\@tool_call,
 			 '>', '/dev/null',
