@@ -216,6 +216,51 @@ sub path_for_stylesheet {
     }
 }
 
+my %scripts = ();
+my $script_home = "/Users/alama/sources/mizar/mizar-items/bin";
+
+sub set_script_home {
+    my $new_home = shift;
+
+    if (defined $new_home) {
+	if (ensure_directory ($new_home)) {
+	    my $old_home = $script_home;
+	    $script_home = $new_home;
+	    return $old_home;
+	} else {
+	    croak ('Error: cannot set ', $new_home, ' to be the new script home because that is not a directory.');
+	}
+    } else {
+	croak ('Error: please supply a directory.');
+    }
+
+}
+
+foreach my $script ('minimal.pl') {
+    my $script_path = "${script_home}/${script}";
+    $scripts{$script} = $script_path;
+}
+
+sub path_for_script {
+    my $script = shift;
+
+    if (! defined $script) {
+	croak ('Error: please supply the name of a script.');
+    }
+
+    my $path = $scripts{$script};
+
+    if (defined $path) {
+	if (ensure_executable ($path)) {
+	    return $path;
+	} else {
+	    croak ('Error: the script ', $script, ' at ', $path, ' either does not exist, is not readable, or is not executable.');
+	}
+    } else {
+	croak ('Error: the script ', $script, ' has no known path.');
+    }
+}
+
 my @mml_lar = ();
 
 my $mizfiles;
