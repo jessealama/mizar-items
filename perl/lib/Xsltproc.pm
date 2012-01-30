@@ -60,7 +60,7 @@ sub apply_stylesheet {
 	croak ('Error: xsltproc did not exit cleanly when applying the stylesheet', "\n", "\n", '  ', $stylesheet, "\n", "\n", 'to', "\n", "\n", '  ', $document, ' .  Its exit code was ', $xsltproc_result, '.', "\n", "\n",  'Here is the error output: ', "\n", $xsltproc_err);
     }
 
-    } elsif (defined $result_path) {
+    if (defined $result_path) {
 	return 1;
     } elsif (wantarray) {
 	# carp 'HEY: wantarray; xsltproc output is ', $xsltproc_out;
