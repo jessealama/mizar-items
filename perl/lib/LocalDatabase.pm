@@ -10,6 +10,7 @@ use XML::LibXML;
 
 # Our stuff
 use Utils qw(ensure_directory ensure_readable_file);
+use Article;
 
 has 'location' => (
     is => 'ro',
