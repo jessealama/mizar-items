@@ -13,12 +13,20 @@ use charnames qw(:full);
 use Utils qw(ensure_directory strip_extension ensure_readable_file);
 use Mizar;
 use Xsltproc qw(apply_stylesheet);
+use LocalDatabase;
 
 has 'local_database' => (
-    is => 'ro',
+    is => 'rw',
     isa => 'LocalDatabase',
     reader => 'get_local_database',
-    required => 1,
+    writer => '_set_local_database',
+);
+
+has 'location' => (
+    is => 'rw',
+    isa => 'Str',
+    reader => 'get_location',
+    writer => '_set_location',
 );
 
 has 'item_to_fragment_table' => (
@@ -89,27 +97,36 @@ sub _set_article_name {
     my $self = shift;
 
     # Extract the article from which the local database was itemized
-    my $local_db = $self->get_local_database ();
+    my $local_db = undef;
+    my $location = undef;
 
-    if (! defined $local_db) {
-	croak ('Error: the mandatory local-database argument seems to be missing!');
+    if (defined $self->get_local_database () && defined $self->get_location ()) {
+	croak ('Error: please use either the local_database or location parameters when creating an ItemizedArticle, but not both.');
+    } elsif (defined $self->get_local_database ()) {
+	$local_db = $self->get_local_database ();
+	$location = $local_db->get_location ();
+	$self->_set_location ($location);
+    } elsif (defined $self->get_location ()) {
+	$location = $self->get_location ();
+	$local_db = LocalDatabase->new (location => $location);
+	$self->_set_local_database ($local_db);
+    } else {
+	croak ('Error: either a local database or a location must be provided when creating an ItemizedArticle.');
     }
 
-    my $local_db_location = $local_db->get_location ();
-
-    if (! ensure_directory ($local_db_location)) {
-	croak ('Error: the location where the local database is stored (', $local_db_location, ') does not seem to exist (as a directory).');
+    if (! ensure_directory ($location)) {
+	croak ('Error: the location where the local database is stored (', $location, ') does not seem to exist (as a directory).');
     }
 
-    my $local_db_location_as_dir = File::Spec->catdir ($local_db_location);
-    my @candidates = glob "${local_db_location_as_dir}*.miz";
+    my $location_as_dir = File::Spec->catdir ($location);
+    my @candidates = glob "${location_as_dir}*.miz";
 
     if (scalar @candidates == 0) {
-	croak ('Error: we found no .miz files under ', $local_db_location_as_dir, '.');
+	croak ('Error: we found no .miz files under ', $location_as_dir, '.');
     }
 
     if (scalar @candidates > 1) {
-	croak ('Error: we found multiple .miz files under ', $local_db_location_as_dir, '; will the real itemized article please stand up?');
+	croak ('Error: we found multiple .miz files under ', $location_as_dir, '; will the real itemized article please stand up?');
     }
 
     my $itemized_article_miz = $candidates[0];
