@@ -1093,6 +1093,8 @@ sub needed_items {
 
     my $self = shift;
 
+    $self->absolutize_environment ();
+
     my @needed = ();
 
     my @non_constructor_dependencies = $self->needed_non_constructors ();
