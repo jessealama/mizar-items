@@ -60,6 +60,30 @@ has 'fragment_to_definientia_table' => (
     writer => '_set_fragment_to_definientia_table',
 );
 
+has 'fragment_of_lemma_table' => (
+    is => 'rw',
+    traits => [qw(Hash)],
+    isa => 'HashRef',
+    reader => 'get_fragment_of_lemma_table',
+    writer => '_set_fragment_of_lemma_table',
+);
+
+has 'all_items' => (
+    is => 'rw',
+    traits => [qw(Array)],
+    isa => 'ArrayRef',
+    reader => 'get_all_items',
+    writer => '_set_all_items',
+);
+
+has 'all_fragments' => (
+    is => 'rw',
+    traits => [qw(Array)],
+    isa => 'ArrayRef',
+    reader => 'get_all_fragments',
+    writer => '_set_all_fragments',
+);
+
 sub _set_article_name {
 
     my $self = shift;
@@ -113,9 +137,26 @@ sub BUILD {
     my %fragment_to_definientia_table = ();
     $self->_set_fragment_to_definientia_table (\%fragment_to_definientia_table);
 
+    my %fragment_of_lemma_table = ();
+    $self->_set_fragment_of_lemma_table (\%fragment_of_lemma_table);
+
     $self->load_item_to_fragment_table ();
 
     $self->load_fragment_to_item_table ();
+
+    my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
+
+    my %items_table = ();
+    my %fragments_table = ();
+    while ((my $k, my $v) = each %item_to_fragment_table) {
+	$items_table{$k} = 0;
+	$fragments_table{$v} = 0;
+    }
+
+    my @items = keys %items_table;
+    my @fragments = keys %fragments_table;
+    $self->_set_all_items (\@items);
+    $self->_set_all_fragments (\@fragments);
 
 }
 
@@ -190,8 +231,8 @@ sub load_item_to_fragment_table {
     $self->load_notations ();
     $self->load_deftheorems ();
     $self->load_schemes ();
-    $self->load_theorems ();
     $self->load_lemmas ();
+    $self->load_theorems ();
     $self->load_reductions ();
     $self->load_clusters ();
     $self->load_identifications ();
@@ -835,6 +876,7 @@ sub load_theorems {
 
     my $local_db = $self->get_local_database ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
+    my %fragment_of_lemma_table = %{$self->get_fragment_of_lemma_table ()};
     my $article_name = $self->get_article_name ();
 
     my @theorems = $local_db->theorems_in_prel ();
@@ -844,8 +886,18 @@ sub load_theorems {
     foreach my $i (1 .. scalar @sorted_theorems) {
 	my $fragment_of_theorem = $sorted_theorems[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_theorem);
-	my $item = "${article_name}:theorem:${i}";
-	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}";
+
+	if (defined $fragment_of_lemma_table{$fragment_number}) {
+	    # Do nothing -- this isn't really a theorem from the
+	    # original article, but a toplevel unexported lemma that
+	    # got promoted to a theorem during our rewriting
+	} else {
+	    my $item = "${article_name}:theorem:${i}";
+	    $item_to_fragment_table{$item}
+		= "${article_name}:fragment:${fragment_number}";
+	}
+
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -899,6 +951,7 @@ sub load_lemmas {
     my $local_db_location = $local_db->get_location ();
     my $article_name = $self->get_article_name ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
+    my %fragment_of_lemma_table = %{$self->get_fragment_of_lemma_table ()};
 
     my $article_itemized_wsx
 	= "${local_db_location}/${article_name}.wsx.split.itemized";
@@ -920,14 +973,37 @@ sub load_lemmas {
 	    my $item = "${article_name}:lemma:${lemma_number}";
 	    my $fragment = "${article_name}:fragment:${fragment_number}";
 	    $item_to_fragment_table{$item} = $fragment;
+
+	    # Record that this fragment number generates a lemma.  If this
+	    # fragment shows up as a theorem, don't call it a theorem.
+	    # The only theorems are the theorems in the original article.
+	    $fragment_of_lemma_table{$fragment_number} = 0;
+
 	} else {
 	    croak ('Error: unable to make sense of the output line \'', $fragment_of_lemma, '\'.');
 	}
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
+    $self->_set_fragment_of_lemma_table (\%fragment_of_lemma_table);
 
     return 1;
+
+}
+
+sub get_lemmas {
+    my $self = shift;
+
+    my @items = @{$self->get_all_items ()};
+
+    my @lemmas = grep { / : lemma : / } @items;
+
+    if (wantarray) {
+	return @lemmas;
+    } else {
+	return join (' ', @lemmas);
+    }
 
 }
 
