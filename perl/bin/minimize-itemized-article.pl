@@ -12,6 +12,7 @@ use Carp qw(croak);
 
 use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
+use LocalDatabase;
 
 my $verbose = 0;
 my $debug = 0;
