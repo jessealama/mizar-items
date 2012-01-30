@@ -579,8 +579,6 @@ sub minimize_articles {
 
     my @article_names = defined $articles_ref ? @{$articles_ref} : ();
 
-    my $progress = Term::ProgressBar->new ({ count => scalar @proper_articles });
-
     my $location = $self->get_location ();
     my $text_dir = $self->get_text_subdir ();
 
