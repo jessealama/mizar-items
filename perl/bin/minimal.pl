@@ -51,7 +51,8 @@ my $article_dirname = dirname ($article);
 my $article_miz = "${article_dirname}/${article_basename}.miz";
 
 my $a = Article->new (path => $article_miz);
-$a->minimize ();
+
+$a->minimize ( { 'checker-only' => $checker_only } );
 
 __END__
 
