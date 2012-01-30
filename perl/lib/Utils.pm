@@ -4,6 +4,7 @@ use base qw(Exporter);
 use warnings;
 use strict;
 use Regexp::DefaultFlags;
+use Carp qw(croak);
 
 our @EXPORT_OK = qw(ensure_readable_file
 		    ensure_directory
