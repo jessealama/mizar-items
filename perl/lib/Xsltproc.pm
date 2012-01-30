@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use Carp qw(croak carp);
 use IPC::Run qw(start);
+use Data::Dumper;
 
 use Utils qw(ensure_readable_file);
 
