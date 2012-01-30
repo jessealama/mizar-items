@@ -268,17 +268,26 @@ sub load_fragment_to_item_table {
 
     my $self = shift;
 
+    my $article_name = $self->get_article_name ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table};
     my %fragment_to_item_table = ();
 
     foreach my $fragment (values %item_to_fragment_table) {
-	my @items = ();
-	foreach my $item (keys %item_to_fragment_table) {
-	    if ($fragment eq $item_to_fragment_table{$item}) {
-		push (@items, $item);
+	if ($fragment =~ / : fragment : ([0-9]+) /) {
+	    my $fragment_proper = "${article_name}:fragment:${1}";
+
+	    my @items = ();
+	    foreach my $item (keys %item_to_fragment_table) {
+		my $other_fragment = $item_to_fragment_table{$item};
+		if ($other_fragment =~ / ${fragment_proper}/) {
+		    push (@items, $item);
+		}
 	    }
+	    $fragment_to_item_table{$fragment_proper} = \@items;
+	} else {
+	    croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
 	}
-	$fragment_to_item_table{$fragment} = \@items;
+
     }
 
     # warn 'Setting the fragment-to-item table to:', Dumper (%fragment_to_item_table);
@@ -390,7 +399,7 @@ sub load_constructors_of_kind {
 	my $fragment_of_ccluster = $sorted_dcos[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_ccluster);
 	my $item = "${article_name}:${kind}constructor:${i}";
-	my $fragment = "${article_name}:fragment:${fragment_number}";
+	my $fragment = "${article_name}:fragment:${fragment_number}[${kind}c]";
 	$item_to_fragment_table{$item} = $fragment;
 
 	# Record that this fragment number generates this constructor.
@@ -440,7 +449,7 @@ sub load_patterns_of_kind {
 	my $fragment = $sorted_dnos[$i - 1];
 	my $fragment_number = fragment_number ($fragment);
 	my $item = "${article_name}:${kind}pattern:${i}";
-	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}";
+	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}[${kind}p]";
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -477,7 +486,7 @@ sub load_definientia_of_kind {
 	my $fragment = $sorted_definientia[$i - 1];
 	my $fragment_number = fragment_number ($fragment);
 	my $item = "${article_name}:${kind}definiens:${i}";
-	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}";
+	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}[${kind}f]";
 
 	# Record that this fragment number generates this definiens.
 	# Later, when computing correctness conditions, we may need
@@ -733,7 +742,7 @@ sub load_deftheorems {
 	my $fragment_of_theorem = $sorted_theorems[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_theorem);
 	my $item = "${article_name}:deftheorem:${i}";
-	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}";
+	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}[dt]";
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
