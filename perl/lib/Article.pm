@@ -1453,6 +1453,8 @@ sub itemize {
 
     print 'done.', "\n";
 
+    return ItemizedArticle->new (local_database => $local_db);
+
 }
 
 sub files {
