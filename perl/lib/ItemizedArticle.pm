@@ -1099,6 +1099,7 @@ sub dependencies {
 
     my $local_db = $self->get_local_database ();
     my $location = $local_db->get_location ();
+    my $text_dir = $local_db->get_text_subdir ();
     my $article_name = $self->get_article_name ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
@@ -1119,40 +1120,47 @@ sub dependencies {
 	# their brackets '[' and ']' to recover the basename of the
 	# .miz we are now after
 
-	# warn 'In ItemizedArticle, getting dependencies of ', $fragment;
+	# warn 'In ItemizedArticle, getting dependencies of fragment ', $fragment, ', which comes from ', $item;
 
 	if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) (\[ ([a-z]{2}) \])? /) {
 	    (my $fragment_number, my $tag) = ($1, $3);
 	    my $fragment_basename
 		= defined $tag ? "ckb${fragment_number}${tag}"
 		               : "ckb${fragment_number}";
-	    my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
 
-	    my %deps = ();
-	    foreach my $dep (@fragment_deps) {
-		my $resolved_dep = $self->resolve_local_item ($dep);
-		if (defined $resolved_dep) {
-		    $deps{$resolved_dep} = 0;
+	    my $fragment_path = "${text_dir}/${fragment_basename}.miz";
+
+	    if (-e $fragment_path) {
+
+		my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
+
+		my %deps = ();
+		foreach my $dep (@fragment_deps) {
+		    my $resolved_dep = $self->resolve_local_item ($dep);
+		    if (defined $resolved_dep) {
+			$deps{$resolved_dep} = 0;
+		    }
 		}
+
+		# Function case: every function constructor depends on its
+		# existence and uniqueness conditions
+		if ($item =~ / : kconstructor : [0-9]+ \z /) {
+		    my $existence_condition = "${item}[existence]";
+		    my $uniqueness_condition = "${item}[uniqueness]";
+		    $deps{$existence_condition} = 0;
+		    $deps{$uniqueness_condition} = 0;
+		}
+
+		my @deps_array = keys %deps;
+
+		$dependencies{$item} = \@deps_array;
+
+	    } else {
+		carp ('Warning: the fragment \'', $fragment, '\' does not exist in the local database.  Is this a case of a redefined constructor?');
 	    }
-
-	    # Function case: every function constructor depends on its
-	    # existence and uniqueness conditions
-	    if ($item =~ / : kconstructor : [0-9]+ \z /) {
-		my $existence_condition = "${item}[existence]";
-		my $uniqueness_condition = "${item}[uniqueness]";
-		$deps{$existence_condition} = 0;
-		$deps{$uniqueness_condition} = 0;
-	    }
-
-	    my @deps_array = keys %deps;
-
-	    $dependencies{$item} = \@deps_array;
-
 	} else {
 	    croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
 	}
-
     }
 
     # Another pass to deal with coherence and compatibility conditions
@@ -1206,7 +1214,7 @@ sub dependencies {
 		    }
 		    my @generated_items = @{$generated_items_ref};
 
-		    warn 'The fragment ', $proper_fragment, ' generates these items:', "\n", Dumper (@generated_items);
+		    # warn 'The fragment ', $proper_fragment, ' generates these items:', "\n", Dumper (@generated_items);
 
 		    my @conditions = grep { / \[  ([a-z]+)  \] \z/ } @generated_items;
 		    foreach my $condition (@conditions) {
