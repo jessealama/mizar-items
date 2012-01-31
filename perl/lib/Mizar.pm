@@ -3,13 +3,18 @@ package Mizar;
 use warnings;
 use strict;
 use Carp;
+use Cwd;
 
 use version; our $VERSION = qv('0.0.3');
 
 use base qw(Exporter);
 use IPC::Run qw(start);
+use IPC::Cmd qw(can_run);
 use Carp qw(croak);
 use File::Basename qw(basename dirname);
+use Data::Dumper;
+
+use Utils qw(ensure_readable_file ensure_directory ensure_executable);
 
 # Other recommended modules (uncomment to use):
 #  use IO::Prompt;
@@ -17,9 +22,29 @@ use File::Basename qw(basename dirname);
 #  use Perl6::Slurp;
 #  use Perl6::Say;
 
-our @EXPORT_OK = qw(accom verifier ensure_sensible_mizar_environment);
+our @EXPORT_OK = qw(accom
+		    verifier
+		    ensure_sensible_mizar_environment
+		    path_for_stylesheet);
 
-# Module implementation here
+my %default_tool_parameters = (
+    'long-lines' => 1,
+    'quiet' => 1,
+);
+
+sub set_default_tool_parameter {
+    my $parameter = shift;
+    my $value = shift;
+    if (defined $parameter) {
+	if (defined $value) {
+	    $default_tool_parameters{$parameter} = $value;
+	} else {
+	    croak ('Error: please supply a value for the parameter ', $parameter, '.');
+	}
+    } else {
+	croak ('Error: please supply a parameter.');
+    }
+}
 
 sub run_mizar_tool {
 
@@ -29,34 +54,50 @@ sub run_mizar_tool {
 
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
+    # Merge the supplied parameters with the default parameters.
+    # Prefer the parameters that were given as part of the invovation.
+
+    my %full_parameters = ();
+    foreach my $param (keys %default_tool_parameters) {
+	$full_parameters{$param} = $default_tool_parameters{$param};
+    }
+    foreach my $param (keys %parameters) {
+	$full_parameters{$param} = $parameters{$param};
+    }
+
     my $article_dirname = dirname ($article_name);
     my $article_basename = basename ($article_name, '.miz');
     my $article_err = "${article_dirname}/${article_basename}.err";
 
     my @tool_call = ($tool);
 
-    my $long_lines = $parameters{'long-lines'};
-    my $checker_only = $parameters{'checker-only'};
-    my $quiet = $parameters{'quiet'};
-    my $stop_on_error = $parameters{'stop-on-error'};
-
-    if (defined $long_lines && $long_lines) {
-	push (@tool_call, '-l');
-    }
-
-    if (defined $checker_only && $checker_only) {
-	push (@tool_call, '-c');
-    }
-
-    if (defined $quiet && $quiet) {
-	push (@tool_call, '-q');
-    }
-
-    if (defined $stop_on_error && $stop_on_error) {
-	push (@tool_call, '-s');
+    # Interpret the parameters, warning if we encounter one we don't
+    # know how to handle.
+    foreach my $param (keys %full_parameters) {
+	if ($param eq 'long-lines') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-l');
+	    }
+	} elsif ($param eq 'checker-only') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-c');
+	    }
+	} elsif ($param eq 'quiet') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-q');
+	    }
+	} elsif ($param eq 'stop-on-error') {
+	    if ($full_parameters{$param}) {
+		push (@tool_call, '-s');
+	    }
+	} else {
+	    carp ('Warning: unknown flag ', $param, '.');
+	}
     }
 
     push (@tool_call, $article_name);
+
+    # warn 'Mizar tool call: ', Dumper (@tool_call);
 
     my $harness = start (\@tool_call,
 			 '>', '/dev/null',
@@ -72,23 +113,151 @@ sub run_mizar_tool {
 sub accom {
     my $article_name = shift;
     my $parameters_ref = shift;
-    if (defined $parameters_ref) {
-	return (run_mizar_tool ('accom', $article_name, $parameters_ref));
-    } else {
-	return (run_mizar_tool ('accom', $article_name));
-    }
+    return (run_mizar_tool ('accom', $article_name, $parameters_ref));
 }
 
 sub verifier {
     my $article_name = shift;
     my $parameters_ref = shift;
-    if (not defined $article_name) {
-	croak ('Error: bogus call to verifier.');
-    }
-    if (defined $parameters_ref) {
-	return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
+    return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
+}
+
+sub exporter {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('exporter', $article_name, $parameters_ref));
+}
+
+sub transfer {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('transfer', $article_name, $parameters_ref));
+}
+
+sub wsmparser {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('wsmparser', $article_name, $parameters_ref));
+}
+
+sub msmprocessor {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('msmprocessor', $article_name, $parameters_ref));
+}
+
+sub msplit {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('msplit', $article_name, $parameters_ref));
+}
+
+sub mglue {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    return (run_mizar_tool ('mglue', $article_name, $parameters_ref));
+}
+
+my %stylesheets = ();
+my $stylesheet_home = "/Users/alama/sources/mizar/mizar-items/xsl";
+
+sub set_stylesheet_home {
+    my $new_home = shift;
+
+    if (defined $new_home) {
+	if (ensure_directory ($new_home)) {
+	    my $old_home = $stylesheet_home;
+	    $stylesheet_home = $new_home;
+	    return $old_home;
+	} else {
+	    croak ('Error: cannot set ', $new_home, ' to be the new stylesheet home because that is not a directory.');
+	}
     } else {
-	return (run_mizar_tool ('verifier', $article_name));
+	croak ('Error: please supply a directory.');
+    }
+
+}
+
+foreach my $sheet ('inferred-constructors',
+		   'addabsrefs',
+	           'properties-of-constructors',
+	           'strip-property',
+	           'properties-of-constructor',
+	           'dependencies',
+	           'split',
+	           'itemize',
+	           'wsm',
+	           'extend-evl',
+	           'conditions-and-properties',
+	           'trim-properties-and-conditions',
+	           'rewrite-aid',
+	           'fragments-of-lemmas') {
+    my $stylesheet_path = "${stylesheet_home}/${sheet}.xsl";
+    $stylesheets{$sheet} = $stylesheet_path;
+}
+
+sub path_for_stylesheet {
+    my $sheet = shift;
+
+    if (! defined $sheet) {
+	croak ('Error: please supply the name of a stylesheet.');
+    }
+
+    my $path = $stylesheets{$sheet};
+
+    if (defined $path) {
+	if (ensure_readable_file ($path)) {
+	    return $path;
+	} else {
+	    croak ('Error: the path for the ', $sheet, ' stylesheet is ', $path, ', but there is no file there (or the file is unreadable).');
+	}
+    } else {
+	croak ('Error: the ', $sheet, ' stylesheet has no known path.');
+    }
+}
+
+my %scripts = ();
+my $script_home = "/Users/alama/sources/mizar/mizar-items/bin";
+
+sub set_script_home {
+    my $new_home = shift;
+
+    if (defined $new_home) {
+	if (ensure_directory ($new_home)) {
+	    my $old_home = $script_home;
+	    $script_home = $new_home;
+	    return $old_home;
+	} else {
+	    croak ('Error: cannot set ', $new_home, ' to be the new script home because that is not a directory.');
+	}
+    } else {
+	croak ('Error: please supply a directory.');
+    }
+
+}
+
+foreach my $script ('minimal.pl') {
+    my $script_path = "${script_home}/${script}";
+    $scripts{$script} = $script_path;
+}
+
+sub path_for_script {
+    my $script = shift;
+
+    if (! defined $script) {
+	croak ('Error: please supply the name of a script.');
+    }
+
+    my $path = $scripts{$script};
+
+    if (defined $path) {
+	if (ensure_executable ($path)) {
+	    return $path;
+	} else {
+	    croak ('Error: the script ', $script, ' at ', $path, ' either does not exist, is not readable, or is not executable.');
+	}
+    } else {
+	croak ('Error: the script ', $script, ' has no known path.');
     }
 }
 
@@ -96,21 +265,15 @@ my @mml_lar = ();
 
 my $mizfiles;
 
-sub which_chomp {
-    my $thing = shift;
-    my $which = `which $thing`;
-    chomp $which;
-    return $which;
-}
-
-# mizar tools
-my %mizar_tool_path
-    = ('makeenv' => which_chomp ('makeenv'),
-       'accom' => which_chomp ('accom'),
-       'verifier' => which_chomp ('verifier'),
-       'dellink' => which_chomp ('dellink'),
-       'JA1' => which_chomp ('JA1'));
-my @mizar_tools = keys %mizar_tool_path;
+my @mizar_tools = ('verifier',
+		   'accom',
+		   'makeenv',
+		   'exporter',
+		   'transfer',
+		   'msmprocessor',
+		   'wsmparser',
+		   'msplit',
+		   'mglue');
 
 sub ensure_sensible_mizar_environment {
   my $mizfiles = $ENV{'MIZFILES'};
@@ -122,6 +285,11 @@ sub ensure_sensible_mizar_environment {
   }
   if (! -d $mizfiles) {
     croak ('Error: the value of the MIZFILES environment variable, ', "\n", "\n", '  ', $mizfiles, "\n", "\n", 'is not a directory.');
+  }
+  foreach my $tool (@mizar_tools) {
+      if (! can_run ($tool)) {
+	  croak ('Error: the needed Mizar tool ', $tool, ' seems to be unavailable.');
+      }
   }
 }
 

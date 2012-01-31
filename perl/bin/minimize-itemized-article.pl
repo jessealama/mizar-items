@@ -10,43 +10,9 @@ use Pod::Usage;
 use File::Temp qw(tempdir);
 use Carp qw(croak);
 
-sub ensure_directory {
-  my $dir = shift;
-  if (! -e $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist.';
-  }
-
-  if (! -d $dir) {
-    die 'Error: the required directory ', $dir, ' does not exist (as a directory).';
-  }
-  return 1;
-}
-
-sub ensure_readable_file {
-  my $file = shift;
-
-  if (! -e $file) {
-    croak ('Error: ', $file, ' does not exist.');
-  }
-  if (! -f $file) {
-    croak ('Error: ', $file, ' is not a file.');
-  }
-
-  if (! -r $file) {
-    croak ('Error: ', $file, ' is unreadable.');
-  }
-
-  return 1;
-}
-
-sub ensure_executable_file {
-  my $path = shift;
-  ensure_readable_file ($path);
-  if (! -x $path) {
-    croak ('Error: ', $path, ' should be executable, but it is not.');
-  }
-  return 1;
-}
+use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use Utils qw(ensure_directory ensure_readable_file ensure_executable);
+use LocalDatabase;
 
 my $verbose = 0;
 my $debug = 0;
@@ -54,8 +20,8 @@ my $man = 0;
 my $help = 0;
 my $paranoid = 0;
 my $minimize_whole_article = 0;
-my $script_home = '/Users/alama/sources/mizar/xsl4mizar/items';
-my $stylesheet_home = '/Users/alama/sources/mizar/xsl4mizar/items';
+my $script_home = '/Users/alama/sources/mizar/mizar-items/bin';
+my $stylesheet_home = '/Users/alama/sources/mizar-items/xsl';
 my $nice = 0;
 my $num_jobs = undef;
 my $workdir = undef;
@@ -81,190 +47,20 @@ if (defined $num_jobs) {
   }
 }
 
-if (defined $workdir) {
-  ensure_directory ($workdir);
+if (scalar @ARGV != 1) {
+    pod2usage (1);
 }
 
-if (scalar @ARGV != 1) {
-  print 'Usage: minimize-itemized-article.pl ITEMIZED-ARTICLE-DIRECTORY', "\n";
-  exit 1;
+if (defined $workdir) {
+  ensure_directory ($workdir)
+      or croak ('Error: the work directory does not exist.');
 }
 
 my $article_dir = $ARGV[0];
-my $article_text_dir = "${article_dir}/text";
+my $local_db = LocalDatabase->new (location => $article_dir);
+my $itemized_article = ItemizedArticle->new (local_database => $local_db);
 
-ensure_directory ($article_dir);
-ensure_directory ($article_text_dir);
-
-my @miz_candidates = `find $article_dir -maxdepth 1 -mindepth 1 -type f -name "*.miz"`;
-chomp @miz_candidates;
-
-if (scalar @miz_candidates == 0) {
-  print 'Error: we did not find any .miz files under ', $article_dir, '.', "\n";
-  exit 1;
-}
-
-if (scalar @miz_candidates > 1) {
-  print 'Error: we found multiple .miz files under $article_dir; which one should we use?', "\n";
-  exit 1;
-}
-
-my $itemized_article_miz = $miz_candidates[0];
-my $itemized_article_basename = basename ($itemized_article_miz, '.miz');
-
-ensure_readable_file ($itemized_article_miz);
-ensure_directory ($script_home);
-
-my $minimize_script = "${script_home}/minimal.pl";
-my $minimize_internally_script = "${script_home}/minimize-internally.pl";
-
-ensure_readable_file ($minimize_script);
-ensure_executable_file ($minimize_script);
-ensure_readable_file ($minimize_internally_script);
-ensure_executable_file ($minimize_internally_script);
-
-ensure_directory ($stylesheet_home);
-
-my $prefer_environment_stylesheet = "${stylesheet_home}/prefer-environment.xsl";
-
-ensure_readable_file ($prefer_environment_stylesheet);
-
-my $real_workdir = undef;
-if (defined $workdir) {
-  $real_workdir = tempdir ("minimization-${itemized_article_basename}-XXXX",
-			   CLEANUP => 1,
-			   DIR => $workdir);
-  if ($verbose == 1) {
-    print 'Copying the itemized article directory', "\n", "\n", '  ', $article_dir, "\n", "\n", 'to the temporary directory', "\n", "\n", '  ', $real_workdir, "\n";
-  }
-  dircopy ($article_dir, $real_workdir)
-    or (print 'Error: something went wrong copying', "\n", "\n", '  ', $article_dir, "\n", "\n", 'to', "\n", "\n", '  ', $real_workdir, "\n", "\n", $!, "\n" && exit 1);
-} else {
-  $real_workdir = File::Spec->rel2abs ($article_dir);
-}
-
-my $real_text_dir = "${real_workdir}/text";
-
-my @fragments = `find $real_text_dir -type f -name "ckb*.miz" | grep 'ckb[1-9][0-9]*.miz'`;
-chomp @fragments;
-
-if (scalar @fragments == 0) {
-  print 'Error: we found 0 fragments under ', $real_text_dir, '.', "\n";
-  exit 1;
-}
-
-my $real_itemized_article_miz = "${real_workdir}/${itemized_article_basename}.miz";
-
-my $parallel_call = undef;
-
-if ($nice == 1) {
-  if (defined $num_jobs) {
-    if ($paranoid == 1) {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs $num_jobs nice ${minimize_script} --fast-theorems --fast-schemes --paranoid --verbose {}";
-    } else {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs $num_jobs nice ${minimize_script} --fast-theorems --fast-schemes --verbose {}";
-    }
-  } else {
-    if ($paranoid == 1) {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs +0 nice ${minimize_script} --paranoid --verbose --fast-theorems --fast-schemes  {}";
-    } else {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs +0 nice ${minimize_script} --fast-theorems --fast-schemes  --verbose {}";
-    }
-  }
-} else {
-  if (defined $num_jobs) {
-    if ($paranoid == 1) {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs $num_jobs ${minimize_script} --fast-theorems --fast-schemes  --paranoid --verbose {}";
-    } else {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs $num_jobs ${minimize_script} --fast-theorems --fast-schemes  --verbose {}";
-    }
-  } else {
-    if ($paranoid == 1) {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs +0 ${minimize_script} --paranoid --verbose --fast-theorems --fast-schemes {}";
-    } else {
-      $parallel_call = "find ${real_text_dir} -name 'ckb*.miz' | grep 'ckb[1-9][0-9]*.miz' | parallel --jobs +0 ${minimize_script} --verbose --fast-theorems --fast-schemes  {}";
-    }
-  }
-}
-
-chdir $real_workdir
-  or croak ('Error: cannot change directory to ', $real_workdir, '.', "\n");
-
-my $parallel_minimize_status = system ($parallel_call);
-my $parallel_minimize_exit_code = $parallel_minimize_status >> 8;
-
-if ($parallel_minimize_exit_code != 0) {
-  croak ('Error: parallel did not exit cleanly when minimizing the fragments of ', $itemized_article_basename, ' under ', $real_text_dir, '.', "\n", 'Its exit code was ', $parallel_minimize_exit_code, '.', "\n");
-}
-
-# Now check for conditions and constructor properties
-
-opendir my $text_dir_fh, $real_text_dir
-    or croak ('Error: unable to open the directory ', $real_text_dir, '.');
-my @ps_and_cs
-    = grep { -f "${real_text_dir}/$_"
-		 && / ckb[0-9]+[a-z]{2}.miz \z/x } readdir $text_dir_fh;
-closedir $text_dir_fh;
-my @properties_and_conditions = map { "${real_text_dir}/$_" } @ps_and_cs;
-
-if ($debug) {
-  print {*STDERR} 'There are ', scalar @properties_and_conditions, ' properties/conditions:', join ("\n", @properties_and_conditions), "\n";
-
-}
-
-# First, internally minimize
-
-my $parallel_minimize_internally_status
-    = system ('parallel '
-	      . $minimize_internally_script
-	      . ' ::: ' . join (' ', @properties_and_conditions));
-my $parallel_minimize_internally_exit_code
-    = $parallel_minimize_internally_status >> 8;
-if ($parallel_minimize_internally_exit_code != 0) {
-    croak ('Error: parallel died internally minimizing the properties and conditions articles for ', $itemized_article_basename, '.');
-}
-
-# Now minimize the envionment of the property and correctness condition guys
-
-my $parallel_minimize_ps_and_cs_status
-    = system ('parallel '
-	      . $minimize_script
-	      . ' --checker-only '
-	      . ' ::: ' . join (' ', @properties_and_conditions));
-my $parallel_minimize_ps_and_cs_exit_code
-    = $parallel_minimize_ps_and_cs_status >> 8;
-if ($parallel_minimize_ps_and_cs_exit_code != 0) {
-    croak ('Error: parallel died minimizing the properties and conditions articles for ', $itemized_article_basename, '.');
-}
-
-if ($paranoid == 1) {
-  my @bad_guys = `find ${real_text_dir} -name 'ckb*.err' ! -empty -exec basename {} .err ';' | sed -e 's/ckb//' | sort --numeric-sort`;
-  chomp @bad_guys;
-  if (scalar @bad_guys > 0) {
-    print 'Error: some fragments of ', $itemized_article_basename, ' are not verifiable!  The failed fragments are:', "\n";
-    foreach my $bad_guy (@bad_guys) {
-      print '* ', $bad_guy, "\n";
-    }
-    exit 1;
-  }
-  if ($verbose == 1) {
-    print 'Paranoia: all minimized fragments are still verifiable.', "\n";
-  }
-}
-
-if ($verbose == 1) {
-  print 'Done.', "\n";
-}
-
-if (defined $workdir) {
-  if ($verbose == 1) {
-    print 'Moving the newly minimized directory back from', "\n", "\n", '  ', $real_workdir, "\n", "\n", 'to', "\n", "\n", '  ', $article_dir, "\n";
-  }
-  dirmove ($real_workdir, $article_dir)
-    or (print 'Error: something went wrong moving the newly minimized directory back from', "\n", "\n", '  ', $real_workdir, "\n", "\n", 'to', "\n", "\n", '  ', $article_dir, "\n" && exit 1);
-}
-
-exit 0;
+$itemized_article->minimize ();
 
 __END__
 

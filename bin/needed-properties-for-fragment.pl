@@ -1,1 +1,0 @@
-perl/bin/needed-properties-for-fragment.pl

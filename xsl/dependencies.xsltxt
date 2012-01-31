@@ -40,10 +40,11 @@ tpl [Article[not(@aid)]] {
 }
 
 tpl [Article[@aid]] {
+  $aid = `@aid`;
   $aid-lc = lowercase (#string = `@aid`);
 
   // deftheorems
-  for-each [descendant::Ref[@kind = "D" and @absnr and @aid]] {
+  for-each [descendant::Ref[@kind = "D" and @absnr and @aid and not(@aid = $aid)]] {
     apply [.]; "\n";
   }
 
@@ -53,7 +54,8 @@ tpl [Article[@aid]] {
   }
 
   // schemes
-  $esh = `concat ($aid-lc, ".esh1")`;
+  // absolute form of .esh is unreliable, because it rewrites the nr attribute
+  $esh = `concat ($aid-lc, ".esh")`;
   $full-esh = `concat ($article-directory, $esh)`;
   for-each [document ($full-esh, /)] {
     apply [Schemes];

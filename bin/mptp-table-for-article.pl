@@ -1,1 +1,0 @@
-perl/bin/mptp-table-for-article.pl

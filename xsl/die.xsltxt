@@ -1,0 +1,27 @@
+stylesheet 1.0;
+
+// A handy template to kill the XSLT processor, emitting a message
+// before doing so.  Try to determine line and column information from
+// the current context node, too.
+
+tpl die(#message) {
+  choose {
+    when [@line and @col] {
+      $line = `@line`;
+      $col = `@col`;
+      $final_message = `concat ($message, " (line ", $line, ", column ", $col, ")")`;
+      msg terminate="yes" $final_message;
+    }
+    when [preceding::*[@line and @col]] {
+      $nearest-with-line-and-col-info = `preceding::*[@line and @col][1]`;
+      $line = `$nearest-with-line-and-col-info/@line`;
+      $col = `$nearest-with-line-and-col-info/@col`;
+      $final_message = `concat ($message, " (we were unable to detemine line and column information for the current context node, but the nearest preceding node with line and column is at line ", $line, " and column ", $col, ")")`;
+      msg terminate="yes" $final_message;
+    }
+    otherwise {
+      $final_message = `concat ($message, " (unable to determine line and column information)")`;
+      msg terminate="yes" $final_message;
+    }
+  }
+}

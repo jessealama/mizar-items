@@ -3,12 +3,10 @@ stylesheet "1.0";
 output method="text";
 
 //////////////////////////////////////////////////////////////////////
-// Identifying a specific constructor
+// Identifying a list of constructors
 //////////////////////////////////////////////////////////////////////
 
-#aid = { ""; }
-#nr = { ""; }
-#kind = { ""; }
+#constructors = { ""; }
 
 //////////////////////////////////////////////////////////////////////
 // Utilities
@@ -26,21 +24,8 @@ tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
 
 tpl [/] {
   choose {
-    when [$aid = ""] {
-      msg terminate="yes" "Error: please supply a value for aid attribute of the constructor to target.";
-    }
-    when [$nr = ""] {
-      msg terminate="yes" "Error: please supply a value for the nr attribute of the constructor to target.";
-    }
-    when [$kind = ""] {
-      msg terminate="yes" "Error: please supply a value for the kind attribute of the constructor to target.";
-    }
     when [Constructors] {
-      $kind-lc = lowercase (#string = $kind);
-      $aid-lc = lowercase (#string = $aid);
-      apply [Constructors] (#target-aid = $aid-lc,
-       	    		    #target-nr = $nr,
-			    #target-kind = $kind-lc);
+      apply [Constructors];
     }
     otherwise {
       msg terminate="yes" "Error: the Constructors root element is missing.  (Are you applying this stylesheet to a .atr file?)";
@@ -48,43 +33,42 @@ tpl [/] {
   }
 }
 
-tpl [Constructors] (#target-kind, #target-aid, #target-nr) {
+tpl [Constructors] {
   for-each [Constructor] {
-    apply [.] (#target-kind = $target-kind,
-  	       #target-aid = $target-aid,
-	       #target-nr = $target-nr);
+    apply [.];
   }
 }
 
-tpl [Constructor[not(@aid)]] (#target-kind, #target-aid, #target-nr) {
+tpl [Constructor[not(@aid)]] {
   msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an aid attribute.";
 }
 
-tpl [Constructor[not(@kind)]] (#target-kind, #target-aid, #target-nr) {
+tpl [Constructor[not(@kind)]] {
   msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks a kind attribute.";
 }
 
-tpl [Constructor[not(@nr)]] (#target-kind, #target-aid, #target-nr) {
+tpl [Constructor[not(@nr)]] {
   msg terminate="yes" "Error: we don't know how to handle a Constructor element that lacks an nr attribute.";
 }
 
-tpl [Constructor[@aid and @nr and @kind]] (#target-kind, #target-aid, #target-nr) {
+tpl [Constructor[@aid and @nr and @kind]] {
   $this-nr = `@nr`;
   $this-aid = lowercase (#string = `@aid`);
   $this-kind = lowercase (#string = `@kind`);
-  if [$this-kind = $target-kind and $this-nr = $target-nr and $this-aid = $target-aid] {
-    apply [Properties];
+  $token = `concat (",",
+                    $this-aid, ":", $this-kind, "constructor", ":", $this-nr,
+		    ",")`;
+  if [contains ($constructors, $token)] {
+    apply [Properties] (#aid = $this-aid,
+                        #kind = $this-kind,
+			#nr = $this-nr);
   }
 }
 
-tpl [Properties] {
+tpl [Properties] (#aid, #kind, #nr) {
   for-each [*] {
     $name-lc = lowercase (#string = `name (.)`);
-    if [$name-lc = "antisymmetry"] {
-      "asymmetry";
-    } else {
-      $name-lc;
-    }
-    "\n";
+    $prop = { if [$name-lc = "antisymmetry"] { "asymmetry"; } else { $name-lc; } }
+    $aid; ":"; $kind; "constructor"; ":"; $nr; "["; $prop; "]"; "\n";
   }
 }

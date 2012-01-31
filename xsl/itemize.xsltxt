@@ -2,8 +2,7 @@ stylesheet 1.0;
 
 output method=xml indent="yes";
 
-include ../utils/die.xsl;
-include ../utils/tokens.xsl;
+include "tokens.xsl";
 
 tpl [*] {
   $element = `local-name ()`;
@@ -62,9 +61,7 @@ tpl enumerate-items (#items, #users, #non-users) {
           emit-needed (#needed = $needed);
           <Item {
             for-each [@*] { copy-of `.`; }
-            @promoted-lemma = "no";
             @theorem-number = `count (preceding-sibling::Item[@kind = "Theorem-Item"]) + 1`;
-            @lemma-number = `count (preceding::Item[parent::Text-Proper and @kind = "Regular-Statement"]) + 1`;
             apply [*];
           }
         }
@@ -604,16 +601,9 @@ tpl bad-term-hunting (#candidates) {
   }
 }
 
-// tpl [Text-Proper/*/Straightforward-Justification/Link] {
-//   for-each [../..] {
-//     $num-previous = `count (preceding::Item[parent::Text-Proper])`;
-//     $label = `concat ("CKB", $num-previous)`;
-//     <Theorem-Reference {
-//       @spelling = $label;
-//       @"number" = "1";
-//     }
-//   }
-// }
+tpl [Text-Proper/*/Straightforward-Justification/Link] {
+  die (#message = "We assume that toplevel linking justifications have been removed, but we found one!");
+}
 
 //////////////////////////////////////////////////////////////////////
 // Resolving article-local references
@@ -644,31 +634,7 @@ tpl [Scheme-Justification[@idnr and @nr = "0"]] {
   }
 }
 
-// tpl [Scheme-Justification[@nr = "0"
-//                           and @idnr = preceding::Item[parent::Text-Proper
-//                                                       and @kind = "Scheme-Block-Item"]/Block[@kind = "Scheme-Block"]/Item[@kind = "Scheme-Head"]/Scheme[@idnr]/@idnr]] {
-//   $context = `.`;
-//   $idnr = `@idnr`;
-//   for-each [preceding::Item[parent::Text-Proper and @kind = "Scheme-Block-Item" and descendant::Scheme[@idnr = $idnr]][1]] {
-//     $num-previous = `count (preceding::Item[parent::Text-Proper])`;
-//     $position = `$num-previous + 1`;
-//     $spelling = `concat ("CKB", $position)`;
-//     <Scheme-Justification {
-//       @spelling = $spelling;
-//       @idnr = "1";
-//       @nr = "1"; // might not be right
-//       @promoted = "promoted";
-//       apply [`$context/*`];
-//     }
-//   }
-// }
-
 // Non-scheme references
-
-// By default, we don't know how to resolve; just copy.
-// tpl [Local-Reference] {
-//   copy-of `.`;
-// }
 
 // TODO: make a table for local refernce idnrs.  This could speed things up a lot.
 //

@@ -170,12 +170,26 @@ sub count_dependent_items {
   print scalar keys %dep_items, "\n";
 }
 
-sub implicitly_independent_items {
-  foreach my $item (keys %all_items) {
-    if (! defined $dep_items{$item}) {
-      print $item, "\n";
+sub get_implicitly_independent_items {
+    my @items = ();
+    foreach my $item (keys %all_items) {
+	if (! defined $dep_items{$item}) {
+	    push (@items, $item);
+	}
     }
-  }
+
+    if (wantarray) {
+	return @items;
+    } else {
+	return \@items;
+    }
+}
+
+sub implicitly_independent_items {
+    my @items = get_implicitly_independent_items ();
+    foreach my $item (@items) {
+	print $item, "\n";
+    }
 }
 
 sub count_implicitly_independent_items {
@@ -199,8 +213,11 @@ sub count_explicitly_independent_items {
 }
 
 sub independent_items {
-  print join ("\n", keys %trivial_dep_items), "\n";
-  implicitly_independent_items ();
+    my @trivial_deps = keys %trivial_dep_items;
+    my @implicitly_independent = get_implicitly_independent_items ();
+    foreach my $item (@trivial_deps, @implicitly_independent) {
+	print $item, "\n";
+    }
 }
 
 sub count_independent_items {

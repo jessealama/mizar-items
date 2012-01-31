@@ -59,6 +59,11 @@ tpl [Article[@aid]] {
   $full-eno = `concat ($article-directory, $eno)`;
   for-each [document ($full-eno, /)] {
     print-everything (#except = $aid);
+    // for-each [Notations] {
+    //   for-each [Pattern] {
+    //     apply [.]; "\n";
+    //   }
+    // }
   }
 
   // inspect the .dfs
@@ -66,6 +71,11 @@ tpl [Article[@aid]] {
   $full-dfs = `concat ($article-directory, $dfs)`;
   for-each [document ($full-dfs, /)] {
     print-everything (#except = $aid);
+    for-each [Definientia] {
+      for-each [Definiens] {
+        apply [.]; "\n";
+      }
+    }
   }
 
   // inspect the .ecl
@@ -80,6 +90,11 @@ tpl [Article[@aid]] {
   $full-eid = `concat ($article-directory, $eid)`;
   for-each [document ($full-eid, /)] {
     print-everything (#except = $aid);
+    for-each [IdentifyRegistrations] {
+      for-each [Identify] {
+        apply [.]; "\n";
+      }
+    }
   }
 
   // inspect the .epr
@@ -138,9 +153,66 @@ tpl [*[@aid and @kind and @absnr]] {
 // Used only to fish out constructors that have an abstractness property
 tpl [Constructors] {
   for-each [Constructor[@kind and @nr and @aid and Properties/Abstractness]] {
-    $kind = lowercase (#string = `@kind`);
-    $aid = lowercase (#string = `@aid`);
+    $kind = lc (#s = `@kind`);
+    $aid = lc (#s = `@aid`);
     $nr = `@nr`;
     $aid; ":"; $kind-lc; "constructor"; ":"; $nr; "\n";
   }
+}
+
+tpl [Pattern[not(@aid)]] {
+  msg terminate="yes" "Error: we cannot handle a Pattern element that lacks an aid attribute.";
+}
+
+tpl [Pattern[not(@kind)]] {
+  msg terminate="yes" "Error: we cannot handle a Pattern element that lacks a kind attribute.";
+}
+
+tpl [Pattern[not(@absconstrnr)]] {
+  msg terminate="yes" "Error: we cannot handle a Pattern element that lacks an absconstrnr attribute.";
+}
+
+tpl [Pattern[@aid and @kind and @absconstrnr]] {
+  $aid = lc (#s = `@aid`);
+  $kind = lc (#s = `@kind`);
+  $nr = `@absconstrnr`;
+  $aid; ":"; $kind; "constructor"; ":"; $nr;
+}
+
+tpl [Definiens[not(@aid)]] {
+  msg terminate="yes" "Error: we cannot handle a Definiens element that lacks an aid attribute.";
+}
+
+tpl [Definiens[not(@constrkind)]] {
+  msg terminate="yes" "Error: we cannot handle a Definiens element that lacks a constrkind attribute.";
+}
+
+tpl [Definiens[not(@absconstrnr)]] {
+  msg terminate="yes" "Error: we cannot handle a Definiens element that lacks an absconstrnr attribute.";
+}
+
+tpl [Definiens[@aid and @constrkind and @absconstrnr]] {
+  $aid = lc (#s = `@aid`);
+  $kind = lc (#s = `@constrkind`);
+  $nr = `@absconstrnr`;
+  $aid; ":"; $kind; "constructor"; ":"; $nr;
+}
+
+tpl [Identify[not(@aid)]] {
+  msg terminate="yes" "Error: we cannot handle a Identify element that lacks an aid attribute.";
+}
+
+tpl [Identify[not(@constrkind)]] {
+  msg terminate="yes" "Error: we cannot handle a Identify element that lacks a constrkind attribute.";
+}
+
+tpl [Identify[not(@nr)]] {
+  msg terminate="yes" "Error: we cannot handle a Identify element that lacks an absconstrnr attribute.";
+}
+
+tpl [Identify[@aid and @constrkind and @nr]] {
+  $aid = lc (#s = `@aid`);
+  $kind = lc (#s = `@constrkind`);
+  $nr = `@nr`;
+  $aid; ":"; $kind; "constructor"; ":"; $nr;
 }

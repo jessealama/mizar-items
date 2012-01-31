@@ -1,1 +1,0 @@
-perl/bin/lemma-unpromotable-constructors.pl

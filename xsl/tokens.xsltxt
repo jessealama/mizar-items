@@ -1,0 +1,286 @@
+stylesheet 1.0;
+
+// Tokens
+
+//////////////////////////////////////////////////////////////////////
+/// Sanity checks
+//////////////////////////////////////////////////////////////////////
+
+// Determine whether $string is actually a token string.  This means that it is either empty or (i) begins with a comma, (ii) contains a second comma, (iii) the substring between the first and second comma is non-empty, and (iv) the substring starting at the second comma is a valid token string.
+tpl ensure-token-string (#string) {
+  if [$string = ""] {
+    "1";
+  } else {
+    if [starts-with ($string, ",")] {
+      $after-first-comma = `substring-after ($string, ",")`;
+      $between-first-and-second-comma = `substring-before ($after-first-comma, ",")`;
+      if [$between-first-and-second-comma = ""] {
+        "0";
+      } else {
+        $after-second-comma = `substring-after ($after-first-comma, ",")`;
+        if [$after-second-comma = ""] {
+          "1";
+        } else {
+          $tail = `concat (",", $after-second-comma)`;
+          ensure-token-string (#string = $tail);
+        }
+      }
+    } else {
+      "0";
+    }
+  }
+}
+
+tpl token-string-is-empty (#token-string) {
+  if [$token-string = ""] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl first-token (#token-string) {
+  if [$token-string = ""] {
+    die (#message = "We can't find the first token of an empty token string!");
+  } else {
+    if [starts-with ($token-string, ",")] {
+      $after-first-comma = `substring-after ($token-string, ",")`;
+      $between-first-and-second-comma = `substring-before ($after-first-comma, ",")`;
+      if [$between-first-and-second-comma = ""] {
+        $message = `concat ("We cannot compute the first token of the token string '", $token-string, "', because it starts with two adjacent commas")`;
+        die (#message = $message);
+      } else {
+        `concat (",", $between-first-and-second-comma, ",")`;
+      }
+    } else {
+      $message = `concat ("We cannot compute the first token of the token string '", $token-string, "; because it does not start with a comma and is thus not a valid token string")`;
+      die (#message = $message);
+    }
+  }
+}
+
+tpl first-item (#token-string) {
+  $first-token = first-token (#token-string = $token-string);
+  value-of-token (#token = $first-token);
+}
+
+tpl token-string-tail (#token-string) {
+  if [$token-string = ""] {
+    "";
+  } else {
+    if [starts-with ($token-string, ",")] {
+      $after-first-comma = `substring-after ($token-string, ",")`;
+      if [contains ($after-first-comma, ",")] {
+        $after-second-comma = `substring-after ($after-first-comma, ",")`;
+        if [$after-second-comma = ""] {
+          "";
+        } else {
+          `concat (",", $after-second-comma)`;
+        }
+      } else {
+        $message = `concat ("We cannot compute the tail of the token string '", $token-string, "', because it contains only one comma; valid token strings contain at least two commas")`;
+        die (#message = $message);
+      }
+    } else {
+      $message = `concat ("We canot take the tail of the token string '", $token-string, "': since it does not begin with a comma, it is not actually a valid token string")`;
+      die (#message = $message);
+    }
+  }
+}
+
+tpl token-string-length (#token-string) {
+  if [$token-string = ""] {
+    "0";
+  } else {
+    $tail = token-string-tail (#token-string = $token-string);
+    $tail-length = token-string-length (#token-string = $tail);
+    `1 + $tail-length`;
+  }
+}
+
+tpl append-token-strings (#token-string-a, #token-string-b) {
+  choose {
+    when [$token-string-a = ""] { $token-string-b; }
+    when [$token-string-b = ""] { $token-string-a; }
+    otherwise {
+      $b-minus-initial-comma = `substring-after ($token-string-b, ",")`;
+      `concat ($token-string-a, $b-minus-initial-comma)`;
+    }
+  }
+}
+
+tpl value-of-token (#token) {
+  if [starts-with ($token, ",")] {
+    $after-first-comma = `substring-after ($token, ",")`;
+    if [contains ($after-first-comma, ",")] {
+      `substring-before ($after-first-comma, ",")`;
+    } else {
+      $message = `concat ("The token '", $token, "' does not contain two commas, so it is not actually a valid token")`;
+      die (#message = $message);
+    }
+  } else {
+    $message = `concat ("The token '", $token, "' does not start with a comma, so it is not actually a valid token")`;
+    die (#message = $message);
+  }
+}
+
+tpl position-of-item-helper (#item, #token-string, #val) {
+  $empty = token-string-is-empty (#token-string = $token-string);
+  if [$empty = "1"] {
+    "0";
+  } else {
+    $head = first-item (#token-string = $token-string);
+    if [$head = $item] {
+      $val;
+    } else {
+      $tail = token-string-tail (#token-string = $token-string);
+      position-of-item-helper (#item = $item,
+                               #token-string = $tail,
+                               #val = `$val + 1`);
+    }
+  }
+}
+
+// The position of $item in $token-string, starting from 1.  It is
+// assumed that $item is the item itself, without any delimiting
+// symbols (e.g., initial and final commas ",").  If the value does
+// not occur in the token string, return 0.
+tpl position-of-item (#item, #token-string) {
+  position-of-item-helper (#item = $item,
+                           #token-string = $token-string,
+                           #val = "1");
+}
+
+// Remove all of the tokens in $to-remove from $token-string.  Only the
+// first occurrence of an item in $to-remove will be removed from
+// $token-string.
+tpl token-string-difference (#token-string, #to-remove) {
+  $is-empty = token-string-is-empty (#token-string = $to-remove);
+  if [$is-empty = "1"] {
+    $token-string;
+  } else {
+    $first-token = first-token (#token-string = $to-remove);
+    $to-remove-tail = token-string-tail (#token-string = $to-remove);
+    if [contains ($token-string, $first-token)] {
+      $token-string-before = `substring-before ($token-string, $first-token)`;
+      $token-string-after = `substring-after ($token-string, $first-token)`;
+      $cut = `concat ($token-string-before, ",", $token-string-after)`;
+      token-string-difference (#token-string = $cut,
+                               #to-remove = $to-remove-tail);
+    } else {
+      token-string-difference (#token-string = $token-string,
+                               #to-remove = $to-remove-tail);
+    }
+  }
+}
+
+tpl cons-token-string (#item, #token-string) {
+  append-token-strings (#token-string-a = `concat (",", $item, ",")`,
+                        #token-string-b = $token-string);
+}
+
+tpl cons-token-string-at-end (#item, #token-string) {
+  append-token-strings (#token-string-b = `concat (",", $item, ",")`,
+                        #token-string-a = $token-string);
+}
+
+tpl item-in-token-list (#token-list, #item) {
+  $token = `concat (",", $item, ",")`;
+  if [contains ($token-list, $token)] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl remove-duplicates (#token-string) {
+  $empty = token-string-is-empty (#token-string = $token-string);
+  if [$empty = "1"] {
+    $token-string;
+  } else {
+    $first-item = first-item (#token-string = $token-string);
+    $tail = token-string-tail (#token-string = $token-string);
+    $item-in-tail = item-in-token-list (#token-list = $tail, #item = $first-item);
+    if [$item-in-tail = "1"] {
+      remove-duplicates (#token-string = $tail);
+    } else {
+      $tail-sans-duplicates = remove-duplicates (#token-string = $tail);
+      cons-token-string (#item = $first-item,
+                         #token-string = $tail-sans-duplicates);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+/// Printing token strings
+//////////////////////////////////////////////////////////////////////
+
+tpl render-token-string-helper (#token-string, #before-item, #after-item, #val) {
+  if [$token-string = ""] {
+    `$val`;
+  } else {
+    $item = first-item (#token-string = $token-string);
+    $tail = token-string-tail (#token-string = $token-string);
+    render-token-string-helper (#token-string = $tail,
+                                #before-item = $before-item,
+                                #after-item = $after-item,
+                                #val = `concat ($val, $before-item, $item, $after-item)`);
+  }
+}
+
+tpl render-token-string (#token-string, #before-item, #after-item) {
+  $ok = ensure-token-string (#string = $token-string);
+  if [$ok = "1"] {
+    render-token-string-helper (#token-string = $token-string,
+                                #before-item = $before-item,
+                                #after-item = $after-item,
+                                #val = "");
+  } else {
+    $message = `concat ("We cannot redner the token string&#xa;&#xa;  ", $token-string, "&#xa;&#xa;because it is not actually a token string!")`;
+    die (#message = $message);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+/// Constructing token strings
+//////////////////////////////////////////////////////////////////////
+
+tpl make-token-string-helper (#elements, #val) {
+  if [$elements] {
+    $new-val = cons-token-string (#item = `$elements[1]`, #token-string = $val);
+    make-token-string-helper (#elements = `$elements[position() > 1]`,
+                              #val = $new-val);
+  } else {
+    $val;
+  }
+}
+
+tpl make-token-string (#elements) {
+  make-token-string-helper (#elements = $elements,
+                            #val = "");
+}
+
+
+tpl make-token-string-uniq (#elements, #val) {
+  if [$elements] {
+    $element = `$elements[1]`;
+    $token = `concat (",", $element, ",")`;
+    $contains = item-in-token-list (#item = $element, #token-list = $val);
+    if [$contains = "1"] {
+      make-token-string-uniq (#elements = `$elements[position() > 1]`,
+                              #val = $val);
+    } else {
+      $new-val = cons-token-string (#item = $element,
+                                    #token-string = $val);
+      make-token-string-uniq (#elements = `$elements[position() > 1]`,
+                              #val = $new-val);
+    }
+  } else {
+    $val;
+  }
+}
+
+tpl make-token-string-no-duplicates (#elements) {
+  make-token-string-uniq (#elements = $elements,
+                          #val = "");
+}

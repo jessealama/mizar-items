@@ -1,0 +1,28 @@
+stylesheet "1.0";
+
+// List the lemmas occurring in an itemized .wsx file.
+
+output method="text";
+
+tpl [/] {
+    if [Fragments] {
+      apply [Fragments];
+    } else {
+      msg terminate="yes" "Error: the required Fragments document element is missing.  (Are you applying this stylesheet to an itemized .wsx file?)";
+    }
+}
+
+tpl [Fragments] {
+    for-each [Text-Proper] {
+      apply [.];
+    }
+}
+
+tpl [Text-Proper] {
+  $pos = `count (preceding-sibling::Text-Proper) + 1`;
+  for-each [Item[position() = last()]] {
+    if [@lemma-number] {
+      `@lemma-number`; " "; $pos; "\n";
+    }
+  }
+}
