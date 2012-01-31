@@ -4,6 +4,19 @@ stylesheet "1.0";
 
 output method="text";
 
+tpl count-preceding-lemmas {
+  $num-preceding-regular-statements
+    = `count (preceding::Item[parent::Text-Proper
+    	                               and @kind = "Regular-Statement"])`;
+  $num-preceding-consider-propositions
+    = `count (preceding::Proposition[parent::Conditions[parent::Item[@kind = "Choice-Statement" and parent::Text-Proper]]])`;
+  `$num-preceding-regular-statements + $num-preceding-consider-propositions + 1`;
+
+}
+
+// By default, do nothing
+tpl [*] { }
+
 tpl [/] {
     if [Fragments] {
       apply [Fragments];
@@ -21,8 +34,20 @@ tpl [Fragments] {
 tpl [Text-Proper] {
   $pos = `count (preceding-sibling::Text-Proper) + 1`;
   for-each [Item[position() = last()]] {
-    if [@lemma-number] {
-      `@lemma-number`; " "; $pos; "\n";
-    }
+    apply [.] (#position = $pos);
+  }
+}
+
+tpl [Item[@kind = "Regular-Statement" and @lemma-number]] (#position) {
+  `@lemma-number`; " "; $position; "\n";
+}
+
+tpl [Item[@kind = "Theorem-Item" and @lemma-number]] (#position) {
+  `@lemma-number`; " "; $position; "\n";
+}
+
+tpl [Item[@kind = "Choice-Statement"]] (#position) {
+  for-each [Conditions/Proposition[@lemma-number]] {
+    `@lemma-number`; " "; $position; "\n";
   }
 }
