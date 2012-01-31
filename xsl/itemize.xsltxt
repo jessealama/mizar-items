@@ -16,6 +16,16 @@ tpl [/] {
   apply [Text-Proper];
 }
 
+tpl count-preceding-lemmas {
+  $num-preceding-regular-statements
+    = `count (preceding::Item[parent::Text-Proper
+    	                               and @kind = "Regular-Statement"])`;
+  $num-preceding-consider-propositions
+    = `count (preceding::Proposition[parent::Conditions[parent::Item[@kind = "Choice-Statement" and parent::Text-Proper]]])`;
+  `$num-preceding-regular-statements + $num-preceding-consider-propositions + 1`;
+
+}
+
 tpl enumerate-items (#items, #users, #non-users) {
   if [$items] {
     $item = `$items[1]`;
@@ -26,6 +36,39 @@ tpl enumerate-items (#items, #users, #non-users) {
       $new-users = `substring-before ($new-users-and-non-users, ":")`;
       $new-non-users = `substring-after ($new-users-and-non-users, ":")`;
       choose {
+        when [self::Item[@kind = "Choice-Statement"]] {
+          if [not(Conditions)] {
+    	    die (#message = "Error: the required Conditions child of a Choice-Statement is missing.");
+          }
+	  <Text-Proper {
+	    <Item { @kind = "Section-Pragma"; }
+	    emit-needed (#needed = $needed);
+            <Item {
+              for-each [@*] { copy-of `.`; }
+  	      for-each [Explicitly-Qualified-Segment | Implicitly-Qualified-Segment] {
+  	      apply [.];
+              }
+              <Conditions {
+                for-each [Conditions] {
+                  for-each [@*] { copy-of `.`; }
+                  for-each [Proposition] {
+  		  <Proposition {
+  		    for-each [@*] { copy-of `.`; }
+  		    @lemma-number = count-preceding-lemmas ();
+                      for-each [*] {
+  		      apply [.];
+     		    }
+        		  }
+                  }
+                }
+              }
+              if [not(Straightforward-Justification)] {
+                die (#message = "A Choice-Statement lacks a straightforward-Justification child.");
+              }
+              apply [Straightforward-Justification];
+            }
+          }
+        }
         when [self::Item[@kind = "Regular-Statement" and @exportable = "yes"]] {
         for-each [Proposition] {
           <Text-Proper {
@@ -34,7 +77,7 @@ tpl enumerate-items (#items, #users, #non-users) {
             <Item {
               @kind = "Theorem-Item";
               @promoted-lemma = "yes";
-              @lemma-number = `count (preceding::Item[parent::Text-Proper and @kind = "Regular-Statement"]) + 1`;
+              @lemma-number = count-preceding-lemmas ();
               apply [.];
               for-each [following-sibling::*] {
                 apply [.];
@@ -50,7 +93,7 @@ tpl enumerate-items (#items, #users, #non-users) {
           <Item {
             for-each [@*] { copy-of `.`; }
             @promoted-lemma = "no";
-            @lemma-number = `count (preceding::Item[parent::Text-Proper and @kind = "Regular-Statement"]) + 1`;
+            @lemma-number = count-preceding-lemmas ();
             apply [*];
           }
         }
