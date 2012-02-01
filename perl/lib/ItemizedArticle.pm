@@ -1198,7 +1198,7 @@ sub dependencies {
 	}
     }
 
-    # Yet pass to deal with constructor properties for redefined constructors
+    # Yet another pass to deal with constructor properties for redefined constructors
     foreach my $item (@items) {
 	if ($item =~ / : (.) constructor : ([0-9]+) \[ ( compatibility | coherence ) \] \z/) {
 	    (my $item_kind, my $item_number) = ($1, $2);
