@@ -358,7 +358,6 @@ sub load_properties_of_constructors_of_kind {
 		croak ('Error: what is the short form of \'', $property, '\'?');
 	    }
 
-
 	}
     }
 
