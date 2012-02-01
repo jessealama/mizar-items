@@ -88,8 +88,6 @@ sub absolutize_extension {
 	return (apply_stylesheet ($absrefs_stylesheet,
 				  $xml_path,
 				  $abs_xml_path));
-    } else {
-	carp ('Warning: there is no .', $extension, ' file for ', $self->name (), ', but we were asked to absolutize it.');
     }
 }
 
