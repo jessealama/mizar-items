@@ -1317,23 +1317,32 @@ sub rewrite_pseudo_fragment_aids {
     my $text_dir = $self->get_text_subdir ();
 
     my @pseudo_fragments = $self->get_pseudo_fragments ();
-    my @pseudo_fragment_xmls = map { "${text_dir}/${_}.xml" } @pseudo_fragments;
-
-    # warn 'pseudo fragments = ', Dumper (@pseudo_fragment_xmls);
-
     my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
 
-    foreach my $pseudo_fragment (@pseudo_fragments) {
-	my $pseudo_fragment_xml = "${text_dir}/${pseudo_fragment}.xml";
-	my $pseudo_fragment_xml_tmp = "${pseudo_fragment_xml}.tmp";
-	apply_stylesheet ($rewrite_aid_stylesheet,
-			  $pseudo_fragment_xml,
-			  $pseudo_fragment_xml_tmp,
-			  { 'new-aid' => $pseudo_fragment });
-	File::Copy::move ($pseudo_fragment_xml_tmp,
-			  $pseudo_fragment_xml)
-	      or croak ('Error: unable to rename ', $pseudo_fragment_xml_tmp, ' to ', $pseudo_fragment_xml, '.');
+    foreach my $extension ('xml', 'xml1', 'eno', 'dfs', 'ecl', 'eid', 'epr', 'erd', 'esh', 'eth') {
+	foreach my $pseudo_fragment (@pseudo_fragments) {
+	    if ($pseudo_fragment =~ / ckb ([0-9]+) /) {
+		my $proper_fragment = "ckb${1}";
+		my $pseudo_fragment_xml = "${text_dir}/${pseudo_fragment}.${extension}";
+		my $pseudo_fragment_xml_tmp = "${pseudo_fragment_xml}.tmp";
+		if (-e $pseudo_fragment_xml) {
+		    apply_stylesheet ($rewrite_aid_stylesheet,
+				      $pseudo_fragment_xml,
+				      $pseudo_fragment_xml_tmp,
+				      { 'old' => $proper_fragment,
+					'new' => $pseudo_fragment });
+		    if (! -e $pseudo_fragment_xml_tmp) {
+			croak ('wtf? ', $pseudo_fragment_xml_tmp, ' does not exist.');
+		    }
+		    File::Copy::move ($pseudo_fragment_xml_tmp,
+				      $pseudo_fragment_xml)
+			  or croak ('Error: unable to rename ', $pseudo_fragment_xml_tmp, ' to ', $pseudo_fragment_xml, ': ', $!);
+		}
+	    } else {
+		croak ('Error: unable to make sense of the pseudo-fragment \'', $pseudo_fragment, '\'.');
+	    }
 
+	}
     }
 
     return 1;
