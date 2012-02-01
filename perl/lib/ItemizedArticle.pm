@@ -352,12 +352,17 @@ sub load_properties_of_constructors_of_kind {
 	    my $property_code = $code_of_property{$property};
 
 	    if (defined $property_code) {
-		my $pseudo_fragment = "${fragment}[$property_code]";
-		$item_to_fragment_table{$item} = $pseudo_fragment;
+		# Structure case: don't try to be clever!  Structures
+		# behave uniquely and therefore need unique treatment
+		if ($property eq 'abstractness') {
+		    $item_to_fragment_table{$item} = $fragment;
+		} else {
+		    my $pseudo_fragment = "${fragment}[$property_code]";
+		    $item_to_fragment_table{$item} = $pseudo_fragment;
+		}
 	    } else {
 		croak ('Error: what is the short form of \'', $property, '\'?');
 	    }
-
 
 	}
     }
@@ -384,7 +389,7 @@ sub load_constructors_of_kind {
     my $kind = shift;
 
     my $local_db = $self->get_local_database ();
-
+    my $text_dir = $self->get_text_subdir ();
     my $article_name = $self->get_article_name ();
 
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
@@ -399,8 +404,32 @@ sub load_constructors_of_kind {
 	my $fragment_of_ccluster = $sorted_dcos[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_ccluster);
 	my $item = "${article_name}:${kind}constructor:${i}";
-	my $fragment = "${article_name}:fragment:${fragment_number}[${kind}c]";
-	$item_to_fragment_table{$item} = $fragment;
+	my $fragment = undef;
+
+	# Structure case: don't try to be clever and say that the
+	# constructor comes from the pseudo fragment.  Unfortunately,
+	# structures are too messed up at the moment for this to work
+	# as expected.
+
+	my $fragment_xml = "${text_dir}/ckb${fragment_number}.xml";
+
+	if (! -e $fragment_xml) {
+	    croak ('Error: there is no XML file at ', $fragment_xml, '.');
+	}
+
+	my $fragment_doc = eval { $xml_parser->parse_file ($fragment_xml) };
+
+	if (! defined $fragment_doc) {
+	    croak ('Error: the XML file at ', $fragment_doc, ' is not actually a well-formed XML file.');
+	}
+
+	if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+	    my $fragment = "${article_name}:fragment:${fragment_number}";
+	    $item_to_fragment_table{$item} = $fragment;
+	} else {
+	    my $fragment = "${article_name}:fragment:${fragment_number}[${kind}c]";
+	    $item_to_fragment_table{$item} = $fragment;
+	}
 
 	# Record that this fragment number generates this constructor.
 	# Later, when computing correctness conditions, we'll need
@@ -413,7 +442,6 @@ sub load_constructors_of_kind {
 	} else {
 	    $fragment_to_constructor_table{$fragment_number} = [$item];
 	}
-
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -438,6 +466,7 @@ sub load_patterns_of_kind {
     my $kind = shift;
 
     my $local_db = $self->get_local_database ();
+    my $text_dir = $self->get_text_subdir ();
     my $article_name = $self->get_article_name ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my @dnos = $local_db->patterns_in_prel_of_kind ($kind);
@@ -449,7 +478,35 @@ sub load_patterns_of_kind {
 	my $fragment = $sorted_dnos[$i - 1];
 	my $fragment_number = fragment_number ($fragment);
 	my $item = "${article_name}:${kind}pattern:${i}";
-	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}[${kind}p]";
+
+
+	# Structure case: don't try to be clever and say that the
+	# constructor comes from the pseudo fragment.  Unfortunately,
+	# structures are too messed up at the moment for this to work
+	# as expected.
+
+	my $fragment_xml = "${text_dir}/ckb${fragment_number}.xml";
+
+	if (! -e $fragment_xml) {
+	    croak ('Error: there is no XML file at ', $fragment_xml, '.');
+	}
+
+	my $fragment_doc = eval { $xml_parser->parse_file ($fragment_xml) };
+
+	if (! defined $fragment_doc) {
+	    croak ('Error: the XML file at ', $fragment_doc, ' is not actually a well-formed XML file.');
+	}
+
+	if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+	    my $fragment = "${article_name}:fragment:${fragment_number}";
+	    $item_to_fragment_table{$item} = $fragment;
+	} else {
+	    my $fragment = "${article_name}:fragment:${fragment_number}[${kind}p]";
+	    $item_to_fragment_table{$item} = $fragment;
+	}
+
+
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -872,6 +929,7 @@ sub load_clusters_of_kind {
     my $kind = shift;
 
     my $local_db = $self->get_local_database ();
+    my $text_subdir = $self->get_text_subdir ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my $article_name = $self->get_article_name ();
 
@@ -883,8 +941,11 @@ sub load_clusters_of_kind {
     foreach my $i (1 .. scalar @sorted_clusters) {
 	my $fragment_of_cluster = $sorted_clusters[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_cluster);
+
 	my $item = "${article_name}:${kind}cluster:${i}";
+
 	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}";
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -1128,9 +1189,43 @@ sub dependencies {
 		= defined $tag ? "ckb${fragment_number}${tag}"
 		               : "ckb${fragment_number}";
 
-	    my $fragment_path = "${text_dir}/${fragment_basename}.miz";
+	    my $fragment_miz = "${text_dir}/${fragment_basename}.miz";
+	    my $fragment_abs_xml = "${text_dir}/${fragment_basename}.xml1";
 
-	    if (-e $fragment_path) {
+	    if (-e $fragment_miz && -e $fragment_abs_xml) {
+
+ 		# Structure definitions are a special case because,
+		# for some reason, the pseudo fragments that they
+		# generate must include a bogus registration that
+		# introduces false dependencies
+
+		my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
+
+		if (! defined $fragment_doc) {
+		    croak ('Error: the XML document at ', $fragment_abs_xml, ' is not well-formed; we tried to sniff into it to see whether we are dealing with a structure definition, but we cannot.');
+		}
+
+		if ($fragment_doc->exists ('.//Definition[@kind = "G"]')
+			&& defined $tag
+			    && $tag ne 'xx') {
+
+		    # Dump the registration from the absolute XML.  It
+		    # is bogus.
+
+		    my $strip_registration_stylesheet
+			= Mizar::path_for_stylesheet ('strip-registration');
+
+		    my $fragment_abs_xml_tmp = "${fragment_abs_xml}.tmp";
+
+		    apply_stylesheet ($strip_registration_stylesheet,
+				      $fragment_abs_xml,
+				      $fragment_abs_xml_tmp);
+
+		    File::Copy::move ($fragment_abs_xml_tmp,
+				      $fragment_abs_xml)
+			  or croak ('Error: unable to rename ', $fragment_abs_xml_tmp, ' to ', $fragment_abs_xml, '.');
+
+		}
 
 		my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
 
@@ -1141,6 +1236,7 @@ sub dependencies {
 			$deps{$resolved_dep} = 0;
 		    }
 		}
+
 
 		# Function case: every function constructor depends on its
 		# existence and uniqueness conditions
@@ -1199,7 +1295,7 @@ sub dependencies {
 	}
     }
 
-    # Yet pass to deal with constructor properties for redefined constructors
+    # Yet another pass to deal with constructor properties for redefined constructors
     foreach my $item (@items) {
 	if ($item =~ / : (.) constructor : ([0-9]+) \[ ( compatibility | coherence ) \] \z/) {
 	    (my $item_kind, my $item_number) = ($1, $2);
@@ -1267,7 +1363,6 @@ sub dependencies {
 	}
     }
 
-
     return \%dependencies;
 
 }
@@ -1284,12 +1379,23 @@ sub minimize {
 
     # warn 'pseudo articles: ', "\n", Dumper (@pseudo_articles);
 
-    $local_db->minimize_articles (\@proper_articles);
+    $local_db->minimize_articles (\@proper_articles, { 'fast-theorems-and-schemes' => 1 });
 
     $local_db->minimize_articles (\@pseudo_articles, { 'checker-only' => 1 });
 
+    # We need to rewrite aids.  Sigh.
+    warn 'Rewriting aids, post minimization...';
+    # $self->absolutize ();
+    $self->rewrite_pseudo_fragment_aids ();
+
     return 1;
 
+}
+
+sub absolutize {
+    my $self = shift;
+    my $local_db = $self->get_local_database ();
+    return $local_db->absolutize ();
 }
 
 sub get_pseudo_fragments {
@@ -1318,23 +1424,32 @@ sub rewrite_pseudo_fragment_aids {
     my $text_dir = $self->get_text_subdir ();
 
     my @pseudo_fragments = $self->get_pseudo_fragments ();
-    my @pseudo_fragment_xmls = map { "${text_dir}/${_}.xml" } @pseudo_fragments;
-
-    # warn 'pseudo fragments = ', Dumper (@pseudo_fragment_xmls);
-
     my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
 
-    foreach my $pseudo_fragment (@pseudo_fragments) {
-	my $pseudo_fragment_xml = "${text_dir}/${pseudo_fragment}.xml";
-	my $pseudo_fragment_xml_tmp = "${pseudo_fragment_xml}.tmp";
-	apply_stylesheet ($rewrite_aid_stylesheet,
-			  $pseudo_fragment_xml,
-			  $pseudo_fragment_xml_tmp,
-			  { 'new-aid' => $pseudo_fragment });
-	File::Copy::move ($pseudo_fragment_xml_tmp,
-			  $pseudo_fragment_xml)
-	      or croak ('Error: unable to rename ', $pseudo_fragment_xml_tmp, ' to ', $pseudo_fragment_xml, '.');
+#    foreach my $extension ('xml1', 'eno1', 'dfs1', 'ecl1', 'eid1', 'epr1', 'erd1', 'esh1', 'eth1') {
+    foreach my $extension ('xml1') {
+	foreach my $pseudo_fragment (@pseudo_fragments) {
+	    if ($pseudo_fragment =~ / ckb ([0-9]+) /) {
+		my $proper_fragment = "ckb${1}";
+		my $pseudo_fragment_xml = "${text_dir}/${pseudo_fragment}.${extension}";
+		my $pseudo_fragment_xml_tmp = "${pseudo_fragment_xml}.tmp";
+		if (-e $pseudo_fragment_xml) {
+		    apply_stylesheet ($rewrite_aid_stylesheet,
+				      $pseudo_fragment_xml,
+				      $pseudo_fragment_xml_tmp,
+				      { 'new' => $pseudo_fragment });
+		    if (! -e $pseudo_fragment_xml_tmp) {
+			croak ('wtf? ', $pseudo_fragment_xml_tmp, ' does not exist.');
+		    }
+		    File::Copy::move ($pseudo_fragment_xml_tmp,
+				      $pseudo_fragment_xml)
+			  or croak ('Error: unable to rename ', $pseudo_fragment_xml_tmp, ' to ', $pseudo_fragment_xml, ': ', $!);
+		}
+	    } else {
+		croak ('Error: unable to make sense of the pseudo-fragment \'', $pseudo_fragment, '\'.');
+	    }
 
+	}
     }
 
     return 1;

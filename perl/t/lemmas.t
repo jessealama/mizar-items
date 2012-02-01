@@ -46,14 +46,19 @@ END_ARTICLE
 
 Readonly my $one_iter_equality => <<'END_ARTICLE';
 environ begin
-reserve x for set;
-x = x .= x;
+the set = the set .= the set;
 END_ARTICLE
 
 Readonly my $one_consider => <<'END_ARTICLE';
 environ begin
 the set = the set;
 then consider x being set such that x = x;
+END_ARTICLE
+
+Readonly my $two_considers => <<'END_ARTICLE';
+environ begin
+the set = the set;
+then consider x, y being set such that x = x and y = y;
 END_ARTICLE
 
 # Save all this to disk
@@ -159,6 +164,26 @@ my @a4_lemmas = $a4_itemized->get_lemmas ();
 
 is (scalar @a4_lemmas, 2,
     'a4 has exactly two lemmas');
+
+######################################################################
+## two consider proposition
+######################################################################
+my $a5_path = "${dir}/a5.miz";
+
+write_string_to_file ($two_considers, $a5_path);
+
+my $a5 = Article->new (path => $a5_path);
+my $a5_itemized = $a5->itemize ("${dir}/a5");
+
+is (scalar @{$a5_itemized->get_all_items ()}, 3,
+    'a5 has exactly 3 items');
+
+diag ('items of a5: ', @{$a5_itemized->get_all_items ()});
+
+my @a5_lemmas = $a5_itemized->get_lemmas ();
+
+is (scalar @a5_lemmas, 3,
+    'a5 has exactly three lemmas');
 
 
 ### Local Variables: ***

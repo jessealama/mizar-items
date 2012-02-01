@@ -104,6 +104,7 @@ load_table ();
 
 my %command_dispatch_table =
   ('all' => \&all,
+   'print' => \&complete_table,
    'count-all' => \&count_all,
    'dependent-items' => \&dependent_items,
    'count-dependent-items' => \&count_dependent_items,

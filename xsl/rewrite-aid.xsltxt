@@ -2,43 +2,39 @@ stylesheet "1.0";
 
 output method="xml" indent="no";
 
-#new-aid = { ""; }
+#new = { ""; }
 
 $lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
 $ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
 
 tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
 
-tpl [*] (#aid, #update-aid) {
+tpl [/] {
+  apply [*] mode="root";
+}
+
+tpl [*] mode="root" {
   $n = `local-name (.)`;
   <$n {
     for-each [@*] { copy-of `.`; }
     if [@aid] {
-      $this-aid = `@aid`;
-      if [$this-aid = $aid] {
-        @aid = $update-aid;
-      }
+      $new-uc = uppercase (#string = $new);
+      @aid = $new-uc;
     }
     if [*] {
-      "\n"; apply [*] (#aid = $aid, #update-aid = $update-aid);
+      "\n"; apply [*] mode="copy";
     }
   }
   "\n";
 }
 
-tpl [/] {
-  apply [Article];
-}
-
-tpl [Article[@aid]] {
-  $aid = `@aid`;
-  $new-aid-uc = uppercase (#string = $new-aid);
-  <Article {
+tpl [*] mode="copy" {
+  $n = `local-name (.)`;
+  <$n {
     for-each [@*] { copy-of `.`; }
-    @aid = $new-aid-uc;
-    "\n";
-    for-each [*] {
-      apply [.] (#aid = $aid, #update-aid = $new-aid-uc); "\n";
+    if [*] {
+      "\n"; apply [*] mode="copy";
     }
   }
+  "\n";
 }
