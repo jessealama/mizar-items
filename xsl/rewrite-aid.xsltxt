@@ -2,7 +2,6 @@ stylesheet "1.0";
 
 output method="xml" indent="no";
 
-#old = { ""; }
 #new = { ""; }
 
 $lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
@@ -10,25 +9,32 @@ $ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
 
 tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
 
-tpl [*] (#param-old, #param-new){
+tpl [/] {
+  apply [*] mode="root";
+}
+
+tpl [*] mode="root" {
   $n = `local-name (.)`;
   <$n {
     for-each [@*] { copy-of `.`; }
     if [@aid] {
-      $aid = `@aid`;
-      if [$aid = $param-old] {
-        @aid = $param-new;
-      }
+      $new-uc = uppercase (#string = $new);
+      @aid = $new-uc;
     }
     if [*] {
-      "\n"; apply [*] (#param-old = $param-old, #param-new = $param-new);
+      "\n"; apply [*] mode="copy";
     }
   }
   "\n";
 }
 
-tpl [/] {
-  $old-uc = uppercase (#string = $old);
-  $new-uc = uppercase (#string = $new);
-  apply [*] (#param-old = $old-uc, #param-new = $new-uc);
+tpl [*] mode="copy" {
+  $n = `local-name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n"; apply [*] mode="copy";
+    }
+  }
+  "\n";
 }
