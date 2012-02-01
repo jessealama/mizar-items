@@ -1283,9 +1283,13 @@ sub minimize {
 
     # warn 'pseudo articles: ', "\n", Dumper (@pseudo_articles);
 
-    $local_db->minimize_articles (\@proper_articles);
+    $local_db->minimize_articles (\@proper_articles, { 'fast-theorems-and-schemes' => 1 });
 
     $local_db->minimize_articles (\@pseudo_articles, { 'checker-only' => 1 });
+
+    # We need to rewrite aids.  Sigh.
+    warn 'Rewriting aids, post minimization...';
+    $self->rewrite_pseudo_fragment_aids ();
 
     return 1;
 
