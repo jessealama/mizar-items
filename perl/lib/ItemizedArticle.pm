@@ -1266,7 +1266,6 @@ sub dependencies {
 	}
     }
 
-
     return \%dependencies;
 
 }
