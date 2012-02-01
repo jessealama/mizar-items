@@ -1288,10 +1288,17 @@ sub minimize {
 
     # We need to rewrite aids.  Sigh.
     warn 'Rewriting aids, post minimization...';
+    # $self->absolutize ();
     $self->rewrite_pseudo_fragment_aids ();
 
     return 1;
 
+}
+
+sub absolutize {
+    my $self = shift;
+    my $local_db = $self->get_local_database ();
+    return $local_db->absolutize ();
 }
 
 sub get_pseudo_fragments {
@@ -1322,7 +1329,8 @@ sub rewrite_pseudo_fragment_aids {
     my @pseudo_fragments = $self->get_pseudo_fragments ();
     my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
 
-    foreach my $extension ('xml', 'xml1', 'eno', 'dfs', 'ecl', 'eid', 'epr', 'erd', 'esh', 'eth') {
+#    foreach my $extension ('xml1', 'eno1', 'dfs1', 'ecl1', 'eid1', 'epr1', 'erd1', 'esh1', 'eth1') {
+    foreach my $extension ('xml1') {
 	foreach my $pseudo_fragment (@pseudo_fragments) {
 	    if ($pseudo_fragment =~ / ckb ([0-9]+) /) {
 		my $proper_fragment = "ckb${1}";
@@ -1332,8 +1340,7 @@ sub rewrite_pseudo_fragment_aids {
 		    apply_stylesheet ($rewrite_aid_stylesheet,
 				      $pseudo_fragment_xml,
 				      $pseudo_fragment_xml_tmp,
-				      { 'old' => $proper_fragment,
-					'new' => $pseudo_fragment });
+				      { 'new' => $pseudo_fragment });
 		    if (! -e $pseudo_fragment_xml_tmp) {
 			croak ('wtf? ', $pseudo_fragment_xml_tmp, ' does not exist.');
 		    }
