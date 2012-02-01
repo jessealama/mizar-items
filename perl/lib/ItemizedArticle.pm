@@ -352,8 +352,14 @@ sub load_properties_of_constructors_of_kind {
 	    my $property_code = $code_of_property{$property};
 
 	    if (defined $property_code) {
-		my $pseudo_fragment = "${fragment}[$property_code]";
-		$item_to_fragment_table{$item} = $pseudo_fragment;
+		# Structure case: don't try to be clever!  Structures
+		# behave uniquely and therefore need unique treatment
+		if ($property eq 'abstractness') {
+		    $item_to_fragment_table{$item} = $fragment;
+		} else {
+		    my $pseudo_fragment = "${fragment}[$property_code]";
+		    $item_to_fragment_table{$item} = $pseudo_fragment;
+		}
 	    } else {
 		croak ('Error: what is the short form of \'', $property, '\'?');
 	    }
@@ -383,7 +389,7 @@ sub load_constructors_of_kind {
     my $kind = shift;
 
     my $local_db = $self->get_local_database ();
-
+    my $text_dir = $self->get_text_subdir ();
     my $article_name = $self->get_article_name ();
 
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
@@ -398,8 +404,32 @@ sub load_constructors_of_kind {
 	my $fragment_of_ccluster = $sorted_dcos[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_ccluster);
 	my $item = "${article_name}:${kind}constructor:${i}";
-	my $fragment = "${article_name}:fragment:${fragment_number}[${kind}c]";
-	$item_to_fragment_table{$item} = $fragment;
+	my $fragment = undef;
+
+	# Structure case: don't try to be clever and say that the
+	# constructor comes from the pseudo fragment.  Unfortunately,
+	# structures are too messed up at the moment for this to work
+	# as expected.
+
+	my $fragment_xml = "${text_dir}/ckb${fragment_number}.xml";
+
+	if (! -e $fragment_xml) {
+	    croak ('Error: there is no XML file at ', $fragment_xml, '.');
+	}
+
+	my $fragment_doc = eval { $xml_parser->parse_file ($fragment_xml) };
+
+	if (! defined $fragment_doc) {
+	    croak ('Error: the XML file at ', $fragment_doc, ' is not actually a well-formed XML file.');
+	}
+
+	if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+	    my $fragment = "${article_name}:fragment:${fragment_number}";
+	    $item_to_fragment_table{$item} = $fragment;
+	} else {
+	    my $fragment = "${article_name}:fragment:${fragment_number}[${kind}c]";
+	    $item_to_fragment_table{$item} = $fragment;
+	}
 
 	# Record that this fragment number generates this constructor.
 	# Later, when computing correctness conditions, we'll need
@@ -412,7 +442,6 @@ sub load_constructors_of_kind {
 	} else {
 	    $fragment_to_constructor_table{$fragment_number} = [$item];
 	}
-
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -437,6 +466,7 @@ sub load_patterns_of_kind {
     my $kind = shift;
 
     my $local_db = $self->get_local_database ();
+    my $text_dir = $self->get_text_subdir ();
     my $article_name = $self->get_article_name ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my @dnos = $local_db->patterns_in_prel_of_kind ($kind);
@@ -448,7 +478,35 @@ sub load_patterns_of_kind {
 	my $fragment = $sorted_dnos[$i - 1];
 	my $fragment_number = fragment_number ($fragment);
 	my $item = "${article_name}:${kind}pattern:${i}";
-	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}[${kind}p]";
+
+
+	# Structure case: don't try to be clever and say that the
+	# constructor comes from the pseudo fragment.  Unfortunately,
+	# structures are too messed up at the moment for this to work
+	# as expected.
+
+	my $fragment_xml = "${text_dir}/ckb${fragment_number}.xml";
+
+	if (! -e $fragment_xml) {
+	    croak ('Error: there is no XML file at ', $fragment_xml, '.');
+	}
+
+	my $fragment_doc = eval { $xml_parser->parse_file ($fragment_xml) };
+
+	if (! defined $fragment_doc) {
+	    croak ('Error: the XML file at ', $fragment_doc, ' is not actually a well-formed XML file.');
+	}
+
+	if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+	    my $fragment = "${article_name}:fragment:${fragment_number}";
+	    $item_to_fragment_table{$item} = $fragment;
+	} else {
+	    my $fragment = "${article_name}:fragment:${fragment_number}[${kind}p]";
+	    $item_to_fragment_table{$item} = $fragment;
+	}
+
+
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -871,6 +929,7 @@ sub load_clusters_of_kind {
     my $kind = shift;
 
     my $local_db = $self->get_local_database ();
+    my $text_subdir = $self->get_text_subdir ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my $article_name = $self->get_article_name ();
 
@@ -882,8 +941,11 @@ sub load_clusters_of_kind {
     foreach my $i (1 .. scalar @sorted_clusters) {
 	my $fragment_of_cluster = $sorted_clusters[$i - 1];
 	my $fragment_number = fragment_number ($fragment_of_cluster);
+
 	my $item = "${article_name}:${kind}cluster:${i}";
+
 	$item_to_fragment_table{$item} = "${article_name}:fragment:${fragment_number}";
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -1143,7 +1205,9 @@ sub dependencies {
 		    croak ('Error: the XML document at ', $fragment_abs_xml, ' is not well-formed; we tried to sniff into it to see whether we are dealing with a structure definition, but we cannot.');
 		}
 
-		if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+		if ($fragment_doc->exists ('.//Definition[@kind = "G"]')
+			&& defined $tag
+			    && $tag ne 'xx') {
 
 		    # Dump the registration from the absolute XML.  It
 		    # is bogus.
