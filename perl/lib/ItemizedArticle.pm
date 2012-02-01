@@ -1127,9 +1127,41 @@ sub dependencies {
 		= defined $tag ? "ckb${fragment_number}${tag}"
 		               : "ckb${fragment_number}";
 
-	    my $fragment_path = "${text_dir}/${fragment_basename}.miz";
+	    my $fragment_miz = "${text_dir}/${fragment_basename}.miz";
+	    my $fragment_abs_xml = "${text_dir}/${fragment_basename}.xml1";
 
-	    if (-e $fragment_path) {
+	    if (-e $fragment_miz && -e $fragment_abs_xml) {
+
+ 		# Structure definitions are a special case because,
+		# for some reason, the pseudo fragments that they
+		# generate must include a bogus registration that
+		# introduces false dependencies
+
+		my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
+
+		if (! defined $fragment_doc) {
+		    croak ('Error: the XML document at ', $fragment_abs_xml, ' is not well-formed; we tried to sniff into it to see whether we are dealing with a structure definition, but we cannot.');
+		}
+
+		if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+
+		    # Dump the registration from the absolute XML.  It
+		    # is bogus.
+
+		    my $strip_registration_stylesheet
+			= Mizar::path_for_stylesheet ('strip-registration');
+
+		    my $fragment_abs_xml_tmp = "${fragment_abs_xml}.tmp";
+
+		    apply_stylesheet ($strip_registration_stylesheet,
+				      $fragment_abs_xml,
+				      $fragment_abs_xml_tmp);
+
+		    File::Copy::move ($fragment_abs_xml_tmp,
+				      $fragment_abs_xml)
+			  or croak ('Error: unable to rename ', $fragment_abs_xml_tmp, ' to ', $fragment_abs_xml, '.');
+
+		}
 
 		my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
 
@@ -1140,6 +1172,7 @@ sub dependencies {
 			$deps{$resolved_dep} = 0;
 		    }
 		}
+
 
 		# Function case: every function constructor depends on its
 		# existence and uniqueness conditions
