@@ -82,14 +82,14 @@ sub absolutize_extension {
     my $xml_path = $self->file_with_extension ($extension);
     my $abs_xml_path = $self->file_with_extension ("${extension}1");
 
-    if (-e $xml_path) {
+    if (-e $xml_path && ! -e $abs_xml_path) {
 	my $absrefs_stylesheet = Mizar::path_for_stylesheet ('addabsrefs');
 
 	return (apply_stylesheet ($absrefs_stylesheet,
 				  $xml_path,
 				  $abs_xml_path));
     } else {
-	croak ('Error: there is no .', $extension, ' file for ', $self->name (), '.');
+	carp ('Warning: there is no .', $extension, ' file for ', $self->name (), ', but we were asked to absolutize it.');
     }
 }
 
