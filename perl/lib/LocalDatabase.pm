@@ -611,16 +611,19 @@ sub minimize_articles {
 	    push (@parallel_call, $path);
 	}
 
+	my $parallel_out = '';
+	my $parallel_err = '';
+
 	my $h = start (\@parallel_call,
-		       '>', '/dev/null',
-		       '2>', '/dev/null');
+		       '>', \$parallel_out,
+		       '2>', \$parallel_err);
 
 	$h->finish ();
 
 	my $parallel_exit_code = $h->result (0);
 
 	if ($parallel_exit_code != 0) {
-	    croak ('Error: parallel did not exit cleanly when minimizing some articles; the exit code was ', $parallel_exit_code, '.');
+	    croak ('Error: parallel did not exit cleanly when minimizing some articles; the exit code was ', $parallel_exit_code, '.  Here is the standard error: (warning: it may be garbled because of the parallel computation):', "\n", $parallel_err);
 	} else {
 	    return 1;
 	}
