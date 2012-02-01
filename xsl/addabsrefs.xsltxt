@@ -1,0 +1,560 @@
+stylesheet 1.0;
+
+// XSLTXT (https://xsltxt.dev.java.net/) stylesheet adding
+// absolute names to Mizar constructors and references.
+// This means that the "aid" (article name) and the "absnr"
+// (serial number in its article) attributes are added,
+// and the "kind" attribute is added if not present.
+
+// To produce standard XSLT from this do e.g.:
+// java -jar xsltxt.jar toXSL addabsrefs.xsltxt > addabsrefs.xsl
+
+// Then e.g.: xalan -XSL addabsrefs.xsl <ordinal2.xml >ordinal2.xml1
+//        or: xsltproc addabsrefs.xsl ordinal2.xml >ordinal2.xml1
+
+// TODO:
+//       article numbering in Ref?
+//       absolute definiens numbers for thesisExpansions?
+//       add @nr to canceled
+//       Constructor should know its serial number! - needed in defs
+
+// NOTES: constructor disambiguation is done using the absolute numbers
+//        (attribute 'nr' and 'aid' of the Constructor element.
+//        This info for Constructors not defined in the article is
+//        taken from the .atr file (see variable $constrs)
+
+output method=xml;
+
+// keys for fast constructor and reference lookup
+key "M" [Constructor[@kind='M']] `@relnr` ;
+key "L" [Constructor[@kind='L']] `@relnr` ;
+key "V" [Constructor[@kind='V']] `@relnr` ;
+key "R" [Constructor[@kind='R']] `@relnr` ;
+key "K" [Constructor[@kind='K']] `@relnr` ;
+key "U" [Constructor[@kind='U']] `@relnr` ;
+key "G" [Constructor[@kind='G']] `@relnr` ;
+
+key "T" [/Theorems/Theorem[@kind='T']] `concat(@articlenr,':',@nr)`;
+key "D" [/Theorems/Theorem[@kind='D']] `concat(@articlenr,':',@nr)`;
+key "S" [/Schemes/Scheme] `concat(@articlenr,':',@nr)`;
+key "DF" [Definiens] `@relnr` ;
+
+// lookup for FromExplanations (in .fex)
+key "SI" [/FromExplanations/SchemeInstantiation] `concat(@line,':',@col)`;
+
+// lookup for ByExplanations (in .bex)
+// after running verifier, postprocess (sort away redundant stuff from) .bex with:
+// perl -e 'local $/;$_=<>; m/((.|[\n])*?)<PolyEval/; print $1; while(m/(<PolyEval((.|[\n])*?)<\/PolyEval>)/g) { if(!(exists $h{$1})) { print $1; $h{$1} = (); }} print "</ByExplanations>";'
+key "PE" [/ByExplanations/PolyEval] `concat(@line,':',@col)`;
+
+$lcletters= { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters= { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+// name of current article (upper case)
+#aname= { `string(/*/@aid)`; }
+
+// name of current article (lower case)
+#anamelc= { `translate($aname, $ucletters, $lcletters)`; }
+
+// .atr file with imported constructors
+#constrs=  { `concat($anamelc, '.atr')`; }
+
+// .dco file with exported constructors
+#dcoconstrs=  { `concat($anamelc, '.dco')`; }
+
+// .eth file with imported theorems
+#thms=  { `concat($anamelc, '.eth')`; }
+
+// .esh file with imported schemes
+#schms=  { `concat($anamelc, '.esh')`; }
+
+// .dfs file with imported definientia
+#dfs=  { `concat($anamelc, '.dfs')`; }
+
+// set this to 0 to get rid of missing document errors
+// when the ByExplanations and SchemeInstantiation are missing
+#explainbyfrom = { "1"; }
+
+
+// .fex file with FromExplanations
+#fex=  { `concat($anamelc, '.fex')`; }
+
+// .bex file with ByExplanations
+#bex=  { `concat($anamelc, '.bex')`; }
+
+
+// this needs to be set to 1 for processing .eth files
+#ethprocess = { "0"; }
+
+// top level element instead of top-level document, which is hard to
+// know
+#top = `/`;
+
+// tpl [Const](#s) {  <Const { copy-of `@*`; @plevel=$s; }}
+
+// #e optionally is the element giving context, e.g. for schemes
+tpl [Pred](#i,#s,#e) {
+  <Pred { copy-of `@*`;
+  if [@kind='P'] {
+      if [$e] { abs_fp(#el=$e); } else { abs_fp(#el=`.`); }
+      apply(#s=$s,#e=$e); }
+  else { abs(#k=`@kind`, #nr=`@nr`); apply(#s=$s,#e=$e); }}}
+
+tpl [Func](#s,#e) { <Func {  copy-of `@*`;
+  if [@kind='F']  {
+     if [$e] { abs_fp(#el=$e); } else { abs_fp(#el=`.`); }
+     apply(#s=$s,#e=$e); }
+  else { abs(#k=`@kind`, #nr=`@nr`); apply(#s=$s,#e=$e); }}}
+
+// for .fex (FromExplanations file)
+tpl [FuncInstance | PredInstance](#s,#e) {
+    $n=`name()`; <$n { copy-of `@*`;
+    if [(@kind='K') or (@kind='R') or (@kind='V')]
+       { abs(#k=`@kind`, #nr=`@nr`); }
+    apply(#s=$s,#e=$e); } }
+
+// Adjective
+tpl [Adjective](#s,#e) { <Adjective
+    { copy-of `@*`; abs(#k="V", #nr=`@nr`); apply(#s=$s,#e=$e); }}
+
+// Types
+tpl [Typ](#s,#e) {
+   <Typ { copy-of `@*`;
+   if [@kind="M"] { abs(#k="M", #nr=`@nr`); }
+   else { if [@kind="G"] { abs(#k="G", #nr=`@nr`); }
+     else { `@kind`; }}
+   apply(#s=$s,#e=$e);}
+}
+
+tpl [From](#s){ <From
+{
+    copy-of `@*`;
+    $schnr = `@nr`; $el = `.`; $anr=`@articlenr`;
+    getschref(#anr=$anr, #nr=$schnr);
+    // insert the SchemeInstantiation element from $fex, make
+    // them absolute by adding @schemnr, @aid, @instaid, @instschemenr
+    $l = `@line`; $c = `@col`;
+    $pos = `concat($l,':',$c)`;
+    if[$explainbyfrom > 0]
+    {
+        for-each [document($fex,/)] {
+        for-each [key('SI',$pos)] {
+         <SchemeInstantiation  { copy-of `@*`;
+        for-each [FuncInstance | PredInstance] {  $nm = `name()`;
+          <$nm {
+          copy-of `@*`;
+          getschattrs(#anr=$anr,#nr=$schnr,#i="1");
+          $k = `@kind`;
+          // instantiated to other functor
+          if [$k] {
+          choose {
+             when [($k="K") or ($k="R") or ($k="V")] { abs(#k=$k, #nr=`@nr`); }
+             when [($k="F") or ($k= "P")] { abs_fp(#el=$el); }
+             otherwise {  }
+          }}
+          apply(#s=$s,#e=$el); }}}}
+    }}
+    apply(#s=$s);
+}}
+
+tpl [Requirement](#s) { <Requirement { copy-of `@*`; abs(#k=`@constrkind`, #nr=`@constrnr`); }}
+
+tpl [By](#s) {
+    <By
+    {
+       copy-of `@*`;
+       apply(#s=$s);
+       // insert the PolyEval elements from $bex, make
+       // them absolute by adding @schemnr, @aid, @instaid, @instschemenr
+       $l = `@line`; $c = `@col`;
+       $pos = `concat($l,':',$c)`;
+       if[$explainbyfrom > 0]
+       {
+          for-each [document($bex,/)] {
+             for-each [key('PE',$pos)]
+             {
+                  <PolyEval  { copy-of `@*`; apply(#s=$s); }
+             }
+          }
+       }
+    }
+}
+
+
+tpl [Ref](#s) { if [not(@articlenr)] { copy { apply [@*](#s=$s); apply(#s=$s); } }
+            else { <Ref {  copy-of `@*`;
+    getref(#k=`@kind`, #anr=`@articlenr`, #nr=`@nr`);} }}
+
+// the pair is copied here too, for easy handling by miz.xsl,
+// but is ignored by mizpl.xsl
+tpl [ThesisExpansions/Pair] {
+   <Pair { copy-of `@*`; }
+   $x= `@x`;
+   <Ref {
+   if [key('DF',$x)] {
+      for-each [key('DF',$x)] {
+               @nr=`@defnr`;
+               mkref(#aid=`@aid`, #nr=`@defnr`, #k="D", #c="1"); }}
+   else {
+      for-each [document($dfs,/)] {
+         if [key('DF',$x)] {
+            for-each [key('DF',$x)] {
+                     @nr=`@defnr`;
+                     mkref(#aid=`@aid`, #nr=`@defnr`, #k="D"); } }
+         else { "errorexpansion"; }}}}}
+
+// add absolute numbers to these (they are kind-dependent)
+// note that redefnr of Patterns (relative nr of the synonym/antonym
+// Pattern) is ignored
+tpl [Theorem|Constructor|Pattern](#s) {
+             $n=`name()`; <$n
+             {
+             copy-of `@*`;
+             if [$ethprocess = 0]
+             {
+               $k=`@kind`;
+               if [not(@aid)] { @aid=$aname; }
+               @nr=`1 + count(preceding::*[(name()=$n) and (@kind=$k)])`;
+               if [(@redefnr > 0) and ($n = "Constructor")] { abs(#k=$k,#nr=`@redefnr`,#r="1"); }
+               else { if [($n = "Pattern") and (not(Expansion))]
+               {
+                   abs(#k=`@constrkind`,#nr=`@constrnr`,#r="2");
+               }}
+             }
+             apply(#s=$s); }}
+
+// the aid and nr are already in the standard xml now
+tpl [RCluster|CCluster|FCluster|IdentifyWithExp|Identify](#s)
+{
+  $n=`name()`; <$n
+  {
+    copy-of `@*`;
+    apply(#s=$s);
+  }
+}
+
+tpl [Scheme|Definiens](#s)
+{
+  $n=`name()`; <$n
+  {
+    copy-of `@*`;
+    if [$ethprocess = 0]
+    {
+      if [@aid] { @aid = `@aid`; } else { @aid = $aname; }
+      @nr = `1 + count(preceding::*[(name()=$n)])`;
+      if [($n = "Definiens")] { abs(#k=`@constrkind`,#nr=`@constrnr`,#r="2"); }
+    }
+    apply(#s=$s);
+  }
+}
+
+tpl [Field](#s) { <Field
+    { copy-of `@*`; abs(#k="U", #nr=`@nr`);
+      @arity= arity(#k="U", #nr=`@nr`);  apply(#s=$s); }}
+
+
+tpl arity(#k,#nr) {
+    if [key($k,$nr)] { for-each [key($k,$nr)] { `count(ArgTypes/Typ)`;}}
+   else {
+     for-each [document($constrs,/)] {
+       if [key($k,$nr)] { for-each [key($k,$nr)] { `count(ArgTypes/Typ)`;}}
+       else {
+         for-each [document($dcoconstrs,/)] {
+           for-each [key($k,$nr)] { `count(ArgTypes/Typ)`;}}}}}}
+
+
+// tpl [Field] { <Field
+//     { copy-of `@*`; abs(#k="U", #nr=`@nr`);
+//       $typs = widening(typ(U),typ(L),typ(U));
+//       for-each [$typs] {
+//           repl_loc_args(#w=
+
+// apply; }}
+
+// // find widening path from $f to $t
+// tpl widening(#f,#t,#path) {
+//     if [absname($f) = absname($t)] { $path } else {
+//     for-each [$f/Typ] {
+//       $p1 = { `.`; $path; }
+//       widening(#f=`.`,#t=$t,#path=$p1) }}}
+
+
+// tpl repl_path(#f,#t,#a) {
+//     if [$f=$t] { $a; } else {
+//     if [$f/@nr < $t/@nr] {
+//     for-each [$f/Typ] {
+//       $p1 = { <Path { $f $path } }
+//       widening(#f=`.`,#t=$t,#path=$p1) }}}
+
+// // replace Loci vars in $w with respective terms from $a
+// tpl repl_loc_args(#w,#a) { for-each [$w] { $n=`name()`;
+//     if [($n = "Locus") and (count($a) >= @nr)] {
+//       $nr=`@nr`; `$a[position() = $nr]`; }
+//     else { <$n { copy-of `@*`; for-each [*] { repl_loc_args(#w=`.`,#a) } }}}}
+
+
+// // replace Locus var nr $f with term $t in $w
+// tpl repl_loci(#w,#f,#t) { $n=`name()`;
+//     if [($n = "Locus") and (@nr = $f)] { $t; } else { <$n {
+//     copy-of `@*`; for-each [*] { repl_loci(#w=`.`,#f=$f,#t=$t) } }}}
+
+
+// add the constructor href, if $r, it tells if this is from redefinition (r=1)
+// or constr (r=2)
+tpl absref(#elems,#r) { for-each [$elems] {
+    if [$r>0] { if [$r=1] { @redefaid=`@aid`; @absredefnr=`@nr`; }
+                else { if [$r=2] { @constraid=`@aid`; @absconstrnr=`@nr`;} }}
+    else { @kind=`@kind`; // @kind=mkind(#kind=`@kind`);
+           @nr=`@relnr`; @aid=`@aid`; @absnr=`@nr`; }} }
+
+tpl abs(#k,#nr,#r) {
+   for-each [$top] {
+   if [key($k,$nr)] { absref(#elems=`key($k,$nr)`,#r=$r); }
+   else {
+     for-each [document($constrs,/)] {
+       if [key($k,$nr)] { absref(#elems=`key($k,$nr)`,#r=$r); }
+       else {
+         for-each [document($dcoconstrs,/)] {
+           absref(#elems=`key($k,$nr)`,#r=$r); } } } } } }
+
+// add the @aid and @schemenr attrs to scheme functor or predicate
+// must get the element explicitely, resolves by its SchemeBlock
+// or Scheme ancestor
+tpl abs_fp(#el) { for-each [$el] {
+    if [ancestor::SchemeBlock] {
+       for-each [ancestor::SchemeBlock] {getschattrs(#nr=`@schemenr`); }}
+    else { for-each [ancestor::Scheme] {
+       $anr1 = { if [@articlenr] { `@articlenr`; } else { "0"; } }
+       $n1 =  { if [@nr] { `@nr`; } else {
+               `1 + count(preceding::*[(name()="Scheme")])`; }}
+                getschattrs(#anr=$anr1, #nr=$n1); }}
+ }}
+
+
+
+
+// theorem, definition and scheme references
+// add the reference's href, $c tells if it is from current article
+tpl mkref(#aid,#nr,#k,#c) {
+      @kind=`$k`; // @kind=refkind(#kind=$k);
+      @aid=`$aid`; @absnr=`$nr`; }
+
+tpl getschref(#anr,#nr) {
+    if [$anr>0] { for-each [document($schms,/)] {
+        for-each [key('S',concat($anr,':',$nr))] {
+           mkref(#aid=`@aid`, #nr=$nr, #k="S"); }}}
+    else { mkref(#aid=$aname,#nr=$nr,#k="S",#c="1"); }}
+
+// insert schemenr and aid attrs for scheme functors,
+// possibly change to inst... if #i > 0
+tpl mkschattrs(#aid,#nr,#i) {
+    if [$i>0] { @instaid=`$aid`; @instschemenr=`$nr`; }
+    else {  @aid=`$aid`; @schemenr=`$nr`;  }}
+
+tpl getschattrs(#anr,#nr,#i) {
+    if [$anr>0] { for-each [document($schms,/)] {
+        for-each [key('S',concat($anr,':',$nr))] {
+           mkschattrs(#aid=`@aid`, #nr=$nr, #i=$i); }}}
+    else { mkschattrs(#aid=$aname,#nr=$nr,#i=$i); }}
+
+tpl getref(#k,#anr,#nr) {
+    if [$anr>0] { for-each [document($thms,/)] {
+        for-each [key($k,concat($anr,':',$nr))] {
+           mkref(#aid=`@aid`, #nr=$nr, #k=$k); }}}
+    else { mkref(#aid=$aname,#nr=$nr,#k=$k,#c="1"); }}
+
+// translate constructor kinds to their mizar/mmlquery names
+tpl mkind(#kind) {
+   choose {
+      when [$kind = 'M'] { "mode";}
+      when [$kind = 'V'] { "attr";}
+      when [$kind = 'R'] { "pred";}
+      when [$kind = 'K'] { "func";}
+      when [$kind = 'G'] { "aggr";}
+      when [$kind = 'L'] { "struct";}
+      when [$kind = 'U'] { "sel";}
+ }}
+
+// translate reference kinds to their mizar/mmlquery names
+tpl refkind(#kind) {
+  choose {
+      when [$kind = 'T'] { "th";}
+      when [$kind = 'D'] { "def";}
+      when [$kind = 'S'] { "sch";}
+  }}
+
+// add plevel and also @kind, @nr and @aid
+tpl [JustifiedTheorem](#s) {
+    $nr1 = `1+count(preceding-sibling::JustifiedTheorem)`;
+    copy { copy-of `@*`; @plevel=$s;  @aid=$aname; @kind="T"; @nr=$nr1;
+           apply(#s=$s); }}
+
+tpl [DefTheorem](#s) {
+    $nr1 = `1+count(preceding-sibling::DefTheorem)`;
+    copy { copy-of `@*`; @plevel=$s;  @aid=$aname; @kind="D"; @nr=$nr1;
+           apply(#s=$s); }}
+
+// add plevel explicitly to items and propositions
+tpl [Conclusion | Assume | Take | Thesis | BlockThesis |
+    Case | Suppose | PerCases | SchemeFuncDecl | SchemePredDecl |
+   UnknownCorrCond | Coherence |
+   Compatibility | Consistency | Existence | Uniqueness |
+   Correctness | JustifiedProperty](#s)
+{
+  copy { copy-of `@*`; @plevel=$s;  apply(#s=$s);}
+}
+
+// numbering of private funcs and defs
+// scheme funcs and preds are numbered by the standard @nr attribute and plevel
+// adds the @plevel and @nr and @nr attributes
+tpl [DefFunc](#s) { $c =`1 + count(preceding-sibling::DefFunc)`;
+    copy { copy-of `@*`; @plevel=$s; @privnr=$c; apply(#s=$s);}}
+
+tpl [DefPred](#s) { $c =`1 + count(preceding-sibling::DefPred)`;
+    copy { copy-of `@*`; @plevel=$s; @privnr=$c; apply(#s=$s);}}
+
+
+// numbering of constants
+// adds the @plevel and @constnr attributes
+tpl [Let | Given | TakeAsVar | Consider | Set | Reconsider](#s) {
+    $c = prevconsts(#el=`.`); copy { copy-of `@*`; @plevel=$s;
+    @constnr=`1 + $c`; apply(#s=$s);}}
+
+tpl prevconsts(#el) { for-each [$el] {
+    `count(preceding-sibling::Reconsider/*[(name() = "Var") or
+    (name() = "LocusVar") or (name() = "Const") or (name() = "InfConst")
+    or (name() = "Num") or (name() = "Func") or (name() = "PrivFunc")
+    or (name() = "Fraenkel") or (name() = "QuaTrm") or (name() = "It")
+    or (name() = "Choice") or (name() = "ErrorTrm")]) +
+     count(preceding-sibling::*[(name() = "Let") or (name() = "TakeAsVar")
+     or (name() = "Given") or (name() = "Consider") or (name() = "Set")]/Typ)`; }}
+
+// serial numbering of embedded propositions
+// adds the @plevel and @propnr  attributes
+tpl [Assume/Proposition | Given/Proposition | Consider/Proposition |
+     Reconsider/Proposition | Conclusion/Proposition | PerCases/Proposition |
+     Case/Proposition | Suppose/Proposition |
+    JustifiedTheorem/Proposition | DefTheorem/Proposition |
+    UnknownCorrCond/Proposition | Coherence/Proposition |
+    Compatibility/Proposition | Consistency/Proposition |
+    Existence/Proposition | Uniqueness/Proposition |
+    SchemePremises/Proposition |
+    Correctness/Proposition | JustifiedProperty/Proposition](#s) {
+    $s0 =  prevprops(#el=`..`);
+    $s1 =  `1 + $s0 + count(preceding-sibling::Proposition)`; //in this item
+    copy { copy-of `@*`; @plevel=$s; @propnr=$s1; apply(#s=$s); }}
+
+tpl [Conclusion/Now | Conclusion/IterEquality](#s) {
+    $p0 =  prevprops(#el=`..`); $p1 = `1 + $p0`;
+    $s0 =  prevblocks(#el=`.`); $s1 = `1 + $s0`;
+    $s2 = { if [$s] { `concat($s,"_",$s1)`; } else { $s1; } }
+    copy { copy-of `@*`; @plevel=$s; @newlevel=$s2; @propnr=$p1;
+           apply(#s=$s2); }}
+
+// lemmas - both proof items and propositions
+tpl [ Proposition](#s) {
+    $s0 =  prevprops(#el=`.`); $s1 = `1 + $s0`;
+    copy { copy-of `@*`; @plevel=$s;  @propnr=$s1; apply(#s=$s); }}
+
+tpl [ Now | IterEquality](#s)
+{
+    $p0 =  prevprops(#el = `.`);
+    $p1 = `1 + $p0`;
+    $s0 =  prevblocks(#el = `.`);
+    $s1 = `1 + $s0`;
+    $s2 = { if [$s] { `concat($s, "_", $s1)`; } else { $s1; } }
+
+    copy
+    {
+       copy-of `@*`;
+       @plevel   = $s;
+       @newlevel = $s2;
+       @propnr   = $p1;
+
+       apply(#s = $s2);
+    }
+}
+
+tpl [ IterStep](#s) {
+    $s1 =  `1 + count(preceding-sibling::IterStep)`; //in this IterEquality
+    copy { copy-of `@*`; @plevel=$s; @propnr=$s1; apply(#s=$s); }}
+
+
+tpl prevprops(#el) { for-each [$el] {
+    `count(preceding-sibling::*[(name() = "Assume") or (name() = "Given")
+        or (name() = "Consider") or (name() = "Reconsider")
+        or (name() = "Conclusion") or (name() = "PerCases")
+        or (name() = "JustifiedTheorem") or (name() = "DefTheorem")
+        or (name() = "Case") or (name() = "Suppose")
+        or (name() = "UnknownCorrCond") or (name() = "Coherence")
+        or (name() = "Compatibility") or (name() = "Consistency")
+        or (name() = "Existence") or (name() = "Uniqueness")
+        or (name() = "SchemePremises")
+        or (name() = "Correctness") or (name() = "JustifiedProperty")]/*[(name() = "Now")
+        or (name() = "Proposition") or (name() = "IterEquality")]) +
+     count(preceding-sibling::*[(name() = "Now") or (name() = "Proposition")
+        or (name() = "IterEquality")])`; }}
+
+// raise level - Now is handled separately
+// adds the @plevel and @newlevel attributes.
+// Each Definition, Registration, and IdentifyRegistration inside such blocks create
+// their own block to properly number correctness conditions.
+tpl [Proof|CaseBlock|SupposeBlock|PerCasesReasoning|DefinitionBlock|RegistrationBlock|NotationBlock|SchemeBlock|Definition|Registration|IdentifyRegistration|SkippedProof](#s)
+{
+   $s0 =  prevblocks(#el=`.`);
+   $s1 = `1 + $s0`;
+   $s2 = { if [$s] { `concat($s,"_",$s1)`; } else { $s1; } }
+
+   copy
+   {
+      copy-of `@*`;
+      @plevel = $s;
+      @newlevel = $s2;
+      apply(#s = $s2);
+   }
+}
+
+
+tpl [*](#s,#e) { copy { apply [@*](#s=$s,#e=$e); apply(#s=$s,#e=$e); } }
+tpl [@*] { copy-of `.`; }
+
+// count previous blocks on the same level\
+// IterEquality counts as a block too - reserved for
+// propositions created from IterSteps
+tpl prevblocks(#el) { for-each [$el] {
+    if [parent::*[(name() = "Conclusion") or (name() = "JustifiedTheorem")
+       or (name() = "UnknownCorrCond") or (name() = "Coherence")
+       or (name() = "Compatibility") or (name() = "Consistency")
+       or (name() = "Existence") or (name() = "Uniqueness")
+       or (name() = "Correctness") or (name() = "JustifiedProperty")]] {
+    for-each [parent::*] {
+        `count(preceding-sibling::*[(name() = "Proof") or (name() = "Now")
+        or (name() = "CaseBlock") or (name() = "SupposeBlock") or
+        (name() = "PerCasesReasoning") or (name() = "Definition") or
+        (name() = "Registration") or (name() = "IterEquality") or
+        (name() = "IdentifyRegistration") or (name() = "SkippedProof") or
+        (name() = "DefinitionBlock") or (name() = "RegistrationBlock") or
+        (name() = "NotationBlock") or (name() = "SchemeBlock")]) +
+        count(preceding-sibling::*[(name() = "Conclusion")
+         or (name() = "JustifiedTheorem") or (name() = "UnknownCorrCond")
+         or (name() = "Coherence") or (name() = "Compatibility")
+         or (name() = "Consistency") or (name() = "Existence")
+         or (name() = "Uniqueness") or (name() = "Correctness")
+         or (name() = "JustifiedProperty")]/*[(name() = "Proof") or
+         (name() = "Now") or (name() = "SkippedProof") or (name() = "IterEquality")])`; }}
+    else  {
+        `count(preceding-sibling::*[(name() = "Proof") or (name() = "Now")
+        or (name() = "CaseBlock") or (name() = "SupposeBlock") or
+        (name() = "PerCasesReasoning") or (name() = "Definition") or
+        (name() = "Registration") or (name() = "IterEquality") or
+        (name() = "IdentifyRegistration") or (name() = "SkippedProof") or
+        (name() = "DefinitionBlock") or (name() = "RegistrationBlock") or
+        (name() = "NotationBlock") or (name() = "SchemeBlock")]) +
+         count(preceding-sibling::*[(name() = "Conclusion")
+         or (name() = "JustifiedTheorem") or (name() = "UnknownCorrCond")
+         or (name() = "Coherence") or (name() = "Compatibility")
+         or (name() = "Consistency") or (name() = "Existence")
+         or (name() = "Uniqueness") or (name() = "Correctness")
+         or (name() = "JustifiedProperty")]/*[(name() = "Proof") or
+         (name() = "Now") or (name() = "SkippedProof") or (name() = "IterEquality")])`;
+}}}
