@@ -1205,29 +1205,27 @@ sub dependencies {
 		    croak ('Error: the XML document at ', $fragment_abs_xml, ' is not well-formed; we tried to sniff into it to see whether we are dealing with a structure definition, but we cannot.');
 		}
 
-		if ($fragment_doc->exists ('.//Definition[@kind = "G"]')
-			&& defined $tag
-			    && $tag ne 'xx') {
-
-		    # Dump the registration from the absolute XML.  It
-		    # is bogus.
-
-		    my $strip_registration_stylesheet
-			= Mizar::path_for_stylesheet ('strip-registration');
-
-		    my $fragment_abs_xml_tmp = "${fragment_abs_xml}.tmp";
-
-		    apply_stylesheet ($strip_registration_stylesheet,
-				      $fragment_abs_xml,
-				      $fragment_abs_xml_tmp);
-
-		    File::Copy::move ($fragment_abs_xml_tmp,
-				      $fragment_abs_xml)
-			  or croak ('Error: unable to rename ', $fragment_abs_xml_tmp, ' to ', $fragment_abs_xml, '.');
-
-		}
-
 		my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
+
+		# Structure case: we handle the dependencies
+		# explicitly ourselves.
+
+		if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+
+		    my @non_structure_deps = ();
+
+		    foreach my $dep (@fragment_deps) {
+ 			# Does this dependency come from the same
+			# fragment?  If so, it is incorrect; dump it.
+			if ($dep =~ / \A ckb ${fragment_number} : /) {
+			    # ignore
+			} else {
+			    push (@non_structure_deps, $dep);
+			}
+		    }
+
+		    @fragment_deps = @non_structure_deps;
+		}
 
 		my %deps = ();
 		foreach my $dep (@fragment_deps) {
@@ -1236,7 +1234,6 @@ sub dependencies {
 			$deps{$resolved_dep} = 0;
 		    }
 		}
-
 
 		# Function case: every function constructor depends on its
 		# existence and uniqueness conditions
