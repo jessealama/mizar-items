@@ -1194,15 +1194,10 @@ sub dependencies {
 
 	    if (-e $fragment_miz && -e $fragment_abs_xml) {
 
- 		# Structure definitions are a special case because,
-		# for some reason, the pseudo fragments that they
-		# generate must include a bogus registration that
-		# introduces false dependencies
-
 		my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
 
 		if (! defined $fragment_doc) {
-		    croak ('Error: the XML document at ', $fragment_abs_xml, ' is not well-formed; we tried to sniff into it to see whether we are dealing with a structure definition, but we cannot.');
+		    croak ('Error: the XML document at ', $fragment_abs_xml, '.');
 		}
 
 		my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
@@ -1359,6 +1354,61 @@ sub dependencies {
 	    }
 	}
     }
+
+    # Another pass to deal with structures
+    my @fragments = @{$self->get_all_fragments ()};
+    my $structure_dependencies_stylesheet
+	= Mizar::path_for_stylesheet ('structure-dependencies');
+    foreach my $fragment (@fragments) {
+
+	if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) \z/) {
+
+	    my $fragment_number = $1;
+
+	    my $fragment_abs_xml = "${text_dir}/ckb${fragment_number}.xml1";
+
+	    if (! ensure_readable_file ($fragment_abs_xml)) {
+		croak ('Error: we expected to find an absolutized fragment XML file at ', $fragment_abs_xml, ', but there is nothing there (or it is unreadable).');
+	    }
+
+	    my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
+
+	    if (! defined $fragment_doc) {
+		croak ('Error: the XML file at ', $fragment_abs_xml, ' seems to be invalid.');
+	    }
+
+	    if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
+
+		my @structure_dep_lines
+		    = apply_stylesheet ($structure_dependencies_stylesheet,
+					$fragment_abs_xml);
+		foreach my $line (@structure_dep_lines) {
+		    chomp $line;
+		    my ($item, @deps) = split (/ \N{SPACE} /, $line);
+		    my $resolved_item = $self->resolve_local_item ($item);
+		    my @resolved_deps = map { $self->resolve_local_item ($_) } @deps;
+
+ 		    # Abstractness kludge: the abstractness principle
+		    # does not depend on itself
+		    if ($resolved_item =~ / \[ abstractness \] \z/) {
+			my $item_escaped = escape_item ($resolved_item);
+			@resolved_deps = grep { ! / \A ${item_escaped} \z / } @resolved_deps;
+		    }
+
+		    if (defined $dependencies{$resolved_item}) {
+			my @old_deps = @{$dependencies{$resolved_item}};
+			push (@old_deps, @resolved_deps);
+			$dependencies{$resolved_item} = \@old_deps;
+		    } else {
+			$dependencies{$item} = \@resolved_deps;
+		    }
+		}
+
+	    }
+
+	}
+    }
+
 
     return \%dependencies;
 
