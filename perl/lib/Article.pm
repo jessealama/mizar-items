@@ -104,21 +104,6 @@ sub absolutize_environment {
     return 1;
 }
 
-# sub minimize_abstractness {
-#     my $minimize_abstractness_out = '';
-#     my $minimize_abstractness_err  ='';
-#     my @minimize_abstractness_call = ($minimize_abstractness_script);
-#     if ($checker_only) {
-# 	push (@minimize_abstractness_call, '--checker-only');
-#     }
-#     push (@minimize_abstractness_call, $article_miz);
-
-#     run (\@minimize_abstractness_call,
-# 	 '>', '/dev/null',
-# 	 '2>', \$minimize_abstractness_err)
-# 	or croak ('Error: the abstractness minimization script did not exit cleanly for ', $article_basename, '.  Here are the errors it emitted:', "\n", $minimize_abstractness_err);
-# }
-
 # sub confirm_minimality_of_extension {
 #   my $extension_to_minimize = shift;
 #   my $root_element_name = $extension_to_element_table{$extension_to_minimize};
