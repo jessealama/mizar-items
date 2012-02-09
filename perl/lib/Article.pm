@@ -1105,6 +1105,40 @@ sub minimize_environment {
 
 }
 
+Readonly my %REQUIREMENTS_CONSTRUCTORS =>
+    ( 1 => 'hidden:mconstructor:1',    # rqAny
+      2 => 'hidden:rconstructor:1',    # rqEqualsTo
+      3 => 'hidden:rconstructor:2',    # rqBelongsTo
+      4 => 'xboole_0:vconstructor:1',  # rqEmpty
+      5 => 'xboole_0:kconstructor:1',  # rqEmptySet
+      6 => 'subset_1:mconstructor:1',  # rqElement
+      7 => 'zfmisc_1:kconstructor:2',  # rqPowerSet
+      8 => 'tarski:rconstructor:1',    # rqInclusion
+      9 => 'subset_1:mconstructor:2',  # rqSubDomElem (?)
+      10 => 'numbers:kconstructor:1',  # rqRealDom
+      11 => 'numbers:kconstructor:5',  # rqNatDom
+      12 => 'xcmplx_0:kconstructor:2', # rqRealAdd
+      13 => 'xcmplx_0:kconstructor:3', # rqRealMult
+      14 => 'arytm_0:rconstructor:1',  # rqLessOrEqual (?)
+      15 => 'ordinal1:kconstructor:1', # rqSucc
+      16 => 'xboole_0:kconstructor:2', # rqUnion
+      17 => 'xboole_0:kconstructor:3', # rqIntersection
+      18 => 'xboole_0:kconstructor:4', # rqSubtraction
+      19 => 'xboole_0:kconstructor:5', # rqSymmetricDifference
+      20 => 'xboole_0:rconstructor:1', # rqMeets
+      21 => 'xcmplx_0:kconstructor:4', # rqRealNeg
+      22 => 'xcmplx_0:kconstructor:5', # rqRealInv
+      23 => 'xcmplx_0:kconstructor:6', # rqRealDiff
+      24 => 'xcmplx_0:kconstructor:7', # rqRealDiv
+      25 => 'xcmplx_0:vconstructor:1', # rqReal
+      26 => 'xxreal_0:vconstructor:2', # rqPositive
+      27 => 'xxreal_0:vconstructor:3', # rqNegative
+      28 => 'ordinal1:vconstructor:7', # rqNatural
+      29 => 'xcmplx_0:kconstructor:1', # rqImaginaryUnit
+      30 => 'xcmplx_0:vconstructor:1', # rqComplex
+      31 => 'ordinal1:kconstructor:4', # rqOmega
+  );
+
 sub write_ere_table {
 
     warn 'writing new ere table';
