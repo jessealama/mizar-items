@@ -23,6 +23,40 @@ use Xsltproc qw(apply_stylesheet);
 
 Readonly my $NUM_REQUIREMENTS => 32; # the number of requirements declared in builtin.pas
 
+Readonly my %REQUIREMENTS_CONSTRUCTORS =>
+    ( 1 => 'hidden:mconstructor:1',    # rqAny
+      2 => 'hidden:rconstructor:1',    # rqEqualsTo
+      3 => 'hidden:rconstructor:2',    # rqBelongsTo
+      4 => 'xboole_0:vconstructor:1',  # rqEmpty
+      5 => 'xboole_0:kconstructor:1',  # rqEmptySet
+      6 => 'subset_1:mconstructor:1',  # rqElement
+      7 => 'zfmisc_1:kconstructor:2',  # rqPowerSet
+      8 => 'tarski:rconstructor:1',    # rqInclusion
+      9 => 'subset_1:mconstructor:2',  # rqSubDomElem (?)
+      10 => 'numbers:kconstructor:1',  # rqRealDom
+      11 => 'numbers:kconstructor:5',  # rqNatDom
+      12 => 'xcmplx_0:kconstructor:2', # rqRealAdd
+      13 => 'xcmplx_0:kconstructor:3', # rqRealMult
+      14 => 'arytm_0:rconstructor:1',  # rqLessOrEqual (?)
+      15 => 'ordinal1:kconstructor:1', # rqSucc
+      16 => 'xboole_0:kconstructor:2', # rqUnion
+      17 => 'xboole_0:kconstructor:3', # rqIntersection
+      18 => 'xboole_0:kconstructor:4', # rqSubtraction
+      19 => 'xboole_0:kconstructor:5', # rqSymmetricDifference
+      20 => 'xboole_0:rconstructor:1', # rqMeets
+      21 => 'xcmplx_0:kconstructor:4', # rqRealNeg
+      22 => 'xcmplx_0:kconstructor:5', # rqRealInv
+      23 => 'xcmplx_0:kconstructor:6', # rqRealDiff
+      24 => 'xcmplx_0:kconstructor:7', # rqRealDiv
+      25 => 'xcmplx_0:vconstructor:1', # rqReal
+      26 => 'xxreal_0:vconstructor:2', # rqPositive
+      27 => 'xxreal_0:vconstructor:3', # rqNegative
+      28 => 'ordinal1:vconstructor:7', # rqNatural
+      29 => 'xcmplx_0:kconstructor:1', # rqImaginaryUnit
+      30 => 'xcmplx_0:vconstructor:1', # rqComplex
+      31 => 'ordinal1:kconstructor:4', # rqOmega
+  );
+
 has 'path' => (
     is => 'ro',
     isa => 'Str',
@@ -208,6 +242,12 @@ sub needed_non_constructors {
     }
 }
 
+sub delete_space {
+    my $str = shift;
+    $str =~ s / \N{SPACE} //g;
+    return $str;
+}
+
 sub needed_constructors {
     my $self = shift;
     my $abs_xml_path = $self->file_with_extension ('xml1');
@@ -243,12 +283,30 @@ sub needed_constructors {
     my @ere_lines = `cat $ere`;
     chomp @ere_lines;
 
+    my @trimmed_ere_lines = map { delete_space ($_); } @ere_lines; # it seems there can be extra spaces in the file
+
     # sanity check
-    if (scalar @ere_lines != $NUM_REQUIREMENTS) {
+    if (scalar @trimmed_ere_lines != $NUM_REQUIREMENTS) {
 	croak ('Error: the number of requirements in the ere file ', $ere, ' differs from the number that we expect (', $NUM_REQUIREMENTS, ').');
     }
 
-    # Need to do something here
+    foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
+	my $ere_line = $trimmed_ere_lines[$i];
+
+	# warn 'ere line ', $i, ' is ', $ere_line;
+
+	if ($ere_line ne '0') {
+	    my $required_constructor = $REQUIREMENTS_CONSTRUCTORS{$i};
+	    if (defined $required_constructor) {
+
+		# warn 'Grabbing ', $required_constructor, ' as a dependency from ', $ere;
+
+		$constructors{$required_constructor} = 0;
+	    } else {
+		croak ('Error: unable to determine the constructor(s) to which a non-zero entry (', $ere_line, ') at line ', $i, ' in ', $ere, ' corresponds.', "\n", 'Here are the (trimmed) lines of the ere file:', "\n", Dumper (@trimmed_ere_lines));
+	    }
+	}
+    }
 
     if (wantarray) {
 	return keys %constructors;
@@ -1106,40 +1164,6 @@ sub minimize_environment {
 
 }
 
-Readonly my %REQUIREMENTS_CONSTRUCTORS =>
-    ( 1 => 'hidden:mconstructor:1',    # rqAny
-      2 => 'hidden:rconstructor:1',    # rqEqualsTo
-      3 => 'hidden:rconstructor:2',    # rqBelongsTo
-      4 => 'xboole_0:vconstructor:1',  # rqEmpty
-      5 => 'xboole_0:kconstructor:1',  # rqEmptySet
-      6 => 'subset_1:mconstructor:1',  # rqElement
-      7 => 'zfmisc_1:kconstructor:2',  # rqPowerSet
-      8 => 'tarski:rconstructor:1',    # rqInclusion
-      9 => 'subset_1:mconstructor:2',  # rqSubDomElem (?)
-      10 => 'numbers:kconstructor:1',  # rqRealDom
-      11 => 'numbers:kconstructor:5',  # rqNatDom
-      12 => 'xcmplx_0:kconstructor:2', # rqRealAdd
-      13 => 'xcmplx_0:kconstructor:3', # rqRealMult
-      14 => 'arytm_0:rconstructor:1',  # rqLessOrEqual (?)
-      15 => 'ordinal1:kconstructor:1', # rqSucc
-      16 => 'xboole_0:kconstructor:2', # rqUnion
-      17 => 'xboole_0:kconstructor:3', # rqIntersection
-      18 => 'xboole_0:kconstructor:4', # rqSubtraction
-      19 => 'xboole_0:kconstructor:5', # rqSymmetricDifference
-      20 => 'xboole_0:rconstructor:1', # rqMeets
-      21 => 'xcmplx_0:kconstructor:4', # rqRealNeg
-      22 => 'xcmplx_0:kconstructor:5', # rqRealInv
-      23 => 'xcmplx_0:kconstructor:6', # rqRealDiff
-      24 => 'xcmplx_0:kconstructor:7', # rqRealDiv
-      25 => 'xcmplx_0:vconstructor:1', # rqReal
-      26 => 'xxreal_0:vconstructor:2', # rqPositive
-      27 => 'xxreal_0:vconstructor:3', # rqNegative
-      28 => 'ordinal1:vconstructor:7', # rqNatural
-      29 => 'xcmplx_0:kconstructor:1', # rqImaginaryUnit
-      30 => 'xcmplx_0:vconstructor:1', # rqComplex
-      31 => 'ordinal1:kconstructor:4', # rqOmega
-  );
-
 sub write_ere_table {
 
     warn 'writing new ere table';
@@ -1321,7 +1345,9 @@ sub minimize_requirements {
     my @ere_lines = `cat $ere`;
     chomp @ere_lines;
 
-    if (scalar @ere_lines != $NUM_REQUIREMENTS) {
+    my @trimmed_ere_lines = map { s/ \N{SPACE} //g } @ere_lines; # it seems there can be extra spaces in the file
+
+    if (scalar @trimmed_ere_lines != $NUM_REQUIREMENTS) {
 	croak ('Error: the .ere file at ', $ere, ' does not have the expected number of lines (', $NUM_REQUIREMENTS, ').');
     }
 
@@ -1333,7 +1359,7 @@ sub minimize_requirements {
 
     my %original_requirements = ();
     foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
-	$original_requirements{$i} = $ere_lines[$i];
+	$original_requirements{$i} = $trimmed_ere_lines[$i];
     }
 
     my %minimal_needed = %{$self->minimize_by_requirement (\%needed_requirements,
