@@ -192,7 +192,8 @@ foreach my $sheet ('inferred-constructors',
 	           'trim-properties-and-conditions',
 	           'rewrite-aid',
 	           'fragments-of-lemmas',
-	           'strip-registration') {
+	           'strip-registration',
+	           'structure-dependencies') {
     my $stylesheet_path = "${stylesheet_home}/${sheet}.xsl";
     $stylesheets{$sheet} = $stylesheet_path;
 }

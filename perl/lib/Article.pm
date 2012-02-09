@@ -8,6 +8,7 @@ use Regexp::DefaultFlags;
 use XML::LibXML;
 use POSIX qw(floor ceil);
 use Data::Dumper;
+use Readonly;
 
 # Our libraries
 use FindBin;
@@ -17,6 +18,9 @@ use Mizar;
 use ItemizedArticle;
 use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
+
+
+Readonly my $NUM_REQUIREMENTS => 32; # the number of requirements declared in builtin.pas
 
 has 'path' => (
     is => 'ro',
@@ -103,21 +107,6 @@ sub absolutize_environment {
 
     return 1;
 }
-
-# sub minimize_abstractness {
-#     my $minimize_abstractness_out = '';
-#     my $minimize_abstractness_err  ='';
-#     my @minimize_abstractness_call = ($minimize_abstractness_script);
-#     if ($checker_only) {
-# 	push (@minimize_abstractness_call, '--checker-only');
-#     }
-#     push (@minimize_abstractness_call, $article_miz);
-
-#     run (\@minimize_abstractness_call,
-# 	 '>', '/dev/null',
-# 	 '2>', \$minimize_abstractness_err)
-# 	or croak ('Error: the abstractness minimization script did not exit cleanly for ', $article_basename, '.  Here are the errors it emitted:', "\n", $minimize_abstractness_err);
-# }
 
 # sub confirm_minimality_of_extension {
 #   my $extension_to_minimize = shift;
@@ -245,6 +234,20 @@ sub needed_constructors {
 	    $constructors{$constructor} = 0;
 	}
     }
+
+    # Look into the .ere file to see what further constructors might be needed
+
+    my $ere = $self->file_with_extension ('ere');
+
+    my @ere_lines = `cat $ere`;
+    chomp @ere_lines;
+
+    # sanity check
+    if (scalar @ere_lines != $NUM_REQUIREMENTS) {
+	croak ('Error: the number of requirements in the ere file ', $ere, ' differs from the number that we expect (', $NUM_REQUIREMENTS, ').');
+    }
+
+    # Need to do something here
 
     if (wantarray) {
 	return keys %constructors;
@@ -1102,6 +1105,218 @@ sub minimize_environment {
 
 }
 
+sub write_ere_table {
+
+    warn 'writing new ere table';
+
+    my $self = shift;
+    my %table = %{shift ()};
+    my %original_requirements = %{shift ()};
+
+    my $ere_path = $self->file_with_extension ('ere');
+
+    open (my $ere_fh, '>', $ere_path)
+	or croak ('Error: unable to open an output filehandle for ', $ere_path, '.');
+    foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
+	if (defined $table{$i}) {
+	    if (defined $original_requirements{$i}) {
+		print {$ere_fh} $original_requirements{$i};
+	    } else {
+		close $ere_fh;
+		croak ('Error: we are supposed to emit requirement #', $i, ', but we do not know the original value in for this requirement.');
+	    }
+	} else {
+	    print {$ere_fh} '0';
+	}
+
+	print {$ere_fh} "\n";
+    }
+
+    close $ere_fh
+	or croak ('Error: unable to close the output filehandle for ', $ere_path, '.');
+
+    # warn 'ere file now looks like:', "\n", `cat $ere_path`;
+
+    return 1;
+
+}
+
+sub minimize_by_requirement {
+
+    warn 'we are minimizing requirements';
+
+    my $self = shift;
+    my %table = %{shift ()};
+    my %original_requirements = %{shift ()};
+    my $begin = shift;
+    my $end = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    my $err_path = $self->file_with_extension ('err');
+
+    if ($end < $begin) {
+
+	return \%table;
+
+    } elsif ($end == $begin) {
+
+	delete $table{$end};
+
+	# Save the table to disk
+	$self->write_ere_table (\%table, \%original_requirements);
+
+	my $deletable = $self->verify (\%parameters);
+
+	if (! $deletable) {
+
+	    # DEBUG
+	    warn 'We cannot dump requirement #', $end, '; errors:', "\n", `cat $err_path`;
+
+	    $table{$end} = 0;
+	    $self->write_ere_table (\%table, \%original_requirements);
+	} else {
+	    warn 'We can dump requirement #', $begin;
+	}
+
+	return \%table;
+
+    } elsif ($begin + 1 == $end) {
+
+	delete $table{$begin};
+	$self->write_ere_table (\%table, \%original_requirements);
+
+	my $begin_deletable = $self->verify (\%parameters);
+
+	if (! $begin_deletable) {
+
+	    warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
+
+	    $table{$begin} = 0;
+	    $self->write_ere_table (\%table, \%original_requirements);
+	} else {
+	    warn 'We can dump requirement #', $begin;
+	}
+
+	delete $table{$end};
+
+	$self->write_ere_table (\%table, \%original_requirements);
+
+	my $end_deletable = $self->verify (\%parameters);
+
+	if (! $end_deletable) {
+
+	    warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
+
+	    $table{$begin} = 0;
+	    $self->write_ere_table (\%table, \%original_requirements);
+	} else {
+	    warn 'We can dump requirement #', $end;
+	}
+
+	return \%table;
+
+    } else {
+
+	my $segment_length = $end - $begin + 1;
+	my $half_segment_length = floor ($segment_length / 2);
+
+	# Dump the lower half
+	foreach my $i ($begin .. $begin + $half_segment_length) {
+	    delete $table{$i};
+	}
+
+	# Write this to disk
+	$self->write_ere_table (\%table, \%original_requirements);
+
+	# Check that deleting the lower half is safe
+	my $lower_half_safe = $self->verify (\%parameters);
+
+	if ($lower_half_safe) {
+
+	    foreach my $i ($begin .. $begin + $half_segment_length) {
+		warn 'We can dump requirement #', $i;
+	    }
+
+	    return ($self->minimize_by_requirement (\%table,
+						    \%original_requirements,
+						    $begin + $half_segment_length + 1,
+						    $end,
+						    \%parameters));
+
+	} else {
+
+	    warn 'We cannot dump all requirements between ', $begin, ' and ', $begin + $half_segment_length, '; errors:', "\n", `cat $err_path`;
+
+	    # Restore the lower half
+	    foreach my $i ($begin .. $begin + $half_segment_length) {
+		$table{$i} = 0;
+	    }
+
+	    $self->write_ere_table (\%table, \%original_requirements);
+
+	    # Minimize just the lower half
+	    my %table_for_lower_half
+		= %{$self->minimize_by_requirement (\%table,
+						    \%original_requirements,
+						    $begin,
+						    $begin + $half_segment_length,
+						    \%parameters)};
+	    return ($self->minimize_by_requirement (\%table_for_lower_half,
+						    \%original_requirements,
+						    $begin + $half_segment_length + 1,
+						    $end,
+						    \%parameters));
+	}
+    }
+}
+
+sub minimize_requirements {
+    my $self = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my $ere = $self->file_with_extension ('ere');
+
+    if (! ensure_readable_file ($ere)) {
+	croak ('Error: the needed .ere file does not exist (or is unreadable).');
+    }
+
+    my @ere_lines = `cat $ere`;
+    chomp @ere_lines;
+
+    if (scalar @ere_lines != $NUM_REQUIREMENTS) {
+	croak ('Error: the .ere file at ', $ere, ' does not have the expected number of lines (', $NUM_REQUIREMENTS, ').');
+    }
+
+    # initially everything is needed
+    my %needed_requirements = ();
+    foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
+	$needed_requirements{$i} = 0;
+    }
+
+    my %original_requirements = ();
+    foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
+	$original_requirements{$i} = $ere_lines[$i];
+    }
+
+    my %minimal_needed = %{$self->minimize_by_requirement (\%needed_requirements,
+							   \%original_requirements,
+							   0,
+							   $NUM_REQUIREMENTS - 1,
+							   \%parameters)};
+
+    foreach my $needed_index (keys %minimal_needed) {
+	warn 'We really need requirement #', $needed_index;
+    }
+
+    warn 'After minimizing requirements, the ere file looks like:', "\n", `cat $ere`;
+
+    return 1;
+
+}
+
 sub minimize {
     my $self = shift;
     my $parameters_ref = shift;
@@ -1110,6 +1325,7 @@ sub minimize {
 
     $self->minimize_environment (\%parameters);
     $self->minimize_properties (\%parameters);
+    $self->minimize_requirements (\%parameters);
 
     return 1;
 }
