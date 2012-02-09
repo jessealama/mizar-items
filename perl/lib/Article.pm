@@ -9,6 +9,7 @@ use XML::LibXML;
 use POSIX qw(floor ceil);
 use Data::Dumper;
 use Readonly;
+use charnames qw(:full);
 
 # Our libraries
 use FindBin;
