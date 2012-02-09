@@ -57,6 +57,78 @@ Readonly my %REQUIREMENTS_CONSTRUCTORS =>
       31 => 'ordinal1:kconstructor:4', # rqOmega
   );
 
+Readonly my %REQUIREMENTS =>
+    ( 0 => 'rqNone',
+      1 => 'rqAny',
+      2 => 'rqEqualsTo',
+      3 => 'rqBelongsTo',
+      4 => 'rqEmpty',
+      5 => 'rqEmptySet',
+      6 => 'rqElement',
+      7 => 'rqPowerSet',
+      8 => 'rqInclusion',
+      9 => 'rqSubDomElem',
+      10 => 'rqRealDom',
+      11 => 'rqNatDom',
+      12 => 'rqRealAdd',
+      13 => 'rqRealMult',
+      14 => 'rqLessOrEqual',
+      15 => 'rqSucc',
+      16 => 'rqUnion',
+      17 => 'rqIntersection',
+      18 => 'rqSubtraction',
+      19 => 'rqSymmetricDifference',
+      20 => 'rqMeets',
+      21 => 'rqRealNeg',
+      22 => 'rqRealInv',
+      23 => 'rqRealDiff',
+      24 => 'rqRealDiv',
+      25 => 'rqReal',
+      26 => 'rqPositive',
+      27 => 'rqNegative',
+      28 => 'rqNatural',
+      29 => 'rqImaginaryUnit',
+      30 => 'rqComplex',
+      31 => 'rqOmega',
+  );
+
+# TODO map requirements to theorems
+
+Readonly my %REQUIREMENTS_THEOREMS => (
+    'rqNone' => [],
+    'rqAny' => [],
+    'rqEqualsTo' => [],
+    'rqBelongsTo' => [],
+    'rqEmpty' => [],
+    'rqEmptySet' => [],
+    'rqElement' => [],
+    'rqPowerSet' => [],
+    'rqInclusion' => [],
+    'rqSubDomElem' => [],
+    'rqRealDom' => [],
+    'rqNatDom' => [],
+    'rqRealAdd' => [],
+    'rqRealMult' => [],
+    'rqLessOrEqual' => [],
+    'rqSucc' => [],
+    'rqUnion' => [],
+    'rqIntersection' => [],
+    'rqSubtraction' => [],
+    'rqSymmetricDifference' => [],
+    'rqMeets' => [],
+    'rqRealNeg' => [],
+    'rqRealInv' => [],
+    'rqRealDiff' => [],
+    'rqRealDiv' => [],
+    'rqReal' => [],
+    'rqPositive' => [],
+    'rqNegative' => [],
+    'rqNatural' => [],
+    'rqImaginaryUnit' => [],
+    'rqComplex' => [],
+    'rqOmega' => [],
+);
+
 has 'path' => (
     is => 'ro',
     isa => 'Str',
@@ -235,6 +307,27 @@ sub needed_non_constructors {
 	$items{$item} = 0;
     }
 
+    # Grab theorems inferred from needed requirements
+
+    my @ere_lines = $self->ere_lines ();
+
+    foreach my $i (0 .. scalar @ere_lines - 1) {
+	my $requirement_name = $REQUIREMENTS{$i};
+
+	if (! defined $requirement_name) {
+	    croak ('Error: what is the symbolic name of requirement number ',$i, '?');
+	}
+
+	if (defined $REQUIREMENTS_THEOREMS{$requirement_name}) {
+	    my @theorems_from_requirements = @{$REQUIREMENTS_THEOREMS{$requirement_name}};
+	    foreach my $theorem (@theorems_from_requirements) {
+		$items{$theorem} = 0;
+	    }
+	} else {
+	    croak ('Error: What theorems correspond to the requirement named \'', $requirement_name, '\'?');
+	}
+    }
+
     if (wantarray) {
 	return keys %items;
     } else {
@@ -246,6 +339,32 @@ sub delete_space {
     my $str = shift;
     $str =~ s / \N{SPACE} //g;
     return $str;
+}
+
+sub ere_lines {
+    my $self = shift;
+
+    my $ere = $self->file_with_extension ('ere');
+
+    if (! ensure_readable_file ($ere)) {
+	croak ('Error: the ere file for ', $self->name (), ' does not exist (or is unreadable).');
+    }
+
+    my @ere_lines = `cat $ere`;
+    chomp @ere_lines;
+
+    my @trimmed_ere_lines = map { delete_space ($_); } @ere_lines; # it seems there can be extra spaces in the file
+
+    # sanity check
+    if (scalar @trimmed_ere_lines != $NUM_REQUIREMENTS) {
+	croak ('Error: the number of requirements in the ere file ', $ere, ' differs from the number that we expect (', $NUM_REQUIREMENTS, ').');
+    }
+
+    if (wantarray) {
+	return @trimmed_ere_lines;
+    } else {
+	return join (' ', @ere_lines);
+    }
 }
 
 sub needed_constructors {
@@ -277,25 +396,17 @@ sub needed_constructors {
     }
 
     # Look into the .ere file to see what further constructors might be needed
-
     my $ere = $self->file_with_extension ('ere');
-
-    my @ere_lines = `cat $ere`;
-    chomp @ere_lines;
-
-    my @trimmed_ere_lines = map { delete_space ($_); } @ere_lines; # it seems there can be extra spaces in the file
-
-    # sanity check
-    if (scalar @trimmed_ere_lines != $NUM_REQUIREMENTS) {
-	croak ('Error: the number of requirements in the ere file ', $ere, ' differs from the number that we expect (', $NUM_REQUIREMENTS, ').');
-    }
+    my @ere_lines = $self->ere_lines ();
 
     foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
-	my $ere_line = $trimmed_ere_lines[$i];
+	my $ere_line = $ere_lines[$i];
 
 	# warn 'ere line ', $i, ' is ', $ere_line;
 
 	if ($ere_line ne '0') {
+
+	    # Grab associated constructor
 	    my $required_constructor = $REQUIREMENTS_CONSTRUCTORS{$i};
 	    if (defined $required_constructor) {
 
@@ -303,7 +414,7 @@ sub needed_constructors {
 
 		$constructors{$required_constructor} = 0;
 	    } else {
-		croak ('Error: unable to determine the constructor(s) to which a non-zero entry (', $ere_line, ') at line ', $i, ' in ', $ere, ' corresponds.', "\n", 'Here are the (trimmed) lines of the ere file:', "\n", Dumper (@trimmed_ere_lines));
+		croak ('Error: unable to determine the constructor(s) to which a non-zero entry (', $ere_line, ') at line ', $i, ' in ', $ere, ' corresponds.', "\n", 'Here are the lines of the ere file:', "\n", Dumper (@ere_lines));
 	    }
 	}
     }
@@ -1342,14 +1453,7 @@ sub minimize_requirements {
 	croak ('Error: the needed .ere file does not exist (or is unreadable).');
     }
 
-    my @ere_lines = `cat $ere`;
-    chomp @ere_lines;
-
-    my @trimmed_ere_lines = map { s/ \N{SPACE} //g } @ere_lines; # it seems there can be extra spaces in the file
-
-    if (scalar @trimmed_ere_lines != $NUM_REQUIREMENTS) {
-	croak ('Error: the .ere file at ', $ere, ' does not have the expected number of lines (', $NUM_REQUIREMENTS, ').');
-    }
+    my @ere_lines = $self->ere_lines ();
 
     # initially everything is needed
     my %needed_requirements = ();
@@ -1359,7 +1463,7 @@ sub minimize_requirements {
 
     my %original_requirements = ();
     foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
-	$original_requirements{$i} = $trimmed_ere_lines[$i];
+	$original_requirements{$i} = $ere_lines[$i];
     }
 
     my %minimal_needed = %{$self->minimize_by_requirement (\%needed_requirements,
