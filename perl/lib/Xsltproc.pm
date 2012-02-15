@@ -9,7 +9,7 @@ use Data::Dumper;
 
 use Utils qw(ensure_readable_file);
 
-our @EXPORT_OK = qw(apply_stylesheet);
+our @EXPORT = qw(apply_stylesheet);
 
 sub apply_stylesheet {
 
