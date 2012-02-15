@@ -158,8 +158,28 @@ sub mglue {
     return (run_mizar_tool ('mglue', $article_name, $parameters_ref));
 }
 
+my $home = "/Users/alama/sources/mizar/mizar-items/";
+
+sub set_mizar_items_home {
+    my $new_home = shift;
+
+    if (defined $new_home) {
+	if (ensure_directory ($new_home)) {
+	    my $old_home = $home;
+	    $home = $new_home;
+	    return $old_home;
+	} else {
+	    croak ('Error: cannot set ', $new_home, ' to be the new mizar-items home because that is not a directory.');
+	}
+    } else {
+	croak ('Error: please supply a directory.');
+    }
+
+}
+
+
 my %stylesheets = ();
-my $stylesheet_home = "/Users/alama/sources/mizar/mizar-items/xsl";
+my $stylesheet_home = "${home}/xsl";
 
 sub set_stylesheet_home {
     my $new_home = shift;
