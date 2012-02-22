@@ -1813,8 +1813,10 @@ sub itemize {
 	my $fragment_number = fragment_number ($fragment);
 	my $fragment_xml = "${target_text_subdir}/${fragment}.xml";
 	my $fragment_miz = "${target_text_subdir}/${fragment}.miz";
+	my $stylesheet_home = $self->get_stylesheet_home ();
 
-	my $fragment_article = Article->new (path => $fragment_miz)
+	my $fragment_article = Article->new (path => $fragment_miz,
+					     stylesheet_home => $stylesheet_home)
 	    or croak ('Error creating article for ', $fragment_miz, '.');
 
 	my @correctness_conditions_and_properties
