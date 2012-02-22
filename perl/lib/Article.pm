@@ -12,8 +12,8 @@ use Readonly;
 use charnames qw(:full);
 
 # Our libraries
-use FindBin;
-use lib $FindBin::Bin;
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 use Utils qw(ensure_readable_file ensure_directory strip_extension extension);
 use Mizar;
 use ItemizedArticle;
