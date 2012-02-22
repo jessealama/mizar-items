@@ -1626,7 +1626,9 @@ sub itemize {
     my $target_directory = shift;
 
     my $article_basename = $self->name ();
-    my $local_db = LocalDatabase->new (location => $target_directory);
+    my $stylesheet_home = $self->get_stylesheet_home ();
+    my $local_db = LocalDatabase->new (location => $target_directory,
+				       stylesheet_home => $stylesheet_home);
 
     my $target_text_subdir = $local_db->get_text_subdir ();
     my $target_prel_subdir = $local_db->get_prel_subdir ();
