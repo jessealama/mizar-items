@@ -1872,7 +1872,8 @@ sub itemize {
 
     print 'done.', "\n";
 
-    my $itemized_article = ItemizedArticle->new (local_database => $local_db);
+    my $itemized_article = ItemizedArticle->new (local_database => $local_db,
+					         stylesheet_home => $stylesheet_home);
 
     print 'Rewriting aid attributes...';
 
