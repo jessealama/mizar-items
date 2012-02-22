@@ -3,7 +3,7 @@ package LocalDatabase;
 use Moose;
 use File::Basename qw(basename dirname);
 use File::Spec;
-use Carp qw(croak);
+use Carp qw(croak carp);
 use Cwd;
 use IPC::Run qw(run start);
 use XML::LibXML;
@@ -16,6 +16,13 @@ use Article;
 has 'location' => (
     is => 'ro',
     reader => 'get_location',
+);
+
+has 'stylesheet_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_stylesheet_home',
+    required => 1,
 );
 
 sub BUILD {
@@ -46,6 +53,13 @@ sub BUILD {
 		or croak ('Error: unable to make the \'', $subdir_name, '\' subdirectory of ', $path, '.', "\n");
 	}
     }
+
+    my $sheet_home = $self->get_stylesheet_home ();
+    if (! ensure_directory ($sheet_home)) {
+	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
+    }
+
+    return $self;
 }
 
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1,
@@ -522,10 +536,18 @@ sub transfer {
 
 }
 
+sub path_for_stylesheet {
+    my $self = shift;
+    my $sheet = shift;
+    my $stylesheet_home = $self->get_stylesheet_home ();
+    return "${stylesheet_home}/${sheet}.xsl";
+}
+
 sub absolutize {
     my $self = shift;
 
     my $text_subdir = $self->get_text_subdir ();
+    my $absrefs_stylesheet = $self->path_for_stylesheet ('addabsrefs');
 
     my @fragment_xmls = glob "${text_subdir}/*.xml";
     my $fragment_xmls_with_space = join (' ', @fragment_xmls);
@@ -533,7 +555,7 @@ sub absolutize {
     my @parallel_call = ('parallel',
 			 'xsltproc',
 			 '--output', '{.}.xml1',
-			 Mizar::path_for_stylesheet ('addabsrefs'),
+			 $absrefs_stylesheet,
 			 '{}',
 			 ':::');
     foreach my $fragment_xml (@fragment_xmls) {
@@ -552,6 +574,7 @@ sub dependencies_of {
     # Check that there really is an article here with the given name
 
     my $text_subdir = $self->get_text_subdir ();
+    my $stylesheet_home = $self->get_stylesheet_home ();
 
     my $article_miz = "${text_subdir}/${article_name}.miz";
 
@@ -559,7 +582,8 @@ sub dependencies_of {
 	croak ('Error: there is no article by the name \'', $article_miz, '\' under ', $self->get_location (), '.');
     }
 
-    my $article = Article->new (path => $article_miz);
+    my $article = Article->new (path => $article_miz,
+			        stylesheet_home => $stylesheet_home);
 
     my @deps = $article->needed_items ();
 
@@ -619,6 +643,9 @@ sub minimize_articles {
 		       '2>', \$parallel_err);
 
 	$h->finish ();
+
+	# DEBUG
+	# carp ('Done minimizing articles; here was the error output:', "\n", $parallel_err);
 
 	my $parallel_exit_code = $h->result (0);
 

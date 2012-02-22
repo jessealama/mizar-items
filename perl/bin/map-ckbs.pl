@@ -6,7 +6,8 @@ use File::Basename qw(basename);
 use Getopt::Long;
 use Pod::Usage;
 
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 use LocalDatabase;
 use ItemizedArticle;
 use Utils qw(ensure_directory);
@@ -14,9 +15,11 @@ use Utils qw(ensure_directory);
 my $help = 0;
 my $man = 0;
 my $verbose = 0;
+my $stylesheet_home = "$RealBin/../../xsl";
 
 GetOptions('help|?' => \$help,
            'man' => \$man,
+           'stylesheet-home' => \$stylesheet_home,
            'verbose'  => \$verbose)
     or pod2usage(2);
 pod2usage(1) if $help;
@@ -30,8 +33,15 @@ if (! ensure_directory ($article_dir)) {
     exit 1;
 }
 
-my $local_db = LocalDatabase->new (location => $article_dir);
-my $itemized_article = ItemizedArticle->new (local_database => $local_db);
+if (! ensure_directory ($stylesheet_home)) {
+    print 'Errior: the supplied directory \'', $stylesheet_home, '\' to be used for locating stylesheets is not a directory.', "\n";
+    exit 1;
+}
+
+my $local_db = LocalDatabase->new (location => $article_dir,
+			           stylesheet_home => $stylesheet_home);
+my $itemized_article = ItemizedArticle->new (local_database => $local_db,
+					     stylesheet_home => $stylesheet_home);
 
 my %item_to_fragment_table = %{$itemized_article->get_item_to_fragment_table ()};
 

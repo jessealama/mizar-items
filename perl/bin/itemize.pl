@@ -14,7 +14,8 @@ use File::Copy qw(copy move);
 use Carp qw(croak carp);
 use IPC::Cmd qw(can_run);
 
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 use Utils qw(ensure_directory ensure_readable_file extension strip_extension);
 use Mizar;
 use Article;
@@ -22,7 +23,7 @@ use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
 
 my $paranoid = 0;
-my $stylesheet_home = '/Users/alama/sources/mizar/mizar-items';
+my $stylesheet_home = "$RealBin/../../xsl";
 my $verbose = 0;
 my $debug = 0;
 my $man = 0;
@@ -64,7 +65,8 @@ if (defined $target_directory) {
     }
 }
 
-my $article = Article->new (path => $article_miz);
+my $article = Article->new (path => $article_miz,
+			    stylesheet_home => $stylesheet_home);
 $article->itemize ($target_directory);
 
 __END__

@@ -12,8 +12,8 @@ use Readonly;
 use charnames qw(:full);
 
 # Our libraries
-use FindBin;
-use lib $FindBin::Bin;
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 use Utils qw(ensure_readable_file ensure_directory strip_extension extension);
 use Mizar;
 use ItemizedArticle;
@@ -136,6 +136,13 @@ has 'path' => (
     required => 1,
 );
 
+has 'stylesheet_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_stylesheet_home',
+    required => 1,
+);
+
 my $xml_parser = XML::LibXML->new (suppress_errors => 1,
 				   suppress_warnings => 1);
 
@@ -146,6 +153,13 @@ sub BUILD {
     if ( ! ensure_readable_file ($path)) {
 	croak ('Error: the assigned path (', $path, ') is not a readable file.');
     }
+
+    my $sheet_home = $self->get_stylesheet_home ();
+    if (! ensure_directory ($sheet_home)) {
+	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
+    }
+
+    return $self;
 }
 
 sub name {
@@ -162,6 +176,13 @@ sub aid {
 sub get_dirname {
     my $self = shift;
     return dirname ($self->get_path ());
+}
+
+sub path_for_stylesheet {
+    my $self = shift;
+    my $sheet = shift;
+    my $stylesheet_home = $self->get_stylesheet_home ();
+    return "${stylesheet_home}/${sheet}.xsl";
 }
 
 sub file_with_extension {
@@ -194,7 +215,7 @@ sub absolutize_extension {
     my $abs_xml_path = $self->file_with_extension ("${extension}1");
 
     if (-e $xml_path && ! -e $abs_xml_path) {
-	my $absrefs_stylesheet = Mizar::path_for_stylesheet ('addabsrefs');
+	my $absrefs_stylesheet = $self->path_for_stylesheet ('addabsrefs');
 
 	return (apply_stylesheet ($absrefs_stylesheet,
 				  $xml_path,
@@ -296,7 +317,7 @@ sub needed_non_constructors {
 
     my $abs_xml = $self->file_with_extension ('xml1');
 
-    my $dependencies_stylesheet = Mizar::path_for_stylesheet ('dependencies');
+    my $dependencies_stylesheet = $self->path_for_stylesheet ('dependencies');
 
     my @needed = apply_stylesheet ($dependencies_stylesheet,
 				   $abs_xml);
@@ -381,7 +402,7 @@ sub needed_constructors {
     }
 
     my $inferred_constructors_stylesheet
-	= Mizar::path_for_stylesheet ('inferred-constructors');
+	= $self->path_for_stylesheet ('inferred-constructors');
 
     my @all_constructors = apply_stylesheet ($inferred_constructors_stylesheet,
 					     $abs_xml_path);
@@ -449,7 +470,7 @@ sub properties_of_constructor {
 	    );
 
 	my @props
-	    = apply_stylesheet (Mizar::path_for_stylesheet ('properties-of-constructor'),
+	    = apply_stylesheet ($self->path_for_stylesheet ('properties-of-constructor'),
 				$atr,
 				undef,
 				\%params);
@@ -591,7 +612,7 @@ sub minimize_properties {
     File::Copy::copy ($atr, $atr_orig)
 	or croak ('Error: Unable to save a copy of ', $atr, ' to ', $atr_orig, '.');
 
-    my $strip_property_stylesheet = Mizar::path_for_stylesheet ('strip-property');
+    my $strip_property_stylesheet = $self->path_for_stylesheet ('strip-property');
 
     foreach my $constructor (@needed_constructors) {
 	my @properties = $self->properties_of_constructor ($constructor);
@@ -615,12 +636,18 @@ sub minimize_properties {
 		    or croak ('Error: unable to apply the strip-property stylesheet to ', $atr);
 		File::Copy::move ($atr_tmp, $atr);
 
-
 		if ($self->verify (\%parameters)) {
 		    $unneeded_properties{"${constructor}[${property}]"} = 0;
+
+		    # carp ('Warning: we can dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+
 		    File::Copy::copy ($atr, $atr_orig)
 			or croak ('Error: we were unable to update the .atr for ', $self->name (), ' to reflect its independence from the property ', $property, ' of constructor ', $constructor, '.', "\n");
+
 		} else {
+
+		    # carp ('Warning: cannot dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+
 		    $needed_properties{"${constructor}[${property}]"} = 0;
 		    File::Copy::copy ($atr_orig, $atr)
 			or croak ('Error: we are unable to restore the original article .atr from ', $atr_orig, '.', "\n");
@@ -1605,7 +1632,9 @@ sub itemize {
     my $target_directory = shift;
 
     my $article_basename = $self->name ();
-    my $local_db = LocalDatabase->new (location => $target_directory);
+    my $stylesheet_home = $self->get_stylesheet_home ();
+    my $local_db = LocalDatabase->new (location => $target_directory,
+				       stylesheet_home => $stylesheet_home);
 
     my $target_text_subdir = $local_db->get_text_subdir ();
     my $target_prel_subdir = $local_db->get_prel_subdir ();
@@ -1619,12 +1648,12 @@ sub itemize {
     # Transform the new miz
     print 'Rewriting the text of ', $article_basename, ': ';
 
-    my $split_stylesheet = Mizar::path_for_stylesheet ('split');
-    my $itemize_stylesheet = Mizar::path_for_stylesheet ('itemize');
-    my $wsm_stylesheet = Mizar::path_for_stylesheet ('wsm');
-    my $extend_evl_stylesheet = Mizar::path_for_stylesheet ('extend-evl');
-    my $conditions_and_properties_stylesheet = Mizar::path_for_stylesheet ('conditions-and-properties');
-    my $trim_properties_and_conditions_stylesheet = Mizar::path_for_stylesheet ('trim-properties-and-conditions');
+    my $split_stylesheet = $self->path_for_stylesheet ('split');
+    my $itemize_stylesheet = $self->path_for_stylesheet ('itemize');
+    my $wsm_stylesheet = $self->path_for_stylesheet ('wsm');
+    my $extend_evl_stylesheet = $self->path_for_stylesheet ('extend-evl');
+    my $conditions_and_properties_stylesheet = $self->path_for_stylesheet ('conditions-and-properties');
+    my $trim_properties_and_conditions_stylesheet = $self->path_for_stylesheet ('trim-properties-and-conditions');
 
     $article_in_target_dir->msmify ()
 	or croak ('Error: ', $article_basename, ' cannot be MSMified.');
@@ -1794,8 +1823,10 @@ sub itemize {
 	my $fragment_number = fragment_number ($fragment);
 	my $fragment_xml = "${target_text_subdir}/${fragment}.xml";
 	my $fragment_miz = "${target_text_subdir}/${fragment}.miz";
+	my $stylesheet_home = $self->get_stylesheet_home ();
 
-	my $fragment_article = Article->new (path => $fragment_miz)
+	my $fragment_article = Article->new (path => $fragment_miz,
+					     stylesheet_home => $stylesheet_home)
 	    or croak ('Error creating article for ', $fragment_miz, '.');
 
 	my @correctness_conditions_and_properties
@@ -1847,7 +1878,8 @@ sub itemize {
 
     print 'done.', "\n";
 
-    my $itemized_article = ItemizedArticle->new (local_database => $local_db);
+    my $itemized_article = ItemizedArticle->new (local_database => $local_db,
+					         stylesheet_home => $stylesheet_home);
 
     print 'Rewriting aid attributes...';
 
@@ -1913,8 +1945,10 @@ sub copy {
     my $new_path_basename = basename ($new_path, '.miz');
 
     my $new_path_miz = "${new_path_dir}/${new_path_basename}.miz";
+    my $stylesheet_home = $self->get_stylesheet_home ();
 
-    my $new_article = Article->new (path => $new_path_miz);
+    my $new_article = Article->new (path => $new_path_miz,
+				    stylesheet_home => $stylesheet_home);
 
     return $new_article;
 
@@ -1939,8 +1973,10 @@ sub copy_with_new_name {
     }
 
     my $new_path_miz = "${current_dir}/${new_basename}.miz";
+    my $stylesheet_home = $self->get_stylesheet_home ();
 
-    my $new_article = Article->new (path => $new_path_miz);
+    my $new_article = Article->new (path => $new_path_miz,
+				    stylesheet_home => $stylesheet_home);
 
     return $new_article;
 

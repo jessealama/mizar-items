@@ -10,7 +10,8 @@ use Pod::Usage;
 use File::Temp qw(tempdir);
 use Carp qw(croak);
 
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 use LocalDatabase;
 
@@ -20,8 +21,8 @@ my $man = 0;
 my $help = 0;
 my $paranoid = 0;
 my $minimize_whole_article = 0;
-my $script_home = '/Users/alama/sources/mizar/mizar-items/bin';
-my $stylesheet_home = '/Users/alama/sources/mizar-items/xsl';
+my $script_home = "$RealBin/../../bin";
+my $stylesheet_home = "$RealBin/../../xsl";
 my $nice = 0;
 my $num_jobs = undef;
 my $workdir = undef;
@@ -57,8 +58,10 @@ if (defined $workdir) {
 }
 
 my $article_dir = $ARGV[0];
-my $local_db = LocalDatabase->new (location => $article_dir);
-my $itemized_article = ItemizedArticle->new (local_database => $local_db);
+my $local_db = LocalDatabase->new (location => $article_dir,
+			           stylesheet_home => $stylesheet_home);
+my $itemized_article = ItemizedArticle->new (local_database => $local_db,
+					     stylesheet_home => $stylesheet_home);
 
 $itemized_article->minimize ();
 
