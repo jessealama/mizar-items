@@ -3,7 +3,7 @@ package LocalDatabase;
 use Moose;
 use File::Basename qw(basename dirname);
 use File::Spec;
-use Carp qw(croak);
+use Carp qw(croak carp);
 use Cwd;
 use IPC::Run qw(run start);
 use XML::LibXML;
@@ -643,6 +643,9 @@ sub minimize_articles {
 		       '2>', \$parallel_err);
 
 	$h->finish ();
+
+	# DEBUG
+	# carp ('Done minimizing articles; here was the error output:', "\n", $parallel_err);
 
 	my $parallel_exit_code = $h->result (0);
 
