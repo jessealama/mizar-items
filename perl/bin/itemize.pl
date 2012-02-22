@@ -23,7 +23,7 @@ use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
 
 my $paranoid = 0;
-my $stylesheet_home = '/Users/alama/sources/mizar/mizar-items';
+my $stylesheet_home = "$RealBin/../../xsl";
 my $verbose = 0;
 my $debug = 0;
 my $man = 0;
