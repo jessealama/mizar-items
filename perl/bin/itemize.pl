@@ -14,7 +14,7 @@ use File::Copy qw(copy move);
 use Carp qw(croak carp);
 use IPC::Cmd qw(can_run);
 
-use FindBin;
+use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
 use Utils qw(ensure_directory ensure_readable_file extension strip_extension);
 use Mizar;
