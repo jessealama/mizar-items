@@ -574,6 +574,7 @@ sub dependencies_of {
     # Check that there really is an article here with the given name
 
     my $text_subdir = $self->get_text_subdir ();
+    my $stylesheet_home = $self->get_stylesheet_home ();
 
     my $article_miz = "${text_subdir}/${article_name}.miz";
 
@@ -581,7 +582,8 @@ sub dependencies_of {
 	croak ('Error: there is no article by the name \'', $article_miz, '\' under ', $self->get_location (), '.');
     }
 
-    my $article = Article->new (path => $article_miz);
+    my $article = Article->new (path => $article_miz,
+			        stylesheet_home => $stylesheet_home);
 
     my @deps = $article->needed_items ();
 

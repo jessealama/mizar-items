@@ -106,6 +106,7 @@ sub _set_article_name {
     # Extract the article from which the local database was itemized
     my $local_db = undef;
     my $location = undef;
+    my $stylesheet_home = $self->get_stylesheet_home ();
 
     if (defined $self->get_local_database () && defined $self->get_location ()) {
 	croak ('Error: please use either the local_database or location parameters when creating an ItemizedArticle, but not both.');
@@ -115,7 +116,8 @@ sub _set_article_name {
 	$self->_set_location ($location);
     } elsif (defined $self->get_location ()) {
 	$location = $self->get_location ();
-	$local_db = LocalDatabase->new (location => $location);
+	$local_db = LocalDatabase->new (location => $location,
+				        stylesheet_home => $stylesheet_home);
 	$self->_set_local_database ($local_db);
     } else {
 	croak ('Error: either a local database or a location must be provided when creating an ItemizedArticle.');

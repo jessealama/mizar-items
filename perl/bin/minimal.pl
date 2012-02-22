@@ -10,8 +10,8 @@ use Pod::Usage;
 use Carp qw(croak);
 use IPC::Run qw(run);
 
-use FindBin;
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 use Article;
@@ -24,6 +24,7 @@ my $help = 0;
 my $confirm_only = 0;
 my $checker_only = 0;
 my $script_home = "$FindBin::Bin";
+my $stylesheet_home = "$RealBin/../../xsl";
 my $fast_theorems = 0;
 my $fast_schemes = 0;
 
@@ -34,6 +35,7 @@ GetOptions('help|?' => \$help,
 	   'paranoid' => \$paranoid,
 	   'fast-schemes' => \$fast_schemes,
 	   'script-home' => \$script_home,
+	   'stylesheet-home' => \$stylesheet_home,
 	   'fast-theorems' => \$fast_theorems,
 	   'checker-only' => \$checker_only,
 	   'confirm-only' => \$confirm_only)
@@ -50,7 +52,8 @@ my $article_basename = basename ($article, '.miz');
 my $article_dirname = dirname ($article);
 my $article_miz = "${article_dirname}/${article_basename}.miz";
 
-my $a = Article->new (path => $article_miz);
+my $a = Article->new (path => $article_miz,
+		      stylesheet_home => $stylesheet_home);
 
 $a->minimize ( { 'checker-only' => $checker_only } );
 

@@ -13,7 +13,8 @@ use Regexp::DefaultFlags;
 use IPC::Run qw(run);
 use charnames qw( :full ); # for referring to characters in regular expressions
 
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
 
 use Utils qw(ensure_readable_file ensure_directory ensure_executable);
 use ItemizedArticle;
@@ -21,8 +22,8 @@ use ItemizedArticle;
 # Set up an XML parser that we might use
 my $xml_parser = XML::LibXML->new ();
 
-my $stylesheet_home = '/Users/alama/sources/mizar/mizar-items/xsl';
-my $script_home = '/Users/alama/sources/mizar/mizar-items/bin';
+my $stylesheet_home = "$RealBin/../../xsl";
+my $script_home = "$RealBin/../../bin";
 my $verbose = 0;
 my $man = 0;
 my $help = 0;
@@ -64,7 +65,8 @@ if (! ensure_directory ($article_dir)) {
     exit 1;
 }
 
-my $itemized_article = ItemizedArticle->new (location => $article_dir);
+my $itemized_article = ItemizedArticle->new (location => $article_dir,
+					     stylesheet_home => $stylesheet_home);
 
 my %dependencies = %{$itemized_article->dependencies ()};
 
