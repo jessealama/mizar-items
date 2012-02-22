@@ -158,6 +158,8 @@ sub BUILD {
     if (! ensure_directory ($sheet_home)) {
 	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
     }
+
+    return $self;
 }
 
 sub name {
