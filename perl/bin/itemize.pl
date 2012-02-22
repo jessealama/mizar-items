@@ -14,7 +14,8 @@ use File::Copy qw(copy move);
 use Carp qw(croak carp);
 use IPC::Cmd qw(can_run);
 
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin;
+use lib "$RealBin/../lib";
 use Utils qw(ensure_directory ensure_readable_file extension strip_extension);
 use Mizar;
 use Article;
