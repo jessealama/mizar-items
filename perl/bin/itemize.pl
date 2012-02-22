@@ -65,7 +65,8 @@ if (defined $target_directory) {
     }
 }
 
-my $article = Article->new (path => $article_miz);
+my $article = Article->new (path => $article_miz,
+			    stylesheet_home => $stylesheet_home);
 $article->itemize ($target_directory);
 
 __END__
