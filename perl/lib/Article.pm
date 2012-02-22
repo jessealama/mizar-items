@@ -636,12 +636,18 @@ sub minimize_properties {
 		    or croak ('Error: unable to apply the strip-property stylesheet to ', $atr);
 		File::Copy::move ($atr_tmp, $atr);
 
-
 		if ($self->verify (\%parameters)) {
 		    $unneeded_properties{"${constructor}[${property}]"} = 0;
+
+		    # carp ('Warning: we can dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+
 		    File::Copy::copy ($atr, $atr_orig)
 			or croak ('Error: we were unable to update the .atr for ', $self->name (), ' to reflect its independence from the property ', $property, ' of constructor ', $constructor, '.', "\n");
+
 		} else {
+
+		    # carp ('Warning: cannot dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+
 		    $needed_properties{"${constructor}[${property}]"} = 0;
 		    File::Copy::copy ($atr_orig, $atr)
 			or croak ('Error: we are unable to restore the original article .atr from ', $atr_orig, '.', "\n");
