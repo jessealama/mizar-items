@@ -92,6 +92,13 @@ has 'all_fragments' => (
     writer => '_set_all_fragments',
 );
 
+has 'stylesheet_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_stylesheet_home',
+    required => 1,
+);
+
 sub _set_article_name {
 
     my $self = shift;
@@ -175,6 +182,20 @@ sub BUILD {
     $self->_set_all_items (\@items);
     $self->_set_all_fragments (\@fragments);
 
+    my $sheet_home = $self->get_stylesheet_home ();
+    if (! ensure_directory ($sheet_home)) {
+	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
+    }
+
+    return $self;
+
+}
+
+sub path_for_stylesheet {
+    my $self = shift;
+    my $sheet = shift;
+    my $stylesheet_home = $self->get_stylesheet_home ();
+    return "${stylesheet_home}/${sheet}.xsl";
 }
 
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1, # quiet, please
@@ -1054,7 +1075,7 @@ sub load_lemmas {
     }
 
     my $fragments_of_lemma_stylesheet
-	= Mizar::path_for_stylesheet ('fragments-of-lemmas');
+	= $self->path_for_stylesheet ('fragments-of-lemmas');
 
     my @fragments_of_lemmas = apply_stylesheet ($fragments_of_lemma_stylesheet,
 						$article_itemized_wsx);
@@ -1358,7 +1379,7 @@ sub dependencies {
     # Another pass to deal with structures
     my @fragments = @{$self->get_all_fragments ()};
     my $structure_dependencies_stylesheet
-	= Mizar::path_for_stylesheet ('structure-dependencies');
+	= $self->path_for_stylesheet ('structure-dependencies');
     foreach my $fragment (@fragments) {
 
 	if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) \z/) {
@@ -1471,7 +1492,7 @@ sub rewrite_pseudo_fragment_aids {
     my $text_dir = $self->get_text_subdir ();
 
     my @pseudo_fragments = $self->get_pseudo_fragments ();
-    my $rewrite_aid_stylesheet = Mizar::path_for_stylesheet ('rewrite-aid');
+    my $rewrite_aid_stylesheet = $self->path_for_stylesheet ('rewrite-aid');
 
 #    foreach my $extension ('xml1', 'eno1', 'dfs1', 'ecl1', 'eid1', 'epr1', 'erd1', 'esh1', 'eth1') {
     foreach my $extension ('xml1') {
