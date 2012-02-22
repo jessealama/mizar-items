@@ -1932,8 +1932,10 @@ sub copy {
     my $new_path_basename = basename ($new_path, '.miz');
 
     my $new_path_miz = "${new_path_dir}/${new_path_basename}.miz";
+    my $stylesheet_home = $self->get_stylesheet_home ();
 
-    my $new_article = Article->new (path => $new_path_miz);
+    my $new_article = Article->new (path => $new_path_miz,
+				    stylesheet_home => $stylesheet_home);
 
     return $new_article;
 
