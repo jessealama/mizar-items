@@ -18,6 +18,13 @@ has 'location' => (
     reader => 'get_location',
 );
 
+has 'stylesheet_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_stylesheet_home',
+    required => 1,
+);
+
 sub BUILD {
     my $self = shift;
 
@@ -46,6 +53,13 @@ sub BUILD {
 		or croak ('Error: unable to make the \'', $subdir_name, '\' subdirectory of ', $path, '.', "\n");
 	}
     }
+
+    my $sheet_home = $self->get_stylesheet_home ();
+    if (! ensure_directory ($sheet_home)) {
+	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
+    }
+
+    return $self;
 }
 
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1,
@@ -522,10 +536,18 @@ sub transfer {
 
 }
 
+sub path_for_stylesheet {
+    my $self = shift;
+    my $sheet = shift;
+    my $stylesheet_home = $self->get_stylesheet_home ();
+    return "${stylesheet_home}/${sheet}.xsl";
+}
+
 sub absolutize {
     my $self = shift;
 
     my $text_subdir = $self->get_text_subdir ();
+    my $absrefs_stylesheet = $self->path_for_stylesheet ('addabsrefs');
 
     my @fragment_xmls = glob "${text_subdir}/*.xml";
     my $fragment_xmls_with_space = join (' ', @fragment_xmls);
@@ -533,7 +555,7 @@ sub absolutize {
     my @parallel_call = ('parallel',
 			 'xsltproc',
 			 '--output', '{.}.xml1',
-			 Mizar::path_for_stylesheet ('addabsrefs'),
+			 $absrefs_stylesheet,
 			 '{}',
 			 ':::');
     foreach my $fragment_xml (@fragment_xmls) {
