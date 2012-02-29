@@ -1454,7 +1454,7 @@ sub minimize {
     $local_db->minimize_articles (\@pseudo_articles, { 'checker-only' => 1 });
 
     # We need to rewrite aids.  Sigh.
-    warn 'Rewriting aids, post minimization...';
+    # warn 'Rewriting aids, post minimization...';
     # $self->absolutize ();
     $self->rewrite_pseudo_fragment_aids ();
 
