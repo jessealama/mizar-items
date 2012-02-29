@@ -5,6 +5,7 @@ use warnings;
 use File::Basename qw(basename dirname);
 use File::Copy qw(copy move);
 use File::Copy::Recursive qw(dircopy dirmove);
+use File::Path qw(rmtree);
 use Getopt::Long;
 use Pod::Usage;
 use File::Temp qw(tempdir);
@@ -52,18 +53,42 @@ if (scalar @ARGV != 1) {
     pod2usage (1);
 }
 
+my $article_dir = $ARGV[0];
+
+my $article_basename = basename ($article_dir);
+
+my $real_workdir = undef;
+
 if (defined $workdir) {
-  ensure_directory ($workdir)
-      or croak ('Error: the work directory does not exist.');
+    ensure_directory ($workdir)
+	or croak ('Error: the work directory does not exist.');
+    my $candidate_workdir = "${workdir}/${article_basename}";
+    if (-e $candidate_workdir) {
+	print {*STDERR} 'Error: there is already a file or directory in the work directory (', $workdir, ') called \'', $article_basename, '\'.', "\n";
+	exit 1;
+    }
+    $real_workdir = $candidate_workdir;
+
+    dircopy ($article_dir, $workdir)
+	or print {*STDERR} 'Error: unable to copy ', $article_dir, ' to the work directory (', $workdir, '): ', $! && exit 1;
+} else {
+    $real_workdir = $article_dir;
 }
 
-my $article_dir = $ARGV[0];
-my $local_db = LocalDatabase->new (location => $article_dir,
+my $local_db = LocalDatabase->new (location => $real_workdir,
 			           stylesheet_home => $stylesheet_home);
 my $itemized_article = ItemizedArticle->new (local_database => $local_db,
 					     stylesheet_home => $stylesheet_home);
 
 $itemized_article->minimize ();
+
+if (defined $workdir) {
+    rmtree ($article_dir)
+	or print {*STDERR} 'Error: unable to delete the directory ', $article_dir, ': ', $! && exit 1;
+    dirmove ($real_workdir, $article_dir)
+	or print {*STDERR} 'Error: unable to move the directory ', $real_workdir, ' to ', $article_dir, ': ', $! && exit 1;
+}
+
 
 __END__
 
