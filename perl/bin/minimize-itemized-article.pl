@@ -82,7 +82,8 @@ if (defined $workdir) {
 }
 
 my $local_db = LocalDatabase->new (location => $real_workdir,
-			           stylesheet_home => $stylesheet_home);
+			           stylesheet_home => $stylesheet_home,
+			           script_home => $script_home);
 my $itemized_article = ItemizedArticle->new (local_database => $local_db,
 					     stylesheet_home => $stylesheet_home);
 
