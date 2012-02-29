@@ -25,6 +25,13 @@ has 'stylesheet_home' => (
     required => 1,
 );
 
+has 'script_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_script_home',
+    required => 1,
+);
+
 sub BUILD {
     my $self = shift;
 
@@ -57,6 +64,13 @@ sub BUILD {
     my $sheet_home = $self->get_stylesheet_home ();
     if (! ensure_directory ($sheet_home)) {
 	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
+    }
+
+    return $self;
+
+    my $script_home = $self->get_script_home ();
+    if (! ensure_directory ($script_home)) {
+	croak ('Error: the supplied path (', $script_home, ') is not a directory.');
     }
 
     return $self;
@@ -543,6 +557,13 @@ sub path_for_stylesheet {
     return "${stylesheet_home}/${sheet}.xsl";
 }
 
+sub path_for_script {
+    my $self = shift;
+    my $sheet = shift;
+    my $script_home = $self->get_script_home ();
+    return "${script_home}/${script}";
+}
+
 sub absolutize {
     my $self = shift;
 
@@ -621,7 +642,7 @@ sub minimize_articles {
 	}
 
 	# Build a call to GNU parallel
-	my $minimizer_script = Mizar::path_for_script ('minimal.pl');
+	my $minimizer_script = $self->path_for_script ('minimal.pl');
 
 	my @parallel_call = ('parallel',
 			     $minimizer_script);
