@@ -1517,7 +1517,7 @@ sub minimize {
 
     $self->minimize_environment (\%parameters);
     $self->minimize_properties (\%parameters);
-    $self->minimize_requirements (\%parameters);
+    # $self->minimize_requirements (\%parameters);
 
     return 1;
 }
