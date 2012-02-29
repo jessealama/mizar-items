@@ -559,7 +559,7 @@ sub path_for_stylesheet {
 
 sub path_for_script {
     my $self = shift;
-    my $sheet = shift;
+    my $script = shift;
     my $script_home = $self->get_script_home ();
     return "${script_home}/${script}";
 }
