@@ -67,13 +67,21 @@ if (defined $workdir) {
 	print {*STDERR} 'Error: there is already a file or directory in the work directory (', $workdir, ') called \'', $article_basename, '\'.', "\n";
 	exit 1;
     }
+    # mkdir $candidate_workdir
+    # 	or print {*STDERR} 'Error: unable to create the directory ', $candidate_workdir, ':', $! && exit 1;
+
+    dircopy ($article_dir, $candidate_workdir)
+	or (print {*STDERR} 'Error: unable to copy ', $article_dir, ' to the work directory (', $workdir, '): ', $!) && exit 1;
+
     $real_workdir = $candidate_workdir;
 
-    dircopy ($article_dir, $workdir)
-	or print {*STDERR} 'Error: unable to copy ', $article_dir, ' to the work directory (', $workdir, '): ', $! && exit 1;
 } else {
+
     $real_workdir = $article_dir;
+
 }
+
+print {*STDERR} 'hey', "\n";
 
 my $local_db = LocalDatabase->new (location => $real_workdir,
 			           stylesheet_home => $stylesheet_home);
@@ -84,9 +92,9 @@ $itemized_article->minimize ();
 
 if (defined $workdir) {
     rmtree ($article_dir)
-	or print {*STDERR} 'Error: unable to delete the directory ', $article_dir, ': ', $! && exit 1;
+	or (print {*STDERR} 'Error: unable to delete the directory ', $article_dir, ': ', $!) && exit 1;
     dirmove ($real_workdir, $article_dir)
-	or print {*STDERR} 'Error: unable to move the directory ', $real_workdir, ' to ', $article_dir, ': ', $! && exit 1;
+	or (print {*STDERR} 'Error: unable to move the directory ', $real_workdir, ' to ', $article_dir, ': ', $!) && exit 1;
 }
 
 
