@@ -13,6 +13,7 @@ use Cwd qw(cwd);
 use File::Copy qw(copy move);
 use Carp qw(croak carp);
 use IPC::Cmd qw(can_run);
+use Pod::Usage;
 
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
