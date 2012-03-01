@@ -30,6 +30,7 @@ our @EXPORT_OK = qw(accom
 my %default_tool_parameters = (
     'long-lines' => 1,
     'quiet' => 1,
+    'timeout' => '600',
 );
 
 sub set_default_tool_parameter {
@@ -69,7 +70,9 @@ sub run_mizar_tool {
     my $article_basename = basename ($article_name, '.miz');
     my $article_err = "${article_dirname}/${article_basename}.err";
 
-    my $timeout = 30; # seconds
+    my $timeout = $full_parameters{'timeout'};
+    delete $full_parameters{'timeout'};
+
     my @tool_call = ($tool);
 
     # Interpret the parameters, warning if we encounter one we don't
@@ -90,10 +93,6 @@ sub run_mizar_tool {
 	} elsif ($param eq 'stop-on-error') {
 	    if ($full_parameters{$param}) {
 		push (@tool_call, '-s');
-	    }
-	} elsif ($param eq 'timeout') {
-	    if (defined $full_parameters{$param}) {
-		$timeout = $full_parameters{$param};
 	    }
 	} else {
 	    carp ('Warning: unknown flag ', $param, '.');
