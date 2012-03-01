@@ -2022,7 +2022,7 @@ sub msmify {
     $self->accom ()
 	or croak ('Error: unable to accom ', $self->name (), '.');
     $self->wsmparser ()
-	or croak ('Error: msmprocessor failed on ', $self->name (), '.');
+	or croak ('Error: wsmparser failed on ', $self->name (), '.');
     $self->msmprocessor ()
 	or croak ('Error: msmprocessor failed on ', $self->name (), '.');
     $self->msplit ()
