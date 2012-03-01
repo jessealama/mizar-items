@@ -25,7 +25,7 @@ my $minimize_whole_article = 0;
 my $script_home = "$RealBin/../../bin";
 my $stylesheet_home = "$RealBin/../../xsl";
 my $nice = 0;
-my $num_jobs = undef;
+my $num_jobs = 1;
 my $workdir = undef;
 
 GetOptions('help|?' => \$help,
@@ -85,9 +85,10 @@ my $local_db = LocalDatabase->new (location => $real_workdir,
 			           stylesheet_home => $stylesheet_home,
 			           script_home => $script_home);
 my $itemized_article = ItemizedArticle->new (local_database => $local_db,
-					     stylesheet_home => $stylesheet_home);
+					     stylesheet_home => $stylesheet_home,
+					     script_home => $script_home);
 
-$itemized_article->minimize ();
+$itemized_article->minimize ( { jobs => $num_jobs } );
 
 if (defined $workdir) {
     rmtree ($article_dir)

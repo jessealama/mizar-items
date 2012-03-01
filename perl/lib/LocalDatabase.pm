@@ -644,8 +644,14 @@ sub minimize_articles {
 	# Build a call to GNU parallel
 	my $minimizer_script = $self->path_for_script ('minimal.pl');
 
-	my @parallel_call = ('parallel',
-			     $minimizer_script);
+	my @parallel_call = ('parallel');
+
+	if (defined $parameters{'jobs'} && $parameters{'jobs'}) {
+	    my $jobs = $parameters{'jobs'};
+	    push (@parallel_call, '--jobs', $jobs);
+	}
+
+	push (@parallel_call, $minimizer_script);
 
 	if (defined $parameters{'checker-only'} && $parameters{'checker-only'}) {
 	    push (@parallel_call, '--checker-only');
