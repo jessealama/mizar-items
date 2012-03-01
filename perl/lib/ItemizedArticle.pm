@@ -99,6 +99,13 @@ has 'stylesheet_home' => (
     required => 1,
 );
 
+has 'script_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_script_home',
+    required => 1,
+);
+
 sub _set_article_name {
 
     my $self = shift;
@@ -107,6 +114,7 @@ sub _set_article_name {
     my $local_db = undef;
     my $location = undef;
     my $stylesheet_home = $self->get_stylesheet_home ();
+    my $script_home = $self->get_script_home ();
 
     if (defined $self->get_local_database () && defined $self->get_location ()) {
 	croak ('Error: please use either the local_database or location parameters when creating an ItemizedArticle, but not both.');
@@ -117,7 +125,8 @@ sub _set_article_name {
     } elsif (defined $self->get_location ()) {
 	$location = $self->get_location ();
 	$local_db = LocalDatabase->new (location => $location,
-				        stylesheet_home => $stylesheet_home);
+				        stylesheet_home => $stylesheet_home,
+				        script_home => $script_home);
 	$self->_set_local_database ($local_db);
     } else {
 	croak ('Error: either a local database or a location must be provided when creating an ItemizedArticle.');
@@ -1440,6 +1449,10 @@ sub dependencies {
 sub minimize {
 
     my $self = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
     my $local_db = $self->get_local_database ();
 
     my @all_articles = $local_db->articles ();
