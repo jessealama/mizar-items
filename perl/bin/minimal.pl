@@ -27,12 +27,14 @@ my $script_home = "$RealBin/../../bin";
 my $stylesheet_home = "$RealBin/../../xsl";
 my $fast_theorems = 0;
 my $fast_schemes = 0;
+my $timeout = 600; # seconds
 
 GetOptions('help|?' => \$help,
            'man' => \$man,
            'verbose'  => \$verbose,
 	   'debug' => \$debug,
 	   'paranoid' => \$paranoid,
+	   'timeout' => \$timeout,
 	   'fast-schemes' => \$fast_schemes,
 	   'script-home' => \$script_home,
 	   'stylesheet-home' => \$stylesheet_home,
