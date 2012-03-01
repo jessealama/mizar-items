@@ -548,7 +548,11 @@ sub show_errors {
 
 sub accom {
     my $self = shift;
-    return Mizar::accom ($self->get_path ());
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    return Mizar::accom ($self->get_path (),
+		         \%parameters);
 }
 
 sub is_accomable {
@@ -559,8 +563,8 @@ sub is_accomable {
 sub verify {
     my $self = shift;
     my $parameters_ref = shift;
-
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
     return Mizar::verifier ($self->get_path (),
 			    \%parameters);
 }
@@ -568,14 +572,17 @@ sub verify {
 sub is_verifiable {
     my $self = shift;
     my $parameters_ref = shift;
-
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
     return $self->verify (\%parameters);
 }
 
 sub wsmparser {
     my $self = shift;
-    return Mizar::wsmparser ($self->get_path ());
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    return Mizar::wsmparser ($self->get_path (),
+			     \%parameters);
 }
 
 sub export {
