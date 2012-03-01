@@ -596,6 +596,7 @@ sub dependencies_of {
 
     my $text_subdir = $self->get_text_subdir ();
     my $stylesheet_home = $self->get_stylesheet_home ();
+    my $script_home = $self->get_script_home ();
 
     my $article_miz = "${text_subdir}/${article_name}.miz";
 
@@ -604,7 +605,8 @@ sub dependencies_of {
     }
 
     my $article = Article->new (path => $article_miz,
-			        stylesheet_home => $stylesheet_home);
+			        stylesheet_home => $stylesheet_home,
+			        script_home => $script_home);
 
     my @deps = $article->needed_items ();
 
