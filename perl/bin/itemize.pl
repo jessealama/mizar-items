@@ -25,6 +25,7 @@ use Xsltproc qw(apply_stylesheet);
 
 my $paranoid = 0;
 my $stylesheet_home = "$RealBin/../../xsl";
+my $script_home = "$RealBin/../../bin";
 my $verbose = 0;
 my $debug = 0;
 my $man = 0;
@@ -67,7 +68,8 @@ if (defined $target_directory) {
 }
 
 my $article = Article->new (path => $article_miz,
-			    stylesheet_home => $stylesheet_home);
+			    stylesheet_home => $stylesheet_home,
+			    script_home => $script_home);
 $article->itemize ($target_directory);
 
 __END__
