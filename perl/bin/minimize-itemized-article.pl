@@ -88,7 +88,8 @@ my $itemized_article = ItemizedArticle->new (local_database => $local_db,
 					     stylesheet_home => $stylesheet_home,
 					     script_home => $script_home);
 
-$itemized_article->minimize ( { jobs => $num_jobs } );
+$itemized_article->minimize ( { jobs => $num_jobs,
+			        timeout => 30 } );
 
 if (defined $workdir) {
     rmtree ($article_dir)
