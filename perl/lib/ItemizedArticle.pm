@@ -1462,9 +1462,13 @@ sub minimize {
 
     # warn 'pseudo articles: ', "\n", Dumper (@pseudo_articles);
 
-    $local_db->minimize_articles (\@proper_articles, { 'fast-theorems-and-schemes' => 1 });
+    my %proper_article_parameters = %parameters;
+    $proper_article_parameters{'fast-theorems-and-schemes'} = 1;
+    $local_db->minimize_articles (\@proper_articles, \%proper_article_parameters);
 
-    $local_db->minimize_articles (\@pseudo_articles, { 'checker-only' => 1 });
+    my %pseudo_article_parameters = %parameters;
+    $pseudo_article_parameters{'checker-only'} = 1;
+    $local_db->minimize_articles (\@pseudo_articles, \%pseudo_article_parameters);
 
     # We need to rewrite aids.  Sigh.
     # warn 'Rewriting aids, post minimization...';
