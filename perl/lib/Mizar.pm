@@ -8,7 +8,7 @@ use Cwd;
 use version; our $VERSION = qv('0.0.3');
 
 use base qw(Exporter);
-use IPC::Run qw(start);
+use IPC::Run qw(start harness timer);
 use IPC::Cmd qw(can_run);
 use Carp qw(croak);
 use File::Basename qw(basename dirname);
@@ -69,6 +69,7 @@ sub run_mizar_tool {
     my $article_basename = basename ($article_name, '.miz');
     my $article_err = "${article_dirname}/${article_basename}.err";
 
+    my $timeout = 30; # seconds
     my @tool_call = ($tool);
 
     # Interpret the parameters, warning if we encounter one we don't
@@ -90,6 +91,10 @@ sub run_mizar_tool {
 	    if ($full_parameters{$param}) {
 		push (@tool_call, '-s');
 	    }
+	} elsif ($param eq 'timeout') {
+	    if (defined $full_parameters{$param}) {
+		$timeout = $full_parameters{$param};
+	    }
 	} else {
 	    carp ('Warning: unknown flag ', $param, '.');
 	}
@@ -99,14 +104,24 @@ sub run_mizar_tool {
 
     # warn 'Mizar tool call: ', Dumper (@tool_call);
 
-    my $harness = start (\@tool_call,
-			 '>', '/dev/null',
-			 '2>', '/dev/null');
+    my $harness = harness (\@tool_call,
+			   '>', '/dev/null',
+			   '2>', '/dev/null');
+    my $timer = timer ($timeout);
+    $harness->run ();
+    $timer->start ();
 
-    $harness->finish ();
-    my $exit_code = $harness->result (0);
+    until (defined eval { $harness->result () } || $timer->is_expired ()) {
+	sleep 1;
+    }
 
-    ($exit_code == 0) && (-r $article_err) && (-z $article_err) ? return 1 : return 0;
+    if ($timer->is_expired ()) {
+	carp ('Warning: unable to finish ', $tool, ' on ', $article_name, ' within ', $timeout, ' seconds: ', $@);
+	return 0;
+    } else {
+	my $exit_code = $harness->result (0);
+	($exit_code == 0) && (-r $article_err) && (-z $article_err) ? return 1 : return 0;
+    }
 
 }
 
