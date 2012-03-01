@@ -143,6 +143,13 @@ has 'stylesheet_home' => (
     required => 1,
 );
 
+has 'script_home' => (
+    is => 'ro',
+    isa => 'Str',
+    reader => 'get_script_home',
+    required => 1,
+);
+
 my $xml_parser = XML::LibXML->new (suppress_errors => 1,
 				   suppress_warnings => 1);
 
@@ -157,6 +164,11 @@ sub BUILD {
     my $sheet_home = $self->get_stylesheet_home ();
     if (! ensure_directory ($sheet_home)) {
 	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
+    }
+
+    my $script_home = $self->get_script_home ();
+    if (! ensure_directory ($script_home)) {
+	croak ('Error: the supplied path (', $script_home, ') is not a directory.');
     }
 
     return $self;
@@ -183,6 +195,13 @@ sub path_for_stylesheet {
     my $sheet = shift;
     my $stylesheet_home = $self->get_stylesheet_home ();
     return "${stylesheet_home}/${sheet}.xsl";
+}
+
+sub path_for_script {
+    my $self = shift;
+    my $script = shift;
+    my $stylesheet_home = $self->get_script_home ();
+    return "${stylesheet_home}/${script}";
 }
 
 sub file_with_extension {
@@ -1633,8 +1652,10 @@ sub itemize {
 
     my $article_basename = $self->name ();
     my $stylesheet_home = $self->get_stylesheet_home ();
+    my $script_home = $self->get_script_home ();
     my $local_db = LocalDatabase->new (location => $target_directory,
-				       stylesheet_home => $stylesheet_home);
+				       stylesheet_home => $stylesheet_home,
+				       script_home => $script_home);
 
     my $target_text_subdir = $local_db->get_text_subdir ();
     my $target_prel_subdir = $local_db->get_prel_subdir ();
@@ -1824,9 +1845,11 @@ sub itemize {
 	my $fragment_xml = "${target_text_subdir}/${fragment}.xml";
 	my $fragment_miz = "${target_text_subdir}/${fragment}.miz";
 	my $stylesheet_home = $self->get_stylesheet_home ();
+	my $script_home = $self->get_script_home ();
 
 	my $fragment_article = Article->new (path => $fragment_miz,
-					     stylesheet_home => $stylesheet_home)
+					     stylesheet_home => $stylesheet_home,
+					     script_home => $script_home)
 	    or croak ('Error creating article for ', $fragment_miz, '.');
 
 	my @correctness_conditions_and_properties
@@ -1879,7 +1902,8 @@ sub itemize {
     print 'done.', "\n";
 
     my $itemized_article = ItemizedArticle->new (local_database => $local_db,
-					         stylesheet_home => $stylesheet_home);
+					         stylesheet_home => $stylesheet_home,
+					         script_home => $script_home);
 
     print 'Rewriting aid attributes...';
 
@@ -1946,9 +1970,10 @@ sub copy {
 
     my $new_path_miz = "${new_path_dir}/${new_path_basename}.miz";
     my $stylesheet_home = $self->get_stylesheet_home ();
-
+    my $script_home = $self->get_script_home ();
     my $new_article = Article->new (path => $new_path_miz,
-				    stylesheet_home => $stylesheet_home);
+				    stylesheet_home => $stylesheet_home,
+				    script_home => $script_home);
 
     return $new_article;
 
@@ -1974,9 +1999,11 @@ sub copy_with_new_name {
 
     my $new_path_miz = "${current_dir}/${new_basename}.miz";
     my $stylesheet_home = $self->get_stylesheet_home ();
+    my $script_home = $self->get_script_home ();
 
     my $new_article = Article->new (path => $new_path_miz,
-				    stylesheet_home => $stylesheet_home);
+				    stylesheet_home => $stylesheet_home,
+				    script_home => $script_home);
 
     return $new_article;
 
