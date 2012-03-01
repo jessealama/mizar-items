@@ -23,7 +23,7 @@ my $man = 0;
 my $help = 0;
 my $confirm_only = 0;
 my $checker_only = 0;
-my $script_home = "$FindBin::Bin";
+my $script_home = "$RealBin/../../bin";
 my $stylesheet_home = "$RealBin/../../xsl";
 my $fast_theorems = 0;
 my $fast_schemes = 0;
@@ -53,7 +53,8 @@ my $article_dirname = dirname ($article);
 my $article_miz = "${article_dirname}/${article_basename}.miz";
 
 my $a = Article->new (path => $article_miz,
-		      stylesheet_home => $stylesheet_home);
+		      stylesheet_home => $stylesheet_home,
+		      script_home => $script_home);
 
 $a->minimize ( { 'checker-only' => $checker_only } );
 
