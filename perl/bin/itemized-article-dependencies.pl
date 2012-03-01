@@ -65,8 +65,10 @@ if (! ensure_directory ($article_dir)) {
     exit 1;
 }
 
-my $itemized_article = ItemizedArticle->new (location => $article_dir,
-					     stylesheet_home => $stylesheet_home);
+my $itemized_article
+    = ItemizedArticle->new (location => $article_dir,
+			    stylesheet_home => $stylesheet_home,
+			    script_home => $script_home);
 
 my %dependencies = %{$itemized_article->dependencies ()};
 
