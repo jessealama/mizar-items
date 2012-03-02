@@ -2,21 +2,21 @@
 
 use strict;
 use warnings;
-
-# Set up our location
-use FindBin;
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
-use Xsltproc qw(apply_stylesheet);
-use Utils qw(ensure_directory);
-use Article;
-
 use Getopt::Long;
 use Pod::Usage;
 use File::Basename qw(basename dirname);
 use Carp qw(croak);
 use Regexp::DefaultFlags;
 
-my $stylesheet_home = undef;
+# Set up our location
+use FindBin qw($RealBin);
+use lib "$RealBin/../lib";
+use Xsltproc qw(apply_stylesheet);
+use Utils qw(ensure_directory);
+use Article;
+
+my $stylesheet_home = "$RealBin/../../xsl";
+my $script_home     = "$RealBin/../../bin";
 my $verbose         = 0;
 my $debug           = 0;
 my $man             = 0;
@@ -58,7 +58,9 @@ my $article_basename = basename ($article_path, '.miz');
 my $article_dirname = dirname ($article_path);
 my $article_miz = "${article_dirname}/${article_basename}.miz";
 
-my $article = Article->new (path => $article_miz);
+my $article = Article->new (path => $article_miz,
+			    stylesheet_home => $stylesheet_home,
+			    script_home => $script_home);
 
 my @needed = $article->needed_items ();
 
