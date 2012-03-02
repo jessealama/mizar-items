@@ -72,7 +72,20 @@ my $itemized_article
 
 my %dependencies = %{$itemized_article->dependencies ()};
 
-foreach my $item (keys %dependencies) {
+my %item_to_fragment_table = %{$itemized_article->get_item_to_fragment_table ()};
+
+sub item_less_than {
+    my $item_1 = $a;
+    my $item_2 = $b;
+
+    my $fragment_1 = $itemized_article->fragment_for_item ($item_1);
+    my $fragment_2 = $itemized_article->fragment_for_item ($item_2);
+
+    return $itemized_article->fragment_less_than ($fragment_1, $fragment_2);
+
+}
+
+foreach my $item (sort { item_less_than } keys %dependencies) {
     my @deps = @{$dependencies{$item}};
     print $item;
     foreach my $dep (@deps) {
