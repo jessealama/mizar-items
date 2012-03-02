@@ -653,6 +653,8 @@ sub minimize_articles {
 	    push (@parallel_call, '--jobs', $jobs);
 	}
 
+	push (@parallel_call, '--joblog', 'minimize.log');
+
 	push (@parallel_call, $minimizer_script);
 
 	if (defined $parameters{'checker-only'} && $parameters{'checker-only'}) {
