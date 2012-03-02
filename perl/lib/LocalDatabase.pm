@@ -628,6 +628,7 @@ sub minimize_articles {
 
     my $location = $self->get_location ();
     my $text_dir = $self->get_text_subdir ();
+    my $now = time;
 
     my @article_paths = map { "${text_dir}/${_}.miz" } @article_names;
 
@@ -653,7 +654,8 @@ sub minimize_articles {
 	    push (@parallel_call, '--jobs', $jobs);
 	}
 
-	push (@parallel_call, '--joblog', 'minimize.log');
+	my $logfile = "${location}/minimize-${now}.log";
+	push (@parallel_call, '--joblog', $logfile);
 
 	push (@parallel_call, $minimizer_script);
 
