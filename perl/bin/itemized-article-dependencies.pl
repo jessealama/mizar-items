@@ -88,9 +88,9 @@ sub item_less_than {
 
 foreach my $item (sort { item_less_than } keys %dependencies) {
     my @deps = @{$dependencies{$item}};
-    my @sorted_deps = sort { item_less_than } @deps;
+    # my @sorted_deps = sort { item_less_than } @deps;
     print $item;
-    foreach my $dep (@sorted_deps) {
+    foreach my $dep (@deps) {
 	print ' ', $dep;
     }
     print "\n";
