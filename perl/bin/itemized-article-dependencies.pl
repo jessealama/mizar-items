@@ -74,7 +74,7 @@ my %dependencies = %{$itemized_article->dependencies ()};
 
 my %item_to_fragment_table = %{$itemized_article->get_item_to_fragment_table ()};
 
-memoize ('item_less_than');
+# memoize ('item_less_than');
 sub item_less_than {
     my $item_1 = $a;
     my $item_2 = $b;
