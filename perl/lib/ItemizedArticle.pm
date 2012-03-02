@@ -222,12 +222,17 @@ sub fragment_number {
     my $fragment = shift;
     if ($fragment =~ / ckb ([0-9]+) /) {
 	return $1;
+    } elsif ($fragment =~ / : fragment : ([0-9]+) /) {
+	return $1;
     } else {
 	croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
     }
 }
 
 sub fragment_less_than {
+    my $self = shift;
+    my $a = shift;
+    my $b = shift;
     my $a_num = fragment_number ($a);
     my $b_num = fragment_number ($b);
     if ($a_num < $b_num) {
@@ -237,6 +242,34 @@ sub fragment_less_than {
     } else {
 	return 1;
     }
+}
+
+sub fragment_for_item {
+    my $self = shift;
+    my $item = shift;
+
+    my $article = $self->get_article_name ();
+    my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
+
+    my $fragment = undef;
+
+    if (defined $item_to_fragment_table{$item}) {
+	$fragment = $item_to_fragment_table{$item};
+
+	if (! defined $fragment) {
+	    croak 'Error: the entry in the item-to-fragment table of ', $article, ' for \'', $item, '\' is undefined.';
+	}
+
+    } elsif ($item =~ / (.+) \[ .+ \] \z /) {
+	my $item_sans_condition = $1;
+	return $self->fragment_for_item ($item_sans_condition);
+    } else {
+	my @keys = keys %item_to_fragment_table;
+	croak 'Error: we cannot find \'', $item, '\' in the item-to-fragment table for ', $article, ', nor could we resolve this item by stripping away a condition (e.g., existence, uniqueness).  The keys of the table are:', "\n", Dumper (@keys);
+    }
+
+    return $fragment;
+
 }
 
 my %conditions
@@ -352,7 +385,7 @@ sub load_properties_of_constructors_of_kind {
     my @dcos = $local_db->constructors_in_prel_of_kind ($kind);
     my @dcos_no_extension = map { strip_extension ($_) } @dcos;
     my @sorted_dcos
-	= sort { fragment_less_than ($a, $b) } @dcos_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @dcos_no_extension;
 
     foreach my $i (1 .. scalar @sorted_dcos) {
 	my $dco = $sorted_dcos[$i - 1];
@@ -430,7 +463,7 @@ sub load_constructors_of_kind {
     my @dcos = $local_db->constructors_in_prel_of_kind ($kind);
     my @dcos_no_extension = map { strip_extension ($_) } @dcos;
     my @sorted_dcos
-	= sort { fragment_less_than ($a, $b) } @dcos_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @dcos_no_extension;
 
     foreach my $i (1 .. scalar @sorted_dcos) {
 	my $fragment_of_ccluster = $sorted_dcos[$i - 1];
@@ -504,7 +537,7 @@ sub load_patterns_of_kind {
     my @dnos = $local_db->patterns_in_prel_of_kind ($kind);
     my @dnos_no_extension = map { strip_extension ($_) } @dnos;
     my @sorted_dnos
-	= sort { fragment_less_than ($a, $b) } @dnos_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @dnos_no_extension;
 
     foreach my $i (1 .. scalar @sorted_dnos) {
 	my $fragment = $sorted_dnos[$i - 1];
@@ -569,7 +602,7 @@ sub load_definientia_of_kind {
     my @definientia = $local_db->definientia_in_prel_of_kind ($kind);
     my @definientia_no_extension = map { strip_extension ($_) } @definientia;
     my @sorted_definientia
-	= sort { fragment_less_than ($a, $b) } @definientia_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @definientia_no_extension;
 
     foreach my $i (1 .. scalar @sorted_definientia) {
 	my $fragment = $sorted_definientia[$i - 1];
@@ -825,7 +858,7 @@ sub load_deftheorems {
 
     my @theorems = $local_db->deftheorems_in_prel ();
     my @theorems_no_extension = map { strip_extension ($_) } @theorems;
-    my @sorted_theorems = sort { fragment_less_than ($a, $b) } @theorems_no_extension;
+    my @sorted_theorems = sort { $self->fragment_less_than ($a, $b) } @theorems_no_extension;
 
     foreach my $i (1 .. scalar @sorted_theorems) {
 	my $fragment_of_theorem = $sorted_theorems[$i - 1];
@@ -840,27 +873,6 @@ sub load_deftheorems {
 
 }
 
-# sub fragment_number {
-#     my $fragment = shift;
-#     if ($fragment =~ / ckb ([0-9]+) /) {
-# 	return $1;
-#     } else {
-# 	croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
-#     }
-# }
-
-# sub fragment_less_than {
-#     my $a_num = fragment_number ($a);
-#     my $b_num = fragment_number ($b);
-#     if ($a_num < $b_num) {
-# 	return -1;
-#     } elsif ($a_num == $b_num) {
-# 	return 0;
-#     } else {
-# 	return 1;
-#     }
-# }
-
 sub load_schemes {
     my $self = shift;
 
@@ -870,7 +882,7 @@ sub load_schemes {
 
     my @schemes = $local_db->schemes_in_prel ();
     my @schemes_no_extension = map { strip_extension ($_) } @schemes;
-    my @sorted_schemes = sort { fragment_less_than ($a, $b) } @schemes_no_extension;
+    my @sorted_schemes = sort { $self->fragment_less_than ($a, $b) } @schemes_no_extension;
 
     foreach my $i (1 .. scalar @sorted_schemes) {
 	my $fragment_of_scheme = $sorted_schemes[$i - 1];
@@ -896,7 +908,7 @@ sub load_reductions {
     my @reductions = $local_db->reductions_in_prel ();
     my @reductions_no_extension = map { strip_extension ($_) } @reductions;
     my @sorted_reductions
-	= sort { fragment_less_than ($a, $b) } @reductions_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @reductions_no_extension;
 
     foreach my $i (1 .. scalar @sorted_reductions) {
 	my $fragment_of_reduction = $sorted_reductions[$i - 1];
@@ -916,7 +928,7 @@ sub load_reductions {
 #     my @cclusters = $local_db->conditional_clusters_in_prel ();
 #     my @cclusters_no_extension = map { strip_extension ($_) } @cclusters;
 #     my @sorted_cclusters
-# 	= sort { fragment_less_than ($a, $b) } @cclusters_no_extension;
+# 	= sort { $self->fragment_less_than ($a, $b) } @cclusters_no_extension;
 
 #     foreach my $i (1 .. scalar @sorted_cclusters) {
 # 	my $fragment_of_ccluster = $sorted_cclusters[$i - 1];
@@ -931,7 +943,7 @@ sub load_reductions {
 #     my @fclusters = $local_db->functorial_clusters_in_prel ();
 #     my @fclusters_no_extension = map { strip_extension ($_) } @fclusters;
 #     my @sorted_fclusters
-# 	= sort { fragment_less_than ($a, $b) } @fclusters_no_extension;
+# 	= sort { $self->fragment_less_than ($a, $b) } @fclusters_no_extension;
 
 #     foreach my $i (1 .. scalar @sorted_fclusters) {
 # 	my $fragment_of_fcluster = $sorted_fclusters[$i - 1];
@@ -946,7 +958,7 @@ sub load_reductions {
 #     my @rclusters = $local_db->existential_clusters_in_prel ();
 #     my @rclusters_no_extension = map { strip_extension ($_) } @rclusters;
 #     my @sorted_rclusters
-# 	= sort { fragment_less_than ($a, $b) } @rclusters_no_extension;
+# 	= sort { $self->fragment_less_than ($a, $b) } @rclusters_no_extension;
 
 #     foreach my $i (1 .. scalar @sorted_rclusters) {
 # 	my $fragment_of_rcluster = $sorted_rclusters[$i - 1];
@@ -968,7 +980,7 @@ sub load_clusters_of_kind {
     my @clusters = $local_db->clusters_in_prel_of_kind ($kind);
     my @clusters_no_extension = map { strip_extension ($_) } @clusters;
     my @sorted_clusters
-	= sort { fragment_less_than ($a, $b) } @clusters_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @clusters_no_extension;
 
     foreach my $i (1 .. scalar @sorted_clusters) {
 	my $fragment_of_cluster = $sorted_clusters[$i - 1];
@@ -1006,7 +1018,7 @@ sub load_theorems {
 
     my @theorems = $local_db->theorems_in_prel ();
     my @theorems_no_extension = map { strip_extension ($_) } @theorems;
-    my @sorted_theorems = sort { fragment_less_than ($a, $b) } @theorems_no_extension;
+    my @sorted_theorems = sort { $self->fragment_less_than ($a, $b) } @theorems_no_extension;
 
     foreach my $i (1 .. scalar @sorted_theorems) {
 	my $fragment_of_theorem = $sorted_theorems[$i - 1];
@@ -1043,7 +1055,7 @@ sub load_identifications_of_kind {
     my @identifications = $local_db->clusters_in_prel_of_kind ($kind);
     my @identifications_no_extension = map { strip_extension ($_) } @identifications;
     my @sorted_identifications
-	= sort { fragment_less_than ($a, $b) } @identifications_no_extension;
+	= sort { $self->fragment_less_than ($a, $b) } @identifications_no_extension;
 
     foreach my $i (1 .. scalar @sorted_identifications) {
 	my $fragment = $sorted_identifications[$i - 1];
@@ -1342,10 +1354,10 @@ sub dependencies {
 			    if (defined $dependencies{$condition}) {
 				my @deps = @{$dependencies{$condition}};
 				push (@deps, $item);
-				warn 'Registering ', $item, ' as a dependency of ', $condition;
+				# warn 'Registering ', $item, ' as a dependency of ', $condition;
 				$dependencies{$condition} = \@deps;
 			    } else {
-				warn 'Registering ', $item, ' as a dependency of ', $condition;
+				# warn 'Registering ', $item, ' as a dependency of ', $condition;
 				$dependencies{$condition} = [ $item ];
 			    }
 			}
@@ -1364,13 +1376,13 @@ sub dependencies {
 				unless (grep { /\A ${item_escaped} \z/ } @deps) {
 				    push (@deps, $item);
 
-				    warn 'Registering ', $item, ' as a dependency for ', $condition_item;
+				    # warn 'Registering ', $item, ' as a dependency for ', $condition_item;
 
 				    $dependencies{$condition_item} = \@deps;
 				}
 			    } else {
 
-				warn 'Registering ', $item, ' as a dependency for ', $condition_item;
+				# warn 'Registering ', $item, ' as a dependency for ', $condition_item;
 
 				$dependencies{$condition_item} = [ $item ];
 			    }
