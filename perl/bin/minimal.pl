@@ -5,7 +5,7 @@ use strict;
 use File::Basename qw(basename dirname);
 use XML::LibXML;
 use POSIX qw(floor ceil);
-use Getopt::Long;
+use Getopt::Long qw(:config gnu_compat);
 use Pod::Usage;
 use Carp qw(croak);
 use IPC::Run qw(run);
@@ -28,6 +28,8 @@ my $stylesheet_home = "$RealBin/../../xsl";
 my $fast_theorems = 0;
 my $fast_schemes = 0;
 my $timeout = 600; # seconds
+my $suggested_clusters = undef;
+my $clusters_only = 0;
 
 GetOptions('help|?' => \$help,
            'man' => \$man,
@@ -40,7 +42,9 @@ GetOptions('help|?' => \$help,
 	   'stylesheet-home' => \$stylesheet_home,
 	   'fast-theorems' => \$fast_theorems,
 	   'checker-only' => \$checker_only,
-	   'confirm-only' => \$confirm_only)
+	   'confirm-only' => \$confirm_only,
+           'suggested-clusters=s' => \$suggested_clusters,
+           'clusters-only' => \$clusters_only)
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
@@ -58,7 +62,22 @@ my $a = Article->new (path => $article_miz,
 		      stylesheet_home => $stylesheet_home,
 		      script_home => $script_home);
 
-$a->minimize ( { 'checker-only' => $checker_only } );
+if (defined $suggested_clusters) {
+    my @suggested_clusters = split (',', $suggested_clusters);
+    if ($clusters_only) {
+	$a->minimize_extension_with_suggestion ('ecl',
+						\@suggested_clusters,
+						{ 'checker-only' => $checker_only,
+						  'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes } );
+    } else {
+	$a->minimize_with_suggested_environment ( { 'ecl' => \@suggested_clusters },
+						  { 'checker-only' => $checker_only,
+						    'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes } )
+    }
+} else {
+    $a->minimize ( { 'checker-only' => $checker_only,
+		     'fast-theorems-and-schemes' => ($fast_theorems && $fast_schemes)} )
+}
 
 __END__
 
