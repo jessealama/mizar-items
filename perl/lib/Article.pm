@@ -10,6 +10,7 @@ use POSIX qw(floor ceil);
 use Data::Dumper;
 use Readonly;
 use charnames qw(:full);
+use List::MoreUtils qw(first_index);
 
 # Our libraries
 use FindBin qw($RealBin);
@@ -564,6 +565,9 @@ sub verify {
     my $self = shift;
     my $parameters_ref = shift;
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    # Ugh
+    delete $parameters{'fast-theorems-and-schemes'};
 
     return Mizar::verifier ($self->get_path (),
 			    \%parameters);
@@ -1307,6 +1311,385 @@ sub minimize_extension {
     }
 }
 
+sub element_to_item {
+    my $element = shift;
+    my $name = $element->nodeName ();
+    my $name_lc = lc $name;
+    if (! $element->exists ('@aid')) {
+	die 'Error: unable to handle an element that lacks an aid attribute.';
+    }
+    my $aid = $element->findvalue ('@aid');
+    my $aid_lc = lc $aid;
+    if ($name_lc =~ /\A ([cfr])cluster \z/) {
+	my $cluster_kind = $1;
+	if (! $element->exists ('@nr')) {
+	    die 'Error: unable to handle a cluster element that lacks an nr attribute.';
+	}
+	my $nr = $element->findvalue ('@nr');
+	return "${aid_lc}:${cluster_kind}cluster:${nr}";
+    } else {
+	die 'Error: unable to handle an element whose name is \'', $name, '\'.';
+    }
+}
+
+sub prefer_suggested {
+    my $element_1 = shift;
+    my $element_2 = shift;
+    my $suggestions_ref = shift;
+
+    my @suggestions = defined $suggestions_ref ? @{$suggestions_ref} : ();
+
+    my $element_1_name = element_to_item ($element_1);
+    my $element_2_name = element_to_item ($element_2);
+
+    my $element_1_idx = first_index { $_ eq $element_1_name } @suggestions;
+    my $element_2_idx = first_index { $_ eq $element_2_name } @suggestions;
+
+    if ($element_1_idx < 0) {
+	if ($element_2_idx < 0) {
+	    return 0;
+	} else {
+	    return 1;
+	}
+    } elsif ($element_2_idx < 0) {
+	return -1;
+    } else {
+	return $element_1_idx <=> $element_2_idx;
+    }
+
+}
+
+sub shortest_initial_verifiable_subsequence {
+    my $self = shift;
+    my $elements_ref = shift;
+    my $path = shift;
+    my $root_element_name = shift;
+    my $parameters_ref = shift;
+
+    my @elements = defined $elements_ref ? @{$elements_ref} : ();
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    # carp ('Computing shortest initial segment of ', scalar @elements, ' ', $root_element_name, ' elements (saving results under ', $path, '.)');
+
+    my $article_name = $self->name ();
+
+    my %needed = ();
+    my $index = scalar @elements - 1;
+
+    # Initially everything is needed
+    foreach my $i (0 .. $index) {
+	$needed{$i} = 0;
+    }
+
+    # Write this to disk
+    $self->write_element_table (\@elements,
+				\%needed,
+				$path,
+				$root_element_name);
+
+    my $verifiable = $self->verify (\%parameters);
+
+    if ($verifiable != 1) {
+	croak ('Error: ', $article_name, ' is not initially verifiable!');
+    }
+
+    while ($verifiable == 1 && $index > 0) {
+
+	# carp ('Warning: index is ', $index, '.');
+
+	$index = ceil ($index / 2);
+
+	# Delete everything after the index
+	foreach my $i ($index .. scalar @elements - 1) {
+	    delete $needed{$i};
+	}
+
+	# Write this to disk
+	$self->write_element_table (\@elements,
+				    \%needed,
+				    $path,
+				    $root_element_name);
+
+	# Try verifying
+	$verifiable = $self->verify (\%parameters);
+
+    }
+
+    # carp ('Warning: done finding the smallest index; index is now ', $index, '.  Verifiable is ', $verifiable, '.');
+
+    # Restore needed elements that we just dumped
+    if ($verifiable == 0) {
+
+	# carp ('Warning: restoring elements from index 0 to index ', 2 * $index);
+
+	foreach my $i (0 .. 2 * $index + 1) {
+	    $needed{$i} = 0;
+	}
+
+	# Write this to disk
+	$self->write_element_table (\@elements,
+				    \%needed,
+				    $path,
+				    $root_element_name);
+
+	# Restore
+	my $verifier_ok = $self->verify (\%parameters);
+
+	if ($verifier_ok != 1) {
+	    croak ('Error: after finding a short initial subsequence, we find that ', $article_name, ' is not verifiable.  We restored all elements from 0 to ', 2 * $index + 1, ', but it is still not verifiable.');
+	}
+
+    }
+
+    return 2 * $index + 1;
+
+}
+
+# $self->minimize_linear_scan (\@sorted_elements,
+# 			     $article_with_extension,
+# 			     $root_element_name,
+# 			     0,
+# 			     $index);
+
+sub minimize_linear_scan {
+    my $self = shift;
+    my $elements_ref = shift;
+    my $path = shift;
+    my $root_element_name = shift;
+    my $begin = shift;
+    my $end = shift;
+    my $parameters_ref = shift;
+
+    my @elements = defined $elements_ref ? @{$elements_ref} : ();
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my %needed = ();
+
+    # Initially everything is needed
+    foreach my $i ($begin .. $end) {
+	$needed{$i} = 0;
+    }
+
+    # Write this to disk
+    $self->write_element_table (\@elements,
+				\%needed,
+				$path,
+				$root_element_name);
+
+    # Initial check
+    my $initially_verifiable = $self->verify (\%parameters);
+
+    if ($initially_verifiable != 1) {
+	croak ('Error: before doing a linear scan minimization of ', $self->name (), ', the article is not verifiable.');
+    }
+
+    carp ('Linear scan minimization of ', scalar @elements, ' from index ', $begin, ' to ', $end);
+
+    foreach my $i ($begin .. $end) {
+	delete $needed{$i};
+	$self->write_element_table (\@elements,
+				    \%needed,
+				    $path,
+				    $root_element_name);
+	my $deletable = $self->verify (\%parameters);
+	if ($deletable == 0) {
+	    $needed{$i} = 0;
+	    $self->write_element_table (\@elements,
+					\%needed,
+					$path,
+					$root_element_name);
+	    carp ('Element ', $i, ' is not deletable.');
+	} else {
+	    carp ('Element ', $i, ' is deletable.');
+	}
+    }
+
+    # Restore
+    $self->verify (\%parameters);
+
+    my @needed = keys %needed;
+    carp ('Of the elements from ', $begin, ' to ', $end, ', linear scan shows that these are needed:', "\n", Dumper (@needed));
+
+    return;
+
+}
+
+sub minimize_extension_with_suggestion {
+    my $self = shift;
+    my $extension_to_minimize = shift;
+    my $suggestions_ref = shift;
+    my $parameters_ref = shift;
+
+    my @suggestions = defined $suggestions_ref ? @{$suggestions_ref} : ();
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    # carp ('Minimizing the ', $extension_to_minimize, ' file using the suggestions ', "\n", scalar @suggestions == 0 ? '(empty list)' : Dumper (@suggestions));
+
+    my $root_element_name = $extension_to_element_table{$extension_to_minimize};
+    my $article_name = $self->name ();
+
+    if (! defined $root_element_name) {
+	croak ('Error: we do not know how to deal with the ', $extension_to_minimize, ' files.')
+    }
+
+    my $article_with_extension = $self->file_with_extension ($extension_to_minimize);
+
+    if (-e $article_with_extension) {
+	my $xml_doc = eval { $xml_parser->parse_file ($article_with_extension) };
+	if (! defined $xml_doc) {
+	    croak ('Error: the .', $extension_to_minimize, ' file of ', $self->name (), ' is not well-formed XML.');
+	}
+
+	my @elements = $xml_doc->findnodes ("/${root_element_name}/*");
+
+	my %initial_table = ();
+
+	if (scalar @suggestions == 0) {
+
+	    # Try verifying with an empty set of suggestions
+	    foreach my $i (0 .. scalar @elements - 1) {
+		delete $initial_table{$i};
+	    }
+
+	    # Write this to disk
+	    $self->write_element_table (\@elements,
+					\%initial_table,
+					$article_with_extension,
+					$root_element_name);
+
+	    # Try verifying
+	    my $all_deletable = $self->verify (\%parameters);
+
+	    if ($all_deletable) {
+		carp ('Warning: from ', $article_name, ' we can delete all ', $root_element_name, ' elements, as suggested.');
+		return;
+	    } else {
+		carp ('Warning: from ', $article_name, ' we cannot delete all ', $root_element_name, ' elements, as suggested.', "\n", 'Proceeding using normal brute-force minimization...');
+
+		# Try verifying with an empty set of suggestions
+		foreach my $i (0 .. scalar @elements - 1) {
+		    $initial_table{$i} = 0;
+		}
+
+		# Write this to disk
+		$self->write_element_table (\@elements,
+					    \%initial_table,
+					    $article_with_extension,
+					    $root_element_name);
+
+		# Restore
+		$self->verify (\%parameters);
+
+		return $self->minimize_extension ($extension_to_minimize, \%parameters);
+
+	    }
+
+	} else {
+
+	    my @sorted_elements =
+		sort { prefer_suggested ($a, $b, \@suggestions) } @elements;
+
+	    # my @sorted_element_names = map { element_to_item ($_) } @sorted_elements;
+	    # carp ('Sorted environment, adhering to suggestion:', "\n", Dumper (@sorted_element_names));
+
+	    # Initially, everything is needed.
+	    foreach my $i (0 .. scalar @sorted_elements - 1) {
+		$initial_table{$i} = 0;
+	    }
+
+	    $self->write_element_table (\@sorted_elements,
+					\%initial_table,
+					$article_with_extension,
+					$root_element_name);
+
+	    # First do binary search for the smallest initial segment
+	    # of @elements that is verifiable.
+	    my $index = $self->shortest_initial_verifiable_subsequence (\@sorted_elements,
+									$article_with_extension,
+									$root_element_name,
+								        \%parameters);
+
+	    if ($index < 0) {
+
+		carp ('Warning: the article is verifiable using an empty ', $root_element_name, ' environment!');
+
+		return;
+
+	    } else {
+
+		# carp ('Warning: index of shortest initial verifiable subsequence: ', $index);
+		# carp ('Deleting all elements from ', $index + 1, ' to ', scalar @sorted_elements - 1);
+
+		foreach my $i ($index + 1 .. scalar @sorted_elements - 1) {
+		    delete $initial_table{$i};
+		}
+
+		$self->write_element_table (\@sorted_elements,
+					    \%initial_table,
+					    $article_with_extension,
+					    $root_element_name);
+
+		# Check
+		my $before_linear_scan_ok = $self->verify (\%parameters);
+
+		if ($before_linear_scan_ok != 1) {
+		    croak ('Error: before doing a brute force binary search, we find that ', $self->name (), ' is not verifiable.');
+		}
+
+		my %really_needed_table = %{$self->minimize_elements (\@sorted_elements,
+								      \%initial_table,
+								      $article_with_extension,
+								      $root_element_name,
+								      0,
+								      $index,
+								      \%parameters)};
+
+		# my @really_needed = keys %really_needed_table;
+
+		# carp ('Indices of elements that are really needed: ', Dumper (@really_needed));
+
+		return keys %really_needed_table;
+
+	    }
+
+	    return keys %initial_table;
+
+	}
+
+    } else {
+	return;
+    }
+}
+
+sub minimize_environment_with_suggestions {
+
+    my $self = shift;
+    my $suggestions_ref = shift;
+    my $parameters_ref = shift;
+
+    my %suggestions = defined $suggestions_ref ? %{$suggestions_ref} : ();
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfs', 'eid', 'ecl');
+
+    if (defined $parameters{'fast-theorems-and-schemes'}) {
+	$self->prune_theorems_and_schemes ();
+	delete $parameters{'fast-theorems-and-schemes'};
+    } else {
+	push (@extensions_to_minimize, 'esh', 'eth');
+    }
+
+    foreach my $extension (@extensions_to_minimize) {
+	if (defined $suggestions{$extension}) {
+	    my @suggestions = @{$suggestions{$extension}};
+	    $self->minimize_extension_with_suggestion ($extension, \@suggestions, \%parameters);
+	} else {
+	    $self->minimize_extension ($extension, \%parameters);
+	}
+    }
+
+}
+
 sub minimize_environment {
 
     my $self = shift;
@@ -1317,7 +1700,8 @@ sub minimize_environment {
     my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfs', 'eid', 'ecl');
 
     if (defined $parameters{'fast-theorems-and-schemes'}) {
-	prune_theorems_and_schemes ();
+	$self->prune_theorems_and_schemes ();
+	delete $parameters{'fast-theorems-and-schemes'};
     } else {
 	push (@extensions_to_minimize, 'esh', 'eth');
     }
@@ -1546,6 +1930,28 @@ sub minimize {
     # $self->minimize_requirements (\%parameters);
 
     return 1;
+}
+
+sub minimize_with_suggested_environment {
+    my $self = shift;
+    my $suggested_environment_ref = shift;
+    my $parameters_ref = shift;
+
+    my %suggested_environment
+	= defined $suggested_environment_ref ? %{$suggested_environment_ref}
+	                                     : ();
+    my %parameters
+	= defined $parameters_ref ? %{$parameters_ref}
+	                          : ();
+
+
+    $self->minimize_environment_with_suggestions (\%suggested_environment,
+						  \%parameters);
+    $self->minimize_properties (\%parameters);
+    # $self->minimize_requirements (\%parameters);
+
+    return 1;
+
 }
 
 sub needed_items {
