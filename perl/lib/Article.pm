@@ -1396,7 +1396,7 @@ sub shortest_initial_verifiable_subsequence {
 
     my $last = scalar @elements - 1;
 
-    while ($index < $last) {
+    while ($index + 1 < $last) {
 
 	carp ('Index = ', $index, ' and last = ', $last);
 
