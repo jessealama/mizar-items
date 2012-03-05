@@ -1419,7 +1419,7 @@ sub shortest_initial_verifiable_subsequence {
 	} else {
 
 	    # Restore
-	    foreach my $i ($index .. scalar @elements - 1) {
+	    foreach my $i ($index + 1 .. scalar @elements - 1) {
 		$needed{$i} = 0;
 	    }
 
