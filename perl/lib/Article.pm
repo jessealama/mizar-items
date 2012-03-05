@@ -1439,7 +1439,7 @@ sub shortest_initial_verifiable_subsequence {
 
 	# carp ('Warning: restoring elements from index 0 to index ', 2 * $index);
 
-	foreach my $i (0 .. 2 * $index + 1) {
+	foreach my $i (0 .. $index) {
 	    $needed{$i} = 0;
 	}
 
@@ -1453,12 +1453,12 @@ sub shortest_initial_verifiable_subsequence {
 	my $verifier_ok = $self->verify (\%parameters);
 
 	if ($verifier_ok != 1) {
-	    croak ('Error: after finding a short initial subsequence, we find that ', $article_name, ' is not verifiable.  We restored all elements from 0 to ', 2 * $index + 1, ', but it is still not verifiable.');
+	    croak ('Error: after finding a short initial subsequence, we find that ', $article_name, ' is not verifiable.  We restored all elements from 0 to ', $index, ', but it is still not verifiable.');
 	}
 
     }
 
-    return 2 * $index + 1;
+    return $index;
 
 }
 
