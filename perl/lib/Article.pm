@@ -1389,7 +1389,7 @@ sub shortest_initial_verifiable_subsequence {
 				$path,
 				$root_element_name);
 
-    while ($lo < $hi) {
+    while ($lo + 1 < $hi) {
 
 	my $guess = $lo + floor (($hi - $lo) / 2);
 
