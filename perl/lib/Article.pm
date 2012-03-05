@@ -1458,6 +1458,8 @@ sub shortest_initial_verifiable_subsequence {
 
     }
 
+    carp ('Our index is: ', $index);
+
     return $index;
 
 }
