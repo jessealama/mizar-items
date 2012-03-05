@@ -1398,7 +1398,7 @@ sub shortest_initial_verifiable_subsequence {
 
 	# carp ('Warning: index is ', $index, '.');
 
-	$index = ceil ($index / 2);
+	$index = floor ($index / 2);
 
 	# Delete everything after the index
 	foreach my $i ($index .. scalar @elements - 1) {
