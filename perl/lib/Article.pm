@@ -1434,28 +1434,21 @@ sub shortest_initial_verifiable_subsequence {
 
     }
 
-    # Restore needed elements that we just dumped
-    if ($verifiable == 0) {
+    foreach my $i (0 .. $index) {
+	$needed{$i} = 0;
+    }
 
-	# carp ('Warning: restoring elements from index 0 to index ', 2 * $index);
+    # Write this to disk
+    $self->write_element_table (\@elements,
+				\%needed,
+				$path,
+				$root_element_name);
 
-	foreach my $i (0 .. $index) {
-	    $needed{$i} = 0;
-	}
+    # Restore
+    my $verifier_ok = $self->verify (\%parameters);
 
-	# Write this to disk
-	$self->write_element_table (\@elements,
-				    \%needed,
-				    $path,
-				    $root_element_name);
-
-	# Restore
-	my $verifier_ok = $self->verify (\%parameters);
-
-	if ($verifier_ok != 1) {
-	    croak ('Error: after finding a short initial subsequence, we find that ', $article_name, ' is not verifiable.  We restored all elements from 0 to ', $index, ', but it is still not verifiable.');
-	}
-
+    if ($verifier_ok != 1) {
+	croak ('Error: after finding a short initial subsequence, we find that ', $article_name, ' is not verifiable.  We restored all elements from 0 to ', $index, ', but it is still not verifiable.');
     }
 
     carp ('Our index is: ', $index);
