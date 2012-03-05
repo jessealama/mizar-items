@@ -1401,7 +1401,7 @@ sub shortest_initial_verifiable_subsequence {
 	carp ('Index = ', $index, ' and last = ', $last);
 
 	# Delete everything after the index
-	foreach my $i ($index .. scalar @elements - 1) {
+	foreach my $i ($index + 1 .. scalar @elements - 1) {
 	    delete $needed{$i};
 	}
 
@@ -1418,7 +1418,7 @@ sub shortest_initial_verifiable_subsequence {
 	    ($index, $last) = (floor ($index / 2), $index);
 	} else {
 
-	    # Delete everything after the index
+	    # Restore
 	    foreach my $i ($index .. scalar @elements - 1) {
 		$needed{$i} = 0;
 	    }
