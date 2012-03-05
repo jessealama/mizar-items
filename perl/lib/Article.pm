@@ -1656,9 +1656,9 @@ sub minimize_extension_with_suggestion {
 								      $index,
 								      \%parameters)};
 
-		# my @really_needed = keys %really_needed_table;
+		my @really_needed = keys %really_needed_table;
 
-		# carp ('Indices of elements that are really needed: ', Dumper (@really_needed));
+		carp ('Indices of elements that are really needed: ', Dumper (@really_needed));
 
 		return keys %really_needed_table;
 
