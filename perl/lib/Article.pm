@@ -1391,7 +1391,7 @@ sub shortest_initial_verifiable_subsequence {
 
     while ($lo < $hi) {
 
-	my $guess = floor ( ($hi - $lo) / 2);
+	my $guess = $low + floor (($hi - $lo) / 2);
 
 	carp ('(lo,hi,guess) = (', $lo, ',', $hi, ',', $guess, ')');
 
