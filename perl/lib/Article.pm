@@ -1375,7 +1375,8 @@ sub shortest_initial_verifiable_subsequence {
     my $article_path = $self->get_path ();
 
     my %needed = ();
-    my $index = floor ( (scalar @elements - 1) / 2);
+    my $lo = 0;
+    my $hi = scalar @elements - 1;
 
     # Initially everything is needed
     foreach my $i (0 .. scalar @elements - 1) {
@@ -1388,20 +1389,14 @@ sub shortest_initial_verifiable_subsequence {
 				$path,
 				$root_element_name);
 
-    my $verifiable = $self->verify (\%parameters);
+    while ($lo < $hi) {
 
-    if ($verifiable != 1) {
-	croak ('Error: ', $article_name, ' at ', $article_path, ' is not initially verifiable!');
-    }
+	my $guess = floor ( ($hi - $lo) / 2);
 
-    my $last = scalar @elements - 1;
-
-    while ($index + 1 < $last) {
-
-	carp ('Index = ', $index, ' and last = ', $last);
+	carp ('(lo,hi,guess) = (', $lo, ',', $hi, ',', $guess, ')');
 
 	# Delete everything after the index
-	foreach my $i ($index + 1 .. scalar @elements - 1) {
+	foreach my $i ($guess + 1 .. scalar @elements - 1) {
 	    delete $needed{$i};
 	}
 
@@ -1415,13 +1410,11 @@ sub shortest_initial_verifiable_subsequence {
 	my $verifiable = $self->verify (\%parameters);
 
 	if ($verifiable) {
-	    ($index, $last) = ($index + floor ( ($last - $index) / 2), $last);
+	    $hi = $guess;
 	} else {
 
-	    carp ('We cannot delete every element from index ', $index + 1, ' to ', scalar @elements - 1);
-
 	    # Restore
-	    foreach my $i ($index + 1 .. scalar @elements - 1) {
+	    foreach my $i ($guess + 1 .. scalar @elements - 1) {
 		$needed{$i} = 0;
 	    }
 
@@ -1431,31 +1424,14 @@ sub shortest_initial_verifiable_subsequence {
 					$path,
 					$root_element_name);
 
-	    ($index, $last) = ($index + floor ( ($last - $index) / 2), $index);
+	    $lo = $guess;
 	}
 
     }
 
-    foreach my $i (0 .. $index) {
-	$needed{$i} = 0;
-    }
+    carp ('Our index is: ', $hi);
 
-    # Write this to disk
-    $self->write_element_table (\@elements,
-				\%needed,
-				$path,
-				$root_element_name);
-
-    # Restore
-    my $verifier_ok = $self->verify (\%parameters);
-
-    if ($verifier_ok != 1) {
-	croak ('Error: after finding a short initial subsequence, we find that ', $article_name, ' is not verifiable.  We restored all elements from 0 to ', $index, ', but it is still not verifiable.');
-    }
-
-    carp ('Our index is: ', $index);
-
-    return $index;
+    return $hi;
 
 }
 
