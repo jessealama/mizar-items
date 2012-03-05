@@ -1418,6 +1418,8 @@ sub shortest_initial_verifiable_subsequence {
 	    ($index, $last) = (floor ($index / 2), $index);
 	} else {
 
+	    carp ('We cannot delete every element from index ', $index + 1, ' to ', scalar @elements - 1);
+
 	    # Restore
 	    foreach my $i ($index + 1 .. scalar @elements - 1) {
 		$needed{$i} = 0;
