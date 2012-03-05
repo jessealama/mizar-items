@@ -1611,7 +1611,7 @@ sub minimize_extension_with_suggestion {
 
 	    if ($index < 0) {
 
-		carp ('Warning: the article is verifiable using an empty ', $root_element_name, ' environment!');
+		# carp ('Warning: the article is verifiable using an empty ', $root_element_name, ' environment!');
 
 		return;
 
