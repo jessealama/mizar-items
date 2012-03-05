@@ -1415,7 +1415,7 @@ sub shortest_initial_verifiable_subsequence {
 	my $verifiable = $self->verify (\%parameters);
 
 	if ($verifiable) {
-	    ($index, $last) = ($index + floor ( ($last - $index) / 2), $index);
+	    ($index, $last) = (floor ($last / 2), $index);
 	} else {
 
 	    carp ('We cannot delete every element from index ', $index + 1, ' to ', scalar @elements - 1);
