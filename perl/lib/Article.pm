@@ -1375,10 +1375,10 @@ sub shortest_initial_verifiable_subsequence {
     my $article_path = $self->get_path ();
 
     my %needed = ();
-    my $index = scalar @elements - 1;
+    my $index = floor ( (scalar @elements - 1) / 2);
 
     # Initially everything is needed
-    foreach my $i (0 .. $index) {
+    foreach my $i (0 .. scalar @elements - 1) {
 	$needed{$i} = 0;
     }
 
@@ -1394,11 +1394,11 @@ sub shortest_initial_verifiable_subsequence {
 	croak ('Error: ', $article_name, ' at ', $article_path, ' is not initially verifiable!');
     }
 
-    while ($verifiable == 1 && $index > 0) {
+    my $last = scalar @elements - 1;
 
-	# carp ('Warning: index is ', $index, '.');
+    while ($index < $last) {
 
-	$index = floor ($index / 2);
+	carp ('Index = ', $index, ' and last = ', $last);
 
 	# Delete everything after the index
 	foreach my $i ($index .. scalar @elements - 1) {
@@ -1412,11 +1412,27 @@ sub shortest_initial_verifiable_subsequence {
 				    $root_element_name);
 
 	# Try verifying
-	$verifiable = $self->verify (\%parameters);
+	my $verifiable = $self->verify (\%parameters);
+
+	if ($verifiable) {
+	    ($index, $last) = (floor ($index / 2), $index);
+	} else {
+
+	    # Delete everything after the index
+	    foreach my $i ($index .. scalar @elements - 1) {
+		$needed{$i} = 0;
+	    }
+
+	    # Write this to disk
+	    $self->write_element_table (\@elements,
+					\%needed,
+					$path,
+					$root_element_name);
+
+	    ($index, $last) = (floor ( ($last - $index) / 2), $index);
+	}
 
     }
-
-    # carp ('Warning: done finding the smallest index; index is now ', $index, '.  Verifiable is ', $verifiable, '.');
 
     # Restore needed elements that we just dumped
     if ($verifiable == 0) {
