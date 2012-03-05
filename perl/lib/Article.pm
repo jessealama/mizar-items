@@ -1372,7 +1372,7 @@ sub shortest_initial_verifiable_subsequence {
     # carp ('Computing shortest initial segment of ', scalar @elements, ' ', $root_element_name, ' elements (saving results under ', $path, '.)');
 
     my $article_name = $self->name ();
-    my $path = $self->get_path ();
+    my $article_path = $self->get_path ();
 
     my %needed = ();
     my $index = scalar @elements - 1;
@@ -1391,7 +1391,7 @@ sub shortest_initial_verifiable_subsequence {
     my $verifiable = $self->verify (\%parameters);
 
     if ($verifiable != 1) {
-	croak ('Error: ', $article_name, ' at ', $path, ' is not initially verifiable!');
+	croak ('Error: ', $article_name, ' at ', $article_path, ' is not initially verifiable!');
     }
 
     while ($verifiable == 1 && $index > 0) {
