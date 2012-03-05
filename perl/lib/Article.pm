@@ -1393,7 +1393,7 @@ sub shortest_initial_verifiable_subsequence {
 
 	my $guess = $lo + floor (($hi - $lo) / 2);
 
-	carp ('(lo,hi,guess) = (', $lo, ',', $hi, ',', $guess, ')');
+	# carp ('(lo,hi,guess) = (', $lo, ',', $hi, ',', $guess, ')');
 
 	# Delete everything after the index
 	foreach my $i ($guess + 1 .. scalar @elements - 1) {
@@ -1429,7 +1429,7 @@ sub shortest_initial_verifiable_subsequence {
 
     }
 
-    carp ('Our index is: ', $hi);
+    # carp ('Our index is: ', $hi);
 
     return $hi;
 
@@ -1551,10 +1551,10 @@ sub minimize_extension_with_suggestion {
 	    my $all_deletable = $self->verify (\%parameters);
 
 	    if ($all_deletable) {
-		carp ('Warning: from ', $article_name, ' we can delete all ', $root_element_name, ' elements, as suggested.');
+		# carp ('Warning: from ', $article_name, ' we can delete all ', $root_element_name, ' elements, as suggested.');
 		return;
 	    } else {
-		carp ('Warning: from ', $article_name, ' we cannot delete all ', $root_element_name, ' elements, as suggested.', "\n", 'Proceeding using normal brute-force minimization...');
+		# carp ('Warning: from ', $article_name, ' we cannot delete all ', $root_element_name, ' elements, as suggested.', "\n", 'Proceeding using normal brute-force minimization...');
 
 		# Try verifying with an empty set of suggestions
 		foreach my $i (0 .. scalar @elements - 1) {
@@ -1636,7 +1636,7 @@ sub minimize_extension_with_suggestion {
 
 		my @really_needed = keys %really_needed_table;
 
-		carp ('Indices of elements that are really needed: ', Dumper (@really_needed));
+		# carp ('Indices of elements that are really needed: ', Dumper (@really_needed));
 
 		return keys %really_needed_table;
 
