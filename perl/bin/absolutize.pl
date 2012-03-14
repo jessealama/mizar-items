@@ -7,14 +7,16 @@ use Pod::Usage;
 use File::Basename qw(basename dirname);
 use Getopt::Long;
 
-use FindBin;
-use lib '/Users/alama/sources/mizar/mizar-items/perl/lib';
+use FindBin qw($RealBin);
+use lib "${RealBin}/../lib";
 
 use Article;
 use Utils qw(ensure_readable_file);
 
 my $help = 0;
 my $man = 0;
+my $stylesheet_home = "$RealBin/../../xsl";
+my $script_home = "$RealBin/../../bin";
 GetOptions (
     'help' => \$help,
     'man' => \$man,
@@ -34,7 +36,9 @@ if (! ensure_readable_file ($article_miz)) {
     exit 1;
 }
 
-my $a = Article->new (path => $article_miz);
+my $a = Article->new (path => $article_miz,
+		      stylesheet_home => $stylesheet_home,
+		      script_home => $script_home);
 
 $a->absolutize ();
 $a->absolutize_environment ();
