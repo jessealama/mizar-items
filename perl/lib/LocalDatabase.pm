@@ -663,6 +663,10 @@ sub minimize_articles {
 	    push (@parallel_call, '--checker-only');
 	}
 
+	if (defined $parameters{'fast-theorems-and-schemes'}) {
+	    push (@parallel_call, '--fast-theorems', '--fast-schemes');
+	}
+
 	push (@parallel_call, '{}', ':::');
 	foreach my $path (@article_paths) {
 	    push (@parallel_call, $path);
