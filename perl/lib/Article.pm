@@ -21,6 +21,15 @@ use ItemizedArticle;
 use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
 
+# The greatest number of fragments that an article may possess.  It
+# should be at most 3 decimal digits.  This is because we may
+# potentially add 2-letter suffixes to the names of our fragments.  We
+# use 'ckb' as the prefix, followed by a number and maybe a two-letter
+# constructor property/correctness condition code, thus, 'ckb50' or
+# 'ckb50ab'.  If there are more than 999 fragments, then we could
+# potentially use names like 'ckb1000ab', which is too long for a
+# Mizar article name (these have to be at most 8 characters long).
+Readonly my $MAX_FRAGMENTS => 999;
 
 Readonly my $NUM_REQUIREMENTS => 32; # the number of requirements declared in builtin.pas
 
@@ -2117,14 +2126,7 @@ sub itemize {
 
     my @fragments = $itemized_article_doc->findnodes ('/Fragments/Text-Proper');
 
-    # Our upper bound: 999.  This is because we may potentially add
-    # 2-letter suffixes to the names of our fragments.  We use 'ckb' as
-    # the prefix, followed by a number and maybe a two-letter constructor
-    # property/correctness condition code, thus, 'ckb50' or 'ckb50ab'.  If
-    # there are more than 999 fragments, then we could potentially use
-    # names like 'ckb1000ab', which is too long for a Mizar article name
-    # (these have to be at most 8 characters long).
-    if (scalar @fragments > 999) {
+    if (scalar @fragments > $MAX_FRAGMENTS) {
 	croak ('Error: because of limitations in Mizar, we cannot itemize articles with more than 999 fragments.');
     }
 
