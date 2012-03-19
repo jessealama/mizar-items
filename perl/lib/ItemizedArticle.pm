@@ -218,6 +218,22 @@ sub get_text_subdir {
     return $local_db->get_text_subdir ();
 }
 
+sub text_for_fragment {
+    my $self = shift;
+    my $fragment = shift;
+
+    my $fragment_article_name = "ckb${fragment}";
+    my $local_db = $self->get_local_database ();
+
+    if ($local_db->has_article ($fragment_article_name)) {
+	return $local_db->text_of_article ($fragment_article_name);
+    } else {
+	my $location = $self->get_location ();
+	croak ('Error: there is no fragment ', $fragment, ' under ', $location, '.');
+    }
+
+}
+
 sub fragment_number {
     my $fragment = shift;
     if ($fragment =~ / ckb ([0-9]+) /) {
