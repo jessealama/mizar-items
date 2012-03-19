@@ -106,6 +106,11 @@ has 'script_home' => (
     required => 1,
 );
 
+sub ensure_appropriate_directory_structure {
+    my $dir = shift;
+    return LocalDatabase::dir_has_local_db_structure ($dir);
+}
+
 sub _set_article_name {
 
     my $self = shift;
