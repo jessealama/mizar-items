@@ -10,7 +10,7 @@ use XML::LibXML;
 use Data::Dumper;
 
 # Our stuff
-use Utils qw(ensure_directory ensure_readable_file);
+use Utils qw(ensure_directory ensure_readable_file slurp);
 use Article;
 
 has 'location' => (
@@ -31,6 +31,51 @@ has 'script_home' => (
     reader => 'get_script_home',
     required => 1,
 );
+
+sub dir_has_local_db_structure {
+    my $dir = shift;
+
+    if (ensure_directory ($dir)) {
+
+	foreach my $s ('dict', 'prel', 'text') {
+	    my $subdir = "${dir}/${s}";
+	    if (! ensure_directory ($subdir)) {
+		return 0;
+	    }
+	}
+
+	return 1;
+
+    } else {
+	return 0;
+    }
+
+}
+
+sub has_article {
+    my $self = shift;
+    my $article_name = shift;
+
+    my $text_subdir = $self->get_text_subdir ();
+    my $path = "${text_subdir}/${article_name}.miz";
+
+    return ensure_readable_file ($path);
+}
+
+sub text_of_article {
+    my $self = shift;
+    my $article_name = shift;
+
+    my $text_subdir = $self->get_text_subdir ();
+    my $path = "${text_subdir}/${article_name}.miz";
+
+    if (ensure_readable_file ($path)) {
+	return slurp ($path);
+    } else {
+	my $location = $self->get_location ();
+	croak ('Error: there is no article by the name ', $article_name, ' under ', $location, '.');
+    }
+}
 
 sub BUILD {
     my $self = shift;
