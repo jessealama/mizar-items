@@ -6,7 +6,8 @@ use strict;
 use Regexp::DefaultFlags;
 use Carp qw(croak);
 
-our @EXPORT_OK = qw(ensure_readable_file
+our @EXPORT_OK = qw(delete_space
+		    ensure_readable_file
 		    ensure_directory
 		    ensure_executable
 	            write_string_to_file
@@ -96,6 +97,12 @@ sub slurp {
 	or die 'Error: unable to close the file (or filehandle) ', $path_or_fh, '.';
 
     return $contents;
+}
+
+sub delete_space {
+    my $str = shift;
+    $str =~ s / \N{SPACE} //g;
+    return $str;
 }
 
 1;

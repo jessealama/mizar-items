@@ -15,7 +15,7 @@ use List::MoreUtils qw(first_index);
 # Our libraries
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
-use Utils qw(ensure_readable_file ensure_directory strip_extension extension);
+use Utils qw(ensure_readable_file ensure_directory strip_extension extension delete_space);
 use Mizar;
 use ItemizedArticle;
 use LocalDatabase;
@@ -383,12 +383,6 @@ sub needed_non_constructors {
     } else {
 	return join (' ', keys %items);
     }
-}
-
-sub delete_space {
-    my $str = shift;
-    $str =~ s / \N{SPACE} //g;
-    return $str;
 }
 
 sub ere_lines {
