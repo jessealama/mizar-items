@@ -1432,17 +1432,9 @@ sub shortest_initial_verifiable_subsequence {
 
     }
 
-    # carp ('Our index is: ', $hi);
-
     return $hi;
 
 }
-
-# $self->minimize_linear_scan (\@sorted_elements,
-# 			     $article_with_extension,
-# 			     $root_element_name,
-# 			     0,
-# 			     $index);
 
 sub minimize_linear_scan {
     my $self = shift;
