@@ -1293,9 +1293,6 @@ sub minimize_extension {
 	# Restore
 	$self->verify (\%parameters);
 
-	my $num_elements_post_whole_article_deletion
-	    = scalar keys %minimized_by_article_table;
-
 	my %minimized_table
 	    = %{$self->minimize_elements (\@elements,
 					  \%minimized_by_article_table,
