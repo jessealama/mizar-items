@@ -712,6 +712,10 @@ sub minimize_articles {
 	    push (@parallel_call, '--fast-theorems', '--fast-schemes');
 	}
 
+	if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
+	    push (@parallel_call, '--randomize');
+	}
+
 	push (@parallel_call, '{}', ':::');
 	foreach my $path (@article_paths) {
 	    push (@parallel_call, $path);
