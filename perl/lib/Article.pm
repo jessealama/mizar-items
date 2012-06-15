@@ -1964,7 +1964,7 @@ sub minimize_with_suggested_environment {
     $self->minimize_environment_with_suggestions (\%suggested_environment,
 						  \%parameters);
     $self->minimize_properties (\%parameters);
-    # $self->minimize_requirements (\%parameters);
+    $self->minimize_requirements (\%parameters);
 
     return 1;
 
