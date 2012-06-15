@@ -574,6 +574,7 @@ sub verify {
 
     # Ugh
     delete $parameters{'fast-theorems-and-schemes'};
+    delete $parameters{'randomize'};
 
     return Mizar::verifier ($self->get_path (),
 			    \%parameters);
@@ -1295,6 +1296,34 @@ sub minimize_extension {
 
 	# Restore
 	$self->verify (\%parameters);
+
+	if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
+
+	    # Randomize the order of the elements
+	    my %minimized_by_article_table_shuffled = ();
+	    my %shuffled_index = ();
+	    my @elements_shuffled = shuffle @elements;
+	    foreach my $i (0 .. scalar @elements - 1) {
+		my $element = $elements[$i];
+		my $shuffled_idx = first_index { $_ == $element } @elements_shuffled;
+		if ($shuffled_idx < 0) {
+		    croak 'We failed to find element', $SPACE, $i, $SPACE, 'in the shuffled list.';
+		}
+		$shuffled_index{$i} = $shuffled_idx;
+	    }
+
+	    foreach my $index (keys %minimized_by_article_table) {
+		my $shuffled_index = $shuffled_index{$index};
+		$minimized_by_article_table_shuffled{$shuffled_index} = 0;
+	    }
+
+	    @elements = @elements_shuffled;
+	    %minimized_by_article_table = %minimized_by_article_table_shuffled;
+
+	    carp 'Elements are shuffled.';
+
+	}
+
 
 	my %minimized_table
 	    = %{$self->minimize_elements (\@elements,
