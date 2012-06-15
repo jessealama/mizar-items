@@ -1920,9 +1920,8 @@ sub minimize_requirements {
     my %minimal_needed
 	= %{$self->minimize_by_requirement (\%needed_requirements,
 					    \%original_requirements,
-					    1, # don't dump the very
-                                               # first requirement
-                                               # (set constructor)
+					    2, # don't dump the first
+                                               # two requirements
 					    $NUM_REQUIREMENTS - 1,
 					    \%parameters)};
 
