@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use Regexp::DefaultFlags;
 use Carp qw(croak);
+use charnames qw(:full);
 
 our @EXPORT_OK = qw(delete_space
 		    ensure_readable_file
