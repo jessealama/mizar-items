@@ -140,6 +140,8 @@ Readonly my %REQUIREMENTS_THEOREMS => (
     'rqOmega' => [],
 );
 
+Readonly my $SPACE => q{ };
+
 has 'path' => (
     is => 'ro',
     isa => 'Str',
