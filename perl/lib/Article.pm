@@ -1917,11 +1917,14 @@ sub minimize_requirements {
 	$original_requirements{$i} = $ere_lines[$i];
     }
 
-    my %minimal_needed = %{$self->minimize_by_requirement (\%needed_requirements,
-							   \%original_requirements,
-							   0,
-							   $NUM_REQUIREMENTS - 1,
-							   \%parameters)};
+    my %minimal_needed
+	= %{$self->minimize_by_requirement (\%needed_requirements,
+					    \%original_requirements,
+					    1, # don't dump the very
+                                               # first requirement
+                                               # (set constructor)
+					    $NUM_REQUIREMENTS - 1,
+					    \%parameters)};
 
     foreach my $needed_index (keys %minimal_needed) {
 	warn 'We really need requirement #', $needed_index;
