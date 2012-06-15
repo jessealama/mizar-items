@@ -27,6 +27,7 @@ my $stylesheet_home = "$RealBin/../../xsl";
 my $nice = 0;
 my $num_jobs = 1;
 my $workdir = undef;
+my $opt_randomize = 0;
 
 GetOptions('help|?' => \$help,
            'man' => \$man,
@@ -38,7 +39,8 @@ GetOptions('help|?' => \$help,
 	   'nice' => \$nice,
 	   'paranoid' => \$paranoid,
 	   'jobs=i' => \$num_jobs,
-	   'workdir=s' => \$workdir)
+	   'workdir=s' => \$workdir,
+	   'randomize' => \$opt_randomize)
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
@@ -89,7 +91,8 @@ my $itemized_article = ItemizedArticle->new (local_database => $local_db,
 					     script_home => $script_home);
 
 $itemized_article->minimize ( { jobs => $num_jobs,
-			        timeout => 30 } );
+			        timeout => 30,
+				randomize => $opt_randomize} );
 
 if (defined $workdir) {
     rmtree ($article_dir)
