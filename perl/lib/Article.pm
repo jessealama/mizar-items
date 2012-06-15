@@ -10,6 +10,7 @@ use POSIX qw(floor ceil);
 use Data::Dumper;
 use Readonly;
 use charnames qw(:full);
+use List::Util qw(shuffle);
 use List::MoreUtils qw(first_index);
 
 # Our libraries
