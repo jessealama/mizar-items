@@ -30,22 +30,26 @@ my $fast_schemes = 0;
 my $timeout = 600; # seconds
 my $suggested_clusters = undef;
 my $clusters_only = 0;
+my $opt_randomize = 0;
 
-GetOptions('help|?' => \$help,
-           'man' => \$man,
-           'verbose'  => \$verbose,
-	   'debug' => \$debug,
-	   'paranoid' => \$paranoid,
-	   'timeout' => \$timeout,
-	   'fast-schemes' => \$fast_schemes,
-	   'script-home' => \$script_home,
-	   'stylesheet-home' => \$stylesheet_home,
-	   'fast-theorems' => \$fast_theorems,
-	   'checker-only' => \$checker_only,
-	   'confirm-only' => \$confirm_only,
-           'suggested-clusters=s' => \$suggested_clusters,
-           'clusters-only' => \$clusters_only)
-  or pod2usage(2);
+GetOptions(
+    'help|?' => \$help,
+    'man' => \$man,
+    'verbose'  => \$verbose,
+    'debug' => \$debug,
+    'paranoid' => \$paranoid,
+    'timeout' => \$timeout,
+    'fast-schemes' => \$fast_schemes,
+    'script-home' => \$script_home,
+    'stylesheet-home' => \$stylesheet_home,
+    'fast-theorems' => \$fast_theorems,
+    'checker-only' => \$checker_only,
+    'confirm-only' => \$confirm_only,
+    'suggested-clusters=s' => \$suggested_clusters,
+    'clusters-only' => \$clusters_only,
+    'randomize' => \$opt_randomize,
+) or pod2usage(2);
+
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 
@@ -75,8 +79,11 @@ if (defined $suggested_clusters) {
 						    'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes } )
     }
 } else {
-    $a->minimize ( { 'checker-only' => $checker_only,
-		     'fast-theorems-and-schemes' => ($fast_theorems && $fast_schemes)} )
+    $a->minimize (
+	{ 'checker-only' => $checker_only,
+	  'fast-theorems-and-schemes' => ($fast_theorems && $fast_schemes),
+	  'randomize' => $opt_randomize}
+    );
 }
 
 __END__
