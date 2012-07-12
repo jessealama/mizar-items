@@ -38,8 +38,14 @@ e.g., constructor environment, notation environment, etc."))
 	     (verifier article :flags '("-q" "-l"))
 	   (mizar-error () nil)))))
 
-(defmethod minimize ((article pathname))
-  ())
+(defmethod minimize :around ((article pathname))
+  (if (file-exists-p article)
+      (call-next-method)
+      (error "There is no article at '~a'." article)))
+
+(defmethod minimize ((article-path pathname))
+  (minimize (make-instance 'article
+			   :path article-path)))
 
 (defgeneric minimize-requirements (article &optional working-directory)
   (:documentation "From the explicitly required set of requirements
