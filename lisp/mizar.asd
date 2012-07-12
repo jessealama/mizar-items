@@ -21,9 +21,7 @@
 	       "hunchentoot"
 	       "cl-who"
 	       "hunchentoot-utils"
-	       "xuriella"
-	       "drakma"
-	       "fiveam")
+	       "xuriella")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
