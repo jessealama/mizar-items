@@ -1,12 +1,12 @@
 
 (in-package :mizar)
 
-(defparameter *mizar-items-root* "/Users/alama/sources/mizar/mizar-items")
+(defparameter *mizar-items-root* "/Users/alama/sources/mizar/mizar-items/lisp")
 
 (defun file-in-mizar-items-dir (filename)
   (concatenate 'string *mizar-items-root* "/" filename))
 
-(defparameter *mizar-items-xsl4mizar-root* "/Users/alama/sources/mizar/xsl4mizar/items")
+(defparameter *mizar-items-xsl4mizar-root* "/Users/alama/sources/mizar/mizar-items/xsl")
 
 (defun file-in-xsl4mizar-dir (filename)
   (concatenate 'string *mizar-items-xsl4mizar-root* "/" filename))
