@@ -14,7 +14,16 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria" "hunchentoot" "cl-who" "hunchentoot-utils" "xuriella" "ironclad" "drakma" "fiveam")
+  :depends-on ("xpath"
+	       "cl-ppcre"
+	       "com.gigamonkeys.pathnames"
+	       "alexandria"
+	       "hunchentoot"
+	       "cl-who"
+	       "hunchentoot-utils"
+	       "xuriella"
+	       "drakma"
+	       "fiveam")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
