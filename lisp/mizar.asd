@@ -21,6 +21,7 @@
 	       "hunchentoot"
 	       "cl-who"
 	       "hunchentoot-utils"
+	       "drakma"
 	       "xuriella")
   :components ((:file "packages")
 	       (:file "config")
