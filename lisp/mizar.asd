@@ -16,13 +16,13 @@
   :serial t
   :depends-on ("xpath"
 	       "cl-ppcre"
-	       "com.gigamonkeys.pathnames"
+	       "cl-fad"
 	       "alexandria"
 	       "hunchentoot"
 	       "cl-who"
 	       "hunchentoot-utils"
-	       "drakma"
-	       "xuriella")
+	       "xuriella"
+	       "drakma")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
@@ -30,7 +30,10 @@
 	       (:file "xml-utils")
 	       (:file "file-utils")
 	       (:file "author")
+	       (:file "local-db")
 	       (:file "article")
+	       (:file "run")
+	       (:file "stylesheets")
 	       (:file "mizar-condition")
 	       (:file "mizar")
 	       (:file "mizar-xsl")
