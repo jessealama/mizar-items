@@ -1,0 +1,43 @@
+stylesheet "1.0";
+import "utils/list.xsl";
+import "utils/strings.xsl";
+output method="text";
+
+tpl [/] {
+  if [Environ] {
+    apply [Environ];
+  } else {
+    msg terminate="yes" "Error: the required Environ document element is missing.  (Is this stylesheet being applied to a .evl file?)";
+  }
+}
+
+tpl [Environ] {
+  "environ"; "\n";
+  apply [Directive[@name = "Vocabularies"]];
+  apply [Directive[@name = "Notations"]];
+  apply [Directive[@name = "Definitions"]];
+  apply [Directive[@name = "Schemes"]];
+  apply [Directive[@name = "Registrations"]];
+  apply [Directive[@name = "Constructors"]];
+  apply [Directive[@name = "Requirements"]];
+}
+
+tpl [Directive[not(@name)]] {
+  msg terminate="yes" "Error: we found a Directive element that lacks a name attribute.";
+}
+
+tpl [Directive[@name]] {
+  $name-lc = lc (#s = `@name`);
+  if [Ident[not(@name = "HIDDEN")]] {
+    $name-lc;
+    " "; list (#elems = `Ident[not(@name = "HIDDEN")]`, #separ = ","); ";"; "\n";
+  }
+}
+
+tpl [Ident[not(@name)]] {
+  msg terminate="yes" "Error: we encountered an Ident element that lacks a name attribute.";
+}
+
+tpl [Ident[@name]] {
+  `@name`;
+}
