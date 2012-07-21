@@ -257,6 +257,16 @@ LIST; otherwise, return T and NIL."
 (defmacro while (condition &body body)
   `(do nil ((not ,condition)) ,@body))
 
+(defun expand-forms (forms)
+  (if forms
+      (if (rest forms)
+	  (list 'if (first forms) (expand-forms (cdr forms)) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (first forms)))
+	  (list 'unless (first forms) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (first forms))))
+      (list t)))
+
+(defmacro stop-if-nil (&body body)
+  `,(expand-forms body))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Hash tables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
