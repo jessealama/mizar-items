@@ -21,10 +21,10 @@
 	    array)))
 
 (defun uppercase (str)
-  (format nil "~@:(~A~)" str))
+  (format nil "~@:(~a~)" str))
 
 (defun lowercase (str)
-  (format nil "~(~A~)" str))
+  (format nil "~(~a~)" str))
 
 (defun colon-separated-list (list)
   (format nil "~{~a~^:~}" list))
@@ -425,7 +425,9 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 
 (defun files-in-directory-with-extension (directory extension)
   (let ((dir (pathname (pathname-as-directory directory))))
-    (directory (format nil "~a*.~a" dir extension))))
+    (let ((files (directory (format nil "~a*.~a" dir extension))))
+      (let ((sorted-files (sort files #'< :key #'file-write-date)))
+	sorted-files))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Regular expressions
@@ -438,5 +440,12 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 
 (defun exact-regexp (str)
   (concatenate 'string "^" str "$"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Token lists
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun tokenize (list)
+  (format nil ",~{~a~^,~}," list))
 
 ;;; utils.lisp ends here

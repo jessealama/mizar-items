@@ -18,7 +18,7 @@
   :documentation "The system number and MML version that we use, in that order, separated by a dash.")
 
 (define-constant +mizar-release-root-dir+
-    (pathname "/Users/alama/sources/mizar/qrelease/")
+    (pathname "/Users/alama/sources/mizar/release/")
   :test #'equal
   :documentation "The directory under which we look for Mizar installations.")
 
@@ -53,8 +53,48 @@
   (let ((old-mizfiles (gensym)))
     `(let ((,old-mizfiles (ccl:getenv "MIZFILES")))
        (ccl:setenv "MIZFILES" (namestring (mizfiles)))
-       ,@body
-       (ccl:setenv "MIZFILES" ,old-mizfiles))))
+       (let ((vals (multiple-value-list (progn ,@body))))
+	 (ccl:setenv "MIZFILES" ,old-mizfiles)
+	 (apply #'values vals)))))
+
+(defmethod run-mizar-tool (tool flags (article pathname))
+  #+ccl
+  (let ((tool-path (path-for-tool tool)))
+    (with-mizfiles
+	(let ((proc (ccl:run-program tool-path
+				     (append flags (list (namestring article)))
+				     :wait t
+				     :input nil
+				     :output nil
+				     :error nil)))
+	  (multiple-value-bind (status exit-code)
+	      (ccl:external-process-status proc)
+	    (declare (ignore status))
+	    (values (and (numberp exit-code)
+			 (zerop exit-code))
+		    (when (and (numberp exit-code)
+			       (not (zerop exit-code)))
+		      (or (not (file-exists-p (err-file article)))
+			  (empty-err-file? article))))))))
+  #+sbcl
+  (let* ((path (miz-file article))
+	 (err-path (file-with-extension article "err"))
+	 (tool-path (path-for-tool tool))
+	 (proc (sb-ext:run-program tool-path
+				   (append flags (list (namestring path)))
+				   :environment (list (format nil "MIZFILES=~a" (namestring (mizfiles))))
+				   :search nil
+				   :wait t
+				   :input nil
+				   :output nil
+				   :error nil)))
+    (let ((exit-code (sb-ext:process-exit-code proc)))
+      (values (and (numberp exit-code)
+		   (zerop exit-code))
+	      (and (file-exists-p err-path)
+		   (empty-err-file? article)))))
+  #-(or ccl sbcl)
+  (error "We don't handle your Common Lisp.  Sorry."))
 
 (defmethod run-mizar-tool (tool flags (article article))
   #+ccl
@@ -105,9 +145,15 @@
 (defgeneric msmprocessor (article))
 (defgeneric msplit (article))
 (defgeneric mglue (article))
+(defgeneric verifier (article))
+(defgeneric exporter (article))
+(defgeneric transfer (article))
 
 (defmethod accom ((article article))
   (run-mizar-tool-with-standard-flags "accom" article))
+
+(defmethod accom ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "accom" article-path))
 
 (defmethod makeenv ((article article))
   (run-mizar-tool-with-standard-flags "makeenv" article))
@@ -123,5 +169,26 @@
 
 (defmethod mglue ((article article))
   (run-mizar-tool-with-standard-flags "mglue" article))
+
+(defmethod mglue ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "mglue" article-path))
+
+(defmethod verifier ((article article))
+  (run-mizar-tool-with-standard-flags "verifier" article))
+
+(defmethod verifier ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "verifier" article-path))
+
+(defmethod exporter ((article article))
+  (run-mizar-tool-with-standard-flags "exporter" article))
+
+(defmethod exporter ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "exporter" article-path))
+
+(defmethod transfer ((article article))
+  (run-mizar-tool-with-standard-flags "transfer" article))
+
+(defmethod transfer ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "transfer" article-path))
 
 ;;; mizar.lisp ends here

@@ -39,6 +39,11 @@
 (defmethod err-file ((article article))
   (file-with-extension article "err"))
 
+(defmethod err-file ((article-path pathname))
+  (let ((directory (pathname-as-directory (pathname (directory-namestring article-path))))
+	(name (pathname-name article-path)))
+    (merge-pathnames (format nil "~a.err" name) directory)))
+
 (defgeneric miz-file (article))
 
 (defmethod miz-file ((article article))
@@ -47,8 +52,11 @@
 (defgeneric empty-err-file? (article))
 
 (defmethod empty-err-file? ((article article))
+  (empty-err-file? (path article)))
+
+(defmethod empty-err-file? ((article-path pathname))
   (zerop
-   (with-open-file (file (err-file article))
+   (with-open-file (file (err-file article-path))
      (file-length file))))
 
 (defun message-file ()
