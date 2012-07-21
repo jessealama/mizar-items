@@ -130,17 +130,13 @@
 			   ckb-evl
 			   nil
 			   ckb-evd)
-	 (if (mglue ckb-basename)
-	     (if (accom ckb-miz)
-		 (if (verifier ckb-miz)
-		     (progn
-		       (copy-file ckb-xml ckb-xml-orig)
-		       (if (exporter ckb-miz)
-			   (unless (transfer ckb-miz)
-			     (error "transfer failed on ~a." (namestring ckb-miz)))
-			   (error "exporter failed on ~a" (namestring ckb-miz))))
-		     (error "verifier failed on ~a" (namestring ckb-miz)))
-		 (error "accom failed on ~a" (namestring ckb-miz)))
-	     (error "mglue failed on ~a" (namestring ckb-miz))))))
+	 (stop-if-nil
+	   (mglue ckb-basename)
+	   (accom ckb-miz)
+	   (verifier ckb-miz)
+	   (copy-file ckb-xml ckb-xml-orig)
+	   (exporter ckb-miz)
+	   (transfer ckb-miz))
+	 t)))
 
 ;;; itemize.lisp ends here
