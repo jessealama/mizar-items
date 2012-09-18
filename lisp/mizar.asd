@@ -32,6 +32,7 @@
 	       (:file "author")
 	       (:file "local-db")
 	       (:file "article")
+	       (:file "itemized-db")
 	       (:file "run")
 	       (:file "stylesheets")
 	       (:file "mizar-condition")

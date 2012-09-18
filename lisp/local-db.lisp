@@ -9,6 +9,16 @@
     :initform (error "Local databases need to be in a directory.")))
   (:documentation "A local-db is a representation of a Mizar local database."))
 
+(defmethod print-object ((db local-db) stream)
+  (let* ((articles (article-paths db))
+	 (vocabularies (vocabulary-files db))
+	 (location (location db)))
+    (print-unreadable-object (db stream :type t :identity nil)
+      (format stream "~a (~d vocabulary files, ~d articles)"
+	      (namestring location)
+	      (length vocabularies)
+	      (length articles)))))
+
 (defun subdirectory-of-db (db subdir)
   (pathname-as-directory (merge-pathnames subdir (location db))))
 
@@ -71,6 +81,13 @@
 
 (defmethod text-files ((db local-db))
   (text-files (location db)))
+
+(defgeneric article-paths (db))
+
+(defmethod article-paths ((db local-db))
+  (let* ((text-subdir (text-subdirectory db))
+	 (article-wildcard (format nil "~a*.miz" text-subdir)))
+    (directory article-wildcard)))
 
 (defun files-in-directory-with-extension (directory extension)
   (remove-if-not #'(lambda (path)

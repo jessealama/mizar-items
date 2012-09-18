@@ -136,7 +136,7 @@
 	   (verifier ckb-miz)
 	   (copy-file ckb-xml ckb-xml-orig)
 	   (exporter ckb-miz)
-	   (transfer ckb-miz))
-	 t)))
+	   (transfer ckb-miz)))
+    db))
 
 ;;; itemize.lisp ends here
