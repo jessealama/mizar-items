@@ -145,48 +145,67 @@
 (defgeneric msmprocessor (article))
 (defgeneric msplit (article))
 (defgeneric mglue (article))
+(defgeneric analyzer (article))
 (defgeneric verifier (article))
 (defgeneric exporter (article))
 (defgeneric transfer (article))
 
 (defmethod accom ((article article))
-  (run-mizar-tool-with-standard-flags "accom" article))
+  (accom (path article)))
 
 (defmethod accom ((article-path pathname))
   (run-mizar-tool-with-standard-flags "accom" article-path))
 
 (defmethod makeenv ((article article))
+  (makeenv (path article)))
+
+(defmethod makeenv ((article pathname))
   (run-mizar-tool-with-standard-flags "makeenv" article))
 
 (defmethod wsmparser ((article article))
+  (wsmparser (path article)))
+
+(defmethod wsmparser ((article pathname))
   (run-mizar-tool-with-standard-flags "wsmparser" article))
 
 (defmethod msmprocessor ((article article))
+  (msmprocessor (path article)))
+
+(defmethod msmprocessor ((article pathname))
   (run-mizar-tool-with-standard-flags "msmprocessor" article))
 
 (defmethod msplit ((article article))
-  (run-mizar-tool-with-standard-flags "msplit" article))
+  (msplit (path article)))
+
+(defmethod msplit ((article pathname))
+  (msplit (path article)))
 
 (defmethod mglue ((article article))
-  (run-mizar-tool-with-standard-flags "mglue" article))
+  (mglue (path article)))
 
 (defmethod mglue ((article-path pathname))
   (run-mizar-tool-with-standard-flags "mglue" article-path))
 
 (defmethod verifier ((article article))
-  (run-mizar-tool-with-standard-flags "verifier" article))
+  (verifier (path article)))
 
 (defmethod verifier ((article-path pathname))
   (run-mizar-tool-with-standard-flags "verifier" article-path))
 
+(defmethod analyzer ((article article))
+  (run-mizar-tool "verifier" '("-a" "-q" "-s" "-l") article))
+
+(defmethod analyzer ((article-path pathname))
+  (run-mizar-tool "verifier" '("-a" "-q" "-s" "-l") article-path))
+
 (defmethod exporter ((article article))
-  (run-mizar-tool-with-standard-flags "exporter" article))
+  (exporter (path article)))
 
 (defmethod exporter ((article-path pathname))
   (run-mizar-tool-with-standard-flags "exporter" article-path))
 
 (defmethod transfer ((article article))
-  (run-mizar-tool-with-standard-flags "transfer" article))
+  (transfer (path article)))
 
 (defmethod transfer ((article-path pathname))
   (run-mizar-tool-with-standard-flags "transfer" article-path))
