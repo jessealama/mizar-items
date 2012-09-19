@@ -10,6 +10,7 @@
   (:import-from :xuriella
 		#:parse-stylesheet)
   (:import-from :alexandria
+		#:starts-with-subseq
 		#:define-constant
 		#:set-equal
 		#:hash-table-keys
