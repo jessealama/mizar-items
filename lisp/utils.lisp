@@ -90,20 +90,6 @@
 	(and (= first-1 first-2)
 	     (< second-1 second-2)))))
 
-(defun minimal-sublist-satisfying (list predicate)
-  "Find a minimal sublist of LIST that satisfies PREDICATE, which is
-assumed to take a single argument of type list.
-
-The computed sublist will be built by successively removing elements
-from the beginning of the list."
-  (if (null list)
-      nil
-      (let ((head (car list))
-	    (tail (cdr list)))
-	(if (funcall predicate tail)
-	    (minimal-sublist-satisfying tail predicate)
-	    (cons head (minimal-sublist-satisfying tail predicate))))))
-
 (defun all-but-last (lst)
   (reverse (cdr (reverse lst))))
 
@@ -221,19 +207,6 @@ from the beginning of the list."
      collecting i into nums
      finally (return nums)))
 
-(defun minimal-subsequence-satisfying (seq predicate)
-  (loop
-     with len = (length seq)
-     with needed-indices = (numbers-from-to 0 (1- len))
-     for i from len downto 1
-     for elt = (aref seq (1- i))
-     for candidate = (subsequence-from-indices seq needed-indices)
-     do
-       (unless (funcall predicate candidate)
-	 (delete (1- i) needed-indices))
-     finally
-       (return (subsequence-from-indices seq needed-indices))))
-
 (defun every-with-falsifying-witness (list pred)
   "Determine whether every member of LIST satisfies the unary
 predicate PRED.  Rreturns two values: if there is a member of LIST
@@ -246,6 +219,76 @@ LIST; otherwise, return T and NIL."
 	 (return (values nil elt)))
      finally
        (return (values t nil))))
+
+(defun minimal-sublist-satisfying (list predicate &key change-hook)
+  (let ((needed-table (make-hash-table :test #'eql))
+	(length (length list)))
+    ;; initially, everything is needed
+    (loop
+       for i from 0 upto (1- length)
+       do
+	 (setf (gethash i needed-table) t))
+    (minimal-sublist-satisfying-1 list
+				  predicate
+				  needed-table
+				  0
+				  (1- length)
+				  :change-hook change-hook)))
+
+(defun list-terms-from-table (list needed-table)
+  (loop
+     with length = (length list)
+     for i from 0 upto (1- length)
+     for item across list
+     when (gethash i needed-table) collect item into new-list
+     finally (return new-list)))
+
+(defun minimal-sublist-satisfying-1 (list predicate needed-table begin end &key change-hook)
+  (symbol-macrolet
+      (($update
+	`(funcall change-hook (list-terms-from-table list needed-table))))
+    (flet ((clear-range (begin end)
+	     (loop for i from begin upto end do (remhash i needed-table))
+	     $update)
+	   (restore-range (begin end)
+	     (loop for i from begin upto end do (setf (gethash i needed-table) t))
+	     $update))
+      (cond ((< end begin)
+	     needed-table)
+	    ((= end begin)
+	     (clear-range begin end)
+	     (let ((trimmed-items (list-terms-from-table list needed-table)))
+	       (unless (funcall predicate trimmed-items)
+		 (restore-range begin end))
+	       needed-table))
+	    ((< begin end)
+	     (let* ((width (- end begin))
+		    (half (floor (/ width 2)))
+		    (midpoint (+ begin half)))
+	       (clear-range begin midpoint)
+	       (let ((trimmed-items (list-terms-from-table list needed-table)))
+		 (if (funcall predicate trimmed-items)
+		     (minimal-sublist-satisfying-1 list
+						   predicate
+						   needed-table
+						   (1+ midpoint)
+						   end
+						   :change-hook change-hook)
+		     (progn
+		       (restore-range begin midpoint)
+		       (let ((needed-bottom-half
+			      (minimal-sublist-satisfying-1 list
+							    predicate
+							    needed-table
+							    begin
+							    midpoint
+							    :change-hook change-hook)))
+			 (minimal-sublist-satisfying-1 list
+						       predicate
+						       needed-bottom-half
+						       (1+ midpoint)
+						       end)))))))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
