@@ -47,8 +47,9 @@
 	 (directory (pathname (directory-namestring path)))
 	 (file (pathname-name path))
 	 (itemization-directory (pathname-as-directory (merge-pathnames file directory)))
-	 (db (make-instance 'local-db
-			    :location itemization-directory))
+	 (db (make-instance 'itemized-db
+			    :location itemization-directory
+			    :article article))
 	 (article-in-db (copy-to-db article db))
 	 (split-wsx (file-with-extension article-in-db "wsx.split"))
 	 (itemized-wsx (file-with-extension article-in-db "wsx.split.itemized")))
@@ -60,8 +61,9 @@
 	 (directory (pathname (directory-namestring path)))
 	 (file (pathname-name path))
 	 (itemization-directory (pathname-as-directory (merge-pathnames file directory)))
-	 (db (make-instance 'local-db
-			    :location itemization-directory))
+	 (db (make-instance 'itemized-db
+			    :location itemization-directory
+			    :article article))
 	 (article-in-db (copy-to-db article db))
 	 (itemized-wsx (file-with-extension article-in-db "wsx.split.itemized"))
 	 (article-evl (file-with-extension article-in-db "evl"))
