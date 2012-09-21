@@ -2,6 +2,8 @@
 
 (in-package :mizar)
 
+(defparameter *keep-elements-stylesheet* (path-for-stylesheet "keep-elements"))
+
 (defgeneric minimize (article)
   (:documentation "Find the smallest envionment with respect to which ARTICLE is a verifiable MIZAR article."))
 
@@ -70,32 +72,154 @@ e.g., constructor environment, notation environment, etc."))
 	(call-next-method)
 	(error "The extension '~a' is not registered in the root element table." extension))))
 
+(defun write-document (document path)
+  (with-open-file (xml-file path
+			    :direction :output
+			    :if-exists :supersede
+			    :element-type '(unsigned-byte 8))
+    (dom:map-document (cxml:make-octet-stream-sink xml-file) document)))
+
+(defun write-nodes (indices-to-keep path)
+  (let ((indices-token-string (tokenize (mapcar #'1+ indices-to-keep))))
+    (apply-stylesheet *keep-elements-stylesheet*
+		      path
+		      (list (cons "to-keep" indices-token-string))
+		      path)
+    ;; sanity check: PATH now has (length indices-to-keep) child
+    (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
+      (let ((root (dom:document-element doc)))
+	(let ((children (remove-if #'dom:text-node-p (dom:child-nodes root))))
+	  (unless (length= children indices-to-keep)
+	    (error "Sanity check failed: there are ~d children in~%~%  ~a~%~%but we were asked to keep ~d children" (length children) (namestring path) (length indices-to-keep))))))))
+
+(defgeneric nodes-equal? (node-1 node-2))
+
+(defmethod nodes-equal? ((node-1 t) (node-2 t))
+  (error "Don't know how to compare node~%~%  ~a~%~%to~%~%  ~a" node-1 node-2))
+
+(defmethod nodes-equal? ((node-1 dom:text) (node-2 dom:text))
+  (string= (dom:data node-1)
+	   (dom:data node-2)))
+
+(defmethod nodes-equal? ((node-1 dom:attr) (node-2 dom:attr))
+  (let ((name-1 (dom:node-name node-1))
+	(name-2 (dom:node-name node-2)))
+    (when (string= name-1 name-2)
+      (let ((value-1 (dom:value node-1))
+	    (value-2 (dom:value node-2)))
+	(string= value-1 value-2)))))
+
+(defun uninteresting-attribute-p (attribute)
+  (let ((name (dom:node-name attribute)))
+    (or (string= name "pid")
+	(string= name "relnr")
+	(string= name "redefnr")
+	(string= name "line")
+	(string= name "col")
+	(string= name "x")
+	(string= name "y"))))
+
+(defmethod nodes-equal? ((node-1 dom:element) (node-2 dom:element))
+  (let ((name-1 (dom:node-name node-1))
+	(name-2 (dom:node-name node-2)))
+    (when (string= name-1 name-2)
+      (let ((attributes-1 (remove-if #'uninteresting-attribute-p
+				     (dom:items (dom:attributes node-1))))
+	    (attributes-2 (remove-if #'uninteresting-attribute-p
+				     (dom:items (dom:attributes node-2)))))
+	(flet ((attr-subset (attribute-list-1 attribute-list-2)
+		 (every #'(lambda (attr-1)
+			    (some #'(lambda (attr-2) (nodes-equal? attr-1 attr-2))
+				  attribute-list-2))
+			attribute-list-1)))
+	  (if (and (attr-subset attributes-1 attributes-2)
+		   (attr-subset attributes-2 attributes-1))
+	      (let ((children-1 (dom:child-nodes node-1))
+		    (children-2 (dom:child-nodes node-2)))
+		(loop
+		   for child-1 across children-1
+		   for child-2 across children-2
+		   do
+		     (unless (nodes-equal? child-1 child-2)
+		       (return nil))
+		   finally
+		     (return t)))
+	      (progn
+		(break "Nodes have different attributes.")
+		nil)))))))
+
+(defun analyzer-xmls-equal? (miz-xml-1 miz-xml-2)
+  (let* ((doc-1 (cxml:parse-file miz-xml-1 (cxml-dom:make-dom-builder)))
+	 (doc-2 (cxml:parse-file miz-xml-2 (cxml-dom:make-dom-builder)))
+	 (article-node-1 (dom:document-element doc-1))
+	 (article-node-2 (dom:document-element doc-2))
+	 (children-1 (dom:child-nodes article-node-1))
+	 (children-2 (dom:child-nodes article-node-2)))
+    (when (length= children-1 children-2)
+      (loop
+	 for child-1 across children-1
+	 for child-2 across children-2
+	 do
+	   (unless (nodes-equal? child-1 child-2)
+	     (return nil))
+	 finally
+	   (return t)))))
+
 (defmethod minimize-extension ((article article) (extension string))
-  (let* ((file-to-minimize (file-with-extension article extension)))
+  (let* ((file-to-minimize (file-with-extension article extension))
+	 (analyzer-xml (file-with-extension article "xml"))
+	 (analyzer-xml-orig (file-with-extension article "xml.orig"))
+	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension))))
+    (unless (file-exists-p analyzer-xml)
+      (error "The .xml for ~a is missing." (name article)))
     (if (file-exists-p file-to-minimize)
-	(let* ((safe-sha1 (ironclad:digest-file :sha1 file-to-minimize))
-	       (doc (cxml:parse-file file-to-minimize (cxml-dom:make-dom-builder)))
+	(let* ((doc (cxml:parse-file file-to-minimize (cxml-dom:make-dom-builder)))
 	       (document-element (dom:document-element doc))
-	       (nodes (dom:child-nodes document-element)))
-	  (flet ((analyzable-and-has-same-meaning (dummy)
-		   (declare (ignore dummy))
-		   (when (analyzer article)
-		     (let ((new-sha1 (ironclad:digest-file :sha1 file-to-minimize)))
-		       (starts-with-subseq new-sha1 safe-sha1))))
-		 (write-new-nodes (new-nodes)
-		   (let ((new-doc (cxml-dom:create-document document-element)))
-		     (dolist (node new-nodes)
-		       (dom:append-child node document-element))
-		     (with-open-file
-			 (xml-file
-			  file-to-minimize
-			  :direction :output
-			  :if-exists :supersede
-			  :element-type '(unsigned-byte 8))
-		       (dom:map-document (cxml:make-octet-stream-sink xml-file)
-					 new-doc)))))
-	    (minimal-sublist-satisfying nodes #'analyzable-and-has-same-meaning
-					:change-hook #'write-new-nodes))))))
+	       (nodes (xpath:all-nodes (xpath:evaluate "*" document-element))))
+
+	  ;; save a known good copy
+	  (copy-file file-to-minimize file-to-minimize-copy
+		     :if-to-exists :supersede
+		     :finish-output t)
+
+	  (format t "~a: " (namestring file-to-minimize))
+	  (labels ((restore ()
+		     (copy-file file-to-minimize-copy
+				file-to-minimize
+				:if-to-exists :supersede
+				:finish-output t)
+		     ;; (break "Take a look now at ~a" (namestring file-to-minimize))
+		     )
+		   (analyzable-and-has-same-meaning (trial-indices)
+
+		     ;; write to disk
+		     (write-nodes trial-indices file-to-minimize)
+
+		     ;; (break "Look at ~a" (namestring file-to-minimize))
+
+		     ;; test whether this is ok
+		     (multiple-value-bind (analyzer-ok? analyzer-crashed?)
+			 (analyzer article)
+		       (prog1
+			   (cond (analyzer-ok?
+				  (cond ((analyzer-xmls-equal? analyzer-xml-orig
+							       analyzer-xml)
+					 t)
+					(t
+					 ;; (format t "Analyzable, but XML changed.~%")
+					 nil)))
+				 (analyzer-crashed?
+				  ;; (warn "Analyzer crash.")
+				  nil)
+				 (t
+				  ;; (format t "Analyzer did not crash, but it failed.")
+				  nil))
+			 ;; (format t "Restoring...~%")
+			 (restore)))))
+	    (let ((minimal (minimal-sublist-satisfying nodes
+						       #'analyzable-and-has-same-meaning)))
+	      ;; (format t "Done computing minimal.~%")
+	      (write-nodes minimal file-to-minimize)))))))
 
 (defgeneric minimize-notations (article))
 
@@ -137,6 +261,15 @@ e.g., constructor environment, notation environment, etc."))
   (minimize-identifications article)        ;; .eid
   (minimize-clusters article))              ;; .ecl
 
+(defmethod minimize :before ((article article))
+  (let* ((analyzer-xml (file-with-extension article "xml"))
+	 (analyzer-xml-orig (file-with-extension article "xml.orig")))
+    (unless (file-exists-p analyzer-xml)
+      (error "The .xml for ~a is missing." (namestring (path article))))
+    (unless (copy-file analyzer-xml analyzer-xml-orig
+		       :if-to-exists :supersede
+		       :finish-output t)
+      (error "Unable to save a copy of~%~%  ~a~%~%to~%~%  ~a" (namestring analyzer-xml) (namestring analyzer-xml-orig)))))
 
 (defmethod minimize ((article article))
   (minimize-environment article)
