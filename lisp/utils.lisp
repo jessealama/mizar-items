@@ -233,15 +233,7 @@ LIST; otherwise, return T and NIL."
 				  needed-table
 				  0
 				  (1- length))))
-      (loop
-	 for i from 0 upto (1- length)
-	 initially (format t "[")
-	 do
-	 (if (values (gethash i needed))
-	     (format t "+")
-	     (format t "-"))
-	 finally (format t "]~%"))
-      (hash-table-keys needed-table))))
+      (hash-table-keys needed))))
 
 (defun list-terms-from-table (list needed-table)
   (loop
