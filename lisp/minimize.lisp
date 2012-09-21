@@ -219,6 +219,15 @@ e.g., constructor environment, notation environment, etc."))
 	    (let ((minimal (minimal-sublist-satisfying nodes
 						       #'analyzable-and-has-same-meaning)))
 	      ;; (format t "Done computing minimal.~%")
+	      (loop
+		 for i from 0 upto (1- nodes)
+		 initially (format t "[")
+		 do
+		   (if (values (gethash i minimal))
+		       (format t "+")
+		       (format t "-"))
+		 finally (format t "]~%"))
+
 	      (write-nodes minimal file-to-minimize)))))))
 
 (defgeneric minimize-notations (article))
