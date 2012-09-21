@@ -2,7 +2,83 @@ JAVA = java
 XSLTXT = xsltxt.jar
 CAT = cat
 
-all: addabsrefs.xsl bogus.xsl conditions-and-properties.xsl constructors-with-abstractness.xsl constructors.xsl contains-toplevel-private-function.xsl contains-toplevel-private-predicate.xsl contains-toplevel-type-changing-statements.xsl count-toplevel.xsl delete-abstractness.xsl delete-elements.xsl delete-properties.xsl dependencies.xsl die.xsl elicit-correctness-conditions.xsl evl2environ.xsl extend-evl.xsl fold-reservations.xsl fragments-of-lemmas.xsl free-variables.xsl id.xsl implicitly-qualified.xsl inferred-constructors.xsl itemize.xsl lemma-deps-non-absolute.xsl lemma-deps.xsl list-properties.xsl no-attributes.xsl non-scheme-uses-scheme.xsl paths.xsl prefer-environment.xsl print-evl.xsl print-toplevel.xsl promotable-constructors.xsl promote-lemmas.xsl promote.xsl promoted-constructors.xsl propertied-constructors.xsl properties-of-constructor.xsl properties-of-constructors.xsl remove-properties.xsl resolve-references.xsl rewrite-aid.xsl skip-non-ultimate-proofs.xsl skip-proofs-preceding.xsl split-reservations.xsl split.xsl strings.xsl strip-bogus-structure-registration.xsl strip-definition.xsl strip-prop.xsl strip-property.xsl strip-registration.xsl structure-dependencies.xsl tokens.xsl toplevel-choice.xsl toplevel-constant-definition.xsl toplevel-dellink.xsl toplevel-diffuse.xsl toplevel-items.xsl toplevel-private-functions.xsl toplevel-private-predicates-and-functions.xsl toplevel-propositions.xsl toplevel-type-changing-statements.xsl trim-properties-and-conditions.xsl truncate.xsl unpromoted-constructors.xsl wsm.xsl
+sheets = addabsrefs \
+         bogus \
+         conditions-and-properties \
+         constructors-with-abstractness \
+         constructors \
+         contains-toplevel-private-function \
+         contains-toplevel-private-predicate \
+         contains-toplevel-type-changing-statements \
+         count-toplevel \
+         delete-abstractness \
+         delete-elements \
+         delete-properties \
+         keep-elements \
+         dependencies \
+         die \
+         elicit-correctness-conditions \
+         evl2environ \
+         extend-evl \
+         fold-reservations \
+         fragments-of-lemmas \
+         free-variables \
+         id \
+         implicitly-qualified \
+         inferred-constructors \
+         itemize \
+         lemma-deps-non-absolute \
+         lemma-deps \
+         list-properties \
+         no-attributes \
+         non-scheme-uses-scheme \
+         paths \
+         prefer-environment \
+         print-evl \
+         print-toplevel \
+         promotable-constructors \
+         promote-lemmas \
+         promote \
+         promoted-constructors \
+         propertied-constructors \
+         properties-of-constructor \
+         properties-of-constructors \
+         remove-properties \
+         resolve-references \
+         rewrite-aid \
+         skip-non-ultimate-proofs \
+         skip-proofs-preceding \
+         split-reservations \
+         split \
+         strings \
+         strip-bogus-structure-registration \
+         strip-definition \
+         strip-prop \
+         strip-property \
+         strip-registration \
+         structure-dependencies \
+         tokens \
+         toplevel-choice \
+         toplevel-constant-definition \
+         toplevel-dellink \
+         toplevel-diffuse \
+         toplevel-items \
+         toplevel-private-functions \
+         toplevel-private-predicates-and-functions \
+         toplevel-propositions \
+         toplevel-type-changing-statements \
+         trim-properties-and-conditions \
+         truncate \
+         unpromoted-constructors \
+         wsm
+
+xsltxts = $(addsuffix .xsltxt,$(sheets))
+xsls    = $(addsuffix .xsl,$(sheets))
+
+all: $(xsls)
 
 %.xsl: %.xsltxt
-	$(JAVA) -jar $(XSLTXT) toXSL $*.xsltxt | sed -e 's/<!\-\- *\(<\/*xsl:document.*\) *\-\->/\1/g' > $*.xsl
+	$(JAVA) -jar $(XSLTXT) toXSL $*.xsltxt $*.xsl || rm -f $*.xsl
+
+clean:
+	rm -f $(xsls)
