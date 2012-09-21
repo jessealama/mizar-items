@@ -86,7 +86,7 @@
 
 (defmethod article-paths ((db local-db))
   (let* ((text-subdir (text-subdirectory db))
-	 (article-wildcard (format nil "~a*.miz" text-subdir)))
+	 (article-wildcard (format nil "~a*.miz" (namestring text-subdir))))
     (directory article-wildcard)))
 
 (defun files-in-directory-with-extension (directory extension)
