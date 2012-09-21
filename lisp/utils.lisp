@@ -401,6 +401,12 @@ LIST; otherwise, return T and NIL."
       (declare (ignore we-already-know-that-its-present))
       (values random-key value))))
 
+(defun present-in-table? (key table)
+  (multiple-value-bind (dummy present?)
+      (gethash key table)
+    (declare (ignore dummy))
+    present?))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
