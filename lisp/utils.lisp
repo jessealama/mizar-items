@@ -220,7 +220,7 @@ LIST; otherwise, return T and NIL."
      finally
        (return (values t nil))))
 
-(defun minimal-sublist-satisfying (list predicate &key change-hook)
+(defun minimal-sublist-satisfying (list predicate)
   (let ((needed-table (make-hash-table :test #'eql))
 	(length (length list)))
     ;; initially, everything is needed
@@ -228,66 +228,98 @@ LIST; otherwise, return T and NIL."
        for i from 0 upto (1- length)
        do
 	 (setf (gethash i needed-table) t))
-    (minimal-sublist-satisfying-1 list
+    (let ((needed (minimal-sublist-satisfying-1 list
 				  predicate
 				  needed-table
 				  0
-				  (1- length)
-				  :change-hook change-hook)))
+				  (1- length))))
+      (loop
+	 for i from 0 upto (1- length)
+	 initially (format t "[")
+	 do
+	 (if (values (gethash i needed))
+	     (format t "+")
+	     (format t "-"))
+	 finally (format t "]~%"))
+      (hash-table-keys needed-table))))
 
 (defun list-terms-from-table (list needed-table)
   (loop
-     with length = (length list)
-     for i from 0 upto (1- length)
-     for item across list
-     when (gethash i needed-table) collect item into new-list
-     finally (return new-list)))
+     with new-list = nil
+     for i from 0 upto (1- (length list))
+     for item in list
+     do
+       (multiple-value-bind (dummy present?)
+	   (gethash i needed-table)
+	 (declare (ignore dummy))
+	 (when present?
+	   (push item new-list)))
+     finally
+       (return (reverse new-list))))
 
-(defun minimal-sublist-satisfying-1 (list predicate needed-table begin end &key change-hook)
-  (symbol-macrolet
-      (($update
-	`(funcall change-hook (list-terms-from-table list needed-table))))
-    (flet ((clear-range (begin end)
-	     (loop for i from begin upto end do (remhash i needed-table))
-	     $update)
-	   (restore-range (begin end)
-	     (loop for i from begin upto end do (setf (gethash i needed-table) t))
-	     $update))
-      (cond ((< end begin)
-	     needed-table)
-	    ((= end begin)
-	     (clear-range begin end)
-	     (let ((trimmed-items (list-terms-from-table list needed-table)))
-	       (unless (funcall predicate trimmed-items)
-		 (restore-range begin end))
-	       needed-table))
-	    ((< begin end)
-	     (let* ((width (- end begin))
-		    (half (floor (/ width 2)))
-		    (midpoint (+ begin half)))
-	       (clear-range begin midpoint)
-	       (let ((trimmed-items (list-terms-from-table list needed-table)))
-		 (if (funcall predicate trimmed-items)
+(defun minimal-sublist-satisfying-1 (list predicate needed-table begin end)
+  ;; (format t "[~d,~d]~%" begin end)
+  (flet ((clear-range (a b)
+	   (loop for i from a upto b do (remhash i needed-table)))
+	 (restore-range (a b)
+	   (loop for i from a upto b do (setf (gethash i needed-table) t)))
+	 (testing ()
+	   (loop
+	      for i from 0 upto (1- (length list))
+	      initially (format t "testing [")
+	      do
+		(multiple-value-bind (dummy present?)
+		    (gethash i needed-table)
+		  (declare (ignore dummy))
+		  (if present?
+		      (format t "+")
+		      (format t "-")))
+	      finally (format t "]: "))))
+    (cond ((< end begin)
+	   needed-table)
+	  ((= end begin)
+	   (clear-range begin end)
+	   ;; (testing)
+	   (if (funcall predicate (hash-table-keys needed-table))
+	       (progn
+		 ;; (format t "good~%")
+		 ;; (format t "Element ~d can be dumped.~%" begin)
+		 t)
+	       (progn
+		 ;; (format t "bad~%")
+		 ;; (format t "Element ~d cannot be dumped.~%" begin)
+		 (restore-range begin end)))
+	   needed-table)
+	  ((< begin end)
+	   (let* ((width (- end begin))
+		  (half (floor (/ width 2)))
+		  (midpoint (+ begin half)))
+	     (clear-range begin midpoint)
+	     ;; (testing)
+	     (if (funcall predicate (hash-table-keys needed-table))
+		 (progn
+		   ;; (format t "good~%")
+		   ;; (format t "Every element from ~d to ~d can be dumped.~%" begin end)
+		   (minimal-sublist-satisfying-1 list
+						 predicate
+						 needed-table
+						 (1+ midpoint)
+						 end))
+		 (progn
+		   ;; (format t "bad~%")
+		   ;; (format t "Not every element from ~d to ~d can be dumped.~%" begin end)
+		   (restore-range begin midpoint)
+		   (let ((needed-bottom-half
+			  (minimal-sublist-satisfying-1 list
+							predicate
+							needed-table
+							begin
+							midpoint)))
 		     (minimal-sublist-satisfying-1 list
 						   predicate
-						   needed-table
+						   needed-bottom-half
 						   (1+ midpoint)
-						   end
-						   :change-hook change-hook)
-		     (progn
-		       (restore-range begin midpoint)
-		       (let ((needed-bottom-half
-			      (minimal-sublist-satisfying-1 list
-							    predicate
-							    needed-table
-							    begin
-							    midpoint
-							    :change-hook change-hook)))
-			 (minimal-sublist-satisfying-1 list
-						       predicate
-						       needed-bottom-half
-						       (1+ midpoint)
-						       end)))))))))))
+						   end)))))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
