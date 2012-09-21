@@ -1,0 +1,195 @@
+stylesheet "1.0";
+
+output method="text";
+
+//////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////
+
+$lcletters = { "abcdefghijklmnopqrstuvwxyz"; }
+$ucletters = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; }
+
+tpl lowercase (#string) { `translate($string, $ucletters, $lcletters)`; }
+tpl uppercase (#string) { `translate($string, $lcletters, $ucletters)`; }
+
+//////////////////////////////////////////////////////////////////////
+// Document templates
+//////////////////////////////////////////////////////////////////////
+
+tpl [*] {
+  $n = `name (.)`;
+  $message = `concat ("Error: Don't know how to handle a(n) ", $n, " element.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [/] {
+  if [Article] {
+    apply [Article];
+  } else {
+    msg terminate="yes" "Error: there is no Article root element.  (Are you applying this stylesheet to a Mizar .xml file?)";
+  }
+}
+
+tpl [Article[not(@aid)]] {
+  msg terminate="yes" "Error: the Article element is missing the necessary aid attribute.";
+}
+
+tpl [Article[@aid]] {
+  $num-definition-blocks = `count (DefinitionBlock)`;
+  choose {
+    when [$num-definition-blocks = 0] {
+      msg terminate="yes" "Error: there are no DefinitionBlock elements in the document.";
+    }
+    when [$num-definition-blocks = 1] {
+      apply [DefinitionBlock] (#aid = `@aid`);
+    }
+    otherwise {
+      msg terminate="yes" "Error: there are multiple DefinitionBlock elements in the document.";
+    }
+  }
+}
+
+tpl [DefinitionBlock] (#aid) {
+  $num-definitions = `count (Definition)`;
+  choose {
+    when [$num-definitions = 0] {
+      msg terminate="yes" "Error: there are no Definition elements in the DefinitionBlock of this document.";
+    }
+    when [$num-definitions = 1] {
+      apply [Definition] (#aid = $aid);
+    }
+    otherwise {
+      msg terminate="yes" "Error: there are multiple Definition elements in the DefinitionBlock of this document.";
+    }
+  }
+}
+
+tpl [Definition[not(@kind = "G")]] (#aid) {
+  msg terminate="yes" "Error: the Definition element in this document is not a structure definition.";
+}
+
+tpl [Definition[@kind = "G"]] (#aid) {
+  if [count (Constructor[@kind = "V"]) > 1] {
+    msg terminate="yes" "Error: we found multiple attribute constructors in this structure definition.";
+  }
+  for-each [Constructor] {
+    apply [.] (#aid = $aid);
+  }
+  for-each [Pattern] {
+    apply [.] (#aid = $aid);
+  }
+  for-each [Constructor[@kind = "V"]/Properties/Abstractness] {
+    $aid-lc = lowercase (#string = $aid);
+    $aid-lc; ":"; "vconstructor"; ":"; "1"; "[abstractness]"; " "; $aid-lc; ":"; "vconstructor"; ":"; "1"; "\n";
+  }
+}
+
+tpl [Constructor[not(@kind)]] (#aid) {
+  msg terminate="yes" "Error: we require that all Constructor elements have a kind attribute, but we found one that lacks this attribute.";
+}
+
+tpl [Constructor[@kind = "V" and @aid and @nr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "constructor"; ":"; `@nr`; " "; $aid-lc; ":"; "gconstructor"; ":"; "1";
+}
+
+tpl [Constructor[@kind = "L"]] (#aid) {
+  for-each [ArgTypes] {
+    for-each [Typ[@aid = $aid]] {
+      " "; apply [.];
+    }
+  }
+  for-each [Typ[@aid = $aid]] {
+    " "; apply [.];
+  }
+  for-each [Fields] {
+    for-each [Field[@aid = $aid]] {
+      " "; apply [.];
+    }
+  }
+  "\n";
+}
+
+tpl [Constructor[@kind = "G" and @nr and @aid]] (#aid) {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "constructor"; ":"; `@nr`;
+  for-each [ArgTypes] {
+    for-each [Typ[@aid = $aid]] {
+      " "; apply [.];
+    }
+  }
+  for-each [Typ[@aid = $aid]] {
+    " "; apply [.];
+  }
+  for-each [Fields] {
+    for-each [Field[@aid = $aid]] {
+      " "; apply [.];
+    }
+  }
+  "\n";
+}
+
+tpl [Constructor[@kind = "U" and @nr and @aid]] (#aid) {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "constructor"; ":"; `@nr`;
+  for-each [ArgTypes] {
+    for-each [Typ[@aid = $aid]] {
+      " "; apply [.];
+    }
+  }
+  for-each [Typ[@aid = $aid]] {
+    " "; apply [.];
+  }
+  "\n";
+}
+
+tpl [Typ[not(@kind)]] {
+  msg terminate="yes" "Error: Don't know how to deal with a Typ element that lacks a kind attribute.";
+}
+
+tpl [Typ[not(@aid)]] {
+  msg terminate="yes" "Error: Don't know how to deal with a Typ element that lacks an aid attribute.";
+}
+
+tpl [Typ[not(@absnr)]] {
+  msg terminate="yes" "Error: Don't know how to deal with a Typ element that lacks an absnr attribute.";
+}
+
+tpl [Typ[@kind and @aid and @absnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "constructor"; ":"; `@absnr`;
+}
+
+tpl [Field[not(@kind)]] {
+  msg terminate="yes" "Error: Don't know how to deal with a Field element that lacks a kind attribute.";
+}
+
+tpl [Field[not(@aid)]] {
+  msg terminate="yes" "Error: Don't know how to deal with a Field element that lacks an aid attribute.";
+}
+
+tpl [Field[not(@absnr)]] {
+  msg terminate="yes" "Error: Don't know how to deal with a Field element that lacks an absnr attribute.";
+}
+
+tpl [Field[@kind and @aid and @absnr]] {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "constructor"; ":"; `@absnr`;
+}
+
+tpl [Pattern[@kind and @nr and @aid]] (#aid) {
+  $aid-lc = lowercase (#string = `@aid`);
+  $kind-lc = lowercase (#string = `@kind`);
+  $aid-lc; ":"; $kind-lc; "pattern"; ":"; `@nr`;
+  for-each [ArgTypes] {
+    for-each [Typ[@aid = $aid]] {
+      " "; apply [.];
+    }
+  }
+  "\n";
+}
