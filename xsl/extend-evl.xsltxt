@@ -1,4 +1,5 @@
 stylesheet 1.0;
+import "utils/token-strings.xsl";
 output method=xml;
 
 // Applied to a .evl file, reprint the .evl file with some extra
@@ -43,32 +44,31 @@ output method=xml;
 //   - that there are no repetitions (this is bad because MIZAR will
 //     complain if there are duplicate entries in a directive)
 
-#vocabularies = { ""; }
-#notations = { ""; }
-#definitions = { ""; }
-#theorems = { ""; }
-#registrations = { ""; }
-#constructors = { ""; }
-#requirements = { ""; }
-#schemes = { ""; }
+#vocabularies = { ",,"; }
+#notations = { ",,"; }
+#definitions = { ",,"; }
+#theorems = { ",,"; }
+#registrations = { ",,"; }
+#constructors = { ",,"; }
+#requirements = { ",,"; }
+#schemes = { ",,"; }
 
-tpl list(#separ,#elems) { 
+tpl list(#separ,#elems) {
  for-each [$elems] {
   apply[.]; if [not(position()=last())] { copy-of $separ; } }
 }
 
 tpl [Environ] {
   <Environ {
-    @aid = `@aid`;
-    "\n"; apply [Directive[@name="Vocabularies"]](#extras = $vocabularies);
-    "\n"; apply [Directive[@name="Notations"]](#extras = $notations);
-    "\n"; apply [Directive[@name="Definitions"]](#extras = $definitions);
-    "\n"; apply [Directive[@name="Theorems"]](#extras = $theorems);
-    "\n"; apply [Directive[@name="Schemes"]](#extras = $schemes);
-    "\n"; apply [Directive[@name="Registrations"]](#extras = $registrations);
-    "\n"; apply [Directive[@name="Constructors"]](#extras = $constructors);
-    "\n"; apply [Directive[@name="Requirements"]](#extras = $requirements);
-    "\n";
+    @aid = `@aid`; "\n";
+    apply [Directive[@name="Vocabularies"]] (#extras = $vocabularies);
+    apply [Directive[@name="Notations"]] (#extras = $notations);
+    apply [Directive[@name="Definitions"]] (#extras = $definitions);
+    apply [Directive[@name="Theorems"]] (#extras = $theorems);
+    apply [Directive[@name="Schemes"]] (#extras = $schemes);
+    apply [Directive[@name="Registrations"]] (#extras = $registrations);
+    apply [Directive[@name="Constructors"]] (#extras = $constructors);
+    apply [Directive[@name="Requirements"]] (#extras = $requirements);
   }
 }
 
@@ -79,28 +79,37 @@ tpl [Ident] {
 }
 
 tpl write-extras (#extras) {
-  if [contains ($extras, ",")] {
-    $extra = `substring-before ($extras, ",")`;
+  $empty = token-string-is-empty (#token-string = $extras);
+  if [$empty = "1"] {
+    // nothing to do
+  } else {
+    $head = token-string-head (#token-string = $extras);
+    $tail = token-string-tail (#token-string = $extras);
     <Ident {
-      @"name" = $extra;
+      @"name" = $head;
     }
-    "\n";
-    write-extras (#extras = `substring-after ($extras, ",")`);
+    write-extras (#extras = $tail);
   }
 }
 
-tpl [Directive](#extras) {
-  <Directive {
-    @"name" = `@name`;
-    for-each [Ident] {
-      if [position() = 1] {
+tpl [Directive] (#extras) {
+  $valid = is-valid-token-string (#string = $extras);
+  if [$valid = "1"] {
+    <Directive {
+      @"name" = `@name`;
+      for-each [Ident] {
+        if [position() = 1] {
+          "\n";
+        }
+        apply [.]; "\n";
+      }
+      if [$extras and count (Ident) = "0"] {
         "\n";
       }
-      apply [.]; "\n";
+      write-extras (#extras = $extras);
     }
-    if [$extras and count (Ident) = "0"] {
-      "\n";
-    }
-    write-extras (#extras = $extras);
+    "\n";
+  } else {
+    msg terminate="yes" `concat("Error: '", $extras, "' is not a valid token string.")`;
   }
 }

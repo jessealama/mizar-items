@@ -2,7 +2,34 @@
 (in-package :cl-user)
 
 (defpackage :mizar
-  (:use :cl :cl-ppcre :com.gigamonkeys.pathnames :alexandria :hunchentoot :cl-who :hunchentoot-utils))
+  (:use :cl)
+  (:import-from :cl-ppcre
+		#:scan
+		#:register-groups-bind
+		#:split)
+  (:import-from :xuriella
+		#:parse-stylesheet)
+  (:import-from :alexandria
+		#:starts-with-subseq
+		#:define-constant
+		#:set-equal
+		#:hash-table-keys
+		#:random-elt
+		#:copy-file
+		#:length=
+		#:disjoin
+		#:switch)
+  (:import-from :cl-fad
+		#:directory-exists-p
+		#:directory-pathname-p
+		#:walk-directory
+		#:list-directory
+		#:file-exists-p
+		#:pathname-as-directory
+		#:pathname-as-file)
+  (:use :hunchentoot)
+  (:use :cl-who)
+  (:use :hunchentoot-utils))
 
 (defvar *mizar-package* (find-package :mizar))
 

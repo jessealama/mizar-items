@@ -89,7 +89,7 @@ fragment at CKB-PATH-2."
   (first (last (pathname-directory path))))
 
 (defun directories-in-directory (dir)
-  (remove-if-not #'directory-p
+  (remove-if-not #'directory-pathname-p
 		 (list-directory dir)))
 
 (defun articles-present-in-itemization-directory ()
