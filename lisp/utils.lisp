@@ -241,11 +241,8 @@ LIST; otherwise, return T and NIL."
      for i from 0 upto (1- (length list))
      for item in list
      do
-       (multiple-value-bind (dummy present?)
-	   (gethash i needed-table)
-	 (declare (ignore dummy))
-	 (when present?
-	   (push item new-list)))
+       (when (present-in-table? i needed-table)
+	 (push item new-list))
      finally
        (return (reverse new-list))))
 
@@ -260,12 +257,9 @@ LIST; otherwise, return T and NIL."
 	      for i from 0 upto (1- (length list))
 	      initially (format t "testing [")
 	      do
-		(multiple-value-bind (dummy present?)
-		    (gethash i needed-table)
-		  (declare (ignore dummy))
-		  (if present?
-		      (format t "+")
-		      (format t "-")))
+		(if (present-in-table? i needed-table)
+		    (format t "+")
+		    (format t "-"))
 	      finally (format t "]: "))))
     (cond ((< end begin)
 	   needed-table)
