@@ -86,11 +86,12 @@ e.g., constructor environment, notation environment, etc."))
 		      (list (cons "to-keep" indices-token-string))
 		      path)
     ;; sanity check: PATH now has (length indices-to-keep) child
-    (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
-      (let ((root (dom:document-element doc)))
-	(let ((children (remove-if #'dom:text-node-p (dom:child-nodes root))))
-	  (unless (length= children indices-to-keep)
-	    (error "Sanity check failed: there are ~d children in~%~%  ~a~%~%but we were asked to keep ~d children" (length children) (namestring path) (length indices-to-keep))))))))
+    ;; (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
+    ;;   (let ((root (dom:document-element doc)))
+    ;; 	(let ((children (remove-if #'dom:text-node-p (dom:child-nodes root))))
+    ;; 	  (unless (length= children indices-to-keep)
+    ;; 	    (error "Sanity check failed: there are ~d children in~%~%  ~a~%~%but we were asked to keep ~d children" (length children) (namestring path) (length indices-to-keep))))))
+    ))
 
 (defgeneric nodes-equal? (node-1 node-2))
 
