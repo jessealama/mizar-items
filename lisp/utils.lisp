@@ -278,7 +278,6 @@ LIST; otherwise, return T and NIL."
 	   needed-table)
 	  ((= end (1+ begin))
 	   (clear-range begin begin)
-	   (testing)
 	   (if (funcall predicate (hash-table-keys needed-table))
 	       (progn
 		 (clear-range end end)
@@ -295,7 +294,6 @@ LIST; otherwise, return T and NIL."
 		  (half (floor (/ width 2)))
 		  (midpoint (+ begin half)))
 	     (clear-range begin midpoint)
-	     ;; (testing)
 	     (if (funcall predicate (hash-table-keys needed-table))
 		 (progn
 		   ;; (format t "good~%")
