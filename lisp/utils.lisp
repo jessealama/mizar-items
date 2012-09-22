@@ -260,12 +260,11 @@ LIST; otherwise, return T and NIL."
 		(if (present-in-table? i needed-table)
 		    (format t "+")
 		    (format t "-"))
-	      finally (format t "]: "))))
+	      finally (format t "] (~d,~d)~%" begin end))))
     (cond ((< end begin)
 	   needed-table)
 	  ((= end begin)
 	   (clear-range begin end)
-	   ;; (testing)
 	   (if (funcall predicate (hash-table-keys needed-table))
 	       (progn
 		 ;; (format t "good~%")
