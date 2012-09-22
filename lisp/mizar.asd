@@ -23,7 +23,8 @@
 	       "hunchentoot-utils"
 	       "xuriella"
 	       "ironclad"
-	       "drakma")
+	       "drakma"
+	       "pcall")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
