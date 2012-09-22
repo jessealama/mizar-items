@@ -37,7 +37,10 @@
       ;; 	      articles)
       ;; (pcall:finish-tasks)
       (mapc #'minimize articles)
-      t)))
+      t)
+    #-ccl
+    (error "We don't support non-CCL environments.  Sorry.")
+    ))
 
 (defun minimize-itemized-db (dirname)
   (let* ((ensure-directory (pathname-as-directory dirname))
