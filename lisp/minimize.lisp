@@ -207,10 +207,10 @@ e.g., constructor environment, notation environment, etc."))
 						       #'analyzable-and-has-same-meaning)))
 	      ;; (format t "Done computing minimal.~%")
 	      (loop
-		 for i from 0 upto (1- nodes)
+		 for i from 0 upto (1- (length nodes))
 		 initially (format t "[")
 		 do
-		   (if (values (gethash i minimal))
+		   (if (find i minimal)
 		       (format t "+")
 		       (format t "-"))
 		 finally (format t "]~%"))
