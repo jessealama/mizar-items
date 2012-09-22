@@ -148,28 +148,13 @@ e.g., constructor environment, notation environment, etc."))
 		(break "Nodes have different attributes.")
 		nil)))))))
 
-(defun analyzer-xmls-equal? (miz-xml-1 miz-xml-2)
-  (let* ((doc-1 (cxml:parse-file miz-xml-1 (cxml-dom:make-dom-builder)))
-	 (doc-2 (cxml:parse-file miz-xml-2 (cxml-dom:make-dom-builder)))
-	 (article-node-1 (dom:document-element doc-1))
-	 (article-node-2 (dom:document-element doc-2))
-	 (children-1 (dom:child-nodes article-node-1))
-	 (children-2 (dom:child-nodes article-node-2)))
-    (when (length= children-1 children-2)
-      (loop
-	 for child-1 across children-1
-	 for child-2 across children-2
-	 do
-	   (unless (nodes-equal? child-1 child-2)
-	     (return nil))
-	 finally
-	   (return t)))))
-
 (defmethod minimize-extension ((article article) (extension string))
   (let* ((file-to-minimize (file-with-extension article extension))
 	 (analyzer-xml (file-with-extension article "xml"))
 	 (analyzer-xml-orig (file-with-extension article "xml.orig"))
-	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension))))
+	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension)))
+	 (orig-xml-doc (cxml:parse-file analyzer-xml (cxml-dom:make-dom-builder)))
+	 (orig-xml-root (dom:document-element orig-xml-doc)))
     (unless (file-exists-p analyzer-xml)
       (error "The .xml for ~a is missing." (name article)))
     (if (file-exists-p file-to-minimize)
@@ -202,12 +187,14 @@ e.g., constructor environment, notation environment, etc."))
 			 (analyzer article)
 		       (prog1
 			   (cond (analyzer-ok?
-				  (cond ((analyzer-xmls-equal? analyzer-xml-orig
-							       analyzer-xml)
-					 t)
-					(t
-					 ;; (format t "Analyzable, but XML changed.~%")
-					 nil)))
+				  (let* ((new-xml-doc (cxml:parse-file analyzer-xml
+								       (cxml-dom:make-dom-builder)))
+					 (new-xml-root (dom:document-element new-xml-doc)))
+				    (cond ((nodes-equal? orig-xml-root new-xml-root)
+					   t)
+					  (t
+					   ;; (format t "Analyzable, but XML changed.~%")
+					   nil))))
 				 (analyzer-crashed?
 				  ;; (warn "Analyzer crash.")
 				  nil)
