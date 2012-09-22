@@ -268,7 +268,7 @@ LIST; otherwise, return T and NIL."
 	       (progn
 		 ;; (format t "good~%")
 		 ;; (format t "Element ~d can be dumped.~%" begin)
-		 t)
+		 )
 	       (progn
 		 ;; (format t "bad~%")
 		 ;; (format t "Element ~d cannot be dumped.~%" begin)
