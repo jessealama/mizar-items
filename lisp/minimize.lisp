@@ -173,6 +173,11 @@ e.g., constructor environment, notation environment, etc."))
 				file-to-minimize
 				:if-to-exists :supersede
 				:finish-output t)
+		     (copy-file analyzer-xml-orig
+				analyzer-xml
+				:if-to-exists :supersede
+				:finish-output t)
+		     t
 		     ;; (break "Take a look now at ~a" (namestring file-to-minimize))
 		     )
 		   (analyzable-and-has-same-meaning (trial-indices)
