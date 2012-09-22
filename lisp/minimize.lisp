@@ -65,12 +65,9 @@ e.g., constructor environment, notation environment, etc."))
 (defgeneric minimize-extension (article extension))
 
 (defmethod minimize-extension :around ((article article) (extension string))
-  (multiple-value-bind (root present?)
-      (gethash extension *extension-to-root-element-table*)
-    (declare (ignore root))
-    (if present?
-	(call-next-method)
-	(error "The extension '~a' is not registered in the root element table." extension))))
+  (if (present-in-table? extension *extension-to-root-element-table*)
+      (call-next-method)
+      (error "The extension '~a' is not registered in the root element table." extension)))
 
 (defun write-document (document path)
   (with-open-file (xml-file path
