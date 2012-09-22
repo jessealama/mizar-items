@@ -247,7 +247,6 @@ LIST; otherwise, return T and NIL."
        (return (reverse new-list))))
 
 (defun minimal-sublist-satisfying-1 (list predicate needed-table begin end)
-  ;; (format t "[~d,~d]~%" begin end)
   (flet ((clear-range (a b)
 	   (loop for i from a upto b do (remhash i needed-table)))
 	 (restore-range (a b)
