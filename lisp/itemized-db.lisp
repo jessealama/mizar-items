@@ -32,9 +32,12 @@
 	(articles (article-paths db)))
     #+ccl
     (ccl::with-preserved-working-directory (location)
-      (dolist (article articles)
-	;; (format t "Looking at article ~a~%" (pathname-name article))
-	(minimize article)))))
+      ;; (setf (pcall:thread-pool-size) 1)
+      ;; (mapcar #'(lambda (article) (pcall:pexec (minimize article)))
+      ;; 	      articles)
+      ;; (pcall:finish-tasks)
+      (mapc #'minimize articles)
+      t)))
 
 (defun minimize-itemized-db (dirname)
   (let* ((ensure-directory (pathname-as-directory dirname))
