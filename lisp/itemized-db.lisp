@@ -33,10 +33,11 @@
     #+ccl
     (ccl::with-preserved-working-directory (location)
       ;; (setf (pcall:thread-pool-size) 1)
-      ;; (mapcar #'(lambda (article) (pcall:pexec (minimize article)))
-      ;; 	      articles)
-      ;; (pcall:finish-tasks)
-      (mapc #'minimize articles)
+      (mapcar #'(lambda (article) (pcall:pexec (minimize article)))
+      	      articles)
+      (pcall:finish-tasks)
+
+      ;; (mapc #'minimize articles)
       t)
     #-ccl
     (error "We don't support non-CCL environments.  Sorry.")
