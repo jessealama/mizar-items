@@ -51,9 +51,8 @@
 	  ((rest miz-files)
 	   (error "There are multiple .miz files in the directory~%~%  ~a" (namestring ensure-directory)))
 	  (t
-	   (let ((article (make-instance 'article
-					 :path (first miz-files))))
-	     (let ((db (make-instance 'itemized-db
-				      :article article
-				      :location ensure-directory)))
-	       (minimize db)))))))
+	   (let ((path (first miz-files)))
+	     (minimize (make-instance 'itemized-db
+				      :article (make-instance 'article
+							      :path path)
+				      :location ensure-directory)))))))
