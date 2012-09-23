@@ -106,4 +106,9 @@ sub delete_space {
     return $str;
 }
 
+sub ensure_valid_xml_file {
+  my $xml_path = shift;
+  return (defined eval { $xml_parser->parse_file ($xml_path) });
+}
+
 1;
