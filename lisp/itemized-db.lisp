@@ -15,7 +15,7 @@
 
 (defmethod print-object ((db itemized-db) stream)
   (let* ((location (location db))
-	 (article-wildcard "*.miz")
+	 (article-wildcard (format nil "~a*.miz" (namestring (text-subdirectory db))))
 	 (articles (directory article-wildcard))
 	 (vocabularies (vocabulary-files db))
 	 (article (main-article db))
