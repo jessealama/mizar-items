@@ -17,6 +17,8 @@
   :depends-on ("xpath"
 	       "cl-ppcre"
 	       "cl-fad"
+	       "trivial-timeout"
+	       "com.dvlsoft.clon"
 	       "alexandria"
 	       "hunchentoot"
 	       "cl-who"
