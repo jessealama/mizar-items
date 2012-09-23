@@ -331,8 +331,8 @@ LIST; otherwise, return T and NIL."
 (defun expand-forms (forms)
   (if forms
       (if (rest forms)
-	  (list 'if (first forms) (expand-forms (cdr forms)) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (first forms)))
-	  (list 'unless (first forms) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (first forms))))
+	  (list 'if (first forms) (expand-forms (cdr forms)) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (list 'quote (first forms))))
+	  (list 'unless (first forms) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (list 'quote (first forms)))))
       (list t)))
 
 (defmacro stop-if-nil (&body body)
