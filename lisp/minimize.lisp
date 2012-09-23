@@ -147,13 +147,26 @@ e.g., constructor environment, notation environment, etc."))
 		(break "Nodes have different attributes.")
 		nil)))))))
 
+(defun equivalent-miz-xmls? (xml-path-1 xml-path-2)
+  (let* ((path-1 (ccl:native-translated-namestring xml-path-1))
+	 (path-2 (ccl:native-translated-namestring xml-path-2))
+	 (equiv-proc (run-program "/Users/alama/sources/mizar/mizar-items/perl/bin/equivalent-miz-xml.pl"
+				  (list path-1 path-2)
+				  :search nil
+				  :input nil
+				  :output nil
+				  :error nil
+				  :wait t)))
+    (zerop (process-exit-code equiv-proc))))
+
 (defmethod minimize-extension ((article article) (extension string))
   (let* ((file-to-minimize (file-with-extension article extension))
 	 (analyzer-xml (file-with-extension article "xml"))
 	 (analyzer-xml-orig (file-with-extension article "xml.orig"))
 	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension)))
-	 (orig-xml-doc (cxml:parse-file analyzer-xml (cxml-dom:make-dom-builder)))
-	 (orig-xml-root (dom:document-element orig-xml-doc)))
+	 ;; (orig-xml-doc (cxml:parse-file analyzer-xml (cxml-dom:make-dom-builder)))
+	 ;; (orig-xml-root (dom:document-element orig-xml-doc))
+	 )
     (unless (file-exists-p analyzer-xml)
       (error "The .xml for ~a is missing." (name article)))
     (if (file-exists-p file-to-minimize)
@@ -191,14 +204,12 @@ e.g., constructor environment, notation environment, etc."))
 			 (analyzer article)
 		       (prog1
 			   (cond (analyzer-ok?
-				  (let* ((new-xml-doc (cxml:parse-file analyzer-xml
-								       (cxml-dom:make-dom-builder)))
-					 (new-xml-root (dom:document-element new-xml-doc)))
-				    (cond ((nodes-equal? orig-xml-root new-xml-root)
-					   t)
-					  (t
-					   ;; (format t "Analyzable, but XML changed.~%")
-					   nil))))
+				  (cond ((equivalent-miz-xmls? analyzer-xml-orig
+							       analyzer-xml)
+					 t)
+					(t
+					 ;; (format t "Analyzable, but XML changed.~%")
+					 nil)))
 				 (analyzer-crashed?
 				  ;; (warn "Analyzer crash.")
 				  nil)
