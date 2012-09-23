@@ -14,7 +14,8 @@ our @EXPORT_OK = qw(delete_space
 	            write_string_to_file
 	            extension
 		    strip_extension
-	            slurp);
+	            slurp
+		    ensure_valid_xml_file);
 
 sub ensure_readable_file {
   my $file = shift;
