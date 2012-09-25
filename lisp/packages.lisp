@@ -18,6 +18,7 @@
 		#:copy-file
 		#:length=
 		#:disjoin
+		#:write-string-into-file
 		#:switch)
   (:import-from :cl-fad
 		#:directory-exists-p
