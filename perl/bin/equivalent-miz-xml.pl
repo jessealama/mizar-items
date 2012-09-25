@@ -3,32 +3,17 @@
 use strict;
 use warnings;
 use XML::LibXML;
-use Pod::Usage;
-use Getopt::Long;
 
-sub text_nodes_are_equal {
-    my $text_node_1 = shift;
-    my $text_node_2 = shift;
-
-    my $text_1 = $text_node_1->nodeValue ();
-    my $text_2 = $text_node_2->nodeValue ();
-
-    return ($text_1 eq $text_2);
-}
-
-my @uninteresting_attributes = ('pid',
-				'relnr',
-				'redefnr',
-				'line',
-				'col',
-				'x',
-				'y',
-				'mizfiles');
-
-my %uninteresting_attrs = ();
-foreach my $attr (@uninteresting_attributes) {
-    $uninteresting_attrs{$attr} = 0;
-}
+my %uninteresting_attrs = (
+    'pid' => 0,
+    'relnr' => 0,
+    'redefnr' => 0,
+    'line' => 0,
+    'col' => 0,
+    'x' => 0,
+    'y' => 0,
+    'mizfiles' => 0,
+);
 
 sub attribute_nodes_are_equal {
     my $attr_node_1 = shift;
@@ -112,8 +97,8 @@ sub element_nodes_are_equal {
 
     if ($element_name_1 eq $element_name_2) {
 	if (nodes_have_same_attributes ($element_node_1, $element_node_2)) {
-	    my @children_1 = $element_node_1->childNodes ();
-	    my @children_2 = $element_node_2->childNodes ();
+	    my @children_1 = $element_node_1->nonBlankChildNodes ();
+	    my @children_2 = $element_node_2->nonBlankChildNodes ();
 	    my $num_children_1 = scalar @children_1;
 	    my $num_children_2 = scalar @children_2;
 	    if ($num_children_1 == $num_children_2) {
@@ -147,8 +132,6 @@ sub nodes_are_equal {
 	    return element_nodes_are_equal ($xml_node_1, $xml_node_2);
 	} elsif ($type_1 == XML_ATTRIBUTE_NODE) {
 	    return attribute_nodes_are_equal ($xml_node_1, $xml_node_2);
-	} elsif ($type_1 == XML_TEXT_NODE) {
-	    return text_nodes_are_equal ($xml_node_1, $xml_node_2);
 	} else {
 	    print {*STDERR} 'Error: unhandled node type ', $type_1, '.';
 	    exit 1;
@@ -159,60 +142,14 @@ sub nodes_are_equal {
 
 }
 
-my $verbose = 0;
-my $debug = 0;
-my $man = 0;
-my $help = 0;
-my $target_directory = undef;
-
-GetOptions('help|?' => \$help,
-	   'man' => \$man,
-	   'verbose'  => \$verbose,
-	   'debug' => \$debug)
-    or pod2usage (2);
-
-if ($help) {
-    pod2usage (1);
-}
-
-if ($man) {
-    pod2usage (-exitstatus => 0,
-	       -verbose => 2);
-}
-
 if (scalar @ARGV < 2) {
-    pod2usage (1);
+    print {*STDERR} 'Usage: miz-equivalent-xml.pl MIZ-XML-1 MIZ-XML-2';
+    exit 1;
 }
 
 my $xml_path_1 = $ARGV[0];
 my $xml_path_2 = $ARGV[1];
 my $xml_parser = XML::LibXML->new ();
-
-if (-d $xml_path_1) {
-    print {*STDERR} 'Error: ', $xml_path_1, ' is a directory, not a file.';
-    exit 1;
-}
-
-if (-d $xml_path_2) {
-    print {*STDERR} 'Error: ', $xml_path_2, ' is a directory, not a file.';
-    exit 1;
-}
-
-if (! -e $xml_path_1) {
-    print {*STDERR} 'Error: ', $xml_path_1, ' does not exist.';
-}
-
-if (! -e $xml_path_2) {
-    print {*STDERR} 'Error: ', $xml_path_2, ' does not exist.';
-}
-
-if (! -r $xml_path_1) {
-    print {*STDERR} 'Error: ', $xml_path_1, ' is unreadable.';
-}
-
-if (! -r $xml_path_2) {
-    print {*STDERR} 'Error: ', $xml_path_2, ' is unreadable.';
-}
 
 my $xml_doc_1 = eval { $xml_parser->parse_file ($xml_path_1) };
 
@@ -230,5 +167,3 @@ my $xml_root_1 = $xml_doc_1->documentElement ();
 my $xml_root_2 = $xml_doc_2->documentElement ();
 
 exit (nodes_are_equal ($xml_root_1, $xml_root_2) ? 0 : 1);
-
-__END__
