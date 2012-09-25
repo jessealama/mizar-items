@@ -70,7 +70,8 @@ sheets = addabsrefs \
          trim-properties-and-conditions \
          truncate \
          unpromoted-constructors \
-         wsm
+         wsm \
+         uninteresting-attributes
 
 xsltxts = $(addsuffix .xsltxt,$(sheets))
 xsls    = $(addsuffix .xsl,$(sheets))
