@@ -2,7 +2,10 @@
 
 (in-package :mizar)
 
-(defparameter *keep-elements-stylesheet* (path-for-stylesheet "keep-elements"))
+(defparameter *keep-elements-stylesheet*
+  (path-for-stylesheet "keep-elements"))
+(defparameter *uninteresting-attributes-stylesheet*
+  (path-for-stylesheet "uninteresting-attributes"))
 
 (defgeneric minimize (article)
   (:documentation "Find the smallest envionment with respect to which ARTICLE is a verifiable MIZAR article."))
@@ -76,19 +79,25 @@ e.g., constructor environment, notation environment, etc."))
 			    :element-type '(unsigned-byte 8))
     (dom:map-document (cxml:make-octet-stream-sink xml-file) document)))
 
+(defun write-nodes-xuriella (indices-to-keep path)
+  (let* ((indices-token-string (tokenize (mapcar #'1+ indices-to-keep)))
+	 (new-xml-stream (make-string-output-stream))
+	 (to-keep-param (xuriella:make-parameter indices-token-string
+						 "to-keep")))
+    (xuriella:apply-stylesheet *keep-elements-stylesheet*
+			       path
+			       :parameters (list to-keep-param)
+			       :output new-xml-stream)
+    (alexandria:write-string-into-file (get-output-stream-string new-xml-stream)
+				       path
+				       :if-exists :supersede)))
+
 (defun write-nodes (indices-to-keep path)
   (let ((indices-token-string (tokenize (mapcar #'1+ indices-to-keep))))
     (apply-stylesheet *keep-elements-stylesheet*
 		      path
 		      (list (cons "to-keep" indices-token-string))
-		      path)
-    ;; sanity check: PATH now has (length indices-to-keep) child
-    ;; (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
-    ;;   (let ((root (dom:document-element doc)))
-    ;; 	(let ((children (remove-if #'dom:text-node-p (dom:child-nodes root))))
-    ;; 	  (unless (length= children indices-to-keep)
-    ;; 	    (error "Sanity check failed: there are ~d children in~%~%  ~a~%~%but we were asked to keep ~d children" (length children) (namestring path) (length indices-to-keep))))))
-    ))
+		      path)))
 
 (defgeneric nodes-equal? (node-1 node-2))
 
@@ -150,29 +159,39 @@ e.g., constructor environment, notation environment, etc."))
 (defun equivalent-miz-xmls? (xml-path-1 xml-path-2)
   (let* ((path-1 (ccl:native-translated-namestring xml-path-1))
 	 (path-2 (ccl:native-translated-namestring xml-path-2))
+	 (error-output (make-string-output-stream))
 	 (equiv-proc (run-program "/Users/alama/sources/mizar/mizar-items/perl/bin/equivalent-miz-xml.pl"
 				  (list path-1 path-2)
 				  :search nil
 				  :input nil
 				  :output nil
-				  :error nil
+				  :error error-output
 				  :wait t)))
-    (zerop (process-exit-code equiv-proc))))
+    (if (zerop (process-exit-code equiv-proc))
+	t
+	(let ((error-string (get-output-stream-string error-output)))
+	  (break "~a is not equivalent to ~a:~%~%~a" path-1 path-2 error-string)
+	  nil))))
 
 (defmethod minimize-extension ((article article) (extension string))
   (let* ((file-to-minimize (file-with-extension article extension))
 	 (analyzer-xml (file-with-extension article "xml"))
 	 (analyzer-xml-orig (file-with-extension article "xml.orig"))
-	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension)))
-	 ;; (orig-xml-doc (cxml:parse-file analyzer-xml (cxml-dom:make-dom-builder)))
-	 ;; (orig-xml-root (dom:document-element orig-xml-doc))
-	 )
+	 (analyzer-xml-orig-trimmed-path (file-with-extension article
+							      "xml.orig.trimmed"))
+	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension))))
     (unless (file-exists-p analyzer-xml)
       (error "The .xml for ~a is missing." (name article)))
+    (apply-stylesheet *uninteresting-attributes-stylesheet*
+		      analyzer-xml-orig
+		      nil
+		      analyzer-xml-orig-trimmed-path)
     (if (file-exists-p file-to-minimize)
 	(let* ((doc (cxml:parse-file file-to-minimize (cxml-dom:make-dom-builder)))
 	       (document-element (dom:document-element doc))
-	       (nodes (xpath:all-nodes (xpath:evaluate "*" document-element))))
+	       (nodes (xpath:all-nodes (xpath:evaluate "*" document-element)))
+	       (analyzer-xml-orig-sha1 (ironclad:digest-file :sha1
+							     analyzer-xml-orig-trimmed-path)))
 
 	  ;; save a known good copy
 	  (copy-file file-to-minimize file-to-minimize-copy
@@ -204,12 +223,19 @@ e.g., constructor environment, notation environment, etc."))
 			 (analyzer article)
 		       (prog1
 			   (cond (analyzer-ok?
-				  (cond ((equivalent-miz-xmls? analyzer-xml-orig
-							       analyzer-xml)
-					 t)
-					(t
+				  (let ((new-trimmed-xml-path (file-with-extension article "xml.trimmed")))
+				    (apply-stylesheet *uninteresting-attributes-stylesheet*
+						      analyzer-xml
+						      nil
+						      new-trimmed-xml-path)
+				    (let ((new-sha1 (ironclad:digest-file :sha1 new-trimmed-xml-path)))
+				      (cond ((mismatch analyzer-xml-orig-sha1
+						     new-sha1)
+					   (break "Different XMLs, after stripping uninteresting attributes:~%~%  ~a~%~%  ~a~%" (namestring analyzer-xml-orig) (namestring analyzer-xml))
+					   nil)
+					  (t
 					 ;; (format t "Analyzable, but XML changed.~%")
-					 nil)))
+					   t)))))
 				 (analyzer-crashed?
 				  ;; (warn "Analyzer crash.")
 				  nil)
@@ -277,10 +303,7 @@ e.g., constructor environment, notation environment, etc."))
 	 (analyzer-xml-orig (file-with-extension article "xml.orig")))
     (unless (file-exists-p analyzer-xml)
       (error "The .xml for ~a is missing." (namestring (path article))))
-    (unless (copy-file analyzer-xml analyzer-xml-orig
-		       :if-to-exists :supersede
-		       :finish-output t)
-      (error "Unable to save a copy of~%~%  ~a~%~%to~%~%  ~a" (namestring analyzer-xml) (namestring analyzer-xml-orig)))))
+    (copy-file analyzer-xml analyzer-xml-orig)))
 
 (defmethod minimize ((article article))
   (minimize-environment article)
