@@ -32,12 +32,14 @@
 	(articles (article-paths db)))
     #+ccl
     (ccl::with-preserved-working-directory (location)
-      ;; (setf (pcall:thread-pool-size) 1)
       (mapc #'(lambda (article) (pcall:pexec (minimize article)))
       	      articles)
       (pcall:finish-tasks)
+      (pcall:finish-tasks)
+      (pcall:finish-tasks)
 
       ;; (mapc #'minimize articles)
+
       t)
     #-ccl
     (error "We don't support non-CCL environments.  Sorry.")
