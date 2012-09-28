@@ -1,0 +1,73 @@
+stylesheet "1.0";
+
+output method="text";
+
+tpl [/] {
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    msg terminate="yes" "Error: there is no toplevel Text-Proper element.";
+  }
+}
+
+tpl [Text-Proper[not(@articleid)]] {
+  msg terminate="yes" "Error: a Text-Proper element lacks an articleid attribute.";
+}
+
+tpl [Text-Proper[@articleid]] {
+  $aid = `@articleid`;
+  for-each [Item[@kind = "Theorem-Item" and descendant::Scheme-Justification]] {
+    apply [.] (#aid = $aid);
+  }
+}
+
+tpl [Item[not(@kind)]] (#aid) {
+  $message = `concat ("Error (", $aid, "): we do not know how to handle an Item that lacks a kind attribute.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Item[@kind and not(@kind = "Theorem-Item")]] (#aid) {
+  $kind = `@kind`;
+  $message = `concat ("Error (", $aid, "): we do not know how to handle a ", $kind, " item.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Item[@kind = "Theorem-Item" and not(descendant::Scheme-Justification)]] (#aid) {
+  $message = `concat ("Error (", $aid, "): unable to handle a Theorem-Item that lacks a Scheme-Justification descendant.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Item[@kind = "Theorem-Item" and descendant::Scheme-Justification]] (#aid) {
+  $num-previous-theorems = `count (preceding::Item[@kind = "Theorem-Item"])`;
+  $position = `$num-previous-theorems + 1`;
+  for-each [descendant::Scheme-Justification] {
+    `$aid`; ":"; `$position`; " "; apply [.]; "\n";
+  }
+}
+
+tpl [Scheme-Justification[not(@line and @col)]] (#aid) {
+  $message = `concat ("Error (", $aid, "): unable to handle a Scheme-Justification element that lacks both line and column information.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Scheme-Justification[@line and @col and not(@nr)]] (#aid) {
+  $line = `@line`;
+  $col = `@col`;
+  $message = `concat ("Error (", $aid, "): unable to handle a Scheme-Justification element that lacks an nr attribute (line ", $line, ", column ", $col, ")")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Scheme-Justification[@line and @col and not(@spelling)]] (#aid) {
+  $line = `@line`;
+  $col = `@col`;
+  $message = `concat ("Error (", $aid, "): unable to handle a Scheme-Justification element that lacks a spelling attribute (line ", $line, ", column ", $col, ")")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Scheme-Justification[@nr = "0" and @spelling]] (#aid) {
+  `@spelling`;
+}
+
+tpl [Scheme-Justification[@nr and not(@nr = "0") and @spelling]] {
+  `@spelling`; ":"; `@nr`;
+}
