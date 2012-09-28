@@ -1,0 +1,57 @@
+stylesheet "1.0";
+
+output method="text";
+
+tpl [/] {
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    msg terminate="yes" "Error: there is no toplevel Text-Proper element.";
+  }
+}
+
+tpl [Text-Proper[not(@articleid)]] {
+  msg terminate="yes" "Error: a Text-Proper element lacks an articleid attribute.";
+}
+
+tpl [Text-Proper[@articleid]] {
+  $aid = `@articleid`;
+  for-each [Item[@kind = "Theorem-Item"]] {
+    apply [.] (#aid = $aid);
+  }
+}
+
+tpl [Item[not(@kind)]] (#aid) {
+  $message = `concat ("Error (", $aid, "): we do not know how to handle an Item that lacks a kind attribute.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Item[@kind and not(@kind = "Theorem-Item")]] (#aid) {
+  $kind = `@kind`;
+  $message = `concat ("Error (", $aid, "): we do not know how to handle a ", $kind, " item.")`;
+  msg terminate="yes" $message;
+}
+
+tpl [Item[@kind = "Theorem-Item"]] (#aid) {
+  $num-previous-theorems = `count (preceding::Item[@kind = "Theorem-Item"])`;
+  $position = `$num-previous-theorems + 1`;
+  if [Proposition/Biconditional-Formula] {
+    if [Block[@kind = "Proof"]] {
+      for-each [Block[@kind = "Proof"]] {
+        if [count (Item[@kind = "Conclusion" and @shape = "Compact-Statement"]) = 2] {
+          if [count (*) = 2] {
+            `$aid`; ":"; `$position`; " is standard"; "\n";
+          } else {
+            `$aid`; ":"; `$position`; " is standard, but has more than 2 children"; "\n";
+          }
+        } else {
+          `$aid`; ":"; `$position`; " is nonstandard (the proof does not have the expected structure)"; "\n";
+        }
+      }
+    } else {
+      `$aid`; ":"; `$position`; " is nonstandard (there is no proof block)"; "\n";
+    }
+  } else {
+    ""; // nothing
+  }
+}
