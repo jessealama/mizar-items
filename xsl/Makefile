@@ -31,6 +31,7 @@ sheets = addabsrefs \
          lemma-deps \
          list-properties \
          no-attributes \
+         non-scheme-uses-scheme \
          paths \
          prefer-environment \
          print-evl \
