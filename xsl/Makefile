@@ -78,6 +78,8 @@ xsls    = $(addsuffix .xsl,$(sheets))
 
 emacs-backups = $(addsuffix ~,$(xsltxts))
 
+.PHONY: all clean
+
 all: $(xsls)
 
 %.xsl: %.xsltxt
