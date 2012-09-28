@@ -76,6 +76,8 @@ sheets = addabsrefs \
 xsltxts = $(addsuffix .xsltxt,$(sheets))
 xsls    = $(addsuffix .xsl,$(sheets))
 
+emacs-backups = $(addsuffix ~,$(xsltxts))
+
 all: $(xsls)
 
 %.xsl: %.xsltxt
@@ -83,3 +85,4 @@ all: $(xsls)
 
 clean:
 	rm -f $(xsls)
+	rm -f $(emacs-backups)
