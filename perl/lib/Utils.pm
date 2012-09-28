@@ -14,7 +14,8 @@ our @EXPORT_OK = qw(delete_space
 	            write_string_to_file
 	            extension
 		    strip_extension
-	            slurp);
+	            slurp
+		    ensure_valid_xml_file);
 
 sub ensure_readable_file {
   my $file = shift;
@@ -104,6 +105,11 @@ sub delete_space {
     my $str = shift;
     $str =~ s / \N{SPACE} //g;
     return $str;
+}
+
+sub ensure_valid_xml_file {
+  my $xml_path = shift;
+  return (defined eval { $xml_parser->parse_file ($xml_path) });
 }
 
 1;

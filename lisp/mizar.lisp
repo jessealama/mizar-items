@@ -2,285 +2,212 @@
 
 (in-package :mizar)
 
-(defvar *mizfiles*
-  (let ((mizfiles
-         #+sbcl (sb-ext:posix-getenv "MIZFILES")
-         #+ccl (ccl:getenv "MIZFILES")))
-    (when mizfiles
-      (ensure-directory mizfiles)))
-  "The directory that contains the MML and the mml.lar file.
+(define-constant +mizar-system-version+
+    "7.13.01"
+  :test #'string=
+  :documentation "The system version of the Mizar that we currently support.")
 
-The default value is the value of the MIZFILES environment
-variable (at load time).")
+(define-constant +mml-version+
+    "4.181.1147"
+  :test #'string=
+  :documentation "The MML version that we support.")
 
-(define-constant +needed-mizfiles-files+
-    '("mml.lar" "mml.ini" "mizar.dct" "mizar.msg" "mml.vct")
-  :test #'equalp
-  :documentation "The list of files that are needed in a proper $MIZFILES.")
+(define-constant +mizar-version+
+    (format nil "~a-~a" +mizar-system-version+ +mml-version+)
+  :test #'string=
+  :documentation "The system number and MML version that we use, in that order, separated by a dash.")
 
-(define-constant +needed-mizfiles-subdirs+
-    '("prel" "mml")
-  :test #'equalp
-  :documentation "The list of subdirectories that need to be present in a proper $MIZFILES.")
+(define-constant +mizar-release-root-dir+
+    (pathname "/Users/alama/sources/mizar/release/")
+  :test #'equal
+  :documentation "The directory under which we look for Mizar installations.")
 
-(defun set-mizfiles (new-mizfiles)
-  "Set *MIZFILES* to NEW-MIZFILES, provided NEW-MIZFILES is a suitable
-  for that, viz., NEW-MIZFILES is the name of a directory that
-  contains the files
+(defun path-for-tool (tool &optional (mizar-version +mizar-version+))
+  (let ((directory-for-version (merge-pathnames (format nil "~a/" mizar-version)
+						+mizar-release-root-dir+)))
+    (if (directory-exists-p directory-for-version)
+	(let ((bin-subdir (merge-pathnames "bin/" directory-for-version)))
+	  (if (directory-exists-p bin-subdir)
+	      (merge-pathnames tool bin-subdir)
+	      (error "The bin subdirectory~%~%  ~a~%~%of~%~%  ~a~%~%does not exist." bin-subdir directory-for-version)))
+	(error "The release directory ~a doest not exist." directory-for-version))))
 
-- mml.lar
-- mml.ini
-- mizar.dct
-- mizar.msg
-- mml.vct
+(defun mizfiles (&optional (mizar-system-version +mizar-system-version+)
+		           (mml-version +mml-version+))
+  (let ((full-system-name (format nil "~a-~a" mizar-system-version mml-version)))
+    (pathname (format nil "~a~a/"
+		      (namestring +mizar-release-root-dir+)
+		      full-system-name))))
 
-and subdirectories
+(defgeneric run-mizar-tool (tool flags article))
 
-- prel
-- mml
+(defmethod run-mizar-tool :around (tool flags article)
+  (declare (ignore flags article))
+  (let ((tool-path (path-for-tool tool)))
+    (if (file-exists-p tool-path)
+	(call-next-method)
+	(error "We cannot find ~a at its expected location~%~%  ~a~%" tool tool-path))))
 
-The presence of these files is, in general, necessary for the mizar
-suite to work correctly."
-  (let ((dir (ensure-directory new-mizfiles)))
-    (flet ((file-ok-in-proposed-mizfiles (file)
-             (file-exists-p (file-in-directory dir file)))
-           (directory-ok (some-dir)
-             (file-exists-p (ensure-directory
-                             (file-in-directory dir some-dir)))))
-      (multiple-value-bind (all-files-ok bad-file)
-          (every-with-falsifying-witness +needed-mizfiles-files+
-                                         #'file-ok-in-proposed-mizfiles)
-        (if all-files-ok
-            (multiple-value-bind (all-dirs-ok bad-dir)
-                (every-with-falsifying-witness +needed-mizfiles-subdirs+
-                                               #'directory-ok)
-              (if all-dirs-ok
-                  (setf *mizfiles* dir)
-                  (error "Unable to set $MIZFILES to '~a' because the needed directory '~a' is missing" new-mizfiles bad-dir)))
-            (error "Unable to set $MIZFILES to '~a' because the needed file '~a' does not exist there" new-mizfiles bad-file))))))
+(defmacro with-mizfiles (&body body)
+  #+ccl
+  (let ((old-mizfiles (gensym)))
+    `(let ((,old-mizfiles (ccl:getenv "MIZFILES")))
+       (ccl:setenv "MIZFILES" (namestring (mizfiles)))
+       (let ((vals (multiple-value-list (progn ,@body))))
+	 (ccl:setenv "MIZFILES" ,old-mizfiles)
+	 (apply #'values vals)))))
 
-(defgeneric belongs-to-mml (article))
+(defmethod run-mizar-tool (tool flags (article pathname))
+  #+ccl
+  (let ((tool-path (path-for-tool tool)))
+    (with-mizfiles
+	(let ((proc (ccl:run-program tool-path
+				     (append flags (list (namestring article)))
+				     :wait t
+				     :input nil
+				     :output nil
+				     :error nil)))
+	  (multiple-value-bind (status exit-code)
+	      (ccl:external-process-status proc)
+	    (declare (ignore status))
+	    (values (and (numberp exit-code)
+			 (zerop exit-code))
+		    (when (and (numberp exit-code)
+			       (not (zerop exit-code)))
+		      (or (not (file-exists-p (err-file article)))
+			  (empty-err-file? article))))))))
+  #+sbcl
+  (let* ((path (miz-file article))
+	 (err-path (file-with-extension article "err"))
+	 (tool-path (path-for-tool tool))
+	 (proc (sb-ext:run-program tool-path
+				   (append flags (list (namestring path)))
+				   :environment (list (format nil "MIZFILES=~a" (namestring (mizfiles))))
+				   :search nil
+				   :wait t
+				   :input nil
+				   :output nil
+				   :error nil)))
+    (let ((exit-code (sb-ext:process-exit-code proc)))
+      (values (and (numberp exit-code)
+		   (zerop exit-code))
+	      (and (file-exists-p err-path)
+		   (empty-err-file? article)))))
+  #-(or ccl sbcl)
+  (error "We don't handle your Common Lisp.  Sorry."))
 
-(defmethod belongs-to-mml ((article-str string))
-  (let ((article-str-lc (lowercase article-str)))
-    (find article-str-lc *mml-lar*
-          :test #'string=
-          :key #'name)))
+(defmethod run-mizar-tool (tool flags (article article))
+  #+ccl
+  (let ((path (miz-file article))
+	 (tool-path (path-for-tool tool)))
+    (with-mizfiles
+	(let ((proc (ccl:run-program tool-path
+				     (append flags (list (namestring path)))
+				     :wait t
+				     :input nil
+				     :output nil
+				     :error nil)))
+	  (multiple-value-bind (status exit-code)
+	      (ccl:external-process-status proc)
+	    (declare (ignore status))
+	    (values (and (numberp exit-code)
+			 (zerop exit-code))
+		    (when (and (numberp exit-code)
+			       (not (zerop exit-code)))
+		      (or (not (file-exists-p (err-file article)))
+			  (empty-err-file? article))))))))
+  #+sbcl
+  (let* ((path (miz-file article))
+	 (err-path (file-with-extension article "err"))
+	 (tool-path (path-for-tool tool))
+	 (proc (sb-ext:run-program tool-path
+				   (append flags (list (namestring path)))
+				   :environment (list (format nil "MIZFILES=~a" (namestring (mizfiles))))
+				   :search nil
+				   :wait t
+				   :input nil
+				   :output nil
+				   :error nil)))
+    (let ((exit-code (sb-ext:process-exit-code proc)))
+      (values (and (numberp exit-code)
+		   (zerop exit-code))
+	      (and (file-exists-p err-path)
+		   (empty-err-file? article)))))
+  #-(or ccl sbcl)
+  (error "We don't handle your Common Lisp.  Sorry."))
 
-(defmethod belongs-to-mml ((article article))
-  (find article *mml-lar*))
+(defmacro run-mizar-tool-with-standard-flags (tool article)
+  `(run-mizar-tool ,tool '("-q" "-s" "-l") ,article))
 
-(defgeneric mml-lar-index (thing)
-  (:documentation "Where THINGS sits in the currentl mml.lar ordering."))
+(defgeneric makeenv (article))
+(defgeneric accom (article))
+(defgeneric wsmparser (article))
+(defgeneric msmprocessor (article))
+(defgeneric msplit (article))
+(defgeneric mglue (article))
+(defgeneric analyzer (article))
+(defgeneric verifier (article))
+(defgeneric exporter (article))
+(defgeneric transfer (article))
 
-(let ((table (make-hash-table :test #'equal)))
-  (defmethod mml-lar-index ((article-name string))
-    (multiple-value-bind (position present?)
-        (gethash article-name table)
-      (if present?
-          position
-          (setf (gethash article-name table)
-                (position article-name *mml-lar* :test #'string= :key #'name))))))
+(defmethod accom ((article article))
+  (accom (path article)))
 
-(defmethod mml-lar-index ((thing article))
-  (mml-lar-index (name thing)))
+(defmethod accom ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "accom" article-path))
 
-(defun mml-< (article-1 article-2)
-  (< (mml-lar-index article-1)
-     (mml-lar-index article-2)))
+(defmethod makeenv ((article article))
+  (makeenv (path article)))
 
-(defmacro define-file-transformer (name program &rest arguments)
-  ; check that TOOL is real
-  (let* ((eval-program (eval program))
-         (check (run-program "which" (list eval-program) :search t)))
-    (if (zerop (process-exit-code check))
-        `(progn
-           (defgeneric ,name (file &optional directory))
-           (defmethod ,name ((miz-path pathname) &optional (directory (user-homedir-pathname)))
-             (let* ((tmp-path (replace-extension miz-path "miz" "splork"))
-                    (proc (run-in-directory ,eval-program
-                                            directory
-                                            (append ',arguments (list (namestring miz-path)))
-                                            :output tmp-path
-                                            :if-output-exists :supersede)))
-               (if (zerop (process-exit-code proc))
-                   (rename-file tmp-path miz-path)
-                   (error "Something went wrong when calling '~A' with arguments ~A; the process exited with code ~S" ,eval-program ',arguments (process-exit-code proc)))))
-             (defmethod ,name ((article-path string) &optional (directory (user-homedir-pathname)))
-               (,name (pathname article-path) directory))
-             (defmethod ,name ((article article) &optional (directory (user-homedir-pathname)))
-               (,name (path article) directory)
-               (refresh-text article)))
-        (error "The program ~S could not be found in your path (or it is not executable)" eval-program))))
+(defmethod makeenv ((article pathname))
+  (run-mizar-tool-with-standard-flags "makeenv" article))
 
-(defun atr-file-for-article (article-pathname)
-  (let ((article-base (pathname-name article-pathname))
-        (article-dir (directory-namestring article-pathname)))
-    (merge-pathnames (format nil "~a.atr" article-base)
-                     article-dir)))
+(defmethod wsmparser ((article article))
+  (wsmparser (path article)))
 
-(defun pruned-atr-file-for-article (article-pathname)
-  (let ((article-base (pathname-name article-pathname))
-        (article-dir (directory-namestring article-pathname)))
-    (merge-pathnames (format nil "~a.atr.pruned" article-base)
-                     article-dir)))
+(defmethod wsmparser ((article pathname))
+  (run-mizar-tool-with-standard-flags "wsmparser" article))
 
-(defun err-file-for-article (article-pathname)
-  (let ((article-base (pathname-name article-pathname))
-        (article-dir (directory-namestring article-pathname)))
-    (merge-pathnames (format nil "~a.err" article-base)
-                     article-dir)))
+(defmethod msmprocessor ((article article))
+  (msmprocessor (path article)))
 
-(defgeneric run-mizar-tool (tool article &key directory ignore-exit-code flags))
+(defmethod msmprocessor ((article pathname))
+  (run-mizar-tool-with-standard-flags "msmprocessor" article))
 
-(defmethod run-mizar-tool :around ((tool string) (article pathname) &key directory ignore-exit-code flags)
-  (declare (ignore ignore-exit-code))
-  (when (string= tool "")
-    (error "A mizar tool to be applied (the empty string doesn't count!)"))
-  (when directory
-    (unless (file-exists-p (ensure-directory directory))
-      (error "The supplied work directory '~a' doesn't exist!" directory)))
-  (if (listp flags)
-      (multiple-value-bind (ok bad-guy)
-          (every-with-falsifying-witness flags #'non-empty-stringp)
-        (unless ok
-          (error "The list of flags should contain only non-empty strings; '~a' isn't" bad-guy)))
-      (error "The list of flags '~a' isn't actually a list!" flags))
-  (if (probe-file article)
-      (call-next-method)
-      (error "No such file: ~a" article)))
+(defmethod msplit ((article article))
+  (msplit (path article)))
 
-(defmethod run-mizar-tool (tool (article-path pathname) &key directory ignore-exit-code flags)
-  (let ((article-dir (cond ((typep directory 'sandbox)
-                            (location directory))
-                           ((null directory)
-                            (directory-namestring article-path))
-                           ((pathnamep directory)
-                            directory)
-                           ((stringp directory)
-                             (pathname directory))
-                           (t
-                            (error "Unable to handle the supplied working directory '~a'" directory)))))
-    (run-mizar-tool tool article-path
-                    :directory article-dir
-                    :ignore-exit-code ignore-exit-code
-                    :flags flags)))
+(defmethod msplit ((article pathname))
+  (msplit (path article)))
 
-(defmethod run-mizar-tool ((tool string) (article-path pathname) &key directory ignore-exit-code flags)
-  (let ((name (namestring article-path)))
-    (let ((proc (run-in-directory tool directory (append flags (list name)))))
-      (or ignore-exit-code
-          (or (zerop (process-exit-code proc))
-              (error 'mizar-error
-                     :tool tool
-                     :working-directory directory
-                     :argument article-path
-                     :output-stream (process-output proc)
-                     :error-stream (process-error proc)
-                     :exit-code (process-exit-code proc)))))))
+(defmethod mglue ((article article))
+  (mglue (path article)))
 
-(defmethod run-mizar-tool ((tool string) (article-path string) &key directory ignore-exit-code flags)
-  (run-mizar-tool tool (pathname article-path)
-                  :directory directory
-                  :ignore-exit-code ignore-exit-code
-                  :flags flags))
+(defmethod mglue ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "mglue" article-path))
 
-(defmethod run-mizar-tool ((tool string) (article article) &key directory ignore-exit-code flags)
-  (if (slot-boundp article 'path)
-      (run-mizar-tool tool (path article)
-                      :directory directory
-                      :ignore-exit-code ignore-exit-code
-                      :flags flags)
-      (error "Cannot apply ~S to ~S because we don't know its path"
-             tool article)))
+(defmethod verifier ((article article))
+  (verifier (path article)))
 
-(defmethod run-mizar-tool ((tool symbol) article &key directory ignore-exit-code flags)
-  (run-mizar-tool (format nil "~(~a~)" (string tool)) ; lowercase: watch out
-                  article
-                  :directory directory
-                  :ignore-exit-code ignore-exit-code
-                  :flags flags))
+(defmethod verifier ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "verifier" article-path))
 
-(defmacro define-mizar-tool (tool)
-  (let ((tool-as-symbol (intern (format nil "~:@(~a~)" tool))))
-    `(defun ,tool-as-symbol (article &key working-directory flags)
-       (run-mizar-tool ,tool article
-                       :directory working-directory
-                       :ignore-exit-code nil
-                       :flags flags))))
+(defmethod analyzer ((article article))
+  (run-mizar-tool "verifier" '("-a" "-q" "-s" "-l") article))
 
-;; workhorses
-(define-mizar-tool "edtfile")
-(define-mizar-tool "makeenv")
-(define-mizar-tool "accom")
-(define-mizar-tool "verifier")
-(define-mizar-tool "envget")
-(define-mizar-tool "exporter")
-(define-mizar-tool "wsmparser")
-(define-mizar-tool "msmprocessor")
-(define-mizar-tool "transfer")
-(define-mizar-tool "irrths")
-(define-mizar-tool "irrvoc")
-(define-mizar-tool "errflag")
-(define-mizar-tool "addfmsg")
-(define-mizar-tool "inacc")
-(define-mizar-tool "relprem")
-(define-mizar-tool "reliters")
-(define-mizar-tool "relinfer")
-(define-mizar-tool "trivdemo")
-(define-mizar-tool "chklab")
-(define-mizar-tool "newparser")
+(defmethod analyzer ((article-path pathname))
+  (run-mizar-tool "verifier" '("-a" "-q" "-s" "-l") article-path))
 
-(defun verify-and-export (article &optional directory)
-  (accom article directory "-q" "-s" "-l")
-  (verifier article directory "-q" "-s" "-l")
-  (exporter article directory "-q" "-s" "-l")
-  (transfer article directory "-q" "-s" "-l"))
+(defmethod exporter ((article article))
+  (exporter (path article)))
 
-(defun listvoc (article-name)
-  (if (string= article-name "HIDDEN") ; can't list symbols in this special vocab file
-      nil
-      (let ((proc (run-program (mizar-items-config 'listvoc-script-path)
-                               (list article-name)
-                               :search t
-                               :output :stream)))
-        (let ((exit-code (process-exit-code proc)))
-          (if (zerop exit-code)
-              (stream-lines (process-output proc))
-              (error "Something went wrong running listvoc.sh: the exit code was ~d" exit-code))))))
+(defmethod exporter ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "exporter" article-path))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Generated mizar files
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defmethod transfer ((article article))
+  (transfer (path article)))
 
-(defun voc-file-p (path)
-  (file-has-extension path "voc"))
-
-(defun sch-file-p (path)
-  (file-has-extension path "sch"))
-
-(defun dco-file-p (path)
-  (file-has-extension path "dco"))
-
-(defun def-file-p (path)
-  (file-has-extension path "def"))
-
-(defun dno-file-p (path)
-  (file-has-extension path "dno"))
-
-(defun dcl-file-p (path)
-  (file-has-extension path "dcl"))
-
-(defun drd-file-p (path)
-  (file-has-extension path "drd"))
-
-(defun eid-file-p (path)
-  (file-has-extension path "eid"))
-
-(defun did-file-p (path)
-  (file-has-extension path "did"))
-
-(defun the-file-p (path)
-  (file-has-extension path "the"))
+(defmethod transfer ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "transfer" article-path))
 
 ;;; mizar.lisp ends here

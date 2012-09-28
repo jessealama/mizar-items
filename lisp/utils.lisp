@@ -21,10 +21,10 @@
 	    array)))
 
 (defun uppercase (str)
-  (format nil "~@:(~A~)" str))
+  (format nil "~@:(~a~)" str))
 
 (defun lowercase (str)
-  (format nil "~(~A~)" str))
+  (format nil "~(~a~)" str))
 
 (defun colon-separated-list (list)
   (format nil "~{~a~^:~}" list))
@@ -89,20 +89,6 @@
     (or (< first-1 first-2)
 	(and (= first-1 first-2)
 	     (< second-1 second-2)))))
-
-(defun minimal-sublist-satisfying (list predicate)
-  "Find a minimal sublist of LIST that satisfies PREDICATE, which is
-assumed to take a single argument of type list.
-
-The computed sublist will be built by successively removing elements
-from the beginning of the list."
-  (if (null list)
-      nil
-      (let ((head (car list))
-	    (tail (cdr list)))
-	(if (funcall predicate tail)
-	    (minimal-sublist-satisfying tail predicate)
-	    (cons head (minimal-sublist-satisfying tail predicate))))))
 
 (defun all-but-last (lst)
   (reverse (cdr (reverse lst))))
@@ -221,19 +207,6 @@ from the beginning of the list."
      collecting i into nums
      finally (return nums)))
 
-(defun minimal-subsequence-satisfying (seq predicate)
-  (loop
-     with len = (length seq)
-     with needed-indices = (numbers-from-to 0 (1- len))
-     for i from len downto 1
-     for elt = (aref seq (1- i))
-     for candidate = (subsequence-from-indices seq needed-indices)
-     do
-       (unless (funcall predicate candidate)
-	 (delete (1- i) needed-indices))
-     finally
-       (return (subsequence-from-indices seq needed-indices))))
-
 (defun every-with-falsifying-witness (list pred)
   "Determine whether every member of LIST satisfies the unary
 predicate PRED.  Rreturns two values: if there is a member of LIST
@@ -247,6 +220,104 @@ LIST; otherwise, return T and NIL."
      finally
        (return (values t nil))))
 
+(defun minimal-sublist-satisfying (list predicate)
+  (let ((needed-table (make-hash-table :test #'eql))
+	(length (length list)))
+    ;; initially, everything is needed
+    (loop
+       for i from 0 upto (1- length)
+       do
+	 (setf (gethash i needed-table) t))
+    (let ((needed (minimal-sublist-satisfying-1 list
+				  predicate
+				  needed-table
+				  0
+				  (1- length))))
+      (hash-table-keys needed))))
+
+(defun list-terms-from-table (list needed-table)
+  (loop
+     with new-list = nil
+     for i from 0 upto (1- (length list))
+     for item in list
+     do
+       (when (present-in-table? i needed-table)
+	 (push item new-list))
+     finally
+       (return (reverse new-list))))
+
+(defun minimal-sublist-satisfying-1 (list predicate needed-table begin end)
+  (flet ((clear-range (a b)
+	   (loop for i from a upto b do (remhash i needed-table)))
+	 (restore-range (a b)
+	   (loop for i from a upto b do (setf (gethash i needed-table) t)))
+	 (testing ()
+	   (loop
+	      for i from 0 upto (1- (length list))
+	      initially (format t "testing [")
+	      do
+		(if (present-in-table? i needed-table)
+		    (format t "+")
+		    (format t "-"))
+	      finally (format t "] (~d,~d)~%" begin end))))
+    (cond ((< end begin)
+	   needed-table)
+	  ((= end begin)
+	   (clear-range begin end)
+	   (if (funcall predicate (hash-table-keys needed-table))
+	       (progn
+		 ;; (format t "good~%")
+		 ;; (format t "Element ~d can be dumped.~%" begin)
+		 )
+	       (progn
+		 ;; (format t "bad~%")
+		 ;; (format t "Element ~d cannot be dumped.~%" begin)
+		 (restore-range begin end)))
+	   needed-table)
+	  ((= end (1+ begin))
+	   (clear-range begin begin)
+	   (if (funcall predicate (hash-table-keys needed-table))
+	       (progn
+		 (clear-range end end)
+		 (unless (funcall predicate (hash-table-keys needed-table))
+		   (restore-range end end)))
+	       (progn
+		 (restore-range begin begin)
+		 (clear-range end end)
+		 (unless (funcall predicate (hash-table-keys needed-table))
+		   (restore-range end end))))
+	   needed-table)
+	  ((< begin end)
+	   (let* ((width (- end begin))
+		  (half (floor (/ width 2)))
+		  (midpoint (+ begin half)))
+	     (clear-range begin midpoint)
+	     (if (funcall predicate (hash-table-keys needed-table))
+		 (progn
+		   ;; (format t "good~%")
+		   ;; (format t "Every element from ~d to ~d can be dumped.~%" begin end)
+		   (minimal-sublist-satisfying-1 list
+						 predicate
+						 needed-table
+						 (1+ midpoint)
+						 end))
+		 (progn
+		   ;; (format t "bad~%")
+		   ;; (format t "Not every element from ~d to ~d can be dumped.~%" begin end)
+		   (restore-range begin midpoint)
+		   (let ((needed-bottom-half
+			  (minimal-sublist-satisfying-1 list
+							predicate
+							needed-table
+							begin
+							midpoint)))
+		     (minimal-sublist-satisfying-1 list
+						   predicate
+						   needed-bottom-half
+						   (1+ midpoint)
+						   end)))))))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -256,6 +327,16 @@ LIST; otherwise, return T and NIL."
 
 (defmacro while (condition &body body)
   `(do nil ((not ,condition)) ,@body))
+
+(defun expand-forms (forms)
+  (if forms
+      (if (rest forms)
+	  (list 'if (first forms) (expand-forms (cdr forms)) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (list 'quote (first forms))))
+	  (list 'unless (first forms) (list 'error "The form~%~%  ~a~%~%evaluated to NIL." (list 'quote (first forms)))))
+      (list t)))
+
+(defmacro stop-if-nil (&body body)
+  `,(expand-forms body))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Hash tables
@@ -324,6 +405,12 @@ LIST; otherwise, return T and NIL."
       (declare (ignore we-already-know-that-its-present))
       (values random-key value))))
 
+(defun present-in-table? (key table)
+  (multiple-value-bind (dummy present?)
+      (gethash key table)
+    (declare (ignore dummy))
+    present?))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Files and streams
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -375,7 +462,7 @@ LIST; otherwise, return T and NIL."
 		      (register-groups-bind (real-ext)
 			  ("^\.?([a-zA-Z0-9]*)$" extension)
 			(let ((real-tmp-dir (pathname-as-directory tmp-dir)))
-			  (if (directory-p real-tmp-dir)
+			  (if (directory-pathname-p real-tmp-dir)
 			      (loop
 				 with real-tmp-dir-name = (namestring real-tmp-dir)
 				 for i from 1 upto 1000
@@ -425,7 +512,9 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 
 (defun files-in-directory-with-extension (directory extension)
   (let ((dir (pathname (pathname-as-directory directory))))
-    (directory (format nil "~a*.~a" dir extension))))
+    (let ((files (directory (format nil "~a*.~a" dir extension))))
+      (let ((sorted-files (sort files #'< :key #'file-write-date)))
+	sorted-files))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Regular expressions
@@ -440,208 +529,10 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
   (concatenate 'string "^" str "$"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Running programs
+;;; Token lists
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun run-program (program args &key search input output error wait if-output-exists)
-  #+sbcl
-  (sb-ext:run-program program
-		      args
-		      :search t
-		      :input nil
-		      :output nil
-		      :error nil
-		      :wait wait
-		      :if-output-exists if-output-exists)
-  #+ccl
-  (ccl:run-program program
-		   args
-		   :input input
-		   :output output
-		   :error error
-		   :wait wait
-		   :if-output-exists if-output-exists))
-
-(defun process-exit-code (process)
-  #+sbcl
-  (sb-ext:process-exit-code process)
-  #+ccl
-  (multiple-value-bind (status exit-code)
-      (ccl:external-process-status process)
-    (declare (ignore status))
-    exit-code))
-
-(defun process-output (process)
-  #+sbcl
-  (sb-ext:process-output process)
-  #+ccl
-  (ccl:external-process-output-stream process))
-
-(defun process-error (process)
-  #+sbcl
-  (sb-ext:process-error process)
-  #+ccl
-  (ccl:external-process-error-stream process))
-
-(defgeneric run-in-directory (program working-directory args))
-
-(defmethod run-in-directory (program (working-directory sandbox) args)
-  (run-in-directory program (location working-directory) args))
-
-(defmethod run-in-directory :around ((program string) (working-directory pathname) (args list))
-  (when (string= program "")
-    (error "The empty string is not the name of a program!"))
-  (unless (file-exists-p working-directory)
-    (error "The supplied working directory, '~a', doesn't exist!" working-directory))
-  (if (every #'non-empty-stringp args)
-      (call-next-method)
-      (error "The list of arguments is supposed to consist entirely of non-empty strings!")))
-
-(defmethod run-in-directory ((program string) (working-directory null) (args list))
-  (run-program program
-	       args
-	       :wait t
-	       :search t
-	       :input nil
-	       :output nil
-	       :error nil))
-
-(defmethod run-in-directory ((program string) (working-directory pathname) (args list))
-  (let ((dir-as-string (directory-namestring
-			(pathname-as-directory working-directory))))
-    (run-program (mizar-items-config 'exec-in-dir-script-path)
-		 (append (list dir-as-string program) args)
-		 :search t
-		 :wait t
-		 :input nil
-		 :output nil
-		 :error nil)))
-
-(defmethod run-in-directory (program (working-directory string) args)
-  (run-in-directory program (pathname working-directory) args))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; XSL
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric apply-stylesheet (stylesheet xml-document parameters output)
-  (:documentation "Apply the XSL stylesheet STYLESHEET to XML-DOCUMENT  OUTPUT is either NIL or a string or a pathname; NIL means that the value of APPLY-STYLESHEET will be the output of the XSLT processor as a string.  If OUTPUT is either a string or a pathname, it will be interpreted as the path to a file where the output should be saved.  If there is already a file at the supplied OUTPUT, it will be overwritten.  If the value of OUTPUT is either a string or a pathname, the value of the function will be simply T.  The XSLT processor may signals an error during the application of STYLESHEET to XML-DOCUMENT.  PARAMETERS is supposed to be an association list mapping strings to strings."))
-
-(defmethod apply-stylesheet ((stylesheet string) xml-document parameters output)
-  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT, saving the result in OUTPUT.  (If OUTPUT is NIL, the value of this function will be a string, representing the result of applying STYLESHEET to XML-DOCUMENT.  Otherwise, OUTPUT will be interpreted as a file, and the result of applying the XSLT processor will be stored there.
-
-If STYLESHEET is the empty string, nothing will be done, and XML-DOCUMENT will be returned.  If STYLESHEET is not the empty string, its first character will be consulted.  If it is a forward slash '/', then STYLESHEET will be understood as a path to an XSL file.  If STYLESHEET is not empty and its first character is not a forward slash '/', then STYLESHEET will be understood as a string representation of an XSL stylesheet.  PARAMETERS is suposed to be an association list mapping strings to strings."
-  (if (string= stylesheet "")
-      xml-document
-      (let ((first-char (char stylesheet 0)))
-	(if (char= first-char #\/)
-	    (apply-stylesheet (pathname stylesheet) xml-document parameters output)
-	    (let ((tmp-xsl-path (temporary-file)))
-	      (with-open-file (xsl tmp-xsl-path
-				   :direction :output
-				   :if-exists :error
-				   :if-does-not-exist :create)
-		(format xsl "~a" stylesheet))
-	      (prog1
-		  (apply-stylesheet tmp-xsl-path xml-document parameters output)
-		(delete-file tmp-xsl-path)))))))
-
-(defmethod apply-stylesheet (stylesheet (xml-document string) parameters output)
-  "Apply the stylesheet indicated by STYLESHEET to XML-DOCUMENT, saving the result in OUTPUT.  (If OUTPUT is NIL, the value of this function will be a string, representing the result of applying STYLESHEET to XML-DOCUMENT.  Otherwise, OUTPUT will be interpreted as a file, and the result of applying the XSLT processor will be stored there.
-
-If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz, the empty string) will be returned.  If XML-DOCUMENT is not the empty string, its first character will be consulted.  If it is a forward slash '/', then XML-DOCUMENT will be understood as a path to an XML file.  If XML-DOCUMENT is not empty and its first character is not a forward slash '/', then XML-DOCUMENT will be understood as a string representation of an XML document.  PARAMETERS is supposed to be an association list mapping strings to strings."
-  (if (string= xml-document "")
-      xml-document
-      (let ((first-char (char xml-document 0)))
-	(if (char= first-char #\/)
-	    (apply-stylesheet stylesheet (pathname xml-document) parameters output)
-	    (let ((tmp-xml-path (temporary-file)))
-	      (with-open-file (xml tmp-xml-path
-				   :direction :output
-				   :if-exists :error
-				   :if-does-not-exist :create)
-		(format xml "~a" xml-document))
-	      (prog1
-		  (apply-stylesheet stylesheet tmp-xml-path parameters output)
-		(delete-file tmp-xml-path)))))))
-
-(defmethod apply-stylesheet :around ((stylesheet pathname) xml-document parameters output)
-  (declare (ignore xml-document output parameters))
-  (if (file-exists-p stylesheet)
-      (call-next-method)
-      (error "There is no stylesheet at ~a" (namestring stylesheet))))
-
-(defmethod apply-stylesheet :around (stylesheet (xml-document pathname) parameters output)
-  (declare (ignore stylesheet output parameters))
-  (if (file-exists-p xml-document)
-      (call-next-method)
-      (error "There is no XML document at ~a" (namestring xml-document))))
-
-(defmethod apply-stylesheet :around (stylesheet xml-document parameters output)
-  (declare (ignore stylesheet xml-document output))
-  (if (listp parameters)
-      (flet ((string-string-cons (x)
-	       (and (consp x)
-		    (stringp (car x))
-		    (stringp (cdr x)))))
-	(if (every #'string-string-cons parameters)
-	    (call-next-method)
-	    (error "The supplied list of parameters is not an association list that maps strings to strings!")))
-      (error "The supplied parameter 'list' isnt' actually a list")))
-
-(defmethod apply-stylesheet :around (stylesheet xml-document parameters (output string))
-  (declare (ignore stylesheet xml-document parameters))
-  (let ((writeable t))
-    (handler-case (ensure-directories-exist output)
-      (error () (setf writeable nil)))
-    (if writeable
-	(call-next-method)
-	(error "Cannot save output to '~a' because we cannot ensure that its directories exist" output))))
-
-(defmethod apply-stylesheet :around (stylesheet xml-document parameters (output pathname))
-  (declare (ignore stylesheet xml-document parameters))
-  (let ((writeable t))
-    (handler-case (ensure-directories-exist output)
-      (error () (setf writeable nil)))
-    (if writeable
-	(call-next-method)
-	(error "Cannot save output to '~a' because we cannot ensure that its directories exist" (namestring output)))))
-
-(defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname) parameters output)
-  (labels ((xsltproc-args ()
-	     (loop
-		with args = nil
-		for (param . value) in parameters
-		do
-		  (push value args)
-		  (push param args)
-		  (push "--stringparam" args)
-		finally
-		  (return args))))
-    (let* ((stylesheet-name (namestring stylesheet))
-	   (document-name (namestring xml-document))
-	   (xsltproc (run-program "xsltproc"
-				  (append (xsltproc-args)
-					  (list stylesheet-name
-						document-name))
-				  :search t
-				  :input nil
-				  :output (or output :stream)
-				  :if-output-exists :supersede
-				  :error :stream
-				  :wait nil)))
-      (let* ((out (process-output xsltproc))
-	     (out-lines (stream-lines out)))
-	(let ((exit-code (process-exit-code xsltproc)))
-	  (if (or (null exit-code)
-		  (zerop exit-code))
-	      (if output
-		  t
-		  (format nil "~{~a~%~}" out-lines))
-	      (let* ((err (process-error xsltproc))
-		     (err-lines (stream-lines err)))
-		(if err-lines
-		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~{  ~a~%~}" stylesheet-name document-name exit-code err-lines)
-		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%(There was no output on standard error.)" stylesheet-name document-name exit-code)))))))))
+(defun tokenize (list)
+  (format nil ",~{~a~^,~}," list))
 
 ;;; utils.lisp ends here

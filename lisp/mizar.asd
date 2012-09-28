@@ -14,7 +14,19 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on ("xpath" "cl-ppcre" "com.gigamonkeys.pathnames" "alexandria" "hunchentoot" "cl-who" "hunchentoot-utils" "xuriella" "ironclad" "drakma" "fiveam")
+  :depends-on ("xpath"
+	       "cl-ppcre"
+	       "cl-fad"
+	       "trivial-timeout"
+	       "com.dvlsoft.clon"
+	       "alexandria"
+	       "hunchentoot"
+	       "cl-who"
+	       "hunchentoot-utils"
+	       "xuriella"
+	       "ironclad"
+	       "drakma"
+	       "pcall")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
@@ -22,7 +34,11 @@
 	       (:file "xml-utils")
 	       (:file "file-utils")
 	       (:file "author")
+	       (:file "local-db")
 	       (:file "article")
+	       (:file "itemized-db")
+	       (:file "run")
+	       (:file "stylesheets")
 	       (:file "mizar-condition")
 	       (:file "mizar")
 	       (:file "mizar-xsl")

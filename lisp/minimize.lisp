@@ -2,6 +2,8 @@
 
 (in-package :mizar)
 
+(defparameter *keep-elements-stylesheet* (path-for-stylesheet "keep-elements"))
+
 (defgeneric minimize (article)
   (:documentation "Find the smallest envionment with respect to which ARTICLE is a verifiable MIZAR article."))
 
@@ -38,8 +40,253 @@ e.g., constructor environment, notation environment, etc."))
 	     (verifier article :flags '("-q" "-l"))
 	   (mizar-error () nil)))))
 
-(defmethod minimize ((article pathname))
-  ())
+(defmethod minimize :around ((article pathname))
+  (if (file-exists-p article)
+      (call-next-method)
+      (error "There is no article at '~a'." article)))
+
+(defmethod minimize ((article-path pathname))
+  (minimize (make-instance 'article
+			   :path article-path)))
+
+(defparameter *extension-to-root-element-table*
+  (let ((table (make-hash-table :test #'equal)))
+    (setf (gethash "eno" table) "Notations"
+	  (gethash "erd" table) "ReductionRegistrations"
+	  (gethash "epr" table) "PropertyRegistration" ; sic
+	  (gethash "dfs" table) "Definientia"
+	  (gethash "eid" table) "IdentifyRegistrations"
+	  (gethash "ecl" table) "Registrations"
+	  (gethash "esh" table) "Schemes"
+	  (gethash "eth" table) "Theorems")
+    table)
+  "A hash table mapping Mizar file extensions for XML files to the expected root elements of these files.")
+
+(defgeneric minimize-extension (article extension))
+
+(defmethod minimize-extension :around ((article article) (extension string))
+  (if (present-in-table? extension *extension-to-root-element-table*)
+      (call-next-method)
+      (error "The extension '~a' is not registered in the root element table." extension)))
+
+(defun write-document (document path)
+  (with-open-file (xml-file path
+			    :direction :output
+			    :if-exists :supersede
+			    :element-type '(unsigned-byte 8))
+    (dom:map-document (cxml:make-octet-stream-sink xml-file) document)))
+
+(defun write-nodes (indices-to-keep path)
+  (let ((indices-token-string (tokenize (mapcar #'1+ indices-to-keep))))
+    (apply-stylesheet *keep-elements-stylesheet*
+		      path
+		      (list (cons "to-keep" indices-token-string))
+		      path)
+    ;; sanity check: PATH now has (length indices-to-keep) child
+    ;; (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
+    ;;   (let ((root (dom:document-element doc)))
+    ;; 	(let ((children (remove-if #'dom:text-node-p (dom:child-nodes root))))
+    ;; 	  (unless (length= children indices-to-keep)
+    ;; 	    (error "Sanity check failed: there are ~d children in~%~%  ~a~%~%but we were asked to keep ~d children" (length children) (namestring path) (length indices-to-keep))))))
+    ))
+
+(defgeneric nodes-equal? (node-1 node-2))
+
+(defmethod nodes-equal? ((node-1 t) (node-2 t))
+  (error "Don't know how to compare node~%~%  ~a~%~%to~%~%  ~a" node-1 node-2))
+
+(defmethod nodes-equal? ((node-1 dom:text) (node-2 dom:text))
+  (string= (dom:data node-1)
+	   (dom:data node-2)))
+
+(defmethod nodes-equal? ((node-1 dom:attr) (node-2 dom:attr))
+  (let ((name-1 (dom:node-name node-1))
+	(name-2 (dom:node-name node-2)))
+    (when (string= name-1 name-2)
+      (let ((value-1 (dom:value node-1))
+	    (value-2 (dom:value node-2)))
+	(string= value-1 value-2)))))
+
+(defun uninteresting-attribute-p (attribute)
+  (let ((name (dom:node-name attribute)))
+    (or (string= name "pid")
+	(string= name "relnr")
+	(string= name "redefnr")
+	(string= name "line")
+	(string= name "col")
+	(string= name "x")
+	(string= name "y")
+	(string= name "mizfiles"))))
+
+(defmethod nodes-equal? ((node-1 dom:element) (node-2 dom:element))
+  (let ((name-1 (dom:node-name node-1))
+	(name-2 (dom:node-name node-2)))
+    (when (string= name-1 name-2)
+      (let ((attributes-1 (remove-if #'uninteresting-attribute-p
+				     (dom:items (dom:attributes node-1))))
+	    (attributes-2 (remove-if #'uninteresting-attribute-p
+				     (dom:items (dom:attributes node-2)))))
+	(flet ((attr-subset (attribute-list-1 attribute-list-2)
+		 (every #'(lambda (attr-1)
+			    (some #'(lambda (attr-2) (nodes-equal? attr-1 attr-2))
+				  attribute-list-2))
+			attribute-list-1)))
+	  (if (and (attr-subset attributes-1 attributes-2)
+		   (attr-subset attributes-2 attributes-1))
+	      (let ((children-1 (dom:child-nodes node-1))
+		    (children-2 (dom:child-nodes node-2)))
+		(loop
+		   for child-1 across children-1
+		   for child-2 across children-2
+		   do
+		     (unless (nodes-equal? child-1 child-2)
+		       (return nil))
+		   finally
+		     (return t)))
+	      (progn
+		(break "Nodes have different attributes.")
+		nil)))))))
+
+(defun equivalent-miz-xmls? (xml-path-1 xml-path-2)
+  (let* ((path-1 (ccl:native-translated-namestring xml-path-1))
+	 (path-2 (ccl:native-translated-namestring xml-path-2))
+	 (equiv-proc (run-program "/Users/alama/sources/mizar/mizar-items/perl/bin/equivalent-miz-xml.pl"
+				  (list path-1 path-2)
+				  :search nil
+				  :input nil
+				  :output nil
+				  :error nil
+				  :wait t)))
+    (zerop (process-exit-code equiv-proc))))
+
+(defmethod minimize-extension ((article article) (extension string))
+  (let* ((file-to-minimize (file-with-extension article extension))
+	 (analyzer-xml (file-with-extension article "xml"))
+	 (analyzer-xml-orig (file-with-extension article "xml.orig"))
+	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension)))
+	 ;; (orig-xml-doc (cxml:parse-file analyzer-xml (cxml-dom:make-dom-builder)))
+	 ;; (orig-xml-root (dom:document-element orig-xml-doc))
+	 )
+    (unless (file-exists-p analyzer-xml)
+      (error "The .xml for ~a is missing." (name article)))
+    (if (file-exists-p file-to-minimize)
+	(let* ((doc (cxml:parse-file file-to-minimize (cxml-dom:make-dom-builder)))
+	       (document-element (dom:document-element doc))
+	       (nodes (xpath:all-nodes (xpath:evaluate "*" document-element))))
+
+	  ;; save a known good copy
+	  (copy-file file-to-minimize file-to-minimize-copy
+		     :if-to-exists :supersede
+		     :finish-output t)
+
+	  (format t "~a: " (namestring file-to-minimize))
+	  (labels ((restore ()
+		     (copy-file file-to-minimize-copy
+				file-to-minimize
+				:if-to-exists :supersede
+				:finish-output t)
+		     (copy-file analyzer-xml-orig
+				analyzer-xml
+				:if-to-exists :supersede
+				:finish-output t)
+		     t
+		     ;; (break "Take a look now at ~a" (namestring file-to-minimize))
+		     )
+		   (analyzable-and-has-same-meaning (trial-indices)
+
+		     ;; write to disk
+		     (write-nodes trial-indices file-to-minimize)
+
+		     ;; (break "Look at ~a" (namestring file-to-minimize))
+
+		     ;; test whether this is ok
+		     (multiple-value-bind (analyzer-ok? analyzer-crashed?)
+			 (analyzer article)
+		       (prog1
+			   (cond (analyzer-ok?
+				  (cond ((equivalent-miz-xmls? analyzer-xml-orig
+							       analyzer-xml)
+					 t)
+					(t
+					 ;; (format t "Analyzable, but XML changed.~%")
+					 nil)))
+				 (analyzer-crashed?
+				  ;; (warn "Analyzer crash.")
+				  nil)
+				 (t
+				  ;; (format t "Analyzer did not crash, but it failed.")
+				  nil))
+			 ;; (format t "Restoring...~%")
+			 (restore)))))
+	    (let ((minimal (minimal-sublist-satisfying nodes
+						       #'analyzable-and-has-same-meaning)))
+	      ;; (format t "Done computing minimal.~%")
+	      (loop
+		 for i from 0 upto (1- (length nodes))
+		 initially (format t "[")
+		 do
+		   (if (find i minimal)
+		       (format t "+")
+		       (format t "-"))
+		 finally (format t "]~%"))
+
+	      (write-nodes minimal file-to-minimize)))))))
+
+(defgeneric minimize-notations (article))
+
+(defmethod minimize-notations ((article article))
+  (minimize-extension article "eno"))
+
+(defgeneric minimize-reductions (article))
+
+(defmethod minimize-reductions ((article article))
+  (minimize-extension article "erd"))
+
+(defgeneric minimize-property-registrations (article))
+
+(defmethod minimize-property-registrations ((article article))
+  (minimize-extension article "epr"))
+
+(defgeneric minimize-definientia (article))
+
+(defmethod minimize-definientia ((article article))
+  (minimize-extension article "dfs"))
+
+(defgeneric minimize-identifications (article))
+
+(defmethod minimize-identifications ((article article))
+  (minimize-extension article "eid"))
+
+(defgeneric minimize-clusters (article))
+
+(defmethod minimize-clusters ((article article))
+  (minimize-extension article "ecl"))
+
+(defgeneric minimize-environment (article))
+
+(defmethod minimize-environment ((article article))
+  (minimize-notations article)              ;; .eno
+  (minimize-reductions article)             ;; .erd
+  (minimize-property-registrations article) ;; .epr
+  (minimize-definientia article)            ;; .dfs
+  (minimize-identifications article)        ;; .eid
+  (minimize-clusters article))              ;; .ecl
+
+(defmethod minimize :before ((article article))
+  (let* ((analyzer-xml (file-with-extension article "xml"))
+	 (analyzer-xml-orig (file-with-extension article "xml.orig")))
+    (unless (file-exists-p analyzer-xml)
+      (error "The .xml for ~a is missing." (namestring (path article))))
+    (unless (copy-file analyzer-xml analyzer-xml-orig
+		       :if-to-exists :supersede
+		       :finish-output t)
+      (error "Unable to save a copy of~%~%  ~a~%~%to~%~%  ~a" (namestring analyzer-xml) (namestring analyzer-xml-orig)))))
+
+(defmethod minimize ((article article))
+  (minimize-environment article)
+  ;; (minimize-properties article)
+  ;; (minimize-requirements article)
+  )
 
 (defgeneric minimize-requirements (article &optional working-directory)
   (:documentation "From the explicitly required set of requirements
@@ -60,137 +307,12 @@ e.g., constructor environment, notation environment, etc."))
 	    (error "The .evl file for~%~%  ~a~%~%does not exist at the expected location~%~%  ~a~%" article-path evl-file)))
       (error "The file~%~%  ~a~%~%does not exist~%" article-path)))
 
-(defmethod requirements-of-article ((article-path pathname))
-  (let* ((evl-file (replace-extension article-path "miz" "evl"))
-	 (doc (cxml:parse-file evl-file (cxml-dom:make-dom-builder))))
-    (mapcar #'xpath:string-value
-	    (xpath:all-nodes
-	     (xpath:evaluate "/Environ/Directive[@name = 'Requirements']/Ident/@name"
-			     doc)))))
-
-(defgeneric update-requirements (article new-requirements &optional working-directory)
-  (:documentation "Force the requirements directive of ARTICLE to have the contents NEW-REQUIREMENTS.  Any invocations of mizar tools will be carried out in WORKING-DIRECTORY."))
-
-(defmethod update-requirements :around ((article-path pathname) (new-requirements list) &optional working-directory)
-  (if (file-exists-p article-path)
-      (if working-directory
-	  (if (file-exists-p working-directory)
-	      (if (directory-p working-directory)
-		  (call-next-method)
-		  (error "The supplied working directory,~%~%  ~a~%~%is not actually a directory!~%" working-directory))
-	      (error "The supplied working directory,~%~%  ~a~%~%does not exist~%" working-directory))
-	  (call-next-method))
-      (error "The given article path,~%~%  ~a~%~%does not exist!~%" article-path)))
-
-(defparameter *requirements-regexp* "requirements ([^;]+);")
-
-(defun split-requirements-line (requirements-line)
-  (if (scan *requirements-regexp* requirements-line)
-      (register-groups-bind (comma-delimited-list)
-	  (*requirements-regexp* requirements-line)
-	(mapcar #'delete-space
-		(split #\, comma-delimited-list)))
-      (error "The supplied requirements line~%~%  ~a~%~%does not match the regular expressio~%~%  ~a~%" requirements-line *requirements-regexp*)))
-
-(defmethod update-requirements ((article-path pathname) (new-requirements list) &optional working-directory)
-  (let ((new-miz-text
-	 (with-open-file (miz article-path
-			      :direction :input
-			      :if-does-not-exist :error)
-	   (with-output-to-string (s)
-	     (loop
-		for line = (read-line miz nil nil)
-		do
-		  (if line
-		      (if (cl-ppcre:scan *requirements-regexp* line)
-			  (when new-requirements
-			    (format s "requirements ~{~a~#[~:;,~]~};~%" new-requirements))
-			  (format s "~a~%" line))
-		      (return)))))))
-    (with-open-file (new-miz article-path
-			     :direction :output
-			     :if-exists :supersede)
-      (format new-miz "~a" new-miz-text))
-    (handler-case
-	(accom article-path
-	       :flags '("-q" "-s" "-l")
-	       :working-directory working-directory)
-      (mizar-error (miz-err)
-	(unless (innocent-accomodator-errorp miz-err)
-	  (error "While accommodating~%~%  ~a~%~%we encountered a non-innocent accommodator error!~%" article-path))))))
-
-;; This method works by using the .wsx file output by Czeslaw's
-;; newparser.  For libraries where newparser is unavailable, a more
-;; brutish method is required.
-;;
-;; (defmethod update-requirements ((article-path pathname) (new-requirements list) &optional working-directory)
-;;   (let ((token-string-requirements (if new-requirements
-;; 				       (format nil "~{,~a~}," new-requirements)
-;; 				       ""))
-;; 	(evl-file (replace-extension article-path "miz" "evl"))
-;; 	(wsx-file (replace-extension article-path "miz" "wsx")))
-;;     (handler-case
-;; 	(newparser article-path
-;; 		   :flags '("-q" "-s" "-l")
-;; 		   :working-directory working-directory)
-;;       (mizar-error () (error "Something went wrong generating the .wsx for~%~%  ~a" article-path)))
-;;     (let ((new-evl-as-string (apply-stylesheet (mizar-items-config 'update-requirements-stylesheet) evl-file (list (cons "new-requirements" token-string-requirements)) nil)))
-;;       (write-string-into-file new-evl-as-string evl-file
-;; 			      :if-does-not-exist :error
-;; 			      :if-exists :supersede)
-;;       ;; now regenerate the text of the article
-;;       (let ((new-article-text (apply-stylesheet (mizar-items-config 'wsm-stylesheet)
-;; 						wsx-file
-;; 						nil
-;; 						nil)))
-;; 	(write-string-into-file new-article-text
-;; 				article-path
-;; 				:if-exists :supersede
-;; 				:if-does-not-exist :error))
-;;       ;; re-accommodate (effectively generating a new .ere using the trimmed requirements directive)
-;;       (accom article-path
-;; 	     :flags '("-q" "-s" "-l")
-;; 	     :working-directory working-directory))))
-
-(defmethod minimize-requirements :around ((article-path pathname) &optional working-directory)
-  (if (file-exists-p article-path)
-      (if working-directory
-	  (if (directory-p working-directory)
-	      (call-next-method)
-	      (error "The supplied working directory,~%~%  ~a~%~%is not a directory!" working-directory))
-	  (call-next-method))
-      (error "There is no file at~%~%  ~a~%" article-path)))
-
-(defmethod minimize-requirements ((article-path pathname) &optional working-directory)
-  (loop
-     with requirements = (remove "HIDDEN" (requirements-of-article article-path)
-				 :test #'string=)
-     with final-trimmed-requirements = requirements
-     for requirement in requirements
-     do
-       (let ((trimmed-requirements (remove requirement final-trimmed-requirements)))
-	 (update-requirements article-path trimmed-requirements working-directory)
-	 (handler-case
-	     (progn
-	       (verifier article-path
-			 :flags '("-q" "-s" "-l")
-			 :working-directory working-directory)
-	       (setf final-trimmed-requirements trimmed-requirements)
-	       (format t "We don't need the requirement ~a~%" requirement))
-	   (mizar-error ()
-	     (progn
-	       (push requirement trimmed-requirements)
-	       (update-requirements article-path trimmed-requirements working-directory)
-	       (format t "We do need the requirement ~a~%" requirement)))))
-     finally
-       (return final-trimmed-requirements)))
-
 (defgeneric minimize-requirements-of-itemized-db (miz-db)
   (:documentation "Minimize the requirements of every article fragment appearing under MIZ-DB."))
 
 (defmethod minimize-requirements-of-itemized-db :around ((miz-db-path pathname))
   (if (file-exists-p miz-db-path)
-      (if (directory-p miz-db-path)
+      (if (directory-pathname-p miz-db-path)
 	  (let ((text-subdir (merge-pathnames "text/" miz-db-path)))
 	    (if (file-exists-p text-subdir)
 		(call-next-method)
@@ -217,55 +339,5 @@ e.g., constructor environment, notation environment, etc."))
 	t)
       (error ()
 	(format *error-output* "~a: failure~%" miz-db-path))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Brute-force computation of a fragment's minimal environment
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric minimize-clusters (article)
-  (:documentation "Rewrite the .ecl file associated with ARTICLE to find the smallest set of clusters needed for it."))
-
-(defmethod minimize-clusters ((article-path string))
-  (minimize-clusters (pathname article-path)))
-
-(defmethod minimize-clusters :around ((article-path pathname))
-  (if (file-exists-p article-path)
-      (let ((ecl-path (replace-extension article-path "miz" "ecl")))
-	(if (file-exists-p ecl-path)
-	    (call-next-method)
-	    (error "The .ecl file for~%~%  ~a~%~%does not exist at the expected location~%~%  ~a~%" (namestring article-path) (namestring ecl-path))))
-      (error "The article~%~%  ~a~%~%does not exist!" (namestring article-path))))
-
-(defun replace-ecl-file (ecl-path new-clusters aid mizfiles)
-  (with-open-file (ecl ecl-path
-		       :direction :output
-		       :if-exists :supersede
-		       :if-does-not-exist :create)
-    (format ecl "<?xml version=\"1.0\" ?>")
-    (terpri ecl)
-    (format ecl "<Registrations aid=\"~a\" mizfiles=\"~a\"" aid mizfiles)
-    (terpri ecl)
-    (dolist (node new-clusters)
-      (format ecl "~a" node)
-      (terpri ecl))
-    (format ecl "</Registrations>")
-    (terpri ecl)))
-
-(defmethod minimize-clusters ((article-path pathname))
-  (let* ((ecl-path (replace-extension article-path "miz" "ecl"))
-	 (ecl-doc (cxml:parse-file ecl-path (cxml-dom:make-dom-builder)))
-	 (nodes (xpath:all-nodes
-		    (xpath:evaluate "/Registrations/CCluster | /Registrations/FCluster | /Registrations/RCluster" ecl-doc))))
-    (first-n nodes 5)))
-
-;; HEre's how to write XML
-;;
-;; (with-open-file (element #p"/tmp/junk"
-;; 				:direction :output
-;; 				:if-does-not-exist :create
-;; 				:if-exists :supersede
-;; 				:element-type '(unsigned-byte 8))
-;; 	 (dom:map-document (cxml:make-octet-stream-sink element) *))
-
 
 ;;; minimize.lisp ends here

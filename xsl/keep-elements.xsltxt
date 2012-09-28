@@ -1,0 +1,52 @@
+stylesheet "1.0";
+output method="xml" indent="no";
+
+// Comma-delimited list of positive natural numbers representing
+// indices of elements of the root element that are to be kept.
+// Everything else will be deleted.
+
+#to-keep = { ""; }
+
+tpl [/] {
+  apply [*] mode="root";
+}
+
+tpl [*] mode="root" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] {
+      $attribute-name = `name (.)`;
+      if [not($attribute-name = "mizfiles")] { copy-of `.`; }
+    }
+    "\n";
+    for-each [*] {
+      apply [.] mode="toplevel";
+    }
+  }
+}
+
+tpl [*] mode="copy"{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    if [*] {
+      "\n";
+      for-each [*] {
+        apply [.] mode="copy";
+      }
+    }
+  }
+  "\n";
+}
+
+tpl [*] mode="toplevel" {
+  $pos = `count (preceding-sibling::*) + 1`;
+  $token = `concat (",", $pos, ",")`;
+  $message = `concat ("Checking whether we are to keep element ", $pos, " (to-keep = '", $to-keep, "'")`;
+  msg $message;
+  if [contains ($to-keep, $token)] {
+    apply [.] mode="copy";
+  } else {
+    // ignore
+  }
+}
