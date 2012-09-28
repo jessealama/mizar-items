@@ -380,14 +380,8 @@ sub needed_non_constructors {
 	    croak ('Error: what is the symbolic name of requirement number ',$i, '?');
 	}
 
-	if (defined $REQUIREMENTS_THEOREMS{$requirement_name}) {
-	    my @theorems_from_requirements = @{$REQUIREMENTS_THEOREMS{$requirement_name}};
-	    foreach my $theorem (@theorems_from_requirements) {
-		$items{$theorem} = 0;
-	    }
-	} else {
-	    croak ('Error: What theorems correspond to the requirement named \'', $requirement_name, '\'?');
-	}
+	$items{$requirement_name} = 0;
+
     }
 
     if (wantarray) {
