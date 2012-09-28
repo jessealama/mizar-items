@@ -32,13 +32,13 @@
 	(articles (article-paths db)))
     #+ccl
     (ccl::with-preserved-working-directory (location)
-      (mapc #'(lambda (article) (pcall:pexec (minimize article)))
-      	      articles)
-      (pcall:finish-tasks)
-      (pcall:finish-tasks)
-      (pcall:finish-tasks)
+      ;; (mapc #'(lambda (article) (pcall:pexec (minimize article)))
+      ;; 	      articles)
+      ;; (pcall:finish-tasks)
+      ;; (pcall:finish-tasks)
+      ;; (pcall:finish-tasks)
 
-      ;; (mapc #'minimize articles)
+      (mapc #'minimize articles)
 
       t)
     #-ccl
