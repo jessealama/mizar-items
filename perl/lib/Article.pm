@@ -268,78 +268,78 @@ sub absolutize_environment {
     return 1;
 }
 
-# sub confirm_minimality_of_extension {
-#   my $extension_to_minimize = shift;
-#   my $root_element_name = $extension_to_element_table{$extension_to_minimize};
-#   my @removable = ();
-#   if (defined $root_element_name) {
-#     my $article_with_extension = "${article_dirname}/${article_basename}.${extension_to_minimize}";
-#     if (-e $article_with_extension) {
-#       my $xml_doc = undef;
-#       eval {
-# 	$xml_doc = $xml_parser->parse_file ($article_with_extension);
-#       };
-#       if ($@) {
-# 	print 'Error: the .', $extension_to_minimize, ' file of ', $article_basename, ' is not well-formed XML.', "\n";
-# 	exit 1;
-#       }
-#       my @elements = $xml_doc->findnodes ("/${root_element_name}/*");
+sub confirm_minimality_of_extension {
+  my $extension_to_minimize = shift;
+  my $root_element_name = $extension_to_element_table{$extension_to_minimize};
+  my @removable = ();
+  if (defined $root_element_name) {
+    my $article_with_extension = "${article_dirname}/${article_basename}.${extension_to_minimize}";
+    if (-e $article_with_extension) {
+      my $xml_doc = undef;
+      eval {
+	$xml_doc = $xml_parser->parse_file ($article_with_extension);
+      };
+      if ($@) {
+	print 'Error: the .', $extension_to_minimize, ' file of ', $article_basename, ' is not well-formed XML.', "\n";
+	exit 1;
+      }
+      my @elements = $xml_doc->findnodes ("/${root_element_name}/*");
 
-#       my %needed_elements_table = ();
-#       foreach my $i (0 .. scalar @elements - 1) {
-#         $needed_elements_table{$i} = 0;
-#       }
+      my %needed_elements_table = ();
+      foreach my $i (0 .. scalar @elements - 1) {
+        $needed_elements_table{$i} = 0;
+      }
 
-#       my $removable_element_found = 0;
-#       my $i = 0;
-#       my $num_elements = scalar @elements;
+      my $removable_element_found = 0;
+      my $i = 0;
+      my $num_elements = scalar @elements;
 
-#       # DEBUG
-#       # print 'We are about to inspect ', scalar @elements, ' elements, checking for removability.', "\n";
+      # DEBUG
+      # print 'We are about to inspect ', scalar @elements, ' elements, checking for removability.', "\n";
 
-#       while ($i < $num_elements && $removable_element_found == 0) {
+      while ($i < $num_elements && $removable_element_found == 0) {
 
-# 	my $element = $elements[$i];
+	my $element = $elements[$i];
 
-# 	# DEBUG
-# 	my $element_pretty = render_element ($element);
-# 	# print 'Checking whether the element ', $element_pretty, ' can be removed from the .', $extension_to_minimize, ' file of ', $article_basename, '...';
+	# DEBUG
+	my $element_pretty = render_element ($element);
+	# print 'Checking whether the element ', $element_pretty, ' can be removed from the .', $extension_to_minimize, ' file of ', $article_basename, '...';
 
-# 	delete $needed_elements_table{$i};
-# 	write_element_table (\@elements, \%needed_elements_table, $article_with_extension, $root_element_name);
+	delete $needed_elements_table{$i};
+	write_element_table (\@elements, \%needed_elements_table, $article_with_extension, $root_element_name);
 
-# 	my $verifier_ok = our_verify ();
-# 	if ($verifier_ok) {
+	my $verifier_ok = our_verify ();
+	if ($verifier_ok) {
 
-# 	  # DEBUG
-# 	  # print 'removable!', "\n";
+	  # DEBUG
+	  # print 'removable!', "\n";
 
-# 	  my $element_pretty = render_element ($element);
-# 	  push (@removable, $element_pretty);
-# 	  $removable_element_found = 1;
-# 	} else {
-# 	  # DEBUG
-# 	  # print 'unremovable!', "\n";
-# 	}
+	  my $element_pretty = render_element ($element);
+	  push (@removable, $element_pretty);
+	  $removable_element_found = 1;
+	} else {
+	  # DEBUG
+	  # print 'unremovable!', "\n";
+	}
 
-# 	$needed_elements_table{$i} = 0;
-# 	write_element_table (\@elements, \%needed_elements_table, $article_with_extension, $root_element_name);
+	$needed_elements_table{$i} = 0;
+	write_element_table (\@elements, \%needed_elements_table, $article_with_extension, $root_element_name);
 
-# 	$i++;
+	$i++;
 
-#       }
-#     }
+      }
+    }
 
-#     # Return the XML, etc. to its initial state
-#     our_verify ();
+    # Return the XML, etc. to its initial state
+    our_verify ();
 
-#     return \@removable;
+    return \@removable;
 
-#   } else {
-#     print 'Error: we do not know how to deal with the ', $extension_to_minimize, ' files.', "\n";
-#     exit 1;
-#   }
-# }
+  } else {
+    print 'Error: we do not know how to deal with the ', $extension_to_minimize, ' files.', "\n";
+    exit 1;
+  }
+}
 
 sub needed_non_constructors {
     my $self = shift;
