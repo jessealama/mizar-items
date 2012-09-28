@@ -102,39 +102,53 @@ sub to_mptp {
 
 }
 
+my %handled_table = ();
+
+
 sub handled {
     my $item = shift;
+
+    my $known_answer = $handled_table{$item};
+    if (defined $known_answer) {
+	return $known_answer;
+    }
+
+    my $answer = undef;
 
     if ($item =~ / \A ([a-z_0-9]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z /) {
 	(my $article, my $kind, my $number, my $property) = ($1, $2, $3, $5);
 	if (defined $property) {
 	    if ($property eq 'coherence') {
-		return 0;
+		$answer = 0;
 	    } elsif ($property eq 'existence') {
-		return 0;
+		$answer = 0;
 	    } elsif ($property eq 'uniqueness') {
-		return 0;
+		$answer = 0;
 	    } elsif ($property eq 'compatibility') {
-		return 0;
+		$answer = 0;
 	    } elsif ($property eq 'sethood') {
-		return 0;
+		$answer = 0;
 	    } else {
-		return 1;
+		$answer = 1;
 	    }
 	} else {
 	    if ($kind =~ /[glrv]constructor/) {
-		return 0;
+		$answer = 0;
 	    } elsif ($kind =~ /[gjklmruv]pattern/) {
-		return 0;
+		$answer = 0;
 	    } elsif ($kind eq 'lemma') {
-		return 0;
+		$answer = 0;
 	    } else {
-		return 1;
+		$answer = 1;
 	    }
 	}
     } else {
 	die 'Error: cannot make sense of the item ', $item;
     }
+
+    $handled_table{$item} = $answer;
+
+    return $answer;
 
 }
 
