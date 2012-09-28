@@ -1041,8 +1041,8 @@ sub load_theorems {
     my @theorems_no_extension = map { strip_extension ($_) } @theorems;
     my @sorted_theorems = sort { $self->fragment_less_than ($a, $b) } @theorems_no_extension;
 
-    foreach my $i (1 .. scalar @sorted_theorems) {
-	my $fragment_of_theorem = $sorted_theorems[$i - 1];
+    my $genuine_theorem_number = 1;
+    foreach my $fragment_of_theorem (@sorted_theorems) {
 	my $fragment_number = fragment_number ($fragment_of_theorem);
 
 	if (defined $fragment_of_lemma_table{$fragment_number}) {
@@ -1050,9 +1050,11 @@ sub load_theorems {
 	    # original article, but a toplevel unexported lemma that
 	    # got promoted to a theorem during our rewriting
 	} else {
-	    my $item = "${article_name}:theorem:${i}";
+
+	    my $item = "${article_name}:theorem:${genuine_theorem_number}";
 	    $item_to_fragment_table{$item}
 		= "${article_name}:fragment:${fragment_number}";
+	    $genuine_theorem_number++;
 	}
 
 
