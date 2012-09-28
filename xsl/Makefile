@@ -79,7 +79,7 @@ xsls    = $(addsuffix .xsl,$(sheets))
 all: $(xsls)
 
 %.xsl: %.xsltxt
-	$(JAVA) -jar $(XSLTXT) toXSL $*.xsltxt $*.xsl || rm -f $*.xsl
+	$(JAVA) -jar $(XSLTXT) toXSL $*.xsltxt $*.xsl || (rm -f $*.xsl; false)
 
 clean:
 	rm -f $(xsls)
