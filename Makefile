@@ -2,7 +2,7 @@
 
 subdirs = bin lisp perl xsl
 
-editable-files = .gitignore todo.org notes.org Makefile
+editable-files = .gitignore notes.org Makefile
 emacs-backups = $(addsuffix ~,$(editable-files))
 
 all:
