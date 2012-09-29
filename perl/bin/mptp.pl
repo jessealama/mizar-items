@@ -150,6 +150,8 @@ sub handled {
 		$answer = 1;
 	    }
 	}
+    } elsif ($item =~ /\A rq [a-zA-Z]+ \z /) {
+	$answer = 0;
     } else {
 	die 'Error: cannot make sense of the item ', $item;
     }
