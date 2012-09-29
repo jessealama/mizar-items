@@ -125,7 +125,11 @@ sub handled {
 	    if ($property eq 'coherence') {
 		$answer = 0;
 	    } elsif ($property eq 'existence') {
-		$answer = 0;
+		if ($kind =~ /\A [k]constructor \z/) {
+		    $answer = 0;
+		} else {
+		    $answer = 1;
+		}
 	    } elsif ($property eq 'uniqueness') {
 		$answer = 0;
 	    } elsif ($property eq 'compatibility') {
