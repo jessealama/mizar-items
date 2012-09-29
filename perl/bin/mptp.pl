@@ -57,10 +57,11 @@ sub to_mptp {
 
 	if (defined $property) {
 	    if ($kind =~ /\A ([lmvrk])constructor \z/) {
+		my $constructor_kind = $1;
 		if ($property eq 'asymmetry') {
 		    $answer = "antisymmetry_${1}${number}_${article}";
 		} else {
-		    $answer = "${property}_${1}${number}_${article}";
+		    $answer = "${property}_${constructor_kind}${number}_${article}";
 		}
 	    } else {
 		die 'Error: unhandled item ', $item;
