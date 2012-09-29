@@ -438,6 +438,11 @@ sub needed_constructors {
 
     # warn 'Results of the inferred-constructors stylesheet:', Dumper (@all_constructors);
 
+    # we used to do the lowercase operation within the
+    # inferred-constructors stylesheet, but that is unnecessary and,
+    # more importantly, very slow
+    @all_constructors = map { lc ($_) } @all_constructors;
+
     my %constructors = ();
     foreach my $constructor (@all_constructors) {
 	if (! defined $constructors{$constructor}) {
