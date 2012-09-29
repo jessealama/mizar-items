@@ -377,13 +377,13 @@ sub needed_non_constructors {
         my $ere_line = $ere_lines[$i];
 	if ($ere_line ne '0') {
 	  my $requirement_name = $REQUIREMENTS{$i};
-	  
+
 	  if (! defined $requirement_name) {
 	    croak ('Error: what is the symbolic name of requirement number ',$i, '?');
 	  }
-	  
+
 	  $items{$requirement_name} = 0;
-	  
+
 	}
       }
 
@@ -423,6 +423,7 @@ sub ere_lines {
 sub needed_constructors {
     my $self = shift;
     my $abs_xml_path = $self->file_with_extension ('xml1');
+    my $dir = $self->get_dirname ();
 
     $self->absolutize ();
     $self->absolutize_environment ();
@@ -436,8 +437,14 @@ sub needed_constructors {
     my $inferred_constructors_stylesheet
 	= $self->path_for_stylesheet ('inferred-constructors');
 
-    my @all_constructors = apply_stylesheet ($inferred_constructors_stylesheet,
-					     $abs_xml_path);
+    my @all_constructors =
+	apply_stylesheet
+	    (
+		$inferred_constructors_stylesheet,
+		$abs_xml_path,
+		undef,
+		{ 'article-directory' => $dir }
+	    );
 
     # warn 'Results of the inferred-constructors stylesheet:', Dumper (@all_constructors);
 
