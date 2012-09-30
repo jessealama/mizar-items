@@ -1,5 +1,7 @@
 #!/bin/bash -
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 # Check whether newparser produces veriable articles
 #
 # No arguments are needed, but the script does use $MIZFILES.
@@ -26,7 +28,7 @@ echo "Working in $workdir...";
 for article in `cat $MIZFILES/mml.lar`; do
     article_dir="$workdir/$article";
     mml_article="$MIZFILES/mml/$article.miz";
-    if [[ -e $mml_article && -f $mml_article && -r $mml_article ]]; then 
+    if [[ -e $mml_article && -f $mml_article && -r $mml_article ]]; then
 	mkdir $article_dir \
 	    || echo "Can't create directory '$article_dir'" 1>&2;
 	cd $article_dir \
@@ -64,7 +66,7 @@ for article in `cat $MIZFILES/mml.lar`; do
 	echo "$article: doesn't exist under '$MIZFILES/mml' or is not a regular readable file" 1>&2;
     fi
 done
-    
+
 cd $pwd;
 
 exit 0;

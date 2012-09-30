@@ -1,5 +1,7 @@
 #!/bin/bash -
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 # General dependence computation
 depends_property () {
 	grep " $1 " * | wc --lines;

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 article=$1;
 /usr/bin/time --format="%U" /mnt/sdb3/alama/mizar-items/verify-quietly.sh $article 2>&1;
 #                                                                                           ^^^^

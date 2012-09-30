@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 # Execute an arbitraty command in a specified directory, specified in
 # the first argument.  Example:
 #

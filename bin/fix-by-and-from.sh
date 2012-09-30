@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 file=$1;
 
 null_script=/Users/alama/sources/mizar/mizar-items/null.pl;

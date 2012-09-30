@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 article=$1;
 
 clusters=$article.ecl;

@@ -1,5 +1,7 @@
 #!/bin/bash -
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 html_stylesheet=/home/mizar-items/xsl4mizar/MHTML/mhtml_main.xsl
 cwd=`pwd`;
 

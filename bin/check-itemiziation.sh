@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 article=$1;
 article_in_harddisk=/mnt/sdb3/alama/itemization/$article;
 article_in_ramdisk=/dev/shm/alama/itemization/$article;

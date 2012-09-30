@@ -1,5 +1,7 @@
 #!/bin/bash -
 
+set -u; # enable some extra checks, such as using uninitialized variables
+
 mmllar=`cat $MIZFILES/mml.lar`;
 itemization_source=/local/data/alama;
 
