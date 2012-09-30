@@ -75,8 +75,9 @@ sheets = addabsrefs \
 
 xsltxts = $(addsuffix .xsltxt,$(sheets))
 xsls    = $(addsuffix .xsl,$(sheets))
+editable-files = $(xsltxts) Makefile
 
-emacs-backups = $(addsuffix ~,$(xsltxts))
+emacs-backups = $(addsuffix ~,$(editable-files))
 
 .PHONY: all clean
 
