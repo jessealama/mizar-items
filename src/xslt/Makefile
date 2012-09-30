@@ -1,6 +1,3 @@
-JAVA = java
-XSLTXT = xsltxt.jar
-
 sheets = addabsrefs \
          bogus \
          conditions-and-properties \
@@ -78,12 +75,16 @@ editable-files = $(xsltxts) Makefile
 
 emacs-backups = $(addsuffix ~,$(editable-files))
 
+# functions
+xslize = java -jar xsltxt.jar toXSL $(1) $(2)
+xslize-or-kill = $(call xslize,$(1),$(2)) || (rm -f $(2); false)
+
 .PHONY: all clean
 
 all: $(xsls)
 
 %.xsl: %.xsltxt
-	$(JAVA) -jar $(XSLTXT) toXSL $*.xsltxt $*.xsl || (rm -f $*.xsl; false)
+	$(call xslize-or-kill,$*.xsltxt,$*.xsl)
 
 clean:
 	rm -f $(xsls)
