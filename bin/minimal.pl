@@ -1,1 +1,0 @@
-../perl/bin/minimal.pl
