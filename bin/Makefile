@@ -20,7 +20,9 @@ emacs-backups = $(addsuffix ~,$(shs))
 
 
 all:
-	# nothing to do
+	ok="1"; \
+        for script in $(shs); do bash -n $$script || ok="0"; done; \
+        [ "$$ok" = "1" ];
 
 clean:
 	rm -f $(emacs-backups)
