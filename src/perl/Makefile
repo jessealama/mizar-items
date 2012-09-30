@@ -16,3 +16,4 @@ clean:
 	rm -f $(emacs-backups)
 
 all:
+	# nothing yet
