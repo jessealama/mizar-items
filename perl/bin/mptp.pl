@@ -50,10 +50,10 @@ sub to_mptp {
 	return $already_resolved;
     }
 
+    my $answer = undef;
+
     if ($item =~ / \A ([a-z_0-9]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []])? \z /) {
 	(my $article, my $kind, my $number, my $property) = ($1, $2, $3, $5);
-
-	my $answer = undef;
 
 	if (defined $property) {
 	    if ($kind =~ /\A ([lmvrk])constructor \z/) {
@@ -100,7 +100,8 @@ sub to_mptp {
 	$mptp_for_item{$item} = $answer;
 
 	return $answer;
-
+    } elsif ($item =~ /rq[a-zA-Z]/) {
+	$answer = $item;
     } else {
 	die 'Error: cannot make sense of the item ', $item;
     }
@@ -152,7 +153,7 @@ sub handled {
 	    }
 	}
     } elsif ($item =~ /\A rq [a-zA-Z]+ \z /) {
-	$answer = 0;
+	$answer = 1;
     } else {
 	die 'Error: cannot make sense of the item ', $item;
     }
