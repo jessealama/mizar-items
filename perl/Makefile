@@ -7,3 +7,6 @@ all:
 
 clean:
 	for dir in $(subdirs); do make -C $$dir clean; done
+
+check:
+	for dir in $(subdirs); do make -C $$dir check; done
