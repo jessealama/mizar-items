@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all clean check
 
 shell-scripts = check-itemiziation \
                 check-newparser \
@@ -26,3 +26,5 @@ all:
 
 clean:
 	rm -f $(emacs-backups)
+
+check: all
