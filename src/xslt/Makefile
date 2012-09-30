@@ -1,6 +1,5 @@
 JAVA = java
 XSLTXT = xsltxt.jar
-CAT = cat
 
 sheets = addabsrefs \
          bogus \
