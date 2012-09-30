@@ -2009,13 +2009,7 @@ sub needed_items {
 
 sub list_as_token_string {
   my @lst = @{shift ()};
-  my $val = '';
-  my $num_elements = scalar @lst;
-  for (my $i = 0; $i < $num_elements; $i++) {
-    $val .= $lst[$i];
-    $val .= ',';
-  }
-  return $val;
+  return ',' . join (',', @lst) . ',';
 }
 
 sub fragment_number {
