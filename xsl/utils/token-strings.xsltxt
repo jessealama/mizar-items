@@ -1,0 +1,75 @@
+stylesheet "1.0";
+
+//////////////////////////////////////////////////////////////////////
+// Token string utilities
+//////////////////////////////////////////////////////////////////////
+
+tpl token-string-is-empty (#token-string) {
+  if [$token-string = ",,"] {
+    "1";
+  } else {
+    "0";
+  }
+}
+
+tpl token-string-tail (#token-string) {
+  $empty = token-string-is-empty (#token-string = $token-string);
+  if [$empty = "1"] {
+    msg terminate="yes" "Error: cannot take the tail of an empty token string.";
+  } else {
+    $after-first-comma = `substring-after ($token-string, ",")`;
+    $after-second-comma = `substring-after ($after-first-comma, ",")`;
+    if [$after-second-comma = ""] {
+      ",,";
+    } else {
+      `concat (",", $after-second-comma)`;
+    }
+  }
+}
+
+tpl token-string-head (#token-string) {
+  $empty = token-string-is-empty (#token-string = $token-string);
+  if [$empty = "1"] {
+    msg terminate="yes" "Error: cannot take the head of an empty token string.";
+  } else {
+    $after-first-comma = `substring-after ($token-string, ",")`;
+    `substring-before ($after-first-comma, ",")`;
+  }
+}
+
+// Determine whether $string is actually a token string.  This means that it is either empty or (i) begins with a comma, (ii) contains a second comma, (iii) the substring between the first and second comma is non-empty, and (iv) the substring starting at the second comma is a valid token string.
+tpl is-valid-token-string (#string) {
+  if [starts-with ($string, ",")] {
+    $after-first-comma = `substring-after ($string, ",")`;
+    $between-first-and-second-comma = `substring-before ($after-first-comma, ",")`;
+    $after-second-comma = `substring-after ($after-first-comma, ",")`;
+    if [$after-second-comma = ""] {
+      "1";
+    } else {
+      $tail = `concat (",", $after-second-comma)`;
+      is-valid-token-string (#string = $tail);
+    }
+  } else {
+    "0";
+  }
+}
+
+tpl count-items-in-token-string (#token-string) {
+  $empty = token-string-is-empty (#token-string = $token-string);
+  if [$empty = "1"] {
+    "0";
+  } else {
+    $tail = token-string-tail (#token-string = $token-string);
+    $items-in-tail = count-items-in-token-string (#token-string = $tail);
+    `$items-in-tail + 1`;
+  }
+}
+
+tpl add-to-token-string (#item, #token-string) {
+  $empty = token-string-is-empty (#token-string = $token-string);
+  if [$empty = "1"] {
+    `concat (",", $item, ",")`;
+  } else {
+    `concat (",", $item, $token-string)`;
+  }
+}
