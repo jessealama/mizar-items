@@ -593,6 +593,7 @@ sub verify {
     # Ugh
     delete $parameters{'fast-theorems-and-schemes'};
     delete $parameters{'randomize'};
+    delete $parameters{'debug'};
 
     return Mizar::verifier ($self->get_path (),
 			    \%parameters);
