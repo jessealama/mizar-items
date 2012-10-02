@@ -211,7 +211,12 @@ sub path_for_stylesheet {
     my $self = shift;
     my $sheet = shift;
     my $stylesheet_home = $self->get_stylesheet_home ();
-    return "${stylesheet_home}/${sheet}.xsl";
+    my $sheet_path = "${stylesheet_home}/${sheet}.xsl";
+    if (ensure_readable_file ($sheet_path)) {
+	return $sheet_path;
+    } else {
+	croak 'Error: the ', $sheet, ' stylesheet could not be found at the expected location', "\n", "\n", $sheet_path, "\n";
+    }
 }
 
 my $xml_parser = XML::LibXML->new (suppress_warnings => 1, # quiet, please
