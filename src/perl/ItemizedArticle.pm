@@ -1307,6 +1307,8 @@ sub dependencies {
 		    @fragment_deps = @non_structure_deps;
 		}
 
+		# warn 'Dependencies of ', $item, ' are:', "\n", Dumper (@fragment_deps);
+
 		my %deps = ();
 		foreach my $dep (@fragment_deps) {
 		    my $resolved_dep = $self->resolve_local_item ($dep);
@@ -1314,6 +1316,9 @@ sub dependencies {
 			$deps{$resolved_dep} = 0;
 		    }
 		}
+
+		# warn 'After resolving, dependencies of ', $item, ' are:', "\n", Dumper (%deps);
+
 
 		# Function case: every function constructor depends on its
 		# existence and uniqueness conditions
@@ -1334,7 +1339,9 @@ sub dependencies {
 	} else {
 	    croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
 	}
+
     }
+
 
     # Another pass to deal with coherence and compatibility conditions
     foreach my $item (@items) {
