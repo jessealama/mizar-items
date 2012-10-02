@@ -12,7 +12,7 @@ use File::Temp qw(tempdir);
 use Carp qw(croak);
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../src/perl";
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 use LocalDatabase;
 
@@ -22,8 +22,8 @@ my $man = 0;
 my $help = 0;
 my $paranoid = 0;
 my $minimize_whole_article = 0;
-my $script_home = "$RealBin/../../bin";
-my $stylesheet_home = "$RealBin/../../xsl";
+my $script_home = "$RealBin";
+my $stylesheet_home = "$RealBin/../src/xslt";
 my $nice = 0;
 my $num_jobs = 1;
 my $workdir = undef;
