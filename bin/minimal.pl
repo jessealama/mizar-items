@@ -11,20 +11,20 @@ use Carp qw(croak);
 use IPC::Run qw(run);
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../src/perl";
 
 use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 use Article;
 
 my $paranoid = 0;
 my $verbose = 0;
-my $debug = 0;
+my $opt_debug = 0;
 my $man = 0;
 my $help = 0;
 my $confirm_only = 0;
 my $checker_only = 0;
-my $script_home = "$RealBin/../../bin";
-my $stylesheet_home = "$RealBin/../../xsl";
+my $script_home = "$RealBin";
+my $stylesheet_home = "$RealBin/../src/xslt";
 my $fast_theorems = 0;
 my $fast_schemes = 0;
 my $timeout = 600; # seconds
@@ -36,7 +36,7 @@ GetOptions(
     'help|?' => \$help,
     'man' => \$man,
     'verbose'  => \$verbose,
-    'debug' => \$debug,
+    'debug' => \$opt_debug,
     'paranoid' => \$paranoid,
     'timeout' => \$timeout,
     'fast-schemes' => \$fast_schemes,
@@ -72,17 +72,20 @@ if (defined $suggested_clusters) {
 	$a->minimize_extension_with_suggestion ('ecl',
 						\@suggested_clusters,
 						{ 'checker-only' => $checker_only,
-						  'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes } );
+						  'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes,
+						  'debug' => $opt_debug} );
     } else {
 	$a->minimize_with_suggested_environment ( { 'ecl' => \@suggested_clusters },
 						  { 'checker-only' => $checker_only,
-						    'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes } )
+						    'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes, 'debug' => $opt_debug } )
     }
 } else {
     $a->minimize (
 	{ 'checker-only' => $checker_only,
 	  'fast-theorems-and-schemes' => ($fast_theorems && $fast_schemes),
-	  'randomize' => $opt_randomize}
+	  'randomize' => $opt_randomize,
+	  'debug' => $opt_debug,
+      }
     );
 }
 

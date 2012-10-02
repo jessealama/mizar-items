@@ -16,7 +16,7 @@ use IPC::Cmd qw(can_run);
 use Pod::Usage;
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../src/perl";
 use Utils qw(ensure_directory ensure_readable_file extension strip_extension);
 use Mizar;
 use Article;
@@ -24,8 +24,8 @@ use LocalDatabase;
 use Xsltproc qw(apply_stylesheet);
 
 my $paranoid = 0;
-my $stylesheet_home = "$RealBin/../../xsl";
-my $script_home = "$RealBin/../../bin";
+my $stylesheet_home = "$RealBin/../src/xslt";
+my $script_home = "$RealBin";
 my $verbose = 0;
 my $debug = 0;
 my $man = 0;
