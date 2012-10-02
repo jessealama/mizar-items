@@ -1189,18 +1189,31 @@ sub resolve_local_item {
     my $article_name = $self->get_article_name ();
     my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
 
-    if ($item =~ /\A ckb ([0-9]+) : ([^:]+) : [0-9]+ /) {
-	(my $fragment_number, my $item_kind) = ($1, $2);
-	my $fragment = "${article_name}:fragment:${fragment_number}";
+    if ($item =~ /\A ckb ([0-9]+) : ([^:]+) : [0-9]+ ( [[] ([a-z]{2}) []] )? \z/) {
+	(my $fragment_number, my $item_kind, my $tag) = ($1, $2, $4);
+	my $fragment = defined $tag ?
+	    "${article_name}:fragment:${fragment_number}[${tag}]"
+		: "${article_name}:fragment:${fragment_number}";
 	if (! defined $fragment_to_item_table{$fragment}) {
 	    croak ('Error: what in the world is \'', $fragment, '\'?');
 	}
 	my @generated_items = @{$fragment_to_item_table{$fragment}};
+
+	# warn 'Generated items of ', $fragment, ' (coming from item ', $item, ') are:', "\n", Dumper (@generated_items);
+
 	my $answer = undef;
 	foreach my $generated_item (@generated_items) {
 	    my $this_kind = item_kind ($generated_item);
 	    if ($this_kind eq $item_kind) {
-		return $generated_item;
+		if (defined $tag && $generated_item =~ / [[] $tag []] \z/) {
+		    return $generated_item;
+		} elsif (defined $tag) {
+		    # nothing
+		} elsif ($generated_item =~ / [[] [a-z]+ []] \z/) {
+		    # nothing
+		} else {
+		    return $generated_item;
+		}
 	    }
 
 	    # Lemma case
