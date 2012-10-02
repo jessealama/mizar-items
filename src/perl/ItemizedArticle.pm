@@ -261,13 +261,7 @@ sub fragment_less_than {
     my $b = shift;
     my $a_num = fragment_number ($a);
     my $b_num = fragment_number ($b);
-    if ($a_num < $b_num) {
-	return -1;
-    } elsif ($a_num == $b_num) {
-	return 0;
-    } else {
-	return 1;
-    }
+    return ($a_num cmp $b_num);
 }
 
 sub fragment_for_item {
