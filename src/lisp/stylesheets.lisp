@@ -1,7 +1,7 @@
 
 (in-package :mizar)
 
-(defparameter *stylesheet-home* #p"/Users/alama/sources/mizar/mizar-items/xsl/")
+(defparameter *stylesheet-home* #p"/Users/alama/sources/mizar/mizar-items/src/xslt/")
 
 (defun path-for-stylesheet (sheet)
   (let ((xsl (format nil "~a.xsl" sheet)))

@@ -6,7 +6,7 @@
 (defun file-in-mizar-items-dir (filename)
   (concatenate 'string *mizar-items-root* "/" filename))
 
-(defparameter *mizar-items-xsl4mizar-root* "/Users/alama/sources/mizar/mizar-items/xsl")
+(defparameter *mizar-items-xsl4mizar-root* "/Users/alama/sources/mizar/mizar-items/src/xslt")
 
 (defun file-in-xsl4mizar-dir (filename)
   (concatenate 'string *mizar-items-xsl4mizar-root* "/" filename))
