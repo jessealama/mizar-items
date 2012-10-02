@@ -922,6 +922,10 @@ sub minimize_elements {
     my $parameters_ref = shift;
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
+    if (defined $parameters{'debug'} && $parameters{'debug'}) {
+	warn 'Minimizing ', $root_element_name, ' elements for ', $path, ' from ', $begin, ' to ', $end, '...';
+    }
+
     if ($end < $begin) {
 
 	return \%table;
@@ -1738,7 +1742,7 @@ sub minimize_environment {
 
 sub write_ere_table {
 
-    warn 'writing new ere table';
+    # warn 'writing new ere table';
 
     my $self = shift;
     my %table = %{shift ()};
@@ -1774,7 +1778,7 @@ sub write_ere_table {
 
 sub minimize_by_requirement {
 
-    warn 'we are minimizing requirements';
+    # warn 'we are minimizing requirements';
 
     my $self = shift;
     my %table = %{shift ()};
@@ -1802,12 +1806,12 @@ sub minimize_by_requirement {
 	if (! $deletable) {
 
 	    # DEBUG
-	    warn 'We cannot dump requirement #', $end, '; errors:', "\n", `cat $err_path`;
+	    # warn 'We cannot dump requirement #', $end, '; errors:', "\n", `cat $err_path`;
 
 	    $table{$end} = 0;
 	    $self->write_ere_table (\%table, \%original_requirements);
 	} else {
-	    warn 'We can dump requirement #', $begin;
+	    # warn 'We can dump requirement #', $begin;
 	}
 
 	return \%table;
@@ -1821,12 +1825,12 @@ sub minimize_by_requirement {
 
 	if (! $begin_deletable) {
 
-	    warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
+	    # warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
 
 	    $table{$begin} = 0;
 	    $self->write_ere_table (\%table, \%original_requirements);
 	} else {
-	    warn 'We can dump requirement #', $begin;
+	    # warn 'We can dump requirement #', $begin;
 	}
 
 	delete $table{$end};
@@ -1837,12 +1841,12 @@ sub minimize_by_requirement {
 
 	if (! $end_deletable) {
 
-	    warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
+	    # warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
 
 	    $table{$begin} = 0;
 	    $self->write_ere_table (\%table, \%original_requirements);
 	} else {
-	    warn 'We can dump requirement #', $end;
+	    # warn 'We can dump requirement #', $end;
 	}
 
 	return \%table;
@@ -1866,7 +1870,7 @@ sub minimize_by_requirement {
 	if ($lower_half_safe) {
 
 	    foreach my $i ($begin .. $begin + $half_segment_length) {
-		warn 'We can dump requirement #', $i;
+		# warn 'We can dump requirement #', $i;
 	    }
 
 	    return ($self->minimize_by_requirement (\%table,
@@ -1877,7 +1881,7 @@ sub minimize_by_requirement {
 
 	} else {
 
-	    warn 'We cannot dump all requirements between ', $begin, ' and ', $begin + $half_segment_length, '; errors:', "\n", `cat $err_path`;
+	    # warn 'We cannot dump all requirements between ', $begin, ' and ', $begin + $half_segment_length, '; errors:', "\n", `cat $err_path`;
 
 	    # Restore the lower half
 	    foreach my $i ($begin .. $begin + $half_segment_length) {
@@ -1935,11 +1939,11 @@ sub minimize_requirements {
 					    $NUM_REQUIREMENTS - 1,
 					    \%parameters)};
 
-    foreach my $needed_index (keys %minimal_needed) {
-	warn 'We really need requirement #', $needed_index;
-    }
+    # foreach my $needed_index (keys %minimal_needed) {
+    # 	warn 'We really need requirement #', $needed_index;
+    # }
 
-    warn 'After minimizing requirements, the ere file looks like:', "\n", `cat $ere`;
+    # warn 'After minimizing requirements, the ere file looks like:', "\n", `cat $ere`;
 
     return 1;
 
@@ -1995,6 +1999,10 @@ sub needed_items {
 
     my @constructor_dependencies = $self->needed_constructors ();
     my @property_dependencies = $self->properties_of_needed_constructors ();
+
+    my $path = $self->get_path ();
+
+    # warn 'Property dependencies for :', $path, "\n", Dumper (@property_dependencies);
 
     push (@needed, @non_constructor_dependencies);
     push (@needed, @constructor_dependencies);
