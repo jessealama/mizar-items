@@ -14,7 +14,7 @@ use IPC::Run qw(run);
 use charnames qw( :full ); # for referring to characters in regular expressions
 
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../src/perl/";
 
 use Utils qw(ensure_readable_file ensure_directory ensure_executable);
 use ItemizedArticle;
@@ -22,8 +22,8 @@ use ItemizedArticle;
 # Set up an XML parser that we might use
 my $xml_parser = XML::LibXML->new ();
 
-my $stylesheet_home = "$RealBin/../../xsl";
-my $script_home = "$RealBin/../../bin";
+my $stylesheet_home = "$RealBin/../src/xslt";
+my $script_home = "$RealBin";
 my $verbose = 0;
 my $man = 0;
 my $help = 0;
@@ -76,17 +76,19 @@ my %item_to_fragment_table = %{$itemized_article->get_item_to_fragment_table ()}
 
 # memoize ('item_less_than');
 sub item_less_than {
-    my $item_1 = $a;
-    my $item_2 = $b;
+    my $item_1 = shift;
+    my $item_2 = shift;
 
     my $fragment_1 = $itemized_article->fragment_for_item ($item_1);
     my $fragment_2 = $itemized_article->fragment_for_item ($item_2);
+
+    # warn 'fragment for ', $item_1, ' is ', $fragment_1, ' ; fragment for ', $item_2, ' is ', $fragment_2;
 
     return $itemized_article->fragment_less_than ($fragment_1, $fragment_2);
 
 }
 
-foreach my $item (sort { item_less_than } keys %dependencies) {
+foreach my $item (sort { item_less_than ($a,$b) } keys %dependencies) {
     my @deps = @{$dependencies{$item}};
     # my @sorted_deps = sort { item_less_than } @deps;
     print $item;
