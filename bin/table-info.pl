@@ -13,16 +13,16 @@ sub ensure_readable_file {
   my $file = shift;
 
   if (! -e $file) {
-      print {*STDERR} 'Error: ', $file, ' does not exist.';
+      print {*STDERR} 'Error: ', $file, ' does not exist.', "\n";
       exit 1;
   }
   if (! -f $file) {
-      print {*STDERR} 'Error: ', $file, ' is not a file.';
+      print {*STDERR} 'Error: ', $file, ' is not a file.', "\n";
       exit 1;
   }
 
   if (! -r $file) {
-      print {*STDERR} 'Error: ', $file, ' is unreadable.';
+      print {*STDERR} 'Error: ', $file, ' is unreadable.', "\n";
   }
 
   return;
