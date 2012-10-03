@@ -8,15 +8,15 @@ use File::Basename qw(basename dirname);
 use Getopt::Long;
 
 use FindBin qw($RealBin);
-use lib "${RealBin}/../lib";
+use lib "${RealBin}/../src/perl";
 
 use Article;
 use Utils qw(ensure_readable_file);
 
 my $help = 0;
 my $man = 0;
-my $stylesheet_home = "$RealBin/../../xsl";
-my $script_home = "$RealBin/../../bin";
+my $stylesheet_home = "$RealBin/../src/xslt";
+my $script_home = "$RealBin";
 GetOptions (
     'help' => \$help,
     'man' => \$man,
