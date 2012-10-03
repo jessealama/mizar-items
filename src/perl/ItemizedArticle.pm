@@ -261,7 +261,34 @@ sub fragment_less_than {
     my $b = shift;
     my $a_num = fragment_number ($a);
     my $b_num = fragment_number ($b);
-    return ($a_num cmp $b_num);
+    if ($a_num < $b_num) {
+	return -1;
+    } elsif ($a_num == $b_num) {
+
+	if ($a =~ / [[] ([a-z]+) []] \z/) {
+	    my $a_tag = $1;
+	    if ($b =~ / [[] ([a-z]+) []] \z/) {
+		my $b_tag = $1;
+		if ($a_tag eq $b_tag) {
+		    return 0;
+		} elsif ($a_tag eq 'dt') {
+		    return 1;
+		} elsif ($b_tag eq 'dt') {
+		    return -1;
+		} else {
+		    return 0;
+		}
+	    } else {
+		return -1;
+	    }
+	} elsif ($b =~ / [[] ([a-z]+) []] \z/) {
+	    return -1;
+	} else {
+	    return 0;
+	}
+    } else {
+	return 1;
+    }
 }
 
 sub fragment_for_item {
@@ -280,7 +307,7 @@ sub fragment_for_item {
 	    croak 'Error: the entry in the item-to-fragment table of ', $article, ' for \'', $item, '\' is undefined.';
 	}
 
-    } elsif ($item =~ / (.+) \[ .+ \] \z /) {
+    } elsif ($item =~ / (.+) [[] .+ []] \z /) {
 	my $item_sans_condition = $1;
 	return $self->fragment_for_item ($item_sans_condition);
     } else {
@@ -670,6 +697,12 @@ sub load_correctness_conditions {
 
 }
 
+sub items_generated_by_fragment_number {
+    my $self = shift;
+    my $fragment_number = shift;
+
+}
+
 sub items_generated_by_fragment {
     my $self = shift;
     my $fragment = shift;
@@ -681,6 +714,9 @@ sub items_generated_by_fragment {
     }
 
     my %fragment_to_item_table = %{$fragment_to_item_table_ref};
+
+    # DEBUG
+    warn 'Fragment-to-item table:', "\n", Dumper (%fragment_to_item_table);
 
     my @items = defined $fragment_to_item_table{$fragment} ? @{$fragment_to_item_table{$fragment}} : ();
 
