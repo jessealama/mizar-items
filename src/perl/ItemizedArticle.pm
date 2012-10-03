@@ -1152,17 +1152,18 @@ sub resolve_local_item {
 
     my $article_name = $self->get_article_name ();
     my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
+    my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
 
-    if ($item =~ /\A ckb ([0-9]+) : ([^:]+) : [0-9]+ ( [[] ([a-z]+) []] )? \z/) {
+    if ($item =~ /\A ckb ([0-9]+) [:] ([a-z]+) [:] [0-9]+ ( [[] ([a-z]+) []] )? \z/) {
 	(my $fragment_number, my $item_kind, my $tag) = ($1, $2, $4);
 	my $fragment = "${article_name}:fragment:${fragment_number}" . (defined $tag ? '[' . $code_of_property{$tag} .']' : '');
 
 	if (defined $tag) {
 	  # nothing more to do
 	} else {
-	  if ($item_kind =~ /\A ([krv]) constructor \z/) {
+	  if ($item_kind =~ /\A ([gkruv]) constructor \z/) {
 	    $fragment .= "[${1}c]";
-	  } elsif ($item_kind =~ /\A ([kmrv]) pattern \z/) {
+	  } elsif ($item_kind =~ /\A ([gjklmruv]) pattern \z/) {
 	    $fragment .= "[${1}p]";
 	  } elsif ($item_kind eq 'deftheorem') {
 	    $fragment .= '[dt]';
