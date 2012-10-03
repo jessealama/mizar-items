@@ -1219,7 +1219,7 @@ sub resolve_local_item {
 	} else {
 	  if ($item_kind =~ /\A ([krv]) constructor \z/) {
 	    $fragment .= "[${1}c]";
-	  } elsif ($item_kind =~ /\A ([krv]) pattern \z/) {
+	  } elsif ($item_kind =~ /\A ([kmrv]) pattern \z/) {
 	    $fragment .= "[${1}p]";
 	  } elsif ($item_kind eq 'deftheorem') {
 	    $fragment .= '[dt]';
