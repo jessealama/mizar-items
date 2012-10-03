@@ -13,29 +13,36 @@ sub ensure_readable_file {
   my $file = shift;
 
   if (! -e $file) {
-    croak ('Error: ', $file, ' does not exist.');
+      print {*STDERR} 'Error: ', $file, ' does not exist.';
+      exit 1;
   }
   if (! -f $file) {
-    croak ('Error: ', $file, ' is not a file.');
+      print {*STDERR} 'Error: ', $file, ' is not a file.';
+      exit 1;
   }
 
   if (! -r $file) {
-    croak ('Error: ', $file, ' is unreadable.');
+      print {*STDERR} 'Error: ', $file, ' is unreadable.';
   }
 
-  return 1;
+  return;
 }
 
-my $help = 0;
-my $man = 0;
-my $table_file = undef;
+my $opt_help = 0;
+my $opt_man = 0;
 
-GetOptions('help|?' => \$help,
-           'man' => \$man,
-	   'table=s' => \$table_file)
-  or pod2usage(2);
-pod2usage(1) if $help;
-pod2usage(-exitstatus => 0, -verbose => 2) if $man;
+GetOptions(
+    'help|?' => \$opt_help,
+    'man' => \$opt_man
+) or pod2usage (2);
+
+if ($help) {
+    pod2usage(1);
+}
+
+if ($man) {
+    pod2usage(-exitstatus => 0, -verbose => 2);
+}
 
 if (! defined $table_file && ! defined $ENV{'DEPENDENCY_TABLE'}) {
   pod2usage (1);
