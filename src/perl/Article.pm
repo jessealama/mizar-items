@@ -408,15 +408,10 @@ sub ere_lines {
 
     my @trimmed_ere_lines = map { delete_space ($_); } @ere_lines; # it seems there can be extra spaces in the file
 
-    # sanity check
-    if (scalar @trimmed_ere_lines != $NUM_REQUIREMENTS) {
-	croak ('Error: the number of requirements in the ere file ', $ere, ' differs from the number that we expect (', $NUM_REQUIREMENTS, ').');
-    }
-
     if (wantarray) {
 	return @trimmed_ere_lines;
     } else {
-	return join (' ', @ere_lines);
+	return join (' ', @trimmed_ere_lines);
     }
 }
 
