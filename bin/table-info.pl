@@ -36,21 +36,19 @@ GetOptions(
     'man' => \$opt_man
 ) or pod2usage (2);
 
-if ($help) {
+if ($opt_help) {
     pod2usage(1);
 }
 
-if ($man) {
+if ($opt_man) {
     pod2usage(-exitstatus => 0, -verbose => 2);
 }
 
-if (! defined $table_file && ! defined $ENV{'DEPENDENCY_TABLE'}) {
-  pod2usage (1);
+if (scalar @ARGV == 0) {
+    pod2usage (1);
 }
 
-if (! defined $table_file && defined $ENV{'DEPENDENCY_TABLE'}) {
-  $table_file = $ENV{'DEPENDENCY_TABLE'};
-}
+my $table_file = shift @ARGV;
 
 ensure_readable_file ($table_file);
 
