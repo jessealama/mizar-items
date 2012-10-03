@@ -389,21 +389,14 @@ sub load_fragment_to_item_table {
     my %fragment_to_item_table = ();
 
     foreach my $fragment (values %item_to_fragment_table) {
-	if ($fragment =~ / : fragment : ([0-9]+) /) {
-	    my $fragment_proper = "${article_name}:fragment:${1}";
-
-	    my @items = ();
-	    foreach my $item (keys %item_to_fragment_table) {
-		my $other_fragment = $item_to_fragment_table{$item};
-		if ($other_fragment =~ / ${fragment_proper}/) {
-		    push (@items, $item);
-		}
-	    }
-	    $fragment_to_item_table{$fragment_proper} = \@items;
-	} else {
-	    croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
+      my @items = ();
+      foreach my $item (keys %item_to_fragment_table) {
+	my $other_fragment = $item_to_fragment_table{$item};
+	if ($other_fragment eq $fragment) {
+	  push (@items, $item);
 	}
-
+	$fragment_to_item_table{$fragment} = \@items;
+      }
     }
 
     # warn 'Setting the fragment-to-item table to:', Dumper (%fragment_to_item_table);
@@ -698,12 +691,6 @@ sub load_correctness_conditions {
     $self->load_function_uniqueness_conditions ();
     $self->load_constructor_coherence_conditions ();
     $self->load_redefined_constructor_compatibility_conditions ();
-
-}
-
-sub items_generated_by_fragment_number {
-    my $self = shift;
-    my $fragment_number = shift;
 
 }
 
@@ -1223,19 +1210,31 @@ sub resolve_local_item {
     my $article_name = $self->get_article_name ();
     my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
 
-    if ($item =~ /\A ckb ([0-9]+) : ([^:]+) : [0-9]+ ( [[] ([a-z]{2}) []] )? \z/) {
+    if ($item =~ /\A ckb ([0-9]+) : ([^:]+) : [0-9]+ ( [[] ([a-z]+) []] )? \z/) {
 	(my $fragment_number, my $item_kind, my $tag) = ($1, $2, $4);
-	my $fragment = defined $tag ?
-	    "${article_name}:fragment:${fragment_number}[${tag}]"
-		: "${article_name}:fragment:${fragment_number}";
+	my $fragment = "${article_name}:fragment:${fragment_number}" . (defined $tag ? '[' . $code_of_property{$tag} .']' : '');
+
+	if (defined $tag) {
+	  # nothing more to do
+	} else {
+	  if ($item_kind =~ /\A ([krv]) constructor \z/) {
+	    $fragment .= "[${1}c]";
+	  } elsif ($item_kind =~ /\A ([krv]) pattern \z/) {
+	    $fragment .= "[${1}p]";
+	  } elsif ($item_kind eq 'deftheorem') {
+	    $fragment .= '[dt]';
+	  } elsif ($item_kind =~ / \A ([krv]) definiens \z /) {
+	    $fragment .= "[${1}f]";
+	  }
+	}
+
 	if (! defined $fragment_to_item_table{$fragment}) {
-	    croak ('Error: what in the world is \'', $fragment, '\'?');
+	    croak ('Error: what in the world is \'', $fragment, '\'? We cannot resolve \'', $item, '\'.');
 	}
 	my @generated_items = @{$fragment_to_item_table{$fragment}};
-
+	
 	# warn 'Generated items of ', $fragment, ' (coming from item ', $item, ') are:', "\n", Dumper (@generated_items);
 
-	my $answer = undef;
 	foreach my $generated_item (@generated_items) {
 	    my $this_kind = item_kind ($generated_item);
 	    if ($this_kind eq $item_kind) {
@@ -1286,6 +1285,7 @@ sub dependencies {
     my @items = @{$self->get_all_items ()};
 
     # warn 'Item-to-fragment table is:', "\n", Dumper (%item_to_fragment_table);
+    # warn 'Fragment-to-item table is:', "\n", Dumper (%fragment_to_item_table);
 
     my %dependencies = ();
 
@@ -1383,7 +1383,7 @@ sub dependencies {
 	    my @deps = @{$dependencies{$item}};
 	    my @more_deps = @deps; # we may add further dependencies
 	    foreach my $dep (@deps) {
-		if ($dep =~ /\A ${article_name} : [^:]+ : [0-9]+ \z/) {
+		if ($dep =~ /\A ${article_name} [:] [^:]+ [:] [0-9]+ \z/) {
 		    my $fragment_for_dep = $item_to_fragment_table{$dep};
 		    if (! defined $fragment_for_dep) {
 			croak ('Error: we were unable to look up the fragment corresponding to ', $dep, '.');
@@ -1392,9 +1392,9 @@ sub dependencies {
 			my $proper_fragment_for_dep = "${article_name}:fragment:${1}";
 
 			my $generated_items_ref
-			    = $fragment_to_item_table{$proper_fragment_for_dep};
+			    = $fragment_to_item_table{$fragment_for_dep};
 			if (! defined $generated_items_ref) {
-			    croak ('Error: we were unable to find an entry for ', $proper_fragment_for_dep, ' in the fragment-to-item table.');
+			    croak ('Error: we were unable to find an entry for ', $fragment_for_dep, ' in the fragment-to-item table.  We were trying to deal with coherence and compatibility conditions for \'', $item, '\'.  We are inspecting the dependency \'', $dep, '\', whose fragment is \'', $fragment_for_dep, '\'.');
 			}
 			my @generated_items = @{$generated_items_ref};
 
@@ -1422,13 +1422,13 @@ sub dependencies {
 		if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) /) {
 		    my $proper_fragment = "${article_name}:fragment:${1}";
 		    my $generated_items_ref
-			= $fragment_to_item_table{$proper_fragment};
+			= $fragment_to_item_table{$fragment};
 		    if (! defined $generated_items_ref) {
-			croak ('Error: there is no entry for ', $proper_fragment, ' in the fragment-to-item table.');
+			croak ('Error: there is no entry for ', $fragment, ' in the fragment-to-item table.');
 		    }
 		    my @generated_items = @{$generated_items_ref};
 
-		    # warn 'The fragment ', $proper_fragment, ' generates these items:', "\n", Dumper (@generated_items);
+		    # warn 'The fragment ', $fragment, ' generates these items:', "\n", Dumper (@generated_items);
 
 		    my @conditions = grep { / \[  ([a-z]+)  \] \z/ } @generated_items;
 		    foreach my $condition (@conditions) {
