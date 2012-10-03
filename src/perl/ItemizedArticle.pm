@@ -271,10 +271,14 @@ sub fragment_less_than {
 		my $b_tag = $1;
 		if ($a_tag eq $b_tag) {
 		    return 0;
-		} elsif ($a_tag eq 'dt') {
+		} elsif ($a_tag eq 'dt') { # deftheorems last
 		    return 1;
 		} elsif ($b_tag eq 'dt') {
 		    return -1;
+		} elsif ($a_tag eq 'ch') { # coherence first
+		    return -1;
+		} elsif ($b_tag eq 'ch') {
+		    return 1;
 		} else {
 		    return 0;
 		}
