@@ -1430,9 +1430,9 @@ sub dependencies {
 
 		    # warn 'The fragment ', $fragment, ' generates these items:', "\n", Dumper (@generated_items);
 
-		    my @conditions = grep { / \[  ([a-z]+)  \] \z/ } @generated_items;
+		    my @conditions = grep { / [[] ([a-z]+) []] \z/ } @generated_items;
 		    foreach my $condition (@conditions) {
-			if ($condition !~ / \[  ( compatibility | coherence ) \] \z/) {
+			if ($condition !~ / [[] (compatibility | coherence) []] \z/) {
 			    if (defined $dependencies{$condition}) {
 				my @deps = @{$dependencies{$condition}};
 				push (@deps, $item);
