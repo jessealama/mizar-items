@@ -1172,7 +1172,7 @@ sub resolve_local_item {
 	}
 
 	if (! defined $fragment_to_item_table{$fragment}) {
-	    croak ('Error: what in the world is \'', $fragment, '\'? We cannot resolve \'', $item, '\'.  The fragment-to-item table looks like:', "\n", Dumper (%fragment_to_item_table));
+	    croak ('Error: what in the world is \'', $fragment, '\'? We cannot resolve \'', $item, '\'.  The fragment-to-item table looks like:', "\n", Dumper (%fragment_to_item_table), "\n", 'and the item-to-fragment table looks like', "\n", Dumper (%item_to_fragment_table));
 	}
 	my @generated_items = @{$fragment_to_item_table{$fragment}};
 
