@@ -1302,7 +1302,7 @@ sub dependencies {
 
 	# warn 'In ItemizedArticle, getting dependencies of fragment ', $fragment, ', which comes from ', $item;
 
-	if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) (\[ ([a-z]{2}) \])? /) {
+	if ($fragment =~ /\A ${article_name} [:] fragment [:] ([0-9]+) ([[] ([a-z]{2}) []])? /) {
 	    (my $fragment_number, my $tag) = ($1, $3);
 	    my $fragment_basename
 		= defined $tag ? "ckb${fragment_number}${tag}"
