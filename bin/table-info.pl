@@ -141,12 +141,6 @@ my %command_dispatch_table =
    'promote-to-axiom' => \&promote_to_axiom,
    'mizar-tests' => \&run_mizar_tests);
 
-if (scalar @ARGV == 0) {
-  load_table ();
-  complete_table ();
-  exit 0;
-}
-
 my $command = $ARGV[0];
 chomp $command;
 
