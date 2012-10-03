@@ -10,13 +10,13 @@ use Regexp::DefaultFlags;
 
 # Set up our location
 use FindBin qw($RealBin);
-use lib "$RealBin/../lib";
+use lib "$RealBin/../src/perl";
 use Xsltproc qw(apply_stylesheet);
 use Utils qw(ensure_directory);
 use Article;
 
-my $stylesheet_home = "$RealBin/../../xsl";
-my $script_home     = "$RealBin/../../bin";
+my $stylesheet_home = "$RealBin/../src/xslt";
+my $script_home     = "$RealBin";
 my $verbose         = 0;
 my $debug           = 0;
 my $man             = 0;
