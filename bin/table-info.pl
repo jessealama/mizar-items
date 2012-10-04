@@ -52,7 +52,7 @@ my $table_file = shift @ARGV;
 
 ensure_readable_file ($table_file);
 
-my @items = ();
+my @defined_items = ();
 my %table = ();
 my %all_items = ();
 my %dep_items = ();
@@ -95,11 +95,14 @@ sub load_table {
 	$non_trivial_dep_items{$item} = 0;
     }
 
-    push (@items, $item);
+    push (@defined_items, $item);
 
   }
   close $table_fh
     or croak ('Error: unable to close the input filehandle for ', $table_file, '.', "\n");
+
+  return;
+
 }
 
 sub escape_item {
