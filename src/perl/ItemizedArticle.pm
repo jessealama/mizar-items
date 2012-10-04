@@ -1159,17 +1159,17 @@ sub resolve_local_item {
 	my $fragment = "${article_name}:fragment:${fragment_number}" . (defined $tag ? '[' . $code_of_property{$tag} .']' : '');
 
 	if (defined $tag) {
-	  # nothing more to do
+	    # nothing more to do
 	} else {
-	  if ($item_kind =~ /\A ([gkmruv]) constructor \z/) {
-	    $fragment .= "[${1}c]";
-	  } elsif ($item_kind =~ /\A ([gjklmruv]) pattern \z/) {
-	    $fragment .= "[${1}p]";
-	  } elsif ($item_kind eq 'deftheorem') {
-	    $fragment .= '[dt]';
-	  } elsif ($item_kind =~ / \A ([kmrv]) definiens \z /) {
-	    $fragment .= "[${1}f]";
-	  }
+	    if ($item_kind =~ /\A ([gkmruv]) constructor \z/) {
+		$fragment .= "[${1}c]";
+	    } elsif ($item_kind =~ /\A ([gjklmruv]) pattern \z/) {
+		$fragment .= "[${1}p]";
+	    } elsif ($item_kind eq 'deftheorem') {
+		$fragment .= '[dt]';
+	    } elsif ($item_kind =~ / \A ([kmrv]) definiens \z /) {
+		$fragment .= "[${1}f]";
+	    }
 	}
 
 	if (! defined $fragment_to_item_table{$fragment}) {
