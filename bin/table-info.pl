@@ -504,9 +504,11 @@ sub check_structurally {
   my @cycle = $g->find_a_cycle ();
 
   if (scalar @cycle > 0) {
-    print $table_file, ' has a cycle:', "\n", join ("\n", @cycle), "\n";
+      my $cycle_length = scalar @cycle;
+      print $table_file, ' has at least one cycle of length ', $cycle_length, ':', "\n", join ("\n", @cycle), "\n";
+      print '(There may be more cycles; we are printing only one.)', "\n";
   } else {
-    print $table_file, ' is acyclic.', "\n";
+      print $table_file, ' is acyclic.', "\n";
   }
 }
 
