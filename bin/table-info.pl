@@ -503,6 +503,22 @@ sub load_graph {
 
 sub check_structurally {
 
+    my %encountered = ();
+    foreach my $item (@items) {
+	if (defined $table{$item}) {
+	    my @deps = @{$table{$item}};
+	    foreach my $dep_item (@deps) {
+		if (! defined $encountered{$dep_item}) {
+		    if (defined $table{$dep_item}) {
+			print $item, ' depends on ', $dep_item, ', whose dependencies are not yet known.', "\n";
+			exit 1;
+		    }
+		}
+	    }
+	}
+	$encountered{$item} = 0;
+    }
+
   my $g = load_graph ();
 
   my @cycle = $g->find_a_cycle ();
