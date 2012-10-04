@@ -279,9 +279,9 @@ sub fragment_less_than {
 		    return -1;
 		} elsif ($b_tag eq 'ch') {
 		    return 1;
-		} elsif ($a_tag =~ /\A .[p] \z/) { # patterns first
+		} elsif ($a_tag eq 'gc') { # structure constructors first
 		    return -1;
-		} elsif ($b_tag =~ /\A .[p] \z/) {
+		} elsif ($b_tag eq 'gc') {
 		    return 1;
 		} else {
 		    return 0;
