@@ -145,6 +145,10 @@ my %command_dispatch_table =
    'promote-to-axiom' => \&promote_to_axiom,
    'mizar-tests' => \&run_mizar_tests);
 
+if (scalar @ARGV == 0) {
+    pod2usage (1);
+}
+
 my $command = $ARGV[0];
 chomp $command;
 
