@@ -160,6 +160,8 @@ sub handled {
 	    } else {
 		$answer = 1;
 	    }
+	} elsif ($kind =~ /\A . definiens \z/) {
+	    $answer = 0;
 	} else {
 	    if ($kind =~ /[glrv]constructor/) {
 		$answer = 0;
