@@ -509,7 +509,7 @@ sub load_graph {
 sub check_structurally {
 
     my %encountered = ();
-    foreach my $item (@items) {
+    foreach my $item (@defined_items) {
 	if (defined $encountered{$item}) {
 	    print $item, ' occurs as the first item of a dependency line more than once.', "\n";
 	    exit 1;
