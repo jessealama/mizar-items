@@ -1044,7 +1044,7 @@ sub load_identifications_of_kind {
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my $article_name = $self->get_article_name ();
 
-    my @identifications = $local_db->clusters_in_prel_of_kind ($kind);
+    my @identifications = $local_db->identifications_in_prel_of_kind ($kind);
     my @identifications_no_extension = map { strip_extension ($_) } @identifications;
     my @sorted_identifications
 	= sort { $self->fragment_less_than ($a, $b) } @identifications_no_extension;
