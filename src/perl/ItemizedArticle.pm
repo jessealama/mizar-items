@@ -1167,7 +1167,7 @@ sub resolve_local_item {
 	    $fragment .= "[${1}p]";
 	  } elsif ($item_kind eq 'deftheorem') {
 	    $fragment .= '[dt]';
-	  } elsif ($item_kind =~ / \A ([krv]) definiens \z /) {
+	  } elsif ($item_kind =~ / \A ([kmrv]) definiens \z /) {
 	    $fragment .= "[${1}f]";
 	  }
 	}
