@@ -283,6 +283,10 @@ sub fragment_less_than {
 		    return -1;
 		} elsif ($b_tag eq 'gc') {
 		    return 1;
+		} elsif ($a_tag eq 'ex') { # existence conditions first
+		    return -1;
+		} elsif ($b_tag eq 'ex') {
+		    return 1;
 		} else {
 		    return 0;
 		}
