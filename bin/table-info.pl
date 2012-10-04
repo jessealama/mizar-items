@@ -519,17 +519,17 @@ sub check_structurally {
 	$encountered{$item} = 0;
     }
 
-  my $g = load_graph ();
+    my $g = load_graph ();
 
-  my @cycle = $g->find_a_cycle ();
+    my @cycle = $g->find_a_cycle ();
 
-  if (scalar @cycle > 0) {
-      my $cycle_length = scalar @cycle;
-      print $table_file, ' has at least one cycle of length ', $cycle_length, ':', "\n", join ("\n", @cycle), "\n";
-      print '(There may be more cycles; we are printing only one.)', "\n";
-  } else {
-      print $table_file, ' is acyclic.', "\n";
-  }
+    if (scalar @cycle > 0) {
+	my $cycle_length = scalar @cycle;
+	print $table_file, ' has at least one cycle of length ', $cycle_length, ':', "\n", join ("\n", @cycle), "\n";
+	print '(There may be more cycles; we are printing only one.)', "\n";
+    } else {
+	print $table_file, ' is acyclic.', "\n";
+    }
 }
 
 sub predecessors_of_item {
