@@ -1161,7 +1161,7 @@ sub resolve_local_item {
 	if (defined $tag) {
 	  # nothing more to do
 	} else {
-	  if ($item_kind =~ /\A ([gkruv]) constructor \z/) {
+	  if ($item_kind =~ /\A ([gkmruv]) constructor \z/) {
 	    $fragment .= "[${1}c]";
 	  } elsif ($item_kind =~ /\A ([gjklmruv]) pattern \z/) {
 	    $fragment .= "[${1}p]";
