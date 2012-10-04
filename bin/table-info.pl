@@ -112,8 +112,6 @@ sub escape_item {
   return $item;
 }
 
-load_table ();
-
 my %command_dispatch_table =
   ('all' => \&all,
    'print' => \&complete_table,
