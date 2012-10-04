@@ -119,6 +119,25 @@ sub handled {
 	return $known_answer;
     }
 
+    # symmetry and reflexivity of equality is built-in
+    if ($item eq 'hidden:rconstructor:1[symmetry]') {
+	return 0;
+    }
+
+    if ($item eq 'hidden:rconstructor:1[reflexivity]') {
+	return 0;
+    }
+
+    # rqAny is bogus
+    if ($item eq 'rqAny') {
+	return 0;
+    }
+
+    # the 'set' constructor does not need to be handled
+    if ($item eq 'hidden:mconstructor:1') {
+	return 0;
+    }
+
     my $answer = undef;
 
     if ($item =~ / \A ([a-z_0-9]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z /) {
