@@ -172,7 +172,7 @@ sub handled {
 	    }
 	}
     } elsif ($item =~ /\A rq [a-zA-Z]+ \z /) {
-	$answer = 1;
+	$answer = 0;
     } else {
 	die 'Error: cannot make sense of the item ', $item;
     }
