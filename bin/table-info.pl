@@ -505,6 +505,10 @@ sub check_structurally {
 
     my %encountered = ();
     foreach my $item (@items) {
+	if (defined $encountered{$item}) {
+	    print $item, ' occurs as the first item of a dependency line more than once.', "\n";
+	    exit 1;
+	}
 	if (defined $table{$item}) {
 	    my @deps = @{$table{$item}};
 	    foreach my $dep_item (@deps) {
