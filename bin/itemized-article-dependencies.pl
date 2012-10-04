@@ -78,7 +78,8 @@ my %item_to_fragment_table = %{$itemized_article->get_item_to_fragment_table ()}
 sub item_less_than {
     my $fragment_1 = $itemized_article->fragment_for_item ($a);
     my $fragment_2 = $itemized_article->fragment_for_item ($b);
-    return $itemized_article->fragment_less_than ($fragment_1, $fragment_2);
+    my $result = $itemized_article->fragment_less_than ($fragment_1, $fragment_2);
+    return $result;
 }
 
 foreach my $item (sort { item_less_than } keys %dependencies) {
