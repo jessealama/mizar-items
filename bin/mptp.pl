@@ -310,8 +310,16 @@ foreach my $item (@items) {
 
 	    }
 
-	    # todo: if any G constructors are among the dependencies,
-	    # add the associated freeness conditions.
+	    foreach my $dep_item (@deps) {
+		if ($dep_item =~ /\A ([a-z0-9_]+) [:] gconstructor [:] ([0-9]+) \z/) {
+		    (my $article, my $number) = ($1, $2);
+		    my $free_item = "free_g${number}_${article}";
+		    if (! defined $printed_for_this_item{$free_item}) {
+			print ' ', $free_item;
+			$printed_for_this_item{$free_item} = 0;
+		    }
+		}
+	    }
 
 	    print "\n";
 	    $printed{$mptp} = 0;
