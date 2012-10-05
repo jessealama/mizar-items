@@ -40,6 +40,7 @@ sheets = addabsrefs \
          propertied-constructors \
          properties-of-constructor \
          properties-of-constructors \
+         redefined-constructors \
          remove-properties \
          resolve-references \
          rewrite-aid \
