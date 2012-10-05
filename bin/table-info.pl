@@ -508,6 +508,16 @@ sub load_graph {
 
 sub check_structurally {
 
+    # check for self dependency
+    foreach my $item (keys %table) {
+	my @deps = @{$table{$item}};
+	foreach my $dep (@deps) {
+	    if ($dep eq $item) {
+		print $item, ' depends on itself', "\n";
+	    }
+	}
+    }
+
     my %encountered = ();
     foreach my $item (@defined_items) {
 	if (defined $encountered{$item}) {
