@@ -304,7 +304,14 @@ foreach my $item (@items) {
 		} else {
 		    die 'Error: cannot make sense of \'', $item, '\'.';
 		}
+
+		# todo: if the original constructor had any
+		# properties, add them here
+
 	    }
+
+	    # todo: if any G constructors are among the dependencies,
+	    # add the associated freeness conditions.
 
 	    print "\n";
 	    $printed{$mptp} = 0;
