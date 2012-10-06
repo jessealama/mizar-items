@@ -1002,6 +1002,9 @@ sub load_identifications {
     return 1;
 }
 
+my $fragments_of_lemma_stylesheet
+    = $self->path_for_stylesheet ('fragments-of-lemmas');
+
 sub load_lemmas {
 
     my $self = shift;
@@ -1018,9 +1021,6 @@ sub load_lemmas {
     if (! ensure_readable_file ($article_itemized_wsx)) {
 	croak ('Error: the split-and-itemized .wsx for ', $article_name, ' does not exist at the expected location (', $article_itemized_wsx, '.');
     }
-
-    my $fragments_of_lemma_stylesheet
-	= $self->path_for_stylesheet ('fragments-of-lemmas');
 
     my @fragments_of_lemmas = apply_stylesheet ($fragments_of_lemma_stylesheet,
 						$article_itemized_wsx);
@@ -1145,6 +1145,9 @@ sub escape_item {
   $item =~ s/\]/\\]/;
   return $item;
 }
+
+my $structure_dependencies_stylesheet
+    = $self->path_for_stylesheet ('structure-dependencies');
 
 sub dependencies {
 
@@ -1357,8 +1360,6 @@ sub dependencies {
 
     # Another pass to deal with structures
     my @fragments = @{$self->get_all_fragments ()};
-    my $structure_dependencies_stylesheet
-	= $self->path_for_stylesheet ('structure-dependencies');
     foreach my $fragment (@fragments) {
 
 	if ($fragment =~ /\A ${article_name} : fragment : ([0-9]+) \z/) {
