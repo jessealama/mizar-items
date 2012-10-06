@@ -540,6 +540,8 @@ sub properties_of_needed_constructors {
 
     my @needed_constructors = $self->needed_constructors ();
 
+    # warn 'Needed constructors:', Dumper (@needed_constructors);
+
     my @needed = ();
 
     foreach my $constructor (@needed_constructors) {
