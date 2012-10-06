@@ -265,7 +265,10 @@ my %printed = ();
 foreach my $item (@items) {
     if (handled ($item)) {
 	my $mptp = to_mptp ($item);
-	my %printed_for_this_item = ();
+	my %printed_for_this_item = (
+	    'symmetry_r1_hidden' => 0,
+	    'reflexivity_r1_hidden' => 0,
+	);
 	if (defined $printed{$mptp}) {
 	    # ignore
 	} else {
