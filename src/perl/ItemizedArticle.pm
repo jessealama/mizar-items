@@ -888,51 +888,6 @@ sub load_reductions {
 
 }
 
-# sub print_conditional_clusters {
-
-#     my @cclusters = $local_db->conditional_clusters_in_prel ();
-#     my @cclusters_no_extension = map { strip_extension ($_) } @cclusters;
-#     my @sorted_cclusters
-# 	= sort { $self->fragment_less_than ($a, $b) } @cclusters_no_extension;
-
-#     foreach my $i (1 .. scalar @sorted_cclusters) {
-# 	my $fragment_of_ccluster = $sorted_cclusters[$i - 1];
-# 	my $fragment_number = fragment_number ($fragment_of_ccluster);
-# 	print $article_basename, ':', 'ccluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
-#     }
-
-# }
-
-# sub print_functorial_clusters {
-
-#     my @fclusters = $local_db->functorial_clusters_in_prel ();
-#     my @fclusters_no_extension = map { strip_extension ($_) } @fclusters;
-#     my @sorted_fclusters
-# 	= sort { $self->fragment_less_than ($a, $b) } @fclusters_no_extension;
-
-#     foreach my $i (1 .. scalar @sorted_fclusters) {
-# 	my $fragment_of_fcluster = $sorted_fclusters[$i - 1];
-# 	my $fragment_number = fragment_number ($fragment_of_fcluster);
-# 	print $article_basename, ':', 'fcluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
-#     }
-
-# }
-
-# sub print_existential_clusters {
-
-#     my @rclusters = $local_db->existential_clusters_in_prel ();
-#     my @rclusters_no_extension = map { strip_extension ($_) } @rclusters;
-#     my @sorted_rclusters
-# 	= sort { $self->fragment_less_than ($a, $b) } @rclusters_no_extension;
-
-#     foreach my $i (1 .. scalar @sorted_rclusters) {
-# 	my $fragment_of_rcluster = $sorted_rclusters[$i - 1];
-# 	my $fragment_number = fragment_number ($fragment_of_rcluster);
-# 	print $article_basename, ':', 'rcluster', ':', $i, ' => ', $article_basename, ':', 'fragment', ':', $fragment_number, "\n";
-#     }
-
-# }
-
 sub load_clusters_of_kind {
     my $self = shift;
     my $kind = shift;
