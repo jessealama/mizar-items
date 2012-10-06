@@ -339,15 +339,59 @@ foreach my $item (@items) {
 			    }
 			}
 		    } else {
-			warn 'To ', $item, ' neither a compatibility nor a coherence item is associated.';
+			# warn 'To ', $item, ' neither a compatibility nor a coherence item is associated.';
 		    }
 		} else {
 		    die 'Error: cannot make sense of \'', $item, '\'.';
 		}
+	    }
 
-		# todo: if the original constructor had any
-		# properties, add them here
+	    # todo: if the original constructor had any properties
+	    # but the new constructor does not, add them here
+	    foreach my $dep_item (@deps) {
+		if (is_redefined_constructor ($dep_item)) {
+		    if ($dep_item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z/) {
+			(my $new_article, my $new_kind, my $new_number) = ($1, $2, $3);
+			my $new_mptp = "${new_kind}${new_number}_${new_article}";
 
+			foreach my $property (@properties) {
+
+			    if ($property eq 'asymmetry') {
+				$property = 'antisymmetry';
+			    }
+
+			    my $new_with_property = "${property}_${new_mptp}";
+
+			    if (defined $mptp_items{$new_with_property}) {
+				if (! defined $printed_for_this_item{$new_with_property}) {
+				    print ' ', $new_with_property;
+				    $printed_for_this_item{$new_with_property} = 0;
+				    # warn 'HEY: throwing in ', $new_with_property;
+				}
+			    }
+
+			    my $old_mptp = $redefined_constructors{$new_mptp};
+
+			    if (defined $old_mptp) {
+				if ($old_mptp =~ /\A (.) ([0-9]+) [_] ([a-z0-9_]+) \z/) {
+				    (my $old_kind, my $old_number, my $old_article)
+					= ($1, $2, $3);
+				    my $old_with_property = "${property}_${old_mptp}";
+				    if (defined $mptp_items{$old_with_property}) {
+					if (! defined $printed_for_this_item{$old_with_property}) {
+					    print ' ', $old_with_property;
+					    $printed_for_this_item{$old_with_property} = 0;
+					    # warn 'HEY: throwing in ', $old_with_property;
+					}
+				    }
+				} else {
+				    die 'Error: cannot make sense of the MPTP constructor \'', $old_mptp, '\'.';
+				}
+
+			    }
+			}
+		    }
+		}
 	    }
 
 	    foreach my $dep_item (@deps) {
