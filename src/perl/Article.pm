@@ -756,14 +756,14 @@ sub minimize_properties {
 		if ($self->verify (\%parameters)) {
 		    $unneeded_properties{"${constructor}[${property}]"} = 0;
 
-		    # carp ('Warning: we can dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+		    # carp ('We can dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
 
 		    File::Copy::copy ($atr, $atr_orig)
 			or croak ('Error: we were unable to update the .atr for ', $self->name (), ' to reflect its independence from the property ', $property, ' of constructor ', $constructor, '.', "\n");
 
 		} else {
 
-		    # carp ('Warning: cannot dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+		    carp ('Cannot dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
 
 		    $needed_properties{"${constructor}[${property}]"} = 0;
 		    File::Copy::copy ($atr_orig, $atr)
