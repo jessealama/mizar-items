@@ -544,7 +544,6 @@ sub check_structurally {
 		if (! defined $encountered{$dep_item}) {
 		    if (defined $table{$dep_item}) {
 			print $item, ' depends on ', $dep_item, ', whose dependencies are not yet known.', "\n";
-			exit 1;
 		    }
 		}
 	    }
