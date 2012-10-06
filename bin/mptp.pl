@@ -8,11 +8,37 @@ my %mptp_for_item = ();
 my %redefined_constructors = ();
 my %mptp_lemmas = ();
 
+my @function_properties = ('projectivity',
+			   'involutiveness',
+			   'idempotence',
+			   'commutativity');
+my @relation_properties = ('reflexivity',
+			   'irreflexivity',
+			   'symmetry',
+			   'asymmetry',
+			   'connectedness');
+my @properties = (@function_properties, @relation_properties);
+
+my %mptp_items = ();
+
 sub load_redefined_constructors {
-    while (defined (my $item = <DATA>)) {
-	chomp $item;
-	$redefined_constructors{$item} = 0;
+    while (defined (my $line = <DATA>)) {
+	chomp $line;
+	(my $new, my $old) = split (' ', $line);
+	$redefined_constructors{$new} = $old;
     }
+    return;
+}
+
+sub load_mptp_items {
+    open (my $items_fh, '<', '00allmmlax.items')
+	or die 'Cannot open 00allmmlax.items: ', $!;
+    while (defined (my $item = <$items_fh>)) {
+	chomp $item;
+	$mptp_items{$item} = 0;
+    }
+    close $items_fh
+	or die 'Cannot close input filehandle for 00allmmlax.items: ', $!;
     return;
 }
 
