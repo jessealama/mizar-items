@@ -284,24 +284,28 @@ foreach my $item (@items) {
 	    foreach my $dep_item (@deps) {
 		if ($item eq $dep_item) {
 		    # ignore self-dependencies.  These come from structure constructors
+		} elsif (is_redefined_constructor ($dep_item)) {
+		    my $redefined = redefine_constructor ($dep_item);
+		    print ' ', $redefined;
+		    $printed_for_this_item{$redefined} = 0;
 		} elsif (handled ($dep_item)) {
 		    my $dep_mptp = to_mptp ($dep_item);
 		    if (defined $printed_for_this_item{$dep_mptp}) {
 			# don't print
-		    } elsif (is_redefined_constructor ($dep_item)) {
-			print ' ', redefine_constructor ($dep_item);
 		    } else {
 			print ' ', $dep_mptp;
-
 		    }
 		    $printed_for_this_item{$dep_mptp} = 0;
 		}
 	    }
 
+ 	    # todo: for every constructor that's included, throw in
+ 	    # its associated deftheorem
+
 	    # Redefinition case
 	    if (is_redefined_constructor ($item)) {
 		# Look up a coherence/compatibility condition for the constructor
-		if ($item =~ /\A [a-z0-9_]+ [:] . constructor [:] [0-9]+ \z/) {
+		if ($item =~ /\A [a-z0-9_]+ [:] . (constructor | definiens) [:] [0-9]+ \z/) {
 		    my $coherence_item = "${item}[coherence]";
 		    my $compatibility_item = "${item}[compatibility]";
 		    if (defined $dependency_table{$coherence_item}) {
