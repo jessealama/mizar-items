@@ -364,7 +364,6 @@ Readonly my %ITEM_KINDS_BY_EXTENSION => (
     'property-registration' => 'epr1',
 );
 
-# todo: do this in perl, rather than in XSL
 sub needed_non_constructors {
     my $self = shift;
 
@@ -391,7 +390,7 @@ sub needed_non_constructors {
 	}
     }
 
-    @needed = lc @needed;
+    @needed = map { lc ($_) } @needed;
 
     # There may be repetitions here
     my %items = ();
@@ -403,7 +402,8 @@ sub needed_non_constructors {
 
     my @ere_lines = $self->ere_lines ();
 
-    foreach my $i (0 .. scalar @ere_lines - 1) {
+    foreach my $i (2 .. scalar @ere_lines - 1) {
+	#          ^    start from 2 because the first two requirements are bogus
         my $ere_line = $ere_lines[$i];
 	if ($ere_line ne '0') {
 	    my $requirement_name = $REQUIREMENTS{$i};
@@ -452,43 +452,72 @@ sub ere_lines {
     }
 }
 
+sub extract_constructor {
+    my $constructor_node = shift;
+
+    if ($constructor_node->exists ('@aid')
+	    && $constructor_node->exists ('@kind')
+		&& $constructor_node->exists ('@absnr')) {
+	(my $aid) = $constructor_node->findvalue ('@aid');
+	(my $kind) = $constructor_node->findvalue ('@kind');
+	(my $absnr) = $constructor_node->findvalue ('@absnr');
+	return "${aid}:${kind}constructor:${absnr}";
+    } else {
+	my $node_name = $constructor_node->nodeName ();
+	my $node_owner = $constructor_node->ownerDocument ();
+	my $uri = $node_owner->URI ();
+	croak 'A(n) ', $node_name, ' node in ', $uri, ' lacks either an aid, kind or absnr attribute.';
+    }
+}
+
+sub find_all_constructors {
+    my $root_node = shift;
+
+    my $constructor_xpath = 'descendant::Pred[@kind = "R"] | descendant::Func[@kind = "K"] | descendant::Adjective | descendant::Typ | descendant::Field';
+
+    my @constructors = $root_node->findnodes ($constructor_xpath);
+
+    @constructors = map { extract_constructor ($_) } @constructors;
+    @constructors = map { lc ($_) } @constructors;
+
+    # carp 'Extracted constructors:', "\n", Dumper (@constructors);
+
+    my %constructor_table = ();
+
+    foreach my $constructor (@constructors) {
+	$constructor_table{$constructor} = 0;
+    }
+
+    @constructors = keys %constructor_table;
+
+    if (wantarray) {
+	return @constructors;
+    } else {
+	return join (' ', @constructors);
+    }
+
+}
+
 sub needed_constructors {
     my $self = shift;
-    my $abs_xml_path = $self->file_with_extension ('xml1');
-    my $dir = $self->get_dirname ();
 
     $self->absolutize ();
     $self->absolutize_environment ();
 
-    # warn 'Computing needed constructors; looking in ', $abs_xml_path;
-
-    if (! ensure_readable_file ($abs_xml_path)) {
-	croak ('Error: the absolute XML does not exist (or is unreadable).');
-    }
-
     my $inferred_constructors_stylesheet
 	= $self->path_for_stylesheet ('inferred-constructors');
 
-    my @all_constructors =
-	apply_stylesheet
-	    (
-		$inferred_constructors_stylesheet,
-		$abs_xml_path,
-		undef,
-		{ 'article-directory' => $dir }
-	    );
+    my %constructors;
 
-    # warn 'Results of the inferred-constructors stylesheet:', Dumper (@all_constructors);
-
-    # we used to do the lowercase operation within the
-    # inferred-constructors stylesheet, but that is unnecessary and,
-    # more importantly, very slow
-    @all_constructors = map { lc ($_) } @all_constructors;
-
-    my %constructors = ();
-    foreach my $constructor (@all_constructors) {
-	if (! defined $constructors{$constructor}) {
-	    $constructors{$constructor} = 0;
+    foreach my $extension (%ITEM_KINDS_BY_EXTENSION) {
+	my $xml_to_inspect = $self->file_with_extension ($extension);
+	if (-e $xml_to_inspect) {
+	    my $doc = $xml_parser->parse_file ($xml_to_inspect);
+	    my $root = $doc->documentElement ();
+	    my @more_constructors = find_all_constructors ($root);
+	    foreach my $constructor (@more_constructors) {
+		$constructors{$constructor} = 0;
+	    }
 	}
     }
 
@@ -496,7 +525,8 @@ sub needed_constructors {
     my $ere = $self->file_with_extension ('ere');
     my @ere_lines = $self->ere_lines ();
 
-    foreach my $i (0 .. $NUM_REQUIREMENTS - 1) {
+    foreach my $i (2 .. $NUM_REQUIREMENTS - 1) {
+	#          ^  the first two requirements are bogus
 	my $ere_line = $ere_lines[$i];
 
 	# warn 'ere line ', $i, ' is ', $ere_line;
@@ -517,7 +547,7 @@ sub needed_constructors {
     }
 
     if (wantarray) {
-	return keys %constructors;
+	return (keys %constructors);
     } else {
 	return join (' ', keys %constructors);
     }
@@ -2038,9 +2068,10 @@ sub needed_items {
 
     # warn 'Property dependencies for :', $path, "\n", Dumper (@property_dependencies);
 
-    push (@needed, @non_constructor_dependencies);
-    push (@needed, @constructor_dependencies);
-    push (@needed, @property_dependencies);
+    push (@needed,
+	  @non_constructor_dependencies,
+	  @constructor_dependencies,
+	  @property_dependencies);
 
     if (wantarray) {
 	return @needed;
