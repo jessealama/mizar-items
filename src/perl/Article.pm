@@ -570,8 +570,10 @@ sub properties_of_constructor {
 		'nr' => $nr,
 	    );
 
+	my $properties_stylesheet
+	    = $self->path_for_stylesheet ('properties-of-constructor');
 	my @props
-	    = apply_stylesheet ($self->path_for_stylesheet ('properties-of-constructor'),
+	    = apply_stylesheet ($properties_stylesheet,
 				$atr,
 				undef,
 				\%params);
