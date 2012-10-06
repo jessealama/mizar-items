@@ -364,6 +364,7 @@ Readonly my %ITEM_KINDS_BY_EXTENSION => (
     'property-registration' => 'epr1',
 );
 
+# todo: do this in perl, rather than in XSL
 sub needed_non_constructors {
     my $self = shift;
 
