@@ -249,10 +249,12 @@ sub absolutize_extension {
     if (-e $xml_path && ! -e $abs_xml_path) {
 	my $absrefs_stylesheet = $self->path_for_stylesheet ('addabsrefs');
 
-	return (apply_stylesheet ($absrefs_stylesheet,
-				  $xml_path,
-				  $abs_xml_path));
+	apply_stylesheet ($absrefs_stylesheet,
+			  $xml_path,
+			  $abs_xml_path);
     }
+
+    return;
 }
 
 sub absolutize_environment {
