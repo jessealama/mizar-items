@@ -17,7 +17,7 @@ use Utils qw(ensure_directory ensure_readable_file ensure_executable);
 use Article;
 
 my $paranoid = 0;
-my $verbose = 0;
+my $opt_verbose = 0;
 my $opt_debug = 0;
 my $man = 0;
 my $help = 0;
@@ -35,7 +35,7 @@ my $opt_randomize = 0;
 GetOptions(
     'help|?' => \$help,
     'man' => \$man,
-    'verbose'  => \$verbose,
+    'verbose'  => \$opt_verbose,
     'debug' => \$opt_debug,
     'paranoid' => \$paranoid,
     'timeout' => \$timeout,
@@ -73,11 +73,15 @@ if (defined $suggested_clusters) {
 						\@suggested_clusters,
 						{ 'checker-only' => $checker_only,
 						  'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes,
-						  'debug' => $opt_debug} );
+						  'debug' => $opt_debug,
+						  'verbose' => $opt_verbose} );
     } else {
-	$a->minimize_with_suggested_environment ( { 'ecl' => \@suggested_clusters },
-						  { 'checker-only' => $checker_only,
-						    'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes, 'debug' => $opt_debug } )
+	$a->minimize_with_suggested_environment
+	    ( { 'ecl' => \@suggested_clusters },
+	      { 'checker-only' => $checker_only,
+		'fast-theorems-and-schemes' => $fast_theorems && $fast_schemes,
+		'debug' => $opt_debug,
+		'verbose' => $opt_verbose} );
     }
 } else {
     $a->minimize (
