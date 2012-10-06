@@ -519,7 +519,7 @@ sub properties_of_constructor {
 				undef,
 				\%params);
 
-	# carp ('Inside properties_of_constructor: ', join (' ', @props));
+	# carp ('Inside properties_of_constructor for ', $constructor, ' : ', join (' ', @props));
 
 	if (wantarray) {
 	    return @props;
