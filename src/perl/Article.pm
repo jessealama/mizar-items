@@ -403,15 +403,20 @@ sub ere_lines {
 	croak ('Error: the ere file for ', $self->name (), ' does not exist (or is unreadable).');
     }
 
-    my @ere_lines = `cat $ere`;
-    chomp @ere_lines;
-
-    my @trimmed_ere_lines = map { delete_space ($_); } @ere_lines; # it seems there can be extra spaces in the file
+    my @ere_lines = ();
+    open (my $ere_fh, '<', $ere)
+	or croak 'Unable to open an input filehandle for ', $ere, ': ', $!;
+    while (defined (my $ere_line = <$ere_fh>)) {
+	chomp $ere_line;
+	push (@ere_lines, $ere_line);
+    }
+    close $ere_fh
+	or croak 'Unable to close the output filehandle for ', $ere, ': ', $!;
 
     if (wantarray) {
-	return @trimmed_ere_lines;
+	return @ere_lines;
     } else {
-	return join (' ', @trimmed_ere_lines);
+	return join (' ', @ere_lines);
     }
 }
 
