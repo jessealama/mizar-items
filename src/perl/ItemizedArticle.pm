@@ -264,40 +264,7 @@ sub fragment_less_than {
     if ($a_num < $b_num) {
 	return -1;
     } elsif ($a_num == $b_num) {
-
-	if ($a =~ / [[] ([a-z]+) []] \z/) {
-	    my $a_tag = $1;
-	    if ($b =~ / [[] ([a-z]+) []] \z/) {
-		my $b_tag = $1;
-		if ($a_tag eq $b_tag) {
-		    return 0;
-		} elsif ($a_tag eq 'dt') { # deftheorems last
-		    return 1;
-		} elsif ($b_tag eq 'dt') {
-		    return -1;
-		} elsif ($a_tag eq 'ch') { # coherence first
-		    return -1;
-		} elsif ($b_tag eq 'ch') {
-		    return 1;
-		} elsif ($a_tag eq 'gc') { # structure constructors first
-		    return -1;
-		} elsif ($b_tag eq 'gc') {
-		    return 1;
-		} elsif ($a_tag eq 'ex') { # existence conditions first
-		    return -1;
-		} elsif ($b_tag eq 'ex') {
-		    return 1;
-		} else {
-		    return 0;
-		}
-	    } else {
-		return -1;
-	    }
-	} elsif ($b =~ / [[] ([a-z]+) []] \z/) {
-	    return -1;
-	} else {
-	    return 0;
-	}
+	return 0;
     } else {
 	return 1;
     }
