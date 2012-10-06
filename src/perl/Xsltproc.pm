@@ -4,14 +4,13 @@ use base qw(Exporter);
 use warnings;
 use strict;
 use Carp qw(croak carp);
-use Data::Dumper;
 use XML::LibXSLT;
 use XML::LibXML;
 use charnames qw(:full);
 
-use Utils qw(ensure_readable_file);
-
 our @EXPORT = qw(apply_stylesheet);
+
+my %parsed_stylesheet_table = ();
 
 sub apply_stylesheet {
 
@@ -25,17 +24,21 @@ sub apply_stylesheet {
 	croak ('Error: please supply a document.');
     }
 
-    if (! ensure_readable_file ($document)) {
-	croak ('Error: there is no file at ', $document, '.');
+    if (! -e $document || ! -r $document) {
+	croak ('Error: there is no (readable) file at ', $document, '.');
     }
 
-    my %parameters = defined $parameters_ref ? %{$parameters_ref}
-	                                     : ()
-					     ;
+    my %parameters = XML::LibXSLT::xpath_to_string
+	(defined $parameters_ref ? %{$parameters_ref} : () );
 
-    my $xslt = XML::LibXSLT->new ();
-    my $style_doc = XML::LibXML->load_xml (location => $stylesheet);
-    my $parsed_stylesheet = $xslt->parse_stylesheet ($style_doc);
+    my $parsed_stylesheet = $parsed_stylesheet_table{$stylesheet};
+    if (! defined $parsed_stylesheet) {
+	my $xslt = XML::LibXSLT->new ();
+	my $style_doc = XML::LibXML->load_xml (location => $stylesheet);
+	$parsed_stylesheet = $xslt->parse_stylesheet ($style_doc);
+	$parsed_stylesheet_table{$stylesheet} = $parsed_stylesheet;
+    }
+
     my $results = $parsed_stylesheet->transform_file ($document, %parameters);
     my $result_bytes = $parsed_stylesheet->output_as_bytes ($results);
 
