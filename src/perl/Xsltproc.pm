@@ -4,8 +4,10 @@ use base qw(Exporter);
 use warnings;
 use strict;
 use Carp qw(croak carp);
-use IPC::Run qw(start);
 use Data::Dumper;
+use XML::LibXSLT;
+use XML::LibXML;
+use charnames qw(:full);
 
 use Utils qw(ensure_readable_file);
 
@@ -31,45 +33,22 @@ sub apply_stylesheet {
 	                                     : ()
 					     ;
 
-    my @xsltproc_call = ('xsltproc');
-    my $params = '';
-    foreach my $parameter (keys %parameters) {
-	my $value = $parameters{$parameter};
-	push (@xsltproc_call, '--stringparam', $parameter, $value);
-    }
-    if (defined $result_path) {
-	push (@xsltproc_call, '--output', $result_path);
-    }
-
-    push (@xsltproc_call, $stylesheet);
-    push (@xsltproc_call, $document);
-
-    # warn 'xsltproc_call = ', Dumper (@xsltproc_call);
-
-    my $xsltproc_out = '';
-    my $xsltproc_err = '';
-
-    my $xsltproc_harness = start (\@xsltproc_call,
-				  '>', \$xsltproc_out,
-				  '2>', \$xsltproc_err);
-
-    $xsltproc_harness->finish ();
-    my $xsltproc_result = $xsltproc_harness->result (0);
-
-    if ($xsltproc_result != 0) {
-	croak ('Error: xsltproc did not exit cleanly when applying the stylesheet', "\n", "\n", '  ', $stylesheet, "\n", "\n", 'to', "\n", "\n", '  ', $document, ' .  Its exit code was ', $xsltproc_result, '.', "\n", "\n",  'Here is the error output: ', "\n", $xsltproc_err);
-    }
+    my $xslt = XML::LibXSLT->new ();
+    my $style_doc = XML::LibXML->load_xml (location => $stylesheet);
+    my $parsed_stylesheet = $xslt->parse_stylesheet ($style_doc);
+    my $results = $parsed_stylesheet->transform_file ($document, %parameters);
+    my $result_bytes = $parsed_stylesheet->output_as_bytes ($results);
 
     if (defined $result_path) {
-	return 1;
-    } elsif (wantarray) {
-	# carp 'HEY: wantarray; xsltproc output is ', $xsltproc_out;
-	chomp $xsltproc_out;
-	my @answer = split (/\n/, $xsltproc_out);
-	return @answer;
+	open (my $result_fh, '>', $result_path);
+	print {$result_fh} $result_bytes;
+	close $result_fh;
+    }
+
+    if (wantarray) {
+	return split ("\N{LF}", $result_bytes);
     } else {
-	# carp 'HEY: do not wantarray';
-	return $xsltproc_out;
+	return $result_bytes;
     }
 
 }
