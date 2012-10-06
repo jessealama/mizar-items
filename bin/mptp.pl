@@ -226,6 +226,9 @@ sub is_redefined_constructor {
     if ($item =~ / \A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z /) {
 	my $mptp = "${2}${3}_${1}";
 	return (defined $redefined_constructors{$mptp});
+    } elsif ($item =~ /\A ([a-z0-9_]+) [:] (.) definiens [:] ([0-9]+) \z/) {
+	my $mptp = "${2}${3}_${1}";
+	return (defined $redefined_constructors{$mptp});
     } else {
 	return 0;
     }
@@ -236,12 +239,16 @@ sub redefine_constructor {
     if ($item =~ / \A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z /) {
 	my $mptp = "${2}${3}_${1}";
 	return "redefinition_${mptp}";
+    } elsif ($item =~ /\A ([a-z0-9_]+) [:] (.) definiens [:] ([0-9]+) \z/) {
+	my $mptp = "${2}${3}_${1}";
+	return "redefinition_${mptp}";
     } else {
 	die 'Error: cannot redefine \'', $item, '\', because it was not redefined.';
     }
 }
 
 load_redefined_constructors ();
+load_mptp_items ();
 
 my %dependency_table = ();
 my @items = ();
