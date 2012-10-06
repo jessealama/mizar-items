@@ -406,21 +406,23 @@ sub needed_non_constructors {
     foreach my $i (0 .. scalar @ere_lines - 1) {
         my $ere_line = $ere_lines[$i];
 	if ($ere_line ne '0') {
-	  my $requirement_name = $REQUIREMENTS{$i};
+	    my $requirement_name = $REQUIREMENTS{$i};
 
-	  if (! defined $requirement_name) {
-	    croak ('Error: what is the symbolic name of requirement number ',$i, '?');
-	  }
+	    if (! defined $requirement_name) {
+		croak ('Error: what is the symbolic name of requirement number ',$i, '?');
+	    }
 
-	  $items{$requirement_name} = 0;
+	    $items{$requirement_name} = 0;
 
 	}
-      }
+    }
+
+    @needed = keys %items;
 
     if (wantarray) {
-	return keys %items;
+	return @needed;
     } else {
-	return join (' ', keys %items);
+	return join (' ', @needed);
     }
 }
 
