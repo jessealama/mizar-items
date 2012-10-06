@@ -72,19 +72,8 @@ my $itemized_article
 
 my %dependencies = %{$itemized_article->dependencies ()};
 
-my %item_to_fragment_table = %{$itemized_article->get_item_to_fragment_table ()};
-
-# memoize ('item_less_than');
-sub item_less_than {
-    my $fragment_1 = $itemized_article->fragment_for_item ($a);
-    my $fragment_2 = $itemized_article->fragment_for_item ($b);
-    my $result = $itemized_article->fragment_less_than ($fragment_1, $fragment_2);
-    return $result;
-}
-
-foreach my $item (sort { item_less_than } keys %dependencies) {
+foreach my $item (keys %dependencies) {
     my @deps = @{$dependencies{$item}};
-    # my @sorted_deps = sort { item_less_than } @deps;
     print $item;
     foreach my $dep (@deps) {
 	print ' ', $dep;
