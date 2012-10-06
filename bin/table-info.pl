@@ -518,6 +518,17 @@ sub check_structurally {
 	}
     }
 
+    # check for undefined items
+    foreach my $item (keys %table) {
+	my @deps = @{$table{$item}};
+	foreach my $dep (@deps) {
+	    if (! defined $table{$dep}) {
+		print {*STDERR} $dep, ' is undefined.', "\n";
+		exit 1;
+	    }
+	}
+    }
+
     my %encountered = ();
     foreach my $item (@defined_items) {
 	if (defined $encountered{$item}) {
