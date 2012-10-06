@@ -16,7 +16,7 @@ use List::MoreUtils qw(first_index);
 # Our libraries
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
-use Utils qw(ensure_readable_file ensure_directory strip_extension extension delete_space);
+use Utils qw(ensure_readable_file strip_extension extension delete_space);
 use Mizar;
 use ItemizedArticle;
 use LocalDatabase;
@@ -175,12 +175,12 @@ sub BUILD {
     }
 
     my $sheet_home = $self->get_stylesheet_home ();
-    if (! ensure_directory ($sheet_home)) {
+    if (! -d $sheet_home) {
 	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
     }
 
     my $script_home = $self->get_script_home ();
-    if (! ensure_directory ($script_home)) {
+    if (! -d $script_home) {
 	croak ('Error: the supplied path (', $script_home, ') is not a directory.');
     }
 
@@ -381,7 +381,6 @@ sub needed_non_constructors {
 	my $extension = $ITEM_KINDS_BY_EXTENSION{$item_kind};
 	my $xml_to_inspect = $self->file_with_extension ($extension);
 	if (-e $xml_to_inspect) {
-	    carp 'xml to inspect is ', $xml_to_inspect;
 	    my @needed_for_extension
 		= apply_stylesheet ($dependencies_stylesheet,
 				    $xml_to_inspect,
@@ -2421,7 +2420,7 @@ sub copy {
     my $current_dir = dirname ($current_path);
     my $new_path_dir = File::Spec->catdir ($new_path);
 
-    if (! ensure_directory ($new_path_dir)) {
+    if (! -d $new_path_dir) {
 	croak ('Error: the directory name, ', $new_path_dir, ' of the target ', $new_path, ' is not a directory.');
     }
 
