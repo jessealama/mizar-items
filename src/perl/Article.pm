@@ -528,7 +528,7 @@ sub properties_of_constructor {
 	}
 
     } else {
-	croak ('Error: Unable to make sense of the constructor \'', $constructor, '\'.');
+	croak ('Error (properties_of_constructor): Unable to make sense of the constructor \'', $constructor, '\'.');
     }
 
 
