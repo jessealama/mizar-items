@@ -556,12 +556,7 @@ sub needed_constructors {
 
 sub properties_of_constructor {
     my $self = shift;
-
     my $constructor = shift;
-
-    if (! defined $constructor) {
-	croak ('Error: please supply a constructor.');
-    }
 
     if ($constructor =~ /\A ([0-9a-z_]+) : (.) constructor : ([0-9]+) \z/) {
 	my ($aid, my $kind, my $nr) = ($1, $2, $3);
