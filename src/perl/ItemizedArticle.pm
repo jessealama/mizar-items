@@ -1002,9 +1002,6 @@ sub load_identifications {
     return 1;
 }
 
-my $fragments_of_lemma_stylesheet
-    = $self->path_for_stylesheet ('fragments-of-lemmas');
-
 sub load_lemmas {
 
     my $self = shift;
@@ -1021,6 +1018,9 @@ sub load_lemmas {
     if (! ensure_readable_file ($article_itemized_wsx)) {
 	croak ('Error: the split-and-itemized .wsx for ', $article_name, ' does not exist at the expected location (', $article_itemized_wsx, '.');
     }
+
+    my $fragments_of_lemma_stylesheet
+	= $self->path_for_stylesheet ('fragments-of-lemmas');
 
     my @fragments_of_lemmas = apply_stylesheet ($fragments_of_lemma_stylesheet,
 						$article_itemized_wsx);
@@ -1145,9 +1145,6 @@ sub escape_item {
   $item =~ s/\]/\\]/;
   return $item;
 }
-
-my $structure_dependencies_stylesheet
-    = $self->path_for_stylesheet ('structure-dependencies');
 
 sub dependencies {
 
@@ -1377,6 +1374,9 @@ sub dependencies {
 	    if (! defined $fragment_doc) {
 		croak ('Error: the XML file at ', $fragment_abs_xml, ' seems to be invalid.');
 	    }
+
+	    my $structure_dependencies_stylesheet
+		= $self->path_for_stylesheet ('structure-dependencies');
 
 	    if ($fragment_doc->exists ('.//Definition[@kind = "G"]')) {
 
