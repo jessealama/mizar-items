@@ -237,7 +237,7 @@ sub file_with_extension {
 
 sub absolutize {
     my $self = shift;
-    $self->absolutize_extension ('xml');
+    return $self->absolutize_extension ('xml');
 }
 
 sub absolutize_extension {
