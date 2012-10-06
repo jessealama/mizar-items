@@ -346,8 +346,6 @@ foreach my $item (@items) {
 		}
 	    }
 
-	    # todo: if the original constructor had any properties
-	    # but the new constructor does not, add them here
 	    foreach my $dep_item (@deps) {
 		if (is_redefined_constructor ($dep_item)) {
 		    if ($dep_item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z/) {
