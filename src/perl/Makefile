@@ -17,3 +17,8 @@ clean:
 
 all:
 	# nothing yet
+
+check:
+	ok=1; \
+	for module in $(pms); do perl -c $$module || ok=0; done; \
+	test "$$ok" = "1";
