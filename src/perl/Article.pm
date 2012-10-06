@@ -352,6 +352,18 @@ my %extension_to_element_table = ('eno' => 'Notations',
 #   }
 # }
 
+Readonly my %ITEM_KINDS_BY_EXTENSION => (
+    'deftheorem' => 'xml1',
+    'theorem' => 'xml1',
+    'scheme' => 'esh',
+    'definiens' => 'dfs1',
+    'cluster' => 'ecl1',
+    'identification' => 'eid1',
+    'reduction' => 'erd1',
+    'pattern' => 'eno1',
+    'property-registration' => 'epr1',
+);
+
 sub needed_non_constructors {
     my $self = shift;
 
@@ -362,8 +374,24 @@ sub needed_non_constructors {
 
     my $dependencies_stylesheet = $self->path_for_stylesheet ('dependencies');
 
-    my @needed = apply_stylesheet ($dependencies_stylesheet,
-				   $abs_xml);
+    my @needed = ();
+
+    foreach my $item_kind (keys %ITEM_KINDS_BY_EXTENSION) {
+	my $extension = $ITEM_KINDS_BY_EXTENSION{$item_kind};
+	my $xml_to_inspect = $self->file_with_extension ($extension);
+	if (-e $xml_to_inspect) {
+	    carp 'xml to inspect is ', $xml_to_inspect;
+	    my @needed_for_extension
+		= apply_stylesheet ($dependencies_stylesheet,
+				    $xml_to_inspect,
+				    undef,
+				    { 'item-kind' => $item_kind }
+				);
+	    push (@needed, @needed_for_extension);
+	}
+    }
+
+    @needed = lc @needed;
 
     # There may be repetitions here
     my %items = ();
