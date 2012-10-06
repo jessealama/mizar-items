@@ -1,8 +1,8 @@
 .PHONY: all
 
-subdirs = bin src
+subdirs = perl lisp xslt
 
-editable-files = .gitignore notes.org Makefile
+editable-files = Makefile
 emacs-backups = $(addsuffix ~,$(editable-files))
 
 all:
