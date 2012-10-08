@@ -52,7 +52,8 @@ tpl enumerate-items (#items, #users, #non-users) {
                   for-each [Proposition] {
   		  <Proposition {
   		    for-each [@*] { copy-of `.`; }
-  		    @lemma-number = count-preceding-lemmas ();
+                    $num-preceding-lemmas = count-preceding-lemmas ();
+  		    @lemma-number = `$num-preceding-lemmas + 1`;
                       for-each [*] {
   		      apply [.];
      		    }
@@ -75,7 +76,26 @@ tpl enumerate-items (#items, #users, #non-users) {
             <Item {
               @kind = "Theorem-Item";
               @promoted-lemma = "yes";
-              @lemma-number = count-preceding-lemmas ();
+              $num-preceding-lemmas = count-preceding-lemmas ();
+              @lemma-number = `$num-preceding-lemmas + 1`;
+              apply [.];
+              for-each [following-sibling::*] {
+                apply [.];
+              }
+            }
+          }
+        }
+      }
+      when [self::Item[@type-changing-lemma = "yes"]] {
+        for-each [Proposition] {
+          <Text-Proper {
+            <Item { @kind = "Section-Pragma"; }
+            emit-needed (#needed = $needed);
+            <Item {
+              @kind = "Theorem-Item";
+              @promoted-lemma = "yes";
+              $num-preceding-lemmas = count-preceding-lemmas ();
+              @lemma-number = `$num-preceding-lemmas + 1`;
               apply [.];
               for-each [following-sibling::*] {
                 apply [.];
@@ -91,7 +111,8 @@ tpl enumerate-items (#items, #users, #non-users) {
           <Item {
             for-each [@*] { copy-of `.`; }
             @promoted-lemma = "no";
-            @lemma-number = count-preceding-lemmas ();
+            $num-preceding-lemmas = count-preceding-lemmas ();
+            @lemma-number = `$num-preceding-lemmas + 1`;
             apply [*];
           }
         }
