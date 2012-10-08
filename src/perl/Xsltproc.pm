@@ -7,8 +7,13 @@ use Carp qw(croak carp);
 use XML::LibXSLT;
 use XML::LibXML;
 use charnames qw(:full);
+use Readonly;
 
 our @EXPORT = qw(apply_stylesheet);
+
+Readonly my $RECURSION_DEPTH => 3000;
+
+XML::LibXSLT->max_depth ($RECURSION_DEPTH);
 
 my %parsed_stylesheet_table = ();
 
