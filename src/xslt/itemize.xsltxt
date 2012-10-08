@@ -669,11 +669,58 @@ tpl [Scheme-Justification[@idnr and @nr = "0"]] {
 
 // TODO: make a table for local refernce idnrs.  This could speed things up a lot.
 //
+
+tpl [Theorem-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]]] {
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    $num-previous = `count (preceding-sibling::Item)`;
+    $new_spelling = `concat ("CKB", $num-previous)`;
+    <Theorem-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
+
+tpl [Scheme-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]]] {
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    $num-previous = `count (preceding-sibling::Item)`;
+    $new_spelling = `concat ("CKB", $num-previous)`;
+    <Theorem-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
+
+tpl [Definition-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]]] {
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    $num-previous = `count (preceding-sibling::Item)`;
+    $new_spelling = `concat ("CKB", $num-previous)`;
+    <Theorem-Reference {
+      @spelling = $new_spelling;
+      @promoted = "promoted";
+      @"number" = "1";
+    }
+  }
+}
+
 tpl [Local-Reference[@idnr]] {
   $context = `.`;
   $idnr = `@idnr`;
   for-each [ancestor::Item[parent::Text-Proper]] {
     choose {
+      when [self::Item[@kind = "Type-Changing-Statement"]] {
+        $num-previous = `count (preceding-sibling::Item)`;
+        $position = `$num-previous + 1`;
+        $new_spelling = `concat ("CKB", $position)`;
+        <Theorem-Reference {
+          @spelling = $new_spelling;
+          @promoted = "promoted";
+          @"number" = "1";
+        }
+      }
       when [$idnr = preceding-sibling::Item[@kind = "Regular-Statement"
                                             and @shape = "Compact-Statement"
                                             and @exportable = "yes"]/Proposition/Label[@idnr]/@idnr] {
