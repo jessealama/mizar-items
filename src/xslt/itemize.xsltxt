@@ -5,18 +5,6 @@ output method=xml indent="yes";
 include "die.xsl";
 include "tokens.xsl";
 
-tpl [*] {
-  $element = `local-name ()`;
-  <$element {
-    for-each [@*] { copy-of `.`; }
-    apply [*];
-  }
-}
-
-tpl [/] {
-  apply [Text-Proper];
-}
-
 tpl count-preceding-lemmas {
   $num-preceding-regular-statements
     = `count (preceding::Item[parent::Text-Proper
@@ -31,9 +19,14 @@ tpl enumerate-items (#items, #users, #non-users) {
   if [$items] {
     $item = `$items[1]`;
     for-each [$item] {
-      $needed-new-users-and-non-users = prepend-context-for-item (#item = $item, #users = $users, #non-users = $non-users);
-      $needed = `substring-before ($needed-new-users-and-non-users, ":")`;
-      $new-users-and-non-users = `substring-after ($needed-new-users-and-non-users, ":")`;
+      $needed-new-users-and-non-users
+        = prepend-context-for-item (#item = $item,
+      	 		            #users = $users,
+				    #non-users = $non-users);
+      $needed
+        = `substring-before ($needed-new-users-and-non-users, ":")`;
+      $new-users-and-non-users
+        = `substring-after ($needed-new-users-and-non-users, ":")`;
       $new-users = `substring-before ($new-users-and-non-users, ":")`;
       $new-non-users = `substring-after ($new-users-and-non-users, ":")`;
       choose {
@@ -47,7 +40,7 @@ tpl enumerate-items (#items, #users, #non-users) {
             <Item {
               for-each [@*] { copy-of `.`; }
   	      for-each [Explicitly-Qualified-Segment | Implicitly-Qualified-Segment] {
-  	      apply [.];
+  	        apply [.];
               }
               <Conditions {
                 for-each [Conditions] {
@@ -123,6 +116,18 @@ tpl enumerate-items (#items, #users, #non-users) {
                      #non-users = $new-non-users);
     }
   }
+}
+
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [/] {
+  apply [Text-Proper];
 }
 
 tpl [Text-Proper] {
