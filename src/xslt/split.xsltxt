@@ -410,9 +410,17 @@ tpl emit-type-changing-equations (#equations, #type) {
 
 tpl [Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]] {
   $equations = `Equality`;
+  $bad = bad-term-hunting (#candidates = `descendant::Simple-Term[ancestor::Equality]`);
+  // msg `concat ("type changing statement: bad = ", $bad)`;
   <Item {
-    @kind = "Theorem-Item";
-    @exportable = "yes";
+    if [$bad = "1"] {
+      @kind = "Regular-Statement";
+      @shape = "Compact-Statement";
+      @exportable = "no";
+    } else {
+      @kind = "Theorem-Item";
+      @exportable = "yes";
+    }
     @type-changing-lemma = "yes";
     for-each [Equality[position() = last()]] {
       $type = `following-sibling::*[1]`;
