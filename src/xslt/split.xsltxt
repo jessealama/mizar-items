@@ -384,3 +384,44 @@ tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and not(@shape = "
     apply [*];
   }
 }
+
+tpl emit-type-changing-equations (#equations, #type) {
+  if [$equations] {
+    $equation = `$equations[1]`;
+    for-each [$equation] {
+      if [count ($equations) = 1] {
+        <Attributive-Formula {
+          apply [*[position() = last ()]]; // term
+          apply [$type]; // type
+        }
+      } else {
+        <Conjunctive-Formula {
+          <Attributive-Formula {
+            apply [*[position() = last ()]]; // term
+            apply [$type]; // type
+          }
+          emit-type-changing-equations (#equations = `$equations[position() > 1]`,
+	  			        #type = $type);
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]] {
+  $equations = `Equality`;
+  <Item {
+    @kind = "Theorem-Item";
+    @exportable = "yes";
+    @type-changing-lemma = "yes";
+    for-each [Equality[position() = last()]] {
+      $type = `following-sibling::*[1]`;
+      <Proposition {
+        emit-type-changing-equations (#equations = $equations, #type = $type);
+      }
+    }
+    apply [*[position() = last()]]; // justification
+  }
+
+  copy-of `.`;
+}
