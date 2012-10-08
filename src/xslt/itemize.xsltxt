@@ -33,12 +33,14 @@ tpl enumerate-items (#items, #users, #non-users) {
         = `substring-after ($needed-new-users-and-non-users, ":")`;
       $new-users = `substring-before ($new-users-and-non-users, ":")`;
       $new-non-users = `substring-after ($new-users-and-non-users, ":")`;
+      $item-position = `count (preceding-sibling::Item) + 1`;
       choose {
         when [self::Item[@kind = "Choice-Statement"]] {
           if [not(Conditions)] {
     	    die (#message = "Error: the required Conditions child of a Choice-Statement is missing.");
           }
 	  <Text-Proper {
+            @fragment-number = $item-position;
 	    <Item { @kind = "Section-Pragma"; }
 	    emit-needed (#needed = $needed);
             <Item {
@@ -71,6 +73,7 @@ tpl enumerate-items (#items, #users, #non-users) {
         when [self::Item[@kind = "Regular-Statement" and @exportable = "yes"]] {
         for-each [Proposition] {
           <Text-Proper {
+            @fragment-number = $item-position;
             <Item { @kind = "Section-Pragma"; }
             emit-needed (#needed = $needed);
             <Item {
@@ -89,11 +92,19 @@ tpl enumerate-items (#items, #users, #non-users) {
       when [self::Item[@type-changing-lemma = "yes"]] {
         for-each [Proposition] {
           <Text-Proper {
+            @fragment-number = $item-position;
             <Item { @kind = "Section-Pragma"; }
             emit-needed (#needed = $needed);
             <Item {
-              @kind = "Theorem-Item";
-              @promoted-lemma = "yes";
+
+              if [@promotable = "yes"] {
+                @kind = "Theorem-Item";
+                @promoted-lemma = "yes";
+              } else {
+                @kind = "Regular-Statement";
+                @shape = "Compact-Statement";
+              }
+
               $num-preceding-lemmas = count-preceding-lemmas ();
               @lemma-number = `$num-preceding-lemmas + 1`;
               apply [.];
@@ -106,6 +117,7 @@ tpl enumerate-items (#items, #users, #non-users) {
       }
       when [self::Item[@kind = "Regular-Statement" and @exportable = "no"]] {
         <Text-Proper {
+          @fragment-number = $item-position;
           <Item { @kind = "Section-Pragma"; }
           emit-needed (#needed = $needed);
           <Item {
@@ -119,6 +131,7 @@ tpl enumerate-items (#items, #users, #non-users) {
       }
       when [self::Item[@kind = "Theorem-Item"]] {
         <Text-Proper {
+          @fragment-number = $item-position;
           <Item { @kind = "Section-Pragma"; }
           emit-needed (#needed = $needed);
           <Item {
@@ -130,6 +143,7 @@ tpl enumerate-items (#items, #users, #non-users) {
       }
       otherwise {
         <Text-Proper {
+          @fragment-number = $item-position;
           <Item { @kind = "Section-Pragma"; }
           emit-needed (#needed = $needed);
           apply [$item];
