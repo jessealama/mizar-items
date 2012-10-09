@@ -433,3 +433,51 @@ tpl [Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]] {
 
   copy-of `.`;
 }
+
+tpl emit-conjunction-stripping-labels (#propositions) {
+  if [$propositions] {
+    $proposition = `$propositions[1]`;
+    for-each [$proposition] {
+      if [count ($propositions) = 1] {
+        <Proposition {
+          apply [*[position() = last ()]];
+        }
+      } else {
+        <Conjunctive-Formula {
+          <Proposition {
+            apply [*[position() = last()]];
+          }
+          emit-conjunction-stripping-labels (#propositions = `$propositions[position() > 1]`);
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[parent::Text-Proper
+          and @kind = "Choice-Statement"
+          and Explicitly-Qualified-Segment]] {
+  $variables = `Explicitly-Qualified-Segment/Variables/Variable`;
+  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
+
+  <Item {
+
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    @exportable = "no";
+    @choice-statement-lemma = "yes";
+
+    <Proposition {
+      <Existential-Quantifier-Formula {
+        copy-of `Explicitly-Qualified-Segment`;
+        emit-conjunction-stripping-labels (#propositions = `Conditions/*`);
+      }
+    }
+
+    copy-of `*[position() = last()]`; // justification
+
+  }
+
+  copy-of `.`;
+
+}
