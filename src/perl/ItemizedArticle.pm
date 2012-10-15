@@ -1401,7 +1401,7 @@ sub dependencies {
 			push (@old_deps, @resolved_deps);
 			$dependencies{$resolved_item} = \@old_deps;
 		    } else {
-			$dependencies{$item} = \@resolved_deps;
+			$dependencies{$resolved_item} = \@resolved_deps;
 		    }
 		}
 
