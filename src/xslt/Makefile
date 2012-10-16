@@ -27,6 +27,7 @@ sheets = addabsrefs \
          lemma-deps-non-absolute \
          lemma-deps \
          list-properties \
+         mptp-fraenkels \
          no-attributes \
          non-scheme-uses-scheme \
          paths \
