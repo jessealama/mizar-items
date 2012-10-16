@@ -11,6 +11,7 @@ sheets = addabsrefs \
          delete-abstractness \
          delete-elements \
          delete-properties \
+         expand-canceled \
          keep-elements \
          dependencies \
          die \
