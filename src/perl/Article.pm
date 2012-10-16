@@ -2172,6 +2172,7 @@ sub itemize {
     # Transform the new miz
     print 'Rewriting the text of ', $article_basename, ': ';
 
+    my $expand_canceled_stylesheet = $self->path_for_stylesheet ('expand-canceled');
     my $split_stylesheet = $self->path_for_stylesheet ('split');
     my $itemize_stylesheet = $self->path_for_stylesheet ('itemize');
     my $wsm_stylesheet = $self->path_for_stylesheet ('wsm');
@@ -2190,6 +2191,15 @@ sub itemize {
 	= $article_in_target_dir->file_with_extension ('wsx.split');
     my $article_itemized_wsx_in_target_dir
 	= $article_in_target_dir->file_with_extension ('wsx.split.itemized');
+
+    print 'Expand canceled theorems: ', $article_basename, ': ';
+    apply_stylesheet ($expand_canceled_stylesheet,
+		      $article_wsx_in_target_dir,
+		      $article_wsx_in_target_dir)
+	or
+	    croak ('Error: xsltproc did not exit cleanly when applying the expand-canceled stylesheet at ', $expand_canceled_stylesheet, ' to ', $article_wsx_in_target_dir, '.', "\n");
+
+    print 'done.', "\n";
 
     print 'Split ', $article_basename, ': ';
     apply_stylesheet ($split_stylesheet,
