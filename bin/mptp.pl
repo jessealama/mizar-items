@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Regexp::DefaultFlags;
+use Data::Dumper;
 
 my %mptp_for_item = ();
 my %redefined_constructors = ();
@@ -250,8 +251,9 @@ load_mptp_items ();
 
 my %dependency_table = ();
 my @items = ();
+my %encountered = ();
 
-foreach my $line (<STDIN>) {
+while (defined (my $line = <STDIN>)) {
     chomp $line;
     (my $item, my @deps) = split (' ', $line);
     push (@items, $item);
