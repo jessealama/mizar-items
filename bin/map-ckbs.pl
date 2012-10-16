@@ -30,17 +30,17 @@ pod2usage(1) if (scalar @ARGV != 1);
 
 my $article_dir = $ARGV[0];
 
-if (! ensure_directory ($article_dir)) {
+if (! -d $article_dir) {
     print 'Error: the supplied directory \'', $article_dir, '\' does not exist.', "\n";
     exit 1;
 }
 
-if (! ensure_directory ($stylesheet_home)) {
+if (! -d $stylesheet_home) {
     print 'Errior: the supplied directory \'', $stylesheet_home, '\' to be used for locating stylesheets is not a directory.', "\n";
     exit 1;
 }
 
-if (! ensure_directory ($script_home)) {
+if (! -d $script_home) {
     print 'Errior: the supplied directory \'', $stylesheet_home, '\' to be used for locating scripts is not a directory.', "\n";
     exit 1;
 }
