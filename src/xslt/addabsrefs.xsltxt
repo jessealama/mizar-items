@@ -206,7 +206,7 @@ tpl [ThesisExpansions/Pair] {
 // add absolute numbers to these (they are kind-dependent)
 // note that redefnr of Patterns (relative nr of the synonym/antonym
 // Pattern) is ignored
-tpl [Theorem|Constructor|Pattern](#s) {
+tpl [Theorem|Constructor](#s) {
              $n=`name()`; <$n
              {
              copy-of `@*`;
@@ -215,6 +215,23 @@ tpl [Theorem|Constructor|Pattern](#s) {
                $k=`@kind`;
                if [not(@aid)] { @aid=$aname; }
                @nr=`1 + count(preceding::*[(name()=$n) and (@kind=$k)])`;
+               if [(@redefnr > 0) and ($n = "Constructor")] { abs(#k=$k,#nr=`@redefnr`,#r="1"); }
+               else { if [($n = "Pattern") and (not(Expansion))]
+               {
+                   abs(#k=`@constrkind`,#nr=`@constrnr`,#r="2");
+               }}
+             }
+             apply(#s=$s); }}
+
+tpl [Pattern](#s) {
+             $n=`name()`; <$n
+             {
+             copy-of `@*`;
+             if [$ethprocess = 0]
+             {
+               $k=`@kind`;
+               if [not(@aid)] { @aid=$aname; }
+               // @nr=`1 + count(preceding::*[(name()=$n) and (@kind=$k)])`;
                if [(@redefnr > 0) and ($n = "Constructor")] { abs(#k=$k,#nr=`@redefnr`,#r="1"); }
                else { if [($n = "Pattern") and (not(Expansion))]
                {

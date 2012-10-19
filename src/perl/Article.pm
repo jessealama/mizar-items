@@ -360,7 +360,7 @@ Readonly my %ITEM_KINDS_BY_EXTENSION => (
     'cluster' => 'ecl1',
     'identification' => 'eid1',
     'reduction' => 'erd1',
-    'pattern' => 'eno', # absolutizing the eno can produce nonsense
+    'pattern' => 'eno1',
     'property-registration' => 'epr1',
 );
 
