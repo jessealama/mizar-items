@@ -1,7 +1,7 @@
 package ItemizedArticle;
 
 use Moose;
-use Carp qw(croak carp);
+use Carp qw(croak carp confess);
 use File::Spec;
 use Data::Dumper;
 use File::Basename qw(basename);
@@ -1401,7 +1401,7 @@ sub dependencies {
 			push (@old_deps, @resolved_deps);
 			$dependencies{$resolved_item} = \@old_deps;
 		    } else {
-			$dependencies{$item} = \@resolved_deps;
+			$dependencies{$resolved_item} = \@resolved_deps;
 		    }
 		}
 

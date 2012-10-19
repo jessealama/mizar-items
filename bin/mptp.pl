@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Regexp::DefaultFlags;
+use Data::Dumper;
 
 my %mptp_for_item = ();
 my %redefined_constructors = ();
@@ -196,16 +197,14 @@ sub handled {
 	    }
 	} elsif ($kind =~ /\A . definiens \z/) {
 	    $answer = 1;
+	} elsif ($kind =~ /[rv]constructor/) {
+	    $answer = 0;
+	} elsif ($kind =~ /[gjklmruv]pattern/) {
+	    $answer = 0;
+	} elsif ($kind eq 'lemma') {
+	    $answer = 0;
 	} else {
-	    if ($kind =~ /[rv]constructor/) {
-		$answer = 0;
-	    } elsif ($kind =~ /[gjklmruv]pattern/) {
-		$answer = 0;
-	    } elsif ($kind eq 'lemma') {
-		$answer = 0;
-	    } else {
-		$answer = 1;
-	    }
+	    $answer = 1;
 	}
     } elsif ($item =~ /\A rq [a-zA-Z]+ \z /) {
 	$answer = 0;
@@ -252,198 +251,205 @@ load_mptp_items ();
 
 my %dependency_table = ();
 my @items = ();
+my %encountered = ();
 
-foreach my $line (<STDIN>) {
+while (defined (my $line = <STDIN>)) {
     chomp $line;
     (my $item, my @deps) = split (' ', $line);
     push (@items, $item);
     $dependency_table{$item} = \@deps;
+
+    $encountered{$item} = 0;
+    foreach my $dep_item (@deps) {
+	$encountered{$dep_item} = 0;
+    }
 }
 
-my %printed = ();
+close *STDIN;
 
-foreach my $item (@items) {
+foreach my $item (keys %encountered) {
+    if (! defined $dependency_table{$item}) {
+	$dependency_table{$item} = [];
+    }
+}
+
+foreach my $item (keys %encountered) {
+
+    my %printed_for_this_item = (
+	'symmetry_r1_hidden' => 0,
+	'reflexivity_r1_hidden' => 0,
+    );
+
     if (handled ($item)) {
 	my $mptp = to_mptp ($item);
-	my %printed_for_this_item = (
-	    'symmetry_r1_hidden' => 0,
-	    'reflexivity_r1_hidden' => 0,
-	);
-	if (defined $printed{$mptp}) {
-	    # ignore
+	if (is_redefined_constructor ($item)) {
+	    my $redefined = redefine_constructor ($item);
+	    print $redefined;
 	} else {
+	    print $mptp;
+	}
 
-	    if (is_redefined_constructor ($item)) {
-		print redefine_constructor ($item);
-	    } else {
-		print $mptp;
+	my @deps = @{$dependency_table{$item}};
+
+	foreach my $dep_item (@deps) {
+	    if ($item eq $dep_item) {
+		# ignore self-dependencies.  These come from structure constructors
+	    } elsif (is_redefined_constructor ($dep_item)) {
+		my $redefined = redefine_constructor ($dep_item);
+		print ' ', $redefined;
+		$printed_for_this_item{$redefined} = 0;
+	    } elsif (handled ($dep_item)) {
+		my $dep_mptp = to_mptp ($dep_item);
+		if (defined $printed_for_this_item{$dep_mptp}) {
+		    # don't print
+		} else {
+		    print ' ', $dep_mptp;
+		    $printed_for_this_item{$dep_mptp} = 0;
+		}
 	    }
+	}
 
-	    my @deps = @{$dependency_table{$item}};
+	# todo: for every constructor that's included, throw in
+	# its associated deftheorem
+
+	# Redefinition case
+	if (is_redefined_constructor ($item)) {
+	    # Look up a coherence/compatibility condition for the constructor
+	    if ($item =~ /\A [a-z0-9_]+ [:] . (constructor | definiens) [:] [0-9]+ \z/) {
+		my $coherence_item = "${item}[coherence]";
+		my $compatibility_item = "${item}[compatibility]";
+		if (defined $dependency_table{$coherence_item}) {
+		    my @coherence_deps = @{$dependency_table{$coherence_item}};
+		    foreach my $dep_item (@coherence_deps) {
+			if (handled ($dep_item)) {
+			    my $dep_mptp = to_mptp ($dep_item);
+			    if (defined $printed_for_this_item{$dep_mptp}) {
+				# don't print
+			    } elsif (is_redefined_constructor ($dep_item)) {
+				print ' ', redefine_constructor ($dep_item);
+			    } else {
+				print ' ', $dep_mptp;
+			    }
+			    $printed_for_this_item{$dep_mptp} = 0;
+			}
+		    }
+		} elsif (defined $dependency_table{$compatibility_item}) {
+		    my @compatibility_deps = @{$dependency_table{$compatibility_item}};
+		    foreach my $dep_item (@compatibility_deps) {
+			if (handled ($dep_item)) {
+			    my $dep_mptp = to_mptp ($dep_item);
+			    if (defined $printed_for_this_item{$dep_mptp}) {
+				# don't print
+			    } elsif (is_redefined_constructor ($dep_item)) {
+				print ' ', redefine_constructor ($dep_item);
+			    } else {
+				print ' ', $dep_mptp;
+			    }
+			    $printed_for_this_item{$dep_mptp} = 0;
+			}
+		    }
+		} else {
+		    # warn 'To ', $item, ' neither a compatibility nor a coherence item is associated.';
+		}
+	    } else {
+		die 'Error: cannot make sense of \'', $item, '\'.';
+	    }
+	}
+
+	foreach my $dep_item (@deps) {
+	    if (is_redefined_constructor ($dep_item)) {
+		if ($dep_item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z/) {
+		    (my $new_article, my $new_kind, my $new_number) = ($1, $2, $3);
+		    my $new_mptp = "${new_kind}${new_number}_${new_article}";
+
+		    foreach my $property (@properties) {
+
+			if ($property eq 'asymmetry') {
+			    $property = 'antisymmetry';
+			}
+
+			my $new_with_property = "${property}_${new_mptp}";
+
+			if (defined $mptp_items{$new_with_property}) {
+			    if (! defined $printed_for_this_item{$new_with_property}) {
+				print ' ', $new_with_property;
+				$printed_for_this_item{$new_with_property} = 0;
+				# warn 'HEY: throwing in ', $new_with_property;
+			    }
+			}
+
+			my $old_mptp = $redefined_constructors{$new_mptp};
+
+			if (defined $old_mptp) {
+			    if ($old_mptp =~ /\A (.) ([0-9]+) [_] ([a-z0-9_]+) \z/) {
+				(my $old_kind, my $old_number, my $old_article)
+				    = ($1, $2, $3);
+				my $old_with_property = "${property}_${old_mptp}";
+				if (defined $mptp_items{$old_with_property}) {
+				    if (! defined $printed_for_this_item{$old_with_property}) {
+					print ' ', $old_with_property;
+					$printed_for_this_item{$old_with_property} = 0;
+					# warn 'HEY: throwing in ', $old_with_property;
+				    }
+				}
+			    } else {
+				die 'Error: cannot make sense of the MPTP constructor \'', $old_mptp, '\'.';
+			    }
+
+			}
+		    }
+		}
+	    }
+	}
+
+	foreach my $dep_item (@deps) {
+	    if ($dep_item =~ /\A ([a-z0-9_]+) [:] gconstructor [:] ([0-9]+) \z/) {
+		(my $article, my $number) = ($1, $2);
+		my $free_item = "free_g${number}_${article}";
+		if (! defined $printed_for_this_item{$free_item}) {
+		    print ' ', $free_item;
+		    $printed_for_this_item{$free_item} = 0;
+		}
+	    }
+	}
+
+	print "\n";
+
+	# Typing for redefined functors
+	if (is_redefined_constructor ($item)) {
+	    if ($item =~ / [:] . constructor [:] /) {
+		my $redefinition = redefine_constructor ($item);
+		print $mptp, ' ', $redefinition, "\n";
+	    }
+	}
+
+	# Mode existence conditions
+	%printed_for_this_item = ();
+	if ($item =~ / \A ([a-z0-9_]+) [:] ([lm]) constructor [:] ([0-9]+) \z/) {
+	    (my $article, my $kind, my $number) = ($1, $2, $3);
+	    my $mptp_existence = "existence_${kind}${number}_${article}";
+
+	    print $mptp_existence;
 
 	    foreach my $dep_item (@deps) {
 		if ($item eq $dep_item) {
 		    # ignore self-dependencies.  These come from structure constructors
-		} elsif (is_redefined_constructor ($dep_item)) {
-		    my $redefined = redefine_constructor ($dep_item);
-		    print ' ', $redefined;
-		    $printed_for_this_item{$redefined} = 0;
 		} elsif (handled ($dep_item)) {
 		    my $dep_mptp = to_mptp ($dep_item);
 		    if (defined $printed_for_this_item{$dep_mptp}) {
 			# don't print
+		    } elsif (is_redefined_constructor ($dep_item)) {
+			print ' ', redefine_constructor ($dep_item);
 		    } else {
 			print ' ', $dep_mptp;
+
 		    }
 		    $printed_for_this_item{$dep_mptp} = 0;
 		}
 	    }
 
- 	    # todo: for every constructor that's included, throw in
- 	    # its associated deftheorem
-
-	    # Redefinition case
-	    if (is_redefined_constructor ($item)) {
-		# Look up a coherence/compatibility condition for the constructor
-		if ($item =~ /\A [a-z0-9_]+ [:] . (constructor | definiens) [:] [0-9]+ \z/) {
-		    my $coherence_item = "${item}[coherence]";
-		    my $compatibility_item = "${item}[compatibility]";
-		    if (defined $dependency_table{$coherence_item}) {
-			my @coherence_deps = @{$dependency_table{$coherence_item}};
-			foreach my $dep_item (@coherence_deps) {
-			    if (handled ($dep_item)) {
-				my $dep_mptp = to_mptp ($dep_item);
-				if (defined $printed_for_this_item{$dep_mptp}) {
-				    # don't print
-				} elsif (is_redefined_constructor ($dep_item)) {
-				    print ' ', redefine_constructor ($dep_item);
-				} else {
-				    print ' ', $dep_mptp;
-				}
-				$printed_for_this_item{$dep_mptp} = 0;
-			    }
-			}
-		    } elsif (defined $dependency_table{$compatibility_item}) {
-			my @compatibility_deps = @{$dependency_table{$compatibility_item}};
-			foreach my $dep_item (@compatibility_deps) {
-			    if (handled ($dep_item)) {
-				my $dep_mptp = to_mptp ($dep_item);
-				if (defined $printed_for_this_item{$dep_mptp}) {
-				    # don't print
-				} elsif (is_redefined_constructor ($dep_item)) {
-				    print ' ', redefine_constructor ($dep_item);
-				} else {
-				    print ' ', $dep_mptp;
-				}
-				$printed_for_this_item{$dep_mptp} = 0;
-			    }
-			}
-		    } else {
-			# warn 'To ', $item, ' neither a compatibility nor a coherence item is associated.';
-		    }
-		} else {
-		    die 'Error: cannot make sense of \'', $item, '\'.';
-		}
-	    }
-
-	    foreach my $dep_item (@deps) {
-		if (is_redefined_constructor ($dep_item)) {
-		    if ($dep_item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z/) {
-			(my $new_article, my $new_kind, my $new_number) = ($1, $2, $3);
-			my $new_mptp = "${new_kind}${new_number}_${new_article}";
-
-			foreach my $property (@properties) {
-
-			    if ($property eq 'asymmetry') {
-				$property = 'antisymmetry';
-			    }
-
-			    my $new_with_property = "${property}_${new_mptp}";
-
-			    if (defined $mptp_items{$new_with_property}) {
-				if (! defined $printed_for_this_item{$new_with_property}) {
-				    print ' ', $new_with_property;
-				    $printed_for_this_item{$new_with_property} = 0;
-				    # warn 'HEY: throwing in ', $new_with_property;
-				}
-			    }
-
-			    my $old_mptp = $redefined_constructors{$new_mptp};
-
-			    if (defined $old_mptp) {
-				if ($old_mptp =~ /\A (.) ([0-9]+) [_] ([a-z0-9_]+) \z/) {
-				    (my $old_kind, my $old_number, my $old_article)
-					= ($1, $2, $3);
-				    my $old_with_property = "${property}_${old_mptp}";
-				    if (defined $mptp_items{$old_with_property}) {
-					if (! defined $printed_for_this_item{$old_with_property}) {
-					    print ' ', $old_with_property;
-					    $printed_for_this_item{$old_with_property} = 0;
-					    # warn 'HEY: throwing in ', $old_with_property;
-					}
-				    }
-				} else {
-				    die 'Error: cannot make sense of the MPTP constructor \'', $old_mptp, '\'.';
-				}
-
-			    }
-			}
-		    }
-		}
-	    }
-
-	    foreach my $dep_item (@deps) {
-		if ($dep_item =~ /\A ([a-z0-9_]+) [:] gconstructor [:] ([0-9]+) \z/) {
-		    (my $article, my $number) = ($1, $2);
-		    my $free_item = "free_g${number}_${article}";
-		    if (! defined $printed_for_this_item{$free_item}) {
-			print ' ', $free_item;
-			$printed_for_this_item{$free_item} = 0;
-		    }
-		}
-	    }
-
 	    print "\n";
-	    $printed{$mptp} = 0;
 
-	    # Typing for redefined functors
-	    if (is_redefined_constructor ($item)) {
-		if ($item =~ / [:] . constructor [:] /) {
-		    my $mptp = to_mptp ($item);
-		    my $redefinition = redefine_constructor ($item);
-		    print $mptp, ' ', $redefinition, "\n";
-		    $printed{$mptp} = 0;
-		}
-	    }
-
-	    # Mode existence conditions
-	    %printed_for_this_item = ();
-	    if ($item =~ / \A ([a-z0-9_]+) [:] ([lm]) constructor [:] ([0-9]+) \z/) {
-		(my $article, my $kind, my $number) = ($1, $2, $3);
-		my $mptp_existence = "existence_${kind}${number}_${article}";
-
-		print $mptp_existence;
-
-		foreach my $dep_item (@deps) {
-		    if ($item eq $dep_item) {
-			# ignore self-dependencies.  These come from structure constructors
-		    } elsif (handled ($dep_item)) {
-			my $dep_mptp = to_mptp ($dep_item);
-			if (defined $printed_for_this_item{$dep_mptp}) {
-			    # don't print
-			} elsif (is_redefined_constructor ($dep_item)) {
-			    print ' ', redefine_constructor ($dep_item);
-			} else {
-			    print ' ', $dep_mptp;
-
-			}
-			$printed_for_this_item{$dep_mptp} = 0;
-		    }
-		}
-
-		print "\n";
-		$printed{$mptp_existence} = 0;
-	    }
 	}
     }
 }

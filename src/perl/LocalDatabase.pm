@@ -439,7 +439,8 @@ sub constructors_in_prel_of_kind {
 	    if (defined $dco_doc) {
 
 		my $xpath = '/Constructors/Constructor[@kind = "' . (uc $kind) . '"]';
-		if ($dco_doc->exists ($xpath)) {
+		my @nodes = $dco_doc->findnodes ($xpath);
+		foreach my $node (@nodes) {
 		    push (@answers, $dco);
 		}
 

@@ -11,6 +11,7 @@ sheets = addabsrefs \
          delete-abstractness \
          delete-elements \
          delete-properties \
+         expand-canceled \
          keep-elements \
          dependencies \
          die \
@@ -27,6 +28,7 @@ sheets = addabsrefs \
          lemma-deps-non-absolute \
          lemma-deps \
          list-properties \
+         mptp-fraenkels \
          no-attributes \
          non-scheme-uses-scheme \
          paths \

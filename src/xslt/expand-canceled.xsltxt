@@ -1,0 +1,32 @@
+stylesheet "1.0";
+output method="xml" indent="yes";
+
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [/] {
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    msg terminate="yes" "Error: the mandator Text-Proper document element is missing.";
+  }
+}
+
+tpl [Item[@kind = "Canceled-Pragma" and @number]] {
+  emit-canceled (#times = `@number`);
+}
+
+tpl emit-canceled (#times) {
+  if [not($times = "0")] {
+    <Item {
+      @kind = "Canceled-Pragma";
+      @"number" = "1";
+    }
+    emit-canceled (#times = `$times - 1`);
+  }
+}
