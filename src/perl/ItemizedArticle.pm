@@ -10,7 +10,7 @@ use XML::LibXML;
 use charnames qw(:full);
 
 # Local stuff
-use Utils qw(ensure_directory strip_extension ensure_readable_file);
+use Utils qw(strip_extension ensure_readable_file);
 use Mizar;
 use Xsltproc qw(apply_stylesheet);
 use LocalDatabase;
@@ -137,7 +137,7 @@ sub _set_article_name {
 	croak ('Error: either a local database or a location must be provided when creating an ItemizedArticle.');
     }
 
-    if (! ensure_directory ($location)) {
+    if (! -d $location) {
 	croak ('Error: the location where the local database is stored (', $location, ') does not seem to exist (as a directory).');
     }
 
@@ -199,7 +199,7 @@ sub BUILD {
     $self->_set_all_fragments (\@fragments);
 
     my $sheet_home = $self->get_stylesheet_home ();
-    if (! ensure_directory ($sheet_home)) {
+    if (! -d $sheet_home) {
 	croak ('Error: the supplied path (', $sheet_home, ') is not a directory.');
     }
 
