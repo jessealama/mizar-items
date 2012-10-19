@@ -7,12 +7,24 @@ use Regexp::DefaultFlags;
 sub load_mml {
     my @articles = ();
     while (defined (my $article = <DATA>)) {
+	chomp $article;
 	push (@articles, $article);
     }
     return @articles;
 }
 
-my $item_to_fragment_table = '../data/7.13.01-4.181.1147/item-fragment-table';
+my @mml = load_mml ();
+
+warn 'MML loaded (', scalar @mml, ' articles)';
+
+my %mml_order = ();
+
+foreach my $i (1 .. scalar @mml) {
+    my $article = $mml[$i - 1];
+    $mml_order{$article} = $i;
+}
+
+my $item_to_fragment_table = '/Users/alama/sources/mizar/mizar-items/data/7.13.01-4.181.1147/item-fragment-table';
 
 sub load_item_to_fragment_table {
 
@@ -44,6 +56,10 @@ sub load_item_to_fragment_table {
 
 }
 
+my %item_to_fragment_table = %{load_item_to_fragment_table ()};
+
+warn 'Item-to-fragment table loaded.';
+
 my %less_than = ();
 sub item_less_than {
     my $item_1 = shift;
@@ -57,7 +73,11 @@ sub item_less_than {
 
     my $answer = undef;
 
-    if ($item_1 =~ /\A ([a-z0-9_]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z/) {
+    if ($item_1 =~ /\A rq [a-zA-Z]+ \z/) {
+	$answer = 1;
+    } elsif ($item_2 =~ /\A rq [a-zA-Z]+ \z/) {
+	$answer = -1;
+    } elsif ($item_1 =~ /\A ([a-z0-9_]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z/) {
 	(my $item_1_article, my $item_1_kind, my $item_1_number, my $item_1_tag)
 	    = ($1, $2, $3, $5);
 	if ($item_2 =~ /\A ([a-z0-9_]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z/) {
@@ -83,22 +103,23 @@ sub item_less_than {
 		my $fragment_2 = $item_to_fragment_table{$item_2};
 
 		if (! defined $fragment_1) {
-		    die 'Error: the item-to-fragment table has no entry for ', $fragment_1;
+		    die 'Error: the item-to-fragment table has no entry for ', $item_1;
 		}
 
 		if (! defined $fragment_2) {
-		    die 'Error: the item-to-fragment table has no entry for ', $fragment_2;
+		    die 'Error: the item-to-fragment table has no entry for ', $item_2;
 		}
 
 		if ($fragment_1 =~ / [:] fragment [:] ([0-9]+) /) {
-		    my $fragment_number = $1;
+		    my $fragment_number_1 = $1;
 		    if ($fragment_2 =~ /[:] fragment [:] ([0-9]+) /) {
-			if ($fragment_1 < $fragment_2) {
+			my $fragment_number_2 = $1;
+			if ($fragment_number_1 < $fragment_number_2) {
 			    $answer = -1;
-			} elsif ($fragment_2 < $fragment_1) {
+			} elsif ($fragment_number_2 < $fragment_number_1) {
 			    $answer = 1;
 			} else {
-			    die 'How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', fragment_2, ')', "\n", '?', "\n";
+			    die 'How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', $fragment_2, ')', "\n", '?', "\n";
 			}
 		    } else {
 			die 'Error: unable to make sense of \'', $fragment_2, '\'.';
@@ -132,17 +153,6 @@ sub item_less_than {
 
 }
 
-my @mml = load_mml ();
-
-my %mml_order = ();
-
-foreach my $i (1 .. scalar @mml) {
-    my $article = $mml[$i - 1];
-    $mml_order{$article} = $i;
-}
-
-my %item_to_fragment_table = %{load_item_to_fragment_table ()};
-
 my %items = ();
 my %dependencies = ();
 
@@ -153,6 +163,32 @@ while (defined (my $dependency_line = <STDIN>)) {
 	$items{$dep_item} = 0;
 	$dependencies{$item}{$dep_item} = 0;
     }
+}
+
+warn 'Dependency hashes installed.';
+
+my @sorted_items = sort { item_less_than ($a, $b) } keys %items;
+
+sub item_dependencies {
+    my $item = shift;
+    my @deps = ();
+    foreach my $other_item (@sorted_items) {
+	if (defined $dependencies{$item}{$other_item}) {
+	    push (@deps, $other_item);
+	}
+    }
+    return @deps;
+}
+
+warn 'Sorted.';
+
+foreach my $item (@sorted_items) {
+    my @deps = item_dependencies ($item);
+    print $item;
+    foreach my $dep_item (@deps) {
+	print ' ', $dep_item;
+    }
+    print "\n";
 }
 
 __DATA__
