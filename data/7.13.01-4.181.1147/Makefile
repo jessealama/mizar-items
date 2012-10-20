@@ -1153,4 +1153,21 @@ mml := hidden
        ratfunc1 \
 
 dependency-tables = $(addsuffix .deps,$(mml))
-dependency-table: $(dependency-tables)
+dependencies: $(dependency-tables)
+	cat $(dependency-tables) > dependencies.1
+	../../bin/sort-dependency-table.pl < dependencies.1 > dependencies
+	rm dependencies.1
+
+dependencies.tc: dependencies
+	../../bin/table-info.pl transitive dependencies > dependencies.tc.1
+	../../bin/sort-dependency-table.pl < dependencies.tc.1 > dependencies.tc
+
+dependencies.mptp: dependencies
+	../../bin/mptp.pl < dependencies > dependencies.mptp
+
+dependencies.mptp.tc: dependencies.tc
+	../../bin/mptp.pl < dependencies.tc > dependencies.tc.mptp
+
+check: dependencies dependencies.tc
+	../../bin/table-info.pl structural-check dependencies
+	../../bin/table-info.pl structural-check dependencies.tc
