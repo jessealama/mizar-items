@@ -227,8 +227,9 @@ warn 'Sorted.';
 
 foreach my $item (@sorted_items) {
     my @deps = item_dependencies ($item);
+    my @sorted_deps = sort { item_less_than ($a, $b) } @deps;
     print $item;
-    foreach my $dep_item (@deps) {
+    foreach my $dep_item (@sorted_deps) {
 	print ' ', $dep_item;
     }
     print "\n";
