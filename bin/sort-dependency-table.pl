@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Regexp::DefaultFlags;
+use List::MoreUtils qw(firstidx);
 
 sub load_mml {
     my @articles = ();
@@ -60,6 +61,8 @@ my %item_to_fragment_table = %{load_item_to_fragment_table ()};
 
 warn 'Item-to-fragment table loaded.';
 
+my @condition_order = ('kp', 'ch');
+
 my %less_than = ();
 sub item_less_than {
     my $item_1 = shift;
@@ -78,11 +81,11 @@ sub item_less_than {
     } elsif ($item_2 =~ /\A rq [a-zA-Z]+ \z/) {
 	$answer = -1;
     } elsif ($item_1 =~ /\A ([a-z0-9_]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z/) {
-	(my $item_1_article, my $item_1_kind, my $item_1_number, my $item_1_tag)
-	    = ($1, $2, $3, $5);
+	(my $item_1_article, my $item_1_kind, my $item_1_number)
+	    = ($1, $2, $3);
 	if ($item_2 =~ /\A ([a-z0-9_]+) [:] ([a-z]+) [:] ([0-9]+) ([[] ([a-z]+) []] )? \z/) {
-	    (my $item_2_article, my $item_2_kind, my $item_2_number, my $item_2_tag)
-		= ($1, $2, $3, $5);
+	    (my $item_2_article, my $item_2_kind, my $item_2_number)
+		= ($1, $2, $3);
 	    my $article_1_position = $mml_order{$item_1_article};
 	    my $article_2_position = $mml_order{$item_2_article};
 
@@ -102,30 +105,70 @@ sub item_less_than {
 		my $fragment_1 = $item_to_fragment_table{$item_1};
 		my $fragment_2 = $item_to_fragment_table{$item_2};
 
-		if (! defined $fragment_1) {
-		    die 'Error: the item-to-fragment table has no entry for ', $item_1;
-		}
-
-		if (! defined $fragment_2) {
-		    die 'Error: the item-to-fragment table has no entry for ', $item_2;
-		}
-
-		if ($fragment_1 =~ / [:] fragment [:] ([0-9]+) /) {
-		    my $fragment_number_1 = $1;
-		    if ($fragment_2 =~ /[:] fragment [:] ([0-9]+) /) {
-			my $fragment_number_2 = $1;
-			if ($fragment_number_1 < $fragment_number_2) {
-			    $answer = -1;
-			} elsif ($fragment_number_2 < $fragment_number_1) {
-			    $answer = 1;
+		if (defined $fragment_1) {
+		    if (defined $fragment_2) {
+			if ($fragment_1 =~ / [:] fragment [:] ([0-9]+) ([[] ([a-z]+) []]) ? /) {
+			    (my $fragment_number_1, my $fragment_1_tag) = ($1, $3);
+			    if ($fragment_2 =~ /[:] fragment [:] ([0-9]+) ([[] ([a-z]+) []]) ? /) {
+				(my $fragment_number_2, my $fragment_2_tag) = ($1, $3);
+				if ($fragment_number_1 < $fragment_number_2) {
+				    $answer = -1;
+				} elsif ($fragment_number_2 < $fragment_number_1) {
+				    $answer = 1;
+				} else {
+				    if (defined $fragment_1_tag) {
+					if (defined $fragment_2_tag) {
+					    my $tag_1_pos = firstidx { $_ eq $fragment_1_tag } @condition_order;
+					    my $tag_2_pos = firstidx { $_ eq $fragment_2_tag } @condition_order;
+					    if (defined $tag_1_pos) {
+						if (defined $tag_2_pos) {
+						    if ($tag_1_pos < $tag_2_pos) {
+							$answer = -1;
+						    } elsif ($tag_1_pos > $tag_2_pos) {
+							$answer = 1;
+						    } else {
+							$answer = 0;
+						    }
+						} else {
+						    die 'The tag ', $fragment_2_tag, ' of item 2,', $item_2, ' was not found in the condition ordering list.';
+						}
+					    } else {
+						die 'The tag ', $fragment_1_tag, ' of item 1,', $item_1, ' was not found in the condition ordering list.';
+					    }
+					} else {
+					    if ($item_2_kind eq 'rcluster') {
+						$answer = -1;
+					    } else {
+						die 'First item has tag ', $fragment_1_tag, ' but the second item has no tag.  How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', $fragment_2, ')', "\n", "\n", '?', "\n";
+					    }
+					}
+				    } elsif (defined $fragment_2_tag) {
+					if ($item_1_kind eq 'rcluster') {
+					    $answer = 1;
+					} else {
+					    die 'First item has no tag, but the second item has the tag ', $fragment_2_tag, '. How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', $fragment_2, ')', "\n", '?', "\n";
+					}
+				    } else {
+					$answer = 0;
+				    }
+				}
+			    } else {
+				die 'Error: unable to make sense of \'', $fragment_2, '\'.';
+			    }
 			} else {
-			    die 'How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', $fragment_2, ')', "\n", '?', "\n";
+			    die 'Error: unable to make sense of \'', $fragment_1, '\'.';
 			}
 		    } else {
-			die 'Error: unable to make sense of \'', $fragment_2, '\'.';
+			warn 'The fragment for ', $item_1, ' is ', $fragment_1, ' but the fragment for ', $item_2, ' is undefined; stipulating that the two items are equal.';
+			$answer = 0;
 		    }
+
+		} elsif (defined $fragment_2) {
+		    warn 'The fragment for ', $item_1, ' is undefined, while the fragment for ', $item_2, ' is ', $fragment_2, '; stipulating that the two items are equal.';
+			$answer = 0;
 		} else {
-		    die 'Error: unable to make sense of \'', $fragment_1, '\'.';
+		    warn 'Error: the item-to-fragment table has an entry for neither ', $item_1, ' nor ', $item_2, '; stipulating that they are equal.';
+		    $answer = 0;
 		}
 
 	    }
@@ -184,8 +227,9 @@ warn 'Sorted.';
 
 foreach my $item (@sorted_items) {
     my @deps = item_dependencies ($item);
+    my @sorted_deps = sort { item_less_than ($a, $b) } @deps;
     print $item;
-    foreach my $dep_item (@deps) {
+    foreach my $dep_item (@sorted_deps) {
 	print ' ', $dep_item;
     }
     print "\n";
