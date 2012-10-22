@@ -1,7 +1,32 @@
 stylesheet "1.0";
+import "utils/die.xsl";
 output method="xml" indent="yes";
 
-include "die.xsl";
+tpl try-fresh-variable (#prefix, #try) {
+  $trial-name = `concat ($prefix, $try)`;
+  $next-try = `$try + 1`;
+  choose {
+    when [descendant::Simple-Term[@spelling = $trial-name]] {
+      try-fresh-variable (#prefix = $prefix,
+      			  #try = $next-try);
+    }
+    when [descendant::Variable[@spelling = $trial-name]] {
+      try-fresh-variable (#prefix = $prefix,
+      			  #try = $next-try);
+    }
+    otherwise {
+      $trial-name;
+    }
+  }
+}
+
+tpl fresh-variable (#prefix) {
+  if [$prefix = ""] {
+    try-fresh-variable (#prefix = $prefix, #try = "z");
+  } else {
+    try-fresh-variable (#prefix = $prefix, #try = "1");
+  }
+}
 
 // By default, copy and recurse
 tpl [*] {
@@ -13,7 +38,7 @@ tpl [*] {
 }
 
 tpl [Text-Proper/Item[@kind = "Reservation" and not(Variables)]] {
-  die (#message = "We require that a Reservation item have a Variables child!");
+  apply [.] (#message = "We require that a Reservation item have a Variables child!") mode="die";
 }
 
 tpl [Text-Proper/Item[@kind = "Reservation"]] {
@@ -123,7 +148,169 @@ tpl [Block[@kind = "Notation-Block"]] {
 	      or @kind = "Mode-Antonym" or @kind = "Mode-Synonym"]];
 }
 
-tpl [Item[@kind = "Cluster"]] {
+tpl emit-conjunction-of-attributive-adjectives (#term-name, #adjectives) {
+  choose {
+    when [count ($adjectives) = 0] {
+      die (#message = "Error: zero adjectives were given.");
+    }
+    when [count ($adjectives) = 1] {
+      $adjective = `$adjectives[1]`;
+      <Attributive-Formula {
+        <Simple-Term {
+          @spelling = $term-name;
+        }
+        apply [$adjective];
+      }
+    }
+    otherwise {
+      $first-adjective = `$adjectives[1]`;
+      $remaining-adjectives = `$adjectives[position () > 1]`;
+      <Conjunctive-Formula {
+        <Attributive-Formula {
+          <Simple-Term {
+            @spelling = $term-name;
+          }
+          apply [$first-adjective];
+        }
+        emit-conjunction-of-attributive-adjectives (#term-name = $term-name,
+						    #adjectives = $remaining-adjectives);
+      }
+    }
+  }
+}
+
+tpl [Item[@kind = "Cluster" and Existential-Registration and Item[@kind = "Loci-Declaration"]]] {
+  // Emit a lemma before the condition
+  <Item {
+    @kind = "Theorem-Item";
+    $fresh-variable-name = fresh-variable (#prefix = "Z");
+    <Proposition {
+      <Universal-Quantifier-Formula {
+        // variables
+        for-each [Item[@kind = "Loci-Declaration"]] {
+          apply [Explicitly-Qualified-Segment | Implicitly-Qualified-Segment];
+        }
+        <Existential-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable {
+                @spelling = $fresh-variable-name;
+              }
+            }
+            for-each [Existential-Registration] {
+              apply [*[position() = last()]]; // type
+            }
+          }
+          for-each [Existential-Registration] {
+            if [Adjective-Cluster] {
+              for-each [Adjective-Cluster] {
+                emit-conjunction-of-attributive-adjectives (#term-name = $fresh-variable-name, #adjectives = `Adjective | NegatedAdjective`);
+              }
+            } else {
+              die (#message = "An Existential-Registration lacks an Adjective-Cluster!");
+            }
+          }
+        }
+      }
+    }
+    for-each [following-sibling::Item[@kind = "Correctness-Condition" and @condition = "existence"]] {
+      apply [*];
+    }
+  }
+  <Item {
+    @kind = "Definition-Item";
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    <Block {
+      @kind = "Registration-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"
+                                        or @kind = "Type-Changing-Statement"
+                                        or @kind = "Constant-Definition"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Cluster";
+        apply [*];
+      }
+
+      <Item {
+        @kind = "Correctness-Condition";
+        @condition = "existence";
+        <Straightforward-Justification {
+          <Local-Reference {
+            @spelling = "Existence";
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[@kind = "Cluster" and Existential-Registration and not(Item[@kind = "Loci-Declaration"])]] {
+  // Emit a lemma before the condition
+  <Item {
+    @kind = "Theorem-Item";
+    $fresh-variable-name = fresh-variable (#prefix = "Z");
+    <Proposition {
+      <Label {
+        @spelling = "Existence";
+      }
+      <Existential-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable {
+              @spelling = $fresh-variable-name;
+            }
+          }
+          for-each [Existential-Registration] {
+            apply [*[position() = last()]]; // type
+          }
+        }
+        for-each [Existential-Registration] {
+          if [Adjective-Cluster] {
+            for-each [Adjective-Cluster] {
+              emit-conjunction-of-attributive-adjectives (#term-name = $fresh-variable-name, #adjectives = `Adjective | NegatedAdjective`);
+            }
+          } else {
+            die (#message = "An Existential-Registration lacks an Adjective-Cluster!");
+          }
+        }
+
+      }
+    }
+    for-each [following-sibling::Item[@kind = "Correctness-Condition" and @condition = "existence"]] {
+      apply [*];
+    }
+  }
+  <Item {
+    @kind = "Definition-Item";
+    if [@line] { @line = `@line`; }
+    if [@col] { @col = `@col`; }
+    <Block {
+      @kind = "Registration-Block";
+      for-each [preceding-sibling::Item[@kind = "Loci-Declaration"
+                                        or @kind = "Type-Changing-Statement"
+                                        or @kind = "Constant-Definition"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Cluster";
+        apply [*];
+      }
+      <Item {
+        @kind = "Correctness-Condition";
+        @condition = "existence";
+        <Straightforward-Justification {
+          <Local-Reference {
+            @spelling = "Existence";
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[@kind = "Cluster" and not(Existential-Registration)]] {
   <Item {
     @kind = "Definition-Item";
     if [@line] { @line = `@line`; }
