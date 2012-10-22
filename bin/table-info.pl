@@ -30,6 +30,7 @@ sub ensure_readable_file {
 
 my $opt_help = 0;
 my $opt_man = 0;
+my $opt_ordered = 0;
 
 GetOptions(
     'help|?' => \$opt_help,
@@ -538,12 +539,14 @@ sub check_structurally {
 	    print $item, ' occurs as the first item of a dependency line more than once.', "\n";
 	    exit 1;
 	}
-	if (defined $table{$item}) {
-	    my @deps = @{$table{$item}};
-	    foreach my $dep_item (@deps) {
-		if (! defined $encountered{$dep_item}) {
-		    if (defined $table{$dep_item}) {
-			print $item, ' depends on ', $dep_item, ', whose dependencies are not yet known.', "\n";
+	if ($opt_ordered) {
+	    if (defined $table{$item}) {
+		my @deps = @{$table{$item}};
+		foreach my $dep_item (@deps) {
+		    if (! defined $encountered{$dep_item}) {
+			if (defined $table{$dep_item}) {
+			    print $item, ' depends on ', $dep_item, ', whose dependencies are not yet known.', "\n";
+			}
 		    }
 		}
 	    }
