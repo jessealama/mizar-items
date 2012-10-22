@@ -355,7 +355,7 @@ my %extension_to_element_table = ('eno' => 'Notations',
 Readonly my %ITEM_KINDS_BY_EXTENSION => (
     'deftheorem' => 'xml1',
     'theorem' => 'xml1',
-    'scheme' => 'esh1',
+    'scheme' => 'esh',
     'definiens' => 'dfs1',
     'cluster' => 'ecl1',
     'identification' => 'eid1',
