@@ -660,6 +660,22 @@ sub verify {
 			    \%parameters);
 }
 
+sub analyze {
+    my $self = shift;
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    $parameters{'analyzer'} = 0;
+
+    # Ugh
+    delete $parameters{'fast-theorems-and-schemes'};
+    delete $parameters{'randomize'};
+    delete $parameters{'debug'};
+
+    return Mizar::verifier ($self->get_path (),
+			    \%parameters);
+}
+
 sub is_verifiable {
     my $self = shift;
     my $parameters_ref = shift;
