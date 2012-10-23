@@ -1435,14 +1435,14 @@ sub minimize {
     $proper_article_parameters{'fast-theorems-and-schemes'} = 1;
     $local_db->minimize_articles (\@proper_articles, \%proper_article_parameters);
 
-    my %pseudo_article_parameters = %parameters;
-    $pseudo_article_parameters{'checker-only'} = 1;
-    $local_db->minimize_articles (\@pseudo_articles, \%pseudo_article_parameters);
+    # my %pseudo_article_parameters = %parameters;
+    # $pseudo_article_parameters{'checker-only'} = 1;
+    # $local_db->minimize_articles (\@pseudo_articles, \%pseudo_article_parameters);
 
     # We need to rewrite aids.  Sigh.
     # warn 'Rewriting aids, post minimization...';
     # $self->absolutize ();
-    $self->rewrite_pseudo_fragment_aids ();
+    # $self->rewrite_pseudo_fragment_aids ();
 
     return 1;
 
