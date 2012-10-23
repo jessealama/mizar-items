@@ -93,6 +93,14 @@ sub run_mizar_tool {
 	    if ($full_parameters{$param}) {
 		push (@tool_call, '-s');
 	    }
+	} elsif ($param eq 'analyzer') {
+	    if ($full_parameters{$param}) {
+		if ((! defined $full_parameters{'checker-only'}) || (! $full_parameters{'checker-only'})) {
+		    push (@tool_call, '-a');
+		} else {
+		    carp 'Warning: -a and -c are conflicting verifier options; choosing -c only...';
+		}
+	    }
 	} else {
 	    carp ('Warning: unknown flag ', $param, '.');
 	}
