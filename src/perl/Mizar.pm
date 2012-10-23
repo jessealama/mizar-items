@@ -9,7 +9,7 @@ use version; our $VERSION = qv('0.0.3');
 use base qw(Exporter);
 use IPC::Run qw(start harness timer);
 use IPC::Cmd qw(can_run);
-use Carp qw(croak);
+use Carp qw(croak carp);
 use File::Basename qw(basename dirname);
 use Data::Dumper;
 
