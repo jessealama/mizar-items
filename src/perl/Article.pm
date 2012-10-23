@@ -531,7 +531,7 @@ sub needed_constructors {
 
 	# warn 'ere line ', $i, ' is ', $ere_line;
 
-	if ($ere_line ne '0') {
+	if ($ere_line !~ /\A [0]/) {
 
 	    # Grab associated constructor
 	    my $required_constructor = $REQUIREMENTS_CONSTRUCTORS{$i};
