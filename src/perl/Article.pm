@@ -996,8 +996,12 @@ sub minimize_elements {
     my $root_element_name = shift;
     my $begin = shift;
     my $end = shift;
+    my $original_md5 = shift;
     my $parameters_ref = shift;
+
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    my $article_xml = $self->file_with_extension ('xml');
+    my $article_xml_saved = $self->file_with_extension ('xml.reference');
 
     if (defined $parameters{'debug'} && $parameters{'debug'}) {
 	warn 'Minimizing ', $root_element_name, ' elements for ', $path, ' from ', $begin, ' to ', $end, '...';
@@ -1017,9 +1021,25 @@ sub minimize_elements {
 				    $path,
 				    $root_element_name);
 
-	my $deletable = $self->verify (\%parameters);
+	my $analyzable = $self->analyze (\%parameters);
 
-	if (! $deletable) {
+	if ($analyzable) {
+
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+		# nothing to do
+	    } else {
+		# Semantics have changed
+		File::Copy::copy ($article_xml_saved, $article_xml);
+		$table{$begin} = 0;
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+	    }
+
+	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 	    $table{$begin} = 0;
 	    $self->write_element_table (\@elements,
 					\%table,
@@ -1038,9 +1058,24 @@ sub minimize_elements {
 				    $path,
 				    $root_element_name);
 
-	my $begin_deletable = $self->verify (\%parameters);
+	my $begin_analyzable = $self->analyze (\%parameters);
 
-	if (! $begin_deletable) {
+	if ($begin_analyzable) {
+	    my $new_md5 = md5sum_for_file ($article_xml);
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+		# nothing to do
+	    } else {
+		# Semantics have changed
+		File::Copy::copy ($article_xml_saved, $article_xml);
+		$table{$begin} = 0;
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+	    }
+	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 	    $table{$begin} = 0;
 	    $self->write_element_table (\@elements,
 					\%table,
@@ -1055,9 +1090,23 @@ sub minimize_elements {
 				    $path,
 				    $root_element_name);
 
-	my $end_deletable = $self->verify (\%parameters);
+	my $end_analyzable = $self->analyze (\%parameters);
 
-	if (! $end_deletable) {
+	if ($end_analyzable) {
+	    my $new_md5 = md5sum_for_file ($article_xml);
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+		# nothing to do
+	    } else {
+		# Semantics have changed
+		File::Copy::copy ($article_xml_saved, $article_xml);
+		$table{$end} = 0;
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+	    }
+	} else {
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 	    $table{$end} = 0;
 	    $self->write_element_table (\@elements,
 					\%table,
@@ -1084,19 +1133,57 @@ sub minimize_elements {
 				    $root_element_name);
 
 	# Check that deleting the lower half is safe
-	my $lower_half_safe = $self->verify (\%parameters);
+	my $lower_half_safe = $self->analyze (\%parameters);
 
 	if ($lower_half_safe) {
 
-	    return ($self->minimize_elements (\@elements,
-					      \%table,
-					      $path,
-					      $root_element_name,
-					      $begin + $half_segment_length + 1,
-					      $end,
-					      \%parameters));
+	    my $new_md5 = md5sum_for_file ($article_xml);
 
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+
+		return ($self->minimize_elements (\@elements,
+						  \%table,
+						  $path,
+						  $root_element_name,
+						  $begin + $half_segment_length + 1,
+						  $end,
+						  $original_md5,
+						  \%parameters));
+	    } else {
+		# Semantics have changed
+		File::Copy::copy ($article_xml_saved, $article_xml);
+
+		# Restore the lower half
+		foreach my $i ($begin .. $begin + $half_segment_length) {
+		    $table{$i} = 0;
+		}
+
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+
+		# Minimize just the lower half
+		my %table_for_lower_half
+		    = %{$self->minimize_elements (\@elements,
+						  \%table,
+						  $path, $root_element_name,
+						  $begin,
+						  $begin + $half_segment_length,
+						  $original_md5,
+						  \%parameters)};
+		return ($self->minimize_elements (\@elements,
+						  \%table_for_lower_half,
+						  $path,
+						  $root_element_name,
+						  $begin + $half_segment_length + 1,
+						  $end,
+						  $original_md5,
+						  \%parameters));
+	    }
 	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 
 	    # Restore the lower half
 	    foreach my $i ($begin .. $begin + $half_segment_length) {
@@ -1115,6 +1202,7 @@ sub minimize_elements {
 					      $path, $root_element_name,
 					      $begin,
 					      $begin + $half_segment_length,
+					      $original_md5,
 					      \%parameters)};
 	    return ($self->minimize_elements (\@elements,
 					      \%table_for_lower_half,
@@ -1122,6 +1210,7 @@ sub minimize_elements {
 					      $root_element_name,
 					      $begin + $half_segment_length + 1,
 					      $end,
+					      $original_md5,
 					      \%parameters));
 	}
     }
@@ -1136,8 +1225,13 @@ sub minimize_by_article {
     my $root_element_name = shift;
     my $begin = shift;
     my $end = shift;
+    my $original_md5 = shift;
     my $parameters_ref = shift;
+
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    my $article_xml = $self->file_with_extension ('xml');
+    my $article_xml_saved = $self->file_with_extension ('xml.reference');
 
     if ($end < $begin) {
 
@@ -1158,9 +1252,38 @@ sub minimize_by_article {
 	# Save the table to disk
 	$self->write_element_table (\@elements, \%table, $path, $root_element_name);
 
-	my $deletable = $self->verify (\%parameters);
+	my $analyzable = $self->analyze (\%parameters);
 
-	if (! $deletable) {
+	if ($analyzable) {
+
+	    my $new_md5 = md5sum_for_file ($article_xml);
+
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+		# nothing to do
+	    } else {
+
+		# Semantics have changed; restore the original XML
+		File::Copy::copy ($article_xml_saved, $article_xml);
+
+		# Restore all elements from $article
+		foreach my $i (0 .. scalar @elements - 1) {
+		    my $element = $elements[$i];
+		    my $aid = aid_for_element ($element);
+		    if (defined $aid && $aid eq $article) {
+			$table{$i} = 0;
+		    }
+		}
+
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+
+	    }
+
+	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 
 	    # Restore all elements from $article
 	    foreach my $i (0 .. scalar @elements - 1) {
@@ -1177,6 +1300,7 @@ sub minimize_by_article {
 					$root_element_name);
 
 	}
+
 	return \%table;
 
     } elsif ($begin + 1 == $end) {
@@ -1192,9 +1316,33 @@ sub minimize_by_article {
 
 	$self->write_element_table (\@elements, \%table, $path, $root_element_name);
 
-	my $begin_deletable = $self->verify (\%parameters);
+	my $begin_analyzable = $self->analyze (\%parameters);
 
-	if (! $begin_deletable) {
+	if ($begin_analyzable) {
+	    my $new_md5 = md5sum_for_file ($article_xml);
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+		# nothing to do
+	    } else {
+
+		File::Copy::copy ($article_xml_saved, $article_xml);
+
+		# Restore the beginning
+		foreach my $i (0 .. scalar @elements - 1) {
+		    my $element = $elements[$i];
+		    my $aid = aid_for_element ($element);
+		    if ($aid eq $begin_article) {
+			$table{$i} = 0;
+		    }
+		}
+
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+	    }
+	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 
 	    # Restore the beginning
 	    foreach my $i (0 .. scalar @elements - 1) {
@@ -1224,9 +1372,38 @@ sub minimize_by_article {
 
 	$self->write_element_table (\@elements, \%table, $path, $root_element_name);
 
-	my $end_deletable = $self->verify (\%parameters);
+	my $end_analyzable = $self->analyze (\%parameters);
 
-	if (! $end_deletable) {
+	if ($end_analyzable) {
+
+	    my $new_md5 = md5sum_for_file ($article_xml);
+
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+		# nothing to do
+	    } else {
+
+		# Semantics have changed
+		File::Copy::copy ($article_xml_saved, $article_xml);
+
+		# Restore the end
+		foreach my $i (0 .. scalar @elements - 1) {
+		    my $element = $elements[$i];
+		    my $aid = aid_for_element ($element);
+		    if ($aid eq $end_article) {
+			$table{$i} = 0;
+		    }
+		}
+
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+
+	    }
+
+	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 
 	    # Restore the end
 	    foreach my $i (0 .. scalar @elements - 1) {
@@ -1267,20 +1444,71 @@ sub minimize_by_article {
 	$self->write_element_table (\@elements, \%table, $path, $root_element_name);
 
 	# Check that deleting the lower half is safe
-	my $lower_half_safe = $self->verify (\%parameters);
+	my $lower_half_safe = $self->analyze (\%parameters);
 
 	if ($lower_half_safe) {
 
-	    return ($self->minimize_by_article (\@elements,
-						\@articles,
-						\%table,
-						$path,
-						$root_element_name,
-						$begin + $half_segment_length + 1,
-						$end,
-						\%parameters));
+	    my $new_md5 = md5sum_for_file ($article_xml);
+
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+
+		return ($self->minimize_by_article (\@elements,
+						    \@articles,
+						    \%table,
+						    $path,
+						    $root_element_name,
+						    $begin + $half_segment_length + 1,
+						    $end,
+						    $original_md5,
+						    \%parameters));
+	    } else {
+
+		File::Copy::copy ($article_xml_saved, $article_xml);
+
+		# Restore the lower half
+		foreach my $i ($begin .. $begin + $half_segment_length) {
+		    my $article = $articles[$i];
+		    foreach my $i (0 .. scalar @elements - 1) {
+			my $element = $elements[$i];
+			my $aid = aid_for_element ($element);
+			if ($aid eq $article) {
+			    $table{$i} = 0;
+			}
+		    }
+		}
+
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+
+		# Minimize just the lower half
+		my %table_for_lower_half
+		    = %{$self->minimize_by_article (\@elements,
+						    \@articles,
+						    \%table,
+						    $path,
+						    $root_element_name,
+						    $begin,
+						    $begin + $half_segment_length,
+						    $original_md5,
+						    \%parameters)};
+		return ($self->minimize_by_article (\@elements,
+						    \@articles,
+						    \%table_for_lower_half,
+						    $path,
+						    $root_element_name,
+						    $begin + $half_segment_length + 1,
+						    $end,
+						    $original_md5,
+						    \%parameters));
+
+
+	    }
 
 	} else {
+
+	    File::Copy::copy ($article_xml_saved, $article_xml);
 
 	    # Restore the lower half
 	    foreach my $i ($begin .. $begin + $half_segment_length) {
@@ -1308,6 +1536,7 @@ sub minimize_by_article {
 						$root_element_name,
 						$begin,
 						$begin + $half_segment_length,
+						$original_md5,
 						\%parameters)};
 	    return ($self->minimize_by_article (\@elements,
 						\@articles,
@@ -1316,6 +1545,7 @@ sub minimize_by_article {
 						$root_element_name,
 						$begin + $half_segment_length + 1,
 						$end,
+						$original_md5,
 						\%parameters));
 	}
     }
@@ -1324,6 +1554,34 @@ sub minimize_by_article {
 sub aid_for_element {
   my $element = shift;
   $element->exists ('@aid') ? return $element->findvalue ('@aid') : return undef;
+}
+
+sub md5sum_for_file {
+    my $path = shift;
+    my $md5sum = `md5sum $path | cut -f 1 -d ' '`;
+    chomp $md5sum;
+    return $md5sum;
+}
+
+sub stripped_xml_has_md5sum {
+    my $self = shift;
+    my $other_md5sum = shift;
+
+    my $article_xml = $self->file_with_extension ('xml');
+    my $article_xml_stripped = $self->file_with_extension ('xml.temp.stripped');
+
+    my $uninteresting_attributes_stylesheet
+	= $self->path_for_stylesheet ('uninteresting-attributes');
+
+    apply_stylesheet ($uninteresting_attributes_stylesheet,
+		      $article_xml,
+		      $article_xml_stripped,
+		      undef);
+
+    my $stripped_md5sum = md5sum_for_file ($article_xml_stripped);
+
+    return ($stripped_md5sum eq $other_md5sum ? 1 : 0);
+
 }
 
 sub minimize_extension {
@@ -1340,6 +1598,24 @@ sub minimize_extension {
     }
 
     my $article_with_extension = $self->file_with_extension ($extension_to_minimize);
+    my $article_xml = $self->file_with_extension ('xml');
+    my $article_xml_saved = $self->file_with_extension ('xml.reference');
+    File::Copy::copy ($article_xml, $article_xml_saved);
+
+    # Strip 'uninteresting' attributes so that we can later compare
+    # quickly whether the semantics of the article changes if we mess
+    # around with the environment
+    my $article_xml_stripped = $self->file_with_extension ('xml.stripped');
+
+    my $uninteresting_attributes_stylesheet
+	= $self->path_for_stylesheet ('uninteresting-attributes');
+
+    apply_stylesheet ($uninteresting_attributes_stylesheet,
+		      $article_xml,
+		      $article_xml_stripped,
+		      undef);
+
+    my $article_xml_md5 = md5sum_for_file ($article_xml_stripped);
 
     if (-e $article_with_extension) {
 	my $xml_doc = eval { $xml_parser->parse_file ($article_with_extension) };
@@ -1383,10 +1659,8 @@ sub minimize_extension {
 					    $root_element_name,
 					    0,
 					    scalar @articles - 1,
+					    $article_xml_md5,
 					    \%parameters)};
-
-	# Restore
-	$self->verify (\%parameters);
 
 	if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
 
@@ -1415,6 +1689,16 @@ sub minimize_extension {
 
 	}
 
+	apply_stylesheet ($uninteresting_attributes_stylesheet,
+			  $article_xml,
+			  $article_xml_stripped,
+			  undef);
+
+	my $md5_now = md5sum_for_file ($article_xml_stripped);
+	if ($md5_now ne $article_xml_md5) {
+	    croak 'Error: the MD5 sum for ', $self->name (), ' changed between whole-article minimization.';
+	}
+
 
 	my %minimized_table
 	    = %{$self->minimize_elements (\@elements,
@@ -1422,10 +1706,22 @@ sub minimize_extension {
 					  $article_with_extension, $root_element_name,
 					  0,
 					  scalar @elements - 1,
+					  $article_xml_md5,
 					  \%parameters)};
 
-	# Restore
-	$self->verify (\%parameters);
+	# # Restore
+	# $self->verify (\%parameters);
+
+	print {*STDERR} $self->name (), '.', $extension_to_minimize, ' : ';
+	print {*STDERR} '[';
+	foreach my $i (0 .. scalar @elements - 1) {
+	    if (defined $minimized_table{$i}) {
+		print {*STDERR} '+';
+	    } else {
+		print {*STDERR} '-';
+	    }
+	}
+	print {*STDERR} ']', "\n";
 
 	return keys %minimized_table;
 
