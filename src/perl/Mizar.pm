@@ -2,7 +2,6 @@ package Mizar;
 
 use warnings;
 use strict;
-use Carp;
 use Cwd;
 
 use version; our $VERSION = qv('0.0.3');
