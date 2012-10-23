@@ -126,7 +126,16 @@ sub run_mizar_tool {
 	return 0;
     } else {
 	my $exit_code = $harness->result (0);
-	($exit_code == 0) && (-r $article_err) && (-z $article_err) ? return 1 : return 0;
+	my $ok = (($exit_code == 0) && (-r $article_err) && (-z $article_err));
+
+	# if (! $ok) {
+	#     if (-r $article_err && -s $article_err) {
+	# 	my $errs = `cat $article_err`;
+	# 	carp 'Errors:', "\n", $errs;
+	#     }
+	# }
+
+	return ($ok ? 1 : 0);
     }
 
 }
