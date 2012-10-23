@@ -253,19 +253,66 @@ my %dependency_table = ();
 my @items = ();
 my %encountered = ();
 
+my %ordering = ();
+
 while (defined (my $line = <STDIN>)) {
     chomp $line;
+
     (my $item, my @deps) = split (' ', $line);
+
+    my $num_items_so_far = scalar @items;
     push (@items, $item);
+
     $dependency_table{$item} = \@deps;
 
     $encountered{$item} = 0;
     foreach my $dep_item (@deps) {
 	$encountered{$dep_item} = 0;
     }
+
+    # Order the elements
+    foreach my $dep_item (@deps) {
+	$ordering{$item}{$dep_item} = -1;
+	$ordering{$dep_item}{$item} = 1;
+    }
+
+    my $num_deps = scalar @deps;
+    foreach my $i (1 .. $num_deps) {
+	my $dep_i = $deps[$i - 1];
+	foreach my $j ($i +1 .. $num_deps) {
+	    my $dep_j = $deps[$j - 1];
+	    $ordering{$dep_i}{$dep_j} = -1;
+	    $ordering{$dep_j}{$dep_i} = 1;
+	}
+    }
+
+    foreach my $i (1 .. $num_items_so_far) {
+	my $earlier_item = $items[$i - 1];
+	my @earlier_deps = @{$dependency_table{$earlier_item}};
+	$ordering{$item}{$earlier_item} = 1;
+	$ordering{$earlier_item}{$item} = -1;
+	foreach my $earlier_dep (@earlier_deps) {
+	    $ordering{$item}{$earlier_dep} = 1;
+	    $ordering{$earlier_dep}{$item} = -1;
+	}
+    }
 }
 
 close *STDIN;
+
+sub item_less_than {
+    my $item_1 = shift;
+    my $item_2 = shift;
+    if ($item_1 eq $item_2) {
+	return 0;
+    } elsif (defined $ordering{$item_1}{$item_2}) {
+	my $order = $ordering{$item_1}{$item_2};
+	return $order;
+    } else {
+	print {*STDERR} 'We do not know how to order ', $item_1, ' and ', $item_2, '.', "\n";
+	exit 1;
+    }
+}
 
 foreach my $item (keys %encountered) {
     if (! defined $dependency_table{$item}) {
@@ -273,7 +320,7 @@ foreach my $item (keys %encountered) {
     }
 }
 
-foreach my $item (keys %encountered) {
+foreach my $item (sort { item_less_than ($a, $b) } keys %encountered) {
 
     my %printed_for_this_item = (
 	'symmetry_r1_hidden' => 0,
@@ -290,8 +337,9 @@ foreach my $item (keys %encountered) {
 	}
 
 	my @deps = @{$dependency_table{$item}};
+	my @sorted_deps = sort { item_less_than ($a, $b) } @deps;
 
-	foreach my $dep_item (@deps) {
+	foreach my $dep_item (@sorted_deps) {
 	    if ($item eq $dep_item) {
 		# ignore self-dependencies.  These come from structure constructors
 	    } elsif (is_redefined_constructor ($dep_item)) {
@@ -356,7 +404,7 @@ foreach my $item (keys %encountered) {
 	    }
 	}
 
-	foreach my $dep_item (@deps) {
+	foreach my $dep_item (@sorted_deps) {
 	    if (is_redefined_constructor ($dep_item)) {
 		if ($dep_item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z/) {
 		    (my $new_article, my $new_kind, my $new_number) = ($1, $2, $3);
@@ -402,7 +450,7 @@ foreach my $item (keys %encountered) {
 	    }
 	}
 
-	foreach my $dep_item (@deps) {
+	foreach my $dep_item (@sorted_deps) {
 	    if ($dep_item =~ /\A ([a-z0-9_]+) [:] gconstructor [:] ([0-9]+) \z/) {
 		(my $article, my $number) = ($1, $2);
 		my $free_item = "free_g${number}_${article}";
@@ -431,7 +479,7 @@ foreach my $item (keys %encountered) {
 
 	    print $mptp_existence;
 
-	    foreach my $dep_item (@deps) {
+	    foreach my $dep_item (@sorted_deps) {
 		if ($item eq $dep_item) {
 		    # ignore self-dependencies.  These come from structure constructors
 		} elsif (handled ($dep_item)) {
