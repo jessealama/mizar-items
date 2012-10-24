@@ -99,6 +99,9 @@ sub item_less_than {
 		die 'The article (', $item_2_article, ') of ', $item_2, ' has no known position in mml.lar.';
 	    }
 
+	    my $item_1_stripped = "${item_1_article}:${item_1_kind}:${item_1_number}";
+	    my $item_2_stripped = "${item_2_article}:${item_2_kind}:${item_2_number}";
+
 	    if ($article_1_position < $article_2_position) {
 		$answer = -1;
 	    } elsif ($article_1_position > $article_2_position) {
@@ -137,13 +140,23 @@ sub item_less_than {
 			    }
 			}
 		    } else {
-			warn $item_2, ' is not in the item-to-fragment table.';
-			$answer = 0;
+			if (defined $item_to_fragment_table{$item_2_stripped}) {
+			    $answer = item_less_than ($item_1, $item_2_stripped);
+			} else {
+			    die 'Neither ', $item_2, ' nor its stripped form ', $item_2_stripped, ' could be found in the item-to-fragment table.';
+			}
 		    }
 		} else {
-		    warn $item_1, ' is not in the item-to-fragment table.';
-		    $answer = 0;
+		    if (defined $item_to_fragment_table{$item_1_stripped}) {
+			$answer = item_less_than ($item_1_stripped, $item_2);
+		    } else {
+			die 'Neither ', $item_1, ' nor its stripped form ', $item_1_stripped, ' could be found in the item-to-fragment table.';
+		    }
 		}
+	    }
+
+	    if (! defined $answer) {
+		die 'We computed no answer when comparing ', $item_1, ' with ', $item_2, '.';
 	    }
 
 	    $less_than{$item_1}{$item_2} = $answer;
@@ -160,7 +173,7 @@ sub item_less_than {
 	}
     }
 
-    warn 'answer: ', $answer;
+    # warn 'answer: ', $answer;
 
     return $answer;
 
