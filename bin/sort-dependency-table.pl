@@ -169,7 +169,11 @@ sub item_less_than {
 				} else {
 				    $answer = 0;
 				}
+			    } else {
+				die 'Unable to make sense of the fragment \'', $fragment_2, '\'.';
 			    }
+			} else {
+			    die 'Unable to make sense of the fragment \'', $fragment_1, '\'.';
 			}
 		    } else {
 			if (defined $item_to_fragment_table{$item_2_stripped}) {
