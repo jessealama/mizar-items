@@ -16,7 +16,7 @@ all:
 
 100: dependencies.100
 
-item-fragment-table.100:
+item-fragment-table.100: $(first-100-maps)
 	cat $(first-100-maps) | sed -e 's/ => / /' > item-fragment-table.100
 
 dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
