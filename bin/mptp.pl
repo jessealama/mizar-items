@@ -473,7 +473,7 @@ foreach my $item (sort { item_less_than ($a, $b) } keys %encountered) {
 
 	    # Mode existence conditions
 	    %printed_for_this_item = ();
-	    if ($item =~ / \A ([a-z0-9_]+) [:] ([lm]) constructor [:] ([0-9]+) \z/) {
+	    if ($item =~ / \A ([a-z0-9_]+) [:] ([l]) constructor [:] ([0-9]+) \z/) {
 		(my $article, my $kind, my $number) = ($1, $2, $3);
 		my $mptp_existence = "existence_${kind}${number}_${article}";
 
