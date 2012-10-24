@@ -156,7 +156,11 @@ sub item_less_than {
 				    if ($item_2 =~ /[:] [0-9]+ \z/) {
 					if ($item_1 =~ /[:] deftheorem [:] /) {
 					    $answer = 1;
+					} elsif ($item_1 =~ /[:] . definiens [:]/) {
+					    $answer = 1
 					} elsif ($item_2 =~ /[:] deftheorem [:] /) {
+					    $answer = -1;
+					} elsif ($item_2 =~ /[:] . definiens [:]/) {
 					    $answer = -1;
 					} else {
 					    $answer = 0;
