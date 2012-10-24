@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Regexp::DefaultFlags;
 use Data::Dumper;
+use List::MoreUtils qw(any);
 
 my %mptp_for_item = ();
 my %redefined_constructors = ();
