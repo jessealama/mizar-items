@@ -179,14 +179,14 @@ sub item_less_than {
 			if (defined $item_to_fragment_table{$item_2_stripped}) {
 			    $answer = item_less_than ($item_1, $item_2_stripped);
 			} else {
-			    die 'Neither ', $item_2, ' nor its stripped form ', $item_2_stripped, ' could be found in the item-to-fragment table.';
+			    die 'Neither ', $item_2, ' nor its stripped form ', $item_2_stripped, ' could be found in the item-to-fragment table at ', $opt_item_to_fragment_table, '.';
 			}
 		    }
 		} else {
 		    if (defined $item_to_fragment_table{$item_1_stripped}) {
 			$answer = item_less_than ($item_1_stripped, $item_2);
 		    } else {
-			die 'Neither ', $item_1, ' nor its stripped form ', $item_1_stripped, ' could be found in the item-to-fragment table.';
+			die 'Neither ', $item_1, ' nor its stripped form ', $item_1_stripped, ' could be found in the item-to-fragment table at ', $opt_item_to_fragment_table, '.';
 		    }
 		}
 	    }
