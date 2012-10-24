@@ -405,7 +405,7 @@ sub needed_non_constructors {
     foreach my $i (2 .. scalar @ere_lines - 1) {
 	#          ^    start from 2 because the first two requirements are bogus
         my $ere_line = $ere_lines[$i];
-	if ($ere_line ne '0') {
+	if ($ere_line !~ /\A [0] /) {
 	    my $requirement_name = $REQUIREMENTS{$i};
 
 	    if (! defined $requirement_name) {
