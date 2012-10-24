@@ -602,9 +602,11 @@ sub properties_of_needed_constructors {
     # warn 'Needed constructors:', Dumper (@needed_constructors);
 
     my @needed = ();
+    my $name = $self->name ();
 
     foreach my $constructor (@needed_constructors) {
 	my @props = $self->properties_of_constructor ($constructor);
+	# warn 'Needed properties of constructor ', $constructor, ' for ', $name, ':', "\n", (scalar @props == 0 ? '(none)' : Dumper (@props));
 	push (@needed, map { "${constructor}[$_]"; } @props);
     }
 
@@ -772,7 +774,7 @@ sub minimize_properties {
 		if ($self->verify (\%parameters)) {
 		    $unneeded_properties{"${constructor}[${property}]"} = 0;
 
-		    # carp ('We can dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
+		    carp ('We can dump property ', $property, ' of constructor ', $constructor, ' from ', $self->name ());
 
 		    File::Copy::copy ($atr, $atr_orig)
 			or croak ('Error: we were unable to update the .atr for ', $self->name (), ' to reflect its independence from the property ', $property, ' of constructor ', $constructor, '.', "\n");
@@ -2161,6 +2163,7 @@ sub minimize_by_requirement {
     my $parameters_ref = shift;
 
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
     my $err_path = $self->file_with_extension ('err');
 
     if ($end < $begin) {
