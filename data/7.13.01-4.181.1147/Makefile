@@ -7,6 +7,7 @@ maps = $(addsuffix .map,$(mml))
 
 first-100-dependency-tables = $(wordlist 1,100,$(dependency-tables))
 first-100-maps = $(wordlist 1,100,$(maps))
+first-10-maps = $(wordlist 1,10,$(maps))
 
 # functions
 sort-table = perl ../../bin/sort-dependency-table.pl < $(1) > $(2)
@@ -20,8 +21,18 @@ all:
 
 100: dependencies.100
 
+10: dependencies.10
+
 item-fragment-table.100: $(first-100-maps)
 	cat $(first-100-maps) | sed -e 's/ => / /' > item-fragment-table.100
+
+item-fragment-table.10: $(first-10-maps)
+	cat $(first-10-maps) | sed -e 's/ => / /' > item-fragment-table.10
+
+dependencies.10: $(first-10-dependency-tables) item-fragment-table.10
+	cat $(first-10-dependency-tables) > dependencies.10.1
+	$(call sort-table-or-kill,dependencies.10.1,dependencies.10)
+	rm -f dependencies.10.1
 
 dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
 	cat $(first-100-dependency-tables) > dependencies.100.1
