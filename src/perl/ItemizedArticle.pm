@@ -1178,9 +1178,9 @@ sub dependencies {
 
 	if ($fragment =~ /\A ${article_name} [:] fragment [:] ([0-9]+) ([[] ([a-z]{2}) []])? /) {
 	    (my $fragment_number, my $tag) = ($1, $3);
-	    my $fragment_basename
-		= defined $tag ? "ckb${fragment_number}${tag}"
-		               : "ckb${fragment_number}";
+	    my $fragment_basename = "ckb${fragment_number}";
+		# = defined $tag ? "ckb${fragment_number}${tag}"
+		#                : "ckb${fragment_number}";
 
 	    my $fragment_miz = "${text_dir}/${fragment_basename}.miz";
 	    my $fragment_abs_xml = "${text_dir}/${fragment_basename}.xml1";
