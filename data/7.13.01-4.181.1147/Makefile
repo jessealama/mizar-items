@@ -9,17 +9,17 @@ first-100-dependency-tables = $(wordlist 1,100,$(dependency-tables))
 first-100-maps = $(wordlist 1,100,$(maps))
 
 # functions
-sort-table = ../../bin/sort-dependency-table.pl < $(1) > $(2)
+sort-table = perl ../../bin/sort-dependency-table.pl < $(1) > $(2)
 sort-table-or-kill = $(call sort-table,$(1),$(2)) || (rm -f $(2); false)
 
 all:
 
 100: dependencies.100
 
-item-to-fragment-table.100:
-	cat $(first-100-maps) > item-to-fragment-table.100
+item-fragment-table.100:
+	cat $(first-100-maps) | sed -e 's/ => / /' > item-fragment-table.100
 
-dependencies.100: $(first-100-dependency-tables) item-to-fragment-table.100
+dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
 	cat $(first-100-dependency-tables) > dependencies.100.1
 	$(call sort-table-or-kill,dependencies.100.1,dependencies.100)
 	rm -f dependencies.100.1
