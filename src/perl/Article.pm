@@ -2467,6 +2467,9 @@ my %conditions_and_properties_shortcuts
 sub itemize {
     my $self = shift;
     my $target_directory = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
     my $article_basename = $self->name ();
     my $stylesheet_home = $self->get_stylesheet_home ();
@@ -2627,7 +2630,7 @@ sub itemize {
 	$local_db->accom ($fragment_basename)
 	    or croak ('Warning: accom did not exit cleanly when applied to fragment number ', $i, ' of ', $article_basename, '.');
 
-	if ($local_db->verify ($fragment_basename)) {
+	if ($local_db->verify ($fragment_basename, \%parameters)) {
 	    File::Copy::copy ($fragment_xml, $fragment_xml_orig)
 		  or croak ('Error: unable to save a copy of ', $fragment_xml, ' to ', $fragment_xml_orig, ': ', $!);
 	    if ($local_db->export ($fragment_basename)) {
