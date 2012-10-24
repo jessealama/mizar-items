@@ -34,7 +34,8 @@ my $opt_ordered = 0;
 
 GetOptions(
     'help|?' => \$opt_help,
-    'man' => \$opt_man
+    'man' => \$opt_man,
+    'ordered' => \$opt_ordered,
 ) or pod2usage (2);
 
 if ($opt_help) {
