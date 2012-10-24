@@ -35,6 +35,9 @@ dependencies.10: $(first-10-dependency-tables) item-fragment-table.10
 	$(call sort-table,dependencies.10.1,dependencies.10,item-fragment-table.10)
 	rm -f dependencies.10.1
 
+%.mptp: $*
+	../../bin/mptp.pl < $* > $*.mptp
+
 dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
 	cat $(first-100-dependency-tables) > dependencies.100.1
 	$(call sort-table-or-kill,dependencies.100.1,dependencies.100,item-fragment-table.100)
