@@ -1,4 +1,4 @@
-mml := hidden
+mml := hidden \
        tarski \
        xboole_0 \
        boole \
