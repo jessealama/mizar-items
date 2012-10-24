@@ -398,24 +398,24 @@ sub needed_non_constructors {
 	$items{$item} = 0;
     }
 
-    # Grab theorems inferred from needed requirements
+    # # Grab theorems inferred from needed requirements
 
-    my @ere_lines = $self->ere_lines ();
+    # my @ere_lines = $self->ere_lines ();
 
-    foreach my $i (2 .. scalar @ere_lines - 1) {
-	#          ^    start from 2 because the first two requirements are bogus
-        my $ere_line = $ere_lines[$i];
-	if ($ere_line !~ /\A [0] /) {
-	    my $requirement_name = $REQUIREMENTS{$i};
+    # foreach my $i (2 .. scalar @ere_lines - 1) {
+    # 	#          ^    start from 2 because the first two requirements are bogus
+    #     my $ere_line = $ere_lines[$i];
+    # 	if ($ere_line !~ /\A [0] /) {
+    # 	    my $requirement_name = $REQUIREMENTS{$i};
 
-	    if (! defined $requirement_name) {
-		croak ('Error: what is the symbolic name of requirement number ',$i, '?');
-	    }
+    # 	    if (! defined $requirement_name) {
+    # 		croak ('Error: what is the symbolic name of requirement number ',$i, '?');
+    # 	    }
 
-	    $items{$requirement_name} = 0;
+    # 	    $items{$requirement_name} = 0;
 
-	}
-    }
+    # 	}
+    # }
 
     @needed = keys %items;
 
