@@ -76,7 +76,9 @@ sub item_less_than {
 
     my $answer = undef;
 
-    if ($item_1 =~ /\A rq [a-zA-Z]+ \z/) {
+    if ($item_1 eq $item_2) {
+	$answer = 0;
+    } elsif ($item_1 =~ /\A rq [a-zA-Z]+ \z/) {
 	$answer = 1;
     } elsif ($item_2 =~ /\A rq [a-zA-Z]+ \z/) {
 	$answer = -1;
