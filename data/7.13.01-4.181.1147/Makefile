@@ -6,18 +6,19 @@ dependency-tables = $(addsuffix .deps,$(mml))
 maps = $(addsuffix .map,$(mml))
 
 first-100-dependency-tables = $(wordlist 1,100,$(dependency-tables))
+first-10-dependency-tables = $(wordlist 1,10,$(dependency-tables))
 first-100-maps = $(wordlist 1,100,$(maps))
 first-10-maps = $(wordlist 1,10,$(maps))
 
 # functions
-sort-table = perl ../../bin/sort-dependency-table.pl < $(1) > $(2)
-sort-table-or-kill = ($(call sort-table,$(1),$(2))) || (rm -f $(2); false)
+sort-table = ../../bin/sort-dependency-table.pl --fragment-table=$(3) --lar=mml.lar < $(1) > $(2)
+sort-table-or-kill = ($(call sort-table,$(1),$(2),$(3))) || (rm -f $(2); false)
 
 all:
 	# no default action yet
 
 %.deps:
-	[ -d $* ] && ../../bin/itemized-article-dependencies.pl $* > $*.deps;
+	../../bin/itemized-article-dependencies.pl $* > $*.deps;
 
 100: dependencies.100
 
@@ -31,12 +32,12 @@ item-fragment-table.10: $(first-10-maps)
 
 dependencies.10: $(first-10-dependency-tables) item-fragment-table.10
 	cat $(first-10-dependency-tables) > dependencies.10.1
-	$(call sort-table-or-kill,dependencies.10.1,dependencies.10)
+	$(call sort-table,dependencies.10.1,dependencies.10,item-fragment-table.10)
 	rm -f dependencies.10.1
 
 dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
 	cat $(first-100-dependency-tables) > dependencies.100.1
-	$(call sort-table-or-kill,dependencies.100.1,dependencies.100)
+	$(call sort-table-or-kill,dependencies.100.1,dependencies.100,item-fragment-table.100)
 	rm -f dependencies.100.1
 
 dependencies.tc: dependencies
