@@ -521,30 +521,34 @@ sub needed_constructors {
 	}
     }
 
+    # This doesn't work.  Let's content ourselves with emitting a
+    # requirements item, rather than trying to guess what further
+    # constructors the requirement item depends upon.
+
     # Look into the .ere file to see what further constructors might be needed
-    my $ere = $self->file_with_extension ('ere');
-    my @ere_lines = $self->ere_lines ();
+    # my $ere = $self->file_with_extension ('ere');
+    # my @ere_lines = $self->ere_lines ();
 
-    foreach my $i (2 .. $NUM_REQUIREMENTS - 1) {
-	#          ^  the first two requirements are bogus
-	my $ere_line = $ere_lines[$i];
+    # foreach my $i (2 .. $NUM_REQUIREMENTS - 1) {
+    # 	#          ^  the first two requirements are bogus
+    # 	my $ere_line = $ere_lines[$i];
 
-	# warn 'ere line ', $i, ' is ', $ere_line;
+    # 	# warn 'ere line ', $i, ' is ', $ere_line;
 
-	if ($ere_line !~ /\A [0]/) {
+    # 	if ($ere_line !~ /\A [0]/) {
 
-	    # Grab associated constructor
-	    my $required_constructor = $REQUIREMENTS_CONSTRUCTORS{$i};
-	    if (defined $required_constructor) {
+    # 	    # Grab associated constructor
+    # 	    my $required_constructor = $REQUIREMENTS_CONSTRUCTORS{$i};
+    # 	    if (defined $required_constructor) {
 
-		# warn 'Grabbing ', $required_constructor, ' as a dependency from ', $ere;
+    # 		# warn 'Grabbing ', $required_constructor, ' as a dependency from ', $ere;
 
-		$constructors{$required_constructor} = 0;
-	    } else {
-		croak ('Error: unable to determine the constructor(s) to which a non-zero entry (', $ere_line, ') at line ', $i, ' in ', $ere, ' corresponds.', "\n", 'Here are the lines of the ere file:', "\n", Dumper (@ere_lines));
-	    }
-	}
-    }
+    # 		$constructors{$required_constructor} = 0;
+    # 	    } else {
+    # 		croak ('Error: unable to determine the constructor(s) to which a non-zero entry (', $ere_line, ') at line ', $i, ' in ', $ere, ' corresponds.', "\n", 'Here are the lines of the ere file:', "\n", Dumper (@ere_lines));
+    # 	    }
+    # 	}
+    # }
 
     if (wantarray) {
 	return (keys %constructors);
