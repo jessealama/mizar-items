@@ -16,7 +16,7 @@ all:
 	# no default action yet
 
 %.deps:
-	perl ../../bin/itemized-article-dependencies.pl $* > $*.deps
+	[ -d $* ] && ../../bin/itemized-article-dependencies.pl $* > $*.deps;
 
 100: dependencies.100
 
