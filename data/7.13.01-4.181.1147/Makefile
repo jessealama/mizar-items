@@ -15,6 +15,9 @@ sort-table-or-kill = ($(call sort-table,$(1),$(2))) || (rm -f $(2); false)
 all:
 	# no default action yet
 
+%.deps:
+	perl ../../bin/itemized-article-dependencies.pl $* > $*.deps
+
 100: dependencies.100
 
 item-fragment-table.100: $(first-100-maps)
