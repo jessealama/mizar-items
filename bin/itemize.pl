@@ -31,12 +31,14 @@ my $debug = 0;
 my $man = 0;
 my $help = 0;
 my $target_directory = undef;
+my $opt_analyzer = 0;
 
 GetOptions('help|?' => \$help,
            'man' => \$man,
            'verbose'  => \$verbose,
 	   'debug' => \$debug,
 	   'paranoid' => \$paranoid,
+	   'analyzer' => \$opt_analyzer,
 	   'stylesheet-home=s' => \$stylesheet_home,
 	   'target-directory=s' => \$target_directory)
   or pod2usage(2);
@@ -70,7 +72,7 @@ if (defined $target_directory) {
 my $article = Article->new (path => $article_miz,
 			    stylesheet_home => $stylesheet_home,
 			    script_home => $script_home);
-$article->itemize ($target_directory);
+$article->itemize ($target_directory, { 'analyzer' => ($opt_analyzer ? 1 : 0) });
 
 __END__
 
@@ -190,6 +192,12 @@ Say what we're doing.
 =item B<--paranoid>
 
 After itemizing, verify all of the article's fragments.
+
+=item B<--analyzer>
+
+Do not use the full Mizar verifier; use only the analyzer.  This
+option is useful when working with articles that are not fully
+verifiable, such as the axiomatic article TARSKI.
 
 =item B<--target-directory=DIR>
 
