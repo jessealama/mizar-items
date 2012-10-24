@@ -265,37 +265,25 @@ while (defined (my $line = <STDIN>)) {
 
     $dependency_table{$item} = \@deps;
 
+    # Order the elements
+    foreach my $dep_item (@deps) {
+	$ordering{$item}{$dep_item} = -1;
+	# $ordering{$dep_item}{$item} = 1;
+    }
+
+    # Earlier stuff
+    foreach my $earlier_item (keys %encountered) {
+	$ordering{$earlier_item}{$item} = -1;
+	# $ordering{$item}{$earlier_item} = 1;
+    }
+
     $encountered{$item} = 0;
     foreach my $dep_item (@deps) {
 	$encountered{$dep_item} = 0;
     }
 
-    # Order the elements
-    foreach my $dep_item (@deps) {
-	$ordering{$item}{$dep_item} = -1;
-	$ordering{$dep_item}{$item} = 1;
-    }
+    warn $num_items_so_far;
 
-    my $num_deps = scalar @deps;
-    foreach my $i (1 .. $num_deps) {
-	my $dep_i = $deps[$i - 1];
-	foreach my $j ($i +1 .. $num_deps) {
-	    my $dep_j = $deps[$j - 1];
-	    $ordering{$dep_i}{$dep_j} = -1;
-	    $ordering{$dep_j}{$dep_i} = 1;
-	}
-    }
-
-    foreach my $i (1 .. $num_items_so_far) {
-	my $earlier_item = $items[$i - 1];
-	my @earlier_deps = @{$dependency_table{$earlier_item}};
-	$ordering{$item}{$earlier_item} = 1;
-	$ordering{$earlier_item}{$item} = -1;
-	foreach my $earlier_dep (@earlier_deps) {
-	    $ordering{$item}{$earlier_dep} = 1;
-	    $ordering{$earlier_dep}{$item} = -1;
-	}
-    }
 }
 
 close *STDIN;
@@ -308,6 +296,9 @@ sub item_less_than {
     } elsif (defined $ordering{$item_1}{$item_2}) {
 	my $order = $ordering{$item_1}{$item_2};
 	return $order;
+    } elsif (defined $ordering{$item_2}{$item_1}) {
+	my $order = $ordering{$item_2}{$item_1};
+	return (- $order);
     } else {
 	print {*STDERR} 'We do not know how to order ', $item_1, ' and ', $item_2, '.', "\n";
 	exit 1;
