@@ -107,90 +107,58 @@ sub item_less_than {
 
 		if (defined $fragment_1) {
 		    if (defined $fragment_2) {
-			if ($fragment_1 =~ / [:] fragment [:] ([0-9]+) ([[] ([a-z]+) []]) ? /) {
+			if ($fragment_1 =~ / [:] fragment [:] ([0-9]+) ([[] ([a-z]+) []]) ? \z/) {
 			    (my $fragment_number_1, my $fragment_1_tag) = ($1, $3);
-			    if ($fragment_2 =~ /[:] fragment [:] ([0-9]+) ([[] ([a-z]+) []]) ? /) {
+			    if ($fragment_2 =~ /[:] fragment [:] ([0-9]+) ([[] ([a-z]+) []]) ? \z/) {
 				(my $fragment_number_2, my $fragment_2_tag) = ($1, $3);
 				if ($fragment_number_1 < $fragment_number_2) {
 				    $answer = -1;
 				} elsif ($fragment_number_2 < $fragment_number_1) {
 				    $answer = 1;
-				} else {
-				    if (defined $fragment_1_tag) {
-					if (defined $fragment_2_tag) {
-					    my $tag_1_pos = firstidx { $_ eq $fragment_1_tag } @condition_order;
-					    my $tag_2_pos = firstidx { $_ eq $fragment_2_tag } @condition_order;
-					    if (defined $tag_1_pos) {
-						if (defined $tag_2_pos) {
-						    if ($tag_1_pos < $tag_2_pos) {
-							$answer = -1;
-						    } elsif ($tag_1_pos > $tag_2_pos) {
-							$answer = 1;
-						    } else {
-							$answer = 0;
-						    }
-						} else {
-						    die 'The tag ', $fragment_2_tag, ' of item 2,', $item_2, ' was not found in the condition ordering list.';
-						}
-					    } else {
-						die 'The tag ', $fragment_1_tag, ' of item 1,', $item_1, ' was not found in the condition ordering list.';
-					    }
-					} else {
-					    if ($item_2_kind eq 'rcluster') {
-						$answer = -1;
-					    } else {
-						die 'First item has tag ', $fragment_1_tag, ' but the second item has no tag.  How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', $fragment_2, ')', "\n", "\n", '?', "\n";
-					    }
-					}
-				    } elsif (defined $fragment_2_tag) {
-					if ($item_1_kind eq 'rcluster') {
+				} elsif ($item_1 =~ /[:] [0-9]+ \z/) {
+				    if ($item_2 =~ /[:] [0-9]+ \z/) {
+					if ($item_1 =~ /[:] deftheorem [:] /) {
 					    $answer = 1;
+					} elsif ($item_2 =~ /[:] deftheorem [:] /) {
+					    $answer = -1;
 					} else {
-					    die 'First item has no tag, but the second item has the tag ', $fragment_2_tag, '. How to compare', "\n", "\n", '  ', $item_1, ' (from ', $fragment_1, ')', "\n", "\n", 'and', "\n", "\n", '  ', $item_2, ' (from ', $fragment_2, ')', "\n", '?', "\n";
+					    $answer = 0;
 					}
 				    } else {
-					$answer = 0;
+					$answer = -1;
 				    }
+				} elsif ($item_2 =~ /[:] [0-9]+ \z/) {
+				    $answer = 1;
+				} else {
+				    $answer = 0;
 				}
-			    } else {
-				die 'Error: unable to make sense of \'', $fragment_2, '\'.';
 			    }
-			} else {
-			    die 'Error: unable to make sense of \'', $fragment_1, '\'.';
 			}
 		    } else {
-			warn 'The fragment for ', $item_1, ' is ', $fragment_1, ' but the fragment for ', $item_2, ' is undefined; stipulating that the two items are equal.';
+			warn $item_2, ' is not in the item-to-fragment table.';
 			$answer = 0;
 		    }
-
-		} elsif (defined $fragment_2) {
-		    warn 'The fragment for ', $item_1, ' is undefined, while the fragment for ', $item_2, ' is ', $fragment_2, '; stipulating that the two items are equal.';
-			$answer = 0;
 		} else {
-		    warn 'Error: the item-to-fragment table has an entry for neither ', $item_1, ' nor ', $item_2, '; stipulating that they are equal.';
+		    warn $item_1, ' is not in the item-to-fragment table.';
 		    $answer = 0;
 		}
-
 	    }
 
-	} else {
-	    die 'Cannot make sense of \'', $item_2, '\'.';
+	    $less_than{$item_1}{$item_2} = $answer;
+
+	    if ($answer == -1) {
+		$less_than{$item_2}{$item_1} = 1;
+	    } elsif ($answer == 0) {
+		$less_than{$item_2}{$item_1} = 0;
+	    } elsif ($answer == 1) {
+		$less_than{$item_2}{$item_1} = -1;
+	    } else {
+		die 'We computed an unrecognized answer, \'', $answer, '\' when computing whether', "\n", "\n", '  ', $item_1, "\n", "\n", 'is less than', "\n", "\n", '  ', $item_2, "\n";
+	    }
 	}
-    } else {
-	die 'Cannot make sense of \'', $item_1, '\'.';
     }
 
-    $less_than{$item_1}{$item_2} = $answer;
-
-    if ($answer == -1) {
-	$less_than{$item_2}{$item_1} = 1;
-    } elsif ($answer == 0) {
-	$less_than{$item_2}{$item_1} = 0;
-    } elsif ($answer == 1) {
-	$less_than{$item_2}{$item_1} = -1;
-    } else {
-	die 'We computed an unrecognized answer, \'', $answer, '\' when computing whether', "\n", "\n", '  ', $item_1, "\n", "\n", 'is less than', "\n", "\n", '  ', $item_2, "\n";
-    }
+    warn 'answer: ', $answer;
 
     return $answer;
 
