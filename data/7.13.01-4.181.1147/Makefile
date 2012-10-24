@@ -10,7 +10,7 @@ first-100-maps = $(wordlist 1,100,$(maps))
 
 # functions
 sort-table = perl ../../bin/sort-dependency-table.pl < $(1) > $(2)
-sort-table-or-kill = $(call sort-table,$(1),$(2)) || (rm -f $(2); false)
+sort-table-or-kill = ($(call sort-table,$(1),$(2))) || (rm -f $(2); false)
 
 all:
 
