@@ -312,12 +312,24 @@ sub dependencies_of_random_item {
 }
 
 sub tsort {
+
+  foreach my $item (keys %all_items) {
+    if (defined $table{$item}) {
+      my @deps = @{$table{$item}};
+      if (@deps == 0) {
+  	print $item, "\n";
+      }
+    } else {
+      print $item, "\n";
+    }
+  }
+
   my $split_vertices_fh = File::Temp->new ();
   my $split_vertices_path = $split_vertices_fh->filename ();
   foreach my $item (keys %dep_items) {
     my @deps = @{$table{$item}};
     foreach my $dep (@deps) {
-      print {$split_vertices_fh} $item, ' ', $dep, "\n";
+      print {$split_vertices_fh} $dep, ' ', $item, "\n";
     }
   }
   close $split_vertices_fh
@@ -341,17 +353,6 @@ sub tsort {
   # Now print the items that appear in the table but don't have known
   # dependencies, as well as the items that have zero known
   # dependencies.
-
-  foreach my $item (keys %all_items) {
-    if (defined $table{$item}) {
-      my @deps = @{$table{$item}};
-      if (@deps == 0) {
-	print $item, "\n";
-      }
-    } else {
-      print $item, "\n";
-    }
-  }
 
 }
 
