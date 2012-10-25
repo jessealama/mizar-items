@@ -402,6 +402,7 @@ sub needed_non_constructors {
 
     # Throw out self-dependencies.  These can arise from definition items
     my $name = $self->name ();
+    # warn 'Checking for self-dependencies: article is ', $name, ' and needed are:', Dumper (@needed);
     foreach my $item (@needed) {
 	if ($item =~ /\A ${name} [:] /) {
 	    delete $items{$item};
@@ -560,10 +561,22 @@ sub needed_constructors {
     # 	}
     # }
 
+    # Throw out self-dependencies.  These can arise from definition items
+    my $name = $self->name ();
+    my @needed = keys %constructors;
+    # warn 'Checking for self-dependencies among constructors: article is ', $name, ' and needed constructors are:', Dumper (@needed);
+    foreach my $item (@needed) {
+	if ($item =~ /\A ${name} [:] /) {
+	    delete $constructors{$item};
+	}
+    }
+
+    @needed = keys %constructors;
+
     if (wantarray) {
-	return (keys %constructors);
+	return @needed;
     } else {
-	return join (' ', keys %constructors);
+	return join (' ', @needed);
     }
 
 }
