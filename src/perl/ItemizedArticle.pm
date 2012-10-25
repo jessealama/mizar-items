@@ -1197,9 +1197,13 @@ sub dependencies {
 
 		my %deps = ();
 		foreach my $dep (@fragment_deps) {
-		    my $resolved_dep = $self->resolve_local_item ($dep);
-		    if (defined $resolved_dep) {
-			$deps{$resolved_dep} = 0;
+		    if ($dep =~ /\A ckb ${fragment_number} [:] /) {
+			warn 'Throwing out a self-dependency...';
+		    } else {
+			my $resolved_dep = $self->resolve_local_item ($dep);
+			if (defined $resolved_dep) {
+			    $deps{$resolved_dep} = 0;
+			}
 		    }
 		}
 
