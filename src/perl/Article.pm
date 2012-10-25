@@ -398,6 +398,18 @@ sub needed_non_constructors {
 	$items{$item} = 0;
     }
 
+    @needed = keys %items;
+
+    # Throw out self-dependencies.  These can arise from definition items
+    my $name = $self->name ();
+    foreach my $item (@needed) {
+	if ($item =~ /\A ${name} [:] /) {
+	    delete $items{$item};
+	}
+    }
+
+    @needed = keys %items;
+
     # # Grab theorems inferred from needed requirements
 
     # my @ere_lines = $self->ere_lines ();
@@ -416,8 +428,6 @@ sub needed_non_constructors {
 
     # 	}
     # }
-
-    @needed = keys %items;
 
     if (wantarray) {
 	return @needed;
