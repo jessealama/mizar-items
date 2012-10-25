@@ -11,11 +11,40 @@ tpl [/] {
 
 tpl [tstp] {
   for-each [formula] {
+    apply [.];
+  }
+}
+
+tpl [formula[@name]] {
+  if [starts-with (@name, "fraenkel_")] {
     $n = `@name`;
-    for-each [*[1]] {
-      for-each [descendant::function[starts-with (@name, "a_")]] {
-        $fraenkel-name = `@name`;
-        $n; " "; $fraenkel-name; "\n";
+    $fraenkel-name = `substring-after ($n, "fraenkel_")`;
+
+    // What does this Frankel term depend upon?
+    `$n`;
+    for-each [descendant::function[not(@name = $fraenkel-name)]] {
+      $function-name = `@name`;
+      choose {
+        when [starts-with ($function-name, "f")] {
+          // ignore: we're looking at a schematic function, not a concrete function
+        }
+        when [starts-with ($function-name, "a_")] {
+          // ignore: this is another Fraenkel
+        }
+        otherwise {
+          " "; `concat ("dt_", $function-name)`;
+        }
+      }
+    }
+    " "; "s1_tarski"; "\n"; // assume that the replacement scheme is needed
+
+    // What other things depend on this Fraenkel term?
+    for-each [parent::tstp] {
+      for-each [formula[not(@name = $n)]] {
+        $formula-name = `@name`;
+        if [count (descendant::function[@name = $fraenkel-name]) > 0] {
+          `$formula-name`; " "; `$n`; "\n";
+        }
       }
     }
   }
