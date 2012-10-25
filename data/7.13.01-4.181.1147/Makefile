@@ -49,8 +49,14 @@ dependencies.10: $(first-10-dependency-tables) item-fragment-table.10
 	$(call sort-table,dependencies.10.1,dependencies.10,item-fragment-table.10)
 	rm -f dependencies.10.1
 
-%.mptp: $*
-	../../bin/mptp.pl < $* > $*.mptp
+dependencies.10.mptp: dependencies.10
+	../../bin/mptp.pl --lemma-map=lemma-map.10 --mptp-axioms=MPTP2/00allmmlax < dependencies.10 > dependencies.10.mptp || rm -f dependencies.10.mptp
+
+dependencies.100.mptp: dependencies.100
+	../../bin/mptp.pl --lemma-map=lemma-map.100 --mptp-axioms=MPTP2/00allmmlax < dependencies.100 > dependencies.100.mptp || rm -f dependencies.100.mptp
+
+dependencies.100.mptp.items: dependencies.100.mptp
+	cat dependencies.100.mptp | tr ' ' '\n' | sort --unique > dependencies.100.mptp.items
 
 dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
 	cat $(first-100-dependency-tables) > dependencies.100.1
