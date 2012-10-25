@@ -5,10 +5,14 @@ mml = $(shell cat mml.lar)
 dependency-tables = $(addsuffix .deps,$(mml))
 maps = $(addsuffix .map,$(mml))
 
+first-10-mml = $(wordlist 1,10,$(mml))
+first-100-mml = $(wordlist 1,100,$(mml))
 first-100-dependency-tables = $(wordlist 1,100,$(dependency-tables))
 first-10-dependency-tables = $(wordlist 1,10,$(dependency-tables))
-first-100-maps = $(wordlist 1,100,$(maps))
-first-10-maps = $(wordlist 1,10,$(maps))
+first-100-maps = $(addsuffix .map,$(first-100-mml))
+first-10-maps = $(addsuffix .map,$(first-10-mml))
+first-10-lemmas = $(addsuffix .lemmas,$(first-10-mml))
+first-100-lemmas = $(addsuffix .lemmas,$(first-100-mml))
 
 # functions
 sort-table = ../../bin/sort-dependency-table.pl --fragment-table=$(3) --lar=mml.lar < $(1) > $(2)
@@ -19,6 +23,16 @@ all:
 
 %.deps:
 	../../bin/itemized-article-dependencies.pl $* > $*.deps;
+
+%.lemmas: %.map
+	+make -C MPTP2 $*.tptp
+	../../bin/lemmas.pl $*.map MPTP2/$*.tptp > $*.lemmas
+
+lemma-map.10: $(first-10-lemmas)
+	cat $(first-10-lemmas) > lemma-map.10
+
+lemma-map.100: $(first-100-lemmas)
+	cat $(first-100-lemmas) > lemma-map.100
 
 100: dependencies.100
 
