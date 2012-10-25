@@ -13,6 +13,12 @@ tptp-lemmas = $(addsuffix .tptp,$(mml))
           do egrep "^fof[(][^ ]+[_]$$article[,]" 00allmmlax; \
         done > 00allmmlax.100
 
+00allmmlax.items: 00allmmlax
+	cut -f 1 -d ',' 00allmmlax | cut -f 2 -d '(' | sort --unique > 00allmmlax.items
+
+00allmmlax.100.items: 00allmmlax.100
+	cut -f 1 -d ',' 00allmmlax.100 | cut -f 2 -d '(' | sort --unique > 00allmmlax.100.items
+
 all: $(tptp-lemmas)
 
 clean:
