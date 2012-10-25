@@ -253,6 +253,7 @@ my %dependency_table = ();
 my @items = ();
 my %encountered = ();
 
+my $next_item_number = 1;
 my %ordering = ();
 
 while (defined (my $line = <STDIN>)) {
@@ -260,29 +261,24 @@ while (defined (my $line = <STDIN>)) {
 
     (my $item, my @deps) = split (' ', $line);
 
+    if (defined $ordering{$item}) {
+	die 'We have already encountered ', $item;
+    }
+
+    $ordering{$item} = $next_item_number;
+    $next_item_number++;
+
     my $num_items_so_far = scalar @items;
     push (@items, $item);
 
     $dependency_table{$item} = \@deps;
-
-    # Order the elements
-    foreach my $dep_item (@deps) {
-	$ordering{$item}{$dep_item} = -1;
-	# $ordering{$dep_item}{$item} = 1;
-    }
-
-    # Earlier stuff
-    foreach my $earlier_item (keys %encountered) {
-	$ordering{$earlier_item}{$item} = -1;
-	# $ordering{$item}{$earlier_item} = 1;
-    }
 
     $encountered{$item} = 0;
     foreach my $dep_item (@deps) {
 	$encountered{$dep_item} = 0;
     }
 
-    warn $num_items_so_far;
+    # warn $num_items_so_far;
 
 }
 
@@ -293,15 +289,26 @@ sub item_less_than {
     my $item_2 = shift;
     if ($item_1 eq $item_2) {
 	return 0;
-    } elsif (defined $ordering{$item_1}{$item_2}) {
-	my $order = $ordering{$item_1}{$item_2};
-	return $order;
-    } elsif (defined $ordering{$item_2}{$item_1}) {
-	my $order = $ordering{$item_2}{$item_1};
-	return (- $order);
     } else {
-	print {*STDERR} 'We do not know how to order ', $item_1, ' and ', $item_2, '.', "\n";
-	exit 1;
+
+	my $order_1 = $ordering{$item_1};
+	my $order_2 = $ordering{$item_2};
+
+	if (! defined $item_1) {
+	    die 'We never assigned an order to ', $item_1;
+	}
+
+	if (! defined $item_2) {
+	    die 'We never assigned an order to ', $item_2;
+	}
+
+	if ($order_1 < $order_2) {
+	    return -1;
+	} elsif ($order_1 > $order_2) {
+	    return 1;
+	}  else {
+	    die $item_1, ' and ', $item_2, ' are distinct, but have the same ordering.';
+	}
     }
 }
 
