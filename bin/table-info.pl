@@ -443,16 +443,22 @@ sub shuffle_table {
 }
 
 sub complete_table {
-  foreach my $item (keys %all_items) {
-    print $item;
-    if (defined $table{$item}) {
-      my @deps = @{$table{$item}};
-      if (@deps) {
-	print ' ', join (' ', @deps);
-      }
+    foreach my $item (keys %all_items) {
+	print $item;
+	my %printed_already = ();
+	if (defined $table{$item}) {
+	    my @deps = @{$table{$item}};
+	    foreach my $dep (@deps) {
+		if (defined $printed_already{$dep}) {
+		    # don't reprint this guy
+		} else {
+		    print ' ', $dep;
+		    $printed_already{$dep} = 0;
+		}
+	    }
+	}
+	print "\n";
     }
-    print "\n";
-  }
 }
 
 sub invert_table {
