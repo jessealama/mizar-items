@@ -26,9 +26,11 @@ sub ensure_readable_file {
 }
 
 my $opt_lemma_map_file = undef;
+my $opt_mptp_axiom_file = undef;
 
 GetOptions (
     'lemma-map=s' => \$opt_lemma_map_file,
+    'mptp-axioms=s' => \$opt_mptp_axiom_file,
 ) or pod2usage (2);
 
 if (! defined $opt_lemma_map_file) {
@@ -37,9 +39,14 @@ if (! defined $opt_lemma_map_file) {
 }
 ensure_readable_file ($opt_lemma_map_file);
 
+if (! defined $opt_mptp_axiom_file) {
+    pod2usage (-exitval => 2,
+	       -message => 'Please supply an MPTP axiom file.');
+}
+ensure_readable_file ($opt_mptp_axiom_file);
+
 my %mptp_for_item = ();
 my %redefined_constructors = ();
-my %mptp_lemmas = ();
 
 my @function_properties = ('projectivity',
 			   'involutiveness',
@@ -64,14 +71,14 @@ sub load_redefined_constructors {
 }
 
 sub load_mptp_items {
-    open (my $items_fh, '<', '00allmmlax.items')
-	or die 'Cannot open 00allmmlax.items: ', $!;
+    open (my $items_fh, '<', $opt_mptp_axiom_file)
+	or die 'Cannot open an input filehandle for ', $opt_mptp_axiom_file, ': ', $!;
     while (defined (my $item = <$items_fh>)) {
 	chomp $item;
 	$mptp_items{$item} = 0;
     }
     close $items_fh
-	or die 'Cannot close input filehandle for 00allmmlax.items: ', $!;
+	or die 'Cannot close input filehandle for ', $opt_mptp_axiom_file, ': ', $!;
     return;
 }
 
@@ -82,7 +89,7 @@ sub load_lemmas {
     while (defined (my $lemma_line = <$lemma_fh>)) {
 	chomp $lemma_line;
 	(my $item, my $lemma) = split (' ', $lemma_line);
-	$table{$lemma} = $item;
+	$table{$item} = $lemma;
     }
     close $lemma_fh
 	or die 'Error closing the input filehandle for \'', $opt_lemma_map_file, '\: ', $!;
@@ -90,6 +97,8 @@ sub load_lemmas {
     return \%table;
 
 }
+
+my %mptp_lemmas = %{load_lemmas ()};
 
 sub to_mptp {
     my $item = shift;
@@ -215,7 +224,7 @@ sub handled {
 	} elsif ($kind =~ /[gjklmruv]pattern/) {
 	    $answer = 0;
 	} elsif ($kind eq 'lemma') {
-	    $answer = 0;
+	    $answer = 1;
 	} else {
 	    $answer = 1;
 	}
@@ -230,8 +239,6 @@ sub handled {
     return $answer;
 
 }
-
-my %lemma_table = %{load_lemmas ()};
 
 sub is_redefined_constructor {
     my $item = shift;
