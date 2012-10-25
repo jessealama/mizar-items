@@ -239,8 +239,10 @@ sub item_dependencies {
     my $item = shift;
     my @deps = ();
     foreach my $other_item (@sorted_items) {
-	if (defined $dependencies{$item}{$other_item}) {
-	    push (@deps, $other_item);
+	if ($item ne $other_item) {
+	    if (defined $dependencies{$item}{$other_item}) {
+		push (@deps, $other_item);
+	    }
 	}
     }
     return @deps;
