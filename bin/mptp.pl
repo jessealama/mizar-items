@@ -5,6 +5,37 @@ use warnings;
 use Regexp::DefaultFlags;
 use Data::Dumper;
 use List::MoreUtils qw(any);
+use Getopt::Long;
+use Pod::Usage;
+
+sub ensure_readable_file {
+    my $path = shift;
+    if (-d $path) {
+	print {*STDERR} $path, ' is a directory, not a file.', "\n";
+	exit 1;
+    }
+    if (! -e $path) {
+	print {*STDERR} 'No such file \'', $path, '\'.', "\n";
+	exit 1;
+    }
+    if (! -r $path) {
+	print {*STDERR} $path, ' is unreadable.', "\n";
+	exit 1;
+    }
+    return;
+}
+
+my $opt_lemma_map_file = undef;
+
+GetOptions (
+    'lemma-map=s' => \$opt_lemma_map_file,
+) or pod2usage (2);
+
+if (! defined $opt_lemma_map_file) {
+    pod2usage (-exitval => 2,
+	       -message => 'Please supply a lemma map file.');
+}
+ensure_readable_file ($opt_lemma_map_file);
 
 my %mptp_for_item = ();
 my %redefined_constructors = ();
@@ -45,36 +76,18 @@ sub load_mptp_items {
 }
 
 sub load_lemmas {
-    my $lemma_file = 'lemmas';
-
-
-    if (! -e $lemma_file) {
-	die 'The lemma file does not exist in the expected location \'', $lemma_file, '\'.';
-    }
-
-    if (-d $lemma_file) {
-	die 'The lemma file at \'', $lemma_file, '\' is actually a directory.';
-    }
-
-    if (! -r $lemma_file) {
-	die 'The lemma file at \'', $lemma_file, '\' is unreadable.';
-    }
-
-    open (my $lemma_fh, '<', $lemma_file)
-	or die 'Unable to open an input filehandle for \'', $lemma_file, '\': ', $!;
+    my %table = ();
+    open (my $lemma_fh, '<', $opt_lemma_map_file)
+	or die 'Unable to open an input filehandle for \'', $opt_lemma_map_file, '\': ', $!;
     while (defined (my $lemma_line = <$lemma_fh>)) {
 	chomp $lemma_line;
-	if ($lemma_line =~ / \A ([^ ]+) [ ] ([^ ]+) \z/) {
-	    (my $item, my $lemma) = ($1, $2);
-	    $mptp_lemmas{$lemma} = $item;
-	} else {
-	    die 'Cannot parse lemma line \'', $lemma_line, '\'.';
-	}
+	(my $item, my $lemma) = split (' ', $lemma_line);
+	$table{$lemma} = $item;
     }
     close $lemma_fh
-	or die 'Error closing the input filehandle for \'', $lemma_file, '\: ', $!;
+	or die 'Error closing the input filehandle for \'', $opt_lemma_map_file, '\: ', $!;
 
-    return;
+    return \%table;
 
 }
 
@@ -218,7 +231,7 @@ sub handled {
 
 }
 
-# load_lemmas ();
+my %lemma_table = %{load_lemmas ()};
 
 sub is_redefined_constructor {
     my $item = shift;
