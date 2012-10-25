@@ -52,8 +52,14 @@ dependencies.10: $(first-10-dependency-tables) item-fragment-table.10
 dependencies.10.mptp: dependencies.10
 	../../bin/mptp.pl --lemma-map=lemma-map.10 --mptp-axioms=MPTP2/00allmmlax < dependencies.10 > dependencies.10.mptp || rm -f dependencies.10.mptp
 
-dependencies.100.mptp: dependencies.100
+dependencies.100.mptp: dependencies.100 lemma-map.100
+	+make -C MPTP2 fraenkel-dependencies.100
 	../../bin/mptp.pl --lemma-map=lemma-map.100 --mptp-axioms=MPTP2/00allmmlax < dependencies.100 > dependencies.100.mptp || rm -f dependencies.100.mptp
+	../../bin/insert-fraenkels.pl dependencies.100.mptp MPTP2/fraenkel-dependencies.100 > dependencies.100.mptp1
+	mv dependencies.100.mptp1 dependencies.100.mptp
+	../../bin/table-info.pl dependencies.100.mptp implicitly-independent-items > dependencies.100.mptp.implicitly-independent
+	../../bin/insert-fraenkels.pl dependencies.100.mptp dependencies.100.mptp.implicitly-independent > dependencies.100.mptp1
+	mv dependencies.100.mptp1 dependencies.100.mptp
 
 dependencies.100.mptp.items: dependencies.100.mptp
 	cat dependencies.100.mptp | tr ' ' '\n' | sort --unique > dependencies.100.mptp.items
@@ -61,7 +67,7 @@ dependencies.100.mptp.items: dependencies.100.mptp
 dependencies.100: $(first-100-dependency-tables) item-fragment-table.100
 	cat $(first-100-dependency-tables) > dependencies.100.1
 	$(call sort-table-or-kill,dependencies.100.1,dependencies.100,item-fragment-table.100)
-	rm -f dependencies.100.1
+	# rm -f dependencies.100.1
 
 dependencies.tc: dependencies
 	../../bin/table-info.pl transitive dependencies > dependencies.tc.1
