@@ -140,6 +140,7 @@ my %command_dispatch_table =
    'complete' => \&complete_table,
    'invert' => \&invert_table,
    'structural-check' => \&check_structurally,
+   'used-before-defined' => \&used_before_defined,
    'predecessors' => \&predecessors_of_item,
    'successors' => \&successors_of_item,
    'truncate' => \&truncate_at_items,
@@ -513,6 +514,24 @@ sub load_graph {
 
   return $g;
 
+}
+
+sub used_before_defined {
+    my %encountered = ();
+    foreach my $item (@defined_items) {
+	$encountered{$item} = 0;
+	if (defined $table{$item}) {
+	    my @deps = @{$table{$item}};
+	    foreach my $dep_item (@deps) {
+		if (! defined $encountered{$dep_item}) {
+		    if (defined $table{$dep_item}) {
+			print $dep_item, "\n";
+		    }
+		}
+		$encountered{$dep_item} = 0;
+	    }
+	}
+    }
 }
 
 sub check_structurally {
