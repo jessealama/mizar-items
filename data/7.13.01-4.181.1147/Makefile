@@ -62,6 +62,9 @@ dependencies.100.mptp: dependencies.100 lemma-map.100
 	../../bin/table-info.pl dependencies.100.mptp implicitly-independent-items > dependencies.100.mptp.implicitly-independent
 	../../bin/insert-fraenkels.pl dependencies.100.mptp dependencies.100.mptp.implicitly-independent > dependencies.100.mptp1
 	mv dependencies.100.mptp1 dependencies.100.mptp
+	../../bin/table-info.pl dependencies.100.mptp used-before-defined > dependencies.100.mptp.used-before-defined
+	../../bin/insert-fraenkels.pl dependencies.100.mptp dependencies.100.mptp.used-before-defined > dependencies.100.mptp1
+	mv dependencies.100.mptp1 dependencies.100.mptp
 
 dependencies.100.mptp.gz: dependencies.100.mptp
 	rm -f dependencies.100.mptp.gz
