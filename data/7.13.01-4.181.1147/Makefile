@@ -57,6 +57,8 @@ dependencies.100.mptp: dependencies.100 lemma-map.100
 	../../bin/mptp.pl --lemma-map=lemma-map.100 --mptp-axioms=MPTP2/00allmmlax < dependencies.100 > dependencies.100.mptp || rm -f dependencies.100.mptp
 	../../bin/insert-fraenkels.pl dependencies.100.mptp MPTP2/fraenkel-dependencies.100 > dependencies.100.mptp1
 	mv dependencies.100.mptp1 dependencies.100.mptp
+	../../bin/insert-fraenkels.pl dependencies.100.mptp MPTP2/choice-terms > dependencies.100.mptp1
+	mv dependencies.100.mptp1 dependencies.100.mptp
 	../../bin/table-info.pl dependencies.100.mptp implicitly-independent-items > dependencies.100.mptp.implicitly-independent
 	../../bin/insert-fraenkels.pl dependencies.100.mptp dependencies.100.mptp.implicitly-independent > dependencies.100.mptp1
 	mv dependencies.100.mptp1 dependencies.100.mptp
