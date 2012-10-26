@@ -52,4 +52,4 @@ clean:
 	gzip 00allmmlax.100.lemmas
 
 upload: 00allmmlax.lemmas.gz 00allmmlax.100.lemmas.gz
-	scp 00allmmlax.lemmas.gz alama@mizar.cs.ualberta.ca:~/public_html/7.13.01-4.181.1147/
+	scp 00allmmlax.lemmas.gz 00allmmlax.100.lemmas.gz alama@mizar.cs.ualberta.ca:~/public_html/7.13.01-4.181.1147/
