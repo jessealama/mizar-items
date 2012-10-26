@@ -89,11 +89,19 @@ foreach my $item (@items) {
     # Check for undefined items in the Fraenkel table appearing as dependencies
     foreach my $dep (@deps) {
 	if (defined $new_axioms{$dep}) {
-	    if (! defined $mptp_dependencies{$dep}) {
+	    if (defined $mptp_dependencies{$dep}) {
 		if (! defined $printed{$dep}) {
-		    print $dep, "\n";
+		    print $dep;
+		    my @dep_deps = @{$mptp_dependencies{$dep}};
+		    foreach my $dep_dep (@dep_deps) {
+			print ' ', $dep_dep;
+		    }
+		    print "\n";
 		    $printed{$dep} = 0;
 		}
+	    } elsif (! defined $printed{$dep}) {
+		print $dep, "\n";
+		$printed{$dep} = 0;
 	    }
 	}
     }
