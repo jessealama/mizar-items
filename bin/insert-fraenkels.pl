@@ -35,14 +35,13 @@ ensure_readable_file ($fraenkel_table);
 
 # Load the Fraenkel table
 my %fraenkel = ();
+my %new_axioms = ();
 open (my $fraenkel_fh, '<', $fraenkel_table);
 while (defined (my $line = <$fraenkel_fh>)) {
     chomp $line;
     (my $item, my @deps) = split (' ', $line);
     if (scalar @deps == 0) {
-	warn 'no deps for ', $item;
-	my %empy_table = ();
-	$fraenkel{$item} = \%empy_table;
+	$new_axioms{$item} = 0;
     } else {
 	foreach my $dep (@deps) {
 	    $fraenkel{$item}{$dep} = 0;
@@ -51,33 +50,49 @@ while (defined (my $line = <$fraenkel_fh>)) {
 }
 close $fraenkel_fh;
 
-my %mptp_deps = ();
 my %printed = ();
 open (my $table_fh, '<', $mptp_table);
+
+my %mptp_dependencies = ();
+my @items = ();
 while (defined (my $line = <$table_fh>)) {
     chomp $line;
     (my $item, my @deps) = split (' ', $line);
+    $mptp_dependencies{$item} = \@deps;
+    push (@items, $item);
+}
 
+foreach my $item (@items) {
     if (defined $fraenkel{$item}) {
 	my %fraenkel_for_item = %{$fraenkel{$item}};
 	my @fraenkel_deps = keys %fraenkel_for_item;
-	if (scalar @fraenkel_deps == 0) {
-
-	} else {
-	    foreach my $fraenkel_dep (@fraenkel_deps) {
-		if ($fraenkel_dep =~ /\A fraenkel_ /) {
-		    if (! defined $printed{$fraenkel_dep}) {
-			print $fraenkel_dep;
-			$printed{$fraenkel_dep} = 0;
-			if (defined $fraenkel{$fraenkel_dep}) {
-			    my %fraenkel_deps_for_fraenkel = %{$fraenkel{$fraenkel_dep}};
-			    my @fraenkel_deps_deps = keys %fraenkel_deps_for_fraenkel;
-			    foreach my $dep (@fraenkel_deps_deps) {
-				print ' ', $dep;
-			    }
+	foreach my $fraenkel_dep (@fraenkel_deps) {
+	    if ($fraenkel_dep =~ /\A fraenkel_ /) {
+		if (! defined $printed{$fraenkel_dep}) {
+		    print $fraenkel_dep;
+		    $printed{$fraenkel_dep} = 0;
+		    if (defined $fraenkel{$fraenkel_dep}) {
+			my %fraenkel_deps_for_fraenkel = %{$fraenkel{$fraenkel_dep}};
+			my @fraenkel_deps_deps = keys %fraenkel_deps_for_fraenkel;
+			foreach my $dep (@fraenkel_deps_deps) {
+			    print ' ', $dep;
 			}
-			print "\n";
 		    }
+		    print "\n";
+		}
+	    }
+	}
+    }
+
+    my @deps = @{$mptp_dependencies{$item}};
+
+    # Check for undefined items in the Fraenkel table appearing as dependencies
+    foreach my $dep (@deps) {
+	if (defined $new_axioms{$dep}) {
+	    if (! defined $mptp_dependencies{$dep}) {
+		if (! defined $printed{$dep}) {
+		    print $dep, "\n";
+		    $printed{$dep} = 0;
 		}
 	    }
 	}
