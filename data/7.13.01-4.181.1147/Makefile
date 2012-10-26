@@ -1,4 +1,4 @@
-.PHONY: all 100
+.PHONY: all 100 check upload
 
 mml = $(shell cat mml.lar)
 
@@ -60,6 +60,13 @@ dependencies.100.mptp: dependencies.100 lemma-map.100
 	../../bin/table-info.pl dependencies.100.mptp implicitly-independent-items > dependencies.100.mptp.implicitly-independent
 	../../bin/insert-fraenkels.pl dependencies.100.mptp dependencies.100.mptp.implicitly-independent > dependencies.100.mptp1
 	mv dependencies.100.mptp1 dependencies.100.mptp
+
+dependencies.100.mptp.gz: dependencies.100.mptp
+	rm -f dependencies.100.mptp.gz
+	gzip dependencies.100.mptp
+
+upload: dependencies.100.mptp.gz
+	scp dependencies.100.mptp.gz alama@mizar.cs.ualberta.ca:~/public_html/7.13.01-4.181.1147/
 
 dependencies.100.mptp.items: dependencies.100.mptp
 	cat dependencies.100.mptp | tr ' ' '\n' | sort --unique > dependencies.100.mptp.items
