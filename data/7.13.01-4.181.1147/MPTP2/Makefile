@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean upload
 
 mml = hidden tarski $(shell cat ../mml.lar)
 mml-100 = $(wordlist 1,100,$(mml))
@@ -16,6 +16,11 @@ fraenkel-dependencies.100: 00allmmlax.100.xml
 	xsltproc ../../../src/xslt/mptp-fraenkels.xsl 00allmmlax.100.xml > fraenkel-dependencies.100.1
 	../../../bin/table-info.pl fraenkel-dependencies.100.1 print > fraenkel-dependencies.100
 
+fraenkel-dependencies: 00allmmlax.xml
+	make -C ../../../src/xslt mptp-fraenkels.xsl
+	xsltproc ../../../src/xslt/mptp-fraenkels.xsl 00allmmlax.xml > fraenkel-dependencies1
+	../../../bin/table-info.pl fraenkel-dependencies1 print > fraenkel-dependencies
+
 00allmmlax.100: 00allmmlax
 	for article in $(mml-100); \
           do egrep "^fof[(][^ ]+[_]$$article[,]" 00allmmlax; \
@@ -31,3 +36,20 @@ all: $(tptp-lemmas)
 
 clean:
 	rm -f $(tptp-lemmas)
+
+00allmmlax.100.lemmas: $(wordlist 1,100,$(tptp-lemmas))
+	cat $(wordlist 1,100,$(tptp-lemmas)) > 00allmmlax.100.lemmas
+
+00allmmlax.lemmas: $(tptp-lemmas)
+	cat $(tptp-lemmas) > 00allmmlax.lemmas
+
+00allmmlax.lemmas.gz: 00allmmlax.lemmas
+	rm -f 00allmmlax.lemmas.gz
+	gzip 00allmmlax.lemmas
+
+00allmmlax.100.lemmas.gz: 00allmmlax.100.lemmas
+	rm -f 00allmmlax.100.lemmas.gz
+	gzip 00allmmlax.100.lemmas
+
+upload: 00allmmlax.lemmas.gz 00allmmlax.100.lemmas.gz
+	scp 00allmmlax.lemmas.gz alama@mizar.cs.ualberta.ca:~/public_html/7.13.01-4.181.1147/
