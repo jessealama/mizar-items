@@ -4,10 +4,49 @@ use strict;
 use warnings;
 use Regexp::DefaultFlags;
 use Data::Dumper;
+use List::MoreUtils qw(any);
+use Getopt::Long;
+use Pod::Usage;
+
+sub ensure_readable_file {
+    my $path = shift;
+    if (-d $path) {
+	print {*STDERR} $path, ' is a directory, not a file.', "\n";
+	exit 1;
+    }
+    if (! -e $path) {
+	print {*STDERR} 'No such file \'', $path, '\'.', "\n";
+	exit 1;
+    }
+    if (! -r $path) {
+	print {*STDERR} $path, ' is unreadable.', "\n";
+	exit 1;
+    }
+    return;
+}
+
+my $opt_lemma_map_file = undef;
+my $opt_mptp_axiom_file = undef;
+
+GetOptions (
+    'lemma-map=s' => \$opt_lemma_map_file,
+    'mptp-axioms=s' => \$opt_mptp_axiom_file,
+) or pod2usage (2);
+
+if (! defined $opt_lemma_map_file) {
+    pod2usage (-exitval => 2,
+	       -message => 'Please supply a lemma map file.');
+}
+ensure_readable_file ($opt_lemma_map_file);
+
+if (! defined $opt_mptp_axiom_file) {
+    pod2usage (-exitval => 2,
+	       -message => 'Please supply an MPTP axiom file.');
+}
+ensure_readable_file ($opt_mptp_axiom_file);
 
 my %mptp_for_item = ();
 my %redefined_constructors = ();
-my %mptp_lemmas = ();
 
 my @function_properties = ('projectivity',
 			   'involutiveness',
@@ -32,50 +71,34 @@ sub load_redefined_constructors {
 }
 
 sub load_mptp_items {
-    open (my $items_fh, '<', '00allmmlax.items')
-	or die 'Cannot open 00allmmlax.items: ', $!;
+    open (my $items_fh, '<', $opt_mptp_axiom_file)
+	or die 'Cannot open an input filehandle for ', $opt_mptp_axiom_file, ': ', $!;
     while (defined (my $item = <$items_fh>)) {
 	chomp $item;
 	$mptp_items{$item} = 0;
     }
     close $items_fh
-	or die 'Cannot close input filehandle for 00allmmlax.items: ', $!;
+	or die 'Cannot close input filehandle for ', $opt_mptp_axiom_file, ': ', $!;
     return;
 }
 
 sub load_lemmas {
-    my $lemma_file = 'lemmas';
-
-
-    if (! -e $lemma_file) {
-	die 'The lemma file does not exist in the expected location \'', $lemma_file, '\'.';
-    }
-
-    if (-d $lemma_file) {
-	die 'The lemma file at \'', $lemma_file, '\' is actually a directory.';
-    }
-
-    if (! -r $lemma_file) {
-	die 'The lemma file at \'', $lemma_file, '\' is unreadable.';
-    }
-
-    open (my $lemma_fh, '<', $lemma_file)
-	or die 'Unable to open an input filehandle for \'', $lemma_file, '\': ', $!;
+    my %table = ();
+    open (my $lemma_fh, '<', $opt_lemma_map_file)
+	or die 'Unable to open an input filehandle for \'', $opt_lemma_map_file, '\': ', $!;
     while (defined (my $lemma_line = <$lemma_fh>)) {
 	chomp $lemma_line;
-	if ($lemma_line =~ / \A ([^ ]+) [ ] ([^ ]+) \z/) {
-	    (my $item, my $lemma) = ($1, $2);
-	    $mptp_lemmas{$lemma} = $item;
-	} else {
-	    die 'Cannot parse lemma line \'', $lemma_line, '\'.';
-	}
+	(my $item, my $lemma) = split (' ', $lemma_line);
+	$table{$item} = $lemma;
     }
     close $lemma_fh
-	or die 'Error closing the input filehandle for \'', $lemma_file, '\: ', $!;
+	or die 'Error closing the input filehandle for \'', $opt_lemma_map_file, '\: ', $!;
 
-    return;
+    return \%table;
 
 }
+
+my %mptp_lemmas = %{load_lemmas ()};
 
 sub to_mptp {
     my $item = shift;
@@ -145,7 +168,6 @@ sub to_mptp {
 
 my %handled_table = ();
 
-
 sub handled {
     my $item = shift;
 
@@ -202,7 +224,7 @@ sub handled {
 	} elsif ($kind =~ /[gjklmruv]pattern/) {
 	    $answer = 0;
 	} elsif ($kind eq 'lemma') {
-	    $answer = 0;
+	    $answer = 1;
 	} else {
 	    $answer = 1;
 	}
@@ -217,8 +239,6 @@ sub handled {
     return $answer;
 
 }
-
-# load_lemmas ();
 
 sub is_redefined_constructor {
     my $item = shift;
@@ -253,19 +273,64 @@ my %dependency_table = ();
 my @items = ();
 my %encountered = ();
 
+my $next_item_number = 1;
+my %ordering = ();
+
 while (defined (my $line = <STDIN>)) {
     chomp $line;
+
     (my $item, my @deps) = split (' ', $line);
+
+    if (defined $ordering{$item}) {
+	die 'We have already encountered ', $item;
+    }
+
+    $ordering{$item} = $next_item_number;
+    $next_item_number++;
+
+    my $num_items_so_far = scalar @items;
     push (@items, $item);
+
     $dependency_table{$item} = \@deps;
 
     $encountered{$item} = 0;
     foreach my $dep_item (@deps) {
 	$encountered{$dep_item} = 0;
     }
+
+    # warn $num_items_so_far;
+
 }
 
 close *STDIN;
+
+sub item_less_than {
+    my $item_1 = shift;
+    my $item_2 = shift;
+    if ($item_1 eq $item_2) {
+	return 0;
+    } else {
+
+	my $order_1 = $ordering{$item_1};
+	my $order_2 = $ordering{$item_2};
+
+	if (! defined $item_1) {
+	    die 'We never assigned an order to ', $item_1;
+	}
+
+	if (! defined $item_2) {
+	    die 'We never assigned an order to ', $item_2;
+	}
+
+	if ($order_1 < $order_2) {
+	    return -1;
+	} elsif ($order_1 > $order_2) {
+	    return 1;
+	}  else {
+	    die $item_1, ' and ', $item_2, ' are distinct, but have the same ordering.';
+	}
+    }
+}
 
 foreach my $item (keys %encountered) {
     if (! defined $dependency_table{$item}) {
@@ -273,7 +338,30 @@ foreach my $item (keys %encountered) {
     }
 }
 
-foreach my $item (keys %encountered) {
+my %printed = ();
+
+sub print_items {
+    my @items = @_;
+    foreach my $item (@items) {
+	if (handled ($item)) {
+	    print ' ';
+	    my $mptp = to_mptp ($item);
+	    if (is_redefined_constructor ($item)) {
+		my $redefined = redefine_constructor ($item);
+		if (defined $printed{$redefined}) {
+		    print $mptp;
+		} else {
+		    print $redefined;
+		}
+	    } else {
+		print $mptp;
+	    }
+	}
+    }
+    return;
+}
+
+foreach my $item (sort { item_less_than ($a, $b) } keys %encountered) {
 
     my %printed_for_this_item = (
 	'symmetry_r1_hidden' => 0,
@@ -281,174 +369,47 @@ foreach my $item (keys %encountered) {
     );
 
     if (handled ($item)) {
-	my $mptp = to_mptp ($item);
+	my $item_number = $ordering{$item};
 	if (is_redefined_constructor ($item)) {
 	    my $redefined = redefine_constructor ($item);
-	    print $redefined;
-	} else {
-	    print $mptp;
-	}
-
-	my @deps = @{$dependency_table{$item}};
-
-	foreach my $dep_item (@deps) {
-	    if ($item eq $dep_item) {
-		# ignore self-dependencies.  These come from structure constructors
-	    } elsif (is_redefined_constructor ($dep_item)) {
-		my $redefined = redefine_constructor ($dep_item);
-		print ' ', $redefined;
-		$printed_for_this_item{$redefined} = 0;
-	    } elsif (handled ($dep_item)) {
-		my $dep_mptp = to_mptp ($dep_item);
-		if (defined $printed_for_this_item{$dep_mptp}) {
-		    # don't print
-		} else {
-		    print ' ', $dep_mptp;
-		    $printed_for_this_item{$dep_mptp} = 0;
-		}
-	    }
-	}
-
-	# todo: for every constructor that's included, throw in
-	# its associated deftheorem
-
-	# Redefinition case
-	if (is_redefined_constructor ($item)) {
-	    # Look up a coherence/compatibility condition for the constructor
-	    if ($item =~ /\A [a-z0-9_]+ [:] . (constructor | definiens) [:] [0-9]+ \z/) {
-		my $coherence_item = "${item}[coherence]";
-		my $compatibility_item = "${item}[compatibility]";
-		if (defined $dependency_table{$coherence_item}) {
-		    my @coherence_deps = @{$dependency_table{$coherence_item}};
-		    foreach my $dep_item (@coherence_deps) {
-			if (handled ($dep_item)) {
-			    my $dep_mptp = to_mptp ($dep_item);
-			    if (defined $printed_for_this_item{$dep_mptp}) {
-				# don't print
-			    } elsif (is_redefined_constructor ($dep_item)) {
-				print ' ', redefine_constructor ($dep_item);
-			    } else {
-				print ' ', $dep_mptp;
-			    }
-			    $printed_for_this_item{$dep_mptp} = 0;
-			}
-		    }
-		} elsif (defined $dependency_table{$compatibility_item}) {
-		    my @compatibility_deps = @{$dependency_table{$compatibility_item}};
-		    foreach my $dep_item (@compatibility_deps) {
-			if (handled ($dep_item)) {
-			    my $dep_mptp = to_mptp ($dep_item);
-			    if (defined $printed_for_this_item{$dep_mptp}) {
-				# don't print
-			    } elsif (is_redefined_constructor ($dep_item)) {
-				print ' ', redefine_constructor ($dep_item);
-			    } else {
-				print ' ', $dep_mptp;
-			    }
-			    $printed_for_this_item{$dep_mptp} = 0;
-			}
-		    }
-		} else {
-		    # warn 'To ', $item, ' neither a compatibility nor a coherence item is associated.';
-		}
-	    } else {
-		die 'Error: cannot make sense of \'', $item, '\'.';
-	    }
-	}
-
-	foreach my $dep_item (@deps) {
-	    if (is_redefined_constructor ($dep_item)) {
-		if ($dep_item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] ([0-9]+) \z/) {
-		    (my $new_article, my $new_kind, my $new_number) = ($1, $2, $3);
-		    my $new_mptp = "${new_kind}${new_number}_${new_article}";
-
-		    foreach my $property (@properties) {
-
-			if ($property eq 'asymmetry') {
-			    $property = 'antisymmetry';
-			}
-
-			my $new_with_property = "${property}_${new_mptp}";
-
-			if (defined $mptp_items{$new_with_property}) {
-			    if (! defined $printed_for_this_item{$new_with_property}) {
-				print ' ', $new_with_property;
-				$printed_for_this_item{$new_with_property} = 0;
-				# warn 'HEY: throwing in ', $new_with_property;
-			    }
-			}
-
-			my $old_mptp = $redefined_constructors{$new_mptp};
-
-			if (defined $old_mptp) {
-			    if ($old_mptp =~ /\A (.) ([0-9]+) [_] ([a-z0-9_]+) \z/) {
-				(my $old_kind, my $old_number, my $old_article)
-				    = ($1, $2, $3);
-				my $old_with_property = "${property}_${old_mptp}";
-				if (defined $mptp_items{$old_with_property}) {
-				    if (! defined $printed_for_this_item{$old_with_property}) {
-					print ' ', $old_with_property;
-					$printed_for_this_item{$old_with_property} = 0;
-					# warn 'HEY: throwing in ', $old_with_property;
-				    }
-				}
-			    } else {
-				die 'Error: cannot make sense of the MPTP constructor \'', $old_mptp, '\'.';
-			    }
-
-			}
-		    }
-		}
-	    }
-	}
-
-	foreach my $dep_item (@deps) {
-	    if ($dep_item =~ /\A ([a-z0-9_]+) [:] gconstructor [:] ([0-9]+) \z/) {
-		(my $article, my $number) = ($1, $2);
-		my $free_item = "free_g${number}_${article}";
-		if (! defined $printed_for_this_item{$free_item}) {
-		    print ' ', $free_item;
-		    $printed_for_this_item{$free_item} = 0;
-		}
-	    }
-	}
-
-	print "\n";
-
-	# Typing for redefined functors
-	if (is_redefined_constructor ($item)) {
-	    if ($item =~ / [:] . constructor [:] /) {
-		my $redefinition = redefine_constructor ($item);
-		print $mptp, ' ', $redefinition, "\n";
-	    }
-	}
-
-	# Mode existence conditions
-	%printed_for_this_item = ();
-	if ($item =~ / \A ([a-z0-9_]+) [:] ([lm]) constructor [:] ([0-9]+) \z/) {
-	    (my $article, my $kind, my $number) = ($1, $2, $3);
-	    my $mptp_existence = "existence_${kind}${number}_${article}";
-
-	    print $mptp_existence;
-
-	    foreach my $dep_item (@deps) {
-		if ($item eq $dep_item) {
-		    # ignore self-dependencies.  These come from structure constructors
-		} elsif (handled ($dep_item)) {
-		    my $dep_mptp = to_mptp ($dep_item);
-		    if (defined $printed_for_this_item{$dep_mptp}) {
-			# don't print
-		    } elsif (is_redefined_constructor ($dep_item)) {
-			print ' ', redefine_constructor ($dep_item);
+	    if (! defined $printed{$redefined}) {
+		print $redefined;
+		$printed{$redefined} = 0;
+		# Look up a coherence/compatibility condition for the constructor
+		if ($item =~ /\A [a-z0-9_]+ [:] . (constructor | definiens) [:] [0-9]+ \z/) {
+		    my $coherence_item = "${item}[coherence]";
+		    my $compatibility_item = "${item}[compatibility]";
+		    if (defined $dependency_table{$coherence_item}) {
+			my @coherence_deps = @{$dependency_table{$coherence_item}};
+			print_items (@coherence_deps);
+		    } elsif (defined $dependency_table{$compatibility_item}) {
+			my @compatibility_deps = @{$dependency_table{$compatibility_item}};
+			print_items (@compatibility_deps);
 		    } else {
-			print ' ', $dep_mptp;
-
+			# warn 'To ', $item, ' neither a compatibility nor a coherence item is associated.';
 		    }
-		    $printed_for_this_item{$dep_mptp} = 0;
+
+		    print "\n";
+
+		} else {
+		    die 'Error: cannot make sense of \'', $item, '\'.';
 		}
 	    }
+	} else {
+	    my $mptp = to_mptp ($item);
 
-	    print "\n";
+	    my @deps = @{$dependency_table{$item}};
+	    my @sorted_deps = sort { item_less_than ($a, $b) } @deps;
+
+	    if (! defined $printed{$mptp}) {
+		print $mptp;
+		$printed{$mptp} = 0;
+		print_items (@sorted_deps);
+		print "\n";
+	    }
+
+	    # todo: for every constructor that's included, throw in
+	    # its associated deftheorem
 
 	}
     }

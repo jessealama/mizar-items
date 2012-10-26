@@ -2,7 +2,6 @@ package Mizar;
 
 use warnings;
 use strict;
-use Carp;
 use Cwd;
 
 use version; our $VERSION = qv('0.0.3');
@@ -10,7 +9,7 @@ use version; our $VERSION = qv('0.0.3');
 use base qw(Exporter);
 use IPC::Run qw(start harness timer);
 use IPC::Cmd qw(can_run);
-use Carp qw(croak);
+use Carp qw(croak carp);
 use File::Basename qw(basename dirname);
 use Data::Dumper;
 
@@ -94,6 +93,14 @@ sub run_mizar_tool {
 	    if ($full_parameters{$param}) {
 		push (@tool_call, '-s');
 	    }
+	} elsif ($param eq 'analyzer') {
+	    if ($full_parameters{$param}) {
+		if ((! defined $full_parameters{'checker-only'}) || (! $full_parameters{'checker-only'})) {
+		    push (@tool_call, '-a');
+		} else {
+		    carp 'Warning: -a and -c are conflicting verifier options; choosing -c only...';
+		}
+	    }
 	} else {
 	    carp ('Warning: unknown flag ', $param, '.');
 	}
@@ -119,7 +126,16 @@ sub run_mizar_tool {
 	return 0;
     } else {
 	my $exit_code = $harness->result (0);
-	($exit_code == 0) && (-r $article_err) && (-z $article_err) ? return 1 : return 0;
+	my $ok = (($exit_code == 0) && (-r $article_err) && (-z $article_err));
+
+	# if (! $ok) {
+	#     if (-r $article_err && -s $article_err) {
+	# 	my $errs = `cat $article_err`;
+	# 	carp 'Errors:', "\n", $errs;
+	#     }
+	# }
+
+	return ($ok ? 1 : 0);
     }
 
 }

@@ -34,7 +34,8 @@ my $opt_ordered = 0;
 
 GetOptions(
     'help|?' => \$opt_help,
-    'man' => \$opt_man
+    'man' => \$opt_man,
+    'ordered' => \$opt_ordered,
 ) or pod2usage (2);
 
 if ($opt_help) {
@@ -139,6 +140,7 @@ my %command_dispatch_table =
    'complete' => \&complete_table,
    'invert' => \&invert_table,
    'structural-check' => \&check_structurally,
+   'used-before-defined' => \&used_before_defined,
    'predecessors' => \&predecessors_of_item,
    'successors' => \&successors_of_item,
    'truncate' => \&truncate_at_items,
@@ -311,12 +313,24 @@ sub dependencies_of_random_item {
 }
 
 sub tsort {
+
+  foreach my $item (keys %all_items) {
+    if (defined $table{$item}) {
+      my @deps = @{$table{$item}};
+      if (@deps == 0) {
+  	print $item, "\n";
+      }
+    } else {
+      print $item, "\n";
+    }
+  }
+
   my $split_vertices_fh = File::Temp->new ();
   my $split_vertices_path = $split_vertices_fh->filename ();
   foreach my $item (keys %dep_items) {
     my @deps = @{$table{$item}};
     foreach my $dep (@deps) {
-      print {$split_vertices_fh} $item, ' ', $dep, "\n";
+      print {$split_vertices_fh} $dep, ' ', $item, "\n";
     }
   }
   close $split_vertices_fh
@@ -340,17 +354,6 @@ sub tsort {
   # Now print the items that appear in the table but don't have known
   # dependencies, as well as the items that have zero known
   # dependencies.
-
-  foreach my $item (keys %all_items) {
-    if (defined $table{$item}) {
-      my @deps = @{$table{$item}};
-      if (@deps == 0) {
-	print $item, "\n";
-      }
-    } else {
-      print $item, "\n";
-    }
-  }
 
 }
 
@@ -441,16 +444,22 @@ sub shuffle_table {
 }
 
 sub complete_table {
-  foreach my $item (keys %all_items) {
-    print $item;
-    if (defined $table{$item}) {
-      my @deps = @{$table{$item}};
-      if (@deps) {
-	print ' ', join (' ', @deps);
-      }
+    foreach my $item (keys %all_items) {
+	print $item;
+	my %printed_already = ();
+	if (defined $table{$item}) {
+	    my @deps = @{$table{$item}};
+	    foreach my $dep (@deps) {
+		if (defined $printed_already{$dep}) {
+		    # don't reprint this guy
+		} else {
+		    print ' ', $dep;
+		    $printed_already{$dep} = 0;
+		}
+	    }
+	}
+	print "\n";
     }
-    print "\n";
-  }
 }
 
 sub invert_table {
@@ -505,6 +514,24 @@ sub load_graph {
 
   return $g;
 
+}
+
+sub used_before_defined {
+    my %encountered = ();
+    foreach my $item (@defined_items) {
+	$encountered{$item} = 0;
+	if (defined $table{$item}) {
+	    my @deps = @{$table{$item}};
+	    foreach my $dep_item (@deps) {
+		if (! defined $encountered{$dep_item}) {
+		    if (defined $table{$dep_item}) {
+			print $dep_item, "\n";
+		    }
+		}
+		$encountered{$dep_item} = 0;
+	    }
+	}
+    }
 }
 
 sub check_structurally {

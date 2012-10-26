@@ -726,8 +726,8 @@ sub minimize_articles {
 	my $parallel_err = '';
 
 	my $h = start (\@parallel_call,
-		       '>', \$parallel_out,
-		       '2>', \$parallel_err);
+		       '>', \$parallel_out);
+#		       '2>', \$parallel_err);
 
 	$h->finish ();
 
