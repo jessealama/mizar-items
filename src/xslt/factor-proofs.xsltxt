@@ -311,6 +311,27 @@ tpl [Item[@kind = "Definition-Item"
   }
 }
 
+tpl [Item[@kind = "Correctness-Condition"
+          and @condition = "coherence"
+          and preceding-sibling::Item[@kind = "Functor-Definition"
+                                      and @shape = "Means"]]] {
+  die (#message = "We don't handle coherence conditions yet.");
+}
+
+tpl [Item[@kind = "Definition-Item"
+     and Block[@kind = "Definitional-Block"
+               and Item[@kind = "Predicate-Definition"]]]] {
+  for-each [Block[@kind = "Definitional-Block"]] {
+    for-each [Item[@kind = "Correctness-Condition"]] {
+      die (#message = "Unhandled correctness condition.");
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="straightforward-corectness";
+  }
+}
+
 tpl [*] (#it) mode="replace-it-term" {
   $n = `name (.)`;
   <$n {
