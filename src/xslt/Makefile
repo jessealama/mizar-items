@@ -18,6 +18,7 @@ sheets = addabsrefs \
          elicit-correctness-conditions \
          evl2environ \
          extend-evl \
+         factor-proofs \
          fold-reservations \
          fragments-of-lemmas \
          free-variables \
