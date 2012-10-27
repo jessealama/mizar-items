@@ -248,34 +248,43 @@ tpl [Item[@kind = "Correctness-Condition"
           and @condition = "uniqueness"
           and preceding-sibling::Item[@kind = "Functor-Definition"
                                       and @shape = "Means"]]] {
-  for-each [Item[parent::Text-Proper]] {
+  for-each [ancestor::Item[parent::Text-Proper]] {
     $uniqueness-variable-1 = fresh-variable (#prefix = "A");
     $uniqueness-variable-2 = fresh-variable (#prefix = "B");
     <Item {
       @kind = "Theorem-Item";
       <Proposition {
         <Label { @spelling = "UniquenessLemma"; }
-        for-each [Block] {
+        for-each [Block[@kind = "Definitional-Block"]] {
           universally-bind-explicit-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
         }
       }
       <Block {
         @kind = "Proof";
-        for-each [Block] {
+        for-each [Block[@kind = "Definitional-Block"]] {
           for-each [Item[@kind = "Loci-Declaration"]] {
             <Item {
               @kind = "Generalization";
               apply [Explicitly-Qualified-Segment];
             }
           }
-        }
-        for-each [Block/Item[@kind = "Correctness-Condition"
-                             and @condition = "uniqueness"]/Block[@kind = "Proof"]] {
-          apply [*];
+          for-each [Item[@kind = "Correctness-Condition"
+                         and @condition = "uniqueness"]] {
+            for-each [Block[@kind = "Proof"]] {
+              apply [*];
+            }
+          }
         }
       }
     }
   }
+}
+
+tpl [Item[@kind = "Correctness-Condition"
+          and @condition = "coherence"
+          and preceding-sibling::Item[@kind = "Functor-Definition"
+                                      and @shape = "Means"]]] {
+  die (#message = "We don't handle coherence conditions yet.");
 }
 
 tpl [Item[@kind = "Definition-Item"
