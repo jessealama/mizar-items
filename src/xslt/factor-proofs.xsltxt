@@ -1,0 +1,334 @@
+stylesheet "1.0";
+import "utils/die.xsl";
+output method="xml" indent="yes";
+
+tpl try-fresh-variable (#prefix, #try) {
+  $trial-name = `concat ($prefix, $try)`;
+  $next-try = `$try + 1`;
+  choose {
+    when [descendant::Simple-Term[@spelling = $trial-name]] {
+      try-fresh-variable (#prefix = $prefix,
+      			  #try = $next-try);
+    }
+    when [descendant::Variable[@spelling = $trial-name]] {
+      try-fresh-variable (#prefix = $prefix,
+      			  #try = $next-try);
+    }
+    otherwise {
+      $trial-name;
+    }
+  }
+}
+
+tpl fresh-variable (#prefix) {
+  if [$prefix = ""] {
+    try-fresh-variable (#prefix = $prefix, #try = "z");
+  } else {
+    try-fresh-variable (#prefix = $prefix, #try = "1");
+  }
+}
+
+tpl emit-conjunction-of-attributive-adjectives (#term-name, #adjectives) {
+  choose {
+    when [count ($adjectives) = 0] {
+      die (#message = "Error: zero adjectives were given.");
+    }
+    when [count ($adjectives) = 1] {
+      $adjective = `$adjectives[1]`;
+      <Attributive-Formula {
+        <Simple-Term {
+          @spelling = $term-name;
+        }
+        apply [$adjective];
+      }
+    }
+    otherwise {
+      $first-adjective = `$adjectives[1]`;
+      $remaining-adjectives = `$adjectives[position () > 1]`;
+      <Conjunctive-Formula {
+        <Attributive-Formula {
+          <Simple-Term {
+            @spelling = $term-name;
+          }
+          apply [$first-adjective];
+        }
+        emit-conjunction-of-attributive-adjectives (#term-name = $term-name,
+						    #adjectives = $remaining-adjectives);
+      }
+    }
+  }
+}
+
+// By default, copy
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl universally-bind-conjunction-of-adjectives (#adjectives,
+						#it,
+						#type,
+						#segments) {
+  $num-adjectives = `count ($adjectives)`;
+  msg `concat ($num-adjectives, " adjectives")`;
+  if [count ($segments) = 0] {
+    <Existential-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable {
+            @spelling = $it;
+          }
+        }
+        apply [$type];
+      }
+      emit-conjunction-of-attributive-adjectives (#term-name = $it,
+      					          #adjectives = $adjectives);
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-conjunction-of-adjectives (#segments = $rest,
+      						  #type = $type,
+						  #it = $it,
+						  #adjectives = $adjectives);
+    }
+  }
+}
+
+tpl [Item[@kind = "Definition-Item"
+          and Block[@kind = "Registration-Block"
+                    and Item[@kind = "Cluster"
+                             and Existential-Registration]
+                    and Item[@kind = "Correctness-Condition"
+                             and Block[@kind = "Proof"]]]]] {
+  // Emit a lemma before the condition
+  <Item {
+    @kind = "Theorem-Item";
+    $fresh-variable-name = fresh-variable (#prefix = "Z");
+    <Proposition {
+      <Label { @spelling = "Existence"; }
+      for-each [Block[@kind = "Registration-Block"]] {
+        universally-bind-conjunction-of-adjectives
+          (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`,
+	   #type = `Item[@kind = "Cluster"]/Existential-Registration/*[position() = last()]`,
+	   #adjectives = `Item[@kind = "Cluster"]/Existential-Registration/Adjective-Cluster/Adjective | Item[@kind = "Cluster"]/Existential-Registration/Adjective-Cluster/NegatedAdjective`,
+	   #it = $fresh-variable-name);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [Block[@kind = "Registration-Block"]/Item[@kind = "Correctness-Condition" and @condition = "existence"]/Block[@kind = "Proof"]] {
+        apply [*];
+      }
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [Block[@kind = "Proof"
+           and parent::Item[@kind = "Correctness-Condition"
+                            and @condition = "existence"
+                            and parent::Block[@kind = "Registration-Block"
+                                              and parent::Item[@kind = "Definition-Item"
+                                                               and parent::Text-Proper]]]]] {
+  <Straightforward-Justification {
+    <Local-Reference {
+      @spelling = "Existence";
+    }
+  }
+}
+
+tpl universally-bind-explicit-segments (#segments, #it, #formula, #type) {
+  if [count ($segments) = 0] {
+    <Existential-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable {
+            @spelling = $it;
+          }
+        }
+        apply [$type];
+      }
+      apply [$formula] (#it = $it) mode="replace-it-term";
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-explicit-segments (#segments = $rest, #it = $it, #formula = $formula, #type = $type);
+    }
+  }
+}
+
+tpl universally-bind-explicit-segments-uniqueness (#segments,
+                                                   #variable-1,
+                                                   #variable-2,
+                                                   #formula,
+                                                   #type) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = $variable-1; }
+          <Variable { @spelling = $variable-2; }
+        }
+        apply [$type];
+      }
+      <Conditional-Formula {
+        <Conjunctive-Formula {
+          apply [$formula] (#it = $variable-1) mode="replace-it-term";
+          apply [$formula] (#it = $variable-2) mode="replace-it-term";
+        }
+        <Predicative-Formula {
+          @spelling = "=";
+          <Arguments { <Simple-Term { @spelling = $variable-1; } }
+          <Arguments { <Simple-Term { @spelling = $variable-2; } }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-explicit-segments-uniqueness (#segments = $rest,
+      						     #variable-1 = $variable-1,
+						     #variable-2 = $variable-2,
+						     #formula = $formula,
+						     #type = $type);
+    }
+  }
+}
+
+tpl [Item[@kind = "Definition-Item"
+     and Block[@kind = "Definitional-Block"
+               and Item[@kind = "Loci-Declaration"
+                        and not(Implicitly-Qualified-Segment)]
+               and Item[@kind = "Functor-Definition"
+                        and Definiens[@kind = "Simple-Definiens"
+                                      and @shape = "Formula-Expression"]]
+                        and Item[@kind = "Correctness-Condition"
+                                 and @condition = "existence"
+                                 and Block[@kind = "Proof"]]]]] {
+  // New existence theorem
+  $existential-variable = fresh-variable ();
+  <Item {
+    @kind = "Theorem-Item";
+    <Proposition {
+      <Label { @spelling = "ExistenceLemma"; }
+      for-each [Block] {
+        universally-bind-explicit-segments (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #it = $existential-variable, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [Block] {
+        for-each [Item[@kind = "Loci-Declaration"]] {
+          <Item {
+            @kind = "Generalization";
+            apply [Explicitly-Qualified-Segment];
+          }
+        }
+      }
+      for-each [Block/Item[@kind = "Correctness-Condition" and @condition = "existence"]/Block[@kind = "Proof"]] {
+        apply [*];
+      }
+    }
+  }
+  // Keep processing the definition item
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [Item[@kind = "Definition-Item"
+     and Block[@kind = "Definitional-Block"
+               and Item[@kind = "Loci-Declaration"
+                        and not(Implicitly-Qualified-Segment)]
+               and Item[@kind = "Functor-Definition"
+                        and Definiens[@kind = "Simple-Definiens"
+                                      and @shape = "Formula-Expression"]]
+                        and Item[@kind = "Correctness-Condition"
+                                 and @condition = "uniqueness"
+                                 and Block[@kind = "Proof"]]]]] {
+  // New uniqueness theorem
+  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
+  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
+  <Item {
+    @kind = "Theorem-Item";
+    <Proposition {
+      <Label { @spelling = "UniquenessLemma"; }
+      for-each [Block] {
+        universally-bind-explicit-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [Block] {
+        for-each [Item[@kind = "Loci-Declaration"]] {
+          <Item {
+            @kind = "Generalization";
+            apply [Explicitly-Qualified-Segment];
+          }
+        }
+      }
+      for-each [Block/Item[@kind = "Correctness-Condition"
+                           and @condition = "uniqueness"]/Block[@kind = "Proof"]] {
+        apply [*];
+      }
+    }
+  }
+  // Keep processing the definition item
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [*] (#it) mode="replace-it-term" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#it = $it) mode="replace-it-term";
+  }
+}
+
+tpl [it-Term] (#it) mode="replace-it-term" {
+  <Simple-Term {
+    @spelling = $it;
+  }
+}
+
+tpl [Block[@kind = "Proof"
+           and parent::Item[@kind = "Correctness-Condition"
+                            and @condition = "existence"
+                            and preceding-sibling::Item[@kind = "Functor-Definition"
+                                                        and parent::Block[@kind = "Definitional-Block"
+                                                                          and parent::Item[@kind = "Definition-Item"
+                                                                                           and parent::Text-Proper]]]]]] {
+  <Straightforward-Justification {
+    <Local-Reference { @spelling = "ExistenceLemma"; }
+  }
+}
+
+tpl [Block[@kind = "Proof"
+           and parent::Item[@kind = "Correctness-Condition"
+                            and @condition = "uniqueness"
+                            and preceding-sibling::Item[@kind = "Functor-Definition"
+                                                        and parent::Block[@kind = "Definitional-Block"
+                                                                          and parent::Item[@kind = "Definition-Item"
+                                                                                           and parent::Text-Proper]]]]]] {
+  <Straightforward-Justification {
+    <Local-Reference { @spelling = "UniquenessLemma"; }
+  }
+}
