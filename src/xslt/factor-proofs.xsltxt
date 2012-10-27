@@ -209,89 +209,96 @@ tpl universally-bind-explicit-segments-uniqueness (#segments,
   }
 }
 
-tpl [Item[@kind = "Definition-Item"
-     and Block[@kind = "Definitional-Block"
-               and Item[@kind = "Loci-Declaration"
-                        and not(Implicitly-Qualified-Segment)]
-               and Item[@kind = "Functor-Definition"
-                        and Definiens[@kind = "Simple-Definiens"
-                                      and @shape = "Formula-Expression"]]
-                        and Item[@kind = "Correctness-Condition"
-                                 and @condition = "existence"
-                                 and Block[@kind = "Proof"]]]]] {
-  // New existence theorem
-  $existential-variable = fresh-variable ();
-  <Item {
-    @kind = "Theorem-Item";
-    <Proposition {
-      <Label { @spelling = "ExistenceLemma"; }
-      for-each [Block] {
-        universally-bind-explicit-segments (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #it = $existential-variable, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+tpl [Item[@kind = "Correctness-Condition"
+          and @condition = "existence"
+          and preceding-sibling::Item[@kind = "Functor-Definition"
+                                      and @shape = "Means"]]] {
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    $existential-variable = fresh-variable ();
+    <Item {
+      @kind = "Theorem-Item";
+      <Proposition {
+        <Label { @spelling = "ExistenceLemma"; }
+        for-each [Block] {
+          universally-bind-explicit-segments (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #it = $existential-variable, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+        }
       }
-    }
-    <Block {
-      @kind = "Proof";
-      for-each [Block] {
-        for-each [Item[@kind = "Loci-Declaration"]] {
-          <Item {
-            @kind = "Generalization";
-            apply [Explicitly-Qualified-Segment];
+      <Block {
+        @kind = "Proof";
+        for-each [Block[@kind = "Definition-Block"]] {
+          for-each [Item[@kind = "Loci-Declaration"]] {
+            <Item {
+              @kind = "Generalization";
+              apply [Explicitly-Qualified-Segment];
+            }
+          }
+          for-each [Item[@kind = "Correctness-Condition"
+                         and @condition = "existence"]] {
+            for-each [Block[@kind = "Proof"]] {
+              apply [*];
+            }
           }
         }
       }
-      for-each [Block/Item[@kind = "Correctness-Condition" and @condition = "existence"]/Block[@kind = "Proof"]] {
-        apply [*];
-      }
     }
   }
-  // Keep processing the definition item
-  <Item {
-    for-each [@*] { copy-of `.`; }
-    apply [*];
+}
+
+tpl [Item[@kind = "Correctness-Condition"
+          and @condition = "uniqueness"
+          and preceding-sibling::Item[@kind = "Functor-Definition"
+                                      and @shape = "Means"]]] {
+  for-each [Item[parent::Text-Proper]] {
+    $uniqueness-variable-1 = fresh-variable (#prefix = "A");
+    $uniqueness-variable-2 = fresh-variable (#prefix = "B");
+    <Item {
+      @kind = "Theorem-Item";
+      <Proposition {
+        <Label { @spelling = "UniquenessLemma"; }
+        for-each [Block] {
+          universally-bind-explicit-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+        }
+      }
+      <Block {
+        @kind = "Proof";
+        for-each [Block] {
+          for-each [Item[@kind = "Loci-Declaration"]] {
+            <Item {
+              @kind = "Generalization";
+              apply [Explicitly-Qualified-Segment];
+            }
+          }
+        }
+        for-each [Block/Item[@kind = "Correctness-Condition"
+                             and @condition = "uniqueness"]/Block[@kind = "Proof"]] {
+          apply [*];
+        }
+      }
+    }
   }
 }
 
 tpl [Item[@kind = "Definition-Item"
      and Block[@kind = "Definitional-Block"
-               and Item[@kind = "Loci-Declaration"
-                        and not(Implicitly-Qualified-Segment)]
-               and Item[@kind = "Functor-Definition"
-                        and Definiens[@kind = "Simple-Definiens"
-                                      and @shape = "Formula-Expression"]]
-                        and Item[@kind = "Correctness-Condition"
-                                 and @condition = "uniqueness"
-                                 and Block[@kind = "Proof"]]]]] {
-  // New uniqueness theorem
-  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
-  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
-  <Item {
-    @kind = "Theorem-Item";
-    <Proposition {
-      <Label { @spelling = "UniquenessLemma"; }
-      for-each [Block] {
-        universally-bind-explicit-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
-      }
-    }
-    <Block {
-      @kind = "Proof";
-      for-each [Block] {
-        for-each [Item[@kind = "Loci-Declaration"]] {
-          <Item {
-            @kind = "Generalization";
-            apply [Explicitly-Qualified-Segment];
-          }
+               and Item[@kind = "Functor-Definition"]]]] {
+  for-each [Block[@kind = "Definitional-Block"]] {
+    for-each [Item[@kind = "Correctness-Condition"]] {
+      choose {
+        when [@condition = "existence"] {
+          apply [.];
         }
-      }
-      for-each [Block/Item[@kind = "Correctness-Condition"
-                           and @condition = "uniqueness"]/Block[@kind = "Proof"]] {
-        apply [*];
+        when [@condition = "uniqueness"] {
+          apply [.];
+        }
+        otherwise {
+          die (#message = "Unhandled correctness condition.");
+        }
       }
     }
   }
-  // Keep processing the definition item
   <Item {
     for-each [@*] { copy-of `.`; }
-    apply [*];
+    apply [*] mode="straightforward-corectness";
   }
 }
 
@@ -309,13 +316,21 @@ tpl [it-Term] (#it) mode="replace-it-term" {
   }
 }
 
+tpl [*] (#it) mode="straightforward-corectness" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#it = $it) mode="straightforward-corectness";
+  }
+}
+
 tpl [Block[@kind = "Proof"
            and parent::Item[@kind = "Correctness-Condition"
                             and @condition = "existence"
                             and preceding-sibling::Item[@kind = "Functor-Definition"
                                                         and parent::Block[@kind = "Definitional-Block"
                                                                           and parent::Item[@kind = "Definition-Item"
-                                                                                           and parent::Text-Proper]]]]]] {
+                                                                                           and parent::Text-Proper]]]]]] mode="straightforward-corectness" {
   <Straightforward-Justification {
     <Local-Reference { @spelling = "ExistenceLemma"; }
   }
@@ -327,7 +342,7 @@ tpl [Block[@kind = "Proof"
                             and preceding-sibling::Item[@kind = "Functor-Definition"
                                                         and parent::Block[@kind = "Definitional-Block"
                                                                           and parent::Item[@kind = "Definition-Item"
-                                                                                           and parent::Text-Proper]]]]]] {
+                                                                                           and parent::Text-Proper]]]]]] mode="straightforward-corectness" {
   <Straightforward-Justification {
     <Local-Reference { @spelling = "UniquenessLemma"; }
   }
