@@ -1,6 +1,7 @@
 sheets = addabsrefs \
          bogus \
          canceled-deftheorems \
+         check-factorization \
          conditions-and-properties \
          constructors-with-abstractness \
          constructors \
