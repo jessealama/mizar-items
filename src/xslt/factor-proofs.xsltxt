@@ -209,6 +209,26 @@ tpl universally-bind-explicit-segments-uniqueness (#segments,
   }
 }
 
+tpl universally-bind-explicit-segments-compatibility (#segments,
+                                                     #original-formula,
+						     #new-formula) {
+  if [count ($segments) = 0] {
+    <Biconditional-Formula {
+      apply [$original-formula];
+      apply [$new-formula];
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-explicit-segments-compatibility (#segments = $rest,
+      						        #original-formula = $original-formula,
+ 						       #new-formula = $new-formula);
+    }
+  }
+}
+
 tpl [Item[@kind = "Correctness-Condition"
           and @condition = "existence"
           and preceding-sibling::Item[@kind = "Functor-Definition"
@@ -220,7 +240,7 @@ tpl [Item[@kind = "Correctness-Condition"
       <Proposition {
         <Label { @spelling = "ExistenceLemma"; }
         for-each [Block] {
-          universally-bind-explicit-segments (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #it = $existential-variable, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+          universally-bind-explicit-segments (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment | Item[@kind = "Loci-Declaration"]/Implicitly-Qualified-Segment`, #it = $existential-variable, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
         }
       }
       <Block {
@@ -229,7 +249,7 @@ tpl [Item[@kind = "Correctness-Condition"
           for-each [Item[@kind = "Loci-Declaration"]] {
             <Item {
               @kind = "Generalization";
-              apply [Explicitly-Qualified-Segment];
+              apply [Explicitly-Qualified-Segment | Implicitly-Qualified-Segment];
             }
           }
           for-each [Item[@kind = "Correctness-Condition"
@@ -256,7 +276,7 @@ tpl [Item[@kind = "Correctness-Condition"
       <Proposition {
         <Label { @spelling = "UniquenessLemma"; }
         for-each [Block[@kind = "Definitional-Block"]] {
-          universally-bind-explicit-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+          universally-bind-explicit-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment | Item[@kind = "Loci-Declaration"]/Implicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
         }
       }
       <Block {
@@ -265,7 +285,7 @@ tpl [Item[@kind = "Correctness-Condition"
           for-each [Item[@kind = "Loci-Declaration"]] {
             <Item {
               @kind = "Generalization";
-              apply [Explicitly-Qualified-Segment];
+              apply [Explicitly-Qualified-Segment | Implicitly-Qualified-Segment];
             }
           }
           for-each [Item[@kind = "Correctness-Condition"
@@ -281,10 +301,57 @@ tpl [Item[@kind = "Correctness-Condition"
 }
 
 tpl [Item[@kind = "Correctness-Condition"
+          and @condition = "compatibility"
+          and preceding-sibling::Item[@kind = "Predicate-Definition"
+                                      and Redefine]]] {
+  for-each [ancestor::Item[parent::Text-Proper]] {
+    <Item {
+      @kind = "Theorem-Item";
+      <Proposition {
+        <Label { @spelling = "CompatibilityLemma"; }
+        for-each [Block[@kind = "Definitional-Block"]] {
+         universally-bind-explicit-segments-compatibility (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #original-formula = `Item[@kind = "Predicate-Definition"]/Predicate-Pattern`, #new-formula = `Item[@kind = "Predicate-Definition"]/Definiens/*[position() = last()]`);
+        }
+      }
+      <Block {
+        @kind = "Proof";
+        for-each [Block[@kind = "Definitional-Block"]] {
+          for-each [Item[@kind = "Loci-Declaration"]] {
+            <Item {
+              @kind = "Generalization";
+              apply [Explicitly-Qualified-Segment];
+            }
+          }
+          for-each [Item[@kind = "Correctness-Condition"
+                         and @condition = "compatibility"]] {
+            for-each [Block[@kind = "Proof"]] {
+              apply [*];
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition"
           and @condition = "coherence"
-          and preceding-sibling::Item[@kind = "Functor-Definition"
-                                      and @shape = "Means"]]] {
-  die (#message = "We don't handle coherence conditions yet.");
+          and preceding-sibling::Item[@kind = "Functor-Definition"]]] {
+  choose {
+    when [Proof] {
+      die (#message = "Don't know how to handle a coherence item justified by a proof.");
+    }
+    when [count (Straightforward-Justification/*) = 0] {
+      // skip: this is obvious for the checker
+    }
+    when [count (Straightforward-Justification/*) = 1] {
+      // skip: there's already a single lemma/theorem/scheme that
+      // justifies this
+    }
+    otherwise {
+      die (#message = "Don't know how to handle a coherence item justified by multiple items.");
+    }
+  }
 }
 
 tpl [Item[@kind = "Definition-Item"
@@ -297,6 +364,9 @@ tpl [Item[@kind = "Definition-Item"
           apply [.];
         }
         when [@condition = "uniqueness"] {
+          apply [.];
+        }
+        when [@condition = "coherence"] {
           apply [.];
         }
         otherwise {
@@ -323,7 +393,15 @@ tpl [Item[@kind = "Definition-Item"
                and Item[@kind = "Predicate-Definition"]]]] {
   for-each [Block[@kind = "Definitional-Block"]] {
     for-each [Item[@kind = "Correctness-Condition"]] {
-      die (#message = "Unhandled correctness condition.");
+      $c = `@condition`;
+      choose {
+        when [$c = "compatibility"] {
+          apply [.];
+        }
+        otherwise {
+          die (#message = "Unhandled predicate correctness condition.");
+        }
+      }
     }
   }
   <Item {
