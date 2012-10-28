@@ -307,7 +307,7 @@ tpl [Item[@kind = "Definition-Item"
   }
   <Item {
     for-each [@*] { copy-of `.`; }
-    apply [*] mode="straightforward-corectness";
+    apply [*] mode="straightforward-correctness";
   }
 }
 
@@ -328,7 +328,7 @@ tpl [Item[@kind = "Definition-Item"
   }
   <Item {
     for-each [@*] { copy-of `.`; }
-    apply [*] mode="straightforward-corectness";
+    apply [*] mode="straightforward-correctness";
   }
 }
 
@@ -346,34 +346,40 @@ tpl [it-Term] (#it) mode="replace-it-term" {
   }
 }
 
-tpl [*] (#it) mode="straightforward-corectness" {
+tpl [*] (#it) mode="straightforward-correctness" {
   $n = `name (.)`;
   <$n {
     for-each [@*] { copy-of `.`; }
-    apply [*] (#it = $it) mode="straightforward-corectness";
+    apply [*] (#it = $it) mode="straightforward-correctness";
   }
 }
 
 tpl [Block[@kind = "Proof"
-           and parent::Item[@kind = "Correctness-Condition"
-                            and @condition = "existence"
-                            and preceding-sibling::Item[@kind = "Functor-Definition"
-                                                        and parent::Block[@kind = "Definitional-Block"
-                                                                          and parent::Item[@kind = "Definition-Item"
-                                                                                           and parent::Text-Proper]]]]]] mode="straightforward-corectness" {
-  <Straightforward-Justification {
-    <Local-Reference { @spelling = "ExistenceLemma"; }
-  }
-}
-
-tpl [Block[@kind = "Proof"
-           and parent::Item[@kind = "Correctness-Condition"
-                            and @condition = "uniqueness"
-                            and preceding-sibling::Item[@kind = "Functor-Definition"
-                                                        and parent::Block[@kind = "Definitional-Block"
-                                                                          and parent::Item[@kind = "Definition-Item"
-                                                                                           and parent::Text-Proper]]]]]] mode="straightforward-corectness" {
-  <Straightforward-Justification {
-    <Local-Reference { @spelling = "UniquenessLemma"; }
+           and parent::Item[@kind = "Correctness-Condition"]]] mode="straightforward-correctness" {
+  $c = `parent::Item[@kind = "Correctness-Condition"]/@condition`;
+  choose {
+    when [$c = "existence"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "ExistenceLemma"; }
+      }
+    }
+    when [$c = "uniqueness"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "UniquenessLemma"; }
+      }
+    }
+    when [$c = "coherence"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "CoherenceLemma"; }
+      }
+    }
+    when [$c = "compatibility"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "CompatibilityLemma"; }
+      }
+    }
+    otherwise {
+      die (#message = `concat ("Don't know how to handle a '", $c, "' correctness condition.")`);
+    }
   }
 }
