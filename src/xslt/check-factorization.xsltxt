@@ -1,0 +1,37 @@
+stylesheet "1.0";
+import "utils/die.xsl";
+output method="xml" indent="yes";
+
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [/] {
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    die (#message = "The Text-Proper document node is missing.");
+  }
+}
+
+tpl [Text-Proper] {
+  for-each [descendant::Item[@kind = "Correctness-Condition"]] {
+    apply [.];
+  }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and Block[@kind = "Proof"]]] {
+  die (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.");
+}
+
+tpl [Item[@kind = "Correctness-Condition" and Block[@kind = "Proof"]]] {
+ die (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.");
+}
+
+tpl [Item[@kind = "Correctness-Condition" and (count (Straightforward-Justification/*) > 1)]] {
+  die (#message = "Every correctness condition with a Straightforward-Justification should have at most 1 justification element.");
+}
