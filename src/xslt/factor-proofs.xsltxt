@@ -268,6 +268,7 @@ tpl [
         [
               @kind = "Functor-Definition"
           and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
          ]
   ]
 ]
@@ -312,20 +313,57 @@ tpl [
   }
 }
 
-tpl [Item[@kind = "Correctness-Condition"
-          and @condition = "uniqueness"
-          and preceding-sibling::Item[@kind = "Functor-Definition"
-                                      and @shape = "Means"]]] {
+tpl [
+  Item
+  [
+        @kind = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) > 0
+         ]
+  ]
+]
+{
+  die (#message = "We do not yet handle existence conditions for functor definitions that have assumtions.");
+}
+
+tpl [
+  Item
+  [
+        @kind = "Correctness-Condition"
+    and @condition = "uniqueness"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"] = 0)
+        ]
+  ]
+]
+{
+  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
+  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
   for-each [ancestor::Item[parent::Text-Proper]] {
-    $uniqueness-variable-1 = fresh-variable (#prefix = "A");
-    $uniqueness-variable-2 = fresh-variable (#prefix = "B");
     <Item {
       @kind = "Regular-Statement";
       @shape = "Compact-Statement";
       <Proposition {
         <Label { @spelling = "UniquenessLemma"; }
         for-each [Block[@kind = "Definitional-Block"]] {
-          universally-bind-segments-uniqueness (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`, #variable-1 = $uniqueness-variable-1, #variable-2 = $uniqueness-variable-2, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+          $locus = `Item[@kind = "Loci-Declaration"]`;
+          $segments = `$locus/Explicitly-Qualified-Segment`;
+          $fd = `Item[@kind = "Functor-Definition"]`;
+          $formula = `$fd/Definiens/*[position() = last()]`;
+          $type = `$fd/Type-Specification/*[1]`;
+          universally-bind-segments-uniqueness
+	    (#segments   = $segments,
+	     #variable-1 = $uniqueness-variable-1,
+	     #variable-2 = $uniqueness-variable-2,
+	     #formula    = $formula,
+	     #type       = $type);
         }
       }
       <Block {
@@ -337,7 +375,7 @@ tpl [Item[@kind = "Correctness-Condition"
               apply [Explicitly-Qualified-Segment];
             }
           }
-          for-each [Item[@kind = "Correctness-Condition"
+          for-each [Item[    @kind      = "Correctness-Condition"
                          and @condition = "uniqueness"]] {
             for-each [Block[@kind = "Proof"]] {
               apply [*];
@@ -347,6 +385,23 @@ tpl [Item[@kind = "Correctness-Condition"
       }
     }
   }
+}
+
+tpl [
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "uniqueness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"] > 0)
+        ]
+  ]
+]
+{
+  die (#message = "We do not handle uniqueness conditions for functor definitions that have assumptions.");
 }
 
 tpl [Item[@kind = "Correctness-Condition"
