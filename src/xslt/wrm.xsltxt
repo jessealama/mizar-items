@@ -1,0 +1,46 @@
+stylesheet "1.0";
+import "utils/die.xsl";
+output method="xml" indent="yes";
+
+tpl [/] {
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    msg terminate="yes" "Error: the Text-Proper document element is missing.";
+  }
+}
+
+// By default, copy
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [Item[@kind = "Reservation"]] {
+  // ignore
+}
+
+tpl [Implicitly-Qualified-Segment] {
+  for-each [Variable[@idnr]] {
+    $idnr = `@idnr`;
+    $earlier = `preceding::Variable[@idnr = $idnr and parent::Variables[parent::Item[@kind = "Reservation"]]][1]`;
+    if [not($earlier)] {
+      die (#message = `concat ("There is no previously reserved variable with idnr = ", $idnr, ".")`);
+    }
+    <Explicitly-Qualified-Segment {
+      for-each [$earlier] {
+        <Variables {
+          apply [.];
+        }
+        for-each [parent::Variables] {
+          for-each [parent::Item[@kind = "Reservation"]] {
+            apply [*[position() = last()]];
+          }
+        }
+      }
+    }
+  }
+}
