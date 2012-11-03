@@ -100,17 +100,31 @@ tpl universally-bind-conjunction-of-adjectives (#adjectives,
   }
 }
 
-tpl [Item[@kind = "Definition-Item"
-          and Block[@kind = "Registration-Block"
-                    and Item[@kind = "Cluster"
-                             and Existential-Registration]
-                    and Item[@kind = "Correctness-Condition"
-                             and Block[@kind = "Proof"]]]]] {
+tpl [
+  Item
+  [
+        @kind = "Definition-Item"
+    and Block
+        [
+              @kind = "Registration-Block"
+          and Item
+              [
+                    @kind = "Cluster"
+                and Existential-Registration
+              ]
+          and Item
+              [
+                    @kind = "Correctness-Condition"
+                and Block[@kind = "Proof"]
+              ]
+        ]
+ ]
+] {
   // Emit a lemma before the condition
+  $fresh-variable-name = fresh-variable (#prefix = "Z");
   <Item {
     @kind = "Regular-Statement";
     @shape = "Compact-Statement";
-    $fresh-variable-name = fresh-variable (#prefix = "Z");
     <Proposition {
       <Label { @spelling = "Existence"; }
       for-each [Block[@kind = "Registration-Block"]] {
@@ -123,9 +137,12 @@ tpl [Item[@kind = "Definition-Item"
     }
     <Block {
       @kind = "Proof";
-      for-each [Block[@kind = "Registration-Block"]/Item[@kind = "Correctness-Condition" and @condition = "existence"]/Block[@kind = "Proof"]] {
-        apply [*];
-      }
+      apply [Block[@kind = "Registration-Block"]
+             /
+             Item[@kind = "Correctness-Condition"
+                  and @condition = "existence"]
+             /
+             Block[@kind = "Proof"]];
     }
   }
   <Item {
@@ -230,10 +247,19 @@ tpl universally-bind-segments-compatibility (#segments,
   }
 }
 
-tpl [Item[@kind = "Correctness-Condition"
-          and @condition = "existence"
-          and preceding-sibling::Item[@kind = "Functor-Definition"
-                                      and @shape = "Means"]]] {
+tpl [
+  Item
+  [
+        @kind = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+         ]
+  ]
+]
+{
   for-each [ancestor::Item[parent::Text-Proper]] {
     $existential-variable = fresh-variable ();
     <Item {
@@ -242,7 +268,15 @@ tpl [Item[@kind = "Correctness-Condition"
       <Proposition {
         <Label { @spelling = "ExistenceLemma"; }
         for-each [Block] {
-          universally-bind-segments (#segments = `Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment | Item[@kind = "Loci-Declaration"]/Implicitly-Qualified-Segment`, #it = $existential-variable, #formula = `Item[@kind = "Functor-Definition"]/Definiens/*[position() = last()]`, #type = `Item[@kind = "Functor-Definition"]/Type-Specification/*[1]`);
+          $locus = `Item[@kind = "Loci-Declaration"]`;
+          $segments = `$locus/Explicitly-Qualified-Segment | $locus/Implicitly-Qualified-Segment`;
+          $fd = `Item[@kind = "Functor-Definition"]`;
+          $formula = `$fd/Definiens/*[position() = last()]`;
+          $type = `$fd/Type-Specification/*[1]`;
+          universally-bind-segments (#segments = $segments,
+                                     #it       = $existential-variable,
+                                     #formula  = $formula,
+                                     #type     = $type);
         }
       }
       <Block {
@@ -436,8 +470,18 @@ tpl [*] (#it) mode="straightforward-correctness" {
   }
 }
 
-tpl [Block[@kind = "Proof"
-           and parent::Item[@kind = "Correctness-Condition"]]] mode="straightforward-correctness" {
+tpl [
+  Block
+  [
+        @kind = "Proof"
+    and parent::Item
+        [
+          @kind = "Correctness-Condition"
+        ]
+  ]
+]
+mode="straightforward-correctness"
+{
   $c = `parent::Item[@kind = "Correctness-Condition"]/@condition`;
   choose {
     when [$c = "existence"] {
@@ -468,9 +512,12 @@ tpl [Block[@kind = "Proof"
 
 // Rewriting definition block content
 
-tpl [Item[@kind = "Assumption"
-          and parent::Block[@kind = "Definitional-Block"
-                            and parent::Item[@kind = "Definition-Item"]]]] {
+tpl [Item [
+       @kind = "Assumption"
+       and parent::Block[
+             @kind = "Definitional-Block"
+             and parent::Item[
+                   @kind = "Definition-Item"]]]] {
   // ignore: We'll take care of this later
 }
 
@@ -478,4 +525,82 @@ tpl [Item[@kind = "Choice-Statement"
           and parent::Block[@kind = "Definitional-Block"
                             and parent::Item[@kind = "Definition-Item"]]]] {
   // ignore: We'll take care of this later
+}
+
+tpl [Definiens
+      [
+        @kind = "Simple-Definiens"
+        and @shape = "Formula-Expression"
+        and parent::Item
+            [
+              @kind = "Functor-Definition"
+              and @shape = "Means"
+              and preceding-sibling::Item
+                  [
+                    @kind = "Assumption"
+                    and not(Single-Assumption)
+                  ]
+            ]
+      ]
+    ] {
+  die (#message = "Don't know how to handle non-Single-Assumption definitions.");
+}
+
+tpl [Definiens
+      [
+        @kind = "Simple-Definiens"
+        and @shape = "Formula-Expression"
+        and parent::Item
+            [
+              @kind = "Functor-Definition"
+              and @shape = "Means"
+              and count(preceding-sibling::Item
+                        [
+                          @kind = "Assumption"
+                          and Single-Assumption
+                        ]) > 1
+            ]
+      ]
+    ] {
+  die (#message = "Don't know how to handle multiple Single-Assumption definitions.");
+}
+
+tpl [
+  Definiens
+  [
+        @kind = "Simple-Definiens"
+    and @shape = "Formula-Expression"
+    and parent::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and preceding-sibling::Item
+              [
+                    @kind = "Assumption"
+                and Single-Assumption
+              ]
+        ]
+  ]
+] {
+  $definiens = `.`;
+  <Definiens {
+    @kind = "Simple-Definiens";
+    @shape = "Formula-Expression";
+    <Conditional-Formula {
+      for-each [parent::Item[@kind = "Functor-Definition"
+                             and @shape = "Means"]] {
+        for-each [preceding-sibling::Item[@kind = "Assumption"
+                                          and Single-Assumption]] {
+          apply [Proposition];
+        }
+      }
+      apply [*[position() = last()]];
+    }
+  }
+
+  // emit a label if there is one
+  if [Label] {
+    apply [Label];
+  }
+
 }
