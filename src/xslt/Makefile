@@ -23,13 +23,12 @@ all: $(xsls)
 clean:
 	rm -f $(xsls)
 	rm -f $(emacs-backups)
+	find . -maxdepth 1 -name "*.miz" -exec basename {} .miz ';' | parallel rm -f "{}.*"
 
-%.miz:
+%.miz %.wsx %.wsm %.tpr %.evd:
 	cp $(MIZFILES)/mml/$*.miz .
-
-%.wrx: %.miz
 	accom -l -q $* > /dev/null 2>&1
-	msplit $*
+	msplit -l -q $*
 	wsmparser -l -q $* > /dev/null 2>&1
 	msmprocessor -l -q $* > /dev/null 2>&1
 	cp $*.msm $*.tpr
@@ -37,9 +36,17 @@ clean:
 	mglue -l -q $* > /dev/null 2>&1
 	accom -l -q $* > /dev/null 2>&1
 	wsmparser -l -q $* > /dev/null 2>&1
+
+%.xml: %.wrm %.tpr
+	cp $*.wrm $*.tpr
+	mglue $*
+	accom -l $* > /dev/null 2>&1
+	verifier -l $* > /dev/null 2>&1 || (errflag $*; addfmsg $* $(MIZFILES)/mizar; false)
+
+%.wrx: %.wsx wrm.xsl
 	xsltproc --output $*.wrx wrm.xsl $*.wsx
 
-%.wrm: %.wrx
+%.wrm: %.wrx /Users/alama/sources/mizar/parsing/pp.xsl
 	xsltproc --output $*.wrm --stringparam suppress-environment '1' /Users/alama/sources/mizar/parsing/pp.xsl $*.wrx
 
 wrms: $(addsuffix .wrm,$(mml))
@@ -49,3 +56,8 @@ tpr-100: $(addsuffix .tpr,$(mml-100))
 
 wrms-10: $(addsuffix .wrm,$(mml-10))
 tpr-10: $(addsuffix .tpr,$(mml-10))
+
+xmls-10: $(addsuffix .xml,$(mml-10))
+xmls-100: $(addsuffix .xml,$(mml-100))
+
+clean:
