@@ -44,3 +44,31 @@ tpl [Implicitly-Qualified-Segment] {
     }
   }
 }
+
+tpl [Fraenkel-Term] {
+  $fraenkel = `.`;
+  <Fraenkel-Term {
+    for-each [@*] { copy-of `.`; }
+    $num-children = `count (*)`;
+    for-each [*[position() < $num-children - 1]] {
+      apply [.];
+    }
+    for-each [*[position() = $num-children - 1]] {
+      for-each [descendant-or-self::Simple-Term[@idnr and starts-with (@spelling, "R")]] {
+        $idnr = `@idnr`;
+        for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@idnr = $idnr])[1]] {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              apply [.];
+            }
+            for-each [ancestor::Item[@kind = "Reservation"]] {
+              apply [*[position() = last()]];
+            }
+          }
+        }
+      }
+      apply [.];
+    }
+    apply [*[position() = last()]];
+  }
+}
