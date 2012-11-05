@@ -184,19 +184,26 @@ tpl [*] (#already-bound, #maybe-bind) mode="bind" {
       apply [.] (#already-bound = $already-bound,
       	    	 #maybe-bind = $more);
     } else {
-      <Universal-Quantifier-Formula {
-        <Explicitly-Qualified-Segment {
-          <Variables {
-            apply [$next];
-          }
-          for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@spelling = $next-spelling])[1]] {
-            for-each [ancestor::Item[@kind = "Reservation"]] {
-              apply [*[position() = last()]];
+      $bound = already-bound (#spelling = $next-spelling,
+      		       		      #context = $next);
+      if [$bound = "1"] {
+        apply [.] (#already-bound = $already-bound,
+        	   #maybe-bind = $more);
+      } else {
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              apply [$next];
+            }
+            for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@spelling = $next-spelling])[1]] {
+              for-each [ancestor::Item[@kind = "Reservation"]] {
+                apply [*[position() = last()]];
+              }
             }
           }
+          apply [.] (#already-bound = `$already-bound | $next`,
+  	      	   #maybe-find = $more);
         }
-        apply [.] (#already-bound = `$already-bound | $next`,
-	      	   #maybe-find = $more);
       }
     }
   } else {
