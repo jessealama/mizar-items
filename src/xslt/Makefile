@@ -39,7 +39,7 @@ clean:
 
 %.xml: %.wrm %.tpr
 	cp $*.wrm $*.tpr
-	mglue $*
+	mglue $* > /dev/null 2>&1
 	accom -l $* > /dev/null 2>&1
 	verifier -l $* > /dev/null 2>&1 || (errflag $*; addfmsg $* $(MIZFILES)/mizar; false)
 
