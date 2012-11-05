@@ -198,6 +198,54 @@ tpl universally-bind-segments (#segments, #it, #formula, #type) {
   }
 }
 
+tpl universally-bind-segments-existence (#segments,
+                                         #it,
+                                         #formula,
+                                         #type,
+                                         #assumption) {
+  if [count ($segments) = 0] {
+    <Existential-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+
+        <Variables {
+          <Variable {
+            @spelling = $it;
+          }
+        }
+
+        if [$type] {
+          apply [$type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+
+      }
+
+      if [$assumption] {
+        <Conditional-Formula {
+          apply [$assumption];
+          apply [$formula] (#it = $it) mode="replace-it-term";
+        }
+      } else {
+        apply [$formula] (#it = $it) mode="replace-it-term";
+      }
+
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-existence
+        (#segments = $rest,
+	 #it = $it,
+	 #formula = $formula,
+	 #type = $type,
+	 #assumption = $assumption);
+    }
+  }
+}
+
 tpl universally-bind-segments-uniqueness (#segments,
                                                    #variable-1,
                                                    #variable-2,
@@ -319,24 +367,6 @@ tpl
   Item
   [
         @kind = "Correctness-Condition"
-    and @condition = "existence"
-    and preceding-sibling::Item
-        [
-              @kind = "Functor-Definition"
-          and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"]) > 0
-         ]
-  ]
-]
-{
-  die (#message = "We do not yet handle existence conditions for functor definitions that have assumtions.");
-}
-
-tpl
-[
-  Item
-  [
-        @kind = "Correctness-Condition"
     and @condition = "uniqueness"
     and preceding-sibling::Item
         [
@@ -400,7 +430,7 @@ tpl
         [
               @kind  = "Functor-Definition"
           and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"] > 0)
+          and count (preceding-sibling::Item[@kind = "Assumption"]) > 0
         ]
   ]
 ]
@@ -504,16 +534,32 @@ tpl
 ]
 {
   for-each [Block[@kind = "Definitional-Block"]] {
-    for-each [Item[@kind = "Correctness-Condition"]] {
+    for-each [Item[@kind = "Correctness-Condition" and @condition]] {
+      $c = `@condition`;
       choose {
-        when [@condition = "existence"] {
+        when [$c = "existence"] {
           apply [.];
         }
-        when [@condition = "uniqueness"] {
+        when [$c = "uniqueness"] {
           apply [.];
         }
-        when [@condition = "coherence"] {
+        when [$c = "coherence"] {
           apply [.];
+        }
+        when [$c = "compatibility"] {
+	  die (#message = "Unhandled compatibility condition.");
+        }
+        when [$c = "projectivity"] {
+	  die (#message = "Unhandled projectivity condition.");
+        }
+        when [$c = "involutiveness"] {
+	  die (#message = "Unhandled involutiveness condition.");
+        }
+        when [$c = "idempotence"] {
+	  die (#message = "Unhandled idempotence condition.");
+        }
+        when [$c = "commutativity"] {
+	  die (#message = "Unhandled commutativity condition.");
         }
         otherwise {
           die (#message = "Unhandled correctness condition.");
@@ -566,6 +612,21 @@ tpl
       choose {
         when [$c = "compatibility"] {
           apply [.];
+        }
+        when [$c = "coherence"] {
+          die (#message = "Unhandled predicate coherence condition.");
+        }
+        when [$c = "reflexivity"] {
+          die (#message = "Unhandled irreflexivity condition.");
+        }
+        when [$c = "symmetry"] {
+          die (#message = "Unhandled symmetry condition.");
+        }
+        when [$c = "asymmetry"] {
+          die (#message = "Unhandled asymmetry condition.");
+        }
+        when [$c = "connectedness"] {
+          die (#message = "Unhandled connectedness condition.");
         }
         otherwise {
           die (#message = "Unhandled predicate correctness condition.");
@@ -764,4 +825,57 @@ tpl
     apply [Label];
   }
 
+}
+
+tpl
+[
+  Item
+  [
+        @kind = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 1
+         ]
+  ]
+]
+{
+  $definiens = `preceding-sibling::Definiens/*[position() = last()]`;
+  $existential-variable = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { "ExistenceLemma"; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      $fd = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]`;
+      $type = `$fd/Operation-Functor-Pattern/Type-Specification/*[1]`;
+      $assumption = `preceding-sibling::Item[@kind = "Assumption"]/Single-Assumption/Proposition/*[position() = last()]`;
+      universally-bind-segments-existence (#segments   = $segments,
+                                           #formula    = $definiens,
+                                           #type       = $type,
+					   #it         = $existential-variable,
+                                           #assumption = $assumption);
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) > 1
+         ]
+  ]
+]
+{
+  die (#message = "We do not yet handle existence conditions for functor definitions that have multiple assumtions.");
 }
