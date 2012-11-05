@@ -45,6 +45,43 @@ tpl [Implicitly-Qualified-Segment] {
   }
 }
 
+tpl already-bound (#spelling) {
+  choose {
+    when [parent::Text-Proper] {
+      "0";
+    }
+    when [preceding-sibling::Item[@kind = "Generalization"]/Implicitly-Qualified-Segment/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [preceding-sibling::Item[@kind = "Generalization"]/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [preceding-sibling::Item[@kind = "Loci-Declaration"]/Implicitly-Qualified-Segment/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [ancestor::Universal-Quantifier-Formula/Implicitly-Qualified-Segment/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [ancestor::Universal-Quantifier-Formula/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [ancestor::Existential-Quantifier-Formula/Implicitly-Qualified-Segment/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    when [ancestor::Existential-Quantifier-Formula/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $spelling]] {
+      "1";
+    }
+    otherwise {
+      for-each [parent::*] {
+        already-bound (#spelling = $spelling);
+      }
+    }
+  }
+}
+
 tpl [Fraenkel-Term] {
   $fraenkel = `.`;
   <Fraenkel-Term {
@@ -56,19 +93,58 @@ tpl [Fraenkel-Term] {
     for-each [*[position() = $num-children - 1]] {
       for-each [descendant-or-self::Simple-Term[@idnr and starts-with (@spelling, "R")]] {
         $idnr = `@idnr`;
-        for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@idnr = $idnr])[1]] {
-          <Explicitly-Qualified-Segment {
-            <Variables {
-              apply [.];
-            }
-            for-each [ancestor::Item[@kind = "Reservation"]] {
-              apply [*[position() = last()]];
+        $bound-earlier = already-bound (#spelling = `@spelling`);
+        if [$bound-earlier = "1"] {
+          // nothing to do
+        } else {
+          for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@idnr = $idnr])[1]] {
+            <Explicitly-Qualified-Segment {
+              <Variables {
+                apply [.];
+              }
+              for-each [ancestor::Item[@kind = "Reservation"]] {
+                apply [*[position() = last()]];
+              }
             }
           }
         }
       }
       apply [.];
     }
-    apply [*[position() = last()]];
+    $already-bound = `preceding-sibling::*[position() > 1]/Explicitly-Qualified-Segment/Variables/Variable | preceding-sibling::*[position() > 1]/Implicitly-Qualified-Segment/Variable | preceding-sibling::*[1][self::Simple-Term]`;
+    for-each [*[position() = last()]] {
+      // apply [.] (#already-bound = $already-bound,
+      // 	         #maybe-bind = `descendant::Simple-Term[starts-with (@spelling, "R")]`) mode="bind";
+      apply [.];
+    }
+  }
+}
+
+tpl [*] (#already-bound, #maybe-bind) mode="bind" {
+  if [$maybe-bind] {
+    $next = `$maybe-bind[1]`;
+    $more = `$maybe-bind[position() > 1]`;
+    $next-spelling = `$next/@spelling`;
+    if [$already-bound[@spelling = $next-spelling]] {
+      apply [.] (#already-bound = $already-bound,
+      	    	 #maybe-bind = $more);
+    } else {
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            apply [$next];
+          }
+          for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@spelling = $next-spelling])[1]] {
+            for-each [ancestor::Item[@kind = "Reservation"]] {
+              apply [*[position() = last()]];
+            }
+          }
+        }
+        apply [.] (#already-bound = `$already-bound | $next`,
+	      	   #maybe-find = $more);
+      }
+    }
+  } else {
+    apply [.];
   }
 }
