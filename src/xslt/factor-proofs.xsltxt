@@ -1,7 +1,34 @@
 stylesheet "1.0";
 import "utils/die.xsl";
-import "fresh-variable.xsl";
 output method="xml" indent="yes";
+
+tpl try-fresh-variable (#prefix, #try) {
+  $trial-name = `concat ($prefix, $try)`;
+  $next-try = `$try + 1`;
+  choose {
+    when [descendant::Simple-Term[@spelling = $trial-name]] {
+      try-fresh-variable (#prefix = $prefix,
+                          #try = $next-try);
+    }
+    when [descendant::Variable[@spelling = $trial-name]] {
+      try-fresh-variable (#prefix = $prefix,
+                          #try = $next-try);
+    }
+    otherwise {
+      $trial-name;
+    }
+  }
+}
+
+tpl fresh-variable (#prefix) {
+  for-each [ancestor::Text-Proper] {
+    if [$prefix = ""] {
+      try-fresh-variable (#prefix = "z", #try = "1");
+    } else {
+      try-fresh-variable (#prefix = $prefix, #try = "1");
+    }
+  }
+}
 
 tpl emit-conjunction-of-attributive-adjectives (#term-name, #adjectives) {
   choose {
@@ -45,7 +72,7 @@ tpl [*] {
 
 // Sanity check
 tpl [Text-Proper] {
-  if [descendant::Implicitly-Qualified-Segment] {
+  if [count (descendant::Implicitly-Qualified-Segment) > 0] {
     die (#message = "There are not supposed to be any Implicitly-Qualified-Segments");
   } else {
     <Text-Proper {
@@ -175,29 +202,6 @@ tpl
   }
 }
 
-tpl universally-bind-segments (#segments, #it, #formula, #type) {
-  if [count ($segments) = 0] {
-    <Existential-Quantifier-Formula {
-      <Explicitly-Qualified-Segment {
-        <Variables {
-          <Variable {
-            @spelling = $it;
-          }
-        }
-        apply [$type];
-      }
-      apply [$formula] (#it = $it) mode="replace-it-term";
-    }
-  } else {
-    $segment = `$segments[1]`;
-    $rest = `$segments[position() > 1]`;
-    <Universal-Quantifier-Formula {
-      apply [$segment];
-      universally-bind-segments (#segments = $rest, #it = $it, #formula = $formula, #type = $type);
-    }
-  }
-}
-
 tpl universally-bind-segments-existence (#segments,
                                          #it,
                                          #formula,
@@ -236,21 +240,21 @@ tpl universally-bind-segments-existence (#segments,
     $rest = `$segments[position() > 1]`;
     <Universal-Quantifier-Formula {
       apply [$segment];
-      universally-bind-segments-existence
-        (#segments = $rest,
-	 #it = $it,
-	 #formula = $formula,
-	 #type = $type,
-	 #assumption = $assumption);
+      universally-bind-segments-existence (#segments   = $rest,
+      					   #it         = $it,
+	                                   #formula    = $formula,
+	                                   #type       = $type,
+	                                   #assumption = $assumption);
     }
   }
 }
 
 tpl universally-bind-segments-uniqueness (#segments,
-                                                   #variable-1,
-                                                   #variable-2,
-                                                   #formula,
-                                                   #type) {
+                                          #variable-1,
+                                          #variable-2,
+                                          #formula,
+                                          #type,
+					  #assumption) {
   if [count ($segments) = 0] {
     <Universal-Quantifier-Formula {
       <Explicitly-Qualified-Segment {
@@ -258,17 +262,43 @@ tpl universally-bind-segments-uniqueness (#segments,
           <Variable { @spelling = $variable-1; }
           <Variable { @spelling = $variable-2; }
         }
-        apply [$type];
-      }
-      <Conditional-Formula {
-        <Conjunctive-Formula {
-          apply [$formula] (#it = $variable-1) mode="replace-it-term";
-          apply [$formula] (#it = $variable-2) mode="replace-it-term";
+
+        if [$type] {
+          apply [$type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
         }
-        <Predicative-Formula {
-          @spelling = "=";
-          <Arguments { <Simple-Term { @spelling = $variable-1; } }
-          <Arguments { <Simple-Term { @spelling = $variable-2; } }
+
+      }
+      if [$assumption] {
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            <Conditional-Formula {
+              apply [$assumption];
+              apply [$formula] (#it = $variable-1) mode="replace-it-term";
+            }
+            <Conditional-Formula {
+              apply [$assumption];
+              apply [$formula] (#it = $variable-2) mode="replace-it-term";
+            }
+          }
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments { <Simple-Term { @spelling = $variable-1; } }
+            <Arguments { <Simple-Term { @spelling = $variable-2; } }
+          }
+        }
+      } else {
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            apply [$formula] (#it = $variable-1) mode="replace-it-term";
+            apply [$formula] (#it = $variable-2) mode="replace-it-term";
+          }
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments { <Simple-Term { @spelling = $variable-1; } }
+            <Arguments { <Simple-Term { @spelling = $variable-2; } }
+          }
         }
       }
     }
@@ -277,11 +307,12 @@ tpl universally-bind-segments-uniqueness (#segments,
     $rest = `$segments[position() > 1]`;
     <Universal-Quantifier-Formula {
       apply [$segment];
-      universally-bind-segments-uniqueness (#segments = $rest,
+      universally-bind-segments-uniqueness (#segments   = $rest,
                                             #variable-1 = $variable-1,
                                             #variable-2 = $variable-2,
-                                            #formula = $formula,
-                                            #type = $type);
+                                            #formula    = $formula,
+                                            #type       = $type,
+					    #assumption = $assumption);
     }
   }
 }
@@ -311,175 +342,42 @@ tpl
 [
   Item
   [
-        @kind = "Correctness-Condition"
-    and @condition = "existence"
-    and preceding-sibling::Item
-        [
-              @kind = "Functor-Definition"
-          and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
-         ]
-  ]
-]
-{
-  for-each [ancestor::Item[parent::Text-Proper]] {
-    $existential-variable = fresh-variable ();
-    <Item {
-      @kind = "Regular-Statement";
-      @shape = "Compact-Statement";
-      <Proposition {
-        <Label { @spelling = "ExistenceLemma"; }
-        for-each [Block] {
-          $locus = `Item[@kind = "Loci-Declaration"]`;
-          $segments = `$locus/Explicitly-Qualified-Segment`;
-          $fd = `Item[@kind = "Functor-Definition"]`;
-          $formula = `$fd/Definiens/*[position() = last()]`;
-          $type = `$fd/Type-Specification/*[1]`;
-          universally-bind-segments (#segments = $segments,
-                                     #it       = $existential-variable,
-                                     #formula  = $formula,
-                                     #type     = $type);
-        }
-      }
-      <Block {
-        @kind = "Proof";
-        for-each [Block[@kind = "Definitional-Block"]] {
-          for-each [Item[@kind = "Loci-Declaration"]] {
-            <Item {
-              @kind = "Generalization";
-              apply [Explicitly-Qualified-Segment];
-            }
-          }
-          for-each [Item[@kind = "Correctness-Condition"
-                         and @condition = "existence"]] {
-            for-each [Block[@kind = "Proof"]] {
-              apply [*];
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-tpl
-[
-  Item
-  [
-        @kind = "Correctness-Condition"
-    and @condition = "uniqueness"
-    and preceding-sibling::Item
-        [
-              @kind = "Functor-Definition"
-          and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"] = 0)
-        ]
-  ]
-]
-{
-  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
-  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
-  for-each [ancestor::Item[parent::Text-Proper]] {
-    <Item {
-      @kind = "Regular-Statement";
-      @shape = "Compact-Statement";
-      <Proposition {
-        <Label { @spelling = "UniquenessLemma"; }
-        for-each [Block[@kind = "Definitional-Block"]] {
-          $locus = `Item[@kind = "Loci-Declaration"]`;
-          $segments = `$locus/Explicitly-Qualified-Segment`;
-          $fd = `Item[@kind = "Functor-Definition"]`;
-          $formula = `$fd/Definiens/*[position() = last()]`;
-          $type = `$fd/Type-Specification/*[1]`;
-          universally-bind-segments-uniqueness
-            (#segments   = $segments,
-             #variable-1 = $uniqueness-variable-1,
-             #variable-2 = $uniqueness-variable-2,
-             #formula    = $formula,
-             #type       = $type);
-        }
-      }
-      <Block {
-        @kind = "Proof";
-        for-each [Block[@kind = "Definitional-Block"]] {
-          for-each [Item[@kind = "Loci-Declaration"]] {
-            <Item {
-              @kind = "Generalization";
-              apply [Explicitly-Qualified-Segment];
-            }
-          }
-          for-each [Item[    @kind      = "Correctness-Condition"
-                         and @condition = "uniqueness"]] {
-            for-each [Block[@kind = "Proof"]] {
-              apply [*];
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-tpl
-[
-  Item
-  [
-        @kind      = "Correctness-Condition"
-    and @condition = "uniqueness"
-    and preceding-sibling::Item
-        [
-              @kind  = "Functor-Definition"
-          and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"]) > 0
-        ]
-  ]
-]
-{
-  die (#message = "We do not handle uniqueness conditions for functor definitions that have assumptions.");
-}
-
-tpl
-[
-  Item
-  [
         @kind      = "Correctness-Condition"
     and @condition = "compatibility"
     and preceding-sibling::Item
         [
               @kind = "Predicate-Definition"
           and Redefine]]] {
-  for-each [ancestor::Item[parent::Text-Proper]] {
-    <Item {
-      @kind = "Regular-Statement";
-      @shape = "Compact-Statement";
-      <Proposition {
-        <Label { @spelling = "CompatibilityLemma"; }
-        for-each [Block[@kind = "Definitional-Block"]] {
-         $locus = `Item[@kind = "Loci-Declaration"]`;
-         $segments = `$locus/Explicitly-Qualified-Segment`;
-         $pd = `Item[@kind = "Predicate-Definition"]`;
-         $original-formula = `$pd/Predicate-Pattern`;
-         $new-formula = `$pd/Definiens/*[position() = last()]`;
-         universally-bind-segments-compatibility
-           (#segments         = $segments,
-            #original-formula = $original-formula,
-            #new-formula      = $new-formula);
-        }
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CompatibilityLemma"; }
+      for-each [Block[@kind = "Definitional-Block"]] {
+       $locus = `Item[@kind = "Loci-Declaration"]`;
+       $segments = `$locus/Explicitly-Qualified-Segment`;
+       $pd = `Item[@kind = "Predicate-Definition"]`;
+       $original-formula = `$pd/Predicate-Pattern`;
+       $new-formula = `$pd/Definiens/*[position() = last()]`;
+       universally-bind-segments-compatibility
+         (#segments         = $segments,
+          #original-formula = $original-formula,
+          #new-formula      = $new-formula);
       }
-      <Block {
-        @kind = "Proof";
-        for-each [Block[@kind = "Definitional-Block"]] {
-          for-each [Item[@kind = "Loci-Declaration"]] {
-            <Item {
-              @kind = "Generalization";
-              apply [Explicitly-Qualified-Segment];
-            }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [Block[@kind = "Definitional-Block"]] {
+        for-each [Item[@kind = "Loci-Declaration"]] {
+          <Item {
+            @kind = "Generalization";
+            apply [Explicitly-Qualified-Segment];
           }
-          for-each [Item[    @kind      = "Correctness-Condition"
-                         and @condition = "compatibility"]] {
-            for-each [Block[@kind = "Proof"]] {
-              apply [*];
-            }
+        }
+        for-each [Item[    @kind      = "Correctness-Condition"
+                       and @condition = "compatibility"]] {
+          for-each [Block[@kind = "Proof"]] {
+            apply [*];
           }
         }
       }
@@ -536,40 +434,30 @@ tpl
   for-each [Block[@kind = "Definitional-Block"]] {
     for-each [Item[@kind = "Correctness-Condition" and @condition]] {
       $c = `@condition`;
-      choose {
-        when [$c = "existence"] {
-          apply [.];
-        }
-        when [$c = "uniqueness"] {
-          apply [.];
-        }
-        when [$c = "coherence"] {
-          apply [.];
-        }
-        when [$c = "compatibility"] {
-	  die (#message = "Unhandled compatibility condition.");
-        }
-        when [$c = "projectivity"] {
-	  die (#message = "Unhandled projectivity condition.");
-        }
-        when [$c = "involutiveness"] {
-	  die (#message = "Unhandled involutiveness condition.");
-        }
-        when [$c = "idempotence"] {
-	  die (#message = "Unhandled idempotence condition.");
-        }
-        when [$c = "commutativity"] {
-	  die (#message = "Unhandled commutativity condition.");
-        }
-        otherwise {
-          die (#message = "Unhandled correctness condition.");
-        }
-      }
+      msg `concat ("working on condition ", $c)`;
+      apply [.];
+      msg "done.";
     }
   }
+
   <Item {
     for-each [@*] { copy-of `.`; }
-    apply [*] mode="straightforward-correctness";
+    for-each [Block[@kind = "Definitional-Block"]] {
+      <Block {
+        for-each [@*] { copy-of `.`; }
+          for-each [*] {
+            if [self::Item[@kind = "Correctness-Condition"]] {
+              // ignore
+            } else {
+              apply [.];
+            }
+          }
+
+          apply [Item[@kind = "Correctness-Condition"]]
+            mode="straightforward-correctness";
+
+      }
+    }
   }
 }
 
@@ -608,30 +496,7 @@ tpl
 {
   for-each [Block[@kind = "Definitional-Block"]] {
     for-each [Item[@kind = "Correctness-Condition"]] {
-      $c = `@condition`;
-      choose {
-        when [$c = "compatibility"] {
-          apply [.];
-        }
-        when [$c = "coherence"] {
-          die (#message = "Unhandled predicate coherence condition.");
-        }
-        when [$c = "reflexivity"] {
-          die (#message = "Unhandled irreflexivity condition.");
-        }
-        when [$c = "symmetry"] {
-          die (#message = "Unhandled symmetry condition.");
-        }
-        when [$c = "asymmetry"] {
-          die (#message = "Unhandled asymmetry condition.");
-        }
-        when [$c = "connectedness"] {
-          die (#message = "Unhandled connectedness condition.");
-        }
-        otherwise {
-          die (#message = "Unhandled predicate correctness condition.");
-        }
-      }
+      apply [.];
     }
   }
   <Item {
@@ -649,16 +514,18 @@ tpl [*] (#it) mode="replace-it-term" {
 }
 
 tpl [it-Term] (#it) mode="replace-it-term" {
+  $it-as-string = `concat ("", $it, "")`;
+  msg `concat ("die bitch: ", $it-as-string)`;
   <Simple-Term {
-    @spelling = $it;
+    @spelling = $it-as-string;
   }
 }
 
-tpl [*] (#it) mode="straightforward-correctness" {
+tpl [*] mode="straightforward-correctness" {
   $n = `name (.)`;
   <$n {
     for-each [@*] { copy-of `.`; }
-    apply [*] (#it = $it) mode="straightforward-correctness";
+    apply [*] mode="straightforward-correctness";
   }
 }
 
@@ -804,6 +671,7 @@ tpl
         ]
   ]
 ] {
+  msg "making a conditional definiens";
   $definiens = `.`;
   <Definiens {
     @kind = "Simple-Definiens";
@@ -811,9 +679,12 @@ tpl
     <Conditional-Formula {
       for-each [parent::Item[@kind = "Functor-Definition"
                              and @shape = "Means"]] {
-        for-each [preceding-sibling::Item[@kind = "Assumption"
-                                          and Single-Assumption]] {
-          apply [Proposition];
+        for-each [preceding-sibling::Item[@kind = "Assumption"]] {
+          for-each [Single-Assumption] {
+            for-each [Proposition] {
+              apply [*[position() = last()]];
+            }
+          }
         }
       }
       apply [*[position() = last()]];
@@ -831,24 +702,25 @@ tpl
 [
   Item
   [
-        @kind = "Correctness-Condition"
+        @kind      = "Correctness-Condition"
     and @condition = "existence"
     and preceding-sibling::Item
         [
-              @kind = "Functor-Definition"
+              @kind  = "Functor-Definition"
           and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"]) = 1
+          and (count (preceding-sibling::Item[@kind = "Assumption"]) <= 1)
          ]
   ]
 ]
 {
-  $definiens = `preceding-sibling::Definiens/*[position() = last()]`;
+  msg "hey existence";
+  $definiens = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]/Definiens/*[position() = last()]`;
   $existential-variable = fresh-variable ();
   <Item {
     @kind = "Regular-Statement";
     @shape = "Compact-Statement";
     <Proposition {
-      <Label { "ExistenceLemma"; }
+      <Label { @spelling = "ExistenceLemma"; }
       $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
       $fd = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]`;
       $type = `$fd/Operation-Functor-Pattern/Type-Specification/*[1]`;
@@ -859,6 +731,8 @@ tpl
 					   #it         = $existential-variable,
                                            #assumption = $assumption);
     }
+    // justification should go here
+    <Straightforward-Justification;
   }
 }
 
@@ -866,16 +740,93 @@ tpl
 [
   Item
   [
-        @kind = "Correctness-Condition"
+        @kind      = "Correctness-Condition"
     and @condition = "existence"
     and preceding-sibling::Item
         [
-              @kind = "Functor-Definition"
+              @kind  = "Functor-Definition"
           and @shape = "Means"
-          and count (preceding-sibling::Item[@kind = "Assumption"]) > 1
+          and (count (preceding-sibling::Item[@kind = "Assumption"]) > 1)
          ]
   ]
 ]
 {
   die (#message = "We do not yet handle existence conditions for functor definitions that have multiple assumtions.");
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "uniqueness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and (count (preceding-sibling::Item[@kind = "Assumption"]) <= 1)
+        ]
+  ]
+]
+{
+  msg "hey uniqueness";
+  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
+  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "UniquenessLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+        $locus = `Item[@kind = "Loci-Declaration"]`;
+        $segments = `$locus/Explicitly-Qualified-Segment`;
+        $fd = `Item[@kind = "Functor-Definition"]`;
+        $formula = `$fd/Definiens/*[position() = last()]`;
+        $type = `$fd/Type-Specification/*[1]`;
+ $assumption = `Item[@kind = "Assumption"]/Single-Assumption/Proposition/*[position() = last()]`;
+        universally-bind-segments-uniqueness
+          (#segments   = $segments,
+           #variable-1 = $uniqueness-variable-1,
+           #variable-2 = $uniqueness-variable-2,
+           #formula    = $formula,
+           #type       = $type,
+           #assumption = $assumption);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [Block[@kind = "Definitional-Block"]] {
+        for-each [Item[@kind = "Loci-Declaration"]] {
+          <Item {
+            @kind = "Generalization";
+            apply [Explicitly-Qualified-Segment];
+          }
+        }
+        for-each [Item[    @kind      = "Correctness-Condition"
+                       and @condition = "uniqueness"]] {
+          for-each [Block[@kind = "Proof"]] {
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "uniqueness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) > 1
+        ]
+  ]
+]
+{
+  die (#message = "We do not handle uniqueness conditions for functor definitions that have assumptions.");
 }
