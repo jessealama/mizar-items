@@ -8,12 +8,16 @@ use XML::LibXSLT;
 use XML::LibXML;
 use charnames qw(:full);
 use Readonly;
+use Regexp::DefaultFlags;
+use charnames qw(:full);
 
 our @EXPORT = qw(apply_stylesheet);
 
 Readonly my $RECURSION_DEPTH => 3000;
 
 XML::LibXSLT->max_depth ($RECURSION_DEPTH);
+
+my $xml_parser = XML::LibXML->new ();
 
 my %parsed_stylesheet_table = ();
 
@@ -29,10 +33,6 @@ sub apply_stylesheet {
 	croak ('Error: please supply a document.');
     }
 
-    if (! -e $document || ! -r $document) {
-	croak ('Error: there is no (readable) file at ', $document, '.');
-    }
-
     my %parameters = XML::LibXSLT::xpath_to_string
 	(defined $parameters_ref ? %{$parameters_ref} : () );
 
@@ -44,7 +44,26 @@ sub apply_stylesheet {
 	$parsed_stylesheet_table{$stylesheet} = $parsed_stylesheet;
     }
 
-    my $results = $parsed_stylesheet->transform_file ($document, %parameters);
+    my $results;
+    if ($document =~ /[\N{LF}]/m) {
+	# this isn't a file
+	my $doc = $xml_parser->load_xml (string => $document);
+	$results = eval {$parsed_stylesheet->transform ($doc,
+							%parameters) }
+    } elsif (-e $document && -r $document) {
+	$results = eval { $parsed_stylesheet->transform_file ($document,
+							      %parameters) }
+    } else {
+	# $document appears to be a string
+	my $doc = $xml_parser->load_xml (string => $document);
+	$results = eval { $parsed_stylesheet->transform ($document,
+							 %parameters) }
+    }
+
+    if (! defined $results) {
+	croak 'Unable to apply ', $stylesheet, '.';
+    }
+
     my $result_bytes = $parsed_stylesheet->output_as_bytes ($results);
 
     if (defined $result_path) {
