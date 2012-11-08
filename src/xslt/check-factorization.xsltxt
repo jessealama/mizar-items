@@ -19,19 +19,19 @@ tpl [/] {
 }
 
 tpl [Text-Proper] {
-  for-each [descendant::Item[@kind = "Correctness-Condition"]] {
-    apply [.];
+  if [Item[@kind = "Reservation"]] {
+    die (#message = "We found a reservation.");
   }
-}
-
-tpl [Item[@kind = "Correctness-Condition" and Block[@kind = "Proof"]]] {
-  die (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.");
-}
-
-tpl [Item[@kind = "Correctness-Condition" and Block[@kind = "Proof"]]] {
- die (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.");
-}
-
-tpl [Item[@kind = "Correctness-Condition" and (count (Straightforward-Justification/*) > 1)]] {
-  die (#message = "Every correctness condition with a Straightforward-Justification should have at most 1 justification element.");
+  if [descendant::Item[@kind = "Implicitly-Qualified-Segment"]] {
+    die (#message = "We found an implicitly qualified segment.");
+  }
+  for-each [descendant::Item[@kind = "Correctness-Condition"]] {
+    if [Block[@kind = "Proof"]] {
+      die (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.");
+    }
+    if [not(count(Straightforward-Justification/*) = 1)] {
+      die (#message = "Every correctness condition with a Straightforward-Justification should have at most 1 justification element.");
+    }
+  }
+  msg "ok";
 }
