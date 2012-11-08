@@ -1,5 +1,6 @@
 stylesheet "1.0";
 import "utils/die.xsl";
+import "utils/copy.xsl";
 output method="xml" indent="yes";
 
 tpl try-fresh-variable (#prefix, #try) {
@@ -208,33 +209,54 @@ tpl universally-bind-segments-existence (#segments,
                                          #type,
                                          #assumption) {
   if [count ($segments) = 0] {
-    <Existential-Quantifier-Formula {
-      <Explicitly-Qualified-Segment {
+    if [$assumption] {
+      <Conditional-Formula {
+        apply [$assumption];
+        <Existential-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
 
-        <Variables {
-          <Variable {
-            @spelling = $it;
+            <Variables {
+              <Variable {
+                @spelling = $it;
+              }
+            }
+
+            if [$type] {
+              apply [$type];
+            } else {
+              <Standard-Type { @nr = "1"; @spelling = "set"; }
+            }
+
           }
-        }
 
-        if [$type] {
-          apply [$type];
-        } else {
-          <Standard-Type { @nr = "1"; @spelling = "set"; }
-        }
-
-      }
-
-      if [$assumption] {
-        <Conditional-Formula {
-          apply [$assumption];
           apply [$formula] (#it = $it) mode="replace-it-term";
+
         }
-      } else {
+      }
+    } else {
+      <Existential-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+
+          <Variables {
+            <Variable {
+              @spelling = $it;
+            }
+          }
+
+          if [$type] {
+            apply [$type];
+          } else {
+            <Standard-Type { @nr = "1"; @spelling = "set"; }
+          }
+
+        }
+
         apply [$formula] (#it = $it) mode="replace-it-term";
+
       }
 
     }
+
   } else {
     $segment = `$segments[1]`;
     $rest = `$segments[position() > 1]`;
@@ -402,9 +424,6 @@ tpl
     when [Proof] {
       die (#message = "Don't know how to handle a coherence item justified by a proof.");
     }
-    when [count (Straightforward-Justification/*) = 0] {
-      // skip: this is obvious for the checker
-    }
     when [count (Straightforward-Justification/*) = 1] {
       // skip: there's already a single lemma/theorem/scheme that
       // justifies this
@@ -514,10 +533,8 @@ tpl [*] (#it) mode="replace-it-term" {
 }
 
 tpl [it-Term] (#it) mode="replace-it-term" {
-  $it-as-string = `concat ("", $it, "")`;
-  msg `concat ("die bitch: ", $it-as-string)`;
   <Simple-Term {
-    @spelling = $it-as-string;
+    @spelling = $it;
   }
 }
 
@@ -713,7 +730,6 @@ tpl
   ]
 ]
 {
-  msg "hey existence";
   $definiens = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]/Definiens/*[position() = last()]`;
   $existential-variable = fresh-variable ();
   <Item {
@@ -731,8 +747,45 @@ tpl
 					   #it         = $existential-variable,
                                            #assumption = $assumption);
     }
-    // justification should go here
-    <Straightforward-Justification;
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Item[@kind = "Correctness-Condition" and @condition = "existence"]] {
+              for-each [preceding-sibling::Item[   @kind = "Loci-Declaration"
+                                                or @kind = "Choice-Statement"
+                                                or @kind = "Assumption"]] {
+                choose {
+                  when [self::Item[@kind = "Loci-Declaration"]] {
+                    <Item {
+                      @kind = "Generalization";
+                      apply [*];
+                    }
+                  }
+                  when [self::Item[@kind = "Choice-Statement"]] {
+                    apply [.] mode="copy";
+                  }
+                  when [self::Item[@kind = "Assumption"]] {
+                    apply [.] mode="copy";
+                  }
+                  otherwise {
+                    die (#message = "Don't know how to handle a definition block item.");
+                  }
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+        otherwise {
+          die (#message = "Don't know how to handle the justification of a uniquness condition.");
+        }
+      }
+    }
   }
 }
 
@@ -793,23 +846,49 @@ tpl
            #assumption = $assumption);
       }
     }
-    <Block {
-      @kind = "Proof";
-      for-each [Block[@kind = "Definitional-Block"]] {
-        for-each [Item[@kind = "Loci-Declaration"]] {
-          <Item {
-            @kind = "Generalization";
-            apply [Explicitly-Qualified-Segment];
-          }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
         }
-        for-each [Item[    @kind      = "Correctness-Condition"
-                       and @condition = "uniqueness"]] {
-          for-each [Block[@kind = "Proof"]] {
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Item[@kind = "Correctness-Condition" and @condition = "uniqueness"]] {
+              for-each [preceding-sibling::Item[   @kind = "Loci-Declaration"]] {
+                                                // don't know what to do yet
+                                                // or @kind = "Choice-Statement"
+                                                // or @kind = "Assumption"]] {
+                choose {
+                  when [self::Item[@kind = "Loci-Declaration"]] {
+                    <Item {
+                      @kind = "Generalization";
+                      apply [*];
+                    }
+                  }
+                  when [self::Item[@kind = "Choice-Statement"]] {
+                    apply [.] mode="copy";
+                  }
+                  when [self::Item[@kind = "Assumption"]] {
+                    apply [.] mode="copy";
+                  }
+                  otherwise {
+                    die (#message = "Don't know how to handle a definition block item.");
+                  }
+                }
+              }
+            }
             apply [*];
           }
         }
+        otherwise {
+          die (#message = "Don't know how to handle the justification of a uniquness condition.");
+        }
       }
     }
+
   }
 }
 
