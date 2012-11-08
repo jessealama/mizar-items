@@ -30,7 +30,8 @@
   (let* ((path (path article))
 	 (directory (pathname (directory-namestring path)))
 	 (file (pathname-name path))
-	 (itemization-directory (pathname-as-directory (merge-pathnames file directory))))
+	 (itemization-path (merge-pathnames file directory))
+	 (itemization-directory (pathname-as-directory itemization-path)))
     (if (file-exists-p itemization-directory)
 	(error "The itemization directory~%~%  ~a~%~%already exists." (namestring itemization-directory))
 	(progn
@@ -46,7 +47,8 @@
   (let* ((path (path article))
 	 (directory (pathname (directory-namestring path)))
 	 (file (pathname-name path))
-	 (itemization-directory (pathname-as-directory (merge-pathnames file directory)))
+	 (itemization-path (merge-pathnames file directory))
+	 (itemization-directory (pathname-as-directory itemization-path))
 	 (db (make-instance 'itemized-db
 			    :location itemization-directory
 			    :article article))
