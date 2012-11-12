@@ -141,6 +141,7 @@ Readonly my %REQUIREMENTS_THEOREMS => (
 );
 
 Readonly my $SPACE => q{ };
+Readonly my $LF => "\N{LF}";
 
 has 'path' => (
     is => 'ro',
@@ -2960,6 +2961,51 @@ sub schemes {
 sub constructors {
     my $self = shift;
     return $self->evl_idents_under_name ('Constructors');
+}
+
+sub without_reservations {
+    my $self = shift;
+
+    my $styesheet_home = $self->get_stylesheet_home ();
+    my $name = $self->name ();
+    my $tpr_path = $self->file_with_extension ('tpr');
+
+    my $wrm_stylesheet = $self->path_for_stylesheet ('wrm');
+    my $msm_path = $self->file_with_extension ('msm');
+
+    if (! ensure_readable_file ($wrm_stylesheet)) {
+	confess ('The without-reservations stylesheet could not be found at the expected location', $LF, $LF, '  ', $wrm_stylesheet, $LF);
+    }
+
+    $self->accom ();
+    $self->msplit ();
+    $self->wsmparser ();
+    $self->msmprocessor ();
+    File::Copy::copy ($msm_path, $tpr_path)
+	  or confess ('Could not copy ', $msm_path, ' to ', $tpr_path, ': ', $!);
+    $self->mglue ();
+    $self->accom ();
+    $self->wsmparser ();
+
+    my $wsx_path = $self->file_with_extension ('wsx');
+    if (! ensure_readable_file ($wsx_path)) {
+	confess ('The .wsx file for ', $name, ' does not exist (or is unreadable).');
+    }
+    my $wrx_path = $self->file_with_extension ('wrx');
+
+    apply_stylesheet ($wrm_stylesheet, $wsx_path, $wrx_path);
+
+    my $pp_stylesheet = '/Users/alama/sources/mizar/parsing/pp.xsl';
+
+    my $wrm_path = $self->file_with_extension ('wrm');
+
+    apply_stylesheet ($pp_stylesheet,
+		      $wrx_path,
+		      $wrm_path,
+		      { 'suppress-environment' => 1 });
+
+    return $?;
+
 }
 
 1;
