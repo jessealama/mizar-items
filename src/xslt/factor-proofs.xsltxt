@@ -451,9 +451,14 @@ tpl
 ]
 {
   for-each [Block[@kind = "Definitional-Block"]] {
-    for-each [Item[@kind = "Correctness-Condition" and @condition]] {
-      $c = `@condition`;
-      msg `concat ("working on condition ", $c)`;
+    for-each [Item[@kind = "Correctness-Condition" and @condition] | Item[@kind = "Property" and @property]] {
+      if [self::Item[@kind = "Correctness-Condition"]] {
+        $c = `@condition`;
+        msg `concat ("working on condition ", $c)`;
+      } else {
+        $p = `@property`;
+        msg `concat ("working on property ", $p)`;
+      }
       apply [.];
       msg "done.";
     }
@@ -464,16 +469,17 @@ tpl
     for-each [Block[@kind = "Definitional-Block"]] {
       <Block {
         for-each [@*] { copy-of `.`; }
-          for-each [*] {
-            if [self::Item[@kind = "Correctness-Condition"]] {
-              // ignore
-            } else {
-              apply [.];
-            }
+        for-each [*] {
+          if [self::Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+            // ignore
+          } else {
+            apply [.];
           }
+        }
 
-          apply [Item[@kind = "Correctness-Condition"]]
-            mode="straightforward-correctness";
+         for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+           apply [.] mode="straightforward-correctness";
+         }
 
       }
     }
