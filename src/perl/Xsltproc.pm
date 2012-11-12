@@ -14,6 +14,7 @@ use charnames qw(:full);
 our @EXPORT = qw(apply_stylesheet);
 
 Readonly my $RECURSION_DEPTH => 3000;
+Readonly my $LF => "\N{LF}";
 
 XML::LibXSLT->max_depth ($RECURSION_DEPTH);
 
@@ -44,24 +45,31 @@ sub apply_stylesheet {
 	$parsed_stylesheet_table{$stylesheet} = $parsed_stylesheet;
     }
 
-    my $results;
+    my ($results, $err);
     if ($document =~ /[\N{LF}]/m) {
 	# this isn't a file
 	my $doc = $xml_parser->load_xml (string => $document);
 	$results = eval {$parsed_stylesheet->transform ($doc,
-							%parameters) }
+							%parameters) };
+	$err = $!;
     } elsif (-e $document && -r $document) {
 	$results = eval { $parsed_stylesheet->transform_file ($document,
-							      %parameters) }
+							      %parameters) };
+	$err = $!;
     } else {
 	# $document appears to be a string
 	my $doc = $xml_parser->load_xml (string => $document);
 	$results = eval { $parsed_stylesheet->transform ($document,
-							 %parameters) }
+							 %parameters) };
+	$err = $!;
     }
 
     if (! defined $results) {
-	croak 'Unable to apply ', $stylesheet, '.';
+	if (defined $err) {
+	    croak 'Unable to apply ', $stylesheet, '.  The error was:', $LF, $LF, $err, $LF;
+	} else {
+	    croak 'Unable to apply ', $stylesheet, '.  It is unclear what the error was.';
+	}
     }
 
     my $result_bytes = $parsed_stylesheet->output_as_bytes ($results);
