@@ -2525,18 +2525,20 @@ sub itemize {
     my $extend_evl_stylesheet = $self->path_for_stylesheet ('extend-evl');
     my $conditions_and_properties_stylesheet = $self->path_for_stylesheet ('conditions-and-properties');
     my $trim_properties_and_conditions_stylesheet = $self->path_for_stylesheet ('trim-properties-and-conditions');
+    my $factor_proofs_stylesheet = $self->path_for_stylesheet ('factor-proofs');
+    my $wrm_stylesheet = $self->path_for_stylesheet ('wrm');
 
-    $article_in_target_dir->msmify ()
-	or croak ('Error: ', $article_basename, ' cannot be MSMified.');
+    $article_in_target_dir->without_reservations ()
+	or confess ('Error computing the without-reservations form of ', $article_basename, ': ', $!);
 
     print 'done.', "\n";
 
     my $article_wsx_in_target_dir
 	= $article_in_target_dir->file_with_extension ('wsx');
-    my $article_split_wsx_in_target_dir
-	= $article_in_target_dir->file_with_extension ('wsx.split');
+    my $article_tpr_in_target_dir
+	= $article_in_target_dir->file_with_extension ('tpr');
     my $article_itemized_wsx_in_target_dir
-	= $article_in_target_dir->file_with_extension ('wsx.split.itemized');
+	= $article_in_target_dir->file_with_extension ('wsx.itemized');
 
     print 'Expand canceled theorems: ', $article_basename, ': ';
     apply_stylesheet ($expand_canceled_stylesheet,
@@ -2550,17 +2552,36 @@ sub itemize {
     print 'Split ', $article_basename, ': ';
     apply_stylesheet ($split_stylesheet,
 		      $article_wsx_in_target_dir,
-		      $article_split_wsx_in_target_dir)
+		      $article_wsx_in_target_dir)
 	or
 	    croak ('Error: xsltproc did not exit cleanly when applying the split stylesheet at ', $split_stylesheet, ' to ', $article_wsx_in_target_dir, '.', "\n");
 
     print 'done.', "\n";
 
+    print 'Factor proofs';
+    apply_stylesheet ($factor_proofs_stylesheet,
+		      $article_wsx_in_target_dir,
+		      $article_wsx_in_target_dir);
+
+    $article_in_target_dir->accom ();
+    $article_in_target_dir->msplit ();
+    my $pp_stylesheet = '/Users/alama/sources/mizar/parsing/pp.xsl';
+
+    apply_stylesheet ($pp_stylesheet,
+		      $article_wsx_in_target_dir,
+		      $article_tpr_in_target_dir,
+		      { 'suppress-environment' => 1 });
+
+    $article_in_target_dir->mglue ();
+    $article_in_target_dir->accom ();
+    $article_in_target_dir->msmify ();
+    $article_in_target_dir->wsmparser ();
+
     print 'Itemize ', $article_basename, ': ';
     apply_stylesheet ($itemize_stylesheet,
-		      $article_split_wsx_in_target_dir,
+		      $article_wsx_in_target_dir,
 		      $article_itemized_wsx_in_target_dir)
-	or croak ('Error: xsltproc did not exit cleanly when applying the itemize stylesheet at ', $itemize_stylesheet, ' to ', $article_split_wsx_in_target_dir, '.', "\n");
+	or croak ('Error: xsltproc did not exit cleanly when applying the itemize stylesheet at ', $itemize_stylesheet, ' to ', $article_wsx_in_target_dir, '.', "\n");
 
     print 'done.', "\n";
 
@@ -3004,7 +3025,12 @@ sub without_reservations {
 		      $wrm_path,
 		      { 'suppress-environment' => 1 });
 
-    return $?;
+    File::Copy::copy ($wrm_path, $tpr_path);
+    $self->mglue ();
+    $self->accom ();
+    $self->wsmparser ();
+
+    return 1;
 
 }
 
