@@ -21,8 +21,8 @@ all: $(xsls)
 	$(call xslize-or-kill,$*.xsltxt,$*.xsl)
 
 clean:
-	rm -f $(xsls)
-	rm -f $(emacs-backups)
+	find . -maxdepth 1 -type f -name "*.xsl" -delete
+	find . -maxdepth 1 -type f -name "*~" -delete
 	find . -maxdepth 1 -name "*.miz" -exec basename {} .miz ';' | parallel rm -f "{}.*"
 
 %.miz %.wsx %.wsm %.tpr %.evd:
@@ -36,11 +36,10 @@ clean:
 	mglue -l -q $* > /dev/null 2>&1
 	accom -l -q $* > /dev/null 2>&1
 	wsmparser -l -q $* > /dev/null 2>&1
+	msmprocessor -l -q $* > /dev/null 2>&1
 
-%.xml: %.wrm %.tpr
-	cp $*.wrm $*.tpr
-	mglue $* > /dev/null 2>&1
-	accom -l $* > /dev/null 2>&1
+%.xml: %.miz
+	makeenv -l $* > /dev/null 2>&1
 	verifier -l $* > /dev/null 2>&1 || (errflag $*; addfmsg $* $(MIZFILES)/mizar; false)
 
 %.wrx: %.wsx wrm.xsl
