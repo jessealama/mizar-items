@@ -418,6 +418,236 @@ tpl universally-bind-segments-commutativity (#segments,
   }
 }
 
+tpl universally-bind-segments-idempotence (#segments,
+                                           #formula,
+                                           #type,
+                                           #it,
+                                           #arg-type,
+                                           #arg-1,
+                                           #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = $it; }
+        }
+
+        if [$arg-type] {
+          apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+
+      }
+
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = `$arg-1`; }
+          }
+
+          if [$arg-type] {
+            apply [$arg-type];
+          } else {
+            <Standard-Type { @nr = "1"; @spelling = "set"; }
+          }
+
+        }
+        apply [$formula] (#x  = $arg-2,
+                          #y  = $arg-1,
+                          #it = $arg-1) mode="replace";
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-idempotence (#segments = $rest,
+                                             #formula  = $formula,
+                                             #type     = $type,
+                                             #it       = $it,
+                                             #arg-type = $arg-type,
+                                             #arg-1    = $arg-1,
+                                             #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-symmetry (#segments,
+                                        #formula,
+                                        #it,
+                                        #arg-type,
+                                        #arg-1,
+                                        #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = `$arg-1`; }
+          <Variable { @spelling = `$arg-2`; }
+        }
+
+         if [$arg-type] {
+           apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+      }
+
+      <Conditional-Formula {
+        apply [$formula];
+        apply [$formula] (#x  = $arg-1,
+ 		          #y  = $arg-2,
+	                  #it = $it) mode="swap";
+      }
+    }
+
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-symmetry (#segments = $rest,
+                                          #formula  = $formula,
+                                          #it       = $it,
+                                          #arg-type = $arg-type,
+                                          #arg-1    = $arg-1,
+                                          #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-asymmetry (#segments,
+                                         #formula,
+                                         #it,
+                                         #arg-type,
+                                         #arg-1,
+                                         #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = `$arg-1`; }
+          <Variable { @spelling = `$arg-2`; }
+        }
+
+         if [$arg-type] {
+           apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+      }
+
+      <Conditional-Formula {
+        apply [$formula];
+        <Negated-Formula {
+          apply [$formula] (#x  = $arg-2,
+   		            #y  = $arg-1,
+  	                    #it = $it) mode="swap";
+        }
+      }
+    }
+
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-asymmetry (#segments = $rest,
+                                           #formula  = $formula,
+                                           #it       = $it,
+                                           #arg-type = $arg-type,
+                                           #arg-1    = $arg-1,
+                                           #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-irreflexivity (#segments,
+                                             #formula,
+                                             #it,
+                                             #arg-type,
+                                             #arg-1,
+                                             #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = `$arg-1`; }
+        }
+
+         if [$arg-type] {
+           apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+      }
+
+      <Negated-Formula {
+        apply [$formula] (#x  = $arg-2,
+ 		          #y  = $arg-1,
+  	                  #it = $arg-1) mode="replace";
+      }
+    }
+
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-irreflexivity (#segments = $rest,
+                                               #formula  = $formula,
+                                               #it       = $it,
+                                               #arg-type = $arg-type,
+                                               #arg-1    = $arg-1,
+                                               #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-reflexivity (#segments,
+                                           #formula,
+                                           #it,
+                                           #arg-type,
+                                           #arg-1,
+                                           #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = `$arg-1`; }
+          <Variable { @spelling = `$arg-2`; }
+        }
+
+         if [$arg-type] {
+           apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+      }
+
+      apply [$formula] (#x  = $arg-2,
+	                #y  = $arg-1,
+	                #it = $arg-1) mode="replace";
+    }
+
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-reflexivity (#segments = $rest,
+                                             #formula  = $formula,
+                                             #it       = $it,
+                                             #arg-type = $arg-type,
+                                             #arg-1    = $arg-1,
+                                             #arg-2    = $arg-2);
+    }
+  }
+}
+
 tpl
 [
   Item
@@ -591,7 +821,7 @@ tpl
 ]
 {
   for-each [Block[@kind = "Definitional-Block"]] {
-    for-each [Item[@kind = "Correctness-Condition"]] {
+    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
       apply [.];
     }
   }
@@ -641,6 +871,32 @@ tpl [Simple-Term] (#x, #y, #it) mode="swap" {
   }
 }
 
+tpl [*] (#x, #y, #it) mode="replace" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#x = $x, #y = $y, #it = $it) mode="replace";
+  }
+}
+
+tpl [it-Term] (#x, #y, #it) mode="replace" {
+  <Simple-Term {
+    @spelling = $it;
+  }
+}
+
+tpl [Simple-Term] (#x, #y, #it) mode="replace" {
+  $s = `@spelling`;
+  <Simple-Term {
+    for-each [@*] { copy-of `.`; }
+    if [$s = $x] {
+      @spelling = $y;
+    } else {
+      @spelling = $s;
+    }
+  }
+}
+
 tpl [*] mode="straightforward-correctness" {
   $n = `name (.)`;
   <$n {
@@ -686,6 +942,102 @@ mode="straightforward-correctness"
     }
     otherwise {
       die (#message = `concat ("Don't know how to handle a '", $c, "' correctness condition.")`);
+    }
+  }
+}
+
+tpl
+[
+  Block
+  [
+        @kind = "Proof"
+    and parent::Item
+        [
+          @kind = "Property"
+        ]
+  ]
+]
+mode="straightforward-correctness"
+{
+  $p = `parent::Item[@kind = "Property"]/@property`;
+  choose {
+    when [$p = "idempotence"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "IdempotenceLemma"; }
+      }
+    }
+    when [$p = "commutativity"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "CommutativityLemma"; }
+      }
+    }
+    when [$p = "asymmetry"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "AsymmetryLemma"; }
+      }
+    }
+    when [$p = "reflexivity"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "ReflexivityLemma"; }
+      }
+    }
+    when [$p = "irreflexivity"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "IrreflexivityLemma"; }
+      }
+    }
+    otherwise {
+      die (#message = `concat ("Don't know how to handle a '", $p, "' property.")`);
+    }
+  }
+}
+
+tpl
+[
+  Straightforward-Justification
+  [
+    parent::Item
+    [
+      @kind = "Property"
+    ]
+  ]
+]
+mode="straightforward-correctness"
+{
+  $p = `parent::Item[@kind = "Property"]/@property`;
+  choose {
+    when [$p = "idempotence"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "IdempotenceLemma"; }
+      }
+    }
+    when [$p = "commutativity"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "CommutativityLemma"; }
+      }
+    }
+    when [$p = "asymmetry"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "AsymmetryLemma"; }
+      }
+    }
+   when [$p = "symmetry"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "SymmetryLemma"; }
+      }
+    }
+    when [$p = "reflexivity"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "ReflexivityLemma"; }
+      }
+    }
+    when [$p = "irreflexivity"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "IrreflexivityLemma"; }
+      }
+    }
+    otherwise {
+      die (#message = `concat ("Don't know how to handle a '", $p, "' property.")`);
     }
   }
 }
@@ -1102,6 +1454,337 @@ tpl
             for-each [@*] { copy-of `.`; }
             for-each [ancestor::Block[@kind = "Definitional-Block"]] {
               for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "idempotence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "IdempotenceLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $type       = `$fd/Type-Specification/*[1]`;
+        $pattern    = `$fd/Operation-Functor-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-idempotence
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #type     = $type,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "symmetry"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "SymmetryLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-symmetry
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "asymmetry"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "AsymmetryLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-asymmetry
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "irreflexivity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "IrreflexivityLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-irreflexivity
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
                 if [self::Item[@kind = "Loci-Declaration"]] {
                   <Item {
                     @kind = "Generalization";
