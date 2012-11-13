@@ -158,11 +158,23 @@ tpl
            #it         = $fresh-variable);
       }
     }
-    <Block {
-      @kind = "Proof";
-      for-each [Block[@kind = "Registration-Block"]] {
-        for-each [Item[@kind = "Correctness-Condition" and @condition = "existence"]] {
-          for-each [Block[@kind = "Proof"]] {
+    for-each [Block[@kind = "Registration-Block"]] {
+      for-each [Item[@kind = "Correctness-Condition"]] {
+        for-each [Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Registration-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Cluster"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
             apply [*];
           }
         }
@@ -453,6 +465,78 @@ tpl universally-bind-segments-commutativity (#segments,
                                                #arg-type = $arg-type,
                                                #arg-1    = $arg-1,
                                                #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-involutiveness (#segments,
+                                              #formula,
+                                              #type,
+                                              #it,
+                                              #shape,
+                                              #arg-type,
+                                              #arg-1) {
+  if [count ($segments) = 0] {
+    $value-1 = fresh-variable (#prefix = "u");
+    $value-2 = fresh-variable (#prefix = "v");
+    choose {
+      when [$shape = "Means"] {
+        die (#message = "We don't yet handle involutiveness for functors defined by a formula.");
+      }
+      when [$shape = "Equals"] {
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable { @spelling = $value-1; }
+	      <Variable { @spelling = $value-2; }
+            }
+
+            if [$arg-type] {
+              apply [$arg-type];
+            } else {
+              <Standard-Type { @nr = "1"; @spelling = "set"; }
+            }
+
+          }
+
+	  <Conditional-Formula {
+	    <Predicative-Formula {
+              @spelling = "=";
+	      <Arguments {
+                <Simple-Term { @spelling = $value-1; }
+              }
+	      <Arguments {
+                apply [$formula] (#target = $arg-1, #val = $value-2) mode="plug-in";
+              }
+            }
+            <Predicative-Formula {
+               @spelling = "=";
+               <Arguments {
+                 <Simple-Term { @spelling = $value-2; }
+               }
+               <Arguments {
+                apply [$formula] (#target = $arg-1, #val = $value-1) mode="plug-in";
+              }
+            }
+          }
+        }
+      }
+      otherwise {
+        die (#message = `concat ("Unknown shape '", $shape, "' for involutiveness.")`);
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-involutiveness (#segments = $rest,
+                                                #formula  = $formula,
+                                                #type     = $type,
+                                                #it       = $it,
+                                                #shape    = $shape,
+                                                #arg-type = $arg-type,
+                                                #arg-1    = $arg-1);
     }
   }
 }
@@ -936,6 +1020,28 @@ tpl [Simple-Term] (#x, #y, #it) mode="replace" {
   }
 }
 
+
+
+tpl [*] (#target, #val) mode="plug-in" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#target = $target, #val = $val) mode="plug-in";
+  }
+}
+
+tpl [Simple-Term] (#target, #val) mode="plug-in" {
+  $s = `@spelling`;
+  if [$s = $target] {
+    <Simple-Term { @spelling = $val; }
+  } else {
+    <Simple-Term {
+      for-each [@*] { copy-of `.`; }
+      apply [*] (#target = $target, #val = $val) mode="plug-in";
+    }
+  }
+}
+
 tpl [*] mode="straightforward-correctness" {
   $n = `name (.)`;
   <$n {
@@ -954,33 +1060,33 @@ tpl
           @kind = "Correctness-Condition"
         ]
   ]
-]
-mode="straightforward-correctness"
+] mode="straightforward-correctness"
 {
   $c = `parent::Item[@kind = "Correctness-Condition"]/@condition`;
-  choose {
-    when [$c = "existence"] {
-      <Straightforward-Justification {
+  <Straightforward-Justification {
+    choose {
+      when [$c = "existence"] {
         <Local-Reference { @spelling = "ExistenceLemma"; }
       }
-    }
-    when [$c = "uniqueness"] {
-      <Straightforward-Justification {
+      when [$c = "uniqueness"] {
         <Local-Reference { @spelling = "UniquenessLemma"; }
       }
-    }
-    when [$c = "coherence"] {
-      <Straightforward-Justification {
+      when [$c = "coherence"] {
         <Local-Reference { @spelling = "CoherenceLemma"; }
       }
-    }
-    when [$c = "compatibility"] {
-      <Straightforward-Justification {
+      when [$c = "compatibility"] {
         <Local-Reference { @spelling = "CompatibilityLemma"; }
       }
+      otherwise {
+        die (#message = `concat ("Don't know how to handle a '", $c, "' correctness condition.")`);
+      }
     }
-    otherwise {
-      die (#message = `concat ("Don't know how to handle a '", $c, "' correctness condition.")`);
+    for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
     }
   }
 }
@@ -1008,6 +1114,11 @@ mode="straightforward-correctness"
     when [$p = "commutativity"] {
       <Straightforward-Justification {
         <Local-Reference { @spelling = "CommutativityLemma"; }
+      }
+    }
+   when [$p = "involutiveness"] {
+      <Straightforward-Justification {
+        <Local-Reference { @spelling = "InvolutivenessLemma"; }
       }
     }
     when [$p = "asymmetry"] {
@@ -1044,39 +1155,39 @@ tpl
 mode="straightforward-correctness"
 {
   $p = `parent::Item[@kind = "Property"]/@property`;
-  choose {
-    when [$p = "idempotence"] {
-      <Straightforward-Justification {
+  <Straightforward-Justification {
+    choose {
+      when [$p = "idempotence"] {
         <Local-Reference { @spelling = "IdempotenceLemma"; }
       }
-    }
-    when [$p = "commutativity"] {
-      <Straightforward-Justification {
+      when [$p = "involutiveness"] {
+        <Local-Reference { @spelling = "InvolutivenessLemma"; }
+      }
+      when [$p = "commutativity"] {
         <Local-Reference { @spelling = "CommutativityLemma"; }
       }
-    }
-    when [$p = "asymmetry"] {
-      <Straightforward-Justification {
+      when [$p = "asymmetry"] {
         <Local-Reference { @spelling = "AsymmetryLemma"; }
       }
-    }
-   when [$p = "symmetry"] {
-      <Straightforward-Justification {
+     when [$p = "symmetry"] {
         <Local-Reference { @spelling = "SymmetryLemma"; }
       }
-    }
-    when [$p = "reflexivity"] {
-      <Straightforward-Justification {
+      when [$p = "reflexivity"] {
         <Local-Reference { @spelling = "ReflexivityLemma"; }
       }
-    }
-    when [$p = "irreflexivity"] {
-      <Straightforward-Justification {
+      when [$p = "irreflexivity"] {
         <Local-Reference { @spelling = "IrreflexivityLemma"; }
       }
+      otherwise {
+        die (#message = `concat ("Don't know how to handle a '", $p, "' property.")`);
+      }
     }
-    otherwise {
-      die (#message = `concat ("Don't know how to handle a '", $p, "' property.")`);
+    for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
     }
   }
 }
@@ -1675,6 +1786,89 @@ tpl
                 }
               }
             }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "involutiveness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "InvolutivenessLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+	$shape      = `$fd/@shape`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $type       = `$fd/Type-Specification/*[1]`;
+        $pattern    = `$fd/Operation-Functor-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `.`;
+                universally-bind-segments-involutiveness
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #type     = $type,
+                   #it       = $it,
+		   #shape    = $shape,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
             apply [*];
           }
         }
