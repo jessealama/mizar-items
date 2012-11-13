@@ -1013,7 +1013,7 @@ sub load_lemmas {
     my %fragment_of_lemma_table = %{$self->get_fragment_of_lemma_table ()};
 
     my $article_itemized_wsx
-	= "${local_db_location}/${article_name}.wsx.split.itemized";
+	= "${local_db_location}/${article_name}.wsx.itemized";
 
     if (! ensure_readable_file ($article_itemized_wsx)) {
 	croak ('Error: the split-and-itemized .wsx for ', $article_name, ' does not exist at the expected location (', $article_itemized_wsx, '.');
