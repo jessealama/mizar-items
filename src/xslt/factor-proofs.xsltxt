@@ -260,10 +260,10 @@ tpl universally-bind-segments-existence (#segments,
     <Universal-Quantifier-Formula {
       apply [$segment];
       universally-bind-segments-existence (#segments   = $rest,
-      					   #it         = $it,
-	                                   #formula    = $formula,
-	                                   #type       = $type,
-	                                   #assumption = $assumption);
+                                           #it         = $it,
+                                           #formula    = $formula,
+                                           #type       = $type,
+                                           #assumption = $assumption);
     }
   }
 }
@@ -273,7 +273,7 @@ tpl universally-bind-segments-uniqueness (#segments,
                                           #variable-2,
                                           #formula,
                                           #type,
-					  #assumption) {
+                                          #assumption) {
   if [count ($segments) = 0] {
     <Universal-Quantifier-Formula {
       <Explicitly-Qualified-Segment {
@@ -331,7 +331,7 @@ tpl universally-bind-segments-uniqueness (#segments,
                                             #variable-2 = $variable-2,
                                             #formula    = $formula,
                                             #type       = $type,
-					    #assumption = $assumption);
+                                            #assumption = $assumption);
     }
   }
 }
@@ -353,6 +353,67 @@ tpl universally-bind-segments-compatibility (#segments,
         (#segments         = $rest,
          #original-formula = $original-formula,
          #new-formula      = $new-formula);
+    }
+  }
+}
+
+tpl universally-bind-segments-commutativity (#segments,
+                                             #formula,
+                                             #type,
+                                             #it,
+                                             #arg-type,
+                                             #arg-1,
+                                             #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = $it; }
+        }
+
+        if [$arg-type] {
+          apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+
+      }
+
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = `$arg-1`; }
+            <Variable { @spelling = `$arg-2`; }
+          }
+
+          if [$arg-type] {
+            apply [$arg-type];
+          } else {
+            <Standard-Type { @nr = "1"; @spelling = "set"; }
+          }
+
+        }
+        <Conditional-Formula {
+          apply [$formula] (#it = $it) mode="replace-it-term";
+          apply [$formula] (#x  = $arg-1,
+	  		    #y  = $arg-2,
+			    #it = $it) mode="swap";
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-commutativity (#segments = $rest,
+                                               #formula  = $formula,
+                                               #type     = $type,
+                                               #it       = $it,
+                                               #arg-type = $arg-type,
+                                               #arg-1    = $arg-1,
+                                               #arg-2    = $arg-2);
     }
   }
 }
@@ -554,6 +615,32 @@ tpl [it-Term] (#it) mode="replace-it-term" {
   }
 }
 
+tpl [*] (#x, #y, #it) mode="swap" {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#x = $x, #y = $y, #it = $it) mode="swap";
+  }
+}
+
+tpl [it-Term] (#x, #y, #it) mode="swap" {
+  <Simple-Term {
+    @spelling = $it;
+  }
+}
+
+tpl [Simple-Term] (#x, #y, #it) mode="swap" {
+  $s = `@spelling`;
+  <Simple-Term {
+    for-each [@*] { copy-of `.`; }
+    choose {
+      when [$s = $x] { @spelling = $y; }
+      when [$s = $y] { @spelling = $x; }
+      otherwise { @spelling = $s; }
+    }
+  }
+}
+
 tpl [*] mode="straightforward-correctness" {
   $n = `name (.)`;
   <$n {
@@ -675,7 +762,7 @@ tpl
       universally-bind-segments-existence (#segments   = $segments,
                                            #formula    = $definiens,
                                            #type       = $type,
-					   #it         = $existential-variable);
+                                           #it         = $existential-variable);
     }
     for-each [*[position() = last()]] {
       choose {
@@ -809,12 +896,14 @@ tpl
     <Proposition {
       <Label { @spelling = "UniquenessLemma"; }
       for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-        $locus = `Item[@kind = "Loci-Declaration"]`;
-        $segments = `$locus/Explicitly-Qualified-Segment`;
-        $fd = `Item[@kind = "Functor-Definition"]`;
-        $formula = `$fd/Definiens/*[position() = last()]`;
-        $type = `$fd/Type-Specification/*[1]`;
- $assumption = `Item[@kind = "Assumption"]/Single-Assumption/Proposition/*[position() = last()]`;
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $type       = `$fd/Type-Specification/*[1]`;
+        $assumption = `Item[@kind = "Assumption"]/Single-Assumption/Proposition/*[position() = last()]`;
+
         universally-bind-segments-uniqueness
           (#segments   = $segments,
            #variable-1 = $uniqueness-variable-1,
@@ -945,4 +1034,89 @@ tpl
 ]
 {
   die (#message = "We do not handle uniqueness conditions for functor definitions that have assumptions.");
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "commutativity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CommutativityLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $type       = `$fd/Type-Specification/*[1]`;
+        $pattern    = `$fd/Operation-Functor-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-commutativity
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #type     = $type,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
 }
