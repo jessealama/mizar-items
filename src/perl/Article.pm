@@ -2968,6 +2968,7 @@ sub without_reservations {
     $self->mglue ();
     $self->accom ();
     $self->wsmparser ();
+    $self->msmprocessor ();
 
     return 1;
 
