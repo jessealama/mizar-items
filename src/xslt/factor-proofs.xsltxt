@@ -372,7 +372,7 @@ tpl
     @shape = "Compact-Statement";
     <Proposition {
       <Label { @spelling = "CompatibilityLemma"; }
-      for-each [Block[@kind = "Definitional-Block"]] {
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
        $locus = `Item[@kind = "Loci-Declaration"]`;
        $segments = `$locus/Explicitly-Qualified-Segment`;
        $pd = `Item[@kind = "Predicate-Definition"]`;
@@ -384,18 +384,28 @@ tpl
           #new-formula      = $new-formula);
       }
     }
-    <Block {
-      @kind = "Proof";
-      for-each [Block[@kind = "Definitional-Block"]] {
-        for-each [Item[@kind = "Loci-Declaration"]] {
-          <Item {
-            @kind = "Generalization";
-            apply [Explicitly-Qualified-Segment];
-          }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
         }
-        for-each [Item[    @kind      = "Correctness-Condition"
-                       and @condition = "compatibility"]] {
-          for-each [Block[@kind = "Proof"]] {
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
             apply [*];
           }
         }
@@ -859,7 +869,6 @@ tpl
   ]
 ]
 {
-  msg "hey assumption uniqueness";
   $uniqueness-variable-1 = fresh-variable (#prefix = "A");
   $uniqueness-variable-2 = fresh-variable (#prefix = "B");
   <Item {
