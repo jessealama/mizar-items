@@ -2577,6 +2577,15 @@ sub itemize {
     $article_in_target_dir->msmify ();
     $article_in_target_dir->wsmparser ();
 
+    print 'Split again', $article_basename, ': ';
+    apply_stylesheet ($split_stylesheet,
+		      $article_wsx_in_target_dir,
+		      $article_wsx_in_target_dir)
+	or
+	    croak ('Error: xsltproc did not exit cleanly when applying the split stylesheet at ', $split_stylesheet, ' to ', $article_wsx_in_target_dir, '.', "\n");
+
+    print 'done.', "\n";
+
     print 'Itemize ', $article_basename, ': ';
     apply_stylesheet ($itemize_stylesheet,
 		      $article_wsx_in_target_dir,
