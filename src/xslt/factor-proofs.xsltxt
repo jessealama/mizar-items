@@ -1929,3 +1929,85 @@ tpl
 
   }
 }
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "reflexivity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "ReflexivityLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-reflexivity
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
