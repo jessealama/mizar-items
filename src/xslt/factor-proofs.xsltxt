@@ -1216,47 +1216,6 @@ tpl [*] mode="straightforward-correctness" {
   }
 }
 
-tpl
-[
-  Block
-  [
-        @kind = "Proof"
-    and parent::Item
-        [
-          @kind = "Correctness-Condition"
-        ]
-  ]
-] mode="straightforward-correctness"
-{
-  $c = `parent::Item[@kind = "Correctness-Condition"]/@condition`;
-  <Straightforward-Justification {
-    choose {
-      when [$c = "existence"] {
-        <Local-Reference { @spelling = "ExistenceLemma"; }
-      }
-      when [$c = "uniqueness"] {
-        <Local-Reference { @spelling = "UniquenessLemma"; }
-      }
-      when [$c = "coherence"] {
-        <Local-Reference { @spelling = "CoherenceLemma"; }
-      }
-      when [$c = "compatibility"] {
-        <Local-Reference { @spelling = "CompatibilityLemma"; }
-      }
-      otherwise {
-        die (#message = `concat ("Don't know how to handle a '", $c, "' correctness condition.")`);
-      }
-    }
-    for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
-        <Local-Reference {
-          @spelling = `@spelling`;
-        }
-      }
-    }
-  }
-}
-
 tpl [Item[@kind = "Property" and @property = "reflexivity"]] mode="local-reference"
 {
   <Local-Reference { @spelling = $reflexivity-lemma; }
@@ -1297,9 +1256,34 @@ tpl [Item[@kind = "Property" and @property = "projectivity"]] mode="local-refere
   <Local-Reference { @spelling = $projectivity-lemma; }
 }
 
-tpl [Item[@kind = "Property" and @property = "projectivity"]] mode="local-reference"
+tpl [Item[@kind = "Property" and @property = "commutativity"]] mode="local-reference"
 {
-  <Local-Reference { @spelling = $projectivity-lemma; }
+  <Local-Reference { @spelling = $commutativity-lemma; }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "consistency"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $consistency-lemma; }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "existence"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $existence-lemma; }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "uniqueness"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $uniqueness-lemma; }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "compatibility"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $compatibility-lemma; }
+}
+
+tpl [Item[@kind = "Correctness-Condition" and @condition = "coherence"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $coherence-lemma; }
 }
 
 tpl
@@ -1341,6 +1325,55 @@ mode="straightforward-correctness"
 {
   <Straightforward-Justification {
     apply [parent::Item[@kind = "Property"]] mode="local-reference";
+    for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Block
+  [
+        @kind = "Proof"
+    and parent::Item
+        [
+          @kind = "Correctness-Condition"
+        ]
+  ]
+]
+mode="straightforward-correctness"
+{
+  <Straightforward-Justification {
+    apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
+    for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Straightforward-Justification
+  [
+    parent::Item
+    [
+      @kind = "Correctness-Condition"
+    ]
+  ]
+]
+mode="straightforward-correctness"
+{
+  <Straightforward-Justification {
+    apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
       for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
         <Local-Reference {
@@ -2293,6 +2326,34 @@ tpl
         }
       }
     }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+          @kind  = "Functor-Definition"
+        ]
+  ]
+]
+{
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $consistency-lemma; }
+      <Negated-Formula {
+        <Contradiction;
+      }
+    }
+
+    <Straightforward-Justification;
 
   }
 }
