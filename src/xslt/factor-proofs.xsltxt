@@ -839,6 +839,52 @@ tpl universally-bind-segments-symmetry (#segments,
   }
 }
 
+tpl universally-bind-segments-connectedness (#segments,
+                                             #formula,
+                                             #it,
+                                             #arg-type,
+                                             #arg-1,
+                                             #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = `$arg-1`; }
+          <Variable { @spelling = `$arg-2`; }
+        }
+
+         if [$arg-type] {
+           apply [$arg-type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+      }
+
+      <Conditional-Formula {
+        <Negated-Formula {
+          apply [$formula];
+        }
+        apply [$formula] (#x  = $arg-1,
+                          #y  = $arg-2,
+                          #it = $it) mode="swap";
+      }
+    }
+
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-connectedness (#segments = $rest,
+                                               #formula  = $formula,
+                                               #it       = $it,
+                                               #arg-type = $arg-type,
+                                               #arg-1    = $arg-1,
+                                               #arg-2    = $arg-2);
+    }
+  }
+}
+
 tpl universally-bind-segments-asymmetry (#segments,
                                          #formula,
                                          #it,
@@ -1038,7 +1084,8 @@ tpl
     and preceding-sibling::Item
         [
               @kind = "Predicate-Definition"
-          and Redefine]]] {
+          and Redefine
+	  and not(Definiens)]]] {
   $p = `@property`;
   msg `concat ("Unsupported property ", $p, " of a redefined predicate.")`;
 }
@@ -1290,7 +1337,9 @@ tpl
           and Item
               [
                     @kind = "Predicate-Definition"
-                and not(Redefine and parent::Block/Item[@kind = "Property"])
+                and not(    Redefine
+		        and not(Definiens)
+			and parent::Block/Item[@kind = "Property"])
               ]
         ]
   ]
@@ -2507,6 +2556,89 @@ tpl
                 }
               }
             }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "connectedness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and not(Redefine and not(Definiens))
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $connectedness-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `.`;
+                universally-bind-segments-connectedness
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
             apply [*];
           }
         }
