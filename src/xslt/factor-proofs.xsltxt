@@ -469,6 +469,31 @@ tpl universally-bind-segments-commutativity (#segments,
   }
 }
 
+tpl universally-bind-segments-coherence (#segments,
+                                         #formula,
+                                         #type) {
+  if [count ($segments) = 0] {
+    <Attributive-Formula {
+      apply [$formula];
+
+      if [$type] {
+        apply [$type];
+      } else {
+        <Standard-Type { @nr = "1"; @spelling = "set"; }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-coherence (#segments = $rest,
+                                           #formula  = $formula,
+                                           #type     = $type);
+    }
+  }
+}
+
 tpl universally-bind-segments-involutiveness (#segments,
                                               #formula,
                                               #type,
@@ -854,27 +879,59 @@ tpl
     and @condition = "coherence"
     and preceding-sibling::Item
         [
-              @kind = "Functor-Definition"
+              @kind  = "Functor-Definition"
+          and @shape = "Equals"
 	  and not(Redefine)
         ]
   ]
 ]
 {
-  choose {
-    when [Proof] {
-      die (#message = "Don't know how to handle a coherence item justified by a proof.");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CoherenceLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $type       = `$fd/Type-Specification/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-coherence
+          (#segments = $segments,
+           #formula  = $formula,
+           #type     = $type);
+      }
     }
-    when [Straightforward-Justification and count (Straightforward-Justification/*) = 1] {
-      // skip: there's already a single lemma/theorem/scheme that
-      // justifies this
-    }
-    when [Straightforward-Justification and count (Straightforward-Justification/*) = 0] {
-      // skip: this is obvious for the checker
-    }
-    when [Straightforward-Justification and count (Straightforward-Justification/*) > 1] {
-      die (#message = "Don't know how to handle a coherence item justified by multiple items.");
+
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
     }
   }
+
 }
 
 tpl
@@ -895,14 +952,22 @@ tpl
 ]
 {
   for-each [Block[@kind = "Definitional-Block"]] {
-    for-each [Item[@kind = "Correctness-Condition" and @condition] | Item[@kind = "Property" and @property]] {
-      if [self::Item[@kind = "Correctness-Condition"]] {
-        $c = `@condition`;
-        msg `concat ("working on condition ", $c)`;
-      } else {
-        $p = `@property`;
-        msg `concat ("working on property ", $p)`;
+    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+
+      choose {
+        when [self::Item[@kind = "Correctness-Condition"]] {
+          $c = `@condition`;
+          msg `concat ("working on condition ", $c)`;
+        }
+        when [self::Item[@kind = "Property"]] {
+          $p = `@property`;
+          msg `concat ("working on property ", $p)`;
+        }
+        when [self::Item[@kind = "Correctness"]] {
+          msg "working on correctness";
+        }
       }
+
       apply [.];
       msg "done.";
     }
@@ -914,17 +979,18 @@ tpl
       <Block {
         for-each [@*] { copy-of `.`; }
         for-each [*] {
-          if [self::Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
-            // ignore
-          } else {
-            apply [.];
+          choose {
+            when [self::Item[@kind = "Correctness-Condition"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            when [self::Item[@kind = "Property"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            otherwise {
+              apply [.];
+            }
           }
         }
-
-         for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
-           apply [.] mode="straightforward-correctness";
-         }
-
       }
     }
   }
@@ -1914,18 +1980,27 @@ tpl
         when [self::Block[@kind = "Proof"]] {
           <Block {
             for-each [@*] { copy-of `.`; }
-            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-            //   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
-            //     if [self::Item[@kind = "Loci-Declaration"]] {
-            //       <Item {
-            //         @kind = "Generalization";
-            //         apply [*];
-            //       }
-            //     } else {
-            //       apply [.];
-            //     }
-            //   }
-            // }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              $fd      = `Item[@kind = "Functor-Definition"]`;
+              $pattern = `$fd/Operation-Functor-Pattern`;
+              $block = `.`;
+              for-each [$pattern] {
+                $loci = `descendant::Locus`;
+                for-each [$block] {
+                  for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                  if [self::Item[@kind = "Loci-Declaration" and not(@spelling = $loci/@spelling)]] {
+                    <Item {
+                      @kind = "Generalization";
+                      apply [*];
+                    }
+                  } else {
+                    apply [.];
+                  }
+                }
+              }
+
+              }
+            }
             apply [*];
           }
         }
