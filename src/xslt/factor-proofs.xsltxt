@@ -3,6 +3,16 @@ import "utils/die.xsl";
 import "utils/copy.xsl";
 output method="xml" indent="yes";
 
+$projectivity-lemma   = "ProjectivityLemma";
+$involutiveness-lemma = "InvolutivenessLemma";
+$idempotence-lemma    = "IdempotenceLemma";
+$commutativity-lemma  = "CommutativityLemma";
+$reflexivity-lemma    = "ReflexivityLemma";
+$irreflexivity-lemma  = "IrreflexivityLemma";
+$symmetry-lemma       = "SymmetryLemma";
+$asymmetry-lemma      = "AsymmetryLemma";
+$connectedness-lemma  = "ConnectednessLemma";
+
 tpl try-fresh-variable (#prefix, #try) {
   $trial-name = `concat ($prefix, $try)`;
   $next-try = `$try + 1`;
@@ -568,41 +578,49 @@ tpl universally-bind-segments-idempotence (#segments,
                                            #formula,
                                            #type,
                                            #it,
+					   #shape,
                                            #arg-type,
                                            #arg-1,
                                            #arg-2) {
   if [count ($segments) = 0] {
-    <Universal-Quantifier-Formula {
+    choose {
+      when [$shape = "Means"] {
+        <Universal-Quantifier-Formula {
 
-      <Explicitly-Qualified-Segment {
-        <Variables {
-          <Variable { @spelling = $it; }
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable { @spelling = $it; }
+            }
+
+            if [$arg-type] {
+              apply [$arg-type];
+            } else {
+              <Standard-Type { @nr = "1"; @spelling = "set"; }
+            }
+
+          }
+
+          <Universal-Quantifier-Formula {
+            <Explicitly-Qualified-Segment {
+              <Variables {
+                <Variable { @spelling = `$arg-1`; }
+              }
+
+              if [$arg-type] {
+                apply [$arg-type];
+              } else {
+                <Standard-Type { @nr = "1"; @spelling = "set"; }
+              }
+
+            }
+            apply [$formula] (#x  = $arg-2,
+                              #y  = $arg-1,
+                              #it = $arg-1) mode="replace";
+          }
         }
-
-        if [$arg-type] {
-          apply [$arg-type];
-        } else {
-          <Standard-Type { @nr = "1"; @spelling = "set"; }
-        }
-
       }
-
-      <Universal-Quantifier-Formula {
-        <Explicitly-Qualified-Segment {
-          <Variables {
-            <Variable { @spelling = `$arg-1`; }
-          }
-
-          if [$arg-type] {
-            apply [$arg-type];
-          } else {
-            <Standard-Type { @nr = "1"; @spelling = "set"; }
-          }
-
-        }
-        apply [$formula] (#x  = $arg-2,
-                          #y  = $arg-1,
-                          #it = $arg-1) mode="replace";
+      when [$shape = "Equals"] {
+        die (#message = "We don't yet handle idempotence for functors defined by an equation.");
       }
     }
   } else {
@@ -1212,6 +1230,51 @@ tpl
   }
 }
 
+tpl [Item[@kind = "Property" and @property = "reflexivity"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $reflexivity-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "irreflexivity"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $irreflexivity-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "symmetry"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $symmetry-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "asymmetry"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $asymmetry-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "connectedness"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $connectedness-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "projectivity"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $projectivity-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "involutiveness"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $involutiveness-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "projectivity"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $projectivity-lemma; }
+}
+
+tpl [Item[@kind = "Property" and @property = "projectivity"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $projectivity-lemma; }
+}
+
 tpl
 [
   Block
@@ -1225,40 +1288,14 @@ tpl
 ]
 mode="straightforward-correctness"
 {
-  $p = `parent::Item[@kind = "Property"]/@property`;
-  choose {
-    when [$p = "idempotence"] {
-      <Straightforward-Justification {
-        <Local-Reference { @spelling = "IdempotenceLemma"; }
+  <Straightforward-Justification {
+    apply [parent::Item[@kind = "Property"]] mode="local-reference";
+    for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
       }
-    }
-    when [$p = "commutativity"] {
-      <Straightforward-Justification {
-        <Local-Reference { @spelling = "CommutativityLemma"; }
-      }
-    }
-   when [$p = "involutiveness"] {
-      <Straightforward-Justification {
-        <Local-Reference { @spelling = "InvolutivenessLemma"; }
-      }
-    }
-    when [$p = "asymmetry"] {
-      <Straightforward-Justification {
-        <Local-Reference { @spelling = "AsymmetryLemma"; }
-      }
-    }
-    when [$p = "reflexivity"] {
-      <Straightforward-Justification {
-        <Local-Reference { @spelling = "ReflexivityLemma"; }
-      }
-    }
-    when [$p = "irreflexivity"] {
-      <Straightforward-Justification {
-        <Local-Reference { @spelling = "IrreflexivityLemma"; }
-      }
-    }
-    otherwise {
-      die (#message = `concat ("Don't know how to handle a '", $p, "' property.")`);
     }
   }
 }
@@ -1275,34 +1312,8 @@ tpl
 ]
 mode="straightforward-correctness"
 {
-  $p = `parent::Item[@kind = "Property"]/@property`;
   <Straightforward-Justification {
-    choose {
-      when [$p = "idempotence"] {
-        <Local-Reference { @spelling = "IdempotenceLemma"; }
-      }
-      when [$p = "involutiveness"] {
-        <Local-Reference { @spelling = "InvolutivenessLemma"; }
-      }
-      when [$p = "commutativity"] {
-        <Local-Reference { @spelling = "CommutativityLemma"; }
-      }
-      when [$p = "asymmetry"] {
-        <Local-Reference { @spelling = "AsymmetryLemma"; }
-      }
-     when [$p = "symmetry"] {
-        <Local-Reference { @spelling = "SymmetryLemma"; }
-      }
-      when [$p = "reflexivity"] {
-        <Local-Reference { @spelling = "ReflexivityLemma"; }
-      }
-      when [$p = "irreflexivity"] {
-        <Local-Reference { @spelling = "IrreflexivityLemma"; }
-      }
-      otherwise {
-        die (#message = `concat ("Don't know how to handle a '", $p, "' property.")`);
-      }
-    }
+    apply [parent::Item[@kind = "Property"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
       for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
         <Local-Reference {
@@ -1768,11 +1779,12 @@ tpl
       <Label { @spelling = "IdempotenceLemma"; }
       for-each [ancestor::Block[@kind = "Definitional-Block"]] {
 
-        $locus      = `Item[@kind = "Loci-Declaration"]`;
-        $fd         = `Item[@kind = "Functor-Definition"]`;
-        $formula    = `$fd/Definiens/*[position() = last()]`;
-        $type       = `$fd/Type-Specification/*[1]`;
-        $pattern    = `$fd/Operation-Functor-Pattern`;
+        $locus   = `Item[@kind = "Loci-Declaration"]`;
+        $fd      = `Item[@kind = "Functor-Definition"]`;
+        $formula = `$fd/Definiens/*[position() = last()]`;
+        $type    = `$fd/Type-Specification/*[1]`;
+        $pattern = `$fd/Operation-Functor-Pattern`;
+	$shape   = `$fd/@shape`;
         for-each [$pattern] {
           $arg-1 = `descendant::Locus[1]`;
           $arg-2 = `descendant::Locus[2]`;
@@ -1788,6 +1800,7 @@ tpl
                 universally-bind-segments-idempotence
                   (#segments = $segments,
                    #formula  = $formula,
+		   #shape    = $shape,
                    #type     = $type,
                    #it       = $it,
                    #arg-type = $arg-type,
@@ -1849,7 +1862,7 @@ tpl
     @kind = "Regular-Statement";
     @shape = "Compact-Statement";
     <Proposition {
-      <Label { @spelling = "InvolutivenessLemma"; }
+      <Label { @spelling = $involutiveness-lemma; }
       for-each [ancestor::Block[@kind = "Definitional-Block"]] {
 
         $locus      = `Item[@kind = "Loci-Declaration"]`;
