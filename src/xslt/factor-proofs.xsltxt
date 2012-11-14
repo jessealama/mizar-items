@@ -1585,7 +1585,7 @@ mode="straightforward-correctness"
   <Straightforward-Justification {
     apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label | Item[@kind = "Assumption"]/Collective-Assumption/Conditions/Proposition/Label] {
         <Local-Reference {
           @spelling = `@spelling`;
         }
@@ -1609,7 +1609,7 @@ mode="straightforward-correctness"
   <Straightforward-Justification {
     apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label | Item[@kind = "Assumption"]/Collective-Assumption/Conditions/Proposition/Label] {
         <Local-Reference {
           @spelling = `@spelling`;
         }
@@ -1628,38 +1628,12 @@ tpl
         [
           @kind = "Functor-Definition"
           and @shape = "Means"
-          and preceding-sibling::Item
-              [
-                @kind = "Assumption"
-                and not(Single-Assumption)
-              ]
+          and count(preceding-sibling::Item[@kind = "Assumption"]) > 1
         ]
   ]
 ]
 {
-  die (#message = "Don't know how to handle non-Single-Assumption definitions.");
-}
-
-tpl
-[
-  Definiens
-  [
-    @kind = "Simple-Definiens"
-    and @shape = "Formula-Expression"
-    and parent::Item
-        [
-          @kind = "Functor-Definition"
-          and @shape = "Means"
-          and count(preceding-sibling::Item
-                    [
-                      @kind = "Assumption"
-                      and Single-Assumption
-                    ]) > 1
-        ]
-  ]
-]
-{
-  die (#message = "Don't know how to handle multiple Single-Assumption definitions.");
+  die (#message = "Don't know how to handle multiple Assumption definitions.");
 }
 
 tpl
@@ -1831,7 +1805,6 @@ tpl
         $fd         = `Item[@kind = "Functor-Definition"]`;
         $formula    = `$fd/Definiens`;
         $type       = `$fd/Type-Specification/*[1]`;
-        $assumption = `Item[@kind = "Assumption"]/Single-Assumption/Proposition/*[position() = last()]`;
 
         universally-bind-segments-uniqueness
           (#segments   = $segments,
