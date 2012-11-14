@@ -2586,6 +2586,10 @@ sub itemize {
 
     print 'done.', "\n";
 
+    if (! $article_in_target_dir->is_verifiable ()) {
+	confess 'The transformed article is not verifiable.';
+    }
+
     print 'Itemize ', $article_basename, ': ';
     apply_stylesheet ($itemize_stylesheet,
 		      $article_wsx_in_target_dir,
