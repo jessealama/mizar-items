@@ -495,11 +495,42 @@ tpl universally-bind-segments-uniqueness (#segments,
 
 tpl universally-bind-segments-compatibility (#segments,
                                              #original-formula,
-                                             #new-formula) {
+                                             #new-formula,
+					     #it,
+					     #value-type)
+{
   if [count ($segments) = 0] {
-    <Biconditional-Formula {
-      apply [$original-formula];
-      apply [$new-formula];
+    if [$it] {
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = $it; }
+          }
+
+          if [$value-type] {
+            apply [$value-type];
+          } else {
+            <Standard-Type { @nr = "1"; @spelling = "set"; }
+          }
+        }
+        <Biconditional-Formula {
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments {
+              <Simple-Term { @spelling = $it; }
+            }
+            <Arguments {
+              apply [$original-formula];
+            }
+          }
+          apply [$new-formula] (#it = $it) mode="replace-it-term";
+        }
+      }
+    } else {
+      <Biconditional-Formula {
+        apply [$original-formula];
+        apply [$new-formula];
+      }
     }
   } else {
     $segment = `$segments[1]`;
@@ -509,7 +540,9 @@ tpl universally-bind-segments-compatibility (#segments,
       universally-bind-segments-compatibility
         (#segments         = $rest,
          #original-formula = $original-formula,
-         #new-formula      = $new-formula);
+         #new-formula      = $new-formula,
+	 #it               = $it,
+	 #value-type       = $value-type);
     }
   }
 }
@@ -1075,6 +1108,72 @@ tpl
 [
   Item
   [
+        @kind      = "Correctness-Condition"
+    and @condition = "compatibility"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and Redefine
+	  and Definiens
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $compatibility-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+       $locus = `Item[@kind = "Loci-Declaration"]`;
+       $segments = `$locus/Explicitly-Qualified-Segment`;
+       $fd = `Item[@kind = "Functor-Definition"]`;
+       $original-formula = `$fd/Operation-Functor-Pattern`;
+       $new-formula = `$fd/Definiens/*[position() = last()]`;
+       $type = `$fd/Type-Specification/*[1]`;
+       universally-bind-segments-compatibility
+         (#segments         = $segments,
+          #original-formula = $original-formula,
+          #new-formula      = $new-formula,
+	  #it               = $it,
+	  #value-type       = $type);
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
         @kind = "Property"
     and (   @property = "reflexivity"
          or @property = "irreflexivity"
@@ -1271,24 +1370,6 @@ tpl
       }
     }
   }
-}
-
-tpl
-[
-  Item
-  [
-        @kind      = "Correctness-Condition"
-    and preceding-sibling::Item
-        [
-              @kind  = "Functor-Definition"
-          and Redefine
-        ]
-  ]
-]
-{
-  $c = `@condition`;
-  msg `concat ("Warning: unsupported correctness condition '", $c, "' for a redefined functor.")`;
-  apply [.] mode="copy";
 }
 
 tpl
