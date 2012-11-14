@@ -1053,7 +1053,8 @@ tpl
         [
               @kind  = "Functor-Definition"
           and @shape = "Equals"
-	  and not(Redefine)
+          and not(Redefine)
+          and count(preceding-sibling::Item[@kind = "Assumption"]) = 0
         ]
   ]
 ]
@@ -1070,10 +1071,9 @@ tpl
         $formula    = `$fd/Definiens/*[position() = last()]`;
         $type       = `$fd/Type-Specification/*[1]`;
         $segments   = `$locus/Explicitly-Qualified-Segment`;
-        universally-bind-segments-coherence
-          (#segments = $segments,
-           #formula  = $formula,
-           #type     = $type);
+        universally-bind-segments-coherence (#segments   = $segments,
+                                             #formula    = $formula,
+                                             #type       = $type);
       }
     }
 
@@ -1104,6 +1104,64 @@ tpl
     }
   }
 
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "coherence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 1
+         ]
+  ]
+]
+{
+  $definiens = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]/Definiens/*[position() = last()]`;
+  $existential-variable = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Diffuse-Statement";
+    <Label { @spelling = $coherence-lemma; }
+    <Block {
+      @kind = "Now-Reasoning";
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+        for-each [Item[@kind = "Loci-Declaration" or @kind = "Choice-Statement" or @kind = "Assumption"]] {
+          choose {
+            when [self::Item[@kind = "Loci-Declaration"]] {
+              <Item { @kind = "Generalization"; apply [*]; }
+            }
+            otherwise {
+              // nothing special to do; apply the default template
+              apply [.];
+            }
+          }
+        }
+      }
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        $fd = `preceding-sibling::Item[@kind = "Functor-Definition"]`;
+        $formula = `$fd/Definiens/*[position() = last()]`;
+        $type = `$fd/Type-Specification/*[1]`;
+        <Proposition {
+	  <Attributive-Formula {
+            apply [$formula];
+            if [$type] {
+              apply [$type];
+            } else {
+              <Standard-Type { @nr = "1"; @spelling = "set"; }
+            }
+
+          }
+        }
+        apply [*[position() = last()]];
+      }
+    }
+  }
 }
 
 tpl
@@ -1478,7 +1536,7 @@ mode="straightforward-correctness"
   <Straightforward-Justification {
     apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label] {
         <Local-Reference {
           @spelling = `@spelling`;
         }
@@ -1502,7 +1560,7 @@ mode="straightforward-correctness"
   <Straightforward-Justification {
     apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label] {
         <Local-Reference {
           @spelling = `@spelling`;
         }
@@ -1634,7 +1692,7 @@ tpl
   <Item {
     @kind = "Regular-Statement";
     @shape = "Diffuse-Statement";
-    <Label { @spelling = "ExistenceLemma"; }
+    <Label { @spelling = $existence-lemma; }
     <Block {
       @kind = "Now-Reasoning";
       for-each [ancestor::Block[@kind = "Definitional-Block"]] {
@@ -1885,7 +1943,7 @@ tpl
         $formula = `$fd/Definiens/*[position() = last()]`;
         $type    = `$fd/Type-Specification/*[1]`;
         $pattern = `$fd/Operation-Functor-Pattern`;
-	$shape   = `$fd/@shape`;
+        $shape   = `$fd/@shape`;
         for-each [$pattern] {
           $arg-1 = `descendant::Locus[1]`;
           $arg-2 = `descendant::Locus[2]`;
@@ -1923,18 +1981,18 @@ tpl
         when [self::Block[@kind = "Proof"]] {
           <Block {
             for-each [@*] { copy-of `.`; }
-            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
-                if [self::Item[@kind = "Loci-Declaration"]] {
-                  <Item {
-                    @kind = "Generalization";
-                    apply [*];
-                  }
-                } else {
-                  apply [.];
-                }
-              }
-            }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
             apply [*];
           }
         }
@@ -1972,7 +2030,7 @@ tpl
         $formula = `$fd/Definiens/*[position() = last()]`;
         $type    = `$fd/Type-Specification/*[1]`;
         $pattern = `$fd/Operation-Functor-Pattern`;
-	$shape   = `$fd/@shape`;
+        $shape   = `$fd/@shape`;
         for-each [$pattern] {
           $arg-1 = `descendant::Locus[1]`;
           $arg-2 = `descendant::Locus[2]`;
@@ -1988,7 +2046,7 @@ tpl
                 universally-bind-segments-idempotence
                   (#segments = $segments,
                    #formula  = $formula,
-		   #shape    = $shape,
+                   #shape    = $shape,
                    #type     = $type,
                    #it       = $it,
                    #arg-type = $arg-type,
@@ -2055,7 +2113,7 @@ tpl
 
         $locus      = `Item[@kind = "Loci-Declaration"]`;
         $fd         = `Item[@kind = "Functor-Definition"]`;
-	$shape      = `$fd/@shape`;
+        $shape      = `$fd/@shape`;
         $formula    = `$fd/Definiens/*[position() = last()]`;
         $type       = `$fd/Type-Specification/*[1]`;
         $pattern    = `$fd/Operation-Functor-Pattern`;
@@ -2074,7 +2132,7 @@ tpl
                    #formula  = $formula,
                    #type     = $type,
                    #it       = $it,
-		   #shape    = $shape,
+                   #shape    = $shape,
                    #arg-type = $arg-type,
                    #arg-1    = $arg-1-spelling);
               }
@@ -2218,7 +2276,7 @@ tpl
     and preceding-sibling::Item
         [
               @kind  = "Predicate-Definition"
-	  and not(Redefine)
+          and not(Redefine)
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
         ]
   ]
@@ -2301,7 +2359,7 @@ tpl
     and preceding-sibling::Item
         [
               @kind  = "Predicate-Definition"
-	  and not(Redefine)
+          and not(Redefine)
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
         ]
   ]
@@ -2384,7 +2442,7 @@ tpl
     and preceding-sibling::Item
         [
               @kind  = "Predicate-Definition"
-	  and not(Redefine)
+          and not(Redefine)
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
         ]
   ]
@@ -2476,8 +2534,16 @@ tpl
     @shape = "Compact-Statement";
     <Proposition {
       <Label { @spelling = $consistency-lemma; }
-      <Negated-Formula {
-        <Contradiction;
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = "x"; }
+          }
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+        <Negated-Formula {
+          <Contradiction;
+        }
       }
     }
 
