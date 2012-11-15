@@ -516,6 +516,14 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
       (let ((sorted-files (sort files #'< :key #'file-write-date)))
 	sorted-files))))
 
+(defun native-namestring (path)
+  #+ccl
+  (ccl:native-translated-namestring xml-path-1)
+  #+sbcl
+  (sb-ext:native-namestring (path))
+  #-(or ccl sbcl)
+  (error "We can compute native pathnames only for CCL and SBCL."))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Regular expressions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
