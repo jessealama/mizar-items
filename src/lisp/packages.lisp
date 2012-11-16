@@ -18,6 +18,7 @@
 		#:copy-file
 		#:length=
 		#:disjoin
+		#:read-file-into-string
 		#:write-string-into-file
 		#:switch)
   (:import-from :cl-fad
