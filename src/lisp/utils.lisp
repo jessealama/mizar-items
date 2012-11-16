@@ -520,7 +520,7 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
   #+ccl
   (ccl:native-translated-namestring xml-path-1)
   #+sbcl
-  (sb-ext:native-namestring (path))
+  (sb-ext:native-namestring path)
   #-(or ccl sbcl)
   (error "We can compute native pathnames only for CCL and SBCL."))
 
