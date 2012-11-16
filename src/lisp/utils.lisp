@@ -543,4 +543,12 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 (defun tokenize (list)
   (format nil ",~{~a~^,~}," list))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; XML
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun parse-xml-file (path)
+  (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
+    (dom:child-nodes (dom:document-element doc))))
+
 ;;; utils.lisp ends here
