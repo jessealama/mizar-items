@@ -48,40 +48,30 @@
 	(call-next-method)
 	(error "We cannot find ~a at its expected location~%~%  ~a~%" tool tool-path))))
 
-(defmacro with-mizfiles (&body body)
-  #+ccl
-  (let ((old-mizfiles (gensym)))
-    `(let ((,old-mizfiles (ccl:getenv "MIZFILES")))
-       (ccl:setenv "MIZFILES" (namestring (mizfiles)))
-       (let ((vals (multiple-value-list (progn ,@body))))
-	 (ccl:setenv "MIZFILES" ,old-mizfiles)
-	 (apply #'values vals)))))
-
 (defmethod run-mizar-tool (tool flags (article pathname))
   #+ccl
   (let ((tool-path (path-for-tool tool)))
-    (with-mizfiles
-	(let ((proc (ccl:run-program tool-path
-				     (append flags (list (namestring article)))
-				     :wait t
-				     :input nil
-				     :output nil
-				     :error nil)))
-	  (multiple-value-bind (status exit-code)
-	      (ccl:external-process-status proc)
-	    (declare (ignore status))
-	    (values (and (numberp exit-code)
-			 (zerop exit-code))
-		    (when (and (numberp exit-code)
-			       (not (zerop exit-code)))
-		      (or (not (file-exists-p (err-file article)))
-			  (empty-err-file? article))))))))
+    (let ((proc (ccl:run-program tool-path
+				 (append flags (list (namestring article)))
+				 :wait t
+				 :input nil
+				 :output nil
+				 :error nil)))
+      (multiple-value-bind (status exit-code)
+	  (ccl:external-process-status proc)
+	(declare (ignore status))
+	(values (and (numberp exit-code)
+		     (zerop exit-code))
+		(when (and (numberp exit-code)
+			   (not (zerop exit-code)))
+		  (or (not (file-exists-p (err-file article)))
+		      (empty-err-file? article)))))))
   #+sbcl
-  (let* ((path (miz-file article))
-	 (err-path (file-with-extension article "err"))
+  (let* ((err-path (file-with-extension article "err"))
 	 (tool-path (path-for-tool tool))
 	 (proc (sb-ext:run-program tool-path
-				   (append flags (list (namestring path)))
+				   (append flags
+					   (list (native-namestring article)))
 				   :environment (list (format nil "MIZFILES=~a" (namestring (mizfiles))))
 				   :search nil
 				   :wait t
@@ -100,22 +90,21 @@
   #+ccl
   (let ((path (miz-file article))
 	 (tool-path (path-for-tool tool)))
-    (with-mizfiles
-	(let ((proc (ccl:run-program tool-path
-				     (append flags (list (namestring path)))
-				     :wait t
-				     :input nil
-				     :output nil
-				     :error nil)))
-	  (multiple-value-bind (status exit-code)
-	      (ccl:external-process-status proc)
-	    (declare (ignore status))
-	    (values (and (numberp exit-code)
-			 (zerop exit-code))
-		    (when (and (numberp exit-code)
-			       (not (zerop exit-code)))
-		      (or (not (file-exists-p (err-file article)))
-			  (empty-err-file? article))))))))
+    (let ((proc (ccl:run-program tool-path
+				 (append flags (list (namestring path)))
+				 :wait t
+				 :input nil
+				 :output nil
+				 :error nil)))
+      (multiple-value-bind (status exit-code)
+	  (ccl:external-process-status proc)
+	(declare (ignore status))
+	(values (and (numberp exit-code)
+		     (zerop exit-code))
+		(when (and (numberp exit-code)
+			   (not (zerop exit-code)))
+		  (or (not (file-exists-p (err-file article)))
+		      (empty-err-file? article)))))))
   #+sbcl
   (let* ((path (miz-file article))
 	 (err-path (file-with-extension article "err"))
@@ -178,7 +167,7 @@
   (msplit (path article)))
 
 (defmethod msplit ((article pathname))
-  (msplit (path article)))
+  (run-mizar-tool-with-standard-flags "msplit" article))
 
 (defmethod mglue ((article article))
   (mglue (path article)))
