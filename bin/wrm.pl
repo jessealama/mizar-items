@@ -73,7 +73,6 @@ my $article = Article->new (path => $article_miz,
 $article->without_reservations ();
 
 if ($opt_check) {
-    warn 'hey';
     my $wrm_path = "${article_dirname}/${article_basename}.wrm";
 
     if (! ensure_readable_file ($wrm_path)) {
