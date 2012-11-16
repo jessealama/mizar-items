@@ -28,6 +28,12 @@
 
 (defgeneric file-with-extension (article extension))
 
+(defmethod file-with-extension ((article-path pathname) extension)
+  (let ((dirname (directory-namestring article-path))
+	(name (pathname-name article-path)))
+    (let ((file (format nil "~a.~a" name extension)))
+      (merge-pathnames file dirname))))
+
 (defmethod file-with-extension ((article article) extension)
   (let* ((path (path article))
 	 (name (pathname-name path))
