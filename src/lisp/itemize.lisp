@@ -20,11 +20,10 @@
 (defmethod itemize :around ((article-path pathname))
   (if (file-exists-p article-path)
       (call-next-method)
-      (error "There is no file at '~a'." (namestring article-path))))
+      (error "There is no file at '~a'." (native-namestring article-path))))
 
 (defmethod itemize ((article-path pathname))
-  (itemize (make-instance 'article
-			  :path article-path)))
+  (itemize (make-instance 'article :path article-path)))
 
 (defmethod itemize :around ((article article))
   (let* ((path (path article))
