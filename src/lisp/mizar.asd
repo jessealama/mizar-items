@@ -48,6 +48,7 @@
 	       (:file "search")
 	       (:file "bidirectional")
 	       (:file "mml")
+	       (:file "reservations")
 	       (:file "depgraph")
 	       (:file "mptp")
 	       (:file "properties")
