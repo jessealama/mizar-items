@@ -2520,7 +2520,7 @@ sub itemize {
 
     my $expand_canceled_stylesheet = $self->path_for_stylesheet ('expand-canceled');
     my $split_stylesheet = $self->path_for_stylesheet ('split');
-    my $pp_stylesheet = $self->path_for_stylesheet ('wrm');
+    my $pp_stylesheet = $self->path_for_stylesheet ('wsm');
     my $itemize_stylesheet = $self->path_for_stylesheet ('itemize');
     my $wsm_stylesheet = $self->path_for_stylesheet ('wsm');
     my $extend_evl_stylesheet = $self->path_for_stylesheet ('extend-evl');
