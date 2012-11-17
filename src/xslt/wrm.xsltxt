@@ -128,13 +128,13 @@ tpl [*] (#variables, #encountered) mode="maybe-qualify" {
     $token = `concat (":", $spelling, ":")`;
     if [contains ($encountered, $token)] {
       apply [.] (#variables = $more-variables,
-     	         #encountered = $encountered) mode="maybe-qualify";
+                 #encountered = $encountered) mode="maybe-qualify";
     } else {
       $bound-earlier = already-bound (#spelling = $spelling,
-      		       		      #context = $variable);
+                                      #context = $variable);
       if [$bound-earlier = "1"] {
         apply [.] (#variables = $more-variables,
-	      	   #encountered = $encountered) mode="maybe-qualify";
+                   #encountered = $encountered) mode="maybe-qualify";
       } else {
         for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@idnr = $idnr])[1]] {
           <Explicitly-Qualified-Segment {
@@ -147,7 +147,7 @@ tpl [*] (#variables, #encountered) mode="maybe-qualify" {
           }
         }
         apply [.] (#variables = $more-variables,
-  	           #encountered = `concat ($token, $encountered)`) mode="maybe-qualify";
+                   #encountered = `concat ($token, $encountered)`) mode="maybe-qualify";
        }
      }
    } else {
@@ -163,12 +163,12 @@ tpl reserved-variables-in-with-candidates (#formula, #candidates, #answer) {
     $token = `concat (":", $spelling, ":")`;
     if [contains ($answer, $token)] {
       reserved-variables-in-with-candidates (#formula = $formula,
-      					     #candidates = $more-candidates,
-					     #answer = $answer);
+                                             #candidates = $more-candidates,
+                                             #answer = $answer);
     } else {
       reserved-variables-in-with-candidates (#formula = $formula,
-      					     #candidates = $more-candidates,
-					     #answer = `concat ($answer, $token)`);
+                                             #candidates = $more-candidates,
+                                             #answer = `concat ($answer, $token)`);
     }
   } else {
     $answer;
@@ -179,8 +179,8 @@ tpl reserved-variables-in (#formula) {
   for-each [$formula] {
     $candidates = `descendant::Simple-Term[starts-with (@spelling, "R")]`;
     reserved-variables-in-with-candidates (#formula = $formula,
-    					   #candidates = $candidates,
-					   #answer = "");
+                                           #candidates = $candidates,
+                                           #answer = "");
   }
 }
 
@@ -223,7 +223,7 @@ tpl [Fraenkel-Term] {
       for-each [$fraenkel] {
         for-each [*[position() = last()]] {
            apply [.] (#already-bound = $more-bound,
-            	      #maybe-bind = `descendant::Simple-Term[starts-with (@spelling, "R")]`) mode="bind";
+                      #maybe-bind = `descendant::Simple-Term[starts-with (@spelling, "R") and not(parent::Fraenkel-Term)]`) mode="bind";
           // apply [.];
         }
       }
@@ -238,27 +238,38 @@ tpl [*] (#already-bound, #maybe-bind) mode="bind" {
     $next-spelling = `$next/@spelling`;
     if [$already-bound[@spelling = $next-spelling]] {
       apply [.] (#already-bound = $already-bound,
-      	    	 #maybe-bind = $more) mode="bind";
+                 #maybe-bind = $more) mode="bind";
     } else {
       $bound = already-bound (#spelling = $next-spelling,
-      		       		      #context = $next);
+                                      #context = $next);
       if [$bound = "1"] {
         apply [.] (#already-bound = $already-bound,
-        	   #maybe-bind = $more) mode="bind";
+                   #maybe-bind = $more) mode="bind";
       } else {
-        <Universal-Quantifier-Formula {
-          <Explicitly-Qualified-Segment {
-            <Variables {
-              apply [$next];
-            }
-            for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@spelling = $next-spelling])[1]] {
-              for-each [ancestor::Item[@kind = "Reservation"]] {
-                apply [*[position() = last()]];
+        if [ancestor::Fraenkel-Term[ancestor::Fraenkel-Term]] {
+          // total kludge
+          apply [.] (#already-bound = $already-bound,
+                     #maybe-bind = $more) mode="bind";
+        } else {
+          if [descendant::Fraenkel-Term[*[position() = last() - 1][descendant::Simple-Term[@spelling = $next-spelling]]]] {
+            apply [.] (#already-bound = $already-bound,
+                       #maybe-bind = $more) mode="bind";
+          } else {
+            <Universal-Quantifier-Formula {
+              <Explicitly-Qualified-Segment {
+                <Variables {
+                  apply [$next];
+                }
+                for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@spelling = $next-spelling])[1]] {
+                  for-each [ancestor::Item[@kind = "Reservation"]] {
+                    apply [*[position() = last()]];
+                  }
+                }
               }
+              apply [.] (#already-bound = `$already-bound | $next`,
+                     #maybe-bind = $more) mode="bind";
             }
           }
-          apply [.] (#already-bound = `$already-bound | $next`,
-  	      	     #maybe-bind = $more) mode="bind";
         }
       }
     }
