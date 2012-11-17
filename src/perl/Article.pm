@@ -2520,6 +2520,7 @@ sub itemize {
 
     my $expand_canceled_stylesheet = $self->path_for_stylesheet ('expand-canceled');
     my $split_stylesheet = $self->path_for_stylesheet ('split');
+    my $pp_stylesheet = $self->path_for_stylesheet ('wrm');
     my $itemize_stylesheet = $self->path_for_stylesheet ('itemize');
     my $wsm_stylesheet = $self->path_for_stylesheet ('wsm');
     my $extend_evl_stylesheet = $self->path_for_stylesheet ('extend-evl');
@@ -2565,7 +2566,6 @@ sub itemize {
 
     $article_in_target_dir->accom ();
     $article_in_target_dir->msplit ();
-    my $pp_stylesheet = '/Users/alama/sources/mizar/parsing/pp.xsl';
 
     apply_stylesheet ($pp_stylesheet,
 		      $article_wsx_in_target_dir,
@@ -2935,6 +2935,7 @@ sub without_reservations {
     my $tpr_path = $self->file_with_extension ('tpr');
 
     my $wrm_stylesheet = $self->path_for_stylesheet ('wrm');
+    my $pp_stylesheet = $self->path_for_stylesheet ('wsm');
     my $msm_path = $self->file_with_extension ('msm');
 
     if (! ensure_readable_file ($wrm_stylesheet)) {
@@ -2958,8 +2959,6 @@ sub without_reservations {
     my $wrx_path = $self->file_with_extension ('wrx');
 
     apply_stylesheet ($wrm_stylesheet, $wsx_path, $wrx_path);
-
-    my $pp_stylesheet = '/Users/alama/sources/mizar/parsing/pp.xsl';
 
     my $wrm_path = $self->file_with_extension ('wrm');
 
