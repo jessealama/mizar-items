@@ -88,3 +88,21 @@
   (wsmparser thing)
   (let ((wsx-file (file-with-extension thing "wsx")))
     (apply-stylesheet stylesheet wsx-file parameters output)))
+
+(defgeneric parse-tree (article)
+  (:documentation "An XML document representing the parse tree of ARTICLE."))
+
+(defmethod parse-tree ((article article))
+  (parse-tree (path article)))
+
+(defmethod parse-tree ((article pathname))
+  (parse-xml-file (file-with-extension article "wsx")))
+
+(defgeneric items (article)
+  (:documentation "The toplevel items of ARTICLE"))
+
+(defmethod items ((article article))
+  (items (path article)))
+
+(defmethod items ((article pathname))
+  (remove-if #'dom:text-node-p (parse-tree article)))
