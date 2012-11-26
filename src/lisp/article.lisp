@@ -110,4 +110,6 @@
   (items (path article)))
 
 (defmethod items ((article pathname))
-  (remove-if #'dom:text-node-p (parse-tree article)))
+  (map 'list
+       #'make-item-from-xml
+       (remove-if #'dom:text-node-p (parse-tree article))))
