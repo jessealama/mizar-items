@@ -12,7 +12,7 @@
 (defmethod without-reservations :before ((article-path pathname))
   (let ((tpr-path (file-with-extension article-path "tpr"))
 	(msm-path (file-with-extension article-path "msm")))
-    (accom article-path)
+    (makeenv article-path)
     (wsmparser article-path)
     (msmprocessor article-path)
     (msplit article-path)
@@ -22,8 +22,15 @@
     (wsmparser article-path)
     (msmprocessor article-path)))
 
+(defun reservation-item-p (x)
+  (eql (type-of x) 'reservation-item))
+
 (defmethod without-reservations ((article-path pathname))
-  (let ((wsx-path (file-with-extension article-path "wsx")))
-    (let ((item-nodes (remove-if #'dom:text-node-p
-				 (parse-xml-file wsx-path))))
-      )))
+  (loop
+     with items = (items article-path)
+     for item in (remove-if #'reservation-item-p items)
+     collect (without-reservations item) into wrm-items
+     finally (return wrm-items)))
+
+(defun without-reservations ((item item))
+  ())
