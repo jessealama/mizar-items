@@ -6,12 +6,60 @@
   ((xml-node
     :accessor xml-node
     :initarg :xml-node
-    :initform (error "To create an item, a snippet of XML is required.")))
+    :initform (error "To create an item, a snippet of XML is required."))
+   (line
+    :reader line
+    :initarg :line
+    :initform nil
+    :type (or null integer))
+   (column
+    :reader column
+    :initarg :column
+    :initform nil
+    :type (or null integer)))
   (:documentation "A piece of a Mizar article."))
 
 (defun make-item-from-xml (xml)
-  (let ((name (xpath "name (.)" xml)))
-    (error "Don't know how to make an item from XML nodes named '~a'" name)))
+  (let ((name (xpath:evaluate "name (.)" xml)))
+    (cond ((string= name "Item")
+	   (let ((kind-attribute (xpath:evaluate "@kind" xml)))
+	     (if (xpath:node-set-empty-p kind-attribute)
+		 (error "Don't know how to deal with an Item element that lacks a kind attribute.")
+		 (let ((kind (xpath:string-value kind-attribute)))
+		   (cond ((string= kind "Reservation")
+			  (make-instance 'reservation-item :xml-node xml))
+			 ((string= kind "Section-Pragma")
+			  (make-instance 'section-pragma :xml-node xml))
+			 ((string= kind "Scheme-Block-Item")
+			  (make-instance 'scheme-block-item :xml-node xml))
+			 ((string= kind "Definition-Item")
+			  (make-instance 'definition-item :xml-node xml))
+			 ((string= kind "Theorem-Item")
+			  (make-instance 'theorem-item :xml-node xml))
+			 ((string= kind "Regular-Statement")
+			  (make-instance 'regular-statement :xml-node xml))
+			 (t
+			  (error "Don't know how to deal with Item nodes whose kind attribute is~%~%  ~a~%" kind)))))))
+	  (t
+	   (error "Don't know how to make an item from XML nodes named '~a'" name)))))
+
+(defclass regular-statement (item)
+  nil)
+
+(defclass theorem-item (item)
+  nil)
+
+(defclass definition-item (item)
+  nil)
+
+(defclass scheme-block-item (item)
+  nil)
+
+(defclass section-pragma (item)
+  nil)
+
+(defclass reservation-item (item)
+  nil)
 
 (defclass quantified-formula (item)
   ((matrix
