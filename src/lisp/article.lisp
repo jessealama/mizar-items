@@ -95,6 +95,11 @@
 (defmethod parse-tree ((article article))
   (parse-tree (path article)))
 
+(defmethod parse-tree :before ((article pathname))
+  (unless (file-exists-p (file-with-extension article "wsx"))
+    (makeenv article)
+    (wsmparser article)))
+
 (defmethod parse-tree ((article pathname))
   (parse-xml-file (file-with-extension article "wsx")))
 
