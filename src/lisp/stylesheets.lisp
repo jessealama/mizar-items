@@ -94,7 +94,7 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 	(error "Cannot save output to '~a' because we cannot ensure that its directories exist" (namestring output)))))
 
 (defmethod apply-stylesheet ((stylesheet pathname) (xml-document pathname) parameters output)
-  (labels ((xsltproc-args ()
+  (flet ((xsltproc-args ()
 	     (loop
 		with args = nil
 		for (param . value) in parameters
