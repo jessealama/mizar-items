@@ -120,14 +120,11 @@
   (if (null form)
       (error "Cannot convert NIL to a Mizar item.")
       (let ((head (first form))
-	    (rest (mapcar #'form->item )))
+	    (rest (mapcar #'form->item (rest form))))
 	())))
 
 (defmethod items ((article pathname))
   (let ((wsx-file (file-with-extension article "wsx")))
-    (let ((wsx-as-lisp (apply-stylesheet *miz2lisp-stylesheet*
-					 wsx-file
-					 nil
-					 nil)))
-      (let ((wsx-form (read-from-string wsx-as-lisp)))
-	(form->article wsx-form)))))
+    (map 'list
+	 #'identity
+	 (remove-if #'dom:text-node-p (parse-xml-file wsx-file)))))
