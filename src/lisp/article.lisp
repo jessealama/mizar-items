@@ -109,7 +109,25 @@
 (defmethod items ((article article))
   (items (path article)))
 
+(defmethod items :before ((article pathname))
+  (unless (file-exists-p (file-with-extension article "wsx"))
+    (makeenv article)
+    (wsmparser article)))
+
+(defparameter *miz2lisp-stylesheet* (path-for-stylesheet "miz2lisp"))
+
+(defun form->article (form)
+  (if (null form)
+      (error "Cannot convert NIL to a Mizar item.")
+      (let ((head (first form))
+	    (rest (mapcar #'form->item )))
+	())))
+
 (defmethod items ((article pathname))
-  (map 'list
-       #'make-item-from-xml
-       (remove-if #'dom:text-node-p (parse-tree article))))
+  (let ((wsx-file (file-with-extension article "wsx")))
+    (let ((wsx-as-lisp (apply-stylesheet *miz2lisp-stylesheet*
+					 wsx-file
+					 nil
+					 nil)))
+      (let ((wsx-form (read-from-string wsx-as-lisp)))
+	(form->article wsx-form)))))
