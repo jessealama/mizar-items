@@ -104,28 +104,23 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 		  (push "--stringparam" args)
 		finally
 		  (return args))))
-    (let* ((stylesheet-name (namestring stylesheet))
-	   (document-name (namestring xml-document))
-	   (xsltproc (run-program "xsltproc"
-				  (append (xsltproc-args)
-					  (list stylesheet-name
-						"-"))
-				  :search t
-				  :input xml-document
-				  :output (or output :stream)
-				  :if-output-exists :supersede
-				  :error :stream
-				  :wait t)))
-      (let* ((out (process-output xsltproc))
-	     (out-lines (stream-lines out)))
-	(let ((exit-code (process-exit-code xsltproc)))
-	  (if (or (null exit-code)
-		  (zerop exit-code))
-	      (if output
-		  t
-		  (format nil "~{~a~%~}" out-lines))
-	      (let* ((err (process-error xsltproc))
-		     (err-lines (stream-lines err)))
-		(if err-lines
-		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~{  ~a~%~}" stylesheet-name document-name exit-code err-lines)
-		    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%(There was no output on standard error.)" stylesheet-name document-name exit-code)))))))))
+    (let* ((stylesheet-name (native-namestring stylesheet))
+	   (document-name (native-namestring xml-document))
+	   (xsltproc-output (make-string-output-stream))
+	   (xsltproc-error (make-string-output-stream)))
+      (unwind-protect
+	   (let* ((xsltproc (run-program "xsltproc"
+					 (append (xsltproc-args)
+						 (list stylesheet-name
+						       document-name))
+					 :search t
+					 :input nil
+					 :output xsltproc-output
+					 :error xsltproc-error
+					 :wait t))
+		  (exit-code (process-exit-code xsltproc)))
+	     (if (zerop exit-code)
+		 (get-output-stream-string xsltproc-output)
+		 (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~a~%" stylesheet-name document-name exit-code (get-output-stream-string xsltproc-error))))
+	(close xsltproc-output)
+	(close xsltproc-error)))))
