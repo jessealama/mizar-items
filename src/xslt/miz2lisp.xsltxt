@@ -1,17 +1,31 @@
 stylesheet "1.0";
+import "utils/strings.xsl";
+import "utils/list.xsl";
 output method="text";
 
+tpl [@*] {
+  $attr = `name (.)`;
+  $val = `string (.)`;
+  " "; ":"; $attr; " "; "\""; $val; "\"";
+}
+
+tpl [@line] {
+  // ignore
+}
+
+tpl [@col] {
+  // ignore
+}
+
 tpl [*] {
-  $n = `name (.)`;
+  $n = lc (#s = `name (.)`);
   "("; $n;
   for-each [@*] {
-    $attr = `name (.)`;
-    $val = `string (.)`;
-    " "; ":"; $attr; " "; "\""; $val; "\"";
+    apply [.];
   }
   if [*] {
     "\n";
-    apply [*];
+    list (#separ = " ", #elems = `*`);
   }
   ")"; "\n";
 }
@@ -25,5 +39,94 @@ tpl [/] {
 }
 
 tpl [Variables] {
+  "("; list (#separ = " ", #elems = `*`); ")";
+}
+
+tpl [Item[@kind]] {
+  $n = lc (#s = `@kind`);
+  "("; $n;
+  for-each [@*] {
+    if [name(.) = "kind"] {
+      // ignore
+    } else {
+      apply [.];
+    }
+  }
+  if [*] {
+    "\n";
+    apply [*];
+  }
+  ")"; "\n";
+}
+
+// tpl [Block] {
+//   apply [*];
+// }
+
+tpl [Block[@kind = "Proof"]] {
+  "(proof"; "\n"; list (#separ = "\n", #elems = `*`); ")"; "\n";
+}
+
+tpl [Block[@kind = "Scheme-Block"]] {
   apply [*];
+}
+
+tpl [Block[@kind = "Definitional-Block"]] {
+  "(definition"; "\n"; list (#separ = "\n", #elems = `*`); ")"; "\n";
+}
+
+tpl [Placeholder-Term] {
+  `@spelling`;
+}
+
+tpl [Arguments] {
+  "("; apply [*]; ")";
+}
+
+tpl [Simple-Term] {
+  `@spelling`;
+}
+
+tpl [Variable] {
+  `@spelling`;
+}
+
+tpl [Predicative-Formula] {
+  "("; `@spelling`; if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
+}
+
+tpl [Private-Predicate-Formula] {
+  "("; `@spelling`; if [count(*) > 0] { " "; apply [*]; } ")";
+}
+
+tpl [Proposition[Label]] {
+  "(proposition :label \""; `Label/@spelling`; "\"  "; apply [*[not(self::Label)]]; ")";
+}
+
+tpl [Biconditional-Formula] {
+  "(iff "; apply [*[1]]; " "; apply [*[2]]; ")";
+}
+
+tpl [Local-Reference] {
+  `@spelling`;
+}
+
+tpl [Thesis] {
+  "thesis";
+}
+
+tpl [Item[@kind = "Reservation"]] {
+  "(reserve :variables ("; apply [*[position() < last()]]; ") :type "; apply [*[position() = last()]]; ")";
+}
+
+tpl [Item[@kind = "Property"]] {
+  "("; `@property`; if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
+}
+
+tpl [Item[@kind = "Correctness-Condition"]] {
+  "("; `@condition`; if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
+}
+
+tpl [Global-Choice-Term] {
+  "(the "; list (#separ = " ", #elems = `*`); ")";
 }
