@@ -31,15 +31,19 @@
 	 (file (pathname-name path))
 	 (itemization-path (merge-pathnames file directory))
 	 (itemization-directory (pathname-as-directory itemization-path)))
-    (if (file-exists-p itemization-directory)
-	(error "The itemization directory~%~%  ~a~%~%already exists." (namestring itemization-directory))
-	(progn
-	  (ensure-directories-exist itemization-directory)
-	  #+ccl
-	  (ccl::with-preserved-working-directory (itemization-directory)
-	    (call-next-method))
-	  #-ccl
-	  (error "Don't know how to change directory to the itemization directory.")))
+    (when (file-exists-p itemization-directory)
+      (error "The itemization directory~%~%  ~a~%~%already exists." (namestring itemization-directory)))
+    (ensure-directories-exist itemization-directory)
+    #+ccl
+    (ccl::with-preserved-working-directory (itemization-directory)
+      (call-next-method))
+    #+sbcl
+    (let ((cwd (sb-posix:getcwd)))
+      (sb-posix:chdir itemization-directory)
+      (unwind-protect (call-next-method)
+	(sb-posix:chdir cwd)))
+    #-(or sbcl ccl)
+    (error "Don't know how to change directory to the itemization directory.")
     ))
 
 (defmethod itemize :before ((article article))
