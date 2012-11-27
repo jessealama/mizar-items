@@ -16,32 +16,85 @@
     :reader column
     :initarg :column
     :initform nil
-    :type (or null integer)))
+    :type (or null integer))
+   (children
+    :type list
+    :initform nil
+    :initarg :children
+    :accessor children))
   (:documentation "A piece of a Mizar article."))
 
 (defun make-item-from-xml (xml)
-  (let ((name (xpath:evaluate "name (.)" xml)))
+  (let ((name (xpath:evaluate "name (.)" xml))
+	(children (xpath "*" xml)))
     (cond ((string= name "Item")
-	   (let ((kind-attribute (xpath:evaluate "@kind" xml)))
-	     (if (xpath:node-set-empty-p kind-attribute)
-		 (error "Don't know how to deal with an Item element that lacks a kind attribute.")
-		 (let ((kind (xpath:string-value kind-attribute)))
-		   (cond ((string= kind "Reservation")
-			  (make-instance 'reservation-item :xml-node xml))
-			 ((string= kind "Section-Pragma")
-			  (make-instance 'section-pragma :xml-node xml))
-			 ((string= kind "Scheme-Block-Item")
-			  (make-instance 'scheme-block-item :xml-node xml))
-			 ((string= kind "Definition-Item")
-			  (make-instance 'definition-item :xml-node xml))
-			 ((string= kind "Theorem-Item")
-			  (make-instance 'theorem-item :xml-node xml))
-			 ((string= kind "Regular-Statement")
-			  (make-instance 'regular-statement :xml-node xml))
-			 (t
-			  (error "Don't know how to deal with Item nodes whose kind attribute is~%~%  ~a~%" kind)))))))
+	   (make-instance (let ((kind-attribute (xpath:evaluate "@kind" xml)))
+			    (if (xpath:node-set-empty-p kind-attribute)
+				(error "Don't know how to deal with an Item element that lacks a kind attribute.")
+				(let ((kind (xpath:string-value kind-attribute)))
+				  (cond ((string= kind "Reservation")
+					 'reservation-item)
+					((string= kind "Section-Pragma")
+					 'section-pragma)
+					((string= kind "Scheme-Block-Item")
+					 'scheme-block-item)
+					((string= kind "Scheme-Head")
+					 'scheme-head)
+					((string= kind "Definition-Item")
+					 'definition-item)
+					((string= kind "Theorem-Item")
+					 'theorem-item)
+					((string= kind "Regular-Statement")
+					 'regular-statement)
+					(t
+					 (error "Don't know how to deal with Item nodes whose kind attribute is~%~%  ~a~%" kind))))))
+			  :xml-node xml
+			  :children (mapcar #'make-item-from-xml children)))
+	  ((string= name "Block")
+	   (make-instance 'mizar-block
+			  :xml-node xml
+			  :children (mapcar #'make-item-from-xml children)))
+	  ((string= name "Standard-Type")
+	   (make-instance 'standard-type
+			  :xml-node xml
+			  :children (mapcar #'make-item-from-xml children)))
+	  ((string= name "Variable")
+	   (make-instance 'variable-item
+			  :xml-node xml
+			  :children (mapcar #'make-item-from-xml children)))
+	  ((string= name "Variables")
+	   (mapcar #'make-item-from-xml children))
 	  (t
 	   (error "Don't know how to make an item from XML nodes named '~a'" name)))))
+
+(defclass mizar-block (item)
+  nil)
+
+(defclass mizar-type (item)
+  nil)
+
+(defclass standard-type (mizar-type)
+  nil)
+
+(defclass qualified-segment (item)
+  ((variables
+    :type list
+    :accessor variables
+    :initform (error "To create a qualified segment, please supply a non-null list of variables.")
+    :initarg :variables)))
+
+(defclass implicitly-qualified-segment (qualified-segment)
+  nil)
+
+(defclass explicitly-qualified-segment (qualified-segment)
+  ((variable-type
+    :type item
+    :accessor variable-type
+    :initarg :type
+    :initform (error "To create an explicitly qualified segment, please supply a type for the qualified variables."))))
+
+(defclass variable-item (item)
+  nil)
 
 (defclass regular-statement (item)
   nil)
@@ -53,6 +106,9 @@
   nil)
 
 (defclass scheme-block-item (item)
+  nil)
+
+(defclass scheme-head (item)
   nil)
 
 (defclass section-pragma (item)
