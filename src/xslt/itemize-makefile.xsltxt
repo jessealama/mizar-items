@@ -1,0 +1,194 @@
+stylesheet "1.0";
+import "utils/die.xsl";
+import "utils/strings.xsl";
+output method="text";
+
+$fragment-prefix  = "ckb";
+$itemize-makefile = "itemize.mk";
+
+tpl cp (#source, #target) {
+  `concat ("cp ", $source, " ", $target)`;
+}
+
+tpl verifier (#article) {
+  `concat ("verifier -l ", $article)`;
+}
+
+tpl accom (#article) {
+  `concat ("accom -l ", $article)`;
+}
+
+tpl exporter (#article) {
+  `concat ("exporter -l ", $article)`;
+}
+
+tpl transfer (#article) {
+  `concat ("transfer -l ", $article)`;
+}
+
+tpl mglue (#article) {
+  `concat ("mglue -l ", $article)`;
+}
+
+tpl file-in-text-subdir (#file) {
+  `concat ("text/", $file)`;
+}
+
+tpl file-with-extension (#basename, #extension) {
+  `concat ($basename, ".", $extension)`;
+}
+
+tpl fragment-with-extension (#fragment-number, #extension) {
+  file-with-extension
+    (#basename = `concat ($fragment-prefix, $fragment-number)`,
+     #extension = $extension);
+}
+
+tpl fragment-with-extension-in-prel (#fragment-number, #extension) {
+  `concat ("prel/",
+  	   $fragment-prefix,
+	   $fragment-number,
+	   ".",
+	   $extension)`;
+}
+
+tpl fragment-with-extension-in-text (#fragment-number, #extension) {
+  `concat ("text/",
+  	   $fragment-prefix,
+	   $fragment-number,
+	   ".",
+	   $extension)`;
+}
+
+tpl prel-targets-in-text-dir (#fragment-number) {
+   fragment-with-extension-in-text (#fragment-number = $fragment-number,
+    				    #extension = "dco");
+    " ";
+   fragment-with-extension-in-text (#fragment-number = $fragment-number,
+    				    #extension = "dcl");
+    " ";
+    fragment-with-extension-in-text (#fragment-number = $fragment-number,
+    				     #extension = "dno");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "def");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "the");
+    " ";
+    fragment-with-extension-in-text (#fragment-number = $fragment-number,
+    				     #extension = "sch");
+}
+
+tpl prel-targets-in-prel-dir (#fragment-number) {
+   fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "dco");
+    " ";
+   fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "dcl");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "dno");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "def");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "the");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $fragment-number,
+    				     #extension = "sch");
+}
+
+tpl earlier-prels (#fragment-number) {
+  $one-less = `$fragment-number - 1`;
+  if [$one-less = 0] {
+    // nothing to do
+  } else {
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $one-less,
+    				     #extension = "dco");
+    " ";
+    fragment-with-extension-in-prel (#fragment-number = $one-less,
+    				     #extension = "dno");
+    earlier-prels (#fragment-number = $one-less);
+  }
+}
+
+tpl [/] {
+  if [Fragments] {
+    apply [Fragments];
+  } else {
+    msg terminate="yes" "Error: the required Fragments document element is missing.";
+  }
+}
+
+tpl [Fragments[@articleid]] {
+
+    $articleid = lc (#s = `@articleid`);
+    $num-fragments = `count (*)`;
+
+  "all:";
+  for-each [Text-Proper] {
+    $fragment-number = `position ()`;
+    $xml = fragment-with-extension (#fragment-number = $fragment-number,
+    	   	      	            #extension = "xml");
+    $xml-in-text-dir = file-in-text-subdir (#file = $xml);
+    " "; $xml-in-text-dir;
+  }
+  "\n";
+
+  `concat ("numbers = $(shell seq ", $num-fragments, ")")`; "\n";
+  "earlier-prels = $(foreach i,$(wordlist 1,$(1),$(numbers)),$(wildcard prel/ckb${i}.*))"; "\n";
+
+  for-each [Text-Proper] {
+
+    $fragment-number = `position ()`;
+
+    $tpr = fragment-with-extension (#fragment-number = $fragment-number,
+    	   		            #extension = "tpr");
+    $evd = fragment-with-extension (#fragment-number = $fragment-number,
+    	   	      	            #extension = "evd");
+    $evl = fragment-with-extension (#fragment-number = $fragment-number,
+    	   	      	            #extension = "evl");
+    $miz = fragment-with-extension (#fragment-number = $fragment-number,
+    	   	      	            #extension = "miz");
+    $xml = fragment-with-extension (#fragment-number = $fragment-number,
+    	   	      	            #extension = "xml");
+    $base = `concat ($fragment-prefix, $fragment-number)`;
+    $base-in-text-dir = file-in-text-subdir (#file = $base);
+    $xml-in-text-dir = file-in-text-subdir (#file = $xml);
+    $tpr-in-text-dir = file-in-text-subdir (#file = $tpr);
+    $evd-in-text-dir = file-in-text-subdir (#file = $evd);
+    $evl-in-text-dir = file-in-text-subdir (#file = $evl);
+    $miz-in-text-dir = file-in-text-subdir (#file = $miz);
+
+     // tpr should already exist
+    $tpr-in-text-dir; " : "; "\n";
+
+    // .xml
+    $xml-in-text-dir; " : "; $miz-in-text-dir; "\n";
+    "\t"; accom (#article = $miz-in-text-dir); "\n";
+    "\t"; verifier (#article = $miz-in-text-dir); "\n";
+
+    // .miz
+    $miz-in-text-dir; " : "; $tpr-in-text-dir; " "; $evd-in-text-dir; "\n";
+    "\t"; mglue (#article = $base-in-text-dir); "\n";
+
+    // .evd
+    $original-evl = `concat ($articleid, ".evl")`;
+    $evd-in-text-dir; " : "; earlier-prels (#fragment-number = $fragment-number); "\n";
+    "\t"; cp (#source = $original-evl, #target = $evl-in-text-dir); "\n";
+    "\t"; "extend-evl "; $evl-in-text-dir; " $(call earlier-prels,"; $fragment-number; ") > "; $evd-in-text-dir; "\n";
+
+    // export stuff
+    prel-targets-in-text-dir (#fragment-number = $fragment-number); " : "; $xml-in-text-dir; "\n";
+    "\t"; exporter (#article = $base-in-text-dir); "\n";
+
+     // stuff in prel depends on everything prior
+    prel-targets-in-prel-dir (#fragment-number = $fragment-number); " : ";     prel-targets-in-text-dir (#fragment-number = $fragment-number); "\n";
+
+    "\t"; transfer (#article = $base-in-text-dir); "\n";
+
+  }
+}
