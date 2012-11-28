@@ -44,5 +44,5 @@
     (if (string= name "Fraenkel-Term")
 	(error "hey")
 	(let ((new-node (dom:create-element document name)))
-	  (dolist (child (children (xpath "*" node)) new-node)
+	  (dolist (child (xpath "*" node) new-node)
 	    (dom:append-child new-node (without-reservations child)))))))
