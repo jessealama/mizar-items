@@ -35,7 +35,7 @@
      collect (without-reservations item) into wrm-items
      finally (return wrm-items)))
 
-(defmethod without-reservation ((text-node dom:text))
+(defmethod without-reservations ((text-node dom:text))
   text-node)
 
 (defmethod without-reservations ((node dom:element))
