@@ -124,7 +124,6 @@
 	())))
 
 (defmethod items ((article pathname))
-  (let ((wsx-file (file-with-extension article "wsx")))
-    (map 'list
-	 #'identity
-	 (remove-if #'dom:text-node-p (parse-xml-file wsx-file)))))
+  (let ((wsx-doc (cxml:parse-file (file-with-extension article "wsx")
+				  (cxml-dom:make-dom-builder))))
+    (children (make-item-from-xml (dom:document-element wsx-doc)))))
