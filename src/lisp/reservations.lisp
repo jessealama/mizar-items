@@ -22,16 +22,10 @@
     (wsmparser article-path)
     (msmprocessor article-path)))
 
-(defun reservation-node-p (thing)
-  (let ((kind-attribute (xpath:evaluate "@kind" thing)))
-    (and (string= (xpath:evaluate "name (.)" thing) "Item")
-	 (not (xpath:node-set-empty-p kind-attribute))
-	 (string= (xpath:string-value kind-attribute) "Reservation"))))
-
 (defmethod without-reservations ((article-path pathname))
   (loop
      with items = (items article-path)
-     for item in (remove-if #'reservation-node-p items)
+     for item in (remove-if #'reservation-item-p items)
      collect (without-reservations item) into wrm-items
      finally (return wrm-items)))
 
