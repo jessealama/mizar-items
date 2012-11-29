@@ -7,6 +7,8 @@
 		#:scan
 		#:register-groups-bind
 		#:split)
+  (:import-from :editor-hints.named-readtables
+		#:find-readtable)
   (:import-from :xuriella
 		#:parse-stylesheet)
   (:import-from :alexandria
