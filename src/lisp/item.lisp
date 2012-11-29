@@ -451,9 +451,6 @@
 (defclass section-pragma (item)
   nil)
 
-(defclass reservation-item (item)
-  nil)
-
 (defun reservation-item-p (x)
   (eql (type-of x) 'reservation-item))
 
