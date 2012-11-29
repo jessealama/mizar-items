@@ -116,14 +116,109 @@
 
 (defparameter *miz2lisp-stylesheet* (path-for-stylesheet "miz2lisp"))
 
-(defun form->article (form)
-  (if (null form)
-      (error "Cannot convert NIL to a Mizar item.")
-      (let ((head (first form))
-	    (rest (mapcar #'form->item (rest form))))
-	())))
-
 (defmethod items ((article pathname))
   (let ((wsx-doc (cxml:parse-file (file-with-extension article "wsx")
 				  (cxml-dom:make-dom-builder))))
     (children (make-item-from-xml (dom:document-element wsx-doc)))))
+
+(defun form->item (form)
+  (multiple-value-bind (expanded expandable)
+      (macroexpand-1 form)
+    (if expandable
+	expanded
+	(error "The form~%~%  ~a~%~%did not match any known form-to-item rules." form))))
+
+(defmacro |text-proper| ((articleid) &body body)
+  (make-instance 'text-proper-item
+		 :articleid articleid
+		 :toplevel-items (mapcar #'form->item body)))
+
+(defmacro |section-pragma| ()
+  (make-instance 'section-pragma-item))
+
+(defmacro |reserve| (&key |variables| |type|)
+  (unless (every #'symbolp |variables|)
+    (error "All reserved variables in a reservation ought to be symbols."))
+  (make-instance 'reservation-item
+		 :variables |variables|
+		 :type (form->item |type|)))
+
+(defmacro |standard-type| (&body body)
+  (unless body
+    (error "Empty standard type."))
+  (let ((radix (first body)))
+    (unless (symbolp radix)
+      (error "Non-symbol radix:~%~%  ~a~%" radix))
+    (make-instance 'standard-type
+		   :radix radix
+		   :arguments (mapcar #'form->item (rest body)))))
+
+(defclass mizar-item ()
+  nil)
+
+(defclass text-proper-item (mizar-item)
+  ((articleid
+    :type symbol
+    :initarg :articleid
+    :accessor articleid)
+   (toplevel-items
+    :type list
+    :initarg :toplevel-items
+    :accessor toplevel-items)))
+
+(defclass section-pragma-item (mizar-item)
+  nil)
+
+(defclass reservation-item (mizar-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To create a reservation, please supply a non-null list of variables."))
+   (type
+    :type mizar-type
+    :accessor reserved-type
+    :initarg :type
+    :initform (error "To create a reservation, please supply a type for the reserved variables."))))
+
+(defclass mizar-type (mizar-item)
+  nil)
+
+(defclass standard-type (mizar-type)
+  ((radix
+    :type symbol
+    :accessor radix
+    :initarg :radix
+    :initform (error "To create a standard type, please supply a radix."))
+   (arguments
+    :type list
+    :accessor arguments
+    :initarg :arguments
+    :initform nil)))
+
+(defgeneric parse (article))
+
+(defmethod parse ((article article))
+  (parse (path article)))
+
+(defmethod parse :before ((article pathname))
+  (let ((tpr-path (file-with-extension article "tpr"))
+	(msm-path (file-with-extension article "msm")))
+    (makeenv article)
+    (wsmparser article)
+    (msmprocessor article)
+    (msplit article)
+    (copy-file msm-path tpr-path)
+    (mglue article)
+    (accom article)
+    (wsmparser article)
+    (msmprocessor article)))
+
+(defmethod parse ((article pathname))
+  (let ((wsx (file-with-extension article "wsx")))
+    (unless (file-exists-p wsx)
+      (error "The .wsx file is missing for ~a." (native-namestring article)))
+    (let ((article-as-lisp-string (apply-stylesheet *miz2lisp-stylesheet* wsx nil nil)))
+      (let ((article-as-lisp (with-readtable (find-readtable :modern)
+			       (read-from-string article-as-lisp-string))))
+	(form->item article-as-lisp)))))
