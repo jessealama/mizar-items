@@ -554,4 +554,12 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 (defun xpath (xpath-expression context-node)
   (xpath:all-nodes (xpath:evaluate xpath-expression context-node)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Input and output
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro with-readtable (readtable &body body)
+  `(let ((*readtable* ,readtable))
+     ,@body))
+
 ;;; utils.lisp ends here
