@@ -20,6 +20,7 @@
 	       "trivial-timeout"
 	       "com.dvlsoft.clon"
 	       "alexandria"
+	       "named-readtables"
 	       "hunchentoot"
 	       "cl-who"
 	       "hunchentoot-utils"
