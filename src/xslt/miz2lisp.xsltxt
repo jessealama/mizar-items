@@ -77,8 +77,41 @@ tpl [Block[@kind = "Proof"]] {
   "(proof"; "\n"; list (#separ = "\n", #elems = `*`); ")"; "\n";
 }
 
+tpl [Item[@kind = "Scheme-Block-Item"]] {
+  apply [Block[@kind = "Scheme-Block"]];
+}
+
 tpl [Block[@kind = "Scheme-Block"]] {
-  apply [*];
+  for-each [Item[@kind = "Scheme-Head"]] {
+    "(scheme ";
+    apply [Scheme]; " ";
+    if [Schematic-Variables] { apply [Schematic-Variables]; } else { "nil"; } "\n";
+    "  "; apply [*[position() = last()]]; "\n";
+  }
+  "  "; if [Provisional-Formulas] { apply [Provisional-Formulas]; } else { "nil"; } "\n";
+  for-each [Item[@kind = "Scheme-Head"]] {
+    list (#separ = "\n", #elems = `following-sibling::*`);
+  }
+}
+
+tpl [Scheme] {
+  `@spelling`;
+}
+
+tpl [Schematic-Variables] {
+  "("; list (#separ = " ", #elems = `*`); ")";
+}
+
+tpl [Functor-Segment] {
+  "(functor-segment "; apply [Variables]; " "; apply [Type-List]; " "; apply [Type-Specification]; ")";
+}
+
+tpl [Type-Specification] {
+  apply [*[1]];
+}
+
+tpl [Type-List] {
+  "("; list (#separ = " ", #elems = `*`); ")";
 }
 
 tpl [Block[@kind = "Definitional-Block"]] {
