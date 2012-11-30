@@ -166,6 +166,96 @@
     :initarg :toplevel-items
     :accessor toplevel-items)))
 
+(defmacro |scheme| (name schematic-variables conclusion provisos &rest justification)
+  (break "provisos = ~a" provisos)
+  (make-instance 'scheme-item
+		 :name name
+		 :schematic-variables (mapcar #'form->item schematic-variables)
+		 :conclusion (form->item conclusion)
+		 :provisos provisos
+		 :justification (mapcar #'form->item justification)))
+
+(defclass formula-item (mizar-item)
+  nil)
+
+(defclass quantified-formula (formula-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To create a quantified formula, please supply a list of variables."))
+   (matrix
+    :type formula-item
+    :accessor matrix
+    :initarg :matrix
+    :initform (error "To create a quantified formula, please supply a matrix."))))
+
+(defclass existential-quantifier-formula (quantified-formula)
+  nil)
+
+(defclass universal-quantifier-formula (quantified-formula)
+  nil)
+
+(defmacro |existential-quantifier-formula| (variables matrix)
+  (make-instance 'existential-quantifier-formula
+		 :variables (mapcar #'form->item variables)
+		 :matrix (form->item matrix)))
+
+(defmacro |universal-quantifier-formula| (variables matrix)
+  (make-instance 'universal-quantifier-formula
+		 :variables (mapcar #'form->item variables)
+		 :matrix (form->item matrix)))
+
+(defclass scheme-item (mizar-item)
+  ((name
+    :type symbol
+    :accessor name
+    :initarg :name
+    :initform (error "To specify a scheme, a name is required."))
+   (schematic-variables
+    :type list
+    :accessor schematic-variables
+    :initarg :schematic-variables
+    :initform nil)
+   (provisos
+    :type list
+    :accessor provisos
+    :initarg :provisos
+    :initform nil)
+   (conclusion
+    :type formula-item
+    :accessor conclusion
+    :initarg :conclusion
+    :initform (error "To specify a scheme, a conclusion is required."))
+   (justification
+    :type list
+    :accessor justification
+    :initarg :justification
+    :initform nil)))
+
+(defclass functor-segment (mizar-item)
+  ((variables
+    :type list
+    :initform (error "To create a functor-segment object, a non-null list of variables is required.")
+    :initarg :variables
+    :accessor variables)
+   (type-list
+    :type list
+    :accessor type-list
+    :initarg :type-list
+    :initform nil)
+   (type
+    :type mizar-type
+    :accessor functor-segment-type
+    :initarg :type
+    :initform (error "To create a functor-segment object, a type is required."))))
+
+(defmacro |functor-segment| (variables type-list type)
+  (make-instance 'functor-segment
+		 :variables (mapcar #'form->item variables)
+		 :type-list (mapcar #'form->item type-list)
+		 :type (form->item type)))
+
 (defclass section-pragma-item (mizar-item)
   nil)
 
