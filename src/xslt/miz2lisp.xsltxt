@@ -135,11 +135,15 @@ tpl [Variable] {
 }
 
 tpl [Predicative-Formula] {
-  "("; `@spelling`; if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
+  "(predicative-formula "; `@spelling`; if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Private-Predicate-Formula] {
-  "("; `@spelling`; if [count(*) > 0] { " "; apply [*]; } ")";
+  "(private-predicate-formula "; `@spelling`; if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
+}
+
+tpl [Private-Functor-Term] {
+  "(private-functor-term "; `@spelling`; if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Proposition[Label]] {
@@ -159,7 +163,7 @@ tpl [Thesis] {
 }
 
 tpl [Item[@kind = "Reservation"]] {
-  "(reserve :variables "; apply [Variables]; " :type "; apply [*[position() = last()]]; ")";
+  "(reserve "; apply [Variables]; " "; apply [*[position() = last()]]; ")";
 }
 
 tpl [Item[@kind = "Property"]] {
@@ -176,4 +180,37 @@ tpl [Global-Choice-Term] {
 
 tpl [Standard-Type] {
   "(standard-type "; `@spelling`; if [*] { list (#separ = " ", #elems = `*`); } ")";
+}
+
+tpl variable-segments (#segments) {
+  if [$segments] {
+    $segment = `$segments[1]`;
+    $more-segments = `$segments[position() > 1]`;
+    for-each [$segment] {
+      choose {
+        when [self::Implicitly-Qualified-Segment] {
+          list (#separ = " ", #elems = `Variable`);
+        }
+        when [self::Explicitly-Qualified-Segment] {
+          $type = `*[position() = last()]`;
+          for-each [Variables] {
+            for-each [*] {
+              "("; apply [.]; " "; apply [$type]; ")";
+            }
+            if [position() < last()] {
+              " ";
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl [Existential-Quantifier-Formula] {
+  "(∃ "; "("; variable-segments (#segments = `*[position() < last()]`); ") "; apply [*[position() = last()]]; ")";
+}
+
+tpl [Universal-Quantifier-Formula] {
+  "(∀ "; "("; variable-segments (#segments = `*[position() < last()]`); ") "; apply [*[position() = last()]]; ")";
 }
