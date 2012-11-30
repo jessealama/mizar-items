@@ -144,15 +144,10 @@
 		 :variables |variables|
 		 :type (form->item |type|)))
 
-(defmacro |standard-type| (&body body)
-  (unless body
-    (error "Empty standard type."))
-  (let ((radix (first body)))
-    (unless (symbolp radix)
-      (error "Non-symbol radix:~%~%  ~a~%" radix))
-    (make-instance 'standard-type
-		   :radix radix
-		   :arguments (mapcar #'form->item (rest body)))))
+(defmacro |standard-type| (radix &rest arguments)
+  (make-instance 'standard-type
+		 :radix (form->item radix)
+		 :arguments (mapcar #'form->item arguments)))
 
 (defclass mizar-item ()
   nil)
