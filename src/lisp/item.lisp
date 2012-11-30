@@ -194,310 +194,310 @@
 		   :xml-node xml
 		   :children (mapcar #'make-item-from-xml children))))
 
-(defclass redefine (item)
-  nil)
+;; (defclass redefine (item)
+;;   nil)
 
-(defclass correctness-condition (item)
-  nil)
+;; (defclass correctness-condition (item)
+;;   nil)
 
-(defclass correctness (item)
-  nil)
+;; (defclass correctness (item)
+;;   nil)
 
-(defclass property (item)
-  nil)
+;; (defclass property (item)
+;;   nil)
 
-(defclass private-predicate-definition (item)
-  nil)
+;; (defclass private-predicate-definition (item)
+;;   nil)
 
-(defclass mizar-term (item)
-  nil)
+;; (defclass mizar-term (item)
+;;   nil)
 
-(defclass global-choice-term (mizar-term)
-  nil)
+;; (defclass global-choice-term (mizar-term)
+;;   nil)
 
-(defclass placeholder-term (mizar-term)
-  nil)
+;; (defclass placeholder-term (mizar-term)
+;;   nil)
 
-(defclass simple-term (mizar-term)
-  nil)
+;; (defclass simple-term (mizar-term)
+;;   nil)
 
-(defclass private-functor-term (mizar-term)
-  nil)
+;; (defclass private-functor-term (mizar-term)
+;;   nil)
 
-(defclass it-term (mizar-term)
-  nil)
+;; (defclass it-term (mizar-term)
+;;   nil)
 
-(defclass infix-term (mizar-term)
-  nil)
+;; (defclass infix-term (mizar-term)
+;;   nil)
 
-(defclass circumfix-term (mizar-term)
-  nil)
+;; (defclass circumfix-term (mizar-term)
+;;   nil)
 
-(defclass right-circumflex-symbol (item)
-  nil)
+;; (defclass right-circumflex-symbol (item)
+;;   nil)
 
-(defclass arguments-item (item)
-  nil)
+;; (defclass arguments-item (item)
+;;   nil)
 
-(defclass proposition (item)
-  nil)
+;; (defclass proposition (item)
+;;   nil)
 
-(defclass label-item (item)
-  nil)
+;; (defclass label-item (item)
+;;   nil)
 
-(defclass local-reference (item)
-  nil)
+;; (defclass local-reference (item)
+;;   nil)
 
-(defclass theorem-reference (item)
-  nil)
+;; (defclass theorem-reference (item)
+;;   nil)
 
-(defclass definition-reference (item)
-  nil)
+;; (defclass definition-reference (item)
+;;   nil)
 
-(defclass straightforward-justification (item)
-  nil)
+;; (defclass straightforward-justification (item)
+;;   nil)
 
-(defclass scheme-justification (item)
-  nil)
+;; (defclass scheme-justification (item)
+;;   nil)
 
-(defclass formula-item (item)
-  nil)
+;; (defclass formula-item (item)
+;;   nil)
 
-(defclass negated-formula (formula-item)
-  nil)
+;; (defclass negated-formula (formula-item)
+;;   nil)
 
-(defclass predicative-formula (formula-item)
-  nil)
+;; (defclass predicative-formula (formula-item)
+;;   nil)
 
-(defclass attributive-formula (formula-item)
-  nil)
+;; (defclass attributive-formula (formula-item)
+;;   nil)
 
-(defclass assumption (item)
-  nil)
+;; (defclass assumption (item)
+;;   nil)
 
-(defclass existential-assumption (item)
-  nil)
+;; (defclass existential-assumption (item)
+;;   nil)
 
-(defclass collective-assumption (item)
-  nil)
+;; (defclass collective-assumption (item)
+;;   nil)
 
-(defclass single-assumption (item)
-  nil)
+;; (defclass single-assumption (item)
+;;   nil)
 
-(defclass contradiction (formula-item)
-  nil)
+;; (defclass contradiction (formula-item)
+;;   nil)
 
-(defclass private-predicate-formula (formula-item)
-  nil)
+;; (defclass private-predicate-formula (formula-item)
+;;   nil)
 
-(defclass existential-quantifier-formula (formula-item)
-  nil)
+;; (defclass existential-quantifier-formula (formula-item)
+;;   nil)
 
-(defclass choice-statement (item)
-  nil)
+;; (defclass choice-statement (item)
+;;   nil)
 
-(defclass exemplification (item)
-  nil)
+;; (defclass exemplification (item)
+;;   nil)
 
-(defclass generalization (item)
-  nil)
+;; (defclass generalization (item)
+;;   nil)
 
-(defclass conclusion (item)
-  nil)
+;; (defclass conclusion (item)
+;;   nil)
 
-(defclass loci-declaration (item)
-  nil)
+;; (defclass loci-declaration (item)
+;;   nil)
 
-(defclass thesis (item)
-  nil)
+;; (defclass thesis (item)
+;;   nil)
 
-(defclass conditions-item (item)
-  nil)
+;; (defclass conditions-item (item)
+;;   nil)
 
 
 
-(defclass universal-quantifier-formula (formula-item)
-  nil)
+;; (defclass universal-quantifier-formula (formula-item)
+;;   nil)
 
-(defclass conditional-formula (formula-item)
-  nil)
+;; (defclass conditional-formula (formula-item)
+;;   nil)
 
-(defclass biconditional-formula (formula-item)
-  nil)
+;; (defclass biconditional-formula (formula-item)
+;;   nil)
 
-(defclass conjunctive-formula (formula-item)
-  nil)
+;; (defclass conjunctive-formula (formula-item)
+;;   nil)
 
-(defclass disjunctive-formula (formula-item)
-  nil)
+;; (defclass disjunctive-formula (formula-item)
+;;   nil)
 
-(defclass text-proper (item)
-  nil)
+;; (defclass text-proper (item)
+;;   nil)
 
-(defclass mizar-block (item)
-  nil)
+;; (defclass mizar-block (item)
+;;   nil)
 
-(defclass mizar-type (item)
-  nil)
+;; (defclass mizar-type (item)
+;;   nil)
 
-(defclass standard-type (mizar-type)
-  nil)
+;; (defclass standard-type (mizar-type)
+;;   nil)
 
-(defclass clustered-type (mizar-type)
-  nil)
+;; (defclass clustered-type (mizar-type)
+;;   nil)
 
-(defclass type-list-item (item)
-  nil)
+;; (defclass type-list-item (item)
+;;   nil)
 
-(defclass type-specification (item)
-  nil)
+;; (defclass type-specification (item)
+;;   nil)
 
-(defclass segment-item (item)
-  nil)
+;; (defclass segment-item (item)
+;;   nil)
 
-(defclass functor-segment-item (segment-item)
-  nil)
+;; (defclass functor-segment-item (segment-item)
+;;   nil)
 
-(defclass predicate-segment-item (segment-item)
-  nil)
+;; (defclass predicate-segment-item (segment-item)
+;;   nil)
 
-(defclass qualified-segment (segment-item)
-  nil)
+;; (defclass qualified-segment (segment-item)
+;;   nil)
 
-(defclass implicitly-qualified-segment (qualified-segment)
-  nil)
+;; (defclass implicitly-qualified-segment (qualified-segment)
+;;   nil)
 
-(defclass explicitly-qualified-segment (qualified-segment)
-  nil)
+;; (defclass explicitly-qualified-segment (qualified-segment)
+;;   nil)
 
-(defclass variable-item (item)
-  nil)
+;; (defclass variable-item (item)
+;;   nil)
 
-(defclass variables-item (item)
-  nil)
+;; (defclass variables-item (item)
+;;   nil)
 
-(defclass scheme-item (item)
-  nil)
+;; (defclass scheme-item (item)
+;;   nil)
 
-(defclass schematic-variables-item (item)
-  nil)
+;; (defclass schematic-variables-item (item)
+;;   nil)
 
-(defclass regular-statement (item)
-  nil)
+;; (defclass regular-statement (item)
+;;   nil)
 
-(defclass theorem-item (item)
-  nil)
+;; (defclass theorem-item (item)
+;;   nil)
 
-(defclass definition-item (item)
-  nil)
+;; (defclass definition-item (item)
+;;   nil)
 
-(defclass functor-definition (item)
-  nil)
+;; (defclass functor-definition (item)
+;;   nil)
 
-(defclass predicate-definition (item)
-  nil)
+;; (defclass predicate-definition (item)
+;;   nil)
 
-(defclass cluster (item)
-  nil)
+;; (defclass cluster (item)
+;;   nil)
 
-(defclass adjective-cluster (item)
-  nil)
+;; (defclass adjective-cluster (item)
+;;   nil)
 
-(defclass adjective (item)
-  nil)
+;; (defclass adjective (item)
+;;   nil)
 
-(defclass existential-registration (item)
-  nil)
+;; (defclass existential-registration (item)
+;;   nil)
 
-(defclass functorial-registration (item)
-  nil)
+;; (defclass functorial-registration (item)
+;;   nil)
 
-(defclass definiens (item)
-  nil)
+;; (defclass definiens (item)
+;;   nil)
 
-(defclass attribute-definition (item)
-  nil)
+;; (defclass attribute-definition (item)
+;;   nil)
 
-(defclass attribute-pattern (item)
-  nil)
+;; (defclass attribute-pattern (item)
+;;   nil)
 
-(defclass predicate-pattern (item)
-  nil)
+;; (defclass predicate-pattern (item)
+;;   nil)
 
-(defclass negated-adjective (item)
-  nil)
+;; (defclass negated-adjective (item)
+;;   nil)
 
-(defclass provisional-formulas (item)
-  nil)
+;; (defclass provisional-formulas (item)
+;;   nil)
 
-(defclass predicate-antonym (item)
-  nil)
+;; (defclass predicate-antonym (item)
+;;   nil)
 
-(defclass operation-functor-pattern (item)
-  nil)
+;; (defclass operation-functor-pattern (item)
+;;   nil)
 
-(defclass locus (item)
-  nil)
+;; (defclass locus (item)
+;;   nil)
 
-(defclass loci-item (item)
-  nil)
+;; (defclass loci-item (item)
+;;   nil)
 
-(defclass scheme-block-item (item)
-  nil)
+;; (defclass scheme-block-item (item)
+;;   nil)
 
-(defclass scheme-head (item)
-  nil)
+;; (defclass scheme-head (item)
+;;   nil)
 
-(defclass section-pragma (item)
-  nil)
+;; (defclass section-pragma (item)
+;;   nil)
 
-(defun reservation-item-p (x)
-  (eql (type-of x) 'reservation-item))
+;; (defun reservation-item-p (x)
+;;   (eql (type-of x) 'reservation-item))
 
-(defclass quantified-formula (item)
-  ((matrix
-    :accessor matrix
-    :type item)
-   (variables
-    :accessor variables
-    :type list))
-  (:documentation "A quantified formula."))
+;; (defclass quantified-formula (item)
+;;   ((matrix
+;;     :accessor matrix
+;;     :type item)
+;;    (variables
+;;     :accessor variables
+;;     :type list))
+;;   (:documentation "A quantified formula."))
 
-(defmethod initialize-instance :after ((formula quantified-formula) &rest initargs)
-  (declare (ignore initargs))
-  (let ((xml (xml-node formula)))
-    (let ((segments-xml (xpath "*[position() < last()]" xml))
-	  (formula-xml (first (xpath "*[position() = last()]" xml))))
-      (loop
-	 with variables-and-types = nil
-	 for segment-xml in segments-xml
-	 do
-	   (cond ((xpath "self::Explicitly-Qualified-Segment" segment-xml)
-		  (let ((type (first (xpath "*[position() = last()]" segment-xml)))
-			(variables (xpath "Variables/*" segment-xml)))
-		    (dolist (variable variables)
-		      (setf variables-and-types
-			    (append variables-and-types
-				    (list (cons (make-item-from-xml variable) type)))))))
-		 ((xpath "self::Implicitly-Qualified-Segment" segment-xml)
-		  (let ((variables (xpath "*" segment-xml)))
-		    (dolist (variable variables)
-		      (setf variables-and-types
-			    (append variables-and-types
-				    (list (cons (make-item-from-xml variable) nil)))))))
-		 (t
-		  (error "Don't know how to deal with a segment that is neither an explicitly nor an implicitly qualified segment.")))
-	 finally
-	   (setf (matrix formula) (make-item-from-xml formula-xml))
-	   (setf (variables formula) variables-and-types)
-	   (return formula)))))
+;; (defmethod initialize-instance :after ((formula quantified-formula) &rest initargs)
+;;   (declare (ignore initargs))
+;;   (let ((xml (xml-node formula)))
+;;     (let ((segments-xml (xpath "*[position() < last()]" xml))
+;; 	  (formula-xml (first (xpath "*[position() = last()]" xml))))
+;;       (loop
+;; 	 with variables-and-types = nil
+;; 	 for segment-xml in segments-xml
+;; 	 do
+;; 	   (cond ((xpath "self::Explicitly-Qualified-Segment" segment-xml)
+;; 		  (let ((type (first (xpath "*[position() = last()]" segment-xml)))
+;; 			(variables (xpath "Variables/*" segment-xml)))
+;; 		    (dolist (variable variables)
+;; 		      (setf variables-and-types
+;; 			    (append variables-and-types
+;; 				    (list (cons (make-item-from-xml variable) type)))))))
+;; 		 ((xpath "self::Implicitly-Qualified-Segment" segment-xml)
+;; 		  (let ((variables (xpath "*" segment-xml)))
+;; 		    (dolist (variable variables)
+;; 		      (setf variables-and-types
+;; 			    (append variables-and-types
+;; 				    (list (cons (make-item-from-xml variable) nil)))))))
+;; 		 (t
+;; 		  (error "Don't know how to deal with a segment that is neither an explicitly nor an implicitly qualified segment.")))
+;; 	 finally
+;; 	   (setf (matrix formula) (make-item-from-xml formula-xml))
+;; 	   (setf (variables formula) variables-and-types)
+;; 	   (return formula)))))
 
-(defclass universal-quantifier-formula (quantified-formula)
-  nil
-  (:documentation "A universally quantified formula"))
+;; (defclass universal-quantifier-formula (quantified-formula)
+;;   nil
+;;   (:documentation "A universally quantified formula"))
 
-(defclass existential-quantifier-formula (quantified-formula)
-  nil
-  (:documentation "A universally quantified formula"))
+;; (defclass existential-quantifier-formula (quantified-formula)
+;;   nil
+;;   (:documentation "A universally quantified formula"))
 
 ;;; item.lisp ends here
