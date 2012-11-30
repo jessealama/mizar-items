@@ -124,9 +124,10 @@
 (defun form->item (form)
   (multiple-value-bind (expanded expandable)
       (macroexpand-1 form)
-    (if expandable
-	expanded
-	(error "The form~%~%  ~a~%~%did not match any known form-to-item rules." form))))
+    (cond (expandable expanded)
+	  ((symbolp form) form)
+	  (t
+	   (error "The form~%~%  ~a~%~%did not match any known form-to-item rules, nor is is a user symbol." form)))))
 
 (defmacro |text-proper| ((articleid) &body body)
   (make-instance 'text-proper-item
