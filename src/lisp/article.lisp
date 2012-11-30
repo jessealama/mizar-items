@@ -137,12 +137,10 @@
 (defmacro |section-pragma| ()
   (make-instance 'section-pragma-item))
 
-(defmacro |reserve| (&key |variables| |type|)
-  (unless (every #'symbolp |variables|)
-    (error "All reserved variables in a reservation ought to be symbols."))
+(defmacro |reserve| (variables type)
   (make-instance 'reservation-item
-		 :variables |variables|
-		 :type (form->item |type|)))
+		 :variables (mapcar #'form->item variables)
+		 :type (form->item type)))
 
 (defmacro |standard-type| (radix &rest arguments)
   (make-instance 'standard-type
@@ -151,6 +149,59 @@
 
 (defclass mizar-item ()
   nil)
+
+(defclass mizar-term (mizar-item)
+  ((spelling
+    :accessor spelling
+    :type symbol
+    :initarg :spelling
+    :initform (error "To make a variable, please provide a spelling."))))
+
+(defclass variable-item (mizar-term)
+  nil)
+
+(defclass schematic-variable (variable-item)
+  ((arguments
+    :type list
+    :accessor arguments
+    :initarg :arguments
+    :initform nil)))
+
+(defclass schematic-functor-variable (schematic-variable)
+  ((value-type
+    :type mizar-type
+    :accessor value-type
+    :initarg :value-type
+    :initform (error "To define a schematic functor variable, please supply a value type."))))
+
+(defclass schematic-predicate-variable (schematic-variable)
+  nil)
+
+(defclass private-functor-term (mizar-term)
+  ((arguments
+   :type list
+   :accessor arguments
+   :initarg :arguments
+   :initform nil)))
+
+(defclass private-predicate-formula (atomic-formula)
+  ((predicate
+    :type symbol
+    :accessor predicate
+    :initarg :predicate
+    :initform (error "Missing predicate from a predicative formula"))
+   (arguments
+    :type list
+    :accessor arguments
+    :initarg :arguments
+    :initform nil)))
+
+(defclass simple-variable (variable-item)
+  ((type
+    :accessor variable-type
+    :type mizar-type
+    :initarg :type
+    :initform (error "To make a variable, a type is required."))))
 
 (defclass text-proper-item (mizar-item)
   ((articleid
@@ -163,7 +214,6 @@
     :accessor toplevel-items)))
 
 (defmacro |scheme| (name schematic-variables conclusion provisos &rest justification)
-  (break "provisos = ~a" provisos)
   (make-instance 'scheme-item
 		 :name name
 		 :schematic-variables (mapcar #'form->item schematic-variables)
@@ -192,14 +242,104 @@
 (defclass universal-quantifier-formula (quantified-formula)
   nil)
 
-(defmacro |existential-quantifier-formula| (variables matrix)
+(defclass atomic-formula (formula-item)
+  nil)
+
+(defclass predicative-formula (atomic-formula)
+  ((predicate
+    :type symbol
+    :accessor predicate
+    :initarg :predicate
+    :initform (error "Missing predicate from a predicative formula"))
+   (left-arguments
+    :type list
+    :accessor left-arguments
+    :initarg :left-arguments
+    :initform nil)
+   (right-arguments
+    :type list
+    :accessor right-arguments
+    :initarg :right-arguments
+    :initform nil)))
+
+(defmacro |predicative-formula| (spelling left-arguments right-arguments)
+  (make-instance 'predicative-formula
+		 :predicate spelling
+		 :left-arguments (mapcar #'form->item left-arguments)
+		 :right-arguments (mapcar #'form->item right-arguments)))
+
+(defmacro |private-functor-term| (functor &rest arguments)
+  (make-instance 'private-functor-term
+		 :spelling functor
+		 :arguments (mapcar #'form->item arguments)))
+
+(defmacro |private-predicate-formula| (predicate &rest arguments)
+  (make-instance 'private-predicate-formula
+		 :predicate predicate
+		 :arguments (mapcar #'form->item arguments)))
+
+(defclass biconditional-formula (formula-item)
+  ((lhs
+    :type formula-item
+    :accessor lhs
+    :initarg :lhs
+    :initform (error "Missing left-hand side from a biconditional."))
+   (rhs
+    :type formula-item
+    :accessor rhs
+    :initarg :rhs
+    :initform (error "Missing right-hand side from a biconditional."))))
+
+(defclass conjunctive-formula (formula-item)
+  ((lhs
+    :type formula-item
+    :accessor lhs
+    :initarg :lhs
+    :initform (error "Missing left-hand side from a conjunction."))
+   (rhs
+    :type formula-item
+    :accessor rhs
+    :initarg :rhs
+    :initform (error "Missing right-hand side from a conjunction."))))
+
+(defmacro |conjunctive-formula| (lhs rhs)
+  (make-instance 'conjunctive-formula
+		 :lhs (form->item lhs)
+		 :rhs (form->item rhs)))
+
+(defmacro |iff| (lhs rhs)
+  (make-instance 'biconditional-formula
+		 :lhs (form->item lhs)
+		 :rhs (form->item rhs)))
+
+(defparameter *reserved-variables* (make-hash-table :test #'eql))
+
+(defun variable-list->variables (variable-list)
+  (loop
+     for variable in variable-list
+     collect (cond ((symbolp variable)
+		    (multiple-value-bind (reserved-variable known?)
+			(gethash variable *reserved-variables*)
+		      (if known?
+			  reserved-variable
+			  (error "~a is not reserved." variable))))
+		   ((listp variable)
+		    (let ((variable-spelling (first variable))
+			  (type (second variable)))
+		      (make-instance 'simple-variable
+				     :spelling variable-spelling
+				     :type type))))
+       into variables
+       finally (return variables)))
+
+(defmacro |∃| (variables matrix)
   (make-instance 'existential-quantifier-formula
-		 :variables (mapcar #'form->item variables)
+		 :variables (variable-list->variables variables)
 		 :matrix (form->item matrix)))
 
-(defmacro |universal-quantifier-formula| (variables matrix)
+(defmacro |∀| (variables matrix)
   (make-instance 'universal-quantifier-formula
-		 :variables (mapcar #'form->item variables)
+		 :variables (variable-list->variables variables)
 		 :matrix (form->item matrix)))
 
 (defclass scheme-item (mizar-item)
@@ -229,6 +369,18 @@
     :initarg :justification
     :initform nil)))
 
+(defclass predicate-segment (mizar-item)
+  ((variables
+    :type list
+    :initform (error "To create a predicate-segment object, a non-null list of variables is required.")
+    :initarg :variables
+    :accessor variables)
+   (type-list
+    :type list
+    :accessor type-list
+    :initarg :type-list
+    :initform nil)))
+
 (defclass functor-segment (mizar-item)
   ((variables
     :type list
@@ -246,11 +398,20 @@
     :initarg :type
     :initform (error "To create a functor-segment object, a type is required."))))
 
-(defmacro |functor-segment| (variables type-list type)
-  (make-instance 'functor-segment
+(defmacro |functor-segment| (variables type-list value-type)
+  (let ((value-type (form->item value-type))
+	(type-list (mapcar #'form->item type-list)))
+    (flet ((make-schematic-functor-variable (variable)
+	     (make-instance 'schematic-functor-variable
+			    :arguments type-list
+			    :value-type value-type
+			    :spelling variable)))
+      (mapcar #'make-schematic-functor-variable variables))))
+
+(defmacro |predicate-segment| (variables type-list)
+  (make-instance 'predicate-segment
 		 :variables (mapcar #'form->item variables)
-		 :type-list (mapcar #'form->item type-list)
-		 :type (form->item type)))
+		 :type-list (mapcar #'form->item type-list)))
 
 (defclass section-pragma-item (mizar-item)
   nil)
@@ -266,6 +427,13 @@
     :accessor reserved-type
     :initarg :type
     :initform (error "To create a reservation, please supply a type for the reserved variables."))))
+
+(defmethod initialize-instance :after ((reservation reservation-item) &rest initargs)
+  (declare (ignore initargs))
+  (let ((variables (variables reservation))
+	(type (reserved-type reservation)))
+    (dolist (variable variables)
+      (setf (gethash variable *reserved-variables*) type))))
 
 (defclass mizar-type (mizar-item)
   nil)
