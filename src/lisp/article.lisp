@@ -465,6 +465,34 @@
     :initarg :justification
     :initform (error "To make a choice statement, a justification is required."))))
 
+(defclass generalization (mizar-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To make a generalization, a non-null list of variables is needed."))))
+
+(defmacro |generalization| (&rest variables)
+  (make-instance 'generalization
+		 :variables (mapcar #'form->item variables)))
+
+(defclass conclusion (mizar-item)
+  ((proposition
+    :type proposition-item
+    :accessor proposition
+    :initarg :proposition
+    :initform (error "To create a conclusion item, a proposition is necessary."))
+   (justification
+    :type justification-item
+    :accessor justification
+    :initarg :justification
+    :initform (error "To create a conclusion item, a justification is necessary."))))
+
+(defmacro |thus| (proposition justification)
+  (make-instance 'conclusion
+		 :proposition (form->item proposition)
+		 :justification (form->item justification)))
+
 (defmacro |consider| (variables conditions justification)
   (make-instance 'choice-statement
 		 :variables (mapcar #'form->item variables)
