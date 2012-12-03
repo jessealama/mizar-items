@@ -278,6 +278,17 @@
 		 :predicate predicate
 		 :arguments (mapcar #'form->item arguments)))
 
+(defclass negated-formula (formula-item)
+  ((argument
+    :accessor unnegate
+    :type formula-item
+    :initarg :argument
+    :initform (error "To create a negated formula, an argument is require."))))
+
+(defmacro |¬| (argument)
+  (make-instance 'negated-formula
+		 :argument (form->item argument)))
+
 (defclass biconditional-formula (formula-item)
   ((lhs
     :type formula-item
@@ -472,9 +483,43 @@
     :initarg :variables
     :initform (error "To make a generalization, a non-null list of variables is needed."))))
 
+(defclass loci-declaration (mizar-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To make a loci declaration, a non-null list of variables is needed."))))
+
 (defmacro |generalization| (&rest variables)
   (make-instance 'generalization
-		 :variables (mapcar #'form->item variables)))
+		 :variables (variable-list->variables variables)))
+
+(defmacro |loci-declaration| (&rest variables)
+  (make-instance 'loci-declaration
+		 :variables (variable-list->variables variables)))
+
+(defclass attribute-definition (mizar-item)
+  ((spelling
+    :type symbol
+    :accessor spelling
+    :initform (error "To create an attribute definition, a spelling is required for the new attribute.")
+    :initarg :spelling)
+   (label
+    :type (or null symbol)
+    :accessor label
+    :initform nil
+    :initarg :label)
+   (definiens
+       :type formula-item
+     :accessor definiens
+     :initarg :definiens
+     :initform (error "To create an attribute definition, a definiens is required."))))
+
+(defmacro |attribute-definition| (spelling label definiens)
+  (make-instance 'attribute-definition
+		 :spelling (form->item spelling)
+		 :label (form->item label)
+		 :definiens (form->item definiens)))
 
 (defclass conclusion (mizar-item)
   ((proposition
@@ -528,7 +573,22 @@
     :initarg :type
     :initform (error "To create a functor-segment object, a type is required."))))
 
-(defclass private-predicate-definition (mizar-item)
+
+(defmacro |definitional-block| (&rest items)
+  (make-instance 'definition-block
+		 :items (mapcar #'form->item items)))
+
+(defclass definition-block (mizar-item)
+  ((items
+    :type list
+    :accessor items
+    :initform (error "To create a definition block, a non-null list of items is required.")
+    :initarg :items)))
+
+(defclass mizar-pattern (mizar-item)
+  nil)
+
+(defclass private-predicate-definition (mizar-definition)
   ((predicate
     :type symbol
     :accessor predicate
