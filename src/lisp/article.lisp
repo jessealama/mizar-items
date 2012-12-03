@@ -398,6 +398,29 @@
     :initarg :type
     :initform (error "To create a functor-segment object, a type is required."))))
 
+(defclass private-predicate-definition (mizar-item)
+  ((predicate
+    :type symbol
+    :accessor predicate
+    :initarg :predicate
+    :initform (error "To create a private predicate definition, a predicate is required."))
+   (signature
+    :type list
+    :accessor :signature
+    :initarg :signature
+    :initform nil)
+   (definiens
+     :type formula-item
+     :accessor definiens
+     :initarg :definiens
+     :initform (error "To create a private predicate definition, a definiens is required."))))
+
+(defmacro |private-predicate-definition| (predicate signature definiens)
+  (make-instance 'private-predicate-definition
+		 :predicate predicate
+		 :signature (mapcar #'form->item signature)
+		 :definiens (form->item definiens)))
+
 (defmacro |functor-segment| (variables type-list value-type)
   (let ((value-type (form->item value-type))
 	(type-list (mapcar #'form->item type-list)))
