@@ -290,6 +290,18 @@
     :initarg :rhs
     :initform (error "Missing right-hand side from a biconditional."))))
 
+(defclass conditional-formula (formula-item)
+  ((antecedent
+    :type formula-item
+    :accessor antecedent
+    :initarg :antecedent
+    :initform (error "Missing antecedent of a conditional."))
+   (consequent
+    :type formula-item
+    :accessor consequent
+    :initarg :consequent
+    :initform (error "Missing consequent of a conditional."))))
+
 (defclass conjunctive-formula (formula-item)
   ((lhs
     :type formula-item
@@ -301,6 +313,11 @@
     :accessor rhs
     :initarg :rhs
     :initform (error "Missing right-hand side from a conjunction."))))
+
+(defmacro |→| (antecedent consequent)
+  (make-instance 'conditional-formula
+		 :antecedent (form->item antecedent)
+		 :consequent (form->item consequent)))
 
 (defmacro |conjunctive-formula| (lhs rhs)
   (make-instance 'conjunctive-formula
@@ -369,6 +386,91 @@
     :initarg :justification
     :initform nil)))
 
+(defclass justification-item (mizar-item)
+  nil)
+
+(defclass straightforward-justification (justification-item)
+  ((references
+    :type list
+    :accessor references
+    :initarg :references
+    :initform nil)))
+
+(defclass scheme-justification (justification-item)
+  ((arguments
+    :type list
+    :accessor arguments
+    :initarg :arguments
+    :initform nil)))
+
+(defclass external-scheme-justification (scheme-justification)
+  ((article
+    :type symbol
+    :accessor article
+    :initform (error "To make an external scheme justification, an article must be supplied.")
+    :initarg :article)
+   (nr
+    :type integer
+    :accessor nr
+    :initform (error "To make an external scheme justification, a number must be provided.")
+    :initarg :nr)))
+
+(defclass internal-scheme-justification (scheme-justification)
+  ((spelling
+    :type symbol
+    :accessor spelling
+    :initarg :spelling
+    :initform (error "To make an article-internal scheme justification, a spelling is needed."))))
+
+(defmacro |straightforward-justification| (&rest references)
+  (make-instance 'straightforward-justification
+		 :references (mapcar #'form->item references)))
+
+(defmacro |internal-scheme-justification| (spelling &rest arguments)
+  (make-instance 'internal-scheme-justification
+		 :spelling (form->item spelling)
+		 :arguments (mapcar #'form->item arguments)))
+
+(defmacro |external-scheme-justification| (article nr &rest arguments)
+  (make-instance 'external-scheme-justification
+		 :article (form->item article)
+		 :nr nr
+		 :arguments (mapcar #'form->item arguments)))
+
+(defclass exemplification (mizar-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To make an exemplification, a non-null list of variables is needed."))))
+
+(defmacro |take| (&rest variables)
+  (make-instance 'exemplification
+		 :variables (mapcar #'form->item variables)))
+
+(defclass choice-statement (mizar-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To make a choice statement, a non-null list of variables is needed."))
+   (conditions
+    :type list
+    :accessor conditions
+    :initarg :conditions
+    :initform (error "To make a choice statement, a non-null list of conditions is needed."))
+   (justification
+    :type justification-item
+    :accessor justification
+    :initarg :justification
+    :initform (error "To make a choice statement, a justification is required."))))
+
+(defmacro |consider| (variables conditions justification)
+  (make-instance 'choice-statement
+		 :variables (mapcar #'form->item variables)
+		 :conditions (mapcar #'form->item conditions)
+		 :justification (form->item justification)))
+
 (defclass predicate-segment (mizar-item)
   ((variables
     :type list
@@ -420,6 +522,40 @@
 		 :predicate predicate
 		 :signature (mapcar #'form->item signature)
 		 :definiens (form->item definiens)))
+
+(defclass proposition-item (mizar-item)
+  ((label
+    :type (or null symbol)
+    :accessor label
+    :initarg :label
+    :initform nil)
+   (formula
+    :type formula-item
+    :accessor formula
+    :initarg :formula
+    :initform (error "To make a proposition, a formula is required."))))
+
+(defclass regular-statement (mizar-item)
+  ((proposition
+    :type proposition-item
+    :accessor proposition
+    :initarg :proposition
+    :initform (error "To make a regular statement, a proposition is needed."))
+   (justification
+    :type justification-item
+    :accessor justification
+    :initarg :justification
+    :initform nil)))
+
+(defmacro |regular-statement| (proposition justification)
+  (make-instance 'regular-statement
+		 :proposition (form->item proposition)
+		 :justification (form->item justification)))
+
+(defmacro |proposition| (label formula)
+  (make-instance 'proposition-item
+		 :label (form->item label)
+		 :formula (form->item formula)))
 
 (defmacro |functor-segment| (variables type-list value-type)
   (let ((value-type (form->item value-type))
