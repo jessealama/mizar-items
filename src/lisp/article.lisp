@@ -654,16 +654,16 @@
 		 :proposition (form->item proposition)
 		 :justification (form->item justification)))
 
-(defmacro |proposition| (label formula)
-  (make-instance 'proposition-item
-		 :label (when label (form->item label))
-		 :formula (form->item formula)))
-
 (defclass thesis-item (formula-item)
   nil)
 
 (defmacro |thesis| ()
   (make-instance 'thesis-item))
+
+(defmacro |proposition| (label formula)
+  (make-instance 'proposition-item
+		 :label (when label (form->item label))
+		 :formula (form->item formula)))
 
 (defmacro |functor-segment| (variables type-list value-type)
   (let ((value-type (form->item value-type))
