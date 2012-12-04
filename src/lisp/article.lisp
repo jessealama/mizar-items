@@ -223,7 +223,7 @@
 		 :name name
 		 :schematic-variables (mapcar #'form->item schematic-variables)
 		 :conclusion (form->item conclusion)
-		 :provisos provisos
+		 :provisos (mapcar #'form->item provisos)
 		 :justification (mapcar #'form->item justification)))
 
 (defclass formula-item (mizar-item)
