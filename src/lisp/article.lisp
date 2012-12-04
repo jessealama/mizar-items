@@ -588,6 +588,9 @@
 (defclass mizar-pattern (mizar-item)
   nil)
 
+(defclass mizar-definition (mizar-item)
+  nil)
+
 (defclass private-predicate-definition (mizar-definition)
   ((predicate
     :type symbol
