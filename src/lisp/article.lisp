@@ -156,14 +156,31 @@
   nil)
 
 (defclass mizar-term (mizar-item)
+  nil)
+
+(defclass global-choice-term (mizar-term)
+  ((type
+    :type mizar-type
+    :accessor choice-term-type
+    :initarg :type
+    :initform (error "A global choice term requires a type."))))
+
+(defclass it-term (mizar-term)
+  nil)
+
+(defmacro |it| ()
+  (make-instance 'it-term))
+
+(defmacro |the| (type)
+  (make-instance 'global-choice-term
+		 :type (form->item type)))
+
+(defclass variable-item (mizar-term)
   ((spelling
     :accessor spelling
     :type symbol
     :initarg :spelling
     :initform (error "To make a variable, please provide a spelling."))))
-
-(defclass variable-item (mizar-term)
-  nil)
 
 (defclass schematic-variable (variable-item)
   ((arguments
@@ -183,7 +200,12 @@
   nil)
 
 (defclass private-functor-term (mizar-term)
-  ((arguments
+  ((spelling
+    :accessor spelling
+    :type symbol
+    :initarg :spelling
+    :initform (error "To make a variable, please provide a spelling."))
+   (arguments
    :type list
    :accessor arguments
    :initarg :arguments
@@ -330,13 +352,30 @@
     :initarg :rhs
     :initform (error "Missing right-hand side from a conjunction."))))
 
+(defclass disjunctive-formula (formula-item)
+  ((lhs
+    :type formula-item
+    :accessor lhs
+    :initarg :lhs
+    :initform (error "Missing left-hand side from a disjunction."))
+   (rhs
+    :type formula-item
+    :accessor rhs
+    :initarg :rhs
+    :initform (error "Missing right-hand side from a disjunction."))))
+
 (defmacro |→| (antecedent consequent)
   (make-instance 'conditional-formula
 		 :antecedent (form->item antecedent)
 		 :consequent (form->item consequent)))
 
-(defmacro |conjunctive-formula| (lhs rhs)
+(defmacro |∧| (lhs rhs)
   (make-instance 'conjunctive-formula
+		 :lhs (form->item lhs)
+		 :rhs (form->item rhs)))
+
+(defmacro |∨| (lhs rhs)
+  (make-instance 'disjunctive-formula
 		 :lhs (form->item lhs)
 		 :rhs (form->item rhs)))
 
@@ -416,6 +455,17 @@
     :accessor linked
     :initarg :linked
     :initform nil)))
+
+(defclass proof-item (justification-item)
+  ((steps
+    :type list
+    :accessor steps
+    :initarg :steps
+    :initform nil)))
+
+(defmacro |proof| (&rest steps)
+  (make-instance 'proof-item
+		 :steps (mapcar #'form->item steps)))
 
 (defclass scheme-justification (justification-item)
   ((arguments
@@ -541,15 +591,23 @@
     :accessor pattern
     :initform nil
     :initarg :pattern)
+   (label
+    :type (or null symbol)
+    :accessor label
+    :initform nil
+    :initarg :label)
    (definiens
        :type (or null mizar-term formula-item)
      :accessor definiens
      :initform nil
      :initarg :definiens)))
 
-(defmacro |functor-definition| (shape pattern definiens)
+(defmacro |functor-definition| (shape pattern label definiens)
   (make-instance 'functor-definition
 		 :shape shape
+		 :label (let ((name (symbol-name label)))
+			  (cond ((string= name "nil") nil)
+				(t label)))
 		 :pattern (form->item pattern)
 		 :definiens (form->item definiens)))
 
@@ -634,6 +692,19 @@
     :initarg :type
     :initform (error "To create a functor-segment object, a type is required."))))
 
+(defclass correctness-condition (mizar-item)
+  ((justification
+    :type justification-item
+    :accessor justification
+    :initarg :justification
+    :initform (error "To make a correctness condition, a justification is required."))))
+
+(defclass coherence-condition (correctness-condition)
+  nil)
+
+(defmacro |coherence| (justification)
+  (make-instance 'coherence-condition
+		 :justification (form->item justification)))
 
 (defmacro |definitional-block| (&rest items)
   (make-instance 'definition-block
@@ -767,16 +838,42 @@
     :initarg :arguments
     :initform nil)))
 
+(defclass adjective-cluster (mizar-item)
+  ((adjectives
+    :type list
+    :accessor adjectives
+    :initarg :adjectives
+    :initform nil)))
+
+(defclass clustered-type (mizar-type)
+  ((cluster
+    :type adjective-cluster
+    :accessor cluster
+    :initarg :cluster
+    :initform (error "To make a clustered type, an adjective cluster is needed."))
+   (argument
+    :type mizar-type
+    :accessor argument
+    :initarg :argument
+    :initform (error "To make a clustered type, an argument type is required."))))
+
+(defmacro |clustered-type| (cluster argument)
+  (make-instance 'clustered-type
+		 :cluster (form->item cluster)
+		 :argument (form->item argument)))
+
+(defmacro |adjective-cluster| (&rest adjectives)
+  (make-instance 'adjective-cluster
+		 :adjectives (mapcar #'form->item adjectives)))
+
 (defgeneric parse (article))
 
 (defmethod parse ((article article))
   (parse (path article)))
 
 (defmethod parse :before ((article pathname))
-  (let ((wsx-path (file-with-extension article "wsx")))
-    (unless (file-exists-p wsx-path)
-      (makeenv article)
-      (wsmparser article))))
+  (makeenv article)
+  (wsmparser article))
 
 (defmethod parse ((article pathname))
   (let ((wsx (file-with-extension article "wsx")))

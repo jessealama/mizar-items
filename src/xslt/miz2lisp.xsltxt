@@ -90,7 +90,7 @@ tpl [Block[@kind = "Scheme-Block"]] {
   }
   "  "; if [Provisional-Formulas] { apply [Provisional-Formulas]; } else { "()"; } "\n";
   for-each [Item[@kind = "Scheme-Head"]] {
-    list (#separ = "\n", #elems = `following-sibling::*`);
+    "(proof "; "\n"; list (#separ = "\n", #elems = `following-sibling::*`); ")";
   }
   ")";
 }
@@ -153,6 +153,14 @@ tpl [Proposition[not(Label)]] {
 
 tpl [Label] {
   `@spelling`;
+}
+
+tpl [Conjunctive-Formula] {
+  "(∧ "; apply [*[1]]; " "; apply [*[2]]; ")";
+}
+
+tpl [Disjunctive-Formula] {
+  "(∨ "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Biconditional-Formula] {
@@ -301,10 +309,39 @@ tpl [Item[@kind = "Functor-Definition"]] {
     "formula";
   }
   " "; apply [Operation-Functor-Pattern];
-  " "; apply [Definiens];
+  " ";
+  for-each [Definiens] {
+    if [Label] {
+      apply [Label];
+    } else {
+      "nil";
+    }
+    " ";
+    apply [.];
+  }
   ")";
 }
 
 tpl [Operation-Functor-Pattern] {
   "(functor-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+}
+
+tpl [Definiens] {
+  apply [*[position() = last()]];
+}
+
+tpl [Adjective-Cluster] {
+  "(adjective-cluster "; list (#separ = " ", #elems = `*`); ")";
+}
+
+tpl [Adjective] {
+  `@spelling`;
+}
+
+tpl [Locus] {
+  `@spelling`;
+}
+
+tpl [it-Term] {
+  "it";
 }
