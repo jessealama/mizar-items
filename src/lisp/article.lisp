@@ -405,6 +405,11 @@
     :type list
     :accessor references
     :initarg :references
+    :initform nil)
+   (linked
+    :type boolean
+    :accessor linked
+    :initarg :linked
     :initform nil)))
 
 (defclass scheme-justification (justification-item)
@@ -433,9 +438,10 @@
     :initarg :spelling
     :initform (error "To make an article-internal scheme justification, a spelling is needed."))))
 
-(defmacro |straightforward-justification| (&rest references)
+(defmacro |straightforward-justification| (linked-p &rest references)
   (make-instance 'straightforward-justification
-		 :references (mapcar #'form->item references)))
+		 :references (mapcar #'form->item references)
+		 :linked linked-p))
 
 (defmacro |internal-scheme-justification| (spelling &rest arguments)
   (make-instance 'internal-scheme-justification
