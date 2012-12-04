@@ -125,7 +125,12 @@
   (multiple-value-bind (expanded expandable)
       (macroexpand-1 form)
     (cond (expandable expanded)
-	  ((symbolp form) form)
+	  ((symbolp form)
+	   (let ((name (symbol-name form)))
+	     (cond ((string= name "thesis")
+		    (make-instance 'thesis-item))
+		   (t
+		    form))))
 	  (t
 	   (error "The form~%~%  ~a~%~%did not match any known form-to-item rules, nor is is a user symbol." form)))))
 
