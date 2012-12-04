@@ -530,11 +530,57 @@
      :initarg :definiens
      :initform (error "To create an attribute definition, a definiens is required."))))
 
+(defclass functor-definition (mizar-item)
+  ((shape
+    :type symbol
+    :accessor shape
+    :initarg :shape
+    :initform (error "To make a functor definition, a shape is required."))
+   (pattern
+    :type (or null functor-pattern)
+    :accessor pattern
+    :initform nil
+    :initarg :pattern)
+   (definiens
+       :type (or null mizar-term formula-item)
+     :accessor definiens
+     :initform nil
+     :initarg :definiens)))
+
+(defmacro |functor-definition| (shape pattern definiens)
+  (make-instance 'functor-definition
+		 :shape shape
+		 :pattern (form->item pattern)
+		 :definiens (form->item definiens)))
+
 (defmacro |attribute-definition| (spelling label definiens)
   (make-instance 'attribute-definition
 		 :spelling (form->item spelling)
 		 :label (form->item label)
 		 :definiens (form->item definiens)))
+
+(defclass functor-pattern (mizar-pattern)
+  ((spelling
+    :type symbol
+    :accessor spelling
+    :initform (error "To make a functor pattern, please supply a spelling.")
+    :initarg :spelling)
+   (left-arguments
+    :type list
+    :accessor left-arguments
+    :initform nil
+    :initarg :left-arguments)
+   (right-arguments
+    :type list
+    :accessor right-arguments
+    :initform nil
+    :initarg :right-arguments)))
+
+(defmacro |functor-pattern| (spelling left right)
+  (make-instance 'functor-pattern
+		 :spelling spelling
+		 :left-arguments (mapcar #'form->item left)
+		 :right-arguments (mapcar #'form->item right)))
 
 (defclass conclusion (mizar-item)
   ((proposition
