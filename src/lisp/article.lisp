@@ -446,7 +446,11 @@
 (defmacro |straightforward-justification| (linked-p &rest references)
   (make-instance 'straightforward-justification
 		 :references (mapcar #'form->item references)
-		 :linked linked-p))
+		 :linked (let ((name (symbol-name linked-p)))
+			   (cond ((string= name "nil") nil)
+				 ((string= name "t") t)
+				 (t
+				  (error "Unknown linked-p status: '~a'" linked-p))))))
 
 (defmacro |internal-scheme-justification| (spelling &rest arguments)
   (make-instance 'internal-scheme-justification
