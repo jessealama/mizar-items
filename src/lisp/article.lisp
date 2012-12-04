@@ -356,7 +356,7 @@
 			  (type (second variable)))
 		      (make-instance 'simple-variable
 				     :spelling variable-spelling
-				     :type type))))
+				     :type (form->item type)))))
        into variables
        finally (return variables)))
 
