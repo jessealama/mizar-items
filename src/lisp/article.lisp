@@ -654,6 +654,12 @@
 		 :label (when label (form->item label))
 		 :formula (form->item formula)))
 
+(defclass thesis-item (formula-item)
+  nil)
+
+(defmacro |thesis| ()
+  (make-instance 'thesis-item))
+
 (defmacro |functor-segment| (variables type-list value-type)
   (let ((value-type (form->item value-type))
 	(type-list (mapcar #'form->item type-list)))
