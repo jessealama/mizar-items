@@ -651,7 +651,7 @@
 
 (defmacro |proposition| (label formula)
   (make-instance 'proposition-item
-		 :label (form->item label)
+		 :label (when label (form->item label))
 		 :formula (form->item formula)))
 
 (defmacro |functor-segment| (variables type-list value-type)
