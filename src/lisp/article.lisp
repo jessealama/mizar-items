@@ -301,6 +301,27 @@
     :initarg :type
     :initform (error "To make an attributive formula, a type is required."))))
 
+(defclass adjective (mizar-item)
+  ((negated
+    :type boolean
+    :initform nil
+    :accessor negated-p
+    :initarg :negated)
+   (spelling
+    :type symbol
+    :initform (error "Please supply a spelling for an adjective.")
+    :initarg :spelling
+    :accessor spelling)))
+
+(defmacro |adjective| (adjective)
+  (make-instance 'adjective
+		 :spelling (form->item adjective)))
+
+(defmacro |negated-adjective| (adjective)
+  (make-instance 'adjective
+		 :spelling (form->item adjective)
+		 :negated t))
+
 (defmacro |attributive-formula| (term type)
   (make-instance 'attributive-formula
 		 :term (form->item term)
@@ -657,7 +678,14 @@
   (make-instance 'exemplification
 		 :variables (mapcar #'form->item variables)))
 
-(defclass choice-statement (mizar-item)
+(defclass justified-mixin ()
+  ((justification
+    :type (or null justification-item)
+    :accessor justification
+    :initarg :justification
+    :initform nil)))
+
+(defclass choice-statement (mizar-item justified-mixin)
   ((variables
     :type list
     :accessor variables
@@ -667,12 +695,7 @@
     :type list
     :accessor conditions
     :initarg :conditions
-    :initform (error "To make a choice statement, a non-null list of conditions is needed."))
-   (justification
-    :type justification-item
-    :accessor justification
-    :initarg :justification
-    :initform (error "To make a choice statement, a justification is required."))))
+    :initform (error "To make a choice statement, a non-null list of conditions is needed."))))
 
 (defclass generalization (mizar-item)
   ((variables
@@ -776,6 +799,32 @@
 		 :definiens (form->item definiens)))
 
 (defclass functor-pattern (mizar-pattern)
+  nil)
+
+(defclass bracket-functor-pattern (functor-pattern)
+  ((left
+    :type symbol
+    :accessor left
+    :initarg :left
+    :initform (error "To create a circumfix term, a left symbol is required."))
+   (right
+    :type symbol
+    :accessor right
+    :initarg :right
+    :initform (error "To create a circumfix term, a right symbol is required."))
+   (arguments
+    :type list
+    :accessor arguments
+    :initarg :arguments
+    :initform nil)))
+
+(defmacro |bracket-functor-pattern| (left right &rest arguments)
+  (make-instance 'bracket-functor-pattern
+		 :left left
+		 :right right
+		 :arguments (mapcar #'form->item arguments)))
+
+(defclass operation-functor-pattern (functor-pattern)
   ((spelling
     :type symbol
     :accessor spelling
@@ -809,11 +858,34 @@
     :initform nil
     :initarg :right-arguments)))
 
-(defmacro |functor-pattern| (spelling left right)
-  (make-instance 'functor-pattern
+(defmacro |operation-functor-pattern| (spelling left right)
+  (make-instance 'operation-functor-pattern
 		 :spelling spelling
 		 :left-arguments (mapcar #'form->item left)
 		 :right-arguments (mapcar #'form->item right)))
+
+(defclass iterative-equality (mizar-item)
+  ((initial-equation
+    :type proposition-item
+    :accessor initial-equation
+    :initarg :initial-equation
+    :initform (error "An iterative equality needs an initial equation."))
+   (initial-justification
+    :type justification-item
+    :accessor initial-justification
+    :initarg :initial-justification
+    :initform (error "An iterative equality needs an initial justification."))
+   (steps
+    :type list
+    :accessor steps
+    :initform nil
+    :initarg :steps)))
+
+(defmacro |iterative-equality| (initial-equation initial-justification &rest steps)
+  (make-instance 'iterative-equality
+		 :initial-equation (form->item initial-equation)
+		 :initial-justification (form->item initial-justification)
+		 :steps (mapcar #'form->item steps)))
 
 (defmacro |predicate-pattern| (spelling left right)
   (make-instance 'predicate-pattern
@@ -821,17 +893,12 @@
 		 :left-arguments (mapcar #'form->item left)
 		 :right-arguments (mapcar #'form->item right)))
 
-(defclass conclusion (mizar-item)
+(defclass conclusion (mizar-item justified-mixin)
   ((proposition
-    :type proposition-item
+    :type (or proposition-item iterative-equality)
     :accessor proposition
     :initarg :proposition
-    :initform (error "To create a conclusion item, a proposition is necessary."))
-   (justification
-    :type justification-item
-    :accessor justification
-    :initarg :justification
-    :initform (error "To create a conclusion item, a justification is necessary."))))
+    :initform (error "To create a conclusion item, a proposition is necessary."))))
 
 (defclass diffuse-conclusion (mizar-item)
   ((proposition
@@ -840,10 +907,10 @@
     :initarg :proposition
     :initform (error "To create a diffuse conclusion item, a proposition is necessary."))))
 
-(defmacro |thus| (proposition justification)
+(defmacro |thus| (proposition &optional justification)
   (make-instance 'conclusion
 		 :proposition (form->item proposition)
-		 :justification (form->item justification)))
+		 :justification (when justification (form->item justification))))
 
 (defmacro |thus-diffuse| (diffuse-proposition)
   (make-instance 'diffuse-conclusion
@@ -884,12 +951,8 @@
     :initarg :type
     :initform (error "To create a functor-segment object, a type is required."))))
 
-(defclass correctness-condition (mizar-item)
-  ((justification
-    :type justification-item
-    :accessor justification
-    :initarg :justification
-    :initform (error "To make a correctness condition, a justification is required."))))
+(defclass correctness-condition (mizar-item justified-mixin)
+  nil)
 
 (defclass coherence-condition (correctness-condition)
   nil)
@@ -972,23 +1035,48 @@
   (make-instance 'definition-block
 		 :items (mapcar #'form->item items)))
 
-(defclass definition-block (mizar-item)
+(defclass block-mixin ()
   ((items
     :type list
     :accessor items
     :initform (error "To create a definition block, a non-null list of items is required.")
     :initarg :items)))
 
-(defclass hereby-reasoning (mizar-item)
-  ((items
+(defclass definition-block (mizar-item block-mixin)
+  nil)
+
+(defclass case-block (mizar-item block-mixin)
+  nil)
+
+(defclass suppose-block (mizar-item block-mixin)
+  ((suppositions
     :type list
-    :accessor items
-    :initform (error "To create a hereby reasoning block, a non-null list of items is required.")
-    :initarg :items)))
+    :accessor suppositions
+    :initarg :suppositions
+    :initform nil)))
+
+(defmacro |case-block| (&rest items)
+  (make-instance 'case-block
+		 :items (mapcar #'form->item items)))
+
+(defmacro |suppose-block| (assumptions &rest items)
+  (make-instance 'suppose-block
+		 :suppositions (mapcar #'form->item assumptions)
+		 :items (mapcar #'form->item items)))
+
+(defclass hereby-reasoning (mizar-item block-mixin)
+  nil)
 
 (defmacro |hereby| (&rest items)
   (make-instance 'hereby-reasoning
 		 :items (mapcar #'form->item items)))
+
+(defclass per-cases (justified-mixin)
+  nil)
+
+(defmacro |per-cases| (justification)
+  (make-instance 'per-cases
+		 :justification (form->item justification)))
 
 (defclass mizar-pattern (mizar-item)
   nil)
@@ -1029,36 +1117,26 @@
     :type formula-item
     :accessor formula
     :initarg :formula
-    :initform (error "To make a proposition, a formula is required."))))
+    :initform (error "To make a proposition, a formula is required."))o))
 
-(defclass regular-statement (mizar-item)
+(defclass regular-statement (mizar-item justified-mixin)
   ((proposition
     :type proposition-item
     :accessor proposition
     :initarg :proposition
-    :initform (error "To make a regular statement, a proposition is needed."))
-   (justification
-    :type justification-item
-    :accessor justification
-    :initarg :justification
-    :initform nil)))
+    :initform (error "To make a regular statement, a proposition is needed."))))
 
 (defmacro |regular-statement| (proposition justification)
   (make-instance 'regular-statement
 		 :proposition (form->item proposition)
 		 :justification (form->item justification)))
 
-(defclass theorem-item (mizar-item)
+(defclass theorem-item (mizar-item justified-mixin)
   ((proposition
     :type proposition-item
     :accessor proposition
     :initarg :proposition
-    :initform (error "To make a theorem, a proposition is required."))
-   (justification
-    :type justification-item
-    :accessor justification
-    :initarg :justification
-    :initform (error "To make a theorem, a justification is required."))))
+    :initform (error "To make a theorem, a proposition is required."))))
 
 (defmacro |theorem-item| (proposition justification)
   (make-instance 'theorem-item

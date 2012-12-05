@@ -69,12 +69,33 @@ tpl [Item[@kind]] {
   ")"; "\n";
 }
 
-// tpl [Block] {
-//   apply [*];
-// }
-
 tpl [Block[@kind = "Proof"]] {
   "(proof"; "\n"; list (#separ = "\n", #elems = `*`); ")"; "\n";
+}
+
+tpl [Block[@kind = "Suppose"]] {
+  "(suppose-block ";
+  for-each [Item[@kind = "Suppose-Head"]] {
+    choose {
+      when [Single-Assumption] {
+        for-each [Single-Assumption] {
+          "("; apply [Proposition]; ")";
+        }
+      }
+      when [Collective-Assumption] {
+        for-each [Collective-Assumption] {
+          for-each [Conditions] {
+            "("; list (#separ = "\n", #elems = `*`); ")";
+          }
+        }
+      }
+      otherwise {
+        msg terminate="yes" "Don't know how to handle a Suppose-Block item.";
+      }
+    }
+    " "; list (#separ = "\n", #elems = `following-sibling::*`);
+  }
+  ")";
 }
 
 tpl [Item[@kind = "Scheme-Block-Item"]] {
@@ -315,6 +336,18 @@ tpl [Item[@kind = "Conclusion" and @shape = "Diffuse-Statement"]] {
   "(thus-diffuse "; apply [*[1]]; ")";
 }
 
+tpl [Item[@kind = "Conclusion" and @shape = "Iterative-Equality"]] {
+  "(thus (iterative-equality ";
+  for-each [Proposition] {
+    apply [.];
+    " "; apply [following-sibling::*[1]];
+  }
+  for-each [Iterative-Step] {
+    " "; apply [*[1]]; " "; apply [*[2]];
+  }
+  "))";
+}
+
 tpl [Item[@kind = "Definition-Item"]] {
   apply [Block[@kind = "Definitional-Block"]];
 }
@@ -359,7 +392,7 @@ tpl [Item[@kind = "Functor-Definition"]] {
   } else {
     "formula";
   }
-  " "; apply [Operation-Functor-Pattern];
+  " "; apply [Operation-Functor-Pattern | Bracket-Functor-Pattern];
   " ";
   for-each [Definiens] {
     if [Label] {
@@ -390,7 +423,11 @@ tpl [Item[@kind = "Predicate-Definition"]] {
 }
 
 tpl [Operation-Functor-Pattern] {
-  "(functor-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(operation-functor-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+}
+
+tpl [Bracket-Functor-Pattern] {
+  "(bracket-functor-pattern "; `@spelling`; " "; apply [Right-Circumflex-Symbol]; " "; list (#separ = " ", #elems = `Loci/*`); ")";
 }
 
 tpl [Predicate-Pattern] {
@@ -406,7 +443,11 @@ tpl [Adjective-Cluster] {
 }
 
 tpl [Adjective] {
-  `@spelling`;
+  "(adjective "; `@spelling`; ")";
+}
+
+tpl [NegatedAdjective] {
+  "(negated-adjective "; `Adjective/@spelling`; ")";
 }
 
 tpl [Locus] {
