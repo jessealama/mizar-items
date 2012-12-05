@@ -134,6 +134,15 @@
 	  (t
 	   (error "The form~%~%  ~a~%~%did not match any known form-to-item rules, nor is is a user symbol." form)))))
 
+(defgeneric render (item stream)
+  (:documentation "Render ITEM as a piece of Mizar text to STREAM."))
+
+(defun write-article (text-proper path)
+  (with-open-file (miz-stream path
+			      :direction :output
+			      :if-exists :supersede)
+    (render text-proper miz-stream)))
+
 (defmacro |text-proper| ((articleid) &body body)
   (make-instance 'text-proper-item
 		 :articleid articleid
@@ -239,6 +248,16 @@
     :type list
     :initarg :toplevel-items
     :accessor toplevel-items)))
+
+(defmethod render ((text text-proper-item) stream)
+  (format stream "environ")
+  (dolist (item (toplevel-items text))
+    (terpri stream)
+    (render item stream)))
+
+(defmethod print-object ((text text-proper-item) stream)
+  (print-unreadable-object (text stream :type t :identity nil)
+    (format stream "~a~%~{~a~%~}" (articleid text) (toplevel-items text))))
 
 (defmacro |scheme| (name schematic-variables conclusion provisos &rest justification)
   (make-instance 'scheme-item
@@ -606,9 +625,15 @@
     :initform nil)
    (linked
     :type boolean
-    :accessor linkedq
+    :accessor linked-p
     :initarg :linked
     :initform nil)))
+
+(defmethod print-object ((just straightforward-justification) stream)
+  (print-unreadable-object (just stream :type t :identity nil)
+    (when (linked-p just)
+      (format stream "(linked) "))
+    (format stream "~{~a~}" (references just))))
 
 (defclass proof-item (justification-item)
   ((steps
@@ -650,11 +675,9 @@
 (defmacro |straightforward-justification| (linked-p &rest references)
   (make-instance 'straightforward-justification
 		 :references (mapcar #'form->item references)
-		 :linked (let ((name (symbol-name linked-p)))
-			   (cond ((string= name "nil") nil)
-				 ((string= name "t") t)
-				 (t
-				  (error "Unknown linked-p status: '~a'" linked-p))))))
+		 :linked (if (null linked-p)
+			     nil
+			     t)))
 
 (defmacro |internal-scheme-justification| (spelling &rest arguments)
   (make-instance 'internal-scheme-justification
@@ -1119,6 +1142,13 @@
     :initarg :formula
     :initform (error "To make a proposition, a formula is required."))o))
 
+(defmethod print-object ((prop proposition-item) stream)
+  (print-unreadable-object (prop stream :type t :identity nil)
+    (let ((label (label prop)))
+      (when label
+	(format stream "(~a) " label))
+      (format stream "~a" (formula prop)))))
+
 (defclass regular-statement (mizar-item justified-mixin)
   ((proposition
     :type proposition-item
@@ -1137,6 +1167,12 @@
     :accessor proposition
     :initarg :proposition
     :initform (error "To make a theorem, a proposition is required."))))
+
+(defmethod print-object ((theorem theorem-item) stream)
+  (print-unreadable-object (theorem stream :type t :identity nil)
+    (let ((prop (proposition theorem))
+	  (justification (justification theorem)))
+      (format stream "~a ~a" prop justification))))
 
 (defmacro |theorem-item| (proposition justification)
   (make-instance 'theorem-item
@@ -1182,6 +1218,9 @@
 
 (defclass section-pragma-item (mizar-item)
   nil)
+
+(defmethod print-object ((section section-pragma-item) stream)
+  (print-unreadable-object (section stream :type t :identity nil)))
 
 (defclass reservation-item (mizar-item)
   ((variables
@@ -1262,3 +1301,11 @@
       (let ((article-as-lisp (with-readtable (find-readtable :modern)
 			       (read-from-string article-as-lisp-string))))
 	(form->item article-as-lisp)))))
+
+(defmethod parse ((article string))
+  (let ((temp (temporary-file :base "article" :extension "miz")))
+    (write-string-into-file article temp
+			    :if-exists :supersede
+			    :if-does-not-exist :create)
+    (unwind-protect (parse temp)
+      (delete-file temp))))
