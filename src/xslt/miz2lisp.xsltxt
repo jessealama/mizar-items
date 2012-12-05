@@ -86,13 +86,16 @@ tpl [Block[@kind = "Scheme-Block"]] {
     "(scheme ";
     apply [Scheme]; " ";
     if [Schematic-Variables] { apply [Schematic-Variables]; } else { "nil"; } "\n";
-    "  "; apply [*[position() = last()]]; "\n";
   }
   "  "; if [Provisional-Formulas] { apply [Provisional-Formulas]; } else { "()"; } "\n";
   for-each [Item[@kind = "Scheme-Head"]] {
     "(proof "; "\n"; list (#separ = "\n", #elems = `following-sibling::*`); ")";
   }
   ")";
+}
+
+tpl [Provisional-Formulas] {
+  "("; list (#separ = "\n", #elems = `*`); ")";
 }
 
 tpl [Scheme] {
@@ -215,6 +218,15 @@ tpl [Item[@kind = "Correctness-Condition"]] {
   "("; `@condition`; if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
+tpl [Item[@kind = "Correctness"]] {
+  $justification = `*[position() = last()]`;
+  for-each [Conditions] {
+    for-each [Correctness] {
+      "("; `@condition`; " "; apply [$justification]; ")";
+    }
+  }
+}
+
 tpl [Global-Choice-Term] {
   "(the "; list (#separ = " ", #elems = `*`); ")";
 }
@@ -288,8 +300,12 @@ tpl [Item[@kind = "Loci-Declaration"]] {
   "(loci-declaration "; variable-segments (#segments = `Implicitly-Qualified-Segment | Explicitly-Qualified-Segment`); ")";
 }
 
-tpl [Item[@kind = "Conclusion"]] {
+tpl [Item[@kind = "Conclusion" and @shape = "Compact-Statement"]] {
   "(thus "; apply [*[1]]; " "; apply [*[2]]; ")";
+}
+
+tpl [Item[@kind = "Conclusion" and @shape = "Diffuse-Statement"]] {
+  "(thus-diffuse "; apply [*[1]]; ")";
 }
 
 tpl [Item[@kind = "Definition-Item"]] {
@@ -298,6 +314,10 @@ tpl [Item[@kind = "Definition-Item"]] {
 
 tpl [Block[@kind = "Definitional-Block"]] {
   "(definitional-block "; list (#separ = " ", #elems = `*`); ")";
+}
+
+tpl [Block[@kind = "Hereby-Reasoning"]] {
+  "(hereby "; list (#separ = "\n", #elems = `*`); ")";
 }
 
 tpl [Item[@kind = "Attribute-Definition"]] {
@@ -346,8 +366,28 @@ tpl [Item[@kind = "Functor-Definition"]] {
   ")";
 }
 
+tpl [Item[@kind = "Predicate-Definition"]] {
+  "(predicate-definition ";
+  apply [Predicate-Pattern];
+  " ";
+  for-each [Definiens] {
+    if [Label] {
+      apply [Label];
+    } else {
+      "nil";
+    }
+    " ";
+    apply [.];
+  }
+  ")";
+}
+
 tpl [Operation-Functor-Pattern] {
   "(functor-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+}
+
+tpl [Predicate-Pattern] {
+  "(predicate-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Definiens] {

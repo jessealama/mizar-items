@@ -289,6 +289,23 @@
     :initarg :right-arguments
     :initform nil)))
 
+(defclass attributive-formula (atomic-formula)
+  ((term
+    :type mizar-term
+    :accessor term
+    :initarg :term
+    :initform (error "To make an attributive formula, a term is required."))
+   (type
+    :type mizar-type
+    :accessor attributive-type
+    :initarg :type
+    :initform (error "To make an attributive formula, a type is required."))))
+
+(defmacro |attributive-formula| (term type)
+  (make-instance 'attributive-formula
+		 :term (form->item term)
+		 :type (form->item type)))
+
 (defclass infix-term (mizar-term)
   ((functor
     :type symbol
@@ -350,6 +367,23 @@
     :accessor proposition
     :initarg :proposition
     :initform (error "To create a single assumption, a proposition is required."))))
+
+(defclass existential-assumption (mizar-item)
+  ((variables
+    :type list
+    :accessor variables
+    :initarg :variables
+    :initform (error "To make an existential assumption, a non-null list of variables is needed."))
+   (conditions
+    :type list
+    :accessor conditions
+    :initarg :conditions
+    :initform (error "To make an existential assumption, a non-null list of conditions is needed."))))
+
+(defmacro |existential-assumption| (variables conditions)
+  (make-instance 'existential-assumption
+		 :variables (mapcar #'form->item variables)
+		 :conditions (mapcar #'form->item conditions)))
 
 (defmacro |assumption| (assumption)
   (if assumption
@@ -701,9 +735,34 @@
      :initform nil
      :initarg :definiens)))
 
+(defclass predicate-definition (mizar-item)
+  ((pattern
+    :type (or null predicate-pattern)
+    :accessor pattern
+    :initform nil
+    :initarg :pattern)
+   (label
+    :type (or null symbol)
+    :accessor label
+    :initform nil
+    :initarg :label)
+   (definiens
+       :type (or null formula-item)
+     :accessor definiens
+     :initform nil
+     :initarg :definiens)))
+
 (defmacro |functor-definition| (shape pattern label definiens)
   (make-instance 'functor-definition
 		 :shape shape
+		 :label (let ((name (symbol-name label)))
+			  (cond ((string= name "nil") nil)
+				(t label)))
+		 :pattern (form->item pattern)
+		 :definiens (form->item definiens)))
+
+(defmacro |predicate-definition| (pattern label definiens)
+  (make-instance 'predicate-definition
 		 :label (let ((name (symbol-name label)))
 			  (cond ((string= name "nil") nil)
 				(t label)))
@@ -733,8 +792,31 @@
     :initform nil
     :initarg :right-arguments)))
 
+(defclass predicate-pattern (mizar-pattern)
+  ((spelling
+    :type symbol
+    :accessor spelling
+    :initform (error "To make a predicate pattern, please supply a spelling.")
+    :initarg :spelling)
+   (left-arguments
+    :type list
+    :accessor left-arguments
+    :initform nil
+    :initarg :left-arguments)
+   (right-arguments
+    :type list
+    :accessor right-arguments
+    :initform nil
+    :initarg :right-arguments)))
+
 (defmacro |functor-pattern| (spelling left right)
   (make-instance 'functor-pattern
+		 :spelling spelling
+		 :left-arguments (mapcar #'form->item left)
+		 :right-arguments (mapcar #'form->item right)))
+
+(defmacro |predicate-pattern| (spelling left right)
+  (make-instance 'predicate-pattern
 		 :spelling spelling
 		 :left-arguments (mapcar #'form->item left)
 		 :right-arguments (mapcar #'form->item right)))
@@ -751,10 +833,21 @@
     :initarg :justification
     :initform (error "To create a conclusion item, a justification is necessary."))))
 
+(defclass diffuse-conclusion (mizar-item)
+  ((proposition
+    :type proposition-item
+    :accessor proposition
+    :initarg :proposition
+    :initform (error "To create a diffuse conclusion item, a proposition is necessary."))))
+
 (defmacro |thus| (proposition justification)
   (make-instance 'conclusion
 		 :proposition (form->item proposition)
 		 :justification (form->item justification)))
+
+(defmacro |thus-diffuse| (diffuse-proposition)
+  (make-instance 'diffuse-conclusion
+		 :proposition (form->item diffuse-proposition)))
 
 (defmacro |consider| (variables conditions justification)
   (make-instance 'choice-statement
@@ -801,6 +894,9 @@
 (defclass coherence-condition (correctness-condition)
   nil)
 
+(defclass compatibility-condition (correctness-condition)
+  nil)
+
 (defclass existence-condition (correctness-condition)
   nil)
 
@@ -812,6 +908,25 @@
 
 (defclass idempotence-condition (correctness-condition)
   nil)
+
+(defclass correctness-item (correctness-condition)
+  nil)
+
+(defclass symmetry-condition (correctness-condition)
+  nil)
+
+(defclass antisymmetry-condition (correctness-condition)
+  nil)
+
+(defclass reflexivity-condition (correctness-condition)
+  nil)
+
+(defclass irreflexivity-condition (correctness-condition)
+  nil)
+
+(defmacro |correctness| (justification)
+  (make-instance 'correctness-item
+		 :justification (form->item justification)))
 
 (defmacro |existence| (justification)
   (make-instance 'existence-condition
@@ -825,12 +940,32 @@
   (make-instance 'coherence-condition
 		 :justification (form->item justification)))
 
+(defmacro |compatibility| (justification)
+  (make-instance 'compatibility-condition
+		 :justification (form->item justification)))
+
 (defmacro |commutativity| (justification)
   (make-instance 'commutativity-condition
 		 :justification (form->item justification)))
 
 (defmacro |idempotence| (justification)
   (make-instance 'idempotence-condition
+		 :justification (form->item justification)))
+
+(defmacro |symmetry| (justification)
+  (make-instance 'symmetry-condition
+		 :justification (form->item justification)))
+
+(defmacro |reflexivity| (justification)
+  (make-instance 'reflexivity-condition
+		 :justification (form->item justification)))
+
+(defmacro |irreflexivity| (justification)
+  (make-instance 'irreflexivity-condition
+		 :justification (form->item justification)))
+
+(defmacro |asymmetry| (justification)
+  (make-instance 'antisymmetry-condition
 		 :justification (form->item justification)))
 
 (defmacro |definitional-block| (&rest items)
@@ -843,6 +978,17 @@
     :accessor items
     :initform (error "To create a definition block, a non-null list of items is required.")
     :initarg :items)))
+
+(defclass hereby-reasoning (mizar-item)
+  ((items
+    :type list
+    :accessor items
+    :initform (error "To create a hereby reasoning block, a non-null list of items is required.")
+    :initarg :items)))
+
+(defmacro |hereby| (&rest items)
+  (make-instance 'hereby-reasoning
+		 :items (mapcar #'form->item items)))
 
 (defclass mizar-pattern (mizar-item)
   nil)
@@ -899,6 +1045,23 @@
 
 (defmacro |regular-statement| (proposition justification)
   (make-instance 'regular-statement
+		 :proposition (form->item proposition)
+		 :justification (form->item justification)))
+
+(defclass theorem-item (mizar-item)
+  ((proposition
+    :type proposition-item
+    :accessor proposition
+    :initarg :proposition
+    :initform (error "To make a theorem, a proposition is required."))
+   (justification
+    :type justification-item
+    :accessor justification
+    :initarg :justification
+    :initform (error "To make a theorem, a justification is required."))))
+
+(defmacro |theorem-item| (proposition justification)
+  (make-instance 'theorem-item
 		 :proposition (form->item proposition)
 		 :justification (form->item justification)))
 
