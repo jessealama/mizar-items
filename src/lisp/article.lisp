@@ -289,11 +289,76 @@
     :initarg :right-arguments
     :initform nil)))
 
+(defclass infix-term (mizar-term)
+  ((functor
+    :type symbol
+    :accessor functor
+    :initarg :functor
+    :initform (error "Missing functor from an infix term"))
+   (left-arguments
+    :type list
+    :accessor left-arguments
+    :initarg :left-arguments
+    :initform nil)
+   (right-arguments
+    :type list
+    :accessor right-arguments
+    :initarg :right-arguments
+    :initform nil)))
+
 (defmacro |predicative-formula| (spelling left-arguments right-arguments)
   (make-instance 'predicative-formula
 		 :predicate spelling
 		 :left-arguments (mapcar #'form->item left-arguments)
 		 :right-arguments (mapcar #'form->item right-arguments)))
+
+(defmacro |infix-term| (functor left-arguments right-arguments)
+  (make-instance 'infix-term
+		 :functor functor
+		 :left-arguments (mapcar #'form->item left-arguments)
+		 :right-arguments (mapcar #'form->item right-arguments)))
+
+(defclass circumfix-term (mizar-term)
+  ((left
+    :type symbol
+    :accessor left
+    :initarg :left
+    :initform (error "To create a circumfix term, a left symbol is required."))
+   (right
+    :type symbol
+    :accessor right
+    :initarg :right
+    :initform (error "To create a circumfix term, a right symbol is required."))
+   (arguments
+    :type list
+    :accessor arguments
+    :initarg :arguments
+    :initform nil)))
+
+(defmacro |circumfix-term| (left right &rest arguments)
+  (make-instance 'circumfix-term
+		 :left left
+		 :right right
+		 :arguments (mapcar #'form->item arguments)))
+
+(defclass assumption-item (mizar-item)
+  nil)
+
+(defclass single-assumption (assumption-item)
+  ((proposition
+    :type proposition-item
+    :accessor proposition
+    :initarg :proposition
+    :initform (error "To create a single assumption, a proposition is required."))))
+
+(defmacro |assumption| (assumption)
+  (if assumption
+      (form->item (first assumption))
+      (error "Empty assumption.")))
+
+(defmacro |single-assumption| (proposition)
+  (make-instance 'single-assumption
+		 :proposition (form->item proposition)))
 
 (defmacro |private-functor-term| (functor &rest arguments)
   (make-instance 'private-functor-term
@@ -444,6 +509,40 @@
 (defclass justification-item (mizar-item)
   nil)
 
+(defclass definition-reference (mizar-item)
+  ((article
+   :type symbol
+   :accessor article
+   :initarg :article
+   :initform (error "To create a definition reference, an article is required."))
+   (nr
+    :type integer
+    :accessor nr
+    :initarg :nr
+    :initform (error "To create a definition reference, an nr is required."))))
+
+(defclass theorem-reference (mizar-item)
+  ((article
+   :type symbol
+   :accessor article
+   :initarg :article
+   :initform (error "To create a theorem reference, an article is required."))
+   (nr
+    :type integer
+    :accessor nr
+    :initarg :nr
+    :initform (error "To create a theorem reference, an nr is required."))))
+
+(defmacro |definition-reference| (article nr)
+  (make-instance 'definition-reference
+		 :article article
+		 :nr nr))
+
+(defmacro |theorem-reference| (article nr)
+  (make-instance 'theorem-reference
+		 :article article
+		 :nr nr))
+
 (defclass straightforward-justification (justification-item)
   ((references
     :type list
@@ -452,7 +551,7 @@
     :initform nil)
    (linked
     :type boolean
-    :accessor linked
+    :accessor linkedq
     :initarg :linked
     :initform nil)))
 
@@ -702,8 +801,36 @@
 (defclass coherence-condition (correctness-condition)
   nil)
 
+(defclass existence-condition (correctness-condition)
+  nil)
+
+(defclass uniqueness-condition (correctness-condition)
+  nil)
+
+(defclass commutativity-condition (correctness-condition)
+  nil)
+
+(defclass idempotence-condition (correctness-condition)
+  nil)
+
+(defmacro |existence| (justification)
+  (make-instance 'existence-condition
+		 :justification (form->item justification)))
+
+(defmacro |uniqueness| (justification)
+  (make-instance 'uniqueness-condition
+		 :justification (form->item justification)))
+
 (defmacro |coherence| (justification)
   (make-instance 'coherence-condition
+		 :justification (form->item justification)))
+
+(defmacro |commutativity| (justification)
+  (make-instance 'commutativity-condition
+		 :justification (form->item justification)))
+
+(defmacro |idempotence| (justification)
+  (make-instance 'idempotence-condition
 		 :justification (form->item justification)))
 
 (defmacro |definitional-block| (&rest items)
@@ -774,6 +901,17 @@
   (make-instance 'regular-statement
 		 :proposition (form->item proposition)
 		 :justification (form->item justification)))
+
+(defclass diffuse-statement (mizar-item)
+  ((reasoning
+    :type list
+    :accessor reasoning
+    :initarg :reasoning
+    :initform (error "To create a diffuse statement, a non-null list of steps is required."))))
+
+(defmacro |diffuse-statement| (&rest reasoning)
+  (make-instance 'diffuse-statement
+		 :reasoning (mapcar #'form->item reasoning)))
 
 (defclass thesis-item (formula-item)
   nil)
