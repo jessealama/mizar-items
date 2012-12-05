@@ -291,12 +291,12 @@
 
 (defclass attributive-formula (atomic-formula)
   ((term
-    :type mizar-term
+    :type (or symbol mizar-term)
     :accessor term
     :initarg :term
     :initform (error "To make an attributive formula, a term is required."))
    (type
-    :type mizar-type
+    :type (or mizar-type adjective-cluster)
     :accessor attributive-type
     :initarg :type
     :initform (error "To make an attributive formula, a type is required."))))
@@ -835,7 +835,7 @@
 
 (defclass diffuse-conclusion (mizar-item)
   ((proposition
-    :type proposition-item
+    :type hereby-reasoning
     :accessor proposition
     :initarg :proposition
     :initform (error "To create a diffuse conclusion item, a proposition is necessary."))))
