@@ -25,6 +25,7 @@
 	       "cl-who"
 	       "hunchentoot-utils"
 	       "xuriella"
+	       "clunit"
 	       "ironclad"
 	       "drakma"
 	       "pcall")

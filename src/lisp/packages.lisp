@@ -3,6 +3,12 @@
 
 (defpackage :mizar
   (:use :cl)
+  (:import-from :clunit
+		#:defsuite
+		#:deftest
+		#:assert-true
+		#:assert-false
+		#:assert-equal)
   (:import-from :cl-ppcre
 		#:scan
 		#:register-groups-bind
