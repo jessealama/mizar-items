@@ -8,7 +8,8 @@
 		#:deftest
 		#:assert-true
 		#:assert-false
-		#:assert-equal)
+		#:assert-equal
+		#:run-suite)
   (:import-from :cl-ppcre
 		#:scan
 		#:register-groups-bind
