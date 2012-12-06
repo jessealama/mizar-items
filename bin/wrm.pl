@@ -33,15 +33,9 @@ my $opt_check = 0;
 
 my $stylesheet_home = "$RealBin/../src/xslt";
 my $script_home = $RealBin;
-my $wrm_stylesheet = "${stylesheet_home}/wrm.xsl";
 
 if (! -d $stylesheet_home) {
     say {*STDERR} 'The stylesheet home directory at', $LF, $LF, '  ', $stylesheet_home, $LF, $LF, 'is not actually a directory.';
-    exit 1;
-}
-
-if (! ensure_readable_file ($wrm_stylesheet)) {
-    say {*STDERR} 'The needed WRM stylesheet was not found at the expected location', $LF, $LF, '  ', $wrm_stylesheet, $LF;
     exit 1;
 }
 
@@ -73,23 +67,6 @@ my $article = Article->new (path => $article_miz,
 $article->without_reservations ();
 
 if ($opt_check) {
-    my $wrm_path = "${article_dirname}/${article_basename}.wrm";
-
-    if (! ensure_readable_file ($wrm_path)) {
-	say {*STDERR} 'The .wrm file does not exist.';
-	exit 1;
-    }
-
-    my $evd_path = "${article_dirname}/${article_basename}.evd";
-    my $tpr_path = "${article_dirname}/${article_basename}.tpr";
-
-    if (! ensure_readable_file ($evd_path)) {
-	say {*STDERR} 'The .evd file does not exist.';
-	exit 1;
-    }
-
-    copy ($wrm_path, $tpr_path);
-    $article->mglue ();
 
     if ($article->accom ()) {
 	if ($article->is_verifiable ()) {

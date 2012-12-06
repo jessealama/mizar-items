@@ -11,12 +11,12 @@ use Data::Dumper;
 use Readonly;
 use charnames qw(:full);
 use List::Util qw(shuffle);
-use List::MoreUtils qw(first_index);
+use List::MoreUtils qw(first_index any);
 
 # Our libraries
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
-use Utils qw(ensure_readable_file strip_extension extension delete_space);
+use Utils qw(ensure_readable_file strip_extension extension delete_space write_string_to_file);
 use Mizar;
 use ItemizedArticle;
 use LocalDatabase;
@@ -2927,11 +2927,385 @@ sub constructors {
     return $self->evl_idents_under_name ('Constructors');
 }
 
+sub text_node_without_reservations {
+    my $text_node = shift;
+    return $text_node; # no transformation
+}
+
+sub is_reservation_node {
+    my $node = shift;
+    my $node_name = $node->nodeName ();
+    if ($node_name eq 'Item') {
+	if ($node->hasAttribute ('kind')) {
+	    my $kind = $node->getAttribute ('kind');
+	    return ($kind eq 'Reservation');
+	} else {
+	    return 0;
+	}
+    } else {
+	return 0;
+    }
+}
+
+sub is_implicitly_qualified_segment {
+    my $node = shift;
+    my $node_type = $node->nodeType ();
+    if ($node_type == XML::LibXML::XML_ELEMENT_NODE) {
+	my $node_name = $node->nodeName ();
+	return ($node_name eq 'Implicitly-Qualified-Segment');
+    } else {
+	return 0;
+    }
+}
+
+sub is_fraenkel_term {
+    my $node = shift;
+    my $node_type = $node->nodeType ();
+    if ($node_type == XML::LibXML::XML_ELEMENT_NODE) {
+	my $node_name = $node->nodeName ();
+	return ($node_name eq 'Fraenkel-Term');
+    } else {
+	return 0;
+    }
+}
+
+sub new_element {
+    my $name = shift;
+    my $owner = shift;
+    my $new_node = XML::LibXML::Element->new ($name);
+    $new_node->setOwnerDocument ($owner);
+    return $new_node;
+}
+
+sub fraenkel_binds_variable {
+    my $fraenkel = shift;
+    my $variable = shift;
+
+    my $fraenkel_line = $fraenkel->hasAttribute ('line') ? $fraenkel->getAttribute ('line') : '(undefined)';
+    my $fraenkel_col = $fraenkel->hasAttribute ('col') ? $fraenkel->getAttribute ('col') : '(undefined)';
+
+    my $spelling = $variable->getAttribute ('spelling');
+
+    my @fraenkel_children = $fraenkel->nonBlankChildNodes ();
+    my $num_fraenkel_children = scalar @fraenkel_children;
+    my $fraenkel_term = $fraenkel_children[$num_fraenkel_children - 2];
+    my $fraenkel_formula = $fraenkel_children[$num_fraenkel_children - 1];
+
+    my @reserved_in_term = $fraenkel_term->findnodes ('descendant-or-self::Simple-Term[starts-with (@spelling, "R")]');
+
+    warn 'checking whether a Fraenkel binds ', $spelling;
+    warn 'reserved in the term part of this Fraenkel:';
+    foreach my $term (@reserved_in_term) {
+	warn $term->getAttribute ('spelling');
+    }
+
+    my $reserved_idx = first_index { $_->getAttribute ('spelling') eq $spelling } @reserved_in_term;
+
+    if ($reserved_idx < 0) {
+	return 0;
+    } else {
+	my $reserved = $reserved_in_term[$reserved_idx];
+	my $reserved_line = $reserved->getAttribute ('line');
+	my $reserved_col = $reserved->getAttribute ('col');
+	warn $spelling, ' appears to be bound by the item at (', $reserved_line, ',', $reserved_col, ').';
+	return 1;
+    }
+
+}
+
+sub node_binds_variable {
+    my $node = shift;
+    my $variable = shift;
+
+    my $spelling = $variable->getAttribute ('spelling');
+
+    if (is_fraenkel_term ($node)) {
+	return fraenkel_binds_variable ($node, $variable);
+    }
+
+    my @binder_xpaths = (
+	'self::Universal-Quantifier-Formula[Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Universal-Quantifier-Formula[Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Existential-Quantifier-Formula[Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Existential-Quantifier-Formula[Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Generalization" and Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Generalization" and Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Choice-Statement" and Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Choice-Statement" and Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Loci-Declaration" and Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Loci-Declaration" and Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
+
+    );
+
+    if (any { $node->exists ($_) } @binder_xpaths) {
+	return 1;
+    } else {
+	return 0;
+    }
+
+}
+
+sub earlier_items {
+    my $node = shift;
+
+    my @preceding_siblings
+	= $node->findnodes ('preceding-sibling::*');
+    my $parent = $node->parentNode;
+
+    if (defined $parent) {
+	my @earlier_from_parent = earlier_items ($parent);
+	return (@preceding_siblings, $parent, @earlier_from_parent);
+    } else {
+	return @preceding_siblings;
+    }
+
+}
+
+sub bound_outside_containing_fraenkel {
+    my $term = shift;
+    (my $containing_fraenkel) = $term->findnodes ('ancestor::Fraenkel-Term');
+    my @potential_binders = earlier_items ($containing_fraenkel);
+    if (any { node_binds_variable ($_, $term) } @potential_binders) {
+	return 1;
+    } else {
+	return 0;
+    }
+}
+
+sub occurs_freely {
+    my $variable_node = shift;
+
+    my @potential_binders = earlier_items ($variable_node);
+
+    my $binder_index = first_index { node_binds_variable ($_, $variable_node) } @potential_binders;
+
+    if ($binder_index < 0) {
+	return 1;
+    } else {
+	my $binder = $potential_binders[$binder_index];
+	my $binder_line = $binder->getAttribute ('line');
+	my $binder_col = $binder->getAttribute ('col');
+	my $spelling = $variable_node->getAttribute ('spelling');
+	warn $spelling, ' is bound by the item at (', $binder_line, ',', $binder_col, ').';
+	return 0;
+    }
+
+}
+
+sub bind_free_reserved_variables {
+    my $formula_node = shift;
+    my @reserved = $formula_node->findnodes ('descendant::Simple-Term[starts-with (@spelling, "R")]');
+    my @to_be_bound = ();
+    foreach my $variable (@reserved) {
+	my $spelling = $variable->getAttribute ('spelling');
+	my $line = $variable->getAttribute ('line');
+	my $col = $variable->getAttribute ('col');
+	warn 'considering ', $spelling, ' at (', $line, ',', $col, ')';
+	if (! (any { $_->getAttribute ('spelling') eq $spelling } @to_be_bound)) {
+	    if (occurs_freely ($variable)) {
+		push (@to_be_bound, $variable);
+		warn $spelling, ' at (', $line, ',', $col, ') appears to be free.';
+	    } else {
+		warn $spelling, ' appears to be already bound.';
+	    }
+	}
+    }
+
+    my $document = $formula_node->ownerDocument;
+    my $new_formula = $formula_node->cloneNode (1);
+
+    foreach my $variable (@to_be_bound) {
+	my $spelling = $variable->getAttribute ('spelling');
+	my $quantifier_element = new_element ('Universal-Quantifier-Formula',
+					      $document);
+	my $implicit_segment = new_element ('Implicitly-Qualified-Segment',
+					    $document);
+	my $variable_node = new_element ('Variable', $document);
+	$variable_node->setAttribute ('spelling', $spelling);
+
+	$implicit_segment->addChild ($variable_node);
+	$quantifier_element->addChild ($implicit_segment);
+	$quantifier_element->addChild ($new_formula);
+	$new_formula = $quantifier_element;
+    }
+
+    return $new_formula;
+}
+
+sub explicitly_qualify_fraenkel {
+    my $fraenkel_node = shift;
+
+    (my $fraenkel_term) = $fraenkel_node->findnodes ('*[position() = last() - 1]');
+    (my $fraenkel_formula) = $fraenkel_node->findnodes ('*[position() = last()]');
+    my @fraenkel_qualifiers = $fraenkel_node->findnodes ('*[position() < last() - 1]');
+
+    my @reserved_in_term = $fraenkel_term->findnodes ('descendant-or-self::Simple-Term[starts-with (@spelling, "R")]');
+
+    my %qualified = ();
+
+    foreach my $qualified (@fraenkel_qualifiers) {
+	# something should be done here
+    }
+
+    my $term_owner = $fraenkel_term->ownerDocument;
+
+    my @new_qualifiers = ();
+
+    foreach my $term (@reserved_in_term) {
+	my $term_spelling = $term->getAttribute ('spelling');
+	warn 'explicitly_qualify_fraenkel: considering ', $term_spelling;
+	if (is_fraenkel_term ($fraenkel_term)) {
+	    if (fraenkel_binds_variable ($fraenkel_term, $term)) {
+		warn 'fraenkel term DOES bind ', $term_spelling, '; what should we do here?';
+	    } elsif (! defined $qualified{$term_spelling}) {
+		warn 'WOW! We are going to qualify ', $term_spelling;
+		my $explicit_segment_node =
+		    new_element ('Explicitly-Qualified-Segment', $term_owner);
+		my $variables_node = new_element ('Variables', $term_owner);
+		my $type = reserved_variable_type ($term);
+		$variables_node->addChild ($term->cloneNode (1));
+		$explicit_segment_node->addChild ($variables_node);
+		$explicit_segment_node->addChild ($type->cloneNode (1));
+		push (@new_qualifiers, $explicit_segment_node);
+		$qualified{$term_spelling} = 0;
+	    } else {
+		# nothing to say or do
+	    }
+	} elsif (! defined $qualified{$term_spelling}) {
+	    if (! bound_outside_containing_fraenkel ($term)) {
+		my $explicit_segment_node =
+		    new_element ('Explicitly-Qualified-Segment', $term_owner);
+		my $variables_node = new_element ('Variables', $term_owner);
+		my $type = reserved_variable_type ($term);
+		$variables_node->addChild ($term->cloneNode (1));
+		$explicit_segment_node->addChild ($variables_node);
+		$explicit_segment_node->addChild ($type->cloneNode (1));
+		push (@new_qualifiers, $explicit_segment_node);
+		$qualified{$term_spelling} = 0;
+	    }
+	}
+    }
+
+    @fraenkel_qualifiers = (@new_qualifiers, @fraenkel_qualifiers);
+
+    my $new_fraenkel = new_element ('Fraenkel-Term', $term_owner);
+    foreach my $qualifier (@fraenkel_qualifiers) {
+	$new_fraenkel->addChild ($qualifier->cloneNode (1));
+    }
+
+    if (is_fraenkel_term ($fraenkel_term)) {
+	warn 'HEY DUDE';
+	my $qualified_fraenkel_term = explicitly_qualify_fraenkel ($fraenkel_term);
+	$new_fraenkel->addChild ($qualified_fraenkel_term);
+    } else {
+	$new_fraenkel->addChild ($fraenkel_term);
+    }
+
+    my $transformed_formula = bind_free_reserved_variables ($fraenkel_formula);
+
+    $fraenkel_node->replaceChild ($transformed_formula,
+     				  $fraenkel_formula);
+    my $no_res_transformed =
+     	element_node_without_reservations ($transformed_formula);
+     $new_fraenkel->addChild ($no_res_transformed);
+
+    # $new_fraenkel->addChild ($fraenkel_formula);
+
+    return $new_fraenkel;
+}
+
+sub reserved_variable_type {
+    my $variable = shift;
+    my $spelling = $variable->getAttribute ('spelling');
+    (my $earlier_reservation) = $variable->findnodes ('preceding::Item[@kind = "Reservation" and Variables/Variable[@spelling = "' . $spelling . '"]]');
+    if (! defined $earlier_reservation) {
+	confess 'We found no previous reservation for ', $spelling;
+    }
+
+    my $earlier_line = $earlier_reservation->getAttribute ('line');
+    my $earlier_col = $earlier_reservation->getAttribute ('col');
+
+    warn $spelling, ' was reserved at line ', $earlier_line, ' and col ', $earlier_col;
+
+    (my $earlier_type) = $earlier_reservation->findnodes ('*[position() = last()]');
+
+    if (! defined $earlier_type) {
+	confess 'Unable to determine the reserved type for ', $spelling;
+    }
+
+    return $earlier_type;
+}
+
+sub implicit_to_explicit {
+    my $node = shift;
+    my $node_line = $node->getAttribute ('line');
+    my $node_col = $node->getAttribute ('col');
+    my @variables = $node->findnodes ('Variable');
+    my @explicit_segments = ();
+    foreach my $variable (@variables) {
+	my $explicit_element
+	    = XML::LibXML::Element->new ('Explicitly-Qualified-Segment');
+	$explicit_element->setOwnerDocument ($node->ownerDocument ());
+	my $variables_element = XML::LibXML::Element->new ('Variables');
+	$variables_element->setOwnerDocument ($node->ownerDocument ());
+
+	my $earlier_type = reserved_variable_type ($variable);
+
+	$variables_element->addChild ($variable->cloneNode (1));
+	$explicit_element->addChild ($variables_element->cloneNode (1));
+	$explicit_element->addChild ($earlier_type->cloneNode (1));
+	push (@explicit_segments, $explicit_element);
+    }
+
+    return @explicit_segments;
+
+}
+
+sub element_node_without_reservations {
+    my $element_node = shift;
+    my $element_name = $element_node->nodeName ();
+
+    my $new_element_node = $element_node->cloneNode (0);
+    my @children = $element_node->childNodes ();
+    foreach my $child (@children) {
+	if (is_reservation_node ($child)) {
+	    # skip
+	} elsif (is_implicitly_qualified_segment ($child)) {
+	    my @explicit_children = implicit_to_explicit ($child);
+	    foreach my $explicit_child (@explicit_children) {
+		$new_element_node->addChild ($explicit_child);
+	    }
+	} elsif (is_fraenkel_term ($child)) {
+	    my $explicit_fraenkel = explicitly_qualify_fraenkel ($child);
+	    $new_element_node->addChild ($explicit_fraenkel);
+	} else {
+	    my $transformed_child = node_without_reservations ($child);
+	    $new_element_node->addChild ($transformed_child);
+	}
+    }
+    return $new_element_node;
+}
+
+sub node_without_reservations {
+    my $node = shift;
+
+    my $type = $node->nodeType ();
+
+    if ($type == XML::LibXML::XML_TEXT_NODE) {
+	return text_node_without_reservations ($node);
+    } elsif ($type == XML::LibXML::XML_ELEMENT_NODE) {
+	return element_node_without_reservations ($node);
+    } else {
+	confess 'Unknown node type ', $type;
+    }
+}
+
 sub without_reservations {
     my $self = shift;
 
     my $styesheet_home = $self->get_stylesheet_home ();
     my $name = $self->name ();
+    my $path = $self->get_path ();
     my $tpr_path = $self->file_with_extension ('tpr');
 
     my $wrm_stylesheet = $self->path_for_stylesheet ('wrm');
@@ -2956,22 +3330,28 @@ sub without_reservations {
     if (! ensure_readable_file ($wsx_path)) {
 	confess ('The .wsx file for ', $name, ' does not exist (or is unreadable).');
     }
-    my $wrx_path = $self->file_with_extension ('wrx');
 
-    apply_stylesheet ($wrm_stylesheet, $wsx_path, $wrx_path);
+    my $wsx_doc = eval { $xml_parser->parse_file ($wsx_path) };
 
-    my $wrm_path = $self->file_with_extension ('wrm');
+    if (! defined $wsx_doc) {
+	confess 'Unable to parse ', $wsx_path, ' as XML.';
+    }
 
-    apply_stylesheet ($pp_stylesheet,
-		      $wrx_path,
-		      $wrm_path,
-		      { 'suppress-environment' => 1 });
+    my $wsx_root = $wsx_doc->documentElement ();
+    my $new_wsx_root = node_without_reservations ($wsx_root);
+    my $new_wsx_doc = XML::LibXML::Document->createDocument ();
 
-    File::Copy::copy ($wrm_path, $tpr_path);
+    $new_wsx_doc->setDocumentElement ($new_wsx_root);
+
+    my $temp = File::Temp->new ();
+    write_string_to_file ($new_wsx_doc->toString (), $temp->filename);
+
+    my $new_text = apply_stylesheet ($pp_stylesheet,
+				     $temp,
+				     $tpr_path,
+				     { 'suppress-environment' => '1' });
+
     $self->mglue ();
-    $self->accom ();
-    $self->wsmparser ();
-    $self->msmprocessor ();
 
     return 1;
 
