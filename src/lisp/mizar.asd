@@ -28,7 +28,8 @@
 	       "clunit"
 	       "ironclad"
 	       "drakma"
-	       "pcall")
+	       "pcall"
+	       "osicat")
   :components ((:file "packages")
 	       (:file "config")
 	       (:file "sandbox")
