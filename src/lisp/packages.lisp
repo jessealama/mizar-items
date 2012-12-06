@@ -11,6 +11,8 @@
 		#:assert-equal
 		#:run-suite
 		#:run-test)
+  (:import-from :osicat
+		#:with-temporary-file)
   (:import-from :cl-ppcre
 		#:scan
 		#:register-groups-bind
