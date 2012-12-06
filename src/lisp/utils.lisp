@@ -456,11 +456,11 @@ LIST; otherwise, return T and NIL."
   (if (or (stringp tmp-dir)
 	  (pathnamep tmp-dir))
       (if (stringp extension)
-	  (if (scan "^\.?[a-zA-Z0-9]*$" extension)
+	  (if (scan "^\\.?[a-zA-Z0-9]*$" extension)
 	      (if (stringp base)
 		  (if (scan "^[A-Za-z]*$" base)
 		      (register-groups-bind (real-ext)
-			  ("^\.?([a-zA-Z0-9]*)$" extension)
+			  ("^\\.?([a-zA-Z0-9]*)$" extension)
 			(let ((real-tmp-dir (pathname-as-directory tmp-dir)))
 			  (if (directory-pathname-p real-tmp-dir)
 			      (loop
