@@ -9,7 +9,8 @@
 		#:assert-true
 		#:assert-false
 		#:assert-equal
-		#:run-suite)
+		#:run-suite
+		#:run-test)
   (:import-from :cl-ppcre
 		#:scan
 		#:register-groups-bind
