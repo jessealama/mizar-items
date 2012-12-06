@@ -175,6 +175,14 @@
 (defmethod mglue ((article-path pathname))
   (run-mizar-tool-with-standard-flags "mglue" article-path))
 
+(defgeneric verifiable (article))
+
+(defmethod verifiable ((article article))
+  (verifier (path article)))
+
+(defmethod verifiable ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "verifier" article-path))
+
 (defmethod verifier ((article article))
   (verifier (path article)))
 
