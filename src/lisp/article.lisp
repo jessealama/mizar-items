@@ -319,6 +319,18 @@
     :initarg :type
     :initform (error "To make an attributive formula, a type is required."))))
 
+(defclass qualifying-formula (atomic-formula)
+  ((term
+    :type (or string mizar-term)
+    :accessor term
+    :initarg :term
+    :initform (error "To make a qualifying formula, a term is required."))
+   (type
+    :type (or mizar-type adjective-cluster)
+    :accessor attributive-type
+    :initarg :type
+    :initform (error "To make a qualifying formula, a type is required."))))
+
 (defclass adjective (mizar-item)
   ((negated
     :type boolean
@@ -342,6 +354,11 @@
 
 (defmacro |attributive-formula| (term type)
   (make-instance 'attributive-formula
+		 :term (form->item term)
+		 :type (form->item type)))
+
+(defmacro |qualifying-formula| (term type)
+  (make-instance 'qualifying-formula
 		 :term (form->item term)
 		 :type (form->item type)))
 
