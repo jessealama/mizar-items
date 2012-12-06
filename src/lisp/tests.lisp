@@ -1,6 +1,13 @@
 
 (in-package :mizar)
 
+(defsuite utils nil)
+
+(deftest temp-file-extension (utils)
+  (let ((temp (temporary-file :extension "miz" :base "article")))
+    (assert-true (string= (pathname-type temp) "miz") temp)
+    (assert-true (starts-with-subseq "article" (pathname-name temp)) temp)))
+
 (defsuite mizar-environment nil)
 
 (deftest mizfiles-exists (mizar-environment)
