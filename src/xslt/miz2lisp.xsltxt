@@ -3,6 +3,52 @@ import "utils/strings.xsl";
 import "utils/list.xsl";
 output method="text";
 
+$quote-string = { "\""; }
+$slash-string = { `concat ("", '\\')`; }
+
+tpl escape (#s) {
+  choose {
+    when [$s = ""] {
+      "";
+    }
+    when [contains ($s, $quote-string)] {
+      $before-quote = `substring-before ($s, $quote-string)`;
+      if [contains ($s, $slash-string)] {
+        $before-slash = `substring-before ($s, $slash-string)`;
+        $len-before-quote = `string-length ($before-quote)`;
+        $len-before-slash = `string-length ($before-slash)`;
+        if [$len-before-quote < $len-before-slash] {
+          $after-quote = `substring-after ($s, $quote-string)`;
+          $after-quote-escaped = escape (#s = $after-quote);
+          `concat ($before-quote, $after-quote-escaped)`;
+        } else {
+          $after-slash = `substring-after ($s, $slash-string)`;
+          $after-slash-escaped = escape (#s = $after-slash);
+          `concat ($before-slash, $slash-string, $slash-string, $after-slash-escaped)`;
+        }
+      } else {
+        $after-quote = `substring-after ($s, $quote-string)`;
+        $after-quote-escaped = escape (#s = $after-quote);
+        `concat ($before-quote, $after-quote-escaped)`;
+      }
+    }
+    when [contains ($s, $slash-string)] {
+      $before-slash = `substring-before ($s, $slash-string)`;
+      $after-slash = `substring-after ($s, $slash-string)`;
+      $after-slash-escaped = escape (#s = $after-slash);
+      `concat ($before-slash, $slash-string, $slash-string, $after-slash-escaped)`;
+    }
+    otherwise {
+      $s;
+    }
+  }
+}
+
+tpl quote (#s) {
+  $escaped = escape (#s = $s);
+  `concat ($quote-string, $escaped, $quote-string)`;
+}
+
 tpl [@*] {
   $attr = `name (.)`;
   $val = `string (.)`;
@@ -35,7 +81,8 @@ tpl [*] {
 }
 
 tpl [Text-Proper] {
-  "(text-proper ("; lc (#s = `@articleid`); ")"; "\n";
+
+  "(text-proper ("; quote (#s = `@articleid`); ")"; "\n";
   list (#separ = "\n", #elems = `*`);
   ")"; "\n";
 }
@@ -73,6 +120,20 @@ tpl [Block[@kind = "Proof"]] {
   "(proof"; "\n"; list (#separ = "\n", #elems = `*`); ")"; "\n";
 }
 
+tpl [Item[@kind = "Case-Block"]] {
+  "(case-block ";
+  for-each [Block[@kind = "Case"]] {
+    list (#separ = "\n", #elems = `*`);
+  }
+  ")";
+}
+
+tpl [Collective-Assumption] {
+  for-each [Conditions] {
+    "(collective-assumption "; list (#separ = "\n", #elems = `*`); ")";
+  }
+}
+
 tpl [Block[@kind = "Suppose"]] {
   "(suppose-block ";
   for-each [Item[@kind = "Suppose-Head"]] {
@@ -83,11 +144,7 @@ tpl [Block[@kind = "Suppose"]] {
         }
       }
       when [Collective-Assumption] {
-        for-each [Collective-Assumption] {
-          for-each [Conditions] {
-            "("; list (#separ = "\n", #elems = `*`); ")";
-          }
-        }
+        apply [Collective-Assumption];
       }
       otherwise {
         msg terminate="yes" "Don't know how to handle a Suppose-Block item.";
@@ -127,7 +184,7 @@ tpl [Provisional-Formulas] {
 }
 
 tpl [Scheme] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Schematic-Variables] {
@@ -147,7 +204,7 @@ tpl [Type-List] {
 }
 
 tpl [Placeholder-Term] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Arguments] {
@@ -155,35 +212,35 @@ tpl [Arguments] {
 }
 
 tpl [Simple-Term] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Variable] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Predicative-Formula] {
-  "(predicative-formula "; `@spelling`; if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
+  "(predicative-formula "; quote (#s = `@spelling`); if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Infix-Term] {
-  "(infix-term "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(infix-term "; quote (#s = `@spelling`); " "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Circumfix-Term] {
-  "(circumfix-term "; `@spelling`; " "; list (#separ = " ", #elems = `*`); ")";
+  "(circumfix-term "; quote (#s = `@spelling`); " "; list (#separ = " ", #elems = `*`); ")";
 }
 
 tpl [Right-Circumflex-Symbol] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Private-Predicate-Formula] {
-  "(private-predicate-formula "; `@spelling`; if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
+  "(private-predicate-formula "; quote (#s = `@spelling`); if [count(*) > 0] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Private-Functor-Term] {
-  "(private-functor-term "; `@spelling`; if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
+  "(private-functor-term "; quote (#s = `@spelling`); if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Proposition[Label]] {
@@ -195,43 +252,43 @@ tpl [Proposition[not(Label)]] {
 }
 
 tpl [Label] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Conjunctive-Formula] {
-  "(∧ "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(conjunctive-formula "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Disjunctive-Formula] {
-  "(∨ "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(disjunctive-formula "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Biconditional-Formula] {
-  "(iff "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(biconditional-formula "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Conditional-Formula] {
-  "(→ "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(conditional-formula "; apply [*[1]]; " "; apply [*[2]]; ")";
 }
 
 tpl [Negated-Formula] {
-  "(¬ "; apply [*[1]]; ")";
+  "(negated-formula "; apply [*[1]]; ")";
 }
 
 tpl [Local-Reference] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Definition-Reference] {
-  "(definition-reference "; `@spelling`; " "; `@nr`; ")";
+  "(definition-reference "; quote (#s = `@spelling`); " "; `@nr`; ")";
 }
 
 tpl [Theorem-Reference] {
-  "(theorem-reference "; `@spelling`; " "; `@nr`; ")";
+  "(theorem-reference "; quote (#s = `@spelling`); " "; `@nr`; ")";
 }
 
 tpl [Thesis] {
-  "thesis";
+  "(thesis)";
 }
 
 tpl [Item[@kind = "Reservation"]] {
@@ -260,7 +317,7 @@ tpl [Global-Choice-Term] {
 }
 
 tpl [Standard-Type] {
-  "(standard-type "; `@spelling`; if [*] { list (#separ = " ", #elems = `*`); } ")";
+  "(standard-type "; quote (#s = `@spelling`); if [*] { " "; list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl variable-segments (#segments) {
@@ -268,6 +325,7 @@ tpl variable-segments (#segments) {
     $segment = `$segments[1]`;
     $more-segments = `$segments[position() > 1]`;
     for-each [$segment] {
+      " ";
       choose {
         when [self::Implicitly-Qualified-Segment] {
           list (#separ = " ", #elems = `Variable`);
@@ -289,11 +347,11 @@ tpl variable-segments (#segments) {
 }
 
 tpl [Existential-Quantifier-Formula] {
-  "(∃ "; "("; variable-segments (#segments = `*[position() < last()]`); ") "; apply [*[position() = last()]]; ")";
+  "(existential-quantifier-formula "; "("; variable-segments (#segments = `*[position() < last()]`); ") "; apply [*[position() = last()]]; ")";
 }
 
 tpl [Universal-Quantifier-Formula] {
-  "(∀ "; "("; variable-segments (#segments = `*[position() < last()]`); ") "; apply [*[position() = last()]]; ")";
+  "(universal-quantifier-formula "; "("; variable-segments (#segments = `*[position() < last()]`); ") "; apply [*[position() = last()]]; ")";
 }
 
 tpl [Item[@kind = "Regular-Statement" and @shape = "Compact-Statement"]] {
@@ -308,12 +366,16 @@ tpl [Item[@kind = "Choice-Statement"]] {
   "(consider "; "("; variable-segments (#segments = `Implicitly-Qualified-Segment | Explicitly-Qualified-Segment`); ") "; "("; list (#separ = " ", #elems = `Conditions/*`); ") "; apply [*[position() = last()]]; ")";
 }
 
+tpl [Item[@kind = "Existential-Assumption"]] {
+  "(existential-assumption "; "("; variable-segments (#segments = `Implicitly-Qualified-Segment | Explicitly-Qualified-Segment`); ") "; "("; list (#separ = " ", #elems = `Conditions/*`); ") "; ")";
+}
+
 tpl [Scheme-Justification[@nr = "0"]] {
-  "(internal-scheme-justification "; `@spelling`; if [*] { list (#separ = " ", #elems = `*`); } ")";
+  "(internal-scheme-justification "; quote (#s = `@spelling`); if [*] { list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Scheme-Justification[not(@nr = "0")]] {
-  "(external-scheme-justification "; `@spelling`; " "; `@nr`; " "; if [*] { list (#separ = " ", #elems = `*`); } ")";
+  "(external-scheme-justification "; quote (#s = `@spelling`); " "; `@nr`; " "; if [*] { list (#separ = " ", #elems = `*`); } ")";
 }
 
 tpl [Item[@kind = "Exemplification"]] {
@@ -365,7 +427,7 @@ tpl [Item[@kind = "Attribute-Definition"]] {
 }
 
 tpl [Attribute-Pattern] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [Straightforward-Justification] {
@@ -387,12 +449,7 @@ tpl [Link] {
 
 tpl [Item[@kind = "Functor-Definition"]] {
   "(functor-definition ";
-  if [@shape = "Equals"] {
-    "term";
-  } else {
-    "formula";
-  }
-  " "; apply [Operation-Functor-Pattern | Bracket-Functor-Pattern];
+  apply [Operation-Functor-Pattern | Bracket-Functor-Pattern];
   " ";
   for-each [Definiens] {
     if [Label] {
@@ -422,16 +479,48 @@ tpl [Item[@kind = "Predicate-Definition"]] {
   ")";
 }
 
+tpl [Item[@kind = "Mode-Definition" and Expandable-Mode]] {
+  "(expandable-mode-definition ";
+  apply [Mode-Pattern];
+  " ";
+  for-each [Expandable-Mode] {
+    apply [*[1]];
+  }
+  ")";
+}
+
+tpl [Item[@kind = "Mode-Definition" and Standard-Mode]] {
+  "(standard-mode-definition ";
+  apply [Mode-Pattern];
+  " ";
+  for-each [Standard-Mode] {
+    for-each [Definiens] {
+      if [Label] {
+        apply [Label];
+      } else {
+        "()";
+      }
+      " ";
+      apply [*[position() = last()]];
+    }
+  }
+  ")";
+}
+
+tpl [Mode-Pattern] {
+  "(mode-pattern "; quote (#s = `@spelling`); " "; list (#separ = " ", #elems = `Loci/*`); ")";
+}
+
 tpl [Operation-Functor-Pattern] {
-  "(operation-functor-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(operation-functor-pattern "; quote (#s = `@spelling`); " "; "("; list (#separ = " ", #elems = `*[1]/*`); ")"; " "; "("; list (#separ = " ", #elems = `*[2]/*`); ")"; ")";
 }
 
 tpl [Bracket-Functor-Pattern] {
-  "(bracket-functor-pattern "; `@spelling`; " "; apply [Right-Circumflex-Symbol]; " "; list (#separ = " ", #elems = `Loci/*`); ")";
+  "(bracket-functor-pattern "; quote (#s = `@spelling`); " "; apply [Right-Circumflex-Symbol]; " "; list (#separ = " ", #elems = `Loci/*`); ")";
 }
 
 tpl [Predicate-Pattern] {
-  "(predicate-pattern "; `@spelling`; " "; apply [*[1]]; " "; apply [*[2]]; ")";
+  "(predicate-pattern "; quote (#s = `@spelling`); " "; "("; list (#separ = " ", #elems = `Loci[1]/*`); ") "; "("; list (#separ = " ", #elems = `Loci[2]/*`); ")"; ")";
 }
 
 tpl [Definiens] {
@@ -443,17 +532,17 @@ tpl [Adjective-Cluster] {
 }
 
 tpl [Adjective] {
-  "(adjective "; `@spelling`; ")";
+  "(adjective "; quote (#s = `@spelling`); ")";
 }
 
 tpl [NegatedAdjective] {
-  "(negated-adjective "; `Adjective/@spelling`; ")";
+  "(negated-adjective "; quote (#s = `Adjective/@spelling`); ")";
 }
 
 tpl [Locus] {
-  `@spelling`;
+  quote (#s = `@spelling`);
 }
 
 tpl [it-Term] {
-  "it";
+  "(it)";
 }

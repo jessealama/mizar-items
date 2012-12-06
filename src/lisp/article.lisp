@@ -125,14 +125,13 @@
   (multiple-value-bind (expanded expandable)
       (macroexpand-1 form)
     (cond (expandable expanded)
-	  ((symbolp form)
-	   (let ((name (symbol-name form)))
-	     (cond ((string= name "thesis")
-		    (make-instance 'thesis-item))
-		   (t
-		    form))))
+	  ((stringp form)
+	   (cond ((string= form "thesis")
+		  (make-instance 'thesis-item))
+		 (t
+		  form)))
 	  (t
-	   (error "The form~%~%  ~a~%~%did not match any known form-to-item rules, nor is is a user symbol." form)))))
+	   (error "The form~%~%  ~a~%~%did not match any known form-to-item rules, nor is is a string." form)))))
 
 (defgeneric render (item stream)
   (:documentation "Render ITEM as a piece of Mizar text to STREAM."))
@@ -187,7 +186,7 @@
 (defclass variable-item (mizar-term)
   ((spelling
     :accessor spelling
-    :type symbol
+    :type string
     :initarg :spelling
     :initform (error "To make a variable, please provide a spelling."))))
 
@@ -211,7 +210,7 @@
 (defclass private-functor-term (mizar-term)
   ((spelling
     :accessor spelling
-    :type symbol
+    :type string
     :initarg :spelling
     :initform (error "To make a variable, please provide a spelling."))
    (arguments
@@ -222,7 +221,7 @@
 
 (defclass private-predicate-formula (atomic-formula)
   ((predicate
-    :type symbol
+    :type string
     :accessor predicate
     :initarg :predicate
     :initform (error "Missing predicate from a predicative formula"))
@@ -241,7 +240,7 @@
 
 (defclass text-proper-item (mizar-item)
   ((articleid
-    :type symbol
+    :type string
     :initarg :articleid
     :accessor articleid)
    (toplevel-items
@@ -293,7 +292,7 @@
 
 (defclass predicative-formula (atomic-formula)
   ((predicate
-    :type symbol
+    :type string
     :accessor predicate
     :initarg :predicate
     :initform (error "Missing predicate from a predicative formula"))
@@ -310,7 +309,7 @@
 
 (defclass attributive-formula (atomic-formula)
   ((term
-    :type (or symbol mizar-term)
+    :type (or string mizar-term)
     :accessor term
     :initarg :term
     :initform (error "To make an attributive formula, a term is required."))
@@ -327,7 +326,7 @@
     :accessor negated-p
     :initarg :negated)
    (spelling
-    :type symbol
+    :type string
     :initform (error "Please supply a spelling for an adjective.")
     :initarg :spelling
     :accessor spelling)))
@@ -348,7 +347,7 @@
 
 (defclass infix-term (mizar-term)
   ((functor
-    :type symbol
+    :type string
     :accessor functor
     :initarg :functor
     :initform (error "Missing functor from an infix term"))
@@ -377,12 +376,12 @@
 
 (defclass circumfix-term (mizar-term)
   ((left
-    :type symbol
+    :type string
     :accessor left
     :initarg :left
     :initform (error "To create a circumfix term, a left symbol is required."))
    (right
-    :type symbol
+    :type string
     :accessor right
     :initarg :right
     :initform (error "To create a circumfix term, a right symbol is required."))
@@ -408,6 +407,17 @@
     :initarg :proposition
     :initform (error "To create a single assumption, a proposition is required."))))
 
+(defclass collective-assumption (assumption-item)
+  ((conditions
+    :type list
+    :accessor conditions
+    :initarg :conditions
+    :initform (error "A list of conditions for a collective assumption is necessary."))))
+
+(defmacro |collective-assumption| (&rest conditions)
+  (make-instance 'collective-assumption
+		 :conditions (mapcar #'form->item conditions)))
+
 (defclass existential-assumption (mizar-item)
   ((variables
     :type list
@@ -427,7 +437,7 @@
 
 (defmacro |assumption| (assumption)
   (if assumption
-      (form->item (first assumption))
+      (form->item assumption)
       (error "Empty assumption.")))
 
 (defmacro |single-assumption| (proposition)
@@ -451,7 +461,7 @@
     :initarg :argument
     :initform (error "To create a negated formula, an argument is require."))))
 
-(defmacro |¬| (argument)
+(defmacro |negated-formula| (argument)
   (make-instance 'negated-formula
 		 :argument (form->item argument)))
 
@@ -503,32 +513,32 @@
     :initarg :rhs
     :initform (error "Missing right-hand side from a disjunction."))))
 
-(defmacro |→| (antecedent consequent)
+(defmacro |conditional-formula| (antecedent consequent)
   (make-instance 'conditional-formula
 		 :antecedent (form->item antecedent)
 		 :consequent (form->item consequent)))
 
-(defmacro |∧| (lhs rhs)
+(defmacro |conjunctive-formula| (lhs rhs)
   (make-instance 'conjunctive-formula
 		 :lhs (form->item lhs)
 		 :rhs (form->item rhs)))
 
-(defmacro |∨| (lhs rhs)
+(defmacro |disjunctive-formula| (lhs rhs)
   (make-instance 'disjunctive-formula
 		 :lhs (form->item lhs)
 		 :rhs (form->item rhs)))
 
-(defmacro |iff| (lhs rhs)
+(defmacro |biconditional-formula| (lhs rhs)
   (make-instance 'biconditional-formula
 		 :lhs (form->item lhs)
 		 :rhs (form->item rhs)))
 
-(defparameter *reserved-variables* (make-hash-table :test #'eql))
+(defparameter *reserved-variables* (make-hash-table :test #'equal))
 
 (defun variable-list->variables (variable-list)
   (loop
      for variable in variable-list
-     collect (cond ((symbolp variable)
+     collect (cond ((stringp variable)
 		    (multiple-value-bind (reserved-variable known?)
 			(gethash variable *reserved-variables*)
 		      (if known?
@@ -543,19 +553,19 @@
        into variables
        finally (return variables)))
 
-(defmacro |∃| (variables matrix)
+(defmacro |existential-quantifier-formula| (variables matrix)
   (make-instance 'existential-quantifier-formula
 		 :variables (variable-list->variables variables)
 		 :matrix (form->item matrix)))
 
-(defmacro |∀| (variables matrix)
+(defmacro |universal-quantifier-formula| (variables matrix)
   (make-instance 'universal-quantifier-formula
 		 :variables (variable-list->variables variables)
 		 :matrix (form->item matrix)))
 
 (defclass scheme-item (mizar-item)
   ((name
-    :type symbol
+    :type string
     :accessor name
     :initarg :name
     :initform (error "To specify a scheme, a name is required."))
@@ -585,7 +595,7 @@
 
 (defclass definition-reference (mizar-item)
   ((article
-   :type symbol
+   :type string
    :accessor article
    :initarg :article
    :initform (error "To create a definition reference, an article is required."))
@@ -597,7 +607,7 @@
 
 (defclass theorem-reference (mizar-item)
   ((article
-   :type symbol
+   :type string
    :accessor article
    :initarg :article
    :initform (error "To create a theorem reference, an article is required."))
@@ -655,7 +665,7 @@
 
 (defclass external-scheme-justification (scheme-justification)
   ((article
-    :type symbol
+    :type string
     :accessor article
     :initform (error "To make an external scheme justification, an article must be supplied.")
     :initarg :article)
@@ -667,7 +677,7 @@
 
 (defclass internal-scheme-justification (scheme-justification)
   ((spelling
-    :type symbol
+    :type string
     :accessor spelling
     :initarg :spelling
     :initform (error "To make an article-internal scheme justification, a spelling is needed."))))
@@ -744,12 +754,12 @@
 
 (defclass attribute-definition (mizar-item)
   ((spelling
-    :type symbol
+    :type string
     :accessor spelling
     :initform (error "To create an attribute definition, a spelling is required for the new attribute.")
     :initarg :spelling)
    (label
-    :type (or null symbol)
+    :type (or null string)
     :accessor label
     :initform nil
     :initarg :label)
@@ -759,19 +769,42 @@
      :initarg :definiens
      :initform (error "To create an attribute definition, a definiens is required."))))
 
+(defclass mode-definition (mizar-item)
+  ((pattern
+    :type (or null mode-pattern)
+    :accessor pattern
+    :initform nil
+    :initarg :pattern)
+      (label
+    :type (or null string)
+    :accessor label
+    :initform nil
+    :initarg :label)
+   (definiens
+       :type (or null mizar-type formula-item)
+     :accessor definiens
+     :initform nil
+     :initarg :definiens)))
+
+(defmacro |expandable-mode-definition| (pattern type)
+  (make-instance 'mode-definition
+		 :pattern (form->item pattern)
+		 :definiens (form->item type)))
+
+(defmacro |standard-mode-definition| (pattern label definiens)
+  (make-instance 'mode-definition
+		 :pattern (form->item pattern)
+		 :label label
+		 :definiens (form->item definiens)))
+
 (defclass functor-definition (mizar-item)
-  ((shape
-    :type symbol
-    :accessor shape
-    :initarg :shape
-    :initform (error "To make a functor definition, a shape is required."))
-   (pattern
+  ((pattern
     :type (or null functor-pattern)
     :accessor pattern
     :initform nil
     :initarg :pattern)
    (label
-    :type (or null symbol)
+    :type (or null string)
     :accessor label
     :initform nil
     :initarg :label)
@@ -788,7 +821,7 @@
     :initform nil
     :initarg :pattern)
    (label
-    :type (or null symbol)
+    :type (or null string)
     :accessor label
     :initform nil
     :initarg :label)
@@ -798,20 +831,15 @@
      :initform nil
      :initarg :definiens)))
 
-(defmacro |functor-definition| (shape pattern label definiens)
+(defmacro |functor-definition| (pattern label definiens)
   (make-instance 'functor-definition
-		 :shape shape
-		 :label (let ((name (symbol-name label)))
-			  (cond ((string= name "nil") nil)
-				(t label)))
+		 :label label
 		 :pattern (form->item pattern)
 		 :definiens (form->item definiens)))
 
 (defmacro |predicate-definition| (pattern label definiens)
   (make-instance 'predicate-definition
-		 :label (let ((name (symbol-name label)))
-			  (cond ((string= name "nil") nil)
-				(t label)))
+		 :label label
 		 :pattern (form->item pattern)
 		 :definiens (form->item definiens)))
 
@@ -824,14 +852,17 @@
 (defclass functor-pattern (mizar-pattern)
   nil)
 
+(defclass mode-pattern (mizar-pattern)
+  nil)
+
 (defclass bracket-functor-pattern (functor-pattern)
   ((left
-    :type symbol
+    :type string
     :accessor left
     :initarg :left
     :initform (error "To create a circumfix term, a left symbol is required."))
    (right
-    :type symbol
+    :type string
     :accessor right
     :initarg :right
     :initform (error "To create a circumfix term, a right symbol is required."))
@@ -849,7 +880,7 @@
 
 (defclass operation-functor-pattern (functor-pattern)
   ((spelling
-    :type symbol
+    :type string
     :accessor spelling
     :initform (error "To make a functor pattern, please supply a spelling.")
     :initarg :spelling)
@@ -864,9 +895,26 @@
     :initform nil
     :initarg :right-arguments)))
 
+(defclass mode-pattern (mizar-pattern)
+  ((spelling
+    :type string
+    :accessor spelling
+    :initform (error "To make a mode pattern, please supply a spelling.")
+    :initarg :spelling)
+   (arguments
+    :type list
+    :accessor arguments
+    :initform nil
+    :initarg :arguments)))
+
+(defmacro |mode-pattern| (spelling &rest arguments)
+  (make-instance 'mode-pattern
+		 :spelling spelling
+		 :arguments (mapcar #'form->item arguments)))
+
 (defclass predicate-pattern (mizar-pattern)
   ((spelling
-    :type symbol
+    :type string
     :accessor spelling
     :initform (error "To make a predicate pattern, please supply a spelling.")
     :initarg :spelling)
@@ -1109,7 +1157,7 @@
 
 (defclass private-predicate-definition (mizar-definition)
   ((predicate
-    :type symbol
+    :type string
     :accessor predicate
     :initarg :predicate
     :initform (error "To create a private predicate definition, a predicate is required."))
@@ -1132,7 +1180,7 @@
 
 (defclass proposition-item (mizar-item)
   ((label
-    :type (or null symbol)
+    :type (or null string)
     :accessor label
     :initarg :label
     :initform nil)
@@ -1246,7 +1294,7 @@
 
 (defclass standard-type (mizar-type)
   ((radix
-    :type symbol
+    :type string
     :accessor radix
     :initarg :radix
     :initform (error "To create a standard type, please supply a radix."))
