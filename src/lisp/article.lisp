@@ -133,14 +133,11 @@
 	  (t
 	   (error "The form~%~%  ~a~%~%did not match any known form-to-item rules, nor is is a string." form)))))
 
-(defgeneric render (item stream)
-  (:documentation "Render ITEM as a piece of Mizar text to STREAM."))
-
 (defun write-article (text-proper path)
   (with-open-file (miz-stream path
 			      :direction :output
 			      :if-exists :supersede)
-    (render text-proper miz-stream)))
+    (print-object text-proper miz-stream)))
 
 (defmacro |text-proper| ((articleid) &body body)
   (make-instance 'text-proper-item
@@ -248,15 +245,8 @@
     :initarg :toplevel-items
     :accessor toplevel-items)))
 
-(defmethod render ((text text-proper-item) stream)
-  (format stream "environ")
-  (dolist (item (toplevel-items text))
-    (terpri stream)
-    (render item stream)))
-
 (defmethod print-object ((text text-proper-item) stream)
-  (print-unreadable-object (text stream :type t :identity nil)
-    (format stream "~a~%~{~a~%~}" (articleid text) (toplevel-items text))))
+  (format stream "environ~%~{~a~%~}" (toplevel-items text)))
 
 (defmacro |scheme| (name schematic-variables conclusion provisos &rest justification)
   (make-instance 'scheme-item
@@ -1285,7 +1275,7 @@
   nil)
 
 (defmethod print-object ((section section-pragma-item) stream)
-  (print-unreadable-object (section stream :type t :identity nil)))
+  "begin")
 
 (defclass reservation-item (mizar-item)
   ((variables
