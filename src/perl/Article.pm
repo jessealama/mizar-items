@@ -2986,14 +2986,21 @@ sub fraenkel_binds_variable {
 
     my $spelling = $variable->getAttribute ('spelling');
 
-    my @fraenkel_children = $fraenkel->nonBlankChildNodes ();
-    my $num_fraenkel_children = scalar @fraenkel_children;
-    my $fraenkel_term = $fraenkel_children[$num_fraenkel_children - 2];
-    my $fraenkel_formula = $fraenkel_children[$num_fraenkel_children - 1];
+    my $num_fraenkel_children = $fraenkel->findvalue ('count (*)');
+    (my $fraenkel_term) = $fraenkel->findnodes ('*[position() = last() - 1]');
+    (my $fraenkel_formula) = $fraenkel->findnodes ('*[position() = last()]');
+
+    if (! defined $fraenkel_formula) {
+	confess 'The Fraenkel-Term at (', $fraenkel_line, ',', $fraenkel_col, ' has no children.';
+    }
+
+    if (! defined $fraenkel_term) {
+	confess 'The Fraenkel-Term at (', $fraenkel_line, ',', $fraenkel_col, ' has at most 1 child:', "\n", $fraenkel->toString ();
+    }
 
     my @reserved_in_term = $fraenkel_term->findnodes ('descendant-or-self::Simple-Term[starts-with (@spelling, "R")]');
 
-    warn 'checking whether a Fraenkel binds ', $spelling;
+    warn 'checking whether the Fraenkel at (', $fraenkel_line, ',', $fraenkel_col, ') with ', $num_fraenkel_children, ' children binds ', $spelling;
     warn 'reserved in the term part of this Fraenkel:';
     foreach my $term (@reserved_in_term) {
 	warn $term->getAttribute ('spelling');
@@ -3034,6 +3041,8 @@ sub node_binds_variable {
 	'self::Item[@kind = "Choice-Statement" and Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
 	'self::Item[@kind = "Loci-Declaration" and Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
 	'self::Item[@kind = "Loci-Declaration" and Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Existential-Assumption" and Implicitly-Qualified-Segment/Variable[@spelling = "' . $spelling . '"]]',
+	'self::Item[@kind = "Existential-Assumption" and Explicitly-Qualified-Segment/Variables/Variable[@spelling = "' . $spelling . '"]]',
 
     );
 
@@ -3094,25 +3103,33 @@ sub occurs_freely {
 
 sub bind_free_reserved_variables {
     my $formula_node = shift;
+    my @exceptions = @_; # don't bind variables appearing here
     my @reserved = $formula_node->findnodes ('descendant::Simple-Term[starts-with (@spelling, "R")]');
     my @to_be_bound = ();
+    warn 'bind_free_reserved_variables: ', scalar (@exceptions), ' exceptions';
     foreach my $variable (@reserved) {
 	my $spelling = $variable->getAttribute ('spelling');
 	my $line = $variable->getAttribute ('line');
 	my $col = $variable->getAttribute ('col');
 	warn 'considering ', $spelling, ' at (', $line, ',', $col, ')';
-	if (! (any { $_->getAttribute ('spelling') eq $spelling } @to_be_bound)) {
-	    if (occurs_freely ($variable)) {
-		push (@to_be_bound, $variable);
-		warn $spelling, ' at (', $line, ',', $col, ') appears to be free.';
-	    } else {
-		warn $spelling, ' appears to be already bound.';
+	if (any { $_->exists ('self::Explicitly-Qualified-Segment/Variables/*[@spelling = "' . $spelling . '"]') } @exceptions) {
+	    warn 'dude, we have already taken care of ', $spelling;
+	} else {
+	    if (! (any { $_->getAttribute ('spelling') eq $spelling } @to_be_bound)) {
+		if (occurs_freely ($variable)) {
+		    push (@to_be_bound, $variable);
+		    warn $spelling, ' at (', $line, ',', $col, ') appears to be free.';
+		} else {
+		    warn $spelling, ' appears to be already bound.';
+		}
 	    }
 	}
     }
 
     my $document = $formula_node->ownerDocument;
     my $new_formula = $formula_node->cloneNode (1);
+
+    @to_be_bound = reverse @to_be_bound;
 
     foreach my $variable (@to_be_bound) {
 	my $spelling = $variable->getAttribute ('spelling');
@@ -3130,6 +3147,76 @@ sub bind_free_reserved_variables {
     }
 
     return $new_formula;
+}
+
+sub explicitly_qualify_inner_fraenkels {
+    my $term = shift;
+
+    if (is_fraenkel_term ($term)) {
+	my $transformed_fraenkel = explicitly_qualify_fraenkel ($term->cloneNode (1));
+	warn 'HEY: we just transformed an inner fraenkel term.  Old', "\n", $term->toString, "\n", 'new:', "\n", $transformed_fraenkel->toString;
+	return $transformed_fraenkel->cloneNode (1);
+    } else {
+	my @children = $term->childNodes;
+	if (scalar @children == 0) {
+	    return $term->cloneNode (1);
+	} else {
+	    my $term_name = $term->nodeName;
+	    my $term_owner = $term->ownerDocument;
+	    my $new_term = new_element ($term_name, $term_owner);
+	    foreach my $child (@children) {
+		my $transformed_child = explicitly_qualify_inner_fraenkels ($child);
+		$new_term->addChild ($transformed_child);
+	    }
+	    return $new_term;
+	}
+    }
+}
+
+sub explicit_segment_less_than {
+    my $segment_1 = shift;
+    my $segment_2 = shift;
+
+    (my $variable_1) = $segment_1->findnodes ('Variables/*[1]');
+    (my $variable_2) = $segment_2->findnodes ('Variables/*[1]');
+
+    if (! defined $variable_1) {
+	confess 'Unable to extract a variable from a variable segment ', $segment_1->toString;
+    }
+
+    if (! defined $variable_2) {
+	confess 'Unable to extract a variable from a variable segment ', $segment_2->toString;
+    }
+
+    return reserved_variable_less_than ($variable_1, $variable_2);
+
+}
+
+sub reserved_variable_less_than {
+    my $var_1 = shift;
+    my $var_2 = shift;
+
+    my $var_1_name = $var_1->getAttribute ('spelling');
+    my $var_2_name = $var_2->getAttribute ('spelling');
+
+    if ($var_1_name =~ /\A R (\d+) \z/) {
+	my $var_1_number = $1;
+	if ($var_2_name =~ /\A R (\d+) \z/) {
+	    my $var_2_number = $1;
+	    if ($var_1_number < $var_2_number) {
+		return -1;
+	    } elsif ($var_2_number < $var_1_number) {
+		return 1;
+	    } else {
+		return 0;
+	    }
+	} else {
+	    confess 'Unable to make sense of variable spelling \'', $var_2_name, '\'.';
+	}
+    } else {
+	    confess 'Unable to make sense of variable spelling \'', $var_1_name, '\'.';
+    }
+
 }
 
 sub explicitly_qualify_fraenkel {
@@ -3186,6 +3273,8 @@ sub explicitly_qualify_fraenkel {
 	}
     }
 
+    @new_qualifiers = sort { explicit_segment_less_than ($a, $b) } @new_qualifiers;
+
     @fraenkel_qualifiers = (@new_qualifiers, @fraenkel_qualifiers);
 
     my $new_fraenkel = new_element ('Fraenkel-Term', $term_owner);
@@ -3193,16 +3282,21 @@ sub explicitly_qualify_fraenkel {
 	$new_fraenkel->addChild ($qualifier->cloneNode (1));
     }
 
-    if (is_fraenkel_term ($fraenkel_term)) {
-	warn 'HEY DUDE';
-	my $qualified_fraenkel_term = explicitly_qualify_fraenkel ($fraenkel_term);
-	$new_fraenkel->addChild ($qualified_fraenkel_term);
-    } else {
-	$new_fraenkel->addChild ($fraenkel_term);
-    }
+    # warn 'about to possibly qualify the term part of the Fraenkel term ', $fraenkel_node->toString ();
 
-    my $transformed_formula = bind_free_reserved_variables ($fraenkel_formula);
+    # my $new_fraenkel_term = explicitly_qualify_inner_fraenkels ($fraenkel_term);
+    # $new_fraenkel->addChild ($new_fraenkel_term->cloneNode (1));
+    # $fraenkel_node->replaceChild ($new_fraenkel_term->cloneNode (1), $fraenkel_term);
+    #
+    # warn 'new fraenkel term:', "\n", $new_fraenkel_term->toString;
 
+    $new_fraenkel->addChild ($fraenkel_term->cloneNode (1));
+
+    # warn 'about to bind free variables in the formula part of the Fraenkel term ', $fraenkel_node->toString ();
+
+    my $transformed_formula = bind_free_reserved_variables ($fraenkel_formula, @fraenkel_qualifiers);
+
+    warn 'replacing child of ', $fraenkel_node->toString ();
     $fraenkel_node->replaceChild ($transformed_formula,
      				  $fraenkel_formula);
     my $no_res_transformed =
@@ -3344,10 +3438,15 @@ sub without_reservations {
     $new_wsx_doc->setDocumentElement ($new_wsx_root);
 
     my $temp = File::Temp->new ();
-    write_string_to_file ($new_wsx_doc->toString (), $temp->filename);
+    my $wsx_doc_string = $new_wsx_doc->toString;
+
+    warn 'wsx doc string:', "\n", $wsx_doc_string;
+
+    my $temp_path = $temp->filename;
+    write_string_to_file ($wsx_doc_string, $temp_path);
 
     my $new_text = apply_stylesheet ($pp_stylesheet,
-				     $temp,
+				     $temp_path,
 				     $tpr_path,
 				     { 'suppress-environment' => '1' });
 
