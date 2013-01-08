@@ -3284,13 +3284,13 @@ sub explicitly_qualify_fraenkel {
 
     # warn 'about to possibly qualify the term part of the Fraenkel term ', $fraenkel_node->toString ();
 
-    # my $new_fraenkel_term = explicitly_qualify_inner_fraenkels ($fraenkel_term);
-    # $new_fraenkel->addChild ($new_fraenkel_term->cloneNode (1));
-    # $fraenkel_node->replaceChild ($new_fraenkel_term->cloneNode (1), $fraenkel_term);
-    #
-    # warn 'new fraenkel term:', "\n", $new_fraenkel_term->toString;
+    my $new_fraenkel_term = element_node_without_reservations ($fraenkel_term);
+    $new_fraenkel->addChild ($new_fraenkel_term->cloneNode (1));
+    $fraenkel_node->replaceChild ($new_fraenkel_term->cloneNode (1), $fraenkel_term);
+    warn 'new fraenkel term:', "\n", $new_fraenkel_term->toString;
 
-    $new_fraenkel->addChild ($fraenkel_term->cloneNode (1));
+
+    # $new_fraenkel->addChild ($fraenkel_term->cloneNode (1));
 
     # warn 'about to bind free variables in the formula part of the Fraenkel term ', $fraenkel_node->toString ();
 
