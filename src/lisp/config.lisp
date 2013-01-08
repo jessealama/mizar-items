@@ -23,11 +23,11 @@
 (defun mml-lar-path (mml-version)
   (file-in-data-dir-for-mml "mml.lar" mml-version))
 
-(defun mml-lar (mml-version)
-  (lines-of-file (mml-lar-path mml-version)))
+(defun mml-lar ()
+  (lines-of-file (merge-pathnames "mml.lar" (mizfiles))))
 
-(defun mml-data-dir (mml-version)
-  (format nil "~a/~a" *mizar-items-data-root* mml-version))
+(defun mml-data-dir ()
+  (merge-pathnames "mml/" (mizfiles)))
 
 (defun bib-directory-for-mml (mml-version)
   (format nil "~a/bib" (mml-data-dir mml-version)))
