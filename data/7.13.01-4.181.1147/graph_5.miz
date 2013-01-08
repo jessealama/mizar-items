@@ -1,0 +1,3227 @@
+:: The Underlying Principle of {D}ijkstra's Shortest Path Algorithm
+::  by Jingchao Chen and Yatsuka Nakamura
+::
+:: Received January 7, 2003
+:: Copyright (c) 2003-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, FUNCT_1, RELAT_1, TARSKI, CARD_1, FINSET_1,
+      XXREAL_0, FINSEQ_1, FINSEQ_2, CARD_3, NAT_1, XBOOLE_0, ARYTM_3, XREAL_0,
+      ORDINAL1, ARYTM_1, ORDINAL4, GRAPH_1, STRUCT_0, TREES_2, GRAPH_4,
+      PARTFUN1, GLIB_000, REAL_1, GRAPH_5, ARYTM_2;
+ notations TARSKI, XBOOLE_0, SUBSET_1, ORDINAL1, CARD_1, NUMBERS, XCMPLX_0,
+      XXREAL_0, XREAL_0, RELAT_1, FUNCT_1, PARTFUN1, FINSEQ_1, SEQ_1, FINSEQ_2,
+      FINSEQ_4, FINSET_1, ARYTM_2, REAL_1, NAT_1, NAT_D, STRUCT_0, GRAPH_1,
+      FUNCT_2, GRAPH_4, CARD_3, RVSUM_1;
+ constructors FINSEQ_4, FINSOP_1, BINARITH, GRAPH_4, SEQ_1, NAT_D, RVSUM_1,
+      ARYTM_2, RELSET_1;
+ registrations XBOOLE_0, RELAT_1, FUNCT_1, FINSET_1, NUMBERS, XXREAL_0,
+      XREAL_0, NAT_1, MEMBERED, FINSEQ_1, GRAPH_1, GRAPH_4, VALUED_0, CARD_1,
+      STRUCT_0, ARYTM_2, FINSEQ_3;
+ requirements REAL, BOOLE, SUBSET, NUMERALS, ARITHM;
+ definitions TARSKI, FUNCT_1, RVSUM_1;
+ theorems FUNCT_2, XBOOLE_1, GRAPH_1, FINSEQ_1, GRAPH_4, FUNCT_1, FINSEQ_3,
+      FINSEQ_4, NAT_1, TARSKI, CARD_5, FINSEQ_2, XBOOLE_0, CARD_2,
+      RVSUM_1, SUBSET_1, ZFMISC_1, XREAL_1, XXREAL_0, FINSOP_1, PRE_CIRC,
+      ORDINAL1, PARTFUN1, ARYTM_0, REAL_1;
+ schemes FUNCT_1, NAT_1, CLASSES1;
+
+begin
+theorem
+L1: (for R6 being set holds (for R13 being Function holds (for R14 being Function holds ((( rng R13 ) c= ( rng R14 ) & R6 in ( dom R13 )) implies (ex R7 being set st (R7 in ( dom R14 ) & ( R13 . R6 ) = ( R14 . R7 )))))))
+proof
+let R6 being set;
+let R13 being Function;
+let R14 being Function;
+assume that
+L2: ( rng R13 ) c= ( rng R14 )
+and
+L3: R6 in ( dom R13 );
+L4: ( R13 . R6 ) in ( rng R13 ) by L3 , FUNCT_1:3;
+thus L5: thesis by L4 , L2 , FUNCT_1:def 3;
+end;
+scheme LambdaAB { F1 , F2() -> set , F3((Element of F2())) -> set } : (ex B1 being Function st (( dom B1 ) = F1() & (for B2 being (Element of F2()) holds (B2 in F1() implies ( B1 . B2 ) = F3(B2)))))
+proof
+defpred S1[ set , set ] means (($1 is (Element of F2()) implies (ex B3 being (Element of F2()) st (B3 = $1 & $2 = F3(B3)))) & ((not $1 is (Element of F2())) implies $2 = ( 0 )));
+L6: (for R6 being set holds (R6 in F1() implies (ex R7 being set st S1[ R6 , R7 ])))
+proof
+let R6 being set;
+assume L7: R6 in F1();
+per cases ;
+suppose L8: R6 is (Element of F2());
+
+reconsider D1 = R6 as (Element of F2()) by L8;
+take F3(D1);
+thus L9: thesis;
+end;
+suppose L10: (not R6 is (Element of F2()));
+
+take ( 0 );
+thus L11: thesis by L10;
+end;
+end;
+L13: (ex R13 being Function st (( dom R13 ) = F1() & (for R6 being set holds (R6 in F1() implies S1[ R6 , ( R13 . R6 ) ])))) from CLASSES1:sch 1(L6);
+consider R13 being Function such that L14: ( dom R13 ) = F1() and L15: (for R6 being set holds (R6 in F1() implies S1[ R6 , ( R13 . R6 ) ])) by L13;
+take R13;
+L16:
+now
+let C1 being (Element of F2());
+assume L17: C1 in F1();
+L18: S1[ C1 , ( R13 . C1 ) ] by L17 , L15;
+thus L19: ( R13 . C1 ) = F3(C1) by L18;
+end;
+thus L20: thesis by L16 , L14;
+end;
+theorem
+L21: (for B4 being  finite set holds (for B5 being (Element of ( NAT )) holds (for B6 being set holds (B6 = { B7 where B7 is (Element of ( B4 * )) : (1 <= ( len B7 ) & ( len B7 ) <= B5) } implies B6 is  finite))))
+proof
+let C2 being  finite set;
+let C3 being (Element of ( NAT ));
+let C4 being set;
+deffunc H1((Element of ( NAT ))) = ( $1 -tuples_on C2 );
+consider C5 being Function such that L22: (( dom C5 ) = ( Seg C3 ) & (for B8 being (Element of ( NAT )) holds (B8 in ( Seg C3 ) implies ( C5 . B8 ) = H1(B8)))) from LambdaAB;
+assume L23: C4 = { B9 where B9 is (Element of ( C2 * )) : (1 <= ( len B9 ) & ( len B9 ) <= C3) };
+L24: C4 c= ( Union C5 )
+proof
+let R6 being set;
+assume L25: R6 in C4;
+consider C6 being (Element of ( C2 * )) such that L26: R6 = C6 and L27: (1 <= ( len C6 ) & ( len C6 ) <= C3) by L25 , L23;
+consider C7 being Nat such that L28: ( dom C6 ) = ( Seg C7 ) by FINSEQ_1:def 2;
+L29: C7 in ( NAT ) by ORDINAL1:def 12;
+L30: ( len C6 ) = C7 by L29 , L28 , FINSEQ_1:def 3;
+L31: C7 in ( dom C5 ) by L30 , L22 , L27 , FINSEQ_1:1;
+L32: C6 in { B10 where B10 is (Element of ( C2 * )) : ( len B10 ) = C7 } by L30;
+L33: C6 in ( C7 -tuples_on C2 ) by L32 , FINSEQ_2:def 4;
+L34: C6 in ( C5 . C7 ) by L33 , L22 , L31;
+thus L35: thesis by L34 , L26 , L31 , CARD_5:2;
+end;
+L36:
+now
+let R6 being set;
+assume L37: R6 in ( dom C5 );
+reconsider D2 = R6 as (Element of ( NAT )) by L37 , L22;
+L38: ( C5 . D2 ) = H1(D2) by L22 , L37;
+thus L39: ( C5 . R6 ) is  finite by L38;
+end;
+L40: ( Union C5 ) is  finite by L36 , L22 , CARD_2:88;
+thus L41: thesis by L40 , L24;
+end;
+theorem
+L42: (for B11 being  finite set holds (for B12 being (Element of ( NAT )) holds (for B13 being set holds (B13 = { B14 where B14 is (Element of ( B11 * )) : ( len B14 ) <= B12 } implies B13 is  finite))))
+proof
+let C8 being  finite set;
+let C9 being (Element of ( NAT ));
+let C10 being set;
+set D3 = { B15 where B15 is (Element of ( C8 * )) : (1 <= ( len B15 ) & ( len B15 ) <= C9) };
+assume L43: C10 = { B16 where B16 is (Element of ( C8 * )) : ( len B16 ) <= C9 };
+L44: C10 c= ( { ( {} ) } \/ D3 )
+proof
+let R7 being set;
+assume L45: R7 in C10;
+consider C11 being (Element of ( C8 * )) such that L46: R7 = C11 and L47: ( len C11 ) <= C9 by L45 , L43;
+per cases ;
+suppose L48: ( len C11 ) < ( ( 0 ) + 1 );
+
+L49: C11 = ( {} ) by L48 , NAT_1:13;
+L50: C11 in { ( {} ) } by L49 , TARSKI:def 1;
+thus L51: thesis by L50 , L46 , XBOOLE_0:def 3;
+end;
+suppose L52: ( len C11 ) >= ( ( 0 ) + 1 );
+
+L53: C11 in D3 by L52 , L47;
+thus L54: thesis by L53 , L46 , XBOOLE_0:def 3;
+end;
+end;
+L56: D3 is  finite by L21;
+thus L57: thesis by L56 , L44;
+end;
+theorem
+L58: (for B17 being  finite set holds (for B18 being (Element of ( NAT )) holds (( card B17 ) = ( B18 + 1 ) implies (ex B19 being (Element of B17) st (ex B20 being (Subset of B17) st (B17 = ( B20 \/ { B19 } ) & ( card B20 ) = B18))))))
+proof
+let C12 being  finite set;
+let C13 being (Element of ( NAT ));
+assume L59: ( card C12 ) = ( C13 + 1 );
+L60: C12 <> ( {} ) by L59;
+consider C14 being set such that L61: C14 in C12 by L60 , XBOOLE_0:def 1;
+reconsider D4 = ( C12 \ { C14 } ) as (Subset of C12);
+reconsider D5 = C14 as (Element of C12) by L61;
+take D5;
+take D4;
+L62: D5 in { D5 } by TARSKI:def 1;
+L63: (not D5 in D4) by L62 , XBOOLE_0:def 5;
+L64: { D5 } c= C12 by L61 , ZFMISC_1:31;
+thus L65: C12 = ( D4 \/ { D5 } ) by L64 , XBOOLE_1:45;
+L66: ( card C12 ) = ( ( card D4 ) + 1 ) by L65 , L63 , CARD_2:41;
+thus L67: thesis by L66 , L59;
+end;
+theorem
+L68: (for B21 being  finite set holds (( card B21 ) = 1 implies (ex B22 being (Element of B21) st B21 = { B22 })))
+proof
+let C15 being  finite set;
+assume L69: ( card C15 ) = 1;
+L70: ( card C15 ) = ( ( 0 ) + 1 ) by L69;
+consider C16 being (Element of C15), C17 being (Subset of C15) such that L71: C15 = ( C17 \/ { C16 } ) and L72: ( card C17 ) = ( 0 ) by L70 , L58;
+take C16;
+L73: C17 = ( {} ) by L72;
+thus L74: thesis by L73 , L71;
+end;
+scheme MinValue { F4() -> non  empty  finite set , F5((Element of F4())) ->  real number } : (ex B23 being (Element of F4()) st (for B24 being (Element of F4()) holds F5(B23) <= F5(B24)))
+proof
+defpred S2[ (Element of ( NAT )) ] means (for B25 being (Subset of F4()) holds (( $1 + 1 ) = ( card B25 ) implies (ex B26 being (Element of F4()) st (B26 in B25 & (for B27 being (Element of F4()) holds (B27 in B25 implies F5(B26) <= F5(B27)))))));
+L75: ( ( ( card F4() ) -' 1 ) + 1 ) = ( ( ( card F4() ) - 1 ) + 1 ) by PRE_CIRC:20
+.= ( card F4() );
+L76: F4() c= F4();
+L77: (for R5 being (Element of ( NAT )) holds (S2[ R5 ] implies S2[ ( R5 + 1 ) ]))
+proof
+let R5 being (Element of ( NAT ));
+assume L78: S2[ R5 ];
+L79:
+now
+let C18 being (Subset of F4());
+assume L80: ( ( R5 + 1 ) + 1 ) = ( card C18 );
+L81: C18 <> ( {} ) by L80;
+consider C19 being (Element of C18), C20 being (Subset of C18) such that L82: C18 = ( C20 \/ { C19 } ) and L83: ( card C20 ) = ( R5 + 1 ) by L80 , L58;
+L84: C19 in C18 by L81;
+reconsider D6 = C19 as (Element of F4()) by L84;
+reconsider D7 = C20 as (Subset of F4()) by XBOOLE_1:1;
+consider C21 being (Element of F4()) such that L85: C21 in D7 and L86: (for B28 being (Element of F4()) holds (B28 in D7 implies F5(C21) <= F5(B28))) by L78 , L83;
+per cases ;
+suppose L87: F5(D6) <= F5(C21);
+
+take D8 = D6;
+thus L88: D8 in C18 by L81;
+thus L89:now
+let C22 being (Element of F4());
+assume L90: C22 in C18;
+per cases  by L82 , L90 , XBOOLE_0:def 3;
+suppose L91: C22 in D7;
+
+L92: F5(C21) <= F5(C22) by L91 , L86;
+thus L93: F5(D8) <= F5(C22) by L92 , L87 , XXREAL_0:2;
+end;
+suppose L94: C22 in { D8 };
+
+thus L95: F5(D8) <= F5(C22) by L94 , TARSKI:def 1;
+end;
+end;
+end;
+suppose L90: F5(D6) > F5(C21);
+
+take D9 = C21;
+thus L91: D9 in C18 by L85;
+thus L92:now
+let C23 being (Element of F4());
+assume L93: C23 in C18;
+per cases  by L82 , L93 , XBOOLE_0:def 3;
+suppose L94: C23 in D7;
+
+thus L95: F5(D9) <= F5(C23) by L94 , L86;
+end;
+suppose L96: C23 in { D6 };
+
+thus L97: F5(D9) <= F5(C23) by L96 , L90 , TARSKI:def 1;
+end;
+end;
+end;
+end;
+thus L94: thesis by L79;
+end;
+L95: S2[ ( 0 ) ]
+proof
+let C24 being (Subset of F4());
+assume L96: ( ( 0 ) + 1 ) = ( card C24 );
+consider C25 being (Element of C24) such that L97: C24 = { C25 } by L96 , L68;
+reconsider D10 = C25 as (Element of F4()) by L97 , ZFMISC_1:31;
+take D10;
+thus L98: D10 in C24 by L97;
+thus L99: thesis by L97 , TARSKI:def 1;
+end;
+L100: (for R5 being (Element of ( NAT )) holds S2[ R5 ]) from NAT_1:sch 1(L95 , L77);
+consider C26 being (Element of F4()) such that L101: C26 in F4() and L102: (for B29 being (Element of F4()) holds (B29 in F4() implies F5(C26) <= F5(B29))) by L100 , L75 , L76;
+take C26;
+let C27 being (Element of F4());
+thus L103: thesis by L102;
+end;
+definition
+let C28 being set;
+let C29 being non  empty (Subset of ( C28 * ));
+redefine mode Element of C29
+ -> (FinSequence of C28);
+coherence
+proof
+let C30 being (Element of C29);
+reconsider D11 = C30 as (Element of ( C28 * ));
+L104: D11 is (FinSequence of C28);
+thus L105: thesis by L104;
+end;
+end;
+begin
+L107: (for R1 being (Element of ( NAT )) holds (for R15 being FinSequence holds (for R16 being FinSequence holds ((1 <= R1 & R1 <= ( len R15 )) implies ( R15 . R1 ) = ( ( R15 ^ R16 ) . R1 )))))
+proof
+let R1 being (Element of ( NAT ));
+let R15 being FinSequence;
+let R16 being FinSequence;
+assume L108: (1 <= R1 & R1 <= ( len R15 ));
+L109: R1 in ( dom R15 ) by L108 , FINSEQ_3:25;
+thus L110: thesis by L109 , FINSEQ_1:def 7;
+end;
+L111: (for R1 being (Element of ( NAT )) holds (for R15 being FinSequence holds (for R16 being FinSequence holds ((1 <= R1 & R1 <= ( len R16 )) implies ( R16 . R1 ) = ( ( R15 ^ R16 ) . ( ( len R15 ) + R1 ) )))))
+proof
+let R1 being (Element of ( NAT ));
+let R15 being FinSequence;
+let R16 being FinSequence;
+assume L112: (1 <= R1 & R1 <= ( len R16 ));
+L113: R1 in ( dom R16 ) by L112 , FINSEQ_3:25;
+thus L114: thesis by L113 , FINSEQ_1:def 7;
+end;
+theorem
+L115: (for R15 being FinSequence holds ((for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len R15 )) implies ( R15 . R1 ) <> ( R15 . R2 )))) iff R15 is  one-to-one))
+proof
+let R15 being FinSequence;
+thus L116:now
+assume L117: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len R15 )) implies ( R15 . R1 ) <> ( R15 . R2 ))));
+thus L118: R15 is  one-to-one
+proof
+let C31 , C32 being set;
+assume that
+L119: (C31 in ( dom R15 ) & C32 in ( dom R15 ))
+and
+L120: ( R15 . C31 ) = ( R15 . C32 );
+reconsider D12 = C31 , D13 = C32 as (Element of ( NAT )) by L119;
+L121: (D12 <= ( len R15 ) & 1 <= D13) by L119 , FINSEQ_3:25;
+L122: (1 <= D12 & D13 <= ( len R15 )) by L119 , FINSEQ_3:25;
+assume L123: C31 <> C32;
+per cases ;
+suppose L124: D13 <= D12;
+
+L125: D13 < D12 by L124 , L123 , XXREAL_0:1;
+thus L126: contradiction by L125 , L117 , L120 , L121;
+end;
+suppose L127: D13 > D12;
+
+thus L128: contradiction by L127 , L117 , L120 , L122;
+end;
+end;
+
+end;
+assume L119: R15 is  one-to-one;
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L120: 1 <= R1
+and
+L121: R1 < R2
+and
+L122: R2 <= ( len R15 );
+L123: R1 <= ( len R15 ) by L121 , L122 , XXREAL_0:2;
+L124: R1 in ( dom R15 ) by L123 , L120 , FINSEQ_3:25;
+L125: 1 <= R2 by L120 , L121 , XXREAL_0:2;
+L126: R2 in ( dom R15 ) by L125 , L122 , FINSEQ_3:25;
+assume L127: ( R15 . R1 ) = ( R15 . R2 );
+thus L128: contradiction by L127 , L119 , L121 , L124 , L126 , FUNCT_1:def 4;
+end;
+theorem
+L129: (for R15 being FinSequence holds ((for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len R15 )) implies ( R15 . R1 ) <> ( R15 . R2 )))) iff ( card ( rng R15 ) ) = ( len R15 )))
+proof
+let R15 being FinSequence;
+L130: (R15 is  one-to-one iff ( card ( rng R15 ) ) = ( len R15 )) by FINSEQ_4:62;
+thus L131: thesis by L130 , L115;
+end;
+theorem
+L132: (for R3 being (Element of ( NAT )) holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (R3 in ( dom R18 ) implies (( (the Source of R17) . ( R18 . R3 ) ) in (the carrier of R17) & ( (the Target of R17) . ( R18 . R3 ) ) in (the carrier of R17)))))) by FINSEQ_2:11 , FUNCT_2:5;
+theorem
+L133: (for R6 being set holds (for R15 being FinSequence holds (for R16 being FinSequence holds ((( R16 ^ <* R6 *> ) is  one-to-one & ( rng ( R16 ^ <* R6 *> ) ) c= ( rng R15 )) implies (ex B30 , B31 being FinSequence st (R15 = ( ( B30 ^ <* R6 *> ) ^ B31 ) & ( rng R16 ) c= ( rng ( B30 ^ B31 ) )))))))
+proof
+let R6 being set;
+let R15 being FinSequence;
+let R16 being FinSequence;
+set D14 = ( R16 ^ <* R6 *> );
+set D15 = ( ( len R16 ) + 1 );
+assume that
+L134: D14 is  one-to-one
+and
+L135: ( rng D14 ) c= ( rng R15 );
+L136: ( D14 . D15 ) = R6 by FINSEQ_1:42;
+L137: ( rng R16 ) c= ( rng D14 ) by FINSEQ_1:29;
+L138: ( rng R16 ) c= ( rng R15 ) by L137 , L135 , XBOOLE_1:1;
+L139: (( len D14 ) = D15 & 1 <= D15) by FINSEQ_2:16 , NAT_1:11;
+L140: D15 in ( dom D14 ) by L139 , FINSEQ_3:25;
+consider C33 being set such that L141: C33 in ( dom R15 ) and L142: ( D14 . D15 ) = ( R15 . C33 ) by L140 , L135 , L1;
+reconsider D16 = C33 as (Element of ( NAT )) by L141;
+L143: D16 <= ( len R15 ) by L141 , FINSEQ_3:25;
+consider C34 being Nat such that L144: ( len R15 ) = ( D16 + C34 ) by L143 , NAT_1:10;
+reconsider D17 = C34 as (Element of ( NAT )) by ORDINAL1:def 12;
+consider C35 , C36 being FinSequence such that L145: ( len C35 ) = D16 and L146: ( len C36 ) = D17 and L147: R15 = ( C35 ^ C36 ) by L144 , FINSEQ_2:22;
+L148: 1 <= D16 by L141 , FINSEQ_3:25;
+L149: (ex B32 being Nat st D16 = ( 1 + B32 )) by L148 , NAT_1:10;
+consider C37 being FinSequence, C38 being set such that L150: C35 = ( C37 ^ <* C38 *> ) by L149 , L145 , FINSEQ_2:18;
+L151: D16 in ( dom C35 ) by L145 , L148 , FINSEQ_3:25;
+L152: ( C35 . D16 ) = R6 by L151 , L142 , L147 , L136 , FINSEQ_1:def 7;
+take C37;
+take C36;
+L153: D16 = ( ( len C37 ) + 1 ) by L145 , L150 , FINSEQ_2:16;
+thus L154: R15 = ( ( C37 ^ <* R6 *> ) ^ C36 ) by L153 , L147 , L150 , L152 , FINSEQ_1:42;
+let C39 being set;
+assume L155: C39 in ( rng R16 );
+L156:
+now
+let C40 being set;
+assume L157: C40 in ( rng R16 );
+assume L158: C40 = R6;
+consider C41 being set such that L159: C41 in ( dom R16 ) and L160: R6 = ( R16 . C41 ) by L158 , L157 , FUNCT_1:def 3;
+reconsider D18 = C41 as (Element of ( NAT )) by L159;
+L161: D18 <= ( len R16 ) by L159 , FINSEQ_3:25;
+L162: D18 <> D15 by L161 , XREAL_1:29;
+L163: (D18 in ( dom D14 ) & ( D14 . D18 ) = ( D14 . D15 )) by L136 , L159 , L160 , FINSEQ_1:def 7 , FINSEQ_2:15;
+thus L164: contradiction by L163 , L134 , L140 , L162 , FUNCT_1:def 4;
+end;
+L165: C39 <> R6 by L156 , L155;
+L166: C35 = ( C37 ^ <* R6 *> ) by L150 , L153 , L152 , FINSEQ_1:42;
+L167: ( rng R15 ) = ( ( rng ( C37 ^ <* R6 *> ) ) \/ ( rng C36 ) ) by L166 , L147 , FINSEQ_1:31
+.= ( ( ( rng C37 ) \/ ( rng <* R6 *> ) ) \/ ( rng C36 ) ) by FINSEQ_1:31
+.= ( ( ( rng C37 ) \/ ( rng C36 ) ) \/ ( rng <* R6 *> ) ) by XBOOLE_1:4
+.= ( ( rng ( C37 ^ C36 ) ) \/ ( rng <* R6 *> ) ) by FINSEQ_1:31
+.= ( ( rng ( C37 ^ C36 ) ) \/ { R6 } ) by FINSEQ_1:38;
+L168: (C39 in ( rng ( C37 ^ C36 ) ) or C39 in { R6 }) by L167 , L155 , L138 , XBOOLE_0:def 3;
+thus L169: thesis by L168 , L165 , TARSKI:def 1;
+end;
+begin
+theorem
+L170: (for R15 being FinSequence holds (for R16 being FinSequence holds (for R17 being Graph holds (( R15 ^ R16 ) is (Chain of R17) implies (R15 is (Chain of R17) & R16 is (Chain of R17))))))
+proof
+let R15 being FinSequence;
+let R16 being FinSequence;
+let R17 being Graph;
+set D19 = ( R15 ^ R16 );
+set D20 = (the carrier' of R17);
+set D21 = (the carrier of R17);
+assume L171: ( R15 ^ R16 ) is (Chain of R17);
+consider C42 being FinSequence such that L172: ( len C42 ) = ( ( len D19 ) + 1 ) and L173: (for R1 being (Element of ( NAT )) holds ((1 <= R1 & R1 <= ( len C42 )) implies ( C42 . R1 ) in D21)) and L174: (for R1 being (Element of ( NAT )) holds ((1 <= R1 & R1 <= ( len D19 )) implies (ex B33 , B34 being (Element of D21) st (B33 = ( C42 . R1 ) & B34 = ( C42 . ( R1 + 1 ) ) & ( D19 . R1 ) joins B33 , B34)))) by L171 , GRAPH_1:def 14;
+L175: ( len D19 ) = ( ( len R15 ) + ( len R16 ) ) by FINSEQ_1:22;
+L176: ( len C42 ) = ( ( len R15 ) + ( ( len R16 ) + 1 ) ) by L175 , L172;
+consider C43 , C44 being FinSequence such that L177: ( len C43 ) = ( len R15 ) and L178: ( len C44 ) = ( ( len R16 ) + 1 ) and L179: C42 = ( C43 ^ C44 ) by L176 , FINSEQ_2:22;
+L180:
+now
+take D22 = C44;
+thus L181: ( len D22 ) = ( ( len R16 ) + 1 ) by L178;
+thus L182:now
+let R1 being (Element of ( NAT ));
+assume that
+L183: 1 <= R1
+and
+L184: R1 <= ( len D22 );
+L185: R1 <= ( ( len C43 ) + R1 ) by NAT_1:11;
+L186: 1 <= ( ( len C43 ) + R1 ) by L185 , L183 , XXREAL_0:2;
+L187: ( ( len C43 ) + R1 ) <= ( ( len C43 ) + ( len D22 ) ) by L184 , XREAL_1:7;
+L188: ( ( len C43 ) + R1 ) <= ( len C42 ) by L187 , L179 , FINSEQ_1:22;
+L189: R1 in ( dom D22 ) by L183 , L184 , FINSEQ_3:25;
+L190: ( D22 . R1 ) = ( C42 . ( ( len C43 ) + R1 ) ) by L189 , L179 , FINSEQ_1:def 7;
+thus L191: ( D22 . R1 ) in D21 by L190 , L173 , L188 , L186;
+end;
+thus L192:now
+let R1 being (Element of ( NAT ));
+assume that
+L193: 1 <= R1
+and
+L194: R1 <= ( len R16 );
+set D23 = ( ( len R15 ) + R1 );
+L195: R1 <= D23 by NAT_1:11;
+L196: 1 <= D23 by L195 , L193 , XXREAL_0:2;
+consider C45 , C46 being (Element of D21) such that L197: C45 = ( C42 . D23 ) and L198: C46 = ( C42 . ( D23 + 1 ) ) and L199: ( D19 . D23 ) joins C45 , C46 by L196 , L174 , L175 , L194 , XREAL_1:7;
+take D24 = C45;
+take D25 = C46;
+L200: ( len R16 ) <= ( len D22 ) by L178 , NAT_1:11;
+L201: R1 <= ( len D22 ) by L200 , L194 , XXREAL_0:2;
+thus L202: D24 = ( D22 . R1 ) by L201 , L177 , L179 , L193 , L197 , L111;
+L203: 1 <= ( R1 + 1 ) by NAT_1:11;
+thus L204: ( D22 . ( R1 + 1 ) ) = ( C42 . ( ( len C43 ) + ( R1 + 1 ) ) ) by L203 , L178 , L179 , L194 , L111 , XREAL_1:7
+.= D25 by L177 , L198;
+thus L205: ( R16 . R1 ) joins D24 , D25 by L193 , L194 , L199 , L111;
+end;
+end;
+L193: ( len C42 ) = ( ( ( len R15 ) + 1 ) + ( len R16 ) ) by L172 , L175;
+consider C47 , C48 being FinSequence such that L194: ( len C47 ) = ( ( len R15 ) + 1 ) and L195: ( len C48 ) = ( len R16 ) and L196: C42 = ( C47 ^ C48 ) by L193 , FINSEQ_2:22;
+L197:
+now
+take D26 = C47;
+thus L198: ( len D26 ) = ( ( len R15 ) + 1 ) by L194;
+thus L199:now
+let R1 being (Element of ( NAT ));
+assume that
+L200: 1 <= R1
+and
+L201: R1 <= ( len D26 );
+L202: ( len D26 ) <= ( len C42 ) by L193 , L194 , NAT_1:11;
+L203: R1 <= ( len C42 ) by L202 , L201 , XXREAL_0:2;
+L204: ( C42 . R1 ) in D21 by L203 , L173 , L200;
+L205: R1 in ( dom D26 ) by L200 , L201 , FINSEQ_3:25;
+thus L206: ( D26 . R1 ) in D21 by L205 , L196 , L204 , FINSEQ_1:def 7;
+end;
+thus L207:now
+let R1 being (Element of ( NAT ));
+assume that
+L208: 1 <= R1
+and
+L209: R1 <= ( len R15 );
+L210: ( len R15 ) <= ( len D19 ) by L175 , NAT_1:11;
+L211: R1 <= ( len D19 ) by L210 , L209 , XXREAL_0:2;
+consider C49 , C50 being (Element of D21) such that L212: C49 = ( C42 . R1 ) and L213: C50 = ( C42 . ( R1 + 1 ) ) and L214: ( D19 . R1 ) joins C49 , C50 by L211 , L174 , L208;
+take D27 = C49;
+take D28 = C50;
+L215: ( len R15 ) <= ( len D26 ) by L194 , NAT_1:11;
+L216: R1 <= ( len D26 ) by L215 , L209 , XXREAL_0:2;
+thus L217: D27 = ( D26 . R1 ) by L216 , L196 , L208 , L212 , L107;
+L218: (1 <= ( R1 + 1 ) & ( R1 + 1 ) <= ( len D26 )) by L194 , L209 , NAT_1:11 , XREAL_1:7;
+L219: ( R1 + 1 ) in ( dom D26 ) by L218 , FINSEQ_3:25;
+thus L220: D28 = ( D26 . ( R1 + 1 ) ) by L219 , L196 , L213 , FINSEQ_1:def 7;
+thus L221: ( R15 . R1 ) joins D27 , D28 by L208 , L209 , L214 , L107;
+end;
+end;
+L208: R15 is (FinSequence of D20) by L171 , FINSEQ_1:36;
+L209:
+now
+let R1 being (Element of ( NAT ));
+assume L210: (1 <= R1 & R1 <= ( len R15 ));
+L211: R1 in ( dom R15 ) by L210 , FINSEQ_3:25;
+thus L212: ( R15 . R1 ) in D20 by L211 , L208 , FINSEQ_2:11;
+end;
+thus L213: R15 is (Chain of R17) by L209 , L197 , GRAPH_1:def 14;
+L214: R16 is (FinSequence of D20) by L171 , FINSEQ_1:36;
+L215:
+now
+let R1 being (Element of ( NAT ));
+assume L216: (1 <= R1 & R1 <= ( len R16 ));
+L217: R1 in ( dom R16 ) by L216 , FINSEQ_3:25;
+thus L218: ( R16 . R1 ) in D20 by L217 , L214 , FINSEQ_2:11;
+end;
+thus L219: thesis by L215 , L180 , GRAPH_1:def 14;
+end;
+theorem
+L220: (for R15 being FinSequence holds (for R16 being FinSequence holds (for R17 being Graph holds (( R15 ^ R16 ) is  oriented  oriented  oriented  oriented (Chain of R17) implies (R15 is  oriented  oriented  oriented  oriented (Chain of R17) & R16 is  oriented  oriented  oriented  oriented (Chain of R17))))))
+proof
+let R15 being FinSequence;
+let R16 being FinSequence;
+let R17 being Graph;
+assume L221: ( R15 ^ R16 ) is  oriented  oriented  oriented  oriented (Chain of R17);
+set D29 = ( R15 ^ R16 );
+L222: ( len D29 ) = ( ( len R15 ) + ( len R16 ) ) by FINSEQ_1:22;
+L223:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L224: 1 <= R1
+and
+L225: R1 < ( len R16 );
+set D30 = ( ( len R15 ) + R1 );
+L226: R1 <= D30 by NAT_1:11;
+L227: 1 <= D30 by L226 , L224 , XXREAL_0:2;
+L228: ( R1 + 1 ) <= ( len R16 ) by L225 , NAT_1:13;
+L229: ( R16 . ( R1 + 1 ) ) = ( D29 . ( ( len R15 ) + ( R1 + 1 ) ) ) by L228 , L111 , NAT_1:11
+.= ( D29 . ( D30 + 1 ) );
+L230: D30 < ( len D29 ) by L222 , L225 , XREAL_1:8;
+L231: ( (the Source of R17) . ( D29 . ( D30 + 1 ) ) ) = ( (the Target of R17) . ( D29 . D30 ) ) by L230 , L221 , L227 , GRAPH_1:def 15;
+thus L232: ( (the Source of R17) . ( R16 . ( R1 + 1 ) ) ) = ( (the Target of R17) . ( R16 . R1 ) ) by L231 , L224 , L225 , L229 , L111;
+end;
+L233:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L234: 1 <= R1
+and
+L235: R1 < ( len R15 );
+L236: ( R1 + 1 ) <= ( len R15 ) by L235 , NAT_1:13;
+L237: ( R15 . ( R1 + 1 ) ) = ( D29 . ( R1 + 1 ) ) by L236 , L107 , NAT_1:11;
+L238: ( len R15 ) <= ( len D29 ) by L222 , NAT_1:11;
+L239: R1 < ( len D29 ) by L238 , L235 , XXREAL_0:2;
+L240: ( (the Source of R17) . ( D29 . ( R1 + 1 ) ) ) = ( (the Target of R17) . ( D29 . R1 ) ) by L239 , L221 , L234 , GRAPH_1:def 15;
+thus L241: ( (the Source of R17) . ( R15 . ( R1 + 1 ) ) ) = ( (the Target of R17) . ( R15 . R1 ) ) by L240 , L234 , L235 , L237 , L107;
+end;
+thus L242: thesis by L233 , L221 , L223 , L170 , GRAPH_1:def 15;
+end;
+theorem
+L243: (for R17 being Graph holds (for B35 , B36 being  oriented (Chain of R17) holds (( (the Target of R17) . ( B35 . ( len B35 ) ) ) = ( (the Source of R17) . ( B36 . 1 ) ) implies ( B35 ^ B36 ) is  oriented  oriented  oriented  oriented (Chain of R17))))
+proof
+let R17 being Graph;
+let C51 , C52 being  oriented (Chain of R17);
+assume L244: ( (the Target of R17) . ( C51 . ( len C51 ) ) ) = ( (the Source of R17) . ( C52 . 1 ) );
+per cases ;
+suppose L245: (C51 = ( {} ) or C52 = ( {} ));
+
+thus L246:now
+per cases  by L245;
+suppose L247: C51 = ( {} );
+
+thus L248: thesis by L247 , FINSEQ_1:34;
+end;
+suppose L249: C52 = ( {} );
+
+thus L250: thesis by L249 , FINSEQ_1:34;
+end;
+end;
+end;
+suppose L247: (not (C51 = ( {} ) or C52 = ( {} )));
+
+consider C53 being (FinSequence of (the carrier of R17)) such that L248: C53 is_oriented_vertex_seq_of C52 by GRAPH_4:9;
+L249: ( len C53 ) = ( ( len C52 ) + 1 ) by L248 , GRAPH_4:def 5;
+L250: ( len C53 ) >= 1 by L249 , NAT_1:12;
+L251: ( len C52 ) >= 1 by L247 , FINSEQ_1:20;
+L252: ( C52 . 1 ) orientedly_joins ( C53 /. 1 ) , ( C53 /. ( 1 + 1 ) ) by L251 , L248 , GRAPH_4:def 5;
+L253: ( (the Source of R17) . ( C52 . 1 ) ) = ( C53 /. 1 ) by L252 , GRAPH_4:def 1
+.= ( C53 . 1 ) by L250 , FINSEQ_4:15;
+consider C54 being (FinSequence of (the carrier of R17)) such that L254: C54 is_oriented_vertex_seq_of C51 by GRAPH_4:9;
+L255: ( len C54 ) = ( ( len C51 ) + 1 ) by L254 , GRAPH_4:def 5;
+L256: ( len C54 ) >= 1 by L255 , NAT_1:12;
+L257: ( len C51 ) >= 1 by L247 , FINSEQ_1:20;
+L258: ( C51 . ( len C51 ) ) orientedly_joins ( C54 /. ( len C51 ) ) , ( C54 /. ( ( len C51 ) + 1 ) ) by L257 , L254 , GRAPH_4:def 5;
+L259: ( (the Target of R17) . ( C51 . ( len C51 ) ) ) = ( C54 /. ( len C54 ) ) by L258 , L255 , GRAPH_4:def 1
+.= ( C54 . ( len C54 ) ) by L256 , FINSEQ_4:15;
+thus L260: thesis by L259 , L244 , L254 , L248 , L253 , GRAPH_4:14;
+end;
+end;
+begin
+theorem
+L262: (for R17 being Graph holds ( {} ) is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17))
+proof
+let R17 being Graph;
+set D31 = the (Element of R17);
+set D32 = <* D31 *>;
+L263:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L264: (1 <= R1 & R1 < R2 & R2 <= ( len D32 ))
+and
+L265: ( D32 . R1 ) = ( D32 . R2 );
+assume L266: (not (R1 = 1 & R2 = ( len D32 )));
+L267: ( len D32 ) = 1 by FINSEQ_1:39;
+thus L268: contradiction by L267 , L264 , XXREAL_0:2;
+end;
+L269: D32 is_oriented_vertex_seq_of (( {} ) qua FinSequence) by GRAPH_4:8;
+thus L270: thesis by L269 , L263 , GRAPH_1:14 , GRAPH_4:def 7;
+end;
+theorem
+L271: (for R15 being FinSequence holds (for R16 being FinSequence holds (for R17 being Graph holds (( R15 ^ R16 ) is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17) implies (R15 is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17) & R16 is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17))))))
+proof
+let R15 being FinSequence;
+let R16 being FinSequence;
+let R17 being Graph;
+assume L272: ( R15 ^ R16 ) is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17);
+set D33 = ( R15 ^ R16 );
+per cases ;
+suppose L273: (R15 = ( {} ) or R16 = ( {} ));
+
+thus L274:now
+per cases  by L273;
+suppose L275: R15 = ( {} );
+
+thus L276: thesis by L275 , L272 , L262 , FINSEQ_1:34;
+end;
+suppose L277: R16 = ( {} );
+
+thus L278: thesis by L277 , L272 , L262 , FINSEQ_1:34;
+end;
+end;
+end;
+suppose L275: (not (R15 = ( {} ) or R16 = ( {} )));
+
+consider C55 being (FinSequence of (the carrier of R17)) such that L276: C55 is_oriented_vertex_seq_of D33 and L277: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C55 ) & ( C55 . R1 ) = ( C55 . R2 )) implies (R1 = 1 & R2 = ( len C55 ))))) by L272 , GRAPH_4:def 7;
+L278: ( len C55 ) = ( ( len D33 ) + 1 ) by L276 , GRAPH_4:def 5;
+L279: ( len D33 ) = ( ( len R15 ) + ( len R16 ) ) by FINSEQ_1:22;
+L280: ( len C55 ) = ( ( ( len R15 ) + 1 ) + ( len R16 ) ) by L279 , L278;
+consider C56 , C57 being FinSequence such that L281: ( len C56 ) = ( ( len R15 ) + 1 ) and L282: ( len C57 ) = ( len R16 ) and L283: C55 = ( C56 ^ C57 ) by L280 , FINSEQ_2:22;
+L284: ( len C55 ) = ( ( len R15 ) + ( ( len R16 ) + 1 ) ) by L278 , L279;
+consider C58 , C59 being FinSequence such that L285: ( len C58 ) = ( len R15 ) and L286: ( len C59 ) = ( ( len R16 ) + 1 ) and L287: C55 = ( C58 ^ C59 ) by L284 , FINSEQ_2:22;
+reconsider D34 = C56 as (FinSequence of (the carrier of R17)) by L283 , FINSEQ_1:36;
+L288:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L289: 1 <= R1
+and
+L290: R1 < R2
+and
+L291: R2 <= ( len D34 )
+and
+L292: ( D34 . R1 ) = ( D34 . R2 );
+L293: R1 <= ( len D34 ) by L290 , L291 , XXREAL_0:2;
+L294: ( D34 . R1 ) = ( C55 . R1 ) by L293 , L283 , L289 , L107;
+L295: 1 <= R2 by L289 , L290 , XXREAL_0:2;
+L296: ( D34 . R2 ) = ( C55 . R2 ) by L295 , L283 , L291 , L107;
+assume L297: (not (R1 = 1 & R2 = ( len D34 )));
+L298: ( ( len D34 ) + ( 0 ) ) < ( len C55 ) by L275 , L280 , L281 , XREAL_1:8;
+L299: R2 < ( len C55 ) by L298 , L291 , XXREAL_0:2;
+thus L300: contradiction by L299 , L277 , L289 , L290 , L292 , L294 , L296;
+end;
+reconsider D35 = C59 as (FinSequence of (the carrier of R17)) by L287 , FINSEQ_1:36;
+L301:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L302: 1 <= R1
+and
+L303: R1 <= ( len R16 );
+set D36 = ( ( len R15 ) + R1 );
+L304: D36 <= ( len D33 ) by L279 , L303 , XREAL_1:7;
+L305: (1 <= ( D36 + 1 ) & ( D36 + 1 ) <= ( len C55 )) by L304 , L278 , NAT_1:11 , XREAL_1:7;
+L306: ( D36 + 1 ) in ( dom C55 ) by L305 , FINSEQ_3:25;
+L307: 1 <= ( R1 + 1 ) by NAT_1:11;
+L308: ( R1 + 1 ) <= ( len D35 ) by L286 , L303 , XREAL_1:7;
+L309: ( R1 + 1 ) in ( dom D35 ) by L308 , L307 , FINSEQ_3:25;
+L310: ( D35 /. ( R1 + 1 ) ) = ( D35 . ( R1 + 1 ) ) by L309 , PARTFUN1:def 6
+.= ( C55 . ( ( len C58 ) + ( R1 + 1 ) ) ) by L286 , L287 , L303 , L307 , L111 , XREAL_1:7
+.= ( C55 /. ( D36 + 1 ) ) by L285 , L306 , PARTFUN1:def 6;
+L311: R1 <= D36 by NAT_1:11;
+L312: 1 <= D36 by L311 , L302 , XXREAL_0:2;
+L313: ( len D33 ) <= ( len C55 ) by L278 , NAT_1:11;
+L314: D36 <= ( len C55 ) by L313 , L304 , XXREAL_0:2;
+L315: D36 in ( dom C55 ) by L314 , L312 , FINSEQ_3:25;
+L316: ( R1 + ( 0 ) ) <= ( len D35 ) by L286 , L303 , XREAL_1:7;
+L317: R1 in ( dom D35 ) by L316 , L302 , FINSEQ_3:25;
+L318: ( D35 /. R1 ) = ( D35 . R1 ) by L317 , PARTFUN1:def 6
+.= ( C55 . D36 ) by L285 , L287 , L302 , L316 , L111
+.= ( C55 /. D36 ) by L315 , PARTFUN1:def 6;
+L319: ( D33 . D36 ) orientedly_joins ( C55 /. D36 ) , ( C55 /. ( D36 + 1 ) ) by L276 , L304 , L312 , GRAPH_4:def 5;
+thus L320: ( R16 . R1 ) orientedly_joins ( D35 /. R1 ) , ( D35 /. ( R1 + 1 ) ) by L319 , L302 , L303 , L318 , L310 , L111;
+end;
+L321: D35 is_oriented_vertex_seq_of R16 by L301 , L286 , GRAPH_4:def 5;
+L322:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L323: 1 <= R1
+and
+L324: R1 <= ( len R15 );
+L325: 1 <= ( R1 + 1 ) by NAT_1:11;
+L326: ( len R15 ) <= ( len D33 ) by L279 , NAT_1:11;
+L327: R1 <= ( len D33 ) by L326 , L324 , XXREAL_0:2;
+L328: ( R1 + 1 ) <= ( len C55 ) by L327 , L278 , XREAL_1:7;
+L329: ( R1 + 1 ) in ( dom C55 ) by L328 , L325 , FINSEQ_3:25;
+L330: ( len R15 ) <= ( len C55 ) by L284 , NAT_1:11;
+L331: R1 <= ( len C55 ) by L330 , L324 , XXREAL_0:2;
+L332: R1 in ( dom C55 ) by L331 , L323 , FINSEQ_3:25;
+L333: ( R1 + ( 0 ) ) <= ( len D34 ) by L281 , L324 , XREAL_1:7;
+L334: R1 in ( dom D34 ) by L333 , L323 , FINSEQ_3:25;
+L335: ( D34 /. R1 ) = ( D34 . R1 ) by L334 , PARTFUN1:def 6
+.= ( C55 . R1 ) by L283 , L323 , L333 , L107
+.= ( C55 /. R1 ) by L332 , PARTFUN1:def 6;
+L336: ( R1 + 1 ) <= ( len D34 ) by L281 , L324 , XREAL_1:7;
+L337: ( R1 + 1 ) in ( dom D34 ) by L336 , L325 , FINSEQ_3:25;
+L338: ( D34 /. ( R1 + 1 ) ) = ( D34 . ( R1 + 1 ) ) by L337 , PARTFUN1:def 6
+.= ( C55 . ( R1 + 1 ) ) by L281 , L283 , L324 , L325 , L107 , XREAL_1:7
+.= ( C55 /. ( R1 + 1 ) ) by L329 , PARTFUN1:def 6;
+L339: ( D33 . R1 ) orientedly_joins ( C55 /. R1 ) , ( C55 /. ( R1 + 1 ) ) by L276 , L323 , L327 , GRAPH_4:def 5;
+thus L340: ( R15 . R1 ) orientedly_joins ( D34 /. R1 ) , ( D34 /. ( R1 + 1 ) ) by L339 , L323 , L324 , L335 , L338 , L107;
+end;
+L341: D34 is_oriented_vertex_seq_of R15 by L322 , L281 , GRAPH_4:def 5;
+thus L342: R15 is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17) by L341 , L272 , L288 , L220 , GRAPH_4:def 7;
+L343:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L344: 1 <= R1
+and
+L345: R1 < R2
+and
+L346: R2 <= ( len D35 )
+and
+L347: ( D35 . R1 ) = ( D35 . R2 );
+L348: R1 <= ( len D35 ) by L345 , L346 , XXREAL_0:2;
+L349: ( D35 . R1 ) = ( C55 . ( ( len C58 ) + R1 ) ) by L348 , L287 , L344 , L111;
+assume L350: (not (R1 = 1 & R2 = ( len D35 )));
+L351: ( ( len C58 ) + R2 ) <= ( len C55 ) by L284 , L285 , L286 , L346 , XREAL_1:7;
+L352: 1 <= R2 by L344 , L345 , XXREAL_0:2;
+L353: ( D35 . R2 ) = ( C55 . ( ( len C58 ) + R2 ) ) by L352 , L287 , L346 , L111;
+L354: (( ( 0 ) + 1 ) < ( ( len C58 ) + R1 ) & ( ( len C58 ) + R1 ) < ( ( len C58 ) + R2 )) by L275 , L285 , L344 , L345 , XREAL_1:8;
+thus L355: contradiction by L354 , L277 , L347 , L349 , L353 , L351;
+end;
+thus L356: thesis by L343 , L272 , L321 , L220 , GRAPH_4:def 7;
+end;
+end;
+theorem
+L358: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (( len R18 ) = 1 implies R18 is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+set D37 = R18;
+set D38 = ( (the Source of R17) . ( D37 . 1 ) );
+set D39 = ( (the Target of R17) . ( D37 . 1 ) );
+L359:
+now
+let R1 being (Element of ( NAT ));
+assume L360: (1 <= R1 & R1 <= ( len D37 ));
+L361: R1 in ( dom D37 ) by L360 , FINSEQ_3:25;
+thus L362: ( D37 . R1 ) in (the carrier' of R17) by L361 , FINSEQ_2:11;
+end;
+assume L363: ( len D37 ) = 1;
+L364: 1 in ( dom D37 ) by L363 , FINSEQ_3:25;
+reconsider D40 = D38 , D41 = D39 as (Element of R17) by L364 , FINSEQ_2:11 , FUNCT_2:5;
+set D42 = <* D40 , D41 *>;
+L365: ( len D42 ) = ( ( len D37 ) + 1 ) by L363 , FINSEQ_1:44;
+L366:
+now
+let R1 being (Element of ( NAT ));
+assume L367: (1 <= R1 & R1 <= ( len D37 ));
+L368: R1 = 1 by L367 , L363 , XXREAL_0:1;
+take D43 = D40;
+take D44 = D41;
+thus L369: (D43 = ( D42 . R1 ) & D44 = ( D42 . ( R1 + 1 ) )) by L368 , FINSEQ_1:44;
+thus L370: ( D37 . R1 ) joins D43 , D44 by L368 , GRAPH_1:def 12;
+end;
+L371: ( len D42 ) = 2 by FINSEQ_1:44;
+L372:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L373: 1 <= R1
+and
+L374: R1 < R2
+and
+L375: R2 <= ( len D42 )
+and
+L376: ( D42 . R1 ) = ( D42 . R2 );
+L377: R1 < ( 1 + 1 ) by L371 , L374 , L375 , XXREAL_0:2;
+L378: R1 <= 1 by L377 , NAT_1:13;
+thus L379: R1 = 1 by L378 , L373 , XXREAL_0:1;
+L380: 1 < R2 by L373 , L374 , XXREAL_0:2;
+L381: ( 1 + 1 ) < ( R2 + 1 ) by L380 , XREAL_1:8;
+L382: 2 <= R2 by L381 , NAT_1:13;
+thus L383: R2 = ( len D42 ) by L382 , L371 , L375 , XXREAL_0:1;
+end;
+L384:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L385: 1 <= R1
+and
+L386: R1 <= ( len D42 );
+per cases ;
+suppose L387: R1 < ( 1 + 1 );
+
+L388: R1 <= 1 by L387 , NAT_1:13;
+L389: R1 = 1 by L388 , L385 , XXREAL_0:1;
+L390: ( D42 . R1 ) = D40 by L389 , FINSEQ_1:44;
+thus L391: ( D42 . R1 ) in (the carrier of R17) by L390;
+end;
+suppose L392: R1 >= 2;
+
+L393: R1 = 2 by L392 , L371 , L386 , XXREAL_0:1;
+L394: ( D42 . R1 ) = D41 by L393 , FINSEQ_1:44;
+thus L395: ( D42 . R1 ) in (the carrier of R17) by L394;
+end;
+end;
+L397: (for R1 being (Element of ( NAT )) holds ((1 <= R1 & R1 < ( len D37 ) & ( (the Source of R17) . ( D37 . ( R1 + 1 ) ) ) <> ( (the Target of R17) . ( D37 . R1 ) )) implies contradiction)) by L363;
+L398:
+now
+let R1 being (Element of ( NAT ));
+assume L399: (1 <= R1 & R1 <= ( len D37 ));
+L400: R1 = 1 by L399 , L363 , XXREAL_0:1;
+L401: (( D42 /. 1 ) = D40 & ( D42 /. ( 1 + 1 ) ) = D41) by FINSEQ_4:17;
+thus L402: ( D37 . R1 ) orientedly_joins ( D42 /. R1 ) , ( D42 /. ( R1 + 1 ) ) by L401 , L400 , GRAPH_4:def 1;
+end;
+L403: D42 is_oriented_vertex_seq_of D37 by L398 , L365 , GRAPH_4:def 5;
+thus L404: thesis by L403 , L365 , L372 , L359 , L384 , L366 , L397 , GRAPH_1:def 14 , GRAPH_1:def 15 , GRAPH_4:def 7;
+end;
+theorem
+L405: (for R17 being Graph holds (for B37 being  Simple  oriented (Chain of R17) holds (for B38 being (FinSequence of (the carrier' of R17)) holds ((( len B37 ) >= 1 & ( len B38 ) = 1 & ( (the Source of R17) . ( B38 . 1 ) ) = ( (the Target of R17) . ( B37 . ( len B37 ) ) ) & ( (the Source of R17) . ( B37 . 1 ) ) <> ( (the Target of R17) . ( B37 . ( len B37 ) ) ) & (not (ex R5 being (Element of ( NAT )) st (1 <= R5 & R5 <= ( len B37 ) & ( (the Target of R17) . ( B37 . R5 ) ) = ( (the Target of R17) . ( B38 . 1 ) ))))) implies ( B37 ^ B38 ) is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17)))))
+proof
+let R17 being Graph;
+let C60 being  Simple  oriented (Chain of R17);
+let C61 being (FinSequence of (the carrier' of R17));
+set D45 = (the Source of R17);
+set D46 = (the Target of R17);
+set D47 = ( D45 . ( C61 . 1 ) );
+set D48 = ( D46 . ( C61 . 1 ) );
+set D49 = ( (the Target of R17) . ( C60 . ( len C60 ) ) );
+set D50 = (the carrier' of R17);
+set D51 = (the carrier of R17);
+assume that
+L406: ( len C60 ) >= 1
+and
+L407: ( len C61 ) = 1
+and
+L408: D47 = D49
+and
+L409: ( D45 . ( C60 . 1 ) ) <> D49
+and
+L410: (not (ex R5 being (Element of ( NAT )) st (1 <= R5 & R5 <= ( len C60 ) & ( D46 . ( C60 . R5 ) ) = D48)));
+set D52 = ( len C60 );
+L411: 1 in ( dom C61 ) by L407 , FINSEQ_3:25;
+reconsider D53 = D47 , D54 = D48 as (Element of D51) by L411 , FINSEQ_2:11 , FUNCT_2:5;
+consider C62 being (FinSequence of D51) such that L412: C62 is_oriented_vertex_seq_of C60 and L413: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C62 ) & ( C62 . R1 ) = ( C62 . R2 )) implies (R1 = 1 & R2 = ( len C62 ))))) by GRAPH_4:def 7;
+set D55 = ( C60 ^ C61 );
+set D56 = ( C62 ^ <* D54 *> );
+L414: ( len C62 ) = ( ( len C60 ) + 1 ) by L412 , GRAPH_4:def 5;
+L415:
+now
+let R1 being (Element of ( NAT ));
+assume L416: (1 <= R1 & R1 <= ( len C60 ));
+L417: ( C60 . R1 ) orientedly_joins ( C62 /. R1 ) , ( C62 /. ( R1 + 1 ) ) by L416 , L412 , GRAPH_4:def 5;
+thus L418: ( C60 . R1 ) joins ( C62 /. R1 ) , ( C62 /. ( R1 + 1 ) ) by L417 , GRAPH_4:1;
+end;
+L419:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L420: 1 <= R1
+and
+L421: R1 <= ( len D55 );
+per cases ;
+suppose L422: R1 = ( len D55 );
+
+set D57 = ( len C60 );
+take D58 = D53;
+take D59 = D54;
+L423: ( C60 . D57 ) orientedly_joins ( C62 /. D57 ) , ( C62 /. ( D57 + 1 ) ) by L406 , L412 , GRAPH_4:def 5;
+L424: D49 = ( C62 /. ( D57 + 1 ) ) by L423 , GRAPH_4:def 1;
+L425: R1 = ( len C62 ) by L407 , L414 , L422 , FINSEQ_1:22;
+L426: R1 in ( dom C62 ) by L425 , L420 , FINSEQ_3:25;
+thus L427: D58 = ( C62 . R1 ) by L426 , L408 , L414 , L425 , L424 , PARTFUN1:def 6
+.= ( D56 . R1 ) by L420 , L425 , L107;
+thus L428: D59 = ( D56 . ( R1 + 1 ) ) by L425 , FINSEQ_1:42;
+L429: ( C61 . 1 ) joins D58 , D59 by GRAPH_1:def 12;
+thus L430: ( D55 . R1 ) joins D58 , D59 by L429 , L407 , L414 , L425 , L111;
+end;
+suppose L431: R1 <> ( len D55 );
+
+take D60 = ( C62 /. R1 );
+take D61 = ( C62 /. ( R1 + 1 ) );
+L432: R1 < ( len D55 ) by L421 , L431 , XXREAL_0:1;
+L433: R1 < ( ( len C60 ) + 1 ) by L432 , L407 , FINSEQ_1:22;
+L434: ( R1 + 1 ) <= ( len C62 ) by L433 , L414 , NAT_1:13;
+L435: R1 in ( dom C62 ) by L414 , L420 , L433 , FINSEQ_3:25;
+thus L436: D60 = ( C62 . R1 ) by L435 , PARTFUN1:def 6
+.= ( D56 . R1 ) by L414 , L420 , L433 , L107;
+L437: 1 <= ( R1 + 1 ) by NAT_1:12;
+L438: ( R1 + 1 ) in ( dom C62 ) by L437 , L434 , FINSEQ_3:25;
+thus L439: D61 = ( C62 . ( R1 + 1 ) ) by L438 , PARTFUN1:def 6
+.= ( D56 . ( R1 + 1 ) ) by L434 , L107 , NAT_1:12;
+L440: R1 <= ( len C60 ) by L433 , NAT_1:13;
+L441: ( C60 . R1 ) joins ( C62 /. R1 ) , ( C62 /. ( R1 + 1 ) ) by L440 , L415 , L420;
+thus L442: ( D55 . R1 ) joins D60 , D61 by L441 , L420 , L440 , L107;
+end;
+end;
+L444:
+now
+let R1 being (Element of ( NAT ));
+assume L445: (1 <= R1 & R1 <= ( len D55 ));
+L446: R1 in ( dom D55 ) by L445 , FINSEQ_3:25;
+L447: ( D55 . R1 ) in ( rng D55 ) by L446 , FUNCT_1:def 3;
+L448: ( D55 . R1 ) in ( ( rng C60 ) \/ ( rng C61 ) ) by L447 , FINSEQ_1:31;
+L449: (( rng C60 ) c= D50 & ( rng C61 ) c= D50) by FINSEQ_1:def 4;
+L450: ( ( rng C60 ) \/ ( rng C61 ) ) c= D50 by L449 , XBOOLE_1:8;
+thus L451: ( D55 . R1 ) in D50 by L450 , L448;
+end;
+L452: ( len D56 ) = ( ( len C62 ) + 1 ) by FINSEQ_2:16;
+L453: ( len D56 ) = ( ( len D55 ) + 1 ) by L452 , L407 , L414 , FINSEQ_1:22;
+L454: ( C60 . D52 ) orientedly_joins ( C62 /. D52 ) , ( C62 /. ( D52 + 1 ) ) by L406 , L412 , GRAPH_4:def 5;
+L455: D49 = ( C62 /. ( D52 + 1 ) ) by L454 , GRAPH_4:def 1;
+L456:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L457: 1 <= R1
+and
+L458: R1 < R2
+and
+L459: R2 <= ( len D56 )
+and
+L460: ( D56 . R1 ) = ( D56 . R2 );
+assume L461: (not (R1 = 1 & R2 = ( len D56 )));
+per cases ;
+suppose L462: R2 < ( len D56 );
+
+L463: R2 <= ( len C62 ) by L462 , L452 , NAT_1:13;
+L464: 1 <= R2 by L457 , L458 , XXREAL_0:2;
+L465: R2 in ( dom C62 ) by L464 , L463 , FINSEQ_3:25;
+L466: R1 < ( len C62 ) by L458 , L463 , XXREAL_0:2;
+L467: ( C62 . R1 ) = ( D56 . R1 ) by L466 , L457 , L107
+.= ( C62 . R2 ) by L460 , L463 , L464 , L107;
+L468: R2 = ( len C62 ) by L467 , L413 , L457 , L458 , L463;
+L469: R1 = 1 by L413 , L457 , L458 , L463 , L467;
+L470: 1 in ( dom C62 ) by L469 , L458 , L468 , FINSEQ_3:25;
+L471: ( C60 . 1 ) orientedly_joins ( C62 /. 1 ) , ( C62 /. ( 1 + 1 ) ) by L406 , L412 , GRAPH_4:def 5;
+L472: ( D45 . ( C60 . 1 ) ) = ( C62 /. 1 ) by L471 , GRAPH_4:def 1
+.= ( C62 . R2 ) by L467 , L469 , L470 , PARTFUN1:def 6
+.= D49 by L414 , L455 , L468 , L465 , PARTFUN1:def 6;
+thus L473: contradiction by L472 , L409;
+end;
+suppose L474: R2 >= ( len D56 );
+
+L475: R2 = ( len D56 ) by L474 , L459 , XXREAL_0:1;
+L476: D54 = ( D56 . R2 ) by L475 , L452 , FINSEQ_1:42;
+consider C63 being Nat such that L477: R1 = ( C63 + 1 ) by L457 , NAT_1:6;
+reconsider D62 = C63 as (Element of ( NAT )) by ORDINAL1:def 12;
+L478: 1 < R1 by L457 , L459 , L461 , L474 , XXREAL_0:1;
+L479: 1 <= D62 by L478 , L477 , NAT_1:13;
+L480: ( D62 + 1 ) < ( ( len C62 ) + 1 ) by L452 , L458 , L459 , L477 , XXREAL_0:2;
+L481: ( D62 + 1 ) <= ( len C62 ) by L480 , NAT_1:13;
+L482: ( D62 + 1 ) in ( dom C62 ) by L481 , L457 , L477 , FINSEQ_3:25;
+L483: D62 <= ( len C60 ) by L414 , L481 , XREAL_1:6;
+L484: ( C60 . D62 ) orientedly_joins ( C62 /. D62 ) , ( C62 /. ( D62 + 1 ) ) by L483 , L412 , L479 , GRAPH_4:def 5;
+L485: ( D46 . ( C60 . D62 ) ) = ( C62 /. ( D62 + 1 ) ) by L484 , GRAPH_4:def 1
+.= ( C62 . ( D62 + 1 ) ) by L482 , PARTFUN1:def 6
+.= D54 by L457 , L460 , L476 , L477 , L481 , L107;
+thus L486: contradiction by L485 , L410 , L479 , L483;
+end;
+end;
+L488:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L489: 1 <= R1
+and
+L490: R1 < ( len D55 );
+per cases ;
+suppose L491: R1 < ( len C60 );
+
+L492: ( R1 + 1 ) <= ( len C60 ) by L491 , NAT_1:13;
+L493: (( D45 . ( C60 . ( R1 + 1 ) ) ) = ( D46 . ( C60 . R1 ) ) & ( C60 . R1 ) = ( D55 . R1 )) by L489 , L491 , L107 , GRAPH_1:def 15;
+thus L494: ( D45 . ( D55 . ( R1 + 1 ) ) ) = ( D46 . ( D55 . R1 ) ) by L493 , L492 , L107 , NAT_1:12;
+end;
+suppose L495: R1 >= ( len C60 );
+
+L496: R1 < ( ( len C60 ) + 1 ) by L407 , L490 , FINSEQ_1:22;
+L497: R1 <= ( len C60 ) by L496 , NAT_1:13;
+L498: R1 = ( len C60 ) by L497 , L495 , XXREAL_0:1;
+L499: ( D55 . R1 ) = ( C60 . ( len C60 ) ) by L498 , L406 , L107;
+thus L500: ( D45 . ( D55 . ( R1 + 1 ) ) ) = ( D46 . ( D55 . R1 ) ) by L499 , L407 , L408 , L498 , L111;
+end;
+end;
+L502:
+now
+let R1 being (Element of ( NAT ));
+assume that
+L503: 1 <= R1
+and
+L504: R1 <= ( len D56 );
+per cases ;
+suppose L505: R1 = ( len D56 );
+
+L506: ( D56 . R1 ) = D54 by L505 , L452 , FINSEQ_1:42;
+thus L507: ( D56 . R1 ) in D51 by L506;
+end;
+suppose L508: R1 <> ( len D56 );
+
+L509: R1 < ( len D56 ) by L508 , L504 , XXREAL_0:1;
+L510: R1 <= ( len C62 ) by L509 , L452 , NAT_1:13;
+L511: R1 in ( dom C62 ) by L510 , L503 , FINSEQ_3:25;
+L512: ( C62 . R1 ) in D51 by L511 , FINSEQ_2:11;
+thus L513: ( D56 . R1 ) in D51 by L512 , L503 , L510 , L107;
+end;
+end;
+L515:
+now
+L516: ( dom C62 ) c= ( dom D56 ) by FINSEQ_1:26;
+let R1 being (Element of ( NAT ));
+assume that
+L517: 1 <= R1
+and
+L518: R1 <= ( len D55 );
+per cases ;
+suppose L519: R1 <= ( len C60 );
+
+L520: ( R1 + 1 ) <= ( len C62 ) by L519 , L414 , XREAL_1:7;
+L521: 1 <= ( R1 + 1 ) by NAT_1:12;
+L522: ( R1 + 1 ) in ( dom C62 ) by L521 , L520 , FINSEQ_3:25;
+L523: ( C62 /. ( R1 + 1 ) ) = ( C62 . ( R1 + 1 ) ) by L522 , PARTFUN1:def 6
+.= ( D56 . ( R1 + 1 ) ) by L520 , L107 , NAT_1:12
+.= ( D56 /. ( R1 + 1 ) ) by L516 , L522 , PARTFUN1:def 6;
+L524: ( C60 . R1 ) orientedly_joins ( C62 /. R1 ) , ( C62 /. ( R1 + 1 ) ) by L412 , L517 , L519 , GRAPH_4:def 5;
+L525: R1 <= ( len C62 ) by L414 , L519 , NAT_1:12;
+L526: R1 in ( dom C62 ) by L525 , L517 , FINSEQ_3:25;
+L527: ( C62 /. R1 ) = ( C62 . R1 ) by L526 , PARTFUN1:def 6
+.= ( D56 . R1 ) by L517 , L525 , L107
+.= ( D56 /. R1 ) by L516 , L526 , PARTFUN1:def 6;
+thus L528: ( D55 . R1 ) orientedly_joins ( D56 /. R1 ) , ( D56 /. ( R1 + 1 ) ) by L527 , L517 , L519 , L524 , L523 , L107;
+end;
+suppose L529: R1 > ( len C60 );
+
+L530: ( ( len C60 ) + 1 ) >= R1 by L407 , L518 , FINSEQ_1:22;
+L531: ( ( len C60 ) + 1 ) <= R1 by L529 , NAT_1:13;
+L532: R1 = ( len C62 ) by L531 , L414 , L530 , XXREAL_0:1;
+L533: 1 <= ( R1 + 1 ) by NAT_1:12;
+L534: ( R1 + 1 ) in ( dom D56 ) by L533 , L452 , L532 , FINSEQ_3:25;
+L535: D54 = ( D56 . ( R1 + 1 ) ) by L532 , FINSEQ_1:42
+.= ( D56 /. ( R1 + 1 ) ) by L534 , PARTFUN1:def 6;
+L536: ( C61 . 1 ) orientedly_joins D53 , D54 by GRAPH_4:def 1;
+L537: R1 in ( dom C62 ) by L414 , L517 , L530 , FINSEQ_3:25;
+L538: D53 = ( C62 . R1 ) by L537 , L408 , L414 , L455 , L532 , PARTFUN1:def 6
+.= ( D56 . R1 ) by L414 , L517 , L530 , L107
+.= ( D56 /. R1 ) by L516 , L537 , PARTFUN1:def 6;
+thus L539: ( D55 . R1 ) orientedly_joins ( D56 /. R1 ) , ( D56 /. ( R1 + 1 ) ) by L538 , L407 , L414 , L532 , L535 , L536 , L111;
+end;
+end;
+L541: D56 is_oriented_vertex_seq_of D55 by L515 , L453 , GRAPH_4:def 5;
+thus L542: thesis by L541 , L444 , L453 , L502 , L419 , L488 , L456 , GRAPH_1:def 14 , GRAPH_1:def 15 , GRAPH_4:def 7;
+end;
+theorem
+L543: (for R17 being Graph holds (for B39 being  Simple  oriented (Chain of R17) holds B39 is  one-to-one))
+proof
+let R17 being Graph;
+let C64 being  Simple  oriented (Chain of R17);
+set D63 = (the carrier of R17);
+consider C65 being (FinSequence of D63) such that L544: C65 is_oriented_vertex_seq_of C64 and L545: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C65 ) & ( C65 . R1 ) = ( C65 . R2 )) implies (R1 = 1 & R2 = ( len C65 ))))) by GRAPH_4:def 7;
+L546: ( len C65 ) = ( ( len C64 ) + 1 ) by L544 , GRAPH_4:def 5;
+L547:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L548: 1 <= R1
+and
+L549: R1 < R2
+and
+L550: R2 <= ( len C64 );
+L551: 1 <= R2 by L548 , L549 , XXREAL_0:2;
+L552: ( C64 . R2 ) orientedly_joins ( C65 /. R2 ) , ( C65 /. ( R2 + 1 ) ) by L551 , L544 , L550 , GRAPH_4:def 5;
+assume L553: ( C64 . R1 ) = ( C64 . R2 );
+L554: R1 <= ( len C64 ) by L549 , L550 , XXREAL_0:2;
+L555: ( C64 . R1 ) orientedly_joins ( C65 /. R1 ) , ( C65 /. ( R1 + 1 ) ) by L554 , L544 , L548 , GRAPH_4:def 5;
+L556: ( C65 /. R1 ) = ( (the Source of R17) . ( C64 . R2 ) ) by L555 , L553 , GRAPH_4:def 1
+.= ( C65 /. R2 ) by L552 , GRAPH_4:def 1;
+L557: ( len C64 ) < ( len C65 ) by L546 , XREAL_1:29;
+L558: R1 <= ( len C65 ) by L557 , L554 , XXREAL_0:2;
+L559: R1 in ( dom C65 ) by L558 , L548 , FINSEQ_3:25;
+L560: ( C65 . R1 ) = ( C65 /. R1 ) by L559 , PARTFUN1:def 6;
+L561: R2 <= ( len C65 ) by L550 , L557 , XXREAL_0:2;
+L562: R2 in ( dom C65 ) by L561 , L551 , FINSEQ_3:25;
+L563: ( C65 . R2 ) = ( C65 . R1 ) by L562 , L556 , L560 , PARTFUN1:def 6;
+L564: R2 = ( len C65 ) by L563 , L545 , L548 , L549 , L561;
+thus L565: contradiction by L564 , L546 , L550 , XREAL_1:29;
+end;
+thus L566: thesis by L547 , L115;
+end;
+begin
+definition
+let C66 being Graph;
+let C67 being (Element of (the carrier' of C66));
+func vertices C67 equals 
+{ ( (the Source of C66) . C67 ) , ( (the Target of C66) . C67 ) };
+coherence;
+end;
+definition
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+func vertices R18 -> (Subset of (the carrier of R17)) equals 
+{ B40 where B40 is (Vertex of R17) : (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & B40 in ( vertices ( R18 /. R3 ) ))) };
+coherence
+proof
+set D64 = { B41 where B41 is (Vertex of R17) : (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & B41 in ( vertices ( R18 /. R3 ) ))) };
+L568: D64 c= (the carrier of R17)
+proof
+let C68 being set;
+assume L569: C68 in D64;
+L570: (ex B42 being (Vertex of R17) st (C68 = B42 & (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & B42 in ( vertices ( R18 /. R3 ) ))))) by L569;
+thus L571: thesis by L570;
+end;
+thus L572: thesis by L568;
+end;
+end;
+theorem
+L574: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds (for B43 being  Simple  oriented (Chain of R17) holds ((B43 = ( R18 ^ R19 ) & ( len R18 ) >= 1 & ( len R19 ) >= 1 & ( (the Source of R17) . ( B43 . 1 ) ) <> ( (the Target of R17) . ( B43 . ( len B43 ) ) )) implies ((not ( (the Source of R17) . ( B43 . 1 ) ) in ( vertices R19 )) & (not ( (the Target of R17) . ( B43 . ( len B43 ) ) ) in ( vertices R18 ))))))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+let C69 being  Simple  oriented (Chain of R17);
+set D65 = (the Target of R17);
+set D66 = (the Source of R17);
+assume that
+L575: C69 = ( R18 ^ R19 )
+and
+L576: ( len R18 ) >= 1
+and
+L577: ( len R19 ) >= 1
+and
+L578: ( D66 . ( C69 . 1 ) ) <> ( D65 . ( C69 . ( len C69 ) ) );
+consider C70 being (FinSequence of (the carrier of R17)) such that L579: C70 is_oriented_vertex_seq_of C69 and L580: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C70 ) & ( C70 . R1 ) = ( C70 . R2 )) implies (R1 = 1 & R2 = ( len C70 ))))) by GRAPH_4:def 7;
+L581: ( len C70 ) = ( ( len C69 ) + 1 ) by L579 , GRAPH_4:def 5;
+L582: 1 <= ( len C70 ) by L581 , NAT_1:12;
+L583: ( len C69 ) = ( ( len R18 ) + ( len R19 ) ) by L575 , FINSEQ_1:22;
+L584: ( len C69 ) >= 1 by L583 , L576 , NAT_1:12;
+L585: ( C69 . 1 ) orientedly_joins ( C70 /. 1 ) , ( C70 /. ( 1 + 1 ) ) by L584 , L579 , GRAPH_4:def 5;
+L586: ( D66 . ( C69 . 1 ) ) = ( C70 /. 1 ) by L585 , GRAPH_4:def 1
+.= ( C70 . 1 ) by L582 , FINSEQ_4:15;
+L587: ( C69 . ( len C69 ) ) orientedly_joins ( C70 /. ( len C69 ) ) , ( C70 /. ( ( len C69 ) + 1 ) ) by L579 , L584 , GRAPH_4:def 5;
+L588: ( D65 . ( C69 . ( len C69 ) ) ) = ( C70 /. ( ( len C69 ) + 1 ) ) by L587 , GRAPH_4:def 1
+.= ( C70 . ( len C70 ) ) by L581 , L582 , FINSEQ_4:15;
+thus L589:now
+assume L590: ( D66 . ( C69 . 1 ) ) in ( vertices R19 );
+consider C71 being (Vertex of R17) such that L591: ( D66 . ( C69 . 1 ) ) = C71 and L592: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R19 ) & C71 in ( vertices ( R19 /. R3 ) ))) by L590;
+consider R3 being (Element of ( NAT )) such that L593: R3 in ( dom R19 ) and L594: C71 in ( vertices ( R19 /. R3 ) ) by L592;
+set D67 = ( ( len R18 ) + R3 );
+L595: ( R19 /. R3 ) = ( R19 . R3 ) by L593 , PARTFUN1:def 6
+.= ( C69 . D67 ) by L575 , L593 , FINSEQ_1:def 7;
+L596: 1 <= R3 by L593 , FINSEQ_3:25;
+L597: 1 < ( R3 + 1 ) by L596 , NAT_1:13;
+L598: R3 <= ( len R19 ) by L593 , FINSEQ_3:25;
+L599: D67 <= ( len C69 ) by L598 , L583 , XREAL_1:7;
+L600: D67 <= ( len C70 ) by L599 , L581 , NAT_1:13;
+L601: ( 1 + R3 ) <= D67 by L576 , XREAL_1:7;
+L602: 1 < D67 by L601 , L597 , XXREAL_0:2;
+L603: ( C69 . D67 ) orientedly_joins ( C70 /. D67 ) , ( C70 /. ( D67 + 1 ) ) by L602 , L579 , L599 , GRAPH_4:def 5;
+per cases  by L594 , L595 , TARSKI:def 2;
+suppose L604: C71 = ( D66 . ( C69 . D67 ) );
+
+L605: ( D66 . ( C69 . D67 ) ) = ( C70 /. D67 ) by L603 , GRAPH_4:def 1
+.= ( C70 . D67 ) by L602 , L600 , FINSEQ_4:15;
+thus L606: contradiction by L605 , L578 , L580 , L586 , L588 , L591 , L602 , L600 , L604;
+end;
+suppose L607: C71 = ( D65 . ( C69 . D67 ) );
+
+L608: 1 < ( D67 + 1 ) by L602 , NAT_1:13;
+L609: ( D67 + 1 ) <= ( len C70 ) by L581 , L599 , XREAL_1:7;
+L610: ( D65 . ( C69 . D67 ) ) = ( C70 /. ( D67 + 1 ) ) by L603 , GRAPH_4:def 1
+.= ( C70 . ( D67 + 1 ) ) by L609 , FINSEQ_4:15 , NAT_1:12;
+thus L611: contradiction by L610 , L578 , L580 , L586 , L588 , L591 , L607 , L609 , L608;
+end;
+end;
+thus L613:now
+assume L614: ( D65 . ( C69 . ( len C69 ) ) ) in ( vertices R18 );
+consider C72 being (Vertex of R17) such that L615: ( D65 . ( C69 . ( len C69 ) ) ) = C72 and L616: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & C72 in ( vertices ( R18 /. R3 ) ))) by L614;
+consider R3 being (Element of ( NAT )) such that L617: R3 in ( dom R18 ) and L618: C72 in ( vertices ( R18 /. R3 ) ) by L616;
+L619: ( R18 /. R3 ) = ( R18 . R3 ) by L617 , PARTFUN1:def 6
+.= ( C69 . R3 ) by L575 , L617 , FINSEQ_1:def 7;
+L620: R3 <= ( len R18 ) by L617 , FINSEQ_3:25;
+L621: R3 <= ( len C69 ) by L620 , L583 , NAT_1:12;
+L622: R3 < ( len C70 ) by L621 , L581 , NAT_1:13;
+L623: 1 <= R3 by L617 , FINSEQ_3:25;
+L624: ( C69 . R3 ) orientedly_joins ( C70 /. R3 ) , ( C70 /. ( R3 + 1 ) ) by L623 , L579 , L621 , GRAPH_4:def 5;
+per cases  by L618 , L619 , TARSKI:def 2;
+suppose L625: C72 = ( D66 . ( C69 . R3 ) );
+
+L626: ( D66 . ( C69 . R3 ) ) = ( C70 /. R3 ) by L624 , GRAPH_4:def 1
+.= ( C70 . R3 ) by L623 , L622 , FINSEQ_4:15;
+thus L627: contradiction by L626 , L578 , L580 , L588 , L615 , L623 , L622 , L625;
+end;
+suppose L628: C72 = ( D65 . ( C69 . R3 ) );
+
+L629: ( R3 + 1 ) <= ( len C70 ) by L581 , L621 , XREAL_1:7;
+L630: (( ( len R18 ) + 1 ) <= ( ( len R18 ) + ( len R19 ) ) & ( R3 + 1 ) <= ( ( len R18 ) + 1 )) by L577 , L620 , XREAL_1:7;
+L631: ( R3 + 1 ) <= ( len C69 ) by L630 , L583 , XXREAL_0:2;
+L632: (1 <= ( R3 + 1 ) & ( R3 + 1 ) < ( len C70 )) by L631 , L581 , NAT_1:12 , NAT_1:13;
+L633: ( D65 . ( C69 . R3 ) ) = ( C70 /. ( R3 + 1 ) ) by L624 , GRAPH_4:def 1
+.= ( C70 . ( R3 + 1 ) ) by L629 , FINSEQ_4:15 , NAT_1:12;
+thus L634: contradiction by L633 , L578 , L580 , L586 , L588 , L615 , L628 , L632;
+end;
+end;
+end;
+theorem
+L614: (for R10 being set holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (( vertices R18 ) c= R10 iff (for B44 being Nat holds (B44 in ( dom R18 ) implies ( vertices ( R18 /. B44 ) ) c= R10))))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+set D68 = (the Source of R17);
+set D69 = (the Target of R17);
+thus L615:now
+assume L616: ( vertices R18 ) c= R10;
+thus L617:now
+let C73 being Nat;
+assume L618: C73 in ( dom R18 );
+L619: (1 <= C73 & C73 <= ( len R18 )) by L618 , FINSEQ_3:25;
+thus L620: ( vertices ( R18 /. C73 ) ) c= R10
+proof
+let C74 being set;
+assume L621: C74 in ( vertices ( R18 /. C73 ) );
+L622: (C74 = ( D68 . ( R18 /. C73 ) ) or C74 = ( D69 . ( R18 /. C73 ) )) by L621 , TARSKI:def 2;
+L623: (C74 = ( D68 . ( R18 . C73 ) ) or C74 = ( D69 . ( R18 . C73 ) )) by L622 , L619 , FINSEQ_4:15;
+reconsider D70 = C74 as (Vertex of R17) by L623 , L618 , FINSEQ_2:11 , FUNCT_2:5;
+L624: D70 in { B45 where B45 is (Vertex of R17) : (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & B45 in ( vertices ( R18 /. R3 ) ))) } by L618 , L621;
+thus L625: thesis by L624 , L616;
+end;
+
+end;
+end;
+assume L618: (for B46 being Nat holds (B46 in ( dom R18 ) implies ( vertices ( R18 /. B46 ) ) c= R10));
+let C75 being set;
+assume L619: C75 in ( vertices R18 );
+consider C76 being (Vertex of R17) such that L620: C76 = C75 and L621: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & C76 in ( vertices ( R18 /. R3 ) ))) by L619;
+consider R3 being (Element of ( NAT )) such that L622: R3 in ( dom R18 ) and L623: C76 in ( vertices ( R18 /. R3 ) ) by L621;
+L624: ( vertices ( R18 /. R3 ) ) c= R10 by L618 , L622;
+thus L625: thesis by L624 , L620 , L623;
+end;
+theorem
+L626: (for R10 being set holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds ((not ( vertices R18 ) c= R10) implies (ex B47 being (Element of ( NAT )) st (ex B48 , B49 being (FinSequence of (the carrier' of R17)) st (( B47 + 1 ) <= ( len R18 ) & (not ( vertices ( R18 /. ( B47 + 1 ) ) ) c= R10) & ( len B48 ) = B47 & R18 = ( B48 ^ B49 ) & ( vertices B48 ) c= R10)))))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+defpred S3[ Nat ] means ($1 in ( dom R18 ) & (not ( vertices ( R18 /. $1 ) ) c= R10));
+assume L627: (not ( vertices R18 ) c= R10);
+L628: (ex B50 being Nat st S3[ B50 ]) by L627 , L614;
+consider C77 being Nat such that L629: (S3[ C77 ] & (for B51 being Nat holds (S3[ B51 ] implies C77 <= B51))) from NAT_1:sch 5(L628);
+L630: C77 <= ( len R18 ) by L629 , FINSEQ_3:25;
+consider C78 being Nat such that L631: ( len R18 ) = ( C77 + C78 ) by L630 , NAT_1:10;
+reconsider D71 = C78 as (Element of ( NAT )) by ORDINAL1:def 12;
+L632: 1 <= C77 by L629 , FINSEQ_3:25;
+consider C79 being Nat such that L633: C77 = ( 1 + C79 ) by L632 , NAT_1:10;
+reconsider D72 = C79 as (Element of ( NAT )) by ORDINAL1:def 12;
+L634: ( len R18 ) = ( D72 + ( 1 + D71 ) ) by L633 , L631;
+consider C80 , C81 being FinSequence such that L635: ( len C80 ) = D72 and L636: ( len C81 ) = ( 1 + D71 ) and L637: R18 = ( C80 ^ C81 ) by L634 , FINSEQ_2:22;
+reconsider D73 = C80 , D74 = C81 as (FinSequence of (the carrier' of R17)) by L637 , FINSEQ_1:36;
+take D72;
+take D73;
+take D74;
+thus L638: (( D72 + 1 ) <= ( len R18 ) & (not ( vertices ( R18 /. ( D72 + 1 ) ) ) c= R10)) by L629 , L633 , FINSEQ_3:25;
+thus L639: (( len D73 ) = D72 & R18 = ( D73 ^ D74 )) by L635 , L637;
+L640:
+now
+let C82 being Nat;
+assume L641: C82 in ( dom D73 );
+L642: C82 <= ( len D73 ) by L641 , FINSEQ_3:25;
+L643: ( dom D73 ) c= ( dom R18 ) by L637 , FINSEQ_1:26;
+assume L644: (not ( vertices ( D73 /. C82 ) ) c= R10);
+L645: ( D73 /. C82 ) = ( D73 . C82 ) by L641 , PARTFUN1:def 6
+.= ( R18 . C82 ) by L637 , L641 , FINSEQ_1:def 7
+.= ( R18 /. C82 ) by L641 , L643 , PARTFUN1:def 6;
+L646: C77 <= C82 by L645 , L629 , L641 , L644 , L643;
+thus L647: contradiction by L646 , L633 , L635 , L642 , NAT_1:13;
+end;
+thus L648: thesis by L640 , L614;
+end;
+theorem
+L649: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds (( rng R19 ) c= ( rng R18 ) implies ( vertices R19 ) c= ( vertices R18 )))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+assume L650: ( rng R19 ) c= ( rng R18 );
+let C83 being set;
+assume L651: C83 in ( vertices R19 );
+consider C84 being (Vertex of R17) such that L652: C83 = C84 and L653: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R19 ) & C84 in ( vertices ( R19 /. R3 ) ))) by L651;
+consider R3 being (Element of ( NAT )) such that L654: R3 in ( dom R19 ) and L655: C84 in ( vertices ( R19 /. R3 ) ) by L653;
+L656: ( R19 . R3 ) in ( rng R19 ) by L654 , FUNCT_1:def 3;
+consider C85 being set such that L657: C85 in ( dom R18 ) and L658: ( R19 . R3 ) = ( R18 . C85 ) by L656 , L650 , FUNCT_1:def 3;
+reconsider D75 = C85 as (Element of ( NAT )) by L657;
+L659: ( R19 /. R3 ) = ( R19 . R3 ) by L654 , PARTFUN1:def 6;
+L660: ( R18 /. D75 ) = ( R19 /. R3 ) by L659 , L657 , L658 , PARTFUN1:def 6;
+thus L661: thesis by L660 , L652 , L655 , L657;
+end;
+theorem
+L662: (for R9 being set holds (for R10 being set holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds ((( rng R19 ) c= ( rng R18 ) & ( ( vertices R18 ) \ R9 ) c= R10) implies ( ( vertices R19 ) \ R9 ) c= R10))))))
+proof
+let R9 being set;
+let R10 being set;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+assume that
+L663: ( rng R19 ) c= ( rng R18 )
+and
+L664: ( ( vertices R18 ) \ R9 ) c= R10;
+L665: ( vertices R19 ) c= ( vertices R18 ) by L663 , L649;
+L666: ( ( vertices R19 ) \ R9 ) c= ( ( vertices R18 ) \ R9 ) by L665 , XBOOLE_1:35;
+thus L667: thesis by L666 , L664 , XBOOLE_1:1;
+end;
+theorem
+L668: (for R9 being set holds (for R10 being set holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds (( ( vertices ( R18 ^ R19 ) ) \ R9 ) c= R10 implies (( ( vertices R18 ) \ R9 ) c= R10 & ( ( vertices R19 ) \ R9 ) c= R10)))))))
+proof
+let R9 being set;
+let R10 being set;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+L669: (( rng R18 ) c= ( rng ( R18 ^ R19 ) ) & ( rng R19 ) c= ( rng ( R18 ^ R19 ) )) by FINSEQ_1:29 , FINSEQ_1:30;
+assume L670: ( ( vertices ( R18 ^ R19 ) ) \ R9 ) c= R10;
+thus L671: thesis by L670 , L669 , L662;
+end;
+theorem
+L672: (for R3 being (Element of ( NAT )) holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R20 being (Element of R17) holds ((R3 in ( dom R18 ) & (R20 = ( (the Source of R17) . ( R18 . R3 ) ) or R20 = ( (the Target of R17) . ( R18 . R3 ) ))) implies R20 in ( vertices R18 ))))))
+proof
+let R3 being (Element of ( NAT ));
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R20 being (Element of R17);
+set D76 = (the Source of R17);
+set D77 = (the Target of R17);
+assume that
+L673: R3 in ( dom R18 )
+and
+L674: (R20 = ( D76 . ( R18 . R3 ) ) or R20 = ( D77 . ( R18 . R3 ) ));
+L675: (R20 = ( D76 . ( R18 /. R3 ) ) or R20 = ( D77 . ( R18 /. R3 ) )) by L673 , L674 , PARTFUN1:def 6;
+L676: R20 in ( vertices ( R18 /. R3 ) ) by L675 , TARSKI:def 2;
+thus L677: thesis by L676 , L673;
+end;
+theorem
+L678: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (( len R18 ) = 1 implies ( vertices R18 ) = ( vertices ( R18 /. 1 ) ))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+set D78 = (the Source of R17);
+set D79 = (the Target of R17);
+assume L679: ( len R18 ) = 1;
+L680: 1 in ( dom R18 ) by L679 , FINSEQ_3:25;
+L681:
+now
+let C86 being set;
+thus L682:now
+assume L683: C86 in ( vertices R18 );
+consider C87 being (Vertex of R17) such that L684: C87 = C86 and L685: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & C87 in ( vertices ( R18 /. R3 ) ))) by L683;
+consider R3 being (Element of ( NAT )) such that L686: R3 in ( dom R18 ) and L687: C87 in ( vertices ( R18 /. R3 ) ) by L685;
+L688: (1 <= R3 & R3 <= ( len R18 )) by L686 , FINSEQ_3:25;
+thus L689: C86 in ( vertices ( R18 /. 1 ) ) by L688 , L679 , L684 , L687 , XXREAL_0:1;
+end;
+assume L690: C86 in ( vertices ( R18 /. 1 ) );
+L691: (C86 = ( D78 . ( R18 /. 1 ) ) or C86 = ( D79 . ( R18 /. 1 ) )) by L690 , TARSKI:def 2;
+L692: (C86 = ( D78 . ( R18 . 1 ) ) or C86 = ( D79 . ( R18 . 1 ) )) by L691 , L679 , FINSEQ_4:15;
+reconsider D80 = C86 as (Vertex of R17) by L692 , L680 , FINSEQ_2:11 , FUNCT_2:5;
+L693: D80 in { B52 where B52 is (Vertex of R17) : (ex R3 being (Element of ( NAT )) st (R3 in ( dom R18 ) & B52 in ( vertices ( R18 /. R3 ) ))) } by L680 , L690;
+thus L694: C86 in ( vertices R18 ) by L693;
+end;
+thus L695: thesis by L681 , TARSKI:1;
+end;
+theorem
+L696: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds (( vertices R18 ) c= ( vertices ( R18 ^ R19 ) ) & ( vertices R19 ) c= ( vertices ( R18 ^ R19 ) )))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+L697: (( rng R18 ) c= ( rng ( R18 ^ R19 ) ) & ( rng R19 ) c= ( rng ( R18 ^ R19 ) )) by FINSEQ_1:29 , FINSEQ_1:30;
+thus L698: thesis by L697 , L649;
+end;
+theorem
+L699: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R24 being  oriented (Chain of R17) holds (for R25 being  oriented (Chain of R17) holds ((R24 = ( R25 ^ R18 ) & ( len R25 ) >= 1 & ( len R18 ) = 1) implies ( vertices R24 ) = ( ( vertices R25 ) \/ { ( (the Target of R17) . ( R18 . 1 ) ) } ))))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R24 being  oriented (Chain of R17);
+let R25 being  oriented (Chain of R17);
+assume that
+L700: R24 = ( R25 ^ R18 )
+and
+L701: ( len R25 ) >= 1
+and
+L702: ( len R18 ) = 1;
+set D81 = (the Source of R17);
+set D82 = (the Target of R17);
+set D83 = { ( D82 . ( R18 . 1 ) ) };
+L703: ( len R24 ) = ( ( len R25 ) + 1 ) by L700 , L702 , FINSEQ_1:22;
+L704:
+now
+let C88 being set;
+thus L705:now
+assume L706: C88 in ( vertices R24 );
+consider C89 being (Vertex of R17) such that L707: C89 = C88 and L708: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R24 ) & C89 in ( vertices ( R24 /. R3 ) ))) by L706;
+consider R3 being (Element of ( NAT )) such that L709: R3 in ( dom R24 ) and L710: C89 in ( vertices ( R24 /. R3 ) ) by L708;
+L711: 1 <= R3 by L709 , FINSEQ_3:25;
+L712: R3 <= ( len R24 ) by L709 , FINSEQ_3:25;
+per cases ;
+suppose L713: R3 <= ( len R25 );
+
+L714: R3 in ( dom R25 ) by L713 , L711 , FINSEQ_3:25;
+L715: ( R24 /. R3 ) = ( R24 . R3 ) by L711 , L712 , FINSEQ_4:15
+.= ( R25 . R3 ) by L700 , L711 , L713 , L107
+.= ( R25 /. R3 ) by L711 , L713 , FINSEQ_4:15;
+L716: C89 in { B53 where B53 is (Vertex of R17) : (ex R4 being (Element of ( NAT )) st (R4 in ( dom R25 ) & B53 in ( vertices ( R25 /. R4 ) ))) } by L715 , L710 , L714;
+thus L717: C88 in ( ( vertices R25 ) \/ D83 ) by L716 , L707 , XBOOLE_0:def 3;
+end;
+suppose L718: R3 > ( len R25 );
+
+reconsider D84 = C89 as (Vertex of R17);
+L719: R3 >= ( ( len R25 ) + 1 ) by L718 , NAT_1:13;
+L720: R3 = ( ( len R25 ) + 1 ) by L719 , L703 , L712 , XXREAL_0:1;
+L721: (C89 = ( D81 . ( R24 /. R3 ) ) or C89 = ( D82 . ( R24 /. R3 ) )) by L710 , TARSKI:def 2;
+thus L722:now
+per cases  by L711 , L712 , L721 , FINSEQ_4:15;
+suppose L723: D84 = ( D81 . ( R24 . R3 ) );
+
+L724: ( len R25 ) < ( len R24 ) by L703 , NAT_1:13;
+L725: D84 = ( D82 . ( R24 . ( len R25 ) ) ) by L724 , L701 , L720 , L723 , GRAPH_1:def 15
+.= ( D82 . ( R25 . ( len R25 ) ) ) by L700 , L701 , L107
+.= ( D82 . ( R25 /. ( len R25 ) ) ) by L701 , FINSEQ_4:15;
+L726: D84 in ( vertices ( R25 /. ( len R25 ) ) ) by L725 , TARSKI:def 2;
+L727: ( len R25 ) in ( dom R25 ) by L701 , FINSEQ_3:25;
+L728: D84 in { B54 where B54 is (Vertex of R17) : (ex R4 being (Element of ( NAT )) st (R4 in ( dom R25 ) & B54 in ( vertices ( R25 /. R4 ) ))) } by L727 , L726;
+thus L729: C88 in ( ( vertices R25 ) \/ D83 ) by L728 , L707 , XBOOLE_0:def 3;
+end;
+suppose L730: D84 = ( D82 . ( R24 . R3 ) );
+
+L731: D84 = ( D82 . ( R18 . 1 ) ) by L730 , L700 , L702 , L720 , L111;
+L732: D84 in D83 by L731 , TARSKI:def 1;
+thus L733: C88 in ( ( vertices R25 ) \/ D83 ) by L732 , L707 , XBOOLE_0:def 3;
+end;
+end;
+end;
+end;
+assume L724: C88 in ( ( vertices R25 ) \/ D83 );
+per cases  by L724 , XBOOLE_0:def 3;
+suppose L725: C88 in ( vertices R25 );
+
+L726: ( vertices R25 ) c= ( vertices R24 ) by L700 , L696;
+thus L727: C88 in ( vertices R24 ) by L726 , L725;
+end;
+suppose L728: C88 in D83;
+
+L729: 1 in ( dom R18 ) by L702 , FINSEQ_3:25;
+reconsider D85 = ( D82 . ( R18 . 1 ) ) as (Vertex of R17) by L729 , FINSEQ_2:11 , FUNCT_2:5;
+L730: 1 <= ( len R24 ) by L703 , NAT_1:12;
+L731: ( len R24 ) in ( dom R24 ) by L730 , FINSEQ_3:25;
+L732: D85 = ( D82 . ( R24 . ( len R24 ) ) ) by L700 , L702 , L703 , L111
+.= ( D82 . ( R24 /. ( len R24 ) ) ) by L730 , FINSEQ_4:15;
+L733: D85 in ( vertices ( R24 /. ( len R24 ) ) ) by L732 , TARSKI:def 2;
+L734: C88 = ( D82 . ( R18 . 1 ) ) by L728 , TARSKI:def 1;
+thus L735: C88 in ( vertices R24 ) by L734 , L733 , L731;
+end;
+end;
+thus L737: thesis by L704 , TARSKI:1;
+end;
+theorem
+L738: (for R17 being Graph holds (for R20 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds ((R20 <> ( (the Source of R17) . ( R24 . 1 ) ) & R20 in ( vertices R24 )) implies (ex R3 being (Element of ( NAT )) st (1 <= R3 & R3 <= ( len R24 ) & R20 = ( (the Target of R17) . ( R24 . R3 ) )))))))
+proof
+let R17 being Graph;
+let R20 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+set D86 = (the Target of R17);
+set D87 = (the Source of R17);
+assume that
+L739: R20 <> ( D87 . ( R24 . 1 ) )
+and
+L740: R20 in ( vertices R24 );
+consider C90 being (Vertex of R17) such that L741: R20 = C90 and L742: (ex R3 being (Element of ( NAT )) st (R3 in ( dom R24 ) & C90 in ( vertices ( R24 /. R3 ) ))) by L740;
+consider R3 being (Element of ( NAT )) such that L743: R3 in ( dom R24 ) and L744: C90 in ( vertices ( R24 /. R3 ) ) by L742;
+L745: (C90 = ( D87 . ( R24 /. R3 ) ) or C90 = ( D86 . ( R24 /. R3 ) )) by L744 , TARSKI:def 2;
+L746: 1 <= R3 by L743 , FINSEQ_3:25;
+L747: R3 <= ( len R24 ) by L743 , FINSEQ_3:25;
+per cases  by L741 , L745 , L746 , L747 , FINSEQ_4:15;
+suppose L748: R20 = ( D86 . ( R24 . R3 ) );
+
+take R3;
+thus L749: thesis by L743 , L748 , FINSEQ_3:25;
+end;
+suppose L750: R20 = ( D87 . ( R24 . R3 ) );
+
+consider C91 being Nat such that L751: R3 = ( 1 + C91 ) by L746 , NAT_1:10;
+reconsider D88 = C91 as (Element of ( NAT )) by ORDINAL1:def 12;
+L752: D88 < ( len R24 ) by L747 , L751 , NAT_1:13;
+take D88;
+L753: R3 > 1 by L739 , L746 , L750 , XXREAL_0:1;
+L754: D88 >= 1 by L753 , L751 , NAT_1:13;
+thus L755: thesis by L754 , L750 , L751 , L752 , GRAPH_1:def 15;
+end;
+end;
+begin
+definition
+let R17 being Graph;
+let R24 being  oriented (Chain of R17);
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+pred R24 is_orientedpath_of R21 , R22
+means
+:L757: (R24 <> ( {} ) & ( (the Source of R17) . ( R24 . 1 ) ) = R21 & ( (the Target of R17) . ( R24 . ( len R24 ) ) ) = R22)
+;end;
+definition
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+let R10 being set;
+pred R24 is_orientedpath_of R21 , R22 , R10
+means
+:L759: (R24 is_orientedpath_of R21 , R22 & ( ( vertices R24 ) \ { R22 } ) c= R10)
+;end;
+definition
+let C92 being Graph;
+let C93 , C94 being (Element of C92);
+func OrientedPaths (C93 , C94) -> (Subset of ( (the carrier' of C92) * )) equals 
+{ B55 where B55 is  oriented (Chain of C92) : B55 is_orientedpath_of C93 , C94 };
+coherence
+proof
+set D89 = { B56 where B56 is  oriented (Chain of C92) : B56 is_orientedpath_of C93 , C94 };
+L761: D89 c= ( (the carrier' of C92) * )
+proof
+let C95 being set;
+assume L762: C95 in D89;
+L763: (ex B57 being  oriented (Chain of C92) st (C95 = B57 & B57 is_orientedpath_of C93 , C94)) by L762;
+thus L764: thesis by L763 , FINSEQ_1:def 11;
+end;
+thus L765: thesis by L761;
+end;
+end;
+theorem
+L767: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 is_orientedpath_of R21 , R22 implies (R21 in ( vertices R24 ) & R22 in ( vertices R24 )))))))
+proof
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume L768: R24 is_orientedpath_of R21 , R22;
+L769: R24 <> ( {} ) by L768 , L757;
+L770: 1 <= ( len R24 ) by L769 , FINSEQ_1:20;
+L771: (1 in ( dom R24 ) & ( len R24 ) in ( dom R24 )) by L770 , FINSEQ_3:25;
+L772: (( (the Source of R17) . ( R24 . 1 ) ) = R21 & ( (the Target of R17) . ( R24 . ( len R24 ) ) ) = R22) by L768 , L757;
+thus L773: thesis by L772 , L771 , L672;
+end;
+theorem
+L774: (for R6 being set holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (R6 in ( OrientedPaths (R21 , R22) ) iff (ex R24 being  oriented (Chain of R17) st (R24 = R6 & R24 is_orientedpath_of R21 , R22)))))));
+theorem
+L775: (for R10 being set holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds ((R24 is_orientedpath_of R21 , R22 , R10 & R21 <> R22) implies R21 in R10))))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume that
+L776: R24 is_orientedpath_of R21 , R22 , R10
+and
+L777: R21 <> R22;
+L778: R24 is_orientedpath_of R21 , R22 by L776 , L759;
+L779: R21 in ( vertices R24 ) by L778 , L767;
+L780: (not R21 in { R22 }) by L777 , TARSKI:def 1;
+L781: R21 in ( ( vertices R24 ) \ { R22 } ) by L780 , L779 , XBOOLE_0:def 5;
+L782: ( ( vertices R24 ) \ { R22 } ) c= R10 by L776 , L759;
+thus L783: thesis by L782 , L781;
+end;
+theorem
+L784: (for R10 being set holds (for R11 being set holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds ((R24 is_orientedpath_of R21 , R22 , R10 & R10 c= R11) implies R24 is_orientedpath_of R21 , R22 , R11)))))))
+proof
+let R10 being set;
+let R11 being set;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume that
+L785: R24 is_orientedpath_of R21 , R22 , R10
+and
+L786: R10 c= R11;
+L787: ( ( vertices R24 ) \ { R22 } ) c= R10 by L785 , L759;
+L788: ( ( vertices R24 ) \ { R22 } ) c= R11 by L787 , L786 , XBOOLE_1:1;
+L789: R24 is_orientedpath_of R21 , R22 by L785 , L759;
+thus L790: thesis by L789 , L788 , L759;
+end;
+theorem
+L791: (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R23 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds ((( len R24 ) >= 1 & R24 is_orientedpath_of R21 , R22 & ( R18 . 1 ) orientedly_joins R22 , R23 & ( len R18 ) = 1) implies (ex R25 being  oriented (Chain of R17) st (R25 = ( R24 ^ R18 ) & R25 is_orientedpath_of R21 , R23)))))))))
+proof
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R23 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume that
+L792: ( len R24 ) >= 1
+and
+L793: R24 is_orientedpath_of R21 , R22
+and
+L794: ( R18 . 1 ) orientedly_joins R22 , R23
+and
+L795: ( len R18 ) = 1;
+set D90 = (the Target of R17);
+set D91 = (the Source of R17);
+L796: R18 is  oriented  oriented  oriented  oriented (Chain of R17) by L795 , L358;
+L797: (( D90 . ( R24 . ( len R24 ) ) ) = R22 & ( D91 . ( R18 . 1 ) ) = R22) by L793 , L794 , L757 , GRAPH_4:def 1;
+reconsider D92 = ( R24 ^ R18 ) as  oriented (Chain of R17) by L797 , L796 , L243;
+L798: ( len D92 ) = ( ( len R24 ) + 1 ) by L795 , FINSEQ_1:22;
+L799: ( D90 . ( R18 . 1 ) ) = R23 by L794 , GRAPH_4:def 1;
+L800: ( D90 . ( D92 . ( len D92 ) ) ) = R23 by L799 , L795 , L798 , L111;
+L801: ( D91 . ( R24 . 1 ) ) = R21 by L793 , L757;
+L802: ( D91 . ( D92 . 1 ) ) = R21 by L801 , L792 , L107;
+take D92;
+L803: D92 <> ( {} ) by L798;
+thus L804: thesis by L803 , L802 , L800 , L757;
+end;
+theorem
+L805: (for R10 being set holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R23 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (for R25 being  oriented (Chain of R17) holds ((R25 = ( R24 ^ R18 ) & ( len R24 ) >= 1 & ( len R18 ) = 1 & R24 is_orientedpath_of R21 , R22 , R10 & ( R18 . 1 ) orientedly_joins R22 , R23) implies R25 is_orientedpath_of R21 , R23 , ( R10 \/ { R22 } ))))))))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R23 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+let R25 being  oriented (Chain of R17);
+assume that
+L806: R25 = ( R24 ^ R18 )
+and
+L807: (( len R24 ) >= 1 & ( len R18 ) = 1)
+and
+L808: R24 is_orientedpath_of R21 , R22 , R10
+and
+L809: ( R18 . 1 ) orientedly_joins R22 , R23;
+L810: R24 is_orientedpath_of R21 , R22 by L808 , L759;
+L811: (ex B58 being  oriented (Chain of R17) st (B58 = ( R24 ^ R18 ) & B58 is_orientedpath_of R21 , R23)) by L810 , L807 , L809 , L791;
+set D93 = (the Target of R17);
+L812: ( D93 . ( R18 . 1 ) ) = R23 by L809 , GRAPH_4:def 1;
+L813: ( ( vertices R25 ) \ { R23 } ) = ( ( ( vertices R24 ) \/ { R23 } ) \ { R23 } ) by L812 , L806 , L807 , L699
+.= ( ( vertices R24 ) \ { R23 } ) by XBOOLE_1:40;
+L814: ( ( vertices R25 ) \ { R23 } ) c= ( vertices R24 ) by L813 , XBOOLE_1:36;
+L815: ( ( vertices R24 ) \ { R22 } ) c= R10 by L808 , L759;
+L816: ( vertices R24 ) c= ( R10 \/ { R22 } ) by L815 , XBOOLE_1:44;
+L817: ( ( vertices R25 ) \ { R23 } ) c= ( R10 \/ { R22 } ) by L816 , L814 , XBOOLE_1:1;
+thus L818: thesis by L817 , L806 , L811 , L759;
+end;
+begin
+definition
+let C96 being Graph;
+let C97 being  oriented (Chain of C96);
+let C98 , C99 being (Element of C96);
+pred C97 is_acyclicpath_of C98 , C99
+means
+:L819: (C97 is  Simple & C97 is_orientedpath_of C98 , C99)
+;end;
+definition
+let C100 being Graph;
+let C101 being  oriented (Chain of C100);
+let C102 , C103 being (Element of C100);
+let C104 being set;
+pred C101 is_acyclicpath_of C102 , C103 , C104
+means
+:L821: (C101 is  Simple & C101 is_orientedpath_of C102 , C103 , C104)
+;end;
+definition
+let C105 being Graph;
+let C106 , C107 being (Element of C105);
+func AcyclicPaths (C106 , C107) -> (Subset of ( (the carrier' of C105) * )) equals 
+{ B59 where B59 is  Simple  oriented (Chain of C105) : B59 is_acyclicpath_of C106 , C107 };
+coherence
+proof
+set D94 = { B60 where B60 is  Simple  oriented (Chain of C105) : B60 is_acyclicpath_of C106 , C107 };
+L823: D94 c= ( (the carrier' of C105) * )
+proof
+let C108 being set;
+assume L824: C108 in D94;
+L825: (ex B61 being  Simple  oriented (Chain of C105) st (C108 = B61 & B61 is_acyclicpath_of C106 , C107)) by L824;
+thus L826: thesis by L825 , FINSEQ_1:def 11;
+end;
+thus L827: thesis by L823;
+end;
+end;
+definition
+let C109 being Graph;
+let C110 , C111 being (Element of C109);
+let C112 being set;
+func AcyclicPaths (C110 , C111 , C112) -> (Subset of ( (the carrier' of C109) * )) equals 
+{ B62 where B62 is  Simple  oriented (Chain of C109) : B62 is_acyclicpath_of C110 , C111 , C112 };
+coherence
+proof
+set D95 = { B63 where B63 is  Simple  oriented (Chain of C109) : B63 is_acyclicpath_of C110 , C111 , C112 };
+L829: D95 c= ( (the carrier' of C109) * )
+proof
+let C113 being set;
+assume L830: C113 in D95;
+L831: (ex B64 being  Simple  oriented (Chain of C109) st (C113 = B64 & B64 is_acyclicpath_of C110 , C111 , C112)) by L830;
+thus L832: thesis by L831 , FINSEQ_1:def 11;
+end;
+thus L833: thesis by L829;
+end;
+end;
+definition
+let C114 being Graph;
+let C115 being  oriented (Chain of C114);
+func AcyclicPaths C115 -> (Subset of ( (the carrier' of C114) * )) equals 
+{ B65 where B65 is  Simple  oriented (Chain of C114) : (B65 <> ( {} ) & ( (the Source of C114) . ( B65 . 1 ) ) = ( (the Source of C114) . ( C115 . 1 ) ) & ( (the Target of C114) . ( B65 . ( len B65 ) ) ) = ( (the Target of C114) . ( C115 . ( len C115 ) ) ) & ( rng B65 ) c= ( rng C115 )) };
+coherence
+proof
+set D96 = { B66 where B66 is  Simple  oriented (Chain of C114) : (B66 <> ( {} ) & ( (the Source of C114) . ( B66 . 1 ) ) = ( (the Source of C114) . ( C115 . 1 ) ) & ( (the Target of C114) . ( B66 . ( len B66 ) ) ) = ( (the Target of C114) . ( C115 . ( len C115 ) ) ) & ( rng B66 ) c= ( rng C115 )) };
+L835: D96 c= ( (the carrier' of C114) * )
+proof
+let C116 being set;
+assume L836: C116 in D96;
+L837: (ex B67 being  Simple  oriented (Chain of C114) st (C116 = B67 & B67 <> ( {} ) & ( (the Source of C114) . ( B67 . 1 ) ) = ( (the Source of C114) . ( C115 . 1 ) ) & ( (the Target of C114) . ( B67 . ( len B67 ) ) ) = ( (the Target of C114) . ( C115 . ( len C115 ) ) ) & ( rng B67 ) c= ( rng C115 ))) by L836;
+thus L838: thesis by L837 , FINSEQ_1:def 11;
+end;
+thus L839: thesis by L835;
+end;
+end;
+definition
+let C117 being Graph;
+func AcyclicPaths C117 -> (Subset of ( (the carrier' of C117) * )) equals 
+{ B68 where B68 is  Simple  oriented (Chain of C117) : (not contradiction) };
+coherence
+proof
+set D97 = { B69 where B69 is  Simple  oriented (Chain of C117) : (not contradiction) };
+L841: D97 c= ( (the carrier' of C117) * )
+proof
+let C118 being set;
+assume L842: C118 in D97;
+L843: (ex B70 being  Simple  oriented (Chain of C117) st C118 = B70) by L842;
+thus L844: thesis by L843 , FINSEQ_1:def 11;
+end;
+thus L845: thesis by L841;
+end;
+end;
+theorem
+L847: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 = ( {} ) implies (not R24 is_acyclicpath_of R21 , R22))))))
+proof
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume L848: R24 = ( {} );
+L849: (not R24 is_orientedpath_of R21 , R22) by L848 , L757;
+thus L850: thesis by L849 , L819;
+end;
+theorem
+L851: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 is_acyclicpath_of R21 , R22 implies R24 is_orientedpath_of R21 , R22))))) by L819;
+theorem
+L852: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds ( AcyclicPaths (R21 , R22) ) c= ( OrientedPaths (R21 , R22) ))))
+proof
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R6 being set;
+assume L853: R6 in ( AcyclicPaths (R21 , R22) );
+consider C119 being  Simple  oriented (Chain of R17) such that L854: R6 = C119 and L855: C119 is_acyclicpath_of R21 , R22 by L853;
+L856: C119 is_orientedpath_of R21 , R22 by L855 , L819;
+thus L857: thesis by L856 , L854;
+end;
+theorem
+L858: (for R17 being Graph holds (for R24 being  oriented (Chain of R17) holds ( AcyclicPaths R24 ) c= ( AcyclicPaths R17 )))
+proof
+let R17 being Graph;
+let R24 being  oriented (Chain of R17);
+let C120 being set;
+assume L859: C120 in ( AcyclicPaths R24 );
+L860: (ex B71 being  Simple  oriented (Chain of R17) st (C120 = B71 & B71 <> ( {} ) & ( (the Source of R17) . ( B71 . 1 ) ) = ( (the Source of R17) . ( R24 . 1 ) ) & ( (the Target of R17) . ( B71 . ( len B71 ) ) ) = ( (the Target of R17) . ( R24 . ( len R24 ) ) ) & ( rng B71 ) c= ( rng R24 ))) by L859;
+thus L861: thesis by L860;
+end;
+theorem
+L862: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds ( AcyclicPaths (R21 , R22) ) c= ( AcyclicPaths R17 ))))
+proof
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let C121 being set;
+assume L863: C121 in ( AcyclicPaths (R21 , R22) );
+L864: (ex B72 being  Simple  oriented (Chain of R17) st (C121 = B72 & B72 is_acyclicpath_of R21 , R22)) by L863;
+thus L865: thesis by L864;
+end;
+theorem
+L866: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 is_orientedpath_of R21 , R22 implies ( AcyclicPaths R24 ) c= ( AcyclicPaths (R21 , R22) ))))))
+proof
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume L867: R24 is_orientedpath_of R21 , R22;
+L868: (( (the Source of R17) . ( R24 . 1 ) ) = R21 & ( (the Target of R17) . ( R24 . ( len R24 ) ) ) = R22) by L867 , L757;
+let R6 being set;
+assume L869: R6 in ( AcyclicPaths R24 );
+consider C122 being  Simple  oriented (Chain of R17) such that L870: R6 = C122 and L871: (C122 <> ( {} ) & ( (the Source of R17) . ( C122 . 1 ) ) = ( (the Source of R17) . ( R24 . 1 ) ) & ( (the Target of R17) . ( C122 . ( len C122 ) ) ) = ( (the Target of R17) . ( R24 . ( len R24 ) ) )) and L872: ( rng C122 ) c= ( rng R24 ) by L869;
+L873: C122 is_orientedpath_of R21 , R22 by L868 , L871 , L757;
+L874: C122 is_acyclicpath_of R21 , R22 by L873 , L819;
+thus L875: thesis by L874 , L870;
+end;
+theorem
+L876: (for R10 being set holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 is_orientedpath_of R21 , R22 , R10 implies ( AcyclicPaths R24 ) c= ( AcyclicPaths (R21 , R22 , R10) )))))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+assume L877: R24 is_orientedpath_of R21 , R22 , R10;
+let R6 being set;
+assume L878: R6 in ( AcyclicPaths R24 );
+consider C123 being  Simple  oriented (Chain of R17) such that L879: R6 = C123 and L880: (C123 <> ( {} ) & ( (the Source of R17) . ( C123 . 1 ) ) = ( (the Source of R17) . ( R24 . 1 ) ) & ( (the Target of R17) . ( C123 . ( len C123 ) ) ) = ( (the Target of R17) . ( R24 . ( len R24 ) ) )) and L881: ( rng C123 ) c= ( rng R24 ) by L878;
+L882: ( ( vertices R24 ) \ { R22 } ) c= R10 by L877 , L759;
+L883: ( ( vertices C123 ) \ { R22 } ) c= R10 by L882 , L881 , L662;
+L884: R24 is_orientedpath_of R21 , R22 by L877 , L759;
+L885: (( (the Source of R17) . ( R24 . 1 ) ) = R21 & ( (the Target of R17) . ( R24 . ( len R24 ) ) ) = R22) by L884 , L757;
+L886: C123 is_orientedpath_of R21 , R22 by L885 , L880 , L757;
+L887: C123 is_orientedpath_of R21 , R22 , R10 by L886 , L883 , L759;
+L888: C123 is_acyclicpath_of R21 , R22 , R10 by L887 , L821;
+thus L889: thesis by L888 , L879;
+end;
+theorem
+L890: (for R17 being Graph holds (for R24 being  oriented (Chain of R17) holds (for R25 being  oriented (Chain of R17) holds (R25 in ( AcyclicPaths R24 ) implies ( len R25 ) <= ( len R24 )))))
+proof
+let R17 being Graph;
+let R24 being  oriented (Chain of R17);
+let R25 being  oriented (Chain of R17);
+L891: ( card ( rng R24 ) ) <= ( card ( dom R24 ) ) by CARD_2:47;
+L892: ( card ( dom R24 ) ) = ( card ( Seg ( len R24 ) ) ) by FINSEQ_1:def 3
+.= ( len R24 ) by FINSEQ_1:57;
+assume L893: R25 in ( AcyclicPaths R24 );
+consider C124 being  Simple  oriented (Chain of R17) such that L894: R25 = C124 and L895: C124 <> ( {} ) and L896: ( (the Source of R17) . ( C124 . 1 ) ) = ( (the Source of R17) . ( R24 . 1 ) ) and L897: ( (the Target of R17) . ( C124 . ( len C124 ) ) ) = ( (the Target of R17) . ( R24 . ( len R24 ) ) ) and L898: ( rng C124 ) c= ( rng R24 ) by L893;
+L899: C124 is  one-to-one by L543;
+L900: ( card ( rng C124 ) ) = ( len C124 ) by L899 , FINSEQ_4:62;
+L901: ( card ( rng C124 ) ) <= ( card ( rng R24 ) ) by L898 , NAT_1:43;
+thus L902: thesis by L901 , L894 , L900 , L891 , L892 , XXREAL_0:2;
+end;
+theorem
+L903: (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 is_orientedpath_of R21 , R22 implies (( AcyclicPaths R24 ) <> ( {} ) & ( AcyclicPaths (R21 , R22) ) <> ( {} )))))))
+proof
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+defpred S4[ (Element of ( NAT )) ] means (for R24 being  oriented (Chain of R17) holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds ((( $1 + 1 ) = ( len R24 ) & R24 is_orientedpath_of R21 , R22) implies ( AcyclicPaths R24 ) <> ( {} )))));
+set D98 = (the Source of R17);
+set D99 = (the Target of R17);
+L904: (for R5 being (Element of ( NAT )) holds (S4[ R5 ] implies S4[ ( R5 + 1 ) ]))
+proof
+let R5 being (Element of ( NAT ));
+assume L905: S4[ R5 ];
+L906:
+now
+let R24 being  oriented (Chain of R17);
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+assume that
+L907: ( ( R5 + 1 ) + 1 ) = ( len R24 )
+and
+L908: R24 is_orientedpath_of R21 , R22;
+consider C125 , C126 being FinSequence such that L909: ( len C125 ) = ( R5 + 1 ) and L910: ( len C126 ) = 1 and L911: R24 = ( C125 ^ C126 ) by L907 , FINSEQ_2:22;
+reconsider D100 = C125 as  oriented (Chain of R17) by L911 , L220;
+L912: 1 <= ( len D100 ) by L909 , NAT_1:11;
+L913: 1 in ( dom D100 ) by L912 , FINSEQ_3:25;
+reconsider D101 = ( D98 . ( D100 . 1 ) ) as (Element of R17) by L913 , FINSEQ_2:11 , FUNCT_2:5;
+L914: ( D100 . 1 ) = ( R24 . 1 ) by L911 , L912 , L107;
+L915: ( len D100 ) in ( dom D100 ) by L912 , FINSEQ_3:25;
+reconsider D102 = ( D99 . ( D100 . ( len D100 ) ) ) as (Element of R17) by L915 , FINSEQ_2:11 , FUNCT_2:5;
+L916: D100 <> ( {} ) by L909;
+L917: D100 is_orientedpath_of D101 , D102 by L916 , L757;
+L918: ( AcyclicPaths D100 ) <> ( {} ) by L917 , L905 , L909;
+consider C127 being set such that L919: C127 in ( AcyclicPaths D100 ) by L918 , XBOOLE_0:def 1;
+L920: ( rng D100 ) c= ( rng R24 ) by L911 , FINSEQ_1:29;
+L921: ( rng C126 ) c= ( rng R24 ) by L911 , FINSEQ_1:30;
+L922: 1 in ( dom C126 ) by L910 , FINSEQ_3:25;
+L923: ( R24 . ( ( len D100 ) + 1 ) ) = ( C126 . 1 ) by L922 , L911 , FINSEQ_1:def 7;
+consider C128 being  Simple  oriented (Chain of R17) such that L924: C127 = C128 and L925: C128 <> ( {} ) and L926: ( D98 . ( C128 . 1 ) ) = D101 and L927: ( D99 . ( C128 . ( len C128 ) ) ) = D102 and L928: ( rng C128 ) c= ( rng D100 ) by L919;
+L929: ( len D100 ) < ( len R24 ) by L907 , L909 , NAT_1:13;
+L930: ( D98 . ( R24 . ( ( len D100 ) + 1 ) ) ) = ( D99 . ( R24 . ( len D100 ) ) ) by L929 , L912 , GRAPH_1:def 15
+.= ( D99 . ( C128 . ( len C128 ) ) ) by L911 , L912 , L927 , L107;
+L931: ( D98 . ( C126 . 1 ) ) = ( D99 . ( C128 . ( len C128 ) ) ) by L930 , L911 , L922 , FINSEQ_1:def 7;
+per cases ;
+suppose L932: (ex R5 being (Element of ( NAT )) st (1 <= R5 & R5 <= ( len C128 ) & ( D99 . ( C128 . R5 ) ) = ( D99 . ( C126 . 1 ) )));
+
+consider R5 being (Element of ( NAT )) such that L933: 1 <= R5 and L934: R5 <= ( len C128 ) and L935: ( D99 . ( C128 . R5 ) ) = ( D99 . ( C126 . 1 ) ) by L932;
+consider C129 being Nat such that L936: ( len C128 ) = ( R5 + C129 ) by L934 , NAT_1:10;
+consider C130 , C131 being FinSequence such that L937: ( len C130 ) = R5 and L938: ( len C131 ) = C129 and L939: C128 = ( C130 ^ C131 ) by L936 , FINSEQ_2:22;
+reconsider D103 = C130 as  Simple  oriented (Chain of R17) by L939 , L271;
+L940: (D103 <> ( {} ) & ( D98 . ( D103 . 1 ) ) = ( D98 . ( R24 . 1 ) )) by L914 , L926 , L933 , L937 , L939 , L107;
+L941: ( rng D103 ) c= ( rng C128 ) by L939 , FINSEQ_1:29;
+L942: ( rng D103 ) c= ( rng D100 ) by L941 , L928 , XBOOLE_1:1;
+L943: ( rng D103 ) c= ( rng R24 ) by L942 , L920 , XBOOLE_1:1;
+L944: ( D99 . ( D103 . ( len D103 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) ) by L907 , L909 , L923 , L933 , L935 , L937 , L939 , L107;
+L945: D103 in { B73 where B73 is  Simple  oriented (Chain of R17) : (B73 <> ( {} ) & ( D98 . ( B73 . 1 ) ) = ( D98 . ( R24 . 1 ) ) & ( D99 . ( B73 . ( len B73 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) ) & ( rng B73 ) c= ( rng R24 )) } by L944 , L943 , L940;
+thus L946: ( AcyclicPaths R24 ) <> ( {} ) by L945;
+end;
+suppose L947: (not (ex R5 being (Element of ( NAT )) st (1 <= R5 & R5 <= ( len C128 ) & ( D99 . ( C128 . R5 ) ) = ( D99 . ( C126 . 1 ) ))));
+
+reconsider D104 = C126 as  oriented (Chain of R17) by L911 , L220;
+thus L948:now
+per cases ;
+suppose L949: ( D98 . ( C128 . 1 ) ) <> ( D99 . ( C128 . ( len C128 ) ) );
+
+set D105 = ( C128 ^ D104 );
+L950: (( rng D105 ) = ( ( rng C128 ) \/ ( rng D104 ) ) & ( rng C128 ) c= ( rng R24 )) by L928 , L920 , FINSEQ_1:31 , XBOOLE_1:1;
+L951: ( rng D105 ) c= ( ( rng R24 ) \/ ( rng R24 ) ) by L950 , L921 , XBOOLE_1:13;
+L952: ( len C128 ) >= 1 by L925 , FINSEQ_1:20;
+L953: ( D98 . ( D105 . 1 ) ) = ( D98 . ( R24 . 1 ) ) by L952 , L914 , L926 , L107;
+L954: ( len D105 ) = ( ( len C128 ) + 1 ) by L910 , FINSEQ_1:22;
+L955: (D105 <> ( {} ) & ( D99 . ( D105 . ( len D105 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) )) by L954 , L907 , L909 , L910 , L923 , L111;
+L956: D105 is  Simple  oriented  Simple  oriented  Simple  oriented  Simple  oriented (Chain of R17) by L910 , L923 , L930 , L947 , L949 , L952 , L405;
+L957: D105 in { B74 where B74 is  Simple  oriented (Chain of R17) : (B74 <> ( {} ) & ( D98 . ( B74 . 1 ) ) = ( D98 . ( R24 . 1 ) ) & ( D99 . ( B74 . ( len B74 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) ) & ( rng B74 ) c= ( rng R24 )) } by L956 , L953 , L955 , L951;
+thus L958: ( AcyclicPaths R24 ) <> ( {} ) by L957;
+end;
+suppose L959: ( D98 . ( C128 . 1 ) ) = ( D99 . ( C128 . ( len C128 ) ) );
+
+reconsider D106 = D104 as  Simple  oriented (Chain of R17) by L910 , L358;
+L960: (D106 <> ( {} ) & ( D99 . ( D106 . ( len D106 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) )) by L907 , L909 , L910 , L911 , L111;
+L961: D106 in { B75 where B75 is  Simple  oriented (Chain of R17) : (B75 <> ( {} ) & ( D98 . ( B75 . 1 ) ) = ( D98 . ( R24 . 1 ) ) & ( D99 . ( B75 . ( len B75 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) ) & ( rng B75 ) c= ( rng R24 )) } by L960 , L914 , L926 , L921 , L931 , L959;
+thus L962: ( AcyclicPaths R24 ) <> ( {} ) by L961;
+end;
+end;
+end;
+end;
+thus L950: thesis by L906;
+end;
+L951: S4[ ( 0 ) ]
+proof
+let R24 being  oriented (Chain of R17);
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+assume that
+L952: ( ( 0 ) + 1 ) = ( len R24 )
+and
+L953: R24 is_orientedpath_of R21 , R22;
+reconsider D107 = R24 as  Simple  oriented (Chain of R17) by L952 , L358;
+L954: D107 <> ( {} ) by L952;
+L955: D107 in { B76 where B76 is  Simple  oriented (Chain of R17) : (B76 <> ( {} ) & ( D98 . ( B76 . 1 ) ) = ( D98 . ( R24 . 1 ) ) & ( D99 . ( B76 . ( len B76 ) ) ) = ( D99 . ( R24 . ( len R24 ) ) ) & ( rng B76 ) c= ( rng R24 )) } by L954;
+thus L956: thesis by L955;
+end;
+L957: (for R5 being (Element of ( NAT )) holds S4[ R5 ]) from NAT_1:sch 1(L951 , L904);
+assume L958: R24 is_orientedpath_of R21 , R22;
+L959: R24 <> ( {} ) by L958 , L757;
+L960: ( len R24 ) >= 1 by L959 , FINSEQ_1:20;
+L961: ( ( ( len R24 ) -' 1 ) + 1 ) = ( len R24 ) by L960 , XREAL_1:235;
+thus L962: ( AcyclicPaths R24 ) <> ( {} ) by L961 , L958 , L957;
+L963: (ex B77 being set st B77 in ( AcyclicPaths R24 )) by L962 , XBOOLE_0:def 1;
+L964: ( AcyclicPaths R24 ) c= ( AcyclicPaths (R21 , R22) ) by L958 , L866;
+thus L965: thesis by L964 , L963;
+end;
+theorem
+L966: (for R10 being set holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for R24 being  oriented (Chain of R17) holds (R24 is_orientedpath_of R21 , R22 , R10 implies (( AcyclicPaths R24 ) <> ( {} ) & ( AcyclicPaths (R21 , R22 , R10) ) <> ( {} ))))))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let R24 being  oriented (Chain of R17);
+defpred S5[ (Element of ( NAT )) ] means (for R24 being  oriented (Chain of R17) holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds ((( len R24 ) <= ( $1 + 1 ) & R24 is_orientedpath_of R21 , R22 , R10) implies ( AcyclicPaths R24 ) <> ( {} )))));
+set D108 = (the Source of R17);
+set D109 = (the Target of R17);
+assume L967: R24 is_orientedpath_of R21 , R22 , R10;
+L968: R24 is_orientedpath_of R21 , R22 by L967 , L759;
+L969: R24 <> ( {} ) by L968 , L757;
+L970: ( len R24 ) >= 1 by L969 , FINSEQ_1:20;
+L971: ( ( ( len R24 ) -' 1 ) + 1 ) = ( len R24 ) by L970 , XREAL_1:235;
+L972: (for R5 being (Element of ( NAT )) holds (S5[ R5 ] implies S5[ ( R5 + 1 ) ]))
+proof
+let R5 being (Element of ( NAT ));
+assume L973: S5[ R5 ];
+L974:
+now
+let R24 being  oriented (Chain of R17);
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+assume that
+L975: ( len R24 ) <= ( ( R5 + 1 ) + 1 )
+and
+L976: R24 is_orientedpath_of R21 , R22 , R10;
+consider C132 being (FinSequence of (the carrier of R17)) such that L977: C132 is_oriented_vertex_seq_of R24 by GRAPH_4:9;
+L978: ( ( vertices R24 ) \ { R22 } ) c= R10 by L976 , L759;
+L979: ( len C132 ) = ( ( len R24 ) + 1 ) by L977 , GRAPH_4:def 5;
+L980: ( len C132 ) >= 1 by L979 , NAT_1:12;
+L981: R24 is_orientedpath_of R21 , R22 by L976 , L759;
+L982: R24 <> ( {} ) by L981 , L757;
+L983: ( len R24 ) >= 1 by L982 , FINSEQ_1:20;
+L984: ( R24 . ( len R24 ) ) orientedly_joins ( C132 /. ( len R24 ) ) , ( C132 /. ( ( len R24 ) + 1 ) ) by L983 , L977 , GRAPH_4:def 5;
+L985: ( D109 . ( R24 . ( len R24 ) ) ) = ( C132 /. ( ( len R24 ) + 1 ) ) by L984 , GRAPH_4:def 1;
+L986: ( D109 . ( R24 . ( len R24 ) ) ) = ( C132 . ( len C132 ) ) by L985 , L979 , L980 , FINSEQ_4:15;
+per cases ;
+suppose L987: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C132 ) & ( C132 . R1 ) = ( C132 . R2 )) implies (R1 = 1 & R2 = ( len C132 )))));
+
+L988: R24 is  Simple by L987 , L977 , GRAPH_4:def 7;
+L989: R24 in { B78 where B78 is  Simple  oriented (Chain of R17) : (B78 <> ( {} ) & ( D108 . ( B78 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( B78 . ( len B78 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) ) & ( rng B78 ) c= ( rng R24 )) } by L988 , L982;
+thus L990: ( AcyclicPaths R24 ) <> ( {} ) by L989;
+end;
+suppose L991: (not (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C132 ) & ( C132 . R1 ) = ( C132 . R2 )) implies (R1 = 1 & R2 = ( len C132 ))))));
+
+consider R1 being (Element of ( NAT )), R2 being (Element of ( NAT )) such that L992: 1 <= R1 and L993: R1 < R2 and L994: R2 <= ( len C132 ) and L995: ( C132 . R1 ) = ( C132 . R2 ) and L996: (not (R1 = 1 & R2 = ( len C132 ))) by L991;
+consider C133 being Nat such that L997: R2 = ( 1 + C133 ) by L992 , L993 , NAT_1:10 , XXREAL_0:2;
+reconsider D110 = C133 as (Element of ( NAT )) by ORDINAL1:def 12;
+L998: R2 >= 1 by L992 , L993 , XXREAL_0:2;
+thus L999:now
+per cases ;
+suppose L1000: R1 = 1;
+
+L1001: R2 < ( len C132 ) by L1000 , L994 , L996 , XXREAL_0:1;
+L1002: R2 <= ( len R24 ) by L1001 , L979 , NAT_1:13;
+consider C134 being Nat such that L1003: ( len R24 ) = ( R2 + C134 ) by L1002 , NAT_1:10;
+L1004: ( R24 . 1 ) orientedly_joins ( C132 /. 1 ) , ( C132 /. ( 1 + 1 ) ) by L977 , L983 , GRAPH_4:def 5;
+L1005: R1 <= ( len C132 ) by L993 , L994 , XXREAL_0:2;
+L1006: ( R24 . R2 ) orientedly_joins ( C132 /. R2 ) , ( C132 /. ( R2 + 1 ) ) by L977 , L993 , L1000 , L1002 , GRAPH_4:def 5;
+L1007: ( D108 . ( R24 . R2 ) ) = ( C132 /. R2 ) by L1006 , GRAPH_4:def 1
+.= ( C132 . R2 ) by L993 , L994 , L1000 , FINSEQ_4:15
+.= ( C132 /. R1 ) by L992 , L995 , L1005 , FINSEQ_4:15
+.= ( D108 . ( R24 . 1 ) ) by L1000 , L1004 , GRAPH_4:def 1
+.= R21 by L981 , L757;
+reconsider D111 = C134 as (Element of ( NAT )) by ORDINAL1:def 12;
+L1008: ( len R24 ) = ( D110 + ( 1 + D111 ) ) by L997 , L1003;
+consider C135 , C136 being FinSequence such that L1009: ( len C135 ) = D110 and L1010: ( len C136 ) = ( 1 + D111 ) and L1011: R24 = ( C135 ^ C136 ) by L1008 , FINSEQ_2:22;
+L1012: 1 <= ( len C136 ) by L1010 , NAT_1:11;
+L1013: ( C136 . 1 ) = ( R24 . R2 ) by L1012 , L997 , L1009 , L1011 , L111;
+L1014: ( C136 . ( len C136 ) ) = ( R24 . ( len R24 ) ) by L1008 , L1009 , L1010 , L1011 , L1012 , L111;
+L1015: ( D109 . ( C136 . ( len C136 ) ) ) = R22 by L1014 , L981 , L757;
+reconsider D112 = C135 , D113 = C136 as  oriented (Chain of R17) by L1011 , L220;
+L1016: ( ( D110 + 1 ) + ( - 1 ) ) > ( 1 + ( - 1 ) ) by L993 , L997 , L1000 , XREAL_1:8;
+L1017: ( len D113 ) < ( len R24 ) by L1016 , L1008 , L1010 , XREAL_1:29;
+L1018: ( len D113 ) < ( ( R5 + 1 ) + 1 ) by L1017 , L975 , XXREAL_0:2;
+L1019: ( len D113 ) <= ( R5 + 1 ) by L1018 , NAT_1:13;
+L1020: ( ( vertices ( D112 ^ D113 ) ) \ { R22 } ) c= R10 by L976 , L1011 , L759;
+L1021: ( ( vertices D113 ) \ { R22 } ) c= R10 by L1020 , L668;
+L1022: D113 <> ( {} ) by L1010;
+L1023: D113 is_orientedpath_of R21 , R22 by L1022 , L1007 , L1013 , L1015 , L757;
+L1024: D113 is_orientedpath_of R21 , R22 , R10 by L1023 , L1021 , L759;
+L1025: ( AcyclicPaths D113 ) <> ( {} ) by L1024 , L973 , L1019;
+consider C137 being set such that L1026: C137 in ( AcyclicPaths D113 ) by L1025 , XBOOLE_0:def 1;
+consider C138 being  Simple  oriented (Chain of R17) such that L1027: C137 = C138 and L1028: C138 <> ( {} ) and L1029: (( D108 . ( C138 . 1 ) ) = R21 & ( D109 . ( C138 . ( len C138 ) ) ) = R22) and L1030: ( rng C138 ) c= ( rng D113 ) by L1007 , L1013 , L1015 , L1026;
+L1031: ( rng D113 ) c= ( rng R24 ) by L1011 , FINSEQ_1:30;
+L1032: ( rng C138 ) c= ( rng R24 ) by L1031 , L1030 , XBOOLE_1:1;
+L1033: (( D108 . ( C138 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( C138 . ( len C138 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) )) by L981 , L1029 , L757;
+L1034: C138 in { B79 where B79 is  Simple  oriented (Chain of R17) : (B79 <> ( {} ) & ( D108 . ( B79 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( B79 . ( len B79 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) ) & ( rng B79 ) c= ( rng R24 )) } by L1033 , L1028 , L1032;
+thus L1035: ( AcyclicPaths R24 ) <> ( {} ) by L1034;
+end;
+suppose L1036: R1 <> 1;
+
+consider C139 being Nat such that L1037: R1 = ( 1 + C139 ) by L992 , NAT_1:10;
+reconsider D114 = C139 as (Element of ( NAT )) by ORDINAL1:def 12;
+L1038: R1 < ( len C132 ) by L993 , L994 , XXREAL_0:2;
+L1039: D114 < ( len R24 ) by L1038 , L979 , L1037 , XREAL_1:7;
+consider C140 being Nat such that L1040: ( len R24 ) = ( D114 + C140 ) by L1039 , NAT_1:10;
+reconsider D115 = C140 as (Element of ( NAT )) by ORDINAL1:def 12;
+consider C141 , C142 being FinSequence such that L1041: ( len C141 ) = D114 and L1042: ( len C142 ) = D115 and L1043: R24 = ( C141 ^ C142 ) by L1040 , FINSEQ_2:22;
+L1044: R1 > 1 by L992 , L1036 , XXREAL_0:1;
+L1045: D114 >= 1 by L1044 , L1037 , NAT_1:13;
+L1046: ( C141 . ( len C141 ) ) = ( R24 . D114 ) by L1045 , L1041 , L1043 , L107;
+L1047: ( C141 . 1 ) = ( R24 . 1 ) by L1041 , L1043 , L1045 , L107;
+L1048: ( D108 . ( C141 . 1 ) ) = R21 by L1047 , L981 , L757;
+L1049: ( rng C141 ) c= ( rng R24 ) by L1043 , FINSEQ_1:29;
+reconsider D116 = C141 , D117 = C142 as  oriented (Chain of R17) by L1043 , L220;
+L1050: ( R24 . D114 ) orientedly_joins ( C132 /. D114 ) , ( C132 /. ( D114 + 1 ) ) by L977 , L1039 , L1045 , GRAPH_4:def 5;
+L1051: ( D109 . ( R24 . D114 ) ) = ( C132 /. R1 ) by L1050 , L1037 , GRAPH_4:def 1
+.= ( C132 . R1 ) by L992 , L1038 , FINSEQ_4:15;
+thus L1052:now
+per cases ;
+suppose L1053: R2 = ( len C132 );
+
+L1054: ( D109 . ( D116 . ( len D116 ) ) ) = R22 by L1053 , L981 , L986 , L995 , L1051 , L1046 , L757;
+L1055: ( ( vertices ( D116 ^ D117 ) ) \ { R22 } ) c= R10 by L976 , L1043 , L759;
+L1056: ( ( vertices D116 ) \ { R22 } ) c= R10 by L1055 , L668;
+L1057: D114 < ( ( R5 + 1 ) + 1 ) by L975 , L1039 , XXREAL_0:2;
+L1058: ( len D116 ) <= ( R5 + 1 ) by L1057 , L1041 , NAT_1:13;
+L1059: D116 <> ( {} ) by L1044 , L1037 , L1041 , NAT_1:13;
+L1060: D116 is_orientedpath_of R21 , R22 by L1059 , L1048 , L1054 , L757;
+L1061: D116 is_orientedpath_of R21 , R22 , R10 by L1060 , L1056 , L759;
+L1062: ( AcyclicPaths D116 ) <> ( {} ) by L1061 , L973 , L1058;
+consider C143 being set such that L1063: C143 in ( AcyclicPaths D116 ) by L1062 , XBOOLE_0:def 1;
+consider C144 being  Simple  oriented (Chain of R17) such that L1064: C143 = C144 and L1065: C144 <> ( {} ) and L1066: ( D108 . ( C144 . 1 ) ) = R21 and L1067: ( D109 . ( C144 . ( len C144 ) ) ) = R22 and L1068: ( rng C144 ) c= ( rng D116 ) by L1048 , L1054 , L1063;
+L1069: ( D109 . ( C144 . ( len C144 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) ) by L981 , L1067 , L757;
+L1070: (( rng C144 ) c= ( rng R24 ) & ( D108 . ( C144 . 1 ) ) = ( D108 . ( R24 . 1 ) )) by L981 , L1049 , L1066 , L1068 , L757 , XBOOLE_1:1;
+L1071: C144 in { B80 where B80 is  Simple  oriented (Chain of R17) : (B80 <> ( {} ) & ( D108 . ( B80 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( B80 . ( len B80 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) ) & ( rng B80 ) c= ( rng R24 )) } by L1070 , L1065 , L1069;
+thus L1072: ( AcyclicPaths R24 ) <> ( {} ) by L1071;
+end;
+suppose L1073: R2 <> ( len C132 );
+
+L1074: R2 < ( len C132 ) by L1073 , L994 , XXREAL_0:1;
+L1075: R2 <= ( len R24 ) by L1074 , L979 , NAT_1:13;
+consider C145 being Nat such that L1076: ( len R24 ) = ( R2 + C145 ) by L1075 , NAT_1:10;
+L1077: ( R24 . R2 ) orientedly_joins ( C132 /. R2 ) , ( C132 /. ( R2 + 1 ) ) by L977 , L998 , L1075 , GRAPH_4:def 5;
+L1078: ( D108 . ( R24 . R2 ) ) = ( C132 /. R2 ) by L1077 , GRAPH_4:def 1
+.= ( D109 . ( D116 . ( len D116 ) ) ) by L994 , L995 , L998 , L1051 , L1046 , FINSEQ_4:15;
+reconsider D118 = C145 as (Element of ( NAT )) by ORDINAL1:def 12;
+L1079: ( len R24 ) = ( D110 + ( 1 + D118 ) ) by L997 , L1076;
+consider C146 , C147 being FinSequence such that L1080: ( len C146 ) = D110 and L1081: ( len C147 ) = ( 1 + D118 ) and L1082: R24 = ( C146 ^ C147 ) by L1079 , FINSEQ_2:22;
+reconsider D119 = C147 as  oriented (Chain of R17) by L1082 , L220;
+L1083: 1 <= ( len D119 ) by L1081 , NAT_1:12;
+L1084: ( D119 . 1 ) = ( R24 . R2 ) by L1083 , L997 , L1080 , L1082 , L111;
+reconsider D120 = ( D116 ^ D119 ) as  oriented (Chain of R17) by L1084 , L1078 , L243;
+L1085: ( D120 . ( len D120 ) ) = ( D120 . ( ( len D116 ) + ( len D119 ) ) ) by FINSEQ_1:22
+.= ( D119 . ( len D119 ) ) by L1083 , L111
+.= ( R24 . ( len R24 ) ) by L1079 , L1080 , L1081 , L1082 , L1083 , L111;
+L1086: ( D109 . ( D120 . ( len D120 ) ) ) = R22 by L1085 , L981 , L757;
+L1087: ( rng D120 ) = ( ( rng D116 ) \/ ( rng D119 ) ) by FINSEQ_1:31;
+L1088: ( rng D119 ) c= ( rng R24 ) by L1082 , FINSEQ_1:30;
+L1089: ( rng D120 ) c= ( rng R24 ) by L1088 , L1049 , L1087 , XBOOLE_1:8;
+L1090: ( ( vertices D120 ) \ { R22 } ) c= R10 by L1089 , L978 , L662;
+L1091: ( len D120 ) = ( D114 + ( 1 + D118 ) ) by L1041 , L1081 , FINSEQ_1:22;
+L1092: ( R2 + D118 ) > ( R1 + D118 ) by L993 , XREAL_1:8;
+L1093: ( len D120 ) < ( ( R5 + 1 ) + 1 ) by L1092 , L975 , L1037 , L1076 , L1091 , XXREAL_0:2;
+L1094: ( len D120 ) <= ( R5 + 1 ) by L1093 , NAT_1:13;
+L1095: ( D108 . ( D120 . 1 ) ) = R21 by L1041 , L1045 , L1048 , L107;
+L1096: D120 <> ( {} ) by L1091;
+L1097: D120 is_orientedpath_of R21 , R22 by L1096 , L1095 , L1086 , L757;
+L1098: D120 is_orientedpath_of R21 , R22 , R10 by L1097 , L1090 , L759;
+L1099: ( AcyclicPaths D120 ) <> ( {} ) by L1098 , L973 , L1094;
+consider C148 being set such that L1100: C148 in ( AcyclicPaths D120 ) by L1099 , XBOOLE_0:def 1;
+consider C149 being  Simple  oriented (Chain of R17) such that L1101: C148 = C149 and L1102: C149 <> ( {} ) and L1103: (( D108 . ( C149 . 1 ) ) = R21 & ( D109 . ( C149 . ( len C149 ) ) ) = R22) and L1104: ( rng C149 ) c= ( rng D120 ) by L1095 , L1086 , L1100;
+L1105: ( rng C149 ) c= ( rng R24 ) by L1089 , L1104 , XBOOLE_1:1;
+L1106: (( D108 . ( C149 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( C149 . ( len C149 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) )) by L981 , L1103 , L757;
+L1107: C149 in { B81 where B81 is  Simple  oriented (Chain of R17) : (B81 <> ( {} ) & ( D108 . ( B81 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( B81 . ( len B81 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) ) & ( rng B81 ) c= ( rng R24 )) } by L1106 , L1102 , L1105;
+thus L1108: ( AcyclicPaths R24 ) <> ( {} ) by L1107;
+end;
+end;
+end;
+end;
+end;
+end;
+thus L1001: thesis by L974;
+end;
+L1002: S5[ ( 0 ) ]
+proof
+let R24 being  oriented (Chain of R17);
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+assume that
+L1003: ( len R24 ) <= ( ( 0 ) + 1 )
+and
+L1004: R24 is_orientedpath_of R21 , R22 , R10;
+L1005: R24 is_orientedpath_of R21 , R22 by L1004 , L759;
+L1006: R24 <> ( {} ) by L1005 , L757;
+L1007: ( len R24 ) >= 1 by L1006 , FINSEQ_1:20;
+reconsider D121 = R24 as  Simple  oriented (Chain of R17) by L1007 , L1003 , L358 , XXREAL_0:1;
+L1008: D121 in { B82 where B82 is  Simple  oriented (Chain of R17) : (B82 <> ( {} ) & ( D108 . ( B82 . 1 ) ) = ( D108 . ( R24 . 1 ) ) & ( D109 . ( B82 . ( len B82 ) ) ) = ( D109 . ( R24 . ( len R24 ) ) ) & ( rng B82 ) c= ( rng R24 )) } by L1006;
+thus L1009: thesis by L1008;
+end;
+L1010: (for R5 being (Element of ( NAT )) holds S5[ R5 ]) from NAT_1:sch 1(L1002 , L972);
+thus L1011: ( AcyclicPaths R24 ) <> ( {} ) by L1010 , L967 , L971;
+L1012: (ex B83 being set st B83 in ( AcyclicPaths R24 )) by L1011 , XBOOLE_0:def 1;
+L1013: ( AcyclicPaths R24 ) c= ( AcyclicPaths (R21 , R22 , R10) ) by L967 , L876;
+thus L1014: thesis by L1013 , L1012;
+end;
+theorem
+L1015: (for R10 being set holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds ( AcyclicPaths (R21 , R22 , R10) ) c= ( AcyclicPaths R17 )))))
+proof
+let R10 being set;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let C150 being set;
+assume L1016: C150 in ( AcyclicPaths (R21 , R22 , R10) );
+L1017: (ex B84 being  Simple  oriented (Chain of R17) st (C150 = B84 & B84 is_acyclicpath_of R21 , R22 , R10)) by L1016;
+thus L1018: thesis by L1017;
+end;
+begin
+notation
+synonym Real>=0 for REAL+;
+end;
+definition
+redefine func Real>=0 -> (Subset of ( REAL )) equals 
+{ B85 where B85 is Real : B85 >= ( 0 ) };
+compatibility by REAL_1:1;
+coherence by ARYTM_0:1;
+end;
+registration
+cluster ( Real>=0 ) -> non  empty;
+coherence;
+end;
+definition
+let C151 being Graph;
+let C152 being Function;
+pred C152 is_weight>=0of C151
+means
+:L1022: C152 is (Function of (the carrier' of C151) , ( Real>=0 ))
+;end;
+definition
+let C153 being Graph;
+let C154 being Function;
+pred C154 is_weight_of C153
+means
+:L1024: C154 is (Function of (the carrier' of C153) , ( REAL ))
+;end;
+definition
+let C155 being Graph;
+let C156 being (FinSequence of (the carrier' of C155));
+let C157 being Function;
+assume L1026: C157 is_weight_of C155;
+func RealSequence (C156 , C157) -> (FinSequence of ( REAL )) means 
+:L1027: (( dom C156 ) = ( dom it ) & (for B86 being (Element of ( NAT )) holds (B86 in ( dom C156 ) implies ( it . B86 ) = ( C157 . ( C156 . B86 ) ))));
+existence
+proof
+deffunc H2(set) = ( C157 . ( C156 . $1 ) );
+consider R13 being Function such that L1028: (( dom R13 ) = ( dom C156 ) & (for R6 being set holds (R6 in ( dom C156 ) implies ( R13 . R6 ) = H2(R6)))) from FUNCT_1:sch 3;
+L1029:
+now
+let C158 being Nat;
+L1030: C157 is (Function of (the carrier' of C155) , ( REAL )) by L1026 , L1024;
+assume L1031: C158 in ( dom R13 );
+L1032: ( R13 . C158 ) = ( C157 . ( C156 . C158 ) ) by L1031 , L1028;
+thus L1033: ( R13 . C158 ) in ( REAL ) by L1032 , L1028 , L1031 , L1030 , FINSEQ_2:11 , FUNCT_2:5;
+end;
+L1034: ( dom R13 ) = ( Seg ( len C156 ) ) by L1028 , FINSEQ_1:def 3;
+L1035: R13 is FinSequence by L1034 , FINSEQ_1:def 2;
+reconsider D122 = R13 as (FinSequence of ( REAL )) by L1035 , L1029 , FINSEQ_2:12;
+take D122;
+thus L1036: ( dom C156 ) = ( dom D122 ) by L1028;
+let R3 being (Element of ( NAT ));
+assume L1037: R3 in ( dom C156 );
+thus L1038: thesis by L1037 , L1028;
+end;
+uniqueness
+proof
+let C159 , C160 being (FinSequence of ( REAL ));
+assume that
+L1039: ( dom C156 ) = ( dom C159 )
+and
+L1040: (for B87 being (Element of ( NAT )) holds (B87 in ( dom C156 ) implies ( C159 . B87 ) = ( C157 . ( C156 . B87 ) )));
+assume that
+L1041: ( dom C156 ) = ( dom C160 )
+and
+L1042: (for B88 being (Element of ( NAT )) holds (B88 in ( dom C156 ) implies ( C160 . B88 ) = ( C157 . ( C156 . B88 ) )));
+L1043:
+now
+let C161 being Nat;
+assume L1044: C161 in ( dom C159 );
+thus L1045: ( C159 . C161 ) = ( C157 . ( C156 . C161 ) ) by L1044 , L1039 , L1040
+.= ( C160 . C161 ) by L1039 , L1042 , L1044;
+end;
+thus L1046: thesis by L1043 , L1039 , L1041 , FINSEQ_1:13;
+end;
+end;
+definition
+let C162 being Graph;
+let C163 being (FinSequence of (the carrier' of C162));
+let C164 being Function;
+func cost (C163 , C164) -> Real equals 
+( Sum ( RealSequence (C163 , C164) ) );
+coherence;
+end;
+theorem
+L1049: (for R12 being Function holds (for R17 being Graph holds (R12 is_weight>=0of R17 implies R12 is_weight_of R17)))
+proof
+let R12 being Function;
+let R17 being Graph;
+assume L1050: R12 is_weight>=0of R17;
+L1051: R12 is (Function of (the carrier' of R17) , ( Real>=0 )) by L1050 , L1022;
+L1052: R12 is (Function of (the carrier' of R17) , ( REAL )) by L1051 , FUNCT_2:7;
+thus L1053: thesis by L1052 , L1024;
+end;
+theorem
+L1054: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for B89 being (FinSequence of ( REAL )) holds ((R12 is_weight>=0of R17 & B89 = ( RealSequence (R18 , R12) )) implies (for R3 being (Element of ( NAT )) holds (R3 in ( dom B89 ) implies ( B89 . R3 ) >= ( 0 ))))))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let C165 being (FinSequence of ( REAL ));
+assume that
+L1055: R12 is_weight>=0of R17
+and
+L1056: C165 = ( RealSequence (R18 , R12) );
+L1057: R12 is (Function of (the carrier' of R17) , ( Real>=0 )) by L1055 , L1022;
+let R3 being (Element of ( NAT ));
+assume L1058: R3 in ( dom C165 );
+L1059: R12 is_weight_of R17 by L1055 , L1049;
+L1060: ( dom R18 ) = ( dom C165 ) by L1059 , L1056 , L1027;
+L1061: ( C165 . R3 ) = ( R12 . ( R18 . R3 ) ) by L1060 , L1056 , L1059 , L1058 , L1027;
+L1062: ( C165 . R3 ) in ( Real>=0 ) by L1061 , L1060 , L1057 , L1058 , FINSEQ_2:11 , FUNCT_2:5;
+L1063: (ex B90 being Real st (( C165 . R3 ) = B90 & B90 >= ( 0 ))) by L1062;
+thus L1064: thesis by L1063;
+end;
+theorem
+L1065: (for R3 being (Element of ( NAT )) holds (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds ((( rng R19 ) c= ( rng R18 ) & R12 is_weight_of R17 & R3 in ( dom R19 )) implies (ex R4 being (Element of ( NAT )) st (R4 in ( dom R18 ) & ( ( RealSequence (R18 , R12) ) . R4 ) = ( ( RealSequence (R19 , R12) ) . R3 )))))))))
+proof
+let R3 being (Element of ( NAT ));
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+assume that
+L1066: ( rng R19 ) c= ( rng R18 )
+and
+L1067: R12 is_weight_of R17
+and
+L1068: R3 in ( dom R19 );
+set D123 = ( RealSequence (R19 , R12) );
+consider C166 being set such that L1069: C166 in ( dom R18 ) and L1070: ( R19 . R3 ) = ( R18 . C166 ) by L1066 , L1068 , L1;
+reconsider D124 = C166 as (Element of ( NAT )) by L1069;
+take D124;
+thus L1071: D124 in ( dom R18 ) by L1069;
+L1072: ( D123 . R3 ) = ( R12 . ( R19 . R3 ) ) by L1067 , L1068 , L1027;
+thus L1073: thesis by L1072 , L1067 , L1069 , L1070 , L1027;
+end;
+L1074: (for B91 being (FinSequence of ( REAL )) holds ((for B92 being Real holds (B92 in ( rng B91 ) implies B92 >= ( 0 ))) iff (for B93 being Nat holds (B93 in ( dom B91 ) implies ( B91 . B93 ) >= ( 0 )))))
+proof
+let C167 being (FinSequence of ( REAL ));
+thus L1075:now
+assume L1076: (for B94 being Real holds (B94 in ( rng C167 ) implies B94 >= ( 0 )));
+thus L1077:now
+let C168 being Nat;
+assume L1078: C168 in ( dom C167 );
+L1079: ( C167 . C168 ) in ( rng C167 ) by L1078 , FUNCT_1:def 3;
+thus L1080: ( C167 . C168 ) >= ( 0 ) by L1079 , L1076;
+end;
+end;
+assume L1078: (for B95 being Nat holds (B95 in ( dom C167 ) implies ( C167 . B95 ) >= ( 0 )));
+thus L1079:now
+let C169 being Real;
+assume L1080: C169 in ( rng C167 );
+consider C170 being set such that L1081: C170 in ( dom C167 ) and L1082: C169 = ( C167 . C170 ) by L1080 , FUNCT_1:def 3;
+thus L1083: C169 >= ( 0 ) by L1078 , L1081 , L1082;
+end;
+end;
+L1080: (for B96 , B97 , B98 being (FinSequence of ( REAL )) holds ((B98 = ( B96 ^ B97 ) & (for B99 being Real holds (B99 in ( rng B98 ) implies B99 >= ( 0 )))) implies ((for R3 being (Element of ( NAT )) holds (R3 in ( dom B96 ) implies ( B96 . R3 ) >= ( 0 ))) & (for R3 being (Element of ( NAT )) holds (R3 in ( dom B97 ) implies ( B97 . R3 ) >= ( 0 ))))))
+proof
+let C171 , C172 , C173 being (FinSequence of ( REAL ));
+assume that
+L1081: C173 = ( C171 ^ C172 )
+and
+L1082: (for B100 being Real holds (B100 in ( rng C173 ) implies B100 >= ( 0 )));
+L1083: ( rng C171 ) c= ( rng C173 ) by L1081 , FINSEQ_1:29;
+L1084: (for B101 being Real holds (B101 in ( rng C171 ) implies B101 >= ( 0 ))) by L1083 , L1082;
+thus L1085: (for R3 being (Element of ( NAT )) holds (R3 in ( dom C171 ) implies ( C171 . R3 ) >= ( 0 ))) by L1084 , L1074;
+L1086: ( rng C172 ) c= ( rng C173 ) by L1081 , FINSEQ_1:30;
+L1087: (for B102 being Real holds (B102 in ( rng C172 ) implies B102 >= ( 0 ))) by L1086 , L1082;
+thus L1088: thesis by L1087 , L1074;
+end;
+theorem
+L1089: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds ((( len R19 ) = 1 & ( rng R19 ) c= ( rng R18 ) & R12 is_weight>=0of R17) implies ( cost (R19 , R12) ) <= ( cost (R18 , R12) ))))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+assume that
+L1090: ( len R19 ) = 1
+and
+L1091: ( rng R19 ) c= ( rng R18 )
+and
+L1092: R12 is_weight>=0of R17;
+set D125 = ( RealSequence (R18 , R12) );
+set D126 = ( RealSequence (R19 , R12) );
+L1093: 1 in ( dom R19 ) by L1090 , FINSEQ_3:25;
+consider R4 being (Element of ( NAT )) such that L1094: R4 in ( dom R18 ) and L1095: ( D125 . R4 ) = ( D126 . 1 ) by L1093 , L1091 , L1092 , L1049 , L1065;
+L1096: R12 is_weight_of R17 by L1092 , L1049;
+L1097: ( dom R18 ) = ( dom D125 ) by L1096 , L1027;
+L1098: ( len R18 ) = ( len D125 ) by L1097 , FINSEQ_3:29;
+L1099: ( dom D126 ) = ( dom R19 ) by L1096 , L1027;
+L1100: ( len D126 ) = ( len R19 ) by L1099 , FINSEQ_3:29;
+L1101: D126 = <* ( D126 . 1 ) *> by L1100 , L1090 , FINSEQ_1:40;
+L1102: ( cost (R19 , R12) ) = ( D126 . 1 ) by L1101 , FINSOP_1:11;
+L1103: R4 <= ( len R18 ) by L1094 , FINSEQ_3:25;
+consider C174 being Nat such that L1104: ( len D125 ) = ( R4 + C174 ) by L1103 , L1098 , NAT_1:10;
+reconsider D127 = C174 as (Element of ( NAT )) by ORDINAL1:def 12;
+consider C175 , C176 being (FinSequence of ( REAL )) such that L1105: ( len C175 ) = R4 and L1106: ( len C176 ) = D127 and L1107: D125 = ( C175 ^ C176 ) by L1104 , FINSEQ_2:23;
+L1108: 1 <= R4 by L1094 , FINSEQ_3:25;
+consider C177 being (FinSequence of ( REAL )), C178 being Real such that L1109: C175 = ( C177 ^ <* C178 *> ) by L1108 , L1105 , FINSEQ_2:19;
+L1110: R4 in ( dom C175 ) by L1108 , L1105 , FINSEQ_3:25;
+L1111: ( C175 . R4 ) = ( D126 . 1 ) by L1110 , L1095 , L1107 , FINSEQ_1:def 7;
+L1112: R4 = ( ( len C177 ) + 1 ) by L1105 , L1109 , FINSEQ_2:16;
+L1113: C178 = ( D126 . 1 ) by L1112 , L1109 , L1111 , FINSEQ_1:42;
+L1114: (for B103 being Nat holds (B103 in ( dom D125 ) implies ( D125 . B103 ) >= ( 0 ))) by L1092 , L1054;
+L1115: (for B104 being Real holds (B104 in ( rng D125 ) implies B104 >= ( 0 ))) by L1114 , L1074;
+L1116: (for B105 being Nat holds (B105 in ( dom C176 ) implies ( C176 . B105 ) >= ( 0 ))) by L1115 , L1107 , L1080;
+L1117: ( Sum C176 ) >= ( 0 ) by L1116 , RVSUM_1:84;
+L1118: (for B106 being Nat holds (B106 in ( dom C175 ) implies ( C175 . B106 ) >= ( 0 ))) by L1107 , L1115 , L1080;
+L1119: (for B107 being Real holds (B107 in ( rng C175 ) implies B107 >= ( 0 ))) by L1118 , L1074;
+L1120: (for B108 being Nat holds (B108 in ( dom C177 ) implies ( C177 . B108 ) >= ( 0 ))) by L1119 , L1109 , L1080;
+L1121: ( Sum C177 ) >= ( 0 ) by L1120 , RVSUM_1:84;
+L1122: ( Sum C175 ) = ( ( Sum C177 ) + ( Sum <* C178 *> ) ) by L1109 , RVSUM_1:75
+.= ( ( Sum C177 ) + ( D126 . 1 ) ) by L1113 , FINSOP_1:11;
+L1123: ( Sum C175 ) >= ( (( 0 ) qua Nat) + ( D126 . 1 ) ) by L1122 , L1121 , XREAL_1:7;
+L1124: ( Sum D125 ) = ( ( Sum C175 ) + ( Sum C176 ) ) by L1107 , RVSUM_1:75;
+thus L1125: thesis by L1124 , L1102 , L1117 , L1123 , XREAL_1:7;
+end;
+theorem
+L1126: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (R12 is_weight>=0of R17 implies ( cost (R18 , R12) ) >= ( 0 )))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+set D128 = ( RealSequence (R18 , R12) );
+assume L1127: R12 is_weight>=0of R17;
+L1128: (for B109 being Nat holds (B109 in ( dom D128 ) implies ( D128 . B109 ) >= ( 0 ))) by L1127 , L1054;
+thus L1129: thesis by L1128 , RVSUM_1:84;
+end;
+theorem
+L1130: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds ((R18 = ( {} ) & R12 is_weight_of R17) implies ( cost (R18 , R12) ) = ( 0 )))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+assume that
+L1131: R18 = ( {} )
+and
+L1132: R12 is_weight_of R17;
+set D129 = ( RealSequence (R18 , R12) );
+L1133: ( dom D129 ) = ( dom R18 ) by L1132 , L1027;
+L1134: ( len D129 ) = ( len R18 ) by L1133 , FINSEQ_3:29
+.= ( 0 ) by L1131;
+L1135: D129 = ( <*> ( REAL ) ) by L1134;
+thus L1136: thesis by L1135 , RVSUM_1:72;
+end;
+theorem
+L1137: (for R12 being Function holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for B110 being non  empty  finite (Subset of ( (the carrier' of R17) * )) holds (B110 = ( AcyclicPaths (R21 , R22) ) implies (ex R18 being (FinSequence of (the carrier' of R17)) st (R18 in B110 & (for R19 being (FinSequence of (the carrier' of R17)) holds (R19 in B110 implies ( cost (R18 , R12) ) <= ( cost (R19 , R12) )))))))))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let C179 being non  empty  finite (Subset of ( (the carrier' of R17) * ));
+deffunc H3((Element of C179)) = ( cost ($1 , R12) );
+consider C180 being (Element of C179) such that L1138: (for B111 being (Element of C179) holds H3(C180) <= H3(B111)) from MinValue;
+assume L1139: C179 = ( AcyclicPaths (R21 , R22) );
+L1140: C180 in ( AcyclicPaths (R21 , R22) ) by L1139;
+consider C181 being  Simple  oriented (Chain of R17) such that L1141: C180 = C181 and L1142: C181 is_acyclicpath_of R21 , R22 by L1140;
+take C181;
+thus L1143: C181 in C179 by L1141;
+let C182 being (FinSequence of (the carrier' of R17));
+assume L1144: C182 in C179;
+reconsider D130 = C182 as (Element of C179) by L1144;
+L1145: H3(C180) <= H3(D130) by L1138;
+thus L1146: thesis by L1145 , L1141;
+end;
+theorem
+L1147: (for R10 being set holds (for R12 being Function holds (for R17 being Graph holds (for R21 being (Element of R17) holds (for R22 being (Element of R17) holds (for B112 being non  empty  finite (Subset of ( (the carrier' of R17) * )) holds (B112 = ( AcyclicPaths (R21 , R22 , R10) ) implies (ex R18 being (FinSequence of (the carrier' of R17)) st (R18 in B112 & (for R19 being (FinSequence of (the carrier' of R17)) holds (R19 in B112 implies ( cost (R18 , R12) ) <= ( cost (R19 , R12) ))))))))))))
+proof
+let R10 being set;
+let R12 being Function;
+let R17 being Graph;
+let R21 being (Element of R17);
+let R22 being (Element of R17);
+let C183 being non  empty  finite (Subset of ( (the carrier' of R17) * ));
+deffunc H4((Element of C183)) = ( cost ($1 , R12) );
+consider C184 being (Element of C183) such that L1148: (for B113 being (Element of C183) holds H4(C184) <= H4(B113)) from MinValue;
+assume L1149: C183 = ( AcyclicPaths (R21 , R22 , R10) );
+L1150: C184 in ( AcyclicPaths (R21 , R22 , R10) ) by L1149;
+consider C185 being  Simple  oriented (Chain of R17) such that L1151: C184 = C185 and L1152: C185 is_acyclicpath_of R21 , R22 , R10 by L1150;
+take C185;
+thus L1153: C185 in C183 by L1151;
+let R18 being (FinSequence of (the carrier' of R17));
+assume L1154: R18 in C183;
+reconsider D131 = R18 as (Element of C183) by L1154;
+L1155: H4(C184) <= H4(D131) by L1148;
+thus L1156: thesis by L1155 , L1151;
+end;
+theorem
+L1157: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds (R12 is_weight_of R17 implies ( cost (( R18 ^ R19 ) , R12) ) = ( ( cost (R18 , R12) ) + ( cost (R19 , R12) ) ))))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+set D132 = ( R18 ^ R19 );
+set D133 = ( RealSequence (( R18 ^ R19 ) , R12) );
+set D134 = ( RealSequence (R18 , R12) );
+set D135 = ( RealSequence (R19 , R12) );
+assume L1158: R12 is_weight_of R17;
+L1159: ( dom R18 ) = ( dom D134 ) by L1158 , L1027;
+L1160: ( len R18 ) = ( len D134 ) by L1159 , FINSEQ_3:29;
+L1161: ( dom R19 ) = ( dom D135 ) by L1158 , L1027;
+L1162: ( len R19 ) = ( len D135 ) by L1161 , FINSEQ_3:29;
+L1163: ( dom D132 ) = ( dom D133 ) by L1158 , L1027;
+L1164: ( len D133 ) = ( len D132 ) by L1163 , FINSEQ_3:29;
+L1165: ( len D133 ) = ( ( len D134 ) + ( len D135 ) ) by L1164 , L1160 , L1162 , FINSEQ_1:22;
+L1166:
+now
+let R3 being (Element of ( NAT ));
+assume L1167: R3 in ( dom D135 );
+L1168: 1 <= R3 by L1167 , FINSEQ_3:25;
+L1169: 1 <= ( ( len D134 ) + R3 ) by L1168 , NAT_1:12;
+L1170: R3 <= ( len D135 ) by L1167 , FINSEQ_3:25;
+L1171: ( ( len D134 ) + R3 ) <= ( len D133 ) by L1170 , L1165 , XREAL_1:7;
+L1172: ( ( len D134 ) + R3 ) in ( dom D133 ) by L1171 , L1169 , FINSEQ_3:25;
+L1173: (( D135 . R3 ) = ( R12 . ( R19 . R3 ) ) & ( D132 . ( ( len D134 ) + R3 ) ) = ( R19 . R3 )) by L1158 , L1161 , L1160 , L1167 , L1027 , FINSEQ_1:def 7;
+thus L1174: ( D133 . ( ( len D134 ) + R3 ) ) = ( D135 . R3 ) by L1173 , L1158 , L1163 , L1172 , L1027;
+end;
+L1175:
+now
+let R3 being (Element of ( NAT ));
+assume L1176: R3 in ( dom D134 );
+L1177: R3 <= ( len D134 ) by L1176 , FINSEQ_3:25;
+L1178: R3 <= ( len D133 ) by L1177 , L1165 , NAT_1:12;
+L1179: 1 <= R3 by L1176 , FINSEQ_3:25;
+L1180: R3 in ( dom D133 ) by L1179 , L1178 , FINSEQ_3:25;
+L1181: (( D134 . R3 ) = ( R12 . ( R18 . R3 ) ) & ( D132 . R3 ) = ( R18 . R3 )) by L1158 , L1159 , L1176 , L1027 , FINSEQ_1:def 7;
+thus L1182: ( D133 . R3 ) = ( D134 . R3 ) by L1181 , L1158 , L1163 , L1180 , L1027;
+end;
+L1183: D133 = ( D134 ^ D135 ) by L1175 , L1165 , L1166 , FINSEQ_3:38;
+thus L1184: thesis by L1183 , RVSUM_1:75;
+end;
+theorem
+L1185: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R19 being (FinSequence of (the carrier' of R17)) holds ((R19 is  one-to-one & ( rng R19 ) c= ( rng R18 ) & R12 is_weight>=0of R17) implies ( cost (R19 , R12) ) <= ( cost (R18 , R12) ))))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R19 being (FinSequence of (the carrier' of R17));
+set D136 = (the carrier' of R17);
+assume that
+L1186: (R19 is  one-to-one & ( rng R19 ) c= ( rng R18 ))
+and
+L1187: R12 is_weight>=0of R17;
+defpred S6[ Nat ] means (for B114 , B115 being (FinSequence of D136) holds ((B115 is  one-to-one & ( rng B115 ) c= ( rng B114 ) & ( len B115 ) = $1) implies ( cost (B115 , R12) ) <= ( cost (B114 , R12) )));
+L1188: (for B116 being (Element of ( NAT )) holds (S6[ B116 ] implies S6[ ( B116 + 1 ) ]))
+proof
+let C186 being (Element of ( NAT ));
+assume L1189: S6[ C186 ];
+L1190:
+now
+let C187 , C188 being (FinSequence of D136);
+assume that
+L1191: C188 is  one-to-one
+and
+L1192: ( rng C188 ) c= ( rng C187 )
+and
+L1193: ( len C188 ) = ( C186 + 1 );
+consider C189 being FinSequence, C190 being set such that L1194: C188 = ( C189 ^ <* C190 *> ) by L1193 , FINSEQ_2:18;
+L1195: ( C186 + 1 ) = ( ( len C189 ) + 1 ) by L1193 , L1194 , FINSEQ_2:16;
+consider C191 , C192 being FinSequence such that L1196: C187 = ( ( C191 ^ <* C190 *> ) ^ C192 ) and L1197: ( rng C189 ) c= ( rng ( C191 ^ C192 ) ) by L1191 , L1192 , L1194 , L133;
+reconsider D137 = C189 as (FinSequence of D136) by L1194 , FINSEQ_1:36;
+L1198: ( C191 ^ <* C190 *> ) is (FinSequence of D136) by L1196 , FINSEQ_1:36;
+reconsider D138 = <* C190 *> as (FinSequence of D136) by L1198 , FINSEQ_1:36;
+reconsider D139 = C192 as (FinSequence of D136) by L1196 , FINSEQ_1:36;
+reconsider D140 = C191 as (FinSequence of D136) by L1198 , FINSEQ_1:36;
+L1199: D137 is  one-to-one by L1191 , L1194 , FINSEQ_3:91;
+L1200: ( cost (D137 , R12) ) <= ( cost (( D140 ^ D139 ) , R12) ) by L1199 , L1189 , L1197 , L1195;
+L1201: ( cost (C188 , R12) ) = ( ( cost (D137 , R12) ) + ( cost (D138 , R12) ) ) by L1187 , L1194 , L1049 , L1157;
+L1202: ( cost (C187 , R12) ) = ( ( cost (( D140 ^ D138 ) , R12) ) + ( cost (D139 , R12) ) ) by L1187 , L1196 , L1049 , L1157
+.= ( ( ( cost (D140 , R12) ) + ( cost (D138 , R12) ) ) + ( cost (D139 , R12) ) ) by L1187 , L1049 , L1157
+.= ( ( ( cost (D140 , R12) ) + ( cost (D139 , R12) ) ) + ( cost (D138 , R12) ) )
+.= ( ( cost (( D140 ^ D139 ) , R12) ) + ( cost (D138 , R12) ) ) by L1187 , L1049 , L1157;
+thus L1203: ( cost (C188 , R12) ) <= ( cost (C187 , R12) ) by L1202 , L1201 , L1200 , XREAL_1:7;
+end;
+thus L1204: thesis by L1190;
+end;
+L1205: S6[ ( 0 ) ]
+proof
+let C193 , C194 being (FinSequence of D136);
+assume that
+L1206: C194 is  one-to-one
+and
+L1207: ( rng C194 ) c= ( rng C193 )
+and
+L1208: ( len C194 ) = ( 0 );
+L1209: C194 = ( {} ) by L1208;
+L1210: ( cost (C194 , R12) ) = ( 0 ) by L1209 , L1187 , L1049 , L1130;
+thus L1211: thesis by L1210 , L1187 , L1126;
+end;
+L1212: (for B117 being (Element of ( NAT )) holds S6[ B117 ]) from NAT_1:sch 1(L1205 , L1188);
+L1213: S6[ ( len R19 ) ] by L1212;
+thus L1214: thesis by L1213 , L1186;
+end;
+theorem
+L1215: (for R12 being Function holds (for R17 being Graph holds (for R18 being (FinSequence of (the carrier' of R17)) holds (for R24 being  oriented (Chain of R17) holds ((R18 in ( AcyclicPaths R24 ) & R12 is_weight>=0of R17) implies ( cost (R18 , R12) ) <= ( cost (R24 , R12) ))))))
+proof
+let R12 being Function;
+let R17 being Graph;
+let R18 being (FinSequence of (the carrier' of R17));
+let R24 being  oriented (Chain of R17);
+assume that
+L1216: R18 in ( AcyclicPaths R24 )
+and
+L1217: R12 is_weight>=0of R17;
+L1218: (ex B118 being  Simple  oriented (Chain of R17) st (B118 = R18 & B118 <> ( {} ) & ( (the Source of R17) . ( B118 . 1 ) ) = ( (the Source of R17) . ( R24 . 1 ) ) & ( (the Target of R17) . ( B118 . ( len B118 ) ) ) = ( (the Target of R17) . ( R24 . ( len R24 ) ) ) & ( rng B118 ) c= ( rng R24 ))) by L1216;
+L1219: R18 is  one-to-one by L1218 , L543;
+thus L1220: thesis by L1219 , L1217 , L1218 , L1185;
+end;
+begin
+definition
+let C195 being Graph;
+let C196 , C197 being (Vertex of C195);
+let C198 being  oriented (Chain of C195);
+let C199 being Function;
+pred C198 is_shortestpath_of C196 , C197 , C199
+means
+:L1221: (C198 is_orientedpath_of C196 , C197 & (for B119 being  oriented (Chain of C195) holds (B119 is_orientedpath_of C196 , C197 implies ( cost (C198 , C199) ) <= ( cost (B119 , C199) ))))
+;end;
+definition
+let C200 being Graph;
+let C201 , C202 being (Vertex of C200);
+let C203 being  oriented (Chain of C200);
+let C204 being set;
+let C205 being Function;
+pred C203 is_shortestpath_of C201 , C202 , C204 , C205
+means
+:L1223: (C203 is_orientedpath_of C201 , C202 , C204 & (for B120 being  oriented (Chain of C200) holds (B120 is_orientedpath_of C201 , C202 , C204 implies ( cost (C203 , C205) ) <= ( cost (B120 , C205) ))))
+;end;
+begin
+theorem
+L1225: (for R26 being  finite Graph holds (for R27 being  Simple  oriented (Chain of R26) holds ( len R27 ) <= ( VerticesCount R26 )))
+proof
+let R26 being  finite Graph;
+let R27 being  Simple  oriented (Chain of R26);
+set D141 = (the carrier of R26);
+consider C206 being (FinSequence of D141) such that L1226: C206 is_oriented_vertex_seq_of R27 and L1227: (for R1 being (Element of ( NAT )) holds (for R2 being (Element of ( NAT )) holds ((1 <= R1 & R1 < R2 & R2 <= ( len C206 ) & ( C206 . R1 ) = ( C206 . R2 )) implies (R1 = 1 & R2 = ( len C206 ))))) by GRAPH_4:def 7;
+reconsider D142 = D141 as  finite set;
+L1228: ( len C206 ) = ( ( len R27 ) + 1 ) by L1226 , GRAPH_4:def 5;
+L1229: C206 <> ( {} ) by L1228;
+consider C207 being FinSequence, C208 being set such that L1230: C206 = ( C207 ^ <* C208 *> ) by L1229 , FINSEQ_1:46;
+L1231: ( ( len R27 ) + 1 ) = ( ( len C207 ) + ( len <* C208 *> ) ) by L1228 , L1230 , FINSEQ_1:22
+.= ( ( len C207 ) + 1 ) by FINSEQ_1:39;
+L1232:
+now
+let R1 being (Element of ( NAT ));
+let R2 being (Element of ( NAT ));
+assume that
+L1233: 1 <= R1
+and
+L1234: R1 < R2
+and
+L1235: R2 <= ( len C207 );
+L1236: 1 <= R2 by L1233 , L1234 , XXREAL_0:2;
+L1237: R2 in ( dom C207 ) by L1236 , L1235 , FINSEQ_3:25;
+L1238: R1 <= ( len C207 ) by L1234 , L1235 , XXREAL_0:2;
+L1239: R1 in ( dom C207 ) by L1238 , L1233 , FINSEQ_3:25;
+L1240: ( C206 . R1 ) = ( C207 . R1 ) by L1239 , L1230 , FINSEQ_1:def 7;
+L1241: ( len C207 ) < ( len C206 ) by L1228 , L1231 , XREAL_1:29;
+L1242: R2 < ( len C206 ) by L1241 , L1235 , XXREAL_0:2;
+assume L1243: ( C207 . R1 ) = ( C207 . R2 );
+L1244: ( C206 . R2 ) = ( C206 . R1 ) by L1243 , L1230 , L1240 , L1237 , FINSEQ_1:def 7;
+thus L1245: contradiction by L1244 , L1227 , L1233 , L1234 , L1242;
+end;
+L1246: ( card ( rng C207 ) ) = ( len C207 ) by L1232 , L129;
+L1247: (( rng C206 ) c= D141 & ( rng C207 ) c= ( rng C206 )) by L1230 , FINSEQ_1:29 , FINSEQ_1:def 4;
+L1248: ( card ( rng C207 ) ) <= ( card D142 ) by L1247 , NAT_1:43 , XBOOLE_1:1;
+thus L1249: thesis by L1248 , L1231 , L1246 , GRAPH_1:def 19;
+end;
+theorem
+L1250: (for R26 being  finite Graph holds (for R27 being  Simple  oriented (Chain of R26) holds ( len R27 ) <= ( EdgesCount R26 )))
+proof
+let R26 being  finite Graph;
+let R27 being  Simple  oriented (Chain of R26);
+reconsider D143 = (the carrier' of R26) as  finite set;
+L1251: ( rng R27 ) c= (the carrier' of R26) by FINSEQ_1:def 4;
+L1252: ( card ( rng R27 ) ) <= ( card D143 ) by L1251 , NAT_1:43;
+L1253: R27 is  one-to-one by L543;
+L1254: ( card ( rng R27 ) ) = ( len R27 ) by L1253 , FINSEQ_4:62;
+thus L1255: thesis by L1254 , L1252 , GRAPH_1:def 20;
+end;
+L1256: (for R26 being  finite Graph holds ( AcyclicPaths R26 ) is  finite)
+proof
+let R26 being  finite Graph;
+set D144 = ( EdgesCount R26 );
+set D145 = (the carrier' of R26);
+set D146 = { B121 where B121 is (Element of ( D145 * )) : ( len B121 ) <= D144 };
+L1257: ( AcyclicPaths R26 ) c= D146
+proof
+let R6 being set;
+assume L1258: R6 in ( AcyclicPaths R26 );
+consider C209 being  Simple  oriented (Chain of R26) such that L1259: R6 = C209 by L1258;
+L1260: (C209 is (Element of ( D145 * )) & ( len C209 ) <= D144) by L1250 , FINSEQ_1:def 11;
+thus L1261: thesis by L1260 , L1259;
+end;
+L1262: D146 is  finite by L42;
+thus L1263: thesis by L1262 , L1257;
+end;
+registration
+let R26 being  finite Graph;
+cluster ( AcyclicPaths R26 ) ->  finite;
+coherence by L1256;
+end;
+L1265: (for R26 being  finite Graph holds (for R28 being  oriented (Chain of R26) holds ( AcyclicPaths R28 ) is  finite))
+proof
+let R26 being  finite Graph;
+let R28 being  oriented (Chain of R26);
+L1266: ( AcyclicPaths R28 ) c= ( AcyclicPaths R26 ) by L858;
+thus L1267: thesis by L1266;
+end;
+L1268: (for R26 being  finite Graph holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds ( AcyclicPaths (R30 , R31) ) is  finite)))
+proof
+let R26 being  finite Graph;
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+L1269: ( AcyclicPaths (R30 , R31) ) c= ( AcyclicPaths R26 ) by L862;
+thus L1270: thesis by L1269;
+end;
+L1271: (for R10 being set holds (for R26 being  finite Graph holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds ( AcyclicPaths (R30 , R31 , R10) ) is  finite))))
+proof
+let R10 being set;
+let R26 being  finite Graph;
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+L1272: ( AcyclicPaths (R30 , R31 , R10) ) c= ( AcyclicPaths R26 ) by L1015;
+thus L1273: thesis by L1272;
+end;
+registration
+let R26 being  finite Graph;
+let R28 being  oriented (Chain of R26);
+cluster ( AcyclicPaths R28 ) ->  finite;
+coherence by L1265;
+end;
+registration
+let R26 being  finite Graph;
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+cluster ( AcyclicPaths (R30 , R31) ) ->  finite;
+coherence by L1268;
+end;
+registration
+let R26 being  finite Graph;
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+let R10 being set;
+cluster ( AcyclicPaths (R30 , R31 , R10) ) ->  finite;
+coherence by L1271;
+end;
+theorem
+L1277: (for R12 being Function holds (for R26 being  finite Graph holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds (( AcyclicPaths (R30 , R31) ) <> ( {} ) implies (ex R33 being (FinSequence of (the carrier' of R26)) st (R33 in ( AcyclicPaths (R30 , R31) ) & (for R34 being (FinSequence of (the carrier' of R26)) holds (R34 in ( AcyclicPaths (R30 , R31) ) implies ( cost (R33 , R12) ) <= ( cost (R34 , R12) )))))))))) by L1137;
+theorem
+L1278: (for R10 being set holds (for R12 being Function holds (for R26 being  finite Graph holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds (( AcyclicPaths (R30 , R31 , R10) ) <> ( {} ) implies (ex R33 being (FinSequence of (the carrier' of R26)) st (R33 in ( AcyclicPaths (R30 , R31 , R10) ) & (for R34 being (FinSequence of (the carrier' of R26)) holds (R34 in ( AcyclicPaths (R30 , R31 , R10) ) implies ( cost (R33 , R12) ) <= ( cost (R34 , R12) ))))))))))) by L1147;
+theorem
+L1279: (for R12 being Function holds (for R26 being  finite Graph holds (for R28 being  oriented (Chain of R26) holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds ((R28 is_orientedpath_of R30 , R31 & R12 is_weight>=0of R26) implies (ex B122 being  Simple  oriented (Chain of R26) st B122 is_shortestpath_of R30 , R31 , R12)))))))
+proof
+let R12 being Function;
+let R26 being  finite Graph;
+let R28 being  oriented (Chain of R26);
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+assume that
+L1280: R28 is_orientedpath_of R30 , R31
+and
+L1281: R12 is_weight>=0of R26;
+L1282: ( AcyclicPaths (R30 , R31) ) <> ( {} ) by L1280 , L903;
+consider C210 being (FinSequence of (the carrier' of R26)) such that L1283: C210 in ( AcyclicPaths (R30 , R31) ) and L1284: (for B123 being (FinSequence of (the carrier' of R26)) holds (B123 in ( AcyclicPaths (R30 , R31) ) implies ( cost (C210 , R12) ) <= ( cost (B123 , R12) ))) by L1282 , L1137;
+consider C211 being  Simple  oriented (Chain of R26) such that L1285: C210 = C211 and L1286: C211 is_acyclicpath_of R30 , R31 by L1283;
+take C211;
+thus L1287: C211 is_orientedpath_of R30 , R31 by L1286 , L819;
+thus L1288:now
+let C212 being  oriented (Chain of R26);
+assume L1289: C212 is_orientedpath_of R30 , R31;
+consider C213 being (Element of ( (the carrier' of R26) * )) such that L1290: C213 in ( AcyclicPaths C212 ) by L1289 , L903 , SUBSET_1:4;
+L1291: ( AcyclicPaths C212 ) c= ( AcyclicPaths (R30 , R31) ) by L1289 , L866;
+L1292: ( cost (C210 , R12) ) <= ( cost (C213 , R12) ) by L1291 , L1284 , L1290;
+L1293: ( cost (C213 , R12) ) <= ( cost (C212 , R12) ) by L1281 , L1290 , L1215;
+thus L1294: ( cost (C211 , R12) ) <= ( cost (C212 , R12) ) by L1293 , L1285 , L1292 , XXREAL_0:2;
+end;
+end;
+theorem
+L1289: (for R10 being set holds (for R12 being Function holds (for R26 being  finite Graph holds (for R28 being  oriented (Chain of R26) holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds ((R28 is_orientedpath_of R30 , R31 , R10 & R12 is_weight>=0of R26) implies (ex B124 being  Simple  oriented (Chain of R26) st B124 is_shortestpath_of R30 , R31 , R10 , R12))))))))
+proof
+let R10 being set;
+let R12 being Function;
+let R26 being  finite Graph;
+let R28 being  oriented (Chain of R26);
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+assume that
+L1290: R28 is_orientedpath_of R30 , R31 , R10
+and
+L1291: R12 is_weight>=0of R26;
+L1292: ( AcyclicPaths (R30 , R31 , R10) ) <> ( {} ) by L1290 , L966;
+consider C214 being (FinSequence of (the carrier' of R26)) such that L1293: C214 in ( AcyclicPaths (R30 , R31 , R10) ) and L1294: (for B125 being (FinSequence of (the carrier' of R26)) holds (B125 in ( AcyclicPaths (R30 , R31 , R10) ) implies ( cost (C214 , R12) ) <= ( cost (B125 , R12) ))) by L1292 , L1147;
+consider C215 being  Simple  oriented (Chain of R26) such that L1295: C214 = C215 and L1296: C215 is_acyclicpath_of R30 , R31 , R10 by L1293;
+take C215;
+thus L1297: C215 is_orientedpath_of R30 , R31 , R10 by L1296 , L821;
+thus L1298:now
+let C216 being  oriented (Chain of R26);
+assume L1299: C216 is_orientedpath_of R30 , R31 , R10;
+consider C217 being (Element of ( (the carrier' of R26) * )) such that L1300: C217 in ( AcyclicPaths C216 ) by L1299 , L966 , SUBSET_1:4;
+L1301: ( AcyclicPaths C216 ) c= ( AcyclicPaths (R30 , R31 , R10) ) by L1299 , L876;
+L1302: ( cost (C214 , R12) ) <= ( cost (C217 , R12) ) by L1301 , L1294 , L1300;
+L1303: ( cost (C217 , R12) ) <= ( cost (C216 , R12) ) by L1291 , L1300 , L1215;
+thus L1304: ( cost (C215 , R12) ) <= ( cost (C216 , R12) ) by L1303 , L1295 , L1302 , XXREAL_0:2;
+end;
+end;
+begin
+theorem
+L1299: (for R10 being set holds (for R12 being Function holds (for R26 being  finite Graph holds (for R28 being  oriented (Chain of R26) holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds ((R12 is_weight>=0of R26 & R28 is_shortestpath_of R30 , R31 , R10 , R12 & R30 <> R31 & (for R29 being  oriented (Chain of R26) holds (for R32 being (Element of R26) holds (((not R32 in R10) & R29 is_shortestpath_of R30 , R32 , R10 , R12) implies ( cost (R28 , R12) ) <= ( cost (R29 , R12) ))))) implies R28 is_shortestpath_of R30 , R31 , R12)))))))
+proof
+let R10 being set;
+let R12 being Function;
+let R26 being  finite Graph;
+let R28 being  oriented (Chain of R26);
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+assume that
+L1300: R12 is_weight>=0of R26
+and
+L1301: R28 is_shortestpath_of R30 , R31 , R10 , R12
+and
+L1302: R30 <> R31
+and
+L1303: (for R29 being  oriented (Chain of R26) holds (for R32 being (Element of R26) holds (((not R32 in R10) & R29 is_shortestpath_of R30 , R32 , R10 , R12) implies ( cost (R28 , R12) ) <= ( cost (R29 , R12) ))));
+L1304: R28 is_orientedpath_of R30 , R31 , R10 by L1301 , L1223;
+L1305: R30 in R10 by L1304 , L1302 , L775;
+L1306:
+now
+let C218 being  oriented (Chain of R26);
+assume L1307: C218 is_orientedpath_of R30 , R31;
+per cases ;
+suppose L1308: (not ( vertices C218 ) c= R10);
+
+set D147 = (the Target of R26);
+set D148 = (the Source of R26);
+consider C219 being (Element of ( NAT )), C220 , C221 being (FinSequence of (the carrier' of R26)) such that L1309: ( C219 + 1 ) <= ( len C218 ) and L1310: (not ( vertices ( C218 /. ( C219 + 1 ) ) ) c= R10) and L1311: ( len C220 ) = C219 and L1312: C218 = ( C220 ^ C221 ) and L1313: ( vertices C220 ) c= R10 by L1308 , L626;
+L1314: ( C219 + 1 ) <= ( ( len C220 ) + ( len C221 ) ) by L1309 , L1312 , FINSEQ_1:22;
+L1315: 1 <= ( len C221 ) by L1314 , L1311 , XREAL_1:6;
+consider C222 being Nat such that L1316: ( len C221 ) = ( 1 + C222 ) by L1315 , NAT_1:10;
+reconsider D149 = C220 , D150 = C221 as  oriented (Chain of R26) by L1312 , L220;
+reconsider D151 = C222 as (Element of ( NAT )) by ORDINAL1:def 12;
+consider C223 , C224 being FinSequence such that L1317: ( len C223 ) = 1 and L1318: ( len C224 ) = D151 and L1319: D150 = ( C223 ^ C224 ) by L1316 , FINSEQ_2:22;
+reconsider D152 = C223 , D153 = C224 as  oriented (Chain of R26) by L1319 , L220;
+L1320: ( C218 . ( C219 + 1 ) ) = ( D150 . 1 ) by L1311 , L1312 , L1315 , L111
+.= ( D152 . 1 ) by L1317 , L1319 , L107;
+L1321: ( cost (D153 , R12) ) >= ( 0 ) by L1300 , L1126;
+L1322: C218 = ( ( D149 ^ D152 ) ^ D153 ) by L1312 , L1319 , FINSEQ_1:32;
+L1323: ( cost (C218 , R12) ) = ( ( cost (( D149 ^ D152 ) , R12) ) + ( cost (D153 , R12) ) ) by L1322 , L1300 , L1049 , L1157;
+L1324: ( cost (C218 , R12) ) >= ( ( cost (( D149 ^ D152 ) , R12) ) + (( 0 ) qua Nat) ) by L1323 , L1321 , XREAL_1:7;
+set D154 = ( C218 /. ( C219 + 1 ) );
+L1325: D154 = ( C218 . ( C219 + 1 ) ) by L1309 , FINSEQ_4:15 , NAT_1:11;
+consider C225 being set such that L1326: C225 in ( vertices D154 ) and L1327: (not C225 in R10) by L1310 , TARSKI:def 3;
+L1328: (C225 = ( D148 . D154 ) or C225 = ( D147 . D154 )) by L1326 , TARSKI:def 2;
+L1329: 1 in ( dom D152 ) by L1317 , FINSEQ_3:25;
+reconsider D155 = C225 as (Vertex of R26) by L1329 , L1325 , L1320 , L1328 , FINSEQ_2:11 , FUNCT_2:5;
+L1330: R30 = ( D148 . ( C218 . 1 ) ) by L1307 , L757;
+thus L1331:now
+per cases ;
+suppose L1332: C219 = ( 0 );
+
+L1333: ( D148 . ( D152 . 1 ) ) = R30 by L1332 , L1307 , L1320 , L757;
+L1334: ( ( vertices D152 ) \ { D155 } ) c= R10
+proof
+let C226 being set;
+assume L1335: C226 in ( ( vertices D152 ) \ { D155 } );
+L1336: (not C226 in { D155 }) by L1335 , XBOOLE_0:def 5;
+L1337: C226 in ( vertices D152 ) by L1335 , XBOOLE_0:def 5;
+L1338: C226 in ( vertices ( D152 /. 1 ) ) by L1337 , L1317 , L678;
+L1339: (C226 = ( D148 . ( D152 /. 1 ) ) or C226 = ( D147 . ( D152 /. 1 ) )) by L1338 , TARSKI:def 2;
+L1340: ( D147 . ( D152 /. 1 ) ) = D155 by L1302 , L1304 , L1317 , L1325 , L1320 , L1327 , L1328 , L1330 , L1332 , L775 , FINSEQ_4:15;
+thus L1341: thesis by L1340 , L1305 , L1317 , L1333 , L1336 , L1339 , FINSEQ_4:15 , TARSKI:def 1;
+end;
+L1342: D152 <> ( {} ) by L1317;
+L1343: R30 = ( D148 . D154 ) by L1307 , L1325 , L1332 , L757;
+L1344: D152 is_orientedpath_of R30 , D155 by L1343 , L1302 , L1304 , L1317 , L1325 , L1320 , L1327 , L1328 , L1342 , L757 , L775;
+L1345: D152 is_orientedpath_of R30 , D155 , R10 by L1344 , L1334 , L759;
+consider C227 being  Simple  oriented (Chain of R26) such that L1346: C227 is_shortestpath_of R30 , D155 , R10 , R12 by L1345 , L1300 , L1289;
+L1347: D149 = ( {} ) by L1311 , L1332;
+L1348: ( D149 ^ D152 ) = D152 by L1347 , FINSEQ_1:34;
+L1349: ( cost (C227 , R12) ) <= ( cost (D152 , R12) ) by L1345 , L1346 , L1223;
+L1350: ( cost (R28 , R12) ) <= ( cost (C227 , R12) ) by L1303 , L1327 , L1346;
+L1351: ( cost (R28 , R12) ) <= ( cost (D152 , R12) ) by L1350 , L1349 , XXREAL_0:2;
+thus L1352: ( cost (R28 , R12) ) <= ( cost (C218 , R12) ) by L1351 , L1324 , L1348 , XXREAL_0:2;
+end;
+suppose L1353: C219 <> ( 0 );
+
+reconsider D156 = ( D149 ^ D152 ) as  oriented (Chain of R26) by L1322 , L220;
+L1354: C219 < ( len C218 ) by L1309 , NAT_1:13;
+L1355: ( C219 + 1 ) > ( ( 0 ) + 1 ) by L1353 , XREAL_1:8;
+L1356: C219 >= 1 by L1355 , NAT_1:13;
+L1357: C219 in ( dom D149 ) by L1356 , L1311 , FINSEQ_3:25;
+L1358:
+now
+assume L1359: ( D148 . ( C218 . ( C219 + 1 ) ) ) = D155;
+L1360: D155 = ( D147 . ( C218 . C219 ) ) by L1359 , L1356 , L1354 , GRAPH_1:def 15;
+L1361: ( C218 . C219 ) = ( D149 . C219 ) by L1311 , L1312 , L1356 , L107;
+L1362: D155 in ( vertices D149 ) by L1361 , L1357 , L1360 , L672;
+thus L1363: contradiction by L1362 , L1313 , L1327;
+end;
+L1364: ( ( vertices D156 ) \ { D155 } ) c= R10
+proof
+set D157 = { ( D147 . ( D152 . 1 ) ) };
+let C228 being set;
+assume L1365: C228 in ( ( vertices D156 ) \ { D155 } );
+L1366: C228 in ( vertices D156 ) by L1365 , XBOOLE_0:def 5;
+L1367: ( vertices D156 ) = ( ( vertices D149 ) \/ D157 ) by L1311 , L1317 , L1356 , L699;
+L1368: (C228 in ( vertices D149 ) or C228 in D157) by L1367 , L1366 , XBOOLE_0:def 3;
+L1369: (not C228 in { D155 }) by L1365 , XBOOLE_0:def 5;
+thus L1370: thesis by L1369 , L1309 , L1313 , L1320 , L1328 , L1358 , L1368 , FINSEQ_4:15 , NAT_1:11;
+end;
+L1371: ( len D156 ) = ( ( len D149 ) + ( len D152 ) ) by FINSEQ_1:22;
+L1372: (D156 <> ( {} ) & ( D156 . ( len D156 ) ) = ( D152 . 1 )) by L1371 , L1317 , L111;
+L1373: ( D156 . 1 ) = ( D149 . 1 ) by L1311 , L1356 , L107
+.= ( C218 . 1 ) by L1311 , L1312 , L1356 , L107;
+L1374: ( D148 . ( D156 . 1 ) ) = R30 by L1373 , L1307 , L757;
+L1375: D156 is_orientedpath_of R30 , D155 by L1374 , L1325 , L1320 , L1328 , L1358 , L1372 , L757;
+L1376: D156 is_orientedpath_of R30 , D155 , R10 by L1375 , L1364 , L759;
+consider C229 being  Simple  oriented (Chain of R26) such that L1377: C229 is_shortestpath_of R30 , D155 , R10 , R12 by L1376 , L1300 , L1289;
+L1378: ( cost (C229 , R12) ) <= ( cost (D156 , R12) ) by L1376 , L1377 , L1223;
+L1379: ( cost (R28 , R12) ) <= ( cost (C229 , R12) ) by L1303 , L1327 , L1377;
+L1380: ( cost (R28 , R12) ) <= ( cost (D156 , R12) ) by L1379 , L1378 , XXREAL_0:2;
+thus L1381: ( cost (R28 , R12) ) <= ( cost (C218 , R12) ) by L1380 , L1324 , XXREAL_0:2;
+end;
+end;
+end;
+suppose L1332: ( vertices C218 ) c= R10;
+
+L1333: ( ( vertices C218 ) \ { R31 } ) c= ( R10 \ { R31 } ) by L1332 , XBOOLE_1:33;
+L1334: ( ( vertices C218 ) \ { R31 } ) c= R10 by L1333 , XBOOLE_1:1;
+L1335: C218 is_orientedpath_of R30 , R31 , R10 by L1334 , L1307 , L759;
+thus L1336: ( cost (R28 , R12) ) <= ( cost (C218 , R12) ) by L1335 , L1301 , L1223;
+end;
+end;
+L1338: R28 is_orientedpath_of R30 , R31 by L1304 , L759;
+thus L1339: thesis by L1338 , L1306 , L1221;
+end;
+theorem
+L1340: (for R10 being set holds (for R11 being set holds (for R12 being Function holds (for R26 being  finite Graph holds (for R28 being  oriented (Chain of R26) holds (for R30 being (Element of R26) holds (for R31 being (Element of R26) holds ((R12 is_weight>=0of R26 & R28 is_shortestpath_of R30 , R31 , R10 , R12 & R30 <> R31 & R10 c= R11 & (for R29 being  oriented (Chain of R26) holds (for R32 being (Element of R26) holds (((not R32 in R10) & R29 is_shortestpath_of R30 , R32 , R10 , R12) implies ( cost (R28 , R12) ) <= ( cost (R29 , R12) ))))) implies R28 is_shortestpath_of R30 , R31 , R11 , R12))))))))
+proof
+let R10 being set;
+let R11 being set;
+let R12 being Function;
+let R26 being  finite Graph;
+let R28 being  oriented (Chain of R26);
+let R30 being (Element of R26);
+let R31 being (Element of R26);
+assume that
+L1341: R12 is_weight>=0of R26
+and
+L1342: R28 is_shortestpath_of R30 , R31 , R10 , R12
+and
+L1343: R30 <> R31
+and
+L1344: R10 c= R11
+and
+L1345: (for R29 being  oriented (Chain of R26) holds (for R32 being (Element of R26) holds (((not R32 in R10) & R29 is_shortestpath_of R30 , R32 , R10 , R12) implies ( cost (R28 , R12) ) <= ( cost (R29 , R12) ))));
+L1346: R28 is_shortestpath_of R30 , R31 , R12 by L1341 , L1342 , L1343 , L1345 , L1299;
+L1347:
+now
+let C230 being  oriented (Chain of R26);
+assume L1348: C230 is_orientedpath_of R30 , R31 , R11;
+L1349: C230 is_orientedpath_of R30 , R31 by L1348 , L759;
+thus L1350: ( cost (R28 , R12) ) <= ( cost (C230 , R12) ) by L1349 , L1346 , L1221;
+end;
+L1351: R28 is_orientedpath_of R30 , R31 , R10 by L1342 , L1223;
+L1352: R28 is_orientedpath_of R30 , R31 , R11 by L1351 , L1344 , L784;
+thus L1353: thesis by L1352 , L1347 , L1223;
+end;
+definition
+let C231 being Graph;
+let C232 being (FinSequence of (the carrier' of C231));
+let C233 being set;
+let C234 being (Vertex of C231);
+let C235 being Function;
+pred C232 islongestInShortestpath C233 , C234 , C235
+means
+:L1354: (for B126 being (Vertex of C231) holds ((B126 in C233 & B126 <> C234) implies (ex B127 being  oriented (Chain of C231) st (B127 is_shortestpath_of C234 , B126 , C233 , C235 & ( cost (B127 , C235) ) <= ( cost (C232 , C235) )))))
+;end;
+::$N Dijkstra's shortest path algorithm
+theorem
+L1356: (for R8 being set holds (for R10 being set holds (for R12 being Function holds (for B128 being  finite  oriented Graph holds (for B129 , B130 , B131 being  oriented (Chain of B128) holds (for B132 , B133 , B134 being (Element of B128) holds ((R8 in (the carrier' of B128) & R12 is_weight>=0of B128 & ( len B129 ) >= 1 & B129 is_shortestpath_of B132 , B133 , R10 , R12 & B132 <> B133 & B132 <> B134 & B131 = ( B129 ^ <* R8 *> ) & B130 is_shortestpath_of B132 , B134 , R10 , R12 & R8 orientedly_joins B133 , B134 & B129 islongestInShortestpath R10 , B132 , R12) implies ((( cost (B130 , R12) ) <= ( cost (B131 , R12) ) implies B130 is_shortestpath_of B132 , B134 , ( R10 \/ { B133 } ) , R12) & (( cost (B130 , R12) ) >= ( cost (B131 , R12) ) implies B131 is_shortestpath_of B132 , B134 , ( R10 \/ { B133 } ) , R12)))))))))
+proof
+let R8 being set;
+let R10 being set;
+let R12 being Function;
+let C236 being  finite  oriented Graph;
+let C237 , C238 , C239 being  oriented (Chain of C236);
+let C240 , C241 , C242 being (Element of C236);
+assume that
+L1357: R8 in (the carrier' of C236)
+and
+L1358: R12 is_weight>=0of C236
+and
+L1359: ( len C237 ) >= 1
+and
+L1360: C237 is_shortestpath_of C240 , C241 , R10 , R12
+and
+L1361: C240 <> C241
+and
+L1362: C240 <> C242
+and
+L1363: C239 = ( C237 ^ <* R8 *> )
+and
+L1364: C238 is_shortestpath_of C240 , C242 , R10 , R12
+and
+L1365: R8 orientedly_joins C241 , C242
+and
+L1366: C237 islongestInShortestpath R10 , C240 , R12;
+L1367: C237 is_orientedpath_of C240 , C241 , R10 by L1360 , L1223;
+L1368: C240 in R10 by L1367 , L1361 , L775;
+set D158 = (the carrier' of C236);
+reconsider D159 = <* R8 *> as (FinSequence of D158) by L1357 , FINSEQ_1:74;
+set D160 = ( R10 \/ { C241 } );
+L1369: C238 is_orientedpath_of C240 , C242 , R10 by L1364 , L1223;
+L1370: C238 is_orientedpath_of C240 , C242 , D160 by L1369 , L784 , XBOOLE_1:7;
+L1371: (( len D159 ) = 1 & ( D159 . 1 ) = R8) by FINSEQ_1:40;
+consider C243 being  Simple  oriented (Chain of C236) such that L1372: C243 is_shortestpath_of C240 , C242 , D160 , R12 by L1371 , L1358 , L1359 , L1363 , L1365 , L1367 , L805 , L1289;
+L1373: C239 is_orientedpath_of C240 , C242 , D160 by L1359 , L1363 , L1365 , L1367 , L1371 , L805;
+L1374:
+now
+assume L1375: ( cost (C238 , R12) ) <= ( cost (C243 , R12) );
+thus L1376:now
+assume L1377: ( cost (C238 , R12) ) <= ( cost (C239 , R12) );
+L1378:
+now
+let C244 being  oriented (Chain of C236);
+assume L1379: C244 is_orientedpath_of C240 , C242 , D160;
+L1380: ( cost (C243 , R12) ) <= ( cost (C244 , R12) ) by L1379 , L1372 , L1223;
+thus L1381: ( cost (C238 , R12) ) <= ( cost (C244 , R12) ) by L1380 , L1375 , XXREAL_0:2;
+end;
+thus L1382: C238 is_shortestpath_of C240 , C242 , D160 , R12 by L1378 , L1370 , L1223;
+end;
+thus L1383:now
+assume L1384: ( cost (C238 , R12) ) >= ( cost (C239 , R12) );
+L1385:
+now
+let C245 being  oriented (Chain of C236);
+assume L1386: C245 is_orientedpath_of C240 , C242 , D160;
+L1387: ( cost (C243 , R12) ) <= ( cost (C245 , R12) ) by L1386 , L1372 , L1223;
+L1388: ( cost (C238 , R12) ) <= ( cost (C245 , R12) ) by L1387 , L1375 , XXREAL_0:2;
+thus L1389: ( cost (C239 , R12) ) <= ( cost (C245 , R12) ) by L1388 , L1384 , XXREAL_0:2;
+end;
+thus L1390: C239 is_shortestpath_of C240 , C242 , D160 , R12 by L1385 , L1373 , L1223;
+end;
+end;
+set D161 = (the Target of C236);
+set D162 = (the Source of C236);
+L1384: (( D162 . R8 ) = C241 & ( D161 . R8 ) = C242) by L1365 , GRAPH_4:def 1;
+L1385: C243 is_orientedpath_of C240 , C242 , D160 by L1372 , L1223;
+L1386: C243 is_orientedpath_of C240 , C242 by L1385 , L759;
+L1387: ( D161 . ( C243 . ( len C243 ) ) ) = C242 by L1386 , L757;
+L1388: C243 <> ( {} ) by L1386 , L757;
+L1389: ( len C243 ) >= 1 by L1388 , FINSEQ_1:20;
+per cases ;
+suppose L1390: ( len C243 ) >= 2;
+
+consider C246 being Nat such that L1391: ( len C243 ) = ( ( 1 + 1 ) + C246 ) by L1390 , NAT_1:10;
+L1392: ( D160 \ { C241 } ) = ( R10 \ { C241 } ) by XBOOLE_1:40;
+reconsider D163 = C246 as (Element of ( NAT )) by ORDINAL1:def 12;
+L1393: ( len C243 ) = ( 1 + ( 1 + D163 ) ) by L1391;
+consider C247 , C248 being FinSequence such that L1394: ( len C247 ) = ( 1 + D163 ) and L1395: ( len C248 ) = 1 and L1396: C243 = ( C247 ^ C248 ) by L1393 , FINSEQ_2:22;
+reconsider D164 = C247 , D165 = C248 as  Simple  oriented (Chain of C236) by L1396 , L271;
+L1397: ( len D164 ) >= 1 by L1394 , NAT_1:12;
+L1398: ( D162 . ( C243 . 1 ) ) = C240 by L1386 , L757;
+L1399: ( D162 . ( D164 . 1 ) ) = C240 by L1398 , L1396 , L1397 , L107;
+L1400: ( len D165 ) = 1 by L1395;
+L1401: (not C242 in ( vertices D164 )) by L1400 , L1362 , L1387 , L1396 , L1397 , L1398 , L574;
+L1402: ( D165 . 1 ) = ( C243 . ( len C243 ) ) by L1393 , L1394 , L1395 , L1396 , L111;
+L1403: ( ( vertices C243 ) \ { C242 } ) = ( ( ( vertices D164 ) \/ { C242 } ) \ { C242 } ) by L1402 , L1387 , L1394 , L1395 , L1396 , L699 , NAT_1:12
+.= ( ( vertices D164 ) \ { C242 } ) by XBOOLE_1:40
+.= ( vertices D164 ) by L1401 , ZFMISC_1:57;
+L1404: ( vertices D164 ) c= D160 by L1403 , L1385 , L759;
+L1405: ( ( vertices D164 ) \ { C241 } ) c= ( D160 \ { C241 } ) by L1404 , XBOOLE_1:33;
+L1406: ( ( vertices D164 ) \ { C241 } ) c= R10 by L1405 , L1392 , XBOOLE_1:1;
+L1407: ( len D164 ) < ( len C243 ) by L1393 , L1394 , NAT_1:13;
+L1408: ( D162 . ( C243 . ( ( len D164 ) + 1 ) ) ) = ( D161 . ( C243 . ( len D164 ) ) ) by L1407 , L1397 , GRAPH_1:def 15;
+L1409: ( D164 . ( len D164 ) ) = ( C243 . ( len D164 ) ) by L1396 , L1397 , L107;
+L1410: ( D162 . ( D165 . 1 ) ) = ( D161 . ( D164 . ( len D164 ) ) ) by L1409 , L1393 , L1394 , L1402 , L1397 , L1407 , GRAPH_1:def 15;
+L1411: ( cost (C243 , R12) ) = ( ( cost (D164 , R12) ) + ( cost (D165 , R12) ) ) by L1358 , L1396 , L1049 , L1157;
+L1412: (not C240 in ( vertices D165 )) by L1362 , L1387 , L1395 , L1396 , L1397 , L1398 , L574;
+thus L1413:now
+per cases ;
+suppose L1414: C241 in ( vertices D164 );
+
+consider R3 being (Element of ( NAT )) such that L1415: 1 <= R3 and L1416: R3 <= ( len D164 ) and L1417: C241 = ( D161 . ( D164 . R3 ) ) by L1414 , L1361 , L1399 , L738;
+L1418: ( D165 /. 1 ) in D158 by L1357;
+L1419: ( D165 . 1 ) in D158 by L1418 , L1395 , FINSEQ_4:15;
+thus L1420:now
+per cases ;
+suppose L1421: ( D162 . ( D165 . 1 ) ) = C241;
+
+L1422: D164 <> ( {} ) by L1394;
+L1423: D164 is_orientedpath_of C240 , C241 by L1422 , L1399 , L1410 , L1421 , L757;
+L1424: D164 is_orientedpath_of C240 , C241 , R10 by L1423 , L1406 , L759;
+L1425: ( cost (C237 , R12) ) <= ( cost (D164 , R12) ) by L1424 , L1360 , L1223;
+L1426: ( D165 . 1 ) = R8 by L1357 , L1387 , L1384 , L1402 , L1419 , L1421 , GRAPH_1:def 7;
+L1427: D165 = D159 by L1426 , L1395 , FINSEQ_1:40;
+L1428: ( cost (C239 , R12) ) = ( ( cost (C237 , R12) ) + ( cost (D165 , R12) ) ) by L1427 , L1358 , L1363 , L1049 , L1157;
+L1429: ( cost (C239 , R12) ) <= ( cost (C243 , R12) ) by L1428 , L1411 , L1425 , XREAL_1:7;
+thus L1430:now
+assume L1431: ( cost (C238 , R12) ) <= ( cost (C239 , R12) );
+L1432: ( cost (C238 , R12) ) <= ( cost (C243 , R12) ) by L1431 , L1429 , XXREAL_0:2;
+L1433:
+now
+let C249 being  oriented (Chain of C236);
+assume L1434: C249 is_orientedpath_of C240 , C242 , D160;
+L1435: ( cost (C243 , R12) ) <= ( cost (C249 , R12) ) by L1434 , L1372 , L1223;
+thus L1436: ( cost (C238 , R12) ) <= ( cost (C249 , R12) ) by L1435 , L1432 , XXREAL_0:2;
+end;
+thus L1437: C238 is_shortestpath_of C240 , C242 , D160 , R12 by L1433 , L1370 , L1223;
+end;
+thus L1438:now
+assume L1439: ( cost (C238 , R12) ) >= ( cost (C239 , R12) );
+L1440:
+now
+let C250 being  oriented (Chain of C236);
+assume L1441: C250 is_orientedpath_of C240 , C242 , D160;
+L1442: ( cost (C243 , R12) ) <= ( cost (C250 , R12) ) by L1441 , L1372 , L1223;
+thus L1443: ( cost (C239 , R12) ) <= ( cost (C250 , R12) ) by L1442 , L1429 , XXREAL_0:2;
+end;
+thus L1444: C239 is_shortestpath_of C240 , C242 , D160 , R12 by L1440 , L1373 , L1223;
+end;
+end;
+suppose L1439: ( D162 . ( D165 . 1 ) ) <> C241;
+
+L1440: ( len D164 ) in ( dom D164 ) by L1397 , FINSEQ_3:25;
+reconsider D166 = ( D161 . ( D164 . ( len D164 ) ) ) as (Vertex of C236) by L1440 , FINSEQ_2:11 , FUNCT_2:5;
+L1441: (not D166 in { C241 }) by L1410 , L1439 , TARSKI:def 1;
+L1442: ( len D164 ) in ( dom D164 ) by L1397 , FINSEQ_3:25;
+L1443: D166 in ( vertices D164 ) by L1442 , L672;
+L1444: ( vertices D164 ) c= D160 by L1385 , L1403 , L759;
+L1445: D166 in R10 by L1444 , L1443 , L1441 , XBOOLE_0:def 3;
+L1446: { D166 } c= R10
+proof
+let C251 being set;
+assume L1447: C251 in { D166 };
+thus L1448: thesis by L1447 , L1445 , TARSKI:def 1;
+end;
+L1449: ( R10 \/ { D166 } ) c= R10 by L1446 , XBOOLE_1:8;
+L1450: 1 in ( dom D165 ) by L1395 , FINSEQ_3:25;
+L1451: D166 <> C240 by L1450 , L1391 , L1394 , L1402 , L1409 , L1412 , L1408 , L672;
+consider C252 being  oriented (Chain of C236) such that L1452: C252 is_shortestpath_of C240 , D166 , R10 , R12 and L1453: ( cost (C252 , R12) ) <= ( cost (C237 , R12) ) by L1451 , L1366 , L1445 , L1354;
+consider C253 being Nat such that L1454: ( len D164 ) = ( R3 + C253 ) by L1416 , NAT_1:10;
+L1455: C252 is_orientedpath_of C240 , D166 , R10 by L1452 , L1223;
+L1456: C252 is_orientedpath_of C240 , D166 by L1455 , L759;
+L1457: C252 <> ( {} ) by L1456 , L757;
+L1458: ( len C252 ) >= 1 by L1457 , FINSEQ_1:20;
+L1459: ( D161 . ( C252 . ( len C252 ) ) ) = D166 by L1456 , L757;
+reconsider D167 = ( C252 ^ D165 ) as  oriented (Chain of C236) by L1459 , L1391 , L1394 , L1402 , L1409 , L1408 , L243;
+L1460: ( len D167 ) = ( ( len C252 ) + 1 ) by L1395 , FINSEQ_1:22;
+L1461: (D167 <> ( {} ) & ( D161 . ( D167 . ( len D167 ) ) ) = C242) by L1460 , L1387 , L1395 , L1402 , L111;
+L1462: ( D162 . ( C252 . 1 ) ) = C240 by L1456 , L757;
+L1463: ( D162 . ( D167 . 1 ) ) = C240 by L1462 , L1458 , L107;
+L1464: D167 is_orientedpath_of C240 , C242 by L1463 , L1461 , L757;
+L1465: ( ( vertices C252 ) \ { D166 } ) c= R10 by L1455 , L759;
+L1466: ( vertices C252 ) c= ( R10 \/ { D166 } ) by L1465 , XBOOLE_1:44;
+L1467: ( vertices C252 ) c= R10 by L1466 , L1449 , XBOOLE_1:1;
+L1468: ( ( vertices C252 ) \ { C242 } ) c= ( R10 \ { C242 } ) by L1467 , XBOOLE_1:33;
+L1469: ( vertices D167 ) = ( ( vertices C252 ) \/ { C242 } ) by L1387 , L1395 , L1402 , L1458 , L699;
+L1470: ( ( vertices D167 ) \ { C242 } ) = ( ( vertices C252 ) \ { C242 } ) by L1469 , XBOOLE_1:40;
+L1471: ( ( vertices D167 ) \ { C242 } ) c= R10 by L1470 , L1468 , XBOOLE_1:1;
+L1472: D167 is_orientedpath_of C240 , C242 , R10 by L1471 , L1464 , L759;
+L1473: ( cost (C238 , R12) ) <= ( cost (D167 , R12) ) by L1472 , L1364 , L1223;
+reconsider D168 = C253 as (Element of ( NAT )) by ORDINAL1:def 12;
+consider C254 , C255 being FinSequence such that L1474: ( len C254 ) = R3 and L1475: ( len C255 ) = D168 and L1476: D164 = ( C254 ^ C255 ) by L1454 , FINSEQ_2:22;
+reconsider D169 = C254 , D170 = C255 as  Simple  oriented (Chain of C236) by L1476 , L271;
+L1477: ( D161 . ( D169 . ( len D169 ) ) ) = C241 by L1415 , L1417 , L1474 , L1476 , L107;
+L1478: ( vertices D169 ) c= ( vertices ( D169 ^ D170 ) ) by L696;
+L1479: ( ( vertices D169 ) \ { C241 } ) c= ( ( vertices D164 ) \ { C241 } ) by L1478 , L1476 , XBOOLE_1:33;
+L1480: ( ( vertices D169 ) \ { C241 } ) c= R10 by L1479 , L1406 , XBOOLE_1:1;
+L1481: (D169 <> ( {} ) & ( D162 . ( D169 . 1 ) ) = C240) by L1399 , L1415 , L1474 , L1476 , L107;
+L1482: D169 is_orientedpath_of C240 , C241 by L1481 , L1477 , L757;
+L1483: D169 is_orientedpath_of C240 , C241 , R10 by L1482 , L1480 , L759;
+L1484: ( cost (C237 , R12) ) <= ( cost (D169 , R12) ) by L1483 , L1360 , L1223;
+L1485: ( cost (D170 , R12) ) >= ( 0 ) by L1358 , L1126;
+L1486: ( cost (D164 , R12) ) = ( ( cost (D169 , R12) ) + ( cost (D170 , R12) ) ) by L1358 , L1476 , L1049 , L1157;
+L1487: ( ( cost (D169 , R12) ) + (( 0 ) qua Nat) ) <= ( cost (D164 , R12) ) by L1486 , L1485 , XREAL_1:7;
+L1488: ( cost (C237 , R12) ) <= ( cost (D164 , R12) ) by L1487 , L1484 , XXREAL_0:2;
+L1489: ( cost (C252 , R12) ) <= ( cost (D164 , R12) ) by L1488 , L1453 , XXREAL_0:2;
+L1490: ( cost (D167 , R12) ) = ( ( cost (C252 , R12) ) + ( cost (D165 , R12) ) ) by L1358 , L1049 , L1157;
+L1491: ( cost (D167 , R12) ) <= ( cost (C243 , R12) ) by L1490 , L1411 , L1489 , XREAL_1:7;
+L1492: ( cost (C238 , R12) ) <= ( cost (C243 , R12) ) by L1491 , L1473 , XXREAL_0:2;
+thus L1493:now
+assume L1494: ( cost (C238 , R12) ) <= ( cost (C239 , R12) );
+L1495:
+now
+let C256 being  oriented (Chain of C236);
+assume L1496: C256 is_orientedpath_of C240 , C242 , D160;
+L1497: ( cost (C243 , R12) ) <= ( cost (C256 , R12) ) by L1496 , L1372 , L1223;
+thus L1498: ( cost (C238 , R12) ) <= ( cost (C256 , R12) ) by L1497 , L1492 , XXREAL_0:2;
+end;
+thus L1499: C238 is_shortestpath_of C240 , C242 , D160 , R12 by L1495 , L1370 , L1223;
+end;
+thus L1500:now
+assume L1501: ( cost (C238 , R12) ) >= ( cost (C239 , R12) );
+L1502: ( cost (C239 , R12) ) <= ( cost (C243 , R12) ) by L1501 , L1492 , XXREAL_0:2;
+L1503:
+now
+let C257 being  oriented (Chain of C236);
+assume L1504: C257 is_orientedpath_of C240 , C242 , D160;
+L1505: ( cost (C243 , R12) ) <= ( cost (C257 , R12) ) by L1504 , L1372 , L1223;
+thus L1506: ( cost (C239 , R12) ) <= ( cost (C257 , R12) ) by L1505 , L1502 , XXREAL_0:2;
+end;
+thus L1507: C239 is_shortestpath_of C240 , C242 , D160 , R12 by L1503 , L1373 , L1223;
+end;
+end;
+end;
+end;
+suppose L1421: (not C241 in ( vertices D164 ));
+
+L1422: ( ( vertices D164 ) \ { C241 } ) = ( vertices D164 ) by L1421 , ZFMISC_1:57;
+L1423: ( ( vertices D164 ) \ { C241 } ) c= D160 by L1422 , L1385 , L1403 , L759;
+L1424: ( ( vertices C243 ) \ { C242 } ) c= R10 by L1423 , L1403 , L1422 , XBOOLE_1:43;
+L1425: C243 is_orientedpath_of C240 , C242 , R10 by L1424 , L1386 , L759;
+thus L1426: thesis by L1425 , L1364 , L1374 , L1223;
+end;
+end;
+end;
+suppose L1414: ( len C243 ) < ( 1 + 1 );
+
+L1415: ( len C243 ) <= 1 by L1414 , NAT_1:13;
+L1416: ( len C243 ) = 1 by L1415 , L1389 , XXREAL_0:1;
+L1417: ( vertices C243 ) = ( vertices ( C243 /. 1 ) ) by L1389 , L1415 , L678 , XXREAL_0:1;
+L1418: ( ( vertices C243 ) \ { C242 } ) c= R10
+proof
+let C258 being set;
+assume L1419: C258 in ( ( vertices C243 ) \ { C242 } );
+L1420: (not C258 in { C242 }) by L1419 , XBOOLE_0:def 5;
+L1421: C258 in ( vertices ( C243 /. 1 ) ) by L1417 , L1419 , XBOOLE_0:def 5;
+L1422: (C258 = ( D162 . ( C243 /. 1 ) ) or C258 = ( D161 . ( C243 /. 1 ) )) by L1421 , TARSKI:def 2;
+L1423: ( C243 /. 1 ) = ( C243 . 1 ) by L1389 , FINSEQ_4:15;
+L1424: C242 = ( D161 . ( C243 . ( len C243 ) ) ) by L1386 , L757
+.= ( D161 . ( C243 /. 1 ) ) by L1416 , FINSEQ_4:15;
+thus L1425: thesis by L1424 , L1386 , L1368 , L1420 , L1422 , L1423 , L757 , TARSKI:def 1;
+end;
+L1426: C243 is_orientedpath_of C240 , C242 , R10 by L1418 , L1386 , L759;
+thus L1427: thesis by L1426 , L1364 , L1374 , L1223;
+end;
+end;

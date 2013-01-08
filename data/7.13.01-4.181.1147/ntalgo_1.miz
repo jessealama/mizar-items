@@ -1,0 +1,1802 @@
+:: Extended Euclidean Algorithm and CRT Algorithm
+::  by Hiroyuki Okazaki , Yosiki Aoki and Yasunari Shidama
+:: 
+:: Received February 8, 2012
+:: Copyright (c) 2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies RECDEF_2, TARSKI, XBOOLE_0, FINSEQ_1, RELAT_1, FUNCT_1, COMPLEX1,
+      NAT_1, MCART_1, ZFMISC_1, SUBSET_1, NUMBERS, INT_1, INT_2, CARD_1,
+      ARYTM_1, XXREAL_0, ARYTM_3, ORDINAL4, NTALGO_1, CARD_3;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, FUNCT_1, XTUPLE_0, MCART_1,
+      FUNCT_2, NUMBERS, XCMPLX_0, XXREAL_0, NAT_1, INT_1, INT_2, NAT_D,
+      FINSEQ_1, RVSUM_1, ORDINAL1;
+ constructors XXREAL_0, NAT_D, REAL_1, BINARITH, RVSUM_1, XTUPLE_0;
+ registrations XREAL_0, RELSET_1, ORDINAL1, INT_1, SUBSET_1, FINSEQ_1, NAT_1,
+      XXREAL_0, XBOOLE_0, VALUED_0, CARD_1, NUMBERS, XTUPLE_0;
+ requirements NUMERALS, BOOLE, SUBSET, REAL, ARITHM;
+ definitions FINSEQ_1, INT_1, XTUPLE_0;
+ theorems TARSKI, ZFMISC_1, FUNCT_1, MCART_1, FUNCT_2, XXREAL_0, XREAL_1,
+      NAT_1, INT_1, INT_2, NAT_D, FINSEQ_1, FINSEQ_2, XBOOLE_1, ORDINAL1,
+      ABSVALUE, XCMPLX_1, INT_4, RVSUM_1, INT_6, XTUPLE_0, WSIERP_1;
+ schemes FINSEQ_1, NAT_1, RECDEF_1, RECDEF_2;
+
+begin
+theorem
+L1: (for B1 , B2 being Integer holds ( ( B1 mod B2 ) mod B2 ) = ( B1 mod B2 ))
+proof
+let C1 , C2 being Integer;
+L2: ( C1 mod C2 ) = ( ( C1 + ( 0 ) ) mod C2 )
+.= ( ( ( C1 mod C2 ) + ( ( 0 ) mod C2 ) ) mod C2 ) by NAT_D:66
+.= ( ( ( C1 mod C2 ) + ( 0 ) ) mod C2 ) by INT_4:12;
+thus L3: thesis by L2;
+end;
+L4: (for B3 being (Element of ( NAT )) holds ( B3 gcd ( 0 ) ) = B3)
+proof
+let C3 being (Element of ( NAT ));
+L5: ( 0 ) = ( ( 0 ) * C3 );
+L6: C3 divides ( 0 ) by L5 , INT_1:def 3;
+L7: (for B4 being Integer holds ((B4 divides C3 & B4 divides ( 0 )) implies B4 divides C3));
+thus L8: ( C3 gcd ( 0 ) ) = C3 by L7 , L6 , INT_2:def 2;
+end;
+L9: (for B5 , B6 being (Element of ( INT )) holds (ex B7 , B8 being (sequence of ( NAT )) st (( B7 . ( 0 ) ) = ( abs B5 ) & ( B8 . ( 0 ) ) = ( abs B6 ) & (for B9 being (Element of ( NAT )) holds (( B7 . ( B9 + 1 ) ) = ( B8 . B9 ) & ( B8 . ( B9 + 1 ) ) = ( ( B7 . B9 ) mod ( B8 . B9 ) ))))))
+proof
+let C4 , C5 being (Element of ( INT ));
+defpred S1[ Nat , Nat , Nat , Nat , Nat ] means ($4 = $3 & $5 = ( $2 mod $3 ));
+L10: (for B10 being (Element of ( NAT )) holds (for B11 being (Element of ( NAT )) holds (for B12 being (Element of ( NAT )) holds (ex B13 being (Element of ( NAT )) st (ex B14 being (Element of ( NAT )) st S1[ B10 , B11 , B12 , B13 , B14 ])))));
+consider C6 being (Function of ( NAT ) , ( NAT )), C7 being (Function of ( NAT ) , ( NAT )) such that L11: (( C6 . ( 0 ) ) = ( abs C4 ) & ( C7 . ( 0 ) ) = ( abs C5 ) & (for B15 being (Element of ( NAT )) holds S1[ B15 , ( C6 . B15 ) , ( C7 . B15 ) , ( C6 . ( B15 + 1 ) ) , ( C7 . ( B15 + 1 ) ) ])) from RECDEF_2:sch 3(L10);
+take C6;
+take C7;
+thus L12: thesis by L11;
+end;
+L13: (for B16 , B17 being (Element of ( INT )) holds (for B18 , B19 , B20 , B21 being (sequence of ( NAT )) holds ((( B18 . ( 0 ) ) = ( abs B16 ) & ( B19 . ( 0 ) ) = ( abs B17 ) & (for B22 being (Element of ( NAT )) holds (( B18 . ( B22 + 1 ) ) = ( B19 . B22 ) & ( B19 . ( B22 + 1 ) ) = ( ( B18 . B22 ) mod ( B19 . B22 ) ))) & ( B20 . ( 0 ) ) = ( abs B16 ) & ( B21 . ( 0 ) ) = ( abs B17 ) & (for B23 being (Element of ( NAT )) holds (( B20 . ( B23 + 1 ) ) = ( B21 . B23 ) & ( B21 . ( B23 + 1 ) ) = ( ( B20 . B23 ) mod ( B21 . B23 ) )))) implies (B18 = B20 & B19 = B21))))
+proof
+let C8 , C9 being (Element of ( INT ));
+let C10 , C11 , C12 , C13 being (sequence of ( NAT ));
+assume L14: (( C10 . ( 0 ) ) = ( abs C8 ) & ( C11 . ( 0 ) ) = ( abs C9 ) & (for B24 being (Element of ( NAT )) holds (( C10 . ( B24 + 1 ) ) = ( C11 . B24 ) & ( C11 . ( B24 + 1 ) ) = ( ( C10 . B24 ) mod ( C11 . B24 ) ))));
+assume L15: (( C12 . ( 0 ) ) = ( abs C8 ) & ( C13 . ( 0 ) ) = ( abs C9 ) & (for B25 being (Element of ( NAT )) holds (( C12 . ( B25 + 1 ) ) = ( C13 . B25 ) & ( C13 . ( B25 + 1 ) ) = ( ( C12 . B25 ) mod ( C13 . B25 ) ))));
+defpred S2[ Nat ] means (( C10 . $1 ) = ( C12 . $1 ) & ( C11 . $1 ) = ( C13 . $1 ));
+L16: S2[ ( 0 ) ] by L14 , L15;
+L17: (for B26 being (Element of ( NAT )) holds (S2[ B26 ] implies S2[ ( B26 + 1 ) ]))
+proof
+let C14 being (Element of ( NAT ));
+assume L18: S2[ C14 ];
+L19: ( C10 . ( C14 + 1 ) ) = ( C11 . C14 ) by L14
+.= ( C12 . ( C14 + 1 ) ) by L15 , L18;
+L20: ( C11 . ( C14 + 1 ) ) = ( ( C10 . C14 ) mod ( C11 . C14 ) ) by L14
+.= ( C13 . ( C14 + 1 ) ) by L15 , L18;
+thus L21: S2[ ( C14 + 1 ) ] by L20 , L19;
+end;
+L22: (for B27 being (Element of ( NAT )) holds S2[ B27 ]) from NAT_1:sch 1(L16 , L17);
+thus L23: thesis by L22 , FUNCT_2:def 8;
+end;
+definition
+let C15 , C16 being (Element of ( INT ));
+func ALGO_GCD (C15 , C16) -> (Element of ( NAT )) means 
+:L24: (ex B28 , B29 being (sequence of ( NAT )) st (( B28 . ( 0 ) ) = ( abs C15 ) & ( B29 . ( 0 ) ) = ( abs C16 ) & (for B30 being (Element of ( NAT )) holds (( B28 . ( B30 + 1 ) ) = ( B29 . B30 ) & ( B29 . ( B30 + 1 ) ) = ( ( B28 . B30 ) mod ( B29 . B30 ) ))) & it = ( B28 . ( min* { B31 where B31 is (Element of ( NAT )) : ( B29 . B31 ) = ( 0 ) } ) )));
+existence
+proof
+consider C17 , C18 being (sequence of ( NAT )) such that L25: (( C17 . ( 0 ) ) = ( abs C15 ) & ( C18 . ( 0 ) ) = ( abs C16 ) & (for B32 being (Element of ( NAT )) holds (( C17 . ( B32 + 1 ) ) = ( C18 . B32 ) & ( C18 . ( B32 + 1 ) ) = ( ( C17 . B32 ) mod ( C18 . B32 ) )))) by L9;
+set D1 = ( C17 . ( min* { B33 where B33 is (Element of ( NAT )) : ( C18 . B33 ) = ( 0 ) } ) );
+L26: D1 is (Element of ( NAT ));
+thus L27: thesis by L26 , L25;
+end;
+uniqueness
+proof
+let C19 , C20 being (Element of ( NAT ));
+assume L28: (ex B34 , B35 being (sequence of ( NAT )) st (( B34 . ( 0 ) ) = ( abs C15 ) & ( B35 . ( 0 ) ) = ( abs C16 ) & (for B36 being (Element of ( NAT )) holds (( B34 . ( B36 + 1 ) ) = ( B35 . B36 ) & ( B35 . ( B36 + 1 ) ) = ( ( B34 . B36 ) mod ( B35 . B36 ) ))) & C19 = ( B34 . ( min* { B37 where B37 is (Element of ( NAT )) : ( B35 . B37 ) = ( 0 ) } ) )));
+consider C21 , C22 being (sequence of ( NAT )) such that L29: (( C21 . ( 0 ) ) = ( abs C15 ) & ( C22 . ( 0 ) ) = ( abs C16 ) & (for B38 being (Element of ( NAT )) holds (( C21 . ( B38 + 1 ) ) = ( C22 . B38 ) & ( C22 . ( B38 + 1 ) ) = ( ( C21 . B38 ) mod ( C22 . B38 ) ))) & C19 = ( C21 . ( min* { B39 where B39 is (Element of ( NAT )) : ( C22 . B39 ) = ( 0 ) } ) )) by L28;
+assume L30: (ex B40 , B41 being (sequence of ( NAT )) st (( B40 . ( 0 ) ) = ( abs C15 ) & ( B41 . ( 0 ) ) = ( abs C16 ) & (for B42 being (Element of ( NAT )) holds (( B40 . ( B42 + 1 ) ) = ( B41 . B42 ) & ( B41 . ( B42 + 1 ) ) = ( ( B40 . B42 ) mod ( B41 . B42 ) ))) & C20 = ( B40 . ( min* { B43 where B43 is (Element of ( NAT )) : ( B41 . B43 ) = ( 0 ) } ) )));
+consider C23 , C24 being (sequence of ( NAT )) such that L31: (( C23 . ( 0 ) ) = ( abs C15 ) & ( C24 . ( 0 ) ) = ( abs C16 ) & (for B44 being (Element of ( NAT )) holds (( C23 . ( B44 + 1 ) ) = ( C24 . B44 ) & ( C24 . ( B44 + 1 ) ) = ( ( C23 . B44 ) mod ( C24 . B44 ) ))) & C20 = ( C23 . ( min* { B45 where B45 is (Element of ( NAT )) : ( C24 . B45 ) = ( 0 ) } ) )) by L30;
+L32: (C21 = C23 & C22 = C24) by L13 , L29 , L31;
+thus L33: thesis by L32 , L29 , L31;
+end;
+end;
+L35: (for B46 , B47 being (Element of ( INT )) holds (for B48 , B49 being (sequence of ( NAT )) holds ((( B48 . ( 0 ) ) = ( abs B46 ) & ( B49 . ( 0 ) ) = ( abs B47 ) & (for B50 being (Element of ( NAT )) holds (( B48 . ( B50 + 1 ) ) = ( B49 . B50 ) & ( B49 . ( B50 + 1 ) ) = ( ( B48 . B50 ) mod ( B49 . B50 ) )))) implies (for B51 being (Element of ( NAT )) holds (( B49 . B51 ) <> ( 0 ) implies ( ( B48 . B51 ) gcd ( B49 . B51 ) ) = ( ( B48 . ( B51 + 1 ) ) gcd ( B49 . ( B51 + 1 ) ) ))))))
+proof
+let C25 , C26 being (Element of ( INT ));
+let C27 , C28 being (sequence of ( NAT ));
+assume L36: (( C27 . ( 0 ) ) = ( abs C25 ) & ( C28 . ( 0 ) ) = ( abs C26 ) & (for B52 being (Element of ( NAT )) holds (( C27 . ( B52 + 1 ) ) = ( C28 . B52 ) & ( C28 . ( B52 + 1 ) ) = ( ( C27 . B52 ) mod ( C28 . B52 ) ))));
+let C29 being (Element of ( NAT ));
+assume L37: ( C28 . C29 ) <> ( 0 );
+set D2 = ( ( C27 . C29 ) gcd ( C28 . C29 ) );
+L38: ( C27 . ( C29 + 1 ) ) = ( C28 . C29 ) by L36;
+L39: ( C28 . ( C29 + 1 ) ) = ( ( C27 . C29 ) mod ( C28 . C29 ) ) by L36;
+L40: D2 divides ( C27 . ( C29 + 1 ) ) by L38 , INT_2:def 2;
+L41: D2 divides ( C28 . ( C29 + 1 ) )
+proof
+L42: ( C28 . ( C29 + 1 ) ) = ( ( C27 . C29 ) - ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * ( C28 . C29 ) ) ) by INT_1:def 10 , L39 , L37;
+L43: D2 divides ( C27 . C29 ) by INT_2:def 2;
+L44: D2 divides ( C28 . C29 ) by INT_2:def 2;
+L45: (ex B53 being Integer st ( C27 . C29 ) = ( D2 * B53 )) by L43 , INT_1:def 3;
+L46: (ex B54 being Integer st ( C28 . C29 ) = ( D2 * B54 )) by L44 , INT_1:def 3;
+consider C30 , C31 being Integer such that L47: ( C28 . ( C29 + 1 ) ) = ( ( D2 * C30 ) - ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * ( D2 * C31 ) ) ) by L46 , L42 , L45;
+L48: ( C28 . ( C29 + 1 ) ) = ( ( C30 - ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * C31 ) ) * D2 ) by L47;
+thus L49: D2 divides ( C28 . ( C29 + 1 ) ) by L48 , INT_1:def 3;
+end;
+L50: (for B55 being Integer holds ((B55 divides ( C27 . ( C29 + 1 ) ) & B55 divides ( C28 . ( C29 + 1 ) )) implies B55 divides D2))
+proof
+let C32 being Integer;
+assume L51: (C32 divides ( C27 . ( C29 + 1 ) ) & C32 divides ( C28 . ( C29 + 1 ) ));
+L52: C32 divides ( C28 . C29 ) by L51 , L36;
+L53: C32 divides ( C27 . C29 )
+proof
+L54: ( C28 . ( C29 + 1 ) ) = ( ( C27 . C29 ) - ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * ( C28 . C29 ) ) ) by INT_1:def 10 , L39 , L37;
+L55: ( C27 . C29 ) = ( ( C28 . ( C29 + 1 ) ) + ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * ( C28 . C29 ) ) ) by L54;
+L56: (ex B56 being Integer st ( C28 . C29 ) = ( C32 * B56 )) by INT_1:def 3 , L52;
+L57: (ex B57 being Integer st ( C28 . ( C29 + 1 ) ) = ( C32 * B57 )) by INT_1:def 3 , L51;
+consider C33 , C34 being Integer such that L58: ( C27 . C29 ) = ( ( C32 * C33 ) + ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * ( C32 * C34 ) ) ) by L55 , L56 , L57;
+L59: ( C27 . C29 ) = ( C32 * ( C33 + ( ( ( C27 . C29 ) div ( C28 . C29 ) ) * C34 ) ) ) by L58;
+thus L60: C32 divides ( C27 . C29 ) by L59 , INT_1:def 3;
+end;
+thus L61: C32 divides D2 by L52 , L53 , INT_2:def 2;
+end;
+thus L62: ( ( C27 . ( C29 + 1 ) ) gcd ( C28 . ( C29 + 1 ) ) ) = D2 by L50 , L40 , L41 , INT_2:def 2;
+end;
+L63: (for B58 , B59 being (Element of ( INT )) holds (for B60 , B61 being (sequence of ( NAT )) holds ((( B60 . ( 0 ) ) = ( abs B58 ) & ( B61 . ( 0 ) ) = ( abs B59 ) & (for B62 being (Element of ( NAT )) holds (( B60 . ( B62 + 1 ) ) = ( B61 . B62 ) & ( B61 . ( B62 + 1 ) ) = ( ( B60 . B62 ) mod ( B61 . B62 ) )))) implies (for B63 being (Element of ( NAT )) holds (( B61 . B63 ) <> ( 0 ) implies ( ( B60 . ( 0 ) ) gcd ( B61 . ( 0 ) ) ) = ( ( B60 . B63 ) gcd ( B61 . B63 ) ))))))
+proof
+let C35 , C36 being (Element of ( INT ));
+let C37 , C38 being (sequence of ( NAT ));
+assume L64: (( C37 . ( 0 ) ) = ( abs C35 ) & ( C38 . ( 0 ) ) = ( abs C36 ) & (for B64 being (Element of ( NAT )) holds (( C37 . ( B64 + 1 ) ) = ( C38 . B64 ) & ( C38 . ( B64 + 1 ) ) = ( ( C37 . B64 ) mod ( C38 . B64 ) ))));
+defpred S3[ Nat ] means (( C38 . $1 ) <> ( 0 ) implies ( ( C37 . ( 0 ) ) gcd ( C38 . ( 0 ) ) ) = ( ( C37 . $1 ) gcd ( C38 . $1 ) ));
+L65: S3[ ( 0 ) ];
+L66: (for B65 being (Element of ( NAT )) holds (S3[ B65 ] implies S3[ ( B65 + 1 ) ]))
+proof
+let C39 being (Element of ( NAT ));
+assume L67: S3[ C39 ];
+L68: (( C38 . ( C39 + 1 ) ) <> ( 0 ) implies ( ( C37 . ( 0 ) ) gcd ( C38 . ( 0 ) ) ) = ( ( C37 . ( C39 + 1 ) ) gcd ( C38 . ( C39 + 1 ) ) ))
+proof
+assume L69: ( C38 . ( C39 + 1 ) ) <> ( 0 );
+L70: ( C38 . C39 ) <> ( 0 )
+proof
+assume L71: ( C38 . C39 ) = ( 0 );
+L72: ( C38 . ( C39 + 1 ) ) = ( ( C37 . C39 ) mod ( C38 . C39 ) ) by L64;
+thus L73: contradiction by L72 , L69 , L71 , INT_1:def 10;
+end;
+thus L74: thesis by L70 , L67 , L64 , L35;
+end;
+thus L75: S3[ ( C39 + 1 ) ] by L68;
+end;
+L76: (for B66 being (Element of ( NAT )) holds S3[ B66 ]) from NAT_1:sch 1(L65 , L66);
+thus L77: thesis by L76;
+end;
+L78: (for B67 , B68 being (Element of ( INT )) holds (for B69 , B70 being (sequence of ( NAT )) holds ((( B69 . ( 0 ) ) = ( abs B67 ) & ( B70 . ( 0 ) ) = ( abs B68 ) & (for B71 being (Element of ( NAT )) holds (( B69 . ( B71 + 1 ) ) = ( B70 . B71 ) & ( B70 . ( B71 + 1 ) ) = ( ( B69 . B71 ) mod ( B70 . B71 ) )))) implies { B72 where B72 is (Element of ( NAT )) : ( B70 . B72 ) = ( 0 ) } is non  empty non  empty non  empty non  empty (Subset of ( NAT )))))
+proof
+let C40 , C41 being (Element of ( INT ));
+let C42 , C43 being (sequence of ( NAT ));
+assume L79: (( C42 . ( 0 ) ) = ( abs C40 ) & ( C43 . ( 0 ) ) = ( abs C41 ) & (for B73 being (Element of ( NAT )) holds (( C42 . ( B73 + 1 ) ) = ( C43 . B73 ) & ( C43 . ( B73 + 1 ) ) = ( ( C42 . B73 ) mod ( C43 . B73 ) ))));
+L80: (for B74 being set holds (B74 in { B75 where B75 is (Element of ( NAT )) : ( C43 . B75 ) = ( 0 ) } implies B74 in ( NAT )))
+proof
+let C44 being set;
+assume L81: C44 in { B76 where B76 is (Element of ( NAT )) : ( C43 . B76 ) = ( 0 ) };
+L82: (ex B77 being (Element of ( NAT )) st (C44 = B77 & ( C43 . B77 ) = ( 0 ))) by L81;
+thus L83: C44 in ( NAT ) by L82;
+end;
+L84: (ex B78 being (Element of ( NAT )) st ( C43 . B78 ) = ( 0 ))
+proof
+assume L85: (not (ex B79 being (Element of ( NAT )) st ( C43 . B79 ) = ( 0 )));
+L86: (for B80 being (Element of ( NAT )) holds ( C43 . ( B80 + 1 ) ) <= ( ( C43 . B80 ) - 1 ))
+proof
+let C45 being (Element of ( NAT ));
+L87: ( C43 . C45 ) <> ( 0 ) by L85;
+L88: ( C43 . ( C45 + 1 ) ) = ( ( C42 . C45 ) mod ( C43 . C45 ) ) by L79;
+L89: ( C43 . ( C45 + 1 ) ) < ( C43 . C45 ) by L88 , L87 , INT_1:58;
+L90: ( ( C43 . ( C45 + 1 ) ) + 1 ) <= ( C43 . C45 ) by L89 , NAT_1:13;
+L91: ( ( ( C43 . ( C45 + 1 ) ) + 1 ) - 1 ) <= ( ( C43 . C45 ) - 1 ) by L90 , XREAL_1:9;
+thus L92: ( C43 . ( C45 + 1 ) ) <= ( ( C43 . C45 ) - 1 ) by L91;
+end;
+defpred S4[ Nat ] means ( C43 . $1 ) <= ( ( C43 . ( 0 ) ) - $1 );
+L93: S4[ ( 0 ) ];
+L94: (for B81 being (Element of ( NAT )) holds (S4[ B81 ] implies S4[ ( B81 + 1 ) ]))
+proof
+let C46 being (Element of ( NAT ));
+assume L95: S4[ C46 ];
+L96: ( C43 . ( C46 + 1 ) ) <= ( ( C43 . C46 ) - 1 ) by L86;
+L97: ( ( C43 . C46 ) - 1 ) <= ( ( ( C43 . ( 0 ) ) - C46 ) - 1 ) by L95 , XREAL_1:9;
+thus L98: S4[ ( C46 + 1 ) ] by L97 , XXREAL_0:2 , L96;
+end;
+L99: (for B82 being (Element of ( NAT )) holds S4[ B82 ]) from NAT_1:sch 1(L93 , L94);
+L100: ( C43 . ( C43 . ( 0 ) ) ) <= ( ( C43 . ( 0 ) ) - ( C43 . ( 0 ) ) ) by L99;
+thus L101: contradiction by L100 , L85 , NAT_1:14;
+end;
+consider C47 being (Element of ( NAT )) such that L102: ( C43 . C47 ) = ( 0 ) by L84;
+L103: C47 in { B83 where B83 is (Element of ( NAT )) : ( C43 . B83 ) = ( 0 ) } by L102;
+thus L104: thesis by L103 , L80 , TARSKI:def 3;
+end;
+theorem
+L105: (for B84 , B85 being (Element of ( INT )) holds ( ALGO_GCD (B84 , B85) ) = ( B84 gcd B85 ))
+proof
+let C48 , C49 being (Element of ( INT ));
+consider C50 , C51 being (sequence of ( NAT )) such that L106: (( C50 . ( 0 ) ) = ( abs C48 ) & ( C51 . ( 0 ) ) = ( abs C49 ) & (for B86 being (Element of ( NAT )) holds (( C50 . ( B86 + 1 ) ) = ( C51 . B86 ) & ( C51 . ( B86 + 1 ) ) = ( ( C50 . B86 ) mod ( C51 . B86 ) ))) & ( ALGO_GCD (C48 , C49) ) = ( C50 . ( min* { B87 where B87 is (Element of ( NAT )) : ( C51 . B87 ) = ( 0 ) } ) )) by L24;
+set D3 = ( min* { B88 where B88 is (Element of ( NAT )) : ( C51 . B88 ) = ( 0 ) } );
+L107: { B89 where B89 is (Element of ( NAT )) : ( C51 . B89 ) = ( 0 ) } is non  empty non  empty non  empty non  empty (Subset of ( NAT )) by L106 , L78;
+L108: D3 in { B90 where B90 is (Element of ( NAT )) : ( C51 . B90 ) = ( 0 ) } by L107 , NAT_1:def 1;
+L109: (ex B91 being (Element of ( NAT )) st (D3 = B91 & ( C51 . B91 ) = ( 0 ))) by L108;
+per cases ;
+suppose L110: D3 = ( 0 );
+
+thus L111: ( ALGO_GCD (C48 , C49) ) = ( ( C50 . ( 0 ) ) gcd ( C51 . ( 0 ) ) ) by L109 , L110 , L4 , L106
+.= ( C48 gcd C49 ) by INT_2:34 , L106;
+end;
+suppose L112: D3 <> ( 0 );
+
+L113: 1 <= D3 by L112 , NAT_1:14;
+L114: ( 1 - 1 ) <= ( D3 - 1 ) by L113 , XREAL_1:9;
+reconsider D4 = ( D3 - 1 ) as (Element of ( NAT )) by L114 , INT_1:3;
+L115: ( C51 . D4 ) <> ( 0 )
+proof
+assume L116: ( C51 . D4 ) = ( 0 );
+L117: D4 in { B92 where B92 is (Element of ( NAT )) : ( C51 . B92 ) = ( 0 ) } by L116;
+L118: ( D3 - 1 ) < ( D3 - ( 0 ) ) by XREAL_1:15;
+thus L119: contradiction by L118 , L117 , L107 , NAT_1:def 1;
+end;
+L120: ( ( C50 . ( 0 ) ) gcd ( C51 . ( 0 ) ) ) = ( ( C50 . D4 ) gcd ( C51 . D4 ) ) by L115 , L106 , L63;
+L121: ( ( C50 . D4 ) gcd ( C51 . D4 ) ) = ( ( C50 . ( D4 + 1 ) ) gcd ( C51 . ( D4 + 1 ) ) ) by L35 , L115 , L106;
+L122: ( ( C50 . D3 ) gcd ( C51 . D3 ) ) = ( ALGO_GCD (C48 , C49) ) by L106 , L4 , L109;
+thus L123: thesis by L122 , L121 , INT_2:34 , L120 , L106;
+end;
+end;
+begin
+scheme QuadChoiceRec { F1 , F2 , F3 , F4() -> non  empty set , F5() -> (Element of F1()) , F6() -> (Element of F2()) , F7() -> (Element of F3()) , F8() -> (Element of F4()) , P1[set , set , set , set , set , set , set , set , set] } : (ex B93 being (Function of ( NAT ) , F1()) st (ex B94 being (Function of ( NAT ) , F2()) st (ex B95 being (Function of ( NAT ) , F3()) st (ex B96 being (Function of ( NAT ) , F4()) st (( B93 . ( 0 ) ) = F5() & ( B94 . ( 0 ) ) = F6() & ( B95 . ( 0 ) ) = F7() & ( B96 . ( 0 ) ) = F8() & (for B97 being (Element of ( NAT )) holds P1[ B97 , ( B93 . B97 ) , ( B94 . B97 ) , ( B95 . B97 ) , ( B96 . B97 ) , ( B93 . ( B97 + 1 ) ) , ( B94 . ( B97 + 1 ) ) , ( B95 . ( B97 + 1 ) ) , ( B96 . ( B97 + 1 ) ) ]))))))
+provided
+L125: (for B98 being (Element of ( NAT )) holds (for B99 being (Element of F1()) holds (for B100 being (Element of F2()) holds (for B101 being (Element of F3()) holds (for B102 being (Element of F4()) holds (ex B103 being (Element of F1()) st (ex B104 being (Element of F2()) st (ex B105 being (Element of F3()) st (ex B106 being (Element of F4()) st P1[ B98 , B99 , B100 , B101 , B102 , B103 , B104 , B105 , B106 ])))))))))
+proof
+defpred S5[ set , set , set , set , set ] means P1[ $1 , ( $2 `1 ) , ( $2 `2 ) , ( $3 `1 ) , ( $3 `2 ) , ( $4 `1 ) , ( $4 `2 ) , ( $5 `1 ) , ( $5 `2 ) ];
+L126: (for B107 being (Element of ( NAT )) holds (for B108 being (Element of [: F1() , F2() :]) holds (for B109 being (Element of [: F3() , F4() :]) holds (ex B110 being (Element of [: F1() , F2() :]) st (ex B111 being (Element of [: F3() , F4() :]) st S5[ B107 , B108 , B109 , B110 , B111 ])))))
+proof
+let C52 being (Element of ( NAT ));
+let C53 being (Element of [: F1() , F2() :]);
+let C54 being (Element of [: F3() , F4() :]);
+L127: (( C53 `1 ) is (Element of F1()) & ( C53 `2 ) is (Element of F2()) & ( C54 `1 ) is (Element of F3()) & ( C54 `2 ) is (Element of F4())) by MCART_1:10;
+consider C55 being (Element of F1()), C56 being (Element of F2()), C57 being (Element of F3()), C58 being (Element of F4()) such that L128: P1[ C52 , ( C53 `1 ) , ( C53 `2 ) , ( C54 `1 ) , ( C54 `2 ) , C55 , C56 , C57 , C58 ] by L127 , L125;
+reconsider D5 = [ C55 , C56 ] as (Element of [: F1() , F2() :]) by ZFMISC_1:87;
+reconsider D6 = [ C57 , C58 ] as (Element of [: F3() , F4() :]) by ZFMISC_1:87;
+take D5;
+take D6;
+L129: (( [ C55 , C56 ] `1 ) = C55 & ( [ C55 , C56 ] `2 ) = C56 & ( [ C57 , C58 ] `1 ) = C57 & ( [ C57 , C58 ] `2 ) = C58) by MCART_1:7;
+thus L130: thesis by L129 , L128;
+end;
+reconsider D7 = [ F5() , F6() ] as (Element of [: F1() , F2() :]) by ZFMISC_1:87;
+reconsider D8 = [ F7() , F8() ] as (Element of [: F3() , F4() :]) by ZFMISC_1:87;
+consider C59 being (Function of ( NAT ) , [: F1() , F2() :]), C60 being (Function of ( NAT ) , [: F3() , F4() :]) such that L131: ( C59 . ( 0 ) ) = D7 and L132: ( C60 . ( 0 ) ) = D8 and L133: (for B112 being (Element of ( NAT )) holds S5[ B112 , ( C59 . B112 ) , ( C60 . B112 ) , ( C59 . ( B112 + 1 ) ) , ( C60 . ( B112 + 1 ) ) ]) from RECDEF_2:sch 3(L126);
+take ( pr1 C59 );
+take ( pr2 C59 );
+take ( pr1 C60 );
+take ( pr2 C60 );
+L134: (( ( C59 . ( 0 ) ) `1 ) = ( ( pr1 C59 ) . ( 0 ) ) & ( ( C59 . ( 0 ) ) `2 ) = ( ( pr2 C59 ) . ( 0 ) ) & ( ( C60 . ( 0 ) ) `1 ) = ( ( pr1 C60 ) . ( 0 ) ) & ( ( C60 . ( 0 ) ) `2 ) = ( ( pr2 C60 ) . ( 0 ) )) by FUNCT_2:def 5 , FUNCT_2:def 6;
+thus L135: (( ( pr1 C59 ) . ( 0 ) ) = F5() & ( ( pr2 C59 ) . ( 0 ) ) = F6() & ( ( pr1 C60 ) . ( 0 ) ) = F7() & ( ( pr2 C60 ) . ( 0 ) ) = F8()) by L134 , L131 , L132 , XTUPLE_0:def 2 , XTUPLE_0:def 3;
+let C61 being (Element of ( NAT ));
+L136: (( ( C59 . ( C61 + 1 ) ) `1 ) = ( ( pr1 C59 ) . ( C61 + 1 ) ) & ( ( C59 . ( C61 + 1 ) ) `2 ) = ( ( pr2 C59 ) . ( C61 + 1 ) ) & ( ( C60 . ( C61 + 1 ) ) `1 ) = ( ( pr1 C60 ) . ( C61 + 1 ) ) & ( ( C60 . ( C61 + 1 ) ) `2 ) = ( ( pr2 C60 ) . ( C61 + 1 ) )) by FUNCT_2:def 5 , FUNCT_2:def 6;
+L137: (( ( C59 . C61 ) `1 ) = ( ( pr1 C59 ) . C61 ) & ( ( C59 . C61 ) `2 ) = ( ( pr2 C59 ) . C61 ) & ( ( C60 . C61 ) `1 ) = ( ( pr1 C60 ) . C61 ) & ( ( C60 . C61 ) `2 ) = ( ( pr2 C60 ) . C61 )) by FUNCT_2:def 5 , FUNCT_2:def 6;
+thus L138: thesis by L137 , L133 , L136;
+end;
+L139: (for B113 , B114 being (Element of ( INT )) holds (ex B115 , B116 , B117 , B118 being (sequence of ( INT )) st (ex B119 , B120 , B121 , B122 being (sequence of ( INT )) st (( B119 . ( 0 ) ) = 1 & ( B120 . ( 0 ) ) = ( 0 ) & ( B115 . ( 0 ) ) = B113 & ( B117 . ( 0 ) ) = ( 0 ) & ( B122 . ( 0 ) ) = ( 0 ) & ( B121 . ( 0 ) ) = 1 & ( B116 . ( 0 ) ) = B114 & ( B118 . ( 0 ) ) = ( 0 ) & (for B123 being (Element of ( NAT )) holds (( B117 . ( B123 + 1 ) ) = ( ( B115 . B123 ) div ( B116 . B123 ) ) & ( B118 . ( B123 + 1 ) ) = ( ( B115 . B123 ) mod ( B116 . B123 ) ) & ( B119 . ( B123 + 1 ) ) = ( B122 . B123 ) & ( B120 . ( B123 + 1 ) ) = ( B121 . B123 ) & ( B115 . ( B123 + 1 ) ) = ( B116 . B123 ) & ( B122 . ( B123 + 1 ) ) = ( ( B119 . B123 ) - ( ( B117 . ( B123 + 1 ) ) * ( B122 . B123 ) ) ) & ( B121 . ( B123 + 1 ) ) = ( ( B120 . B123 ) - ( ( B117 . ( B123 + 1 ) ) * ( B121 . B123 ) ) ) & ( B116 . ( B123 + 1 ) ) = ( B118 . ( B123 + 1 ) )))))))
+proof
+let C62 , C63 being (Element of ( INT ));
+defpred S6[ Nat , Integer , Integer , Integer , Integer , Integer , Integer , Integer , Integer ] means ($6 = ( $4 div $5 ) & $7 = ( $4 mod $5 ) & $8 = $5 & $9 = $7);
+L140: (for B124 being (Element of ( NAT )) holds (for B125 being (Element of ( INT )) holds (for B126 being (Element of ( INT )) holds (for B127 being (Element of ( INT )) holds (for B128 being (Element of ( INT )) holds (ex B129 being (Element of ( INT )) st (ex B130 being (Element of ( INT )) st (ex B131 being (Element of ( INT )) st (ex B132 being (Element of ( INT )) st S6[ B124 , B125 , B126 , B127 , B128 , B129 , B130 , B131 , B132 ])))))))))
+proof
+let C64 being (Element of ( NAT ));
+let C65 , C66 , C67 , C68 being (Element of ( INT ));
+reconsider D9 = ( C67 div C68 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D10 = ( C67 mod C68 ) as (Element of ( INT )) by INT_1:def 2;
+set D11 = C68;
+set D12 = D10;
+take D9;
+take D10;
+take D11;
+take D12;
+thus L141: S6[ C64 , C65 , C66 , C67 , C68 , D9 , D10 , D11 , D12 ];
+end;
+reconsider D13 = 1 as (Element of ( INT )) by INT_1:def 2;
+reconsider D14 = ( 0 ) as (Element of ( INT )) by INT_1:def 2;
+consider C69 , C70 , C71 , C72 being (sequence of ( INT )) such that L142: (( C69 . ( 0 ) ) = D14 & ( C70 . ( 0 ) ) = D14 & ( C71 . ( 0 ) ) = C62 & ( C72 . ( 0 ) ) = C63 & (for B133 being (Element of ( NAT )) holds S6[ B133 , ( C69 . B133 ) , ( C70 . B133 ) , ( C71 . B133 ) , ( C72 . B133 ) , ( C69 . ( B133 + 1 ) ) , ( C70 . ( B133 + 1 ) ) , ( C71 . ( B133 + 1 ) ) , ( C72 . ( B133 + 1 ) ) ])) from QuadChoiceRec(L140);
+defpred S7[ Nat , Integer , Integer , Integer , Integer , Integer , Integer , Integer , Integer ] means ($6 = $4 & $7 = $5 & $8 = ( $2 - ( ( C69 . ( $1 + 1 ) ) * $4 ) ) & $9 = ( $3 - ( ( C69 . ( $1 + 1 ) ) * $5 ) ));
+L143: (for B134 being (Element of ( NAT )) holds (for B135 , B136 , B137 , B138 being (Element of ( INT )) holds (ex B139 , B140 , B141 , B142 being (Element of ( INT )) st S7[ B134 , B135 , B136 , B137 , B138 , B139 , B140 , B141 , B142 ])))
+proof
+let C73 being (Element of ( NAT ));
+let C74 , C75 , C76 , C77 being (Element of ( INT ));
+reconsider D15 = ( C69 . ( C73 + 1 ) ) as (Element of ( INT ));
+set D16 = C76;
+set D17 = C77;
+reconsider D18 = ( C74 - ( ( C69 . ( C73 + 1 ) ) * C76 ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D19 = ( C75 - ( ( C69 . ( C73 + 1 ) ) * C77 ) ) as (Element of ( INT )) by INT_1:def 2;
+take D16;
+take D17;
+take D18;
+take D19;
+thus L144: S7[ C73 , C74 , C75 , C76 , C77 , D16 , D17 , D18 , D19 ];
+end;
+consider C78 , C79 , C80 , C81 being (sequence of ( INT )) such that L145: (( C78 . ( 0 ) ) = D13 & ( C79 . ( 0 ) ) = D14 & ( C80 . ( 0 ) ) = D14 & ( C81 . ( 0 ) ) = D13 & (for B143 being (Element of ( NAT )) holds S7[ B143 , ( C78 . B143 ) , ( C79 . B143 ) , ( C80 . B143 ) , ( C81 . B143 ) , ( C78 . ( B143 + 1 ) ) , ( C79 . ( B143 + 1 ) ) , ( C80 . ( B143 + 1 ) ) , ( C81 . ( B143 + 1 ) ) ])) from QuadChoiceRec(L143);
+take C71;
+take C72;
+take C69;
+take C70;
+take C78;
+take C79;
+take C81;
+take C80;
+thus L146: thesis by L142 , L145;
+end;
+L147: (for B144 , B145 being (Element of ( INT )) holds (for B146 , B147 , B148 , B149 , B150 , B151 , B152 , B153 , B154 , B155 , B156 , B157 , B158 , B159 , B160 , B161 being (sequence of ( INT )) holds ((( B150 . ( 0 ) ) = 1 & ( B151 . ( 0 ) ) = ( 0 ) & ( B146 . ( 0 ) ) = B144 & ( B148 . ( 0 ) ) = ( 0 ) & ( B153 . ( 0 ) ) = ( 0 ) & ( B152 . ( 0 ) ) = 1 & ( B147 . ( 0 ) ) = B145 & ( B149 . ( 0 ) ) = ( 0 ) & (for B162 being (Element of ( NAT )) holds (( B148 . ( B162 + 1 ) ) = ( ( B146 . B162 ) div ( B147 . B162 ) ) & ( B149 . ( B162 + 1 ) ) = ( ( B146 . B162 ) mod ( B147 . B162 ) ) & ( B150 . ( B162 + 1 ) ) = ( B153 . B162 ) & ( B151 . ( B162 + 1 ) ) = ( B152 . B162 ) & ( B146 . ( B162 + 1 ) ) = ( B147 . B162 ) & ( B153 . ( B162 + 1 ) ) = ( ( B150 . B162 ) - ( ( B148 . ( B162 + 1 ) ) * ( B153 . B162 ) ) ) & ( B152 . ( B162 + 1 ) ) = ( ( B151 . B162 ) - ( ( B148 . ( B162 + 1 ) ) * ( B152 . B162 ) ) ) & ( B147 . ( B162 + 1 ) ) = ( B149 . ( B162 + 1 ) ))) & ( B158 . ( 0 ) ) = 1 & ( B159 . ( 0 ) ) = ( 0 ) & ( B154 . ( 0 ) ) = B144 & ( B156 . ( 0 ) ) = ( 0 ) & ( B161 . ( 0 ) ) = ( 0 ) & ( B160 . ( 0 ) ) = 1 & ( B155 . ( 0 ) ) = B145 & ( B157 . ( 0 ) ) = ( 0 ) & (for B163 being (Element of ( NAT )) holds (( B156 . ( B163 + 1 ) ) = ( ( B154 . B163 ) div ( B155 . B163 ) ) & ( B157 . ( B163 + 1 ) ) = ( ( B154 . B163 ) mod ( B155 . B163 ) ) & ( B158 . ( B163 + 1 ) ) = ( B161 . B163 ) & ( B159 . ( B163 + 1 ) ) = ( B160 . B163 ) & ( B154 . ( B163 + 1 ) ) = ( B155 . B163 ) & ( B161 . ( B163 + 1 ) ) = ( ( B158 . B163 ) - ( ( B156 . ( B163 + 1 ) ) * ( B161 . B163 ) ) ) & ( B160 . ( B163 + 1 ) ) = ( ( B159 . B163 ) - ( ( B156 . ( B163 + 1 ) ) * ( B160 . B163 ) ) ) & ( B155 . ( B163 + 1 ) ) = ( B157 . ( B163 + 1 ) )))) implies (B146 = B154 & B147 = B155 & B148 = B156 & B149 = B157 & B150 = B158 & B151 = B159 & B152 = B160 & B153 = B161))))
+proof
+let C82 , C83 being (Element of ( INT ));
+let C84 , C85 , C86 , C87 , C88 , C89 , C90 , C91 , C92 , C93 , C94 , C95 , C96 , C97 , C98 , C99 being (sequence of ( INT ));
+assume L148: (( C88 . ( 0 ) ) = 1 & ( C89 . ( 0 ) ) = ( 0 ) & ( C84 . ( 0 ) ) = C82 & ( C86 . ( 0 ) ) = ( 0 ) & ( C91 . ( 0 ) ) = ( 0 ) & ( C90 . ( 0 ) ) = 1 & ( C85 . ( 0 ) ) = C83 & ( C87 . ( 0 ) ) = ( 0 ) & (for B164 being (Element of ( NAT )) holds (( C86 . ( B164 + 1 ) ) = ( ( C84 . B164 ) div ( C85 . B164 ) ) & ( C87 . ( B164 + 1 ) ) = ( ( C84 . B164 ) mod ( C85 . B164 ) ) & ( C88 . ( B164 + 1 ) ) = ( C91 . B164 ) & ( C89 . ( B164 + 1 ) ) = ( C90 . B164 ) & ( C84 . ( B164 + 1 ) ) = ( C85 . B164 ) & ( C91 . ( B164 + 1 ) ) = ( ( C88 . B164 ) - ( ( C86 . ( B164 + 1 ) ) * ( C91 . B164 ) ) ) & ( C90 . ( B164 + 1 ) ) = ( ( C89 . B164 ) - ( ( C86 . ( B164 + 1 ) ) * ( C90 . B164 ) ) ) & ( C85 . ( B164 + 1 ) ) = ( C87 . ( B164 + 1 ) ))));
+assume L149: (( C96 . ( 0 ) ) = 1 & ( C97 . ( 0 ) ) = ( 0 ) & ( C92 . ( 0 ) ) = C82 & ( C94 . ( 0 ) ) = ( 0 ) & ( C99 . ( 0 ) ) = ( 0 ) & ( C98 . ( 0 ) ) = 1 & ( C93 . ( 0 ) ) = C83 & ( C95 . ( 0 ) ) = ( 0 ) & (for B165 being (Element of ( NAT )) holds (( C94 . ( B165 + 1 ) ) = ( ( C92 . B165 ) div ( C93 . B165 ) ) & ( C95 . ( B165 + 1 ) ) = ( ( C92 . B165 ) mod ( C93 . B165 ) ) & ( C96 . ( B165 + 1 ) ) = ( C99 . B165 ) & ( C97 . ( B165 + 1 ) ) = ( C98 . B165 ) & ( C92 . ( B165 + 1 ) ) = ( C93 . B165 ) & ( C99 . ( B165 + 1 ) ) = ( ( C96 . B165 ) - ( ( C94 . ( B165 + 1 ) ) * ( C99 . B165 ) ) ) & ( C98 . ( B165 + 1 ) ) = ( ( C97 . B165 ) - ( ( C94 . ( B165 + 1 ) ) * ( C98 . B165 ) ) ) & ( C93 . ( B165 + 1 ) ) = ( C95 . ( B165 + 1 ) ))));
+defpred S8[ Nat ] means (( C84 . $1 ) = ( C92 . $1 ) & ( C85 . $1 ) = ( C93 . $1 ) & ( C86 . $1 ) = ( C94 . $1 ) & ( C87 . $1 ) = ( C95 . $1 ) & ( C88 . $1 ) = ( C96 . $1 ) & ( C89 . $1 ) = ( C97 . $1 ) & ( C90 . $1 ) = ( C98 . $1 ) & ( C91 . $1 ) = ( C99 . $1 ));
+L150: S8[ ( 0 ) ] by L148 , L149;
+L151: (for B166 being (Element of ( NAT )) holds (S8[ B166 ] implies S8[ ( B166 + 1 ) ]))
+proof
+let C100 being (Element of ( NAT ));
+assume L152: S8[ C100 ];
+L153: ( C86 . ( C100 + 1 ) ) = ( ( C92 . C100 ) div ( C93 . C100 ) ) by L148 , L152
+.= ( C94 . ( C100 + 1 ) ) by L149;
+L154: ( C87 . ( C100 + 1 ) ) = ( ( C92 . C100 ) mod ( C93 . C100 ) ) by L148 , L152
+.= ( C95 . ( C100 + 1 ) ) by L149;
+L155: ( C88 . ( C100 + 1 ) ) = ( C99 . C100 ) by L148 , L152
+.= ( C96 . ( C100 + 1 ) ) by L149;
+L156: ( C89 . ( C100 + 1 ) ) = ( C98 . C100 ) by L152 , L148
+.= ( C97 . ( C100 + 1 ) ) by L149;
+L157: ( C84 . ( C100 + 1 ) ) = ( C93 . C100 ) by L152 , L148
+.= ( C92 . ( C100 + 1 ) ) by L149;
+L158: ( C91 . ( C100 + 1 ) ) = ( ( C96 . C100 ) - ( ( C86 . ( C100 + 1 ) ) * ( C99 . C100 ) ) ) by L148 , L152
+.= ( C99 . ( C100 + 1 ) ) by L149 , L153;
+L159: ( C90 . ( C100 + 1 ) ) = ( ( C97 . C100 ) - ( ( C86 . ( C100 + 1 ) ) * ( C98 . C100 ) ) ) by L152 , L148
+.= ( C98 . ( C100 + 1 ) ) by L149 , L153;
+L160: ( C85 . ( C100 + 1 ) ) = ( C95 . ( C100 + 1 ) ) by L154 , L148
+.= ( C93 . ( C100 + 1 ) ) by L149;
+thus L161: S8[ ( C100 + 1 ) ] by L160 , L153 , L154 , L155 , L156 , L157 , L158 , L159;
+end;
+L162: (for B167 being (Element of ( NAT )) holds S8[ B167 ]) from NAT_1:sch 1(L150 , L151);
+thus L163: thesis by L162 , FUNCT_2:def 8;
+end;
+definition
+let C101 , C102 being (Element of ( INT ));
+func ALGO_EXGCD (C101 , C102) -> (Element of [: ( INT ) , ( INT ) , ( INT ) :]) means 
+:L164: (ex B168 , B169 , B170 , B171 being (sequence of ( INT )) st (ex B172 , B173 , B174 , B175 being (sequence of ( INT )) st (ex B176 being (Element of ( NAT )) st (( B172 . ( 0 ) ) = 1 & ( B173 . ( 0 ) ) = ( 0 ) & ( B168 . ( 0 ) ) = C101 & ( B170 . ( 0 ) ) = ( 0 ) & ( B175 . ( 0 ) ) = ( 0 ) & ( B174 . ( 0 ) ) = 1 & ( B169 . ( 0 ) ) = C102 & ( B171 . ( 0 ) ) = ( 0 ) & (for B177 being (Element of ( NAT )) holds (( B170 . ( B177 + 1 ) ) = ( ( B168 . B177 ) div ( B169 . B177 ) ) & ( B171 . ( B177 + 1 ) ) = ( ( B168 . B177 ) mod ( B169 . B177 ) ) & ( B172 . ( B177 + 1 ) ) = ( B175 . B177 ) & ( B173 . ( B177 + 1 ) ) = ( B174 . B177 ) & ( B168 . ( B177 + 1 ) ) = ( B169 . B177 ) & ( B175 . ( B177 + 1 ) ) = ( ( B172 . B177 ) - ( ( B170 . ( B177 + 1 ) ) * ( B175 . B177 ) ) ) & ( B174 . ( B177 + 1 ) ) = ( ( B173 . B177 ) - ( ( B170 . ( B177 + 1 ) ) * ( B174 . B177 ) ) ) & ( B169 . ( B177 + 1 ) ) = ( B171 . ( B177 + 1 ) ))) & B176 = ( min* { B178 where B178 is (Element of ( NAT )) : ( B169 . B178 ) = ( 0 ) } ) & (( 0 ) <= ( B168 . B176 ) implies it = [ ( B172 . B176 ) , ( B173 . B176 ) , ( B168 . B176 ) ]) & (( B168 . B176 ) < ( 0 ) implies it = [ ( - ( B172 . B176 ) ) , ( - ( B173 . B176 ) ) , ( - ( B168 . B176 ) ) ])))));
+existence
+proof
+consider C103 , C104 , C105 , C106 being (sequence of ( INT )), C107 , C108 , C109 , C110 being (sequence of ( INT )) such that L165: (( C107 . ( 0 ) ) = 1 & ( C108 . ( 0 ) ) = ( 0 ) & ( C103 . ( 0 ) ) = C101 & ( C105 . ( 0 ) ) = ( 0 ) & ( C110 . ( 0 ) ) = ( 0 ) & ( C109 . ( 0 ) ) = 1 & ( C104 . ( 0 ) ) = C102 & ( C106 . ( 0 ) ) = ( 0 ) & (for B179 being (Element of ( NAT )) holds (( C105 . ( B179 + 1 ) ) = ( ( C103 . B179 ) div ( C104 . B179 ) ) & ( C106 . ( B179 + 1 ) ) = ( ( C103 . B179 ) mod ( C104 . B179 ) ) & ( C107 . ( B179 + 1 ) ) = ( C110 . B179 ) & ( C108 . ( B179 + 1 ) ) = ( C109 . B179 ) & ( C103 . ( B179 + 1 ) ) = ( C104 . B179 ) & ( C110 . ( B179 + 1 ) ) = ( ( C107 . B179 ) - ( ( C105 . ( B179 + 1 ) ) * ( C110 . B179 ) ) ) & ( C109 . ( B179 + 1 ) ) = ( ( C108 . B179 ) - ( ( C105 . ( B179 + 1 ) ) * ( C109 . B179 ) ) ) & ( C104 . ( B179 + 1 ) ) = ( C106 . ( B179 + 1 ) )))) by L139;
+set D20 = ( min* { B180 where B180 is (Element of ( NAT )) : ( C104 . B180 ) = ( 0 ) } );
+L166:
+now
+per cases ;
+suppose L167: ( 0 ) <= ( C103 . D20 );
+
+L168: [ ( C107 . D20 ) , ( C108 . D20 ) , ( C103 . D20 ) ] in [: ( INT ) , ( INT ) , ( INT ) :] by MCART_1:69;
+thus L169: (ex B181 being (Element of [: ( INT ) , ( INT ) , ( INT ) :]) st ((( 0 ) <= ( C103 . D20 ) implies B181 = [ ( C107 . D20 ) , ( C108 . D20 ) , ( C103 . D20 ) ]) & (( C103 . D20 ) < ( 0 ) implies B181 = [ ( - ( C107 . D20 ) ) , ( - ( C108 . D20 ) ) , ( - ( C103 . D20 ) ) ]))) by L168 , L167;
+end;
+suppose L170: ( C103 . D20 ) < ( 0 );
+
+L171: ( - ( C103 . D20 ) ) in ( INT ) by INT_1:def 2;
+L172: (( - ( C107 . D20 ) ) in ( INT ) & ( - ( C108 . D20 ) ) in ( INT )) by INT_1:def 2;
+L173: [ ( - ( C107 . D20 ) ) , ( - ( C108 . D20 ) ) , ( - ( C103 . D20 ) ) ] in [: ( INT ) , ( INT ) , ( INT ) :] by L172 , MCART_1:69 , L171;
+thus L174: (ex B182 being (Element of [: ( INT ) , ( INT ) , ( INT ) :]) st ((( 0 ) <= ( C103 . D20 ) implies B182 = [ ( C107 . D20 ) , ( C108 . D20 ) , ( C103 . D20 ) ]) & (( C103 . D20 ) < ( 0 ) implies B182 = [ ( - ( C107 . D20 ) ) , ( - ( C108 . D20 ) ) , ( - ( C103 . D20 ) ) ]))) by L173 , L170;
+end;
+end;
+consider C111 being (Element of [: ( INT ) , ( INT ) , ( INT ) :]) such that L176: ((( 0 ) <= ( C103 . D20 ) implies C111 = [ ( C107 . D20 ) , ( C108 . D20 ) , ( C103 . D20 ) ]) & (( C103 . D20 ) < ( 0 ) implies C111 = [ ( - ( C107 . D20 ) ) , ( - ( C108 . D20 ) ) , ( - ( C103 . D20 ) ) ])) by L166;
+take C111;
+thus L177: thesis by L165 , L176;
+end;
+uniqueness
+proof
+let C112 , C113 being (Element of [: ( INT ) , ( INT ) , ( INT ) :]);
+assume L178: (ex B183 , B184 , B185 , B186 , B187 , B188 , B189 , B190 being (sequence of ( INT )) st (ex B191 being (Element of ( NAT )) st (( B187 . ( 0 ) ) = 1 & ( B188 . ( 0 ) ) = ( 0 ) & ( B183 . ( 0 ) ) = C101 & ( B185 . ( 0 ) ) = ( 0 ) & ( B190 . ( 0 ) ) = ( 0 ) & ( B189 . ( 0 ) ) = 1 & ( B184 . ( 0 ) ) = C102 & ( B186 . ( 0 ) ) = ( 0 ) & (for B192 being (Element of ( NAT )) holds (( B185 . ( B192 + 1 ) ) = ( ( B183 . B192 ) div ( B184 . B192 ) ) & ( B186 . ( B192 + 1 ) ) = ( ( B183 . B192 ) mod ( B184 . B192 ) ) & ( B187 . ( B192 + 1 ) ) = ( B190 . B192 ) & ( B188 . ( B192 + 1 ) ) = ( B189 . B192 ) & ( B183 . ( B192 + 1 ) ) = ( B184 . B192 ) & ( B190 . ( B192 + 1 ) ) = ( ( B187 . B192 ) - ( ( B185 . ( B192 + 1 ) ) * ( B190 . B192 ) ) ) & ( B189 . ( B192 + 1 ) ) = ( ( B188 . B192 ) - ( ( B185 . ( B192 + 1 ) ) * ( B189 . B192 ) ) ) & ( B184 . ( B192 + 1 ) ) = ( B186 . ( B192 + 1 ) ))) & B191 = ( min* { B193 where B193 is (Element of ( NAT )) : ( B184 . B193 ) = ( 0 ) } ) & (( 0 ) <= ( B183 . B191 ) implies C112 = [ ( B187 . B191 ) , ( B188 . B191 ) , ( B183 . B191 ) ]) & (( B183 . B191 ) < ( 0 ) implies C112 = [ ( - ( B187 . B191 ) ) , ( - ( B188 . B191 ) ) , ( - ( B183 . B191 ) ) ]))));
+assume L179: (ex B194 , B195 , B196 , B197 being (sequence of ( INT )) st (ex B198 , B199 , B200 , B201 being (sequence of ( INT )) st (ex B202 being (Element of ( NAT )) st (( B198 . ( 0 ) ) = 1 & ( B199 . ( 0 ) ) = ( 0 ) & ( B194 . ( 0 ) ) = C101 & ( B196 . ( 0 ) ) = ( 0 ) & ( B201 . ( 0 ) ) = ( 0 ) & ( B200 . ( 0 ) ) = 1 & ( B195 . ( 0 ) ) = C102 & ( B197 . ( 0 ) ) = ( 0 ) & (for B203 being (Element of ( NAT )) holds (( B196 . ( B203 + 1 ) ) = ( ( B194 . B203 ) div ( B195 . B203 ) ) & ( B197 . ( B203 + 1 ) ) = ( ( B194 . B203 ) mod ( B195 . B203 ) ) & ( B198 . ( B203 + 1 ) ) = ( B201 . B203 ) & ( B199 . ( B203 + 1 ) ) = ( B200 . B203 ) & ( B194 . ( B203 + 1 ) ) = ( B195 . B203 ) & ( B201 . ( B203 + 1 ) ) = ( ( B198 . B203 ) - ( ( B196 . ( B203 + 1 ) ) * ( B201 . B203 ) ) ) & ( B200 . ( B203 + 1 ) ) = ( ( B199 . B203 ) - ( ( B196 . ( B203 + 1 ) ) * ( B200 . B203 ) ) ) & ( B195 . ( B203 + 1 ) ) = ( B197 . ( B203 + 1 ) ))) & B202 = ( min* { B204 where B204 is (Element of ( NAT )) : ( B195 . B204 ) = ( 0 ) } ) & (( 0 ) <= ( B194 . B202 ) implies C113 = [ ( B198 . B202 ) , ( B199 . B202 ) , ( B194 . B202 ) ]) & (( B194 . B202 ) < ( 0 ) implies C113 = [ ( - ( B198 . B202 ) ) , ( - ( B199 . B202 ) ) , ( - ( B194 . B202 ) ) ])))));
+consider C114 , C115 , C116 , C117 being (sequence of ( INT )), C118 , C119 , C120 , C121 being (sequence of ( INT )), C122 being (Element of ( NAT )) such that L180: (( C118 . ( 0 ) ) = 1 & ( C119 . ( 0 ) ) = ( 0 ) & ( C114 . ( 0 ) ) = C101 & ( C116 . ( 0 ) ) = ( 0 ) & ( C121 . ( 0 ) ) = ( 0 ) & ( C120 . ( 0 ) ) = 1 & ( C115 . ( 0 ) ) = C102 & ( C117 . ( 0 ) ) = ( 0 ) & (for B205 being (Element of ( NAT )) holds (( C116 . ( B205 + 1 ) ) = ( ( C114 . B205 ) div ( C115 . B205 ) ) & ( C117 . ( B205 + 1 ) ) = ( ( C114 . B205 ) mod ( C115 . B205 ) ) & ( C118 . ( B205 + 1 ) ) = ( C121 . B205 ) & ( C119 . ( B205 + 1 ) ) = ( C120 . B205 ) & ( C114 . ( B205 + 1 ) ) = ( C115 . B205 ) & ( C121 . ( B205 + 1 ) ) = ( ( C118 . B205 ) - ( ( C116 . ( B205 + 1 ) ) * ( C121 . B205 ) ) ) & ( C120 . ( B205 + 1 ) ) = ( ( C119 . B205 ) - ( ( C116 . ( B205 + 1 ) ) * ( C120 . B205 ) ) ) & ( C115 . ( B205 + 1 ) ) = ( C117 . ( B205 + 1 ) ))) & C122 = ( min* { B206 where B206 is (Element of ( NAT )) : ( C115 . B206 ) = ( 0 ) } ) & (( 0 ) <= ( C114 . C122 ) implies C112 = [ ( C118 . C122 ) , ( C119 . C122 ) , ( C114 . C122 ) ]) & (( C114 . C122 ) < ( 0 ) implies C112 = [ ( - ( C118 . C122 ) ) , ( - ( C119 . C122 ) ) , ( - ( C114 . C122 ) ) ])) by L178;
+consider C123 , C124 , C125 , C126 being (sequence of ( INT )), C127 , C128 , C129 , C130 being (sequence of ( INT )), C131 being (Element of ( NAT )) such that L181: (( C127 . ( 0 ) ) = 1 & ( C128 . ( 0 ) ) = ( 0 ) & ( C123 . ( 0 ) ) = C101 & ( C125 . ( 0 ) ) = ( 0 ) & ( C130 . ( 0 ) ) = ( 0 ) & ( C129 . ( 0 ) ) = 1 & ( C124 . ( 0 ) ) = C102 & ( C126 . ( 0 ) ) = ( 0 ) & (for B207 being (Element of ( NAT )) holds (( C125 . ( B207 + 1 ) ) = ( ( C123 . B207 ) div ( C124 . B207 ) ) & ( C126 . ( B207 + 1 ) ) = ( ( C123 . B207 ) mod ( C124 . B207 ) ) & ( C127 . ( B207 + 1 ) ) = ( C130 . B207 ) & ( C128 . ( B207 + 1 ) ) = ( C129 . B207 ) & ( C123 . ( B207 + 1 ) ) = ( C124 . B207 ) & ( C130 . ( B207 + 1 ) ) = ( ( C127 . B207 ) - ( ( C125 . ( B207 + 1 ) ) * ( C130 . B207 ) ) ) & ( C129 . ( B207 + 1 ) ) = ( ( C128 . B207 ) - ( ( C125 . ( B207 + 1 ) ) * ( C129 . B207 ) ) ) & ( C124 . ( B207 + 1 ) ) = ( C126 . ( B207 + 1 ) ))) & C131 = ( min* { B208 where B208 is (Element of ( NAT )) : ( C124 . B208 ) = ( 0 ) } ) & (( 0 ) <= ( C123 . C131 ) implies C113 = [ ( C127 . C131 ) , ( C128 . C131 ) , ( C123 . C131 ) ]) & (( C123 . C131 ) < ( 0 ) implies C113 = [ ( - ( C127 . C131 ) ) , ( - ( C128 . C131 ) ) , ( - ( C123 . C131 ) ) ])) by L179;
+L182: (C114 = C123 & C115 = C124 & C118 = C127 & C119 = C128) by L180 , L181 , L147;
+thus L183: C112 = C113 by L182 , L180 , L181;
+end;
+end;
+L185: (for B209 , B210 being (Element of ( INT )) holds (for B211 , B212 being (sequence of ( INT )) holds ((( B211 . ( 0 ) ) = B209 & ( B212 . ( 0 ) ) = B210 & (for B213 being (Element of ( NAT )) holds (( B211 . ( B213 + 1 ) ) = ( B212 . B213 ) & ( B212 . ( B213 + 1 ) ) = ( ( B211 . B213 ) mod ( B212 . B213 ) )))) implies (for B214 being (Element of ( NAT )) holds (( B212 . B214 ) <> ( 0 ) implies ( ( B211 . B214 ) gcd ( B212 . B214 ) ) = ( ( B211 . ( B214 + 1 ) ) gcd ( B212 . ( B214 + 1 ) ) ))))))
+proof
+let C132 , C133 being (Element of ( INT ));
+let C134 , C135 being (sequence of ( INT ));
+assume L186: (( C134 . ( 0 ) ) = C132 & ( C135 . ( 0 ) ) = C133 & (for B215 being (Element of ( NAT )) holds (( C134 . ( B215 + 1 ) ) = ( C135 . B215 ) & ( C135 . ( B215 + 1 ) ) = ( ( C134 . B215 ) mod ( C135 . B215 ) ))));
+let C136 being (Element of ( NAT ));
+assume L187: ( C135 . C136 ) <> ( 0 );
+set D21 = ( ( C134 . C136 ) gcd ( C135 . C136 ) );
+L188: ( C134 . ( C136 + 1 ) ) = ( C135 . C136 ) by L186;
+L189: ( C135 . ( C136 + 1 ) ) = ( ( C134 . C136 ) mod ( C135 . C136 ) ) by L186;
+L190: D21 divides ( C134 . ( C136 + 1 ) ) by L188 , INT_2:def 2;
+L191: D21 divides ( C135 . ( C136 + 1 ) )
+proof
+L192: ( C135 . ( C136 + 1 ) ) = ( ( C134 . C136 ) - ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * ( C135 . C136 ) ) ) by INT_1:def 10 , L189 , L187;
+L193: D21 divides ( C134 . C136 ) by INT_2:def 2;
+L194: D21 divides ( C135 . C136 ) by INT_2:def 2;
+L195: (ex B216 being Integer st ( C134 . C136 ) = ( D21 * B216 )) by L193 , INT_1:def 3;
+L196: (ex B217 being Integer st ( C135 . C136 ) = ( D21 * B217 )) by L194 , INT_1:def 3;
+consider C137 , C138 being Integer such that L197: ( C135 . ( C136 + 1 ) ) = ( ( D21 * C137 ) - ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * ( D21 * C138 ) ) ) by L196 , L192 , L195;
+L198: ( C135 . ( C136 + 1 ) ) = ( ( C137 - ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * C138 ) ) * D21 ) by L197;
+thus L199: D21 divides ( C135 . ( C136 + 1 ) ) by L198 , INT_1:def 3;
+end;
+L200: (for B218 being Integer holds ((B218 divides ( C134 . ( C136 + 1 ) ) & B218 divides ( C135 . ( C136 + 1 ) )) implies B218 divides D21))
+proof
+let C139 being Integer;
+assume L201: (C139 divides ( C134 . ( C136 + 1 ) ) & C139 divides ( C135 . ( C136 + 1 ) ));
+L202: C139 divides ( C135 . C136 ) by L201 , L186;
+L203: C139 divides ( C134 . C136 )
+proof
+L204: ( C135 . ( C136 + 1 ) ) = ( ( C134 . C136 ) - ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * ( C135 . C136 ) ) ) by INT_1:def 10 , L189 , L187;
+L205: ( C134 . C136 ) = ( ( C135 . ( C136 + 1 ) ) + ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * ( C135 . C136 ) ) ) by L204;
+L206: (ex B219 being Integer st ( C135 . C136 ) = ( C139 * B219 )) by INT_1:def 3 , L202;
+L207: (ex B220 being Integer st ( C135 . ( C136 + 1 ) ) = ( C139 * B220 )) by INT_1:def 3 , L201;
+consider C140 , C141 being Integer such that L208: ( C134 . C136 ) = ( ( C139 * C140 ) + ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * ( C139 * C141 ) ) ) by L205 , L206 , L207;
+L209: ( C134 . C136 ) = ( C139 * ( C140 + ( ( ( C134 . C136 ) div ( C135 . C136 ) ) * C141 ) ) ) by L208;
+thus L210: C139 divides ( C134 . C136 ) by L209 , INT_1:def 3;
+end;
+thus L211: C139 divides D21 by L202 , L203 , INT_2:def 2;
+end;
+thus L212: ( ( C134 . ( C136 + 1 ) ) gcd ( C135 . ( C136 + 1 ) ) ) = D21 by L200 , L190 , L191 , INT_2:def 2;
+end;
+L213: (for B221 , B222 being (Element of ( INT )) holds (for B223 , B224 being (sequence of ( INT )) holds ((( B223 . ( 0 ) ) = B221 & ( B224 . ( 0 ) ) = B222 & (for B225 being (Element of ( NAT )) holds (( B223 . ( B225 + 1 ) ) = ( B224 . B225 ) & ( B224 . ( B225 + 1 ) ) = ( ( B223 . B225 ) mod ( B224 . B225 ) )))) implies (for B226 being (Element of ( NAT )) holds (( B224 . B226 ) <> ( 0 ) implies ( ( B223 . ( 0 ) ) gcd ( B224 . ( 0 ) ) ) = ( ( B223 . B226 ) gcd ( B224 . B226 ) ))))))
+proof
+let C142 , C143 being (Element of ( INT ));
+let C144 , C145 being (sequence of ( INT ));
+assume L214: (( C144 . ( 0 ) ) = C142 & ( C145 . ( 0 ) ) = C143 & (for B227 being (Element of ( NAT )) holds (( C144 . ( B227 + 1 ) ) = ( C145 . B227 ) & ( C145 . ( B227 + 1 ) ) = ( ( C144 . B227 ) mod ( C145 . B227 ) ))));
+defpred S9[ Nat ] means (( C145 . $1 ) <> ( 0 ) implies ( ( C144 . ( 0 ) ) gcd ( C145 . ( 0 ) ) ) = ( ( C144 . $1 ) gcd ( C145 . $1 ) ));
+L215: S9[ ( 0 ) ];
+L216: (for B228 being (Element of ( NAT )) holds (S9[ B228 ] implies S9[ ( B228 + 1 ) ]))
+proof
+let C146 being (Element of ( NAT ));
+assume L217: S9[ C146 ];
+L218: (( C145 . ( C146 + 1 ) ) <> ( 0 ) implies ( ( C144 . ( 0 ) ) gcd ( C145 . ( 0 ) ) ) = ( ( C144 . ( C146 + 1 ) ) gcd ( C145 . ( C146 + 1 ) ) ))
+proof
+assume L219: ( C145 . ( C146 + 1 ) ) <> ( 0 );
+L220: ( C145 . C146 ) <> ( 0 )
+proof
+assume L221: ( C145 . C146 ) = ( 0 );
+L222: ( C145 . ( C146 + 1 ) ) = ( ( C144 . C146 ) mod ( C145 . C146 ) ) by L214;
+thus L223: contradiction by L222 , L219 , L221 , INT_1:def 10;
+end;
+thus L224: thesis by L220 , L217 , L214 , L185;
+end;
+thus L225: S9[ ( C146 + 1 ) ] by L218;
+end;
+L226: (for B229 being (Element of ( NAT )) holds S9[ B229 ]) from NAT_1:sch 1(L215 , L216);
+thus L227: thesis by L226;
+end;
+theorem
+L228: (for B230 , B231 being Integer holds (B230 <= ( 0 ) implies ( B231 mod B230 ) <= ( 0 )))
+proof
+let C147 , C148 being Integer;
+assume L229: C147 <= ( 0 );
+per cases  by L229;
+suppose L230: C147 < ( 0 );
+
+L231: [\ ( C148 / C147 ) /] <= ( C148 / C147 ) by INT_1:def 6;
+L232: ( ( C148 / C147 ) * C147 ) <= ( ( C148 div C147 ) * C147 ) by L231 , L230 , XREAL_1:65;
+L233: C148 <= ( ( C148 div C147 ) * C147 ) by L232 , L230 , XCMPLX_1:87;
+L234: ( C148 - ( ( C148 div C147 ) * C147 ) ) <= ( 0 ) by L233 , XREAL_1:47;
+thus L235: ( C148 mod C147 ) <= ( 0 ) by L234 , INT_1:def 10;
+end;
+suppose L236: C147 = ( 0 );
+
+thus L237: ( C148 mod C147 ) <= ( 0 ) by L236 , INT_1:def 10;
+end;
+end;
+theorem
+L239: (for B232 , B233 being Integer holds (B232 < ( 0 ) implies ( - ( B233 mod B232 ) ) < ( - B232 )))
+proof
+let C149 , C150 being Integer;
+assume L240: C149 < ( 0 );
+L241: ( ( C150 / C149 ) - 1 ) < [\ ( C150 / C149 ) /] by INT_1:def 6;
+L242: ( ( C150 div C149 ) * C149 ) < ( ( ( C150 / C149 ) - 1 ) * C149 ) by L241 , L240 , XREAL_1:69;
+L243: ( ( C150 div C149 ) * C149 ) < ( ( ( C150 / C149 ) * C149 ) - ( 1 * C149 ) ) by L242;
+L244: ( ( C150 div C149 ) * C149 ) < ( C150 - C149 ) by L243 , L240 , XCMPLX_1:87;
+L245: ( ( ( C150 div C149 ) * C149 ) - C150 ) < ( ( C150 - C149 ) - C150 ) by L244 , XREAL_1:14;
+L246: ( - ( C150 - ( ( C150 div C149 ) * C149 ) ) ) < ( - C149 ) by L245;
+thus L247: ( - ( C150 mod C149 ) ) < ( - C149 ) by L246 , L240 , INT_1:def 10;
+end;
+theorem
+L248: (for B234 , B235 being (Element of ( INT )) holds (( abs B235 ) <> ( 0 ) implies ( abs ( B234 mod B235 ) ) < ( abs B235 )))
+proof
+let C151 , C152 being (Element of ( INT ));
+assume L249: ( abs C152 ) <> ( 0 );
+per cases ;
+suppose L250: ( 0 ) < C152;
+
+L251: ( C151 mod C152 ) < C152 by L250 , INT_1:58;
+L252: ( 0 ) <= ( C151 mod C152 ) by INT_1:57 , L250;
+L253: ( abs ( C151 mod C152 ) ) < C152 by L252 , ABSVALUE:def 1 , L251;
+L254: C152 <= ( abs C152 ) by ABSVALUE:4;
+thus L255: ( abs ( C151 mod C152 ) ) < ( abs C152 ) by L254 , L253 , XXREAL_0:2;
+end;
+suppose L256: C152 <= ( 0 );
+
+L257: C152 <> ( 0 ) by ABSVALUE:2 , L249;
+L258: ( - ( C151 mod C152 ) ) < ( - C152 ) by L239 , L257 , L256;
+L259: ( C151 mod C152 ) <= ( 0 ) by L256 , L228;
+L260: ( abs ( C151 mod C152 ) ) = ( - ( C151 mod C152 ) )
+proof
+per cases ;
+suppose L261: ( C151 mod C152 ) = ( 0 );
+
+thus L262: ( abs ( C151 mod C152 ) ) = ( - ( C151 mod C152 ) ) by L261 , ABSVALUE:2;
+end;
+suppose L263: ( C151 mod C152 ) <> ( 0 );
+
+thus L264: ( abs ( C151 mod C152 ) ) = ( - ( C151 mod C152 ) ) by L263 , ABSVALUE:def 1 , L259;
+end;
+end;
+thus L266: ( abs ( C151 mod C152 ) ) < ( abs C152 ) by L260 , L258 , L257 , L256 , ABSVALUE:def 1;
+end;
+end;
+L268: (for B236 , B237 being (Element of ( INT )) holds (for B238 , B239 being (sequence of ( INT )) holds ((( B238 . ( 0 ) ) = B236 & ( B239 . ( 0 ) ) = B237 & (for B240 being (Element of ( NAT )) holds (( B238 . ( B240 + 1 ) ) = ( B239 . B240 ) & ( B239 . ( B240 + 1 ) ) = ( ( B238 . B240 ) mod ( B239 . B240 ) )))) implies { B241 where B241 is (Element of ( NAT )) : ( B239 . B241 ) = ( 0 ) } is non  empty non  empty non  empty non  empty (Subset of ( NAT )))))
+proof
+let C153 , C154 being (Element of ( INT ));
+let C155 , C156 being (sequence of ( INT ));
+assume L269: (( C155 . ( 0 ) ) = C153 & ( C156 . ( 0 ) ) = C154 & (for B242 being (Element of ( NAT )) holds (( C155 . ( B242 + 1 ) ) = ( C156 . B242 ) & ( C156 . ( B242 + 1 ) ) = ( ( C155 . B242 ) mod ( C156 . B242 ) ))));
+L270: (for B243 being set holds (B243 in { B244 where B244 is (Element of ( NAT )) : ( C156 . B244 ) = ( 0 ) } implies B243 in ( NAT )))
+proof
+let C157 being set;
+assume L271: C157 in { B245 where B245 is (Element of ( NAT )) : ( C156 . B245 ) = ( 0 ) };
+L272: (ex B246 being (Element of ( NAT )) st (C157 = B246 & ( C156 . B246 ) = ( 0 ))) by L271;
+thus L273: C157 in ( NAT ) by L272;
+end;
+L274: (ex B247 being (Element of ( NAT )) st ( C156 . B247 ) = ( 0 ))
+proof
+assume L275: (not (ex B248 being (Element of ( NAT )) st ( C156 . B248 ) = ( 0 )));
+L276: (for B249 being (Element of ( NAT )) holds ( abs ( C156 . B249 ) ) <> ( 0 ))
+proof
+let C158 being (Element of ( NAT ));
+L277: ( C156 . C158 ) <> ( 0 ) by L275;
+thus L278: ( abs ( C156 . C158 ) ) <> ( 0 ) by L277 , ABSVALUE:2;
+end;
+L279: (for B250 being (Element of ( NAT )) holds ( abs ( C156 . ( B250 + 1 ) ) ) <= ( ( abs ( C156 . B250 ) ) - 1 ))
+proof
+let C159 being (Element of ( NAT ));
+L280: ( abs ( C156 . ( C159 + 1 ) ) ) = ( abs ( ( C155 . C159 ) mod ( C156 . C159 ) ) ) by L269;
+L281: ( abs ( C156 . ( C159 + 1 ) ) ) < ( abs ( C156 . C159 ) ) by L280 , L276 , L248;
+L282: ( ( abs ( C156 . ( C159 + 1 ) ) ) + 1 ) <= ( abs ( C156 . C159 ) ) by L281 , NAT_1:13;
+L283: ( ( ( abs ( C156 . ( C159 + 1 ) ) ) + 1 ) - 1 ) <= ( ( abs ( C156 . C159 ) ) - 1 ) by L282 , XREAL_1:9;
+thus L284: ( abs ( C156 . ( C159 + 1 ) ) ) <= ( ( abs ( C156 . C159 ) ) - 1 ) by L283;
+end;
+defpred S10[ Nat ] means ( abs ( C156 . $1 ) ) <= ( ( abs ( C156 . ( 0 ) ) ) - $1 );
+L285: S10[ ( 0 ) ];
+L286: (for B251 being (Element of ( NAT )) holds (S10[ B251 ] implies S10[ ( B251 + 1 ) ]))
+proof
+let C160 being (Element of ( NAT ));
+assume L287: S10[ C160 ];
+L288: ( abs ( C156 . ( C160 + 1 ) ) ) <= ( ( abs ( C156 . C160 ) ) - 1 ) by L279;
+L289: ( ( abs ( C156 . C160 ) ) - 1 ) <= ( ( ( abs ( C156 . ( 0 ) ) ) - C160 ) - 1 ) by L287 , XREAL_1:9;
+thus L290: S10[ ( C160 + 1 ) ] by L289 , XXREAL_0:2 , L288;
+end;
+L291: (for B252 being (Element of ( NAT )) holds S10[ B252 ]) from NAT_1:sch 1(L285 , L286);
+L292: ( abs ( C156 . ( abs ( C156 . ( 0 ) ) ) ) ) <= ( ( abs ( C156 . ( 0 ) ) ) - ( abs ( C156 . ( 0 ) ) ) ) by L291;
+thus L293: contradiction by L292 , L276 , NAT_1:14;
+end;
+consider C161 being (Element of ( NAT )) such that L294: ( C156 . C161 ) = ( 0 ) by L274;
+L295: C161 in { B253 where B253 is (Element of ( NAT )) : ( C156 . B253 ) = ( 0 ) } by L294;
+thus L296: thesis by L295 , L270 , TARSKI:def 3;
+end;
+L297: (for B254 being (Element of ( INT )) holds ( B254 gcd ( 0 ) ) = ( abs B254 )) by WSIERP_1:8;
+L298: (for B255 , B256 being (Element of ( INT )) holds (for B257 , B258 , B259 , B260 being (sequence of ( INT )) holds (for B261 , B262 , B263 , B264 being (sequence of ( INT )) holds ((( B261 . ( 0 ) ) = 1 & ( B262 . ( 0 ) ) = ( 0 ) & ( B257 . ( 0 ) ) = B255 & ( B259 . ( 0 ) ) = ( 0 ) & ( B264 . ( 0 ) ) = ( 0 ) & ( B263 . ( 0 ) ) = 1 & ( B258 . ( 0 ) ) = B256 & ( B260 . ( 0 ) ) = ( 0 ) & (for B265 being (Element of ( NAT )) holds (( B259 . ( B265 + 1 ) ) = ( ( B257 . B265 ) div ( B258 . B265 ) ) & ( B260 . ( B265 + 1 ) ) = ( ( B257 . B265 ) mod ( B258 . B265 ) ) & ( B261 . ( B265 + 1 ) ) = ( B264 . B265 ) & ( B262 . ( B265 + 1 ) ) = ( B263 . B265 ) & ( B257 . ( B265 + 1 ) ) = ( B258 . B265 ) & ( B264 . ( B265 + 1 ) ) = ( ( B261 . B265 ) - ( ( B259 . ( B265 + 1 ) ) * ( B264 . B265 ) ) ) & ( B263 . ( B265 + 1 ) ) = ( ( B262 . B265 ) - ( ( B259 . ( B265 + 1 ) ) * ( B263 . B265 ) ) ) & ( B258 . ( B265 + 1 ) ) = ( B260 . ( B265 + 1 ) )))) implies (for B266 being (Element of ( NAT )) holds (( B258 . B266 ) <> ( 0 ) implies ( ( ( B261 . ( B266 + 1 ) ) * B255 ) + ( ( B262 . ( B266 + 1 ) ) * B256 ) ) = ( B257 . ( B266 + 1 ) )))))))
+proof
+let C162 , C163 being (Element of ( INT ));
+let C164 , C165 , C166 , C167 being (sequence of ( INT ));
+let C168 , C169 , C170 , C171 being (sequence of ( INT ));
+assume L299: (( C168 . ( 0 ) ) = 1 & ( C169 . ( 0 ) ) = ( 0 ) & ( C164 . ( 0 ) ) = C162 & ( C166 . ( 0 ) ) = ( 0 ) & ( C171 . ( 0 ) ) = ( 0 ) & ( C170 . ( 0 ) ) = 1 & ( C165 . ( 0 ) ) = C163 & ( C167 . ( 0 ) ) = ( 0 ) & (for B267 being (Element of ( NAT )) holds (( C166 . ( B267 + 1 ) ) = ( ( C164 . B267 ) div ( C165 . B267 ) ) & ( C167 . ( B267 + 1 ) ) = ( ( C164 . B267 ) mod ( C165 . B267 ) ) & ( C168 . ( B267 + 1 ) ) = ( C171 . B267 ) & ( C169 . ( B267 + 1 ) ) = ( C170 . B267 ) & ( C164 . ( B267 + 1 ) ) = ( C165 . B267 ) & ( C171 . ( B267 + 1 ) ) = ( ( C168 . B267 ) - ( ( C166 . ( B267 + 1 ) ) * ( C171 . B267 ) ) ) & ( C170 . ( B267 + 1 ) ) = ( ( C169 . B267 ) - ( ( C166 . ( B267 + 1 ) ) * ( C170 . B267 ) ) ) & ( C165 . ( B267 + 1 ) ) = ( C167 . ( B267 + 1 ) ))));
+defpred S11[ Nat ] means (( C165 . $1 ) <> ( 0 ) implies (( ( ( C168 . $1 ) * C162 ) + ( ( C169 . $1 ) * C163 ) ) = ( C164 . $1 ) & ( ( ( C168 . ( $1 + 1 ) ) * C162 ) + ( ( C169 . ( $1 + 1 ) ) * C163 ) ) = ( C164 . ( $1 + 1 ) )));
+L300: S11[ ( 0 ) ]
+proof
+assume L301: ( C165 . ( 0 ) ) <> ( 0 );
+reconsider D22 = ( 0 ) as (Element of ( NAT ));
+L302: ( ( ( C168 . ( D22 + 1 ) ) * C162 ) + ( ( C169 . ( D22 + 1 ) ) * C163 ) ) = ( ( ( C171 . ( 0 ) ) * C162 ) + ( ( C169 . ( D22 + 1 ) ) * C163 ) ) by L299
+.= ( ( ( 0 ) * C162 ) + ( 1 * C163 ) ) by L299
+.= ( C164 . ( D22 + 1 ) ) by L299;
+thus L303: thesis by L302 , L299;
+end;
+L304: (for B268 being (Element of ( NAT )) holds (S11[ B268 ] implies S11[ ( B268 + 1 ) ]))
+proof
+let C172 being (Element of ( NAT ));
+assume L305: S11[ C172 ];
+assume L306: ( C165 . ( C172 + 1 ) ) <> ( 0 );
+L307: ( C165 . C172 ) <> ( 0 )
+proof
+assume L308: ( C165 . C172 ) = ( 0 );
+L309: ( C167 . ( C172 + 1 ) ) = ( ( C164 . C172 ) mod ( C165 . C172 ) ) by L299
+.= ( 0 ) by L308 , INT_1:def 10;
+thus L310: contradiction by L309 , L299 , L306;
+end;
+L311: ( ( ( C168 . ( ( C172 + 1 ) + 1 ) ) * C162 ) + ( ( C169 . ( ( C172 + 1 ) + 1 ) ) * C163 ) ) = ( ( ( C171 . ( C172 + 1 ) ) * C162 ) + ( ( C169 . ( ( C172 + 1 ) + 1 ) ) * C163 ) ) by L299
+.= ( ( ( C171 . ( C172 + 1 ) ) * C162 ) + ( ( C170 . ( C172 + 1 ) ) * C163 ) ) by L299
+.= ( ( ( ( C168 . C172 ) - ( ( C166 . ( C172 + 1 ) ) * ( C171 . C172 ) ) ) * C162 ) + ( ( C170 . ( C172 + 1 ) ) * C163 ) ) by L299
+.= ( ( ( ( C168 . C172 ) - ( ( C166 . ( C172 + 1 ) ) * ( C171 . C172 ) ) ) * C162 ) + ( ( ( C169 . C172 ) - ( ( C166 . ( C172 + 1 ) ) * ( C170 . C172 ) ) ) * C163 ) ) by L299
+.= ( ( C164 . C172 ) - ( ( C166 . ( C172 + 1 ) ) * ( ( ( C171 . C172 ) * C162 ) + ( ( C170 . C172 ) * C163 ) ) ) ) by L307 , L305
+.= ( ( C164 . C172 ) - ( ( C166 . ( C172 + 1 ) ) * ( ( ( C168 . ( C172 + 1 ) ) * C162 ) + ( ( C170 . C172 ) * C163 ) ) ) ) by L299
+.= ( ( C164 . C172 ) - ( ( C166 . ( C172 + 1 ) ) * ( C164 . ( C172 + 1 ) ) ) ) by L307 , L305 , L299
+.= ( ( C164 . C172 ) - ( ( ( C164 . C172 ) div ( C165 . C172 ) ) * ( C164 . ( C172 + 1 ) ) ) ) by L299
+.= ( ( C164 . C172 ) - ( ( ( C164 . C172 ) div ( C165 . C172 ) ) * ( C165 . C172 ) ) ) by L299
+.= ( ( C164 . C172 ) mod ( C165 . C172 ) ) by INT_1:def 10 , L307
+.= ( C167 . ( C172 + 1 ) ) by L299
+.= ( C165 . ( C172 + 1 ) ) by L299
+.= ( C164 . ( ( C172 + 1 ) + 1 ) ) by L299;
+thus L312: thesis by L311 , L307 , L305;
+end;
+L313: (for B269 being (Element of ( NAT )) holds S11[ B269 ]) from NAT_1:sch 1(L300 , L304);
+thus L314: thesis by L313;
+end;
+theorem
+L315: (for B270 , B271 being (Element of ( INT )) holds (( ( ALGO_EXGCD (B270 , B271) ) `3_3 ) = ( B270 gcd B271 ) & ( ( ( ( ALGO_EXGCD (B270 , B271) ) `1_3 ) * B270 ) + ( ( ( ALGO_EXGCD (B270 , B271) ) `2_3 ) * B271 ) ) = ( B270 gcd B271 )))
+proof
+let C173 , C174 being (Element of ( INT ));
+consider C175 , C176 , C177 , C178 being (sequence of ( INT )), C179 , C180 , C181 , C182 being (sequence of ( INT )), C183 being (Element of ( NAT )) such that L316: (( C179 . ( 0 ) ) = 1 & ( C180 . ( 0 ) ) = ( 0 ) & ( C175 . ( 0 ) ) = C173 & ( C177 . ( 0 ) ) = ( 0 ) & ( C182 . ( 0 ) ) = ( 0 ) & ( C181 . ( 0 ) ) = 1 & ( C176 . ( 0 ) ) = C174 & ( C178 . ( 0 ) ) = ( 0 ) & (for B272 being (Element of ( NAT )) holds (( C177 . ( B272 + 1 ) ) = ( ( C175 . B272 ) div ( C176 . B272 ) ) & ( C178 . ( B272 + 1 ) ) = ( ( C175 . B272 ) mod ( C176 . B272 ) ) & ( C179 . ( B272 + 1 ) ) = ( C182 . B272 ) & ( C180 . ( B272 + 1 ) ) = ( C181 . B272 ) & ( C175 . ( B272 + 1 ) ) = ( C176 . B272 ) & ( C182 . ( B272 + 1 ) ) = ( ( C179 . B272 ) - ( ( C177 . ( B272 + 1 ) ) * ( C182 . B272 ) ) ) & ( C181 . ( B272 + 1 ) ) = ( ( C180 . B272 ) - ( ( C177 . ( B272 + 1 ) ) * ( C181 . B272 ) ) ) & ( C176 . ( B272 + 1 ) ) = ( C178 . ( B272 + 1 ) ))) & C183 = ( min* { B273 where B273 is (Element of ( NAT )) : ( C176 . B273 ) = ( 0 ) } ) & (( 0 ) <= ( C175 . C183 ) implies ( ALGO_EXGCD (C173 , C174) ) = [ ( C179 . C183 ) , ( C180 . C183 ) , ( C175 . C183 ) ]) & (( C175 . C183 ) < ( 0 ) implies ( ALGO_EXGCD (C173 , C174) ) = [ ( - ( C179 . C183 ) ) , ( - ( C180 . C183 ) ) , ( - ( C175 . C183 ) ) ])) by L164;
+L317:
+now
+let C184 being (Element of ( NAT ));
+thus L318: ( C175 . ( C184 + 1 ) ) = ( C176 . C184 ) by L316;
+thus L319: ( C176 . ( C184 + 1 ) ) = ( C178 . ( C184 + 1 ) ) by L316
+.= ( ( C175 . C184 ) mod ( C176 . C184 ) ) by L316;
+end;
+L320: { B274 where B274 is (Element of ( NAT )) : ( C176 . B274 ) = ( 0 ) } is non  empty non  empty non  empty non  empty (Subset of ( NAT )) by L316 , L317 , L268;
+L321: C183 in { B275 where B275 is (Element of ( NAT )) : ( C176 . B275 ) = ( 0 ) } by L320 , L316 , NAT_1:def 1;
+L322: (ex B276 being (Element of ( NAT )) st (C183 = B276 & ( C176 . B276 ) = ( 0 ))) by L321;
+L323: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( abs ( C175 . C183 ) )
+proof
+per cases ;
+suppose L324: ( 0 ) <= ( C175 . C183 );
+
+L325: ( abs ( C175 . C183 ) ) = ( C175 . C183 ) by L324 , ABSVALUE:def 1;
+thus L326: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( abs ( C175 . C183 ) ) by L325 , L316 , MCART_1:def 7;
+end;
+suppose L327: ( C175 . C183 ) < ( 0 );
+
+L328: ( abs ( C175 . C183 ) ) = ( - ( C175 . C183 ) ) by L327 , ABSVALUE:def 1;
+thus L329: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( abs ( C175 . C183 ) ) by L328 , L316 , L327 , MCART_1:def 7;
+end;
+end;
+per cases ;
+suppose L331: C183 = ( 0 );
+
+thus L332: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( C173 gcd C174 ) by L316 , L322 , L297 , L323 , L331;
+thus L333: ( ( ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) * C173 ) + ( ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) * C174 ) ) = ( C173 gcd C174 )
+proof
+per cases ;
+suppose L334: ( 0 ) <= ( C175 . C183 );
+
+L335: ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) = 1 by L331 , L316 , L334 , MCART_1:def 5;
+L336: ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) = ( 0 ) by L331 , L316 , MCART_1:def 6;
+thus L337: ( ( ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) * C173 ) + ( ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) * C174 ) ) = ( C173 gcd C174 ) by L336 , L334 , L316 , L331 , L323 , ABSVALUE:def 1 , L335 , L332;
+end;
+suppose L338: ( C175 . C183 ) < ( 0 );
+
+L339: ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) = ( - 1 ) by L331 , L316 , L338 , MCART_1:def 5;
+L340: ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) = ( 0 ) by L316 , L331 , MCART_1:def 6;
+thus L341: ( ( ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) * C173 ) + ( ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) * C174 ) ) = ( C173 gcd C174 ) by L340 , L316 , L331 , L323 , ABSVALUE:def 1 , L338 , L339 , L332;
+end;
+end;
+
+end;
+suppose L334: C183 <> ( 0 );
+
+L335: 1 <= C183 by L334 , NAT_1:14;
+L336: ( 1 - 1 ) <= ( C183 - 1 ) by L335 , XREAL_1:9;
+reconsider D23 = ( C183 - 1 ) as (Element of ( NAT )) by L336 , INT_1:3;
+L337: ( C176 . D23 ) <> ( 0 )
+proof
+assume L338: ( C176 . D23 ) = ( 0 );
+L339: D23 in { B277 where B277 is (Element of ( NAT )) : ( C176 . B277 ) = ( 0 ) } by L338;
+L340: ( C183 - 1 ) < ( C183 - ( 0 ) ) by XREAL_1:15;
+thus L341: contradiction by L340 , L339 , L316 , L320 , NAT_1:def 1;
+end;
+L342: ( ( C175 . D23 ) gcd ( C176 . D23 ) ) = ( ( C175 . ( D23 + 1 ) ) gcd ( C176 . ( D23 + 1 ) ) ) by L185 , L316 , L337 , L317;
+L343: ( ( C175 . C183 ) gcd ( C176 . C183 ) ) = ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) by L323 , L297 , L322;
+thus L344: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( C173 gcd C174 ) by L343 , L342 , L337 , L317 , L213 , L316;
+L345: ( ( ( C179 . ( D23 + 1 ) ) * C173 ) + ( ( C180 . ( D23 + 1 ) ) * C174 ) ) = ( C175 . ( D23 + 1 ) ) by L337 , L298 , L316;
+thus L346: ( ( ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) * C173 ) + ( ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) * C174 ) ) = ( C173 gcd C174 )
+proof
+per cases ;
+suppose L347: ( 0 ) <= ( C175 . C183 );
+
+L348: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( C175 . C183 ) by L347 , L323 , ABSVALUE:def 1;
+L349: ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) = ( C179 . C183 ) by L316 , L347 , MCART_1:def 5;
+thus L350: ( ( ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) * C173 ) + ( ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) * C174 ) ) = ( C173 gcd C174 ) by L349 , L344 , L345 , L348 , L316 , MCART_1:def 6;
+end;
+suppose L351: ( C175 . C183 ) < ( 0 );
+
+L352: ( ( ALGO_EXGCD (C173 , C174) ) `3_3 ) = ( - ( C175 . C183 ) ) by L351 , L323 , ABSVALUE:def 1;
+L353: ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) = ( - ( C179 . C183 ) ) by L316 , L351 , MCART_1:def 5;
+L354: ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) = ( - ( C180 . C183 ) ) by L316 , L351 , MCART_1:def 6;
+thus L355: ( ( ( ( ALGO_EXGCD (C173 , C174) ) `1_3 ) * C173 ) + ( ( ( ALGO_EXGCD (C173 , C174) ) `2_3 ) * C174 ) ) = ( C173 gcd C174 ) by L354 , L345 , L352 , L353 , L343 , L342 , L337 , L317 , L213 , L316;
+end;
+end;
+
+end;
+end;
+definition
+let C185 , C186 being (Element of ( INT ));
+func ALGO_INVERSE (C185 , C186) -> (Element of ( INT )) means 
+:L348: (for B278 being (Element of ( INT )) holds (B278 = ( C185 mod C186 ) implies ((( ( ALGO_EXGCD (C186 , B278) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , B278) ) `2_3 ) < ( 0 ) implies (ex B279 being (Element of ( INT )) st (B279 = ( ( ALGO_EXGCD (C186 , B278) ) `2_3 ) & it = ( C186 + B279 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , B278) ) `2_3 ) implies it = ( ( ALGO_EXGCD (C186 , B278) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , B278) ) `3_3 ) <> 1 implies it = ( {} )))));
+existence
+proof
+reconsider D24 = ( C185 mod C186 ) as (Element of ( INT )) by INT_1:def 2;
+L349:
+now
+per cases ;
+suppose L350: ( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) = 1;
+
+L351:
+now
+per cases ;
+suppose L352: ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) < ( 0 );
+
+reconsider D25 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) as (Element of ( INT ));
+reconsider D26 = ( C186 + D25 ) as (Element of ( INT )) by INT_1:def 2;
+L353: (ex B280 being (Element of ( INT )) st (B280 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) & D26 = ( C186 + B280 )));
+thus L354: (ex B281 being (Element of ( INT )) st ((( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) < ( 0 ) implies (ex B282 being (Element of ( INT )) st (B282 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) & B281 = ( C186 + B282 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) implies B281 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 )) & (( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1 implies B281 = ( {} )))) by L353 , L352 , L350;
+end;
+suppose L355: ( 0 ) <= ( ( ALGO_EXGCD (C186 , D24) ) `2_3 );
+
+reconsider D27 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) as (Element of ( INT ));
+thus L356: (ex B283 being (Element of ( INT )) st ((( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) < ( 0 ) implies (ex B284 being (Element of ( INT )) st (B284 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) & B283 = ( C186 + B284 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) implies B283 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 )) & (( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1 implies B283 = ( {} )))) by L355 , L350;
+end;
+end;
+thus L358: (ex B285 being (Element of ( INT )) st ((( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) < ( 0 ) implies (ex B286 being (Element of ( INT )) st (B286 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) & B285 = ( C186 + B286 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) implies B285 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1 implies B285 = ( {} )))) by L351;
+end;
+suppose L359: ( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1;
+
+reconsider D28 = ( {} ) as (Element of ( INT )) by INT_1:def 2;
+L360: (( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1 implies D28 = ( {} ));
+thus L361: (ex B287 being (Element of ( INT )) st ((( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) < ( 0 ) implies (ex B288 being (Element of ( INT )) st (B288 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) & B287 = ( C186 + B288 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) implies B287 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1 implies B287 = ( {} )))) by L360 , L359;
+end;
+end;
+consider C187 being (Element of ( INT )) such that L363: ((( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) < ( 0 ) implies (ex B289 being (Element of ( INT )) st (B289 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) & C187 = ( C186 + B289 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , D24) ) `2_3 ) implies C187 = ( ( ALGO_EXGCD (C186 , D24) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , D24) ) `3_3 ) <> 1 implies C187 = ( {} ))) by L349;
+take C187;
+thus L364: (for B290 being (Element of ( INT )) holds (B290 = ( C185 mod C186 ) implies ((( ( ALGO_EXGCD (C186 , B290) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , B290) ) `2_3 ) < ( 0 ) implies (ex B291 being (Element of ( INT )) st (B291 = ( ( ALGO_EXGCD (C186 , B290) ) `2_3 ) & C187 = ( C186 + B291 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , B290) ) `2_3 ) implies C187 = ( ( ALGO_EXGCD (C186 , B290) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , B290) ) `3_3 ) <> 1 implies C187 = ( {} ))))) by L363;
+end;
+uniqueness
+proof
+let C188 , C189 being (Element of ( INT ));
+assume L365: (for B292 being (Element of ( INT )) holds (B292 = ( C185 mod C186 ) implies ((( ( ALGO_EXGCD (C186 , B292) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , B292) ) `2_3 ) < ( 0 ) implies (ex B293 being (Element of ( INT )) st (B293 = ( ( ALGO_EXGCD (C186 , B292) ) `2_3 ) & C188 = ( C186 + B293 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , B292) ) `2_3 ) implies C188 = ( ( ALGO_EXGCD (C186 , B292) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , B292) ) `3_3 ) <> 1 implies C188 = ( {} )))));
+assume L366: (for B294 being (Element of ( INT )) holds (B294 = ( C185 mod C186 ) implies ((( ( ALGO_EXGCD (C186 , B294) ) `3_3 ) = 1 implies ((( ( ALGO_EXGCD (C186 , B294) ) `2_3 ) < ( 0 ) implies (ex B295 being (Element of ( INT )) st (B295 = ( ( ALGO_EXGCD (C186 , B294) ) `2_3 ) & C189 = ( C186 + B295 )))) & (( 0 ) <= ( ( ALGO_EXGCD (C186 , B294) ) `2_3 ) implies C189 = ( ( ALGO_EXGCD (C186 , B294) ) `2_3 )))) & (( ( ALGO_EXGCD (C186 , B294) ) `3_3 ) <> 1 implies C189 = ( {} )))));
+reconsider D29 = ( C185 mod C186 ) as (Element of ( INT )) by INT_1:def 2;
+thus L367: C188 = C189
+proof
+per cases ;
+suppose L368: ( ( ALGO_EXGCD (C186 , D29) ) `3_3 ) = 1;
+
+thus L369: C188 = C189
+proof
+per cases ;
+suppose L370: ( ( ALGO_EXGCD (C186 , D29) ) `2_3 ) < ( 0 );
+
+L371: (ex B296 being (Element of ( INT )) st (B296 = ( ( ALGO_EXGCD (C186 , D29) ) `2_3 ) & C188 = ( C186 + B296 ))) by L370 , L365 , L368;
+L372: (ex B297 being (Element of ( INT )) st (B297 = ( ( ALGO_EXGCD (C186 , D29) ) `2_3 ) & C189 = ( C186 + B297 ))) by L366 , L368 , L370;
+thus L373: C188 = C189 by L372 , L371;
+end;
+suppose L374: ( 0 ) <= ( ( ALGO_EXGCD (C186 , D29) ) `2_3 );
+
+thus L375: C188 = ( ( ALGO_EXGCD (C186 , D29) ) `2_3 ) by L374 , L368 , L365
+.= C189 by L374 , L368 , L366;
+end;
+end;
+
+end;
+suppose L370: ( ( ALGO_EXGCD (C186 , D29) ) `3_3 ) <> 1;
+
+thus L371: C188 = ( {} ) by L365 , L370
+.= C189 by L366 , L370;
+end;
+end;
+
+end;
+end;
+L369: (for B298 , B299 , B300 being (Element of ( INT )) holds ((B299 = ( B298 mod B300 ) & ( ( ALGO_EXGCD (B300 , B299) ) `3_3 ) = 1 & B300 <> ( 0 )) implies ( ( ( ALGO_INVERSE (B298 , B300) ) * B298 ) mod B300 ) = ( 1 mod B300 )))
+proof
+let C190 , C191 , C192 being (Element of ( INT ));
+assume L370: (C191 = ( C190 mod C192 ) & ( ( ALGO_EXGCD (C192 , C191) ) `3_3 ) = 1 & C192 <> ( 0 ));
+L371: (( ( ALGO_EXGCD (C192 , C191) ) `3_3 ) = ( C192 gcd C191 ) & ( ( ( ( ALGO_EXGCD (C192 , C191) ) `1_3 ) * C192 ) + ( ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) * C191 ) ) = ( C192 gcd C191 )) by L315;
+reconsider D30 = ( ( ( ALGO_EXGCD (C192 , C191) ) `1_3 ) * C192 ) as Integer;
+reconsider D31 = ( ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) * C191 ) as Integer;
+reconsider D32 = ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) as Integer;
+L372: ( C192 mod C192 ) = ( 0 ) by INT_1:50;
+L373: ( ( ( ( ALGO_EXGCD (C192 , C191) ) `1_3 ) * C192 ) mod C192 ) = ( ( ( ( ( ALGO_EXGCD (C192 , C191) ) `1_3 ) mod C192 ) * ( C192 mod C192 ) ) mod C192 ) by NAT_D:67
+.= ( 0 ) by INT_4:12 , L372;
+reconsider D33 = ( 0 ) as (Element of ( INT )) by INT_1:def 2;
+L374: ( ( ( ( ( ALGO_EXGCD (C192 , C191) ) `1_3 ) * C192 ) + ( ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) * C191 ) ) mod C192 ) = ( ( ( D30 mod C192 ) + ( D31 mod C192 ) ) mod C192 ) by NAT_D:66
+.= ( ( ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) * C191 ) mod C192 ) by L1 , L373;
+per cases ;
+suppose L375: ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) < ( 0 );
+
+consider C193 being (Element of ( INT )) such that L376: (C193 = ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) & ( ALGO_INVERSE (C190 , C192) ) = ( C192 + C193 )) by L375 , L348 , L370;
+thus L377: ( ( ( ALGO_INVERSE (C190 , C192) ) * C190 ) mod C192 ) = ( ( ( C192 * C190 ) + ( C193 * C190 ) ) mod C192 ) by L376
+.= ( ( C193 * C190 ) mod C192 ) by NAT_D:61
+.= ( ( ( C193 mod C192 ) * ( C190 mod C192 ) ) mod C192 ) by NAT_D:67
+.= ( ( ( C193 mod C192 ) * ( ( C190 mod C192 ) mod C192 ) ) mod C192 ) by L1
+.= ( 1 mod C192 ) by L374 , L376 , L371 , L370 , NAT_D:67;
+end;
+suppose L378: ( 0 ) <= ( ( ALGO_EXGCD (C192 , C191) ) `2_3 );
+
+thus L379: ( ( ( ALGO_INVERSE (C190 , C192) ) * C190 ) mod C192 ) = ( ( ( ( ALGO_EXGCD (C192 , C191) ) `2_3 ) * C190 ) mod C192 ) by L378 , L348 , L370
+.= ( ( ( D32 mod C192 ) * ( C190 mod C192 ) ) mod C192 ) by NAT_D:67
+.= ( ( ( D32 mod C192 ) * ( ( C190 mod C192 ) mod C192 ) ) mod C192 ) by L1
+.= ( 1 mod C192 ) by L374 , L371 , L370 , NAT_D:67;
+end;
+end;
+theorem
+L381: (for B301 , B302 , B303 being (Element of ( INT )) holds ((B303 = ( B301 mod B302 ) & ( ( ALGO_EXGCD (B302 , B303) ) `3_3 ) = 1) implies ( ( ( ALGO_INVERSE (B301 , B302) ) * B301 ) mod B302 ) = ( 1 mod B302 )))
+proof
+let C194 , C195 , C196 being (Element of ( INT ));
+assume L382: (C196 = ( C194 mod C195 ) & ( ( ALGO_EXGCD (C195 , C196) ) `3_3 ) = 1);
+per cases ;
+suppose L383: C195 = ( 0 );
+
+thus L384: ( ( ( ALGO_INVERSE (C194 , C195) ) * C194 ) mod C195 ) = ( 0 ) by L383 , INT_1:def 10
+.= ( 1 mod C195 ) by L383 , INT_1:def 10;
+end;
+suppose L385: C195 <> ( 0 );
+
+thus L386: ( ( ( ALGO_INVERSE (C194 , C195) ) * C194 ) mod C195 ) = ( 1 mod C195 ) by L385 , L369 , L382;
+end;
+end;
+begin
+definition
+let C197 being non  empty (FinSequence of [: ( INT ) , ( INT ) :]);
+func ALGO_CRT C197 -> (Element of ( INT )) means 
+:L388: ((( len C197 ) = 1 implies it = ( ( C197 . 1 ) `1 )) & (( len C197 ) <> 1 implies (ex B304 , B305 , B306 , B307 being (FinSequence of ( INT )) st (ex B308 , B309 being (Element of ( INT )) st (( len B304 ) = ( len C197 ) & ( len B305 ) = ( len C197 ) & ( len B306 ) = ( ( len C197 ) - 1 ) & ( len B307 ) = ( ( len C197 ) - 1 ) & ( B304 . 1 ) = 1 & (for B310 being Nat holds ((1 <= B310 & B310 <= ( ( len B304 ) - 1 )) implies (ex B311 , B312 , B313 being (Element of ( INT )) st (B312 = ( ( C197 . B310 ) `2 ) & ( B304 . ( B310 + 1 ) ) = ( ( B304 . B310 ) * B312 ) & B313 = ( B304 . ( B310 + 1 ) ) & B311 = ( ( C197 . ( B310 + 1 ) ) `2 ) & ( B307 . B310 ) = ( ALGO_INVERSE (B313 , B311) ) & ( B306 . B310 ) = B313)))) & B308 = ( ( C197 . ( len B304 ) ) `2 ) & B309 = ( ( B306 . ( ( len B304 ) - 1 ) ) * B308 ) & ( B305 . 1 ) = ( ( C197 . 1 ) `1 ) & (for B314 being Nat holds ((1 <= B314 & B314 <= ( ( len B304 ) - 1 )) implies (ex B315 , B316 , B317 being (Element of ( INT )) st (B316 = ( ( C197 . ( B314 + 1 ) ) `1 ) & B317 = ( ( C197 . ( B314 + 1 ) ) `2 ) & B315 = ( ( ( B316 - ( B305 . B314 ) ) * ( B307 . B314 ) ) mod B317 ) & ( B305 . ( B314 + 1 ) ) = ( ( B305 . B314 ) + ( B315 * ( B306 . B314 ) ) ))))) & it = ( ( B305 . ( len B304 ) ) mod B309 ))))));
+existence
+proof
+per cases ;
+suppose L389: ( len C197 ) = 1;
+
+L390: 1 in ( Seg ( len C197 ) ) by L389;
+L391: 1 in ( dom C197 ) by L390 , FINSEQ_1:def 3;
+L392: ( C197 . 1 ) in [: ( INT ) , ( INT ) :] by L391 , FINSEQ_2:11;
+L393: ( ( C197 . 1 ) `1 ) is (Element of ( INT )) by L392 , MCART_1:10;
+thus L394: thesis by L393 , L389;
+end;
+suppose L395: ( len C197 ) <> 1;
+
+defpred S12[ Nat , Integer , Integer ] means (ex B318 being (Element of ( INT )) st (B318 = ( ( C197 . $1 ) `2 ) & $3 = ( $2 * B318 )));
+reconsider D34 = 1 as (Element of ( INT )) by INT_1:def 1;
+L396: (for B319 being (Element of ( NAT )) holds ((1 <= B319 & B319 < ( len C197 )) implies (for B320 being (Element of ( INT )) holds (ex B321 being (Element of ( INT )) st S12[ B319 , B320 , B321 ]))))
+proof
+let C198 being (Element of ( NAT ));
+assume L397: (1 <= C198 & C198 < ( len C197 ));
+let C199 being (Element of ( INT ));
+L398: C198 in ( Seg ( len C197 ) ) by L397;
+L399: C198 in ( dom C197 ) by L398 , FINSEQ_1:def 3;
+L400: ( C197 . C198 ) in [: ( INT ) , ( INT ) :] by L399 , FINSEQ_2:11;
+reconsider D35 = ( ( C197 . C198 ) `2 ) as (Element of ( INT )) by L400 , MCART_1:10;
+reconsider D36 = ( C199 * D35 ) as (Element of ( INT )) by INT_1:def 2;
+take D36;
+thus L401: S12[ C198 , C199 , D36 ];
+end;
+consider C200 being (FinSequence of ( INT )) such that L402: (( len C200 ) = ( len C197 ) & (( C200 . 1 ) = D34 or ( len C197 ) = ( 0 )) & (for B322 being (Element of ( NAT )) holds ((1 <= B322 & B322 < ( len C197 )) implies S12[ B322 , ( C200 . B322 ) , ( C200 . ( B322 + 1 ) ) ]))) from RECDEF_1:sch 4(L396);
+L403: ( ( len C200 ) - 1 ) < ( ( len C200 ) - ( 0 ) ) by XREAL_1:15;
+L404: (for B323 being Nat holds ((1 <= B323 & B323 <= ( ( len C200 ) - 1 )) implies (ex B324 being (Element of ( INT )) st (B324 = ( ( C197 . B323 ) `2 ) & ( C200 . ( B323 + 1 ) ) = ( ( C200 . B323 ) * B324 )))))
+proof
+let C201 being Nat;
+assume L405: (1 <= C201 & C201 <= ( ( len C200 ) - 1 ));
+L406: (1 <= C201 & C201 < ( len C197 )) by L405 , L402 , L403 , XXREAL_0:2;
+L407: C201 is (Element of ( NAT )) by ORDINAL1:def 12;
+thus L408: (ex B325 being (Element of ( INT )) st (B325 = ( ( C197 . C201 ) `2 ) & ( C200 . ( C201 + 1 ) ) = ( ( C200 . C201 ) * B325 ))) by L407 , L402 , L406;
+end;
+L409: 1 <= ( len C200 ) by NAT_1:14 , L402;
+L410: ( 1 - 1 ) <= ( ( len C200 ) - 1 ) by L409 , XREAL_1:9;
+reconsider D37 = ( ( len C200 ) - 1 ) as (Element of ( NAT )) by L410 , INT_1:3;
+defpred S13[ Nat , Integer ] means (ex B326 , B327 , B328 being (Element of ( INT )) st (B327 = ( ( C197 . $1 ) `2 ) & ( C200 . ( $1 + 1 ) ) = ( ( C200 . $1 ) * B327 ) & B328 = ( C200 . ( $1 + 1 ) ) & B326 = ( ( C197 . ( $1 + 1 ) ) `2 ) & $2 = ( ALGO_INVERSE (B328 , B326) )));
+L411: (for B329 being Nat holds (B329 in ( Seg D37 ) implies (ex B330 being (Element of ( INT )) st S13[ B329 , B330 ])))
+proof
+let C202 being Nat;
+assume L412: C202 in ( Seg D37 );
+L413: (1 <= C202 & C202 <= ( ( len C200 ) - 1 )) by FINSEQ_1:1 , L412;
+consider C203 being (Element of ( INT )) such that L414: (C203 = ( ( C197 . C202 ) `2 ) & ( C200 . ( C202 + 1 ) ) = ( ( C200 . C202 ) * C203 )) by L413 , L404;
+reconsider D38 = ( C200 . ( C202 + 1 ) ) as (Element of ( INT )) by INT_1:def 2;
+L415: ( C202 + 1 ) <= ( ( ( len C200 ) - 1 ) + 1 ) by L413 , XREAL_1:6;
+L416: (1 <= ( C202 + 1 ) & ( C202 + 1 ) <= ( len C200 )) by L415 , NAT_1:12;
+L417: ( C202 + 1 ) in ( Seg ( len C197 ) ) by L416 , L402;
+L418: ( C202 + 1 ) in ( dom C197 ) by L417 , FINSEQ_1:def 3;
+L419: ( C197 . ( C202 + 1 ) ) in [: ( INT ) , ( INT ) :] by L418 , FINSEQ_2:11;
+reconsider D39 = ( ( C197 . ( C202 + 1 ) ) `2 ) as (Element of ( INT )) by L419 , MCART_1:10;
+reconsider D40 = ( ALGO_INVERSE (D38 , D39) ) as (Element of ( INT ));
+take D40;
+thus L420: S13[ C202 , D40 ] by L414;
+end;
+consider C204 being (FinSequence of ( INT )) such that L421: (( dom C204 ) = ( Seg D37 ) & (for B331 being Nat holds (B331 in ( Seg D37 ) implies S13[ B331 , ( C204 . B331 ) ]))) from FINSEQ_1:sch 5(L411);
+L422: ( len C204 ) = ( ( len C197 ) - 1 ) by L402 , FINSEQ_1:def 3 , L421;
+L423: (for B332 being Nat holds ((1 <= B332 & B332 <= ( ( len C200 ) - 1 )) implies (ex B333 , B334 , B335 being (Element of ( INT )) st (B334 = ( ( C197 . B332 ) `2 ) & ( C200 . ( B332 + 1 ) ) = ( ( C200 . B332 ) * B334 ) & B335 = ( C200 . ( B332 + 1 ) ) & B333 = ( ( C197 . ( B332 + 1 ) ) `2 ) & ( C204 . B332 ) = ( ALGO_INVERSE (B335 , B333) )))))
+proof
+let C205 being Nat;
+assume L424: (1 <= C205 & C205 <= ( ( len C200 ) - 1 ));
+L425: C205 in ( Seg D37 ) by L424 , FINSEQ_1:1;
+thus L426: (ex B336 , B337 , B338 being (Element of ( INT )) st (B337 = ( ( C197 . C205 ) `2 ) & ( C200 . ( C205 + 1 ) ) = ( ( C200 . C205 ) * B337 ) & B338 = ( C200 . ( C205 + 1 ) ) & B336 = ( ( C197 . ( C205 + 1 ) ) `2 ) & ( C204 . C205 ) = ( ALGO_INVERSE (B338 , B336) ))) by L425 , L421;
+end;
+defpred S14[ Nat , Integer ] means (ex B339 , B340 , B341 being (Element of ( INT )) st (B340 = ( ( C197 . $1 ) `2 ) & ( C200 . ( $1 + 1 ) ) = ( ( C200 . $1 ) * B340 ) & B341 = ( C200 . ( $1 + 1 ) ) & B339 = ( ( C197 . ( $1 + 1 ) ) `2 ) & ( C204 . $1 ) = ( ALGO_INVERSE (B341 , B339) ) & $2 = B341));
+L427: (for B342 being Nat holds (B342 in ( Seg D37 ) implies (ex B343 being (Element of ( INT )) st S14[ B342 , B343 ])))
+proof
+let C206 being Nat;
+assume L428: C206 in ( Seg D37 );
+L429: (1 <= C206 & C206 <= ( ( len C200 ) - 1 )) by FINSEQ_1:1 , L428;
+consider C207 , C208 , C209 being (Element of ( INT )) such that L430: (C208 = ( ( C197 . C206 ) `2 ) & ( C200 . ( C206 + 1 ) ) = ( ( C200 . C206 ) * C208 ) & C209 = ( C200 . ( C206 + 1 ) ) & C207 = ( ( C197 . ( C206 + 1 ) ) `2 ) & ( C204 . C206 ) = ( ALGO_INVERSE (C209 , C207) )) by L429 , L423;
+reconsider D41 = C209 as (Element of ( INT ));
+take D41;
+thus L431: S14[ C206 , D41 ] by L430;
+end;
+consider C210 being (FinSequence of ( INT )) such that L432: (( dom C210 ) = ( Seg D37 ) & (for B344 being Nat holds (B344 in ( Seg D37 ) implies S14[ B344 , ( C210 . B344 ) ]))) from FINSEQ_1:sch 5(L427);
+L433: ( len C210 ) = ( ( len C197 ) - 1 ) by L402 , FINSEQ_1:def 3 , L432;
+L434: (for B345 being Nat holds ((1 <= B345 & B345 <= ( ( len C200 ) - 1 )) implies (ex B346 , B347 , B348 being (Element of ( INT )) st (B347 = ( ( C197 . B345 ) `2 ) & ( C200 . ( B345 + 1 ) ) = ( ( C200 . B345 ) * B347 ) & B348 = ( C200 . ( B345 + 1 ) ) & B346 = ( ( C197 . ( B345 + 1 ) ) `2 ) & ( C204 . B345 ) = ( ALGO_INVERSE (B348 , B346) ) & ( C210 . B345 ) = B348))))
+proof
+let C211 being Nat;
+assume L435: (1 <= C211 & C211 <= ( ( len C200 ) - 1 ));
+L436: C211 in ( Seg D37 ) by L435 , FINSEQ_1:1;
+thus L437: (ex B349 , B350 , B351 being (Element of ( INT )) st (B350 = ( ( C197 . C211 ) `2 ) & ( C200 . ( C211 + 1 ) ) = ( ( C200 . C211 ) * B350 ) & B351 = ( C200 . ( C211 + 1 ) ) & B349 = ( ( C197 . ( C211 + 1 ) ) `2 ) & ( C204 . C211 ) = ( ALGO_INVERSE (B351 , B349) ) & ( C210 . C211 ) = B351)) by L436 , L432;
+end;
+L438: ( len C197 ) in ( Seg ( len C197 ) ) by FINSEQ_1:3;
+L439: ( len C200 ) in ( dom C197 ) by L438 , L402 , FINSEQ_1:def 3;
+L440: ( C197 . ( len C200 ) ) in [: ( INT ) , ( INT ) :] by L439 , FINSEQ_2:11;
+reconsider D42 = ( ( C197 . ( len C200 ) ) `2 ) as (Element of ( INT )) by L440 , MCART_1:10;
+L441: 1 < ( len C200 ) by L409 , L395 , L402 , XXREAL_0:1;
+L442: ( 1 + 1 ) <= ( len C200 ) by L441 , NAT_1:13;
+L443: ( 2 - 1 ) <= ( ( len C200 ) - 1 ) by L442 , XREAL_1:9;
+L444: D37 in ( dom C210 ) by L443 , L432;
+L445: C210 in ( ( INT ) * ) by FINSEQ_1:def 11;
+reconsider D43 = ( C210 . ( ( len C200 ) - 1 ) ) as (Element of ( INT )) by L445 , L444 , FINSEQ_1:84;
+reconsider D44 = ( D43 * D42 ) as (Element of ( INT )) by INT_1:def 2;
+defpred S15[ Nat , Integer , Integer ] means (ex B352 , B353 , B354 being (Element of ( INT )) st (B353 = ( ( C197 . ( $1 + 1 ) ) `1 ) & B354 = ( ( C197 . ( $1 + 1 ) ) `2 ) & B352 = ( ( ( B353 - $2 ) * ( C204 . $1 ) ) mod B354 ) & $3 = ( $2 + ( B352 * ( C210 . $1 ) ) )));
+reconsider D45 = 1 as (Element of ( INT )) by INT_1:def 1;
+L446: (for B355 being (Element of ( NAT )) holds ((1 <= B355 & B355 < ( len C197 )) implies (for B356 being (Element of ( INT )) holds (ex B357 being (Element of ( INT )) st S15[ B355 , B356 , B357 ]))))
+proof
+let C212 being (Element of ( NAT ));
+assume L447: (1 <= C212 & C212 < ( len C197 ));
+let C213 being (Element of ( INT ));
+L448: (1 <= ( C212 + 1 ) & ( C212 + 1 ) <= ( len C200 )) by L447 , L402 , NAT_1:13;
+L449: ( C212 + 1 ) in ( Seg ( len C197 ) ) by L448 , L402;
+L450: ( C212 + 1 ) in ( dom C197 ) by L449 , FINSEQ_1:def 3;
+L451: ( C197 . ( C212 + 1 ) ) in [: ( INT ) , ( INT ) :] by L450 , FINSEQ_2:11;
+reconsider D46 = ( ( C197 . ( C212 + 1 ) ) `1 ) as (Element of ( INT )) by L451 , MCART_1:10;
+reconsider D47 = ( ( C197 . ( C212 + 1 ) ) `2 ) as (Element of ( INT )) by L451 , MCART_1:10;
+reconsider D48 = ( ( ( D46 - C213 ) * ( C204 . C212 ) ) mod D47 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D49 = ( C213 + ( D48 * ( C210 . C212 ) ) ) as (Element of ( INT )) by INT_1:def 2;
+take D49;
+thus L452: S15[ C212 , C213 , D49 ];
+end;
+L453: 1 in ( Seg ( len C197 ) ) by L409 , L402;
+L454: 1 in ( dom C197 ) by L453 , FINSEQ_1:def 3;
+L455: ( C197 . 1 ) in [: ( INT ) , ( INT ) :] by L454 , FINSEQ_2:11;
+reconsider D50 = ( ( C197 . 1 ) `1 ) as (Element of ( INT )) by L455 , MCART_1:10;
+consider C214 being (FinSequence of ( INT )) such that L456: (( len C214 ) = ( len C197 ) & (( C214 . 1 ) = D50 or ( len C197 ) = ( 0 )) & (for B358 being (Element of ( NAT )) holds ((1 <= B358 & B358 < ( len C197 )) implies S15[ B358 , ( C214 . B358 ) , ( C214 . ( B358 + 1 ) ) ]))) from RECDEF_1:sch 4(L446);
+L457: (for B359 being Nat holds ((1 <= B359 & B359 <= ( ( len C200 ) - 1 )) implies (ex B360 , B361 , B362 being (Element of ( INT )) st (B361 = ( ( C197 . ( B359 + 1 ) ) `1 ) & B362 = ( ( C197 . ( B359 + 1 ) ) `2 ) & B360 = ( ( ( B361 - ( C214 . B359 ) ) * ( C204 . B359 ) ) mod B362 ) & ( C214 . ( B359 + 1 ) ) = ( ( C214 . B359 ) + ( B360 * ( C210 . B359 ) ) )))))
+proof
+let C215 being Nat;
+assume L458: (1 <= C215 & C215 <= ( ( len C200 ) - 1 ));
+L459: (1 <= C215 & C215 < ( len C197 )) by L458 , L402 , L403 , XXREAL_0:2;
+L460: C215 is (Element of ( NAT )) by ORDINAL1:def 12;
+thus L461: (ex B363 , B364 , B365 being (Element of ( INT )) st (B364 = ( ( C197 . ( C215 + 1 ) ) `1 ) & B365 = ( ( C197 . ( C215 + 1 ) ) `2 ) & B363 = ( ( ( B364 - ( C214 . C215 ) ) * ( C204 . C215 ) ) mod B365 ) & ( C214 . ( C215 + 1 ) ) = ( ( C214 . C215 ) + ( B363 * ( C210 . C215 ) ) ))) by L460 , L456 , L459;
+end;
+reconsider D51 = ( ( C214 . ( len C200 ) ) mod D44 ) as (Element of ( INT )) by INT_1:def 2;
+L462: (D42 = ( ( C197 . ( len C200 ) ) `2 ) & D44 = ( ( C210 . ( ( len C200 ) - 1 ) ) * D42 ) & D51 = ( ( C214 . ( len C200 ) ) mod D44 ));
+thus L463: thesis by L462 , L395 , L457 , L434 , L402 , L456 , L422 , L433;
+end;
+end;
+uniqueness
+proof
+let C216 , C217 being (Element of ( INT ));
+assume L465: ((( len C197 ) = 1 implies C216 = ( ( C197 . 1 ) `1 )) & (( len C197 ) <> 1 implies (ex B366 , B367 , B368 , B369 being (FinSequence of ( INT )) st (ex B370 , B371 being (Element of ( INT )) st (( len B366 ) = ( len C197 ) & ( len B367 ) = ( len C197 ) & ( len B368 ) = ( ( len C197 ) - 1 ) & ( len B369 ) = ( ( len C197 ) - 1 ) & ( B366 . 1 ) = 1 & (for B372 being Nat holds ((1 <= B372 & B372 <= ( ( len B366 ) - 1 )) implies (ex B373 , B374 , B375 being (Element of ( INT )) st (B374 = ( ( C197 . B372 ) `2 ) & ( B366 . ( B372 + 1 ) ) = ( ( B366 . B372 ) * B374 ) & B375 = ( B366 . ( B372 + 1 ) ) & B373 = ( ( C197 . ( B372 + 1 ) ) `2 ) & ( B369 . B372 ) = ( ALGO_INVERSE (B375 , B373) ) & ( B368 . B372 ) = B375)))) & B370 = ( ( C197 . ( len B366 ) ) `2 ) & B371 = ( ( B368 . ( ( len B366 ) - 1 ) ) * B370 ) & ( B367 . 1 ) = ( ( C197 . 1 ) `1 ) & (for B376 being Nat holds ((1 <= B376 & B376 <= ( ( len B366 ) - 1 )) implies (ex B377 , B378 , B379 being (Element of ( INT )) st (B378 = ( ( C197 . ( B376 + 1 ) ) `1 ) & B379 = ( ( C197 . ( B376 + 1 ) ) `2 ) & B377 = ( ( ( B378 - ( B367 . B376 ) ) * ( B369 . B376 ) ) mod B379 ) & ( B367 . ( B376 + 1 ) ) = ( ( B367 . B376 ) + ( B377 * ( B368 . B376 ) ) ))))) & C216 = ( ( B367 . ( len B366 ) ) mod B371 ))))));
+assume L466: ((( len C197 ) = 1 implies C217 = ( ( C197 . 1 ) `1 )) & (( len C197 ) <> 1 implies (ex B380 , B381 , B382 , B383 being (FinSequence of ( INT )) st (ex B384 , B385 being (Element of ( INT )) st (( len B380 ) = ( len C197 ) & ( len B381 ) = ( len C197 ) & ( len B382 ) = ( ( len C197 ) - 1 ) & ( len B383 ) = ( ( len C197 ) - 1 ) & ( B380 . 1 ) = 1 & (for B386 being Nat holds ((1 <= B386 & B386 <= ( ( len B380 ) - 1 )) implies (ex B387 , B388 , B389 being (Element of ( INT )) st (B388 = ( ( C197 . B386 ) `2 ) & ( B380 . ( B386 + 1 ) ) = ( ( B380 . B386 ) * B388 ) & B389 = ( B380 . ( B386 + 1 ) ) & B387 = ( ( C197 . ( B386 + 1 ) ) `2 ) & ( B383 . B386 ) = ( ALGO_INVERSE (B389 , B387) ) & ( B382 . B386 ) = B389)))) & B384 = ( ( C197 . ( len B380 ) ) `2 ) & B385 = ( ( B382 . ( ( len B380 ) - 1 ) ) * B384 ) & ( B381 . 1 ) = ( ( C197 . 1 ) `1 ) & (for B390 being Nat holds ((1 <= B390 & B390 <= ( ( len B380 ) - 1 )) implies (ex B391 , B392 , B393 being (Element of ( INT )) st (B392 = ( ( C197 . ( B390 + 1 ) ) `1 ) & B393 = ( ( C197 . ( B390 + 1 ) ) `2 ) & B391 = ( ( ( B392 - ( B381 . B390 ) ) * ( B383 . B390 ) ) mod B393 ) & ( B381 . ( B390 + 1 ) ) = ( ( B381 . B390 ) + ( B391 * ( B382 . B390 ) ) ))))) & C217 = ( ( B381 . ( len B380 ) ) mod B385 ))))));
+per cases ;
+suppose L467: ( len C197 ) = 1;
+
+thus L468: C216 = C217 by L465 , L466 , L467;
+end;
+suppose L469: ( len C197 ) <> 1;
+
+consider C218 , C219 , C220 , C221 being (FinSequence of ( INT )), C222 , C223 being (Element of ( INT )) such that L470: (( len C218 ) = ( len C197 ) & ( len C219 ) = ( len C197 ) & ( len C220 ) = ( ( len C197 ) - 1 ) & ( len C221 ) = ( ( len C197 ) - 1 ) & ( C218 . 1 ) = 1 & (for B394 being Nat holds ((1 <= B394 & B394 <= ( ( len C218 ) - 1 )) implies (ex B395 , B396 , B397 being (Element of ( INT )) st (B396 = ( ( C197 . B394 ) `2 ) & ( C218 . ( B394 + 1 ) ) = ( ( C218 . B394 ) * B396 ) & B397 = ( C218 . ( B394 + 1 ) ) & B395 = ( ( C197 . ( B394 + 1 ) ) `2 ) & ( C221 . B394 ) = ( ALGO_INVERSE (B397 , B395) ) & ( C220 . B394 ) = B397)))) & C222 = ( ( C197 . ( len C218 ) ) `2 ) & C223 = ( ( C220 . ( ( len C218 ) - 1 ) ) * C222 ) & ( C219 . 1 ) = ( ( C197 . 1 ) `1 ) & (for B398 being Nat holds ((1 <= B398 & B398 <= ( ( len C218 ) - 1 )) implies (ex B399 , B400 , B401 being (Element of ( INT )) st (B400 = ( ( C197 . ( B398 + 1 ) ) `1 ) & B401 = ( ( C197 . ( B398 + 1 ) ) `2 ) & B399 = ( ( ( B400 - ( C219 . B398 ) ) * ( C221 . B398 ) ) mod B401 ) & ( C219 . ( B398 + 1 ) ) = ( ( C219 . B398 ) + ( B399 * ( C220 . B398 ) ) ))))) & C216 = ( ( C219 . ( len C218 ) ) mod C223 )) by L469 , L465;
+consider C224 , C225 , C226 , C227 being (FinSequence of ( INT )), C228 , C229 being (Element of ( INT )) such that L471: (( len C224 ) = ( len C197 ) & ( len C225 ) = ( len C197 ) & ( len C226 ) = ( ( len C197 ) - 1 ) & ( len C227 ) = ( ( len C197 ) - 1 ) & ( C224 . 1 ) = 1 & (for B402 being Nat holds ((1 <= B402 & B402 <= ( ( len C224 ) - 1 )) implies (ex B403 , B404 , B405 being (Element of ( INT )) st (B404 = ( ( C197 . B402 ) `2 ) & ( C224 . ( B402 + 1 ) ) = ( ( C224 . B402 ) * B404 ) & B405 = ( C224 . ( B402 + 1 ) ) & B403 = ( ( C197 . ( B402 + 1 ) ) `2 ) & ( C227 . B402 ) = ( ALGO_INVERSE (B405 , B403) ) & ( C226 . B402 ) = B405)))) & C228 = ( ( C197 . ( len C224 ) ) `2 ) & C229 = ( ( C226 . ( ( len C224 ) - 1 ) ) * C228 ) & ( C225 . 1 ) = ( ( C197 . 1 ) `1 ) & (for B406 being Nat holds ((1 <= B406 & B406 <= ( ( len C224 ) - 1 )) implies (ex B407 , B408 , B409 being (Element of ( INT )) st (B408 = ( ( C197 . ( B406 + 1 ) ) `1 ) & B409 = ( ( C197 . ( B406 + 1 ) ) `2 ) & B407 = ( ( ( B408 - ( C225 . B406 ) ) * ( C227 . B406 ) ) mod B409 ) & ( C225 . ( B406 + 1 ) ) = ( ( C225 . B406 ) + ( B407 * ( C226 . B406 ) ) ))))) & C217 = ( ( C225 . ( len C224 ) ) mod C229 )) by L469 , L466;
+defpred S16[ Nat ] means ((1 <= $1 & $1 <= ( len C218 )) implies ( C218 . $1 ) = ( C224 . $1 ));
+L472: S16[ ( 0 ) ];
+L473: (for B410 being Nat holds (S16[ B410 ] implies S16[ ( B410 + 1 ) ]))
+proof
+let C230 being Nat;
+assume L474: S16[ C230 ];
+assume L475: (1 <= ( C230 + 1 ) & ( C230 + 1 ) <= ( len C218 ));
+L476: (( 1 - 1 ) <= ( ( C230 + 1 ) - 1 ) & ( ( C230 + 1 ) - 1 ) <= ( ( len C218 ) - 1 )) by L475 , XREAL_1:9;
+L477: ( ( len C218 ) - 1 ) <= ( ( len C218 ) - ( 0 ) ) by XREAL_1:13;
+per cases ;
+suppose L478: C230 = ( 0 );
+
+thus L479: ( C218 . ( C230 + 1 ) ) = ( C224 . ( C230 + 1 ) ) by L470 , L471 , L478;
+end;
+suppose L480: C230 <> ( 0 );
+
+L481: 1 <= C230 by L480 , NAT_1:14;
+L482: (ex B411 , B412 , B413 being (Element of ( INT )) st (B412 = ( ( C197 . C230 ) `2 ) & ( C218 . ( C230 + 1 ) ) = ( ( C218 . C230 ) * B412 ) & B413 = ( C218 . ( C230 + 1 ) ) & B411 = ( ( C197 . ( C230 + 1 ) ) `2 ) & ( C221 . C230 ) = ( ALGO_INVERSE (B413 , B411) ) & ( C220 . C230 ) = B413)) by L470 , L481 , L476;
+L483: (1 <= C230 & C230 <= ( ( len C224 ) - 1 )) by L480 , L476 , L470 , L471 , NAT_1:14;
+L484: (ex B414 , B415 , B416 being (Element of ( INT )) st (B415 = ( ( C197 . C230 ) `2 ) & ( C224 . ( C230 + 1 ) ) = ( ( C224 . C230 ) * B415 ) & B416 = ( C224 . ( C230 + 1 ) ) & B414 = ( ( C197 . ( C230 + 1 ) ) `2 ) & ( C227 . C230 ) = ( ALGO_INVERSE (B416 , B414) ) & ( C226 . C230 ) = B416)) by L483 , L471;
+thus L485: ( C218 . ( C230 + 1 ) ) = ( C224 . ( C230 + 1 ) ) by L484 , L482 , L476 , L474 , L477 , L480 , NAT_1:14 , XXREAL_0:2;
+end;
+end;
+L487: (for B417 being Nat holds S16[ B417 ]) from NAT_1:sch 2(L472 , L473);
+L488:
+now
+let C231 being Nat;
+assume L489: (1 <= C231 & C231 <= ( len C220 ));
+L490: (ex B418 , B419 , B420 being (Element of ( INT )) st (B419 = ( ( C197 . C231 ) `2 ) & ( C218 . ( C231 + 1 ) ) = ( ( C218 . C231 ) * B419 ) & B420 = ( C218 . ( C231 + 1 ) ) & B418 = ( ( C197 . ( C231 + 1 ) ) `2 ) & ( C221 . C231 ) = ( ALGO_INVERSE (B420 , B418) ) & ( C220 . C231 ) = B420)) by L489 , L470;
+L491: (ex B421 , B422 , B423 being (Element of ( INT )) st (B422 = ( ( C197 . C231 ) `2 ) & ( C224 . ( C231 + 1 ) ) = ( ( C224 . C231 ) * B422 ) & B423 = ( C224 . ( C231 + 1 ) ) & B421 = ( ( C197 . ( C231 + 1 ) ) `2 ) & ( C227 . C231 ) = ( ALGO_INVERSE (B423 , B421) ) & ( C226 . C231 ) = B423)) by L471 , L489 , L470;
+thus L492: ( C220 . C231 ) = ( C226 . C231 ) by L491 , L490 , FINSEQ_1:14 , L470 , L471 , L487;
+end;
+L493: C220 = C226 by L488 , FINSEQ_1:14 , L470 , L471;
+L494:
+now
+let C232 being Nat;
+assume L495: (1 <= C232 & C232 <= ( len C221 ));
+L496: (ex B424 , B425 , B426 being (Element of ( INT )) st (B425 = ( ( C197 . C232 ) `2 ) & ( C218 . ( C232 + 1 ) ) = ( ( C218 . C232 ) * B425 ) & B426 = ( C218 . ( C232 + 1 ) ) & B424 = ( ( C197 . ( C232 + 1 ) ) `2 ) & ( C221 . C232 ) = ( ALGO_INVERSE (B426 , B424) ) & ( C220 . C232 ) = B426)) by L495 , L470;
+L497: (ex B427 , B428 , B429 being (Element of ( INT )) st (B428 = ( ( C197 . C232 ) `2 ) & ( C224 . ( C232 + 1 ) ) = ( ( C224 . C232 ) * B428 ) & B429 = ( C224 . ( C232 + 1 ) ) & B427 = ( ( C197 . ( C232 + 1 ) ) `2 ) & ( C227 . C232 ) = ( ALGO_INVERSE (B429 , B427) ) & ( C226 . C232 ) = B429)) by L471 , L495 , L470;
+thus L498: ( C221 . C232 ) = ( C227 . C232 ) by L497 , L496 , L487 , FINSEQ_1:14 , L470 , L471;
+end;
+L499: C223 = C229 by L471 , FINSEQ_1:14 , L470 , L488;
+defpred S17[ Nat ] means ((1 <= $1 & $1 <= ( len C219 )) implies ( C219 . $1 ) = ( C225 . $1 ));
+L500: S17[ ( 0 ) ];
+L501: (for B430 being Nat holds (S17[ B430 ] implies S17[ ( B430 + 1 ) ]))
+proof
+let C233 being Nat;
+assume L502: S17[ C233 ];
+assume L503: (1 <= ( C233 + 1 ) & ( C233 + 1 ) <= ( len C219 ));
+L504: (( 1 - 1 ) <= ( ( C233 + 1 ) - 1 ) & ( ( C233 + 1 ) - 1 ) <= ( ( len C219 ) - 1 )) by L503 , XREAL_1:9;
+L505: ( ( len C219 ) - 1 ) <= ( ( len C219 ) - ( 0 ) ) by XREAL_1:13;
+per cases ;
+suppose L506: C233 = ( 0 );
+
+thus L507: ( C219 . ( C233 + 1 ) ) = ( C225 . ( C233 + 1 ) ) by L470 , L471 , L506;
+end;
+suppose L508: C233 <> ( 0 );
+
+L509: 1 <= C233 by L508 , NAT_1:14;
+L510: (ex B431 , B432 , B433 being (Element of ( INT )) st (B432 = ( ( C197 . ( C233 + 1 ) ) `1 ) & B433 = ( ( C197 . ( C233 + 1 ) ) `2 ) & B431 = ( ( ( B432 - ( C219 . C233 ) ) * ( C221 . C233 ) ) mod B433 ) & ( C219 . ( C233 + 1 ) ) = ( ( C219 . C233 ) + ( B431 * ( C220 . C233 ) ) ))) by L509 , L504 , L470;
+L511: (ex B434 , B435 , B436 being (Element of ( INT )) st (B435 = ( ( C197 . ( C233 + 1 ) ) `1 ) & B436 = ( ( C197 . ( C233 + 1 ) ) `2 ) & B434 = ( ( ( B435 - ( C225 . C233 ) ) * ( C227 . C233 ) ) mod B436 ) & ( C225 . ( C233 + 1 ) ) = ( ( C225 . C233 ) + ( B434 * ( C226 . C233 ) ) ))) by L509 , L504 , L470 , L471;
+thus L512: ( C219 . ( C233 + 1 ) ) = ( C225 . ( C233 + 1 ) ) by L511 , L493 , L510 , L502 , L505 , L508 , NAT_1:14 , L504 , XXREAL_0:2 , FINSEQ_1:14 , L470 , L471 , L494;
+end;
+end;
+L514: (for B437 being Nat holds S17[ B437 ]) from NAT_1:sch 2(L500 , L501);
+thus L515: C216 = C217 by L514 , L499 , L470 , L471 , FINSEQ_1:14;
+end;
+end;
+end;
+theorem
+L518: (for B438 , B439 being (Element of ( INT )) holds (B439 <> ( 0 ) implies ( B438 mod B439 ) , B438 are_congruent_mod B439))
+proof
+let C234 , C235 being (Element of ( INT ));
+assume L519: C235 <> ( 0 );
+L520: ( C234 mod C235 ) = ( C234 - ( ( C234 div C235 ) * C235 ) ) by L519 , INT_1:def 10;
+reconsider D52 = ( - ( C234 div C235 ) ) as (Element of ( INT )) by INT_1:def 2;
+take D52;
+thus L521: thesis by L520;
+end;
+theorem
+L522: (for B440 , B441 being (Element of ( INT )) holds (B441 <> ( 0 ) implies ( ( B440 mod B441 ) gcd B441 ) = ( B440 gcd B441 ))) by INT_4:14 , L518;
+theorem
+L523: (for B442 , B443 , B444 being (Element of ( INT )) holds ((B444 <> ( 0 ) & B442 = ( B443 mod B444 ) & B443 , B444 are_relative_prime ) implies B442 , B444 are_relative_prime ))
+proof
+let C236 , C237 , C238 being (Element of ( INT ));
+assume L524: (C238 <> ( 0 ) & C236 = ( C237 mod C238 ) & C237 , C238 are_relative_prime );
+L525: ( C237 gcd C238 ) = 1 by L524 , INT_2:def 3;
+L526: ( C236 gcd C238 ) = 1 by L525 , L524 , INT_4:14 , L518;
+thus L527: thesis by L526 , INT_2:def 3;
+end;
+L528: (for B445 , B446 , B447 being (Element of ( INT )) holds ((B445 = ( B446 mod B447 ) & B447 <> ( 0 )) implies (ex B448 being (Element of ( INT )) st B445 = ( B446 + ( B448 * B447 ) ))))
+proof
+let C239 , C240 , C241 being (Element of ( INT ));
+assume L529: (C239 = ( C240 mod C241 ) & C241 <> ( 0 ));
+L530: C240 = ( ( ( C240 div C241 ) * C241 ) + C239 ) by L529 , INT_1:59;
+reconsider D53 = ( - ( C240 div C241 ) ) as (Element of ( INT )) by INT_1:def 2;
+take D53;
+thus L531: thesis by L530;
+end;
+L532: (for B449 , B450 being (FinSequence of ( INT )) holds ((( len B449 ) = ( len B450 ) & (for B451 being Nat holds (B451 in ( Seg ( len B449 ) ) implies ( B449 . B451 ) <> ( 0 ))) & ( B450 . 1 ) = 1) implies (for B452 being (Element of ( NAT )) holds ((1 <= B452 & B452 <= ( ( len B449 ) - 1 ) & (for B453 being Nat holds ((1 <= B453 & B453 <= B452) implies ( B450 . ( B453 + 1 ) ) = ( ( B450 . B453 ) * ( B449 . B453 ) )))) implies ( B450 . ( B452 + 1 ) ) <> ( 0 )))))
+proof
+let C242 , C243 being (FinSequence of ( INT ));
+assume L533: ( len C242 ) = ( len C243 );
+assume L534: ((for B454 being Nat holds (B454 in ( Seg ( len C242 ) ) implies ( C242 . B454 ) <> ( 0 ))) & ( C243 . 1 ) = 1);
+defpred S18[ Nat ] means ((1 <= $1 & $1 <= ( ( len C242 ) - 1 ) & (for B455 being Nat holds ((1 <= B455 & B455 <= $1) implies ( C243 . ( B455 + 1 ) ) = ( ( C243 . B455 ) * ( C242 . B455 ) )))) implies ( C243 . ( $1 + 1 ) ) <> ( 0 ));
+reconsider D54 = ( 0 ) as (Element of ( NAT ));
+L535: S18[ ( 0 ) ];
+L536: (for B456 being (Element of ( NAT )) holds (S18[ B456 ] implies S18[ ( B456 + 1 ) ]))
+proof
+let C244 being (Element of ( NAT ));
+assume L537: S18[ C244 ];
+assume L538: (1 <= ( C244 + 1 ) & ( C244 + 1 ) <= ( ( len C242 ) - 1 ) & (for B457 being Nat holds ((1 <= B457 & B457 <= ( C244 + 1 )) implies ( C243 . ( B457 + 1 ) ) = ( ( C243 . B457 ) * ( C242 . B457 ) ))));
+L539: C244 <= ( C244 + 1 ) by NAT_1:12;
+per cases ;
+suppose L540: C244 = ( 0 );
+
+L541: ( C243 . ( ( C244 + 1 ) + 1 ) ) = ( ( C243 . 1 ) * ( C242 . 1 ) ) by L538 , L540
+.= ( C242 . 1 ) by L534;
+L542: ( ( ( len C242 ) - 1 ) + (( 0 ) qua Nat) ) <= ( ( ( len C242 ) - 1 ) + 1 ) by XREAL_1:7;
+L543: ( C244 + 1 ) <= ( len C242 ) by L542 , L538 , XXREAL_0:2;
+L544: (1 <= 1 & 1 <= ( len C242 )) by L543 , XXREAL_0:2 , L538;
+L545: 1 in ( Seg ( len C242 ) ) by L544;
+thus L546: ( C243 . ( ( C244 + 1 ) + 1 ) ) <> ( 0 ) by L545 , L541 , L534;
+end;
+suppose L547: C244 <> ( 0 );
+
+L548:
+now
+let C245 being Nat;
+assume L549: (1 <= C245 & C245 <= C244);
+L550: (1 <= C245 & C245 <= ( C244 + 1 )) by L549 , NAT_1:12;
+thus L551: ( C243 . ( C245 + 1 ) ) = ( ( C243 . C245 ) * ( C242 . C245 ) ) by L550 , L538;
+end;
+thus L552: ( C243 . ( ( C244 + 1 ) + 1 ) ) <> ( 0 )
+proof
+L553: ( ( C244 + 1 ) + 1 ) <= ( ( ( len C242 ) - 1 ) + 1 ) by L538 , XREAL_1:6;
+L554: ( C244 + 1 ) <= ( ( C244 + 1 ) + 1 ) by NAT_1:12;
+L555: 1 <= ( C244 + 1 ) by NAT_1:12;
+L556: ( C244 + 1 ) <= ( len C242 ) by L554 , L553 , XXREAL_0:2;
+L557: ( C244 + 1 ) in ( Seg ( len C242 ) ) by L556 , L555;
+L558: ( C242 . ( C244 + 1 ) ) <> ( 0 ) by L557 , L534;
+L559: ( C243 . ( ( C244 + 1 ) + 1 ) ) = ( ( C243 . ( C244 + 1 ) ) * ( C242 . ( C244 + 1 ) ) ) by L538;
+thus L560: ( C243 . ( ( C244 + 1 ) + 1 ) ) <> ( 0 ) by L559 , L558 , L548 , L537 , L538 , L539 , XXREAL_0:2 , NAT_1:14 , L547 , XCMPLX_1:6;
+end;
+
+end;
+end;
+L554: (for B458 being (Element of ( NAT )) holds S18[ B458 ]) from NAT_1:sch 1(L535 , L536);
+thus L555: thesis by L554;
+end;
+L556: (for B459 , B460 being (FinSequence of ( INT )) holds ((2 <= ( len B459 ) & (for B461 , B462 being Nat holds ((B461 in ( Seg ( len B459 ) ) & B462 in ( Seg ( len B459 ) ) & B461 <> B462) implies ( B459 . B461 ) , ( B459 . B462 ) are_relative_prime )) & ( B460 . 1 ) = 1) implies (for B463 being (Element of ( NAT )) holds ((1 <= B463 & B463 <= ( ( len B459 ) - 1 ) & (for B464 being Nat holds ((1 <= B464 & B464 <= B463) implies ( B460 . ( B464 + 1 ) ) = ( ( B460 . B464 ) * ( B459 . B464 ) )))) implies (for B465 being Nat holds ((( B463 + 1 ) <= B465 & B465 <= ( len B459 )) implies ( B460 . ( B463 + 1 ) ) , ( B459 . B465 ) are_relative_prime ))))))
+proof
+let C246 , C247 being (FinSequence of ( INT ));
+assume L557: 2 <= ( len C246 );
+assume L558: ((for B466 , B467 being Nat holds ((B466 in ( Seg ( len C246 ) ) & B467 in ( Seg ( len C246 ) ) & B466 <> B467) implies ( C246 . B466 ) , ( C246 . B467 ) are_relative_prime )) & ( C247 . 1 ) = 1);
+defpred S19[ Nat ] means ((1 <= $1 & $1 <= ( ( len C246 ) - 1 ) & (for B468 being Nat holds ((1 <= B468 & B468 <= $1) implies ( C247 . ( B468 + 1 ) ) = ( ( C247 . B468 ) * ( C246 . B468 ) )))) implies (for B469 being Nat holds ((( $1 + 1 ) <= B469 & B469 <= ( len C246 )) implies ( C247 . ( $1 + 1 ) ) , ( C246 . B469 ) are_relative_prime )));
+reconsider D55 = ( 0 ) as (Element of ( NAT ));
+L559: S19[ ( 0 ) ];
+L560: (for B470 being (Element of ( NAT )) holds (S19[ B470 ] implies S19[ ( B470 + 1 ) ]))
+proof
+let C248 being (Element of ( NAT ));
+assume L561: S19[ C248 ];
+assume L562: (1 <= ( C248 + 1 ) & ( C248 + 1 ) <= ( ( len C246 ) - 1 ) & (for B471 being Nat holds ((1 <= B471 & B471 <= ( C248 + 1 )) implies ( C247 . ( B471 + 1 ) ) = ( ( C247 . B471 ) * ( C246 . B471 ) ))));
+L563: C248 <= ( C248 + 1 ) by NAT_1:12;
+per cases ;
+suppose L564: C248 = ( 0 );
+
+L565: ( C247 . ( ( C248 + 1 ) + 1 ) ) = ( ( C247 . 1 ) * ( C246 . 1 ) ) by L562 , L564
+.= ( C246 . 1 ) by L558;
+L566: (for B472 being Nat holds ((( ( C248 + 1 ) + 1 ) <= B472 & B472 <= ( len C246 )) implies ( C247 . ( ( C248 + 1 ) + 1 ) ) , ( C246 . B472 ) are_relative_prime ))
+proof
+let C249 being Nat;
+assume L567: (( ( C248 + 1 ) + 1 ) <= C249 & C249 <= ( len C246 ));
+L568: (1 <= C249 & C249 <= ( len C246 )) by L567 , XXREAL_0:2 , L564;
+L569: C249 in ( Seg ( len C246 ) ) by L568 , FINSEQ_1:1;
+L570: (1 <= 1 & 1 <= ( len C246 )) by XXREAL_0:2 , L568;
+L571: 1 in ( Seg ( len C246 ) ) by L570;
+L572: 1 <> C249 by L567 , L564;
+thus L573: ( C247 . ( ( C248 + 1 ) + 1 ) ) , ( C246 . C249 ) are_relative_prime  by L572 , L565 , L558 , L569 , L571;
+end;
+thus L574: thesis by L566;
+end;
+suppose L575: C248 <> ( 0 );
+
+L576:
+now
+let C250 being Nat;
+assume L577: (1 <= C250 & C250 <= C248);
+L578: (1 <= C250 & C250 <= ( C248 + 1 )) by L577 , NAT_1:12;
+thus L579: ( C247 . ( C250 + 1 ) ) = ( ( C247 . C250 ) * ( C246 . C250 ) ) by L578 , L562;
+end;
+thus L580: (for B473 being Nat holds ((( ( C248 + 1 ) + 1 ) <= B473 & B473 <= ( len C246 )) implies ( C247 . ( ( C248 + 1 ) + 1 ) ) , ( C246 . B473 ) are_relative_prime ))
+proof
+let C251 being Nat;
+assume L581: (( ( C248 + 1 ) + 1 ) <= C251 & C251 <= ( len C246 ));
+L582: ( C248 + 1 ) <= ( ( C248 + 1 ) + 1 ) by NAT_1:12;
+L583: (( C248 + 1 ) <= C251 & C251 <= ( len C246 )) by L582 , L581 , XXREAL_0:2;
+L584: ( C247 . ( C248 + 1 ) ) , ( C246 . C251 ) are_relative_prime  by L583 , L576 , L561 , L562 , L563 , XXREAL_0:2 , NAT_1:14 , L575;
+L585: 1 <= ( C248 + 1 ) by NAT_1:12;
+L586: ( C248 + 1 ) <= ( len C246 ) by L583 , XXREAL_0:2;
+L587: ( C248 + 1 ) in ( Seg ( len C246 ) ) by L586 , L585;
+L588: (1 <= C251 & C251 <= ( len C246 )) by L583 , L585 , XXREAL_0:2;
+L589: C251 in ( Seg ( len C246 ) ) by L588 , FINSEQ_1:1;
+L590: ( C248 + 1 ) < C251 by L581 , XXREAL_0:2 , NAT_1:16;
+L591: ( C246 . ( C248 + 1 ) ) , ( C246 . C251 ) are_relative_prime  by L590 , L558 , L587 , L589;
+L592: ( C247 . ( ( C248 + 1 ) + 1 ) ) = ( ( C247 . ( C248 + 1 ) ) * ( C246 . ( C248 + 1 ) ) ) by L562;
+thus L593: ( C247 . ( ( C248 + 1 ) + 1 ) ) , ( C246 . C251 ) are_relative_prime  by L592 , L591 , L584 , INT_2:26;
+end;
+
+end;
+end;
+L582: (for B474 being (Element of ( NAT )) holds S19[ B474 ]) from NAT_1:sch 1(L559 , L560);
+thus L583: thesis by L582;
+end;
+L584: (for B475 , B476 being (FinSequence of ( INT )) holds ((( len B475 ) = ( len B476 ) & ( B476 . 1 ) = 1) implies (for B477 being (Element of ( NAT )) holds ((1 <= B477 & B477 <= ( ( len B475 ) - 1 ) & (for B478 being Nat holds ((1 <= B478 & B478 <= B477) implies ( B476 . ( B478 + 1 ) ) = ( ( B476 . B478 ) * ( B475 . B478 ) )))) implies (for B479 being Nat holds ((1 <= B479 & B479 <= B477) implies ( ( B476 . ( B477 + 1 ) ) mod ( B475 . B479 ) ) = ( 0 )))))))
+proof
+let C252 , C253 being (FinSequence of ( INT ));
+assume L585: ( len C252 ) = ( len C253 );
+assume L586: ( C253 . 1 ) = 1;
+defpred S20[ Nat ] means ((1 <= $1 & $1 <= ( ( len C252 ) - 1 ) & (for B480 being Nat holds ((1 <= B480 & B480 <= $1) implies ( C253 . ( B480 + 1 ) ) = ( ( C253 . B480 ) * ( C252 . B480 ) )))) implies (for B481 being Nat holds ((1 <= B481 & B481 <= $1) implies ( ( C253 . ( $1 + 1 ) ) mod ( C252 . B481 ) ) = ( 0 ))));
+reconsider D56 = ( 0 ) as (Element of ( NAT ));
+L587: S20[ ( 0 ) ];
+L588: (for B482 being (Element of ( NAT )) holds (S20[ B482 ] implies S20[ ( B482 + 1 ) ]))
+proof
+let C254 being (Element of ( NAT ));
+assume L589: S20[ C254 ];
+assume L590: (1 <= ( C254 + 1 ) & ( C254 + 1 ) <= ( ( len C252 ) - 1 ) & (for B483 being Nat holds ((1 <= B483 & B483 <= ( C254 + 1 )) implies ( C253 . ( B483 + 1 ) ) = ( ( C253 . B483 ) * ( C252 . B483 ) ))));
+L591: C254 <= ( C254 + 1 ) by NAT_1:12;
+per cases ;
+suppose L592: C254 = ( 0 );
+
+L593: ( C253 . ( ( C254 + 1 ) + 1 ) ) = ( ( C253 . 1 ) * ( C252 . 1 ) ) by L590 , L592
+.= ( C252 . 1 ) by L586;
+L594: (for B484 being Nat holds ((1 <= B484 & B484 <= ( C254 + 1 )) implies ( ( C253 . ( ( C254 + 1 ) + 1 ) ) mod ( C252 . B484 ) ) = ( 0 )))
+proof
+let C255 being Nat;
+assume L595: (1 <= C255 & C255 <= ( C254 + 1 ));
+L596: C255 = 1 by L595 , XXREAL_0:1 , L592;
+thus L597: ( ( C253 . ( ( C254 + 1 ) + 1 ) ) mod ( C252 . C255 ) ) = ( 0 ) by L596 , INT_1:50 , L593;
+end;
+thus L598: thesis by L594;
+end;
+suppose L599: C254 <> ( 0 );
+
+L600:
+now
+let C256 being Nat;
+assume L601: (1 <= C256 & C256 <= C254);
+L602: (1 <= C256 & C256 <= ( C254 + 1 )) by L601 , NAT_1:12;
+thus L603: ( C253 . ( C256 + 1 ) ) = ( ( C253 . C256 ) * ( C252 . C256 ) ) by L602 , L590;
+end;
+thus L604: (for B485 being Nat holds ((1 <= B485 & B485 <= ( C254 + 1 )) implies ( ( C253 . ( ( C254 + 1 ) + 1 ) ) mod ( C252 . B485 ) ) = ( 0 )))
+proof
+let C257 being Nat;
+assume L605: (1 <= C257 & C257 <= ( C254 + 1 ));
+reconsider D57 = ( C252 . C257 ) as (Element of ( INT )) by INT_1:def 2;
+per cases ;
+suppose L606: C257 = ( C254 + 1 );
+
+thus L607: ( ( C253 . ( ( C254 + 1 ) + 1 ) ) mod ( C252 . C257 ) ) = ( ( ( C253 . ( C254 + 1 ) ) * ( C252 . ( C254 + 1 ) ) ) mod ( C252 . C257 ) ) by L590
+.= ( ( ( ( C253 . ( C254 + 1 ) ) mod ( C252 . C257 ) ) * ( ( C252 . ( C254 + 1 ) ) mod ( C252 . C257 ) ) ) mod ( C252 . C257 ) ) by NAT_D:67
+.= ( ( ( ( C253 . ( C254 + 1 ) ) mod ( C252 . C257 ) ) * (( 0 ) qua Nat) ) mod ( C252 . C257 ) ) by INT_1:50 , L606
+.= ( 0 ) by INT_4:12;
+end;
+suppose L608: C257 <> ( C254 + 1 );
+
+L609: C257 < ( C254 + 1 ) by L608 , L605 , XXREAL_0:1;
+L610: C257 <= C254 by L609 , NAT_1:13;
+thus L611: ( ( C253 . ( ( C254 + 1 ) + 1 ) ) mod ( C252 . C257 ) ) = ( ( ( C253 . ( C254 + 1 ) ) * ( C252 . ( C254 + 1 ) ) ) mod ( C252 . C257 ) ) by L590
+.= ( ( ( ( C253 . ( C254 + 1 ) ) mod ( C252 . C257 ) ) * ( ( C252 . ( C254 + 1 ) ) mod ( C252 . C257 ) ) ) mod ( C252 . C257 ) ) by NAT_D:67
+.= ( ( ( 0 ) * ( ( C252 . ( C254 + 1 ) ) mod ( C252 . C257 ) ) ) mod ( C252 . C257 ) ) by L610 , L600 , L605 , L589 , L590 , L591 , XXREAL_0:2
+.= ( 0 ) by INT_4:12;
+end;
+end;
+
+end;
+end;
+L606: (for B486 being (Element of ( NAT )) holds S20[ B486 ]) from NAT_1:sch 1(L587 , L588);
+thus L607: thesis by L606;
+end;
+theorem
+L608: (for B487 being non  empty (FinSequence of [: ( INT ) , ( INT ) :]) holds (for B488 , B489 being (FinSequence of ( INT )) holds ((( len B488 ) = ( len B489 ) & ( len B488 ) = ( len B487 ) & (for B490 being Nat holds (B490 in ( Seg ( len B487 ) ) implies ( B489 . B490 ) <> ( 0 ))) & (for B491 being Nat holds (B491 in ( Seg ( len B487 ) ) implies (( ( B487 . B491 ) `1 ) = ( B488 . B491 ) & ( ( B487 . B491 ) `2 ) = ( B489 . B491 )))) & (for B492 , B493 being Nat holds ((B492 in ( Seg ( len B487 ) ) & B493 in ( Seg ( len B487 ) ) & B492 <> B493) implies ( B489 . B492 ) , ( B489 . B493 ) are_relative_prime ))) implies (for B494 being Nat holds (B494 in ( Seg ( len B487 ) ) implies ( ( ALGO_CRT B487 ) mod ( B489 . B494 ) ) = ( ( B488 . B494 ) mod ( B489 . B494 ) ))))))
+proof
+defpred S21[ Nat ] means (for B495 being non  empty (FinSequence of [: ( INT ) , ( INT ) :]) holds (for B496 , B497 being (FinSequence of ( INT )) holds ((( len B495 ) = $1 & ( len B496 ) = ( len B497 ) & ( len B496 ) = ( len B495 ) & (for B498 being Nat holds (B498 in ( Seg ( len B495 ) ) implies ( B497 . B498 ) <> ( 0 ))) & (for B499 being Nat holds (B499 in ( Seg ( len B495 ) ) implies (( ( B495 . B499 ) `1 ) = ( B496 . B499 ) & ( ( B495 . B499 ) `2 ) = ( B497 . B499 )))) & (for B500 , B501 being Nat holds ((B500 in ( Seg ( len B495 ) ) & B501 in ( Seg ( len B495 ) ) & B500 <> B501) implies ( B497 . B500 ) , ( B497 . B501 ) are_relative_prime ))) implies (for B502 being Nat holds (B502 in ( Seg ( len B495 ) ) implies ( ( ALGO_CRT B495 ) mod ( B497 . B502 ) ) = ( ( B496 . B502 ) mod ( B497 . B502 ) ))))));
+L609: S21[ ( 0 ) ];
+L610: (for B503 being (Element of ( NAT )) holds (S21[ B503 ] implies S21[ ( B503 + 1 ) ]))
+proof
+let C258 being (Element of ( NAT ));
+assume L611: S21[ C258 ];
+let C259 being non  empty (FinSequence of [: ( INT ) , ( INT ) :]);
+let C260 , C261 being (FinSequence of ( INT ));
+assume L612: (( len C259 ) = ( C258 + 1 ) & ( len C260 ) = ( len C261 ) & ( len C260 ) = ( len C259 ) & (for B504 being Nat holds (B504 in ( Seg ( len C259 ) ) implies ( C261 . B504 ) <> ( 0 ))) & (for B505 being Nat holds (B505 in ( Seg ( len C259 ) ) implies (( ( C259 . B505 ) `1 ) = ( C260 . B505 ) & ( ( C259 . B505 ) `2 ) = ( C261 . B505 )))) & (for B506 , B507 being Nat holds ((B506 in ( Seg ( len C259 ) ) & B507 in ( Seg ( len C259 ) ) & B506 <> B507) implies ( C261 . B506 ) , ( C261 . B507 ) are_relative_prime )));
+per cases ;
+suppose L613: C258 = ( 0 );
+
+L614: 1 in ( Seg ( len C259 ) ) by L613 , L612;
+L615: ( ALGO_CRT C259 ) = ( ( C259 . 1 ) `1 ) by L388 , L613 , L612
+.= ( C260 . 1 ) by L612 , L614;
+thus L616: (for B508 being Nat holds (B508 in ( Seg ( len C259 ) ) implies ( ( ALGO_CRT C259 ) mod ( C261 . B508 ) ) = ( ( C260 . B508 ) mod ( C261 . B508 ) ))) by L615 , TARSKI:def 1 , FINSEQ_1:2 , L613 , L612;
+end;
+suppose L617: C258 <> ( 0 );
+
+L618: 1 <= C258 by L617 , NAT_1:14;
+L619: ( len C259 ) <> 1 by L612 , L617;
+reconsider D58 = ( C259 | C258 ) as (FinSequence of [: ( INT ) , ( INT ) :]);
+reconsider D59 = ( C260 | C258 ) as (FinSequence of ( INT ));
+reconsider D60 = ( C261 | C258 ) as (FinSequence of ( INT ));
+L620: C258 <= ( C258 + 1 ) by NAT_1:11;
+L621: ( len D59 ) = C258 by L620 , FINSEQ_1:59 , L612;
+L622: ( len D58 ) = C258 by L620 , FINSEQ_1:59 , L612;
+reconsider D61 = D58 as non  empty (FinSequence of [: ( INT ) , ( INT ) :]) by L622 , L617;
+L623: ( dom D61 ) = ( Seg ( len D61 ) ) by FINSEQ_1:def 3
+.= ( Seg C258 ) by L620 , FINSEQ_1:59 , L612;
+L624: ( len D61 ) = C258 by L623 , FINSEQ_1:def 3;
+L625: ( Seg ( len D61 ) ) c= ( Seg ( len C259 ) ) by L624 , L620 , FINSEQ_1:5 , L612;
+L626: (( len D61 ) = C258 & ( len D59 ) = ( len D60 ) & ( len D59 ) = ( len D61 )) by L621 , L620 , FINSEQ_1:59 , L612;
+L627: (for B509 being Nat holds (B509 in ( Seg ( len D61 ) ) implies ( D60 . B509 ) <> ( 0 )))
+proof
+let C262 being Nat;
+assume L628: C262 in ( Seg ( len D61 ) );
+L629: ( D60 . C262 ) = ( C261 . C262 ) by L628 , FUNCT_1:49 , L624;
+thus L630: thesis by L629 , L625 , L628 , L612;
+end;
+L631: (for B510 being Nat holds (B510 in ( Seg ( len D61 ) ) implies (( ( D61 . B510 ) `1 ) = ( D59 . B510 ) & ( ( D61 . B510 ) `2 ) = ( D60 . B510 ))))
+proof
+let C263 being Nat;
+assume L632: C263 in ( Seg ( len D61 ) );
+L633: ( ( D61 . C263 ) `1 ) = ( ( C259 . C263 ) `1 ) by L632 , FUNCT_1:49 , L624
+.= ( C260 . C263 ) by L632 , L625 , L612
+.= ( D59 . C263 ) by L632 , FUNCT_1:49 , L624;
+L634: ( ( D61 . C263 ) `2 ) = ( ( C259 . C263 ) `2 ) by L632 , FUNCT_1:49 , L624
+.= ( C261 . C263 ) by L632 , L625 , L612
+.= ( D60 . C263 ) by L632 , FUNCT_1:49 , L624;
+thus L635: thesis by L634 , L633;
+end;
+L636: (for B511 , B512 being Nat holds ((B511 in ( Seg ( len D61 ) ) & B512 in ( Seg ( len D61 ) ) & B511 <> B512) implies ( D60 . B511 ) , ( D60 . B512 ) are_relative_prime ))
+proof
+let C264 , C265 being Nat;
+assume L637: (C264 in ( Seg ( len D61 ) ) & C265 in ( Seg ( len D61 ) ) & C264 <> C265);
+L638: ( C261 . C264 ) = ( D60 . C264 ) by L637 , FUNCT_1:49 , L624;
+L639: ( C261 . C265 ) = ( D60 . C265 ) by L637 , FUNCT_1:49 , L624;
+thus L640: thesis by L639 , L638 , L637 , L625 , L612;
+end;
+L641: (for B513 being Nat holds (B513 in ( Seg ( len D61 ) ) implies ( ( ALGO_CRT D61 ) mod ( C261 . B513 ) ) = ( ( C260 . B513 ) mod ( C261 . B513 ) )))
+proof
+let C266 being Nat;
+assume L642: C266 in ( Seg ( len D61 ) );
+L643: (( D59 . C266 ) = ( C260 . C266 ) & ( D60 . C266 ) = ( C261 . C266 )) by L642 , FUNCT_1:49 , L624;
+thus L644: ( ( ALGO_CRT D61 ) mod ( C261 . C266 ) ) = ( ( C260 . C266 ) mod ( C261 . C266 ) ) by L643 , L611 , L626 , L631 , L636 , L627 , L642;
+end;
+consider C267 , C268 , C269 , C270 being (FinSequence of ( INT )), C271 , C272 being (Element of ( INT )) such that L645: (( len C267 ) = ( len C259 ) & ( len C268 ) = ( len C259 ) & ( len C269 ) = ( ( len C259 ) - 1 ) & ( len C270 ) = ( ( len C259 ) - 1 ) & ( C267 . 1 ) = 1 & (for B514 being Nat holds ((1 <= B514 & B514 <= ( ( len C267 ) - 1 )) implies (ex B515 , B516 , B517 being (Element of ( INT )) st (B516 = ( ( C259 . B514 ) `2 ) & ( C267 . ( B514 + 1 ) ) = ( ( C267 . B514 ) * B516 ) & B517 = ( C267 . ( B514 + 1 ) ) & B515 = ( ( C259 . ( B514 + 1 ) ) `2 ) & ( C270 . B514 ) = ( ALGO_INVERSE (B517 , B515) ) & ( C269 . B514 ) = B517)))) & C271 = ( ( C259 . ( len C267 ) ) `2 ) & C272 = ( ( C269 . ( ( len C267 ) - 1 ) ) * C271 ) & ( C268 . 1 ) = ( ( C259 . 1 ) `1 ) & (for B518 being Nat holds ((1 <= B518 & B518 <= ( ( len C267 ) - 1 )) implies (ex B519 , B520 , B521 being (Element of ( INT )) st (B520 = ( ( C259 . ( B518 + 1 ) ) `1 ) & B521 = ( ( C259 . ( B518 + 1 ) ) `2 ) & B519 = ( ( ( B520 - ( C268 . B518 ) ) * ( C270 . B518 ) ) mod B521 ) & ( C268 . ( B518 + 1 ) ) = ( ( C268 . B518 ) + ( B519 * ( C269 . B518 ) ) ))))) & ( ALGO_CRT C259 ) = ( ( C268 . ( len C267 ) ) mod C272 )) by L619 , L388;
+L646: ( 1 + 1 ) <= ( C258 + 1 ) by XREAL_1:6 , L618;
+reconsider D62 = ( ( len C261 ) - 1 ) as (Element of ( NAT )) by L612;
+L647: (1 <= D62 & D62 <= D62) by L612 , NAT_1:14 , L617;
+L648: (for B522 being Nat holds ((1 <= B522 & B522 <= D62) implies ( C267 . ( B522 + 1 ) ) = ( ( C267 . B522 ) * ( C261 . B522 ) )))
+proof
+let C273 being Nat;
+assume L649: (1 <= C273 & C273 <= D62);
+L650: (ex B523 , B524 , B525 being (Element of ( INT )) st (B524 = ( ( C259 . C273 ) `2 ) & ( C267 . ( C273 + 1 ) ) = ( ( C267 . C273 ) * B524 ) & B525 = ( C267 . ( C273 + 1 ) ) & B523 = ( ( C259 . ( C273 + 1 ) ) `2 ) & ( C270 . C273 ) = ( ALGO_INVERSE (B525 , B523) ) & ( C269 . C273 ) = B525)) by L649 , L612 , L645;
+L651: C273 in ( Seg ( len D61 ) ) by L649 , L622 , L612 , FINSEQ_1:1;
+thus L652: ( C267 . ( C273 + 1 ) ) = ( ( C267 . C273 ) * ( C261 . C273 ) ) by L651 , L650 , L612 , L625;
+end;
+L653: ( C267 . ( len C259 ) ) , ( C261 . ( len C259 ) ) are_relative_prime  by L612 , L556 , L646 , L645 , L647 , L648;
+set D63 = ( C268 | C258 );
+set D64 = ( C267 | C258 );
+L654: C258 <= ( C258 + 1 ) by NAT_1:11;
+L655: ( len D63 ) = C258 by L654 , L612 , FINSEQ_1:59 , L645;
+L656: ( dom D64 ) = ( Seg ( len D64 ) ) by FINSEQ_1:def 3
+.= ( Seg C258 ) by L612 , FINSEQ_1:59 , L645 , L654;
+L657: ( len D64 ) = C258 by L656 , FINSEQ_1:def 3;
+L658: ( 1 - 1 ) <= ( C258 - 1 ) by L618 , XREAL_1:9;
+L659: ( C258 - 1 ) in ( NAT ) by L658 , INT_1:3;
+reconsider D65 = ( C258 - 1 ) as Nat by L659;
+reconsider D66 = ( C270 | D65 ) as (FinSequence of ( INT ));
+reconsider D67 = ( C269 | D65 ) as (FinSequence of ( INT ));
+L660: ( C258 - 1 ) <= ( C258 - ( 0 ) ) by XREAL_1:10;
+L661: ( len D66 ) = D65 by L660 , L612 , L645 , FINSEQ_1:59;
+L662: ( len D67 ) = D65 by L660 , L612 , L645 , FINSEQ_1:59;
+L663: 1 in ( Seg C258 ) by L618;
+L664: ( D63 . 1 ) = ( C268 . 1 ) by FUNCT_1:49 , L663
+.= ( ( D61 . 1 ) `1 ) by FUNCT_1:49 , L663 , L645;
+L665: ( C258 - 1 ) <= ( C258 - ( 0 ) ) by XREAL_1:10;
+L666:
+now
+let C274 being Nat;
+assume L667: (1 <= C274 & C274 <= ( ( len D64 ) - 1 ));
+L668: (1 <= C274 & C274 <= ( len D64 )) by L667 , L657 , L665 , XXREAL_0:2;
+L669: C274 in ( Seg ( len D64 ) ) by L668 , FINSEQ_1:1;
+thus L670: ( D64 . C274 ) = ( C267 . C274 ) by L669 , FUNCT_1:49 , L657;
+L671: C274 in ( Seg ( len D63 ) ) by FINSEQ_1:1 , L668 , L655 , L657;
+thus L672: ( D63 . C274 ) = ( C268 . C274 ) by L671 , FUNCT_1:49 , L655;
+L673: C274 in ( Seg ( len D66 ) ) by FINSEQ_1:1 , L667 , L657 , L661;
+thus L674: ( D66 . C274 ) = ( C270 . C274 ) by L673 , FUNCT_1:49 , L661;
+L675: C274 in ( Seg ( len D67 ) ) by FINSEQ_1:1 , L667 , L657 , L662;
+thus L676: ( D67 . C274 ) = ( C269 . C274 ) by L675 , FUNCT_1:49 , L662;
+end;
+L677: ( len D64 ) in ( Seg ( len D61 ) ) by L622 , L657 , FINSEQ_1:3;
+L678: ( len D64 ) in ( Seg ( len C259 ) ) by L677 , L625;
+L679: ( D61 . ( len D64 ) ) = ( C259 . ( len D64 ) ) by FUNCT_1:49 , L622 , L657 , FINSEQ_1:3;
+L680: ( len D64 ) in ( dom C259 ) by FINSEQ_1:def 3 , L678;
+L681: ( D61 . ( len D64 ) ) in [: ( INT ) , ( INT ) :] by L680 , FINSEQ_2:11 , L679;
+reconsider D68 = ( ( D61 . ( len D64 ) ) `2 ) as (Element of ( INT )) by L681 , MCART_1:10;
+reconsider D69 = ( ( D67 . ( ( len D64 ) - 1 ) ) * D68 ) as (Element of ( INT )) by INT_1:def 2;
+L682: (( len D64 ) = ( len D61 ) & ( len D63 ) = ( len D61 ) & ( len D67 ) = ( ( len D61 ) - 1 ) & ( len D66 ) = ( ( len D61 ) - 1 ) & ( D64 . 1 ) = 1) by L654 , FINSEQ_1:59 , L612 , L657 , L655 , L662 , L661 , L645 , FUNCT_1:49 , L663;
+L683: (for B526 being Nat holds ((1 <= B526 & B526 <= ( ( len D64 ) - 1 )) implies (ex B527 , B528 , B529 being (Element of ( INT )) st (B528 = ( ( D61 . B526 ) `2 ) & ( D64 . ( B526 + 1 ) ) = ( ( D64 . B526 ) * B528 ) & B529 = ( D64 . ( B526 + 1 ) ) & B527 = ( ( D61 . ( B526 + 1 ) ) `2 ) & ( D66 . B526 ) = ( ALGO_INVERSE (B529 , B527) ) & ( D67 . B526 ) = B529))))
+proof
+let C275 being Nat;
+assume L684: (1 <= C275 & C275 <= ( ( len D64 ) - 1 ));
+L685: ( D64 . C275 ) = ( C267 . C275 ) by L684 , L666;
+L686: ( D66 . C275 ) = ( C270 . C275 ) by L666 , L684;
+L687: ( D67 . C275 ) = ( C269 . C275 ) by L666 , L684;
+L688: 1 <= ( C275 + 1 ) by NAT_1:12;
+L689: ( C275 + 1 ) <= ( ( ( len D64 ) - 1 ) + 1 ) by L684 , XREAL_1:6;
+L690: ( C275 + 1 ) in ( Seg ( len D64 ) ) by L689 , L688;
+L691: ( D64 . ( C275 + 1 ) ) = ( C267 . ( C275 + 1 ) ) by L690 , FUNCT_1:49 , L657;
+L692: (1 <= C275 & C275 <= ( len D64 )) by L684 , L657 , L665 , XXREAL_0:2;
+L693: (1 <= C275 & C275 <= ( ( len C267 ) - 1 )) by L645 , L612 , L684 , L657 , L665 , XXREAL_0:2;
+L694: C275 in ( Seg ( len D61 ) ) by L657 , L622 , L692 , FINSEQ_1:1;
+L695: ( D61 . C275 ) = ( C259 . C275 ) by L694 , FUNCT_1:49 , L624;
+L696: ( D61 . ( C275 + 1 ) ) = ( C259 . ( C275 + 1 ) ) by FUNCT_1:49 , L657 , L690;
+thus L697: thesis by L696 , L685 , L686 , L687 , L691 , L693 , L695 , L645;
+end;
+L698: (for B530 being Nat holds ((1 <= B530 & B530 <= ( ( len D64 ) - 1 )) implies (ex B531 , B532 , B533 being (Element of ( INT )) st (B532 = ( ( D61 . ( B530 + 1 ) ) `1 ) & B533 = ( ( D61 . ( B530 + 1 ) ) `2 ) & B531 = ( ( ( B532 - ( D63 . B530 ) ) * ( D66 . B530 ) ) mod B533 ) & ( D63 . ( B530 + 1 ) ) = ( ( D63 . B530 ) + ( B531 * ( D67 . B530 ) ) )))))
+proof
+let C276 being Nat;
+assume L699: (1 <= C276 & C276 <= ( ( len D64 ) - 1 ));
+L700: ( D63 . C276 ) = ( C268 . C276 ) by L699 , L666;
+L701: ( D66 . C276 ) = ( C270 . C276 ) by L666 , L699;
+L702: ( D67 . C276 ) = ( C269 . C276 ) by L666 , L699;
+L703: 1 <= ( C276 + 1 ) by NAT_1:12;
+L704: ( C276 + 1 ) <= ( ( ( len D64 ) - 1 ) + 1 ) by L699 , XREAL_1:6;
+L705: ( C276 + 1 ) in ( Seg ( len D64 ) ) by L704 , L703;
+L706: ( D63 . ( C276 + 1 ) ) = ( C268 . ( C276 + 1 ) ) by L705 , FUNCT_1:49 , L657;
+L707: (1 <= C276 & C276 <= ( ( len C267 ) - 1 )) by L645 , L612 , L699 , L657 , L665 , XXREAL_0:2;
+L708: ( D61 . ( C276 + 1 ) ) = ( C259 . ( C276 + 1 ) ) by FUNCT_1:49 , L657 , L705;
+thus L709: thesis by L708 , L700 , L701 , L702 , L706 , L707 , L645;
+end;
+reconsider D70 = ( ( D63 . ( len D64 ) ) mod D69 ) as (Element of ( INT )) by INT_1:def 2;
+L710: 1 <= ( ( len C267 ) - 1 ) by L645 , L612 , NAT_1:14 , L617;
+reconsider D71 = ( ( len C267 ) - 1 ) as (Element of ( NAT )) by L645;
+L711: (1 <= D71 & D71 <= ( ( len C267 ) - 1 )) by L645 , L612 , NAT_1:14 , L617;
+consider C277 , C278 , C279 being (Element of ( INT )) such that L712: (C278 = ( ( C259 . D71 ) `2 ) & ( C267 . ( D71 + 1 ) ) = ( ( C267 . D71 ) * C278 ) & C279 = ( C267 . ( D71 + 1 ) ) & C277 = ( ( C259 . ( D71 + 1 ) ) `2 ) & ( C270 . D71 ) = ( ALGO_INVERSE (C279 , C277) ) & ( C269 . D71 ) = C279) by L645 , L612 , L618;
+consider C280 , C281 , C282 being (Element of ( INT )) such that L713: (C281 = ( ( C259 . ( D71 + 1 ) ) `1 ) & C282 = ( ( C259 . ( D71 + 1 ) ) `2 ) & C280 = ( ( ( C281 - ( C268 . D71 ) ) * ( C270 . D71 ) ) mod C282 ) & ( C268 . ( D71 + 1 ) ) = ( ( C268 . D71 ) + ( C280 * ( C269 . D71 ) ) )) by L711 , L645;
+L714: ( len C259 ) in ( Seg ( len C259 ) ) by FINSEQ_1:3;
+L715: C271 = ( C261 . ( len C259 ) ) by L645 , L612 , L714;
+L716: C271 <> ( 0 ) by L715 , L714 , L612;
+L717: ( ( C281 - ( C268 . ( ( len C267 ) - 1 ) ) ) * ( ALGO_INVERSE (C279 , C271) ) ) is (Element of ( INT )) by INT_1:def 2;
+consider C283 being (Element of ( INT )) such that L718: C280 = ( ( ( C281 - ( C268 . ( ( len C267 ) - 1 ) ) ) * ( ALGO_INVERSE (C279 , C271) ) ) + ( C283 * C271 ) ) by L528 , L645 , L712 , L713 , L717 , L716;
+L719: C279 <> ( 0 ) by L712 , L645 , L612 , L532 , L647 , L648;
+L720:
+now
+per cases ;
+suppose L721: ( len D61 ) = 1;
+
+L722: ( ALGO_CRT D61 ) = ( ( D61 . 1 ) `1 ) by L721 , L388
+.= ( ( C259 . 1 ) `1 ) by FUNCT_1:49 , L663
+.= ( C268 . ( ( len C267 ) - 1 ) ) by L721 , L612 , L645 , L623 , FINSEQ_1:def 3;
+L723: ( ALGO_CRT C259 ) = ( ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C280 * C279 ) ) mod C272 ) by L712 , L713 , L645;
+reconsider D72 = ( 0 ) as (Element of ( INT )) by INT_1:def 2;
+L724: ( ALGO_CRT D61 ) = ( ( C268 . ( ( len C267 ) - 1 ) ) + ( D72 * C279 ) ) by L722;
+reconsider D73 = ( C280 * C279 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D74 = ( C268 . ( ( len C267 ) - 1 ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D75 = ( D74 + D73 ) as (Element of ( INT )) by INT_1:def 2;
+L725: C272 = ( C279 * C271 ) by L645 , L712;
+consider C284 being (Element of ( INT )) such that L726: ( ALGO_CRT C259 ) = ( D75 + ( C284 * C272 ) ) by L725 , L528 , L723 , L716 , L719 , XCMPLX_1:6;
+reconsider D76 = ( C283 + C284 ) as (Element of ( INT )) by INT_1:def 2;
+L727: ( ALGO_CRT C259 ) = ( ( ( ( ALGO_CRT D61 ) - ( ( ( D74 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( D72 * C279 ) ) ) + ( ( D76 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) ) by L645 , L712 , L718 , L726 , L722;
+thus L728: (ex B534 , B535 being (Element of ( INT )) st (( ALGO_CRT C259 ) = ( ( ( ( ALGO_CRT D61 ) - ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( B534 * C279 ) ) ) + ( ( B535 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) ) & ( ALGO_CRT D61 ) = ( ( C268 . ( ( len C267 ) - 1 ) ) + ( B534 * C279 ) ))) by L727 , L724;
+end;
+suppose L729: ( len D61 ) <> 1;
+
+L730: ( ALGO_CRT D61 ) = D70 by L729 , L388 , L682 , L683 , L698 , L664
+.= ( ( D63 . ( len D64 ) ) mod ( ( D67 . ( ( len D64 ) - 1 ) ) * D68 ) );
+L731: ( D63 . ( len D63 ) ) = ( C268 . ( len D63 ) ) by FUNCT_1:49 , L617 , L655 , FINSEQ_1:3
+.= ( C268 . ( ( len C267 ) - 1 ) ) by L645 , L612 , FINSEQ_1:59 , L654;
+L732: 2 <= ( len D61 ) by L729 , NAT_1:23;
+L733: ( 2 - 1 ) <= ( ( len D64 ) - 1 ) by L732 , XREAL_1:9 , L657 , L626;
+L734: (1 <= D65 & D65 <= ( ( len D64 ) - 1 )) by L733 , L656 , FINSEQ_1:def 3;
+L735: D68 = ( ( C259 . ( len D64 ) ) `2 ) by FUNCT_1:49 , L622 , L657 , FINSEQ_1:3
+.= ( ( C259 . ( ( len C267 ) - 1 ) ) `2 ) by L645 , L612 , L656 , FINSEQ_1:def 3;
+consider C285 , C286 , C287 being (Element of ( INT )) such that L736: (C286 = ( ( D61 . D65 ) `2 ) & ( D64 . ( D65 + 1 ) ) = ( ( D64 . D65 ) * C286 ) & C287 = ( D64 . ( D65 + 1 ) ) & C285 = ( ( D61 . ( D65 + 1 ) ) `2 ) & ( D66 . D65 ) = ( ALGO_INVERSE (C287 , C285) ) & ( D67 . D65 ) = C287) by L683 , L734;
+L737: ( len D64 ) = ( ( len C267 ) - 1 ) by L645 , L612 , L656 , FINSEQ_1:def 3;
+L738: D71 in ( Seg ( len D64 ) ) by L737 , L710;
+L739: ( ALGO_CRT D61 ) = ( ( C268 . ( ( len C267 ) - 1 ) ) mod ( C287 * D68 ) ) by L736 , L730 , L737 , L731 , L612 , FINSEQ_1:59 , L645 , L654;
+L740: (( ALGO_CRT D61 ) is (Element of ( INT )) & ( C268 . ( ( len C267 ) - 1 ) ) is (Element of ( INT )) & ( C287 * D68 ) is (Element of ( INT ))) by INT_1:def 2;
+L741: C279 = ( C287 * C278 ) by L736 , L645 , L612 , FUNCT_1:49 , L657 , L738 , L712;
+L742: ( C287 * D68 ) <> ( 0 ) by L741 , L645 , L612 , L532 , L647 , L648 , L735 , L712;
+consider C288 being (Element of ( INT )) such that L743: ( ALGO_CRT D61 ) = ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C288 * ( C287 * D68 ) ) ) by L739 , L528 , L740 , L719 , L735 , L712 , L741;
+L744: ( ALGO_CRT C259 ) = ( ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C280 * ( C287 * C278 ) ) ) mod ( ( C269 . ( ( len C267 ) - 1 ) ) * C271 ) ) by L736 , L645 , L612 , FUNCT_1:49 , L657 , L738 , L712 , L713
+.= ( ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C280 * ( C287 * C278 ) ) ) mod ( ( C287 * C278 ) * C271 ) ) by L736 , L645 , L612 , FUNCT_1:49 , L657 , L738 , L712;
+L745: (( ALGO_CRT C259 ) is (Element of ( INT )) & ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C280 * ( C287 * C278 ) ) ) is (Element of ( INT )) & ( ( C287 * C278 ) * C271 ) is (Element of ( INT ))) by INT_1:def 2;
+consider C289 being (Element of ( INT )) such that L746: ( ALGO_CRT C259 ) = ( ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C280 * ( C287 * C278 ) ) ) + ( C289 * ( ( C287 * C278 ) * C271 ) ) ) by L745 , L744 , L528 , L735 , L712 , L742 , XCMPLX_1:6 , L716;
+reconsider D77 = ( C283 + C289 ) as (Element of ( INT )) by INT_1:def 2;
+L747: ( ( ( ALGO_CRT D61 ) - ( C288 * ( C287 * D68 ) ) ) + ( C280 * ( C287 * C278 ) ) ) = ( ( ( ALGO_CRT D61 ) - ( C288 * ( C287 * C278 ) ) ) + ( C280 * ( C287 * C278 ) ) ) by L735 , L712
+.= ( ( ( ( ALGO_CRT D61 ) - ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( C288 * C279 ) ) ) + ( ( C283 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) ) by L741 , L718;
+L748: ( ALGO_CRT C259 ) = ( ( ( ( ( ALGO_CRT D61 ) - ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( C288 * C279 ) ) ) + ( ( C283 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) ) + ( C289 * ( C279 * C271 ) ) ) by L747 , L736 , L645 , L612 , FUNCT_1:49 , L657 , L738 , L712 , L746 , L743
+.= ( ( ( ( ALGO_CRT D61 ) - ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( C288 * C279 ) ) ) + ( ( D77 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) );
+thus L749: (ex B536 , B537 being (Element of ( INT )) st (( ALGO_CRT C259 ) = ( ( ( ( ALGO_CRT D61 ) - ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( B536 * C279 ) ) ) + ( ( B537 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) ) & ( ALGO_CRT D61 ) = ( ( C268 . ( ( len C267 ) - 1 ) ) + ( B536 * C279 ) ))) by L748 , L743 , L741 , L735 , L712;
+end;
+end;
+consider C290 , C291 being (Element of ( INT )) such that L751: (( ALGO_CRT C259 ) = ( ( ( ( ALGO_CRT D61 ) - ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( C290 * C279 ) ) ) + ( ( C291 * C271 ) * C279 ) ) + ( ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) ) & ( ALGO_CRT D61 ) = ( ( C268 . ( ( len C267 ) - 1 ) ) + ( C290 * C279 ) )) by L720;
+reconsider D78 = ( C279 mod C271 ) as (Element of ( INT )) by INT_1:def 2;
+L752: D78 , C271 are_relative_prime  by L716 , L523 , L712 , L645 , L715 , L653;
+L753: ( D78 gcd C271 ) = 1 by L752 , INT_2:def 3;
+L754: ( ( ALGO_EXGCD (C271 , D78) ) `3_3 ) = 1 by L753 , L315;
+L755: ( ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( C290 * C279 ) ) mod C271 ) = ( ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ( ALGO_INVERSE (C279 , C271) ) * C279 ) ) mod C271 ) + ( ( C290 * C279 ) mod C271 ) ) mod C271 ) by NAT_D:66
+.= ( ( ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) mod C271 ) * ( ( ( ALGO_INVERSE (C279 , C271) ) * C279 ) mod C271 ) ) mod C271 ) + ( ( C290 * C279 ) mod C271 ) ) mod C271 ) by NAT_D:67
+.= ( ( ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) mod C271 ) * ( 1 mod C271 ) ) mod C271 ) + ( ( C290 * C279 ) mod C271 ) ) mod C271 ) by L754 , L381
+.= ( ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * 1 ) mod C271 ) + ( ( C290 * C279 ) mod C271 ) ) mod C271 ) by NAT_D:67
+.= ( ( ALGO_CRT D61 ) mod C271 ) by L751 , NAT_D:66;
+thus L756: (for B538 being Nat holds (B538 in ( Seg ( len C259 ) ) implies ( ( ALGO_CRT C259 ) mod ( C261 . B538 ) ) = ( ( C260 . B538 ) mod ( C261 . B538 ) )))
+proof
+let C292 being Nat;
+assume L757: C292 in ( Seg ( len C259 ) );
+L758: (1 <= C292 & C292 <= ( len C259 )) by L757 , FINSEQ_1:1;
+per cases ;
+suppose L759: C292 = ( len C259 );
+
+L760: ( C261 . C292 ) <> ( 0 ) by L612 , L757;
+reconsider D79 = ( 0 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D80 = ( ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) * C279 ) + ( C290 * C279 ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D81 = ( ( C291 * C279 ) * C271 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D82 = ( C281 * ( ( ALGO_INVERSE (C279 , C271) ) * C279 ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D83 = ( D81 + D82 ) as (Element of ( INT )) by INT_1:def 2;
+L761: ( D81 mod ( C261 . C292 ) ) = ( ( ( ( C291 * C279 ) mod C271 ) * ( C271 mod C271 ) ) mod C271 ) by L715 , L759 , NAT_D:67
+.= ( ( ( ( C291 * C279 ) mod C271 ) * D79 ) mod C271 ) by INT_1:50
+.= ( D79 mod ( C261 . C292 ) ) by L759 , L645 , L612 , L714;
+L762: ( D83 mod ( C261 . C292 ) ) = ( ( ( D79 mod ( C261 . C292 ) ) + ( D82 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by L761 , NAT_D:66
+.= ( ( D79 + D82 ) mod ( C261 . C292 ) ) by NAT_D:66
+.= ( ( ( C281 mod ( C261 . C292 ) ) * ( ( ( ALGO_INVERSE (C279 , C271) ) * C279 ) mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:67
+.= ( ( ( C281 mod ( C261 . C292 ) ) * ( 1 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by L754 , L381 , L759 , L715
+.= ( ( C281 * 1 ) mod ( C261 . C292 ) ) by NAT_D:67
+.= ( ( C260 . C292 ) mod ( C261 . C292 ) ) by L759 , L714 , L645 , L612 , L713;
+L763: ( ( ( ALGO_CRT C259 ) + D80 ) mod ( C261 . C292 ) ) = ( ( ( ( ALGO_CRT C259 ) mod ( C261 . C292 ) ) + ( ( ALGO_CRT D61 ) mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by L755 , L759 , L715 , NAT_D:66
+.= ( ( ( ALGO_CRT C259 ) + ( ALGO_CRT D61 ) ) mod ( C261 . C292 ) ) by NAT_D:66;
+L764: ( ( ( ALGO_CRT D61 ) + D83 ) mod ( C261 . C292 ) ) = ( ( ( ( ALGO_CRT D61 ) mod ( C261 . C292 ) ) + ( D83 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:66
+.= ( ( ( ALGO_CRT D61 ) + ( C260 . C292 ) ) mod ( C261 . C292 ) ) by NAT_D:66 , L762;
+reconsider D84 = ( ( ( ALGO_CRT D61 ) + ( C260 . C292 ) ) mod ( C261 . C292 ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D85 = ( ( ALGO_CRT C259 ) + ( ALGO_CRT D61 ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D86 = ( C261 . C292 ) as (Element of ( INT )) by INT_1:def 2;
+consider C293 being (Element of ( INT )) such that L765: D84 = ( D85 + ( C293 * D86 ) ) by L528 , L760 , L763 , L764 , L751;
+reconsider D87 = ( ( ALGO_CRT D61 ) + ( C260 . C292 ) ) as (Element of ( INT )) by INT_1:def 2;
+consider C294 being (Element of ( INT )) such that L766: D84 = ( D87 + ( C294 * D86 ) ) by L528 , L760;
+reconsider D88 = ( C294 - C293 ) as (Element of ( INT )) by INT_1:def 2;
+L767: ( ( D88 * ( C261 . C292 ) ) mod ( C261 . C292 ) ) = ( ( ( D88 mod ( C261 . C292 ) ) * ( ( C261 . C292 ) mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:67
+.= ( ( ( D88 mod ( C261 . C292 ) ) * D79 ) mod ( C261 . C292 ) ) by INT_1:50
+.= ( D79 mod ( C261 . C292 ) );
+thus L768: ( ( ALGO_CRT C259 ) mod ( C261 . C292 ) ) = ( ( ( C260 . C292 ) + ( ( C294 - C293 ) * ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by L765 , L766
+.= ( ( ( ( C260 . C292 ) mod ( C261 . C292 ) ) + ( D79 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by L767 , NAT_D:66
+.= ( ( ( C260 . C292 ) + D79 ) mod ( C261 . C292 ) ) by NAT_D:66
+.= ( ( C260 . C292 ) mod ( C261 . C292 ) );
+end;
+suppose L769: C292 <> ( len C259 );
+
+L770: C292 < ( len C259 ) by L769 , L758 , XXREAL_0:1;
+L771: ( C292 + 1 ) <= ( len C259 ) by L770 , NAT_1:13;
+L772: ( ( C292 + 1 ) - 1 ) <= ( ( len C259 ) - 1 ) by L771 , XREAL_1:9;
+L773: (1 <= C292 & C292 <= ( len D61 )) by L772 , L654 , FINSEQ_1:59 , L612 , FINSEQ_1:1 , L757;
+L774: C292 in ( Seg ( len D61 ) ) by FINSEQ_1:1 , L772 , L612 , L626 , L758;
+reconsider D89 = ( ( ( C268 . ( ( len C267 ) - 1 ) ) * ( ALGO_INVERSE (C279 , C271) ) ) + C290 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D90 = ( ( C291 * C271 ) + ( C281 * ( ALGO_INVERSE (C279 , C271) ) ) ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D91 = ( 0 ) as (Element of ( INT )) by INT_1:def 2;
+L775: ( C279 mod ( C261 . C292 ) ) = ( 0 ) by L626 , L712 , L584 , L647 , L648 , L612 , L645 , L773;
+reconsider D92 = ( D89 * C279 ) as (Element of ( INT )) by INT_1:def 2;
+reconsider D93 = ( D90 * C279 ) as (Element of ( INT )) by INT_1:def 2;
+L776: ( ( D89 * C279 ) mod ( C261 . C292 ) ) = ( ( ( D89 mod ( C261 . C292 ) ) * ( C279 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:67
+.= ( ( 0 ) mod ( C261 . C292 ) ) by L775;
+L777: ( ( D90 * C279 ) mod ( C261 . C292 ) ) = ( ( ( D90 mod ( C261 . C292 ) ) * ( C279 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:67
+.= ( ( 0 ) mod ( C261 . C292 ) ) by L775;
+L778: ( ( ( ALGO_CRT C259 ) + D92 ) mod ( C261 . C292 ) ) = ( ( ( ( ALGO_CRT C259 ) mod ( C261 . C292 ) ) + ( D92 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:66
+.= ( ( ( ALGO_CRT C259 ) + D91 ) mod ( C261 . C292 ) ) by NAT_D:66 , L776
+.= ( ( ALGO_CRT C259 ) mod ( C261 . C292 ) );
+L779: ( ( ( ALGO_CRT D61 ) + D93 ) mod ( C261 . C292 ) ) = ( ( ( ( ALGO_CRT D61 ) mod ( C261 . C292 ) ) + ( D93 mod ( C261 . C292 ) ) ) mod ( C261 . C292 ) ) by NAT_D:66
+.= ( ( ( ALGO_CRT D61 ) + D91 ) mod ( C261 . C292 ) ) by NAT_D:66 , L777
+.= ( ( ALGO_CRT D61 ) mod ( C261 . C292 ) );
+thus L780: ( ( ALGO_CRT C259 ) mod ( C261 . C292 ) ) = ( ( C260 . C292 ) mod ( C261 . C292 ) ) by L779 , L774 , L751 , L778 , L641;
+end;
+end;
+
+end;
+end;
+L758: (for B539 being (Element of ( NAT )) holds S21[ B539 ]) from NAT_1:sch 1(L609 , L610);
+thus L759: thesis by L758;
+end;
+L760: (for B540 , B541 , B542 , B543 being (Element of ( INT )) holds ((( B540 mod B542 ) = ( B541 mod B542 ) & ( B540 mod B543 ) = ( B541 mod B543 ) & B542 , B543 are_relative_prime ) implies ( B540 mod ( B542 * B543 ) ) = ( B541 mod ( B542 * B543 ) )))
+proof
+let C295 , C296 , C297 , C298 being (Element of ( INT ));
+assume L761: (( C295 mod C297 ) = ( C296 mod C297 ) & ( C295 mod C298 ) = ( C296 mod C298 ) & C297 , C298 are_relative_prime );
+set D94 = ( C295 mod C297 );
+set D95 = ( C295 mod C298 );
+per cases ;
+suppose L762: ( C297 * C298 ) = ( 0 );
+
+thus L763: ( C295 mod ( C297 * C298 ) ) = ( 0 ) by INT_1:def 10 , L762
+.= ( C296 mod ( C297 * C298 ) ) by L762 , INT_1:def 10;
+end;
+suppose L764: ( C297 * C298 ) <> ( 0 );
+
+L765: (C297 <> ( 0 ) & C298 <> ( 0 )) by L764;
+L766: C296 = ( ( ( C296 div C297 ) * C297 ) + ( C296 mod C297 ) ) by L765 , INT_1:59;
+L767: C295 = ( ( ( C295 div C298 ) * C298 ) + ( C295 mod C298 ) ) by L765 , INT_1:59;
+L768: ( C295 - C296 ) = ( ( ( ( C295 div C297 ) * C297 ) + ( C295 mod C297 ) ) - ( ( ( C296 div C297 ) * C297 ) + ( C296 mod C297 ) ) ) by L765 , INT_1:59 , L766
+.= ( ( ( C295 div C297 ) - ( C296 div C297 ) ) * C297 ) by L761;
+L769: C297 divides ( C295 - C296 ) by L768 , INT_1:def 3;
+L770: C295 , C296 are_congruent_mod C297 by L769 , INT_1:def 4;
+L771: ( C295 - C296 ) = ( ( ( ( C295 div C298 ) * C298 ) + ( C295 mod C298 ) ) - ( ( ( C296 div C298 ) * C298 ) + ( C296 mod C298 ) ) ) by L765 , INT_1:59 , L767
+.= ( ( ( C295 div C298 ) - ( C296 div C298 ) ) * C298 ) by L761;
+L772: C298 divides ( C295 - C296 ) by L771 , INT_1:def 3;
+L773: C295 , C296 are_congruent_mod C298 by L772 , INT_1:def 4;
+L774: C295 , C296 are_congruent_mod ( C297 * C298 ) by L773 , L761 , L770 , INT_6:21;
+L775: ( C297 * C298 ) divides ( C295 - C296 ) by L774 , INT_1:def 4;
+consider C299 being Integer such that L776: ( C295 - C296 ) = ( ( C297 * C298 ) * C299 ) by L775 , INT_1:def 3;
+reconsider D96 = ( 0 ) as (Element of ( INT )) by INT_1:def 2;
+thus L777: ( C295 mod ( C297 * C298 ) ) = ( ( C296 + ( ( C297 * C298 ) * C299 ) ) mod ( C297 * C298 ) ) by L776
+.= ( ( ( C296 mod ( C297 * C298 ) ) + ( ( ( C297 * C298 ) * C299 ) mod ( C297 * C298 ) ) ) mod ( C297 * C298 ) ) by NAT_D:66
+.= ( ( ( C296 mod ( C297 * C298 ) ) + ( ( ( ( C297 * C298 ) mod ( C297 * C298 ) ) * ( C299 mod ( C297 * C298 ) ) ) mod ( C297 * C298 ) ) ) mod ( C297 * C298 ) ) by NAT_D:67
+.= ( ( ( C296 mod ( C297 * C298 ) ) + ( ( D96 * ( C299 mod ( C297 * C298 ) ) ) mod ( C297 * C298 ) ) ) mod ( C297 * C298 ) ) by INT_1:50
+.= ( ( C296 + D96 ) mod ( C297 * C298 ) ) by NAT_D:66
+.= ( C296 mod ( C297 * C298 ) );
+end;
+end;
+theorem
+L779: (for B544 , B545 being (Element of ( INT )) holds (for B546 , B547 being non  empty (FinSequence of ( INT )) holds ((2 <= ( len B546 ) & (for B548 , B549 being Nat holds ((B548 in ( Seg ( len B546 ) ) & B549 in ( Seg ( len B546 ) ) & B548 <> B549) implies ( B546 . B548 ) , ( B546 . B549 ) are_relative_prime )) & (for B550 being Nat holds (B550 in ( Seg ( len B546 ) ) implies ( B544 mod ( B546 . B550 ) ) = ( B545 mod ( B546 . B550 ) ))) & ( B547 . 1 ) = 1) implies (for B551 being (Element of ( NAT )) holds ((1 <= B551 & B551 <= ( len B546 ) & (for B552 being Nat holds ((1 <= B552 & B552 <= B551) implies ( B547 . ( B552 + 1 ) ) = ( ( B547 . B552 ) * ( B546 . B552 ) )))) implies ( B544 mod ( B547 . ( B551 + 1 ) ) ) = ( B545 mod ( B547 . ( B551 + 1 ) ) ))))))
+proof
+let C300 , C301 being (Element of ( INT ));
+let C302 , C303 being non  empty (FinSequence of ( INT ));
+assume L780: 2 <= ( len C302 );
+assume L781: (for B553 , B554 being Nat holds ((B553 in ( Seg ( len C302 ) ) & B554 in ( Seg ( len C302 ) ) & B553 <> B554) implies ( C302 . B553 ) , ( C302 . B554 ) are_relative_prime ));
+assume L782: (for B555 being Nat holds (B555 in ( Seg ( len C302 ) ) implies ( C300 mod ( C302 . B555 ) ) = ( C301 mod ( C302 . B555 ) )));
+assume L783: ( C303 . 1 ) = 1;
+defpred S22[ Nat ] means ((1 <= $1 & $1 <= ( len C302 ) & (for B556 being Nat holds ((1 <= B556 & B556 <= $1) implies ( C303 . ( B556 + 1 ) ) = ( ( C303 . B556 ) * ( C302 . B556 ) )))) implies ( C300 mod ( C303 . ( $1 + 1 ) ) ) = ( C301 mod ( C303 . ( $1 + 1 ) ) ));
+reconsider D97 = ( 0 ) as (Element of ( NAT ));
+L784: S22[ ( 0 ) ];
+L785: (for B557 being (Element of ( NAT )) holds (S22[ B557 ] implies S22[ ( B557 + 1 ) ]))
+proof
+let C304 being (Element of ( NAT ));
+assume L786: S22[ C304 ];
+assume L787: (1 <= ( C304 + 1 ) & ( C304 + 1 ) <= ( len C302 ) & (for B558 being Nat holds ((1 <= B558 & B558 <= ( C304 + 1 )) implies ( C303 . ( B558 + 1 ) ) = ( ( C303 . B558 ) * ( C302 . B558 ) ))));
+L788: C304 <= ( C304 + 1 ) by NAT_1:12;
+per cases ;
+suppose L789: C304 = ( 0 );
+
+L790: ( C303 . ( ( C304 + 1 ) + 1 ) ) = ( ( C303 . 1 ) * ( C302 . 1 ) ) by L787 , L789
+.= ( C302 . 1 ) by L783;
+L791: (1 <= 1 & 1 <= ( len C302 )) by NAT_1:14;
+L792: 1 in ( Seg ( len C302 ) ) by L791;
+thus L793: ( C300 mod ( C303 . ( ( C304 + 1 ) + 1 ) ) ) = ( C301 mod ( C303 . ( ( C304 + 1 ) + 1 ) ) ) by L790 , L792 , L782;
+end;
+suppose L794: C304 <> ( 0 );
+
+L795: ( ( C304 + 1 ) - 1 ) <= ( ( len C302 ) - 1 ) by L787 , XREAL_1:9;
+L796: (1 <= C304 & C304 <= ( ( len C302 ) - 1 )) by L795 , L794 , NAT_1:14;
+L797:
+now
+let C305 being Nat;
+assume L798: (1 <= C305 & C305 <= C304);
+L799: (1 <= C305 & C305 <= ( C304 + 1 )) by L798 , NAT_1:12;
+thus L800: ( C303 . ( C305 + 1 ) ) = ( ( C303 . C305 ) * ( C302 . C305 ) ) by L799 , L787;
+end;
+L801: ( C303 . ( ( C304 + 1 ) + 1 ) ) = ( ( C303 . ( C304 + 1 ) ) * ( C302 . ( C304 + 1 ) ) ) by L787;
+L802: ( C304 + 1 ) in ( Seg ( len C302 ) ) by L787;
+L803: ( C300 mod ( C302 . ( C304 + 1 ) ) ) = ( C301 mod ( C302 . ( C304 + 1 ) ) ) by L802 , L782;
+L804: ( C303 . ( C304 + 1 ) ) , ( C302 . ( C304 + 1 ) ) are_relative_prime  by L556 , L797 , L796 , L780 , L781 , L783 , L787;
+L805: (( C303 . ( C304 + 1 ) ) is (Element of ( INT )) & ( C302 . ( C304 + 1 ) ) is (Element of ( INT ))) by INT_1:def 2;
+thus L806: ( C300 mod ( C303 . ( ( C304 + 1 ) + 1 ) ) ) = ( C301 mod ( C303 . ( ( C304 + 1 ) + 1 ) ) ) by L805 , L801 , L803 , L786 , NAT_1:14 , L794 , L787 , L788 , XXREAL_0:2 , L797 , L804 , L760;
+end;
+end;
+L808: (for B559 being (Element of ( NAT )) holds S22[ B559 ]) from NAT_1:sch 1(L784 , L785);
+thus L809: thesis by L808;
+end;
+theorem
+L810: (for B560 being (FinSequence of ( INT )) holds (( len B560 ) = 1 implies ( Product B560 ) = ( B560 . 1 )))
+proof
+let C306 being (FinSequence of ( INT ));
+assume L811: ( len C306 ) = 1;
+L812: C306 = <* ( C306 . 1 ) *> by L811 , FINSEQ_1:40;
+thus L813: ( Product C306 ) = ( C306 . 1 ) by L812 , RVSUM_1:95;
+end;
+theorem
+L814: (for B561 being (FinSequence of ( INT )) holds (ex B562 being non  empty (FinSequence of ( INT )) st (( len B562 ) = ( ( len B561 ) + 1 ) & ( B562 . 1 ) = 1 & (for B563 being Nat holds ((1 <= B563 & B563 <= ( len B561 )) implies ( B562 . ( B563 + 1 ) ) = ( ( B562 . B563 ) * ( B561 . B563 ) ))) & ( Product B561 ) = ( B562 . ( ( len B561 ) + 1 ) ))))
+proof
+defpred S23[ Nat ] means (for B564 being (FinSequence of ( INT )) holds (( len B564 ) = $1 implies (ex B565 being non  empty (FinSequence of ( INT )) st (( len B565 ) = ( ( len B564 ) + 1 ) & ( B565 . 1 ) = 1 & (for B566 being Nat holds ((1 <= B566 & B566 <= ( len B564 )) implies ( B565 . ( B566 + 1 ) ) = ( ( B565 . B566 ) * ( B564 . B566 ) ))) & ( Product B564 ) = ( B565 . ( ( len B564 ) + 1 ) )))));
+L815: S23[ ( 0 ) ]
+proof
+let C307 being (FinSequence of ( INT ));
+assume L816: ( len C307 ) = ( 0 );
+L817: 1 in ( INT ) by INT_1:def 2;
+L818: ( rng <* (1 qua Integer) *> ) = { (1 qua Integer) } by FINSEQ_1:39;
+L819: ( rng <* (1 qua Integer) *> ) c= ( INT ) by L818 , ZFMISC_1:31 , L817;
+reconsider D98 = <* (1 qua Integer) *> as non  empty (FinSequence of ( INT )) by L819 , FINSEQ_1:def 4;
+L820: ( len D98 ) = ( ( len C307 ) + 1 ) by L816 , FINSEQ_1:40;
+L821: ( D98 . 1 ) = 1 by FINSEQ_1:40;
+L822: (for B567 being Nat holds ((1 <= B567 & B567 <= ( len C307 )) implies ( D98 . ( B567 + 1 ) ) = ( ( D98 . B567 ) * ( C307 . B567 ) ))) by L816;
+L823: C307 = ( <*> ( REAL ) ) by L816;
+thus L824: thesis by L823 , L820 , L821 , L822 , L816 , RVSUM_1:94;
+end;
+L825: (for B568 being (Element of ( NAT )) holds (S23[ B568 ] implies S23[ ( B568 + 1 ) ]))
+proof
+let C308 being (Element of ( NAT ));
+assume L826: S23[ C308 ];
+let C309 being (FinSequence of ( INT ));
+assume L827: ( len C309 ) = ( C308 + 1 );
+set D99 = ( C309 | C308 );
+L828: ( len D99 ) = C308 by FINSEQ_1:59 , L827 , NAT_1:12;
+consider C310 being non  empty (FinSequence of ( INT )) such that L829: (( ( len D99 ) + 1 ) = ( len C310 ) & ( C310 . 1 ) = 1 & (for B569 being Nat holds ((1 <= B569 & B569 <= ( len D99 )) implies ( C310 . ( B569 + 1 ) ) = ( ( C310 . B569 ) * ( D99 . B569 ) ))) & ( Product D99 ) = ( C310 . ( ( len D99 ) + 1 ) )) by L828 , L826;
+set D100 = ( C310 ^ <* ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) *> );
+L830: ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) in ( INT ) by L829 , INT_1:def 2;
+L831: ( rng <* ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) *> ) = { ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) } by FINSEQ_1:39;
+L832: ( rng <* ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) *> ) c= ( INT ) by L831 , ZFMISC_1:31 , L830;
+L833: ( len D100 ) = ( ( len C310 ) + ( len <* ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) *> ) ) by FINSEQ_1:22
+.= ( ( ( len D99 ) + 1 ) + 1 ) by L829 , FINSEQ_1:40
+.= ( ( len C309 ) + 1 ) by FINSEQ_1:59 , L827 , NAT_1:12;
+L834: ( rng D100 ) = ( ( rng C310 ) \/ { ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) } ) by FINSEQ_1:31 , L831;
+L835: ( rng C310 ) c= ( INT ) by FINSEQ_1:def 4;
+L836: ( rng D100 ) c= ( INT ) by L835 , L831 , L834 , L832 , XBOOLE_1:8;
+reconsider D101 = D100 as non  empty (FinSequence of ( INT )) by L836 , FINSEQ_1:def 4;
+L837: ( len C310 ) = ( ( len D99 ) + 1 ) by L829
+.= ( C308 + 1 ) by FINSEQ_1:59 , L827 , NAT_1:12;
+L838: (1 <= 1 & 1 <= ( C308 + 1 )) by NAT_1:12;
+L839: 1 in ( Seg ( len C310 ) ) by L838 , L837;
+L840: 1 in ( dom C310 ) by L839 , FINSEQ_1:def 3;
+L841: ( D101 . 1 ) = 1 by L840 , L829 , FINSEQ_1:def 7;
+L842: (for B570 being Nat holds ((1 <= B570 & B570 <= ( len C309 )) implies ( D101 . ( B570 + 1 ) ) = ( ( D101 . B570 ) * ( C309 . B570 ) )))
+proof
+let C311 being Nat;
+assume L843: (1 <= C311 & C311 <= ( len C309 ));
+per cases ;
+suppose L844: C311 = ( len C309 );
+
+L845: ( ( len D99 ) + 1 ) in ( Seg ( len C310 ) ) by L828 , L837 , FINSEQ_1:4;
+L846: ( ( len D99 ) + 1 ) in ( dom C310 ) by L845 , FINSEQ_1:def 3;
+L847: ( C310 . ( ( len D99 ) + 1 ) ) = ( D101 . ( ( len D99 ) + 1 ) ) by L846 , FINSEQ_1:def 7
+.= ( D101 . C311 ) by L827 , FINSEQ_1:59 , NAT_1:12 , L844;
+L848: 1 in ( Seg 1 );
+L849: 1 in ( dom <* ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) *> ) by L848 , FINSEQ_1:38;
+thus L850: ( D101 . ( C311 + 1 ) ) = ( <* ( ( Product D99 ) * ( C309 . ( len C309 ) ) ) *> . 1 ) by FINSEQ_1:def 7 , L844 , L827 , L837 , L849
+.= ( ( D101 . C311 ) * ( C309 . C311 ) ) by L847 , L844 , L829 , FINSEQ_1:40;
+end;
+suppose L851: C311 <> ( len C309 );
+
+L852: C311 < ( len C309 ) by L851 , L843 , XXREAL_0:1;
+L853: (1 <= C311 & C311 <= ( len D99 )) by L852 , L828 , L827 , NAT_1:13 , L843;
+L854: ( C310 . ( C311 + 1 ) ) = ( ( C310 . C311 ) * ( D99 . C311 ) ) by L853 , L829;
+L855: C311 in ( Seg ( len C310 ) ) by FINSEQ_1:1 , L843 , L827 , L837;
+L856: C311 in ( dom C310 ) by L855 , FINSEQ_1:def 3;
+L857: ( C311 + 1 ) <= ( len C310 ) by L827 , L837 , L852 , NAT_1:13;
+L858: 1 <= ( C311 + 1 ) by NAT_1:12;
+L859: ( C311 + 1 ) in ( Seg ( len C310 ) ) by L858 , L857;
+L860: ( C311 + 1 ) in ( dom C310 ) by L859 , FINSEQ_1:def 3;
+L861: C311 in ( Seg C308 ) by L853 , FINSEQ_1:1 , L828;
+L862: ( C309 . C311 ) = ( D99 . C311 ) by L861 , FUNCT_1:49;
+L863: ( D101 . C311 ) = ( C310 . C311 ) by FINSEQ_1:def 7 , L856;
+thus L864: ( D101 . ( C311 + 1 ) ) = ( ( D101 . C311 ) * ( C309 . C311 ) ) by L854 , FINSEQ_1:def 7 , L860 , L862 , L863;
+end;
+end;
+L866: ( C309 | ( C308 + 1 ) ) = ( D99 ^ <* ( C309 . ( len C309 ) ) *> ) by INT_6:5 , L827;
+L867: C309 = ( D99 ^ <* ( C309 . ( len C309 ) ) *> ) by L866 , FINSEQ_1:58 , L827;
+L868: ( len C309 ) in ( Seg ( len C310 ) ) by FINSEQ_1:4 , L827 , L837;
+L869: ( len C309 ) in ( dom C310 ) by L868 , FINSEQ_1:def 3;
+L870: (1 <= ( len C309 ) & ( len C309 ) <= ( len C309 )) by L827 , NAT_1:12;
+L871: ( Product C309 ) = ( ( C310 . ( ( len D99 ) + 1 ) ) * ( C309 . ( len C309 ) ) ) by L829 , RVSUM_1:96 , L867
+.= ( ( C310 . ( len C309 ) ) * ( C309 . ( len C309 ) ) ) by L827 , FINSEQ_1:59 , NAT_1:12
+.= ( ( D101 . ( len C309 ) ) * ( C309 . ( len C309 ) ) ) by FINSEQ_1:def 7 , L869
+.= ( D101 . ( ( len C309 ) + 1 ) ) by L842 , L870;
+thus L872: thesis by L871 , L833 , L841 , L842;
+end;
+L873: (for B571 being (Element of ( NAT )) holds S23[ B571 ]) from NAT_1:sch 1(L815 , L825);
+thus L874: thesis by L873;
+end;
+theorem
+L875: (for B572 being non  empty (FinSequence of [: ( INT ) , ( INT ) :]) holds (for B573 , B574 being non  empty (FinSequence of ( INT )) holds (for B575 , B576 being (Element of ( INT )) holds ((( len B573 ) = ( len B574 ) & ( len B573 ) = ( len B572 ) & (for B577 being Nat holds (B577 in ( Seg ( len B572 ) ) implies ( B574 . B577 ) <> ( 0 ))) & (for B578 being Nat holds (B578 in ( Seg ( len B572 ) ) implies (( ( B572 . B578 ) `1 ) = ( B573 . B578 ) & ( ( B572 . B578 ) `2 ) = ( B574 . B578 )))) & (for B579 , B580 being Nat holds ((B579 in ( Seg ( len B572 ) ) & B580 in ( Seg ( len B572 ) ) & B579 <> B580) implies ( B574 . B579 ) , ( B574 . B580 ) are_relative_prime )) & (for B581 being Nat holds (B581 in ( Seg ( len B572 ) ) implies ( B575 mod ( B574 . B581 ) ) = ( ( B573 . B581 ) mod ( B574 . B581 ) ))) & B576 = ( Product B574 )) implies ( ( ALGO_CRT B572 ) mod B576 ) = ( B575 mod B576 )))))
+proof
+let C312 being non  empty (FinSequence of [: ( INT ) , ( INT ) :]);
+let C313 , C314 being non  empty (FinSequence of ( INT ));
+let C315 , C316 being (Element of ( INT ));
+assume L876: (( len C313 ) = ( len C314 ) & ( len C313 ) = ( len C312 ));
+assume L877: (for B582 being Nat holds (B582 in ( Seg ( len C312 ) ) implies ( C314 . B582 ) <> ( 0 )));
+assume L878: (for B583 being Nat holds (B583 in ( Seg ( len C312 ) ) implies (( ( C312 . B583 ) `1 ) = ( C313 . B583 ) & ( ( C312 . B583 ) `2 ) = ( C314 . B583 ))));
+assume L879: (for B584 , B585 being Nat holds ((B584 in ( Seg ( len C312 ) ) & B585 in ( Seg ( len C312 ) ) & B584 <> B585) implies ( C314 . B584 ) , ( C314 . B585 ) are_relative_prime ));
+assume L880: (for B586 being Nat holds (B586 in ( Seg ( len C312 ) ) implies ( C315 mod ( C314 . B586 ) ) = ( ( C313 . B586 ) mod ( C314 . B586 ) )));
+assume L881: C316 = ( Product C314 );
+L882: (for B587 being Nat holds (B587 in ( Seg ( len C312 ) ) implies ( ( ALGO_CRT C312 ) mod ( C314 . B587 ) ) = ( C315 mod ( C314 . B587 ) )))
+proof
+let C317 being Nat;
+assume L883: C317 in ( Seg ( len C312 ) );
+thus L884: ( ( ALGO_CRT C312 ) mod ( C314 . C317 ) ) = ( ( C313 . C317 ) mod ( C314 . C317 ) ) by L883 , L608 , L876 , L877 , L878 , L879
+.= ( C315 mod ( C314 . C317 ) ) by L880 , L883;
+end;
+per cases ;
+suppose L885: ( len C312 ) = 1;
+
+L886: 1 in ( Seg ( len C312 ) ) by L885;
+thus L887: ( ( ALGO_CRT C312 ) mod C316 ) = ( ( ALGO_CRT C312 ) mod ( C314 . 1 ) ) by L885 , L876 , L810 , L881
+.= ( C315 mod ( C314 . 1 ) ) by L882 , L886
+.= ( C315 mod C316 ) by L885 , L876 , L810 , L881;
+end;
+suppose L888: ( len C312 ) <> 1;
+
+L889: 2 <= ( len C312 ) by L888 , NAT_1:23;
+L890: 2 <= ( len C314 ) by L876 , L888 , NAT_1:23;
+consider C318 being non  empty (FinSequence of ( INT )) such that L891: (( len C318 ) = ( ( len C314 ) + 1 ) & ( C318 . 1 ) = 1 & (for B588 being Nat holds ((1 <= B588 & B588 <= ( len C314 )) implies ( C318 . ( B588 + 1 ) ) = ( ( C318 . B588 ) * ( C314 . B588 ) ))) & ( Product C314 ) = ( C318 . ( ( len C314 ) + 1 ) )) by L814;
+L892: (1 <= ( len C314 ) & ( len C314 ) <= ( len C314 )) by L890 , XXREAL_0:2;
+thus L893: ( ( ALGO_CRT C312 ) mod C316 ) = ( C315 mod C316 ) by L892 , L881 , L891 , L779 , L876 , L879 , L882 , L889;
+end;
+end;

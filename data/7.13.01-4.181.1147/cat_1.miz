@@ -1,0 +1,1789 @@
+:: Introduction to Categories and Functors
+::  by Czes{\l}aw Byli\'nski
+::
+:: Received October 25, 1989
+:: Copyright (c) 1990-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies GRAPH_1, STRUCT_0, FUNCT_1, PARTFUN1, ZFMISC_1, SUBSET_1,
+      XBOOLE_0, CARD_1, FUNCOP_1, RELAT_1, TARSKI, ALGSTR_0, WELLORD1, CAT_1,
+      MONOID_0, RELAT_2, BINOP_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELAT_1, FUNCT_1, PARTFUN1,
+      FUNCT_2, NUMBERS, BINOP_1, FUNCOP_1, STRUCT_0, GRAPH_1;
+ constructors PARTFUN1, WELLORD2, BINOP_1, PBOOLE, GRAPH_1, RELSET_1;
+ registrations XBOOLE_0, FUNCT_1, RELSET_1, FUNCT_2, STRUCT_0, RELAT_1,
+      ZFMISC_1;
+ requirements SUBSET, BOOLE;
+ definitions TARSKI, FUNCOP_1, BINOP_1, GRAPH_1;
+ theorems TARSKI, FUNCT_1, FUNCT_2, PARTFUN1, FUNCOP_1, SUBSET_1, WELLORD2,
+      RELAT_1, ZFMISC_1;
+ schemes FUNCT_2;
+
+begin
+definition
+struct (MultiGraphStruct) CatStr(# carrier , carrier' -> set , Source , Target -> (Function of the carrier' , the carrier) , Comp -> (PartFunc of [: the carrier' , the carrier' :] , the carrier') #);
+end;
+definition
+let R1 being CatStr;
+mode Object of R1
+ is (Element of R1);
+mode Morphism of R1
+ is (Element of (the carrier' of R1));
+end;
+registration
+cluster non  void non  empty for CatStr;
+existence
+proof
+take CatStr (# { ( 0 ) } , { 1 } , ( 1 :-> ( 0 ) ) , ( 1 :-> ( 0 ) ) , ( (1 , 1) :-> 1 ) #);
+thus L3: thesis;
+end;
+end;
+definition
+let R1 being CatStr;
+let R2 being (Morphism of R1);
+let R3 being (Morphism of R1);
+assume L5: [ R3 , R2 ] in ( dom (the Comp of R1) );
+func R3 (*) R2 -> (Morphism of R1) equals 
+:L6: ( (the Comp of R1) . (R3 , R2) );
+coherence by L5 , PARTFUN1:4;
+end;
+definition
+canceled 2;
+let C1 being non  void non  empty CatStr;
+let C2 , C3 being (Object of C1);
+func Hom (C2 , C3) -> (Subset of (the carrier' of C1)) equals 
+{ B1 where B1 is (Morphism of C1) : (( dom B1 ) = C2 & ( cod B1 ) = C3) };
+correctness
+proof
+set D1 = { B2 where B2 is (Morphism of C1) : (( dom B2 ) = C2 & ( cod B2 ) = C3) };
+L8: D1 c= (the carrier' of C1)
+proof
+let C4 being set;
+assume L9: C4 in D1;
+L10: (ex B3 being (Morphism of C1) st (C4 = B3 & ( dom B3 ) = C2 & ( cod B3 ) = C3)) by L9;
+thus L11: thesis by L10;
+end;
+thus L12: thesis by L8;
+end;
+end;
+theorem
+L14: (for R4 being non  void non  empty CatStr holds (for R5 being (Morphism of R4) holds (for R7 being (Object of R4) holds (for R8 being (Object of R4) holds (R5 in ( Hom (R7 , R8) ) iff (( dom R5 ) = R7 & ( cod R5 ) = R8))))))
+proof
+let R4 being non  void non  empty CatStr;
+let R5 being (Morphism of R4);
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+thus L15: (R5 in ( Hom (R7 , R8) ) implies (( dom R5 ) = R7 & ( cod R5 ) = R8))
+proof
+assume L16: R5 in ( Hom (R7 , R8) );
+L17: (ex R6 being (Morphism of R4) st (R5 = R6 & ( dom R6 ) = R7 & ( cod R6 ) = R8)) by L16;
+thus L18: thesis by L17;
+end;
+
+thus L19: thesis;
+end;
+theorem
+L20: (for R4 being non  void non  empty CatStr holds (for R5 being (Morphism of R4) holds ( Hom (( dom R5 ) , ( cod R5 )) ) <> ( {} ))) by L14;
+definition
+let R4 being non  void non  empty CatStr;
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+assume L21: ( Hom (R7 , R8) ) <> ( {} );
+mode Morphism of R7 , R8
+ -> (Morphism of R4)
+means :L22: it in ( Hom (R7 , R8) );
+existence by L21 , SUBSET_1:4;
+end;
+canceled 1;
+theorem
+L24: (for R4 being non  void non  empty CatStr holds (for B4 being (Morphism of R4) holds B4 is (Morphism of ( dom B4 ) , ( cod B4 ))))
+proof
+let R4 being non  void non  empty CatStr;
+let C5 being (Morphism of R4);
+L25: C5 in ( Hom (( dom C5 ) , ( cod C5 )) );
+thus L26: thesis by L25 , L22;
+end;
+theorem
+L27: (for R4 being non  void non  empty CatStr holds (for R7 being (Object of R4) holds (for R8 being (Object of R4) holds (for B5 being (Morphism of R7 , R8) holds (( Hom (R7 , R8) ) <> ( {} ) implies (( dom B5 ) = R7 & ( cod B5 ) = R8))))))
+proof
+let R4 being non  void non  empty CatStr;
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+let C6 being (Morphism of R7 , R8);
+assume L28: ( Hom (R7 , R8) ) <> ( {} );
+L29: C6 in ( Hom (R7 , R8) ) by L28 , L22;
+thus L30: thesis by L29 , L14;
+end;
+theorem
+L31: (for R4 being non  void non  empty CatStr holds (for R7 being (Object of R4) holds (for R8 being (Object of R4) holds (for R9 being (Object of R4) holds (for R10 being (Object of R4) holds (for B6 being (Morphism of R7 , R8) holds (for B7 being (Morphism of R9 , R10) holds ((( Hom (R7 , R8) ) <> ( {} ) & ( Hom (R9 , R10) ) <> ( {} ) & B6 = B7) implies (R7 = R9 & R8 = R10)))))))))
+proof
+let R4 being non  void non  empty CatStr;
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+let R9 being (Object of R4);
+let R10 being (Object of R4);
+let C7 being (Morphism of R7 , R8);
+let C8 being (Morphism of R9 , R10);
+assume that
+L32: ( Hom (R7 , R8) ) <> ( {} )
+and
+L33: ( Hom (R9 , R10) ) <> ( {} );
+L34: (( dom C7 ) = R7 & ( cod C7 ) = R8) by L32 , L27;
+thus L35: thesis by L34 , L33 , L27;
+end;
+theorem
+L36: (for R4 being non  void non  empty CatStr holds (for R7 being (Object of R4) holds (for R8 being (Object of R4) holds (for B8 being (Morphism of R7 , R8) holds (( Hom (R7 , R8) ) = { B8 } implies (for B9 being (Morphism of R7 , R8) holds B8 = B9))))))
+proof
+let R4 being non  void non  empty CatStr;
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+let C9 being (Morphism of R7 , R8);
+assume that
+L37: ( Hom (R7 , R8) ) = { C9 };
+let C10 being (Morphism of R7 , R8);
+L38: C10 in { C9 } by L37 , L22;
+thus L39: thesis by L38 , TARSKI:def 1;
+end;
+theorem
+L40: (for R4 being non  void non  empty CatStr holds (for R7 being (Object of R4) holds (for R8 being (Object of R4) holds (for B10 being (Morphism of R7 , R8) holds ((( Hom (R7 , R8) ) <> ( {} ) & (for B11 being (Morphism of R7 , R8) holds B10 = B11)) implies ( Hom (R7 , R8) ) = { B10 })))))
+proof
+let R4 being non  void non  empty CatStr;
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+let C11 being (Morphism of R7 , R8);
+assume that
+L41: ( Hom (R7 , R8) ) <> ( {} )
+and
+L42: (for B12 being (Morphism of R7 , R8) holds C11 = B12);
+L43: (for B13 being set holds (B13 in ( Hom (R7 , R8) ) iff B13 = C11))
+proof
+let C12 being set;
+thus L44: (C12 in ( Hom (R7 , R8) ) implies C12 = C11)
+proof
+assume L45: C12 in ( Hom (R7 , R8) );
+consider C13 being (Morphism of R4) such that L46: C12 = C13 and L47: (( dom C13 ) = R7 & ( cod C13 ) = R8) by L45;
+L48: C13 is (Morphism of R7 , R8) by L47 , L24;
+thus L49: thesis by L48 , L42 , L46;
+end;
+
+thus L50: thesis by L41 , L22;
+end;
+thus L51: thesis by L43 , TARSKI:def 1;
+end;
+theorem
+L52: (for R4 being non  void non  empty CatStr holds (for R7 being (Object of R4) holds (for R8 being (Object of R4) holds (for R9 being (Object of R4) holds (for R10 being (Object of R4) holds (for B14 being (Morphism of R7 , R8) holds ((( Hom (R7 , R8) ) , ( Hom (R9 , R10) ) are_equipotent  & ( Hom (R7 , R8) ) = { B14 }) implies (ex B15 being (Morphism of R9 , R10) st ( Hom (R9 , R10) ) = { B15 }))))))))
+proof
+let R4 being non  void non  empty CatStr;
+let R7 being (Object of R4);
+let R8 being (Object of R4);
+let R9 being (Object of R4);
+let R10 being (Object of R4);
+let C14 being (Morphism of R7 , R8);
+assume L53: ( Hom (R7 , R8) ) , ( Hom (R9 , R10) ) are_equipotent ;
+consider C15 being Function such that L54: C15 is  one-to-one and L55: (( dom C15 ) = ( Hom (R7 , R8) ) & ( rng C15 ) = ( Hom (R9 , R10) )) by L53 , WELLORD2:def 4;
+assume L56: ( Hom (R7 , R8) ) = { C14 };
+L57: ( Hom (R9 , R10) ) = { ( C15 . C14 ) } by L56 , L55 , FUNCT_1:4;
+L58: ( C15 . C14 ) in ( Hom (R9 , R10) ) by L57 , TARSKI:def 1;
+L59: ( C15 . C14 ) is (Morphism of R9 , R10) by L58 , L22;
+thus L60: thesis by L59 , L57;
+end;
+definition
+let C16 being non  empty non  void CatStr;
+attr C16 is  Category-like
+means
+:L61: (for B16 , B17 being (Morphism of C16) holds ([ B17 , B16 ] in ( dom (the Comp of C16) ) iff ( dom B17 ) = ( cod B16 )));
+attr C16 is  transitive
+means
+:L62: (for B18 , B19 being (Morphism of C16) holds (( dom B19 ) = ( cod B18 ) implies (( dom ( B19 (*) B18 ) ) = ( dom B18 ) & ( cod ( B19 (*) B18 ) ) = ( cod B19 ))));
+attr C16 is  associative
+means
+:L63: (for B20 , B21 , B22 being (Morphism of C16) holds ((( dom B22 ) = ( cod B21 ) & ( dom B21 ) = ( cod B20 )) implies ( B22 (*) ( B21 (*) B20 ) ) = ( ( B22 (*) B21 ) (*) B20 )));
+attr C16 is  reflexive
+means
+:L64: (for B23 being (Element of C16) holds ( Hom (B23 , B23) ) <> ( {} ));
+attr C16 is  with_identities
+means
+:L65: (for B24 being (Element of C16) holds (ex B25 being (Morphism of B24 , B24) st (for B26 being (Element of C16) holds ((( Hom (B24 , B26) ) <> ( {} ) implies (for B27 being (Morphism of B24 , B26) holds ( B27 (*) B25 ) = B27)) & (( Hom (B26 , B24) ) <> ( {} ) implies (for B28 being (Morphism of B26 , B24) holds ( B25 (*) B28 ) = B28))))));
+end;
+definition
+let C17 , C18 being set;
+func 1Cat (C17 , C18) ->  strict CatStr equals 
+CatStr (# { C17 } , { C18 } , ( C18 :-> C17 ) , ( C18 :-> C17 ) , ( (C18 , C18) :-> C18 ) #);
+correctness;
+end;
+registration
+let C19 , C20 being set;
+cluster ( 1Cat (C19 , C20) ) -> non  empty  trivial non  void  trivial';
+coherence;
+end;
+registration
+cluster non  empty  trivial ->  transitive  reflexive for non  empty non  void non  empty non  void non  empty non  void non  empty non  void CatStr;
+coherence
+proof
+let C21 being non  empty non  void CatStr;
+assume that
+L69: C21 is non  empty  trivial;
+thus L70: (for B29 , B30 being (Morphism of C21) holds (( dom B30 ) = ( cod B29 ) implies (( dom ( B30 (*) B29 ) ) = ( dom B29 ) & ( cod ( B30 (*) B29 ) ) = ( cod B30 )))) by L69 , ZFMISC_1:def 10;
+let C22 being (Element of C21);
+set D2 = the (Morphism of C21);
+L71: (( cod D2 ) = C22 & ( dom D2 ) = C22) by L69 , ZFMISC_1:def 10;
+thus L72: ( Hom (C22 , C22) ) <> ( {} ) by L71 , L14;
+end;
+end;
+registration
+cluster non  void  trivial' ->  associative  with_identities for non  empty non  void non  empty non  void non  empty non  void non  empty non  void CatStr;
+coherence
+proof
+let C23 being non  empty non  void CatStr;
+assume that
+L74: C23 is non  void  trivial';
+thus L75: (for B31 , B32 , B33 being (Morphism of C23) holds ((( dom B33 ) = ( cod B32 ) & ( dom B32 ) = ( cod B31 )) implies ( B33 (*) ( B32 (*) B31 ) ) = ( ( B33 (*) B32 ) (*) B31 ))) by L74 , ZFMISC_1:def 10;
+let C24 being (Element of C23);
+take D3 = the (Morphism of C24 , C24);
+let C25 being (Element of C23);
+thus L76: (( Hom (C24 , C25) ) <> ( {} ) implies (for B34 being (Morphism of C24 , C25) holds ( B34 (*) D3 ) = B34)) by L74 , ZFMISC_1:def 10;
+thus L77: (( Hom (C25 , C24) ) <> ( {} ) implies (for B35 being (Morphism of C25 , C24) holds ( D3 (*) B35 ) = B35)) by L74 , ZFMISC_1:def 10;
+end;
+end;
+registration
+let C26 , C27 being set;
+cluster ( 1Cat (C26 , C27) ) ->  Category-like;
+coherence
+proof
+let C28 , C29 being (Morphism of ( 1Cat (C26 , C27) ));
+thus L79: ([ C29 , C28 ] in ( dom (the Comp of ( 1Cat (C26 , C27) )) ) implies ( dom C29 ) = ( cod C28 )) by ZFMISC_1:def 10;
+assume L80: ( dom C29 ) = ( cod C28 );
+L81: ( dom (the Comp of ( 1Cat (C26 , C27) )) ) = { [ C27 , C27 ] } by FUNCOP_1:13;
+L82: (C28 = C27 & C29 = C27) by TARSKI:def 1;
+thus L83: thesis by L82 , L81 , TARSKI:def 1;
+end;
+end;
+registration
+cluster  reflexive  transitive  associative  with_identities  Category-like non  void non  empty  strict for non  empty non  void non  empty non  void non  empty non  void non  empty non  void CatStr;
+existence
+proof
+take ( 1Cat (( 0 ) , ( 0 )) );
+thus L85: thesis;
+end;
+end;
+definition
+mode Category
+ is  reflexive  transitive  associative  with_identities  Category-like non  void non  empty CatStr;
+end;
+registration
+let C30 being  reflexive non  void non  empty CatStr;
+let C31 being (Object of C30);
+cluster ( Hom (C31 , C31) ) -> non  empty;
+coherence by L64;
+end;
+definition
+let C32 being  with_identities  reflexive non  void non  empty CatStr;
+let C33 being (Object of C32);
+func id C33 -> (Morphism of C33 , C33) means 
+:L89: (for B36 being (Object of C32) holds ((( Hom (C33 , B36) ) <> ( {} ) implies (for B37 being (Morphism of C33 , B36) holds ( B37 (*) it ) = B37)) & (( Hom (B36 , C33) ) <> ( {} ) implies (for B38 being (Morphism of B36 , C33) holds ( it (*) B38 ) = B38))));
+existence by L65;
+uniqueness
+proof
+let C34 , C35 being (Morphism of C33 , C33);
+assume that
+L90: (for B39 being (Object of C32) holds ((( Hom (C33 , B39) ) <> ( {} ) implies (for B40 being (Morphism of C33 , B39) holds ( B40 (*) C34 ) = B40)) & (( Hom (B39 , C33) ) <> ( {} ) implies (for B41 being (Morphism of B39 , C33) holds ( C34 (*) B41 ) = B41))))
+and
+L91: (for B42 being (Object of C32) holds ((( Hom (C33 , B42) ) <> ( {} ) implies (for B43 being (Morphism of C33 , B42) holds ( B43 (*) C35 ) = B43)) & (( Hom (B42 , C33) ) <> ( {} ) implies (for B44 being (Morphism of B42 , C33) holds ( C35 (*) B44 ) = B44))));
+L92: ( Hom (C33 , C33) ) <> ( {} );
+thus L93: C34 = ( C34 (*) C35 ) by L92 , L91
+.= C35 by L92 , L90;
+end;
+end;
+canceled 1;
+theorem
+L95: (for R11 being set holds (for R12 being set holds (for B45 , B46 being (Object of ( 1Cat (R11 , R12) )) holds (for B47 being (Morphism of ( 1Cat (R11 , R12) )) holds B47 in ( Hom (B45 , B46) )))))
+proof
+let R11 being set;
+let R12 being set;
+let C36 , C37 being (Object of ( 1Cat (R11 , R12) ));
+let C38 being (Morphism of ( 1Cat (R11 , R12) ));
+L96: ( dom C38 ) = R11 by TARSKI:def 1;
+L97: (( dom C38 ) = C36 & ( cod C38 ) = C37) by L96 , TARSKI:def 1;
+thus L98: thesis by L97;
+end;
+theorem
+L99: (for R11 being set holds (for R12 being set holds (for B48 , B49 being (Object of ( 1Cat (R11 , R12) )) holds (for B50 being (Morphism of ( 1Cat (R11 , R12) )) holds B50 is (Morphism of B48 , B49)))))
+proof
+let R11 being set;
+let R12 being set;
+let C39 , C40 being (Object of ( 1Cat (R11 , R12) ));
+let C41 being (Morphism of ( 1Cat (R11 , R12) ));
+L100: C41 in ( Hom (C39 , C40) ) by L95;
+thus L101: thesis by L100 , L22;
+end;
+theorem
+L102: (for R11 being set holds (for R12 being set holds (for B51 , B52 being (Object of ( 1Cat (R11 , R12) )) holds ( Hom (B51 , B52) ) <> ( {} )))) by L95;
+theorem
+L103: (for R11 being set holds (for R12 being set holds (for B53 , B54 , B55 , B56 being (Object of ( 1Cat (R11 , R12) )) holds (for B57 being (Morphism of B53 , B54) holds (for B58 being (Morphism of B55 , B56) holds B57 = B58)))))
+proof
+let R11 being set;
+let R12 being set;
+let C42 , C43 , C44 , C45 being (Object of ( 1Cat (R11 , R12) ));
+let C46 being (Morphism of C42 , C43);
+let C47 being (Morphism of C44 , C45);
+L104: C46 = R12 by TARSKI:def 1;
+thus L105: thesis by L104 , TARSKI:def 1;
+end;
+theorem
+L106: (for R14 being Category holds (for R20 being (Morphism of R14) holds (for R23 being (Morphism of R14) holds (( dom R23 ) = ( cod R20 ) iff [ R23 , R20 ] in ( dom (the Comp of R14) ))))) by L61;
+theorem
+L107: (for R14 being Category holds (for R20 being (Morphism of R14) holds (for R23 being (Morphism of R14) holds (( dom R23 ) = ( cod R20 ) implies ( R23 (*) R20 ) = ( (the Comp of R14) . (R23 , R20) )))))
+proof
+let R14 being Category;
+let R20 being (Morphism of R14);
+let R23 being (Morphism of R14);
+assume L108: ( dom R23 ) = ( cod R20 );
+L109: [ R23 , R20 ] in ( dom (the Comp of R14) ) by L108 , L61;
+thus L110: thesis by L109 , L6;
+end;
+theorem
+L111: (for R14 being Category holds (for B59 , B60 being (Morphism of R14) holds (( dom B60 ) = ( cod B59 ) implies (( dom ( B60 (*) B59 ) ) = ( dom B59 ) & ( cod ( B60 (*) B59 ) ) = ( cod B60 ))))) by L62;
+theorem
+L112: (for R14 being Category holds (for B61 , B62 , B63 being (Morphism of R14) holds ((( dom B63 ) = ( cod B62 ) & ( dom B62 ) = ( cod B61 )) implies ( B63 (*) ( B62 (*) B61 ) ) = ( ( B63 (*) B62 ) (*) B61 )))) by L63;
+canceled 2;
+theorem
+L113: (for R14 being Category holds (for R17 being (Object of R14) holds (for B64 being (Morphism of R14) holds (( cod B64 ) = R17 implies ( ( id R17 ) (*) B64 ) = B64))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+let C48 being (Morphism of R14);
+assume L114: ( cod C48 ) = R17;
+reconsider D4 = C48 as (Morphism of ( dom C48 ) , R17) by L114 , L24;
+L115: ( Hom (( dom C48 ) , R17) ) <> ( {} ) by L114 , L14;
+L116: ( ( id R17 ) (*) D4 ) = D4 by L115 , L89;
+thus L117: thesis by L116;
+end;
+theorem
+L118: (for R14 being Category holds (for R17 being (Object of R14) holds (for B65 being (Morphism of R14) holds (( dom B65 ) = R17 implies ( B65 (*) ( id R17 ) ) = B65))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+let C49 being (Morphism of R14);
+assume L119: ( dom C49 ) = R17;
+reconsider D5 = C49 as (Morphism of R17 , ( cod C49 )) by L119 , L24;
+L120: ( Hom (R17 , ( cod C49 )) ) <> ( {} ) by L119 , L14;
+L121: ( D5 (*) ( id R17 ) ) = D5 by L120 , L89;
+thus L122: thesis by L121;
+end;
+theorem
+L123: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (for R30 being (Morphism of R17 , R18) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R18) ) <> ( {} )) implies ( R30 (*) R26 ) in ( Hom (R16 , R18) ))))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+assume that
+L124: ( Hom (R16 , R17) ) <> ( {} )
+and
+L125: ( Hom (R17 , R18) ) <> ( {} );
+L126: R26 in ( Hom (R16 , R17) ) by L124 , L22;
+L127: ( cod R26 ) = R17 by L126 , L14;
+L128: R30 in ( Hom (R17 , R18) ) by L125 , L22;
+L129: ( dom R30 ) = R17 by L128 , L14;
+L130: ( cod R30 ) = R18 by L128 , L14;
+L131: ( cod ( R30 (*) R26 ) ) = R18 by L130 , L129 , L127 , L62;
+L132: ( dom R26 ) = R16 by L126 , L14;
+L133: ( dom ( R30 (*) R26 ) ) = R16 by L132 , L129 , L127 , L62;
+thus L134: thesis by L133 , L131;
+end;
+definition
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+assume L135: (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R18) ) <> ( {} ));
+func R30 * R26 -> (Morphism of R16 , R18) equals 
+:L136: ( R30 (*) R26 );
+correctness
+proof
+L137: ( R30 (*) R26 ) in ( Hom (R16 , R18) ) by L135 , L123;
+thus L138: thesis by L137 , L22;
+end;
+end;
+theorem
+L140: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R18) ) <> ( {} )) implies ( Hom (R16 , R18) ) <> ( {} )))))) by L123;
+theorem
+L141: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R19 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (for R30 being (Morphism of R17 , R18) holds (for R31 being (Morphism of R18 , R19) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R18) ) <> ( {} ) & ( Hom (R18 , R19) ) <> ( {} )) implies ( ( R31 * R30 ) * R26 ) = ( R31 * ( R30 * R26 ) ))))))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R19 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+let R31 being (Morphism of R18 , R19);
+assume that
+L142: ( Hom (R16 , R17) ) <> ( {} )
+and
+L143: ( Hom (R17 , R18) ) <> ( {} )
+and
+L144: ( Hom (R18 , R19) ) <> ( {} );
+L145: ( Hom (R16 , R18) ) <> ( {} ) by L142 , L143 , L123;
+L146: R31 in ( Hom (R18 , R19) ) by L144 , L22;
+L147: ( dom R31 ) = R18 by L146 , L14;
+L148: R30 in ( Hom (R17 , R18) ) by L143 , L22;
+L149: (( cod R30 ) = R18 & ( dom R30 ) = R17) by L148 , L14;
+reconsider D6 = R31 as (Morphism of R14);
+reconsider D7 = R30 as (Morphism of R14);
+reconsider D8 = R26 as (Morphism of R14);
+L150: R26 in ( Hom (R16 , R17) ) by L142 , L22;
+L151: ( cod R26 ) = R17 by L150 , L14;
+L152: ( Hom (R17 , R19) ) <> ( {} ) by L143 , L144 , L123;
+thus L153: ( ( R31 * R30 ) * R26 ) = ( ( R31 * R30 ) (*) D8 ) by L152 , L142 , L136
+.= ( ( D6 (*) D7 ) (*) D8 ) by L143 , L144 , L136
+.= ( D6 (*) ( D7 (*) D8 ) ) by L147 , L149 , L151 , L63
+.= ( D6 (*) ( R30 * R26 ) ) by L142 , L143 , L136
+.= ( R31 * ( R30 * R26 ) ) by L144 , L145 , L136;
+end;
+canceled 1;
+theorem
+L154: (for R14 being Category holds (for R16 being (Object of R14) holds ( id R16 ) in ( Hom (R16 , R16) ))) by L22;
+theorem
+L155: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (( Hom (R16 , R17) ) <> ( {} ) implies ( ( id R17 ) * R26 ) = R26)))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume L156: ( Hom (R16 , R17) ) <> ( {} );
+L157: ( ( id R17 ) (*) R26 ) = R26 by L156 , L89;
+L158: ( Hom (R17 , R17) ) <> ( {} );
+thus L159: thesis by L158 , L156 , L157 , L136;
+end;
+theorem
+L160: (for R14 being Category holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R30 being (Morphism of R17 , R18) holds (( Hom (R17 , R18) ) <> ( {} ) implies ( R30 * ( id R17 ) ) = R30)))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R30 being (Morphism of R17 , R18);
+assume L161: ( Hom (R17 , R18) ) <> ( {} );
+L162: ( R30 (*) ( id R17 ) ) = R30 by L161 , L89;
+L163: ( Hom (R17 , R17) ) <> ( {} );
+thus L164: thesis by L163 , L161 , L162 , L136;
+end;
+registration
+let R14 being Category;
+let R16 being (Object of R14);
+let C50 being (Morphism of R16 , R16);
+L165: ( Hom (R16 , R16) ) <> ( {} );
+reduce ( C50 * ( id R16 ) ) to C50;
+reducibility by L165 , L160;
+reduce ( ( id R16 ) * C50 ) to C50;
+reducibility by L165 , L155;
+end;
+theorem
+L167: (for R14 being Category holds (for R16 being (Object of R14) holds ( ( id R16 ) * ( id R16 ) ) = ( id R16 )));
+definition
+let C51 being Category;
+let C52 , C53 being (Object of C51);
+let C54 being (Morphism of C52 , C53);
+attr C54 is  monic
+means
+:L168: (( Hom (C52 , C53) ) <> ( {} ) & (for B66 being (Object of C51) holds (( Hom (B66 , C52) ) <> ( {} ) implies (for B67 , B68 being (Morphism of B66 , C52) holds (( C54 * B67 ) = ( C54 * B68 ) implies B67 = B68)))));
+end;
+definition
+let C55 being Category;
+let C56 , C57 being (Object of C55);
+let C58 being (Morphism of C56 , C57);
+attr C58 is  epi
+means
+:L170: (( Hom (C56 , C57) ) <> ( {} ) & (for B69 being (Object of C55) holds (( Hom (C57 , B69) ) <> ( {} ) implies (for B70 , B71 being (Morphism of C57 , B69) holds (( B70 * C58 ) = ( B71 * C58 ) implies B70 = B71)))));
+end;
+definition
+let C59 being Category;
+let C60 , C61 being (Object of C59);
+let C62 being (Morphism of C60 , C61);
+attr C62 is  invertible
+means
+:L172: (( Hom (C60 , C61) ) <> ( {} ) & ( Hom (C61 , C60) ) <> ( {} ) & (ex B72 being (Morphism of C61 , C60) st (( C62 * B72 ) = ( id C61 ) & ( B72 * C62 ) = ( id C60 ))));
+end;
+theorem
+L174: (for R14 being Category holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R30 being (Morphism of R17 , R18) holds (( Hom (R17 , R18) ) <> ( {} ) implies (R30 is  monic iff (for R16 being (Object of R14) holds (for B73 , B74 being (Morphism of R16 , R17) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( R30 * B73 ) = ( R30 * B74 )) implies B73 = B74)))))))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R30 being (Morphism of R17 , R18);
+assume L175: ( Hom (R17 , R18) ) <> ( {} );
+thus L176: (R30 is  monic implies (for R16 being (Object of R14) holds (for B75 , B76 being (Morphism of R16 , R17) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( R30 * B75 ) = ( R30 * B76 )) implies B75 = B76)))) by L168;
+assume L177: (for R16 being (Object of R14) holds (for B77 , B78 being (Morphism of R16 , R17) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( R30 * B77 ) = ( R30 * B78 )) implies B77 = B78)));
+thus L178: ( Hom (R17 , R18) ) <> ( {} ) by L175;
+thus L179: thesis by L177;
+end;
+theorem
+L180: (for R14 being Category holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R19 being (Object of R14) holds (for R30 being (Morphism of R17 , R18) holds (for R31 being (Morphism of R18 , R19) holds ((R30 is  monic & R31 is  monic) implies ( R31 * R30 ) is  monic)))))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R19 being (Object of R14);
+let R30 being (Morphism of R17 , R18);
+let R31 being (Morphism of R18 , R19);
+assume that
+L181: R30 is  monic
+and
+L182: R31 is  monic;
+L183: ( Hom (R17 , R18) ) <> ( {} ) by L181 , L168;
+L184: ( Hom (R18 , R19) ) <> ( {} ) by L182 , L168;
+L185:
+now
+let R16 being (Object of R14);
+let R27 being (Morphism of R16 , R17);
+let R28 being (Morphism of R16 , R17);
+assume that
+L186: ( Hom (R16 , R17) ) <> ( {} )
+and
+L187: ( ( R31 * R30 ) * R27 ) = ( ( R31 * R30 ) * R28 );
+L188: ( Hom (R16 , R18) ) <> ( {} ) by L183 , L186 , L123;
+L189: (( R31 * ( R30 * R27 ) ) = ( ( R31 * R30 ) * R27 ) & ( ( R31 * R30 ) * R28 ) = ( R31 * ( R30 * R28 ) )) by L183 , L184 , L186 , L141;
+L190: ( R30 * R27 ) = ( R30 * R28 ) by L189 , L168 , L182 , L187 , L188;
+thus L191: R27 = R28 by L190 , L168 , L181 , L186;
+end;
+L192: ( Hom (R17 , R19) ) <> ( {} ) by L183 , L184 , L123;
+thus L193: thesis by L192 , L185 , L174;
+end;
+theorem
+L194: (for R14 being Category holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R19 being (Object of R14) holds (for R30 being (Morphism of R17 , R18) holds (for R31 being (Morphism of R18 , R19) holds ((( Hom (R17 , R18) ) <> ( {} ) & ( Hom (R18 , R19) ) <> ( {} ) & ( R31 * R30 ) is  monic) implies R30 is  monic)))))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R19 being (Object of R14);
+let R30 being (Morphism of R17 , R18);
+let R31 being (Morphism of R18 , R19);
+assume that
+L195: ( Hom (R17 , R18) ) <> ( {} )
+and
+L196: ( Hom (R18 , R19) ) <> ( {} )
+and
+L197: ( R31 * R30 ) is  monic;
+L198:
+now
+let R16 being (Object of R14);
+let R27 being (Morphism of R16 , R17);
+let R28 being (Morphism of R16 , R17);
+L199: ( Hom (R17 , R19) ) <> ( {} ) by L195 , L196 , L123;
+assume L200: ( Hom (R16 , R17) ) <> ( {} );
+L201: (( R31 * ( R30 * R27 ) ) = ( ( R31 * R30 ) * R27 ) & ( R31 * ( R30 * R28 ) ) = ( ( R31 * R30 ) * R28 )) by L200 , L195 , L196 , L141;
+thus L202: (( R30 * R27 ) = ( R30 * R28 ) implies R27 = R28) by L201 , L197 , L200 , L199 , L174;
+end;
+thus L203: thesis by L198 , L195 , L174;
+end;
+theorem
+L204: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for B79 being (Morphism of R16 , R17) holds (for B80 being (Morphism of R17 , R16) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} ) & ( B79 * B80 ) = ( id R17 )) implies B80 is  monic))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let C63 being (Morphism of R16 , R17);
+let C64 being (Morphism of R17 , R16);
+assume that
+L205: ( Hom (R16 , R17) ) <> ( {} )
+and
+L206: ( Hom (R17 , R16) ) <> ( {} )
+and
+L207: ( C63 * C64 ) = ( id R17 );
+L208:
+now
+let R18 being (Object of R14);
+let C65 , C66 being (Morphism of R18 , R17);
+assume that
+L209: ( Hom (R18 , R17) ) <> ( {} )
+and
+L210: ( C64 * C65 ) = ( C64 * C66 );
+thus L211: C65 = ( ( C63 * C64 ) * C65 ) by L207 , L209 , L155
+.= ( C63 * ( C64 * C66 ) ) by L205 , L206 , L209 , L210 , L141
+.= ( ( C63 * C64 ) * C66 ) by L205 , L206 , L209 , L141
+.= C66 by L207 , L209 , L155;
+end;
+thus L212: thesis by L208 , L206 , L174;
+end;
+theorem
+L213: (for R14 being Category holds (for R17 being (Object of R14) holds ( id R17 ) is  monic))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+L214:
+now
+let R16 being (Object of R14);
+let C67 , C68 being (Morphism of R16 , R17);
+assume L215: ( Hom (R16 , R17) ) <> ( {} );
+L216: ( ( id R17 ) * C67 ) = C67 by L215 , L155;
+thus L217: (( ( id R17 ) * C67 ) = ( ( id R17 ) * C68 ) implies C67 = C68) by L216 , L215 , L155;
+end;
+L218: ( Hom (R17 , R17) ) <> ( {} );
+thus L219: thesis by L218 , L214 , L174;
+end;
+theorem
+L220: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (( Hom (R16 , R17) ) <> ( {} ) implies (R26 is  epi iff (for R18 being (Object of R14) holds (for B81 , B82 being (Morphism of R17 , R18) holds ((( Hom (R17 , R18) ) <> ( {} ) & ( B81 * R26 ) = ( B82 * R26 )) implies B81 = B82)))))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume L221: ( Hom (R16 , R17) ) <> ( {} );
+thus L222: (R26 is  epi implies (for R18 being (Object of R14) holds (for B83 , B84 being (Morphism of R17 , R18) holds ((( Hom (R17 , R18) ) <> ( {} ) & ( B83 * R26 ) = ( B84 * R26 )) implies B83 = B84))))
+proof
+assume that
+L223: ( Hom (R16 , R17) ) <> ( {} )
+and
+L224: (for B85 being (Object of R14) holds (( Hom (R17 , B85) ) <> ( {} ) implies (for B86 , B87 being (Morphism of R17 , B85) holds (( B86 * R26 ) = ( B87 * R26 ) implies B86 = B87))));
+let R18 being (Object of R14);
+let C69 , C70 being (Morphism of R17 , R18);
+thus L225: thesis by L224;
+end;
+
+assume L226: (for R18 being (Object of R14) holds (for B88 , B89 being (Morphism of R17 , R18) holds ((( Hom (R17 , R18) ) <> ( {} ) & ( B88 * R26 ) = ( B89 * R26 )) implies B88 = B89)));
+thus L227: ( Hom (R16 , R17) ) <> ( {} ) by L221;
+thus L228: thesis by L226;
+end;
+theorem
+L229: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (for R30 being (Morphism of R17 , R18) holds ((R26 is  epi & R30 is  epi) implies ( R30 * R26 ) is  epi)))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+assume that
+L230: R26 is  epi
+and
+L231: R30 is  epi;
+L232: ( Hom (R16 , R17) ) <> ( {} ) by L230 , L170;
+L233: ( Hom (R17 , R18) ) <> ( {} ) by L231 , L170;
+L234:
+now
+let R19 being (Object of R14);
+let R32 being (Morphism of R18 , R19);
+let R33 being (Morphism of R18 , R19);
+assume that
+L235: ( Hom (R18 , R19) ) <> ( {} )
+and
+L236: ( R32 * ( R30 * R26 ) ) = ( R33 * ( R30 * R26 ) );
+L237: ( Hom (R17 , R19) ) <> ( {} ) by L233 , L235 , L123;
+L238: (( R32 * ( R30 * R26 ) ) = ( ( R32 * R30 ) * R26 ) & ( ( R33 * R30 ) * R26 ) = ( R33 * ( R30 * R26 ) )) by L232 , L233 , L235 , L141;
+L239: ( R32 * R30 ) = ( R33 * R30 ) by L238 , L170 , L230 , L236 , L237;
+thus L240: R32 = R33 by L239 , L170 , L231 , L235;
+end;
+L241: ( Hom (R16 , R18) ) <> ( {} ) by L232 , L233 , L123;
+thus L242: thesis by L241 , L234 , L220;
+end;
+theorem
+L243: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (for R30 being (Morphism of R17 , R18) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R18) ) <> ( {} ) & ( R30 * R26 ) is  epi) implies R30 is  epi)))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+assume that
+L244: ( Hom (R16 , R17) ) <> ( {} )
+and
+L245: ( Hom (R17 , R18) ) <> ( {} )
+and
+L246: ( R30 * R26 ) is  epi;
+L247:
+now
+let R19 being (Object of R14);
+let R32 being (Morphism of R18 , R19);
+let R33 being (Morphism of R18 , R19);
+L248: ( Hom (R16 , R18) ) <> ( {} ) by L244 , L245 , L123;
+assume L249: ( Hom (R18 , R19) ) <> ( {} );
+L250: (( R32 * ( R30 * R26 ) ) = ( ( R32 * R30 ) * R26 ) & ( R33 * ( R30 * R26 ) ) = ( ( R33 * R30 ) * R26 )) by L249 , L244 , L245 , L141;
+thus L251: (( R32 * R30 ) = ( R33 * R30 ) implies R32 = R33) by L250 , L246 , L249 , L248 , L220;
+end;
+thus L252: thesis by L247 , L245 , L220;
+end;
+theorem
+L253: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for B90 being (Morphism of R16 , R17) holds (for B91 being (Morphism of R17 , R16) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} ) & ( B90 * B91 ) = ( id R17 )) implies B90 is  epi))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let C71 being (Morphism of R16 , R17);
+let C72 being (Morphism of R17 , R16);
+assume that
+L254: ( Hom (R16 , R17) ) <> ( {} )
+and
+L255: ( Hom (R17 , R16) ) <> ( {} )
+and
+L256: ( C71 * C72 ) = ( id R17 );
+L257:
+now
+let R18 being (Object of R14);
+let C73 , C74 being (Morphism of R17 , R18);
+assume that
+L258: ( Hom (R17 , R18) ) <> ( {} )
+and
+L259: ( C73 * C71 ) = ( C74 * C71 );
+thus L260: C73 = ( C73 * ( C71 * C72 ) ) by L256 , L258 , L160
+.= ( ( C74 * C71 ) * C72 ) by L254 , L255 , L258 , L259 , L141
+.= ( C74 * ( C71 * C72 ) ) by L254 , L255 , L258 , L141
+.= C74 by L256 , L258 , L160;
+end;
+thus L261: thesis by L257 , L254 , L220;
+end;
+theorem
+L262: (for R14 being Category holds (for R17 being (Object of R14) holds ( id R17 ) is  epi))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+L263:
+now
+let R18 being (Object of R14);
+let C75 , C76 being (Morphism of R17 , R18);
+assume L264: ( Hom (R17 , R18) ) <> ( {} );
+L265: ( C75 * ( id R17 ) ) = C75 by L264 , L160;
+thus L266: (( C75 * ( id R17 ) ) = ( C76 * ( id R17 ) ) implies C75 = C76) by L265 , L264 , L160;
+end;
+L267: ( Hom (R17 , R17) ) <> ( {} );
+thus L268: thesis by L267 , L263 , L220;
+end;
+theorem
+L269: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (( Hom (R16 , R17) ) <> ( {} ) implies (R26 is  invertible iff (( Hom (R17 , R16) ) <> ( {} ) & (ex B92 being (Morphism of R17 , R16) st (( R26 * B92 ) = ( id R17 ) & ( B92 * R26 ) = ( id R16 ))))))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume L270: ( Hom (R16 , R17) ) <> ( {} );
+thus L271: (R26 is  invertible implies (( Hom (R17 , R16) ) <> ( {} ) & (ex B93 being (Morphism of R17 , R16) st (( R26 * B93 ) = ( id R17 ) & ( B93 * R26 ) = ( id R16 )))))
+proof
+assume L272: (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} ));
+given C77 being (Morphism of R17 , R16) such that
+L273: (( R26 * C77 ) = ( id R17 ) & ( C77 * R26 ) = ( id R16 ));
+
+thus L274: ( Hom (R17 , R16) ) <> ( {} ) by L272;
+take C77;
+thus L275: thesis by L273;
+end;
+
+assume L276: ( Hom (R17 , R16) ) <> ( {} );
+given C78 being (Morphism of R17 , R16) such that
+L277: (( R26 * C78 ) = ( id R17 ) & ( C78 * R26 ) = ( id R16 ));
+
+thus L278: (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} )) by L270 , L276;
+take C78;
+thus L279: thesis by L277;
+end;
+theorem
+L280: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds ((( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} )) implies (for B94 , B95 being (Morphism of R17 , R16) holds ((( R26 * B94 ) = ( id R17 ) & ( B95 * R26 ) = ( id R16 )) implies B94 = B95)))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume that
+L281: ( Hom (R16 , R17) ) <> ( {} )
+and
+L282: ( Hom (R17 , R16) ) <> ( {} );
+let C79 , C80 being (Morphism of R17 , R16);
+assume L283: ( R26 * C79 ) = ( id R17 );
+assume L284: ( C80 * R26 ) = ( id R16 );
+thus L285: C79 = ( ( C80 * R26 ) * C79 ) by L284 , L282 , L155
+.= ( C80 * ( id R17 ) ) by L281 , L282 , L283 , L141
+.= C80 by L282 , L160;
+end;
+definition
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume that
+L286: R26 is  invertible;
+L287: ( Hom (R16 , R17) ) <> ( {} ) by L286 , L172;
+func R26 " -> (Morphism of R17 , R16) means 
+:L288: (( R26 * it ) = ( id R17 ) & ( it * R26 ) = ( id R16 ));
+existence by L172 , L286;
+uniqueness
+proof
+L289: ( Hom (R17 , R16) ) <> ( {} ) by L172 , L286;
+thus L290: thesis by L289 , L287 , L280;
+end;
+end;
+theorem
+L292: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (R26 is  invertible implies (R26 is  monic & R26 is  epi))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume that
+L293: R26 is  invertible;
+L294: ( Hom (R16 , R17) ) <> ( {} ) by L293 , L172;
+consider C81 being (Morphism of R17 , R16) such that L295: ( R26 * C81 ) = ( id R17 ) and L296: ( C81 * R26 ) = ( id R16 ) by L172 , L293;
+L297: ( Hom (R17 , R16) ) <> ( {} ) by L172 , L293;
+L298:
+now
+let C82 being (Object of R14);
+let C83 , C84 being (Morphism of C82 , R16);
+assume that
+L299: ( Hom (C82 , R16) ) <> ( {} )
+and
+L300: ( R26 * C83 ) = ( R26 * C84 );
+L301: C83 = ( ( C81 * R26 ) * C83 ) by L296 , L299 , L155
+.= ( C81 * ( R26 * C84 ) ) by L294 , L297 , L299 , L300 , L141
+.= ( ( id R16 ) * C84 ) by L294 , L297 , L296 , L299 , L141;
+thus L302: C83 = C84 by L301 , L299 , L155;
+end;
+thus L303: R26 is  monic by L298 , L294 , L174;
+L304:
+now
+let C85 being (Object of R14);
+let C86 , C87 being (Morphism of R17 , C85);
+assume that
+L305: ( Hom (R17 , C85) ) <> ( {} )
+and
+L306: ( C86 * R26 ) = ( C87 * R26 );
+L307: C86 = ( C86 * ( R26 * C81 ) ) by L295 , L305 , L160
+.= ( ( C87 * R26 ) * C81 ) by L294 , L297 , L305 , L306 , L141
+.= ( C87 * ( id R17 ) ) by L294 , L297 , L295 , L305 , L141;
+thus L308: C86 = C87 by L307 , L305 , L160;
+end;
+thus L309: thesis by L304 , L294 , L220;
+end;
+theorem
+L310: (for R14 being Category holds (for R16 being (Object of R14) holds ( id R16 ) is  invertible))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+L311: (( Hom (R16 , R16) ) <> ( {} ) & ( ( id R16 ) * ( id R16 ) ) = ( id R16 ));
+thus L312: thesis by L311 , L269;
+end;
+theorem
+L313: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (for R30 being (Morphism of R17 , R18) holds ((R26 is  invertible & R30 is  invertible) implies ( R30 * R26 ) is  invertible)))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+assume L314: R26 is  invertible;
+L315: (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} )) by L314 , L172;
+consider C88 being (Morphism of R17 , R16) such that L316: ( R26 * C88 ) = ( id R17 ) and L317: ( C88 * R26 ) = ( id R16 ) by L172 , L314;
+assume L318: R30 is  invertible;
+L319: (( Hom (R17 , R18) ) <> ( {} ) & ( Hom (R18 , R17) ) <> ( {} )) by L318 , L172;
+consider C89 being (Morphism of R18 , R17) such that L320: ( R30 * C89 ) = ( id R18 ) and L321: ( C89 * R30 ) = ( id R17 ) by L172 , L318;
+L322:
+now
+thus L323: ( Hom (R18 , R16) ) <> ( {} ) by L315 , L319 , L123;
+take D9 = ( C88 * C89 );
+thus L324: ( ( R30 * R26 ) * D9 ) = ( R30 * ( R26 * ( C88 * C89 ) ) ) by L315 , L319 , L323 , L141
+.= ( R30 * ( ( id R17 ) * C89 ) ) by L315 , L316 , L319 , L141
+.= ( id R18 ) by L319 , L320 , L155;
+L325: ( Hom (R16 , R18) ) <> ( {} ) by L315 , L319 , L123;
+thus L326: ( D9 * ( R30 * R26 ) ) = ( C88 * ( C89 * ( R30 * R26 ) ) ) by L325 , L315 , L319 , L141
+.= ( C88 * ( ( id R17 ) * R26 ) ) by L315 , L319 , L321 , L141
+.= ( id R16 ) by L315 , L317 , L155;
+end;
+L327: ( Hom (R16 , R18) ) <> ( {} ) by L315 , L319 , L123;
+thus L328: thesis by L327 , L322 , L269;
+end;
+theorem
+L329: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (R26 is  invertible implies ( R26 " ) is  invertible)))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume L330: R26 is  invertible;
+L331: ( R26 * ( R26 " ) ) = ( id R17 ) by L330 , L288;
+L332: ( Hom (R16 , R17) ) <> ( {} ) by L330 , L172;
+L333: (( Hom (R17 , R16) ) <> ( {} ) & ( ( R26 " ) * R26 ) = ( id R16 )) by L172 , L330 , L288;
+thus L334: thesis by L333 , L332 , L331 , L269;
+end;
+theorem
+L335: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds (for R30 being (Morphism of R17 , R18) holds ((R26 is  invertible & R30 is  invertible) implies ( ( R30 * R26 ) " ) = ( ( R26 " ) * ( R30 " ) ))))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+let R30 being (Morphism of R17 , R18);
+assume that
+L336: R26 is  invertible
+and
+L337: R30 is  invertible;
+L338: ( Hom (R16 , R17) ) <> ( {} ) by L336 , L172;
+L339: ( Hom (R17 , R18) ) <> ( {} ) by L337 , L172;
+L340: ( Hom (R18 , R17) ) <> ( {} ) by L172 , L337;
+L341: ( Hom (R17 , R16) ) <> ( {} ) by L172 , L336;
+L342: ( Hom (R18 , R16) ) <> ( {} ) by L341 , L340 , L123;
+L343: ( ( ( R26 " ) * ( R30 " ) ) * ( R30 * R26 ) ) = ( ( ( ( R26 " ) * ( R30 " ) ) * R30 ) * R26 ) by L342 , L338 , L339 , L141
+.= ( ( ( R26 " ) * ( ( R30 " ) * R30 ) ) * R26 ) by L339 , L341 , L340 , L141
+.= ( ( ( R26 " ) * ( id R17 ) ) * R26 ) by L337 , L288
+.= ( ( R26 " ) * R26 ) by L341 , L160
+.= ( id R16 ) by L336 , L288;
+L344: (( Hom (R16 , R18) ) <> ( {} ) & ( R30 * R26 ) is  invertible) by L338 , L339 , L336 , L337 , L123 , L313;
+L345: ( ( R30 * R26 ) * ( ( R26 " ) * ( R30 " ) ) ) = ( R30 * ( R26 * ( ( R26 " ) * ( R30 " ) ) ) ) by L338 , L339 , L342 , L141
+.= ( R30 * ( ( R26 * ( R26 " ) ) * ( R30 " ) ) ) by L338 , L341 , L340 , L141
+.= ( R30 * ( ( id R17 ) * ( R30 " ) ) ) by L336 , L288
+.= ( R30 * ( R30 " ) ) by L340 , L155
+.= ( id R18 ) by L337 , L288;
+thus L346: thesis by L345 , L343 , L344 , L288;
+end;
+definition
+let R14 being Category;
+let R16 being (Object of R14);
+attr R16 is  terminal
+means
+:L347: (for R17 being (Object of R14) holds (( Hom (R17 , R16) ) <> ( {} ) & (ex B96 being (Morphism of R17 , R16) st (for B97 being (Morphism of R17 , R16) holds B96 = B97))));
+attr R16 is  initial
+means
+:L348: (for R17 being (Object of R14) holds (( Hom (R16 , R17) ) <> ( {} ) & (ex B98 being (Morphism of R16 , R17) st (for B99 being (Morphism of R16 , R17) holds B98 = B99))));
+let R17 being (Object of R14);
+pred R16 , R17 are_isomorphic 
+means
+(ex R26 being (Morphism of R16 , R17) st R26 is  invertible)
+;reflexivity
+proof
+let C90 being (Object of R14);
+L349: ( Hom (C90 , C90) ) <> ( {} );
+take ( id C90 );
+L350: ( ( id C90 ) * ( id C90 ) ) = ( id C90 );
+thus L351: thesis by L350 , L349 , L269;
+end;
+symmetry
+proof
+let C91 , C92 being (Object of R14);
+given C93 being (Morphism of C91 , C92) such that
+L352: C93 is  invertible;
+
+L353: (( Hom (C92 , C91) ) <> ( {} ) & ( Hom (C91 , C92) ) <> ( {} )) by L352 , L172;
+consider C94 being (Morphism of C92 , C91) such that L354: (( C93 * C94 ) = ( id C92 ) & ( C94 * C93 ) = ( id C91 )) by L352 , L172;
+take C94;
+thus L355: C94 is  invertible by L353 , L354 , L172;
+end;
+end;
+theorem
+L357: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (R16 , R17 are_isomorphic  iff (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} ) & (ex R26 being (Morphism of R16 , R17) st (ex R29 being (Morphism of R17 , R16) st (( R26 * R29 ) = ( id R17 ) & ( R29 * R26 ) = ( id R16 )))))))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+thus L358: (R16 , R17 are_isomorphic  implies (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} ) & (ex R26 being (Morphism of R16 , R17) st (ex R29 being (Morphism of R17 , R16) st (( R26 * R29 ) = ( id R17 ) & ( R29 * R26 ) = ( id R16 ))))))
+proof
+given R26 being (Morphism of R16 , R17) such that
+L359: R26 is  invertible;
+
+thus L360: (( Hom (R16 , R17) ) <> ( {} ) & ( Hom (R17 , R16) ) <> ( {} )) by L359 , L172;
+take R26;
+thus L361: thesis by L359 , L172;
+end;
+
+assume that
+L362: ( Hom (R16 , R17) ) <> ( {} )
+and
+L363: ( Hom (R17 , R16) ) <> ( {} );
+given R26 being (Morphism of R16 , R17) such that
+L364: (ex R29 being (Morphism of R17 , R16) st (( R26 * R29 ) = ( id R17 ) & ( R29 * R26 ) = ( id R16 )));
+
+take R26;
+thus L365: thesis by L362 , L363 , L364 , L269;
+end;
+theorem
+L366: (for R14 being Category holds (for R16 being (Object of R14) holds (R16 is  initial iff (for R17 being (Object of R14) holds (ex B100 being (Morphism of R16 , R17) st ( Hom (R16 , R17) ) = { B100 })))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+thus L367: (R16 is  initial implies (for R17 being (Object of R14) holds (ex B101 being (Morphism of R16 , R17) st ( Hom (R16 , R17) ) = { B101 })))
+proof
+assume L368: R16 is  initial;
+let R17 being (Object of R14);
+consider C95 being (Morphism of R16 , R17) such that L369: (for B102 being (Morphism of R16 , R17) holds C95 = B102) by L368 , L348;
+take C95;
+thus L370: thesis by L369 , L40 , L368 , L348;
+end;
+
+assume L371: (for R17 being (Object of R14) holds (ex B103 being (Morphism of R16 , R17) st ( Hom (R16 , R17) ) = { B103 }));
+let R17 being (Object of R14);
+consider C96 being (Morphism of R16 , R17) such that L372: ( Hom (R16 , R17) ) = { C96 } by L371;
+thus L373: ( Hom (R16 , R17) ) <> ( {} ) by L372;
+take C96;
+thus L374: thesis by L372 , L36;
+end;
+theorem
+L375: (for R14 being Category holds (for R16 being (Object of R14) holds (R16 is  initial implies (for B104 being (Morphism of R16 , R16) holds ( id R16 ) = B104))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+assume L376: R16 is  initial;
+consider C97 being (Morphism of R16 , R16) such that L377: (for B105 being (Morphism of R16 , R16) holds C97 = B105) by L376 , L348;
+let C98 being (Morphism of R16 , R16);
+L378: ( id R16 ) = C97 by L377;
+thus L379: thesis by L378 , L377;
+end;
+theorem
+L380: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds ((R16 is  initial & R17 is  initial) implies R16 , R17 are_isomorphic ))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+assume that
+L381: R16 is  initial
+and
+L382: R17 is  initial;
+set D10 = the (Morphism of R17 , R16);
+set D11 = the (Morphism of R16 , R17);
+L383: ( Hom (R16 , R17) ) <> ( {} ) by L381 , L348;
+take D11;
+L384:
+now
+thus L385: ( Hom (R17 , R16) ) <> ( {} ) by L382 , L348;
+take D12 = D10;
+thus L386: (( D11 * D12 ) = ( id R17 ) & ( D12 * D11 ) = ( id R16 )) by L381 , L382 , L375;
+end;
+thus L387: thesis by L384 , L383 , L269;
+end;
+theorem
+L388: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds ((R16 is  initial & R16 , R17 are_isomorphic ) implies R17 is  initial))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+assume that
+L389: R16 is  initial;
+given R26 being (Morphism of R16 , R17) such that
+L390: R26 is  invertible;
+
+L391: ( Hom (R17 , R16) ) <> ( {} ) by L390 , L172;
+let R18 being (Object of R14);
+consider C99 being (Morphism of R16 , R18) such that L392: (for B106 being (Morphism of R16 , R18) holds C99 = B106) by L389 , L348;
+L393: ( Hom (R16 , R18) ) <> ( {} ) by L389 , L348;
+thus L394: ( Hom (R17 , R18) ) <> ( {} ) by L393 , L391 , L123;
+consider R29 being (Morphism of R17 , R16) such that L395: ( R26 * R29 ) = ( id R17 ) and L396: ( R29 * R26 ) = ( id R16 ) by L390 , L172;
+L397: ( Hom (R16 , R17) ) <> ( {} ) by L390 , L172;
+take ( C99 * R29 );
+let C100 being (Morphism of R17 , R18);
+thus L398: C100 = ( C100 * ( R26 * R29 ) ) by L395 , L394 , L160
+.= ( ( C100 * R26 ) * R29 ) by L391 , L394 , L397 , L141
+.= ( C99 * R29 ) by L392;
+end;
+theorem
+L399: (for R14 being Category holds (for R17 being (Object of R14) holds (R17 is  terminal iff (for R16 being (Object of R14) holds (ex B107 being (Morphism of R16 , R17) st ( Hom (R16 , R17) ) = { B107 })))))
+proof
+let R14 being Category;
+let R17 being (Object of R14);
+thus L400: (R17 is  terminal implies (for R16 being (Object of R14) holds (ex B108 being (Morphism of R16 , R17) st ( Hom (R16 , R17) ) = { B108 })))
+proof
+assume L401: R17 is  terminal;
+let R16 being (Object of R14);
+consider C101 being (Morphism of R16 , R17) such that L402: (for B109 being (Morphism of R16 , R17) holds C101 = B109) by L401 , L347;
+take C101;
+thus L403: thesis by L402 , L40 , L401 , L347;
+end;
+
+assume L404: (for R16 being (Object of R14) holds (ex B110 being (Morphism of R16 , R17) st ( Hom (R16 , R17) ) = { B110 }));
+let R16 being (Object of R14);
+consider C102 being (Morphism of R16 , R17) such that L405: ( Hom (R16 , R17) ) = { C102 } by L404;
+thus L406: ( Hom (R16 , R17) ) <> ( {} ) by L405;
+take C102;
+thus L407: thesis by L405 , L36;
+end;
+theorem
+L408: (for R14 being Category holds (for R16 being (Object of R14) holds (R16 is  terminal implies (for B111 being (Morphism of R16 , R16) holds ( id R16 ) = B111))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+assume L409: R16 is  terminal;
+consider C103 being (Morphism of R16 , R16) such that L410: (for B112 being (Morphism of R16 , R16) holds C103 = B112) by L409 , L347;
+let C104 being (Morphism of R16 , R16);
+L411: ( id R16 ) = C103 by L410;
+thus L412: thesis by L411 , L410;
+end;
+theorem
+L413: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds ((R16 is  terminal & R17 is  terminal) implies R16 , R17 are_isomorphic ))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+assume that
+L414: R16 is  terminal
+and
+L415: R17 is  terminal;
+set D13 = the (Morphism of R17 , R16);
+set D14 = the (Morphism of R16 , R17);
+L416: ( Hom (R16 , R17) ) <> ( {} ) by L415 , L347;
+take D14;
+L417:
+now
+thus L418: ( Hom (R17 , R16) ) <> ( {} ) by L414 , L347;
+take D15 = D13;
+thus L419: (( D14 * D15 ) = ( id R17 ) & ( D15 * D14 ) = ( id R16 )) by L414 , L415 , L408;
+end;
+thus L420: thesis by L417 , L416 , L269;
+end;
+theorem
+L421: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds ((R17 is  terminal & R16 , R17 are_isomorphic ) implies R16 is  terminal))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+assume that
+L422: R17 is  terminal;
+given R26 being (Morphism of R16 , R17) such that
+L423: R26 is  invertible;
+
+L424: ( Hom (R17 , R16) ) <> ( {} ) by L423 , L172;
+let R18 being (Object of R14);
+consider C105 being (Morphism of R18 , R17) such that L425: (for B113 being (Morphism of R18 , R17) holds C105 = B113) by L422 , L347;
+L426: ( Hom (R18 , R17) ) <> ( {} ) by L422 , L347;
+thus L427: ( Hom (R18 , R16) ) <> ( {} ) by L426 , L424 , L123;
+consider R29 being (Morphism of R17 , R16) such that L428: ( R26 * R29 ) = ( id R17 ) and L429: ( R29 * R26 ) = ( id R16 ) by L423 , L172;
+L430: ( Hom (R16 , R17) ) <> ( {} ) by L423 , L172;
+take ( R29 * C105 );
+let C106 being (Morphism of R18 , R16);
+thus L431: ( R29 * C105 ) = ( R29 * ( R26 * C106 ) ) by L425
+.= ( ( R29 * R26 ) * C106 ) by L424 , L427 , L430 , L141
+.= C106 by L429 , L427 , L155;
+end;
+theorem
+L432: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R26 being (Morphism of R16 , R17) holds ((( Hom (R16 , R17) ) <> ( {} ) & R16 is  terminal) implies R26 is  monic)))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R26 being (Morphism of R16 , R17);
+assume that
+L433: ( Hom (R16 , R17) ) <> ( {} )
+and
+L434: R16 is  terminal;
+L435:
+now
+let C107 being (Object of R14);
+let C108 , C109 being (Morphism of C107 , R16);
+assume that
+L436: ( Hom (C107 , R16) ) <> ( {} )
+and
+L437: ( R26 * C108 ) = ( R26 * C109 );
+consider C110 being (Morphism of C107 , R16) such that L438: (for B114 being (Morphism of C107 , R16) holds C110 = B114) by L434 , L347;
+L439: C110 = C108 by L438;
+thus L440: C108 = C109 by L439 , L438;
+end;
+thus L441: thesis by L435 , L433 , L174;
+end;
+registration
+let R14 being Category;
+let R16 being (Object of R14);
+reduce ( dom ( id R16 ) ) to R16;
+reducibility
+proof
+L442: ( id R16 ) in ( Hom (R16 , R16) ) by L22;
+thus L443: thesis by L442 , L14;
+end;
+reduce ( cod ( id R16 ) ) to R16;
+reducibility
+proof
+L444: ( id R16 ) in ( Hom (R16 , R16) ) by L22;
+thus L445: thesis by L444 , L14;
+end;
+end;
+theorem
+L447: (for R14 being Category holds (for R16 being (Object of R14) holds (( dom ( id R16 ) ) = R16 & ( cod ( id R16 ) ) = R16)));
+theorem
+L448: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (( id R16 ) = ( id R17 ) implies R16 = R17))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+assume L449: ( id R16 ) = ( id R17 );
+thus L450: R16 = ( dom ( id R16 ) )
+.= R17 by L447 , L449;
+end;
+theorem
+L451: (for R14 being Category holds (for R16 being (Object of R14) holds (for R17 being (Object of R14) holds (for R18 being (Object of R14) holds ((R16 , R17 are_isomorphic  & R17 , R18 are_isomorphic ) implies R16 , R18 are_isomorphic )))))
+proof
+let R14 being Category;
+let R16 being (Object of R14);
+let R17 being (Object of R14);
+let R18 being (Object of R14);
+given C111 being (Morphism of R16 , R17) such that
+L452: C111 is  invertible;
+
+given C112 being (Morphism of R17 , R18) such that
+L453: C112 is  invertible;
+
+take ( C112 * C111 );
+thus L454: thesis by L452 , L453 , L313;
+end;
+definition
+let R14 being Category;
+let R15 being Category;
+mode Functor of R14 , R15
+ -> (Function of (the carrier' of R14) , (the carrier' of R15))
+means :L455: ((for B115 being (Element of R14) holds (ex B116 being (Element of R15) st ( it . ( id B115 ) ) = ( id B116 ))) & (for B117 being (Element of (the carrier' of R14)) holds (( it . ( id ( dom B117 ) ) ) = ( id ( dom ( it . B117 ) ) ) & ( it . ( id ( cod B117 ) ) ) = ( id ( cod ( it . B117 ) ) ))) & (for B118 , B119 being (Element of (the carrier' of R14)) holds ([ B119 , B118 ] in ( dom (the Comp of R14) ) implies ( it . ( B119 (*) B118 ) ) = ( ( it . B119 ) (*) ( it . B118 ) ))));
+existence
+proof
+set D16 = the (Element of R15);
+reconsider D17 = ( (the carrier' of R14) --> ( id D16 ) ) as (Function of (the carrier' of R14) , (the carrier' of R15));
+take D17;
+thus L456: (for B120 being (Element of R14) holds (ex B121 being (Element of R15) st ( D17 . ( id B120 ) ) = ( id B121 ))) by FUNCOP_1:7;
+L457: ( Hom (D16 , D16) ) <> ( {} );
+thus L458: (for B122 being (Element of (the carrier' of R14)) holds (( D17 . ( id ( dom B122 ) ) ) = ( id ( dom ( D17 . B122 ) ) ) & ( D17 . ( id ( cod B122 ) ) ) = ( id ( cod ( D17 . B122 ) ) )))
+proof
+let C113 being (Element of (the carrier' of R14));
+L459: ( D17 . C113 ) = ( id D16 ) by FUNCOP_1:7;
+thus L460: ( D17 . ( id ( dom C113 ) ) ) = ( id D16 ) by FUNCOP_1:7
+.= ( id ( dom ( D17 . C113 ) ) ) by L459 , L447;
+thus L461: ( D17 . ( id ( cod C113 ) ) ) = ( id D16 ) by FUNCOP_1:7
+.= ( id ( cod ( D17 . C113 ) ) ) by L459 , L447;
+end;
+
+let C114 , C115 being (Element of (the carrier' of R14));
+assume that
+L462: [ C115 , C114 ] in ( dom (the Comp of R14) );
+thus L463: ( D17 . ( C115 (*) C114 ) ) = ( ( id D16 ) * ( id D16 ) ) by FUNCOP_1:7
+.= ( ( id D16 ) (*) ( id D16 ) ) by L457 , L136
+.= ( ( id D16 ) (*) ( D17 . C114 ) ) by FUNCOP_1:7
+.= ( ( D17 . C115 ) (*) ( D17 . C114 ) ) by FUNCOP_1:7;
+end;
+end;
+theorem
+L465: (for R14 being Category holds (for R15 being Category holds (for B123 being (Function of (the carrier' of R14) , (the carrier' of R15)) holds (((for B124 being (Object of R14) holds (ex B125 being (Object of R15) st ( B123 . ( id B124 ) ) = ( id B125 ))) & (for B126 being (Morphism of R14) holds (( B123 . ( id ( dom B126 ) ) ) = ( id ( dom ( B123 . B126 ) ) ) & ( B123 . ( id ( cod B126 ) ) ) = ( id ( cod ( B123 . B126 ) ) ))) & (for B127 , B128 being (Morphism of R14) holds (( dom B128 ) = ( cod B127 ) implies ( B123 . ( B128 (*) B127 ) ) = ( ( B123 . B128 ) (*) ( B123 . B127 ) )))) implies B123 is (Functor of R14 , R15)))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C116 being (Function of (the carrier' of R14) , (the carrier' of R15));
+assume that
+L466: (for B129 being (Object of R14) holds (ex B130 being (Object of R15) st ( C116 . ( id B129 ) ) = ( id B130 )))
+and
+L467: (for B131 being (Morphism of R14) holds (( C116 . ( id ( dom B131 ) ) ) = ( id ( dom ( C116 . B131 ) ) ) & ( C116 . ( id ( cod B131 ) ) ) = ( id ( cod ( C116 . B131 ) ) )))
+and
+L468: (for B132 , B133 being (Morphism of R14) holds (( dom B133 ) = ( cod B132 ) implies ( C116 . ( B133 (*) B132 ) ) = ( ( C116 . B133 ) (*) ( C116 . B132 ) )));
+thus L469: (for B134 being (Element of R14) holds (ex B135 being (Element of R15) st ( C116 . ( id B134 ) ) = ( id B135 ))) by L466;
+thus L470: (for B136 being (Element of (the carrier' of R14)) holds (( C116 . ( id ( dom B136 ) ) ) = ( id ( dom ( C116 . B136 ) ) ) & ( C116 . ( id ( cod B136 ) ) ) = ( id ( cod ( C116 . B136 ) ) ))) by L467;
+let C117 , C118 being (Element of (the carrier' of R14));
+assume L471: [ C118 , C117 ] in ( dom (the Comp of R14) );
+L472: ( dom C118 ) = ( cod C117 ) by L471 , L61;
+thus L473: thesis by L468 , L472;
+end;
+theorem
+L474: (for R14 being Category holds (for R15 being Category holds (for B137 being (Functor of R14 , R15) holds (for B138 being (Object of R14) holds (ex B139 being (Object of R15) st ( B137 . ( id B138 ) ) = ( id B139 )))))) by L455;
+theorem
+L475: (for R14 being Category holds (for R15 being Category holds (for B140 being (Functor of R14 , R15) holds (for B141 being (Morphism of R14) holds (( B140 . ( id ( dom B141 ) ) ) = ( id ( dom ( B140 . B141 ) ) ) & ( B140 . ( id ( cod B141 ) ) ) = ( id ( cod ( B140 . B141 ) ) )))))) by L455;
+theorem
+L476: (for R14 being Category holds (for R15 being Category holds (for B142 being (Functor of R14 , R15) holds (for B143 , B144 being (Morphism of R14) holds (( dom B144 ) = ( cod B143 ) implies (( dom ( B142 . B144 ) ) = ( cod ( B142 . B143 ) ) & ( B142 . ( B144 (*) B143 ) ) = ( ( B142 . B144 ) (*) ( B142 . B143 ) )))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C119 being (Functor of R14 , R15);
+let C120 , C121 being (Morphism of R14);
+assume L477: ( dom C121 ) = ( cod C120 );
+L478: (( (the Comp of R14) . (C121 , C120) ) = ( C121 (*) C120 ) & [ C121 , C120 ] in ( dom (the Comp of R14) )) by L477 , L61 , L107;
+L479: ( id ( dom ( C119 . C121 ) ) ) = ( C119 . ( id ( cod C120 ) ) ) by L477 , L455
+.= ( id ( cod ( C119 . C120 ) ) ) by L455;
+thus L480: ( dom ( C119 . C121 ) ) = ( cod ( C119 . C120 ) ) by L479 , L448;
+thus L481: thesis by L478 , L455;
+end;
+theorem
+L482: (for R14 being Category holds (for R15 being Category holds (for B145 being (Function of (the carrier' of R14) , (the carrier' of R15)) holds (for B146 being (Function of (the carrier of R14) , (the carrier of R15)) holds (((for B147 being (Object of R14) holds ( B145 . ( id B147 ) ) = ( id ( B146 . B147 ) )) & (for B148 being (Morphism of R14) holds (( B146 . ( dom B148 ) ) = ( dom ( B145 . B148 ) ) & ( B146 . ( cod B148 ) ) = ( cod ( B145 . B148 ) ))) & (for B149 , B150 being (Morphism of R14) holds (( dom B150 ) = ( cod B149 ) implies ( B145 . ( B150 (*) B149 ) ) = ( ( B145 . B150 ) (*) ( B145 . B149 ) )))) implies B145 is (Functor of R14 , R15))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C122 being (Function of (the carrier' of R14) , (the carrier' of R15));
+let C123 being (Function of (the carrier of R14) , (the carrier of R15));
+assume that
+L483: (for B151 being (Object of R14) holds ( C122 . ( id B151 ) ) = ( id ( C123 . B151 ) ))
+and
+L484: (for B152 being (Morphism of R14) holds (( C123 . ( dom B152 ) ) = ( dom ( C122 . B152 ) ) & ( C123 . ( cod B152 ) ) = ( cod ( C122 . B152 ) )))
+and
+L485: (for B153 , B154 being (Morphism of R14) holds (( dom B154 ) = ( cod B153 ) implies ( C122 . ( B154 (*) B153 ) ) = ( ( C122 . B154 ) (*) ( C122 . B153 ) )));
+L486: (for B155 being (Object of R14) holds (ex B156 being (Object of R15) st ( C122 . ( id B155 ) ) = ( id B156 )))
+proof
+let C124 being (Object of R14);
+take ( C123 . C124 );
+thus L487: thesis by L483;
+end;
+L488: (for B157 being (Morphism of R14) holds (( C122 . ( id ( dom B157 ) ) ) = ( id ( dom ( C122 . B157 ) ) ) & ( C122 . ( id ( cod B157 ) ) ) = ( id ( cod ( C122 . B157 ) ) )))
+proof
+let C125 being (Morphism of R14);
+thus L489: ( C122 . ( id ( dom C125 ) ) ) = ( id ( C123 . ( dom C125 ) ) ) by L483
+.= ( id ( dom ( C122 . C125 ) ) ) by L484;
+thus L490: ( C122 . ( id ( cod C125 ) ) ) = ( id ( C123 . ( cod C125 ) ) ) by L483
+.= ( id ( cod ( C122 . C125 ) ) ) by L484;
+end;
+thus L491: thesis by L488 , L485 , L486 , L465;
+end;
+definition
+let R14 being Category;
+let R15 being Category;
+let C126 being (Function of (the carrier' of R14) , (the carrier' of R15));
+assume L492: (for B158 being (Element of R14) holds (ex B159 being (Element of R15) st ( C126 . ( id B158 ) ) = ( id B159 )));
+func Obj C126 -> (Function of (the carrier of R14) , (the carrier of R15)) means 
+:L493: (for B160 being (Element of R14) holds (for B161 being (Element of R15) holds (( C126 . ( id B160 ) ) = ( id B161 ) implies ( it . B160 ) = B161)));
+existence
+proof
+defpred S1[ (Object of R14) , (Object of R15) ] means (for B162 being (Element of R15) holds (( C126 . ( id $1 ) ) = ( id B162 ) implies $2 = B162));
+L494: (for B163 being (Element of R14) holds (ex B164 being (Element of R15) st S1[ B163 , B164 ]))
+proof
+let C127 being (Element of R14);
+consider C128 being (Element of R15) such that L495: ( C126 . ( id C127 ) ) = ( id C128 ) by L492;
+take C128;
+let C129 being (Element of R15);
+assume L496: ( C126 . ( id C127 ) ) = ( id C129 );
+thus L497: thesis by L496 , L495 , L448;
+end;
+thus L498: (ex B165 being (Function of (the carrier of R14) , (the carrier of R15)) st (for B166 being (Element of R14) holds S1[ B166 , ( B165 . B166 ) ])) from FUNCT_2:sch 3(L494);
+end;
+uniqueness
+proof
+let C130 , C131 being (Function of (the carrier of R14) , (the carrier of R15));
+assume that
+L499: (for B167 being (Element of R14) holds (for B168 being (Element of R15) holds (( C126 . ( id B167 ) ) = ( id B168 ) implies ( C130 . B167 ) = B168)))
+and
+L500: (for B169 being (Element of R14) holds (for B170 being (Element of R15) holds (( C126 . ( id B169 ) ) = ( id B170 ) implies ( C131 . B169 ) = B170)));
+L501: (for B171 being (Element of R14) holds ( C130 . B171 ) = ( C131 . B171 ))
+proof
+let C132 being (Element of R14);
+consider C133 being (Element of R15) such that L502: ( C126 . ( id C132 ) ) = ( id C133 ) by L492;
+L503: ( C130 . C132 ) = C133 by L499 , L502;
+thus L504: thesis by L503 , L500 , L502;
+end;
+thus L505: thesis by L501 , FUNCT_2:63;
+end;
+end;
+theorem
+L507: (for R14 being Category holds (for R15 being Category holds (for B172 being (Function of (the carrier' of R14) , (the carrier' of R15)) holds ((for B173 being (Object of R14) holds (ex B174 being (Object of R15) st ( B172 . ( id B173 ) ) = ( id B174 ))) implies (for B175 being (Object of R14) holds (for B176 being (Object of R15) holds (( B172 . ( id B175 ) ) = ( id B176 ) implies ( ( Obj B172 ) . B175 ) = B176))))))) by L493;
+theorem
+L508: (for R14 being Category holds (for R15 being Category holds (for B177 being (Functor of R14 , R15) holds (for B178 being (Object of R14) holds (for B179 being (Object of R15) holds (( B177 . ( id B178 ) ) = ( id B179 ) implies ( ( Obj B177 ) . B178 ) = B179))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C134 being (Functor of R14 , R15);
+L509: (for B180 being (Object of R14) holds (ex B181 being (Object of R15) st ( C134 . ( id B180 ) ) = ( id B181 ))) by L455;
+thus L510: thesis by L509 , L493;
+end;
+theorem
+L511: (for R14 being Category holds (for R15 being Category holds (for B182 being (Functor of R14 , R15) holds (for B183 being (Object of R14) holds ( B182 . ( id B183 ) ) = ( id ( ( Obj B182 ) . B183 ) )))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C135 being (Functor of R14 , R15);
+let C136 being (Object of R14);
+L512: (ex B184 being (Object of R15) st ( C135 . ( id C136 ) ) = ( id B184 )) by L455;
+thus L513: thesis by L512 , L508;
+end;
+theorem
+L514: (for R14 being Category holds (for R15 being Category holds (for B185 being (Functor of R14 , R15) holds (for B186 being (Morphism of R14) holds (( ( Obj B185 ) . ( dom B186 ) ) = ( dom ( B185 . B186 ) ) & ( ( Obj B185 ) . ( cod B186 ) ) = ( cod ( B185 . B186 ) ))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C137 being (Functor of R14 , R15);
+let C138 being (Morphism of R14);
+L515: (( C137 . ( id ( dom C138 ) ) ) = ( id ( dom ( C137 . C138 ) ) ) & ( C137 . ( id ( cod C138 ) ) ) = ( id ( cod ( C137 . C138 ) ) )) by L455;
+thus L516: thesis by L515 , L508;
+end;
+definition
+let C139 , C140 being Category;
+let C141 being (Functor of C139 , C140);
+let C142 being (Object of C139);
+func C141 . C142 -> (Object of C140) equals 
+( ( Obj C141 ) . C142 );
+correctness;
+end;
+theorem
+L518: (for R14 being Category holds (for R15 being Category holds (for B187 being (Functor of R14 , R15) holds (for B188 being (Object of R14) holds (for B189 being (Object of R15) holds (( B187 . ( id B188 ) ) = ( id B189 ) implies ( B187 . B188 ) = B189)))))) by L508;
+theorem
+L519: (for R14 being Category holds (for R15 being Category holds (for B190 being (Functor of R14 , R15) holds (for B191 being (Object of R14) holds ( B190 . ( id B191 ) ) = ( id ( B190 . B191 ) ))))) by L511;
+theorem
+L520: (for R14 being Category holds (for R15 being Category holds (for B192 being (Functor of R14 , R15) holds (for B193 being (Morphism of R14) holds (( B192 . ( dom B193 ) ) = ( dom ( B192 . B193 ) ) & ( B192 . ( cod B193 ) ) = ( cod ( B192 . B193 ) )))))) by L514;
+theorem
+L521: (for R13 being Category holds (for R14 being Category holds (for R15 being Category holds (for B194 being (Functor of R13 , R14) holds (for B195 being (Functor of R14 , R15) holds ( B195 * B194 ) is (Functor of R13 , R15))))))
+proof
+let R13 being Category;
+let R14 being Category;
+let R15 being Category;
+let C143 being (Functor of R13 , R14);
+let C144 being (Functor of R14 , R15);
+reconsider D18 = ( ( Obj C144 ) * ( Obj C143 ) ) as (Function of (the carrier of R13) , (the carrier of R15));
+reconsider D19 = ( C144 * C143 ) as (Function of (the carrier' of R13) , (the carrier' of R15));
+L522:
+now
+thus L523: (for B196 being (Object of R13) holds ( D19 . ( id B196 ) ) = ( id ( D18 . B196 ) ))
+proof
+let C145 being (Object of R13);
+thus L524: ( D19 . ( id C145 ) ) = ( C144 . ( C143 . ( id C145 ) ) ) by FUNCT_2:15
+.= ( C144 . ( id ( C143 . C145 ) ) ) by L511
+.= ( id ( C144 . ( ( Obj C143 ) . C145 ) ) ) by L511
+.= ( id ( D18 . C145 ) ) by FUNCT_2:15;
+end;
+
+thus L525: (for B197 being (Morphism of R13) holds (( D18 . ( dom B197 ) ) = ( dom ( D19 . B197 ) ) & ( D18 . ( cod B197 ) ) = ( cod ( D19 . B197 ) )))
+proof
+let C146 being (Morphism of R13);
+thus L526: ( D18 . ( dom C146 ) ) = ( ( Obj C144 ) . ( ( Obj C143 ) . ( dom C146 ) ) ) by FUNCT_2:15
+.= ( ( Obj C144 ) . ( dom ( C143 . C146 ) ) ) by L514
+.= ( dom ( C144 . ( C143 . C146 ) ) ) by L514
+.= ( dom ( D19 . C146 ) ) by FUNCT_2:15;
+thus L527: ( D18 . ( cod C146 ) ) = ( ( Obj C144 ) . ( ( Obj C143 ) . ( cod C146 ) ) ) by FUNCT_2:15
+.= ( ( Obj C144 ) . ( cod ( C143 . C146 ) ) ) by L514
+.= ( cod ( C144 . ( C143 . C146 ) ) ) by L514
+.= ( cod ( D19 . C146 ) ) by FUNCT_2:15;
+end;
+
+let C147 , C148 being (Morphism of R13);
+assume L528: ( dom C148 ) = ( cod C147 );
+L529: ( dom ( C143 . C148 ) ) = ( cod ( C143 . C147 ) ) by L528 , L476;
+thus L530: ( D19 . ( C148 (*) C147 ) ) = ( C144 . ( C143 . ( C148 (*) C147 ) ) ) by FUNCT_2:15
+.= ( C144 . ( ( C143 . C148 ) (*) ( C143 . C147 ) ) ) by L528 , L476
+.= ( ( C144 . ( C143 . C148 ) ) (*) ( C144 . ( C143 . C147 ) ) ) by L529 , L476
+.= ( ( D19 . C148 ) (*) ( C144 . ( C143 . C147 ) ) ) by FUNCT_2:15
+.= ( ( D19 . C148 ) (*) ( D19 . C147 ) ) by FUNCT_2:15;
+end;
+thus L531: thesis by L522 , L482;
+end;
+definition
+let R13 being Category;
+let R14 being Category;
+let R15 being Category;
+let C149 being (Functor of R13 , R14);
+let C150 being (Functor of R14 , R15);
+redefine func C150 * C149 -> (Functor of R13 , R15);
+
+coherence by L521;
+end;
+theorem
+L533: (for R14 being Category holds ( id (the carrier' of R14) ) is (Functor of R14 , R14))
+proof
+let R14 being Category;
+set D20 = ( id (the carrier of R14) );
+set D21 = ( id (the carrier' of R14) );
+L534:
+now
+thus L535: (for B198 being (Object of R14) holds ( D21 . ( id B198 ) ) = ( id ( D20 . B198 ) ))
+proof
+let C151 being (Object of R14);
+L536: ( D20 . C151 ) = C151 by FUNCT_1:18;
+thus L537: thesis by L536 , FUNCT_1:18;
+end;
+
+thus L538: (for B199 being (Morphism of R14) holds (( D20 . ( dom B199 ) ) = ( dom ( D21 . B199 ) ) & ( D20 . ( cod B199 ) ) = ( cod ( D21 . B199 ) )))
+proof
+let C152 being (Morphism of R14);
+L539: ( D21 . C152 ) = C152 by FUNCT_1:18;
+thus L540: thesis by L539 , FUNCT_1:18;
+end;
+
+let C153 , C154 being (Morphism of R14);
+assume L541: ( dom C154 ) = ( cod C153 );
+thus L542: ( D21 . ( C154 (*) C153 ) ) = ( C154 (*) C153 ) by FUNCT_1:18
+.= ( ( D21 . C154 ) (*) C153 ) by FUNCT_1:18
+.= ( ( D21 . C154 ) (*) ( D21 . C153 ) ) by FUNCT_1:18;
+end;
+thus L543: thesis by L534 , L482;
+end;
+theorem
+L544: (for R13 being Category holds (for R14 being Category holds (for R15 being Category holds (for B200 being (Functor of R13 , R14) holds (for B201 being (Functor of R14 , R15) holds (for B202 being (Object of R13) holds ( ( Obj ( B201 * B200 ) ) . B202 ) = ( ( Obj B201 ) . ( ( Obj B200 ) . B202 ) )))))))
+proof
+let R13 being Category;
+let R14 being Category;
+let R15 being Category;
+let C155 being (Functor of R13 , R14);
+let C156 being (Functor of R14 , R15);
+let C157 being (Object of R13);
+L545: ( ( C156 * C155 ) . ( id C157 ) ) = ( C156 . ( C155 . ( id C157 ) ) ) by FUNCT_2:15;
+consider C158 being (Object of R15) such that L546: ( ( C156 * C155 ) . ( id C157 ) ) = ( id C158 ) by L455;
+consider C159 being (Object of R14) such that L547: ( C155 . ( id C157 ) ) = ( id C159 ) by L455;
+thus L548: ( ( Obj ( C156 * C155 ) ) . C157 ) = C158 by L546 , L508
+.= ( ( Obj C156 ) . C159 ) by L546 , L547 , L545 , L508
+.= ( ( Obj C156 ) . ( ( Obj C155 ) . C157 ) ) by L547 , L508;
+end;
+theorem
+L549: (for R13 being Category holds (for R14 being Category holds (for R15 being Category holds (for B203 being (Functor of R13 , R14) holds (for B204 being (Functor of R14 , R15) holds (for B205 being (Object of R13) holds ( ( B204 * B203 ) . B205 ) = ( B204 . ( B203 . B205 ) ))))))) by L544;
+definition
+let R14 being Category;
+func id R14 -> (Functor of R14 , R14) equals 
+( id (the carrier' of R14) );
+coherence by L533;
+end;
+theorem
+L551: (for R14 being Category holds (for B206 being (Object of R14) holds ( ( Obj ( id R14 ) ) . B206 ) = B206))
+proof
+let R14 being Category;
+let C160 being (Object of R14);
+L552: ( ( id R14 ) . ( id C160 ) ) = ( id C160 ) by FUNCT_1:18;
+thus L553: thesis by L552 , L508;
+end;
+theorem
+L554: (for R14 being Category holds ( Obj ( id R14 ) ) = ( id (the carrier of R14) ))
+proof
+let R14 being Category;
+L555: (( dom ( Obj ( id R14 ) ) ) = (the carrier of R14) & (for B207 being set holds (B207 in (the carrier of R14) implies ( ( Obj ( id R14 ) ) . B207 ) = B207))) by L551 , FUNCT_2:def 1;
+thus L556: thesis by L555 , FUNCT_1:17;
+end;
+theorem
+L557: (for R14 being Category holds (for B208 being (Object of R14) holds ( ( id R14 ) . B208 ) = B208)) by L551;
+definition
+let C161 , C162 being Category;
+let C163 being (Functor of C161 , C162);
+attr C163 is  isomorphic
+means
+(C163 is  one-to-one & ( rng C163 ) = (the carrier' of C162) & ( rng ( Obj C163 ) ) = (the carrier of C162));
+attr C163 is  full
+means
+:L558: (for B209 , B210 being (Object of C161) holds (( Hom (( C163 . B209 ) , ( C163 . B210 )) ) <> ( {} ) implies (for B211 being (Morphism of ( C163 . B209 ) , ( C163 . B210 )) holds (( Hom (B209 , B210) ) <> ( {} ) & (ex B212 being (Morphism of B209 , B210) st B211 = ( C163 . B212 ))))));
+attr C163 is  faithful
+means
+:L559: (for B213 , B214 being (Object of C161) holds (( Hom (B213 , B214) ) <> ( {} ) implies (for B215 , B216 being (Morphism of B213 , B214) holds (( C163 . B215 ) = ( C163 . B216 ) implies B215 = B216))));
+end;
+theorem
+L561: (for R14 being Category holds ( id R14 ) is  isomorphic)
+proof
+let R14 being Category;
+L562: ( rng ( id (the carrier of R14) ) ) = (the carrier of R14);
+thus L563: (( id R14 ) is  one-to-one & ( rng ( id R14 ) ) = (the carrier' of R14) & ( rng ( Obj ( id R14 ) ) ) = (the carrier of R14)) by L562 , L554 , RELAT_1:45;
+end;
+theorem
+L564: (for R14 being Category holds (for R15 being Category holds (for B217 being (Functor of R14 , R15) holds (for B218 , B219 being (Object of R14) holds (for B220 being set holds (B220 in ( Hom (B218 , B219) ) implies ( B217 . B220 ) in ( Hom (( B217 . B218 ) , ( B217 . B219 )) )))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C164 being (Functor of R14 , R15);
+let C165 , C166 being (Object of R14);
+let C167 being set;
+assume L565: C167 in ( Hom (C165 , C166) );
+reconsider D22 = C167 as (Morphism of C165 , C166) by L565 , L22;
+L566: ( cod D22 ) = C166 by L565 , L14;
+L567: ( C164 . C166 ) = ( cod ( C164 . D22 ) ) by L566 , L514;
+L568: ( dom D22 ) = C165 by L565 , L14;
+L569: ( C164 . C165 ) = ( dom ( C164 . D22 ) ) by L568 , L514;
+thus L570: thesis by L569 , L567;
+end;
+theorem
+L571: (for R14 being Category holds (for R15 being Category holds (for B221 being (Functor of R14 , R15) holds (for B222 , B223 being (Object of R14) holds (( Hom (B222 , B223) ) <> ( {} ) implies (for B224 being (Morphism of B222 , B223) holds ( B221 . B224 ) in ( Hom (( B221 . B222 ) , ( B221 . B223 )) )))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C168 being (Functor of R14 , R15);
+let C169 , C170 being (Object of R14);
+assume that
+L572: ( Hom (C169 , C170) ) <> ( {} );
+let C171 being (Morphism of C169 , C170);
+L573: C171 in ( Hom (C169 , C170) ) by L572 , L22;
+thus L574: thesis by L573 , L564;
+end;
+theorem
+L575: (for R14 being Category holds (for R15 being Category holds (for B225 being (Functor of R14 , R15) holds (for B226 , B227 being (Object of R14) holds (( Hom (B226 , B227) ) <> ( {} ) implies (for B228 being (Morphism of B226 , B227) holds ( B225 . B228 ) is (Morphism of ( B225 . B226 ) , ( B225 . B227 ))))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C172 being (Functor of R14 , R15);
+let C173 , C174 being (Object of R14);
+assume that
+L576: ( Hom (C173 , C174) ) <> ( {} );
+let C175 being (Morphism of C173 , C174);
+L577: ( C172 . C175 ) in ( Hom (( C172 . C173 ) , ( C172 . C174 )) ) by L576 , L571;
+thus L578: thesis by L577 , L22;
+end;
+theorem
+L579: (for R14 being Category holds (for R15 being Category holds (for B229 being (Functor of R14 , R15) holds (for B230 , B231 being (Object of R14) holds (( Hom (B230 , B231) ) <> ( {} ) implies ( Hom (( B229 . B230 ) , ( B229 . B231 )) ) <> ( {} ))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C176 being (Functor of R14 , R15);
+let C177 , C178 being (Object of R14);
+set D23 = the (Element of ( Hom (C177 , C178) ));
+assume L580: ( Hom (C177 , C178) ) <> ( {} );
+L581: D23 in ( Hom (C177 , C178) ) by L580;
+thus L582: thesis by L581 , L564;
+end;
+theorem
+L583: (for R13 being Category holds (for R14 being Category holds (for R15 being Category holds (for B232 being (Functor of R13 , R14) holds (for B233 being (Functor of R14 , R15) holds ((B232 is  full & B233 is  full) implies ( B233 * B232 ) is  full))))))
+proof
+let R13 being Category;
+let R14 being Category;
+let R15 being Category;
+let C179 being (Functor of R13 , R14);
+let C180 being (Functor of R14 , R15);
+assume that
+L584: C179 is  full
+and
+L585: C180 is  full;
+let C181 , C182 being (Object of R13);
+assume that
+L586: ( Hom (( ( C180 * C179 ) . C181 ) , ( ( C180 * C179 ) . C182 )) ) <> ( {} );
+let C183 being (Morphism of ( ( C180 * C179 ) . C181 ) , ( ( C180 * C179 ) . C182 ));
+L587: (( ( C180 * C179 ) . C181 ) = ( C180 . ( C179 . C181 ) ) & ( ( C180 * C179 ) . C182 ) = ( C180 . ( C179 . C182 ) )) by L544;
+consider C184 being (Morphism of ( C179 . C181 ) , ( C179 . C182 )) such that L588: C183 = ( C180 . C184 ) by L587 , L585 , L586 , L558;
+L589: ( Hom (( C179 . C181 ) , ( C179 . C182 )) ) <> ( {} ) by L585 , L586 , L587 , L558;
+thus L590: ( Hom (C181 , C182) ) <> ( {} ) by L589 , L584 , L558;
+consider C185 being (Morphism of C181 , C182) such that L591: C184 = ( C179 . C185 ) by L584 , L589 , L558;
+take C185;
+thus L592: thesis by L588 , L591 , FUNCT_2:15;
+end;
+theorem
+L593: (for R13 being Category holds (for R14 being Category holds (for R15 being Category holds (for B234 being (Functor of R13 , R14) holds (for B235 being (Functor of R14 , R15) holds ((B234 is  faithful & B235 is  faithful) implies ( B235 * B234 ) is  faithful))))))
+proof
+let R13 being Category;
+let R14 being Category;
+let R15 being Category;
+let C186 being (Functor of R13 , R14);
+let C187 being (Functor of R14 , R15);
+assume that
+L594: C186 is  faithful
+and
+L595: C187 is  faithful;
+let C188 , C189 being (Object of R13);
+assume that
+L596: ( Hom (C188 , C189) ) <> ( {} );
+let C190 , C191 being (Morphism of C188 , C189);
+L597: ( C186 . C191 ) is (Morphism of ( C186 . C188 ) , ( C186 . C189 )) by L596 , L575;
+assume L598: ( ( C187 * C186 ) . C190 ) = ( ( C187 * C186 ) . C191 );
+L599: (( ( C187 * C186 ) . C190 ) = ( C187 . ( C186 . C190 ) ) & ( ( C187 * C186 ) . C191 ) = ( C187 . ( C186 . C191 ) )) by FUNCT_2:15;
+L600: (( Hom (( C186 . C188 ) , ( C186 . C189 )) ) <> ( {} ) & ( C186 . C190 ) is (Morphism of ( C186 . C188 ) , ( C186 . C189 ))) by L596 , L575 , L579;
+L601: ( C186 . C190 ) = ( C186 . C191 ) by L600 , L595 , L598 , L599 , L597 , L559;
+thus L602: thesis by L601 , L594 , L596 , L559;
+end;
+theorem
+L603: (for R14 being Category holds (for R15 being Category holds (for B236 being (Functor of R14 , R15) holds (for B237 , B238 being (Object of R14) holds ( B236 .: ( Hom (B237 , B238) ) ) c= ( Hom (( B236 . B237 ) , ( B236 . B238 )) )))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C192 being (Functor of R14 , R15);
+let C193 , C194 being (Object of R14);
+let C195 being set;
+assume L604: C195 in ( C192 .: ( Hom (C193 , C194) ) );
+L605: (ex B239 being (Element of (the carrier' of R14)) st (B239 in ( Hom (C193 , C194) ) & C195 = ( C192 . B239 ))) by L604 , FUNCT_2:65;
+thus L606: thesis by L605 , L564;
+end;
+definition
+let C196 , C197 being Category;
+let C198 being (Functor of C196 , C197);
+let C199 , C200 being (Object of C196);
+func hom (C198 , C199 , C200) -> (Function of ( Hom (C199 , C200) ) , ( Hom (( C198 . C199 ) , ( C198 . C200 )) )) equals 
+( C198 | ( Hom (C199 , C200) ) );
+correctness
+proof
+L607: ( C198 .: ( Hom (C199 , C200) ) ) c= ( Hom (( C198 . C199 ) , ( C198 . C200 )) ) by L603;
+thus L608: thesis by L607 , FUNCT_2:101;
+end;
+end;
+theorem
+L610: (for R14 being Category holds (for R15 being Category holds (for B240 being (Functor of R14 , R15) holds (for B241 , B242 being (Object of R14) holds (( Hom (B241 , B242) ) <> ( {} ) implies (for B243 being (Morphism of B241 , B242) holds ( ( hom (B240 , B241 , B242) ) . B243 ) = ( B240 . B243 )))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C201 being (Functor of R14 , R15);
+let C202 , C203 being (Object of R14);
+assume L611: ( Hom (C202 , C203) ) <> ( {} );
+let C204 being (Morphism of C202 , C203);
+L612: C204 in ( Hom (C202 , C203) ) by L611 , L22;
+thus L613: thesis by L612 , FUNCT_1:49;
+end;
+theorem
+L614: (for R14 being Category holds (for R15 being Category holds (for B244 being (Functor of R14 , R15) holds (B244 is  full iff (for B245 , B246 being (Object of R14) holds ( rng ( hom (B244 , B245 , B246) ) ) = ( Hom (( B244 . B245 ) , ( B244 . B246 )) ))))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C205 being (Functor of R14 , R15);
+thus L615: (C205 is  full implies (for B247 , B248 being (Object of R14) holds ( rng ( hom (C205 , B247 , B248) ) ) = ( Hom (( C205 . B247 ) , ( C205 . B248 )) )))
+proof
+assume L616: C205 is  full;
+let C206 , C207 being (Object of R14);
+L617:
+now
+assume L618: ( Hom (( C205 . C206 ) , ( C205 . C207 )) ) <> ( {} );
+L619: (for B249 being set holds (B249 in ( rng ( hom (C205 , C206 , C207) ) ) iff B249 in ( Hom (( C205 . C206 ) , ( C205 . C207 )) )))
+proof
+let C208 being set;
+thus L620: (C208 in ( rng ( hom (C205 , C206 , C207) ) ) implies C208 in ( Hom (( C205 . C206 ) , ( C205 . C207 )) ))
+proof
+assume L621: C208 in ( rng ( hom (C205 , C206 , C207) ) );
+consider C209 being set such that L622: C209 in ( dom ( hom (C205 , C206 , C207) ) ) and L623: ( ( hom (C205 , C206 , C207) ) . C209 ) = C208 by L621 , FUNCT_1:def 3;
+L624: C209 in ( Hom (C206 , C207) ) by L618 , L622 , FUNCT_2:def 1;
+thus L625: thesis by L624 , L618 , L623 , FUNCT_2:5;
+end;
+
+assume L626: C208 in ( Hom (( C205 . C206 ) , ( C205 . C207 )) );
+L627: C208 is (Morphism of ( C205 . C206 ) , ( C205 . C207 )) by L626 , L22;
+consider C210 being (Morphism of C206 , C207) such that L628: C208 = ( C205 . C210 ) by L627 , L616 , L618 , L558;
+L629: ( Hom (C206 , C207) ) <> ( {} ) by L616 , L618 , L558;
+L630: C210 in ( Hom (C206 , C207) ) by L629 , L22;
+L631: ( ( hom (C205 , C206 , C207) ) . C210 ) in ( rng ( hom (C205 , C206 , C207) ) ) by L630 , L618 , FUNCT_2:4;
+thus L632: thesis by L631 , L628 , L616 , L618 , L558 , L610;
+end;
+thus L633: thesis by L619 , TARSKI:1;
+end;
+thus L634: thesis by L617;
+end;
+
+assume L635: (for B250 , B251 being (Object of R14) holds ( rng ( hom (C205 , B250 , B251) ) ) = ( Hom (( C205 . B250 ) , ( C205 . B251 )) ));
+let C211 , C212 being (Object of R14);
+assume that
+L636: ( Hom (( C205 . C211 ) , ( C205 . C212 )) ) <> ( {} );
+let C213 being (Morphism of ( C205 . C211 ) , ( C205 . C212 ));
+L637: C213 in ( Hom (( C205 . C211 ) , ( C205 . C212 )) ) by L636 , L22;
+L638: C213 in ( rng ( hom (C205 , C211 , C212) ) ) by L637 , L635;
+consider C214 being set such that L639: C214 in ( dom ( hom (C205 , C211 , C212) ) ) and L640: ( ( hom (C205 , C211 , C212) ) . C214 ) = C213 by L638 , FUNCT_1:def 3;
+thus L641: ( Hom (C211 , C212) ) <> ( {} ) by L639;
+L642: C214 in ( Hom (C211 , C212) ) by L636 , L639 , FUNCT_2:def 1;
+reconsider D24 = C214 as (Morphism of C211 , C212) by L642 , L22;
+take D24;
+thus L643: thesis by L640 , L642 , L610;
+end;
+theorem
+L644: (for R14 being Category holds (for R15 being Category holds (for B252 being (Functor of R14 , R15) holds (B252 is  faithful iff (for B253 , B254 being (Object of R14) holds ( hom (B252 , B253 , B254) ) is  one-to-one)))))
+proof
+let R14 being Category;
+let R15 being Category;
+let C215 being (Functor of R14 , R15);
+thus L645: (C215 is  faithful implies (for B255 , B256 being (Object of R14) holds ( hom (C215 , B255 , B256) ) is  one-to-one))
+proof
+assume L646: C215 is  faithful;
+let C216 , C217 being (Object of R14);
+L647:
+now
+L648:
+now
+let C218 , C219 being set;
+assume that
+L649: C218 in ( Hom (C216 , C217) )
+and
+L650: C219 in ( Hom (C216 , C217) );
+L651: C219 is (Morphism of C216 , C217) by L650 , L22;
+L652: ( C215 . C219 ) = ( ( hom (C215 , C216 , C217) ) . C219 ) by L651 , L649 , L610;
+L653: C218 is (Morphism of C216 , C217) by L649 , L22;
+L654: ( C215 . C218 ) = ( ( hom (C215 , C216 , C217) ) . C218 ) by L653 , L649 , L610;
+thus L655: (( ( hom (C215 , C216 , C217) ) . C218 ) = ( ( hom (C215 , C216 , C217) ) . C219 ) implies C218 = C219) by L654 , L646 , L649 , L653 , L651 , L652 , L559;
+end;
+assume L656: ( Hom (( C215 . C216 ) , ( C215 . C217 )) ) <> ( {} );
+thus L657: thesis by L656 , L648 , FUNCT_2:19;
+end;
+thus L658: thesis by L647;
+end;
+
+assume L659: (for B257 , B258 being (Object of R14) holds ( hom (C215 , B257 , B258) ) is  one-to-one);
+let C220 , C221 being (Object of R14);
+assume that
+L660: ( Hom (C220 , C221) ) <> ( {} );
+let C222 , C223 being (Morphism of C220 , C221);
+L661: ( C215 . C223 ) = ( ( hom (C215 , C220 , C221) ) . C223 ) by L660 , L610;
+L662: (C223 in ( Hom (C220 , C221) ) & ( C215 . C222 ) = ( ( hom (C215 , C220 , C221) ) . C222 )) by L660 , L22 , L610;
+L663: ( hom (C215 , C220 , C221) ) is  one-to-one by L659;
+L664: (( Hom (( C215 . C220 ) , ( C215 . C221 )) ) <> ( {} ) & C222 in ( Hom (C220 , C221) )) by L660 , L22 , L579;
+thus L665: thesis by L664 , L663 , L662 , L661 , FUNCT_2:19;
+end;

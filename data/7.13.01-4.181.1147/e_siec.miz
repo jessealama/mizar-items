@@ -1,0 +1,786 @@
+:: Definitions of Petri Net - Part II
+::  by Waldemar Korczy\'nski
+::
+:: Received January 31, 1992
+:: Copyright (c) 1992-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies STRUCT_0, RELAT_1, TARSKI, ZFMISC_1, XBOOLE_0, SYSREL, E_SIEC;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, RELAT_1, SYSREL, STRUCT_0;
+ constructors SYSREL, STRUCT_0, XTUPLE_0;
+ registrations XBOOLE_0, RELAT_1;
+ requirements SUBSET, BOOLE;
+ definitions STRUCT_0;
+ theorems ZFMISC_1, RELAT_1, SYSREL, RELSET_1, XBOOLE_0, XBOOLE_1,XTUPLE_0;
+
+begin
+definition
+struct (1-sorted) G_Net(# carrier -> set , entrance , escape -> Relation #);
+end;
+definition
+let C1 being G_Net;
+attr C1 is  GG
+means
+:L2: ((the entrance of C1) c= [: (the carrier of C1) , (the carrier of C1) :] & (the escape of C1) c= [: (the carrier of C1) , (the carrier of C1) :] & ( (the entrance of C1) * (the entrance of C1) ) = (the entrance of C1) & ( (the entrance of C1) * (the escape of C1) ) = (the entrance of C1) & ( (the escape of C1) * (the escape of C1) ) = (the escape of C1) & ( (the escape of C1) * (the entrance of C1) ) = (the escape of C1));
+end;
+registration
+cluster  GG for G_Net;
+existence
+proof
+take D1 = G_Net (# ( {} ) , ( {} ) , ( {} ) #);
+L4: ((the escape of D1) c= [: (the carrier of D1) , (the carrier of D1) :] & ( (the entrance of D1) * (the entrance of D1) ) = ( {} )) by XBOOLE_1:2;
+thus L5: thesis by L4 , L2;
+end;
+end;
+definition
+mode gg_net
+ is  GG G_Net;
+end;
+definition
+let C2 being G_Net;
+attr C2 is  EE
+means
+:L8: (( (the entrance of C2) * ( (the entrance of C2) \ ( id (the carrier of C2) ) ) ) = ( {} ) & ( (the escape of C2) * ( (the escape of C2) \ ( id (the carrier of C2) ) ) ) = ( {} ));
+end;
+registration
+cluster  EE for G_Net;
+existence
+proof
+take D2 = G_Net (# ( {} ) , ( {} ) , ( {} ) #);
+L10: ( (the entrance of D2) * ( (the entrance of D2) \ ( id D2 ) ) ) = ( {} );
+thus L11: thesis by L10 , L8;
+end;
+end;
+registration
+cluster  strict  GG  EE for G_Net;
+existence
+proof
+take D3 = G_Net (# ( {} ) , ( {} ) , ( {} ) #);
+L13: ((the entrance of D3) c= [: (the carrier of D3) , (the carrier of D3) :] & ( (the escape of D3) * ( (the escape of D3) \ ( id D3 ) ) ) = ( {} )) by XBOOLE_1:2;
+thus L14: thesis by L13 , L2 , L8;
+end;
+end;
+definition
+mode e_net
+ is  EE  GG G_Net;
+end;
+theorem
+L17: (for R4 being set holds (for B1 , B2 being Relation holds (G_Net (# R4 , B1 , B2 #) is e_net iff (B1 c= [: R4 , R4 :] & B2 c= [: R4 , R4 :] & ( B1 * B1 ) = B1 & ( B1 * B2 ) = B1 & ( B2 * B2 ) = B2 & ( B2 * B1 ) = B2 & ( B1 * ( B1 \ ( id R4 ) ) ) = ( {} ) & ( B2 * ( B2 \ ( id R4 ) ) ) = ( {} ))))) by L2 , L8;
+theorem
+L18: (for R4 being set holds G_Net (# R4 , ( {} ) , ( {} ) #) is e_net)
+proof
+let R4 being set;
+L19: (( {} ) c= [: R4 , R4 :] & ( ( {} ) * ( ( {} ) \ ( id R4 ) ) ) = ( {} )) by XBOOLE_1:2;
+thus L20: thesis by L19 , L2 , L8;
+end;
+theorem
+L21: (for R4 being set holds G_Net (# R4 , ( id R4 ) , ( id R4 ) #) is e_net)
+proof
+let R4 being set;
+L22: ( ( id R4 ) * ( ( id R4 ) \ ( id R4 ) ) ) = ( ( id R4 ) * ( {} ) ) by XBOOLE_1:37
+.= ( {} );
+L23: (( id R4 ) c= [: R4 , R4 :] & ( ( id R4 ) * ( id R4 ) ) = ( id R4 )) by RELSET_1:13 , SYSREL:12;
+thus L24: thesis by L23 , L22 , L2 , L8;
+end;
+theorem
+L25: G_Net (# ( {} ) , ( {} ) , ( {} ) #) is e_net by L18;
+theorem
+L26: (for R4 being set holds (for R5 being set holds G_Net (# R4 , ( id ( R4 \ R5 ) ) , ( id ( R4 \ R5 ) ) #) is e_net))
+proof
+let R4 being set;
+let R5 being set;
+L27: ( ( id ( R4 \ R5 ) ) * ( ( id ( R4 \ R5 ) ) \ ( id R4 ) ) ) = ( ( id ( R4 \ R5 ) ) * ( {} ) ) by SYSREL:16
+.= ( {} );
+L28: ( R4 \ R5 ) c= R4 by XBOOLE_1:36;
+L29: [: ( R4 \ R5 ) , ( R4 \ R5 ) :] c= [: R4 , R4 :] by L28 , ZFMISC_1:96;
+L30: ( id ( R4 \ R5 ) ) c= [: ( R4 \ R5 ) , ( R4 \ R5 ) :] by RELSET_1:13;
+L31: ( id ( R4 \ R5 ) ) c= [: R4 , R4 :] by L30 , L29 , XBOOLE_1:1;
+L32: ( ( id ( R4 \ R5 ) ) * ( id ( R4 \ R5 ) ) ) = ( id ( R4 \ R5 ) ) by SYSREL:12;
+thus L33: thesis by L32 , L31 , L27 , L2 , L8;
+end;
+definition
+func empty_e_net ->  strict e_net equals 
+G_Net (# ( {} ) , ( {} ) , ( {} ) #);
+correctness by L18;
+end;
+definition
+let R4 being set;
+func Tempty_e_net R4 ->  strict e_net equals 
+G_Net (# R4 , ( id R4 ) , ( id R4 ) #);
+coherence by L21;
+func Pempty_e_net R4 ->  strict e_net equals 
+G_Net (# R4 , ( {} ) , ( {} ) #);
+coherence by L18;
+end;
+theorem
+L36: (for R4 being set holds ((the carrier of ( Tempty_e_net R4 )) = R4 & (the entrance of ( Tempty_e_net R4 )) = ( id R4 ) & (the escape of ( Tempty_e_net R4 )) = ( id R4 )));
+theorem
+L37: (for R4 being set holds ((the carrier of ( Pempty_e_net R4 )) = R4 & (the entrance of ( Pempty_e_net R4 )) = ( {} ) & (the escape of ( Pempty_e_net R4 )) = ( {} )));
+definition
+let R1 being set;
+func Psingle_e_net R1 ->  strict e_net equals 
+G_Net (# { R1 } , ( id { R1 } ) , ( id { R1 } ) #);
+coherence by L21;
+func Tsingle_e_net R1 ->  strict e_net equals 
+G_Net (# { R1 } , ( {} ) , ( {} ) #);
+coherence by L18;
+end;
+theorem
+L39: (for R1 being set holds ((the carrier of ( Psingle_e_net R1 )) = { R1 } & (the entrance of ( Psingle_e_net R1 )) = ( id { R1 } ) & (the escape of ( Psingle_e_net R1 )) = ( id { R1 } )));
+theorem
+L40: (for R1 being set holds ((the carrier of ( Tsingle_e_net R1 )) = { R1 } & (the entrance of ( Tsingle_e_net R1 )) = ( {} ) & (the escape of ( Tsingle_e_net R1 )) = ( {} )));
+theorem
+L41: (for R4 being set holds (for R5 being set holds G_Net (# ( R4 \/ R5 ) , ( id R4 ) , ( id R4 ) #) is e_net))
+proof
+let R4 being set;
+let R5 being set;
+L42: R4 c= ( R4 \/ R5 ) by XBOOLE_1:7;
+L43: (( id R4 ) c= [: R4 , R4 :] & [: R4 , R4 :] c= [: ( R4 \/ R5 ) , ( R4 \/ R5 ) :]) by L42 , RELSET_1:13 , ZFMISC_1:96;
+L44: ( id R4 ) c= [: ( R4 \/ R5 ) , ( R4 \/ R5 ) :] by L43 , XBOOLE_1:1;
+L45: ( id R4 ) c= ( ( id R4 ) \/ ( id R5 ) ) by XBOOLE_1:7;
+L46: ( id R4 ) c= ( id ( R4 \/ R5 ) ) by L45 , SYSREL:14;
+L47: ( ( id R4 ) * ( ( id R4 ) \ ( id ( R4 \/ R5 ) ) ) ) = ( ( id R4 ) * ( {} ) ) by L46 , XBOOLE_1:37
+.= ( {} );
+L48: ( ( id R4 ) * ( id R4 ) ) = ( id R4 ) by SYSREL:12;
+thus L49: thesis by L48 , L44 , L47 , L2 , L8;
+end;
+definition
+let R4 being set;
+let R5 being set;
+func PTempty_e_net (R4 , R5) ->  strict e_net equals 
+G_Net (# ( R4 \/ R5 ) , ( id R4 ) , ( id R4 ) #);
+coherence by L41;
+end;
+theorem
+L51: (for R6 being e_net holds (( (the entrance of R6) \ ( id ( dom (the entrance of R6) ) ) ) = ( (the entrance of R6) \ ( id (the carrier of R6) ) ) & ( (the escape of R6) \ ( id ( dom (the escape of R6) ) ) ) = ( (the escape of R6) \ ( id (the carrier of R6) ) ) & ( (the entrance of R6) \ ( id ( rng (the entrance of R6) ) ) ) = ( (the entrance of R6) \ ( id (the carrier of R6) ) ) & ( (the escape of R6) \ ( id ( rng (the escape of R6) ) ) ) = ( (the escape of R6) \ ( id (the carrier of R6) ) )))
+proof
+let R6 being e_net;
+L52: ((the entrance of R6) c= [: (the carrier of R6) , (the carrier of R6) :] & (the escape of R6) c= [: (the carrier of R6) , (the carrier of R6) :]) by L2;
+thus L53: thesis by L52 , SYSREL:20;
+end;
+theorem
+L54: (for R6 being e_net holds ( CL (the entrance of R6) ) = ( CL (the escape of R6) ))
+proof
+let R6 being e_net;
+L55: ( (the escape of R6) * ( (the escape of R6) \ ( id R6 ) ) ) = ( {} ) by L8;
+L56: ( (the escape of R6) * ( (the escape of R6) \ ( id ( dom (the escape of R6) ) ) ) ) = ( {} ) by L55 , L51;
+L57: ( (the entrance of R6) * ( (the entrance of R6) \ ( id R6 ) ) ) = ( {} ) by L8;
+L58: ( (the entrance of R6) * ( (the entrance of R6) \ ( id ( dom (the entrance of R6) ) ) ) ) = ( {} ) by L57 , L51;
+L59: (( (the entrance of R6) * (the escape of R6) ) = (the entrance of R6) & ( (the escape of R6) * (the entrance of R6) ) = (the escape of R6)) by L2;
+thus L60: thesis by L59 , L56 , L58 , SYSREL:40;
+end;
+theorem
+L61: (for R6 being e_net holds (( rng (the entrance of R6) ) = ( rng ( CL (the entrance of R6) ) ) & ( rng (the entrance of R6) ) = ( dom ( CL (the entrance of R6) ) ) & ( rng (the escape of R6) ) = ( rng ( CL (the escape of R6) ) ) & ( rng (the escape of R6) ) = ( dom ( CL (the escape of R6) ) ) & ( rng (the entrance of R6) ) = ( rng (the escape of R6) )))
+proof
+let R6 being e_net;
+L62: ( (the entrance of R6) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) by L8;
+L63: ( (the entrance of R6) * ( (the entrance of R6) \ ( id ( dom (the entrance of R6) ) ) ) ) = ( {} ) by L62 , L51;
+L64: ( (the escape of R6) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) by L8;
+L65: ( (the escape of R6) * ( (the escape of R6) \ ( id ( dom (the escape of R6) ) ) ) ) = ( {} ) by L64 , L51;
+L66: ( (the escape of R6) * (the escape of R6) ) = (the escape of R6) by L2;
+L67: ( rng (the escape of R6) ) = ( rng ( CL (the escape of R6) ) ) by L66 , L65 , SYSREL:31;
+L68: ( (the entrance of R6) * (the entrance of R6) ) = (the entrance of R6) by L2;
+L69: ( rng (the entrance of R6) ) = ( rng ( CL (the entrance of R6) ) ) by L68 , L63 , SYSREL:31;
+thus L70: thesis by L69 , L68 , L63 , L66 , L65 , L67 , L54 , SYSREL:31;
+end;
+theorem
+L71: (for R6 being e_net holds (( dom (the entrance of R6) ) c= (the carrier of R6) & ( rng (the entrance of R6) ) c= (the carrier of R6) & ( dom (the escape of R6) ) c= (the carrier of R6) & ( rng (the escape of R6) ) c= (the carrier of R6)))
+proof
+let R6 being e_net;
+L72: ((the entrance of R6) c= [: (the carrier of R6) , (the carrier of R6) :] & (the escape of R6) c= [: (the carrier of R6) , (the carrier of R6) :]) by L2;
+thus L73: thesis by L72 , SYSREL:3;
+end;
+theorem
+L74: (for R6 being e_net holds (( (the entrance of R6) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( (the escape of R6) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} )))
+proof
+let R6 being e_net;
+set D4 = (the entrance of R6);
+set D5 = (the escape of R6);
+set D6 = ( id (the carrier of R6) );
+L75: ( D5 * ( D4 \ D6 ) ) = ( D5 * ( D4 \ ( id ( dom D4 ) ) ) ) by L51
+.= ( ( D5 * D4 ) * ( D4 \ ( id ( dom D4 ) ) ) ) by L2
+.= ( D5 * ( D4 * ( D4 \ ( id ( dom D4 ) ) ) ) ) by RELAT_1:36
+.= ( D5 * ( D4 * ( D4 \ D6 ) ) ) by L51
+.= ( D5 * ( {} ) ) by L8
+.= ( {} );
+L76: ( D4 * ( D5 \ D6 ) ) = ( D4 * ( D5 \ ( id ( dom D5 ) ) ) ) by L51
+.= ( ( D4 * D5 ) * ( D5 \ ( id ( dom D5 ) ) ) ) by L2
+.= ( D4 * ( D5 * ( D5 \ ( id ( dom D5 ) ) ) ) ) by RELAT_1:36
+.= ( D4 * ( D5 * ( D5 \ D6 ) ) ) by L51
+.= ( D4 * ( {} ) ) by L8
+.= ( {} );
+thus L77: thesis by L76 , L75;
+end;
+theorem
+L78: (for R6 being e_net holds (( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} )))
+proof
+let R6 being e_net;
+set D7 = (the entrance of R6);
+set D8 = (the escape of R6);
+set D9 = ( id (the carrier of R6) );
+L79: ( ( D7 \ D9 ) * ( D8 \ D9 ) ) c= ( D7 * ( D8 \ D9 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L80: ( ( D7 \ D9 ) * ( D8 \ D9 ) ) c= ( {} ) by L79 , L74;
+L81: ( ( D8 \ D9 ) * ( D8 \ D9 ) ) c= ( D8 * ( D8 \ D9 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L82: ( ( D8 \ D9 ) * ( D8 \ D9 ) ) c= ( {} ) by L81 , L8;
+L83: ( ( D8 \ D9 ) * ( D7 \ D9 ) ) c= ( D8 * ( D7 \ D9 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L84: ( ( D8 \ D9 ) * ( D7 \ D9 ) ) c= ( {} ) by L83 , L74;
+L85: ( ( D7 \ D9 ) * ( D7 \ D9 ) ) c= ( D7 * ( D7 \ D9 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L86: ( ( D7 \ D9 ) * ( D7 \ D9 ) ) c= ( {} ) by L85 , L8;
+thus L87: thesis by L86 , L80 , L82 , L84 , XBOOLE_1:3;
+end;
+definition
+let R6 being e_net;
+func e_Places R6 -> set equals 
+( rng (the entrance of R6) );
+correctness;
+end;
+definition
+let R6 being e_net;
+func e_Transitions R6 -> set equals 
+( (the carrier of R6) \ ( e_Places R6 ) );
+correctness;
+end;
+theorem
+L90: (for R1 being set holds (for R2 being set holds (for R6 being e_net holds ((([ R1 , R2 ] in (the entrance of R6) or [ R1 , R2 ] in (the escape of R6)) & R1 <> R2) implies (R1 in ( e_Transitions R6 ) & R2 in ( e_Places R6 ))))))
+proof
+let R1 being set;
+let R2 being set;
+let R6 being e_net;
+L91: (([ R1 , R2 ] in (the escape of R6) & R1 <> R2) implies (R1 in ( e_Transitions R6 ) & R2 in ( e_Places R6 )))
+proof
+L92: ( (the escape of R6) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) by L8;
+L93: ( (the escape of R6) * ( (the escape of R6) \ ( id ( dom (the escape of R6) ) ) ) ) = ( {} ) by L92 , L51;
+L94: ( dom (the escape of R6) ) c= (the carrier of R6) by L71;
+L95: ( ( dom (the escape of R6) ) \ ( dom ( CL (the escape of R6) ) ) ) c= ( (the carrier of R6) \ ( dom ( CL (the escape of R6) ) ) ) by L94 , XBOOLE_1:33;
+assume L96: ([ R1 , R2 ] in (the escape of R6) & R1 <> R2);
+L97: ( (the escape of R6) * (the escape of R6) ) = (the escape of R6) by L2;
+L98: R1 in ( ( dom (the escape of R6) ) \ ( dom ( CL (the escape of R6) ) ) ) by L97 , L96 , L93 , SYSREL:30;
+L99: R1 in ( (the carrier of R6) \ ( dom ( CL (the escape of R6) ) ) ) by L98 , L95;
+L100: R1 in ( (the carrier of R6) \ ( rng (the escape of R6) ) ) by L99 , L61;
+L101: R2 in ( dom ( CL (the escape of R6) ) ) by L96 , L97 , L93 , SYSREL:30;
+L102: R2 in ( rng (the escape of R6) ) by L101 , L61;
+thus L103: thesis by L102 , L100 , L61;
+end;
+L104: (([ R1 , R2 ] in (the entrance of R6) & R1 <> R2) implies (R1 in ( e_Transitions R6 ) & R2 in ( e_Places R6 )))
+proof
+L105: ( (the entrance of R6) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) by L8;
+L106: ( (the entrance of R6) * ( (the entrance of R6) \ ( id ( dom (the entrance of R6) ) ) ) ) = ( {} ) by L105 , L51;
+L107: ( dom (the entrance of R6) ) c= (the carrier of R6) by L71;
+L108: ( ( dom (the entrance of R6) ) \ ( dom ( CL (the entrance of R6) ) ) ) c= ( (the carrier of R6) \ ( dom ( CL (the entrance of R6) ) ) ) by L107 , XBOOLE_1:33;
+assume L109: ([ R1 , R2 ] in (the entrance of R6) & R1 <> R2);
+L110: ( (the entrance of R6) * (the entrance of R6) ) = (the entrance of R6) by L2;
+L111: R1 in ( ( dom (the entrance of R6) ) \ ( dom ( CL (the entrance of R6) ) ) ) by L110 , L109 , L106 , SYSREL:30;
+L112: R1 in ( (the carrier of R6) \ ( dom ( CL (the entrance of R6) ) ) ) by L111 , L108;
+L113: R2 in ( dom ( CL (the entrance of R6) ) ) by L109 , L110 , L106 , SYSREL:30;
+thus L114: thesis by L113 , L112 , L61;
+end;
+thus L115: thesis by L104 , L91;
+end;
+theorem
+L116: (for R6 being e_net holds (( (the entrance of R6) \ ( id (the carrier of R6) ) ) c= [: ( e_Transitions R6 ) , ( e_Places R6 ) :] & ( (the escape of R6) \ ( id (the carrier of R6) ) ) c= [: ( e_Transitions R6 ) , ( e_Places R6 ) :]))
+proof
+let R6 being e_net;
+L117: (for R1 being set holds (for R2 being set holds ([ R1 , R2 ] in ( (the entrance of R6) \ ( id (the carrier of R6) ) ) implies [ R1 , R2 ] in [: ( e_Transitions R6 ) , ( e_Places R6 ) :])))
+proof
+let R1 being set;
+let R2 being set;
+assume L118: [ R1 , R2 ] in ( (the entrance of R6) \ ( id (the carrier of R6) ) );
+L119: [ R1 , R2 ] in (the entrance of R6) by L118 , XBOOLE_0:def 5;
+L120: R1 in ( dom (the entrance of R6) ) by L119 , XTUPLE_0:def 12;
+L121: (not [ R1 , R2 ] in ( id (the carrier of R6) )) by L118 , XBOOLE_0:def 5;
+L122: ((not R1 in (the carrier of R6)) or R1 <> R2) by L121 , RELAT_1:def 10;
+L123: [ R1 , R2 ] in (the entrance of R6) by L118 , XBOOLE_0:def 5;
+L124: R2 in ( e_Places R6 ) by L123 , XTUPLE_0:def 13;
+L125: ( dom (the entrance of R6) ) c= (the carrier of R6) by L71;
+L126: R1 in ( e_Transitions R6 ) by L125 , L123 , L122 , L120 , L90;
+thus L127: thesis by L126 , L124 , ZFMISC_1:87;
+end;
+L128: (for R1 being set holds (for R2 being set holds ([ R1 , R2 ] in ( (the escape of R6) \ ( id (the carrier of R6) ) ) implies [ R1 , R2 ] in [: ( e_Transitions R6 ) , ( e_Places R6 ) :])))
+proof
+let R1 being set;
+let R2 being set;
+L129: ( dom (the escape of R6) ) c= (the carrier of R6) by L71;
+assume L130: [ R1 , R2 ] in ( (the escape of R6) \ ( id (the carrier of R6) ) );
+L131: [ R1 , R2 ] in (the escape of R6) by L130 , XBOOLE_0:def 5;
+L132: R1 in ( dom (the escape of R6) ) by L131 , XTUPLE_0:def 12;
+L133: (not [ R1 , R2 ] in ( id (the carrier of R6) )) by L130 , XBOOLE_0:def 5;
+L134: ((not R1 in (the carrier of R6)) or R1 <> R2) by L133 , RELAT_1:def 10;
+L135: [ R1 , R2 ] in (the escape of R6) by L130 , XBOOLE_0:def 5;
+L136: (R1 in ( e_Transitions R6 ) & R2 in ( e_Places R6 )) by L135 , L134 , L132 , L129 , L90;
+thus L137: thesis by L136 , ZFMISC_1:87;
+end;
+thus L138: thesis by L128 , L117 , RELAT_1:def 3;
+end;
+definition
+let R6 being e_net;
+func e_Flow R6 -> Relation equals 
+( ( ( (the entrance of R6) ~ ) \/ (the escape of R6) ) \ ( id R6 ) );
+correctness;
+end;
+theorem
+L140: (for R6 being e_net holds ( e_Flow R6 ) c= ( [: ( e_Places R6 ) , ( e_Transitions R6 ) :] \/ [: ( e_Transitions R6 ) , ( e_Places R6 ) :] ))
+proof
+let R6 being e_net;
+L141: ( ( (the entrance of R6) ~ ) \ ( id R6 ) ) = ( ( (the entrance of R6) ~ ) \ ( ( id (the carrier of R6) ) ~ ) ) by RELAT_1:46
+.= ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) by RELAT_1:24;
+L142: (( e_Flow R6 ) = ( ( ( (the entrance of R6) ~ ) \ ( id (the carrier of R6) ) ) \/ ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) & ( (the escape of R6) \ ( id (the carrier of R6) ) ) c= [: ( e_Transitions R6 ) , ( e_Places R6 ) :]) by L116 , XBOOLE_1:42;
+L143: ( (the entrance of R6) \ ( id (the carrier of R6) ) ) c= [: ( e_Transitions R6 ) , ( e_Places R6 ) :] by L116;
+L144: ( ( (the entrance of R6) ~ ) \ ( id (the carrier of R6) ) ) c= [: ( e_Places R6 ) , ( e_Transitions R6 ) :] by L143 , L141 , SYSREL:4;
+thus L145: thesis by L144 , L142 , XBOOLE_1:13;
+end;
+definition
+let R6 being e_net;
+func e_pre R6 -> Relation equals 
+( (the entrance of R6) \ ( id (the carrier of R6) ) );
+correctness;
+func e_post R6 -> Relation equals 
+( (the escape of R6) \ ( id (the carrier of R6) ) );
+correctness;
+end;
+theorem
+L147: (for R6 being e_net holds (( e_pre R6 ) c= [: ( e_Transitions R6 ) , ( e_Places R6 ) :] & ( e_post R6 ) c= [: ( e_Transitions R6 ) , ( e_Places R6 ) :])) by L116;
+definition
+let R6 being e_net;
+func e_shore R6 -> set equals 
+(the carrier of R6);
+correctness;
+func e_prox R6 -> Relation equals 
+( ( (the entrance of R6) \/ (the escape of R6) ) ~ );
+correctness;
+func e_flow R6 -> Relation equals 
+( ( ( (the entrance of R6) ~ ) \/ (the escape of R6) ) \/ ( id (the carrier of R6) ) );
+correctness;
+end;
+theorem
+L149: (for R6 being e_net holds (( e_prox R6 ) c= [: ( e_shore R6 ) , ( e_shore R6 ) :] & ( e_flow R6 ) c= [: ( e_shore R6 ) , ( e_shore R6 ) :]))
+proof
+let R6 being e_net;
+L150: ( id (the carrier of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :] by RELSET_1:13;
+L151: (the escape of R6) c= [: (the carrier of R6) , (the carrier of R6) :] by L2;
+L152: (the entrance of R6) c= [: (the carrier of R6) , (the carrier of R6) :] by L2;
+L153: ( (the entrance of R6) ~ ) c= [: (the carrier of R6) , (the carrier of R6) :] by L152 , SYSREL:4;
+L154: ( ( (the entrance of R6) ~ ) \/ (the escape of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :] by L153 , L151 , XBOOLE_1:8;
+L155: ( (the entrance of R6) \/ (the escape of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :] by L152 , L151 , XBOOLE_1:8;
+thus L156: thesis by L155 , L154 , L150 , SYSREL:4 , XBOOLE_1:8;
+end;
+theorem
+L157: (for R6 being e_net holds (( ( e_prox R6 ) * ( e_prox R6 ) ) = ( e_prox R6 ) & ( ( ( e_prox R6 ) \ ( id ( e_shore R6 ) ) ) * ( e_prox R6 ) ) = ( {} ) & ( ( ( e_prox R6 ) \/ ( ( e_prox R6 ) ~ ) ) \/ ( id ( e_shore R6 ) ) ) = ( ( e_flow R6 ) \/ ( ( e_flow R6 ) ~ ) )))
+proof
+let R6 being e_net;
+set D10 = (the entrance of R6);
+set D11 = (the escape of R6);
+set D12 = ( id (the carrier of R6) );
+L158: ( ( ( e_prox R6 ) \/ ( ( e_prox R6 ) ~ ) ) \/ ( id ( e_shore R6 ) ) ) = ( ( ( ( D10 ~ ) \/ ( D11 ~ ) ) \/ ( D11 \/ D10 ) ) \/ D12 ) by RELAT_1:23
+.= ( ( ( ( ( D10 ~ ) \/ ( D11 ~ ) ) \/ D11 ) \/ D10 ) \/ D12 ) by XBOOLE_1:4
+.= ( ( ( ( D10 ~ ) \/ ( ( D11 ~ ) \/ D11 ) ) \/ D10 ) \/ D12 ) by XBOOLE_1:4
+.= ( ( ( D10 ~ ) \/ ( ( D11 \/ ( D11 ~ ) ) \/ D10 ) ) \/ D12 ) by XBOOLE_1:4
+.= ( ( ( D10 ~ ) \/ ( D11 \/ ( ( D11 ~ ) \/ D10 ) ) ) \/ D12 ) by XBOOLE_1:4
+.= ( ( ( ( D10 ~ ) \/ D11 ) \/ ( ( D11 ~ ) \/ D10 ) ) \/ D12 ) by XBOOLE_1:4
+.= ( ( e_flow R6 ) \/ ( ( ( D11 ~ ) \/ ( ( D10 ~ ) ~ ) ) \/ D12 ) ) by XBOOLE_1:5
+.= ( ( e_flow R6 ) \/ ( ( ( ( D10 ~ ) \/ D11 ) ~ ) \/ D12 ) ) by RELAT_1:23
+.= ( ( e_flow R6 ) \/ ( ( ( ( D10 ~ ) \/ D11 ) ~ ) \/ ( D12 ~ ) ) )
+.= ( ( e_flow R6 ) \/ ( ( e_flow R6 ) ~ ) ) by RELAT_1:23;
+L159: ( ( ( e_prox R6 ) \ D12 ) * ( e_prox R6 ) ) = ( ( ( ( D10 ~ ) \/ ( D11 ~ ) ) \ D12 ) * ( ( D10 \/ D11 ) ~ ) ) by RELAT_1:23
+.= ( ( ( ( D10 ~ ) \ D12 ) \/ ( ( D11 ~ ) \ D12 ) ) * ( ( D10 \/ D11 ) ~ ) ) by XBOOLE_1:42
+.= ( ( ( ( D10 ~ ) \ D12 ) \/ ( ( D11 ~ ) \ D12 ) ) * ( ( D10 ~ ) \/ ( D11 ~ ) ) ) by RELAT_1:23
+.= ( ( ( ( ( D10 ~ ) \ D12 ) \/ ( ( D11 ~ ) \ D12 ) ) * ( D10 ~ ) ) \/ ( ( ( ( D10 ~ ) \ D12 ) \/ ( ( D11 ~ ) \ D12 ) ) * ( D11 ~ ) ) ) by RELAT_1:32
+.= ( ( ( ( ( D10 ~ ) \ D12 ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ D12 ) \/ ( ( D11 ~ ) \ D12 ) ) * ( D11 ~ ) ) ) by SYSREL:6
+.= ( ( ( ( ( D10 ~ ) \ D12 ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ D12 ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D11 ~ ) ) ) ) by SYSREL:6
+.= ( ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ D12 ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D11 ~ ) ) ) )
+.= ( ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ D12 ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D11 ~ ) ) ) )
+.= ( ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ D12 ) * ( D11 ~ ) ) ) )
+.= ( ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) ) )
+.= ( ( ( ( ( D10 \ D12 ) ~ ) * ( D10 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) ) ) by RELAT_1:24
+.= ( ( ( ( ( D10 \ D12 ) ~ ) * ( D10 ~ ) ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) ) ) by RELAT_1:24
+.= ( ( ( ( ( D10 \ D12 ) ~ ) * ( D10 ~ ) ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 \ D12 ) ~ ) * ( D11 ~ ) ) \/ ( ( ( D11 ~ ) \ ( D12 ~ ) ) * ( D11 ~ ) ) ) ) by RELAT_1:24
+.= ( ( ( ( ( D10 \ D12 ) ~ ) * ( D10 ~ ) ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 \ D12 ) ~ ) * ( D11 ~ ) ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D11 ~ ) ) ) ) by RELAT_1:24
+.= ( ( ( ( D10 * ( D10 \ D12 ) ) ~ ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D10 ~ ) ) ) \/ ( ( ( ( D10 \ D12 ) ~ ) * ( D11 ~ ) ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D11 ~ ) ) ) ) by RELAT_1:35
+.= ( ( ( ( D10 * ( D10 \ D12 ) ) ~ ) \/ ( ( D10 * ( D11 \ D12 ) ) ~ ) ) \/ ( ( ( ( D10 \ D12 ) ~ ) * ( D11 ~ ) ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D11 ~ ) ) ) ) by RELAT_1:35
+.= ( ( ( ( D10 * ( D10 \ D12 ) ) ~ ) \/ ( ( D10 * ( D11 \ D12 ) ) ~ ) ) \/ ( ( ( D11 * ( D10 \ D12 ) ) ~ ) \/ ( ( ( D11 \ D12 ) ~ ) * ( D11 ~ ) ) ) ) by RELAT_1:35
+.= ( ( ( ( D10 * ( D10 \ D12 ) ) ~ ) \/ ( ( D10 * ( D11 \ D12 ) ) ~ ) ) \/ ( ( ( D11 * ( D10 \ D12 ) ) ~ ) \/ ( ( D11 * ( D11 \ D12 ) ) ~ ) ) ) by RELAT_1:35
+.= ( ( ( ( {} ) ~ ) \/ ( ( D10 * ( D11 \ D12 ) ) ~ ) ) \/ ( ( ( D11 * ( D10 \ D12 ) ) ~ ) \/ ( ( D11 * ( D11 \ D12 ) ) ~ ) ) ) by L8
+.= ( ( ( ( {} ) ~ ) \/ ( ( D10 * ( D11 \ D12 ) ) ~ ) ) \/ ( ( ( D11 * ( D10 \ D12 ) ) ~ ) \/ ( ( {} ) ~ ) ) ) by L8
+.= ( ( ( ( {} ) ~ ) \/ ( ( {} ) ~ ) ) \/ ( ( ( D11 * ( D10 \ D12 ) ) ~ ) \/ ( ( {} ) ~ ) ) ) by L74
+.= ( {} ) by L74;
+L160: ( ( e_prox R6 ) * ( e_prox R6 ) ) = ( ( ( D10 \/ D11 ) * ( D10 \/ D11 ) ) ~ ) by RELAT_1:35
+.= ( ( ( ( D10 \/ D11 ) * D10 ) \/ ( ( D10 \/ D11 ) * D11 ) ) ~ ) by RELAT_1:32
+.= ( ( ( ( D10 * D10 ) \/ ( D11 * D10 ) ) \/ ( ( D10 \/ D11 ) * D11 ) ) ~ ) by SYSREL:6
+.= ( ( ( ( D10 * D10 ) \/ ( D11 * D10 ) ) \/ ( ( D10 * D11 ) \/ ( D11 * D11 ) ) ) ~ ) by SYSREL:6
+.= ( ( ( D10 \/ ( D11 * D10 ) ) \/ ( ( D10 * D11 ) \/ ( D11 * D11 ) ) ) ~ ) by L2
+.= ( ( ( D10 \/ D11 ) \/ ( ( D10 * D11 ) \/ ( D11 * D11 ) ) ) ~ ) by L2
+.= ( ( ( D10 \/ D11 ) \/ ( D10 \/ ( D11 * D11 ) ) ) ~ ) by L2
+.= ( ( ( D10 \/ D11 ) \/ ( D10 \/ D11 ) ) ~ ) by L2
+.= ( e_prox R6 );
+thus L161: thesis by L160 , L159 , L158;
+end;
+theorem
+L162: (for R6 being e_net holds (( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( (the escape of R6) \ ( id (the carrier of R6) ) ) & ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( (the entrance of R6) \ ( id (the carrier of R6) ) )))
+proof
+let R6 being e_net;
+set D13 = (the entrance of R6);
+set D14 = (the carrier of R6);
+set D15 = (the escape of R6);
+set D16 = ( id D14 );
+L163: (for R1 being set holds (for R2 being set holds ([ R1 , R2 ] in ( D15 \ D16 ) implies [ R1 , R2 ] in ( ( id ( D14 \ ( rng D15 ) ) ) * ( D15 \ D16 ) ))))
+proof
+let R1 being set;
+let R2 being set;
+assume L164: [ R1 , R2 ] in ( D15 \ D16 );
+L165: [ R1 , R2 ] in D15 by L164 , XBOOLE_0:def 5;
+L166: R1 in ( dom D15 ) by L165 , XTUPLE_0:def 12;
+L167: (not R1 in ( rng D15 ))
+proof
+assume L168: R1 in ( rng D15 );
+L169: (ex R3 being set st [ R3 , R1 ] in D15) by L168 , XTUPLE_0:def 13;
+L170: ( D15 * ( D15 \ D16 ) ) <> ( {} ) by L169 , L164 , RELAT_1:def 8;
+thus L171: thesis by L170 , L8;
+end;
+L172: ( dom D15 ) c= D14 by L71;
+L173: R1 in ( D14 \ ( rng D15 ) ) by L172 , L166 , L167 , XBOOLE_0:def 5;
+L174: [ R1 , R1 ] in ( id ( D14 \ ( rng D15 ) ) ) by L173 , RELAT_1:def 10;
+thus L175: thesis by L174 , L164 , RELAT_1:def 8;
+end;
+L176: ( D15 \ D16 ) c= ( ( id ( D14 \ ( rng D15 ) ) ) * ( D15 \ D16 ) ) by L163 , RELAT_1:def 3;
+L177: (for R1 being set holds (for R2 being set holds ([ R1 , R2 ] in ( D13 \ D16 ) implies [ R1 , R2 ] in ( ( id ( D14 \ ( rng D13 ) ) ) * ( D13 \ D16 ) ))))
+proof
+let R1 being set;
+let R2 being set;
+assume L178: [ R1 , R2 ] in ( D13 \ D16 );
+L179: [ R1 , R2 ] in D13 by L178 , XBOOLE_0:def 5;
+L180: R1 in ( dom D13 ) by L179 , XTUPLE_0:def 12;
+L181: (not R1 in ( rng D13 ))
+proof
+assume L182: R1 in ( rng D13 );
+L183: (ex R3 being set st [ R3 , R1 ] in D13) by L182 , XTUPLE_0:def 13;
+L184: ( D13 * ( D13 \ D16 ) ) <> ( {} ) by L183 , L178 , RELAT_1:def 8;
+thus L185: thesis by L184 , L8;
+end;
+L186: ( dom D13 ) c= D14 by L71;
+L187: R1 in ( D14 \ ( rng D13 ) ) by L186 , L180 , L181 , XBOOLE_0:def 5;
+L188: [ R1 , R1 ] in ( id ( D14 \ ( rng D13 ) ) ) by L187 , RELAT_1:def 10;
+thus L189: thesis by L188 , L178 , RELAT_1:def 8;
+end;
+L190: ( D13 \ D16 ) c= ( ( id ( D14 \ ( rng D13 ) ) ) * ( D13 \ D16 ) ) by L177 , RELAT_1:def 3;
+L191: (( ( id ( D14 \ ( rng D15 ) ) ) * ( D15 \ D16 ) ) c= ( D15 \ D16 ) & ( ( id ( D14 \ ( rng D13 ) ) ) * ( D13 \ D16 ) ) c= ( D13 \ D16 )) by RELAT_1:50;
+thus L192: thesis by L191 , L176 , L190 , XBOOLE_0:def 10;
+end;
+theorem
+L193: (for R6 being e_net holds (( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) = ( {} ) & ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) = ( {} )))
+proof
+let R6 being e_net;
+set D17 = (the entrance of R6);
+set D18 = (the carrier of R6);
+set D19 = (the escape of R6);
+set D20 = ( id D18 );
+L194: ( ( D17 \ D20 ) * ( D17 \ D20 ) ) c= ( D17 * ( D17 \ D20 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L195: ( ( D17 \ D20 ) * ( D17 \ D20 ) ) c= ( {} ) by L194 , L8;
+L196: ( ( D19 \ D20 ) * ( D17 \ D20 ) ) c= ( D19 * ( D17 \ D20 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L197: ( ( D19 \ D20 ) * ( D17 \ D20 ) ) c= ( {} ) by L196 , L74;
+L198: ( ( D17 \ D20 ) * ( D19 \ D20 ) ) c= ( D17 * ( D19 \ D20 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L199: ( ( D17 \ D20 ) * ( D19 \ D20 ) ) c= ( {} ) by L198 , L74;
+L200: ( ( D19 \ D20 ) * ( D19 \ D20 ) ) c= ( D19 * ( D19 \ D20 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L201: ( ( D19 \ D20 ) * ( D19 \ D20 ) ) c= ( {} ) by L200 , L8;
+thus L202: thesis by L201 , L195 , L197 , L199 , XBOOLE_1:3;
+end;
+theorem
+L203: (for R6 being e_net holds (( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( {} ) & ( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( {} )))
+proof
+let R6 being e_net;
+L204: ( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) ~ ) by RELAT_1:35
+.= ( {} ) by L193 , RELAT_1:43;
+L205: ( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) ~ ) by RELAT_1:35
+.= ( {} ) by L193 , RELAT_1:43;
+thus L206: thesis by L205 , L204;
+end;
+theorem
+L207: (for R6 being e_net holds (( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) ~ ) ) = ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) & ( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) ~ ) ) = ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ )))
+proof
+let R6 being e_net;
+L208: ( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) ~ ) ) = ( ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) * ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ) ~ ) by RELAT_1:35
+.= ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) by L162;
+L209: ( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) * ( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) ~ ) ) = ( ( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) * ( (the escape of R6) \ ( id (the carrier of R6) ) ) ) ~ ) by RELAT_1:35
+.= ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) by L162;
+thus L210: thesis by L209 , L208;
+end;
+theorem
+L211: (for R6 being e_net holds (( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) ) = ( {} ) & ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) ) = ( {} )))
+proof
+let R6 being e_net;
+L212: (for R1 being set holds (for R2 being set holds (not [ R1 , R2 ] in ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) ))))
+proof
+let R1 being set;
+let R2 being set;
+assume L213: [ R1 , R2 ] in ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) );
+consider R3 being set such that L214: [ R1 , R3 ] in ( (the entrance of R6) \ ( id (the carrier of R6) ) ) and L215: [ R3 , R2 ] in ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) by L213 , RELAT_1:def 8;
+L216: R3 in ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) by L215 , RELAT_1:def 10;
+L217: (not R3 in ( rng (the entrance of R6) )) by L216 , XBOOLE_0:def 5;
+L218: [ R1 , R3 ] in (the entrance of R6) by L214 , XBOOLE_0:def 5;
+thus L219: thesis by L218 , L217 , XTUPLE_0:def 13;
+end;
+L220: (for R1 being set holds (for R2 being set holds (not [ R1 , R2 ] in ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) ))))
+proof
+let R1 being set;
+let R2 being set;
+assume L221: [ R1 , R2 ] in ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) );
+consider R3 being set such that L222: [ R1 , R3 ] in ( (the escape of R6) \ ( id (the carrier of R6) ) ) and L223: [ R3 , R2 ] in ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) by L221 , RELAT_1:def 8;
+L224: R3 in ( (the carrier of R6) \ ( rng (the escape of R6) ) ) by L223 , RELAT_1:def 10;
+L225: (not R3 in ( rng (the escape of R6) )) by L224 , XBOOLE_0:def 5;
+L226: [ R1 , R3 ] in (the escape of R6) by L222 , XBOOLE_0:def 5;
+thus L227: thesis by L226 , L225 , XTUPLE_0:def 13;
+end;
+thus L228: thesis by L220 , L212 , RELAT_1:37;
+end;
+theorem
+L229: (for R6 being e_net holds (( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) * ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( {} ) & ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) * ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( {} )))
+proof
+let R6 being e_net;
+L230: ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) * ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( ( ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) ~ ) * ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) )
+.= ( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) ) ~ ) by RELAT_1:35
+.= ( {} ) by L211 , RELAT_1:43;
+L231: ( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) * ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) ) = ( ( ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) ~ ) * ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) )
+.= ( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) * ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) ) ~ ) by RELAT_1:35
+.= ( {} ) by L211 , RELAT_1:43;
+thus L232: thesis by L231 , L230;
+end;
+definition
+let R6 being e_net;
+func e_entrance R6 -> Relation equals 
+( ( ( (the escape of R6) \ ( id (the carrier of R6) ) ) ~ ) \/ ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) ) );
+correctness;
+func e_escape R6 -> Relation equals 
+( ( ( (the entrance of R6) \ ( id (the carrier of R6) ) ) ~ ) \/ ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) );
+correctness;
+end;
+theorem
+L234: (for R6 being e_net holds (( ( e_entrance R6 ) * ( e_entrance R6 ) ) = ( e_entrance R6 ) & ( ( e_entrance R6 ) * ( e_escape R6 ) ) = ( e_entrance R6 ) & ( ( e_escape R6 ) * ( e_entrance R6 ) ) = ( e_escape R6 ) & ( ( e_escape R6 ) * ( e_escape R6 ) ) = ( e_escape R6 )))
+proof
+let R6 being e_net;
+set D21 = ( (the escape of R6) \ ( id (the carrier of R6) ) );
+set D22 = ( (the entrance of R6) \ ( id (the carrier of R6) ) );
+set D23 = ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) );
+set D24 = ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) );
+L235: ( ( e_entrance R6 ) * ( e_entrance R6 ) ) = ( ( ( D21 ~ ) * ( ( D21 ~ ) \/ D24 ) ) \/ ( D24 * ( ( D21 ~ ) \/ D24 ) ) ) by SYSREL:6
+.= ( ( ( ( D21 ~ ) * ( D21 ~ ) ) \/ ( ( D21 ~ ) * D24 ) ) \/ ( D24 * ( ( D21 ~ ) \/ D24 ) ) ) by RELAT_1:32
+.= ( ( ( ( D21 ~ ) * ( D21 ~ ) ) \/ ( ( D21 ~ ) * D24 ) ) \/ ( ( D24 * ( D21 ~ ) ) \/ ( D24 * D24 ) ) ) by RELAT_1:32
+.= ( ( ( ( D21 * D21 ) ~ ) \/ ( ( D21 ~ ) * D24 ) ) \/ ( ( D24 * ( D21 ~ ) ) \/ ( D24 * D24 ) ) ) by RELAT_1:35
+.= ( ( ( ( D21 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D24 ~ ) ) ) \/ ( ( D24 * ( D21 ~ ) ) \/ ( D24 * D24 ) ) )
+.= ( ( ( ( D21 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D24 ~ ) ) ) \/ ( ( ( D24 ~ ) * ( D21 ~ ) ) \/ ( D24 * D24 ) ) )
+.= ( ( ( ( D21 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D24 ~ ) ) ) \/ ( ( ( D24 ~ ) * ( D21 ~ ) ) \/ D24 ) ) by SYSREL:12
+.= ( ( ( ( D21 * D21 ) ~ ) \/ ( ( D24 * D21 ) ~ ) ) \/ ( ( ( D24 ~ ) * ( D21 ~ ) ) \/ D24 ) ) by RELAT_1:35
+.= ( ( ( ( D21 * D21 ) ~ ) \/ ( ( D24 * D21 ) ~ ) ) \/ ( ( ( D21 * D24 ) ~ ) \/ D24 ) ) by RELAT_1:35
+.= ( ( ( ( {} ) ~ ) \/ ( ( D24 * D21 ) ~ ) ) \/ ( ( ( D21 * D24 ) ~ ) \/ D24 ) ) by L193
+.= ( ( ( ( {} ) ~ ) \/ ( D21 ~ ) ) \/ ( ( ( D21 * D24 ) ~ ) \/ D24 ) ) by L162
+.= ( ( ( {} ) \/ ( D21 ~ ) ) \/ ( ( {} ) \/ D24 ) ) by L211
+.= ( e_entrance R6 );
+L236: ( ( e_escape R6 ) * ( e_escape R6 ) ) = ( ( ( D22 ~ ) * ( ( D22 ~ ) \/ D23 ) ) \/ ( D23 * ( ( D22 ~ ) \/ D23 ) ) ) by SYSREL:6
+.= ( ( ( ( D22 ~ ) * ( D22 ~ ) ) \/ ( ( D22 ~ ) * D23 ) ) \/ ( D23 * ( ( D22 ~ ) \/ D23 ) ) ) by RELAT_1:32
+.= ( ( ( ( D22 ~ ) * ( D22 ~ ) ) \/ ( ( D22 ~ ) * D23 ) ) \/ ( ( D23 * ( D22 ~ ) ) \/ ( D23 * D23 ) ) ) by RELAT_1:32
+.= ( ( ( ( D22 * D22 ) ~ ) \/ ( ( D22 ~ ) * D23 ) ) \/ ( ( D23 * ( D22 ~ ) ) \/ ( D23 * D23 ) ) ) by RELAT_1:35
+.= ( ( ( ( D22 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D23 ~ ) ) ) \/ ( ( D23 * ( D22 ~ ) ) \/ ( D23 * D23 ) ) )
+.= ( ( ( ( D22 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D23 ~ ) ) ) \/ ( ( ( D23 ~ ) * ( D22 ~ ) ) \/ ( D23 * D23 ) ) )
+.= ( ( ( ( D22 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D23 ~ ) ) ) \/ ( ( ( D23 ~ ) * ( D22 ~ ) ) \/ D23 ) ) by SYSREL:12
+.= ( ( ( ( D22 * D22 ) ~ ) \/ ( ( D23 * D22 ) ~ ) ) \/ ( ( ( D23 ~ ) * ( D22 ~ ) ) \/ D23 ) ) by RELAT_1:35
+.= ( ( ( ( D22 * D22 ) ~ ) \/ ( ( D23 * D22 ) ~ ) ) \/ ( ( ( D22 * D23 ) ~ ) \/ D23 ) ) by RELAT_1:35
+.= ( ( ( ( {} ) ~ ) \/ ( ( D23 * D22 ) ~ ) ) \/ ( ( ( D22 * D23 ) ~ ) \/ D23 ) ) by L193
+.= ( ( ( ( {} ) ~ ) \/ ( D22 ~ ) ) \/ ( ( ( D22 * D23 ) ~ ) \/ D23 ) ) by L162
+.= ( ( ( {} ) \/ ( D22 ~ ) ) \/ ( ( {} ) \/ D23 ) ) by L211
+.= ( e_escape R6 );
+L237: ( ( e_escape R6 ) * ( e_entrance R6 ) ) = ( ( ( D22 ~ ) * ( ( D21 ~ ) \/ D24 ) ) \/ ( D23 * ( ( D21 ~ ) \/ D24 ) ) ) by SYSREL:6
+.= ( ( ( ( D22 ~ ) * ( D21 ~ ) ) \/ ( ( D22 ~ ) * D24 ) ) \/ ( D23 * ( ( D21 ~ ) \/ D24 ) ) ) by RELAT_1:32
+.= ( ( ( ( D22 ~ ) * ( D21 ~ ) ) \/ ( ( D22 ~ ) * D24 ) ) \/ ( ( D23 * ( D21 ~ ) ) \/ ( D23 * D24 ) ) ) by RELAT_1:32
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D22 ~ ) * D24 ) ) \/ ( ( D23 * ( D21 ~ ) ) \/ ( D23 * D24 ) ) ) by RELAT_1:35
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D24 ~ ) ) ) \/ ( ( D23 * ( D21 ~ ) ) \/ ( D23 * D24 ) ) )
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D24 ~ ) ) ) \/ ( ( ( D23 ~ ) * ( D21 ~ ) ) \/ ( D23 * D24 ) ) )
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D24 ~ ) ) ) \/ ( ( ( D23 ~ ) * ( D21 ~ ) ) \/ ( D23 * D23 ) ) ) by L61
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D22 ~ ) * ( D24 ~ ) ) ) \/ ( ( ( D23 ~ ) * ( D21 ~ ) ) \/ D23 ) ) by SYSREL:12
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D24 * D22 ) ~ ) ) \/ ( ( ( D23 ~ ) * ( D21 ~ ) ) \/ D23 ) ) by RELAT_1:35
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D24 * D22 ) ~ ) ) \/ ( ( ( D21 * D23 ) ~ ) \/ D23 ) ) by RELAT_1:35
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D23 * D22 ) ~ ) ) \/ ( ( ( D21 * D23 ) ~ ) \/ D23 ) ) by L61
+.= ( ( ( ( D21 * D22 ) ~ ) \/ ( ( D23 * D22 ) ~ ) ) \/ ( ( ( D21 * D24 ) ~ ) \/ D23 ) ) by L61
+.= ( ( ( ( {} ) ~ ) \/ ( ( D23 * D22 ) ~ ) ) \/ ( ( ( D21 * D24 ) ~ ) \/ D23 ) ) by L193
+.= ( ( ( ( {} ) ~ ) \/ ( D22 ~ ) ) \/ ( ( ( D21 * D24 ) ~ ) \/ D23 ) ) by L162
+.= ( ( ( {} ) \/ ( D22 ~ ) ) \/ ( ( {} ) \/ D23 ) ) by L211
+.= ( e_escape R6 );
+L238: ( ( e_entrance R6 ) * ( e_escape R6 ) ) = ( ( ( D21 ~ ) * ( ( D22 ~ ) \/ D23 ) ) \/ ( D24 * ( ( D22 ~ ) \/ D23 ) ) ) by SYSREL:6
+.= ( ( ( ( D21 ~ ) * ( D22 ~ ) ) \/ ( ( D21 ~ ) * D23 ) ) \/ ( D24 * ( ( D22 ~ ) \/ D23 ) ) ) by RELAT_1:32
+.= ( ( ( ( D21 ~ ) * ( D22 ~ ) ) \/ ( ( D21 ~ ) * D23 ) ) \/ ( ( D24 * ( D22 ~ ) ) \/ ( D24 * D23 ) ) ) by RELAT_1:32
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D21 ~ ) * D23 ) ) \/ ( ( D24 * ( D22 ~ ) ) \/ ( D24 * D23 ) ) ) by RELAT_1:35
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D23 ~ ) ) ) \/ ( ( D24 * ( D22 ~ ) ) \/ ( D24 * D23 ) ) )
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D23 ~ ) ) ) \/ ( ( ( D24 ~ ) * ( D22 ~ ) ) \/ ( D24 * D23 ) ) )
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D23 ~ ) ) ) \/ ( ( ( D24 ~ ) * ( D22 ~ ) ) \/ ( D24 * D24 ) ) ) by L61
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D21 ~ ) * ( D23 ~ ) ) ) \/ ( ( ( D24 ~ ) * ( D22 ~ ) ) \/ D24 ) ) by SYSREL:12
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D23 * D21 ) ~ ) ) \/ ( ( ( D24 ~ ) * ( D22 ~ ) ) \/ D24 ) ) by RELAT_1:35
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D23 * D21 ) ~ ) ) \/ ( ( ( D22 * D24 ) ~ ) \/ D24 ) ) by RELAT_1:35
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D24 * D21 ) ~ ) ) \/ ( ( ( D22 * D24 ) ~ ) \/ D24 ) ) by L61
+.= ( ( ( ( D22 * D21 ) ~ ) \/ ( ( D24 * D21 ) ~ ) ) \/ ( ( ( D22 * D23 ) ~ ) \/ D24 ) ) by L61
+.= ( ( ( ( {} ) ~ ) \/ ( ( D24 * D21 ) ~ ) ) \/ ( ( ( D22 * D23 ) ~ ) \/ D24 ) ) by L193
+.= ( ( ( ( {} ) ~ ) \/ ( D21 ~ ) ) \/ ( ( ( D22 * D23 ) ~ ) \/ D24 ) ) by L162
+.= ( ( ( {} ) \/ ( D21 ~ ) ) \/ ( ( {} ) \/ D24 ) ) by L211
+.= ( e_entrance R6 );
+thus L239: thesis by L238 , L235 , L237 , L236;
+end;
+theorem
+L240: (for R6 being e_net holds (( ( e_entrance R6 ) * ( ( e_entrance R6 ) \ ( id ( e_shore R6 ) ) ) ) = ( {} ) & ( ( e_escape R6 ) * ( ( e_escape R6 ) \ ( id ( e_shore R6 ) ) ) ) = ( {} )))
+proof
+let R6 being e_net;
+set D25 = ( (the escape of R6) \ ( id R6 ) );
+set D26 = ( (the entrance of R6) \ ( id (the carrier of R6) ) );
+set D27 = ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) );
+set D28 = ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) );
+set D29 = ( id (the carrier of R6) );
+L241: D27 c= D29 by SYSREL:15 , XBOOLE_1:36;
+L242: ( ( D26 ~ ) * ( ( D26 ~ ) \ D29 ) ) c= ( ( D26 ~ ) * ( D26 ~ ) ) by RELAT_1:29 , XBOOLE_1:36;
+L243: ( ( D26 ~ ) * ( ( D26 ~ ) \ D29 ) ) c= ( {} ) by L242 , L203;
+L244: ( ( D26 ~ ) * ( ( D26 ~ ) \ D29 ) ) = ( {} ) by L243 , XBOOLE_1:3;
+L245: ( D27 * ( ( D26 ~ ) \ D29 ) ) c= ( D27 * ( D26 ~ ) ) by RELAT_1:29 , XBOOLE_1:36;
+L246: ( D27 * ( ( D26 ~ ) \ D29 ) ) c= ( {} ) by L245 , L229;
+L247: ( D27 * ( ( D26 ~ ) \ D29 ) ) = ( {} ) by L246 , XBOOLE_1:3;
+L248: ( ( e_escape R6 ) * ( ( e_escape R6 ) \ ( id ( e_shore R6 ) ) ) ) = ( ( ( D26 ~ ) \/ D27 ) * ( ( ( D26 ~ ) \ D29 ) \/ ( D27 \ D29 ) ) ) by XBOOLE_1:42
+.= ( ( ( D26 ~ ) \/ D27 ) * ( ( ( D26 ~ ) \ D29 ) \/ ( {} ) ) ) by L241 , XBOOLE_1:37
+.= ( ( {} ) \/ ( {} ) ) by L244 , L247 , SYSREL:6
+.= ( {} );
+L249: D28 c= D29 by SYSREL:15 , XBOOLE_1:36;
+L250: ( D28 * ( ( D25 ~ ) \ D29 ) ) c= ( D28 * ( D25 ~ ) ) by RELAT_1:29 , XBOOLE_1:36;
+L251: ( D28 * ( ( D25 ~ ) \ D29 ) ) c= ( {} ) by L250 , L229;
+L252: ( D28 * ( ( D25 ~ ) \ D29 ) ) = ( {} ) by L251 , XBOOLE_1:3;
+L253: ( ( D25 ~ ) * ( ( D25 ~ ) \ D29 ) ) c= ( ( D25 ~ ) * ( D25 ~ ) ) by RELAT_1:29 , XBOOLE_1:36;
+L254: ( ( D25 ~ ) * ( ( D25 ~ ) \ D29 ) ) c= ( {} ) by L253 , L203;
+L255: ( ( D25 ~ ) * ( ( D25 ~ ) \ D29 ) ) = ( {} ) by L254 , XBOOLE_1:3;
+L256: ( ( e_entrance R6 ) * ( ( e_entrance R6 ) \ ( id ( e_shore R6 ) ) ) ) = ( ( ( D25 ~ ) \/ D28 ) * ( ( ( D25 ~ ) \ D29 ) \/ ( D28 \ D29 ) ) ) by XBOOLE_1:42
+.= ( ( ( D25 ~ ) \/ D28 ) * ( ( ( D25 ~ ) \ D29 ) \/ ( {} ) ) ) by L249 , XBOOLE_1:37
+.= ( ( {} ) \/ ( {} ) ) by L255 , L252 , SYSREL:6
+.= ( {} );
+thus L257: thesis by L256 , L248;
+end;
+definition
+let R6 being e_net;
+func e_adjac R6 -> Relation equals 
+( ( ( (the entrance of R6) \/ (the escape of R6) ) \ ( id (the carrier of R6) ) ) \/ ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) );
+correctness;
+end;
+theorem
+L259: (for R6 being e_net holds (( e_adjac R6 ) c= [: ( e_shore R6 ) , ( e_shore R6 ) :] & ( e_flow R6 ) c= [: ( e_shore R6 ) , ( e_shore R6 ) :]))
+proof
+let R6 being e_net;
+L260: ( ( (the entrance of R6) \/ (the escape of R6) ) \ ( id (the carrier of R6) ) ) c= ( (the entrance of R6) \/ (the escape of R6) ) by XBOOLE_1:36;
+L261: (the escape of R6) c= [: (the carrier of R6) , (the carrier of R6) :] by L2;
+L262: (the entrance of R6) c= [: (the carrier of R6) , (the carrier of R6) :] by L2;
+L263: ( (the entrance of R6) ~ ) c= [: (the carrier of R6) , (the carrier of R6) :] by L262 , SYSREL:4;
+L264: (( id (the carrier of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :] & ( ( (the entrance of R6) ~ ) \/ (the escape of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :]) by L263 , L261 , RELSET_1:13 , XBOOLE_1:8;
+L265: (( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) c= ( id (the carrier of R6) ) & ( id (the carrier of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :]) by RELSET_1:13 , SYSREL:15 , XBOOLE_1:36;
+L266: ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) ) c= [: (the carrier of R6) , (the carrier of R6) :] by L265 , XBOOLE_1:1;
+L267: ( (the entrance of R6) \/ (the escape of R6) ) c= [: (the carrier of R6) , (the carrier of R6) :] by L262 , L261 , XBOOLE_1:8;
+L268: ( ( (the entrance of R6) \/ (the escape of R6) ) \ ( id (the carrier of R6) ) ) c= [: (the carrier of R6) , (the carrier of R6) :] by L267 , L260 , XBOOLE_1:1;
+thus L269: thesis by L268 , L266 , L264 , XBOOLE_1:8;
+end;
+theorem
+L270: (for R6 being e_net holds (( ( e_adjac R6 ) * ( e_adjac R6 ) ) = ( e_adjac R6 ) & ( ( ( e_adjac R6 ) \ ( id ( e_shore R6 ) ) ) * ( e_adjac R6 ) ) = ( {} ) & ( ( ( e_adjac R6 ) \/ ( ( e_adjac R6 ) ~ ) ) \/ ( id ( e_shore R6 ) ) ) = ( ( e_flow R6 ) \/ ( ( e_flow R6 ) ~ ) )))
+proof
+let R6 being e_net;
+set D30 = (the entrance of R6);
+set D31 = (the escape of R6);
+set D32 = ( id (the carrier of R6) );
+set D33 = ( id ( (the carrier of R6) \ ( rng (the entrance of R6) ) ) );
+set D34 = ( id ( (the carrier of R6) \ ( rng (the escape of R6) ) ) );
+L271: D33 c= D32 by SYSREL:15 , XBOOLE_1:36;
+L272: ( ( e_adjac R6 ) \/ ( ( e_adjac R6 ) ~ ) ) = ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \/ ( ( ( ( D30 \/ D31 ) \ D32 ) ~ ) \/ ( D33 ~ ) ) ) by RELAT_1:23
+.= ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \/ ( ( ( ( D30 \/ D31 ) \ D32 ) ~ ) \/ D33 ) )
+.= ( ( ( ( D30 \/ D31 ) \ D32 ) \/ ( ( ( D30 \/ D31 ) \ D32 ) ~ ) ) \/ D33 ) by XBOOLE_1:5
+.= ( ( ( ( D30 \/ D31 ) \ D32 ) \/ ( ( ( D30 \/ D31 ) ~ ) \ ( D32 ~ ) ) ) \/ D33 ) by RELAT_1:24
+.= ( ( ( ( D30 \/ D31 ) \ D32 ) \/ ( ( ( D30 \/ D31 ) ~ ) \ D32 ) ) \/ D33 )
+.= ( ( ( ( D30 \/ D31 ) \/ ( ( D30 \/ D31 ) ~ ) ) \ D32 ) \/ D33 ) by XBOOLE_1:42;
+L273: ( ( ( e_adjac R6 ) \/ ( ( e_adjac R6 ) ~ ) ) \/ ( id ( e_shore R6 ) ) ) = ( ( ( ( D30 \/ D31 ) \/ ( ( D30 \/ D31 ) ~ ) ) \ D32 ) \/ ( D33 \/ D32 ) ) by L272 , XBOOLE_1:4
+.= ( ( ( ( D30 \/ D31 ) \/ ( ( D30 \/ D31 ) ~ ) ) \ D32 ) \/ D32 ) by L271 , XBOOLE_1:12
+.= ( ( ( ( ( D30 ~ ) \/ ( D31 ~ ) ) \/ ( D30 \/ D31 ) ) \ D32 ) \/ D32 ) by RELAT_1:23
+.= ( ( ( ( D30 ~ ) \/ ( ( D31 \/ D30 ) \/ ( D31 ~ ) ) ) \ D32 ) \/ D32 ) by XBOOLE_1:4
+.= ( ( ( ( D30 ~ ) \/ ( D31 \/ ( D30 \/ ( D31 ~ ) ) ) ) \ D32 ) \/ D32 ) by XBOOLE_1:4
+.= ( ( ( ( ( D30 ~ ) \/ D31 ) \/ ( D30 \/ ( D31 ~ ) ) ) \ D32 ) \/ D32 ) by XBOOLE_1:4
+.= ( ( ( ( D30 ~ ) \/ D31 ) \/ ( D30 \/ ( D31 ~ ) ) ) \/ D32 ) by XBOOLE_1:39
+.= ( ( e_flow R6 ) \/ ( ( ( ( D30 \/ ( D31 ~ ) ) ~ ) ~ ) \/ D32 ) ) by XBOOLE_1:5
+.= ( ( e_flow R6 ) \/ ( ( ( ( D30 ~ ) \/ ( ( D31 ~ ) ~ ) ) ~ ) \/ D32 ) ) by RELAT_1:23
+.= ( ( e_flow R6 ) \/ ( ( ( ( D30 ~ ) \/ D31 ) ~ ) \/ ( D32 ~ ) ) )
+.= ( ( e_flow R6 ) \/ ( ( e_flow R6 ) ~ ) ) by RELAT_1:23;
+L274: D33 c= D32 by SYSREL:15 , XBOOLE_1:36;
+L275: ( D33 \ D32 ) = ( {} ) by L274 , XBOOLE_1:37;
+L276: ( ( D30 \ D32 ) * ( D31 \ D32 ) ) c= ( D30 * ( D31 \ D32 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L277: ( ( D30 \ D32 ) * ( D31 \ D32 ) ) c= ( {} ) by L276 , L74;
+L278: ( ( D30 \ D32 ) * ( D31 \ D32 ) ) = ( {} ) by L277 , XBOOLE_1:3;
+L279: ( ( D30 \ D32 ) * ( D30 \ D32 ) ) c= ( D30 * ( D30 \ D32 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L280: ( ( D30 \ D32 ) * ( D30 \ D32 ) ) c= ( {} ) by L279 , L8;
+L281: ( ( D30 \ D32 ) * ( D30 \ D32 ) ) = ( {} ) by L280 , XBOOLE_1:3;
+L282: ( ( D31 \ D32 ) * ( D30 \ D32 ) ) c= ( D31 * ( D30 \ D32 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L283: ( ( D31 \ D32 ) * ( D30 \ D32 ) ) c= ( {} ) by L282 , L74;
+L284: ( ( D31 \ D32 ) * ( D30 \ D32 ) ) = ( {} ) by L283 , XBOOLE_1:3;
+L285: ( ( D31 \ D32 ) * ( D31 \ D32 ) ) c= ( D31 * ( D31 \ D32 ) ) by RELAT_1:30 , XBOOLE_1:36;
+L286: ( ( D31 \ D32 ) * ( D31 \ D32 ) ) c= ( {} ) by L285 , L8;
+L287: ( ( D31 \ D32 ) * ( D31 \ D32 ) ) = ( {} ) by L286 , XBOOLE_1:3;
+L288: ( ( ( e_adjac R6 ) \ D32 ) * ( e_adjac R6 ) ) = ( ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by RELAT_1:32
+.= ( ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:42
+.= ( ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \ D32 ) \/ ( D33 \ D32 ) ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:42
+.= ( ( ( ( ( ( D30 \ D32 ) \ D32 ) \/ ( ( D31 \ D32 ) \ D32 ) ) \/ ( D33 \ D32 ) ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:42
+.= ( ( ( ( ( D30 \ ( D32 \/ D32 ) ) \/ ( ( D31 \ D32 ) \ D32 ) ) \/ ( D33 \ D32 ) ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:41
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ ( D32 \/ D32 ) ) ) \/ ( D33 \ D32 ) ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:41
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ ( D33 \ D32 ) ) * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( ( ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:42
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ ( D33 \ D32 ) ) * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * D33 ) ) by XBOOLE_1:42
+.= ( ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ ( D33 \ D32 ) ) * ( D30 \ D32 ) ) \/ ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ ( D33 \ D32 ) ) * ( D31 \ D32 ) ) ) \/ ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * D33 ) ) by RELAT_1:32
+.= ( ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ ( D33 \ D32 ) ) * ( D30 \ D32 ) ) \/ ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D31 \ D32 ) ) \/ ( ( D33 \ D32 ) * ( D31 \ D32 ) ) ) ) \/ ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * D33 ) ) by SYSREL:6
+.= ( ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D30 \ D32 ) ) \/ ( ( D33 \ D32 ) * ( D30 \ D32 ) ) ) \/ ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D31 \ D32 ) ) \/ ( ( D33 \ D32 ) * ( D31 \ D32 ) ) ) ) \/ ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * D33 ) ) by SYSREL:6
+.= ( ( ( ( ( {} ) \/ ( {} ) ) \/ ( ( D33 \ D32 ) * ( D30 \ D32 ) ) ) \/ ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D31 \ D32 ) ) \/ ( ( D33 \ D32 ) * ( D31 \ D32 ) ) ) ) \/ ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * D33 ) ) by L281 , L284 , SYSREL:6
+.= ( ( ( ( {} ) * ( D30 \ D32 ) ) \/ ( ( {} ) * ( D31 \ D32 ) ) ) \/ ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) \ D32 ) * D33 ) ) by L275 , L278 , L287 , SYSREL:6
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \ D32 ) \/ ( D33 \ D32 ) ) * D33 ) by XBOOLE_1:42
+.= ( ( ( ( ( D30 \ D32 ) \ D32 ) \/ ( ( D31 \ D32 ) \ D32 ) ) \/ ( D33 \ D32 ) ) * D33 ) by XBOOLE_1:42
+.= ( ( ( ( D30 \ ( D32 \/ D32 ) ) \/ ( ( D31 \ D32 ) \ D32 ) ) \/ ( D33 \ D32 ) ) * D33 ) by XBOOLE_1:41
+.= ( ( ( ( D30 \ D32 ) \/ ( D31 \ ( D32 \/ D32 ) ) ) \/ ( D33 \ D32 ) ) * D33 ) by XBOOLE_1:41
+.= ( ( ( D30 \ D32 ) * D33 ) \/ ( ( D31 \ D32 ) * D33 ) ) by L275 , SYSREL:6
+.= ( ( {} ) \/ ( ( D31 \ D32 ) * D33 ) ) by L211
+.= ( ( {} ) \/ ( ( D31 \ D32 ) * D34 ) ) by L61
+.= ( {} ) by L211;
+L289: ( ( e_adjac R6 ) * ( e_adjac R6 ) ) = ( ( ( ( D30 \/ D31 ) \ D32 ) * ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) ) \/ ( D33 * ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) ) ) by SYSREL:6
+.= ( ( ( ( ( D30 \/ D31 ) \ D32 ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( D30 \/ D31 ) \ D32 ) * D33 ) ) \/ ( D33 * ( ( ( D30 \/ D31 ) \ D32 ) \/ D33 ) ) ) by RELAT_1:32
+.= ( ( ( ( ( D30 \/ D31 ) \ D32 ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( D30 \/ D31 ) \ D32 ) * D33 ) ) \/ ( ( D33 * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( D33 * D33 ) ) ) by RELAT_1:32
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( ( ( D30 \/ D31 ) \ D32 ) * D33 ) ) \/ ( ( D33 * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( D33 * D33 ) ) ) by XBOOLE_1:42
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( ( ( D30 \/ D31 ) \ D32 ) * D33 ) ) \/ ( ( D33 * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( D33 * D33 ) ) ) by XBOOLE_1:42
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * D33 ) ) \/ ( ( D33 * ( ( D30 \/ D31 ) \ D32 ) ) \/ ( D33 * D33 ) ) ) by XBOOLE_1:42
+.= ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * D33 ) ) \/ ( ( D33 * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( D33 * D33 ) ) ) by XBOOLE_1:42
+.= ( ( ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D30 \ D32 ) ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D31 \ D32 ) ) ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * D33 ) ) \/ ( ( D33 * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( D33 * D33 ) ) ) by RELAT_1:32
+.= ( ( ( ( ( {} ) \/ ( {} ) ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * ( D31 \ D32 ) ) ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * D33 ) ) \/ ( ( D33 * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( D33 * D33 ) ) ) by L281 , L284 , SYSREL:6
+.= ( ( ( {} ) \/ ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * D33 ) ) \/ ( ( D33 * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ ( D33 * D33 ) ) ) by L278 , L287 , SYSREL:6
+.= ( ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) * D33 ) \/ ( ( D33 * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ D33 ) ) by SYSREL:12
+.= ( ( ( ( D30 \ D32 ) * D33 ) \/ ( ( D31 \ D32 ) * D33 ) ) \/ ( ( D33 * ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) ) \/ D33 ) ) by SYSREL:6
+.= ( ( ( ( D30 \ D32 ) * D33 ) \/ ( ( D31 \ D32 ) * D33 ) ) \/ ( ( ( D33 * ( D30 \ D32 ) ) \/ ( D33 * ( D31 \ D32 ) ) ) \/ D33 ) ) by RELAT_1:32
+.= ( ( ( {} ) \/ ( ( D31 \ D32 ) * D33 ) ) \/ ( ( ( D33 * ( D30 \ D32 ) ) \/ ( D33 * ( D31 \ D32 ) ) ) \/ D33 ) ) by L211
+.= ( ( ( D31 \ D32 ) * D34 ) \/ ( ( ( D33 * ( D30 \ D32 ) ) \/ ( D33 * ( D31 \ D32 ) ) ) \/ D33 ) ) by L61
+.= ( ( {} ) \/ ( ( ( D33 * ( D30 \ D32 ) ) \/ ( D33 * ( D31 \ D32 ) ) ) \/ D33 ) ) by L211
+.= ( ( ( D30 \ D32 ) \/ ( D33 * ( D31 \ D32 ) ) ) \/ D33 ) by L162
+.= ( ( ( D30 \ D32 ) \/ ( D34 * ( D31 \ D32 ) ) ) \/ D33 ) by L61
+.= ( ( ( D30 \ D32 ) \/ ( D31 \ D32 ) ) \/ D33 ) by L162
+.= ( e_adjac R6 ) by XBOOLE_1:42;
+thus L290: thesis by L289 , L288 , L273;
+end;
+theorem
+L291: (for R7 being e_net holds (( ( (the entrance of R7) \ ( id (the carrier of R7) ) ) ~ ) c= [: ( e_Places R7 ) , ( e_Transitions R7 ) :] & ( ( (the escape of R7) \ ( id (the carrier of R7) ) ) ~ ) c= [: ( e_Places R7 ) , ( e_Transitions R7 ) :]))
+proof
+let R7 being e_net;
+L292: (( (the entrance of R7) \ ( id (the carrier of R7) ) ) c= [: ( e_Transitions R7 ) , ( e_Places R7 ) :] & ( (the escape of R7) \ ( id (the carrier of R7) ) ) c= [: ( e_Transitions R7 ) , ( e_Places R7 ) :]) by L116;
+thus L293: thesis by L292 , SYSREL:4;
+end;
+definition
+let C3 being G_Net;
+func s_pre C3 -> Relation equals 
+( ( (the escape of C3) \ ( id (the carrier of C3) ) ) ~ );
+coherence;
+func s_post C3 -> Relation equals 
+( ( (the entrance of C3) \ ( id (the carrier of C3) ) ) ~ );
+coherence;
+end;
+theorem
+L295: (for R7 being e_net holds (( s_post R7 ) c= [: ( e_Places R7 ) , ( e_Transitions R7 ) :] & ( s_pre R7 ) c= [: ( e_Places R7 ) , ( e_Transitions R7 ) :])) by L291;

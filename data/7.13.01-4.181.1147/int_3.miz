@@ -1,0 +1,1707 @@
+:: The Ring of Integers, Euclidean Rings and Modulo Integers
+::  by Christoph Schwarzweller
+::
+:: Received February 4, 1999
+:: Copyright (c) 1999-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, BINOP_2, SUBSET_1, FUNCT_1, BINOP_1, RELAT_1, ARYTM_1,
+      ALGSTR_0, FUNCT_7, CARD_1, STRUCT_0, XBOOLE_0, INT_1, ARYTM_3, SUPINF_2,
+      VECTSP_1, MESFUNC1, GROUP_1, RLVECT_1, LATTICES, VECTSP_2, COMPLEX1,
+      XXREAL_0, EUCLID, TARSKI, NAT_1, FUNCSDOM, GCD_1, INT_2, XCMPLX_0,
+      MCART_1, NEWTON, INT_3, MEMBERED, FINSET_1;
+ notations TARSKI, SUBSET_1, ORDINAL1, CARD_1, NUMBERS, COMPLEX1, XTUPLE_0,
+      MCART_1, RELAT_1, FUNCT_1, FUNCT_2, FUNCSDOM, BINOP_1, EUCLID, XXREAL_0,
+      BINOP_2, GR_CY_1, INT_1, FUNCT_7, NEWTON, INT_2, NAT_D, MEMBERED,
+      STRUCT_0, ALGSTR_0, RLVECT_1, GCD_1, GROUP_1, VECTSP_1, VECTSP_2;
+ constructors REAL_1, NAT_D, BINOP_2, NEWTON, FUNCT_7, GR_CY_1, EUCLID, GCD_1,
+      SEQ_1, RELSET_1, XTUPLE_0;
+ registrations XBOOLE_0, FUNCT_1, ORDINAL1, RELSET_1, NUMBERS, XXREAL_0,
+      XREAL_0, NAT_1, INT_1, NEWTON, STRUCT_0, VECTSP_1, GR_CY_1, GCD_1,
+      VALUED_0, MEMBERED, XTUPLE_0;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions RLVECT_1, STRUCT_0, GROUP_1, VECTSP_1, VECTSP_2, CARD_1, ALGSTR_0,
+      XTUPLE_0;
+ theorems TARSKI, BINOP_1, FUNCT_1, FUNCT_2, VECTSP_1, INT_1, RELAT_1, GCD_1,
+      RLVECT_1, EUCLID, ABSVALUE, GR_CY_1, FUNCT_7, NAT_1, MCART_1, INT_2,
+      RELSET_1, ORDINAL1, XCMPLX_1, NUMBERS, BINOP_2, GROUP_1, XREAL_1,
+      COMPLEX1, XXREAL_0, NAT_D, STRUCT_0, NEWTON, CARD_1, XTUPLE_0;
+ schemes NAT_1, BINOP_1, LMOD_7, BINOP_2;
+
+begin
+definition
+redefine func multint means 
+:L1: (for B1 , B2 being (Element of ( INT )) holds ( it . (B1 , B2) ) = ( ( multreal ) . (B1 , B2) ));
+compatibility
+proof
+let C1 being (BinOp of ( INT ));
+thus L2:now
+assume L3: C1 = ( multint );
+let C2 , C3 being (Element of ( INT ));
+thus L4: ( C1 . (C2 , C3) ) = ( C2 * C3 ) by L3 , BINOP_2:def 22
+.= ( ( multreal ) . (C2 , C3) ) by BINOP_2:def 11;
+end;
+assume L5: (for B3 , B4 being (Element of ( INT )) holds ( C1 . (B3 , B4) ) = ( ( multreal ) . (B3 , B4) ));
+L6:
+now
+let C4 , C5 being (Element of ( INT ));
+thus L7: ( C1 . (C4 , C5) ) = ( ( multreal ) . (C4 , C5) ) by L5
+.= ( C4 * C5 ) by BINOP_2:def 11
+.= ( ( multint ) . (C4 , C5) ) by BINOP_2:def 22;
+end;
+thus L8: C1 = ( multint ) by L6 , BINOP_1:2;
+end;
+end;
+definition
+redefine func compint means 
+(for B5 being (Element of ( INT )) holds ( it . B5 ) = ( ( compreal ) . B5 ));
+compatibility
+proof
+let C6 being (UnOp of ( INT ));
+thus L10:now
+assume L11: C6 = ( compint );
+let C7 being (Element of ( INT ));
+thus L12: ( C6 . C7 ) = ( - C7 ) by L11 , BINOP_2:def 19
+.= ( ( compreal ) . C7 ) by BINOP_2:def 7;
+end;
+assume L13: (for B6 being (Element of ( INT )) holds ( C6 . B6 ) = ( ( compreal ) . B6 ));
+L14:
+now
+let C8 being (Element of ( INT ));
+thus L15: ( C6 . C8 ) = ( ( compreal ) . C8 ) by L13
+.= ( - C8 ) by BINOP_2:def 7
+.= ( ( compint ) . C8 ) by BINOP_2:def 19;
+end;
+thus L16: C6 = ( compint ) by L14 , FUNCT_2:63;
+end;
+end;
+definition
+func INT.Ring -> doubleLoopStr equals 
+doubleLoopStr (# ( INT ) , ( addint ) , ( multint ) , ( In (1 , ( INT )) ) , ( In (( 0 ) , ( INT )) ) #);
+coherence;
+end;
+L19: (for B7 being (Element of ( INT.Ring )) holds B7 in ( REAL ))
+proof
+let C9 being (Element of ( INT.Ring ));
+L20: C9 in ( INT );
+thus L21: thesis by L20 , NUMBERS:15;
+end;
+registration
+cluster ( INT.Ring ) ->  strict non  empty;
+coherence;
+end;
+registration
+cluster (the carrier of ( INT.Ring )) ->  integer-membered;
+coherence;
+end;
+registration
+let C10 , C11 being (Element of ( INT.Ring ));
+let C12 , C13 being Integer;
+identify C10 * C11 with C12 * C13 when C10 = C12 , C11 = C13;
+compatibility
+proof
+assume L24: (C10 = C12 & C11 = C13);
+L25: ( ( multint ) . (C10 , C11) ) = ( ( multreal ) . (C10 , C11) ) by L1
+.= ( C12 * C13 ) by L24 , BINOP_2:def 11;
+thus L26: thesis by L25;
+end;
+identify C10 + C11 with C12 + C13 when C10 = C12 , C11 = C13;
+compatibility
+proof
+assume L27: (C10 = C12 & C11 = C13);
+L28: ( ( addint ) . (C10 , C11) ) = ( ( addreal ) . (C10 , C11) ) by GR_CY_1:def 1
+.= ( C12 + C13 ) by L27 , BINOP_2:def 9;
+thus L29: thesis by L28;
+end;
+end;
+set D1 = ( INT.Ring );
+L31: ( 0 ) in ( INT ) by INT_1:def 2;
+L32: ( 0 ) = ( 0. D1 ) by L31 , FUNCT_7:def 1;
+registration
+cluster ( INT.Ring ) ->  well-unital;
+coherence
+proof
+let C14 being (Element of ( INT.Ring ));
+L33: 1 in ( INT ) by INT_1:def 2;
+L34: 1 = ( 1. D1 ) by L33 , FUNCT_7:def 1;
+thus L35: thesis by L34;
+end;
+end;
+L37: ( 1_ D1 ) = 1
+proof
+reconsider D2 = 1 as (Element of D1) by INT_1:def 1;
+L38: (for B8 being (Element of D1) holds (( B8 * D2 ) = B8 & ( D2 * B8 ) = B8));
+L39: ( 1_ ( INT.Ring ) ) = D2 by L38 , GROUP_1:def 4;
+thus L40: thesis by L39;
+end;
+registration
+cluster ( INT.Ring ) ->  Abelian  add-associative  right_zeroed  right_complementable  distributive  commutative  associative  domRing-like non  degenerated;
+coherence
+proof
+thus L41: (for B9 , B10 being (Element of D1) holds ( B9 + B10 ) = ( B10 + B9 ));
+thus L42: (for B11 , B12 , B13 being (Element of D1) holds ( ( B11 + B12 ) + B13 ) = ( B11 + ( B12 + B13 ) ));
+thus L43:now
+reconsider D3 = ( 0 ) as (Element of ( REAL ));
+let C15 being (Element of D1);
+reconsider D4 = C15 as (Element of ( REAL )) by L19;
+L44: ( ( addreal ) . (D4 , D3) ) = ( D4 + D3 ) by BINOP_2:def 9
+.= C15;
+L45: ( C15 + ( 0. D1 ) ) = ( ( addreal ) . (C15 , ( 0. D1 )) ) by GR_CY_1:def 1
+.= ( ( addreal ) . (C15 , ( 0 )) ) by L31 , FUNCT_7:def 1;
+thus L46: ( C15 + ( 0. D1 ) ) = C15 by L45 , L44;
+end;
+thus L47: D1 is  right_complementable
+proof
+let C16 being (Element of D1);
+reconsider D5 = C16 as Integer;
+reconsider D6 = ( - D5 ) as (Element of D1);
+take D6;
+thus L48: thesis by FUNCT_7:def 1;
+end;
+
+thus L49: (for B14 , B15 , B16 being (Element of D1) holds (( B14 * ( B15 + B16 ) ) = ( ( B14 * B15 ) + ( B14 * B16 ) ) & ( ( B15 + B16 ) * B14 ) = ( ( B15 * B14 ) + ( B16 * B14 ) )));
+thus L50: (for B17 , B18 being (Element of D1) holds ( B17 * B18 ) = ( B18 * B17 ));
+thus L51: (for B19 , B20 , B21 being (Element of D1) holds ( ( B19 * B20 ) * B21 ) = ( B19 * ( B20 * B21 ) ));
+thus L52: (for B22 , B23 being (Element of D1) holds (( B22 * B23 ) = ( 0. D1 ) implies (B22 = ( 0. D1 ) or B23 = ( 0. D1 )))) by L32 , XCMPLX_1:6;
+thus L53: ( 0. D1 ) <> ( 1. D1 ) by L31 , L37 , FUNCT_7:def 1;
+end;
+end;
+registration
+let C17 being (Element of ( INT.Ring ));
+let C18 being Integer;
+identify - C17 with - C18 when C17 = C18;
+compatibility
+proof
+reconsider D7 = ( - C18 ) as (Element of D1);
+assume L55: C18 = C17;
+L56: ( D7 + C17 ) = ( 0. D1 ) by L55 , FUNCT_7:def 1;
+thus L57: thesis by L56 , RLVECT_1:6;
+end;
+end;
+definition
+let C19 being (Element of ( INT.Ring ));
+redefine func abs C19 -> (Element of ( INT.Ring )) equals 
+C19 if C19 >= ( 0. ( INT.Ring ) ) otherwise ( - C19 );
+coherence
+proof
+L59: ( abs C19 ) in ( INT ) by INT_1:def 2;
+thus L60: thesis by L59;
+end;
+compatibility by L32 , ABSVALUE:def 1;
+consistency;
+end;
+definition
+func absint -> (Function of (the carrier of ( INT.Ring )) , ( NAT )) means 
+:L62: (for B24 being (Element of ( INT.Ring )) holds ( it . B24 ) = ( ( absreal ) . B24 ));
+existence
+proof
+L63: ( dom ( absreal ) ) = ( REAL ) by FUNCT_2:def 1;
+L64: ( dom ( ( absreal ) | ( INT ) ) ) = (the carrier of ( INT.Ring )) by L63 , NUMBERS:15 , RELAT_1:62;
+L65: (for B25 being set holds (B25 in ( rng ( ( absreal ) | ( INT ) ) ) implies B25 in ( NAT )))
+proof
+let C20 being set;
+assume L66: C20 in ( rng ( ( absreal ) | ( INT ) ) );
+consider C21 being set such that L67: [ C21 , C20 ] in ( ( absreal ) | ( INT ) ) by L66 , XTUPLE_0:def 13;
+L68: ( ( ( absreal ) | ( INT ) ) . C21 ) = C20 by L67 , FUNCT_1:1;
+L69: C21 in ( dom ( ( absreal ) | ( INT ) ) ) by L67 , XTUPLE_0:def 12;
+reconsider D8 = C21 as Integer by L69 , L64;
+L70: ( ( ( absreal ) | ( INT ) ) . D8 ) = ( ( absreal ) . D8 ) by L64 , L69 , FUNCT_1:49;
+L71:
+now
+per cases ;
+case L72: ( 0 ) <= D8;
+L73: ( ( ( absreal ) | ( INT ) ) . D8 ) = ( abs D8 ) by L70 , EUCLID:def 2
+.= D8 by L72 , ABSVALUE:def 1;
+thus L74: ( ( ( absreal ) | ( INT ) ) . D8 ) is (Element of ( NAT )) by L73 , L72 , INT_1:3;
+end;
+case L75: (not ( 0 ) <= D8);
+L76: ( ( ( absreal ) | ( INT ) ) . D8 ) = ( abs D8 ) by L70 , EUCLID:def 2
+.= ( - D8 ) by L75 , ABSVALUE:def 1;
+thus L77: ( ( ( absreal ) | ( INT ) ) . D8 ) is (Element of ( NAT )) by L76 , L75 , INT_1:3;
+end;
+end;
+thus L79: thesis by L71 , L68;
+end;
+L80: ( rng ( ( absreal ) | ( INT ) ) ) c= ( NAT ) by L65 , TARSKI:def 3;
+reconsider D9 = ( ( absreal ) | ( INT ) ) as (Function of (the carrier of ( INT.Ring )) , ( NAT )) by L80 , L64 , FUNCT_2:def 1 , RELSET_1:4;
+take D9;
+thus L81: thesis by FUNCT_1:49;
+end;
+uniqueness
+proof
+deffunc H1((Element of ( INT.Ring ))) = ( ( absreal ) . $1 );
+thus L82: (for B26 , B27 being (Function of (the carrier of ( INT.Ring )) , ( NAT )) holds (((for B28 being (Element of ( INT.Ring )) holds ( B26 . B28 ) = H1(B28)) & (for B29 being (Element of ( INT.Ring )) holds ( B27 . B29 ) = H1(B29))) implies B26 = B27)) from BINOP_2:sch 1;
+end;
+end;
+theorem
+L84: (for B30 being (Element of ( INT.Ring )) holds ( ( absint ) . B30 ) = ( abs B30 ))
+proof
+let C22 being (Element of ( INT.Ring ));
+reconsider D10 = C22 as Integer;
+L85: ( ( absint ) . C22 ) = ( ( absreal ) . D10 ) by L62
+.= ( abs D10 ) by EUCLID:def 2;
+thus L86: thesis by L85;
+end;
+L87: (for B31 being Integer holds (B31 = ( 0 ) or ( ( absreal ) . B31 ) >= 1))
+proof
+let C23 being Integer;
+assume L88: C23 <> ( 0 );
+L89:
+now
+per cases ;
+case L90: ( 0 ) <= C23;
+reconsider D11 = C23 as (Element of ( NAT )) by L90 , INT_1:3;
+L91: ( ( absreal ) . D11 ) = ( abs D11 ) by EUCLID:def 2
+.= D11 by ABSVALUE:def 1;
+L92: ( ( 0 ) + 1 ) < ( D11 + 1 ) by L88 , XREAL_1:6;
+thus L93: thesis by L92 , L91 , NAT_1:13;
+end;
+case L94: C23 < ( 0 );
+L95: C23 <= ( - 1 ) by L94 , INT_1:8;
+L96: ( - ( - 1 ) ) <= ( - C23 ) by L95 , XREAL_1:24;
+L97: ( ( absreal ) . C23 ) = ( abs C23 ) by EUCLID:def 2
+.= ( - C23 ) by L94 , ABSVALUE:def 1;
+thus L98: thesis by L97 , L96;
+end;
+end;
+thus L100: thesis by L89;
+end;
+L101: (for B32 , B33 being (Element of ( INT.Ring )) holds (B33 <> ( 0. ( INT.Ring ) ) implies (for B34 being Integer holds (B34 = B33 implies (( 0 ) <= B34 implies (ex B35 , B36 being (Element of ( INT.Ring )) st (B32 = ( ( B35 * B33 ) + B36 ) & (B36 = ( 0. ( INT.Ring ) ) or ( ( absint ) . B36 ) < ( ( absint ) . B33 )))))))))
+proof
+let C24 , C25 being (Element of D1);
+assume L102: C25 <> ( 0. D1 );
+reconsider D12 = C24 as Integer;
+let C26 being Integer;
+assume L103: C26 = C25;
+defpred S1[ Nat ] means (ex B37 being Integer st $1 = ( D12 - ( B37 * C26 ) ));
+assume L104: ( 0 ) <= C26;
+L105: (ex B38 being Nat st S1[ B38 ])
+proof
+L106:
+now
+per cases ;
+case L107: ( 0 ) <= D12;
+reconsider D13 = D12 as (Element of ( NAT )) by L107 , INT_1:3;
+L108: ( D13 - ( ( 0 ) * C26 ) ) = D13;
+thus L109: thesis by L108;
+end;
+case L110: D12 < ( 0 );
+L111: ( 1 + ( 0 ) ) <= C26 by L102 , L103 , L104 , L32 , INT_1:7;
+L112: ( 1 - 1 ) <= ( C26 - 1 ) by L111 , XREAL_1:9;
+reconsider D14 = ( C26 - 1 ) as (Element of ( NAT )) by L112 , INT_1:3;
+reconsider D15 = ( - D12 ) as (Element of ( NAT )) by L110 , INT_1:3;
+L113: (( D12 - ( D12 * C26 ) ) = ( ( - D12 ) * ( C26 - 1 ) ) & ( D15 * D14 ) is (Element of ( NAT )));
+thus L114: thesis by L113;
+end;
+end;
+thus L116: thesis by L106;
+end;
+L117: (ex B39 being Nat st (S1[ B39 ] & (for B40 being Nat holds (S1[ B40 ] implies B39 <= B40)))) from NAT_1:sch 5(L105);
+consider C27 being Nat such that L118: (ex B41 being Integer st (C27 = ( D12 - ( B41 * C26 ) ) & (for B42 being Nat holds ((ex B43 being Integer st B42 = ( D12 - ( B43 * C26 ) )) implies C27 <= B42)))) by L117;
+consider C28 being Integer such that L119: C27 = ( D12 - ( C28 * C26 ) ) by L118;
+reconsider D16 = C27 , D17 = C28 as (Element of D1) by INT_1:def 2;
+L120: (C27 = ( 0 ) or C27 < C26)
+proof
+assume L121: C27 <> ( 0 );
+assume L122: C26 <= C27;
+reconsider D18 = ( C27 - C26 ) as (Element of ( NAT )) by L122 , INT_1:5;
+L123: C27 > D18
+proof
+reconsider D19 = C26 as (Element of ( NAT )) by L104 , INT_1:3;
+assume L124: C27 <= D18;
+consider C29 being Nat such that L125: D18 = ( C27 + C29 ) by L124 , NAT_1:10;
+L126: ( - C29 ) = D19 by L125;
+thus L127: contradiction by L126 , L102 , L103 , L31 , FUNCT_7:def 1;
+end;
+L128: ( C27 - C26 ) = ( D12 - ( ( C28 + 1 ) * C26 ) ) by L119;
+thus L129: thesis by L128 , L118 , L123;
+end;
+L130: (D16 = ( 0. D1 ) or ( ( absint ) . D16 ) < ( ( absint ) . C25 ))
+proof
+reconsider D20 = C26 as (Element of ( NAT )) by L104 , INT_1:3;
+assume L131: D16 <> ( 0. D1 );
+L132: ( ( absint ) . D16 ) = ( ( absreal ) . D16 ) by L62
+.= ( abs C27 ) by EUCLID:def 2
+.= C27 by ABSVALUE:def 1;
+L133: ( ( absint ) . C25 ) = ( ( absreal ) . D20 ) by L103 , L62
+.= ( abs D20 ) by EUCLID:def 2
+.= D20 by ABSVALUE:def 1;
+thus L134: thesis by L133 , L120 , L131 , L132 , FUNCT_7:def 1;
+end;
+L135: ( D16 + ( D17 * C25 ) ) = C24 by L103 , L119;
+thus L136: thesis by L135 , L130;
+end;
+L137: (for B44 , B45 being (Element of ( INT.Ring )) holds (B45 <> ( 0. ( INT.Ring ) ) implies (for B46 being Integer holds (B46 = B45 implies (( 0 ) <= B46 implies (ex B47 , B48 being (Element of ( INT.Ring )) st (B44 = ( ( B47 * B45 ) + B48 ) & ( 0. ( INT.Ring ) ) <= B48 & B48 < ( abs B45 ))))))))
+proof
+let C30 , C31 being (Element of D1);
+assume L138: C31 <> ( 0. D1 );
+reconsider D21 = C30 as Integer;
+let C32 being Integer;
+assume L139: C32 = C31;
+defpred S2[ Nat ] means (ex B49 being Integer st $1 = ( D21 - ( B49 * C32 ) ));
+assume L140: ( 0 ) <= C32;
+L141: (ex B50 being Nat st S2[ B50 ])
+proof
+L142:
+now
+per cases ;
+case L143: ( 0 ) <= D21;
+reconsider D22 = D21 as (Element of ( NAT )) by L143 , INT_1:3;
+L144: ( D22 - ( ( 0 ) * C32 ) ) = D22;
+thus L145: thesis by L144;
+end;
+case L146: D21 < ( 0 );
+L147: ( 1 + ( 0 ) ) <= C32 by L138 , L139 , L140 , L32 , INT_1:7;
+L148: ( 1 - 1 ) <= ( C32 - 1 ) by L147 , XREAL_1:9;
+reconsider D23 = ( C32 - 1 ) as (Element of ( NAT )) by L148 , INT_1:3;
+reconsider D24 = ( - D21 ) as (Element of ( NAT )) by L146 , INT_1:3;
+L149: (( D21 - ( D21 * C32 ) ) = ( ( - D21 ) * ( C32 - 1 ) ) & ( D24 * D23 ) is (Element of ( NAT )));
+thus L150: thesis by L149;
+end;
+end;
+thus L152: thesis by L142;
+end;
+L153: (ex B51 being Nat st (S2[ B51 ] & (for B52 being Nat holds (S2[ B52 ] implies B51 <= B52)))) from NAT_1:sch 5(L141);
+consider C33 being Nat such that L154: (ex B53 being Integer st (C33 = ( D21 - ( B53 * C32 ) ) & (for B54 being Nat holds ((ex B55 being Integer st B54 = ( D21 - ( B55 * C32 ) )) implies C33 <= B54)))) by L153;
+consider C34 being Integer such that L155: C33 = ( D21 - ( C34 * C32 ) ) by L154;
+reconsider D25 = C33 , D26 = C34 as (Element of D1) by INT_1:def 2;
+L156: (C33 = ( 0 ) or C33 < C32)
+proof
+assume L157: C33 <> ( 0 );
+assume L158: C32 <= C33;
+reconsider D27 = ( C33 - C32 ) as (Element of ( NAT )) by L158 , INT_1:5;
+L159: C33 > D27
+proof
+reconsider D28 = C32 as (Element of ( NAT )) by L140 , INT_1:3;
+assume L160: C33 <= D27;
+consider C35 being Nat such that L161: D27 = ( C33 + C35 ) by L160 , NAT_1:10;
+L162: ( - C35 ) = D28 by L161;
+thus L163: contradiction by L162 , L138 , L139 , L31 , FUNCT_7:def 1;
+end;
+L164: ( C33 - C32 ) = ( D21 - ( ( C34 + 1 ) * C32 ) ) by L155;
+thus L165: thesis by L164 , L154 , L159;
+end;
+L166: (( 0. D1 ) <= D25 & D25 < ( abs C31 ))
+proof
+reconsider D29 = C32 as (Element of ( NAT )) by L140 , INT_1:3;
+reconsider D30 = C33 as (Element of ( NAT )) by ORDINAL1:def 12;
+L167: ( ( absint ) . C31 ) = ( ( absreal ) . D29 ) by L139 , L62
+.= ( abs D29 ) by EUCLID:def 2
+.= D29 by ABSVALUE:def 1;
+L168:
+now
+per cases  by L156;
+case L169: D30 = ( 0 );
+thus L170: thesis by L169 , L138 , L139 , L167 , L32 , L84;
+end;
+case L171: D30 < D29;
+thus L172: thesis by L171 , L167 , L31 , L84 , FUNCT_7:def 1;
+end;
+end;
+thus L174: thesis by L168;
+end;
+L175: ( D25 + ( D26 * C31 ) ) = C30 by L139 , L155;
+thus L176: thesis by L175 , L166;
+end;
+theorem
+L177: (for B56 , B57 , B58 , B59 , B60 , B61 being (Element of ( INT.Ring )) holds ((B57 <> ( 0. ( INT.Ring ) ) & B56 = ( ( B58 * B57 ) + B60 ) & ( 0. ( INT.Ring ) ) <= B60 & B60 < ( abs B57 ) & B56 = ( ( B59 * B57 ) + B61 ) & ( 0. ( INT.Ring ) ) <= B61 & B61 < ( abs B57 )) implies (B58 = B59 & B60 = B61)))
+proof
+let C36 , C37 , C38 , C39 , C40 , C41 being (Element of ( INT.Ring ));
+assume that
+L178: C37 <> ( 0. ( INT.Ring ) )
+and
+L179: C36 = ( ( C38 * C37 ) + C40 )
+and
+L180: ( 0. ( INT.Ring ) ) <= C40
+and
+L181: C40 < ( abs C37 )
+and
+L182: C36 = ( ( C39 * C37 ) + C41 )
+and
+L183: ( 0. ( INT.Ring ) ) <= C41
+and
+L184: C41 < ( abs C37 );
+reconsider D31 = C41 as Integer;
+reconsider D32 = C40 as Integer;
+reconsider D33 = C39 as Integer;
+reconsider D34 = C38 as Integer;
+reconsider D35 = C37 as Integer;
+L185:
+now
+per cases ;
+case L186: ( 0 ) <= ( D32 - D31 );
+L187: ( ( D33 - D34 ) * D35 ) = ( D32 - D31 ) by L179 , L182;
+L188:
+now
+per cases ;
+case L189: ( 0 ) = ( D32 - D31 );
+L190: (( D33 - D34 ) = ( 0 ) or D35 = ( 0 )) by L189 , L187 , XCMPLX_1:6;
+thus L191: C38 = C39 by L190 , L178 , FUNCT_7:def 1;
+end;
+case L192: ( 0 ) <> ( D32 - D31 );
+L193: ( 0 ) <> ( D33 - D34 ) by L192 , L187;
+L194: ( ( ( absreal ) . ( D33 - D34 ) ) * ( ( absreal ) . D35 ) ) >= ( ( absreal ) . D35 )
+proof
+reconsider D36 = ( C39 + ( - C38 ) ) as (Element of D1);
+reconsider D37 = ( D33 - D34 ) as Integer;
+L195: ( ( absreal ) . D35 ) = ( ( absint ) . C37 ) by L62;
+reconsider D38 = ( ( absreal ) . D35 ) as (Element of ( NAT )) by L195;
+L196: ( ( absreal ) . D37 ) = ( ( absint ) . D36 ) by L62;
+reconsider D39 = ( ( absreal ) . D37 ) as (Element of ( NAT )) by L196;
+L197: ( D39 * D38 ) >= ( 1 * D38 ) by L193 , L87 , NAT_1:4;
+thus L198: thesis by L197;
+end;
+L199: ( D32 + ( - D31 ) ) <= ( D32 + ( 0 ) ) by L183 , L32 , XREAL_1:6;
+L200: ( abs C37 ) = ( ( absint ) . C37 ) by L84
+.= ( ( absreal ) . C37 ) by L62;
+L201: ( D32 - D31 ) = ( abs ( ( D33 - D34 ) * D35 ) ) by L179 , L182 , L186 , ABSVALUE:def 1
+.= ( ( abs ( D33 - D34 ) ) * ( abs D35 ) ) by COMPLEX1:65
+.= ( ( ( absreal ) . ( D33 - D34 ) ) * ( abs D35 ) ) by EUCLID:def 2
+.= ( ( ( absreal ) . ( D33 - D34 ) ) * ( ( absreal ) . D35 ) ) by EUCLID:def 2;
+thus L202: C38 = C39 by L201 , L181 , L194 , L199 , L200 , XXREAL_0:2;
+end;
+end;
+thus L204: C38 = C39 by L188;
+end;
+case L205: ( D32 - D31 ) < ( 0 );
+L206: (( - ( D32 - D31 ) ) = ( D31 - D32 ) & ( ( D34 - D33 ) * D35 ) = ( D31 - D32 )) by L179 , L182;
+L207: ( 0 ) <> ( D34 - D33 ) by L206 , L205 , XREAL_1:58;
+L208: ( ( ( absreal ) . ( D34 - D33 ) ) * ( ( absreal ) . D35 ) ) >= ( ( absreal ) . D35 )
+proof
+reconsider D40 = ( C38 + ( - C39 ) ) as (Element of D1);
+reconsider D41 = ( D34 - D33 ) as Integer;
+L209: ( ( absreal ) . D35 ) = ( ( absint ) . C37 ) by L62;
+reconsider D42 = ( ( absreal ) . D35 ) as (Element of ( NAT )) by L209;
+L210: ( ( absreal ) . D41 ) = ( ( absint ) . D40 ) by L62;
+reconsider D43 = ( ( absreal ) . D41 ) as (Element of ( NAT )) by L210;
+L211: ( D43 * D42 ) >= ( 1 * D42 ) by L207 , L87 , NAT_1:4;
+thus L212: thesis by L211;
+end;
+L213: ( abs C37 ) = ( ( absint ) . C37 ) by L84
+.= ( ( absreal ) . C37 ) by L62;
+L214: ( - ( D32 - D31 ) ) > ( 0 ) by L205 , XREAL_1:58;
+L215: ( D31 - D32 ) = ( abs ( ( D34 - D33 ) * D35 ) ) by L214 , L179 , L182 , ABSVALUE:def 1
+.= ( ( abs ( D34 - D33 ) ) * ( abs D35 ) ) by COMPLEX1:65
+.= ( ( ( absreal ) . ( D34 - D33 ) ) * ( abs D35 ) ) by EUCLID:def 2
+.= ( ( ( absreal ) . ( D34 - D33 ) ) * ( ( absreal ) . D35 ) ) by EUCLID:def 2;
+L216: ( D31 + ( - D32 ) ) <= ( D31 + ( 0 ) ) by L180 , L32 , XREAL_1:6;
+thus L217: C38 = C39 by L216 , L184 , L208 , L213 , L215 , XXREAL_0:2;
+end;
+end;
+thus L219: thesis by L185 , L179 , L182;
+end;
+definition
+let C42 , C43 being (Element of ( INT.Ring ));
+assume L220: C43 <> ( 0. ( INT.Ring ) );
+func C42 div C43 -> (Element of ( INT.Ring )) means 
+:L221: (ex B62 being (Element of ( INT.Ring )) st (C42 = ( ( it * C43 ) + B62 ) & ( 0. ( INT.Ring ) ) <= B62 & B62 < ( abs C43 )));
+existence
+proof
+reconsider D44 = C43 as Integer;
+L222:
+now
+per cases ;
+case L223: ( 0 ) <= D44;
+thus L224: thesis by L223 , L220 , L137;
+end;
+case L225: D44 < ( 0 );
+reconsider D45 = ( - D44 ) as (Element of D1);
+L226: ( 0 ) < ( - D44 ) by L225 , XREAL_1:58;
+consider C44 , C45 being (Element of D1) such that L227: C42 = ( ( C44 * D45 ) + C45 ) and L228: ( 0. D1 ) <= C45 and L229: C45 < ( abs D45 ) by L226 , L32 , L137;
+reconsider D46 = ( - C44 ) as (Element of D1);
+L230: ( ( D46 * C43 ) + C45 ) = C42 by L227;
+L231: ( ( absint ) . D45 ) = ( ( absreal ) . D45 ) by L62
+.= ( abs ( - D44 ) ) by EUCLID:def 2
+.= ( - D44 ) by L225 , ABSVALUE:def 1
+.= ( abs D44 ) by L225 , ABSVALUE:def 1
+.= ( ( absreal ) . D44 ) by EUCLID:def 2
+.= ( ( absint ) . C43 ) by L62
+.= ( abs C43 ) by L84;
+L232: C45 < ( abs C43 ) by L231 , L229 , L84;
+thus L233: thesis by L232 , L228 , L230;
+end;
+end;
+thus L235: thesis by L222;
+end;
+uniqueness by L220 , L177;
+end;
+definition
+let C46 , C47 being (Element of ( INT.Ring ));
+assume L237: C47 <> ( 0. ( INT.Ring ) );
+func C46 mod C47 -> (Element of ( INT.Ring )) means 
+:L238: (ex B63 being (Element of ( INT.Ring )) st (C46 = ( ( B63 * C47 ) + it ) & ( 0. ( INT.Ring ) ) <= it & it < ( abs C47 )));
+existence
+proof
+reconsider D47 = C47 as Integer;
+L239:
+now
+per cases ;
+case L240: ( 0 ) <= D47;
+L241: (ex B64 , B65 being (Element of ( INT.Ring )) st (C46 = ( ( B64 * C47 ) + B65 ) & ( 0. ( INT.Ring ) ) <= B65 & B65 < ( abs C47 ))) by L240 , L237 , L137;
+thus L242: thesis by L241;
+end;
+case L243: D47 < ( 0 );
+reconsider D48 = ( - D47 ) as (Element of D1);
+L244: ( 0 ) < ( - D47 ) by L243 , XREAL_1:58;
+consider C48 , C49 being (Element of D1) such that L245: C46 = ( ( C48 * D48 ) + C49 ) and L246: ( 0. D1 ) <= C49 and L247: C49 < ( abs D48 ) by L244 , L32 , L137;
+reconsider D49 = ( - C48 ) as (Element of D1);
+L248: ( ( D49 * C47 ) + C49 ) = C46 by L245;
+L249: ( ( absint ) . D48 ) = ( ( absreal ) . D48 ) by L62
+.= ( abs ( - D47 ) ) by EUCLID:def 2
+.= ( - D47 ) by L243 , ABSVALUE:def 1
+.= ( abs D47 ) by L243 , ABSVALUE:def 1
+.= ( ( absreal ) . D47 ) by EUCLID:def 2
+.= ( ( absint ) . C47 ) by L62
+.= ( abs C47 ) by L84;
+L250: C49 < ( abs C47 ) by L249 , L247 , L84;
+thus L251: thesis by L250 , L246 , L248;
+end;
+end;
+thus L253: thesis by L239;
+end;
+uniqueness by L237 , L177;
+end;
+theorem
+L255: (for B66 , B67 being (Element of ( INT.Ring )) holds (B67 <> ( 0. ( INT.Ring ) ) implies B66 = ( ( ( B66 div B67 ) * B67 ) + ( B66 mod B67 ) )))
+proof
+let C50 , C51 being (Element of ( INT.Ring ));
+consider C52 being (Element of ( INT.Ring )) such that L256: C52 = ( C50 div C51 );
+assume L257: C51 <> ( 0. ( INT.Ring ) );
+L258: (ex B68 being (Element of ( INT.Ring )) st (C50 = ( ( C52 * C51 ) + B68 ) & ( 0. ( INT.Ring ) ) <= B68 & B68 < ( abs C51 ))) by L257 , L256 , L221;
+thus L259: thesis by L258 , L257 , L256 , L238;
+end;
+begin
+definition
+let C53 being non  empty doubleLoopStr;
+attr C53 is  Euclidian
+means
+:L260: (ex B69 being (Function of (the carrier of C53) , ( NAT )) st (for B70 , B71 being (Element of C53) holds (B71 <> ( 0. C53 ) implies (ex B72 , B73 being (Element of C53) st (B70 = ( ( B72 * B71 ) + B73 ) & (B73 = ( 0. C53 ) or ( B69 . B73 ) < ( B69 . B71 )))))));
+end;
+registration
+cluster ( INT.Ring ) ->  Euclidian;
+coherence
+proof
+take ( absint );
+let C54 , C55 being (Element of D1);
+reconsider D50 = C55 as Integer;
+assume L262: C55 <> ( 0. D1 );
+L263:
+now
+per cases ;
+case L264: ( 0 ) <= D50;
+thus L265: thesis by L264 , L262 , L101;
+end;
+case L266: D50 < ( 0 );
+reconsider D51 = ( - D50 ) as (Element of D1);
+L267: ( 0 ) < ( - D50 ) by L266 , XREAL_1:58;
+consider C56 , C57 being (Element of D1) such that L268: C54 = ( ( C56 * D51 ) + C57 ) and L269: (C57 = ( 0. D1 ) or ( ( absint ) . C57 ) < ( ( absint ) . D51 )) by L267 , L32 , L101;
+L270: (C57 = ( 0. D1 ) or ( ( absint ) . C57 ) < ( ( absint ) . C55 ))
+proof
+assume L271: C57 <> ( 0. D1 );
+L272: ( ( absint ) . D51 ) = ( ( absreal ) . D51 ) by L62
+.= ( abs ( - D50 ) ) by EUCLID:def 2
+.= ( - D50 ) by L266 , ABSVALUE:def 1
+.= ( abs D50 ) by L266 , ABSVALUE:def 1
+.= ( ( absreal ) . D50 ) by EUCLID:def 2
+.= ( ( absint ) . C55 ) by L62;
+thus L273: thesis by L272 , L269 , L271;
+end;
+reconsider D52 = ( - C56 ) as (Element of D1);
+L274: ( ( D52 * C55 ) + C57 ) = C54 by L268;
+thus L275: (ex B74 , B75 being (Element of D1) st (C54 = ( ( B74 * C55 ) + B75 ) & (B75 = ( 0. D1 ) or ( ( absint ) . B75 ) < ( ( absint ) . C55 )))) by L274 , L270;
+end;
+end;
+thus L277: thesis by L263;
+end;
+end;
+L279: (for B76 being  commutative  associative  well-unital  almost_left_invertible  right_zeroed non  empty doubleLoopStr holds (for B77 being (Function of (the carrier of B76) , ( NAT )) holds (for B78 , B79 being (Element of B76) holds (B79 <> ( 0. B76 ) implies (ex B80 , B81 being (Element of B76) st (B78 = ( ( B80 * B79 ) + B81 ) & (B81 = ( 0. B76 ) or ( B77 . B81 ) < ( B77 . B79 ))))))))
+proof
+let C58 being  commutative  associative  well-unital  almost_left_invertible  right_zeroed non  empty doubleLoopStr;
+let C59 being (Function of (the carrier of C58) , ( NAT ));
+L280:
+now
+let C60 , C61 being (Element of C58);
+assume L281: C61 <> ( 0. C58 );
+L282: (ex B82 , B83 being (Element of C58) st (C60 = ( ( B82 * C61 ) + B83 ) & (B83 = ( 0. C58 ) or ( C59 . B83 ) < ( C59 . C61 ))))
+proof
+consider C62 being (Element of C58) such that L283: ( C62 * C61 ) = ( 1. C58 ) by L281 , VECTSP_1:def 9;
+L284: ( ( ( C60 * C62 ) * C61 ) + ( 0. C58 ) ) = ( ( C60 * ( 1. C58 ) ) + ( 0. C58 ) ) by L283 , GROUP_1:def 3
+.= ( C60 + ( 0. C58 ) ) by VECTSP_1:def 6
+.= C60 by RLVECT_1:def 4;
+thus L285: thesis by L284;
+end;
+thus L286: (C61 <> ( 0. C58 ) implies (ex B84 , B85 being (Element of C58) st (C60 = ( ( B84 * C61 ) + B85 ) & (B85 = ( 0. C58 ) or ( C59 . B85 ) < ( C59 . C61 ))))) by L282;
+end;
+thus L287: thesis by L280;
+end;
+registration
+cluster  strict  Euclidian  domRing-like non  degenerated  distributive  commutative for Ring;
+existence
+proof
+take ( INT.Ring );
+thus L288: thesis;
+end;
+end;
+definition
+mode EuclidianRing
+ is  Euclidian  domRing-like non  degenerated  distributive  commutative Ring;
+end;
+registration
+cluster  strict for EuclidianRing;
+existence
+proof
+take ( INT.Ring );
+thus L291: thesis;
+end;
+end;
+definition
+let C63 being  Euclidian non  empty doubleLoopStr;
+mode DegreeFunction of C63
+ -> (Function of (the carrier of C63) , ( NAT ))
+means :L293: (for B86 , B87 being (Element of C63) holds (B87 <> ( 0. C63 ) implies (ex B88 , B89 being (Element of C63) st (B86 = ( ( B88 * B87 ) + B89 ) & (B89 = ( 0. C63 ) or ( it . B89 ) < ( it . B87 ))))));
+existence by L260;
+end;
+theorem
+L295: (for B90 being EuclidianRing holds B90 is gcdDomain)
+proof
+let C64 being EuclidianRing;
+set D53 = the (DegreeFunction of C64);
+L296:
+now
+let C65 , C66 being (Element of C64);
+L297:
+now
+per cases ;
+case L298: C65 = ( 0. C64 );
+L299: ( C66 * ( 0. C64 ) ) = ( 0. C64 ) by VECTSP_1:6;
+L300: C66 divides ( 0. C64 ) by L299 , GCD_1:def 1;
+L301: (for B91 being (Element of C64) holds ((B91 divides C65 & B91 divides C66) implies B91 divides C66));
+thus L302: (ex B92 being (Element of C64) st (B92 divides C65 & B92 divides C66 & (for B93 being (Element of C64) holds ((B93 divides C65 & B93 divides C66) implies B93 divides B92)))) by L301 , L298 , L300;
+end;
+case L303: C65 <> ( 0. C64 );
+set D54 = { B94 where B94 is (Element of C64) : (ex B95 , B96 being (Element of C64) st B94 = ( ( B95 * C65 ) + ( B96 * C66 ) )) };
+defpred S3[ Nat ] means (ex B97 being (Element of C64) st (B97 in D54 & B97 <> ( 0. C64 ) & $1 = ( D53 . B97 )));
+L304: ( ( ( 1. C64 ) * C65 ) + ( ( 0. C64 ) * C66 ) ) = ( ( ( 1. C64 ) * C65 ) + ( 0. C64 ) ) by VECTSP_1:7
+.= ( ( 1. C64 ) * C65 ) by RLVECT_1:def 4
+.= C65 by VECTSP_1:def 6;
+L305: C65 in D54 by L304;
+L306: (ex B98 being (Element of ( NAT )) st B98 = ( D53 . C65 ));
+L307: (ex B99 being Nat st S3[ B99 ]) by L306 , L303 , L305;
+L308: (ex B100 being Nat st (S3[ B100 ] & (for B101 being Nat holds (S3[ B101 ] implies B100 <= B101)))) from NAT_1:sch 5(L307);
+consider C67 being Nat such that L309: (S3[ C67 ] & (for B102 being Nat holds (S3[ B102 ] implies C67 <= B102))) by L308;
+consider C68 being (Element of C64) such that L310: C68 in D54 and L311: C68 <> ( 0. C64 ) and L312: (C67 = ( D53 . C68 ) & (for B103 being Nat holds ((ex B104 being (Element of C64) st (B104 in D54 & B104 <> ( 0. C64 ) & B103 = ( D53 . B104 ))) implies C67 <= B103))) by L309;
+set D55 = { B105 where B105 is (Element of C64) : (ex B106 being (Element of C64) st B105 = ( B106 * C68 )) };
+L313: (for B107 being set holds (B107 in D54 implies B107 in D55))
+proof
+let C69 being set;
+assume L314: C69 in D54;
+consider C70 being (Element of C64) such that L315: C69 = C70 and L316: (ex B108 , B109 being (Element of C64) st C70 = ( ( B108 * C65 ) + ( B109 * C66 ) )) by L314;
+consider C71 , C72 being (Element of C64) such that L317: C70 = ( ( C71 * C65 ) + ( C72 * C66 ) ) by L316;
+reconsider D56 = C69 as (Element of C64) by L315;
+consider C73 , C74 being (Element of C64) such that L318: D56 = ( ( C73 * C68 ) + C74 ) and L319: (C74 = ( 0. C64 ) or ( D53 . C74 ) < ( D53 . C68 )) by L311 , L293;
+L320: C74 in D54
+proof
+consider C75 being (Element of C64) such that L321: C68 = C75 and L322: (ex B110 , B111 being (Element of C64) st C75 = ( ( B110 * C65 ) + ( B111 * C66 ) )) by L310;
+consider C76 , C77 being (Element of C64) such that L323: C75 = ( ( C76 * C65 ) + ( C77 * C66 ) ) by L322;
+L324: ( D56 + ( - ( C73 * C68 ) ) ) = ( C74 + ( ( C73 * C68 ) + ( - ( C73 * C68 ) ) ) ) by L318 , RLVECT_1:def 3
+.= ( C74 + ( 0. C64 ) ) by RLVECT_1:def 10
+.= C74 by RLVECT_1:def 4;
+L325: C74 = ( D56 + ( - ( ( C73 * ( C76 * C65 ) ) + ( C73 * ( C77 * C66 ) ) ) ) ) by L324 , L321 , L323 , VECTSP_1:def 7
+.= ( D56 + ( ( - ( C73 * ( C76 * C65 ) ) ) + ( - ( C73 * ( C77 * C66 ) ) ) ) ) by RLVECT_1:31
+.= ( ( ( ( C71 * C65 ) + ( C72 * C66 ) ) + ( - ( C73 * ( C76 * C65 ) ) ) ) + ( - ( C73 * ( C77 * C66 ) ) ) ) by L315 , L317 , RLVECT_1:def 3
+.= ( ( ( ( C71 * C65 ) + ( - ( C73 * ( C76 * C65 ) ) ) ) + ( C72 * C66 ) ) + ( - ( C73 * ( C77 * C66 ) ) ) ) by RLVECT_1:def 3
+.= ( ( ( C71 * C65 ) + ( - ( C73 * ( C76 * C65 ) ) ) ) + ( ( C72 * C66 ) + ( - ( C73 * ( C77 * C66 ) ) ) ) ) by RLVECT_1:def 3
+.= ( ( ( C71 * C65 ) + ( ( - C73 ) * ( C76 * C65 ) ) ) + ( ( C72 * C66 ) + ( - ( C73 * ( C77 * C66 ) ) ) ) ) by GCD_1:48
+.= ( ( ( C71 * C65 ) + ( ( - C73 ) * ( C76 * C65 ) ) ) + ( ( C72 * C66 ) + ( ( - C73 ) * ( C77 * C66 ) ) ) ) by GCD_1:48
+.= ( ( ( C71 * C65 ) + ( ( ( - C73 ) * C76 ) * C65 ) ) + ( ( C72 * C66 ) + ( ( - C73 ) * ( C77 * C66 ) ) ) ) by GROUP_1:def 3
+.= ( ( ( C71 * C65 ) + ( ( ( - C73 ) * C76 ) * C65 ) ) + ( ( C72 * C66 ) + ( ( ( - C73 ) * C77 ) * C66 ) ) ) by GROUP_1:def 3
+.= ( ( ( C71 + ( ( - C73 ) * C76 ) ) * C65 ) + ( ( C72 * C66 ) + ( ( ( - C73 ) * C77 ) * C66 ) ) ) by VECTSP_1:def 7
+.= ( ( ( C71 + ( ( - C73 ) * C76 ) ) * C65 ) + ( ( C72 + ( ( - C73 ) * C77 ) ) * C66 ) ) by VECTSP_1:def 7;
+thus L326: thesis by L325;
+end;
+L327: C74 = ( 0. C64 ) by L320 , L312 , L319;
+L328: D56 = ( C73 * C68 ) by L327 , L318 , RLVECT_1:def 4;
+thus L329: thesis by L328;
+end;
+L330: (for B112 being (Element of C64) holds ((B112 divides C65 & B112 divides C66) implies B112 divides C68))
+proof
+let C78 being (Element of C64);
+assume that
+L331: C78 divides C65
+and
+L332: C78 divides C66;
+consider C79 being (Element of C64) such that L333: C65 = ( C78 * C79 ) by L331 , GCD_1:def 1;
+consider C80 being (Element of C64) such that L334: C68 = C80 and L335: (ex B113 , B114 being (Element of C64) st C80 = ( ( B113 * C65 ) + ( B114 * C66 ) )) by L310;
+consider C81 , C82 being (Element of C64) such that L336: C80 = ( ( C81 * C65 ) + ( C82 * C66 ) ) by L335;
+consider C83 being (Element of C64) such that L337: C66 = ( C78 * C83 ) by L332 , GCD_1:def 1;
+L338: C68 = ( ( ( C81 * C79 ) * C78 ) + ( C82 * ( C83 * C78 ) ) ) by L333 , L337 , L334 , L336 , GROUP_1:def 3
+.= ( ( ( C81 * C79 ) * C78 ) + ( ( C82 * C83 ) * C78 ) ) by GROUP_1:def 3
+.= ( ( ( C81 * C79 ) + ( C82 * C83 ) ) * C78 ) by VECTSP_1:def 7;
+thus L339: thesis by L338 , GCD_1:def 1;
+end;
+L340: ( ( ( 0. C64 ) * C65 ) + ( ( 1. C64 ) * C66 ) ) = ( ( 0. C64 ) + ( ( 1. C64 ) * C66 ) ) by VECTSP_1:7
+.= ( ( 1. C64 ) * C66 ) by RLVECT_1:4
+.= C66 by VECTSP_1:def 6;
+L341: C66 in D54 by L340;
+L342: (for B115 being set holds (B115 in D55 implies B115 in D54))
+proof
+let C84 being set;
+assume L343: C84 in D55;
+consider C85 being (Element of C64) such that L344: C84 = C85 and L345: (ex B116 being (Element of C64) st C85 = ( B116 * C68 )) by L343;
+reconsider D57 = C84 as (Element of C64) by L344;
+consider C86 being (Element of C64) such that L346: C85 = ( C86 * C68 ) by L345;
+consider C87 being (Element of C64) such that L347: C68 = C87 and L348: (ex B117 , B118 being (Element of C64) st C87 = ( ( B117 * C65 ) + ( B118 * C66 ) )) by L310;
+consider C88 , C89 being (Element of C64) such that L349: C87 = ( ( C88 * C65 ) + ( C89 * C66 ) ) by L348;
+L350: D57 = ( ( C86 * ( C88 * C65 ) ) + ( C86 * ( C89 * C66 ) ) ) by L344 , L346 , L347 , L349 , VECTSP_1:def 2
+.= ( ( ( C86 * C88 ) * C65 ) + ( C86 * ( C89 * C66 ) ) ) by GROUP_1:def 3
+.= ( ( ( C86 * C88 ) * C65 ) + ( ( C86 * C89 ) * C66 ) ) by GROUP_1:def 3;
+thus L351: thesis by L350;
+end;
+L352: D54 = D55 by L342 , L313 , TARSKI:1;
+L353: (C68 divides C65 & C68 divides C66)
+proof
+L354: ((ex B119 being (Element of C64) st (C65 = B119 & (ex B120 being (Element of C64) st B119 = ( B120 * C68 )))) & (ex B121 being (Element of C64) st (C66 = B121 & (ex B122 being (Element of C64) st B121 = ( B122 * C68 ))))) by L305 , L341 , L352;
+thus L355: thesis by L354 , GCD_1:def 1;
+end;
+thus L356: (ex B123 being (Element of C64) st (B123 divides C65 & B123 divides C66 & (for B124 being (Element of C64) holds ((B124 divides C65 & B124 divides C66) implies B124 divides B123)))) by L353 , L330;
+end;
+end;
+thus L358: (ex B125 being (Element of C64) st (B125 divides C65 & B125 divides C66 & (for B126 being (Element of C64) holds ((B126 divides C65 & B126 divides C66) implies B126 divides B125)))) by L297;
+end;
+thus L359: thesis by L296 , GCD_1:def 11;
+end;
+registration
+cluster  Euclidian ->  gcd-like for  domRing-like non  degenerated  Abelian  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  right-distributive non  empty  domRing-like non  degenerated  Abelian  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  right-distributive non  empty  domRing-like non  degenerated  Abelian  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  right-distributive non  empty  domRing-like non  degenerated  Abelian  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  right-distributive non  empty doubleLoopStr;
+coherence by L295;
+end;
+definition
+redefine func absint -> (DegreeFunction of ( INT.Ring ));
+
+coherence
+proof
+L361: (for B127 , B128 being (Element of D1) holds (B128 <> ( 0. D1 ) implies (ex B129 , B130 being (Element of D1) st (B127 = ( ( B129 * B128 ) + B130 ) & (B130 = ( 0. D1 ) or ( ( absint ) . B130 ) < ( ( absint ) . B128 ))))))
+proof
+let C90 , C91 being (Element of D1);
+reconsider D58 = C91 as Integer;
+assume L362: C91 <> ( 0. D1 );
+L363:
+now
+per cases ;
+case L364: ( 0 ) <= D58;
+thus L365: thesis by L364 , L362 , L101;
+end;
+case L366: D58 < ( 0 );
+reconsider D59 = ( - D58 ) as (Element of D1);
+L367: ( 0 ) < ( - D58 ) by L366 , XREAL_1:58;
+consider C92 , C93 being (Element of D1) such that L368: C90 = ( ( C92 * D59 ) + C93 ) and L369: (C93 = ( 0. D1 ) or ( ( absint ) . C93 ) < ( ( absint ) . D59 )) by L367 , L32 , L101;
+L370: (C93 = ( 0. D1 ) or ( ( absint ) . C93 ) < ( ( absint ) . C91 ))
+proof
+assume L371: C93 <> ( 0. D1 );
+L372: ( ( absint ) . D59 ) = ( ( absreal ) . D59 ) by L62
+.= ( abs ( - D58 ) ) by EUCLID:def 2
+.= ( - D58 ) by L366 , ABSVALUE:def 1
+.= ( abs D58 ) by L366 , ABSVALUE:def 1
+.= ( ( absreal ) . D58 ) by EUCLID:def 2
+.= ( ( absint ) . C91 ) by L62;
+thus L373: thesis by L372 , L369 , L371;
+end;
+reconsider D60 = ( - C92 ) as (Element of D1);
+L374: ( ( D60 * C91 ) + C93 ) = C90 by L368;
+thus L375: thesis by L374 , L370;
+end;
+end;
+thus L377: thesis by L363;
+end;
+thus L378: thesis by L361 , L293;
+end;
+end;
+theorem
+L380: (for B131 being  commutative  associative  well-unital  almost_left_invertible  right_zeroed non  empty doubleLoopStr holds B131 is  Euclidian)
+proof
+let C94 being  commutative  associative  well-unital  almost_left_invertible  right_zeroed non  empty doubleLoopStr;
+set D61 = the (Function of (the carrier of C94) , ( NAT ));
+L381: (for B132 , B133 being (Element of C94) holds (B133 <> ( 0. C94 ) implies (ex B134 , B135 being (Element of C94) st (B132 = ( ( B134 * B133 ) + B135 ) & (B135 = ( 0. C94 ) or ( D61 . B135 ) < ( D61 . B133 )))))) by L279;
+thus L382: thesis by L381 , L260;
+end;
+registration
+cluster  commutative  associative  well-unital  almost_left_invertible  right_zeroed  almost_left_invertible ->  Euclidian for non  empty non  empty non  empty non  empty doubleLoopStr;
+coherence by L380;
+end;
+theorem
+L384: (for B136 being  commutative  associative  well-unital  almost_left_invertible  right_zeroed non  empty doubleLoopStr holds (for B137 being (Function of (the carrier of B136) , ( NAT )) holds B137 is (DegreeFunction of B136)))
+proof
+let C95 being  commutative  associative  well-unital  almost_left_invertible  right_zeroed non  empty doubleLoopStr;
+let C96 being (Function of (the carrier of C95) , ( NAT ));
+L385: (for B138 , B139 being (Element of C95) holds (B139 <> ( 0. C95 ) implies (ex B140 , B141 being (Element of C95) st (B138 = ( ( B140 * B139 ) + B141 ) & (B141 = ( 0. C95 ) or ( C96 . B141 ) < ( C96 . B139 )))))) by L279;
+thus L386: thesis by L385 , L293;
+end;
+begin
+definition
+let C97 being Nat;
+assume that
+L387: C97 > ( 0 );
+func multint C97 -> (BinOp of ( Segm C97 )) means 
+:L388: (for B142 , B143 being (Element of ( Segm C97 )) holds ( it . (B142 , B143) ) = ( ( B142 * B143 ) mod C97 ));
+existence
+proof
+reconsider D62 = C97 as non  zero Nat by L387;
+defpred S4[ (Element of ( Segm D62 )) , (Element of ( Segm D62 )) , set ] means $3 = ( ( $1 * $2 ) mod D62 );
+L389: (for B144 , B145 being (Element of ( Segm D62 )) holds (ex B146 being (Element of ( Segm D62 )) st S4[ B144 , B145 , B146 ]))
+proof
+let C98 , C99 being (Element of ( Segm D62 ));
+reconsider D63 = C98 , D64 = C99 as (Element of ( NAT ));
+L390: ( ( D63 * D64 ) mod D62 ) < D62 by NAT_D:1;
+reconsider D65 = ( ( D63 * D64 ) mod D62 ) as (Element of ( Segm D62 )) by L390 , NAT_1:44;
+take D65;
+thus L391: thesis;
+end;
+L392: (ex B147 being (BinOp of ( Segm D62 )) st (for B148 , B149 being (Element of ( Segm D62 )) holds S4[ B148 , B149 , ( B147 . (B148 , B149) ) ])) from BINOP_1:sch 3(L389);
+thus L393: thesis by L392;
+end;
+uniqueness
+proof
+reconsider D66 = C97 as non  zero Nat by L387;
+deffunc H2((Element of ( Segm D66 )) , (Element of ( Segm D66 ))) = ( ( $1 * $2 ) mod D66 );
+L394: (for B150 , B151 being (BinOp of ( Segm D66 )) holds (((for B152 , B153 being (Element of ( Segm D66 )) holds ( B150 . (B152 , B153) ) = H2(B152 , B153)) & (for B154 , B155 being (Element of ( Segm D66 )) holds ( B151 . (B154 , B155) ) = H2(B154 , B155))) implies B150 = B151)) from BINOP_2:sch 2;
+thus L395: thesis by L394;
+end;
+end;
+definition
+let C100 being Nat;
+assume that
+L397: C100 > ( 0 );
+func compint C100 -> (UnOp of ( Segm C100 )) means 
+:L398: (for B156 being (Element of ( Segm C100 )) holds ( it . B156 ) = ( ( C100 - B156 ) mod C100 ));
+existence
+proof
+reconsider D67 = C100 as non  zero Nat by L397;
+set D68 = { [ B157 , ( ( D67 - B157 ) mod D67 ) ] where B157 is (Element of ( NAT )) : B157 < D67 };
+L399: (for B158 being set holds (B158 in D68 implies (ex B159 , B160 being set st B158 = [ B159 , B160 ])))
+proof
+let C101 being set;
+assume L400: C101 in D68;
+L401: (ex B161 being (Element of ( NAT )) st (C101 = [ B161 , ( ( D67 - B161 ) mod D67 ) ] & B161 < D67)) by L400;
+thus L402: thesis by L401;
+end;
+L403: (for B162 , B163 , B164 being set holds (([ B162 , B163 ] in D68 & [ B162 , B164 ] in D68) implies B163 = B164))
+proof
+let C102 , C103 , C104 being set;
+assume that
+L404: [ C102 , C103 ] in D68
+and
+L405: [ C102 , C104 ] in D68;
+consider C105 being (Element of ( NAT )) such that L406: [ C102 , C103 ] = [ C105 , ( ( D67 - C105 ) mod D67 ) ] and L407: C105 < D67 by L404;
+L408: C103 = ( ( D67 - C105 ) mod D67 ) by L406 , XTUPLE_0:1;
+consider C106 being (Element of ( NAT )) such that L409: [ C102 , C104 ] = [ C106 , ( ( D67 - C106 ) mod D67 ) ] and L410: C106 < D67 by L405;
+L411: C104 = ( ( D67 - C106 ) mod D67 ) by L409 , XTUPLE_0:1;
+L412: C105 = C102 by L406 , XTUPLE_0:1
+.= C106 by L409 , XTUPLE_0:1;
+thus L413: thesis by L412 , L408 , L411;
+end;
+reconsider D69 = D68 as Function by L403 , L399 , FUNCT_1:def 1 , RELAT_1:def 1;
+L414: (for B165 being set holds (B165 in ( Segm D67 ) implies B165 in ( dom D69 )))
+proof
+let C107 being set;
+assume L415: C107 in ( Segm D67 );
+reconsider D70 = C107 as (Element of ( NAT )) by L415;
+L416: D70 < D67 by L415 , NAT_1:44;
+L417: [ D70 , ( ( D67 - D70 ) mod D67 ) ] in D69 by L416;
+thus L418: thesis by L417 , XTUPLE_0:def 12;
+end;
+L419: (for B166 being set holds (B166 in ( dom D69 ) implies B166 in ( Segm D67 )))
+proof
+let C108 being set;
+assume L420: C108 in ( dom D69 );
+consider C109 being set such that L421: [ C108 , C109 ] in D69 by L420 , XTUPLE_0:def 12;
+consider C110 being (Element of ( NAT )) such that L422: [ C108 , C109 ] = [ C110 , ( ( D67 - C110 ) mod D67 ) ] and L423: C110 < D67 by L421;
+L424: C108 = C110 by L422 , XTUPLE_0:1;
+thus L425: thesis by L424 , L423 , NAT_1:44;
+end;
+L426: ( dom D69 ) = ( Segm D67 ) by L419 , L414 , TARSKI:1;
+L427: (for B167 being set holds (B167 in ( rng D69 ) implies B167 in ( Segm D67 )))
+proof
+let C111 being set;
+assume L428: C111 in ( rng D69 );
+consider C112 being set such that L429: [ C112 , C111 ] in D69 by L428 , XTUPLE_0:def 13;
+consider C113 being (Element of ( NAT )) such that L430: [ C112 , C111 ] = [ C113 , ( ( D67 - C113 ) mod D67 ) ] and L431: C113 < D67 by L429;
+L432: ( C113 - C113 ) < ( D67 - C113 ) by L431 , XREAL_1:9;
+reconsider D71 = ( D67 - C113 ) as (Element of ( NAT )) by L432 , INT_1:3;
+L433: ( D71 mod D67 ) < D67 by NAT_D:1;
+L434: C111 = ( ( D67 - C113 ) mod D67 ) by L430 , XTUPLE_0:1;
+thus L435: thesis by L434 , L433 , NAT_1:44;
+end;
+L436: ( rng D69 ) c= ( Segm D67 ) by L427 , TARSKI:def 3;
+reconsider D72 = D69 as (UnOp of ( Segm D67 )) by L436 , L426 , FUNCT_2:def 1 , RELSET_1:4;
+L437: (for B168 being (Element of ( Segm D67 )) holds ( D72 . B168 ) = ( ( D67 - B168 ) mod D67 ))
+proof
+let C114 being (Element of ( Segm D67 ));
+reconsider D73 = C114 as (Element of ( NAT ));
+L438: D73 < D67 by NAT_1:44;
+L439: [ D73 , ( ( D67 - D73 ) mod D67 ) ] in D72 by L438;
+thus L440: thesis by L439 , L426 , FUNCT_1:def 2;
+end;
+thus L441: thesis by L437;
+end;
+uniqueness
+proof
+reconsider D74 = C100 as non  zero Nat by L397;
+deffunc H3((Element of ( Segm D74 ))) = ( ( D74 - $1 ) mod D74 );
+L442: (for B169 , B170 being (UnOp of ( Segm D74 )) holds (((for B171 being (Element of ( Segm D74 )) holds ( B169 . B171 ) = H3(B171)) & (for B172 being (Element of ( Segm D74 )) holds ( B170 . B172 ) = H3(B172))) implies B169 = B170)) from LMOD_7:sch 2;
+thus L443: thesis by L442;
+end;
+end;
+theorem
+L445: (for B173 being Nat holds (B173 > ( 0 ) implies (for B174 , B175 being (Element of ( Segm B173 )) holds ((( B174 + B175 ) < B173 iff ( ( addint B173 ) . (B174 , B175) ) = ( B174 + B175 )) & (( B174 + B175 ) >= B173 iff ( ( addint B173 ) . (B174 , B175) ) = ( ( B174 + B175 ) - B173 ))))))
+proof
+let C115 being Nat;
+assume L446: C115 > ( 0 );
+let C116 , C117 being (Element of ( Segm C115 ));
+reconsider D75 = C115 as non  zero Nat by L446;
+consider C118 being (Element of ( NAT )) such that L447: C118 = ( ( C116 + C117 ) mod D75 );
+consider C119 being Nat such that L448: ((( C116 + C117 ) = ( ( D75 * C119 ) + C118 ) & C118 < D75) or (C118 = ( 0 ) & D75 = ( 0 ))) by L447 , NAT_D:def 2;
+L449:
+now
+assume L450: ( C116 + C117 ) >= D75;
+L451: C119 = 1
+proof
+L452:
+now
+per cases ;
+case L453: C119 = ( 0 );
+thus L454: thesis by L453 , L448 , L450;
+end;
+case L455: C119 <> ( 0 );
+L456: C119 < 2
+proof
+L457: (C116 < D75 & C117 < D75) by NAT_1:44;
+L458: (( ( D75 * C119 ) + C118 ) >= ( D75 * C119 ) & ( C116 + C117 ) < ( ( D75 * 1 ) + ( D75 * 1 ) )) by L457 , NAT_1:11 , XREAL_1:8;
+assume L459: C119 >= 2;
+L460: ( D75 * C119 ) >= ( D75 * 2 ) by L459 , XREAL_1:64;
+thus L461: thesis by L460 , L448 , L458 , XXREAL_0:2;
+end;
+L462: C119 < ( 1 + 1 ) by L456;
+L463: C119 <= 1 by L462 , NAT_1:13;
+L464: ( 1 + ( 0 ) ) <= C119 by L455 , INT_1:7;
+thus L465: thesis by L464 , L463 , XXREAL_0:1;
+end;
+end;
+thus L467: thesis by L452;
+end;
+thus L468: ( ( addint D75 ) . (C116 , C117) ) = ( ( C116 + C117 ) - D75 ) by L451 , L447 , L448 , GR_CY_1:def 4;
+end;
+L469: (( ( addint D75 ) . (C116 , C117) ) = ( ( C116 + C117 ) - D75 ) implies ( C116 + C117 ) >= D75)
+proof
+assume L470: ( ( addint D75 ) . (C116 , C117) ) = ( ( C116 + C117 ) - D75 );
+L471: ( ( C116 + C117 ) mod D75 ) = ( ( C116 + C117 ) - D75 ) by L470 , GR_CY_1:def 4;
+consider C120 being Nat such that L472: ( C116 + C117 ) = ( ( D75 * C120 ) + ( ( C116 + C117 ) mod D75 ) ) and L473: ( ( C116 + C117 ) mod D75 ) < D75 by NAT_D:def 2;
+assume L474: ( C116 + C117 ) < D75;
+L475: C120 = ( 0 )
+proof
+assume L476: C120 <> ( 0 );
+L477: ( 1 + ( 0 ) ) <= C120 by L476 , INT_1:7;
+L478: ( 1 * D75 ) <= ( C120 * D75 ) by L477 , XREAL_1:64;
+L479: ( C120 * D75 ) <= ( ( C120 * D75 ) + ( ( C116 + C117 ) mod D75 ) ) by NAT_1:11;
+thus L480: thesis by L479 , L474 , L472 , L478 , XXREAL_0:2;
+end;
+thus L481: thesis by L475 , L471 , L472;
+end;
+L482:
+now
+assume L483: ( C116 + C117 ) < D75;
+L484: C119 = ( 0 )
+proof
+assume L485: C119 <> ( 0 );
+L486: ( 1 + ( 0 ) ) <= C119 by L485 , INT_1:7;
+L487: ( 1 * D75 ) <= ( C119 * D75 ) by L486 , XREAL_1:64;
+L488: ( D75 * C119 ) <= ( ( D75 * C119 ) + C118 ) by NAT_1:11;
+thus L489: thesis by L488 , L448 , L483 , L487 , XXREAL_0:2;
+end;
+thus L490: ( ( addint D75 ) . (C116 , C117) ) = ( C116 + C117 ) by L484 , L447 , L448 , GR_CY_1:def 4;
+end;
+L491: (( ( addint D75 ) . (C116 , C117) ) = ( C116 + C117 ) implies ( C116 + C117 ) < D75)
+proof
+assume L492: ( ( addint D75 ) . (C116 , C117) ) = ( C116 + C117 );
+L493: ( ( C116 + C117 ) mod D75 ) = ( C116 + C117 ) by L492 , GR_CY_1:def 4;
+thus L494: thesis by L493 , NAT_D:1;
+end;
+thus L495: thesis by L491 , L482 , L469 , L449;
+end;
+L496: (for B176 , B177 being Nat holds (B177 <> ( 0 ) implies (ex B178 being (Element of ( NAT )) st (( B178 * B177 ) <= B176 & B176 < ( ( B178 + 1 ) * B177 )))))
+proof
+let C121 , C122 being Nat;
+set D76 = ( C121 div C122 );
+assume L497: C122 <> ( 0 );
+L498: (ex B179 being Nat st (C121 = ( ( C122 * D76 ) + B179 ) & B179 < C122)) by L497 , NAT_D:def 1;
+L499: ( ( D76 + 1 ) * C122 ) = ( ( D76 * C122 ) + C122 );
+L500: ( ( D76 + 1 ) * C122 ) > C121 by L499 , L498 , XREAL_1:6;
+thus L501: thesis by L500 , L498 , NAT_1:11;
+end;
+theorem
+L502: (for B180 being Nat holds (B180 > ( 0 ) implies (for B181 , B182 being (Element of ( Segm B180 )) holds (for B183 being Nat holds ((( B183 * B180 ) <= ( B181 * B182 ) & ( B181 * B182 ) < ( ( B183 + 1 ) * B180 )) iff ( ( multint B180 ) . (B181 , B182) ) = ( ( B181 * B182 ) - ( B183 * B180 ) ))))))
+proof
+let C123 being Nat;
+assume L503: C123 > ( 0 );
+let C124 , C125 being (Element of ( Segm C123 ));
+reconsider D77 = C124 , D78 = C125 as (Element of ( NAT )) by ORDINAL1:def 12;
+let C126 being Nat;
+L504:
+now
+assume that
+L505: ( C126 * C123 ) <= ( D77 * D78 )
+and
+L506: ( D77 * D78 ) < ( ( C126 + 1 ) * C123 );
+consider C127 being (Element of ( NAT )) such that L507: C127 = ( ( D77 * D78 ) mod C123 );
+consider C128 being Nat such that L508: ((( D77 * D78 ) = ( ( C123 * C128 ) + C127 ) & C127 < C123) or (C127 = ( 0 ) & C123 = ( 0 ))) by L507 , NAT_D:def 2;
+L509:
+now
+consider C129 being Nat such that L510: ( D77 * D78 ) = ( ( C126 * C123 ) + C129 ) by L505 , NAT_1:10;
+L511: C128 = C126
+proof
+L512:
+now
+per cases ;
+case L513: C128 <= C126;
+consider C130 being Nat such that L514: ( C128 + C130 ) = C126 by L513 , NAT_1:10;
+L515: ( ( C123 * C128 ) + C127 ) = ( ( C128 * C123 ) + ( ( C130 * C123 ) + C129 ) ) by L503 , L508 , L510 , L514;
+L516:
+now
+per cases ;
+case L517: C128 = C126;
+thus L518: thesis by L517;
+end;
+case L519: C128 <> C126;
+L520: C130 >= 1
+proof
+assume L521: C130 < 1;
+L522: C130 = ( 0 )
+proof
+assume L523: C130 <> ( 0 );
+L524: ( 1 + ( 0 ) ) <= C130 by L523 , INT_1:7;
+thus L525: thesis by L524 , L521;
+end;
+thus L526: thesis by L522 , L514 , L519;
+end;
+L527: ( C130 * C123 ) >= ( 1 * C123 ) by L520 , NAT_1:4;
+L528: ( ( C130 * C123 ) + C129 ) >= ( ( 1 * C123 ) + C129 ) by L527 , XREAL_1:6;
+L529: ( ( 1 * C123 ) + C129 ) >= C123 by NAT_1:11;
+thus L530: thesis by L529 , L503 , L508 , L515 , L528 , XXREAL_0:2;
+end;
+end;
+thus L532: thesis by L516;
+end;
+case L533: C128 > C126;
+L534: C128 >= ( C126 + 1 ) by L533 , INT_1:7;
+L535: ( C123 * C128 ) >= ( C123 * ( C126 + 1 ) ) by L534 , NAT_1:4;
+L536: ( ( C123 * C128 ) + C127 ) >= ( C123 * C128 ) by NAT_1:11;
+thus L537: thesis by L536 , L506 , L508 , L535 , XXREAL_0:2;
+end;
+end;
+thus L539: thesis by L512;
+end;
+thus L540: ( ( multint C123 ) . (D77 , D78) ) = ( ( D77 * D78 ) - ( C126 * C123 ) ) by L511 , L503 , L507 , L508 , L388;
+end;
+thus L541: ( ( multint C123 ) . (D77 , D78) ) = ( ( D77 * D78 ) - ( C126 * C123 ) ) by L509;
+end;
+L542:
+now
+assume L543: ( ( multint C123 ) . (D77 , D78) ) = ( ( D77 * D78 ) - ( C126 * C123 ) );
+L544: ( ( D77 * D78 ) mod C123 ) = ( ( D77 * D78 ) - ( C126 * C123 ) ) by L543 , L503 , L388;
+L545: (( ( ( D77 * D78 ) - ( C126 * C123 ) ) + ( C126 * C123 ) ) >= ( ( 0 ) + ( C126 * C123 ) ) & (ex B184 being Nat st (( D77 * D78 ) = ( ( C123 * B184 ) + ( ( D77 * D78 ) - ( C123 * C126 ) ) ) & ( ( D77 * D78 ) - ( C123 * C126 ) ) < C123))) by L544 , L503 , NAT_D:def 2 , XREAL_1:6;
+L546: ( ( C126 + 1 ) * C123 ) = ( ( C126 * C123 ) + C123 );
+thus L547: (( C126 * C123 ) <= ( D77 * D78 ) & ( D77 * D78 ) < ( ( C126 + 1 ) * C123 )) by L546 , L545 , XREAL_1:6;
+end;
+thus L548: thesis by L542 , L504;
+end;
+theorem
+L549: (for B185 being Nat holds (B185 > ( 0 ) implies (for B186 being (Element of ( Segm B185 )) holds ((B186 = ( 0 ) iff ( ( compint B185 ) . B186 ) = ( 0 )) & (B186 <> ( 0 ) iff ( ( compint B185 ) . B186 ) = ( B185 - B186 ))))))
+proof
+let C131 being Nat;
+assume L550: C131 > ( 0 );
+let C132 being (Element of ( Segm C131 ));
+reconsider D79 = C131 as non  zero Nat by L550;
+reconsider D80 = C132 as (Element of ( NAT )) by ORDINAL1:def 12;
+L551: D80 < D79 by NAT_1:44;
+L552: ( D80 - D80 ) < ( D79 - D80 ) by L551 , XREAL_1:9;
+reconsider D81 = ( D79 - D80 ) as (Element of ( NAT )) by L552 , INT_1:3;
+consider C133 being (Element of ( NAT )) such that L553: C133 = ( D81 mod D79 );
+L554: (( ( compint D79 ) . D80 ) = ( 0 ) implies D80 = ( 0 ))
+proof
+L555: ( D80 - D80 ) < ( D79 - D80 ) by L551 , XREAL_1:9;
+reconsider D82 = ( D79 - D80 ) as (Element of ( NAT )) by L555 , INT_1:3;
+assume L556: ( ( compint D79 ) . D80 ) = ( 0 );
+L557: D79 <= ( D79 + D80 ) by NAT_1:11;
+L558: ( D79 - D80 ) <= ( ( D79 + D80 ) - D80 ) by L557 , XREAL_1:9;
+consider C134 being Nat such that L559: D82 = ( ( D79 * C134 ) + ( D82 mod D79 ) ) and L560: ( D82 mod D79 ) < D79 by NAT_D:def 2;
+assume L561: D80 <> ( 0 );
+L562: ( D79 - D80 ) <> D79 by L561;
+L563: ( D79 - D80 ) < D79 by L562 , L558 , XXREAL_0:1;
+L564: C134 = ( 0 )
+proof
+assume L565: C134 <> ( 0 );
+L566: ( 1 + ( 0 ) ) <= C134 by L565 , INT_1:7;
+L567: ( 1 * D79 ) <= ( C134 * D79 ) by L566 , XREAL_1:64;
+L568: ( C134 * D79 ) <= ( ( C134 * D79 ) + ( D82 mod D79 ) ) by NAT_1:11;
+thus L569: thesis by L568 , L563 , L559 , L567 , XXREAL_0:2;
+end;
+L570: D82 = ( 0 ) by L564 , L556 , L559 , L398;
+thus L571: thesis by L570 , NAT_1:44;
+end;
+consider C135 being Nat such that L572: ((D81 = ( ( D79 * C135 ) + C133 ) & C133 < D79) or (C133 = ( 0 ) & D79 = ( 0 ))) by L553 , NAT_D:def 2;
+L573: ( D79 - D80 ) <= D79
+proof
+assume L574: ( D79 - D80 ) > D79;
+L575: ( ( D79 - D80 ) + D80 ) > ( D79 + D80 ) by L574 , XREAL_1:6;
+thus L576: thesis by L575 , NAT_1:11;
+end;
+L577:
+now
+assume L578: D80 = ( 0 );
+L579: C135 = 1
+proof
+L580:
+now
+per cases ;
+case L581: C135 = ( 0 );
+thus L582: thesis by L581 , L572 , L578;
+end;
+case L583: C135 <> ( 0 );
+L584: C135 < 2
+proof
+assume L585: C135 >= 2;
+L586: ( D79 * C135 ) >= ( D79 * 2 ) by L585 , XREAL_1:64;
+L587: D79 <= ( ( D79 * 1 ) + ( D79 * 1 ) ) by NAT_1:11;
+L588: ( ( D79 * C135 ) + C133 ) >= ( D79 * C135 ) by NAT_1:11;
+L589: ( D79 - D80 ) >= ( D79 * 2 ) by L588 , L572 , L586 , XXREAL_0:2;
+L590: ( D79 * 1 ) = ( 2 * D79 ) by L589 , L578 , L587 , XXREAL_0:1;
+thus L591: thesis by L590 , L550;
+end;
+L592: C135 < ( 1 + 1 ) by L584;
+L593: C135 <= 1 by L592 , NAT_1:13;
+L594: ( 1 + ( 0 ) ) <= C135 by L583 , INT_1:7;
+thus L595: thesis by L594 , L593 , XXREAL_0:1;
+end;
+end;
+thus L597: thesis by L580;
+end;
+L598: C133 = ( 0 )
+proof
+assume L599: C133 <> ( 0 );
+L600: ( D79 + C133 ) > ( D79 + ( 0 ) ) by L599 , XREAL_1:6;
+thus L601: thesis by L600 , L572 , L573 , L579;
+end;
+thus L602: ( ( compint D79 ) . D80 ) = ( 0 ) by L598 , L553 , L398;
+end;
+L603:
+now
+assume L604: D80 <> ( 0 );
+L605: ( D79 - D80 ) < D79
+proof
+assume L606: ( D79 - D80 ) >= D79;
+L607: ( D79 - D80 ) = D79 by L606 , L573 , XXREAL_0:1;
+thus L608: thesis by L607 , L604;
+end;
+L609: C135 = ( 0 )
+proof
+assume L610: C135 <> ( 0 );
+L611: ( 1 + ( 0 ) ) <= C135 by L610 , INT_1:7;
+L612: ( 1 * D79 ) <= ( C135 * D79 ) by L611 , XREAL_1:64;
+L613: ( D79 * C135 ) <= ( ( D79 * C135 ) + C133 ) by NAT_1:11;
+thus L614: thesis by L613 , L572 , L605 , L612 , XXREAL_0:2;
+end;
+thus L615: ( ( compint D79 ) . D80 ) = ( D79 - D80 ) by L609 , L553 , L572 , L398;
+end;
+thus L616: thesis by L603 , L577 , L554;
+end;
+definition
+let C136 being Nat;
+func INT.Ring C136 -> doubleLoopStr equals 
+doubleLoopStr (# ( Segm C136 ) , ( addint C136 ) , ( multint C136 ) , ( In (1 , ( Segm C136 )) ) , ( In (( 0 ) , ( Segm C136 )) ) #);
+coherence;
+end;
+registration
+let C137 being non  zero Nat;
+cluster ( INT.Ring C137 ) ->  strict non  empty;
+coherence;
+end;
+theorem
+L619: (( INT.Ring 1 ) is  degenerated & ( INT.Ring 1 ) is Ring & ( INT.Ring 1 ) is  almost_left_invertible  unital  distributive  commutative)
+proof
+set D83 = 1;
+set D84 = ( INT.Ring D83 );
+L620: (for B187 being (Element of D84) holds (B187 <> ( 0. D84 ) implies (ex B188 being (Element of D84) st ( B188 * B187 ) = ( 1. D84 ))))
+proof
+let C138 being (Element of D84);
+assume L621: C138 <> ( 0. D84 );
+L622: C138 <> ( 0 ) by L621 , FUNCT_7:def 1;
+thus L623: thesis by L622 , CARD_1:49 , TARSKI:def 1;
+end;
+L624: (for B189 , B190 being (Element of D84) holds ( B189 + B190 ) = ( B190 + B189 ))
+proof
+let C139 , C140 being (Element of D84);
+thus L625: ( C139 + C140 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( C140 + C139 ) by CARD_1:49 , TARSKI:def 1;
+end;
+L626: (for B191 being (Element of D84) holds ( B191 + ( 0. D84 ) ) = B191)
+proof
+let C141 being (Element of D84);
+L627: C141 = ( 0 ) by CARD_1:49 , TARSKI:def 1;
+thus L628: thesis by L627 , CARD_1:49 , TARSKI:def 1;
+end;
+L629: (for B192 , B193 , B194 being (Element of D84) holds ( ( B192 * B193 ) * B194 ) = ( B192 * ( B193 * B194 ) ))
+proof
+let C142 , C143 , C144 being (Element of D84);
+thus L630: ( ( C142 * C143 ) * C144 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( C142 * ( C143 * C144 ) ) by CARD_1:49 , TARSKI:def 1;
+end;
+L631: (for B195 being (Element of D84) holds ( B195 + ( - B195 ) ) = ( 0. D84 ))
+proof
+let C145 being (Element of D84);
+thus L632: ( C145 + ( - C145 ) ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( 0. D84 ) by CARD_1:49 , TARSKI:def 1;
+end;
+L633: D84 is  right_complementable
+proof
+let C146 being (Element of D84);
+take ( - C146 );
+thus L634: thesis by L631;
+end;
+L635: (for B196 , B197 , B198 being (Element of D84) holds ( ( B196 + B197 ) + B198 ) = ( B196 + ( B197 + B198 ) ))
+proof
+let C147 , C148 , C149 being (Element of D84);
+thus L636: ( ( C147 + C148 ) + C149 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( C147 + ( C148 + C149 ) ) by CARD_1:49 , TARSKI:def 1;
+end;
+L637: (for B199 being (Element of D84) holds (( ( 1. D84 ) * B199 ) = B199 & ( B199 * ( 1. D84 ) ) = B199))
+proof
+let C150 being (Element of D84);
+L638: ( C150 * ( 1. D84 ) ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= C150 by CARD_1:49 , TARSKI:def 1;
+L639: ( ( 1. D84 ) * C150 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= C150 by CARD_1:49 , TARSKI:def 1;
+thus L640: thesis by L639 , L638;
+end;
+L641: D84 is  well-unital
+proof
+let C151 being (Element of D84);
+thus L642: ( C151 * ( 1. D84 ) ) = C151 by L637;
+thus L643: thesis by L637;
+end;
+L644: (for B200 , B201 being (Element of D84) holds ( B200 * B201 ) = ( B201 * B200 ))
+proof
+let C152 , C153 being (Element of D84);
+thus L645: ( C152 * C153 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( C153 * C152 ) by CARD_1:49 , TARSKI:def 1;
+end;
+L646: (for B202 , B203 , B204 being (Element of D84) holds ( B202 * ( B203 + B204 ) ) = ( ( B202 * B203 ) + ( B202 * B204 ) ))
+proof
+let C154 , C155 , C156 being (Element of D84);
+thus L647: ( C154 * ( C155 + C156 ) ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( ( C154 * C155 ) + ( C154 * C156 ) ) by CARD_1:49 , TARSKI:def 1;
+end;
+L648: (for B205 , B206 , B207 being (Element of D84) holds ( ( B206 + B207 ) * B205 ) = ( ( B206 * B205 ) + ( B207 * B205 ) ))
+proof
+let C157 , C158 , C159 being (Element of D84);
+thus L649: ( ( C158 + C159 ) * C157 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( ( C158 * C157 ) + ( C159 * C157 ) ) by CARD_1:49 , TARSKI:def 1;
+end;
+L650: ( 0. D84 ) = ( 0 ) by CARD_1:49 , TARSKI:def 1
+.= ( 1. D84 ) by CARD_1:49 , TARSKI:def 1;
+thus L651: thesis by L650 , L620 , L624 , L644 , L635 , L629 , L626 , L648 , L646 , L633 , L641 , GROUP_1:def 3 , GROUP_1:def 12 , RLVECT_1:def 2 , RLVECT_1:def 3 , RLVECT_1:def 4 , VECTSP_1:def 7 , VECTSP_1:def 9;
+end;
+registration
+cluster  strict  degenerated  unital  distributive  almost_left_invertible  commutative for Ring;
+existence by L619;
+end;
+L653:
+now
+let C160 , C161 being Nat;
+assume L654: C160 in ( Segm C161 );
+L655: C160 < C161 by L654 , NAT_1:44;
+L656: ( C161 - C160 ) is (Element of ( NAT )) by L655 , INT_1:5;
+assume L657: C160 > ( 0 );
+L658: ( C161 - C160 ) < ( C161 - ( 0 ) ) by L657 , XREAL_1:15;
+thus L659: ( C161 - C160 ) in ( Segm C161 ) by L658 , L656 , NAT_1:44;
+end;
+L660: (for B208 being Nat holds (1 < B208 implies ( 1. ( INT.Ring B208 ) ) = 1))
+proof
+let C162 being Nat;
+assume L661: 1 < C162;
+L662: 1 in ( Segm C162 ) by L661 , NAT_1:44;
+thus L663: thesis by L662 , FUNCT_7:def 1;
+end;
+theorem
+L664: (for B209 being Nat holds (B209 > 1 implies (( INT.Ring B209 ) is non  degenerated & ( INT.Ring B209 ) is  well-unital  distributive  commutative  well-unital  distributive  commutative  well-unital  distributive  commutative  well-unital  distributive  commutative Ring)))
+proof
+let C163 being Nat;
+assume L665: C163 > 1;
+reconsider D85 = C163 as non  zero Nat by L665;
+set D86 = ( INT.Ring D85 );
+L666: ( 1. D86 ) = 1 by L665 , L660;
+L667: (for B210 being (Element of D86) holds (( ( 1. D86 ) * B210 ) = B210 & ( B210 * ( 1. D86 ) ) = B210))
+proof
+let C164 being (Element of D86);
+reconsider D87 = C164 as (Element of ( Segm D85 ));
+L668: (( 1 * D87 ) < ( ( ( 0 ) + 1 ) * D85 ) & 1 is (Element of ( Segm D85 ))) by L665 , NAT_1:44;
+L669: ( ( multint D85 ) . (C164 , 1) ) = ( D87 - ( ( 0 ) * D85 ) ) by L668 , L502
+.= D87;
+L670: ( ( multint D85 ) . (1 , C164) ) = ( D87 - ( ( 0 ) * D85 ) ) by L668 , L502
+.= D87;
+thus L671: thesis by L670 , L665 , L669 , L660;
+end;
+L672: D86 is  well-unital
+proof
+let C165 being (Element of D86);
+thus L673: ( C165 * ( 1. D86 ) ) = C165 by L667;
+thus L674: thesis by L667;
+end;
+L675: (for B211 , B212 being (Element of D86) holds ( B211 + B212 ) = ( B212 + B211 ))
+proof
+let C166 , C167 being (Element of D86);
+reconsider D88 = C166 as (Element of ( Segm D85 ));
+reconsider D89 = C167 as (Element of ( Segm D85 ));
+L676:
+now
+per cases ;
+case L677: ( D88 + D89 ) < D85;
+thus L678: ( ( addint D85 ) . (C166 , C167) ) = ( D88 + D89 ) by L677 , L445
+.= ( ( addint D85 ) . (C167 , C166) ) by L677 , L445;
+end;
+case L679: ( D88 + D89 ) >= D85;
+thus L680: ( ( addint D85 ) . (C166 , C167) ) = ( ( D88 + D89 ) - D85 ) by L679 , L445
+.= ( ( addint D85 ) . (C167 , C166) ) by L679 , L445;
+end;
+end;
+thus L682: thesis by L676;
+end;
+L683: (for B213 , B214 , B215 being (Element of D86) holds ( ( B213 * B214 ) * B215 ) = ( B213 * ( B214 * B215 ) ))
+proof
+let C168 , C169 , C170 being (Element of D86);
+reconsider D90 = C168 , D91 = C169 , D92 = C170 as (Element of ( Segm D85 ));
+reconsider D93 = D90 as (Element of ( NAT ));
+reconsider D94 = D93 as Integer;
+reconsider D95 = D91 as (Element of ( NAT ));
+reconsider D96 = D95 as Integer;
+reconsider D97 = D92 as (Element of ( NAT ));
+reconsider D98 = D97 as Integer;
+L684: D98 < D85 by NAT_1:44;
+L685: D94 < D85 by NAT_1:44;
+L686: ( ( D90 * ( ( D91 * D92 ) mod D85 ) ) mod D85 ) = ( ( ( D94 mod D85 ) * ( ( D96 * D98 ) mod D85 ) ) mod D85 ) by L685 , NAT_D:63
+.= ( ( D94 * ( D96 * D98 ) ) mod D85 ) by NAT_D:67
+.= ( ( ( D94 * D96 ) * D98 ) mod D85 )
+.= ( ( ( ( D94 * D96 ) mod D85 ) * ( D98 mod D85 ) ) mod D85 ) by NAT_D:67
+.= ( ( ( ( D90 * D91 ) mod D85 ) * D92 ) mod D85 ) by L684 , NAT_D:63;
+L687: ( ( D94 * D96 ) mod D85 ) < D85 by NAT_D:62;
+L688: ( ( D90 * D91 ) mod D85 ) is (Element of ( Segm D85 )) by L687 , NAT_1:44;
+L689: ( ( D96 * D98 ) mod D85 ) < D85 by NAT_D:62;
+L690: ( ( D91 * D92 ) mod D85 ) is (Element of ( Segm D85 )) by L689 , NAT_1:44;
+L691: ( C168 * ( C169 * C170 ) ) = ( ( multint D85 ) . (D90 , ( ( D91 * D92 ) mod D85 )) ) by L388
+.= ( ( D90 * ( ( D91 * D92 ) mod D85 ) ) mod D85 ) by L690 , L388;
+L692: ( ( C168 * C169 ) * C170 ) = ( ( multint D85 ) . (( ( D90 * D91 ) mod D85 ) , D92) ) by L388
+.= ( ( ( ( D90 * D91 ) mod D85 ) * D92 ) mod D85 ) by L688 , L388;
+thus L693: thesis by L692 , L691 , L686;
+end;
+L694: (for B216 , B217 being (Element of D86) holds ( B216 * B217 ) = ( B217 * B216 ))
+proof
+let C171 , C172 being (Element of D86);
+reconsider D99 = C171 as (Element of ( Segm D85 ));
+reconsider D100 = C172 as (Element of ( Segm D85 ));
+consider C173 being (Element of ( NAT )) such that L695: (( C173 * D85 ) <= ( D99 * D100 ) & ( D99 * D100 ) < ( ( C173 + 1 ) * D85 )) by L496;
+L696: ( ( multint D85 ) . (D99 , D100) ) = ( ( D99 * D100 ) - ( C173 * D85 ) ) by L695 , L502
+.= ( ( multint D85 ) . (D100 , D99) ) by L695 , L502;
+thus L697: thesis by L696;
+end;
+L698: (for B218 , B219 , B220 being (Element of D86) holds ( ( B218 + B219 ) + B220 ) = ( B218 + ( B219 + B220 ) ))
+proof
+let C174 , C175 , C176 being (Element of D86);
+reconsider D101 = C174 , D102 = C175 , D103 = C176 as (Element of ( Segm D85 ));
+reconsider D104 = D101 as (Element of ( NAT ));
+reconsider D105 = D104 as Integer;
+reconsider D106 = D102 as (Element of ( NAT ));
+reconsider D107 = D106 as Integer;
+reconsider D108 = D103 as (Element of ( NAT ));
+reconsider D109 = D108 as Integer;
+L699: D109 < D85 by NAT_1:44;
+L700: D105 < D85 by NAT_1:44;
+L701: ( ( D101 + ( ( D102 + D103 ) mod D85 ) ) mod D85 ) = ( ( ( D105 mod D85 ) + ( ( D107 + D109 ) mod D85 ) ) mod D85 ) by L700 , NAT_D:63
+.= ( ( D105 + ( D107 + D109 ) ) mod D85 ) by NAT_D:66
+.= ( ( ( D105 + D107 ) + D109 ) mod D85 )
+.= ( ( ( ( D105 + D107 ) mod D85 ) + ( D109 mod D85 ) ) mod D85 ) by NAT_D:66
+.= ( ( ( ( D101 + D102 ) mod D85 ) + D103 ) mod D85 ) by L699 , NAT_D:63;
+L702: ( ( D105 + D107 ) mod D85 ) < D85 by NAT_D:62;
+L703: ( ( D101 + D102 ) mod D85 ) is (Element of ( Segm D85 )) by L702 , NAT_1:44;
+L704: ( ( D107 + D109 ) mod D85 ) < D85 by NAT_D:62;
+L705: ( ( D102 + D103 ) mod D85 ) is (Element of ( Segm D85 )) by L704 , NAT_1:44;
+L706: ( C174 + ( C175 + C176 ) ) = ( ( addint D85 ) . (D101 , ( ( D102 + D103 ) mod D85 )) ) by GR_CY_1:def 4
+.= ( ( D101 + ( ( D102 + D103 ) mod D85 ) ) mod D85 ) by L705 , GR_CY_1:def 4;
+L707: ( ( C174 + C175 ) + C176 ) = ( ( addint D85 ) . (( ( D101 + D102 ) mod D85 ) , D103) ) by GR_CY_1:def 4
+.= ( ( ( ( D101 + D102 ) mod D85 ) + D103 ) mod D85 ) by L703 , GR_CY_1:def 4;
+thus L708: thesis by L707 , L706 , L701;
+end;
+L709: ( 0 ) in ( Segm D85 ) by NAT_1:44;
+L710: ( 0. D86 ) = ( 0 ) by L709 , FUNCT_7:def 1;
+L711: (for B221 being (Element of D86) holds ( B221 + ( 0. D86 ) ) = B221)
+proof
+let C177 being (Element of D86);
+reconsider D110 = C177 as (Element of ( Segm D85 ));
+L712: ( D110 + ( 0 ) ) < D85 by NAT_1:44;
+thus L713: thesis by L712 , L710 , L445;
+end;
+L714: D86 is  right_complementable
+proof
+let C178 being (Element of D86);
+reconsider D111 = C178 as (Element of ( Segm D85 ));
+reconsider D112 = D111 as (Element of ( NAT ));
+per cases ;
+suppose L715: D112 = ( 0 );
+
+take ( 0. D86 );
+thus L716: thesis by L710 , L711 , L715;
+end;
+suppose L717: D112 <> ( 0 );
+
+reconsider D113 = ( D85 - D112 ) as (Element of ( Segm D85 )) by L717 , L653;
+reconsider D114 = D113 as (Element of D86);
+take D114;
+thus L718: ( C178 + D114 ) = ( ( D112 + D113 ) mod D85 ) by GR_CY_1:def 4
+.= ( 0. D86 ) by L710 , NAT_D:25;
+end;
+end;
+L720: (for B222 , B223 , B224 being (Element of D86) holds ( ( B223 + B224 ) * B222 ) = ( ( B223 * B222 ) + ( B224 * B222 ) ))
+proof
+let C179 , C180 , C181 being (Element of D86);
+reconsider D115 = C179 , D116 = C180 , D117 = C181 as (Element of ( Segm D85 ));
+reconsider D118 = D115 as (Element of ( NAT ));
+reconsider D119 = D118 as Integer;
+reconsider D120 = D116 as (Element of ( NAT ));
+reconsider D121 = D120 as Integer;
+reconsider D122 = D117 as (Element of ( NAT ));
+reconsider D123 = D122 as Integer;
+L721: D119 < D85 by NAT_1:44;
+L722: ( ( ( ( D116 * D115 ) mod D85 ) + ( ( D117 * D115 ) mod D85 ) ) mod D85 ) = ( ( ( D121 * D119 ) + ( D123 * D119 ) ) mod D85 ) by NAT_D:66
+.= ( ( ( D121 + D123 ) * D119 ) mod D85 )
+.= ( ( ( ( D121 + D123 ) mod D85 ) * ( D119 mod D85 ) ) mod D85 ) by NAT_D:67
+.= ( ( ( ( D116 + D117 ) mod D85 ) * D115 ) mod D85 ) by L721 , NAT_D:63;
+L723: ( ( D121 + D123 ) mod D85 ) < D85 by NAT_D:62;
+L724: ( ( D116 + D117 ) mod D85 ) is (Element of ( Segm D85 )) by L723 , NAT_1:44;
+L725: ( ( D123 * D119 ) mod D85 ) < D85 by NAT_D:62;
+L726: ( ( D117 * D115 ) mod D85 ) is (Element of ( Segm D85 )) by L725 , NAT_1:44;
+L727: ( ( D121 * D119 ) mod D85 ) < D85 by NAT_D:62;
+L728: ( ( D116 * D115 ) mod D85 ) is (Element of ( Segm D85 )) by L727 , NAT_1:44;
+L729: ( ( C180 + C181 ) * C179 ) = ( ( multint D85 ) . (( ( D116 + D117 ) mod D85 ) , D115) ) by GR_CY_1:def 4
+.= ( ( ( ( D116 + D117 ) mod D85 ) * D115 ) mod D85 ) by L724 , L388;
+L730: ( ( C180 * C179 ) + ( C181 * C179 ) ) = ( ( addint D85 ) . (( ( multint D85 ) . (C180 , C179) ) , ( ( D117 * D115 ) mod D85 )) ) by L388
+.= ( ( addint D85 ) . (( ( D116 * D115 ) mod D85 ) , ( ( D117 * D115 ) mod D85 )) ) by L388
+.= ( ( ( ( D116 * D115 ) mod D85 ) + ( ( D117 * D115 ) mod D85 ) ) mod D85 ) by L728 , L726 , GR_CY_1:def 4;
+thus L731: thesis by L730 , L729 , L722;
+end;
+L732: (for B225 , B226 , B227 being (Element of D86) holds ( B225 * ( B226 + B227 ) ) = ( ( B225 * B226 ) + ( B225 * B227 ) ))
+proof
+let C182 , C183 , C184 being (Element of D86);
+thus L733: ( C182 * ( C183 + C184 ) ) = ( ( C183 + C184 ) * C182 ) by L694
+.= ( ( C183 * C182 ) + ( C184 * C182 ) ) by L720
+.= ( ( C182 * C183 ) + ( C184 * C182 ) ) by L694
+.= ( ( C182 * C183 ) + ( C182 * C184 ) ) by L694;
+end;
+reconsider D124 = D86 as  commutative Ring by L732 , L675 , L694 , L698 , L683 , L711 , L720 , L714 , L672 , GROUP_1:def 3 , GROUP_1:def 12 , RLVECT_1:def 2 , RLVECT_1:def 3 , RLVECT_1:def 4 , VECTSP_1:def 7;
+L734: D124 is non  degenerated by L710 , L666 , STRUCT_0:def 8;
+thus L735: thesis by L734;
+end;
+theorem
+L736: (for B228 being Nat holds (B228 > 1 implies (( INT.Ring B228 ) is  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr iff B228 is Prime)))
+proof
+let C185 being Nat;
+assume L737: C185 > 1;
+reconsider D125 = C185 as non  zero Nat by L737;
+reconsider D126 = ( INT.Ring D125 ) as Ring by L737 , L664;
+reconsider D127 = D125 as non  zero (Element of ( NAT )) by ORDINAL1:def 12;
+L738:
+now
+assume L739: ( INT.Ring D127 ) is  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+L740: (for B229 being Nat holds (B229 divides D127 implies (B229 = 1 or B229 = D127)))
+proof
+let C186 being Nat;
+assume L741: C186 divides D127;
+consider C187 being Nat such that L742: D127 = ( C186 * C187 ) by L741 , NAT_D:def 3;
+L743: C186 <= D127
+proof
+assume L744: C186 > D127;
+L745:
+now
+per cases ;
+case L746: C187 = ( 0 );
+thus L747: thesis by L746 , L742;
+end;
+case L748: C187 <> ( 0 );
+L749: C187 >= ( 1 + ( 0 ) ) by L748 , INT_1:7;
+L750: ( C187 * D127 ) >= ( 1 * D127 ) by L749 , XREAL_1:64;
+thus L751: thesis by L750 , L742 , L744 , L748 , XREAL_1:68;
+end;
+end;
+thus L753: thesis by L745;
+end;
+L754: C187 <= D127
+proof
+assume L755: C187 > D127;
+L756:
+now
+per cases ;
+case L757: C186 = ( 0 );
+thus L758: thesis by L757 , L742;
+end;
+case L759: C186 <> ( 0 );
+L760: C186 >= ( 1 + ( 0 ) ) by L759 , INT_1:7;
+L761: ( C186 * D127 ) >= ( 1 * D127 ) by L760 , XREAL_1:64;
+thus L762: thesis by L761 , L742 , L755 , L759 , XREAL_1:68;
+end;
+end;
+thus L764: thesis by L756;
+end;
+L765:
+now
+per cases ;
+case L766: C187 = D127;
+L767: ( 1 * D127 ) = ( D127 * C186 ) by L766 , L742;
+thus L768: thesis by L767 , XCMPLX_1:5;
+end;
+case L769: C187 <> D127;
+L770: C187 < D127 by L769 , L754 , XXREAL_0:1;
+L771:
+now
+per cases ;
+case L772: C186 = D127;
+L773: ( 1 * D127 ) = ( C187 * D127 ) by L772 , L742;
+L774: C187 = 1 by L773 , XCMPLX_1:5;
+thus L775: thesis by L774 , L742;
+end;
+case L776: C186 <> D127;
+L777: C186 < D127 by L776 , L743 , XXREAL_0:1;
+reconsider D128 = C186 as (Element of ( Segm D127 )) by L777 , NAT_1:44;
+L778: ( 0 ) in D127 by NAT_1:44;
+L779: ( 0 ) = ( 0. ( INT.Ring D127 ) ) by L778 , FUNCT_7:def 1;
+L780: C187 <> ( 0 ) by L742;
+L781: C187 <> ( 0. ( INT.Ring D127 ) ) by L780 , L779;
+reconsider D129 = C187 as (Element of ( Segm D127 )) by L770 , NAT_1:44;
+reconsider D130 = D128 as (Element of ( INT.Ring D127 ));
+reconsider D131 = D129 as (Element of ( INT.Ring D127 ));
+L782: C186 <> ( 0 ) by L742;
+L783: C186 <> ( 0. ( INT.Ring D127 ) ) by L782 , L779;
+L784: ( D130 * D131 ) = ( ( D128 * D129 ) mod D127 ) by L388
+.= ( 0. ( INT.Ring D127 ) ) by L779 , L742 , INT_1:62;
+thus L785: contradiction by L784 , L739 , L783 , L781 , VECTSP_1:12;
+end;
+end;
+thus L787: thesis by L771;
+end;
+end;
+thus L789: thesis by L765;
+end;
+thus L790: D127 is Prime by L740 , L737 , INT_2:def 4;
+end;
+L791:
+now
+assume L792: D127 is Prime;
+L793: (for B230 being (Element of D126) holds (B230 <> ( 0. D126 ) implies (ex B231 being (Element of D126) st ( B231 * B230 ) = ( 1. D126 ))))
+proof
+reconsider D132 = 1 as Integer;
+let C188 being (Element of D126);
+reconsider D133 = C188 as (Element of ( Segm D127 ));
+reconsider D134 = D133 as (Element of ( NAT ));
+reconsider D135 = D134 as Integer;
+L794: ( 1 * D127 ) = D127;
+L795: 1 divides D127 by L794 , NAT_D:def 3;
+assume L796: C188 <> ( 0. D126 );
+L797: (for B232 being Nat holds ((B232 divides D134 & B232 divides D127) implies B232 divides 1))
+proof
+let C189 being Nat;
+assume that
+L798: C189 divides D134
+and
+L799: C189 divides D127;
+consider C190 being Nat such that L800: D134 = ( C189 * C190 ) by L798 , NAT_D:def 3;
+L801: C189 <= D134
+proof
+assume L802: C189 > D134;
+L803:
+now
+per cases ;
+case L804: C190 = ( 0 );
+thus L805: thesis by L804 , L796 , L800 , FUNCT_7:def 1;
+end;
+case L806: C190 <> ( 0 );
+L807: C190 >= ( 1 + ( 0 ) ) by L806 , INT_1:7;
+L808: ( C190 * D134 ) >= ( 1 * D134 ) by L807 , XREAL_1:64;
+thus L809: thesis by L808 , L800 , L802 , L806 , XREAL_1:68;
+end;
+end;
+thus L811: thesis by L803;
+end;
+L812: C189 <> D127 by L801 , NAT_1:44;
+thus L813: thesis by L812 , L792 , L799 , INT_2:def 4;
+end;
+L814: ( 1 * D134 ) = D134;
+L815: 1 divides D134 by L814 , NAT_D:def 3;
+L816: ( D134 gcd D127 ) = 1 by L815 , L795 , L797 , NAT_D:def 5;
+consider C191 , C192 being Integer such that L817: 1 = ( ( C191 * D134 ) + ( C192 * D127 ) ) by L816 , NAT_D:68;
+L818: ( C191 mod D127 ) >= ( 0 ) by NAT_D:62;
+L819: ( C191 mod D127 ) is (Element of ( NAT )) by L818 , INT_1:3;
+L820: ( C191 mod D127 ) < D127 by NAT_D:62;
+reconsider D136 = ( C191 mod D127 ) as (Element of ( Segm D127 )) by L820 , L819 , NAT_1:44;
+reconsider D137 = D136 as (Element of D126);
+L821: ( D137 * C188 ) = ( ( D134 * D136 ) mod D127 ) by L388
+.= ( ( ( D135 mod D127 ) * ( ( C191 mod D127 ) mod D127 ) ) mod D127 ) by NAT_D:67
+.= ( ( ( D135 mod D127 ) * ( C191 mod D127 ) ) mod D127 ) by NAT_D:65
+.= ( ( D135 * C191 ) mod D127 ) by NAT_D:67
+.= ( D132 mod D127 ) by L817 , NAT_D:61
+.= D132 by L737 , NAT_D:63
+.= ( 1. D126 ) by L737 , L660;
+thus L822: thesis by L821;
+end;
+thus L823: ( INT.Ring D127 ) is  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr by L793 , L737 , L664 , VECTSP_1:def 9;
+end;
+thus L824: thesis by L791 , L738;
+end;
+registration
+cluster  -> non  zero for Prime;
+coherence
+proof
+let C193 being Prime;
+assume L825: C193 is  zero;
+L826: C193 in ( SetPrimenumber 2 ) by L825 , NEWTON:def 7;
+thus L827: contradiction by L826;
+end;
+end;
+registration
+let C194 being Prime;
+cluster ( INT.Ring C194 ) ->  add-associative  right_zeroed  right_complementable  Abelian  commutative  associative  well-unital  distributive  almost_left_invertible non  degenerated;
+coherence
+proof
+L829: C194 > 1 by INT_2:def 4;
+thus L830: thesis by L829 , L736;
+end;
+end;
+theorem
+L832: ( 1. ( INT.Ring ) ) = 1 by L37;
+theorem
+L833: (for B233 being Nat holds (1 < B233 implies ( 1. ( INT.Ring B233 ) ) = 1)) by L660;
+begin
+registration
+cluster ( INT.Ring ) ->  infinite;
+coherence;
+end;
+registration
+cluster  strict  infinite for Ring;
+existence
+proof
+take ( INT.Ring );
+thus L835: thesis;
+end;
+end;

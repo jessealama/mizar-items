@@ -1,0 +1,996 @@
+:: High Speed Modulo Calculation Algorithm with Radix-$2^k$ SD Number
+::  by Masaaki Niimura and Yasushi Fuwa
+::
+:: Received November 7, 2003
+:: Copyright (c) 2003-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, NAT_1, XXREAL_0, ARYTM_3, RADIX_1, RADIX_5, FINSEQ_1,
+      CARD_1, FUNCT_1, NEWTON, RELAT_1, PARTFUN1, ARYTM_1, CARD_3, FINSEQ_2,
+      SUBSET_1, INT_1, RADIX_6;
+ notations SUBSET_1, NUMBERS, XCMPLX_0, XXREAL_0, INT_1, ORDINAL1, NAT_D,
+      NEWTON, RADIX_1, FINSEQ_1, FINSEQ_2, FUNCT_1, RELSET_1, PARTFUN1,
+      GR_CY_1, RADIX_5;
+ constructors REAL_1, NAT_D, NEWTON, GR_CY_1, RADIX_5, SEQ_1, RELSET_1;
+ registrations RELSET_1, XXREAL_0, XREAL_0, NAT_1, INT_1, ORDINAL1, NEWTON,
+      XBOOLE_0, FINSEQ_2;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ theorems RADIX_1, RADIX_2, RADIX_4, RADIX_5, INT_1, NAT_1, NAT_2, FINSEQ_1,
+      FINSEQ_2, RVSUM_1, NEWTON, PREPOWER, FUNCT_1, FINSEQ_3, XREAL_1,
+      XXREAL_0, NAT_D, CARD_1;
+ schemes FINSEQ_2, NAT_1;
+
+begin
+L1: (for B1 being Nat holds (B1 >= 1 implies ( B1 + 2 ) > 1))
+proof
+let C1 being Nat;
+L2: ( C1 + 2 ) > C1 by XREAL_1:29;
+thus L3: thesis by L2 , XXREAL_0:2;
+end;
+theorem
+L4: (for B2 being Nat holds (B2 >= 1 implies (for B3 , B4 being Nat holds ((B3 >= 1 & B4 >= 2) implies ( SDDec ( Fmin (( B3 + B2 ) , B3 , B4) ) ) = ( SDDec ( Fmin (B3 , B3 , B4) ) )))))
+proof
+defpred S1[ Nat ] means (for B5 , B6 being Nat holds ((B5 >= 1 & B6 >= 2) implies ( SDDec ( Fmin (( B5 + $1 ) , B5 , B6) ) ) = ( SDDec ( Fmin (B5 , B5 , B6) ) )));
+L5: (for B7 being Nat holds ((B7 >= 1 & S1[ B7 ]) implies S1[ ( B7 + 1 ) ]))
+proof
+let C2 being Nat;
+assume that
+L6: C2 >= 1
+and
+L7: S1[ C2 ];
+let C3 , C4 being Nat;
+assume that
+L8: C3 >= 1
+and
+L9: C4 >= 2;
+L10: ( C3 + C2 ) >= C3 by NAT_1:11;
+L11: ( ( C3 + C2 ) + 1 ) > C3 by L10 , NAT_1:13;
+L12: ( ( C3 + C2 ) + 1 ) in ( Seg ( ( C3 + C2 ) + 1 ) ) by FINSEQ_1:4;
+L13: ( DigA (( Fmin (( ( C3 + C2 ) + 1 ) , C3 , C4) ) , ( ( C3 + C2 ) + 1 )) ) = ( FminDigit (C3 , C4 , ( ( C3 + C2 ) + 1 )) ) by L12 , RADIX_5:def 6
+.= ( 0 ) by L9 , L11 , RADIX_5:def 5;
+L14: (for B8 being Nat holds (B8 in ( Seg ( C3 + C2 ) ) implies ( ( Fmin (( ( C3 + C2 ) + 1 ) , C3 , C4) ) . B8 ) = ( ( Fmin (( C3 + C2 ) , C3 , C4) ) . B8 )))
+proof
+let C5 being Nat;
+assume L15: C5 in ( Seg ( C3 + C2 ) );
+L16: C5 in ( Seg ( ( C3 + C2 ) + 1 ) ) by L15 , FINSEQ_2:8;
+L17: ( ( Fmin (( ( C3 + C2 ) + 1 ) , C3 , C4) ) . C5 ) = ( DigA (( Fmin (( ( C3 + C2 ) + 1 ) , C3 , C4) ) , C5) ) by L16 , RADIX_1:def 3
+.= ( FminDigit (C3 , C4 , C5) ) by L16 , RADIX_5:def 6
+.= ( DigA (( Fmin (( C3 + C2 ) , C3 , C4) ) , C5) ) by L15 , RADIX_5:def 6;
+thus L18: thesis by L17 , L15 , RADIX_1:def 3;
+end;
+L19: ( SDDec ( Fmin (( C3 + ( C2 + 1 ) ) , C3 , C4) ) ) = ( ( SDDec ( Fmin (( C3 + C2 ) , C3 , C4) ) ) + ( ( ( Radix C4 ) |^ ( C3 + C2 ) ) * ( DigA (( Fmin (( ( C3 + C2 ) + 1 ) , C3 , C4) ) , ( ( C3 + C2 ) + 1 )) ) ) ) by L14 , RADIX_2:10
+.= ( SDDec ( Fmin (C3 , C3 , C4) ) ) by L7 , L8 , L9 , L13;
+thus L20: thesis by L19;
+end;
+L21: S1[ 1 ]
+proof
+let C6 , C7 being Nat;
+assume that
+L22: C6 >= 1
+and
+L23: C7 >= 2;
+L24: ( C6 + 1 ) > C6 by NAT_1:13;
+L25: (for B9 being Nat holds (B9 in ( Seg C6 ) implies ( ( Fmin (( C6 + 1 ) , C6 , C7) ) . B9 ) = ( ( Fmin (C6 , C6 , C7) ) . B9 )))
+proof
+let C8 being Nat;
+assume L26: C8 in ( Seg C6 );
+L27: C8 in ( Seg ( C6 + 1 ) ) by L26 , FINSEQ_2:8;
+L28: ( ( Fmin (( C6 + 1 ) , C6 , C7) ) . C8 ) = ( DigA (( Fmin (( C6 + 1 ) , C6 , C7) ) , C8) ) by L27 , RADIX_1:def 3
+.= ( FminDigit (C6 , C7 , C8) ) by L27 , RADIX_5:def 6
+.= ( DigA (( Fmin (C6 , C6 , C7) ) , C8) ) by L26 , RADIX_5:def 6;
+thus L29: thesis by L28 , L26 , RADIX_1:def 3;
+end;
+L30: ( SDDec ( Fmin (( C6 + 1 ) , C6 , C7) ) ) = ( ( SDDec ( Fmin (C6 , C6 , C7) ) ) + ( ( ( Radix C7 ) |^ C6 ) * ( DigA (( Fmin (( C6 + 1 ) , C6 , C7) ) , ( C6 + 1 )) ) ) ) by L25 , RADIX_2:10;
+L31: ( C6 + 1 ) in ( Seg ( C6 + 1 ) ) by FINSEQ_1:4;
+L32: ( DigA (( Fmin (( C6 + 1 ) , C6 , C7) ) , ( C6 + 1 )) ) = ( FminDigit (C6 , C7 , ( C6 + 1 )) ) by L31 , RADIX_5:def 6
+.= ( 0 ) by L23 , L24 , RADIX_5:def 5;
+thus L33: thesis by L32 , L30;
+end;
+L34: (for B10 being Nat holds (B10 >= 1 implies S1[ B10 ])) from NAT_1:sch 8(L21 , L5);
+thus L35: thesis by L34;
+end;
+theorem
+L36: (for B11 , B12 being Nat holds ((B11 >= 1 & B12 >= 2) implies ( SDDec ( Fmin (B11 , B11 , B12) ) ) > ( 0 )))
+proof
+defpred S2[ Nat ] means (for B13 being Nat holds (B13 >= 2 implies ( SDDec ( Fmin ($1 , $1 , B13) ) ) > ( 0 )));
+L37: (for B14 being Nat holds ((B14 >= 1 & S2[ B14 ]) implies S2[ ( B14 + 1 ) ]))
+proof
+let C9 being Nat;
+assume that
+L38: C9 >= 1
+and
+L39: S2[ C9 ];
+let C10 being Nat;
+assume L40: C10 >= 2;
+L41: ( Radix C10 ) > 2 by L40 , RADIX_4:1;
+L42: ( Radix C10 ) > 1 by L41 , XXREAL_0:2;
+L43: ( C9 + 1 ) in ( Seg ( C9 + 1 ) ) by FINSEQ_1:4;
+L44: ( DigA (( Fmin (( C9 + 1 ) , ( C9 + 1 ) , C10) ) , ( C9 + 1 )) ) = ( FminDigit (( C9 + 1 ) , C10 , ( C9 + 1 )) ) by L43 , RADIX_5:def 6
+.= 1 by L40 , RADIX_5:def 5;
+L45: (for B15 being Nat holds (B15 in ( Seg C9 ) implies ( ( Fmin (( C9 + 1 ) , ( C9 + 1 ) , C10) ) . B15 ) = ( ( DecSD (( 0 ) , C9 , C10) ) . B15 )))
+proof
+let C11 being Nat;
+assume L46: C11 in ( Seg C9 );
+L47: C11 <= C9 by L46 , FINSEQ_1:1;
+L48: C11 < ( C9 + 1 ) by L47 , NAT_1:13;
+L49: C11 in ( Seg ( C9 + 1 ) ) by L46 , FINSEQ_2:8;
+L50: ( ( Fmin (( C9 + 1 ) , ( C9 + 1 ) , C10) ) . C11 ) = ( DigA (( Fmin (( C9 + 1 ) , ( C9 + 1 ) , C10) ) , C11) ) by L49 , RADIX_1:def 3
+.= ( FminDigit (( C9 + 1 ) , C10 , C11) ) by L49 , RADIX_5:def 6
+.= ( 0 ) by L40 , L48 , RADIX_5:def 5
+.= ( DigA (( DecSD (( 0 ) , C9 , C10) ) , C11) ) by L46 , RADIX_5:5;
+thus L51: thesis by L50 , L46 , RADIX_1:def 3;
+end;
+L52: ( SDDec ( Fmin (( C9 + 1 ) , ( C9 + 1 ) , C10) ) ) = ( ( SDDec ( DecSD (( 0 ) , C9 , C10) ) ) + ( ( ( Radix C10 ) |^ C9 ) * ( DigA (( Fmin (( C9 + 1 ) , ( C9 + 1 ) , C10) ) , ( C9 + 1 )) ) ) ) by L45 , RADIX_2:10
+.= ( ( 0 ) + ( ( Radix C10 ) |^ C9 ) ) by L38 , L44 , RADIX_5:6;
+thus L53: thesis by L52 , L42 , PREPOWER:11;
+end;
+L54: S2[ 1 ]
+proof
+let C12 being Nat;
+assume L55: C12 >= 2;
+L56: 1 in ( Seg 1 ) by FINSEQ_1:1;
+L57: ( ( DigitSD ( Fmin (1 , 1 , C12) ) ) /. 1 ) = ( SubDigit (( Fmin (1 , 1 , C12) ) , 1 , C12) ) by L56 , RADIX_1:def 6
+.= ( ( ( Radix C12 ) |^ ( 1 -' 1 ) ) * ( DigB (( Fmin (1 , 1 , C12) ) , 1) ) ) by RADIX_1:def 5
+.= ( ( ( Radix C12 ) |^ ( 1 -' 1 ) ) * ( DigA (( Fmin (1 , 1 , C12) ) , 1) ) ) by RADIX_1:def 4
+.= ( ( ( Radix C12 ) |^ ( 0 ) ) * ( DigA (( Fmin (1 , 1 , C12) ) , 1) ) ) by XREAL_1:232
+.= ( 1 * ( DigA (( Fmin (1 , 1 , C12) ) , 1) ) ) by NEWTON:4
+.= ( FminDigit (1 , C12 , 1) ) by L56 , RADIX_5:def 6
+.= 1 by L55 , RADIX_5:def 5;
+L58: ( DigitSD ( Fmin (1 , 1 , C12) ) ) = <* 1 *> by L57 , RADIX_1:17;
+L59: ( SDDec ( Fmin (1 , 1 , C12) ) ) = ( Sum ( DigitSD ( Fmin (1 , 1 , C12) ) ) ) by RADIX_1:def 7
+.= 1 by L58 , RVSUM_1:73;
+thus L60: thesis by L59;
+end;
+L61: (for B16 being Nat holds (B16 >= 1 implies S2[ B16 ])) from NAT_1:sch 8(L54 , L37);
+thus L62: thesis by L61;
+end;
+begin
+definition
+let C13 , C14 , C15 being Nat;
+let C16 being (Tuple of ( C14 + 2 ) , ( C15 -SD ));
+assume L63: C13 in ( Seg ( C14 + 2 ) );
+func M0Digit (C16 , C13) -> (Element of ( C15 -SD )) equals 
+:L64: ( C16 . C13 ) if C13 >= C14 otherwise ( 0 );
+coherence
+proof
+L65: ( len C16 ) = ( C14 + 2 ) by CARD_1:def 7;
+L66: C13 in ( dom C16 ) by L65 , L63 , FINSEQ_1:def 3;
+L67: ( C16 . C13 ) in ( rng C16 ) by L66 , FUNCT_1:def 3;
+thus L68: thesis by L67 , RADIX_1:14;
+end;
+consistency;
+end;
+definition
+let C17 , C18 being Nat;
+let C19 being (Tuple of ( C17 + 2 ) , ( C18 -SD ));
+func M0 C19 -> (Tuple of ( C17 + 2 ) , ( C18 -SD )) means 
+:L70: (for B17 being Nat holds (B17 in ( Seg ( C17 + 2 ) ) implies ( DigA (it , B17) ) = ( M0Digit (C19 , B17) )));
+existence
+proof
+deffunc H1(Nat) = ( M0Digit (C19 , $1) );
+consider C20 being (FinSequence of ( C18 -SD )) such that L71: ( len C20 ) = ( C17 + 2 ) and L72: (for B18 being Nat holds (B18 in ( dom C20 ) implies ( C20 . B18 ) = H1(B18))) from FINSEQ_2:sch 1;
+L73: ( dom C20 ) = ( Seg ( C17 + 2 ) ) by L71 , FINSEQ_1:def 3;
+L74: C20 is (Element of ( ( C17 + 2 ) -tuples_on ( C18 -SD ) )) by L71 , FINSEQ_2:92;
+reconsider D1 = C20 as (Tuple of ( C17 + 2 ) , ( C18 -SD )) by L74;
+take D1;
+let C21 being Nat;
+assume L75: C21 in ( Seg ( C17 + 2 ) );
+thus L76: ( DigA (D1 , C21) ) = ( D1 . C21 ) by L75 , RADIX_1:def 3
+.= ( M0Digit (C19 , C21) ) by L72 , L73 , L75;
+end;
+uniqueness
+proof
+let C22 , C23 being (Tuple of ( C17 + 2 ) , ( C18 -SD ));
+assume that
+L77: (for B19 being Nat holds (B19 in ( Seg ( C17 + 2 ) ) implies ( DigA (C22 , B19) ) = ( M0Digit (C19 , B19) )))
+and
+L78: (for B20 being Nat holds (B20 in ( Seg ( C17 + 2 ) ) implies ( DigA (C23 , B20) ) = ( M0Digit (C19 , B20) )));
+L79: ( len C22 ) = ( C17 + 2 ) by CARD_1:def 7;
+L80: ( dom C22 ) = ( Seg ( C17 + 2 ) ) by L79 , FINSEQ_1:def 3;
+L81:
+now
+let C24 being Nat;
+assume L82: C24 in ( dom C22 );
+L83: ( C22 . C24 ) = ( DigA (C22 , C24) ) by L82 , L80 , RADIX_1:def 3
+.= ( M0Digit (C19 , C24) ) by L77 , L80 , L82
+.= ( DigA (C23 , C24) ) by L78 , L80 , L82
+.= ( C23 . C24 ) by L80 , L82 , RADIX_1:def 3;
+thus L84: ( C22 . C24 ) = ( C23 . C24 ) by L83;
+end;
+L85: ( len C23 ) = ( C17 + 2 ) by CARD_1:def 7;
+thus L86: C22 = C23 by L85 , L79 , L81 , FINSEQ_2:9;
+end;
+end;
+definition
+let C25 , C26 , C27 being Nat;
+let C28 being (Tuple of ( C26 + 2 ) , ( C27 -SD ));
+assume that
+L88: C27 >= 2
+and
+L89: C25 in ( Seg ( C26 + 2 ) );
+func MmaxDigit (C28 , C25) -> (Element of ( C27 -SD )) equals 
+:L90: ( C28 . C25 ) if C25 >= C26 otherwise ( ( Radix C27 ) - 1 );
+coherence
+proof
+L91: ( len C28 ) = ( C26 + 2 ) by CARD_1:def 7;
+L92: C25 in ( dom C28 ) by L91 , L89 , FINSEQ_1:def 3;
+L93: ( C28 . C25 ) in ( rng C28 ) by L92 , FUNCT_1:def 3;
+thus L94: thesis by L93 , L88 , RADIX_5:1;
+end;
+consistency;
+end;
+definition
+let C29 , C30 being Nat;
+let C31 being (Tuple of ( C29 + 2 ) , ( C30 -SD ));
+func Mmax C31 -> (Tuple of ( C29 + 2 ) , ( C30 -SD )) means 
+:L96: (for B21 being Nat holds (B21 in ( Seg ( C29 + 2 ) ) implies ( DigA (it , B21) ) = ( MmaxDigit (C31 , B21) )));
+existence
+proof
+deffunc H2(Nat) = ( MmaxDigit (C31 , $1) );
+consider C32 being (FinSequence of ( C30 -SD )) such that L97: ( len C32 ) = ( C29 + 2 ) and L98: (for B22 being Nat holds (B22 in ( dom C32 ) implies ( C32 . B22 ) = H2(B22))) from FINSEQ_2:sch 1;
+L99: ( dom C32 ) = ( Seg ( C29 + 2 ) ) by L97 , FINSEQ_1:def 3;
+L100: C32 is (Element of ( ( C29 + 2 ) -tuples_on ( C30 -SD ) )) by L97 , FINSEQ_2:92;
+reconsider D2 = C32 as (Tuple of ( C29 + 2 ) , ( C30 -SD )) by L100;
+take D2;
+let C33 being Nat;
+assume L101: C33 in ( Seg ( C29 + 2 ) );
+thus L102: ( DigA (D2 , C33) ) = ( D2 . C33 ) by L101 , RADIX_1:def 3
+.= ( MmaxDigit (C31 , C33) ) by L98 , L99 , L101;
+end;
+uniqueness
+proof
+let C34 , C35 being (Tuple of ( C29 + 2 ) , ( C30 -SD ));
+assume that
+L103: (for B23 being Nat holds (B23 in ( Seg ( C29 + 2 ) ) implies ( DigA (C34 , B23) ) = ( MmaxDigit (C31 , B23) )))
+and
+L104: (for B24 being Nat holds (B24 in ( Seg ( C29 + 2 ) ) implies ( DigA (C35 , B24) ) = ( MmaxDigit (C31 , B24) )));
+L105: ( len C34 ) = ( C29 + 2 ) by CARD_1:def 7;
+L106: ( dom C34 ) = ( Seg ( C29 + 2 ) ) by L105 , FINSEQ_1:def 3;
+L107:
+now
+let C36 being Nat;
+assume L108: C36 in ( dom C34 );
+L109: ( C34 . C36 ) = ( DigA (C34 , C36) ) by L108 , L106 , RADIX_1:def 3
+.= ( MmaxDigit (C31 , C36) ) by L103 , L106 , L108
+.= ( DigA (C35 , C36) ) by L104 , L106 , L108
+.= ( C35 . C36 ) by L106 , L108 , RADIX_1:def 3;
+thus L110: ( C34 . C36 ) = ( C35 . C36 ) by L109;
+end;
+L111: ( len C35 ) = ( C29 + 2 ) by CARD_1:def 7;
+thus L112: C34 = C35 by L111 , L105 , L107 , FINSEQ_2:9;
+end;
+end;
+definition
+let C37 , C38 , C39 being Nat;
+let C40 being (Tuple of ( C38 + 2 ) , ( C39 -SD ));
+assume that
+L114: C39 >= 2
+and
+L115: C37 in ( Seg ( C38 + 2 ) );
+func MminDigit (C40 , C37) -> (Element of ( C39 -SD )) equals 
+:L116: ( C40 . C37 ) if C37 >= C38 otherwise ( ( - ( Radix C39 ) ) + 1 );
+coherence
+proof
+L117: ( len C40 ) = ( C38 + 2 ) by CARD_1:def 7;
+L118: C37 in ( dom C40 ) by L117 , L115 , FINSEQ_1:def 3;
+L119: ( C40 . C37 ) in ( rng C40 ) by L118 , FUNCT_1:def 3;
+L120: ( Radix C39 ) > 2 by L114 , RADIX_4:1;
+L121: ( Radix C39 ) > 1 by L120 , XXREAL_0:2;
+L122: ( ( Radix C39 ) + ( Radix C39 ) ) > ( 1 + 1 ) by L121 , XREAL_1:8;
+L123: ( ( Radix C39 ) - 1 ) > ( 1 - ( Radix C39 ) ) by L122 , XREAL_1:21;
+L124: ( ( - ( Radix C39 ) ) + 1 ) is (Element of ( INT )) by INT_1:def 2;
+L125: ( C39 -SD ) = { B25 where B25 is (Element of ( INT )) : (B25 <= ( ( Radix C39 ) - 1 ) & B25 >= ( ( - ( Radix C39 ) ) + 1 )) } by RADIX_1:def 2;
+L126: ( ( - ( Radix C39 ) ) + 1 ) in ( C39 -SD ) by L125 , L123 , L124;
+thus L127: thesis by L126 , L119;
+end;
+consistency;
+end;
+definition
+let C41 , C42 being Nat;
+let C43 being (Tuple of ( C41 + 2 ) , ( C42 -SD ));
+func Mmin C43 -> (Tuple of ( C41 + 2 ) , ( C42 -SD )) means 
+:L129: (for B26 being Nat holds (B26 in ( Seg ( C41 + 2 ) ) implies ( DigA (it , B26) ) = ( MminDigit (C43 , B26) )));
+existence
+proof
+deffunc H3(Nat) = ( MminDigit (C43 , $1) );
+consider C44 being (FinSequence of ( C42 -SD )) such that L130: ( len C44 ) = ( C41 + 2 ) and L131: (for B27 being Nat holds (B27 in ( dom C44 ) implies ( C44 . B27 ) = H3(B27))) from FINSEQ_2:sch 1;
+L132: ( dom C44 ) = ( Seg ( C41 + 2 ) ) by L130 , FINSEQ_1:def 3;
+L133: C44 is (Element of ( ( C41 + 2 ) -tuples_on ( C42 -SD ) )) by L130 , FINSEQ_2:92;
+reconsider D3 = C44 as (Tuple of ( C41 + 2 ) , ( C42 -SD )) by L133;
+take D3;
+let C45 being Nat;
+assume L134: C45 in ( Seg ( C41 + 2 ) );
+thus L135: ( DigA (D3 , C45) ) = ( D3 . C45 ) by L134 , RADIX_1:def 3
+.= H3(C45) by L131 , L132 , L134;
+end;
+uniqueness
+proof
+let C46 , C47 being (Tuple of ( C41 + 2 ) , ( C42 -SD ));
+assume that
+L136: (for B28 being Nat holds (B28 in ( Seg ( C41 + 2 ) ) implies ( DigA (C46 , B28) ) = ( MminDigit (C43 , B28) )))
+and
+L137: (for B29 being Nat holds (B29 in ( Seg ( C41 + 2 ) ) implies ( DigA (C47 , B29) ) = ( MminDigit (C43 , B29) )));
+L138: ( len C46 ) = ( C41 + 2 ) by CARD_1:def 7;
+L139: ( dom C46 ) = ( Seg ( C41 + 2 ) ) by L138 , FINSEQ_1:def 3;
+L140:
+now
+let C48 being Nat;
+assume L141: C48 in ( dom C46 );
+L142: ( C46 . C48 ) = ( DigA (C46 , C48) ) by L141 , L139 , RADIX_1:def 3
+.= ( MminDigit (C43 , C48) ) by L136 , L139 , L141
+.= ( DigA (C47 , C48) ) by L137 , L139 , L141
+.= ( C47 . C48 ) by L139 , L141 , RADIX_1:def 3;
+thus L143: ( C46 . C48 ) = ( C47 . C48 ) by L142;
+end;
+L144: ( len C47 ) = ( C41 + 2 ) by CARD_1:def 7;
+thus L145: C46 = C47 by L144 , L138 , L140 , FINSEQ_2:9;
+end;
+end;
+theorem
+L147: (for B30 , B31 being Nat holds (B31 >= 2 implies (for B32 being (Tuple of ( B30 + 2 ) , ( B31 -SD )) holds ( SDDec ( Mmax B32 ) ) >= ( SDDec B32 ))))
+proof
+let C49 , C50 being Nat;
+assume that
+L148: C50 >= 2;
+let C51 being (Tuple of ( C49 + 2 ) , ( C50 -SD ));
+L149: (for B33 being Nat holds (B33 in ( Seg ( C49 + 2 ) ) implies ( DigA (( Mmax C51 ) , B33) ) >= ( DigA (C51 , B33) )))
+proof
+let C52 being Nat;
+assume L150: C52 in ( Seg ( C49 + 2 ) );
+L151: ( DigA (( Mmax C51 ) , C52) ) = ( MmaxDigit (C51 , C52) ) by L150 , L96;
+L152:
+now
+per cases ;
+suppose L153: C52 >= C49;
+
+L154: ( DigA (( Mmax C51 ) , C52) ) = ( C51 . C52 ) by L153 , L148 , L150 , L151 , L90
+.= ( DigA (C51 , C52) ) by L150 , RADIX_1:def 3;
+thus L155: thesis by L154;
+end;
+suppose L156: C52 < C49;
+
+L157: ( DigA (C51 , C52) ) = ( C51 . C52 ) by L150 , RADIX_1:def 3;
+L158: ( C51 . C52 ) is (Element of ( C50 -SD )) by L150 , RADIX_1:15;
+L159: ( DigA (( Mmax C51 ) , C52) ) = ( ( Radix C50 ) - 1 ) by L148 , L150 , L151 , L156 , L90;
+thus L160: thesis by L159 , L157 , L158 , RADIX_1:13;
+end;
+end;
+thus L162: thesis by L152;
+end;
+thus L163: thesis by L149 , NAT_1:12 , RADIX_5:13;
+end;
+theorem
+L164: (for B34 , B35 being Nat holds (B35 >= 2 implies (for B36 being (Tuple of ( B34 + 2 ) , ( B35 -SD )) holds ( SDDec B36 ) >= ( SDDec ( Mmin B36 ) ))))
+proof
+let C53 , C54 being Nat;
+assume that
+L165: C54 >= 2;
+let C55 being (Tuple of ( C53 + 2 ) , ( C54 -SD ));
+L166: (for B37 being Nat holds (B37 in ( Seg ( C53 + 2 ) ) implies ( DigA (C55 , B37) ) >= ( DigA (( Mmin C55 ) , B37) )))
+proof
+let C56 being Nat;
+assume L167: C56 in ( Seg ( C53 + 2 ) );
+L168: ( DigA (( Mmin C55 ) , C56) ) = ( MminDigit (C55 , C56) ) by L167 , L129;
+L169:
+now
+per cases ;
+suppose L170: C56 >= C53;
+
+L171: ( DigA (( Mmin C55 ) , C56) ) = ( C55 . C56 ) by L170 , L165 , L167 , L168 , L116
+.= ( DigA (C55 , C56) ) by L167 , RADIX_1:def 3;
+thus L172: thesis by L171;
+end;
+suppose L173: C56 < C53;
+
+L174: ( DigA (C55 , C56) ) = ( C55 . C56 ) by L167 , RADIX_1:def 3;
+L175: ( C55 . C56 ) is (Element of ( C54 -SD )) by L167 , RADIX_1:15;
+L176: ( DigA (( Mmin C55 ) , C56) ) = ( ( - ( Radix C54 ) ) + 1 ) by L165 , L167 , L168 , L173 , L116;
+thus L177: thesis by L176 , L174 , L175 , RADIX_1:13;
+end;
+end;
+thus L179: thesis by L169;
+end;
+thus L180: thesis by L166 , NAT_1:12 , RADIX_5:13;
+end;
+begin
+definition
+let C57 , C58 being Nat;
+let C59 being Integer;
+pred C59 needs_digits_of C57 , C58
+means
+:L181: (C59 < ( ( Radix C58 ) |^ C57 ) & C59 >= ( ( Radix C58 ) |^ ( C57 -' 1 ) ))
+;end;
+theorem
+L183: (for B38 , B39 , B40 , B41 being Nat holds (B41 in ( Seg B39 ) implies ( DigA (( DecSD (B38 , B39 , B40) ) , B41) ) >= ( 0 )))
+proof
+let C60 , C61 , C62 , C63 being Nat;
+assume L184: C63 in ( Seg C61 );
+L185: C63 >= 1 by L184 , FINSEQ_1:1;
+L186: ( DigA (( DecSD (C60 , C61 , C62) ) , C63) ) = ( DigitDC (C60 , C63 , C62) ) by L184 , RADIX_1:def 9
+.= ( ( C60 mod ( ( Radix C62 ) |^ C63 ) ) div ( ( Radix C62 ) |^ ( C63 -' 1 ) ) ) by RADIX_1:def 8
+.= ( ( C60 div ( ( Radix C62 ) |^ ( C63 -' 1 ) ) ) mod ( Radix C62 ) ) by L185 , RADIX_2:4 , RADIX_2:6;
+thus L187: thesis by L186;
+end;
+theorem
+L188: (for B42 , B43 , B44 being Nat holds ((B42 >= 1 & B44 needs_digits_of B42 , B43) implies ( DigA (( DecSD (B44 , B42 , B43) ) , B42) ) > ( 0 )))
+proof
+let C64 , C65 , C66 being Nat;
+assume that
+L189: C64 >= 1
+and
+L190: C66 needs_digits_of C64 , C65;
+L191: C66 < ( ( Radix C65 ) |^ C64 ) by L190 , L181;
+L192: ( C66 mod ( ( Radix C65 ) |^ C64 ) ) = C66 by L191 , NAT_D:24;
+L193: C64 in ( Seg C64 ) by L189 , FINSEQ_1:3;
+L194: ( DigA (( DecSD (C66 , C64 , C65) ) , C64) ) = ( DigitDC (C66 , C64 , C65) ) by L193 , RADIX_1:def 9
+.= ( C66 div ( ( Radix C65 ) |^ ( C64 -' 1 ) ) ) by L192 , RADIX_1:def 8;
+L195: ( ( Radix C65 ) |^ ( C64 -' 1 ) ) > ( 0 ) by PREPOWER:6 , RADIX_2:6;
+L196: C66 >= ( ( Radix C65 ) |^ ( C64 -' 1 ) ) by L190 , L181;
+thus L197: thesis by L196 , L194 , L195 , NAT_2:13;
+end;
+theorem
+L198: (for B45 , B46 , B47 being Nat holds ((B46 >= 1 & B47 >= 2 & B45 needs_digits_of B46 , B47) implies B45 >= ( SDDec ( Fmin (( B46 + 2 ) , B46 , B47) ) )))
+proof
+let C67 , C68 , C69 being Nat;
+assume that
+L199: C68 >= 1
+and
+L200: C69 >= 2
+and
+L201: C67 needs_digits_of C68 , C69;
+L202: (for B48 being Nat holds (B48 in ( Seg C68 ) implies ( DigA (( DecSD (C67 , C68 , C69) ) , B48) ) >= ( DigA (( Fmin (C68 , C68 , C69) ) , B48) )))
+proof
+let C70 being Nat;
+assume L203: C70 in ( Seg C68 );
+L204: C70 <= C68 by L203 , FINSEQ_1:1;
+L205:
+now
+per cases  by L204 , XXREAL_0:1;
+suppose L206: C70 = C68;
+
+L207: ( DigA (( DecSD (C67 , C68 , C69) ) , C70) ) > ( 0 ) by L206 , L199 , L201 , L188;
+L208: ( DigA (( DecSD (C67 , C68 , C69) ) , C70) ) >= ( ( 0 ) + 1 ) by L207 , INT_1:7;
+L209: ( DigA (( Fmin (C68 , C68 , C69) ) , C70) ) = ( FminDigit (C68 , C69 , C70) ) by L203 , RADIX_5:def 6
+.= 1 by L200 , L206 , RADIX_5:def 5;
+thus L210: thesis by L209 , L208;
+end;
+suppose L211: C70 < C68;
+
+L212: ( DigA (( Fmin (C68 , C68 , C69) ) , C70) ) = ( FminDigit (C68 , C69 , C70) ) by L203 , RADIX_5:def 6
+.= ( 0 ) by L200 , L211 , RADIX_5:def 5;
+thus L213: thesis by L212 , L203 , L183;
+end;
+end;
+thus L215: thesis by L205;
+end;
+L216: ( SDDec ( DecSD (C67 , C68 , C69) ) ) >= ( SDDec ( Fmin (C68 , C68 , C69) ) ) by L202 , L199 , RADIX_5:13;
+L217: ( SDDec ( DecSD (C67 , C68 , C69) ) ) >= ( SDDec ( Fmin (( C68 + 2 ) , C68 , C69) ) ) by L216 , L199 , L200 , L4;
+L218: C67 < ( ( Radix C69 ) |^ C68 ) by L201 , L181;
+L219: C67 is_represented_by C68 , C69 by L218 , RADIX_1:def 12;
+thus L220: thesis by L219 , L199 , L217 , RADIX_1:22;
+end;
+begin
+theorem
+L221: (for B49 , B50 , B51 being Integer holds ((B50 < ( B49 + B51 ) & B51 > ( 0 )) implies (ex B52 being Integer st (( - B51 ) < ( B49 - ( B52 * B51 ) ) & ( B50 - ( B52 * B51 ) ) < B51))))
+proof
+let C71 , C72 , C73 being Integer;
+assume that
+L222: C72 < ( C71 + C73 )
+and
+L223: C73 > ( 0 );
+reconsider D4 = C73 as (Element of ( NAT )) by L223 , INT_1:3;
+L224: ( C72 + ( - ( ( C72 div D4 ) * D4 ) ) ) < ( ( C71 + D4 ) + ( - ( ( C72 div D4 ) * D4 ) ) ) by L222 , XREAL_1:6;
+L225: ( C72 mod D4 ) = ( C72 - ( ( C72 div D4 ) * D4 ) ) by L223 , INT_1:def 10;
+L226: ( 0 ) <= ( C72 - ( ( C72 div D4 ) * D4 ) ) by L225 , L223 , NAT_D:62;
+L227: ( ( 0 ) + ( - D4 ) ) < ( ( ( C71 + ( - ( ( C72 div D4 ) * D4 ) ) ) + D4 ) + ( - D4 ) ) by L226 , L224 , XREAL_1:6;
+L228: ( - D4 ) < ( C71 - ( ( C72 div D4 ) * D4 ) ) by L227;
+thus L229: thesis by L228 , L223 , L225 , NAT_D:62;
+end;
+theorem
+L230: (for B53 , B54 being Nat holds (B54 >= 2 implies (for B55 being (Tuple of ( B53 + 2 ) , ( B54 -SD )) holds ( ( SDDec ( Mmax B55 ) ) + ( SDDec ( DecSD (( 0 ) , ( B53 + 2 ) , B54) ) ) ) = ( ( SDDec ( M0 B55 ) ) + ( SDDec ( SDMax (( B53 + 2 ) , B53 , B54) ) ) ))))
+proof
+let C74 , C75 being Nat;
+assume that
+L231: C75 >= 2;
+let C76 being (Tuple of ( C74 + 2 ) , ( C75 -SD ));
+L232: (for B56 being Nat holds (B56 in ( Seg ( C74 + 2 ) ) implies ((( DigA (( M0 C76 ) , B56) ) = ( DigA (( Mmax C76 ) , B56) ) & ( DigA (( SDMax (( C74 + 2 ) , C74 , C75) ) , B56) ) = ( 0 )) or (( DigA (( SDMax (( C74 + 2 ) , C74 , C75) ) , B56) ) = ( DigA (( Mmax C76 ) , B56) ) & ( DigA (( M0 C76 ) , B56) ) = ( 0 )))))
+proof
+let C77 being Nat;
+assume L233: C77 in ( Seg ( C74 + 2 ) );
+L234: ( DigA (( Mmax C76 ) , C77) ) = ( MmaxDigit (C76 , C77) ) by L233 , L96;
+L235: C77 >= 1 by L233 , FINSEQ_1:1;
+L236:
+now
+per cases ;
+suppose L237: C77 < C74;
+
+L238: ( DigA (( M0 C76 ) , C77) ) = ( M0Digit (C76 , C77) ) by L233 , L70
+.= ( 0 ) by L233 , L237 , L64;
+L239: ( DigA (( Mmax C76 ) , C77) ) = ( ( Radix C75 ) - 1 ) by L231 , L233 , L234 , L237 , L90
+.= ( SDMaxDigit (C74 , C75 , C77) ) by L231 , L235 , L237 , RADIX_5:def 3
+.= ( DigA (( SDMax (( C74 + 2 ) , C74 , C75) ) , C77) ) by L233 , RADIX_5:def 4;
+thus L240: thesis by L239 , L238;
+end;
+suppose L241: C77 >= C74;
+
+L242: ( DigA (( SDMax (( C74 + 2 ) , C74 , C75) ) , C77) ) = ( SDMaxDigit (C74 , C75 , C77) ) by L233 , RADIX_5:def 4
+.= ( 0 ) by L231 , L241 , RADIX_5:def 3;
+L243: ( DigA (( Mmax C76 ) , C77) ) = ( C76 . C77 ) by L231 , L233 , L234 , L241 , L90
+.= ( M0Digit (C76 , C77) ) by L233 , L241 , L64
+.= ( DigA (( M0 C76 ) , C77) ) by L233 , L70;
+thus L244: thesis by L243 , L242;
+end;
+end;
+thus L246: thesis by L236;
+end;
+L247: ( C74 + 2 ) >= 1 by NAT_1:12;
+thus L248: thesis by L247 , L231 , L232 , RADIX_5:15;
+end;
+theorem
+L249: (for B57 , B58 being Nat holds ((B57 >= 1 & B58 >= 2) implies (for B59 being (Tuple of ( B57 + 2 ) , ( B58 -SD )) holds ( SDDec ( Mmax B59 ) ) < ( ( SDDec ( M0 B59 ) ) + ( SDDec ( Fmin (( B57 + 2 ) , B57 , B58) ) ) ))))
+proof
+let C78 , C79 being Nat;
+assume that
+L250: C78 >= 1
+and
+L251: C79 >= 2;
+L252: ( C78 + 2 ) > 1 by L250 , L1;
+let C80 being (Tuple of ( C78 + 2 ) , ( C79 -SD ));
+L253: ( ( SDDec ( Mmax C80 ) ) + 1 ) > ( ( SDDec ( Mmax C80 ) ) + ( 0 ) ) by XREAL_1:8;
+L254: ( ( SDDec ( M0 C80 ) ) + ( SDDec ( SDMax (( C78 + 2 ) , C78 , C79) ) ) ) = ( ( SDDec ( Mmax C80 ) ) + ( SDDec ( DecSD (( 0 ) , ( C78 + 2 ) , C79) ) ) ) by L251 , L230
+.= ( ( SDDec ( Mmax C80 ) ) + ( 0 ) ) by L252 , RADIX_5:6;
+L255: C78 in ( Seg ( C78 + 2 ) ) by L250 , FINSEQ_3:9;
+L256: ( SDDec ( Fmin (( C78 + 2 ) , C78 , C79) ) ) = ( ( SDDec ( SDMax (( C78 + 2 ) , C78 , C79) ) ) + ( SDDec ( DecSD (1 , ( C78 + 2 ) , C79) ) ) ) by L255 , L251 , L252 , RADIX_5:18
+.= ( ( SDDec ( SDMax (( C78 + 2 ) , C78 , C79) ) ) + 1 ) by L251 , L252 , RADIX_5:9;
+thus L257: thesis by L256 , L254 , L253;
+end;
+theorem
+L258: (for B60 , B61 being Nat holds (B61 >= 2 implies (for B62 being (Tuple of ( B60 + 2 ) , ( B61 -SD )) holds ( ( SDDec ( Mmin B62 ) ) + ( SDDec ( DecSD (( 0 ) , ( B60 + 2 ) , B61) ) ) ) = ( ( SDDec ( M0 B62 ) ) + ( SDDec ( SDMin (( B60 + 2 ) , B60 , B61) ) ) ))))
+proof
+let C81 , C82 being Nat;
+assume that
+L259: C82 >= 2;
+let C83 being (Tuple of ( C81 + 2 ) , ( C82 -SD ));
+L260: (for B63 being Nat holds (B63 in ( Seg ( C81 + 2 ) ) implies ((( DigA (( M0 C83 ) , B63) ) = ( DigA (( Mmin C83 ) , B63) ) & ( DigA (( SDMin (( C81 + 2 ) , C81 , C82) ) , B63) ) = ( 0 )) or (( DigA (( SDMin (( C81 + 2 ) , C81 , C82) ) , B63) ) = ( DigA (( Mmin C83 ) , B63) ) & ( DigA (( M0 C83 ) , B63) ) = ( 0 )))))
+proof
+let C84 being Nat;
+assume L261: C84 in ( Seg ( C81 + 2 ) );
+L262: ( DigA (( Mmin C83 ) , C84) ) = ( MminDigit (C83 , C84) ) by L261 , L129;
+L263: C84 >= 1 by L261 , FINSEQ_1:1;
+L264:
+now
+per cases ;
+suppose L265: C84 < C81;
+
+L266: ( DigA (( M0 C83 ) , C84) ) = ( M0Digit (C83 , C84) ) by L261 , L70
+.= ( 0 ) by L261 , L265 , L64;
+L267: ( DigA (( Mmin C83 ) , C84) ) = ( ( - ( Radix C82 ) ) + 1 ) by L259 , L261 , L262 , L265 , L116
+.= ( SDMinDigit (C81 , C82 , C84) ) by L259 , L263 , L265 , RADIX_5:def 1
+.= ( DigA (( SDMin (( C81 + 2 ) , C81 , C82) ) , C84) ) by L261 , RADIX_5:def 2;
+thus L268: thesis by L267 , L266;
+end;
+suppose L269: C84 >= C81;
+
+L270: ( DigA (( SDMin (( C81 + 2 ) , C81 , C82) ) , C84) ) = ( SDMinDigit (C81 , C82 , C84) ) by L261 , RADIX_5:def 2
+.= ( 0 ) by L259 , L269 , RADIX_5:def 1;
+L271: ( DigA (( Mmin C83 ) , C84) ) = ( C83 . C84 ) by L259 , L261 , L262 , L269 , L116
+.= ( M0Digit (C83 , C84) ) by L261 , L269 , L64
+.= ( DigA (( M0 C83 ) , C84) ) by L261 , L70;
+thus L272: thesis by L271 , L270;
+end;
+end;
+thus L274: thesis by L264;
+end;
+L275: ( C81 + 2 ) >= 1 by NAT_1:12;
+thus L276: thesis by L275 , L259 , L260 , RADIX_5:15;
+end;
+theorem
+L277: (for B64 , B65 being Nat holds (for B66 being (Tuple of ( B64 + 2 ) , ( B65 -SD )) holds ((B64 >= 1 & B65 >= 2) implies ( ( SDDec ( M0 B66 ) ) + ( SDDec ( DecSD (( 0 ) , ( B64 + 2 ) , B65) ) ) ) = ( ( SDDec ( Mmin B66 ) ) + ( SDDec ( SDMax (( B64 + 2 ) , B64 , B65) ) ) ))))
+proof
+let C85 , C86 being Nat;
+let C87 being (Tuple of ( C85 + 2 ) , ( C86 -SD ));
+assume that
+L278: C85 >= 1
+and
+L279: C86 >= 2;
+L280: ( C85 + 2 ) > 1 by L278 , L1;
+L281: ( ( SDDec ( M0 C87 ) ) + ( SDDec ( SDMin (( C85 + 2 ) , C85 , C86) ) ) ) = ( ( SDDec ( Mmin C87 ) ) + ( SDDec ( DecSD (( 0 ) , ( C85 + 2 ) , C86) ) ) ) by L279 , L258
+.= ( ( SDDec ( Mmin C87 ) ) + ( 0 ) ) by L280 , RADIX_5:6;
+L282: ( ( SDDec ( Mmin C87 ) ) + ( SDDec ( SDMax (( C85 + 2 ) , C85 , C86) ) ) ) = ( ( SDDec ( M0 C87 ) ) + ( ( SDDec ( SDMax (( C85 + 2 ) , C85 , C86) ) ) + ( SDDec ( SDMin (( C85 + 2 ) , C85 , C86) ) ) ) ) by L281
+.= ( ( SDDec ( M0 C87 ) ) + ( SDDec ( DecSD (( 0 ) , ( C85 + 2 ) , C86) ) ) ) by L279 , L280 , RADIX_5:17;
+thus L283: thesis by L282;
+end;
+theorem
+L284: (for B67 , B68 being Nat holds ((B67 >= 1 & B68 >= 2) implies (for B69 being (Tuple of ( B67 + 2 ) , ( B68 -SD )) holds ( SDDec ( M0 B69 ) ) < ( ( SDDec ( Mmin B69 ) ) + ( SDDec ( Fmin (( B67 + 2 ) , B67 , B68) ) ) ))))
+proof
+let C88 , C89 being Nat;
+assume that
+L285: C88 >= 1
+and
+L286: C89 >= 2;
+let C90 being (Tuple of ( C88 + 2 ) , ( C89 -SD ));
+L287: ( C88 + 2 ) > 1 by L285 , L1;
+L288: ( ( SDDec ( Mmin C90 ) ) + ( SDDec ( SDMax (( C88 + 2 ) , C88 , C89) ) ) ) = ( ( SDDec ( M0 C90 ) ) + ( SDDec ( DecSD (( 0 ) , ( C88 + 2 ) , C89) ) ) ) by L285 , L286 , L277
+.= ( ( SDDec ( M0 C90 ) ) + ( 0 ) ) by L287 , RADIX_5:6;
+L289: ( ( SDDec ( M0 C90 ) ) + 1 ) > ( ( SDDec ( M0 C90 ) ) + ( 0 ) ) by XREAL_1:8;
+L290: C88 in ( Seg ( C88 + 2 ) ) by L285 , FINSEQ_3:9;
+L291: ( SDDec ( Fmin (( C88 + 2 ) , C88 , C89) ) ) = ( ( SDDec ( SDMax (( C88 + 2 ) , C88 , C89) ) ) + ( SDDec ( DecSD (1 , ( C88 + 2 ) , C89) ) ) ) by L290 , L286 , L287 , RADIX_5:18
+.= ( ( SDDec ( SDMax (( C88 + 2 ) , C88 , C89) ) ) + 1 ) by L286 , L287 , RADIX_5:9;
+thus L292: thesis by L291 , L288 , L289;
+end;
+theorem
+L293: (for B70 , B71 , B72 being Nat holds (for B73 being (Tuple of ( B70 + 2 ) , ( B71 -SD )) holds ((B70 >= 1 & B71 >= 2 & B72 needs_digits_of B70 , B71) implies (ex B74 being Integer st (( - B72 ) < ( ( SDDec ( M0 B73 ) ) - ( B74 * B72 ) ) & ( ( SDDec ( Mmax B73 ) ) - ( B74 * B72 ) ) < B72)))))
+proof
+let C91 , C92 , C93 being Nat;
+let C94 being (Tuple of ( C91 + 2 ) , ( C92 -SD ));
+assume that
+L294: C91 >= 1
+and
+L295: C92 >= 2
+and
+L296: C93 needs_digits_of C91 , C92;
+L297: ( SDDec ( Fmin (( C91 + 2 ) , C91 , C92) ) ) <= C93 by L294 , L295 , L296 , L198;
+L298: ( ( SDDec ( M0 C94 ) ) + ( SDDec ( Fmin (( C91 + 2 ) , C91 , C92) ) ) ) <= ( ( SDDec ( M0 C94 ) ) + C93 ) by L297 , XREAL_1:7;
+L299: ( SDDec ( Mmax C94 ) ) < ( ( SDDec ( M0 C94 ) ) + ( SDDec ( Fmin (( C91 + 2 ) , C91 , C92) ) ) ) by L294 , L295 , L249;
+L300: ( SDDec ( Mmax C94 ) ) < ( ( SDDec ( M0 C94 ) ) + C93 ) by L299 , L298 , XXREAL_0:2;
+L301: ( ( Radix C92 ) |^ ( C91 -' 1 ) ) > ( 0 ) by NEWTON:83 , RADIX_2:6;
+L302: C93 > ( 0 ) by L301 , L296 , L181;
+thus L303: thesis by L302 , L300 , L221;
+end;
+theorem
+L304: (for B75 , B76 , B77 being Nat holds (for B78 being (Tuple of ( B75 + 2 ) , ( B76 -SD )) holds ((B75 >= 1 & B76 >= 2 & B77 needs_digits_of B75 , B76) implies (ex B79 being Integer st (( - B77 ) < ( ( SDDec ( Mmin B78 ) ) - ( B79 * B77 ) ) & ( ( SDDec ( M0 B78 ) ) - ( B79 * B77 ) ) < B77)))))
+proof
+let C95 , C96 , C97 being Nat;
+let C98 being (Tuple of ( C95 + 2 ) , ( C96 -SD ));
+assume that
+L305: C95 >= 1
+and
+L306: C96 >= 2
+and
+L307: C97 needs_digits_of C95 , C96;
+L308: ( SDDec ( Fmin (( C95 + 2 ) , C95 , C96) ) ) <= C97 by L305 , L306 , L307 , L198;
+L309: ( ( SDDec ( Mmin C98 ) ) + ( SDDec ( Fmin (( C95 + 2 ) , C95 , C96) ) ) ) <= ( ( SDDec ( Mmin C98 ) ) + C97 ) by L308 , XREAL_1:7;
+L310: ( SDDec ( M0 C98 ) ) < ( ( SDDec ( Mmin C98 ) ) + ( SDDec ( Fmin (( C95 + 2 ) , C95 , C96) ) ) ) by L305 , L306 , L284;
+L311: ( SDDec ( M0 C98 ) ) < ( ( SDDec ( Mmin C98 ) ) + C97 ) by L310 , L309 , XXREAL_0:2;
+L312: ( ( Radix C96 ) |^ ( C95 -' 1 ) ) > ( 0 ) by NEWTON:83 , RADIX_2:6;
+L313: C97 > ( 0 ) by L312 , L307 , L181;
+thus L314: thesis by L313 , L311 , L221;
+end;
+theorem
+L315: (for B80 , B81 being Nat holds (for B82 being (Tuple of ( B80 + 2 ) , ( B81 -SD )) holds (B81 >= 2 implies ((( SDDec ( M0 B82 ) ) <= ( SDDec B82 ) & ( SDDec B82 ) <= ( SDDec ( Mmax B82 ) )) or (( SDDec ( Mmin B82 ) ) <= ( SDDec B82 ) & ( SDDec B82 ) < ( SDDec ( M0 B82 ) ))))))
+proof
+let C99 , C100 being Nat;
+let C101 being (Tuple of ( C99 + 2 ) , ( C100 -SD ));
+set D5 = ( SDDec ( M0 C101 ) );
+set D6 = ( SDDec C101 );
+assume that
+L316: C100 >= 2;
+L317:
+now
+per cases ;
+suppose L318: D6 < D5;
+
+thus L319: thesis by L318 , L316 , L164;
+end;
+suppose L320: D6 >= D5;
+
+thus L321: thesis by L320 , L316 , L147;
+end;
+end;
+thus L323: thesis by L317;
+end;
+begin
+definition
+let C102 , C103 , C104 being Nat;
+let C105 being (Tuple of ( C103 + 2 ) , ( C104 -SD ));
+assume L324: C102 in ( Seg ( C103 + 2 ) );
+func MmaskDigit (C105 , C102) -> (Element of ( C104 -SD )) equals 
+:L325: ( C105 . C102 ) if C102 < C103 otherwise ( 0 );
+coherence
+proof
+L326: ( len C105 ) = ( C103 + 2 ) by CARD_1:def 7;
+L327: C102 in ( dom C105 ) by L326 , L324 , FINSEQ_1:def 3;
+L328: ( C105 . C102 ) in ( rng C105 ) by L327 , FUNCT_1:def 3;
+thus L329: thesis by L328 , RADIX_1:14;
+end;
+consistency;
+end;
+definition
+let C106 , C107 being Nat;
+let C108 being (Tuple of ( C106 + 2 ) , ( C107 -SD ));
+func Mmask C108 -> (Tuple of ( C106 + 2 ) , ( C107 -SD )) means 
+:L331: (for B83 being Nat holds (B83 in ( Seg ( C106 + 2 ) ) implies ( DigA (it , B83) ) = ( MmaskDigit (C108 , B83) )));
+existence
+proof
+deffunc H4(Nat) = ( MmaskDigit (C108 , $1) );
+consider C109 being (FinSequence of ( C107 -SD )) such that L332: ( len C109 ) = ( C106 + 2 ) and L333: (for B84 being Nat holds (B84 in ( dom C109 ) implies ( C109 . B84 ) = H4(B84))) from FINSEQ_2:sch 1;
+L334: ( dom C109 ) = ( Seg ( C106 + 2 ) ) by L332 , FINSEQ_1:def 3;
+L335: C109 is (Element of ( ( C106 + 2 ) -tuples_on ( C107 -SD ) )) by L332 , FINSEQ_2:92;
+reconsider D7 = C109 as (Tuple of ( C106 + 2 ) , ( C107 -SD )) by L335;
+take D7;
+let C110 being Nat;
+assume L336: C110 in ( Seg ( C106 + 2 ) );
+thus L337: ( DigA (D7 , C110) ) = ( D7 . C110 ) by L336 , RADIX_1:def 3
+.= ( MmaskDigit (C108 , C110) ) by L333 , L334 , L336;
+end;
+uniqueness
+proof
+let C111 , C112 being (Tuple of ( C106 + 2 ) , ( C107 -SD ));
+assume that
+L338: (for B85 being Nat holds (B85 in ( Seg ( C106 + 2 ) ) implies ( DigA (C111 , B85) ) = ( MmaskDigit (C108 , B85) )))
+and
+L339: (for B86 being Nat holds (B86 in ( Seg ( C106 + 2 ) ) implies ( DigA (C112 , B86) ) = ( MmaskDigit (C108 , B86) )));
+L340: ( len C111 ) = ( C106 + 2 ) by CARD_1:def 7;
+L341: ( dom C111 ) = ( Seg ( C106 + 2 ) ) by L340 , FINSEQ_1:def 3;
+L342:
+now
+let C113 being Nat;
+assume L343: C113 in ( dom C111 );
+L344: ( C111 . C113 ) = ( DigA (C111 , C113) ) by L343 , L341 , RADIX_1:def 3
+.= ( MmaskDigit (C108 , C113) ) by L338 , L341 , L343
+.= ( DigA (C112 , C113) ) by L339 , L341 , L343
+.= ( C112 . C113 ) by L341 , L343 , RADIX_1:def 3;
+thus L345: ( C111 . C113 ) = ( C112 . C113 ) by L344;
+end;
+L346: ( len C112 ) = ( C106 + 2 ) by CARD_1:def 7;
+thus L347: C111 = C112 by L346 , L340 , L342 , FINSEQ_2:9;
+end;
+end;
+theorem
+L349: (for B87 , B88 being Nat holds (for B89 being (Tuple of ( B87 + 2 ) , ( B88 -SD )) holds (B88 >= 2 implies ( ( SDDec ( M0 B89 ) ) + ( SDDec ( Mmask B89 ) ) ) = ( ( SDDec B89 ) + ( SDDec ( DecSD (( 0 ) , ( B87 + 2 ) , B88) ) ) ))))
+proof
+let C114 , C115 being Nat;
+let C116 being (Tuple of ( C114 + 2 ) , ( C115 -SD ));
+L350: ( C114 + 2 ) >= 1 by NAT_1:12;
+L351: (for B90 being Nat holds (B90 in ( Seg ( C114 + 2 ) ) implies ((( DigA (( M0 C116 ) , B90) ) = ( DigA (C116 , B90) ) & ( DigA (( Mmask C116 ) , B90) ) = ( 0 )) or (( DigA (( Mmask C116 ) , B90) ) = ( DigA (C116 , B90) ) & ( DigA (( M0 C116 ) , B90) ) = ( 0 )))))
+proof
+let C117 being Nat;
+assume L352: C117 in ( Seg ( C114 + 2 ) );
+L353:
+now
+per cases ;
+suppose L354: C117 < C114;
+
+L355: ( DigA (( M0 C116 ) , C117) ) = ( M0Digit (C116 , C117) ) by L352 , L70
+.= ( 0 ) by L352 , L354 , L64;
+L356: ( DigA (( Mmask C116 ) , C117) ) = ( MmaskDigit (C116 , C117) ) by L352 , L331
+.= ( C116 . C117 ) by L352 , L354 , L325
+.= ( DigA (C116 , C117) ) by L352 , RADIX_1:def 3;
+thus L357: thesis by L356 , L355;
+end;
+suppose L358: C117 >= C114;
+
+L359: ( DigA (( Mmask C116 ) , C117) ) = ( MmaskDigit (C116 , C117) ) by L352 , L331
+.= ( 0 ) by L352 , L358 , L325;
+L360: ( DigA (( M0 C116 ) , C117) ) = ( M0Digit (C116 , C117) ) by L352 , L70
+.= ( C116 . C117 ) by L352 , L358 , L64
+.= ( DigA (C116 , C117) ) by L352 , RADIX_1:def 3;
+thus L361: thesis by L360 , L359;
+end;
+end;
+thus L363: thesis by L353;
+end;
+assume L364: C115 >= 2;
+thus L365: thesis by L364 , L350 , L351 , RADIX_5:15;
+end;
+theorem
+L366: (for B91 , B92 being Nat holds (for B93 being (Tuple of ( B91 + 2 ) , ( B92 -SD )) holds ((B91 >= 1 & B92 >= 2) implies (( SDDec ( Mmask B93 ) ) > ( 0 ) implies ( SDDec B93 ) > ( SDDec ( M0 B93 ) )))))
+proof
+let C118 , C119 being Nat;
+let C120 being (Tuple of ( C118 + 2 ) , ( C119 -SD ));
+assume that
+L367: C118 >= 1
+and
+L368: C119 >= 2;
+L369: ( C118 + 2 ) > 1 by L367 , L1;
+L370: ( ( SDDec ( M0 C120 ) ) + ( SDDec ( Mmask C120 ) ) ) = ( ( SDDec C120 ) + ( SDDec ( DecSD (( 0 ) , ( C118 + 2 ) , C119) ) ) ) by L368 , L349
+.= ( ( SDDec C120 ) + ( 0 ) ) by L369 , RADIX_5:6;
+L371: ( ( SDDec C120 ) - ( SDDec ( M0 C120 ) ) ) = ( ( SDDec ( Mmask C120 ) ) - ( 0 ) ) by L370;
+assume L372: ( SDDec ( Mmask C120 ) ) > ( 0 );
+thus L373: thesis by L372 , L371 , XREAL_1:47;
+end;
+definition
+let C121 , C122 , C123 being Nat;
+assume L374: C123 >= 2;
+func FSDMinDigit (C122 , C123 , C121) -> (Element of ( C123 -SD )) equals 
+:L375: ( 0 ) if C121 > C122 , 1 if C121 = C122 otherwise ( ( - ( Radix C123 ) ) + 1 );
+coherence
+proof
+L376: ( Radix C123 ) > 2 by L374 , RADIX_4:1;
+L377: ( Radix C123 ) > 1 by L376 , XXREAL_0:2;
+L378: ( ( Radix C123 ) + ( Radix C123 ) ) > ( 1 + 1 ) by L377 , XREAL_1:8;
+L379: ( ( Radix C123 ) - 1 ) > ( 1 - ( Radix C123 ) ) by L378 , XREAL_1:21;
+L380: ( C123 -SD ) = { B94 where B94 is (Element of ( INT )) : (B94 <= ( ( Radix C123 ) - 1 ) & B94 >= ( ( - ( Radix C123 ) ) + 1 )) } by RADIX_1:def 2;
+L381: ( Radix C123 ) > 2 by L374 , RADIX_4:1;
+L382: ( - ( Radix C123 ) ) < ( - 2 ) by L381 , XREAL_1:24;
+L383: ( ( - ( Radix C123 ) ) + 1 ) < ( ( - 2 ) + 1 ) by L382 , XREAL_1:6;
+L384: ( ( - ( Radix C123 ) ) + 1 ) is (Element of ( INT )) by INT_1:def 2;
+L385: ( ( - ( Radix C123 ) ) + 1 ) in ( C123 -SD ) by L384 , L380 , L379;
+L386: 1 is (Element of ( INT )) by INT_1:def 2;
+L387: ( ( Radix C123 ) + ( - 1 ) ) > ( 2 + ( - 1 ) ) by L381 , XREAL_1:6;
+L388: 1 in ( C123 -SD ) by L387 , L380 , L383 , L386;
+thus L389: thesis by L388 , L385 , RADIX_1:14;
+end;
+consistency;
+end;
+definition
+let C124 , C125 , C126 being Nat;
+func FSDMin (C124 , C125 , C126) -> (Tuple of C124 , ( C126 -SD )) means 
+:L391: (for B95 being Nat holds (B95 in ( Seg C124 ) implies ( DigA (it , B95) ) = ( FSDMinDigit (C125 , C126 , B95) )));
+existence
+proof
+deffunc H5(Nat) = ( FSDMinDigit (C125 , C126 , $1) );
+consider C127 being (FinSequence of ( C126 -SD )) such that L392: ( len C127 ) = C124 and L393: (for B96 being Nat holds (B96 in ( dom C127 ) implies ( C127 . B96 ) = H5(B96))) from FINSEQ_2:sch 1;
+L394: ( dom C127 ) = ( Seg C124 ) by L392 , FINSEQ_1:def 3;
+L395: C127 is (Element of ( C124 -tuples_on ( C126 -SD ) )) by L392 , FINSEQ_2:92;
+reconsider D8 = C127 as (Tuple of C124 , ( C126 -SD )) by L395;
+take D8;
+let C128 being Nat;
+assume L396: C128 in ( Seg C124 );
+L397: ( DigA (D8 , C128) ) = ( D8 . C128 ) by L396 , RADIX_1:def 3;
+thus L398: thesis by L397 , L393 , L394 , L396;
+end;
+uniqueness
+proof
+let C129 , C130 being (Tuple of C124 , ( C126 -SD ));
+assume that
+L399: (for B97 being Nat holds (B97 in ( Seg C124 ) implies ( DigA (C129 , B97) ) = ( FSDMinDigit (C125 , C126 , B97) )))
+and
+L400: (for B98 being Nat holds (B98 in ( Seg C124 ) implies ( DigA (C130 , B98) ) = ( FSDMinDigit (C125 , C126 , B98) )));
+L401: ( len C129 ) = C124 by CARD_1:def 7;
+L402: ( dom C129 ) = ( Seg C124 ) by L401 , FINSEQ_1:def 3;
+L403:
+now
+let C131 being Nat;
+assume L404: C131 in ( dom C129 );
+L405: ( C129 . C131 ) = ( DigA (C129 , C131) ) by L404 , L402 , RADIX_1:def 3
+.= ( FSDMinDigit (C125 , C126 , C131) ) by L399 , L402 , L404
+.= ( DigA (C130 , C131) ) by L400 , L402 , L404
+.= ( C130 . C131 ) by L402 , L404 , RADIX_1:def 3;
+thus L406: ( C129 . C131 ) = ( C130 . C131 ) by L405;
+end;
+L407: ( len C130 ) = C124 by CARD_1:def 7;
+thus L408: C129 = C130 by L407 , L401 , L403 , FINSEQ_2:9;
+end;
+end;
+theorem
+L410: (for B99 being Nat holds (B99 >= 1 implies (for B100 , B101 being Nat holds ((B100 in ( Seg B99 ) & B101 >= 2) implies ( SDDec ( FSDMin (B99 , B100 , B101) ) ) = 1))))
+proof
+let C132 being Nat;
+assume L411: C132 >= 1;
+let C133 , C134 being Nat;
+assume that
+L412: C133 in ( Seg C132 )
+and
+L413: C134 >= 2;
+L414: (for B102 being Nat holds (B102 in ( Seg C132 ) implies ((( DigA (( FSDMin (C132 , C133 , C134) ) , B102) ) = ( DigA (( Fmin (C132 , C133 , C134) ) , B102) ) & ( DigA (( SDMin (C132 , C133 , C134) ) , B102) ) = ( 0 )) or (( DigA (( FSDMin (C132 , C133 , C134) ) , B102) ) = ( DigA (( SDMin (C132 , C133 , C134) ) , B102) ) & ( DigA (( Fmin (C132 , C133 , C134) ) , B102) ) = ( 0 )))))
+proof
+let C135 being Nat;
+assume L415: C135 in ( Seg C132 );
+L416: C135 >= 1 by L415 , FINSEQ_1:1;
+L417:
+now
+per cases ;
+suppose L418: C135 > C133;
+
+L419: ( DigA (( Fmin (C132 , C133 , C134) ) , C135) ) = ( FminDigit (C133 , C134 , C135) ) by L415 , RADIX_5:def 6
+.= ( 0 ) by L413 , L418 , RADIX_5:def 5;
+L420: ( DigA (( SDMin (C132 , C133 , C134) ) , C135) ) = ( SDMinDigit (C133 , C134 , C135) ) by L415 , RADIX_5:def 2
+.= ( 0 ) by L413 , L418 , RADIX_5:def 1;
+L421: ( DigA (( FSDMin (C132 , C133 , C134) ) , C135) ) = ( FSDMinDigit (C133 , C134 , C135) ) by L415 , L391
+.= ( 0 ) by L413 , L418 , L375;
+thus L422: thesis by L421 , L420 , L419;
+end;
+suppose L423: C135 <= C133;
+
+L424:
+now
+per cases  by L423 , XXREAL_0:1;
+suppose L425: C135 = C133;
+
+L426: ( DigA (( Fmin (C132 , C133 , C134) ) , C135) ) = ( FminDigit (C133 , C134 , C135) ) by L415 , RADIX_5:def 6
+.= 1 by L413 , L425 , RADIX_5:def 5;
+L427: ( DigA (( SDMin (C132 , C133 , C134) ) , C135) ) = ( SDMinDigit (C133 , C134 , C135) ) by L415 , RADIX_5:def 2
+.= ( 0 ) by L413 , L425 , RADIX_5:def 1;
+L428: ( DigA (( FSDMin (C132 , C133 , C134) ) , C135) ) = ( FSDMinDigit (C133 , C134 , C135) ) by L415 , L391
+.= 1 by L413 , L425 , L375;
+thus L429: thesis by L428 , L427 , L426;
+end;
+suppose L430: C135 < C133;
+
+L431: ( DigA (( Fmin (C132 , C133 , C134) ) , C135) ) = ( FminDigit (C133 , C134 , C135) ) by L415 , RADIX_5:def 6
+.= ( 0 ) by L413 , L430 , RADIX_5:def 5;
+L432: ( DigA (( SDMin (C132 , C133 , C134) ) , C135) ) = ( SDMinDigit (C133 , C134 , C135) ) by L415 , RADIX_5:def 2
+.= ( ( - ( Radix C134 ) ) + 1 ) by L413 , L416 , L430 , RADIX_5:def 1;
+L433: ( DigA (( FSDMin (C132 , C133 , C134) ) , C135) ) = ( FSDMinDigit (C133 , C134 , C135) ) by L415 , L391
+.= ( ( - ( Radix C134 ) ) + 1 ) by L413 , L430 , L375;
+thus L434: thesis by L433 , L432 , L431;
+end;
+end;
+thus L436: thesis by L424;
+end;
+end;
+thus L438: thesis by L417;
+end;
+L439: ( ( SDDec ( FSDMin (C132 , C133 , C134) ) ) + ( SDDec ( DecSD (( 0 ) , C132 , C134) ) ) ) = ( ( SDDec ( Fmin (C132 , C133 , C134) ) ) + ( SDDec ( SDMin (C132 , C133 , C134) ) ) ) by L414 , L411 , L413 , RADIX_5:15;
+L440: ( ( SDDec ( FSDMin (C132 , C133 , C134) ) ) + ( 0 ) ) = ( ( SDDec ( Fmin (C132 , C133 , C134) ) ) + ( SDDec ( SDMin (C132 , C133 , C134) ) ) ) by L439 , L411 , RADIX_5:6
+.= ( ( ( SDDec ( SDMax (C132 , C133 , C134) ) ) + ( SDDec ( DecSD (1 , C132 , C134) ) ) ) + ( SDDec ( SDMin (C132 , C133 , C134) ) ) ) by L411 , L412 , L413 , RADIX_5:18
+.= ( ( ( SDDec ( SDMax (C132 , C133 , C134) ) ) + ( SDDec ( SDMin (C132 , C133 , C134) ) ) ) + ( SDDec ( DecSD (1 , C132 , C134) ) ) )
+.= ( ( SDDec ( DecSD (( 0 ) , C132 , C134) ) ) + ( SDDec ( DecSD (1 , C132 , C134) ) ) ) by L411 , L413 , RADIX_5:17
+.= ( ( 0 ) + ( SDDec ( DecSD (1 , C132 , C134) ) ) ) by L411 , RADIX_5:6;
+thus L441: thesis by L440 , L411 , L413 , RADIX_5:9;
+end;
+definition
+let C136 , C137 , C138 being Nat;
+let C139 being (Tuple of ( C137 + 2 ) , ( C138 -SD ));
+pred C139 is_Zero_over C136
+means
+:L442: (for B103 being Nat holds (B103 > C136 implies ( DigA (C139 , B103) ) = ( 0 )))
+;end;
+theorem
+L444: (for B104 being Nat holds (B104 >= 1 implies (for B105 , B106 being Nat holds (for B107 being (Tuple of ( B104 + 2 ) , ( B106 -SD )) holds ((B106 >= 2 & B105 in ( Seg ( B104 + 2 ) ) & ( Mmask B107 ) is_Zero_over B105 & ( DigA (( Mmask B107 ) , B105) ) > ( 0 )) implies ( SDDec ( Mmask B107 ) ) > ( 0 ))))))
+proof
+let C140 being Nat;
+assume L445: C140 >= 1;
+L446: ( C140 + 2 ) >= 1 by L445 , L1;
+let C141 , C142 being Nat;
+let C143 being (Tuple of ( C140 + 2 ) , ( C142 -SD ));
+assume that
+L447: C142 >= 2
+and
+L448: C141 in ( Seg ( C140 + 2 ) )
+and
+L449: ( Mmask C143 ) is_Zero_over C141
+and
+L450: ( DigA (( Mmask C143 ) , C141) ) > ( 0 );
+L451: (for B108 being Nat holds (B108 in ( Seg ( C140 + 2 ) ) implies ( DigA (( Mmask C143 ) , B108) ) >= ( DigA (( FSDMin (( C140 + 2 ) , C141 , C142) ) , B108) )))
+proof
+let C144 being Nat;
+assume L452: C144 in ( Seg ( C140 + 2 ) );
+L453:
+now
+per cases ;
+suppose L454: C144 > C141;
+
+L455: ( DigA (( FSDMin (( C140 + 2 ) , C141 , C142) ) , C144) ) = ( FSDMinDigit (C141 , C142 , C144) ) by L452 , L391
+.= ( 0 ) by L447 , L454 , L375;
+thus L456: thesis by L455 , L449 , L454 , L442;
+end;
+suppose L457: C144 <= C141;
+
+L458:
+now
+per cases  by L457 , XXREAL_0:1;
+suppose L459: C144 = C141;
+
+L460: ( DigA (( Mmask C143 ) , C144) ) >= ( ( 0 ) + 1 ) by L459 , L450 , INT_1:7;
+L461: ( DigA (( FSDMin (( C140 + 2 ) , C141 , C142) ) , C144) ) = ( FSDMinDigit (C141 , C142 , C144) ) by L452 , L391
+.= 1 by L447 , L459 , L375;
+thus L462: thesis by L461 , L460;
+end;
+suppose L463: C144 < C141;
+
+L464: ( DigA (( Mmask C143 ) , C144) ) = ( ( Mmask C143 ) . C144 ) by L452 , RADIX_1:def 3;
+L465: ( ( Mmask C143 ) . C144 ) is (Element of ( C142 -SD )) by L452 , RADIX_1:15;
+L466: ( DigA (( FSDMin (( C140 + 2 ) , C141 , C142) ) , C144) ) = ( FSDMinDigit (C141 , C142 , C144) ) by L452 , L391
+.= ( ( - ( Radix C142 ) ) + 1 ) by L447 , L463 , L375;
+thus L467: thesis by L466 , L464 , L465 , RADIX_1:13;
+end;
+end;
+thus L469: thesis by L458;
+end;
+end;
+thus L471: thesis by L453;
+end;
+L472: ( SDDec ( Mmask C143 ) ) >= ( SDDec ( FSDMin (( C140 + 2 ) , C141 , C142) ) ) by L451 , L446 , RADIX_5:13;
+thus L473: thesis by L472 , L447 , L448 , L446 , L410;
+end;

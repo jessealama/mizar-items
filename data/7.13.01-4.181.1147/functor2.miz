@@ -1,0 +1,994 @@
+:: Category of Functors between Alternative Categories
+::  by Robert Nieszczerzewski
+::
+:: Received June 12, 1997
+:: Copyright (c) 1997-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies RELAT_2, ALTCAT_1, XBOOLE_0, MSUALG_6, FUNCTOR0, CAT_1, FUNCT_1,
+      PZFMISC1, NATTRA_1, PBOOLE, STRUCT_0, SUBSET_1, REALSET1, RELAT_1,
+      FUNCT_2, CARD_3, CAT_2, ZFMISC_1, TARSKI, FUNCTOR2;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, FUNCTOR0, XTUPLE_0, MCART_1,
+      DOMAIN_1, RELAT_1, STRUCT_0, CARD_3, FUNCT_1, PBOOLE, FUNCT_2, BINOP_1,
+      MULTOP_1, ALTCAT_1;
+ constructors DOMAIN_1, CARD_3, FUNCTOR0, RELSET_1, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, STRUCT_0, ALTCAT_1, FUNCTOR0,
+      PBOOLE, FUNCT_1, RELAT_1, XTUPLE_0;
+ requirements SUBSET, BOOLE;
+ definitions ALTCAT_1, BINOP_1, XTUPLE_0;
+ theorems MCART_1, MULTOP_1, FUNCT_2, ZFMISC_1, ALTCAT_1, PBOOLE, BINOP_1,
+      TARSKI, ALTCAT_2, FUNCTOR0, CARD_3, XBOOLE_0, PARTFUN1, RELAT_1,
+      XTUPLE_0;
+ schemes TARSKI, PBOOLE, MSSUBFAM, XBOOLE_0;
+
+begin
+registration
+let C1 being  transitive  with_units non  empty AltCatStr;
+let C2 being  with_units non  empty AltCatStr;
+cluster  ->  feasible  id-preserving for (Functor of C1 , C2);
+coherence by FUNCTOR0:def 25;
+end;
+registration
+let C3 being  transitive  with_units non  empty AltCatStr;
+let C4 being  with_units non  empty AltCatStr;
+cluster  covariant ->  Covariant  comp-preserving for (Functor of C3 , C4);
+coherence by FUNCTOR0:def 26;
+cluster  Covariant  comp-preserving ->  covariant for (Functor of C3 , C4);
+coherence by FUNCTOR0:def 26;
+cluster  contravariant ->  Contravariant  comp-reversing for (Functor of C3 , C4);
+coherence by FUNCTOR0:def 27;
+cluster  Contravariant  comp-reversing ->  contravariant for (Functor of C3 , C4);
+coherence by FUNCTOR0:def 27;
+end;
+theorem
+L3: (for B1 , B2 being  transitive  with_units non  empty AltCatStr holds (for B3 being  covariant (Functor of B1 , B2) holds (for B4 being (object of B1) holds ( B3 . ( idm B4 ) ) = ( idm ( B3 . B4 ) ))))
+proof
+let C5 , C6 being  transitive  with_units non  empty AltCatStr;
+let C7 being  covariant (Functor of C5 , C6);
+let C8 being (object of C5);
+L4: (<^ C8 , C8 ^> <> ( {} ) & <^ ( C7 . C8 ) , ( C7 . C8 ) ^> <> ( {} )) by ALTCAT_2:def 7;
+thus L5: ( C7 . ( idm C8 ) ) = ( ( Morph-Map (C7 , C8 , C8) ) . ( idm C8 ) ) by L4 , FUNCTOR0:def 15
+.= ( idm ( C7 . C8 ) ) by FUNCTOR0:def 20;
+end;
+begin
+definition
+let C9 , C10 being  transitive  with_units non  empty AltCatStr;
+let C11 , C12 being (Functor of C9 , C10);
+pred C11 is_transformable_to C12
+means
+:L6: (for B5 being (object of C9) holds <^ ( C11 . B5 ) , ( C12 . B5 ) ^> <> ( {} ))
+;reflexivity
+ by ALTCAT_2:def 7;
+end;
+theorem
+L8: (for B6 , B7 being  transitive  with_units non  empty AltCatStr holds (for B8 , B9 , B10 being (Functor of B6 , B7) holds ((B8 is_transformable_to B9 & B9 is_transformable_to B10) implies B8 is_transformable_to B10)))
+proof
+let C13 , C14 being  transitive  with_units non  empty AltCatStr;
+let C15 , C16 , C17 being (Functor of C13 , C14);
+assume L9: (C15 is_transformable_to C16 & C16 is_transformable_to C17);
+let C18 being (object of C13);
+L10: (<^ ( C15 . C18 ) , ( C16 . C18 ) ^> <> ( {} ) & <^ ( C16 . C18 ) , ( C17 . C18 ) ^> <> ( {} )) by L9 , L6;
+thus L11: thesis by L10 , ALTCAT_1:def 2;
+end;
+definition
+let C19 , C20 being  transitive  with_units non  empty AltCatStr;
+let C21 , C22 being (Functor of C19 , C20);
+assume L12: C21 is_transformable_to C22;
+mode transformation of C21 , C22
+ -> (ManySortedSet of (the carrier of C19))
+means :L13: (for B11 being (object of C19) holds ( it . B11 ) is (Morphism of ( C21 . B11 ) , ( C22 . B11 )));
+existence
+proof
+defpred S1[ (object of C19) , set ] means $2 in <^ ( C21 . $1 ) , ( C22 . $1 ) ^>;
+L14: (for B12 being (Element of C19) holds (ex B13 being set st S1[ B12 , B13 ]))
+proof
+let C23 being (Element of C19);
+reconsider D1 = C23 as (object of C19);
+L15: <^ ( C21 . D1 ) , ( C22 . D1 ) ^> <> ( {} ) by L12 , L6;
+thus L16: thesis by L15 , XBOOLE_0:def 1;
+end;
+consider C24 being (ManySortedSet of (the carrier of C19)) such that L17: (for B14 being (Element of C19) holds S1[ B14 , ( C24 . B14 ) ]) from PBOOLE:sch 6(L14);
+take C24;
+thus L18: thesis by L17;
+end;
+end;
+definition
+let C25 , C26 being  transitive  with_units non  empty AltCatStr;
+let C27 being (Functor of C25 , C26);
+func idt C27 -> (transformation of C27 , C27) means 
+:L20: (for B15 being (object of C25) holds ( it . B15 ) = ( idm ( C27 . B15 ) ));
+existence
+proof
+defpred S2[ (object of C25) , set ] means $2 = ( idm ( C27 . $1 ) );
+L21: (for B16 being (Element of C25) holds (ex B17 being set st S2[ B16 , B17 ]));
+consider C28 being (ManySortedSet of (the carrier of C25)) such that L22: (for B18 being (Element of C25) holds S2[ B18 , ( C28 . B18 ) ]) from PBOOLE:sch 6(L21);
+L23: (for B19 being (object of C25) holds ( C28 . B19 ) is (Morphism of ( C27 . B19 ) , ( C27 . B19 )))
+proof
+let C29 being (Element of C25);
+L24: S2[ C29 , ( C28 . C29 ) ] by L22;
+thus L25: thesis by L24;
+end;
+L26: C28 is (transformation of C27 , C27) by L23 , L13;
+thus L27: thesis by L26 , L22;
+end;
+uniqueness
+proof
+let C30 , C31 being (transformation of C27 , C27);
+assume that
+L28: (for B20 being (object of C25) holds ( C30 . B20 ) = ( idm ( C27 . B20 ) ))
+and
+L29: (for B21 being (object of C25) holds ( C31 . B21 ) = ( idm ( C27 . B21 ) ));
+L30:
+now
+let C32 being set;
+assume L31: C32 in (the carrier of C25);
+reconsider D2 = C32 as (object of C25) by L31;
+thus L32: ( C30 . C32 ) = ( idm ( C27 . D2 ) ) by L28
+.= ( C31 . C32 ) by L29;
+end;
+thus L33: C30 = C31 by L30 , PBOOLE:3;
+end;
+end;
+definition
+let C33 , C34 being  transitive  with_units non  empty AltCatStr;
+let C35 , C36 being (Functor of C33 , C34);
+assume L35: C35 is_transformable_to C36;
+let C37 being (transformation of C35 , C36);
+let C38 being (object of C33);
+func C37 ! C38 -> (Morphism of ( C35 . C38 ) , ( C36 . C38 )) means 
+:L36: it = ( C37 . C38 );
+existence
+proof
+L37: ( C37 . C38 ) is (Morphism of ( C35 . C38 ) , ( C36 . C38 )) by L35 , L13;
+thus L38: thesis by L37;
+end;
+correctness;
+end;
+definition
+let C39 , C40 being  transitive  with_units non  empty AltCatStr;
+let C41 , C42 , C43 being (Functor of C39 , C40);
+assume L40: (C41 is_transformable_to C42 & C42 is_transformable_to C43);
+let C44 being (transformation of C41 , C42);
+let C45 being (transformation of C42 , C43);
+func C45 `*` C44 -> (transformation of C41 , C43) means 
+:L41: (for B22 being (object of C39) holds ( it ! B22 ) = ( ( C45 ! B22 ) * ( C44 ! B22 ) ));
+existence
+proof
+defpred S3[ (object of C39) , set ] means $2 = ( ( C45 ! $1 ) * ( C44 ! $1 ) );
+L42: (for B23 being (Element of C39) holds (ex B24 being set st S3[ B23 , B24 ]));
+consider C46 being (ManySortedSet of (the carrier of C39)) such that L43: (for B25 being (Element of C39) holds S3[ B25 , ( C46 . B25 ) ]) from PBOOLE:sch 6(L42);
+L44: C41 is_transformable_to C43 by L40 , L8;
+L45: (for B26 being (object of C39) holds ( C46 . B26 ) is (Morphism of ( C41 . B26 ) , ( C43 . B26 )))
+proof
+let C47 being (Element of C39);
+L46: S3[ C47 , ( C46 . C47 ) ] by L43;
+thus L47: thesis by L46;
+end;
+reconsider D3 = C46 as (transformation of C41 , C43) by L45 , L44 , L13;
+take D3;
+let C48 being (Element of C39);
+L48: S3[ C48 , ( C46 . C48 ) ] by L43;
+thus L49: thesis by L48 , L44 , L36;
+end;
+uniqueness
+proof
+let C49 , C50 being (transformation of C41 , C43);
+assume that
+L50: (for B27 being (object of C39) holds ( C49 ! B27 ) = ( ( C45 ! B27 ) * ( C44 ! B27 ) ))
+and
+L51: (for B28 being (object of C39) holds ( C50 ! B28 ) = ( ( C45 ! B28 ) * ( C44 ! B28 ) ));
+L52: C41 is_transformable_to C43 by L40 , L8;
+L53:
+now
+let C51 being set;
+assume L54: C51 in (the carrier of C39);
+reconsider D4 = C51 as (object of C39) by L54;
+thus L55: ( (C49 qua (ManySortedSet of (the carrier of C39))) . C51 ) = ( C49 ! D4 ) by L52 , L36
+.= ( ( C45 ! D4 ) * ( C44 ! D4 ) ) by L50
+.= ( C50 ! D4 ) by L51
+.= ( (C50 qua (ManySortedSet of (the carrier of C39))) . C51 ) by L52 , L36;
+end;
+thus L56: C49 = C50 by L53 , PBOOLE:3;
+end;
+end;
+theorem
+L58: (for B29 , B30 being  transitive  with_units non  empty AltCatStr holds (for B31 , B32 being (Functor of B29 , B30) holds (B31 is_transformable_to B32 implies (for B33 , B34 being (transformation of B31 , B32) holds ((for B35 being (object of B29) holds ( B33 ! B35 ) = ( B34 ! B35 )) implies B33 = B34)))))
+proof
+let C52 , C53 being  transitive  with_units non  empty AltCatStr;
+let C54 , C55 being (Functor of C52 , C53);
+assume L59: C54 is_transformable_to C55;
+let C56 , C57 being (transformation of C54 , C55);
+assume L60: (for B36 being (object of C52) holds ( C56 ! B36 ) = ( C57 ! B36 ));
+L61:
+now
+let C58 being set;
+assume L62: C58 in (the carrier of C52);
+reconsider D5 = C58 as (object of C52) by L62;
+thus L63: ( (C56 qua (ManySortedSet of (the carrier of C52))) . C58 ) = ( C56 ! D5 ) by L59 , L36
+.= ( C57 ! D5 ) by L60
+.= ( (C57 qua (ManySortedSet of (the carrier of C52))) . C58 ) by L59 , L36;
+end;
+thus L64: thesis by L61 , PBOOLE:3;
+end;
+theorem
+L65: (for B37 , B38 being  transitive  with_units non  empty AltCatStr holds (for B39 being (Functor of B37 , B38) holds (for B40 being (object of B37) holds ( ( idt B39 ) ! B40 ) = ( idm ( B39 . B40 ) ))))
+proof
+let C59 , C60 being  transitive  with_units non  empty AltCatStr;
+let C61 being (Functor of C59 , C60);
+let C62 being (object of C59);
+thus L66: ( ( idt C61 ) ! C62 ) = ( (( idt C61 ) qua (ManySortedSet of (the carrier of C59))) . C62 ) by L36
+.= ( idm ( C61 . C62 ) ) by L20;
+end;
+theorem
+L67: (for B41 , B42 being  transitive  with_units non  empty AltCatStr holds (for B43 , B44 being (Functor of B41 , B42) holds (B43 is_transformable_to B44 implies (for B45 being (transformation of B43 , B44) holds (( ( idt B44 ) `*` B45 ) = B45 & ( B45 `*` ( idt B43 ) ) = B45)))))
+proof
+let C63 , C64 being  transitive  with_units non  empty AltCatStr;
+let C65 , C66 being (Functor of C63 , C64);
+assume L68: C65 is_transformable_to C66;
+let C67 being (transformation of C65 , C66);
+L69:
+now
+let C68 being (object of C63);
+L70: <^ ( C65 . C68 ) , ( C66 . C68 ) ^> <> ( {} ) by L68 , L6;
+thus L71: ( ( ( idt C66 ) `*` C67 ) ! C68 ) = ( ( ( idt C66 ) ! C68 ) * ( C67 ! C68 ) ) by L68 , L41
+.= ( ( idm ( C66 . C68 ) ) * ( C67 ! C68 ) ) by L65
+.= ( C67 ! C68 ) by L70 , ALTCAT_1:20;
+end;
+thus L72: ( ( idt C66 ) `*` C67 ) = C67 by L69 , L68 , L58;
+L73:
+now
+let C69 being (object of C63);
+L74: <^ ( C65 . C69 ) , ( C66 . C69 ) ^> <> ( {} ) by L68 , L6;
+thus L75: ( ( C67 `*` ( idt C65 ) ) ! C69 ) = ( ( C67 ! C69 ) * ( ( idt C65 ) ! C69 ) ) by L68 , L41
+.= ( ( C67 ! C69 ) * ( idm ( C65 . C69 ) ) ) by L65
+.= ( C67 ! C69 ) by L74 , ALTCAT_1:def 17;
+end;
+thus L76: thesis by L73 , L68 , L58;
+end;
+theorem
+L77: (for B46 , B47 being category holds (for B48 , B49 , B50 , B51 being (Functor of B46 , B47) holds ((B48 is_transformable_to B49 & B49 is_transformable_to B50 & B50 is_transformable_to B51) implies (for B52 being (transformation of B48 , B49) holds (for B53 being (transformation of B49 , B50) holds (for B54 being (transformation of B50 , B51) holds ( ( B54 `*` B53 ) `*` B52 ) = ( B54 `*` ( B53 `*` B52 ) )))))))
+proof
+let C70 , C71 being category;
+let C72 , C73 , C74 , C75 being (Functor of C70 , C71);
+assume that
+L78: C72 is_transformable_to C73
+and
+L79: C73 is_transformable_to C74
+and
+L80: C74 is_transformable_to C75;
+let C76 being (transformation of C72 , C73);
+let C77 being (transformation of C73 , C74);
+let C78 being (transformation of C74 , C75);
+L81: C73 is_transformable_to C75 by L79 , L80 , L8;
+L82: C72 is_transformable_to C74 by L78 , L79 , L8;
+L83:
+now
+let C79 being (object of C70);
+L84: <^ ( C74 . C79 ) , ( C75 . C79 ) ^> <> ( {} ) by L80 , L6;
+L85: (<^ ( C72 . C79 ) , ( C73 . C79 ) ^> <> ( {} ) & <^ ( C73 . C79 ) , ( C74 . C79 ) ^> <> ( {} )) by L78 , L79 , L6;
+thus L86: ( ( ( C78 `*` C77 ) `*` C76 ) ! C79 ) = ( ( ( C78 `*` C77 ) ! C79 ) * ( C76 ! C79 ) ) by L78 , L81 , L41
+.= ( ( ( C78 ! C79 ) * ( C77 ! C79 ) ) * ( C76 ! C79 ) ) by L79 , L80 , L41
+.= ( ( C78 ! C79 ) * ( ( C77 ! C79 ) * ( C76 ! C79 ) ) ) by L85 , L84 , ALTCAT_1:21
+.= ( ( C78 ! C79 ) * ( ( C77 `*` C76 ) ! C79 ) ) by L78 , L79 , L41
+.= ( ( C78 `*` ( C77 `*` C76 ) ) ! C79 ) by L80 , L82 , L41;
+end;
+thus L87: thesis by L83 , L78 , L81 , L8 , L58;
+end;
+begin
+L88: (for B55 , B56 being  transitive  with_units non  empty AltCatStr holds (for B57 , B58 being  covariant (Functor of B55 , B56) holds (for B59 , B60 being (object of B55) holds (<^ B59 , B60 ^> <> ( {} ) implies (for B61 being (Morphism of B59 , B60) holds ( ( ( idt B57 ) ! B60 ) * ( B57 . B61 ) ) = ( ( B57 . B61 ) * ( ( idt B57 ) ! B59 ) ))))))
+proof
+let C80 , C81 being  transitive  with_units non  empty AltCatStr;
+let C82 , C83 being  covariant (Functor of C80 , C81);
+let C84 , C85 being (object of C80);
+assume that
+L89: <^ C84 , C85 ^> <> ( {} );
+let C86 being (Morphism of C84 , C85);
+L90: <^ C84 , C84 ^> <> ( {} ) by ALTCAT_2:def 7;
+L91: <^ C85 , C85 ^> <> ( {} ) by ALTCAT_2:def 7;
+thus L92: ( ( ( idt C82 ) ! C85 ) * ( C82 . C86 ) ) = ( ( idm ( C82 . C85 ) ) * ( C82 . C86 ) ) by L65
+.= ( ( C82 . ( idm C85 ) ) * ( C82 . C86 ) ) by L3
+.= ( C82 . ( ( idm C85 ) * C86 ) ) by L89 , L91 , FUNCTOR0:def 23
+.= ( C82 . C86 ) by L89 , ALTCAT_1:20
+.= ( C82 . ( C86 * ( idm C84 ) ) ) by L89 , ALTCAT_1:def 17
+.= ( ( C82 . C86 ) * ( C82 . ( idm C84 ) ) ) by L89 , L90 , FUNCTOR0:def 23
+.= ( ( C82 . C86 ) * ( idm ( C82 . C84 ) ) ) by L3
+.= ( ( C82 . C86 ) * ( ( idt C82 ) ! C84 ) ) by L65;
+end;
+definition
+let C87 , C88 being  transitive  with_units non  empty AltCatStr;
+let C89 , C90 being  covariant (Functor of C87 , C88);
+pred C89 is_naturally_transformable_to C90
+means
+:L93: (C89 is_transformable_to C90 & (ex B62 being (transformation of C89 , C90) st (for B63 , B64 being (object of C87) holds (<^ B63 , B64 ^> <> ( {} ) implies (for B65 being (Morphism of B63 , B64) holds ( ( B62 ! B64 ) * ( C89 . B65 ) ) = ( ( C90 . B65 ) * ( B62 ! B63 ) ))))))
+;reflexivity
+proof
+let C91 being  covariant (Functor of C87 , C88);
+thus L94: C91 is_transformable_to C91;
+take ( idt C91 );
+thus L95: thesis by L88;
+end;
+end;
+theorem
+L97: (for B66 , B67 being  transitive  with_units non  empty AltCatStr holds (for B68 being  covariant (Functor of B66 , B67) holds B68 is_naturally_transformable_to B68));
+L98: (for B69 , B70 being category holds (for B71 , B72 , B73 being  covariant (Functor of B69 , B70) holds ((B71 is_transformable_to B72 & B72 is_transformable_to B73) implies (for B74 being (transformation of B71 , B72) holds ((for B75 , B76 being (object of B69) holds (<^ B75 , B76 ^> <> ( {} ) implies (for B77 being (Morphism of B75 , B76) holds ( ( B74 ! B76 ) * ( B71 . B77 ) ) = ( ( B72 . B77 ) * ( B74 ! B75 ) )))) implies (for B78 being (transformation of B72 , B73) holds ((for B79 , B80 being (object of B69) holds (<^ B79 , B80 ^> <> ( {} ) implies (for B81 being (Morphism of B79 , B80) holds ( ( B78 ! B80 ) * ( B72 . B81 ) ) = ( ( B73 . B81 ) * ( B78 ! B79 ) )))) implies (for B82 , B83 being (object of B69) holds (<^ B82 , B83 ^> <> ( {} ) implies (for B84 being (Morphism of B82 , B83) holds ( ( ( B78 `*` B74 ) ! B83 ) * ( B71 . B84 ) ) = ( ( B73 . B84 ) * ( ( B78 `*` B74 ) ! B82 ) )))))))))))
+proof
+let C92 , C93 being category;
+let C94 , C95 , C96 being  covariant (Functor of C92 , C93);
+assume that
+L99: C94 is_transformable_to C95
+and
+L100: C95 is_transformable_to C96;
+let C97 being (transformation of C94 , C95);
+assume that
+L101: (for B85 , B86 being (object of C92) holds (<^ B85 , B86 ^> <> ( {} ) implies (for B87 being (Morphism of B85 , B86) holds ( ( C97 ! B86 ) * ( C94 . B87 ) ) = ( ( C95 . B87 ) * ( C97 ! B85 ) ))));
+let C98 being (transformation of C95 , C96);
+assume that
+L102: (for B88 , B89 being (object of C92) holds (<^ B88 , B89 ^> <> ( {} ) implies (for B90 being (Morphism of B88 , B89) holds ( ( C98 ! B89 ) * ( C95 . B90 ) ) = ( ( C96 . B90 ) * ( C98 ! B88 ) ))));
+let C99 , C100 being (object of C92);
+L103: <^ ( C94 . C100 ) , ( C95 . C100 ) ^> <> ( {} ) by L99 , L6;
+L104: <^ ( C94 . C99 ) , ( C95 . C99 ) ^> <> ( {} ) by L99 , L6;
+L105: <^ ( C95 . C100 ) , ( C96 . C100 ) ^> <> ( {} ) by L100 , L6;
+L106: <^ ( C95 . C99 ) , ( C96 . C99 ) ^> <> ( {} ) by L100 , L6;
+assume L107: <^ C99 , C100 ^> <> ( {} );
+L108: <^ ( C94 . C99 ) , ( C94 . C100 ) ^> <> ( {} ) by L107 , FUNCTOR0:def 18;
+let C101 being (Morphism of C99 , C100);
+L109: <^ ( C96 . C99 ) , ( C96 . C100 ) ^> <> ( {} ) by L107 , FUNCTOR0:def 18;
+L110: <^ ( C95 . C99 ) , ( C95 . C100 ) ^> <> ( {} ) by L107 , FUNCTOR0:def 18;
+thus L111: ( ( ( C98 `*` C97 ) ! C100 ) * ( C94 . C101 ) ) = ( ( ( C98 ! C100 ) * ( C97 ! C100 ) ) * ( C94 . C101 ) ) by L99 , L100 , L41
+.= ( ( C98 ! C100 ) * ( ( C97 ! C100 ) * ( C94 . C101 ) ) ) by L108 , L103 , L105 , ALTCAT_1:21
+.= ( ( C98 ! C100 ) * ( ( C95 . C101 ) * ( C97 ! C99 ) ) ) by L101 , L107
+.= ( ( ( C98 ! C100 ) * ( C95 . C101 ) ) * ( C97 ! C99 ) ) by L104 , L105 , L110 , ALTCAT_1:21
+.= ( ( ( C96 . C101 ) * ( C98 ! C99 ) ) * ( C97 ! C99 ) ) by L102 , L107
+.= ( ( C96 . C101 ) * ( ( C98 ! C99 ) * ( C97 ! C99 ) ) ) by L104 , L106 , L109 , ALTCAT_1:21
+.= ( ( C96 . C101 ) * ( ( C98 `*` C97 ) ! C99 ) ) by L99 , L100 , L41;
+end;
+theorem
+L112: (for B91 , B92 being category holds (for B93 , B94 , B95 being  covariant (Functor of B91 , B92) holds ((B93 is_naturally_transformable_to B94 & B94 is_naturally_transformable_to B95) implies B93 is_naturally_transformable_to B95)))
+proof
+let C102 , C103 being category;
+let C104 , C105 , C106 being  covariant (Functor of C102 , C103);
+assume L113: C104 is_transformable_to C105;
+given C107 being (transformation of C104 , C105) such that
+L114: (for B96 , B97 being (object of C102) holds (<^ B96 , B97 ^> <> ( {} ) implies (for B98 being (Morphism of B96 , B97) holds ( ( C107 ! B97 ) * ( C104 . B98 ) ) = ( ( C105 . B98 ) * ( C107 ! B96 ) ))));
+
+assume L115: C105 is_transformable_to C106;
+given C108 being (transformation of C105 , C106) such that
+L116: (for B99 , B100 being (object of C102) holds (<^ B99 , B100 ^> <> ( {} ) implies (for B101 being (Morphism of B99 , B100) holds ( ( C108 ! B100 ) * ( C105 . B101 ) ) = ( ( C106 . B101 ) * ( C108 ! B99 ) ))));
+
+thus L117: C104 is_transformable_to C106 by L113 , L115 , L8;
+take ( C108 `*` C107 );
+thus L118: thesis by L113 , L114 , L115 , L116 , L98;
+end;
+definition
+let C109 , C110 being  transitive  with_units non  empty AltCatStr;
+let C111 , C112 being  covariant (Functor of C109 , C110);
+assume L119: C111 is_naturally_transformable_to C112;
+mode natural_transformation of C111 , C112
+ -> (transformation of C111 , C112)
+means :L120: (for B102 , B103 being (object of C109) holds (<^ B102 , B103 ^> <> ( {} ) implies (for B104 being (Morphism of B102 , B103) holds ( ( it ! B103 ) * ( C111 . B104 ) ) = ( ( C112 . B104 ) * ( it ! B102 ) ))));
+existence by L119 , L93;
+end;
+definition
+let C113 , C114 being  transitive  with_units non  empty AltCatStr;
+let C115 being  covariant (Functor of C113 , C114);
+redefine func idt C115 -> (natural_transformation of C115 , C115);
+
+coherence
+proof
+L122: (C115 is_naturally_transformable_to C115 & (for B105 , B106 being (object of C113) holds (<^ B105 , B106 ^> <> ( {} ) implies (for B107 being (Morphism of B105 , B106) holds ( ( ( idt C115 ) ! B106 ) * ( C115 . B107 ) ) = ( ( C115 . B107 ) * ( ( idt C115 ) ! B105 ) ))))) by L88;
+thus L123: thesis by L122 , L120;
+end;
+end;
+definition
+let C116 , C117 being category;
+let C118 , C119 , C120 being  covariant (Functor of C116 , C117);
+assume that
+L125: (C118 is_naturally_transformable_to C119 & C119 is_naturally_transformable_to C120);
+let C121 being (natural_transformation of C118 , C119);
+let C122 being (natural_transformation of C119 , C120);
+func C122 `*` C121 -> (natural_transformation of C118 , C120) means 
+:L126: it = ( C122 `*` C121 );
+existence
+proof
+L127: C118 is_naturally_transformable_to C120 by L125 , L112;
+L128: ((for B108 , B109 being (object of C116) holds (<^ B108 , B109 ^> <> ( {} ) implies (for B110 being (Morphism of B108 , B109) holds ( ( C121 ! B109 ) * ( C118 . B110 ) ) = ( ( C119 . B110 ) * ( C121 ! B108 ) )))) & (for B111 , B112 being (object of C116) holds (<^ B111 , B112 ^> <> ( {} ) implies (for B113 being (Morphism of B111 , B112) holds ( ( C122 ! B112 ) * ( C119 . B113 ) ) = ( ( C120 . B113 ) * ( C122 ! B111 ) ))))) by L125 , L120;
+L129: (C118 is_transformable_to C119 & C119 is_transformable_to C120) by L125 , L93;
+L130: (for B114 , B115 being (object of C116) holds (<^ B114 , B115 ^> <> ( {} ) implies (for B116 being (Morphism of B114 , B115) holds ( ( ( C122 `*` C121 ) ! B115 ) * ( C118 . B116 ) ) = ( ( C120 . B116 ) * ( ( C122 `*` C121 ) ! B114 ) )))) by L129 , L128 , L98;
+L131: ( C122 `*` C121 ) is (natural_transformation of C118 , C120) by L130 , L127 , L120;
+thus L132: thesis by L131;
+end;
+correctness;
+end;
+theorem
+L134: (for B117 , B118 being  transitive  with_units non  empty AltCatStr holds (for B119 , B120 being  covariant (Functor of B117 , B118) holds (B119 is_naturally_transformable_to B120 implies (for B121 being (natural_transformation of B119 , B120) holds (( ( idt B120 ) `*` B121 ) = B121 & ( B121 `*` ( idt B119 ) ) = B121)))))
+proof
+let C123 , C124 being  transitive  with_units non  empty AltCatStr;
+let C125 , C126 being  covariant (Functor of C123 , C124);
+assume L135: C125 is_naturally_transformable_to C126;
+L136: C125 is_transformable_to C126 by L135 , L93;
+let C127 being (natural_transformation of C125 , C126);
+thus L137: ( ( idt C126 ) `*` C127 ) = C127 by L136 , L67;
+thus L138: thesis by L136 , L67;
+end;
+theorem
+L139: (for B122 , B123 being  transitive  with_units non  empty AltCatStr holds (for B124 , B125 , B126 being  covariant (Functor of B122 , B123) holds ((B124 is_naturally_transformable_to B125 & B125 is_naturally_transformable_to B126) implies (for B127 being (natural_transformation of B124 , B125) holds (for B128 being (natural_transformation of B125 , B126) holds (for B129 being (object of B122) holds ( ( B128 `*` B127 ) ! B129 ) = ( ( B128 ! B129 ) * ( B127 ! B129 ) )))))))
+proof
+let C128 , C129 being  transitive  with_units non  empty AltCatStr;
+let C130 , C131 , C132 being  covariant (Functor of C128 , C129);
+assume L140: (C130 is_naturally_transformable_to C131 & C131 is_naturally_transformable_to C132);
+let C133 being (natural_transformation of C130 , C131);
+let C134 being (natural_transformation of C131 , C132);
+let C135 being (object of C128);
+L141: (C130 is_transformable_to C131 & C131 is_transformable_to C132) by L140 , L93;
+thus L142: thesis by L141 , L41;
+end;
+theorem
+L143: (for B130 , B131 being category holds (for B132 , B133 , B134 , B135 being  covariant (Functor of B130 , B131) holds (for B136 being (natural_transformation of B132 , B133) holds (for B137 being (natural_transformation of B133 , B134) holds ((B132 is_naturally_transformable_to B133 & B133 is_naturally_transformable_to B134 & B134 is_naturally_transformable_to B135) implies (for B138 being (natural_transformation of B134 , B135) holds ( ( B138 `*` B137 ) `*` B136 ) = ( B138 `*` ( B137 `*` B136 ) )))))))
+proof
+let C136 , C137 being category;
+let C138 , C139 , C140 , C141 being  covariant (Functor of C136 , C137);
+let C142 being (natural_transformation of C138 , C139);
+let C143 being (natural_transformation of C139 , C140);
+assume that
+L144: C138 is_naturally_transformable_to C139
+and
+L145: C139 is_naturally_transformable_to C140
+and
+L146: C140 is_naturally_transformable_to C141;
+L147: C138 is_naturally_transformable_to C140 by L144 , L145 , L112;
+let C144 being (natural_transformation of C140 , C141);
+L148: C140 is_transformable_to C141 by L146 , L93;
+L149: (C138 is_transformable_to C139 & C139 is_transformable_to C140) by L144 , L145 , L93;
+L150: C139 is_naturally_transformable_to C141 by L145 , L146 , L112;
+thus L151: ( ( C144 `*` C143 ) `*` C142 ) = ( ( C144 `*` C143 ) `*` (C142 qua (transformation of C138 , C139)) ) by L150 , L144 , L126
+.= ( ( (C144 qua (transformation of C140 , C141)) `*` C143 ) `*` C142 ) by L145 , L146 , L126
+.= ( C144 `*` ( C143 `*` (C142 qua (transformation of C138 , C139)) ) ) by L149 , L148 , L77
+.= ( (C144 qua (transformation of C140 , C141)) `*` ( C143 `*` C142 ) ) by L144 , L145 , L126
+.= ( C144 `*` ( C143 `*` C142 ) ) by L146 , L147 , L126;
+end;
+begin
+definition
+let C145 being set;
+let C146 , C147 being (ManySortedSet of C145);
+func Funcs (C146 , C147) -> set means 
+:L152: (for B139 being set holds (B139 in it iff B139 is (ManySortedFunction of C146 , C147))) if (for B140 being set holds (B140 in C145 implies (( C147 . B140 ) = ( {} ) implies ( C146 . B140 ) = ( {} )))) otherwise it = ( {} );
+existence
+proof
+thus L153: ((for B141 being set holds (B141 in C145 implies (( C147 . B141 ) = ( {} ) implies ( C146 . B141 ) = ( {} )))) implies (ex B142 being set st (for B143 being set holds (B143 in B142 iff B143 is (ManySortedFunction of C146 , C147)))))
+proof
+deffunc H1(set) = ( Funcs (( C146 . $1 ) , ( C147 . $1 )) );
+assume L154: (for B144 being set holds (B144 in C145 implies (( C147 . B144 ) = ( {} ) implies ( C146 . B144 ) = ( {} ))));
+consider C148 being (ManySortedSet of C145) such that L155: (for B145 being set holds (B145 in C145 implies ( C148 . B145 ) = H1(B145))) from PBOOLE:sch 4;
+take ( product C148 );
+let C149 being set;
+thus L156: (C149 in ( product C148 ) implies C149 is (ManySortedFunction of C146 , C147))
+proof
+assume L157: C149 in ( product C148 );
+consider C150 being Function such that L158: C149 = C150 and L159: ( dom C150 ) = ( dom C148 ) and L160: (for B146 being set holds (B146 in ( dom C148 ) implies ( C150 . B146 ) in ( C148 . B146 ))) by L157 , CARD_3:def 5;
+L161: (for B147 being set holds (B147 in C145 implies ( C150 . B147 ) is (Function of ( C146 . B147 ) , ( C147 . B147 ))))
+proof
+let C151 being set;
+assume that
+L162: C151 in C145;
+L163: (( dom C148 ) = C145 & ( C148 . C151 ) = ( Funcs (( C146 . C151 ) , ( C147 . C151 )) )) by L155 , L162 , PARTFUN1:def 2;
+thus L164: thesis by L163 , L160 , L162 , FUNCT_2:66;
+end;
+L165: ( dom C148 ) = C145 by PARTFUN1:def 2;
+reconsider D6 = C150 as (ManySortedSet of C145) by L165 , L159 , PARTFUN1:def 2 , RELAT_1:def 18;
+L166: D6 is (ManySortedFunction of C146 , C147) by L161 , PBOOLE:def 15;
+thus L167: thesis by L166 , L158;
+end;
+
+assume L168: C149 is (ManySortedFunction of C146 , C147);
+reconsider D7 = C149 as (ManySortedSet of C145) by L168;
+L169: (for B148 being set holds (B148 in C145 implies ( D7 . B148 ) in ( Funcs (( C146 . B148 ) , ( C147 . B148 )) )))
+proof
+let C152 being set;
+assume L170: C152 in C145;
+L171: (( C147 . C152 ) = ( {} ) implies ( C146 . C152 ) = ( {} )) by L170 , L154;
+L172: ( D7 . C152 ) is (Function of ( C146 . C152 ) , ( C147 . C152 )) by L168 , L170 , PBOOLE:def 15;
+thus L173: thesis by L172 , L171 , FUNCT_2:8;
+end;
+L174: (for B149 being set holds (B149 in C145 implies ( D7 . B149 ) in ( C148 . B149 )))
+proof
+let C153 being set;
+assume L175: C153 in C145;
+L176: ( C148 . C153 ) = ( Funcs (( C146 . C153 ) , ( C147 . C153 )) ) by L175 , L155;
+thus L177: thesis by L176 , L169 , L175;
+end;
+L178: (for B150 being set holds (B150 in ( dom C148 ) implies ( D7 . B150 ) in ( C148 . B150 )))
+proof
+L179: ( dom C148 ) = C145 by PARTFUN1:def 2;
+let C154 being set;
+assume L180: C154 in ( dom C148 );
+thus L181: thesis by L180 , L174 , L179;
+end;
+L182: ( dom D7 ) = C145 by PARTFUN1:def 2;
+L183: ( dom D7 ) = ( dom C148 ) by L182 , PARTFUN1:def 2;
+thus L184: thesis by L183 , L178 , CARD_3:def 5;
+end;
+
+thus L185: thesis;
+end;
+uniqueness
+proof
+let C155 , C156 being set;
+thus L186:now
+assume L187: (for B151 being set holds (B151 in C145 implies (( C147 . B151 ) = ( {} ) implies ( C146 . B151 ) = ( {} ))));
+assume that
+L188: (for B152 being set holds (B152 in C155 iff B152 is (ManySortedFunction of C146 , C147)))
+and
+L189: (for B153 being set holds (B153 in C156 iff B153 is (ManySortedFunction of C146 , C147)));
+L190:
+now
+let C157 being set;
+L191: (C157 in C155 iff C157 is (ManySortedFunction of C146 , C147)) by L188;
+thus L192: (C157 in C155 iff C157 in C156) by L191 , L189;
+end;
+thus L193: C155 = C156 by L190 , TARSKI:1;
+end;
+thus L194: thesis;
+end;
+consistency;
+end;
+definition
+let C158 , C159 being  transitive  with_units non  empty AltCatStr;
+func Funct (C158 , C159) -> set means 
+:L196: (for B154 being set holds (B154 in it iff B154 is  covariant  strict  covariant  strict  covariant  strict  covariant  strict (Functor of C158 , C159)));
+existence
+proof
+set D8 = ( Funcs ([: (the carrier of C158) , (the carrier of C158) :] , [: (the carrier of C159) , (the carrier of C159) :]) );
+set D9 = { ( (the Arrows of C159) * B155 ) where B155 is (Element of D8) : (not contradiction) };
+set D10 = the (Element of D8);
+L197: ( (the Arrows of C159) * D10 ) in D9;
+reconsider D11 = D9 as non  empty set by L197;
+defpred S4[ set , set ] means (ex B156 being  Covariant (bifunction of (the carrier of C158) , (the carrier of C159)) st (ex B157 being (MSUnTrans of B156 , (the Arrows of C158) , (the Arrows of C159)) st ($1 = [ B156 , B157 ] & $2 = FunctorStr (# B156 , B157 #) & $2 is  covariant  covariant  covariant  covariant (Functor of C158 , C159))));
+defpred S5[ set , set ] means (ex B158 being (ManySortedSet of [: (the carrier of C158) , (the carrier of C158) :]) st ($1 = B158 & $2 = ( Funcs ((the Arrows of C158) , B158) )));
+L198: (for B159 , B160 , B161 being set holds ((S5[ B159 , B160 ] & S5[ B159 , B161 ]) implies B160 = B161));
+consider C160 being set such that L199: (for B162 being set holds (B162 in C160 iff (ex B163 being set st (B163 in D11 & S5[ B163 , B162 ])))) from TARSKI:sch 1(L198);
+L200: (for B164 , B165 , B166 being set holds ((S4[ B164 , B165 ] & S4[ B164 , B166 ]) implies B165 = B166))
+proof
+let C161 , C162 , C163 being set;
+given C164 being  Covariant (bifunction of (the carrier of C158) , (the carrier of C159)) , C165 being (MSUnTrans of C164 , (the Arrows of C158) , (the Arrows of C159)) such that
+L201: C161 = [ C164 , C165 ]
+and
+L202: C162 = FunctorStr (# C164 , C165 #)
+and
+L203: C162 is  covariant  covariant  covariant  covariant (Functor of C158 , C159);
+
+given C166 being  Covariant (bifunction of (the carrier of C158) , (the carrier of C159)) , C167 being (MSUnTrans of C166 , (the Arrows of C158) , (the Arrows of C159)) such that
+L204: C161 = [ C166 , C167 ]
+and
+L205: C163 = FunctorStr (# C166 , C167 #)
+and
+L206: C163 is  covariant  covariant  covariant  covariant (Functor of C158 , C159);
+
+L207: C164 = C166 by L201 , L204 , XTUPLE_0:1;
+thus L208: thesis by L207 , L201 , L202 , L204 , L205 , XTUPLE_0:1;
+end;
+consider C168 being set such that L209: (for B167 being set holds (B167 in C168 iff (ex B168 being set st (B168 in [: D8 , ( union C160 ) :] & S4[ B168 , B167 ])))) from TARSKI:sch 1(L200);
+take C168;
+let C169 being set;
+thus L210: (C169 in C168 implies C169 is  covariant  strict  covariant  strict  covariant  strict  covariant  strict (Functor of C158 , C159))
+proof
+assume L211: C169 in C168;
+L212: (ex B169 being set st (B169 in [: D8 , ( union C160 ) :] & (ex B170 being  Covariant (bifunction of (the carrier of C158) , (the carrier of C159)) st (ex B171 being (MSUnTrans of B170 , (the Arrows of C158) , (the Arrows of C159)) st (B169 = [ B170 , B171 ] & C169 = FunctorStr (# B170 , B171 #) & C169 is  covariant  covariant  covariant  covariant (Functor of C158 , C159)))))) by L211 , L209;
+thus L213: thesis by L212;
+end;
+
+assume L214: C169 is  covariant  strict  covariant  strict  covariant  strict  covariant  strict (Functor of C158 , C159);
+reconsider D12 = C169 as  covariant  strict (Functor of C158 , C159) by L214;
+reconsider D13 = (the ObjectMap of D12) as  Covariant (bifunction of (the carrier of C158) , (the carrier of C159)) by FUNCTOR0:def 12;
+reconsider D14 = (the MorphMap of D12) as (MSUnTrans of D13 , (the Arrows of C158) , (the Arrows of C159));
+reconsider D15 = [ D13 , D14 ] as set;
+L215: (for B172 , B173 being (object of C158) holds (( (the Arrows of C158) . (B172 , B173) ) <> ( {} ) implies ( (the Arrows of C159) . ( D13 . (B172 , B173) ) ) <> ( {} )))
+proof
+let C170 , C171 being (object of C158);
+assume that
+L216: ( (the Arrows of C158) . (C170 , C171) ) <> ( {} );
+L217: ( (the Arrows of C158) . (C170 , C171) ) = <^ C170 , C171 ^>;
+thus L218: thesis by L217 , L216 , FUNCTOR0:def 11;
+end;
+L219: (for B174 , B175 being (object of C158) holds (( (the Arrows of C158) . (B174 , B175) ) <> ( {} ) implies ( (the Arrows of C159) . [ ( D12 . B174 ) , ( D12 . B175 ) ] ) <> ( {} )))
+proof
+let C172 , C173 being (object of C158);
+assume that
+L220: ( (the Arrows of C158) . (C172 , C173) ) <> ( {} );
+L221: ( D13 . (C172 , C173) ) = [ ( D12 . C172 ) , ( D12 . C173 ) ] by FUNCTOR0:22;
+thus L222: thesis by L221 , L215 , L220;
+end;
+L223: D15 in [: D8 , ( union C160 ) :]
+proof
+set D16 = [: (the carrier of C158) , (the carrier of C158) :];
+reconsider D17 = ( (the Arrows of C159) * D13 ) as (ManySortedSet of [: (the carrier of C158) , (the carrier of C158) :]);
+L224: (for B176 being set holds ((B176 in D16 & ( (the Arrows of C158) . B176 ) <> ( {} )) implies ( (the Arrows of C159) . ( D13 . B176 ) ) <> ( {} )))
+proof
+let C174 being set;
+assume that
+L225: C174 in D16
+and
+L226: ( (the Arrows of C158) . C174 ) <> ( {} );
+consider C175 , C176 being set such that L227: (C175 in (the carrier of C158) & C176 in (the carrier of C158)) and L228: C174 = [ C175 , C176 ] by L225 , ZFMISC_1:def 2;
+reconsider D18 = C175 , D19 = C176 as (object of C158) by L227;
+L229: ( (the Arrows of C159) . ( D13 . C174 ) ) = ( (the Arrows of C159) . ( D13 . (C175 , C176) ) ) by L228
+.= ( (the Arrows of C159) . [ ( D12 . D18 ) , ( D12 . D19 ) ] ) by FUNCTOR0:22;
+L230: ( (the Arrows of C158) . (C175 , C176) ) <> ( {} ) by L226 , L228;
+thus L231: thesis by L230 , L219 , L229;
+end;
+L232: (for B177 being set holds (B177 in D16 implies (( (the Arrows of C158) . B177 ) <> ( {} ) implies ( D17 . B177 ) <> ( {} ))))
+proof
+let C177 being set;
+assume that
+L233: C177 in D16;
+assume L234: ( (the Arrows of C158) . C177 ) <> ( {} );
+L235: ( D17 . C177 ) = ( (the Arrows of C159) . ( D13 . C177 ) ) by L233 , FUNCT_2:15;
+thus L236: thesis by L235 , L224 , L233 , L234;
+end;
+L237: (D14 is (ManySortedFunction of (the Arrows of C158) , D17) & (for B178 being set holds (B178 in D16 implies (( D17 . B178 ) = ( {} ) implies ( (the Arrows of C158) . B178 ) = ( {} ))))) by L232 , FUNCTOR0:def 4;
+L238: D14 in ( Funcs ((the Arrows of C158) , D17) ) by L237 , L152;
+L239: D13 in D8 by FUNCT_2:8;
+L240: ( (the Arrows of C159) * D13 ) in D11 by L239;
+L241: ( Funcs ((the Arrows of C158) , D17) ) in C160 by L240 , L199;
+L242: D14 in ( union C160 ) by L241 , L238 , TARSKI:def 4;
+thus L243: thesis by L242 , L239 , ZFMISC_1:def 2;
+end;
+thus L244: thesis by L223 , L209;
+end;
+uniqueness
+proof
+let C178 , C179 being set;
+assume that
+L245: (for B179 being set holds (B179 in C178 iff B179 is  covariant  strict  covariant  strict  covariant  strict  covariant  strict (Functor of C158 , C159)))
+and
+L246: (for B180 being set holds (B180 in C179 iff B180 is  covariant  strict  covariant  strict  covariant  strict  covariant  strict (Functor of C158 , C159)));
+L247:
+now
+let C180 being set;
+L248: (C180 in C178 iff C180 is  covariant  strict  covariant  strict  covariant  strict  covariant  strict (Functor of C158 , C159)) by L245;
+thus L249: (C180 in C178 iff C180 in C179) by L248 , L246;
+end;
+thus L250: thesis by L247 , TARSKI:1;
+end;
+end;
+definition
+let C181 , C182 being category;
+func Functors (C181 , C182) ->  strict non  empty  transitive AltCatStr means 
+((the carrier of it) = ( Funct (C181 , C182) ) & (for B181 , B182 being  strict  covariant (Functor of C181 , C182) holds (for B183 being set holds (B183 in ( (the Arrows of it) . (B181 , B182) ) iff (B181 is_naturally_transformable_to B182 & B183 is (natural_transformation of B181 , B182))))) & (for B184 , B185 , B186 being  strict  covariant (Functor of C181 , C182) holds ((B184 is_naturally_transformable_to B185 & B185 is_naturally_transformable_to B186) implies (for B187 being (natural_transformation of B184 , B185) holds (for B188 being (natural_transformation of B185 , B186) holds (ex B189 being Function st (B189 = ( (the Comp of it) . (B184 , B185 , B186) ) & ( B189 . (B188 , B187) ) = ( B188 `*` B187 ))))))));
+existence
+proof
+defpred S6[ set , set , set ] means (for B190 , B191 , B192 being  strict  covariant (Functor of C181 , C182) holds ([ B190 , B191 , B192 ] = $3 implies (for B193 being (natural_transformation of B190 , B191) holds (for B194 being (natural_transformation of B191 , B192) holds (([ B194 , B193 ] = $2 & (ex B195 being Function st ( B195 . $2 ) = $1)) implies $1 = ( B194 `*` B193 ))))));
+defpred S7[ set , set ] means (for B196 , B197 being  strict  covariant (Functor of C181 , C182) holds ([ B196 , B197 ] = $1 implies (for B198 being set holds (B198 in $2 iff (B196 is_naturally_transformable_to B197 & B198 is (natural_transformation of B196 , B197))))));
+L252: (for B199 being set holds (B199 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] implies (ex B200 being set st S7[ B199 , B200 ])))
+proof
+let C183 being set;
+assume L253: C183 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :];
+consider C184 being set, C185 being set such that L254: (C184 in ( Funct (C181 , C182) ) & C185 in ( Funct (C181 , C182) )) and L255: C183 = [ C184 , C185 ] by L253 , ZFMISC_1:def 2;
+reconsider D20 = C184 , D21 = C185 as  strict  covariant (Functor of C181 , C182) by L254 , L196;
+defpred S8[ (object of C181) , set ] means $2 = <^ ( D20 . $1 ) , ( D21 . $1 ) ^>;
+defpred S9[ set ] means (D20 is_naturally_transformable_to D21 & $1 is (natural_transformation of D20 , D21));
+L256: (for B201 being (Element of C181) holds (ex B202 being set st S8[ B201 , B202 ]));
+consider C186 being (ManySortedSet of (the carrier of C181)) such that L257: (for B203 being (Element of C181) holds S8[ B203 , ( C186 . B203 ) ]) from PBOOLE:sch 6(L256);
+consider C187 being set such that L258: (for B204 being set holds (B204 in C187 iff (B204 in ( product C186 ) & S9[ B204 ]))) from XBOOLE_0:sch 1;
+take C187;
+let C188 , C189 being  strict  covariant (Functor of C181 , C182);
+assume that
+L259: [ C188 , C189 ] = C183;
+let C190 being set;
+thus L260: (C190 in C187 implies (C188 is_naturally_transformable_to C189 & C190 is (natural_transformation of C188 , C189)))
+proof
+assume L261: C190 in C187;
+L262: (C188 = D20 & C189 = D21) by L255 , L259 , XTUPLE_0:1;
+thus L263: thesis by L262 , L258 , L261;
+end;
+
+thus L264: ((C188 is_naturally_transformable_to C189 & C190 is (natural_transformation of C188 , C189)) implies C190 in C187)
+proof
+L265: (C188 = D20 & C189 = D21) by L255 , L259 , XTUPLE_0:1;
+set D22 = (the carrier of C181);
+assume that
+L266: C188 is_naturally_transformable_to C189
+and
+L267: C190 is (natural_transformation of C188 , C189);
+reconsider D23 = C190 as (ManySortedSet of (the carrier of C181)) by L267;
+L268: C188 is_transformable_to C189 by L266 , L93;
+L269: (for B205 being set holds (B205 in D22 implies ( D23 . B205 ) in ( C186 . B205 )))
+proof
+let C191 being set;
+assume L270: C191 in D22;
+reconsider D24 = C191 as (Element of C181) by L270;
+L271: S8[ D24 , ( C186 . D24 ) ] by L257;
+L272: (<^ ( D20 . D24 ) , ( D21 . D24 ) ^> <> ( {} ) & ( D23 . D24 ) is (Element of <^ ( D20 . D24 ) , ( D21 . D24 ) ^>)) by L267 , L268 , L265 , L6 , L13;
+thus L273: thesis by L272 , L271;
+end;
+L274: (for B206 being set holds (B206 in ( dom C186 ) implies ( D23 . B206 ) in ( C186 . B206 )))
+proof
+L275: ( dom C186 ) = D22 by PARTFUN1:def 2;
+let C192 being set;
+assume L276: C192 in ( dom C186 );
+thus L277: thesis by L276 , L269 , L275;
+end;
+L278: ( dom D23 ) = (the carrier of C181) by PARTFUN1:def 2;
+L279: ( dom D23 ) = ( dom C186 ) by L278 , PARTFUN1:def 2;
+L280: C190 in ( product C186 ) by L279 , L274 , CARD_3:9;
+thus L281: thesis by L280 , L258 , L266 , L267 , L265;
+end;
+
+end;
+consider C193 being (ManySortedSet of [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :]) such that L265: (for B207 being set holds (B207 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] implies S7[ B207 , ( C193 . B207 ) ])) from PBOOLE:sch 3(L252);
+L266: (for B208 being set holds (B208 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] implies (for B209 being set holds (B209 in ( {| C193 , C193 |} . B208 ) implies (ex B210 being set st (B210 in ( {| C193 |} . B208 ) & S6[ B210 , B209 , B208 ]))))))
+proof
+let C194 being set;
+assume L267: C194 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :];
+L268: C194 in [: [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] , ( Funct (C181 , C182) ) :] by L267 , ZFMISC_1:def 3;
+consider C195 , C196 being set such that L269: C195 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] and L270: C196 in ( Funct (C181 , C182) ) and L271: C194 = [ C195 , C196 ] by L268 , ZFMISC_1:def 2;
+consider C197 , C198 being set such that L272: (C197 in ( Funct (C181 , C182) ) & C198 in ( Funct (C181 , C182) )) and L273: C195 = [ C197 , C198 ] by L269 , ZFMISC_1:def 2;
+L274: C194 = [ C197 , C198 , C196 ] by L271 , L273;
+reconsider D25 = ( Funct (C181 , C182) ) as non  empty set by L270;
+reconsider D26 = C197 , D27 = C198 , D28 = C196 as (Element of D25) by L270 , L272;
+L275: ( {| C193 |} . [ D26 , D27 , D28 ] ) = ( {| C193 |} . (D26 , D27 , D28) ) by MULTOP_1:def 1
+.= ( C193 . (D26 , D28) ) by ALTCAT_1:def 3;
+L276: ( {| C193 , C193 |} . [ D26 , D27 , D28 ] ) = ( {| C193 , C193 |} . (D26 , D27 , D28) ) by MULTOP_1:def 1
+.= [: ( C193 . (D27 , D28) ) , ( C193 . (D26 , D27) ) :] by ALTCAT_1:def 4;
+L277: (for B211 being set holds (B211 in ( {| C193 , C193 |} . C194 ) implies (ex B212 being set st (B212 in ( {| C193 |} . C194 ) & S6[ B212 , B211 , C194 ]))))
+proof
+reconsider D29 = D26 , D30 = D27 , D31 = D28 as  strict  covariant (Functor of C181 , C182) by L196;
+let C199 being set;
+L278: [ D29 , D31 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by ZFMISC_1:def 2;
+assume L279: C199 in ( {| C193 , C193 |} . C194 );
+consider C200 , C201 being set such that L280: C200 in ( C193 . (D27 , D28) ) and L281: C201 in ( C193 . (D26 , D27) ) and L282: C199 = [ C200 , C201 ] by L279 , L274 , L276 , ZFMISC_1:def 2;
+L283: C200 in ( C193 . [ D27 , D28 ] ) by L280;
+L284: D30 is_naturally_transformable_to D31 by L283 , L265;
+reconsider D32 = C200 as (natural_transformation of D30 , D31) by L265 , L283;
+L285: C201 in ( C193 . [ D26 , D27 ] ) by L281;
+reconsider D33 = C201 as (natural_transformation of D29 , D30) by L285 , L265;
+reconsider D34 = ( D32 `*` D33 ) as (natural_transformation of D29 , D31);
+L286: (for B213 , B214 , B215 being  strict  covariant (Functor of C181 , C182) holds ([ B213 , B214 , B215 ] = C194 implies (for B216 being (natural_transformation of B213 , B214) holds (for B217 being (natural_transformation of B214 , B215) holds (([ B217 , B216 ] = C199 & (ex B218 being Function st ( B218 . C199 ) = D34)) implies D34 = ( B217 `*` B216 ))))))
+proof
+let C202 , C203 , C204 being  strict  covariant (Functor of C181 , C182);
+assume that
+L287: [ C202 , C203 , C204 ] = C194;
+L288: D30 = C203 by L274 , L287 , XTUPLE_0:3;
+reconsider D35 = D32 as (natural_transformation of C203 , C204) by L288 , L274 , L287 , XTUPLE_0:3;
+L289: (D29 = C202 & D31 = C204) by L274 , L287 , XTUPLE_0:3;
+let C205 being (natural_transformation of C202 , C203);
+let C206 being (natural_transformation of C203 , C204);
+assume that
+L290: [ C206 , C205 ] = C199
+and
+L291: (ex B219 being Function st ( B219 . C199 ) = D34);
+L292: D35 = C206 by L282 , L290 , XTUPLE_0:1;
+thus L293: thesis by L292 , L282 , L290 , L288 , L289 , XTUPLE_0:1;
+end;
+L294: D29 is_naturally_transformable_to D30 by L265 , L285;
+L295: D29 is_naturally_transformable_to D31 by L294 , L284 , L112;
+L296: D34 in ( C193 . [ D29 , D31 ] ) by L295 , L265 , L278;
+thus L297: thesis by L296 , L274 , L275 , L286;
+end;
+thus L298: thesis by L277;
+end;
+consider C207 being (ManySortedFunction of {| C193 , C193 |} , {| C193 |}) such that L299: (for B220 being set holds (B220 in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] implies (ex B221 being (Function of ( {| C193 , C193 |} . B220 ) , ( {| C193 |} . B220 )) st (B221 = ( C207 . B220 ) & (for B222 being set holds (B222 in ( {| C193 , C193 |} . B220 ) implies S6[ ( B221 . B222 ) , B222 , B220 ])))))) from MSSUBFAM:sch 1(L266);
+set D36 = AltCatStr (# ( Funct (C181 , C182) ) , C193 , C207 #);
+L300: ( Funct (C181 , C182) ) is non  empty
+proof
+set D37 = the  strict  covariant (Functor of C181 , C182);
+L301: D37 in ( Funct (C181 , C182) ) by L196;
+thus L302: thesis by L301;
+end;
+L303: D36 is  transitive
+proof
+let C208 , C209 , C210 being (object of D36);
+reconsider D38 = C208 , D39 = C209 , D40 = C210 as  strict  covariant (Functor of C181 , C182) by L300 , L196;
+assume that
+L304: <^ C208 , C209 ^> <> ( {} )
+and
+L305: <^ C209 , C210 ^> <> ( {} );
+consider C211 being set such that L306: C211 in ( C193 . [ C209 , C210 ] ) by L305 , XBOOLE_0:def 1;
+L307: [ C209 , C210 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L300 , ZFMISC_1:def 2;
+L308: D39 is_naturally_transformable_to D40 by L307 , L265 , L306;
+reconsider D41 = C211 as (natural_transformation of D39 , D40) by L265 , L307 , L306;
+consider C212 being set such that L309: C212 in ( C193 . [ C208 , C209 ] ) by L304 , XBOOLE_0:def 1;
+L310: [ C208 , C209 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L300 , ZFMISC_1:def 2;
+reconsider D42 = C212 as (natural_transformation of D38 , D39) by L310 , L265 , L309;
+L311: D38 is_naturally_transformable_to D39 by L265 , L310 , L309;
+L312: D38 is_naturally_transformable_to D40 by L311 , L308 , L112;
+L313: (( D41 `*` D42 ) is (natural_transformation of D38 , D40) & [ C208 , C210 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :]) by L300 , ZFMISC_1:def 2;
+thus L314: thesis by L313 , L265 , L312;
+end;
+reconsider D43 = D36 as  strict non  empty  transitive AltCatStr by L303 , L300;
+take D43;
+thus L315: (the carrier of D43) = ( Funct (C181 , C182) );
+thus L316: (for B223 , B224 being  strict  covariant (Functor of C181 , C182) holds (for B225 being set holds (B225 in ( (the Arrows of D43) . (B223 , B224) ) iff (B223 is_naturally_transformable_to B224 & B225 is (natural_transformation of B223 , B224)))))
+proof
+let C213 , C214 being  strict  covariant (Functor of C181 , C182);
+let C215 being set;
+thus L317: (C215 in ( (the Arrows of D43) . (C213 , C214) ) implies (C213 is_naturally_transformable_to C214 & C215 is (natural_transformation of C213 , C214)))
+proof
+L318: (C213 in ( Funct (C181 , C182) ) & C214 in ( Funct (C181 , C182) )) by L196;
+L319: [ C213 , C214 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L318 , ZFMISC_1:def 2;
+assume L320: C215 in ( (the Arrows of D43) . (C213 , C214) );
+thus L321: thesis by L320 , L265 , L319;
+end;
+
+thus L322: ((C213 is_naturally_transformable_to C214 & C215 is (natural_transformation of C213 , C214)) implies C215 in ( (the Arrows of D43) . (C213 , C214) ))
+proof
+L323: (C213 in ( Funct (C181 , C182) ) & C214 in ( Funct (C181 , C182) )) by L196;
+L324: [ C213 , C214 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L323 , ZFMISC_1:87;
+assume L325: (C213 is_naturally_transformable_to C214 & C215 is (natural_transformation of C213 , C214));
+thus L326: thesis by L325 , L265 , L324;
+end;
+
+end;
+
+let C216 , C217 , C218 being  strict  covariant (Functor of C181 , C182);
+assume that
+L323: C216 is_naturally_transformable_to C217
+and
+L324: C217 is_naturally_transformable_to C218;
+let C219 being (natural_transformation of C216 , C217);
+let C220 being (natural_transformation of C217 , C218);
+L325: C216 in ( Funct (C181 , C182) ) by L196;
+reconsider D44 = ( Funct (C181 , C182) ) as non  empty set by L325;
+L326: C217 in ( Funct (C181 , C182) ) by L196;
+L327: [ C216 , C217 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L326 , L325 , ZFMISC_1:87;
+L328: C218 in ( Funct (C181 , C182) ) by L196;
+L329: [ C217 , C218 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L328 , L326 , ZFMISC_1:87;
+L330: C220 in ( C193 . [ C217 , C218 ] ) by L329 , L265 , L324;
+reconsider D45 = C216 , D46 = C217 , D47 = C218 as (Element of D44) by L196;
+L331: ( {| C193 , C193 |} . [ D45 , D46 , D47 ] ) = ( {| C193 , C193 |} . (D45 , D46 , D47) ) by MULTOP_1:def 1
+.= [: ( C193 . (D46 , D47) ) , ( C193 . (D45 , D46) ) :] by ALTCAT_1:def 4;
+L332: ([: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] = [: [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] , ( Funct (C181 , C182) ) :] & [ C216 , C217 , C218 ] = [ [ C216 , C217 ] , C218 ]) by ZFMISC_1:def 3;
+L333: [ C216 , C217 , C218 ] in [: ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) , ( Funct (C181 , C182) ) :] by L332 , L328 , L327 , ZFMISC_1:87;
+consider C221 being (Function of ( {| C193 , C193 |} . [ C216 , C217 , C218 ] ) , ( {| C193 |} . [ C216 , C217 , C218 ] )) such that L334: C221 = ( C207 . [ C216 , C217 , C218 ] ) and L335: (for B226 being set holds (B226 in ( {| C193 , C193 |} . [ C216 , C217 , C218 ] ) implies S6[ ( C221 . B226 ) , B226 , [ C216 , C217 , C218 ] ])) by L333 , L299;
+L336: C219 in ( C193 . [ C216 , C217 ] ) by L265 , L323 , L327;
+L337: [ C220 , C219 ] in ( {| C193 , C193 |} . [ C216 , C217 , C218 ] ) by L336 , L331 , L330 , ZFMISC_1:87;
+L338: ( C221 . (C220 , C219) ) = ( C220 `*` C219 ) by L337 , L335;
+L339: C221 = ( C207 . (C216 , C217 , C218) ) by L334 , MULTOP_1:def 1;
+thus L340: thesis by L339 , L338;
+end;
+uniqueness
+proof
+let C222 , C223 being  strict non  empty  transitive AltCatStr;
+assume that
+L341: (the carrier of C222) = ( Funct (C181 , C182) )
+and
+L342: (for B227 , B228 being  strict  covariant (Functor of C181 , C182) holds (for B229 being set holds (B229 in ( (the Arrows of C222) . (B227 , B228) ) iff (B227 is_naturally_transformable_to B228 & B229 is (natural_transformation of B227 , B228)))))
+and
+L343: (for B230 , B231 , B232 being  strict  covariant (Functor of C181 , C182) holds ((B230 is_naturally_transformable_to B231 & B231 is_naturally_transformable_to B232) implies (for B233 being (natural_transformation of B230 , B231) holds (for B234 being (natural_transformation of B231 , B232) holds (ex B235 being Function st (B235 = ( (the Comp of C222) . (B230 , B231 , B232) ) & ( B235 . (B234 , B233) ) = ( B234 `*` B233 )))))))
+and
+L344: (the carrier of C223) = ( Funct (C181 , C182) )
+and
+L345: (for B236 , B237 being  strict  covariant (Functor of C181 , C182) holds (for B238 being set holds (B238 in ( (the Arrows of C223) . (B236 , B237) ) iff (B236 is_naturally_transformable_to B237 & B238 is (natural_transformation of B236 , B237)))))
+and
+L346: (for B239 , B240 , B241 being  strict  covariant (Functor of C181 , C182) holds ((B239 is_naturally_transformable_to B240 & B240 is_naturally_transformable_to B241) implies (for B242 being (natural_transformation of B239 , B240) holds (for B243 being (natural_transformation of B240 , B241) holds (ex B244 being Function st (B244 = ( (the Comp of C223) . (B239 , B240 , B241) ) & ( B244 . (B243 , B242) ) = ( B243 `*` B242 )))))));
+set D48 = (the carrier of C222);
+set D49 = (the carrier of C223);
+set D50 = (the Arrows of C222);
+set D51 = (the Arrows of C223);
+set D52 = (the Comp of C222);
+set D53 = (the Comp of C223);
+L347: (for B245 , B246 being set holds ((B245 in D48 & B246 in D49) implies ( D50 . (B245 , B246) ) = ( D51 . (B245 , B246) )))
+proof
+let C224 , C225 being set;
+assume that
+L348: C224 in D48
+and
+L349: C225 in D49;
+reconsider D54 = C225 as  strict  covariant (Functor of C181 , C182) by L344 , L349 , L196;
+reconsider D55 = C224 as  strict  covariant (Functor of C181 , C182) by L341 , L348 , L196;
+L350:
+now
+let C226 being set;
+L351: (C226 in ( D50 . (C224 , C225) ) iff (D55 is_naturally_transformable_to D54 & C226 is (natural_transformation of D55 , D54))) by L342;
+thus L352: (C226 in ( D50 . (C224 , C225) ) iff C226 in ( D51 . (C224 , C225) )) by L351 , L345;
+end;
+thus L353: thesis by L350 , TARSKI:1;
+end;
+L354: (the Arrows of C222) = (the Arrows of C223) by L347 , L341 , L344 , ALTCAT_1:6;
+L355: (for B247 , B248 , B249 being set holds ((B247 in D48 & B248 in D48 & B249 in D48) implies ( D52 . (B247 , B248 , B249) ) = ( D53 . (B247 , B248 , B249) )))
+proof
+let C227 , C228 , C229 being set;
+assume that
+L356: C227 in D48
+and
+L357: C228 in D48
+and
+L358: C229 in D48;
+reconsider D56 = C229 as  strict  covariant (Functor of C181 , C182) by L341 , L358 , L196;
+reconsider D57 = C228 as  strict  covariant (Functor of C181 , C182) by L341 , L357 , L196;
+reconsider D58 = C227 as  strict  covariant (Functor of C181 , C182) by L341 , L356 , L196;
+per cases ;
+suppose L359: (( D50 . (C227 , C228) ) = ( {} ) or ( D50 . (C228 , C229) ) = ( {} ));
+
+thus L360: ( D52 . (C227 , C228 , C229) ) = ( D53 . (C227 , C228 , C229) )
+proof
+per cases  by L359;
+suppose L361: ( D50 . (C227 , C228) ) = ( {} );
+
+reconsider D59 = D49 as non  empty set;
+reconsider D60 = C227 , D61 = C228 , D62 = C229 as (Element of D59) by L341 , L344 , L356 , L357 , L358;
+L362: ( D51 . (C227 , C228) ) = ( {} ) by L341 , L344 , L347 , L361 , ALTCAT_1:6;
+L363: [: ( D51 . (D61 , D62) ) , ( D51 . (D60 , D61) ) :] = ( {} ) by L362 , ZFMISC_1:90;
+L364: ( {| D51 , D51 |} . [ D60 , D61 , D62 ] ) = ( {| D51 , D51 |} . (D60 , D61 , D62) ) by MULTOP_1:def 1
+.= [: ( D51 . (D61 , D62) ) , ( D51 . (D60 , D61) ) :] by ALTCAT_1:def 4;
+L365: ( {| D51 |} . [ D60 , D61 , D62 ] ) = ( {| D51 |} . (D60 , D61 , D62) ) by MULTOP_1:def 1
+.= ( D51 . (D60 , D62) ) by ALTCAT_1:def 3;
+L366: ( D53 . [ D60 , D61 , D62 ] ) = ( D53 . (D60 , D61 , D62) ) by MULTOP_1:def 1;
+L367: ( D53 . (D60 , D61 , D62) ) is (Function of [: ( D51 . (D61 , D62) ) , ( D51 . (D60 , D61) ) :] , ( D51 . (D60 , D62) )) by L366 , L364 , L365 , PBOOLE:def 15;
+L368: ( {| D51 , D51 |} . [ D60 , D61 , D62 ] ) = ( {| D51 , D51 |} . (D60 , D61 , D62) ) by MULTOP_1:def 1
+.= [: ( D51 . (D61 , D62) ) , ( D51 . (D60 , D61) ) :] by ALTCAT_1:def 4;
+L369: ( {| D51 |} . [ D60 , D61 , D62 ] ) = ( {| D51 |} . (D60 , D61 , D62) ) by MULTOP_1:def 1
+.= ( D51 . (D60 , D62) ) by ALTCAT_1:def 3;
+L370: ( D52 . [ D60 , D61 , D62 ] ) = ( D52 . (D60 , D61 , D62) ) by MULTOP_1:def 1;
+L371: ( D52 . (D60 , D61 , D62) ) is (Function of [: ( D51 . (D61 , D62) ) , ( D51 . (D60 , D61) ) :] , ( D51 . (D60 , D62) )) by L370 , L341 , L344 , L354 , L368 , L369 , PBOOLE:def 15;
+thus L372: thesis by L371 , L363 , L367;
+end;
+suppose L373: ( D50 . (C228 , C229) ) = ( {} );
+
+reconsider D63 = D49 as non  empty set;
+reconsider D64 = C227 , D65 = C228 , D66 = C229 as (Element of D63) by L341 , L344 , L356 , L357 , L358;
+L374: ( D51 . (C228 , C229) ) = ( {} ) by L341 , L344 , L347 , L373 , ALTCAT_1:6;
+L375: [: ( D51 . (D65 , D66) ) , ( D51 . (D64 , D65) ) :] = ( {} ) by L374 , ZFMISC_1:90;
+L376: ( {| D51 , D51 |} . [ D64 , D65 , D66 ] ) = ( {| D51 , D51 |} . (D64 , D65 , D66) ) by MULTOP_1:def 1
+.= [: ( D51 . (D65 , D66) ) , ( D51 . (D64 , D65) ) :] by ALTCAT_1:def 4;
+L377: ( {| D51 |} . [ D64 , D65 , D66 ] ) = ( {| D51 |} . (D64 , D65 , D66) ) by MULTOP_1:def 1
+.= ( D51 . (D64 , D66) ) by ALTCAT_1:def 3;
+L378: ( D53 . [ D64 , D65 , D66 ] ) = ( D53 . (D64 , D65 , D66) ) by MULTOP_1:def 1;
+L379: ( D53 . (D64 , D65 , D66) ) is (Function of [: ( D51 . (D65 , D66) ) , ( D51 . (D64 , D65) ) :] , ( D51 . (D64 , D66) )) by L378 , L376 , L377 , PBOOLE:def 15;
+L380: ( {| D51 , D51 |} . [ D64 , D65 , D66 ] ) = ( {| D51 , D51 |} . (D64 , D65 , D66) ) by MULTOP_1:def 1
+.= [: ( D51 . (D65 , D66) ) , ( D51 . (D64 , D65) ) :] by ALTCAT_1:def 4;
+L381: ( {| D51 |} . [ D64 , D65 , D66 ] ) = ( {| D51 |} . (D64 , D65 , D66) ) by MULTOP_1:def 1
+.= ( D51 . (D64 , D66) ) by ALTCAT_1:def 3;
+L382: ( D52 . [ D64 , D65 , D66 ] ) = ( D52 . (D64 , D65 , D66) ) by MULTOP_1:def 1;
+L383: ( D52 . (D64 , D65 , D66) ) is (Function of [: ( D51 . (D65 , D66) ) , ( D51 . (D64 , D65) ) :] , ( D51 . (D64 , D66) )) by L382 , L341 , L344 , L354 , L380 , L381 , PBOOLE:def 15;
+thus L384: thesis by L383 , L375 , L379;
+end;
+end;
+
+end;
+suppose that L361: ( D50 . (C227 , C228) ) <> ( {} )
+and
+L362: ( D50 . (C228 , C229) ) <> ( {} );
+reconsider D67 = D49 as non  empty set;
+reconsider D68 = C227 , D69 = C228 , D70 = C229 as (Element of D67) by L341 , L344 , L356 , L357 , L358;
+L363: ( {| D51 , D51 |} . [ D68 , D69 , D70 ] ) = ( {| D51 , D51 |} . (D68 , D69 , D70) ) by MULTOP_1:def 1
+.= [: ( D51 . (D69 , D70) ) , ( D51 . (D68 , D69) ) :] by ALTCAT_1:def 4;
+L364: ( {| D51 |} . [ D68 , D69 , D70 ] ) = ( {| D51 |} . (D68 , D69 , D70) ) by MULTOP_1:def 1
+.= ( D51 . (D68 , D70) ) by ALTCAT_1:def 3;
+L365: ( D53 . [ D68 , D69 , D70 ] ) = ( D53 . (D68 , D69 , D70) ) by MULTOP_1:def 1;
+reconsider D71 = ( D53 . (C227 , C228 , C229) ) as (Function of [: ( D51 . (C228 , C229) ) , ( D51 . (C227 , C228) ) :] , ( D51 . (C227 , C229) )) by L365 , L363 , L364 , PBOOLE:def 15;
+L366: ( {| D51 , D51 |} . [ D68 , D69 , D70 ] ) = ( {| D51 , D51 |} . (D68 , D69 , D70) ) by MULTOP_1:def 1
+.= [: ( D51 . (D69 , D70) ) , ( D51 . (D68 , D69) ) :] by ALTCAT_1:def 4;
+L367: ( {| D51 |} . [ D68 , D69 , D70 ] ) = ( {| D51 |} . (D68 , D69 , D70) ) by MULTOP_1:def 1
+.= ( D51 . (D68 , D70) ) by ALTCAT_1:def 3;
+L368: ( D52 . [ D68 , D69 , D70 ] ) = ( D52 . (D68 , D69 , D70) ) by MULTOP_1:def 1;
+reconsider D72 = ( D52 . (C227 , C228 , C229) ) as (Function of [: ( D51 . (C228 , C229) ) , ( D51 . (C227 , C228) ) :] , ( D51 . (C227 , C229) )) by L368 , L341 , L344 , L354 , L366 , L367 , PBOOLE:def 15;
+L369: ( D51 . (C228 , C229) ) <> ( {} ) by L341 , L344 , L347 , L362 , ALTCAT_1:6;
+L370: ( D51 . (C227 , C228) ) <> ( {} ) by L341 , L344 , L347 , L361 , ALTCAT_1:6;
+L371: (for B250 being (Element of ( D51 . (C228 , C229) )) holds (for B251 being (Element of ( D51 . (C227 , C228) )) holds ( D72 . (B250 , B251) ) = ( D71 . (B250 , B251) )))
+proof
+let C230 being (Element of ( D51 . (C228 , C229) ));
+let C231 being (Element of ( D51 . (C227 , C228) ));
+L372: C230 in ( D51 . (C228 , C229) ) by L369;
+L373: D57 is_naturally_transformable_to D56 by L372 , L345;
+reconsider D73 = C230 as (natural_transformation of D57 , D56) by L345 , L369;
+L374: C231 in ( D51 . (C227 , C228) ) by L370;
+L375: D58 is_naturally_transformable_to D57 by L374 , L345;
+reconsider D74 = C231 as (natural_transformation of D58 , D57) by L345 , L370;
+L376: ((ex B252 being Function st (B252 = ( D52 . (D58 , D57 , D56) ) & ( B252 . (D73 , D74) ) = ( D73 `*` D74 ))) & (ex B253 being Function st (B253 = ( D53 . (D58 , D57 , D56) ) & ( B253 . (D73 , D74) ) = ( D73 `*` D74 )))) by L343 , L346 , L373 , L375;
+thus L377: thesis by L376;
+end;
+thus L378: thesis by L371 , BINOP_1:2;
+end;
+end;
+thus L380: thesis by L355 , L341 , L344 , L354 , ALTCAT_1:8;
+end;
+end;

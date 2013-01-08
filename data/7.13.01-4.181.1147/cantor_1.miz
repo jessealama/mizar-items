@@ -1,0 +1,608 @@
+:: The Cantor Set
+::  by Alexander Yu. Shibakov and Andrzej Trybulec
+::
+:: Received January 9, 1995
+:: Copyright (c) 1995-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies SETFAM_1, SUBSET_1, TARSKI, PRE_TOPC, RCOMP_1, RLVECT_3,
+      FINSET_1, XBOOLE_0, FINSUB_1, SETWISEO, ZFMISC_1, STRUCT_0, FUNCT_1,
+      RELAT_1, CARD_3, NUMBERS, FUNCOP_1, CARD_1, NAT_1, CANTOR_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, NUMBERS, ORDINAL1, NAT_1,
+      SETFAM_1, RELAT_1, FUNCT_1, FUNCT_2, FINSET_1, FINSUB_1, SETWISEO,
+      PROB_1, STRUCT_0, PRE_TOPC, TOPS_2, CARD_3, FUNCOP_1;
+ constructors SETFAM_1, FUNCOP_1, SETWISEO, CARD_3, TOPS_2, RELSET_1, PROB_1;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, FUNCOP_1, FINSET_1, CARD_3,
+      PRE_TOPC, FUNCT_1, TOPS_2;
+ requirements BOOLE, SUBSET;
+ definitions PRE_TOPC, TARSKI, TOPS_2, XBOOLE_0, STRUCT_0;
+ theorems ZFMISC_1, PRE_TOPC, SUBSET_1, SETFAM_1, FINSET_1, FUNCT_2, FUNCT_1,
+      TARSKI, FINSUB_1, RELAT_1, XBOOLE_0, XBOOLE_1, TOPS_2, EQREL_1;
+ schemes SUBSET_1, FUNCT_2, SETWISEO;
+
+begin
+definition
+let C1 being set;
+let C2 being (Subset-Family of C1);
+func UniCl C2 -> (Subset-Family of C1) means 
+:L1: (for B1 being (Subset of C1) holds (B1 in it iff (ex B2 being (Subset-Family of C1) st (B2 c= C2 & B1 = ( union B2 )))));
+existence
+proof
+defpred S1[ set ] means (ex B3 being (Subset-Family of C1) st (B3 c= C2 & $1 = ( union B3 )));
+L2: (ex B4 being (Subset-Family of C1) st (for B5 being (Subset of C1) holds (B5 in B4 iff S1[ B5 ]))) from SUBSET_1:sch 3;
+thus L3: thesis by L2;
+end;
+uniqueness
+proof
+let C3 , C4 being (Subset-Family of C1);
+assume that
+L4: (for B6 being (Subset of C1) holds (B6 in C3 iff (ex B7 being (Subset-Family of C1) st (B7 c= C2 & B6 = ( union B7 )))))
+and
+L5: (for B8 being (Subset of C1) holds (B8 in C4 iff (ex B9 being (Subset-Family of C1) st (B9 c= C2 & B8 = ( union B9 )))));
+L6:
+now
+let C5 being (Subset of C1);
+L7: (C5 in C3 iff (ex B10 being (Subset-Family of C1) st (B10 c= C2 & C5 = ( union B10 )))) by L4;
+thus L8: (C5 in C3 iff C5 in C4) by L7 , L5;
+end;
+thus L9: thesis by L6 , SUBSET_1:3;
+end;
+end;
+definition
+let C6 being TopStruct;
+let C7 being (Subset-Family of C6);
+attr C7 is  quasi_basis
+means
+:L11: (the topology of C6) c= ( UniCl C7 );
+end;
+registration
+let C8 being TopStruct;
+cluster (the topology of C8) ->  quasi_basis;
+coherence
+proof
+set D1 = (the topology of C8);
+let C9 being set;
+assume L13: C9 in D1;
+reconsider D2 = { C9 } as (Subset-Family of C8) by L13 , SUBSET_1:41;
+L14: D2 c= D1 by L13 , ZFMISC_1:31;
+L15: C9 = ( union D2 ) by ZFMISC_1:25;
+thus L16: C9 in ( UniCl D1 ) by L15 , L14 , L1;
+end;
+end;
+registration
+let C10 being TopStruct;
+cluster  open  quasi_basis for (Subset-Family of C10);
+existence
+proof
+take (the topology of C10);
+thus L18: thesis;
+end;
+end;
+definition
+let C11 being TopStruct;
+mode Basis of C11
+ is  open  quasi_basis (Subset-Family of C11);
+end;
+theorem
+L21: (for B11 being set holds (for B12 being (Subset-Family of B11) holds B12 c= ( UniCl B12 )))
+proof
+let C12 being set;
+let C13 being (Subset-Family of C12);
+let C14 being set;
+assume L22: C14 in C13;
+reconsider D3 = C14 as (Subset of C12) by L22;
+reconsider D4 = { D3 } as (Subset-Family of C12) by SUBSET_1:41;
+L23: C14 = ( union D4 ) by ZFMISC_1:25;
+L24: D4 c= C13 by L22 , ZFMISC_1:31;
+thus L25: thesis by L24 , L23 , L1;
+end;
+theorem
+L26: (for B13 being TopStruct holds (the topology of B13) is (Basis of B13));
+theorem
+L27: (for B14 being TopStruct holds (the topology of B14) is  open);
+definition
+let C15 being set;
+let C16 being (Subset-Family of C15);
+func FinMeetCl C16 -> (Subset-Family of C15) means 
+:L28: (for B15 being (Subset of C15) holds (B15 in it iff (ex B16 being (Subset-Family of C15) st (B16 c= C16 & B16 is  finite & B15 = ( Intersect B16 )))));
+existence
+proof
+defpred S2[ set ] means (ex B17 being (Subset-Family of C15) st (B17 c= C16 & B17 is  finite & $1 = ( Intersect B17 )));
+L29: (ex B18 being (Subset-Family of C15) st (for B19 being (Subset of C15) holds (B19 in B18 iff S2[ B19 ]))) from SUBSET_1:sch 3;
+thus L30: thesis by L29;
+end;
+uniqueness
+proof
+let C17 , C18 being (Subset-Family of C15);
+assume that
+L31: (for B20 being (Subset of C15) holds (B20 in C17 iff (ex B21 being (Subset-Family of C15) st (B21 c= C16 & B21 is  finite & B20 = ( Intersect B21 )))))
+and
+L32: (for B22 being (Subset of C15) holds (B22 in C18 iff (ex B23 being (Subset-Family of C15) st (B23 c= C16 & B23 is  finite & B22 = ( Intersect B23 )))));
+L33:
+now
+let C19 being (Subset of C15);
+L34: (C19 in C18 iff (ex B24 being (Subset-Family of C15) st (B24 c= C16 & B24 is  finite & C19 = ( Intersect B24 )))) by L32;
+thus L35: (C19 in C18 iff C19 in C17) by L34 , L31;
+end;
+thus L36: thesis by L33 , SUBSET_1:3;
+end;
+end;
+theorem
+L38: (for B25 being set holds (for B26 being (Subset-Family of B25) holds B26 c= ( FinMeetCl B26 )))
+proof
+let C20 being set;
+let C21 being (Subset-Family of C20);
+let C22 being set;
+assume L39: C22 in C21;
+reconsider D5 = C22 as (Subset of C20) by L39;
+reconsider D6 = { D5 } as (Subset-Family of C20) by SUBSET_1:41;
+L40: C22 = ( meet D6 ) by SETFAM_1:10;
+L41: C22 = ( Intersect D6 ) by L40 , SETFAM_1:def 9;
+L42: D6 c= C21 by L39 , ZFMISC_1:31;
+thus L43: thesis by L42 , L41 , L28;
+end;
+theorem
+L44: (for B27 being non  empty TopSpace holds (the topology of B27) = ( FinMeetCl (the topology of B27) ))
+proof
+let C23 being non  empty TopSpace;
+set D7 = (the topology of C23);
+defpred S3[ set ] means ( meet $1 ) in (the topology of C23);
+L45: (for B28 being (Element of ( Fin D7 )) holds (for B29 being (Element of D7) holds (S3[ B28 ] implies S3[ ( B28 \/ { B29 } ) ])))
+proof
+let C24 being (Element of ( Fin D7 ));
+let C25 being (Element of D7);
+L46: ( meet { C25 } ) = C25 by SETFAM_1:10;
+assume L47: ( meet C24 ) in D7;
+per cases ;
+suppose L48: C24 <> ( {} );
+
+L49: ( meet ( C24 \/ { C25 } ) ) = ( ( meet C24 ) /\ ( meet { C25 } ) ) by L48 , SETFAM_1:9;
+thus L50: thesis by L49 , L46 , L47 , PRE_TOPC:def 1;
+end;
+suppose L51: C24 = ( {} );
+
+thus L52: thesis by L51 , L46;
+end;
+end;
+thus L54: (the topology of C23) c= ( FinMeetCl (the topology of C23) ) by L38;
+L55: S3[ ( {}. D7 ) ] by PRE_TOPC:1 , SETFAM_1:1;
+L56: (for B30 being (Element of ( Fin D7 )) holds S3[ B30 ]) from SETWISEO:sch 4(L55 , L45);
+L57:
+now
+let C26 being (Subset of C23);
+assume L58: C26 in ( FinMeetCl D7 );
+consider C27 being (Subset-Family of C23) such that L59: (C27 c= D7 & C27 is  finite) and L60: C26 = ( Intersect C27 ) by L58 , L28;
+reconsider D8 = C27 as (Subset-Family of C23);
+per cases ;
+suppose L61: D8 <> ( {} );
+
+L62: D8 in ( Fin D7 ) by L59 , FINSUB_1:def 5;
+L63: C26 = ( meet D8 ) by L60 , L61 , SETFAM_1:def 9;
+thus L64: C26 in D7 by L63 , L56 , L62;
+end;
+suppose L65: D8 = ( {} );
+
+reconsider D9 = ( {} ( bool (the carrier of C23) ) ) as (Subset-Family of (the carrier of C23));
+L66: ( Intersect D9 ) = (the carrier of C23) by SETFAM_1:def 9;
+thus L67: C26 in D7 by L66 , L60 , L65 , PRE_TOPC:def 1;
+end;
+end;
+thus L69: thesis by L57 , SUBSET_1:2;
+end;
+theorem
+L70: (for B31 being TopSpace holds (the topology of B31) = ( UniCl (the topology of B31) ))
+proof
+let C28 being TopSpace;
+thus L71: (the topology of C28) c= ( UniCl (the topology of C28) ) by L21;
+let C29 being set;
+assume L72: C29 in ( UniCl (the topology of C28) );
+reconsider D10 = C29 as (Subset of C28) by L72;
+L73: (ex B32 being (Subset-Family of C28) st (B32 c= (the topology of C28) & D10 = ( union B32 ))) by L72 , L1;
+thus L74: thesis by L73 , PRE_TOPC:def 1;
+end;
+theorem
+L75: (for B33 being non  empty TopSpace holds (the topology of B33) = ( UniCl ( FinMeetCl (the topology of B33) ) ))
+proof
+let C30 being non  empty TopSpace;
+L76: (the topology of C30) = ( FinMeetCl (the topology of C30) ) by L44;
+thus L77: thesis by L76 , L70;
+end;
+theorem
+L78: (for B34 being set holds (for B35 being (Subset-Family of B34) holds B34 in ( FinMeetCl B35 )))
+proof
+let C31 being set;
+let C32 being (Subset-Family of C31);
+L79: ( {} ) is (Subset-Family of C31) by XBOOLE_1:2;
+consider C33 being (Subset-Family of C31) such that L80: C33 = ( {} ) by L79;
+L81: (C33 c= C32 & ( Intersect C33 ) = C31) by L80 , SETFAM_1:def 9 , XBOOLE_1:2;
+thus L82: thesis by L81 , L80 , L28;
+end;
+theorem
+L83: (for B36 being set holds (for B37 , B38 being (Subset-Family of B36) holds (B37 c= B38 implies ( UniCl B37 ) c= ( UniCl B38 ))))
+proof
+let C34 being set;
+let C35 , C36 being (Subset-Family of C34);
+assume that
+L84: C35 c= C36;
+let C37 being set;
+assume L85: C37 in ( UniCl C35 );
+reconsider D11 = C37 as (Subset of C34) by L85;
+consider C38 being (Subset-Family of C34) such that L86: C38 c= C35 and L87: D11 = ( union C38 ) by L85 , L1;
+L88: C38 c= C36 by L84 , L86 , XBOOLE_1:1;
+thus L89: thesis by L88 , L87 , L1;
+end;
+theorem
+L90: (for B39 being set holds (for B40 being non  empty (Subset-Family of ( bool B39 )) holds (for B41 being (Subset-Family of B39) holds (B41 = { ( Intersect B42 ) where B42 is (Element of B40) : (not contradiction) } implies ( Intersect B41 ) = ( Intersect ( union B40 ) )))))
+proof
+let C39 being set;
+let C40 being non  empty (Subset-Family of ( bool C39 ));
+let C41 being (Subset-Family of C39);
+assume that
+L91: C41 = { ( Intersect B43 ) where B43 is (Element of C40) : (not contradiction) };
+thus L92:now
+let C42 being set;
+assume L93: C42 in ( Intersect C41 );
+L94: (for B44 being set holds (B44 in ( union C40 ) implies C42 in B44))
+proof
+let C43 being set;
+assume L95: C43 in ( union C40 );
+consider C44 being set such that L96: C43 in C44 and L97: C44 in C40 by L95 , TARSKI:def 4;
+reconsider D12 = C44 as (Subset-Family of C39) by L97;
+reconsider D13 = D12 as (Subset-Family of C39);
+L98: ( Intersect D13 ) in C41 by L91 , L97;
+L99: C42 in ( Intersect D13 ) by L98 , L93 , SETFAM_1:43;
+thus L100: thesis by L99 , L96 , SETFAM_1:43;
+end;
+thus L101: C42 in ( Intersect ( union C40 ) ) by L94 , L93 , SETFAM_1:43;
+end;
+let C45 being set;
+assume L102: C45 in ( Intersect ( union C40 ) );
+L103: (for B45 being set holds (B45 in C41 implies C45 in B45))
+proof
+let C46 being set;
+assume L104: C46 in C41;
+consider C47 being (Element of C40) such that L105: C46 = ( Intersect C47 ) by L104 , L91;
+L106: ( Intersect ( union C40 ) ) c= ( Intersect C47 ) by SETFAM_1:44 , ZFMISC_1:74;
+thus L107: thesis by L106 , L102 , L105;
+end;
+thus L108: thesis by L103 , L102 , SETFAM_1:43;
+end;
+theorem
+L109: (for B46 being set holds (for B47 being (Subset-Family of B46) holds ( FinMeetCl B47 ) = ( FinMeetCl ( FinMeetCl B47 ) )))
+proof
+let C48 being set;
+let C49 being (Subset-Family of C48);
+defpred S4[ set , set ] means (ex B48 being (Subset-Family of C48) st ($1 = ( Intersect B48 ) & B48 = $2 & $2 is  finite));
+thus L110: ( FinMeetCl C49 ) c= ( FinMeetCl ( FinMeetCl C49 ) ) by L38;
+let C50 being set;
+assume L111: C50 in ( FinMeetCl ( FinMeetCl C49 ) );
+reconsider D14 = C50 as (Subset of C48) by L111;
+consider C51 being (Subset-Family of C48) such that L112: C51 c= ( FinMeetCl C49 ) and L113: C51 is  finite and L114: D14 = ( Intersect C51 ) by L111 , L28;
+L115: (for B49 being set holds (B49 in C51 implies (ex B50 being set st (B50 in ( bool C49 ) & S4[ B49 , B50 ]))))
+proof
+let C52 being set;
+assume L116: C52 in C51;
+reconsider D15 = C52 as (Subset of C48) by L116;
+consider C53 being (Subset-Family of C48) such that L117: (C53 c= C49 & C53 is  finite & D15 = ( Intersect C53 )) by L112 , L116 , L28;
+take C53;
+thus L118: thesis by L117;
+end;
+consider C54 being (Function of C51 , ( bool C49 )) such that L119: (for B51 being set holds (B51 in C51 implies S4[ B51 , ( C54 . B51 ) ])) from FUNCT_2:sch 1(L115);
+set D16 = { ( Intersect B52 ) where B52 is (Subset-Family of C48) : B52 in ( rng C54 ) };
+L120: D16 c= C51
+proof
+let C55 being set;
+assume L121: C55 in D16;
+consider C56 being (Subset-Family of C48) such that L122: C55 = ( Intersect C56 ) and L123: C56 in ( rng C54 ) by L121;
+consider C57 being set such that L124: C57 in ( dom C54 ) and L125: C56 = ( C54 . C57 ) by L123 , FUNCT_1:def 3;
+L126: C57 in C51 by L124 , FUNCT_2:def 1;
+L127: S4[ C57 , ( C54 . C57 ) ] by L126 , L119;
+thus L128: thesis by L127 , L122 , L124 , L125 , FUNCT_2:def 1;
+end;
+L129: ( rng C54 ) c= ( bool C49 ) by RELAT_1:def 19;
+L130: ( union ( rng C54 ) ) c= ( union ( bool C49 ) ) by L129 , ZFMISC_1:77;
+L131: ( union ( rng C54 ) ) c= C49 by L130 , ZFMISC_1:81;
+reconsider D17 = ( union ( rng C54 ) ) as (Subset-Family of C48) by L131 , XBOOLE_1:1;
+reconsider D18 = D17 as (Subset-Family of C48);
+L132: C51 c= D16
+proof
+let C58 being set;
+assume L133: C58 in C51;
+consider C59 being (Subset-Family of C48) such that L134: C58 = ( Intersect C59 ) and L135: C59 = ( C54 . C58 ) and L136: ( C54 . C58 ) is  finite by L133 , L119;
+L137: C58 in ( dom C54 ) by L133 , FUNCT_2:def 1;
+L138: C59 in ( rng C54 ) by L137 , L135 , FUNCT_1:def 3;
+thus L139: thesis by L138 , L134;
+end;
+L140: C51 = D16 by L132 , L120 , XBOOLE_0:def 10;
+L141: C50 = ( Intersect D18 )
+proof
+per cases ;
+suppose L142: ( rng C54 ) <> ( {} );
+
+L143: (( rng C54 ) c= ( bool C49 ) & ( bool C49 ) c= ( bool ( bool C48 ) )) by RELAT_1:def 19 , ZFMISC_1:67;
+reconsider D19 = ( rng C54 ) as non  empty (Subset-Family of ( bool C48 )) by L143 , L142 , XBOOLE_1:1;
+reconsider D20 = D19 as non  empty (Subset-Family of ( bool C48 ));
+L144: D16 = { ( Intersect B53 ) where B53 is (Element of D20) : (not contradiction) }
+proof
+thus L145:now
+let C60 being set;
+assume L146: C60 in D16;
+L147: (ex B54 being (Subset-Family of C48) st (C60 = ( Intersect B54 ) & B54 in ( rng C54 ))) by L146;
+thus L148: C60 in { ( Intersect B55 ) where B55 is (Element of D20) : (not contradiction) } by L147;
+end;
+let C61 being set;
+assume L149: C61 in { ( Intersect B56 ) where B56 is (Element of D20) : (not contradiction) };
+L150: (ex B57 being (Element of D20) st C61 = ( Intersect B57 )) by L149;
+thus L151: thesis by L150;
+end;
+thus L152: thesis by L144 , L114 , L140 , L90;
+end;
+suppose L153: ( rng C54 ) = ( {} );
+
+L154: C51 = ( dom C54 ) by FUNCT_2:def 1;
+thus L155: thesis by L154 , L114 , L153 , RELAT_1:38 , RELAT_1:41 , ZFMISC_1:2;
+end;
+end;
+L157: (for B58 being set holds (B58 in ( rng C54 ) implies B58 is  finite))
+proof
+let C62 being set;
+assume L158: C62 in ( rng C54 );
+consider C63 being set such that L159: C63 in ( dom C54 ) and L160: C62 = ( C54 . C63 ) by L158 , FUNCT_1:def 3;
+L161: C63 in C51 by L159 , FUNCT_2:def 1;
+reconsider D21 = C63 as (Subset of C48) by L161;
+reconsider D22 = ( C54 . D21 ) as (Subset-Family of C48);
+L162: D21 in C51 by L159 , FUNCT_2:def 1;
+L163: S4[ D21 , D22 ] by L162 , L119;
+thus L164: thesis by L163 , L160;
+end;
+L165: ( union ( rng C54 ) ) is  finite by L157 , L113 , FINSET_1:7;
+thus L166: thesis by L165 , L131 , L141 , L28;
+end;
+theorem
+L167: (for B59 being set holds (for B60 being (Subset-Family of B59) holds (for B61 , B62 being set holds ((B61 in ( FinMeetCl B60 ) & B62 in ( FinMeetCl B60 )) implies ( B61 /\ B62 ) in ( FinMeetCl B60 )))))
+proof
+let C64 being set;
+let C65 being (Subset-Family of C64);
+let C66 , C67 being set;
+assume L168: (C66 in ( FinMeetCl C65 ) & C67 in ( FinMeetCl C65 ));
+reconsider D23 = { C66 , C67 } as (Subset-Family of C64) by L168 , ZFMISC_1:32;
+reconsider D24 = D23 as (Subset-Family of C64);
+L169: ( C66 /\ C67 ) = ( meet D24 ) by SETFAM_1:11;
+L170: ( C66 /\ C67 ) = ( Intersect D24 ) by L169 , SETFAM_1:def 9;
+L171: D24 c= ( FinMeetCl C65 ) by L168 , ZFMISC_1:32;
+L172: ( Intersect D24 ) in ( FinMeetCl ( FinMeetCl C65 ) ) by L171 , L28;
+thus L173: thesis by L172 , L170 , L109;
+end;
+theorem
+L174: (for B63 being set holds (for B64 being (Subset-Family of B63) holds (for B65 , B66 being set holds ((B65 c= ( FinMeetCl B64 ) & B66 c= ( FinMeetCl B64 )) implies ( INTERSECTION (B65 , B66) ) c= ( FinMeetCl B64 )))))
+proof
+let C68 being set;
+let C69 being (Subset-Family of C68);
+let C70 , C71 being set;
+assume that
+L175: (C70 c= ( FinMeetCl C69 ) & C71 c= ( FinMeetCl C69 ));
+let C72 being set;
+assume L176: C72 in ( INTERSECTION (C70 , C71) );
+consider C73 , C74 being set such that L177: (C73 in C70 & C74 in C71) and L178: C72 = ( C73 /\ C74 ) by L176 , SETFAM_1:def 5;
+L179: (C73 in ( FinMeetCl C69 ) & C74 in ( FinMeetCl C69 )) by L175 , L177;
+reconsider D25 = { C73 , C74 } as (Subset-Family of C68) by L179 , ZFMISC_1:32;
+reconsider D26 = D25 as (Subset-Family of C68);
+L180: ( C73 /\ C74 ) = ( meet D26 ) by SETFAM_1:11;
+L181: ( C73 /\ C74 ) = ( Intersect D26 ) by L180 , SETFAM_1:def 9;
+L182: D26 c= ( FinMeetCl C69 ) by L175 , L177 , ZFMISC_1:32;
+L183: ( Intersect D26 ) in ( FinMeetCl ( FinMeetCl C69 ) ) by L182 , L28;
+thus L184: thesis by L183 , L178 , L181 , L109;
+end;
+theorem
+L185: (for B67 being set holds (for B68 , B69 being (Subset-Family of B67) holds (B68 c= B69 implies ( FinMeetCl B68 ) c= ( FinMeetCl B69 ))))
+proof
+let C75 being set;
+let C76 , C77 being (Subset-Family of C75);
+assume that
+L186: C76 c= C77;
+let C78 being set;
+assume L187: C78 in ( FinMeetCl C76 );
+reconsider D27 = C78 as (Subset of C75) by L187;
+consider C79 being (Subset-Family of C75) such that L188: C79 c= C76 and L189: (C79 is  finite & D27 = ( Intersect C79 )) by L187 , L28;
+L190: C79 c= C77 by L186 , L188 , XBOOLE_1:1;
+thus L191: thesis by L190 , L189 , L28;
+end;
+registration
+let C80 being set;
+let C81 being (Subset-Family of C80);
+cluster ( FinMeetCl C81 ) -> non  empty;
+coherence by L78;
+end;
+theorem
+L193: (for B70 being non  empty set holds (for B71 being (Subset-Family of B70) holds TopStruct (# B70 , ( UniCl ( FinMeetCl B71 ) ) #) is  TopSpace-like))
+proof
+let C82 being non  empty set;
+let C83 being (Subset-Family of C82);
+set D28 = TopStruct (# C82 , ( UniCl ( FinMeetCl C83 ) ) #);
+L194: ( [#] D28 ) in ( FinMeetCl C83 ) by L78;
+L195:
+now
+reconsider D29 = { ( [#] D28 ) } as (Subset-Family of C82) by ZFMISC_1:68;
+reconsider D30 = D29 as (Subset-Family of C82);
+take D31 = D30;
+thus L196: D31 c= ( FinMeetCl C83 ) by L194 , ZFMISC_1:31;
+thus L197: ( [#] D28 ) = ( union D31 ) by ZFMISC_1:25;
+end;
+thus L198: (the carrier of D28) in (the topology of D28) by L195 , L1;
+thus L199: (for B72 being (Subset-Family of D28) holds (B72 c= (the topology of D28) implies ( union B72 ) in (the topology of D28)))
+proof
+let C84 being (Subset-Family of D28);
+assume that
+L200: C84 c= (the topology of D28);
+defpred S5[ set ] means (ex B73 being (Subset of D28) st (B73 in C84 & B73 = ( union $1 )));
+consider C85 being (Subset-Family of ( FinMeetCl C83 )) such that L201: (for B74 being (Subset of ( FinMeetCl C83 )) holds (B74 in C85 iff S5[ B74 ])) from SUBSET_1:sch 3;
+L202: C84 = { ( union B75 ) where B75 is (Subset of ( FinMeetCl C83 )) : B75 in C85 }
+proof
+set D32 = { ( union B76 ) where B76 is (Subset of ( FinMeetCl C83 )) : B76 in C85 };
+thus L203:now
+let C86 being set;
+assume L204: C86 in C84;
+reconsider D33 = C86 as (Subset of C82) by L204;
+consider C87 being (Subset-Family of C82) such that L205: C87 c= ( FinMeetCl C83 ) and L206: D33 = ( union C87 ) by L200 , L204 , L1;
+L207: C87 in C85 by L201 , L204 , L205 , L206;
+thus L208: C86 in D32 by L207 , L206;
+end;
+let C88 being set;
+assume L209: C88 in D32;
+consider C89 being (Subset of ( FinMeetCl C83 )) such that L210: C88 = ( union C89 ) and L211: C89 in C85 by L209;
+L212: (ex B77 being (Subset of D28) st (B77 in C84 & B77 = ( union C89 ))) by L201 , L211;
+thus L213: thesis by L212 , L210;
+end;
+L214: (( union ( union C85 ) ) = ( union { ( union B78 ) where B78 is (Subset of ( FinMeetCl C83 )) : B78 in C85 } ) & ( union C85 ) c= ( bool C82 )) by EQREL_1:54 , XBOOLE_1:1;
+thus L215: thesis by L214 , L202 , L1;
+end;
+
+let C90 , C91 being (Subset of D28);
+assume L216: C90 in (the topology of D28);
+consider C92 being (Subset-Family of C82) such that L217: C92 c= ( FinMeetCl C83 ) and L218: C90 = ( union C92 ) by L216 , L1;
+assume L219: C91 in (the topology of D28);
+consider C93 being (Subset-Family of C82) such that L220: C93 c= ( FinMeetCl C83 ) and L221: C91 = ( union C93 ) by L219 , L1;
+L222: ( union ( INTERSECTION (C92 , C93) ) ) = ( C90 /\ C91 ) by L218 , L221 , SETFAM_1:28;
+L223: ( INTERSECTION (C92 , C93) ) c= ( FinMeetCl C83 ) by L217 , L220 , L174;
+L224: ( INTERSECTION (C92 , C93) ) is (Subset-Family of C82) by L223 , XBOOLE_1:1;
+thus L225: thesis by L224 , L223 , L222 , L1;
+end;
+definition
+let C94 being TopStruct;
+let C95 being (Subset-Family of C94);
+attr C95 is  quasi_prebasis
+means
+:L226: (ex B79 being (Basis of C94) st B79 c= ( FinMeetCl C95 ));
+end;
+registration
+let C96 being TopStruct;
+cluster (the topology of C96) ->  quasi_prebasis;
+coherence
+proof
+take (the topology of C96);
+thus L228: thesis by L38;
+end;
+cluster  ->  quasi_prebasis for (Basis of C96);
+coherence
+proof
+let C97 being (Basis of C96);
+take C97;
+thus L229: thesis by L38;
+end;
+cluster  open  quasi_prebasis for (Subset-Family of C96);
+existence
+proof
+take (the topology of C96);
+thus L230: thesis;
+end;
+end;
+definition
+let C98 being TopStruct;
+mode prebasis of C98
+ is  open  quasi_prebasis (Subset-Family of C98);
+end;
+theorem
+L233: (for B80 being non  empty set holds (for B81 being (Subset-Family of B80) holds B81 is (Basis of TopStruct (# B80 , ( UniCl B81 ) #))))
+proof
+let C99 being non  empty set;
+let C100 being (Subset-Family of C99);
+L234: C100 c= ( UniCl C100 ) by L21;
+thus L235: thesis by L234 , L11 , TOPS_2:64;
+end;
+theorem
+L236: (for B82 , B83 being  strict non  empty TopSpace holds (for B84 being (prebasis of B82) holds (((the carrier of B82) = (the carrier of B83) & B84 is (prebasis of B83)) implies B82 = B83)))
+proof
+let C101 , C102 being  strict non  empty TopSpace;
+let C103 being (prebasis of C101);
+assume that
+L237: (the carrier of C101) = (the carrier of C102)
+and
+L238: C103 is (prebasis of C102);
+reconsider D34 = C103 as (prebasis of C102) by L238;
+consider C104 being (Basis of C101) such that L239: C104 c= ( FinMeetCl C103 ) by L226;
+L240: C103 c= (the topology of C101) by TOPS_2:64;
+L241: ( FinMeetCl C103 ) c= ( FinMeetCl (the topology of C101) ) by L240 , L185;
+L242: ( UniCl ( FinMeetCl C103 ) ) c= ( UniCl ( FinMeetCl (the topology of C101) ) ) by L241 , L83;
+L243: D34 c= (the topology of C102) by TOPS_2:64;
+L244: ( FinMeetCl D34 ) c= ( FinMeetCl (the topology of C102) ) by L243 , L185;
+L245: ( UniCl ( FinMeetCl D34 ) ) c= ( UniCl ( FinMeetCl (the topology of C102) ) ) by L244 , L83;
+L246: (the topology of C101) c= ( UniCl C104 ) by L11;
+L247: ( UniCl C104 ) c= ( UniCl ( FinMeetCl C103 ) ) by L239 , L83;
+L248: (the topology of C101) c= ( UniCl ( FinMeetCl C103 ) ) by L247 , L246 , XBOOLE_1:1;
+consider C105 being (Basis of C102) such that L249: C105 c= ( FinMeetCl D34 ) by L226;
+L250: (the topology of C102) c= ( UniCl C105 ) by L11;
+L251: ( UniCl C105 ) c= ( UniCl ( FinMeetCl D34 ) ) by L249 , L83;
+L252: (the topology of C102) c= ( UniCl ( FinMeetCl D34 ) ) by L251 , L250 , XBOOLE_1:1;
+L253: (the topology of C102) = ( UniCl ( FinMeetCl (the topology of C102) ) ) by L75;
+L254: ( UniCl ( FinMeetCl D34 ) ) = (the topology of C102) by L253 , L252 , L245 , XBOOLE_0:def 10;
+L255: (the topology of C101) = ( UniCl ( FinMeetCl (the topology of C101) ) ) by L75;
+thus L256: thesis by L255 , L237 , L248 , L254 , L242 , XBOOLE_0:def 10;
+end;
+theorem
+L257: (for B85 being non  empty set holds (for B86 being (Subset-Family of B85) holds B86 is (prebasis of TopStruct (# B85 , ( UniCl ( FinMeetCl B86 ) ) #))))
+proof
+let C106 being non  empty set;
+let C107 being (Subset-Family of C106);
+set D35 = TopStruct (# C106 , ( UniCl ( FinMeetCl C107 ) ) #);
+reconsider D36 = C107 as (Subset-Family of D35);
+L258:
+now
+L259: (D36 c= ( FinMeetCl C107 ) & ( FinMeetCl C107 ) c= (the topology of D35)) by L21 , L38;
+L260: D36 c= (the topology of D35) by L259 , XBOOLE_1:1;
+thus L261: D36 is  open by L260 , TOPS_2:64;
+thus L262: D36 is  quasi_prebasis
+proof
+reconsider D37 = ( FinMeetCl D36 ) as (Basis of D35) by L233;
+take D37;
+thus L263: thesis;
+end;
+
+end;
+thus L263: thesis by L258;
+end;
+definition
+func the_Cantor_set ->  strict non  empty TopSpace means 
+((the carrier of it) = ( product ( ( NAT ) --> { ( 0 ) , 1 } ) ) & (ex B87 being (prebasis of it) st (for B88 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B88 in B87 iff (ex B89 , B90 being Nat st (for B91 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B91 in B88 iff ( B91 . B89 ) = B90)))))));
+existence
+proof
+defpred S6[ set ] means (ex B92 , B93 being Nat st (for B94 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B94 in $1 iff ( B94 . B92 ) = B93)));
+consider C108 being (Subset-Family of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) such that L264: (for B95 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B95 in C108 iff S6[ B95 ])) from SUBSET_1:sch 3;
+reconsider D38 = TopStruct (# ( product ( ( NAT ) --> { ( 0 ) , 1 } ) ) , ( UniCl ( FinMeetCl C108 ) ) #) as  strict non  empty TopSpace by L193;
+take D38;
+thus L265: (the carrier of D38) = ( product ( ( NAT ) --> { ( 0 ) , 1 } ) );
+reconsider D39 = C108 as (prebasis of D38) by L257;
+take D39;
+thus L266: thesis by L264;
+end;
+uniqueness
+proof
+let C109 , C110 being  strict non  empty TopSpace;
+assume that
+L267: (the carrier of C109) = ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )
+and
+L268: (ex B96 being (prebasis of C109) st (for B97 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B97 in B96 iff (ex B98 , B99 being Nat st (for B100 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B100 in B97 iff ( B100 . B98 ) = B99))))))
+and
+L269: (the carrier of C110) = ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )
+and
+L270: (ex B101 being (prebasis of C110) st (for B102 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B102 in B101 iff (ex B103 , B104 being Nat st (for B105 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B105 in B102 iff ( B105 . B103 ) = B104))))));
+consider C111 being (prebasis of C109) such that L271: (for B106 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B106 in C111 iff (ex B107 , B108 being Nat st (for B109 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B109 in B106 iff ( B109 . B107 ) = B108))))) by L268;
+consider C112 being (prebasis of C110) such that L272: (for B110 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B110 in C112 iff (ex B111 , B112 being Nat st (for B113 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B113 in B110 iff ( B113 . B111 ) = B112))))) by L270;
+L273:
+now
+let C113 being (Subset of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) ));
+L274: (C113 in C111 iff (ex B114 , B115 being Nat st (for B116 being (Element of ( product ( ( NAT ) --> { ( 0 ) , 1 } ) )) holds (B116 in C113 iff ( B116 . B114 ) = B115)))) by L271;
+thus L275: (C113 in C111 iff C113 in C112) by L274 , L272;
+end;
+L276: C111 = C112 by L273 , L267 , L269 , SUBSET_1:3;
+thus L277: thesis by L276 , L267 , L269 , L236;
+end;
+end;

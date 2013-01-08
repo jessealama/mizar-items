@@ -1,0 +1,1142 @@
+:: Relocatability
+::  by Yasushi Tanaka
+::
+:: Received June 16, 1994
+:: Copyright (c) 1994-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies SUBSET_1, NUMBERS, AMI_1, AMI_3, AMISTD_2, ARYTM_3, GRAPHSP,
+      CARD_1, RELAT_1, FUNCT_1, TARSKI, FUNCT_4, XBOOLE_0, FSM_1, CIRCUIT2,
+      EXTPRO_1, ARYTM_1, INT_1, XXREAL_0, STRUCT_0, ORDINAL1, RELOC, FINSET_1,
+      FINSEQ_1, NAT_1, AMISTD_5, COMPOS_1;
+ notations TARSKI, XBOOLE_0,
+      XTUPLE_0, SUBSET_1, FINSET_1, NUMBERS, XCMPLX_0, INT_1,
+      ORDINAL1, NAT_1, VALUED_1, RELAT_1, FUNCT_1, PARTFUN1, FUNCT_4, PBOOLE,
+      FINSEQ_1, NAT_D, STRUCT_0, MEMSTR_0, COMPOS_0, COMPOS_1, EXTPRO_1, AMI_3,
+      XXREAL_0, AMISTD_2, AMISTD_5;
+ constructors DOMAIN_1, XXREAL_0, AMI_3, NAT_D, PRE_POLY, AMISTD_2,
+      VALUED_1, AMI_2, AMISTD_1, AMISTD_5, PBOOLE, MEMSTR_0, RELSET_1,
+      XTUPLE_0;
+ registrations XBOOLE_0, SETFAM_1, FUNCT_1, ORDINAL1, RELSET_1, NUMBERS,
+      XREAL_0, INT_1, CARD_3, AMI_3, RELAT_1, FUNCT_4, GRFUNC_1, FUNCT_2,
+      AMI_6, VALUED_0, AMISTD_2, COMPOS_1, EXTPRO_1, NAT_1, FINSEQ_1, AMISTD_5,
+      AMI_5, PBOOLE, MEMSTR_0, COMPOS_0, XTUPLE_0;
+ requirements NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions FUNCOP_1, COMPOS_1, EXTPRO_1, RELAT_1, TARSKI, AMI_3, AMISTD_2,
+      FUNCT_1, AMISTD_5, MEMSTR_0, COMPOS_0, XTUPLE_0;
+ theorems AMI_3, GRFUNC_1, NAT_1, TARSKI, FUNCT_4, FUNCT_1, AMI_5, RELAT_1,
+      XBOOLE_1, PARTFUN1, VALUED_1, RECDEF_2, FINSEQ_1, COMPOS_1, EXTPRO_1,
+      ORDINAL1, AMISTD_2, AMISTD_5, STRUCT_0, MEMSTR_0, AMI_2, COMPOS_0;
+ schemes NAT_1;
+
+begin
+registration
+let C1 , C2 being Data-Location;
+cluster ( C1 := C2 ) ->  ins-loc-free;
+coherence;
+cluster ( AddTo (C1 , C2) ) ->  ins-loc-free;
+coherence;
+cluster ( SubFrom (C1 , C2) ) ->  ins-loc-free;
+coherence;
+cluster ( MultBy (C1 , C2) ) ->  ins-loc-free;
+coherence;
+cluster ( Divide (C1 , C2) ) ->  ins-loc-free;
+coherence;
+end;
+theorem
+L2: (for B1 , B2 being Nat holds ( IncAddr (( SCM-goto B2 ) , B1) ) = ( SCM-goto ( B2 + B1 ) ))
+proof
+let C3 , C4 being Nat;
+L3: ( InsCode ( IncAddr (( SCM-goto C4 ) , C3) ) ) = ( InsCode ( SCM-goto C4 ) ) by COMPOS_0:def 9
+.= 6 by RECDEF_2:def 1
+.= ( InsCode ( SCM-goto ( C4 + C3 ) ) ) by RECDEF_2:def 1;
+L4: ( AddressPart ( IncAddr (( SCM-goto C4 ) , C3) ) ) = ( AddressPart ( SCM-goto C4 ) ) by COMPOS_0:def 9
+.= ( {} ) by RECDEF_2:def 3
+.= ( AddressPart ( SCM-goto ( C4 + C3 ) ) ) by RECDEF_2:def 3;
+L5: ( JumpPart ( IncAddr (( SCM-goto C4 ) , C3) ) ) = ( C3 + ( JumpPart ( SCM-goto C4 ) ) ) by COMPOS_0:def 9;
+L6: ( JumpPart ( IncAddr (( SCM-goto C4 ) , C3) ) ) = ( JumpPart ( SCM-goto ( C4 + C3 ) ) )
+proof
+thus L7: ( dom ( JumpPart ( IncAddr (( SCM-goto C4 ) , C3) ) ) ) = ( dom ( JumpPart ( SCM-goto ( C4 + C3 ) ) ) ) by L3 , COMPOS_0:def 5;
+L8: ( JumpPart ( SCM-goto C4 ) ) = <* C4 *> by RECDEF_2:def 2;
+L9: ( JumpPart ( SCM-goto ( C4 + C3 ) ) ) = <* ( C4 + C3 ) *> by RECDEF_2:def 2;
+let C5 being set;
+assume L10: C5 in ( dom ( JumpPart ( IncAddr (( SCM-goto C4 ) , C3) ) ) );
+L11: ( dom <* ( C4 + C3 ) *> ) = { 1 } by FINSEQ_1:2 , FINSEQ_1:38;
+L12: C5 = 1 by L11 , L10 , L7 , L9 , TARSKI:def 1;
+thus L13: ( ( JumpPart ( IncAddr (( SCM-goto C4 ) , C3) ) ) . C5 ) = ( C3 + ( ( JumpPart ( SCM-goto C4 ) ) . C5 ) ) by L5 , L10 , VALUED_1:def 2
+.= ( C4 + C3 ) by L8 , L12 , FINSEQ_1:40
+.= ( ( JumpPart ( SCM-goto ( C4 + C3 ) ) ) . C5 ) by L9 , L12 , FINSEQ_1:40;
+end;
+thus L14: thesis by L6 , L3 , L4 , COMPOS_0:1;
+end;
+theorem
+L15: (for B3 , B4 being Nat holds (for B5 being Data-Location holds ( IncAddr (( B5 =0_goto B4 ) , B3) ) = ( B5 =0_goto ( B4 + B3 ) )))
+proof
+let C6 , C7 being Nat;
+let C8 being Data-Location;
+L16: ( InsCode ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) = ( InsCode ( C8 =0_goto C7 ) ) by COMPOS_0:def 9
+.= 7 by RECDEF_2:def 1
+.= ( InsCode ( C8 =0_goto ( C7 + C6 ) ) ) by RECDEF_2:def 1;
+L17: ( AddressPart ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) = ( AddressPart ( C8 =0_goto C7 ) ) by COMPOS_0:def 9
+.= <* C8 *> by RECDEF_2:def 3
+.= ( AddressPart ( C8 =0_goto ( C7 + C6 ) ) ) by RECDEF_2:def 3;
+L18: ( JumpPart ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) = ( C6 + ( JumpPart ( C8 =0_goto C7 ) ) ) by COMPOS_0:def 9;
+L19: ( JumpPart ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) = ( JumpPart ( C8 =0_goto ( C7 + C6 ) ) )
+proof
+thus L20: ( dom ( JumpPart ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) ) = ( dom ( JumpPart ( C8 =0_goto ( C7 + C6 ) ) ) ) by L16 , COMPOS_0:def 5;
+L21: ( JumpPart ( C8 =0_goto C7 ) ) = <* C7 *> by RECDEF_2:def 2;
+L22: ( JumpPart ( C8 =0_goto ( C7 + C6 ) ) ) = <* ( C7 + C6 ) *> by RECDEF_2:def 2;
+let C9 being set;
+assume L23: C9 in ( dom ( JumpPart ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) );
+L24: ( dom <* ( C7 + C6 ) *> ) = { 1 } by FINSEQ_1:2 , FINSEQ_1:38;
+L25: C9 = 1 by L24 , L23 , L20 , L22 , TARSKI:def 1;
+thus L26: ( ( JumpPart ( IncAddr (( C8 =0_goto C7 ) , C6) ) ) . C9 ) = ( C6 + ( ( JumpPart ( C8 =0_goto C7 ) ) . C9 ) ) by L18 , L23 , VALUED_1:def 2
+.= ( C7 + C6 ) by L21 , L25 , FINSEQ_1:40
+.= ( ( JumpPart ( C8 =0_goto ( C7 + C6 ) ) ) . C9 ) by L22 , L25 , FINSEQ_1:40;
+end;
+thus L27: thesis by L19 , L16 , L17 , COMPOS_0:1;
+end;
+theorem
+L28: (for B6 , B7 being Nat holds (for B8 being Data-Location holds ( IncAddr (( B8 >0_goto B7 ) , B6) ) = ( B8 >0_goto ( B7 + B6 ) )))
+proof
+let C10 , C11 being Nat;
+let C12 being Data-Location;
+L29: ( InsCode ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) = ( InsCode ( C12 >0_goto C11 ) ) by COMPOS_0:def 9
+.= 8 by RECDEF_2:def 1
+.= ( InsCode ( C12 >0_goto ( C11 + C10 ) ) ) by RECDEF_2:def 1;
+L30: ( AddressPart ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) = ( AddressPart ( C12 >0_goto C11 ) ) by COMPOS_0:def 9
+.= <* C12 *> by RECDEF_2:def 3
+.= ( AddressPart ( C12 >0_goto ( C11 + C10 ) ) ) by RECDEF_2:def 3;
+L31: ( JumpPart ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) = ( C10 + ( JumpPart ( C12 >0_goto C11 ) ) ) by COMPOS_0:def 9;
+L32: ( JumpPart ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) = ( JumpPart ( C12 >0_goto ( C11 + C10 ) ) )
+proof
+thus L33: ( dom ( JumpPart ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) ) = ( dom ( JumpPart ( C12 >0_goto ( C11 + C10 ) ) ) ) by L29 , COMPOS_0:def 5;
+L34: ( JumpPart ( C12 >0_goto C11 ) ) = <* C11 *> by RECDEF_2:def 2;
+L35: ( JumpPart ( C12 >0_goto ( C11 + C10 ) ) ) = <* ( C11 + C10 ) *> by RECDEF_2:def 2;
+let C13 being set;
+assume L36: C13 in ( dom ( JumpPart ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) );
+L37: ( dom <* ( C11 + C10 ) *> ) = { 1 } by FINSEQ_1:2 , FINSEQ_1:38;
+L38: C13 = 1 by L37 , L36 , L33 , L35 , TARSKI:def 1;
+thus L39: ( ( JumpPart ( IncAddr (( C12 >0_goto C11 ) , C10) ) ) . C13 ) = ( C10 + ( ( JumpPart ( C12 >0_goto C11 ) ) . C13 ) ) by L31 , L36 , VALUED_1:def 2
+.= ( C11 + C10 ) by L34 , L38 , FINSEQ_1:40
+.= ( ( JumpPart ( C12 >0_goto ( C11 + C10 ) ) ) . C13 ) by L35 , L38 , FINSEQ_1:40;
+end;
+thus L40: thesis by L32 , L29 , L30 , COMPOS_0:1;
+end;
+theorem
+L41: (for B9 being (Instruction of ( SCM )) holds (for B10 being (Element of ( NAT )) holds ((( InsCode B9 ) = ( 0 ) or ( InsCode B9 ) = 1 or ( InsCode B9 ) = 2 or ( InsCode B9 ) = 3 or ( InsCode B9 ) = 4 or ( InsCode B9 ) = 5) implies ( IncAddr (B9 , B10) ) = B9)))
+proof
+let C14 being (Instruction of ( SCM ));
+let C15 being (Element of ( NAT ));
+assume that
+L42: (( InsCode C14 ) = ( 0 ) or ( InsCode C14 ) = 1 or ( InsCode C14 ) = 2 or ( InsCode C14 ) = 3 or ( InsCode C14 ) = 4 or ( InsCode C14 ) = 5);
+per cases  by L42;
+suppose L43: ( InsCode C14 ) = ( 0 );
+
+L44: C14 = ( halt ( SCM ) ) by L43 , AMI_5:7;
+thus L45: thesis by L44 , COMPOS_0:4;
+end;
+suppose L46: ( InsCode C14 ) = 1;
+
+L47: (ex B11 , B12 being Data-Location st C14 = ( B11 := B12 )) by L46 , AMI_5:8;
+thus L48: ( IncAddr (C14 , C15) ) = C14 by L47 , COMPOS_0:4;
+end;
+suppose L49: ( InsCode C14 ) = 2;
+
+L50: (ex B13 , B14 being Data-Location st C14 = ( AddTo (B13 , B14) )) by L49 , AMI_5:9;
+thus L51: ( IncAddr (C14 , C15) ) = C14 by L50 , COMPOS_0:4;
+end;
+suppose L52: ( InsCode C14 ) = 3;
+
+L53: (ex B15 , B16 being Data-Location st C14 = ( SubFrom (B15 , B16) )) by L52 , AMI_5:10;
+thus L54: ( IncAddr (C14 , C15) ) = C14 by L53 , COMPOS_0:4;
+end;
+suppose L55: ( InsCode C14 ) = 4;
+
+L56: (ex B17 , B18 being Data-Location st C14 = ( MultBy (B17 , B18) )) by L55 , AMI_5:11;
+thus L57: ( IncAddr (C14 , C15) ) = C14 by L56 , COMPOS_0:4;
+end;
+suppose L58: ( InsCode C14 ) = 5;
+
+L59: (ex B19 , B20 being Data-Location st C14 = ( Divide (B19 , B20) )) by L58 , AMI_5:12;
+thus L60: ( IncAddr (C14 , C15) ) = C14 by L59 , COMPOS_0:4;
+end;
+end;
+theorem
+L62: (for B21 , B22 being (Instruction of ( SCM )) holds (for B23 being (Element of ( NAT )) holds (((( InsCode B22 ) = ( 0 ) or ( InsCode B22 ) = 1 or ( InsCode B22 ) = 2 or ( InsCode B22 ) = 3 or ( InsCode B22 ) = 4 or ( InsCode B22 ) = 5) & ( IncAddr (B21 , B23) ) = B22) implies B21 = B22)))
+proof
+let C16 , C17 being (Instruction of ( SCM ));
+let C18 being (Element of ( NAT ));
+assume that
+L63: (( InsCode C17 ) = ( 0 ) or ( InsCode C17 ) = 1 or ( InsCode C17 ) = 2 or ( InsCode C17 ) = 3 or ( InsCode C17 ) = 4 or ( InsCode C17 ) = 5)
+and
+L64: ( IncAddr (C16 , C18) ) = C17;
+L65: ( IncAddr (C17 , C18) ) = C17 by L63 , L41;
+thus L66: thesis by L65 , L64 , COMPOS_0:6;
+end;
+registration
+cluster ( SCM ) ->  relocable;
+coherence
+proof
+let C19 being (Instruction of ( SCM ));
+let C20 , C21 being Nat;
+reconsider D1 = C21 as (Element of ( NAT )) by ORDINAL1:def 12;
+let C22 being (State of ( SCM ));
+L67: ( IC ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) ) = ( ( IC ( Exec (( IncAddr (C19 , C20) ) , C22) ) ) + D1 ) by MEMSTR_0:53
+.= ( IC ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) ) by AMISTD_2:def 3;
+per cases  by AMI_5:5 , NAT_1:32;
+suppose L68: ( InsCode C19 ) = ( 0 );
+
+L69: C19 = ( halt ( SCM ) ) by L68 , AMI_5:7;
+L70: ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) = ( Exec (C19 , ( IncIC (C22 , D1) )) ) by L69 , COMPOS_0:4
+.= ( IncIC (C22 , D1) ) by L69 , EXTPRO_1:def 3
+.= ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) by L69 , EXTPRO_1:def 3;
+thus L71: thesis by L70;
+end;
+suppose L72: ( InsCode C19 ) = 1;
+
+consider C23 , C24 being Data-Location such that L73: C19 = ( C23 := C24 ) by L72 , AMI_5:8;
+L74:
+now
+let C25 being Data-Location;
+per cases ;
+suppose L75: C23 = C25;
+
+thus L76: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C25 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C25 ) by L73 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C24 ) by L73 , L75 , AMI_3:2
+.= ( C22 . C24 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C25 ) by L73 , L75 , AMI_3:2
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C25 ) by L73 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C25 ) by AMI_5:16;
+end;
+suppose L77: C23 <> C25;
+
+thus L78: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C25 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C25 ) by L73 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C25 ) by L73 , L77 , AMI_3:2
+.= ( C22 . C25 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C25 ) by L73 , L77 , AMI_3:2
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C25 ) by L73 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C25 ) by AMI_5:16;
+end;
+end;
+thus L80: thesis by L74 , L67 , AMI_5:25;
+end;
+suppose L81: ( InsCode C19 ) = 2;
+
+consider C26 , C27 being Data-Location such that L82: C19 = ( AddTo (C26 , C27) ) by L81 , AMI_5:9;
+L83:
+now
+let C28 being Data-Location;
+per cases ;
+suppose L84: C26 = C28;
+
+thus L85: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C28 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C28 ) by L82 , COMPOS_0:4
+.= ( ( ( IncIC (C22 , D1) ) . C26 ) + ( ( IncIC (C22 , D1) ) . C27 ) ) by L84 , L82 , AMI_3:3
+.= ( ( C22 . C26 ) + ( ( IncIC (C22 , D1) ) . C27 ) ) by AMI_5:16
+.= ( ( C22 . C26 ) + ( C22 . C27 ) ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C28 ) by L82 , L84 , AMI_3:3
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C28 ) by L82 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C28 ) by AMI_5:16;
+end;
+suppose L86: C26 <> C28;
+
+thus L87: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C28 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C28 ) by L82 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C28 ) by L82 , L86 , AMI_3:3
+.= ( C22 . C28 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C28 ) by L82 , L86 , AMI_3:3
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C28 ) by L82 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C28 ) by AMI_5:16;
+end;
+end;
+thus L89: thesis by L83 , L67 , AMI_5:25;
+end;
+suppose L90: ( InsCode C19 ) = 3;
+
+consider C29 , C30 being Data-Location such that L91: C19 = ( SubFrom (C29 , C30) ) by L90 , AMI_5:10;
+L92:
+now
+let C31 being Data-Location;
+per cases ;
+suppose L93: C29 = C31;
+
+thus L94: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C31 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C31 ) by L91 , COMPOS_0:4
+.= ( ( ( IncIC (C22 , D1) ) . C29 ) - ( ( IncIC (C22 , D1) ) . C30 ) ) by L93 , L91 , AMI_3:4
+.= ( ( C22 . C29 ) - ( ( IncIC (C22 , D1) ) . C30 ) ) by AMI_5:16
+.= ( ( C22 . C29 ) - ( C22 . C30 ) ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C31 ) by L91 , L93 , AMI_3:4
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C31 ) by L91 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C31 ) by AMI_5:16;
+end;
+suppose L95: C29 <> C31;
+
+thus L96: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C31 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C31 ) by L91 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C31 ) by L91 , L95 , AMI_3:4
+.= ( C22 . C31 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C31 ) by L91 , L95 , AMI_3:4
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C31 ) by L91 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C31 ) by AMI_5:16;
+end;
+end;
+thus L98: thesis by L92 , L67 , AMI_5:25;
+end;
+suppose L99: ( InsCode C19 ) = 4;
+
+consider C32 , C33 being Data-Location such that L100: C19 = ( MultBy (C32 , C33) ) by L99 , AMI_5:11;
+L101:
+now
+let C34 being Data-Location;
+per cases ;
+suppose L102: C32 = C34;
+
+thus L103: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C34 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C34 ) by L100 , COMPOS_0:4
+.= ( ( ( IncIC (C22 , D1) ) . C32 ) * ( ( IncIC (C22 , D1) ) . C33 ) ) by L102 , L100 , AMI_3:5
+.= ( ( C22 . C32 ) * ( ( IncIC (C22 , D1) ) . C33 ) ) by AMI_5:16
+.= ( ( C22 . C32 ) * ( C22 . C33 ) ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C34 ) by L100 , L102 , AMI_3:5
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C34 ) by L100 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C34 ) by AMI_5:16;
+end;
+suppose L104: C32 <> C34;
+
+thus L105: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C34 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C34 ) by L100 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C34 ) by L100 , L104 , AMI_3:5
+.= ( C22 . C34 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C34 ) by L100 , L104 , AMI_3:5
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C34 ) by L100 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C34 ) by AMI_5:16;
+end;
+end;
+thus L107: thesis by L101 , L67 , AMI_5:25;
+end;
+suppose L108: ( InsCode C19 ) = 5;
+
+consider C35 , C36 being Data-Location such that L109: C19 = ( Divide (C35 , C36) ) by L108 , AMI_5:12;
+L110:
+now
+let C37 being Data-Location;
+per cases ;
+suppose L111: C35 <> C36;
+
+thus L112:now
+per cases ;
+suppose L113: C35 = C37;
+
+thus L114: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C37 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( ( IncIC (C22 , D1) ) . C35 ) div ( ( IncIC (C22 , D1) ) . C36 ) ) by L111 , L113 , L109 , AMI_3:6
+.= ( ( C22 . C35 ) div ( ( IncIC (C22 , D1) ) . C36 ) ) by AMI_5:16
+.= ( ( C22 . C35 ) div ( C22 . C36 ) ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C37 ) by L109 , L111 , L113 , AMI_3:6
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C37 ) by AMI_5:16;
+end;
+suppose L115: C36 = C37;
+
+thus L116: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C37 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( ( IncIC (C22 , D1) ) . C35 ) mod ( ( IncIC (C22 , D1) ) . C36 ) ) by L115 , L109 , AMI_3:6
+.= ( ( C22 . C35 ) mod ( ( IncIC (C22 , D1) ) . C36 ) ) by AMI_5:16
+.= ( ( C22 . C35 ) mod ( C22 . C36 ) ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C37 ) by L109 , L115 , AMI_3:6
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C37 ) by AMI_5:16;
+end;
+suppose L117: (C35 <> C37 & C36 <> C37);
+
+thus L118: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C37 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C37 ) by L109 , L117 , AMI_3:6
+.= ( C22 . C37 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C37 ) by L109 , L117 , AMI_3:6
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C37 ) by AMI_5:16;
+end;
+end;
+end;
+suppose L113: C35 = C36;
+
+per cases ;
+suppose L114: C35 = C37;
+
+thus L115: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C37 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( ( IncIC (C22 , D1) ) . C35 ) mod ( ( IncIC (C22 , D1) ) . C36 ) ) by L113 , L114 , L109 , AMI_3:6
+.= ( ( C22 . C35 ) mod ( ( IncIC (C22 , D1) ) . C36 ) ) by AMI_5:16
+.= ( ( C22 . C35 ) mod ( C22 . C36 ) ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C37 ) by L109 , L113 , L114 , AMI_3:6
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C37 ) by AMI_5:16;
+end;
+suppose L116: C35 <> C37;
+
+thus L117: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C37 ) = ( ( Exec (C19 , ( IncIC (C22 , D1) )) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (C22 , D1) ) . C37 ) by L109 , L113 , L116 , AMI_3:6
+.= ( C22 . C37 ) by AMI_5:16
+.= ( ( Exec (C19 , C22) ) . C37 ) by L109 , L113 , L116 , AMI_3:6
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C37 ) by L109 , COMPOS_0:4
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C37 ) by AMI_5:16;
+end;
+end;
+end;
+thus L120: thesis by L110 , L67 , AMI_5:25;
+end;
+suppose L121: ( InsCode C19 ) = 6;
+
+consider C38 being (Element of ( NAT )) such that L122: C19 = ( SCM-goto C38 ) by L121 , AMI_5:13;
+L123: ( IncAddr (C19 , ( C20 + D1 )) ) = ( SCM-goto ( C38 + ( C20 + D1 ) ) ) by L122 , L2;
+L124: ( IncAddr (C19 , C20) ) = ( SCM-goto ( C38 + C20 ) ) by L122 , L2;
+L125:
+now
+let C39 being Data-Location;
+thus L126: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C39 ) = ( ( IncIC (C22 , D1) ) . C39 ) by L123 , AMI_3:7
+.= ( C22 . C39 ) by AMI_5:16
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C39 ) by L124 , AMI_3:7
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C39 ) by AMI_5:16;
+end;
+thus L127: thesis by L125 , L67 , AMI_5:25;
+end;
+suppose L128: ( InsCode C19 ) = 7;
+
+consider C40 being (Element of ( NAT )), C41 being Data-Location such that L129: C19 = ( C41 =0_goto C40 ) by L128 , AMI_5:14;
+L130: ( IncAddr (C19 , ( C20 + D1 )) ) = ( C41 =0_goto ( C40 + ( C20 + D1 ) ) ) by L129 , L15;
+L131: ( IncAddr (C19 , C20) ) = ( C41 =0_goto ( C40 + C20 ) ) by L129 , L15;
+L132:
+now
+let C42 being Data-Location;
+thus L133: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C42 ) = ( ( IncIC (C22 , D1) ) . C42 ) by L130 , AMI_3:8
+.= ( C22 . C42 ) by AMI_5:16
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C42 ) by L131 , AMI_3:8
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C42 ) by AMI_5:16;
+end;
+thus L134: thesis by L132 , L67 , AMI_5:25;
+end;
+suppose L135: ( InsCode C19 ) = 8;
+
+consider C43 being (Element of ( NAT )), C44 being Data-Location such that L136: C19 = ( C44 >0_goto C43 ) by L135 , AMI_5:15;
+L137: ( IncAddr (C19 , ( C20 + D1 )) ) = ( C44 >0_goto ( C43 + ( C20 + D1 ) ) ) by L136 , L28;
+L138: ( IncAddr (C19 , C20) ) = ( C44 >0_goto ( C43 + C20 ) ) by L136 , L28;
+L139:
+now
+let C45 being Data-Location;
+thus L140: ( ( Exec (( IncAddr (C19 , ( C20 + D1 )) ) , ( IncIC (C22 , D1) )) ) . C45 ) = ( ( IncIC (C22 , D1) ) . C45 ) by L137 , AMI_3:9
+.= ( C22 . C45 ) by AMI_5:16
+.= ( ( Exec (( IncAddr (C19 , C20) ) , C22) ) . C45 ) by L138 , AMI_3:9
+.= ( ( IncIC (( Exec (( IncAddr (C19 , C20) ) , C22) ) , D1) ) . C45 ) by AMI_5:16;
+end;
+thus L141: thesis by L139 , L67 , AMI_5:25;
+end;
+end;
+end;
+begin
+L144: (for B24 being (Element of ( NAT )) holds (for B25 being non  halt-free  finite (the InstructionsF of ( SCM )) -valued ( NAT ) -defined Function holds (for B26 being B25 -autonomic non  empty (FinPartState of ( SCM )) holds (for B27 , B28 being (State of ( SCM )) holds ((B26 c= B27 & ( IncIC (B26 , B24) ) c= B28) implies (for B29 , B30 being (Instruction-Sequence of ( SCM )) holds ((B25 c= B29 & ( Reloc (B25 , B24) ) c= B30) implies (for B31 being (Element of ( NAT )) holds (( ( IC ( Comput (B29 , B27 , B31) ) ) + B24 ) = ( IC ( Comput (B30 , B28 , B31) ) ) & ( IncAddr (( CurInstr (B29 , ( Comput (B29 , B27 , B31) )) ) , B24) ) = ( CurInstr (B30 , ( Comput (B30 , B28 , B31) )) ) & ( ( Comput (B29 , B27 , B31) ) | ( dom ( DataPart B26 ) ) ) = ( ( Comput (B30 , B28 , B31) ) | ( dom ( DataPart B26 ) ) ) & ( DataPart ( Comput (B29 , ( B27 +* ( DataPart B28 ) ) , B31) ) ) = ( DataPart ( Comput (B30 , B28 , B31) ) ))))))))))
+proof
+let C46 being (Element of ( NAT ));
+let C47 being non  halt-free  finite (the InstructionsF of ( SCM )) -valued ( NAT ) -defined Function;
+let C48 being C47 -autonomic non  empty (FinPartState of ( SCM ));
+let C49 , C50 being (State of ( SCM ));
+assume that
+L145: C48 c= C49
+and
+L146: ( IncIC (C48 , C46) ) c= C50;
+L147: ( IC ( SCM ) ) in ( dom C48 ) by AMISTD_5:6;
+L148: C48 c= C49 by L145;
+let C51 , C52 being (Instruction-Sequence of ( SCM ));
+assume that
+L149: (C47 c= C51 & ( Reloc (C47 , C46) ) c= C52);
+L150: ( Reloc (C47 , C46) ) c= C52 by L149;
+L151: C47 c= C51 by L149;
+set D2 = ( C49 +* ( DataPart C50 ) );
+defpred S1[ (Element of ( NAT )) ] means (( ( IC ( Comput (C51 , C49 , $1) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , $1) ) ) & ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , $1) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , $1) )) ) & ( ( Comput (C51 , C49 , $1) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , $1) ) | ( dom ( DataPart C48 ) ) ) & ( DataPart ( Comput (C51 , D2 , $1) ) ) = ( DataPart ( Comput (C52 , C50 , $1) ) ));
+L152: C48 c= D2 by L145 , L146 , MEMSTR_0:61;
+L153: (for B32 being (Element of ( NAT )) holds (S1[ B32 ] implies S1[ ( B32 + 1 ) ]))
+proof
+set D3 = ( DataPart C48 );
+let C53 being (Element of ( NAT ));
+assume that
+L154: ( ( IC ( Comput (C51 , C49 , C53) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , C53) ) )
+and
+L155: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , C53) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , C53) )) )
+and
+L156: ( ( Comput (C51 , C49 , C53) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , C53) ) | ( dom ( DataPart C48 ) ) )
+and
+L157: ( DataPart ( Comput (C51 , D2 , C53) ) ) = ( DataPart ( Comput (C52 , C50 , C53) ) );
+set D4 = ( Comput (C52 , C50 , ( C53 + 1 )) );
+set D5 = ( Comput (C51 , D2 , C53) );
+set D6 = ( Comput (C52 , C50 , C53) );
+L158: ( dom D4 ) = (the carrier of ( SCM )) by PARTFUN1:def 2;
+L159: ( dom D4 ) = ( { ( IC ( SCM ) ) } \/ ( Data-Locations ( SCM ) ) ) by L158 , STRUCT_0:4;
+set D7 = ( Comput (C51 , D2 , ( C53 + 1 )) );
+L160: ( dom ( DataPart D6 ) ) = ( Data-Locations ( SCM ) ) by MEMSTR_0:9;
+L161: ( dom ( DataPart D7 ) ) = ( Data-Locations ( SCM ) ) by MEMSTR_0:9;
+L162: ( dom ( DataPart D4 ) ) = ( Data-Locations ( SCM ) ) by MEMSTR_0:9;
+L163:
+now
+let C54 being set;
+assume that
+L164: C54 in ( dom ( DataPart D7 ) )
+and
+L165: ( D7 . C54 ) = ( D4 . C54 );
+thus L166: ( ( DataPart D7 ) . C54 ) = ( D4 . C54 ) by L164 , L165 , FUNCT_1:47
+.= ( ( DataPart D4 ) . C54 ) by L161 , L162 , L164 , FUNCT_1:47;
+end;
+L167: ( dom ( DataPart D5 ) ) = ( Data-Locations ( SCM ) ) by MEMSTR_0:9;
+L168:
+now
+let C55 being set;
+assume that
+L169: C55 in ( dom ( DataPart D7 ) )
+and
+L170: (( D7 . C55 ) = ( D5 . C55 ) & ( D4 . C55 ) = ( D6 . C55 ));
+L171: ( ( DataPart D5 ) . C55 ) = ( D5 . C55 ) by L167 , L161 , L169 , FUNCT_1:47;
+thus L172: ( ( DataPart D7 ) . C55 ) = ( ( DataPart D4 ) . C55 ) by L171 , L157 , L160 , L161 , L163 , L169 , L170 , FUNCT_1:47;
+end;
+L173:
+now
+let C56 being (State of ( SCM ));
+let C57 being Data-Location;
+L174: C57 in ( Data-Locations ( SCM ) ) by AMI_2:def 16 , AMI_3:27;
+thus L175: C57 in ( dom ( DataPart C56 ) ) by L174 , MEMSTR_0:9;
+end;
+L176:
+now
+let C58 being Data-Location;
+L177: C58 in ( dom ( DataPart D5 ) ) by L173;
+thus L178: ( D5 . C58 ) = ( ( DataPart D5 ) . C58 ) by L177 , FUNCT_1:47
+.= ( D6 . C58 ) by L157 , L177 , FUNCT_1:47;
+end;
+set D8 = ( Comput (C51 , C49 , ( C53 + 1 )) );
+set D9 = ( Comput (C51 , C49 , C53) );
+L179: ( dom D8 ) = (the carrier of ( SCM )) by PARTFUN1:def 2;
+L180: ( dom D8 ) = ( { ( IC ( SCM ) ) } \/ ( Data-Locations ( SCM ) ) ) by L179 , STRUCT_0:4;
+L181: ( dom D3 ) = ( ( dom C48 ) /\ ( Data-Locations ( SCM ) ) ) by RELAT_1:61;
+L182: ( dom D3 ) c= ( { ( IC ( SCM ) ) } \/ ( Data-Locations ( SCM ) ) ) by L181 , XBOOLE_1:10 , XBOOLE_1:17;
+L183: ( dom ( D8 | ( dom D3 ) ) ) = ( ( dom D8 ) /\ ( dom D3 ) ) by RELAT_1:61
+.= ( dom D3 ) by L180 , L182 , XBOOLE_1:28;
+L184:
+now
+reconsider D10 = ( IC D8 ) as (Element of ( NAT ));
+assume L185: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) );
+reconsider D11 = D10 as (Element of ( NAT ));
+L186: D10 in ( dom C47 ) by L151 , L148 , AMISTD_5:def 4;
+L187: ( D10 + C46 ) in ( dom ( Reloc (C47 , C46) ) ) by L186 , COMPOS_1:46;
+L188: ( dom C52 ) = ( NAT ) by PARTFUN1:def 2;
+L189: ( dom C51 ) = ( NAT ) by PARTFUN1:def 2;
+L190: ( CurInstr (C51 , D8) ) = ( C51 . D10 ) by L189 , PARTFUN1:def 6
+.= ( C47 . D10 ) by L186 , L149 , GRFUNC_1:2
+.= ( C47 . D10 );
+thus L191: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( ( Reloc (C47 , C46) ) . ( D10 + C46 ) ) by L190 , L186 , COMPOS_1:35
+.= ( C52 . ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) ) by L185 , L187 , L150 , GRFUNC_1:2
+.= ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L188 , PARTFUN1:def 6;
+end;
+set D12 = ( CurInstr (C51 , D9) );
+L192: D4 = ( Following (C52 , D6) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (C52 , D6) ) , D6) );
+L193: ( dom D6 ) = (the carrier of ( SCM )) by PARTFUN1:def 2;
+L194: ( dom D6 ) = ( { ( IC ( SCM ) ) } \/ ( Data-Locations ( SCM ) ) ) by L193 , STRUCT_0:4;
+L195: ( dom D9 ) = (the carrier of ( SCM )) by PARTFUN1:def 2;
+L196: ( dom D9 ) = ( { ( IC ( SCM ) ) } \/ ( Data-Locations ( SCM ) ) ) by L195 , STRUCT_0:4;
+L197: ( dom ( D9 | ( dom D3 ) ) ) = ( ( dom D9 ) /\ ( dom D3 ) ) by RELAT_1:61
+.= ( dom D3 ) by L196 , L182 , XBOOLE_1:28;
+L198: D7 = ( Following (C51 , D5) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (C51 , D9) ) , D5) ) by L145 , L152 , L149 , AMISTD_5:7;
+L199: ( dom ( D4 | ( dom ( DataPart C48 ) ) ) ) = ( ( dom D4 ) /\ ( dom D3 ) ) by RELAT_1:61
+.= ( dom D3 ) by L159 , L182 , XBOOLE_1:28;
+L200:
+now
+let C59 being set;
+let C60 being Data-Location;
+assume that
+L201: (C60 = C59 & C60 in ( dom D3 ))
+and
+L202: ( D8 . C60 ) = ( D4 . C60 );
+thus L203: ( ( D8 | ( dom D3 ) ) . C59 ) = ( D4 . C60 ) by L183 , L201 , L202 , FUNCT_1:47
+.= ( ( D4 | ( dom D3 ) ) . C59 ) by L199 , L201 , FUNCT_1:47;
+end;
+L204: ( dom ( D6 | ( dom ( DataPart C48 ) ) ) ) = ( ( dom D6 ) /\ ( dom D3 ) ) by RELAT_1:61
+.= ( dom D3 ) by L194 , L182 , XBOOLE_1:28;
+L205:
+now
+let C61 being set;
+let C62 being Data-Location;
+assume that
+L206: C62 = C61
+and
+L207: C62 in ( dom D3 )
+and
+L208: (( D8 . C62 ) = ( D9 . C62 ) & ( D4 . C62 ) = ( D6 . C62 ));
+L209: (( ( D9 | ( dom D3 ) ) . C62 ) = ( D9 . C62 ) & ( ( D6 | ( dom D3 ) ) . C62 ) = ( D6 . C62 )) by L197 , L204 , L207 , FUNCT_1:47;
+thus L210: ( ( D8 | ( dom D3 ) ) . C61 ) = ( D4 . C62 ) by L209 , L156 , L183 , L206 , L207 , L208 , FUNCT_1:47
+.= ( ( D4 | ( dom D3 ) ) . C61 ) by L199 , L206 , L207 , FUNCT_1:47;
+end;
+reconsider D13 = ( IC D9 ) as (Element of ( NAT ));
+L211: D8 = ( Following (C51 , D9) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (C51 , D9) ) , D9) );
+L212: ( succ ( ( IC D9 ) + C46 ) ) = ( ( D13 + C46 ) + 1 ) by NAT_1:38
+.= ( ( D13 + 1 ) + C46 )
+.= ( ( succ D13 ) + C46 ) by NAT_1:38;
+per cases  by AMI_5:5 , NAT_1:32;
+suppose L213: ( InsCode D12 ) = ( 0 );
+
+L214: D12 = ( halt ( SCM ) ) by L213 , AMI_5:7;
+thus L215: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( ( IC D9 ) + C46 ) by L211 , L214 , EXTPRO_1:def 3
+.= ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L154 , L192 , L214 , L155 , EXTPRO_1:def 3;
+thus L216: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L215 , L184;
+L217: D4 = D6 by L192 , L214 , L155 , EXTPRO_1:def 3;
+thus L218: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L217 , L156 , L211 , L214 , EXTPRO_1:def 3;
+thus L219: ( DataPart D7 ) = ( DataPart D4 ) by L157 , L198 , L214 , L217 , EXTPRO_1:def 3;
+end;
+suppose L220: ( InsCode D12 ) = 1;
+
+consider C63 , C64 being Data-Location such that L221: D12 = ( C63 := C64 ) by L220 , AMI_5:8;
+L222: ( IncAddr (D12 , C46) ) = ( C63 := C64 ) by L221 , COMPOS_0:4;
+L223: ( ( Exec (D12 , D9) ) . ( IC ( SCM ) ) ) = ( succ ( IC D9 ) ) by L221 , AMI_3:2;
+thus L224: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L223 , L154 , L155 , L211 , L192 , L212 , L222 , AMI_3:2;
+thus L225: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L154 , L155 , L184 , L211 , L192 , L212 , L222 , L223 , AMI_3:2;
+L226: ( D5 . C64 ) = ( D6 . C64 ) by L176;
+L227:
+now
+L228: D3 c= C48 by RELAT_1:59;
+L229: ( dom D3 ) c= ( dom C48 ) by L228 , GRFUNC_1:2;
+let C65 being set;
+assume L230: C65 in ( dom ( D8 | ( dom D3 ) ) );
+L231: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L232: C65 in ( Data-Locations ( SCM ) ) by L231 , L183 , L230;
+reconsider D14 = C65 as Data-Location by L232 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L233: C63 = D14;
+
+L234: (( D8 . D14 ) = ( D9 . C64 ) & ( D4 . D14 ) = ( D6 . C64 )) by L233 , L155 , L211 , L192 , L221 , L222 , AMI_3:2;
+thus L235: ( ( D8 | ( dom D3 ) ) . C65 ) = ( ( D4 | ( dom D3 ) ) . C65 ) by L234 , L145 , L152 , L183 , L200 , L221 , L226 , L230 , L229 , L233 , L149 , AMI_5:17;
+end;
+suppose L236: C63 <> D14;
+
+L237: (( D8 . D14 ) = ( D9 . D14 ) & ( D4 . D14 ) = ( D6 . D14 )) by L236 , L155 , L211 , L192 , L221 , L222 , AMI_3:2;
+thus L238: ( ( D8 | ( dom D3 ) ) . C65 ) = ( ( D4 | ( dom D3 ) ) . C65 ) by L237 , L183 , L205 , L230;
+end;
+end;
+L240: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L227 , L183 , L199 , GRFUNC_1:2;
+thus L241: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L240 , L183 , L199 , GRFUNC_1:3;
+L242:
+now
+let C66 being set;
+assume L243: C66 in ( dom ( DataPart D7 ) );
+reconsider D15 = C66 as Data-Location by L243 , L161 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L244: C63 = D15;
+
+L245: (( D4 . D15 ) = ( D6 . C64 ) & ( D7 . D15 ) = ( D5 . C64 )) by L244 , L155 , L192 , L198 , L221 , L222 , AMI_3:2;
+thus L246: ( ( DataPart D7 ) . C66 ) = ( ( DataPart D4 ) . C66 ) by L245 , L176 , L163 , L243;
+end;
+suppose L247: C63 <> D15;
+
+L248: (( D7 . D15 ) = ( D5 . D15 ) & ( D4 . D15 ) = ( D6 . D15 )) by L247 , L155 , L192 , L198 , L221 , L222 , AMI_3:2;
+thus L249: ( ( DataPart D7 ) . C66 ) = ( ( DataPart D4 ) . C66 ) by L248 , L168 , L243;
+end;
+end;
+L251: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L242 , L161 , L162 , GRFUNC_1:2;
+thus L252: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L251 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L253: ( InsCode D12 ) = 2;
+
+consider C67 , C68 being Data-Location such that L254: D12 = ( AddTo (C67 , C68) ) by L253 , AMI_5:9;
+L255: ( IncAddr (D12 , C46) ) = ( AddTo (C67 , C68) ) by L254 , COMPOS_0:4;
+L256: ( ( Exec (D12 , D9) ) . ( IC ( SCM ) ) ) = ( succ ( IC D9 ) ) by L254 , AMI_3:3;
+thus L257: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L256 , L154 , L155 , L211 , L192 , L212 , L255 , AMI_3:3;
+thus L258: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L154 , L155 , L184 , L211 , L192 , L212 , L255 , L256 , AMI_3:3;
+L259: (( D5 . C67 ) = ( D6 . C67 ) & ( D5 . C68 ) = ( D6 . C68 )) by L176;
+L260:
+now
+L261: D3 c= C48 by RELAT_1:59;
+L262: ( dom D3 ) c= ( dom C48 ) by L261 , GRFUNC_1:2;
+let C69 being set;
+assume that
+L263: C69 in ( dom ( D8 | ( dom D3 ) ) );
+L264: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L265: C69 in ( Data-Locations ( SCM ) ) by L264 , L183 , L263;
+reconsider D16 = C69 as Data-Location by L265 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L266: C67 = D16;
+
+L267: (( D8 . D16 ) = ( ( D9 . C67 ) + ( D9 . C68 ) ) & ( D4 . D16 ) = ( ( D6 . C67 ) + ( D6 . C68 ) )) by L266 , L155 , L211 , L192 , L254 , L255 , AMI_3:3;
+thus L268: ( ( D8 | ( dom D3 ) ) . C69 ) = ( ( D4 | ( dom D3 ) ) . C69 ) by L267 , L145 , L152 , L183 , L200 , L254 , L259 , L263 , L262 , L266 , L149 , AMI_5:18;
+end;
+suppose L269: C67 <> D16;
+
+L270: (( D8 . D16 ) = ( D9 . D16 ) & ( D4 . D16 ) = ( D6 . D16 )) by L269 , L155 , L211 , L192 , L254 , L255 , AMI_3:3;
+thus L271: ( ( D8 | ( dom D3 ) ) . C69 ) = ( ( D4 | ( dom D3 ) ) . C69 ) by L270 , L183 , L205 , L263;
+end;
+end;
+L273: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L260 , L183 , L199 , GRFUNC_1:2;
+thus L274: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L273 , L183 , L199 , GRFUNC_1:3;
+L275:
+now
+let C70 being set;
+assume L276: C70 in ( dom ( DataPart D7 ) );
+reconsider D17 = C70 as Data-Location by L276 , L161 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L277: C67 = D17;
+
+L278: (( D4 . D17 ) = ( ( D6 . C67 ) + ( D6 . C68 ) ) & ( D7 . D17 ) = ( ( D5 . C67 ) + ( D5 . C68 ) )) by L277 , L155 , L192 , L198 , L254 , L255 , AMI_3:3;
+thus L279: ( ( DataPart D7 ) . C70 ) = ( ( DataPart D4 ) . C70 ) by L278 , L163 , L259 , L276;
+end;
+suppose L280: C67 <> D17;
+
+L281: (( D7 . D17 ) = ( D5 . D17 ) & ( D4 . D17 ) = ( D6 . D17 )) by L280 , L155 , L192 , L198 , L254 , L255 , AMI_3:3;
+thus L282: ( ( DataPart D7 ) . C70 ) = ( ( DataPart D4 ) . C70 ) by L281 , L168 , L276;
+end;
+end;
+L284: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L275 , L161 , L162 , GRFUNC_1:2;
+thus L285: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L284 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L286: ( InsCode D12 ) = 3;
+
+consider C71 , C72 being Data-Location such that L287: D12 = ( SubFrom (C71 , C72) ) by L286 , AMI_5:10;
+L288: ( IncAddr (D12 , C46) ) = ( SubFrom (C71 , C72) ) by L287 , COMPOS_0:4;
+L289: ( ( Exec (D12 , D9) ) . ( IC ( SCM ) ) ) = ( succ ( IC D9 ) ) by L287 , AMI_3:4;
+thus L290: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L289 , L154 , L155 , L211 , L192 , L212 , L288 , AMI_3:4;
+thus L291: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L154 , L155 , L184 , L211 , L192 , L212 , L288 , L289 , AMI_3:4;
+L292: (( D5 . C71 ) = ( D6 . C71 ) & ( D5 . C72 ) = ( D6 . C72 )) by L176;
+L293:
+now
+L294: D3 c= C48 by RELAT_1:59;
+L295: ( dom D3 ) c= ( dom C48 ) by L294 , GRFUNC_1:2;
+let C73 being set;
+assume that
+L296: C73 in ( dom ( D8 | ( dom D3 ) ) );
+L297: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L298: C73 in ( Data-Locations ( SCM ) ) by L297 , L183 , L296;
+reconsider D18 = C73 as Data-Location by L298 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L299: C71 = D18;
+
+L300: (( D8 . D18 ) = ( ( D9 . C71 ) - ( D9 . C72 ) ) & ( D4 . D18 ) = ( ( D6 . C71 ) - ( D6 . C72 ) )) by L299 , L155 , L211 , L192 , L287 , L288 , AMI_3:4;
+thus L301: ( ( D8 | ( dom D3 ) ) . C73 ) = ( ( D4 | ( dom D3 ) ) . C73 ) by L300 , L145 , L152 , L183 , L200 , L287 , L292 , L296 , L295 , L299 , L149 , AMI_5:19;
+end;
+suppose L302: C71 <> D18;
+
+L303: (( D8 . D18 ) = ( D9 . D18 ) & ( D4 . D18 ) = ( D6 . D18 )) by L302 , L155 , L211 , L192 , L287 , L288 , AMI_3:4;
+thus L304: ( ( D8 | ( dom D3 ) ) . C73 ) = ( ( D4 | ( dom D3 ) ) . C73 ) by L303 , L183 , L205 , L296;
+end;
+end;
+L306: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L293 , L183 , L199 , GRFUNC_1:2;
+thus L307: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L306 , L183 , L199 , GRFUNC_1:3;
+L308:
+now
+let C74 being set;
+assume L309: C74 in ( dom ( DataPart D7 ) );
+reconsider D19 = C74 as Data-Location by L309 , L161 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L310: C71 = D19;
+
+L311: (( D4 . D19 ) = ( ( D6 . C71 ) - ( D6 . C72 ) ) & ( D7 . D19 ) = ( ( D5 . C71 ) - ( D5 . C72 ) )) by L310 , L155 , L192 , L198 , L287 , L288 , AMI_3:4;
+thus L312: ( ( DataPart D7 ) . C74 ) = ( ( DataPart D4 ) . C74 ) by L311 , L163 , L292 , L309;
+end;
+suppose L313: C71 <> D19;
+
+L314: (( D7 . D19 ) = ( D5 . D19 ) & ( D4 . D19 ) = ( D6 . D19 )) by L313 , L155 , L192 , L198 , L287 , L288 , AMI_3:4;
+thus L315: ( ( DataPart D7 ) . C74 ) = ( ( DataPart D4 ) . C74 ) by L314 , L168 , L309;
+end;
+end;
+L317: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L308 , L161 , L162 , GRFUNC_1:2;
+thus L318: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L317 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L319: ( InsCode D12 ) = 4;
+
+consider C75 , C76 being Data-Location such that L320: D12 = ( MultBy (C75 , C76) ) by L319 , AMI_5:11;
+L321: ( IncAddr (D12 , C46) ) = ( MultBy (C75 , C76) ) by L320 , COMPOS_0:4;
+L322: ( ( Exec (D12 , D9) ) . ( IC ( SCM ) ) ) = ( succ ( IC D9 ) ) by L320 , AMI_3:5;
+thus L323: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L322 , L154 , L155 , L211 , L192 , L212 , L321 , AMI_3:5;
+thus L324: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L154 , L155 , L184 , L211 , L192 , L212 , L321 , L322 , AMI_3:5;
+L325: (( D5 . C75 ) = ( D6 . C75 ) & ( D5 . C76 ) = ( D6 . C76 )) by L176;
+L326:
+now
+L327: D3 c= C48 by RELAT_1:59;
+L328: ( dom D3 ) c= ( dom C48 ) by L327 , GRFUNC_1:2;
+let C77 being set;
+assume that
+L329: C77 in ( dom ( D8 | ( dom D3 ) ) );
+L330: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L331: C77 in ( Data-Locations ( SCM ) ) by L330 , L183 , L329;
+reconsider D20 = C77 as Data-Location by L331 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L332: C75 = D20;
+
+L333: (( D8 . D20 ) = ( ( D9 . C75 ) * ( D9 . C76 ) ) & ( D4 . D20 ) = ( ( D6 . C75 ) * ( D6 . C76 ) )) by L332 , L155 , L211 , L192 , L320 , L321 , AMI_3:5;
+thus L334: ( ( D8 | ( dom D3 ) ) . C77 ) = ( ( D4 | ( dom D3 ) ) . C77 ) by L333 , L145 , L152 , L183 , L200 , L320 , L325 , L329 , L328 , L332 , L149 , AMI_5:20;
+end;
+suppose L335: C75 <> D20;
+
+L336: (( D8 . D20 ) = ( D9 . D20 ) & ( D4 . D20 ) = ( D6 . D20 )) by L335 , L155 , L211 , L192 , L320 , L321 , AMI_3:5;
+thus L337: ( ( D8 | ( dom D3 ) ) . C77 ) = ( ( D4 | ( dom D3 ) ) . C77 ) by L336 , L183 , L205 , L329;
+end;
+end;
+L339: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L326 , L183 , L199 , GRFUNC_1:2;
+thus L340: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L339 , L183 , L199 , GRFUNC_1:3;
+L341:
+now
+let C78 being set;
+assume L342: C78 in ( dom ( DataPart D7 ) );
+reconsider D21 = C78 as Data-Location by L342 , L161 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L343: C75 = D21;
+
+L344: (( D4 . D21 ) = ( ( D6 . C75 ) * ( D6 . C76 ) ) & ( D7 . D21 ) = ( ( D5 . C75 ) * ( D5 . C76 ) )) by L343 , L155 , L192 , L198 , L320 , L321 , AMI_3:5;
+thus L345: ( ( DataPart D7 ) . C78 ) = ( ( DataPart D4 ) . C78 ) by L344 , L163 , L325 , L342;
+end;
+suppose L346: C75 <> D21;
+
+L347: (( D7 . D21 ) = ( D5 . D21 ) & ( D4 . D21 ) = ( D6 . D21 )) by L346 , L155 , L192 , L198 , L320 , L321 , AMI_3:5;
+thus L348: ( ( DataPart D7 ) . C78 ) = ( ( DataPart D4 ) . C78 ) by L347 , L168 , L342;
+end;
+end;
+L350: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L341 , L161 , L162 , GRFUNC_1:2;
+thus L351: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L350 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L352: ( InsCode D12 ) = 5;
+
+consider C79 , C80 being Data-Location such that L353: D12 = ( Divide (C79 , C80) ) by L352 , AMI_5:12;
+L354: ( IncAddr (D12 , C46) ) = ( Divide (C79 , C80) ) by L353 , COMPOS_0:4;
+L355: (( D5 . C79 ) = ( D6 . C79 ) & ( D5 . C80 ) = ( D6 . C80 )) by L176;
+per cases ;
+suppose L356: C79 <> C80;
+
+L357: ( ( Exec (D12 , D9) ) . ( IC ( SCM ) ) ) = ( succ ( IC D9 ) ) by L353 , AMI_3:6;
+thus L358: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L357 , L154 , L155 , L211 , L192 , L212 , L354 , AMI_3:6;
+thus L359: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L154 , L155 , L184 , L211 , L192 , L212 , L354 , L357 , AMI_3:6;
+L360:
+now
+L361: D3 c= C48 by RELAT_1:59;
+L362: ( dom D3 ) c= ( dom C48 ) by L361 , GRFUNC_1:2;
+let C81 being set;
+assume that
+L363: C81 in ( dom ( D8 | ( dom D3 ) ) );
+L364: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L365: C81 in ( Data-Locations ( SCM ) ) by L364 , L183 , L363;
+reconsider D22 = C81 as Data-Location by L365 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L366: C79 = D22;
+
+L367: (( D8 . D22 ) = ( ( D9 . C79 ) div ( D9 . C80 ) ) & ( D4 . D22 ) = ( ( D6 . C79 ) div ( D6 . C80 ) )) by L366 , L155 , L211 , L192 , L353 , L354 , L356 , AMI_3:6;
+L368: ( ( D5 . C79 ) div ( D5 . C80 ) ) = ( ( D9 . C79 ) div ( D9 . C80 ) ) by L145 , L152 , L183 , L353 , L356 , L363 , L362 , L366 , L149 , AMI_5:21;
+thus L369: ( ( D8 | ( dom D3 ) ) . C81 ) = ( D4 . D22 ) by L368 , L355 , L363 , L367 , FUNCT_1:47
+.= ( ( D4 | ( dom D3 ) ) . C81 ) by L183 , L199 , L363 , FUNCT_1:47;
+end;
+suppose L370: C80 = D22;
+
+L371: (( D8 . D22 ) = ( ( D9 . C79 ) mod ( D9 . C80 ) ) & ( D4 . D22 ) = ( ( D6 . C79 ) mod ( D6 . C80 ) )) by L370 , L155 , L211 , L192 , L353 , L354 , AMI_3:6;
+thus L372: ( ( D8 | ( dom D3 ) ) . C81 ) = ( ( D4 | ( dom D3 ) ) . C81 ) by L371 , L145 , L152 , L183 , L200 , L353 , L355 , L363 , L362 , L370 , L149 , AMI_5:22;
+end;
+suppose L373: (C79 <> D22 & C80 <> D22);
+
+L374: (( D8 . D22 ) = ( D9 . D22 ) & ( D4 . D22 ) = ( D6 . D22 )) by L373 , L155 , L211 , L192 , L353 , L354 , AMI_3:6;
+thus L375: ( ( D8 | ( dom D3 ) ) . C81 ) = ( ( D4 | ( dom D3 ) ) . C81 ) by L374 , L183 , L205 , L363;
+end;
+end;
+L377: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L360 , L183 , L199 , GRFUNC_1:2;
+thus L378: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L377 , L183 , L199 , GRFUNC_1:3;
+L379:
+now
+let C82 being set;
+assume L380: C82 in ( dom ( DataPart D7 ) );
+reconsider D23 = C82 as Data-Location by L380 , L161 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L381: C79 = D23;
+
+L382: (( D4 . D23 ) = ( ( D6 . C79 ) div ( D6 . C80 ) ) & ( D7 . D23 ) = ( ( D5 . C79 ) div ( D5 . C80 ) )) by L381 , L155 , L192 , L198 , L353 , L354 , L356 , AMI_3:6;
+thus L383: ( ( DataPart D7 ) . C82 ) = ( ( DataPart D4 ) . C82 ) by L382 , L163 , L355 , L380;
+end;
+suppose L384: C80 = D23;
+
+L385: (( D4 . D23 ) = ( ( D6 . C79 ) mod ( D6 . C80 ) ) & ( D7 . D23 ) = ( ( D5 . C79 ) mod ( D5 . C80 ) )) by L384 , L155 , L192 , L198 , L353 , L354 , AMI_3:6;
+thus L386: ( ( DataPart D7 ) . C82 ) = ( ( DataPart D4 ) . C82 ) by L385 , L163 , L355 , L380;
+end;
+suppose L387: (C79 <> D23 & C80 <> D23);
+
+L388: (( D7 . D23 ) = ( D5 . D23 ) & ( D4 . D23 ) = ( D6 . D23 )) by L387 , L155 , L192 , L198 , L353 , L354 , AMI_3:6;
+thus L389: ( ( DataPart D7 ) . C82 ) = ( ( DataPart D4 ) . C82 ) by L388 , L168 , L380;
+end;
+end;
+L391: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L379 , L161 , L162 , GRFUNC_1:2;
+thus L392: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L391 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L393: C79 = C80;
+
+L394: ( ( Exec (D12 , D9) ) . ( IC ( SCM ) ) ) = ( succ ( IC D9 ) ) by L353 , AMI_3:6;
+thus L395: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L394 , L154 , L155 , L211 , L192 , L212 , L354 , AMI_3:6;
+thus L396: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L154 , L155 , L184 , L211 , L192 , L212 , L354 , L394 , AMI_3:6;
+L397:
+now
+let C83 being set;
+assume that
+L398: C83 in ( dom ( D8 | ( dom D3 ) ) );
+L399: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L400: C83 in ( Data-Locations ( SCM ) ) by L399 , L183 , L398;
+reconsider D24 = C83 as Data-Location by L400 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L401: C79 = D24;
+
+L402: (( ( D9 | ( dom D3 ) ) . D24 ) = ( D9 . D24 ) & ( ( D6 | ( dom D3 ) ) . D24 ) = ( D6 . D24 )) by L183 , L197 , L204 , L398 , FUNCT_1:47;
+L403: (( ( D8 | ( dom D3 ) ) . D24 ) = ( D8 . D24 ) & ( ( D4 | ( dom D3 ) ) . D24 ) = ( D4 . D24 )) by L183 , L199 , L398 , FUNCT_1:47;
+L404: ( D4 . D24 ) = ( ( D6 . C79 ) mod ( D6 . C80 ) ) by L155 , L192 , L354 , L393 , L401 , AMI_3:6;
+thus L405: ( ( D8 | ( dom D3 ) ) . C83 ) = ( ( D4 | ( dom D3 ) ) . C83 ) by L404 , L156 , L211 , L353 , L393 , L401 , L402 , L403 , AMI_3:6;
+end;
+suppose L406: C79 <> D24;
+
+L407: (( D8 . D24 ) = ( D9 . D24 ) & ( D4 . D24 ) = ( D6 . D24 )) by L406 , L155 , L211 , L192 , L353 , L354 , L393 , AMI_3:6;
+thus L408: ( ( D8 | ( dom D3 ) ) . C83 ) = ( ( D4 | ( dom D3 ) ) . C83 ) by L407 , L183 , L205 , L398;
+end;
+end;
+L410: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L397 , L183 , L199 , GRFUNC_1:2;
+thus L411: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L410 , L183 , L199 , GRFUNC_1:3;
+L412:
+now
+let C84 being set;
+assume L413: C84 in ( dom ( DataPart D7 ) );
+reconsider D25 = C84 as Data-Location by L413 , L161 , AMI_2:def 16 , AMI_3:27;
+per cases ;
+suppose L414: C79 = D25;
+
+L415: (( D4 . D25 ) = ( ( D6 . C79 ) mod ( D6 . C80 ) ) & ( D7 . D25 ) = ( ( D5 . C79 ) mod ( D5 . C80 ) )) by L414 , L155 , L192 , L198 , L353 , L354 , L393 , AMI_3:6;
+thus L416: ( ( DataPart D7 ) . C84 ) = ( ( DataPart D4 ) . C84 ) by L415 , L163 , L355 , L413;
+end;
+suppose L417: C79 <> D25;
+
+L418: (( D7 . D25 ) = ( D5 . D25 ) & ( D4 . D25 ) = ( D6 . D25 )) by L417 , L155 , L192 , L198 , L353 , L354 , L393 , AMI_3:6;
+thus L419: ( ( DataPart D7 ) . C84 ) = ( ( DataPart D4 ) . C84 ) by L418 , L168 , L413;
+end;
+end;
+L421: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L412 , L161 , L162 , GRFUNC_1:2;
+thus L422: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L421 , L161 , L162 , GRFUNC_1:3;
+end;
+end;
+suppose L424: ( InsCode D12 ) = 6;
+
+consider C85 being (Element of ( NAT )) such that L425: D12 = ( SCM-goto C85 ) by L424 , AMI_5:13;
+L426: ( CurInstr (C52 , D6) ) = ( SCM-goto ( C85 + C46 ) ) by L155 , L425 , L2;
+thus L427: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( C85 + C46 ) by L211 , L425 , AMI_3:7
+.= ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L192 , L426 , AMI_3:7;
+thus L428: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L427 , L184;
+L429:
+now
+let C86 being set;
+assume that
+L430: C86 in ( dom ( D8 | ( dom D3 ) ) );
+L431: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L432: C86 in ( Data-Locations ( SCM ) ) by L431 , L183 , L430;
+reconsider D26 = C86 as Data-Location by L432 , AMI_2:def 16 , AMI_3:27;
+L433: (( D8 . D26 ) = ( D9 . D26 ) & ( D4 . D26 ) = ( D6 . D26 )) by L211 , L192 , L425 , L426 , AMI_3:7;
+thus L434: ( ( D8 | ( dom D3 ) ) . C86 ) = ( ( D4 | ( dom D3 ) ) . C86 ) by L433 , L183 , L205 , L430;
+end;
+L435: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L429 , L183 , L199 , GRFUNC_1:2;
+thus L436: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L435 , L183 , L199 , GRFUNC_1:3;
+L437:
+now
+let C87 being set;
+assume L438: C87 in ( dom ( DataPart D7 ) );
+reconsider D27 = C87 as Data-Location by L438 , L161 , AMI_2:def 16 , AMI_3:27;
+L439: (( D7 . D27 ) = ( D5 . D27 ) & ( D4 . D27 ) = ( D6 . D27 )) by L192 , L198 , L425 , L426 , AMI_3:7;
+thus L440: ( ( DataPart D7 ) . C87 ) = ( ( DataPart D4 ) . C87 ) by L439 , L168 , L438;
+end;
+L441: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L437 , L161 , L162 , GRFUNC_1:2;
+thus L442: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L441 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L443: ( InsCode D12 ) = 7;
+
+consider C88 being (Element of ( NAT )), C89 being Data-Location such that L444: D12 = ( C89 =0_goto C88 ) by L443 , AMI_5:14;
+L445:
+now
+per cases ;
+case L446: ( D9 . C89 ) = ( 0 );
+thus L447: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( C88 + C46 ) by L446 , L211 , L444 , AMI_3:8;
+end;
+case L448: ( D9 . C89 ) <> ( 0 );
+thus L449: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( succ ( IC D6 ) ) by L448 , L154 , L211 , L212 , L444 , AMI_3:8;
+end;
+end;
+L451: ( CurInstr (C52 , D6) ) = ( C89 =0_goto ( C88 + C46 ) ) by L155 , L444 , L15;
+L452:
+now
+per cases ;
+case L453: ( D6 . C89 ) = ( 0 );
+thus L454: ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) = ( C88 + C46 ) by L453 , L192 , L451 , AMI_3:8;
+end;
+case L455: ( D6 . C89 ) <> ( 0 );
+thus L456: ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) = ( succ ( IC D6 ) ) by L455 , L192 , L451 , AMI_3:8;
+end;
+end;
+L458: ( D5 . C89 ) = ( D6 . C89 ) by L176;
+L459:
+now
+per cases ;
+suppose L460: C88 <> ( succ ( IC D9 ) );
+
+thus L461: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L460 , L145 , L152 , L444 , L458 , L445 , L452 , L149 , AMI_5:23;
+end;
+suppose L462: C88 = ( succ ( IC D9 ) );
+
+thus L463: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L462 , L154 , L212 , L445 , L452;
+end;
+end;
+thus L465: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L459;
+thus L466: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L184 , L459;
+L467:
+now
+let C90 being set;
+assume that
+L468: C90 in ( dom ( D8 | ( dom D3 ) ) );
+L469: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L470: C90 in ( Data-Locations ( SCM ) ) by L469 , L183 , L468;
+reconsider D28 = C90 as Data-Location by L470 , AMI_2:def 16 , AMI_3:27;
+L471: (( D8 . D28 ) = ( D9 . D28 ) & ( D4 . D28 ) = ( D6 . D28 )) by L211 , L192 , L444 , L451 , AMI_3:8;
+thus L472: ( ( D8 | ( dom D3 ) ) . C90 ) = ( ( D4 | ( dom D3 ) ) . C90 ) by L471 , L183 , L205 , L468;
+end;
+L473: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L467 , L183 , L199 , GRFUNC_1:2;
+thus L474: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L473 , L183 , L199 , GRFUNC_1:3;
+L475:
+now
+let C91 being set;
+assume L476: C91 in ( dom ( DataPart D7 ) );
+reconsider D29 = C91 as Data-Location by L476 , L161 , AMI_2:def 16 , AMI_3:27;
+L477: (( D7 . D29 ) = ( D5 . D29 ) & ( D4 . D29 ) = ( D6 . D29 )) by L192 , L198 , L444 , L451 , AMI_3:8;
+thus L478: ( ( DataPart D7 ) . C91 ) = ( ( DataPart D4 ) . C91 ) by L477 , L168 , L476;
+end;
+L479: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L475 , L161 , L162 , GRFUNC_1:2;
+thus L480: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L479 , L161 , L162 , GRFUNC_1:3;
+end;
+suppose L481: ( InsCode D12 ) = 8;
+
+consider C92 being (Element of ( NAT )), C93 being Data-Location such that L482: D12 = ( C93 >0_goto C92 ) by L481 , AMI_5:15;
+L483:
+now
+per cases ;
+case L484: ( D9 . C93 ) > ( 0 );
+thus L485: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( C92 + C46 ) by L484 , L211 , L482 , AMI_3:9;
+end;
+case L486: ( D9 . C93 ) <= ( 0 );
+thus L487: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( succ ( IC D6 ) ) by L486 , L154 , L211 , L212 , L482 , AMI_3:9;
+end;
+end;
+L489: ( CurInstr (C52 , D6) ) = ( C93 >0_goto ( C92 + C46 ) ) by L155 , L482 , L28;
+L490:
+now
+per cases ;
+case L491: ( D6 . C93 ) > ( 0 );
+thus L492: ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) = ( C92 + C46 ) by L491 , L192 , L489 , AMI_3:9;
+end;
+case L493: ( D6 . C93 ) <= ( 0 );
+thus L494: ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) = ( succ ( IC D6 ) ) by L493 , L192 , L489 , AMI_3:9;
+end;
+end;
+L496: ( D5 . C93 ) = ( D6 . C93 ) by L176;
+L497:
+now
+per cases ;
+suppose L498: C92 <> ( succ ( IC D9 ) );
+
+thus L499: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L498 , L145 , L152 , L482 , L496 , L483 , L490 , L149 , AMI_5:24;
+end;
+suppose L500: C92 = ( succ ( IC D9 ) );
+
+thus L501: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L500 , L154 , L212 , L483 , L490;
+end;
+end;
+thus L503: ( ( IC ( Comput (C51 , C49 , ( C53 + 1 )) ) ) + C46 ) = ( IC ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L497;
+thus L504: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( C53 + 1 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( C53 + 1 )) )) ) by L184 , L497;
+L505:
+now
+let C94 being set;
+assume that
+L506: C94 in ( dom ( D8 | ( dom D3 ) ) );
+L507: ( dom D3 ) c= ( Data-Locations ( SCM ) ) by RELAT_1:58;
+L508: C94 in ( Data-Locations ( SCM ) ) by L507 , L183 , L506;
+reconsider D30 = C94 as Data-Location by L508 , AMI_2:def 16 , AMI_3:27;
+L509: (( D8 . D30 ) = ( D9 . D30 ) & ( D4 . D30 ) = ( D6 . D30 )) by L211 , L192 , L482 , L489 , AMI_3:9;
+thus L510: ( ( D8 | ( dom D3 ) ) . C94 ) = ( ( D4 | ( dom D3 ) ) . C94 ) by L509 , L183 , L205 , L506;
+end;
+L511: ( D8 | ( dom D3 ) ) c= ( D4 | ( dom D3 ) ) by L505 , L183 , L199 , GRFUNC_1:2;
+thus L512: ( ( Comput (C51 , C49 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) = ( ( Comput (C52 , C50 , ( C53 + 1 )) ) | ( dom ( DataPart C48 ) ) ) by L511 , L183 , L199 , GRFUNC_1:3;
+L513:
+now
+let C95 being set;
+assume L514: C95 in ( dom ( DataPart D7 ) );
+reconsider D31 = C95 as Data-Location by L514 , L161 , AMI_2:def 16 , AMI_3:27;
+L515: (( D7 . D31 ) = ( D5 . D31 ) & ( D4 . D31 ) = ( D6 . D31 )) by L192 , L198 , L482 , L489 , AMI_3:9;
+thus L516: ( ( DataPart D7 ) . C95 ) = ( ( DataPart D4 ) . C95 ) by L515 , L168 , L514;
+end;
+L517: ( DataPart D7 ) c= ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L513 , L161 , L162 , GRFUNC_1:2;
+thus L518: ( DataPart D7 ) = ( DataPart ( Comput (C52 , C50 , ( C53 + 1 )) ) ) by L517 , L161 , L162 , GRFUNC_1:3;
+end;
+end;
+L520: ( DataPart C48 ) c= C48 by RELAT_1:59;
+L521: ( IC ( SCM ) ) in ( dom ( IncIC (C48 , C46) ) ) by MEMSTR_0:52;
+L522:
+now
+thus L523: ( ( IC ( Comput (C51 , C49 , ( 0 )) ) ) + C46 ) = ( ( IC C49 ) + C46 ) by EXTPRO_1:2
+.= ( ( IC C48 ) + C46 ) by L145 , L147 , GRFUNC_1:2
+.= ( ( IC C48 ) + C46 )
+.= ( IC ( IncIC (C48 , C46) ) ) by MEMSTR_0:53
+.= ( IC C50 ) by L146 , L521 , GRFUNC_1:2
+.= ( IC ( Comput (C52 , C50 , ( 0 )) ) ) by EXTPRO_1:2;
+reconsider D32 = ( IC C48 ) as (Element of ( NAT ));
+L524: ( IC C48 ) = ( IC C49 ) by L145 , L147 , GRFUNC_1:2;
+L525: ( IC C48 ) = ( IC ( Comput (C51 , C49 , ( 0 )) ) ) by L524 , EXTPRO_1:2;
+L526: D32 in ( dom C47 ) by L525 , L151 , L148 , AMISTD_5:def 4;
+L527: ( ( IC C48 ) + C46 ) in ( dom ( Reloc (C47 , C46) ) ) by L526 , COMPOS_1:46;
+L528: ( IC ( SCM ) ) in ( dom ( IncIC (C48 , C46) ) ) by MEMSTR_0:52;
+L529: ( C47 . ( IC C48 ) ) = ( C51 . ( IC C49 ) ) by L524 , L526 , L149 , GRFUNC_1:2;
+L530: ( dom C52 ) = ( NAT ) by PARTFUN1:def 2;
+L531: ( CurInstr (C52 , ( Comput (C52 , C50 , ( 0 )) )) ) = ( C52 . ( IC ( Comput (C52 , C50 , ( 0 )) ) ) ) by L530 , PARTFUN1:def 6
+.= ( C52 . ( IC C50 ) ) by EXTPRO_1:2
+.= ( C52 . ( IC ( IncIC (C48 , C46) ) ) ) by L146 , L528 , GRFUNC_1:2
+.= ( C52 . ( ( IC C48 ) + C46 ) ) by MEMSTR_0:53
+.= ( C52 . ( ( IC C48 ) + C46 ) )
+.= ( ( Reloc (C47 , C46) ) . ( ( IC C48 ) + C46 ) ) by L527 , L149 , GRFUNC_1:2;
+L532: ( dom C51 ) = ( NAT ) by PARTFUN1:def 2;
+L533: ( CurInstr (C51 , ( Comput (C51 , C49 , ( 0 )) )) ) = ( CurInstr (C51 , C49) ) by EXTPRO_1:2
+.= ( C51 . ( IC C49 ) ) by L532 , PARTFUN1:def 6;
+thus L534: ( IncAddr (( CurInstr (C51 , ( Comput (C51 , C49 , ( 0 )) )) ) , C46) ) = ( CurInstr (C52 , ( Comput (C52 , C50 , ( 0 )) )) ) by L533 , L526 , L529 , L531 , COMPOS_1:35;
+L535: ( dom ( DataPart C50 ) ) = ( Data-Locations ( SCM ) ) by MEMSTR_0:9;
+L536: ( DataPart C48 ) c= C49 by L145 , L520 , XBOOLE_1:1;
+L537: ( DataPart ( IncIC (C48 , C46) ) ) = ( DataPart C48 ) by MEMSTR_0:51;
+L538: ( DataPart C48 ) c= ( IncIC (C48 , C46) ) by L537 , MEMSTR_0:12;
+L539: ( DataPart C48 ) c= C50 by L538 , L146 , XBOOLE_1:1;
+thus L540: ( ( Comput (C51 , C49 , ( 0 )) ) | ( dom ( DataPart C48 ) ) ) = ( C49 | ( dom ( DataPart C48 ) ) ) by EXTPRO_1:2
+.= ( DataPart C48 ) by L536 , GRFUNC_1:23
+.= ( C50 | ( dom ( DataPart C48 ) ) ) by L539 , GRFUNC_1:23
+.= ( ( Comput (C52 , C50 , ( 0 )) ) | ( dom ( DataPart C48 ) ) ) by EXTPRO_1:2;
+thus L541: ( DataPart ( Comput (C51 , D2 , ( 0 )) ) ) = ( DataPart ( C49 +* ( DataPart C50 ) ) ) by EXTPRO_1:2
+.= ( DataPart C50 ) by L535 , FUNCT_4:23
+.= ( DataPart ( Comput (C52 , C50 , ( 0 )) ) ) by EXTPRO_1:2;
+end;
+L542: S1[ ( 0 ) ] by L522;
+thus L543: (for B33 being (Element of ( NAT )) holds S1[ B33 ]) from NAT_1:sch 1(L542 , L153);
+end;
+theorem
+L544: (for B34 being (Element of ( NAT )) holds (for B35 being non  halt-free  finite (the InstructionsF of ( SCM )) -valued ( NAT ) -defined Function holds (for B36 being B35 -autonomic non  empty (FinPartState of ( SCM )) holds (for B37 , B38 being (State of ( SCM )) holds ((( IC ( SCM ) ) in ( dom B36 ) & B36 c= B37 & ( IncIC (B36 , B34) ) c= B38) implies (for B39 , B40 being (Instruction-Sequence of ( SCM )) holds ((B35 c= B39 & ( Reloc (B35 , B34) ) c= B40) implies (for B41 being (Element of ( NAT )) holds ( ( IC ( Comput (B39 , B37 , B41) ) ) + B34 ) = ( IC ( Comput (B40 , B38 , B41) ) ))))))))) by L144;
+registration
+cluster ( SCM ) ->  relocable1  relocable2;
+coherence
+proof
+thus L545: ( SCM ) is  relocable1
+proof
+thus L546: (for B42 being (Element of ( NAT )) holds (for B43 being non  halt-free  finite (the InstructionsF of ( SCM )) -valued ( NAT ) -defined Function holds (for B44 being B43 -autonomic non  empty (FinPartState of ( SCM )) holds (for B45 , B46 being (State of ( SCM )) holds ((B44 c= B45 & ( IncIC (B44 , B42) ) c= B46) implies (for B47 , B48 being (Instruction-Sequence of ( SCM )) holds ((B43 c= B47 & ( Reloc (B43 , B42) ) c= B48) implies (for B49 being (Element of ( NAT )) holds ( IncAddr (( CurInstr (B47 , ( Comput (B47 , B45 , B49) )) ) , B42) ) = ( CurInstr (B48 , ( Comput (B48 , B46 , B49) )) ))))))))) by L144;
+end;
+
+let C96 being (Element of ( NAT ));
+let C97 being non  halt-free  finite (the InstructionsF of ( SCM )) -valued ( NAT ) -defined Function;
+let C98 being C97 -autonomic non  empty (FinPartState of ( SCM ));
+let C99 , C100 being (State of ( SCM ));
+assume L547: (C98 c= C99 & ( IncIC (C98 , C96) ) c= C100);
+let C101 , C102 being (Instruction-Sequence of ( SCM ));
+assume that
+L548: (C97 c= C101 & ( Reloc (C97 , C96) ) c= C102);
+thus L549: (for B50 being (Element of ( NAT )) holds ( ( Comput (C101 , C99 , B50) ) | ( dom ( DataPart C98 ) ) ) = ( ( Comput (C102 , C100 , B50) ) | ( dom ( DataPart C98 ) ) )) by L547 , L144 , L548;
+end;
+end;
+theorem
+L551: (for B51 being (Element of ( NAT )) holds (for B52 being non  halt-free  finite (the InstructionsF of ( SCM )) -valued ( NAT ) -defined Function holds (for B53 being B52 -autonomic non  empty (FinPartState of ( SCM )) holds (for B54 , B55 , B56 being (State of ( SCM )) holds ((( IC ( SCM ) ) in ( dom B53 ) & B53 c= B54 & ( IncIC (B53 , B51) ) c= B55 & B56 = ( B54 +* ( DataPart B55 ) )) implies (for B57 , B58 being (Instruction-Sequence of ( SCM )) holds ((B52 c= B57 & ( Reloc (B52 , B51) ) c= B58) implies (for B59 being (Element of ( NAT )) holds ( DataPart ( Comput (B57 , B56 , B59) ) ) = ( DataPart ( Comput (B58 , B55 , B59) ) ))))))))) by L144;

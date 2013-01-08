@@ -1,0 +1,3547 @@
+:: Alternative Graph Structures
+::  by Gilbert Lee and Piotr Rudnicki
+::
+:: Received February 22, 2005
+:: Copyright (c) 2005-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, FINSET_1, RELAT_1, FUNCT_1, XBOOLE_0, TARSKI, SUBSET_1,
+      FINSEQ_1, NAT_1, FUNCT_4, FUNCOP_1, ZFMISC_1, CARD_1, ARYTM_3, CARD_2,
+      ORDINAL2, XXREAL_0, PBOOLE, GLIB_000;
+ notations TARSKI, XBOOLE_0, DOMAIN_1, SUBSET_1, PBOOLE, RELAT_1, CARD_1,
+      CARD_2, FUNCT_1, RELSET_1, FINSEQ_1, FINSET_1, ORDINAL1, NAT_1, FUNCT_2,
+      FUNCOP_1, FUNCT_4, ORDINAL2, FINSEQ_4, NUMBERS, XXREAL_0;
+ constructors DOMAIN_1, FUNCT_4, XXREAL_0, NAT_1, NAT_D, BINOP_2, CARD_2,
+      FINSEQ_4, PBOOLE, ORDINAL3, WELLORD2, PARTFUN1, RELSET_1;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_1, ORDINAL1, FUNCOP_1,
+      FINSET_1, XREAL_0, NAT_1, CARD_1, FINSEQ_1, FINSEQ_4, FUNCT_2, PARTFUN1,
+      RELSET_1;
+ requirements ARITHM, BOOLE, NUMERALS, REAL, SUBSET;
+ definitions FUNCOP_1, RELAT_1;
+ theorems CARD_1, CARD_2, FUNCOP_1, ENUMSET1, FINSEQ_1, FUNCT_1, FUNCT_2,
+      FUNCT_4, NAT_1, RELAT_1, FINSEQ_4, TARSKI, XBOOLE_0, XBOOLE_1, ZFMISC_1,
+      XREAL_1, XXREAL_0, ORDINAL1, RELSET_1;
+ schemes NAT_1, SUBSET_1;
+
+begin
+registration
+cluster  finite ( NAT ) -defined for Function;
+existence
+proof
+take ( {} );
+thus L1: ( {} ) is  finite;
+thus L2: ( dom ( {} ) ) c= ( NAT );
+end;
+end;
+definition
+mode GraphStruct
+ is  finite ( NAT ) -defined Function;
+end;
+definition
+func VertexSelector -> (Element of ( NAT )) equals 
+1;
+coherence;
+func EdgeSelector -> (Element of ( NAT )) equals 
+2;
+coherence;
+func SourceSelector -> (Element of ( NAT )) equals 
+3;
+coherence;
+func TargetSelector -> (Element of ( NAT )) equals 
+4;
+coherence;
+end;
+definition
+func _GraphSelectors -> non  empty (Subset of ( NAT )) equals 
+{ ( VertexSelector ) , ( EdgeSelector ) , ( SourceSelector ) , ( TargetSelector ) };
+coherence;
+end;
+definition
+let C1 being GraphStruct;
+func the_Vertices_of C1 equals 
+( C1 . ( VertexSelector ) );
+coherence;
+func the_Edges_of C1 equals 
+( C1 . ( EdgeSelector ) );
+coherence;
+func the_Source_of C1 equals 
+( C1 . ( SourceSelector ) );
+coherence;
+func the_Target_of C1 equals 
+( C1 . ( TargetSelector ) );
+coherence;
+end;
+definition
+let C2 being GraphStruct;
+attr C2 is  [Graph-like]
+means
+:L8: (( VertexSelector ) in ( dom C2 ) & ( EdgeSelector ) in ( dom C2 ) & ( SourceSelector ) in ( dom C2 ) & ( TargetSelector ) in ( dom C2 ) & ( the_Vertices_of C2 ) is non  empty non  empty non  empty non  empty set & ( the_Source_of C2 ) is (Function of ( the_Edges_of C2 ) , ( the_Vertices_of C2 )) & ( the_Target_of C2 ) is (Function of ( the_Edges_of C2 ) , ( the_Vertices_of C2 )));
+end;
+registration
+cluster  [Graph-like] for GraphStruct;
+existence
+proof
+set D1 = { 1 };
+set D2 = ( {} );
+reconsider D3 = ( {} ) as (Function of D2 , D1) by RELSET_1:12;
+set D4 = <* D1 , D2 , D3 , D3 *>;
+L10: ( len D4 ) = 4 by FINSEQ_4:76;
+L11: ( dom D4 ) = ( Seg 4 ) by L10 , FINSEQ_1:def 3;
+reconsider D5 = D4 as GraphStruct;
+L12: (( SourceSelector ) in ( dom D5 ) & ( TargetSelector ) in ( dom D5 )) by L11 , FINSEQ_1:1;
+L13: (( the_Vertices_of D5 ) = D1 & ( the_Edges_of D5 ) = D2) by FINSEQ_4:76;
+L14: (( the_Source_of D5 ) = D3 & ( the_Target_of D5 ) = D3) by FINSEQ_4:76;
+L15: (( VertexSelector ) in ( dom D5 ) & ( EdgeSelector ) in ( dom D5 )) by L11 , FINSEQ_1:1;
+L16: D5 is  [Graph-like] by L15 , L13 , L14 , L12 , L8;
+thus L17: thesis by L16;
+end;
+end;
+definition
+mode _Graph
+ is  [Graph-like] GraphStruct;
+end;
+registration
+let C3 being _Graph;
+cluster ( the_Vertices_of C3 ) -> non  empty;
+coherence by L8;
+end;
+definition
+let C4 being _Graph;
+redefine func the_Source_of C4 -> (Function of ( the_Edges_of C4 ) , ( the_Vertices_of C4 ));
+
+coherence by L8;
+redefine func the_Target_of C4 -> (Function of ( the_Edges_of C4 ) , ( the_Vertices_of C4 ));
+
+coherence by L8;
+end;
+definition
+let C5 being non  empty set;
+let C6 being set;
+let C7 , C8 being (Function of C6 , C5);
+func createGraph (C5 , C6 , C7 , C8) -> _Graph equals 
+<* C5 , C6 , C7 , C8 *>;
+coherence
+proof
+set D6 = <* C5 , C6 , C7 , C8 *>;
+L22: ( len D6 ) = 4 by FINSEQ_4:76;
+L23: ( dom D6 ) = ( Seg 4 ) by L22 , FINSEQ_1:def 3;
+reconsider D7 = D6 as GraphStruct;
+L24: (( SourceSelector ) in ( dom D7 ) & ( TargetSelector ) in ( dom D7 )) by L23 , FINSEQ_1:1;
+L25: (( the_Vertices_of D7 ) = C5 & ( the_Edges_of D7 ) = C6) by FINSEQ_4:76;
+L26: (( the_Source_of D7 ) = C7 & ( the_Target_of D7 ) = C8) by FINSEQ_4:76;
+L27: (( VertexSelector ) in ( dom D7 ) & ( EdgeSelector ) in ( dom D7 )) by L23 , FINSEQ_1:1;
+thus L28: thesis by L27 , L25 , L26 , L24 , L8;
+end;
+end;
+definition
+let C9 being GraphStruct;
+let C10 being Nat;
+let C11 being set;
+func C9 .set (C10 , C11) -> GraphStruct equals 
+( C9 +* ( C10 .--> C11 ) );
+coherence
+proof
+set D8 = ( C9 +* ( C10 .--> C11 ) );
+L30: ( dom ( C10 .--> C11 ) ) = { C10 } by FUNCOP_1:13;
+L31: C10 in ( NAT ) by ORDINAL1:def 12;
+L32: { C10 } c= ( NAT ) by L31 , ZFMISC_1:31;
+L33: (( dom D8 ) = ( ( dom C9 ) \/ ( dom ( C10 .--> C11 ) ) ) & ( dom C9 ) c= ( NAT )) by FUNCT_4:def 1;
+L34: ( dom D8 ) c= ( NAT ) by L33 , L32 , L30 , XBOOLE_1:8;
+thus L35: thesis by L34 , RELAT_1:def 18;
+end;
+end;
+L37: (for B1 being GraphStruct holds (B1 is  [Graph-like] iff (( _GraphSelectors ) c= ( dom B1 ) & ( the_Vertices_of B1 ) is non  empty & ( the_Source_of B1 ) is (Function of ( the_Edges_of B1 ) , ( the_Vertices_of B1 )) & ( the_Target_of B1 ) is (Function of ( the_Edges_of B1 ) , ( the_Vertices_of B1 )))))
+proof
+let C12 being GraphStruct;
+L38:
+now
+thus L39:now
+assume L40: (( VertexSelector ) in ( dom C12 ) & ( EdgeSelector ) in ( dom C12 ) & ( SourceSelector ) in ( dom C12 ) & ( TargetSelector ) in ( dom C12 ));
+L41: (for B2 being set holds (B2 in ( _GraphSelectors ) implies B2 in ( dom C12 ))) by L40 , ENUMSET1:def 2;
+thus L42: ( _GraphSelectors ) c= ( dom C12 ) by L41 , TARSKI:def 3;
+end;
+L43: (( VertexSelector ) in ( _GraphSelectors ) & ( EdgeSelector ) in ( _GraphSelectors )) by ENUMSET1:def 2;
+L44: (( SourceSelector ) in ( _GraphSelectors ) & ( TargetSelector ) in ( _GraphSelectors )) by ENUMSET1:def 2;
+assume L45: ( _GraphSelectors ) c= ( dom C12 );
+thus L46: (( VertexSelector ) in ( dom C12 ) & ( EdgeSelector ) in ( dom C12 ) & ( SourceSelector ) in ( dom C12 ) & ( TargetSelector ) in ( dom C12 )) by L45 , L43 , L44;
+end;
+thus L47: thesis by L38 , L8;
+end;
+registration
+let C13 being _Graph;
+cluster ( C13 | ( _GraphSelectors ) ) ->  [Graph-like];
+coherence
+proof
+L48:
+now
+let C14 being set;
+assume L49: C14 in ( _GraphSelectors );
+L50: (C14 = ( VertexSelector ) or C14 = ( EdgeSelector ) or C14 = ( SourceSelector ) or C14 = ( TargetSelector )) by L49 , ENUMSET1:def 2;
+thus L51: C14 in ( dom C13 ) by L50 , L8;
+end;
+L52: ( _GraphSelectors ) c= ( dom C13 ) by L48 , TARSKI:def 3;
+set D9 = ( C13 | ( _GraphSelectors ) );
+L53: ( VertexSelector ) in ( _GraphSelectors ) by ENUMSET1:def 2;
+L54: ( the_Vertices_of D9 ) = ( the_Vertices_of C13 ) by L53 , FUNCT_1:49;
+L55: ( EdgeSelector ) in ( _GraphSelectors ) by ENUMSET1:def 2;
+L56: ( the_Edges_of D9 ) = ( the_Edges_of C13 ) by L55 , FUNCT_1:49;
+L57: ( TargetSelector ) in ( _GraphSelectors ) by ENUMSET1:def 2;
+L58: ( the_Target_of D9 ) = ( the_Target_of C13 ) by L57 , FUNCT_1:49;
+L59: ( SourceSelector ) in ( _GraphSelectors ) by ENUMSET1:def 2;
+L60: ( the_Source_of D9 ) = ( the_Source_of C13 ) by L59 , FUNCT_1:49;
+L61: ( dom D9 ) = ( ( dom C13 ) /\ ( _GraphSelectors ) ) by RELAT_1:61
+.= ( _GraphSelectors ) by L52 , XBOOLE_1:28;
+thus L62: thesis by L61 , L54 , L56 , L60 , L58 , L37;
+end;
+end;
+definition
+let C15 being _Graph;
+let C16 , C17 , C18 being set;
+pred C18 Joins C16 , C17 , C15
+means
+:L64: (C18 in ( the_Edges_of C15 ) & ((( ( the_Source_of C15 ) . C18 ) = C16 & ( ( the_Target_of C15 ) . C18 ) = C17) or (( ( the_Source_of C15 ) . C18 ) = C17 & ( ( the_Target_of C15 ) . C18 ) = C16)))
+;end;
+definition
+let C19 being _Graph;
+let C20 , C21 , C22 being set;
+pred C22 DJoins C20 , C21 , C19
+means
+:L66: (C22 in ( the_Edges_of C19 ) & ( ( the_Source_of C19 ) . C22 ) = C20 & ( ( the_Target_of C19 ) . C22 ) = C21)
+;end;
+definition
+let C23 being _Graph;
+let C24 , C25 , C26 being set;
+pred C26 SJoins C24 , C25 , C23
+means
+:L68: (C26 in ( the_Edges_of C23 ) & ((( ( the_Source_of C23 ) . C26 ) in C24 & ( ( the_Target_of C23 ) . C26 ) in C25) or (( ( the_Source_of C23 ) . C26 ) in C25 & ( ( the_Target_of C23 ) . C26 ) in C24)))
+;pred C26 DSJoins C24 , C25 , C23
+means
+:L69: (C26 in ( the_Edges_of C23 ) & ( ( the_Source_of C23 ) . C26 ) in C24 & ( ( the_Target_of C23 ) . C26 ) in C25)
+;end;
+L71: (for B3 being _Graph holds (for B4 , B5 , B6 being set holds (B4 Joins B5 , B6 , B3 iff (B4 DJoins B5 , B6 , B3 or B4 DJoins B6 , B5 , B3))))
+proof
+let C27 being _Graph;
+let C28 , C29 , C30 being set;
+thus L72:now
+assume L73: C28 Joins C29 , C30 , C27;
+L74: ((( ( the_Source_of C27 ) . C28 ) = C29 & ( ( the_Target_of C27 ) . C28 ) = C30) or (( ( the_Source_of C27 ) . C28 ) = C30 & ( ( the_Target_of C27 ) . C28 ) = C29)) by L73 , L64;
+L75: C28 in ( the_Edges_of C27 ) by L73 , L64;
+thus L76: (C28 DJoins C29 , C30 , C27 or C28 DJoins C30 , C29 , C27) by L75 , L74 , L66;
+end;
+assume L77: (C28 DJoins C29 , C30 , C27 or C28 DJoins C30 , C29 , C27);
+L78: ((( ( the_Source_of C27 ) . C28 ) = C29 & ( ( the_Target_of C27 ) . C28 ) = C30) or (( ( the_Source_of C27 ) . C28 ) = C30 & ( ( the_Target_of C27 ) . C28 ) = C29)) by L77 , L66;
+L79: C28 in ( the_Edges_of C27 ) by L77 , L66;
+thus L80: thesis by L79 , L78 , L64;
+end;
+definition
+let C31 being _Graph;
+attr C31 is  finite
+means
+:L81: (( the_Vertices_of C31 ) is  finite & ( the_Edges_of C31 ) is  finite);
+attr C31 is  loopless
+means
+:L82: (not (ex B7 being set st (B7 in ( the_Edges_of C31 ) & ( ( the_Source_of C31 ) . B7 ) = ( ( the_Target_of C31 ) . B7 ))));
+attr C31 is  trivial
+means
+:L83: ( card ( the_Vertices_of C31 ) ) = 1;
+attr C31 is  non-multi
+means
+:L84: (for B8 , B9 , B10 , B11 being set holds ((B8 Joins B10 , B11 , C31 & B9 Joins B10 , B11 , C31) implies B8 = B9));
+attr C31 is  non-Dmulti
+means
+:L85: (for B12 , B13 , B14 , B15 being set holds ((B12 DJoins B14 , B15 , C31 & B13 DJoins B14 , B15 , C31) implies B12 = B13));
+end;
+definition
+let C32 being _Graph;
+attr C32 is  simple
+means
+:L87: (C32 is  loopless & C32 is  non-multi);
+attr C32 is  Dsimple
+means
+:L88: (C32 is  loopless & C32 is  non-Dmulti);
+end;
+L90: (for B16 being _Graph holds (( the_Edges_of B16 ) = ( {} ) implies B16 is  simple))
+proof
+let C33 being _Graph;
+assume L91: ( the_Edges_of C33 ) = ( {} );
+L92: (not (ex B17 being set st (B17 in ( the_Edges_of C33 ) & ( ( the_Source_of C33 ) . B17 ) = ( ( the_Target_of C33 ) . B17 )))) by L91;
+L93: C33 is  loopless by L92 , L82;
+L94: (for B18 , B19 , B20 , B21 being set holds ((B18 Joins B20 , B21 , C33 & B19 Joins B20 , B21 , C33) implies B18 = B19)) by L91 , L64;
+L95: C33 is  non-multi by L94 , L84;
+thus L96: thesis by L95 , L93 , L87;
+end;
+registration
+cluster  non-multi ->  non-Dmulti for _Graph;
+coherence
+proof
+let C34 being _Graph;
+assume L97: C34 is  non-multi;
+L98:
+now
+let C35 , C36 , C37 , C38 being set;
+assume L99: (C35 DJoins C37 , C38 , C34 & C36 DJoins C37 , C38 , C34);
+L100: (C35 Joins C37 , C38 , C34 & C36 Joins C37 , C38 , C34) by L99 , L71;
+thus L101: C35 = C36 by L100 , L97 , L84;
+end;
+thus L102: thesis by L98 , L85;
+end;
+cluster  simple ->  loopless  non-multi for _Graph;
+coherence by L87;
+cluster  loopless  non-multi ->  simple for _Graph;
+coherence by L87;
+cluster  loopless  non-Dmulti ->  Dsimple for _Graph;
+coherence by L88;
+cluster  Dsimple ->  loopless  non-Dmulti for _Graph;
+coherence by L88;
+cluster  trivial  loopless ->  finite for _Graph;
+coherence
+proof
+let C39 being _Graph;
+assume that
+L103: C39 is  trivial
+and
+L104: C39 is  loopless;
+L105: ( card ( the_Vertices_of C39 ) ) = 1 by L103 , L83;
+consider C40 being set such that L106: ( the_Vertices_of C39 ) = { C40 } by L105 , CARD_2:42;
+L107:
+now
+per cases ;
+suppose L108: ( the_Edges_of C39 ) is  empty;
+
+thus L109: ( the_Edges_of C39 ) is  finite by L108;
+end;
+suppose L110: ( the_Edges_of C39 ) is non  empty;
+
+consider C41 being set such that L111: C41 in ( the_Edges_of C39 ) by L110 , XBOOLE_0:def 1;
+L112: ( ( the_Target_of C39 ) . C41 ) in ( the_Vertices_of C39 ) by L111 , FUNCT_2:5;
+L113: ( ( the_Target_of C39 ) . C41 ) = C40 by L112 , L106 , TARSKI:def 1;
+L114: ( ( the_Source_of C39 ) . C41 ) in ( the_Vertices_of C39 ) by L111 , FUNCT_2:5;
+L115: ( ( the_Source_of C39 ) . C41 ) = C40 by L114 , L106 , TARSKI:def 1;
+thus L116: ( the_Edges_of C39 ) is  finite by L115 , L104 , L111 , L113 , L82;
+end;
+end;
+thus L118: thesis by L107 , L106 , L81;
+end;
+cluster  trivial  non-Dmulti ->  finite for _Graph;
+coherence
+proof
+let C42 being _Graph;
+assume that
+L119: C42 is  trivial
+and
+L120: C42 is  non-Dmulti;
+L121: ( card ( the_Vertices_of C42 ) ) = 1 by L119 , L83;
+consider C43 being set such that L122: ( the_Vertices_of C42 ) = { C43 } by L121 , CARD_2:42;
+L123:
+now
+set D10 = ( choose ( the_Edges_of C42 ) );
+set D11 = ( ( the_Source_of C42 ) . D10 );
+set D12 = ( ( the_Target_of C42 ) . D10 );
+assume L124: (not ( the_Edges_of C42 ) is  finite);
+L125: ( the_Edges_of C42 ) <> ( {} ) by L124;
+L126: D12 in ( the_Vertices_of C42 ) by L124 , FUNCT_2:5;
+L127: D12 = C43 by L126 , L122 , TARSKI:def 1;
+L128: D11 in ( the_Vertices_of C42 ) by L124 , FUNCT_2:5;
+L129: D11 = C43 by L128 , L122 , TARSKI:def 1;
+L130: D10 DJoins C43 , C43 , C42 by L129 , L125 , L127 , L66;
+L131:
+now
+let C44 being set;
+set D13 = ( ( the_Source_of C42 ) . C44 );
+set D14 = ( ( the_Target_of C42 ) . C44 );
+thus L132:now
+assume L133: C44 in { D10 };
+L134: C44 = D10 by L133 , TARSKI:def 1;
+thus L135: C44 in ( the_Edges_of C42 ) by L134 , L125;
+end;
+assume L136: C44 in ( the_Edges_of C42 );
+L137: D14 in ( the_Vertices_of C42 ) by L136 , FUNCT_2:5;
+L138: D14 = C43 by L137 , L122 , TARSKI:def 1;
+L139: D13 in ( the_Vertices_of C42 ) by L136 , FUNCT_2:5;
+L140: D13 = C43 by L139 , L122 , TARSKI:def 1;
+L141: C44 DJoins C43 , C43 , C42 by L140 , L136 , L138 , L66;
+L142: C44 = D10 by L141 , L120 , L130 , L85;
+thus L143: C44 in { D10 } by L142 , TARSKI:def 1;
+end;
+thus L144: contradiction by L131 , L124 , TARSKI:1;
+end;
+thus L145: thesis by L123 , L122 , L81;
+end;
+end;
+registration
+cluster  trivial  simple for _Graph;
+existence
+proof
+set D15 = { 1 };
+set D16 = ( {} );
+reconsider D17 = ( {} ) as (Function of D16 , D15) by RELSET_1:12;
+set D18 = ( createGraph (D15 , D16 , D17 , D17) );
+take D18;
+L147: ( the_Vertices_of D18 ) = { 1 } by FINSEQ_4:76;
+L148: ( card ( the_Vertices_of D18 ) ) = 1 by L147 , CARD_1:30;
+thus L149: D18 is  trivial by L148 , L83;
+L150: ( the_Edges_of D18 ) = ( {} ) by FINSEQ_4:76;
+L151: (for B22 , B23 , B24 , B25 being set holds ((B22 Joins B24 , B25 , D18 & B23 Joins B24 , B25 , D18) implies B22 = B23)) by L150 , L64;
+L152: D18 is  non-multi by L151 , L84;
+L153: (not (ex B26 being set st (B26 in ( the_Edges_of D18 ) & ( ( the_Source_of D18 ) . B26 ) = ( ( the_Target_of D18 ) . B26 )))) by FINSEQ_4:76;
+L154: D18 is  loopless by L153 , L82;
+thus L155: thesis by L154 , L152;
+end;
+cluster  finite non  trivial  simple for _Graph;
+existence
+proof
+set D19 = { 1 , 2 };
+set D20 = ( {} );
+reconsider D21 = ( {} ) as (Function of D20 , D19) by RELSET_1:12;
+set D22 = ( createGraph (D19 , D20 , D21 , D21) );
+take D22;
+L156: ( the_Edges_of D22 ) = ( {} ) by FINSEQ_4:76;
+L157: ( the_Vertices_of D22 ) = { 1 , 2 } by FINSEQ_4:76;
+thus L158: D22 is  finite by L157 , L156 , L81;
+L159: ( card ( the_Vertices_of D22 ) ) <> 1 by L157 , CARD_2:57;
+thus L160: D22 is non  trivial by L159 , L83;
+L161: (not (ex B27 being set st (B27 in ( the_Edges_of D22 ) & ( ( the_Source_of D22 ) . B27 ) = ( ( the_Target_of D22 ) . B27 )))) by FINSEQ_4:76;
+L162: D22 is  loopless by L161 , L82;
+L163: (for B28 , B29 , B30 , B31 being set holds ((B28 Joins B30 , B31 , D22 & B29 Joins B30 , B31 , D22) implies B28 = B29)) by L156 , L64;
+L164: D22 is  non-multi by L163 , L84;
+thus L165: thesis by L164 , L162;
+end;
+end;
+registration
+let C45 being  finite _Graph;
+cluster ( the_Vertices_of C45 ) ->  finite;
+coherence by L81;
+cluster ( the_Edges_of C45 ) ->  finite;
+coherence by L81;
+end;
+registration
+let C46 being  trivial _Graph;
+cluster ( the_Vertices_of C46 ) ->  finite;
+coherence
+proof
+L168: ( card ( the_Vertices_of C46 ) ) = 1 by L83;
+thus L169: thesis by L168;
+end;
+end;
+registration
+let C47 being non  empty  finite set;
+let C48 being  finite set;
+let C49 , C50 being (Function of C48 , C47);
+cluster ( createGraph (C47 , C48 , C49 , C50) ) ->  finite;
+coherence
+proof
+set D23 = ( createGraph (C47 , C48 , C49 , C50) );
+L171: (( the_Vertices_of D23 ) = C47 & ( the_Edges_of D23 ) = C48) by FINSEQ_4:76;
+thus L172: thesis by L171 , L81;
+end;
+end;
+registration
+let C51 being non  empty set;
+let C52 being  empty set;
+let C53 , C54 being (Function of C52 , C51);
+cluster ( createGraph (C51 , C52 , C53 , C54) ) ->  simple;
+coherence
+proof
+set D24 = ( createGraph (C51 , C52 , C53 , C54) );
+L174: ( the_Edges_of D24 ) = C52 by FINSEQ_4:76;
+L175: (for B32 , B33 , B34 , B35 being set holds ((B32 Joins B34 , B35 , D24 & B33 Joins B34 , B35 , D24) implies B32 = B33)) by L174 , L64;
+L176: D24 is  non-multi by L175 , L84;
+L177: (not (ex B36 being set st (B36 in ( the_Edges_of D24 ) & ( ( the_Source_of D24 ) . B36 ) = ( ( the_Target_of D24 ) . B36 )))) by FINSEQ_4:76;
+L178: D24 is  loopless by L177 , L82;
+thus L179: thesis by L178 , L176;
+end;
+end;
+registration
+let C55 being set;
+let C56 being set;
+let C57 , C58 being (Function of C56 , { C55 });
+cluster ( createGraph ({ C55 } , C56 , C57 , C58) ) ->  trivial;
+coherence
+proof
+set D25 = ( createGraph ({ C55 } , C56 , C57 , C58) );
+L181: ( the_Vertices_of D25 ) = { C55 } by FINSEQ_4:76;
+L182: ( card ( the_Vertices_of D25 ) ) = 1 by L181 , CARD_1:30;
+thus L183: thesis by L182 , L83;
+end;
+end;
+definition
+let C59 being _Graph;
+func C59 .order() -> Cardinal equals 
+( card ( the_Vertices_of C59 ) );
+coherence;
+end;
+definition
+let C60 being  finite _Graph;
+redefine func C60 .order() -> non  empty (Element of ( NAT ));
+
+coherence
+proof
+L186: ( C60 .order() ) = ( card ( the_Vertices_of C60 ) );
+thus L187: thesis by L186;
+end;
+end;
+definition
+let C61 being _Graph;
+func C61 .size() -> Cardinal equals 
+( card ( the_Edges_of C61 ) );
+coherence;
+end;
+definition
+let C62 being  finite _Graph;
+redefine func C62 .size() -> (Element of ( NAT ));
+
+coherence
+proof
+L190: ( C62 .size() ) = ( card ( the_Edges_of C62 ) );
+thus L191: thesis by L190;
+end;
+end;
+definition
+let C63 being _Graph;
+let C64 being set;
+func C63 .edgesInto C64 -> (Subset of ( the_Edges_of C63 )) means 
+:L193: (for B37 being set holds (B37 in it iff (B37 in ( the_Edges_of C63 ) & ( ( the_Target_of C63 ) . B37 ) in C64)));
+existence
+proof
+defpred S1[ set ] means ( ( the_Target_of C63 ) . $1 ) in C64;
+consider C65 being (Subset of ( the_Edges_of C63 )) such that L194: (for B38 being set holds (B38 in C65 iff (B38 in ( the_Edges_of C63 ) & S1[ B38 ]))) from SUBSET_1:sch 1;
+take C65;
+thus L195: thesis by L194;
+end;
+uniqueness
+proof
+let C66 , C67 being (Subset of ( the_Edges_of C63 ));
+assume that
+L196: (for B39 being set holds (B39 in C66 iff (B39 in ( the_Edges_of C63 ) & ( ( the_Target_of C63 ) . B39 ) in C64)))
+and
+L197: (for B40 being set holds (B40 in C67 iff (B40 in ( the_Edges_of C63 ) & ( ( the_Target_of C63 ) . B40 ) in C64)));
+L198:
+now
+let C68 being set;
+thus L199:now
+assume L200: C68 in C66;
+L201: ( ( the_Target_of C63 ) . C68 ) in C64 by L200 , L196;
+thus L202: C68 in C67 by L201 , L197 , L200;
+end;
+assume L203: C68 in C67;
+L204: ( ( the_Target_of C63 ) . C68 ) in C64 by L203 , L197;
+thus L205: C68 in C66 by L204 , L196 , L203;
+end;
+thus L206: thesis by L198 , TARSKI:1;
+end;
+func C63 .edgesOutOf C64 -> (Subset of ( the_Edges_of C63 )) means 
+:L207: (for B41 being set holds (B41 in it iff (B41 in ( the_Edges_of C63 ) & ( ( the_Source_of C63 ) . B41 ) in C64)));
+existence
+proof
+defpred S2[ set ] means ( ( the_Source_of C63 ) . $1 ) in C64;
+consider C69 being (Subset of ( the_Edges_of C63 )) such that L208: (for B42 being set holds (B42 in C69 iff (B42 in ( the_Edges_of C63 ) & S2[ B42 ]))) from SUBSET_1:sch 1;
+take C69;
+thus L209: thesis by L208;
+end;
+uniqueness
+proof
+let C70 , C71 being (Subset of ( the_Edges_of C63 ));
+assume that
+L210: (for B43 being set holds (B43 in C70 iff (B43 in ( the_Edges_of C63 ) & ( ( the_Source_of C63 ) . B43 ) in C64)))
+and
+L211: (for B44 being set holds (B44 in C71 iff (B44 in ( the_Edges_of C63 ) & ( ( the_Source_of C63 ) . B44 ) in C64)));
+L212:
+now
+let C72 being set;
+thus L213:now
+assume L214: C72 in C70;
+L215: ( ( the_Source_of C63 ) . C72 ) in C64 by L214 , L210;
+thus L216: C72 in C71 by L215 , L211 , L214;
+end;
+assume L217: C72 in C71;
+L218: ( ( the_Source_of C63 ) . C72 ) in C64 by L217 , L211;
+thus L219: C72 in C70 by L218 , L210 , L217;
+end;
+thus L220: thesis by L212 , TARSKI:1;
+end;
+end;
+definition
+let C73 being _Graph;
+let C74 being set;
+func C73 .edgesInOut C74 -> (Subset of ( the_Edges_of C73 )) equals 
+( ( C73 .edgesInto C74 ) \/ ( C73 .edgesOutOf C74 ) );
+coherence;
+func C73 .edgesBetween C74 -> (Subset of ( the_Edges_of C73 )) equals 
+( ( C73 .edgesInto C74 ) /\ ( C73 .edgesOutOf C74 ) );
+coherence;
+end;
+definition
+let C75 being _Graph;
+let C76 , C77 being set;
+func C75 .edgesBetween (C76 , C77) -> (Subset of ( the_Edges_of C75 )) means 
+:L223: (for B45 being set holds (B45 in it iff B45 SJoins C76 , C77 , C75));
+existence
+proof
+defpred S3[ set ] means $1 SJoins C76 , C77 , C75;
+consider C78 being (Subset of ( the_Edges_of C75 )) such that L224: (for B46 being set holds (B46 in C78 iff (B46 in ( the_Edges_of C75 ) & S3[ B46 ]))) from SUBSET_1:sch 1;
+take C78;
+let C79 being set;
+thus L225: (C79 in C78 implies S3[ C79 ]) by L224;
+assume L226: C79 SJoins C76 , C77 , C75;
+L227: C79 in ( the_Edges_of C75 ) by L226 , L68;
+thus L228: thesis by L227 , L224 , L226;
+end;
+uniqueness
+proof
+let C80 , C81 being (Subset of ( the_Edges_of C75 ));
+assume that
+L229: (for B47 being set holds (B47 in C80 iff B47 SJoins C76 , C77 , C75))
+and
+L230: (for B48 being set holds (B48 in C81 iff B48 SJoins C76 , C77 , C75));
+L231:
+now
+let C82 being set;
+L232: (C82 in C80 iff C82 SJoins C76 , C77 , C75) by L229;
+thus L233: (C82 in C81 iff C82 in C80) by L232 , L230;
+end;
+thus L234: thesis by L231 , TARSKI:1;
+end;
+func C75 .edgesDBetween (C76 , C77) -> (Subset of ( the_Edges_of C75 )) means 
+:L235: (for B49 being set holds (B49 in it iff B49 DSJoins C76 , C77 , C75));
+existence
+proof
+defpred S4[ set ] means $1 DSJoins C76 , C77 , C75;
+consider C83 being (Subset of ( the_Edges_of C75 )) such that L236: (for B50 being set holds (B50 in C83 iff (B50 in ( the_Edges_of C75 ) & S4[ B50 ]))) from SUBSET_1:sch 1;
+take C83;
+let C84 being set;
+thus L237: (C84 in C83 implies S4[ C84 ]) by L236;
+assume L238: C84 DSJoins C76 , C77 , C75;
+L239: C84 in ( the_Edges_of C75 ) by L238 , L69;
+thus L240: thesis by L239 , L236 , L238;
+end;
+uniqueness
+proof
+let C85 , C86 being (Subset of ( the_Edges_of C75 ));
+assume that
+L241: (for B51 being set holds (B51 in C85 iff B51 DSJoins C76 , C77 , C75))
+and
+L242: (for B52 being set holds (B52 in C86 iff B52 DSJoins C76 , C77 , C75));
+L243:
+now
+let C87 being set;
+L244: (C87 in C85 iff C87 DSJoins C76 , C77 , C75) by L241;
+thus L245: (C87 in C86 iff C87 in C85) by L244 , L242;
+end;
+thus L246: thesis by L243 , TARSKI:1;
+end;
+end;
+scheme FinGraphOrderInd { P1[ finite _Graph] } : (for B53 being  finite _Graph holds P1[ B53 ])
+provided
+L248: (for B54 being  finite _Graph holds (( B54 .order() ) = 1 implies P1[ B54 ]))
+and
+L249: (for B55 being non  empty Nat holds ((for B56 being  finite _Graph holds (( B56 .order() ) = B55 implies P1[ B56 ])) implies (for B57 being  finite _Graph holds (( B57 .order() ) = ( B55 + 1 ) implies P1[ B57 ]))))
+proof
+defpred S5[ Nat ] means (for B58 being  finite _Graph holds (( B58 .order() ) = $1 implies P1[ B58 ]));
+L250: (for B59 being non  empty Nat holds (S5[ B59 ] implies S5[ ( B59 + 1 ) ])) by L249;
+let C88 being  finite _Graph;
+L251: ( C88 .order() ) = ( C88 .order() );
+L252: S5[ 1 ] by L248;
+L253: (for B60 being non  empty Nat holds S5[ B60 ]) from NAT_1:sch 10(L252 , L250);
+thus L254: thesis by L253 , L251;
+end;
+scheme FinGraphSizeInd { P2[ finite _Graph] } : (for B61 being  finite _Graph holds P2[ B61 ])
+provided
+L255: (for B62 being  finite _Graph holds (( B62 .size() ) = ( 0 ) implies P2[ B62 ]))
+and
+L256: (for B63 being (Element of ( NAT )) holds ((for B64 being  finite _Graph holds (( B64 .size() ) = B63 implies P2[ B64 ])) implies (for B65 being  finite _Graph holds (( B65 .size() ) = ( B63 + 1 ) implies P2[ B65 ]))))
+proof
+defpred S6[ (Element of ( NAT )) ] means (for B66 being  finite _Graph holds (( B66 .size() ) = $1 implies P2[ B66 ]));
+L257: (for B67 being (Element of ( NAT )) holds (S6[ B67 ] implies S6[ ( B67 + 1 ) ])) by L256;
+let C89 being  finite _Graph;
+L258: ( C89 .size() ) = ( C89 .size() );
+L259: S6[ ( 0 ) ] by L255;
+L260: (for B68 being (Element of ( NAT )) holds S6[ B68 ]) from NAT_1:sch 1(L259 , L257);
+thus L261: thesis by L260 , L258;
+end;
+definition
+let C90 being _Graph;
+mode Subgraph of C90
+ -> _Graph
+means :L262: (( the_Vertices_of it ) c= ( the_Vertices_of C90 ) & ( the_Edges_of it ) c= ( the_Edges_of C90 ) & (for B69 being set holds (B69 in ( the_Edges_of it ) implies (( ( the_Source_of it ) . B69 ) = ( ( the_Source_of C90 ) . B69 ) & ( ( the_Target_of it ) . B69 ) = ( ( the_Target_of C90 ) . B69 )))));
+existence
+proof
+take C90;
+thus L263: thesis;
+end;
+end;
+definition
+let C91 being _Graph;
+let C92 being (Subgraph of C91);
+redefine func the_Vertices_of C92 -> non  empty (Subset of ( the_Vertices_of C91 ));
+
+coherence by L262;
+redefine func the_Edges_of C92 -> (Subset of ( the_Edges_of C91 ));
+
+coherence by L262;
+end;
+registration
+let C93 being _Graph;
+cluster  trivial  simple for (Subgraph of C93);
+existence
+proof
+set D26 = the (Element of ( the_Vertices_of C93 ));
+set D27 = { D26 };
+set D28 = ( {} );
+reconsider D29 = ( {} ) as (Function of D28 , D27) by RELSET_1:12;
+set D30 = ( createGraph (D27 , D28 , D29 , D29) );
+L266: (( the_Vertices_of D30 ) = { D26 } & (for B70 being set holds (B70 in ( the_Edges_of D30 ) implies (( ( the_Source_of D30 ) . B70 ) = ( ( the_Source_of C93 ) . B70 ) & ( ( the_Target_of D30 ) . B70 ) = ( ( the_Target_of C93 ) . B70 ))))) by FINSEQ_4:76;
+L267: ( the_Edges_of D30 ) = ( {} ) by FINSEQ_4:76;
+L268: ( the_Edges_of D30 ) c= ( the_Edges_of C93 ) by L267 , XBOOLE_1:2;
+reconsider D31 = D30 as (Subgraph of C93) by L268 , L266 , L262;
+take D31;
+thus L269: thesis;
+end;
+end;
+L271: (for B71 being _Graph holds B71 is (Subgraph of B71))
+proof
+let C94 being _Graph;
+L272: (for B72 being set holds (B72 in ( the_Edges_of C94 ) implies (( ( the_Source_of C94 ) . B72 ) = ( ( the_Source_of C94 ) . B72 ) & ( ( the_Target_of C94 ) . B72 ) = ( ( the_Target_of C94 ) . B72 ))));
+thus L273: thesis by L272 , L262;
+end;
+L274: (for B73 being _Graph holds (for B74 being (Subgraph of B73) holds (for B75 , B76 , B77 being set holds (B77 Joins B75 , B76 , B74 implies B77 Joins B75 , B76 , B73))))
+proof
+let C95 being _Graph;
+let C96 being (Subgraph of C95);
+let C97 , C98 , C99 being set;
+assume L275: C99 Joins C97 , C98 , C96;
+L276: C99 in ( the_Edges_of C96 ) by L275 , L64;
+L277: ((( ( the_Source_of C96 ) . C99 ) = C97 & ( ( the_Target_of C96 ) . C99 ) = C98) or (( ( the_Source_of C96 ) . C99 ) = C98 & ( ( the_Target_of C96 ) . C99 ) = C97)) by L275 , L64;
+L278: ((( ( the_Source_of C95 ) . C99 ) = C97 & ( ( the_Target_of C95 ) . C99 ) = C98) or (( ( the_Source_of C95 ) . C99 ) = C98 & ( ( the_Target_of C95 ) . C99 ) = C97)) by L277 , L276 , L262;
+thus L279: thesis by L278 , L276 , L64;
+end;
+registration
+let C100 being  finite _Graph;
+cluster  ->  finite for (Subgraph of C100);
+coherence
+proof
+let C101 being (Subgraph of C100);
+L280: (( the_Vertices_of C101 ) is  finite & ( the_Edges_of C101 ) is  finite);
+thus L281: thesis by L280 , L81;
+end;
+end;
+registration
+let C102 being  loopless _Graph;
+cluster  ->  loopless for (Subgraph of C102);
+coherence
+proof
+let C103 being (Subgraph of C102);
+L283:
+now
+given C104 being set such that
+L284: C104 in ( the_Edges_of C103 )
+and
+L285: ( ( the_Source_of C103 ) . C104 ) = ( ( the_Target_of C103 ) . C104 );
+
+L286: (( ( the_Source_of C103 ) . C104 ) = ( ( the_Source_of C102 ) . C104 ) & ( ( the_Target_of C103 ) . C104 ) = ( ( the_Target_of C102 ) . C104 )) by L284 , L262;
+thus L287: contradiction by L286 , L284 , L285 , L82;
+end;
+thus L288: thesis by L283 , L82;
+end;
+end;
+registration
+let C105 being  trivial _Graph;
+cluster  ->  trivial for (Subgraph of C105);
+coherence
+proof
+let C106 being (Subgraph of C105);
+L290: ( card ( the_Vertices_of C105 ) ) = 1 by L83;
+consider C107 being set such that L291: ( the_Vertices_of C105 ) = { C107 } by L290 , CARD_2:42;
+L292: ( the_Vertices_of C106 ) = { C107 } by L291 , ZFMISC_1:33;
+L293: ( card ( the_Vertices_of C106 ) ) = 1 by L292 , CARD_1:30;
+thus L294: thesis by L293 , L83;
+end;
+end;
+registration
+let C108 being  non-multi _Graph;
+cluster  ->  non-multi for (Subgraph of C108);
+coherence
+proof
+let C109 being (Subgraph of C108);
+L296:
+now
+let C110 , C111 , C112 , C113 being set;
+assume L297: (C110 Joins C112 , C113 , C109 & C111 Joins C112 , C113 , C109);
+L298: (C110 Joins C112 , C113 , C108 & C111 Joins C112 , C113 , C108) by L297 , L274;
+thus L299: C110 = C111 by L298 , L84;
+end;
+thus L300: thesis by L296 , L84;
+end;
+end;
+definition
+let C114 being _Graph;
+let C115 being (Subgraph of C114);
+attr C115 is  spanning
+means
+:L302: ( the_Vertices_of C115 ) = ( the_Vertices_of C114 );
+end;
+registration
+let C116 being _Graph;
+cluster  spanning for (Subgraph of C116);
+existence
+proof
+reconsider D32 = C116 as (Subgraph of C116) by L271;
+take D32;
+L304: ( the_Vertices_of D32 ) = ( the_Vertices_of C116 );
+thus L305: thesis by L304 , L302;
+end;
+end;
+definition
+let C117 , C118 being _Graph;
+pred C117 == C118
+means
+:L307: (( the_Vertices_of C117 ) = ( the_Vertices_of C118 ) & ( the_Edges_of C117 ) = ( the_Edges_of C118 ) & ( the_Source_of C117 ) = ( the_Source_of C118 ) & ( the_Target_of C117 ) = ( the_Target_of C118 ))
+;reflexivity
+;
+symmetry
+;
+end;
+notation
+let C119 , C120 being _Graph;
+antonym C119 != C120 for C119 == C120;
+end;
+definition
+let C121 , C122 being _Graph;
+pred C121 c= C122
+means
+:L310: C121 is (Subgraph of C122)
+;reflexivity
+ by L271;
+end;
+definition
+let C123 , C124 being _Graph;
+pred C123 c< C124
+means
+:L312: (C123 c= C124 & C123 != C124)
+;irreflexivity
+;
+end;
+definition
+let C125 being _Graph;
+let C126 , C127 being set;
+mode inducedSubgraph of C125 , C126 , C127
+ -> (Subgraph of C125)
+means :L314: (( the_Vertices_of it ) = C126 & ( the_Edges_of it ) = C127) if (C126 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C125 )) & C127 c= ( C125 .edgesBetween C126 )) otherwise it == C125;
+existence
+proof
+thus L315:now
+assume that
+L316: C126 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C125 ))
+and
+L317: C127 c= ( C125 .edgesBetween C126 );
+reconsider D33 = C127 as (Subset of ( the_Edges_of C125 )) by L317 , XBOOLE_1:1;
+set D34 = ( ( the_Source_of C125 ) | D33 );
+set D35 = ( ( the_Target_of C125 ) | D33 );
+reconsider D36 = C126 as non  empty (Subset of ( the_Vertices_of C125 )) by L316;
+L318: ( dom ( the_Target_of C125 ) ) = ( the_Edges_of C125 ) by FUNCT_2:def 1;
+L319: ( dom D35 ) = D33 by L318 , RELAT_1:62;
+L320:
+now
+let C128 being set;
+assume L321: C128 in D33;
+L322: C128 in ( C125 .edgesInto C126 ) by L321 , L317 , XBOOLE_0:def 4;
+L323: ( ( the_Target_of C125 ) . C128 ) in C126 by L322 , L193;
+thus L324: ( D35 . C128 ) in C126 by L323 , L321 , FUNCT_1:49;
+end;
+reconsider D37 = D35 as (Function of D33 , D36) by L320 , L319 , FUNCT_2:3;
+L325: ( dom ( the_Source_of C125 ) ) = ( the_Edges_of C125 ) by FUNCT_2:def 1;
+L326: ( dom D34 ) = D33 by L325 , RELAT_1:62;
+L327:
+now
+let C129 being set;
+assume L328: C129 in D33;
+L329: C129 in ( C125 .edgesOutOf C126 ) by L328 , L317 , XBOOLE_0:def 4;
+L330: ( ( the_Source_of C125 ) . C129 ) in C126 by L329 , L207;
+thus L331: ( D34 . C129 ) in C126 by L330 , L328 , FUNCT_1:49;
+end;
+reconsider D38 = D34 as (Function of D33 , D36) by L327 , L326 , FUNCT_2:3;
+set D39 = ( createGraph (D36 , D33 , D38 , D37) );
+L332: ( the_Edges_of D39 ) = C127 by FINSEQ_4:76;
+L333: (( the_Source_of D39 ) = D38 & ( the_Target_of D39 ) = D37) by FINSEQ_4:76;
+L334: (( the_Vertices_of D39 ) = C126 & (for B78 being set holds (B78 in ( the_Edges_of D39 ) implies (( ( the_Source_of D39 ) . B78 ) = ( ( the_Source_of C125 ) . B78 ) & ( ( the_Target_of D39 ) . B78 ) = ( ( the_Target_of C125 ) . B78 ))))) by L333 , L332 , FINSEQ_4:76 , FUNCT_1:49;
+reconsider D40 = D39 as (Subgraph of C125) by L334 , L332 , L262;
+take D41 = D40;
+thus L335: (( the_Vertices_of D41 ) = C126 & ( the_Edges_of D41 ) = C127) by FINSEQ_4:76;
+end;
+L336: C125 is (Subgraph of C125) by L271;
+thus L337: thesis by L336;
+end;
+consistency;
+end;
+definition
+let C130 being _Graph;
+let C131 being set;
+mode inducedSubgraph of C130 , C131
+ is (inducedSubgraph of C130 , C131 , ( C130 .edgesBetween C131 ));
+end;
+registration
+let C132 being _Graph;
+let C133 being  finite non  empty (Subset of ( the_Vertices_of C132 ));
+let C134 being  finite (Subset of ( C132 .edgesBetween C133 ));
+cluster  ->  finite for (inducedSubgraph of C132 , C133 , C134);
+coherence
+proof
+let C135 being (inducedSubgraph of C132 , C133 , C134);
+L340: (( the_Vertices_of C135 ) = C133 & ( the_Edges_of C135 ) = C134) by L314;
+thus L341: thesis by L340 , L81;
+end;
+end;
+registration
+let C136 being _Graph;
+let C137 being (Element of ( the_Vertices_of C136 ));
+let C138 being (Subset of ( C136 .edgesBetween { C137 } ));
+cluster  ->  trivial for (inducedSubgraph of C136 , { C137 } , C138);
+coherence
+proof
+let C139 being (inducedSubgraph of C136 , { C137 } , C138);
+L343: ( the_Vertices_of C139 ) = { C137 } by L314;
+L344: ( card ( the_Vertices_of C139 ) ) = 1 by L343 , CARD_1:30;
+thus L345: thesis by L344 , L83;
+end;
+end;
+registration
+let C140 being _Graph;
+let C141 being (Element of ( the_Vertices_of C140 ));
+cluster  ->  finite  trivial for (inducedSubgraph of C140 , { C141 } , ( {} ));
+coherence
+proof
+reconsider D42 = ( {} ) as  finite (Subset of ( C140 .edgesBetween { C141 } )) by XBOOLE_1:2;
+let C142 being (inducedSubgraph of C140 , { C141 } , ( {} ));
+L347: C142 is (inducedSubgraph of C140 , { C141 } , D42);
+thus L348: thesis by L347;
+end;
+end;
+registration
+let C143 being _Graph;
+let C144 being non  empty (Subset of ( the_Vertices_of C143 ));
+cluster  ->  simple for (inducedSubgraph of C143 , C144 , ( {} ));
+coherence
+proof
+let C145 being (inducedSubgraph of C143 , C144 , ( {} ));
+reconsider D43 = ( {} ) as (Subset of ( C143 .edgesBetween C144 )) by XBOOLE_1:2;
+L350: C145 is (inducedSubgraph of C143 , C144 , D43);
+L351: ( the_Edges_of C145 ) = ( {} ) by L350 , L314;
+thus L352: thesis by L351 , L90;
+end;
+end;
+L354: (for B79 being _Graph holds (for B80 , B81 being set holds ((B80 in ( the_Edges_of B79 ) & ( ( the_Source_of B79 ) . B80 ) in B81 & ( ( the_Target_of B79 ) . B80 ) in B81) iff B80 in ( B79 .edgesBetween B81 ))))
+proof
+let C146 being _Graph;
+let C147 , C148 being set;
+thus L355:now
+assume L356: (C147 in ( the_Edges_of C146 ) & ( ( the_Source_of C146 ) . C147 ) in C148 & ( ( the_Target_of C146 ) . C147 ) in C148);
+L357: (C147 in ( C146 .edgesInto C148 ) & C147 in ( C146 .edgesOutOf C148 )) by L356 , L193 , L207;
+thus L358: C147 in ( C146 .edgesBetween C148 ) by L357 , XBOOLE_0:def 4;
+end;
+assume L359: C147 in ( C146 .edgesBetween C148 );
+L360: (C147 in ( C146 .edgesInto C148 ) & C147 in ( C146 .edgesOutOf C148 )) by L359 , XBOOLE_0:def 4;
+thus L361: thesis by L360 , L193 , L207;
+end;
+L362: (for B82 being _Graph holds ( the_Edges_of B82 ) = ( B82 .edgesBetween ( the_Vertices_of B82 ) ))
+proof
+let C149 being _Graph;
+set D44 = ( the_Edges_of C149 );
+set D45 = ( the_Source_of C149 );
+set D46 = ( the_Target_of C149 );
+L363:
+now
+let C150 being set;
+thus L364:now
+assume L365: C150 in D44;
+L366: (( D45 . C150 ) in ( the_Vertices_of C149 ) & ( D46 . C150 ) in ( the_Vertices_of C149 )) by L365 , FUNCT_2:5;
+thus L367: C150 in ( C149 .edgesBetween ( the_Vertices_of C149 ) ) by L366 , L365 , L354;
+end;
+assume L368: C150 in ( C149 .edgesBetween ( the_Vertices_of C149 ) );
+thus L369: C150 in D44 by L368;
+end;
+thus L370: thesis by L363 , TARSKI:1;
+end;
+registration
+let C151 being _Graph;
+let C152 being (Subset of ( the_Edges_of C151 ));
+cluster  ->  spanning for (inducedSubgraph of C151 , ( the_Vertices_of C151 ) , C152);
+coherence
+proof
+let C153 being (inducedSubgraph of C151 , ( the_Vertices_of C151 ) , C152);
+L371: (( C151 .edgesBetween ( the_Vertices_of C151 ) ) = ( the_Edges_of C151 ) & ( the_Vertices_of C151 ) c= ( the_Vertices_of C151 )) by L362;
+L372: ( the_Vertices_of C153 ) = ( the_Vertices_of C151 ) by L371 , L314;
+thus L373: thesis by L372 , L302;
+end;
+end;
+registration
+let C154 being _Graph;
+cluster  ->  spanning for (inducedSubgraph of C154 , ( the_Vertices_of C154 ) , ( {} ));
+coherence
+proof
+let C155 being (inducedSubgraph of C154 , ( the_Vertices_of C154 ) , ( {} ));
+L375: (( the_Vertices_of C154 ) c= ( the_Vertices_of C154 ) & ( {} ) c= ( C154 .edgesBetween ( the_Vertices_of C154 ) )) by XBOOLE_1:2;
+L376: ( the_Vertices_of C155 ) = ( the_Vertices_of C154 ) by L375 , L314;
+thus L377: thesis by L376 , L302;
+end;
+end;
+definition
+let C156 being _Graph;
+let C157 being set;
+mode removeVertex of C156 , C157
+ is (inducedSubgraph of C156 , ( ( the_Vertices_of C156 ) \ { C157 } ));
+end;
+definition
+let C158 being _Graph;
+let C159 being set;
+mode removeVertices of C158 , C159
+ is (inducedSubgraph of C158 , ( ( the_Vertices_of C158 ) \ C159 ));
+end;
+definition
+let C160 being _Graph;
+let C161 being set;
+mode removeEdge of C160 , C161
+ is (inducedSubgraph of C160 , ( the_Vertices_of C160 ) , ( ( the_Edges_of C160 ) \ { C161 } ));
+end;
+definition
+let C162 being _Graph;
+let C163 being set;
+mode removeEdges of C162 , C163
+ is (inducedSubgraph of C162 , ( the_Vertices_of C162 ) , ( ( the_Edges_of C162 ) \ C163 ));
+end;
+registration
+let C164 being _Graph;
+let C165 being set;
+cluster  ->  spanning for (removeEdge of C164 , C165);
+coherence;
+end;
+registration
+let C166 being _Graph;
+let C167 being set;
+cluster  ->  spanning for (removeEdges of C166 , C167);
+coherence;
+end;
+definition
+let C168 being _Graph;
+mode Vertex of C168
+ is (Element of ( the_Vertices_of C168 ));
+end;
+definition
+let C169 being _Graph;
+let C170 being (Vertex of C169);
+func C170 .edgesIn() -> (Subset of ( the_Edges_of C169 )) equals 
+( C169 .edgesInto { C170 } );
+coherence;
+func C170 .edgesOut() -> (Subset of ( the_Edges_of C169 )) equals 
+( C169 .edgesOutOf { C170 } );
+coherence;
+func C170 .edgesInOut() -> (Subset of ( the_Edges_of C169 )) equals 
+( C169 .edgesInOut { C170 } );
+coherence;
+end;
+L387: (for B83 being _Graph holds (for B84 being (Vertex of B83) holds (for B85 being set holds (B85 in ( B84 .edgesIn() ) iff (B85 in ( the_Edges_of B83 ) & ( ( the_Target_of B83 ) . B85 ) = B84)))))
+proof
+let C171 being _Graph;
+let C172 being (Vertex of C171);
+let C173 being set;
+thus L388:now
+assume L389: C173 in ( C172 .edgesIn() );
+L390: ( ( the_Target_of C171 ) . C173 ) in { C172 } by L389 , L193;
+thus L391: (C173 in ( the_Edges_of C171 ) & ( ( the_Target_of C171 ) . C173 ) = C172) by L390 , L389 , TARSKI:def 1;
+end;
+assume that
+L392: C173 in ( the_Edges_of C171 )
+and
+L393: ( ( the_Target_of C171 ) . C173 ) = C172;
+L394: ( ( the_Target_of C171 ) . C173 ) in { C172 } by L393 , TARSKI:def 1;
+thus L395: thesis by L394 , L392 , L193;
+end;
+L396: (for B86 being _Graph holds (for B87 being (Vertex of B86) holds (for B88 being set holds (B88 in ( B87 .edgesOut() ) iff (B88 in ( the_Edges_of B86 ) & ( ( the_Source_of B86 ) . B88 ) = B87)))))
+proof
+let C174 being _Graph;
+let C175 being (Vertex of C174);
+let C176 being set;
+thus L397:now
+assume L398: C176 in ( C175 .edgesOut() );
+L399: ( ( the_Source_of C174 ) . C176 ) in { C175 } by L398 , L207;
+thus L400: (C176 in ( the_Edges_of C174 ) & ( ( the_Source_of C174 ) . C176 ) = C175) by L399 , L398 , TARSKI:def 1;
+end;
+assume that
+L401: C176 in ( the_Edges_of C174 )
+and
+L402: ( ( the_Source_of C174 ) . C176 ) = C175;
+L403: ( ( the_Source_of C174 ) . C176 ) in { C175 } by L402 , TARSKI:def 1;
+thus L404: thesis by L403 , L401 , L207;
+end;
+definition
+let C177 being _Graph;
+let C178 being (Vertex of C177);
+let C179 being set;
+func C178 .adj C179 -> (Vertex of C177) equals 
+:L405: ( ( the_Source_of C177 ) . C179 ) if (C179 in ( the_Edges_of C177 ) & ( ( the_Target_of C177 ) . C179 ) = C178) , ( ( the_Target_of C177 ) . C179 ) if (C179 in ( the_Edges_of C177 ) & ( ( the_Source_of C177 ) . C179 ) = C178 & (not ( ( the_Target_of C177 ) . C179 ) = C178)) otherwise C178;
+coherence by FUNCT_2:5;
+consistency;
+end;
+definition
+let C180 being _Graph;
+let C181 being (Vertex of C180);
+func C181 .inDegree() -> Cardinal equals 
+( card ( C181 .edgesIn() ) );
+coherence;
+func C181 .outDegree() -> Cardinal equals 
+( card ( C181 .edgesOut() ) );
+coherence;
+end;
+definition
+let C182 being  finite _Graph;
+let C183 being (Vertex of C182);
+redefine func C183 .inDegree() -> (Element of ( NAT ));
+
+coherence
+proof
+L408: ( C183 .inDegree() ) = ( card ( C183 .edgesIn() ) );
+thus L409: thesis by L408;
+end;
+redefine func C183 .outDegree() -> (Element of ( NAT ));
+
+coherence
+proof
+L410: ( C183 .outDegree() ) = ( card ( C183 .edgesOut() ) );
+thus L411: thesis by L410;
+end;
+end;
+definition
+let C184 being _Graph;
+let C185 being (Vertex of C184);
+func C185 .degree() -> Cardinal equals 
+( ( C185 .inDegree() ) +` ( C185 .outDegree() ) );
+coherence;
+end;
+definition
+let C186 being  finite _Graph;
+let C187 being (Vertex of C186);
+redefine func C187 .degree() -> (Element of ( NAT )) equals 
+( ( C187 .inDegree() ) + ( C187 .outDegree() ) );
+correctness
+proof
+L414: ( C187 .degree() ) = ( card ( ( C187 .inDegree() ) +^ ( C187 .outDegree() ) ) ) by CARD_2:def 1
+.= ( card ( ( C187 .inDegree() ) + ( C187 .outDegree() ) ) ) by CARD_2:36
+.= ( ( C187 .inDegree() ) + ( C187 .outDegree() ) ) by CARD_1:def 2;
+thus L415: thesis by L414;
+end;
+end;
+definition
+let C188 being _Graph;
+let C189 being (Vertex of C188);
+func C189 .inNeighbors() -> (Subset of ( the_Vertices_of C188 )) equals 
+( ( the_Source_of C188 ) .: ( C189 .edgesIn() ) );
+coherence;
+func C189 .outNeighbors() -> (Subset of ( the_Vertices_of C188 )) equals 
+( ( the_Target_of C188 ) .: ( C189 .edgesOut() ) );
+coherence;
+end;
+definition
+let C190 being _Graph;
+let C191 being (Vertex of C190);
+func C191 .allNeighbors() -> (Subset of ( the_Vertices_of C190 )) equals 
+( ( C191 .inNeighbors() ) \/ ( C191 .outNeighbors() ) );
+coherence;
+end;
+definition
+let C192 being _Graph;
+let C193 being (Vertex of C192);
+attr C193 is  isolated
+means
+:L419: ( C193 .edgesInOut() ) = ( {} );
+end;
+definition
+let C194 being  finite _Graph;
+let C195 being (Vertex of C194);
+redefine attr C195 is  isolated
+means
+( C195 .degree() ) = ( 0 );
+compatibility
+proof
+thus L421:now
+assume L422: C195 is  isolated;
+L423: ( C195 .edgesInOut() ) = ( {} ) by L422 , L419;
+L424: ( C195 .inDegree() ) = ( 0 ) by L423 , CARD_1:27 , XBOOLE_1:15;
+thus L425: ( C195 .degree() ) = ( 0 ) by L424 , L423 , CARD_1:27 , XBOOLE_1:15;
+end;
+assume L426: ( C195 .degree() ) = ( 0 );
+L427: ( C195 .edgesIn() ) = ( {} ) by L426;
+L428: ( C195 .edgesInOut() ) = ( {} ) by L427 , L426;
+thus L429: thesis by L428 , L419;
+end;
+end;
+definition
+let C196 being _Graph;
+let C197 being (Vertex of C196);
+attr C197 is  endvertex
+means
+:L431: (ex B89 being set st (( C197 .edgesInOut() ) = { B89 } & (not B89 Joins C197 , C197 , C196)));
+end;
+definition
+let C198 being  finite _Graph;
+let C199 being (Vertex of C198);
+redefine attr C199 is  endvertex
+means
+( C199 .degree() ) = 1;
+compatibility
+proof
+thus L433:now
+assume L434: C199 is  endvertex;
+consider C200 being set such that L435: ( C199 .edgesInOut() ) = { C200 } and L436: (not C200 Joins C199 , C199 , C198) by L434 , L431;
+L437:
+now
+per cases  by L435 , ZFMISC_1:37;
+suppose L438: (( C199 .edgesIn() ) = { C200 } & ( C199 .edgesOut() ) = { C200 });
+
+L439: C200 in ( C199 .edgesOut() ) by L438 , TARSKI:def 1;
+L440: ( ( the_Source_of C198 ) . C200 ) = C199 by L439 , L396;
+L441: C200 in ( C199 .edgesIn() ) by L438 , TARSKI:def 1;
+L442: ( ( the_Target_of C198 ) . C200 ) = C199 by L441 , L387;
+thus L443: ( C199 .degree() ) = 1 by L442 , L436 , L441 , L440 , L64;
+end;
+suppose L444: (( C199 .edgesIn() ) = ( {} ) & ( C199 .edgesOut() ) = { C200 });
+
+thus L445: ( C199 .degree() ) = 1 by L444 , CARD_1:27 , CARD_1:30;
+end;
+suppose L446: (( C199 .edgesIn() ) = { C200 } & ( C199 .edgesOut() ) = ( {} ));
+
+thus L447: ( C199 .degree() ) = 1 by L446 , CARD_1:27 , CARD_1:30;
+end;
+end;
+thus L449: ( C199 .degree() ) = 1 by L437;
+end;
+assume L450: ( C199 .degree() ) = 1;
+L451:
+now
+per cases ;
+suppose L452: ( card ( C199 .edgesIn() ) ) = ( 0 );
+
+consider C201 being set such that L453: ( C199 .edgesOut() ) = { C201 } by L452 , L450 , CARD_2:42;
+L454: ( C199 .edgesIn() ) = ( {} ) by L452;
+L455:
+now
+assume L456: C201 Joins C199 , C199 , C198;
+L457: (C201 in ( the_Edges_of C198 ) & ( ( the_Target_of C198 ) . C201 ) = C199) by L456 , L64;
+thus L458: contradiction by L457 , L454 , L387;
+end;
+L459: ( C199 .edgesInOut() ) = { C201 } by L454 , L453;
+thus L460: thesis by L459 , L455 , L431;
+end;
+suppose L461: ( card ( C199 .edgesIn() ) ) <> ( 0 );
+
+L462: ( 0 ) < ( card ( C199 .edgesIn() ) ) by L461 , NAT_1:3;
+L463: ( ( 0 ) + 1 ) <= ( card ( C199 .edgesIn() ) ) by L462 , NAT_1:13;
+L464: ( card ( C199 .edgesIn() ) ) <= 1 by L450 , NAT_1:11;
+L465: ( card ( C199 .edgesIn() ) ) = 1 by L464 , L463 , XXREAL_0:1;
+consider C202 being set such that L466: ( C199 .edgesIn() ) = { C202 } by L465 , CARD_2:42;
+L467: ( C199 .edgesOut() ) = ( {} ) by L450 , L465;
+L468:
+now
+assume L469: C202 Joins C199 , C199 , C198;
+L470: (C202 in ( the_Edges_of C198 ) & ( ( the_Source_of C198 ) . C202 ) = C199) by L469 , L64;
+thus L471: contradiction by L470 , L467 , L396;
+end;
+L472: ( C199 .edgesInOut() ) = { C202 } by L466 , L467;
+thus L473: thesis by L472 , L468 , L431;
+end;
+end;
+thus L475: thesis by L451;
+end;
+end;
+definition
+let C203 being (ManySortedSet of ( NAT ));
+attr C203 is  Graph-yielding
+means
+:L477: (for B90 being Nat holds ( C203 . B90 ) is _Graph);
+attr C203 is  halting
+means
+:L478: (ex B91 being Nat st ( C203 . B91 ) = ( C203 . ( B91 + 1 ) ));
+end;
+definition
+let C204 being (ManySortedSet of ( NAT ));
+func C204 .Lifespan() -> (Element of ( NAT )) means 
+(( C204 . it ) = ( C204 . ( it + 1 ) ) & (for B92 being Nat holds (( C204 . B92 ) = ( C204 . ( B92 + 1 ) ) implies it <= B92))) if C204 is  halting otherwise it = ( 0 );
+existence
+proof
+defpred S7[ Nat ] means ( C204 . $1 ) = ( C204 . ( $1 + 1 ) );
+thus L480:now
+assume L481: C204 is  halting;
+L482: (ex B93 being Nat st S7[ B93 ]) by L481 , L478;
+L483: (ex B94 being Nat st (S7[ B94 ] & (for B95 being Nat holds (S7[ B95 ] implies B94 <= B95)))) from NAT_1:sch 5(L482);
+consider C205 being Nat such that L484: (S7[ C205 ] & (for B96 being Nat holds (S7[ B96 ] implies C205 <= B96))) by L483;
+L485: C205 in ( NAT ) by ORDINAL1:def 12;
+thus L486: (ex B97 being (Element of ( NAT )) st (S7[ B97 ] & (for B98 being Nat holds (S7[ B98 ] implies B97 <= B98)))) by L485 , L484;
+end;
+thus L487: thesis;
+end;
+uniqueness
+proof
+let C206 , C207 being (Element of ( NAT ));
+thus L488:now
+assume L489: C204 is  halting;
+assume L490: (( C204 . C206 ) = ( C204 . ( C206 + 1 ) ) & (for B99 being Nat holds (( C204 . B99 ) = ( C204 . ( B99 + 1 ) ) implies C206 <= B99)));
+assume L491: (( C204 . C207 ) = ( C204 . ( C207 + 1 ) ) & (for B100 being Nat holds (( C204 . B100 ) = ( C204 . ( B100 + 1 ) ) implies C207 <= B100)));
+L492: (C206 <= C207 & C207 <= C206) by L491 , L490;
+thus L493: C206 = C207 by L492 , XXREAL_0:1;
+end;
+thus L494: thesis;
+end;
+consistency;
+end;
+definition
+let C208 being (ManySortedSet of ( NAT ));
+func C208 .Result() -> set equals 
+( C208 . ( C208 .Lifespan() ) );
+coherence;
+end;
+registration
+cluster  Graph-yielding for (ManySortedSet of ( NAT ));
+existence
+proof
+set D47 = the _Graph;
+set D48 = ( ( NAT ) --> D47 );
+L497: ( dom D48 ) = ( NAT ) by FUNCOP_1:13;
+reconsider D49 = D48 as (ManySortedSet of ( NAT ));
+take D49;
+let C209 being Nat;
+L498: C209 in ( NAT ) by ORDINAL1:def 12;
+L499: ( D49 . C209 ) in ( rng D49 ) by L498 , L497 , FUNCT_1:3;
+L500: ( D49 . C209 ) in { D47 } by L499 , FUNCOP_1:8;
+thus L501: thesis by L500 , TARSKI:def 1;
+end;
+end;
+definition
+mode GraphSeq
+ is  Graph-yielding (ManySortedSet of ( NAT ));
+end;
+registration
+let C210 being GraphSeq;
+let C211 being Nat;
+cluster ( C210 . C211 ) ->  Function-like  Relation-like;
+coherence by L477;
+end;
+registration
+let C212 being GraphSeq;
+let C213 being Nat;
+cluster ( C212 . C213 ) -> ( NAT ) -defined  finite;
+coherence by L477;
+end;
+registration
+let C214 being GraphSeq;
+let C215 being Nat;
+cluster ( C214 . C215 ) ->  [Graph-like];
+coherence by L477;
+end;
+definition
+let C216 being GraphSeq;
+attr C216 is  finite
+means
+:L507: (for B101 being Nat holds ( C216 . B101 ) is  finite);
+attr C216 is  loopless
+means
+:L508: (for B102 being Nat holds ( C216 . B102 ) is  loopless);
+attr C216 is  trivial
+means
+:L509: (for B103 being Nat holds ( C216 . B103 ) is  trivial);
+attr C216 is  non-trivial
+means
+:L510: (for B104 being Nat holds ( C216 . B104 ) is non  trivial);
+attr C216 is  non-multi
+means
+:L511: (for B105 being Nat holds ( C216 . B105 ) is  non-multi);
+attr C216 is  non-Dmulti
+means
+:L512: (for B106 being Nat holds ( C216 . B106 ) is  non-Dmulti);
+attr C216 is  simple
+means
+:L513: (for B107 being Nat holds ( C216 . B107 ) is  simple);
+attr C216 is  Dsimple
+means
+:L514: (for B108 being Nat holds ( C216 . B108 ) is  Dsimple);
+end;
+definition
+let C217 being GraphSeq;
+redefine attr C217 is  halting
+means
+(ex B109 being Nat st ( C217 . B109 ) = ( C217 . ( B109 + 1 ) ));
+compatibility by L478;
+end;
+registration
+cluster  halting  finite  loopless  trivial  non-multi  non-Dmulti  simple  Dsimple for GraphSeq;
+existence
+proof
+set D50 = the  finite  loopless  trivial  non-multi  non-Dmulti  simple  Dsimple _Graph;
+set D51 = ( ( NAT ) --> D50 );
+L517: ( dom D51 ) = ( NAT ) by FUNCOP_1:13;
+reconsider D52 = D51 as (ManySortedSet of ( NAT ));
+L518:
+now
+let C218 being Nat;
+L519: C218 in ( NAT ) by ORDINAL1:def 12;
+L520: ( D52 . C218 ) in ( rng D52 ) by L519 , L517 , FUNCT_1:3;
+L521: ( D52 . C218 ) in { D50 } by L520 , FUNCOP_1:8;
+thus L522: ( D52 . C218 ) is _Graph by L521 , TARSKI:def 1;
+end;
+reconsider D53 = D52 as GraphSeq by L518 , L477;
+L523: ( D53 . ( 1 + 1 ) ) in ( rng D53 ) by L517 , FUNCT_1:3;
+L524: ( D53 . ( 1 + 1 ) ) in { D50 } by L523 , FUNCOP_1:8;
+L525: ( D53 . ( 1 + 1 ) ) = D50 by L524 , TARSKI:def 1;
+take D53;
+L526: ( D53 . 1 ) in ( rng D53 ) by L517 , FUNCT_1:3;
+L527: ( D53 . 1 ) in { D50 } by L526 , FUNCOP_1:8;
+L528: ( D53 . 1 ) = D50 by L527 , TARSKI:def 1;
+thus L529: D53 is  halting by L528 , L525 , L478;
+L530:
+now
+let C219 being Nat;
+L531: C219 in ( NAT ) by ORDINAL1:def 12;
+L532: ( D53 . C219 ) in ( rng D53 ) by L531 , L517 , FUNCT_1:3;
+L533: ( D53 . C219 ) in { D50 } by L532 , FUNCOP_1:8;
+thus L534: (( D53 . C219 ) is  finite & ( D53 . C219 ) is  loopless & ( D53 . C219 ) is  trivial & ( D53 . C219 ) is  non-multi & ( D53 . C219 ) is  non-Dmulti & ( D53 . C219 ) is  simple & ( D53 . C219 ) is  Dsimple) by L533 , TARSKI:def 1;
+end;
+thus L535: thesis by L530 , L507 , L508 , L509 , L511 , L512 , L513 , L514;
+end;
+cluster  halting  finite  loopless  non-trivial  non-multi  non-Dmulti  simple  Dsimple for GraphSeq;
+existence
+proof
+set D54 = the  finite  loopless non  trivial  non-multi  non-Dmulti  simple  Dsimple _Graph;
+set D55 = ( ( NAT ) --> D54 );
+L536: ( dom D55 ) = ( NAT ) by FUNCOP_1:13;
+reconsider D56 = D55 as (ManySortedSet of ( NAT ));
+L537:
+now
+let C220 being Nat;
+L538: C220 in ( NAT ) by ORDINAL1:def 12;
+L539: ( D56 . C220 ) in ( rng D56 ) by L538 , L536 , FUNCT_1:3;
+L540: ( D56 . C220 ) in { D54 } by L539 , FUNCOP_1:8;
+thus L541: ( D56 . C220 ) is _Graph by L540 , TARSKI:def 1;
+end;
+reconsider D57 = D56 as GraphSeq by L537 , L477;
+L542: ( D57 . ( 1 + 1 ) ) in ( rng D57 ) by L536 , FUNCT_1:3;
+L543: ( D57 . ( 1 + 1 ) ) in { D54 } by L542 , FUNCOP_1:8;
+L544: ( D57 . ( 1 + 1 ) ) = D54 by L543 , TARSKI:def 1;
+take D57;
+L545: ( D57 . 1 ) in ( rng D57 ) by L536 , FUNCT_1:3;
+L546: ( D57 . 1 ) in { D54 } by L545 , FUNCOP_1:8;
+L547: ( D57 . 1 ) = D54 by L546 , TARSKI:def 1;
+thus L548: D57 is  halting by L547 , L544 , L478;
+L549:
+now
+let C221 being Nat;
+L550: C221 in ( NAT ) by ORDINAL1:def 12;
+L551: ( D57 . C221 ) in ( rng D57 ) by L550 , L536 , FUNCT_1:3;
+L552: ( D57 . C221 ) in { D54 } by L551 , FUNCOP_1:8;
+thus L553: (( D57 . C221 ) is  finite & ( D57 . C221 ) is  loopless & ( D57 . C221 ) is non  trivial & ( D57 . C221 ) is  non-multi & ( D57 . C221 ) is  non-Dmulti & ( D57 . C221 ) is  simple & ( D57 . C221 ) is  Dsimple) by L552 , TARSKI:def 1;
+end;
+thus L554: thesis by L549 , L507 , L508 , L510 , L511 , L512 , L513 , L514;
+end;
+end;
+registration
+let C222 being  finite GraphSeq;
+let C223 being Nat;
+cluster ( C222 . C223 ) ->  finite;
+coherence by L507;
+end;
+registration
+let C224 being  loopless GraphSeq;
+let C225 being Nat;
+cluster ( C224 . C225 ) ->  loopless for _Graph;
+coherence by L508;
+end;
+registration
+let C226 being  trivial GraphSeq;
+let C227 being Nat;
+cluster ( C226 . C227 ) ->  trivial for _Graph;
+coherence by L509;
+end;
+registration
+let C228 being  non-trivial GraphSeq;
+let C229 being Nat;
+cluster ( C228 . C229 ) -> non  trivial for _Graph;
+coherence by L510;
+end;
+registration
+let C230 being  non-multi GraphSeq;
+let C231 being Nat;
+cluster ( C230 . C231 ) ->  non-multi for _Graph;
+coherence by L511;
+end;
+registration
+let C232 being  non-Dmulti GraphSeq;
+let C233 being Nat;
+cluster ( C232 . C233 ) ->  non-Dmulti for _Graph;
+coherence by L512;
+end;
+registration
+let C234 being  simple GraphSeq;
+let C235 being Nat;
+cluster ( C234 . C235 ) ->  simple for _Graph;
+coherence by L513;
+end;
+registration
+let C236 being  Dsimple GraphSeq;
+let C237 being Nat;
+cluster ( C236 . C237 ) ->  Dsimple for _Graph;
+coherence by L514;
+end;
+registration
+cluster  non-multi ->  non-Dmulti for GraphSeq;
+coherence
+proof
+let C238 being GraphSeq;
+assume L564: C238 is  non-multi;
+reconsider D58 = C238 as  non-multi GraphSeq by L564;
+L565: (for B110 being Nat holds ( D58 . B110 ) is  non-Dmulti);
+thus L566: thesis by L565 , L512;
+end;
+end;
+registration
+cluster  simple ->  loopless  non-multi for GraphSeq;
+coherence
+proof
+let C239 being GraphSeq;
+assume L568: C239 is  simple;
+reconsider D59 = C239 as  simple GraphSeq by L568;
+L569: (for B111 being Nat holds ( D59 . B111 ) is  loopless);
+thus L570: C239 is  loopless by L569 , L508;
+L571: (for B112 being Nat holds ( D59 . B112 ) is  non-multi);
+thus L572: thesis by L571 , L511;
+end;
+end;
+registration
+cluster  loopless  non-multi ->  simple for GraphSeq;
+coherence
+proof
+let C240 being GraphSeq;
+assume L574: (C240 is  loopless & C240 is  non-multi);
+reconsider D60 = C240 as  loopless  non-multi GraphSeq by L574;
+L575: (for B113 being Nat holds ( D60 . B113 ) is  simple);
+thus L576: thesis by L575 , L513;
+end;
+end;
+registration
+cluster  loopless  non-Dmulti ->  Dsimple for GraphSeq;
+coherence
+proof
+let C241 being GraphSeq;
+assume L578: (C241 is  loopless & C241 is  non-Dmulti);
+reconsider D61 = C241 as  loopless  non-Dmulti GraphSeq by L578;
+L579: (for B114 being Nat holds ( D61 . B114 ) is  Dsimple);
+thus L580: thesis by L579 , L514;
+end;
+end;
+registration
+cluster  Dsimple ->  loopless  non-Dmulti for GraphSeq;
+coherence
+proof
+let C242 being GraphSeq;
+assume L582: C242 is  Dsimple;
+reconsider D62 = C242 as  Dsimple GraphSeq by L582;
+L583: (for B115 being Nat holds ( D62 . B115 ) is  loopless);
+thus L584: C242 is  loopless by L583 , L508;
+L585: (for B116 being Nat holds ( D62 . B116 ) is  non-Dmulti);
+thus L586: thesis by L585 , L512;
+end;
+end;
+registration
+cluster  trivial  loopless ->  finite for GraphSeq;
+coherence
+proof
+let C243 being GraphSeq;
+assume L588: (C243 is  trivial & C243 is  loopless);
+reconsider D63 = C243 as  trivial  loopless GraphSeq by L588;
+L589: (for B117 being Nat holds ( D63 . B117 ) is  finite);
+thus L590: thesis by L589 , L507;
+end;
+end;
+registration
+cluster  trivial  non-Dmulti ->  finite for GraphSeq;
+coherence
+proof
+let C244 being GraphSeq;
+assume L592: (C244 is  trivial & C244 is  non-Dmulti);
+reconsider D64 = C244 as  trivial  non-Dmulti GraphSeq by L592;
+L593: (for B118 being Nat holds ( D64 . B118 ) is  finite);
+thus L594: thesis by L593 , L507;
+end;
+end;
+begin
+theorem
+L596: (( VertexSelector ) = 1 & ( EdgeSelector ) = 2 & ( SourceSelector ) = 3 & ( TargetSelector ) = 4);
+theorem
+L597: (for R2 being _Graph holds ( _GraphSelectors ) c= ( dom R2 ))
+proof
+let R2 being _Graph;
+L598:
+now
+let C245 being set;
+assume L599: C245 in ( _GraphSelectors );
+L600: (C245 = ( VertexSelector ) or C245 = ( EdgeSelector ) or C245 = ( SourceSelector ) or C245 = ( TargetSelector )) by L599 , ENUMSET1:def 2;
+thus L601: C245 in ( dom R2 ) by L600 , L8;
+end;
+thus L602: thesis by L598 , TARSKI:def 3;
+end;
+theorem
+L603: (for R1 being GraphStruct holds (( the_Vertices_of R1 ) = ( R1 . ( VertexSelector ) ) & ( the_Edges_of R1 ) = ( R1 . ( EdgeSelector ) ) & ( the_Source_of R1 ) = ( R1 . ( SourceSelector ) ) & ( the_Target_of R1 ) = ( R1 . ( TargetSelector ) )));
+theorem
+L604: (for R2 being _Graph holds (( dom ( the_Source_of R2 ) ) = ( the_Edges_of R2 ) & ( dom ( the_Target_of R2 ) ) = ( the_Edges_of R2 ) & ( rng ( the_Source_of R2 ) ) c= ( the_Vertices_of R2 ) & ( rng ( the_Target_of R2 ) ) c= ( the_Vertices_of R2 ))) by FUNCT_2:def 1;
+theorem
+L605: (for R1 being GraphStruct holds (R1 is  [Graph-like] iff (( _GraphSelectors ) c= ( dom R1 ) & ( the_Vertices_of R1 ) is non  empty & ( the_Source_of R1 ) is (Function of ( the_Edges_of R1 ) , ( the_Vertices_of R1 )) & ( the_Target_of R1 ) is (Function of ( the_Edges_of R1 ) , ( the_Vertices_of R1 ))))) by L37;
+theorem
+L606: (for B119 being non  empty set holds (for B120 being set holds (for B121 , B122 being (Function of B120 , B119) holds (( the_Vertices_of ( createGraph (B119 , B120 , B121 , B122) ) ) = B119 & ( the_Edges_of ( createGraph (B119 , B120 , B121 , B122) ) ) = B120 & ( the_Source_of ( createGraph (B119 , B120 , B121 , B122) ) ) = B121 & ( the_Target_of ( createGraph (B119 , B120 , B121 , B122) ) ) = B122)))) by FINSEQ_4:76;
+theorem
+L607: (for R1 being GraphStruct holds (for R7 being set holds (for R17 being Nat holds ( dom ( R1 .set (R17 , R7) ) ) = ( ( dom R1 ) \/ { R17 } ))))
+proof
+let R1 being GraphStruct;
+let R7 being set;
+let R17 being Nat;
+set D65 = ( R1 .set (R17 , R7) );
+thus L608: ( dom D65 ) = ( ( dom R1 ) \/ ( dom ( R17 .--> R7 ) ) ) by FUNCT_4:def 1
+.= ( ( dom R1 ) \/ { R17 } ) by FUNCOP_1:13;
+end;
+theorem
+L609: (for R1 being GraphStruct holds (for R7 being set holds (for R17 being Nat holds ( ( R1 .set (R17 , R7) ) . R17 ) = R7)))
+proof
+let R1 being GraphStruct;
+let R7 being set;
+let R17 being Nat;
+set D66 = ( R1 .set (R17 , R7) );
+L610: ( dom ( R17 .--> R7 ) ) = { R17 } by FUNCOP_1:13;
+L611: R17 in ( dom ( R17 .--> R7 ) ) by L610 , TARSKI:def 1;
+thus L612: ( D66 . R17 ) = ( ( R17 .--> R7 ) . R17 ) by L611 , FUNCT_4:13
+.= R7 by FUNCOP_1:72;
+end;
+theorem
+L613: (for R1 being GraphStruct holds (for R7 being set holds (for R18 being Nat holds (for R19 being Nat holds (R18 <> R19 implies ( R1 . R19 ) = ( ( R1 .set (R18 , R7) ) . R19 ))))))
+proof
+let R1 being GraphStruct;
+let R7 being set;
+let R18 being Nat;
+let R19 being Nat;
+assume L614: R18 <> R19;
+L615: (not R19 in ( dom ( R18 .--> R7 ) )) by L614 , TARSKI:def 1;
+thus L616: thesis by L615 , FUNCT_4:11;
+end;
+theorem
+L617: (for R2 being _Graph holds (for R7 being set holds (for R17 being Nat holds ((not R17 in ( _GraphSelectors )) implies (( the_Vertices_of R2 ) = ( the_Vertices_of ( R2 .set (R17 , R7) ) ) & ( the_Edges_of R2 ) = ( the_Edges_of ( R2 .set (R17 , R7) ) ) & ( the_Source_of R2 ) = ( the_Source_of ( R2 .set (R17 , R7) ) ) & ( the_Target_of R2 ) = ( the_Target_of ( R2 .set (R17 , R7) ) ) & ( R2 .set (R17 , R7) ) is _Graph)))))
+proof
+let R2 being _Graph;
+let R7 being set;
+let R17 being Nat;
+set D67 = ( R2 .set (R17 , R7) );
+L618: ( dom R2 ) c= ( dom D67 ) by FUNCT_4:10;
+assume L619: (not R17 in ( _GraphSelectors ));
+L620: ( EdgeSelector ) <> R17 by L619 , ENUMSET1:def 2;
+L621: (not ( EdgeSelector ) in ( dom ( R17 .--> R7 ) )) by L620 , TARSKI:def 1;
+L622: ( TargetSelector ) <> R17 by L619 , ENUMSET1:def 2;
+L623: (not ( TargetSelector ) in ( dom ( R17 .--> R7 ) )) by L622 , TARSKI:def 1;
+L624: ( SourceSelector ) <> R17 by L619 , ENUMSET1:def 2;
+L625: (not ( SourceSelector ) in ( dom ( R17 .--> R7 ) )) by L624 , TARSKI:def 1;
+L626: ( VertexSelector ) <> R17 by L619 , ENUMSET1:def 2;
+L627: (not ( VertexSelector ) in ( dom ( R17 .--> R7 ) )) by L626 , TARSKI:def 1;
+thus L628: (( the_Vertices_of D67 ) = ( the_Vertices_of R2 ) & ( the_Edges_of D67 ) = ( the_Edges_of R2 ) & ( the_Source_of D67 ) = ( the_Source_of R2 ) & ( the_Target_of D67 ) = ( the_Target_of R2 )) by L627 , L621 , L625 , L623 , FUNCT_4:11;
+L629: (( SourceSelector ) in ( dom R2 ) & ( TargetSelector ) in ( dom R2 )) by L8;
+L630: (( VertexSelector ) in ( dom R2 ) & ( EdgeSelector ) in ( dom R2 )) by L8;
+thus L631: thesis by L630 , L629 , L618 , L628 , L8;
+end;
+theorem
+L632: (for R1 being GraphStruct holds (for R7 being set holds (( the_Vertices_of ( R1 .set (( VertexSelector ) , R7) ) ) = R7 & ( the_Edges_of ( R1 .set (( EdgeSelector ) , R7) ) ) = R7 & ( the_Source_of ( R1 .set (( SourceSelector ) , R7) ) ) = R7 & ( the_Target_of ( R1 .set (( TargetSelector ) , R7) ) ) = R7))) by L609;
+theorem
+L633: (for R1 being GraphStruct holds (for R7 being set holds (for R10 being set holds (for R18 being Nat holds (for R19 being Nat holds (R18 <> R19 implies (R18 in ( dom ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) ) & R19 in ( dom ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) ) & ( ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) . R18 ) = R7 & ( ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) . R19 ) = R10)))))))
+proof
+let R1 being GraphStruct;
+let R7 being set;
+let R10 being set;
+let R18 being Nat;
+let R19 being Nat;
+assume L634: R18 <> R19;
+set D68 = ( R1 .set (R18 , R7) );
+set D69 = ( D68 .set (R19 , R10) );
+L635: ( dom D69 ) = ( ( dom D68 ) \/ { R19 } ) by L607;
+L636: (( dom D68 ) = ( ( dom R1 ) \/ { R18 } ) & R18 in { R18 }) by L607 , TARSKI:def 1;
+L637: R18 in ( dom D68 ) by L636 , XBOOLE_0:def 3;
+thus L638: R18 in ( dom ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) ) by L637 , L635 , XBOOLE_0:def 3;
+L639: R19 in { R19 } by TARSKI:def 1;
+thus L640: R19 in ( dom ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) ) by L639 , L635 , XBOOLE_0:def 3;
+thus L641: ( ( ( R1 .set (R18 , R7) ) .set (R19 , R10) ) . R18 ) = ( D68 . R18 ) by L634 , L613
+.= R7 by L609;
+thus L642: thesis by L609;
+end;
+theorem
+L643: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (R6 Joins R7 , R10 , R2 implies (R7 in ( the_Vertices_of R2 ) & R10 in ( the_Vertices_of R2 )))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R7 being set;
+let R10 being set;
+assume L644: R6 Joins R7 , R10 , R2;
+L645: ((( ( the_Source_of R2 ) . R6 ) = R7 & ( ( the_Target_of R2 ) . R6 ) = R10) or (( ( the_Source_of R2 ) . R6 ) = R10 & ( ( the_Target_of R2 ) . R6 ) = R7)) by L644 , L64;
+L646: R6 in ( the_Edges_of R2 ) by L644 , L64;
+thus L647: thesis by L646 , L645 , FUNCT_2:5;
+end;
+theorem
+L648: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (R6 Joins R7 , R10 , R2 implies R6 Joins R10 , R7 , R2)))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R7 being set;
+let R10 being set;
+assume L649: R6 Joins R7 , R10 , R2;
+L650: ((( ( the_Source_of R2 ) . R6 ) = R7 & ( ( the_Target_of R2 ) . R6 ) = R10) or (( ( the_Source_of R2 ) . R6 ) = R10 & ( ( the_Target_of R2 ) . R6 ) = R7)) by L649 , L64;
+L651: R6 in ( the_Edges_of R2 ) by L649 , L64;
+thus L652: thesis by L651 , L650 , L64;
+end;
+theorem
+L653: (for R2 being _Graph holds (for R6 being set holds (for R8 being set holds (for R9 being set holds (for R11 being set holds (for R12 being set holds ((R6 Joins R8 , R11 , R2 & R6 Joins R9 , R12 , R2) implies ((R8 = R9 & R11 = R12) or (R8 = R12 & R11 = R9)))))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R8 being set;
+let R9 being set;
+let R11 being set;
+let R12 being set;
+assume that
+L654: R6 Joins R8 , R11 , R2
+and
+L655: R6 Joins R9 , R12 , R2;
+set D70 = ( ( the_Source_of R2 ) . R6 );
+set D71 = ( ( the_Target_of R2 ) . R6 );
+L656:
+now
+per cases  by L654 , L64;
+suppose L657: (D70 = R8 & D71 = R11);
+
+L658:
+now
+per cases  by L655 , L64;
+suppose L659: (D70 = R9 & D71 = R12);
+
+thus L660: thesis by L659 , L657;
+end;
+suppose L661: (D70 = R12 & D71 = R9);
+
+thus L662: thesis by L661 , L657;
+end;
+end;
+thus L664: thesis by L658;
+end;
+suppose L665: (D70 = R11 & D71 = R8);
+
+L666:
+now
+per cases  by L655 , L64;
+suppose L667: (D70 = R9 & D71 = R12);
+
+thus L668: thesis by L667 , L665;
+end;
+suppose L669: (D70 = R12 & D71 = R9);
+
+thus L670: thesis by L669 , L665;
+end;
+end;
+thus L672: thesis by L666;
+end;
+end;
+thus L674: thesis by L656;
+end;
+theorem
+L675: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (R6 Joins R7 , R10 , R2 iff (R6 DJoins R7 , R10 , R2 or R6 DJoins R10 , R7 , R2)))))) by L71;
+theorem
+L676: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (for R15 being set holds (for R16 being set holds ((R6 Joins R7 , R10 , R2 & ((R7 in R15 & R10 in R16) or (R7 in R16 & R10 in R15))) implies R6 SJoins R15 , R16 , R2)))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R7 being set;
+let R10 being set;
+let R15 being set;
+let R16 being set;
+assume that
+L677: R6 Joins R7 , R10 , R2
+and
+L678: ((R7 in R15 & R10 in R16) or (R7 in R16 & R10 in R15));
+L679: ((( ( the_Source_of R2 ) . R6 ) = R7 & ( ( the_Target_of R2 ) . R6 ) = R10) or (( ( the_Source_of R2 ) . R6 ) = R10 & ( ( the_Target_of R2 ) . R6 ) = R7)) by L677 , L64;
+L680: R6 in ( the_Edges_of R2 ) by L677 , L64;
+thus L681: thesis by L680 , L678 , L679 , L68;
+end;
+theorem
+L682: (for R2 being _Graph holds (R2 is  loopless iff (for B123 being set holds (not (ex B124 being set st B124 Joins B123 , B123 , R2)))))
+proof
+let R2 being _Graph;
+thus L683:now
+assume L684: R2 is  loopless;
+let C246 being set;
+L685:
+now
+given C247 being set such that
+L686: C247 Joins C246 , C246 , R2;
+
+L687: ( ( the_Target_of R2 ) . C247 ) = C246 by L686 , L64;
+L688: (C247 in ( the_Edges_of R2 ) & ( ( the_Source_of R2 ) . C247 ) = C246) by L686 , L64;
+thus L689: contradiction by L688 , L684 , L687 , L82;
+end;
+thus L690: (not (ex B125 being set st B125 Joins C246 , C246 , R2)) by L685;
+end;
+assume L691: (for B126 being set holds (not (ex B127 being set st B127 Joins B126 , B126 , R2)));
+L692:
+now
+given C248 being set such that
+L693: (C248 in ( the_Edges_of R2 ) & ( ( the_Source_of R2 ) . C248 ) = ( ( the_Target_of R2 ) . C248 ));
+
+set D72 = ( ( the_Source_of R2 ) . C248 );
+L694: C248 Joins D72 , D72 , R2 by L693 , L64;
+thus L695: contradiction by L694 , L691;
+end;
+thus L696: thesis by L692 , L82;
+end;
+theorem
+L697: (for B128 being  finite  loopless _Graph holds (for B129 being (Vertex of B128) holds ( B129 .degree() ) = ( card ( B129 .edgesInOut() ) )))
+proof
+let C249 being  finite  loopless _Graph;
+let C250 being (Vertex of C249);
+set D73 = ( C250 .edgesIn() );
+set D74 = ( C250 .edgesOut() );
+L698:
+now
+given R6 being set such that
+L699: R6 in ( D73 /\ D74 );
+
+L700: R6 in D74 by L699 , XBOOLE_0:def 4;
+L701: ( ( the_Source_of C249 ) . R6 ) = C250 by L700 , L396;
+L702: R6 in D73 by L699 , XBOOLE_0:def 4;
+L703: ( ( the_Target_of C249 ) . R6 ) = C250 by L702 , L387;
+thus L704: contradiction by L703 , L699 , L701 , L82;
+end;
+L705: ( D73 /\ D74 ) = ( {} ) by L698 , XBOOLE_0:def 1;
+L706: D73 misses D74 by L705 , XBOOLE_0:def 7;
+thus L707: thesis by L706 , CARD_2:40;
+end;
+theorem
+L708: (for B130 being non  trivial _Graph holds (for B131 being (Vertex of B130) holds ( ( the_Vertices_of B130 ) \ { B131 } ) is non  empty))
+proof
+let C251 being non  trivial _Graph;
+let C252 being (Vertex of C251);
+set D75 = ( the_Vertices_of C251 );
+L709:
+now
+assume L710: ( D75 \ { C252 } ) = ( {} );
+L711: D75 c= { C252 } by L710 , XBOOLE_1:37;
+L712: D75 = { C252 } by L711 , ZFMISC_1:33;
+L713: ( card D75 ) = 1 by L712 , CARD_1:30;
+thus L714: contradiction by L713 , L83;
+end;
+thus L715: thesis by L709;
+end;
+theorem
+L716: (for B132 being non  trivial _Graph holds (ex B133 , B134 being (Vertex of B132) st B133 <> B134))
+proof
+let C253 being non  trivial _Graph;
+set D76 = ( the_Vertices_of C253 );
+take D77 = ( choose D76 );
+set D78 = ( D76 \ { D77 } );
+L717:
+now
+assume L718: D78 = ( {} );
+L719: ( card ( D78 \/ { D77 } ) ) = ( ( card D78 ) +` ( card { D77 } ) ) by CARD_2:35 , XBOOLE_1:79
+.= ( ( 0 ) +` 1 ) by L718 , CARD_1:27 , CARD_1:30
+.= ( card ( ( 0 ) +^ 1 ) ) by CARD_2:def 1
+.= ( card ( ( 0 ) + 1 ) ) by CARD_2:36
+.= 1 by CARD_1:def 2;
+L720: ( card D76 ) = 1 by L719 , XBOOLE_1:45;
+thus L721: contradiction by L720 , L83;
+end;
+reconsider D79 = D78 as non  empty set by L717;
+set D80 = ( choose D79 );
+L722: (not D80 in { D77 }) by XBOOLE_0:def 5;
+reconsider D81 = D80 as (Vertex of C253) by XBOOLE_0:def 5;
+take D81;
+thus L723: thesis by L722 , TARSKI:def 1;
+end;
+theorem
+L724: (for B135 being  trivial _Graph holds (ex B136 being (Vertex of B135) st ( the_Vertices_of B135 ) = { B136 }))
+proof
+let C254 being  trivial _Graph;
+L725: ( card ( the_Vertices_of C254 ) ) = 1 by L83;
+consider C255 being set such that L726: ( the_Vertices_of C254 ) = { C255 } by L725 , CARD_2:42;
+reconsider D82 = C255 as (Vertex of C254) by L726 , TARSKI:def 1;
+take D82;
+thus L727: thesis by L726;
+end;
+theorem
+L728: (for B137 being  trivial  loopless _Graph holds ( the_Edges_of B137 ) = ( {} ))
+proof
+let C256 being  trivial  loopless _Graph;
+consider C257 being (Vertex of C256) such that L729: ( the_Vertices_of C256 ) = { C257 } by L724;
+L730:
+now
+assume L731: ( the_Edges_of C256 ) <> ( {} );
+consider C258 being set such that L732: C258 in ( the_Edges_of C256 ) by L731 , XBOOLE_0:def 1;
+L733: ( ( the_Target_of C256 ) . C258 ) in { C257 } by L729 , L732 , FUNCT_2:5;
+L734: ( ( the_Target_of C256 ) . C258 ) = C257 by L733 , TARSKI:def 1;
+L735: ( ( the_Source_of C256 ) . C258 ) in { C257 } by L729 , L732 , FUNCT_2:5;
+L736: ( ( the_Source_of C256 ) . C258 ) = C257 by L735 , TARSKI:def 1;
+thus L737: contradiction by L736 , L732 , L734 , L82;
+end;
+thus L738: thesis by L730;
+end;
+theorem
+L739: (for R2 being _Graph holds (( the_Edges_of R2 ) = ( {} ) implies R2 is  simple))
+proof
+let R2 being _Graph;
+assume L740: ( the_Edges_of R2 ) = ( {} );
+L741: (not (ex B138 being set st (B138 in ( the_Edges_of R2 ) & ( ( the_Source_of R2 ) . B138 ) = ( ( the_Target_of R2 ) . B138 )))) by L740;
+L742: R2 is  loopless by L741 , L82;
+L743: (for B139 , B140 , B141 , B142 being set holds ((B139 Joins B141 , B142 , R2 & B140 Joins B141 , B142 , R2) implies B139 = B140)) by L740 , L64;
+L744: R2 is  non-multi by L743 , L84;
+thus L745: thesis by L744 , L742;
+end;
+theorem
+L746: (for B143 being  finite _Graph holds ( B143 .order() ) >= 1)
+proof
+let C259 being  finite _Graph;
+L747: ( ( 0 ) + 1 ) < ( ( C259 .order() ) + 1 ) by NAT_1:3 , XREAL_1:8;
+thus L748: thesis by L747 , NAT_1:13;
+end;
+theorem
+L749: (for B144 being  finite _Graph holds (( B144 .order() ) = 1 iff B144 is  trivial)) by L83;
+theorem
+L750: (for B145 being  finite _Graph holds (( B145 .order() ) = 1 iff (ex B146 being (Vertex of B145) st ( the_Vertices_of B145 ) = { B146 })))
+proof
+let C260 being  finite _Graph;
+thus L751:now
+assume L752: ( C260 .order() ) = 1;
+consider C261 being set such that L753: ( the_Vertices_of C260 ) = { C261 } by L752 , CARD_2:42;
+reconsider D83 = C261 as (Vertex of C260) by L753 , TARSKI:def 1;
+take D84 = D83;
+thus L754: ( the_Vertices_of C260 ) = { D84 } by L753;
+end;
+given C262 being (Vertex of C260) such that
+L755: ( the_Vertices_of C260 ) = { C262 };
+
+thus L756: thesis by L755 , CARD_1:30;
+end;
+theorem
+L757: (for R2 being _Graph holds (for R6 being set holds (for R15 being set holds ((R6 in ( the_Edges_of R2 ) & (( ( the_Source_of R2 ) . R6 ) in R15 or ( ( the_Target_of R2 ) . R6 ) in R15)) iff R6 in ( R2 .edgesInOut R15 )))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R15 being set;
+thus L758:now
+assume that
+L759: R6 in ( the_Edges_of R2 )
+and
+L760: (( ( the_Source_of R2 ) . R6 ) in R15 or ( ( the_Target_of R2 ) . R6 ) in R15);
+L761:
+now
+per cases  by L760;
+suppose L762: ( ( the_Source_of R2 ) . R6 ) in R15;
+
+L763: R6 in ( R2 .edgesOutOf R15 ) by L762 , L759 , L207;
+thus L764: R6 in ( R2 .edgesInOut R15 ) by L763 , XBOOLE_0:def 3;
+end;
+suppose L765: ( ( the_Target_of R2 ) . R6 ) in R15;
+
+L766: R6 in ( R2 .edgesInto R15 ) by L765 , L759 , L193;
+thus L767: R6 in ( R2 .edgesInOut R15 ) by L766 , XBOOLE_0:def 3;
+end;
+end;
+thus L769: R6 in ( R2 .edgesInOut R15 ) by L761;
+end;
+assume L770: R6 in ( R2 .edgesInOut R15 );
+L771: (R6 in ( R2 .edgesInto R15 ) or R6 in ( R2 .edgesOutOf R15 )) by L770 , XBOOLE_0:def 3;
+thus L772: thesis by L771 , L193 , L207;
+end;
+theorem
+L773: (for R2 being _Graph holds (for R15 being set holds (( R2 .edgesInto R15 ) c= ( R2 .edgesInOut R15 ) & ( R2 .edgesOutOf R15 ) c= ( R2 .edgesInOut R15 ))))
+proof
+let R2 being _Graph;
+let R15 being set;
+L774: (for B147 being set holds (B147 in ( R2 .edgesInto R15 ) implies B147 in ( R2 .edgesInOut R15 ))) by XBOOLE_0:def 3;
+thus L775: ( R2 .edgesInto R15 ) c= ( R2 .edgesInOut R15 ) by L774 , TARSKI:def 3;
+L776: (for B148 being set holds (B148 in ( R2 .edgesOutOf R15 ) implies B148 in ( R2 .edgesInOut R15 ))) by XBOOLE_0:def 3;
+thus L777: thesis by L776 , TARSKI:def 3;
+end;
+theorem
+L778: (for R2 being _Graph holds ( the_Edges_of R2 ) = ( R2 .edgesInOut ( the_Vertices_of R2 ) ))
+proof
+let R2 being _Graph;
+set D85 = ( the_Edges_of R2 );
+set D86 = ( the_Source_of R2 );
+L779:
+now
+let C263 being set;
+thus L780:now
+assume L781: C263 in D85;
+L782: ( D86 . C263 ) in ( the_Vertices_of R2 ) by L781 , FUNCT_2:5;
+thus L783: C263 in ( R2 .edgesInOut ( the_Vertices_of R2 ) ) by L782 , L781 , L757;
+end;
+assume L784: C263 in ( R2 .edgesInOut ( the_Vertices_of R2 ) );
+thus L785: C263 in D85 by L784;
+end;
+thus L786: thesis by L779 , TARSKI:1;
+end;
+theorem
+L787: (for R2 being _Graph holds (for R6 being set holds (for R15 being set holds ((R6 in ( the_Edges_of R2 ) & ( ( the_Source_of R2 ) . R6 ) in R15 & ( ( the_Target_of R2 ) . R6 ) in R15) iff R6 in ( R2 .edgesBetween R15 ))))) by L354;
+theorem
+L788: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (for R15 being set holds ((R7 in R15 & R10 in R15 & R6 Joins R7 , R10 , R2) implies R6 in ( R2 .edgesBetween R15 )))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R7 being set;
+let R10 being set;
+let R15 being set;
+assume that
+L789: (R7 in R15 & R10 in R15)
+and
+L790: R6 Joins R7 , R10 , R2;
+L791: ((( ( the_Source_of R2 ) . R6 ) = R7 & ( ( the_Target_of R2 ) . R6 ) = R10) or (( ( the_Source_of R2 ) . R6 ) = R10 & ( ( the_Target_of R2 ) . R6 ) = R7)) by L790 , L64;
+L792: R6 in ( the_Edges_of R2 ) by L790 , L64;
+thus L793: thesis by L792 , L789 , L791 , L354;
+end;
+theorem
+L794: (for R2 being _Graph holds (for R15 being set holds ( R2 .edgesBetween R15 ) c= ( R2 .edgesInOut R15 )))
+proof
+let R2 being _Graph;
+let R15 being set;
+L795:
+now
+let C264 being set;
+assume L796: C264 in ( R2 .edgesBetween R15 );
+L797: C264 in ( R2 .edgesInto R15 ) by L796 , XBOOLE_0:def 4;
+thus L798: C264 in ( R2 .edgesInOut R15 ) by L797 , XBOOLE_0:def 3;
+end;
+thus L799: thesis by L795 , TARSKI:def 3;
+end;
+theorem
+L800: (for R2 being _Graph holds ( the_Edges_of R2 ) = ( R2 .edgesBetween ( the_Vertices_of R2 ) ))
+proof
+let R2 being _Graph;
+set D87 = ( the_Edges_of R2 );
+set D88 = ( the_Source_of R2 );
+set D89 = ( the_Target_of R2 );
+L801:
+now
+let C265 being set;
+thus L802:now
+assume L803: C265 in D87;
+L804: (( D88 . C265 ) in ( the_Vertices_of R2 ) & ( D89 . C265 ) in ( the_Vertices_of R2 )) by L803 , FUNCT_2:5;
+thus L805: C265 in ( R2 .edgesBetween ( the_Vertices_of R2 ) ) by L804 , L803 , L354;
+end;
+assume L806: C265 in ( R2 .edgesBetween ( the_Vertices_of R2 ) );
+thus L807: C265 in D87 by L806;
+end;
+thus L808: thesis by L801 , TARSKI:1;
+end;
+theorem
+L809: (for R2 being _Graph holds (for R15 being set holds ( ( the_Edges_of R2 ) \ ( R2 .edgesInOut R15 ) ) = ( R2 .edgesBetween ( ( the_Vertices_of R2 ) \ R15 ) )))
+proof
+let R2 being _Graph;
+let R15 being set;
+set D90 = ( the_Edges_of R2 );
+set D91 = ( the_Vertices_of R2 );
+set D92 = ( R2 .edgesInOut R15 );
+set D93 = ( R2 .edgesBetween ( D91 \ R15 ) );
+L810:
+now
+let C266 being set;
+thus L811:now
+assume L812: C266 in ( D90 \ D92 );
+L813: ( ( the_Target_of R2 ) . C266 ) in D91 by L812 , FUNCT_2:5;
+L814: (not C266 in D92) by L812 , XBOOLE_0:def 5;
+L815: (not ( ( the_Target_of R2 ) . C266 ) in R15) by L814 , L812 , L757;
+L816: ( ( the_Target_of R2 ) . C266 ) in ( D91 \ R15 ) by L815 , L813 , XBOOLE_0:def 5;
+L817: ( ( the_Source_of R2 ) . C266 ) in D91 by L812 , FUNCT_2:5;
+L818: (not ( ( the_Source_of R2 ) . C266 ) in R15) by L812 , L814 , L757;
+L819: ( ( the_Source_of R2 ) . C266 ) in ( D91 \ R15 ) by L818 , L817 , XBOOLE_0:def 5;
+thus L820: C266 in D93 by L819 , L812 , L816 , L354;
+end;
+assume L821: C266 in D93;
+L822: ( ( the_Target_of R2 ) . C266 ) in ( D91 \ R15 ) by L821 , L354;
+L823: (not ( ( the_Target_of R2 ) . C266 ) in R15) by L822 , XBOOLE_0:def 5;
+L824: ( ( the_Source_of R2 ) . C266 ) in ( D91 \ R15 ) by L821 , L354;
+L825: (not ( ( the_Source_of R2 ) . C266 ) in R15) by L824 , XBOOLE_0:def 5;
+L826: (not C266 in D92) by L825 , L823 , L757;
+thus L827: C266 in ( D90 \ D92 ) by L826 , L821 , XBOOLE_0:def 5;
+end;
+thus L828: thesis by L810 , TARSKI:1;
+end;
+theorem
+L829: (for R2 being _Graph holds (for R15 being set holds (for R16 being set holds (R15 c= R16 implies ( R2 .edgesBetween R15 ) c= ( R2 .edgesBetween R16 )))))
+proof
+let R2 being _Graph;
+let R15 being set;
+let R16 being set;
+assume L830: R15 c= R16;
+L831:
+now
+let C267 being set;
+assume L832: C267 in ( R2 .edgesBetween R15 );
+L833: (( ( the_Source_of R2 ) . C267 ) in R15 & ( ( the_Target_of R2 ) . C267 ) in R15) by L832 , L354;
+thus L834: C267 in ( R2 .edgesBetween R16 ) by L833 , L830 , L832 , L354;
+end;
+thus L835: thesis by L831 , TARSKI:def 3;
+end;
+theorem
+L836: (for B149 being _Graph holds (for B150 , B151 , B152 , B153 being set holds ((B150 c= B151 & B152 c= B153) implies ( B149 .edgesBetween (B150 , B152) ) c= ( B149 .edgesBetween (B151 , B153) ))))
+proof
+let C268 being _Graph;
+let C269 , C270 , C271 , C272 being set;
+assume L837: (C269 c= C270 & C271 c= C272);
+L838:
+now
+let C273 being set;
+assume L839: C273 in ( C268 .edgesBetween (C269 , C271) );
+L840: C273 SJoins C269 , C271 , C268 by L839 , L223;
+L841: ((( ( the_Source_of C268 ) . C273 ) in C269 & ( ( the_Target_of C268 ) . C273 ) in C271) or (( ( the_Source_of C268 ) . C273 ) in C271 & ( ( the_Target_of C268 ) . C273 ) in C269)) by L840 , L68;
+L842: C273 SJoins C270 , C272 , C268 by L841 , L837 , L839 , L68;
+thus L843: C273 in ( C268 .edgesBetween (C270 , C272) ) by L842 , L223;
+end;
+thus L844: thesis by L838 , TARSKI:def 3;
+end;
+theorem
+L845: (for B154 being _Graph holds (for B155 , B156 , B157 , B158 being set holds ((B155 c= B156 & B157 c= B158) implies ( B154 .edgesDBetween (B155 , B157) ) c= ( B154 .edgesDBetween (B156 , B158) ))))
+proof
+let C274 being _Graph;
+let C275 , C276 , C277 , C278 being set;
+assume L846: (C275 c= C276 & C277 c= C278);
+L847:
+now
+let C279 being set;
+assume L848: C279 in ( C274 .edgesDBetween (C275 , C277) );
+L849: C279 DSJoins C275 , C277 , C274 by L848 , L235;
+L850: (( ( the_Source_of C274 ) . C279 ) in C275 & ( ( the_Target_of C274 ) . C279 ) in C277) by L849 , L69;
+L851: C279 DSJoins C276 , C278 , C274 by L850 , L846 , L848 , L69;
+thus L852: C279 in ( C274 .edgesDBetween (C276 , C278) ) by L851 , L235;
+end;
+thus L853: thesis by L847 , TARSKI:def 3;
+end;
+theorem
+L854: (for B159 being _Graph holds (for B160 being (Vertex of B159) holds (( B160 .edgesIn() ) = ( B159 .edgesDBetween (( the_Vertices_of B159 ) , { B160 }) ) & ( B160 .edgesOut() ) = ( B159 .edgesDBetween ({ B160 } , ( the_Vertices_of B159 )) ))))
+proof
+let C280 being _Graph;
+let C281 being (Vertex of C280);
+L855:
+now
+let C282 being set;
+thus L856:now
+assume L857: C282 in ( C281 .edgesIn() );
+L858: ( ( the_Target_of C280 ) . C282 ) = C281 by L857 , L387;
+L859: ( ( the_Target_of C280 ) . C282 ) in { C281 } by L858 , TARSKI:def 1;
+L860: ( ( the_Source_of C280 ) . C282 ) in ( the_Vertices_of C280 ) by L857 , FUNCT_2:5;
+L861: C282 DSJoins ( the_Vertices_of C280 ) , { C281 } , C280 by L860 , L857 , L859 , L69;
+thus L862: C282 in ( C280 .edgesDBetween (( the_Vertices_of C280 ) , { C281 }) ) by L861 , L235;
+end;
+assume L863: C282 in ( C280 .edgesDBetween (( the_Vertices_of C280 ) , { C281 }) );
+L864: C282 DSJoins ( the_Vertices_of C280 ) , { C281 } , C280 by L863 , L235;
+L865: ( ( the_Target_of C280 ) . C282 ) in { C281 } by L864 , L69;
+L866: ( ( the_Target_of C280 ) . C282 ) = C281 by L865 , TARSKI:def 1;
+thus L867: C282 in ( C281 .edgesIn() ) by L866 , L863 , L387;
+end;
+thus L868: ( C281 .edgesIn() ) = ( C280 .edgesDBetween (( the_Vertices_of C280 ) , { C281 }) ) by L855 , TARSKI:1;
+L869:
+now
+let C283 being set;
+thus L870:now
+assume L871: C283 in ( C281 .edgesOut() );
+L872: ( ( the_Source_of C280 ) . C283 ) = C281 by L871 , L396;
+L873: ( ( the_Source_of C280 ) . C283 ) in { C281 } by L872 , TARSKI:def 1;
+L874: ( ( the_Target_of C280 ) . C283 ) in ( the_Vertices_of C280 ) by L871 , FUNCT_2:5;
+L875: C283 DSJoins { C281 } , ( the_Vertices_of C280 ) , C280 by L874 , L871 , L873 , L69;
+thus L876: C283 in ( C280 .edgesDBetween ({ C281 } , ( the_Vertices_of C280 )) ) by L875 , L235;
+end;
+assume L877: C283 in ( C280 .edgesDBetween ({ C281 } , ( the_Vertices_of C280 )) );
+L878: C283 DSJoins { C281 } , ( the_Vertices_of C280 ) , C280 by L877 , L235;
+L879: ( ( the_Source_of C280 ) . C283 ) in { C281 } by L878 , L69;
+L880: ( ( the_Source_of C280 ) . C283 ) = C281 by L879 , TARSKI:def 1;
+thus L881: C283 in ( C281 .edgesOut() ) by L880 , L877 , L396;
+end;
+thus L882: thesis by L869 , TARSKI:1;
+end;
+theorem
+L883: (for R2 being _Graph holds R2 is (Subgraph of R2)) by L271;
+theorem
+L884: (for R3 being _Graph holds (for R4 being _Graph holds ((R3 is (Subgraph of R4) & R4 is (Subgraph of R3)) iff (( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) & ( the_Edges_of R3 ) = ( the_Edges_of R4 ) & ( the_Source_of R3 ) = ( the_Source_of R4 ) & ( the_Target_of R3 ) = ( the_Target_of R4 )))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+thus L885:now
+assume that
+L886: R3 is (Subgraph of R4)
+and
+L887: R4 is (Subgraph of R3);
+L888: (( the_Vertices_of R4 ) c= ( the_Vertices_of R3 ) & ( the_Edges_of R4 ) c= ( the_Edges_of R3 )) by L887 , L262;
+L889: (( the_Vertices_of R3 ) c= ( the_Vertices_of R4 ) & ( the_Edges_of R3 ) c= ( the_Edges_of R4 )) by L886 , L262;
+thus L890: (( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) & ( the_Edges_of R3 ) = ( the_Edges_of R4 )) by L889 , L888 , XBOOLE_0:def 10;
+L891: (( dom ( the_Source_of R3 ) ) = ( the_Edges_of R3 ) & ( dom ( the_Source_of R4 ) ) = ( the_Edges_of R3 )) by L890 , FUNCT_2:def 1;
+L892: (for B161 being set holds (B161 in ( dom ( the_Source_of R3 ) ) implies ( ( the_Source_of R3 ) . B161 ) = ( ( the_Source_of R4 ) . B161 ))) by L886 , L262;
+thus L893: ( the_Source_of R3 ) = ( the_Source_of R4 ) by L892 , L891 , FUNCT_1:2;
+L894: (( dom ( the_Target_of R3 ) ) = ( the_Edges_of R3 ) & ( dom ( the_Target_of R4 ) ) = ( the_Edges_of R3 )) by L890 , FUNCT_2:def 1;
+L895: (for B162 being set holds (B162 in ( dom ( the_Target_of R3 ) ) implies ( ( the_Target_of R3 ) . B162 ) = ( ( the_Target_of R4 ) . B162 ))) by L886 , L262;
+thus L896: ( the_Target_of R3 ) = ( the_Target_of R4 ) by L895 , L894 , FUNCT_1:2;
+end;
+assume that
+L897: (( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) & ( the_Edges_of R3 ) = ( the_Edges_of R4 ))
+and
+L898: (( the_Source_of R3 ) = ( the_Source_of R4 ) & ( the_Target_of R3 ) = ( the_Target_of R4 ));
+L899: (for B163 being set holds (B163 in ( the_Edges_of R3 ) implies (( ( the_Source_of R3 ) . B163 ) = ( ( the_Source_of R4 ) . B163 ) & ( ( the_Target_of R3 ) . B163 ) = ( ( the_Target_of R4 ) . B163 )))) by L898;
+thus L900: thesis by L899 , L897 , L262;
+end;
+theorem
+L901: (for B164 being _Graph holds (for B165 being (Subgraph of B164) holds (for B166 being set holds ((B166 in ( the_Vertices_of B165 ) implies B166 in ( the_Vertices_of B164 )) & (B166 in ( the_Edges_of B165 ) implies B166 in ( the_Edges_of B164 ))))));
+theorem
+L902: (for B167 being _Graph holds (for B168 being (Subgraph of B167) holds (for B169 being (Subgraph of B168) holds B169 is (Subgraph of B167))))
+proof
+let C284 being _Graph;
+let C285 being (Subgraph of C284);
+let C286 being (Subgraph of C285);
+L903: ( the_Edges_of C285 ) c= ( the_Edges_of C284 );
+L904: ( the_Vertices_of C286 ) c= ( the_Vertices_of C285 );
+L905:
+now
+thus L906: ( the_Vertices_of C286 ) c= ( the_Vertices_of C284 ) by L904 , XBOOLE_1:1;
+thus L907: ( the_Edges_of C286 ) c= ( the_Edges_of C284 ) by L903 , XBOOLE_1:1;
+let C287 being set;
+assume L908: C287 in ( the_Edges_of C286 );
+thus L909: ( ( the_Source_of C286 ) . C287 ) = ( ( the_Source_of C285 ) . C287 ) by L908 , L262
+.= ( ( the_Source_of C284 ) . C287 ) by L908 , L262;
+thus L910: ( ( the_Target_of C286 ) . C287 ) = ( ( the_Target_of C285 ) . C287 ) by L908 , L262
+.= ( ( the_Target_of C284 ) . C287 ) by L908 , L262;
+end;
+thus L911: thesis by L905 , L262;
+end;
+theorem
+L912: (for B170 being _Graph holds (for B171 , B172 being (Subgraph of B170) holds ((( the_Vertices_of B171 ) c= ( the_Vertices_of B172 ) & ( the_Edges_of B171 ) c= ( the_Edges_of B172 )) implies B171 is (Subgraph of B172))))
+proof
+let C288 being _Graph;
+let C289 , C290 being (Subgraph of C288);
+assume that
+L913: ( the_Vertices_of C289 ) c= ( the_Vertices_of C290 )
+and
+L914: ( the_Edges_of C289 ) c= ( the_Edges_of C290 );
+L915:
+now
+let C291 being set;
+assume L916: C291 in ( the_Edges_of C289 );
+thus L917: ( ( the_Source_of C289 ) . C291 ) = ( ( the_Source_of C288 ) . C291 ) by L916 , L262
+.= ( ( the_Source_of C290 ) . C291 ) by L914 , L916 , L262;
+thus L918: ( ( the_Target_of C289 ) . C291 ) = ( ( the_Target_of C288 ) . C291 ) by L916 , L262
+.= ( ( the_Target_of C290 ) . C291 ) by L914 , L916 , L262;
+end;
+thus L919: thesis by L915 , L913 , L914 , L262;
+end;
+theorem
+L920: (for B173 being _Graph holds (for B174 being (Subgraph of B173) holds (( the_Source_of B174 ) = ( ( the_Source_of B173 ) | ( the_Edges_of B174 ) ) & ( the_Target_of B174 ) = ( ( the_Target_of B173 ) | ( the_Edges_of B174 ) ))))
+proof
+let C292 being _Graph;
+let C293 being (Subgraph of C292);
+set D94 = ( ( the_Source_of C292 ) | ( the_Edges_of C293 ) );
+set D95 = ( ( the_Target_of C292 ) | ( the_Edges_of C293 ) );
+L921:
+now
+let C294 being set;
+assume L922: C294 in ( dom ( the_Source_of C293 ) );
+thus L923: ( ( the_Source_of C293 ) . C294 ) = ( ( the_Source_of C292 ) . C294 ) by L922 , L262
+.= ( D94 . C294 ) by L922 , FUNCT_1:49;
+end;
+L924: ( dom ( the_Source_of C292 ) ) = ( the_Edges_of C292 ) by FUNCT_2:def 1;
+L925: (( dom ( the_Source_of C293 ) ) = ( the_Edges_of C293 ) & ( dom D94 ) = ( the_Edges_of C293 )) by L924 , FUNCT_2:def 1 , RELAT_1:62;
+thus L926: ( the_Source_of C293 ) = D94 by L925 , L921 , FUNCT_1:2;
+L927:
+now
+let C295 being set;
+assume L928: C295 in ( dom ( the_Target_of C293 ) );
+thus L929: ( ( the_Target_of C293 ) . C295 ) = ( ( the_Target_of C292 ) . C295 ) by L928 , L262
+.= ( D95 . C295 ) by L928 , FUNCT_1:49;
+end;
+L930: ( dom ( the_Target_of C292 ) ) = ( the_Edges_of C292 ) by FUNCT_2:def 1;
+L931: (( dom ( the_Target_of C293 ) ) = ( the_Edges_of C293 ) & ( dom D95 ) = ( the_Edges_of C293 )) by L930 , FUNCT_2:def 1 , RELAT_1:62;
+thus L932: thesis by L931 , L927 , FUNCT_1:2;
+end;
+theorem
+L933: (for B175 being _Graph holds (for B176 , B177 , B178 , B179 being set holds (for B180 being (inducedSubgraph of B175 , B176 , B178) holds (for B181 being (inducedSubgraph of B175 , B177 , B179) holds ((B177 c= B176 & B179 c= B178 & B177 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of B175 )) & B179 c= ( B175 .edgesBetween B177 )) implies B181 is (Subgraph of B180))))))
+proof
+let C296 being _Graph;
+let C297 , C298 , C299 , C300 being set;
+let C301 being (inducedSubgraph of C296 , C297 , C299);
+let C302 being (inducedSubgraph of C296 , C298 , C300);
+assume that
+L934: (C298 c= C297 & C300 c= C299)
+and
+L935: (C298 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C296 )) & C300 c= ( C296 .edgesBetween C298 ));
+L936: (( the_Vertices_of C302 ) = C298 & ( the_Edges_of C302 ) = C300) by L935 , L314;
+L937:
+now
+per cases ;
+suppose L938: (C297 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C296 )) & C299 c= ( C296 .edgesBetween C297 ));
+
+L939: (( the_Vertices_of C301 ) = C297 & ( the_Edges_of C301 ) = C299) by L938 , L314;
+thus L940: thesis by L939 , L934 , L936 , L912;
+end;
+suppose L941: (not (C297 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C296 )) & C299 c= ( C296 .edgesBetween C297 )));
+
+L942: C301 == C296 by L941 , L314;
+L943: (( the_Vertices_of C301 ) = ( the_Vertices_of C296 ) & ( the_Edges_of C301 ) = ( the_Edges_of C296 )) by L942 , L307;
+thus L944: thesis by L943 , L936 , L912;
+end;
+end;
+thus L946: thesis by L937;
+end;
+theorem
+L947: (for B182 being non  trivial _Graph holds (for B183 being (Vertex of B182) holds (for B184 being (removeVertex of B182 , B183) holds (( the_Vertices_of B184 ) = ( ( the_Vertices_of B182 ) \ { B183 } ) & ( the_Edges_of B184 ) = ( B182 .edgesBetween ( ( the_Vertices_of B182 ) \ { B183 } ) )))))
+proof
+let C303 being non  trivial _Graph;
+let C304 being (Vertex of C303);
+let C305 being (removeVertex of C303 , C304);
+set D96 = ( the_Vertices_of C303 );
+set D97 = ( D96 \ { C304 } );
+L948:
+now
+assume L949: D97 is  empty;
+L950: D96 c= { C304 } by L949 , XBOOLE_1:37;
+L951: D96 = { C304 } by L950 , ZFMISC_1:33;
+L952: ( card D96 ) = 1 by L951 , CARD_1:30;
+thus L953: contradiction by L952 , L83;
+end;
+reconsider D98 = D97 as non  empty (Subset of D96) by L948;
+L954: C305 is (inducedSubgraph of C303 , D98);
+thus L955: thesis by L954 , L314;
+end;
+theorem
+L956: (for B185 being  finite non  trivial _Graph holds (for B186 being (Vertex of B185) holds (for B187 being (removeVertex of B185 , B186) holds (( ( B187 .order() ) + 1 ) = ( B185 .order() ) & ( ( B187 .size() ) + ( card ( B186 .edgesInOut() ) ) ) = ( B185 .size() )))))
+proof
+let C306 being  finite non  trivial _Graph;
+let C307 being (Vertex of C306);
+let C308 being (removeVertex of C306 , C307);
+set D99 = ( the_Vertices_of C306 );
+set D100 = ( the_Vertices_of C308 );
+set D101 = ( the_Edges_of C306 );
+set D102 = ( the_Edges_of C308 );
+set D103 = ( C307 .edgesInOut() );
+L957: D100 = ( D99 \ { C307 } ) by L947;
+L958: C307 in { C307 } by TARSKI:def 1;
+L959: (not C307 in D100) by L958 , L957 , XBOOLE_0:def 5;
+L960: ( card ( ( D99 \ { C307 } ) \/ { C307 } ) ) = ( ( C308 .order() ) + 1 ) by L959 , L957 , CARD_2:41;
+thus L961: ( ( C308 .order() ) + 1 ) = ( C306 .order() ) by L960 , XBOOLE_1:45;
+L962: (D102 = ( C306 .edgesBetween ( D99 \ { C307 } ) ) & ( C306 .edgesBetween ( D99 \ { C307 } ) ) = ( D101 \ D103 )) by L809 , L947;
+L963: D101 = ( D102 \/ D103 ) by L962 , XBOOLE_1:45;
+thus L964: thesis by L963 , L962 , CARD_2:40 , XBOOLE_1:79;
+end;
+theorem
+L965: (for B188 being _Graph holds (for B189 being set holds (for B190 being (removeVertices of B188 , B189) holds (B189 c< ( the_Vertices_of B188 ) implies (( the_Vertices_of B190 ) = ( ( the_Vertices_of B188 ) \ B189 ) & ( the_Edges_of B190 ) = ( B188 .edgesBetween ( ( the_Vertices_of B188 ) \ B189 ) ))))))
+proof
+let C309 being _Graph;
+let C310 being set;
+let C311 being (removeVertices of C309 , C310);
+set D104 = ( ( the_Vertices_of C309 ) \ C310 );
+assume L966: C310 c< ( the_Vertices_of C309 );
+L967:
+now
+assume L968: D104 is  empty;
+L969: ( the_Vertices_of C309 ) c= C310 by L968 , XBOOLE_1:37;
+thus L970: contradiction by L969 , L966 , XBOOLE_0:def 8;
+end;
+reconsider D105 = D104 as non  empty (Subset of ( the_Vertices_of C309 )) by L967;
+L971: C311 is (inducedSubgraph of C309 , D105);
+thus L972: thesis by L971 , L314;
+end;
+theorem
+L973: (for B191 being  finite _Graph holds (for B192 being (Subset of ( the_Vertices_of B191 )) holds (for B193 being (removeVertices of B191 , B192) holds (B192 <> ( the_Vertices_of B191 ) implies (( ( B193 .order() ) + ( card B192 ) ) = ( B191 .order() ) & ( ( B193 .size() ) + ( card ( B191 .edgesInOut B192 ) ) ) = ( B191 .size() ))))))
+proof
+let C312 being  finite _Graph;
+let C313 being (Subset of ( the_Vertices_of C312 ));
+let C314 being (removeVertices of C312 , C313);
+set D106 = ( the_Vertices_of C312 );
+set D107 = ( the_Vertices_of C314 );
+set D108 = ( the_Edges_of C312 );
+set D109 = ( the_Edges_of C314 );
+L974: ( C312 .edgesBetween ( D106 \ C313 ) ) = ( D108 \ ( C312 .edgesInOut C313 ) ) by L809;
+assume L975: C313 <> D106;
+L976: C313 c< D106 by L975 , XBOOLE_0:def 8;
+L977: D107 = ( D106 \ C313 ) by L976 , L965;
+L978: ( card ( D107 \/ C313 ) ) = ( ( card D107 ) + ( card C313 ) ) by L977 , CARD_2:40 , XBOOLE_1:79;
+thus L979: ( ( C314 .order() ) + ( card C313 ) ) = ( C312 .order() ) by L978 , L977 , XBOOLE_1:45;
+L980: D109 = ( C312 .edgesBetween ( D106 \ C313 ) ) by L976 , L965;
+L981: D108 = ( D109 \/ ( C312 .edgesInOut C313 ) ) by L980 , L974 , XBOOLE_1:45;
+thus L982: thesis by L981 , L980 , L974 , CARD_2:40 , XBOOLE_1:79;
+end;
+theorem
+L983: (for B194 being _Graph holds (for B195 being set holds (for B196 being (removeEdge of B194 , B195) holds (( the_Vertices_of B196 ) = ( the_Vertices_of B194 ) & ( the_Edges_of B196 ) = ( ( the_Edges_of B194 ) \ { B195 } )))))
+proof
+let C315 being _Graph;
+let C316 being set;
+let C317 being (removeEdge of C315 , C316);
+set D110 = ( the_Vertices_of C315 );
+L984: D110 c= D110;
+reconsider D111 = D110 as non  empty (Subset of ( the_Vertices_of C315 )) by L984;
+set D112 = ( ( the_Edges_of C315 ) \ { C316 } );
+reconsider D113 = D112 as (Subset of ( C315 .edgesBetween D111 )) by L800;
+L985: C317 is (inducedSubgraph of C315 , D111 , D113);
+thus L986: thesis by L985 , L314;
+end;
+theorem
+L987: (for B197 being  finite _Graph holds (for B198 being set holds (for B199 being (removeEdge of B197 , B198) holds (( B197 .order() ) = ( B199 .order() ) & (B198 in ( the_Edges_of B197 ) implies ( ( B199 .size() ) + 1 ) = ( B197 .size() ))))))
+proof
+let C318 being  finite _Graph;
+let C319 being set;
+let C320 being (removeEdge of C318 , C319);
+L988: ( the_Edges_of C320 ) = ( ( the_Edges_of C318 ) \ { C319 } ) by L983;
+thus L989: ( C318 .order() ) = ( C320 .order() ) by L983;
+assume L990: C319 in ( the_Edges_of C318 );
+L991: (for B200 being set holds (B200 in { C319 } implies B200 in ( the_Edges_of C318 ))) by L990 , TARSKI:def 1;
+L992: { C319 } c= ( the_Edges_of C318 ) by L991 , TARSKI:def 3;
+L993: ( the_Edges_of C318 ) = ( ( the_Edges_of C320 ) \/ { C319 } ) by L992 , L988 , XBOOLE_1:45;
+L994: C319 in { C319 } by TARSKI:def 1;
+L995: (not C319 in ( the_Edges_of C320 )) by L994 , L988 , XBOOLE_0:def 5;
+thus L996: thesis by L995 , L993 , CARD_2:41;
+end;
+theorem
+L997: (for B201 being _Graph holds (for B202 being set holds (for B203 being (removeEdges of B201 , B202) holds (( the_Vertices_of B203 ) = ( the_Vertices_of B201 ) & ( the_Edges_of B203 ) = ( ( the_Edges_of B201 ) \ B202 )))))
+proof
+let C321 being _Graph;
+let C322 being set;
+let C323 being (removeEdges of C321 , C322);
+set D114 = ( the_Vertices_of C321 );
+L998: D114 c= D114;
+reconsider D115 = D114 as non  empty (Subset of ( the_Vertices_of C321 )) by L998;
+set D116 = ( ( the_Edges_of C321 ) \ C322 );
+reconsider D117 = D116 as (Subset of ( C321 .edgesBetween D115 )) by L800;
+L999: C323 is (inducedSubgraph of C321 , D115 , D117);
+thus L1000: thesis by L999 , L314;
+end;
+theorem
+L1001: (for B204 being  finite _Graph holds (for B205 being set holds (for B206 being (removeEdges of B204 , B205) holds ( B204 .order() ) = ( B206 .order() )))) by L997;
+theorem
+L1002: (for B207 being  finite _Graph holds (for B208 being (Subset of ( the_Edges_of B207 )) holds (for B209 being (removeEdges of B207 , B208) holds ( ( B209 .size() ) + ( card B208 ) ) = ( B207 .size() ))))
+proof
+let C324 being  finite _Graph;
+let C325 being (Subset of ( the_Edges_of C324 ));
+let C326 being (removeEdges of C324 , C325);
+L1003: ( the_Edges_of C326 ) = ( ( the_Edges_of C324 ) \ C325 ) by L997;
+L1004: ( the_Edges_of C324 ) = ( ( the_Edges_of C326 ) \/ C325 ) by L1003 , XBOOLE_1:45;
+thus L1005: thesis by L1004 , L1003 , CARD_2:40 , XBOOLE_1:79;
+end;
+theorem
+L1006: (for R2 being _Graph holds (for R6 being set holds (for R20 being (Vertex of R2) holds (R6 in ( R20 .edgesIn() ) iff (R6 in ( the_Edges_of R2 ) & ( ( the_Target_of R2 ) . R6 ) = R20))))) by L387;
+theorem
+L1007: (for R2 being _Graph holds (for R6 being set holds (for R20 being (Vertex of R2) holds (R6 in ( R20 .edgesIn() ) iff (ex B210 being set st R6 DJoins B210 , R20 , R2)))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R20 being (Vertex of R2);
+thus L1008:now
+set D118 = ( ( the_Source_of R2 ) . R6 );
+assume L1009: R6 in ( R20 .edgesIn() );
+take D119 = D118;
+L1010: ( ( the_Target_of R2 ) . R6 ) = R20 by L1009 , L387;
+thus L1011: R6 DJoins D119 , R20 , R2 by L1010 , L1009 , L66;
+end;
+given C327 being set such that
+L1012: R6 DJoins C327 , R20 , R2;
+
+L1013: (R6 in ( the_Edges_of R2 ) & ( ( the_Target_of R2 ) . R6 ) = R20) by L1012 , L66;
+thus L1014: thesis by L1013 , L387;
+end;
+theorem
+L1015: (for R2 being _Graph holds (for R6 being set holds (for R20 being (Vertex of R2) holds (R6 in ( R20 .edgesOut() ) iff (R6 in ( the_Edges_of R2 ) & ( ( the_Source_of R2 ) . R6 ) = R20))))) by L396;
+theorem
+L1016: (for R2 being _Graph holds (for R6 being set holds (for R20 being (Vertex of R2) holds (R6 in ( R20 .edgesOut() ) iff (ex B211 being set st R6 DJoins R20 , B211 , R2)))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R20 being (Vertex of R2);
+thus L1017:now
+set D120 = ( ( the_Target_of R2 ) . R6 );
+assume L1018: R6 in ( R20 .edgesOut() );
+take D121 = D120;
+L1019: ( ( the_Source_of R2 ) . R6 ) = R20 by L1018 , L396;
+thus L1020: R6 DJoins R20 , D121 , R2 by L1019 , L1018 , L66;
+end;
+given C328 being set such that
+L1021: R6 DJoins R20 , C328 , R2;
+
+L1022: (R6 in ( the_Edges_of R2 ) & ( ( the_Source_of R2 ) . R6 ) = R20) by L1021 , L66;
+thus L1023: thesis by L1022 , L396;
+end;
+theorem
+L1024: (for R2 being _Graph holds (for R20 being (Vertex of R2) holds ( R20 .edgesInOut() ) = ( ( R20 .edgesIn() ) \/ ( R20 .edgesOut() ) )));
+theorem
+L1025: (for R2 being _Graph holds (for R6 being set holds (for R20 being (Vertex of R2) holds (R6 in ( R20 .edgesInOut() ) iff (R6 in ( the_Edges_of R2 ) & (( ( the_Source_of R2 ) . R6 ) = R20 or ( ( the_Target_of R2 ) . R6 ) = R20))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R20 being (Vertex of R2);
+thus L1026:now
+assume L1027: R6 in ( R20 .edgesInOut() );
+thus L1028: R6 in ( the_Edges_of R2 ) by L1027;
+L1029: (R6 in ( R20 .edgesIn() ) or R6 in ( R20 .edgesOut() )) by L1027 , XBOOLE_0:def 3;
+thus L1030: (( ( the_Source_of R2 ) . R6 ) = R20 or ( ( the_Target_of R2 ) . R6 ) = R20) by L1029 , L387 , L396;
+end;
+assume L1031: (R6 in ( the_Edges_of R2 ) & (( ( the_Source_of R2 ) . R6 ) = R20 or ( ( the_Target_of R2 ) . R6 ) = R20));
+L1032: (R6 in ( R20 .edgesIn() ) or R6 in ( R20 .edgesOut() )) by L1031 , L387 , L396;
+thus L1033: thesis by L1032 , XBOOLE_0:def 3;
+end;
+theorem
+L1034: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R21 being (Vertex of R2) holds (R6 Joins R21 , R7 , R2 implies R6 in ( R21 .edgesInOut() ))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R7 being set;
+let R21 being (Vertex of R2);
+assume L1035: R6 Joins R21 , R7 , R2;
+L1036: ((( ( the_Source_of R2 ) . R6 ) = R21 & ( ( the_Target_of R2 ) . R6 ) = R7) or (( ( the_Source_of R2 ) . R6 ) = R7 & ( ( the_Target_of R2 ) . R6 ) = R21)) by L1035 , L64;
+L1037: R6 in ( the_Edges_of R2 ) by L1035 , L64;
+thus L1038: thesis by L1037 , L1036 , L1025;
+end;
+theorem
+L1039: (for R2 being _Graph holds (for R6 being set holds (for R21 being (Vertex of R2) holds (for R22 being (Vertex of R2) holds (R6 Joins R21 , R22 , R2 implies ((R6 in ( R21 .edgesIn() ) & R6 in ( R22 .edgesOut() )) or (R6 in ( R22 .edgesIn() ) & R6 in ( R21 .edgesOut() ))))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R21 being (Vertex of R2);
+let R22 being (Vertex of R2);
+assume L1040: R6 Joins R21 , R22 , R2;
+L1041: R6 in ( the_Edges_of R2 ) by L1040 , L64;
+L1042:
+now
+per cases  by L1040 , L64;
+suppose L1043: (( ( the_Source_of R2 ) . R6 ) = R21 & ( ( the_Target_of R2 ) . R6 ) = R22);
+
+thus L1044: thesis by L1043 , L1041 , L387 , L396;
+end;
+suppose L1045: (( ( the_Source_of R2 ) . R6 ) = R22 & ( ( the_Target_of R2 ) . R6 ) = R21);
+
+thus L1046: thesis by L1045 , L1041 , L387 , L396;
+end;
+end;
+thus L1048: thesis by L1042;
+end;
+theorem
+L1049: (for R2 being _Graph holds (for R6 being set holds (for R21 being (Vertex of R2) holds (R6 in ( R21 .edgesInOut() ) iff (ex B212 being (Vertex of R2) st R6 Joins R21 , B212 , R2)))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R21 being (Vertex of R2);
+thus L1050:now
+assume L1051: R6 in ( R21 .edgesInOut() );
+L1052:
+now
+per cases  by L1051 , L1025;
+suppose L1053: ( ( the_Source_of R2 ) . R6 ) = R21;
+
+set D122 = ( ( the_Target_of R2 ) . R6 );
+reconsider D123 = D122 as (Vertex of R2) by L1051 , FUNCT_2:5;
+take D124 = D123;
+thus L1054: R6 Joins R21 , D124 , R2 by L1051 , L1053 , L64;
+end;
+suppose L1055: ( ( the_Target_of R2 ) . R6 ) = R21;
+
+set D125 = ( ( the_Source_of R2 ) . R6 );
+reconsider D126 = D125 as (Vertex of R2) by L1051 , FUNCT_2:5;
+take D127 = D126;
+thus L1056: R6 Joins R21 , D127 , R2 by L1051 , L1055 , L64;
+end;
+end;
+thus L1058: (ex B213 being (Vertex of R2) st R6 Joins R21 , B213 , R2) by L1052;
+end;
+given C329 being (Vertex of R2) such that
+L1059: R6 Joins R21 , C329 , R2;
+
+thus L1060: thesis by L1059 , L1034;
+end;
+theorem
+L1061: (for R2 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (for R20 being (Vertex of R2) holds ((R6 in ( R20 .edgesInOut() ) & R6 Joins R7 , R10 , R2) implies (R20 = R7 or R20 = R10)))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R7 being set;
+let R10 being set;
+let R20 being (Vertex of R2);
+assume that
+L1062: R6 in ( R20 .edgesInOut() )
+and
+L1063: R6 Joins R7 , R10 , R2;
+L1064:
+now
+assume L1065: R20 <> R7;
+L1066:
+now
+per cases  by L1062 , L1025;
+suppose L1067: ( ( the_Source_of R2 ) . R6 ) = R20;
+
+thus L1068: R20 = R10 by L1067 , L1063 , L1065 , L64;
+end;
+suppose L1069: ( ( the_Target_of R2 ) . R6 ) = R20;
+
+thus L1070: R20 = R10 by L1069 , L1063 , L1065 , L64;
+end;
+end;
+thus L1072: R20 = R10 by L1066;
+end;
+thus L1073: thesis by L1064;
+end;
+theorem
+L1074: (for R2 being _Graph holds (for R6 being set holds (for R21 being (Vertex of R2) holds (for R22 being (Vertex of R2) holds (R6 Joins R21 , R22 , R2 implies (( R21 .adj R6 ) = R22 & ( R22 .adj R6 ) = R21))))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R21 being (Vertex of R2);
+let R22 being (Vertex of R2);
+assume L1075: R6 Joins R21 , R22 , R2;
+L1076: R6 in ( R21 .edgesInOut() ) by L1075 , L1034;
+L1077:
+now
+per cases  by L1075 , L64;
+suppose L1078: (( ( the_Source_of R2 ) . R6 ) = R22 & ( ( the_Target_of R2 ) . R6 ) = R21);
+
+thus L1079: ( R21 .adj R6 ) = R22 by L1078 , L1076 , L405;
+L1080:
+now
+per cases ;
+suppose L1081: R21 = R22;
+
+thus L1082: ( R22 .adj R6 ) = R21 by L1081 , L1076 , L1078 , L405;
+end;
+suppose L1083: R21 <> R22;
+
+thus L1084: ( R22 .adj R6 ) = R21 by L1083 , L1076 , L1078 , L405;
+end;
+end;
+thus L1086: ( R22 .adj R6 ) = R21 by L1080;
+end;
+suppose L1087: (( ( the_Source_of R2 ) . R6 ) = R21 & ( ( the_Target_of R2 ) . R6 ) = R22);
+
+L1088:
+now
+per cases ;
+suppose L1089: R21 = R22;
+
+thus L1090: ( R21 .adj R6 ) = R22 by L1089 , L1076 , L1087 , L405;
+end;
+suppose L1091: R21 <> R22;
+
+thus L1092: ( R21 .adj R6 ) = R22 by L1091 , L1076 , L1087 , L405;
+end;
+end;
+thus L1094: ( R21 .adj R6 ) = R22 by L1088;
+thus L1095: ( R22 .adj R6 ) = R21 by L1076 , L1087 , L405;
+end;
+end;
+thus L1097: thesis by L1077;
+end;
+theorem
+L1098: (for R2 being _Graph holds (for R6 being set holds (for R20 being (Vertex of R2) holds (R6 in ( R20 .edgesInOut() ) iff R6 Joins R20 , ( R20 .adj R6 ) , R2))))
+proof
+let R2 being _Graph;
+let R6 being set;
+let R20 being (Vertex of R2);
+thus L1099:now
+assume L1100: R6 in ( R20 .edgesInOut() );
+L1101: (( ( the_Source_of R2 ) . R6 ) = R20 or ( ( the_Target_of R2 ) . R6 ) = R20) by L1100 , L1025;
+L1102:
+now
+per cases ;
+suppose L1103: ( ( the_Target_of R2 ) . R6 ) = R20;
+
+L1104: ( R20 .adj R6 ) = ( ( the_Source_of R2 ) . R6 ) by L1103 , L1100 , L405;
+thus L1105: R6 Joins R20 , ( R20 .adj R6 ) , R2 by L1104 , L1100 , L1103 , L64;
+end;
+suppose L1106: ( ( the_Target_of R2 ) . R6 ) <> R20;
+
+L1107: ( R20 .adj R6 ) = ( ( the_Target_of R2 ) . R6 ) by L1106 , L1100 , L1101 , L405;
+thus L1108: R6 Joins R20 , ( R20 .adj R6 ) , R2 by L1107 , L1100 , L1101 , L1106 , L64;
+end;
+end;
+thus L1110: R6 Joins R20 , ( R20 .adj R6 ) , R2 by L1102;
+end;
+assume L1111: R6 Joins R20 , ( R20 .adj R6 ) , R2;
+thus L1112: thesis by L1111 , L1034;
+end;
+theorem
+L1113: (for B214 being  finite _Graph holds (for B215 being set holds (for B216 , B217 being (Vertex of B214) holds (B215 Joins B216 , B217 , B214 implies (1 <= ( B216 .degree() ) & 1 <= ( B217 .degree() ))))))
+proof
+let C330 being  finite _Graph;
+let C331 being set;
+let C332 , C333 being (Vertex of C330);
+assume L1114: C331 Joins C332 , C333 , C330;
+L1115:
+now
+per cases  by L1114 , L1039;
+suppose L1116: (C331 in ( C332 .edgesIn() ) & C331 in ( C333 .edgesOut() ));
+
+L1117: (for B218 being set holds (B218 in { C331 } implies B218 in ( C332 .edgesIn() ))) by L1116 , TARSKI:def 1;
+L1118: { C331 } c= ( C332 .edgesIn() ) by L1117 , TARSKI:def 3;
+L1119: ( card { C331 } ) <= ( card ( C332 .edgesIn() ) ) by L1118 , NAT_1:43;
+L1120: 1 <= ( C332 .inDegree() ) by L1119 , CARD_1:30;
+thus L1121: 1 <= ( C332 .degree() ) by L1120 , NAT_1:12;
+L1122: (for B219 being set holds (B219 in { C331 } implies B219 in ( C333 .edgesOut() ))) by L1116 , TARSKI:def 1;
+L1123: { C331 } c= ( C333 .edgesOut() ) by L1122 , TARSKI:def 3;
+L1124: ( card { C331 } ) <= ( card ( C333 .edgesOut() ) ) by L1123 , NAT_1:43;
+L1125: 1 <= ( C333 .outDegree() ) by L1124 , CARD_1:30;
+thus L1126: 1 <= ( C333 .degree() ) by L1125 , NAT_1:12;
+end;
+suppose L1127: (C331 in ( C333 .edgesIn() ) & C331 in ( C332 .edgesOut() ));
+
+L1128: (for B220 being set holds (B220 in { C331 } implies B220 in ( C332 .edgesOut() ))) by L1127 , TARSKI:def 1;
+L1129: { C331 } c= ( C332 .edgesOut() ) by L1128 , TARSKI:def 3;
+L1130: ( card { C331 } ) <= ( card ( C332 .edgesOut() ) ) by L1129 , NAT_1:43;
+L1131: 1 <= ( C332 .outDegree() ) by L1130 , CARD_1:30;
+thus L1132: 1 <= ( C332 .degree() ) by L1131 , NAT_1:12;
+L1133: (for B221 being set holds (B221 in { C331 } implies B221 in ( C333 .edgesIn() ))) by L1127 , TARSKI:def 1;
+L1134: { C331 } c= ( C333 .edgesIn() ) by L1133 , TARSKI:def 3;
+L1135: ( card { C331 } ) <= ( card ( C333 .edgesIn() ) ) by L1134 , NAT_1:43;
+L1136: 1 <= ( C333 .inDegree() ) by L1135 , CARD_1:30;
+thus L1137: 1 <= ( C333 .degree() ) by L1136 , NAT_1:12;
+end;
+end;
+thus L1139: thesis by L1115;
+end;
+theorem
+L1140: (for R2 being _Graph holds (for R7 being set holds (for R20 being (Vertex of R2) holds (R7 in ( R20 .inNeighbors() ) iff (ex B222 being set st B222 DJoins R7 , R20 , R2)))))
+proof
+let R2 being _Graph;
+let R7 being set;
+let R20 being (Vertex of R2);
+thus L1141:now
+assume L1142: R7 in ( R20 .inNeighbors() );
+consider C334 being set such that L1143: C334 in ( dom ( the_Source_of R2 ) ) and L1144: C334 in ( R20 .edgesIn() ) and L1145: R7 = ( ( the_Source_of R2 ) . C334 ) by L1142 , FUNCT_1:def 6;
+take D128 = C334;
+L1146: ( ( the_Target_of R2 ) . D128 ) = R20 by L1144 , L387;
+thus L1147: D128 DJoins R7 , R20 , R2 by L1146 , L1143 , L1145 , L66;
+end;
+given C335 being set such that
+L1148: C335 DJoins R7 , R20 , R2;
+
+L1149: C335 in ( the_Edges_of R2 ) by L1148 , L66;
+L1150: C335 in ( dom ( the_Source_of R2 ) ) by L1149 , FUNCT_2:def 1;
+L1151: ( ( the_Target_of R2 ) . C335 ) = R20 by L1148 , L66;
+L1152: C335 in ( R20 .edgesIn() ) by L1151 , L1149 , L387;
+L1153: ( ( the_Source_of R2 ) . C335 ) = R7 by L1148 , L66;
+thus L1154: thesis by L1153 , L1152 , L1150 , FUNCT_1:def 6;
+end;
+theorem
+L1155: (for R2 being _Graph holds (for R7 being set holds (for R20 being (Vertex of R2) holds (R7 in ( R20 .outNeighbors() ) iff (ex B223 being set st B223 DJoins R20 , R7 , R2)))))
+proof
+let R2 being _Graph;
+let R7 being set;
+let R20 being (Vertex of R2);
+thus L1156:now
+assume L1157: R7 in ( R20 .outNeighbors() );
+consider C336 being set such that L1158: C336 in ( dom ( the_Target_of R2 ) ) and L1159: C336 in ( R20 .edgesOut() ) and L1160: R7 = ( ( the_Target_of R2 ) . C336 ) by L1157 , FUNCT_1:def 6;
+take D129 = C336;
+L1161: ( ( the_Source_of R2 ) . D129 ) = R20 by L1159 , L396;
+thus L1162: D129 DJoins R20 , R7 , R2 by L1161 , L1158 , L1160 , L66;
+end;
+given C337 being set such that
+L1163: C337 DJoins R20 , R7 , R2;
+
+L1164: C337 in ( the_Edges_of R2 ) by L1163 , L66;
+L1165: C337 in ( dom ( the_Target_of R2 ) ) by L1164 , FUNCT_2:def 1;
+L1166: ( ( the_Source_of R2 ) . C337 ) = R20 by L1163 , L66;
+L1167: C337 in ( R20 .edgesOut() ) by L1166 , L1164 , L396;
+L1168: ( ( the_Target_of R2 ) . C337 ) = R7 by L1163 , L66;
+thus L1169: thesis by L1168 , L1167 , L1165 , FUNCT_1:def 6;
+end;
+theorem
+L1170: (for R2 being _Graph holds (for R7 being set holds (for R20 being (Vertex of R2) holds (R7 in ( R20 .allNeighbors() ) iff (ex B224 being set st B224 Joins R20 , R7 , R2)))))
+proof
+let R2 being _Graph;
+let R7 being set;
+let R20 being (Vertex of R2);
+thus L1171:now
+assume L1172: R7 in ( R20 .allNeighbors() );
+L1173:
+now
+per cases  by L1172 , XBOOLE_0:def 3;
+suppose L1174: R7 in ( R20 .inNeighbors() );
+
+consider C338 being set such that L1175: C338 DJoins R7 , R20 , R2 by L1174 , L1140;
+take D130 = C338;
+thus L1176: D130 Joins R20 , R7 , R2 by L1175 , L71;
+end;
+suppose L1177: R7 in ( R20 .outNeighbors() );
+
+consider C339 being set such that L1178: C339 DJoins R20 , R7 , R2 by L1177 , L1155;
+take D131 = C339;
+thus L1179: D131 Joins R20 , R7 , R2 by L1178 , L71;
+end;
+end;
+thus L1181: (ex B225 being set st B225 Joins R20 , R7 , R2) by L1173;
+end;
+assume L1182: (ex B226 being set st B226 Joins R20 , R7 , R2);
+consider C340 being set such that L1183: C340 Joins R20 , R7 , R2 by L1182;
+L1184:
+now
+per cases  by L1183 , L71;
+suppose L1185: C340 DJoins R7 , R20 , R2;
+
+L1186: R7 in ( R20 .inNeighbors() ) by L1185 , L1140;
+thus L1187: R7 in ( ( R20 .inNeighbors() ) \/ ( R20 .outNeighbors() ) ) by L1186 , XBOOLE_0:def 3;
+end;
+suppose L1188: C340 DJoins R20 , R7 , R2;
+
+L1189: R7 in ( R20 .outNeighbors() ) by L1188 , L1155;
+thus L1190: R7 in ( ( R20 .inNeighbors() ) \/ ( R20 .outNeighbors() ) ) by L1189 , XBOOLE_0:def 3;
+end;
+end;
+thus L1192: thesis by L1184;
+end;
+theorem
+L1193: (for B227 being _Graph holds (for B228 being (Subgraph of B227) holds (for B229 , B230 , B231 being set holds ((B231 Joins B229 , B230 , B228 implies B231 Joins B229 , B230 , B227) & (B231 DJoins B229 , B230 , B228 implies B231 DJoins B229 , B230 , B227) & (B231 SJoins B229 , B230 , B228 implies B231 SJoins B229 , B230 , B227) & (B231 DSJoins B229 , B230 , B228 implies B231 DSJoins B229 , B230 , B227)))))
+proof
+let C341 being _Graph;
+let C342 being (Subgraph of C341);
+let C343 , C344 , C345 being set;
+thus L1194: (C345 Joins C343 , C344 , C342 implies C345 Joins C343 , C344 , C341) by L274;
+thus L1195:now
+assume L1196: C345 DJoins C343 , C344 , C342;
+L1197: C345 in ( the_Edges_of C342 ) by L1196 , L66;
+L1198: ( ( the_Target_of C342 ) . C345 ) = C344 by L1196 , L66;
+L1199: ( ( the_Target_of C341 ) . C345 ) = C344 by L1198 , L1197 , L262;
+L1200: ( ( the_Source_of C342 ) . C345 ) = C343 by L1196 , L66;
+L1201: ( ( the_Source_of C341 ) . C345 ) = C343 by L1200 , L1197 , L262;
+thus L1202: C345 DJoins C343 , C344 , C341 by L1201 , L1197 , L1199 , L66;
+end;
+thus L1203:now
+assume L1204: C345 SJoins C343 , C344 , C342;
+L1205: ((( ( the_Source_of C342 ) . C345 ) in C343 & ( ( the_Target_of C342 ) . C345 ) in C344) or (( ( the_Source_of C342 ) . C345 ) in C344 & ( ( the_Target_of C342 ) . C345 ) in C343)) by L1204 , L68;
+L1206: C345 in ( the_Edges_of C342 ) by L1204 , L68;
+L1207: (( ( the_Source_of C342 ) . C345 ) = ( ( the_Source_of C341 ) . C345 ) & ( ( the_Target_of C342 ) . C345 ) = ( ( the_Target_of C341 ) . C345 )) by L1206 , L262;
+thus L1208: C345 SJoins C343 , C344 , C341 by L1207 , L1206 , L1205 , L68;
+end;
+assume L1209: C345 DSJoins C343 , C344 , C342;
+L1210: (( ( the_Source_of C342 ) . C345 ) in C343 & ( ( the_Target_of C342 ) . C345 ) in C344) by L1209 , L69;
+L1211: C345 in ( the_Edges_of C342 ) by L1209 , L69;
+L1212: (( ( the_Source_of C342 ) . C345 ) = ( ( the_Source_of C341 ) . C345 ) & ( ( the_Target_of C342 ) . C345 ) = ( ( the_Target_of C341 ) . C345 )) by L1211 , L262;
+thus L1213: thesis by L1212 , L1211 , L1210 , L69;
+end;
+theorem
+L1214: (for B232 being _Graph holds (for B233 being (Subgraph of B232) holds (for B234 , B235 , B236 being set holds (B236 in ( the_Edges_of B233 ) implies ((B236 Joins B234 , B235 , B232 implies B236 Joins B234 , B235 , B233) & (B236 DJoins B234 , B235 , B232 implies B236 DJoins B234 , B235 , B233) & (B236 SJoins B234 , B235 , B232 implies B236 SJoins B234 , B235 , B233) & (B236 DSJoins B234 , B235 , B232 implies B236 DSJoins B234 , B235 , B233))))))
+proof
+let C346 being _Graph;
+let C347 being (Subgraph of C346);
+let C348 , C349 , C350 being set;
+assume L1215: C350 in ( the_Edges_of C347 );
+thus L1216:now
+assume L1217: C350 Joins C348 , C349 , C346;
+L1218: ((( ( the_Source_of C346 ) . C350 ) = C348 & ( ( the_Target_of C346 ) . C350 ) = C349) or (( ( the_Source_of C346 ) . C350 ) = C349 & ( ( the_Target_of C346 ) . C350 ) = C348)) by L1217 , L64;
+L1219: (( ( the_Source_of C347 ) . C350 ) = ( ( the_Source_of C346 ) . C350 ) & ( ( the_Target_of C347 ) . C350 ) = ( ( the_Target_of C346 ) . C350 )) by L1215 , L262;
+thus L1220: C350 Joins C348 , C349 , C347 by L1219 , L1215 , L1218 , L64;
+end;
+L1221: ( ( the_Target_of C347 ) . C350 ) = ( ( ( the_Target_of C346 ) | ( the_Edges_of C347 ) ) . C350 ) by L920;
+L1222: ( ( the_Target_of C347 ) . C350 ) = ( ( the_Target_of C346 ) . C350 ) by L1221 , L1215 , FUNCT_1:49;
+thus L1223:now
+assume L1224: C350 DJoins C348 , C349 , C346;
+L1225: ( ( the_Target_of C346 ) . C350 ) = C349 by L1224 , L66;
+L1226: ( ( the_Target_of C347 ) . C350 ) = C349 by L1225 , L1215 , L262;
+L1227: ( ( the_Source_of C346 ) . C350 ) = C348 by L1224 , L66;
+L1228: ( ( the_Source_of C347 ) . C350 ) = C348 by L1227 , L1215 , L262;
+thus L1229: C350 DJoins C348 , C349 , C347 by L1228 , L1215 , L1226 , L66;
+end;
+thus L1230:now
+L1231: ( ( the_Target_of C347 ) . C350 ) = ( ( ( the_Target_of C346 ) | ( the_Edges_of C347 ) ) . C350 ) by L920;
+L1232: ( ( the_Target_of C347 ) . C350 ) = ( ( the_Target_of C346 ) . C350 ) by L1231 , L1215 , FUNCT_1:49;
+assume L1233: C350 SJoins C348 , C349 , C346;
+L1234: ((( ( the_Source_of C346 ) . C350 ) in C348 & ( ( the_Target_of C346 ) . C350 ) in C349) or (( ( the_Source_of C346 ) . C350 ) in C349 & ( ( the_Target_of C346 ) . C350 ) in C348)) by L1233 , L68;
+L1235: ( ( the_Source_of C347 ) . C350 ) = ( ( ( the_Source_of C346 ) | ( the_Edges_of C347 ) ) . C350 ) by L920;
+L1236: ( ( the_Source_of C347 ) . C350 ) = ( ( the_Source_of C346 ) . C350 ) by L1235 , L1215 , FUNCT_1:49;
+thus L1237: C350 SJoins C348 , C349 , C347 by L1236 , L1215 , L1234 , L1232 , L68;
+end;
+assume L1238: C350 DSJoins C348 , C349 , C346;
+L1239: (( ( the_Source_of C346 ) . C350 ) in C348 & ( ( the_Target_of C346 ) . C350 ) in C349) by L1238 , L69;
+L1240: ( ( the_Source_of C347 ) . C350 ) = ( ( ( the_Source_of C346 ) | ( the_Edges_of C347 ) ) . C350 ) by L920;
+L1241: ( ( the_Source_of C347 ) . C350 ) = ( ( the_Source_of C346 ) . C350 ) by L1240 , L1215 , FUNCT_1:49;
+thus L1242: thesis by L1241 , L1215 , L1239 , L1222 , L69;
+end;
+theorem
+L1243: (for B237 being _Graph holds (for B238 being  spanning (Subgraph of B237) holds (for B239 being  spanning (Subgraph of B238) holds B239 is  spanning  spanning  spanning  spanning (Subgraph of B237))))
+proof
+let C351 being _Graph;
+let C352 being  spanning (Subgraph of C351);
+let C353 being  spanning (Subgraph of C352);
+L1244: ( the_Vertices_of C353 ) = ( the_Vertices_of C352 ) by L302
+.= ( the_Vertices_of C351 ) by L302;
+thus L1245: thesis by L1244 , L302 , L902;
+end;
+theorem
+L1246: (for B240 being  finite _Graph holds (for B241 being (Subgraph of B240) holds (( B241 .order() ) <= ( B240 .order() ) & ( B241 .size() ) <= ( B240 .size() ))))
+proof
+let C354 being  finite _Graph;
+let C355 being (Subgraph of C354);
+L1247: ( card ( the_Vertices_of C355 ) ) <= ( card ( the_Vertices_of C354 ) ) by NAT_1:43;
+thus L1248: ( C355 .order() ) <= ( C354 .order() ) by L1247;
+L1249: ( card ( the_Edges_of C355 ) ) <= ( card ( the_Edges_of C354 ) ) by NAT_1:43;
+thus L1250: thesis by L1249;
+end;
+theorem
+L1251: (for B242 being _Graph holds (for B243 being (Subgraph of B242) holds (for B244 being set holds (( B243 .edgesInto B244 ) c= ( B242 .edgesInto B244 ) & ( B243 .edgesOutOf B244 ) c= ( B242 .edgesOutOf B244 ) & ( B243 .edgesInOut B244 ) c= ( B242 .edgesInOut B244 ) & ( B243 .edgesBetween B244 ) c= ( B242 .edgesBetween B244 )))))
+proof
+let C356 being _Graph;
+let C357 being (Subgraph of C356);
+let C358 being set;
+L1252:
+now
+let C359 being set;
+assume L1253: C359 in ( C357 .edgesInto C358 );
+L1254: ( ( the_Target_of C357 ) . C359 ) = ( ( the_Target_of C356 ) . C359 ) by L1253 , L262;
+L1255: (C359 in ( the_Edges_of C357 ) & ( ( the_Target_of C357 ) . C359 ) in C358) by L1253 , L193;
+thus L1256: C359 in ( C356 .edgesInto C358 ) by L1255 , L1254 , L193;
+end;
+thus L1257: ( C357 .edgesInto C358 ) c= ( C356 .edgesInto C358 ) by L1252 , TARSKI:def 3;
+L1258: ( C357 .edgesInto C358 ) c= ( C356 .edgesInOut C358 ) by L1257 , XBOOLE_1:10;
+L1259:
+now
+let C360 being set;
+assume L1260: C360 in ( C357 .edgesOutOf C358 );
+L1261: ( ( the_Source_of C357 ) . C360 ) = ( ( the_Source_of C356 ) . C360 ) by L1260 , L262;
+L1262: (C360 in ( the_Edges_of C357 ) & ( ( the_Source_of C357 ) . C360 ) in C358) by L1260 , L207;
+thus L1263: C360 in ( C356 .edgesOutOf C358 ) by L1262 , L1261 , L207;
+end;
+thus L1264: ( C357 .edgesOutOf C358 ) c= ( C356 .edgesOutOf C358 ) by L1259 , TARSKI:def 3;
+L1265: ( C357 .edgesOutOf C358 ) c= ( C356 .edgesInOut C358 ) by L1264 , XBOOLE_1:10;
+thus L1266: ( C357 .edgesInOut C358 ) c= ( C356 .edgesInOut C358 ) by L1265 , L1258 , XBOOLE_1:8;
+thus L1267: thesis by L1257 , L1264 , XBOOLE_1:27;
+end;
+theorem
+L1268: (for B245 being _Graph holds (for B246 being (Subgraph of B245) holds (for B247 , B248 being set holds (( B246 .edgesBetween (B247 , B248) ) c= ( B245 .edgesBetween (B247 , B248) ) & ( B246 .edgesDBetween (B247 , B248) ) c= ( B245 .edgesDBetween (B247 , B248) )))))
+proof
+let C361 being _Graph;
+let C362 being (Subgraph of C361);
+let C363 , C364 being set;
+L1269:
+now
+let C365 being set;
+assume L1270: C365 in ( C362 .edgesBetween (C363 , C364) );
+L1271: C365 SJoins C363 , C364 , C362 by L1270 , L223;
+L1272: C365 SJoins C363 , C364 , C361 by L1271 , L1193;
+thus L1273: C365 in ( C361 .edgesBetween (C363 , C364) ) by L1272 , L223;
+end;
+thus L1274: ( C362 .edgesBetween (C363 , C364) ) c= ( C361 .edgesBetween (C363 , C364) ) by L1269 , TARSKI:def 3;
+L1275:
+now
+let C366 being set;
+assume L1276: C366 in ( C362 .edgesDBetween (C363 , C364) );
+L1277: C366 DSJoins C363 , C364 , C362 by L1276 , L235;
+L1278: C366 DSJoins C363 , C364 , C361 by L1277 , L1193;
+thus L1279: C366 in ( C361 .edgesDBetween (C363 , C364) ) by L1278 , L235;
+end;
+thus L1280: thesis by L1275 , TARSKI:def 3;
+end;
+theorem
+L1281: (for B249 being _Graph holds (for B250 being (Subgraph of B249) holds (for B251 being (Vertex of B249) holds (for B252 being (Vertex of B250) holds (B251 = B252 implies (( B252 .edgesIn() ) c= ( B251 .edgesIn() ) & ( B252 .edgesOut() ) c= ( B251 .edgesOut() ) & ( B252 .edgesInOut() ) c= ( B251 .edgesInOut() )))))))
+proof
+let C367 being _Graph;
+let C368 being (Subgraph of C367);
+let C369 being (Vertex of C367);
+let C370 being (Vertex of C368);
+assume L1282: C369 = C370;
+L1283:
+now
+let C371 being set;
+assume L1284: C371 in ( C370 .edgesIn() );
+L1285: ( ( the_Target_of C368 ) . C371 ) = C370 by L1284 , L387;
+L1286: ( ( the_Target_of C367 ) . C371 ) = C369 by L1285 , L1282 , L1284 , L262;
+L1287: C371 in ( the_Edges_of C368 ) by L1284;
+thus L1288: C371 in ( C369 .edgesIn() ) by L1287 , L1286 , L387;
+end;
+thus L1289: ( C370 .edgesIn() ) c= ( C369 .edgesIn() ) by L1283 , TARSKI:def 3;
+L1290:
+now
+let C372 being set;
+assume L1291: C372 in ( C370 .edgesOut() );
+L1292: ( ( the_Source_of C368 ) . C372 ) = C370 by L1291 , L396;
+L1293: ( ( the_Source_of C367 ) . C372 ) = C369 by L1292 , L1282 , L1291 , L262;
+L1294: C372 in ( the_Edges_of C368 ) by L1291;
+thus L1295: C372 in ( C369 .edgesOut() ) by L1294 , L1293 , L396;
+end;
+thus L1296: ( C370 .edgesOut() ) c= ( C369 .edgesOut() ) by L1290 , TARSKI:def 3;
+L1297:
+now
+let C373 being set;
+assume L1298: C373 in ( C370 .edgesInOut() );
+L1299: (( ( the_Source_of C368 ) . C373 ) = C370 or ( ( the_Target_of C368 ) . C373 ) = C370) by L1298 , L1025;
+L1300: (( ( the_Source_of C367 ) . C373 ) = C369 or ( ( the_Target_of C367 ) . C373 ) = C369) by L1299 , L1282 , L1298 , L262;
+L1301: C373 in ( the_Edges_of C368 ) by L1298;
+thus L1302: C373 in ( C369 .edgesInOut() ) by L1301 , L1300 , L1025;
+end;
+thus L1303: thesis by L1297 , TARSKI:def 3;
+end;
+theorem
+L1304: (for B253 being _Graph holds (for B254 being (Subgraph of B253) holds (for B255 being (Vertex of B253) holds (for B256 being (Vertex of B254) holds (B255 = B256 implies (( B256 .edgesIn() ) = ( ( B255 .edgesIn() ) /\ ( the_Edges_of B254 ) ) & ( B256 .edgesOut() ) = ( ( B255 .edgesOut() ) /\ ( the_Edges_of B254 ) ) & ( B256 .edgesInOut() ) = ( ( B255 .edgesInOut() ) /\ ( the_Edges_of B254 ) )))))))
+proof
+let C374 being _Graph;
+let C375 being (Subgraph of C374);
+let C376 being (Vertex of C374);
+let C377 being (Vertex of C375);
+assume L1305: C376 = C377;
+L1306:
+now
+let C378 being set;
+thus L1307:now
+assume L1308: C378 in ( C377 .edgesIn() );
+L1309: ( C377 .edgesIn() ) c= ( C376 .edgesIn() ) by L1305 , L1281;
+thus L1310: C378 in ( ( C376 .edgesIn() ) /\ ( the_Edges_of C375 ) ) by L1309 , L1308 , XBOOLE_0:def 4;
+end;
+assume L1311: C378 in ( ( C376 .edgesIn() ) /\ ( the_Edges_of C375 ) );
+L1312: C378 in ( the_Edges_of C375 ) by L1311 , XBOOLE_0:def 4;
+L1313: C378 in ( C376 .edgesIn() ) by L1311 , XBOOLE_0:def 4;
+L1314: ( ( the_Target_of C374 ) . C378 ) = C376 by L1313 , L387;
+L1315: ( ( the_Target_of C375 ) . C378 ) = C377 by L1314 , L1305 , L1312 , L262;
+thus L1316: C378 in ( C377 .edgesIn() ) by L1315 , L1312 , L387;
+end;
+thus L1317: ( C377 .edgesIn() ) = ( ( C376 .edgesIn() ) /\ ( the_Edges_of C375 ) ) by L1306 , TARSKI:1;
+L1318:
+now
+let C379 being set;
+thus L1319:now
+assume L1320: C379 in ( C377 .edgesOut() );
+L1321: ( C377 .edgesOut() ) c= ( C376 .edgesOut() ) by L1305 , L1281;
+thus L1322: C379 in ( ( C376 .edgesOut() ) /\ ( the_Edges_of C375 ) ) by L1321 , L1320 , XBOOLE_0:def 4;
+end;
+assume L1323: C379 in ( ( C376 .edgesOut() ) /\ ( the_Edges_of C375 ) );
+L1324: C379 in ( the_Edges_of C375 ) by L1323 , XBOOLE_0:def 4;
+L1325: C379 in ( C376 .edgesOut() ) by L1323 , XBOOLE_0:def 4;
+L1326: ( ( the_Source_of C374 ) . C379 ) = C376 by L1325 , L396;
+L1327: ( ( the_Source_of C375 ) . C379 ) = C377 by L1326 , L1305 , L1324 , L262;
+thus L1328: C379 in ( C377 .edgesOut() ) by L1327 , L1324 , L396;
+end;
+thus L1329: ( C377 .edgesOut() ) = ( ( C376 .edgesOut() ) /\ ( the_Edges_of C375 ) ) by L1318 , TARSKI:1;
+L1330:
+now
+let C380 being set;
+thus L1331:now
+assume L1332: C380 in ( ( C376 .edgesInOut() ) /\ ( the_Edges_of C375 ) );
+L1333: C380 in ( the_Edges_of C375 ) by L1332 , XBOOLE_0:def 4;
+L1334: C380 in ( C376 .edgesInOut() ) by L1332 , XBOOLE_0:def 4;
+L1335:
+now
+per cases  by L1334 , XBOOLE_0:def 3;
+suppose L1336: C380 in ( C376 .edgesIn() );
+
+L1337: C380 in ( ( C376 .edgesIn() ) /\ ( the_Edges_of C375 ) ) by L1336 , L1333 , XBOOLE_0:def 4;
+thus L1338: C380 in ( C377 .edgesInOut() ) by L1337 , L1317 , XBOOLE_0:def 3;
+end;
+suppose L1339: C380 in ( C376 .edgesOut() );
+
+L1340: C380 in ( ( C376 .edgesOut() ) /\ ( the_Edges_of C375 ) ) by L1339 , L1333 , XBOOLE_0:def 4;
+thus L1341: C380 in ( C377 .edgesInOut() ) by L1340 , L1329 , XBOOLE_0:def 3;
+end;
+end;
+thus L1343: C380 in ( C377 .edgesInOut() ) by L1335;
+end;
+assume L1344: C380 in ( C377 .edgesInOut() );
+L1345:
+now
+per cases  by L1317 , L1329 , L1344 , XBOOLE_0:def 3;
+suppose L1346: C380 in ( ( C376 .edgesIn() ) /\ ( the_Edges_of C375 ) );
+
+L1347: C380 in ( C376 .edgesIn() ) by L1346 , XBOOLE_0:def 4;
+L1348: C380 in ( ( C376 .edgesIn() ) \/ ( C376 .edgesOut() ) ) by L1347 , XBOOLE_0:def 3;
+L1349: C380 in ( the_Edges_of C375 ) by L1346 , XBOOLE_0:def 4;
+thus L1350: C380 in ( ( C376 .edgesInOut() ) /\ ( the_Edges_of C375 ) ) by L1349 , L1348 , XBOOLE_0:def 4;
+end;
+suppose L1351: C380 in ( ( C376 .edgesOut() ) /\ ( the_Edges_of C375 ) );
+
+L1352: C380 in ( C376 .edgesOut() ) by L1351 , XBOOLE_0:def 4;
+L1353: C380 in ( ( C376 .edgesIn() ) \/ ( C376 .edgesOut() ) ) by L1352 , XBOOLE_0:def 3;
+L1354: C380 in ( the_Edges_of C375 ) by L1351 , XBOOLE_0:def 4;
+thus L1355: C380 in ( ( C376 .edgesInOut() ) /\ ( the_Edges_of C375 ) ) by L1354 , L1353 , XBOOLE_0:def 4;
+end;
+end;
+thus L1357: C380 in ( ( C376 .edgesInOut() ) /\ ( the_Edges_of C375 ) ) by L1345;
+end;
+thus L1358: thesis by L1330 , TARSKI:1;
+end;
+theorem
+L1359: (for B257 being _Graph holds (for B258 being (Subgraph of B257) holds (for B259 being (Vertex of B257) holds (for B260 being (Vertex of B258) holds (for B261 being set holds ((B259 = B260 & B261 in ( the_Edges_of B258 )) implies ( B259 .adj B261 ) = ( B260 .adj B261 )))))))
+proof
+let C381 being _Graph;
+let C382 being (Subgraph of C381);
+let C383 being (Vertex of C381);
+let C384 being (Vertex of C382);
+let C385 being set;
+assume that
+L1360: C383 = C384
+and
+L1361: C385 in ( the_Edges_of C382 );
+L1362: (( ( the_Source_of C382 ) . C385 ) = ( ( the_Source_of C381 ) . C385 ) & ( ( the_Target_of C382 ) . C385 ) = ( ( the_Target_of C381 ) . C385 )) by L1361 , L262;
+L1363:
+now
+per cases ;
+suppose L1364: ( ( the_Target_of C381 ) . C385 ) = C383;
+
+thus L1365: ( C383 .adj C385 ) = ( ( the_Source_of C381 ) . C385 ) by L1364 , L1361 , L405
+.= ( C384 .adj C385 ) by L1360 , L1361 , L1362 , L1364 , L405;
+end;
+suppose L1366: (( ( the_Source_of C381 ) . C385 ) = C383 & ( ( the_Target_of C381 ) . C385 ) <> C383);
+
+thus L1367: ( C383 .adj C385 ) = ( ( the_Target_of C381 ) . C385 ) by L1366 , L1361 , L405
+.= ( C384 .adj C385 ) by L1360 , L1361 , L1362 , L1366 , L405;
+end;
+suppose L1368: (( ( the_Source_of C381 ) . C385 ) <> C383 & ( ( the_Target_of C381 ) . C385 ) <> C383);
+
+thus L1369: ( C383 .adj C385 ) = C384 by L1368 , L1360 , L405
+.= ( C384 .adj C385 ) by L1360 , L1362 , L1368 , L405;
+end;
+end;
+thus L1371: thesis by L1363;
+end;
+theorem
+L1372: (for B262 being  finite _Graph holds (for B263 being (Subgraph of B262) holds (for B264 being (Vertex of B262) holds (for B265 being (Vertex of B263) holds (B264 = B265 implies (( B265 .inDegree() ) <= ( B264 .inDegree() ) & ( B265 .outDegree() ) <= ( B264 .outDegree() ) & ( B265 .degree() ) <= ( B264 .degree() )))))))
+proof
+let C386 being  finite _Graph;
+let C387 being (Subgraph of C386);
+let C388 being (Vertex of C386);
+let C389 being (Vertex of C387);
+assume L1373: C388 = C389;
+L1374: ( C389 .edgesIn() ) = ( ( C388 .edgesIn() ) /\ ( the_Edges_of C387 ) ) by L1373 , L1304;
+thus L1375: ( C389 .inDegree() ) <= ( C388 .inDegree() ) by L1374 , NAT_1:43 , XBOOLE_1:17;
+L1376: ( C389 .edgesOut() ) = ( ( C388 .edgesOut() ) /\ ( the_Edges_of C387 ) ) by L1373 , L1304;
+thus L1377: ( C389 .outDegree() ) <= ( C388 .outDegree() ) by L1376 , NAT_1:43 , XBOOLE_1:17;
+L1378: ( C389 .outDegree() ) <= ( card ( C388 .edgesOut() ) ) by L1376 , NAT_1:43 , XBOOLE_1:17;
+thus L1379: thesis by L1378 , L1375 , XREAL_1:7;
+end;
+theorem
+L1380: (for B266 being _Graph holds (for B267 being (Subgraph of B266) holds (for B268 being (Vertex of B266) holds (for B269 being (Vertex of B267) holds (B268 = B269 implies (( B269 .inNeighbors() ) c= ( B268 .inNeighbors() ) & ( B269 .outNeighbors() ) c= ( B268 .outNeighbors() ) & ( B269 .allNeighbors() ) c= ( B268 .allNeighbors() )))))))
+proof
+let C390 being _Graph;
+let C391 being (Subgraph of C390);
+let C392 being (Vertex of C390);
+let C393 being (Vertex of C391);
+assume L1381: C392 = C393;
+L1382:
+now
+let C394 being set;
+assume L1383: C394 in ( C393 .inNeighbors() );
+consider C395 being set such that L1384: C395 DJoins C394 , C393 , C391 by L1383 , L1140;
+L1385: C395 DJoins C394 , C392 , C390 by L1381 , L1384 , L1193;
+thus L1386: C394 in ( C392 .inNeighbors() ) by L1385 , L1140;
+end;
+thus L1387: ( C393 .inNeighbors() ) c= ( C392 .inNeighbors() ) by L1382 , TARSKI:def 3;
+L1388:
+now
+let C396 being set;
+assume L1389: C396 in ( C393 .outNeighbors() );
+consider C397 being set such that L1390: C397 DJoins C393 , C396 , C391 by L1389 , L1155;
+L1391: C397 DJoins C392 , C396 , C390 by L1381 , L1390 , L1193;
+thus L1392: C396 in ( C392 .outNeighbors() ) by L1391 , L1155;
+end;
+thus L1393: ( C393 .outNeighbors() ) c= ( C392 .outNeighbors() ) by L1388 , TARSKI:def 3;
+L1394:
+now
+let C398 being set;
+assume L1395: C398 in ( C393 .allNeighbors() );
+consider C399 being set such that L1396: C399 Joins C393 , C398 , C391 by L1395 , L1170;
+L1397: C399 Joins C392 , C398 , C390 by L1381 , L1396 , L274;
+thus L1398: C398 in ( C392 .allNeighbors() ) by L1397 , L1170;
+end;
+thus L1399: thesis by L1394 , TARSKI:def 3;
+end;
+theorem
+L1400: (for B270 being _Graph holds (for B271 being (Subgraph of B270) holds (for B272 being (Vertex of B270) holds (for B273 being (Vertex of B271) holds ((B272 = B273 & B272 is  isolated) implies B273 is  isolated)))))
+proof
+let C400 being _Graph;
+let C401 being (Subgraph of C400);
+let C402 being (Vertex of C400);
+let C403 being (Vertex of C401);
+assume L1401: (C402 = C403 & C402 is  isolated);
+L1402: (( C402 .edgesInOut() ) = ( {} ) & ( C403 .edgesInOut() ) c= ( C402 .edgesInOut() )) by L1401 , L419 , L1281;
+L1403: ( C403 .edgesInOut() ) = ( {} ) by L1402;
+thus L1404: thesis by L1403 , L419;
+end;
+theorem
+L1405: (for B274 being _Graph holds (for B275 being (Subgraph of B274) holds (for B276 being (Vertex of B274) holds (for B277 being (Vertex of B275) holds ((B276 = B277 & B276 is  endvertex) implies (B277 is  endvertex or B277 is  isolated))))))
+proof
+let C404 being _Graph;
+let C405 being (Subgraph of C404);
+let C406 being (Vertex of C404);
+let C407 being (Vertex of C405);
+assume that
+L1406: C406 = C407
+and
+L1407: C406 is  endvertex;
+consider C408 being set such that L1408: ( C406 .edgesInOut() ) = { C408 } and L1409: (not C408 Joins C406 , C406 , C404) by L1407 , L431;
+L1410: ( C407 .edgesInOut() ) c= ( C406 .edgesInOut() ) by L1406 , L1281;
+L1411: (( C407 .edgesInOut() ) = ( {} ) or ( C407 .edgesInOut() ) = { C408 }) by L1410 , L1408 , ZFMISC_1:33;
+L1412:
+now
+assume L1413: (not C407 is  isolated);
+L1414: (not C408 Joins C407 , C407 , C405) by L1406 , L1409 , L274;
+thus L1415: C407 is  endvertex by L1414 , L1411 , L1413 , L419 , L431;
+end;
+thus L1416: thesis by L1412;
+end;
+theorem
+L1417: (for R3 being _Graph holds (for R4 being _Graph holds (for R5 being _Graph holds ((R3 == R4 & R4 == R5) implies R3 == R5))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let R5 being _Graph;
+assume that
+L1418: R3 == R4
+and
+L1419: R4 == R5;
+L1420: (( the_Source_of R3 ) = ( the_Source_of R4 ) & ( the_Target_of R3 ) = ( the_Target_of R4 )) by L1418 , L307;
+L1421: (( the_Source_of R4 ) = ( the_Source_of R5 ) & ( the_Target_of R4 ) = ( the_Target_of R5 )) by L1419 , L307;
+L1422: (( the_Vertices_of R4 ) = ( the_Vertices_of R5 ) & ( the_Edges_of R4 ) = ( the_Edges_of R5 )) by L1419 , L307;
+L1423: (( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) & ( the_Edges_of R3 ) = ( the_Edges_of R4 )) by L1418 , L307;
+thus L1424: thesis by L1423 , L1420 , L1422 , L1421 , L307;
+end;
+theorem
+L1425: (for B278 being _Graph holds (for B279 , B280 being (Subgraph of B278) holds ((( the_Vertices_of B279 ) = ( the_Vertices_of B280 ) & ( the_Edges_of B279 ) = ( the_Edges_of B280 )) implies B279 == B280)))
+proof
+let C409 being _Graph;
+let C410 , C411 being (Subgraph of C409);
+assume that
+L1426: ( the_Vertices_of C410 ) = ( the_Vertices_of C411 )
+and
+L1427: ( the_Edges_of C410 ) = ( the_Edges_of C411 );
+L1428: (( dom ( the_Target_of C410 ) ) = ( the_Edges_of C410 ) & ( dom ( the_Target_of C411 ) ) = ( the_Edges_of C411 )) by FUNCT_2:def 1;
+L1429:
+now
+let C412 being set;
+assume L1430: C412 in ( the_Edges_of C410 );
+L1431: ( ( the_Target_of C410 ) . C412 ) = ( ( the_Target_of C409 ) . C412 ) by L1430 , L262;
+thus L1432: ( ( the_Target_of C410 ) . C412 ) = ( ( the_Target_of C411 ) . C412 ) by L1431 , L1427 , L1430 , L262;
+end;
+L1433: ( the_Target_of C410 ) = ( the_Target_of C411 ) by L1429 , L1427 , L1428 , FUNCT_1:2;
+L1434:
+now
+let C413 being set;
+assume L1435: C413 in ( the_Edges_of C410 );
+L1436: ( ( the_Source_of C410 ) . C413 ) = ( ( the_Source_of C409 ) . C413 ) by L1435 , L262;
+thus L1437: ( ( the_Source_of C410 ) . C413 ) = ( ( the_Source_of C411 ) . C413 ) by L1436 , L1427 , L1435 , L262;
+end;
+L1438: (( dom ( the_Source_of C410 ) ) = ( the_Edges_of C410 ) & ( dom ( the_Source_of C411 ) ) = ( the_Edges_of C411 )) by FUNCT_2:def 1;
+L1439: ( the_Source_of C410 ) = ( the_Source_of C411 ) by L1438 , L1427 , L1434 , FUNCT_1:2;
+thus L1440: thesis by L1439 , L1426 , L1427 , L1433 , L307;
+end;
+theorem
+L1441: (for R3 being _Graph holds (for R4 being _Graph holds (R3 == R4 iff (R3 is (Subgraph of R4) & R4 is (Subgraph of R3)))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+L1442: ((R3 is (Subgraph of R4) & R4 is (Subgraph of R3)) iff (( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) & ( the_Edges_of R3 ) = ( the_Edges_of R4 ) & ( the_Source_of R3 ) = ( the_Source_of R4 ) & ( the_Target_of R3 ) = ( the_Target_of R4 ))) by L884;
+thus L1443: thesis by L1442 , L307;
+end;
+theorem
+L1444: (for R3 being _Graph holds (for R4 being _Graph holds (for R6 being set holds (for R7 being set holds (for R10 being set holds (for R15 being set holds (for R16 being set holds (R3 == R4 implies ((R6 Joins R7 , R10 , R3 implies R6 Joins R7 , R10 , R4) & (R6 DJoins R7 , R10 , R3 implies R6 DJoins R7 , R10 , R4) & (R6 SJoins R15 , R16 , R3 implies R6 SJoins R15 , R16 , R4) & (R6 DSJoins R15 , R16 , R3 implies R6 DSJoins R15 , R16 , R4))))))))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let R6 being set;
+let R7 being set;
+let R10 being set;
+let R15 being set;
+let R16 being set;
+assume L1445: R3 == R4;
+L1446: R3 is (Subgraph of R4) by L1445 , L1441;
+thus L1447: thesis by L1446 , L1193;
+end;
+theorem
+L1448: (for R3 being _Graph holds (for R4 being _Graph holds (R3 == R4 implies ((R3 is  finite implies R4 is  finite) & (R3 is  loopless implies R4 is  loopless) & (R3 is  trivial implies R4 is  trivial) & (R3 is  non-multi implies R4 is  non-multi) & (R3 is  non-Dmulti implies R4 is  non-Dmulti) & (R3 is  simple implies R4 is  simple) & (R3 is  Dsimple implies R4 is  Dsimple)))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+assume L1449: R3 == R4;
+L1450: ( the_Edges_of R3 ) = ( the_Edges_of R4 ) by L1449 , L307;
+L1451: ( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) by L1449 , L307;
+thus L1452: (R3 is  finite implies R4 is  finite) by L1451 , L1450 , L81;
+L1453: (( the_Source_of R3 ) = ( the_Source_of R4 ) & ( the_Target_of R3 ) = ( the_Target_of R4 )) by L1449 , L307;
+L1454:
+now
+assume L1455: R3 is  loopless;
+L1456: (not (ex B281 being set st (B281 in ( the_Edges_of R4 ) & ( ( the_Source_of R4 ) . B281 ) = ( ( the_Target_of R4 ) . B281 )))) by L1455 , L1450 , L1453 , L82;
+thus L1457: R4 is  loopless by L1456 , L82;
+end;
+thus L1458: (R3 is  loopless implies R4 is  loopless) by L1454;
+thus L1459:now
+assume L1460: R3 is  trivial;
+L1461: ( card ( the_Vertices_of R4 ) ) = 1 by L1460 , L1451 , L83;
+thus L1462: R4 is  trivial by L1461 , L83;
+end;
+L1463:
+now
+assume L1464: R3 is  non-multi;
+L1465:
+now
+let C414 , C415 , C416 , C417 being set;
+assume L1466: (C414 Joins C416 , C417 , R4 & C415 Joins C416 , C417 , R4);
+L1467: (C414 Joins C416 , C417 , R3 & C415 Joins C416 , C417 , R3) by L1466 , L1449 , L1444;
+thus L1468: C414 = C415 by L1467 , L1464 , L84;
+end;
+thus L1469: R4 is  non-multi by L1465 , L84;
+end;
+thus L1470: (R3 is  non-multi implies R4 is  non-multi) by L1463;
+L1471:
+now
+assume L1472: R3 is  non-Dmulti;
+L1473:
+now
+let C418 , C419 , C420 , C421 being set;
+assume L1474: (C418 DJoins C420 , C421 , R4 & C419 DJoins C420 , C421 , R4);
+L1475: (C418 DJoins C420 , C421 , R3 & C419 DJoins C420 , C421 , R3) by L1474 , L1449 , L1444;
+thus L1476: C418 = C419 by L1475 , L1472 , L85;
+end;
+thus L1477: R4 is  non-Dmulti by L1473 , L85;
+end;
+thus L1478: (R3 is  non-Dmulti implies R4 is  non-Dmulti) by L1471;
+thus L1479: (R3 is  simple implies R4 is  simple) by L1454 , L1463;
+thus L1480: thesis by L1454 , L1471;
+end;
+theorem
+L1481: (for R3 being _Graph holds (for R4 being _Graph holds (for R15 being set holds (for R16 being set holds (R3 == R4 implies (( R3 .order() ) = ( R4 .order() ) & ( R3 .size() ) = ( R4 .size() ) & ( R3 .edgesInto R15 ) = ( R4 .edgesInto R15 ) & ( R3 .edgesOutOf R15 ) = ( R4 .edgesOutOf R15 ) & ( R3 .edgesInOut R15 ) = ( R4 .edgesInOut R15 ) & ( R3 .edgesBetween R15 ) = ( R4 .edgesBetween R15 ) & ( R3 .edgesDBetween (R15 , R16) ) = ( R4 .edgesDBetween (R15 , R16) )))))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let R15 being set;
+let R16 being set;
+assume L1482: R3 == R4;
+thus L1483: ( R3 .order() ) = ( R4 .order() ) by L1482 , L307;
+thus L1484: ( R3 .size() ) = ( R4 .size() ) by L1482 , L307;
+L1485: ( the_Edges_of R3 ) = ( the_Edges_of R4 ) by L1482 , L307;
+L1486: ( the_Target_of R3 ) = ( the_Target_of R4 ) by L1482 , L307;
+L1487:
+now
+let C422 being set;
+L1488: (C422 in ( R3 .edgesInto R15 ) iff (C422 in ( the_Edges_of R4 ) & ( ( the_Target_of R4 ) . C422 ) in R15)) by L1485 , L1486 , L193;
+thus L1489: (C422 in ( R3 .edgesInto R15 ) iff C422 in ( R4 .edgesInto R15 )) by L1488 , L193;
+end;
+thus L1490: ( R3 .edgesInto R15 ) = ( R4 .edgesInto R15 ) by L1487 , TARSKI:1;
+L1491: ( the_Source_of R3 ) = ( the_Source_of R4 ) by L1482 , L307;
+L1492:
+now
+let C423 being set;
+L1493: (C423 in ( R3 .edgesOutOf R15 ) iff (C423 in ( the_Edges_of R4 ) & ( ( the_Source_of R4 ) . C423 ) in R15)) by L1485 , L1491 , L207;
+thus L1494: (C423 in ( R3 .edgesOutOf R15 ) iff C423 in ( R4 .edgesOutOf R15 )) by L1493 , L207;
+end;
+thus L1495: ( R3 .edgesOutOf R15 ) = ( R4 .edgesOutOf R15 ) by L1492 , TARSKI:1;
+thus L1496: ( R3 .edgesInOut R15 ) = ( R4 .edgesInOut R15 ) by L1490 , L1492 , TARSKI:1;
+thus L1497: ( R3 .edgesBetween R15 ) = ( R4 .edgesBetween R15 ) by L1487 , L1495 , TARSKI:1;
+L1498:
+now
+let C424 being set;
+L1499: (C424 in ( R3 .edgesDBetween (R15 , R16) ) iff C424 DSJoins R15 , R16 , R3) by L235;
+L1500: (C424 in ( R3 .edgesDBetween (R15 , R16) ) iff C424 DSJoins R15 , R16 , R4) by L1499 , L1482 , L1444;
+thus L1501: (C424 in ( R4 .edgesDBetween (R15 , R16) ) iff C424 in ( R3 .edgesDBetween (R15 , R16) )) by L1500 , L235;
+end;
+thus L1502: thesis by L1498 , TARSKI:1;
+end;
+theorem
+L1503: (for R3 being _Graph holds (for R4 being _Graph holds (for R5 being _Graph holds ((R3 == R4 & R5 is (Subgraph of R3)) implies R5 is (Subgraph of R4)))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let R5 being _Graph;
+assume that
+L1504: R3 == R4
+and
+L1505: R5 is (Subgraph of R3);
+L1506: ( the_Vertices_of R5 ) c= ( the_Vertices_of R3 ) by L1505 , L262;
+thus L1507: ( the_Vertices_of R5 ) c= ( the_Vertices_of R4 ) by L1506 , L1504 , L307;
+L1508: ( the_Edges_of R5 ) c= ( the_Edges_of R3 ) by L1505 , L262;
+thus L1509: ( the_Edges_of R5 ) c= ( the_Edges_of R4 ) by L1508 , L1504 , L307;
+let C425 being set;
+assume L1510: C425 in ( the_Edges_of R5 );
+thus L1511: ( ( the_Source_of R5 ) . C425 ) = ( ( the_Source_of R3 ) . C425 ) by L1510 , L1505 , L262
+.= ( ( the_Source_of R4 ) . C425 ) by L1504 , L307;
+thus L1512: ( ( the_Target_of R5 ) . C425 ) = ( ( the_Target_of R3 ) . C425 ) by L1505 , L1510 , L262
+.= ( ( the_Target_of R4 ) . C425 ) by L1504 , L307;
+end;
+theorem
+L1513: (for R3 being _Graph holds (for R4 being _Graph holds (for R5 being _Graph holds ((R3 == R4 & R3 is (Subgraph of R5)) implies R4 is (Subgraph of R5)))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let R5 being _Graph;
+assume that
+L1514: R3 == R4
+and
+L1515: R3 is (Subgraph of R5);
+L1516: ( the_Edges_of R3 ) = ( the_Edges_of R4 ) by L1514 , L307;
+L1517: (( the_Source_of R3 ) = ( the_Source_of R4 ) & ( the_Target_of R3 ) = ( the_Target_of R4 )) by L1514 , L307;
+L1518: ( the_Vertices_of R3 ) = ( the_Vertices_of R4 ) by L1514 , L307;
+thus L1519: (( the_Vertices_of R4 ) c= ( the_Vertices_of R5 ) & ( the_Edges_of R4 ) c= ( the_Edges_of R5 )) by L1518 , L1515 , L1516 , L262;
+let C426 being set;
+assume L1520: C426 in ( the_Edges_of R4 );
+thus L1521: thesis by L1520 , L1515 , L1516 , L1517 , L262;
+end;
+theorem
+L1522: (for R2 being _Graph holds (for R13 being set holds (for R14 being set holds (for B282 , B283 being (inducedSubgraph of R2 , R14 , R13) holds B282 == B283))))
+proof
+let R2 being _Graph;
+let R13 being set;
+let R14 being set;
+let C427 , C428 being (inducedSubgraph of R2 , R14 , R13);
+L1523:
+now
+per cases ;
+suppose L1524: (R14 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of R2 )) & R13 c= ( R2 .edgesBetween R14 ));
+
+L1525: (( the_Edges_of C427 ) = R13 & ( the_Edges_of C428 ) = R13) by L1524 , L314;
+L1526: (( the_Vertices_of C427 ) = R14 & ( the_Vertices_of C428 ) = R14) by L1524 , L314;
+thus L1527: thesis by L1526 , L1525 , L1425;
+end;
+suppose L1528: (not (R14 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of R2 )) & R13 c= ( R2 .edgesBetween R14 )));
+
+L1529: (C427 == R2 & C428 == R2) by L1528 , L314;
+thus L1530: thesis by L1529 , L1417;
+end;
+end;
+thus L1532: thesis by L1523;
+end;
+theorem
+L1533: (for B284 being _Graph holds (for B285 being (inducedSubgraph of B284 , ( the_Vertices_of B284 )) holds B284 == B285))
+proof
+let C429 being _Graph;
+let C430 being (inducedSubgraph of C429 , ( the_Vertices_of C429 ));
+L1534: ( the_Vertices_of C429 ) c= ( the_Vertices_of C429 );
+L1535: ( the_Edges_of C430 ) = ( C429 .edgesBetween ( the_Vertices_of C429 ) ) by L1534 , L314;
+L1536: ( the_Edges_of C430 ) = ( the_Edges_of C429 ) by L1535 , L800;
+L1537: ( the_Source_of C430 ) = ( ( the_Source_of C429 ) | ( the_Edges_of C429 ) ) by L1536 , L920;
+L1538: ( the_Source_of C430 ) = ( ( the_Source_of C429 ) | ( dom ( the_Source_of C429 ) ) ) by L1537;
+L1539: ( the_Source_of C430 ) = ( the_Source_of C429 ) by L1538;
+L1540: ( the_Target_of C430 ) = ( ( the_Target_of C429 ) | ( the_Edges_of C429 ) ) by L1536 , L920;
+L1541: ( the_Target_of C430 ) = ( ( the_Target_of C429 ) | ( dom ( the_Target_of C429 ) ) ) by L1540;
+L1542: ( the_Target_of C430 ) = ( the_Target_of C429 ) by L1541;
+L1543: ( the_Vertices_of C430 ) = ( the_Vertices_of C429 ) by L1534 , L314;
+thus L1544: thesis by L1543 , L1536 , L1539 , L1542 , L307;
+end;
+theorem
+L1545: (for B286 , B287 being _Graph holds (for B288 , B289 being set holds (for B290 being (inducedSubgraph of B286 , B288 , B289) holds (B286 == B287 implies B290 is (inducedSubgraph of B287 , B288 , B289)))))
+proof
+let C431 , C432 being _Graph;
+let C433 , C434 being set;
+let C435 being (inducedSubgraph of C431 , C433 , C434);
+assume L1546: C431 == C432;
+L1547:
+now
+per cases ;
+suppose L1548: (C433 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C431 )) & C434 c= ( C431 .edgesBetween C433 ));
+
+L1549: (( the_Vertices_of C435 ) = C433 & ( the_Edges_of C435 ) = C434) by L1548 , L314;
+L1550: C435 is (Subgraph of C432) by L1546 , L1503;
+L1551: (C433 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C432 )) & C434 c= ( C432 .edgesBetween C433 )) by L1546 , L1548 , L307 , L1481;
+thus L1552: thesis by L1551 , L1549 , L1550 , L314;
+end;
+suppose L1553: (not (C433 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C431 )) & C434 c= ( C431 .edgesBetween C433 )));
+
+L1554: (not (C433 is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C432 )) & C434 c= ( C432 .edgesBetween C433 ))) by L1553 , L1546 , L307 , L1481;
+L1555: C435 == C431 by L1553 , L314;
+L1556: C435 == C432 by L1555 , L1546 , L1417;
+L1557: C435 is (Subgraph of C432) by L1556 , L1441;
+thus L1558: thesis by L1557 , L1554 , L1556 , L314;
+end;
+end;
+thus L1560: thesis by L1547;
+end;
+theorem
+L1561: (for R3 being _Graph holds (for R4 being _Graph holds (for R6 being set holds (for B291 being (Vertex of R3) holds (for B292 being (Vertex of R4) holds ((B291 = B292 & R3 == R4) implies (( B291 .edgesIn() ) = ( B292 .edgesIn() ) & ( B291 .edgesOut() ) = ( B292 .edgesOut() ) & ( B291 .edgesInOut() ) = ( B292 .edgesInOut() ) & ( B291 .adj R6 ) = ( B292 .adj R6 ) & ( B291 .inDegree() ) = ( B292 .inDegree() ) & ( B291 .outDegree() ) = ( B292 .outDegree() ) & ( B291 .degree() ) = ( B292 .degree() ) & ( B291 .inNeighbors() ) = ( B292 .inNeighbors() ) & ( B291 .outNeighbors() ) = ( B292 .outNeighbors() ) & ( B291 .allNeighbors() ) = ( B292 .allNeighbors() ))))))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let R6 being set;
+let C436 being (Vertex of R3);
+let C437 being (Vertex of R4);
+assume that
+L1562: C436 = C437
+and
+L1563: R3 == R4;
+thus L1564: ( C436 .edgesIn() ) = ( C437 .edgesIn() ) by L1562 , L1563 , L1481;
+thus L1565: ( C436 .edgesOut() ) = ( C437 .edgesOut() ) by L1562 , L1563 , L1481;
+thus L1566: ( C436 .edgesInOut() ) = ( C437 .edgesInOut() ) by L1562 , L1563 , L1481;
+L1567:
+now
+per cases ;
+suppose L1568: (R6 in ( the_Edges_of R3 ) & ( ( the_Target_of R3 ) . R6 ) = C436);
+
+L1569: (R6 in ( the_Edges_of R4 ) & ( ( the_Target_of R4 ) . R6 ) = C437) by L1568 , L1562 , L1563 , L307;
+thus L1570: ( C436 .adj R6 ) = ( ( the_Source_of R3 ) . R6 ) by L1568 , L405
+.= ( ( the_Source_of R4 ) . R6 ) by L1563 , L307
+.= ( C437 .adj R6 ) by L1569 , L405;
+end;
+suppose L1571: (R6 in ( the_Edges_of R3 ) & ( ( the_Source_of R3 ) . R6 ) = C436 & (not ( ( the_Target_of R3 ) . R6 ) = C436));
+
+L1572: (not ( ( the_Target_of R4 ) . R6 ) = C437) by L1571 , L1562 , L1563 , L307;
+L1573: (R6 in ( the_Edges_of R4 ) & ( ( the_Source_of R4 ) . R6 ) = C437) by L1562 , L1563 , L1571 , L307;
+thus L1574: ( C436 .adj R6 ) = ( ( the_Target_of R3 ) . R6 ) by L1571 , L405
+.= ( ( the_Target_of R4 ) . R6 ) by L1563 , L307
+.= ( C437 .adj R6 ) by L1573 , L1572 , L405;
+end;
+suppose L1575: ((not (R6 in ( the_Edges_of R3 ) & ( ( the_Target_of R3 ) . R6 ) = C436)) & (not (R6 in ( the_Edges_of R3 ) & ( ( the_Source_of R3 ) . R6 ) = C436 & (not ( ( the_Target_of R3 ) . R6 ) = C436))));
+
+L1576: ((not (R6 in ( the_Edges_of R4 ) & ( ( the_Target_of R4 ) . R6 ) = C437)) & (not (R6 in ( the_Edges_of R4 ) & ( ( the_Source_of R4 ) . R6 ) = C437 & (not ( ( the_Target_of R4 ) . R6 ) = C437)))) by L1575 , L1562 , L1563 , L307;
+thus L1577: ( C436 .adj R6 ) = C437 by L1562 , L1575 , L405
+.= ( C437 .adj R6 ) by L1576 , L405;
+end;
+end;
+thus L1579: ( C436 .adj R6 ) = ( C437 .adj R6 ) by L1567;
+thus L1580: ( C436 .inDegree() ) = ( C437 .inDegree() ) by L1562 , L1563 , L1481;
+thus L1581: ( C436 .outDegree() ) = ( C437 .outDegree() ) by L1562 , L1563 , L1481;
+thus L1582: ( C436 .degree() ) = ( C437 .degree() ) by L1581 , L1562 , L1563 , L1481;
+thus L1583: ( C436 .inNeighbors() ) = ( C437 .inNeighbors() ) by L1563 , L1564 , L307;
+thus L1584: ( C436 .outNeighbors() ) = ( C437 .outNeighbors() ) by L1563 , L1565 , L307;
+thus L1585: thesis by L1584 , L1563 , L1564 , L307;
+end;
+theorem
+L1586: (for R3 being _Graph holds (for R4 being _Graph holds (for B293 being (Vertex of R3) holds (for B294 being (Vertex of R4) holds ((B293 = B294 & R3 == R4) implies ((B293 is  isolated implies B294 is  isolated) & (B293 is  endvertex implies B294 is  endvertex)))))))
+proof
+let R3 being _Graph;
+let R4 being _Graph;
+let C438 being (Vertex of R3);
+let C439 being (Vertex of R4);
+assume L1587: (C438 = C439 & R3 == R4);
+thus L1588:now
+assume L1589: C438 is  isolated;
+L1590: ( C438 .edgesInOut() ) = ( {} ) by L1589 , L419;
+L1591: ( C439 .edgesInOut() ) = ( {} ) by L1590 , L1587 , L1561;
+thus L1592: C439 is  isolated by L1591 , L419;
+end;
+assume L1593: C438 is  endvertex;
+consider C440 being set such that L1594: (( C438 .edgesInOut() ) = { C440 } & (not C440 Joins C438 , C438 , R3)) by L1593 , L431;
+L1595: (( C439 .edgesInOut() ) = { C440 } & (not C440 Joins C439 , C439 , R4)) by L1587 , L1594 , L1444 , L1561;
+thus L1596: thesis by L1595 , L431;
+end;
+theorem
+L1597: (for B295 being _Graph holds (for B296 , B297 being (Subgraph of B295) holds (B296 c< B297 implies (( the_Vertices_of B296 ) c< ( the_Vertices_of B297 ) or ( the_Edges_of B296 ) c< ( the_Edges_of B297 )))))
+proof
+let C441 being _Graph;
+let C442 , C443 being (Subgraph of C441);
+assume L1598: C442 c< C443;
+L1599: C442 c= C443 by L1598 , L312;
+L1600: C442 is (Subgraph of C443) by L1599 , L310;
+L1601: ( the_Vertices_of C442 ) c= ( the_Vertices_of C443 ) by L1600 , L262;
+L1602: ( the_Edges_of C442 ) c= ( the_Edges_of C443 ) by L1600 , L262;
+L1603: (not C442 == C443) by L1598 , L312;
+L1604:
+now
+per cases  by L1603 , L1425;
+suppose L1605: ( the_Vertices_of C442 ) <> ( the_Vertices_of C443 );
+
+thus L1606: thesis by L1605 , L1601 , XBOOLE_0:def 8;
+end;
+suppose L1607: ( the_Edges_of C442 ) <> ( the_Edges_of C443 );
+
+thus L1608: thesis by L1607 , L1602 , XBOOLE_0:def 8;
+end;
+end;
+thus L1610: thesis by L1604;
+end;
+theorem
+L1611: (for B298 being _Graph holds (for B299 , B300 being (Subgraph of B298) holds (B299 c< B300 implies ((ex B301 being set st (B301 in ( the_Vertices_of B300 ) & (not B301 in ( the_Vertices_of B299 )))) or (ex B302 being set st (B302 in ( the_Edges_of B300 ) & (not B302 in ( the_Edges_of B299 ))))))))
+proof
+let C444 being _Graph;
+let C445 , C446 being (Subgraph of C444);
+assume L1612: C445 c< C446;
+L1613: (( the_Vertices_of C445 ) c< ( the_Vertices_of C446 ) or ( the_Edges_of C445 ) c< ( the_Edges_of C446 )) by L1612 , L1597;
+thus L1614: thesis by L1613 , XBOOLE_0:6;
+end;

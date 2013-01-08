@@ -1,0 +1,1559 @@
+:: Basic Properties of Rough Sets and Rough Membership Function
+::  by Adam Grabowski
+::
+:: Received November 23, 2003
+:: Copyright (c) 2003-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, ORDERS_2, RELAT_1, NATTRA_1, TOLER_1, TARSKI, ZFMISC_1,
+      MATRIX_1, STRUCT_0, RELAT_2, XBOOLE_0, PARTFUN1, SUBSET_1, FINSEQ_1,
+      CARD_3, ORDINAL4, FUNCT_1, PROB_2, FINSEQ_2, NAT_1, FINSET_1, EQREL_1,
+      CARD_1, ARYTM_3, XXREAL_0, XXREAL_1, FUNCT_3, ARYTM_1, ROUGHS_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, CARD_1, NUMBERS, XCMPLX_0,
+      ORDINAL1, XXREAL_0, FINSET_1, RELAT_1, RELAT_2, FUNCT_1, FINSEQ_1,
+      RVSUM_1, FINSEQ_2, RELSET_1, PARTFUN1, CARD_3, PROB_2, FUNCT_2, FUNCT_3,
+      DOMAIN_1, STRUCT_0, ORDERS_2, EQREL_1, RCOMP_1, TOLER_1, ORDERS_3;
+ constructors EQREL_1, PROB_2, RCOMP_1, RVSUM_1, FUNCT_6, REALSET2, ORDERS_3,
+      RELSET_1, BINOP_2;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, PARTFUN1, FINSET_1, NUMBERS,
+      XXREAL_0, XREAL_0, NAT_1, MEMBERED, FINSEQ_1, EQREL_1, STRUCT_0,
+      ORDERS_2, VALUED_0, CARD_1, RELSET_1;
+ requirements BOOLE, SUBSET, NUMERALS, REAL;
+ definitions TARSKI, XBOOLE_0, PROB_2, FINSEQ_2, SUBSET_1, CARD_3, STRUCT_0;
+ theorems EQREL_1, XBOOLE_0, XBOOLE_1, SUBSET_1, XCMPLX_1, CARD_2, CARD_1,
+      TOLER_1, NAT_1, TARSKI, ZFMISC_1, RELAT_1, RELAT_2, ORDERS_3, CHAIN_1,
+      FUNCT_2, FUNCT_3, RVSUM_1, FINSEQ_1, FINSEQ_3, PROB_2, FUNCT_1, GRFUNC_1,
+      FINSEQ_6, FINSEQ_2, ORDERS_2, SYSREL, FUNCOP_1, ORDERS_1, XREAL_0,
+      ORDINAL1, XXREAL_1, XREAL_1, XXREAL_0, PRE_POLY;
+ schemes FUNCT_2, BINOP_2, FINSEQ_2;
+
+begin
+registration
+let C1 being set;
+cluster RelStr (# C1 , ( id C1 ) #) ->  discrete;
+coherence by ORDERS_3:def 1;
+end;
+theorem
+L2: (for B1 being set holds (( Total B1 ) c= ( id B1 ) implies B1 is  trivial))
+proof
+let C2 being set;
+assume L3: ( Total C2 ) c= ( id C2 );
+assume L4: C2 is non  trivial;
+consider C3 , C4 being set such that L5: (C3 in C2 & C4 in C2) and L6: C3 <> C4 by L4 , ZFMISC_1:def 10;
+L7: [ C3 , C4 ] in ( Total C2 ) by L5 , TOLER_1:2;
+thus L8: thesis by L7 , L3 , L6 , RELAT_1:def 10;
+end;
+definition
+let C5 being RelStr;
+attr C5 is  diagonal
+means
+:L9: (the InternalRel of C5) c= ( id (the carrier of C5) );
+end;
+registration
+let C6 being non  trivial set;
+cluster RelStr (# C6 , ( Total C6 ) #) -> non  diagonal;
+coherence
+proof
+L11: (not ( Total C6 ) c= ( id C6 )) by L2;
+thus L12: thesis by L11 , L9;
+end;
+end;
+theorem
+L14: (for B2 being  reflexive RelStr holds ( id (the carrier of B2) ) c= (the InternalRel of B2))
+proof
+let C7 being  reflexive RelStr;
+L15: (for B3 , B4 being set holds ([ B3 , B4 ] in ( id (the carrier of C7) ) implies [ B3 , B4 ] in (the InternalRel of C7)))
+proof
+let C8 , C9 being set;
+assume L16: [ C8 , C9 ] in ( id (the carrier of C7) );
+L17: (C8 = C9 & C8 in (the carrier of C7)) by L16 , RELAT_1:def 10;
+L18: (the InternalRel of C7) is_reflexive_in (the carrier of C7) by ORDERS_2:def 2;
+thus L19: thesis by L18 , L17 , RELAT_2:def 1;
+end;
+thus L20: thesis by L15 , RELAT_1:def 3;
+end;
+L21: (for B5 being RelStr holds (B5 is  reflexive  trivial implies B5 is  discrete))
+proof
+let C10 being RelStr;
+assume L22: C10 is  reflexive  trivial;
+per cases  by L22 , ZFMISC_1:131;
+suppose L23: (the carrier of C10) is  empty;
+
+L24: (the InternalRel of C10) = ( {} ) by L23;
+thus L25: thesis by L24 , L23 , ORDERS_3:def 1 , RELAT_1:55;
+end;
+suppose L26: (ex B6 being set st (the carrier of C10) = { B6 });
+
+consider C11 being set such that L27: (the carrier of C10) = { C11 } by L26;
+L28: (the InternalRel of C10) c= [: { C11 } , { C11 } :] by L27;
+L29: (the InternalRel of C10) c= { [ C11 , C11 ] } by L28 , ZFMISC_1:29;
+L30: ((the InternalRel of C10) = { [ C11 , C11 ] } or (the InternalRel of C10) = ( {} )) by L29 , ZFMISC_1:33;
+L31: (the InternalRel of C10) is_reflexive_in (the carrier of C10) by L22 , ORDERS_2:def 2;
+L32: C11 in (the carrier of C10) by L27 , TARSKI:def 1;
+L33: (the InternalRel of C10) = ( id { C11 } ) by L32 , L30 , L31 , RELAT_2:def 1 , SYSREL:13;
+thus L34: thesis by L33 , L27 , ORDERS_3:def 1;
+end;
+end;
+registration
+cluster non  discrete -> non  trivial for  reflexive  reflexive  reflexive  reflexive RelStr;
+coherence by L21;
+cluster  reflexive  trivial ->  discrete for RelStr;
+coherence;
+end;
+theorem
+L37: (for B7 being set holds (for B8 being  total  reflexive (Relation of B7) holds ( id B7 ) c= B8))
+proof
+let C12 being set;
+let C13 being  total  reflexive (Relation of C12);
+L38: ( field C13 ) = C12 by ORDERS_1:12;
+thus L39: thesis by L38 , RELAT_2:1;
+end;
+L40: (for B9 being RelStr holds (B9 is  discrete implies B9 is  diagonal))
+proof
+let C14 being RelStr;
+assume L41: C14 is  discrete;
+L42: (the InternalRel of C14) = ( id (the carrier of C14) ) by L41 , ORDERS_3:def 1;
+thus L43: thesis by L42 , L9;
+end;
+registration
+cluster  discrete ->  diagonal for RelStr;
+coherence by L40;
+cluster non  diagonal -> non  discrete for RelStr;
+coherence;
+end;
+registration
+cluster non  diagonal non  empty for RelStr;
+existence
+proof
+set D1 = the non  trivial set;
+take RelStr (# D1 , ( Total D1 ) #);
+thus L45: thesis;
+end;
+end;
+theorem
+L47: (for B10 being non  diagonal non  empty RelStr holds (ex B11 , B12 being (Element of B10) st (B11 <> B12 & [ B11 , B12 ] in (the InternalRel of B10))))
+proof
+let C15 being non  diagonal non  empty RelStr;
+L48:
+now
+assume L49: (for B13 , B14 being (Element of C15) holds ([ B13 , B14 ] in (the InternalRel of C15) implies B13 = B14));
+L50: (for B15 , B16 being set holds ([ B15 , B16 ] in (the InternalRel of C15) implies [ B15 , B16 ] in ( id (the carrier of C15) )))
+proof
+let C16 , C17 being set;
+assume L51: [ C16 , C17 ] in (the InternalRel of C15);
+L52: C16 is (Element of C15) by L51 , ZFMISC_1:87;
+L53: C17 is (Element of C15) by L51 , ZFMISC_1:87;
+L54: C16 = C17 by L53 , L49 , L51 , L52;
+thus L55: thesis by L54 , L52 , RELAT_1:def 10;
+end;
+L56: (the InternalRel of C15) c= ( id (the carrier of C15) ) by L50 , RELAT_1:def 3;
+thus L57: thesis by L56 , L9;
+end;
+thus L58: thesis by L48;
+end;
+theorem
+L59: (for B17 being set holds (for B18 , B19 being (FinSequence of B17) holds ( Union ( B18 ^ B19 ) ) = ( ( Union B18 ) \/ ( Union B19 ) )))
+proof
+let C18 being set;
+let C19 , C20 being (FinSequence of C18);
+L60: ( union ( rng ( C19 ^ C20 ) ) ) = ( union ( ( rng C19 ) \/ ( rng C20 ) ) ) by FINSEQ_1:31
+.= ( ( Union C19 ) \/ ( Union C20 ) ) by ZFMISC_1:78;
+thus L61: thesis by L60;
+end;
+theorem
+L62: (for B20 , B21 being Function holds ((B21 is  disjoint_valued & B20 c= B21) implies B20 is  disjoint_valued))
+proof
+let C21 , C22 being Function;
+assume that
+L63: C22 is  disjoint_valued
+and
+L64: C21 c= C22;
+L65: (for B22 , B23 being set holds (B22 <> B23 implies ( C21 . B22 ) misses ( C21 . B23 )))
+proof
+let C23 , C24 being set;
+assume L66: C23 <> C24;
+assume L67: ( C21 . C23 ) meets ( C21 . C24 );
+L68: (C23 in ( dom C21 ) & C24 in ( dom C21 ))
+proof
+assume L69: ((not C23 in ( dom C21 )) or (not C24 in ( dom C21 )));
+L70: (( C21 . C23 ) = ( {} ) or ( C21 . C24 ) = ( {} )) by L69 , FUNCT_1:def 2;
+thus L71: thesis by L70 , L67 , XBOOLE_1:65;
+end;
+L72: (( C21 . C23 ) = ( C22 . C23 ) & ( C21 . C24 ) = ( C22 . C24 )) by L68 , L64 , GRFUNC_1:2;
+thus L73: thesis by L72 , L63 , L66 , L67 , PROB_2:def 2;
+end;
+thus L74: thesis by L65 , PROB_2:def 2;
+end;
+registration
+cluster  empty ->  disjoint_valued for Function;
+coherence
+proof
+let C25 being Function;
+assume L75: C25 is  empty;
+L76: C25 is  disjoint_valued
+proof
+let C26 , C27 being set;
+assume L77: C26 <> C27;
+L78: ( C25 . C26 ) = ( {} ) by L75 , FUNCT_1:def 2 , RELAT_1:38;
+thus L79: thesis by L78 , XBOOLE_1:65;
+end;
+thus L80: thesis by L76;
+end;
+end;
+registration
+let C28 being set;
+cluster  disjoint_valued for (FinSequence of C28);
+existence
+proof
+set D2 = ( <*> C28 );
+L82: D2 is  disjoint_valued;
+thus L83: thesis by L82;
+end;
+end;
+registration
+let C29 being non  empty set;
+cluster non  empty  disjoint_valued for (FinSequence of C29);
+existence
+proof
+set D3 = the (Element of C29);
+reconsider D4 = ( 1 |-> D3 ) as (FinSequence of C29);
+L85: D4 is  disjoint_valued
+proof
+let C30 , C31 being set;
+assume L86: C30 <> C31;
+per cases ;
+suppose L87: (C30 in ( dom D4 ) & C31 in ( dom D4 ));
+
+L88: C30 in ( Seg 1 ) by L87 , FUNCOP_1:13;
+L89: C30 = 1 by L88 , FINSEQ_1:2 , TARSKI:def 1;
+L90: C31 in ( Seg 1 ) by L87 , FUNCOP_1:13;
+thus L91: thesis by L90 , L86 , L89 , FINSEQ_1:2 , TARSKI:def 1;
+end;
+suppose L92: ((not C30 in ( dom D4 )) or (not C31 in ( dom D4 )));
+
+L93: (( D4 . C30 ) = ( {} ) or ( D4 . C31 ) = ( {} )) by L92 , FUNCT_1:def 2;
+thus L94: thesis by L93 , XBOOLE_1:65;
+end;
+end;
+L96: D4 is non  empty by FUNCOP_1:13 , RELAT_1:38;
+thus L97: thesis by L96 , L85;
+end;
+end;
+definition
+let C32 being set;
+let C33 being (FinSequence of ( bool C32 ));
+let C34 being Nat;
+redefine func C33 . C34 -> (Subset of C32);
+
+coherence
+proof
+per cases ;
+suppose L99: (not C34 in ( dom C33 ));
+
+L100: ( C33 . C34 ) = ( {} ) by L99 , FUNCT_1:def 2;
+thus L101: thesis by L100 , XBOOLE_1:2;
+end;
+suppose L102: C34 in ( dom C33 );
+
+thus L103: thesis by L102 , FINSEQ_2:11;
+end;
+end;
+end;
+definition
+let C35 being set;
+let C36 being (FinSequence of ( bool C35 ));
+redefine func Union C36 -> (Subset of C35);
+
+coherence
+proof
+L106: ( union ( rng C36 ) ) c= C35
+proof
+let C37 being set;
+assume L107: C37 in ( union ( rng C36 ) );
+L108: (ex B24 being set st (C37 in B24 & B24 in ( rng C36 ))) by L107 , TARSKI:def 4;
+thus L109: thesis by L108;
+end;
+thus L110: thesis by L106;
+end;
+end;
+registration
+let C38 being  finite set;
+let C39 being (Relation of C38);
+cluster RelStr (# C38 , C39 #) ->  finite;
+coherence;
+end;
+theorem
+L113: (for B25 , B26 , B27 being set holds (for B28 being (Tolerance of B25) holds (B26 in ( Class (B28 , B27) ) implies B27 in ( Class (B28 , B26) ))))
+proof
+let C40 , C41 , C42 being set;
+let C43 being (Tolerance of C40);
+assume L114: C41 in ( Class (C43 , C42) );
+L115: [ C41 , C42 ] in C43 by L114 , EQREL_1:19;
+L116: [ C42 , C41 ] in C43 by L115 , EQREL_1:6;
+thus L117: thesis by L116 , EQREL_1:19;
+end;
+begin
+definition
+let C44 being RelStr;
+attr C44 is  with_equivalence
+means
+:L118: (the InternalRel of C44) is (Equivalence_Relation of (the carrier of C44));
+attr C44 is  with_tolerance
+means
+:L119: (the InternalRel of C44) is (Tolerance of (the carrier of C44));
+end;
+registration
+cluster  with_equivalence ->  with_tolerance for RelStr;
+coherence
+proof
+let C45 being RelStr;
+assume L121: C45 is  with_equivalence;
+L122: (the InternalRel of C45) is (Equivalence_Relation of (the carrier of C45)) by L121 , L118;
+thus L123: thesis by L122 , L119;
+end;
+end;
+registration
+let C46 being set;
+cluster RelStr (# C46 , ( id C46 ) #) ->  with_equivalence;
+coherence by L118;
+end;
+registration
+cluster  discrete  finite  with_equivalence non  empty for RelStr;
+existence
+proof
+set D5 = RelStr (# { ( {} ) } , ( id { ( {} ) } ) #);
+L126: D5 is  discrete;
+thus L127: thesis by L126;
+end;
+cluster non  diagonal  finite  with_equivalence non  empty for RelStr;
+existence
+proof
+set D6 = { ( 0 ) , 1 };
+set D7 = ( Total D6 );
+set D8 = RelStr (# D6 , D7 #);
+reconsider D9 = D8 as non  empty RelStr;
+L128: (D9 is  with_equivalence & D6 is non  trivial) by L118 , CHAIN_1:3;
+thus L129: thesis by L128;
+end;
+end;
+definition
+mode Approximation_Space
+ is  with_equivalence non  empty RelStr;
+mode Tolerance_Space
+ is  with_tolerance non  empty RelStr;
+end;
+registration
+let C47 being Tolerance_Space;
+cluster (the InternalRel of C47) ->  total  reflexive  symmetric;
+coherence by L119;
+end;
+registration
+let C48 being Approximation_Space;
+cluster (the InternalRel of C48) ->  transitive;
+coherence by L118;
+end;
+definition
+let C49 being non  empty RelStr;
+let C50 being (Subset of C49);
+func LAp C50 -> (Subset of C49) equals 
+{ B29 where B29 is (Element of C49) : ( Class ((the InternalRel of C49) , B29) ) c= C50 };
+coherence
+proof
+L134: { B30 where B30 is (Element of C49) : ( Class ((the InternalRel of C49) , B30) ) c= C50 } c= (the carrier of C49)
+proof
+let C51 being set;
+assume L135: C51 in { B31 where B31 is (Element of C49) : ( Class ((the InternalRel of C49) , B31) ) c= C50 };
+L136: (ex B32 being (Element of C49) st (C51 = B32 & ( Class ((the InternalRel of C49) , B32) ) c= C50)) by L135;
+thus L137: thesis by L136;
+end;
+thus L138: thesis by L134;
+end;
+func UAp C50 -> (Subset of C49) equals 
+{ B33 where B33 is (Element of C49) : ( Class ((the InternalRel of C49) , B33) ) meets C50 };
+coherence
+proof
+L139: { B34 where B34 is (Element of C49) : ( Class ((the InternalRel of C49) , B34) ) meets C50 } c= (the carrier of C49)
+proof
+let C52 being set;
+assume L140: C52 in { B35 where B35 is (Element of C49) : ( Class ((the InternalRel of C49) , B35) ) meets C50 };
+L141: (ex B36 being (Element of C49) st (C52 = B36 & ( Class ((the InternalRel of C49) , B36) ) meets C50)) by L140;
+thus L142: thesis by L141;
+end;
+thus L143: thesis by L139;
+end;
+end;
+definition
+let C53 being non  empty RelStr;
+let C54 being (Subset of C53);
+func BndAp C54 -> (Subset of C53) equals 
+( ( UAp C54 ) \ ( LAp C54 ) );
+coherence;
+end;
+definition
+let C55 being non  empty RelStr;
+let C56 being (Subset of C55);
+attr C56 is  rough
+means
+:L146: ( BndAp C56 ) <> ( {} );
+end;
+notation
+let C57 being non  empty RelStr;
+let C58 being (Subset of C57);
+antonym C58 is  exact for C58 is  rough;
+end;
+theorem
+L149: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for B37 being set holds (B37 in ( LAp R2 ) implies ( Class ((the InternalRel of R1) , B37) ) c= R2))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let C59 being set;
+assume L150: C59 in ( LAp R2 );
+L151: (ex B38 being (Element of R1) st (C59 = B38 & ( Class ((the InternalRel of R1) , B38) ) c= R2)) by L150;
+thus L152: thesis by L151;
+end;
+theorem
+L153: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for B39 being (Element of R1) holds (( Class ((the InternalRel of R1) , B39) ) c= R2 implies B39 in ( LAp R2 )))));
+theorem
+L154: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for B40 being set holds (B40 in ( UAp R2 ) implies ( Class ((the InternalRel of R1) , B40) ) meets R2))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let C60 being set;
+assume L155: C60 in ( UAp R2 );
+L156: (ex B41 being (Element of R1) st (C60 = B41 & ( Class ((the InternalRel of R1) , B41) ) meets R2)) by L155;
+thus L157: thesis by L156;
+end;
+theorem
+L158: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for B42 being (Element of R1) holds (( Class ((the InternalRel of R1) , B42) ) meets R2 implies B42 in ( UAp R2 )))));
+theorem
+L159: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( LAp R2 ) c= R2))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let C61 being set;
+assume L160: C61 in ( LAp R2 );
+consider C62 being (Element of R1) such that L161: (C62 = C61 & ( Class ((the InternalRel of R1) , C62) ) c= R2) by L160;
+L162: C62 in ( Class ((the InternalRel of R1) , C62) ) by EQREL_1:20;
+thus L163: thesis by L162 , L161;
+end;
+theorem
+L164: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds R2 c= ( UAp R2 )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let C63 being set;
+assume L165: C63 in R2;
+reconsider D10 = C63 as (Element of R1) by L165;
+L166: D10 in ( Class ((the InternalRel of R1) , D10) ) by EQREL_1:20;
+L167: ( Class ((the InternalRel of R1) , D10) ) meets R2 by L166 , L165 , XBOOLE_0:3;
+thus L168: thesis by L167;
+end;
+theorem
+L169: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( LAp R2 ) c= ( UAp R2 )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+L170: (( LAp R2 ) c= R2 & R2 c= ( UAp R2 )) by L159 , L164;
+thus L171: thesis by L170 , XBOOLE_1:1;
+end;
+theorem
+L172: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (R2 is  exact iff ( LAp R2 ) = R2)))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+L173: ( LAp R2 ) c= ( UAp R2 ) by L169;
+thus L174:now
+assume L175: R2 is  exact;
+L176: ( BndAp R2 ) = ( {} ) by L175 , L146;
+L177: ( UAp R2 ) c= ( LAp R2 ) by L176 , XBOOLE_1:37;
+L178: ( UAp R2 ) = ( LAp R2 ) by L177 , L173 , XBOOLE_0:def 10;
+L179: R2 c= ( LAp R2 ) by L178 , L164;
+L180: ( LAp R2 ) c= R2 by L159;
+thus L181: ( LAp R2 ) = R2 by L180 , L179 , XBOOLE_0:def 10;
+end;
+assume L182: ( LAp R2 ) = R2;
+L183: ( UAp R2 ) c= R2
+proof
+let C64 being set;
+assume L184: C64 in ( UAp R2 );
+L185: ( Class ((the InternalRel of R1) , C64) ) meets R2 by L184 , L154;
+consider C65 being set such that L186: (C65 in ( Class ((the InternalRel of R1) , C64) ) & C65 in ( LAp R2 )) by L185 , L182 , XBOOLE_0:3;
+L187: (( Class ((the InternalRel of R1) , C65) ) c= R2 & C64 in ( Class ((the InternalRel of R1) , C65) )) by L186 , L113 , L149;
+thus L188: thesis by L187;
+end;
+L189: ( BndAp R2 ) = ( {} ) by L183 , L182 , XBOOLE_1:37;
+thus L190: thesis by L189 , L146;
+end;
+theorem
+L191: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (R2 is  exact iff ( UAp R2 ) = R2)))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+thus L192:now
+assume L193: R2 is  exact;
+L194: ( BndAp R2 ) = ( {} ) by L193 , L146;
+L195: ( UAp R2 ) c= ( LAp R2 ) by L194 , XBOOLE_1:37;
+L196: R2 c= ( UAp R2 ) by L164;
+L197: ( LAp R2 ) c= R2 by L159;
+L198: ( UAp R2 ) c= R2 by L197 , L195 , XBOOLE_1:1;
+thus L199: ( UAp R2 ) = R2 by L198 , L196 , XBOOLE_0:def 10;
+end;
+assume L200: ( UAp R2 ) = R2;
+L201: R2 c= ( LAp R2 )
+proof
+let C66 being set;
+assume L202: C66 in R2;
+L203: ( Class ((the InternalRel of R1) , C66) ) c= R2
+proof
+let C67 being set;
+assume L204: C67 in ( Class ((the InternalRel of R1) , C66) );
+L205: [ C67 , C66 ] in (the InternalRel of R1) by L204 , EQREL_1:19;
+L206: [ C66 , C67 ] in (the InternalRel of R1) by L205 , EQREL_1:6;
+L207: C66 in ( Class ((the InternalRel of R1) , C67) ) by L206 , EQREL_1:19;
+L208: ( Class ((the InternalRel of R1) , C67) ) meets R2 by L207 , L202 , XBOOLE_0:3;
+thus L209: thesis by L208 , L200 , L204;
+end;
+thus L210: thesis by L203 , L202;
+end;
+L211: ( BndAp R2 ) = ( {} ) by L201 , L200 , XBOOLE_1:37;
+thus L212: thesis by L211 , L146;
+end;
+theorem
+L213: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (R2 = ( LAp R2 ) iff R2 = ( UAp R2 ))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+L214: (R2 = ( LAp R2 ) iff R2 is  exact) by L172;
+thus L215: thesis by L214 , L191;
+end;
+theorem
+L216: (for R1 being Tolerance_Space holds ( LAp ( {} R1 ) ) = ( {} ))
+proof
+let R1 being Tolerance_Space;
+assume L217: ( LAp ( {} R1 ) ) <> ( {} );
+consider C68 being set such that L218: C68 in ( LAp ( {} R1 ) ) by L217 , XBOOLE_0:def 1;
+L219: (ex B43 being (Element of R1) st (B43 = C68 & ( Class ((the InternalRel of R1) , B43) ) c= ( {} R1 ))) by L218;
+thus L220: thesis by L219 , EQREL_1:20;
+end;
+theorem
+L221: (for R1 being Tolerance_Space holds ( UAp ( {} R1 ) ) = ( {} ))
+proof
+let R1 being Tolerance_Space;
+assume L222: ( UAp ( {} R1 ) ) <> ( {} );
+consider C69 being set such that L223: C69 in ( UAp ( {} R1 ) ) by L222 , XBOOLE_0:def 1;
+L224: (ex B44 being (Element of R1) st (B44 = C69 & ( Class ((the InternalRel of R1) , B44) ) meets ( {} R1 ))) by L223;
+thus L225: thesis by L224 , XBOOLE_1:65;
+end;
+theorem
+L226: (for R1 being Tolerance_Space holds ( LAp ( [#] R1 ) ) = ( [#] R1 ))
+proof
+let R1 being Tolerance_Space;
+thus L227: ( LAp ( [#] R1 ) ) c= ( [#] R1 );
+let C70 being set;
+L228: ( Class ((the InternalRel of R1) , C70) ) c= ( [#] R1 );
+assume L229: C70 in ( [#] R1 );
+thus L230: thesis by L229 , L228;
+end;
+theorem
+L231: (for R1 being Tolerance_Space holds ( UAp ( [#] R1 ) ) = ( [#] R1 ))
+proof
+let R1 being Tolerance_Space;
+L232: ( LAp ( [#] R1 ) ) c= ( UAp ( [#] R1 ) ) by L169;
+L233: ( [#] R1 ) c= ( UAp ( [#] R1 ) ) by L232 , L226;
+thus L234: thesis by L233 , XBOOLE_0:def 10;
+end;
+theorem
+L235: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for R3 being (Subset of R1) holds ( LAp ( R2 /\ R3 ) ) = ( ( LAp R2 ) /\ ( LAp R3 ) ))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let R3 being (Subset of R1);
+thus L236: ( LAp ( R2 /\ R3 ) ) c= ( ( LAp R2 ) /\ ( LAp R3 ) )
+proof
+let C71 being set;
+assume L237: C71 in ( LAp ( R2 /\ R3 ) );
+L238: ( Class ((the InternalRel of R1) , C71) ) c= R3 by L237 , L149 , XBOOLE_1:18;
+L239: C71 in ( LAp R3 ) by L238 , L237;
+L240: ( Class ((the InternalRel of R1) , C71) ) c= R2 by L237 , L149 , XBOOLE_1:18;
+L241: C71 in ( LAp R2 ) by L240 , L237;
+thus L242: thesis by L241 , L239 , XBOOLE_0:def 4;
+end;
+
+let C72 being set;
+assume L243: C72 in ( ( LAp R2 ) /\ ( LAp R3 ) );
+L244: C72 in ( LAp R3 ) by L243 , XBOOLE_0:def 4;
+L245: ( Class ((the InternalRel of R1) , C72) ) c= R3 by L244 , L149;
+L246: C72 in ( LAp R2 ) by L243 , XBOOLE_0:def 4;
+L247: ( Class ((the InternalRel of R1) , C72) ) c= R2 by L246 , L149;
+L248: ( Class ((the InternalRel of R1) , C72) ) c= ( R2 /\ R3 ) by L247 , L245 , XBOOLE_1:19;
+thus L249: thesis by L248 , L243;
+end;
+theorem
+L250: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for R3 being (Subset of R1) holds ( UAp ( R2 \/ R3 ) ) = ( ( UAp R2 ) \/ ( UAp R3 ) ))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let R3 being (Subset of R1);
+thus L251: ( UAp ( R2 \/ R3 ) ) c= ( ( UAp R2 ) \/ ( UAp R3 ) )
+proof
+let C73 being set;
+assume L252: C73 in ( UAp ( R2 \/ R3 ) );
+L253: ( Class ((the InternalRel of R1) , C73) ) meets ( R2 \/ R3 ) by L252 , L154;
+L254: (( Class ((the InternalRel of R1) , C73) ) meets R2 or ( Class ((the InternalRel of R1) , C73) ) meets R3) by L253 , XBOOLE_1:70;
+L255: (C73 in ( UAp R2 ) or C73 in ( UAp R3 )) by L254 , L252;
+thus L256: thesis by L255 , XBOOLE_0:def 3;
+end;
+
+let C74 being set;
+assume L257: C74 in ( ( UAp R2 ) \/ ( UAp R3 ) );
+L258: (C74 in ( UAp R2 ) or C74 in ( UAp R3 )) by L257 , XBOOLE_0:def 3;
+L259: (( Class ((the InternalRel of R1) , C74) ) meets R2 or ( Class ((the InternalRel of R1) , C74) ) meets R3) by L258 , L154;
+L260: ( Class ((the InternalRel of R1) , C74) ) meets ( R2 \/ R3 ) by L259 , XBOOLE_1:70;
+thus L261: thesis by L260 , L257;
+end;
+theorem
+L262: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for R3 being (Subset of R1) holds (R2 c= R3 implies ( LAp R2 ) c= ( LAp R3 )))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let R3 being (Subset of R1);
+assume L263: R2 c= R3;
+let C75 being set;
+assume L264: C75 in ( LAp R2 );
+L265: ( Class ((the InternalRel of R1) , C75) ) c= R2 by L264 , L149;
+L266: ( Class ((the InternalRel of R1) , C75) ) c= R3 by L265 , L263 , XBOOLE_1:1;
+thus L267: thesis by L266 , L264;
+end;
+theorem
+L268: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for R3 being (Subset of R1) holds (R2 c= R3 implies ( UAp R2 ) c= ( UAp R3 )))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let R3 being (Subset of R1);
+assume L269: R2 c= R3;
+let C76 being set;
+assume L270: C76 in ( UAp R2 );
+L271: ( Class ((the InternalRel of R1) , C76) ) meets R2 by L270 , L154;
+L272: ( Class ((the InternalRel of R1) , C76) ) meets R3 by L271 , L269 , XBOOLE_1:63;
+thus L273: thesis by L272 , L270;
+end;
+theorem
+L274: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for R3 being (Subset of R1) holds ( ( LAp R2 ) \/ ( LAp R3 ) ) c= ( LAp ( R2 \/ R3 ) ))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let R3 being (Subset of R1);
+let C77 being set;
+assume L275: C77 in ( ( LAp R2 ) \/ ( LAp R3 ) );
+per cases  by L275 , XBOOLE_0:def 3;
+suppose L276: C77 in ( LAp R2 );
+
+L277: ( Class ((the InternalRel of R1) , C77) ) c= ( R2 \/ R3 ) by L276 , L149 , XBOOLE_1:10;
+thus L278: thesis by L277 , L275;
+end;
+suppose L279: C77 in ( LAp R3 );
+
+L280: ( Class ((the InternalRel of R1) , C77) ) c= ( R2 \/ R3 ) by L279 , L149 , XBOOLE_1:10;
+thus L281: thesis by L280 , L275;
+end;
+end;
+theorem
+L283: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds (for R3 being (Subset of R1) holds ( UAp ( R2 /\ R3 ) ) c= ( ( UAp R2 ) /\ ( UAp R3 ) ))))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+let R3 being (Subset of R1);
+let C78 being set;
+assume L284: C78 in ( UAp ( R2 /\ R3 ) );
+L285: ( Class ((the InternalRel of R1) , C78) ) meets R3 by L284 , L154 , XBOOLE_1:74;
+L286: C78 in ( UAp R3 ) by L285 , L284;
+L287: ( Class ((the InternalRel of R1) , C78) ) meets R2 by L284 , L154 , XBOOLE_1:74;
+L288: C78 in ( UAp R2 ) by L287 , L284;
+thus L289: thesis by L288 , L286 , XBOOLE_0:def 4;
+end;
+theorem
+L290: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( LAp ( R2 ` ) ) = ( ( UAp R2 ) ` )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+L291: ( LAp ( R2 ` ) ) misses ( UAp R2 )
+proof
+assume L292: ( LAp ( R2 ` ) ) meets ( UAp R2 );
+consider C79 being set such that L293: (C79 in ( LAp ( R2 ` ) ) & C79 in ( UAp R2 )) by L292 , XBOOLE_0:3;
+L294: (( Class ((the InternalRel of R1) , C79) ) meets R2 & ( Class ((the InternalRel of R1) , C79) ) c= ( R2 ` )) by L293 , L149 , L154;
+thus L295: thesis by L294 , XBOOLE_1:63 , XBOOLE_1:79;
+end;
+thus L296: ( LAp ( R2 ` ) ) c= ( ( UAp R2 ) ` ) by L291 , SUBSET_1:23;
+let C80 being set;
+assume L297: C80 in ( ( UAp R2 ) ` );
+L298: (not C80 in ( UAp R2 )) by L297 , XBOOLE_0:def 5;
+L299: ( Class ((the InternalRel of R1) , C80) ) misses R2 by L298 , L297;
+L300: ( Class ((the InternalRel of R1) , C80) ) c= ( R2 ` ) by L299 , SUBSET_1:23;
+thus L301: thesis by L300 , L297;
+end;
+theorem
+L302: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( UAp ( R2 ` ) ) = ( ( LAp R2 ) ` )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+L303: ( ( ( UAp ( R2 ` ) ) ` ) ` ) = ( ( LAp ( ( R2 ` ) ` ) ) ` ) by L290;
+thus L304: thesis by L303;
+end;
+theorem
+L305: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( UAp ( LAp ( UAp R2 ) ) ) = ( UAp R2 )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+thus L306: ( UAp ( LAp ( UAp R2 ) ) ) c= ( UAp R2 )
+proof
+let C81 being set;
+assume L307: C81 in ( UAp ( LAp ( UAp R2 ) ) );
+L308: ( Class ((the InternalRel of R1) , C81) ) meets ( LAp ( UAp R2 ) ) by L307 , L154;
+consider C82 being set such that L309: C82 in ( Class ((the InternalRel of R1) , C81) ) and L310: C82 in ( LAp ( UAp R2 ) ) by L308 , XBOOLE_0:3;
+L311: [ C82 , C81 ] in (the InternalRel of R1) by L309 , EQREL_1:19;
+L312: [ C81 , C82 ] in (the InternalRel of R1) by L311 , EQREL_1:6;
+L313: C81 in ( Class ((the InternalRel of R1) , C82) ) by L312 , EQREL_1:19;
+L314: ( Class ((the InternalRel of R1) , C82) ) c= ( UAp R2 ) by L310 , L149;
+thus L315: thesis by L314 , L313;
+end;
+
+L316: R2 c= ( LAp ( UAp R2 ) )
+proof
+let C83 being set;
+assume L317: C83 in R2;
+L318: ( Class ((the InternalRel of R1) , C83) ) c= ( UAp R2 )
+proof
+let C84 being set;
+assume L319: C84 in ( Class ((the InternalRel of R1) , C83) );
+L320: [ C84 , C83 ] in (the InternalRel of R1) by L319 , EQREL_1:19;
+L321: [ C83 , C84 ] in (the InternalRel of R1) by L320 , EQREL_1:6;
+L322: C83 in ( Class ((the InternalRel of R1) , C84) ) by L321 , EQREL_1:19;
+L323: ( Class ((the InternalRel of R1) , C84) ) meets R2 by L322 , L317 , XBOOLE_0:3;
+thus L324: thesis by L323 , L319;
+end;
+thus L325: thesis by L318 , L317;
+end;
+thus L326: ( UAp R2 ) c= ( UAp ( LAp ( UAp R2 ) ) ) by L316 , L268;
+end;
+theorem
+L327: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( LAp ( UAp ( LAp R2 ) ) ) = ( LAp R2 )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+L328: ( UAp ( LAp R2 ) ) c= R2
+proof
+let C85 being set;
+assume L329: C85 in ( UAp ( LAp R2 ) );
+L330: ( Class ((the InternalRel of R1) , C85) ) meets ( LAp R2 ) by L329 , L154;
+consider C86 being set such that L331: C86 in ( Class ((the InternalRel of R1) , C85) ) and L332: C86 in ( LAp R2 ) by L330 , XBOOLE_0:3;
+L333: [ C86 , C85 ] in (the InternalRel of R1) by L331 , EQREL_1:19;
+L334: [ C85 , C86 ] in (the InternalRel of R1) by L333 , EQREL_1:6;
+L335: C85 in ( Class ((the InternalRel of R1) , C86) ) by L334 , EQREL_1:19;
+L336: ( Class ((the InternalRel of R1) , C86) ) c= R2 by L332 , L149;
+thus L337: thesis by L336 , L335;
+end;
+thus L338: ( LAp ( UAp ( LAp R2 ) ) ) c= ( LAp R2 ) by L328 , L262;
+thus L339: ( LAp R2 ) c= ( LAp ( UAp ( LAp R2 ) ) )
+proof
+let C87 being set;
+assume L340: C87 in ( LAp R2 );
+L341: ( Class ((the InternalRel of R1) , C87) ) c= ( UAp ( LAp R2 ) )
+proof
+let C88 being set;
+assume L342: C88 in ( Class ((the InternalRel of R1) , C87) );
+L343: [ C88 , C87 ] in (the InternalRel of R1) by L342 , EQREL_1:19;
+L344: [ C87 , C88 ] in (the InternalRel of R1) by L343 , EQREL_1:6;
+L345: C87 in ( Class ((the InternalRel of R1) , C88) ) by L344 , EQREL_1:19;
+L346: ( Class ((the InternalRel of R1) , C88) ) meets ( LAp R2 ) by L345 , L340 , XBOOLE_0:3;
+thus L347: thesis by L346 , L342;
+end;
+thus L348: thesis by L341 , L340;
+end;
+
+end;
+theorem
+L340: (for R1 being Tolerance_Space holds (for R2 being (Subset of R1) holds ( BndAp R2 ) = ( BndAp ( R2 ` ) )))
+proof
+let R1 being Tolerance_Space;
+let R2 being (Subset of R1);
+thus L341: ( BndAp R2 ) c= ( BndAp ( R2 ` ) )
+proof
+let C89 being set;
+assume L342: C89 in ( BndAp R2 );
+L343: C89 in ( UAp R2 ) by L342 , XBOOLE_0:def 5;
+L344: (not C89 in ( ( UAp R2 ) ` )) by L343 , XBOOLE_0:def 5;
+L345: (not C89 in ( LAp ( R2 ` ) )) by L344 , L290;
+L346: (not C89 in ( LAp R2 )) by L342 , XBOOLE_0:def 5;
+L347: C89 in ( ( LAp R2 ) ` ) by L346 , L342 , XBOOLE_0:def 5;
+L348: C89 in ( UAp ( R2 ` ) ) by L347 , L302;
+thus L349: thesis by L348 , L345 , XBOOLE_0:def 5;
+end;
+
+thus L350: ( BndAp ( R2 ` ) ) c= ( BndAp R2 )
+proof
+let C90 being set;
+assume L351: C90 in ( BndAp ( R2 ` ) );
+L352: C90 in ( UAp ( R2 ` ) ) by L351 , XBOOLE_0:def 5;
+L353: C90 in ( ( LAp R2 ) ` ) by L352 , L302;
+L354: (not C90 in ( LAp R2 )) by L353 , XBOOLE_0:def 5;
+L355: (not C90 in ( LAp ( R2 ` ) )) by L351 , XBOOLE_0:def 5;
+L356: (not C90 in ( ( UAp R2 ) ` )) by L355 , L290;
+L357: C90 in ( ( ( UAp R2 ) ` ) ` ) by L356 , L351 , SUBSET_1:29;
+thus L358: thesis by L357 , L354 , XBOOLE_0:def 5;
+end;
+
+end;
+theorem
+L351: (for R4 being Approximation_Space holds (for R5 being (Subset of R4) holds ( LAp ( LAp R5 ) ) = ( LAp R5 )))
+proof
+let R4 being Approximation_Space;
+let R5 being (Subset of R4);
+thus L352: ( LAp ( LAp R5 ) ) c= ( LAp R5 ) by L159;
+let C91 being set;
+assume L353: C91 in ( LAp R5 );
+L354: ( Class ((the InternalRel of R4) , C91) ) c= R5 by L353 , L149;
+L355: ( Class ((the InternalRel of R4) , C91) ) c= ( LAp R5 )
+proof
+let C92 being set;
+assume L356: C92 in ( Class ((the InternalRel of R4) , C91) );
+L357: ( Class ((the InternalRel of R4) , C91) ) = ( Class ((the InternalRel of R4) , C92) ) by L356 , L353 , EQREL_1:23;
+thus L358: thesis by L357 , L354 , L356;
+end;
+thus L359: thesis by L355 , L353;
+end;
+theorem
+L360: (for R4 being Approximation_Space holds (for R5 being (Subset of R4) holds ( LAp ( LAp R5 ) ) = ( UAp ( LAp R5 ) )))
+proof
+let R4 being Approximation_Space;
+let R5 being (Subset of R4);
+thus L361: ( LAp ( LAp R5 ) ) c= ( UAp ( LAp R5 ) ) by L169;
+let C93 being set;
+assume L362: C93 in ( UAp ( LAp R5 ) );
+L363: ( Class ((the InternalRel of R4) , C93) ) meets ( LAp R5 ) by L362 , L154;
+consider C94 being set such that L364: C94 in ( Class ((the InternalRel of R4) , C93) ) and L365: C94 in ( LAp R5 ) by L363 , XBOOLE_0:3;
+L366: ( Class ((the InternalRel of R4) , C94) ) c= R5 by L365 , L149;
+L367: ( Class ((the InternalRel of R4) , C93) ) c= R5 by L366 , L362 , L364 , EQREL_1:23;
+L368: ( Class ((the InternalRel of R4) , C93) ) c= ( LAp R5 )
+proof
+let C95 being set;
+assume L369: C95 in ( Class ((the InternalRel of R4) , C93) );
+L370: ( Class ((the InternalRel of R4) , C93) ) = ( Class ((the InternalRel of R4) , C95) ) by L369 , L362 , EQREL_1:23;
+thus L371: thesis by L370 , L367 , L369;
+end;
+thus L372: thesis by L368 , L362;
+end;
+theorem
+L373: (for R4 being Approximation_Space holds (for R5 being (Subset of R4) holds ( UAp ( UAp R5 ) ) = ( UAp R5 )))
+proof
+let R4 being Approximation_Space;
+let R5 being (Subset of R4);
+thus L374:now
+let C96 being set;
+assume L375: C96 in ( UAp ( UAp R5 ) );
+L376: ( Class ((the InternalRel of R4) , C96) ) meets ( UAp R5 ) by L375 , L154;
+consider C97 being set such that L377: C97 in ( Class ((the InternalRel of R4) , C96) ) and L378: C97 in ( UAp R5 ) by L376 , XBOOLE_0:3;
+L379: ( Class ((the InternalRel of R4) , C97) ) = ( Class ((the InternalRel of R4) , C96) ) by L375 , L377 , EQREL_1:23;
+L380: ( Class ((the InternalRel of R4) , C97) ) meets R5 by L378 , L154;
+thus L381: C96 in ( UAp R5 ) by L380 , L375 , L379;
+end;
+thus L382: thesis by L164;
+end;
+theorem
+L383: (for R4 being Approximation_Space holds (for R5 being (Subset of R4) holds ( UAp ( UAp R5 ) ) = ( LAp ( UAp R5 ) )))
+proof
+let R4 being Approximation_Space;
+let R5 being (Subset of R4);
+thus L384: ( UAp ( UAp R5 ) ) c= ( LAp ( UAp R5 ) )
+proof
+let C98 being set;
+assume L385: C98 in ( UAp ( UAp R5 ) );
+L386: ( Class ((the InternalRel of R4) , C98) ) meets ( UAp R5 ) by L385 , L154;
+consider C99 being set such that L387: C99 in ( Class ((the InternalRel of R4) , C98) ) and L388: C99 in ( UAp R5 ) by L386 , XBOOLE_0:3;
+L389: ( Class ((the InternalRel of R4) , C99) ) = ( Class ((the InternalRel of R4) , C98) ) by L385 , L387 , EQREL_1:23;
+L390: ( Class ((the InternalRel of R4) , C99) ) meets R5 by L388 , L154;
+L391: ( Class ((the InternalRel of R4) , C98) ) c= ( UAp R5 )
+proof
+let C100 being set;
+assume L392: C100 in ( Class ((the InternalRel of R4) , C98) );
+L393: ( Class ((the InternalRel of R4) , C98) ) = ( Class ((the InternalRel of R4) , C100) ) by L392 , L385 , EQREL_1:23;
+thus L394: thesis by L393 , L390 , L389 , L392;
+end;
+thus L395: thesis by L391 , L385;
+end;
+
+thus L396: thesis by L169;
+end;
+registration
+let C101 being Tolerance_Space;
+cluster  exact for (Subset of C101);
+existence
+proof
+take ( {} C101 );
+L397: ( LAp ( {} C101 ) ) = ( {} ) by L216;
+thus L398: thesis by L397 , L172;
+end;
+end;
+registration
+let C102 being Approximation_Space;
+let C103 being (Subset of C102);
+cluster ( LAp C103 ) ->  exact;
+coherence
+proof
+set D11 = ( LAp C103 );
+L400: ( UAp D11 ) = ( LAp D11 ) by L360;
+L401: ( BndAp D11 ) = ( {} ) by L400 , XBOOLE_1:37;
+thus L402: thesis by L401 , L146;
+end;
+cluster ( UAp C103 ) ->  exact;
+coherence
+proof
+set D12 = ( UAp C103 );
+L403: ( UAp D12 ) = ( LAp D12 ) by L383;
+L404: ( BndAp D12 ) = ( {} ) by L403 , XBOOLE_1:37;
+thus L405: thesis by L404 , L146;
+end;
+end;
+theorem
+L407: (for B45 being Approximation_Space holds (for B46 being (Subset of B45) holds (for B47 , B48 being set holds ((B47 in ( UAp B46 ) & [ B47 , B48 ] in (the InternalRel of B45)) implies B48 in ( UAp B46 )))))
+proof
+let C104 being Approximation_Space;
+let C105 being (Subset of C104);
+let C106 , C107 being set;
+assume that
+L408: C106 in ( UAp C105 )
+and
+L409: [ C106 , C107 ] in (the InternalRel of C104);
+L410: [ C107 , C106 ] in (the InternalRel of C104) by L409 , EQREL_1:6;
+L411: C107 in ( Class ((the InternalRel of C104) , C106) ) by L410 , EQREL_1:19;
+L412: ( Class ((the InternalRel of C104) , C106) ) = ( Class ((the InternalRel of C104) , C107) ) by L411 , L408 , EQREL_1:23;
+L413: (( Class ((the InternalRel of C104) , C106) ) meets C105 & C107 is (Element of C104)) by L408 , L409 , L154 , ZFMISC_1:87;
+thus L414: thesis by L413 , L412;
+end;
+registration
+let C108 being non  diagonal Approximation_Space;
+cluster  rough for (Subset of C108);
+existence
+proof
+consider C109 , C110 being (Element of C108) such that L415: C109 <> C110 and L416: [ C109 , C110 ] in (the InternalRel of C108) by L47;
+set D13 = { C109 };
+L417: (C109 in D13 & D13 c= ( UAp D13 )) by L164 , TARSKI:def 1;
+L418: C110 in ( UAp D13 ) by L417 , L416 , L407;
+L419: ( UAp D13 ) <> D13 by L418 , L415 , TARSKI:def 1;
+L420: (not D13 is  exact) by L419 , L191;
+thus L421: thesis by L420;
+end;
+end;
+definition
+let C111 being Approximation_Space;
+let C112 being (Subset of C111);
+mode RoughSet of C112
+means it = [ ( LAp C112 ) , ( UAp C112 ) ];
+existence;
+end;
+begin
+registration
+let C113 being  finite Tolerance_Space;
+let C114 being (Element of C113);
+cluster ( card ( Class ((the InternalRel of C113) , C114) ) ) -> non  empty;
+coherence
+proof
+L424: C114 in ( Class ((the InternalRel of C113) , C114) ) by EQREL_1:20;
+thus L425: thesis by L424;
+end;
+end;
+definition
+let C115 being  finite Tolerance_Space;
+let C116 being (Subset of C115);
+func MemberFunc (C116 , C115) -> (Function of (the carrier of C115) , ( REAL )) means 
+:L427: (for B49 being (Element of C115) holds ( it . B49 ) = ( ( card ( C116 /\ ( Class ((the InternalRel of C115) , B49) ) ) ) / ( card ( Class ((the InternalRel of C115) , B49) ) ) ));
+existence
+proof
+deffunc H1(set) = ( ( card ( C116 /\ ( Class ((the InternalRel of C115) , $1) ) ) ) / ( card ( Class ((the InternalRel of C115) , $1) ) ) );
+L428: (for B50 being set holds (B50 in (the carrier of C115) implies H1(B50) in ( REAL ))) by XREAL_0:def 1;
+L429: (ex B51 being (Function of (the carrier of C115) , ( REAL )) st (for B52 being set holds (B52 in (the carrier of C115) implies ( B51 . B52 ) = H1(B52)))) from FUNCT_2:sch 2(L428);
+consider C117 being (Function of (the carrier of C115) , ( REAL )) such that L430: (for B53 being set holds (B53 in (the carrier of C115) implies ( C117 . B53 ) = H1(B53))) by L429;
+take C117;
+let C118 being (Element of C115);
+thus L431: thesis by L430;
+end;
+uniqueness
+proof
+deffunc H2((Element of C115)) = ( ( card ( C116 /\ ( Class ((the InternalRel of C115) , $1) ) ) ) / ( card ( Class ((the InternalRel of C115) , $1) ) ) );
+L432: (for B54 , B55 being (Function of (the carrier of C115) , ( REAL )) holds (((for B56 being (Element of C115) holds ( B54 . B56 ) = H2(B56)) & (for B57 being (Element of C115) holds ( B55 . B57 ) = H2(B57))) implies B54 = B55)) from BINOP_2:sch 1;
+let C119 , C120 being (Function of (the carrier of C115) , ( REAL ));
+assume L433: ((for B58 being (Element of C115) holds ( C119 . B58 ) = H2(B58)) & (for B59 being (Element of C115) holds ( C120 . B59 ) = H2(B59)));
+thus L434: C119 = C120 by L433 , L432;
+end;
+end;
+theorem
+L436: (for R6 being  finite Tolerance_Space holds (for R7 being (Subset of R6) holds (for R8 being (Element of R6) holds (( 0 ) <= ( ( MemberFunc (R7 , R6) ) . R8 ) & ( ( MemberFunc (R7 , R6) ) . R8 ) <= 1))))
+proof
+let R6 being  finite Tolerance_Space;
+let R7 being (Subset of R6);
+let R8 being (Element of R6);
+L437: ( ( card ( R7 /\ ( Class ((the InternalRel of R6) , R8) ) ) ) / ( card ( Class ((the InternalRel of R6) , R8) ) ) ) >= ( 0 );
+thus L438: ( 0 ) <= ( ( MemberFunc (R7 , R6) ) . R8 ) by L437 , L427;
+L439: ( card ( R7 /\ ( Class ((the InternalRel of R6) , R8) ) ) ) <= ( card ( Class ((the InternalRel of R6) , R8) ) ) by NAT_1:43 , XBOOLE_1:17;
+L440: ( ( card ( R7 /\ ( Class ((the InternalRel of R6) , R8) ) ) ) / ( card ( Class ((the InternalRel of R6) , R8) ) ) ) <= 1 by L439 , XREAL_1:185;
+thus L441: thesis by L440 , L427;
+end;
+theorem
+L442: (for R6 being  finite Tolerance_Space holds (for R7 being (Subset of R6) holds (for R8 being (Element of R6) holds ( ( MemberFunc (R7 , R6) ) . R8 ) in [. ( 0 ) , 1 .])))
+proof
+let R6 being  finite Tolerance_Space;
+let R7 being (Subset of R6);
+let R8 being (Element of R6);
+L443: (( 0 ) <= ( ( MemberFunc (R7 , R6) ) . R8 ) & ( ( MemberFunc (R7 , R6) ) . R8 ) <= 1) by L436;
+thus L444: thesis by L443 , XXREAL_1:1;
+end;
+theorem
+L445: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R12 being (Element of R9) holds (( ( MemberFunc (R10 , R9) ) . R12 ) = 1 iff R12 in ( LAp R10 )))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R12 being (Element of R9);
+thus L446:now
+assume L447: ( ( MemberFunc (R10 , R9) ) . R12 ) = 1;
+L448: ( ( MemberFunc (R10 , R9) ) . R12 ) = ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L427;
+L449: ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) = ( card ( Class ((the InternalRel of R9) , R12) ) ) by L448 , L447 , XCMPLX_1:58;
+L450: ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) = ( Class ((the InternalRel of R9) , R12) ) by L449 , PRE_POLY:8 , XBOOLE_1:17;
+L451: ( Class ((the InternalRel of R9) , R12) ) c= R10 by L450 , XBOOLE_1:18;
+thus L452: R12 in ( LAp R10 ) by L451;
+end;
+assume L453: R12 in ( LAp R10 );
+L454: ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) = ( card ( Class ((the InternalRel of R9) , R12) ) ) by L453 , L149 , XBOOLE_1:28;
+L455: ( ( MemberFunc (R10 , R9) ) . R12 ) = ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L427;
+thus L456: thesis by L455 , L454 , XCMPLX_1:60;
+end;
+theorem
+L457: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R12 being (Element of R9) holds (( ( MemberFunc (R10 , R9) ) . R12 ) = ( 0 ) iff R12 in ( ( UAp R10 ) ` )))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R12 being (Element of R9);
+thus L458:now
+assume L459: ( ( MemberFunc (R10 , R9) ) . R12 ) = ( 0 );
+L460: ( ( MemberFunc (R10 , R9) ) . R12 ) = ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L427;
+L461: ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) = ( {} ) by L460 , L459 , XCMPLX_1:50;
+L462: R10 misses ( Class ((the InternalRel of R9) , R12) ) by L461 , XBOOLE_0:def 7;
+L463: (not R12 in ( UAp R10 )) by L462 , L154;
+thus L464: R12 in ( ( UAp R10 ) ` ) by L463 , XBOOLE_0:def 5;
+end;
+assume L465: R12 in ( ( UAp R10 ) ` );
+L466: (not R12 in ( UAp R10 )) by L465 , XBOOLE_0:def 5;
+L467: R10 misses ( Class ((the InternalRel of R9) , R12) ) by L466;
+L468: ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) = ( 0 ) by L467 , CARD_1:27 , XBOOLE_0:def 7;
+L469: ( ( MemberFunc (R10 , R9) ) . R12 ) = ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L427;
+thus L470: thesis by L469 , L468;
+end;
+theorem
+L471: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R12 being (Element of R9) holds ((( 0 ) < ( ( MemberFunc (R10 , R9) ) . R12 ) & ( ( MemberFunc (R10 , R9) ) . R12 ) < 1) iff R12 in ( BndAp R10 )))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R12 being (Element of R9);
+thus L472:now
+assume that
+L473: ( 0 ) < ( ( MemberFunc (R10 , R9) ) . R12 )
+and
+L474: ( ( MemberFunc (R10 , R9) ) . R12 ) < 1;
+L475: (not R12 in ( ( UAp R10 ) ` )) by L473 , L457;
+L476: R12 in ( UAp R10 ) by L475 , XBOOLE_0:def 5;
+L477: (not R12 in ( LAp R10 )) by L474 , L445;
+thus L478: R12 in ( BndAp R10 ) by L477 , L476 , XBOOLE_0:def 5;
+end;
+assume L479: R12 in ( BndAp R10 );
+L480: (not R12 in ( LAp R10 )) by L479 , XBOOLE_0:def 5;
+L481: ( ( MemberFunc (R10 , R9) ) . R12 ) <> 1 by L480 , L445;
+L482: R12 in ( UAp R10 ) by L479 , XBOOLE_0:def 5;
+L483: (not R12 in ( ( UAp R10 ) ` )) by L482 , XBOOLE_0:def 5;
+L484: ( 0 ) <> ( ( MemberFunc (R10 , R9) ) . R12 ) by L483 , L457;
+L485: ( ( MemberFunc (R10 , R9) ) . R12 ) <= 1 by L436;
+thus L486: thesis by L485 , L484 , L481 , L436 , XXREAL_0:1;
+end;
+theorem
+L487: (for B60 being  discrete Approximation_Space holds (for B61 being (Subset of B60) holds B61 is  exact))
+proof
+let C121 being  discrete Approximation_Space;
+let C122 being (Subset of C121);
+L488: (the InternalRel of C121) = ( id (the carrier of C121) ) by ORDERS_3:def 1;
+L489: C122 = ( UAp C122 )
+proof
+thus L490: C122 c= ( UAp C122 ) by L164;
+let C123 being set;
+assume L491: C123 in ( UAp C122 );
+L492: ( Class ((the InternalRel of C121) , C123) ) meets C122 by L491 , L154;
+L493: (ex B62 being set st (B62 in ( Class ((the InternalRel of C121) , C123) ) & B62 in C122)) by L492 , XBOOLE_0:3;
+L494: ( Class ((the InternalRel of C121) , C123) ) = { C123 } by L488 , L491 , EQREL_1:25;
+thus L495: thesis by L494 , L493 , TARSKI:def 1;
+end;
+thus L496: thesis by L489;
+end;
+registration
+let C124 being  discrete Approximation_Space;
+cluster  ->  exact for (Subset of C124);
+coherence by L487;
+end;
+theorem
+L498: (for B63 being  discrete  finite Approximation_Space holds (for B64 being (Subset of B63) holds ( MemberFunc (B64 , B63) ) = ( chi (B64 , (the carrier of B63)) )))
+proof
+let C125 being  discrete  finite Approximation_Space;
+let C126 being (Subset of C125);
+reconsider D14 = ( MemberFunc (C126 , C125) ) as (Function of (the carrier of C125) , ( REAL ));
+set D15 = ( chi (C126 , (the carrier of C125)) );
+L499: { ( 0 ) , (1 qua (Element of ( REAL ))) } c= ( REAL );
+reconsider D16 = D15 as (Function of (the carrier of C125) , ( REAL )) by L499 , FUNCT_2:7;
+L500: (for B65 being set holds (B65 in (the carrier of C125) implies ( D14 . B65 ) = ( D16 . B65 )))
+proof
+let C127 being set;
+assume L501: C127 in (the carrier of C125);
+per cases ;
+suppose L502: C127 in C126;
+
+L503: C127 in ( LAp C126 ) by L502 , L172;
+L504: ( D14 . C127 ) = 1 by L503 , L445;
+thus L505: thesis by L504 , L502 , FUNCT_3:def 3;
+end;
+suppose L506: (not C127 in C126);
+
+L507: (not C127 in ( UAp C126 )) by L506 , L191;
+L508: C127 in ( ( UAp C126 ) ` ) by L507 , L501 , XBOOLE_0:def 5;
+L509: ( D14 . C127 ) = ( 0 ) by L508 , L457;
+thus L510: thesis by L509 , L501 , L506 , FUNCT_3:def 3;
+end;
+end;
+thus L512: thesis by L500 , FUNCT_2:12;
+end;
+theorem
+L513: (for B66 being  finite Approximation_Space holds (for B67 being (Subset of B66) holds (for B68 , B69 being set holds ([ B68 , B69 ] in (the InternalRel of B66) implies ( ( MemberFunc (B67 , B66) ) . B68 ) = ( ( MemberFunc (B67 , B66) ) . B69 )))))
+proof
+let C128 being  finite Approximation_Space;
+let C129 being (Subset of C128);
+let C130 , C131 being set;
+assume L514: [ C130 , C131 ] in (the InternalRel of C128);
+L515: C131 is (Element of C128) by L514 , ZFMISC_1:87;
+L516: C130 is (Element of C128) by L514 , ZFMISC_1:87;
+L517: ( ( MemberFunc (C129 , C128) ) . C130 ) = ( ( card ( C129 /\ ( Class ((the InternalRel of C128) , C130) ) ) ) / ( card ( Class ((the InternalRel of C128) , C130) ) ) ) by L516 , L427;
+L518: C130 in ( Class ((the InternalRel of C128) , C131) ) by L514 , EQREL_1:19;
+L519: ( Class ((the InternalRel of C128) , C130) ) = ( Class ((the InternalRel of C128) , C131) ) by L518 , L515 , EQREL_1:23;
+thus L520: thesis by L519 , L515 , L517 , L427;
+end;
+theorem
+L521: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R12 being (Element of R9) holds ( ( MemberFunc (( R10 ` ) , R9) ) . R12 ) = ( 1 - ( ( MemberFunc (R10 , R9) ) . R12 ) ))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R12 being (Element of R9);
+L522: ( ( [#] R9 ) /\ ( Class ((the InternalRel of R9) , R12) ) ) = ( Class ((the InternalRel of R9) , R12) ) by XBOOLE_1:28;
+L523: ( ( MemberFunc (( R10 ` ) , R9) ) . R12 ) = ( ( card ( ( ( [#] R9 ) \ R10 ) /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L427
+.= ( ( card ( ( ( [#] R9 ) /\ ( Class ((the InternalRel of R9) , R12) ) ) \ ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by XBOOLE_1:50
+.= ( ( ( card ( ( [#] R9 ) /\ ( Class ((the InternalRel of R9) , R12) ) ) ) - ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L522 , CARD_2:44 , XBOOLE_1:17
+.= ( ( ( card ( ( [#] R9 ) /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) - ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) ) by XCMPLX_1:120
+.= ( ( ( card ( Class ((the InternalRel of R9) , R12) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) - ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) ) by XBOOLE_1:28
+.= ( 1 - ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) ) by XCMPLX_1:60
+.= ( 1 - ( ( MemberFunc (R10 , R9) ) . R12 ) ) by L427;
+thus L524: thesis by L523;
+end;
+theorem
+L525: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R11 being (Subset of R9) holds (for R12 being (Element of R9) holds (R10 c= R11 implies ( ( MemberFunc (R10 , R9) ) . R12 ) <= ( ( MemberFunc (R11 , R9) ) . R12 ))))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R11 being (Subset of R9);
+let R12 being (Element of R9);
+set D17 = ( Class ((the InternalRel of R9) , R12) );
+assume L526: R10 c= R11;
+L527: ( card ( R11 /\ D17 ) ) >= ( card ( R10 /\ D17 ) ) by L526 , NAT_1:43 , XBOOLE_1:26;
+L528: ( ( card ( R11 /\ D17 ) ) / ( card D17 ) ) >= ( ( card ( R10 /\ D17 ) ) / ( card D17 ) ) by L527 , XREAL_1:72;
+L529: ( ( MemberFunc (R10 , R9) ) . R12 ) = ( ( card ( R10 /\ D17 ) ) / ( card D17 ) ) by L427;
+thus L530: thesis by L529 , L528 , L427;
+end;
+theorem
+L531: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R11 being (Subset of R9) holds (for R12 being (Element of R9) holds ( ( MemberFunc (( R10 \/ R11 ) , R9) ) . R12 ) >= ( ( MemberFunc (R10 , R9) ) . R12 ))))) by L525 , XBOOLE_1:7;
+theorem
+L532: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R11 being (Subset of R9) holds (for R12 being (Element of R9) holds ( ( MemberFunc (( R10 /\ R11 ) , R9) ) . R12 ) <= ( ( MemberFunc (R10 , R9) ) . R12 ))))) by L525 , XBOOLE_1:17;
+theorem
+L533: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R11 being (Subset of R9) holds (for R12 being (Element of R9) holds ( ( MemberFunc (( R10 \/ R11 ) , R9) ) . R12 ) >= ( max (( ( MemberFunc (R10 , R9) ) . R12 ) , ( ( MemberFunc (R11 , R9) ) . R12 )) )))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R11 being (Subset of R9);
+let R12 being (Element of R9);
+L534: (( ( MemberFunc (( R10 \/ R11 ) , R9) ) . R12 ) >= ( ( MemberFunc (R10 , R9) ) . R12 ) & ( ( MemberFunc (( R10 \/ R11 ) , R9) ) . R12 ) >= ( ( MemberFunc (R11 , R9) ) . R12 )) by L525 , XBOOLE_1:7;
+thus L535: thesis by L534 , XXREAL_0:28;
+end;
+theorem
+L536: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R11 being (Subset of R9) holds (for R12 being (Element of R9) holds (R10 misses R11 implies ( ( MemberFunc (( R10 \/ R11 ) , R9) ) . R12 ) = ( ( ( MemberFunc (R10 , R9) ) . R12 ) + ( ( MemberFunc (R11 , R9) ) . R12 ) ))))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R11 being (Subset of R9);
+let R12 being (Element of R9);
+assume L537: R10 misses R11;
+L538: ( card ( ( R10 \/ R11 ) /\ ( Class ((the InternalRel of R9) , R12) ) ) ) = ( card ( ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) \/ ( R11 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) ) by XBOOLE_1:23
+.= ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) + ( card ( R11 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) ) by L537 , CARD_2:40 , XBOOLE_1:76;
+L539: ( ( MemberFunc (( R10 \/ R11 ) , R9) ) . R12 ) = ( ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) + ( card ( R11 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) by L538 , L427
+.= ( ( ( card ( R10 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) + ( ( card ( R11 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) ) by XCMPLX_1:62
+.= ( ( ( MemberFunc (R10 , R9) ) . R12 ) + ( ( card ( R11 /\ ( Class ((the InternalRel of R9) , R12) ) ) ) / ( card ( Class ((the InternalRel of R9) , R12) ) ) ) ) by L427
+.= ( ( ( MemberFunc (R10 , R9) ) . R12 ) + ( ( MemberFunc (R11 , R9) ) . R12 ) ) by L427;
+thus L540: thesis by L539;
+end;
+theorem
+L541: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds (for R11 being (Subset of R9) holds (for R12 being (Element of R9) holds ( ( MemberFunc (( R10 /\ R11 ) , R9) ) . R12 ) <= ( min (( ( MemberFunc (R10 , R9) ) . R12 ) , ( ( MemberFunc (R11 , R9) ) . R12 )) )))))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+let R11 being (Subset of R9);
+let R12 being (Element of R9);
+L542: (( ( MemberFunc (( R10 /\ R11 ) , R9) ) . R12 ) <= ( ( MemberFunc (R10 , R9) ) . R12 ) & ( ( MemberFunc (( R10 /\ R11 ) , R9) ) . R12 ) <= ( ( MemberFunc (R11 , R9) ) . R12 )) by L525 , XBOOLE_1:17;
+thus L543: thesis by L542 , XXREAL_0:20;
+end;
+definition
+let C132 being  finite Tolerance_Space;
+let C133 being (FinSequence of ( bool (the carrier of C132) ));
+let C134 being (Element of C132);
+func FinSeqM (C134 , C133) -> (FinSequence of ( REAL )) means 
+:L544: (( dom it ) = ( dom C133 ) & (for B70 being Nat holds (B70 in ( dom C133 ) implies ( it . B70 ) = ( ( MemberFunc (( C133 . B70 ) , C132) ) . C134 ))));
+existence
+proof
+deffunc H3(Nat) = ( ( MemberFunc (( C133 . $1 ) , C132) ) . C134 );
+L545: (ex B71 being (FinSequence of ( REAL )) st (( len B71 ) = ( len C133 ) & (for B72 being Nat holds (B72 in ( dom B71 ) implies ( B71 . B72 ) = H3(B72))))) from FINSEQ_2:sch 1;
+consider C135 being (FinSequence of ( REAL )) such that L546: ( len C135 ) = ( len C133 ) and L547: (for B73 being Nat holds (B73 in ( dom C135 ) implies ( C135 . B73 ) = H3(B73))) by L545;
+take C135;
+thus L548: ( dom C135 ) = ( Seg ( len C135 ) ) by FINSEQ_1:def 3
+.= ( dom C133 ) by L546 , FINSEQ_1:def 3;
+let C136 being Nat;
+assume L549: C136 in ( dom C133 );
+L550: C136 in ( Seg ( len C133 ) ) by L549 , FINSEQ_1:def 3;
+L551: ( dom C135 ) = ( Seg ( len C133 ) ) by L546 , FINSEQ_1:def 3;
+thus L552: thesis by L551 , L547 , L550;
+end;
+uniqueness
+proof
+let C137 , C138 being (FinSequence of ( REAL ));
+assume that
+L553: ( dom C137 ) = ( dom C133 )
+and
+L554: (for B74 being Nat holds (B74 in ( dom C133 ) implies ( C137 . B74 ) = ( ( MemberFunc (( C133 . B74 ) , C132) ) . C134 )))
+and
+L555: ( dom C138 ) = ( dom C133 )
+and
+L556: (for B75 being Nat holds (B75 in ( dom C133 ) implies ( C138 . B75 ) = ( ( MemberFunc (( C133 . B75 ) , C132) ) . C134 )));
+L557: (for B76 being Nat holds (B76 in ( dom C137 ) implies ( C137 . B76 ) = ( C138 . B76 )))
+proof
+let C139 being Nat;
+assume L558: C139 in ( dom C137 );
+reconsider D18 = C139 as (Element of ( NAT )) by ORDINAL1:def 12;
+L559: ( C137 . D18 ) = ( ( MemberFunc (( C133 . D18 ) , C132) ) . C134 ) by L553 , L554 , L558
+.= ( C138 . D18 ) by L553 , L556 , L558;
+thus L560: thesis by L559;
+end;
+thus L561: thesis by L557 , L553 , L555 , FINSEQ_1:13;
+end;
+end;
+theorem
+L563: (for R9 being  finite Approximation_Space holds (for B77 being (FinSequence of ( bool (the carrier of R9) )) holds (for B78 being (Element of R9) holds (for B79 being (Subset of R9) holds ( FinSeqM (B78 , ( B77 ^ <* B79 *> )) ) = ( ( FinSeqM (B78 , B77) ) ^ <* ( ( MemberFunc (B79 , R9) ) . B78 ) *> )))))
+proof
+let R9 being  finite Approximation_Space;
+let C140 being (FinSequence of ( bool (the carrier of R9) ));
+let C141 being (Element of R9);
+let C142 being (Subset of R9);
+set D19 = ( FinSeqM (C141 , ( C140 ^ <* C142 *> )) );
+set D20 = ( ( FinSeqM (C141 , C140) ) ^ <* ( ( MemberFunc (C142 , R9) ) . C141 ) *> );
+L564: ( dom C140 ) = ( dom ( FinSeqM (C141 , C140) ) ) by L544;
+L565: ( Seg ( len C140 ) ) = ( dom ( FinSeqM (C141 , C140) ) ) by L564 , FINSEQ_1:def 3
+.= ( Seg ( len ( FinSeqM (C141 , C140) ) ) ) by FINSEQ_1:def 3;
+L566: ( len C140 ) = ( len ( FinSeqM (C141 , C140) ) ) by L565 , FINSEQ_1:6;
+L567: ( dom D19 ) = ( dom ( C140 ^ <* C142 *> ) ) by L544
+.= ( Seg ( ( len C140 ) + ( len <* C142 *> ) ) ) by FINSEQ_1:def 7
+.= ( Seg ( ( len C140 ) + 1 ) ) by FINSEQ_1:39;
+L568: (for B80 being Nat holds (B80 in ( dom D19 ) implies ( D19 . B80 ) = ( D20 . B80 )))
+proof
+let C143 being Nat;
+assume L569: C143 in ( dom D19 );
+reconsider D21 = C143 as (Element of ( NAT )) by L569;
+L570: 1 <= D21 by L569 , FINSEQ_3:25;
+L571: D21 in ( dom ( C140 ^ <* C142 *> ) ) by L569 , L544;
+L572: ( D19 . D21 ) = ( ( MemberFunc (( ( C140 ^ <* C142 *> ) . D21 ) , R9) ) . C141 ) by L571 , L544;
+L573: D21 <= ( ( len C140 ) + 1 ) by L567 , L569 , FINSEQ_1:1;
+per cases  by L573 , NAT_1:8;
+suppose L574: D21 <= ( len C140 );
+
+L575: D21 in ( dom C140 ) by L574 , L570 , FINSEQ_3:25;
+L576: D21 in ( dom ( FinSeqM (C141 , C140) ) ) by L566 , L570 , L574 , FINSEQ_3:25;
+L577: ( D20 . D21 ) = ( ( FinSeqM (C141 , C140) ) . D21 ) by L576 , FINSEQ_1:def 7
+.= ( ( MemberFunc (( C140 . D21 ) , R9) ) . C141 ) by L575 , L544;
+thus L578: thesis by L577 , L572 , L575 , FINSEQ_1:def 7;
+end;
+suppose L579: D21 = ( ( len C140 ) + 1 );
+
+L580: ( D20 . D21 ) = ( ( MemberFunc (C142 , R9) ) . C141 ) by L579 , L566 , FINSEQ_1:42;
+thus L581: thesis by L580 , L572 , L579 , FINSEQ_1:42;
+end;
+end;
+L583: ( dom D20 ) = ( Seg ( ( len ( FinSeqM (C141 , C140) ) ) + ( len <* ( ( MemberFunc (C142 , R9) ) . C141 ) *> ) ) ) by FINSEQ_1:def 7
+.= ( Seg ( ( len C140 ) + 1 ) ) by L566 , FINSEQ_1:39;
+thus L584: thesis by L583 , L567 , L568 , FINSEQ_1:13;
+end;
+theorem
+L585: (for R9 being  finite Approximation_Space holds (for R12 being (Element of R9) holds ( ( MemberFunc (( {} R9 ) , R9) ) . R12 ) = ( 0 )))
+proof
+let R9 being  finite Approximation_Space;
+let R12 being (Element of R9);
+L586: ( UAp ( {} R9 ) ) = ( {} ) by L221;
+L587: ( ( UAp ( {} R9 ) ) ` ) = ( [#] R9 ) by L586;
+thus L588: thesis by L587 , L457;
+end;
+theorem
+L589: (for R9 being  finite Approximation_Space holds (for R12 being (Element of R9) holds (for B81 being  disjoint_valued (FinSequence of ( bool (the carrier of R9) )) holds ( ( MemberFunc (( Union B81 ) , R9) ) . R12 ) = ( Sum ( FinSeqM (R12 , B81) ) ))))
+proof
+let R9 being  finite Approximation_Space;
+let R12 being (Element of R9);
+let C144 being  disjoint_valued (FinSequence of ( bool (the carrier of R9) ));
+defpred S1[ (FinSequence of ( bool (the carrier of R9) )) ] means ($1 is  disjoint_valued implies ( ( MemberFunc (( Union $1 ) , R9) ) . R12 ) = ( Sum ( FinSeqM (R12 , $1) ) ));
+L590: (for B82 being (FinSequence of ( bool (the carrier of R9) )) holds (for B83 being (Subset of R9) holds (S1[ B82 ] implies S1[ ( B82 ^ <* B83 *> ) ])))
+proof
+let C145 being (FinSequence of ( bool (the carrier of R9) ));
+let C146 being (Subset of R9);
+assume L591: S1[ C145 ];
+L592: S1[ ( C145 ^ <* C146 *> ) ]
+proof
+assume L593: ( C145 ^ <* C146 *> ) is  disjoint_valued;
+L594: ( Union C145 ) misses C146
+proof
+assume L595: ( Union C145 ) meets C146;
+consider C147 being set such that L596: C147 in ( Union C145 ) and L597: C147 in C146 by L595 , XBOOLE_0:3;
+consider C148 being set such that L598: C147 in C148 and L599: C148 in ( rng C145 ) by L596 , TARSKI:def 4;
+consider C149 being set such that L600: C149 in ( dom C145 ) and L601: C148 = ( C145 . C149 ) by L599 , FUNCT_1:def 3;
+reconsider D22 = C149 as (Element of ( NAT )) by L600;
+L602: (( ( C145 ^ <* C146 *> ) . D22 ) = ( C145 . D22 ) & D22 <= ( len C145 )) by L600 , FINSEQ_1:def 7 , FINSEQ_3:25;
+L603: (( ( C145 ^ <* C146 *> ) . ( ( len C145 ) + 1 ) ) = C146 & ( len C145 ) < ( ( len C145 ) + 1 )) by FINSEQ_1:42 , NAT_1:13;
+L604: ( C145 . D22 ) meets C146 by L597 , L598 , L601 , XBOOLE_0:3;
+thus L605: thesis by L604 , L593 , L603 , L602 , PROB_2:def 2;
+end;
+L606: ( Union ( C145 ^ <* C146 *> ) ) = ( ( Union C145 ) \/ ( Union <* C146 *> ) ) by L59
+.= ( ( Union C145 ) \/ C146 ) by FINSEQ_3:135;
+L607: ( ( MemberFunc (( Union ( C145 ^ <* C146 *> ) ) , R9) ) . R12 ) = ( ( ( MemberFunc (( Union C145 ) , R9) ) . R12 ) + ( ( MemberFunc (C146 , R9) ) . R12 ) ) by L606 , L594 , L536
+.= ( Sum ( ( FinSeqM (R12 , C145) ) ^ <* ( ( MemberFunc (C146 , R9) ) . R12 ) *> ) ) by L591 , L593 , L62 , FINSEQ_6:10 , RVSUM_1:74
+.= ( Sum ( FinSeqM (R12 , ( C145 ^ <* C146 *> )) ) ) by L563;
+thus L608: thesis by L607;
+end;
+thus L609: thesis by L592;
+end;
+L610: S1[ ( <*> ( bool (the carrier of R9) ) ) ]
+proof
+set D23 = ( FinSeqM (R12 , ( <*> ( bool (the carrier of R9) ) )) );
+assume L611: ( <*> ( bool (the carrier of R9) ) ) is  disjoint_valued;
+L612: ( dom D23 ) = ( dom ( <*> ( bool (the carrier of R9) ) ) ) by L544;
+L613: ( Sum D23 ) = ( 0 ) by L612 , RELAT_1:41 , RVSUM_1:72;
+L614: ( Union ( <*> ( bool (the carrier of R9) ) ) ) = ( {} R9 ) by ZFMISC_1:2;
+thus L615: thesis by L614 , L613 , L585;
+end;
+L616: (for B84 being (FinSequence of ( bool (the carrier of R9) )) holds S1[ B84 ]) from FINSEQ_2:sch 2(L610 , L590);
+thus L617: thesis by L616;
+end;
+theorem
+L618: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds ( LAp R10 ) = { B85 where B85 is (Element of R9) : ( ( MemberFunc (R10 , R9) ) . B85 ) = 1 }))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+thus L619: ( LAp R10 ) c= { B86 where B86 is (Element of R9) : ( ( MemberFunc (R10 , R9) ) . B86 ) = 1 }
+proof
+let C150 being set;
+assume L620: C150 in ( LAp R10 );
+reconsider D24 = C150 as (Element of R9) by L620;
+L621: ( ( MemberFunc (R10 , R9) ) . D24 ) = 1 by L620 , L445;
+thus L622: thesis by L621;
+end;
+
+let C151 being set;
+assume L623: C151 in { B87 where B87 is (Element of R9) : ( ( MemberFunc (R10 , R9) ) . B87 ) = 1 };
+L624: (ex B88 being (Element of R9) st (B88 = C151 & ( ( MemberFunc (R10 , R9) ) . B88 ) = 1)) by L623;
+thus L625: thesis by L624 , L445;
+end;
+theorem
+L626: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds ( UAp R10 ) = { B89 where B89 is (Element of R9) : ( ( MemberFunc (R10 , R9) ) . B89 ) > ( 0 ) }))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+thus L627: ( UAp R10 ) c= { B90 where B90 is (Element of R9) : ( ( MemberFunc (R10 , R9) ) . B90 ) > ( 0 ) }
+proof
+let C152 being set;
+assume L628: C152 in ( UAp R10 );
+reconsider D25 = C152 as (Element of R9) by L628;
+L629: (not C152 in ( ( UAp R10 ) ` )) by L628 , XBOOLE_0:def 5;
+L630: ( ( MemberFunc (R10 , R9) ) . D25 ) <> ( 0 ) by L629 , L457;
+L631: ( ( MemberFunc (R10 , R9) ) . D25 ) > ( 0 ) by L630 , L436;
+thus L632: thesis by L631;
+end;
+
+let C153 being set;
+assume L633: C153 in { B91 where B91 is (Element of R9) : ( ( MemberFunc (R10 , R9) ) . B91 ) > ( 0 ) };
+L634: (ex B92 being (Element of R9) st (B92 = C153 & ( ( MemberFunc (R10 , R9) ) . B92 ) > ( 0 ))) by L633;
+L635: (not C153 in ( ( UAp R10 ) ` )) by L634 , L457;
+thus L636: thesis by L635 , L634 , XBOOLE_0:def 5;
+end;
+theorem
+L637: (for R9 being  finite Approximation_Space holds (for R10 being (Subset of R9) holds ( BndAp R10 ) = { B93 where B93 is (Element of R9) : (( 0 ) < ( ( MemberFunc (R10 , R9) ) . B93 ) & ( ( MemberFunc (R10 , R9) ) . B93 ) < 1) }))
+proof
+let R9 being  finite Approximation_Space;
+let R10 being (Subset of R9);
+thus L638: ( BndAp R10 ) c= { B94 where B94 is (Element of R9) : (( 0 ) < ( ( MemberFunc (R10 , R9) ) . B94 ) & ( ( MemberFunc (R10 , R9) ) . B94 ) < 1) }
+proof
+let C154 being set;
+assume L639: C154 in ( BndAp R10 );
+reconsider D26 = C154 as (Element of R9) by L639;
+L640: (( 0 ) < ( ( MemberFunc (R10 , R9) ) . D26 ) & ( ( MemberFunc (R10 , R9) ) . D26 ) < 1) by L639 , L471;
+thus L641: thesis by L640;
+end;
+
+let C155 being set;
+assume L642: C155 in { B95 where B95 is (Element of R9) : (( 0 ) < ( ( MemberFunc (R10 , R9) ) . B95 ) & ( ( MemberFunc (R10 , R9) ) . B95 ) < 1) };
+L643: (ex B96 being (Element of R9) st (B96 = C155 & ( 0 ) < ( ( MemberFunc (R10 , R9) ) . B96 ) & ( ( MemberFunc (R10 , R9) ) . B96 ) < 1)) by L642;
+thus L644: thesis by L643 , L471;
+end;
+begin
+definition
+let C156 being Tolerance_Space;
+let C157 , C158 being (Subset of C156);
+pred C157 _c= C158
+means
+:L645: ( LAp C157 ) c= ( LAp C158 )
+;reflexivity
+;
+pred C157 c=^ C158
+means
+:L646: ( UAp C157 ) c= ( UAp C158 )
+;reflexivity
+;
+end;
+definition
+let C159 being Tolerance_Space;
+let C160 , C161 being (Subset of C159);
+pred C160 _c=^ C161
+means
+:L648: (C160 _c= C161 & C160 c=^ C161)
+;reflexivity
+;
+end;
+theorem
+L650: (for R13 being Tolerance_Space holds (for R14 being (Subset of R13) holds (for R15 being (Subset of R13) holds (for R16 being (Subset of R13) holds ((R14 _c= R15 & R15 _c= R16) implies R14 _c= R16)))))
+proof
+let R13 being Tolerance_Space;
+let R14 being (Subset of R13);
+let R15 being (Subset of R13);
+let R16 being (Subset of R13);
+assume L651: (R14 _c= R15 & R15 _c= R16);
+L652: (( LAp R14 ) c= ( LAp R15 ) & ( LAp R15 ) c= ( LAp R16 )) by L651 , L645;
+L653: ( LAp R14 ) c= ( LAp R16 ) by L652 , XBOOLE_1:1;
+thus L654: thesis by L653 , L645;
+end;
+theorem
+L655: (for R13 being Tolerance_Space holds (for R14 being (Subset of R13) holds (for R15 being (Subset of R13) holds (for R16 being (Subset of R13) holds ((R14 c=^ R15 & R15 c=^ R16) implies R14 c=^ R16)))))
+proof
+let R13 being Tolerance_Space;
+let R14 being (Subset of R13);
+let R15 being (Subset of R13);
+let R16 being (Subset of R13);
+assume L656: (R14 c=^ R15 & R15 c=^ R16);
+L657: (( UAp R14 ) c= ( UAp R15 ) & ( UAp R15 ) c= ( UAp R16 )) by L656 , L646;
+L658: ( UAp R14 ) c= ( UAp R16 ) by L657 , XBOOLE_1:1;
+thus L659: thesis by L658 , L646;
+end;
+theorem
+L660: (for R13 being Tolerance_Space holds (for R14 being (Subset of R13) holds (for R15 being (Subset of R13) holds (for R16 being (Subset of R13) holds ((R14 _c=^ R15 & R15 _c=^ R16) implies R14 _c=^ R16)))))
+proof
+let R13 being Tolerance_Space;
+let R14 being (Subset of R13);
+let R15 being (Subset of R13);
+let R16 being (Subset of R13);
+assume L661: (R14 _c=^ R15 & R15 _c=^ R16);
+L662: (R14 c=^ R15 & R15 c=^ R16) by L661 , L648;
+L663: R14 c=^ R16 by L662 , L655;
+L664: (R14 _c= R15 & R15 _c= R16) by L661 , L648;
+L665: R14 _c= R16 by L664 , L650;
+thus L666: thesis by L665 , L663 , L648;
+end;
+begin
+definition
+let C162 being Tolerance_Space;
+let C163 , C164 being (Subset of C162);
+pred C163 _= C164
+means
+:L667: ( LAp C163 ) = ( LAp C164 )
+;reflexivity
+;
+symmetry
+;
+pred C163 =^ C164
+means
+:L668: ( UAp C163 ) = ( UAp C164 )
+;reflexivity
+;
+symmetry
+;
+pred C163 _=^ C164
+means
+:L669: (( LAp C163 ) = ( LAp C164 ) & ( UAp C163 ) = ( UAp C164 ))
+;reflexivity
+;
+symmetry
+;
+end;
+definition
+let C165 being Tolerance_Space;
+let C166 , C167 being (Subset of C165);
+redefine pred C166 _= C167
+means
+(C166 _c= C167 & C167 _c= C166)
+;compatibility
+proof
+thus L671:now
+assume L672: C166 _= C167;
+L673: ( LAp C166 ) = ( LAp C167 ) by L672 , L667;
+thus L674: (C166 _c= C167 & C167 _c= C166) by L673 , L645;
+end;
+assume L675: (C166 _c= C167 & C167 _c= C166);
+L676: (( LAp C166 ) c= ( LAp C167 ) & ( LAp C167 ) c= ( LAp C166 )) by L675 , L645;
+L677: ( LAp C166 ) = ( LAp C167 ) by L676 , XBOOLE_0:def 10;
+thus L678: thesis by L677 , L667;
+end;
+redefine pred C166 =^ C167
+means
+(C166 c=^ C167 & C167 c=^ C166)
+;compatibility
+proof
+thus L679:now
+assume L680: C166 =^ C167;
+L681: ( UAp C166 ) = ( UAp C167 ) by L680 , L668;
+thus L682: (C166 c=^ C167 & C167 c=^ C166) by L681 , L646;
+end;
+assume L683: (C166 c=^ C167 & C167 c=^ C166);
+L684: (( UAp C166 ) c= ( UAp C167 ) & ( UAp C167 ) c= ( UAp C166 )) by L683 , L646;
+L685: ( UAp C166 ) = ( UAp C167 ) by L684 , XBOOLE_0:def 10;
+thus L686: thesis by L685 , L668;
+end;
+redefine pred C166 _=^ C167
+means
+(C166 _= C167 & C166 =^ C167)
+;compatibility
+proof
+thus L687:now
+assume L688: C166 _=^ C167;
+L689: (( LAp C166 ) = ( LAp C167 ) & ( UAp C166 ) = ( UAp C167 )) by L688 , L669;
+thus L690: (C166 _= C167 & C166 =^ C167) by L689 , L667 , L668;
+end;
+assume L691: (C166 _= C167 & C166 =^ C167);
+L692: (( LAp C166 ) = ( LAp C167 ) & ( UAp C166 ) = ( UAp C167 )) by L691 , L667 , L668;
+thus L693: thesis by L692 , L669;
+end;
+end;

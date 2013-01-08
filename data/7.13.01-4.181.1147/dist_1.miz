@@ -1,0 +1,1097 @@
+:: Probability on Finite and Discrete Set and Uniform Distribution
+::  by Hiroyuki Okazaki
+::
+:: Received May 5, 2009
+:: Copyright (c) 2009-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, XBOOLE_0, FINSET_1, FINSEQ_1, RELAT_1, TARSKI, RPR_1,
+      NAT_1, CARD_1, SUBSET_1, FUNCT_1, REAL_1, ARYTM_3, UPROOTS, SETFAM_1,
+      MATRPROB, VALUED_1, CARD_3, PROB_2, XXREAL_0, ORDINAL4, PARTFUN1, DIST_1;
+ notations TARSKI, XBOOLE_0, SUBSET_1, FINSET_1, CARD_1, CARD_3, NUMBERS,
+      XXREAL_0, BINOP_2, REAL_1, RELAT_1, FUNCT_1, RELSET_1, PARTFUN1,
+      FINSEQ_1, FINSEQ_2, VALUED_1, FUNCT_2, ORDINAL1, SETFAM_1, RPR_1, PROB_2,
+      RVSUM_1, UPROOTS, MATRPROB;
+ constructors RPR_1, RVSUM_1, SEQ_1, BINOP_2, PARTFUN3, PROB_2, UPROOTS,
+      MATRPROB, RELSET_1;
+ registrations FUNCT_1, SUBSET_1, NAT_1, XREAL_0, XXREAL_0, ORDINAL1, UPROOTS,
+      FINSEQ_1, RELAT_1, XBOOLE_0, FINSET_1, NUMBERS, VALUED_0, VALUED_1,
+      CARD_1, MATRPROB, ENTROPY1;
+ requirements NUMERALS, REAL, BOOLE, SUBSET, ARITHM;
+ definitions TARSKI, RPR_1, FINSEQ_1, RELAT_1, FUNCT_1, CARD_3, XBOOLE_0;
+ theorems TARSKI, FINSEQ_2, CARD_2, FINSEQ_4, FUNCT_1, FINSEQ_1, XBOOLE_0,
+      XBOOLE_1, XXREAL_0, PROB_2, NAT_1, RELAT_1, ZFMISC_1, FUNCT_2, XCMPLX_1,
+      VALUED_1, UPROOTS, FINSEQ_5, CARD_1, RVSUM_1, MATRPROB;
+ schemes NAT_1, FINSEQ_1, FUNCT_2, SUBSET_1, CLASSES1;
+
+begin
+notation
+let C1 being set;
+let C2 being (FinSequence of C1);
+synonym whole_event C2 for dom C2;
+end;
+theorem
+L2: (for B1 being set holds (for B2 being (FinSequence of B1) holds ( whole_event B2 ) = ( B2 " B1 )))
+proof
+let C3 being set;
+let C4 being (FinSequence of C3);
+L3: (( C4 " C3 ) c= ( C4 " ( rng C4 ) ) & ( C4 " ( rng C4 ) ) c= ( C4 " C3 )) by RELAT_1:135 , RELAT_1:143;
+L4: ( C4 " ( rng C4 ) ) = ( C4 " C3 ) by L3 , XBOOLE_0:def 10;
+thus L5: thesis by L4 , RELAT_1:134;
+end;
+notation
+let C5 being set;
+let C6 being (FinSequence of C5);
+let C7 being set;
+synonym event_pick (C7 , C6) for Coim (C6 , C7);
+end;
+definition
+let C8 being set;
+let C9 being (FinSequence of C8);
+let C10 being set;
+redefine func event_pick (C10 , C9) -> (Event of ( whole_event C9 ));
+
+correctness by RELAT_1:132;
+end;
+definition
+let C11 being  finite set;
+let C12 being (FinSequence of C11);
+let C13 being set;
+func frequency (C13 , C12) -> Nat equals 
+( card ( event_pick (C13 , C12) ) );
+correctness;
+end;
+theorem
+L9: (for B3 being set holds (for B4 being (FinSequence of B3) holds (for B5 being set holds (B5 in ( whole_event B4 ) implies (ex B6 being (Element of B3) st B5 in ( event_pick (B6 , B4) ))))))
+proof
+let C14 being set;
+let C15 being (FinSequence of C14);
+let C16 being set;
+assume L10: C16 in ( whole_event C15 );
+L11: C16 in ( C15 " C14 ) by L10 , L2;
+L12: ( C15 . C16 ) in C14 by L11 , FUNCT_1:def 7;
+consider C17 being (Element of C14) such that L13: C17 = ( C15 . C16 ) by L12;
+take C17;
+L14: C17 in { C17 } by TARSKI:def 1;
+thus L15: thesis by L14 , L10 , L13 , FUNCT_1:def 7;
+end;
+theorem
+L16: (for B7 being set holds (for B8 being (FinSequence of B7) holds ( card ( whole_event B8 ) ) = ( len B8 )))
+proof
+let C18 being set;
+let C19 being (FinSequence of C18);
+thus L17: ( card ( whole_event C19 ) ) = ( card ( Seg ( len C19 ) ) ) by FINSEQ_1:def 3
+.= ( len C19 ) by FINSEQ_1:57;
+end;
+definition
+let C20 being  finite set;
+let C21 being (FinSequence of C20);
+let C22 being set;
+func FDprobability (C22 , C21) -> Real equals 
+( ( frequency (C22 , C21) ) / ( len C21 ) );
+correctness;
+end;
+theorem
+L19: (for B9 being  finite set holds (for B10 being (FinSequence of B9) holds (for B11 being set holds ( frequency (B11 , B10) ) = ( ( len B10 ) * ( FDprobability (B11 , B10) ) ))))
+proof
+let C23 being  finite set;
+let C24 being (FinSequence of C23);
+let C25 being set;
+per cases ;
+suppose L20: C24 is non  empty;
+
+thus L21: thesis by L20 , XCMPLX_1:87;
+end;
+suppose L22: C24 is  empty;
+
+L23: ( frequency (C25 , C24) ) = ( 0 ) by L22;
+thus L24: thesis by L23;
+end;
+end;
+definition
+let C26 being  finite set;
+let C27 being (FinSequence of C26);
+func FDprobSEQ C27 -> (FinSequence of ( REAL )) means 
+:L26: (( dom it ) = ( Seg ( card C26 ) ) & (for B12 being Nat holds (B12 in ( dom it ) implies ( it . B12 ) = ( FDprobability (( ( canFS C26 ) . B12 ) , C27) ))));
+existence
+proof
+defpred S1[ Nat , set ] means $2 = ( FDprobability (( ( canFS C26 ) . $1 ) , C27) );
+L27: (for B13 being Nat holds (B13 in ( Seg ( card C26 ) ) implies (ex B14 being (Element of ( REAL )) st S1[ B13 , B14 ])));
+consider C28 being (FinSequence of ( REAL )) such that L28: (( dom C28 ) = ( Seg ( card C26 ) ) & (for B15 being Nat holds (B15 in ( Seg ( card C26 ) ) implies S1[ B15 , ( C28 . B15 ) ]))) from FINSEQ_1:sch 5(L27);
+take C28;
+thus L29: thesis by L28;
+end;
+uniqueness
+proof
+let C29 , C30 being (FinSequence of ( REAL ));
+assume that
+L30: ( dom C29 ) = ( Seg ( card C26 ) )
+and
+L31: (for B16 being Nat holds (B16 in ( dom C29 ) implies ( C29 . B16 ) = ( FDprobability (( ( canFS C26 ) . B16 ) , C27) )));
+assume that
+L32: ( dom C30 ) = ( Seg ( card C26 ) )
+and
+L33: (for B17 being Nat holds (B17 in ( dom C30 ) implies ( C30 . B17 ) = ( FDprobability (( ( canFS C26 ) . B17 ) , C27) )));
+L34:
+now
+let C31 being Nat;
+assume L35: C31 in ( dom C29 );
+thus L36: ( C29 . C31 ) = ( FDprobability (( ( canFS C26 ) . C31 ) , C27) ) by L35 , L31
+.= ( C30 . C31 ) by L30 , L32 , L33 , L35;
+end;
+L37: ( len C29 ) = ( card C26 ) by L30 , FINSEQ_1:def 3
+.= ( len C30 ) by L32 , FINSEQ_1:def 3;
+thus L38: thesis by L37 , L34 , FINSEQ_2:9;
+end;
+end;
+theorem
+L40: (for B18 being  finite set holds (for B19 being (FinSequence of B18) holds (for B20 being set holds ( FDprobability (B20 , B19) ) = ( prob ( event_pick (B20 , B19) ) )))) by L16;
+definition
+let C32 being  finite set;
+let C33 , C34 being (FinSequence of C32);
+pred C33 , C34 -are_prob_equivalent 
+means
+:L41: (for B21 being set holds ( FDprobability (B21 , C33) ) = ( FDprobability (B21 , C34) ))
+;reflexivity
+;
+symmetry
+;
+end;
+theorem
+L43: (for B22 being  finite set holds (for B23 , B24 , B25 being (FinSequence of B22) holds ((B23 , B24 -are_prob_equivalent  & B24 , B25 -are_prob_equivalent ) implies B23 , B25 -are_prob_equivalent )))
+proof
+let C35 being  finite set;
+let C36 , C37 , C38 being (FinSequence of C35);
+assume that
+L44: C36 , C37 -are_prob_equivalent 
+and
+L45: C37 , C38 -are_prob_equivalent ;
+let C39 being set;
+thus L46: ( FDprobability (C39 , C36) ) = ( FDprobability (C39 , C37) ) by L44 , L41
+.= ( FDprobability (C39 , C38) ) by L45 , L41;
+end;
+definition
+let C40 being  finite set;
+let C41 being (FinSequence of C40);
+func Finseq-EQclass C41 -> (Subset of ( C40 * )) equals 
+{ B26 where B26 is (FinSequence of C40) : C41 , B26 -are_prob_equivalent  };
+correctness
+proof
+L47: { B27 where B27 is (FinSequence of C40) : C41 , B27 -are_prob_equivalent  } c= ( C40 * )
+proof
+let C42 being set;
+assume L48: C42 in { B28 where B28 is (FinSequence of C40) : C41 , B28 -are_prob_equivalent  };
+L49: (ex B29 being (FinSequence of C40) st (C42 = B29 & C41 , B29 -are_prob_equivalent )) by L48;
+thus L50: C42 in ( C40 * ) by L49 , FINSEQ_1:def 11;
+end;
+thus L51: thesis by L47;
+end;
+end;
+registration
+let C43 being  finite set;
+let C44 being (FinSequence of C43);
+cluster ( Finseq-EQclass C44 ) -> non  empty;
+coherence
+proof
+L53: C44 in ( Finseq-EQclass C44 );
+thus L54: thesis by L53;
+end;
+end;
+theorem
+L56: (for B30 being  finite set holds (for B31 , B32 being (FinSequence of B30) holds (B31 , B32 -are_prob_equivalent  iff B32 in ( Finseq-EQclass B31 ))))
+proof
+let C45 being  finite set;
+let C46 , C47 being (FinSequence of C45);
+L57:
+now
+assume L58: C47 in ( Finseq-EQclass C46 );
+L59: (ex B33 being (FinSequence of C45) st (C47 = B33 & C46 , B33 -are_prob_equivalent )) by L58;
+thus L60: C46 , C47 -are_prob_equivalent  by L59;
+end;
+thus L61: thesis by L57;
+end;
+theorem
+L62: (for B34 being  finite set holds (for B35 being (FinSequence of B34) holds B35 in ( Finseq-EQclass B35 )));
+theorem
+L63: (for B36 being  finite set holds (for B37 , B38 being (FinSequence of B36) holds (B37 , B38 -are_prob_equivalent  iff ( Finseq-EQclass B37 ) = ( Finseq-EQclass B38 ))))
+proof
+let C48 being  finite set;
+let C49 , C50 being (FinSequence of C48);
+thus L64:now
+assume L65: C49 , C50 -are_prob_equivalent ;
+thus L66: ( Finseq-EQclass C49 ) = ( Finseq-EQclass C50 )
+proof
+thus L67: ( Finseq-EQclass C49 ) c= ( Finseq-EQclass C50 )
+proof
+let C51 being set;
+assume L68: C51 in ( Finseq-EQclass C49 );
+consider C52 being (FinSequence of C48) such that L69: C51 = C52 and L70: C49 , C52 -are_prob_equivalent  by L68;
+L71: C50 , C52 -are_prob_equivalent  by L65 , L70 , L43;
+thus L72: C51 in ( Finseq-EQclass C50 ) by L71 , L69;
+end;
+
+let C53 being set;
+assume L73: C53 in ( Finseq-EQclass C50 );
+consider C54 being (FinSequence of C48) such that L74: C53 = C54 and L75: C50 , C54 -are_prob_equivalent  by L73;
+L76: C49 , C54 -are_prob_equivalent  by L65 , L75 , L43;
+thus L77: C53 in ( Finseq-EQclass C49 ) by L76 , L74;
+end;
+
+end;
+assume L67: ( Finseq-EQclass C49 ) = ( Finseq-EQclass C50 );
+L68: C49 in ( Finseq-EQclass C50 ) by L67;
+thus L69: C49 , C50 -are_prob_equivalent  by L68 , L56;
+end;
+definition
+let C55 being  finite set;
+defpred S2[ set ] means (ex B39 being (FinSequence of C55) st $1 = ( Finseq-EQclass B39 ));
+func distribution_family C55 -> (Subset-Family of ( C55 * )) means 
+:L70: (for B40 being (Subset of ( C55 * )) holds (B40 in it iff (ex B41 being (FinSequence of C55) st B40 = ( Finseq-EQclass B41 ))));
+existence
+proof
+L71: (ex B42 being (Subset-Family of ( C55 * )) st (for B43 being (Subset of ( C55 * )) holds (B43 in B42 iff S2[ B43 ]))) from SUBSET_1:sch 3;
+thus L72: thesis by L71;
+end;
+uniqueness
+proof
+let C56 , C57 being (Subset-Family of ( C55 * ));
+assume that
+L73: (for B44 being (Subset of ( C55 * )) holds (B44 in C56 iff S2[ B44 ]))
+and
+L74: (for B45 being (Subset of ( C55 * )) holds (B45 in C57 iff S2[ B45 ]));
+thus L75: thesis from SUBSET_1:sch 4(L73 , L74);
+end;
+end;
+registration
+let C58 being  finite set;
+cluster ( distribution_family C58 ) -> non  empty;
+coherence
+proof
+L77: ( Finseq-EQclass the (Element of ( C58 * )) ) in ( distribution_family C58 ) by L70;
+thus L78: thesis by L77;
+end;
+end;
+theorem
+L80: (for B46 being  finite set holds (for B47 , B48 being (FinSequence of B46) holds (B47 , B48 -are_prob_equivalent  iff ( FDprobSEQ B47 ) = ( FDprobSEQ B48 ))))
+proof
+let C59 being  finite set;
+let C60 , C61 being (FinSequence of C59);
+L81:
+now
+assume L82: ( FDprobSEQ C60 ) = ( FDprobSEQ C61 );
+L83: (for B49 being set holds ( FDprobability (B49 , C61) ) = ( FDprobability (B49 , C60) ))
+proof
+let C62 being set;
+per cases ;
+suppose L84: C62 in C59;
+
+L85: C62 in ( rng ( canFS C59 ) ) by L84 , FUNCT_2:def 3;
+consider C63 being set such that L86: C63 in ( dom ( canFS C59 ) ) and L87: C62 = ( ( canFS C59 ) . C63 ) by L85 , FUNCT_1:def 3;
+reconsider D1 = C63 as (Element of ( NAT )) by L86;
+L88: ( len ( canFS C59 ) ) = ( card C59 ) by UPROOTS:3;
+L89: D1 in ( Seg ( card C59 ) ) by L88 , L86 , FINSEQ_1:def 3;
+L90: D1 in ( dom ( FDprobSEQ C61 ) ) by L89 , L26;
+L91: D1 in ( dom ( FDprobSEQ C60 ) ) by L89 , L26;
+thus L92: ( FDprobability (C62 , C60) ) = ( ( FDprobSEQ C60 ) . D1 ) by L91 , L87 , L26
+.= ( FDprobability (C62 , C61) ) by L82 , L87 , L90 , L26;
+end;
+suppose L93: (not C62 in C59);
+
+L94: (not C62 in ( rng C61 )) by L93;
+L95: ( rng C61 ) misses { C62 } by L94 , ZFMISC_1:50;
+L96: ( C61 " { C62 } ) = ( {} ) by L95 , RELAT_1:138;
+L97: (not C62 in ( rng C60 )) by L93;
+L98: ( rng C60 ) misses { C62 } by L97 , ZFMISC_1:50;
+L99: ( C60 " { C62 } ) = ( {} ) by L98 , RELAT_1:138;
+thus L100: ( FDprobability (C62 , C60) ) = ( 0 ) by L99
+.= ( FDprobability (C62 , C61) ) by L96;
+end;
+end;
+thus L102: C60 , C61 -are_prob_equivalent  by L83 , L41;
+end;
+L103:
+now
+assume L104: C60 , C61 -are_prob_equivalent ;
+L105:
+now
+let C64 being Nat;
+assume L106: C64 in ( dom ( FDprobSEQ C61 ) );
+thus L107: ( ( FDprobSEQ C61 ) . C64 ) = ( FDprobability (( ( canFS C59 ) . C64 ) , C61) ) by L106 , L26
+.= ( FDprobability (( ( canFS C59 ) . C64 ) , C60) ) by L104 , L41;
+end;
+L108: ( dom ( FDprobSEQ C61 ) ) = ( Seg ( card C59 ) ) by L26;
+thus L109: ( FDprobSEQ C60 ) = ( FDprobSEQ C61 ) by L108 , L105 , L26;
+end;
+thus L110: thesis by L103 , L81;
+end;
+theorem
+L111: (for B50 being  finite set holds (for B51 , B52 being (FinSequence of B50) holds (B52 in ( Finseq-EQclass B51 ) implies ( FDprobSEQ B51 ) = ( FDprobSEQ B52 ))))
+proof
+let C65 being  finite set;
+let C66 , C67 being (FinSequence of C65);
+assume L112: C67 in ( Finseq-EQclass C66 );
+L113: (ex B53 being (FinSequence of C65) st (C67 = B53 & C66 , B53 -are_prob_equivalent )) by L112;
+thus L114: thesis by L113 , L80;
+end;
+definition
+let C68 being  finite set;
+func GenProbSEQ C68 -> (Function of ( distribution_family C68 ) , ( ( REAL ) * )) means 
+:L115: (for B54 being (Element of ( distribution_family C68 )) holds (ex B55 being (FinSequence of C68) st (B55 in B54 & ( it . B54 ) = ( FDprobSEQ B55 ))));
+existence
+proof
+defpred S3[ set , set ] means (ex B56 being (FinSequence of C68) st (B56 in $1 & $2 = ( FDprobSEQ B56 )));
+L116: (for B57 being (Element of ( distribution_family C68 )) holds (ex B58 being (Element of ( ( REAL ) * )) st S3[ B57 , B58 ]))
+proof
+let C69 being (Element of ( distribution_family C68 ));
+consider C70 being (FinSequence of C68) such that L117: C69 = ( Finseq-EQclass C70 ) by L70;
+L118: ( FDprobSEQ C70 ) in ( ( REAL ) * ) by FINSEQ_1:def 11;
+thus L119: thesis by L118 , L117 , L62;
+end;
+consider C71 being (Function of ( distribution_family C68 ) , ( ( REAL ) * )) such that L120: (for B59 being (Element of ( distribution_family C68 )) holds S3[ B59 , ( C71 . B59 ) ]) from FUNCT_2:sch 3(L116);
+take C71;
+thus L121: thesis by L120;
+end;
+uniqueness
+proof
+let C72 , C73 being (Function of ( distribution_family C68 ) , ( ( REAL ) * ));
+assume L122: (for B60 being (Element of ( distribution_family C68 )) holds (ex B61 being (FinSequence of C68) st (B61 in B60 & ( C72 . B60 ) = ( FDprobSEQ B61 ))));
+assume L123: (for B62 being (Element of ( distribution_family C68 )) holds (ex B63 being (FinSequence of C68) st (B63 in B62 & ( C73 . B62 ) = ( FDprobSEQ B63 ))));
+L124:
+now
+let C74 being (Element of ( distribution_family C68 ));
+consider C75 being (FinSequence of C68) such that L125: C74 = ( Finseq-EQclass C75 ) by L70;
+consider C76 being (FinSequence of C68) such that L126: C76 in C74 and L127: ( C73 . C74 ) = ( FDprobSEQ C76 ) by L123;
+L128: C76 , C75 -are_prob_equivalent  by L125 , L126 , L56;
+consider C77 being (FinSequence of C68) such that L129: C77 in C74 and L130: ( C72 . C74 ) = ( FDprobSEQ C77 ) by L122;
+L131: C75 , C77 -are_prob_equivalent  by L125 , L129 , L56;
+L132: C76 , C77 -are_prob_equivalent  by L131 , L128 , L43;
+thus L133: ( C72 . C74 ) = ( C73 . C74 ) by L132 , L130 , L127 , L80;
+end;
+thus L134: thesis by L124 , FUNCT_2:def 8;
+end;
+end;
+theorem
+L136: (for B64 being  finite set holds (for B65 being (FinSequence of B64) holds ( ( GenProbSEQ B64 ) . ( Finseq-EQclass B65 ) ) = ( FDprobSEQ B65 )))
+proof
+let C78 being  finite set;
+let C79 being (FinSequence of C78);
+L137: ( Finseq-EQclass C79 ) is (Element of ( distribution_family C78 )) by L70;
+consider C80 being (FinSequence of C78) such that L138: C80 in ( Finseq-EQclass C79 ) and L139: ( ( GenProbSEQ C78 ) . ( Finseq-EQclass C79 ) ) = ( FDprobSEQ C80 ) by L137 , L115;
+L140: C79 , C80 -are_prob_equivalent  by L138 , L56;
+thus L141: thesis by L140 , L139 , L80;
+end;
+registration
+let C81 being  finite set;
+cluster ( GenProbSEQ C81 ) ->  one-to-one;
+coherence
+proof
+L142:
+now
+let C82 , C83 being set;
+assume that
+L143: C82 in ( distribution_family C81 )
+and
+L144: C83 in ( distribution_family C81 )
+and
+L145: ( ( GenProbSEQ C81 ) . C82 ) = ( ( GenProbSEQ C81 ) . C83 );
+consider C84 being (FinSequence of C81) such that L146: C82 = ( Finseq-EQclass C84 ) by L143 , L70;
+consider C85 being (FinSequence of C81) such that L147: C83 = ( Finseq-EQclass C85 ) by L144 , L70;
+consider C86 being (FinSequence of C81) such that L148: C86 in C83 and L149: ( ( GenProbSEQ C81 ) . C83 ) = ( FDprobSEQ C86 ) by L144 , L115;
+consider C87 being (FinSequence of C81) such that L150: C87 in C82 and L151: ( ( GenProbSEQ C81 ) . C82 ) = ( FDprobSEQ C87 ) by L143 , L115;
+L152: C87 , C86 -are_prob_equivalent  by L145 , L151 , L149 , L80;
+L153: C84 , C87 -are_prob_equivalent  by L150 , L146 , L56;
+L154: C84 , C86 -are_prob_equivalent  by L153 , L152 , L43;
+L155: C86 , C85 -are_prob_equivalent  by L148 , L147 , L56;
+L156: C84 , C85 -are_prob_equivalent  by L155 , L154 , L43;
+thus L157: C82 = C83 by L156 , L146 , L147 , L63;
+end;
+thus L158: thesis by L142 , FUNCT_2:19;
+end;
+end;
+definition
+let C88 being  finite set;
+let C89 being  ProbFinS (FinSequence of ( REAL ));
+assume L160: (ex B66 being (FinSequence of C88) st ( FDprobSEQ B66 ) = C89);
+func distribution (C89 , C88) -> (Element of ( distribution_family C88 )) means 
+:L161: ( ( GenProbSEQ C88 ) . it ) = C89;
+existence
+proof
+consider C90 being (FinSequence of C88) such that L162: ( FDprobSEQ C90 ) = C89 by L160;
+reconsider D2 = ( Finseq-EQclass C90 ) as (Element of ( distribution_family C88 )) by L70;
+take D2;
+thus L163: thesis by L162 , L136;
+end;
+uniqueness
+proof
+let C91 , C92 being (Element of ( distribution_family C88 ));
+assume L164: ( ( GenProbSEQ C88 ) . C91 ) = C89;
+L165: C91 in ( dom ( GenProbSEQ C88 ) ) by L164 , FUNCT_1:def 2;
+assume L166: ( ( GenProbSEQ C88 ) . C92 ) = C89;
+L167: C92 in ( dom ( GenProbSEQ C88 ) ) by L166 , FUNCT_1:def 2;
+thus L168: thesis by L167 , L164 , L166 , L165 , FUNCT_1:def 4;
+end;
+end;
+definition
+let C93 being  finite set;
+let C94 being (FinSequence of C93);
+func freqSEQ C94 -> (FinSequence of ( NAT )) means 
+:L170: (( dom it ) = ( Seg ( card C93 ) ) & (for B67 being Nat holds (B67 in ( dom it ) implies ( it . B67 ) = ( ( len C94 ) * ( ( FDprobSEQ C94 ) . B67 ) ))));
+existence
+proof
+defpred S4[ Nat , set ] means $2 = ( ( len C94 ) * ( ( FDprobSEQ C94 ) . $1 ) );
+L171: (for B68 being Nat holds (B68 in ( Seg ( card C93 ) ) implies (ex B69 being (Element of ( NAT )) st S4[ B68 , B69 ])))
+proof
+L172: ( rng ( canFS C93 ) ) = C93 by FUNCT_2:def 3;
+let C95 being Nat;
+assume L173: C95 in ( Seg ( card C93 ) );
+L174: ( Seg ( len ( canFS C93 ) ) ) = ( Seg ( card C93 ) ) by UPROOTS:3;
+L175: C95 in ( dom ( canFS C93 ) ) by L174 , L173 , FINSEQ_1:def 3;
+L176: ( ( canFS C93 ) . C95 ) is (Element of C93) by L175 , L172 , FUNCT_1:3;
+consider C96 being (Element of C93) such that L177: C96 = ( ( canFS C93 ) . C95 ) by L176;
+set D3 = ( ( len C94 ) * ( ( FDprobSEQ C94 ) . C95 ) );
+take D3;
+L178: C95 in ( dom ( FDprobSEQ C94 ) ) by L173 , L26;
+L179: D3 = ( ( len C94 ) * ( FDprobability (C96 , C94) ) ) by L178 , L177 , L26;
+L180: D3 is (Element of ( NAT ))
+proof
+per cases ;
+suppose L181: C94 = ( {} );
+
+thus L182: thesis by L181 , L179;
+end;
+suppose L183: C94 <> ( {} );
+
+thus L184: thesis by L183 , L179 , XCMPLX_1:87;
+end;
+end;
+thus L186: thesis by L180;
+end;
+consider C97 being (FinSequence of ( NAT )) such that L187: (( dom C97 ) = ( Seg ( card C93 ) ) & (for B70 being Nat holds (B70 in ( Seg ( card C93 ) ) implies S4[ B70 , ( C97 . B70 ) ]))) from FINSEQ_1:sch 5(L171);
+take C97;
+thus L188: thesis by L187;
+end;
+uniqueness
+proof
+let C98 , C99 being (FinSequence of ( NAT ));
+assume that
+L189: ( dom C98 ) = ( Seg ( card C93 ) )
+and
+L190: (for B71 being Nat holds (B71 in ( dom C98 ) implies ( C98 . B71 ) = ( ( len C94 ) * ( ( FDprobSEQ C94 ) . B71 ) )));
+assume that
+L191: ( dom C99 ) = ( Seg ( card C93 ) )
+and
+L192: (for B72 being Nat holds (B72 in ( dom C99 ) implies ( C99 . B72 ) = ( ( len C94 ) * ( ( FDprobSEQ C94 ) . B72 ) )));
+L193:
+now
+let C100 being Nat;
+assume L194: C100 in ( dom C98 );
+thus L195: ( C98 . C100 ) = ( ( len C94 ) * ( ( FDprobSEQ C94 ) . C100 ) ) by L194 , L190
+.= ( C99 . C100 ) by L189 , L191 , L192 , L194;
+end;
+L196: ( len C98 ) = ( card C93 ) by L189 , FINSEQ_1:def 3
+.= ( len C99 ) by L191 , FINSEQ_1:def 3;
+thus L197: thesis by L196 , L193 , FINSEQ_2:9;
+end;
+end;
+theorem
+L199: (for B73 being non  empty  finite set holds (for B74 being non  empty (FinSequence of B73) holds (for B75 being Nat holds (B75 in ( Seg ( card B73 ) ) implies (ex B76 being (Element of B73) st (( ( freqSEQ B74 ) . B75 ) = ( frequency (B76 , B74) ) & B76 = ( ( canFS B73 ) . B75 )))))))
+proof
+let C101 being non  empty  finite set;
+let C102 being non  empty (FinSequence of C101);
+let C103 being Nat;
+set D4 = ( ( len C102 ) * ( ( FDprobSEQ C102 ) . C103 ) );
+L200: ( rng ( canFS C101 ) ) = C101 by FUNCT_2:def 3;
+assume L201: C103 in ( Seg ( card C101 ) );
+L202: C103 in ( dom ( freqSEQ C102 ) ) by L201 , L170;
+L203: ( Seg ( len ( canFS C101 ) ) ) = ( Seg ( card C101 ) ) by UPROOTS:3;
+L204: C103 in ( dom ( canFS C101 ) ) by L203 , L201 , FINSEQ_1:def 3;
+L205: ( ( canFS C101 ) . C103 ) is (Element of C101) by L204 , L200 , FUNCT_1:3;
+consider C104 being (Element of C101) such that L206: C104 = ( ( canFS C101 ) . C103 ) by L205;
+take C104;
+L207: C103 in ( dom ( FDprobSEQ C102 ) ) by L201 , L26;
+L208: D4 = ( ( len C102 ) * ( FDprobability (C104 , C102) ) ) by L207 , L206 , L26;
+L209: D4 = ( frequency (C104 , C102) ) by L208 , XCMPLX_1:87;
+thus L210: thesis by L209 , L202 , L206 , L170;
+end;
+theorem
+L211: (for B77 being  finite set holds (for B78 being (FinSequence of B77) holds ( freqSEQ B78 ) = ( ( len B78 ) * ( FDprobSEQ B78 ) )))
+proof
+let C105 being  finite set;
+let C106 being (FinSequence of C105);
+L212: ( dom ( ( len C106 ) (#) ( FDprobSEQ C106 ) ) ) = ( dom ( FDprobSEQ C106 ) ) by VALUED_1:def 5
+.= ( Seg ( card C105 ) ) by L26
+.= ( dom ( freqSEQ C106 ) ) by L170;
+L213:
+now
+let C107 being Nat;
+assume L214: C107 in ( dom ( ( len C106 ) (#) ( FDprobSEQ C106 ) ) );
+thus L215: ( ( ( len C106 ) (#) ( FDprobSEQ C106 ) ) . C107 ) = ( ( len C106 ) * ( ( FDprobSEQ C106 ) . C107 ) ) by L214 , VALUED_1:def 5
+.= ( ( freqSEQ C106 ) . C107 ) by L212 , L214 , L170;
+end;
+thus L216: ( freqSEQ C106 ) = ( ( len C106 ) (#) ( FDprobSEQ C106 ) ) by L213 , L212 , FINSEQ_1:13;
+end;
+theorem
+L217: (for B79 being  finite set holds (for B80 being (FinSequence of B79) holds ( Sum ( freqSEQ B80 ) ) = ( ( len B80 ) * ( Sum ( FDprobSEQ B80 ) ) )))
+proof
+let C108 being  finite set;
+let C109 being (FinSequence of C108);
+L218: ( freqSEQ C109 ) = ( ( len C109 ) * ( FDprobSEQ C109 ) ) by L211;
+thus L219: thesis by L218 , RVSUM_1:87;
+end;
+theorem
+L220: (for B81 being non  empty  finite set holds (for B82 being non  empty (FinSequence of B81) holds (for B83 being Nat holds (B83 in ( dom B82 ) implies (ex B84 being Nat st (( ( freqSEQ B82 ) . B84 ) = ( frequency (( B82 . B83 ) , B82) ) & ( B82 . B83 ) = ( ( canFS B81 ) . B84 )))))))
+proof
+let C110 being non  empty  finite set;
+let C111 being non  empty (FinSequence of C110);
+let C112 being Nat;
+set D5 = ( C111 . C112 );
+assume L221: C112 in ( dom C111 );
+L222: D5 in ( rng C111 ) by L221 , FUNCT_1:3;
+L223: D5 in C110 by L222;
+L224: D5 in ( rng ( canFS C110 ) ) by L223 , FUNCT_2:def 3;
+consider C113 being set such that L225: C113 in ( dom ( canFS C110 ) ) and L226: D5 = ( ( canFS C110 ) . C113 ) by L224 , FUNCT_1:def 3;
+reconsider D6 = C113 as Nat by L225;
+take D6;
+L227: ( Seg ( len ( canFS C110 ) ) ) = ( Seg ( card C110 ) ) by UPROOTS:3;
+L228: ( dom ( canFS C110 ) ) = ( Seg ( card C110 ) ) by L227 , FINSEQ_1:def 3;
+L229: (ex B85 being (Element of C110) st (( ( freqSEQ C111 ) . D6 ) = ( frequency (B85 , C111) ) & B85 = ( ( canFS C110 ) . D6 ))) by L228 , L225 , L199;
+thus L230: thesis by L229 , L226;
+end;
+L231: (for B86 being Function holds (for B87 being set holds (B86 is  disjoint_valued implies ( B86 | B87 ) is  disjoint_valued)))
+proof
+let C114 being Function;
+let C115 being set;
+assume L232: C114 is  disjoint_valued;
+set D7 = ( C114 | C115 );
+L233:
+now
+let C116 , C117 being set;
+assume L234: C116 <> C117;
+per cases ;
+suppose L235: (C116 in ( dom D7 ) & C117 in ( dom D7 ));
+
+L236: (( D7 . C116 ) = ( C114 . C116 ) & ( D7 . C117 ) = ( C114 . C117 )) by L235 , FUNCT_1:47;
+thus L237: ( D7 . C116 ) misses ( D7 . C117 ) by L236 , L232 , L234 , PROB_2:def 2;
+end;
+suppose L238: (not (C116 in ( dom D7 ) & C117 in ( dom D7 )));
+
+L239:
+now
+per cases  by L238;
+suppose L240: (not C116 in ( dom D7 ));
+
+L241: ( D7 . C116 ) = ( {} ) by L240 , FUNCT_1:def 2;
+L242: ( ( D7 . C116 ) /\ ( D7 . C117 ) ) = ( {} ) by L241;
+thus L243: ( D7 . C116 ) misses ( D7 . C117 ) by L242 , XBOOLE_0:def 7;
+end;
+suppose L244: (not C117 in ( dom D7 ));
+
+L245: ( D7 . C117 ) = ( {} ) by L244 , FUNCT_1:def 2;
+L246: ( ( D7 . C116 ) /\ ( D7 . C117 ) ) = ( {} ) by L245;
+thus L247: ( D7 . C116 ) misses ( D7 . C117 ) by L246 , XBOOLE_0:def 7;
+end;
+end;
+thus L249: ( D7 . C116 ) misses ( D7 . C117 ) by L239;
+end;
+end;
+thus L251: thesis by L233 , PROB_2:def 2;
+end;
+L252: (for B88 being Nat holds (for B89 being Function holds (for B90 being (FinSequence of ( NAT )) holds ((B89 is  disjoint_valued & ( dom B89 ) = ( dom B90 ) & B88 = ( len B90 ) & (for B91 being Nat holds (B91 in ( dom B89 ) implies (( B89 . B91 ) is  finite & ( B90 . B91 ) = ( card ( B89 . B91 ) ))))) implies (( Union B89 ) is  finite & ( card ( Union B89 ) ) = ( Sum B90 ))))))
+proof
+defpred S5[ Nat ] means (for B92 being Function holds (for B93 being (FinSequence of ( NAT )) holds ((B92 is  disjoint_valued & ( dom B92 ) = ( dom B93 ) & $1 = ( len B93 ) & (for B94 being Nat holds (B94 in ( dom B92 ) implies (( B92 . B94 ) is  finite & ( B93 . B94 ) = ( card ( B92 . B94 ) ))))) implies (( Union B92 ) is  finite & ( card ( Union B92 ) ) = ( Sum B93 )))));
+L253:
+now
+let C118 being Nat;
+assume L254: S5[ C118 ];
+L255:
+now
+let C119 being Function;
+let C120 being (FinSequence of ( NAT ));
+assume that
+L256: C119 is  disjoint_valued
+and
+L257: ( dom C119 ) = ( dom C120 )
+and
+L258: ( C118 + 1 ) = ( len C120 )
+and
+L259: (for B95 being Nat holds (B95 in ( dom C119 ) implies (( C119 . B95 ) is  finite & ( C120 . B95 ) = ( card ( C119 . B95 ) ))));
+set D8 = ( C119 | ( Seg C118 ) );
+reconsider D9 = ( C120 | C118 ) as (FinSequence of ( NAT ));
+L260: C118 = ( len D9 ) by L258 , FINSEQ_1:59 , NAT_1:12;
+L261:
+now
+let C121 being set;
+assume L262: C121 in ( Union C119 );
+consider C122 being set such that L263: C121 in C122 and L264: C122 in ( rng C119 ) by L262 , TARSKI:def 4;
+consider C123 being set such that L265: C123 in ( dom C119 ) and L266: C122 = ( C119 . C123 ) by L264 , FUNCT_1:def 3;
+L267: C123 in ( Seg ( C118 + 1 ) ) by L257 , L258 , L265 , FINSEQ_1:def 3;
+reconsider D10 = C123 as (Element of ( NAT )) by L257 , L265;
+L268: D10 <= ( C118 + 1 ) by L267 , FINSEQ_1:1;
+L269: 1 <= D10 by L267 , FINSEQ_1:1;
+L270:
+now
+per cases ;
+suppose L271: D10 = ( C118 + 1 );
+
+thus L272: C121 in ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) by L271 , L263 , L266 , XBOOLE_0:def 3;
+end;
+suppose L273: D10 <> ( C118 + 1 );
+
+L274: D10 < ( C118 + 1 ) by L273 , L268 , XXREAL_0:1;
+L275: D10 <= C118 by L274 , NAT_1:13;
+L276: D10 in ( Seg C118 ) by L275 , L269;
+L277: D10 in ( ( dom C119 ) /\ ( Seg C118 ) ) by L276 , L265 , XBOOLE_0:def 4;
+L278: D10 in ( dom D8 ) by L277 , RELAT_1:61;
+L279: ( C119 . D10 ) = ( D8 . D10 ) by L278 , FUNCT_1:47;
+L280: C122 in ( rng D8 ) by L279 , L266 , L278 , FUNCT_1:def 3;
+L281: C121 in ( Union D8 ) by L280 , L263 , TARSKI:def 4;
+thus L282: C121 in ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) by L281 , XBOOLE_0:def 3;
+end;
+end;
+thus L284: C121 in ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) by L270;
+end;
+L285: ( Union C119 ) c= ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) by L261 , TARSKI:def 3;
+L286: ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) c= ( Union C119 )
+proof
+let C124 being set;
+assume L287: C124 in ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) );
+L288:
+now
+per cases  by L287 , XBOOLE_0:def 3;
+suppose L289: C124 in ( C119 . ( C118 + 1 ) );
+
+L290: ( C118 + 1 ) in ( Seg ( C118 + 1 ) ) by FINSEQ_1:4;
+L291: ( C118 + 1 ) in ( dom C119 ) by L290 , L257 , L258 , FINSEQ_1:def 3;
+L292: ( C119 . ( C118 + 1 ) ) in ( rng C119 ) by L291 , FUNCT_1:def 3;
+thus L293: C124 in ( Union C119 ) by L292 , L289 , TARSKI:def 4;
+end;
+suppose L294: C124 in ( Union D8 );
+
+consider C125 being set such that L295: C124 in C125 and L296: C125 in ( rng D8 ) by L294 , TARSKI:def 4;
+consider C126 being set such that L297: C126 in ( dom D8 ) and L298: C125 = ( D8 . C126 ) by L296 , FUNCT_1:def 3;
+L299: C126 in ( ( dom C119 ) /\ ( Seg C118 ) ) by L297 , RELAT_1:61;
+L300: C126 in ( dom C119 ) by L299 , XBOOLE_0:def 4;
+L301: ( D8 . C126 ) = ( C119 . C126 ) by L297 , FUNCT_1:47;
+L302: C125 in ( rng C119 ) by L301 , L298 , L300 , FUNCT_1:def 3;
+thus L303: C124 in ( Union C119 ) by L302 , L295 , TARSKI:def 4;
+end;
+end;
+thus L305: C124 in ( Union C119 ) by L288;
+end;
+L306: ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) = ( Union C119 ) by L286 , L285 , XBOOLE_0:def 10;
+L307: (for B96 being Nat holds (B96 in ( dom D8 ) implies (( D8 . B96 ) is  finite & ( D9 . B96 ) = ( card ( D8 . B96 ) ))))
+proof
+let C127 being Nat;
+assume L308: C127 in ( dom D8 );
+L309: C127 in ( ( dom C119 ) /\ ( Seg C118 ) ) by L308 , RELAT_1:61;
+L310: C127 in ( dom C119 ) by L309 , XBOOLE_0:def 4;
+L311: ( D9 . C127 ) = ( C120 . C127 ) by L257 , L309 , FUNCT_1:48
+.= ( card ( C119 . C127 ) ) by L259 , L310
+.= ( card ( D8 . C127 ) ) by L308 , FUNCT_1:47;
+thus L312: thesis by L311;
+end;
+L313: D8 is  disjoint_valued by L231 , L256;
+L314: ( dom D8 ) = ( ( dom C119 ) /\ ( Seg C118 ) ) by RELAT_1:61
+.= ( dom D9 ) by L257 , RELAT_1:61;
+L315: ( card ( Union D8 ) ) = ( Sum D9 ) by L314 , L254 , L313 , L260 , L307;
+reconsider D11 = ( Union D8 ) as  finite set by L254 , L313 , L314 , L260 , L307;
+L316: 1 <= ( C118 + 1 ) by NAT_1:11;
+L317: C120 = ( ( C120 | C118 ) ^ <* ( C120 /. ( len C120 ) ) *> ) by L258 , FINSEQ_5:21
+.= ( D9 ^ <* ( C120 . ( C118 + 1 ) ) *> ) by L258 , L316 , FINSEQ_4:15;
+L318: ( C118 + 1 ) in ( Seg ( len C120 ) ) by L258 , FINSEQ_1:4;
+L319: ( C118 + 1 ) in ( dom C119 ) by L318 , L257 , FINSEQ_1:def 3;
+reconsider D12 = ( C119 . ( C118 + 1 ) ) as  finite set by L319 , L259;
+L320: ( Union C119 ) = ( D11 \/ D12 ) by L285 , L286 , XBOOLE_0:def 10;
+thus L321: ( Union C119 ) is  finite by L320;
+L322: (for B97 being set holds (B97 in ( rng D8 ) implies B97 misses ( C119 . ( C118 + 1 ) )))
+proof
+let C128 being set;
+assume L323: C128 in ( rng D8 );
+consider C129 being set such that L324: C129 in ( dom D8 ) and L325: C128 = ( D8 . C129 ) by L323 , FUNCT_1:def 3;
+L326: C129 in ( ( dom C119 ) /\ ( Seg C118 ) ) by L324 , RELAT_1:61;
+L327: C129 in ( Seg C118 ) by L326 , XBOOLE_0:def 4;
+reconsider D13 = C129 as (Element of ( NAT )) by L326;
+L328: D13 <= C118 by L327 , FINSEQ_1:1;
+L329: D13 <> ( C118 + 1 ) by L328 , NAT_1:13;
+L330: C128 = ( C119 . D13 ) by L324 , L325 , FUNCT_1:47;
+thus L331: thesis by L330 , L256 , L329 , PROB_2:def 2;
+end;
+L332: ( Union D8 ) misses ( C119 . ( C118 + 1 ) ) by L322 , ZFMISC_1:80;
+L333: ( card ( ( Union D8 ) \/ ( C119 . ( C118 + 1 ) ) ) ) = ( ( card D11 ) + ( card D12 ) ) by L332 , CARD_2:40;
+thus L334: ( card ( Union C119 ) ) = ( ( Sum D9 ) + ( C120 . ( C118 + 1 ) ) ) by L333 , L259 , L319 , L315 , L306
+.= ( Sum C120 ) by L317 , RVSUM_1:74;
+end;
+thus L335: S5[ ( C118 + 1 ) ] by L255;
+end;
+L336: S5[ ( 0 ) ]
+proof
+let C130 being Function;
+let C131 being (FinSequence of ( NAT ));
+assume that
+L337: C130 is  disjoint_valued
+and
+L338: ( dom C130 ) = ( dom C131 )
+and
+L339: ( 0 ) = ( len C131 )
+and
+L340: (for B98 being Nat holds (B98 in ( dom C130 ) implies (( C130 . B98 ) is  finite & ( C131 . B98 ) = ( card ( C130 . B98 ) ))));
+L341: C131 = ( {} ) by L339;
+L342: C130 = ( {} ) by L341 , L338;
+L343: (for B99 being set holds (B99 in ( rng C130 ) implies B99 c= ( {} ))) by L342;
+L344: ( Union C130 ) c= ( {} ) by L343 , ZFMISC_1:76;
+thus L345: (( Union C130 ) is  finite & ( card ( Union C130 ) ) = ( Sum C131 )) by L344 , L341 , RVSUM_1:72;
+end;
+thus L346: (for B100 being Nat holds S5[ B100 ]) from NAT_1:sch 2(L336 , L253);
+end;
+theorem
+L347: (for B101 being Function holds (for B102 being (FinSequence of ( NAT )) holds ((B101 is  disjoint_valued & ( dom B101 ) = ( dom B102 ) & (for B103 being Nat holds (B103 in ( dom B101 ) implies (( B101 . B103 ) is  finite & ( B102 . B103 ) = ( card ( B101 . B103 ) ))))) implies (( Union B101 ) is  finite & ( card ( Union B101 ) ) = ( Sum B102 )))))
+proof
+let C132 being Function;
+let C133 being (FinSequence of ( NAT ));
+L348: ( len C133 ) is (Element of ( NAT ));
+assume L349: (C132 is  disjoint_valued & ( dom C132 ) = ( dom C133 ) & (for B104 being Nat holds (B104 in ( dom C132 ) implies (( C132 . B104 ) is  finite & ( C133 . B104 ) = ( card ( C132 . B104 ) )))));
+thus L350: thesis by L349 , L348 , L252;
+end;
+theorem
+L351: (for B105 being non  empty  finite set holds (for B106 being non  empty (FinSequence of B105) holds ( Sum ( freqSEQ B106 ) ) = ( len B106 )))
+proof
+let C134 being non  empty  finite set;
+let C135 being non  empty (FinSequence of C134);
+set D14 = ( freqSEQ C135 );
+defpred S6[ set , set ] means (ex B107 being (Element of C134) st (B107 = ( ( canFS C134 ) . $1 ) & $2 = ( event_pick (B107 , C135) )));
+L352: ( len ( canFS C134 ) ) = ( card C134 ) by UPROOTS:3;
+L353: ( dom ( canFS C134 ) ) = ( Seg ( card C134 ) ) by L352 , FINSEQ_1:def 3;
+L354: (for B108 being set holds (B108 in ( dom D14 ) implies (ex B109 being set st S6[ B108 , B109 ])))
+proof
+let C136 being set;
+set D15 = ( ( canFS C134 ) . C136 );
+assume L355: C136 in ( dom D14 );
+L356: C136 in ( Seg ( card C134 ) ) by L355 , L170;
+L357: ( rng ( canFS C134 ) ) = C134 by FUNCT_2:def 3;
+reconsider D16 = D15 as (Element of C134) by L357 , L353 , L356 , FUNCT_1:3;
+set D17 = ( C135 " { D16 } );
+take D17;
+L358: D17 = ( event_pick (D16 , C135) );
+thus L359: thesis by L358;
+end;
+consider C137 being Function such that L360: (( dom C137 ) = ( dom D14 ) & (for B110 being set holds (B110 in ( dom D14 ) implies S6[ B110 , ( C137 . B110 ) ]))) from CLASSES1:sch 1(L354);
+L361: (for B111 , B112 being set holds ((B111 in ( dom C137 ) & B112 in ( dom C137 ) & B111 <> B112) implies ( C137 . B111 ) misses ( C137 . B112 )))
+proof
+let C138 , C139 being set;
+assume that
+L362: (C138 in ( dom C137 ) & C139 in ( dom C137 ))
+and
+L363: C138 <> C139;
+L364: (C138 in ( dom ( canFS C134 ) ) & C139 in ( dom ( canFS C134 ) )) by L353 , L360 , L362 , L170;
+L365: ( ( canFS C134 ) . C138 ) <> ( ( canFS C134 ) . C139 ) by L364 , L363 , FUNCT_1:def 4;
+L366: ((ex B113 being (Element of C134) st (B113 = ( ( canFS C134 ) . C138 ) & ( C137 . C138 ) = ( event_pick (B113 , C135) ))) & (ex B114 being (Element of C134) st (B114 = ( ( canFS C134 ) . C139 ) & ( C137 . C139 ) = ( event_pick (B114 , C135) )))) by L360 , L362;
+thus L367: thesis by L366 , L365 , FUNCT_1:71 , ZFMISC_1:11;
+end;
+L368: (for B115 , B116 being set holds (B115 <> B116 implies ( C137 . B115 ) misses ( C137 . B116 )))
+proof
+let C140 , C141 being set;
+assume L369: C140 <> C141;
+per cases ;
+suppose L370: (C140 in ( dom C137 ) & C141 in ( dom C137 ));
+
+thus L371: thesis by L370 , L361 , L369;
+end;
+suppose L372: (not C140 in ( dom C137 ));
+
+L373: ( C137 . C140 ) = ( {} ) by L372 , FUNCT_1:def 2;
+thus L374: thesis by L373 , XBOOLE_1:65;
+end;
+suppose L375: (C140 in ( dom C137 ) & (not C141 in ( dom C137 )));
+
+L376: ( C137 . C141 ) = ( {} ) by L375 , FUNCT_1:def 2;
+thus L377: thesis by L376 , XBOOLE_1:65;
+end;
+end;
+L379: C137 is  disjoint_valued by L368 , PROB_2:def 2;
+L380: ( Seg ( len C135 ) ) c= ( Union C137 )
+proof
+assume L381: (not ( Seg ( len C135 ) ) c= ( Union C137 ));
+consider C142 being set such that L382: C142 in ( Seg ( len C135 ) ) and L383: (not C142 in ( Union C137 )) by L381 , TARSKI:def 3;
+set D18 = ( C135 . C142 );
+L384: C142 in ( dom C135 ) by L382 , FINSEQ_1:def 3;
+L385: D18 in ( rng C135 ) by L384 , FUNCT_1:def 3;
+reconsider D19 = D18 as (Element of C134) by L385;
+L386: ( rng ( canFS C134 ) ) = C134 by FUNCT_2:def 3;
+consider C143 being set such that L387: C143 in ( dom ( canFS C134 ) ) and L388: D19 = ( ( canFS C134 ) . C143 ) by L386 , FUNCT_1:def 3;
+L389: C143 in ( dom D14 ) by L353 , L387 , L170;
+L390: ( C137 . C143 ) in ( rng C137 ) by L389 , L360 , FUNCT_1:3;
+L391: ( C135 . C142 ) in { ( C135 . C142 ) } by TARSKI:def 1;
+L392: (ex B117 being (Element of C134) st (B117 = ( ( canFS C134 ) . C143 ) & ( C137 . C143 ) = ( event_pick (B117 , C135) ))) by L360 , L389;
+L393: C142 in ( C137 . C143 ) by L392 , L384 , L388 , L391 , FUNCT_1:def 7;
+thus L394: contradiction by L393 , L383 , L390 , TARSKI:def 4;
+end;
+L395: (for B118 being Nat holds (B118 in ( dom C137 ) implies (( C137 . B118 ) is  finite & ( D14 . B118 ) = ( card ( C137 . B118 ) ))))
+proof
+let C144 being Nat;
+assume L396: C144 in ( dom C137 );
+L397: (ex B119 being (Element of C134) st (B119 = ( ( canFS C134 ) . C144 ) & ( C137 . C144 ) = ( event_pick (B119 , C135) ))) by L396 , L360;
+L398: ( dom D14 ) = ( Seg ( card C134 ) ) by L170;
+L399: C144 in ( dom ( FDprobSEQ C135 ) ) by L398 , L360 , L396 , L26;
+L400: ( D14 . C144 ) = ( ( len C135 ) * ( ( FDprobSEQ C135 ) . C144 ) ) by L360 , L396 , L170
+.= ( ( len C135 ) * ( FDprobability (( ( canFS C134 ) . C144 ) , C135) ) ) by L399 , L26
+.= ( card ( C137 . C144 ) ) by L397 , XCMPLX_1:87;
+thus L401: thesis by L400;
+end;
+reconsider D20 = ( Union C137 ) as  finite set by L395 , L360 , L379 , L347;
+L402: (for B120 being set holds (B120 in ( rng C137 ) implies B120 c= ( Seg ( len C135 ) )))
+proof
+let C145 being set;
+assume L403: C145 in ( rng C137 );
+consider C146 being set such that L404: C146 in ( dom C137 ) and L405: C145 = ( C137 . C146 ) by L403 , FUNCT_1:def 3;
+L406: (ex B121 being (Element of C134) st (B121 = ( ( canFS C134 ) . C146 ) & ( C137 . C146 ) = ( event_pick (B121 , C135) ))) by L360 , L404;
+L407: C145 c= ( whole_event C135 ) by L406 , L405;
+thus L408: thesis by L407 , FINSEQ_1:def 3;
+end;
+L409: ( Union C137 ) c= ( Seg ( len C135 ) ) by L402 , ZFMISC_1:76;
+L410: D20 = ( Seg ( len C135 ) ) by L409 , L380 , XBOOLE_0:def 10;
+thus L411: ( Sum ( freqSEQ C135 ) ) = ( card D20 ) by L360 , L379 , L395 , L347
+.= ( len C135 ) by L410 , FINSEQ_1:57;
+end;
+theorem
+L412: (for B122 being non  empty  finite set holds (for B123 being non  empty (FinSequence of B122) holds ( Sum ( FDprobSEQ B123 ) ) = 1))
+proof
+let C147 being non  empty  finite set;
+let C148 being non  empty (FinSequence of C147);
+L413: ( Sum ( freqSEQ C148 ) ) = ( len C148 ) by L351;
+L414: ( ( len C148 ) * ( Sum ( FDprobSEQ C148 ) ) ) = ( ( len C148 ) * 1 ) by L413 , L217;
+thus L415: thesis by L414 , XCMPLX_1:5;
+end;
+registration
+let C149 being non  empty  finite set;
+let C150 being non  empty (FinSequence of C149);
+cluster ( FDprobSEQ C150 ) ->  ProbFinS;
+coherence
+proof
+L416: (for B124 being (Element of ( NAT )) holds (B124 in ( dom ( FDprobSEQ C150 ) ) implies ( ( FDprobSEQ C150 ) . B124 ) >= ( 0 )))
+proof
+let C151 being (Element of ( NAT ));
+assume L417: C151 in ( dom ( FDprobSEQ C150 ) );
+L418: ( ( FDprobSEQ C150 ) . C151 ) = ( FDprobability (( ( canFS C149 ) . C151 ) , C150) ) by L417 , L26;
+thus L419: thesis by L418;
+end;
+L420: ( Sum ( FDprobSEQ C150 ) ) = 1 by L412;
+thus L421: thesis by L420 , L416 , MATRPROB:def 5;
+end;
+end;
+definition
+let C152 being non  empty  finite set;
+mode distProbFinS of C152
+ ->  ProbFinS (FinSequence of ( REAL ))
+means :L423: (( len it ) = ( card C152 ) & (ex B125 being (FinSequence of C152) st ( FDprobSEQ B125 ) = it));
+existence
+proof
+set D21 = the (Element of C152);
+set D22 = <* D21 *>;
+set D23 = ( FDprobSEQ D22 );
+L424: ( dom D23 ) = ( Seg ( card C152 ) ) by L26;
+L425: ( len D23 ) = ( card C152 ) by L424 , FINSEQ_1:def 3;
+thus L426: thesis by L425;
+end;
+end;
+theorem
+L428: (for B126 being non  empty  finite set holds (for B127 being (distProbFinS of B126) holds (( distribution (B127 , B126) ) is (Element of ( distribution_family B126 )) & ( ( GenProbSEQ B126 ) . ( distribution (B127 , B126) ) ) = B127)))
+proof
+let C153 being non  empty  finite set;
+let C154 being (distProbFinS of C153);
+thus L429: ( distribution (C154 , C153) ) is (Element of ( distribution_family C153 ));
+L430: (ex B128 being (FinSequence of C153) st ( FDprobSEQ B128 ) = C154) by L423;
+thus L431: ( ( GenProbSEQ C153 ) . ( distribution (C154 , C153) ) ) = C154 by L430 , L161;
+end;
+begin
+definition
+let C155 being  finite set;
+let C156 being (FinSequence of C155);
+attr C156 is  uniformly_distributed
+means
+:L432: (for B129 being Nat holds (B129 in ( dom ( FDprobSEQ C156 ) ) implies ( ( FDprobSEQ C156 ) . B129 ) = ( 1 / ( card C155 ) )));
+end;
+theorem
+L434: (for B130 being  finite set holds (for B131 being (FinSequence of B130) holds (B131 is  uniformly_distributed implies ( FDprobSEQ B131 ) is  constant)))
+proof
+let C157 being  finite set;
+let C158 being (FinSequence of C157);
+assume L435: C158 is  uniformly_distributed;
+let C159 , C160 being set;
+assume that
+L436: C159 in ( dom ( FDprobSEQ C158 ) )
+and
+L437: C160 in ( dom ( FDprobSEQ C158 ) );
+reconsider D24 = C159 , D25 = C160 as Nat by L436 , L437;
+L438: ( ( FDprobSEQ C158 ) . D24 ) = ( 1 / ( card C157 ) ) by L435 , L436 , L432
+.= ( ( FDprobSEQ C158 ) . D25 ) by L435 , L437 , L432;
+thus L439: thesis by L438;
+end;
+theorem
+L440: (for B132 being  finite set holds (for B133 , B134 being (FinSequence of B132) holds ((B133 is  uniformly_distributed & B133 , B134 -are_prob_equivalent ) implies B134 is  uniformly_distributed)))
+proof
+let C161 being  finite set;
+let C162 , C163 being (FinSequence of C161);
+assume that
+L441: C162 is  uniformly_distributed
+and
+L442: C162 , C163 -are_prob_equivalent ;
+L443: ( FDprobSEQ C162 ) = ( FDprobSEQ C163 ) by L442 , L80;
+L444: (for B135 being Nat holds (B135 in ( dom ( FDprobSEQ C163 ) ) implies ( ( FDprobSEQ C163 ) . B135 ) = ( 1 / ( card C161 ) ))) by L443 , L441 , L432;
+thus L445: thesis by L444 , L432;
+end;
+theorem
+L446: (for B136 being  finite set holds (for B137 , B138 being (FinSequence of B136) holds ((B137 is  uniformly_distributed & B138 is  uniformly_distributed) implies B137 , B138 -are_prob_equivalent )))
+proof
+let C164 being  finite set;
+let C165 , C166 being (FinSequence of C164);
+assume that
+L447: C165 is  uniformly_distributed
+and
+L448: C166 is  uniformly_distributed;
+L449: (( dom ( FDprobSEQ C165 ) ) = ( Seg ( card C164 ) ) & ( dom ( FDprobSEQ C166 ) ) = ( Seg ( card C164 ) )) by L26;
+L450: (for B139 being set holds (B139 in ( dom ( FDprobSEQ C165 ) ) implies ( ( FDprobSEQ C165 ) . B139 ) = ( ( FDprobSEQ C166 ) . B139 )))
+proof
+let C167 being set;
+assume L451: C167 in ( dom ( FDprobSEQ C165 ) );
+L452: ( ( FDprobSEQ C165 ) . C167 ) = ( 1 / ( card C164 ) ) by L451 , L447 , L432;
+thus L453: thesis by L452 , L448 , L449 , L451 , L432;
+end;
+L454: ( FDprobSEQ C165 ) = ( FDprobSEQ C166 ) by L450 , L449 , FUNCT_1:2;
+thus L455: thesis by L454 , L80;
+end;
+registration
+let C168 being  finite set;
+cluster ( canFS C168 ) ->  uniformly_distributed;
+coherence
+proof
+set D26 = ( canFS C168 );
+L456: ( len D26 ) = ( card C168 ) by UPROOTS:3;
+L457: ( dom D26 ) = ( Seg ( card C168 ) ) by L456 , FINSEQ_1:def 3;
+L458: ( dom D26 ) = ( dom ( FDprobSEQ D26 ) ) by L457 , L26;
+L459: (for B140 being Nat holds (B140 in ( dom D26 ) implies ( ( FDprobSEQ D26 ) . B140 ) = ( 1 / ( card C168 ) )))
+proof
+let C169 being Nat;
+assume L460: C169 in ( dom D26 );
+L461: ( ( FDprobSEQ D26 ) . C169 ) = ( FDprobability (( D26 . C169 ) , D26) ) by L460 , L458 , L26
+.= ( ( card { C169 } ) / ( len D26 ) ) by L460 , FINSEQ_5:4
+.= ( 1 / ( card C168 ) ) by L456 , CARD_1:30;
+thus L462: thesis by L461;
+end;
+thus L463: thesis by L459 , L458 , L432;
+end;
+end;
+L465: (for B141 being  finite set holds (for B142 being (FinSequence of B141) holds (B142 in ( Finseq-EQclass ( canFS B141 ) ) implies B142 is  uniformly_distributed)))
+proof
+let C170 being  finite set;
+let C171 being (FinSequence of C170);
+assume L466: C171 in ( Finseq-EQclass ( canFS C170 ) );
+L467: C171 , ( canFS C170 ) -are_prob_equivalent  by L466 , L56;
+thus L468: thesis by L467 , L440;
+end;
+L469: (for B143 being  finite set holds (for B144 being (FinSequence of B143) holds (B144 is  uniformly_distributed implies (for B145 being (FinSequence of B143) holds (B145 is  uniformly_distributed implies B145 in ( Finseq-EQclass B144 ))))))
+proof
+let C172 being  finite set;
+let C173 being (FinSequence of C172);
+assume L470: C173 is  uniformly_distributed;
+let C174 being (FinSequence of C172);
+assume L471: C174 is  uniformly_distributed;
+L472: C173 , C174 -are_prob_equivalent  by L471 , L470 , L446;
+thus L473: thesis by L472;
+end;
+definition
+let C175 being  finite set;
+func uniform_distribution C175 -> (Element of ( distribution_family C175 )) means 
+:L474: (for B146 being (FinSequence of C175) holds (B146 in it iff B146 is  uniformly_distributed));
+existence
+proof
+set D27 = ( canFS C175 );
+consider C176 being non  empty (Subset of ( C175 * )) such that L475: C176 = ( Finseq-EQclass D27 );
+reconsider D28 = C176 as (Element of ( distribution_family C175 )) by L475 , L70;
+take D28;
+L476: (for B147 being (FinSequence of C175) holds (B147 in D28 implies D27 , B147 -are_prob_equivalent )) by L475 , L56;
+L477: (for B148 being (FinSequence of C175) holds (B148 in D28 implies B148 is  uniformly_distributed)) by L476 , L440;
+thus L478: thesis by L477 , L475 , L469;
+end;
+uniqueness
+proof
+let C177 , C178 being (Element of ( distribution_family C175 ));
+assume L479: (for B149 being (FinSequence of C175) holds (B149 in C177 iff B149 is  uniformly_distributed));
+assume L480: (for B150 being (FinSequence of C175) holds (B150 in C178 iff B150 is  uniformly_distributed));
+L481: (for B151 being set holds (B151 in C178 implies B151 in C177))
+proof
+let C179 being set;
+assume L482: C179 in C178;
+reconsider D29 = C179 as (Element of ( C175 * )) by L482;
+L483: D29 is  uniformly_distributed by L480 , L482;
+thus L484: thesis by L483 , L479;
+end;
+L485: (for B152 being set holds (B152 in C177 implies B152 in C178))
+proof
+let C180 being set;
+assume L486: C180 in C177;
+reconsider D30 = C180 as (Element of ( C175 * )) by L486;
+L487: D30 is  uniformly_distributed by L479 , L486;
+thus L488: thesis by L487 , L480;
+end;
+thus L489: thesis by L485 , L481 , TARSKI:1;
+end;
+end;
+registration
+let C181 being non  empty  finite set;
+cluster  constant for (distProbFinS of C181);
+existence
+proof
+reconsider D31 = ( canFS C181 ) as (Element of ( C181 * )) by FINSEQ_1:def 11;
+take D32 = ( FDprobSEQ D31 );
+L491: ( dom D32 ) = ( Seg ( card C181 ) ) by L26;
+L492: ( len D32 ) = ( card C181 ) by L491 , FINSEQ_1:def 3;
+thus L493: thesis by L492 , L423 , L434;
+end;
+end;
+definition
+let C182 being non  empty  finite set;
+func Uniform_FDprobSEQ C182 -> (distProbFinS of C182) equals 
+( FDprobSEQ ( canFS C182 ) );
+coherence
+proof
+reconsider D33 = ( canFS C182 ) as (Element of ( C182 * )) by FINSEQ_1:def 11;
+set D34 = ( FDprobSEQ D33 );
+L495: ( dom D34 ) = ( Seg ( card C182 ) ) by L26;
+L496: ( len D34 ) = ( card C182 ) by L495 , FINSEQ_1:def 3;
+thus L497: thesis by L496 , L423;
+end;
+end;
+registration
+let C183 being non  empty  finite set;
+cluster ( Uniform_FDprobSEQ C183 ) ->  constant;
+coherence by L434;
+end;
+theorem
+L500: (for B153 being non  empty  finite set holds ( uniform_distribution B153 ) = ( distribution (( Uniform_FDprobSEQ B153 ) , B153) ))
+proof
+let C184 being non  empty  finite set;
+set D35 = ( Uniform_FDprobSEQ C184 );
+set D36 = ( canFS C184 );
+L501: (for B154 being (FinSequence of C184) holds (B154 is  uniformly_distributed implies B154 in ( Finseq-EQclass D36 )))
+proof
+let C185 being (FinSequence of C184);
+assume L502: C185 is  uniformly_distributed;
+L503: D36 , C185 -are_prob_equivalent  by L502 , L446;
+thus L504: thesis by L503;
+end;
+L505: ((for B155 being (FinSequence of C184) holds (B155 in ( Finseq-EQclass D36 ) implies B155 is  uniformly_distributed)) & ( Finseq-EQclass D36 ) is (Element of ( distribution_family C184 ))) by L70 , L465;
+L506: ( Finseq-EQclass D36 ) = ( uniform_distribution C184 ) by L505 , L501 , L474;
+L507: ( ( GenProbSEQ C184 ) . ( Finseq-EQclass D36 ) ) = D35 by L136;
+L508: ( ( GenProbSEQ C184 ) . ( distribution (D35 , C184) ) ) = ( ( GenProbSEQ C184 ) . ( Finseq-EQclass D36 ) ) by L507 , L428;
+L509: ( dom ( GenProbSEQ C184 ) ) = ( distribution_family C184 ) by FUNCT_2:def 1;
+thus L510: thesis by L509 , L506 , L508 , FUNCT_1:def 4;
+end;

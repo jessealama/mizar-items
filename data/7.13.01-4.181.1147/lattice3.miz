@@ -1,0 +1,2301 @@
+:: Complete Lattices
+::  by Grzegorz Bancerek
+::
+:: Received May 13, 1992
+:: Copyright (c) 1992-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies LATTICES, STRUCT_0, ZFMISC_1, SUBSET_1, FUNCT_1, XBOOLE_0,
+      BINOP_1, EQREL_1, PBOOLE, TARSKI, FILTER_1, ORDERS_1, RELAT_1, RELAT_2,
+      ORDERS_2, XXREAL_0, REWRITE1, FILTER_0, XBOOLEAN, SETFAM_1, LATTICE3;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, SETFAM_1, DOMAIN_1, STRUCT_0,
+      FUNCT_1, FUNCT_2, BINOP_1, LATTICES, FILTER_0, LATTICE2, FILTER_1,
+      RELAT_1, RELAT_2, RELSET_1, ORDERS_1, ORDERS_2;
+ constructors BINOP_1, DOMAIN_1, ORDERS_2, LATTICE2, FILTER_1, RELSET_1,
+      FILTER_0;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, STRUCT_0, LATTICES, ORDERS_2,
+      LATTICE2, RELAT_2;
+ requirements SUBSET, BOOLE;
+ definitions XBOOLE_0, TARSKI, LATTICES, RELAT_1, RELAT_2, ORDERS_2, STRUCT_0;
+ theorems TARSKI, ENUMSET1, ZFMISC_1, FUNCT_1, FUNCT_2, BINOP_1, LATTICES,
+      FILTER_0, FILTER_1, LATTICE2, RELAT_1, ORDERS_2, XBOOLE_0, XBOOLE_1,
+      RELAT_2, PARTFUN1, ORDERS_1, XTUPLE_0;
+ schemes FRAENKEL, BINOP_1, RELSET_1;
+
+begin
+deffunc H1(LattStr) = (the carrier of $1);
+deffunc H2(LattStr) = (the L_join of $1);
+deffunc H3(LattStr) = (the L_meet of $1);
+definition
+let C1 being set;
+func BooleLatt C1 ->  strict LattStr means 
+:L1: ((the carrier of it) = ( bool C1 ) & (for B1 , B2 being (Subset of C1) holds (( (the L_join of it) . (B1 , B2) ) = ( B1 \/ B2 ) & ( (the L_meet of it) . (B1 , B2) ) = ( B1 /\ B2 ))));
+existence
+proof
+deffunc H4((Subset of C1) , (Subset of C1)) = ( $1 \/ $2 );
+consider C2 being (BinOp of ( bool C1 )) such that L2: (for B3 , B4 being (Subset of C1) holds ( C2 . (B3 , B4) ) = H4(B3 , B4)) from BINOP_1:sch 4;
+deffunc H5((Subset of C1) , (Subset of C1)) = ( $1 /\ $2 );
+consider C3 being (BinOp of ( bool C1 )) such that L3: (for B5 , B6 being (Subset of C1) holds ( C3 . (B5 , B6) ) = H5(B5 , B6)) from BINOP_1:sch 4;
+take LattStr (# ( bool C1 ) , C2 , C3 #);
+thus L4: thesis by L2 , L3;
+end;
+uniqueness
+proof
+let C4 , C5 being  strict LattStr;
+assume that
+L5: (the carrier of C4) = ( bool C1 )
+and
+L6: (for B7 , B8 being (Subset of C1) holds (( H2(C4) . (B7 , B8) ) = ( B7 \/ B8 ) & ( H3(C4) . (B7 , B8) ) = ( B7 /\ B8 )))
+and
+L7: (the carrier of C5) = ( bool C1 )
+and
+L8: (for B9 , B10 being (Subset of C1) holds (( H2(C5) . (B9 , B10) ) = ( B9 \/ B10 ) & ( H3(C5) . (B9 , B10) ) = ( B9 /\ B10 )));
+reconsider D1 = H2(C4) , D2 = H2(C5) , D3 = H3(C4) , D4 = H3(C5) as (BinOp of ( bool C1 )) by L5 , L7;
+L9:
+now
+let C6 , C7 being (Subset of C1);
+thus L10: ( D1 . (C6 , C7) ) = ( C6 \/ C7 ) by L6
+.= ( D2 . (C6 , C7) ) by L8;
+end;
+L11: D1 = D2 by L9 , BINOP_1:2;
+L12:
+now
+let C8 , C9 being (Subset of C1);
+thus L13: ( D3 . (C8 , C9) ) = ( C8 /\ C9 ) by L6
+.= ( D4 . (C8 , C9) ) by L8;
+end;
+thus L14: thesis by L12 , L5 , L7 , L11 , BINOP_1:2;
+end;
+end;
+registration
+let C10 being set;
+cluster ( BooleLatt C10 ) -> non  empty;
+coherence
+proof
+L16: (the carrier of ( BooleLatt C10 )) = ( bool C10 ) by L1;
+thus L17: (the carrier of ( BooleLatt C10 )) is non  empty by L16;
+end;
+end;
+registration
+let R1 being set;
+let R2 being (Element of ( BooleLatt R1 ));
+let R3 being (Element of ( BooleLatt R1 ));
+let C11 , C12 being set;
+identify R2 "\/" R3 with C11 \/ C12 when R2 = C11 , R3 = C12;
+compatibility
+proof
+reconsider D5 = R2 , D6 = R3 as (Subset of R1) by L1;
+assume that
+L19: R2 = C11
+and
+L20: R3 = C12;
+thus L21: ( R2 "\/" R3 ) = ( H2(( BooleLatt R1 )) . (D5 , D6) )
+.= ( C11 \/ C12 ) by L19 , L20 , L1;
+end;
+identify R2 "/\" R3 with C11 /\ C12 when R2 = C11 , R3 = C12;
+compatibility
+proof
+reconsider D7 = R2 , D8 = R3 as (Subset of R1) by L1;
+assume that
+L22: R2 = C11
+and
+L23: R3 = C12;
+thus L24: ( R2 "/\" R3 ) = ( H3(( BooleLatt R1 )) . (D7 , D8) )
+.= ( C11 /\ C12 ) by L22 , L23 , L1;
+end;
+end;
+theorem
+L26: (for R1 being set holds (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds (( R2 "\/" R3 ) = ( R2 \/ R3 ) & ( R2 "/\" R3 ) = ( R2 /\ R3 )))));
+theorem
+L27: (for R1 being set holds (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds (R2 [= R3 iff R2 c= R3))))
+proof
+let R1 being set;
+let R2 being (Element of ( BooleLatt R1 ));
+let R3 being (Element of ( BooleLatt R1 ));
+L28: (R2 [= R3 iff ( R2 "\/" R3 ) = R3) by LATTICES:def 3;
+thus L29: thesis by L28 , XBOOLE_1:7 , XBOOLE_1:12;
+end;
+registration
+let R1 being set;
+cluster ( BooleLatt R1 ) ->  Lattice-like;
+coherence
+proof
+L30: (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds ( R2 "\/" R3 ) = ( R3 "\/" R2 )));
+L31: (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds (for R4 being (Element of ( BooleLatt R1 )) holds ( R2 "\/" ( R3 "\/" R4 ) ) = ( ( R2 "\/" R3 ) "\/" R4 )))) by XBOOLE_1:4;
+L32: (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds ( ( R2 "/\" R3 ) "\/" R3 ) = R3)) by XBOOLE_1:22;
+L33: (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds ( R2 "/\" R3 ) = ( R3 "/\" R2 )));
+L34: (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds (for R4 being (Element of ( BooleLatt R1 )) holds ( R2 "/\" ( R3 "/\" R4 ) ) = ( ( R2 "/\" R3 ) "/\" R4 )))) by XBOOLE_1:16;
+L35: (for R2 being (Element of ( BooleLatt R1 )) holds (for R3 being (Element of ( BooleLatt R1 )) holds ( R2 "/\" ( R2 "\/" R3 ) ) = R2)) by XBOOLE_1:21;
+L36: ( BooleLatt R1 ) is  join-commutative  join-associative  meet-absorbing  meet-commutative  meet-associative  join-absorbing by L35 , L30 , L31 , L32 , L33 , L34 , LATTICES:def 4 , LATTICES:def 5 , LATTICES:def 6 , LATTICES:def 7 , LATTICES:def 8 , LATTICES:def 9;
+thus L37: thesis by L36;
+end;
+end;
+theorem
+L39: (for R1 being set holds (( BooleLatt R1 ) is  lower-bounded & ( Bottom ( BooleLatt R1 ) ) = ( {} )))
+proof
+let R1 being set;
+L40: ( {} ) c= R1 by XBOOLE_1:2;
+reconsider D9 = ( {} ) as (Element of ( BooleLatt R1 )) by L40 , L1;
+L41: (for R6 being (Element of ( BooleLatt R1 )) holds ( D9 "/\" R6 ) = D9);
+L42: (for R6 being (Element of ( BooleLatt R1 )) holds ( R6 "/\" D9 ) = D9);
+thus L43: ( BooleLatt R1 ) is  lower-bounded
+proof
+take D9;
+thus L44: thesis;
+end;
+
+thus L45: thesis by L43 , L41 , L42 , LATTICES:def 16;
+end;
+theorem
+L46: (for R1 being set holds (( BooleLatt R1 ) is  upper-bounded & ( Top ( BooleLatt R1 ) ) = R1))
+proof
+let R1 being set;
+L47: ( bool R1 ) = H1(( BooleLatt R1 )) by L1;
+reconsider D10 = R1 as (Element of ( BooleLatt R1 )) by L47 , ZFMISC_1:def 1;
+L48: (for R6 being (Element of ( BooleLatt R1 )) holds ( D10 "\/" R6 ) = D10) by L47 , XBOOLE_1:12;
+L49: (for R6 being (Element of ( BooleLatt R1 )) holds ( R6 "\/" D10 ) = D10) by L47 , XBOOLE_1:12;
+thus L50: ( BooleLatt R1 ) is  upper-bounded
+proof
+take D10;
+thus L51: thesis by L47 , XBOOLE_1:12;
+end;
+
+thus L52: thesis by L50 , L48 , L49 , LATTICES:def 17;
+end;
+registration
+let R1 being set;
+cluster ( BooleLatt R1 ) ->  Boolean;
+coherence
+proof
+set D11 = ( BooleLatt R1 );
+L53: D11 is 0_Lattice by L39;
+L54: D11 is 1_Lattice by L46;
+reconsider D12 = D11 as 01_Lattice by L54 , L53;
+L55: D12 is  complemented
+proof
+let C13 being (Element of D12);
+L56: H1(D12) = ( bool R1 ) by L1;
+reconsider D13 = ( R1 \ C13 ) as (Element of D12) by L1;
+take D13;
+thus L57: ( D13 "\/" C13 ) = ( D13 \/ C13 ) by L26
+.= ( R1 \/ C13 ) by XBOOLE_1:39
+.= R1 by L56 , XBOOLE_1:12
+.= ( Top D12 ) by L46;
+thus L58: ( C13 "\/" D13 ) = ( Top D12 ) by L57;
+L59: D13 misses C13 by XBOOLE_1:79;
+thus L60: ( D13 "/\" C13 ) = ( D13 /\ C13 ) by L26
+.= ( {} ) by L59 , XBOOLE_0:def 7
+.= ( Bottom D12 ) by L39;
+thus L61: thesis by L60;
+end;
+L62: D12 is  distributive
+proof
+let C14 , C15 , C16 being (Element of D12);
+thus L63: ( C14 "/\" ( C15 "\/" C16 ) ) = ( C14 /\ ( C15 "\/" C16 ) ) by L26
+.= ( C14 /\ ( C15 \/ C16 ) ) by L26
+.= ( ( C14 /\ C15 ) \/ ( C14 /\ C16 ) ) by XBOOLE_1:23
+.= ( ( C14 "/\" C15 ) \/ ( C14 /\ C16 ) ) by L26
+.= ( ( C14 "/\" C15 ) \/ ( C14 "/\" C16 ) ) by L26
+.= ( ( C14 "/\" C15 ) "\/" ( C14 "/\" C16 ) ) by L26;
+end;
+thus L64: thesis by L62 , L55;
+end;
+end;
+theorem
+L66: (for R1 being set holds (for B11 being (Element of ( BooleLatt R1 )) holds ( B11 ` ) = ( R1 \ B11 )))
+proof
+let R1 being set;
+set D14 = ( BooleLatt R1 );
+let C17 being (Element of D14);
+L67: ( ( C17 ` ) "/\" C17 ) = ( Bottom D14 ) by LATTICES:20;
+L68: ( C17 "\/" ( C17 ` ) ) = ( Top D14 ) by LATTICES:21;
+L69: ( Bottom D14 ) = ( {} ) by L39;
+L70: ( Top D14 ) = R1 by L46;
+L71: ( C17 ` ) misses C17 by L67 , L69 , XBOOLE_0:def 7;
+L72: ( R1 \ C17 ) = ( ( C17 \ C17 ) \/ ( ( C17 ` ) \ C17 ) ) by L68 , L70 , XBOOLE_1:42;
+L73: ( C17 \ C17 ) = ( {} ) by XBOOLE_1:37;
+thus L74: thesis by L73 , L71 , L72 , XBOOLE_1:83;
+end;
+begin
+definition
+let C18 being Lattice;
+redefine func LattRel C18 -> (Order of (the carrier of C18));
+
+coherence
+proof
+L75: ( LattRel C18 ) = { [ B12 , B13 ] where B12 is (Element of C18) , B13 is (Element of C18) : B12 [= B13 } by FILTER_1:def 8;
+L76: ( LattRel C18 ) c= [: H1(C18) , H1(C18) :]
+proof
+let C19 , C20 being set;
+assume L77: [ C19 , C20 ] in ( LattRel C18 );
+L78: (ex B14 , B15 being (Element of C18) st ([ C19 , C20 ] = [ B14 , B15 ] & B14 [= B15)) by L77 , L75;
+thus L79: thesis by L78 , ZFMISC_1:87;
+end;
+reconsider D15 = ( LattRel C18 ) as (Relation of H1(C18)) by L76;
+L80: D15 is_reflexive_in H1(C18)
+proof
+let C21 being set;
+assume L81: C21 in H1(C18);
+reconsider D16 = C21 as (Element of C18) by L81;
+L82: D16 [= D16;
+thus L83: thesis by L82 , FILTER_1:31;
+end;
+L84: D15 is_antisymmetric_in H1(C18)
+proof
+let C22 , C23 being set;
+assume that
+L85: C22 in H1(C18)
+and
+L86: C23 in H1(C18);
+reconsider D17 = C22 , D18 = C23 as (Element of C18) by L85 , L86;
+assume that
+L87: [ C22 , C23 ] in D15
+and
+L88: [ C23 , C22 ] in D15;
+L89: D17 [= D18 by L87 , FILTER_1:31;
+L90: D18 [= D17 by L88 , FILTER_1:31;
+thus L91: thesis by L90 , L89 , LATTICES:8;
+end;
+L92: D15 is_transitive_in H1(C18)
+proof
+let C24 , C25 , C26 being set;
+assume that
+L93: C24 in H1(C18)
+and
+L94: C25 in H1(C18)
+and
+L95: C26 in H1(C18);
+reconsider D19 = C24 , D20 = C25 , D21 = C26 as (Element of C18) by L93 , L94 , L95;
+assume that
+L96: [ C24 , C25 ] in D15
+and
+L97: [ C25 , C26 ] in D15;
+L98: D19 [= D20 by L96 , FILTER_1:31;
+L99: D20 [= D21 by L97 , FILTER_1:31;
+L100: D19 [= D21 by L99 , L98 , LATTICES:7;
+thus L101: thesis by L100 , FILTER_1:31;
+end;
+L102: ( dom D15 ) = H1(C18) by L80 , ORDERS_1:13;
+L103: ( field D15 ) = H1(C18) by L80 , ORDERS_1:13;
+thus L104: thesis by L103 , L80 , L84 , L92 , L102 , PARTFUN1:def 2 , RELAT_2:def 9 , RELAT_2:def 12 , RELAT_2:def 16;
+end;
+end;
+definition
+let C27 being Lattice;
+func LattPOSet C27 ->  strict Poset equals 
+RelStr (# (the carrier of C27) , ( LattRel C27 ) #);
+correctness;
+end;
+registration
+let C28 being Lattice;
+cluster ( LattPOSet C28 ) -> non  empty;
+coherence;
+end;
+theorem
+L108: (for B16 , B17 being Lattice holds (( LattPOSet B16 ) = ( LattPOSet B17 ) implies ( the LattStr of B16 ) = ( the LattStr of B17 )))
+proof
+let C29 , C30 being Lattice;
+assume that
+L109: ( LattPOSet C29 ) = ( LattPOSet C30 );
+reconsider D22 = H2(C30) , D23 = H3(C30) as (BinOp of H1(C29)) by L109;
+L110:
+now
+let C31 , C32 being (Element of C29);
+reconsider D24 = C31 , D25 = C32 , D26 = ( C31 "\/" C32 ) as (Element of C30) by L109;
+reconsider D27 = ( D24 "\/" D25 ) as (Element of C29) by L109;
+L111: C31 [= ( C31 "\/" C32 ) by LATTICES:5;
+L112: C32 [= ( C32 "\/" C31 ) by LATTICES:5;
+L113: D24 [= ( D24 "\/" D25 ) by LATTICES:5;
+L114: D25 [= ( D25 "\/" D24 ) by LATTICES:5;
+L115: [ D24 , D26 ] in ( LattRel C30 ) by L109 , L111 , FILTER_1:31;
+L116: [ D25 , D26 ] in ( LattRel C30 ) by L109 , L112 , FILTER_1:31;
+L117: [ C31 , D27 ] in ( LattRel C29 ) by L109 , L113 , FILTER_1:31;
+L118: [ C32 , D27 ] in ( LattRel C29 ) by L109 , L114 , FILTER_1:31;
+L119: C31 [= D27 by L117 , FILTER_1:31;
+L120: C32 [= D27 by L118 , FILTER_1:31;
+L121: D24 [= D26 by L115 , FILTER_1:31;
+L122: D25 [= D26 by L116 , FILTER_1:31;
+L123: ( C31 "\/" C32 ) [= D27 by L119 , L120 , FILTER_0:6;
+L124: ( D24 "\/" D25 ) [= D26 by L121 , L122 , FILTER_0:6;
+L125: [ D27 , ( C31 "\/" C32 ) ] in ( LattRel C29 ) by L124 , L109 , FILTER_1:31;
+L126: D27 [= ( C31 "\/" C32 ) by L125 , FILTER_1:31;
+thus L127: ( H2(C29) . (C31 , C32) ) = ( D22 . (C31 , C32) ) by L126 , L123 , LATTICES:8;
+end;
+L128: H2(C29) = D22 by L110 , BINOP_1:2;
+L129:
+now
+let C33 , C34 being (Element of C29);
+reconsider D28 = C33 , D29 = C34 , D30 = ( C33 "/\" C34 ) as (Element of C30) by L109;
+reconsider D31 = ( D28 "/\" D29 ) as (Element of C29) by L109;
+L130: ( C33 "/\" C34 ) [= C33 by LATTICES:6;
+L131: ( C34 "/\" C33 ) [= C34 by LATTICES:6;
+L132: ( D28 "/\" D29 ) [= D28 by LATTICES:6;
+L133: ( D29 "/\" D28 ) [= D29 by LATTICES:6;
+L134: [ D30 , D28 ] in ( LattRel C30 ) by L109 , L130 , FILTER_1:31;
+L135: [ D30 , D29 ] in ( LattRel C30 ) by L109 , L131 , FILTER_1:31;
+L136: [ D31 , C33 ] in ( LattRel C29 ) by L109 , L132 , FILTER_1:31;
+L137: [ D31 , C34 ] in ( LattRel C29 ) by L109 , L133 , FILTER_1:31;
+L138: D31 [= C33 by L136 , FILTER_1:31;
+L139: D31 [= C34 by L137 , FILTER_1:31;
+L140: D30 [= D28 by L134 , FILTER_1:31;
+L141: D30 [= D29 by L135 , FILTER_1:31;
+L142: D31 [= ( C33 "/\" C34 ) by L138 , L139 , FILTER_0:7;
+L143: D30 [= ( D28 "/\" D29 ) by L140 , L141 , FILTER_0:7;
+L144: [ ( C33 "/\" C34 ) , D31 ] in ( LattRel C29 ) by L143 , L109 , FILTER_1:31;
+L145: ( C33 "/\" C34 ) [= D31 by L144 , FILTER_1:31;
+thus L146: ( H3(C29) . (C33 , C34) ) = ( D23 . (C33 , C34) ) by L145 , L142 , LATTICES:8;
+end;
+thus L147: thesis by L129 , L109 , L128 , BINOP_1:2;
+end;
+definition
+let C35 being Lattice;
+let C36 being (Element of C35);
+func C36 % -> (Element of ( LattPOSet C35 )) equals 
+C36;
+correctness;
+end;
+definition
+let C37 being Lattice;
+let C38 being (Element of ( LattPOSet C37 ));
+func % C38 -> (Element of C37) equals 
+C38;
+correctness;
+end;
+theorem
+L150: (for R7 being Lattice holds (for R8 being (Element of R7) holds (for R9 being (Element of R7) holds (R8 [= R9 iff ( R8 % ) <= ( R9 % )))))
+proof
+let R7 being Lattice;
+let R8 being (Element of R7);
+let R9 being (Element of R7);
+L151: (R8 [= R9 iff [ R8 , R9 ] in ( LattRel R7 )) by FILTER_1:31;
+thus L152: thesis by L151 , ORDERS_2:def 5;
+end;
+definition
+let C39 being set;
+let C40 being (Order of C39);
+redefine func C40 ~ -> (Order of C39);
+
+coherence
+proof
+L153: ( dom C40 ) = ( dom ( C40 ~ ) ) by RELAT_2:12;
+L154: ( dom C40 ) = C39 by PARTFUN1:def 2;
+thus L155: thesis by L154 , L153 , PARTFUN1:def 2;
+end;
+end;
+definition
+let C41 being RelStr;
+func C41 ~ ->  strict RelStr equals 
+RelStr (# (the carrier of C41) , ( (the InternalRel of C41) ~ ) #);
+correctness;
+end;
+registration
+let C42 being Poset;
+cluster ( C42 ~ ) ->  reflexive  transitive  antisymmetric;
+coherence
+proof
+L158: ( C42 ~ ) = RelStr (# (the carrier of C42) , ( (the InternalRel of C42) ~ ) #);
+thus L159: thesis by L158;
+end;
+end;
+registration
+let C43 being non  empty RelStr;
+cluster ( C43 ~ ) -> non  empty;
+coherence;
+end;
+theorem
+L162: (for R10 being RelStr holds ( ( R10 ~ ) ~ ) = ( the RelStr of R10 ));
+definition
+let C44 being RelStr;
+let C45 being (Element of C44);
+func C45 ~ -> (Element of ( C44 ~ )) equals 
+C45;
+correctness;
+end;
+definition
+let C46 being RelStr;
+let C47 being (Element of ( C46 ~ ));
+func ~ C47 -> (Element of C46) equals 
+C47;
+correctness;
+end;
+theorem
+L165: (for R10 being RelStr holds (for R11 being (Element of R10) holds (for R12 being (Element of R10) holds (R11 <= R12 iff ( R12 ~ ) <= ( R11 ~ )))))
+proof
+let R10 being RelStr;
+let R11 being (Element of R10);
+let R12 being (Element of R10);
+L166: (R11 <= R12 iff [ R11 , R12 ] in (the InternalRel of R10)) by ORDERS_2:def 5;
+L167: (( R12 ~ ) <= ( R11 ~ ) iff [ ( R12 ~ ) , ( R11 ~ ) ] in (the InternalRel of ( R10 ~ ))) by ORDERS_2:def 5;
+thus L168: thesis by L167 , L166 , RELAT_1:def 7;
+end;
+definition
+let C48 being RelStr;
+let C49 being set;
+let C50 being (Element of C48);
+pred C50 is_<=_than C49
+means
+(for B18 being (Element of C48) holds (B18 in C49 implies C50 <= B18))
+;pred C49 is_<=_than C50
+means
+:L169: (for B19 being (Element of C48) holds (B19 in C49 implies B19 <= C50))
+;end;
+notation
+let C51 being RelStr;
+let C52 being set;
+let C53 being (Element of C51);
+synonym C52 is_>=_than C53 for C53 is_<=_than C52;
+synonym C53 is_>=_than C52 for C52 is_<=_than C53;
+end;
+definition
+let C54 being RelStr;
+attr C54 is  with_suprema
+means
+:L172: (for B20 , B21 being (Element of C54) holds (ex B22 being (Element of C54) st (B20 <= B22 & B21 <= B22 & (for B23 being (Element of C54) holds ((B20 <= B23 & B21 <= B23) implies B22 <= B23)))));
+attr C54 is  with_infima
+means
+:L173: (for B24 , B25 being (Element of C54) holds (ex B26 being (Element of C54) st (B26 <= B24 & B26 <= B25 & (for B27 being (Element of C54) holds ((B27 <= B24 & B27 <= B25) implies B27 <= B26)))));
+end;
+registration
+cluster  with_suprema -> non  empty for RelStr;
+coherence
+proof
+let C55 being RelStr;
+assume that
+L175: (for B28 , B29 being (Element of C55) holds (ex B30 being (Element of C55) st (B28 <= B30 & B29 <= B30 & (for B31 being (Element of C55) holds ((B28 <= B31 & B29 <= B31) implies B30 <= B31)))));
+set D32 = the (Element of C55);
+consider C56 being (Element of C55) such that L176: D32 <= C56 and L177: D32 <= C56 and L178: (for B32 being (Element of C55) holds ((D32 <= B32 & D32 <= B32) implies C56 <= B32)) by L175;
+L179: [ D32 , C56 ] in (the InternalRel of C55) by L176 , ORDERS_2:def 5;
+thus L180: thesis by L179;
+end;
+cluster  with_infima -> non  empty for RelStr;
+coherence
+proof
+let C57 being RelStr;
+assume that
+L181: (for B33 , B34 being (Element of C57) holds (ex B35 being (Element of C57) st (B33 >= B35 & B34 >= B35 & (for B36 being (Element of C57) holds ((B33 >= B36 & B34 >= B36) implies B35 >= B36)))));
+set D33 = the (Element of C57);
+consider C58 being (Element of C57) such that L182: D33 >= C58 and L183: D33 >= C58 and L184: (for B37 being (Element of C57) holds ((D33 >= B37 & D33 >= B37) implies C58 >= B37)) by L181;
+L185: [ C58 , D33 ] in (the InternalRel of C57) by L182 , ORDERS_2:def 5;
+thus L186: thesis by L185;
+end;
+end;
+theorem
+L188: (for R10 being RelStr holds (R10 is  with_suprema iff ( R10 ~ ) is  with_infima))
+proof
+let R10 being RelStr;
+thus L189: (R10 is  with_suprema implies ( R10 ~ ) is  with_infima)
+proof
+assume L190: (for R11 being (Element of R10) holds (for R12 being (Element of R10) holds (ex R13 being (Element of R10) st (R11 <= R13 & R12 <= R13 & (for B38 being (Element of R10) holds ((R11 <= B38 & R12 <= B38) implies R13 <= B38))))));
+let C59 , C60 being (Element of ( R10 ~ ));
+consider R13 being (Element of R10) such that L191: ( ~ C59 ) <= R13 and L192: ( ~ C60 ) <= R13 and L193: (for B39 being (Element of R10) holds ((( ~ C59 ) <= B39 & ( ~ C60 ) <= B39) implies R13 <= B39)) by L190;
+take D34 = ( R13 ~ );
+L194: ( ( ~ C59 ) ~ ) = ( ~ C59 );
+L195: ( ( ~ C60 ) ~ ) = ( ~ C60 );
+thus L196: (D34 <= C59 & D34 <= C60) by L195 , L191 , L192 , L194 , L165;
+let C61 being (Element of ( R10 ~ ));
+L197: ( ( ~ C61 ) ~ ) = ( ~ C61 );
+assume that
+L198: C61 <= C59
+and
+L199: C61 <= C60;
+L200: ( ~ C59 ) <= ( ~ C61 ) by L194 , L197 , L198 , L165;
+L201: ( ~ C60 ) <= ( ~ C61 ) by L195 , L197 , L199 , L165;
+L202: R13 <= ( ~ C61 ) by L201 , L193 , L200;
+thus L203: thesis by L202 , L197 , L165;
+end;
+
+assume L204: (for B40 , B41 being (Element of ( R10 ~ )) holds (ex B42 being (Element of ( R10 ~ )) st (B42 <= B40 & B42 <= B41 & (for B43 being (Element of ( R10 ~ )) holds ((B43 <= B40 & B43 <= B41) implies B43 <= B42)))));
+let R11 being (Element of R10);
+let R12 being (Element of R10);
+consider C62 being (Element of ( R10 ~ )) such that L205: C62 <= ( R11 ~ ) and L206: C62 <= ( R12 ~ ) and L207: (for B44 being (Element of ( R10 ~ )) holds ((B44 <= ( R11 ~ ) & B44 <= ( R12 ~ )) implies B44 <= C62)) by L204;
+take D35 = ( ~ C62 );
+L208: ( ( ~ C62 ) ~ ) = ( ~ C62 );
+thus L209: (R11 <= D35 & R12 <= D35) by L208 , L205 , L206 , L165;
+let C63 being (Element of R10);
+assume that
+L210: R11 <= C63
+and
+L211: R12 <= C63;
+L212: ( C63 ~ ) <= ( R11 ~ ) by L210 , L165;
+L213: ( C63 ~ ) <= ( R12 ~ ) by L211 , L165;
+L214: ( C63 ~ ) <= C62 by L213 , L207 , L212;
+thus L215: thesis by L214 , L208 , L165;
+end;
+theorem
+L216: (for B45 being Lattice holds ( LattPOSet B45 ) is  with_suprema  with_infima)
+proof
+let R7 being Lattice;
+thus L217: ( LattPOSet R7 ) is  with_suprema
+proof
+let C64 , C65 being (Element of ( LattPOSet R7 ));
+take D36 = ( ( ( % C64 ) "\/" ( % C65 ) ) % );
+L218: ( % C64 ) [= ( ( % C64 ) "\/" ( % C65 ) ) by LATTICES:5;
+L219: ( % C65 ) [= ( ( % C65 ) "\/" ( % C64 ) ) by LATTICES:5;
+L220: ( ( % C64 ) % ) = ( % C64 );
+L221: ( ( % C65 ) % ) = ( % C65 );
+thus L222: (C64 <= D36 & C65 <= D36) by L221 , L218 , L219 , L220 , L150;
+let C66 being (Element of ( LattPOSet R7 ));
+L223: ( ( % C66 ) % ) = ( % C66 );
+assume that
+L224: C64 <= C66
+and
+L225: C65 <= C66;
+L226: ( % C64 ) [= ( % C66 ) by L220 , L223 , L224 , L150;
+L227: ( % C65 ) [= ( % C66 ) by L221 , L223 , L225 , L150;
+L228: ( ( % C64 ) "\/" ( % C65 ) ) [= ( % C66 ) by L227 , L226 , FILTER_0:6;
+thus L229: thesis by L228 , L223 , L150;
+end;
+
+let C67 , C68 being (Element of ( LattPOSet R7 ));
+take D37 = ( ( ( % C67 ) "/\" ( % C68 ) ) % );
+L230: ( ( % C67 ) "/\" ( % C68 ) ) [= ( % C67 ) by LATTICES:6;
+L231: ( ( % C68 ) "/\" ( % C67 ) ) [= ( % C68 ) by LATTICES:6;
+L232: ( ( % C67 ) % ) = ( % C67 );
+L233: ( ( % C68 ) % ) = ( % C68 );
+thus L234: (D37 <= C67 & D37 <= C68) by L233 , L230 , L231 , L232 , L150;
+let C69 being (Element of ( LattPOSet R7 ));
+L235: ( ( % C69 ) % ) = ( % C69 );
+assume that
+L236: C69 <= C67
+and
+L237: C69 <= C68;
+L238: ( % C69 ) [= ( % C67 ) by L232 , L235 , L236 , L150;
+L239: ( % C69 ) [= ( % C68 ) by L233 , L235 , L237 , L150;
+L240: ( % C69 ) [= ( ( % C67 ) "/\" ( % C68 ) ) by L239 , L238 , FILTER_0:7;
+thus L241: thesis by L240 , L235 , L150;
+end;
+definition
+let C70 being RelStr;
+attr C70 is  complete
+means
+:L242: (for B46 being set holds (ex B47 being (Element of C70) st (B46 is_<=_than B47 & (for B48 being (Element of C70) holds (B46 is_<=_than B48 implies B47 <= B48)))));
+end;
+registration
+cluster  strict  complete non  empty for Poset;
+existence
+proof
+set D38 = the set;
+set D39 = { D38 };
+set D40 = the (Order of D39);
+take D41 = RelStr (# D39 , D40 #);
+thus L244: D41 is  strict;
+thus L245:now
+let C71 being set;
+reconsider D42 = D38 as (Element of D41) by TARSKI:def 1;
+take D43 = D42;
+thus L246: C71 is_<=_than D43
+proof
+let C72 being (Element of D41);
+assume that
+L247: C72 in C71;
+thus L248: C72 <= D43 by TARSKI:def 1;
+end;
+
+let C73 being (Element of D41);
+assume that
+L249: C71 is_<=_than C73;
+thus L250: D43 <= C73 by TARSKI:def 1;
+end;
+thus L251: thesis;
+end;
+end;
+theorem
+L253: (for R14 being non  empty RelStr holds (R14 is  complete implies R14 is  with_suprema  with_infima))
+proof
+let R14 being non  empty RelStr;
+assume L254: (for B49 being set holds (ex R15 being (Element of R14) st (B49 is_<=_than R15 & (for R16 being (Element of R14) holds (B49 is_<=_than R16 implies R15 <= R16)))));
+thus L255: R14 is  with_suprema
+proof
+let R15 being (Element of R14);
+let R16 being (Element of R14);
+consider R17 being (Element of R14) such that L256: { R15 , R16 } is_<=_than R17 and L257: (for R18 being (Element of R14) holds ({ R15 , R16 } is_<=_than R18 implies R17 <= R18)) by L254;
+take R17;
+L258: R15 in { R15 , R16 } by TARSKI:def 2;
+L259: R16 in { R15 , R16 } by TARSKI:def 2;
+thus L260: (R15 <= R17 & R16 <= R17) by L259 , L256 , L258 , L169;
+let R18 being (Element of R14);
+assume that
+L261: R15 <= R18
+and
+L262: R16 <= R18;
+L263: { R15 , R16 } is_<=_than R18
+proof
+let C74 being (Element of R14);
+assume L264: C74 in { R15 , R16 };
+thus L265: thesis by L264 , L261 , L262 , TARSKI:def 2;
+end;
+thus L266: thesis by L263 , L257;
+end;
+
+let R15 being (Element of R14);
+let R16 being (Element of R14);
+set D44 = { R17 where R17 is (Element of R14) : (R17 <= R15 & R17 <= R16) };
+consider R17 being (Element of R14) such that L267: D44 is_<=_than R17 and L268: (for R18 being (Element of R14) holds (D44 is_<=_than R18 implies R17 <= R18)) by L254;
+take R17;
+L269: D44 is_<=_than R15
+proof
+let R17 being (Element of R14);
+assume L270: R17 in D44;
+L271: (ex R18 being (Element of R14) st (R17 = R18 & R18 <= R15 & R18 <= R16)) by L270;
+thus L272: thesis by L271;
+end;
+thus L273: R17 <= R15 by L269 , L268;
+L274: D44 is_<=_than R16
+proof
+let R17 being (Element of R14);
+assume L275: R17 in D44;
+L276: (ex R18 being (Element of R14) st (R17 = R18 & R18 <= R15 & R18 <= R16)) by L275;
+thus L277: thesis by L276;
+end;
+thus L278: R17 <= R16 by L274 , L268;
+let R18 being (Element of R14);
+assume that
+L279: R18 <= R15
+and
+L280: R18 <= R16;
+L281: R18 in D44 by L279 , L280;
+thus L282: thesis by L281 , L267 , L169;
+end;
+registration
+cluster  complete  with_suprema  with_infima  strict non  empty for Poset;
+existence
+proof
+set D45 = the  complete  strict non  empty Poset;
+take D45;
+thus L283: thesis by L253;
+end;
+end;
+definition
+let C75 being RelStr;
+assume that
+L285: C75 is  antisymmetric;
+let C76 , C77 being (Element of C75);
+assume that
+L286: (ex B50 being (Element of C75) st (C76 <= B50 & C77 <= B50 & (for B51 being (Element of C75) holds ((C76 <= B51 & C77 <= B51) implies B50 <= B51))));
+func C76 "\/" C77 -> (Element of C75) means 
+:L287: (C76 <= it & C77 <= it & (for B52 being (Element of C75) holds ((C76 <= B52 & C77 <= B52) implies it <= B52)));
+existence by L286;
+uniqueness
+proof
+let C78 , C79 being (Element of C75);
+assume that
+L288: C76 <= C78
+and
+L289: C77 <= C78
+and
+L290: (for B53 being (Element of C75) holds ((C76 <= B53 & C77 <= B53) implies C78 <= B53))
+and
+L291: C76 <= C79
+and
+L292: C77 <= C79
+and
+L293: (for B54 being (Element of C75) holds ((C76 <= B54 & C77 <= B54) implies C79 <= B54));
+L294: C78 <= C79 by L290 , L291 , L292;
+L295: C79 <= C78 by L288 , L289 , L293;
+thus L296: thesis by L295 , L285 , L294 , ORDERS_2:2;
+end;
+end;
+L298:
+now
+let C80 being non  empty  antisymmetric  with_suprema RelStr;
+let C81 , C82 being (Element of C80);
+L299: (ex B55 being (Element of C80) st (C81 <= B55 & C82 <= B55 & (for B56 being (Element of C80) holds ((C81 <= B56 & C82 <= B56) implies B55 <= B56)))) by L172;
+thus L300: (for B57 being (Element of C80) holds (B57 = ( C81 "\/" C82 ) iff (C81 <= B57 & C82 <= B57 & (for B58 being (Element of C80) holds ((C81 <= B58 & C82 <= B58) implies B57 <= B58))))) by L299 , L287;
+end;
+definition
+let C83 being RelStr;
+assume that
+L301: C83 is  antisymmetric;
+let C84 , C85 being (Element of C83);
+assume that
+L302: (ex B59 being (Element of C83) st (C84 >= B59 & C85 >= B59 & (for B60 being (Element of C83) holds ((C84 >= B60 & C85 >= B60) implies B59 >= B60))));
+func C84 "/\" C85 -> (Element of C83) means 
+:L303: (it <= C84 & it <= C85 & (for B61 being (Element of C83) holds ((B61 <= C84 & B61 <= C85) implies B61 <= it)));
+existence by L302;
+uniqueness
+proof
+let C86 , C87 being (Element of C83);
+assume that
+L304: C86 <= C84
+and
+L305: C86 <= C85
+and
+L306: (for B62 being (Element of C83) holds ((B62 <= C84 & B62 <= C85) implies B62 <= C86))
+and
+L307: C87 <= C84
+and
+L308: C87 <= C85
+and
+L309: (for B63 being (Element of C83) holds ((B63 <= C84 & B63 <= C85) implies B63 <= C87));
+L310: C86 <= C87 by L304 , L305 , L309;
+L311: C87 <= C86 by L306 , L307 , L308;
+thus L312: thesis by L311 , L301 , L310 , ORDERS_2:2;
+end;
+end;
+L314:
+now
+let C88 being non  empty  antisymmetric  with_infima RelStr;
+let C89 , C90 being (Element of C88);
+L315: (ex B64 being (Element of C88) st (C89 >= B64 & C90 >= B64 & (for B65 being (Element of C88) holds ((C89 >= B65 & C90 >= B65) implies B64 >= B65)))) by L173;
+thus L316: (for B66 being (Element of C88) holds (B66 = ( C89 "/\" C90 ) iff (C89 >= B66 & C90 >= B66 & (for B67 being (Element of C88) holds ((C89 >= B67 & C90 >= B67) implies B66 >= B67))))) by L315 , L303;
+end;
+theorem
+L317: (for R19 being  with_suprema  antisymmetric RelStr holds (for R20 being (Element of R19) holds (for R21 being (Element of R19) holds ( R20 "\/" R21 ) = ( R21 "\/" R20 ))))
+proof
+let R19 being  with_suprema  antisymmetric RelStr;
+let R20 being (Element of R19);
+let R21 being (Element of R19);
+L318: R20 <= ( R20 "\/" R21 ) by L298;
+L319: R21 <= ( R20 "\/" R21 ) by L298;
+L320: (for R22 being (Element of R19) holds ((R21 <= R22 & R20 <= R22) implies ( R20 "\/" R21 ) <= R22)) by L298;
+thus L321: thesis by L320 , L318 , L319 , L287;
+end;
+theorem
+L322: (for R19 being  with_suprema  antisymmetric RelStr holds (for R20 being (Element of R19) holds (for R21 being (Element of R19) holds (for R22 being (Element of R19) holds (R19 is  transitive implies ( ( R20 "\/" R21 ) "\/" R22 ) = ( R20 "\/" ( R21 "\/" R22 ) ))))))
+proof
+let R19 being  with_suprema  antisymmetric RelStr;
+let R20 being (Element of R19);
+let R21 being (Element of R19);
+let R22 being (Element of R19);
+assume L323: R19 is  transitive;
+L324: R20 <= ( R20 "\/" R21 ) by L298;
+L325: R21 <= ( R20 "\/" R21 ) by L298;
+L326: R21 <= ( R21 "\/" R22 ) by L298;
+L327: R22 <= ( R21 "\/" R22 ) by L298;
+L328: ( R20 "\/" R21 ) <= ( ( R20 "\/" R21 ) "\/" R22 ) by L298;
+L329: R22 <= ( ( R20 "\/" R21 ) "\/" R22 ) by L298;
+L330: R20 <= ( ( R20 "\/" R21 ) "\/" R22 ) by L323 , L324 , L328 , ORDERS_2:3;
+L331: R21 <= ( ( R20 "\/" R21 ) "\/" R22 ) by L323 , L325 , L328 , ORDERS_2:3;
+L332: ( R21 "\/" R22 ) <= ( ( R20 "\/" R21 ) "\/" R22 ) by L331 , L329 , L298;
+L333:
+now
+let R23 being (Element of R19);
+assume that
+L334: R20 <= R23
+and
+L335: ( R21 "\/" R22 ) <= R23;
+L336: R21 <= R23 by L323 , L326 , L335 , ORDERS_2:3;
+L337: R22 <= R23 by L323 , L327 , L335 , ORDERS_2:3;
+L338: ( R20 "\/" R21 ) <= R23 by L334 , L336 , L298;
+thus L339: ( ( R20 "\/" R21 ) "\/" R22 ) <= R23 by L338 , L337 , L298;
+end;
+thus L340: thesis by L333 , L330 , L332 , L287;
+end;
+theorem
+L341: (for R24 being  with_infima  antisymmetric RelStr holds (for R25 being (Element of R24) holds (for R26 being (Element of R24) holds ( R25 "/\" R26 ) = ( R26 "/\" R25 ))))
+proof
+let R24 being  with_infima  antisymmetric RelStr;
+let R25 being (Element of R24);
+let R26 being (Element of R24);
+L342: ( R25 "/\" R26 ) <= R25 by L314;
+L343: ( R25 "/\" R26 ) <= R26 by L314;
+L344: (for R27 being (Element of R24) holds ((R27 <= R26 & R27 <= R25) implies R27 <= ( R25 "/\" R26 ))) by L314;
+thus L345: thesis by L344 , L342 , L343 , L303;
+end;
+theorem
+L346: (for R24 being  with_infima  antisymmetric RelStr holds (for R25 being (Element of R24) holds (for R26 being (Element of R24) holds (for R27 being (Element of R24) holds (R24 is  transitive implies ( ( R25 "/\" R26 ) "/\" R27 ) = ( R25 "/\" ( R26 "/\" R27 ) ))))))
+proof
+let R24 being  with_infima  antisymmetric RelStr;
+let R25 being (Element of R24);
+let R26 being (Element of R24);
+let R27 being (Element of R24);
+assume L347: R24 is  transitive;
+L348: ( R25 "/\" R26 ) <= R25 by L314;
+L349: ( R25 "/\" R26 ) <= R26 by L314;
+L350: ( R26 "/\" R27 ) <= R26 by L314;
+L351: ( R26 "/\" R27 ) <= R27 by L314;
+L352: ( ( R25 "/\" R26 ) "/\" R27 ) <= ( R25 "/\" R26 ) by L314;
+L353: ( ( R25 "/\" R26 ) "/\" R27 ) <= R27 by L314;
+L354: ( ( R25 "/\" R26 ) "/\" R27 ) <= R25 by L347 , L348 , L352 , ORDERS_2:3;
+L355: ( ( R25 "/\" R26 ) "/\" R27 ) <= R26 by L347 , L349 , L352 , ORDERS_2:3;
+L356: ( ( R25 "/\" R26 ) "/\" R27 ) <= ( R26 "/\" R27 ) by L355 , L353 , L314;
+L357:
+now
+let R28 being (Element of R24);
+assume that
+L358: R28 <= R25
+and
+L359: R28 <= ( R26 "/\" R27 );
+L360: R28 <= R26 by L347 , L350 , L359 , ORDERS_2:3;
+L361: R28 <= R27 by L347 , L351 , L359 , ORDERS_2:3;
+L362: R28 <= ( R25 "/\" R26 ) by L358 , L360 , L314;
+thus L363: R28 <= ( ( R25 "/\" R26 ) "/\" R27 ) by L362 , L361 , L314;
+end;
+thus L364: thesis by L357 , L354 , L356 , L303;
+end;
+definition
+let C91 being  with_infima  antisymmetric RelStr;
+let C92 , C93 being (Element of C91);
+redefine func C92 "/\" C93;
+
+commutativity
+ by L341;
+end;
+definition
+let C94 being  with_suprema  antisymmetric RelStr;
+let C95 , C96 being (Element of C94);
+redefine func C95 "\/" C96;
+
+commutativity
+ by L317;
+end;
+theorem
+L367: (for R29 being  with_suprema  with_infima  reflexive  antisymmetric RelStr holds (for R30 being (Element of R29) holds (for R31 being (Element of R29) holds ( ( R30 "/\" R31 ) "\/" R31 ) = R31)))
+proof
+let R29 being  with_suprema  with_infima  reflexive  antisymmetric RelStr;
+let R30 being (Element of R29);
+let R31 being (Element of R29);
+L368: ( R30 "/\" R31 ) <= R31 by L314;
+L369: R31 <= R31;
+L370: (for R32 being (Element of R29) holds ((( R30 "/\" R31 ) <= R32 & R31 <= R32) implies R31 <= R32));
+thus L371: thesis by L370 , L368 , L369 , L287;
+end;
+theorem
+L372: (for R29 being  with_suprema  with_infima  reflexive  antisymmetric RelStr holds (for R30 being (Element of R29) holds (for R31 being (Element of R29) holds ( R30 "/\" ( R30 "\/" R31 ) ) = R30)))
+proof
+let R29 being  with_suprema  with_infima  reflexive  antisymmetric RelStr;
+let R30 being (Element of R29);
+let R31 being (Element of R29);
+L373: R30 <= R30;
+L374: R30 <= ( R30 "\/" R31 ) by L298;
+L375: (for R32 being (Element of R29) holds ((R32 <= R30 & R32 <= ( R30 "\/" R31 )) implies R32 <= R30));
+thus L376: thesis by L375 , L373 , L374 , L303;
+end;
+theorem
+L377: (for B68 being  with_suprema  with_infima Poset holds (ex B69 being  strict Lattice st ( the RelStr of B68 ) = ( LattPOSet B69 )))
+proof
+let C97 being  with_suprema  with_infima Poset;
+defpred S1[ (Element of C97) , (Element of C97) , set ] means (for B70 , B71 being (Element of C97) holds ((B70 = $1 & B71 = $2) implies $3 = ( B70 "\/" B71 )));
+L378: (for B72 , B73 being (Element of C97) holds (ex B74 being (Element of C97) st S1[ B72 , B73 , B74 ]))
+proof
+let C98 , C99 being (Element of C97);
+reconsider D46 = C98 , D47 = C99 as (Element of C97);
+take ( D46 "\/" D47 );
+thus L379: thesis;
+end;
+consider C100 being (BinOp of (the carrier of C97)) such that L380: (for B75 , B76 being (Element of C97) holds S1[ B75 , B76 , ( C100 . (B75 , B76) ) ]) from BINOP_1:sch 3(L378);
+defpred S2[ (Element of C97) , (Element of C97) , set ] means (for B77 , B78 being (Element of C97) holds ((B77 = $1 & B78 = $2) implies $3 = ( B77 "/\" B78 )));
+L381: (for B79 , B80 being (Element of C97) holds (ex B81 being (Element of C97) st S2[ B79 , B80 , B81 ]))
+proof
+let C101 , C102 being (Element of C97);
+reconsider D48 = C101 , D49 = C102 as (Element of C97);
+take ( D48 "/\" D49 );
+thus L382: thesis;
+end;
+consider C103 being (BinOp of (the carrier of C97)) such that L383: (for B82 , B83 being (Element of C97) holds S2[ B82 , B83 , ( C103 . (B82 , B83) ) ]) from BINOP_1:sch 3(L381);
+set D50 = LattStr (# (the carrier of C97) , C100 , C103 #);
+L384:
+now
+let C104 , C105 being (Element of D50);
+reconsider D51 = C104 , D52 = C105 as (Element of C97);
+L385: ( C100 . (D51 , D52) ) = ( D51 "\/" D52 ) by L380;
+thus L386: ( C104 "\/" C105 ) = ( C105 "\/" C104 ) by L385 , L380;
+end;
+L387:
+now
+let C106 , C107 , C108 being (Element of D50);
+reconsider D53 = C106 , D54 = C107 , D55 = C108 as (Element of C97);
+thus L388: ( C106 "\/" ( C107 "\/" C108 ) ) = ( C100 . (D53 , ( D54 "\/" D55 )) ) by L380
+.= ( D53 "\/" ( D54 "\/" D55 ) ) by L380
+.= ( ( D53 "\/" D54 ) "\/" D55 ) by L322
+.= ( C100 . (( D53 "\/" D54 ) , D55) ) by L380
+.= ( ( C106 "\/" C107 ) "\/" C108 ) by L380;
+end;
+L389:
+now
+let C109 , C110 being (Element of D50);
+reconsider D56 = C109 , D57 = C110 as (Element of C97);
+thus L390: ( ( C109 "/\" C110 ) "\/" C110 ) = ( C100 . (( D56 "/\" D57 ) , D57) ) by L383
+.= ( ( D56 "/\" D57 ) "\/" D57 ) by L380
+.= C110 by L367;
+end;
+L391:
+now
+let C111 , C112 being (Element of D50);
+reconsider D58 = C111 , D59 = C112 as (Element of C97);
+L392: ( C103 . (D58 , D59) ) = ( D58 "/\" D59 ) by L383;
+thus L393: ( C111 "/\" C112 ) = ( C112 "/\" C111 ) by L392 , L383;
+end;
+L394:
+now
+let C113 , C114 , C115 being (Element of D50);
+reconsider D60 = C113 , D61 = C114 , D62 = C115 as (Element of C97);
+thus L395: ( C113 "/\" ( C114 "/\" C115 ) ) = ( C103 . (D60 , ( D61 "/\" D62 )) ) by L383
+.= ( D60 "/\" ( D61 "/\" D62 ) ) by L383
+.= ( ( D60 "/\" D61 ) "/\" D62 ) by L346
+.= ( C103 . (( D60 "/\" D61 ) , D62) ) by L383
+.= ( ( C113 "/\" C114 ) "/\" C115 ) by L383;
+end;
+L396:
+now
+let C116 , C117 being (Element of D50);
+reconsider D63 = C116 , D64 = C117 as (Element of C97);
+thus L397: ( C116 "/\" ( C116 "\/" C117 ) ) = ( C103 . (D63 , ( D63 "\/" D64 )) ) by L380
+.= ( D63 "/\" ( D63 "\/" D64 ) ) by L383
+.= C116 by L372;
+end;
+L398: D50 is  join-commutative  join-associative  meet-absorbing  meet-commutative  meet-associative  join-absorbing by L396 , L384 , L387 , L389 , L391 , L394 , LATTICES:def 4 , LATTICES:def 5 , LATTICES:def 6 , LATTICES:def 7 , LATTICES:def 8 , LATTICES:def 9;
+reconsider D65 = D50 as  strict Lattice by L398;
+take D65;
+L399: ( LattRel D65 ) = { [ B84 , B85 ] where B84 is (Element of D65) , B85 is (Element of D65) : B84 [= B85 } by FILTER_1:def 8;
+L400: ( LattRel D65 ) = (the InternalRel of C97)
+proof
+let C118 , C119 being set;
+thus L401: ([ C118 , C119 ] in ( LattRel D65 ) implies [ C118 , C119 ] in (the InternalRel of C97))
+proof
+assume L402: [ C118 , C119 ] in ( LattRel D65 );
+consider C120 , C121 being (Element of D65) such that L403: [ C118 , C119 ] = [ C120 , C121 ] and L404: C120 [= C121 by L402 , L399;
+reconsider D66 = C120 , D67 = C121 as (Element of C97);
+L405: ( D66 "\/" D67 ) = ( C120 "\/" C121 ) by L380
+.= C121 by L404 , LATTICES:def 3;
+L406: D66 <= D67 by L405 , L298;
+thus L407: thesis by L406 , L403 , ORDERS_2:def 5;
+end;
+
+assume L408: [ C118 , C119 ] in (the InternalRel of C97);
+consider C122 , C123 being set such that L409: C122 in (the carrier of C97) and L410: C123 in (the carrier of C97) and L411: [ C118 , C119 ] = [ C122 , C123 ] by L408 , ZFMISC_1:84;
+reconsider D68 = C122 , D69 = C123 as (Element of C97) by L409 , L410;
+reconsider D70 = D68 , D71 = D69 as (Element of D65);
+L412: D68 <= D69 by L408 , L411 , ORDERS_2:def 5;
+L413: D69 <= D69;
+L414: ( D68 "\/" D69 ) <= D69 by L413 , L412 , L298;
+L415: D69 <= ( D68 "\/" D69 ) by L298;
+L416: D69 = ( D68 "\/" D69 ) by L415 , L414 , ORDERS_2:2
+.= ( D70 "\/" D71 ) by L380;
+L417: D70 [= D71 by L416 , LATTICES:def 3;
+thus L418: thesis by L417 , L399 , L411;
+end;
+thus L419: thesis by L400;
+end;
+definition
+let C124 being RelStr;
+assume that
+L420: C124 is  with_suprema  with_infima  with_suprema  with_infima  with_suprema  with_infima  with_suprema  with_infima Poset;
+func latt C124 ->  strict Lattice means 
+:L421: ( the RelStr of C124 ) = ( LattPOSet it );
+existence by L420 , L377;
+uniqueness by L108;
+end;
+theorem
+L423: (for R7 being Lattice holds (( ( LattRel R7 ) ~ ) = ( LattRel ( R7 .: ) ) & ( ( LattPOSet R7 ) ~ ) = ( LattPOSet ( R7 .: ) )))
+proof
+let R7 being Lattice;
+L424: ( LattRel R7 ) = { [ R8 , R9 ] where R8 is (Element of R7) , R9 is (Element of R7) : R8 [= R9 } by FILTER_1:def 8;
+L425: ( LattRel ( R7 .: ) ) = { [ B86 , B87 ] where B86 is (Element of ( R7 .: )) , B87 is (Element of ( R7 .: )) : B86 [= B87 } by FILTER_1:def 8;
+L426: ( R7 .: ) = LattStr (# H1(R7) , H3(R7) , H2(R7) #) by LATTICE2:def 2;
+thus L427: ( ( LattRel R7 ) ~ ) = ( LattRel ( R7 .: ) )
+proof
+let C125 , C126 being set;
+thus L428: ([ C125 , C126 ] in ( ( LattRel R7 ) ~ ) implies [ C125 , C126 ] in ( LattRel ( R7 .: ) ))
+proof
+assume L429: [ C125 , C126 ] in ( ( LattRel R7 ) ~ );
+L430: [ C126 , C125 ] in ( LattRel R7 ) by L429 , RELAT_1:def 7;
+consider R8 being (Element of R7), R9 being (Element of R7) such that L431: [ C126 , C125 ] = [ R8 , R9 ] and L432: R8 [= R9 by L430 , L424;
+reconsider D72 = R8 , D73 = R9 as (Element of ( R7 .: )) by L426;
+L433: C125 = R9 by L431 , XTUPLE_0:1;
+L434: C126 = R8 by L431 , XTUPLE_0:1;
+L435: D73 [= D72 by L432 , LATTICE2:38;
+thus L436: thesis by L435 , L425 , L433 , L434;
+end;
+
+assume L437: [ C125 , C126 ] in ( LattRel ( R7 .: ) );
+consider C127 , C128 being (Element of ( R7 .: )) such that L438: [ C125 , C126 ] = [ C127 , C128 ] and L439: C127 [= C128 by L437 , L425;
+reconsider D74 = C127 , D75 = C128 as (Element of R7) by L426;
+L440: C125 = D74 by L438 , XTUPLE_0:1;
+L441: C126 = D75 by L438 , XTUPLE_0:1;
+L442: D75 [= D74 by L439 , LATTICE2:39;
+L443: [ C126 , C125 ] in ( LattRel R7 ) by L442 , L424 , L440 , L441;
+thus L444: thesis by L443 , RELAT_1:def 7;
+end;
+
+thus L445: thesis by L427 , L426;
+end;
+begin
+definition
+let C129 being non  empty LattStr;
+let C130 being (Element of C129);
+let C131 being set;
+pred C130 is_less_than C131
+means
+:L446: (for B88 being (Element of C129) holds (B88 in C131 implies C130 [= B88))
+;pred C131 is_less_than C130
+means
+:L447: (for B89 being (Element of C129) holds (B89 in C131 implies B89 [= C130))
+;end;
+notation
+let C132 being non  empty LattStr;
+let C133 being (Element of C132);
+let C134 being set;
+synonym C134 is_greater_than C133 for C133 is_less_than C134;
+synonym C133 is_greater_than C134 for C134 is_less_than C133;
+end;
+theorem
+L450: (for B90 being Lattice holds (for B91 , B92 , B93 being (Element of B90) holds (B91 is_less_than { B92 , B93 } iff B91 [= ( B92 "/\" B93 ))))
+proof
+let C135 being Lattice;
+let C136 , C137 , C138 being (Element of C135);
+L451: C137 in { C137 , C138 } by TARSKI:def 2;
+L452: C138 in { C137 , C138 } by TARSKI:def 2;
+thus L453: (C136 is_less_than { C137 , C138 } implies C136 [= ( C137 "/\" C138 ))
+proof
+assume L454: C136 is_less_than { C137 , C138 };
+L455: C136 [= C137 by L454 , L451 , L446;
+L456: C136 [= C138 by L452 , L454 , L446;
+thus L457: thesis by L456 , L455 , FILTER_0:7;
+end;
+
+assume L458: C136 [= ( C137 "/\" C138 );
+let C139 being (Element of C135);
+assume L459: C139 in { C137 , C138 };
+L460: (C139 = C137 or C139 = C138) by L459 , TARSKI:def 2;
+L461: ( C137 "/\" C138 ) [= C137 by LATTICES:6;
+L462: ( C138 "/\" C137 ) [= C138 by LATTICES:6;
+thus L463: thesis by L462 , L458 , L460 , L461 , LATTICES:7;
+end;
+theorem
+L464: (for B94 being Lattice holds (for B95 , B96 , B97 being (Element of B94) holds (B95 is_greater_than { B96 , B97 } iff ( B96 "\/" B97 ) [= B95)))
+proof
+let C140 being Lattice;
+let C141 , C142 , C143 being (Element of C140);
+L465: C142 in { C142 , C143 } by TARSKI:def 2;
+L466: C143 in { C142 , C143 } by TARSKI:def 2;
+thus L467: (C141 is_greater_than { C142 , C143 } implies ( C142 "\/" C143 ) [= C141)
+proof
+assume L468: C141 is_greater_than { C142 , C143 };
+L469: C142 [= C141 by L468 , L465 , L447;
+L470: C143 [= C141 by L466 , L468 , L447;
+thus L471: thesis by L470 , L469 , FILTER_0:6;
+end;
+
+assume L472: ( C142 "\/" C143 ) [= C141;
+let C144 being (Element of C140);
+assume L473: C144 in { C142 , C143 };
+L474: (C144 = C142 or C144 = C143) by L473 , TARSKI:def 2;
+L475: C142 [= ( C142 "\/" C143 ) by LATTICES:5;
+L476: C143 [= ( C143 "\/" C142 ) by LATTICES:5;
+thus L477: thesis by L476 , L472 , L474 , L475 , LATTICES:7;
+end;
+definition
+let C145 being non  empty LattStr;
+attr C145 is  complete
+means
+:L478: (for B98 being set holds (ex B99 being (Element of C145) st (B98 is_less_than B99 & (for B100 being (Element of C145) holds (B98 is_less_than B100 implies B99 [= B100)))));
+attr C145 is  \/-distributive
+means
+:L479: (for R1 being set holds (for B101 , B102 , B103 being (Element of C145) holds ((R1 is_less_than B101 & (for B104 being (Element of C145) holds (R1 is_less_than B104 implies B101 [= B104)) & { ( B102 "/\" B105 ) where B105 is (Element of C145) : B105 in R1 } is_less_than B103 & (for B106 being (Element of C145) holds ({ ( B102 "/\" B107 ) where B107 is (Element of C145) : B107 in R1 } is_less_than B106 implies B103 [= B106))) implies ( B102 "/\" B101 ) [= B103)));
+attr C145 is  /\-distributive
+means
+(for R1 being set holds (for B108 , B109 , B110 being (Element of C145) holds ((R1 is_greater_than B108 & (for B111 being (Element of C145) holds (R1 is_greater_than B111 implies B111 [= B108)) & { ( B109 "\/" B112 ) where B112 is (Element of C145) : B112 in R1 } is_greater_than B110 & (for B113 being (Element of C145) holds ({ ( B109 "\/" B114 ) where B114 is (Element of C145) : B114 in R1 } is_greater_than B113 implies B113 [= B110))) implies B110 [= ( B109 "\/" B108 ))));
+end;
+theorem
+L481: (for R1 being set holds (for B115 being B_Lattice holds (for B116 being (Element of B115) holds (R1 is_less_than B116 iff { ( B117 ` ) where B117 is (Element of B115) : B117 in R1 } is_greater_than ( B116 ` )))))
+proof
+let R1 being set;
+let C146 being B_Lattice;
+let C147 being (Element of C146);
+set D76 = { ( B118 ` ) where B118 is (Element of C146) : B118 in R1 };
+thus L482: (R1 is_less_than C147 implies D76 is_greater_than ( C147 ` ))
+proof
+assume L483: (for B119 being (Element of C146) holds (B119 in R1 implies B119 [= C147));
+let C148 being (Element of C146);
+assume L484: C148 in D76;
+L485: (ex B120 being (Element of C146) st (C148 = ( B120 ` ) & B120 in R1)) by L484;
+thus L486: thesis by L485 , L483 , LATTICES:26;
+end;
+
+assume L487: (for B121 being (Element of C146) holds (B121 in D76 implies ( C147 ` ) [= B121));
+let C149 being (Element of C146);
+assume L488: C149 in R1;
+L489: ( C149 ` ) in D76 by L488;
+L490: ( ( C147 ` ) ` ) = C147;
+L491: ( ( C149 ` ) ` ) = C149;
+thus L492: thesis by L491 , L487 , L489 , L490 , LATTICES:26;
+end;
+theorem
+L493: (for R1 being set holds (for B122 being B_Lattice holds (for B123 being (Element of B122) holds (R1 is_greater_than B123 iff { ( B124 ` ) where B124 is (Element of B122) : B124 in R1 } is_less_than ( B123 ` )))))
+proof
+let R1 being set;
+let C150 being B_Lattice;
+let C151 being (Element of C150);
+set D77 = { ( B125 ` ) where B125 is (Element of C150) : B125 in R1 };
+thus L494: (R1 is_greater_than C151 implies D77 is_less_than ( C151 ` ))
+proof
+assume L495: (for B126 being (Element of C150) holds (B126 in R1 implies C151 [= B126));
+let C152 being (Element of C150);
+assume L496: C152 in D77;
+L497: (ex B127 being (Element of C150) st (C152 = ( B127 ` ) & B127 in R1)) by L496;
+thus L498: thesis by L497 , L495 , LATTICES:26;
+end;
+
+assume L499: (for B128 being (Element of C150) holds (B128 in D77 implies B128 [= ( C151 ` )));
+let C153 being (Element of C150);
+assume L500: C153 in R1;
+L501: ( C153 ` ) in D77 by L500;
+L502: ( ( C151 ` ) ` ) = C151;
+L503: ( ( C153 ` ) ` ) = C153;
+thus L504: thesis by L503 , L499 , L501 , L502 , LATTICES:26;
+end;
+theorem
+L505: (for R1 being set holds ( BooleLatt R1 ) is  complete)
+proof
+let R1 being set;
+set D78 = ( BooleLatt R1 );
+let C154 being set;
+set D79 = ( union ( C154 /\ ( bool R1 ) ) );
+L506: H1(D78) = ( bool R1 ) by L1;
+reconsider D80 = D79 as (Element of D78) by L1;
+take D80;
+thus L507: C154 is_less_than D80
+proof
+let C155 being (Element of D78);
+assume L508: C155 in C154;
+L509: C155 in ( C154 /\ ( bool R1 ) ) by L508 , L506 , XBOOLE_0:def 4;
+L510: C155 c= D80 by L509 , ZFMISC_1:74;
+thus L511: thesis by L510 , L27;
+end;
+
+let C156 being (Element of D78);
+assume that
+L512: (for B129 being (Element of D78) holds (B129 in C154 implies B129 [= C156));
+L513:
+now
+let C157 being set;
+assume L514: C157 in ( C154 /\ ( bool R1 ) );
+L515: C157 in C154 by L514 , XBOOLE_0:def 4;
+reconsider D81 = C157 as (Element of D78) by L506 , L514;
+L516: D81 [= C156 by L512 , L515;
+thus L517: C157 c= C156 by L516 , L27;
+end;
+L518: D80 c= C156 by L513 , ZFMISC_1:76;
+thus L519: thesis by L518 , L27;
+end;
+registration
+let C158 being set;
+cluster ( BooleLatt C158 ) ->  complete;
+coherence by L505;
+end;
+theorem
+L521: (for R1 being set holds ( BooleLatt R1 ) is  \/-distributive)
+proof
+let R1 being set;
+let C159 being set;
+set D82 = ( BooleLatt R1 );
+let C160 , C161 , C162 being (Element of D82);
+assume that
+L522: C159 is_less_than C160
+and
+L523: (for B130 being (Element of D82) holds (C159 is_less_than B130 implies C160 [= B130))
+and
+L524: { ( C161 "/\" B131 ) where B131 is (Element of D82) : B131 in C159 } is_less_than C162
+and
+L525: (for B132 being (Element of D82) holds ({ ( C161 "/\" B133 ) where B133 is (Element of D82) : B133 in C159 } is_less_than B132 implies C162 [= B132));
+set D83 = { ( C161 "/\" B134 ) where B134 is (Element of D82) : B134 in C159 };
+L526: H1(D82) = ( bool R1 ) by L1;
+L527: D83 c= ( bool R1 )
+proof
+let C163 being set;
+assume L528: C163 in D83;
+L529: (ex B135 being (Element of D82) st (C163 = ( C161 "/\" B135 ) & B135 in C159)) by L528;
+thus L530: thesis by L529 , L526;
+end;
+L531: ( union D83 ) c= ( union ( bool R1 ) ) by L527 , ZFMISC_1:77;
+L532: ( union ( bool R1 ) ) = R1 by ZFMISC_1:81;
+reconsider D84 = ( union ( C159 /\ ( bool R1 ) ) ) , D85 = ( union D83 ) as (Element of D82) by L532 , L531 , L1;
+L533:
+now
+let C164 being set;
+assume L534: C164 in ( C159 /\ ( bool R1 ) );
+L535: C164 in C159 by L534 , XBOOLE_0:def 4;
+reconsider D86 = C164 as (Element of D82) by L526 , L534;
+L536: D86 [= C160 by L522 , L535 , L447;
+thus L537: C164 c= C160 by L536 , L27;
+end;
+L538: D84 c= C160 by L533 , ZFMISC_1:76;
+L539: C159 is_less_than D84
+proof
+let C165 being (Element of D82);
+assume L540: C165 in C159;
+L541: C165 in ( C159 /\ ( bool R1 ) ) by L540 , L526 , XBOOLE_0:def 4;
+L542: C165 c= D84 by L541 , ZFMISC_1:74;
+thus L543: C165 [= D84 by L542 , L27;
+end;
+L544: D84 [= C160 by L538 , L27;
+L545: C160 [= D84 by L523 , L539;
+L546: C160 = D84 by L545 , L544 , LATTICES:8;
+L547:
+now
+let C166 being set;
+assume L548: C166 in D83;
+consider C167 being (Element of D82) such that L549: C166 = ( C161 "/\" C167 ) and L550: C167 in C159 by L548;
+L551: ( C161 "/\" C167 ) [= C162 by L524 , L548 , L549 , L447;
+thus L552: C166 c= C162 by L551 , L549 , L27;
+end;
+L553: D85 c= C162 by L547 , ZFMISC_1:76;
+L554: D83 is_less_than D85
+proof
+let C168 being (Element of D82);
+assume L555: C168 in D83;
+L556: C168 c= D85 by L555 , ZFMISC_1:74;
+thus L557: C168 [= D85 by L556 , L27;
+end;
+L558: D85 [= C162 by L553 , L27;
+L559: C162 [= D85 by L525 , L554;
+L560: C162 = D85 by L559 , L558 , LATTICES:8;
+L561: ( C161 /\ C160 ) c= C162
+proof
+let C169 being set;
+assume L562: C169 in ( C161 /\ C160 );
+L563: C169 in C161 by L562 , XBOOLE_0:def 4;
+L564: C169 in C160 by L562 , XBOOLE_0:def 4;
+consider C170 being set such that L565: C169 in C170 and L566: C170 in ( C159 /\ ( bool R1 ) ) by L564 , L546 , TARSKI:def 4;
+L567: C170 in C159 by L566 , XBOOLE_0:def 4;
+reconsider D87 = C170 as (Element of D82) by L526 , L566;
+L568: ( C161 "/\" D87 ) in D83 by L567;
+L569: C169 in ( C161 /\ D87 ) by L563 , L565 , XBOOLE_0:def 4;
+thus L570: thesis by L569 , L560 , L568 , TARSKI:def 4;
+end;
+thus L571: ( C161 "/\" C160 ) [= C162 by L561 , L27;
+end;
+theorem
+L572: (for R1 being set holds ( BooleLatt R1 ) is  /\-distributive)
+proof
+let R1 being set;
+let C171 being set;
+set D88 = ( BooleLatt R1 );
+let C172 , C173 , C174 being (Element of D88);
+assume that
+L573: C171 is_greater_than C172
+and
+L574: (for B136 being (Element of D88) holds (C171 is_greater_than B136 implies B136 [= C172))
+and
+L575: { ( C173 "\/" B137 ) where B137 is (Element of D88) : B137 in C171 } is_greater_than C174
+and
+L576: (for B138 being (Element of D88) holds ({ ( C173 "\/" B139 ) where B139 is (Element of D88) : B139 in C171 } is_greater_than B138 implies B138 [= C174));
+set D89 = { ( B140 ` ) where B140 is (Element of D88) : B140 in C171 };
+set D90 = { ( C173 "\/" B141 ) where B141 is (Element of D88) : B141 in C171 };
+set D91 = { ( B142 ` ) where B142 is (Element of D88) : B142 in D90 };
+set D92 = { ( ( C173 ` ) "/\" B143 ) where B143 is (Element of D88) : B143 in D89 };
+L577: D92 = D91
+proof
+thus L578: D92 c= D91
+proof
+let R5 being set;
+assume L579: R5 in D92;
+consider C175 being (Element of D88) such that L580: R5 = ( ( C173 ` ) "/\" C175 ) and L581: C175 in D89 by L579;
+consider C176 being (Element of D88) such that L582: C175 = ( C176 ` ) and L583: C176 in C171 by L581;
+L584: ( C173 "\/" C176 ) in D90 by L583;
+L585: ( ( C173 "\/" C176 ) ` ) = R5 by L580 , L582 , LATTICES:24;
+thus L586: thesis by L585 , L584;
+end;
+
+let R5 being set;
+assume L587: R5 in D91;
+consider C177 being (Element of D88) such that L588: R5 = ( C177 ` ) and L589: C177 in D90 by L587;
+consider C178 being (Element of D88) such that L590: C177 = ( C173 "\/" C178 ) and L591: C178 in C171 by L589;
+L592: ( C178 ` ) in D89 by L591;
+L593: R5 = ( ( C173 ` ) "/\" ( C178 ` ) ) by L588 , L590 , LATTICES:24;
+thus L594: thesis by L593 , L592;
+end;
+L595: ( ( C174 ` ) ` ) = C174;
+L596: D89 is_less_than ( C172 ` ) by L573 , L493;
+L597: (for B144 being (Element of D88) holds (D89 is_less_than B144 implies ( C172 ` ) [= B144))
+proof
+let C179 being (Element of D88);
+L598: ( ( C179 ` ) ` ) = C179;
+assume L599: D89 is_less_than C179;
+L600: C171 is_greater_than ( C179 ` ) by L599 , L598 , L493;
+thus L601: thesis by L600 , L574 , L598 , LATTICES:26;
+end;
+L602: D92 is_less_than ( C174 ` ) by L575 , L577 , L493;
+L603: (for B145 being (Element of D88) holds (D92 is_less_than B145 implies ( C174 ` ) [= B145))
+proof
+let C180 being (Element of D88);
+L604: ( ( C180 ` ) ` ) = C180;
+assume L605: D92 is_less_than C180;
+L606: D90 is_greater_than ( C180 ` ) by L605 , L577 , L604 , L493;
+thus L607: thesis by L606 , L576 , L604 , LATTICES:26;
+end;
+L608: D88 is  \/-distributive by L521;
+L609: ( ( C173 ` ) "/\" ( C172 ` ) ) [= ( C174 ` ) by L608 , L596 , L597 , L602 , L603 , L479;
+L610: ( ( ( C173 ` ) "/\" ( C172 ` ) ) ` ) = ( ( ( C173 ` ) ` ) "\/" ( ( C172 ` ) ` ) ) by LATTICES:23;
+thus L611: C174 [= ( C173 "\/" C172 ) by L610 , L595 , L609 , LATTICES:26;
+end;
+registration
+cluster  complete  \/-distributive  /\-distributive  strict for Lattice;
+existence
+proof
+set D93 = the set;
+L612: ( BooleLatt D93 ) is  complete  \/-distributive  /\-distributive by L521 , L572;
+thus L613: thesis by L612;
+end;
+end;
+theorem
+L615: (for R1 being set holds (for R7 being Lattice holds (for R8 being (Element of R7) holds (R8 is_less_than R1 iff ( R8 % ) is_<=_than R1))))
+proof
+let R1 being set;
+let R7 being Lattice;
+let R8 being (Element of R7);
+thus L616: (R8 is_less_than R1 implies ( R8 % ) is_<=_than R1)
+proof
+assume L617: (for R9 being (Element of R7) holds (R9 in R1 implies R8 [= R9));
+let R33 being (Element of ( LattPOSet R7 ));
+L618: ( ( % R33 ) % ) = ( % R33 );
+assume L619: R33 in R1;
+L620: R8 [= ( % R33 ) by L619 , L617;
+thus L621: thesis by L620 , L618 , L150;
+end;
+
+assume L622: (for R34 being (Element of ( LattPOSet R7 )) holds (R34 in R1 implies ( R8 % ) <= R34));
+let R9 being (Element of R7);
+assume L623: R9 in R1;
+L624: ( R8 % ) <= ( R9 % ) by L623 , L622;
+thus L625: thesis by L624 , L150;
+end;
+theorem
+L626: (for R1 being set holds (for R7 being Lattice holds (for R33 being (Element of ( LattPOSet R7 )) holds (R33 is_<=_than R1 iff ( % R33 ) is_less_than R1))))
+proof
+let R1 being set;
+let R7 being Lattice;
+let R33 being (Element of ( LattPOSet R7 ));
+L627: ( ( % R33 ) % ) = ( % R33 );
+thus L628: thesis by L627 , L615;
+end;
+theorem
+L629: (for R1 being set holds (for R7 being Lattice holds (for R8 being (Element of R7) holds (R1 is_less_than R8 iff R1 is_<=_than ( R8 % )))))
+proof
+let R1 being set;
+let R7 being Lattice;
+let R8 being (Element of R7);
+thus L630: (R1 is_less_than R8 implies R1 is_<=_than ( R8 % ))
+proof
+assume L631: (for R9 being (Element of R7) holds (R9 in R1 implies R9 [= R8));
+let R33 being (Element of ( LattPOSet R7 ));
+L632: ( ( % R33 ) % ) = ( % R33 );
+assume L633: R33 in R1;
+L634: ( % R33 ) [= R8 by L633 , L631;
+thus L635: thesis by L634 , L632 , L150;
+end;
+
+assume L636: (for R34 being (Element of ( LattPOSet R7 )) holds (R34 in R1 implies R34 <= ( R8 % )));
+let R9 being (Element of R7);
+assume L637: R9 in R1;
+L638: ( R9 % ) <= ( R8 % ) by L637 , L636;
+thus L639: thesis by L638 , L150;
+end;
+theorem
+L640: (for R1 being set holds (for R7 being Lattice holds (for R33 being (Element of ( LattPOSet R7 )) holds (R1 is_<=_than R33 iff R1 is_less_than ( % R33 )))))
+proof
+let R1 being set;
+let R7 being Lattice;
+let R33 being (Element of ( LattPOSet R7 ));
+L641: ( ( % R33 ) % ) = ( % R33 );
+thus L642: thesis by L641 , L629;
+end;
+registration
+let C181 being  complete non  empty Poset;
+cluster ( latt C181 ) ->  complete;
+coherence
+proof
+L643: C181 is  with_suprema  with_infima by L253;
+L644: ( the RelStr of C181 ) = ( LattPOSet ( latt C181 ) ) by L643 , L421;
+set D94 = ( LattPOSet ( latt C181 ) );
+L645: ( latt C181 ) is  complete
+proof
+let R1 being set;
+consider C182 being (Element of C181) such that L646: R1 is_<=_than C182 and L647: (for B146 being (Element of C181) holds (R1 is_<=_than B146 implies C182 <= B146)) by L242;
+reconsider D95 = C182 as (Element of D94) by L644;
+take D96 = ( % D95 );
+L648: ( D96 % ) = D96;
+thus L649: R1 is_less_than D96
+proof
+let C183 being (Element of ( latt C181 ));
+reconsider D97 = C183 as (Element of C181) by L644;
+assume L650: C183 in R1;
+L651: D97 <= C182 by L650 , L646 , L169;
+L652: [ D97 , C182 ] in (the InternalRel of C181) by L651 , ORDERS_2:def 5;
+L653: ( C183 % ) <= D95 by L652 , L644 , ORDERS_2:def 5;
+thus L654: C183 [= D96 by L653 , L648 , L150;
+end;
+
+let C184 being (Element of ( latt C181 ));
+assume L655: R1 is_less_than C184;
+L656: R1 is_<=_than ( C184 % ) by L655 , L629;
+reconsider D98 = ( C184 % ) as (Element of C181) by L644;
+L657: R1 is_<=_than D98
+proof
+let C185 being (Element of C181);
+reconsider D99 = C185 as (Element of D94) by L644;
+assume L658: C185 in R1;
+L659: D99 <= ( C184 % ) by L658 , L656 , L169;
+L660: [ C185 , D98 ] in (the InternalRel of ( the RelStr of C181 )) by L659 , L644 , ORDERS_2:def 5;
+thus L661: C185 <= D98 by L660 , ORDERS_2:def 5;
+end;
+L662: C182 <= D98 by L657 , L647;
+L663: [ C182 , D98 ] in (the InternalRel of C181) by L662 , ORDERS_2:def 5;
+L664: D95 <= ( C184 % ) by L663 , L644 , ORDERS_2:def 5;
+thus L665: thesis by L664 , L648 , L150;
+end;
+thus L666: thesis by L645;
+end;
+end;
+definition
+let C186 being non  empty LattStr;
+assume that
+L668: C186 is  complete  complete  complete  complete Lattice;
+let C187 being set;
+func "\/" (C187 , C186) -> (Element of C186) means 
+:L669: (C187 is_less_than it & (for B147 being (Element of C186) holds (C187 is_less_than B147 implies it [= B147)));
+existence by L668 , L478;
+uniqueness
+proof
+let C188 , C189 being (Element of C186);
+assume that
+L670: C187 is_less_than C188
+and
+L671: (for B148 being (Element of C186) holds (C187 is_less_than B148 implies C188 [= B148))
+and
+L672: C187 is_less_than C189
+and
+L673: (for B149 being (Element of C186) holds (C187 is_less_than B149 implies C189 [= B149));
+L674: C188 [= C189 by L671 , L672;
+L675: C189 [= C188 by L670 , L673;
+thus L676: thesis by L675 , L668 , L674 , LATTICES:8;
+end;
+end;
+definition
+let C190 being non  empty LattStr;
+let C191 being set;
+func "/\" (C191 , C190) -> (Element of C190) equals 
+( "\/" ({ B150 where B150 is (Element of C190) : B150 is_less_than C191 } , C190) );
+correctness;
+end;
+notation
+let C192 being non  empty LattStr;
+let C193 being (Subset of C192);
+synonym "\/" C193 for "\/" (C193 , C192);
+synonym "/\" C193 for "/\" (C193 , C192);
+end;
+theorem
+L680: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds ( "\/" ({ ( R36 "/\" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) ) [= ( R36 "/\" ( "\/" (R42 , R35) ) ))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+set D100 = { ( R36 "/\" R38 ) where R38 is (Element of R35) : R38 in R42 };
+L681: D100 is_less_than ( R36 "/\" ( "\/" (R42 , R35) ) )
+proof
+let R40 being (Element of R35);
+assume L682: R40 in D100;
+consider R38 being (Element of R35) such that L683: R40 = ( R36 "/\" R38 ) and L684: R38 in R42 by L682;
+L685: R42 is_less_than ( "\/" (R42 , R35) ) by L669;
+L686: R38 [= ( "\/" (R42 , R35) ) by L685 , L684 , L447;
+thus L687: thesis by L686 , L683 , LATTICES:9;
+end;
+thus L688: thesis by L681 , L669;
+end;
+theorem
+L689: (for R35 being  complete Lattice holds (R35 is  \/-distributive iff (for R42 being set holds (for R36 being (Element of R35) holds ( R36 "/\" ( "\/" (R42 , R35) ) ) [= ( "\/" ({ ( R36 "/\" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) )))))
+proof
+let R35 being  complete Lattice;
+thus L690: (R35 is  \/-distributive implies (for R42 being set holds (for R36 being (Element of R35) holds ( R36 "/\" ( "\/" (R42 , R35) ) ) [= ( "\/" ({ ( R36 "/\" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) ))))
+proof
+assume L691: (for R42 being set holds (for R36 being (Element of R35) holds (for R38 being (Element of R35) holds (for R40 being (Element of R35) holds ((R42 is_less_than R36 & (for R41 being (Element of R35) holds (R42 is_less_than R41 implies R36 [= R41)) & { ( R38 "/\" R37 ) where R37 is (Element of R35) : R37 in R42 } is_less_than R40 & (for R41 being (Element of R35) holds ({ ( R38 "/\" R39 ) where R39 is (Element of R35) : R39 in R42 } is_less_than R41 implies R40 [= R41))) implies ( R38 "/\" R36 ) [= R40)))));
+let R42 being set;
+let R36 being (Element of R35);
+set D101 = { ( R36 "/\" R38 ) where R38 is (Element of R35) : R38 in R42 };
+L692: R42 is_less_than ( "\/" (R42 , R35) ) by L669;
+L693: (for R41 being (Element of R35) holds (R42 is_less_than R41 implies ( "\/" (R42 , R35) ) [= R41)) by L669;
+L694: D101 is_less_than ( "\/" (D101 , R35) ) by L669;
+L695: (for R41 being (Element of R35) holds (D101 is_less_than R41 implies ( "\/" (D101 , R35) ) [= R41)) by L669;
+thus L696: thesis by L695 , L691 , L692 , L693 , L694;
+end;
+
+assume L697: (for R42 being set holds (for R36 being (Element of R35) holds ( R36 "/\" ( "\/" (R42 , R35) ) ) [= ( "\/" ({ ( R36 "/\" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) )));
+let R42 being set;
+let R36 being (Element of R35);
+let R38 being (Element of R35);
+let R40 being (Element of R35);
+assume L698: (R42 is_less_than R36 & (for R41 being (Element of R35) holds (R42 is_less_than R41 implies R36 [= R41)) & { ( R38 "/\" R37 ) where R37 is (Element of R35) : R37 in R42 } is_less_than R40 & (for R41 being (Element of R35) holds ({ ( R38 "/\" R39 ) where R39 is (Element of R35) : R39 in R42 } is_less_than R41 implies R40 [= R41)));
+L699: R36 = ( "\/" (R42 , R35) ) by L698 , L669;
+L700: R40 = ( "\/" ({ ( R38 "/\" R37 ) where R37 is (Element of R35) : R37 in R42 } , R35) ) by L698 , L669;
+thus L701: ( R38 "/\" R36 ) [= R40 by L700 , L697 , L699;
+end;
+theorem
+L702: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds (R36 = ( "/\" (R42 , R35) ) iff (R36 is_less_than R42 & (for R38 being (Element of R35) holds (R38 is_less_than R42 implies R38 [= R36)))))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+set D102 = { R38 where R38 is (Element of R35) : R38 is_less_than R42 };
+L703: (R36 = ( "/\" (R42 , R35) ) iff (D102 is_less_than R36 & (for R40 being (Element of R35) holds (D102 is_less_than R40 implies R36 [= R40)))) by L669;
+thus L704: (R36 = ( "/\" (R42 , R35) ) implies (R36 is_less_than R42 & (for R38 being (Element of R35) holds (R38 is_less_than R42 implies R38 [= R36))))
+proof
+assume L705: R36 = ( "/\" (R42 , R35) );
+L706: D102 is_less_than R36 by L705 , L669;
+thus L707: R36 is_less_than R42
+proof
+let R38 being (Element of R35);
+assume that
+L708: R38 in R42;
+L709: D102 is_less_than R38
+proof
+let R40 being (Element of R35);
+assume L710: R40 in D102;
+L711: (ex B151 being (Element of R35) st (R40 = B151 & B151 is_less_than R42)) by L710;
+thus L712: thesis by L711 , L708 , L446;
+end;
+thus L713: thesis by L709 , L705 , L669;
+end;
+
+let R38 being (Element of R35);
+assume L714: R38 is_less_than R42;
+L715: R38 in D102 by L714;
+thus L716: thesis by L715 , L706 , L447;
+end;
+
+assume that
+L717: R36 is_less_than R42
+and
+L718: (for R38 being (Element of R35) holds (R38 is_less_than R42 implies R38 [= R36));
+L719: D102 is_less_than R36
+proof
+let R38 being (Element of R35);
+assume L720: R38 in D102;
+L721: (ex R40 being (Element of R35) st (R38 = R40 & R40 is_less_than R42)) by L720;
+thus L722: thesis by L721 , L718;
+end;
+L723: R36 in D102 by L717;
+thus L724: thesis by L723 , L703 , L719 , L447;
+end;
+theorem
+L725: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds ( R36 "\/" ( "/\" (R42 , R35) ) ) [= ( "/\" ({ ( R36 "\/" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) ))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+set D103 = { ( R36 "\/" R38 ) where R38 is (Element of R35) : R38 in R42 };
+L726: D103 is_greater_than ( R36 "\/" ( "/\" (R42 , R35) ) )
+proof
+let R40 being (Element of R35);
+assume L727: R40 in D103;
+consider R38 being (Element of R35) such that L728: R40 = ( R36 "\/" R38 ) and L729: R38 in R42 by L727;
+L730: R42 is_greater_than ( "/\" (R42 , R35) ) by L702;
+L731: ( "/\" (R42 , R35) ) [= R38 by L730 , L729 , L446;
+thus L732: thesis by L731 , L728 , FILTER_0:1;
+end;
+thus L733: thesis by L726 , L702;
+end;
+theorem
+L734: (for R35 being  complete Lattice holds (R35 is  /\-distributive iff (for R42 being set holds (for R36 being (Element of R35) holds ( "/\" ({ ( R36 "\/" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) ) [= ( R36 "\/" ( "/\" (R42 , R35) ) )))))
+proof
+let R35 being  complete Lattice;
+thus L735: (R35 is  /\-distributive implies (for R42 being set holds (for R36 being (Element of R35) holds ( "/\" ({ ( R36 "\/" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) ) [= ( R36 "\/" ( "/\" (R42 , R35) ) ))))
+proof
+assume L736: (for R42 being set holds (for R36 being (Element of R35) holds (for R38 being (Element of R35) holds (for R40 being (Element of R35) holds ((R42 is_greater_than R36 & (for R41 being (Element of R35) holds (R42 is_greater_than R41 implies R41 [= R36)) & { ( R38 "\/" R37 ) where R37 is (Element of R35) : R37 in R42 } is_greater_than R40 & (for R41 being (Element of R35) holds ({ ( R38 "\/" R39 ) where R39 is (Element of R35) : R39 in R42 } is_greater_than R41 implies R41 [= R40))) implies R40 [= ( R38 "\/" R36 ))))));
+let R42 being set;
+let R36 being (Element of R35);
+set D104 = { ( R36 "\/" R38 ) where R38 is (Element of R35) : R38 in R42 };
+L737: R42 is_greater_than ( "/\" (R42 , R35) ) by L702;
+L738: (for R41 being (Element of R35) holds (R42 is_greater_than R41 implies R41 [= ( "/\" (R42 , R35) ))) by L702;
+L739: D104 is_greater_than ( "/\" (D104 , R35) ) by L702;
+L740: (for R41 being (Element of R35) holds (D104 is_greater_than R41 implies R41 [= ( "/\" (D104 , R35) ))) by L702;
+thus L741: thesis by L740 , L736 , L737 , L738 , L739;
+end;
+
+assume L742: (for R42 being set holds (for R36 being (Element of R35) holds ( "/\" ({ ( R36 "\/" R38 ) where R38 is (Element of R35) : R38 in R42 } , R35) ) [= ( R36 "\/" ( "/\" (R42 , R35) ) )));
+let R42 being set;
+let R36 being (Element of R35);
+let R38 being (Element of R35);
+let R40 being (Element of R35);
+assume L743: (R42 is_greater_than R36 & (for R41 being (Element of R35) holds (R42 is_greater_than R41 implies R41 [= R36)) & { ( R38 "\/" R37 ) where R37 is (Element of R35) : R37 in R42 } is_greater_than R40 & (for R41 being (Element of R35) holds ({ ( R38 "\/" R39 ) where R39 is (Element of R35) : R39 in R42 } is_greater_than R41 implies R41 [= R40)));
+L744: R36 = ( "/\" (R42 , R35) ) by L743 , L702;
+L745: R40 = ( "/\" ({ ( R38 "\/" R37 ) where R37 is (Element of R35) : R37 in R42 } , R35) ) by L743 , L702;
+thus L746: R40 [= ( R38 "\/" R36 ) by L745 , L742 , L744;
+end;
+theorem
+L747: (for R35 being  complete Lattice holds (for R42 being set holds ( "\/" (R42 , R35) ) = ( "/\" ({ R36 where R36 is (Element of R35) : R36 is_greater_than R42 } , R35) )))
+proof
+let R35 being  complete Lattice;
+let R42 being set;
+set D105 = { R36 where R36 is (Element of R35) : R36 is_greater_than R42 };
+L748: ( "\/" (R42 , R35) ) is_less_than D105
+proof
+let R36 being (Element of R35);
+assume L749: R36 in D105;
+L750: (ex R38 being (Element of R35) st (R36 = R38 & R38 is_greater_than R42)) by L749;
+thus L751: thesis by L750 , L669;
+end;
+L752: R42 is_less_than ( "\/" (R42 , R35) ) by L669;
+L753: ( "\/" (R42 , R35) ) in D105 by L752;
+L754: (for R38 being (Element of R35) holds (R38 is_less_than D105 implies R38 [= ( "\/" (R42 , R35) ))) by L753 , L446;
+thus L755: thesis by L754 , L748 , L702;
+end;
+theorem
+L756: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds (R36 in R42 implies (R36 [= ( "\/" (R42 , R35) ) & ( "/\" (R42 , R35) ) [= R36)))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+assume L757: R36 in R42;
+L758: R42 is_less_than ( "\/" (R42 , R35) ) by L669;
+thus L759: R36 [= ( "\/" (R42 , R35) ) by L758 , L757 , L447;
+L760: { R38 where R38 is (Element of R35) : R38 is_less_than R42 } is_less_than R36
+proof
+let R40 being (Element of R35);
+assume L761: R40 in { R38 where R38 is (Element of R35) : R38 is_less_than R42 };
+L762: (ex R38 being (Element of R35) st (R40 = R38 & R38 is_less_than R42)) by L761;
+thus L763: R40 [= R36 by L762 , L757 , L446;
+end;
+thus L764: thesis by L760 , L669;
+end;
+theorem
+L765: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds (R36 is_less_than R42 implies R36 [= ( "/\" (R42 , R35) )))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+assume L766: R36 is_less_than R42;
+L767: R36 in { R38 where R38 is (Element of R35) : R38 is_less_than R42 } by L766;
+thus L768: thesis by L767 , L756;
+end;
+theorem
+L769: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds ((R36 in R42 & R42 is_less_than R36) implies ( "\/" (R42 , R35) ) = R36))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+assume that
+L770: R36 in R42
+and
+L771: R42 is_less_than R36;
+L772: ( "\/" (R42 , R35) ) [= R36 by L771 , L669;
+L773: R36 [= ( "\/" (R42 , R35) ) by L770 , L756;
+thus L774: thesis by L773 , L772 , LATTICES:8;
+end;
+theorem
+L775: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R42 being set holds ((R36 in R42 & R36 is_less_than R42) implies ( "/\" (R42 , R35) ) = R36))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R42 being set;
+assume that
+L776: R36 in R42
+and
+L777: R36 is_less_than R42;
+L778: ( "/\" (R42 , R35) ) [= R36 by L776 , L756;
+L779: R36 [= ( "/\" (R42 , R35) ) by L777 , L765;
+thus L780: thesis by L779 , L778 , LATTICES:8;
+end;
+theorem
+L781: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (( "\/" { R36 } ) = R36 & ( "/\" { R36 } ) = R36)))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+L782: R36 in { R36 } by TARSKI:def 1;
+L783: { R36 } is_less_than R36
+proof
+let R38 being (Element of R35);
+assume L784: R38 in { R36 };
+thus L785: R38 [= R36 by L784 , TARSKI:def 1;
+end;
+thus L786: ( "\/" { R36 } ) = R36 by L783 , L782 , L769;
+L787: R36 is_less_than { R36 }
+proof
+let R38 being (Element of R35);
+assume L788: R38 in { R36 };
+thus L789: R36 [= R38 by L788 , TARSKI:def 1;
+end;
+thus L790: thesis by L787 , L782 , L775;
+end;
+theorem
+L791: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R38 being (Element of R35) holds (( R36 "\/" R38 ) = ( "\/" { R36 , R38 } ) & ( R36 "/\" R38 ) = ( "/\" { R36 , R38 } )))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R38 being (Element of R35);
+L792: { R36 , R38 } is_less_than ( R36 "\/" R38 )
+proof
+let R40 being (Element of R35);
+assume L793: R40 in { R36 , R38 };
+L794: R36 [= ( R36 "\/" R38 ) by LATTICES:5;
+L795: R38 [= ( R38 "\/" R36 ) by LATTICES:5;
+thus L796: thesis by L795 , L793 , L794 , TARSKI:def 2;
+end;
+L797: R36 in { R36 , R38 } by TARSKI:def 2;
+L798: R38 in { R36 , R38 } by TARSKI:def 2;
+L799:
+now
+let R40 being (Element of R35);
+assume L800: { R36 , R38 } is_less_than R40;
+L801: R36 [= R40 by L800 , L797 , L447;
+L802: R38 [= R40 by L798 , L800 , L447;
+thus L803: ( R36 "\/" R38 ) [= R40 by L802 , L801 , FILTER_0:6;
+end;
+thus L804: ( R36 "\/" R38 ) = ( "\/" { R36 , R38 } ) by L799 , L792 , L669;
+L805: ( R36 "/\" R38 ) is_less_than { R36 , R38 }
+proof
+let R40 being (Element of R35);
+assume L806: R40 in { R36 , R38 };
+L807: (R40 = R36 or (R40 = R38 & ( R38 "/\" R36 ) = ( R36 "/\" R38 ))) by L806 , TARSKI:def 2;
+thus L808: thesis by L807 , LATTICES:6;
+end;
+L809: ( R36 "/\" R38 ) in { R40 where R40 is (Element of R35) : R40 is_less_than { R36 , R38 } } by L805;
+L810: { R40 where R40 is (Element of R35) : R40 is_less_than { R36 , R38 } } is_less_than ( R36 "/\" R38 )
+proof
+let C194 being (Element of R35);
+assume L811: C194 in { R40 where R40 is (Element of R35) : R40 is_less_than { R36 , R38 } };
+L812: (ex R40 being (Element of R35) st (C194 = R40 & R40 is_less_than { R36 , R38 })) by L811;
+L813: C194 [= R36 by L812 , L797 , L446;
+L814: C194 [= R38 by L798 , L812 , L446;
+thus L815: thesis by L814 , L813 , FILTER_0:7;
+end;
+thus L816: thesis by L810 , L809 , L769;
+end;
+theorem
+L817: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (R36 = ( "\/" ({ R38 where R38 is (Element of R35) : R38 [= R36 } , R35) ) & R36 = ( "/\" ({ R40 where R40 is (Element of R35) : R36 [= R40 } , R35) ))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+set D106 = { R38 where R38 is (Element of R35) : R38 [= R36 };
+set D107 = { R40 where R40 is (Element of R35) : R36 [= R40 };
+L818: R36 in D106;
+L819: R36 in D107;
+L820: D106 is_less_than R36
+proof
+let R38 being (Element of R35);
+assume L821: R38 in D106;
+L822: (ex R40 being (Element of R35) st (R38 = R40 & R40 [= R36)) by L821;
+thus L823: thesis by L822;
+end;
+thus L824: R36 = ( "\/" (D106 , R35) ) by L820 , L818 , L769;
+L825: R36 is_less_than D107
+proof
+let R38 being (Element of R35);
+assume L826: R38 in D107;
+L827: (ex R40 being (Element of R35) st (R38 = R40 & R36 [= R40)) by L826;
+thus L828: thesis by L827;
+end;
+thus L829: thesis by L825 , L819 , L775;
+end;
+theorem
+L830: (for R35 being  complete Lattice holds (for R42 being set holds (for R43 being set holds (R42 c= R43 implies (( "\/" (R42 , R35) ) [= ( "\/" (R43 , R35) ) & ( "/\" (R43 , R35) ) [= ( "/\" (R42 , R35) ))))))
+proof
+let R35 being  complete Lattice;
+let R42 being set;
+let R43 being set;
+assume L831: R42 c= R43;
+L832: R42 is_less_than ( "\/" (R43 , R35) )
+proof
+let R36 being (Element of R35);
+assume L833: R36 in R42;
+L834: R43 is_less_than ( "\/" (R43 , R35) ) by L669;
+thus L835: thesis by L834 , L831 , L833 , L447;
+end;
+thus L836: ( "\/" (R42 , R35) ) [= ( "\/" (R43 , R35) ) by L832 , L669;
+L837: ( "/\" (R43 , R35) ) is_less_than R42
+proof
+let R36 being (Element of R35);
+assume L838: R36 in R42;
+L839: ( "/\" (R43 , R35) ) is_less_than R43 by L702;
+thus L840: thesis by L839 , L831 , L838 , L446;
+end;
+thus L841: thesis by L837 , L702;
+end;
+theorem
+L842: (for R35 being  complete Lattice holds (for R42 being set holds (( "\/" (R42 , R35) ) = ( "\/" ({ R36 where R36 is (Element of R35) : (ex R38 being (Element of R35) st (R36 [= R38 & R38 in R42)) } , R35) ) & ( "/\" (R42 , R35) ) = ( "/\" ({ R38 where R38 is (Element of R35) : (ex R36 being (Element of R35) st (R36 [= R38 & R36 in R42)) } , R35) ))))
+proof
+let R35 being  complete Lattice;
+let R42 being set;
+set D108 = { R36 where R36 is (Element of R35) : (ex R38 being (Element of R35) st (R36 [= R38 & R38 in R42)) };
+set D109 = { R36 where R36 is (Element of R35) : (ex R38 being (Element of R35) st (R38 [= R36 & R38 in R42)) };
+L843: R42 is_less_than ( "\/" (D108 , R35) )
+proof
+let R36 being (Element of R35);
+assume L844: R36 in R42;
+L845: R36 in D108 by L844;
+thus L846: thesis by L845 , L756;
+end;
+L847: ( "\/" (R42 , R35) ) [= ( "\/" (D108 , R35) ) by L843 , L669;
+L848: D108 is_less_than ( "\/" (R42 , R35) )
+proof
+let R36 being (Element of R35);
+assume L849: R36 in D108;
+L850: (ex R38 being (Element of R35) st (R36 = R38 & (ex R40 being (Element of R35) st (R38 [= R40 & R40 in R42)))) by L849;
+consider R40 being (Element of R35) such that L851: R36 [= R40 and L852: R40 in R42 by L850;
+L853: R40 [= ( "\/" (R42 , R35) ) by L852 , L756;
+thus L854: thesis by L853 , L851 , LATTICES:7;
+end;
+L855: ( "\/" (D108 , R35) ) [= ( "\/" (R42 , R35) ) by L848 , L669;
+thus L856: ( "\/" (R42 , R35) ) = ( "\/" (D108 , R35) ) by L855 , L847 , LATTICES:8;
+L857: R42 is_greater_than ( "/\" (D109 , R35) )
+proof
+let R36 being (Element of R35);
+assume L858: R36 in R42;
+L859: R36 in D109 by L858;
+thus L860: thesis by L859 , L756;
+end;
+L861: ( "/\" (D109 , R35) ) [= ( "/\" (R42 , R35) ) by L857 , L702;
+L862: D109 is_greater_than ( "/\" (R42 , R35) )
+proof
+let R36 being (Element of R35);
+assume L863: R36 in D109;
+L864: (ex R38 being (Element of R35) st (R36 = R38 & (ex R40 being (Element of R35) st (R40 [= R38 & R40 in R42)))) by L863;
+consider R40 being (Element of R35) such that L865: R40 [= R36 and L866: R40 in R42 by L864;
+L867: ( "/\" (R42 , R35) ) [= R40 by L866 , L756;
+thus L868: thesis by L867 , L865 , LATTICES:7;
+end;
+L869: ( "/\" (R42 , R35) ) [= ( "/\" (D109 , R35) ) by L862 , L702;
+thus L870: thesis by L869 , L861 , LATTICES:8;
+end;
+theorem
+L871: (for R35 being  complete Lattice holds (for R42 being set holds (for R43 being set holds ((for R36 being (Element of R35) holds (R36 in R42 implies (ex R38 being (Element of R35) st (R36 [= R38 & R38 in R43)))) implies ( "\/" (R42 , R35) ) [= ( "\/" (R43 , R35) )))))
+proof
+let R35 being  complete Lattice;
+let R42 being set;
+let R43 being set;
+assume L872: (for R36 being (Element of R35) holds (R36 in R42 implies (ex R38 being (Element of R35) st (R36 [= R38 & R38 in R43))));
+L873: R42 is_less_than ( "\/" (R43 , R35) )
+proof
+let R36 being (Element of R35);
+assume L874: R36 in R42;
+consider R38 being (Element of R35) such that L875: R36 [= R38 and L876: R38 in R43 by L874 , L872;
+L877: R38 [= ( "\/" (R43 , R35) ) by L876 , L756;
+thus L878: thesis by L877 , L875 , LATTICES:7;
+end;
+thus L879: thesis by L873 , L669;
+end;
+theorem
+L880: (for R35 being  complete Lattice holds (for R42 being set holds (R42 c= ( bool (the carrier of R35) ) implies ( "\/" (( union R42 ) , R35) ) = ( "\/" ({ ( "\/" B152 ) where B152 is (Subset of R35) : B152 in R42 } , R35) ))))
+proof
+let R35 being  complete Lattice;
+let R42 being set;
+set D110 = { ( "\/" B153 ) where B153 is (Subset of R35) : B153 in R42 };
+L881: D110 is_less_than ( "\/" (( union R42 ) , R35) )
+proof
+let R36 being (Element of R35);
+assume L882: R36 in D110;
+consider C195 being (Subset of R35) such that L883: R36 = ( "\/" C195 ) and L884: C195 in R42 by L882;
+L885: C195 c= ( union R42 ) by L884 , ZFMISC_1:74;
+thus L886: thesis by L885 , L883 , L830;
+end;
+L887: ( "\/" (D110 , R35) ) [= ( "\/" (( union R42 ) , R35) ) by L881 , L669;
+set D111 = { R36 where R36 is (Element of R35) : (ex R38 being (Element of R35) st (R36 [= R38 & R38 in D110)) };
+assume L888: R42 c= ( bool (the carrier of R35) );
+L889: ( union R42 ) c= D111
+proof
+let C196 being set;
+assume L890: C196 in ( union R42 );
+consider R43 being set such that L891: C196 in R43 and L892: R43 in R42 by L890 , TARSKI:def 4;
+reconsider D112 = R43 as (Subset of R35) by L888 , L892;
+reconsider D113 = C196 as (Element of R35) by L888 , L891 , L892;
+L893: D113 [= ( "\/" D112 ) by L891 , L756;
+L894: ( "\/" D112 ) in D110 by L892;
+thus L895: thesis by L894 , L893;
+end;
+L896: ( "\/" (( union R42 ) , R35) ) [= ( "\/" (D111 , R35) ) by L889 , L830;
+L897: ( "\/" (( union R42 ) , R35) ) [= ( "\/" (D110 , R35) ) by L896 , L842;
+thus L898: thesis by L897 , L887 , LATTICES:8;
+end;
+theorem
+L899: (for R35 being  complete Lattice holds (R35 is 0_Lattice & ( Bottom R35 ) = ( "\/" (( {} ) , R35) )))
+proof
+let R35 being  complete Lattice;
+L900:
+now
+let R36 being (Element of R35);
+L901: ( {} ) is_less_than ( ( "\/" (( {} ) , R35) ) "/\" R36 )
+proof
+let R38 being (Element of R35);
+thus L902: thesis;
+end;
+L903: ( "\/" (( {} ) , R35) ) [= ( ( "\/" (( {} ) , R35) ) "/\" R36 ) by L901 , L669;
+L904: ( ( "\/" (( {} ) , R35) ) "/\" R36 ) [= ( "\/" (( {} ) , R35) ) by LATTICES:6;
+thus L905: ( ( "\/" (( {} ) , R35) ) "/\" R36 ) = ( "\/" (( {} ) , R35) ) by L904 , L903 , LATTICES:8;
+thus L906: ( R36 "/\" ( "\/" (( {} ) , R35) ) ) = ( "\/" (( {} ) , R35) ) by L903 , L904 , LATTICES:8;
+end;
+L907: R35 is  lower-bounded by L900 , LATTICES:def 13;
+thus L908: thesis by L907 , L900 , LATTICES:def 16;
+end;
+theorem
+L909: (for R35 being  complete Lattice holds (R35 is 1_Lattice & ( Top R35 ) = ( "\/" ((the carrier of R35) , R35) )))
+proof
+let R35 being  complete Lattice;
+set D114 = ( "\/" ((the carrier of R35) , R35) );
+L910:
+now
+let R36 being (Element of R35);
+L911: D114 [= ( D114 "\/" R36 ) by LATTICES:5;
+L912: ( D114 "\/" R36 ) [= D114 by L756;
+thus L913: ( D114 "\/" R36 ) = D114 by L912 , L911 , LATTICES:8;
+thus L914: ( R36 "\/" D114 ) = D114 by L911 , L912 , LATTICES:8;
+end;
+L915: R35 is  upper-bounded by L910 , LATTICES:def 14;
+thus L916: thesis by L915 , L910 , LATTICES:def 17;
+end;
+theorem
+L917: (for R35 being  complete Lattice holds (for R36 being (Element of R35) holds (for R38 being (Element of R35) holds (R35 is I_Lattice implies ( R36 => R38 ) = ( "\/" ({ R40 where R40 is (Element of R35) : ( R36 "/\" R40 ) [= R38 } , R35) )))))
+proof
+let R35 being  complete Lattice;
+let R36 being (Element of R35);
+let R38 being (Element of R35);
+set D115 = { R37 where R37 is (Element of R35) : ( R36 "/\" R37 ) [= R38 };
+assume L918: R35 is I_Lattice;
+L919: ( R36 "/\" ( R36 => R38 ) ) [= R38 by L918 , FILTER_0:def 7;
+L920: ( R36 => R38 ) in D115 by L919;
+L921: D115 is_less_than ( R36 => R38 )
+proof
+let R40 being (Element of R35);
+assume L922: R40 in D115;
+L923: (ex R37 being (Element of R35) st (R40 = R37 & ( R36 "/\" R37 ) [= R38)) by L922;
+thus L924: R40 [= ( R36 => R38 ) by L923 , L918 , FILTER_0:def 7;
+end;
+thus L925: thesis by L921 , L920 , L769;
+end;
+theorem
+L926: (for R35 being  complete Lattice holds (R35 is I_Lattice implies R35 is  \/-distributive))
+proof
+let R35 being  complete Lattice;
+assume L927: R35 is I_Lattice;
+L928:
+now
+let R42 being set;
+let R36 being (Element of R35);
+set D116 = { ( R36 "/\" R37 ) where R37 is (Element of R35) : R37 in R42 };
+set D117 = ( "\/" (R42 , R35) );
+set D118 = ( "\/" (D116 , R35) );
+set D119 = { R39 where R39 is (Element of R35) : ( R36 "/\" R39 ) [= D118 };
+L929: R42 is_less_than ( R36 => D118 )
+proof
+let R39 being (Element of R35);
+assume L930: R39 in R42;
+L931: ( R36 "/\" R39 ) in D116 by L930;
+L932: ( R36 "/\" R39 ) [= D118 by L931 , L756;
+L933: R39 in D119 by L932;
+L934: ( R36 => D118 ) = ( "\/" (D119 , R35) ) by L927 , L917;
+thus L935: thesis by L934 , L933 , L756;
+end;
+L936: D117 [= ( R36 => D118 ) by L929 , L669;
+L937: ( R36 "/\" D117 ) [= ( R36 "/\" ( R36 => D118 ) ) by L936 , LATTICES:9;
+L938: ( R36 "/\" ( R36 => D118 ) ) [= D118 by L927 , FILTER_0:def 7;
+thus L939: ( R36 "/\" D117 ) [= D118 by L938 , L937 , LATTICES:7;
+end;
+thus L940: thesis by L928 , L689;
+end;
+theorem
+L941: (for R42 being set holds (for B154 being  complete  \/-distributive Lattice holds (for B155 being (Element of B154) holds (( B155 "/\" ( "\/" (R42 , B154) ) ) = ( "\/" ({ ( B155 "/\" B156 ) where B156 is (Element of B154) : B156 in R42 } , B154) ) & ( ( "\/" (R42 , B154) ) "/\" B155 ) = ( "\/" ({ ( B157 "/\" B155 ) where B157 is (Element of B154) : B157 in R42 } , B154) )))))
+proof
+let R42 being set;
+let C197 being  complete  \/-distributive Lattice;
+let C198 being (Element of C197);
+L942: ( "\/" ({ ( C198 "/\" B158 ) where B158 is (Element of C197) : B158 in R42 } , C197) ) [= ( C198 "/\" ( "\/" (R42 , C197) ) ) by L680;
+L943: ( C198 "/\" ( "\/" (R42 , C197) ) ) [= ( "\/" ({ ( C198 "/\" B159 ) where B159 is (Element of C197) : B159 in R42 } , C197) ) by L689;
+thus L944: ( C198 "/\" ( "\/" (R42 , C197) ) ) = ( "\/" ({ ( C198 "/\" B160 ) where B160 is (Element of C197) : B160 in R42 } , C197) ) by L943 , L942 , LATTICES:8;
+deffunc H6((Element of C197)) = ( $1 "/\" C198 );
+deffunc H7((Element of C197)) = ( C198 "/\" $1 );
+defpred S3[ set ] means $1 in R42;
+L945: (for B161 being (Element of C197) holds H7(B161) = H6(B161));
+L946: { H7(B162) where B162 is (Element of C197) : S3[ B162 ] } = { H6(B163) where B163 is (Element of C197) : S3[ B163 ] } from FRAENKEL:sch 5(L945);
+thus L947: thesis by L946 , L942 , L943 , LATTICES:8;
+end;
+theorem
+L948: (for R42 being set holds (for B164 being  complete  /\-distributive Lattice holds (for B165 being (Element of B164) holds (( B165 "\/" ( "/\" (R42 , B164) ) ) = ( "/\" ({ ( B165 "\/" B166 ) where B166 is (Element of B164) : B166 in R42 } , B164) ) & ( ( "/\" (R42 , B164) ) "\/" B165 ) = ( "/\" ({ ( B167 "\/" B165 ) where B167 is (Element of B164) : B167 in R42 } , B164) )))))
+proof
+let R42 being set;
+let C199 being  complete  /\-distributive Lattice;
+let C200 being (Element of C199);
+defpred S4[ set ] means $1 in R42;
+L949: ( "/\" ({ ( C200 "\/" B168 ) where B168 is (Element of C199) : B168 in R42 } , C199) ) [= ( C200 "\/" ( "/\" (R42 , C199) ) ) by L734;
+L950: ( C200 "\/" ( "/\" (R42 , C199) ) ) [= ( "/\" ({ ( C200 "\/" B169 ) where B169 is (Element of C199) : B169 in R42 } , C199) ) by L725;
+thus L951: ( C200 "\/" ( "/\" (R42 , C199) ) ) = ( "/\" ({ ( C200 "\/" B170 ) where B170 is (Element of C199) : B170 in R42 } , C199) ) by L950 , L949 , LATTICES:8;
+deffunc H8((Element of C199)) = ( $1 "\/" C200 );
+deffunc H9((Element of C199)) = ( C200 "\/" $1 );
+L952: (for B171 being (Element of C199) holds H9(B171) = H8(B171));
+L953: { H9(B172) where B172 is (Element of C199) : S4[ B172 ] } = { H8(B173) where B173 is (Element of C199) : S4[ B173 ] } from FRAENKEL:sch 5(L952);
+thus L954: thesis by L953 , L949 , L950 , LATTICES:8;
+end;
+scheme SingleFraenkel { F1() -> set , F2() -> non  empty set , P1[set] } : { F1() where B174 is (Element of F2()) : P1[ B174 ] } = { F1() }
+provided
+L955: (ex B175 being (Element of F2()) st P1[ B175 ])
+proof
+thus L956: { F1() where B176 is (Element of F2()) : P1[ B176 ] } c= { F1() }
+proof
+let C201 being set;
+assume L957: C201 in { F1() where B177 is (Element of F2()) : P1[ B177 ] };
+L958: (ex B178 being (Element of F2()) st (C201 = F1() & P1[ B178 ])) by L957;
+thus L959: thesis by L958 , TARSKI:def 1;
+end;
+
+let C202 being set;
+assume L960: C202 in { F1() };
+L961: C202 = F1() by L960 , TARSKI:def 1;
+thus L962: thesis by L961 , L955;
+end;
+scheme FuncFraenkel { F3() -> non  empty set , F4() -> non  empty set , F5(set) -> (Element of F4()) , F6() -> Function , P2[set] } : ( F6() .: { F5(B179) where B179 is (Element of F3()) : P2[ B179 ] } ) = { ( F6() . F5(B180) ) where B180 is (Element of F3()) : P2[ B180 ] }
+provided
+L963: F4() c= ( dom F6() )
+proof
+set D120 = F6();
+thus L964: ( D120 .: { F5(B181) where B181 is (Element of F3()) : P2[ B181 ] } ) c= { ( D120 . F5(B182) ) where B182 is (Element of F3()) : P2[ B182 ] }
+proof
+let C203 being set;
+assume L965: C203 in ( D120 .: { F5(B183) where B183 is (Element of F3()) : P2[ B183 ] } );
+consider C204 being set such that L966: C204 in ( dom D120 ) and L967: C204 in { F5(B184) where B184 is (Element of F3()) : P2[ B184 ] } and L968: C203 = ( D120 . C204 ) by L965 , FUNCT_1:def 6;
+L969: (ex B185 being (Element of F3()) st (C204 = F5(B185) & P2[ B185 ])) by L967;
+thus L970: thesis by L969 , L968;
+end;
+
+let C205 being set;
+assume L971: C205 in { ( D120 . F5(B186) ) where B186 is (Element of F3()) : P2[ B186 ] };
+consider C206 being (Element of F3()) such that L972: C205 = ( D120 . F5(C206) ) and L973: P2[ C206 ] by L971;
+L974: F5(C206) in ( dom D120 ) by L963 , TARSKI:def 3;
+L975: F5(C206) in { F5(B187) where B187 is (Element of F3()) : P2[ B187 ] } by L973;
+thus L976: thesis by L975 , L972 , L974 , FUNCT_1:def 6;
+end;
+L977:
+now
+let C207 being non  empty set;
+let C208 being (Function of ( bool C207 ) , C207);
+assume that
+L978: (for B188 being (Element of C207) holds ( C208 . { B188 } ) = B188)
+and
+L979: (for B189 being (Subset-Family of C207) holds ( C208 . ( C208 .: B189 ) ) = ( C208 . ( union B189 ) ));
+defpred S5[ set , set ] means ( C208 . { $1 , $2 } ) = $2;
+consider C209 being (Relation of C207) such that L980: (for B190 , B191 being set holds ([ B190 , B191 ] in C209 iff (B190 in C207 & B191 in C207 & S5[ B190 , B191 ]))) from RELSET_1:sch 1;
+L981: ( dom C208 ) = ( bool C207 ) by FUNCT_2:def 1;
+L982:
+now
+let C210 , C211 being (Subset of C207);
+thus L983: ( C208 . { ( C208 . C210 ) , ( C208 . C211 ) } ) = ( C208 . ( C208 .: { C210 , C211 } ) ) by L981 , FUNCT_1:60
+.= ( C208 . ( union { C210 , C211 } ) ) by L979
+.= ( C208 . ( C210 \/ C211 ) ) by ZFMISC_1:75;
+end;
+L984: (for B192 , B193 being (Element of C207) holds (for B194 being (Subset of C207) holds (B193 in B194 implies ( C208 . ( B194 \/ { B192 } ) ) = ( C208 . { ( C208 . { B195 , B192 } ) where B195 is (Element of C207) : B195 in B194 } ))))
+proof
+let C212 , C213 being (Element of C207);
+let C214 being (Subset of C207);
+assume that
+L985: C213 in C214;
+set D121 = { { B196 , C212 } where B196 is (Element of C207) : B196 in C214 };
+L986: ( C214 \/ { C212 } ) = ( union D121 )
+proof
+thus L987: ( C214 \/ { C212 } ) c= ( union D121 )
+proof
+let R5 being set;
+assume L988: R5 in ( C214 \/ { C212 } );
+L989: ((R5 in C214 & C214 c= C207) or R5 in { C212 }) by L988 , XBOOLE_0:def 3;
+L990: ((R5 in C214 & R5 is (Element of C207)) or R5 = C212) by L989 , TARSKI:def 1;
+L991: ((R5 in { R5 , C212 } & { R5 , C212 } in D121) or (R5 in { C213 , C212 } & { C213 , C212 } in D121)) by L990 , L985 , TARSKI:def 2;
+thus L992: thesis by L991 , TARSKI:def 4;
+end;
+
+let R5 being set;
+assume L993: R5 in ( union D121 );
+consider C215 being set such that L994: R5 in C215 and L995: C215 in D121 by L993 , TARSKI:def 4;
+consider C216 being (Element of C207) such that L996: C215 = { C216 , C212 } and L997: C216 in C214 by L995;
+L998: (R5 = C216 or (R5 = C212 & C212 in { C212 })) by L994 , L996 , TARSKI:def 1 , TARSKI:def 2;
+thus L999: thesis by L998 , L997 , XBOOLE_0:def 3;
+end;
+L1000: D121 c= ( bool C207 )
+proof
+let R5 being set;
+assume L1001: R5 in D121;
+L1002: R5 c= ( C214 \/ { C212 } ) by L1001 , L986 , ZFMISC_1:74;
+L1003: R5 c= C207 by L1002 , XBOOLE_1:1;
+thus L1004: thesis by L1003;
+end;
+reconsider D122 = D121 as (Subset-Family of C207) by L1000;
+defpred S6[ set ] means $1 in C214;
+deffunc H10((Element of C207)) = { $1 , C212 };
+L1005: ( bool C207 ) c= ( dom C208 ) by FUNCT_2:def 1;
+L1006: ( C208 .: { H10(B197) where B197 is (Element of C207) : S6[ B197 ] } ) = { ( C208 . H10(B198) ) where B198 is (Element of C207) : S6[ B198 ] } from FuncFraenkel(L1005);
+L1007: ( C208 . ( union D122 ) ) = ( C208 . { ( C208 . { B199 , C212 } ) where B199 is (Element of C207) : B199 in C214 } ) by L1006 , L979;
+thus L1008: thesis by L1007 , L986;
+end;
+L1009: C209 is_reflexive_in C207
+proof
+let C217 being set;
+assume L1010: C217 in C207;
+L1011: C217 = ( C208 . { C217 } ) by L1010 , L978
+.= ( C208 . { C217 , C217 } ) by ENUMSET1:29;
+thus L1012: thesis by L1011 , L980 , L1010;
+end;
+L1013: C209 is_antisymmetric_in C207
+proof
+let C218 , C219 being set;
+assume that
+L1014: C218 in C207
+and
+L1015: C219 in C207
+and
+L1016: [ C218 , C219 ] in C209
+and
+L1017: [ C219 , C218 ] in C209;
+L1018: ( C208 . { C218 , C219 } ) = C219 by L980 , L1016;
+thus L1019: thesis by L1018 , L980 , L1017;
+end;
+L1020: C209 is_transitive_in C207
+proof
+let C220 , C221 , C222 being set;
+assume that
+L1021: C220 in C207
+and
+L1022: C221 in C207
+and
+L1023: C222 in C207
+and
+L1024: [ C220 , C221 ] in C209
+and
+L1025: [ C221 , C222 ] in C209;
+reconsider D123 = C220 , D124 = C221 , D125 = C222 as (Element of C207) by L1021 , L1022 , L1023;
+L1026: ( C208 . { C220 , C221 } ) = C221 by L980 , L1024;
+L1027: ( C208 . { C221 , C222 } ) = C222 by L980 , L1025;
+L1028: ( C208 . { D123 , D125 } ) = ( C208 . { ( C208 . { D123 } ) , ( C208 . { D124 , D125 } ) } ) by L1027 , L978
+.= ( C208 . ( { D123 } \/ { D124 , D125 } ) ) by L982
+.= ( C208 . { D123 , D124 , D125 } ) by ENUMSET1:2
+.= ( C208 . ( { D123 , D124 } \/ { D125 } ) ) by ENUMSET1:3
+.= ( C208 . { ( C208 . { D123 , D124 } ) , ( C208 . { D125 } ) } ) by L982
+.= D125 by L978 , L1026 , L1027;
+thus L1029: thesis by L1028 , L980;
+end;
+L1030: ( dom C209 ) = C207 by L1009 , ORDERS_1:13;
+L1031: ( field C209 ) = C207 by L1009 , ORDERS_1:13;
+reconsider D126 = C209 as (Order of C207) by L1031 , L1009 , L1013 , L1020 , L1030 , PARTFUN1:def 2 , RELAT_2:def 9 , RELAT_2:def 12 , RELAT_2:def 16;
+set D127 = RelStr (# C207 , D126 #);
+L1032: D127 is  complete
+proof
+let R42 being set;
+reconsider D128 = ( R42 /\ C207 ) as (Subset of C207) by XBOOLE_1:17;
+reconsider D129 = ( C208 . D128 ) as (Element of D127);
+take D129;
+thus L1033: R42 is_<=_than D129
+proof
+let C223 being (Element of D127);
+assume L1034: C223 in R42;
+L1035: C223 in D128 by L1034 , XBOOLE_0:def 4;
+L1036: ( { C223 } \/ D128 ) = D128 by L1035 , ZFMISC_1:40;
+L1037: D129 = ( C208 . { ( C208 . { C223 } ) , D129 } ) by L1036 , L982
+.= ( C208 . { C223 , D129 } ) by L978;
+thus L1038: [ C223 , D129 ] in (the InternalRel of D127) by L1037 , L980;
+end;
+
+let C224 being (Element of D127);
+assume that
+L1039: R42 is_<=_than C224;
+L1040: ( C208 . { D129 , C224 } ) = ( C208 . { D129 , ( C208 . { C224 } ) } ) by L978
+.= ( C208 . ( D128 \/ { C224 } ) ) by L982;
+L1041:
+now
+per cases ;
+suppose L1042: D128 <> ( {} );
+
+set D130 = the (Element of D128);
+reconsider D131 = D130 as (Element of C207) by L1042 , TARSKI:def 3;
+deffunc H11((Element of C207)) = ( C208 . { $1 , C224 } );
+deffunc H12((Element of C207)) = C224;
+defpred S7[ set ] means $1 in D128;
+L1043: (for B200 being (Element of C207) holds (S7[ B200 ] implies H11(B200) = H12(B200)))
+proof
+let C225 being (Element of C207);
+reconsider D132 = C225 as (Element of D127);
+reconsider D133 = C224 as (Element of C207);
+assume L1044: C225 in D128;
+L1045: C225 in R42 by L1044 , XBOOLE_0:def 4;
+L1046: D132 <= C224 by L1045 , L1039 , L169;
+L1047: [ C225 , D133 ] in D126 by L1046 , ORDERS_2:def 5;
+thus L1048: thesis by L1047 , L980;
+end;
+L1049: D131 in D128 by L1042;
+L1050: (ex B201 being (Element of C207) st S7[ B201 ]) by L1049;
+L1051: { H11(B202) where B202 is (Element of C207) : S7[ B202 ] } = { H12(B203) where B203 is (Element of C207) : S7[ B203 ] } from FRAENKEL:sch 6(L1043)
+.= { C224 where B204 is (Element of C207) : S7[ B204 ] }
+.= { C224 } from SingleFraenkel(L1050);
+thus L1052: ( C208 . { D129 , C224 } ) = ( C208 . { C224 } ) by L1051 , L984 , L1040 , L1049
+.= C224 by L978;
+end;
+suppose L1053: D128 = ( {} );
+
+thus L1054: ( C208 . { D129 , C224 } ) = C224 by L1053 , L978 , L1040;
+end;
+end;
+thus L1056: [ D129 , C224 ] in (the InternalRel of D127) by L1041 , L980;
+end;
+reconsider D134 = D127 as  complete  strict non  empty Poset by L1032;
+take D135 = ( latt D134 );
+L1057: D134 is  with_suprema  with_infima by L253;
+L1058: D134 = ( LattPOSet D135 ) by L1057 , L421;
+thus L1059: H1(D135) = C207 by L1058;
+let C226 being (Subset of D135);
+reconsider D136 = C226 as (Subset of C207) by L1058;
+reconsider D137 = ( C208 . D136 ) as (Element of ( LattPOSet D135 )) by L1057 , L421;
+set D138 = ( % D137 );
+L1060: C226 is_<=_than D137
+proof
+let C227 being (Element of ( LattPOSet D135 ));
+reconsider D139 = C227 as (Element of C207) by L1057 , L421;
+assume L1061: C227 in C226;
+L1062: C226 = ( { C227 } \/ C226 ) by L1061 , ZFMISC_1:40;
+L1063: ( C208 . { D139 , ( C208 . D136 ) } ) = ( C208 . { ( C208 . { D139 } ) , ( C208 . D136 ) } ) by L978
+.= D137 by L982 , L1062;
+thus L1064: [ C227 , D137 ] in (the InternalRel of ( LattPOSet D135 )) by L1063 , L980 , L1058;
+end;
+L1065: C226 is_less_than D138 by L1060 , L640;
+L1066:
+now
+let C228 being (Element of D135);
+reconsider D140 = C228 as (Element of C207) by L1058;
+reconsider D141 = D140 as (Element of ( LattPOSet D135 ));
+assume L1067: C226 is_less_than C228;
+L1068: C226 is_<=_than ( C228 % ) by L1067 , L629;
+L1069: ( C208 . { ( C208 . D136 ) , D141 } ) = ( C208 . { ( C208 . D136 ) , ( C208 . { D140 } ) } ) by L978
+.= ( C208 . ( D136 \/ { D141 } ) ) by L982;
+L1070:
+now
+per cases ;
+suppose L1071: D136 <> ( {} );
+
+set D142 = the (Element of D136);
+reconsider D143 = D142 as (Element of C207) by L1071 , TARSKI:def 3;
+deffunc H13((Element of C207)) = ( C208 . { $1 , D141 } );
+deffunc H14((Element of C207)) = D141;
+defpred S8[ set ] means $1 in D136;
+L1072: (for B205 being (Element of C207) holds (S8[ B205 ] implies H13(B205) = H14(B205)))
+proof
+let C229 being (Element of C207);
+reconsider D144 = C229 as (Element of ( LattPOSet D135 )) by L1057 , L421;
+assume L1073: C229 in D136;
+L1074: D144 <= D141 by L1073 , L1068 , L169;
+L1075: [ C229 , D140 ] in D126 by L1074 , L1058 , ORDERS_2:def 5;
+thus L1076: thesis by L1075 , L980;
+end;
+L1077: D143 in D136 by L1071;
+L1078: (ex B206 being (Element of C207) st S8[ B206 ]) by L1077;
+L1079: { H13(B207) where B207 is (Element of C207) : S8[ B207 ] } = { H14(B208) where B208 is (Element of C207) : S8[ B208 ] } from FRAENKEL:sch 6(L1072)
+.= { D141 where B209 is (Element of C207) : S8[ B209 ] }
+.= { D141 } from SingleFraenkel(L1078);
+thus L1080: ( C208 . { D137 , D141 } ) = ( C208 . { D141 } ) by L1079 , L984 , L1069 , L1077
+.= D141 by L978;
+end;
+suppose L1081: D136 = ( {} );
+
+thus L1082: ( C208 . { D137 , D141 } ) = D141 by L1081 , L978 , L1069;
+end;
+end;
+L1084: [ D137 , D141 ] in (the InternalRel of ( LattPOSet D135 )) by L1070 , L980 , L1058;
+L1085: D137 <= D141 by L1084 , ORDERS_2:def 5;
+L1086: ( D138 % ) = D138;
+L1087: ( C228 % ) = D141;
+thus L1088: D138 [= C228 by L1087 , L1085 , L1086 , L150;
+end;
+thus L1089: ( "\/" C226 ) = ( C208 . C226 ) by L1066 , L1065 , L669;
+end;
+theorem
+L1090: (for B210 being non  empty set holds (for B211 being (Function of ( bool B210 ) , B210) holds (((for B212 being (Element of B210) holds ( B211 . { B212 } ) = B212) & (for B213 being (Subset-Family of B210) holds ( B211 . ( B211 .: B213 ) ) = ( B211 . ( union B213 ) ))) implies (ex B214 being  complete  strict Lattice st ((the carrier of B214) = B210 & (for B215 being (Subset of B214) holds ( "\/" B215 ) = ( B211 . B215 ))))))) by L977;

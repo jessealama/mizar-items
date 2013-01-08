@@ -1,0 +1,2052 @@
+:: The { \bf SCM_FSA } computer
+::  by Andrzej Trybulec , Yatsuka Nakamura and Piotr Rudnicki
+::
+:: Received February 7, 1996
+:: Copyright (c) 1996-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, STRUCT_0, AMI_1, RELAT_1, SCMFSA_1, FUNCT_7, XBOOLE_0,
+      TARSKI, AMI_3, ZFMISC_1, SUBSET_1, CARD_1, CAT_1, ORDINAL1, ARYTM_1,
+      ARYTM_3, NAT_1, FINSET_1, FUNCT_1, AMI_2, XXREAL_0, FINSEQ_1, GRAPHSP,
+      FSM_1, FUNCT_4, FUNCOP_1, INT_1, CARD_3, COMPLEX1, PARTFUN1, FINSEQ_2,
+      GLIB_000, SCMFSA_2, RECDEF_2, GOBRD13, MEMSTR_0, AMISTD_4, SCMPDS_5;
+ notations TARSKI, XBOOLE_0, ENUMSET1, ZFMISC_1,
+      XTUPLE_0, SUBSET_1, ORDINAL1, XCMPLX_0,
+      XXREAL_0, NAT_1, INT_1, RELAT_1, MCART_1, CARD_1, CARD_3, INT_2,
+      FINSEQ_1, FUNCOP_1, STRUCT_0, FUNCT_1, RELSET_1, PARTFUN1, FUNCT_2,
+      FINSET_1, FUNCT_4, FINSEQ_2, FUNCT_7, RECDEF_2, NUMBERS, MEMSTR_0,
+      COMPOS_0, COMPOS_1, AMISTD_4,
+      EXTPRO_1, SCM_INST, SCMFSA_I, AMI_2, AMI_3, SCMFSA_1;
+ constructors WELLORD2, DOMAIN_1, REAL_1, FINSEQ_4, AMI_3, SCMFSA_1, RELSET_1,
+      PRE_POLY, FUNCT_7, NAT_D, AMISTD_4, XTUPLE_0;
+ registrations SETFAM_1, RELAT_1, FUNCT_1, ORDINAL1, FUNCOP_1, XREAL_0, NAT_1,
+      INT_1, CARD_3, STRUCT_0, AMI_3, SCMFSA_1, FINSET_1, CARD_2, RELSET_1,
+      EXTPRO_1, MEMSTR_0, COMPOS_0, SCM_INST, SCMFSA_I, XTUPLE_0;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions TARSKI, EXTPRO_1, COMPOS_1, WELLORD2, XBOOLE_0, AMI_2, AMI_3,
+      STRUCT_0, SCMFSA_1, FUNCOP_1, CARD_1, NAT_1, FUNCT_1, MEMSTR_0, COMPOS_0,
+      SCM_INST, SCMFSA_I, AMISTD_4, XTUPLE_0;
+ theorems SCMFSA_1, TARSKI, INT_1, RELAT_1, AMI_5, FUNCT_2, FUNCT_4, CARD_3,
+      FUNCOP_1, FUNCT_1, AMI_3, NAT_1, CARD_1, AMI_2, FUNCT_7, ZFMISC_1,
+      ORDINAL1, XBOOLE_0, XBOOLE_1, XREAL_1, XXREAL_0, NUMBERS, FINSET_1,
+      PARTFUN1, RECDEF_2, EXTPRO_1, MEMSTR_0, SCMFSA_I, SCM_INST, MCART_1,
+      COMPOS_0, COMPOS_1, XTUPLE_0;
+ schemes FUNCT_2;
+
+begin
+definition
+func SCM+FSA ->  strict AMI-Struct over 3 equals
+AMI-Struct (# ( SCM+FSA-Memory ) , ( In (( NAT ) , ( SCM+FSA-Memory )) ) , ( SCM+FSA-Instr ) , ( SCM+FSA-OK ) , ( SCM*-VAL ) , ( SCM+FSA-Exec ) #);
+coherence;
+end;
+registration
+cluster ( SCM+FSA ) -> non  empty  with_non-empty_values;
+coherence
+proof
+thus L2: (the carrier of ( SCM+FSA )) is non  empty;
+thus L3: ( the_Values_of ( SCM+FSA ) ) is  non-empty;
+end;
+end;
+registration
+cluster ( SCM+FSA ) ->  with_non_trivial_Instructions;
+coherence
+proof
+L5: [ ( 0 ) , ( {} ) , ( {} ) ] in ( SCM+FSA-Instr ) by SCMFSA_I:3;
+L6: [ 6 , <* ( 0 ) *> , ( {} ) ] in ( SCM-Instr ) by SCM_INST:2;
+L7: [ 6 , <* ( 0 ) *> , ( {} ) ] in ( SCM+FSA-Instr ) by L6 , SCMFSA_I:1;
+L8: [ ( 0 ) , ( {} ) , ( {} ) ] <> [ 6 , <* ( 0 ) *> , ( {} ) ] by XTUPLE_0:3;
+thus L9: (the InstructionsF of ( SCM+FSA )) is non  trivial by L8 , L5 , L7 , ZFMISC_1:def 10;
+end;
+end;
+theorem
+L11: ( IC ( SCM+FSA ) ) = ( NAT ) by FUNCT_7:def 1 , SCMFSA_1:5;
+begin
+notation
+synonym Int-Locations for SCM+FSA-Data-Loc;
+end;
+definition
+redefine func Int-Locations -> (Subset of ( SCM+FSA ));
+
+coherence
+proof
+L13: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+thus L14: thesis by L13;
+end;
+canceled 1;
+func FinSeq-Locations -> (Subset of ( SCM+FSA )) equals
+( SCM+FSA-Data*-Loc );
+coherence;
+end;
+registration
+cluster  Int-like for (Object of ( SCM+FSA ));
+existence
+proof
+reconsider D1 = the (Element of ( SCM+FSA-Data-Loc )) as (Object of ( SCM+FSA ));
+take D1;
+thus L16: thesis by AMI_2:def 16;
+end;
+end;
+definition
+mode Int-Location
+ is  Int-like (Object of ( SCM+FSA ));
+canceled 1;
+mode FinSeq-Location
+ -> (Object of ( SCM+FSA ))
+means :L18: it in ( SCM+FSA-Data*-Loc );
+existence
+proof
+set D2 = the (Element of ( SCM+FSA-Data*-Loc ));
+reconsider D3 = D2 as (Object of ( SCM+FSA ));
+take D3;
+thus L19: thesis;
+end;
+end;
+canceled 5;
+definition
+let C1 being Nat;
+func intloc C1 -> Int-Location equals
+( dl. C1 );
+coherence
+proof
+L21: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L22: ( dl. C1 ) in ( SCM-Data-Loc ) by AMI_2:def 16;
+thus L23: thesis by L22 , L21;
+end;
+func fsloc C1 -> FinSeq-Location equals
+( - ( C1 + 1 ) );
+coherence
+proof
+reconsider D4 = C1 as (Element of ( NAT )) by ORDINAL1:def 12;
+L24: ( - ( D4 + 1 ) ) < ( - ( 0 ) ) by XREAL_1:24;
+L25: (( - ( D4 + 1 ) ) in ( INT ) & (not ( - ( D4 + 1 ) ) in ( NAT ))) by L24 , INT_1:def 1;
+L26: ( - ( D4 + 1 ) ) in ( SCM+FSA-Data*-Loc ) by L25 , XBOOLE_0:def 5;
+thus L27: thesis by L26 , L18;
+end;
+end;
+theorem
+L29: (for B1 , B2 being Nat holds (B1 <> B2 implies ( fsloc B1 ) <> ( fsloc B2 )));
+theorem
+L30: (for B3 being Int-Location holds (ex B4 being (Element of ( NAT )) st B3 = ( intloc B4 )))
+proof
+let C2 being Int-Location;
+L31: C2 in ( SCM-Data-Loc ) by AMI_2:def 16;
+reconsider D5 = C2 as Data-Location by L31;
+consider C3 being (Element of ( NAT )) such that L32: D5 = ( dl. C3 ) by AMI_5:1;
+take C3;
+thus L33: thesis by L32;
+end;
+theorem
+L34: (for B5 being FinSeq-Location holds (ex B6 being (Element of ( NAT )) st B5 = ( fsloc B6 )))
+proof
+let C4 being FinSeq-Location;
+L35: C4 in ( SCM+FSA-Data*-Loc ) by L18;
+consider C5 being (Element of ( NAT )) such that L36: (C4 = C5 or C4 = ( - C5 )) by L35 , INT_1:def 1;
+L37: C5 <> ( 0 ) by L35 , L36 , XBOOLE_0:def 5;
+consider C6 being Nat such that L38: C5 = ( C6 + 1 ) by L37 , NAT_1:6;
+reconsider D6 = C6 as (Element of ( NAT )) by ORDINAL1:def 12;
+take D6;
+thus L39: thesis by L35 , L36 , L38 , XBOOLE_0:def 5;
+end;
+registration
+cluster ( FinSeq-Locations ) ->  infinite;
+coherence
+proof
+deffunc H1((Element of ( NAT ))) = ( fsloc $1 );
+consider C7 being (Function of ( NAT ) , (the carrier of ( SCM+FSA ))) such that L40: (for R13 being (Element of ( NAT )) holds ( C7 . R13 ) = H1(R13)) from FUNCT_2:sch 4;
+L41: ( NAT ) , ( FinSeq-Locations ) are_equipotent
+proof
+take C7;
+thus L42: C7 is  one-to-one
+proof
+let C8 , C9 being set;
+assume that
+L43: (C8 in ( dom C7 ) & C9 in ( dom C7 ))
+and
+L44: ( C7 . C8 ) = ( C7 . C9 );
+reconsider D7 = C8 , D8 = C9 as (Element of ( NAT )) by L43;
+L45: ( fsloc D7 ) = ( C7 . D7 ) by L40
+.= ( fsloc D8 ) by L40 , L44;
+thus L46: thesis by L45;
+end;
+
+thus L47: ( dom C7 ) = ( NAT ) by FUNCT_2:def 1;
+thus L48: ( rng C7 ) c= ( FinSeq-Locations )
+proof
+let C10 being set;
+assume L49: C10 in ( rng C7 );
+consider C11 being set such that L50: C11 in ( dom C7 ) and L51: C10 = ( C7 . C11 ) by L49 , FUNCT_1:def 3;
+reconsider D9 = C11 as (Element of ( NAT )) by L50;
+L52: C10 = ( fsloc D9 ) by L40 , L51;
+thus L53: thesis by L52 , L18;
+end;
+
+thus L54: ( FinSeq-Locations ) c= ( rng C7 )
+proof
+let C12 being set;
+assume L55: C12 in ( FinSeq-Locations );
+L56: C12 is FinSeq-Location by L55 , L18;
+consider C13 being (Element of ( NAT )) such that L57: C12 = ( fsloc C13 ) by L56 , L34;
+L58: C13 in ( NAT );
+L59: C13 in ( dom C7 ) by L58 , FUNCT_2:def 1;
+L60: C12 = ( C7 . C13 ) by L40 , L57;
+thus L61: thesis by L60 , L59 , FUNCT_1:def 3;
+end;
+
+end;
+thus L55: thesis by L41 , CARD_1:38;
+end;
+end;
+theorem
+L57: (for B7 being Int-Location holds B7 is Data-Location)
+proof
+let C14 being Int-Location;
+L58: C14 in ( SCM-Data-Loc ) by AMI_2:def 16;
+thus L59: thesis by L58;
+end;
+theorem
+L60: (for B8 being Int-Location holds ( Values B8 ) = ( INT ))
+proof
+let C15 being Int-Location;
+L61: C15 in ( SCM-Data-Loc ) by AMI_2:def 16;
+thus L62: thesis by L61 , SCMFSA_1:10;
+end;
+theorem
+L63: (for B9 being FinSeq-Location holds ( Values B9 ) = ( ( INT ) * ))
+proof
+let C16 being FinSeq-Location;
+L64: C16 in ( SCM+FSA-Data*-Loc ) by L18;
+thus L65: thesis by L64 , SCMFSA_1:11;
+end;
+begin
+canceled 2;
+theorem
+L66: (for B10 being (Instruction of ( SCM+FSA )) holds (( InsCode B10 ) <= 8 implies B10 is (Instruction of ( SCM ))))
+proof
+let C17 being (Instruction of ( SCM+FSA ));
+assume L67: ( InsCode C17 ) <= 8;
+L68:
+now
+assume L69: C17 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } };
+consider R15 being (Element of ( Segm 13 )), R34 being (Element of ( SCM+FSA-Data-Loc )), R40 being (Element of ( SCM+FSA-Data*-Loc )) such that L70: C17 = [ R15 , ( {} ) , <* R34 , R40 *> ] and L71: R15 in { 11 , 12 } by L69;
+L72: ( C17 `1_3 ) = R15 by L70 , RECDEF_2:def 1;
+L73: (R15 = 12 or R15 = 11) by L71 , TARSKI:def 2;
+thus L74: contradiction by L73 , L67 , L72;
+end;
+L75: C17 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) by L68 , XBOOLE_0:def 3;
+L76:
+now
+assume L77: C17 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } };
+consider R16 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R32 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L78: C17 = [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] and L79: R16 in { 9 , 10 } by L77;
+L80: ( C17 `1_3 ) = R16 by L78 , RECDEF_2:def 1;
+L81: (R16 = 9 or R16 = 10) by L79 , TARSKI:def 2;
+thus L82: contradiction by L81 , L67 , L80;
+end;
+thus L83: thesis by L76 , L75 , XBOOLE_0:def 3;
+end;
+theorem
+L84: (for B11 being (Instruction of ( SCM+FSA )) holds ( InsCode B11 ) <= 12)
+proof
+let C18 being (Instruction of ( SCM+FSA ));
+L85: (C18 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) or C18 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } }) by XBOOLE_0:def 3;
+per cases  by L85 , XBOOLE_0:def 3;
+suppose L86: C18 in ( SCM-Instr );
+
+reconsider D10 = C18 as (Instruction of ( SCM )) by L86;
+L87: ( InsCode D10 ) <= 8 by AMI_5:5;
+thus L88: thesis by L87 , XXREAL_0:2;
+end;
+suppose L89: C18 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } };
+
+consider R16 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R32 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L90: C18 = [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] and L91: R16 in { 9 , 10 } by L89;
+L92: ( C18 `1_3 ) = R16 by L90 , RECDEF_2:def 1;
+L93: (R16 = 9 or R16 = 10) by L91 , TARSKI:def 2;
+thus L94: thesis by L93 , L92;
+end;
+suppose L95: C18 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } };
+
+consider R15 being (Element of ( Segm 13 )), R34 being (Element of ( SCM+FSA-Data-Loc )), R40 being (Element of ( SCM+FSA-Data*-Loc )) such that L96: C18 = [ R15 , ( {} ) , <* R34 , R40 *> ] and L97: R15 in { 11 , 12 } by L95;
+L98: ( C18 `1_3 ) = R15 by L96 , RECDEF_2:def 1;
+L99: (R15 = 11 or R15 = 12) by L97 , TARSKI:def 2;
+thus L100: thesis by L99 , L98;
+end;
+end;
+theorem
+L102: (for B12 being (Instruction of ( SCM )) holds B12 is (Instruction of ( SCM+FSA )))
+proof
+let C19 being (Instruction of ( SCM ));
+L103: C19 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) by XBOOLE_0:def 3;
+thus L104: thesis by L103 , XBOOLE_0:def 3;
+end;
+definition
+let R46 being Int-Location;
+let R47 being Int-Location;
+func R46 := R47 -> (Instruction of ( SCM+FSA )) means
+:L105: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & it = ( R44 := R45 ))));
+existence
+proof
+reconsider D11 = R46 , D12 = R47 as Data-Location by L57;
+reconsider D13 = ( D11 := D12 ) as (Instruction of ( SCM+FSA )) by L102;
+take D13;
+take D11;
+take D12;
+thus L106: thesis;
+end;
+correctness;
+func AddTo (R46 , R47) -> (Instruction of ( SCM+FSA )) means
+:L107: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & it = ( AddTo (R44 , R45) ))));
+existence
+proof
+reconsider D14 = R46 , D15 = R47 as Data-Location by L57;
+reconsider D16 = ( AddTo (D14 , D15) ) as (Instruction of ( SCM+FSA )) by L102;
+take D16;
+take D14;
+take D15;
+thus L108: thesis;
+end;
+correctness;
+func SubFrom (R46 , R47) -> (Instruction of ( SCM+FSA )) means
+:L109: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & it = ( SubFrom (R44 , R45) ))));
+existence
+proof
+reconsider D17 = R46 , D18 = R47 as Data-Location by L57;
+reconsider D19 = ( SubFrom (D17 , D18) ) as (Instruction of ( SCM+FSA )) by L102;
+take D19;
+take D17;
+take D18;
+thus L110: thesis;
+end;
+correctness;
+func MultBy (R46 , R47) -> (Instruction of ( SCM+FSA )) means
+:L111: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & it = ( MultBy (R44 , R45) ))));
+existence
+proof
+reconsider D20 = R46 , D21 = R47 as Data-Location by L57;
+reconsider D22 = ( MultBy (D20 , D21) ) as (Instruction of ( SCM+FSA )) by L102;
+take D22;
+take D20;
+take D21;
+thus L112: thesis;
+end;
+correctness;
+func Divide (R46 , R47) -> (Instruction of ( SCM+FSA )) means
+:L113: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & it = ( Divide (R44 , R45) ))));
+existence
+proof
+reconsider D23 = R46 , D24 = R47 as Data-Location by L57;
+reconsider D25 = ( Divide (D23 , D24) ) as (Instruction of ( SCM+FSA )) by L102;
+take D25;
+take D23;
+take D24;
+thus L114: thesis;
+end;
+correctness;
+end;
+definition
+let R24 being (Element of ( NAT ));
+func goto R24 -> (Instruction of ( SCM+FSA )) equals
+( SCM-goto R24 );
+coherence by L102;
+let R46 being Int-Location;
+func R46 =0_goto R24 -> (Instruction of ( SCM+FSA )) means
+:L116: (ex R44 being Data-Location st (R46 = R44 & it = ( R44 =0_goto R24 )));
+existence
+proof
+reconsider D26 = R46 as Data-Location by L57;
+reconsider D27 = ( D26 =0_goto R24 ) as (Instruction of ( SCM+FSA )) by L102;
+take D27;
+take D26;
+thus L117: thesis;
+end;
+correctness;
+func R46 >0_goto R24 -> (Instruction of ( SCM+FSA )) means
+:L118: (ex R44 being Data-Location st (R46 = R44 & it = ( R44 >0_goto R24 )));
+existence
+proof
+reconsider D28 = R46 as Data-Location by L57;
+reconsider D29 = ( D28 >0_goto R24 ) as (Instruction of ( SCM+FSA )) by L102;
+take D29;
+take D28;
+thus L119: thesis;
+end;
+correctness;
+end;
+definition
+let C20 , C21 being Int-Location;
+let C22 being FinSeq-Location;
+func C20 := (C22 , C21) -> (Instruction of ( SCM+FSA )) equals
+[ 9 , ( {} ) , <* C20 , C22 , C21 *> ];
+coherence
+proof
+reconsider D30 = C22 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D31 = C20 , D32 = C21 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L121: 9 in { 9 , 10 } by TARSKI:def 2;
+L122: [ 9 , ( {} ) , <* D31 , D30 , D32 *> ] in ( SCM+FSA-Instr ) by L121 , SCMFSA_I:4;
+thus L123: thesis by L122;
+end;
+func (C22 , C21) := C20 -> (Instruction of ( SCM+FSA )) equals
+[ 10 , ( {} ) , <* C20 , C22 , C21 *> ];
+coherence
+proof
+reconsider D33 = C22 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D34 = C20 , D35 = C21 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L124: 10 in { 9 , 10 } by TARSKI:def 2;
+L125: [ 10 , ( {} ) , <* D34 , D33 , D35 *> ] in ( SCM+FSA-Instr ) by L124 , SCMFSA_I:4;
+thus L126: thesis by L125;
+end;
+end;
+definition
+let C23 being Int-Location;
+let C24 being FinSeq-Location;
+func C23 :=len C24 -> (Instruction of ( SCM+FSA )) equals
+[ 11 , ( {} ) , <* C23 , C24 *> ];
+coherence
+proof
+reconsider D36 = C24 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D37 = C23 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L128: 11 in { 11 , 12 } by TARSKI:def 2;
+L129: [ 11 , ( {} ) , <* D37 , D36 *> ] in ( SCM+FSA-Instr ) by L128 , SCMFSA_I:5;
+thus L130: thesis by L129;
+end;
+func C24 :=<0,...,0> C23 -> (Instruction of ( SCM+FSA )) equals
+[ 12 , ( {} ) , <* C23 , C24 *> ];
+coherence
+proof
+reconsider D38 = C24 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D39 = C23 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L131: 12 in { 11 , 12 } by TARSKI:def 2;
+L132: [ 12 , ( {} ) , <* D39 , D38 *> ] in ( SCM+FSA-Instr ) by L131 , SCMFSA_I:5;
+thus L133: thesis by L132;
+end;
+end;
+theorem
+L135: (for R46 being Int-Location holds (for R47 being Int-Location holds ( InsCode ( R46 := R47 ) ) = 1))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+L136: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & ( R46 := R47 ) = ( R44 := R45 )))) by L105;
+thus L137: thesis by L136 , RECDEF_2:def 1;
+end;
+theorem
+L138: (for R46 being Int-Location holds (for R47 being Int-Location holds ( InsCode ( AddTo (R46 , R47) ) ) = 2))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+L139: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & ( AddTo (R46 , R47) ) = ( AddTo (R44 , R45) )))) by L107;
+thus L140: thesis by L139 , RECDEF_2:def 1;
+end;
+theorem
+L141: (for R46 being Int-Location holds (for R47 being Int-Location holds ( InsCode ( SubFrom (R46 , R47) ) ) = 3))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+L142: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & ( SubFrom (R46 , R47) ) = ( SubFrom (R44 , R45) )))) by L109;
+thus L143: thesis by L142 , RECDEF_2:def 1;
+end;
+theorem
+L144: (for R46 being Int-Location holds (for R47 being Int-Location holds ( InsCode ( MultBy (R46 , R47) ) ) = 4))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+L145: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & ( MultBy (R46 , R47) ) = ( MultBy (R44 , R45) )))) by L111;
+thus L146: thesis by L145 , RECDEF_2:def 1;
+end;
+theorem
+L147: (for R46 being Int-Location holds (for R47 being Int-Location holds ( InsCode ( Divide (R46 , R47) ) ) = 5))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+L148: (ex R44 being Data-Location st (ex R45 being Data-Location st (R46 = R44 & R47 = R45 & ( Divide (R46 , R47) ) = ( Divide (R44 , R45) )))) by L113;
+thus L149: thesis by L148 , RECDEF_2:def 1;
+end;
+theorem
+L150: (for R25 being (Element of ( NAT )) holds ( InsCode ( goto R25 ) ) = 6) by RECDEF_2:def 1;
+theorem
+L151: (for R25 being (Element of ( NAT )) holds (for R46 being Int-Location holds ( InsCode ( R46 =0_goto R25 ) ) = 7))
+proof
+let R25 being (Element of ( NAT ));
+let R46 being Int-Location;
+L152: (ex R44 being Data-Location st (R46 = R44 & ( R46 =0_goto R25 ) = ( R44 =0_goto R25 ))) by L116;
+thus L153: thesis by L152 , RECDEF_2:def 1;
+end;
+theorem
+L154: (for R25 being (Element of ( NAT )) holds (for R46 being Int-Location holds ( InsCode ( R46 >0_goto R25 ) ) = 8))
+proof
+let R25 being (Element of ( NAT ));
+let R46 being Int-Location;
+L155: (ex R44 being Data-Location st (R46 = R44 & ( R46 >0_goto R25 ) = ( R44 >0_goto R25 ))) by L118;
+thus L156: thesis by L155 , RECDEF_2:def 1;
+end;
+theorem
+L157: (for R21 being FinSeq-Location holds (for R46 being Int-Location holds (for R48 being Int-Location holds ( InsCode ( R48 := (R21 , R46) ) ) = 9))) by RECDEF_2:def 1;
+theorem
+L158: (for R21 being FinSeq-Location holds (for R46 being Int-Location holds (for R48 being Int-Location holds ( InsCode ( (R21 , R46) := R48 ) ) = 10))) by RECDEF_2:def 1;
+theorem
+L159: (for R21 being FinSeq-Location holds (for R46 being Int-Location holds ( InsCode ( R46 :=len R21 ) ) = 11)) by RECDEF_2:def 1;
+theorem
+L160: (for R21 being FinSeq-Location holds (for R46 being Int-Location holds ( InsCode ( R21 :=<0,...,0> R46 ) ) = 12)) by RECDEF_2:def 1;
+theorem
+L161: (for B13 being (Instruction of ( SCM+FSA )) holds (( InsCode B13 ) = 1 implies (ex R20 being Int-Location st (ex R49 being Int-Location st B13 = ( R20 := R49 )))))
+proof
+let C25 being (Instruction of ( SCM+FSA ));
+assume L162: ( InsCode C25 ) = 1;
+reconsider D40 = C25 as (Instruction of ( SCM )) by L162 , L66;
+consider R44 being Data-Location, R45 being Data-Location such that L163: D40 = ( R44 := R45 ) by L162 , AMI_5:8;
+L164: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L165: (R44 in ( SCM-Data-Loc ) & R45 in ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D41 = R44 , D42 = R45 as Int-Location by L165 , L164;
+take D41;
+take D42;
+thus L166: thesis by L163 , L105;
+end;
+theorem
+L167: (for B14 being (Instruction of ( SCM+FSA )) holds (( InsCode B14 ) = 2 implies (ex R20 being Int-Location st (ex R49 being Int-Location st B14 = ( AddTo (R20 , R49) )))))
+proof
+let C26 being (Instruction of ( SCM+FSA ));
+assume L168: ( InsCode C26 ) = 2;
+reconsider D43 = C26 as (Instruction of ( SCM )) by L168 , L66;
+consider R44 being Data-Location, R45 being Data-Location such that L169: D43 = ( AddTo (R44 , R45) ) by L168 , AMI_5:9;
+L170: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L171: (R44 in ( SCM-Data-Loc ) & R45 in ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D44 = R44 , D45 = R45 as Int-Location by L171 , L170;
+take D44;
+take D45;
+thus L172: thesis by L169 , L107;
+end;
+theorem
+L173: (for B15 being (Instruction of ( SCM+FSA )) holds (( InsCode B15 ) = 3 implies (ex R20 being Int-Location st (ex R49 being Int-Location st B15 = ( SubFrom (R20 , R49) )))))
+proof
+let C27 being (Instruction of ( SCM+FSA ));
+assume L174: ( InsCode C27 ) = 3;
+reconsider D46 = C27 as (Instruction of ( SCM )) by L174 , L66;
+consider R44 being Data-Location, R45 being Data-Location such that L175: D46 = ( SubFrom (R44 , R45) ) by L174 , AMI_5:10;
+L176: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L177: (R44 in ( SCM-Data-Loc ) & R45 in ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D47 = R44 , D48 = R45 as Int-Location by L177 , L176;
+take D47;
+take D48;
+thus L178: thesis by L175 , L109;
+end;
+theorem
+L179: (for B16 being (Instruction of ( SCM+FSA )) holds (( InsCode B16 ) = 4 implies (ex R20 being Int-Location st (ex R49 being Int-Location st B16 = ( MultBy (R20 , R49) )))))
+proof
+let C28 being (Instruction of ( SCM+FSA ));
+assume L180: ( InsCode C28 ) = 4;
+reconsider D49 = C28 as (Instruction of ( SCM )) by L180 , L66;
+consider R44 being Data-Location, R45 being Data-Location such that L181: D49 = ( MultBy (R44 , R45) ) by L180 , AMI_5:11;
+L182: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L183: (R44 in ( SCM-Data-Loc ) & R45 in ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D50 = R44 , D51 = R45 as Int-Location by L183 , L182;
+take D50;
+take D51;
+thus L184: thesis by L181 , L111;
+end;
+theorem
+L185: (for B17 being (Instruction of ( SCM+FSA )) holds (( InsCode B17 ) = 5 implies (ex R20 being Int-Location st (ex R49 being Int-Location st B17 = ( Divide (R20 , R49) )))))
+proof
+let C29 being (Instruction of ( SCM+FSA ));
+assume L186: ( InsCode C29 ) = 5;
+reconsider D52 = C29 as (Instruction of ( SCM )) by L186 , L66;
+consider R44 being Data-Location, R45 being Data-Location such that L187: D52 = ( Divide (R44 , R45) ) by L186 , AMI_5:12;
+L188: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L189: (R44 in ( SCM-Data-Loc ) & R45 in ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D53 = R44 , D54 = R45 as Int-Location by L189 , L188;
+take D53;
+take D54;
+thus L190: thesis by L187 , L113;
+end;
+theorem
+L191: (for B18 being (Instruction of ( SCM+FSA )) holds (( InsCode B18 ) = 6 implies (ex R25 being (Element of ( NAT )) st B18 = ( goto R25 ))))
+proof
+let C30 being (Instruction of ( SCM+FSA ));
+assume L192: ( InsCode C30 ) = 6;
+reconsider D55 = C30 as (Instruction of ( SCM )) by L192 , L66;
+consider R26 being (Element of ( NAT )) such that L193: D55 = ( SCM-goto R26 ) by L192 , AMI_5:13;
+reconsider D56 = R26 as (Element of ( NAT ));
+take D56;
+thus L194: thesis by L193;
+end;
+theorem
+L195: (for B19 being (Instruction of ( SCM+FSA )) holds (( InsCode B19 ) = 7 implies (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st B19 = ( R20 =0_goto R25 )))))
+proof
+let C31 being (Instruction of ( SCM+FSA ));
+assume L196: ( InsCode C31 ) = 7;
+reconsider D57 = C31 as (Instruction of ( SCM )) by L196 , L66;
+consider R26 being (Element of ( NAT )), R44 being Data-Location such that L197: D57 = ( R44 =0_goto R26 ) by L196 , AMI_5:14;
+L198: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L199: R44 in ( SCM-Data-Loc ) by AMI_2:def 16;
+reconsider D58 = R44 as Int-Location by L199 , L198;
+reconsider D59 = R26 as (Element of ( NAT ));
+take D59;
+take D58;
+thus L200: thesis by L197 , L116;
+end;
+theorem
+L201: (for B20 being (Instruction of ( SCM+FSA )) holds (( InsCode B20 ) = 8 implies (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st B20 = ( R20 >0_goto R25 )))))
+proof
+let C32 being (Instruction of ( SCM+FSA ));
+assume L202: ( InsCode C32 ) = 8;
+reconsider D60 = C32 as (Instruction of ( SCM )) by L202 , L66;
+consider R26 being (Element of ( NAT )), R44 being Data-Location such that L203: D60 = ( R44 >0_goto R26 ) by L202 , AMI_5:15;
+L204: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+L205: R44 in ( SCM-Data-Loc ) by AMI_2:def 16;
+reconsider D61 = R44 as Int-Location by L205 , L204;
+reconsider D62 = R26 as (Element of ( NAT ));
+take D62;
+take D61;
+thus L206: thesis by L203 , L118;
+end;
+theorem
+L207: (for B21 being (Instruction of ( SCM+FSA )) holds (( InsCode B21 ) = 9 implies (ex R46 being Int-Location st (ex R47 being Int-Location st (ex R21 being FinSeq-Location st B21 = ( R47 := (R21 , R46) ))))))
+proof
+let C33 being (Instruction of ( SCM+FSA ));
+assume that
+L208: ( InsCode C33 ) = 9;
+L209:
+now
+assume L210: C33 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } };
+consider R15 being (Element of ( Segm 13 )), R34 being (Element of ( SCM+FSA-Data-Loc )), R40 being (Element of ( SCM+FSA-Data*-Loc )) such that L211: C33 = [ R15 , ( {} ) , <* R34 , R40 *> ] and L212: R15 in { 11 , 12 } by L210;
+L213: (R15 = 11 or R15 = 12) by L212 , TARSKI:def 2;
+thus L214: contradiction by L213 , L208 , L211 , RECDEF_2:def 1;
+end;
+L215: (C33 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) or C33 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } }) by XBOOLE_0:def 3;
+L216: (C33 in ( SCM-Instr ) or C33 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } }) by L215 , L209 , XBOOLE_0:def 3;
+consider R16 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R32 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L217: C33 = [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] and L218: R16 in { 9 , 10 } by L216 , L208 , AMI_5:5;
+reconsider D63 = R39 as FinSeq-Location by L18;
+reconsider D64 = R33 , D65 = R32 as Int-Location by AMI_2:def 16;
+take D65;
+take D64;
+take D63;
+thus L219: thesis by L208 , L217 , RECDEF_2:def 1;
+end;
+theorem
+L220: (for B22 being (Instruction of ( SCM+FSA )) holds (( InsCode B22 ) = 10 implies (ex R46 being Int-Location st (ex R47 being Int-Location st (ex R21 being FinSeq-Location st B22 = ( (R21 , R46) := R47 ))))))
+proof
+let C34 being (Instruction of ( SCM+FSA ));
+assume that
+L221: ( InsCode C34 ) = 10;
+L222:
+now
+assume L223: C34 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } };
+consider R15 being (Element of ( Segm 13 )), R34 being (Element of ( SCM+FSA-Data-Loc )), R40 being (Element of ( SCM+FSA-Data*-Loc )) such that L224: C34 = [ R15 , ( {} ) , <* R34 , R40 *> ] and L225: R15 in { 11 , 12 } by L223;
+L226: (R15 = 11 or R15 = 12) by L225 , TARSKI:def 2;
+thus L227: contradiction by L226 , L221 , L224 , RECDEF_2:def 1;
+end;
+L228: (C34 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) or C34 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } }) by XBOOLE_0:def 3;
+L229: (C34 in ( SCM-Instr ) or C34 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } }) by L228 , L222 , XBOOLE_0:def 3;
+consider R16 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R32 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L230: C34 = [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] and L231: R16 in { 9 , 10 } by L229 , L221 , AMI_5:5;
+reconsider D66 = R39 as FinSeq-Location by L18;
+reconsider D67 = R33 , D68 = R32 as Int-Location by AMI_2:def 16;
+take D68;
+take D67;
+take D66;
+thus L232: thesis by L221 , L230 , RECDEF_2:def 1;
+end;
+theorem
+L233: (for B23 being (Instruction of ( SCM+FSA )) holds (( InsCode B23 ) = 11 implies (ex R46 being Int-Location st (ex R21 being FinSeq-Location st B23 = ( R46 :=len R21 )))))
+proof
+let C35 being (Instruction of ( SCM+FSA ));
+assume that
+L234: ( InsCode C35 ) = 11;
+L235:
+now
+assume L236: C35 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } };
+consider R15 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R32 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L237: C35 = [ R15 , ( {} ) , <* R33 , R39 , R32 *> ] and L238: R15 in { 9 , 10 } by L236;
+L239: ( C35 `1_3 ) = R15 by L237 , RECDEF_2:def 1;
+thus L240: contradiction by L239 , L234 , L238 , TARSKI:def 2;
+end;
+L241: (C35 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) or C35 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } }) by XBOOLE_0:def 3;
+L242: (not C35 in ( SCM-Instr )) by L234 , AMI_5:5;
+consider R15 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L243: C35 = [ R15 , ( {} ) , <* R33 , R39 *> ] and L244: R15 in { 11 , 12 } by L242 , L241 , L235 , XBOOLE_0:def 3;
+reconsider D69 = R39 as FinSeq-Location by L18;
+reconsider D70 = R33 as Int-Location by AMI_2:def 16;
+take D70;
+take D69;
+thus L245: thesis by L234 , L243 , RECDEF_2:def 1;
+end;
+theorem
+L246: (for B24 being (Instruction of ( SCM+FSA )) holds (( InsCode B24 ) = 12 implies (ex R46 being Int-Location st (ex R21 being FinSeq-Location st B24 = ( R21 :=<0,...,0> R46 )))))
+proof
+let C36 being (Instruction of ( SCM+FSA ));
+assume that
+L247: ( InsCode C36 ) = 12;
+L248:
+now
+assume L249: C36 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } };
+consider R15 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R32 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L250: C36 = [ R15 , ( {} ) , <* R33 , R39 , R32 *> ] and L251: R15 in { 9 , 10 } by L249;
+L252: ( C36 `1_3 ) = R15 by L250 , RECDEF_2:def 1;
+thus L253: contradiction by L252 , L247 , L251 , TARSKI:def 2;
+end;
+L254: (C36 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) or C36 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } }) by XBOOLE_0:def 3;
+L255: (not C36 in ( SCM-Instr )) by L247 , AMI_5:5;
+consider R15 being (Element of ( Segm 13 )), R33 being (Element of ( SCM+FSA-Data-Loc )), R39 being (Element of ( SCM+FSA-Data*-Loc )) such that L256: C36 = [ R15 , ( {} ) , <* R33 , R39 *> ] and L257: R15 in { 11 , 12 } by L255 , L254 , L248 , XBOOLE_0:def 3;
+reconsider D71 = R39 as FinSeq-Location by L18;
+reconsider D72 = R33 as Int-Location by AMI_2:def 16;
+take D72;
+take D71;
+thus L258: thesis by L247 , L256 , RECDEF_2:def 1;
+end;
+begin
+theorem
+L259: (for B25 being (State of ( SCM+FSA )) holds (for B26 being Int-Location holds B26 in ( dom B25 )))
+proof
+let C37 being (State of ( SCM+FSA ));
+let C38 being Int-Location;
+L260: ( dom C37 ) = (the carrier of ( SCM+FSA )) by PARTFUN1:def 2;
+thus L261: thesis by L260;
+end;
+theorem
+L262: (for R42 being FinSeq-Location holds (for R51 being (State of ( SCM+FSA )) holds R42 in ( dom R51 )))
+proof
+let R42 being FinSeq-Location;
+let R51 being (State of ( SCM+FSA ));
+L263: ( dom R51 ) = ( SCM+FSA-Memory ) by PARTFUN1:def 2;
+thus L264: thesis by L263;
+end;
+theorem
+L265: (for R42 being FinSeq-Location holds (for R50 being (State of ( SCM )) holds (not R42 in ( dom R50 ))))
+proof
+let R42 being FinSeq-Location;
+let R50 being (State of ( SCM ));
+L266: R42 in ( SCM+FSA-Data*-Loc ) by L18;
+thus L267: thesis by L266 , SCMFSA_1:30 , XBOOLE_0:3;
+end;
+theorem
+L268: (for B27 being (State of ( SCM+FSA )) holds ( Int-Locations ) c= ( dom B27 ))
+proof
+let C39 being (State of ( SCM+FSA ));
+L269: ( dom C39 ) = (the carrier of ( SCM+FSA )) by PARTFUN1:def 2;
+thus L270: thesis by L269;
+end;
+theorem
+L271: (for B28 being (State of ( SCM+FSA )) holds ( FinSeq-Locations ) c= ( dom B28 ))
+proof
+let C40 being (State of ( SCM+FSA ));
+L272: ( dom C40 ) = (the carrier of ( SCM+FSA )) by PARTFUN1:def 2;
+thus L273: thesis by L272;
+end;
+theorem
+L274: (for B29 being (State of ( SCM+FSA )) holds ( dom ( B29 | ( Int-Locations ) ) ) = ( Int-Locations ))
+proof
+let C41 being (State of ( SCM+FSA ));
+L275: ( Int-Locations ) c= ( dom C41 ) by L268;
+thus L276: thesis by L275 , RELAT_1:62;
+end;
+theorem
+L277: (for B30 being (State of ( SCM+FSA )) holds ( dom ( B30 | ( FinSeq-Locations ) ) ) = ( FinSeq-Locations ))
+proof
+let C42 being (State of ( SCM+FSA ));
+L278: ( FinSeq-Locations ) c= ( dom C42 ) by L271;
+thus L279: thesis by L278 , RELAT_1:62;
+end;
+theorem
+L280: (for B31 being (State of ( SCM+FSA )) holds (for B32 being (Instruction of ( SCM )) holds ( B31 | ( SCM-Memory ) ) is (State of ( SCM ))))
+proof
+let C43 being (State of ( SCM+FSA ));
+let C44 being (Instruction of ( SCM ));
+reconsider D73 = C43 as SCM+FSA-State by CARD_3:107;
+L281: ( D73 | ( SCM-Memory ) ) is SCM-State by SCMFSA_1:17;
+L282: ( D73 | ( SCM-Memory ) ) is (State of ( SCM )) by L281 , AMI_3:29;
+thus L283: thesis by L282;
+end;
+theorem
+L284: (for B33 being (State of ( SCM+FSA )) holds (for B34 being (State of ( SCM )) holds ( B33 +* B34 ) is (State of ( SCM+FSA ))))
+proof
+let C45 being (State of ( SCM+FSA ));
+let C46 being (State of ( SCM ));
+reconsider D74 = C45 as SCM+FSA-State by CARD_3:107;
+reconsider D75 = C46 as SCM-State by CARD_3:107;
+L285: ( D74 +* D75 ) is SCM+FSA-State by SCMFSA_1:18;
+L286: ( D74 +* D75 ) is (State of ( SCM+FSA )) by L285;
+thus L287: thesis by L286;
+end;
+theorem
+L288: (for B35 being (Instruction of ( SCM )) holds (for B36 being (Instruction of ( SCM+FSA )) holds (for B37 being (State of ( SCM )) holds (for B38 being (State of ( SCM+FSA )) holds ((B35 = B36 & B37 = ( B38 | ( SCM-Memory ) )) implies ( Exec (B36 , B38) ) = ( B38 +* ( Exec (B35 , B37) ) ))))))
+proof
+let C47 being (Instruction of ( SCM ));
+let C48 being (Instruction of ( SCM+FSA ));
+let C49 being (State of ( SCM ));
+let C50 being (State of ( SCM+FSA ));
+assume that
+L289: C47 = C48
+and
+L290: C49 = ( C50 | ( SCM-Memory ) );
+reconsider D76 = C50 as SCM+FSA-State by CARD_3:107;
+reconsider D77 = C48 as (Element of ( SCM+FSA-Instr ));
+L291: ( InsCode D77 ) <= 8 by L289 , AMI_5:5;
+consider C51 being (Element of ( SCM-Instr )), C52 being SCM-State such that L292: (C51 = D77 & C52 = ( D76 | ( SCM-Memory ) )) and L293: ( SCM+FSA-Exec-Res (D77 , D76) ) = ( D76 +* ( SCM-Exec-Res (C51 , C52) ) ) by L291 , SCMFSA_1:def 16;
+L294: ( Exec (C47 , C49) ) = ( SCM-Exec-Res (C51 , C52) ) by L289 , L290 , L292 , AMI_2:def 15;
+thus L295: thesis by L294 , L293 , SCMFSA_1:def 17;
+end;
+registration
+let C53 being (State of ( SCM+FSA ));
+let C54 being Int-Location;
+cluster ( C53 . C54 ) ->  integer;
+coherence
+proof
+reconsider D78 = C54 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D79 = C53 as SCM+FSA-State by CARD_3:107;
+L296: ( D79 . D78 ) = ( C53 . C54 );
+thus L297: thesis by L296;
+end;
+end;
+definition
+let C55 being (State of ( SCM+FSA ));
+let C56 being FinSeq-Location;
+redefine func C55 . C56 -> (FinSequence of ( INT ));
+
+coherence
+proof
+reconsider D80 = C56 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D81 = C55 as SCM+FSA-State by CARD_3:107;
+L299: ( D81 . D80 ) = ( C55 . C56 );
+thus L300: thesis by L299;
+end;
+end;
+theorem
+L302: (for R50 being (State of ( SCM )) holds (for R51 being (State of ( SCM+FSA )) holds (R50 = ( R51 | ( SCM-Memory ) ) implies R51 = ( R51 +* R50 )))) by FUNCT_4:75;
+theorem
+L303: (for R50 being (State of ( SCM )) holds (for R51 being (State of ( SCM+FSA )) holds (for R52 being (State of ( SCM+FSA )) holds (R52 = ( R51 +* R50 ) implies ( R52 . ( IC ( SCM+FSA ) ) ) = ( R50 . ( IC ( SCM ) ) )))))
+proof
+let R50 being (State of ( SCM ));
+let R51 being (State of ( SCM+FSA ));
+let R52 being (State of ( SCM+FSA ));
+L304: ( dom R50 ) = ( SCM-Memory ) by PARTFUN1:def 2;
+assume L305: R52 = ( R51 +* R50 );
+thus L306: ( R52 . ( IC ( SCM+FSA ) ) ) = ( R50 . ( IC ( SCM ) ) ) by L305 , L304 , L11 , AMI_3:1 , FUNCT_4:13;
+end;
+theorem
+L307: (for R44 being Data-Location holds (for R46 being Int-Location holds (for R50 being (State of ( SCM )) holds (for R51 being (State of ( SCM+FSA )) holds (for R52 being (State of ( SCM+FSA )) holds ((R52 = ( R51 +* R50 ) & R44 = R46) implies ( R50 . R44 ) = ( R52 . R46 )))))))
+proof
+let R44 being Data-Location;
+let R46 being Int-Location;
+let R50 being (State of ( SCM ));
+let R51 being (State of ( SCM+FSA ));
+let R52 being (State of ( SCM+FSA ));
+assume that
+L308: R52 = ( R51 +* R50 )
+and
+L309: R44 = R46;
+L310: ( dom R50 ) = ( SCM-Memory ) by PARTFUN1:def 2;
+thus L311: ( R52 . R46 ) = ( R50 . R44 ) by L310 , L308 , L309 , FUNCT_4:13;
+end;
+theorem
+L312: (for R44 being Data-Location holds (for R46 being Int-Location holds (for R50 being (State of ( SCM )) holds (for R51 being (State of ( SCM+FSA )) holds ((R50 = ( R51 | ( SCM-Memory ) ) & R44 = R46) implies ( R50 . R44 ) = ( R51 . R46 ))))))
+proof
+let R44 being Data-Location;
+let R46 being Int-Location;
+let R50 being (State of ( SCM ));
+let R51 being (State of ( SCM+FSA ));
+assume L313: R50 = ( R51 | ( SCM-Memory ) );
+L314: R51 = ( R51 +* R50 ) by L313 , L302;
+thus L315: thesis by L314 , L307;
+end;
+registration
+cluster ( SCM+FSA ) ->  IC-Ins-separated;
+coherence
+proof
+L316: ( Values ( IC ( SCM+FSA ) ) ) = ( NAT ) by FUNCT_7:def 1 , SCMFSA_1:5 , SCMFSA_1:9;
+thus L317: ( SCM+FSA ) is  IC-Ins-separated by L316 , MEMSTR_0:def 6;
+end;
+end;
+theorem
+L319: (for B39 being Int-Location holds B39 <> ( IC ( SCM+FSA ) ))
+proof
+let C57 being Int-Location;
+L320: C57 in [: { 1 } , ( NAT ) :] by AMI_2:def 16;
+thus L321: thesis by L320 , L11 , FINSET_1:15;
+end;
+theorem
+L322: (for B40 being FinSeq-Location holds B40 <> ( IC ( SCM+FSA ) ))
+proof
+let C58 being FinSeq-Location;
+L323:
+now
+assume L324: ( NAT ) in ( ( INT ) \ ( NAT ) );
+L325: ( NAT ) in ( ( NAT ) \/ [: { ( 0 ) } , ( NAT ) :] ) by L324 , NUMBERS:def 4 , XBOOLE_0:def 5;
+per cases  by L325 , XBOOLE_0:def 3;
+suppose L326: ( NAT ) in ( NAT );
+
+thus L327: contradiction by L326;
+end;
+suppose L328: ( NAT ) in [: { ( 0 ) } , ( NAT ) :];
+
+thus L329: contradiction by L328 , FINSET_1:15;
+end;
+end;
+thus L331: thesis by L323 , L18 , L11;
+end;
+theorem
+L332: (for B41 being Int-Location holds (for B42 being FinSeq-Location holds B41 <> B42))
+proof
+let C59 being Int-Location;
+let C60 being FinSeq-Location;
+L333: ( Values C60 ) = ( ( INT ) * ) by L63;
+thus L334: thesis by L333 , L60 , FUNCT_7:16;
+end;
+theorem
+L335: (for B43 being (Element of ( NAT )) holds (for B44 being Int-Location holds B43 <> B44))
+proof
+let C61 being (Element of ( NAT ));
+let C62 being Int-Location;
+L336: C62 in [: { 1 } , ( NAT ) :] by AMI_2:def 16;
+L337: (ex R22 being set st (ex R23 being set st (R22 in { 1 } & R23 in ( NAT ) & C62 = [ R22 , R23 ]))) by L336 , ZFMISC_1:84;
+thus L338: C61 <> C62 by L337;
+end;
+theorem
+L339: (for B45 being (Element of ( NAT )) holds (for B46 being FinSeq-Location holds B45 <> B46))
+proof
+let C63 being (Element of ( NAT ));
+let C64 being FinSeq-Location;
+L340: C64 in ( ( INT ) \ ( NAT ) ) by L18;
+L341: ( NAT ) misses ( ( INT ) \ ( NAT ) ) by XBOOLE_1:79;
+thus L342: thesis by L341 , L340 , XBOOLE_0:3;
+end;
+theorem
+L343: (for B47 , B48 being (State of ( SCM+FSA )) holds ((( IC B47 ) = ( IC B48 ) & (for B49 being Int-Location holds ( B47 . B49 ) = ( B48 . B49 )) & (for B50 being FinSeq-Location holds ( B47 . B50 ) = ( B48 . B50 ))) implies B47 = B48))
+proof
+let C65 , C66 being (State of ( SCM+FSA ));
+assume that
+L344: ( IC C65 ) = ( IC C66 )
+and
+L345: (for B51 being Int-Location holds ( C65 . B51 ) = ( C66 . B51 ))
+and
+L346: (for B52 being FinSeq-Location holds ( C65 . B52 ) = ( C66 . B52 ));
+L347: C65 in ( product ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) ) by CARD_3:107;
+consider C67 being Function such that L348: C65 = C67 and L349: ( dom C67 ) = ( dom ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) ) and L350: (for B53 being set holds (B53 in ( dom ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) ) implies ( C67 . B53 ) in ( ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) . B53 ))) by L347 , CARD_3:def 5;
+L351: C66 in ( product ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) ) by CARD_3:107;
+consider C68 being Function such that L352: C66 = C68 and L353: ( dom C68 ) = ( dom ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) ) and L354: (for B54 being set holds (B54 in ( dom ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) ) implies ( C68 . B54 ) in ( ( ( SCM*-VAL ) * ( SCM+FSA-OK ) ) . B54 ))) by L351 , CARD_3:def 5;
+L355:
+now
+let C69 being set;
+assume L356: C69 in ( SCM+FSA-Memory );
+L357: C69 in ( ( { ( IC ( SCM+FSA ) ) } \/ ( SCM-Data-Loc ) ) \/ ( SCM+FSA-Data*-Loc ) ) by L356 , L11;
+L358: (C69 in ( { ( IC ( SCM+FSA ) ) } \/ ( SCM-Data-Loc ) ) or C69 in ( SCM+FSA-Data*-Loc )) by L357 , XBOOLE_0:def 3;
+L359: ( Int-Locations ) = ( SCM+FSA-Data-Loc );
+per cases  by L358 , XBOOLE_0:def 3;
+suppose L360: C69 in { ( IC ( SCM+FSA ) ) };
+
+L361: C69 = ( IC ( SCM+FSA ) ) by L360 , TARSKI:def 1;
+thus L362: ( C67 . C69 ) = ( C68 . C69 ) by L361 , L344 , L348 , L352;
+end;
+suppose L363: C69 in ( SCM-Data-Loc );
+
+L364: C69 is Int-Location by L363 , L359 , AMI_2:def 16;
+thus L365: ( C67 . C69 ) = ( C68 . C69 ) by L364 , L345 , L348 , L352;
+end;
+suppose L366: C69 in ( SCM+FSA-Data*-Loc );
+
+L367: C69 is FinSeq-Location by L366 , L18;
+thus L368: ( C67 . C69 ) = ( C68 . C69 ) by L367 , L346 , L348 , L352;
+end;
+end;
+L370: ( SCM+FSA-Memory ) = ( dom C67 ) by L349 , SCMFSA_1:32;
+thus L371: thesis by L370 , L348 , L349 , L352 , L353 , L355 , FUNCT_1:2;
+end;
+theorem
+L372: (for R50 being (State of ( SCM )) holds (for R51 being (State of ( SCM+FSA )) holds (R50 = ( R51 | ( SCM-Memory ) ) implies ( IC R51 ) = ( IC R50 ))))
+proof
+let R50 being (State of ( SCM ));
+let R51 being (State of ( SCM+FSA ));
+assume L373: R50 = ( R51 | ( SCM-Memory ) );
+L374: R51 = ( R51 +* R50 ) by L373 , L302;
+thus L375: thesis by L374 , L303;
+end;
+begin
+theorem
+L376: (for R46 being Int-Location holds (for R47 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( R46 := R47 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & ( ( Exec (( R46 := R47 ) , R51) ) . R46 ) = ( R51 . R47 ) & (for R48 being Int-Location holds (R48 <> R46 implies ( ( Exec (( R46 := R47 ) , R51) ) . R48 ) = ( R51 . R48 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( R46 := R47 ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location, R45 being Data-Location such that L377: R46 = R44 and L378: R47 = R45 and L379: ( R46 := R47 ) = ( R44 := R45 ) by L105;
+reconsider D82 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L380: ( Exec (( R46 := R47 ) , R51) ) = ( R51 +* ( Exec (( R44 := R45 ) , D82) ) ) by L379 , L288;
+thus L381: ( ( Exec (( R46 := R47 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( R44 := R45 ) , D82) ) . ( IC ( SCM ) ) ) by L380 , L303
+.= ( succ ( IC D82 ) ) by AMI_3:2
+.= ( succ ( IC R51 ) ) by L372;
+thus L382: ( ( Exec (( R46 := R47 ) , R51) ) . R46 ) = ( ( Exec (( R44 := R45 ) , D82) ) . R44 ) by L377 , L380 , L307
+.= ( D82 . R45 ) by AMI_3:2
+.= ( R51 . R47 ) by L378 , L312;
+thus L383:now
+let R48 being Int-Location;
+assume that
+L384: R48 <> R46;
+reconsider D83 = R48 as Data-Location by L57;
+thus L385: ( ( Exec (( R46 := R47 ) , R51) ) . R48 ) = ( ( Exec (( R44 := R45 ) , D82) ) . D83 ) by L380 , L307
+.= ( D82 . D83 ) by L377 , L384 , AMI_3:2
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L386: (not R42 in ( dom ( Exec (( R44 := R45 ) , D82) ) )) by L265;
+thus L387: ( ( Exec (( R46 := R47 ) , R51) ) . R42 ) = ( R51 . R42 ) by L380 , L386 , FUNCT_4:11;
+end;
+theorem
+L388: (for R46 being Int-Location holds (for R47 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( AddTo (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . R46 ) = ( ( R51 . R46 ) + ( R51 . R47 ) ) & (for R48 being Int-Location holds (R48 <> R46 implies ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . R48 ) = ( R51 . R48 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location, R45 being Data-Location such that L389: R46 = R44 and L390: R47 = R45 and L391: ( AddTo (R46 , R47) ) = ( AddTo (R44 , R45) ) by L107;
+reconsider D84 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L392: ( Exec (( AddTo (R46 , R47) ) , R51) ) = ( R51 +* ( Exec (( AddTo (R44 , R45) ) , D84) ) ) by L391 , L288;
+thus L393: ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( AddTo (R44 , R45) ) , D84) ) . ( IC ( SCM ) ) ) by L392 , L303
+.= ( succ ( IC D84 ) ) by AMI_3:3
+.= ( succ ( IC R51 ) ) by L372;
+thus L394: ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . R46 ) = ( ( Exec (( AddTo (R44 , R45) ) , D84) ) . R44 ) by L389 , L392 , L307
+.= ( ( D84 . R44 ) + ( D84 . R45 ) ) by AMI_3:3
+.= ( ( D84 . R44 ) + ( R51 . R47 ) ) by L390 , L312
+.= ( ( R51 . R46 ) + ( R51 . R47 ) ) by L389 , L312;
+thus L395:now
+let R48 being Int-Location;
+assume that
+L396: R48 <> R46;
+reconsider D85 = R48 as Data-Location by L57;
+thus L397: ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . R48 ) = ( ( Exec (( AddTo (R44 , R45) ) , D84) ) . D85 ) by L392 , L307
+.= ( D84 . D85 ) by L389 , L396 , AMI_3:3
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L398: (not R42 in ( dom ( Exec (( AddTo (R44 , R45) ) , D84) ) )) by L265;
+thus L399: ( ( Exec (( AddTo (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ) by L392 , L398 , FUNCT_4:11;
+end;
+theorem
+L400: (for R46 being Int-Location holds (for R47 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . R46 ) = ( ( R51 . R46 ) - ( R51 . R47 ) ) & (for R48 being Int-Location holds (R48 <> R46 implies ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . R48 ) = ( R51 . R48 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location, R45 being Data-Location such that L401: R46 = R44 and L402: R47 = R45 and L403: ( SubFrom (R46 , R47) ) = ( SubFrom (R44 , R45) ) by L109;
+reconsider D86 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L404: ( Exec (( SubFrom (R46 , R47) ) , R51) ) = ( R51 +* ( Exec (( SubFrom (R44 , R45) ) , D86) ) ) by L403 , L288;
+thus L405: ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( SubFrom (R44 , R45) ) , D86) ) . ( IC ( SCM ) ) ) by L404 , L303
+.= ( succ ( IC D86 ) ) by AMI_3:4
+.= ( succ ( IC R51 ) ) by L372;
+thus L406: ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . R46 ) = ( ( Exec (( SubFrom (R44 , R45) ) , D86) ) . R44 ) by L401 , L404 , L307
+.= ( ( D86 . R44 ) - ( D86 . R45 ) ) by AMI_3:4
+.= ( ( D86 . R44 ) - ( R51 . R47 ) ) by L402 , L312
+.= ( ( R51 . R46 ) - ( R51 . R47 ) ) by L401 , L312;
+thus L407:now
+let R48 being Int-Location;
+assume that
+L408: R48 <> R46;
+reconsider D87 = R48 as Data-Location by L57;
+thus L409: ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . R48 ) = ( ( Exec (( SubFrom (R44 , R45) ) , D86) ) . D87 ) by L404 , L307
+.= ( D86 . D87 ) by L401 , L408 , AMI_3:4
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L410: (not R42 in ( dom ( Exec (( SubFrom (R44 , R45) ) , D86) ) )) by L265;
+thus L411: ( ( Exec (( SubFrom (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ) by L404 , L410 , FUNCT_4:11;
+end;
+theorem
+L412: (for R46 being Int-Location holds (for R47 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( MultBy (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . R46 ) = ( ( R51 . R46 ) * ( R51 . R47 ) ) & (for R48 being Int-Location holds (R48 <> R46 implies ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . R48 ) = ( R51 . R48 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location, R45 being Data-Location such that L413: R46 = R44 and L414: R47 = R45 and L415: ( MultBy (R46 , R47) ) = ( MultBy (R44 , R45) ) by L111;
+reconsider D88 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L416: ( Exec (( MultBy (R46 , R47) ) , R51) ) = ( R51 +* ( Exec (( MultBy (R44 , R45) ) , D88) ) ) by L415 , L288;
+thus L417: ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( MultBy (R44 , R45) ) , D88) ) . ( IC ( SCM ) ) ) by L416 , L303
+.= ( succ ( IC D88 ) ) by AMI_3:5
+.= ( succ ( IC R51 ) ) by L372;
+thus L418: ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . R46 ) = ( ( Exec (( MultBy (R44 , R45) ) , D88) ) . R44 ) by L413 , L416 , L307
+.= ( ( D88 . R44 ) * ( D88 . R45 ) ) by AMI_3:5
+.= ( ( D88 . R44 ) * ( R51 . R47 ) ) by L414 , L312
+.= ( ( R51 . R46 ) * ( R51 . R47 ) ) by L413 , L312;
+thus L419:now
+let R48 being Int-Location;
+assume that
+L420: R48 <> R46;
+reconsider D89 = R48 as Data-Location by L57;
+thus L421: ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . R48 ) = ( ( Exec (( MultBy (R44 , R45) ) , D88) ) . D89 ) by L416 , L307
+.= ( D88 . D89 ) by L413 , L420 , AMI_3:5
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L422: (not R42 in ( dom ( Exec (( MultBy (R44 , R45) ) , D88) ) )) by L265;
+thus L423: ( ( Exec (( MultBy (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ) by L416 , L422 , FUNCT_4:11;
+end;
+theorem
+L424: (for R46 being Int-Location holds (for R47 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( Divide (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & (R46 <> R47 implies ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R46 ) = ( ( R51 . R46 ) div ( R51 . R47 ) )) & ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R47 ) = ( ( R51 . R46 ) mod ( R51 . R47 ) ) & (for R48 being Int-Location holds ((R48 <> R46 & R48 <> R47) implies ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R48 ) = ( R51 . R48 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R46 being Int-Location;
+let R47 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location, R45 being Data-Location such that L425: R46 = R44 and L426: R47 = R45 and L427: ( Divide (R46 , R47) ) = ( Divide (R44 , R45) ) by L113;
+reconsider D90 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L428: ( Exec (( Divide (R46 , R47) ) , R51) ) = ( R51 +* ( Exec (( Divide (R44 , R45) ) , D90) ) ) by L427 , L288;
+thus L429: ( ( Exec (( Divide (R46 , R47) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( Divide (R44 , R45) ) , D90) ) . ( IC ( SCM ) ) ) by L428 , L303
+.= ( succ ( IC D90 ) ) by AMI_3:6
+.= ( succ ( IC R51 ) ) by L372;
+thus L430:now
+assume L431: R46 <> R47;
+thus L432: ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R46 ) = ( ( Exec (( Divide (R44 , R45) ) , D90) ) . R44 ) by L425 , L428 , L307
+.= ( ( D90 . R44 ) div ( D90 . R45 ) ) by L425 , L426 , L431 , AMI_3:6
+.= ( ( D90 . R44 ) div ( R51 . R47 ) ) by L426 , L312
+.= ( ( R51 . R46 ) div ( R51 . R47 ) ) by L425 , L312;
+end;
+thus L433: ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R47 ) = ( ( Exec (( Divide (R44 , R45) ) , D90) ) . R45 ) by L426 , L428 , L307
+.= ( ( D90 . R44 ) mod ( D90 . R45 ) ) by AMI_3:6
+.= ( ( D90 . R44 ) mod ( R51 . R47 ) ) by L426 , L312
+.= ( ( R51 . R46 ) mod ( R51 . R47 ) ) by L425 , L312;
+thus L434:now
+let R48 being Int-Location;
+assume that
+L435: (R48 <> R46 & R48 <> R47);
+reconsider D91 = R48 as Data-Location by L57;
+thus L436: ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R48 ) = ( ( Exec (( Divide (R44 , R45) ) , D90) ) . D91 ) by L428 , L307
+.= ( D90 . D91 ) by L425 , L426 , L435 , AMI_3:6
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L437: (not R42 in ( dom ( Exec (( Divide (R44 , R45) ) , D90) ) )) by L265;
+thus L438: ( ( Exec (( Divide (R46 , R47) ) , R51) ) . R42 ) = ( R51 . R42 ) by L428 , L437 , FUNCT_4:11;
+end;
+theorem
+L439: (for R46 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( Divide (R46 , R46) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & ( ( Exec (( Divide (R46 , R46) ) , R51) ) . R46 ) = ( ( R51 . R46 ) mod ( R51 . R46 ) ) & (for R48 being Int-Location holds (R48 <> R46 implies ( ( Exec (( Divide (R46 , R46) ) , R51) ) . R48 ) = ( R51 . R48 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( Divide (R46 , R46) ) , R51) ) . R42 ) = ( R51 . R42 )))))
+proof
+let R46 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location, R45 being Data-Location such that L440: R46 = R44 and L441: (R46 = R45 & ( Divide (R46 , R46) ) = ( Divide (R44 , R45) )) by L113;
+reconsider D92 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L442: ( Exec (( Divide (R46 , R46) ) , R51) ) = ( R51 +* ( Exec (( Divide (R44 , R44) ) , D92) ) ) by L440 , L441 , L288;
+thus L443: ( ( Exec (( Divide (R46 , R46) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( Divide (R44 , R44) ) , D92) ) . ( IC ( SCM ) ) ) by L442 , L303
+.= ( succ ( IC D92 ) ) by AMI_3:6
+.= ( succ ( IC R51 ) ) by L372;
+thus L444: ( ( Exec (( Divide (R46 , R46) ) , R51) ) . R46 ) = ( ( Exec (( Divide (R44 , R44) ) , D92) ) . R44 ) by L440 , L442 , L307
+.= ( ( D92 . R44 ) mod ( D92 . R44 ) ) by AMI_3:6
+.= ( ( D92 . R44 ) mod ( R51 . R46 ) ) by L440 , L312
+.= ( ( R51 . R46 ) mod ( R51 . R46 ) ) by L440 , L312;
+thus L445:now
+let R48 being Int-Location;
+assume that
+L446: R48 <> R46;
+reconsider D93 = R48 as Data-Location by L57;
+thus L447: ( ( Exec (( Divide (R46 , R46) ) , R51) ) . R48 ) = ( ( Exec (( Divide (R44 , R44) ) , D92) ) . D93 ) by L442 , L307
+.= ( D92 . D93 ) by L440 , L446 , AMI_3:6
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L448: (not R42 in ( dom ( Exec (( Divide (R44 , R44) ) , D92) ) )) by L265;
+thus L449: ( ( Exec (( Divide (R46 , R46) ) , R51) ) . R42 ) = ( R51 . R42 ) by L442 , L448 , FUNCT_4:11;
+end;
+theorem
+L450: (for R29 being (Element of ( NAT )) holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = R29 & (for R48 being Int-Location holds ( ( Exec (( goto R29 ) , R51) ) . R48 ) = ( R51 . R48 )) & (for R42 being FinSeq-Location holds ( ( Exec (( goto R29 ) , R51) ) . R42 ) = ( R51 . R42 )))))
+proof
+let R29 being (Element of ( NAT ));
+let R51 being (State of ( SCM+FSA ));
+consider R26 being (Element of ( NAT )) such that L451: R29 = R26 and L452: ( goto R29 ) = ( SCM-goto R26 );
+reconsider D94 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L453: ( Exec (( goto R29 ) , R51) ) = ( R51 +* ( Exec (( SCM-goto R26 ) , D94) ) ) by L452 , L288;
+thus L454: ( ( Exec (( goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( SCM-goto R26 ) , D94) ) . ( IC ( SCM ) ) ) by L453 , L303
+.= R29 by L451 , AMI_3:7;
+thus L455:now
+let R48 being Int-Location;
+reconsider D95 = R48 as Data-Location by L57;
+thus L456: ( ( Exec (( goto R29 ) , R51) ) . R48 ) = ( ( Exec (( SCM-goto R26 ) , D94) ) . D95 ) by L453 , L307
+.= ( D94 . D95 ) by AMI_3:7
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L457: (not R42 in ( dom ( Exec (( SCM-goto R26 ) , D94) ) )) by L265;
+thus L458: ( ( Exec (( goto R29 ) , R51) ) . R42 ) = ( R51 . R42 ) by L453 , L457 , FUNCT_4:11;
+end;
+theorem
+L459: (for R29 being (Element of ( NAT )) holds (for R46 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds ((( R51 . R46 ) = ( 0 ) implies ( ( Exec (( R46 =0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = R29) & (( R51 . R46 ) <> ( 0 ) implies ( ( Exec (( R46 =0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) )) & (for R48 being Int-Location holds ( ( Exec (( R46 =0_goto R29 ) , R51) ) . R48 ) = ( R51 . R48 )) & (for R42 being FinSeq-Location holds ( ( Exec (( R46 =0_goto R29 ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R29 being (Element of ( NAT ));
+let R46 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location such that L460: R46 = R44 and L461: ( R46 =0_goto R29 ) = ( R44 =0_goto R29 ) by L116;
+reconsider D96 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L462: ( Exec (( R46 =0_goto R29 ) , R51) ) = ( R51 +* ( Exec (( R44 =0_goto R29 ) , D96) ) ) by L461 , L288;
+thus L463:now
+assume L464: ( R51 . R46 ) = ( 0 );
+L465: ( D96 . R44 ) = ( 0 ) by L464 , L460 , L312;
+thus L466: ( ( Exec (( R46 =0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( R44 =0_goto R29 ) , D96) ) . ( IC ( SCM ) ) ) by L462 , L303
+.= R29 by L465 , AMI_3:8;
+end;
+thus L467:now
+assume L468: ( R51 . R46 ) <> ( 0 );
+L469: ( D96 . R44 ) <> ( 0 ) by L468 , L460 , L312;
+thus L470: ( ( Exec (( R46 =0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( R44 =0_goto R29 ) , D96) ) . ( IC ( SCM ) ) ) by L462 , L303
+.= ( succ ( IC D96 ) ) by L469 , AMI_3:8
+.= ( succ ( IC R51 ) ) by L372;
+end;
+thus L471:now
+let R48 being Int-Location;
+reconsider D97 = R48 as Data-Location by L57;
+thus L472: ( ( Exec (( R46 =0_goto R29 ) , R51) ) . R48 ) = ( ( Exec (( R44 =0_goto R29 ) , D96) ) . D97 ) by L462 , L307
+.= ( D96 . D97 ) by AMI_3:8
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L473: (not R42 in ( dom ( Exec (( R44 =0_goto R29 ) , D96) ) )) by L265;
+thus L474: ( ( Exec (( R46 =0_goto R29 ) , R51) ) . R42 ) = ( R51 . R42 ) by L462 , L473 , FUNCT_4:11;
+end;
+theorem
+L475: (for R29 being (Element of ( NAT )) holds (for R46 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds ((( R51 . R46 ) > ( 0 ) implies ( ( Exec (( R46 >0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = R29) & (( R51 . R46 ) <= ( 0 ) implies ( ( Exec (( R46 >0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) )) & (for R48 being Int-Location holds ( ( Exec (( R46 >0_goto R29 ) , R51) ) . R48 ) = ( R51 . R48 )) & (for R42 being FinSeq-Location holds ( ( Exec (( R46 >0_goto R29 ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R29 being (Element of ( NAT ));
+let R46 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+consider R44 being Data-Location such that L476: R46 = R44 and L477: ( R46 >0_goto R29 ) = ( R44 >0_goto R29 ) by L118;
+reconsider D98 = ( R51 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+L478: ( Exec (( R46 >0_goto R29 ) , R51) ) = ( R51 +* ( Exec (( R44 >0_goto R29 ) , D98) ) ) by L477 , L288;
+thus L479:now
+assume L480: ( R51 . R46 ) > ( 0 );
+L481: ( D98 . R44 ) > ( 0 ) by L480 , L476 , L312;
+thus L482: ( ( Exec (( R46 >0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( R44 >0_goto R29 ) , D98) ) . ( IC ( SCM ) ) ) by L478 , L303
+.= R29 by L481 , AMI_3:9;
+end;
+thus L483:now
+assume L484: ( R51 . R46 ) <= ( 0 );
+L485: ( D98 . R44 ) <= ( 0 ) by L484 , L476 , L312;
+thus L486: ( ( Exec (( R46 >0_goto R29 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( ( Exec (( R44 >0_goto R29 ) , D98) ) . ( IC ( SCM ) ) ) by L478 , L303
+.= ( succ ( IC D98 ) ) by L485 , AMI_3:9
+.= ( succ ( IC R51 ) ) by L372;
+end;
+thus L487:now
+let R48 being Int-Location;
+reconsider D99 = R48 as Data-Location by L57;
+thus L488: ( ( Exec (( R46 >0_goto R29 ) , R51) ) . R48 ) = ( ( Exec (( R44 >0_goto R29 ) , D98) ) . D99 ) by L478 , L307
+.= ( D98 . D99 ) by AMI_3:9
+.= ( R51 . R48 ) by L312;
+end;
+let R42 being FinSeq-Location;
+L489: (not R42 in ( dom ( Exec (( R44 >0_goto R29 ) , D98) ) )) by L265;
+thus L490: ( ( Exec (( R46 >0_goto R29 ) , R51) ) . R42 ) = ( R51 . R42 ) by L478 , L489 , FUNCT_4:11;
+end;
+theorem
+L491: (for R43 being FinSeq-Location holds (for R46 being Int-Location holds (for R48 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( R48 := (R43 , R46) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & (ex R13 being (Element of ( NAT )) st (R13 = ( abs ( R51 . R46 ) ) & ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . R48 ) = ( ( R51 . R43 ) /. R13 ))) & (for R47 being Int-Location holds (R47 <> R48 implies ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . R47 ) = ( R51 . R47 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . R42 ) = ( R51 . R42 )))))))
+proof
+let R43 being FinSeq-Location;
+let R46 being Int-Location;
+let R48 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+reconsider D100 = R43 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D101 = R46 , D102 = R48 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D103 = ( R48 := (R43 , R46) ) as (Element of ( SCM+FSA-Instr ));
+reconsider D104 = R51 as SCM+FSA-State by CARD_3:107;
+reconsider D105 = 9 as (Element of ( Segm 13 )) by NAT_1:44;
+L492: ( InsCode D103 ) = 9 by RECDEF_2:def 1;
+consider C70 being Integer, R13 being (Element of ( NAT )) such that L493: R13 = ( abs ( D104 . ( D103 int_addr2 ) ) ) and L494: C70 = ( ( D104 . ( D103 coll_addr1 ) ) /. R13 ) and L495: ( SCM+FSA-Exec-Res (D103 , D104) ) = ( SCM+FSA-Chg (( SCM+FSA-Chg (D104 , ( D103 int_addr1 ) , C70) ) , ( succ ( IC D104 ) )) ) by L492 , SCMFSA_1:def 16;
+set D106 = ( SCM+FSA-Chg (D104 , ( D103 int_addr1 ) , C70) );
+L496: ( Exec (( R48 := (R43 , R46) ) , R51) ) = ( SCM+FSA-Chg (D106 , ( succ ( IC D104 ) )) ) by L495 , SCMFSA_1:def 17;
+thus L497: ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) by L496 , L11 , SCMFSA_1:19;
+L498: (D103 = [ D105 , ( {} ) , <* D102 , D100 , D101 *> ] & ( D103 `3_3 ) = <* D102 , D100 , D101 *>) by RECDEF_2:def 3;
+L499: ( D103 int_addr1 ) = D102 by L498 , SCMFSA_I:def 3;
+L500: ( D103 coll_addr1 ) = D100 by L498 , SCMFSA_I:def 5;
+thus L501:now
+take D107 = R13;
+thus L502: D107 = ( abs ( R51 . R46 ) ) by L498 , L493 , SCMFSA_I:def 4;
+thus L503: ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . R48 ) = ( D106 . D102 ) by L496 , SCMFSA_1:20
+.= ( ( R51 . R43 ) /. D107 ) by L494 , L499 , L500 , SCMFSA_1:24;
+end;
+thus L504:now
+let R47 being Int-Location;
+reconsider D108 = R47 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume L505: R47 <> R48;
+thus L506: ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . R47 ) = ( D106 . D108 ) by L496 , SCMFSA_1:20
+.= ( R51 . R47 ) by L499 , L505 , SCMFSA_1:25;
+end;
+let R42 being FinSeq-Location;
+reconsider D109 = R42 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+thus L507: ( ( Exec (( R48 := (R43 , R46) ) , R51) ) . R42 ) = ( D106 . D109 ) by L496 , SCMFSA_1:21
+.= ( R51 . R42 ) by SCMFSA_1:26;
+end;
+theorem
+L508: (for R43 being FinSeq-Location holds (for R46 being Int-Location holds (for R48 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( (R43 , R46) := R48 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & (ex R13 being (Element of ( NAT )) st (R13 = ( abs ( R51 . R46 ) ) & ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . R43 ) = ( ( R51 . R43 ) +* (R13 , ( R51 . R48 )) ))) & (for R47 being Int-Location holds ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . R47 ) = ( R51 . R47 )) & (for R42 being FinSeq-Location holds (R42 <> R43 implies ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . R42 ) = ( R51 . R42 ))))))))
+proof
+let R43 being FinSeq-Location;
+let R46 being Int-Location;
+let R48 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+reconsider D110 = R43 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D111 = R46 , D112 = R48 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D113 = ( (R43 , R46) := R48 ) as (Element of ( SCM+FSA-Instr ));
+reconsider D114 = R51 as SCM+FSA-State by CARD_3:107;
+reconsider D115 = 10 as (Element of ( Segm 13 )) by NAT_1:44;
+L509: ( InsCode D113 ) = 10 by RECDEF_2:def 1;
+consider C71 being (FinSequence of ( INT )), R13 being (Element of ( NAT )) such that L510: R13 = ( abs ( D114 . ( D113 int_addr2 ) ) ) and L511: C71 = ( ( D114 . ( D113 coll_addr1 ) ) +* (R13 , ( D114 . ( D113 int_addr1 ) )) ) and L512: ( SCM+FSA-Exec-Res (D113 , D114) ) = ( SCM+FSA-Chg (( SCM+FSA-Chg (D114 , ( D113 coll_addr1 ) , C71) ) , ( succ ( IC D114 ) )) ) by L509 , SCMFSA_1:def 16;
+set D116 = ( SCM+FSA-Chg (D114 , ( D113 coll_addr1 ) , C71) );
+L513: ( Exec (( (R43 , R46) := R48 ) , R51) ) = ( SCM+FSA-Chg (D116 , ( succ ( IC D114 ) )) ) by L512 , SCMFSA_1:def 17;
+thus L514: ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) by L513 , L11 , SCMFSA_1:19;
+L515: (D113 = [ D115 , ( {} ) , <* D112 , D110 , D111 *> ] & ( D113 `3_3 ) = <* D112 , D110 , D111 *>) by RECDEF_2:def 3;
+L516: ( D113 coll_addr1 ) = D110 by L515 , SCMFSA_I:def 5;
+L517: ( D113 int_addr1 ) = D112 by L515 , SCMFSA_I:def 3;
+thus L518:now
+take D117 = R13;
+thus L519: D117 = ( abs ( R51 . R46 ) ) by L515 , L510 , SCMFSA_I:def 4;
+thus L520: ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . R43 ) = ( D116 . D110 ) by L513 , SCMFSA_1:21
+.= ( ( R51 . R43 ) +* (D117 , ( R51 . R48 )) ) by L511 , L517 , L516 , SCMFSA_1:27;
+end;
+thus L521:now
+let R47 being Int-Location;
+reconsider D118 = R47 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+thus L522: ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . R47 ) = ( D116 . D118 ) by L513 , SCMFSA_1:20
+.= ( R51 . R47 ) by SCMFSA_1:29;
+end;
+let R42 being FinSeq-Location;
+assume that
+L523: R42 <> R43;
+reconsider D119 = R42 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+thus L524: ( ( Exec (( (R43 , R46) := R48 ) , R51) ) . R42 ) = ( D116 . D119 ) by L513 , SCMFSA_1:21
+.= ( R51 . R42 ) by L516 , L523 , SCMFSA_1:28;
+end;
+theorem
+L525: (for R43 being FinSeq-Location holds (for R48 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( R48 :=len R43 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & ( ( Exec (( R48 :=len R43 ) , R51) ) . R48 ) = ( len ( R51 . R43 ) ) & (for R47 being Int-Location holds (R47 <> R48 implies ( ( Exec (( R48 :=len R43 ) , R51) ) . R47 ) = ( R51 . R47 ))) & (for R42 being FinSeq-Location holds ( ( Exec (( R48 :=len R43 ) , R51) ) . R42 ) = ( R51 . R42 ))))))
+proof
+let R43 being FinSeq-Location;
+let R48 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+reconsider D120 = R51 as SCM+FSA-State by CARD_3:107;
+reconsider D121 = R43 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D122 = ( R48 :=len R43 ) as (Element of ( SCM+FSA-Instr ));
+set D123 = ( SCM+FSA-Chg (D120 , ( D122 int_addr3 ) , ( len ( D120 . ( D122 coll_addr2 ) ) )) );
+reconsider D124 = 11 as (Element of ( Segm 13 )) by NAT_1:44;
+reconsider D125 = R48 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L526: ( InsCode D122 ) = 11 by RECDEF_2:def 1;
+L527: ( Exec (( R48 :=len R43 ) , R51) ) = ( SCM+FSA-Exec-Res (D122 , D120) ) by SCMFSA_1:def 17
+.= ( SCM+FSA-Chg (D123 , ( succ ( IC D120 ) )) ) by L526 , SCMFSA_1:def 16;
+thus L528: ( ( Exec (( R48 :=len R43 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) by L527 , L11 , SCMFSA_1:19;
+L529: (D122 = [ D124 , ( {} ) , <* D125 , D121 *> ] & ( D122 `3_3 ) = <* D125 , D121 *>) by RECDEF_2:def 3;
+L530: ( D122 int_addr3 ) = D125 by L529 , SCMFSA_I:def 7;
+L531: ( D122 coll_addr2 ) = D121 by L529 , SCMFSA_I:def 8;
+thus L532: ( ( Exec (( R48 :=len R43 ) , R51) ) . R48 ) = ( D123 . D125 ) by L527 , SCMFSA_1:20
+.= ( len ( R51 . R43 ) ) by L530 , L531 , SCMFSA_1:24;
+thus L533:now
+let R47 being Int-Location;
+reconsider D126 = R47 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume L534: R47 <> R48;
+thus L535: ( ( Exec (( R48 :=len R43 ) , R51) ) . R47 ) = ( D123 . D126 ) by L527 , SCMFSA_1:20
+.= ( R51 . R47 ) by L530 , L534 , SCMFSA_1:25;
+end;
+let R42 being FinSeq-Location;
+reconsider D127 = R42 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+thus L536: ( ( Exec (( R48 :=len R43 ) , R51) ) . R42 ) = ( D123 . D127 ) by L527 , SCMFSA_1:21
+.= ( R51 . R42 ) by SCMFSA_1:26;
+end;
+theorem
+L537: (for R43 being FinSeq-Location holds (for R48 being Int-Location holds (for R51 being (State of ( SCM+FSA )) holds (( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) & (ex R13 being (Element of ( NAT )) st (R13 = ( abs ( R51 . R48 ) ) & ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . R43 ) = ( R13 |-> ( 0 ) ))) & (for R47 being Int-Location holds ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . R47 ) = ( R51 . R47 )) & (for R42 being FinSeq-Location holds (R42 <> R43 implies ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . R42 ) = ( R51 . R42 )))))))
+proof
+let R43 being FinSeq-Location;
+let R48 being Int-Location;
+let R51 being (State of ( SCM+FSA ));
+reconsider D128 = R43 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+reconsider D129 = R48 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D130 = ( R43 :=<0,...,0> R48 ) as (Element of ( SCM+FSA-Instr ));
+reconsider D131 = R51 as SCM+FSA-State by CARD_3:107;
+reconsider D132 = 12 as (Element of ( Segm 13 )) by NAT_1:44;
+L538: ( InsCode D130 ) = 12 by RECDEF_2:def 1;
+consider C72 being (FinSequence of ( INT )), R13 being (Element of ( NAT )) such that L539: R13 = ( abs ( D131 . ( D130 int_addr3 ) ) ) and L540: C72 = ( R13 |-> ( 0 ) ) and L541: ( SCM+FSA-Exec-Res (D130 , D131) ) = ( SCM+FSA-Chg (( SCM+FSA-Chg (D131 , ( D130 coll_addr2 ) , C72) ) , ( succ ( IC D131 ) )) ) by L538 , SCMFSA_1:def 16;
+set D133 = ( SCM+FSA-Chg (D131 , ( D130 coll_addr2 ) , C72) );
+L542: ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) = ( SCM+FSA-Chg (D133 , ( succ ( IC D131 ) )) ) by L541 , SCMFSA_1:def 17;
+thus L543: ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) ) by L542 , L11 , SCMFSA_1:19;
+L544: (D130 = [ D132 , ( {} ) , <* D129 , D128 *> ] & ( D130 `3_3 ) = <* D129 , D128 *>) by RECDEF_2:def 3;
+L545: ( D130 coll_addr2 ) = D128 by L544 , SCMFSA_I:def 8;
+thus L546:now
+take D134 = R13;
+thus L547: D134 = ( abs ( R51 . R48 ) ) by L544 , L539 , SCMFSA_I:def 7;
+thus L548: ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . R43 ) = ( D133 . D128 ) by L542 , SCMFSA_1:21
+.= ( D134 |-> ( 0 ) ) by L540 , L545 , SCMFSA_1:27;
+end;
+thus L549:now
+let R47 being Int-Location;
+reconsider D135 = R47 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+thus L550: ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . R47 ) = ( D133 . D135 ) by L542 , SCMFSA_1:20
+.= ( R51 . R47 ) by SCMFSA_1:29;
+end;
+let R42 being FinSeq-Location;
+assume that
+L551: R42 <> R43;
+reconsider D136 = R42 as (Element of ( SCM+FSA-Data*-Loc )) by L18;
+thus L552: ( ( Exec (( R43 :=<0,...,0> R48 ) , R51) ) . R42 ) = ( D133 . D136 ) by L542 , SCMFSA_1:21
+.= ( R51 . R42 ) by L545 , L551 , SCMFSA_1:28;
+end;
+begin
+theorem
+L553: (for R51 being (State of ( SCM+FSA )) holds (for B55 being SCM+FSA-State holds (B55 = R51 implies ( IC R51 ) = ( IC B55 )))) by FUNCT_7:def 1 , SCMFSA_1:5;
+theorem
+L554: (for B56 being (Instruction of ( SCM )) holds (for B57 being (Instruction of ( SCM+FSA )) holds ((B56 = B57 & B56 is  halting) implies B57 is  halting)))
+proof
+let C73 being (Instruction of ( SCM ));
+let C74 being (Instruction of ( SCM+FSA ));
+assume that
+L555: C73 = C74;
+assume L556: C73 is  halting;
+let C75 being (State of ( SCM+FSA ));
+reconsider D137 = ( C75 | ( SCM-Memory ) ) as (State of ( SCM )) by L280;
+thus L557: ( Exec (C74 , C75) ) = ( C75 +* ( Exec (C73 , D137) ) ) by L555 , L288
+.= ( C75 +* D137 ) by L556 , EXTPRO_1:def 3
+.= C75 by L302;
+end;
+theorem
+L558: (for B58 being (Instruction of ( SCM+FSA )) holds ((ex R51 being (State of ( SCM+FSA )) st ( ( Exec (B58 , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) )) implies B58 is non  halting))
+proof
+let C76 being (Instruction of ( SCM+FSA ));
+given R51 being (State of ( SCM+FSA )) such that
+L559: ( ( Exec (C76 , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC R51 ) );
+
+reconsider D138 = R51 as SCM+FSA-State by CARD_3:107;
+L560: ( IC D138 ) = ( D138 . ( NAT ) );
+reconsider D139 = ( D138 . ( NAT ) ) as (Element of ( NAT )) by L560;
+assume L561: C76 is  halting;
+L562: ( ( Exec (C76 , R51) ) . ( IC ( SCM+FSA ) ) ) = ( D138 . ( NAT ) ) by L561 , L11 , EXTPRO_1:def 3;
+L563: ( ( Exec (C76 , R51) ) . ( IC ( SCM+FSA ) ) ) = ( succ D139 ) by L559 , FUNCT_7:def 1 , SCMFSA_1:5;
+thus L564: contradiction by L563 , L562;
+end;
+registration
+let R46 being Int-Location;
+let R47 being Int-Location;
+set D140 = the (State of ( SCM+FSA ));
+cluster ( R46 := R47 ) -> non  halting;
+coherence
+proof
+L565: ( IC ( Exec (( R46 := R47 ) , D140) ) ) = ( succ ( IC D140 ) ) by L376;
+thus L566: thesis by L565 , L558;
+end;
+cluster ( AddTo (R46 , R47) ) -> non  halting;
+coherence
+proof
+L567: ( IC ( Exec (( AddTo (R46 , R47) ) , D140) ) ) = ( succ ( IC D140 ) ) by L388;
+thus L568: thesis by L567 , L558;
+end;
+cluster ( SubFrom (R46 , R47) ) -> non  halting;
+coherence
+proof
+L569: ( IC ( Exec (( SubFrom (R46 , R47) ) , D140) ) ) = ( succ ( IC D140 ) ) by L400;
+thus L570: thesis by L569 , L558;
+end;
+cluster ( MultBy (R46 , R47) ) -> non  halting;
+coherence
+proof
+L571: ( IC ( Exec (( MultBy (R46 , R47) ) , D140) ) ) = ( succ ( IC D140 ) ) by L412;
+thus L572: thesis by L571 , L558;
+end;
+cluster ( Divide (R46 , R47) ) -> non  halting;
+coherence
+proof
+L573: ( IC ( Exec (( Divide (R46 , R47) ) , D140) ) ) = ( succ ( IC D140 ) ) by L424;
+thus L574: thesis by L573 , L558;
+end;
+end;
+theorem
+L576: (for R46 being Int-Location holds (for R47 being Int-Location holds ( R46 := R47 ) is non  halting));
+theorem
+L577: (for R46 being Int-Location holds (for R47 being Int-Location holds ( AddTo (R46 , R47) ) is non  halting));
+theorem
+L578: (for R46 being Int-Location holds (for R47 being Int-Location holds ( SubFrom (R46 , R47) ) is non  halting));
+theorem
+L579: (for R46 being Int-Location holds (for R47 being Int-Location holds ( MultBy (R46 , R47) ) is non  halting));
+theorem
+L580: (for R46 being Int-Location holds (for R47 being Int-Location holds ( Divide (R46 , R47) ) is non  halting));
+registration
+let R24 being (Element of ( NAT ));
+cluster ( goto R24 ) -> non  halting;
+coherence
+proof
+set D141 = ( the_Values_of ( SCM+FSA ) );
+set D142 = the SCM+FSA-State;
+assume L581: ( goto R24 ) is  halting;
+reconsider D143 = R24 as (Element of ( NAT ));
+set D144 = ( D142 +* ( ( NAT ) .--> ( succ D143 ) ) );
+L582: ( dom ( ( NAT ) .--> ( succ D143 ) ) ) = { ( NAT ) } by FUNCOP_1:13;
+L583: ( NAT ) in ( dom ( ( NAT ) .--> ( succ D143 ) ) ) by L582 , TARSKI:def 1;
+L584: ( D144 . ( NAT ) ) = ( ( ( NAT ) .--> ( succ D143 ) ) . ( NAT ) ) by L583 , FUNCT_4:13
+.= ( succ D143 ) by FUNCOP_1:72;
+L585: (for B59 being set holds (B59 in ( dom D141 ) implies ( D144 . B59 ) in ( D141 . B59 )))
+proof
+let C77 being set;
+assume that
+L586: C77 in ( dom D141 );
+per cases ;
+suppose L587: C77 = ( NAT );
+
+thus L588: thesis by L587 , L584 , SCMFSA_1:9;
+end;
+suppose L589: C77 <> ( NAT );
+
+L590: (not C77 in ( dom ( ( NAT ) .--> ( succ D143 ) ) )) by L589 , TARSKI:def 1;
+L591: ( D144 . C77 ) = ( D142 . C77 ) by L590 , FUNCT_4:11;
+thus L592: thesis by L591 , L586 , CARD_3:9;
+end;
+end;
+L594: { ( NAT ) } c= ( SCM+FSA-Memory ) by SCMFSA_1:5 , ZFMISC_1:31;
+L595: ( dom D144 ) = ( ( dom D142 ) \/ ( dom ( ( NAT ) .--> ( succ D143 ) ) ) ) by FUNCT_4:def 1
+.= ( ( SCM+FSA-Memory ) \/ ( dom ( ( NAT ) .--> ( succ D143 ) ) ) ) by SCMFSA_1:33
+.= ( ( SCM+FSA-Memory ) \/ { ( NAT ) } ) by FUNCOP_1:13
+.= ( SCM+FSA-Memory ) by L594 , XBOOLE_1:12;
+L596: ( dom D141 ) = ( SCM+FSA-Memory ) by SCMFSA_1:32;
+reconsider D145 = D144 as (State of ( SCM+FSA )) by L596 , L595 , L585 , FUNCT_1:def 14 , PARTFUN1:def 2 , RELAT_1:def 18;
+reconsider D146 = D145 as SCM+FSA-State by CARD_3:107;
+L597: ( dom ( ( NAT ) .--> R24 ) ) = { ( NAT ) } by FUNCOP_1:13;
+L598: ( NAT ) in ( dom ( ( NAT ) .--> R24 ) ) by L597 , TARSKI:def 1;
+L599: ( ( D146 +* ( ( NAT ) .--> R24 ) ) . ( NAT ) ) = ( ( ( NAT ) .--> R24 ) . ( NAT ) ) by L598 , FUNCT_4:13
+.= R24 by FUNCOP_1:72;
+L600: ( ( D146 +* ( ( NAT ) .--> R24 ) ) . ( NAT ) ) = ( ( SCM+FSA-Chg (D146 , D143) ) . ( NAT ) )
+.= D143 by SCMFSA_1:19
+.= ( ( Exec (( goto R24 ) , D145) ) . ( NAT ) ) by L11 , L450
+.= ( D145 . ( NAT ) ) by L581 , EXTPRO_1:def 3;
+thus L601: contradiction by L600 , L584 , L599;
+end;
+end;
+theorem
+L603: (for R24 being (Element of ( NAT )) holds ( goto R24 ) is non  halting);
+registration
+let R46 being Int-Location;
+let R24 being (Element of ( NAT ));
+set D147 = ( the_Values_of ( SCM+FSA ) );
+set D148 = the SCM+FSA-State;
+cluster ( R46 =0_goto R24 ) -> non  halting;
+coherence
+proof
+reconsider D149 = R24 as (Element of ( NAT ));
+set D150 = ( D148 +* ( ( NAT ) .--> ( succ D149 ) ) );
+L604: { ( NAT ) } c= ( SCM+FSA-Memory ) by SCMFSA_1:5 , ZFMISC_1:31;
+L605: ( dom D150 ) = ( ( dom D148 ) \/ ( dom ( ( NAT ) .--> ( succ D149 ) ) ) ) by FUNCT_4:def 1
+.= ( ( SCM+FSA-Memory ) \/ ( dom ( ( NAT ) .--> ( succ D149 ) ) ) ) by SCMFSA_1:33
+.= ( ( SCM+FSA-Memory ) \/ { ( NAT ) } ) by FUNCOP_1:13
+.= ( SCM+FSA-Memory ) by L604 , XBOOLE_1:12;
+assume L606: ( R46 =0_goto R24 ) is  halting;
+L607: ( dom ( ( NAT ) .--> ( succ D149 ) ) ) = { ( NAT ) } by FUNCOP_1:13;
+L608: ( NAT ) in ( dom ( ( NAT ) .--> ( succ D149 ) ) ) by L607 , TARSKI:def 1;
+L609: ( D150 . ( NAT ) ) = ( ( ( NAT ) .--> ( succ D149 ) ) . ( NAT ) ) by L608 , FUNCT_4:13
+.= ( succ D149 ) by FUNCOP_1:72;
+L610: (for B60 being set holds (B60 in ( dom D147 ) implies ( D150 . B60 ) in ( D147 . B60 )))
+proof
+let C78 being set;
+assume that
+L611: C78 in ( dom D147 );
+per cases ;
+suppose L612: C78 = ( NAT );
+
+thus L613: thesis by L612 , L609 , SCMFSA_1:9;
+end;
+suppose L614: C78 <> ( NAT );
+
+L615: (not C78 in ( dom ( ( NAT ) .--> ( succ D149 ) ) )) by L614 , TARSKI:def 1;
+L616: ( D150 . C78 ) = ( D148 . C78 ) by L615 , FUNCT_4:11;
+thus L617: thesis by L616 , L611 , CARD_3:9;
+end;
+end;
+L619: ( dom D147 ) = ( SCM+FSA-Memory ) by SCMFSA_1:32;
+reconsider D151 = D150 as (State of ( SCM+FSA )) by L619 , L605 , L610 , FUNCT_1:def 14 , PARTFUN1:def 2 , RELAT_1:def 18;
+reconsider D152 = D151 as SCM+FSA-State by CARD_3:107;
+L620: ( dom ( ( NAT ) .--> R24 ) ) = { ( NAT ) } by FUNCOP_1:13;
+L621: ( NAT ) in ( dom ( ( NAT ) .--> R24 ) ) by L620 , TARSKI:def 1;
+L622: ( ( D152 +* ( ( NAT ) .--> R24 ) ) . ( NAT ) ) = ( ( ( NAT ) .--> R24 ) . ( NAT ) ) by L621 , FUNCT_4:13
+.= R24 by FUNCOP_1:72;
+per cases ;
+suppose L623: ( D151 . R46 ) <> ( 0 );
+
+L624: ( IC D152 ) = ( D152 . ( NAT ) );
+reconsider D153 = ( D152 . ( NAT ) ) as (Element of ( NAT )) by L624;
+L625: ( IC D151 ) = ( IC D152 ) by FUNCT_7:def 1 , SCMFSA_1:5;
+L626: ( ( Exec (( R46 =0_goto R24 ) , D151) ) . ( IC ( SCM+FSA ) ) ) = ( succ D153 ) by L625 , L623 , L459;
+L627: ( ( Exec (( R46 =0_goto R24 ) , D151) ) . ( IC ( SCM+FSA ) ) ) = ( D152 . ( NAT ) ) by L606 , L11 , EXTPRO_1:def 3;
+thus L628: contradiction by L627 , L626;
+end;
+suppose L629: ( D151 . R46 ) = ( 0 );
+
+L630: ( ( D152 +* ( ( NAT ) .--> R24 ) ) . ( NAT ) ) = ( ( SCM+FSA-Chg (D152 , D149) ) . ( NAT ) )
+.= D149 by SCMFSA_1:19
+.= ( ( Exec (( R46 =0_goto R24 ) , D151) ) . ( NAT ) ) by L629 , L11 , L459
+.= ( D151 . ( NAT ) ) by L606 , EXTPRO_1:def 3;
+thus L631: contradiction by L630 , L609 , L622;
+end;
+end;
+cluster ( R46 >0_goto R24 ) -> non  halting;
+coherence
+proof
+reconsider D154 = R24 as (Element of ( NAT ));
+set D155 = ( D148 +* ( ( NAT ) .--> ( succ D154 ) ) );
+L633: { ( NAT ) } c= ( SCM+FSA-Memory ) by SCMFSA_1:5 , ZFMISC_1:31;
+L634: ( dom D155 ) = ( ( dom D148 ) \/ ( dom ( ( NAT ) .--> ( succ D154 ) ) ) ) by FUNCT_4:def 1
+.= ( ( SCM+FSA-Memory ) \/ ( dom ( ( NAT ) .--> ( succ D154 ) ) ) ) by SCMFSA_1:33
+.= ( ( SCM+FSA-Memory ) \/ { ( NAT ) } ) by FUNCOP_1:13
+.= ( SCM+FSA-Memory ) by L633 , XBOOLE_1:12;
+assume L635: ( R46 >0_goto R24 ) is  halting;
+L636: ( dom ( ( NAT ) .--> ( succ D154 ) ) ) = { ( NAT ) } by FUNCOP_1:13;
+L637: ( NAT ) in ( dom ( ( NAT ) .--> ( succ D154 ) ) ) by L636 , TARSKI:def 1;
+L638: ( D155 . ( NAT ) ) = ( ( ( NAT ) .--> ( succ D154 ) ) . ( NAT ) ) by L637 , FUNCT_4:13
+.= ( succ D154 ) by FUNCOP_1:72;
+L639: (for B61 being set holds (B61 in ( dom D147 ) implies ( D155 . B61 ) in ( D147 . B61 )))
+proof
+let C79 being set;
+assume that
+L640: C79 in ( dom D147 );
+per cases ;
+suppose L641: C79 = ( NAT );
+
+thus L642: thesis by L641 , L638 , SCMFSA_1:9;
+end;
+suppose L643: C79 <> ( NAT );
+
+L644: (not C79 in ( dom ( ( NAT ) .--> ( succ D154 ) ) )) by L643 , TARSKI:def 1;
+L645: ( D155 . C79 ) = ( D148 . C79 ) by L644 , FUNCT_4:11;
+thus L646: thesis by L645 , L640 , CARD_3:9;
+end;
+end;
+L648: ( dom D147 ) = ( SCM+FSA-Memory ) by SCMFSA_1:32;
+reconsider D156 = D155 as (State of ( SCM+FSA )) by L648 , L634 , L639 , FUNCT_1:def 14 , PARTFUN1:def 2 , RELAT_1:def 18;
+reconsider D157 = D156 as SCM+FSA-State by CARD_3:107;
+L649: ( dom ( ( NAT ) .--> R24 ) ) = { ( NAT ) } by FUNCOP_1:13;
+L650: ( NAT ) in ( dom ( ( NAT ) .--> R24 ) ) by L649 , TARSKI:def 1;
+L651: ( ( D157 +* ( ( NAT ) .--> R24 ) ) . ( NAT ) ) = ( ( ( NAT ) .--> R24 ) . ( NAT ) ) by L650 , FUNCT_4:13
+.= R24 by FUNCOP_1:72;
+per cases ;
+suppose L652: ( D156 . R46 ) <= ( 0 );
+
+L653: ( IC D157 ) = ( D157 . ( NAT ) );
+reconsider D158 = ( D157 . ( NAT ) ) as (Element of ( NAT )) by L653;
+L654: ( IC D156 ) = ( IC D157 ) by FUNCT_7:def 1 , SCMFSA_1:5;
+L655: ( ( Exec (( R46 >0_goto R24 ) , D156) ) . ( IC ( SCM+FSA ) ) ) = ( succ D158 ) by L654 , L652 , L475;
+L656: ( ( Exec (( R46 >0_goto R24 ) , D156) ) . ( IC ( SCM+FSA ) ) ) = ( D157 . ( NAT ) ) by L635 , L11 , EXTPRO_1:def 3;
+thus L657: contradiction by L656 , L655;
+end;
+suppose L658: ( D156 . R46 ) > ( 0 );
+
+L659: ( ( D157 +* ( ( NAT ) .--> R24 ) ) . ( NAT ) ) = ( ( SCM+FSA-Chg (D157 , D154) ) . ( NAT ) )
+.= D154 by SCMFSA_1:19
+.= ( ( Exec (( R46 >0_goto R24 ) , D156) ) . ( NAT ) ) by L658 , L11 , L475
+.= ( D156 . ( NAT ) ) by L635 , EXTPRO_1:def 3;
+thus L660: contradiction by L659 , L638 , L651;
+end;
+end;
+end;
+theorem
+L663: (for R24 being (Element of ( NAT )) holds (for R46 being Int-Location holds ( R46 =0_goto R24 ) is non  halting));
+theorem
+L664: (for R24 being (Element of ( NAT )) holds (for R46 being Int-Location holds ( R46 >0_goto R24 ) is non  halting));
+registration
+let R48 being Int-Location;
+let R42 being FinSeq-Location;
+let R46 being Int-Location;
+set D159 = the (State of ( SCM+FSA ));
+cluster ( R48 := (R42 , R46) ) -> non  halting;
+coherence
+proof
+L665: ( ( Exec (( R48 := (R42 , R46) ) , D159) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC D159 ) ) by L491;
+thus L666: thesis by L665 , L558;
+end;
+cluster ( (R42 , R46) := R48 ) -> non  halting;
+coherence
+proof
+L667: ( ( Exec (( (R42 , R46) := R48 ) , D159) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC D159 ) ) by L508;
+thus L668: thesis by L667 , L558;
+end;
+end;
+theorem
+L670: (for R42 being FinSeq-Location holds (for R46 being Int-Location holds (for R48 being Int-Location holds ( R48 := (R42 , R46) ) is non  halting)));
+theorem
+L671: (for R42 being FinSeq-Location holds (for R46 being Int-Location holds (for R48 being Int-Location holds ( (R42 , R46) := R48 ) is non  halting)));
+registration
+let R48 being Int-Location;
+let R42 being FinSeq-Location;
+set D160 = the (State of ( SCM+FSA ));
+cluster ( R48 :=len R42 ) -> non  halting;
+coherence
+proof
+L672: ( ( Exec (( R48 :=len R42 ) , D160) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC D160 ) ) by L525;
+thus L673: thesis by L672 , L558;
+end;
+cluster ( R42 :=<0,...,0> R48 ) -> non  halting;
+coherence
+proof
+L674: ( ( Exec (( R42 :=<0,...,0> R48 ) , D160) ) . ( IC ( SCM+FSA ) ) ) = ( succ ( IC D160 ) ) by L537;
+thus L675: thesis by L674 , L558;
+end;
+end;
+theorem
+L677: (for R42 being FinSeq-Location holds (for R48 being Int-Location holds ( R48 :=len R42 ) is non  halting));
+theorem
+L678: (for R42 being FinSeq-Location holds (for R48 being Int-Location holds ( R42 :=<0,...,0> R48 ) is non  halting));
+theorem
+L679: (for B62 being (Instruction of ( SCM+FSA )) holds (B62 = [ ( 0 ) , ( {} ) , ( {} ) ] implies B62 is  halting)) by L554 , AMI_3:26;
+theorem
+L680: (for B63 being (Instruction of ( SCM+FSA )) holds (( InsCode B63 ) = ( 0 ) implies B63 = [ ( 0 ) , ( {} ) , ( {} ) ]))
+proof
+let C80 being (Instruction of ( SCM+FSA ));
+assume that
+L681: ( InsCode C80 ) = ( 0 );
+L682:
+now
+assume L683: C80 in { [ R19 , ( {} ) , <* R36 , R38 *> ] where R19 is (Element of ( Segm 9 )) , R36 is (Element of ( SCM-Data-Loc )) , R38 is (Element of ( SCM-Data-Loc )) : R19 in { 1 , 2 , 3 , 4 , 5 } };
+L684: (ex R19 being (Element of ( Segm 9 )) st (ex R36 being (Element of ( SCM-Data-Loc )) st (ex R38 being (Element of ( SCM-Data-Loc )) st (C80 = [ R19 , ( {} ) , <* R36 , R38 *> ] & R19 in { 1 , 2 , 3 , 4 , 5 })))) by L683;
+thus L685: contradiction by L684 , L681 , RECDEF_2:def 1;
+end;
+L686:
+now
+assume L687: C80 in { [ R17 , <* R30 *> , ( {} ) ] where R17 is (Element of ( Segm 9 )) , R30 is (Element of ( NAT )) : R17 = 6 };
+L688: (ex R17 being (Element of ( Segm 9 )) st (ex R30 being (Element of ( NAT )) st (C80 = [ R17 , <* R30 *> , ( {} ) ] & R17 = 6))) by L687;
+thus L689: contradiction by L688 , L681 , RECDEF_2:def 1;
+end;
+L690:
+now
+assume L691: C80 in { [ R18 , <* R31 *> , <* R37 *> ] where R18 is (Element of ( Segm 9 )) , R31 is (Element of ( NAT )) , R37 is (Element of ( SCM-Data-Loc )) : R18 in { 7 , 8 } };
+L692: (ex R18 being (Element of ( Segm 9 )) st (ex R31 being (Element of ( NAT )) st (ex R37 being (Element of ( SCM-Data-Loc )) st (C80 = [ R18 , <* R31 *> , <* R37 *> ] & R18 in { 7 , 8 })))) by L691;
+thus L693: contradiction by L692 , L681 , RECDEF_2:def 1;
+end;
+L694:
+now
+assume L695: C80 in { [ R15 , ( {} ) , <* R34 , R40 *> ] where R15 is (Element of ( Segm 13 )) , R34 is (Element of ( SCM+FSA-Data-Loc )) , R40 is (Element of ( SCM+FSA-Data*-Loc )) : R15 in { 11 , 12 } };
+L696: (ex R15 being (Element of ( Segm 13 )) st (ex R34 being (Element of ( SCM+FSA-Data-Loc )) st (ex R40 being (Element of ( SCM+FSA-Data*-Loc )) st (C80 = [ R15 , ( {} ) , <* R34 , R40 *> ] & R15 in { 11 , 12 })))) by L695;
+thus L697: contradiction by L696 , L681 , RECDEF_2:def 1;
+end;
+L698: C80 in ( ( SCM-Instr ) \/ { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } } ) by L694 , XBOOLE_0:def 3;
+L699:
+now
+assume L700: C80 in { [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] where R16 is (Element of ( Segm 13 )) , R33 is (Element of ( SCM+FSA-Data-Loc )) , R32 is (Element of ( SCM+FSA-Data-Loc )) , R39 is (Element of ( SCM+FSA-Data*-Loc )) : R16 in { 9 , 10 } };
+L701: (ex R16 being (Element of ( Segm 13 )) st (ex R33 being (Element of ( SCM+FSA-Data-Loc )) st (ex R32 being (Element of ( SCM+FSA-Data-Loc )) st (ex R39 being (Element of ( SCM+FSA-Data*-Loc )) st (C80 = [ R16 , ( {} ) , <* R33 , R39 , R32 *> ] & R16 in { 9 , 10 }))))) by L700;
+thus L702: contradiction by L701 , L681 , RECDEF_2:def 1;
+end;
+L703: C80 in ( SCM-Instr ) by L699 , L698 , XBOOLE_0:def 3;
+L704: C80 in ( ( { [ ( SCM-Halt ) , ( {} ) , ( {} ) ] } \/ { [ R17 , <* R30 *> , ( {} ) ] where R17 is (Element of ( Segm 9 )) , R30 is (Element of ( NAT )) : R17 = 6 } ) \/ { [ R18 , <* R31 *> , <* R37 *> ] where R18 is (Element of ( Segm 9 )) , R31 is (Element of ( NAT )) , R37 is (Element of ( SCM-Data-Loc )) : R18 in { 7 , 8 } } ) by L703 , L682 , XBOOLE_0:def 3;
+L705: C80 in ( { [ ( SCM-Halt ) , ( {} ) , ( {} ) ] } \/ { [ R17 , <* R30 *> , ( {} ) ] where R17 is (Element of ( Segm 9 )) , R30 is (Element of ( NAT )) : R17 = 6 } ) by L704 , L690 , XBOOLE_0:def 3;
+L706: C80 in { [ ( SCM-Halt ) , ( {} ) , ( {} ) ] } by L705 , L686 , XBOOLE_0:def 3;
+thus L707: thesis by L706 , TARSKI:def 1;
+end;
+theorem
+L708: (for B64 being set holds (B64 is (Instruction of ( SCM+FSA )) iff (B64 = [ ( 0 ) , ( {} ) , ( {} ) ] or (ex R46 being Int-Location st (ex R47 being Int-Location st B64 = ( R46 := R47 ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st B64 = ( AddTo (R46 , R47) ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st B64 = ( SubFrom (R46 , R47) ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st B64 = ( MultBy (R46 , R47) ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st B64 = ( Divide (R46 , R47) ))) or (ex R24 being (Element of ( NAT )) st B64 = ( goto R24 )) or (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st B64 = ( R20 =0_goto R25 ))) or (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st B64 = ( R20 >0_goto R25 ))) or (ex R47 being Int-Location st (ex R46 being Int-Location st (ex R21 being FinSeq-Location st B64 = ( R46 := (R21 , R47) )))) or (ex R46 being Int-Location st (ex R47 being Int-Location st (ex R21 being FinSeq-Location st B64 = ( (R21 , R46) := R47 )))) or (ex R46 being Int-Location st (ex R42 being FinSeq-Location st B64 = ( R46 :=len R42 ))) or (ex R46 being Int-Location st (ex R42 being FinSeq-Location st B64 = ( R42 :=<0,...,0> R46 ))))))
+proof
+let C81 being set;
+thus L709: (C81 is (Instruction of ( SCM+FSA )) implies (C81 = [ ( 0 ) , ( {} ) , ( {} ) ] or (ex R46 being Int-Location st (ex R47 being Int-Location st C81 = ( R46 := R47 ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st C81 = ( AddTo (R46 , R47) ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st C81 = ( SubFrom (R46 , R47) ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st C81 = ( MultBy (R46 , R47) ))) or (ex R46 being Int-Location st (ex R47 being Int-Location st C81 = ( Divide (R46 , R47) ))) or (ex R24 being (Element of ( NAT )) st C81 = ( goto R24 )) or (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st C81 = ( R20 =0_goto R25 ))) or (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st C81 = ( R20 >0_goto R25 ))) or (ex R47 being Int-Location st (ex R46 being Int-Location st (ex R21 being FinSeq-Location st C81 = ( R46 := (R21 , R47) )))) or (ex R46 being Int-Location st (ex R47 being Int-Location st (ex R21 being FinSeq-Location st C81 = ( (R21 , R46) := R47 )))) or (ex R46 being Int-Location st (ex R42 being FinSeq-Location st C81 = ( R46 :=len R42 ))) or (ex R46 being Int-Location st (ex R42 being FinSeq-Location st C81 = ( R42 :=<0,...,0> R46 )))))
+proof
+assume L710: C81 is (Instruction of ( SCM+FSA ));
+reconsider D161 = C81 as (Instruction of ( SCM+FSA )) by L710;
+set D162 = ( InsCode D161 );
+L711: (D162 = ( 0 ) or D162 = 1 or D162 = 2 or D162 = 3 or D162 = 4 or D162 = 5 or D162 = 6 or D162 = 7 or D162 = 8 or D162 = 9 or D162 = 10 or D162 = 11 or D162 = 12) by L84 , NAT_1:36;
+thus L712: thesis by L711 , L161 , L167 , L173 , L179 , L185 , L191 , L195 , L201 , L207 , L220 , L233 , L246 , L680;
+end;
+
+thus L713: thesis by SCMFSA_I:3;
+end;
+L714: (for B65 being (Instruction of ( SCM+FSA )) holds (B65 is  halting implies B65 = [ ( 0 ) , ( {} ) , ( {} ) ]))
+proof
+set D163 = [ ( 0 ) , ( {} ) , ( {} ) ];
+let C82 being (Instruction of ( SCM+FSA ));
+assume that
+L715: C82 is  halting;
+assume L716: D163 <> C82;
+per cases  by L708;
+suppose L717: C82 = [ ( 0 ) , ( {} ) , ( {} ) ];
+
+thus L718: thesis by L717 , L716;
+end;
+suppose L719: (ex R46 being Int-Location st (ex R47 being Int-Location st C82 = ( R46 := R47 )));
+
+thus L720: thesis by L719 , L715;
+end;
+suppose L721: (ex R46 being Int-Location st (ex R47 being Int-Location st C82 = ( AddTo (R46 , R47) )));
+
+thus L722: thesis by L721 , L715;
+end;
+suppose L723: (ex R46 being Int-Location st (ex R47 being Int-Location st C82 = ( SubFrom (R46 , R47) )));
+
+thus L724: thesis by L723 , L715;
+end;
+suppose L725: (ex R46 being Int-Location st (ex R47 being Int-Location st C82 = ( MultBy (R46 , R47) )));
+
+thus L726: thesis by L725 , L715;
+end;
+suppose L727: (ex R46 being Int-Location st (ex R47 being Int-Location st C82 = ( Divide (R46 , R47) )));
+
+thus L728: thesis by L727 , L715;
+end;
+suppose L729: (ex R24 being (Element of ( NAT )) st C82 = ( goto R24 ));
+
+thus L730: thesis by L729 , L715;
+end;
+suppose L731: (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st C82 = ( R20 =0_goto R25 )));
+
+thus L732: thesis by L731 , L715;
+end;
+suppose L733: (ex R25 being (Element of ( NAT )) st (ex R20 being Int-Location st C82 = ( R20 >0_goto R25 )));
+
+thus L734: thesis by L733 , L715;
+end;
+suppose L735: (ex R47 being Int-Location st (ex R46 being Int-Location st (ex R21 being FinSeq-Location st C82 = ( R46 := (R21 , R47) ))));
+
+thus L736: thesis by L735 , L715;
+end;
+suppose L737: (ex R46 being Int-Location st (ex R47 being Int-Location st (ex R21 being FinSeq-Location st C82 = ( (R21 , R46) := R47 ))));
+
+thus L738: thesis by L737 , L715;
+end;
+suppose L739: (ex R46 being Int-Location st (ex R42 being FinSeq-Location st C82 = ( R46 :=len R42 )));
+
+thus L740: thesis by L739 , L715;
+end;
+suppose L741: (ex R46 being Int-Location st (ex R42 being FinSeq-Location st C82 = ( R42 :=<0,...,0> R46 )));
+
+thus L742: thesis by L741 , L715;
+end;
+end;
+registration
+cluster ( SCM+FSA ) ->  halting;
+coherence
+proof
+thus L744: ( halt ( SCM+FSA ) ) is  halting by L554 , AMI_3:26;
+end;
+end;
+theorem
+L746: (for B66 being (Instruction of ( SCM+FSA )) holds (B66 is  halting implies B66 = ( halt ( SCM+FSA ) ))) by L714;
+theorem
+L747: (for B67 being (Instruction of ( SCM+FSA )) holds (( InsCode B67 ) = ( 0 ) implies B67 = ( halt ( SCM+FSA ) ))) by L680;
+theorem
+L748: ( halt ( SCM ) ) = ( halt ( SCM+FSA ) );
+canceled 1;
+theorem
+L749: (for B68 being (Instruction of ( SCM )) holds (for B69 being (Instruction of ( SCM+FSA )) holds ((B68 = B69 & B68 is non  halting) implies B69 is non  halting))) by L746 , L748;
+theorem
+L750: (for B70 , B71 being Nat holds ( fsloc B70 ) <> ( intloc B71 ))
+proof
+let C83 , C84 being Nat;
+L751: ( fsloc C83 ) in ( FinSeq-Locations ) by L18;
+thus L752: thesis by L751 , SCMFSA_1:30 , XBOOLE_0:3;
+end;
+theorem
+L753: ( Data-Locations ( SCM+FSA ) ) = ( ( Int-Locations ) \/ ( FinSeq-Locations ) )
+proof
+L754:
+now
+assume L755: ( NAT ) in ( FinSeq-Locations );
+L756: ( NAT ) in ( ( ( NAT ) \/ [: { ( 0 ) } , ( NAT ) :] ) \ { [ ( 0 ) , ( 0 ) ] } ) by L755 , NUMBERS:def 4;
+L757: (not ( NAT ) in ( NAT ));
+L758: ( NAT ) in [: { ( 0 ) } , ( NAT ) :] by L757 , L756 , XBOOLE_0:def 3;
+L759: (ex B72 , B73 being set st ( NAT ) = [ B72 , B73 ]) by L758 , RELAT_1:def 1;
+thus L760: contradiction by L759;
+end;
+L761: ( FinSeq-Locations ) misses { ( NAT ) } by L754 , ZFMISC_1:50;
+L762: ( FinSeq-Locations ) misses { ( NAT ) } by L761;
+L763: ( ( FinSeq-Locations ) \ { ( NAT ) } ) = ( FinSeq-Locations ) by L762 , XBOOLE_1:83;
+L764: ( SCM-Data-Loc ) misses { ( NAT ) } by AMI_2:20 , ZFMISC_1:50;
+L765: ( SCM-Data-Loc ) misses { ( NAT ) } by L764;
+L766: ( ( SCM-Memory ) \ { ( NAT ) } ) = ( ( SCM-Data-Loc ) \ { ( NAT ) } ) by XBOOLE_1:40
+.= ( Int-Locations ) by L765 , XBOOLE_1:83;
+thus L767: ( Data-Locations ( SCM+FSA ) ) = ( ( ( SCM-Memory ) \/ ( FinSeq-Locations ) ) \ { ( NAT ) } ) by FUNCT_7:def 1 , SCMFSA_1:5
+.= ( ( Int-Locations ) \/ ( FinSeq-Locations ) ) by L763 , L766 , XBOOLE_1:42;
+end;
+theorem
+L768: (for B74 , B75 being Nat holds (B74 <> B75 implies ( intloc B74 ) <> ( intloc B75 ))) by AMI_3:10;
+theorem
+L769: (for R29 being (Element of ( NAT )) holds (for R46 being Int-Location holds (not R46 in ( dom ( Start-At (R29 , ( SCM+FSA )) ) ))))
+proof
+let R29 being (Element of ( NAT ));
+let R46 being Int-Location;
+L770: ( dom ( Start-At (R29 , ( SCM+FSA )) ) ) = { ( IC ( SCM+FSA ) ) } by FUNCOP_1:13;
+assume L771: R46 in ( dom ( Start-At (R29 , ( SCM+FSA )) ) );
+L772: R46 = ( IC ( SCM+FSA ) ) by L771 , L770 , TARSKI:def 1;
+thus L773: contradiction by L772 , L319;
+end;
+theorem
+L774: (for R29 being (Element of ( NAT )) holds (for R42 being FinSeq-Location holds (not R42 in ( dom ( Start-At (R29 , ( SCM+FSA )) ) ))))
+proof
+let R29 being (Element of ( NAT ));
+let R42 being FinSeq-Location;
+L775: ( dom ( Start-At (R29 , ( SCM+FSA )) ) ) = { ( IC ( SCM+FSA ) ) } by FUNCOP_1:13;
+assume L776: R42 in ( dom ( Start-At (R29 , ( SCM+FSA )) ) );
+L777: R42 = ( IC ( SCM+FSA ) ) by L776 , L775 , TARSKI:def 1;
+thus L778: contradiction by L777 , L322;
+end;
+theorem
+L779: (for B76 , B77 being (State of ( SCM+FSA )) holds ((( IC B76 ) = ( IC B77 ) & (for B78 being Int-Location holds ( B76 . B78 ) = ( B77 . B78 )) & (for B79 being FinSeq-Location holds ( B76 . B79 ) = ( B77 . B79 ))) implies B76 = B77))
+proof
+let C85 , C86 being (State of ( SCM+FSA ));
+assume that
+L780: ( IC C85 ) = ( IC C86 );
+L781: (( IC ( SCM+FSA ) ) in ( dom C85 ) & ( IC ( SCM+FSA ) ) in ( dom C86 )) by MEMSTR_0:2;
+L782: (C85 = ( ( DataPart C85 ) +* ( Start-At (( IC C85 ) , ( SCM+FSA )) ) ) & C86 = ( ( DataPart C86 ) +* ( Start-At (( IC C86 ) , ( SCM+FSA )) ) )) by L781 , MEMSTR_0:26;
+assume that
+L783: (for B80 being Int-Location holds ( C85 . B80 ) = ( C86 . B80 ))
+and
+L784: (for B81 being FinSeq-Location holds ( C85 . B81 ) = ( C86 . B81 ));
+L785: ( DataPart C85 ) = ( DataPart C86 )
+proof
+L786: ( dom ( DataPart C85 ) ) = ( Data-Locations ( SCM+FSA ) ) by MEMSTR_0:9;
+thus L787: ( dom ( DataPart C85 ) ) = ( dom ( DataPart C86 ) ) by L786 , MEMSTR_0:9;
+let C87 being set;
+assume L788: C87 in ( dom ( DataPart C85 ) );
+L789: C87 in ( ( Int-Locations ) \/ ( FinSeq-Locations ) ) by L788 , L786 , L753;
+per cases  by L789 , XBOOLE_0:def 3;
+suppose L790: C87 in ( Int-Locations );
+
+L791: C87 is Int-Location by L790 , AMI_2:def 16;
+thus L792: ( ( DataPart C85 ) . C87 ) = ( C85 . C87 ) by L788 , L786 , FUNCT_1:49
+.= ( C86 . C87 ) by L791 , L783
+.= ( ( DataPart C86 ) . C87 ) by L788 , L786 , FUNCT_1:49;
+end;
+suppose L793: C87 in ( FinSeq-Locations );
+
+L794: C87 is FinSeq-Location by L793 , L18;
+thus L795: ( ( DataPart C85 ) . C87 ) = ( C85 . C87 ) by L788 , L786 , FUNCT_1:49
+.= ( C86 . C87 ) by L794 , L784
+.= ( ( DataPart C86 ) . C87 ) by L788 , L786 , FUNCT_1:49;
+end;
+end;
+thus L797: thesis by L785 , L780 , L782;
+end;
+registration
+let C88 being FinSeq-Location;
+let C89 being (FinSequence of ( INT ));
+cluster ( C88 .--> C89 ) ->  data-only for (PartState of ( SCM+FSA ));
+coherence
+proof
+let C90 being (PartState of ( SCM+FSA ));
+assume that
+L798: C90 = ( C88 .--> C89 );
+L799: ( dom C90 ) = { C88 } by L798 , FUNCOP_1:13;
+L800: C88 <> ( IC ( SCM+FSA ) ) by L322;
+L801: { C88 } misses { ( IC ( SCM+FSA ) ) } by L800 , ZFMISC_1:11;
+L802: ( dom C90 ) misses { ( IC ( SCM+FSA ) ) } by L799 , L801;
+thus L803: thesis by L802 , MEMSTR_0:def 9;
+end;
+end;
+registration
+let C91 being Int-Location;
+let C92 being Integer;
+cluster ( C91 .--> C92 ) ->  data-only for (PartState of ( SCM+FSA ));
+coherence
+proof
+let C93 being (PartState of ( SCM+FSA ));
+assume that
+L805: C93 = ( C91 .--> C92 );
+L806: ( dom C93 ) = { C91 } by L805 , FUNCOP_1:13;
+L807: C91 <> ( IC ( SCM+FSA ) ) by L319;
+L808: { C91 } misses { ( IC ( SCM+FSA ) ) } by L807 , ZFMISC_1:11;
+L809: ( dom C93 ) misses { ( IC ( SCM+FSA ) ) } by L808 , L806;
+thus L810: thesis by L809 , MEMSTR_0:def 9;
+end;
+end;
+registration
+let R46 being Int-Location;
+let R47 being Int-Location;
+cluster ( R46 := R47 ) ->  No-StopCode;
+coherence
+proof
+L812: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L813: thesis by L812 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R46 being Int-Location;
+let R47 being Int-Location;
+cluster ( AddTo (R46 , R47) ) ->  No-StopCode;
+coherence
+proof
+L815: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L816: thesis by L815 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R46 being Int-Location;
+let R47 being Int-Location;
+cluster ( SubFrom (R46 , R47) ) ->  No-StopCode;
+coherence
+proof
+L818: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L819: thesis by L818 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R46 being Int-Location;
+let R47 being Int-Location;
+cluster ( MultBy (R46 , R47) ) ->  No-StopCode;
+coherence
+proof
+L821: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L822: thesis by L821 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R46 being Int-Location;
+let R47 being Int-Location;
+cluster ( Divide (R46 , R47) ) ->  No-StopCode;
+coherence
+proof
+L824: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L825: thesis by L824 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R25 being (Element of ( NAT ));
+cluster ( goto R25 ) ->  No-StopCode;
+coherence
+proof
+L827: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L828: thesis by L827 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R25 being (Element of ( NAT ));
+let R46 being Int-Location;
+cluster ( R46 =0_goto R25 ) ->  No-StopCode;
+coherence
+proof
+L830: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L831: thesis by L830 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R25 being (Element of ( NAT ));
+let R46 being Int-Location;
+cluster ( R46 >0_goto R25 ) ->  No-StopCode;
+coherence
+proof
+L833: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L834: thesis by L833 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R21 being FinSeq-Location;
+let R46 being Int-Location;
+let R48 being Int-Location;
+cluster ( R48 := (R21 , R46) ) ->  No-StopCode;
+coherence
+proof
+L836: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L837: thesis by L836 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R21 being FinSeq-Location;
+let R46 being Int-Location;
+let R48 being Int-Location;
+cluster ( (R21 , R46) := R48 ) ->  No-StopCode;
+coherence
+proof
+L839: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L840: thesis by L839 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R21 being FinSeq-Location;
+let R46 being Int-Location;
+cluster ( R46 :=len R21 ) ->  No-StopCode;
+coherence
+proof
+L842: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L843: thesis by L842 , COMPOS_0:def 12;
+end;
+end;
+registration
+let R21 being FinSeq-Location;
+let R46 being Int-Location;
+cluster ( R21 :=<0,...,0> R46 ) ->  No-StopCode;
+coherence
+proof
+L845: ( InsCode ( halt ( SCM+FSA ) ) ) = ( 0 ) by COMPOS_1:70;
+thus L846: thesis by L845 , COMPOS_0:def 12;
+end;
+end;

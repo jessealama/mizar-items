@@ -1,0 +1,2660 @@
+:: Multiplication of Polynomials using {D}iscrete {F}ourier {T}ransformation
+::  by Krzysztof Treyderowski and Christoph Schwarzweller
+::
+:: Received October 12, 2006
+:: Copyright (c) 2006-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, INT_1, XXREAL_0, CARD_1, ARYTM_1, ARYTM_3, SUBSET_1,
+      VECTSP_1, VECTSP_2, STRUCT_0, XBOOLE_0, ALGSTR_0, SUPINF_2, NEWTON,
+      RELAT_1, GROUP_1, BINOP_1, RLVECT_1, MESFUNC1, LATTICES, ALGSTR_1,
+      FINSEQ_1, PARTFUN1, CARD_3, NAT_1, FUNCT_1, ORDINAL4, FINSEQ_2, TARSKI,
+      MATRIX_1, TREES_1, INCSP_1, FVSUM_1, RVSUM_1, ZFMISC_1, ALGSEQ_1,
+      POLYNOM1, COMPLEX1, MCART_1, POLYNOM2, POLYNOM3, POLYNOM8;
+ notations TARSKI, XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_1, FUNCT_2, NUMBERS,
+      XCMPLX_0, XXREAL_0, VECTSP_2, BINOP_1, BINOM, ALGSTR_1, PARTFUN1,
+      FINSEQ_1, FINSEQ_2, INT_1, ORDINAL1, NAT_1, NAT_D, STRUCT_0, ALGSTR_0,
+      RLVECT_1, GROUP_1, VECTSP_1, FVSUM_1, ALGSEQ_1, POLYNOM5, POLYNOM3,
+      MATRIX_1, MATRIX_3, POLYNOM4, XTUPLE_0, MCART_1, INT_2;
+ constructors REAL_1, NAT_D, VECTSP_2, ALGSTR_2, TOPREAL1, MATRIX_3, POLYNOM4,
+      POLYNOM5, BINOM, RELSET_1, FVSUM_1, XTUPLE_0;
+ registrations XBOOLE_0, ORDINAL1, RELSET_1, XXREAL_0, XREAL_0, NAT_1, INT_1,
+      STRUCT_0, VECTSP_1, ALGSTR_1, GCD_1, POLYNOM3, CARD_1, XTUPLE_0;
+ requirements NUMERALS, SUBSET, REAL, BOOLE, ARITHM;
+ definitions VECTSP_1, RLVECT_1, BINOM, FINSEQ_1, MATRIX_1, POLYNOM3, XTUPLE_0;
+ theorems FVSUM_1, GROUP_1, BINOM, VECTSP_1, ALGSEQ_1, NAT_1, FINSEQ_4, INT_1,
+      FUNCT_2, XREAL_1, VECTSP_2, ALGSTR_1, MATRIX_1, FUNCT_1, MATRIX_3,
+      FINSEQ_1, ZFMISC_1, COMPLEX1, RLVECT_1, POLYNOM4, TARSKI, MCART_1,
+      FINSEQ_2, POLYNOM1, ABSVALUE, POLYNOM3, POLYNOM5, FINSEQ_3, ORDINAL1,
+      XXREAL_0, FUNCOP_1, PARTFUN1, XREAL_0, XTUPLE_0;
+ schemes NAT_1, FUNCT_2, MATRIX_1, FINSEQ_1, INT_1;
+
+begin
+L1: (for B1 being Integer holds (B1 >= ( 0 ) or B1 = ( - 1 ) or B1 < ( - 1 )))
+proof
+let C1 being Integer;
+per cases ;
+suppose L2: C1 >= ( 0 );
+
+thus L3: thesis by L2;
+end;
+suppose L4: C1 < ( 0 );
+
+reconsider D1 = ( - C1 ) as (Element of ( NAT )) by L4 , INT_1:3;
+L5: D1 <> ( - ( 0 ) ) by L4;
+L6: D1 >= 1 by L5 , NAT_1:14;
+L7: (D1 > 1 or D1 = 1) by L6 , XXREAL_0:1;
+L8: (( - 1 ) > ( - ( - C1 ) ) or ( - 1 ) = C1) by L7 , XREAL_1:24;
+thus L9: thesis by L8;
+end;
+end;
+L11: (for B2 being Integer holds (B2 >= 1 or B2 = ( 0 ) or B2 < ( 0 )))
+proof
+let C2 being Integer;
+L12: (C2 < ( 0 ) or (C2 is (Element of ( NAT )) & (C2 <> ( 0 ) or C2 = ( 0 )))) by INT_1:3;
+thus L13: thesis by L12 , NAT_1:14;
+end;
+theorem
+L14: (for B3 being (Element of ( NAT )) holds (for B4 being  well-unital  domRing-like non  degenerated non  empty doubleLoopStr holds (for B5 being (Element of B4) holds (B5 <> ( 0. B4 ) implies ( B5 |^ B3 ) <> ( 0. B4 )))))
+proof
+let C3 being (Element of ( NAT ));
+let C4 being  well-unital  domRing-like non  degenerated non  empty doubleLoopStr;
+let C5 being (Element of C4);
+defpred S1[ (Element of ( NAT )) ] means ( C5 |^ $1 ) <> ( 0. C4 );
+assume L15: C5 <> ( 0. C4 );
+L16:
+now
+let C6 being (Element of ( NAT ));
+assume L17: S1[ C6 ];
+L18: ( ( C5 |^ C6 ) * C5 ) <> ( 0. C4 ) by L17 , L15 , VECTSP_2:def 1;
+thus L19: S1[ ( C6 + 1 ) ] by L18 , GROUP_1:def 7;
+end;
+L20: ( C5 |^ ( 0 ) ) = ( 1_ C4 ) by BINOM:8;
+L21: S1[ ( 0 ) ] by L20;
+L22: (for B6 being (Element of ( NAT )) holds S1[ B6 ]) from NAT_1:sch 1(L21 , L16);
+thus L23: thesis by L22;
+end;
+registration
+cluster  almost_left_invertible ->  domRing-like for  associative  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  empty  associative  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  empty  associative  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  empty  associative  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  empty doubleLoopStr;
+coherence
+proof
+let C7 being  associative  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  empty doubleLoopStr;
+assume L24: C7 is  almost_left_invertible;
+L25: (for B7 , B8 being (Element of C7) holds (( B7 * B8 ) = ( 0. C7 ) implies (B7 = ( 0. C7 ) or B8 = ( 0. C7 ))))
+proof
+let C8 , C9 being (Element of C7);
+assume L26: ( C8 * C9 ) = ( 0. C7 );
+L27:
+now
+assume that
+L28: C8 <> ( 0. C7 )
+and
+L29: C9 <> ( 0. C7 );
+consider C10 being (Element of C7) such that L30: ( C10 * C8 ) = ( 1. C7 ) by L24 , L28 , VECTSP_1:def 9;
+L31: C9 = ( ( 1. C7 ) * C9 ) by VECTSP_1:def 8
+.= ( C10 * ( C8 * C9 ) ) by L30 , GROUP_1:def 3
+.= ( 0. C7 ) by L26 , VECTSP_1:6;
+thus L32: contradiction by L31 , L29;
+end;
+thus L33: thesis by L27;
+end;
+thus L34: thesis by L25 , VECTSP_2:def 1;
+end;
+end;
+theorem
+L36: (for B9 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  almost_left_invertible  distributive non  empty doubleLoopStr holds (for B10 , B11 being (Element of B9) holds ((B10 <> ( 0. B9 ) & B11 <> ( 0. B9 )) implies ( ( B10 * B11 ) " ) = ( ( B10 " ) * ( B11 " ) ))))
+proof
+let C11 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  almost_left_invertible  distributive non  empty doubleLoopStr;
+let C12 , C13 being (Element of C11);
+assume that
+L37: C12 <> ( 0. C11 )
+and
+L38: C13 <> ( 0. C11 );
+L39: ( ( ( C12 " ) * ( C13 " ) ) * ( C12 * C13 ) ) = ( ( ( ( C12 " ) * ( C13 " ) ) * C13 ) * C12 ) by GROUP_1:def 3
+.= ( ( ( C12 " ) * ( ( C13 " ) * C13 ) ) * C12 ) by GROUP_1:def 3
+.= ( ( ( C12 " ) * ( 1. C11 ) ) * C12 ) by L38 , VECTSP_1:def 10
+.= ( ( C12 " ) * C12 ) by VECTSP_1:def 4
+.= ( 1. C11 ) by L37 , VECTSP_1:def 10;
+L40: ( C12 * C13 ) <> ( 0. C11 ) by L37 , L38 , VECTSP_1:12;
+thus L41: thesis by L40 , L39 , VECTSP_1:def 10;
+end;
+theorem
+L42: (for B12 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B13 , B14 being (Element of B12) holds (B13 <> ( 0. B12 ) implies B14 = ( ( B14 * B13 ) / B13 ))))
+proof
+let C14 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C15 , C16 being (Element of C14);
+assume L43: C15 <> ( 0. C14 );
+thus L44: ( ( C16 * C15 ) / C15 ) = ( C16 * ( C15 * ( C15 " ) ) ) by GROUP_1:def 3
+.= ( C16 * ( 1. C14 ) ) by L43 , VECTSP_1:def 10
+.= C16 by VECTSP_1:def 8;
+end;
+theorem
+L45: (for B15 being  left_zeroed  right_zeroed  add-associative  right_complementable non  empty doubleLoopStr holds (for B16 being (Element of ( NAT )) holds (for B17 being (FinSequence of B15) holds ((( len B17 ) = B16 & (for B18 being (Element of ( NAT )) holds ((1 <= B18 & B18 <= B16) implies ( B17 /. B18 ) = ( 1. B15 )))) implies ( Sum B17 ) = ( B16 * ( 1. B15 ) )))))
+proof
+let C17 being  left_zeroed  right_zeroed  add-associative  right_complementable non  empty doubleLoopStr;
+let C18 being (Element of ( NAT ));
+let C19 being (FinSequence of C17);
+assume L46: (( len C19 ) = C18 & (for B19 being (Element of ( NAT )) holds ((1 <= B19 & B19 <= C18) implies ( C19 /. B19 ) = ( 1. C17 ))));
+defpred S2[ (Element of ( NAT )) ] means (for B20 being (FinSequence of C17) holds ((( len B20 ) = $1 & (for B21 being (Element of ( NAT )) holds ((1 <= B21 & B21 <= $1) implies ( B20 /. B21 ) = ( 1. C17 )))) implies ( Sum B20 ) = ( $1 * ( 1. C17 ) )));
+L47: (for B22 being (Element of ( NAT )) holds (S2[ B22 ] implies S2[ ( B22 + 1 ) ]))
+proof
+let C20 being (Element of ( NAT ));
+assume L48: (for B23 being (FinSequence of C17) holds ((( len B23 ) = C20 & (for B24 being (Element of ( NAT )) holds ((1 <= B24 & B24 <= C20) implies ( B23 /. B24 ) = ( 1. C17 )))) implies ( Sum B23 ) = ( C20 * ( 1. C17 ) )));
+L49: (for B25 being (FinSequence of C17) holds ((( len B25 ) = ( C20 + 1 ) & (for B26 being (Element of ( NAT )) holds ((1 <= B26 & B26 <= ( C20 + 1 )) implies ( B25 /. B26 ) = ( 1. C17 )))) implies ( Sum B25 ) = ( ( C20 + 1 ) * ( 1. C17 ) )))
+proof
+L50: (ex B27 being (FinSequence of C17) st (( dom B27 ) = ( Seg C20 ) & (for B28 being Nat holds (B28 in ( Seg C20 ) implies ( B27 . B28 ) = ( 1. C17 )))))
+proof
+defpred S3[ Nat , set ] means $2 = ( 1. C17 );
+L51: (for B29 being Nat holds (B29 in ( Seg C20 ) implies (ex B30 being (Element of C17) st S3[ B29 , B30 ])));
+L52: (ex B31 being (FinSequence of C17) st (( dom B31 ) = ( Seg C20 ) & (for B32 being Nat holds (B32 in ( Seg C20 ) implies S3[ B32 , ( B31 . B32 ) ])))) from FINSEQ_1:sch 5(L51);
+thus L53: thesis by L52;
+end;
+consider C21 being (FinSequence of C17) such that L54: ( dom C21 ) = ( Seg C20 ) and L55: (for B33 being Nat holds (B33 in ( Seg C20 ) implies ( C21 . B33 ) = ( 1. C17 ))) by L50;
+L56: ( len C21 ) = C20 by L54 , FINSEQ_1:def 3;
+L57: (for B34 being Nat holds ((1 <= B34 & B34 <= C20) implies ( C21 /. B34 ) = ( 1. C17 )))
+proof
+let C22 being Nat;
+assume L58: (1 <= C22 & C22 <= C20);
+L59: C22 in ( dom C21 ) by L58 , L54 , FINSEQ_1:1;
+L60: C22 in ( Seg C20 ) by L58 , FINSEQ_1:1;
+L61: ( 1. C17 ) = ( C21 . C22 ) by L60 , L55
+.= ( C21 /. C22 ) by L59 , PARTFUN1:def 6;
+thus L62: thesis by L61;
+end;
+L63: (for B35 being (Element of ( NAT )) holds ((1 <= B35 & B35 <= C20) implies ( C21 /. B35 ) = ( 1. C17 ))) by L57;
+L64: ( dom <* ( 1. C17 ) *> ) = ( Seg 1 ) by FINSEQ_1:def 8;
+L65: ( len <* ( 1. C17 ) *> ) = 1 by L64 , FINSEQ_1:def 3;
+let C23 being (FinSequence of C17);
+assume that
+L66: ( len C23 ) = ( C20 + 1 )
+and
+L67: (for B36 being (Element of ( NAT )) holds ((1 <= B36 & B36 <= ( C20 + 1 )) implies ( C23 /. B36 ) = ( 1. C17 )));
+L68: ( dom C23 ) = ( Seg ( C20 + 1 ) ) by L66 , FINSEQ_1:def 3;
+L69: (for B37 being Nat holds (B37 in ( dom C23 ) implies ( C23 . B37 ) = ( ( C21 ^ <* ( 1. C17 ) *> ) . B37 )))
+proof
+L70: ( dom C23 ) = ( Seg ( C20 + 1 ) ) by L66 , FINSEQ_1:def 3;
+let C24 being Nat;
+L71: C24 in ( NAT ) by ORDINAL1:def 12;
+assume L72: C24 in ( dom C23 );
+per cases  by L72 , L70 , FINSEQ_1:1;
+suppose L73: (1 <= C24 & C24 <= C20);
+
+L74: C24 <= ( C20 + 1 ) by L73 , NAT_1:12;
+L75: C24 in ( dom C21 ) by L54 , L71 , L73;
+L76: ( ( C21 ^ <* ( 1. C17 ) *> ) . C24 ) = ( C21 . C24 ) by L75 , FINSEQ_1:def 7
+.= ( C21 /. C24 ) by L75 , PARTFUN1:def 6
+.= ( 1. C17 ) by L57 , L73
+.= ( C23 /. C24 ) by L67 , L71 , L73 , L74
+.= ( C23 . C24 ) by L72 , PARTFUN1:def 6;
+thus L77: thesis by L76;
+end;
+suppose L78: (C20 < C24 & C24 <= ( C20 + 1 ));
+
+L79: ( C24 - C24 ) <= ( ( C20 + 1 ) - C24 ) by L78 , XREAL_1:9;
+reconsider D2 = ( ( ( C20 + 1 ) - C24 ) + 1 ) as (Element of ( NAT )) by L79 , INT_1:3;
+L80: ( C20 + 1 ) <= C24 by L78 , NAT_1:13;
+L81: (( dom <* ( 1. C17 ) *> ) = ( Seg 1 ) & D2 = ( ( C24 - C24 ) + 1 )) by L80 , L78 , FINSEQ_1:def 8 , XXREAL_0:1;
+L82: D2 in ( dom <* ( 1. C17 ) *> ) by L81;
+L83: ( C20 + ( 0 ) ) < ( C24 + C20 ) by L78 , XREAL_1:8;
+L84: ( C20 + 1 ) <= ( C24 + C20 ) by L83 , NAT_1:13;
+L85: ( ( C20 + 1 ) - C20 ) <= ( ( C24 + C20 ) - C20 ) by L84 , XREAL_1:9;
+L86: ( C20 + 1 ) <= C24 by L78 , NAT_1:13;
+L87: D2 = ( ( C24 - C24 ) + 1 ) by L86 , L78 , XXREAL_0:1;
+L88: ( ( C21 ^ <* ( 1. C17 ) *> ) . C24 ) = ( ( C21 ^ <* ( 1. C17 ) *> ) . ( ( len C21 ) + D2 ) ) by L87 , L54 , FINSEQ_1:def 3
+.= ( <* ( 1. C17 ) *> . 1 ) by L82 , L87 , FINSEQ_1:def 7
+.= ( 1. C17 ) by FINSEQ_1:def 8
+.= ( C23 /. C24 ) by L67 , L71 , L78 , L85
+.= ( C23 . C24 ) by L72 , PARTFUN1:def 6;
+thus L89: thesis by L88;
+end;
+end;
+L91: ( dom ( C21 ^ <* ( 1. C17 ) *> ) ) = ( Seg ( ( len C21 ) + ( len <* ( 1. C17 ) *> ) ) ) by FINSEQ_1:def 7
+.= ( dom C23 ) by L54 , L65 , L68 , FINSEQ_1:def 3;
+L92: C23 = ( C21 ^ <* ( 1. C17 ) *> ) by L91 , L69 , FINSEQ_1:13;
+L93: ( Sum C23 ) = ( ( Sum C21 ) + ( 1. C17 ) ) by L92 , FVSUM_1:71
+.= ( ( C20 * ( 1. C17 ) ) + ( 1. C17 ) ) by L48 , L56 , L63
+.= ( ( C20 * ( 1. C17 ) ) + ( 1 * ( 1. C17 ) ) ) by BINOM:13
+.= ( ( C20 + 1 ) * ( 1. C17 ) ) by BINOM:15;
+thus L94: thesis by L93;
+end;
+thus L95: thesis by L49;
+end;
+L96: (for B38 being (FinSequence of C17) holds ((( len B38 ) = ( 0 ) & (for B39 being (Element of ( NAT )) holds ((1 <= B39 & B39 <= ( 0 )) implies ( B38 /. B39 ) = ( 1. C17 )))) implies ( Sum B38 ) = ( ( 0 ) * ( 1. C17 ) )))
+proof
+let C25 being (FinSequence of C17);
+assume that
+L97: ( len C25 ) = ( 0 )
+and
+L98: (for B40 being (Element of ( NAT )) holds ((1 <= B40 & B40 <= ( 0 )) implies ( C25 /. B40 ) = ( 1. C17 )));
+L99: ( <*> (the carrier of C17) ) is (Element of ( ( 0 ) -tuples_on (the carrier of C17) )) by FINSEQ_2:131;
+L100: C25 = ( {} ) by L97;
+L101: ( Sum C25 ) = ( Sum ( <*> (the carrier of C17) ) ) by L100
+.= ( 0. C17 ) by L99 , FVSUM_1:74
+.= ( ( 0 ) * ( 1. C17 ) ) by BINOM:12;
+thus L102: thesis by L101;
+end;
+L103: S2[ ( 0 ) ] by L96;
+L104: (for B41 being (Element of ( NAT )) holds S2[ B41 ]) from NAT_1:sch 1(L103 , L47);
+thus L105: thesis by L104 , L46;
+end;
+theorem
+L106: (for B42 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B43 being (FinSequence of B42) holds (for B44 being (Element of B42) holds ((B44 <> ( 1. B42 ) & (for B45 being Nat holds ((1 <= B45 & B45 <= ( len B43 )) implies ( B43 . B45 ) = ( B44 |^ ( B45 -' 1 ) )))) implies ( Sum B43 ) = ( ( ( 1. B42 ) - ( B44 |^ ( len B43 ) ) ) / ( ( 1. B42 ) - B44 ) )))))
+proof
+let C26 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C27 being (FinSequence of C26);
+let C28 being (Element of C26);
+assume L107: (C28 <> ( 1. C26 ) & (for B46 being Nat holds ((1 <= B46 & B46 <= ( len C27 )) implies ( C27 . B46 ) = ( C28 |^ ( B46 -' 1 ) ))));
+defpred S4[ Nat ] means (for B47 being (FinSequence of C26) holds (( len B47 ) = $1 implies (for B48 being (Element of C26) holds ((B48 <> ( 1. C26 ) & (for B49 being Nat holds ((1 <= B49 & B49 <= ( len B47 )) implies ( B47 . B49 ) = ( B48 |^ ( B49 -' 1 ) )))) implies ( Sum B47 ) = ( ( ( 1. C26 ) - ( B48 |^ ( len B47 ) ) ) / ( ( 1. C26 ) - B48 ) )))));
+L108: (for B50 being Nat holds (S4[ B50 ] implies S4[ ( B50 + 1 ) ]))
+proof
+let C29 being Nat;
+assume L109: S4[ C29 ];
+L110:
+now
+let C30 being (FinSequence of C26);
+set D3 = ( C30 | ( Seg C29 ) );
+reconsider D4 = D3 as FinSequence by FINSEQ_1:15;
+assume L111: ( len C30 ) = ( C29 + 1 );
+L112: 1 <= ( len C30 ) by L111 , NAT_1:12;
+L113: ( len C30 ) in ( dom C30 ) by L112 , FINSEQ_3:25;
+L114: ( C30 /. ( len C30 ) ) = ( C30 . ( len C30 ) ) by L113 , PARTFUN1:def 6;
+L115: C29 <= ( len C30 ) by L111 , NAT_1:13;
+L116: ( len D4 ) = C29 by L115 , FINSEQ_1:17;
+L117:
+now
+let C31 being set;
+assume L118: C31 in ( rng D4 );
+consider C32 being set such that L119: C32 in ( dom D4 ) and L120: ( D4 . C32 ) = C31 by L118 , FUNCT_1:def 3;
+reconsider D5 = C32 as (Element of ( NAT )) by L119;
+L121: D5 <= ( len D4 ) by L119 , FINSEQ_3:25;
+L122: D5 <= ( len C30 ) by L121 , L111 , L116 , NAT_1:12;
+L123: 1 <= D5 by L119 , FINSEQ_3:25;
+L124: C32 in ( dom C30 ) by L123 , L122 , FINSEQ_3:25;
+L125: ( D4 . C32 ) = ( C30 . C32 ) by L119 , FUNCT_1:47
+.= ( C30 /. C32 ) by L124 , PARTFUN1:def 6;
+thus L126: C31 in (the carrier of C26) by L125 , L120;
+end;
+L127: ( rng D4 ) c= (the carrier of C26) by L117 , TARSKI:def 3;
+reconsider D6 = D4 as (FinSequence of C26) by L127 , FINSEQ_1:def 4;
+L128: ( len C30 ) = ( ( len D6 ) + 1 ) by L111 , L115 , FINSEQ_1:17;
+let C33 being (Element of C26);
+assume that
+L129: C33 <> ( 1. C26 )
+and
+L130: (for B51 being Nat holds ((1 <= B51 & B51 <= ( len C30 )) implies ( C30 . B51 ) = ( C33 |^ ( B51 -' 1 ) )));
+L131:
+now
+assume L132: ( ( 1. C26 ) - C33 ) = ( 0. C26 );
+L133: ( ( ( 1. C26 ) - C33 ) + C33 ) = C33 by L132 , ALGSTR_1:def 2;
+L134: ( ( 1. C26 ) + ( ( - C33 ) + C33 ) ) = C33 by L133 , RLVECT_1:def 3;
+L135: ( ( 1. C26 ) + ( 0. C26 ) ) = C33 by L134 , RLVECT_1:5;
+thus L136: contradiction by L135 , L129 , RLVECT_1:def 4;
+end;
+L137: ( ( len C30 ) - 1 ) >= ( 1 - 1 ) by L112 , XREAL_1:9;
+L138: ( ( len C30 ) -' 1 ) = ( ( len C30 ) - 1 ) by L137 , XREAL_0:def 2
+.= ( ( ( len D6 ) + 1 ) - 1 ) by L111 , L115 , FINSEQ_1:17;
+L139:
+now
+let C34 being Nat;
+assume that
+L140: 1 <= C34
+and
+L141: C34 <= ( len D6 );
+L142: C34 <= ( len C30 ) by L111 , L116 , L141 , NAT_1:13;
+L143: C34 in ( dom D6 ) by L140 , L141 , FINSEQ_3:25;
+thus L144: ( D6 . C34 ) = ( C30 . C34 ) by L143 , FUNCT_1:47
+.= ( C33 |^ ( C34 -' 1 ) ) by L130 , L140 , L142;
+end;
+L145: D6 = ( C30 | ( dom D6 ) ) by L115 , FINSEQ_1:17;
+thus L146: ( Sum C30 ) = ( ( Sum D6 ) + ( C30 /. ( len C30 ) ) ) by L145 , L128 , L114 , RLVECT_1:38
+.= ( ( ( ( 1. C26 ) - ( C33 |^ ( len D6 ) ) ) / ( ( 1. C26 ) - C33 ) ) + ( C30 /. ( len C30 ) ) ) by L109 , L129 , L115 , L139 , FINSEQ_1:17
+.= ( ( ( ( 1. C26 ) - ( C33 |^ ( len D6 ) ) ) / ( ( 1. C26 ) - C33 ) ) + ( C33 |^ ( len D6 ) ) ) by L130 , L112 , L138 , L114
+.= ( ( ( ( 1. C26 ) - ( C33 |^ ( len D6 ) ) ) / ( ( 1. C26 ) - C33 ) ) + ( ( ( C33 |^ ( len D6 ) ) * ( ( 1. C26 ) - C33 ) ) / ( ( 1. C26 ) - C33 ) ) ) by L131 , L42
+.= ( ( ( ( 1. C26 ) - ( C33 |^ ( len D6 ) ) ) + ( ( C33 |^ ( len D6 ) ) * ( ( 1. C26 ) - C33 ) ) ) / ( ( 1. C26 ) - C33 ) ) by VECTSP_1:def 3
+.= ( ( ( ( 1. C26 ) - ( C33 |^ ( len D6 ) ) ) + ( ( ( C33 |^ ( len D6 ) ) * ( 1. C26 ) ) + ( ( C33 |^ ( len D6 ) ) * ( - C33 ) ) ) ) / ( ( 1. C26 ) - C33 ) ) by VECTSP_1:def 2
+.= ( ( ( ( 1. C26 ) - ( C33 |^ ( len D6 ) ) ) + ( ( C33 |^ ( len D6 ) ) + ( ( C33 |^ ( len D6 ) ) * ( - C33 ) ) ) ) / ( ( 1. C26 ) - C33 ) ) by VECTSP_1:def 4
+.= ( ( ( 1. C26 ) + ( ( - ( C33 |^ ( len D6 ) ) ) + ( ( C33 |^ ( len D6 ) ) + ( ( C33 |^ ( len D6 ) ) * ( - C33 ) ) ) ) ) / ( ( 1. C26 ) - C33 ) ) by RLVECT_1:def 3
+.= ( ( ( 1. C26 ) + ( ( ( - ( C33 |^ ( len D6 ) ) ) + ( C33 |^ ( len D6 ) ) ) + ( ( C33 |^ ( len D6 ) ) * ( - C33 ) ) ) ) / ( ( 1. C26 ) - C33 ) ) by RLVECT_1:def 3
+.= ( ( ( 1. C26 ) + ( ( 0. C26 ) + ( ( C33 |^ ( len D6 ) ) * ( - C33 ) ) ) ) / ( ( 1. C26 ) - C33 ) ) by RLVECT_1:5
+.= ( ( ( 1. C26 ) + ( ( C33 |^ ( len D6 ) ) * ( - C33 ) ) ) / ( ( 1. C26 ) - C33 ) ) by ALGSTR_1:def 2
+.= ( ( ( 1. C26 ) + ( - ( ( C33 |^ ( len D6 ) ) * C33 ) ) ) / ( ( 1. C26 ) - C33 ) ) by VECTSP_1:8
+.= ( ( ( 1. C26 ) - ( C33 |^ ( len C30 ) ) ) / ( ( 1. C26 ) - C33 ) ) by L128 , GROUP_1:def 7;
+end;
+thus L147: thesis by L110;
+end;
+L148:
+now
+let C35 being (FinSequence of C26);
+assume L149: ( len C35 ) = ( 0 );
+L150: C35 = ( <*> (the carrier of C26) ) by L149;
+let C36 being (Element of C26);
+assume that
+L151: C36 <> ( 1. C26 )
+and
+L152: (for B52 being Nat holds ((1 <= B52 & B52 <= ( len C35 )) implies ( C35 . B52 ) = ( C36 |^ ( B52 -' 1 ) )));
+thus L153: ( ( ( 1. C26 ) - ( C36 |^ ( 0 ) ) ) / ( ( 1. C26 ) - C36 ) ) = ( ( ( 1. C26 ) - ( 1_ C26 ) ) / ( ( 1. C26 ) - C36 ) ) by BINOM:8
+.= ( ( 0. C26 ) / ( ( 1. C26 ) - C36 ) ) by RLVECT_1:15
+.= ( 0. C26 ) by VECTSP_1:6
+.= ( Sum C35 ) by L150 , RLVECT_1:43;
+end;
+L154: S4[ ( 0 ) ] by L148;
+L155: (for B53 being Nat holds S4[ B53 ]) from NAT_1:sch 2(L154 , L108);
+thus L156: thesis by L155 , L107;
+end;
+definition
+let C37 being  well-unital non  empty doubleLoopStr;
+let C38 being (Element of ( NAT ));
+func emb (C38 , C37) -> (Element of C37) equals 
+( C38 * ( 1. C37 ) );
+coherence;
+end;
+theorem
+L158: (for B54 being Field holds (for B55 , B56 , B57 being (Element of ( NAT )) holds ((B55 > ( 0 ) & B56 > ( 0 )) implies (for B58 being (Matrix of B55 , B56 , B54) holds (for B59 being (Matrix of B56 , B57 , B54) holds ( ( ( emb (B55 , B54) ) * B58 ) * B59 ) = ( ( emb (B55 , B54) ) * ( B58 * B59 ) ))))))
+proof
+let C39 being Field;
+let C40 , C41 , C42 being (Element of ( NAT ));
+assume that
+L159: C40 > ( 0 )
+and
+L160: C41 > ( 0 );
+let C43 being (Matrix of C40 , C41 , C39);
+let C44 being (Matrix of C41 , C42 , C39);
+L161: ( width C43 ) = C41 by L159 , MATRIX_1:23
+.= ( len C44 ) by L160 , MATRIX_1:23;
+L162: ( width ( ( emb (C40 , C39) ) * C43 ) ) = ( width C43 ) by MATRIX_3:def 5
+.= C41 by L159 , MATRIX_1:23
+.= ( len C44 ) by L160 , MATRIX_1:23;
+L163: (for B60 , B61 being Nat holds ([ B60 , B61 ] in ( Indices ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) ) implies ( ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) * (B60 , B61) ) = ( ( ( emb (C40 , C39) ) * ( C43 * C44 ) ) * (B60 , B61) )))
+proof
+let C45 , C46 being Nat;
+L164: ( len C43 ) = ( len ( C43 * C44 ) ) by L161 , MATRIX_3:def 4;
+L165: ( len ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) ) = ( len ( ( emb (C40 , C39) ) * C43 ) ) by L162 , MATRIX_3:def 4
+.= ( len C43 ) by MATRIX_3:def 5;
+L166: ( dom ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) ) = ( Seg ( len C43 ) ) by L165 , FINSEQ_1:def 3
+.= ( dom ( C43 * C44 ) ) by L164 , FINSEQ_1:def 3;
+L167: ( Seg ( len ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) ) = ( dom ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) by FINSEQ_1:def 3
+.= ( dom ( Line (C43 , C45) ) ) by POLYNOM1:def 1
+.= ( Seg ( len ( Line (C43 , C45) ) ) ) by FINSEQ_1:def 3;
+L168: ( len ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) = ( len ( Line (C43 , C45) ) ) by L167 , FINSEQ_1:6
+.= ( width C43 ) by MATRIX_1:def 7;
+L169: ( len ( Line (C43 , C45) ) ) = ( len C44 ) by L161 , MATRIX_1:def 7
+.= ( len ( Col (C44 , C46) ) ) by MATRIX_1:def 8;
+assume L170: [ C45 , C46 ] in ( Indices ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) );
+L171: ( ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) * (C45 , C46) ) = ( ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) "*" ( Col (C44 , C46) ) ) by L170 , L162 , MATRIX_3:def 4
+.= ( Sum ( mlt (( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) , ( Col (C44 , C46) )) ) ) by FVSUM_1:def 9;
+L172: ( len ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) ) = ( width ( ( emb (C40 , C39) ) * C43 ) ) by MATRIX_1:def 7
+.= ( width C43 ) by MATRIX_3:def 5;
+L173: ( dom ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) ) = ( Seg ( width C43 ) ) by L172 , FINSEQ_1:def 3;
+L174: ( dom ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) ) = ( dom ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) by L173 , L168 , FINSEQ_1:def 3;
+L175: (for B62 being Nat holds (B62 in ( dom ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) ) implies ( ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) . B62 ) = ( ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) . B62 )))
+proof
+L176: ( len ( C43 * C44 ) ) = ( len C43 ) by L161 , MATRIX_3:def 4
+.= C40 by L159 , MATRIX_1:23;
+L177: ( dom ( C43 * C44 ) ) = ( Seg C40 ) by L176 , FINSEQ_1:def 3;
+L178: (( Indices C43 ) = [: ( Seg C40 ) , ( Seg C41 ) :] & C45 in ( dom ( C43 * C44 ) )) by L159 , L170 , L166 , MATRIX_1:23 , ZFMISC_1:87;
+let C47 being Nat;
+assume L179: C47 in ( dom ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) );
+L180: ( len ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) ) = ( width ( ( emb (C40 , C39) ) * C43 ) ) by MATRIX_1:def 7
+.= ( width C43 ) by MATRIX_3:def 5;
+L181: C47 in ( Seg ( width C43 ) ) by L180 , L179 , FINSEQ_1:def 3;
+L182: ( len ( Line (C43 , C45) ) ) = ( width C43 ) by MATRIX_1:def 7;
+L183: C47 in ( dom ( Line (C43 , C45) ) ) by L182 , L181 , FINSEQ_1:def 3;
+L184: ( ( Line (C43 , C45) ) . C47 ) = ( ( Line (C43 , C45) ) /. C47 ) by L183 , PARTFUN1:def 6;
+reconsider D7 = ( ( Line (C43 , C45) ) . C47 ) as (Element of C39) by L184;
+L185: D7 = ( C43 * (C45 , C47) ) by L181 , MATRIX_1:def 7;
+L186: C47 in ( Seg C41 ) by L159 , L181 , MATRIX_1:23;
+L187: [ C45 , C47 ] in ( Indices C43 ) by L186 , L178 , L177 , ZFMISC_1:87;
+L188: ( ( emb (C40 , C39) ) * D7 ) = ( ( ( emb (C40 , C39) ) * C43 ) * (C45 , C47) ) by L187 , L185 , MATRIX_3:def 5;
+L189: ( dom ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) ) = ( Seg ( width C43 ) ) by L180 , FINSEQ_1:def 3;
+L190: C47 in ( Seg ( width ( ( emb (C40 , C39) ) * C43 ) ) ) by L189 , L179 , MATRIX_3:def 5;
+L191: ( ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) . C47 ) = ( ( emb (C40 , C39) ) * D7 ) by L174 , L179 , FVSUM_1:50;
+thus L192: thesis by L191 , L190 , L188 , MATRIX_1:def 7;
+end;
+L193: ( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) = ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) by L175 , L174 , FINSEQ_1:13;
+L194: ( Seg ( len ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) ) = ( dom ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) by FINSEQ_1:def 3
+.= ( dom ( Line (C43 , C45) ) ) by POLYNOM1:def 1
+.= ( Seg ( len ( Line (C43 , C45) ) ) ) by FINSEQ_1:def 3;
+L195: ( len ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) = ( len ( Line (C43 , C45) ) ) by L194 , FINSEQ_1:6
+.= ( len C44 ) by L161 , MATRIX_1:def 7
+.= ( len ( Col (C44 , C46) ) ) by MATRIX_1:def 8;
+L196: ( dom ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) = ( Seg ( len ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) ) by FINSEQ_1:def 3
+.= ( Seg ( len ( mlt (( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) , ( Col (C44 , C46) )) ) ) ) by L195 , MATRIX_3:6
+.= ( dom ( mlt (( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) , ( Col (C44 , C46) )) ) ) by FINSEQ_1:def 3;
+L197: ( dom ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) ) = ( dom ( Line (C43 , C45) ) ) by POLYNOM1:def 1
+.= ( Seg ( len ( Line (C43 , C45) ) ) ) by FINSEQ_1:def 3
+.= ( Seg ( len ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) ) by L169 , MATRIX_3:6
+.= ( dom ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) by FINSEQ_1:def 3;
+L198: ( dom ( mlt (( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) , ( Col (C44 , C46) )) ) ) = ( dom ( ( emb (C40 , C39) ) * ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) ) by L197 , L196 , POLYNOM1:def 1;
+L199: (for B63 being Nat holds (B63 in ( dom ( mlt (( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) , ( Col (C44 , C46) )) ) ) implies ( ( mlt (( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) , ( Col (C44 , C46) )) ) . B63 ) = ( ( ( emb (C40 , C39) ) * ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) . B63 )))
+proof
+L200: ( len ( Line (C43 , C45) ) ) = ( len C44 ) by L161 , MATRIX_1:def 7
+.= ( len ( Col (C44 , C46) ) ) by MATRIX_1:def 8;
+L201: ( len ( Line (C43 , C45) ) ) = ( width C43 ) by MATRIX_1:def 7;
+let C48 being Nat;
+assume L202: C48 in ( dom ( mlt (( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) , ( Col (C44 , C46) )) ) );
+L203: ( dom ( Line (C43 , C45) ) ) = ( Seg ( len ( Line (C43 , C45) ) ) ) by FINSEQ_1:def 3
+.= ( Seg ( len ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) ) by L200 , MATRIX_3:6
+.= ( dom ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) by FINSEQ_1:def 3;
+L204: C48 in ( Seg ( width C43 ) ) by L203 , L196 , L197 , L202 , L201 , FINSEQ_1:def 3;
+L205: C48 in ( dom C44 ) by L204 , L161 , FINSEQ_1:def 3;
+L206: ( ( Col (C44 , C46) ) . C48 ) = ( C44 * (C48 , C46) ) by L205 , MATRIX_1:def 8;
+L207: ( ( Line (C43 , C45) ) . C48 ) = ( C43 * (C45 , C48) ) by L204 , MATRIX_1:def 7;
+reconsider D8 = ( ( Col (C44 , C46) ) . C48 ) , D9 = ( ( Line (C43 , C45) ) . C48 ) as (Element of C39) by L207 , L206;
+L208: ( ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) . C48 ) = ( D8 * D9 ) by L196 , L197 , L202 , FVSUM_1:60;
+reconsider D10 = ( ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) . C48 ) as (Element of C39) by L208;
+L209: ( ( ( emb (C40 , C39) ) * ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) . C48 ) = ( ( emb (C40 , C39) ) * D10 ) by L198 , L202 , FVSUM_1:50;
+L210: ( ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) . C48 ) = ( ( emb (C40 , C39) ) * D9 ) by L196 , L202 , FVSUM_1:50;
+reconsider D11 = ( ( ( emb (C40 , C39) ) * ( Line (C43 , C45) ) ) . C48 ) as (Element of C39) by L210;
+L211: ( D11 * D8 ) = ( ( ( emb (C40 , C39) ) * D9 ) * D8 ) by L196 , L202 , FVSUM_1:50
+.= ( ( emb (C40 , C39) ) * ( D9 * D8 ) ) by GROUP_1:def 3
+.= ( ( emb (C40 , C39) ) * D10 ) by L196 , L197 , L202 , FVSUM_1:60;
+thus L212: thesis by L211 , L202 , L209 , FVSUM_1:60;
+end;
+L213: ( ( emb (C40 , C39) ) * ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) = ( mlt (( Line (( ( emb (C40 , C39) ) * C43 ) , C45) ) , ( Col (C44 , C46) )) ) by L199 , L193 , L198 , FINSEQ_1:13;
+L214: ( Seg ( width ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) ) ) = ( Seg ( width C44 ) ) by L162 , MATRIX_3:def 4
+.= ( Seg ( width ( C43 * C44 ) ) ) by L161 , MATRIX_3:def 4;
+L215: [ C45 , C46 ] in ( Indices ( C43 * C44 ) ) by L214 , L170 , L166;
+L216: ( ( ( emb (C40 , C39) ) * ( C43 * C44 ) ) * (C45 , C46) ) = ( ( emb (C40 , C39) ) * ( ( C43 * C44 ) * (C45 , C46) ) ) by L215 , MATRIX_3:def 5
+.= ( ( emb (C40 , C39) ) * ( ( Line (C43 , C45) ) "*" ( Col (C44 , C46) ) ) ) by L161 , L215 , MATRIX_3:def 4
+.= ( ( emb (C40 , C39) ) * ( Sum ( mlt (( Line (C43 , C45) ) , ( Col (C44 , C46) )) ) ) ) by FVSUM_1:def 9;
+thus L217: thesis by L216 , L171 , L213 , FVSUM_1:73;
+end;
+L218: ( len ( ( emb (C40 , C39) ) * ( C43 * C44 ) ) ) = ( len ( C43 * C44 ) ) by MATRIX_3:def 5
+.= ( len C43 ) by L161 , MATRIX_3:def 4;
+L219: ( width ( ( emb (C40 , C39) ) * ( C43 * C44 ) ) ) = ( width ( C43 * C44 ) ) by MATRIX_3:def 5
+.= ( width C44 ) by L161 , MATRIX_3:def 4;
+L220: ( width ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) ) = ( width ( ( emb (C40 , C39) ) * ( C43 * C44 ) ) ) by L219 , L162 , MATRIX_3:def 4;
+L221: ( len ( ( ( emb (C40 , C39) ) * C43 ) * C44 ) ) = ( len ( ( emb (C40 , C39) ) * C43 ) ) by L162 , MATRIX_3:def 4
+.= ( len C43 ) by MATRIX_3:def 5;
+thus L222: thesis by L221 , L218 , L220 , L163 , MATRIX_1:21;
+end;
+theorem
+L223: (for B64 being non  empty ZeroStr holds (for B65 being (AlgSequence of B64) holds (for B66 being (Element of ( NAT )) holds (( B65 . B66 ) <> ( 0. B64 ) implies ( len B65 ) >= ( B66 + 1 )))))
+proof
+let C49 being non  empty ZeroStr;
+let C50 being (AlgSequence of C49);
+let C51 being (Element of ( NAT ));
+L224: ( len C50 ) is_at_least_length_of C50 by ALGSEQ_1:def 3;
+assume L225: ( C50 . C51 ) <> ( 0. C49 );
+L226: ( len C50 ) > C51 by L225 , L224 , ALGSEQ_1:def 2;
+thus L227: thesis by L226 , NAT_1:13;
+end;
+theorem
+L228: (for B67 being non  empty ZeroStr holds (for B68 being (AlgSequence of B67) holds (( len B68 ) > ( 0 ) implies ( B68 . ( ( len B68 ) - 1 ) ) <> ( 0. B67 ))))
+proof
+let C52 being non  empty ZeroStr;
+let C53 being (AlgSequence of C52);
+assume L229: ( len C53 ) > ( 0 );
+L230: ( len C53 ) >= ( ( 0 ) + 1 ) by L229 , NAT_1:13;
+L231: ( ( len C53 ) - 1 ) >= ( 1 - 1 ) by L230 , XREAL_1:9;
+reconsider D12 = ( ( len C53 ) - 1 ) as (Element of ( NAT )) by L231 , INT_1:3;
+assume L232: ( C53 . ( ( len C53 ) - 1 ) ) = ( 0. C52 );
+L233:
+now
+let C54 being Nat;
+assume L234: C54 >= D12;
+per cases  by L234 , XXREAL_0:1;
+suppose L235: C54 = D12;
+
+thus L236: ( C53 . C54 ) = ( 0. C52 ) by L235 , L232;
+end;
+suppose L237: C54 > D12;
+
+L238: C54 >= ( D12 + 1 ) by L237 , NAT_1:13;
+thus L239: ( C53 . C54 ) = ( 0. C52 ) by L238 , ALGSEQ_1:8;
+end;
+end;
+L241: D12 is_at_least_length_of C53 by L233 , ALGSEQ_1:def 2;
+L242: ( len C53 ) < ( ( len C53 ) + 1 ) by NAT_1:13;
+L243: ( ( len C53 ) - 1 ) < ( ( ( len C53 ) + 1 ) - 1 ) by L242 , XREAL_1:9;
+thus L244: contradiction by L243 , L241 , ALGSEQ_1:def 3;
+end;
+theorem
+L245: (for B69 being  add-associative  right_zeroed  right_complementable  distributive  commutative  associative  well-unital  domRing-like non  empty doubleLoopStr holds (for B70 , B71 being (Polynomial of B69) holds ((( len B70 ) > ( 0 ) & ( len B71 ) > ( 0 )) implies ( len ( B70 *' B71 ) ) <= ( ( len B70 ) + ( len B71 ) ))))
+proof
+let C55 being  add-associative  right_zeroed  right_complementable  distributive  commutative  associative  well-unital  domRing-like non  empty doubleLoopStr;
+let C56 , C57 being (Polynomial of C55);
+assume that
+L246: ( len C56 ) > ( 0 )
+and
+L247: ( len C57 ) > ( 0 );
+L248: ( ( ( len C56 ) + ( len C57 ) ) - 1 ) <= ( ( ( len C56 ) + ( len C57 ) ) - ( 0 ) ) by XREAL_1:13;
+L249: ( ( len C57 ) + 1 ) > ( ( 0 ) + 1 ) by L247 , XREAL_1:6;
+L250: ( len C57 ) >= 1 by L249 , NAT_1:13;
+L251: ( ( len C57 ) - 1 ) >= ( 1 - 1 ) by L250 , XREAL_1:13;
+L252: ( C57 . ( ( len C57 ) - 1 ) ) <> ( 0. C55 ) by L247 , L228;
+L253: ( C57 . ( ( len C57 ) -' 1 ) ) <> ( 0. C55 ) by L252 , L251 , XREAL_0:def 2;
+L254: ( ( len C56 ) + 1 ) > ( ( 0 ) + 1 ) by L246 , XREAL_1:6;
+L255: ( len C56 ) >= 1 by L254 , NAT_1:13;
+L256: ( ( len C56 ) - 1 ) >= ( 1 - 1 ) by L255 , XREAL_1:13;
+L257: ( C56 . ( ( len C56 ) - 1 ) ) <> ( 0. C55 ) by L246 , L228;
+L258: ( C56 . ( ( len C56 ) -' 1 ) ) <> ( 0. C55 ) by L257 , L256 , XREAL_0:def 2;
+L259: ( ( C56 . ( ( len C56 ) -' 1 ) ) * ( C57 . ( ( len C57 ) -' 1 ) ) ) <> ( 0. C55 ) by L258 , L253 , VECTSP_2:def 1;
+thus L260: thesis by L259 , L248 , POLYNOM4:10;
+end;
+theorem
+L261: (for B72 being  associative non  empty doubleLoopStr holds (for B73 , B74 being (Element of B72) holds (for B75 being (sequence of B72) holds ( B73 * ( B74 * B75 ) ) = ( ( B73 * B74 ) * B75 ))))
+proof
+let C58 being  associative non  empty doubleLoopStr;
+let C59 , C60 being (Element of C58);
+let C61 being (sequence of C58);
+L262:
+now
+let C62 being (Element of ( NAT ));
+thus L263: ( ( C59 * ( C60 * C61 ) ) . C62 ) = ( C59 * ( ( C60 * C61 ) . C62 ) ) by POLYNOM5:def 3
+.= ( C59 * ( C60 * ( C61 . C62 ) ) ) by POLYNOM5:def 3
+.= ( ( C59 * C60 ) * ( C61 . C62 ) ) by GROUP_1:def 3
+.= ( ( ( C59 * C60 ) * C61 ) . C62 ) by POLYNOM5:def 3;
+end;
+thus L264: thesis by L262 , FUNCT_2:63;
+end;
+begin
+definition
+let C63 being non  empty doubleLoopStr;
+let C64 , C65 being (sequence of C63);
+func C64 * C65 -> (sequence of C63) means 
+:L265: (for B76 being Nat holds ( it . B76 ) = ( ( C64 . B76 ) * ( C65 . B76 ) ));
+existence
+proof
+defpred S5[ set , set ] means $2 = ( ( C64 /. $1 ) * ( C65 /. $1 ) );
+L266: (for B77 being set holds (B77 in ( NAT ) implies (ex B78 being set st (B78 in (the carrier of C63) & S5[ B77 , B78 ]))));
+consider C66 being (Function of ( NAT ) , (the carrier of C63)) such that L267: (for B79 being set holds (B79 in ( NAT ) implies S5[ B79 , ( C66 . B79 ) ])) from FUNCT_2:sch 1(L266);
+reconsider D13 = C66 as (sequence of C63);
+take D13;
+L268:
+now
+let C67 being Nat;
+L269: C67 in ( NAT ) by ORDINAL1:def 12;
+L270: ( dom C65 ) = ( NAT ) by FUNCT_2:def 1;
+L271: ( C65 /. C67 ) = ( C65 . C67 ) by L270 , L269 , PARTFUN1:def 6;
+L272: ( dom C64 ) = ( NAT ) by FUNCT_2:def 1;
+L273: ( C64 /. C67 ) = ( C64 . C67 ) by L272 , L269 , PARTFUN1:def 6;
+thus L274: ( D13 . C67 ) = ( ( C64 . C67 ) * ( C65 . C67 ) ) by L273 , L267 , L269 , L271;
+end;
+thus L275: thesis by L268;
+end;
+uniqueness
+proof
+let C68 , C69 being (sequence of C63);
+assume L276: (for B80 being Nat holds ( C68 . B80 ) = ( ( C64 . B80 ) * ( C65 . B80 ) ));
+assume L277: (for B81 being Nat holds ( C69 . B81 ) = ( ( C64 . B81 ) * ( C65 . B81 ) ));
+L278:
+now
+let C70 being set;
+assume L279: C70 in ( dom C68 );
+reconsider D14 = C70 as (Element of ( NAT )) by L279 , FUNCT_2:def 1;
+thus L280: ( C68 . C70 ) = ( ( C64 . D14 ) * ( C65 . D14 ) ) by L276
+.= ( C69 . C70 ) by L277;
+end;
+L281: ( dom C68 ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom C69 ) by FUNCT_2:def 1;
+thus L282: C68 = C69 by L281 , L278 , FUNCT_1:2;
+end;
+end;
+registration
+let C71 being  add-associative  right_zeroed  right_complementable  left-distributive non  empty doubleLoopStr;
+let C72 , C73 being (AlgSequence of C71);
+cluster ( C72 * C73 ) ->  finite-Support;
+coherence
+proof
+set D15 = ( C72 * C73 );
+L284: (ex B82 being Nat st (for B83 being Nat holds (B83 >= B82 implies ( D15 . B83 ) = ( 0. C71 ))))
+proof
+take ( ( len C72 ) + 1 );
+L285:
+now
+let C74 being Nat;
+assume L286: C74 >= ( ( len C72 ) + 1 );
+L287: C74 > ( len C72 ) by L286 , NAT_1:13;
+L288: ( C72 . C74 ) = ( 0. C71 ) by L287 , ALGSEQ_1:8;
+thus L289: ( 0. C71 ) = ( ( C72 . C74 ) * ( C73 . C74 ) ) by L288 , VECTSP_1:7
+.= ( D15 . C74 ) by L265;
+end;
+thus L290: thesis by L285;
+end;
+thus L291: thesis by L284 , ALGSEQ_1:def 1;
+end;
+end;
+theorem
+L293: (for B84 being  add-associative  right_zeroed  right_complementable  distributive non  empty doubleLoopStr holds (for B85 , B86 being (AlgSequence of B84) holds ( len ( B85 * B86 ) ) <= ( min (( len B85 ) , ( len B86 )) )))
+proof
+let C75 being  add-associative  right_zeroed  right_complementable  distributive non  empty doubleLoopStr;
+let C76 , C77 being (AlgSequence of C75);
+set D16 = ( C76 * C77 );
+set D17 = ( min (( len C76 ) , ( len C77 )) );
+reconsider D18 = D17 as (Element of ( NAT ));
+L294:
+now
+let C78 being Nat;
+assume L295: C78 >= D18;
+per cases  by XXREAL_0:15;
+suppose L296: D18 = ( len C76 );
+
+L297: ( C76 . C78 ) = ( 0. C75 ) by L296 , L295 , ALGSEQ_1:8;
+thus L298: ( 0. C75 ) = ( ( C76 . C78 ) * ( C77 . C78 ) ) by L297 , VECTSP_1:7
+.= ( D16 . C78 ) by L265;
+end;
+suppose L299: D18 = ( len C77 );
+
+L300: ( C77 . C78 ) = ( 0. C75 ) by L299 , L295 , ALGSEQ_1:8;
+thus L301: ( 0. C75 ) = ( ( C76 . C78 ) * ( C77 . C78 ) ) by L300 , VECTSP_1:6
+.= ( D16 . C78 ) by L265;
+end;
+end;
+L303: D18 is_at_least_length_of D16 by L294 , ALGSEQ_1:def 2;
+thus L304: thesis by L303 , ALGSEQ_1:def 3;
+end;
+theorem
+L305: (for B87 being  add-associative  right_zeroed  right_complementable  distributive  domRing-like non  empty doubleLoopStr holds (for B88 , B89 being (AlgSequence of B87) holds (( len B88 ) = ( len B89 ) implies ( len ( B88 * B89 ) ) = ( len B88 ))))
+proof
+let C79 being  add-associative  right_zeroed  right_complementable  distributive  domRing-like non  empty doubleLoopStr;
+let C80 , C81 being (AlgSequence of C79);
+set D19 = ( C80 * C81 );
+assume L306: ( len C80 ) = ( len C81 );
+L307:
+now
+per cases ;
+case L308: ( len C80 ) = ( 0 );
+thus L309: ( len D19 ) >= ( len C80 ) by L308;
+end;
+case L310: ( len C80 ) <> ( 0 );
+L311: ( len C80 ) >= ( ( 0 ) + 1 ) by L310 , NAT_1:13;
+L312: ( ( len C80 ) - 1 ) >= ( 1 - 1 ) by L311 , XREAL_1:9;
+reconsider D20 = ( ( len C80 ) - 1 ) as (Element of ( NAT )) by L312 , INT_1:3;
+L313: ( D20 + 1 ) = ( ( len C80 ) + ( 0 ) );
+L314: (( C80 . D20 ) <> ( 0. C79 ) & ( C81 . D20 ) <> ( 0. C79 )) by L313 , L306 , ALGSEQ_1:10;
+L315: ( ( C80 . D20 ) * ( C81 . D20 ) ) <> ( 0. C79 ) by L314 , VECTSP_2:def 1;
+L316: ( D19 . D20 ) <> ( 0. C79 ) by L315 , L265;
+thus L317: ( len D19 ) >= ( len C80 ) by L316 , L313 , L223;
+end;
+end;
+L319: ( min (( len C80 ) , ( len C81 )) ) = ( len C80 ) by L306;
+L320: ( len D19 ) <= ( len C80 ) by L319 , L293;
+thus L321: thesis by L320 , L307 , XXREAL_0:1;
+end;
+begin
+definition
+let C82 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C83 being (Element of C82);
+let C84 being Integer;
+func pow (C83 , C84) -> (Element of C82) equals 
+:L322: ( ( power C82 ) . (C83 , C84) ) if ( 0 ) <= C84 otherwise ( ( ( power C82 ) . (C83 , ( abs C84 )) ) " );
+coherence
+proof
+L323: (( 0 ) <= C84 implies ( ( power C82 ) . (C83 , C84) ) is (Element of C82))
+proof
+assume L324: ( 0 ) <= C84;
+reconsider D21 = C84 as (Element of ( NAT )) by L324 , INT_1:3;
+L325: ( ( power C82 ) . (C83 , D21) ) is (Element of C82);
+thus L326: thesis by L325;
+end;
+thus L327: thesis by L323;
+end;
+consistency;
+end;
+theorem
+L329: (for B90 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B91 being (Element of B90) holds ( pow (B91 , ( 0 )) ) = ( 1. B90 )))
+proof
+let C85 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C86 being (Element of C85);
+L330: ( pow (C86 , ( 0 )) ) = ( C86 |^ ( 0 ) ) by L322
+.= ( 1_ C85 ) by BINOM:8;
+thus L331: thesis by L330;
+end;
+L332: (for B92 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B93 being (Element of B92) holds (for B94 being Integer holds (( 0 ) > B94 implies ( pow (B93 , B94) ) = ( ( pow (B93 , ( abs B94 )) ) " )))))
+proof
+let C87 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C88 being (Element of C87);
+let C89 being Integer;
+assume L333: ( 0 ) > C89;
+L334: ( pow (C88 , ( abs C89 )) ) = ( ( power C87 ) . (C88 , ( abs C89 )) ) by L322;
+thus L335: thesis by L334 , L333 , L322;
+end;
+L336: (for B95 being  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr holds (for B96 being Integer holds (for B97 being (Element of B95) holds (B96 <= ( 0 ) implies ( pow (B97 , B96) ) = ( ( pow (B97 , ( abs B96 )) ) " )))))
+proof
+let C90 being  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+let C91 being Integer;
+let C92 being (Element of C90);
+L337: ( 1. C90 ) <> ( 0. C90 );
+assume L338: C91 <= ( 0 );
+per cases  by L338;
+suppose L339: C91 < ( 0 );
+
+thus L340: thesis by L339 , L332;
+end;
+suppose L341: C91 = ( 0 );
+
+thus L342: ( pow (C92 , C91) ) = ( 1. C90 ) by L341 , L329
+.= ( ( 1. C90 ) * ( ( 1. C90 ) " ) ) by L337 , VECTSP_1:def 10
+.= ( ( 1_ C90 ) " ) by VECTSP_1:def 8
+.= ( ( C92 |^ ( 0 ) ) " ) by BINOM:8
+.= ( ( C92 |^ ( abs C91 ) ) " ) by L341 , ABSVALUE:def 1
+.= ( ( pow (C92 , ( abs C91 )) ) " ) by L322;
+end;
+end;
+theorem
+L344: (for B98 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B99 being (Element of B98) holds ( pow (B99 , 1) ) = B99))
+proof
+let C93 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C94 being (Element of C93);
+thus L345: ( pow (C94 , 1) ) = ( C94 |^ 1 ) by L322
+.= C94 by BINOM:8;
+end;
+theorem
+L346: (for B100 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B101 being (Element of B100) holds ( pow (B101 , ( - 1 )) ) = ( B101 " )))
+proof
+let C95 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C96 being (Element of C95);
+L347: ( abs ( - 1 ) ) = ( - ( - 1 ) ) by ABSVALUE:def 1;
+thus L348: ( pow (C96 , ( - 1 )) ) = ( ( pow (C96 , 1) ) " ) by L347 , L332
+.= ( C96 " ) by L344;
+end;
+L349: (for B102 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B103 being (Element of ( NAT )) holds ( pow (( 1. B102 ) , B103) ) = ( 1. B102 )))
+proof
+let C97 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C98 being (Element of ( NAT ));
+defpred S6[ (Element of ( NAT )) ] means ( pow (( 1. C97 ) , $1) ) = ( 1. C97 );
+L350:
+now
+let C99 being (Element of ( NAT ));
+assume L351: S6[ C99 ];
+L352: ( pow (( 1. C97 ) , ( C99 + 1 )) ) = ( ( power C97 ) . (( 1. C97 ) , ( C99 + 1 )) ) by L322
+.= ( ( ( power C97 ) . (( 1. C97 ) , C99) ) * ( 1. C97 ) ) by GROUP_1:def 7
+.= ( ( 1. C97 ) * ( 1. C97 ) ) by L351 , L322
+.= ( 1. C97 ) by VECTSP_1:def 8;
+thus L353: S6[ ( C99 + 1 ) ] by L352;
+end;
+L354: ( pow (( 1_ C97 ) , ( 0 )) ) = ( ( power C97 ) . (( 1. C97 ) , ( 0 )) ) by L322;
+L355: S6[ ( 0 ) ] by L354 , GROUP_1:def 7;
+L356: (for B104 being (Element of ( NAT )) holds S6[ B104 ]) from NAT_1:sch 1(L355 , L350);
+thus L357: thesis by L356;
+end;
+theorem
+L358: (for B105 being  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr holds (for B106 being Integer holds ( pow (( 1. B105 ) , B106) ) = ( 1. B105 )))
+proof
+let C100 being  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+let C101 being Integer;
+per cases ;
+suppose L359: ( 0 ) <= C101;
+
+L360: C101 is (Element of ( NAT )) by L359 , INT_1:3;
+thus L361: thesis by L360 , L349;
+end;
+suppose L362: ( 0 ) > C101;
+
+L363: (( 1. C100 ) <> ( 0. C100 ) & ( ( 1. C100 ) * ( 1. C100 ) ) = ( 1. C100 )) by VECTSP_1:def 4;
+L364: ( pow (( 1. C100 ) , ( abs C101 )) ) = ( 1. C100 ) by L349;
+L365: ( pow (( 1. C100 ) , C101) ) = ( ( ( power C100 ) . (( 1. C100 ) , ( abs C101 )) ) " ) by L362 , L322
+.= ( ( 1. C100 ) " ) by L364 , L322;
+thus L366: thesis by L365 , L363 , VECTSP_1:def 10;
+end;
+end;
+theorem
+L368: (for B107 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B108 being (Element of B107) holds (for B109 being (Element of ( NAT )) holds (( pow (B108 , ( B109 + 1 )) ) = ( ( pow (B108 , B109) ) * B108 ) & ( pow (B108 , ( B109 + 1 )) ) = ( B108 * ( pow (B108 , B109) ) )))))
+proof
+let C102 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C103 being (Element of C102);
+let C104 being (Element of ( NAT ));
+L369: ( pow (C103 , ( C104 + 1 )) ) = ( C103 |^ ( C104 + 1 ) ) by L322
+.= ( ( C103 |^ C104 ) * C103 ) by GROUP_1:def 7
+.= ( ( pow (C103 , C104) ) * C103 ) by L322;
+thus L370: thesis by L369;
+end;
+L371: (for B110 being  well-unital non  empty doubleLoopStr holds (for B111 being (Element of ( NAT )) holds ( ( 1. B110 ) |^ B111 ) = ( 1. B110 )))
+proof
+let C105 being  well-unital non  empty doubleLoopStr;
+let C106 being (Element of ( NAT ));
+defpred S7[ (Element of ( NAT )) ] means ( ( 1. C105 ) |^ $1 ) = ( 1_ C105 );
+L372:
+now
+let C107 being (Element of ( NAT ));
+assume L373: S7[ C107 ];
+L374: ( ( 1. C105 ) |^ ( C107 + 1 ) ) = ( ( ( 1. C105 ) |^ C107 ) * ( 1. C105 ) ) by GROUP_1:def 7
+.= ( 1. C105 ) by L373 , VECTSP_1:def 8;
+thus L375: S7[ ( C107 + 1 ) ] by L374;
+end;
+L376: S7[ ( 0 ) ] by BINOM:8;
+L377: (for B112 being (Element of ( NAT )) holds S7[ B112 ]) from NAT_1:sch 1(L376 , L372);
+thus L378: thesis by L377;
+end;
+L379: (for B113 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B114 being (Element of ( NAT )) holds (for B115 being (Element of B113) holds (B115 <> ( 0. B113 ) implies ( ( B115 |^ B114 ) * ( ( B115 " ) |^ B114 ) ) = ( 1. B113 )))))
+proof
+let C108 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C109 being (Element of ( NAT ));
+let C110 being (Element of C108);
+assume L380: C110 <> ( 0. C108 );
+L381: ( ( C110 |^ C109 ) * ( ( C110 " ) |^ C109 ) ) = ( ( C110 * ( C110 " ) ) |^ C109 ) by BINOM:9
+.= ( ( 1. C108 ) |^ C109 ) by L380 , VECTSP_1:def 10
+.= ( 1. C108 ) by L371;
+thus L382: thesis by L381;
+end;
+theorem
+L383: (for B116 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr holds (for B117 being Integer holds (for B118 being (Element of B116) holds (B118 <> ( 0. B116 ) implies ( ( pow (B118 , B117) ) " ) = ( pow (B118 , ( - B117 )) )))))
+proof
+let C111 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+let C112 being Integer;
+let C113 being (Element of C111);
+assume L384: C113 <> ( 0. C111 );
+L385: ( 1. C111 ) <> ( 0. C111 );
+per cases ;
+suppose L386: C112 >= ( 0 );
+
+per cases  by L386 , XREAL_1:24;
+suppose L387: ( - C112 ) < ( - ( 0 ) );
+
+thus L388: ( pow (C113 , ( - C112 )) ) = ( ( pow (C113 , ( abs ( - C112 ) )) ) " ) by L387 , L332
+.= ( ( pow (C113 , ( - ( - C112 ) )) ) " ) by L387 , ABSVALUE:def 1
+.= ( ( pow (C113 , C112) ) " );
+end;
+suppose L389: C112 = ( 0 );
+
+thus L390: ( pow (C113 , ( - C112 )) ) = ( 1. C111 ) by L389 , L329
+.= ( ( 1. C111 ) * ( ( 1. C111 ) " ) ) by L385 , VECTSP_1:def 10
+.= ( ( 1. C111 ) " ) by VECTSP_1:def 8
+.= ( ( pow (C113 , C112) ) " ) by L389 , L329;
+end;
+end;
+suppose L392: C112 < ( 0 );
+
+L393: ( pow (C113 , ( abs C112 )) ) = ( C113 |^ ( abs C112 ) ) by L322;
+L394: ( pow (C113 , C112) ) = ( ( pow (C113 , ( abs C112 )) ) " ) by L392 , L332;
+L395: ( ( pow (C113 , C112) ) " ) = ( pow (C113 , ( abs C112 )) ) by L394 , L384 , L393 , L14 , VECTSP_1:24;
+thus L396: thesis by L395 , L392 , ABSVALUE:def 1;
+end;
+end;
+theorem
+L398: (for B119 being Field holds (for B120 being Integer holds (for B121 being (Element of B119) holds (B121 <> ( 0. B119 ) implies ( pow (B121 , ( B120 + 1 )) ) = ( ( pow (B121 , B120) ) * ( pow (B121 , 1) ) )))))
+proof
+let C114 being Field;
+let C115 being Integer;
+let C116 being (Element of C114);
+L399: ( pow (C116 , ( - 1 )) ) = ( ( C116 |^ ( abs ( - 1 ) ) ) " ) by L322;
+assume L400: C116 <> ( 0. C114 );
+L401: ( C116 |^ ( abs ( - 1 ) ) ) <> ( 0. C114 ) by L400 , L14;
+L402: ( pow (C116 , ( - 1 )) ) <> ( 0. C114 ) by L401 , L399 , VECTSP_1:25;
+L403: ( pow (C116 , ( - C115 )) ) <> ( 0. C114 )
+proof
+per cases ;
+suppose L404: ( 0 ) <= ( - C115 );
+
+reconsider D22 = ( - C115 ) as (Element of ( NAT )) by L404 , INT_1:3;
+L405: ( pow (C116 , ( - C115 )) ) = ( C116 |^ D22 ) by L322;
+thus L406: thesis by L405 , L400 , L14;
+end;
+suppose L407: ( - C115 ) < ( 0 );
+
+L408: ( C116 |^ ( abs ( - C115 ) ) ) <> ( 0. C114 ) by L400 , L14;
+L409: ( pow (C116 , ( - C115 )) ) = ( ( C116 |^ ( abs ( - C115 ) ) ) " ) by L407 , L322;
+thus L410: thesis by L409 , L408 , VECTSP_1:25;
+end;
+end;
+L412: ( pow (C116 , ( C115 + 1 )) ) <> ( 0. C114 )
+proof
+per cases ;
+suppose L413: ( 0 ) <= ( C115 + 1 );
+
+reconsider D23 = ( C115 + 1 ) as (Element of ( NAT )) by L413 , INT_1:3;
+L414: ( pow (C116 , ( C115 + 1 )) ) = ( C116 |^ D23 ) by L322;
+thus L415: thesis by L414 , L400 , L14;
+end;
+suppose L416: ( C115 + 1 ) < ( 0 );
+
+L417: ( C116 |^ ( abs ( C115 + 1 ) ) ) <> ( 0. C114 ) by L400 , L14;
+L418: ( pow (C116 , ( C115 + 1 )) ) = ( ( C116 |^ ( abs ( C115 + 1 ) ) ) " ) by L416 , L322;
+thus L419: thesis by L418 , L417 , VECTSP_1:25;
+end;
+end;
+L421:
+now
+per cases  by L1;
+suppose L422: C115 >= ( 0 );
+
+reconsider D24 = C115 as (Element of ( NAT )) by L422 , INT_1:3;
+L423: ( D24 + 1 ) = ( abs ( C115 + 1 ) ) by ABSVALUE:def 1;
+L424: ( pow (C116 , ( abs C115 )) ) = ( C116 |^ ( abs C115 ) ) by L322;
+L425: ( pow (C116 , ( abs C115 )) ) <> ( 0. C114 ) by L424 , L400 , L14;
+L426: ( pow (C116 , ( abs ( C115 + 1 ) )) ) = ( C116 |^ ( abs ( C115 + 1 ) ) ) by L322;
+L427: ( pow (C116 , ( abs ( C115 + 1 ) )) ) <> ( 0. C114 ) by L426 , L400 , L14;
+L428: ( D24 + 1 ) >= ( 0 );
+thus L429: ( ( pow (C116 , ( C115 + 1 )) ) * ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) ) = ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) ) by L428 , ABSVALUE:def 1
+.= ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( C116 " ) * ( pow (C116 , ( - C115 )) ) ) ) by L346
+.= ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( C116 " ) * ( ( pow (C116 , C115) ) " ) ) ) by L400 , L383
+.= ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( C116 " ) * ( ( pow (C116 , ( abs C115 )) ) " ) ) ) by L422 , ABSVALUE:def 1
+.= ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( C116 * ( pow (C116 , ( abs C115 )) ) ) " ) ) by L400 , L425 , L36
+.= ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( pow (C116 , ( ( abs C115 ) + 1 )) ) " ) ) by L368
+.= ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) " ) ) by L423 , ABSVALUE:def 1
+.= ( 1. C114 ) by L427 , VECTSP_1:def 10;
+end;
+suppose L430: C115 < ( - 1 );
+
+L431: ( pow (C116 , ( - C115 )) ) <> ( 0. C114 )
+proof
+reconsider D25 = ( - C115 ) as (Element of ( NAT )) by L430 , INT_1:3;
+L432: ( pow (C116 , ( - C115 )) ) = ( C116 |^ D25 ) by L322;
+thus L433: thesis by L432 , L400 , L14;
+end;
+L434: ( pow (C116 , ( abs ( C115 + 1 ) )) ) = ( C116 |^ ( abs ( C115 + 1 ) ) ) by L322;
+L435: ( pow (C116 , ( abs ( C115 + 1 ) )) ) <> ( 0. C114 ) by L434 , L400 , L14;
+L436: ( C115 + 1 ) < ( ( - 1 ) + 1 ) by L430 , XREAL_1:6;
+thus L437: ( ( pow (C116 , ( C115 + 1 )) ) * ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) ) = ( ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) " ) * ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) ) by L436 , L332
+.= ( ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) " ) * ( ( C116 " ) * ( pow (C116 , ( - C115 )) ) ) ) by L346
+.= ( ( ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) " ) * ( C116 " ) ) * ( pow (C116 , ( - C115 )) ) ) by GROUP_1:def 3
+.= ( ( ( ( pow (C116 , ( abs ( C115 + 1 ) )) ) * C116 ) " ) * ( pow (C116 , ( - C115 )) ) ) by L400 , L435 , L36
+.= ( ( ( pow (C116 , ( ( abs ( C115 + 1 ) ) + 1 )) ) " ) * ( pow (C116 , ( - C115 )) ) ) by L368
+.= ( ( ( pow (C116 , ( ( - ( C115 + 1 ) ) + 1 )) ) " ) * ( pow (C116 , ( - C115 )) ) ) by L436 , ABSVALUE:def 1
+.= ( 1. C114 ) by L431 , VECTSP_1:def 10;
+end;
+suppose L438: C115 = ( - 1 );
+
+L439: ( C116 " ) <> ( 0. C114 ) by L400 , VECTSP_1:25;
+thus L440: ( ( pow (C116 , ( C115 + 1 )) ) * ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) ) = ( ( 1. C114 ) * ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) ) by L438 , L329
+.= ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) by VECTSP_1:def 8
+.= ( ( C116 " ) * ( pow (C116 , ( - C115 )) ) ) by L346
+.= ( ( C116 " ) * ( ( pow (C116 , C115) ) " ) ) by L400 , L383
+.= ( ( C116 " ) * ( ( C116 " ) " ) ) by L438 , L346
+.= ( 1. C114 ) by L439 , VECTSP_1:def 10;
+end;
+end;
+L442: ( pow (C116 , ( C115 + 1 )) ) <> ( 0. C114 )
+proof
+per cases ;
+suppose L443: ( 0 ) <= ( C115 + 1 );
+
+reconsider D26 = ( C115 + 1 ) as (Element of ( NAT )) by L443 , INT_1:3;
+L444: ( pow (C116 , ( C115 + 1 )) ) = ( C116 |^ D26 ) by L322;
+thus L445: thesis by L444 , L400 , L14;
+end;
+suppose L446: ( C115 + 1 ) < ( 0 );
+
+L447: ( C116 |^ ( abs ( C115 + 1 ) ) ) <> ( 0. C114 ) by L400 , L14;
+L448: ( pow (C116 , ( C115 + 1 )) ) = ( ( C116 |^ ( abs ( C115 + 1 ) ) ) " ) by L446 , L322;
+thus L449: thesis by L448 , L447 , VECTSP_1:25;
+end;
+end;
+L451: ( ( pow (C116 , ( C115 + 1 )) ) * ( pow (C116 , ( - ( C115 + 1 ) )) ) ) = ( ( pow (C116 , ( C115 + 1 )) ) * ( ( pow (C116 , ( C115 + 1 )) ) " ) ) by L400 , L383
+.= ( 1. C114 ) by L412 , VECTSP_1:def 10;
+L452: ( pow (C116 , ( - ( C115 + 1 ) )) ) = ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) by L451 , L421 , L442 , VECTSP_1:5;
+thus L453: ( pow (C116 , ( C115 + 1 )) ) = ( pow (C116 , ( - ( - ( C115 + 1 ) ) )) )
+.= ( ( ( pow (C116 , ( - 1 )) ) * ( pow (C116 , ( - C115 )) ) ) " ) by L400 , L452 , L383
+.= ( ( ( pow (C116 , ( - C115 )) ) " ) * ( ( pow (C116 , ( - 1 )) ) " ) ) by L403 , L402 , L36
+.= ( ( pow (C116 , ( - ( - C115 ) )) ) * ( ( pow (C116 , ( - 1 )) ) " ) ) by L400 , L383
+.= ( ( pow (C116 , C115) ) * ( pow (C116 , ( - ( - 1 ) )) ) ) by L400 , L383
+.= ( ( pow (C116 , C115) ) * ( pow (C116 , 1) ) );
+end;
+theorem
+L454: (for B122 being Field holds (for B123 being Integer holds (for B124 being (Element of B122) holds (B124 <> ( 0. B122 ) implies ( pow (B124 , ( B123 - 1 )) ) = ( ( pow (B124 , B123) ) * ( pow (B124 , ( - 1 )) ) )))))
+proof
+let C117 being Field;
+let C118 being Integer;
+let C119 being (Element of C117);
+assume L455: C119 <> ( 0. C117 );
+L456: ( pow (C119 , ( C118 - 1 )) ) <> ( 0. C117 )
+proof
+per cases ;
+suppose L457: ( 0 ) <= ( C118 - 1 );
+
+reconsider D27 = ( C118 - 1 ) as (Element of ( NAT )) by L457 , INT_1:3;
+L458: ( pow (C119 , ( C118 - 1 )) ) = ( C119 |^ D27 ) by L322;
+thus L459: thesis by L458 , L455 , L14;
+end;
+suppose L460: ( C118 - 1 ) < ( 0 );
+
+L461: ( C119 |^ ( abs ( C118 - 1 ) ) ) <> ( 0. C117 ) by L455 , L14;
+L462: ( pow (C119 , ( C118 - 1 )) ) = ( ( C119 |^ ( abs ( C118 - 1 ) ) ) " ) by L460 , L322;
+thus L463: thesis by L462 , L461 , VECTSP_1:25;
+end;
+end;
+L465:
+now
+per cases  by L11;
+suppose L466: C118 >= 1;
+
+L467: ( abs C118 ) = C118 by L466 , ABSVALUE:def 1;
+L468: ( pow (C119 , ( abs ( - C118 ) )) ) = ( C119 |^ ( abs ( - C118 ) ) ) by L322;
+L469: ( pow (C119 , ( abs ( - C118 ) )) ) <> ( 0. C117 ) by L468 , L455 , L14;
+L470: ( abs C118 ) = ( abs ( - C118 ) ) by COMPLEX1:52;
+L471: C118 >= ( 1 + ( 0 ) ) by L466;
+L472: ( C118 - 1 ) >= ( 0 ) by L471 , XREAL_1:19;
+L473: ( ( abs ( C118 - 1 ) ) + 1 ) = ( ( C118 - 1 ) + 1 ) by L472 , ABSVALUE:def 1
+.= C118;
+thus L474: ( ( pow (C119 , ( C118 - 1 )) ) * ( C119 * ( pow (C119 , ( - C118 )) ) ) ) = ( ( ( pow (C119 , ( C118 - 1 )) ) * C119 ) * ( pow (C119 , ( - C118 )) ) ) by GROUP_1:def 3
+.= ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) * C119 ) * ( pow (C119 , ( - C118 )) ) ) by L472 , ABSVALUE:def 1
+.= ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) * C119 ) * ( ( pow (C119 , ( abs ( - C118 ) )) ) " ) ) by L466 , L336
+.= ( ( pow (C119 , ( ( abs ( C118 - 1 ) ) + 1 )) ) * ( ( pow (C119 , ( abs ( - C118 ) )) ) " ) ) by L368
+.= ( 1. C117 ) by L469 , L473 , L467 , L470 , VECTSP_1:def 10;
+end;
+suppose L475: C118 < ( 0 );
+
+L476: ( pow (C119 , ( abs ( C118 - 1 ) )) ) = ( C119 |^ ( abs ( C118 - 1 ) ) ) by L322;
+L477: ( pow (C119 , ( abs ( C118 - 1 ) )) ) <> ( 0. C117 ) by L476 , L455 , L14;
+L478: ( 1 - C118 ) = ( - ( C118 - 1 ) );
+thus L479: ( ( pow (C119 , ( C118 - 1 )) ) * ( C119 * ( pow (C119 , ( - C118 )) ) ) ) = ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) " ) * ( C119 * ( pow (C119 , ( - C118 )) ) ) ) by L475 , L332
+.= ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) " ) * ( C119 * ( pow (C119 , ( abs ( - C118 ) )) ) ) ) by L475 , ABSVALUE:def 1
+.= ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) " ) * ( pow (C119 , ( 1 + ( abs ( - C118 ) ) )) ) ) by L368
+.= ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) " ) * ( pow (C119 , ( 1 + ( - C118 ) )) ) ) by L475 , ABSVALUE:def 1
+.= ( ( ( pow (C119 , ( abs ( C118 - 1 ) )) ) " ) * ( pow (C119 , ( abs ( C118 - 1 ) )) ) ) by L475 , L478 , ABSVALUE:def 1
+.= ( 1. C117 ) by L477 , VECTSP_1:def 10;
+end;
+suppose L480: C118 = ( 0 );
+
+thus L481: ( ( pow (C119 , ( C118 - 1 )) ) * ( C119 * ( pow (C119 , ( - C118 )) ) ) ) = ( ( C119 " ) * ( C119 * ( pow (C119 , ( - C118 )) ) ) ) by L480 , L346
+.= ( ( ( C119 " ) * C119 ) * ( pow (C119 , ( - C118 )) ) ) by GROUP_1:def 3
+.= ( ( 1. C117 ) * ( pow (C119 , ( - C118 )) ) ) by L455 , VECTSP_1:def 10
+.= ( pow (C119 , ( 0 )) ) by L480 , VECTSP_1:def 8
+.= ( 1. C117 ) by L329;
+end;
+end;
+L483: ( pow (C119 , ( - C118 )) ) <> ( 0. C117 )
+proof
+per cases ;
+suppose L484: ( 0 ) <= ( - C118 );
+
+reconsider D28 = ( - C118 ) as (Element of ( NAT )) by L484 , INT_1:3;
+L485: ( pow (C119 , ( - C118 )) ) = ( C119 |^ D28 ) by L322;
+thus L486: thesis by L485 , L455 , L14;
+end;
+suppose L487: ( - C118 ) < ( 0 );
+
+L488: ( C119 |^ ( abs ( - C118 ) ) ) <> ( 0. C117 ) by L455 , L14;
+L489: ( pow (C119 , ( - C118 )) ) = ( ( C119 |^ ( abs ( - C118 ) ) ) " ) by L487 , L322;
+thus L490: thesis by L489 , L488 , VECTSP_1:25;
+end;
+end;
+L492: ( pow (C119 , ( C118 - 1 )) ) <> ( 0. C117 )
+proof
+per cases ;
+suppose L493: ( 0 ) <= ( C118 - 1 );
+
+reconsider D29 = ( C118 - 1 ) as (Element of ( NAT )) by L493 , INT_1:3;
+L494: ( pow (C119 , ( C118 - 1 )) ) = ( C119 |^ D29 ) by L322;
+thus L495: thesis by L494 , L455 , L14;
+end;
+suppose L496: ( C118 - 1 ) < ( 0 );
+
+L497: ( C119 |^ ( abs ( C118 - 1 ) ) ) <> ( 0. C117 ) by L455 , L14;
+L498: ( pow (C119 , ( C118 - 1 )) ) = ( ( C119 |^ ( abs ( C118 - 1 ) ) ) " ) by L496 , L322;
+thus L499: thesis by L498 , L497 , VECTSP_1:25;
+end;
+end;
+L501: ( ( pow (C119 , ( C118 - 1 )) ) * ( pow (C119 , ( 1 - C118 )) ) ) = ( ( pow (C119 , ( C118 - 1 )) ) * ( pow (C119 , ( - ( C118 - 1 ) )) ) )
+.= ( ( pow (C119 , ( C118 - 1 )) ) * ( ( pow (C119 , ( C118 - 1 )) ) " ) ) by L455 , L383
+.= ( 1. C117 ) by L456 , VECTSP_1:def 10;
+L502: ( C119 * ( pow (C119 , ( - C118 )) ) ) = ( pow (C119 , ( 1 - C118 )) ) by L501 , L465 , L492 , VECTSP_1:5;
+L503: ( ( pow (C119 , ( 1 - C118 )) ) " ) = ( ( ( pow (C119 , ( - C118 )) ) " ) * ( C119 " ) ) by L502 , L455 , L483 , L36
+.= ( ( pow (C119 , ( - ( - C118 ) )) ) * ( C119 " ) ) by L455 , L383
+.= ( ( pow (C119 , C118) ) * ( pow (C119 , ( - 1 )) ) ) by L346;
+L504: ( ( pow (C119 , C118) ) * ( pow (C119 , ( - 1 )) ) ) = ( pow (C119 , ( - ( 1 - C118 ) )) ) by L503 , L455 , L383;
+thus L505: thesis by L504;
+end;
+theorem
+L506: (for B125 being Field holds (for B126 , B127 being Integer holds (for B128 being (Element of B125) holds (B128 <> ( 0. B125 ) implies ( ( pow (B128 , B126) ) * ( pow (B128 , B127) ) ) = ( pow (B128 , ( B126 + B127 )) )))))
+proof
+let C120 being Field;
+let C121 , C122 being Integer;
+let C123 being (Element of C120);
+defpred S8[ Integer ] means (for B129 being Integer holds ( pow (C123 , ( B129 + $1 )) ) = ( ( pow (C123 , B129) ) * ( pow (C123 , $1) ) ));
+assume L507: C123 <> ( 0. C120 );
+L508: (for B130 being Integer holds (S8[ B130 ] implies (S8[ ( B130 - 1 ) ] & S8[ ( B130 + 1 ) ])))
+proof
+let C124 being Integer;
+assume L509: (for B131 being Integer holds ( pow (C123 , ( B131 + C124 )) ) = ( ( pow (C123 , B131) ) * ( pow (C123 , C124) ) ));
+thus L510: (for B132 being Integer holds ( pow (C123 , ( B132 + ( C124 - 1 ) )) ) = ( ( pow (C123 , B132) ) * ( pow (C123 , ( C124 - 1 )) ) ))
+proof
+let C125 being Integer;
+thus L511: ( pow (C123 , ( C125 + ( C124 - 1 ) )) ) = ( pow (C123 , ( ( C125 - 1 ) + C124 )) )
+.= ( ( pow (C123 , ( C125 - 1 )) ) * ( pow (C123 , C124) ) ) by L509
+.= ( ( ( pow (C123 , C125) ) * ( pow (C123 , ( - 1 )) ) ) * ( pow (C123 , C124) ) ) by L507 , L454
+.= ( ( pow (C123 , C125) ) * ( ( pow (C123 , ( - 1 )) ) * ( pow (C123 , C124) ) ) ) by GROUP_1:def 3
+.= ( ( pow (C123 , C125) ) * ( pow (C123 , ( C124 + ( - 1 ) )) ) ) by L509
+.= ( ( pow (C123 , C125) ) * ( pow (C123 , ( C124 - 1 )) ) );
+end;
+
+let C126 being Integer;
+thus L512: ( pow (C123 , ( C126 + ( C124 + 1 ) )) ) = ( pow (C123 , ( ( C126 + 1 ) + C124 )) )
+.= ( ( pow (C123 , ( C126 + 1 )) ) * ( pow (C123 , C124) ) ) by L509
+.= ( ( ( pow (C123 , C126) ) * ( pow (C123 , 1) ) ) * ( pow (C123 , C124) ) ) by L507 , L398
+.= ( ( pow (C123 , C126) ) * ( ( pow (C123 , 1) ) * ( pow (C123 , C124) ) ) ) by GROUP_1:def 3
+.= ( ( pow (C123 , C126) ) * ( pow (C123 , ( C124 + 1 )) ) ) by L509;
+end;
+L513: S8[ ( 0 ) ]
+proof
+let C127 being Integer;
+thus L514: ( pow (C123 , ( C127 + ( 0 ) )) ) = ( ( pow (C123 , C127) ) * ( 1. C120 ) ) by VECTSP_1:def 4
+.= ( ( pow (C123 , C127) ) * ( pow (C123 , ( 0 )) ) ) by L329;
+end;
+L515: (for B133 being Integer holds S8[ B133 ]) from INT_1:sch 4(L513 , L508);
+thus L516: thesis by L515;
+end;
+L517: (for B134 being  almost_left_invertible  associative  well-unital  add-associative  right_zeroed  right_complementable  left-distributive  commutative non  degenerated non  empty doubleLoopStr holds (for B135 being (Element of ( NAT )) holds (for B136 being (Element of B134) holds (B136 <> ( 0. B134 ) implies ( ( B136 " ) |^ B135 ) = ( ( B136 |^ B135 ) " )))))
+proof
+let C128 being  almost_left_invertible  associative  well-unital  add-associative  right_zeroed  right_complementable  left-distributive  commutative non  degenerated non  empty doubleLoopStr;
+let C129 being (Element of ( NAT ));
+let C130 being (Element of C128);
+L518: ( 1. C128 ) <> ( 0. C128 );
+defpred S9[ (Element of ( NAT )) ] means ( ( C130 " ) |^ $1 ) = ( ( C130 |^ $1 ) " );
+assume L519: C130 <> ( 0. C128 );
+L520:
+now
+let C131 being (Element of ( NAT ));
+assume L521: S9[ C131 ];
+L522: ( C130 |^ C131 ) <> ( 0. C128 ) by L519 , L14;
+L523: ( ( C130 " ) |^ ( C131 + 1 ) ) = ( ( ( C130 " ) |^ C131 ) * ( C130 " ) ) by GROUP_1:def 7
+.= ( ( C130 * ( C130 |^ C131 ) ) " ) by L519 , L521 , L522 , L36
+.= ( ( ( C130 |^ 1 ) * ( C130 |^ C131 ) ) " ) by BINOM:8
+.= ( ( C130 |^ ( C131 + 1 ) ) " ) by BINOM:10;
+thus L524: S9[ ( C131 + 1 ) ] by L523;
+end;
+L525: ( ( C130 " ) |^ ( 0 ) ) = ( 1_ C128 ) by BINOM:8
+.= ( ( 1. C128 ) * ( ( 1. C128 ) " ) ) by L518 , VECTSP_1:def 10
+.= ( ( 1_ C128 ) " ) by VECTSP_1:def 8
+.= ( ( C130 |^ ( 0 ) ) " ) by BINOM:8;
+L526: S9[ ( 0 ) ] by L525;
+L527: (for B137 being (Element of ( NAT )) holds S9[ B137 ]) from NAT_1:sch 1(L526 , L520);
+thus L528: thesis by L527;
+end;
+theorem
+L529: (for B138 being  almost_left_invertible  associative  well-unital  add-associative  right_zeroed  right_complementable  left-distributive  commutative non  degenerated non  empty doubleLoopStr holds (for B139 being (Element of ( NAT )) holds (for B140 being (Element of B138) holds (B140 <> ( 0. B138 ) implies ( pow (( B140 " ) , B139) ) = ( pow (B140 , ( - B139 )) )))))
+proof
+let C132 being  almost_left_invertible  associative  well-unital  add-associative  right_zeroed  right_complementable  left-distributive  commutative non  degenerated non  empty doubleLoopStr;
+let C133 being (Element of ( NAT ));
+let C134 being (Element of C132);
+assume L530: C134 <> ( 0. C132 );
+L531: ( pow (( C134 " ) , C133) ) = ( ( C134 " ) |^ C133 ) by L322
+.= ( ( C134 |^ C133 ) " ) by L530 , L517
+.= ( ( pow (C134 , C133) ) " ) by L322
+.= ( pow (C134 , ( - C133 )) ) by L530 , L383;
+thus L532: thesis by L531;
+end;
+theorem
+L533: (for B141 being Field holds (for B142 being (Element of B141) holds (B142 <> ( 0. B141 ) implies (for B143 , B144 , B145 being Nat holds ( ( pow (B142 , ( ( B143 - 1 ) * ( B145 - 1 ) )) ) * ( pow (B142 , ( - ( ( B144 - 1 ) * ( B145 - 1 ) ) )) ) ) = ( pow (B142 , ( ( B143 - B144 ) * ( B145 - 1 ) )) )))))
+proof
+let C135 being Field;
+let C136 being (Element of C135);
+assume L534: C136 <> ( 0. C135 );
+let C137 , C138 , C139 being Nat;
+L535: ( ( pow (C136 , ( ( C137 - 1 ) * ( C139 - 1 ) )) ) * ( pow (C136 , ( - ( ( C138 - 1 ) * ( C139 - 1 ) ) )) ) ) = ( pow (C136 , ( ( ( C137 - 1 ) * ( C139 - 1 ) ) + ( - ( ( C138 - 1 ) * ( C139 - 1 ) ) ) )) ) by L534 , L506
+.= ( pow (C136 , ( ( C137 - C138 ) * ( C139 - 1 ) )) );
+thus L536: thesis by L535;
+end;
+theorem
+L537: (for B146 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B147 being (Element of B146) holds (for B148 , B149 being (Element of ( NAT )) holds ( pow (B147 , ( B148 * B149 )) ) = ( pow (( pow (B147 , B148) ) , B149) ))))
+proof
+let C140 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C141 being (Element of C140);
+let C142 , C143 being (Element of ( NAT ));
+L538: ( pow (C141 , ( C142 * C143 )) ) = ( C141 |^ ( C142 * C143 ) ) by L322
+.= ( ( C141 |^ C142 ) |^ C143 ) by BINOM:11
+.= ( pow (( C141 |^ C142 ) , C143) ) by L322
+.= ( pow (( pow (C141 , C142) ) , C143) ) by L322;
+thus L539: thesis by L538;
+end;
+L540: (for B150 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  almost_left_invertible  distributive non  degenerated non  empty doubleLoopStr holds (for B151 being (Element of B150) holds (B151 <> ( 0. B150 ) implies (for B152 being (Element of ( NAT )) holds ( pow (( B151 " ) , B152) ) = ( ( pow (B151 , B152) ) " )))))
+proof
+let C144 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  almost_left_invertible  distributive non  degenerated non  empty doubleLoopStr;
+let C145 being (Element of C144);
+L541: ( 1. C144 ) <> ( 0. C144 );
+defpred S10[ Nat ] means ( pow (( C145 " ) , $1) ) = ( ( pow (C145 , $1) ) " );
+assume L542: C145 <> ( 0. C144 );
+L543:
+now
+let C146 being (Element of ( NAT ));
+assume L544: S10[ C146 ];
+L545: ( C145 |^ C146 ) <> ( 0. C144 ) by L542 , L14;
+thus L546: ( pow (( C145 " ) , ( C146 + 1 )) ) = ( ( C145 " ) |^ ( C146 + 1 ) ) by L322
+.= ( ( ( C145 " ) |^ C146 ) * ( C145 " ) ) by GROUP_1:def 7
+.= ( ( pow (( C145 " ) , C146) ) * ( C145 " ) ) by L322
+.= ( ( ( ( power C144 ) . (C145 , C146) ) " ) * ( C145 " ) ) by L544 , L322
+.= ( ( C145 * ( C145 |^ C146 ) ) " ) by L542 , L545 , L36
+.= ( ( ( C145 |^ 1 ) * ( C145 |^ C146 ) ) " ) by BINOM:8
+.= ( ( C145 |^ ( C146 + 1 ) ) " ) by BINOM:10
+.= ( ( pow (C145 , ( C146 + 1 )) ) " ) by L322;
+thus L547: S10[ ( C146 + 1 ) ] by L546;
+end;
+L548: (for B153 being (Element of ( NAT )) holds (S10[ B153 ] implies S10[ ( B153 + 1 ) ])) by L543;
+let C147 being (Element of ( NAT ));
+L549: ( pow (( C145 " ) , ( 0 )) ) = ( 1. C144 ) by L329
+.= ( ( 1. C144 ) * ( ( 1. C144 ) " ) ) by L541 , VECTSP_1:def 10
+.= ( ( 1. C144 ) " ) by VECTSP_1:def 8
+.= ( ( pow (C145 , ( 0 )) ) " ) by L329;
+L550: S10[ ( 0 ) ] by L549;
+L551: (for B154 being (Element of ( NAT )) holds S10[ B154 ]) from NAT_1:sch 1(L550 , L548);
+thus L552: thesis by L551;
+end;
+theorem
+L553: (for B155 being Field holds (for B156 being (Element of B155) holds (B156 <> ( 0. B155 ) implies (for B157 being Integer holds ( pow (( B156 " ) , B157) ) = ( ( pow (B156 , B157) ) " )))))
+proof
+let C148 being Field;
+let C149 being (Element of C148);
+assume L554: C149 <> ( 0. C148 );
+let C150 being Integer;
+per cases ;
+suppose L555: C150 >= ( 0 );
+
+reconsider D30 = C150 as (Element of ( NAT )) by L555 , INT_1:3;
+thus L556: ( pow (( C149 " ) , C150) ) = ( ( pow (C149 , D30) ) " ) by L554 , L540
+.= ( ( pow (C149 , C150) ) " );
+end;
+suppose L557: C150 < ( 0 );
+
+L558: ( pow (C149 , ( abs C150 )) ) = ( C149 |^ ( abs C150 ) ) by L322;
+thus L559: ( pow (( C149 " ) , C150) ) = ( ( pow (( C149 " ) , ( abs C150 )) ) " ) by L557 , L332
+.= ( pow (( ( C149 " ) " ) , ( abs C150 )) ) by L554 , L540 , VECTSP_1:25
+.= ( pow (C149 , ( abs C150 )) ) by L554 , VECTSP_1:24
+.= ( ( ( pow (C149 , ( abs C150 )) ) " ) " ) by L554 , L558 , L14 , VECTSP_1:24
+.= ( ( pow (C149 , C150) ) " ) by L557 , L332;
+end;
+end;
+theorem
+L561: (for B158 being Field holds (for B159 being (Element of B158) holds (B159 <> ( 0. B158 ) implies (for B160 , B161 being Integer holds ( pow (B159 , ( B160 * B161 )) ) = ( pow (( pow (B159 , B160) ) , B161) )))))
+proof
+let C151 being Field;
+let C152 being (Element of C151);
+assume L562: C152 <> ( 0. C151 );
+let C153 , C154 being Integer;
+per cases ;
+suppose L563: (C153 >= ( 0 ) & C154 >= ( 0 ));
+
+reconsider D31 = C153 , D32 = C154 as (Element of ( NAT )) by L563 , INT_1:3;
+thus L564: ( pow (C152 , ( C153 * C154 )) ) = ( pow (( pow (C152 , D31) ) , D32) ) by L537
+.= ( pow (( pow (C152 , C153) ) , C154) );
+end;
+suppose L565: (C153 >= ( 0 ) & C154 < ( 0 ));
+
+reconsider D33 = C153 , D34 = ( - C154 ) as (Element of ( NAT )) by L565 , INT_1:3;
+L566: ( pow (C152 , C153) ) = ( C152 |^ D33 ) by L322;
+L567: ( pow (C152 , C153) ) <> ( 0. C151 ) by L566 , L562 , L14;
+L568: ( pow (( pow (C152 , C153) ) , C154) ) = ( ( ( pow (C152 , C153) ) |^ ( abs C154 ) ) " ) by L565 , L322;
+L569: ( C153 * C154 ) = ( - ( C153 * D34 ) );
+thus L570: ( pow (C152 , ( C153 * C154 )) ) = ( ( pow (C152 , ( C153 * D34 )) ) " ) by L569 , L562 , L383
+.= ( pow (( C152 " ) , ( C153 * D34 )) ) by L562 , L553
+.= ( pow (( pow (( C152 " ) , D33) ) , D34) ) by L537
+.= ( pow (( ( pow (C152 , C153) ) " ) , D34) ) by L562 , L553
+.= ( ( pow (( ( pow (C152 , C153) ) " ) , C154) ) " ) by L567 , L383 , VECTSP_1:25
+.= ( ( ( pow (( pow (C152 , C153) ) , C154) ) " ) " ) by L562 , L566 , L14 , L553
+.= ( pow (( pow (C152 , C153) ) , C154) ) by L567 , L568 , L14 , VECTSP_1:24;
+end;
+suppose L571: (C153 < ( 0 ) & C154 >= ( 0 ));
+
+reconsider D35 = ( - C153 ) , D36 = C154 as (Element of ( NAT )) by L571 , INT_1:3;
+L572: ( pow (C152 , C153) ) = ( ( C152 |^ ( abs C153 ) ) " ) by L571 , L322;
+L573: ( C153 * C154 ) = ( - ( D35 * C154 ) );
+thus L574: ( pow (C152 , ( C153 * C154 )) ) = ( ( pow (C152 , ( D35 * C154 )) ) " ) by L573 , L562 , L383
+.= ( pow (( C152 " ) , ( D35 * C154 )) ) by L562 , L553
+.= ( pow (( pow (( C152 " ) , D35) ) , D36) ) by L537
+.= ( pow (( ( pow (( C152 " ) , C153) ) " ) , D36) ) by L562 , L383 , VECTSP_1:25
+.= ( pow (( ( ( pow (C152 , C153) ) " ) " ) , C154) ) by L562 , L553
+.= ( pow (( pow (C152 , C153) ) , C154) ) by L562 , L572 , L14 , VECTSP_1:24;
+end;
+suppose L575: (C154 < ( 0 ) & C153 < ( 0 ));
+
+reconsider D37 = ( - C153 ) , D38 = ( - C154 ) as (Element of ( NAT )) by L575 , INT_1:3;
+L576: ( pow (C152 , ( - C153 )) ) = ( C152 |^ D37 ) by L322;
+L577: ( C152 " ) <> ( 0. C151 ) by L562 , VECTSP_1:25;
+L578: ( ( C152 " ) |^ ( abs C153 ) ) <> ( 0. C151 ) by L577 , L14;
+L579: ( pow (( C152 " ) , C153) ) = ( ( ( C152 " ) |^ ( abs C153 ) ) " ) by L575 , L322;
+L580: ( ( C153 * C154 ) * ( ( - 1 ) * ( - 1 ) ) ) = ( D37 * D38 );
+thus L581: ( pow (C152 , ( C153 * C154 )) ) = ( pow (( pow (C152 , D37) ) , D38) ) by L580 , L537
+.= ( ( pow (( pow (C152 , ( - C153 )) ) , C154) ) " ) by L562 , L576 , L14 , L383
+.= ( ( pow (( ( pow (C152 , C153) ) " ) , C154) ) " ) by L562 , L383
+.= ( ( pow (( pow (( C152 " ) , C153) ) , C154) ) " ) by L562 , L553
+.= ( pow (( ( pow (( C152 " ) , C153) ) " ) , C154) ) by L579 , L578 , L553 , VECTSP_1:25
+.= ( pow (( pow (( ( C152 " ) " ) , C153) ) , C154) ) by L562 , L553 , VECTSP_1:25
+.= ( pow (( pow (C152 , C153) ) , C154) ) by L562 , VECTSP_1:24;
+end;
+end;
+theorem
+L583: (for B162 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B163 being (Element of B162) holds (for B164 , B165 being (Element of ( NAT )) holds (1 <= B165 implies ( pow (B163 , ( B164 * ( B165 - 1 ) )) ) = ( pow (( B163 |^ B164 ) , ( B165 - 1 )) )))))
+proof
+let C155 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C156 being (Element of C155);
+let C157 , C158 being (Element of ( NAT ));
+assume L584: 1 <= C158;
+L585: ( 0 ) < C158 by L584;
+reconsider D39 = ( C158 - 1 ) as (Element of ( NAT )) by L585 , NAT_1:20;
+L586: ( pow (C156 , ( C157 * ( C158 - 1 ) )) ) = ( C156 |^ ( C157 * D39 ) ) by L322
+.= ( ( C156 |^ C157 ) |^ D39 ) by BINOM:11
+.= ( pow (( C156 |^ C157 ) , D39) ) by L322;
+thus L587: thesis by L586;
+end;
+L588: (for B166 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr holds (for B167 being (Element of B166) holds (for B168 being (Element of ( NAT )) holds ((B167 <> ( 0. B166 ) & ( B167 |^ B168 ) = ( 1. B166 )) implies ( ( B167 " ) |^ B168 ) = ( 1. B166 )))))
+proof
+let C159 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C160 being (Element of C159);
+let C161 being (Element of ( NAT ));
+assume L589: (C160 <> ( 0. C159 ) & ( C160 |^ C161 ) = ( 1. C159 ));
+L590: ( ( 1. C159 ) * ( ( C160 " ) |^ C161 ) ) = ( 1. C159 ) by L589 , L379;
+thus L591: thesis by L590 , VECTSP_1:def 4;
+end;
+L592: (for B169 being  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr holds (for B170 being (Element of B169) holds (for B171 being (Element of ( NAT )) holds ((B170 <> ( 0. B169 ) & ( ( B170 " ) |^ B171 ) = ( 1. B169 )) implies ( B170 |^ B171 ) = ( 1. B169 )))))
+proof
+let C162 being  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+let C163 being (Element of C162);
+let C164 being (Element of ( NAT ));
+assume that
+L593: C163 <> ( 0. C162 )
+and
+L594: ( ( C163 " ) |^ C164 ) = ( 1. C162 );
+L595: ( 1_ C162 ) = ( C163 |^ ( 0 ) ) by BINOM:8;
+L596: ( ( ( C163 " ) |^ C164 ) * ( 1. C162 ) ) = ( 1. C162 ) by L594 , VECTSP_1:def 4;
+L597: ( ( ( C163 " ) |^ C164 ) * ( C163 |^ ( 0 ) ) ) = ( ( ( C163 " ) |^ C164 ) * ( C163 |^ C164 ) ) by L596 , L593 , L595 , L379;
+thus L598: thesis by L597 , L593 , L594 , L595 , VECTSP_1:5;
+end;
+begin
+definition
+let C165 being Nat;
+let C166 being non  empty ZeroStr;
+let C167 being (AlgSequence of C166);
+func mConv (C167 , C165) -> (Matrix of C165 , 1 , C166) means 
+:L599: (for B172 being Nat holds ((1 <= B172 & B172 <= C165) implies ( it * (B172 , 1) ) = ( C167 . ( B172 - 1 ) )));
+existence
+proof
+defpred S11[ Nat , set , set ] means $3 = ( C167 . ( $1 - 1 ) );
+reconsider D40 = C165 as (Element of ( NAT )) by ORDINAL1:def 12;
+L600: (for B173 , B174 being Nat holds ([ B173 , B174 ] in [: ( Seg D40 ) , ( Seg 1 ) :] implies (ex B175 being (Element of C166) st S11[ B173 , B174 , B175 ])))
+proof
+let C168 , C169 being Nat;
+assume L601: [ C168 , C169 ] in [: ( Seg D40 ) , ( Seg 1 ) :];
+take ( C167 /. ( C168 - 1 ) );
+L602: ( [ C168 , C169 ] `1 ) in ( Seg C165 ) by L601 , MCART_1:10;
+L603: C168 in ( Seg C165 ) by L602;
+L604: 1 <= C168 by L603 , FINSEQ_1:1;
+L605: (( dom C167 ) = ( NAT ) & ( 1 - 1 ) <= ( C168 - 1 )) by L604 , FUNCT_2:def 1 , XREAL_1:9;
+thus L606: thesis by L605 , INT_1:3 , PARTFUN1:def 6;
+end;
+consider C170 being (Matrix of D40 , 1 , C166) such that L607: (for B176 , B177 being Nat holds ([ B176 , B177 ] in ( Indices C170 ) implies S11[ B176 , B177 , ( C170 * (B176 , B177) ) ])) from MATRIX_1:sch 2(L600);
+reconsider D41 = C170 as (Matrix of C165 , 1 , C166);
+take D41;
+L608:
+now
+let C171 being Nat;
+assume L609: (1 <= C171 & C171 <= C165);
+L610: (C171 in ( Seg C165 ) & ( Indices D41 ) = [: ( Seg C165 ) , ( Seg 1 ) :]) by L609 , FINSEQ_1:1 , MATRIX_1:23;
+L611: 1 in ( Seg 1 );
+L612: [ C171 , 1 ] in ( Indices D41 ) by L611 , L610 , ZFMISC_1:def 2;
+thus L613: ( D41 * (C171 , 1) ) = ( C167 . ( C171 - 1 ) ) by L612 , L607;
+end;
+thus L614: thesis by L608;
+end;
+uniqueness
+proof
+let C172 , C173 being (Matrix of C165 , 1 , C166);
+assume that
+L615: (for B178 being Nat holds ((1 <= B178 & B178 <= C165) implies ( C172 * (B178 , 1) ) = ( C167 . ( B178 - 1 ) )))
+and
+L616: (for B179 being Nat holds ((1 <= B179 & B179 <= C165) implies ( C173 * (B179 , 1) ) = ( C167 . ( B179 - 1 ) )));
+per cases ;
+suppose L617: C165 = ( 0 );
+
+L618: (for B180 , B181 being Nat holds ([ B180 , B181 ] in ( Indices C172 ) implies ( C172 * (B180 , B181) ) = ( C173 * (B180 , B181) ))) by L617 , MATRIX_1:22;
+L619: ( width C172 ) = ( 0 ) by L617 , MATRIX_1:22
+.= ( width C173 ) by L617 , MATRIX_1:22;
+L620: ( len C172 ) = ( 0 ) by L617 , MATRIX_1:22
+.= ( len C173 ) by L617 , MATRIX_1:22;
+thus L621: thesis by L620 , L619 , L618 , MATRIX_1:21;
+end;
+suppose L622: C165 > ( 0 );
+
+L623:
+now
+let C174 , C175 being Nat;
+assume L624: [ C174 , C175 ] in ( Indices C172 );
+L625: [ C174 , C175 ] in [: ( Seg C165 ) , ( Seg 1 ) :] by L624 , L622 , MATRIX_1:23;
+L626: ( [ C174 , C175 ] `2 ) in ( Seg 1 ) by L625 , MCART_1:10;
+L627: C175 in ( Seg 1 ) by L626;
+L628: (1 <= C175 & C175 <= 1) by L627 , FINSEQ_1:1;
+L629: C175 = 1 by L628 , XXREAL_0:1;
+L630: ( [ C174 , C175 ] `1 ) in ( Seg C165 ) by L625 , MCART_1:10;
+L631: C174 in ( Seg C165 ) by L630;
+L632: (1 <= C174 & C174 <= C165) by L631 , FINSEQ_1:1;
+thus L633: ( C172 * (C174 , C175) ) = ( C167 . ( C174 - 1 ) ) by L632 , L615 , L629
+.= ( C173 * (C174 , C175) ) by L616 , L632 , L629;
+end;
+L634: ( width C172 ) = 1 by L622 , MATRIX_1:23
+.= ( width C173 ) by L622 , MATRIX_1:23;
+L635: ( len C172 ) = C165 by L622 , MATRIX_1:23
+.= ( len C173 ) by L622 , MATRIX_1:23;
+thus L636: thesis by L635 , L634 , L623 , MATRIX_1:21;
+end;
+end;
+end;
+theorem
+L639: (for B182 being Nat holds (B182 > ( 0 ) implies (for B183 being non  empty ZeroStr holds (for B184 being (AlgSequence of B183) holds (( len ( mConv (B184 , B182) ) ) = B182 & ( width ( mConv (B184 , B182) ) ) = 1 & (for B185 being Nat holds (B185 < B182 implies ( ( mConv (B184 , B182) ) * (( B185 + 1 ) , 1) ) = ( B184 . B185 ))))))))
+proof
+let C176 being Nat;
+assume L640: C176 > ( 0 );
+let C177 being non  empty ZeroStr;
+let C178 being (AlgSequence of C177);
+set D42 = ( mConv (C178 , C176) );
+thus L641: ( len D42 ) = C176 by L640 , MATRIX_1:23;
+thus L642: ( width D42 ) = 1 by L640 , MATRIX_1:23;
+L643:
+now
+let C179 being Nat;
+assume L644: C179 < C176;
+L645: (( ( 0 ) + 1 ) <= ( C179 + 1 ) & ( C179 + 1 ) <= C176) by L644 , NAT_1:13;
+L646: ( D42 * (( C179 + 1 ) , 1) ) = ( C178 . ( ( C179 + 1 ) - 1 ) ) by L645 , L599;
+thus L647: ( D42 * (( C179 + 1 ) , 1) ) = ( C178 . C179 ) by L646;
+end;
+thus L648: thesis by L643;
+end;
+theorem
+L649: (for B186 being Nat holds (B186 > ( 0 ) implies (for B187 being non  empty ZeroStr holds (for B188 being (AlgSequence of B187) holds (for B189 being (Matrix of B186 , 1 , B187) holds ((for B190 being Nat holds (B190 < B186 implies ( B189 * (( B190 + 1 ) , 1) ) = ( B188 . B190 ))) implies ( mConv (B188 , B186) ) = B189))))))
+proof
+let C180 being Nat;
+assume L650: C180 > ( 0 );
+let C181 being non  empty ZeroStr;
+let C182 being (AlgSequence of C181);
+let C183 being (Matrix of C180 , 1 , C181);
+L651: ( width ( mConv (C182 , C180) ) ) = 1 by L650 , L639
+.= ( width C183 ) by L650 , MATRIX_1:23;
+assume L652: (for B191 being Nat holds (B191 < C180 implies ( C183 * (( B191 + 1 ) , 1) ) = ( C182 . B191 )));
+L653: (for B192 , B193 being Nat holds ([ B192 , B193 ] in ( Indices ( mConv (C182 , C180) ) ) implies ( ( mConv (C182 , C180) ) * (B192 , B193) ) = ( C183 * (B192 , B193) )))
+proof
+let C184 , C185 being Nat;
+assume L654: [ C184 , C185 ] in ( Indices ( mConv (C182 , C180) ) );
+L655: C184 in ( dom ( mConv (C182 , C180) ) ) by L654 , ZFMISC_1:87;
+L656: ( len ( mConv (C182 , C180) ) ) = C180 by L650 , L639;
+L657: C184 in ( Seg C180 ) by L656 , L655 , FINSEQ_1:def 3;
+L658: ( 0 ) < C184 by L657 , FINSEQ_1:1;
+reconsider D43 = ( C184 - 1 ) as Nat by L658 , NAT_1:20;
+L659: C185 in ( Seg ( width ( mConv (C182 , C180) ) ) ) by L654 , ZFMISC_1:87;
+L660: 1 <= C185 by L659 , FINSEQ_1:1;
+L661: C185 in ( Seg 1 ) by L650 , L659 , L639;
+L662: C185 <= 1 by L661 , FINSEQ_1:1;
+L663: ( D43 + 1 ) <= C180 by L657 , FINSEQ_1:1;
+L664: D43 < C180 by L663 , NAT_1:13;
+L665: ( C183 * (( D43 + 1 ) , 1) ) = ( C182 . D43 ) by L664 , L652
+.= ( ( mConv (C182 , C180) ) * (( D43 + 1 ) , 1) ) by L664 , L639
+.= ( ( mConv (C182 , C180) ) * (C184 , C185) ) by L660 , L662 , XXREAL_0:1;
+thus L666: thesis by L665 , L660 , L662 , XXREAL_0:1;
+end;
+L667: ( len ( mConv (C182 , C180) ) ) = C180 by L650 , L639
+.= ( len C183 ) by L650 , MATRIX_1:23;
+thus L668: thesis by L667 , L651 , L653 , MATRIX_1:21;
+end;
+definition
+let C186 being non  empty ZeroStr;
+let C187 being (Matrix of C186);
+func aConv C187 -> (AlgSequence of C186) means 
+:L669: ((for B194 being Nat holds (B194 < ( len C187 ) implies ( it . B194 ) = ( C187 * (( B194 + 1 ) , 1) ))) & (for B195 being Nat holds (B195 >= ( len C187 ) implies ( it . B195 ) = ( 0. C186 ))));
+existence
+proof
+defpred S12[ set , set ] means (ex B196 being (Element of ( NAT )) st (B196 = $1 & ((B196 < ( len C187 ) & $2 = ( C187 * (( B196 + 1 ) , 1) )) or (( len C187 ) <= B196 & $2 = ( 0. C186 )))));
+L670: (for B197 being set holds (B197 in ( NAT ) implies (ex B198 being set st (B198 in (the carrier of C186) & S12[ B197 , B198 ]))))
+proof
+let C188 being set;
+assume L671: C188 in ( NAT );
+reconsider D44 = C188 as (Element of ( NAT )) by L671;
+thus L672: (ex B199 being set st (B199 in (the carrier of C186) & S12[ C188 , B199 ]))
+proof
+per cases ;
+suppose L673: D44 < ( len C187 );
+
+take ( C187 * (( D44 + 1 ) , 1) );
+thus L674: thesis by L673;
+end;
+suppose L675: D44 >= ( len C187 );
+
+take ( 0. C186 );
+thus L676: thesis by L675;
+end;
+end;
+
+end;
+consider C189 being (Function of ( NAT ) , (the carrier of C186)) such that L673: (for B200 being set holds (B200 in ( NAT ) implies S12[ B200 , ( C189 . B200 ) ])) from FUNCT_2:sch 1(L670);
+reconsider D45 = C189 as (sequence of C186);
+L674: (ex B201 being Nat st (for B202 being Nat holds (B202 >= B201 implies ( D45 . B202 ) = ( 0. C186 ))))
+proof
+take ( len C187 );
+L675:
+now
+let C190 being Nat;
+L676: C190 in ( NAT ) by ORDINAL1:def 12;
+L677: (ex B203 being (Element of ( NAT )) st (B203 = C190 & ((B203 < ( len C187 ) & ( D45 . C190 ) = ( C187 * (( B203 + 1 ) , 1) )) or (( len C187 ) <= B203 & ( D45 . C190 ) = ( 0. C186 ))))) by L676 , L673;
+assume L678: C190 >= ( len C187 );
+thus L679: ( D45 . C190 ) = ( 0. C186 ) by L678 , L677;
+end;
+thus L680: thesis by L675;
+end;
+reconsider D46 = D45 as (AlgSequence of C186) by L674 , ALGSEQ_1:def 1;
+L681:
+now
+let C191 being Nat;
+L682: C191 in ( NAT ) by ORDINAL1:def 12;
+L683: (ex B204 being (Element of ( NAT )) st (B204 = C191 & ((B204 < ( len C187 ) & ( D46 . C191 ) = ( C187 * (( B204 + 1 ) , 1) )) or (( len C187 ) <= B204 & ( D46 . C191 ) = ( 0. C186 ))))) by L682 , L673;
+assume L684: C191 >= ( len C187 );
+thus L685: ( D46 . C191 ) = ( 0. C186 ) by L684 , L683;
+end;
+take D46;
+L686:
+now
+let C192 being Nat;
+L687: C192 in ( NAT ) by ORDINAL1:def 12;
+L688: (ex B205 being (Element of ( NAT )) st (B205 = C192 & ((B205 < ( len C187 ) & ( D46 . C192 ) = ( C187 * (( B205 + 1 ) , 1) )) or (( len C187 ) <= B205 & ( D46 . C192 ) = ( 0. C186 ))))) by L687 , L673;
+assume L689: C192 < ( len C187 );
+thus L690: ( D46 . C192 ) = ( C187 * (( C192 + 1 ) , 1) ) by L689 , L688;
+end;
+thus L691: thesis by L686 , L681;
+end;
+uniqueness
+proof
+let C193 , C194 being (AlgSequence of C186);
+assume that
+L692: (for B206 being Nat holds (B206 < ( len C187 ) implies ( C193 . B206 ) = ( C187 * (( B206 + 1 ) , 1) )))
+and
+L693: (for B207 being Nat holds (B207 >= ( len C187 ) implies ( C193 . B207 ) = ( 0. C186 )));
+assume that
+L694: (for B208 being Nat holds (B208 < ( len C187 ) implies ( C194 . B208 ) = ( C187 * (( B208 + 1 ) , 1) )))
+and
+L695: (for B209 being Nat holds (B209 >= ( len C187 ) implies ( C194 . B209 ) = ( 0. C186 )));
+L696:
+now
+let C195 being set;
+assume L697: C195 in ( dom C193 );
+reconsider D47 = C195 as (Element of ( NAT )) by L697 , FUNCT_2:def 1;
+per cases ;
+suppose L698: D47 < ( len C187 );
+
+thus L699: ( C193 . C195 ) = ( C187 * (( D47 + 1 ) , 1) ) by L698 , L692
+.= ( C194 . C195 ) by L694 , L698;
+end;
+suppose L700: ( len C187 ) <= D47;
+
+thus L701: ( C193 . C195 ) = ( 0. C186 ) by L700 , L693
+.= ( C194 . C195 ) by L695 , L700;
+end;
+end;
+L703: ( dom C193 ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom C194 ) by FUNCT_2:def 1;
+thus L704: C193 = C194 by L703 , L696 , FUNCT_1:2;
+end;
+end;
+begin
+definition
+let C196 being  well-unital non  empty doubleLoopStr;
+let C197 being (Element of C196);
+let C198 being (Element of ( NAT ));
+pred C197 is_primitive_root_of_degree C198
+means
+:L706: (C198 <> ( 0 ) & ( C197 |^ C198 ) = ( 1. C196 ) & (for B210 being (Element of ( NAT )) holds ((( 0 ) < B210 & B210 < C198) implies ( C197 |^ B210 ) <> ( 1. C196 ))))
+;end;
+theorem
+L708: (for B211 being  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  degenerated non  empty doubleLoopStr holds (for B212 being (Element of ( NAT )) holds (not ( 0. B211 ) is_primitive_root_of_degree B212)))
+proof
+let C199 being  well-unital  add-associative  right_zeroed  right_complementable  right-distributive non  degenerated non  empty doubleLoopStr;
+let C200 being (Element of ( NAT ));
+defpred S13[ Nat ] means ( ( 0. C199 ) |^ $1 ) = ( 0. C199 );
+L709: (for B213 being Nat holds (1 <= B213 implies (S13[ B213 ] implies S13[ ( B213 + 1 ) ])))
+proof
+let C201 being Nat;
+assume L710: 1 <= C201;
+assume L711: S13[ C201 ];
+L712: C201 in ( NAT ) by ORDINAL1:def 12;
+L713: ( ( 0. C199 ) |^ ( C201 + 1 ) ) = ( ( ( 0. C199 ) |^ C201 ) * ( 0. C199 ) ) by L712 , GROUP_1:def 7
+.= ( 0. C199 ) by VECTSP_1:6;
+thus L714: thesis by L713;
+end;
+L715: S13[ 1 ] by BINOM:8;
+L716: (for B214 being Nat holds (1 <= B214 implies S13[ B214 ])) from NAT_1:sch 8(L715 , L709);
+assume L717: ( 0. C199 ) is_primitive_root_of_degree C200;
+L718: C200 <> ( 0 ) by L717 , L706;
+L719: ( ( 0 ) + 1 ) < ( C200 + 1 ) by L718 , XREAL_1:8;
+L720: 1 <= C200 by L719 , NAT_1:13;
+L721: ( ( 0. C199 ) |^ C200 ) <> ( 1. C199 ) by L720 , L716;
+thus L722: contradiction by L721 , L717 , L706;
+end;
+theorem
+L723: (for B215 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr holds (for B216 being (Element of ( NAT )) holds (for B217 being (Element of B215) holds (B217 is_primitive_root_of_degree B216 implies ( B217 " ) is_primitive_root_of_degree B216))))
+proof
+let C202 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+let C203 being (Element of ( NAT ));
+let C204 being (Element of C202);
+assume L724: C204 is_primitive_root_of_degree C203;
+L725: C204 <> ( 0. C202 ) by L724 , L708;
+L726: (for B218 being (Element of ( NAT )) holds ((( 0 ) < B218 & B218 < C203) implies ( ( C204 " ) |^ B218 ) <> ( 1. C202 )))
+proof
+let C205 being (Element of ( NAT ));
+assume L727: (( 0 ) < C205 & C205 < C203);
+L728: ( C204 |^ C205 ) <> ( 1. C202 ) by L727 , L724 , L706;
+thus L729: thesis by L728 , L725 , L592;
+end;
+L730: ( C204 |^ C203 ) = ( 1. C202 ) by L724 , L706;
+L731: ( ( C204 " ) |^ C203 ) = ( 1. C202 ) by L730 , L725 , L588;
+L732: C203 <> ( 0 ) by L724 , L706;
+thus L733: thesis by L732 , L731 , L726 , L706;
+end;
+theorem
+L734: (for B219 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr holds (for B220 being (Element of ( NAT )) holds (for B221 being (Element of B219) holds (B221 is_primitive_root_of_degree B220 implies (for B222 , B223 being Nat holds ((1 <= B222 & B222 <= B220 & 1 <= B223 & B223 <= B220 & B222 <> B223) implies ( pow (B221 , ( B222 - B223 )) ) <> ( 1. B219 )))))))
+proof
+let C206 being  add-associative  right_zeroed  right_complementable  associative  commutative  well-unital  distributive  almost_left_invertible non  degenerated non  empty doubleLoopStr;
+let C207 being (Element of ( NAT ));
+let C208 being (Element of C206);
+assume L735: C208 is_primitive_root_of_degree C207;
+L736: C208 <> ( 0. C206 ) by L735 , L708;
+let C209 , C210 being Nat;
+assume that
+L737: 1 <= C209
+and
+L738: C209 <= C207
+and
+L739: 1 <= C210
+and
+L740: C210 <= C207
+and
+L741: C209 <> C210;
+per cases ;
+suppose L742: C209 > C210;
+
+reconsider D48 = ( C209 - C210 ) as (Element of ( NAT )) by L742 , INT_1:5;
+L743: D48 <= ( C209 - 1 ) by L739 , XREAL_1:13;
+L744: ( D48 + 1 ) <= ( ( C209 - 1 ) + 1 ) by L743 , XREAL_1:6;
+L745: D48 < C209 by L744 , NAT_1:13;
+L746: D48 < C207 by L745 , L738 , XXREAL_0:2;
+L747: ( C209 - C210 ) > ( C210 - C210 ) by L742 , XREAL_1:14;
+L748: ( C208 |^ D48 ) <> ( 1. C206 ) by L747 , L735 , L746 , L706;
+thus L749: thesis by L748 , L322;
+end;
+suppose L750: C209 <= C210;
+
+L751: C209 < C210 by L750 , L741 , XXREAL_0:1;
+L752: ( C210 - C209 ) > ( C209 - C209 ) by L751 , XREAL_1:14;
+L753: ( C209 - C210 ) < ( C210 - C210 ) by L751 , XREAL_1:14;
+L754: ( abs ( C209 - C210 ) ) = ( - ( C209 - C210 ) ) by L753 , ABSVALUE:def 1;
+reconsider D49 = ( - ( C209 - C210 ) ) as (Element of ( NAT )) by L754;
+L755: ( C210 - C209 ) <= ( C210 - 1 ) by L737 , XREAL_1:13;
+L756: ( D49 + 1 ) <= ( ( C210 - 1 ) + 1 ) by L755 , XREAL_1:6;
+L757: D49 < C210 by L756 , NAT_1:13;
+L758: D49 < C207 by L757 , L740 , XXREAL_0:2;
+L759: ( C208 |^ D49 ) <> ( 0. C206 ) by L736 , L14;
+L760:
+now
+assume L761: ( ( C208 |^ D49 ) " ) = ( 1. C206 );
+L762: ( 1. C206 ) = ( ( C208 |^ D49 ) * ( 1. C206 ) ) by L761 , L759 , VECTSP_1:def 10
+.= ( C208 |^ D49 ) by VECTSP_1:def 4;
+thus L763: contradiction by L762 , L735 , L752 , L758 , L706;
+end;
+thus L764: thesis by L760 , L753 , L754 , L322;
+end;
+end;
+definition
+let C211 being Nat;
+let C212 being  well-unital non  empty doubleLoopStr;
+let C213 being (Polynomial of C212);
+let C214 being (Element of C212);
+func DFT (C213 , C214 , C211) -> (AlgSequence of C212) means 
+:L766: ((for B224 being Nat holds (B224 < C211 implies ( it . B224 ) = ( eval (C213 , ( C214 |^ B224 )) ))) & (for B225 being Nat holds (B225 >= C211 implies ( it . B225 ) = ( 0. C212 ))));
+existence
+proof
+defpred S14[ set , set ] means (ex B226 being (Element of ( NAT )) st (B226 = $1 & ((B226 < C211 & $2 = ( eval (C213 , ( C214 |^ B226 )) )) or (C211 <= B226 & $2 = ( 0. C212 )))));
+L767: (for B227 being set holds (B227 in ( NAT ) implies (ex B228 being set st (B228 in (the carrier of C212) & S14[ B227 , B228 ]))))
+proof
+let C215 being set;
+assume L768: C215 in ( NAT );
+reconsider D50 = C215 as (Element of ( NAT )) by L768;
+thus L769: (ex B229 being set st (B229 in (the carrier of C212) & S14[ C215 , B229 ]))
+proof
+per cases ;
+suppose L770: D50 < C211;
+
+take ( eval (C213 , ( C214 |^ D50 )) );
+thus L771: thesis by L770;
+end;
+suppose L772: D50 >= C211;
+
+take ( 0. C212 );
+thus L773: thesis by L772;
+end;
+end;
+
+end;
+consider C216 being (Function of ( NAT ) , (the carrier of C212)) such that L770: (for B230 being set holds (B230 in ( NAT ) implies S14[ B230 , ( C216 . B230 ) ])) from FUNCT_2:sch 1(L767);
+reconsider D51 = C216 as (sequence of C212);
+L771: (ex B231 being Nat st (for B232 being Nat holds (B232 >= B231 implies ( D51 . B232 ) = ( 0. C212 ))))
+proof
+reconsider D52 = C211 as (Element of ( NAT )) by ORDINAL1:def 12;
+take D52;
+L772:
+now
+let C217 being Nat;
+L773: C217 in ( NAT ) by ORDINAL1:def 12;
+L774: (ex B233 being (Element of ( NAT )) st (B233 = C217 & ((B233 < D52 & ( D51 . C217 ) = ( eval (C213 , ( C214 |^ B233 )) )) or (D52 <= B233 & ( D51 . C217 ) = ( 0. C212 ))))) by L773 , L770;
+assume L775: C217 >= D52;
+thus L776: ( D51 . C217 ) = ( 0. C212 ) by L775 , L774;
+end;
+thus L777: thesis by L772;
+end;
+reconsider D53 = D51 as (AlgSequence of C212) by L771 , ALGSEQ_1:def 1;
+L778:
+now
+let C218 being Nat;
+L779: C218 in ( NAT ) by ORDINAL1:def 12;
+L780: (ex B234 being (Element of ( NAT )) st (B234 = C218 & ((B234 < C211 & ( D53 . C218 ) = ( eval (C213 , ( C214 |^ B234 )) )) or (C211 <= B234 & ( D53 . C218 ) = ( 0. C212 ))))) by L779 , L770;
+assume L781: C218 >= C211;
+thus L782: ( D53 . C218 ) = ( 0. C212 ) by L781 , L780;
+end;
+take D53;
+L783:
+now
+let C219 being Nat;
+L784: C219 in ( NAT ) by ORDINAL1:def 12;
+L785: (ex B235 being (Element of ( NAT )) st (B235 = C219 & ((B235 < C211 & ( D53 . C219 ) = ( eval (C213 , ( C214 |^ B235 )) )) or (C211 <= B235 & ( D53 . C219 ) = ( 0. C212 ))))) by L784 , L770;
+assume L786: C219 < C211;
+thus L787: ( D53 . C219 ) = ( eval (C213 , ( C214 |^ C219 )) ) by L786 , L785;
+end;
+thus L788: thesis by L783 , L778;
+end;
+uniqueness
+proof
+let C220 , C221 being (AlgSequence of C212);
+assume that
+L789: (for B236 being Nat holds (B236 < C211 implies ( C220 . B236 ) = ( eval (C213 , ( C214 |^ B236 )) )))
+and
+L790: (for B237 being Nat holds (B237 >= C211 implies ( C220 . B237 ) = ( 0. C212 )));
+assume that
+L791: (for B238 being Nat holds (B238 < C211 implies ( C221 . B238 ) = ( eval (C213 , ( C214 |^ B238 )) )))
+and
+L792: (for B239 being Nat holds (B239 >= C211 implies ( C221 . B239 ) = ( 0. C212 )));
+L793:
+now
+let C222 being set;
+assume L794: C222 in ( dom C220 );
+reconsider D54 = C222 as (Element of ( NAT )) by L794 , FUNCT_2:def 1;
+per cases ;
+suppose L795: D54 < C211;
+
+thus L796: ( C220 . C222 ) = ( eval (C213 , ( C214 |^ D54 )) ) by L795 , L789
+.= ( C221 . C222 ) by L791 , L795;
+end;
+suppose L797: C211 <= D54;
+
+thus L798: ( C220 . C222 ) = ( 0. C212 ) by L797 , L790
+.= ( C221 . C222 ) by L792 , L797;
+end;
+end;
+L800: ( dom C220 ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom C221 ) by FUNCT_2:def 1;
+thus L801: C220 = C221 by L800 , L793 , FUNCT_1:2;
+end;
+end;
+theorem
+L803: (for B240 being Nat holds (for B241 being  well-unital non  empty doubleLoopStr holds (for B242 being (Element of B241) holds ( DFT (( 0_. B241 ) , B242 , B240) ) = ( 0_. B241 ))))
+proof
+let C223 being Nat;
+let C224 being  well-unital non  empty doubleLoopStr;
+let C225 being (Element of C224);
+set D55 = ( DFT (( 0_. C224 ) , C225 , C223) );
+L804:
+now
+let C226 being set;
+assume L805: C226 in ( dom D55 );
+reconsider D56 = C226 as (Element of ( NAT )) by L805 , FUNCT_2:def 1;
+per cases ;
+suppose L806: D56 < C223;
+
+thus L807: ( D55 . C226 ) = ( eval (( 0_. C224 ) , ( C225 |^ D56 )) ) by L806 , L766
+.= ( 0. C224 ) by POLYNOM4:17
+.= ( ( 0_. C224 ) . D56 ) by FUNCOP_1:7
+.= ( ( 0_. C224 ) . C226 );
+end;
+suppose L808: D56 >= C223;
+
+thus L809: ( D55 . C226 ) = ( 0. C224 ) by L808 , L766
+.= ( ( 0_. C224 ) . D56 ) by FUNCOP_1:7
+.= ( ( 0_. C224 ) . C226 );
+end;
+end;
+L811: ( dom D55 ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom ( 0_. C224 ) ) by FUNCT_2:def 1;
+thus L812: thesis by L811 , L804 , FUNCT_1:2;
+end;
+theorem
+L813: (for B243 being Nat holds (for B244 being Field holds (for B245 , B246 being (Polynomial of B244) holds (for B247 being (Element of B244) holds ( ( DFT (B245 , B247 , B243) ) * ( DFT (B246 , B247 , B243) ) ) = ( DFT (( B245 *' B246 ) , B247 , B243) )))))
+proof
+let C227 being Nat;
+let C228 being Field;
+let C229 , C230 being (Polynomial of C228);
+let C231 being (Element of C228);
+set D57 = ( DFT (C229 , C231 , C227) );
+set D58 = ( DFT (C230 , C231 , C227) );
+set D59 = ( DFT (( C229 *' C230 ) , C231 , C227) );
+L814:
+now
+let C232 being set;
+assume L815: C232 in ( dom ( D57 * D58 ) );
+reconsider D60 = C232 as (Element of ( NAT )) by L815 , FUNCT_2:def 1;
+per cases ;
+suppose L816: D60 < C227;
+
+thus L817: ( D59 . C232 ) = ( eval (( C229 *' C230 ) , ( C231 |^ D60 )) ) by L816 , L766
+.= ( ( eval (C229 , ( C231 |^ D60 )) ) * ( eval (C230 , ( C231 |^ D60 )) ) ) by POLYNOM4:24
+.= ( ( D57 . D60 ) * ( eval (C230 , ( C231 |^ D60 )) ) ) by L816 , L766
+.= ( ( D57 . D60 ) * ( D58 . D60 ) ) by L816 , L766
+.= ( ( D57 * D58 ) . C232 ) by L265;
+end;
+suppose L818: C227 <= D60;
+
+thus L819: ( ( D57 * D58 ) . C232 ) = ( ( D57 . D60 ) * ( D58 . D60 ) ) by L265
+.= ( ( 0. C228 ) * ( D58 . D60 ) ) by L818 , L766
+.= ( 0. C228 ) by VECTSP_1:6
+.= ( D59 . C232 ) by L818 , L766;
+end;
+end;
+L821: ( dom ( D57 * D58 ) ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom D59 ) by FUNCT_2:def 1;
+thus L822: thesis by L821 , L814 , FUNCT_1:2;
+end;
+definition
+let C233 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C234 being Nat;
+let C235 being (Element of C233);
+func Vandermonde (C235 , C234) -> (Matrix of C234 , C233) means 
+:L823: (for B248 , B249 being Nat holds ((1 <= B248 & B248 <= C234 & 1 <= B249 & B249 <= C234) implies ( it * (B248 , B249) ) = ( pow (C235 , ( ( B248 - 1 ) * ( B249 - 1 ) )) )));
+existence
+proof
+defpred S15[ Nat , Nat , set ] means $3 = ( pow (C235 , ( ( $1 - 1 ) * ( $2 - 1 ) )) );
+reconsider D61 = C234 as (Element of ( NAT )) by ORDINAL1:def 12;
+L824: (for B250 , B251 being Nat holds ([ B250 , B251 ] in [: ( Seg D61 ) , ( Seg D61 ) :] implies (ex B252 being (Element of C233) st S15[ B250 , B251 , B252 ])));
+consider C236 being (Matrix of D61 , D61 , C233) such that L825: (for B253 , B254 being Nat holds ([ B253 , B254 ] in ( Indices C236 ) implies S15[ B253 , B254 , ( C236 * (B253 , B254) ) ])) from MATRIX_1:sch 2(L824);
+reconsider D62 = C236 as (Matrix of C234 , C234 , C233);
+take D62;
+L826:
+now
+let C237 being Nat;
+assume L827: (1 <= C237 & C237 <= C234);
+L828: (( Indices D62 ) = [: ( Seg C234 ) , ( Seg C234 ) :] & C237 in ( Seg C234 )) by L827 , FINSEQ_1:1 , MATRIX_1:24;
+let C238 being Nat;
+assume L829: (1 <= C238 & C238 <= C234);
+L830: C238 in ( Seg C234 ) by L829 , FINSEQ_1:1;
+L831: [ C237 , C238 ] in ( Indices D62 ) by L830 , L828 , ZFMISC_1:def 2;
+thus L832: ( D62 * (C237 , C238) ) = ( pow (C235 , ( ( C237 - 1 ) * ( C238 - 1 ) )) ) by L831 , L825;
+end;
+thus L833: thesis by L826;
+end;
+uniqueness
+proof
+let C239 , C240 being (Matrix of C234 , C233);
+assume L834: (for B255 , B256 being Nat holds ((1 <= B255 & B255 <= C234 & 1 <= B256 & B256 <= C234) implies ( C239 * (B255 , B256) ) = ( pow (C235 , ( ( B255 - 1 ) * ( B256 - 1 ) )) )));
+assume L835: (for B257 , B258 being Nat holds ((1 <= B257 & B257 <= C234 & 1 <= B258 & B258 <= C234) implies ( C240 * (B257 , B258) ) = ( pow (C235 , ( ( B257 - 1 ) * ( B258 - 1 ) )) )));
+L836:
+now
+let C241 , C242 being Nat;
+L837: ( Indices C239 ) = [: ( Seg C234 ) , ( Seg C234 ) :] by MATRIX_1:24;
+assume L838: [ C241 , C242 ] in ( Indices C239 );
+L839: (ex B259 , B260 being set st (B259 in ( Seg C234 ) & B260 in ( Seg C234 ) & [ B259 , B260 ] = [ C241 , C242 ])) by L838 , L837 , ZFMISC_1:def 2;
+consider C243 , C244 being set such that L840: [ C241 , C242 ] = [ C243 , C244 ] and L841: C243 in ( Seg C234 ) and L842: C244 in ( Seg C234 ) by L839;
+L843: C242 = C244 by L840 , XTUPLE_0:1;
+L844: (1 <= C242 & C242 <= C234) by L843 , L842 , FINSEQ_1:1;
+L845: C241 = C243 by L840 , XTUPLE_0:1;
+L846: (1 <= C241 & C241 <= C234) by L845 , L841 , FINSEQ_1:1;
+thus L847: ( C239 * (C241 , C242) ) = ( pow (C235 , ( ( C241 - 1 ) * ( C242 - 1 ) )) ) by L846 , L834 , L844
+.= ( C240 * (C241 , C242) ) by L835 , L846 , L844;
+end;
+thus L848: thesis by L836 , MATRIX_1:27;
+end;
+end;
+notation
+let C245 being  associative  commutative  well-unital  distributive  almost_left_invertible non  empty doubleLoopStr;
+let C246 being Nat;
+let C247 being (Element of C245);
+synonym VM (C247 , C246) for Vandermonde (C247 , C246);
+end;
+theorem
+L851: (for B261 being Field holds (for B262 , B263 being Nat holds (B262 > ( 0 ) implies (for B264 being (Matrix of B262 , B263 , B261) holds ( ( 1. (B261 , B262) ) * B264 ) = B264))))
+proof
+let C248 being Field;
+let C249 , C250 being Nat;
+assume L852: C249 > ( 0 );
+let C251 being (Matrix of C249 , C250 , C248);
+L853: ( width ( 1. (C248 , C249) ) ) = C249 by L852 , MATRIX_1:23
+.= ( len C251 ) by L852 , MATRIX_1:23;
+set D63 = ( ( 1. (C248 , C249) ) * C251 );
+L854: ( len C251 ) = C249 by L852 , MATRIX_1:23;
+L855: ( len ( 1. (C248 , C249) ) ) = C249 by L852 , MATRIX_1:23;
+L856: C249 = ( len D63 ) by L855 , L853 , MATRIX_3:def 4;
+L857:
+now
+let C252 , C253 being Nat;
+assume L858: [ C252 , C253 ] in ( Indices C251 );
+L859: C252 in ( dom C251 ) by L858 , ZFMISC_1:87;
+L860: ( dom C251 ) = ( Seg ( len C251 ) ) by FINSEQ_1:def 3
+.= ( dom D63 ) by L854 , L856 , FINSEQ_1:def 3;
+L861: ( Indices C251 ) = ( Indices D63 ) by L860 , L853 , MATRIX_3:def 4;
+L862: ( D63 * (C252 , C253) ) = ( ( Line (( 1. (C248 , C249) ) , C252) ) "*" ( Col (C251 , C253) ) ) by L861 , L853 , L858 , MATRIX_3:def 4
+.= ( Sum ( mlt (( Line (( 1. (C248 , C249) ) , C252) ) , ( Col (C251 , C253) )) ) ) by FVSUM_1:def 9;
+L863: ( len ( Line (( 1. (C248 , C249) ) , C252) ) ) = ( width ( 1. (C248 , C249) ) ) by MATRIX_1:def 7
+.= C249 by MATRIX_1:24;
+L864: ( dom ( Line (( 1. (C248 , C249) ) , C252) ) ) = ( Seg C249 ) by L863 , FINSEQ_1:def 3;
+L865: ( len C251 ) = C249 by L852 , MATRIX_1:23;
+L866: C252 in ( dom ( Line (( 1. (C248 , C249) ) , C252) ) ) by L865 , L859 , L864 , FINSEQ_1:def 3;
+L867: ( Indices ( 1. (C248 , C249) ) ) = [: ( Seg C249 ) , ( Seg C249 ) :] by L852 , MATRIX_1:23;
+L868: [ C252 , C252 ] in ( Indices ( 1. (C248 , C249) ) ) by L867 , L864 , L866 , ZFMISC_1:87;
+L869: (for B265 being Nat holds ((B265 in ( dom ( Line (( 1. (C248 , C249) ) , C252) ) ) & B265 <> C252) implies ( ( Line (( 1. (C248 , C249) ) , C252) ) . B265 ) = ( 0. C248 )))
+proof
+let C254 being Nat;
+assume that
+L870: C254 in ( dom ( Line (( 1. (C248 , C249) ) , C252) ) )
+and
+L871: C254 <> C252;
+L872: [ C252 , C254 ] in ( Indices ( 1. (C248 , C249) ) ) by L864 , L866 , L867 , L870 , ZFMISC_1:87;
+L873: C254 in ( Seg ( width ( 1. (C248 , C249) ) ) ) by L864 , L870 , MATRIX_1:24;
+L874: ( ( Line (( 1. (C248 , C249) ) , C252) ) . C254 ) = ( ( 1. (C248 , C249) ) * (C252 , C254) ) by L873 , MATRIX_1:def 7
+.= ( 0. C248 ) by L871 , L872 , MATRIX_1:def 11;
+thus L875: thesis by L874;
+end;
+L876: ( len ( Col (C251 , C253) ) ) = ( len C251 ) by MATRIX_1:def 8
+.= C249 by L852 , MATRIX_1:23;
+L877: ( dom ( Col (C251 , C253) ) ) = ( Seg C249 ) by L876 , FINSEQ_1:def 3;
+L878: C252 in ( dom ( Col (C251 , C253) ) ) by L877 , L859 , L865 , FINSEQ_1:def 3;
+L879: C252 in ( Seg ( width ( 1. (C248 , C249) ) ) ) by L864 , L866 , MATRIX_1:24;
+L880: ( ( Line (( 1. (C248 , C249) ) , C252) ) . C252 ) = ( ( 1. (C248 , C249) ) * (C252 , C252) ) by L879 , MATRIX_1:def 7
+.= ( 1. C248 ) by L868 , MATRIX_1:def 11;
+L881: C252 in ( dom ( Line (( 1. (C248 , C249) ) , C252) ) ) by L859 , L865 , L864 , FINSEQ_1:def 3;
+L882: ( Sum ( mlt (( Line (( 1. (C248 , C249) ) , C252) ) , ( Col (C251 , C253) )) ) ) = ( ( Col (C251 , C253) ) . C252 ) by L881 , L880 , L869 , L878 , MATRIX_3:17;
+thus L883: ( C251 * (C252 , C253) ) = ( D63 * (C252 , C253) ) by L882 , L862 , L859 , MATRIX_1:def 8;
+end;
+L884: ( width C251 ) = ( width D63 ) by L853 , MATRIX_3:def 4;
+thus L885: thesis by L884 , L854 , L856 , L857 , MATRIX_1:21;
+end;
+theorem
+L886: (for B266 being Field holds (for B267 being (Element of ( NAT )) holds (( 0 ) < B267 implies (for B268 , B269 , B270 being (Matrix of B267 , B266) holds ((for B271 , B272 being Nat holds ((1 <= B271 & B271 <= B267 & 1 <= B272 & B272 <= B267) implies ( ( B268 * B269 ) * (B271 , B272) ) = ( ( emb (B267 , B266) ) * ( B270 * (B271 , B272) ) ))) implies ( B268 * B269 ) = ( ( emb (B267 , B266) ) * B270 ))))))
+proof
+let C255 being Field;
+let C256 being (Element of ( NAT ));
+assume L887: C256 > ( 0 );
+let C257 , C258 , C259 being (Matrix of C256 , C255);
+assume L888: (for B273 , B274 being Nat holds ((1 <= B273 & B273 <= C256 & 1 <= B274 & B274 <= C256) implies ( ( C257 * C258 ) * (B273 , B274) ) = ( ( emb (C256 , C255) ) * ( C259 * (B273 , B274) ) )));
+L889: (for B275 , B276 being Nat holds ([ B275 , B276 ] in ( Indices ( C257 * C258 ) ) implies ( ( C257 * C258 ) * (B275 , B276) ) = ( ( ( emb (C256 , C255) ) * C259 ) * (B275 , B276) )))
+proof
+let C260 , C261 being Nat;
+L890: ([ C260 , C261 ] in ( Indices ( C257 * C258 ) ) implies (1 <= C260 & C260 <= C256 & 1 <= C261 & C261 <= C256))
+proof
+L891: ( width C257 ) = C256 by MATRIX_1:24
+.= ( len C258 ) by MATRIX_1:24;
+L892: ( width ( C257 * C258 ) ) = ( width C258 ) by L891 , MATRIX_3:def 4
+.= C256 by MATRIX_1:24;
+assume L893: [ C260 , C261 ] in ( Indices ( C257 * C258 ) );
+L894: C261 in ( Seg C256 ) by L893 , L892 , ZFMISC_1:87;
+L895: ( width C257 ) = C256 by MATRIX_1:24
+.= ( len C258 ) by MATRIX_1:24;
+L896: ( len ( C257 * C258 ) ) = ( len C257 ) by L895 , MATRIX_3:def 4
+.= C256 by MATRIX_1:24;
+L897: ( C257 * C258 ) is (Matrix of C256 , C256 , C255) by L896 , L887 , L892 , MATRIX_1:20;
+L898: ( Indices ( C257 * C258 ) ) = [: ( Seg C256 ) , ( Seg C256 ) :] by L897 , L892 , MATRIX_1:25;
+L899: C260 in ( Seg C256 ) by L898 , L893 , ZFMISC_1:87;
+thus L900: thesis by L899 , L894 , FINSEQ_1:1;
+end;
+assume L901: [ C260 , C261 ] in ( Indices ( C257 * C258 ) );
+L902: (C260 in ( Seg C256 ) & C261 in ( Seg C256 )) by L901 , L890 , FINSEQ_1:1;
+L903: [ C260 , C261 ] in [: ( Seg C256 ) , ( Seg C256 ) :] by L902 , ZFMISC_1:87;
+L904: [ C260 , C261 ] in ( Indices C259 ) by L903 , MATRIX_1:24;
+L905: ( ( ( emb (C256 , C255) ) * C259 ) * (C260 , C261) ) = ( ( emb (C256 , C255) ) * ( C259 * (C260 , C261) ) ) by L904 , MATRIX_3:def 5;
+thus L906: thesis by L905 , L888 , L901 , L890;
+end;
+L907: ( width ( ( emb (C256 , C255) ) * C259 ) ) = ( width C259 ) by MATRIX_3:def 5
+.= C256 by MATRIX_1:24;
+L908: ( width C257 ) = C256 by MATRIX_1:24
+.= ( len C258 ) by MATRIX_1:24;
+L909: ( width ( C257 * C258 ) ) = ( width C258 ) by L908 , MATRIX_3:def 4
+.= C256 by MATRIX_1:24;
+L910: ( width C257 ) = C256 by MATRIX_1:24
+.= ( len C258 ) by MATRIX_1:24;
+L911: ( len ( C257 * C258 ) ) = ( len C257 ) by L910 , MATRIX_3:def 4
+.= C256 by MATRIX_1:24;
+L912: ( len ( ( emb (C256 , C255) ) * C259 ) ) = ( len C259 ) by MATRIX_3:def 5
+.= C256 by MATRIX_1:24;
+thus L913: thesis by L912 , L911 , L907 , L909 , L889 , MATRIX_1:21;
+end;
+L914: (for B277 being Field holds (for B278 being (Element of ( NAT )) holds (B278 > ( 0 ) implies (for B279 , B280 being (Polynomial of B277) holds ( ( emb (( 2 * B278 ) , B277) ) * ( ( 1. (B277 , ( 2 * B278 )) ) * ( mConv (( B279 *' B280 ) , ( 2 * B278 )) ) ) ) = ( ( emb (( 2 * B278 ) , B277) ) * ( mConv (( B279 *' B280 ) , ( 2 * B278 )) ) )))))
+proof
+let C262 being Field;
+let C263 being (Element of ( NAT ));
+assume L915: C263 > ( 0 );
+let C264 , C265 being (Polynomial of C262);
+L916: ( 2 * C263 ) > ( 2 * ( 0 ) ) by L915 , XREAL_1:68;
+thus L917: thesis by L916 , L851;
+end;
+theorem
+L918: (for B281 being Field holds (for B282 being (Element of B281) holds (for B283 being (FinSequence of B281) holds (for B284 , B285 , B286 being (Element of ( NAT )) holds ((B282 is_primitive_root_of_degree B286 & 1 <= B284 & B284 <= B286 & 1 <= B285 & B285 <= B286 & ( len B283 ) = B286 & (for B287 being Nat holds ((1 <= B287 & B287 <= B286) implies ( B283 /. B287 ) = ( pow (B282 , ( ( B284 - B285 ) * ( B287 - 1 ) )) )))) implies ( ( ( VM (B282 , B286) ) * ( VM (( B282 " ) , B286) ) ) * (B284 , B285) ) = ( Sum B283 ))))))
+proof
+let C266 being Field;
+let C267 being (Element of C266);
+let C268 being (FinSequence of C266);
+let C269 , C270 , C271 being (Element of ( NAT ));
+assume that
+L919: C267 is_primitive_root_of_degree C271
+and
+L920: (1 <= C269 & C269 <= C271)
+and
+L921: 1 <= C270
+and
+L922: C270 <= C271
+and
+L923: ( len C268 ) = C271
+and
+L924: (for B288 being Nat holds ((1 <= B288 & B288 <= C271) implies ( C268 /. B288 ) = ( pow (C267 , ( ( C269 - C270 ) * ( B288 - 1 ) )) )));
+L925: ( len ( Line (( VM (C267 , C271) ) , C269) ) ) = ( width ( VM (C267 , C271) ) ) by MATRIX_1:def 7
+.= C271 by MATRIX_1:24
+.= ( len ( VM (( C267 " ) , C271) ) ) by MATRIX_1:24
+.= ( len ( Col (( VM (( C267 " ) , C271) ) , C270) ) ) by MATRIX_1:def 8;
+L926: ( len ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) = ( len ( Line (( VM (C267 , C271) ) , C269) ) ) by L925 , MATRIX_3:6
+.= ( width ( VM (C267 , C271) ) ) by MATRIX_1:def 7
+.= C271 by MATRIX_1:24;
+L927: C267 <> ( 0. C266 ) by L919 , L708;
+L928: (for B289 being Nat holds ((1 <= B289 & B289 <= C271) implies ( ( ( Line (( VM (C267 , C271) ) , C269) ) /. B289 ) * ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) /. B289 ) ) = ( pow (C267 , ( ( C269 - C270 ) * ( B289 - 1 ) )) )))
+proof
+L929: ( len ( Col (( VM (( C267 " ) , C271) ) , C270) ) ) = ( len ( VM (( C267 " ) , C271) ) ) by MATRIX_1:def 8
+.= C271 by MATRIX_1:24;
+L930: ( Seg C271 ) = ( dom ( Col (( VM (( C267 " ) , C271) ) , C270) ) ) by L929 , FINSEQ_1:def 3;
+L931: ( len ( Line (( VM (C267 , C271) ) , C269) ) ) = ( width ( VM (C267 , C271) ) ) by MATRIX_1:def 7
+.= C271 by MATRIX_1:24;
+L932: ( Seg C271 ) = ( dom ( Line (( VM (C267 , C271) ) , C269) ) ) by L931 , FINSEQ_1:def 3;
+L933: ( 1 - 1 ) <= ( C270 - 1 ) by L921 , XREAL_1:9;
+let C272 being Nat;
+assume that
+L934: 1 <= C272
+and
+L935: C272 <= C271;
+L936: (( len ( VM (( C267 " ) , C271) ) ) = C271 & C272 in ( Seg C271 )) by L934 , L935 , FINSEQ_1:1 , MATRIX_1:24;
+L937: C272 in ( dom ( VM (( C267 " ) , C271) ) ) by L936 , FINSEQ_1:def 3;
+L938: C272 in ( Seg C271 ) by L934 , L935 , FINSEQ_1:1;
+L939: ( ( Line (( VM (C267 , C271) ) , C269) ) /. C272 ) = ( ( Line (( VM (C267 , C271) ) , C269) ) . C272 ) by L938 , L932 , PARTFUN1:def 6;
+L940: ( 1 - 1 ) <= ( C272 - 1 ) by L934 , XREAL_1:9;
+L941: ( ( C270 - 1 ) * ( C272 - 1 ) ) in ( NAT ) by L940 , L933 , INT_1:3;
+L942: ( width ( VM (C267 , C271) ) ) = C271 by MATRIX_1:24;
+L943: C272 in ( Seg ( width ( VM (C267 , C271) ) ) ) by L942 , L934 , L935 , FINSEQ_1:1;
+L944: ( ( Line (( VM (C267 , C271) ) , C269) ) . C272 ) = ( ( VM (C267 , C271) ) * (C269 , C272) ) by L943 , MATRIX_1:def 7;
+L945: C272 in ( Seg C271 ) by L934 , L935 , FINSEQ_1:1;
+L946: ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) /. C272 ) = ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) . C272 ) by L945 , L930 , PARTFUN1:def 6;
+L947: ( ( VM (( C267 " ) , C271) ) * (C272 , C270) ) = ( pow (( C267 " ) , ( ( C270 - 1 ) * ( C272 - 1 ) )) ) by L921 , L922 , L934 , L935 , L823
+.= ( pow (C267 , ( - ( ( C270 - 1 ) * ( C272 - 1 ) ) )) ) by L927 , L941 , L529;
+L948: ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) . C272 ) = ( pow (C267 , ( - ( ( C270 - 1 ) * ( C272 - 1 ) ) )) ) by L947 , L937 , MATRIX_1:def 8;
+L949: ( ( ( Line (( VM (C267 , C271) ) , C269) ) /. C272 ) * ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) /. C272 ) ) = ( ( pow (C267 , ( ( C269 - 1 ) * ( C272 - 1 ) )) ) * ( pow (C267 , ( - ( ( C270 - 1 ) * ( C272 - 1 ) ) )) ) ) by L948 , L920 , L934 , L935 , L939 , L944 , L946 , L823
+.= ( pow (C267 , ( ( C269 - C270 ) * ( C272 - 1 ) )) ) by L927 , L533;
+thus L950: thesis by L949;
+end;
+L951: (for B290 being Nat holds ((1 <= B290 & B290 <= C271) implies ( ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) /. B290 ) = ( C268 /. B290 )))
+proof
+L952: ( len ( Col (( VM (( C267 " ) , C271) ) , C270) ) ) = ( len ( VM (( C267 " ) , C271) ) ) by MATRIX_1:def 8
+.= C271 by MATRIX_1:24;
+L953: ( Seg C271 ) = ( dom ( Col (( VM (( C267 " ) , C271) ) , C270) ) ) by L952 , FINSEQ_1:def 3;
+let C273 being Nat;
+L954: ( len ( Line (( VM (C267 , C271) ) , C269) ) ) = ( width ( VM (C267 , C271) ) ) by MATRIX_1:def 7
+.= C271 by MATRIX_1:24;
+L955: ( Seg C271 ) = ( dom ( Line (( VM (C267 , C271) ) , C269) ) ) by L954 , FINSEQ_1:def 3;
+assume L956: (1 <= C273 & C273 <= C271);
+L957: ( ( ( Line (( VM (C267 , C271) ) , C269) ) /. C273 ) * ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) /. C273 ) ) = ( pow (C267 , ( ( C269 - C270 ) * ( C273 - 1 ) )) ) by L956 , L928
+.= ( C268 /. C273 ) by L924 , L956;
+L958: C273 in ( Seg C271 ) by L956 , FINSEQ_1:1;
+L959: ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) . C273 ) = ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) /. C273 ) by L958 , L953 , PARTFUN1:def 6;
+L960: ( Seg C271 ) = ( dom ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) by L926 , FINSEQ_1:def 3;
+L961: C273 in ( dom ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) by L960 , L956 , FINSEQ_1:1;
+L962: C273 in ( Seg C271 ) by L956 , FINSEQ_1:1;
+L963: ( ( Line (( VM (C267 , C271) ) , C269) ) . C273 ) = ( ( Line (( VM (C267 , C271) ) , C269) ) /. C273 ) by L962 , L955 , PARTFUN1:def 6;
+L964: ( ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) . C273 ) = ( ( ( Line (( VM (C267 , C271) ) , C269) ) /. C273 ) * ( ( Col (( VM (( C267 " ) , C271) ) , C270) ) /. C273 ) ) by L963 , L961 , L959 , FVSUM_1:60;
+thus L965: thesis by L964 , L961 , L957 , PARTFUN1:def 6;
+end;
+L966: (for B291 being Nat holds (B291 in ( dom ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) implies ( ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) . B291 ) = ( C268 . B291 )))
+proof
+let C274 being Nat;
+assume L967: C274 in ( dom ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) );
+L968: ( Seg C271 ) = ( dom ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) by L926 , FINSEQ_1:def 3;
+L969: (1 <= C274 & C274 <= C271) by L968 , L967 , FINSEQ_1:1;
+L970: C274 in ( dom C268 ) by L923 , L967 , L968 , FINSEQ_1:def 3;
+L971: ( ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) . C274 ) = ( ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) /. C274 ) by L967 , PARTFUN1:def 6
+.= ( C268 /. C274 ) by L951 , L969
+.= ( C268 . C274 ) by L970 , PARTFUN1:def 6;
+thus L972: thesis by L971;
+end;
+L973: ( dom ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) = ( Seg C271 ) by L926 , FINSEQ_1:def 3
+.= ( dom C268 ) by L923 , FINSEQ_1:def 3;
+L974: ( Sum ( mlt (( Line (( VM (C267 , C271) ) , C269) ) , ( Col (( VM (( C267 " ) , C271) ) , C270) )) ) ) = ( Sum C268 ) by L973 , L966 , FINSEQ_1:13;
+L975: ( width ( VM (C267 , C271) ) ) = C271 by MATRIX_1:24;
+L976: ( width ( VM (C267 , C271) ) ) = ( len ( VM (( C267 " ) , C271) ) ) by L975 , MATRIX_1:24;
+L977: (( width ( VM (C267 , C271) ) ) = C271 & ( len ( VM (( C267 " ) , C271) ) ) = C271) by MATRIX_1:24;
+L978: ( len ( VM (C267 , C271) ) ) = C271 by MATRIX_1:24;
+L979: ( len ( ( VM (C267 , C271) ) * ( VM (( C267 " ) , C271) ) ) ) = C271 by L978 , L977 , MATRIX_3:def 4;
+L980: ( width ( VM (( C267 " ) , C271) ) ) = C271 by MATRIX_1:24;
+L981: ( width ( ( VM (C267 , C271) ) * ( VM (( C267 " ) , C271) ) ) ) = C271 by L980 , L977 , MATRIX_3:def 4;
+L982: ( ( VM (C267 , C271) ) * ( VM (( C267 " ) , C271) ) ) is (Matrix of C271 , C266) by L981 , L920 , L979 , MATRIX_1:20;
+L983: ( Indices ( ( VM (C267 , C271) ) * ( VM (( C267 " ) , C271) ) ) ) = [: ( Seg C271 ) , ( Seg C271 ) :] by L982 , MATRIX_1:24;
+L984: (C269 in ( Seg C271 ) & C270 in ( Seg C271 )) by L920 , L921 , L922;
+L985: [ C269 , C270 ] in ( Indices ( ( VM (C267 , C271) ) * ( VM (( C267 " ) , C271) ) ) ) by L984 , L983 , ZFMISC_1:def 2;
+L986: ( ( ( VM (C267 , C271) ) * ( VM (( C267 " ) , C271) ) ) * (C269 , C270) ) = ( ( Line (( VM (C267 , C271) ) , C269) ) "*" ( Col (( VM (( C267 " ) , C271) ) , C270) ) ) by L985 , L976 , MATRIX_3:def 4;
+thus L987: thesis by L986 , L974 , FVSUM_1:def 9;
+end;
+theorem
+L988: (for B292 being Field holds (for B293 , B294 , B295 being (Element of ( NAT )) holds (for B296 being (Element of B292) holds ((B294 <> B295 & 1 <= B294 & B294 <= B293 & 1 <= B295 & B295 <= B293 & B296 is_primitive_root_of_degree B293) implies ( ( ( VM (B296 , B293) ) * ( VM (( B296 " ) , B293) ) ) * (B294 , B295) ) = ( 0. B292 )))))
+proof
+let C275 being Field;
+let C276 , C277 , C278 being (Element of ( NAT ));
+let C279 being (Element of C275);
+assume that
+L989: C277 <> C278
+and
+L990: (1 <= C277 & C277 <= C276 & 1 <= C278 & C278 <= C276)
+and
+L991: C279 is_primitive_root_of_degree C276;
+L992: C279 <> ( 0. C275 ) by L991 , L708;
+L993: ( pow (C279 , ( C276 * ( C277 - C278 ) )) ) = ( pow (( pow (C279 , C276) ) , ( C277 - C278 )) ) by L992 , L561
+.= ( pow (( C279 |^ C276 ) , ( C277 - C278 )) ) by L322
+.= ( pow (( 1. C275 ) , ( C277 - C278 )) ) by L991 , L706
+.= ( 1. C275 ) by L358;
+L994: (ex B297 being (FinSequence of C275) st (( dom B297 ) = ( Seg C276 ) & (for B298 being Nat holds (B298 in ( Seg C276 ) implies ( B297 . B298 ) = ( pow (C279 , ( ( C277 - C278 ) * ( B298 - 1 ) )) )))))
+proof
+defpred S16[ Nat , set ] means $2 = ( pow (C279 , ( ( C277 - C278 ) * ( $1 - 1 ) )) );
+L995: (for B299 being Nat holds (B299 in ( Seg C276 ) implies (ex B300 being (Element of C275) st S16[ B299 , B300 ])));
+L996: (ex B301 being (FinSequence of C275) st (( dom B301 ) = ( Seg C276 ) & (for B302 being Nat holds (B302 in ( Seg C276 ) implies S16[ B302 , ( B301 . B302 ) ])))) from FINSEQ_1:sch 5(L995);
+thus L997: thesis by L996;
+end;
+consider C280 being (FinSequence of C275) such that L998: ( dom C280 ) = ( Seg C276 ) and L999: (for B303 being Nat holds (B303 in ( Seg C276 ) implies ( C280 . B303 ) = ( pow (C279 , ( ( C277 - C278 ) * ( B303 - 1 ) )) ))) by L994;
+L1000: (for B304 being Nat holds ((1 <= B304 & B304 <= C276) implies ( C280 /. B304 ) = ( pow (C279 , ( ( C277 - C278 ) * ( B304 - 1 ) )) )))
+proof
+let C281 being Nat;
+assume L1001: (1 <= C281 & C281 <= C276);
+L1002: C281 in ( dom C280 ) by L1001 , L998 , FINSEQ_1:1;
+L1003: C281 in ( Seg C276 ) by L1001 , FINSEQ_1:1;
+L1004: ( pow (C279 , ( ( C277 - C278 ) * ( C281 - 1 ) )) ) = ( C280 . C281 ) by L1003 , L999
+.= ( C280 /. C281 ) by L1002 , PARTFUN1:def 6;
+thus L1005: thesis by L1004;
+end;
+consider C282 being (Element of C275) such that L1006: C282 = ( pow (C279 , ( C277 - C278 )) );
+L1007: ( len C280 ) = C276 by L998 , FINSEQ_1:def 3;
+L1008: (for B305 being Nat holds ((1 <= B305 & B305 <= ( len C280 )) implies ( C280 . B305 ) = ( ( pow (C279 , ( C277 - C278 )) ) |^ ( B305 -' 1 ) )))
+proof
+let C283 being Nat;
+assume that
+L1009: 1 <= C283
+and
+L1010: C283 <= ( len C280 );
+L1011: ( 1 - 1 ) <= ( C283 - 1 ) by L1009 , XREAL_1:9;
+L1012: ( C280 . C283 ) = ( C280 /. C283 ) by L1009 , L1010 , FINSEQ_4:15
+.= ( pow (C279 , ( ( C277 - C278 ) * ( C283 - 1 ) )) ) by L1000 , L1007 , L1009 , L1010
+.= ( pow (C279 , ( ( C277 - C278 ) * ( C283 -' 1 ) )) ) by L1011 , XREAL_0:def 2
+.= ( pow (( pow (C279 , ( C277 - C278 )) ) , ( C283 -' 1 )) ) by L992 , L561
+.= ( ( pow (C279 , ( C277 - C278 )) ) |^ ( C283 -' 1 ) ) by L322;
+thus L1013: thesis by L1012;
+end;
+L1014: ( Sum C280 ) = ( ( ( 1. C275 ) - ( ( pow (C279 , ( C277 - C278 )) ) |^ ( len C280 ) ) ) / ( ( 1. C275 ) - ( pow (C279 , ( C277 - C278 )) ) ) ) by L1008 , L989 , L990 , L991 , L106 , L734
+.= ( ( ( 1. C275 ) - ( ( pow (C279 , ( C277 - C278 )) ) |^ C276 ) ) / ( ( 1. C275 ) - ( pow (C279 , ( C277 - C278 )) ) ) ) by L998 , FINSEQ_1:def 3
+.= ( ( ( 1. C275 ) - ( pow (( pow (C279 , ( C277 - C278 )) ) , C276) ) ) / ( ( 1. C275 ) - ( pow (C279 , ( C277 - C278 )) ) ) ) by L322
+.= ( ( ( 1. C275 ) - ( pow (C279 , ( ( C277 - C278 ) * C276 )) ) ) / ( ( 1. C275 ) - ( pow (C279 , ( C277 - C278 )) ) ) ) by L992 , L561
+.= ( ( 0. C275 ) / ( ( 1. C275 ) - C282 ) ) by L993 , L1006 , VECTSP_1:19
+.= ( 0. C275 ) by VECTSP_1:7;
+thus L1015: thesis by L1014 , L990 , L991 , L1000 , L1007 , L918;
+end;
+theorem
+L1016: (for B306 being Field holds (for B307 being (Element of ( NAT )) holds (B307 > ( 0 ) implies (for B308 being (Element of B306) holds (B308 is_primitive_root_of_degree B307 implies ( ( VM (B308 , B307) ) * ( VM (( B308 " ) , B307) ) ) = ( ( emb (B307 , B306) ) * ( 1. (B306 , B307) ) ))))))
+proof
+let C284 being Field;
+let C285 being (Element of ( NAT ));
+assume L1017: C285 > ( 0 );
+let C286 being (Element of C284);
+assume L1018: C286 is_primitive_root_of_degree C285;
+L1019: (for B309 , B310 being Nat holds ((B309 >= 1 & B309 <= C285 & B310 >= 1 & B310 <= C285) implies ( ( ( VM (C286 , C285) ) * ( VM (( C286 " ) , C285) ) ) * (B309 , B310) ) = ( ( emb (C285 , C284) ) * ( ( 1. (C284 , C285) ) * (B309 , B310) ) )))
+proof
+let C287 , C288 being Nat;
+L1020: (C287 in ( NAT ) & C288 in ( NAT )) by ORDINAL1:def 12;
+L1021: (ex B311 being (FinSequence of C284) st (( dom B311 ) = ( Seg C285 ) & (for B312 being Nat holds (B312 in ( Seg C285 ) implies ( B311 . B312 ) = ( pow (C286 , ( ( C287 - C288 ) * ( B312 - 1 ) )) )))))
+proof
+defpred S17[ Nat , set ] means $2 = ( pow (C286 , ( ( C287 - C288 ) * ( $1 - 1 ) )) );
+L1022: (for B313 being Nat holds (B313 in ( Seg C285 ) implies (ex B314 being (Element of C284) st S17[ B313 , B314 ])));
+L1023: (ex B315 being (FinSequence of C284) st (( dom B315 ) = ( Seg C285 ) & (for B316 being Nat holds (B316 in ( Seg C285 ) implies S17[ B316 , ( B315 . B316 ) ])))) from FINSEQ_1:sch 5(L1022);
+thus L1024: thesis by L1023;
+end;
+consider C289 being (FinSequence of C284) such that L1025: ( dom C289 ) = ( Seg C285 ) and L1026: (for B317 being Nat holds (B317 in ( Seg C285 ) implies ( C289 . B317 ) = ( pow (C286 , ( ( C287 - C288 ) * ( B317 - 1 ) )) ))) by L1021;
+L1027: ( len C289 ) = C285 by L1025 , FINSEQ_1:def 3;
+L1028: (for B318 being Nat holds ((1 <= B318 & B318 <= C285) implies ( C289 /. B318 ) = ( pow (C286 , ( ( C287 - C288 ) * ( B318 - 1 ) )) )))
+proof
+let C290 being Nat;
+assume L1029: (1 <= C290 & C290 <= C285);
+L1030: C290 in ( dom C289 ) by L1029 , L1025 , FINSEQ_1:1;
+L1031: C290 in ( Seg C285 ) by L1029 , FINSEQ_1:1;
+L1032: ( pow (C286 , ( ( C287 - C288 ) * ( C290 - 1 ) )) ) = ( C289 . C290 ) by L1031 , L1026
+.= ( C289 /. C290 ) by L1030 , PARTFUN1:def 6;
+thus L1033: thesis by L1032;
+end;
+L1034: ( Indices ( 1. (C284 , C285) ) ) = [: ( Seg C285 ) , ( Seg C285 ) :] by MATRIX_1:24;
+assume that
+L1035: (1 <= C287 & C287 <= C285)
+and
+L1036: (1 <= C288 & C288 <= C285);
+per cases ;
+suppose L1037: C287 = C288;
+
+L1038: (for B319 being (Element of ( NAT )) holds ((1 <= B319 & B319 <= C285) implies ( C289 /. B319 ) = ( 1. C284 )))
+proof
+let C291 being (Element of ( NAT ));
+assume L1039: (1 <= C291 & C291 <= C285);
+L1040: ( C289 /. C291 ) = ( pow (C286 , ( ( C287 - C288 ) * ( C291 - 1 ) )) ) by L1039 , L1028
+.= ( 1. C284 ) by L1037 , L329;
+thus L1041: thesis by L1040;
+end;
+L1042: C287 in ( Seg C285 ) by L1035 , FINSEQ_1:1;
+L1043: [ C287 , C287 ] in ( Indices ( 1. (C284 , C285) ) ) by L1042 , L1034 , ZFMISC_1:87;
+L1044: ( ( ( VM (C286 , C285) ) * ( VM (( C286 " ) , C285) ) ) * (C287 , C288) ) = ( Sum C289 ) by L1018 , L1020 , L1035 , L1036 , L1027 , L1028 , L918
+.= ( C285 * ( 1. C284 ) ) by L1027 , L1038 , L45
+.= ( ( emb (C285 , C284) ) * ( 1. C284 ) ) by VECTSP_1:def 8;
+thus L1045: thesis by L1044 , L1037 , L1043 , MATRIX_1:def 11;
+end;
+suppose L1046: C287 <> C288;
+
+L1047: (C287 in ( Seg C285 ) & C288 in ( Seg C285 )) by L1035 , L1036 , FINSEQ_1:1;
+L1048: [ C287 , C288 ] in ( Indices ( 1. (C284 , C285) ) ) by L1047 , L1034 , ZFMISC_1:87;
+L1049: ( ( ( VM (C286 , C285) ) * ( VM (( C286 " ) , C285) ) ) * (C287 , C288) ) = ( 0. C284 ) by L1018 , L1020 , L1035 , L1036 , L1046 , L988
+.= ( ( emb (C285 , C284) ) * ( 0. C284 ) ) by VECTSP_1:6;
+thus L1050: thesis by L1049 , L1046 , L1048 , MATRIX_1:def 11;
+end;
+end;
+thus L1052: thesis by L1019 , L1017 , L886;
+end;
+theorem
+L1053: (for B320 being Field holds (for B321 being (Element of ( NAT )) holds (for B322 being (Element of B320) holds ((B321 > ( 0 ) & B322 is_primitive_root_of_degree B321) implies ( ( VM (B322 , B321) ) * ( VM (( B322 " ) , B321) ) ) = ( ( VM (( B322 " ) , B321) ) * ( VM (B322 , B321) ) )))))
+proof
+let C292 being Field;
+let C293 being (Element of ( NAT ));
+let C294 being (Element of C292);
+assume that
+L1054: ( 0 ) < C293
+and
+L1055: C294 is_primitive_root_of_degree C293;
+L1056: C294 <> ( 0. C292 ) by L1055 , L708;
+L1057: ( ( VM (( C294 " ) , C293) ) * ( VM (C294 , C293) ) ) = ( ( VM (( C294 " ) , C293) ) * ( VM (( ( C294 " ) " ) , C293) ) ) by L1056 , VECTSP_1:24
+.= ( ( emb (C293 , C292) ) * ( 1. (C292 , C293) ) ) by L1054 , L1055 , L723 , L1016;
+thus L1058: thesis by L1057 , L1054 , L1055 , L1016;
+end;
+begin
+theorem
+L1059: (for B323 being Field holds (for B324 being (Polynomial of B323) holds (for B325 being (Element of ( NAT )) holds ((B325 > ( 0 ) & ( len B324 ) <= B325) implies (for B326 being (Element of B323) holds (for B327 being (Element of ( NAT )) holds (B327 < B325 implies ( ( DFT (B324 , B326 , B325) ) . B327 ) = ( ( ( VM (B326 , B325) ) * ( mConv (B324 , B325) ) ) * (( B327 + 1 ) , 1) ))))))))
+proof
+let C295 being Field;
+let C296 being (Polynomial of C295);
+let C297 being (Element of ( NAT ));
+assume that
+L1060: C297 > ( 0 )
+and
+L1061: ( len C296 ) <= C297;
+let C298 being (Element of C295);
+set D64 = ( VM (C298 , C297) );
+L1062: (for B328 being (Element of ( NAT )) holds (B328 < C297 implies ( ( DFT (C296 , C298 , C297) ) . B328 ) = ( ( D64 * ( mConv (C296 , C297) ) ) * (( B328 + 1 ) , 1) )))
+proof
+L1063: (for B329 being Nat holds (B329 < C297 implies ( ( Col (( mConv (C296 , C297) ) , 1) ) . ( B329 + 1 ) ) = ( C296 . B329 )))
+proof
+let C299 being Nat;
+assume L1064: C299 < C297;
+L1065: (1 <= ( C299 + 1 ) & ( C299 + 1 ) <= C297) by L1064 , NAT_1:11 , NAT_1:13;
+L1066: ( C299 + 1 ) in ( Seg C297 ) by L1065;
+L1067: ( len ( mConv (C296 , C297) ) ) = C297 by L1060 , L639;
+L1068: ( C299 + 1 ) in ( dom ( mConv (C296 , C297) ) ) by L1067 , L1066 , FINSEQ_1:def 3;
+L1069: ( ( Col (( mConv (C296 , C297) ) , 1) ) . ( C299 + 1 ) ) = ( ( mConv (C296 , C297) ) * (( C299 + 1 ) , 1) ) by L1068 , MATRIX_1:def 8;
+thus L1070: thesis by L1069 , L1064 , L639;
+end;
+L1071: ( width D64 ) = C297 by MATRIX_1:24
+.= ( len ( mConv (C296 , C297) ) ) by L1060 , L639;
+L1072: ( len ( D64 * ( mConv (C296 , C297) ) ) ) = ( len D64 ) by L1071 , MATRIX_3:def 4
+.= C297 by MATRIX_1:24;
+L1073: ( width ( D64 * ( mConv (C296 , C297) ) ) ) = ( width ( mConv (C296 , C297) ) ) by L1071 , MATRIX_3:def 4
+.= 1 by L1060 , L639;
+L1074: ( D64 * ( mConv (C296 , C297) ) ) is (Matrix of C297 , 1 , C295) by L1073 , L1060 , L1072 , MATRIX_1:20;
+L1075: ( Indices ( D64 * ( mConv (C296 , C297) ) ) ) = [: ( Seg C297 ) , ( Seg ( width ( D64 * ( mConv (C296 , C297) ) ) ) ) :] by L1074 , MATRIX_1:25;
+L1076: ( len ( mConv (C296 , C297) ) ) = C297 by L1060 , L639
+.= ( width D64 ) by MATRIX_1:24;
+L1077: ( width ( D64 * ( mConv (C296 , C297) ) ) ) = ( width ( mConv (C296 , C297) ) ) by L1071 , MATRIX_3:def 4
+.= 1 by L1060 , L639;
+L1078: 1 in ( Seg ( width ( D64 * ( mConv (C296 , C297) ) ) ) ) by L1077;
+let C300 being (Element of ( NAT ));
+assume L1079: C300 < C297;
+L1080: (for B330 being Nat holds (B330 < C297 implies ( ( Line (D64 , ( C300 + 1 )) ) . ( B330 + 1 ) ) = ( D64 * (( C300 + 1 ) , ( B330 + 1 )) )))
+proof
+let C301 being Nat;
+assume L1081: C301 < C297;
+L1082: (1 <= ( C301 + 1 ) & ( C301 + 1 ) <= C297) by L1081 , NAT_1:11 , NAT_1:13;
+L1083: ( C301 + 1 ) in ( Seg C297 ) by L1082;
+L1084: ( C301 + 1 ) in ( Seg ( width D64 ) ) by L1083 , MATRIX_1:24;
+thus L1085: thesis by L1084 , MATRIX_1:def 7;
+end;
+L1086: (for B331 being Nat holds (B331 < C297 implies ( ( Line (D64 , ( C300 + 1 )) ) . ( B331 + 1 ) ) = ( pow (C298 , ( C300 * B331 )) )))
+proof
+let C302 being Nat;
+assume L1087: C302 < C297;
+L1088: (1 <= ( C302 + 1 ) & ( C302 + 1 ) <= C297) by L1087 , NAT_1:11 , NAT_1:13;
+L1089: (1 <= ( C300 + 1 ) & ( C300 + 1 ) <= C297) by L1079 , NAT_1:11 , NAT_1:13;
+L1090: ( ( Line (D64 , ( C300 + 1 )) ) . ( C302 + 1 ) ) = ( D64 * (( C300 + 1 ) , ( C302 + 1 )) ) by L1080 , L1087
+.= ( pow (C298 , ( ( ( C300 + 1 ) - 1 ) * ( ( C302 + 1 ) - 1 ) )) ) by L1089 , L1088 , L823
+.= ( pow (C298 , ( C300 * C302 )) );
+thus L1091: thesis by L1090;
+end;
+L1092: (for B332 being Nat holds (for B333 , B334 , B335 being (Element of C295) holds ((B333 = ( ( Line (D64 , ( C300 + 1 )) ) . ( B332 + 1 ) ) & B334 = ( ( Col (( mConv (C296 , C297) ) , 1) ) . ( B332 + 1 ) ) & B335 = ( C296 . B332 )) implies (B332 < C297 implies ( B333 * B334 ) = ( ( pow (C298 , ( C300 * B332 )) ) * B335 )))))
+proof
+let C303 being Nat;
+let C304 , C305 , C306 being (Element of C295);
+assume that
+L1093: C304 = ( ( Line (D64 , ( C300 + 1 )) ) . ( C303 + 1 ) )
+and
+L1094: (C305 = ( ( Col (( mConv (C296 , C297) ) , 1) ) . ( C303 + 1 ) ) & C306 = ( C296 . C303 ))
+and
+L1095: C303 < C297;
+L1096: C304 = ( pow (C298 , ( C300 * C303 )) ) by L1086 , L1093 , L1095;
+thus L1097: thesis by L1096 , L1063 , L1094 , L1095;
+end;
+L1098: (for B336 being (Element of ( NAT )) holds ((1 <= B336 & B336 <= C297) implies ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . B336 ) = ( ( C296 . ( B336 -' 1 ) ) * ( ( power C295 ) . (( C298 |^ C300 ) , ( B336 -' 1 )) ) )))
+proof
+L1099: ( len ( mConv (C296 , C297) ) ) = C297 by L1060 , L639;
+let C307 being (Element of ( NAT ));
+assume that
+L1100: 1 <= C307
+and
+L1101: C307 <= C297;
+L1102: C307 in ( Seg C297 ) by L1100 , L1101;
+L1103: C307 in ( dom ( mConv (C296 , C297) ) ) by L1102 , L1099 , FINSEQ_1:def 3;
+L1104: ( ( Col (( mConv (C296 , C297) ) , 1) ) . C307 ) = ( ( mConv (C296 , C297) ) * (C307 , 1) ) by L1103 , MATRIX_1:def 8;
+L1105: ( 0 ) < C307 by L1100;
+L1106: (( dom C296 ) = ( NAT ) & ( C307 - 1 ) is (Element of ( NAT ))) by L1105 , FUNCT_2:def 1 , NAT_1:20;
+L1107: ( C296 . ( C307 - 1 ) ) = ( C296 /. ( C307 - 1 ) ) by L1106 , PARTFUN1:def 6;
+L1108: ( Seg ( width D64 ) ) = ( Seg C297 ) by MATRIX_1:24;
+L1109: C307 in ( Seg ( width D64 ) ) by L1108 , L1100 , L1101;
+L1110: ( ( Line (D64 , ( C300 + 1 )) ) . C307 ) = ( D64 * (( C300 + 1 ) , C307) ) by L1109 , MATRIX_1:def 7;
+reconsider D65 = ( ( Line (D64 , ( C300 + 1 )) ) . C307 ) , D66 = ( ( Col (( mConv (C296 , C297) ) , 1) ) . C307 ) , D67 = ( C296 . ( C307 - 1 ) ) as (Element of C295) by L1110 , L1104 , L1107;
+L1111: ( len ( Line (D64 , ( C300 + 1 )) ) ) = ( width D64 ) by MATRIX_1:def 7
+.= C297 by MATRIX_1:24
+.= ( len ( mConv (C296 , C297) ) ) by L1060 , L639
+.= ( len ( Col (( mConv (C296 , C297) ) , 1) ) ) by MATRIX_1:def 8;
+L1112: ( len ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) = ( len ( Line (D64 , ( C300 + 1 )) ) ) by L1111 , MATRIX_3:6
+.= ( width D64 ) by MATRIX_1:def 7
+.= C297 by MATRIX_1:24;
+L1113: ( dom ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) = ( Seg C297 ) by L1112 , FINSEQ_1:def 3;
+L1114: C307 in ( dom ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) by L1113 , L1100 , L1101;
+L1115: ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . C307 ) = ( D65 * D66 ) by L1114 , FVSUM_1:60;
+L1116: ( D65 * D66 ) = ( ( pow (C298 , ( C300 * ( C307 - 1 ) )) ) * D67 )
+proof
+L1117: ( 0 ) < C307 by L1100;
+L1118: ( C307 - 1 ) is Nat by L1117 , NAT_1:20;
+L1119: (( C307 - 1 ) <= ( C297 - 1 ) & ( C297 - 1 ) is Nat) by L1060 , L1101 , NAT_1:20 , XREAL_1:9;
+L1120: ( C307 - 1 ) < ( ( C297 - 1 ) + 1 ) by L1119 , L1118 , NAT_1:13;
+reconsider D68 = ( C307 - 1 ) as Nat by L1117 , NAT_1:20;
+L1121: D65 = ( ( Line (D64 , ( C300 + 1 )) ) . ( D68 + 1 ) );
+thus L1122: thesis by L1121 , L1092 , L1120;
+end;
+reconsider D69 = ( pow (C298 , ( C300 * ( C307 - 1 ) )) ) as (Element of C295);
+L1123: ( C307 - 1 ) >= ( 0 ) by L1100 , NAT_1:20;
+L1124: D69 = ( pow (( C298 |^ C300 ) , ( C307 - 1 )) ) by L1100 , L583
+.= ( ( power C295 ) . (( C298 |^ C300 ) , ( C307 - 1 )) ) by L1123 , L322
+.= ( ( power C295 ) . (( C298 |^ C300 ) , ( C307 -' 1 )) ) by L1123 , XREAL_0:def 2;
+thus L1125: thesis by L1124 , L1116 , L1115 , L1123 , XREAL_0:def 2;
+end;
+L1126: ( Sum ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) = ( eval (C296 , ( C298 |^ C300 )) )
+proof
+L1127: (for B337 being Nat holds ((( len C296 ) < B337 & B337 <= C297) implies ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . B337 ) = ( 0. C295 )))
+proof
+L1128: 1 <= ( 1 + ( len C296 ) ) by NAT_1:11;
+let C308 being Nat;
+assume that
+L1129: ( len C296 ) < C308
+and
+L1130: C308 <= C297;
+L1131: ( len C296 ) < ( ( C308 - 1 ) + 1 ) by L1129;
+L1132: ( ( len C296 ) + 1 ) <= C308 by L1129 , NAT_1:13;
+L1133: 1 <= C308 by L1132 , L1128 , XXREAL_0:2;
+L1134: ( 1 - 1 ) <= ( C308 - 1 ) by L1133 , XREAL_1:9;
+L1135: ( C308 -' 1 ) = ( C308 - 1 ) by L1134 , XREAL_0:def 2;
+L1136: ( C308 -' 1 ) >= ( len C296 ) by L1135 , L1131 , NAT_1:13;
+L1137: C308 in ( NAT ) by ORDINAL1:def 12;
+L1138: ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . C308 ) = ( ( C296 . ( C308 -' 1 ) ) * ( ( power C295 ) . (( C298 |^ C300 ) , ( C308 -' 1 )) ) ) by L1137 , L1098 , L1130 , L1133
+.= ( ( 0. C295 ) * ( ( power C295 ) . (( C298 |^ C300 ) , ( C308 -' 1 )) ) ) by L1136 , ALGSEQ_1:8
+.= ( 0. C295 ) by VECTSP_1:7;
+thus L1139: thesis by L1138;
+end;
+L1140: ( len ( Line (D64 , ( C300 + 1 )) ) ) = ( width D64 ) by MATRIX_1:def 7
+.= C297 by MATRIX_1:24
+.= ( len ( mConv (C296 , C297) ) ) by L1060 , L639
+.= ( len ( Col (( mConv (C296 , C297) ) , 1) ) ) by MATRIX_1:def 8;
+L1141: ( len ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) = ( len ( Line (D64 , ( C300 + 1 )) ) ) by L1140 , MATRIX_3:6
+.= ( width D64 ) by MATRIX_1:def 7
+.= C297 by MATRIX_1:24;
+L1142: ( ( len C296 ) - ( len C296 ) ) <= ( C297 - ( len C296 ) ) by L1061 , XREAL_1:9;
+reconsider D70 = ( C297 - ( len C296 ) ) as (Element of ( NAT )) by L1142 , INT_1:3;
+consider C309 being (FinSequence of C295) such that L1143: ( eval (C296 , ( C298 |^ C300 )) ) = ( Sum C309 ) and L1144: ( len C309 ) = ( len C296 ) and L1145: (for B338 being (Element of ( NAT )) holds (B338 in ( dom C309 ) implies ( C309 . B338 ) = ( ( C296 . ( B338 -' 1 ) ) * ( ( power C295 ) . (( C298 |^ C300 ) , ( B338 -' 1 )) ) ))) by POLYNOM4:def 2;
+L1146: (ex B339 being (FinSequence of C295) st (( dom B339 ) = ( Seg D70 ) & (for B340 being Nat holds (B340 in ( Seg D70 ) implies ( B339 . B340 ) = ( 0. C295 )))))
+proof
+defpred S18[ set , set ] means $2 = ( 0. C295 );
+L1147: (for B341 being Nat holds (B341 in ( Seg D70 ) implies (ex B342 being (Element of C295) st S18[ B341 , B342 ])));
+L1148: (ex B343 being (FinSequence of C295) st (( dom B343 ) = ( Seg D70 ) & (for B344 being Nat holds (B344 in ( Seg D70 ) implies S18[ B344 , ( B343 . B344 ) ])))) from FINSEQ_1:sch 5(L1147);
+thus L1149: thesis by L1148;
+end;
+consider C310 being (FinSequence of C295) such that L1150: ( dom C310 ) = ( Seg D70 ) and L1151: (for B345 being Nat holds (B345 in ( Seg D70 ) implies ( C310 . B345 ) = ( 0. C295 ))) by L1146;
+L1152: (for B346 being (Element of ( NAT )) holds (B346 in ( Seg D70 ) implies ( C310 . B346 ) = ( 0. C295 ))) by L1151;
+L1153: ( len C310 ) = ( C297 - ( len C296 ) ) by L1150 , FINSEQ_1:def 3;
+L1154: ( ( len C309 ) + ( len C310 ) ) = C297 by L1153 , L1144;
+L1155: ( dom ( C309 ^ C310 ) ) = ( Seg C297 ) by L1154 , FINSEQ_1:def 7;
+L1156: ( dom ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) = ( dom ( C309 ^ C310 ) ) by L1155 , L1141 , FINSEQ_1:def 3;
+L1157: (for B347 being (Element of ( NAT )) holds ((1 <= B347 & B347 <= ( len C296 )) implies ( C309 . B347 ) = ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . B347 )))
+proof
+let C311 being (Element of ( NAT ));
+assume that
+L1158: 1 <= C311
+and
+L1159: C311 <= ( len C296 );
+L1160: C311 <= C297 by L1061 , L1159 , XXREAL_0:2;
+L1161: ( dom C309 ) = ( Seg ( len C296 ) ) by L1144 , FINSEQ_1:def 3;
+L1162: C311 in ( dom C309 ) by L1161 , L1158 , L1159;
+L1163: ( C309 . C311 ) = ( ( C296 . ( C311 -' 1 ) ) * ( ( power C295 ) . (( C298 |^ C300 ) , ( C311 -' 1 )) ) ) by L1162 , L1145
+.= ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . C311 ) by L1098 , L1158 , L1160;
+thus L1164: thesis by L1163;
+end;
+L1165: (for B348 being Nat holds (B348 in ( dom ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) implies ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . B348 ) = ( ( C309 ^ C310 ) . B348 )))
+proof
+let C312 being Nat;
+L1166: ( ( len C309 ) + ( len C310 ) ) = C297 by L1144 , L1153;
+L1167: ( dom ( C309 ^ C310 ) ) = ( Seg C297 ) by L1166 , FINSEQ_1:def 7;
+assume L1168: C312 in ( dom ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) );
+per cases  by L1156 , L1168 , L1167 , FINSEQ_1:1;
+suppose L1169: (1 <= C312 & C312 <= ( len C309 ));
+
+L1170: C312 in ( dom C309 ) by L1169 , FINSEQ_3:25;
+L1171: ( ( C309 ^ C310 ) . C312 ) = ( C309 . C312 ) by L1170 , FINSEQ_1:def 7
+.= ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . C312 ) by L1144 , L1157 , L1168 , L1169;
+thus L1172: thesis by L1171;
+end;
+suppose L1173: (( len C309 ) < C312 & C312 <= C297);
+
+L1174: ( ( len C309 ) + 1 ) <= C312 by L1173 , NAT_1:13;
+L1175: ( ( ( len C309 ) + 1 ) - ( len C309 ) ) <= ( C312 - ( len C309 ) ) by L1174 , XREAL_1:9;
+reconsider D71 = ( C312 - ( len C309 ) ) as (Element of ( NAT )) by L1175 , INT_1:3;
+L1176: ( ( len C296 ) - C297 ) <= ( C297 - C297 ) by L1061 , XREAL_1:9;
+L1177: ( - ( ( len C296 ) - C297 ) ) >= ( 0 ) by L1176;
+reconsider D72 = ( C297 - ( len C296 ) ) as (Element of ( NAT )) by L1177 , INT_1:3;
+L1178: ( ( len C309 ) + 1 ) <= C312 by L1173 , NAT_1:13;
+L1179: ( ( ( len C309 ) + 1 ) - ( len C309 ) ) <= ( C312 - ( len C309 ) ) by L1178 , XREAL_1:9;
+L1180: D71 <= D72 by L1144 , L1173 , XREAL_1:9;
+L1181: D71 in ( dom C310 ) by L1180 , L1150 , L1179;
+L1182: ( ( len C309 ) + ( len C310 ) ) = C297 by L1144 , L1153;
+L1183: ( dom ( C309 ^ C310 ) ) = ( Seg C297 ) by L1182 , FINSEQ_1:def 7;
+L1184: ( len ( C309 ^ C310 ) ) = C297 by L1183 , FINSEQ_1:def 3;
+L1185: ( ( C309 ^ C310 ) . C312 ) = ( C310 . ( C312 - ( len C309 ) ) ) by L1184 , L1173 , FINSEQ_1:24
+.= ( 0. C295 ) by L1150 , L1151 , L1181
+.= ( ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) . C312 ) by L1144 , L1127 , L1173;
+thus L1186: thesis by L1185;
+end;
+end;
+L1188: ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) = ( C309 ^ C310 ) by L1165 , L1156 , FINSEQ_1:13;
+L1189: ( Sum ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) = ( ( Sum C309 ) + ( Sum C310 ) ) by L1188 , RLVECT_1:41
+.= ( ( Sum C309 ) + ( 0. C295 ) ) by L1150 , L1152 , POLYNOM3:1
+.= ( eval (C296 , ( C298 |^ C300 )) ) by L1143 , RLVECT_1:def 4;
+thus L1190: thesis by L1189;
+end;
+L1191: ( ( Line (D64 , ( C300 + 1 )) ) "*" ( Col (( mConv (C296 , C297) ) , 1) ) ) = ( Sum ( mlt (( Line (D64 , ( C300 + 1 )) ) , ( Col (( mConv (C296 , C297) ) , 1) )) ) ) by FVSUM_1:def 9;
+L1192: (1 <= ( C300 + 1 ) & ( C300 + 1 ) <= C297) by L1079 , NAT_1:11 , NAT_1:13;
+L1193: ( C300 + 1 ) in ( Seg C297 ) by L1192;
+L1194: [ ( C300 + 1 ) , 1 ] in ( Indices ( D64 * ( mConv (C296 , C297) ) ) ) by L1193 , L1075 , L1078 , ZFMISC_1:def 2;
+L1195: ( ( D64 * ( mConv (C296 , C297) ) ) * (( C300 + 1 ) , 1) ) = ( eval (C296 , ( C298 |^ C300 )) ) by L1194 , L1076 , L1191 , L1126 , MATRIX_3:def 4;
+thus L1196: thesis by L1195 , L1079 , L766;
+end;
+thus L1197: thesis by L1062;
+end;
+theorem
+L1198: (for B349 being Field holds (for B350 being (Polynomial of B349) holds (for B351 being Nat holds ((( 0 ) < B351 & ( len B350 ) <= B351) implies (for B352 being (Element of B349) holds ( DFT (B350 , B352 , B351) ) = ( aConv ( ( VM (B352 , B351) ) * ( mConv (B350 , B351) ) ) ))))))
+proof
+let C313 being Field;
+let C314 being (Polynomial of C313);
+let C315 being Nat;
+assume that
+L1199: ( 0 ) < C315
+and
+L1200: ( len C314 ) <= C315;
+let C316 being (Element of C313);
+L1201: C315 in ( NAT ) by ORDINAL1:def 12;
+L1202:
+now
+let C317 being set;
+assume L1203: C317 in ( dom ( DFT (C314 , C316 , C315) ) );
+reconsider D73 = C317 as (Element of ( NAT )) by L1203 , FUNCT_2:def 1;
+per cases ;
+suppose L1204: D73 < C315;
+
+L1205: ( width ( VM (C316 , C315) ) ) = C315 by MATRIX_1:24
+.= ( len ( mConv (C314 , C315) ) ) by L1199 , L639;
+L1206: ( len ( ( VM (C316 , C315) ) * ( mConv (C314 , C315) ) ) ) = ( len ( VM (C316 , C315) ) ) by L1205 , MATRIX_3:def 4
+.= C315 by MATRIX_1:24;
+thus L1207: ( ( DFT (C314 , C316 , C315) ) . C317 ) = ( ( ( VM (C316 , C315) ) * ( mConv (C314 , C315) ) ) * (( D73 + 1 ) , 1) ) by L1201 , L1200 , L1204 , L1059
+.= ( ( aConv ( ( VM (C316 , C315) ) * ( mConv (C314 , C315) ) ) ) . C317 ) by L1204 , L1206 , L669;
+end;
+suppose L1208: C315 <= D73;
+
+L1209: ( width ( VM (C316 , C315) ) ) = C315 by MATRIX_1:24
+.= ( len ( mConv (C314 , C315) ) ) by L1199 , L639;
+L1210: ( len ( ( VM (C316 , C315) ) * ( mConv (C314 , C315) ) ) ) = ( len ( VM (C316 , C315) ) ) by L1209 , MATRIX_3:def 4
+.= C315 by MATRIX_1:24;
+thus L1211: ( ( DFT (C314 , C316 , C315) ) . C317 ) = ( 0. C313 ) by L1208 , L766
+.= ( ( aConv ( ( VM (C316 , C315) ) * ( mConv (C314 , C315) ) ) ) . C317 ) by L1208 , L1210 , L669;
+end;
+end;
+L1213: ( dom ( DFT (C314 , C316 , C315) ) ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom ( aConv ( ( VM (C316 , C315) ) * ( mConv (C314 , C315) ) ) ) ) by FUNCT_2:def 1;
+thus L1214: thesis by L1213 , L1202 , FUNCT_1:2;
+end;
+theorem
+L1215: (for B353 being Field holds (for B354 , B355 being (Polynomial of B353) holds (for B356 being (Element of ( NAT )) holds ((B356 > ( 0 ) & ( len B354 ) <= B356 & ( len B355 ) <= B356) implies (for B357 being (Element of B353) holds (B357 is_primitive_root_of_degree ( 2 * B356 ) implies ( DFT (( DFT (( B354 *' B355 ) , B357 , ( 2 * B356 )) ) , ( B357 " ) , ( 2 * B356 )) ) = ( ( emb (( 2 * B356 ) , B353) ) * ( B354 *' B355 ) )))))))
+proof
+let C318 being Field;
+let C319 , C320 being (Polynomial of C318);
+let C321 being (Element of ( NAT ));
+assume that
+L1216: C321 > ( 0 )
+and
+L1217: (( len C319 ) <= C321 & ( len C320 ) <= C321);
+let C322 being (Element of C318);
+assume L1218: C322 is_primitive_root_of_degree ( 2 * C321 );
+per cases ;
+suppose L1219: (( len C319 ) = ( 0 ) or ( len C320 ) = ( 0 ));
+
+per cases  by L1219;
+suppose L1220: ( len C319 ) = ( 0 );
+
+L1221: C319 = ( 0_. C318 ) by L1220 , POLYNOM4:5;
+L1222: ( C319 *' C320 ) = ( 0_. C318 ) by L1221 , POLYNOM3:34;
+L1223: (( ( emb (( 2 * C321 ) , C318) ) * ( C319 *' C320 ) ) = ( 0_. C318 ) & ( DFT (( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) , ( C322 " ) , ( 2 * C321 )) ) = ( DFT (( 0_. C318 ) , ( C322 " ) , ( 2 * C321 )) )) by L1222 , L803 , POLYNOM5:28;
+thus L1224: thesis by L1223 , L803;
+end;
+suppose L1225: ( len C320 ) = ( 0 );
+
+L1226: C320 = ( 0_. C318 ) by L1225 , POLYNOM4:5;
+L1227: ( C319 *' C320 ) = ( 0_. C318 ) by L1226 , POLYNOM3:34;
+L1228: (( ( emb (( 2 * C321 ) , C318) ) * ( C319 *' C320 ) ) = ( 0_. C318 ) & ( DFT (( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) , ( C322 " ) , ( 2 * C321 )) ) = ( DFT (( 0_. C318 ) , ( C322 " ) , ( 2 * C321 )) )) by L1227 , L803 , POLYNOM5:28;
+thus L1229: thesis by L1228 , L803;
+end;
+end;
+suppose L1231: (( len C319 ) <> ( 0 ) & ( len C320 ) <> ( 0 ));
+
+set D74 = ( VM (C322 , ( 2 * C321 )) );
+set D75 = ( VM (( C322 " ) , ( 2 * C321 )) );
+L1232: ( ( len C319 ) + ( len C320 ) ) <= ( C321 + C321 ) by L1217 , XREAL_1:7;
+L1233: ( len ( C319 *' C320 ) ) <= ( ( len C319 ) + ( len C320 ) ) by L1231 , L245;
+L1234: ( len ( C319 *' C320 ) ) <= ( 2 * C321 ) by L1233 , L1232 , XXREAL_0:2;
+L1235: (for B358 being Nat holds (B358 < ( 2 * C321 ) implies ( ( D74 * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) * (( B358 + 1 ) , 1) ) = ( ( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) . B358 )))
+proof
+let C323 being Nat;
+L1236: C323 in ( NAT ) by ORDINAL1:def 12;
+thus L1237: thesis by L1236 , L1234 , L1059;
+end;
+L1238: (for B359 being Nat holds (B359 >= ( 2 * C321 ) implies ( ( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) . B359 ) = ( 0. C318 ))) by L766;
+L1239: ( 2 * C321 ) is_at_least_length_of ( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) by L1238 , ALGSEQ_1:def 2;
+L1240: ( len ( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) ) <= ( 2 * C321 ) by L1239 , ALGSEQ_1:def 3;
+L1241: ( width D75 ) = ( 2 * C321 ) by MATRIX_1:24
+.= ( len D74 ) by MATRIX_1:24;
+L1242: ( C321 + C321 ) <> ( 0 ) by L1216;
+L1243: ( D75 * D74 ) = ( D74 * D75 ) by L1242 , L1218 , L1053
+.= ( ( emb (( 2 * C321 ) , C318) ) * ( 1. (C318 , ( 2 * C321 )) ) ) by L1218 , L1242 , L1016;
+L1244:
+now
+let C324 being set;
+assume L1245: C324 in ( dom ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) );
+reconsider D76 = C324 as (Element of ( NAT )) by L1245 , FUNCT_2:def 1;
+per cases ;
+suppose L1246: D76 < ( 2 * C321 );
+
+L1247: (( ( 0 ) + 1 ) <= ( D76 + 1 ) & ( D76 + 1 ) <= ( 2 * C321 )) by L1246 , NAT_1:13;
+L1248: ( D76 + 1 ) in ( Seg ( 2 * C321 ) ) by L1247;
+L1249: ( len ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) = ( 2 * C321 ) by L1242 , L639;
+L1250: ( dom ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) = ( Seg ( 2 * C321 ) ) by L1249 , FINSEQ_1:def 3;
+L1251: (( Seg ( width ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) = ( Seg 1 ) & 1 in ( Seg 1 )) by L1242 , L639;
+L1252: [ ( D76 + 1 ) , 1 ] in ( Indices ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) by L1251 , L1250 , L1248 , ZFMISC_1:87;
+L1253: ( len ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) = ( len ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) by MATRIX_3:def 5
+.= ( 2 * C321 ) by L1242 , L639;
+thus L1254: ( ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) . C324 ) = ( ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) * (( D76 + 1 ) , 1) ) by L1253 , L1246 , L669
+.= ( ( emb (( 2 * C321 ) , C318) ) * ( ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) * (( D76 + 1 ) , 1) ) ) by L1252 , MATRIX_3:def 5
+.= ( ( emb (( 2 * C321 ) , C318) ) * ( ( C319 *' C320 ) . D76 ) ) by L1246 , L639
+.= ( ( ( emb (( 2 * C321 ) , C318) ) * ( C319 *' C320 ) ) . C324 ) by POLYNOM5:def 3;
+end;
+suppose L1255: ( 2 * C321 ) <= D76;
+
+L1256: ( len ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) = ( len ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) by MATRIX_3:def 5
+.= ( 2 * C321 ) by L1242 , L639;
+thus L1257: ( ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) . C324 ) = ( 0. C318 ) by L1256 , L1255 , L669
+.= ( ( emb (( 2 * C321 ) , C318) ) * ( 0. C318 ) ) by VECTSP_1:6
+.= ( ( emb (( 2 * C321 ) , C318) ) * ( ( C319 *' C320 ) . D76 ) ) by L1234 , L1255 , ALGSEQ_1:8 , XXREAL_0:2
+.= ( ( ( emb (( 2 * C321 ) , C318) ) * ( C319 *' C320 ) ) . C324 ) by POLYNOM5:def 3;
+end;
+end;
+L1259: ( dom ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) ) = ( NAT ) by FUNCT_2:def 1
+.= ( dom ( ( emb (( 2 * C321 ) , C318) ) * ( C319 *' C320 ) ) ) by FUNCT_2:def 1;
+L1260: ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) = ( ( emb (( 2 * C321 ) , C318) ) * ( C319 *' C320 ) ) by L1259 , L1244 , FUNCT_1:2;
+L1261: ( len ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) = ( 2 * C321 ) by L1242 , L639
+.= ( width D74 ) by MATRIX_1:24;
+L1262: ( len ( D74 * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) = ( len D74 ) by L1261 , MATRIX_3:def 4
+.= ( 2 * C321 ) by MATRIX_1:24;
+L1263: ( width ( D74 * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) = ( width ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) by L1261 , MATRIX_3:def 4
+.= 1 by L1242 , L639;
+L1264: ( D74 * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) is (Matrix of ( 2 * C321 ) , 1 , C318) by L1263 , L1242 , L1262 , MATRIX_1:20;
+L1265: ( aConv ( D75 * ( mConv (( DFT (( C319 *' C320 ) , C322 , ( 2 * C321 )) ) , ( 2 * C321 )) ) ) ) = ( aConv ( D75 * ( D74 * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) ) by L1264 , L1242 , L1235 , L649
+.= ( aConv ( ( D75 * D74 ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) by L1241 , L1261 , MATRIX_3:33
+.= ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( ( 1. (C318 , ( 2 * C321 )) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) ) by L1242 , L1243 , L158
+.= ( aConv ( ( emb (( 2 * C321 ) , C318) ) * ( mConv (( C319 *' C320 ) , ( 2 * C321 )) ) ) ) by L1216 , L914;
+thus L1266: thesis by L1265 , L1242 , L1240 , L1260 , L1198;
+end;
+end;
+::$N Multiplication of Polynomials using Discrete Fourier Transformation
+theorem
+L1268: (for B360 being Field holds (for B361 , B362 being (Polynomial of B360) holds (for B363 being (Element of ( NAT )) holds ((B363 > ( 0 ) & ( len B361 ) <= B363 & ( len B362 ) <= B363) implies (for B364 being (Element of B360) holds (B364 is_primitive_root_of_degree ( 2 * B363 ) implies (( emb (( 2 * B363 ) , B360) ) <> ( 0. B360 ) implies ( ( ( emb (( 2 * B363 ) , B360) ) " ) * ( DFT (( ( DFT (B361 , B364 , ( 2 * B363 )) ) * ( DFT (B362 , B364 , ( 2 * B363 )) ) ) , ( B364 " ) , ( 2 * B363 )) ) ) = ( B361 *' B362 ))))))))
+proof
+let C325 being Field;
+let C326 , C327 being (Polynomial of C325);
+let C328 being (Element of ( NAT ));
+assume L1269: (C328 > ( 0 ) & ( len C326 ) <= C328 & ( len C327 ) <= C328);
+let C329 being (Element of C325);
+assume L1270: C329 is_primitive_root_of_degree ( 2 * C328 );
+assume L1271: ( emb (( 2 * C328 ) , C325) ) <> ( 0. C325 );
+L1272: ( ( ( emb (( 2 * C328 ) , C325) ) " ) * ( DFT (( ( DFT (C326 , C329 , ( 2 * C328 )) ) * ( DFT (C327 , C329 , ( 2 * C328 )) ) ) , ( C329 " ) , ( 2 * C328 )) ) ) = ( ( ( emb (( 2 * C328 ) , C325) ) " ) * ( DFT (( DFT (( C326 *' C327 ) , C329 , ( 2 * C328 )) ) , ( C329 " ) , ( 2 * C328 )) ) ) by L813
+.= ( ( ( emb (( 2 * C328 ) , C325) ) " ) * ( ( emb (( 2 * C328 ) , C325) ) * ( C326 *' C327 ) ) ) by L1269 , L1270 , L1215
+.= ( ( ( ( emb (( 2 * C328 ) , C325) ) " ) * ( emb (( 2 * C328 ) , C325) ) ) * ( C326 *' C327 ) ) by L261
+.= ( ( 1. C325 ) * ( C326 *' C327 ) ) by L1271 , VECTSP_1:def 10
+.= ( C326 *' C327 ) by POLYNOM5:27;
+thus L1273: thesis by L1272;
+end;

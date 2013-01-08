@@ -1,0 +1,2699 @@
+:: Preliminaries to Automatic Generation of Mizar Documentation for Circuits
+::  by Grzegorz Bancerek and Adam Naumowicz
+::
+:: Received July 26, 2002
+:: Copyright (c) 2002-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, STRUCT_0, MSAFREE2, XBOOLE_0, MSUALG_1, RELAT_1,
+      CIRCUIT1, FSM_1, SUBSET_1, CIRCUIT2, FUNCT_1, ARYTM_3, CARD_1, XXREAL_0,
+      NAT_1, FUNCT_4, PARTFUN1, FINSET_1, CIRCCOMB, FINSEQ_2, TARSKI, PBOOLE,
+      GLIB_000, FINSEQ_1, NET_1, FACIRC_1, FUNCOP_1, CATALG_1, MCART_1,
+      ZFMISC_1, CLASSES1, REWRITE1, ORDINAL2, MARGREL1, VALUED_0, CIRCCMB3;
+ notations TARSKI, XBOOLE_0,
+      XTUPLE_0, SUBSET_1, NUMBERS, ENUMSET1, ZFMISC_1, RELAT_1,
+      FUNCT_1, PBOOLE, FINSET_1, ORDINAL2, CLASSES1, FUNCT_2, XXREAL_0,
+      ORDINAL1, NAT_1, VALUED_0, PARTFUN1, REWRITE1, FINSEQ_1, FINSEQ_2,
+      FINSEQ_4, FINSEQOP, FUNCT_4, STRUCT_0, MSUALG_1, FACIRC_1, MSAFREE2,
+      CIRCUIT1, CIRCUIT2, CIRCCOMB, FUNCOP_1, XXREAL_2, MCART_1;
+ constructors DOMAIN_1, ORDINAL2, CLASSES1, FINSEQOP, FINSEQ_4, LIMFUNC1,
+      REWRITE1, CIRCUIT1, CIRCUIT2, FACIRC_1, XXREAL_2, VALUED_0, RELSET_1,
+      XTUPLE_0;
+ registrations XBOOLE_0, RELAT_1, FUNCT_1, ORDINAL1, FUNCOP_1, FINSET_1,
+      XREAL_0, MEMBERED, FINSEQ_1, FINSEQ_2, CARD_3, SEQM_3, FINSEQ_4, PBOOLE,
+      STRUCT_0, MSUALG_1, CIRCCOMB, FACIRC_1, XXREAL_2, RELSET_1, XTUPLE_0;
+ requirements BOOLE, SUBSET, NUMERALS, REAL;
+ definitions TARSKI, XBOOLE_0, RELAT_1, REWRITE1, MSAFREE2, CIRCUIT2, FINSET_1,
+      CIRCCOMB, FACIRC_1, XTUPLE_0;
+ theorems CIRCCOMB, ZFMISC_1, TARSKI, XBOOLE_0, FINSEQ_1, FUNCT_1, FINSEQ_2,
+      CIRCUIT1, CARD_3, CIRCCMB2, FUNCOP_1, PBOOLE, FINSEQ_3, ENUMSET1,
+      FACIRC_1, ORDINAL2, MCART_1, FUNCT_4, FINSET_1, NAT_1, RELAT_1, MSUALG_1,
+      MSAFREE2, FUNCT_2, RELSET_1, CLASSES1, ORDINAL1, CIRCUIT2, XBOOLE_1,
+      XREAL_1, XXREAL_0, FINSEQ_4, VALUED_0, XXREAL_2, PARTFUN1, CARD_1,
+      XTUPLE_0;
+ schemes TARSKI, XBOOLE_0, FUNCT_2, NAT_1, REWRITE1, CLASSES1, RELAT_1;
+
+begin
+theorem
+L1: (for B1 being non  void  Circuit-like non  empty ManySortedSign holds (for B2 being  non-empty (Circuit of B1) holds (for B3 being (State of B2) holds (for B4 being set holds (B4 in ( InputVertices B1 ) implies (for B5 being (Element of ( NAT )) holds ( ( Following (B3 , B5) ) . B4 ) = ( B3 . B4 )))))))
+proof
+let C1 being non  void  Circuit-like non  empty ManySortedSign;
+let C2 being  non-empty (Circuit of C1);
+let C3 being (State of C2);
+let C4 being set;
+assume that
+L2: C4 in ( InputVertices C1 );
+defpred S1[ (Element of ( NAT )) ] means ( ( Following (C3 , $1) ) . C4 ) = ( C3 . C4 );
+L3:
+now
+let C5 being (Element of ( NAT ));
+assume L4: S1[ C5 ];
+L5: ( ( Following (C3 , ( C5 + 1 )) ) . C4 ) = ( ( Following ( Following (C3 , C5) ) ) . C4 ) by FACIRC_1:12
+.= ( C3 . C4 ) by L2 , L4 , CIRCUIT2:def 5;
+thus L6: S1[ ( C5 + 1 ) ] by L5;
+end;
+L7: S1[ ( 0 ) ] by FACIRC_1:11;
+thus L8: (for B6 being (Element of ( NAT )) holds S1[ B6 ]) from NAT_1:sch 1(L7 , L3);
+end;
+definition
+let C6 being non  void  Circuit-like non  empty ManySortedSign;
+let C7 being  non-empty (Circuit of C6);
+let C8 being (State of C7);
+attr C8 is  stabilizing
+means
+:L9: (ex B7 being (Element of ( NAT )) st ( Following (C8 , B7) ) is  stable);
+end;
+definition
+let C9 being non  void  Circuit-like non  empty ManySortedSign;
+let C10 being  non-empty (Circuit of C9);
+attr C10 is  stabilizing
+means
+:L11: (for B8 being (State of C10) holds B8 is  stabilizing);
+attr C10 is  with_stabilization-limit
+means
+(ex B9 being (Element of ( NAT )) st (for B10 being (State of C10) holds ( Following (B10 , B9) ) is  stable));
+end;
+registration
+let C11 being non  void  Circuit-like non  empty ManySortedSign;
+cluster  with_stabilization-limit ->  stabilizing for  non-empty  non-empty  non-empty  non-empty (Circuit of C11);
+coherence
+proof
+let C12 being  non-empty (Circuit of C11);
+given C13 being (Element of ( NAT )) such that
+L13: (for B11 being (State of C12) holds ( Following (B11 , C13) ) is  stable);
+
+let C14 being (State of C12);
+take C13;
+thus L14: thesis by L13;
+end;
+end;
+definition
+let C15 being non  void  Circuit-like non  empty ManySortedSign;
+let C16 being  non-empty (Circuit of C15);
+let C17 being (State of C16);
+assume that
+L16: C17 is  stabilizing;
+func Result C17 -> (State of C16) means 
+:L17: (it is  stable & (ex B12 being (Element of ( NAT )) st it = ( Following (C17 , B12) )));
+existence
+proof
+consider C18 being (Element of ( NAT )) such that L18: ( Following (C17 , C18) ) is  stable by L16 , L9;
+take ( Following (C17 , C18) );
+thus L19: thesis by L18;
+end;
+uniqueness
+proof
+let C19 , C20 being (State of C16);
+assume that
+L20: C19 is  stable
+and
+L21: (ex B13 being (Element of ( NAT )) st C19 = ( Following (C17 , B13) ))
+and
+L22: C20 is  stable
+and
+L23: (ex B14 being (Element of ( NAT )) st C20 = ( Following (C17 , B14) ));
+consider C21 being (Element of ( NAT )) such that L24: C19 = ( Following (C17 , C21) ) by L21;
+consider C22 being (Element of ( NAT )) such that L25: C20 = ( Following (C17 , C22) ) by L23;
+per cases ;
+suppose L26: C21 <= C22;
+
+thus L27: thesis by L26 , L20 , L24 , L25 , CIRCCMB2:4;
+end;
+suppose L28: C22 <= C21;
+
+thus L29: thesis by L28 , L22 , L24 , L25 , CIRCCMB2:4;
+end;
+end;
+end;
+definition
+let C23 being non  void  Circuit-like non  empty ManySortedSign;
+let C24 being  non-empty (Circuit of C23);
+let C25 being (State of C24);
+assume that
+L32: C25 is  stabilizing;
+func stabilization-time C25 -> (Element of ( NAT )) means 
+:L33: (( Following (C25 , it) ) is  stable & (for B15 being (Element of ( NAT )) holds (B15 < it implies (not ( Following (C25 , B15) ) is  stable))));
+existence
+proof
+defpred S2[ Nat ] means ( Following (C25 , $1) ) is  stable;
+L34: (ex B16 being (Element of ( NAT )) st S2[ B16 ]) by L32 , L9;
+L35: (ex B17 being Nat st S2[ B17 ]) by L34;
+consider C26 being Nat such that L36: (S2[ C26 ] & (for B18 being Nat holds (S2[ B18 ] implies C26 <= B18))) from NAT_1:sch 5(L35);
+reconsider D1 = C26 as (Element of ( NAT )) by ORDINAL1:def 12;
+take D1;
+thus L37: thesis by L36;
+end;
+uniqueness
+proof
+let C27 , C28 being (Element of ( NAT ));
+assume that
+L38: ( Following (C25 , C27) ) is  stable
+and
+L39: ((for B19 being (Element of ( NAT )) holds (B19 < C27 implies (not ( Following (C25 , B19) ) is  stable))) & ( Following (C25 , C28) ) is  stable)
+and
+L40: (for B20 being (Element of ( NAT )) holds (B20 < C28 implies (not ( Following (C25 , B20) ) is  stable)));
+assume L41: C27 <> C28;
+per cases  by L41 , XXREAL_0:1;
+suppose L42: C27 < C28;
+
+thus L43: contradiction by L42 , L38 , L40;
+end;
+suppose L44: C28 < C27;
+
+thus L45: contradiction by L44 , L39;
+end;
+end;
+end;
+theorem
+L48: (for B21 being non  void  Circuit-like non  empty ManySortedSign holds (for B22 being  non-empty (Circuit of B21) holds (for B23 being (State of B22) holds (B23 is  stabilizing implies ( Result B23 ) = ( Following (B23 , ( stabilization-time B23 )) )))))
+proof
+let C29 being non  void  Circuit-like non  empty ManySortedSign;
+let C30 being  non-empty (Circuit of C29);
+let C31 being (State of C30);
+assume that
+L49: C31 is  stabilizing;
+L50: ( Following (C31 , ( stabilization-time C31 )) ) is  stable by L49 , L33;
+thus L51: thesis by L50 , L49 , L17;
+end;
+theorem
+L52: (for B24 being non  void  Circuit-like non  empty ManySortedSign holds (for B25 being  non-empty (Circuit of B24) holds (for B26 being (State of B25) holds (for B27 being (Element of ( NAT )) holds (( Following (B26 , B27) ) is  stable implies ( stabilization-time B26 ) <= B27)))))
+proof
+let C32 being non  void  Circuit-like non  empty ManySortedSign;
+let C33 being  non-empty (Circuit of C32);
+let C34 being (State of C33);
+let C35 being (Element of ( NAT ));
+assume L53: ( Following (C34 , C35) ) is  stable;
+L54: C34 is  stabilizing by L53 , L9;
+thus L55: thesis by L54 , L53 , L33;
+end;
+theorem
+L56: (for B28 being non  void  Circuit-like non  empty ManySortedSign holds (for B29 being  non-empty (Circuit of B28) holds (for B30 being (State of B29) holds (for B31 being (Element of ( NAT )) holds (( Following (B30 , B31) ) is  stable implies ( Result B30 ) = ( Following (B30 , B31) ))))))
+proof
+let C36 being non  void  Circuit-like non  empty ManySortedSign;
+let C37 being  non-empty (Circuit of C36);
+let C38 being (State of C37);
+let C39 being (Element of ( NAT ));
+assume L57: ( Following (C38 , C39) ) is  stable;
+L58: C38 is  stabilizing by L57 , L9;
+thus L59: thesis by L58 , L57 , L17;
+end;
+theorem
+L60: (for B32 being non  void  Circuit-like non  empty ManySortedSign holds (for B33 being  non-empty (Circuit of B32) holds (for B34 being (State of B33) holds (for B35 being (Element of ( NAT )) holds ((B34 is  stabilizing & B35 >= ( stabilization-time B34 )) implies ( Result B34 ) = ( Following (B34 , B35) ))))))
+proof
+let C40 being non  void  Circuit-like non  empty ManySortedSign;
+let C41 being  non-empty (Circuit of C40);
+let C42 being (State of C41);
+let C43 being (Element of ( NAT ));
+assume that
+L61: C42 is  stabilizing
+and
+L62: C43 >= ( stabilization-time C42 );
+L63: ( Result C42 ) is  stable by L61 , L17;
+L64: ( Following (C42 , ( stabilization-time C42 )) ) is  stable by L63 , L61 , L48;
+L65: ( Following (C42 , C43) ) is  stable by L64 , L62 , CIRCCMB2:4;
+thus L66: thesis by L65 , L56;
+end;
+theorem
+L67: (for B36 being non  void  Circuit-like non  empty ManySortedSign holds (for B37 being  non-empty (Circuit of B36) holds (for B38 being (State of B37) holds (B38 is  stabilizing implies (for B39 being set holds (B39 in ( InputVertices B36 ) implies ( ( Result B38 ) . B39 ) = ( B38 . B39 )))))))
+proof
+let C44 being non  void  Circuit-like non  empty ManySortedSign;
+let C45 being  non-empty (Circuit of C44);
+let C46 being (State of C45);
+assume L68: C46 is  stabilizing;
+L69: ( Result C46 ) = ( Following (C46 , ( stabilization-time C46 )) ) by L68 , L48;
+thus L70: thesis by L69 , L1;
+end;
+theorem
+L71: (for B40 , B41 being non  void  Circuit-like non  empty ManySortedSign holds ((( InputVertices B40 ) misses ( InnerVertices B41 ) & ( InputVertices B41 ) misses ( InnerVertices B40 )) implies (for B42 being non  void  Circuit-like non  empty ManySortedSign holds (B42 = ( B40 +* B41 ) implies (for B43 being  non-empty (Circuit of B40) holds (for B44 being  non-empty (Circuit of B41) holds (B43 tolerates B44 implies (for B45 being  non-empty (Circuit of B42) holds (B45 = ( B43 +* B44 ) implies (for B46 being (State of B45) holds (for B47 being (State of B43) holds (for B48 being (State of B44) holds ((B47 = ( B46 | (the carrier of B40) ) & B48 = ( B46 | (the carrier of B41) ) & B47 is  stabilizing & B48 is  stabilizing) implies B46 is  stabilizing)))))))))))))
+proof
+let C47 , C48 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L72: (( InputVertices C47 ) misses ( InnerVertices C48 ) & ( InputVertices C48 ) misses ( InnerVertices C47 ));
+let C49 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L73: C49 = ( C47 +* C48 );
+let C50 being  non-empty (Circuit of C47);
+let C51 being  non-empty (Circuit of C48);
+assume L74: C50 tolerates C51;
+let C52 being  non-empty (Circuit of C49);
+assume that
+L75: C52 = ( C50 +* C51 );
+let C53 being (State of C52);
+let C54 being (State of C50);
+let C55 being (State of C51);
+assume that
+L76: (C54 = ( C53 | (the carrier of C47) ) & C55 = ( C53 | (the carrier of C48) ))
+and
+L77: C54 is  stabilizing
+and
+L78: C55 is  stabilizing;
+consider C56 being (Element of ( NAT )) such that L79: ( Following (C54 , C56) ) is  stable by L77 , L9;
+consider C57 being (Element of ( NAT )) such that L80: ( Following (C55 , C57) ) is  stable by L78 , L9;
+L81: ( Following (C53 , ( max (C56 , C57) )) ) is  stable by L72 , L73 , L74 , L75 , L76 , L79 , L80 , CIRCCMB2:22;
+thus L82: thesis by L81 , L9;
+end;
+theorem
+L83: (for B49 , B50 being non  void  Circuit-like non  empty ManySortedSign holds ((( InputVertices B49 ) misses ( InnerVertices B50 ) & ( InputVertices B50 ) misses ( InnerVertices B49 )) implies (for B51 being non  void  Circuit-like non  empty ManySortedSign holds (B51 = ( B49 +* B50 ) implies (for B52 being  non-empty (Circuit of B49) holds (for B53 being  non-empty (Circuit of B50) holds (B52 tolerates B53 implies (for B54 being  non-empty (Circuit of B51) holds (B54 = ( B52 +* B53 ) implies (for B55 being (State of B54) holds (for B56 being (State of B52) holds ((B56 = ( B55 | (the carrier of B49) ) & B56 is  stabilizing) implies (for B57 being (State of B53) holds ((B57 = ( B55 | (the carrier of B50) ) & B57 is  stabilizing) implies ( stabilization-time B55 ) = ( max (( stabilization-time B56 ) , ( stabilization-time B57 )) )))))))))))))))
+proof
+let C58 , C59 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L84: (( InputVertices C58 ) misses ( InnerVertices C59 ) & ( InputVertices C59 ) misses ( InnerVertices C58 ));
+let C60 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L85: C60 = ( C58 +* C59 );
+let C61 being  non-empty (Circuit of C58);
+let C62 being  non-empty (Circuit of C59);
+assume L86: C61 tolerates C62;
+let C63 being  non-empty (Circuit of C60);
+assume that
+L87: C63 = ( C61 +* C62 );
+let C64 being (State of C63);
+let C65 being (State of C61);
+assume that
+L88: C65 = ( C64 | (the carrier of C58) )
+and
+L89: C65 is  stabilizing;
+set D2 = ( stabilization-time C65 );
+let C66 being (State of C62);
+assume that
+L90: C66 = ( C64 | (the carrier of C59) )
+and
+L91: C66 is  stabilizing;
+set D3 = ( stabilization-time C66 );
+L92: ( Following (C65 , D2) ) is  stable by L89 , L33;
+L93:
+now
+let C67 being (Element of ( NAT ));
+assume that
+L94: C67 < ( max (D2 , D3) );
+per cases ;
+suppose L95: D2 <= D3;
+
+L96: C67 < D3 by L95 , L94 , XXREAL_0:def 10;
+L97: (not ( Following (C66 , C67) ) is  stable) by L96 , L91 , L33;
+thus L98: (not ( Following (C64 , C67) ) is  stable) by L97 , L84 , L85 , L86 , L87 , L88 , L90 , CIRCCMB2:23;
+end;
+suppose L99: D3 <= D2;
+
+L100: C67 < D2 by L99 , L94 , XXREAL_0:def 10;
+L101: (not ( Following (C65 , C67) ) is  stable) by L100 , L89 , L33;
+thus L102: (not ( Following (C64 , C67) ) is  stable) by L101 , L84 , L85 , L86 , L87 , L88 , L90 , CIRCCMB2:23;
+end;
+end;
+L104: ( Following (C66 , D3) ) is  stable by L91 , L33;
+L105: ( Following (C64 , ( max (D2 , D3) )) ) is  stable by L104 , L84 , L85 , L86 , L87 , L88 , L90 , L92 , CIRCCMB2:22;
+L106: C64 is  stabilizing by L84 , L85 , L86 , L87 , L88 , L89 , L90 , L91 , L71;
+thus L107: thesis by L106 , L105 , L93 , L33;
+end;
+theorem
+L108: (for B58 , B59 being non  void  Circuit-like non  empty ManySortedSign holds (( InputVertices B58 ) misses ( InnerVertices B59 ) implies (for B60 being non  void  Circuit-like non  empty ManySortedSign holds (B60 = ( B58 +* B59 ) implies (for B61 being  non-empty (Circuit of B58) holds (for B62 being  non-empty (Circuit of B59) holds (B61 tolerates B62 implies (for B63 being  non-empty (Circuit of B60) holds (B63 = ( B61 +* B62 ) implies (for B64 being (State of B63) holds (for B65 being (State of B61) holds ((B65 = ( B64 | (the carrier of B58) ) & B65 is  stabilizing) implies (for B66 being (State of B62) holds ((B66 = ( ( Following (B64 , ( stabilization-time B65 )) ) | (the carrier of B59) ) & B66 is  stabilizing) implies B64 is  stabilizing))))))))))))))
+proof
+let C68 , C69 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L109: ( InputVertices C68 ) misses ( InnerVertices C69 );
+let C70 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L110: C70 = ( C68 +* C69 );
+let C71 being  non-empty (Circuit of C68);
+let C72 being  non-empty (Circuit of C69);
+assume L111: C71 tolerates C72;
+let C73 being  non-empty (Circuit of C70);
+assume that
+L112: C73 = ( C71 +* C72 );
+let C74 being (State of C73);
+let C75 being (State of C71);
+assume that
+L113: C75 = ( C74 | (the carrier of C68) )
+and
+L114: C75 is  stabilizing;
+set D4 = ( stabilization-time C75 );
+L115: ( Following (C75 , D4) ) is  stable by L114 , L33;
+let C76 being (State of C72);
+assume that
+L116: C76 = ( ( Following (C74 , D4) ) | (the carrier of C69) )
+and
+L117: C76 is  stabilizing;
+set D5 = ( stabilization-time C76 );
+L118: ( Following (C76 , D5) ) is  stable by L117 , L33;
+L119: ( Following (C74 , ( D4 + D5 )) ) is  stable by L118 , L109 , L110 , L111 , L112 , L113 , L115 , L116 , CIRCCMB2:19;
+thus L120: thesis by L119 , L9;
+end;
+theorem
+L121: (for B67 , B68 being non  void  Circuit-like non  empty ManySortedSign holds (( InputVertices B67 ) misses ( InnerVertices B68 ) implies (for B69 being non  void  Circuit-like non  empty ManySortedSign holds (B69 = ( B67 +* B68 ) implies (for B70 being  non-empty (Circuit of B67) holds (for B71 being  non-empty (Circuit of B68) holds (B70 tolerates B71 implies (for B72 being  non-empty (Circuit of B69) holds (B72 = ( B70 +* B71 ) implies (for B73 being (State of B72) holds (for B74 being (State of B70) holds ((B74 = ( B73 | (the carrier of B67) ) & B74 is  stabilizing) implies (for B75 being (State of B71) holds ((B75 = ( ( Following (B73 , ( stabilization-time B74 )) ) | (the carrier of B68) ) & B75 is  stabilizing) implies ( stabilization-time B73 ) = ( ( stabilization-time B74 ) + ( stabilization-time B75 ) )))))))))))))))
+proof
+let C77 , C78 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L122: ( InputVertices C77 ) misses ( InnerVertices C78 );
+let C79 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L123: C79 = ( C77 +* C78 );
+let C80 being  non-empty (Circuit of C77);
+let C81 being  non-empty (Circuit of C78);
+assume L124: C80 tolerates C81;
+let C82 being  non-empty (Circuit of C79);
+assume that
+L125: C82 = ( C80 +* C81 );
+let C83 being (State of C82);
+let C84 being (State of C80);
+assume that
+L126: C84 = ( C83 | (the carrier of C77) )
+and
+L127: C84 is  stabilizing;
+set D6 = ( stabilization-time C84 );
+let C85 being (State of C81);
+assume that
+L128: C85 = ( ( Following (C83 , D6) ) | (the carrier of C78) )
+and
+L129: C85 is  stabilizing;
+set D7 = ( stabilization-time C85 );
+L130: ( Following (C84 , D6) ) is  stable by L127 , L33;
+L131:
+now
+let C86 being (Element of ( NAT ));
+assume that
+L132: C86 < ( D6 + D7 );
+per cases ;
+suppose L133: D6 <= C86;
+
+consider C87 being Nat such that L134: C86 = ( D6 + C87 ) by L133 , NAT_1:10;
+reconsider D8 = C87 as (Element of ( NAT )) by ORDINAL1:def 12;
+L135: D8 < D7 by L132 , L134 , XREAL_1:6;
+L136: (not ( Following (C85 , D8) ) is  stable) by L135 , L129 , L33;
+L137: ( Following (C84 , D6) ) = ( ( Following (C83 , D6) ) | (the carrier of C77) ) by L122 , L123 , L124 , L125 , L126 , CIRCCMB2:13;
+L138: ( Following (C85 , D8) ) = ( ( Following (( Following (C83 , D6) ) , D8) ) | (the carrier of C78) ) by L137 , L122 , L123 , L124 , L125 , L128 , L130 , CIRCCMB2:18
+.= ( ( Following (C83 , C86) ) | (the carrier of C78) ) by L134 , FACIRC_1:13;
+thus L139: (not ( Following (C83 , C86) ) is  stable) by L138 , L123 , L124 , L125 , L136 , CIRCCMB2:17;
+end;
+suppose L140: C86 < D6;
+
+L141: (not ( Following (C84 , C86) ) is  stable) by L140 , L127 , L33;
+L142: ( ( Following (C83 , C86) ) | (the carrier of C77) ) = ( Following (C84 , C86) ) by L122 , L123 , L124 , L125 , L126 , CIRCCMB2:13;
+thus L143: (not ( Following (C83 , C86) ) is  stable) by L142 , L123 , L124 , L125 , L141 , CIRCCMB2:17;
+end;
+end;
+L145: ( Following (C85 , D7) ) is  stable by L129 , L33;
+L146: ( Following (C83 , ( D6 + D7 )) ) is  stable by L145 , L122 , L123 , L124 , L125 , L126 , L128 , L130 , CIRCCMB2:19;
+L147: C83 is  stabilizing by L122 , L123 , L124 , L125 , L126 , L127 , L128 , L129 , L108;
+thus L148: thesis by L147 , L146 , L131 , L33;
+end;
+theorem
+L149: (for B76 , B77 , B78 being non  void  Circuit-like non  empty ManySortedSign holds ((( InputVertices B76 ) misses ( InnerVertices B77 ) & B78 = ( B76 +* B77 )) implies (for B79 being  non-empty (Circuit of B76) holds (for B80 being  non-empty (Circuit of B77) holds (for B81 being  non-empty (Circuit of B78) holds ((B79 tolerates B80 & B81 = ( B79 +* B80 )) implies (for B82 being (State of B81) holds (for B83 being (State of B79) holds ((B83 = ( B82 | (the carrier of B76) ) & B83 is  stabilizing) implies (for B84 being (State of B80) holds ((B84 = ( ( Following (B82 , ( stabilization-time B83 )) ) | (the carrier of B77) ) & B84 is  stabilizing) implies ( ( Result B82 ) | (the carrier of B76) ) = ( Result B83 ))))))))))))
+proof
+let C88 , C89 , C90 being non  void  Circuit-like non  empty ManySortedSign;
+assume that
+L150: (( InputVertices C88 ) misses ( InnerVertices C89 ) & C90 = ( C88 +* C89 ));
+let C91 being  non-empty (Circuit of C88);
+let C92 being  non-empty (Circuit of C89);
+let C93 being  non-empty (Circuit of C90);
+assume that
+L151: (C91 tolerates C92 & C93 = ( C91 +* C92 ));
+let C94 being (State of C93);
+let C95 being (State of C91);
+assume that
+L152: C95 = ( C94 | (the carrier of C88) )
+and
+L153: C95 is  stabilizing;
+let C96 being (State of C92);
+assume that
+L154: (C96 = ( ( Following (C94 , ( stabilization-time C95 )) ) | (the carrier of C89) ) & C96 is  stabilizing);
+L155: ( stabilization-time C94 ) = ( ( stabilization-time C95 ) + ( stabilization-time C96 ) ) by L150 , L151 , L152 , L153 , L154 , L121;
+thus L156: ( ( Result C94 ) | (the carrier of C88) ) = ( ( Following (C94 , ( stabilization-time C94 )) ) | (the carrier of C88) ) by L150 , L151 , L152 , L153 , L154 , L48 , L108
+.= ( Following (C95 , ( stabilization-time C94 )) ) by L150 , L151 , L152 , CIRCCMB2:13
+.= ( Result C95 ) by L153 , L155 , L60 , NAT_1:11;
+end;
+begin
+theorem
+L157: (for B85 being set holds (for B86 being non  empty  finite set holds (for B87 being (Element of ( NAT )) holds (for B88 being (FinSeqLen of B87) holds (for B89 being (Function of ( B87 -tuples_on B86 ) , B86) holds (for B90 being (State of ( 1GateCircuit (B88 , B89) )) holds ( B90 * B88 ) is (Element of ( B87 -tuples_on B86 ))))))))
+proof
+let C97 being set;
+let C98 being non  empty  finite set;
+let C99 being (Element of ( NAT ));
+let C100 being (FinSeqLen of C99);
+let C101 being (Function of ( C99 -tuples_on C98 ) , C98);
+let C102 being (State of ( 1GateCircuit (C100 , C101) ));
+set D9 = ( 1GateCircStr (C100 , C101) );
+set D10 = ( 1GateCircuit (C100 , C101) );
+L158: ( rng ( C102 * C100 ) ) c= C98
+proof
+let C103 being set;
+L159: ( rng C102 ) c= C98
+proof
+reconsider D11 = (the carrier of D9) as non  empty set;
+let C104 being set;
+reconsider D12 = (the Sorts of D10) as  non-empty (ManySortedSet of D11);
+assume L160: C104 in ( rng C102 );
+consider C105 being set such that L161: C105 in ( dom C102 ) and L162: C104 = ( C102 . C105 ) by L160 , FUNCT_1:def 3;
+reconsider D13 = C105 as (Vertex of D9) by L161 , CIRCUIT1:3;
+L163: ( dom C102 ) = ( dom D12 ) by CARD_3:9;
+L164: ( C102 . D13 ) in ( (the Sorts of D10) . D13 ) by L163 , L161 , CARD_3:9;
+thus L165: thesis by L164 , L162 , CIRCCOMB:54;
+end;
+assume L166: C103 in ( rng ( C102 * C100 ) );
+L167: C103 in ( rng C102 ) by L166 , FUNCT_1:14;
+thus L168: thesis by L167 , L159;
+end;
+L169: ( rng C100 ) c= ( dom C102 )
+proof
+let C106 being set;
+assume L170: C106 in ( rng C100 );
+L171: C106 in ( ( rng C100 ) \/ { [ C100 , C101 ] } ) by L170 , XBOOLE_0:def 3;
+L172: C106 in (the carrier of D9) by L171 , CIRCCOMB:def 6;
+thus L173: thesis by L172 , CIRCUIT1:3;
+end;
+L174: ( C102 * C100 ) is FinSequence by L169 , FINSEQ_1:16;
+reconsider D14 = ( C102 * C100 ) as (FinSequence of C98) by L174 , L158 , FINSEQ_1:def 4;
+L175: ( len D14 ) = ( len C100 ) by L169 , FINSEQ_2:29
+.= C99 by CARD_1:def 7;
+thus L176: thesis by L175 , FINSEQ_2:92;
+end;
+theorem
+L177: (for B91 , B92 , B93 , B94 being set holds ( rng <* B91 , B92 , B93 , B94 *> ) = { B91 , B92 , B93 , B94 })
+proof
+let C107 , C108 , C109 , C110 being set;
+L178: (for B95 being set holds (B95 in { C107 , C108 , C109 , C110 } iff (ex B96 being set st (B96 in ( dom <* C107 , C108 , C109 , C110 *> ) & B95 = ( <* C107 , C108 , C109 , C110 *> . B96 )))))
+proof
+let C111 being set;
+thus L179: (C111 in { C107 , C108 , C109 , C110 } implies (ex B97 being set st (B97 in ( dom <* C107 , C108 , C109 , C110 *> ) & C111 = ( <* C107 , C108 , C109 , C110 *> . B97 ))))
+proof
+L180: ( dom <* C107 , C108 , C109 , C110 *> ) = { 1 , 2 , 3 , 4 } by FINSEQ_1:89 , FINSEQ_3:2;
+assume L181: C111 in { C107 , C108 , C109 , C110 };
+per cases  by L181 , ENUMSET1:def 2;
+suppose L182: C111 = C107;
+
+take 1;
+thus L183: 1 in ( dom <* C107 , C108 , C109 , C110 *> ) by L180 , ENUMSET1:def 2;
+thus L184: thesis by L182 , FINSEQ_4:76;
+end;
+suppose L185: C111 = C108;
+
+take 2;
+thus L186: 2 in ( dom <* C107 , C108 , C109 , C110 *> ) by L180 , ENUMSET1:def 2;
+thus L187: thesis by L185 , FINSEQ_4:76;
+end;
+suppose L188: C111 = C109;
+
+take 3;
+thus L189: 3 in ( dom <* C107 , C108 , C109 , C110 *> ) by L180 , ENUMSET1:def 2;
+thus L190: thesis by L188 , FINSEQ_4:76;
+end;
+suppose L191: C111 = C110;
+
+take 4;
+thus L192: 4 in ( dom <* C107 , C108 , C109 , C110 *> ) by L180 , ENUMSET1:def 2;
+thus L193: thesis by L191 , FINSEQ_4:76;
+end;
+end;
+
+given C112 being set such that
+L195: C112 in ( dom <* C107 , C108 , C109 , C110 *> )
+and
+L196: C111 = ( <* C107 , C108 , C109 , C110 *> . C112 );
+
+L197: C112 in ( Seg 4 ) by L195 , FINSEQ_1:89;
+L198: (C112 = 1 or C112 = 2 or C112 = 3 or C112 = 4) by L197 , ENUMSET1:def 2 , FINSEQ_3:2;
+L199: (( <* C107 , C108 , C109 , C110 *> . C112 ) = C107 or ( <* C107 , C108 , C109 , C110 *> . C112 ) = C108 or ( <* C107 , C108 , C109 , C110 *> . C112 ) = C109 or ( <* C107 , C108 , C109 , C110 *> . C112 ) = C110) by L198 , FINSEQ_4:76;
+thus L200: thesis by L199 , L196 , ENUMSET1:def 2;
+end;
+thus L201: thesis by L178 , FUNCT_1:def 3;
+end;
+theorem
+L202: (for B98 , B99 , B100 , B101 , B102 being set holds ( rng <* B98 , B99 , B100 , B101 , B102 *> ) = { B98 , B99 , B100 , B101 , B102 })
+proof
+let C113 , C114 , C115 , C116 , C117 being set;
+L203: (for B103 being set holds (B103 in { C113 , C114 , C115 , C116 , C117 } iff (ex B104 being set st (B104 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) & B103 = ( <* C113 , C114 , C115 , C116 , C117 *> . B104 )))))
+proof
+let C118 being set;
+thus L204: (C118 in { C113 , C114 , C115 , C116 , C117 } implies (ex B105 being set st (B105 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) & C118 = ( <* C113 , C114 , C115 , C116 , C117 *> . B105 ))))
+proof
+L205: ( dom <* C113 , C114 , C115 , C116 , C117 *> ) = { 1 , 2 , 3 , 4 , 5 } by FINSEQ_1:89 , FINSEQ_3:3;
+assume L206: C118 in { C113 , C114 , C115 , C116 , C117 };
+per cases  by L206 , ENUMSET1:def 3;
+suppose L207: C118 = C113;
+
+take 1;
+thus L208: 1 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) by L205 , ENUMSET1:def 3;
+thus L209: thesis by L207 , FINSEQ_4:78;
+end;
+suppose L210: C118 = C114;
+
+take 2;
+thus L211: 2 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) by L205 , ENUMSET1:def 3;
+thus L212: thesis by L210 , FINSEQ_4:78;
+end;
+suppose L213: C118 = C115;
+
+take 3;
+thus L214: 3 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) by L205 , ENUMSET1:def 3;
+thus L215: thesis by L213 , FINSEQ_4:78;
+end;
+suppose L216: C118 = C116;
+
+take 4;
+thus L217: 4 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) by L205 , ENUMSET1:def 3;
+thus L218: thesis by L216 , FINSEQ_4:78;
+end;
+suppose L219: C118 = C117;
+
+take 5;
+thus L220: 5 in ( dom <* C113 , C114 , C115 , C116 , C117 *> ) by L205 , ENUMSET1:def 3;
+thus L221: thesis by L219 , FINSEQ_4:78;
+end;
+end;
+
+given C119 being set such that
+L223: C119 in ( dom <* C113 , C114 , C115 , C116 , C117 *> )
+and
+L224: C118 = ( <* C113 , C114 , C115 , C116 , C117 *> . C119 );
+
+L225: C119 in ( Seg 5 ) by L223 , FINSEQ_1:89;
+L226: (C119 = 1 or C119 = 2 or C119 = 3 or C119 = 4 or C119 = 5) by L225 , ENUMSET1:def 3 , FINSEQ_3:3;
+L227: (( <* C113 , C114 , C115 , C116 , C117 *> . C119 ) = C113 or ( <* C113 , C114 , C115 , C116 , C117 *> . C119 ) = C114 or ( <* C113 , C114 , C115 , C116 , C117 *> . C119 ) = C115 or ( <* C113 , C114 , C115 , C116 , C117 *> . C119 ) = C116 or ( <* C113 , C114 , C115 , C116 , C117 *> . C119 ) = C117) by L226 , FINSEQ_4:78;
+thus L228: thesis by L227 , L224 , ENUMSET1:def 3;
+end;
+thus L229: thesis by L203 , FUNCT_1:def 3;
+end;
+definition
+let C120 being ManySortedSign;
+attr C120 is  one-gate
+means
+:L230: (ex B106 being non  empty  finite set st (ex B107 being (Element of ( NAT )) st (ex B108 being (FinSeqLen of B107) st (ex B109 being (Function of ( B107 -tuples_on B106 ) , B106) st C120 = ( 1GateCircStr (B108 , B109) )))));
+end;
+definition
+let C121 being non  empty ManySortedSign;
+let C122 being MSAlgebra over C121;
+attr C122 is  one-gate
+means
+:L232: (ex B110 being non  empty  finite set st (ex B111 being (Element of ( NAT )) st (ex B112 being (FinSeqLen of B111) st (ex B113 being (Function of ( B111 -tuples_on B110 ) , B110) st (C121 = ( 1GateCircStr (B112 , B113) ) & C122 = ( 1GateCircuit (B112 , B113) ))))));
+end;
+registration
+let C123 being FinSequence;
+let C124 being set;
+cluster ( 1GateCircStr (C123 , C124) ) ->  finite;
+coherence
+proof
+L234: (the carrier of ( 1GateCircStr (C123 , C124) )) = ( ( rng C123 ) \/ { [ C123 , C124 ] } ) by CIRCCOMB:def 6;
+thus L235: thesis by L234;
+end;
+end;
+registration
+cluster  one-gate ->  strict non  void non  empty  unsplit  gate`1=arity  finite for ManySortedSign;
+coherence
+proof
+let C125 being ManySortedSign;
+assume L237: C125 is  one-gate;
+L238: (ex B114 being non  empty  finite set st (ex B115 being (Element of ( NAT )) st (ex B116 being (FinSeqLen of B115) st (ex B117 being (Function of ( B115 -tuples_on B114 ) , B114) st C125 = ( 1GateCircStr (B116 , B117) ))))) by L237 , L230;
+thus L239: thesis by L238;
+end;
+end;
+registration
+cluster  one-gate ->  gate`2=den for non  empty non  empty non  empty non  empty ManySortedSign;
+coherence
+proof
+let C126 being non  empty ManySortedSign;
+assume L241: C126 is  one-gate;
+L242: (ex B118 being non  empty  finite set st (ex B119 being (Element of ( NAT )) st (ex B120 being (FinSeqLen of B119) st (ex B121 being (Function of ( B119 -tuples_on B118 ) , B118) st C126 = ( 1GateCircStr (B120 , B121) ))))) by L241 , L230;
+thus L243: thesis by L242;
+end;
+end;
+registration
+let C127 being non  empty  finite set;
+let C128 being (Element of ( NAT ));
+let C129 being (FinSeqLen of C128);
+let C130 being (Function of ( C128 -tuples_on C127 ) , C127);
+cluster ( 1GateCircStr (C129 , C130) ) ->  one-gate;
+coherence by L230;
+end;
+registration
+cluster  one-gate for ManySortedSign;
+existence
+proof
+set D15 = the non  empty  finite set;
+set D16 = the (Element of ( NAT ));
+set D17 = the (FinSeqLen of D16);
+set D18 = the (Function of ( D16 -tuples_on D15 ) , D15);
+take ( 1GateCircStr (D17 , D18) );
+thus L246: thesis;
+end;
+end;
+registration
+let C131 being  one-gate ManySortedSign;
+cluster  one-gate ->  strict  non-empty for (Circuit of C131);
+coherence
+proof
+let C132 being (Circuit of C131);
+assume L248: C132 is  one-gate;
+L249: (ex B122 being non  empty  finite set st (ex B123 being (Element of ( NAT )) st (ex B124 being (FinSeqLen of B123) st (ex B125 being (Function of ( B123 -tuples_on B122 ) , B122) st (C131 = ( 1GateCircStr (B124 , B125) ) & C132 = ( 1GateCircuit (B124 , B125) )))))) by L248 , L232;
+thus L250: thesis by L249;
+end;
+end;
+registration
+let C133 being non  empty  finite set;
+let C134 being (Element of ( NAT ));
+let C135 being (FinSeqLen of C134);
+let C136 being (Function of ( C134 -tuples_on C133 ) , C133);
+cluster ( 1GateCircuit (C135 , C136) ) ->  one-gate;
+coherence by L232;
+end;
+registration
+let C137 being  one-gate ManySortedSign;
+cluster  one-gate  non-empty for (Circuit of C137);
+existence
+proof
+consider C138 being non  empty  finite set, C139 being (Element of ( NAT )), C140 being (FinSeqLen of C139), C141 being (Function of ( C139 -tuples_on C138 ) , C138) such that L253: C137 = ( 1GateCircStr (C140 , C141) ) by L230;
+reconsider D19 = ( 1GateCircuit (C140 , C141) ) as  finite-yielding MSAlgebra over C137 by L253;
+take D19;
+thus L254: thesis by L253;
+end;
+end;
+definition
+let C142 being  one-gate ManySortedSign;
+func Output C142 -> (Vertex of C142) equals 
+( union (the carrier' of C142) );
+coherence
+proof
+consider C143 being non  empty  finite set, C144 being (Element of ( NAT )), C145 being (FinSeqLen of C144), C146 being (Function of ( C144 -tuples_on C143 ) , C143) such that L256: C142 = ( 1GateCircStr (C145 , C146) ) by L230;
+L257: [ C145 , C146 ] in { [ C145 , C146 ] } by TARSKI:def 1;
+L258: [ C145 , C146 ] in ( ( rng C145 ) \/ { [ C145 , C146 ] } ) by L257 , XBOOLE_0:def 3;
+L259: (the carrier' of C142) = { [ C145 , C146 ] } by L256 , CIRCCOMB:def 6;
+L260: ( union (the carrier' of C142) ) = [ C145 , C146 ] by L259 , ZFMISC_1:25;
+thus L261: thesis by L260 , L256 , L258 , CIRCCOMB:def 6;
+end;
+end;
+registration
+let C147 being  one-gate ManySortedSign;
+cluster ( Output C147 ) ->  pair;
+coherence
+proof
+consider C148 being non  empty  finite set, C149 being (Element of ( NAT )), C150 being (FinSeqLen of C149), C151 being (Function of ( C149 -tuples_on C148 ) , C148) such that L263: C147 = ( 1GateCircStr (C150 , C151) ) by L230;
+L264: (the carrier' of C147) = { [ C150 , C151 ] } by L263 , CIRCCOMB:def 6;
+thus L265: thesis by L264 , ZFMISC_1:25;
+end;
+end;
+theorem
+L267: (for B126 being  one-gate ManySortedSign holds (for B127 being FinSequence holds (for B128 being set holds (B126 = ( 1GateCircStr (B127 , B128) ) implies ( Output B126 ) = [ B127 , B128 ]))))
+proof
+let C152 being  one-gate ManySortedSign;
+let C153 being FinSequence;
+let C154 being set;
+assume L268: C152 = ( 1GateCircStr (C153 , C154) );
+thus L269: ( Output C152 ) = ( union { [ C153 , C154 ] } ) by L268 , CIRCCOMB:def 6
+.= [ C153 , C154 ] by ZFMISC_1:25;
+end;
+theorem
+L270: (for B129 being  one-gate ManySortedSign holds ( InnerVertices B129 ) = { ( Output B129 ) })
+proof
+let C155 being  one-gate ManySortedSign;
+consider C156 being non  empty  finite set, C157 being (Element of ( NAT )), C158 being (FinSeqLen of C157), C159 being (Function of ( C157 -tuples_on C156 ) , C156) such that L271: C155 = ( 1GateCircStr (C158 , C159) ) by L230;
+L272: ( Output C155 ) = [ C158 , C159 ] by L271 , L267;
+thus L273: thesis by L272 , L271 , CIRCCOMB:42;
+end;
+theorem
+L274: (for B130 being  one-gate ManySortedSign holds (for B131 being  one-gate (Circuit of B130) holds (for B132 being (Element of ( NAT )) holds (for B133 being  finite non  empty set holds (for B134 being (Function of ( B132 -tuples_on B133 ) , B133) holds (for B135 being (FinSeqLen of B132) holds (B131 = ( 1GateCircuit (B135 , B134) ) implies B130 = ( 1GateCircStr (B135 , B134) ))))))))
+proof
+let C160 being  one-gate ManySortedSign;
+let C161 being  one-gate (Circuit of C160);
+let C162 being (Element of ( NAT ));
+let C163 being  finite non  empty set;
+let C164 being (Function of ( C162 -tuples_on C163 ) , C163);
+let C165 being (FinSeqLen of C162);
+assume that
+L275: C161 = ( 1GateCircuit (C165 , C164) );
+consider C166 being non  empty  finite set, C167 being (Element of ( NAT )), C168 being (FinSeqLen of C167), C169 being (Function of ( C167 -tuples_on C166 ) , C166) such that L276: C160 = ( 1GateCircStr (C168 , C169) ) and L277: C161 = ( 1GateCircuit (C168 , C169) ) by L232;
+L278: { [ C165 , C164 ] } = (the carrier' of ( 1GateCircStr (C165 , C164) )) by CIRCCOMB:def 6
+.= ( dom (the Charact of ( 1GateCircuit (C168 , C169) )) ) by L275 , L277 , PARTFUN1:def 2
+.= (the carrier' of ( 1GateCircStr (C168 , C169) )) by PARTFUN1:def 2
+.= { [ C168 , C169 ] } by CIRCCOMB:def 6;
+L279: [ C165 , C164 ] = [ C168 , C169 ] by L278 , ZFMISC_1:3;
+L280: C165 = C168 by L279 , XTUPLE_0:1;
+thus L281: thesis by L280 , L276 , L279 , XTUPLE_0:1;
+end;
+theorem
+L282: (for B136 being (Element of ( NAT )) holds (for B137 being  finite non  empty set holds (for B138 being (Function of ( B136 -tuples_on B137 ) , B137) holds (for B139 being (FinSeqLen of B136) holds (for B140 being (State of ( 1GateCircuit (B139 , B138) )) holds ( ( Following B140 ) . ( Output ( 1GateCircStr (B139 , B138) ) ) ) = ( B138 . ( B140 * B139 ) ))))))
+proof
+let C170 being (Element of ( NAT ));
+let C171 being  finite non  empty set;
+let C172 being (Function of ( C170 -tuples_on C171 ) , C171);
+let C173 being (FinSeqLen of C170);
+let C174 being (State of ( 1GateCircuit (C173 , C172) ));
+L283: ( Output ( 1GateCircStr (C173 , C172) ) ) = [ C173 , C172 ] by L267;
+thus L284: thesis by L283 , CIRCCOMB:56;
+end;
+theorem
+L285: (for B141 being  one-gate ManySortedSign holds (for B142 being  one-gate (Circuit of B141) holds (for B143 being (State of B142) holds ( Following B143 ) is  stable)))
+proof
+let C175 being  one-gate ManySortedSign;
+let C176 being  one-gate (Circuit of C175);
+let C177 being (State of C176);
+L286: (ex B144 being non  empty  finite set st (ex B145 being (Element of ( NAT )) st (ex B146 being (FinSeqLen of B145) st (ex B147 being (Function of ( B145 -tuples_on B144 ) , B144) st (C175 = ( 1GateCircStr (B146 , B147) ) & C176 = ( 1GateCircuit (B146 , B147) )))))) by L232;
+thus L287: thesis by L286 , CIRCCMB2:2;
+end;
+registration
+let C178 being non  void  Circuit-like non  empty ManySortedSign;
+cluster  one-gate ->  with_stabilization-limit for  non-empty  non-empty  non-empty  non-empty (Circuit of C178);
+coherence
+proof
+let C179 being  non-empty (Circuit of C178);
+assume L288: C179 is  one-gate;
+L289: (ex B148 being non  empty  finite set st (ex B149 being (Element of ( NAT )) st (ex B150 being (FinSeqLen of B149) st (ex B151 being (Function of ( B149 -tuples_on B148 ) , B148) st (C178 = ( 1GateCircStr (B150 , B151) ) & C179 = ( 1GateCircuit (B150 , B151) )))))) by L288 , L232;
+reconsider D20 = C178 as  one-gate ManySortedSign by L289;
+reconsider D21 = C179 as  one-gate (Circuit of D20) by L288;
+take 1;
+let C180 being (State of C179);
+reconsider D22 = C180 as (State of D21);
+L290: ( Following D22 ) is  stable by L285;
+thus L291: thesis by L290 , FACIRC_1:14;
+end;
+end;
+theorem
+L293: (for B152 being  one-gate ManySortedSign holds (for B153 being  one-gate (Circuit of B152) holds (for B154 being (State of B153) holds ( Result B154 ) = ( Following B154 ))))
+proof
+let C181 being  one-gate ManySortedSign;
+let C182 being  one-gate (Circuit of C181);
+let C183 being (State of C182);
+L294: ( Following C183 ) = ( Following (C183 , 1) ) by FACIRC_1:14;
+L295: (C183 is  stabilizing & ( Following C183 ) is  stable) by L11 , L285;
+thus L296: thesis by L295 , L294 , L17;
+end;
+theorem
+L297: (for B155 being  one-gate ManySortedSign holds (for B156 being  one-gate (Circuit of B155) holds (for B157 being (State of B156) holds ( stabilization-time B157 ) <= 1)))
+proof
+let C184 being  one-gate ManySortedSign;
+let C185 being  one-gate (Circuit of C184);
+let C186 being (State of C185);
+L298: ( Following C186 ) is  stable by L285;
+L299: ( Following (C186 , 1) ) is  stable by L298 , FACIRC_1:14;
+L300: C186 is  stabilizing by L11;
+thus L301: thesis by L300 , L299 , L33;
+end;
+scheme OneGate1Ex { F1() -> set , F2() -> non  empty  finite set , F3(set) -> (Element of F2()) } : (ex B158 being  one-gate ManySortedSign st (ex B159 being  one-gate (Circuit of B158) st (( InputVertices B158 ) = { F1() } & (for B160 being (State of B159) holds ( ( Result B160 ) . ( Output B158 ) ) = F3(( B160 . F1() ))))))
+proof
+deffunc H1((Element of ( 1 -tuples_on F2() ))) = F3(( $1 . 1 ));
+consider C187 being (Function of ( 1 -tuples_on F2() ) , F2()) such that L302: (for B161 being (Element of ( 1 -tuples_on F2() )) holds ( C187 . B161 ) = H1(B161)) from FUNCT_2:sch 4;
+reconsider D23 = ( 1GateCircStr (<* F1() *> , C187) ) as  one-gate ManySortedSign;
+take D23;
+reconsider D24 = ( 1GateCircuit (<* F1() *> , C187) ) as  one-gate (Circuit of D23);
+take D24;
+L303: ( rng <* F1() *> ) = { F1() } by FINSEQ_1:38;
+thus L304: ( InputVertices D23 ) = { F1() } by L303 , CIRCCOMB:42;
+let C188 being (State of D24);
+reconsider D25 = ( C188 * <* F1() *> ) as (Element of ( 1 -tuples_on F2() )) by L157;
+L305: ( dom <* F1() *> ) = ( Seg 1 ) by FINSEQ_1:38;
+L306: 1 in ( dom <* F1() *> ) by L305 , FINSEQ_1:1;
+thus L307: ( ( Result C188 ) . ( Output D23 ) ) = ( ( Following C188 ) . ( Output D23 ) ) by L293
+.= ( ( Following C188 ) . [ <* F1() *> , C187 ] ) by L267
+.= ( C187 . ( C188 * <* F1() *> ) ) by CIRCCOMB:56
+.= F3(( D25 . 1 )) by L302
+.= F3(( C188 . ( <* F1() *> . 1 ) )) by L306 , FUNCT_1:13
+.= F3(( C188 . F1() )) by FINSEQ_1:def 8;
+end;
+scheme OneGate2Ex { F4 , F5() -> set , F6() -> non  empty  finite set , F7(set , set) -> (Element of F6()) } : (ex B162 being  one-gate ManySortedSign st (ex B163 being  one-gate (Circuit of B162) st (( InputVertices B162 ) = { F4() , F5() } & (for B164 being (State of B163) holds ( ( Result B164 ) . ( Output B162 ) ) = F7(( B164 . F4() ) , ( B164 . F5() ))))))
+proof
+deffunc H2((Element of ( 2 -tuples_on F6() ))) = F7(( $1 . 1 ) , ( $1 . 2 ));
+consider C189 being (Function of ( 2 -tuples_on F6() ) , F6()) such that L308: (for B165 being (Element of ( 2 -tuples_on F6() )) holds ( C189 . B165 ) = H2(B165)) from FUNCT_2:sch 4;
+reconsider D26 = ( 1GateCircStr (<* F4() , F5() *> , C189) ) as  one-gate ManySortedSign;
+take D26;
+reconsider D27 = ( 1GateCircuit (<* F4() , F5() *> , C189) ) as  one-gate (Circuit of D26);
+take D27;
+L309: ( rng <* F4() , F5() *> ) = { F4() , F5() } by FINSEQ_2:127;
+thus L310: ( InputVertices D26 ) = { F4() , F5() } by L309 , CIRCCOMB:42;
+let C190 being (State of D27);
+reconsider D28 = ( C190 * <* F4() , F5() *> ) as (Element of ( 2 -tuples_on F6() )) by L157;
+L311: ( dom <* F4() , F5() *> ) = ( Seg 2 ) by FINSEQ_1:89;
+L312: 1 in ( dom <* F4() , F5() *> ) by L311 , FINSEQ_1:1;
+L313: 2 in ( dom <* F4() , F5() *> ) by L311 , FINSEQ_1:1;
+L314: ( Result C190 ) = ( Following C190 ) by L293;
+thus L315: ( ( Result C190 ) . ( Output D26 ) ) = ( ( Following C190 ) . [ <* F4() , F5() *> , C189 ] ) by L314 , L267
+.= ( C189 . ( C190 * <* F4() , F5() *> ) ) by CIRCCOMB:56
+.= F7(( D28 . 1 ) , ( D28 . 2 )) by L308
+.= F7(( C190 . ( <* F4() , F5() *> . 1 ) ) , ( D28 . 2 )) by L312 , FUNCT_1:13
+.= F7(( C190 . ( <* F4() , F5() *> . 1 ) ) , ( C190 . ( <* F4() , F5() *> . 2 ) )) by L313 , FUNCT_1:13
+.= F7(( C190 . F4() ) , ( C190 . ( <* F4() , F5() *> . 2 ) )) by FINSEQ_1:44
+.= F7(( C190 . F4() ) , ( C190 . F5() )) by FINSEQ_1:44;
+end;
+scheme OneGate3Ex { F8 , F9 , F10() -> set , F11() -> non  empty  finite set , F12(set , set , set) -> (Element of F11()) } : (ex B166 being  one-gate ManySortedSign st (ex B167 being  one-gate (Circuit of B166) st (( InputVertices B166 ) = { F8() , F9() , F10() } & (for B168 being (State of B167) holds ( ( Result B168 ) . ( Output B166 ) ) = F12(( B168 . F8() ) , ( B168 . F9() ) , ( B168 . F10() ))))))
+proof
+deffunc H3((Element of ( 3 -tuples_on F11() ))) = F12(( $1 . 1 ) , ( $1 . 2 ) , ( $1 . 3 ));
+consider C191 being (Function of ( 3 -tuples_on F11() ) , F11()) such that L316: (for B169 being (Element of ( 3 -tuples_on F11() )) holds ( C191 . B169 ) = H3(B169)) from FUNCT_2:sch 4;
+reconsider D29 = ( 1GateCircStr (<* F8() , F9() , F10() *> , C191) ) as  one-gate ManySortedSign;
+take D29;
+reconsider D30 = ( 1GateCircuit (<* F8() , F9() , F10() *> , C191) ) as  one-gate (Circuit of D29);
+take D30;
+L317: ( rng <* F8() , F9() , F10() *> ) = { F8() , F9() , F10() } by FINSEQ_2:128;
+thus L318: ( InputVertices D29 ) = { F8() , F9() , F10() } by L317 , CIRCCOMB:42;
+let C192 being (State of D30);
+reconsider D31 = ( C192 * <* F8() , F9() , F10() *> ) as (Element of ( 3 -tuples_on F11() )) by L157;
+L319: ( dom <* F8() , F9() , F10() *> ) = ( Seg 3 ) by FINSEQ_1:89;
+L320: 1 in ( dom <* F8() , F9() , F10() *> ) by L319 , FINSEQ_1:1;
+L321: 3 in ( dom <* F8() , F9() , F10() *> ) by L319 , FINSEQ_1:1;
+L322: 2 in ( dom <* F8() , F9() , F10() *> ) by L319 , FINSEQ_1:1;
+L323: ( Result C192 ) = ( Following C192 ) by L293;
+thus L324: ( ( Result C192 ) . ( Output D29 ) ) = ( ( Following C192 ) . [ <* F8() , F9() , F10() *> , C191 ] ) by L323 , L267
+.= ( C191 . ( C192 * <* F8() , F9() , F10() *> ) ) by CIRCCOMB:56
+.= F12(( D31 . 1 ) , ( D31 . 2 ) , ( D31 . 3 )) by L316
+.= F12(( C192 . ( <* F8() , F9() , F10() *> . 1 ) ) , ( D31 . 2 ) , ( D31 . 3 )) by L320 , FUNCT_1:13
+.= F12(( C192 . F8() ) , ( D31 . 2 ) , ( D31 . 3 )) by FINSEQ_1:45
+.= F12(( C192 . F8() ) , ( C192 . ( <* F8() , F9() , F10() *> . 2 ) ) , ( D31 . 3 )) by L322 , FUNCT_1:13
+.= F12(( C192 . F8() ) , ( C192 . F9() ) , ( D31 . 3 )) by FINSEQ_1:45
+.= F12(( C192 . F8() ) , ( C192 . F9() ) , ( C192 . ( <* F8() , F9() , F10() *> . 3 ) )) by L321 , FUNCT_1:13
+.= F12(( C192 . F8() ) , ( C192 . F9() ) , ( C192 . F10() )) by FINSEQ_1:45;
+end;
+scheme OneGate4Ex { F13 , F14 , F15 , F16() -> set , F17() -> non  empty  finite set , F18(set , set , set , set) -> (Element of F17()) } : (ex B170 being  one-gate ManySortedSign st (ex B171 being  one-gate (Circuit of B170) st (( InputVertices B170 ) = { F13() , F14() , F15() , F16() } & (for B172 being (State of B171) holds ( ( Result B172 ) . ( Output B170 ) ) = F18(( B172 . F13() ) , ( B172 . F14() ) , ( B172 . F15() ) , ( B172 . F16() ))))))
+proof
+deffunc H4((Element of ( 4 -tuples_on F17() ))) = F18(( $1 . 1 ) , ( $1 . 2 ) , ( $1 . 3 ) , ( $1 . 4 ));
+consider C193 being (Function of ( 4 -tuples_on F17() ) , F17()) such that L325: (for B173 being (Element of ( 4 -tuples_on F17() )) holds ( C193 . B173 ) = H4(B173)) from FUNCT_2:sch 4;
+reconsider D32 = ( 1GateCircStr (<* F13() , F14() , F15() , F16() *> , C193) ) as  one-gate ManySortedSign;
+take D32;
+reconsider D33 = ( 1GateCircuit (<* F13() , F14() , F15() , F16() *> , C193) ) as  one-gate (Circuit of D32);
+take D33;
+L326: ( rng <* F13() , F14() , F15() , F16() *> ) = { F13() , F14() , F15() , F16() } by L177;
+thus L327: ( InputVertices D32 ) = { F13() , F14() , F15() , F16() } by L326 , CIRCCOMB:42;
+let C194 being (State of D33);
+reconsider D34 = ( C194 * <* F13() , F14() , F15() , F16() *> ) as (Element of ( 4 -tuples_on F17() )) by L157;
+L328: ( dom <* F13() , F14() , F15() , F16() *> ) = ( Seg 4 ) by FINSEQ_1:89;
+L329: 1 in ( dom <* F13() , F14() , F15() , F16() *> ) by L328 , FINSEQ_1:1;
+L330: 3 in ( dom <* F13() , F14() , F15() , F16() *> ) by L328 , FINSEQ_1:1;
+L331: 2 in ( dom <* F13() , F14() , F15() , F16() *> ) by L328 , FINSEQ_1:1;
+L332: 4 in ( dom <* F13() , F14() , F15() , F16() *> ) by L328 , FINSEQ_1:1;
+L333: ( Result C194 ) = ( Following C194 ) by L293;
+thus L334: ( ( Result C194 ) . ( Output D32 ) ) = ( ( Following C194 ) . [ <* F13() , F14() , F15() , F16() *> , C193 ] ) by L333 , L267
+.= ( C193 . ( C194 * <* F13() , F14() , F15() , F16() *> ) ) by CIRCCOMB:56
+.= F18(( D34 . 1 ) , ( D34 . 2 ) , ( D34 . 3 ) , ( D34 . 4 )) by L325
+.= F18(( C194 . ( <* F13() , F14() , F15() , F16() *> . 1 ) ) , ( D34 . 2 ) , ( D34 . 3 ) , ( D34 . 4 )) by L329 , FUNCT_1:13
+.= F18(( C194 . F13() ) , ( D34 . 2 ) , ( D34 . 3 ) , ( D34 . 4 )) by FINSEQ_4:76
+.= F18(( C194 . F13() ) , ( C194 . ( <* F13() , F14() , F15() , F16() *> . 2 ) ) , ( D34 . 3 ) , ( D34 . 4 )) by L331 , FUNCT_1:13
+.= F18(( C194 . F13() ) , ( C194 . F14() ) , ( D34 . 3 ) , ( D34 . 4 )) by FINSEQ_4:76
+.= F18(( C194 . F13() ) , ( C194 . F14() ) , ( C194 . ( <* F13() , F14() , F15() , F16() *> . 3 ) ) , ( D34 . 4 )) by L330 , FUNCT_1:13
+.= F18(( C194 . F13() ) , ( C194 . F14() ) , ( C194 . F15() ) , ( D34 . 4 )) by FINSEQ_4:76
+.= F18(( C194 . F13() ) , ( C194 . F14() ) , ( C194 . F15() ) , ( C194 . ( <* F13() , F14() , F15() , F16() *> . 4 ) )) by L332 , FUNCT_1:13
+.= F18(( C194 . F13() ) , ( C194 . F14() ) , ( C194 . F15() ) , ( C194 . F16() )) by FINSEQ_4:76;
+end;
+scheme OneGate5Ex { F19 , F20 , F21 , F22 , F23() -> set , F24() -> non  empty  finite set , F25(set , set , set , set , set) -> (Element of F24()) } : (ex B174 being  one-gate ManySortedSign st (ex B175 being  one-gate (Circuit of B174) st (( InputVertices B174 ) = { F19() , F20() , F21() , F22() , F23() } & (for B176 being (State of B175) holds ( ( Result B176 ) . ( Output B174 ) ) = F25(( B176 . F19() ) , ( B176 . F20() ) , ( B176 . F21() ) , ( B176 . F22() ) , ( B176 . F23() ))))))
+proof
+deffunc H5((Element of ( 5 -tuples_on F24() ))) = F25(( $1 . 1 ) , ( $1 . 2 ) , ( $1 . 3 ) , ( $1 . 4 ) , ( $1 . 5 ));
+consider C195 being (Function of ( 5 -tuples_on F24() ) , F24()) such that L335: (for B177 being (Element of ( 5 -tuples_on F24() )) holds ( C195 . B177 ) = H5(B177)) from FUNCT_2:sch 4;
+reconsider D35 = ( 1GateCircStr (<* F19() , F20() , F21() , F22() , F23() *> , C195) ) as  one-gate ManySortedSign;
+take D35;
+reconsider D36 = ( 1GateCircuit (<* F19() , F20() , F21() , F22() , F23() *> , C195) ) as  one-gate (Circuit of D35);
+take D36;
+L336: ( rng <* F19() , F20() , F21() , F22() , F23() *> ) = { F19() , F20() , F21() , F22() , F23() } by L202;
+thus L337: ( InputVertices D35 ) = { F19() , F20() , F21() , F22() , F23() } by L336 , CIRCCOMB:42;
+let C196 being (State of D36);
+reconsider D37 = ( C196 * <* F19() , F20() , F21() , F22() , F23() *> ) as (Element of ( 5 -tuples_on F24() )) by L157;
+L338: ( dom <* F19() , F20() , F21() , F22() , F23() *> ) = ( Seg 5 ) by FINSEQ_1:89;
+L339: 1 in ( dom <* F19() , F20() , F21() , F22() , F23() *> ) by L338 , FINSEQ_1:1;
+L340: 5 in ( dom <* F19() , F20() , F21() , F22() , F23() *> ) by L338 , FINSEQ_1:1;
+L341: 4 in ( dom <* F19() , F20() , F21() , F22() , F23() *> ) by L338 , FINSEQ_1:1;
+L342: 3 in ( dom <* F19() , F20() , F21() , F22() , F23() *> ) by L338 , FINSEQ_1:1;
+L343: 2 in ( dom <* F19() , F20() , F21() , F22() , F23() *> ) by L338 , FINSEQ_1:1;
+L344: ( Result C196 ) = ( Following C196 ) by L293;
+thus L345: ( ( Result C196 ) . ( Output D35 ) ) = ( ( Following C196 ) . [ <* F19() , F20() , F21() , F22() , F23() *> , C195 ] ) by L344 , L267
+.= ( C195 . ( C196 * <* F19() , F20() , F21() , F22() , F23() *> ) ) by CIRCCOMB:56
+.= F25(( D37 . 1 ) , ( D37 . 2 ) , ( D37 . 3 ) , ( D37 . 4 ) , ( D37 . 5 )) by L335
+.= F25(( C196 . ( <* F19() , F20() , F21() , F22() , F23() *> . 1 ) ) , ( D37 . 2 ) , ( D37 . 3 ) , ( D37 . 4 ) , ( D37 . 5 )) by L339 , FUNCT_1:13
+.= F25(( C196 . F19() ) , ( D37 . 2 ) , ( D37 . 3 ) , ( D37 . 4 ) , ( D37 . 5 )) by FINSEQ_4:78
+.= F25(( C196 . F19() ) , ( C196 . ( <* F19() , F20() , F21() , F22() , F23() *> . 2 ) ) , ( D37 . 3 ) , ( D37 . 4 ) , ( D37 . 5 )) by L343 , FUNCT_1:13
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( D37 . 3 ) , ( D37 . 4 ) , ( D37 . 5 )) by FINSEQ_4:78
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( C196 . ( <* F19() , F20() , F21() , F22() , F23() *> . 3 ) ) , ( D37 . 4 ) , ( D37 . 5 )) by L342 , FUNCT_1:13
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( C196 . F21() ) , ( D37 . 4 ) , ( D37 . 5 )) by FINSEQ_4:78
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( C196 . F21() ) , ( C196 . ( <* F19() , F20() , F21() , F22() , F23() *> . 4 ) ) , ( D37 . 5 )) by L341 , FUNCT_1:13
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( C196 . F21() ) , ( C196 . F22() ) , ( D37 . 5 )) by FINSEQ_4:78
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( C196 . F21() ) , ( C196 . F22() ) , ( C196 . ( <* F19() , F20() , F21() , F22() , F23() *> . 5 ) )) by L340 , FUNCT_1:13
+.= F25(( C196 . F19() ) , ( C196 . F20() ) , ( C196 . F21() ) , ( C196 . F22() ) , ( C196 . F23() )) by FINSEQ_4:78;
+end;
+begin
+theorem
+L346: (for B178 , B179 being non  empty set holds (for B180 , B181 being (Element of ( NAT )) holds ((B180 <> ( 0 ) & ( B180 -tuples_on B178 ) = ( B181 -tuples_on B179 )) implies (B178 = B179 & B180 = B181))))
+proof
+let C197 , C198 being non  empty set;
+let C199 , C200 being (Element of ( NAT ));
+assume that
+L347: C199 <> ( 0 )
+and
+L348: ( C199 -tuples_on C197 ) = ( C200 -tuples_on C198 );
+thus L349: C197 = C198
+proof
+thus L350: C197 c= C198
+proof
+let C201 being set;
+assume L351: C201 in C197;
+L352: ( C199 |-> C201 ) is (Element of ( C199 -tuples_on C197 )) by L351 , FINSEQ_2:112;
+L353: ( C199 |-> C201 ) in ( C200 -tuples_on C198 ) by L352 , L348;
+L354: ( C199 |-> C201 ) in { B182 where B182 is (Element of ( C198 * )) : ( len B182 ) = C200 } by L353 , FINSEQ_2:def 4;
+L355: (ex B183 being (Element of ( C198 * )) st (B183 = ( C199 |-> C201 ) & ( len B183 ) = C200)) by L354;
+L356: ( rng ( C199 |-> C201 ) ) c= C198 by L355 , FINSEQ_1:def 4;
+L357: ( C199 |-> C201 ) = ( ( Seg C199 ) --> C201 ) by FINSEQ_2:def 2;
+L358: ( rng ( C199 |-> C201 ) ) = { C201 } by L357 , L347 , FUNCOP_1:8;
+L359: C201 in ( rng ( C199 |-> C201 ) ) by L358 , TARSKI:def 1;
+thus L360: thesis by L359 , L356;
+end;
+
+let C202 being set;
+L361: ( C200 |-> C202 ) = ( ( Seg C200 ) --> C202 ) by FINSEQ_2:def 2;
+assume L362: C202 in C198;
+L363: ( C200 |-> C202 ) is (Element of ( C200 -tuples_on C198 )) by L362 , FINSEQ_2:112;
+L364: ( C200 |-> C202 ) in ( C199 -tuples_on C197 ) by L363 , L348;
+L365: ( C200 |-> C202 ) in { B184 where B184 is (Element of ( C197 * )) : ( len B184 ) = C199 } by L364 , FINSEQ_2:def 4;
+L366: (ex B185 being (Element of ( C197 * )) st (B185 = ( C200 |-> C202 ) & ( len B185 ) = C199)) by L365;
+L367: C200 = C199 by L366 , CARD_1:def 7;
+L368: ( rng ( C200 |-> C202 ) ) = { C202 } by L367 , L347 , L361 , FUNCOP_1:8;
+L369: C202 in ( rng ( C200 |-> C202 ) ) by L368 , TARSKI:def 1;
+L370: ( rng ( C200 |-> C202 ) ) c= C197 by L366 , FINSEQ_1:def 4;
+thus L371: thesis by L370 , L369;
+end;
+
+thus L372: thesis by L348 , FINSEQ_2:110;
+end;
+theorem
+L373: (for B186 , B187 being non  empty ManySortedSign holds (for B188 being (Vertex of B186) holds B188 is (Vertex of ( B186 +* B187 ))))
+proof
+let C203 , C204 being non  empty ManySortedSign;
+let C205 being (Vertex of C203);
+L374: C205 in ( (the carrier of C203) \/ (the carrier of C204) ) by XBOOLE_0:def 3;
+thus L375: thesis by L374 , CIRCCOMB:def 2;
+end;
+theorem
+L376: (for B189 , B190 being non  empty ManySortedSign holds (for B191 being (Vertex of B190) holds B191 is (Vertex of ( B189 +* B190 ))))
+proof
+let C206 , C207 being non  empty ManySortedSign;
+let C208 being (Vertex of C207);
+L377: C208 in ( (the carrier of C206) \/ (the carrier of C207) ) by XBOOLE_0:def 3;
+thus L378: thesis by L377 , CIRCCOMB:def 2;
+end;
+definition
+let C209 being non  empty  finite set;
+mode Signature of C209
+ ->  gate`2=den non  void non  empty  unsplit  gate`1=arity ManySortedSign
+means :L379: (ex B192 being (Circuit of it) st ((the Sorts of B192) is  constant & ( the_value_of (the Sorts of B192) ) = C209 & B192 is  gate`2=den));
+existence
+proof
+set D38 = the (FinSeqLen of 1);
+set D39 = the (Function of ( 1 -tuples_on C209 ) , C209);
+take ( 1GateCircStr (D38 , D39) );
+set D40 = ( 1GateCircuit (D38 , D39) );
+L380: (the Sorts of D40) = ( (the carrier of ( 1GateCircStr (D38 , D39) )) --> C209 ) by CIRCCOMB:def 13;
+L381: ( the_value_of (the Sorts of D40) ) = C209 by L380 , FUNCOP_1:79;
+thus L382: thesis by L381 , L380;
+end;
+end;
+theorem
+L384: (for B193 being (Element of ( NAT )) holds (for B194 being non  empty  finite set holds (for B195 being (Function of ( B193 -tuples_on B194 ) , B194) holds (for B196 being (FinSeqLen of B193) holds ( 1GateCircStr (B196 , B195) ) is (Signature of B194)))))
+proof
+let C210 being (Element of ( NAT ));
+let C211 being non  empty  finite set;
+let C212 being (Function of ( C210 -tuples_on C211 ) , C211);
+let C213 being (FinSeqLen of C210);
+take D41 = ( 1GateCircuit (C213 , C212) );
+L385: (the Sorts of D41) = ( (the carrier of ( 1GateCircStr (C213 , C212) )) --> C211 ) by CIRCCOMB:def 13;
+thus L386: thesis by L385 , FUNCOP_1:79;
+end;
+registration
+let C214 being non  empty  finite set;
+cluster  strict  one-gate for (Signature of C214);
+existence
+proof
+set D42 = the (FinSeqLen of 1);
+set D43 = the (Function of ( 1 -tuples_on C214 ) , C214);
+L387: ( 1GateCircStr (D42 , D43) ) is (Signature of C214) by L384;
+thus L388: thesis by L387;
+end;
+end;
+definition
+let C215 being (Element of ( NAT ));
+let C216 being non  empty  finite set;
+let C217 being (Function of ( C215 -tuples_on C216 ) , C216);
+let C218 being (FinSeqLen of C215);
+redefine func 1GateCircStr (C218 , C217) ->  strict (Signature of C216);
+
+coherence by L384;
+end;
+definition
+let C219 being non  empty  finite set;
+let C220 being (Signature of C219);
+mode Circuit of C219 , C220
+ -> (Circuit of C220)
+means :L391: (it is  gate`2=den & (the Sorts of it) is  constant & ( the_value_of (the Sorts of it) ) = C219);
+existence
+proof
+L392: (ex B197 being (Circuit of C220) st ((the Sorts of B197) is  constant & ( the_value_of (the Sorts of B197) ) = C219 & B197 is  gate`2=den)) by L379;
+thus L393: thesis by L392;
+end;
+end;
+registration
+let C221 being non  empty  finite set;
+let C222 being (Signature of C221);
+cluster  ->  gate`2=den  non-empty for (Circuit of C221 , C222);
+coherence
+proof
+let C223 being (Circuit of C221 , C222);
+thus L395: C223 is  gate`2=den by L391;
+L396: ((the Sorts of C223) is non  empty  constant & ( the_value_of (the Sorts of C223) ) = C221) by L391;
+L397: (( dom (the Sorts of C223) ) = (the carrier of C222) & (for B198 being set holds (B198 in ( dom (the Sorts of C223) ) implies ( (the Sorts of C223) . B198 ) is non  empty))) by L396 , FUNCT_1:def 12 , PARTFUN1:def 2;
+L398: (the Sorts of C223) is  non-empty by L397 , PBOOLE:def 13;
+thus L399: thesis by L398 , MSUALG_1:def 3;
+end;
+end;
+theorem
+L401: (for B199 being (Element of ( NAT )) holds (for B200 being non  empty  finite set holds (for B201 being (Function of ( B199 -tuples_on B200 ) , B200) holds (for B202 being (FinSeqLen of B199) holds ( 1GateCircuit (B202 , B201) ) is (Circuit of B200 , ( 1GateCircStr (B202 , B201) ))))))
+proof
+let C224 being (Element of ( NAT ));
+let C225 being non  empty  finite set;
+let C226 being (Function of ( C224 -tuples_on C225 ) , C225);
+let C227 being (FinSeqLen of C224);
+set D44 = ( 1GateCircuit (C227 , C226) );
+thus L402: D44 is  gate`2=den;
+L403: (the Sorts of D44) = ( (the carrier of ( 1GateCircStr (C227 , C226) )) --> C225 ) by CIRCCOMB:def 13;
+thus L404: ((the Sorts of D44) is  constant & ( the_value_of (the Sorts of D44) ) = C225) by L403 , FUNCOP_1:79;
+end;
+registration
+let C228 being non  empty  finite set;
+let C229 being  one-gate (Signature of C228);
+cluster  strict  one-gate for (Circuit of C228 , C229);
+existence
+proof
+consider C230 being (Circuit of C229) such that L405: ((the Sorts of C230) is  constant & ( the_value_of (the Sorts of C230) ) = C228) and L406: C230 is  gate`2=den by L379;
+set D45 = ( the MSAlgebra of C230 );
+L407: (the Sorts of C230) is  finite-yielding by MSAFREE2:def 11;
+reconsider D46 = D45 as (Circuit of C229) by L407 , MSAFREE2:def 11;
+L408: (for B203 being set holds (B203 in (the carrier' of C229) implies B203 = [ ( B203 `1 ) , ( (the Charact of D46) . B203 ) ])) by L406 , CIRCCOMB:def 10;
+L409: D46 is  gate`2=den by L408 , CIRCCOMB:def 10;
+reconsider D47 = D46 as (Circuit of C228 , C229) by L409 , L405 , L391;
+consider C231 being non  empty  finite set, C232 being (Element of ( NAT )), C233 being (FinSeqLen of C232), C234 being (Function of ( C232 -tuples_on C231 ) , C231) such that L410: C229 = ( 1GateCircStr (C233 , C234) ) by L230;
+take D47;
+L411: ( dom (the Arity of C229) ) = (the carrier' of C229) by FUNCT_2:def 1;
+L412: ( dom (the Sorts of C230) ) = (the carrier of C229) by PARTFUN1:def 2;
+L413: (the Sorts of D47) = ( (the carrier of C229) --> C228 ) by L412 , L405 , FUNCOP_1:80;
+set D48 = [ C233 , C234 ];
+set D49 = ( 1GateCircuit (C233 , C234) );
+L414: D48 in { D48 } by TARSKI:def 1;
+L415: D48 in (the carrier' of C229) by L414 , L410 , CIRCCOMB:def 6;
+L416: D48 = [ ( D48 `1 ) , ( (the Charact of D49) . D48 ) ] by L415 , L410 , CIRCCOMB:def 10;
+L417: ( (the Arity of C229) . D48 ) in ( (the carrier of C229) * ) by L415 , FUNCT_2:5;
+reconsider D50 = ( (the Arity of C229) . D48 ) as (FinSequence of (the carrier of C229)) by L417 , FINSEQ_1:def 11;
+L418: ( dom (the ResultSort of C229) ) = (the carrier' of C229) by FUNCT_2:def 1;
+L419: ( ( (the Sorts of D47) * (the ResultSort of C229) ) . D48 ) = ( (the Sorts of D47) . ( (the ResultSort of C229) . D48 ) ) by L418 , L415 , FUNCT_1:13;
+L420: ( (the ResultSort of C229) . D48 ) in (the carrier of C229) by L415 , FUNCT_2:5;
+L421: ( (the ResultSort of C229) . D48 ) in ( dom (the Sorts of D47) ) by L420 , PARTFUN1:def 2;
+L422: ( (the Sorts of D47) . ( (the ResultSort of C229) . D48 ) ) = C228 by L421 , L405 , FUNCT_1:def 12;
+L423: D48 = [ ( D48 `1 ) , ( (the Charact of D47) . D48 ) ] by L415 , CIRCCOMB:def 10;
+L424: ( dom ( (the Charact of D47) . D48 ) ) = ( dom C234 ) by L423 , XTUPLE_0:1;
+L425: ( dom ( (the Charact of D47) . D48 ) ) = ( C232 -tuples_on C231 ) by L424 , FUNCT_2:def 1;
+L426: ( (the Charact of D47) . D48 ) is (Function of ( ( ( (the Sorts of D47) # ) * (the Arity of C229) ) . D48 ) , ( ( (the Sorts of D47) * (the ResultSort of C229) ) . D48 )) by L415 , PBOOLE:def 15;
+L427: ( dom ( (the Charact of D47) . D48 ) ) = ( ( ( (the Sorts of D47) # ) * (the Arity of C229) ) . D48 ) by L426 , L415 , FUNCT_2:def 1;
+L428: ( dom ( (the Charact of D47) . D48 ) ) = ( ( (the Sorts of D47) # ) . D50 ) by L427 , L415 , L411 , FUNCT_1:13
+.= ( ( len D50 ) -tuples_on C228 ) by L413 , CIRCCOMB:2;
+per cases ;
+suppose L429: C232 <> ( 0 );
+
+L430:
+now
+let C235 being set;
+assume L431: C235 in (the carrier' of C229);
+L432: C235 in { D48 } by L431 , L410 , CIRCCOMB:def 6;
+L433: C235 = D48 by L432 , TARSKI:def 1;
+thus L434: ( (the Charact of D47) . C235 ) = ( (the Charact of D49) . C235 ) by L433 , L423 , L416 , XTUPLE_0:1;
+end;
+L435: C228 = C231 by L425 , L428 , L429 , L346;
+L436: (the Sorts of D47) = (the Sorts of ( 1GateCircuit (C233 , C234) )) by L435 , L410 , L413 , CIRCCOMB:def 13;
+thus L437: thesis by L436 , L410 , L430 , PBOOLE:3;
+end;
+suppose L438: C232 = ( 0 );
+
+L439: ( C232 -tuples_on C228 ) = { ( <*> C228 ) } by L438 , FINSEQ_2:94
+.= { ( <*> C231 ) }
+.= ( C232 -tuples_on C231 ) by L438 , FINSEQ_2:94;
+L440: ( dom C234 ) = ( C232 -tuples_on C228 ) by L439 , FUNCT_2:def 1;
+L441: ( (the Charact of D47) . D48 ) is (Function of ( ( ( (the Sorts of D47) # ) * (the Arity of C229) ) . D48 ) , ( ( (the Sorts of D47) * (the ResultSort of C229) ) . D48 )) by L415 , PBOOLE:def 15;
+L442: ( rng ( (the Charact of D47) . D48 ) ) c= ( ( (the Sorts of D47) * (the ResultSort of C229) ) . D48 ) by L441 , RELAT_1:def 19;
+L443: ( (the Charact of D47) . D48 ) = C234 by L423 , XTUPLE_0:1;
+reconsider D51 = C234 as (Function of ( C232 -tuples_on C228 ) , C228) by L443 , L419 , L422 , L442 , L440 , FUNCT_2:2;
+set D52 = ( 1GateCircuit (C233 , D51) );
+L444: D48 = [ ( D48 `1 ) , ( (the Charact of D52) . D48 ) ] by L410 , L415 , CIRCCOMB:def 10;
+L445:
+now
+let C236 being set;
+assume L446: C236 in (the carrier' of C229);
+L447: C236 in { D48 } by L446 , L410 , CIRCCOMB:def 6;
+L448: C236 = D48 by L447 , TARSKI:def 1;
+thus L449: ( (the Charact of D47) . C236 ) = ( (the Charact of D52) . C236 ) by L448 , L423 , L444 , XTUPLE_0:1;
+end;
+L450: (the Sorts of D47) = (the Sorts of D52) by L410 , L413 , CIRCCOMB:def 13;
+thus L451: thesis by L450 , L410 , L445 , PBOOLE:3;
+end;
+end;
+end;
+registration
+let C237 being non  empty  finite set;
+let C238 being (Signature of C237);
+cluster  strict for (Circuit of C237 , C238);
+existence
+proof
+consider C239 being (Circuit of C238) such that L454: ((the Sorts of C239) is  constant & ( the_value_of (the Sorts of C239) ) = C237) and L455: C239 is  gate`2=den by L379;
+set D53 = ( the MSAlgebra of C239 );
+L456: (the Sorts of C239) is  finite-yielding by MSAFREE2:def 11;
+reconsider D54 = D53 as (Circuit of C238) by L456 , MSAFREE2:def 11;
+L457: (for B204 being set holds (B204 in (the carrier' of C238) implies B204 = [ ( B204 `1 ) , ( (the Charact of D54) . B204 ) ])) by L455 , CIRCCOMB:def 10;
+L458: D54 is  gate`2=den by L457 , CIRCCOMB:def 10;
+reconsider D55 = D54 as (Circuit of C237 , C238) by L458 , L454 , L391;
+take D55;
+thus L459: thesis;
+end;
+end;
+definition
+let C240 being (Element of ( NAT ));
+let C241 being non  empty  finite set;
+let C242 being (Function of ( C240 -tuples_on C241 ) , C241);
+let C243 being (FinSeqLen of C240);
+redefine func 1GateCircuit (C243 , C242) ->  strict (Circuit of C241 , ( 1GateCircStr (C243 , C242) ));
+
+coherence by L401;
+end;
+theorem
+L462: (for B205 being non  empty  finite set holds (for B206 , B207 being (Signature of B205) holds (for B208 being (Circuit of B205 , B206) holds (for B209 being (Circuit of B205 , B207) holds B208 tolerates B209))))
+proof
+let C244 being non  empty  finite set;
+let C245 , C246 being (Signature of C244);
+let C247 being (Circuit of C244 , C245);
+let C248 being (Circuit of C244 , C246);
+thus L463: C245 tolerates C246 by CIRCCOMB:47;
+L464: ((the Sorts of C248) is  constant & ( the_value_of (the Sorts of C248) ) = C244) by L391;
+L465: (the Sorts of C248) = ( ( dom (the Sorts of C248) ) --> C244 ) by L464 , FUNCOP_1:80;
+L466: ((the Sorts of C247) is  constant & ( the_value_of (the Sorts of C247) ) = C244) by L391;
+L467: (the Sorts of C247) = ( ( dom (the Sorts of C247) ) --> C244 ) by L466 , FUNCOP_1:80;
+thus L468: (the Sorts of C247) tolerates (the Sorts of C248) by L467 , L465 , FUNCOP_1:87;
+thus L469: thesis by CIRCCOMB:48;
+end;
+theorem
+L470: (for B210 being non  empty  finite set holds (for B211 , B212 being (Signature of B210) holds (for B213 being (Circuit of B210 , B211) holds (for B214 being (Circuit of B210 , B212) holds ( B213 +* B214 ) is (Circuit of ( B211 +* B212 ))))))
+proof
+let C249 being non  empty  finite set;
+let C250 , C251 being (Signature of C249);
+L471: (the carrier of ( C250 +* C251 )) = ( (the carrier of C250) \/ (the carrier of C251) ) by CIRCCOMB:def 2;
+let C252 being (Circuit of C249 , C250);
+let C253 being (Circuit of C249 , C251);
+L472: (( dom (the Sorts of C252) ) = (the carrier of C250) & ( dom (the Sorts of C253) ) = (the carrier of C251)) by PARTFUN1:def 2;
+L473: ((the Sorts of C252) is  finite-yielding & (the Sorts of C253) is  finite-yielding) by MSAFREE2:def 11;
+L474: C252 tolerates C253 by L462;
+L475: (the Sorts of C252) tolerates (the Sorts of C253) by L474 , CIRCCOMB:def 3;
+L476: (the Sorts of ( C252 +* C253 )) = ( (the Sorts of C252) +* (the Sorts of C253) ) by L475 , CIRCCOMB:def 4;
+L477: ( C252 +* C253 ) is  finite-yielding
+proof
+let C254 being set;
+assume L478: C254 in (the carrier of ( C250 +* C251 ));
+L479: (C254 in (the carrier of C250) or C254 in (the carrier of C251)) by L478 , L471 , XBOOLE_0:def 3;
+L480: ((C254 in (the carrier of C250) & ( (the Sorts of ( C252 +* C253 )) . C254 ) = ( (the Sorts of C252) . C254 )) or (C254 in (the carrier of C251) & ( (the Sorts of ( C252 +* C253 )) . C254 ) = ( (the Sorts of C253) . C254 ))) by L479 , L475 , L476 , L472 , FUNCT_4:13 , FUNCT_4:15;
+thus L481: thesis by L480 , L473;
+end;
+thus L482: thesis by L477;
+end;
+theorem
+L483: (for B215 being non  empty  finite set holds (for B216 , B217 being (Signature of B215) holds (for B218 being (Circuit of B215 , B216) holds (for B219 being (Circuit of B215 , B217) holds ( B218 +* B219 ) is  gate`2=den))))
+proof
+let C255 being non  empty  finite set;
+let C256 , C257 being (Signature of C255);
+L484: (the carrier' of ( C256 +* C257 )) = ( (the carrier' of C256) \/ (the carrier' of C257) ) by CIRCCOMB:def 2;
+let C258 being (Circuit of C255 , C256);
+let C259 being (Circuit of C255 , C257);
+L485: (( dom (the Charact of C258) ) = (the carrier' of C256) & ( dom (the Charact of C259) ) = (the carrier' of C257)) by PARTFUN1:def 2;
+L486: C258 tolerates C259 by L462;
+L487: (the Sorts of C258) tolerates (the Sorts of C259) by L486 , CIRCCOMB:def 3;
+L488: (the Charact of ( C258 +* C259 )) = ( (the Charact of C258) +* (the Charact of C259) ) by L487 , CIRCCOMB:def 4;
+L489: (the Charact of C258) tolerates (the Charact of C259) by L486 , CIRCCOMB:def 3;
+L490: ( C258 +* C259 ) is  gate`2=den
+proof
+let C260 being set;
+assume L491: C260 in (the carrier' of ( C256 +* C257 ));
+L492: (C260 in (the carrier' of C256) or C260 in (the carrier' of C257)) by L491 , L484 , XBOOLE_0:def 3;
+L493: ((C260 in (the carrier' of C256) & ( (the Charact of ( C258 +* C259 )) . C260 ) = ( (the Charact of C258) . C260 )) or (C260 in (the carrier' of C257) & ( (the Charact of ( C258 +* C259 )) . C260 ) = ( (the Charact of C259) . C260 ))) by L492 , L489 , L488 , L485 , FUNCT_4:13 , FUNCT_4:15;
+thus L494: thesis by L493 , CIRCCOMB:def 10;
+end;
+thus L495: thesis by L490;
+end;
+theorem
+L496: (for B220 being non  empty  finite set holds (for B221 , B222 being (Signature of B220) holds (for B223 being (Circuit of B220 , B221) holds (for B224 being (Circuit of B220 , B222) holds ((the Sorts of ( B223 +* B224 )) is  constant & ( the_value_of (the Sorts of ( B223 +* B224 )) ) = B220)))))
+proof
+let C261 being non  empty  finite set;
+let C262 , C263 being (Signature of C261);
+let C264 being (Circuit of C261 , C262);
+let C265 being (Circuit of C261 , C263);
+reconsider D56 = ( C264 +* C265 ) as (Circuit of ( C262 +* C263 )) by L470;
+L497: ( dom (the Sorts of C264) ) = (the carrier of C262) by PARTFUN1:def 2;
+L498: ((the Sorts of C264) is  constant & ( the_value_of (the Sorts of C264) ) = C261) by L391;
+L499: (the Sorts of C264) = ( ( dom (the Sorts of C264) ) --> C261 ) by L498 , FUNCOP_1:80;
+L500: (the Sorts of C264) = [: ( dom (the Sorts of C264) ) , { C261 } :] by L499 , FUNCOP_1:def 2;
+L501: ((the Sorts of C265) is  constant & ( the_value_of (the Sorts of C265) ) = C261) by L391;
+L502: (the Sorts of C265) = ( ( dom (the Sorts of C265) ) --> C261 ) by L501 , FUNCOP_1:80;
+L503: (the Sorts of C265) = [: ( dom (the Sorts of C265) ) , { C261 } :] by L502 , FUNCOP_1:def 2;
+L504: C264 tolerates C265 by L462;
+L505: (the Sorts of C264) tolerates (the Sorts of C265) by L504 , CIRCCOMB:def 3;
+L506: (the Sorts of D56) = ( (the Sorts of C264) +* (the Sorts of C265) ) by L505 , CIRCCOMB:def 4
+.= ( (the Sorts of C264) \/ (the Sorts of C265) ) by L505 , FUNCT_4:30
+.= [: ( ( dom (the Sorts of C264) ) \/ ( dom (the Sorts of C265) ) ) , { C261 } :] by L500 , L503 , ZFMISC_1:97
+.= ( ( (the carrier of C262) \/ ( dom (the Sorts of C265) ) ) --> C261 ) by L497 , FUNCOP_1:def 2;
+thus L507: thesis by L506 , FUNCOP_1:79;
+end;
+registration
+let C266 , C267 being  finite non  empty ManySortedSign;
+cluster ( C266 +* C267 ) ->  finite;
+coherence
+proof
+L508: (the carrier of ( C266 +* C267 )) = ( (the carrier of C266) \/ (the carrier of C267) ) by CIRCCOMB:def 2;
+thus L509: thesis by L508;
+end;
+end;
+registration
+let C268 being non  empty  finite set;
+let C269 , C270 being (Signature of C268);
+cluster ( C269 +* C270 ) ->  gate`2=den;
+coherence
+proof
+consider C271 being (Circuit of C270) such that L511: ((the Sorts of C271) is  constant & ( the_value_of (the Sorts of C271) ) = C268 & C271 is  gate`2=den) by L379;
+reconsider D57 = C271 as (Circuit of C268 , C270) by L511 , L391;
+consider C272 being (Circuit of C269) such that L512: ((the Sorts of C272) is  constant & ( the_value_of (the Sorts of C272) ) = C268 & C272 is  gate`2=den) by L379;
+reconsider D58 = C272 as (Circuit of C268 , C269) by L512 , L391;
+L513: ( D58 +* D57 ) is  gate`2=den by L483;
+thus L514: thesis by L513 , CIRCCOMB:def 11;
+end;
+end;
+definition
+let C273 being non  empty  finite set;
+let C274 , C275 being (Signature of C273);
+redefine func C274 +* C275 ->  strict (Signature of C273);
+
+coherence
+proof
+consider C276 being (Circuit of C275) such that L516: ((the Sorts of C276) is  constant & ( the_value_of (the Sorts of C276) ) = C273 & C276 is  gate`2=den) by L379;
+reconsider D59 = C276 as (Circuit of C273 , C275) by L516 , L391;
+consider C277 being (Circuit of C274) such that L517: ((the Sorts of C277) is  constant & ( the_value_of (the Sorts of C277) ) = C273 & C277 is  gate`2=den) by L379;
+reconsider D60 = C277 as (Circuit of C273 , C274) by L517 , L391;
+reconsider D61 = ( D60 +* D59 ) as (Circuit of ( C274 +* C275 )) by L470;
+L518: ( C274 +* C275 ) is (Signature of C273)
+proof
+take D61;
+thus L519: ((the Sorts of D61) is  constant & ( the_value_of (the Sorts of D61) ) = C273) by L496;
+thus L520: thesis by L483;
+end;
+thus L521: thesis by L518;
+end;
+end;
+definition
+let C278 being non  empty  finite set;
+let C279 , C280 being (Signature of C278);
+let C281 being (Circuit of C278 , C279);
+let C282 being (Circuit of C278 , C280);
+redefine func C281 +* C282 ->  strict (Circuit of C278 , ( C279 +* C280 ));
+
+coherence
+proof
+L523: ((the Sorts of ( C281 +* C282 )) is  constant & ( the_value_of (the Sorts of ( C281 +* C282 )) ) = C278) by L496;
+L524: (( C281 +* C282 ) is  gate`2=den & ( C281 +* C282 ) is (Circuit of ( C279 +* C280 ))) by L470 , L483;
+thus L525: thesis by L524 , L523 , L391;
+end;
+end;
+theorem
+L527: (for B225 , B226 being set holds (( the_rank_of B225 ) in ( the_rank_of [ B225 , B226 ] ) & ( the_rank_of B226 ) in ( the_rank_of [ B225 , B226 ] )))
+proof
+let C283 , C284 being set;
+L528: { C283 } in { { C283 , C284 } , { C283 } } by TARSKI:def 2;
+L529: ( the_rank_of { C283 } ) in ( the_rank_of { { C283 , C284 } , { C283 } } ) by L528 , CLASSES1:68;
+L530: C283 in { C283 } by TARSKI:def 1;
+L531: ( the_rank_of C283 ) in ( the_rank_of { C283 } ) by L530 , CLASSES1:68;
+thus L532: ( the_rank_of C283 ) in ( the_rank_of [ C283 , C284 ] ) by L531 , L529 , ORDINAL1:10;
+L533: { C283 , C284 } in { { C283 , C284 } , { C283 } } by TARSKI:def 2;
+L534: ( the_rank_of { C283 , C284 } ) in ( the_rank_of { { C283 , C284 } , { C283 } } ) by L533 , CLASSES1:68;
+L535: C284 in { C283 , C284 } by TARSKI:def 2;
+L536: ( the_rank_of C284 ) in ( the_rank_of { C283 , C284 } ) by L535 , CLASSES1:68;
+thus L537: thesis by L536 , L534 , ORDINAL1:10;
+end;
+theorem
+L538: (for B227 being  gate`2=den  finite non  void non  empty  unsplit  gate`1=arity ManySortedSign holds (for B228 being  non-empty (Circuit of B227) holds (B228 is  gate`2=den implies B228 is  with_stabilization-limit)))
+proof
+let C285 being  gate`2=den  finite non  void non  empty  unsplit  gate`1=arity ManySortedSign;
+defpred S3[ set , set ] means ($1 = $2 or ($1 in (the carrier' of C285) & $2 in ( proj2 ( $1 `1 ) )));
+consider C286 being Relation such that L539: (for B229 , B230 being set holds ([ B229 , B230 ] in C286 iff (B229 in (the carrier of C285) & B230 in (the carrier of C285) & S3[ B229 , B230 ]))) from RELAT_1:sch 1;
+let C287 being  non-empty (Circuit of C285);
+assume that
+L540: C287 is  gate`2=den;
+L541: C286 is  co-well_founded
+proof
+defpred S4[ set , set ] means $2 = ( the_rank_of $1 );
+let C288 being set;
+assume that
+L542: C288 c= ( field C286 )
+and
+L543: C288 <> ( {} );
+set D62 = the (Element of C288);
+L544: (for B231 , B232 , B233 being set holds ((S4[ B231 , B232 ] & S4[ B231 , B233 ]) implies B232 = B233));
+consider C289 being set such that L545: (for B234 being set holds (B234 in C289 iff (ex B235 being set st (B235 in C288 & S4[ B235 , B234 ])))) from TARSKI:sch 1(L544);
+L546: ( the_rank_of D62 ) in C289 by L543 , L545;
+L547: ( inf C289 ) in C289 by L546 , ORDINAL2:17;
+consider C290 being set such that L548: C290 in C288 and L549: ( inf C289 ) = ( the_rank_of C290 ) by L547 , L545;
+take C290;
+thus L550: C290 in C288 by L548;
+let C291 being set;
+assume that
+L551: C291 in C288
+and
+L552: (C290 <> C291 & [ C290 , C291 ] in C286);
+L553: ( the_rank_of C291 ) in C289 by L545 , L551;
+L554: ( inf C289 ) c= ( the_rank_of C291 ) by L553 , ORDINAL2:14;
+L555: C290 in (the carrier' of C285) by L539 , L552;
+L556: C290 = [ ( C290 `1 ) , ( (the Charact of C287) . C290 ) ] by L555 , L540 , CIRCCOMB:def 10;
+L557: ( the_rank_of ( C290 `1 ) ) in ( the_rank_of C290 ) by L556 , L527;
+L558: C291 in ( proj2 ( C290 `1 ) ) by L539 , L552;
+consider C292 being set such that L559: [ C292 , C291 ] in ( C290 `1 ) by L558 , XTUPLE_0:def 13;
+L560: ( the_rank_of C291 ) in ( the_rank_of [ C292 , C291 ] ) by L527;
+L561: ( the_rank_of [ C292 , C291 ] ) in ( the_rank_of ( C290 `1 ) ) by L559 , CLASSES1:68;
+thus L562: contradiction by L561 , L549 , L560 , L557 , L554 , ORDINAL1:10;
+end;
+defpred S5[ set , set ] means (ex B236 being (Element of ( NAT )) st ($2 = B236 & (for B237 being (State of C287) holds (for B238 being (Element of ( NAT )) holds (B238 >= B236 implies ( ( Following (B237 , B238) ) . $1 ) = ( ( Following (B237 , B236) ) . $1 ))))));
+defpred S6[ set ] means ($1 in (the carrier of C285) implies (ex B239 being (Element of ( NAT )) st (for B240 being (State of C287) holds (for B241 being (Element of ( NAT )) holds (B241 >= B239 implies ( ( Following (B240 , B241) ) . $1 ) = ( ( Following (B240 , B239) ) . $1 ))))));
+L563: ( rng C286 ) c= (the carrier of C285)
+proof
+let C293 being set;
+assume L564: C293 in ( rng C286 );
+L565: (ex B242 being set st [ B242 , C293 ] in C286) by L564 , XTUPLE_0:def 13;
+thus L566: thesis by L565 , L539;
+end;
+L567: (the carrier of C285) c= ( field C286 )
+proof
+let C294 being set;
+assume L568: C294 in (the carrier of C285);
+L569: [ C294 , C294 ] in C286 by L568 , L539;
+thus L570: thesis by L569 , RELAT_1:15;
+end;
+L571: ( dom C286 ) c= (the carrier of C285)
+proof
+let C295 being set;
+assume L572: C295 in ( dom C286 );
+L573: (ex B243 being set st [ C295 , B243 ] in C286) by L572 , XTUPLE_0:def 12;
+thus L574: thesis by L573 , L539;
+end;
+L575: ( ( dom C286 ) \/ ( rng C286 ) ) c= ( (the carrier of C285) \/ (the carrier of C285) ) by L571 , L563 , XBOOLE_1:13;
+L576: (the carrier of C285) = ( field C286 ) by L575 , L567 , XBOOLE_0:def 10;
+L577: (for B244 being set holds ((for B245 being set holds (([ B244 , B245 ] in C286 & B244 <> B245) implies S6[ B245 ])) implies S6[ B244 ]))
+proof
+defpred S7[ set , set ] means (ex B246 being (Element of ( NAT )) st ($2 = B246 & (for B247 being (State of C287) holds (for B248 being (Element of ( NAT )) holds (B248 >= B246 implies ( ( Following (B247 , B248) ) . $1 ) = ( ( Following (B247 , B246) ) . $1 ))))));
+let C296 being set;
+defpred S8[ set ] means (C296 <> $1 & [ C296 , $1 ] in C286);
+consider C297 being set such that L578: (for B249 being set holds (B249 in C297 iff (B249 in ( field C286 ) & S8[ B249 ]))) from XBOOLE_0:sch 1;
+L579: C297 c= (the carrier of C285)
+proof
+let C298 being set;
+assume L580: C298 in C297;
+thus L581: thesis by L580 , L576 , L578;
+end;
+assume L582: (for B250 being set holds (([ C296 , B250 ] in C286 & C296 <> B250) implies S6[ B250 ]));
+L583: (for B251 being set holds (B251 in C297 implies (ex B252 being set st S7[ B251 , B252 ])))
+proof
+let C299 being set;
+assume L584: C299 in C297;
+L585: (C296 <> C299 & [ C296 , C299 ] in C286) by L584 , L578;
+L586: (ex B253 being (Element of ( NAT )) st (for B254 being (State of C287) holds (for B255 being (Element of ( NAT )) holds (B255 >= B253 implies ( ( Following (B254 , B255) ) . C299 ) = ( ( Following (B254 , B253) ) . C299 ))))) by L585 , L582 , L579 , L584;
+thus L587: thesis by L586;
+end;
+consider C300 being Function such that L588: ( dom C300 ) = C297 and L589: (for B256 being set holds (B256 in C297 implies S7[ B256 , ( C300 . B256 ) ])) from CLASSES1:sch 1(L583);
+assume L590: C296 in (the carrier of C285);
+per cases ;
+suppose L591: C297 <> ( {} );
+
+L592: ( rng C300 ) c= ( NAT )
+proof
+let C301 being set;
+assume L593: C301 in ( rng C300 );
+consider C302 being set such that L594: C302 in ( dom C300 ) and L595: C301 = ( C300 . C302 ) by L593 , FUNCT_1:def 3;
+L596: (ex B257 being (Element of ( NAT )) st (( C300 . C302 ) = B257 & (for B258 being (State of C287) holds (for B259 being (Element of ( NAT )) holds (B259 >= B257 implies ( ( Following (B258 , B259) ) . C302 ) = ( ( Following (B258 , B257) ) . C302 )))))) by L588 , L589 , L594;
+thus L597: thesis by L596 , L595;
+end;
+reconsider D63 = ( rng C300 ) as  finite non  empty (Subset of ( NAT )) by L592 , L579 , L588 , L591 , FINSET_1:8 , RELAT_1:38 , RELAT_1:41;
+set D64 = the (Element of C297);
+L598: (C296 <> D64 & [ C296 , D64 ] in C286) by L578 , L591;
+reconsider D65 = C296 as (Gate of C285) by L598 , L539;
+reconsider D66 = ( max D63 ) as (Element of ( NAT )) by ORDINAL1:def 12;
+take D67 = ( D66 + 1 );
+let C303 being (State of C287);
+let C304 being (Element of ( NAT ));
+assume L599: C304 >= D67;
+consider C305 being Nat such that L600: C304 = ( D67 + C305 ) by L599 , NAT_1:10;
+reconsider D68 = C305 as (Element of ( NAT )) by ORDINAL1:def 12;
+L601: (for B260 being set holds (B260 in ( rng ( the_arity_of D65 ) ) implies ( Following (C303 , D66) ) is_stable_at B260))
+proof
+let C306 being set;
+assume L602: C306 in ( rng ( the_arity_of D65 ) );
+L603: D65 = [ ( (the Arity of C285) . D65 ) , ( D65 `2 ) ] by CIRCCOMB:def 8;
+L604: D65 = [ ( the_arity_of D65 ) , ( D65 `2 ) ] by L603 , MSUALG_1:def 1;
+L605: ( the_rank_of C306 ) in ( the_rank_of D65 ) by L604 , L602 , CLASSES1:82;
+L606: C306 <> C296 by L605;
+L607: (( rng ( the_arity_of D65 ) ) c= (the carrier of C285) & C306 in ( proj2 ( C296 `1 ) )) by L602 , L604 , FINSEQ_1:def 4 , MCART_1:7;
+L608: [ D65 , C306 ] in C286 by L607 , L539 , L590 , L602;
+L609: C306 in ( field C286 ) by L608 , RELAT_1:15;
+L610: C306 in C297 by L609 , L578 , L606 , L608;
+consider C307 being (Element of ( NAT )) such that L611: ( C300 . C306 ) = C307 and L612: (for B261 being (State of C287) holds (for B262 being (Element of ( NAT )) holds (B262 >= C307 implies ( ( Following (B261 , B262) ) . C306 ) = ( ( Following (B261 , C307) ) . C306 )))) by L610 , L589;
+L613: C307 in ( rng C300 ) by L588 , L610 , L611 , FUNCT_1:3;
+L614: ( max D63 ) >= C307 by L613 , XXREAL_2:def 8;
+L615:
+now
+let C308 being Nat;
+L616: ( D66 + C308 ) >= ( max D63 ) by NAT_1:11;
+thus L617: ( ( Following (( Following (C303 , D66) ) , C308) ) . C306 ) = ( ( Following (C303 , ( D66 + C308 )) ) . C306 ) by FACIRC_1:13
+.= ( ( Following (C303 , C307) ) . C306 ) by L612 , L614 , L616 , XXREAL_0:2
+.= ( ( Following (C303 , D66) ) . C306 ) by L612 , L614;
+end;
+thus L618: thesis by L615 , FACIRC_1:def 9;
+end;
+L619: ( the_result_sort_of D65 ) = ( (the ResultSort of C285) . D65 ) by MSUALG_1:def 2
+.= C296 by CIRCCOMB:44;
+L620: ( Following ( Following (C303 , D66) ) ) is_stable_at C296 by L619 , L601 , FACIRC_1:19;
+L621: ( Following (C303 , D67) ) is_stable_at C296 by L620 , FACIRC_1:12;
+L622: ( ( Following (( Following (C303 , D67) ) , D68) ) . C296 ) = ( ( Following (C303 , D67) ) . C296 ) by L621 , FACIRC_1:def 9;
+thus L623: thesis by L622 , L600 , FACIRC_1:13;
+end;
+suppose L624: C297 = ( {} );
+
+take D69 = 1;
+let C309 being (State of C287);
+let C310 being (Element of ( NAT ));
+assume L625: C310 >= D69;
+consider C311 being Nat such that L626: C310 = ( D69 + C311 ) by L625 , NAT_1:10;
+reconsider D70 = C311 as (Element of ( NAT )) by ORDINAL1:def 12;
+L627:
+now
+assume L628: C296 in ( InnerVertices C285 );
+L629: C296 in ( rng ( id (the carrier' of C285) ) ) by L628 , CIRCCOMB:def 7;
+reconsider D71 = C296 as (Gate of C285) by L629;
+L630: (for B263 being set holds (B263 in ( rng ( the_arity_of D71 ) ) implies C309 is_stable_at B263))
+proof
+let C312 being set;
+assume L631: C312 in ( rng ( the_arity_of D71 ) );
+L632: D71 = [ ( (the Arity of C285) . D71 ) , ( D71 `2 ) ] by CIRCCOMB:def 8;
+L633: D71 = [ ( the_arity_of D71 ) , ( D71 `2 ) ] by L632 , MSUALG_1:def 1;
+L634: ( the_rank_of C312 ) in ( the_rank_of D71 ) by L633 , L631 , CLASSES1:82;
+L635: C312 <> C296 by L634;
+L636: (( rng ( the_arity_of D71 ) ) c= (the carrier of C285) & C312 in ( proj2 ( C296 `1 ) )) by L631 , L633 , FINSEQ_1:def 4 , MCART_1:7;
+L637: [ D71 , C312 ] in C286 by L636 , L539 , L590 , L631;
+L638: C312 in ( field C286 ) by L637 , RELAT_1:15;
+thus L639: thesis by L638 , L578 , L624 , L635 , L637;
+end;
+L640: ( Following C309 ) is_stable_at ( the_result_sort_of D71 ) by L630 , FACIRC_1:19;
+L641: ( the_result_sort_of D71 ) = ( (the ResultSort of C285) . D71 ) by MSUALG_1:def 2
+.= D71 by CIRCCOMB:44;
+L642: ( Following (C309 , D69) ) is_stable_at D71 by L641 , L640 , FACIRC_1:14;
+L643: ( ( Following (( Following (C309 , D69) ) , D70) ) . C296 ) = ( ( Following (C309 , D69) ) . C296 ) by L642 , FACIRC_1:def 9;
+thus L644: thesis by L643 , L626 , FACIRC_1:13;
+end;
+L645:
+now
+assume L646: C296 in ( InputVertices C285 );
+L647: C309 is_stable_at C296 by L646 , FACIRC_1:18;
+thus L648: ( ( Following (C309 , C310) ) . C296 ) = ( C309 . C296 ) by L647 , FACIRC_1:def 9
+.= ( ( Following (C309 , D69) ) . C296 ) by L647 , FACIRC_1:def 9;
+end;
+L649: (the carrier of C285) = ( ( InputVertices C285 ) \/ ( InnerVertices C285 ) ) by XBOOLE_1:45;
+thus L650: thesis by L649 , L590 , L645 , L627 , XBOOLE_0:def 3;
+end;
+end;
+L652: (for B264 being set holds (B264 in ( field C286 ) implies S6[ B264 ])) from REWRITE1:sch 2(L541 , L577);
+L653: (for B265 being set holds (B265 in ( field C286 ) implies (ex B266 being set st S5[ B265 , B266 ])))
+proof
+let C313 being set;
+assume L654: C313 in ( field C286 );
+L655: (ex B267 being (Element of ( NAT )) st (for B268 being (State of C287) holds (for B269 being (Element of ( NAT )) holds (B269 >= B267 implies ( ( Following (B268 , B269) ) . C313 ) = ( ( Following (B268 , B267) ) . C313 ))))) by L654 , L575 , L652;
+thus L656: thesis by L655;
+end;
+consider C314 being Function such that L657: ( dom C314 ) = ( field C286 ) and L658: (for B270 being set holds (B270 in ( field C286 ) implies S5[ B270 , ( C314 . B270 ) ])) from CLASSES1:sch 1(L653);
+L659: ( rng C314 ) c= ( NAT )
+proof
+let C315 being set;
+assume L660: C315 in ( rng C314 );
+consider C316 being set such that L661: C316 in ( dom C314 ) and L662: C315 = ( C314 . C316 ) by L660 , FUNCT_1:def 3;
+L663: (ex B271 being (Element of ( NAT )) st (( C314 . C316 ) = B271 & (for B272 being (State of C287) holds (for B273 being (Element of ( NAT )) holds (B273 >= B271 implies ( ( Following (B272 , B273) ) . C316 ) = ( ( Following (B272 , B271) ) . C316 )))))) by L657 , L658 , L661;
+thus L664: thesis by L663 , L662;
+end;
+reconsider D72 = ( rng C314 ) as  finite non  empty (Subset of ( NAT )) by L659 , L576 , L657 , FINSET_1:8 , RELAT_1:38 , RELAT_1:41;
+reconsider D73 = ( max D72 ) as (Element of ( NAT )) by ORDINAL1:def 12;
+take D73;
+let C317 being (State of C287);
+L665:
+now
+let C318 being set;
+assume L666: C318 in (the carrier of C285);
+consider C319 being (Element of ( NAT )) such that L667: ( C314 . C318 ) = C319 and L668: (for B274 being (State of C287) holds (for B275 being (Element of ( NAT )) holds (B275 >= C319 implies ( ( Following (B274 , B275) ) . C318 ) = ( ( Following (B274 , C319) ) . C318 )))) by L666 , L567 , L658;
+L669: C319 in D72 by L567 , L657 , L666 , L667 , FUNCT_1:3;
+L670: D73 >= C319 by L669 , XXREAL_2:def 8;
+L671: ( D73 + 1 ) >= C319 by L670 , NAT_1:13;
+thus L672: ( ( Following (C317 , D73) ) . C318 ) = ( ( Following (C317 , C319) ) . C318 ) by L668 , L670
+.= ( ( Following (C317 , ( D73 + 1 )) ) . C318 ) by L668 , L671
+.= ( ( Following ( Following (C317 , D73) ) ) . C318 ) by FACIRC_1:12;
+end;
+L673: (( dom ( Following (C317 , D73) ) ) = (the carrier of C285) & ( dom ( Following ( Following (C317 , D73) ) ) ) = (the carrier of C285)) by CIRCUIT1:3;
+thus L674: ( Following (C317 , D73) ) = ( Following ( Following (C317 , D73) ) ) by L673 , L665 , FUNCT_1:2;
+end;
+registration
+let C320 being non  empty  finite set;
+let C321 being  finite (Signature of C320);
+cluster  ->  with_stabilization-limit for (Circuit of C320 , C321);
+coherence by L538;
+end;
+scheme 1AryDef { F26() -> non  empty set , F27(set) -> (Element of F26()) } : ((ex B276 being (Function of ( 1 -tuples_on F26() ) , F26()) st (for B277 being (Element of F26()) holds ( B276 . <* B277 *> ) = F27(B277))) & (for B278 , B279 being (Function of ( 1 -tuples_on F26() ) , F26()) holds (((for B280 being (Element of F26()) holds ( B278 . <* B280 *> ) = F27(B280)) & (for B281 being (Element of F26()) holds ( B279 . <* B281 *> ) = F27(B281))) implies B278 = B279)))
+proof
+deffunc H6((Element of ( 1 -tuples_on F26() ))) = F27(( $1 . 1 ));
+consider C322 being (Function of ( 1 -tuples_on F26() ) , F26()) such that L676: (for B282 being (Element of ( 1 -tuples_on F26() )) holds ( C322 . B282 ) = H6(B282)) from FUNCT_2:sch 4;
+thus L677:now
+take D74 = C322;
+let C323 being (Element of F26());
+reconsider D75 = <* C323 *> as (Element of ( 1 -tuples_on F26() )) by FINSEQ_2:98;
+thus L678: ( D74 . <* C323 *> ) = F27(( D75 . 1 )) by L676
+.= F27(C323) by FINSEQ_1:40;
+end;
+let C324 , C325 being (Function of ( 1 -tuples_on F26() ) , F26());
+assume that
+L679: (for B283 being (Element of F26()) holds ( C324 . <* B283 *> ) = F27(B283))
+and
+L680: (for B284 being (Element of F26()) holds ( C325 . <* B284 *> ) = F27(B284));
+L681:
+now
+let C326 being (Element of ( 1 -tuples_on F26() ));
+consider C327 being (Element of F26()) such that L682: C326 = <* C327 *> by FINSEQ_2:97;
+thus L683: ( C324 . C326 ) = F27(C327) by L679 , L682
+.= ( C325 . C326 ) by L680 , L682;
+end;
+thus L684: thesis by L681 , FUNCT_2:63;
+end;
+scheme 2AryDef { F28() -> non  empty set , F29(set , set) -> (Element of F28()) } : ((ex B285 being (Function of ( 2 -tuples_on F28() ) , F28()) st (for B286 , B287 being (Element of F28()) holds ( B285 . <* B286 , B287 *> ) = F29(B286 , B287))) & (for B288 , B289 being (Function of ( 2 -tuples_on F28() ) , F28()) holds (((for B290 , B291 being (Element of F28()) holds ( B288 . <* B290 , B291 *> ) = F29(B290 , B291)) & (for B292 , B293 being (Element of F28()) holds ( B289 . <* B292 , B293 *> ) = F29(B292 , B293))) implies B288 = B289)))
+proof
+deffunc H7((Element of ( 2 -tuples_on F28() ))) = F29(( $1 . 1 ) , ( $1 . 2 ));
+consider C328 being (Function of ( 2 -tuples_on F28() ) , F28()) such that L685: (for B294 being (Element of ( 2 -tuples_on F28() )) holds ( C328 . B294 ) = H7(B294)) from FUNCT_2:sch 4;
+thus L686:now
+take D76 = C328;
+let C329 , C330 being (Element of F28());
+reconsider D77 = <* C329 , C330 *> as (Element of ( 2 -tuples_on F28() )) by FINSEQ_2:101;
+thus L687: ( D76 . <* C329 , C330 *> ) = F29(( D77 . 1 ) , ( D77 . 2 )) by L685
+.= F29(C329 , ( D77 . 2 )) by FINSEQ_1:44
+.= F29(C329 , C330) by FINSEQ_1:44;
+end;
+let C331 , C332 being (Function of ( 2 -tuples_on F28() ) , F28());
+assume that
+L688: (for B295 , B296 being (Element of F28()) holds ( C331 . <* B295 , B296 *> ) = F29(B295 , B296))
+and
+L689: (for B297 , B298 being (Element of F28()) holds ( C332 . <* B297 , B298 *> ) = F29(B297 , B298));
+L690:
+now
+let C333 being (Element of ( 2 -tuples_on F28() ));
+consider C334 , C335 being (Element of F28()) such that L691: C333 = <* C334 , C335 *> by FINSEQ_2:100;
+thus L692: ( C331 . C333 ) = F29(C334 , C335) by L688 , L691
+.= ( C332 . C333 ) by L689 , L691;
+end;
+thus L693: thesis by L690 , FUNCT_2:63;
+end;
+scheme 3AryDef { F30() -> non  empty set , F31(set , set , set) -> (Element of F30()) } : ((ex B299 being (Function of ( 3 -tuples_on F30() ) , F30()) st (for B300 , B301 , B302 being (Element of F30()) holds ( B299 . <* B300 , B301 , B302 *> ) = F31(B300 , B301 , B302))) & (for B303 , B304 being (Function of ( 3 -tuples_on F30() ) , F30()) holds (((for B305 , B306 , B307 being (Element of F30()) holds ( B303 . <* B305 , B306 , B307 *> ) = F31(B305 , B306 , B307)) & (for B308 , B309 , B310 being (Element of F30()) holds ( B304 . <* B308 , B309 , B310 *> ) = F31(B308 , B309 , B310))) implies B303 = B304)))
+proof
+deffunc H8((Element of ( 3 -tuples_on F30() ))) = F31(( $1 . 1 ) , ( $1 . 2 ) , ( $1 . 3 ));
+consider C336 being (Function of ( 3 -tuples_on F30() ) , F30()) such that L694: (for B311 being (Element of ( 3 -tuples_on F30() )) holds ( C336 . B311 ) = H8(B311)) from FUNCT_2:sch 4;
+thus L695:now
+take D78 = C336;
+let C337 , C338 , C339 being (Element of F30());
+reconsider D79 = <* C337 , C338 , C339 *> as (Element of ( 3 -tuples_on F30() )) by FINSEQ_2:104;
+thus L696: ( D78 . <* C337 , C338 , C339 *> ) = F31(( D79 . 1 ) , ( D79 . 2 ) , ( D79 . 3 )) by L694
+.= F31(C337 , ( D79 . 2 ) , ( D79 . 3 )) by FINSEQ_1:45
+.= F31(C337 , C338 , ( D79 . 3 )) by FINSEQ_1:45
+.= F31(C337 , C338 , C339) by FINSEQ_1:45;
+end;
+let C340 , C341 being (Function of ( 3 -tuples_on F30() ) , F30());
+assume that
+L697: (for B312 , B313 , B314 being (Element of F30()) holds ( C340 . <* B312 , B313 , B314 *> ) = F31(B312 , B313 , B314))
+and
+L698: (for B315 , B316 , B317 being (Element of F30()) holds ( C341 . <* B315 , B316 , B317 *> ) = F31(B315 , B316 , B317));
+L699:
+now
+let C342 being (Element of ( 3 -tuples_on F30() ));
+consider C343 , C344 , C345 being (Element of F30()) such that L700: C342 = <* C343 , C344 , C345 *> by FINSEQ_2:103;
+thus L701: ( C340 . C342 ) = F31(C343 , C344 , C345) by L697 , L700
+.= ( C341 . C342 ) by L698 , L700;
+end;
+thus L702: thesis by L699 , FUNCT_2:63;
+end;
+theorem
+L703: (for B318 being Function holds (for B319 , B320 , B321 , B322 being set holds ((B319 in ( dom B318 ) & B320 in ( dom B318 ) & B321 in ( dom B318 ) & B322 in ( dom B318 )) implies ( B318 * <* B319 , B320 , B321 , B322 *> ) = <* ( B318 . B319 ) , ( B318 . B320 ) , ( B318 . B321 ) , ( B318 . B322 ) *>)))
+proof
+let C346 being Function;
+let C347 , C348 , C349 , C350 being set;
+assume that
+L704: C347 in ( dom C346 )
+and
+L705: (C348 in ( dom C346 ) & C349 in ( dom C346 ) & C350 in ( dom C346 ));
+reconsider D80 = ( dom C346 ) , D81 = ( rng C346 ) as non  empty set by L704 , FUNCT_1:3;
+L706: ( rng <* C347 , C348 , C349 , C350 *> ) c= D80
+proof
+let C351 being set;
+assume L707: C351 in ( rng <* C347 , C348 , C349 , C350 *> );
+L708: C351 in { C347 , C348 , C349 , C350 } by L707 , L177;
+thus L709: thesis by L708 , L704 , L705 , ENUMSET1:def 2;
+end;
+reconsider D82 = <* C347 , C348 , C349 , C350 *> as (FinSequence of D80) by L706 , FINSEQ_1:def 4;
+reconsider D83 = C346 as (Function of D80 , D81) by FUNCT_2:def 1 , RELSET_1:4;
+L710: ( dom ( D83 * D82 ) ) = ( dom D82 ) by FINSEQ_3:120;
+L711:
+now
+let C352 being Nat;
+assume L712: C352 in ( dom ( D83 * D82 ) );
+L713: C352 in ( Seg 4 ) by L712 , L710 , FINSEQ_1:89;
+per cases  by L713 , ENUMSET1:def 2 , FINSEQ_3:2;
+suppose L714: C352 = 1;
+
+L715: ( D82 . C352 ) = C347 by L714 , FINSEQ_4:76;
+L716: ( ( D83 * D82 ) . C352 ) = ( D83 . C347 ) by L715 , L712 , FINSEQ_3:120;
+thus L717: ( ( D83 * D82 ) . C352 ) = ( <* ( C346 . C347 ) , ( C346 . C348 ) , ( C346 . C349 ) , ( C346 . C350 ) *> . C352 ) by L716 , L714 , FINSEQ_4:76;
+end;
+suppose L718: C352 = 2;
+
+L719: ( D82 . C352 ) = C348 by L718 , FINSEQ_4:76;
+L720: ( ( D83 * D82 ) . C352 ) = ( D83 . C348 ) by L719 , L712 , FINSEQ_3:120;
+thus L721: ( ( D83 * D82 ) . C352 ) = ( <* ( C346 . C347 ) , ( C346 . C348 ) , ( C346 . C349 ) , ( C346 . C350 ) *> . C352 ) by L720 , L718 , FINSEQ_4:76;
+end;
+suppose L722: C352 = 3;
+
+L723: ( D82 . C352 ) = C349 by L722 , FINSEQ_4:76;
+L724: ( ( D83 * D82 ) . C352 ) = ( D83 . C349 ) by L723 , L712 , FINSEQ_3:120;
+thus L725: ( ( D83 * D82 ) . C352 ) = ( <* ( C346 . C347 ) , ( C346 . C348 ) , ( C346 . C349 ) , ( C346 . C350 ) *> . C352 ) by L724 , L722 , FINSEQ_4:76;
+end;
+suppose L726: C352 = 4;
+
+L727: ( D82 . C352 ) = C350 by L726 , FINSEQ_4:76;
+L728: ( ( D83 * D82 ) . C352 ) = ( D83 . C350 ) by L727 , L712 , FINSEQ_3:120;
+thus L729: ( ( D83 * D82 ) . C352 ) = ( <* ( C346 . C347 ) , ( C346 . C348 ) , ( C346 . C349 ) , ( C346 . C350 ) *> . C352 ) by L728 , L726 , FINSEQ_4:76;
+end;
+end;
+L731: ( dom ( D83 * D82 ) ) = ( Seg 4 ) by L710 , FINSEQ_1:89
+.= ( dom <* ( C346 . C347 ) , ( C346 . C348 ) , ( C346 . C349 ) , ( C346 . C350 ) *> ) by FINSEQ_1:89;
+thus L732: thesis by L731 , L711 , FINSEQ_1:13;
+end;
+theorem
+L733: (for B323 being Function holds (for B324 , B325 , B326 , B327 , B328 being set holds ((B324 in ( dom B323 ) & B325 in ( dom B323 ) & B326 in ( dom B323 ) & B327 in ( dom B323 ) & B328 in ( dom B323 )) implies ( B323 * <* B324 , B325 , B326 , B327 , B328 *> ) = <* ( B323 . B324 ) , ( B323 . B325 ) , ( B323 . B326 ) , ( B323 . B327 ) , ( B323 . B328 ) *>)))
+proof
+let C353 being Function;
+let C354 , C355 , C356 , C357 , C358 being set;
+assume that
+L734: C354 in ( dom C353 )
+and
+L735: (C355 in ( dom C353 ) & C356 in ( dom C353 ) & C357 in ( dom C353 ) & C358 in ( dom C353 ));
+reconsider D84 = ( dom C353 ) , D85 = ( rng C353 ) as non  empty set by L734 , FUNCT_1:3;
+L736: ( rng <* C354 , C355 , C356 , C357 , C358 *> ) c= D84
+proof
+let C359 being set;
+assume L737: C359 in ( rng <* C354 , C355 , C356 , C357 , C358 *> );
+L738: C359 in { C354 , C355 , C356 , C357 , C358 } by L737 , L202;
+thus L739: thesis by L738 , L734 , L735 , ENUMSET1:def 3;
+end;
+reconsider D86 = <* C354 , C355 , C356 , C357 , C358 *> as (FinSequence of D84) by L736 , FINSEQ_1:def 4;
+reconsider D87 = C353 as (Function of D84 , D85) by FUNCT_2:def 1 , RELSET_1:4;
+L740: ( dom ( D87 * D86 ) ) = ( dom D86 ) by FINSEQ_3:120;
+L741:
+now
+let C360 being Nat;
+assume L742: C360 in ( dom ( D87 * D86 ) );
+L743: C360 in ( Seg 5 ) by L742 , L740 , FINSEQ_1:89;
+per cases  by L743 , ENUMSET1:def 3 , FINSEQ_3:3;
+suppose L744: C360 = 1;
+
+L745: ( D86 . C360 ) = C354 by L744 , FINSEQ_4:78;
+L746: ( ( D87 * D86 ) . C360 ) = ( D87 . C354 ) by L745 , L742 , FINSEQ_3:120;
+thus L747: ( ( D87 * D86 ) . C360 ) = ( <* ( C353 . C354 ) , ( C353 . C355 ) , ( C353 . C356 ) , ( C353 . C357 ) , ( C353 . C358 ) *> . C360 ) by L746 , L744 , FINSEQ_4:78;
+end;
+suppose L748: C360 = 2;
+
+L749: ( D86 . C360 ) = C355 by L748 , FINSEQ_4:78;
+L750: ( ( D87 * D86 ) . C360 ) = ( D87 . C355 ) by L749 , L742 , FINSEQ_3:120;
+thus L751: ( ( D87 * D86 ) . C360 ) = ( <* ( C353 . C354 ) , ( C353 . C355 ) , ( C353 . C356 ) , ( C353 . C357 ) , ( C353 . C358 ) *> . C360 ) by L750 , L748 , FINSEQ_4:78;
+end;
+suppose L752: C360 = 3;
+
+L753: ( D86 . C360 ) = C356 by L752 , FINSEQ_4:78;
+L754: ( ( D87 * D86 ) . C360 ) = ( D87 . C356 ) by L753 , L742 , FINSEQ_3:120;
+thus L755: ( ( D87 * D86 ) . C360 ) = ( <* ( C353 . C354 ) , ( C353 . C355 ) , ( C353 . C356 ) , ( C353 . C357 ) , ( C353 . C358 ) *> . C360 ) by L754 , L752 , FINSEQ_4:78;
+end;
+suppose L756: C360 = 4;
+
+L757: ( D86 . C360 ) = C357 by L756 , FINSEQ_4:78;
+L758: ( ( D87 * D86 ) . C360 ) = ( D87 . C357 ) by L757 , L742 , FINSEQ_3:120;
+thus L759: ( ( D87 * D86 ) . C360 ) = ( <* ( C353 . C354 ) , ( C353 . C355 ) , ( C353 . C356 ) , ( C353 . C357 ) , ( C353 . C358 ) *> . C360 ) by L758 , L756 , FINSEQ_4:78;
+end;
+suppose L760: C360 = 5;
+
+L761: ( D86 . C360 ) = C358 by L760 , FINSEQ_4:78;
+L762: ( ( D87 * D86 ) . C360 ) = ( D87 . C358 ) by L761 , L742 , FINSEQ_3:120;
+thus L763: ( ( D87 * D86 ) . C360 ) = ( <* ( C353 . C354 ) , ( C353 . C355 ) , ( C353 . C356 ) , ( C353 . C357 ) , ( C353 . C358 ) *> . C360 ) by L762 , L760 , FINSEQ_4:78;
+end;
+end;
+L765: ( dom ( D87 * D86 ) ) = ( Seg 5 ) by L740 , FINSEQ_1:89
+.= ( dom <* ( C353 . C354 ) , ( C353 . C355 ) , ( C353 . C356 ) , ( C353 . C357 ) , ( C353 . C358 ) *> ) by FINSEQ_1:89;
+thus L766: thesis by L765 , L741 , FINSEQ_1:13;
+end;
+scheme OneGate1Result { F32() -> set , F33() -> non  empty  finite set , F34(set) -> (Element of F33()) , F35() -> (Function of ( 1 -tuples_on F33() ) , F33()) } : (for B329 being (State of ( 1GateCircuit (<* F32() *> , F35()) )) holds (for B330 being (Element of F33()) holds (B330 = ( B329 . F32() ) implies ( ( Result B329 ) . ( Output ( 1GateCircStr (<* F32() *> , F35()) ) ) ) = F34(B330))))
+provided
+L767: (for B331 being (Function of ( 1 -tuples_on F33() ) , F33()) holds (B331 = F35() iff (for B332 being (Element of F33()) holds ( B331 . <* B332 *> ) = F34(B332))))
+proof
+set D88 = ( 1GateCircStr (<* F32() *> , F35()) );
+let C361 being (State of ( 1GateCircuit (<* F32() *> , F35()) ));
+L768: ( dom C361 ) = (the carrier of D88) by CIRCUIT1:3
+.= ( ( rng <* F32() *> ) \/ { [ <* F32() *> , F35() ] } ) by CIRCCOMB:def 6
+.= ( { F32() } \/ { [ <* F32() *> , F35() ] } ) by FINSEQ_1:38
+.= { F32() , [ <* F32() *> , F35() ] } by ENUMSET1:1;
+L769: F32() in ( dom C361 ) by L768 , TARSKI:def 2;
+let C362 being (Element of F33());
+assume L770: C362 = ( C361 . F32() );
+L771: ( C361 * <* F32() *> ) = <* C362 *> by L770 , L769 , FINSEQ_2:34;
+thus L772: ( ( Result C361 ) . ( Output D88 ) ) = ( ( Following C361 ) . ( Output D88 ) ) by L293
+.= ( ( Following C361 ) . [ <* F32() *> , F35() ] ) by L267
+.= ( F35() . ( C361 * <* F32() *> ) ) by CIRCCOMB:56
+.= F34(C362) by L767 , L771;
+end;
+scheme OneGate2Result { F36 , F37() -> set , F38() -> non  empty  finite set , F39(set , set) -> (Element of F38()) , F40() -> (Function of ( 2 -tuples_on F38() ) , F38()) } : (for B333 being (State of ( 1GateCircuit (<* F36() , F37() *> , F40()) )) holds (for B334 , B335 being (Element of F38()) holds ((B334 = ( B333 . F36() ) & B335 = ( B333 . F37() )) implies ( ( Result B333 ) . ( Output ( 1GateCircStr (<* F36() , F37() *> , F40()) ) ) ) = F39(B334 , B335))))
+provided
+L773: (for B336 being (Function of ( 2 -tuples_on F38() ) , F38()) holds (B336 = F40() iff (for B337 , B338 being (Element of F38()) holds ( B336 . <* B337 , B338 *> ) = F39(B337 , B338))))
+proof
+set D89 = ( 1GateCircStr (<* F36() , F37() *> , F40()) );
+let C363 being (State of ( 1GateCircuit (<* F36() , F37() *> , F40()) ));
+L774: ( dom C363 ) = (the carrier of D89) by CIRCUIT1:3
+.= ( ( rng <* F36() , F37() *> ) \/ { [ <* F36() , F37() *> , F40() ] } ) by CIRCCOMB:def 6
+.= ( { F36() , F37() } \/ { [ <* F36() , F37() *> , F40() ] } ) by FINSEQ_2:127
+.= { F36() , F37() , [ <* F36() , F37() *> , F40() ] } by ENUMSET1:3;
+L775: (F36() in ( dom C363 ) & F37() in ( dom C363 )) by L774 , ENUMSET1:def 1;
+let C364 , C365 being (Element of F38());
+assume L776: (C364 = ( C363 . F36() ) & C365 = ( C363 . F37() ));
+L777: ( C363 * <* F36() , F37() *> ) = <* C364 , C365 *> by L776 , L775 , FINSEQ_2:125;
+thus L778: ( ( Result C363 ) . ( Output D89 ) ) = ( ( Following C363 ) . ( Output D89 ) ) by L293
+.= ( ( Following C363 ) . [ <* F36() , F37() *> , F40() ] ) by L267
+.= ( F40() . ( C363 * <* F36() , F37() *> ) ) by CIRCCOMB:56
+.= F39(C364 , C365) by L773 , L777;
+end;
+scheme OneGate3Result { F41 , F42 , F43() -> set , F44() -> non  empty  finite set , F45(set , set , set) -> (Element of F44()) , F46() -> (Function of ( 3 -tuples_on F44() ) , F44()) } : (for B339 being (State of ( 1GateCircuit (<* F41() , F42() , F43() *> , F46()) )) holds (for B340 , B341 , B342 being (Element of F44()) holds ((B340 = ( B339 . F41() ) & B341 = ( B339 . F42() ) & B342 = ( B339 . F43() )) implies ( ( Result B339 ) . ( Output ( 1GateCircStr (<* F41() , F42() , F43() *> , F46()) ) ) ) = F45(B340 , B341 , B342))))
+provided
+L779: (for B343 being (Function of ( 3 -tuples_on F44() ) , F44()) holds (B343 = F46() iff (for B344 , B345 , B346 being (Element of F44()) holds ( B343 . <* B344 , B345 , B346 *> ) = F45(B344 , B345 , B346))))
+proof
+set D90 = ( 1GateCircStr (<* F41() , F42() , F43() *> , F46()) );
+let C366 being (State of ( 1GateCircuit (<* F41() , F42() , F43() *> , F46()) ));
+L780: ( dom C366 ) = (the carrier of D90) by CIRCUIT1:3
+.= ( ( rng <* F41() , F42() , F43() *> ) \/ { [ <* F41() , F42() , F43() *> , F46() ] } ) by CIRCCOMB:def 6
+.= ( { F41() , F42() , F43() } \/ { [ <* F41() , F42() , F43() *> , F46() ] } ) by FINSEQ_2:128
+.= { F41() , F42() , F43() , [ <* F41() , F42() , F43() *> , F46() ] } by ENUMSET1:6;
+L781: (F41() in ( dom C366 ) & F42() in ( dom C366 )) by L780 , ENUMSET1:def 2;
+L782: F43() in ( dom C366 ) by L780 , ENUMSET1:def 2;
+let C367 , C368 , C369 being (Element of F44());
+assume L783: (C367 = ( C366 . F41() ) & C368 = ( C366 . F42() ) & C369 = ( C366 . F43() ));
+L784: ( C366 * <* F41() , F42() , F43() *> ) = <* C367 , C368 , C369 *> by L783 , L781 , L782 , FINSEQ_2:126;
+thus L785: ( ( Result C366 ) . ( Output D90 ) ) = ( ( Following C366 ) . ( Output D90 ) ) by L293
+.= ( ( Following C366 ) . [ <* F41() , F42() , F43() *> , F46() ] ) by L267
+.= ( F46() . ( C366 * <* F41() , F42() , F43() *> ) ) by CIRCCOMB:56
+.= F45(C367 , C368 , C369) by L779 , L784;
+end;
+scheme OneGate4Result { F47 , F48 , F49 , F50() -> set , F51() -> non  empty  finite set , F52(set , set , set , set) -> (Element of F51()) , F53() -> (Function of ( 4 -tuples_on F51() ) , F51()) } : (for B347 being (State of ( 1GateCircuit (<* F47() , F48() , F49() , F50() *> , F53()) )) holds (for B348 , B349 , B350 , B351 being (Element of F51()) holds ((B348 = ( B347 . F47() ) & B349 = ( B347 . F48() ) & B350 = ( B347 . F49() ) & B351 = ( B347 . F50() )) implies ( ( Result B347 ) . ( Output ( 1GateCircStr (<* F47() , F48() , F49() , F50() *> , F53()) ) ) ) = F52(B348 , B349 , B350 , B351))))
+provided
+L786: (for B352 being (Function of ( 4 -tuples_on F51() ) , F51()) holds (B352 = F53() iff (for B353 , B354 , B355 , B356 being (Element of F51()) holds ( B352 . <* B353 , B354 , B355 , B356 *> ) = F52(B353 , B354 , B355 , B356))))
+proof
+set D91 = ( 1GateCircStr (<* F47() , F48() , F49() , F50() *> , F53()) );
+let C370 being (State of ( 1GateCircuit (<* F47() , F48() , F49() , F50() *> , F53()) ));
+L787: ( dom C370 ) = (the carrier of D91) by CIRCUIT1:3
+.= ( ( rng <* F47() , F48() , F49() , F50() *> ) \/ { [ <* F47() , F48() , F49() , F50() *> , F53() ] } ) by CIRCCOMB:def 6
+.= ( { F47() , F48() , F49() , F50() } \/ { [ <* F47() , F48() , F49() , F50() *> , F53() ] } ) by L177
+.= { [ <* F47() , F48() , F49() , F50() *> , F53() ] , F47() , F48() , F49() , F50() } by ENUMSET1:7;
+L788: (F47() in ( dom C370 ) & F48() in ( dom C370 )) by L787 , ENUMSET1:def 3;
+L789: (F49() in ( dom C370 ) & F50() in ( dom C370 )) by L787 , ENUMSET1:def 3;
+let C371 , C372 , C373 , C374 being (Element of F51());
+assume L790: (C371 = ( C370 . F47() ) & C372 = ( C370 . F48() ) & C373 = ( C370 . F49() ) & C374 = ( C370 . F50() ));
+L791: ( C370 * <* F47() , F48() , F49() , F50() *> ) = <* C371 , C372 , C373 , C374 *> by L790 , L788 , L789 , L703;
+thus L792: ( ( Result C370 ) . ( Output D91 ) ) = ( ( Following C370 ) . ( Output D91 ) ) by L293
+.= ( ( Following C370 ) . [ <* F47() , F48() , F49() , F50() *> , F53() ] ) by L267
+.= ( F53() . ( C370 * <* F47() , F48() , F49() , F50() *> ) ) by CIRCCOMB:56
+.= F52(C371 , C372 , C373 , C374) by L786 , L791;
+end;
+scheme OneGate5Result { F54 , F55 , F56 , F57 , F58() -> set , F59() -> non  empty  finite set , F60(set , set , set , set , set) -> (Element of F59()) , F61() -> (Function of ( 5 -tuples_on F59() ) , F59()) } : (for B357 being (State of ( 1GateCircuit (<* F54() , F55() , F56() , F57() , F58() *> , F61()) )) holds (for B358 , B359 , B360 , B361 , B362 being (Element of F59()) holds ((B358 = ( B357 . F54() ) & B359 = ( B357 . F55() ) & B360 = ( B357 . F56() ) & B361 = ( B357 . F57() ) & B362 = ( B357 . F58() )) implies ( ( Result B357 ) . ( Output ( 1GateCircStr (<* F54() , F55() , F56() , F57() , F58() *> , F61()) ) ) ) = F60(B358 , B359 , B360 , B361 , B362))))
+provided
+L793: (for B363 being (Function of ( 5 -tuples_on F59() ) , F59()) holds (B363 = F61() iff (for B364 , B365 , B366 , B367 , B368 being (Element of F59()) holds ( B363 . <* B364 , B365 , B366 , B367 , B368 *> ) = F60(B364 , B365 , B366 , B367 , B368))))
+proof
+set D92 = ( 1GateCircStr (<* F54() , F55() , F56() , F57() , F58() *> , F61()) );
+let C375 being (State of ( 1GateCircuit (<* F54() , F55() , F56() , F57() , F58() *> , F61()) ));
+L794: ( dom C375 ) = (the carrier of D92) by CIRCUIT1:3
+.= ( ( rng <* F54() , F55() , F56() , F57() , F58() *> ) \/ { [ <* F54() , F55() , F56() , F57() , F58() *> , F61() ] } ) by CIRCCOMB:def 6
+.= ( { F54() , F55() , F56() , F57() , F58() } \/ { [ <* F54() , F55() , F56() , F57() , F58() *> , F61() ] } ) by L202
+.= { F54() , F55() , F56() , F57() , F58() , [ <* F54() , F55() , F56() , F57() , F58() *> , F61() ] } by ENUMSET1:15;
+L795: (F54() in ( dom C375 ) & F55() in ( dom C375 )) by L794 , ENUMSET1:def 4;
+L796: F58() in ( dom C375 ) by L794 , ENUMSET1:def 4;
+L797: (F56() in ( dom C375 ) & F57() in ( dom C375 )) by L794 , ENUMSET1:def 4;
+let C376 , C377 , C378 , C379 , C380 being (Element of F59());
+assume L798: (C376 = ( C375 . F54() ) & C377 = ( C375 . F55() ) & C378 = ( C375 . F56() ) & C379 = ( C375 . F57() ) & C380 = ( C375 . F58() ));
+L799: ( C375 * <* F54() , F55() , F56() , F57() , F58() *> ) = <* C376 , C377 , C378 , C379 , C380 *> by L798 , L795 , L797 , L796 , L733;
+thus L800: ( ( Result C375 ) . ( Output D92 ) ) = ( ( Following C375 ) . ( Output D92 ) ) by L293
+.= ( ( Following C375 ) . [ <* F54() , F55() , F56() , F57() , F58() *> , F61() ] ) by L267
+.= ( F61() . ( C375 * <* F54() , F55() , F56() , F57() , F58() *> ) ) by CIRCCOMB:56
+.= F60(C376 , C377 , C378 , C379 , C380) by L793 , L799;
+end;
+begin
+theorem
+L801: (for B369 being (Element of ( NAT )) holds (for B370 being non  empty  finite set holds (for B371 being (Function of ( B369 -tuples_on B370 ) , B370) holds (for B372 being (FinSeqLen of B369) holds (for B373 being (Signature of B370) holds ((( rng B372 ) c= (the carrier of B373) & (not ( Output ( 1GateCircStr (B372 , B371) ) ) in ( InputVertices B373 ))) implies ( InputVertices ( B373 +* ( 1GateCircStr (B372 , B371) ) ) ) = ( InputVertices B373 )))))))
+proof
+let C381 being (Element of ( NAT ));
+let C382 being non  empty  finite set;
+let C383 being (Function of ( C381 -tuples_on C382 ) , C382);
+let C384 being (FinSeqLen of C381);
+let C385 being (Signature of C382);
+assume that
+L802: ( rng C384 ) c= (the carrier of C385)
+and
+L803: (not ( Output ( 1GateCircStr (C384 , C383) ) ) in ( InputVertices C385 ));
+L804: (the carrier of C385) = ( ( InputVertices C385 ) \/ ( InnerVertices C385 ) ) by XBOOLE_1:45;
+thus L805: ( InputVertices ( C385 +* ( 1GateCircStr (C384 , C383) ) ) ) = ( ( ( InputVertices C385 ) \ ( InnerVertices ( 1GateCircStr (C384 , C383) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (C384 , C383) ) ) \ ( InnerVertices C385 ) ) ) by CIRCCMB2:5 , CIRCCOMB:47
+.= ( ( ( InputVertices C385 ) \ ( InnerVertices ( 1GateCircStr (C384 , C383) ) ) ) \/ ( ( rng C384 ) \ ( InnerVertices C385 ) ) ) by CIRCCOMB:42
+.= ( ( ( InputVertices C385 ) \ { ( Output ( 1GateCircStr (C384 , C383) ) ) } ) \/ ( ( rng C384 ) \ ( InnerVertices C385 ) ) ) by L270
+.= ( ( InputVertices C385 ) \/ ( ( rng C384 ) \ ( InnerVertices C385 ) ) ) by L803 , ZFMISC_1:57
+.= ( InputVertices C385 ) by L802 , L804 , XBOOLE_1:12 , XBOOLE_1:43;
+end;
+theorem
+L806: (for B374 , B375 being set holds (for B376 being non  empty  finite set holds (for B377 being (Element of ( NAT )) holds (for B378 being (Function of ( B377 -tuples_on B376 ) , B376) holds (for B379 being (FinSeqLen of B377) holds (for B380 being (Signature of B376) holds ((( rng B379 ) = ( B374 \/ B375 ) & B374 c= (the carrier of B380) & B375 misses ( InnerVertices B380 ) & (not ( Output ( 1GateCircStr (B379 , B378) ) ) in ( InputVertices B380 ))) implies ( InputVertices ( B380 +* ( 1GateCircStr (B379 , B378) ) ) ) = ( ( InputVertices B380 ) \/ B375 ))))))))
+proof
+let C386 , C387 being set;
+let C388 being non  empty  finite set;
+let C389 being (Element of ( NAT ));
+let C390 being (Function of ( C389 -tuples_on C388 ) , C388);
+let C391 being (FinSeqLen of C389);
+let C392 being (Signature of C388);
+assume that
+L807: ( rng C391 ) = ( C386 \/ C387 )
+and
+L808: C386 c= (the carrier of C392)
+and
+L809: C387 misses ( InnerVertices C392 )
+and
+L810: (not ( Output ( 1GateCircStr (C391 , C390) ) ) in ( InputVertices C392 ));
+L811: (the carrier of C392) = ( ( InputVertices C392 ) \/ ( InnerVertices C392 ) ) by XBOOLE_1:45;
+thus L812: ( InputVertices ( C392 +* ( 1GateCircStr (C391 , C390) ) ) ) = ( ( ( InputVertices C392 ) \ ( InnerVertices ( 1GateCircStr (C391 , C390) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (C391 , C390) ) ) \ ( InnerVertices C392 ) ) ) by CIRCCMB2:5 , CIRCCOMB:47
+.= ( ( ( InputVertices C392 ) \ ( InnerVertices ( 1GateCircStr (C391 , C390) ) ) ) \/ ( ( rng C391 ) \ ( InnerVertices C392 ) ) ) by CIRCCOMB:42
+.= ( ( ( InputVertices C392 ) \ ( InnerVertices ( 1GateCircStr (C391 , C390) ) ) ) \/ ( ( C386 \ ( InnerVertices C392 ) ) \/ C387 ) ) by L807 , L809 , XBOOLE_1:87
+.= ( ( ( ( InputVertices C392 ) \ ( InnerVertices ( 1GateCircStr (C391 , C390) ) ) ) \/ ( C386 \ ( InnerVertices C392 ) ) ) \/ C387 ) by XBOOLE_1:4
+.= ( ( ( ( InputVertices C392 ) \ { ( Output ( 1GateCircStr (C391 , C390) ) ) } ) \/ ( C386 \ ( InnerVertices C392 ) ) ) \/ C387 ) by L270
+.= ( ( ( InputVertices C392 ) \/ ( C386 \ ( InnerVertices C392 ) ) ) \/ C387 ) by L810 , ZFMISC_1:57
+.= ( ( InputVertices C392 ) \/ C387 ) by L808 , L811 , XBOOLE_1:12 , XBOOLE_1:43;
+end;
+theorem
+L813: (for B381 being set holds (for B382 being non  empty  finite set holds (for B383 being (Function of ( 1 -tuples_on B382 ) , B382) holds (for B384 being (Signature of B382) holds ((B381 in (the carrier of B384) & (not ( Output ( 1GateCircStr (<* B381 *> , B383) ) ) in ( InputVertices B384 ))) implies ( InputVertices ( B384 +* ( 1GateCircStr (<* B381 *> , B383) ) ) ) = ( InputVertices B384 ))))))
+proof
+let C393 being set;
+let C394 being non  empty  finite set;
+set D93 = <* C393 *>;
+let C395 being (Function of ( 1 -tuples_on C394 ) , C394);
+let C396 being (Signature of C394);
+assume L814: C393 in (the carrier of C396);
+L815: { C393 } c= (the carrier of C396) by L814 , ZFMISC_1:31;
+L816: ( rng D93 ) c= (the carrier of C396) by L815 , FINSEQ_1:38;
+thus L817: thesis by L816 , L801;
+end;
+theorem
+L818: (for B385 , B386 being set holds (for B387 being non  empty  finite set holds (for B388 being (Function of ( 2 -tuples_on B387 ) , B387) holds (for B389 being (Signature of B387) holds ((B385 in (the carrier of B389) & (not B386 in ( InnerVertices B389 )) & (not ( Output ( 1GateCircStr (<* B385 , B386 *> , B388) ) ) in ( InputVertices B389 ))) implies ( InputVertices ( B389 +* ( 1GateCircStr (<* B385 , B386 *> , B388) ) ) ) = ( ( InputVertices B389 ) \/ { B386 } ))))))
+proof
+let C397 , C398 being set;
+let C399 being non  empty  finite set;
+set D94 = <* C397 , C398 *>;
+let C400 being (Function of ( 2 -tuples_on C399 ) , C399);
+let C401 being (Signature of C399);
+assume that
+L819: C397 in (the carrier of C401)
+and
+L820: (not C398 in ( InnerVertices C401 ));
+L821: ( rng D94 ) = { C397 , C398 } by FINSEQ_2:127
+.= ( { C397 } \/ { C398 } ) by ENUMSET1:1;
+L822: { C397 } c= (the carrier of C401) by L819 , ZFMISC_1:31;
+thus L823: thesis by L822 , L820 , L821 , L806 , ZFMISC_1:50;
+end;
+theorem
+L824: (for B390 , B391 being set holds (for B392 being non  empty  finite set holds (for B393 being (Function of ( 2 -tuples_on B392 ) , B392) holds (for B394 being (Signature of B392) holds ((B391 in (the carrier of B394) & (not B390 in ( InnerVertices B394 )) & (not ( Output ( 1GateCircStr (<* B390 , B391 *> , B393) ) ) in ( InputVertices B394 ))) implies ( InputVertices ( B394 +* ( 1GateCircStr (<* B390 , B391 *> , B393) ) ) ) = ( ( InputVertices B394 ) \/ { B390 } ))))))
+proof
+let C402 , C403 being set;
+let C404 being non  empty  finite set;
+set D95 = <* C402 , C403 *>;
+let C405 being (Function of ( 2 -tuples_on C404 ) , C404);
+let C406 being (Signature of C404);
+assume that
+L825: C403 in (the carrier of C406)
+and
+L826: (not C402 in ( InnerVertices C406 ));
+L827: ( rng D95 ) = { C402 , C403 } by FINSEQ_2:127
+.= ( { C402 } \/ { C403 } ) by ENUMSET1:1;
+L828: { C403 } c= (the carrier of C406) by L825 , ZFMISC_1:31;
+thus L829: thesis by L828 , L826 , L827 , L806 , ZFMISC_1:50;
+end;
+theorem
+L830: (for B395 , B396 being set holds (for B397 being non  empty  finite set holds (for B398 being (Function of ( 2 -tuples_on B397 ) , B397) holds (for B399 being (Signature of B397) holds ((B395 in (the carrier of B399) & B396 in (the carrier of B399) & (not ( Output ( 1GateCircStr (<* B395 , B396 *> , B398) ) ) in ( InputVertices B399 ))) implies ( InputVertices ( B399 +* ( 1GateCircStr (<* B395 , B396 *> , B398) ) ) ) = ( InputVertices B399 ))))))
+proof
+let C407 , C408 being set;
+let C409 being non  empty  finite set;
+let C410 being (Function of ( 2 -tuples_on C409 ) , C409);
+L831: ( rng <* C407 , C408 *> ) = { C407 , C408 } by FINSEQ_2:127;
+let C411 being (Signature of C409);
+assume L832: (C407 in (the carrier of C411) & C408 in (the carrier of C411));
+L833: ( rng <* C407 , C408 *> ) c= (the carrier of C411) by L832 , L831 , ZFMISC_1:32;
+thus L834: thesis by L833 , L801;
+end;
+theorem
+L835: (for B400 , B401 , B402 being set holds (for B403 being non  empty  finite set holds (for B404 being (Function of ( 3 -tuples_on B403 ) , B403) holds (for B405 being (Signature of B403) holds ((B400 in (the carrier of B405) & (not B401 in ( InnerVertices B405 )) & (not B402 in ( InnerVertices B405 )) & (not ( Output ( 1GateCircStr (<* B400 , B401 , B402 *> , B404) ) ) in ( InputVertices B405 ))) implies ( InputVertices ( B405 +* ( 1GateCircStr (<* B400 , B401 , B402 *> , B404) ) ) ) = ( ( InputVertices B405 ) \/ { B401 , B402 } ))))))
+proof
+let C412 , C413 , C414 being set;
+let C415 being non  empty  finite set;
+set D96 = <* C412 , C413 , C414 *>;
+let C416 being (Function of ( 3 -tuples_on C415 ) , C415);
+let C417 being (Signature of C415);
+assume that
+L836: C412 in (the carrier of C417)
+and
+L837: ((not C413 in ( InnerVertices C417 )) & (not C414 in ( InnerVertices C417 )));
+L838: ( rng D96 ) = { C412 , C413 , C414 } by FINSEQ_2:128
+.= ( { C412 } \/ { C413 , C414 } ) by ENUMSET1:2;
+L839: { C412 } c= (the carrier of C417) by L836 , ZFMISC_1:31;
+thus L840: thesis by L839 , L837 , L838 , L806 , ZFMISC_1:51;
+end;
+theorem
+L841: (for B406 , B407 , B408 being set holds (for B409 being non  empty  finite set holds (for B410 being (Function of ( 3 -tuples_on B409 ) , B409) holds (for B411 being (Signature of B409) holds ((B407 in (the carrier of B411) & (not B406 in ( InnerVertices B411 )) & (not B408 in ( InnerVertices B411 )) & (not ( Output ( 1GateCircStr (<* B406 , B407 , B408 *> , B410) ) ) in ( InputVertices B411 ))) implies ( InputVertices ( B411 +* ( 1GateCircStr (<* B406 , B407 , B408 *> , B410) ) ) ) = ( ( InputVertices B411 ) \/ { B406 , B408 } ))))))
+proof
+let C418 , C419 , C420 being set;
+let C421 being non  empty  finite set;
+set D97 = <* C418 , C419 , C420 *>;
+let C422 being (Function of ( 3 -tuples_on C421 ) , C421);
+let C423 being (Signature of C421);
+assume that
+L842: C419 in (the carrier of C423)
+and
+L843: ((not C418 in ( InnerVertices C423 )) & (not C420 in ( InnerVertices C423 )));
+L844: ( rng D97 ) = { C418 , C419 , C420 } by FINSEQ_2:128
+.= { C419 , C418 , C420 } by ENUMSET1:58
+.= ( { C419 } \/ { C418 , C420 } ) by ENUMSET1:2;
+L845: { C419 } c= (the carrier of C423) by L842 , ZFMISC_1:31;
+thus L846: thesis by L845 , L843 , L844 , L806 , ZFMISC_1:51;
+end;
+theorem
+L847: (for B412 , B413 , B414 being set holds (for B415 being non  empty  finite set holds (for B416 being (Function of ( 3 -tuples_on B415 ) , B415) holds (for B417 being (Signature of B415) holds ((B414 in (the carrier of B417) & (not B412 in ( InnerVertices B417 )) & (not B413 in ( InnerVertices B417 )) & (not ( Output ( 1GateCircStr (<* B412 , B413 , B414 *> , B416) ) ) in ( InputVertices B417 ))) implies ( InputVertices ( B417 +* ( 1GateCircStr (<* B412 , B413 , B414 *> , B416) ) ) ) = ( ( InputVertices B417 ) \/ { B412 , B413 } ))))))
+proof
+let C424 , C425 , C426 being set;
+let C427 being non  empty  finite set;
+set D98 = <* C424 , C425 , C426 *>;
+let C428 being (Function of ( 3 -tuples_on C427 ) , C427);
+let C429 being (Signature of C427);
+assume that
+L848: C426 in (the carrier of C429)
+and
+L849: ((not C424 in ( InnerVertices C429 )) & (not C425 in ( InnerVertices C429 )));
+L850: ( rng D98 ) = { C424 , C425 , C426 } by FINSEQ_2:128
+.= ( { C424 , C425 } \/ { C426 } ) by ENUMSET1:3;
+L851: { C426 } c= (the carrier of C429) by L848 , ZFMISC_1:31;
+thus L852: thesis by L851 , L849 , L850 , L806 , ZFMISC_1:51;
+end;
+theorem
+L853: (for B418 , B419 , B420 being set holds (for B421 being non  empty  finite set holds (for B422 being (Function of ( 3 -tuples_on B421 ) , B421) holds (for B423 being (Signature of B421) holds ((B418 in (the carrier of B423) & B419 in (the carrier of B423) & (not B420 in ( InnerVertices B423 )) & (not ( Output ( 1GateCircStr (<* B418 , B419 , B420 *> , B422) ) ) in ( InputVertices B423 ))) implies ( InputVertices ( B423 +* ( 1GateCircStr (<* B418 , B419 , B420 *> , B422) ) ) ) = ( ( InputVertices B423 ) \/ { B420 } ))))))
+proof
+let C430 , C431 , C432 being set;
+let C433 being non  empty  finite set;
+set D99 = <* C430 , C431 , C432 *>;
+let C434 being (Function of ( 3 -tuples_on C433 ) , C433);
+let C435 being (Signature of C433);
+assume that
+L854: (C430 in (the carrier of C435) & C431 in (the carrier of C435))
+and
+L855: (not C432 in ( InnerVertices C435 ));
+L856: ( rng D99 ) = { C430 , C431 , C432 } by FINSEQ_2:128
+.= ( { C430 , C431 } \/ { C432 } ) by ENUMSET1:3;
+L857: { C430 , C431 } c= (the carrier of C435) by L854 , ZFMISC_1:32;
+thus L858: thesis by L857 , L855 , L856 , L806 , ZFMISC_1:50;
+end;
+theorem
+L859: (for B424 , B425 , B426 being set holds (for B427 being non  empty  finite set holds (for B428 being (Function of ( 3 -tuples_on B427 ) , B427) holds (for B429 being (Signature of B427) holds ((B424 in (the carrier of B429) & B426 in (the carrier of B429) & (not B425 in ( InnerVertices B429 )) & (not ( Output ( 1GateCircStr (<* B424 , B425 , B426 *> , B428) ) ) in ( InputVertices B429 ))) implies ( InputVertices ( B429 +* ( 1GateCircStr (<* B424 , B425 , B426 *> , B428) ) ) ) = ( ( InputVertices B429 ) \/ { B425 } ))))))
+proof
+let C436 , C437 , C438 being set;
+let C439 being non  empty  finite set;
+set D100 = <* C436 , C437 , C438 *>;
+let C440 being (Function of ( 3 -tuples_on C439 ) , C439);
+let C441 being (Signature of C439);
+assume that
+L860: (C436 in (the carrier of C441) & C438 in (the carrier of C441))
+and
+L861: (not C437 in ( InnerVertices C441 ));
+L862: ( rng D100 ) = { C436 , C437 , C438 } by FINSEQ_2:128
+.= { C437 , C436 , C438 } by ENUMSET1:58
+.= ( { C437 } \/ { C436 , C438 } ) by ENUMSET1:2;
+L863: { C436 , C438 } c= (the carrier of C441) by L860 , ZFMISC_1:32;
+thus L864: thesis by L863 , L861 , L862 , L806 , ZFMISC_1:50;
+end;
+theorem
+L865: (for B430 , B431 , B432 being set holds (for B433 being non  empty  finite set holds (for B434 being (Function of ( 3 -tuples_on B433 ) , B433) holds (for B435 being (Signature of B433) holds ((B431 in (the carrier of B435) & B432 in (the carrier of B435) & (not B430 in ( InnerVertices B435 )) & (not ( Output ( 1GateCircStr (<* B430 , B431 , B432 *> , B434) ) ) in ( InputVertices B435 ))) implies ( InputVertices ( B435 +* ( 1GateCircStr (<* B430 , B431 , B432 *> , B434) ) ) ) = ( ( InputVertices B435 ) \/ { B430 } ))))))
+proof
+let C442 , C443 , C444 being set;
+let C445 being non  empty  finite set;
+set D101 = <* C442 , C443 , C444 *>;
+let C446 being (Function of ( 3 -tuples_on C445 ) , C445);
+let C447 being (Signature of C445);
+assume that
+L866: (C443 in (the carrier of C447) & C444 in (the carrier of C447))
+and
+L867: (not C442 in ( InnerVertices C447 ));
+L868: ( rng D101 ) = { C442 , C443 , C444 } by FINSEQ_2:128
+.= ( { C442 } \/ { C443 , C444 } ) by ENUMSET1:2;
+L869: { C443 , C444 } c= (the carrier of C447) by L866 , ZFMISC_1:32;
+thus L870: thesis by L869 , L867 , L868 , L806 , ZFMISC_1:50;
+end;
+theorem
+L871: (for B436 , B437 , B438 being set holds (for B439 being non  empty  finite set holds (for B440 being (Function of ( 3 -tuples_on B439 ) , B439) holds (for B441 being (Signature of B439) holds ((B436 in (the carrier of B441) & B437 in (the carrier of B441) & B438 in (the carrier of B441) & (not ( Output ( 1GateCircStr (<* B436 , B437 , B438 *> , B440) ) ) in ( InputVertices B441 ))) implies ( InputVertices ( B441 +* ( 1GateCircStr (<* B436 , B437 , B438 *> , B440) ) ) ) = ( InputVertices B441 ))))))
+proof
+let C448 , C449 , C450 being set;
+let C451 being non  empty  finite set;
+let C452 being (Function of ( 3 -tuples_on C451 ) , C451);
+let C453 being (Signature of C451);
+assume L872: (C448 in (the carrier of C453) & C449 in (the carrier of C453) & C450 in (the carrier of C453));
+L873: ({ C448 , C449 } c= (the carrier of C453) & { C450 } c= (the carrier of C453)) by L872 , ZFMISC_1:31 , ZFMISC_1:32;
+L874: ( rng <* C448 , C449 , C450 *> ) = { C448 , C449 , C450 } by FINSEQ_2:128
+.= ( { C448 , C449 } \/ { C450 } ) by ENUMSET1:3;
+thus L875: thesis by L874 , L873 , L801 , XBOOLE_1:8;
+end;
+begin
+theorem
+L876: (for B442 being non  empty  finite set holds (for B443 being  finite (Signature of B442) holds (for B444 being (Circuit of B442 , B443) holds (for B445 being (Element of ( NAT )) holds (for B446 being (Function of ( B445 -tuples_on B442 ) , B442) holds (for B447 being (FinSeqLen of B445) holds ((not ( Output ( 1GateCircStr (B447 , B446) ) ) in ( InputVertices B443 )) implies (for B448 being (State of ( B444 +* ( 1GateCircuit (B447 , B446) ) )) holds (for B449 being (State of B444) holds (B449 = ( B448 | (the carrier of B443) ) implies ( stabilization-time B448 ) <= ( 1 + ( stabilization-time B449 ) )))))))))))
+proof
+let C454 being non  empty  finite set;
+let C455 being  finite (Signature of C454);
+let C456 being (Circuit of C454 , C455);
+let C457 being (Element of ( NAT ));
+let C458 being (Function of ( C457 -tuples_on C454 ) , C454);
+let C459 being (FinSeqLen of C457);
+assume that
+L877: (not ( Output ( 1GateCircStr (C459 , C458) ) ) in ( InputVertices C455 ));
+L878: ( InnerVertices ( 1GateCircStr (C459 , C458) ) ) = { ( Output ( 1GateCircStr (C459 , C458) ) ) } by L270;
+L879: ( InputVertices C455 ) misses ( InnerVertices ( 1GateCircStr (C459 , C458) ) ) by L878 , L877 , ZFMISC_1:50;
+let C460 being (State of ( C456 +* ( 1GateCircuit (C459 , C458) ) ));
+let C461 being (State of C456);
+assume that
+L880: C461 = ( C460 | (the carrier of C455) );
+L881: C456 tolerates ( 1GateCircuit (C459 , C458) ) by L462;
+L882: (the Sorts of C456) tolerates (the Sorts of ( 1GateCircuit (C459 , C458) )) by L881 , CIRCCOMB:def 3;
+reconsider D102 = ( ( Following (C460 , ( stabilization-time C461 )) ) | (the carrier of ( 1GateCircStr (C459 , C458) )) ) as (State of ( 1GateCircuit (C459 , C458) )) by L882 , CIRCCOMB:26;
+L883: ( stabilization-time D102 ) <= 1 by L297;
+L884: (C461 is  stabilizing & D102 is  stabilizing) by L11;
+L885: ( stabilization-time C460 ) = ( ( stabilization-time C461 ) + ( stabilization-time D102 ) ) by L884 , L880 , L879 , L121 , L462;
+thus L886: thesis by L885 , L883 , XREAL_1:6;
+end;
+scheme Comb1CircResult { F62() -> set , F63() -> non  empty  finite set , F64(set) -> (Element of F63()) , F65() ->  finite (Signature of F63()) , F66() -> (Circuit of F63() , F65()) , F67() -> (Function of ( 1 -tuples_on F63() ) , F63()) } : (for B450 being (State of ( F66() +* ( 1GateCircuit (<* F62() *> , F67()) ) )) holds (for B451 being (State of F66()) holds (B451 = ( B450 | (the carrier of F65()) ) implies (for B452 being (Element of F63()) holds (((F62() in ( InnerVertices F65() ) implies B452 = ( ( Result B451 ) . F62() )) & ((not F62() in ( InnerVertices F65() )) implies B452 = ( B450 . F62() ))) implies ( ( Result B450 ) . ( Output ( 1GateCircStr (<* F62() *> , F67()) ) ) ) = F64(B452))))))
+provided
+L887: (for B453 being (Function of ( 1 -tuples_on F63() ) , F63()) holds (B453 = F67() iff (for B454 being (Element of F63()) holds ( B453 . <* B454 *> ) = F64(B454))))
+and
+L888: (not ( Output ( 1GateCircStr (<* F62() *> , F67()) ) ) in ( InputVertices F65() ))
+proof
+set D103 = ( 1GateCircStr (<* F62() *> , F67()) );
+let C462 being (State of ( F66() +* ( 1GateCircuit (<* F62() *> , F67()) ) ));
+let C463 being (State of F66());
+assume that
+L889: C463 = ( C462 | (the carrier of F65()) );
+L890: ( rng <* F62() *> ) = { F62() } by FINSEQ_1:38;
+L891: (( InputVertices D103 ) = ( rng <* F62() *> ) & F62() in ( rng <* F62() *> )) by L890 , CIRCCOMB:42 , TARSKI:def 1;
+L892: (F62() in ( InnerVertices F65() ) or F62() in ( ( InputVertices D103 ) \ ( InnerVertices F65() ) )) by L891 , XBOOLE_0:def 5;
+L893: C463 is  stabilizing by L11;
+L894: ( InnerVertices D103 ) = { ( Output D103 ) } by L270;
+L895: ( InputVertices F65() ) misses ( InnerVertices D103 ) by L894 , L888 , ZFMISC_1:50;
+L896: ( ( Following (C462 , ( stabilization-time C463 )) ) | (the carrier of F65()) ) = ( Following (C463 , ( stabilization-time C463 )) ) by L895 , L889 , L462 , CIRCCMB2:13
+.= ( Result C463 ) by L893 , L48;
+L897: F65() tolerates D103 by CIRCCOMB:47;
+L898: ( InputVertices ( F65() +* D103 ) ) = ( ( InputVertices F65() ) \/ ( ( InputVertices D103 ) \ ( InnerVertices F65() ) ) ) by L897 , L895 , FACIRC_1:4;
+L899: (F62() in ( InnerVertices F65() ) or F62() in ( InputVertices ( F65() +* D103 ) )) by L898 , L892 , XBOOLE_0:def 3;
+let C464 being (Element of F63());
+assume L900: ((F62() in ( InnerVertices F65() ) implies C464 = ( ( Result C463 ) . F62() )) & ((not F62() in ( InnerVertices F65() )) implies C464 = ( C462 . F62() )));
+L901: C464 = ( ( Following (C462 , ( stabilization-time C463 )) ) . F62() ) by L900 , L899 , L896 , L1 , FUNCT_1:49;
+L902: C462 is  stabilizing by L11;
+L903: (the carrier' of D103) = { [ <* F62() *> , F67() ] } by CIRCCOMB:def 6;
+L904: ([ <* F62() *> , F67() ] in { [ <* F62() *> , F67() ] } & (the carrier' of ( F65() +* D103 )) = ( (the carrier' of F65()) \/ { [ <* F62() *> , F67() ] } )) by L903 , CIRCCOMB:def 2 , TARSKI:def 1;
+reconsider D104 = [ <* F62() *> , F67() ] as (Gate of ( F65() +* D103 )) by L904 , XBOOLE_0:def 3;
+L905: ( the_result_sort_of D104 ) = ( (the ResultSort of ( F65() +* D103 )) . D104 ) by MSUALG_1:def 2
+.= D104 by CIRCCOMB:44;
+L906: ( D104 `2 ) = F67() by MCART_1:7;
+L907: (the carrier of ( F65() +* D103 )) = ( (the carrier of F65()) \/ (the carrier of D103) ) by CIRCCOMB:def 2;
+L908: F62() in (the carrier of ( F65() +* D103 )) by L907 , L891 , XBOOLE_0:def 3;
+L909: [ <* F62() *> , F67() ] = ( Output D103 ) by L267;
+L910: D104 = [ ( (the Arity of ( F65() +* D103 )) . D104 ) , ( D104 `2 ) ] by CIRCCOMB:def 8;
+L911: <* F62() *> = ( (the Arity of ( F65() +* D103 )) . D104 ) by L910 , XTUPLE_0:1
+.= ( the_arity_of D104 ) by MSUALG_1:def 1;
+L912: ( dom ( Following (C462 , ( stabilization-time C463 )) ) ) = (the carrier of ( F65() +* D103 )) by CIRCUIT1:3;
+L913: ( ( Following (C462 , ( stabilization-time C463 )) ) * <* F62() *> ) = <* C464 *> by L912 , L908 , L901 , FINSEQ_2:34;
+L914: ( stabilization-time C462 ) <= ( 1 + ( stabilization-time C463 ) ) by L888 , L889 , L876;
+thus L915: ( ( Result C462 ) . ( Output D103 ) ) = ( ( Following (C462 , ( 1 + ( stabilization-time C463 ) )) ) . ( Output D103 ) ) by L914 , L902 , L60
+.= ( ( Following ( Following (C462 , ( stabilization-time C463 )) ) ) . D104 ) by L909 , FACIRC_1:12
+.= ( F67() . ( ( Following (C462 , ( stabilization-time C463 )) ) * <* F62() *> ) ) by L905 , L911 , L906 , FACIRC_1:34
+.= F64(C464) by L887 , L913;
+end;
+scheme Comb2CircResult { F68 , F69() -> set , F70() -> non  empty  finite set , F71(set , set) -> (Element of F70()) , F72() ->  finite (Signature of F70()) , F73() -> (Circuit of F70() , F72()) , F74() -> (Function of ( 2 -tuples_on F70() ) , F70()) } : (for B455 being (State of ( F73() +* ( 1GateCircuit (<* F68() , F69() *> , F74()) ) )) holds (for B456 being (State of F73()) holds (B456 = ( B455 | (the carrier of F72()) ) implies (for B457 , B458 being (Element of F70()) holds (((F68() in ( InnerVertices F72() ) implies B457 = ( ( Result B456 ) . F68() )) & ((not F68() in ( InnerVertices F72() )) implies B457 = ( B455 . F68() )) & (F69() in ( InnerVertices F72() ) implies B458 = ( ( Result B456 ) . F69() )) & ((not F69() in ( InnerVertices F72() )) implies B458 = ( B455 . F69() ))) implies ( ( Result B455 ) . ( Output ( 1GateCircStr (<* F68() , F69() *> , F74()) ) ) ) = F71(B457 , B458))))))
+provided
+L916: (for B459 being (Function of ( 2 -tuples_on F70() ) , F70()) holds (B459 = F74() iff (for B460 , B461 being (Element of F70()) holds ( B459 . <* B460 , B461 *> ) = F71(B460 , B461))))
+and
+L917: (not ( Output ( 1GateCircStr (<* F68() , F69() *> , F74()) ) ) in ( InputVertices F72() ))
+proof
+set D105 = ( 1GateCircStr (<* F68() , F69() *> , F74()) );
+let C465 being (State of ( F73() +* ( 1GateCircuit (<* F68() , F69() *> , F74()) ) ));
+let C466 being (State of F73());
+assume that
+L918: C466 = ( C465 | (the carrier of F72()) );
+L919: C466 is  stabilizing by L11;
+L920: ( InnerVertices D105 ) = { ( Output D105 ) } by L270;
+L921: ( InputVertices F72() ) misses ( InnerVertices D105 ) by L920 , L917 , ZFMISC_1:50;
+L922: ( ( Following (C465 , ( stabilization-time C466 )) ) | (the carrier of F72()) ) = ( Following (C466 , ( stabilization-time C466 )) ) by L921 , L918 , L462 , CIRCCMB2:13
+.= ( Result C466 ) by L919 , L48;
+L923: (the carrier' of D105) = { [ <* F68() , F69() *> , F74() ] } by CIRCCOMB:def 6;
+L924: ([ <* F68() , F69() *> , F74() ] in { [ <* F68() , F69() *> , F74() ] } & (the carrier' of ( F72() +* D105 )) = ( (the carrier' of F72()) \/ { [ <* F68() , F69() *> , F74() ] } )) by L923 , CIRCCOMB:def 2 , TARSKI:def 1;
+reconsider D106 = [ <* F68() , F69() *> , F74() ] as (Gate of ( F72() +* D105 )) by L924 , XBOOLE_0:def 3;
+let C467 , C468 being (Element of F70());
+assume that
+L925: ((F68() in ( InnerVertices F72() ) implies C467 = ( ( Result C466 ) . F68() )) & ((not F68() in ( InnerVertices F72() )) implies C467 = ( C465 . F68() )))
+and
+L926: ((F69() in ( InnerVertices F72() ) implies C468 = ( ( Result C466 ) . F69() )) & ((not F69() in ( InnerVertices F72() )) implies C468 = ( C465 . F69() )));
+L927: ( InputVertices D105 ) = ( rng <* F68() , F69() *> ) by CIRCCOMB:42;
+L928: F72() tolerates D105 by CIRCCOMB:47;
+L929: ( InputVertices ( F72() +* D105 ) ) = ( ( InputVertices F72() ) \/ ( ( InputVertices D105 ) \ ( InnerVertices F72() ) ) ) by L928 , L921 , FACIRC_1:4;
+L930: ( rng <* F68() , F69() *> ) = { F68() , F69() } by FINSEQ_2:127;
+L931: F69() in ( rng <* F68() , F69() *> ) by L930 , TARSKI:def 2;
+L932: (F69() in ( InnerVertices F72() ) or F69() in ( ( InputVertices D105 ) \ ( InnerVertices F72() ) )) by L931 , L927 , XBOOLE_0:def 5;
+L933: (F69() in ( InnerVertices F72() ) or F69() in ( InputVertices ( F72() +* D105 ) )) by L932 , L929 , XBOOLE_0:def 3;
+L934: C468 = ( ( Following (C465 , ( stabilization-time C466 )) ) . F69() ) by L933 , L926 , L922 , L1 , FUNCT_1:49;
+L935: F68() in ( rng <* F68() , F69() *> ) by L930 , TARSKI:def 2;
+L936: (F68() in ( InnerVertices F72() ) or F68() in ( ( InputVertices D105 ) \ ( InnerVertices F72() ) )) by L935 , L927 , XBOOLE_0:def 5;
+L937: (F68() in ( InnerVertices F72() ) or F68() in ( InputVertices ( F72() +* D105 ) )) by L936 , L929 , XBOOLE_0:def 3;
+L938: C467 = ( ( Following (C465 , ( stabilization-time C466 )) ) . F68() ) by L937 , L925 , L922 , L1 , FUNCT_1:49;
+L939: D106 = [ ( (the Arity of ( F72() +* D105 )) . D106 ) , ( D106 `2 ) ] by CIRCCOMB:def 8;
+L940: <* F68() , F69() *> = ( (the Arity of ( F72() +* D105 )) . D106 ) by L939 , XTUPLE_0:1
+.= ( the_arity_of D106 ) by MSUALG_1:def 1;
+L941: ( D106 `2 ) = F74() by MCART_1:7;
+L942: (the carrier of ( F72() +* D105 )) = ( (the carrier of F72()) \/ (the carrier of D105) ) by CIRCCOMB:def 2;
+L943: F69() in (the carrier of ( F72() +* D105 )) by L942 , L927 , L931 , XBOOLE_0:def 3;
+L944: [ <* F68() , F69() *> , F74() ] = ( Output D105 ) by L267;
+L945: C465 is  stabilizing by L11;
+L946: ( dom ( Following (C465 , ( stabilization-time C466 )) ) ) = (the carrier of ( F72() +* D105 )) by CIRCUIT1:3;
+L947: F68() in (the carrier of ( F72() +* D105 )) by L927 , L935 , L942 , XBOOLE_0:def 3;
+L948: ( ( Following (C465 , ( stabilization-time C466 )) ) * <* F68() , F69() *> ) = <* C467 , C468 *> by L947 , L943 , L938 , L934 , L946 , FINSEQ_2:125;
+L949: ( the_result_sort_of D106 ) = ( (the ResultSort of ( F72() +* D105 )) . D106 ) by MSUALG_1:def 2
+.= D106 by CIRCCOMB:44;
+L950: ( stabilization-time C465 ) <= ( 1 + ( stabilization-time C466 ) ) by L917 , L918 , L876;
+thus L951: ( ( Result C465 ) . ( Output D105 ) ) = ( ( Following (C465 , ( 1 + ( stabilization-time C466 ) )) ) . ( Output D105 ) ) by L950 , L945 , L60
+.= ( ( Following ( Following (C465 , ( stabilization-time C466 )) ) ) . D106 ) by L944 , FACIRC_1:12
+.= ( F74() . ( ( Following (C465 , ( stabilization-time C466 )) ) * <* F68() , F69() *> ) ) by L949 , L940 , L941 , FACIRC_1:34
+.= F71(C467 , C468) by L916 , L948;
+end;
+scheme Comb3CircResult { F75 , F76 , F77() -> set , F78() -> non  empty  finite set , F79(set , set , set) -> (Element of F78()) , F80() ->  finite (Signature of F78()) , F81() -> (Circuit of F78() , F80()) , F82() -> (Function of ( 3 -tuples_on F78() ) , F78()) } : (for B462 being (State of ( F81() +* ( 1GateCircuit (<* F75() , F76() , F77() *> , F82()) ) )) holds (for B463 being (State of F81()) holds (B463 = ( B462 | (the carrier of F80()) ) implies (for B464 , B465 , B466 being (Element of F78()) holds (((F75() in ( InnerVertices F80() ) implies B464 = ( ( Result B463 ) . F75() )) & ((not F75() in ( InnerVertices F80() )) implies B464 = ( B462 . F75() )) & (F76() in ( InnerVertices F80() ) implies B465 = ( ( Result B463 ) . F76() )) & ((not F76() in ( InnerVertices F80() )) implies B465 = ( B462 . F76() )) & (F77() in ( InnerVertices F80() ) implies B466 = ( ( Result B463 ) . F77() )) & ((not F77() in ( InnerVertices F80() )) implies B466 = ( B462 . F77() ))) implies ( ( Result B462 ) . ( Output ( 1GateCircStr (<* F75() , F76() , F77() *> , F82()) ) ) ) = F79(B464 , B465 , B466))))))
+provided
+L952: (for B467 being (Function of ( 3 -tuples_on F78() ) , F78()) holds (B467 = F82() iff (for B468 , B469 , B470 being (Element of F78()) holds ( B467 . <* B468 , B469 , B470 *> ) = F79(B468 , B469 , B470))))
+and
+L953: (not ( Output ( 1GateCircStr (<* F75() , F76() , F77() *> , F82()) ) ) in ( InputVertices F80() ))
+proof
+set D107 = ( 1GateCircStr (<* F75() , F76() , F77() *> , F82()) );
+let C469 being (State of ( F81() +* ( 1GateCircuit (<* F75() , F76() , F77() *> , F82()) ) ));
+let C470 being (State of F81());
+assume that
+L954: C470 = ( C469 | (the carrier of F80()) );
+L955: C470 is  stabilizing by L11;
+L956: ( InnerVertices D107 ) = { ( Output D107 ) } by L270;
+L957: ( InputVertices F80() ) misses ( InnerVertices D107 ) by L956 , L953 , ZFMISC_1:50;
+L958: ( ( Following (C469 , ( stabilization-time C470 )) ) | (the carrier of F80()) ) = ( Following (C470 , ( stabilization-time C470 )) ) by L957 , L954 , L462 , CIRCCMB2:13
+.= ( Result C470 ) by L955 , L48;
+L959: F80() tolerates D107 by CIRCCOMB:47;
+L960: ( InputVertices ( F80() +* D107 ) ) = ( ( InputVertices F80() ) \/ ( ( InputVertices D107 ) \ ( InnerVertices F80() ) ) ) by L959 , L957 , FACIRC_1:4;
+L961: (the carrier' of D107) = { [ <* F75() , F76() , F77() *> , F82() ] } by CIRCCOMB:def 6;
+L962: ([ <* F75() , F76() , F77() *> , F82() ] in { [ <* F75() , F76() , F77() *> , F82() ] } & (the carrier' of ( F80() +* D107 )) = ( (the carrier' of F80()) \/ { [ <* F75() , F76() , F77() *> , F82() ] } )) by L961 , CIRCCOMB:def 2 , TARSKI:def 1;
+reconsider D108 = [ <* F75() , F76() , F77() *> , F82() ] as (Gate of ( F80() +* D107 )) by L962 , XBOOLE_0:def 3;
+let C471 , C472 , C473 being (Element of F78());
+assume that
+L963: ((F75() in ( InnerVertices F80() ) implies C471 = ( ( Result C470 ) . F75() )) & ((not F75() in ( InnerVertices F80() )) implies C471 = ( C469 . F75() )))
+and
+L964: ((F76() in ( InnerVertices F80() ) implies C472 = ( ( Result C470 ) . F76() )) & ((not F76() in ( InnerVertices F80() )) implies C472 = ( C469 . F76() )))
+and
+L965: ((F77() in ( InnerVertices F80() ) implies C473 = ( ( Result C470 ) . F77() )) & ((not F77() in ( InnerVertices F80() )) implies C473 = ( C469 . F77() )));
+L966: ( InputVertices D107 ) = ( rng <* F75() , F76() , F77() *> ) by CIRCCOMB:42;
+L967: D108 = [ ( (the Arity of ( F80() +* D107 )) . D108 ) , ( D108 `2 ) ] by CIRCCOMB:def 8;
+L968: <* F75() , F76() , F77() *> = ( (the Arity of ( F80() +* D107 )) . D108 ) by L967 , XTUPLE_0:1
+.= ( the_arity_of D108 ) by MSUALG_1:def 1;
+L969: ( D108 `2 ) = F82() by MCART_1:7;
+L970: C469 is  stabilizing by L11;
+L971: (the carrier of ( F80() +* D107 )) = ( (the carrier of F80()) \/ (the carrier of D107) ) by CIRCCOMB:def 2;
+L972: ( rng <* F75() , F76() , F77() *> ) = { F75() , F76() , F77() } by FINSEQ_2:128;
+L973: F77() in ( rng <* F75() , F76() , F77() *> ) by L972 , ENUMSET1:def 1;
+L974: F77() in (the carrier of ( F80() +* D107 )) by L973 , L966 , L971 , XBOOLE_0:def 3;
+L975: (F77() in ( InnerVertices F80() ) or F77() in ( ( InputVertices D107 ) \ ( InnerVertices F80() ) )) by L966 , L973 , XBOOLE_0:def 5;
+L976: (F77() in ( InnerVertices F80() ) or F77() in ( InputVertices ( F80() +* D107 ) )) by L975 , L960 , XBOOLE_0:def 3;
+L977: C473 = ( ( Following (C469 , ( stabilization-time C470 )) ) . F77() ) by L976 , L965 , L958 , L1 , FUNCT_1:49;
+L978: [ <* F75() , F76() , F77() *> , F82() ] = ( Output D107 ) by L267;
+L979: ( dom ( Following (C469 , ( stabilization-time C470 )) ) ) = (the carrier of ( F80() +* D107 )) by CIRCUIT1:3;
+L980: F75() in ( rng <* F75() , F76() , F77() *> ) by L972 , ENUMSET1:def 1;
+L981: (F75() in ( InnerVertices F80() ) or F75() in ( ( InputVertices D107 ) \ ( InnerVertices F80() ) )) by L980 , L966 , XBOOLE_0:def 5;
+L982: (F75() in ( InnerVertices F80() ) or F75() in ( InputVertices ( F80() +* D107 ) )) by L981 , L960 , XBOOLE_0:def 3;
+L983: C471 = ( ( Following (C469 , ( stabilization-time C470 )) ) . F75() ) by L982 , L963 , L958 , L1 , FUNCT_1:49;
+L984: F76() in ( rng <* F75() , F76() , F77() *> ) by L972 , ENUMSET1:def 1;
+L985: F76() in (the carrier of ( F80() +* D107 )) by L984 , L966 , L971 , XBOOLE_0:def 3;
+L986: (F76() in ( InnerVertices F80() ) or F76() in ( ( InputVertices D107 ) \ ( InnerVertices F80() ) )) by L966 , L984 , XBOOLE_0:def 5;
+L987: (F76() in ( InnerVertices F80() ) or F76() in ( InputVertices ( F80() +* D107 ) )) by L986 , L960 , XBOOLE_0:def 3;
+L988: C472 = ( ( Following (C469 , ( stabilization-time C470 )) ) . F76() ) by L987 , L964 , L958 , L1 , FUNCT_1:49;
+L989: F75() in (the carrier of ( F80() +* D107 )) by L966 , L980 , L971 , XBOOLE_0:def 3;
+L990: ( ( Following (C469 , ( stabilization-time C470 )) ) * <* F75() , F76() , F77() *> ) = <* C471 , C472 , C473 *> by L989 , L985 , L974 , L983 , L988 , L977 , L979 , FINSEQ_2:126;
+L991: ( the_result_sort_of D108 ) = ( (the ResultSort of ( F80() +* D107 )) . D108 ) by MSUALG_1:def 2
+.= D108 by CIRCCOMB:44;
+L992: ( stabilization-time C469 ) <= ( 1 + ( stabilization-time C470 ) ) by L953 , L954 , L876;
+thus L993: ( ( Result C469 ) . ( Output D107 ) ) = ( ( Following (C469 , ( 1 + ( stabilization-time C470 ) )) ) . ( Output D107 ) ) by L992 , L970 , L60
+.= ( ( Following ( Following (C469 , ( stabilization-time C470 )) ) ) . D108 ) by L978 , FACIRC_1:12
+.= ( F82() . ( ( Following (C469 , ( stabilization-time C470 )) ) * <* F75() , F76() , F77() *> ) ) by L991 , L968 , L969 , FACIRC_1:34
+.= F79(C471 , C472 , C473) by L952 , L990;
+end;
+scheme Comb4CircResult { F83 , F84 , F85 , F86() -> set , F87() -> non  empty  finite set , F88(set , set , set , set) -> (Element of F87()) , F89() ->  finite (Signature of F87()) , F90() -> (Circuit of F87() , F89()) , F91() -> (Function of ( 4 -tuples_on F87() ) , F87()) } : (for B471 being (State of ( F90() +* ( 1GateCircuit (<* F83() , F84() , F85() , F86() *> , F91()) ) )) holds (for B472 being (State of F90()) holds (B472 = ( B471 | (the carrier of F89()) ) implies (for B473 , B474 , B475 , B476 being (Element of F87()) holds (((F83() in ( InnerVertices F89() ) implies B473 = ( ( Result B472 ) . F83() )) & ((not F83() in ( InnerVertices F89() )) implies B473 = ( B471 . F83() )) & (F84() in ( InnerVertices F89() ) implies B474 = ( ( Result B472 ) . F84() )) & ((not F84() in ( InnerVertices F89() )) implies B474 = ( B471 . F84() )) & (F85() in ( InnerVertices F89() ) implies B475 = ( ( Result B472 ) . F85() )) & ((not F85() in ( InnerVertices F89() )) implies B475 = ( B471 . F85() )) & (F86() in ( InnerVertices F89() ) implies B476 = ( ( Result B472 ) . F86() )) & ((not F86() in ( InnerVertices F89() )) implies B476 = ( B471 . F86() ))) implies ( ( Result B471 ) . ( Output ( 1GateCircStr (<* F83() , F84() , F85() , F86() *> , F91()) ) ) ) = F88(B473 , B474 , B475 , B476))))))
+provided
+L994: (for B477 being (Function of ( 4 -tuples_on F87() ) , F87()) holds (B477 = F91() iff (for B478 , B479 , B480 , B481 being (Element of F87()) holds ( B477 . <* B478 , B479 , B480 , B481 *> ) = F88(B478 , B479 , B480 , B481))))
+and
+L995: (not ( Output ( 1GateCircStr (<* F83() , F84() , F85() , F86() *> , F91()) ) ) in ( InputVertices F89() ))
+proof
+set D109 = ( 1GateCircStr (<* F83() , F84() , F85() , F86() *> , F91()) );
+let C474 being (State of ( F90() +* ( 1GateCircuit (<* F83() , F84() , F85() , F86() *> , F91()) ) ));
+let C475 being (State of F90());
+assume that
+L996: C475 = ( C474 | (the carrier of F89()) );
+L997: C475 is  stabilizing by L11;
+L998: ( InnerVertices D109 ) = { ( Output D109 ) } by L270;
+L999: ( InputVertices F89() ) misses ( InnerVertices D109 ) by L998 , L995 , ZFMISC_1:50;
+L1000: ( ( Following (C474 , ( stabilization-time C475 )) ) | (the carrier of F89()) ) = ( Following (C475 , ( stabilization-time C475 )) ) by L999 , L996 , L462 , CIRCCMB2:13
+.= ( Result C475 ) by L997 , L48;
+L1001: F89() tolerates D109 by CIRCCOMB:47;
+L1002: ( InputVertices ( F89() +* D109 ) ) = ( ( InputVertices F89() ) \/ ( ( InputVertices D109 ) \ ( InnerVertices F89() ) ) ) by L1001 , L999 , FACIRC_1:4;
+L1003: [ <* F83() , F84() , F85() , F86() *> , F91() ] = ( Output D109 ) by L267;
+L1004: C474 is  stabilizing by L11;
+L1005: (the carrier of ( F89() +* D109 )) = ( (the carrier of F89()) \/ (the carrier of D109) ) by CIRCCOMB:def 2;
+L1006: (the carrier' of D109) = { [ <* F83() , F84() , F85() , F86() *> , F91() ] } by CIRCCOMB:def 6;
+L1007: ([ <* F83() , F84() , F85() , F86() *> , F91() ] in { [ <* F83() , F84() , F85() , F86() *> , F91() ] } & (the carrier' of ( F89() +* D109 )) = ( (the carrier' of F89()) \/ { [ <* F83() , F84() , F85() , F86() *> , F91() ] } )) by L1006 , CIRCCOMB:def 2 , TARSKI:def 1;
+reconsider D110 = [ <* F83() , F84() , F85() , F86() *> , F91() ] as (Gate of ( F89() +* D109 )) by L1007 , XBOOLE_0:def 3;
+let C476 , C477 , C478 , C479 being (Element of F87());
+assume that
+L1008: ((F83() in ( InnerVertices F89() ) implies C476 = ( ( Result C475 ) . F83() )) & ((not F83() in ( InnerVertices F89() )) implies C476 = ( C474 . F83() )))
+and
+L1009: ((F84() in ( InnerVertices F89() ) implies C477 = ( ( Result C475 ) . F84() )) & ((not F84() in ( InnerVertices F89() )) implies C477 = ( C474 . F84() )))
+and
+L1010: ((F85() in ( InnerVertices F89() ) implies C478 = ( ( Result C475 ) . F85() )) & ((not F85() in ( InnerVertices F89() )) implies C478 = ( C474 . F85() )))
+and
+L1011: ((F86() in ( InnerVertices F89() ) implies C479 = ( ( Result C475 ) . F86() )) & ((not F86() in ( InnerVertices F89() )) implies C479 = ( C474 . F86() )));
+L1012: ( InputVertices D109 ) = ( rng <* F83() , F84() , F85() , F86() *> ) by CIRCCOMB:42;
+L1013: ( rng <* F83() , F84() , F85() , F86() *> ) = { F83() , F84() , F85() , F86() } by L177;
+L1014: F85() in ( rng <* F83() , F84() , F85() , F86() *> ) by L1013 , ENUMSET1:def 2;
+L1015: F85() in (the carrier of ( F89() +* D109 )) by L1014 , L1012 , L1005 , XBOOLE_0:def 3;
+L1016: F86() in ( rng <* F83() , F84() , F85() , F86() *> ) by L1013 , ENUMSET1:def 2;
+L1017: F86() in (the carrier of ( F89() +* D109 )) by L1016 , L1012 , L1005 , XBOOLE_0:def 3;
+L1018: F83() in ( rng <* F83() , F84() , F85() , F86() *> ) by L1013 , ENUMSET1:def 2;
+L1019: F83() in (the carrier of ( F89() +* D109 )) by L1018 , L1012 , L1005 , XBOOLE_0:def 3;
+L1020: (F85() in ( InnerVertices F89() ) or F85() in ( ( InputVertices D109 ) \ ( InnerVertices F89() ) )) by L1012 , L1014 , XBOOLE_0:def 5;
+L1021: (F85() in ( InnerVertices F89() ) or F85() in ( InputVertices ( F89() +* D109 ) )) by L1020 , L1002 , XBOOLE_0:def 3;
+L1022: C478 = ( ( Following (C474 , ( stabilization-time C475 )) ) . F85() ) by L1021 , L1010 , L1000 , L1 , FUNCT_1:49;
+L1023: D110 = [ ( (the Arity of ( F89() +* D109 )) . D110 ) , ( D110 `2 ) ] by CIRCCOMB:def 8;
+L1024: <* F83() , F84() , F85() , F86() *> = ( (the Arity of ( F89() +* D109 )) . D110 ) by L1023 , XTUPLE_0:1
+.= ( the_arity_of D110 ) by MSUALG_1:def 1;
+L1025: ( D110 `2 ) = F91() by MCART_1:7;
+L1026: (F83() in ( InnerVertices F89() ) or F83() in ( ( InputVertices D109 ) \ ( InnerVertices F89() ) )) by L1012 , L1018 , XBOOLE_0:def 5;
+L1027: (F83() in ( InnerVertices F89() ) or F83() in ( InputVertices ( F89() +* D109 ) )) by L1026 , L1002 , XBOOLE_0:def 3;
+L1028: C476 = ( ( Following (C474 , ( stabilization-time C475 )) ) . F83() ) by L1027 , L1008 , L1000 , L1 , FUNCT_1:49;
+L1029: F84() in ( rng <* F83() , F84() , F85() , F86() *> ) by L1013 , ENUMSET1:def 2;
+L1030: F84() in (the carrier of ( F89() +* D109 )) by L1029 , L1012 , L1005 , XBOOLE_0:def 3;
+L1031: (F86() in ( InnerVertices F89() ) or F86() in ( ( InputVertices D109 ) \ ( InnerVertices F89() ) )) by L1012 , L1016 , XBOOLE_0:def 5;
+L1032: (F86() in ( InnerVertices F89() ) or F86() in ( InputVertices ( F89() +* D109 ) )) by L1031 , L1002 , XBOOLE_0:def 3;
+L1033: C479 = ( ( Following (C474 , ( stabilization-time C475 )) ) . F86() ) by L1032 , L1011 , L1000 , L1 , FUNCT_1:49;
+L1034: (F84() in ( InnerVertices F89() ) or F84() in ( ( InputVertices D109 ) \ ( InnerVertices F89() ) )) by L1012 , L1029 , XBOOLE_0:def 5;
+L1035: (F84() in ( InnerVertices F89() ) or F84() in ( InputVertices ( F89() +* D109 ) )) by L1034 , L1002 , XBOOLE_0:def 3;
+L1036: C477 = ( ( Following (C474 , ( stabilization-time C475 )) ) . F84() ) by L1035 , L1009 , L1000 , L1 , FUNCT_1:49;
+L1037: ( dom ( Following (C474 , ( stabilization-time C475 )) ) ) = (the carrier of ( F89() +* D109 )) by CIRCUIT1:3;
+L1038: ( ( Following (C474 , ( stabilization-time C475 )) ) * <* F83() , F84() , F85() , F86() *> ) = <* C476 , C477 , C478 , C479 *> by L1037 , L1019 , L1030 , L1015 , L1017 , L1028 , L1036 , L1022 , L1033 , L703;
+L1039: ( the_result_sort_of D110 ) = ( (the ResultSort of ( F89() +* D109 )) . D110 ) by MSUALG_1:def 2
+.= D110 by CIRCCOMB:44;
+L1040: ( stabilization-time C474 ) <= ( 1 + ( stabilization-time C475 ) ) by L995 , L996 , L876;
+thus L1041: ( ( Result C474 ) . ( Output D109 ) ) = ( ( Following (C474 , ( 1 + ( stabilization-time C475 ) )) ) . ( Output D109 ) ) by L1040 , L1004 , L60
+.= ( ( Following ( Following (C474 , ( stabilization-time C475 )) ) ) . D110 ) by L1003 , FACIRC_1:12
+.= ( F91() . ( ( Following (C474 , ( stabilization-time C475 )) ) * <* F83() , F84() , F85() , F86() *> ) ) by L1039 , L1024 , L1025 , FACIRC_1:34
+.= F88(C476 , C477 , C478 , C479) by L994 , L1038;
+end;
+scheme Comb5CircResult { F92 , F93 , F94 , F95 , F96() -> set , F97() -> non  empty  finite set , F98(set , set , set , set , set) -> (Element of F97()) , F99() ->  finite (Signature of F97()) , F100() -> (Circuit of F97() , F99()) , F101() -> (Function of ( 5 -tuples_on F97() ) , F97()) } : (for B482 being (State of ( F100() +* ( 1GateCircuit (<* F92() , F93() , F94() , F95() , F96() *> , F101()) ) )) holds (for B483 being (State of F100()) holds (B483 = ( B482 | (the carrier of F99()) ) implies (for B484 , B485 , B486 , B487 , B488 being (Element of F97()) holds (((F92() in ( InnerVertices F99() ) implies B484 = ( ( Result B483 ) . F92() )) & ((not F92() in ( InnerVertices F99() )) implies B484 = ( B482 . F92() )) & (F93() in ( InnerVertices F99() ) implies B485 = ( ( Result B483 ) . F93() )) & ((not F93() in ( InnerVertices F99() )) implies B485 = ( B482 . F93() )) & (F94() in ( InnerVertices F99() ) implies B486 = ( ( Result B483 ) . F94() )) & ((not F94() in ( InnerVertices F99() )) implies B486 = ( B482 . F94() )) & (F95() in ( InnerVertices F99() ) implies B487 = ( ( Result B483 ) . F95() )) & ((not F95() in ( InnerVertices F99() )) implies B487 = ( B482 . F95() )) & (F96() in ( InnerVertices F99() ) implies B488 = ( ( Result B483 ) . F96() )) & ((not F96() in ( InnerVertices F99() )) implies B488 = ( B482 . F96() ))) implies ( ( Result B482 ) . ( Output ( 1GateCircStr (<* F92() , F93() , F94() , F95() , F96() *> , F101()) ) ) ) = F98(B484 , B485 , B486 , B487 , B488))))))
+provided
+L1042: (for B489 being (Function of ( 5 -tuples_on F97() ) , F97()) holds (B489 = F101() iff (for B490 , B491 , B492 , B493 , B494 being (Element of F97()) holds ( B489 . <* B490 , B491 , B492 , B493 , B494 *> ) = F98(B490 , B491 , B492 , B493 , B494))))
+and
+L1043: (not ( Output ( 1GateCircStr (<* F92() , F93() , F94() , F95() , F96() *> , F101()) ) ) in ( InputVertices F99() ))
+proof
+set D111 = ( 1GateCircStr (<* F92() , F93() , F94() , F95() , F96() *> , F101()) );
+let C480 being (State of ( F100() +* ( 1GateCircuit (<* F92() , F93() , F94() , F95() , F96() *> , F101()) ) ));
+let C481 being (State of F100());
+assume that
+L1044: C481 = ( C480 | (the carrier of F99()) );
+L1045: C481 is  stabilizing by L11;
+L1046: ( InnerVertices D111 ) = { ( Output D111 ) } by L270;
+L1047: ( InputVertices F99() ) misses ( InnerVertices D111 ) by L1046 , L1043 , ZFMISC_1:50;
+L1048: ( ( Following (C480 , ( stabilization-time C481 )) ) | (the carrier of F99()) ) = ( Following (C481 , ( stabilization-time C481 )) ) by L1047 , L1044 , L462 , CIRCCMB2:13
+.= ( Result C481 ) by L1045 , L48;
+L1049: F99() tolerates D111 by CIRCCOMB:47;
+L1050: ( InputVertices ( F99() +* D111 ) ) = ( ( InputVertices F99() ) \/ ( ( InputVertices D111 ) \ ( InnerVertices F99() ) ) ) by L1049 , L1047 , FACIRC_1:4;
+L1051: [ <* F92() , F93() , F94() , F95() , F96() *> , F101() ] = ( Output D111 ) by L267;
+L1052: C480 is  stabilizing by L11;
+L1053: (the carrier of ( F99() +* D111 )) = ( (the carrier of F99()) \/ (the carrier of D111) ) by CIRCCOMB:def 2;
+L1054: (the carrier' of D111) = { [ <* F92() , F93() , F94() , F95() , F96() *> , F101() ] } by CIRCCOMB:def 6;
+L1055: ([ <* F92() , F93() , F94() , F95() , F96() *> , F101() ] in { [ <* F92() , F93() , F94() , F95() , F96() *> , F101() ] } & (the carrier' of ( F99() +* D111 )) = ( (the carrier' of F99()) \/ { [ <* F92() , F93() , F94() , F95() , F96() *> , F101() ] } )) by L1054 , CIRCCOMB:def 2 , TARSKI:def 1;
+reconsider D112 = [ <* F92() , F93() , F94() , F95() , F96() *> , F101() ] as (Gate of ( F99() +* D111 )) by L1055 , XBOOLE_0:def 3;
+let C482 , C483 , C484 , C485 , C486 being (Element of F97());
+assume that
+L1056: ((F92() in ( InnerVertices F99() ) implies C482 = ( ( Result C481 ) . F92() )) & ((not F92() in ( InnerVertices F99() )) implies C482 = ( C480 . F92() )))
+and
+L1057: ((F93() in ( InnerVertices F99() ) implies C483 = ( ( Result C481 ) . F93() )) & ((not F93() in ( InnerVertices F99() )) implies C483 = ( C480 . F93() )))
+and
+L1058: ((F94() in ( InnerVertices F99() ) implies C484 = ( ( Result C481 ) . F94() )) & ((not F94() in ( InnerVertices F99() )) implies C484 = ( C480 . F94() )))
+and
+L1059: ((F95() in ( InnerVertices F99() ) implies C485 = ( ( Result C481 ) . F95() )) & ((not F95() in ( InnerVertices F99() )) implies C485 = ( C480 . F95() )))
+and
+L1060: ((F96() in ( InnerVertices F99() ) implies C486 = ( ( Result C481 ) . F96() )) & ((not F96() in ( InnerVertices F99() )) implies C486 = ( C480 . F96() )));
+L1061: ( InputVertices D111 ) = ( rng <* F92() , F93() , F94() , F95() , F96() *> ) by CIRCCOMB:42;
+L1062: ( rng <* F92() , F93() , F94() , F95() , F96() *> ) = { F92() , F93() , F94() , F95() , F96() } by L202;
+L1063: F92() in ( rng <* F92() , F93() , F94() , F95() , F96() *> ) by L1062 , ENUMSET1:def 3;
+L1064: F92() in (the carrier of ( F99() +* D111 )) by L1063 , L1061 , L1053 , XBOOLE_0:def 3;
+L1065: F96() in ( rng <* F92() , F93() , F94() , F95() , F96() *> ) by L1062 , ENUMSET1:def 3;
+L1066: F96() in (the carrier of ( F99() +* D111 )) by L1065 , L1061 , L1053 , XBOOLE_0:def 3;
+L1067: (F96() in ( InnerVertices F99() ) or F96() in ( ( InputVertices D111 ) \ ( InnerVertices F99() ) )) by L1061 , L1065 , XBOOLE_0:def 5;
+L1068: (F96() in ( InnerVertices F99() ) or F96() in ( InputVertices ( F99() +* D111 ) )) by L1067 , L1050 , XBOOLE_0:def 3;
+L1069: C486 = ( ( Following (C480 , ( stabilization-time C481 )) ) . F96() ) by L1068 , L1060 , L1048 , L1 , FUNCT_1:49;
+L1070: F95() in ( rng <* F92() , F93() , F94() , F95() , F96() *> ) by L1062 , ENUMSET1:def 3;
+L1071: F95() in (the carrier of ( F99() +* D111 )) by L1070 , L1061 , L1053 , XBOOLE_0:def 3;
+L1072: F94() in ( rng <* F92() , F93() , F94() , F95() , F96() *> ) by L1062 , ENUMSET1:def 3;
+L1073: F94() in (the carrier of ( F99() +* D111 )) by L1072 , L1061 , L1053 , XBOOLE_0:def 3;
+L1074: (F94() in ( InnerVertices F99() ) or F94() in ( ( InputVertices D111 ) \ ( InnerVertices F99() ) )) by L1061 , L1072 , XBOOLE_0:def 5;
+L1075: (F94() in ( InnerVertices F99() ) or F94() in ( InputVertices ( F99() +* D111 ) )) by L1074 , L1050 , XBOOLE_0:def 3;
+L1076: C484 = ( ( Following (C480 , ( stabilization-time C481 )) ) . F94() ) by L1075 , L1058 , L1048 , L1 , FUNCT_1:49;
+L1077: F93() in ( rng <* F92() , F93() , F94() , F95() , F96() *> ) by L1062 , ENUMSET1:def 3;
+L1078: F93() in (the carrier of ( F99() +* D111 )) by L1077 , L1061 , L1053 , XBOOLE_0:def 3;
+L1079: (F92() in ( InnerVertices F99() ) or F92() in ( ( InputVertices D111 ) \ ( InnerVertices F99() ) )) by L1061 , L1063 , XBOOLE_0:def 5;
+L1080: (F92() in ( InnerVertices F99() ) or F92() in ( InputVertices ( F99() +* D111 ) )) by L1079 , L1050 , XBOOLE_0:def 3;
+L1081: C482 = ( ( Following (C480 , ( stabilization-time C481 )) ) . F92() ) by L1080 , L1056 , L1048 , L1 , FUNCT_1:49;
+L1082: D112 = [ ( (the Arity of ( F99() +* D111 )) . D112 ) , ( D112 `2 ) ] by CIRCCOMB:def 8;
+L1083: <* F92() , F93() , F94() , F95() , F96() *> = ( (the Arity of ( F99() +* D111 )) . D112 ) by L1082 , XTUPLE_0:1
+.= ( the_arity_of D112 ) by MSUALG_1:def 1;
+L1084: ( D112 `2 ) = F101() by MCART_1:7;
+L1085: (F95() in ( InnerVertices F99() ) or F95() in ( ( InputVertices D111 ) \ ( InnerVertices F99() ) )) by L1061 , L1070 , XBOOLE_0:def 5;
+L1086: (F95() in ( InnerVertices F99() ) or F95() in ( InputVertices ( F99() +* D111 ) )) by L1085 , L1050 , XBOOLE_0:def 3;
+L1087: C485 = ( ( Following (C480 , ( stabilization-time C481 )) ) . F95() ) by L1086 , L1059 , L1048 , L1 , FUNCT_1:49;
+L1088: (F93() in ( InnerVertices F99() ) or F93() in ( ( InputVertices D111 ) \ ( InnerVertices F99() ) )) by L1061 , L1077 , XBOOLE_0:def 5;
+L1089: (F93() in ( InnerVertices F99() ) or F93() in ( InputVertices ( F99() +* D111 ) )) by L1088 , L1050 , XBOOLE_0:def 3;
+L1090: C483 = ( ( Following (C480 , ( stabilization-time C481 )) ) . F93() ) by L1089 , L1057 , L1048 , L1 , FUNCT_1:49;
+L1091: ( dom ( Following (C480 , ( stabilization-time C481 )) ) ) = (the carrier of ( F99() +* D111 )) by CIRCUIT1:3;
+L1092: ( ( Following (C480 , ( stabilization-time C481 )) ) * <* F92() , F93() , F94() , F95() , F96() *> ) = <* C482 , C483 , C484 , C485 , C486 *> by L1091 , L1064 , L1078 , L1073 , L1071 , L1066 , L1081 , L1090 , L1076 , L1087 , L1069 , L733;
+L1093: ( the_result_sort_of D112 ) = ( (the ResultSort of ( F99() +* D111 )) . D112 ) by MSUALG_1:def 2
+.= D112 by CIRCCOMB:44;
+L1094: ( stabilization-time C480 ) <= ( 1 + ( stabilization-time C481 ) ) by L1043 , L1044 , L876;
+thus L1095: ( ( Result C480 ) . ( Output D111 ) ) = ( ( Following (C480 , ( 1 + ( stabilization-time C481 ) )) ) . ( Output D111 ) ) by L1094 , L1052 , L60
+.= ( ( Following ( Following (C480 , ( stabilization-time C481 )) ) ) . D112 ) by L1051 , FACIRC_1:12
+.= ( F101() . ( ( Following (C480 , ( stabilization-time C481 )) ) * <* F92() , F93() , F94() , F95() , F96() *> ) ) by L1093 , L1083 , L1084 , FACIRC_1:34
+.= F98(C482 , C483 , C484 , C485 , C486) by L1042 , L1092;
+end;
+begin
+definition
+let C487 being non  empty ManySortedSign;
+attr C487 is  with_nonpair_inputs
+means
+:L1096: ( InputVertices C487 ) is  without_pairs;
+end;
+registration
+cluster ( NAT ) ->  without_pairs;
+coherence
+proof
+let C488 being  pair set;
+assume L1098: C488 in ( NAT );
+thus L1099: thesis by L1098;
+end;
+let C489 being  without_pairs set;
+cluster  ->  without_pairs for (Subset of C489);
+coherence
+proof
+let C490 being (Subset of C489);
+let C491 being  pair set;
+assume L1100: C491 in C490;
+thus L1101: thesis by L1100 , FACIRC_1:def 2;
+end;
+end;
+registration
+cluster  natural-valued ->  nonpair-yielding for Function;
+coherence
+proof
+let C492 being Function;
+assume L1103: C492 is  natural-valued;
+L1104: ( rng C492 ) c= ( NAT ) by L1103 , VALUED_0:def 6;
+let C493 being set;
+assume L1105: C493 in ( dom C492 );
+L1106: ( C492 . C493 ) in ( rng C492 ) by L1105 , FUNCT_1:def 3;
+thus L1107: thesis by L1106 , L1104;
+end;
+end;
+registration
+cluster  one-to-one  natural-valued for FinSequence;
+existence
+proof
+set D113 = the  one-to-one (FinSequence of ( NAT ));
+take D113;
+thus L1109: thesis;
+end;
+end;
+registration
+let C494 being (Element of ( NAT ));
+cluster  one-to-one  natural-valued for (FinSeqLen of C494);
+existence
+proof
+set D114 = ( id ( Seg C494 ) );
+L1111: ( dom D114 ) = ( Seg C494 );
+L1112: (( rng D114 ) = ( Seg C494 ) & D114 is FinSequence) by L1111 , FINSEQ_1:def 2;
+reconsider D115 = D114 as  one-to-one (FinSequence of ( NAT )) by L1112 , FINSEQ_1:def 4;
+L1113: ( len D115 ) = C494 by L1111 , FINSEQ_1:def 3;
+reconsider D116 = D115 as (FinSeqLen of C494) by L1113 , CARD_1:def 7;
+take D116;
+thus L1114: thesis;
+end;
+end;
+registration
+let C495 being  nonpair-yielding FinSequence;
+let C496 being set;
+cluster ( 1GateCircStr (C495 , C496) ) ->  with_nonpair_inputs;
+coherence
+proof
+L1116: ( InputVertices ( 1GateCircStr (C495 , C496) ) ) = ( rng C495 ) by CIRCCOMB:42;
+thus L1117: ( InputVertices ( 1GateCircStr (C495 , C496) ) ) is  without_pairs by L1116;
+end;
+end;
+registration
+cluster  with_nonpair_inputs for  one-gate  one-gate  one-gate  one-gate ManySortedSign;
+existence
+proof
+set D117 = the (Element of ( NAT ));
+set D118 = the non  empty  finite set;
+set D119 = the (Function of ( D117 -tuples_on D118 ) , D118);
+set D120 = the  natural-valued (FinSeqLen of D117);
+take ( 1GateCircStr (D120 , D119) );
+thus L1119: thesis;
+end;
+let C497 being non  empty  finite set;
+cluster  with_nonpair_inputs for  one-gate  one-gate  one-gate  one-gate (Signature of C497);
+existence
+proof
+set D121 = the  natural-valued (FinSeqLen of ( 0 ));
+set D122 = the (Function of ( ( 0 ) -tuples_on C497 ) , C497);
+take ( 1GateCircStr (D121 , D122) );
+thus L1120: thesis;
+end;
+end;
+registration
+let C498 being  with_nonpair_inputs non  empty ManySortedSign;
+cluster ( InputVertices C498 ) ->  without_pairs;
+coherence by L1096;
+end;
+theorem
+L1123: (for B495 being  with_nonpair_inputs non  empty ManySortedSign holds (for B496 being (Vertex of B495) holds (B496 is  pair implies B496 in ( InnerVertices B495 ))))
+proof
+let C499 being  with_nonpair_inputs non  empty ManySortedSign;
+let C500 being (Vertex of C499);
+L1124: (the carrier of C499) = ( ( InputVertices C499 ) \/ ( InnerVertices C499 ) ) by XBOOLE_1:45;
+L1125: (C500 in ( InputVertices C499 ) or C500 in ( InnerVertices C499 )) by L1124 , XBOOLE_0:def 3;
+thus L1126: thesis by L1125 , FACIRC_1:def 2;
+end;
+registration
+let C501 being  unsplit  gate`1=arity non  empty ManySortedSign;
+cluster ( InnerVertices C501 ) ->  Relation-like;
+coherence
+proof
+let C502 being set;
+assume L1127: C502 in ( InnerVertices C501 );
+L1128: ( InnerVertices C501 ) = (the carrier' of C501) by FACIRC_1:37;
+L1129: C502 = [ ( (the Arity of C501) . C502 ) , ( C502 `2 ) ] by L1128 , L1127 , CIRCCOMB:def 8;
+thus L1130: thesis by L1129;
+end;
+end;
+registration
+let C503 being  unsplit  gate`2=den non  empty non  void ManySortedSign;
+cluster ( InnerVertices C503 ) ->  Relation-like;
+coherence
+proof
+let C504 being set;
+consider C505 being MSAlgebra over C503 such that L1132: C505 is  gate`2=den by CIRCCOMB:def 11;
+assume L1133: C504 in ( InnerVertices C503 );
+reconsider D123 = C504 as (Gate of C503) by L1133 , FACIRC_1:37;
+L1134: D123 = [ ( D123 `1 ) , ( (the Charact of C505) . D123 ) ] by L1132 , CIRCCOMB:def 10;
+thus L1135: thesis by L1134;
+end;
+end;
+registration
+let C506 , C507 being  with_nonpair_inputs  unsplit  gate`1=arity non  empty ManySortedSign;
+cluster ( C506 +* C507 ) ->  with_nonpair_inputs;
+coherence
+proof
+L1137: C506 tolerates C507 by CIRCCOMB:47;
+L1138: ( InputVertices ( C506 +* C507 ) ) is (Subset of ( ( InputVertices C506 ) \/ ( InputVertices C507 ) )) by L1137 , CIRCCOMB:11;
+thus L1139: ( InputVertices ( C506 +* C507 ) ) is  without_pairs by L1138;
+end;
+end;
+theorem
+L1141: (for B497 being non  pair set holds (for B498 being Relation holds (not B497 in B498)))
+proof
+let C508 being non  pair set;
+L1142: (not (ex B499 , B500 being set st C508 = [ B499 , B500 ]));
+thus L1143: thesis by L1142 , RELAT_1:def 1;
+end;
+theorem
+L1144: (for B501 being set holds (for B502 being non  empty  finite set holds (for B503 being (Function of ( 1 -tuples_on B502 ) , B502) holds (for B504 being  with_nonpair_inputs (Signature of B502) holds ((B501 in (the carrier of B504) or B501 is non  pair) implies ( B504 +* ( 1GateCircStr (<* B501 *> , B503) ) ) is  with_nonpair_inputs)))))
+proof
+let C509 being set;
+let C510 being non  empty  finite set;
+let C511 being (Function of ( 1 -tuples_on C510 ) , C510);
+let C512 being  with_nonpair_inputs (Signature of C510);
+assume that
+L1145: (C509 in (the carrier of C512) or C509 is non  pair);
+L1146: (not ( Output ( 1GateCircStr (<* C509 *> , C511) ) ) in ( InputVertices C512 )) by FACIRC_1:def 2;
+per cases  by L1145;
+suppose L1147: C509 in (the carrier of C512);
+
+thus L1148: ( InputVertices ( C512 +* ( 1GateCircStr (<* C509 *> , C511) ) ) ) is  without_pairs by L1147 , L1146 , L813;
+end;
+suppose L1149: C509 is non  pair;
+
+reconsider D124 = C509 as non  pair set by L1149;
+L1150: ( rng <* C509 *> ) = { D124 } by FINSEQ_1:38;
+thus L1151: ( InputVertices ( C512 +* ( 1GateCircStr (<* C509 *> , C511) ) ) ) is  without_pairs by L1150;
+end;
+end;
+registration
+let C513 being non  empty  finite set;
+let C514 being  with_nonpair_inputs (Signature of C513);
+let C515 being (Vertex of C514);
+let C516 being (Function of ( 1 -tuples_on C513 ) , C513);
+cluster ( C514 +* ( 1GateCircStr (<* C515 *> , C516) ) ) ->  with_nonpair_inputs;
+coherence by L1144;
+end;
+registration
+let C517 being non  empty  finite set;
+let C518 being  with_nonpair_inputs (Signature of C517);
+let C519 being non  pair set;
+let C520 being (Function of ( 1 -tuples_on C517 ) , C517);
+cluster ( C518 +* ( 1GateCircStr (<* C519 *> , C520) ) ) ->  with_nonpair_inputs;
+coherence;
+end;
+theorem
+L1155: (for B505 , B506 being set holds (for B507 being non  empty  finite set holds (for B508 being (Function of ( 2 -tuples_on B507 ) , B507) holds (for B509 being  with_nonpair_inputs (Signature of B507) holds (((B505 in (the carrier of B509) or B505 is non  pair) & (B506 in (the carrier of B509) or B506 is non  pair)) implies ( B509 +* ( 1GateCircStr (<* B505 , B506 *> , B508) ) ) is  with_nonpair_inputs)))))
+proof
+let C521 , C522 being set;
+let C523 being non  empty  finite set;
+let C524 being (Function of ( 2 -tuples_on C523 ) , C523);
+let C525 being  with_nonpair_inputs (Signature of C523);
+assume that
+L1156: ((C521 in (the carrier of C525) or C521 is non  pair) & (C522 in (the carrier of C525) or C522 is non  pair));
+L1157: (not ( Output ( 1GateCircStr (<* C521 , C522 *> , C524) ) ) in ( InputVertices C525 )) by FACIRC_1:def 2;
+per cases  by L1156;
+suppose L1158: ((C521 in (the carrier of C525) & C522 in (the carrier of C525)) or (C521 in (the carrier of C525) & (not C522 in ( InnerVertices C525 ))) or (C522 in (the carrier of C525) & (not C521 in ( InnerVertices C525 ))));
+
+L1159: (( InputVertices ( C525 +* ( 1GateCircStr (<* C521 , C522 *> , C524) ) ) ) = ( InputVertices C525 ) or ({ C522 } is  without_pairs & ( InputVertices ( C525 +* ( 1GateCircStr (<* C521 , C522 *> , C524) ) ) ) = ( { C522 } \/ ( InputVertices C525 ) )) or ({ C521 } is  without_pairs & ( InputVertices ( C525 +* ( 1GateCircStr (<* C521 , C522 *> , C524) ) ) ) = ( { C521 } \/ ( InputVertices C525 ) ))) by L1158 , L1156 , L1157 , L818 , L824 , L830;
+thus L1160: ( InputVertices ( C525 +* ( 1GateCircStr (<* C521 , C522 *> , C524) ) ) ) is  without_pairs by L1159;
+end;
+suppose L1161: (C521 is non  pair & C522 is non  pair);
+
+reconsider D125 = C521 , D126 = C522 as non  pair set by L1161;
+L1162: ( rng <* C521 , C522 *> ) = { D125 , D126 } by FINSEQ_2:127;
+thus L1163: ( InputVertices ( C525 +* ( 1GateCircStr (<* C521 , C522 *> , C524) ) ) ) is  without_pairs by L1162;
+end;
+end;
+registration
+let C526 being non  empty  finite set;
+let C527 being  with_nonpair_inputs (Signature of C526);
+let C528 being (Vertex of C527);
+let C529 being non  pair set;
+let C530 being (Function of ( 2 -tuples_on C526 ) , C526);
+cluster ( C527 +* ( 1GateCircStr (<* C528 , C529 *> , C530) ) ) ->  with_nonpair_inputs;
+coherence by L1155;
+cluster ( C527 +* ( 1GateCircStr (<* C529 , C528 *> , C530) ) ) ->  with_nonpair_inputs;
+coherence by L1155;
+end;
+registration
+let C531 being non  empty  finite set;
+let C532 being  with_nonpair_inputs (Signature of C531);
+let C533 , C534 being (Vertex of C532);
+let C535 being (Function of ( 2 -tuples_on C531 ) , C531);
+cluster ( C532 +* ( 1GateCircStr (<* C533 , C534 *> , C535) ) ) ->  with_nonpair_inputs;
+coherence by L1155;
+end;
+theorem
+L1167: (for B510 , B511 , B512 being set holds (for B513 being non  empty  finite set holds (for B514 being (Function of ( 3 -tuples_on B513 ) , B513) holds (for B515 being  with_nonpair_inputs (Signature of B513) holds (((B510 in (the carrier of B515) or B510 is non  pair) & (B511 in (the carrier of B515) or B511 is non  pair) & (B512 in (the carrier of B515) or B512 is non  pair)) implies ( B515 +* ( 1GateCircStr (<* B510 , B511 , B512 *> , B514) ) ) is  with_nonpair_inputs)))))
+proof
+let C536 , C537 , C538 being set;
+let C539 being non  empty  finite set;
+let C540 being (Function of ( 3 -tuples_on C539 ) , C539);
+let C541 being  with_nonpair_inputs (Signature of C539);
+assume that
+L1168: ((C536 in (the carrier of C541) or C536 is non  pair) & (C537 in (the carrier of C541) or C537 is non  pair) & (C538 in (the carrier of C541) or C538 is non  pair));
+L1169: (not ( Output ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) in ( InputVertices C541 )) by FACIRC_1:def 2;
+per cases  by L1168;
+suppose L1170: ((C536 in (the carrier of C541) & C537 in (the carrier of C541) & C538 in (the carrier of C541)) or (C536 in (the carrier of C541) & (not C537 in ( InnerVertices C541 )) & C538 in (the carrier of C541)) or (C537 in (the carrier of C541) & (not C536 in ( InnerVertices C541 )) & C538 in (the carrier of C541)) or (C536 in (the carrier of C541) & C537 in (the carrier of C541) & (not C538 in ( InnerVertices C541 ))) or (C536 in (the carrier of C541) & (not C537 in ( InnerVertices C541 )) & (not C538 in ( InnerVertices C541 ))) or (C537 in (the carrier of C541) & (not C536 in ( InnerVertices C541 )) & (not C538 in ( InnerVertices C541 ))) or ((not C536 in ( InnerVertices C541 )) & (not C537 in ( InnerVertices C541 )) & C538 in (the carrier of C541)));
+
+L1171: (( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( InputVertices C541 ) or ({ C537 } is  without_pairs & ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( { C537 } \/ ( InputVertices C541 ) )) or ({ C536 } is  without_pairs & ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( { C536 } \/ ( InputVertices C541 ) )) or ({ C538 } is  without_pairs & ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( { C538 } \/ ( InputVertices C541 ) )) or ({ C536 , C537 } is  without_pairs & ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( { C536 , C537 } \/ ( InputVertices C541 ) )) or ({ C537 , C538 } is  without_pairs & ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( { C537 , C538 } \/ ( InputVertices C541 ) )) or ({ C536 , C538 } is  without_pairs & ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) = ( { C536 , C538 } \/ ( InputVertices C541 ) ))) by L1170 , L1168 , L1169 , L835 , L841 , L847 , L853 , L859 , L865 , L871;
+thus L1172: ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) is  without_pairs by L1171;
+end;
+suppose L1173: (C536 is non  pair & C537 is non  pair & C538 is non  pair);
+
+reconsider D127 = C536 , D128 = C537 , D129 = C538 as non  pair set by L1173;
+L1174: ( rng <* C536 , C537 , C538 *> ) = { D127 , D128 , D129 } by FINSEQ_2:128;
+thus L1175: ( InputVertices ( C541 +* ( 1GateCircStr (<* C536 , C537 , C538 *> , C540) ) ) ) is  without_pairs by L1174;
+end;
+end;
+registration
+let C542 being non  empty  finite set;
+let C543 being  with_nonpair_inputs (Signature of C542);
+let C544 , C545 being (Vertex of C543);
+let C546 being non  pair set;
+let C547 being (Function of ( 3 -tuples_on C542 ) , C542);
+cluster ( C543 +* ( 1GateCircStr (<* C544 , C545 , C546 *> , C547) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+cluster ( C543 +* ( 1GateCircStr (<* C544 , C546 , C545 *> , C547) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+cluster ( C543 +* ( 1GateCircStr (<* C546 , C544 , C545 *> , C547) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+end;
+registration
+let C548 being non  empty  finite set;
+let C549 being  with_nonpair_inputs (Signature of C548);
+let C550 being (Vertex of C549);
+let C551 , C552 being non  pair set;
+let C553 being (Function of ( 3 -tuples_on C548 ) , C548);
+cluster ( C549 +* ( 1GateCircStr (<* C550 , C551 , C552 *> , C553) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+cluster ( C549 +* ( 1GateCircStr (<* C551 , C550 , C552 *> , C553) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+cluster ( C549 +* ( 1GateCircStr (<* C551 , C552 , C550 *> , C553) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+end;
+registration
+let C554 being non  empty  finite set;
+let C555 being  with_nonpair_inputs (Signature of C554);
+let C556 , C557 , C558 being (Vertex of C555);
+let C559 being (Function of ( 3 -tuples_on C554 ) , C554);
+cluster ( C555 +* ( 1GateCircStr (<* C556 , C557 , C558 *> , C559) ) ) ->  with_nonpair_inputs;
+coherence by L1167;
+end;

@@ -1,0 +1,136 @@
+:: A Small Computer Model with Push-Down Stack
+::  by JingChao Chen
+::
+:: Received June 15, 1999
+:: Copyright (c) 1999-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, CARD_1, AMI_2, INT_1, XBOOLE_0, FINSEQ_1,
+      TARSKI, RELAT_1, ARYTM_3, FUNCT_1, CARD_3, AMI_1, FUNCOP_1, COMPLEX1,
+      ORDINAL1, XXREAL_0, ARYTM_1, ZFMISC_1, FUNCT_5, SCMPDS_1, GROUP_9;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, FUNCT_1, CARD_1, FUNCT_2,
+      BINOP_1, NUMBERS, XCMPLX_0, CARD_3, INT_1, NAT_1, FINSEQ_1, FUNCOP_1,
+      XXREAL_0, FUNCT_5, AMI_2, INT_2, COMPOS_0, SCMPDS_I;
+ constructors NAT_1, NAT_D, FUNCT_5, AMI_2, RELSET_1, FUNCOP_1, COMPOS_0,
+      SCMPDS_I, BINOP_1;
+ registrations ORDINAL1, RELSET_1, XREAL_0, INT_1, FINSEQ_1, CARD_3, AMI_2,
+      ORDINAL2, XXREAL_0, FUNCT_1, FUNCT_2, SCM_INST, SCMPDS_I;
+ requirements NUMERALS, SUBSET, BOOLE;
+ definitions TARSKI, FINSEQ_1;
+ theorems AMI_2, FINSEQ_1, TARSKI, FUNCT_1, FUNCT_2, INT_1, XBOOLE_0,
+      XBOOLE_1, FUNCT_5;
+ schemes BINOP_1;
+
+begin
+canceled 2;
+theorem
+L1: (for B1 being (Element of ( SCM-Data-Loc )) holds B1 in ( ( SCM-Data-Loc ) \/ ( INT ) ))
+proof
+let C1 being (Element of ( SCM-Data-Loc ));
+L2: ( SCM-Data-Loc ) c= ( ( SCM-Data-Loc ) \/ ( INT ) ) by XBOOLE_1:7;
+thus L3: thesis by L2 , TARSKI:def 3;
+end;
+begin
+definition
+canceled 5;
+let C2 being SCM-State;
+let C3 being (Element of ( SCM-Data-Loc ));
+let C4 being Integer;
+func Address_Add (C2 , C3 , C4) -> (Element of ( SCM-Data-Loc )) equals 
+[ 1 , ( abs ( ( C2 . C3 ) + C4 ) ) ];
+coherence by AMI_2:24;
+end;
+definition
+let C5 being SCM-State;
+let C6 being Integer;
+func jump_address (C5 , C6) -> (Element of ( NAT )) equals 
+( abs ( (( IC C5 ) qua (Element of ( NAT ))) + C6 ) );
+coherence;
+end;
+definition
+let C7 being (Element of ( SCM-Data-Loc ));
+let C8 being Integer;
+redefine func <*C7 , C8 *> -> (FinSequence of ( ( SCM-Data-Loc ) \/ ( INT ) ));
+
+coherence
+proof
+let C9 being set;
+L6: ( dom <* C7 , C8 *> ) = { 1 , 2 } by FINSEQ_1:2 , FINSEQ_1:89;
+assume L7: C9 in ( rng <* C7 , C8 *> );
+consider C10 being set such that L8: C10 in ( dom <* C7 , C8 *> ) and L9: ( <* C7 , C8 *> . C10 ) = C9 by L7 , FUNCT_1:def 3;
+per cases  by L8 , L6 , TARSKI:def 2;
+suppose L10: C10 = 1;
+
+L11: C9 = C7 by L10 , L9 , FINSEQ_1:44;
+thus L12: thesis by L11 , XBOOLE_0:def 3;
+end;
+suppose L13: C10 = 2;
+
+L14: C8 in ( INT ) by INT_1:def 2;
+L15: C9 = C8 by L9 , L13 , FINSEQ_1:44;
+thus L16: thesis by L15 , L14 , XBOOLE_0:def 3;
+end;
+end;
+end;
+definition
+canceled 11;
+let C11 being SCM-State;
+let C12 being (Element of ( SCM-Data-Loc ));
+func PopInstrLoc (C11 , C12) -> (Element of ( NAT )) equals 
+( ( abs ( C11 . C12 ) ) + 2 );
+coherence;
+end;
+definition
+canceled 2;
+end;
+definition
+let C13 being (Element of ( SCMPDS-Instr ));
+let C14 being SCM-State;
+func SCM-Exec-Res (C13 , C14) -> SCM-State equals 
+( SCM-Chg (C14 , ( jump_address (C14 , ( C13 const_INT )) )) ) if ( InsCode C13 ) = 14 , ( SCM-Chg (( SCM-Chg (C14 , ( C13 P21address ) , ( C13 P22const )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 2 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P21address ) , ( C13 P22const )) ) , (( IC C14 ) qua (Element of ( NAT )))) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 3 , ( SCM-Chg (( SCM-Chg (C14 , ( C13 address_1 ) , ( C14 . ( Address_Add (C14 , ( C13 address_1 ) , ( RetSP )) ) )) ) , ( PopInstrLoc (C14 , ( Address_Add (C14 , ( C13 address_1 ) , ( RetIC )) )) )) ) if ( InsCode C13 ) = 1 , ( SCM-Chg (C14 , ( IFEQ (( C14 . ( Address_Add (C14 , ( C13 P31address ) , ( C13 P32const )) ) ) , ( 0 ) , ( succ ( IC C14 ) ) , ( jump_address (C14 , ( C13 P33const )) )) )) ) if ( InsCode C13 ) = 4 , ( SCM-Chg (C14 , ( IFGT (( C14 . ( Address_Add (C14 , ( C13 P31address ) , ( C13 P32const )) ) ) , ( 0 ) , ( succ ( IC C14 ) ) , ( jump_address (C14 , ( C13 P33const )) )) )) ) if ( InsCode C13 ) = 5 , ( SCM-Chg (C14 , ( IFGT (( 0 ) , ( C14 . ( Address_Add (C14 , ( C13 P31address ) , ( C13 P32const )) ) ) , ( succ ( IC C14 ) ) , ( jump_address (C14 , ( C13 P33const )) )) )) ) if ( InsCode C13 ) = 6 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P31address ) , ( C13 P32const )) ) , ( C13 P33const )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 7 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P31address ) , ( C13 P32const )) ) , ( ( C14 . ( Address_Add (C14 , ( C13 P31address ) , ( C13 P32const )) ) ) + ( C13 P33const ) )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 8 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) , ( ( C14 . ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) ) + ( C14 . ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) ) )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 9 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) , ( ( C14 . ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) ) - ( C14 . ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) ) )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 10 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) , ( ( C14 . ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) ) * ( C14 . ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) ) )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 11 , ( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) , ( C14 . ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 13 , ( SCM-Chg (( SCM-Chg (( SCM-Chg (C14 , ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) , ( ( C14 . ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) ) div ( C14 . ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) ) )) ) , ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) , ( ( C14 . ( Address_Add (C14 , ( C13 P41address ) , ( C13 P43const )) ) ) mod ( C14 . ( Address_Add (C14 , ( C13 P42address ) , ( C13 P44const )) ) ) )) ) , ( succ ( IC C14 ) )) ) if ( InsCode C13 ) = 12 otherwise C14;
+coherence;
+consistency;
+end;
+definition
+func SCMPDS-Exec -> (Action of ( SCMPDS-Instr ) , ( product ( ( SCM-VAL ) * ( SCM-OK ) ) )) means 
+(for B2 being (Element of ( SCMPDS-Instr )) holds (for B3 being SCM-State holds ( ( it . B2 ) . B3 ) = ( SCM-Exec-Res (B2 , B3) )));
+existence
+proof
+consider C15 being (Function of [: ( SCMPDS-Instr ) , ( product ( ( SCM-VAL ) * ( SCM-OK ) ) ) :] , ( product ( ( SCM-VAL ) * ( SCM-OK ) ) )) such that L22: (for B4 being (Element of ( SCMPDS-Instr )) holds (for B5 being SCM-State holds ( C15 . (B4 , B5) ) = ( SCM-Exec-Res (B4 , B5) ))) from BINOP_1:sch 4;
+take ( curry C15 );
+let C16 being (Element of ( SCMPDS-Instr ));
+let C17 being SCM-State;
+thus L23: ( ( ( curry C15 ) . C16 ) . C17 ) = ( C15 . (C16 , C17) ) by FUNCT_5:69
+.= ( SCM-Exec-Res (C16 , C17) ) by L22;
+end;
+uniqueness
+proof
+let C18 , C19 being (Action of ( SCMPDS-Instr ) , ( product ( ( SCM-VAL ) * ( SCM-OK ) ) ));
+assume that
+L24: (for B6 being (Element of ( SCMPDS-Instr )) holds (for B7 being SCM-State holds ( ( C18 . B6 ) . B7 ) = ( SCM-Exec-Res (B6 , B7) )))
+and
+L25: (for B8 being (Element of ( SCMPDS-Instr )) holds (for B9 being SCM-State holds ( ( C19 . B8 ) . B9 ) = ( SCM-Exec-Res (B8 , B9) )));
+L26:
+now
+let C20 being (Element of ( SCMPDS-Instr ));
+reconsider D1 = ( C19 . C20 ) , D2 = ( C18 . C20 ) as (Function of ( product ( ( SCM-VAL ) * ( SCM-OK ) ) ) , ( product ( ( SCM-VAL ) * ( SCM-OK ) ) )) by FUNCT_2:66;
+L27:
+now
+let C21 being SCM-State;
+thus L28: ( D2 . C21 ) = ( SCM-Exec-Res (C20 , C21) ) by L24
+.= ( D1 . C21 ) by L25;
+end;
+thus L29: ( C18 . C20 ) = ( C19 . C20 ) by L27 , FUNCT_2:63;
+end;
+thus L30: C18 = C19 by L26 , FUNCT_2:63;
+end;
+end;

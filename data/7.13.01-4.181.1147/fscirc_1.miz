@@ -1,0 +1,650 @@
+:: Full Subtracter Circuit. Part { I }
+::  by Katsumi Wasaki and Noboru Endou
+::
+:: Received March 13, 1999
+:: Copyright (c) 1999-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies SUBSET_1, MSAFREE2, FACIRC_1, XBOOLEAN, STRUCT_0, LATTICES,
+      CIRCCOMB, CIRCUIT1, XBOOLE_0, MSUALG_1, FINSEQ_1, TWOSCOMP, FUNCT_4,
+      RELAT_1, PARTFUN1, FSM_1, MARGREL1, FUNCT_1, CIRCUIT2, GLIB_000, ARYTM_3,
+      FSCIRC_1;
+ notations TARSKI, XBOOLE_0, ENUMSET1,
+      XTUPLE_0, SUBSET_1, RELAT_1, FUNCT_1, FINSEQ_1,
+      STRUCT_0, MARGREL1, NAT_1, MSUALG_1, MSAFREE2, CIRCUIT1, CIRCUIT2,
+      CIRCCOMB, TWOSCOMP, FACIRC_1, BINARITH;
+ constructors ENUMSET1, BINARITH, CIRCUIT1, CIRCUIT2, FACIRC_1, TWOSCOMP,
+      NAT_1, RELSET_1, XTUPLE_0;
+ registrations RELSET_1, CARD_3, STRUCT_0, CIRCCOMB, FACIRC_1, ORDINAL1,
+      FINSEQ_1, FUNCT_1, MSAFREE2, XTUPLE_0;
+ requirements NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions CIRCUIT2, FACIRC_1, MSAFREE2, XTUPLE_0;
+ theorems TARSKI, ENUMSET1, RELAT_1, FUNCT_1, FINSEQ_2, CIRCUIT1, CIRCUIT2,
+      CIRCCOMB, FACIRC_1, TWOSCOMP, XBOOLE_0, XBOOLE_1;
+
+begin
+definition
+let C1 , C2 , C3 being set;
+func BitSubtracterOutput (C1 , C2 , C3) -> (Element of ( InnerVertices ( 2GatesCircStr (C1 , C2 , C3 , ( 'xor' )) ) )) equals 
+( 2GatesCircOutput (C1 , C2 , C3 , ( 'xor' )) );
+coherence;
+end;
+definition
+let C4 , C5 , C6 being set;
+func BitSubtracterCirc (C4 , C5 , C6) ->  strict  Boolean  gate`2=den (Circuit of ( 2GatesCircStr (C4 , C5 , C6 , ( 'xor' )) )) equals 
+( 2GatesCircuit (C4 , C5 , C6 , ( 'xor' )) );
+coherence;
+end;
+definition
+let C7 , C8 , C9 being set;
+func BorrowIStr (C7 , C8 , C9) ->  unsplit  gate`1=arity  gate`2isBoolean non  void  strict non  empty ManySortedSign equals 
+( ( ( 1GateCircStr (<* C7 , C8 *> , ( and2a )) ) +* ( 1GateCircStr (<* C8 , C9 *> , ( and2 )) ) ) +* ( 1GateCircStr (<* C7 , C9 *> , ( and2a )) ) );
+correctness;
+end;
+definition
+let C10 , C11 , C12 being set;
+func BorrowStr (C10 , C11 , C12) ->  unsplit  gate`1=arity  gate`2isBoolean non  void  strict non  empty ManySortedSign equals 
+( ( BorrowIStr (C10 , C11 , C12) ) +* ( 1GateCircStr (<* [ <* C10 , C11 *> , ( and2a ) ] , [ <* C11 , C12 *> , ( and2 ) ] , [ <* C10 , C12 *> , ( and2a ) ] *> , ( or3 )) ) );
+correctness;
+end;
+definition
+let C13 , C14 , C15 being set;
+func BorrowICirc (C13 , C14 , C15) ->  strict  Boolean  gate`2=den (Circuit of ( BorrowIStr (C13 , C14 , C15) )) equals 
+( ( ( 1GateCircuit (C13 , C14 , ( and2a )) ) +* ( 1GateCircuit (C14 , C15 , ( and2 )) ) ) +* ( 1GateCircuit (C13 , C15 , ( and2a )) ) );
+coherence;
+end;
+theorem
+L6: (for R1 being set holds (for R2 being set holds (for R3 being set holds ( InnerVertices ( BorrowStr (R1 , R2 , R3) ) ) is Relation)))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+L7: (( InnerVertices ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) ) ) is Relation & ( InnerVertices ( 1GateCircStr (<* R2 , R3 *> , ( and2 )) ) ) is Relation) by FACIRC_1:38;
+L8: (( InnerVertices ( 1GateCircStr (<* R1 , R3 *> , ( and2a )) ) ) is Relation & ( InnerVertices ( ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) ) +* ( 1GateCircStr (<* R2 , R3 *> , ( and2 )) ) ) ) is Relation) by L7 , FACIRC_1:3 , FACIRC_1:38;
+L9: (( InnerVertices ( 1GateCircStr (<* [ <* R1 , R2 *> , ( and2a ) ] , [ <* R2 , R3 *> , ( and2 ) ] , [ <* R1 , R3 *> , ( and2a ) ] *> , ( or3 )) ) ) is Relation & ( InnerVertices ( BorrowIStr (R1 , R2 , R3) ) ) is Relation) by L8 , FACIRC_1:3 , FACIRC_1:38;
+thus L10: thesis by L9 , FACIRC_1:3;
+end;
+theorem
+L11: (for B1 , B2 , B3 being non  pair set holds ( InputVertices ( BorrowStr (B1 , B2 , B3) ) ) is  without_pairs)
+proof
+let C16 , C17 , C18 being non  pair set;
+set D1 = ( BorrowStr (C16 , C17 , C18) );
+set D2 = ( BorrowIStr (C16 , C17 , C18) );
+set D3 = ( 1GateCircStr (<* [ <* C16 , C17 *> , ( and2a ) ] , [ <* C17 , C18 *> , ( and2 ) ] , [ <* C16 , C18 *> , ( and2a ) ] *> , ( or3 )) );
+given C19 being  pair set such that
+L12: C19 in ( InputVertices D1 );
+
+L13: ( 1GateCircStr (<* C16 , C17 *> , ( and2a )) ) tolerates ( 1GateCircStr (<* C17 , C18 *> , ( and2 )) ) by CIRCCOMB:47;
+L14: (( InnerVertices ( 1GateCircStr (<* C16 , C18 *> , ( and2a )) ) ) = { [ <* C16 , C18 *> , ( and2a ) ] } & ( ( 1GateCircStr (<* C16 , C17 *> , ( and2a )) ) +* ( 1GateCircStr (<* C17 , C18 *> , ( and2 )) ) ) tolerates ( 1GateCircStr (<* C16 , C18 *> , ( and2a )) )) by CIRCCOMB:42 , CIRCCOMB:47;
+L15: (( InnerVertices ( 1GateCircStr (<* C16 , C17 *> , ( and2a )) ) ) = { [ <* C16 , C17 *> , ( and2a ) ] } & ( InnerVertices ( 1GateCircStr (<* C17 , C18 *> , ( and2 )) ) ) = { [ <* C17 , C18 *> , ( and2 ) ] }) by CIRCCOMB:42;
+L16: ( InnerVertices ( ( 1GateCircStr (<* C16 , C17 *> , ( and2a )) ) +* ( 1GateCircStr (<* C17 , C18 *> , ( and2 )) ) ) ) = ( { [ <* C16 , C17 *> , ( and2a ) ] } \/ { [ <* C17 , C18 *> , ( and2 ) ] } ) by L15 , L13 , CIRCCOMB:11;
+L17: ( InnerVertices D2 ) = ( ( { [ <* C16 , C17 *> , ( and2a ) ] } \/ { [ <* C17 , C18 *> , ( and2 ) ] } ) \/ { [ <* C16 , C18 *> , ( and2a ) ] } ) by L16 , L14 , CIRCCOMB:11
+.= ( { [ <* C16 , C17 *> , ( and2a ) ] , [ <* C17 , C18 *> , ( and2 ) ] } \/ { [ <* C16 , C18 *> , ( and2a ) ] } ) by ENUMSET1:1
+.= { [ <* C16 , C17 *> , ( and2a ) ] , [ <* C17 , C18 *> , ( and2 ) ] , [ <* C16 , C18 *> , ( and2a ) ] } by ENUMSET1:3;
+L18: ( InputVertices D3 ) = { [ <* C16 , C17 *> , ( and2a ) ] , [ <* C17 , C18 *> , ( and2 ) ] , [ <* C16 , C18 *> , ( and2a ) ] } by FACIRC_1:42;
+L19: ( ( InputVertices D3 ) \ ( InnerVertices D2 ) ) = ( {} ) by L18 , L17 , XBOOLE_1:37;
+L20: (( InputVertices ( 1GateCircStr (<* C16 , C17 *> , ( and2a )) ) ) is  without_pairs & ( InputVertices ( 1GateCircStr (<* C17 , C18 *> , ( and2 )) ) ) is  without_pairs) by FACIRC_1:41;
+L21: (( InputVertices ( 1GateCircStr (<* C16 , C18 *> , ( and2a )) ) ) is  without_pairs & ( InputVertices ( ( 1GateCircStr (<* C16 , C17 *> , ( and2a )) ) +* ( 1GateCircStr (<* C17 , C18 *> , ( and2 )) ) ) ) is  without_pairs) by L20 , FACIRC_1:9 , FACIRC_1:41;
+L22: ( InputVertices D2 ) is  without_pairs by L21 , FACIRC_1:9;
+L23: ( InnerVertices D3 ) is Relation by FACIRC_1:38;
+L24: ( InputVertices D1 ) = ( ( InputVertices D2 ) \/ ( ( InputVertices D3 ) \ ( InnerVertices D2 ) ) ) by L23 , L22 , FACIRC_1:6;
+thus L25: thesis by L24 , L22 , L12 , L19 , FACIRC_1:def 2;
+end;
+theorem
+L26: (for R1 being set holds (for R2 being set holds (for R3 being set holds (for B4 being (State of ( BorrowICirc (R1 , R2 , R3) )) holds (for B5 , B6 being (Element of ( BOOLEAN )) holds ((B5 = ( B4 . R1 ) & B6 = ( B4 . R2 )) implies ( ( Following B4 ) . [ <* R1 , R2 *> , ( and2a ) ] ) = ( ( 'not' B5 ) '&' B6 )))))))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+set D4 = <* R1 , R2 *>;
+set D5 = <* R2 , R3 *>;
+set D6 = <* R1 , R3 *>;
+set D7 = ( 1GateCircStr (D4 , ( and2a )) );
+set D8 = ( 1GateCircuit (R1 , R2 , ( and2a )) );
+set D9 = ( 1GateCircStr (D5 , ( and2 )) );
+set D10 = ( 1GateCircuit (R2 , R3 , ( and2 )) );
+set D11 = ( 1GateCircStr (D6 , ( and2a )) );
+set D12 = ( 1GateCircuit (R1 , R3 , ( and2a )) );
+set D13 = ( BorrowIStr (R1 , R2 , R3) );
+set D14 = ( BorrowICirc (R1 , R2 , R3) );
+set D15 = [ D4 , ( and2a ) ];
+let C20 being (State of D14);
+let C21 , C22 being (Element of ( BOOLEAN ));
+assume that
+L27: (C21 = ( C20 . R1 ) & C22 = ( C20 . R2 ));
+reconsider D16 = R1 , D17 = R2 as (Vertex of D7) by FACIRC_1:43;
+reconsider D18 = D15 as (Element of ( InnerVertices D7 )) by FACIRC_1:47;
+L28: D13 = ( D7 +* ( D9 +* D11 ) ) by CIRCCOMB:6;
+reconsider D19 = D18 as (Element of ( InnerVertices D13 )) by L28 , FACIRC_1:21;
+L29: D14 = ( D8 +* ( D10 +* D12 ) ) by FACIRC_1:25;
+reconsider D20 = ( C20 | (the carrier of D7) ) as (State of D8) by L29 , FACIRC_1:26;
+reconsider D21 = D16 , D22 = D17 as (Vertex of D13) by L28 , FACIRC_1:20;
+L30: ( dom D20 ) = (the carrier of D7) by CIRCUIT1:3;
+thus L31: ( ( Following C20 ) . [ D4 , ( and2a ) ] ) = ( ( Following D20 ) . D19 ) by L28 , L29 , CIRCCOMB:64
+.= ( ( and2a ) . <* ( D20 . D21 ) , ( D20 . D22 ) *> ) by FACIRC_1:50
+.= ( ( and2a ) . <* ( C20 . D21 ) , ( D20 . D22 ) *> ) by L30 , FUNCT_1:47
+.= ( ( and2a ) . <* ( C20 . D21 ) , ( C20 . D22 ) *> ) by L30 , FUNCT_1:47
+.= ( ( 'not' C21 ) '&' C22 ) by L27 , TWOSCOMP:def 2;
+end;
+theorem
+L32: (for R1 being set holds (for R2 being set holds (for R3 being set holds (for B7 being (State of ( BorrowICirc (R1 , R2 , R3) )) holds (for B8 , B9 being (Element of ( BOOLEAN )) holds ((B8 = ( B7 . R2 ) & B9 = ( B7 . R3 )) implies ( ( Following B7 ) . [ <* R2 , R3 *> , ( and2 ) ] ) = ( B8 '&' B9 )))))))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+set D23 = <* R1 , R2 *>;
+set D24 = <* R2 , R3 *>;
+set D25 = <* R1 , R3 *>;
+set D26 = ( 1GateCircStr (D23 , ( and2a )) );
+set D27 = ( 1GateCircuit (R1 , R2 , ( and2a )) );
+set D28 = ( 1GateCircStr (D24 , ( and2 )) );
+set D29 = ( 1GateCircuit (R2 , R3 , ( and2 )) );
+set D30 = ( 1GateCircStr (D25 , ( and2a )) );
+set D31 = ( 1GateCircuit (R1 , R3 , ( and2a )) );
+set D32 = ( BorrowIStr (R1 , R2 , R3) );
+set D33 = ( BorrowICirc (R1 , R2 , R3) );
+set D34 = [ D24 , ( and2 ) ];
+let C23 being (State of D33);
+let C24 , C25 being (Element of ( BOOLEAN ));
+assume that
+L33: (C24 = ( C23 . R2 ) & C25 = ( C23 . R3 ));
+reconsider D35 = R2 , D36 = R3 as (Vertex of D28) by FACIRC_1:43;
+reconsider D37 = D34 as (Element of ( InnerVertices D28 )) by FACIRC_1:47;
+L34: ( D26 +* D28 ) = ( D28 +* D26 ) by FACIRC_1:23;
+L35: D32 = ( D28 +* ( D26 +* D30 ) ) by L34 , CIRCCOMB:6;
+reconsider D38 = D37 as (Element of ( InnerVertices D32 )) by L35 , FACIRC_1:21;
+L36: ( D27 +* D29 ) = ( D29 +* D27 ) by FACIRC_1:24;
+L37: D33 = ( D29 +* ( D27 +* D31 ) ) by L36 , L34 , FACIRC_1:25;
+reconsider D39 = ( C23 | (the carrier of D28) ) as (State of D29) by L37 , FACIRC_1:26;
+reconsider D40 = D35 , D41 = D36 as (Vertex of D32) by L35 , FACIRC_1:20;
+L38: ( dom D39 ) = (the carrier of D28) by CIRCUIT1:3;
+thus L39: ( ( Following C23 ) . [ D24 , ( and2 ) ] ) = ( ( Following D39 ) . D38 ) by L35 , L37 , CIRCCOMB:64
+.= ( ( and2 ) . <* ( D39 . D40 ) , ( D39 . D41 ) *> ) by FACIRC_1:50
+.= ( ( and2 ) . <* ( C23 . D40 ) , ( D39 . D41 ) *> ) by L38 , FUNCT_1:47
+.= ( ( and2 ) . <* ( C23 . D40 ) , ( C23 . D41 ) *> ) by L38 , FUNCT_1:47
+.= ( C24 '&' C25 ) by L33 , TWOSCOMP:def 1;
+end;
+theorem
+L40: (for R1 being set holds (for R2 being set holds (for R3 being set holds (for B10 being (State of ( BorrowICirc (R1 , R2 , R3) )) holds (for B11 , B12 being (Element of ( BOOLEAN )) holds ((B11 = ( B10 . R1 ) & B12 = ( B10 . R3 )) implies ( ( Following B10 ) . [ <* R1 , R3 *> , ( and2a ) ] ) = ( ( 'not' B11 ) '&' B12 )))))))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+set D42 = <* R1 , R3 *>;
+set D43 = ( 1GateCircStr (D42 , ( and2a )) );
+set D44 = ( 1GateCircuit (R1 , R3 , ( and2a )) );
+set D45 = ( BorrowIStr (R1 , R2 , R3) );
+set D46 = ( BorrowICirc (R1 , R2 , R3) );
+set D47 = [ D42 , ( and2a ) ];
+let C26 being (State of D46);
+let C27 , C28 being (Element of ( BOOLEAN ));
+assume that
+L41: (C27 = ( C26 . R1 ) & C28 = ( C26 . R3 ));
+reconsider D48 = R1 , D49 = R3 as (Vertex of D43) by FACIRC_1:43;
+reconsider D50 = ( C26 | (the carrier of D43) ) as (State of D44) by FACIRC_1:26;
+reconsider D51 = D47 as (Element of ( InnerVertices D43 )) by FACIRC_1:47;
+reconsider D52 = D51 as (Element of ( InnerVertices D45 )) by FACIRC_1:21;
+L42: ( dom D50 ) = (the carrier of D43) by CIRCUIT1:3;
+reconsider D53 = D48 , D54 = D49 as (Vertex of D45) by FACIRC_1:20;
+thus L43: ( ( Following C26 ) . [ D42 , ( and2a ) ] ) = ( ( Following D50 ) . D52 ) by CIRCCOMB:64
+.= ( ( and2a ) . <* ( D50 . D53 ) , ( D50 . D54 ) *> ) by FACIRC_1:50
+.= ( ( and2a ) . <* ( C26 . D53 ) , ( D50 . D54 ) *> ) by L42 , FUNCT_1:47
+.= ( ( and2a ) . <* ( C26 . D53 ) , ( C26 . D54 ) *> ) by L42 , FUNCT_1:47
+.= ( ( 'not' C27 ) '&' C28 ) by L41 , TWOSCOMP:def 2;
+end;
+definition
+let C29 , C30 , C31 being set;
+func BorrowOutput (C29 , C30 , C31) -> (Element of ( InnerVertices ( BorrowStr (C29 , C30 , C31) ) )) equals 
+[ <* [ <* C29 , C30 *> , ( and2a ) ] , [ <* C30 , C31 *> , ( and2 ) ] , [ <* C29 , C31 *> , ( and2a ) ] *> , ( or3 ) ];
+coherence
+proof
+L44: [ <* [ <* C29 , C30 *> , ( and2a ) ] , [ <* C30 , C31 *> , ( and2 ) ] , [ <* C29 , C31 *> , ( and2a ) ] *> , ( or3 ) ] in ( InnerVertices ( 1GateCircStr (<* [ <* C29 , C30 *> , ( and2a ) ] , [ <* C30 , C31 *> , ( and2 ) ] , [ <* C29 , C31 *> , ( and2a ) ] *> , ( or3 )) ) ) by FACIRC_1:47;
+thus L45: thesis by L44 , FACIRC_1:21;
+end;
+correctness;
+end;
+definition
+let C32 , C33 , C34 being set;
+func BorrowCirc (C32 , C33 , C34) ->  strict  Boolean  gate`2=den (Circuit of ( BorrowStr (C32 , C33 , C34) )) equals 
+( ( BorrowICirc (C32 , C33 , C34) ) +* ( 1GateCircuit ([ <* C32 , C33 *> , ( and2a ) ] , [ <* C33 , C34 *> , ( and2 ) ] , [ <* C32 , C34 *> , ( and2a ) ] , ( or3 )) ) );
+coherence;
+end;
+theorem
+L48: (for R1 being set holds (for R2 being set holds (for R3 being set holds (R1 in (the carrier of ( BorrowStr (R1 , R2 , R3) )) & R2 in (the carrier of ( BorrowStr (R1 , R2 , R3) )) & R3 in (the carrier of ( BorrowStr (R1 , R2 , R3) ))))))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+L49: R3 in (the carrier of ( 1GateCircStr (<* R1 , R3 *> , ( and2a )) )) by FACIRC_1:43;
+L50: R3 in (the carrier of ( BorrowIStr (R1 , R2 , R3) )) by L49 , FACIRC_1:20;
+L51: R2 in (the carrier of ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) )) by FACIRC_1:43;
+L52: R2 in (the carrier of ( ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) ) +* ( 1GateCircStr (<* R2 , R3 *> , ( and2 )) ) )) by L51 , FACIRC_1:20;
+L53: R2 in (the carrier of ( BorrowIStr (R1 , R2 , R3) )) by L52 , FACIRC_1:20;
+L54: R1 in (the carrier of ( 1GateCircStr (<* R1 , R3 *> , ( and2a )) )) by FACIRC_1:43;
+L55: R1 in (the carrier of ( BorrowIStr (R1 , R2 , R3) )) by L54 , FACIRC_1:20;
+thus L56: thesis by L55 , L53 , L50 , FACIRC_1:20;
+end;
+theorem
+L57: (for R1 being set holds (for R2 being set holds (for R3 being set holds ([ <* R1 , R2 *> , ( and2a ) ] in ( InnerVertices ( BorrowStr (R1 , R2 , R3) ) ) & [ <* R2 , R3 *> , ( and2 ) ] in ( InnerVertices ( BorrowStr (R1 , R2 , R3) ) ) & [ <* R1 , R3 *> , ( and2a ) ] in ( InnerVertices ( BorrowStr (R1 , R2 , R3) ) )))))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+L58: [ <* R1 , R2 *> , ( and2a ) ] in ( InnerVertices ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) ) ) by FACIRC_1:47;
+L59: [ <* R1 , R2 *> , ( and2a ) ] in ( InnerVertices ( ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) ) +* ( 1GateCircStr (<* R2 , R3 *> , ( and2 )) ) ) ) by L58 , FACIRC_1:21;
+L60: [ <* R1 , R2 *> , ( and2a ) ] in ( InnerVertices ( BorrowIStr (R1 , R2 , R3) ) ) by L59 , FACIRC_1:21;
+L61: [ <* R2 , R3 *> , ( and2 ) ] in ( InnerVertices ( 1GateCircStr (<* R2 , R3 *> , ( and2 )) ) ) by FACIRC_1:47;
+L62: [ <* R2 , R3 *> , ( and2 ) ] in ( InnerVertices ( ( 1GateCircStr (<* R1 , R2 *> , ( and2a )) ) +* ( 1GateCircStr (<* R2 , R3 *> , ( and2 )) ) ) ) by L61 , FACIRC_1:21;
+L63: [ <* R2 , R3 *> , ( and2 ) ] in ( InnerVertices ( BorrowIStr (R1 , R2 , R3) ) ) by L62 , FACIRC_1:21;
+L64: [ <* R1 , R3 *> , ( and2a ) ] in ( InnerVertices ( 1GateCircStr (<* R1 , R3 *> , ( and2a )) ) ) by FACIRC_1:47;
+L65: [ <* R1 , R3 *> , ( and2a ) ] in ( InnerVertices ( BorrowIStr (R1 , R2 , R3) ) ) by L64 , FACIRC_1:21;
+thus L66: thesis by L65 , L60 , L63 , FACIRC_1:21;
+end;
+theorem
+L67: (for B13 , B14 , B15 being non  pair set holds (B13 in ( InputVertices ( BorrowStr (B13 , B14 , B15) ) ) & B14 in ( InputVertices ( BorrowStr (B13 , B14 , B15) ) ) & B15 in ( InputVertices ( BorrowStr (B13 , B14 , B15) ) )))
+proof
+let C35 , C36 , C37 being non  pair set;
+assume L68: (not thesis);
+L69: C37 in (the carrier of ( BorrowStr (C35 , C36 , C37) )) by L48;
+L70: ( InnerVertices ( BorrowStr (C35 , C36 , C37) ) ) is Relation by L6;
+L71: (C35 in (the carrier of ( BorrowStr (C35 , C36 , C37) )) & C36 in (the carrier of ( BorrowStr (C35 , C36 , C37) ))) by L48;
+L72: (C35 in ( InnerVertices ( BorrowStr (C35 , C36 , C37) ) ) or C36 in ( InnerVertices ( BorrowStr (C35 , C36 , C37) ) ) or C37 in ( InnerVertices ( BorrowStr (C35 , C36 , C37) ) )) by L71 , L69 , L68 , XBOOLE_0:def 5;
+L73: ((ex B16 , B17 being set st C35 = [ B16 , B17 ]) or (ex B18 , B19 being set st C36 = [ B18 , B19 ]) or (ex B20 , B21 being set st C37 = [ B20 , B21 ])) by L72 , L70 , RELAT_1:def 1;
+thus L74: contradiction by L73;
+end;
+theorem
+L75: (for B22 , B23 , B24 being non  pair set holds (( InputVertices ( BorrowStr (B22 , B23 , B24) ) ) = { B22 , B23 , B24 } & ( InnerVertices ( BorrowStr (B22 , B23 , B24) ) ) = ( { [ <* B22 , B23 *> , ( and2a ) ] , [ <* B23 , B24 *> , ( and2 ) ] , [ <* B22 , B24 *> , ( and2a ) ] } \/ { ( BorrowOutput (B22 , B23 , B24) ) } )))
+proof
+let C38 , C39 , C40 being non  pair set;
+set D55 = <* C38 , C39 *>;
+set D56 = <* C39 , C40 *>;
+set D57 = <* C38 , C40 *>;
+set D58 = [ D55 , ( and2a ) ];
+set D59 = [ D56 , ( and2 ) ];
+set D60 = [ D57 , ( and2a ) ];
+set D61 = ( BorrowIStr (C38 , C39 , C40) );
+set D62 = ( 1GateCircStr (<* D58 , D59 , D60 *> , ( or3 )) );
+set D63 = ( BorrowStr (C38 , C39 , C40) );
+L76: (( InputVertices ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) ) = { C38 , C39 } & ( InputVertices ( 1GateCircStr (<* C38 , C40 *> , ( and2a )) ) ) = { C38 , C40 }) by FACIRC_1:40;
+L77: ( InputVertices ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) = { C39 , C40 } by FACIRC_1:40;
+L78: (( InnerVertices ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) ) = { [ <* C38 , C39 *> , ( and2a ) ] } & ( InnerVertices ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) = { [ <* C39 , C40 *> , ( and2 ) ] }) by CIRCCOMB:42;
+L79: ( InnerVertices D62 ) is Relation by FACIRC_1:38;
+L80: (( InputVertices ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) ) is  without_pairs & ( InputVertices ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) is  without_pairs) by FACIRC_1:41;
+L81: (( InputVertices ( 1GateCircStr (<* C38 , C40 *> , ( and2a )) ) ) is  without_pairs & ( InputVertices ( ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) +* ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) ) is  without_pairs) by L80 , FACIRC_1:9 , FACIRC_1:41;
+L82: ( InputVertices D61 ) is  without_pairs by L81 , FACIRC_1:9;
+L83: ( InputVertices D63 ) = ( ( InputVertices D61 ) \/ ( ( InputVertices D62 ) \ ( InnerVertices D61 ) ) ) by L82 , L79 , FACIRC_1:6;
+L84: ( InnerVertices ( 1GateCircStr (<* C38 , C40 *> , ( and2a )) ) ) = { [ <* C38 , C40 *> , ( and2a ) ] } by CIRCCOMB:42;
+L85: ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) tolerates ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) by CIRCCOMB:47;
+L86: ( InnerVertices ( ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) +* ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) ) = ( { [ <* C38 , C39 *> , ( and2a ) ] } \/ { [ <* C39 , C40 *> , ( and2 ) ] } ) by L85 , L78 , CIRCCOMB:11;
+L87: ( ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) +* ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) tolerates ( 1GateCircStr (<* C38 , C40 *> , ( and2a )) ) by CIRCCOMB:47;
+L88: ( InnerVertices D61 ) = ( ( { [ <* C38 , C39 *> , ( and2a ) ] } \/ { [ <* C39 , C40 *> , ( and2 ) ] } ) \/ { [ <* C38 , C40 *> , ( and2a ) ] } ) by L87 , L84 , L86 , CIRCCOMB:11
+.= ( { [ <* C38 , C39 *> , ( and2a ) ] , [ <* C39 , C40 *> , ( and2 ) ] } \/ { [ <* C38 , C40 *> , ( and2a ) ] } ) by ENUMSET1:1
+.= { [ <* C38 , C39 *> , ( and2a ) ] , [ <* C39 , C40 *> , ( and2 ) ] , [ <* C38 , C40 *> , ( and2a ) ] } by ENUMSET1:3;
+L89: ( InputVertices D62 ) = { [ <* C38 , C39 *> , ( and2a ) ] , [ <* C39 , C40 *> , ( and2 ) ] , [ <* C38 , C40 *> , ( and2a ) ] } by FACIRC_1:42;
+L90: ( ( InputVertices D62 ) \ ( InnerVertices D61 ) ) = ( {} ) by L89 , L88 , XBOOLE_1:37;
+L91: ( InnerVertices ( ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) +* ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) ) = { [ <* C38 , C39 *> , ( and2a ) ] , [ <* C39 , C40 *> , ( and2 ) ] } by L86 , ENUMSET1:1;
+thus L92: ( InputVertices D63 ) = ( ( InputVertices ( ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) +* ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) ) \/ ( InputVertices ( 1GateCircStr (<* C38 , C40 *> , ( and2a )) ) ) ) by L91 , L81 , L83 , L84 , L90 , FACIRC_1:7
+.= ( ( ( InputVertices ( 1GateCircStr (<* C38 , C39 *> , ( and2a )) ) ) \/ ( InputVertices ( 1GateCircStr (<* C39 , C40 *> , ( and2 )) ) ) ) \/ ( InputVertices ( 1GateCircStr (<* C38 , C40 *> , ( and2a )) ) ) ) by L80 , L78 , FACIRC_1:7
+.= ( { C38 , C39 , C39 , C40 } \/ { C40 , C38 } ) by L76 , L77 , ENUMSET1:5
+.= ( { C39 , C39 , C38 , C40 } \/ { C40 , C38 } ) by ENUMSET1:67
+.= ( { C39 , C38 , C40 } \/ { C40 , C38 } ) by ENUMSET1:31
+.= ( { C38 , C39 , C40 } \/ { C40 , C38 } ) by ENUMSET1:58
+.= ( { C38 , C39 , C40 } \/ ( { C40 } \/ { C38 } ) ) by ENUMSET1:1
+.= ( ( { C38 , C39 , C40 } \/ { C40 } ) \/ { C38 } ) by XBOOLE_1:4
+.= ( ( { C40 , C38 , C39 } \/ { C40 } ) \/ { C38 } ) by ENUMSET1:59
+.= ( { C40 , C40 , C38 , C39 } \/ { C38 } ) by ENUMSET1:4
+.= ( { C40 , C38 , C39 } \/ { C38 } ) by ENUMSET1:31
+.= ( { C38 , C39 , C40 } \/ { C38 } ) by ENUMSET1:59
+.= { C38 , C38 , C39 , C40 } by ENUMSET1:4
+.= { C38 , C39 , C40 } by ENUMSET1:31;
+L93: D61 tolerates D62 by CIRCCOMB:47;
+thus L94: ( InnerVertices D63 ) = ( ( InnerVertices D61 ) \/ ( InnerVertices D62 ) ) by L93 , CIRCCOMB:11
+.= ( { [ <* C38 , C39 *> , ( and2a ) ] , [ <* C39 , C40 *> , ( and2 ) ] , [ <* C38 , C40 *> , ( and2a ) ] } \/ { ( BorrowOutput (C38 , C39 , C40) ) } ) by L88 , CIRCCOMB:42;
+end;
+L95: (for B25 , B26 , B27 being non  pair set holds (for B28 being (State of ( BorrowCirc (B25 , B26 , B27) )) holds (for B29 , B30 , B31 being (Element of ( BOOLEAN )) holds ((B29 = ( B28 . B25 ) & B30 = ( B28 . B26 ) & B31 = ( B28 . B27 )) implies (( ( Following B28 ) . [ <* B25 , B26 *> , ( and2a ) ] ) = ( ( 'not' B29 ) '&' B30 ) & ( ( Following B28 ) . [ <* B26 , B27 *> , ( and2 ) ] ) = ( B30 '&' B31 ) & ( ( Following B28 ) . [ <* B25 , B27 *> , ( and2a ) ] ) = ( ( 'not' B29 ) '&' B31 ))))))
+proof
+let C41 , C42 , C43 being non  pair set;
+let C44 being (State of ( BorrowCirc (C41 , C42 , C43) ));
+let C45 , C46 , C47 being (Element of ( BOOLEAN ));
+assume that
+L96: C45 = ( C44 . C41 )
+and
+L97: C46 = ( C44 . C42 )
+and
+L98: C47 = ( C44 . C43 );
+set D64 = ( BorrowStr (C41 , C42 , C43) );
+L99: ( InnerVertices D64 ) = (the carrier' of D64) by FACIRC_1:37;
+L100: C42 in (the carrier of D64) by L48;
+L101: C41 in (the carrier of D64) by L48;
+L102: ( dom C44 ) = (the carrier of D64) by CIRCUIT1:3;
+L103: [ <* C41 , C42 *> , ( and2a ) ] in ( InnerVertices ( BorrowStr (C41 , C42 , C43) ) ) by L57;
+thus L104: ( ( Following C44 ) . [ <* C41 , C42 *> , ( and2a ) ] ) = ( ( and2a ) . ( C44 * <* C41 , C42 *> ) ) by L103 , L99 , FACIRC_1:35
+.= ( ( and2a ) . <* C45 , C46 *> ) by L96 , L97 , L102 , L101 , L100 , FINSEQ_2:125
+.= ( ( 'not' C45 ) '&' C46 ) by TWOSCOMP:def 2;
+L105: C43 in (the carrier of D64) by L48;
+L106: [ <* C42 , C43 *> , ( and2 ) ] in ( InnerVertices ( BorrowStr (C41 , C42 , C43) ) ) by L57;
+thus L107: ( ( Following C44 ) . [ <* C42 , C43 *> , ( and2 ) ] ) = ( ( and2 ) . ( C44 * <* C42 , C43 *> ) ) by L106 , L99 , FACIRC_1:35
+.= ( ( and2 ) . <* C46 , C47 *> ) by L97 , L98 , L102 , L100 , L105 , FINSEQ_2:125
+.= ( C46 '&' C47 ) by TWOSCOMP:def 1;
+L108: [ <* C41 , C43 *> , ( and2a ) ] in ( InnerVertices ( BorrowStr (C41 , C42 , C43) ) ) by L57;
+thus L109: ( ( Following C44 ) . [ <* C41 , C43 *> , ( and2a ) ] ) = ( ( and2a ) . ( C44 * <* C41 , C43 *> ) ) by L108 , L99 , FACIRC_1:35
+.= ( ( and2a ) . <* C45 , C47 *> ) by L96 , L98 , L102 , L101 , L105 , FINSEQ_2:125
+.= ( ( 'not' C45 ) '&' C47 ) by TWOSCOMP:def 2;
+end;
+theorem
+L110: (for B32 , B33 , B34 being non  pair set holds (for B35 being (State of ( BorrowCirc (B32 , B33 , B34) )) holds (for B36 , B37 being (Element of ( BOOLEAN )) holds ((B36 = ( B35 . B32 ) & B37 = ( B35 . B33 )) implies ( ( Following B35 ) . [ <* B32 , B33 *> , ( and2a ) ] ) = ( ( 'not' B36 ) '&' B37 )))))
+proof
+let C48 , C49 , C50 being non  pair set;
+reconsider D65 = C50 as (Vertex of ( BorrowStr (C48 , C49 , C50) )) by L48;
+let C51 being (State of ( BorrowCirc (C48 , C49 , C50) ));
+L111: ( C51 . D65 ) is (Element of ( BOOLEAN ));
+thus L112: thesis by L111 , L95;
+end;
+theorem
+L113: (for B38 , B39 , B40 being non  pair set holds (for B41 being (State of ( BorrowCirc (B38 , B39 , B40) )) holds (for B42 , B43 being (Element of ( BOOLEAN )) holds ((B42 = ( B41 . B39 ) & B43 = ( B41 . B40 )) implies ( ( Following B41 ) . [ <* B39 , B40 *> , ( and2 ) ] ) = ( B42 '&' B43 )))))
+proof
+let C52 , C53 , C54 being non  pair set;
+reconsider D66 = C52 as (Vertex of ( BorrowStr (C52 , C53 , C54) )) by L48;
+let C55 being (State of ( BorrowCirc (C52 , C53 , C54) ));
+L114: ( C55 . D66 ) is (Element of ( BOOLEAN ));
+thus L115: thesis by L114 , L95;
+end;
+theorem
+L116: (for B44 , B45 , B46 being non  pair set holds (for B47 being (State of ( BorrowCirc (B44 , B45 , B46) )) holds (for B48 , B49 being (Element of ( BOOLEAN )) holds ((B48 = ( B47 . B44 ) & B49 = ( B47 . B46 )) implies ( ( Following B47 ) . [ <* B44 , B46 *> , ( and2a ) ] ) = ( ( 'not' B48 ) '&' B49 )))))
+proof
+let C56 , C57 , C58 being non  pair set;
+reconsider D67 = C57 as (Vertex of ( BorrowStr (C56 , C57 , C58) )) by L48;
+let C59 being (State of ( BorrowCirc (C56 , C57 , C58) ));
+L117: ( C59 . D67 ) is (Element of ( BOOLEAN ));
+thus L118: thesis by L117 , L95;
+end;
+theorem
+L119: (for B50 , B51 , B52 being non  pair set holds (for B53 being (State of ( BorrowCirc (B50 , B51 , B52) )) holds (for B54 , B55 , B56 being (Element of ( BOOLEAN )) holds ((B54 = ( B53 . [ <* B50 , B51 *> , ( and2a ) ] ) & B55 = ( B53 . [ <* B51 , B52 *> , ( and2 ) ] ) & B56 = ( B53 . [ <* B50 , B52 *> , ( and2a ) ] )) implies ( ( Following B53 ) . ( BorrowOutput (B50 , B51 , B52) ) ) = ( ( B54 'or' B55 ) 'or' B56 )))))
+proof
+let C60 , C61 , C62 being non  pair set;
+set D68 = <* C60 , C61 *>;
+set D69 = <* C61 , C62 *>;
+set D70 = <* C60 , C62 *>;
+set D71 = [ D68 , ( and2a ) ];
+set D72 = [ D69 , ( and2 ) ];
+set D73 = [ D70 , ( and2a ) ];
+set D74 = ( BorrowStr (C60 , C61 , C62) );
+reconsider D75 = D71 , D76 = D72 , D77 = D73 as (Element of ( InnerVertices D74 )) by L57;
+let C63 being (State of ( BorrowCirc (C60 , C61 , C62) ));
+let C64 , C65 , C66 being (Element of ( BOOLEAN ));
+assume that
+L120: (C64 = ( C63 . [ <* C60 , C61 *> , ( and2a ) ] ) & C65 = ( C63 . [ <* C61 , C62 *> , ( and2 ) ] ) & C66 = ( C63 . [ <* C60 , C62 *> , ( and2a ) ] ));
+L121: ( dom C63 ) = (the carrier of D74) by CIRCUIT1:3;
+L122: ( InnerVertices D74 ) = (the carrier' of D74) by FACIRC_1:37;
+thus L123: ( ( Following C63 ) . ( BorrowOutput (C60 , C61 , C62) ) ) = ( ( or3 ) . ( C63 * <* D75 , D76 , D77 *> ) ) by L122 , FACIRC_1:35
+.= ( ( or3 ) . <* C64 , C65 , C66 *> ) by L120 , L121 , FINSEQ_2:126
+.= ( ( C64 'or' C65 ) 'or' C66 ) by FACIRC_1:def 7;
+end;
+L124: (for B57 , B58 , B59 being non  pair set holds (for B60 being (State of ( BorrowCirc (B57 , B58 , B59) )) holds (for B61 , B62 , B63 being (Element of ( BOOLEAN )) holds ((B61 = ( B60 . B57 ) & B62 = ( B60 . B58 ) & B63 = ( B60 . B59 )) implies (( ( Following (B60 , 2) ) . ( BorrowOutput (B57 , B58 , B59) ) ) = ( ( ( ( 'not' B61 ) '&' B62 ) 'or' ( B62 '&' B63 ) ) 'or' ( ( 'not' B61 ) '&' B63 ) ) & ( ( Following (B60 , 2) ) . [ <* B57 , B58 *> , ( and2a ) ] ) = ( ( 'not' B61 ) '&' B62 ) & ( ( Following (B60 , 2) ) . [ <* B58 , B59 *> , ( and2 ) ] ) = ( B62 '&' B63 ) & ( ( Following (B60 , 2) ) . [ <* B57 , B59 *> , ( and2a ) ] ) = ( ( 'not' B61 ) '&' B63 ))))))
+proof
+let C67 , C68 , C69 being non  pair set;
+set D78 = ( BorrowStr (C67 , C68 , C69) );
+reconsider D79 = C67 , D80 = C68 , D81 = C69 as (Vertex of D78) by L48;
+let C70 being (State of ( BorrowCirc (C67 , C68 , C69) ));
+set D82 = <* C67 , C68 *>;
+set D83 = <* C68 , C69 *>;
+set D84 = <* C67 , C69 *>;
+set D85 = [ D82 , ( and2a ) ];
+set D86 = [ D83 , ( and2 ) ];
+set D87 = [ D84 , ( and2a ) ];
+L125: ( Following (C70 , 2) ) = ( Following ( Following C70 ) ) by FACIRC_1:15;
+let C71 , C72 , C73 being (Element of ( BOOLEAN ));
+assume that
+L126: (C71 = ( C70 . C67 ) & C72 = ( C70 . C68 ) & C73 = ( C70 . C69 ));
+L127: ( ( Following C70 ) . D87 ) = ( ( 'not' C71 ) '&' C73 ) by L126 , L95;
+L128: (( ( Following C70 ) . D85 ) = ( ( 'not' C71 ) '&' C72 ) & ( ( Following C70 ) . D86 ) = ( C72 '&' C73 )) by L126 , L95;
+thus L129: ( ( Following (C70 , 2) ) . ( BorrowOutput (C67 , C68 , C69) ) ) = ( ( ( ( 'not' C71 ) '&' C72 ) 'or' ( C72 '&' C73 ) ) 'or' ( ( 'not' C71 ) '&' C73 ) ) by L128 , L125 , L127 , L119;
+L130: C68 in ( InputVertices D78 ) by L67;
+L131: ( ( Following C70 ) . D80 ) = ( C70 . C68 ) by L130 , CIRCUIT2:def 5;
+L132: C69 in ( InputVertices D78 ) by L67;
+L133: ( ( Following C70 ) . D81 ) = ( C70 . C69 ) by L132 , CIRCUIT2:def 5;
+L134: C67 in ( InputVertices D78 ) by L67;
+L135: ( ( Following C70 ) . D79 ) = ( C70 . C67 ) by L134 , CIRCUIT2:def 5;
+thus L136: thesis by L135 , L126 , L131 , L133 , L125 , L95;
+end;
+theorem
+L137: (for B64 , B65 , B66 being non  pair set holds (for B67 being (State of ( BorrowCirc (B64 , B65 , B66) )) holds (for B68 , B69 being (Element of ( BOOLEAN )) holds ((B68 = ( B67 . B64 ) & B69 = ( B67 . B65 )) implies ( ( Following (B67 , 2) ) . [ <* B64 , B65 *> , ( and2a ) ] ) = ( ( 'not' B68 ) '&' B69 )))))
+proof
+let C74 , C75 , C76 being non  pair set;
+reconsider D88 = C76 as (Vertex of ( BorrowStr (C74 , C75 , C76) )) by L48;
+let C77 being (State of ( BorrowCirc (C74 , C75 , C76) ));
+L138: ( C77 . D88 ) is (Element of ( BOOLEAN ));
+thus L139: thesis by L138 , L124;
+end;
+theorem
+L140: (for B70 , B71 , B72 being non  pair set holds (for B73 being (State of ( BorrowCirc (B70 , B71 , B72) )) holds (for B74 , B75 being (Element of ( BOOLEAN )) holds ((B74 = ( B73 . B71 ) & B75 = ( B73 . B72 )) implies ( ( Following (B73 , 2) ) . [ <* B71 , B72 *> , ( and2 ) ] ) = ( B74 '&' B75 )))))
+proof
+let C78 , C79 , C80 being non  pair set;
+reconsider D89 = C78 as (Vertex of ( BorrowStr (C78 , C79 , C80) )) by L48;
+let C81 being (State of ( BorrowCirc (C78 , C79 , C80) ));
+L141: ( C81 . D89 ) is (Element of ( BOOLEAN ));
+thus L142: thesis by L141 , L124;
+end;
+theorem
+L143: (for B76 , B77 , B78 being non  pair set holds (for B79 being (State of ( BorrowCirc (B76 , B77 , B78) )) holds (for B80 , B81 being (Element of ( BOOLEAN )) holds ((B80 = ( B79 . B76 ) & B81 = ( B79 . B78 )) implies ( ( Following (B79 , 2) ) . [ <* B76 , B78 *> , ( and2a ) ] ) = ( ( 'not' B80 ) '&' B81 )))))
+proof
+let C82 , C83 , C84 being non  pair set;
+reconsider D90 = C83 as (Vertex of ( BorrowStr (C82 , C83 , C84) )) by L48;
+let C85 being (State of ( BorrowCirc (C82 , C83 , C84) ));
+L144: ( C85 . D90 ) is (Element of ( BOOLEAN ));
+thus L145: thesis by L144 , L124;
+end;
+theorem
+L146: (for B82 , B83 , B84 being non  pair set holds (for B85 being (State of ( BorrowCirc (B82 , B83 , B84) )) holds (for B86 , B87 , B88 being (Element of ( BOOLEAN )) holds ((B86 = ( B85 . B82 ) & B87 = ( B85 . B83 ) & B88 = ( B85 . B84 )) implies ( ( Following (B85 , 2) ) . ( BorrowOutput (B82 , B83 , B84) ) ) = ( ( ( ( 'not' B86 ) '&' B87 ) 'or' ( B87 '&' B88 ) ) 'or' ( ( 'not' B86 ) '&' B88 ) ))))) by L124;
+theorem
+L147: (for B89 , B90 , B91 being non  pair set holds (for B92 being (State of ( BorrowCirc (B89 , B90 , B91) )) holds ( Following (B92 , 2) ) is  stable))
+proof
+let C86 , C87 , C88 being non  pair set;
+set D91 = ( BorrowStr (C86 , C87 , C88) );
+reconsider D92 = C86 , D93 = C87 , D94 = C88 as (Vertex of D91) by L48;
+let C89 being (State of ( BorrowCirc (C86 , C87 , C88) ));
+set D95 = ( C89 . D92 );
+set D96 = ( C89 . D93 );
+set D97 = ( C89 . D94 );
+set D98 = ( Following (C89 , 2) );
+set D99 = ( Following D98 );
+L148: D98 = ( Following ( Following C89 ) ) by FACIRC_1:15;
+L149: C87 in ( InputVertices D91 ) by L67;
+L150: ( ( Following C89 ) . C87 ) = D96 by L149 , CIRCUIT2:def 5;
+L151: ( D98 . C87 ) = D96 by L150 , L148 , L149 , CIRCUIT2:def 5;
+L152: D96 = ( C89 . C87 );
+L153: ( D98 . [ <* C86 , C88 *> , ( and2a ) ] ) = ( ( 'not' D95 ) '&' D97 ) by L152 , L124;
+L154: C86 in ( InputVertices D91 ) by L67;
+L155: ( ( Following C89 ) . C86 ) = D95 by L154 , CIRCUIT2:def 5;
+L156: ( D98 . C86 ) = D95 by L155 , L148 , L154 , CIRCUIT2:def 5;
+L157: D95 = ( C89 . C86 );
+L158: ( D98 . [ <* C87 , C88 *> , ( and2 ) ] ) = ( D96 '&' D97 ) by L157 , L124;
+L159: C88 in ( InputVertices D91 ) by L67;
+L160: ( ( Following C89 ) . C88 ) = D97 by L159 , CIRCUIT2:def 5;
+L161: ( D98 . C88 ) = D97 by L160 , L148 , L159 , CIRCUIT2:def 5;
+L162: D97 = ( C89 . C88 );
+L163: ( D98 . [ <* C86 , C87 *> , ( and2a ) ] ) = ( ( 'not' D95 ) '&' D96 ) by L162 , L124;
+L164: ( D98 . ( BorrowOutput (C86 , C87 , C88) ) ) = ( ( ( ( 'not' D95 ) '&' D96 ) 'or' ( D96 '&' D97 ) ) 'or' ( ( 'not' D95 ) '&' D97 ) ) by L124;
+L165:
+now
+let C90 being set;
+assume L166: C90 in (the carrier of D91);
+reconsider D100 = C90 as (Vertex of D91) by L166;
+L167: D100 in ( ( InputVertices D91 ) \/ ( InnerVertices D91 ) ) by L166 , XBOOLE_1:45;
+thus L168: ( D98 . C90 ) = ( D99 . C90 )
+proof
+per cases  by L167 , XBOOLE_0:def 3;
+suppose L169: D100 in ( InputVertices D91 );
+
+thus L170: thesis by L169 , CIRCUIT2:def 5;
+end;
+suppose L171: D100 in ( InnerVertices D91 );
+
+L172: D100 in ( { [ <* C86 , C87 *> , ( and2a ) ] , [ <* C87 , C88 *> , ( and2 ) ] , [ <* C86 , C88 *> , ( and2a ) ] } \/ { ( BorrowOutput (C86 , C87 , C88) ) } ) by L171 , L75;
+L173: (D100 in { [ <* C86 , C87 *> , ( and2a ) ] , [ <* C87 , C88 *> , ( and2 ) ] , [ <* C86 , C88 *> , ( and2a ) ] } or D100 in { ( BorrowOutput (C86 , C87 , C88) ) }) by L172 , XBOOLE_0:def 3;
+L174: (D100 = [ <* C86 , C87 *> , ( and2a ) ] or D100 = [ <* C87 , C88 *> , ( and2 ) ] or D100 = [ <* C86 , C88 *> , ( and2a ) ] or D100 = ( BorrowOutput (C86 , C87 , C88) )) by L173 , ENUMSET1:def 1 , TARSKI:def 1;
+thus L175: thesis by L174 , L164 , L163 , L158 , L153 , L156 , L151 , L161 , L95 , L119;
+end;
+end;
+
+end;
+L169: (( dom ( Following ( Following (C89 , 2) ) ) ) = (the carrier of D91) & ( dom ( Following (C89 , 2) ) ) = (the carrier of D91)) by CIRCUIT1:3;
+thus L170: D98 = D99 by L169 , L165 , FUNCT_1:2;
+end;
+begin
+definition
+let C91 , C92 , C93 being set;
+func BitSubtracterWithBorrowStr (C91 , C92 , C93) ->  unsplit  gate`1=arity  gate`2isBoolean non  void  strict non  empty ManySortedSign equals 
+( ( 2GatesCircStr (C91 , C92 , C93 , ( 'xor' )) ) +* ( BorrowStr (C91 , C92 , C93) ) );
+coherence;
+end;
+theorem
+L172: (for B93 , B94 , B95 being non  pair set holds ( InputVertices ( BitSubtracterWithBorrowStr (B93 , B94 , B95) ) ) = { B93 , B94 , B95 })
+proof
+let C94 , C95 , C96 being non  pair set;
+set D101 = ( BitSubtracterWithBorrowStr (C94 , C95 , C96) );
+set D102 = ( 2GatesCircStr (C94 , C95 , C96 , ( 'xor' )) );
+set D103 = ( BorrowStr (C94 , C95 , C96) );
+L173: (( InputVertices D102 ) = { C94 , C95 , C96 } & ( InputVertices D103 ) = { C94 , C95 , C96 }) by L75 , FACIRC_1:57;
+L174: (( InnerVertices D102 ) is Relation & ( InnerVertices D103 ) is Relation) by L6 , FACIRC_1:58;
+thus L175: ( InputVertices D101 ) = ( { C94 , C95 , C96 } \/ { C94 , C95 , C96 } ) by L174 , L173 , FACIRC_1:7
+.= { C94 , C95 , C96 };
+end;
+theorem
+L176: (for B96 , B97 , B98 being non  pair set holds ( InnerVertices ( BitSubtracterWithBorrowStr (B96 , B97 , B98) ) ) = ( ( { [ <* B96 , B97 *> , ( 'xor' ) ] , ( 2GatesCircOutput (B96 , B97 , B98 , ( 'xor' )) ) } \/ { [ <* B96 , B97 *> , ( and2a ) ] , [ <* B97 , B98 *> , ( and2 ) ] , [ <* B96 , B98 *> , ( and2a ) ] } ) \/ { ( BorrowOutput (B96 , B97 , B98) ) } ))
+proof
+let C97 , C98 , C99 being non  pair set;
+set D104 = ( 2GatesCircStr (C97 , C98 , C99 , ( 'xor' )) );
+set D105 = ( BorrowStr (C97 , C98 , C99) );
+L177: (( ( { [ <* C97 , C98 *> , ( 'xor' ) ] , ( 2GatesCircOutput (C97 , C98 , C99 , ( 'xor' )) ) } \/ { [ <* C97 , C98 *> , ( and2a ) ] , [ <* C98 , C99 *> , ( and2 ) ] , [ <* C97 , C99 *> , ( and2a ) ] } ) \/ { ( BorrowOutput (C97 , C98 , C99) ) } ) = ( { [ <* C97 , C98 *> , ( 'xor' ) ] , ( 2GatesCircOutput (C97 , C98 , C99 , ( 'xor' )) ) } \/ ( { [ <* C97 , C98 *> , ( and2a ) ] , [ <* C98 , C99 *> , ( and2 ) ] , [ <* C97 , C99 *> , ( and2a ) ] } \/ { ( BorrowOutput (C97 , C98 , C99) ) } ) ) & ( InnerVertices D104 ) = { [ <* C97 , C98 *> , ( 'xor' ) ] , ( 2GatesCircOutput (C97 , C98 , C99 , ( 'xor' )) ) }) by FACIRC_1:56 , XBOOLE_1:4;
+L178: ( InnerVertices D105 ) = ( { [ <* C97 , C98 *> , ( and2a ) ] , [ <* C98 , C99 *> , ( and2 ) ] , [ <* C97 , C99 *> , ( and2a ) ] } \/ { ( BorrowOutput (C97 , C98 , C99) ) } ) by L75;
+thus L179: thesis by L178 , L177 , FACIRC_1:27;
+end;
+theorem
+L180: (for R1 being set holds (for R2 being set holds (for R3 being set holds (for B99 being non  empty ManySortedSign holds (B99 = ( BitSubtracterWithBorrowStr (R1 , R2 , R3) ) implies (R1 in (the carrier of B99) & R2 in (the carrier of B99) & R3 in (the carrier of B99)))))))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+set D106 = ( 2GatesCircStr (R1 , R2 , R3 , ( 'xor' )) );
+let C100 being non  empty ManySortedSign;
+L181: (R1 in (the carrier of D106) & R2 in (the carrier of D106)) by FACIRC_1:60;
+L182: R3 in (the carrier of D106) by FACIRC_1:60;
+assume L183: C100 = ( BitSubtracterWithBorrowStr (R1 , R2 , R3) );
+thus L184: thesis by L183 , L181 , L182 , FACIRC_1:20;
+end;
+definition
+let C101 , C102 , C103 being set;
+func BitSubtracterWithBorrowCirc (C101 , C102 , C103) ->  strict  Boolean  gate`2=den (Circuit of ( BitSubtracterWithBorrowStr (C101 , C102 , C103) )) equals 
+( ( BitSubtracterCirc (C101 , C102 , C103) ) +* ( BorrowCirc (C101 , C102 , C103) ) );
+coherence;
+end;
+theorem
+L186: (for R1 being set holds (for R2 being set holds (for R3 being set holds ( InnerVertices ( BitSubtracterWithBorrowStr (R1 , R2 , R3) ) ) is Relation)))
+proof
+let R1 being set;
+let R2 being set;
+let R3 being set;
+L187: (( InnerVertices ( 2GatesCircStr (R1 , R2 , R3 , ( 'xor' )) ) ) is Relation & ( InnerVertices ( BorrowStr (R1 , R2 , R3) ) ) is Relation) by L6 , FACIRC_1:58;
+thus L188: thesis by L187 , FACIRC_1:3;
+end;
+theorem
+L189: (for B100 , B101 , B102 being non  pair set holds ( InputVertices ( BitSubtracterWithBorrowStr (B100 , B101 , B102) ) ) is  without_pairs)
+proof
+let C104 , C105 , C106 being non  pair set;
+L190: ( InputVertices ( BitSubtracterWithBorrowStr (C104 , C105 , C106) ) ) = { C104 , C105 , C106 } by L172;
+thus L191: thesis by L190;
+end;
+theorem
+L192: (for B103 , B104 , B105 being non  pair set holds (for B106 being (State of ( BitSubtracterWithBorrowCirc (B103 , B104 , B105) )) holds (for B107 , B108 , B109 being (Element of ( BOOLEAN )) holds ((B107 = ( B106 . B103 ) & B108 = ( B106 . B104 ) & B109 = ( B106 . B105 )) implies (( ( Following (B106 , 2) ) . ( BitSubtracterOutput (B103 , B104 , B105) ) ) = ( ( B107 'xor' B108 ) 'xor' B109 ) & ( ( Following (B106 , 2) ) . ( BorrowOutput (B103 , B104 , B105) ) ) = ( ( ( ( 'not' B107 ) '&' B108 ) 'or' ( B108 '&' B109 ) ) 'or' ( ( 'not' B107 ) '&' B109 ) ))))))
+proof
+set D107 = ( 'xor' );
+let C107 , C108 , C109 being non  pair set;
+set D108 = ( 2GatesCircStr (C107 , C108 , C109 , ( 'xor' )) );
+set D109 = ( BorrowStr (C107 , C108 , C109) );
+set D110 = ( BitSubtracterWithBorrowCirc (C107 , C108 , C109) );
+set D111 = ( BitSubtracterCirc (C107 , C108 , C109) );
+set D112 = ( BorrowCirc (C107 , C108 , C109) );
+let C110 being (State of D110);
+let C111 , C112 , C113 being (Element of ( BOOLEAN ));
+assume that
+L193: C111 = ( C110 . C107 )
+and
+L194: C112 = ( C110 . C108 )
+and
+L195: C113 = ( C110 . C109 );
+reconsider D113 = ( C110 | (the carrier of D108) ) as (State of D111) by FACIRC_1:26;
+L196: ( dom D113 ) = (the carrier of D108) by CIRCUIT1:3;
+L197: C109 in (the carrier of D108) by FACIRC_1:60;
+L198: C113 = ( D113 . C109 ) by L197 , L195 , L196 , FUNCT_1:47;
+L199: C108 in (the carrier of D108) by FACIRC_1:60;
+L200: C112 = ( D113 . C108 ) by L199 , L194 , L196 , FUNCT_1:47;
+reconsider D114 = C110 as (State of ( D111 +* D112 ));
+L201: ( InputVertices D108 ) is  without_pairs by FACIRC_1:59;
+L202: ( InnerVertices D109 ) misses ( InputVertices D108 ) by L201 , L6 , FACIRC_1:5;
+L203: ( ( Following (D114 , 2) ) . ( 2GatesCircOutput (C107 , C108 , C109 , D107) ) ) = ( ( Following (D113 , 2) ) . ( 2GatesCircOutput (C107 , C108 , C109 , D107) ) ) by L202 , FACIRC_1:32;
+reconsider D115 = ( C110 | (the carrier of D109) ) as (State of D112) by FACIRC_1:26;
+L204: ( dom D115 ) = (the carrier of D109) by CIRCUIT1:3;
+L205: C107 in (the carrier of D108) by FACIRC_1:60;
+L206: C111 = ( D113 . C107 ) by L205 , L193 , L196 , FUNCT_1:47;
+thus L207: ( ( Following (C110 , 2) ) . ( BitSubtracterOutput (C107 , C108 , C109) ) ) = ( ( C111 'xor' C112 ) 'xor' C113 ) by L206 , L200 , L198 , L203 , FACIRC_1:64;
+L208: ( InputVertices D109 ) is  without_pairs by L11;
+L209: ( InnerVertices D108 ) misses ( InputVertices D109 ) by L208 , FACIRC_1:5 , FACIRC_1:58;
+L210: ( ( Following (D114 , 2) ) . ( BorrowOutput (C107 , C108 , C109) ) ) = ( ( Following (D115 , 2) ) . ( BorrowOutput (C107 , C108 , C109) ) ) by L209 , FACIRC_1:33;
+L211: C109 in (the carrier of D109) by L48;
+L212: C113 = ( D115 . C109 ) by L211 , L195 , L204 , FUNCT_1:47;
+L213: C108 in (the carrier of D109) by L48;
+L214: C112 = ( D115 . C108 ) by L213 , L194 , L204 , FUNCT_1:47;
+L215: C107 in (the carrier of D109) by L48;
+L216: C111 = ( D115 . C107 ) by L215 , L193 , L204 , FUNCT_1:47;
+thus L217: thesis by L216 , L214 , L212 , L210 , L124;
+end;
+theorem
+L218: (for B110 , B111 , B112 being non  pair set holds (for B113 being (State of ( BitSubtracterWithBorrowCirc (B110 , B111 , B112) )) holds ( Following (B113 , 2) ) is  stable))
+proof
+let C114 , C115 , C116 being non  pair set;
+set D116 = ( BitSubtracterWithBorrowStr (C114 , C115 , C116) );
+set D117 = ( 2GatesCircStr (C114 , C115 , C116 , ( 'xor' )) );
+set D118 = ( BorrowStr (C114 , C115 , C116) );
+set D119 = ( BitSubtracterWithBorrowCirc (C114 , C115 , C116) );
+set D120 = ( BitSubtracterCirc (C114 , C115 , C116) );
+set D121 = ( BorrowCirc (C114 , C115 , C116) );
+let C117 being (State of D119);
+reconsider D122 = ( C117 | (the carrier of D117) ) as (State of D120) by FACIRC_1:26;
+reconsider D123 = ( C117 | (the carrier of D118) ) as (State of D121) by FACIRC_1:26;
+reconsider D124 = C117 as (State of ( D120 +* D121 ));
+L219: ( dom ( Following (C117 , 3) ) ) = (the carrier of D116) by CIRCUIT1:3;
+L220: (the carrier of D116) = ( (the carrier of D117) \/ (the carrier of D118) ) by CIRCCOMB:def 2;
+L221: ( InputVertices D117 ) is  without_pairs by FACIRC_1:59;
+L222: ( InnerVertices D118 ) misses ( InputVertices D117 ) by L221 , L6 , FACIRC_1:5;
+L223: (( Following (D122 , 2) ) = ( ( Following (D124 , 2) ) | (the carrier of D117) ) & ( Following (D122 , 3) ) = ( ( Following (D124 , 3) ) | (the carrier of D117) )) by L222 , FACIRC_1:30;
+L224: ( Following (D122 , 2) ) is  stable by FACIRC_1:63;
+L225: ( Following (D122 , 2) ) = ( Following ( Following (D122 , 2) ) ) by L224 , CIRCUIT2:def 6
+.= ( Following (D122 , ( 2 + 1 )) ) by FACIRC_1:12;
+L226: ( InputVertices D118 ) is  without_pairs by L11;
+L227: ( InnerVertices D117 ) misses ( InputVertices D118 ) by L226 , FACIRC_1:5 , FACIRC_1:58;
+L228: (( Following (D123 , 2) ) = ( ( Following (D124 , 2) ) | (the carrier of D118) ) & ( Following (D123 , 3) ) = ( ( Following (D124 , 3) ) | (the carrier of D118) )) by L227 , FACIRC_1:31;
+L229: ( Following (D123 , 2) ) is  stable by L147;
+L230: ( Following (D123 , 2) ) = ( Following ( Following (D123 , 2) ) ) by L229 , CIRCUIT2:def 6
+.= ( Following (D123 , ( 2 + 1 )) ) by FACIRC_1:12;
+L231: (( dom ( Following (D122 , 2) ) ) = (the carrier of D117) & ( dom ( Following (D123 , 2) ) ) = (the carrier of D118)) by CIRCUIT1:3;
+L232:
+now
+let C118 being set;
+assume L233: C118 in (the carrier of D116);
+L234: (C118 in (the carrier of D117) or C118 in (the carrier of D118)) by L233 , L220 , XBOOLE_0:def 3;
+L235: ((( ( Following (C117 , 2) ) . C118 ) = ( ( Following (D122 , 2) ) . C118 ) & ( ( Following (C117 , 3) ) . C118 ) = ( ( Following (D122 , 3) ) . C118 )) or (( ( Following (C117 , 2) ) . C118 ) = ( ( Following (D123 , 2) ) . C118 ) & ( ( Following (C117 , 3) ) . C118 ) = ( ( Following (D123 , 3) ) . C118 ))) by L234 , L223 , L228 , L225 , L230 , L231 , FUNCT_1:47;
+thus L236: ( ( Following (C117 , 2) ) . C118 ) = ( ( Following ( Following (C117 , 2) ) ) . C118 ) by L235 , L225 , L230 , FACIRC_1:12;
+end;
+L237: (( Following (C117 , ( 2 + 1 )) ) = ( Following ( Following (C117 , 2) ) ) & ( dom ( Following (C117 , 2) ) ) = (the carrier of D116)) by CIRCUIT1:3 , FACIRC_1:12;
+thus L238: ( Following (C117 , 2) ) = ( Following ( Following (C117 , 2) ) ) by L237 , L219 , L232 , FUNCT_1:2;
+end;

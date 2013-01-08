@@ -1,0 +1,731 @@
+:: Euclide Algorithm
+::  by Andrzej Trybulec and Yatsuka Nakamura
+::
+:: Received October 8, 1993
+:: Copyright (c) 1993-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, AMI_3, CARD_1, NAT_1, AMI_1, FUNCOP_1,
+      RELAT_1, GRAPHSP, FUNCT_4, FSM_1, FUNCT_1, XBOOLE_0, TARSKI, ARYTM_3,
+      INT_1, XXREAL_0, MSUALG_1, INT_2, COMPLEX1, PARTFUN1, TURING_1, STRUCT_0,
+      AMI_4, ORDINAL1, EXTPRO_1, FINSET_1, COMPOS_1;
+ notations TARSKI, XBOOLE_0, ENUMSET1, SUBSET_1, NUMBERS, RELAT_1, FUNCT_1,
+      FINSET_1, INT_1, ORDINAL1, NAT_1, FUNCOP_1, INT_2, FUNCT_4, STRUCT_0,
+      PARTFUN1, MEMSTR_0, COMPOS_1, EXTPRO_1, AMI_3, XXREAL_0;
+ constructors NAT_D, AMI_3, RELSET_1, PRE_POLY, DOMAIN_1;
+ registrations SETFAM_1, ORDINAL1, RELSET_1, XXREAL_0, XREAL_0, NAT_1, INT_1,
+      STRUCT_0, AMI_3, XBOOLE_0, FINSET_1, MEMSTR_0, FUNCT_4, FUNCOP_1,
+      RELAT_1, COMPOS_0;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions FUNCOP_1, EXTPRO_1, TARSKI, COMPOS_1, FUNCT_4, MEMSTR_0;
+ theorems INT_1, ABSVALUE, INT_2, TARSKI, ENUMSET1, NAT_1, FUNCOP_1, PARTFUN1,
+      FUNCT_4, FUNCT_1, GRFUNC_1, ZFMISC_1, AMI_3, RELAT_1, RELSET_1, XBOOLE_0,
+      XBOOLE_1, NEWTON, XXREAL_0, ORDINAL1, NAT_D, CARD_1, PBOOLE, COMPOS_1,
+      EXTPRO_1, MEMSTR_0, XTUPLE_0;
+ schemes NAT_1, NAT_D, FUNCT_1, RELSET_1, NEWTON;
+
+begin
+set D1 = ( dl. ( 0 ) );
+set D2 = ( dl. 1 );
+set D3 = ( dl. 2 );
+L1: (D1 <> D2 & D2 <> D3) by AMI_3:10;
+L2: D3 <> D1 by AMI_3:10;
+begin
+definition
+func Euclide-Algorithm -> ( NAT ) -defined (the InstructionsF of ( SCM )) -valued  finite Function equals 
+( ( ( 0 ) .--> ( ( dl. 2 ) := ( dl. 1 ) ) ) +* ( ( 1 .--> ( Divide (( dl. ( 0 ) ) , ( dl. 1 )) ) ) +* ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) );
+coherence;
+end;
+defpred S1[ (Instruction-Sequence of ( SCM )) ] means (( $1 . ( 0 ) ) = ( D3 := D2 ) & ( $1 . 1 ) = ( Divide (D1 , D2) ) & ( $1 . 2 ) = ( D1 := D3 ) & ( $1 . 3 ) = ( D2 >0_goto ( 0 ) ) & $1 halts_at 4);
+set D4 = ( ( 0 ) .--> ( ( dl. 2 ) := D2 ) );
+set D5 = ( 1 .--> ( Divide (D1 , D2) ) );
+set D6 = ( 2 .--> ( D1 := ( dl. 2 ) ) );
+set D7 = ( 3 .--> ( D2 >0_goto ( 0 ) ) );
+set D8 = ( 4 .--> ( halt ( SCM ) ) );
+set D9 = ( D7 +* D8 );
+set D10 = ( D6 +* D9 );
+set D11 = ( D5 +* D10 );
+set D12 = ( D4 +* D11 );
+theorem
+L4: ( dom (( Euclide-Algorithm ) qua Function) ) = 5
+proof
+L5: (( dom D7 ) = { 3 } & ( dom D8 ) = { 4 }) by FUNCOP_1:13;
+L6: ( dom D9 ) = ( { 3 } \/ { 4 } ) by L5 , FUNCT_4:def 1
+.= { 3 , 4 } by ENUMSET1:1;
+L7: ( dom D5 ) = { 1 } by FUNCOP_1:13;
+L8: ( dom D6 ) = { 2 } by FUNCOP_1:13;
+L9: ( dom D10 ) = ( { 2 } \/ { 3 , 4 } ) by L8 , L6 , FUNCT_4:def 1
+.= { 2 , 3 , 4 } by ENUMSET1:2;
+L10: ( dom D11 ) = ( { 1 } \/ { 2 , 3 , 4 } ) by L9 , L7 , FUNCT_4:def 1
+.= { 1 , 2 , 3 , 4 } by ENUMSET1:4;
+L11: ( dom D4 ) = { ( 0 ) } by FUNCOP_1:13;
+L12: ( dom D12 ) = ( { ( 0 ) } \/ { 1 , 2 , 3 , 4 } ) by L11 , L10 , FUNCT_4:def 1
+.= 5 by CARD_1:53 , ENUMSET1:7;
+thus L13: thesis by L12;
+end;
+L14: (for B1 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B1 implies S1[ B1 ]))
+proof
+let C1 being (Instruction-Sequence of ( SCM ));
+assume L15: ( Euclide-Algorithm ) c= C1;
+L16: D11 c= D12 by FUNCT_4:25;
+L17: D11 c= C1 by L16 , L15 , XBOOLE_1:1;
+L18: D10 c= D11 by FUNCT_4:25;
+L19: D10 c= C1 by L18 , L17 , XBOOLE_1:1;
+L20: D9 c= D10 by FUNCT_4:25;
+L21: D9 c= C1 by L20 , L19 , XBOOLE_1:1;
+L22: ( dom D8 ) = { 4 } by FUNCOP_1:13;
+L23: (not 3 in ( dom D8 )) by L22 , TARSKI:def 1;
+L24: ( dom D7 ) = { 3 } by FUNCOP_1:13;
+L25: ( dom D9 ) = ( { 3 } \/ { 4 } ) by L24 , L22 , FUNCT_4:def 1
+.= { 3 , 4 } by ENUMSET1:1;
+L26: (not 2 in ( dom D9 )) by L25 , TARSKI:def 2;
+L27: ( dom D6 ) = { 2 } by FUNCOP_1:13;
+L28: ( dom D10 ) = ( { 2 } \/ { 3 , 4 } ) by L27 , L25 , FUNCT_4:def 1
+.= { 2 , 3 , 4 } by ENUMSET1:2;
+L29: (not 1 in ( dom D10 )) by L28 , ENUMSET1:def 1;
+L30: ( dom D5 ) = { 1 } by FUNCOP_1:13;
+L31: ( dom D11 ) = ( { 1 } \/ { 2 , 3 , 4 } ) by L30 , L28 , FUNCT_4:def 1
+.= { 1 , 2 , 3 , 4 } by ENUMSET1:4;
+L32: (not ( 0 ) in ( dom D11 )) by L31;
+L33: ( 0 ) in ( dom D12 ) by L4 , CARD_1:53 , ENUMSET1:def 3;
+thus L34: ( C1 . ( 0 ) ) = ( D12 . ( 0 ) ) by L33 , L15 , GRFUNC_1:2
+.= ( D4 . ( 0 ) ) by L32 , FUNCT_4:11
+.= ( D3 := D2 ) by FUNCOP_1:72;
+L35: 1 in ( dom D11 ) by L31 , ENUMSET1:def 2;
+thus L36: ( C1 . 1 ) = ( D11 . 1 ) by L35 , L17 , GRFUNC_1:2
+.= ( D5 . 1 ) by L29 , FUNCT_4:11
+.= ( Divide (D1 , D2) ) by FUNCOP_1:72;
+L37: 2 in ( dom D10 ) by L28 , ENUMSET1:def 1;
+thus L38: ( C1 . 2 ) = ( D10 . 2 ) by L37 , L19 , GRFUNC_1:2
+.= ( D6 . 2 ) by L26 , FUNCT_4:11
+.= ( D1 := D3 ) by FUNCOP_1:72;
+L39: 4 in ( dom D8 ) by L22 , TARSKI:def 1;
+L40: 3 in ( dom D9 ) by L25 , TARSKI:def 2;
+thus L41: ( C1 . 3 ) = ( D9 . 3 ) by L40 , L21 , GRFUNC_1:2
+.= ( D7 . 3 ) by L23 , FUNCT_4:11
+.= ( D2 >0_goto ( 0 ) ) by FUNCOP_1:72;
+L42: 4 in ( dom D9 ) by L25 , TARSKI:def 2;
+thus L43: ( C1 . 4 ) = ( D9 . 4 ) by L21 , L42 , GRFUNC_1:2
+.= ( D8 . 4 ) by L39 , FUNCT_4:13
+.= ( halt ( SCM ) ) by FUNCOP_1:72;
+end;
+begin
+theorem
+L44: (for B2 being (State of ( SCM )) holds (for B3 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B3 implies (for R3 being (Element of ( NAT )) holds (( IC ( Comput (B3 , B2 , R3) ) ) = ( 0 ) implies (( IC ( Comput (B3 , B2 , ( R3 + 1 )) ) ) = 1 & ( ( Comput (B3 , B2 , ( R3 + 1 )) ) . ( dl. ( 0 ) ) ) = ( ( Comput (B3 , B2 , R3) ) . ( dl. ( 0 ) ) ) & ( ( Comput (B3 , B2 , ( R3 + 1 )) ) . ( dl. 1 ) ) = ( ( Comput (B3 , B2 , R3) ) . ( dl. 1 ) ) & ( ( Comput (B3 , B2 , ( R3 + 1 )) ) . ( dl. 2 ) ) = ( ( Comput (B3 , B2 , R3) ) . ( dl. 1 ) )))))))
+proof
+let C2 being (State of ( SCM ));
+let C3 being (Instruction-Sequence of ( SCM ));
+assume that
+L45: ( Euclide-Algorithm ) c= C3;
+let R3 being (Element of ( NAT ));
+assume L46: ( IC ( Comput (C3 , C2 , R3) ) ) = ( 0 );
+L47: ( Comput (C3 , C2 , ( R3 + 1 )) ) = ( Exec (( C3 . ( IC ( Comput (C3 , C2 , R3) ) ) ) , ( Comput (C3 , C2 , R3) )) ) by EXTPRO_1:6
+.= ( Exec (( D3 := D2 ) , ( Comput (C3 , C2 , R3) )) ) by L45 , L46 , L14;
+thus L48: ( IC ( Comput (C3 , C2 , ( R3 + 1 )) ) ) = ( succ ( IC ( Comput (C3 , C2 , R3) ) ) ) by L47 , AMI_3:2
+.= 1 by L46;
+thus L49: (( ( Comput (C3 , C2 , ( R3 + 1 )) ) . D1 ) = ( ( Comput (C3 , C2 , R3) ) . D1 ) & ( ( Comput (C3 , C2 , ( R3 + 1 )) ) . D2 ) = ( ( Comput (C3 , C2 , R3) ) . D2 )) by L47 , AMI_3:2 , AMI_3:10;
+thus L50: thesis by L47 , AMI_3:2;
+end;
+theorem
+L51: (for B4 being (State of ( SCM )) holds (for B5 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B5 implies (for R3 being (Element of ( NAT )) holds (( IC ( Comput (B5 , B4 , R3) ) ) = 1 implies (( IC ( Comput (B5 , B4 , ( R3 + 1 )) ) ) = 2 & ( ( Comput (B5 , B4 , ( R3 + 1 )) ) . ( dl. ( 0 ) ) ) = ( ( ( Comput (B5 , B4 , R3) ) . ( dl. ( 0 ) ) ) div ( ( Comput (B5 , B4 , R3) ) . ( dl. 1 ) ) ) & ( ( Comput (B5 , B4 , ( R3 + 1 )) ) . ( dl. 1 ) ) = ( ( ( Comput (B5 , B4 , R3) ) . ( dl. ( 0 ) ) ) mod ( ( Comput (B5 , B4 , R3) ) . ( dl. 1 ) ) ) & ( ( Comput (B5 , B4 , ( R3 + 1 )) ) . ( dl. 2 ) ) = ( ( Comput (B5 , B4 , R3) ) . ( dl. 2 ) )))))))
+proof
+let C4 being (State of ( SCM ));
+let C5 being (Instruction-Sequence of ( SCM ));
+assume that
+L52: ( Euclide-Algorithm ) c= C5;
+let R3 being (Element of ( NAT ));
+assume that
+L53: ( IC ( Comput (C5 , C4 , R3) ) ) = 1;
+L54: ( Comput (C5 , C4 , ( R3 + 1 )) ) = ( Exec (( C5 . ( IC ( Comput (C5 , C4 , R3) ) ) ) , ( Comput (C5 , C4 , R3) )) ) by EXTPRO_1:6
+.= ( Exec (( Divide (D1 , D2) ) , ( Comput (C5 , C4 , R3) )) ) by L52 , L53 , L14;
+thus L55: ( IC ( Comput (C5 , C4 , ( R3 + 1 )) ) ) = ( succ ( IC ( Comput (C5 , C4 , R3) ) ) ) by L54 , AMI_3:6
+.= 2 by L53;
+thus L56: thesis by L54 , L1 , L2 , AMI_3:6;
+end;
+theorem
+L57: (for B6 being (State of ( SCM )) holds (for B7 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B7 implies (for R3 being (Element of ( NAT )) holds (( IC ( Comput (B7 , B6 , R3) ) ) = 2 implies (( IC ( Comput (B7 , B6 , ( R3 + 1 )) ) ) = 3 & ( ( Comput (B7 , B6 , ( R3 + 1 )) ) . ( dl. ( 0 ) ) ) = ( ( Comput (B7 , B6 , R3) ) . ( dl. 2 ) ) & ( ( Comput (B7 , B6 , ( R3 + 1 )) ) . ( dl. 1 ) ) = ( ( Comput (B7 , B6 , R3) ) . ( dl. 1 ) ) & ( ( Comput (B7 , B6 , ( R3 + 1 )) ) . ( dl. 2 ) ) = ( ( Comput (B7 , B6 , R3) ) . ( dl. 2 ) )))))))
+proof
+let C6 being (State of ( SCM ));
+let C7 being (Instruction-Sequence of ( SCM ));
+assume that
+L58: ( Euclide-Algorithm ) c= C7;
+let R3 being (Element of ( NAT ));
+assume L59: ( IC ( Comput (C7 , C6 , R3) ) ) = 2;
+L60: ( Comput (C7 , C6 , ( R3 + 1 )) ) = ( Exec (( C7 . ( IC ( Comput (C7 , C6 , R3) ) ) ) , ( Comput (C7 , C6 , R3) )) ) by EXTPRO_1:6
+.= ( Exec (( D1 := D3 ) , ( Comput (C7 , C6 , R3) )) ) by L58 , L59 , L14;
+thus L61: ( IC ( Comput (C7 , C6 , ( R3 + 1 )) ) ) = ( succ ( IC ( Comput (C7 , C6 , R3) ) ) ) by L60 , AMI_3:2
+.= 3 by L59;
+thus L62: ( ( Comput (C7 , C6 , ( R3 + 1 )) ) . D1 ) = ( ( Comput (C7 , C6 , R3) ) . D3 ) by L60 , AMI_3:2;
+thus L63: thesis by L60 , AMI_3:2 , AMI_3:10;
+end;
+theorem
+L64: (for B8 being (State of ( SCM )) holds (for B9 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B9 implies (for R3 being (Element of ( NAT )) holds (( IC ( Comput (B9 , B8 , R3) ) ) = 3 implies ((( ( Comput (B9 , B8 , R3) ) . ( dl. 1 ) ) > ( 0 ) implies ( IC ( Comput (B9 , B8 , ( R3 + 1 )) ) ) = ( 0 )) & (( ( Comput (B9 , B8 , R3) ) . ( dl. 1 ) ) <= ( 0 ) implies ( IC ( Comput (B9 , B8 , ( R3 + 1 )) ) ) = 4) & ( ( Comput (B9 , B8 , ( R3 + 1 )) ) . ( dl. ( 0 ) ) ) = ( ( Comput (B9 , B8 , R3) ) . ( dl. ( 0 ) ) ) & ( ( Comput (B9 , B8 , ( R3 + 1 )) ) . ( dl. 1 ) ) = ( ( Comput (B9 , B8 , R3) ) . ( dl. 1 ) )))))))
+proof
+let C8 being (State of ( SCM ));
+let C9 being (Instruction-Sequence of ( SCM ));
+assume that
+L65: ( Euclide-Algorithm ) c= C9;
+let R3 being (Element of ( NAT ));
+assume L66: ( IC ( Comput (C9 , C8 , R3) ) ) = 3;
+L67: ( Comput (C9 , C8 , ( R3 + 1 )) ) = ( Exec (( C9 . ( IC ( Comput (C9 , C8 , R3) ) ) ) , ( Comput (C9 , C8 , R3) )) ) by EXTPRO_1:6
+.= ( Exec (( D2 >0_goto ( 0 ) ) , ( Comput (C9 , C8 , R3) )) ) by L65 , L66 , L14;
+thus L68: (( ( Comput (C9 , C8 , R3) ) . D2 ) > ( 0 ) implies ( IC ( Comput (C9 , C8 , ( R3 + 1 )) ) ) = ( 0 )) by L67 , AMI_3:9;
+thus L69: (( ( Comput (C9 , C8 , R3) ) . D2 ) <= ( 0 ) implies ( IC ( Comput (C9 , C8 , ( R3 + 1 )) ) ) = 4)
+proof
+assume L70: ( ( Comput (C9 , C8 , R3) ) . D2 ) <= ( 0 );
+thus L71: ( IC ( Comput (C9 , C8 , ( R3 + 1 )) ) ) = ( succ ( IC ( Comput (C9 , C8 , R3) ) ) ) by L70 , L67 , AMI_3:9
+.= 4 by L66;
+end;
+
+thus L72: thesis by L67 , AMI_3:9;
+end;
+theorem
+L73: (for B10 being (State of ( SCM )) holds (for B11 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B11 implies (for R3 being (Element of ( NAT )) holds (for R1 being (Element of ( NAT )) holds (( IC ( Comput (B11 , B10 , R3) ) ) = 4 implies ( Comput (B11 , B10 , ( R3 + R1 )) ) = ( Comput (B11 , B10 , R3) )))))))
+proof
+let C10 being (State of ( SCM ));
+let C11 being (Instruction-Sequence of ( SCM ));
+assume that
+L74: ( Euclide-Algorithm ) c= C11;
+let R3 being (Element of ( NAT ));
+let R1 being (Element of ( NAT ));
+assume L75: ( IC ( Comput (C11 , C10 , R3) ) ) = 4;
+L76: C11 halts_at ( IC ( Comput (C11 , C10 , R3) ) ) by L75 , L74 , L14;
+thus L77: thesis by L76 , EXTPRO_1:20 , NAT_1:11;
+end;
+L78: (for R3 being (Element of ( NAT )) holds (for B12 being ( 0 ) -started (State of ( SCM )) holds (for B13 being (Instruction-Sequence of ( SCM )) holds ((( Euclide-Algorithm ) c= B13 & ( B12 . D1 ) > ( 0 ) & ( B12 . D2 ) > ( 0 )) implies (( ( Comput (B13 , B12 , ( 4 * R3 )) ) . D1 ) > ( 0 ) & ((( ( Comput (B13 , B12 , ( 4 * R3 )) ) . D2 ) > ( 0 ) & ( IC ( Comput (B13 , B12 , ( 4 * R3 )) ) ) = ( 0 )) or (( ( Comput (B13 , B12 , ( 4 * R3 )) ) . D2 ) = ( 0 ) & ( IC ( Comput (B13 , B12 , ( 4 * R3 )) ) ) = 4)))))))
+proof
+let R3 being (Element of ( NAT ));
+let C12 being ( 0 ) -started (State of ( SCM ));
+let C13 being (Instruction-Sequence of ( SCM ));
+assume that
+L79: ( Euclide-Algorithm ) c= C13
+and
+L80: (( C12 . D1 ) > ( 0 ) & ( C12 . D2 ) > ( 0 ));
+L81: ( IC C12 ) = ( 0 ) by MEMSTR_0:def 12;
+defpred S2[ (Element of ( NAT )) ] means (( ( Comput (C13 , C12 , ( 4 * $1 )) ) . D1 ) > ( 0 ) & ((( ( Comput (C13 , C12 , ( 4 * $1 )) ) . D2 ) > ( 0 ) & ( IC ( Comput (C13 , C12 , ( 4 * $1 )) ) ) = ( 0 )) or (( ( Comput (C13 , C12 , ( 4 * $1 )) ) . D2 ) = ( 0 ) & ( IC ( Comput (C13 , C12 , ( 4 * $1 )) ) ) = 4)));
+L82: (for R3 being (Element of ( NAT )) holds (S2[ R3 ] implies S2[ ( R3 + 1 ) ]))
+proof
+let R3 being (Element of ( NAT ));
+set D13 = ( Comput (C13 , C12 , ( 4 * R3 )) );
+set D14 = ( Comput (C13 , C12 , ( ( 4 * R3 ) + 1 )) );
+set D15 = ( Comput (C13 , C12 , ( ( 4 * R3 ) + 2 )) );
+set D16 = ( Comput (C13 , C12 , ( ( 4 * R3 ) + 3 )) );
+set D17 = ( Comput (C13 , C12 , ( ( 4 * R3 ) + 4 )) );
+L83: D16 = ( Comput (C13 , C12 , ( ( ( 4 * R3 ) + 2 ) + 1 )) );
+L84: D17 = ( Comput (C13 , C12 , ( ( ( 4 * R3 ) + 3 ) + 1 )) );
+assume L85: ( D13 . D1 ) > ( 0 );
+assume L86: ((( D13 . D2 ) > ( 0 ) & ( IC D13 ) = ( 0 )) or (( D13 . D2 ) = ( 0 ) & ( IC D13 ) = 4));
+L87: D15 = ( Comput (C13 , C12 , ( ( ( 4 * R3 ) + 1 ) + 1 )) );
+L88:
+now
+per cases  by L86;
+case L89: ( D13 . D2 ) > ( 0 );
+L90: ( IC D14 ) = 1 by L89 , L79 , L86 , L44;
+L91: ( IC D15 ) = 2 by L90 , L79 , L87 , L51;
+L92: ( IC D16 ) = 3 by L91 , L79 , L83 , L57;
+L93: ( D17 . D2 ) = ( D16 . D2 ) by L92 , L79 , L84 , L64;
+L94: (( D16 . D1 ) = ( D15 . D3 ) & ( D16 . D2 ) = ( D15 . D2 )) by L79 , L83 , L91 , L57;
+L95: (( D15 . D2 ) = ( ( D14 . D1 ) mod ( D14 . D2 ) ) & ( D15 . D3 ) = ( D14 . D3 )) by L79 , L87 , L90 , L51;
+L96: (( D14 . D2 ) = ( D13 . D2 ) & ( D14 . D3 ) = ( D13 . D2 )) by L79 , L86 , L89 , L44;
+L97: (( D16 . D2 ) > ( 0 ) implies ( IC D17 ) = ( 0 )) by L79 , L84 , L92 , L64;
+thus L98: (( D17 . D1 ) > ( 0 ) & ((( D17 . D2 ) > ( 0 ) & ( IC D17 ) = ( 0 )) or (( D17 . D2 ) = ( 0 ) & ( IC D17 ) = 4))) by L97 , L79 , L84 , L89 , L96 , L95 , L92 , L94 , L93 , L64 , NEWTON:64;
+end;
+case L99: ( D13 . D2 ) = ( 0 );
+thus L100: (( D17 . D1 ) > ( 0 ) & ( D17 . D2 ) = ( 0 ) & ( IC D17 ) = 4) by L99 , L79 , L85 , L86 , L73;
+end;
+end;
+thus L102: thesis by L88;
+end;
+L103: S2[ ( 0 ) ] by L81 , L80 , EXTPRO_1:2;
+L104: (for R3 being (Element of ( NAT )) holds S2[ R3 ]) from NAT_1:sch 1(L103 , L82);
+thus L105: thesis by L104;
+end;
+L106: (for R3 being (Element of ( NAT )) holds (for B14 being ( 0 ) -started (State of ( SCM )) holds (for B15 being (Instruction-Sequence of ( SCM )) holds ((( Euclide-Algorithm ) c= B15 & ( B14 . D1 ) > ( 0 ) & ( B14 . D2 ) > ( 0 )) implies (( ( Comput (B15 , B14 , ( 4 * R3 )) ) . D2 ) > ( 0 ) implies (( ( Comput (B15 , B14 , ( 4 * ( R3 + 1 ) )) ) . D1 ) = ( ( Comput (B15 , B14 , ( 4 * R3 )) ) . D2 ) & ( ( Comput (B15 , B14 , ( 4 * ( R3 + 1 ) )) ) . D2 ) = ( ( ( Comput (B15 , B14 , ( 4 * R3 )) ) . D1 ) mod ( ( Comput (B15 , B14 , ( 4 * R3 )) ) . D2 ) )))))))
+proof
+let R3 being (Element of ( NAT ));
+let C14 being ( 0 ) -started (State of ( SCM ));
+let C15 being (Instruction-Sequence of ( SCM ));
+assume that
+L107: ( Euclide-Algorithm ) c= C15
+and
+L108: (( C14 . D1 ) > ( 0 ) & ( C14 . D2 ) > ( 0 ))
+and
+L109: ( ( Comput (C15 , C14 , ( 4 * R3 )) ) . D2 ) > ( 0 );
+set D18 = ( Comput (C15 , C14 , ( 4 * R3 )) );
+set D19 = ( Comput (C15 , C14 , ( ( 4 * R3 ) + 1 )) );
+set D20 = ( Comput (C15 , C14 , ( ( 4 * R3 ) + 2 )) );
+set D21 = ( Comput (C15 , C14 , ( ( 4 * R3 ) + 3 )) );
+L110: ((( D18 . D2 ) > ( 0 ) & ( IC D18 ) = ( 0 )) or (( D18 . D2 ) = ( 0 ) & ( IC D18 ) = 4)) by L107 , L108 , L78;
+L111: (D20 = ( Comput (C15 , C14 , ( ( ( 4 * R3 ) + 1 ) + 1 )) ) & ( IC D19 ) = 1) by L110 , L107 , L109 , L44;
+L112: ( D20 . D3 ) = ( D19 . D3 ) by L111 , L107 , L51;
+L113: (D21 = ( Comput (C15 , C14 , ( ( ( 4 * R3 ) + 2 ) + 1 )) ) & ( IC D20 ) = 2) by L107 , L111 , L51;
+L114: (( Comput (C15 , C14 , ( ( 4 * R3 ) + 4 )) ) = ( Comput (C15 , C14 , ( ( ( 4 * R3 ) + 3 ) + 1 )) ) & ( IC D21 ) = 3) by L113 , L107 , L57;
+L115: ( D21 . D1 ) = ( D20 . D3 ) by L107 , L113 , L57;
+L116: ( D19 . D3 ) = ( D18 . D2 ) by L107 , L109 , L110 , L44;
+thus L117: ( ( Comput (C15 , C14 , ( 4 * ( R3 + 1 ) )) ) . D1 ) = ( ( Comput (C15 , C14 , ( 4 * R3 )) ) . D2 ) by L116 , L107 , L112 , L114 , L115 , L64;
+L118: ( D21 . D2 ) = ( D20 . D2 ) by L107 , L113 , L57;
+L119: ( D20 . D2 ) = ( ( D19 . D1 ) mod ( D19 . D2 ) ) by L107 , L111 , L51;
+L120: (( D19 . D1 ) = ( D18 . D1 ) & ( D19 . D2 ) = ( D18 . D2 )) by L107 , L109 , L110 , L44;
+thus L121: thesis by L120 , L107 , L119 , L114 , L118 , L64;
+end;
+L122: (for B16 being ( 0 ) -started (State of ( SCM )) holds (for B17 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B17 implies (for B18 , B19 being Integer holds ((( B16 . D1 ) = B18 & ( B16 . D2 ) = B19 & B18 > B19 & B19 > ( 0 )) implies (( ( Result (B17 , B16) ) . D1 ) = ( B18 gcd B19 ) & (ex R3 being (Element of ( NAT )) st B17 halts_at ( IC ( Comput (B17 , B16 , R3) ) ))))))))
+proof
+let C16 being ( 0 ) -started (State of ( SCM ));
+let C17 being (Instruction-Sequence of ( SCM ));
+assume that
+L123: ( Euclide-Algorithm ) c= C17;
+deffunc H1((Element of ( NAT ))) = ( abs ( ( Comput (C17 , C16 , ( 4 * $1 )) ) . D2 ) );
+deffunc H2((Element of ( NAT ))) = ( abs ( ( Comput (C17 , C16 , ( 4 * $1 )) ) . D1 ) );
+let C18 , C19 being Integer;
+assume that
+L124: ( C16 . D1 ) = C18
+and
+L125: ( C16 . D2 ) = C19
+and
+L126: C18 > C19
+and
+L127: C19 > ( 0 );
+L128:
+now
+let R3 being (Element of ( NAT ));
+L129: (( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D2 ) > ( 0 ) or ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D2 ) = ( 0 )) by L123 , L124 , L125 , L126 , L127 , L78;
+assume L130: H1(R3) > ( 0 );
+thus L131: H2(( R3 + 1 )) = H1(R3) by L130 , L123 , L124 , L125 , L126 , L127 , L129 , L106 , ABSVALUE:2;
+L132: ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D1 ) >= ( 0 ) by L123 , L124 , L125 , L126 , L127 , L78;
+L133: ( ( Comput (C17 , C16 , ( 4 * ( R3 + 1 ) )) ) . D2 ) >= ( 0 ) by L123 , L124 , L125 , L126 , L127 , L78;
+thus L134: H1(( R3 + 1 )) = ( ( Comput (C17 , C16 , ( 4 * ( R3 + 1 ) )) ) . D2 ) by L133 , ABSVALUE:def 1
+.= ( ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D1 ) mod ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D2 ) ) by L123 , L124 , L125 , L126 , L127 , L129 , L130 , L106 , ABSVALUE:2
+.= ( H2(R3) mod H1(R3) ) by L129 , L132 , INT_2:32;
+end;
+reconsider D22 = C18 , D23 = C19 as (Element of ( NAT )) by L126 , L127 , INT_1:3;
+L135: D23 < D22 by L126;
+L136: H2(( 0 )) = ( abs C18 ) by L124 , EXTPRO_1:2
+.= D22 by ABSVALUE:def 1;
+L137: H1(( 0 )) = ( abs C19 ) by L125 , EXTPRO_1:2
+.= D23 by ABSVALUE:def 1;
+L138: ( 0 ) < D23 by L127;
+consider R3 being (Element of ( NAT )) such that L139: H2(R3) = ( D22 gcd D23 ) and L140: H1(R3) = ( 0 ) from NEWTON:sch 1(L138 , L135 , L136 , L137 , L128);
+L141: ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D1 ) > ( 0 ) by L123 , L124 , L125 , L126 , L127 , L78;
+L142: ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D2 ) = ( 0 ) by L140 , ABSVALUE:2;
+L143: ( IC ( Comput (C17 , C16 , ( 4 * R3 )) ) ) = 4 by L142 , L123 , L124 , L125 , L126 , L127 , L78;
+L144: C17 halts_at 4 by L123 , L14;
+thus L145: ( ( Result (C17 , C16) ) . D1 ) = ( ( Comput (C17 , C16 , ( 4 * R3 )) ) . D1 ) by L144 , L143 , EXTPRO_1:18
+.= ( C18 gcd C19 ) by L139 , L141 , ABSVALUE:def 1;
+thus L146: thesis by L143 , L144;
+end;
+theorem
+L147: (for B20 being ( 0 ) -started (State of ( SCM )) holds (for B21 being (Instruction-Sequence of ( SCM )) holds (( Euclide-Algorithm ) c= B21 implies (for B22 , B23 being Integer holds ((( B20 . ( dl. ( 0 ) ) ) = B22 & ( B20 . ( dl. 1 ) ) = B23 & B22 > ( 0 ) & B23 > ( 0 )) implies ( ( Result (B21 , B20) ) . ( dl. ( 0 ) ) ) = ( B22 gcd B23 ))))))
+proof
+let C20 being ( 0 ) -started (State of ( SCM ));
+let C21 being (Instruction-Sequence of ( SCM ));
+assume that
+L148: ( Euclide-Algorithm ) c= C21;
+let C22 , C23 being Integer;
+assume that
+L149: (( C20 . D1 ) = C22 & ( C20 . D2 ) = C23)
+and
+L150: C22 > ( 0 )
+and
+L151: C23 > ( 0 );
+L152: ( abs C23 ) = C23 by L151 , ABSVALUE:def 1;
+L153:
+now
+per cases  by XXREAL_0:1;
+case L154: C22 > C23;
+thus L155: thesis by L154 , L148 , L149 , L151 , L122;
+end;
+case L156: C22 = C23;
+reconsider D24 = C22 , D25 = C23 as (Element of ( NAT )) by L150 , L151 , INT_1:3;
+take D26 = ( Comput (C21 , C20 , 4) );
+L157: C20 = ( Comput (C21 , C20 , ( 4 * ( 0 ) )) ) by EXTPRO_1:2;
+L158: D26 = ( Comput (C21 , C20 , ( 4 * ( ( 0 ) + 1 ) )) );
+L159: ( C22 mod C23 ) = ( D24 mod D25 )
+.= ( 0 ) by L156 , NAT_D:25;
+L160: ( D26 . D2 ) = ( 0 ) by L159 , L148 , L149 , L150 , L151 , L157 , L158 , L106;
+L161: ( IC D26 ) = 4 by L160 , L148 , L149 , L150 , L151 , L158 , L78;
+L162: C21 halts_at ( IC D26 ) by L161 , L148 , L14;
+thus L163: ( ( Result (C21 , C20) ) . D1 ) = ( D26 . D1 ) by L162 , EXTPRO_1:18
+.= C23 by L148 , L149 , L150 , L151 , L157 , L158 , L106
+.= ( C22 gcd C23 ) by L152 , L156 , NAT_D:32;
+end;
+case L164: C23 > C22;
+reconsider D27 = C22 , D28 = C23 as (Element of ( NAT )) by L150 , L151 , INT_1:3;
+take D29 = ( Comput (C21 , C20 , 4) );
+L165: D29 = ( Comput (C21 , C20 , ( 4 * ( ( 0 ) + 1 ) )) );
+L166: C20 = ( Comput (C21 , C20 , ( 4 * ( 0 ) )) ) by EXTPRO_1:2;
+L167: ( D29 . D1 ) = C23 by L166 , L148 , L149 , L150 , L151 , L165 , L106;
+L168: ( C22 mod C23 ) = ( D27 mod D28 )
+.= D27 by L164 , NAT_D:24;
+L169: ( D29 . D2 ) = C22 by L168 , L148 , L149 , L150 , L151 , L166 , L165 , L106;
+L170: ( IC D29 ) = ( 0 ) by L169 , L148 , L149 , L150 , L151 , L165 , L78;
+L171: D29 is ( 0 ) -started by L170 , MEMSTR_0:def 12;
+consider C24 being (Element of ( NAT )) such that L172: C21 halts_at ( IC ( Comput (C21 , D29 , C24) ) ) by L171 , L150 , L164 , L167 , L169 , L148 , L122;
+L173: C21 halts_at ( IC ( Comput (C21 , C20 , ( C24 + 4 )) ) ) by L172 , EXTPRO_1:4;
+L174: ( ( Result (C21 , D29) ) . D1 ) = ( C22 gcd C23 ) by L150 , L164 , L167 , L169 , L171 , L148 , L122;
+thus L175: thesis by L174 , L173 , EXTPRO_1:21;
+end;
+end;
+thus L177: thesis by L153;
+end;
+definition
+func Euclide-Function -> (PartFunc of ( FinPartSt ( SCM ) ) , ( FinPartSt ( SCM ) )) means 
+:L178: (for B24 , B25 being (FinPartState of ( SCM )) holds ([ B24 , B25 ] in it iff (ex B26 , B27 being Integer st (B26 > ( 0 ) & B27 > ( 0 ) & B24 = ( (( dl. ( 0 ) ) , ( dl. 1 )) --> (B26 , B27) ) & B25 = ( ( dl. ( 0 ) ) .--> ( B26 gcd B27 ) )))));
+existence
+proof
+defpred S3[ set , set ] means (ex B28 , B29 being Integer st (B28 > ( 0 ) & B29 > ( 0 ) & $1 = ( (D1 , D2) --> (B28 , B29) ) & $2 = ( D1 .--> ( B28 gcd B29 ) )));
+L179: (for B30 , B31 , B32 being set holds ((S3[ B30 , B31 ] & S3[ B30 , B32 ]) implies B31 = B32))
+proof
+let C25 , C26 , C27 being set;
+given C28 , C29 being Integer such that
+L180: C28 > ( 0 )
+and
+L181: C29 > ( 0 )
+and
+L182: C25 = ( (D1 , D2) --> (C28 , C29) )
+and
+L183: C26 = ( D1 .--> ( C28 gcd C29 ) );
+
+given C30 , C31 being Integer such that
+L184: C30 > ( 0 )
+and
+L185: C31 > ( 0 )
+and
+L186: C25 = ( (D1 , D2) --> (C30 , C31) )
+and
+L187: C27 = ( D1 .--> ( C30 gcd C31 ) );
+
+L188: C29 = ( ( (D1 , D2) --> (C28 , C29) ) . D2 ) by FUNCT_4:63
+.= C31 by L182 , L186 , FUNCT_4:63;
+L189: C28 = ( ( (D1 , D2) --> (C28 , C29) ) . D1 ) by AMI_3:10 , FUNCT_4:63
+.= C30 by L182 , L186 , AMI_3:10 , FUNCT_4:63;
+thus L190: thesis by L189 , L183 , L187 , L188;
+end;
+consider C32 being Function such that L191: (for B33 , B34 being set holds ([ B33 , B34 ] in C32 iff (B33 in ( FinPartSt ( SCM ) ) & S3[ B33 , B34 ]))) from FUNCT_1:sch 1(L179);
+L192: ( rng C32 ) c= ( FinPartSt ( SCM ) )
+proof
+let C33 being set;
+assume L193: C33 in ( rng C32 );
+consider C34 being set such that L194: [ C34 , C33 ] in C32 by L193 , XTUPLE_0:def 13;
+L195: (ex B35 , B36 being Integer st (B35 > ( 0 ) & B36 > ( 0 ) & C34 = ( (D1 , D2) --> (B35 , B36) ) & C33 = ( D1 .--> ( B35 gcd B36 ) ))) by L191 , L194;
+thus L196: thesis by L195 , MEMSTR_0:75;
+end;
+L197: ( dom C32 ) c= ( FinPartSt ( SCM ) )
+proof
+let C35 being set;
+assume L198: C35 in ( dom C32 );
+L199: [ C35 , ( C32 . C35 ) ] in C32 by L198 , FUNCT_1:1;
+thus L200: thesis by L199 , L191;
+end;
+reconsider D30 = C32 as (PartFunc of ( FinPartSt ( SCM ) ) , ( FinPartSt ( SCM ) )) by L197 , L192 , RELSET_1:4;
+take D30;
+let C36 , C37 being (FinPartState of ( SCM ));
+thus L201: ([ C36 , C37 ] in D30 implies (ex B37 , B38 being Integer st (B37 > ( 0 ) & B38 > ( 0 ) & C36 = ( (D1 , D2) --> (B37 , B38) ) & C37 = ( D1 .--> ( B37 gcd B38 ) )))) by L191;
+given C38 , C39 being Integer such that
+L202: (C38 > ( 0 ) & C39 > ( 0 ) & C36 = ( (D1 , D2) --> (C38 , C39) ) & C37 = ( D1 .--> ( C38 gcd C39 ) ));
+
+L203: C36 in ( FinPartSt ( SCM ) ) by MEMSTR_0:75;
+thus L204: thesis by L203 , L191 , L202;
+end;
+uniqueness
+proof
+defpred S4[ set , set ] means (ex B39 , B40 being Integer st (B39 > ( 0 ) & B40 > ( 0 ) & $1 = ( (D1 , D2) --> (B39 , B40) ) & $2 = ( D1 .--> ( B39 gcd B40 ) )));
+let C40 , C41 being (PartFunc of ( FinPartSt ( SCM ) ) , ( FinPartSt ( SCM ) ));
+assume that
+L205: (for B41 , B42 being (FinPartState of ( SCM )) holds ([ B41 , B42 ] in C40 iff S4[ B41 , B42 ]))
+and
+L206: (for B43 , B44 being (FinPartState of ( SCM )) holds ([ B43 , B44 ] in C41 iff S4[ B43 , B44 ]));
+L207: (for B45 , B46 being (Element of ( FinPartSt ( SCM ) )) holds ([ B45 , B46 ] in C41 iff S4[ B45 , B46 ]))
+proof
+let C42 , C43 being (Element of ( FinPartSt ( SCM ) ));
+thus L208: ([ C42 , C43 ] in C41 implies S4[ C42 , C43 ])
+proof
+assume L209: [ C42 , C43 ] in C41;
+reconsider D31 = C42 , D32 = C43 as (FinPartState of ( SCM )) by MEMSTR_0:76;
+L210: S4[ D31 , D32 ] by L206 , L209;
+thus L211: thesis by L210;
+end;
+
+thus L212: thesis by L206;
+end;
+L213: (for B47 , B48 being (Element of ( FinPartSt ( SCM ) )) holds ([ B47 , B48 ] in C40 iff S4[ B47 , B48 ]))
+proof
+let C44 , C45 being (Element of ( FinPartSt ( SCM ) ));
+thus L214: ([ C44 , C45 ] in C40 implies S4[ C44 , C45 ])
+proof
+assume L215: [ C44 , C45 ] in C40;
+reconsider D33 = C44 , D34 = C45 as (FinPartState of ( SCM )) by MEMSTR_0:76;
+L216: S4[ D33 , D34 ] by L205 , L215;
+thus L217: thesis by L216;
+end;
+
+thus L218: thesis by L205;
+end;
+thus L219: C40 = C41 from RELSET_1:sch 4(L213 , L207);
+end;
+end;
+theorem
+L221: (for B49 being set holds (B49 in ( dom ( Euclide-Function ) ) iff (ex B50 , B51 being Integer st (B50 > ( 0 ) & B51 > ( 0 ) & B49 = ( (( dl. ( 0 ) ) , ( dl. 1 )) --> (B50 , B51) )))))
+proof
+let C46 being set;
+L222: ( dom ( Euclide-Function ) ) c= ( FinPartSt ( SCM ) ) by RELAT_1:def 18;
+L223: (C46 in ( dom ( Euclide-Function ) ) iff [ C46 , ( ( Euclide-Function ) . C46 ) ] in ( Euclide-Function )) by FUNCT_1:1;
+thus L224:now
+assume L225: C46 in ( dom ( Euclide-Function ) );
+L226: ( ( Euclide-Function ) . C46 ) in ( FinPartSt ( SCM ) ) by L225 , PARTFUN1:4;
+L227: ( ( Euclide-Function ) . C46 ) is (FinPartState of ( SCM )) by L226 , MEMSTR_0:76;
+L228: C46 is (FinPartState of ( SCM )) by L222 , L225 , MEMSTR_0:76;
+L229: (ex B52 , B53 being Integer st (B52 > ( 0 ) & B53 > ( 0 ) & C46 = ( (D1 , D2) --> (B52 , B53) ) & ( ( Euclide-Function ) . C46 ) = ( D1 .--> ( B52 gcd B53 ) ))) by L228 , L223 , L225 , L227 , L178;
+thus L230: (ex B54 , B55 being Integer st (B54 > ( 0 ) & B55 > ( 0 ) & C46 = ( (D1 , D2) --> (B54 , B55) ))) by L229;
+end;
+given C47 , C48 being Integer such that
+L231: (C47 > ( 0 ) & C48 > ( 0 ) & C46 = ( (D1 , D2) --> (C47 , C48) ));
+
+L232: [ C46 , ( D1 .--> ( C47 gcd C48 ) ) ] in ( Euclide-Function ) by L231 , L178;
+thus L233: thesis by L232 , FUNCT_1:1;
+end;
+theorem
+L234: (for B56 , B57 being Integer holds ((B56 > ( 0 ) & B57 > ( 0 )) implies ( ( Euclide-Function ) . ( (( dl. ( 0 ) ) , ( dl. 1 )) --> (B56 , B57) ) ) = ( ( dl. ( 0 ) ) .--> ( B56 gcd B57 ) )))
+proof
+let C49 , C50 being Integer;
+assume L235: (C49 > ( 0 ) & C50 > ( 0 ));
+L236: [ ( (D1 , D2) --> (C49 , C50) ) , ( D1 .--> ( C49 gcd C50 ) ) ] in ( Euclide-Function ) by L235 , L178;
+thus L237: thesis by L236 , FUNCT_1:1;
+end;
+registration
+cluster ( Euclide-Algorithm ) -> (the InstructionsF of ( SCM )) -valued;
+coherence;
+end;
+registration
+cluster ( Euclide-Algorithm ) -> non  halt-free;
+coherence
+proof
+L239: ( rng ( 4 .--> ( halt ( SCM ) ) ) ) = { ( halt ( SCM ) ) } by FUNCOP_1:8;
+L240: ( halt ( SCM ) ) in ( rng ( 4 .--> ( halt ( SCM ) ) ) ) by L239 , TARSKI:def 1;
+L241: ( rng ( 4 .--> ( halt ( SCM ) ) ) ) c= ( rng ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) by FUNCT_4:18;
+L242: ( halt ( SCM ) ) in ( rng ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) by L241 , L240;
+L243: ( rng ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) c= ( rng ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) by FUNCT_4:18;
+L244: ( halt ( SCM ) ) in ( rng ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) by L243 , L242;
+L245: ( rng ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) c= ( rng ( ( 1 .--> ( Divide (( dl. ( 0 ) ) , ( dl. 1 )) ) ) +* ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) ) by FUNCT_4:18;
+L246: ( halt ( SCM ) ) in ( rng ( ( 1 .--> ( Divide (( dl. ( 0 ) ) , ( dl. 1 )) ) ) +* ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) ) by L245 , L244;
+L247: ( rng ( ( 1 .--> ( Divide (( dl. ( 0 ) ) , ( dl. 1 )) ) ) +* ( ( 2 .--> ( ( dl. ( 0 ) ) := ( dl. 2 ) ) ) +* ( ( 3 .--> ( ( dl. 1 ) >0_goto ( 0 ) ) ) +* ( 4 .--> ( halt ( SCM ) ) ) ) ) ) ) c= ( rng ( Euclide-Algorithm ) ) by FUNCT_4:18;
+L248: ( halt ( SCM ) ) in ( rng ( Euclide-Algorithm ) ) by L247 , L246;
+thus L249: thesis by L248 , COMPOS_1:def 11;
+end;
+end;
+theorem
+L251: ( Euclide-Algorithm ) , ( Start-At (( 0 ) , ( SCM )) ) computes ( Euclide-Function )
+proof
+set D35 = ( Euclide-Algorithm );
+set D36 = ( Start-At (( 0 ) , ( SCM )) );
+let C51 being set;
+L252: ( DataPart D36 ) = ( {} ) by MEMSTR_0:20;
+L253: ( dom ( DataPart D36 ) ) = ( {} ) by L252;
+assume L254: C51 in ( dom ( Euclide-Function ) );
+consider C52 , C53 being Integer such that L255: C52 > ( 0 ) and L256: C53 > ( 0 ) and L257: C51 = ( (D1 , D2) --> (C52 , C53) ) by L254 , L221;
+L258: C51 = ( ( D1 .--> C52 ) +* ( D2 .--> C53 ) ) by L257;
+reconsider D37 = C51 as (FinPartState of ( SCM )) by L258;
+consider C54 being (State of ( SCM )) such that L259: ( D36 +* D37 ) c= C54 by PBOOLE:141;
+consider C55 being (Instruction-Sequence of ( SCM )) such that L260: D35 c= C55 by PBOOLE:145;
+L261: ( dom D37 ) = { D1 , D2 } by L257 , FUNCT_4:62;
+L262: D2 in ( dom D37 ) by L261 , TARSKI:def 2;
+L263: D1 in ( dom D37 ) by L261 , TARSKI:def 2;
+L264: (for B58 being (State of ( SCM )) holds (( D36 +* D37 ) c= B58 implies (( B58 . D1 ) = C52 & ( B58 . D2 ) = C53)))
+proof
+let C56 being (State of ( SCM ));
+assume L265: ( D36 +* D37 ) c= C56;
+L266: D37 c= ( D36 +* D37 ) by FUNCT_4:25;
+L267: D37 c= C56 by L266 , L265 , XBOOLE_1:1;
+thus L268: ( C56 . D1 ) = ( D37 . D1 ) by L267 , L263 , GRFUNC_1:2
+.= C52 by L257 , AMI_3:10 , FUNCT_4:63;
+thus L269: ( C56 . D2 ) = ( D37 . D2 ) by L262 , L267 , GRFUNC_1:2
+.= C53 by L257 , FUNCT_4:63;
+end;
+L270: ( dom D36 ) = { ( IC ( SCM ) ) } by FUNCOP_1:13;
+L271:
+now
+assume L272: ( dom D36 ) meets ( dom D37 );
+consider C57 being set such that L273: C57 in ( dom D36 ) and L274: C57 in ( dom D37 ) by L272 , XBOOLE_0:3;
+L275: (C57 = ( IC ( SCM ) ) or C57 = ( 0 ) or C57 = 1 or C57 = 2 or C57 = 3 or C57 = 4) by L270 , L273 , TARSKI:def 1;
+L276: (C57 = D1 or C57 = D2) by L261 , L274 , TARSKI:def 2;
+thus L277: contradiction by L276 , L275 , AMI_3:12 , AMI_3:13;
+end;
+L278: D36 c= ( D36 +* D37 ) by L271 , FUNCT_4:32;
+L279: ( IC ( SCM ) ) in ( dom D36 ) by L270 , TARSKI:def 1;
+L280: ( ( dom D36 ) /\ ( dom D37 ) ) = ( {} ) by L271 , XBOOLE_0:def 7;
+L281: (not ( IC ( SCM ) ) in ( dom D37 )) by L280 , L279 , XBOOLE_0:def 4;
+set D38 = { ( IC ( SCM ) ) , D1 , D2 };
+set D39 = 5;
+L282: ( dom ( D36 +* D37 ) ) = ( dom ( D36 +* D37 ) )
+.= ( ( dom D36 ) \/ ( dom D37 ) ) by FUNCT_4:def 1
+.= ( ( { ( IC ( SCM ) ) } \/ ( dom ( DataPart D36 ) ) ) \/ ( dom D37 ) ) by L279 , MEMSTR_0:24
+.= ( { ( IC ( SCM ) ) } \/ { D1 , D2 } ) by L257 , L253 , FUNCT_4:62
+.= D38 by ENUMSET1:2;
+L283: ( dom D36 ) c= ( dom ( D36 +* D37 ) ) by L278 , RELAT_1:11;
+L284: ( IC ( D36 +* D37 ) ) = ( IC D36 ) by L281 , FUNCT_4:11
+.= ( 0 ) by FUNCOP_1:72;
+L285: ( D36 +* D37 ) is ( 0 ) -started by L284 , L283 , L279 , MEMSTR_0:def 11;
+L286: C54 is ( 0 ) -started by L285 , L259 , MEMSTR_0:17;
+L287: ( D36 +* D37 ) is D35 -autonomic
+proof
+set D40 = { ( IC ( SCM ) ) , D1 , D2 };
+set D41 = 5;
+let C58 , C59 being (Instruction-Sequence of ( SCM ));
+assume that
+L288: D35 c= C58
+and
+L289: D35 c= C59;
+let C60 , C61 being (State of ( SCM ));
+assume that
+L290: ( D36 +* D37 ) c= C60
+and
+L291: ( D36 +* D37 ) c= C61;
+L292: (( C61 . D1 ) = C52 & ( C61 . D2 ) = C53) by L264 , L291;
+let R3 being (Element of ( NAT ));
+defpred S5[ (Element of ( NAT )) ] means (( IC ( Comput (C58 , C60 , $1) ) ) = ( IC ( Comput (C59 , C61 , $1) ) ) & ( ( Comput (C58 , C60 , $1) ) . D1 ) = ( ( Comput (C59 , C61 , $1) ) . D1 ) & ( ( Comput (C58 , C60 , $1) ) . D2 ) = ( ( Comput (C59 , C61 , $1) ) . D2 ));
+L293: (( Comput (C58 , C60 , ( 0 )) ) = C60 & ( Comput (C59 , C61 , ( 0 )) ) = C61) by EXTPRO_1:2;
+L294: C60 is ( 0 ) -started by L285 , L290 , MEMSTR_0:17;
+L295: ( dom ( Comput (C58 , C60 , R3) ) ) = (the carrier of ( SCM )) by PARTFUN1:def 2
+.= ( dom ( Comput (C59 , C61 , R3) ) ) by PARTFUN1:def 2;
+L296: C61 is ( 0 ) -started by L285 , L291 , MEMSTR_0:17;
+L297: (for B59 , B60 being Nat holds ((S5[ ( 4 * B59 ) ] & B60 <> ( 0 ) & B60 <= 4) implies S5[ ( ( 4 * B59 ) + B60 ) ]))
+proof
+let C62 , C63 being Nat;
+assume that
+L298: ( IC ( Comput (C58 , C60 , ( 4 * C62 )) ) ) = ( IC ( Comput (C59 , C61 , ( 4 * C62 )) ) )
+and
+L299: ( ( Comput (C58 , C60 , ( 4 * C62 )) ) . D1 ) = ( ( Comput (C59 , C61 , ( 4 * C62 )) ) . D1 )
+and
+L300: ( ( Comput (C58 , C60 , ( 4 * C62 )) ) . D2 ) = ( ( Comput (C59 , C61 , ( 4 * C62 )) ) . D2 );
+L301: C62 in ( NAT ) by ORDINAL1:def 12;
+assume L302: (C63 <> ( 0 ) & C63 <= 4);
+L303: (C63 = 1 or C63 = 2 or C63 = 3 or C63 = 4) by L302 , NAT_1:28;
+per cases  by L255 , L256 , L296 , L289 , L292 , L301 , L78;
+suppose L304: ( IC ( Comput (C59 , C61 , ( 4 * C62 )) ) ) = ( 0 );
+
+L305: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . D1 ) = ( ( Comput (C58 , C60 , ( 4 * C62 )) ) . D1 ) by L288 , L298 , L304 , L44
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 1 )) ) . D1 ) by L289 , L299 , L304 , L44;
+L306: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . ( dl. 2 ) ) = ( ( Comput (C58 , C60 , ( 4 * C62 )) ) . D2 ) by L288 , L298 , L304 , L44
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 1 )) ) . ( dl. 2 ) ) by L289 , L300 , L304 , L44;
+L307: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . D2 ) = ( ( Comput (C58 , C60 , ( 4 * C62 )) ) . D2 ) by L288 , L298 , L304 , L44
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 1 )) ) . D2 ) by L289 , L300 , L304 , L44;
+L308: ( ( ( 4 * C62 ) + 1 ) + 1 ) = ( ( 4 * C62 ) + ( 1 + 1 ) );
+L309: ( ( ( 4 * C62 ) + 2 ) + 1 ) = ( ( 4 * C62 ) + ( 2 + 1 ) );
+L310: ( IC ( Comput (C59 , C61 , ( ( 4 * C62 ) + 1 )) ) ) = 1 by L289 , L304 , L44;
+L311: ( IC ( Comput (C59 , C61 , ( ( 4 * C62 ) + 2 )) ) ) = 2 by L310 , L289 , L308 , L51;
+L312: ( IC ( Comput (C59 , C61 , ( ( 4 * C62 ) + 3 )) ) ) = 3 by L311 , L289 , L309 , L57;
+L313: ( IC ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) ) = 1 by L288 , L298 , L304 , L44;
+L314: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 2 )) ) . ( dl. 2 ) ) = ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . ( dl. 2 ) ) by L313 , L288 , L308 , L51
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 2 )) ) . ( dl. 2 ) ) by L289 , L308 , L310 , L306 , L51;
+L315: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 2 )) ) . D2 ) = ( ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . D1 ) mod ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . D2 ) ) by L288 , L308 , L313 , L51
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 2 )) ) . D2 ) by L289 , L308 , L310 , L305 , L307 , L51;
+L316: ( IC ( Comput (C58 , C60 , ( ( 4 * C62 ) + 2 )) ) ) = 2 by L288 , L308 , L313 , L51;
+L317: ( IC ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) ) = 3 by L316 , L288 , L309 , L57;
+L318: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 2 )) ) . D1 ) = ( ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . D1 ) div ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 1 )) ) . D2 ) ) by L288 , L308 , L313 , L51
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 2 )) ) . D1 ) by L289 , L308 , L310 , L305 , L307 , L51;
+L319: ( ( ( 4 * C62 ) + 3 ) + 1 ) = ( ( 4 * C62 ) + ( 3 + 1 ) );
+L320: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) . D1 ) = ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 2 )) ) . ( dl. 2 ) ) by L288 , L309 , L316 , L57
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 3 )) ) . D1 ) by L289 , L309 , L311 , L314 , L57;
+L321: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) . D2 ) = ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 2 )) ) . D2 ) by L288 , L309 , L316 , L57
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 3 )) ) . D2 ) by L289 , L309 , L311 , L315 , L57;
+L322: (( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) . D2 ) <= ( 0 ) or ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) . D2 ) > ( 0 ));
+L323: ((( IC ( Comput (C58 , C60 , ( ( 4 * C62 ) + 4 )) ) ) = 4 & ( IC ( Comput (C59 , C61 , ( ( 4 * C62 ) + 4 )) ) ) = 4) or (( IC ( Comput (C58 , C60 , ( ( 4 * C62 ) + 4 )) ) ) = ( 0 ) & ( IC ( Comput (C59 , C61 , ( ( 4 * C62 ) + 4 )) ) ) = ( 0 ))) by L322 , L288 , L289 , L319 , L317 , L312 , L321 , L64;
+thus L324: ( IC ( Comput (C58 , C60 , ( ( 4 * C62 ) + C63 )) ) ) = ( IC ( Comput (C59 , C61 , ( ( 4 * C62 ) + C63 )) ) ) by L323 , L303 , L313 , L289 , L304 , L44 , L288 , L308 , L51 , L311 , L317 , L309 , L57;
+L325: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 4 )) ) . D1 ) = ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) . D1 ) by L288 , L319 , L317 , L64
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 4 )) ) . D1 ) by L289 , L319 , L312 , L320 , L64;
+thus L326: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + C63 )) ) . D1 ) = ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + C63 )) ) . D1 ) by L325 , L303 , L305 , L318 , L320;
+L327: ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 4 )) ) . D2 ) = ( ( Comput (C58 , C60 , ( ( 4 * C62 ) + 3 )) ) . D2 ) by L288 , L319 , L317 , L64
+.= ( ( Comput (C59 , C61 , ( ( 4 * C62 ) + 4 )) ) . D2 ) by L289 , L319 , L312 , L321 , L64;
+thus L328: thesis by L327 , L303 , L307 , L315 , L321;
+end;
+suppose L329: ( IC ( Comput (C59 , C61 , ( 4 * C62 )) ) ) = 4;
+
+L330: C58 halts_at ( IC ( Comput (C58 , C60 , ( 4 * C62 )) ) ) by L329 , L288 , L298 , L14;
+L331: ( Comput (C58 , C60 , ( ( 4 * C62 ) + C63 )) ) = ( Comput (C58 , C60 , ( 4 * C62 )) ) by L330 , EXTPRO_1:20 , NAT_1:11;
+L332: C59 halts_at ( IC ( Comput (C59 , C61 , ( 4 * C62 )) ) ) by L289 , L329 , L14;
+thus L333: thesis by L332 , L298 , L299 , L300 , L331 , EXTPRO_1:20 , NAT_1:11;
+end;
+end;
+L335: ( ( Comput (C58 , C60 , ( 0 )) ) . ( IC ( SCM ) ) ) = ( IC C60 ) by EXTPRO_1:2
+.= ( 0 ) by L294 , MEMSTR_0:def 11
+.= ( IC C61 ) by L296 , MEMSTR_0:def 11
+.= ( ( Comput (C59 , C61 , ( 0 )) ) . ( IC ( SCM ) ) ) by EXTPRO_1:2;
+L336: S5[ ( 0 ) ] by L335 , L264 , L290 , L292 , L293;
+L337: 4 > ( 0 );
+L338: S5[ R3 ] from NAT_D:sch 2(L336 , L337 , L297);
+thus L339: thesis by L338 , L282 , L295 , GRFUNC_1:31;
+end;
+take D37;
+thus L340: C51 = D37;
+L341: ( D36 +* D37 ) is D35 -halted
+proof
+reconsider D42 = C52 , D43 = C53 as (Element of ( NAT )) by L255 , L256 , INT_1:3;
+let C64 being (State of ( SCM ));
+assume L342: ( D36 +* D37 ) c= C64;
+let C65 being (Instruction-Sequence of ( SCM ));
+assume that
+L343: D35 c= C65;
+set D44 = ( Comput (C65 , C64 , 4) );
+L344: ( C64 . D2 ) = C53 by L264 , L342;
+L345: (C64 is ( 0 ) -started & ( C64 . D1 ) = C52) by L285 , L264 , L342 , MEMSTR_0:17;
+per cases  by XXREAL_0:1;
+suppose L346: C52 > C53;
+
+L347: (ex R3 being (Element of ( NAT )) st C65 halts_at ( IC ( Comput (C65 , C64 , R3) ) )) by L346 , L256 , L343 , L345 , L344 , L122;
+thus L348: thesis by L347 , EXTPRO_1:16;
+end;
+suppose L349: C52 = C53;
+
+L350: ( C52 mod C53 ) = ( D42 mod D43 )
+.= ( 0 ) by L349 , NAT_D:25;
+L351: D44 = ( Comput (C65 , C64 , ( 4 * ( ( 0 ) + 1 ) )) );
+L352: C64 = ( Comput (C65 , C64 , ( 4 * ( 0 ) )) ) by EXTPRO_1:2;
+L353: ( D44 . D2 ) = ( ( C64 . D1 ) mod ( C64 . D2 ) ) by L352 , L255 , L256 , L343 , L345 , L344 , L351 , L106;
+L354: ( IC D44 ) = 4 by L353 , L255 , L256 , L343 , L345 , L344 , L350 , L351 , L78;
+L355: C65 halts_at ( IC D44 ) by L354 , L343 , L14;
+thus L356: thesis by L355 , EXTPRO_1:16;
+end;
+suppose L357: C52 < C53;
+
+L358: D44 = ( Comput (C65 , C64 , ( 4 * ( ( 0 ) + 1 ) )) );
+L359: C64 = ( Comput (C65 , C64 , ( 4 * ( 0 ) )) ) by EXTPRO_1:2;
+L360: ( C52 mod C53 ) = ( D42 mod D43 )
+.= D42 by L357 , NAT_D:24;
+L361: ( D44 . D2 ) = C52 by L360 , L255 , L256 , L343 , L345 , L344 , L359 , L358 , L106;
+L362: ( IC D44 ) = ( 0 ) by L361 , L255 , L256 , L343 , L345 , L344 , L358 , L78;
+L363: D44 is ( 0 ) -started by L362 , MEMSTR_0:def 12;
+L364: ( D44 . D1 ) = C53 by L255 , L256 , L343 , L345 , L344 , L359 , L358 , L106;
+consider C66 being (Element of ( NAT )) such that L365: C65 halts_at ( IC ( Comput (C65 , D44 , C66) ) ) by L364 , L255 , L357 , L361 , L363 , L343 , L122;
+L366: C65 halts_at ( IC ( Comput (C65 , C64 , ( C66 + 4 )) ) ) by L365 , EXTPRO_1:4;
+thus L367: thesis by L366 , EXTPRO_1:16;
+end;
+end;
+thus L369: ( D36 +* D37 ) is (Autonomy of D35) by L287 , L341 , EXTPRO_1:def 12;
+L370: ( Result (D35 , ( D36 +* D37 )) ) = ( ( Result (C55 , C54) ) | ( dom ( D36 +* D37 ) ) ) by L369 , L260 , L259 , EXTPRO_1:def 13;
+L371: D1 in (the carrier of ( SCM ));
+L372: D1 in ( dom ( Result (C55 , C54) ) ) by L371 , PARTFUN1:def 2;
+L373: ( D37 . D1 ) = C52 by L257 , AMI_3:10 , FUNCT_4:63;
+L374: ( D37 . D2 ) = C53 by L257 , FUNCT_4:63;
+L375: D37 c= ( D36 +* D37 ) by FUNCT_4:25;
+L376: ( dom D37 ) c= ( dom ( D36 +* D37 ) ) by L375 , RELAT_1:11;
+L377: D37 c= C54 by L375 , L259 , XBOOLE_1:1;
+L378: ( dom D37 ) = { D1 , D2 } by L257 , FUNCT_4:62;
+L379: D2 in ( dom D37 ) by L378 , TARSKI:def 2;
+L380: ( C54 . D2 ) = C53 by L377 , L374 , L379 , GRFUNC_1:2;
+L381: D1 in ( dom D37 ) by L378 , TARSKI:def 2;
+L382: ( C54 . D1 ) = C52 by L377 , L373 , L381 , GRFUNC_1:2;
+L383: ( ( Result (C55 , C54) ) . D1 ) = ( C52 gcd C53 ) by L382 , L255 , L256 , L286 , L380 , L147 , L260;
+L384: ( dom ( D1 .--> ( C52 gcd C53 ) ) ) = { D1 } by FUNCOP_1:13;
+L385: ( dom ( D1 .--> ( C52 gcd C53 ) ) ) c= ( dom D37 ) by L378 , L384 , ZFMISC_1:7;
+L386: ( dom ( D1 .--> ( C52 gcd C53 ) ) ) c= ( dom ( D36 +* D37 ) ) by L385 , L376 , XBOOLE_1:1;
+L387: ( D1 .--> ( C52 gcd C53 ) ) c= ( ( Result (C55 , C54) ) | ( dom ( D36 +* D37 ) ) ) by L386 , L372 , L383 , FUNCT_4:85 , RELAT_1:151;
+thus L388: ( ( Euclide-Function ) . D37 ) c= ( Result (D35 , ( D36 +* D37 )) ) by L387 , L370 , L255 , L256 , L257 , L234;
+end;

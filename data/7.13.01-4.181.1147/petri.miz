@@ -1,0 +1,682 @@
+:: Basic Petri Net Concepts.
+:: Place/Transition Net Structure, Deadlocks, Traps, Dual Nets
+::  by Pauline N. Kawamoto, Yasushi Fuwa and Yatsuka Nakamura
+::
+:: Received November 27, 1992
+:: Copyright (c) 1992-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies XBOOLE_0, RELAT_1, SUBSET_1, ZFMISC_1, MCART_1, ARYTM_3, TARSKI,
+      PETRI, STRUCT_0, PNPROC_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1,
+      XTUPLE_0, SUBSET_1, RELAT_1, RELSET_1, MCART_1,
+      DOMAIN_1, PARTIT_2, STRUCT_0;
+ constructors RELSET_1, DOMAIN_1, STRUCT_0, PARTIT_2, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, STRUCT_0, PARTIT_2, RELAT_1,
+      XTUPLE_0;
+ requirements SUBSET, BOOLE;
+ definitions TARSKI, XBOOLE_0, STRUCT_0, PARTIT_2, XTUPLE_0;
+ theorems SUBSET_1, MCART_1, TARSKI, ZFMISC_1, RELAT_1, XBOOLE_0;
+ schemes DOMAIN_1;
+
+begin
+definition
+let C1 , C2 being non  empty set;
+let C3 being non  empty (Relation of C1 , C2);
+redefine mode Element of C3
+ -> (Element of [: C1 , C2 :]);
+coherence
+proof
+let C4 being (Element of C3);
+thus L1: thesis;
+end;
+end;
+definition
+struct (2-sorted) PT_net_Str(# carrier , carrier' -> set , S-T_Arcs -> (Relation of the carrier , the carrier') , T-S_Arcs -> (Relation of the carrier' , the carrier) #);
+end;
+definition
+let C5 being PT_net_Str;
+attr C5 is  with_S-T_arc
+means
+:L4: (the S-T_Arcs of C5) is non  empty;
+attr C5 is  with_T-S_arc
+means
+:L5: (the T-S_Arcs of C5) is non  empty;
+end;
+definition
+func TrivialPetriNet -> PT_net_Str equals 
+PT_net_Str (# { ( {} ) } , { ( {} ) } , ( [#] ({ ( {} ) } , { ( {} ) }) ) , ( [#] ({ ( {} ) } , { ( {} ) }) ) #);
+coherence;
+end;
+registration
+cluster ( TrivialPetriNet ) ->  with_S-T_arc  with_T-S_arc  strict non  empty non  void;
+coherence
+proof
+set D1 = ( TrivialPetriNet );
+thus L8: (the S-T_Arcs of D1) is non  empty;
+thus L9: (the T-S_Arcs of D1) is non  empty;
+thus L10: thesis;
+end;
+end;
+registration
+cluster non  empty non  void  with_S-T_arc  with_T-S_arc  strict for PT_net_Str;
+existence
+proof
+take ( TrivialPetriNet );
+thus L12: thesis;
+end;
+end;
+registration
+let C6 being  with_S-T_arc PT_net_Str;
+cluster (the S-T_Arcs of C6) -> non  empty;
+coherence by L4;
+end;
+registration
+let C7 being  with_T-S_arc PT_net_Str;
+cluster (the T-S_Arcs of C7) -> non  empty;
+coherence by L5;
+end;
+definition
+mode Petri_net
+ is non  empty non  void  with_S-T_arc  with_T-S_arc PT_net_Str;
+end;
+definition
+let R1 being Petri_net;
+mode place of R1
+ is (Element of (the carrier of R1));
+mode places of R1
+ is (Element of (the carrier of R1));
+mode transition of R1
+ is (Element of (the carrier' of R1));
+mode transitions of R1
+ is (Element of (the carrier' of R1));
+mode S-T_arc of R1
+ is (Element of (the S-T_Arcs of R1));
+mode T-S_arc of R1
+ is (Element of (the T-S_Arcs of R1));
+end;
+definition
+let R1 being Petri_net;
+let C8 being (S-T_arc of R1);
+redefine func C8 `1 -> (place of R1);
+
+coherence
+proof
+thus L18: ( C8 `1 ) is (place of R1);
+end;
+redefine func C8 `2 -> (transition of R1);
+
+coherence
+proof
+thus L19: ( C8 `2 ) is (transition of R1);
+end;
+end;
+definition
+let R1 being Petri_net;
+let C9 being (T-S_arc of R1);
+redefine func C9 `1 -> (transition of R1);
+
+coherence
+proof
+thus L21: ( C9 `1 ) is (transition of R1);
+end;
+redefine func C9 `2 -> (place of R1);
+
+coherence
+proof
+thus L22: ( C9 `2 ) is (place of R1);
+end;
+end;
+definition
+let R1 being Petri_net;
+let R2 being (Subset of (the carrier of R1));
+func *' R2 -> (Subset of (the carrier' of R1)) equals 
+{ B1 where B1 is (transition of R1) : (ex B2 being (T-S_arc of R1) st (ex B3 being (place of R1) st (B3 in R2 & B2 = [ B1 , B3 ]))) };
+coherence
+proof
+defpred S1[ set ] means (ex B4 being (T-S_arc of R1) st (ex B5 being (place of R1) st (B5 in R2 & B4 = [ $1 , B5 ])));
+L24: { B6 where B6 is (transition of R1) : S1[ B6 ] } is (Subset of (the carrier' of R1)) from DOMAIN_1:sch 7;
+thus L25: thesis by L24;
+end;
+correctness;
+func R2 *' -> (Subset of (the carrier' of R1)) equals 
+{ B7 where B7 is (transition of R1) : (ex B8 being (S-T_arc of R1) st (ex B9 being (place of R1) st (B9 in R2 & B8 = [ B9 , B7 ]))) };
+coherence
+proof
+defpred S2[ set ] means (ex B10 being (S-T_arc of R1) st (ex B11 being (place of R1) st (B11 in R2 & B10 = [ B11 , $1 ])));
+L26: { B12 where B12 is (transition of R1) : S2[ B12 ] } is (Subset of (the carrier' of R1)) from DOMAIN_1:sch 7;
+thus L27: thesis by L26;
+end;
+correctness;
+end;
+theorem
+L29: (for R1 being Petri_net holds (for R2 being (Subset of (the carrier of R1)) holds ( *' R2 ) = { ( B13 `1 ) where B13 is (T-S_arc of R1) : ( B13 `2 ) in R2 }))
+proof
+let R1 being Petri_net;
+let R2 being (Subset of (the carrier of R1));
+thus L30: ( *' R2 ) c= { ( B14 `1 ) where B14 is (T-S_arc of R1) : ( B14 `2 ) in R2 }
+proof
+let C10 being set;
+assume L31: C10 in ( *' R2 );
+consider C11 being (transition of R1) such that L32: C10 = C11 and L33: (ex B15 being (T-S_arc of R1) st (ex B16 being (place of R1) st (B16 in R2 & B15 = [ C11 , B16 ]))) by L31;
+consider C12 being (T-S_arc of R1), C13 being (place of R1) such that L34: C13 in R2 and L35: C12 = [ C11 , C13 ] by L33;
+L36: (( C12 `1 ) = C11 & ( C12 `2 ) = C13) by L35 , MCART_1:7;
+thus L37: thesis by L36 , L32 , L34;
+end;
+
+let C14 being set;
+assume L38: C14 in { ( B17 `1 ) where B17 is (T-S_arc of R1) : ( B17 `2 ) in R2 };
+consider C15 being (T-S_arc of R1) such that L39: (C14 = ( C15 `1 ) & ( C15 `2 ) in R2) by L38;
+L40: C15 = [ ( C15 `1 ) , ( C15 `2 ) ] by MCART_1:21;
+thus L41: thesis by L40 , L39;
+end;
+theorem
+L42: (for R1 being Petri_net holds (for R2 being (Subset of (the carrier of R1)) holds (for B18 being set holds (B18 in ( *' R2 ) iff (ex B19 being (T-S_arc of R1) st (ex B20 being (place of R1) st (B20 in R2 & B19 = [ B18 , B20 ])))))))
+proof
+let R1 being Petri_net;
+let R2 being (Subset of (the carrier of R1));
+let C16 being set;
+thus L43: (C16 in ( *' R2 ) implies (ex B21 being (T-S_arc of R1) st (ex B22 being (place of R1) st (B22 in R2 & B21 = [ C16 , B22 ]))))
+proof
+assume L44: C16 in ( *' R2 );
+consider C17 being (transition of R1) such that L45: C16 = C17 and L46: (ex B23 being (T-S_arc of R1) st (ex B24 being (place of R1) st (B24 in R2 & B23 = [ C17 , B24 ]))) by L44;
+consider C18 being (T-S_arc of R1), C19 being (place of R1) such that L47: (C19 in R2 & C18 = [ C17 , C19 ]) by L46;
+take C18;
+take C19;
+thus L48: thesis by L45 , L47;
+end;
+
+given C20 being (T-S_arc of R1) , C21 being (place of R1) such that
+L49: C21 in R2
+and
+L50: C20 = [ C16 , C21 ];
+
+L51: C16 = ( C20 `1 ) by L50 , MCART_1:7;
+thus L52: thesis by L51 , L49 , L50;
+end;
+theorem
+L53: (for R1 being Petri_net holds (for R2 being (Subset of (the carrier of R1)) holds ( R2 *' ) = { ( B25 `2 ) where B25 is (S-T_arc of R1) : ( B25 `1 ) in R2 }))
+proof
+let R1 being Petri_net;
+let R2 being (Subset of (the carrier of R1));
+thus L54: ( R2 *' ) c= { ( B26 `2 ) where B26 is (S-T_arc of R1) : ( B26 `1 ) in R2 }
+proof
+let C22 being set;
+assume L55: C22 in ( R2 *' );
+consider C23 being (transition of R1) such that L56: C22 = C23 and L57: (ex B27 being (S-T_arc of R1) st (ex B28 being (place of R1) st (B28 in R2 & B27 = [ B28 , C23 ]))) by L55;
+consider C24 being (S-T_arc of R1), C25 being (place of R1) such that L58: C25 in R2 and L59: C24 = [ C25 , C23 ] by L57;
+L60: (( C24 `1 ) = C25 & ( C24 `2 ) = C23) by L59 , MCART_1:7;
+thus L61: thesis by L60 , L56 , L58;
+end;
+
+let C26 being set;
+assume L62: C26 in { ( B29 `2 ) where B29 is (S-T_arc of R1) : ( B29 `1 ) in R2 };
+consider C27 being (S-T_arc of R1) such that L63: (C26 = ( C27 `2 ) & ( C27 `1 ) in R2) by L62;
+L64: C27 = [ ( C27 `1 ) , ( C27 `2 ) ] by MCART_1:21;
+thus L65: thesis by L64 , L63;
+end;
+theorem
+L66: (for R1 being Petri_net holds (for R2 being (Subset of (the carrier of R1)) holds (for B30 being set holds (B30 in ( R2 *' ) iff (ex B31 being (S-T_arc of R1) st (ex B32 being (place of R1) st (B32 in R2 & B31 = [ B32 , B30 ])))))))
+proof
+let R1 being Petri_net;
+let R2 being (Subset of (the carrier of R1));
+let C28 being set;
+thus L67: (C28 in ( R2 *' ) implies (ex B33 being (S-T_arc of R1) st (ex B34 being (place of R1) st (B34 in R2 & B33 = [ B34 , C28 ]))))
+proof
+assume L68: C28 in ( R2 *' );
+consider C29 being (transition of R1) such that L69: C28 = C29 and L70: (ex B35 being (S-T_arc of R1) st (ex B36 being (place of R1) st (B36 in R2 & B35 = [ B36 , C29 ]))) by L68;
+consider C30 being (S-T_arc of R1), C31 being (place of R1) such that L71: (C31 in R2 & C30 = [ C31 , C29 ]) by L70;
+take C30;
+take C31;
+thus L72: thesis by L69 , L71;
+end;
+
+given C32 being (S-T_arc of R1) , C33 being (place of R1) such that
+L73: C33 in R2
+and
+L74: C32 = [ C33 , C28 ];
+
+L75: C28 = ( C32 `2 ) by L74 , MCART_1:7;
+thus L76: thesis by L75 , L73 , L74;
+end;
+definition
+let R1 being Petri_net;
+let R3 being (Subset of (the carrier' of R1));
+func *' R3 -> (Subset of (the carrier of R1)) equals 
+{ B37 where B37 is (place of R1) : (ex B38 being (S-T_arc of R1) st (ex B39 being (transition of R1) st (B39 in R3 & B38 = [ B37 , B39 ]))) };
+coherence
+proof
+defpred S3[ set ] means (ex B40 being (S-T_arc of R1) st (ex B41 being (transition of R1) st (B41 in R3 & B40 = [ $1 , B41 ])));
+L77: { B42 where B42 is (place of R1) : S3[ B42 ] } is (Subset of (the carrier of R1)) from DOMAIN_1:sch 7;
+thus L78: thesis by L77;
+end;
+correctness;
+func R3 *' -> (Subset of (the carrier of R1)) equals 
+{ B43 where B43 is (place of R1) : (ex B44 being (T-S_arc of R1) st (ex B45 being (transition of R1) st (B45 in R3 & B44 = [ B45 , B43 ]))) };
+coherence
+proof
+defpred S4[ set ] means (ex B46 being (T-S_arc of R1) st (ex B47 being (transition of R1) st (B47 in R3 & B46 = [ B47 , $1 ])));
+L79: { B48 where B48 is (place of R1) : S4[ B48 ] } is (Subset of (the carrier of R1)) from DOMAIN_1:sch 7;
+thus L80: thesis by L79;
+end;
+correctness;
+end;
+theorem
+L82: (for R1 being Petri_net holds (for R3 being (Subset of (the carrier' of R1)) holds ( *' R3 ) = { ( B49 `1 ) where B49 is (S-T_arc of R1) : ( B49 `2 ) in R3 }))
+proof
+let R1 being Petri_net;
+let R3 being (Subset of (the carrier' of R1));
+thus L83: ( *' R3 ) c= { ( B50 `1 ) where B50 is (S-T_arc of R1) : ( B50 `2 ) in R3 }
+proof
+let C34 being set;
+assume L84: C34 in ( *' R3 );
+consider C35 being (place of R1) such that L85: C34 = C35 and L86: (ex B51 being (S-T_arc of R1) st (ex B52 being (transition of R1) st (B52 in R3 & B51 = [ C35 , B52 ]))) by L84;
+consider C36 being (S-T_arc of R1), C37 being (transition of R1) such that L87: C37 in R3 and L88: C36 = [ C35 , C37 ] by L86;
+L89: (( C36 `1 ) = C35 & ( C36 `2 ) = C37) by L88 , MCART_1:7;
+thus L90: thesis by L89 , L85 , L87;
+end;
+
+let C38 being set;
+assume L91: C38 in { ( B53 `1 ) where B53 is (S-T_arc of R1) : ( B53 `2 ) in R3 };
+consider C39 being (S-T_arc of R1) such that L92: (C38 = ( C39 `1 ) & ( C39 `2 ) in R3) by L91;
+L93: C39 = [ ( C39 `1 ) , ( C39 `2 ) ] by MCART_1:21;
+thus L94: thesis by L93 , L92;
+end;
+theorem
+L95: (for R1 being Petri_net holds (for R3 being (Subset of (the carrier' of R1)) holds (for B54 being set holds (B54 in ( *' R3 ) iff (ex B55 being (S-T_arc of R1) st (ex B56 being (transition of R1) st (B56 in R3 & B55 = [ B54 , B56 ])))))))
+proof
+let R1 being Petri_net;
+let R3 being (Subset of (the carrier' of R1));
+let C40 being set;
+thus L96: (C40 in ( *' R3 ) implies (ex B57 being (S-T_arc of R1) st (ex B58 being (transition of R1) st (B58 in R3 & B57 = [ C40 , B58 ]))))
+proof
+assume L97: C40 in ( *' R3 );
+consider C41 being (place of R1) such that L98: C40 = C41 and L99: (ex B59 being (S-T_arc of R1) st (ex B60 being (transition of R1) st (B60 in R3 & B59 = [ C41 , B60 ]))) by L97;
+consider C42 being (S-T_arc of R1), C43 being (transition of R1) such that L100: (C43 in R3 & C42 = [ C41 , C43 ]) by L99;
+take C42;
+take C43;
+thus L101: thesis by L98 , L100;
+end;
+
+given C44 being (S-T_arc of R1) , C45 being (transition of R1) such that
+L102: C45 in R3
+and
+L103: C44 = [ C40 , C45 ];
+
+L104: C40 = ( C44 `1 ) by L103 , MCART_1:7;
+thus L105: thesis by L104 , L102 , L103;
+end;
+theorem
+L106: (for R1 being Petri_net holds (for R3 being (Subset of (the carrier' of R1)) holds ( R3 *' ) = { ( B61 `2 ) where B61 is (T-S_arc of R1) : ( B61 `1 ) in R3 }))
+proof
+let R1 being Petri_net;
+let R3 being (Subset of (the carrier' of R1));
+thus L107: ( R3 *' ) c= { ( B62 `2 ) where B62 is (T-S_arc of R1) : ( B62 `1 ) in R3 }
+proof
+let C46 being set;
+assume L108: C46 in ( R3 *' );
+consider C47 being (place of R1) such that L109: C46 = C47 and L110: (ex B63 being (T-S_arc of R1) st (ex B64 being (transition of R1) st (B64 in R3 & B63 = [ B64 , C47 ]))) by L108;
+consider C48 being (T-S_arc of R1), C49 being (transition of R1) such that L111: C49 in R3 and L112: C48 = [ C49 , C47 ] by L110;
+L113: (( C48 `1 ) = C49 & ( C48 `2 ) = C47) by L112 , MCART_1:7;
+thus L114: thesis by L113 , L109 , L111;
+end;
+
+let C50 being set;
+assume L115: C50 in { ( B65 `2 ) where B65 is (T-S_arc of R1) : ( B65 `1 ) in R3 };
+consider C51 being (T-S_arc of R1) such that L116: (C50 = ( C51 `2 ) & ( C51 `1 ) in R3) by L115;
+L117: C51 = [ ( C51 `1 ) , ( C51 `2 ) ] by MCART_1:21;
+thus L118: thesis by L117 , L116;
+end;
+theorem
+L119: (for R1 being Petri_net holds (for R3 being (Subset of (the carrier' of R1)) holds (for B66 being set holds (B66 in ( R3 *' ) iff (ex B67 being (T-S_arc of R1) st (ex B68 being (transition of R1) st (B68 in R3 & B67 = [ B68 , B66 ])))))))
+proof
+let R1 being Petri_net;
+let R3 being (Subset of (the carrier' of R1));
+let C52 being set;
+thus L120: (C52 in ( R3 *' ) implies (ex B69 being (T-S_arc of R1) st (ex B70 being (transition of R1) st (B70 in R3 & B69 = [ B70 , C52 ]))))
+proof
+assume L121: C52 in ( R3 *' );
+consider C53 being (place of R1) such that L122: C52 = C53 and L123: (ex B71 being (T-S_arc of R1) st (ex B72 being (transition of R1) st (B72 in R3 & B71 = [ B72 , C53 ]))) by L121;
+consider C54 being (T-S_arc of R1), C55 being (transition of R1) such that L124: (C55 in R3 & C54 = [ C55 , C53 ]) by L123;
+take C54;
+take C55;
+thus L125: thesis by L122 , L124;
+end;
+
+given C56 being (T-S_arc of R1) , C57 being (transition of R1) such that
+L126: C57 in R3
+and
+L127: C56 = [ C57 , C52 ];
+
+L128: C52 = ( C56 `2 ) by L127 , MCART_1:7;
+thus L129: thesis by L128 , L126 , L127;
+end;
+theorem
+L130: (for R1 being Petri_net holds ( *' ( {} (the carrier of R1) ) ) = ( {} ))
+proof
+let R1 being Petri_net;
+set D2 = the (Element of ( *' ( {} (the carrier of R1) ) ));
+assume L131: (not thesis);
+L132: D2 in ( *' ( {} (the carrier of R1) ) ) by L131;
+L133: (ex B73 being (transition of R1) st (D2 = B73 & (ex B74 being (T-S_arc of R1) st (ex B75 being (place of R1) st (B75 in ( {} (the carrier of R1) ) & B74 = [ B73 , B75 ]))))) by L132;
+thus L134: contradiction by L133;
+end;
+theorem
+L135: (for R1 being Petri_net holds ( ( {} (the carrier of R1) ) *' ) = ( {} ))
+proof
+let R1 being Petri_net;
+set D3 = the (Element of ( ( {} (the carrier of R1) ) *' ));
+assume L136: (not thesis);
+L137: D3 in ( ( {} (the carrier of R1) ) *' ) by L136;
+L138: (ex B76 being (transition of R1) st (D3 = B76 & (ex B77 being (S-T_arc of R1) st (ex B78 being (place of R1) st (B78 in ( {} (the carrier of R1) ) & B77 = [ B78 , B76 ]))))) by L137;
+thus L139: contradiction by L138;
+end;
+theorem
+L140: (for R1 being Petri_net holds ( *' ( {} (the carrier' of R1) ) ) = ( {} ))
+proof
+let R1 being Petri_net;
+set D4 = the (Element of ( *' ( {} (the carrier' of R1) ) ));
+assume L141: (not thesis);
+L142: D4 in ( *' ( {} (the carrier' of R1) ) ) by L141;
+L143: (ex B79 being (place of R1) st (D4 = B79 & (ex B80 being (S-T_arc of R1) st (ex B81 being (transition of R1) st (B81 in ( {} (the carrier' of R1) ) & B80 = [ B79 , B81 ]))))) by L142;
+thus L144: contradiction by L143;
+end;
+theorem
+L145: (for R1 being Petri_net holds ( ( {} (the carrier' of R1) ) *' ) = ( {} ))
+proof
+let R1 being Petri_net;
+set D5 = the (Element of ( ( {} (the carrier' of R1) ) *' ));
+assume L146: (not thesis);
+L147: D5 in ( ( {} (the carrier' of R1) ) *' ) by L146;
+L148: (ex B82 being (place of R1) st (D5 = B82 & (ex B83 being (T-S_arc of R1) st (ex B84 being (transition of R1) st (B84 in ( {} (the carrier' of R1) ) & B83 = [ B84 , B82 ]))))) by L147;
+thus L149: contradiction by L148;
+end;
+begin
+definition
+let R1 being Petri_net;
+let C58 being (Subset of (the carrier of R1));
+attr C58 is  Deadlock-like
+means
+( *' C58 ) is (Subset of ( C58 *' ));
+end;
+definition
+let C59 being Petri_net;
+attr C59 is  With_Deadlocks
+means
+(ex B85 being (Subset of (the carrier of C59)) st B85 is  Deadlock-like);
+end;
+registration
+cluster  With_Deadlocks for Petri_net;
+existence
+proof
+take D6 = ( TrivialPetriNet );
+reconsider D7 = ( {} ) as (place of D6) by TARSKI:def 1;
+reconsider D8 = ( {} ) as (transition of D6) by TARSKI:def 1;
+L152: ( [#] ({ ( {} ) } , { ( {} ) }) ) = { [ ( {} ) , ( {} ) ] } by ZFMISC_1:29;
+reconsider D9 = [ ( {} ) , ( {} ) ] as (S-T_arc of D6) by L152 , TARSKI:def 1;
+reconsider D10 = [ ( {} ) , ( {} ) ] as (T-S_arc of D6) by L152 , TARSKI:def 1;
+L153: { ( {} ) } c= (the carrier of D6);
+reconsider D11 = { ( {} ) } as (Subset of (the carrier of D6)) by L153;
+take D11;
+L154: D10 = [ D8 , D7 ];
+L155: D8 in ( *' D11 ) by L154;
+L156: { D8 } c= ( *' D11 ) by L155 , ZFMISC_1:31;
+L157: { D8 } = ( *' D11 ) by L156 , XBOOLE_0:def 10;
+L158: D9 = [ D7 , D8 ];
+L159: D8 in ( D11 *' ) by L158;
+thus L160: ( *' D11 ) is (Subset of ( D11 *' )) by L159 , L157 , ZFMISC_1:31;
+end;
+end;
+begin
+definition
+let R1 being Petri_net;
+let C60 being (Subset of (the carrier of R1));
+attr C60 is  Trap-like
+means
+( C60 *' ) is (Subset of ( *' C60 ));
+end;
+definition
+let C61 being Petri_net;
+attr C61 is  With_Traps
+means
+(ex B86 being (Subset of (the carrier of C61)) st B86 is  Trap-like);
+end;
+registration
+cluster  With_Traps for Petri_net;
+existence
+proof
+take D12 = ( TrivialPetriNet );
+reconsider D13 = ( {} ) as (place of D12) by TARSKI:def 1;
+reconsider D14 = ( {} ) as (transition of D12) by TARSKI:def 1;
+L164: ( [#] ({ ( {} ) } , { ( {} ) }) ) = { [ ( {} ) , ( {} ) ] } by ZFMISC_1:29;
+reconsider D15 = [ ( {} ) , ( {} ) ] as (S-T_arc of D12) by L164 , TARSKI:def 1;
+reconsider D16 = [ ( {} ) , ( {} ) ] as (T-S_arc of D12) by L164 , TARSKI:def 1;
+L165: { ( {} ) } c= (the carrier of D12);
+reconsider D17 = { ( {} ) } as (Subset of (the carrier of D12)) by L165;
+take D17;
+L166: D15 = [ D13 , D14 ];
+L167: D14 in ( D17 *' ) by L166;
+L168: { D14 } c= ( D17 *' ) by L167 , ZFMISC_1:31;
+L169: { D14 } = ( D17 *' ) by L168 , XBOOLE_0:def 10;
+L170: D16 = [ D14 , D13 ];
+L171: D14 in ( *' D17 ) by L170;
+thus L172: ( D17 *' ) is (Subset of ( *' D17 )) by L171 , L169 , ZFMISC_1:31;
+end;
+end;
+definition
+let C62 , C63 being non  empty set;
+let C64 being non  empty (Relation of C62 , C63);
+redefine func C64 ~ -> non  empty (Relation of C63 , C62);
+
+coherence
+proof
+set D18 = the (Element of C64);
+consider C65 , C66 being set such that L174: D18 = [ C65 , C66 ] by RELAT_1:def 1;
+L175: [ C66 , C65 ] in ( C64 ~ ) by L174 , RELAT_1:def 7;
+thus L176: thesis by L175;
+end;
+end;
+begin
+definition
+let C67 being PT_net_Str;
+func C67 .: ->  strict PT_net_Str equals 
+PT_net_Str (# (the carrier of C67) , (the carrier' of C67) , ( (the T-S_Arcs of C67) ~ ) , ( (the S-T_Arcs of C67) ~ ) #);
+correctness;
+end;
+registration
+let C68 being Petri_net;
+cluster ( C68 .: ) ->  with_S-T_arc  with_T-S_arc non  empty non  void;
+coherence
+proof
+L179: ( (the T-S_Arcs of C68) ~ ) is non  empty;
+thus L180: (the S-T_Arcs of ( C68 .: )) is non  empty by L179;
+L181: ( (the S-T_Arcs of C68) ~ ) is non  empty;
+thus L182: (the T-S_Arcs of ( C68 .: )) is non  empty by L181;
+thus L183: thesis;
+end;
+end;
+theorem
+L185: (for R1 being Petri_net holds ( ( R1 .: ) .: ) = ( the PT_net_Str of R1 ));
+theorem
+L186: (for R1 being Petri_net holds ((the carrier of R1) = (the carrier of ( R1 .: )) & (the carrier' of R1) = (the carrier' of ( R1 .: )) & ( (the S-T_Arcs of R1) ~ ) = (the T-S_Arcs of ( R1 .: )) & ( (the T-S_Arcs of R1) ~ ) = (the S-T_Arcs of ( R1 .: ))));
+definition
+let R1 being Petri_net;
+let C69 being (Subset of (the carrier of R1));
+func C69 .: -> (Subset of (the carrier of ( R1 .: ))) equals 
+C69;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C70 being (place of R1);
+func C70 .: -> (place of ( R1 .: )) equals 
+C70;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C71 being (Subset of (the carrier of ( R1 .: )));
+func .: C71 -> (Subset of (the carrier of R1)) equals 
+C71;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C72 being (place of ( R1 .: ));
+func .: C72 -> (place of R1) equals 
+C72;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C73 being (Subset of (the carrier' of R1));
+func C73 .: -> (Subset of (the carrier' of ( R1 .: ))) equals 
+C73;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C74 being (transition of R1);
+func C74 .: -> (transition of ( R1 .: )) equals 
+C74;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C75 being (Subset of (the carrier' of ( R1 .: )));
+func .: C75 -> (Subset of (the carrier' of R1)) equals 
+C75;
+coherence;
+end;
+definition
+let R1 being Petri_net;
+let C76 being (transition of ( R1 .: ));
+func .: C76 -> (transition of R1) equals 
+C76;
+coherence;
+end;
+theorem
+L195: (for R1 being Petri_net holds (for R4 being (Subset of (the carrier of R1)) holds ( ( R4 .: ) *' ) = ( *' R4 )))
+proof
+let R1 being Petri_net;
+let R4 being (Subset of (the carrier of R1));
+thus L196: ( ( R4 .: ) *' ) c= ( *' R4 )
+proof
+let C77 being set;
+assume L197: C77 in ( ( R4 .: ) *' );
+consider C78 being (S-T_arc of ( R1 .: )), C79 being (place of ( R1 .: )) such that L198: C79 in ( R4 .: ) and L199: C78 = [ C79 , C77 ] by L197 , L66;
+L200: [ C77 , ( .: C79 ) ] is (T-S_arc of R1) by L199 , RELAT_1:def 7;
+thus L201: thesis by L200 , L198 , L42;
+end;
+
+let C80 being set;
+assume L202: C80 in ( *' R4 );
+consider C81 being (T-S_arc of R1), C82 being (place of R1) such that L203: C82 in R4 and L204: C81 = [ C80 , C82 ] by L202 , L42;
+L205: [ ( C82 .: ) , C80 ] is (S-T_arc of ( R1 .: )) by L204 , RELAT_1:def 7;
+thus L206: thesis by L205 , L203 , L66;
+end;
+theorem
+L207: (for R1 being Petri_net holds (for R4 being (Subset of (the carrier of R1)) holds ( *' ( R4 .: ) ) = ( R4 *' )))
+proof
+let R1 being Petri_net;
+let R4 being (Subset of (the carrier of R1));
+thus L208: ( *' ( R4 .: ) ) c= ( R4 *' )
+proof
+let C83 being set;
+assume L209: C83 in ( *' ( R4 .: ) );
+consider C84 being (T-S_arc of ( R1 .: )), C85 being (place of ( R1 .: )) such that L210: C85 in ( R4 .: ) and L211: C84 = [ C83 , C85 ] by L209 , L42;
+L212: [ ( .: C85 ) , C83 ] is (S-T_arc of R1) by L211 , RELAT_1:def 7;
+thus L213: thesis by L212 , L210 , L66;
+end;
+
+let C86 being set;
+assume L214: C86 in ( R4 *' );
+consider C87 being (S-T_arc of R1), C88 being (place of R1) such that L215: C88 in R4 and L216: C87 = [ C88 , C86 ] by L214 , L66;
+L217: [ C86 , ( C88 .: ) ] is (T-S_arc of ( R1 .: )) by L216 , RELAT_1:def 7;
+thus L218: thesis by L217 , L215 , L42;
+end;
+theorem
+L219: (for R1 being Petri_net holds (for R4 being (Subset of (the carrier of R1)) holds (R4 is  Deadlock-like iff ( R4 .: ) is  Trap-like)))
+proof
+let R1 being Petri_net;
+let R4 being (Subset of (the carrier of R1));
+L220: ( ( R4 .: ) *' ) = ( *' R4 ) by L195;
+thus L221: (R4 is  Deadlock-like implies ( R4 .: ) is  Trap-like)
+proof
+assume L222: ( *' R4 ) is (Subset of ( R4 *' ));
+thus L223: ( ( R4 .: ) *' ) is (Subset of ( *' ( R4 .: ) )) by L222 , L220 , L207;
+end;
+
+assume L224: ( ( R4 .: ) *' ) is (Subset of ( *' ( R4 .: ) ));
+thus L225: ( *' R4 ) is (Subset of ( R4 *' )) by L224 , L220 , L207;
+end;
+theorem
+L226: (for R1 being Petri_net holds (for R4 being (Subset of (the carrier of R1)) holds (R4 is  Trap-like iff ( R4 .: ) is  Deadlock-like)))
+proof
+let R1 being Petri_net;
+let R4 being (Subset of (the carrier of R1));
+L227: ( ( R4 .: ) *' ) = ( *' R4 ) by L195;
+thus L228: (R4 is  Trap-like implies ( R4 .: ) is  Deadlock-like)
+proof
+assume L229: ( R4 *' ) is (Subset of ( *' R4 ));
+thus L230: ( *' ( R4 .: ) ) is (Subset of ( ( R4 .: ) *' )) by L229 , L227 , L207;
+end;
+
+assume L231: ( *' ( R4 .: ) ) is (Subset of ( ( R4 .: ) *' ));
+thus L232: ( R4 *' ) is (Subset of ( *' R4 )) by L231 , L227 , L207;
+end;
+theorem
+L233: (for B87 being Petri_net holds (for B88 being (transition of B87) holds (for B89 being (Subset of (the carrier of B87)) holds (B88 in ( B89 *' ) iff ( *' { B88 } ) meets B89))))
+proof
+let C89 being Petri_net;
+let C90 being (transition of C89);
+let C91 being (Subset of (the carrier of C89));
+thus L234: (C90 in ( C91 *' ) implies ( *' { C90 } ) meets C91)
+proof
+assume L235: C90 in ( C91 *' );
+consider C92 being (S-T_arc of C89), C93 being (place of C89) such that L236: C93 in C91 and L237: C92 = [ C93 , C90 ] by L235 , L66;
+L238: C90 in { C90 } by TARSKI:def 1;
+L239: C93 in ( *' { C90 } ) by L238 , L237;
+thus L240: ( ( *' { C90 } ) /\ C91 ) <> ( {} ) by L239 , L236 , XBOOLE_0:def 4;
+end;
+
+assume L241: ( ( *' { C90 } ) /\ C91 ) <> ( {} );
+consider C94 being (place of C89) such that L242: C94 in ( ( *' { C90 } ) /\ C91 ) by L241 , SUBSET_1:4;
+L243: C94 in C91 by L242 , XBOOLE_0:def 4;
+L244: C94 in ( *' { C90 } ) by L242 , XBOOLE_0:def 4;
+consider C95 being (S-T_arc of C89), C96 being (transition of C89) such that L245: C96 in { C90 } and L246: C95 = [ C94 , C96 ] by L244 , L95;
+L247: C96 = C90 by L245 , TARSKI:def 1;
+thus L248: thesis by L247 , L243 , L246;
+end;
+theorem
+L249: (for B90 being Petri_net holds (for B91 being (transition of B90) holds (for B92 being (Subset of (the carrier of B90)) holds (B91 in ( *' B92 ) iff ( { B91 } *' ) meets B92))))
+proof
+let C97 being Petri_net;
+let C98 being (transition of C97);
+let C99 being (Subset of (the carrier of C97));
+thus L250: (C98 in ( *' C99 ) implies ( { C98 } *' ) meets C99)
+proof
+assume L251: C98 in ( *' C99 );
+consider C100 being (T-S_arc of C97), C101 being (place of C97) such that L252: C101 in C99 and L253: C100 = [ C98 , C101 ] by L251 , L42;
+L254: C98 in { C98 } by TARSKI:def 1;
+L255: C101 in ( { C98 } *' ) by L254 , L253;
+thus L256: ( ( { C98 } *' ) /\ C99 ) <> ( {} ) by L255 , L252 , XBOOLE_0:def 4;
+end;
+
+assume L257: ( ( { C98 } *' ) /\ C99 ) <> ( {} );
+consider C102 being (place of C97) such that L258: C102 in ( ( { C98 } *' ) /\ C99 ) by L257 , SUBSET_1:4;
+L259: C102 in C99 by L258 , XBOOLE_0:def 4;
+L260: C102 in ( { C98 } *' ) by L258 , XBOOLE_0:def 4;
+consider C103 being (T-S_arc of C97), C104 being (transition of C97) such that L261: C104 in { C98 } and L262: C103 = [ C104 , C102 ] by L260 , L119;
+L263: C104 = C98 by L261 , TARSKI:def 1;
+thus L264: thesis by L263 , L259 , L262;
+end;

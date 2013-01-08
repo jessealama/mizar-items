@@ -1,0 +1,2296 @@
+:: Conway's Games and Some of Their Basic Properties
+::  by Robin Nittka
+::
+:: Received October 13, 2010
+:: Copyright (c) 2010-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies CGAMES_1, RELAT_1, TARSKI, XBOOLE_0, ORDINAL1, FUNCT_1, CARD_1,
+      SUBSET_1, XXREAL_0, ORDINAL2, SUPINF_2, ARYTM_1, PARTFUN1, MSUALG_6,
+      FINSEQ_1, ARYTM_3, NAT_1, ORDINAL4, MESFUNC5, XCMPLX_0;
+ notations TARSKI, XBOOLE_0, XXREAL_0, RELAT_1, ORDINAL1, FUNCT_1, CARD_1,
+      PARTFUN1, ORDINAL2, SUBSET_1, COMPUT_1, FINSEQ_1, XCMPLX_0;
+ constructors ORDINAL2, COMPUT_1, RELSET_1;
+ registrations XBOOLE_0, XREAL_0, XXREAL_0, ORDINAL1, FUNCT_1, CARD_1,
+      SUBSET_1, RELAT_1, COMPUT_1, FINSEQ_1, NAT_1;
+ requirements REAL, SUBSET, BOOLE, NUMERALS, ARITHM;
+ definitions FUNCT_1, TARSKI, PARTFUN1, FINSEQ_1;
+ theorems TARSKI, ORDINAL1, FUNCT_1, ZFMISC_1, RELAT_1, XBOOLE_0, ORDINAL2,
+      XBOOLE_1, PARTFUN1, COMPUT_1, NAT_1, FINSEQ_1, XXREAL_0, XREAL_1,
+      FINSEQ_2, FINSEQ_3, FINSEQ_5, GRFUNC_1, XTUPLE_0;
+ schemes ORDINAL1, NAT_1, TARSKI;
+
+begin
+definition
+struct left-right(# LeftOptions , RightOptions -> set #);
+end;
+definition
+func ConwayZero equals 
+left-right (# ( {} ) , ( {} ) #);
+coherence;
+end;
+registration
+cluster  strict for left-right;
+existence
+proof
+take ( ConwayZero );
+thus L3: thesis;
+end;
+end;
+deffunc H1(T-Sequence) = { left-right (# B1 , B2 #) where B1 , B2 is (Subset of ( union ( rng $1 ) )) : (not contradiction) };
+defpred S1[ T-Sequence ] means (for R9 being Ordinal holds (R9 in ( dom $1 ) implies ( $1 . R9 ) = H1(( $1 | R9 ))));
+L5: (for B3 being T-Sequence holds (S1[ B3 ] implies (for R8 being Ordinal holds S1[ ( B3 | R8 ) ])))
+proof
+let C1 being T-Sequence;
+assume L6: S1[ C1 ];
+let R8 being Ordinal;
+let R9 being Ordinal;
+assume L7: R9 in ( dom ( C1 | R8 ) );
+L8: ( dom ( C1 | R8 ) ) c= ( dom C1 ) by RELAT_1:60;
+L9: ( C1 . R9 ) = H1(( C1 | R9 )) by L8 , L6 , L7;
+L10: ( dom ( C1 | R8 ) ) c= R8 by RELAT_1:58;
+L11: R9 c= R8 by L10 , L7 , ORDINAL1:def 2;
+L12: ( ( C1 | R8 ) | R9 ) = ( C1 | R9 ) by L11 , FUNCT_1:51;
+thus L13: thesis by L12 , L9 , L7 , FUNCT_1:47;
+end;
+definition
+let R8 being Ordinal;
+func ConwayDay R8 -> set means 
+:L14: (ex B4 being T-Sequence st (R8 in ( dom B4 ) & ( B4 . R8 ) = it & (for R9 being Ordinal holds (R9 in ( dom B4 ) implies ( B4 . R9 ) = { left-right (# B5 , B6 #) where B5 , B6 is (Subset of ( union ( rng ( B4 | R9 ) ) )) : (not contradiction) }))));
+existence
+proof
+consider C2 being T-Sequence such that L15: (( dom C2 ) = ( succ R8 ) & (for R9 being Ordinal holds (for B7 being T-Sequence holds ((R9 in ( succ R8 ) & B7 = ( C2 | R9 )) implies ( C2 . R9 ) = H1(B7))))) from ORDINAL1:sch 4;
+take ( C2 . R8 );
+take C2;
+thus L16: R8 in ( dom C2 ) by L15 , ORDINAL1:6;
+thus L17: thesis by L15;
+end;
+uniqueness
+proof
+let R1 being set;
+let R2 being set;
+assume L18: (ex B8 being T-Sequence st (R8 in ( dom B8 ) & ( B8 . R8 ) = R1 & S1[ B8 ]));
+consider C3 being T-Sequence such that L19: (R8 in ( dom C3 ) & ( C3 . R8 ) = R1 & S1[ C3 ]) by L18;
+set D1 = ( C3 | ( succ R8 ) );
+assume L20: (ex B9 being T-Sequence st (R8 in ( dom B9 ) & ( B9 . R8 ) = R2 & S1[ B9 ]));
+consider C4 being T-Sequence such that L21: (R8 in ( dom C4 ) & ( C4 . R8 ) = R2 & S1[ C4 ]) by L20;
+set D2 = ( C4 | ( succ R8 ) );
+L22: (( dom D1 ) = ( succ R8 ) & (for R9 being Ordinal holds (for B10 being T-Sequence holds ((R9 in ( succ R8 ) & B10 = ( D1 | R9 )) implies ( D1 . R9 ) = H1(B10)))))
+proof
+L23: ( succ R8 ) c= ( dom C3 ) by L19 , ORDINAL1:21;
+thus L24: ( dom D1 ) = ( succ R8 ) by L23 , RELAT_1:62;
+let R9 being Ordinal;
+let C5 being T-Sequence;
+assume L25: (R9 in ( succ R8 ) & C5 = ( D1 | R9 ));
+thus L26: thesis by L25 , L24 , L5 , L19;
+end;
+L27: (( dom D2 ) = ( succ R8 ) & (for R9 being Ordinal holds (for B11 being T-Sequence holds ((R9 in ( succ R8 ) & B11 = ( D2 | R9 )) implies ( D2 . R9 ) = H1(B11)))))
+proof
+L28: ( succ R8 ) c= ( dom C4 ) by L21 , ORDINAL1:21;
+thus L29: ( dom D2 ) = ( succ R8 ) by L28 , RELAT_1:62;
+let R9 being Ordinal;
+let C6 being T-Sequence;
+assume L30: (R9 in ( succ R8 ) & C6 = ( D2 | R9 ));
+thus L31: thesis by L30 , L29 , L5 , L21;
+end;
+L32: (( D1 . R8 ) = ( C3 . R8 ) & ( D2 . R8 ) = ( C4 . R8 )) by FUNCT_1:49 , ORDINAL1:6;
+L33: D1 = D2 from ORDINAL1:sch 3(L22 , L27);
+thus L34: R1 = R2 by L33 , L19 , L21 , L32;
+end;
+end;
+theorem
+L36: (for R5 being set holds (for R8 being Ordinal holds (R5 in ( ConwayDay R8 ) iff (ex B12 being  strict left-right st (R5 = B12 & (for R1 being set holds (R1 in ( (the LeftOptions of B12) \/ (the RightOptions of B12) ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 ))))))))))
+proof
+let R5 being set;
+let R8 being Ordinal;
+consider C7 being T-Sequence such that L37: (R8 in ( dom C7 ) & ( C7 . R8 ) = ( ConwayDay R8 ) & S1[ C7 ]) by L14;
+thus L38:now
+assume L39: R5 in ( ConwayDay R8 );
+L40: R5 in H1(( C7 | R8 )) by L39 , L37;
+consider C8 , C9 being (Subset of ( union ( rng ( C7 | R8 ) ) )) such that L41: (R5 = left-right (# C8 , C9 #) & (not contradiction)) by L40;
+reconsider D3 = R5 as  strict left-right by L41;
+take D4 = D3;
+thus L42: R5 = D4;
+let R6 being set;
+assume L43: R6 in ( (the LeftOptions of D4) \/ (the RightOptions of D4) );
+L44: (R6 in C8 or R6 in C9) by L43 , L41 , XBOOLE_0:def 3;
+consider C10 being set such that L45: (R6 in C10 & C10 in ( rng ( C7 | R8 ) )) by L44 , TARSKI:def 4;
+L46: (ex B13 being set st (B13 in ( dom ( C7 | R8 ) ) & C10 = ( ( C7 | R8 ) . B13 ))) by L45 , FUNCT_1:def 3;
+consider R9 being Ordinal such that L47: (R9 in ( dom ( C7 | R8 ) ) & C10 = ( ( C7 | R8 ) . R9 )) by L46;
+take D5 = R9;
+L48: ( dom ( C7 | R8 ) ) c= R8 by RELAT_1:58;
+thus L49: D5 in R8 by L48 , L47;
+L50: ( dom ( C7 | R8 ) ) c= ( dom C7 ) by RELAT_1:60;
+L51: ( C7 . D5 ) = ( ConwayDay D5 ) by L50 , L37 , L14 , L47;
+thus L52: R6 in ( ConwayDay D5 ) by L51 , L45 , L47 , FUNCT_1:47;
+end;
+thus L53:now
+assume L54: (ex B14 being  strict left-right st (R5 = B14 & (for R1 being set holds (R1 in ( (the LeftOptions of B14) \/ (the RightOptions of B14) ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 )))))));
+consider C11 being  strict left-right such that L55: (C11 = R5 & (for R1 being set holds (R1 in ( (the LeftOptions of C11) \/ (the RightOptions of C11) ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 )))))) by L54;
+L56: ((the LeftOptions of C11) is (Subset of ( union ( rng ( C7 | R8 ) ) )) & (the RightOptions of C11) is (Subset of ( union ( rng ( C7 | R8 ) ) )))
+proof
+L57: ( (the LeftOptions of C11) \/ (the RightOptions of C11) ) c= ( union ( rng ( C7 | R8 ) ) )
+proof
+let R6 being set;
+assume L58: R6 in ( (the LeftOptions of C11) \/ (the RightOptions of C11) );
+consider R9 being Ordinal such that L59: (R9 in R8 & R6 in ( ConwayDay R9 )) by L58 , L55;
+L60: R8 c= ( dom C7 ) by L37 , ORDINAL1:def 2;
+L61: ( C7 . R9 ) = ( ConwayDay R9 ) by L60 , L14 , L37 , L59;
+L62: ( ConwayDay R9 ) c= ( union ( rng ( C7 | R8 ) ) ) by L61 , L59 , L60 , FUNCT_1:50 , ZFMISC_1:74;
+thus L63: R6 in ( union ( rng ( C7 | R8 ) ) ) by L62 , L59;
+end;
+thus L64: thesis by L57 , XBOOLE_1:11;
+end;
+L65: C11 in H1(( C7 | R8 )) by L56;
+thus L66: R5 in ( ConwayDay R8 ) by L65 , L37 , L55;
+end;
+end;
+theorem
+L54: ( ConwayDay ( 0 ) ) = { ( ConwayZero ) }
+proof
+L55: ( ConwayDay ( 0 ) ) c= { ( ConwayZero ) }
+proof
+let R5 being set;
+assume L56: R5 in ( ConwayDay ( 0 ) );
+consider C12 being  strict left-right such that L57: (R5 = C12 & (for R6 being set holds (R6 in ( (the LeftOptions of C12) \/ (the RightOptions of C12) ) implies (ex R9 being Ordinal st (R9 in ( 0 ) & R6 in ( ConwayDay R9 )))))) by L56 , L36;
+L58: ( (the LeftOptions of C12) \/ (the RightOptions of C12) ) = ( {} )
+proof
+assume L59: (not thesis);
+consider R6 being set such that L60: R6 in ( (the LeftOptions of C12) \/ (the RightOptions of C12) ) by L59 , XBOOLE_0:def 1;
+L61: (ex R9 being Ordinal st (R9 in ( 0 ) & R6 in ( ConwayDay R9 ))) by L57 , L60;
+thus L62: contradiction by L61;
+end;
+L63: ((the LeftOptions of C12) = ( {} ) & (the RightOptions of C12) = ( {} )) by L58;
+thus L64: R5 in { ( ConwayZero ) } by L63 , L57 , TARSKI:def 1;
+end;
+L65: (for R6 being set holds (R6 in ( ( {} ) \/ ( {} ) ) implies (ex R9 being Ordinal st (R9 in ( 0 ) & R6 in ( ConwayDay R9 )))));
+L66: ( ConwayZero ) in ( ConwayDay ( 0 ) ) by L65 , L36;
+L67: { ( ConwayZero ) } c= ( ConwayDay ( 0 ) ) by L66 , ZFMISC_1:31;
+thus L68: thesis by L67 , L55 , XBOOLE_0:def 10;
+end;
+theorem
+L69: (for R8 being Ordinal holds (for R9 being Ordinal holds (R8 c= R9 implies ( ConwayDay R8 ) c= ( ConwayDay R9 ))))
+proof
+let R8 being Ordinal;
+let R9 being Ordinal;
+assume L70: R8 c= R9;
+let R5 being set;
+assume L71: R5 in ( ConwayDay R8 );
+consider C13 being  strict left-right such that L72: (C13 = R5 & (for R6 being set holds (R6 in ( (the LeftOptions of C13) \/ (the RightOptions of C13) ) implies (ex R10 being Ordinal st (R10 in R8 & R6 in ( ConwayDay R10 )))))) by L71 , L36;
+L73:
+now
+let R6 being set;
+assume L74: R6 in ( (the LeftOptions of C13) \/ (the RightOptions of C13) );
+L75: (ex R10 being Ordinal st (R10 in R8 & R6 in ( ConwayDay R10 ))) by L74 , L72;
+thus L76: (ex R10 being Ordinal st (R10 in R9 & R6 in ( ConwayDay R10 ))) by L75 , L70;
+end;
+thus L77: R5 in ( ConwayDay R9 ) by L73 , L36 , L72;
+end;
+registration
+let R8 being Ordinal;
+cluster ( ConwayDay R8 ) -> non  empty;
+coherence
+proof
+L78: ( 0 ) c= R8;
+L79: ( ConwayDay ( 0 ) ) c= ( ConwayDay R8 ) by L78 , L69;
+thus L80: thesis by L79 , L54;
+end;
+end;
+begin
+definition
+let R1 being set;
+attr R1 is  ConwayGame-like
+means
+:L82: (ex R8 being Ordinal st R1 in ( ConwayDay R8 ));
+end;
+registration
+let R8 being Ordinal;
+cluster  ->  ConwayGame-like for (Element of ( ConwayDay R8 ));
+coherence
+proof
+let C14 being (Element of ( ConwayDay R8 ));
+take R8;
+thus L84: thesis;
+end;
+end;
+registration
+cluster ( ConwayZero ) ->  ConwayGame-like;
+coherence
+proof
+L86: ( ConwayZero ) in ( ConwayDay ( 0 ) ) by L54 , TARSKI:def 1;
+thus L87: thesis by L86;
+end;
+end;
+registration
+cluster  ConwayGame-like  strict for left-right;
+existence
+proof
+take ( ConwayZero );
+thus L89: thesis;
+end;
+cluster  ConwayGame-like for set;
+existence
+proof
+take ( ConwayZero );
+thus L90: thesis;
+end;
+end;
+definition
+mode ConwayGame
+ is  ConwayGame-like set;
+end;
+definition
+redefine func ConwayZero -> (Element of ( ConwayDay ( 0 ) ));
+
+coherence by L54 , TARSKI:def 1;
+end;
+definition
+func ConwayOne -> (Element of ( ConwayDay 1 )) equals 
+left-right (# { ( ConwayZero ) } , ( {} ) #);
+coherence
+proof
+set D6 = left-right (# { ( ConwayZero ) } , ( {} ) #);
+L94: (for R1 being set holds (R1 in ( (the LeftOptions of D6) \/ (the RightOptions of D6) ) implies (ex R9 being Ordinal st (R9 in 1 & R1 in ( ConwayDay R9 )))))
+proof
+let R1 being set;
+assume L95: R1 in ( (the LeftOptions of D6) \/ (the RightOptions of D6) );
+L96: R1 = ( ConwayZero ) by L95 , TARSKI:def 1;
+take ( 0 );
+L97: 1 = ( succ ( 0 ) );
+thus L98: thesis by L97 , L96 , ORDINAL1:6;
+end;
+thus L99: thesis by L94 , L36;
+end;
+func ConwayStar -> (Element of ( ConwayDay 1 )) equals 
+left-right (# { ( ConwayZero ) } , { ( ConwayZero ) } #);
+coherence
+proof
+set D7 = left-right (# { ( ConwayZero ) } , { ( ConwayZero ) } #);
+L100: (for R1 being set holds (R1 in ( (the LeftOptions of D7) \/ (the RightOptions of D7) ) implies (ex R9 being Ordinal st (R9 in 1 & R1 in ( ConwayDay R9 )))))
+proof
+let R1 being set;
+assume L101: R1 in ( (the LeftOptions of D7) \/ (the RightOptions of D7) );
+L102: R1 = ( ConwayZero ) by L101 , TARSKI:def 1;
+take ( 0 );
+L103: 1 = ( succ ( 0 ) );
+thus L104: thesis by L103 , L102 , ORDINAL1:6;
+end;
+thus L105: thesis by L100 , L36;
+end;
+end;
+theorem
+L107: (for R14 being ConwayGame holds R14 is  strict  strict  strict  strict left-right)
+proof
+let R14 being ConwayGame;
+consider R8 being Ordinal such that L108: R14 in ( ConwayDay R8 ) by L82;
+L109: (ex B15 being  strict left-right st (B15 = R14 & (for R1 being set holds (R1 in ( (the LeftOptions of B15) \/ (the RightOptions of B15) ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 ))))))) by L108 , L36;
+thus L110: thesis by L109;
+end;
+registration
+cluster  ConwayGame-like ->  strict for left-right;
+coherence by L107;
+end;
+definition
+let R14 being ConwayGame;
+func the_LeftOptions_of R14 means 
+:L112: (ex B16 being left-right st (R14 = B16 & it = (the LeftOptions of B16)));
+existence
+proof
+reconsider D8 = R14 as left-right by L107;
+take (the LeftOptions of D8);
+thus L113: thesis;
+end;
+uniqueness;
+func the_RightOptions_of R14 means 
+:L114: (ex B17 being left-right st (R14 = B17 & it = (the RightOptions of B17)));
+existence
+proof
+reconsider D9 = R14 as left-right by L107;
+take (the RightOptions of D9);
+thus L115: thesis;
+end;
+uniqueness;
+end;
+definition
+let R14 being ConwayGame;
+func the_Options_of R14 equals 
+( ( the_LeftOptions_of R14 ) \/ ( the_RightOptions_of R14 ) );
+correctness;
+end;
+theorem
+L118: (for R16 being ConwayGame holds (for R17 being ConwayGame holds (R16 = R17 iff (( the_LeftOptions_of R16 ) = ( the_LeftOptions_of R17 ) & ( the_RightOptions_of R16 ) = ( the_RightOptions_of R17 )))))
+proof
+let R16 being ConwayGame;
+let R17 being ConwayGame;
+thus L119: (R16 = R17 implies (( the_LeftOptions_of R16 ) = ( the_LeftOptions_of R17 ) & ( the_RightOptions_of R16 ) = ( the_RightOptions_of R17 )));
+reconsider D10 = R16 as  strict left-right by L107;
+reconsider D11 = R17 as  strict left-right by L107;
+assume L120: (( the_LeftOptions_of R16 ) = ( the_LeftOptions_of R17 ) & ( the_RightOptions_of R16 ) = ( the_RightOptions_of R17 ));
+L121: ((the LeftOptions of D10) = ( the_LeftOptions_of R16 ) & (the LeftOptions of D11) = ( the_LeftOptions_of R17 ) & (the RightOptions of D10) = ( the_RightOptions_of R16 ) & (the RightOptions of D11) = ( the_RightOptions_of R17 )) by L112 , L114;
+thus L122: R16 = R17 by L121 , L120;
+end;
+registration
+cluster ( the_LeftOptions_of ( ConwayZero ) ) ->  empty;
+coherence by L112;
+cluster ( the_RightOptions_of ( ConwayZero ) ) ->  empty;
+coherence by L114;
+cluster ( the_RightOptions_of ( ConwayOne ) ) ->  empty;
+coherence by L114;
+end;
+theorem
+L124: (for R14 being ConwayGame holds (R14 = ( ConwayZero ) iff ( the_Options_of R14 ) = ( {} )))
+proof
+let R14 being ConwayGame;
+thus L125:now
+assume L126: R14 = ( ConwayZero );
+L127: (( the_LeftOptions_of R14 ) = ( {} ) & ( the_RightOptions_of R14 ) = ( {} )) by L126;
+thus L128: ( the_Options_of R14 ) = ( {} ) by L127;
+end;
+thus L129:now
+reconsider D12 = R14 as  strict left-right by L107;
+assume L130: ( the_Options_of R14 ) = ( {} );
+L131: (( the_LeftOptions_of R14 ) = ( {} ) & ( the_RightOptions_of R14 ) = ( {} )) by L130;
+L132: ((the LeftOptions of D12) = ( {} ) & (the RightOptions of D12) = ( {} )) by L131 , L112 , L114;
+thus L133: R14 = ( ConwayZero ) by L132;
+end;
+end;
+theorem
+L130: (for R1 being set holds (R1 in ( the_LeftOptions_of ( ConwayOne ) ) iff R1 = ( ConwayZero )))
+proof
+let R1 being set;
+L131: ( the_LeftOptions_of ( ConwayOne ) ) = { ( ConwayZero ) } by L112;
+thus L132: thesis by L131 , TARSKI:def 1;
+end;
+theorem
+L133: (for R1 being set holds ((R1 in ( the_Options_of ( ConwayStar ) ) iff R1 = ( ConwayZero )) & (R1 in ( the_LeftOptions_of ( ConwayStar ) ) iff R1 = ( ConwayZero )) & (R1 in ( the_RightOptions_of ( ConwayStar ) ) iff R1 = ( ConwayZero ))))
+proof
+let R1 being set;
+L134: (( the_LeftOptions_of ( ConwayStar ) ) = { ( ConwayZero ) } & ( the_RightOptions_of ( ConwayStar ) ) = { ( ConwayZero ) }) by L112 , L114;
+thus L135: thesis by L134 , TARSKI:def 1;
+end;
+theorem
+L136: (for R8 being Ordinal holds (for R14 being ConwayGame holds (R14 in ( ConwayDay R8 ) iff (for R1 being set holds (R1 in ( the_Options_of R14 ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 ))))))))
+proof
+let R8 being Ordinal;
+let R14 being ConwayGame;
+thus L137:now
+assume L138: R14 in ( ConwayDay R8 );
+consider C15 being  strict left-right such that L139: (R14 = C15 & (for R1 being set holds (R1 in ( (the LeftOptions of C15) \/ (the RightOptions of C15) ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 )))))) by L138 , L36;
+let R1 being set;
+L140: ((the LeftOptions of C15) = ( the_LeftOptions_of R14 ) & (the RightOptions of C15) = ( the_RightOptions_of R14 )) by L139 , L112 , L114;
+assume L141: R1 in ( the_Options_of R14 );
+thus L142: (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 ))) by L141 , L139 , L140;
+end;
+thus L143:now
+assume L144: (for R1 being set holds (R1 in ( the_Options_of R14 ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 )))));
+L145: (ex B18 being left-right st (R14 = B18 & (for R1 being set holds (R1 in ( (the LeftOptions of B18) \/ (the RightOptions of B18) ) implies (ex R9 being Ordinal st (R9 in R8 & R1 in ( ConwayDay R9 )))))))
+proof
+reconsider D13 = R14 as  strict left-right by L107;
+take D13;
+L146: ((the LeftOptions of D13) = ( the_LeftOptions_of R14 ) & (the RightOptions of D13) = ( the_RightOptions_of R14 )) by L112 , L114;
+thus L147: thesis by L146 , L144;
+end;
+thus L148: R14 in ( ConwayDay R8 ) by L145 , L36;
+end;
+end;
+definition
+let C16 being set;
+assume L144: C16 is ConwayGame;
+func ConwayRank C16 -> Ordinal means 
+:L145: (C16 in ( ConwayDay it ) & (for R9 being Ordinal holds (R9 in it implies (not C16 in ( ConwayDay R9 )))));
+existence
+proof
+defpred S2[ Ordinal ] means C16 in ( ConwayDay $1 );
+L146: (ex R8 being Ordinal st S2[ R8 ]) by L82 , L144;
+consider R8 being Ordinal such that L147: (S2[ R8 ] & (for R9 being Ordinal holds (S2[ R9 ] implies R8 c= R9))) from ORDINAL1:sch 1(L146);
+take R8;
+thus L148: C16 in ( ConwayDay R8 ) by L147;
+let R9 being Ordinal;
+assume L149: R9 in R8;
+assume L150: C16 in ( ConwayDay R9 );
+L151: R8 c= R9 by L150 , L147;
+L152: R9 in R9 by L151 , L149;
+thus L153: contradiction by L152;
+end;
+uniqueness
+proof
+let C17 , C18 being Ordinal;
+assume L154: (C16 in ( ConwayDay C17 ) & (for R9 being Ordinal holds (R9 in C17 implies (not C16 in ( ConwayDay R9 )))));
+assume L155: (C16 in ( ConwayDay C18 ) & (for R9 being Ordinal holds (R9 in C18 implies (not C16 in ( ConwayDay R9 )))));
+assume L156: C17 <> C18;
+per cases  by L156 , ORDINAL1:14;
+suppose L157: C17 in C18;
+
+thus L158: contradiction by L157 , L154 , L155;
+end;
+suppose L159: C18 in C17;
+
+thus L160: contradiction by L159 , L154 , L155;
+end;
+end;
+end;
+theorem
+L163: (for R1 being set holds (for R8 being Ordinal holds (for R14 being ConwayGame holds ((R14 in ( ConwayDay R8 ) & R1 in ( the_Options_of R14 )) implies R1 in ( ConwayDay R8 )))))
+proof
+let R1 being set;
+let R8 being Ordinal;
+let R14 being ConwayGame;
+assume L164: (R14 in ( ConwayDay R8 ) & R1 in ( the_Options_of R14 ));
+consider R9 being Ordinal such that L165: (R9 in R8 & R1 in ( ConwayDay R9 )) by L164 , L136;
+L166: R9 c= R8 by L165 , ORDINAL1:def 2;
+L167: ( ConwayDay R9 ) c= ( ConwayDay R8 ) by L166 , L69;
+thus L168: R1 in ( ConwayDay R8 ) by L167 , L165;
+end;
+theorem
+L169: (for R1 being set holds (for R8 being Ordinal holds (for R14 being ConwayGame holds ((R14 in ( ConwayDay R8 ) & (R1 in ( the_LeftOptions_of R14 ) or R1 in ( the_RightOptions_of R14 ))) implies R1 in ( ConwayDay R8 )))))
+proof
+let R1 being set;
+let R8 being Ordinal;
+let R14 being ConwayGame;
+L170: ((R1 in ( the_LeftOptions_of R14 ) or R1 in ( the_RightOptions_of R14 )) implies R1 in ( the_Options_of R14 )) by XBOOLE_0:def 3;
+thus L171: thesis by L170 , L163;
+end;
+theorem
+L172: (for R8 being Ordinal holds (for R14 being ConwayGame holds (R14 in ( ConwayDay R8 ) iff ( ConwayRank R14 ) c= R8)))
+proof
+let R8 being Ordinal;
+let R14 being ConwayGame;
+thus L173:now
+assume L174: R14 in ( ConwayDay R8 );
+assume L175: (not ( ConwayRank R14 ) c= R8);
+L176: R8 in ( ConwayRank R14 ) by L175 , ORDINAL1:16;
+thus L177: contradiction by L176 , L174 , L145;
+end;
+thus L178:now
+assume L179: ( ConwayRank R14 ) c= R8;
+L180: ( ConwayDay ( ConwayRank R14 ) ) c= ( ConwayDay R8 ) by L179 , L69;
+L181: R14 in ( ConwayDay ( ConwayRank R14 ) ) by L145;
+thus L182: R14 in ( ConwayDay R8 ) by L181 , L180;
+end;
+end;
+theorem
+L179: (for R8 being Ordinal holds (for R14 being ConwayGame holds (( ConwayRank R14 ) in R8 iff (ex R9 being Ordinal st (R9 in R8 & R14 in ( ConwayDay R9 ))))))
+proof
+let R8 being Ordinal;
+let R14 being ConwayGame;
+thus L180:now
+assume L181: ( ConwayRank R14 ) in R8;
+take D14 = ( ConwayRank R14 );
+thus L182: D14 in R8 by L181;
+thus L183: R14 in ( ConwayDay D14 ) by L172;
+end;
+thus L184:now
+assume L185: (ex R9 being Ordinal st (R9 in R8 & R14 in ( ConwayDay R9 )));
+consider R9 being Ordinal such that L186: (R9 in R8 & R14 in ( ConwayDay R9 )) by L185;
+L187: ( ConwayRank R14 ) c= R9 by L172 , L186;
+thus L188: ( ConwayRank R14 ) in R8 by L187 , L186 , ORDINAL1:12;
+end;
+end;
+theorem
+L185: (for R14 being ConwayGame holds (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies ( ConwayRank R18 ) in ( ConwayRank R14 ))))
+proof
+let R14 being ConwayGame;
+let R18 being ConwayGame;
+set D15 = ( ConwayRank R14 );
+L186: R14 in ( ConwayDay D15 ) by L145;
+assume L187: R18 in ( the_Options_of R14 );
+consider R9 being Ordinal such that L188: (R9 in D15 & R18 in ( ConwayDay R9 )) by L187 , L186 , L136;
+L189: ( ConwayRank R18 ) c= R9 by L188 , L172;
+thus L190: thesis by L189 , L188 , ORDINAL1:12;
+end;
+theorem
+L191: (for R14 being ConwayGame holds (for R18 being ConwayGame holds ((R18 in ( the_LeftOptions_of R14 ) or R18 in ( the_RightOptions_of R14 )) implies ( ConwayRank R18 ) in ( ConwayRank R14 ))))
+proof
+let R14 being ConwayGame;
+let R18 being ConwayGame;
+assume L192: (R18 in ( the_LeftOptions_of R14 ) or R18 in ( the_RightOptions_of R14 ));
+L193: R18 in ( the_Options_of R14 ) by L192 , XBOOLE_0:def 3;
+thus L194: thesis by L193 , L185;
+end;
+theorem
+L195: (for R14 being ConwayGame holds (not R14 in ( the_Options_of R14 )))
+proof
+let R14 being ConwayGame;
+assume L196: (not thesis);
+L197: ( ConwayRank R14 ) in ( ConwayRank R14 ) by L196 , L185;
+thus L198: contradiction by L197;
+end;
+theorem
+L199: (for R1 being set holds (for R14 being ConwayGame holds (R1 in ( the_Options_of R14 ) implies R1 is  ConwayGame-like  ConwayGame-like  ConwayGame-like  ConwayGame-like left-right)))
+proof
+let R1 being set;
+let R14 being ConwayGame;
+consider R8 being Ordinal such that L200: R14 in ( ConwayDay R8 ) by L82;
+assume L201: R1 in ( the_Options_of R14 );
+L202: R1 in ( ConwayDay R8 ) by L201 , L163 , L200;
+thus L203: thesis by L202 , L107;
+end;
+theorem
+L204: (for R1 being set holds (for R14 being ConwayGame holds ((R1 in ( the_LeftOptions_of R14 ) or R1 in ( the_RightOptions_of R14 )) implies R1 is  ConwayGame-like  ConwayGame-like  ConwayGame-like  ConwayGame-like left-right)))
+proof
+let R1 being set;
+let R14 being ConwayGame;
+assume L205: (R1 in ( the_LeftOptions_of R14 ) or R1 in ( the_RightOptions_of R14 ));
+L206: R1 in ( the_Options_of R14 ) by L205 , XBOOLE_0:def 3;
+thus L207: thesis by L206 , L199;
+end;
+theorem
+L208: (for B19 being  strict left-right holds (B19 is ConwayGame iff (for R5 being set holds (R5 in ( (the LeftOptions of B19) \/ (the RightOptions of B19) ) implies R5 is ConwayGame))))
+proof
+let C19 being  strict left-right;
+thus L209:now
+assume L210: C19 is ConwayGame;
+reconsider D16 = C19 as ConwayGame by L210;
+L211: ((the LeftOptions of C19) = ( the_LeftOptions_of D16 ) & (the RightOptions of C19) = ( the_RightOptions_of D16 )) by L112 , L114;
+L212: ( (the LeftOptions of C19) \/ (the RightOptions of C19) ) = ( the_Options_of D16 ) by L211;
+thus L213: (for R5 being set holds (R5 in ( (the LeftOptions of C19) \/ (the RightOptions of C19) ) implies R5 is ConwayGame)) by L212 , L199;
+end;
+thus L214:now
+assume L215: (for R5 being set holds (R5 in ( (the LeftOptions of C19) \/ (the RightOptions of C19) ) implies R5 is ConwayGame));
+set D17 = { ( ConwayRank B20 ) where B20 is (Element of ( (the LeftOptions of C19) \/ (the RightOptions of C19) )) : (not contradiction) };
+set D18 = ( sup D17 );
+L216:
+now
+let R5 being set;
+assume L217: R5 in ( (the LeftOptions of C19) \/ (the RightOptions of C19) );
+L218: ( ConwayRank R5 ) in D17 by L217;
+L219: (( ConwayRank R5 ) in ( On D17 ) & ( On D17 ) c= D18) by L218 , ORDINAL1:def 9 , ORDINAL2:def 3;
+L220: ( ConwayRank R5 ) c= D18 by L219 , ORDINAL1:def 2;
+take D19 = D18;
+thus L221: D19 in ( succ D18 ) by ORDINAL1:6;
+L222: R5 is ConwayGame by L215 , L217;
+thus L223: R5 in ( ConwayDay D19 ) by L222 , L220 , L172;
+end;
+L224: C19 in ( ConwayDay ( succ D18 ) ) by L216 , L36;
+thus L225: C19 is ConwayGame by L224;
+end;
+end;
+begin
+scheme ConwayGameMinTot { P1[ConwayGame] } : (ex R14 being ConwayGame st (P1[ R14 ] & (for R16 being ConwayGame holds (( ConwayRank R16 ) in ( ConwayRank R14 ) implies (not P1[ R16 ])))))
+provided
+L215: (ex R14 being ConwayGame st P1[ R14 ])
+proof
+defpred S3[ Ordinal ] means (for R14 being ConwayGame holds (R14 in ( ConwayDay $1 ) implies (not P1[ R14 ])));
+assume L216: (not thesis);
+L217: (for R8 being Ordinal holds ((for R9 being Ordinal holds (R9 in R8 implies S3[ R9 ])) implies S3[ R8 ]))
+proof
+let R8 being Ordinal;
+assume L218: (for R9 being Ordinal holds (R9 in R8 implies S3[ R9 ]));
+let R14 being ConwayGame;
+assume L219: (R14 in ( ConwayDay R8 ) & P1[ R14 ]);
+consider R16 being ConwayGame such that L220: (( ConwayRank R16 ) in ( ConwayRank R14 ) & P1[ R16 ]) by L219 , L216;
+L221: ( ConwayRank R14 ) c= R8 by L172 , L219;
+consider R9 being Ordinal such that L222: (R9 in R8 & R16 in ( ConwayDay R9 )) by L221 , L179 , L220;
+thus L223: contradiction by L218 , L222 , L220;
+end;
+L224: (for R8 being Ordinal holds S3[ R8 ]) from ORDINAL1:sch 2(L217);
+consider R14 being ConwayGame such that L225: P1[ R14 ] by L215;
+consider R8 being Ordinal such that L226: R14 in ( ConwayDay R8 ) by L82;
+thus L227: contradiction by L224 , L225 , L226;
+end;
+scheme ConwayGameMin { P2[ConwayGame] } : (ex R14 being ConwayGame st (P2[ R14 ] & (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies (not P2[ R18 ])))))
+provided
+L228: (ex R14 being ConwayGame st P2[ R14 ])
+proof
+consider R14 being ConwayGame such that L229: (P2[ R14 ] & (for R16 being ConwayGame holds (( ConwayRank R16 ) in ( ConwayRank R14 ) implies (not P2[ R16 ])))) from ConwayGameMinTot(L228);
+take R14;
+thus L230: P2[ R14 ] by L229;
+let R18 being ConwayGame;
+assume L231: R18 in ( the_Options_of R14 );
+L232: ( ConwayRank R18 ) in ( ConwayRank R14 ) by L231 , L185;
+thus L233: (not P2[ R18 ]) by L232 , L229;
+end;
+scheme ConwayGameInd { P3[ConwayGame] } : (for R14 being ConwayGame holds P3[ R14 ])
+provided
+L234: (for R14 being ConwayGame holds ((for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies P3[ R18 ])) implies P3[ R14 ]))
+proof
+defpred S4[ ConwayGame ] means (not P3[ $1 ]);
+assume L235: (ex R14 being ConwayGame st S4[ R14 ]);
+L236: (ex R14 being ConwayGame st (S4[ R14 ] & (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies (not S4[ R18 ]))))) from ConwayGameMin(L235);
+thus L237: contradiction by L236 , L234;
+end;
+begin
+definition
+let C20 being Function;
+attr C20 is  ConwayGame-valued
+means
+:L238: (for R1 being set holds (R1 in ( dom C20 ) implies ( C20 . R1 ) is ConwayGame));
+end;
+registration
+let R14 being ConwayGame;
+cluster <* R14 *> ->  ConwayGame-valued;
+coherence
+proof
+let R1 being set;
+assume L240: R1 in ( dom <* R14 *> );
+L241: R1 = 1 by L240 , FINSEQ_1:90;
+thus L242: thesis by L241 , FINSEQ_1:def 8;
+end;
+end;
+registration
+cluster  ConwayGame-valued non  empty for FinSequence;
+existence
+proof
+take <* ( ConwayZero ) *>;
+thus L244: thesis;
+end;
+end;
+registration
+let C21 being non  empty FinSequence;
+cluster  ->  natural non  empty for (Element of ( dom C21 ));
+coherence by FINSEQ_3:24;
+end;
+registration
+let C22 being  ConwayGame-valued non  empty Function;
+let C23 being (Element of ( dom C22 ));
+cluster ( C22 . C23 ) ->  ConwayGame-like;
+coherence by L238;
+end;
+definition
+let C24 being  ConwayGame-valued non  empty FinSequence;
+attr C24 is  ConwayGameChain-like
+means
+:L248: (for B21 being (Element of ( dom C24 )) holds (B21 > 1 implies ( C24 . ( B21 - 1 ) ) in ( the_Options_of ( C24 . B21 ) )));
+end;
+theorem
+L250: (for B22 being FinSequence holds (for R11 being Nat holds ((R11 in ( dom B22 ) & R11 > 1) implies ( R11 - 1 ) in ( dom B22 ))))
+proof
+let C25 being FinSequence;
+consider C26 being Nat such that L251: ( dom C25 ) = ( Seg C26 ) by FINSEQ_1:def 2;
+thus L252: thesis by L251 , FINSEQ_3:12;
+end;
+registration
+let R14 being ConwayGame;
+cluster <* R14 *> ->  ConwayGameChain-like;
+coherence
+proof
+let C27 being (Element of ( dom <* R14 *> ));
+L253: ( dom <* R14 *> ) = { 1 } by FINSEQ_1:2 , FINSEQ_1:def 8;
+thus L254: thesis by L253 , TARSKI:def 1;
+end;
+end;
+registration
+cluster  ConwayGameChain-like for  ConwayGame-valued non  empty  ConwayGame-valued non  empty  ConwayGame-valued non  empty  ConwayGame-valued non  empty FinSequence;
+existence
+proof
+set D20 = the ConwayGame;
+take <* D20 *>;
+thus L256: thesis;
+end;
+end;
+definition
+mode ConwayGameChain
+ is  ConwayGameChain-like  ConwayGame-valued non  empty FinSequence;
+end;
+theorem
+L259: (for B23 being ConwayGameChain holds (for B24 , B25 being (Element of ( dom B23 )) holds (B24 < B25 implies ( ConwayRank ( B23 . B24 ) ) in ( ConwayRank ( B23 . B25 ) ))))
+proof
+let C28 being ConwayGameChain;
+let C29 , C30 being (Element of ( dom C28 ));
+assume that
+L260: C29 < C30;
+consider C31 being Nat such that L261: ( dom C28 ) = ( Seg C31 ) by FINSEQ_1:def 2;
+defpred S5[ Nat ] means (( C30 - $1 ) in ( dom C28 ) implies ( ConwayRank ( C28 . ( C30 - $1 ) ) ) in ( ConwayRank ( C28 . C30 ) ));
+L262: C29 >= 1 by L261 , FINSEQ_1:1;
+L263: C30 > 1 by L262 , L260 , XXREAL_0:2;
+L264: S5[ 1 ]
+proof
+assume L265: ( C30 - 1 ) in ( dom C28 );
+reconsider D21 = ( C30 - 1 ) as (Element of ( dom C28 )) by L265;
+L266: ( C28 . D21 ) in ( the_Options_of ( C28 . C30 ) ) by L263 , L248;
+thus L267: thesis by L266 , L185;
+end;
+L268: (for B26 being non  empty Nat holds (S5[ B26 ] implies S5[ ( B26 + 1 ) ]))
+proof
+let C32 being non  empty Nat;
+assume L269: S5[ C32 ];
+assume L270: ( C30 - ( C32 + 1 ) ) in ( dom C28 );
+reconsider D22 = ( C30 - ( C32 + 1 ) ) as (Element of ( dom C28 )) by L270;
+L271: C32 <= ( C32 + 1 ) by XREAL_1:31;
+L272: (1 <= D22 & D22 <= ( C30 - C32 ) & ( C30 - C32 ) <= C30 & C30 <= C31) by L271 , L261 , FINSEQ_1:1 , XREAL_1:10 , XREAL_1:43;
+L273: (1 <= ( C30 - C32 ) & ( C30 - C32 ) <= C31) by L272 , XXREAL_0:2;
+L274: (C30 >= ( C32 + 1 ) & C32 <= ( C32 + 1 )) by L273 , XREAL_1:19 , XREAL_1:31;
+L275: ( C30 - C32 ) is Nat by L274 , NAT_1:21 , XXREAL_0:2;
+reconsider D23 = ( C30 - C32 ) as (Element of ( dom C28 )) by L275 , L273 , L261 , FINSEQ_1:1;
+L276: (( D22 + 1 ) > 1 & D22 = ( D23 - 1 )) by XREAL_1:29;
+L277: ( C28 . D22 ) in ( the_Options_of ( C28 . D23 ) ) by L276 , L248;
+L278: (( ConwayRank ( C28 . D22 ) ) in ( ConwayRank ( C28 . D23 ) ) & ( ConwayRank ( C28 . D23 ) ) in ( ConwayRank ( C28 . C30 ) )) by L277 , L185 , L269;
+thus L279: thesis by L278 , ORDINAL1:10;
+end;
+L280: (for B27 being non  empty Nat holds S5[ B27 ]) from NAT_1:sch 10(L264 , L268);
+reconsider D24 = ( C30 - C29 ) as non  empty Nat by L260 , NAT_1:21;
+L281: ( C30 - D24 ) = C29;
+thus L282: thesis by L281 , L280;
+end;
+theorem
+L283: (for B28 being ConwayGameChain holds (for B29 , B30 being (Element of ( dom B28 )) holds (B29 <= B30 implies ( ConwayRank ( B28 . B29 ) ) c= ( ConwayRank ( B28 . B30 ) ))))
+proof
+let C33 being ConwayGameChain;
+let C34 , C35 being (Element of ( dom C33 ));
+assume that
+L284: C34 <= C35;
+per cases  by L284 , XXREAL_0:1;
+suppose L285: C34 < C35;
+
+L286: ( ConwayRank ( C33 . C34 ) ) in ( ConwayRank ( C33 . C35 ) ) by L285 , L259;
+thus L287: thesis by L286 , ORDINAL1:def 2;
+end;
+suppose L288: C34 = C35;
+
+thus L289: thesis by L288;
+end;
+end;
+theorem
+L291: (for R8 being Ordinal holds (for B31 being ConwayGameChain holds (( B31 . ( len B31 ) ) in ( ConwayDay R8 ) implies ( B31 . 1 ) in ( ConwayDay R8 ))))
+proof
+let R8 being Ordinal;
+let C36 being ConwayGameChain;
+assume L292: ( C36 . ( len C36 ) ) in ( ConwayDay R8 );
+reconsider D25 = 1 as (Element of ( dom C36 )) by FINSEQ_5:6;
+reconsider D26 = ( len C36 ) as (Element of ( dom C36 )) by FINSEQ_5:6;
+L293: D25 <= D26 by NAT_1:14;
+L294: (( ConwayRank ( C36 . D25 ) ) c= ( ConwayRank ( C36 . D26 ) ) & ( ConwayRank ( C36 . D26 ) ) c= R8) by L293 , L283 , L292 , L172;
+L295: ( ConwayRank ( C36 . D25 ) ) c= R8 by L294 , XBOOLE_1:1;
+thus L296: ( C36 . 1 ) in ( ConwayDay R8 ) by L295 , L172;
+end;
+L297: (for R14 being ConwayGame holds (ex B32 being ConwayGameChain st (( B32 . 1 ) = R14 & ( B32 . ( len B32 ) ) = R14)))
+proof
+let R14 being ConwayGame;
+take D27 = <* R14 *>;
+L298: ( len D27 ) = 1 by FINSEQ_1:40;
+thus L299: thesis by L298 , FINSEQ_1:40;
+end;
+definition
+let R14 being ConwayGame;
+func the_Tree_of R14 -> set means 
+:L300: (for R5 being set holds (R5 in it iff (ex B33 being ConwayGameChain st (( B33 . 1 ) = R5 & ( B33 . ( len B33 ) ) = R14))));
+existence
+proof
+consider R8 being Ordinal such that L301: R14 in ( ConwayDay R8 ) by L82;
+take D28 = { B34 where B34 is (Element of ( ConwayDay R8 )) : (ex B35 being ConwayGameChain st (( B35 . 1 ) = B34 & ( B35 . ( len B35 ) ) = R14)) };
+let R5 being set;
+thus L302:now
+assume L303: R5 in D28;
+consider C37 being (Element of ( ConwayDay R8 )) such that L304: (C37 = R5 & (ex B36 being ConwayGameChain st (( B36 . 1 ) = C37 & ( B36 . ( len B36 ) ) = R14))) by L303;
+thus L305: (ex B37 being ConwayGameChain st (( B37 . 1 ) = R5 & ( B37 . ( len B37 ) ) = R14)) by L304;
+end;
+assume L306: (ex B38 being ConwayGameChain st (( B38 . 1 ) = R5 & ( B38 . ( len B38 ) ) = R14));
+consider C38 being ConwayGameChain such that L307: (( C38 . 1 ) = R5 & ( C38 . ( len C38 ) ) = R14) by L306;
+L308: ( C38 . 1 ) in ( ConwayDay R8 ) by L291 , L301 , L307;
+thus L309: R5 in D28 by L308 , L307;
+end;
+uniqueness
+proof
+let C39 , C40 being set;
+assume L310: (for R5 being set holds (R5 in C39 iff (ex B39 being ConwayGameChain st (( B39 . 1 ) = R5 & ( B39 . ( len B39 ) ) = R14))));
+assume L311: (for R5 being set holds (R5 in C40 iff (ex B40 being ConwayGameChain st (( B40 . 1 ) = R5 & ( B40 . ( len B40 ) ) = R14))));
+L312:
+now
+let R5 being set;
+thus L313:now
+assume L314: R5 in C39;
+L315: (ex B41 being ConwayGameChain st (( B41 . 1 ) = R5 & ( B41 . ( len B41 ) ) = R14)) by L314 , L310;
+thus L316: R5 in C40 by L315 , L311;
+end;
+thus L317:now
+assume L318: R5 in C40;
+L319: (ex B42 being ConwayGameChain st (( B42 . 1 ) = R5 & ( B42 . ( len B42 ) ) = R14)) by L318 , L311;
+thus L320: R5 in C39 by L319 , L310;
+end;
+end;
+thus L318: C39 = C40 by L312 , TARSKI:1;
+end;
+end;
+registration
+let R14 being ConwayGame;
+cluster ( the_Tree_of R14 ) -> non  empty;
+coherence
+proof
+L320: (ex B43 being ConwayGameChain st (( B43 . 1 ) = R14 & ( B43 . ( len B43 ) ) = R14)) by L297;
+thus L321: thesis by L320 , L300;
+end;
+end;
+definition
+let R14 being ConwayGame;
+func the_proper_Tree_of R14 -> (Subset of ( the_Tree_of R14 )) equals 
+( ( the_Tree_of R14 ) \ { R14 } );
+coherence;
+end;
+theorem
+L324: (for R14 being ConwayGame holds R14 in ( the_Tree_of R14 ))
+proof
+let R14 being ConwayGame;
+L325: (ex B44 being ConwayGameChain st (( B44 . 1 ) = R14 & ( B44 . ( len B44 ) ) = R14)) by L297;
+thus L326: thesis by L325 , L300;
+end;
+definition
+let R8 being Ordinal;
+let C41 being (Element of ( ConwayDay R8 ));
+redefine func the_Tree_of C41 -> (Subset of ( ConwayDay R8 ));
+
+coherence
+proof
+L327: ( the_Tree_of C41 ) c= ( ConwayDay R8 )
+proof
+let R5 being set;
+assume L328: R5 in ( the_Tree_of C41 );
+consider C42 being ConwayGameChain such that L329: (( C42 . 1 ) = R5 & ( C42 . ( len C42 ) ) = C41) by L328 , L300;
+thus L330: R5 in ( ConwayDay R8 ) by L329 , L291;
+end;
+thus L331: thesis by L327;
+end;
+end;
+registration
+let R14 being ConwayGame;
+cluster  ->  ConwayGame-like for (Element of ( the_Tree_of R14 ));
+coherence
+proof
+let C43 being (Element of ( the_Tree_of R14 ));
+consider R8 being Ordinal such that L333: R14 in ( ConwayDay R8 ) by L82;
+L334: (ex B45 being ConwayGameChain st (( B45 . 1 ) = C43 & ( B45 . ( len B45 ) ) = R14)) by L300;
+L335: C43 in ( ConwayDay R8 ) by L334 , L291 , L333;
+thus L336: thesis by L335;
+end;
+end;
+theorem
+L338: (for B46 being ConwayGameChain holds (for B47 being non  empty Nat holds ( B46 | B47 ) is ConwayGameChain))
+proof
+let C44 being ConwayGameChain;
+let C45 being non  empty Nat;
+set D29 = ( len ( C44 | C45 ) );
+L339: ( C44 | C45 ) is  ConwayGame-valued
+proof
+let R1 being set;
+assume that
+L340: R1 in ( dom ( C44 | C45 ) );
+L341: ( dom ( C44 | C45 ) ) c= ( dom C44 ) by RELAT_1:60;
+L342: ( C44 . R1 ) is ConwayGame by L341 , L340;
+thus L343: ( ( C44 | C45 ) . R1 ) is ConwayGame by L342 , L340 , FUNCT_1:47;
+end;
+L344: (( len C44 ) >= 1 & C45 >= 1 & D29 = ( min (C45 , ( len C44 )) )) by FINSEQ_2:21 , NAT_1:14;
+reconsider D30 = ( C44 | C45 ) as  ConwayGame-valued non  empty FinSequence by L344 , L339 , XXREAL_0:20;
+L345: D30 is  ConwayGameChain-like
+proof
+let C46 being (Element of ( dom D30 ));
+assume that
+L346: C46 > 1;
+L347: (( dom D30 ) c= ( dom C44 ) & C46 in ( dom D30 ) & ( C46 - 1 ) in ( dom D30 )) by L250 , L346 , RELAT_1:60;
+L348: (C46 in ( dom C44 ) & ( C44 . C46 ) = ( D30 . C46 ) & ( C44 . ( C46 - 1 ) ) = ( D30 . ( C46 - 1 ) )) by L347 , FUNCT_1:47;
+thus L349: thesis by L348 , L248 , L346;
+end;
+thus L350: thesis by L345;
+end;
+theorem
+L351: (for B48 , B49 being ConwayGameChain holds ((ex R14 being ConwayGame st (R14 = ( B49 . 1 ) & ( B48 . ( len B48 ) ) in ( the_Options_of R14 ))) implies ( B48 ^ B49 ) is ConwayGameChain))
+proof
+let C47 , C48 being ConwayGameChain;
+assume L352: (ex R14 being ConwayGame st (R14 = ( C48 . 1 ) & ( C47 . ( len C47 ) ) in ( the_Options_of R14 )));
+reconsider D31 = ( C48 . 1 ) as ConwayGame by L352;
+L353: ( C47 ^ C48 ) is  ConwayGame-valued
+proof
+let R1 being set;
+set D32 = ( ( C47 ^ C48 ) . R1 );
+assume L354: R1 in ( dom ( C47 ^ C48 ) );
+L355: D32 in ( rng ( C47 ^ C48 ) ) by L354 , FUNCT_1:3;
+L356: D32 in ( ( rng C47 ) \/ ( rng C48 ) ) by L355 , FINSEQ_1:31;
+per cases  by L356 , XBOOLE_0:def 3;
+suppose L357: D32 in ( rng C47 );
+
+L358: (ex R5 being set st (R5 in ( dom C47 ) & D32 = ( C47 . R5 ))) by L357 , FUNCT_1:def 3;
+thus L359: D32 is ConwayGame by L358;
+end;
+suppose L360: D32 in ( rng C48 );
+
+L361: (ex R5 being set st (R5 in ( dom C48 ) & D32 = ( C48 . R5 ))) by L360 , FUNCT_1:def 3;
+thus L362: D32 is ConwayGame by L361;
+end;
+end;
+reconsider D33 = ( C47 ^ C48 ) as  ConwayGame-valued non  empty FinSequence by L353;
+L364: D33 is  ConwayGameChain-like
+proof
+let C49 being (Element of ( dom D33 ));
+assume L365: C49 > 1;
+per cases  by XXREAL_0:1;
+suppose L366: C49 < ( ( len C47 ) + 1 );
+
+L367: C49 <= ( len C47 ) by L366 , NAT_1:22;
+reconsider D34 = C49 as (Element of ( dom C47 )) by L367 , L365 , FINSEQ_3:25;
+L368: ( D34 - 1 ) in ( dom C47 ) by L250 , L365;
+L369: (( C47 . D34 ) = ( D33 . D34 ) & ( C47 . ( D34 - 1 ) ) = ( D33 . ( D34 - 1 ) )) by L368 , FINSEQ_1:def 7;
+thus L370: thesis by L369 , L365 , L248;
+end;
+suppose L371: C49 = ( ( len C47 ) + 1 );
+
+L372: (( len C47 ) in ( dom C47 ) & 1 in ( dom C48 )) by FINSEQ_5:6;
+L373: (( D33 . ( C49 - 1 ) ) = ( C47 . ( len C47 ) ) & ( D33 . C49 ) = ( C48 . 1 )) by L372 , L371 , FINSEQ_1:def 7;
+thus L374: thesis by L373 , L352;
+end;
+suppose L375: C49 > ( ( len C47 ) + 1 );
+
+L376: (C49 <= ( len D33 ) & ( len D33 ) = ( ( len C47 ) + ( len C48 ) ) & C49 >= ( len C47 )) by L375 , FINSEQ_1:22 , FINSEQ_3:25 , XREAL_1:38;
+L377: (( C49 - ( len C47 ) ) > 1 & ( C49 - ( len C47 ) ) <= ( len C48 ) & ( C49 - ( len C47 ) ) is Nat) by L376 , L375 , NAT_1:21 , XREAL_1:20;
+reconsider D35 = ( C49 - ( len C47 ) ) as (Element of ( dom C48 )) by L377 , FINSEQ_3:25;
+L378: ( D35 - 1 ) in ( dom C48 ) by L377 , L250;
+L379: (( D33 . ( ( len C47 ) + D35 ) ) = ( C48 . D35 ) & ( D33 . ( ( len C47 ) + ( D35 - 1 ) ) ) = ( C48 . ( D35 - 1 ) )) by L378 , FINSEQ_1:def 7;
+thus L380: thesis by L379 , L377 , L248;
+end;
+end;
+thus L382: thesis by L364;
+end;
+theorem
+L383: (for R1 being set holds (for R14 being ConwayGame holds (R1 in ( the_Tree_of R14 ) iff (R1 = R14 or (ex R18 being ConwayGame st (R18 in ( the_Options_of R14 ) & R1 in ( the_Tree_of R18 )))))))
+proof
+let R1 being set;
+let R14 being ConwayGame;
+thus L384:now
+assume L385: R1 in ( the_Tree_of R14 );
+consider C50 being ConwayGameChain such that L386: (( C50 . 1 ) = R1 & ( C50 . ( len C50 ) ) = R14) by L385 , L300;
+reconsider D36 = ( len C50 ) as (Element of ( dom C50 )) by FINSEQ_5:6;
+assume L387: R1 <> R14;
+L388: D36 > 1 by L387 , L386 , NAT_1:53;
+reconsider D37 = ( D36 - 1 ) as (Element of ( dom C50 )) by L250 , L386 , L387 , NAT_1:53;
+take D38 = ( C50 . D37 );
+thus L389: D38 in ( the_Options_of R14 ) by L248 , L388 , L386;
+reconsider D39 = ( C50 | D37 ) as ConwayGameChain by L338;
+L390: (D37 < D36 & 1 in ( dom D39 ) & ( len D39 ) in ( dom D39 )) by FINSEQ_5:6 , XREAL_1:44;
+L391: (( len D39 ) = D37 & ( D39 . 1 ) = ( C50 . 1 ) & ( D39 . ( len D39 ) ) = ( C50 . ( len D39 ) )) by L390 , FINSEQ_1:59 , FUNCT_1:47;
+thus L392: R1 in ( the_Tree_of D38 ) by L391 , L300 , L386;
+end;
+thus L393:now
+assume L394: (R1 = R14 or (ex R18 being ConwayGame st (R18 in ( the_Options_of R14 ) & R1 in ( the_Tree_of R18 ))));
+per cases  by L394;
+suppose L395: R1 = R14;
+
+thus L396: R1 in ( the_Tree_of R14 ) by L395 , L324;
+end;
+suppose L397: (ex R18 being ConwayGame st (R18 in ( the_Options_of R14 ) & R1 in ( the_Tree_of R18 )));
+
+consider R18 being ConwayGame such that L398: (R18 in ( the_Options_of R14 ) & R1 in ( the_Tree_of R18 )) by L397;
+consider C51 being ConwayGameChain such that L399: (( C51 . 1 ) = R1 & ( C51 . ( len C51 ) ) = R18) by L398 , L300;
+L400: (ex R16 being ConwayGame st (R16 = ( <* R14 *> . 1 ) & ( C51 . ( len C51 ) ) in ( the_Options_of R16 )))
+proof
+take R14;
+thus L401: thesis by L398 , L399 , FINSEQ_1:def 8;
+end;
+reconsider D40 = ( C51 ^ <* R14 *> ) as ConwayGameChain by L400 , L351;
+L402: (1 in ( dom C51 ) & ( len D40 ) = ( ( len C51 ) + 1 )) by FINSEQ_2:16 , FINSEQ_5:6;
+L403: (( D40 . 1 ) = R1 & ( D40 . ( len D40 ) ) = R14) by L402 , L399 , FINSEQ_1:42 , FINSEQ_1:def 7;
+thus L404: R1 in ( the_Tree_of R14 ) by L403 , L300;
+end;
+end;
+end;
+theorem
+L394: (for R14 being ConwayGame holds (for R18 being ConwayGame holds (R18 in ( the_Tree_of R14 ) implies (R18 = R14 or ( ConwayRank R18 ) in ( ConwayRank R14 )))))
+proof
+let R14 being ConwayGame;
+let R18 being ConwayGame;
+assume L395: R18 in ( the_Tree_of R14 );
+consider C52 being ConwayGameChain such that L396: (( C52 . 1 ) = R18 & ( C52 . ( len C52 ) ) = R14) by L395 , L300;
+reconsider D41 = 1 as (Element of ( dom C52 )) by FINSEQ_5:6;
+reconsider D42 = ( len C52 ) as (Element of ( dom C52 )) by FINSEQ_5:6;
+L397: D42 >= 1 by NAT_1:14;
+per cases  by L397 , XXREAL_0:1;
+suppose L398: D42 = 1;
+
+thus L399: thesis by L398 , L396;
+end;
+suppose L400: D42 > 1;
+
+L401: ( ConwayRank ( C52 . D41 ) ) in ( ConwayRank ( C52 . D42 ) ) by L400 , L259;
+thus L402: thesis by L401 , L396;
+end;
+end;
+theorem
+L404: (for R14 being ConwayGame holds (for R18 being ConwayGame holds (R18 in ( the_Tree_of R14 ) implies ( ConwayRank R18 ) c= ( ConwayRank R14 ))))
+proof
+let R14 being ConwayGame;
+let R18 being ConwayGame;
+assume L405: R18 in ( the_Tree_of R14 );
+per cases  by L405 , L394;
+suppose L406: R18 = R14;
+
+thus L407: thesis by L406;
+end;
+suppose L408: ( ConwayRank R18 ) in ( ConwayRank R14 );
+
+thus L409: thesis by L408 , ORDINAL1:def 2;
+end;
+end;
+theorem
+L411: (for R14 being ConwayGame holds (for B50 being set holds ((R14 in B50 & (for R16 being ConwayGame holds (R16 in B50 implies ( the_Options_of R16 ) c= B50))) implies ( the_Tree_of R14 ) c= B50)))
+proof
+let R14 being ConwayGame;
+let C53 being set;
+assume that
+L412: (R14 in C53 & (for R16 being ConwayGame holds (R16 in C53 implies ( the_Options_of R16 ) c= C53)));
+thus L413:now
+let R5 being set;
+assume L414: R5 in ( the_Tree_of R14 );
+consider C54 being ConwayGameChain such that L415: (( C54 . 1 ) = R5 & ( C54 . ( len C54 ) ) = R14) by L414 , L300;
+defpred S6[ Nat ] means (( $1 + 1 ) <= ( len C54 ) & ( C54 . ( $1 + 1 ) ) in C53);
+L416: ( len C54 ) > ( 0 );
+reconsider D43 = ( ( len C54 ) - 1 ) as Nat by L416 , NAT_1:20;
+L417: S6[ D43 ] by L415 , L412;
+L418: (ex R13 being Nat st S6[ R13 ]) by L417;
+L419: (for R13 being Nat holds ((R13 <> ( 0 ) & S6[ R13 ]) implies (ex R11 being Nat st (R11 < R13 & S6[ R11 ]))))
+proof
+let R13 being Nat;
+assume L420: (R13 <> ( 0 ) & S6[ R13 ]);
+reconsider D44 = ( R13 - 1 ) as Nat by L420 , NAT_1:20;
+take D44;
+thus L421: D44 < R13 by XREAL_1:147;
+L422: ( D44 + 1 ) < ( R13 + 1 ) by L421 , XREAL_1:6;
+thus L423: ( D44 + 1 ) <= ( len C54 ) by L422 , L420 , XXREAL_0:2;
+L424: ( R13 + 1 ) > 1 by L420 , XREAL_1:29;
+reconsider D45 = ( R13 + 1 ) as (Element of ( dom C54 )) by L424 , L420 , FINSEQ_3:25;
+L425: (( C54 . ( D45 - 1 ) ) in ( the_Options_of ( C54 . D45 ) ) & ( the_Options_of ( C54 . D45 ) ) c= C53) by L248 , L412 , L420 , L424;
+thus L426: ( C54 . ( D44 + 1 ) ) in C53 by L425;
+end;
+L427: S6[ ( 0 ) ] from NAT_1:sch 7(L418 , L419);
+thus L428: R5 in C53 by L427 , L415;
+end;
+end;
+theorem
+L414: (for R16 being ConwayGame holds (for R17 being ConwayGame holds (R16 in ( the_Tree_of R17 ) implies ( the_Tree_of R16 ) c= ( the_Tree_of R17 ))))
+proof
+let R16 being ConwayGame;
+let R17 being ConwayGame;
+assume L415: R16 in ( the_Tree_of R17 );
+consider C55 being ConwayGameChain such that L416: (( C55 . 1 ) = R16 & ( C55 . ( len C55 ) ) = R17) by L415 , L300;
+thus L417:now
+let R1 being set;
+assume L418: R1 in ( the_Tree_of R16 );
+consider C56 being ConwayGameChain such that L419: (( C56 . 1 ) = R1 & ( C56 . ( len C56 ) ) = R16) by L418 , L300;
+L420: ( len C56 ) >= 1 by NAT_1:14;
+per cases  by L420 , XXREAL_0:1;
+suppose L421: ( len C56 ) = 1;
+
+thus L422: R1 in ( the_Tree_of R17 ) by L421 , L416 , L419 , L300;
+end;
+suppose L423: ( len C56 ) > 1;
+
+reconsider D46 = ( ( len C56 ) - 1 ) as non  empty Nat by L423 , NAT_1:21;
+reconsider D47 = ( C56 | D46 ) as ConwayGameChain by L338;
+L424: (( len C56 ) is (Element of ( dom C56 )) & D46 <= ( len C56 )) by FINSEQ_5:6 , XREAL_1:43;
+L425: (( C56 . D46 ) in ( the_Options_of R16 ) & ( D47 . D46 ) = ( C56 . D46 ) & ( len D47 ) = D46) by L424 , L248 , L419 , L423 , FINSEQ_1:59 , FINSEQ_3:112;
+reconsider D48 = ( D47 ^ C55 ) as ConwayGameChain by L425 , L351 , L416;
+L426: D46 >= 1 by NAT_1:14;
+L427: (1 in ( dom D47 ) & ( len C55 ) in ( dom C55 ) & ( D47 . 1 ) = ( C56 . 1 ) & ( len D48 ) = ( ( len D47 ) + ( len C55 ) )) by L426 , FINSEQ_1:22 , FINSEQ_3:112 , FINSEQ_5:6;
+L428: (( D48 . 1 ) = R1 & ( D48 . ( len D48 ) ) = R17) by L427 , L416 , L419 , FINSEQ_1:def 7;
+thus L429: R1 in ( the_Tree_of R17 ) by L428 , L300;
+end;
+end;
+end;
+theorem
+L418: (for R16 being ConwayGame holds (for R17 being ConwayGame holds (R16 in ( the_Tree_of R17 ) implies ( the_proper_Tree_of R16 ) c= ( the_proper_Tree_of R17 ))))
+proof
+let R16 being ConwayGame;
+let R17 being ConwayGame;
+assume L419: R16 in ( the_Tree_of R17 );
+L420: ( the_Tree_of R16 ) c= ( the_Tree_of R17 ) by L419 , L414;
+thus L421:now
+let R1 being set;
+assume L422: R1 in ( the_proper_Tree_of R16 );
+L423: (R1 in ( the_Tree_of R16 ) & R1 <> R16) by L422 , ZFMISC_1:56;
+assume L424: (not R1 in ( the_proper_Tree_of R17 ));
+L425: R1 = R17 by L424 , L420 , L423 , ZFMISC_1:56;
+per cases  by L394 , L419;
+suppose L426: R16 = R17;
+
+thus L427: contradiction by L426 , L422 , L424;
+end;
+suppose L428: ( ConwayRank R16 ) in ( ConwayRank R17 );
+
+reconsider D49 = R1 as ConwayGame by L422;
+L429: ( ConwayRank D49 ) in ( ConwayRank R17 ) by L428 , L404 , L423 , ORDINAL1:12;
+thus L430: contradiction by L429 , L425;
+end;
+end;
+end;
+theorem
+L422: (for R14 being ConwayGame holds ( the_Options_of R14 ) c= ( the_proper_Tree_of R14 ))
+proof
+let R14 being ConwayGame;
+let R1 being set;
+assume that
+L423: R1 in ( the_Options_of R14 );
+reconsider D50 = R1 as ConwayGame by L423 , L199;
+L424: D50 in ( the_Tree_of D50 ) by L324;
+L425: D50 in ( the_Tree_of R14 ) by L424 , L423 , L383;
+L426: (D50 = R14 or D50 in ( the_proper_Tree_of R14 )) by L425 , ZFMISC_1:56;
+thus L427: thesis by L426 , L423 , L195;
+end;
+theorem
+L428: (for R14 being ConwayGame holds ( the_Options_of R14 ) c= ( the_Tree_of R14 ))
+proof
+let R14 being ConwayGame;
+L429: ( the_Options_of R14 ) c= ( the_proper_Tree_of R14 ) by L422;
+thus L430: thesis by L429 , XBOOLE_1:1;
+end;
+theorem
+L431: (for R16 being ConwayGame holds (for R17 being ConwayGame holds (R16 in ( the_proper_Tree_of R17 ) implies ( the_Tree_of R16 ) c= ( the_proper_Tree_of R17 ))))
+proof
+let R16 being ConwayGame;
+let R17 being ConwayGame;
+assume L432: R16 in ( the_proper_Tree_of R17 );
+L433: (R16 in ( the_Tree_of R17 ) & R16 <> R17) by L432 , ZFMISC_1:56;
+L434: ( the_Tree_of R16 ) c= ( the_Tree_of R17 ) by L414 , L432;
+L435: (not R17 in ( the_Tree_of R16 ))
+proof
+L436: ( ConwayRank R16 ) in ( ConwayRank R17 ) by L433 , L394;
+assume L437: R17 in ( the_Tree_of R16 );
+L438: ( ConwayRank R17 ) c= ( ConwayRank R16 ) by L437 , L404;
+L439: ( ConwayRank R16 ) in ( ConwayRank R16 ) by L438 , L436;
+thus L440: contradiction by L439;
+end;
+thus L441: thesis by L435 , L434 , ZFMISC_1:34;
+end;
+theorem
+L442: (for R14 being ConwayGame holds (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies ( the_Tree_of R18 ) c= ( the_proper_Tree_of R14 ))))
+proof
+let R14 being ConwayGame;
+let R18 being ConwayGame;
+assume L443: R18 in ( the_Options_of R14 );
+L444: ( the_Options_of R14 ) c= ( the_proper_Tree_of R14 ) by L422;
+thus L445: thesis by L444 , L431 , L443;
+end;
+theorem
+L446: ( the_Tree_of ( ConwayZero ) ) = { ( ConwayZero ) } by L54 , ZFMISC_1:33;
+theorem
+L447: (for R14 being ConwayGame holds ( ConwayZero ) in ( the_Tree_of R14 ))
+proof
+let R14 being ConwayGame;
+defpred S7[ ConwayGame ] means (not ( ConwayZero ) in ( the_Tree_of $1 ));
+assume L448: (not thesis);
+L449: (ex R14 being ConwayGame st S7[ R14 ]) by L448;
+consider R14 being ConwayGame such that L450: (S7[ R14 ] & (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies (not S7[ R18 ])))) from ConwayGameMin(L449);
+per cases  by L124;
+suppose L451: R14 = ( ConwayZero );
+
+thus L452: contradiction by L451 , L324 , L450;
+end;
+suppose L453: ( the_Options_of R14 ) <> ( {} );
+
+consider R1 being set such that L454: R1 in ( the_Options_of R14 ) by L453 , XBOOLE_0:def 1;
+reconsider D51 = R1 as ConwayGame by L199 , L454;
+L455: ( ConwayZero ) in ( the_Tree_of D51 ) by L450 , L454;
+L456: ( the_Options_of R14 ) c= ( the_Tree_of R14 ) by L428;
+L457: ( the_Tree_of D51 ) c= ( the_Tree_of R14 ) by L456 , L414 , L454;
+thus L458: contradiction by L457 , L450 , L455;
+end;
+end;
+scheme ConwayGameMin2 { P4[ConwayGame] } : (ex R14 being ConwayGame st (P4[ R14 ] & (for R18 being ConwayGame holds (R18 in ( the_proper_Tree_of R14 ) implies (not P4[ R18 ])))))
+provided
+L460: (ex R14 being ConwayGame st P4[ R14 ])
+proof
+consider R14 being ConwayGame such that L461: (P4[ R14 ] & (for R16 being ConwayGame holds (( ConwayRank R16 ) in ( ConwayRank R14 ) implies (not P4[ R16 ])))) from ConwayGameMinTot(L460);
+take R14;
+L462:
+now
+let R18 being ConwayGame;
+assume L463: R18 in ( the_proper_Tree_of R14 );
+L464: (R18 in ( the_Tree_of R14 ) & R18 <> R14) by L463 , ZFMISC_1:56;
+L465: ( ConwayRank R18 ) in ( ConwayRank R14 ) by L464 , L394;
+thus L466: (not P4[ R18 ]) by L465 , L461;
+end;
+thus L467: thesis by L462 , L461;
+end;
+begin
+scheme Func1RecUniq { F1(ConwayGame , Function) -> set } : (for R14 being ConwayGame holds (for B51 , B52 being Function holds ((( dom B51 ) = ( the_Tree_of R14 ) & ( dom B52 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B51 ) implies ( B51 . R16 ) = F1(R16 , ( B51 | ( the_proper_Tree_of R16 ) )))) & (for R16 being ConwayGame holds (R16 in ( dom B52 ) implies ( B52 . R16 ) = F1(R16 , ( B52 | ( the_proper_Tree_of R16 ) ))))) implies B51 = B52)))
+proof
+let R14 being ConwayGame;
+let C57 , C58 being Function;
+assume that
+L468: (( dom C57 ) = ( the_Tree_of R14 ) & ( dom C58 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom C57 ) implies ( C57 . R16 ) = F1(R16 , ( C57 | ( the_proper_Tree_of R16 ) )))) & (for R16 being ConwayGame holds (R16 in ( dom C58 ) implies ( C58 . R16 ) = F1(R16 , ( C58 | ( the_proper_Tree_of R16 ) )))));
+defpred S8[ ConwayGame ] means ($1 in ( the_Tree_of R14 ) & ( C57 . $1 ) <> ( C58 . $1 ));
+assume L469: C57 <> C58;
+L470: (ex R1 being set st (R1 in ( the_Tree_of R14 ) & ( C57 . R1 ) <> ( C58 . R1 ))) by L469 , L468 , FUNCT_1:def 11;
+L471: (ex R15 being ConwayGame st S8[ R15 ]) by L470;
+consider C59 being ConwayGame such that L472: (S8[ C59 ] & (for R18 being ConwayGame holds (R18 in ( the_proper_Tree_of C59 ) implies (not S8[ R18 ])))) from ConwayGameMin2(L471);
+L473: ( C57 | ( the_proper_Tree_of C59 ) ) = ( C58 | ( the_proper_Tree_of C59 ) )
+proof
+L474:
+now
+set D52 = ( C57 | ( the_proper_Tree_of C59 ) );
+set D53 = ( C58 | ( the_proper_Tree_of C59 ) );
+L475: ( the_Tree_of C59 ) c= ( the_Tree_of R14 ) by L472 , L414;
+L476: ( the_proper_Tree_of C59 ) c= ( the_Tree_of R14 ) by L475 , XBOOLE_1:1;
+L477: (( dom D52 ) = ( the_proper_Tree_of C59 ) & ( dom D53 ) = ( the_proper_Tree_of C59 )) by L468 , L475 , RELAT_1:62 , XBOOLE_1:1;
+thus L478: ( dom D52 ) = ( dom D53 ) by L477;
+thus L479:now
+let R1 being set;
+assume that
+L480: R1 in ( dom D52 );
+reconsider D54 = R1 as ConwayGame by L477 , L480;
+L481: (( C57 . R1 ) = ( C58 . R1 ) & ( D52 . R1 ) = ( C57 . R1 ) & ( D53 . R1 ) = ( C58 . R1 )) by L472 , L476 , L477 , L480 , FUNCT_1:47;
+thus L482: ( D52 . R1 ) = ( D53 . R1 ) by L481;
+end;
+end;
+thus L480: thesis by L474 , FUNCT_1:def 11;
+end;
+L481: (( C57 . C59 ) = F1(C59 , ( C57 | ( the_proper_Tree_of C59 ) )) & ( C58 . C59 ) = F1(C59 , ( C58 | ( the_proper_Tree_of C59 ) ))) by L468 , L472;
+thus L482: contradiction by L481 , L473 , L472;
+end;
+scheme Func1RecEx { F2(ConwayGame , Function) -> set } : (for R14 being ConwayGame holds (ex B53 being Function st (( dom B53 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B53 ) implies ( B53 . R16 ) = F2(R16 , ( B53 | ( the_proper_Tree_of R16 ) )))))))
+proof
+defpred S9[ Function ] means (for R14 being ConwayGame holds (R14 in ( dom $1 ) implies ( $1 . R14 ) = F2(R14 , ( $1 | ( the_proper_Tree_of R14 ) ))));
+defpred S10[ ConwayGame ] means (ex B54 being Function st (( dom B54 ) = ( the_Tree_of $1 ) & S9[ B54 ]));
+defpred S11[ set , set ] means (ex B55 being ConwayGame st ($1 = B55 & (ex B56 being Function st ($2 = B56 & ( dom B56 ) = ( the_Tree_of B55 ) & S9[ B56 ]))));
+L483: (for R14 being ConwayGame holds (for B57 , B58 being Function holds ((( dom B57 ) = ( the_Tree_of R14 ) & ( dom B58 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B57 ) implies ( B57 . R16 ) = F2(R16 , ( B57 | ( the_proper_Tree_of R16 ) )))) & (for R16 being ConwayGame holds (R16 in ( dom B58 ) implies ( B58 . R16 ) = F2(R16 , ( B58 | ( the_proper_Tree_of R16 ) ))))) implies B57 = B58))) from Func1RecUniq;
+L484: (for R1 being set holds (for R2 being set holds (for R5 being set holds ((S11[ R1 , R2 ] & S11[ R1 , R5 ]) implies R2 = R5)))) by L483;
+L485: (for R14 being ConwayGame holds (for B59 being Function holds (S9[ B59 ] implies S9[ ( B59 | ( the_Tree_of R14 ) ) ])))
+proof
+let R14 being ConwayGame;
+let C60 being Function;
+assume that
+L486: S9[ C60 ];
+let R16 being ConwayGame;
+assume that
+L487: R16 in ( dom ( C60 | ( the_Tree_of R14 ) ) );
+L488: ( dom ( C60 | ( the_Tree_of R14 ) ) ) c= ( dom C60 ) by RELAT_1:60;
+L489: (( C60 . R16 ) = F2(R16 , ( C60 | ( the_proper_Tree_of R16 ) )) & ( C60 . R16 ) = ( ( C60 | ( the_Tree_of R14 ) ) . R16 )) by L488 , L486 , L487 , FUNCT_1:47;
+L490: ( dom ( C60 | ( the_Tree_of R14 ) ) ) c= ( the_Tree_of R14 ) by RELAT_1:58;
+L491: ( the_Tree_of R16 ) c= ( the_Tree_of R14 ) by L490 , L414 , L487;
+thus L492: thesis by L491 , L489 , RELAT_1:74 , XBOOLE_1:1;
+end;
+L493: (for R14 being ConwayGame holds ((for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies S10[ R18 ])) implies S10[ R14 ]))
+proof
+let R14 being ConwayGame;
+assume L494: (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies S10[ R18 ]));
+consider C61 being set such that L495: (for R2 being set holds (R2 in C61 iff (ex R1 being set st (R1 in ( the_Tree_of R14 ) & S11[ R1 , R2 ])))) from TARSKI:sch 1(L484);
+L496: C61 is  functional  compatible
+proof
+thus L497: C61 is  functional
+proof
+let R2 being set;
+assume L498: R2 in C61;
+L499: (ex R1 being set st (R1 in ( the_Tree_of R14 ) & S11[ R1 , R2 ])) by L498 , L495;
+thus L500: thesis by L499;
+end;
+
+L501:
+now
+let C62 , C63 being Function;
+assume L502: C62 in C61;
+L503: (ex R1 being set st (R1 in ( the_Tree_of R14 ) & S11[ R1 , C62 ])) by L502 , L495;
+consider R16 being ConwayGame such that L504: (R16 in ( the_Tree_of R14 ) & ( dom C62 ) = ( the_Tree_of R16 ) & S9[ C62 ]) by L503;
+assume L505: C63 in C61;
+L506: (ex R1 being set st (R1 in ( the_Tree_of R14 ) & S11[ R1 , C63 ])) by L505 , L495;
+consider R17 being ConwayGame such that L507: (R17 in ( the_Tree_of R14 ) & ( dom C63 ) = ( the_Tree_of R17 ) & S9[ C63 ]) by L506;
+thus L508: C62 tolerates C63
+proof
+let R1 being set;
+assume L509: R1 in ( ( dom C62 ) /\ ( dom C63 ) );
+L510: (R1 in ( the_Tree_of R16 ) & R1 in ( the_Tree_of R17 )) by L509 , L504 , L507 , XBOOLE_0:def 4;
+reconsider D55 = R1 as ConwayGame by L510;
+set D56 = ( the_Tree_of D55 );
+L511: (D56 c= ( dom C62 ) & D56 c= ( dom C63 )) by L414 , L504 , L507 , L510;
+L512: (( dom ( C62 | D56 ) ) = D56 & ( dom ( C63 | D56 ) ) = D56 & S9[ ( C62 | D56 ) ] & S9[ ( C63 | D56 ) ]) by L511 , L485 , L504 , L507 , RELAT_1:62;
+L513: (( C62 | D56 ) = ( C63 | D56 ) & D55 in ( dom ( C62 | D56 ) ) & D55 in ( dom ( C63 | D56 ) )) by L512 , L483 , L324;
+L514: (( C62 | D56 ) = ( C63 | D56 ) & ( C62 . D55 ) = ( ( C62 | D56 ) . D55 ) & ( C63 . D55 ) = ( ( C63 | D56 ) . D55 )) by L513 , FUNCT_1:47;
+thus L515: thesis by L514;
+end;
+
+end;
+thus L509: C61 is  compatible by L501 , COMPUT_1:def 1;
+end;
+reconsider D57 = C61 as  functional  compatible set by L496;
+reconsider D58 = ( union D57 ) as Function;
+take D58;
+L510: ( the_proper_Tree_of R14 ) c= ( dom D58 )
+proof
+let R1 being set;
+assume L511: R1 in ( the_proper_Tree_of R14 );
+L512: (R1 in ( the_Tree_of R14 ) & R1 <> R14) by L511 , ZFMISC_1:56;
+consider R18 being ConwayGame such that L513: (R18 in ( the_Options_of R14 ) & R1 in ( the_Tree_of R18 )) by L512 , L383;
+consider C64 being Function such that L514: (( dom C64 ) = ( the_Tree_of R18 ) & S9[ C64 ]) by L494 , L513;
+L515: ( the_Options_of R14 ) c= ( the_Tree_of R14 ) by L428;
+L516: C64 in C61 by L515 , L495 , L513 , L514;
+L517: (( dom C64 ) c= ( dom D58 ) & R1 in ( dom C64 )) by L516 , L513 , L514 , COMPUT_1:13;
+thus L518: thesis by L517;
+end;
+L519: ( dom D58 ) c= ( the_Tree_of R14 )
+proof
+let R1 being set;
+assume L520: R1 in ( dom D58 );
+L521: [ R1 , ( D58 . R1 ) ] in D58 by L520 , FUNCT_1:def 2;
+L522: (ex R2 being set st ([ R1 , ( D58 . R1 ) ] in R2 & R2 in C61)) by L521 , TARSKI:def 4;
+consider C65 being Function such that L523: ([ R1 , ( D58 . R1 ) ] in C65 & C65 in C61) by L522;
+L524: (ex R2 being set st (R2 in ( the_Tree_of R14 ) & S11[ R2 , C65 ])) by L523 , L495;
+consider R16 being ConwayGame such that L525: (R16 in ( the_Tree_of R14 ) & ( dom C65 ) = ( the_Tree_of R16 )) by L524;
+L526: (R1 in ( dom C65 ) & ( dom C65 ) c= ( the_Tree_of R14 )) by L523 , L525 , L414 , XTUPLE_0:def 12;
+thus L527: R1 in ( the_Tree_of R14 ) by L526;
+end;
+L528: S9[ D58 ]
+proof
+let R16 being ConwayGame;
+assume L529: R16 in ( dom D58 );
+L530: [ R16 , ( D58 . R16 ) ] in D58 by L529 , FUNCT_1:def 2;
+L531: (ex R1 being set st ([ R16 , ( D58 . R16 ) ] in R1 & R1 in C61)) by L530 , TARSKI:def 4;
+consider C66 being Function such that L532: ([ R16 , ( D58 . R16 ) ] in C66 & C66 in C61) by L531;
+L533: (ex R1 being set st (R1 in ( the_Tree_of R14 ) & S11[ R1 , C66 ])) by L495 , L532;
+consider R18 being ConwayGame such that L534: (R18 in ( the_Tree_of R14 ) & ( dom C66 ) = ( the_Tree_of R18 ) & S9[ C66 ]) by L533;
+L535: ( C66 | ( the_proper_Tree_of R16 ) ) = ( D58 | ( the_proper_Tree_of R16 ) )
+proof
+L536:
+now
+L537: R16 in ( the_Tree_of R18 ) by L532 , L534 , FUNCT_1:1;
+L538: ( the_Tree_of R16 ) c= ( the_Tree_of R18 ) by L537 , L414;
+L539: ( the_proper_Tree_of R16 ) c= ( dom C66 ) by L538 , L534 , XBOOLE_1:1;
+L540: ( dom C66 ) c= ( dom D58 ) by L532 , COMPUT_1:13;
+L541: (( dom ( C66 | ( the_proper_Tree_of R16 ) ) ) = ( the_proper_Tree_of R16 ) & ( dom ( D58 | ( the_proper_Tree_of R16 ) ) ) = ( the_proper_Tree_of R16 )) by L540 , L539 , RELAT_1:62 , XBOOLE_1:1;
+thus L542: ( dom ( C66 | ( the_proper_Tree_of R16 ) ) ) = ( dom ( D58 | ( the_proper_Tree_of R16 ) ) ) by L541;
+thus L543:now
+let R1 being set;
+assume L544: R1 in ( dom ( C66 | ( the_proper_Tree_of R16 ) ) );
+L545: (R1 in ( dom C66 ) & R1 in ( dom ( D58 | ( the_proper_Tree_of R16 ) ) )) by L544 , L541 , RELAT_1:57;
+L546: (( C66 . R1 ) = ( D58 . R1 ) & ( ( C66 | ( the_proper_Tree_of R16 ) ) . R1 ) = ( C66 . R1 ) & ( ( D58 | ( the_proper_Tree_of R16 ) ) . R1 ) = ( D58 . R1 )) by L545 , L544 , L532 , COMPUT_1:13 , FUNCT_1:47;
+thus L547: ( ( C66 | ( the_proper_Tree_of R16 ) ) . R1 ) = ( ( D58 | ( the_proper_Tree_of R16 ) ) . R1 ) by L546;
+end;
+end;
+thus L544: thesis by L536 , FUNCT_1:def 11;
+end;
+L545: R16 in ( the_Tree_of R18 ) by L532 , L534 , FUNCT_1:1;
+L546: (( C66 . R16 ) = F2(R16 , ( C66 | ( the_proper_Tree_of R16 ) )) & ( C66 . R16 ) = ( D58 . R16 )) by L545 , L534 , L532 , COMPUT_1:13;
+thus L547: ( D58 . R16 ) = F2(R16 , ( D58 | ( the_proper_Tree_of R16 ) )) by L546 , L535;
+end;
+L548: R14 in ( dom D58 )
+proof
+assume L549: (not R14 in ( dom D58 ));
+set D59 = F2(R14 , ( D58 | ( the_proper_Tree_of R14 ) ));
+L550: ( dom { [ R14 , D59 ] } ) = { R14 } by RELAT_1:9;
+L551: { [ R14 , D59 ] } tolerates D58 by L550 , L549 , PARTFUN1:56 , ZFMISC_1:50;
+L552: (ex B60 being Function st B60 = ( { [ R14 , D59 ] } \/ D58 )) by L551 , PARTFUN1:51;
+reconsider D60 = ( { [ R14 , D59 ] } \/ D58 ) as Function by L552;
+L553: ( dom D60 ) = ( ( dom D58 ) \/ ( dom { [ R14 , D59 ] } ) ) by RELAT_1:1;
+L554: ( dom D60 ) = ( ( dom D58 ) \/ { R14 } ) by L553 , RELAT_1:9;
+L555: S11[ R14 , D60 ]
+proof
+take R14;
+thus L556: R14 = R14;
+take D60;
+thus L557: D60 = D60;
+L558:
+now
+thus L559:now
+let R1 being set;
+assume L560: R1 in ( the_Tree_of R14 );
+L561: R1 in ( ( { R14 } /\ ( the_Tree_of R14 ) ) \/ ( ( the_Tree_of R14 ) \ { R14 } ) ) by L560 , XBOOLE_1:51;
+per cases  by L561 , XBOOLE_0:def 3;
+suppose L562: R1 in ( { R14 } /\ ( the_Tree_of R14 ) );
+
+L563: (R1 in { R14 } & { R14 } c= ( dom D60 )) by L562 , L554 , XBOOLE_0:def 4 , XBOOLE_1:7;
+thus L564: R1 in ( dom D60 ) by L563;
+end;
+suppose L565: R1 in ( the_proper_Tree_of R14 );
+
+L566: (R1 in ( dom D58 ) & ( dom D58 ) c= ( dom D60 )) by L565 , L510 , L553 , XBOOLE_1:7;
+thus L567: R1 in ( dom D60 ) by L566;
+end;
+end;
+thus L569:now
+let R1 being set;
+assume L570: R1 in ( dom D60 );
+per cases  by L570 , L554 , ZFMISC_1:136;
+suppose L571: R1 = R14;
+
+thus L572: R1 in ( the_Tree_of R14 ) by L571 , L324;
+end;
+suppose L573: R1 in ( dom D58 );
+
+thus L574: R1 in ( the_Tree_of R14 ) by L573 , L519;
+end;
+end;
+end;
+thus L570: ( dom D60 ) = ( the_Tree_of R14 ) by L558 , TARSKI:1;
+thus L571: S9[ D60 ]
+proof
+let R16 being ConwayGame;
+assume L572: R16 in ( dom D60 );
+L573:
+now
+thus L574: ( D58 | ( the_proper_Tree_of R16 ) ) c= ( D60 | ( the_proper_Tree_of R16 ) ) by RELAT_1:76 , XBOOLE_1:7;
+L575: ( the_proper_Tree_of R16 ) c= ( the_proper_Tree_of R14 ) by L418 , L570 , L572;
+L576: ( the_proper_Tree_of R16 ) c= ( dom D58 ) by L575 , L510 , XBOOLE_1:1;
+thus L577: ( dom ( D58 | ( the_proper_Tree_of R16 ) ) ) = ( the_proper_Tree_of R16 ) by L575 , L510 , RELAT_1:62 , XBOOLE_1:1;
+L578: D58 c= D60 by XBOOLE_1:7;
+L579: ( dom D58 ) c= ( dom D60 ) by L578 , RELAT_1:11;
+thus L580: ( dom ( D60 | ( the_proper_Tree_of R16 ) ) ) = ( the_proper_Tree_of R16 ) by L579 , L576 , RELAT_1:62 , XBOOLE_1:1;
+end;
+L581: ( D60 | ( the_proper_Tree_of R16 ) ) = ( D58 | ( the_proper_Tree_of R16 ) ) by L573 , GRFUNC_1:3;
+per cases  by L572 , L554 , ZFMISC_1:136;
+suppose L582: R16 = R14;
+
+L583: [ R14 , D59 ] in D60 by ZFMISC_1:136;
+thus L584: thesis by L583 , L581 , L572 , L582 , FUNCT_1:def 2;
+end;
+suppose L585: R16 in ( dom D58 );
+
+L586: D58 c= D60 by XBOOLE_1:7;
+L587: ( D58 . R16 ) = ( D60 . R16 ) by L586 , L585 , GRFUNC_1:2;
+thus L588: thesis by L587 , L528 , L585 , L581;
+end;
+end;
+
+end;
+L572: R14 in ( the_Tree_of R14 ) by L324;
+L573: D60 in C61 by L572 , L495 , L555;
+L574: D60 c= D58 by L573 , ZFMISC_1:74;
+thus L575: contradiction by L574 , L549 , L554 , RELAT_1:11 , ZFMISC_1:39;
+end;
+L576: { R14 } c= ( dom D58 ) by L548 , ZFMISC_1:31;
+L577: ( the_Tree_of R14 ) = ( ( the_proper_Tree_of R14 ) \/ { R14 } ) by L324 , ZFMISC_1:116;
+L578: ( the_Tree_of R14 ) c= ( dom D58 ) by L577 , L576 , L510 , XBOOLE_1:8;
+thus L579: ( dom D58 ) = ( the_Tree_of R14 ) by L578 , L519 , XBOOLE_0:def 10;
+thus L580: S9[ D58 ] by L528;
+end;
+L581: (for R14 being ConwayGame holds S10[ R14 ]) from ConwayGameInd(L493);
+thus L582: thesis by L581;
+end;
+begin
+L583: (for R16 being ConwayGame holds (for B61 being Function holds ({ ( ( B61 | ( the_proper_Tree_of R16 ) ) . B62 ) where B62 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } = { ( B61 . B63 ) where B63 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } & { ( ( B61 | ( the_proper_Tree_of R16 ) ) . B64 ) where B64 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } = { ( B61 . B65 ) where B65 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) })))
+proof
+let R16 being ConwayGame;
+let C67 being Function;
+set D61 = { ( ( C67 | ( the_proper_Tree_of R16 ) ) . B66 ) where B66 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) };
+set D62 = { ( C67 . B67 ) where B67 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) };
+set D63 = { ( ( C67 | ( the_proper_Tree_of R16 ) ) . B68 ) where B68 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) };
+set D64 = { ( C67 . B69 ) where B69 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) };
+L584: (for R18 being ConwayGame holds ((R18 in ( the_LeftOptions_of R16 ) or R18 in ( the_RightOptions_of R16 )) implies ( ( C67 | ( the_proper_Tree_of R16 ) ) . R18 ) = ( C67 . R18 )))
+proof
+let R18 being ConwayGame;
+assume L585: (R18 in ( the_LeftOptions_of R16 ) or R18 in ( the_RightOptions_of R16 ));
+L586: (R18 in ( the_Options_of R16 ) & ( the_Options_of R16 ) c= ( the_proper_Tree_of R16 )) by L585 , L422 , XBOOLE_0:def 3;
+thus L587: thesis by L586 , FUNCT_1:49;
+end;
+L588:
+now
+thus L589:now
+let R1 being set;
+assume L590: R1 in D61;
+consider C68 being (Element of ( the_RightOptions_of R16 )) such that L591: (R1 = ( ( C67 | ( the_proper_Tree_of R16 ) ) . C68 ) & ( the_RightOptions_of R16 ) <> ( {} )) by L590;
+L592: (C68 in ( the_RightOptions_of R16 ) & C68 is ConwayGame) by L591 , L204;
+L593: ( ( C67 | ( the_proper_Tree_of R16 ) ) . C68 ) = ( C67 . C68 ) by L592 , L584;
+thus L594: R1 in D62 by L593 , L591;
+end;
+thus L595:now
+let R1 being set;
+assume L596: R1 in D62;
+consider C69 being (Element of ( the_RightOptions_of R16 )) such that L597: (R1 = ( C67 . C69 ) & ( the_RightOptions_of R16 ) <> ( {} )) by L596;
+L598: (C69 in ( the_RightOptions_of R16 ) & C69 is ConwayGame) by L597 , L204;
+L599: ( ( C67 | ( the_proper_Tree_of R16 ) ) . C69 ) = ( C67 . C69 ) by L598 , L584;
+thus L600: R1 in D61 by L599 , L597;
+end;
+end;
+thus L596: D61 = D62 by L588 , TARSKI:1;
+L597:
+now
+thus L598:now
+let R1 being set;
+assume L599: R1 in D63;
+consider C70 being (Element of ( the_LeftOptions_of R16 )) such that L600: (R1 = ( ( C67 | ( the_proper_Tree_of R16 ) ) . C70 ) & ( the_LeftOptions_of R16 ) <> ( {} )) by L599;
+L601: (C70 in ( the_LeftOptions_of R16 ) & C70 is ConwayGame) by L600 , L204;
+L602: ( ( C67 | ( the_proper_Tree_of R16 ) ) . C70 ) = ( C67 . C70 ) by L601 , L584;
+thus L603: R1 in D64 by L602 , L600;
+end;
+thus L604:now
+let R1 being set;
+assume L605: R1 in D64;
+consider C71 being (Element of ( the_LeftOptions_of R16 )) such that L606: (R1 = ( C67 . C71 ) & ( the_LeftOptions_of R16 ) <> ( {} )) by L605;
+L607: (C71 in ( the_LeftOptions_of R16 ) & C71 is ConwayGame) by L606 , L204;
+L608: ( ( C67 | ( the_proper_Tree_of R16 ) ) . C71 ) = ( C67 . C71 ) by L607 , L584;
+thus L609: R1 in D63 by L608 , L606;
+end;
+end;
+thus L605: D63 = D64 by L597 , TARSKI:1;
+end;
+definition
+let R14 being ConwayGame;
+func - R14 means 
+:L606: (ex B70 being Function st (( dom B70 ) = ( the_Tree_of R14 ) & it = ( B70 . R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B70 ) implies ( B70 . R16 ) = left-right (# { ( B70 . B71 ) where B71 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } , { ( B70 . B72 ) where B72 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } #)))));
+existence
+proof
+deffunc H2(ConwayGame , Function) = left-right (# { ( $2 . B73 ) where B73 is (Element of ( the_RightOptions_of $1 )) : ( the_RightOptions_of $1 ) <> ( {} ) } , { ( $2 . B74 ) where B74 is (Element of ( the_LeftOptions_of $1 )) : ( the_LeftOptions_of $1 ) <> ( {} ) } #);
+L607: (for R14 being ConwayGame holds (ex B75 being Function st (( dom B75 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B75 ) implies ( B75 . R16 ) = H2(R16 , ( B75 | ( the_proper_Tree_of R16 ) ))))))) from Func1RecEx;
+consider C72 being Function such that L608: (( dom C72 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom C72 ) implies ( C72 . R16 ) = H2(R16 , ( C72 | ( the_proper_Tree_of R16 ) ))))) by L607;
+take D65 = ( C72 . R14 );
+take C72;
+thus L609: ( dom C72 ) = ( the_Tree_of R14 ) by L608;
+thus L610: ( C72 . R14 ) = D65;
+let R16 being ConwayGame;
+assume that
+L611: R16 in ( dom C72 );
+L612: ({ ( ( C72 | ( the_proper_Tree_of R16 ) ) . B76 ) where B76 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } = { ( C72 . B77 ) where B77 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } & { ( ( C72 | ( the_proper_Tree_of R16 ) ) . B78 ) where B78 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } = { ( C72 . B79 ) where B79 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) }) by L583;
+thus L613: thesis by L612 , L608 , L611;
+end;
+uniqueness
+proof
+deffunc H3(ConwayGame , Function) = left-right (# { ( $2 . B80 ) where B80 is (Element of ( the_RightOptions_of $1 )) : ( the_RightOptions_of $1 ) <> ( {} ) } , { ( $2 . B81 ) where B81 is (Element of ( the_LeftOptions_of $1 )) : ( the_LeftOptions_of $1 ) <> ( {} ) } #);
+let C73 , C74 being set;
+assume L614: (ex B82 being Function st (( dom B82 ) = ( the_Tree_of R14 ) & C73 = ( B82 . R14 ) & (for R15 being ConwayGame holds (R15 in ( dom B82 ) implies ( B82 . R15 ) = H3(R15 , B82)))));
+consider C75 being Function such that L615: (( dom C75 ) = ( the_Tree_of R14 ) & C73 = ( C75 . R14 ) & (for R15 being ConwayGame holds (R15 in ( dom C75 ) implies ( C75 . R15 ) = H3(R15 , C75)))) by L614;
+assume L616: (ex B83 being Function st (( dom B83 ) = ( the_Tree_of R14 ) & C74 = ( B83 . R14 ) & (for R15 being ConwayGame holds (R15 in ( dom B83 ) implies ( B83 . R15 ) = H3(R15 , B83)))));
+consider C76 being Function such that L617: (( dom C76 ) = ( the_Tree_of R14 ) & C74 = ( C76 . R14 ) & (for R15 being ConwayGame holds (R15 in ( dom C76 ) implies ( C76 . R15 ) = H3(R15 , C76)))) by L616;
+L618: (for R15 being ConwayGame holds (R15 in ( dom C75 ) implies ( C75 . R15 ) = H3(R15 , ( C75 | ( the_proper_Tree_of R15 ) ))))
+proof
+let R15 being ConwayGame;
+set D66 = { ( ( C75 | ( the_proper_Tree_of R15 ) ) . B84 ) where B84 is (Element of ( the_RightOptions_of R15 )) : ( the_RightOptions_of R15 ) <> ( {} ) };
+set D67 = { ( ( C75 | ( the_proper_Tree_of R15 ) ) . B85 ) where B85 is (Element of ( the_LeftOptions_of R15 )) : ( the_LeftOptions_of R15 ) <> ( {} ) };
+set D68 = { ( C75 . B86 ) where B86 is (Element of ( the_RightOptions_of R15 )) : ( the_RightOptions_of R15 ) <> ( {} ) };
+set D69 = { ( C75 . B87 ) where B87 is (Element of ( the_LeftOptions_of R15 )) : ( the_LeftOptions_of R15 ) <> ( {} ) };
+L619: (D68 = D66 & D69 = D67) by L583;
+thus L620: thesis by L619 , L615;
+end;
+L621: (for R15 being ConwayGame holds (R15 in ( dom C76 ) implies ( C76 . R15 ) = H3(R15 , ( C76 | ( the_proper_Tree_of R15 ) ))))
+proof
+let R15 being ConwayGame;
+set D70 = { ( ( C76 | ( the_proper_Tree_of R15 ) ) . B88 ) where B88 is (Element of ( the_RightOptions_of R15 )) : ( the_RightOptions_of R15 ) <> ( {} ) };
+set D71 = { ( ( C76 | ( the_proper_Tree_of R15 ) ) . B89 ) where B89 is (Element of ( the_LeftOptions_of R15 )) : ( the_LeftOptions_of R15 ) <> ( {} ) };
+set D72 = { ( C76 . B90 ) where B90 is (Element of ( the_RightOptions_of R15 )) : ( the_RightOptions_of R15 ) <> ( {} ) };
+set D73 = { ( C76 . B91 ) where B91 is (Element of ( the_LeftOptions_of R15 )) : ( the_LeftOptions_of R15 ) <> ( {} ) };
+L622: (D72 = D70 & D73 = D71) by L583;
+thus L623: thesis by L622 , L617;
+end;
+L624: (for R14 being ConwayGame holds (for B92 , B93 being Function holds ((( dom B92 ) = ( the_Tree_of R14 ) & ( dom B93 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B92 ) implies ( B92 . R16 ) = H3(R16 , ( B92 | ( the_proper_Tree_of R16 ) )))) & (for R16 being ConwayGame holds (R16 in ( dom B93 ) implies ( B93 . R16 ) = H3(R16 , ( B93 | ( the_proper_Tree_of R16 ) ))))) implies B92 = B93))) from Func1RecUniq;
+thus L625: thesis by L624 , L615 , L617 , L618 , L621;
+end;
+end;
+registration
+let R14 being ConwayGame;
+cluster ( - R14 ) ->  ConwayGame-like;
+coherence
+proof
+consider C77 being Function such that L627: (( dom C77 ) = ( the_Tree_of R14 ) & ( - R14 ) = ( C77 . R14 ) & (for R16 being ConwayGame holds (R16 in ( dom C77 ) implies ( C77 . R16 ) = left-right (# { ( C77 . B94 ) where B94 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } , { ( C77 . B95 ) where B95 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } #)))) by L606;
+defpred S12[ ConwayGame ] means ($1 in ( dom C77 ) implies ( C77 . $1 ) is ConwayGame);
+L628: (for R16 being ConwayGame holds ((for R18 being ConwayGame holds (R18 in ( the_Options_of R16 ) implies S12[ R18 ])) implies S12[ R16 ]))
+proof
+let R16 being ConwayGame;
+assume L629: (for R18 being ConwayGame holds (R18 in ( the_Options_of R16 ) implies S12[ R18 ]));
+assume L630: R16 in ( dom C77 );
+set D74 = { ( C77 . B96 ) where B96 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) };
+set D75 = { ( C77 . B97 ) where B97 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) };
+L631: ( C77 . R16 ) = left-right (# D74 , D75 #) by L627 , L630;
+L632:
+now
+let R5 being set;
+assume L633: R5 in ( D74 \/ D75 );
+L634: (ex R18 being ConwayGame st (R18 in ( the_Options_of R16 ) & R5 = ( C77 . R18 )))
+proof
+per cases  by L633 , XBOOLE_0:def 3;
+suppose L635: R5 in D74;
+
+consider C78 being (Element of ( the_RightOptions_of R16 )) such that L636: (R5 = ( C77 . C78 ) & ( the_RightOptions_of R16 ) <> ( {} )) by L635;
+reconsider D76 = C78 as ConwayGame by L204 , L636;
+take D76;
+thus L637: thesis by L636 , XBOOLE_0:def 3;
+end;
+suppose L638: R5 in D75;
+
+consider C79 being (Element of ( the_LeftOptions_of R16 )) such that L639: (R5 = ( C77 . C79 ) & ( the_LeftOptions_of R16 ) <> ( {} )) by L638;
+reconsider D77 = C79 as ConwayGame by L204 , L639;
+take D77;
+thus L640: thesis by L639 , XBOOLE_0:def 3;
+end;
+end;
+consider R18 being ConwayGame such that L642: (R18 in ( the_Options_of R16 ) & R5 = ( C77 . R18 )) by L634;
+L643: (( the_Options_of R16 ) c= ( the_Tree_of R16 ) & ( the_Tree_of R16 ) c= ( dom C77 )) by L428 , L414 , L630 , L627;
+L644: ( the_Options_of R16 ) c= ( dom C77 ) by L643 , XBOOLE_1:1;
+thus L645: R5 is ConwayGame by L644 , L629 , L642;
+end;
+thus L646: thesis by L632 , L631 , L208;
+end;
+L647: (for R14 being ConwayGame holds S12[ R14 ]) from ConwayGameInd(L628);
+L648: R14 in ( the_Tree_of R14 ) by L324;
+thus L649: thesis by L648 , L627 , L647;
+end;
+end;
+L651: (for R14 being ConwayGame holds (for B98 being Function holds ((( dom B98 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom B98 ) implies ( B98 . R16 ) = left-right (# { ( B98 . B99 ) where B99 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } , { ( B98 . B100 ) where B100 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } #)))) implies (for R16 being ConwayGame holds (R16 in ( dom B98 ) implies ( B98 . R16 ) = ( - R16 ))))))
+proof
+let R14 being ConwayGame;
+let C80 being Function;
+assume that
+L652: (( dom C80 ) = ( the_Tree_of R14 ) & (for R16 being ConwayGame holds (R16 in ( dom C80 ) implies ( C80 . R16 ) = left-right (# { ( C80 . B101 ) where B101 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } , { ( C80 . B102 ) where B102 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } #))));
+let R16 being ConwayGame;
+assume that
+L653: R16 in ( dom C80 );
+set D78 = ( C80 | ( the_Tree_of R16 ) );
+L654: ( dom D78 ) = ( the_Tree_of R16 ) by L652 , L653 , L414 , RELAT_1:62;
+L655:
+now
+let R17 being ConwayGame;
+assume that
+L656: R17 in ( dom D78 );
+set D79 = { ( C80 . B103 ) where B103 is (Element of ( the_RightOptions_of R17 )) : ( the_RightOptions_of R17 ) <> ( {} ) };
+set D80 = { ( D78 . B104 ) where B104 is (Element of ( the_RightOptions_of R17 )) : ( the_RightOptions_of R17 ) <> ( {} ) };
+set D81 = { ( C80 . B105 ) where B105 is (Element of ( the_LeftOptions_of R17 )) : ( the_LeftOptions_of R17 ) <> ( {} ) };
+set D82 = { ( D78 . B106 ) where B106 is (Element of ( the_LeftOptions_of R17 )) : ( the_LeftOptions_of R17 ) <> ( {} ) };
+L657: ( dom D78 ) c= ( dom C80 ) by RELAT_1:60;
+L658: ( C80 . R17 ) = left-right (# D79 , D81 #) by L657 , L652 , L656;
+L659: (for R18 being ConwayGame holds ((R18 in ( the_LeftOptions_of R17 ) or R18 in ( the_RightOptions_of R17 )) implies ( D78 . R18 ) = ( C80 . R18 )))
+proof
+let R18 being ConwayGame;
+assume L660: (R18 in ( the_LeftOptions_of R17 ) or R18 in ( the_RightOptions_of R17 ));
+L661: (R18 in ( the_Options_of R17 ) & ( the_Options_of R17 ) c= ( the_Tree_of R17 )) by L660 , L428 , XBOOLE_0:def 3;
+L662: (R18 in ( the_Tree_of R17 ) & ( the_Tree_of R17 ) c= ( dom D78 )) by L661 , L414 , L656 , L654;
+thus L663: thesis by L662 , FUNCT_1:47;
+end;
+L664:
+now
+thus L665:now
+let R1 being set;
+assume L666: R1 in D79;
+consider C81 being (Element of ( the_RightOptions_of R17 )) such that L667: (R1 = ( C80 . C81 ) & ( the_RightOptions_of R17 ) <> ( {} )) by L666;
+L668: (C81 in ( the_RightOptions_of R17 ) & C81 is ConwayGame) by L667 , L204;
+L669: ( D78 . C81 ) = ( C80 . C81 ) by L668 , L659;
+thus L670: R1 in D80 by L669 , L667;
+end;
+thus L671:now
+let R1 being set;
+assume L672: R1 in D80;
+consider C82 being (Element of ( the_RightOptions_of R17 )) such that L673: (R1 = ( D78 . C82 ) & ( the_RightOptions_of R17 ) <> ( {} )) by L672;
+L674: (C82 in ( the_RightOptions_of R17 ) & C82 is ConwayGame) by L673 , L204;
+L675: ( D78 . C82 ) = ( C80 . C82 ) by L674 , L659;
+thus L676: R1 in D79 by L675 , L673;
+end;
+end;
+L672: D79 = D80 by L664 , TARSKI:1;
+L673:
+now
+thus L674:now
+let R1 being set;
+assume L675: R1 in D81;
+consider C83 being (Element of ( the_LeftOptions_of R17 )) such that L676: (R1 = ( C80 . C83 ) & ( the_LeftOptions_of R17 ) <> ( {} )) by L675;
+L677: (C83 in ( the_LeftOptions_of R17 ) & C83 is ConwayGame) by L676 , L204;
+L678: ( D78 . C83 ) = ( C80 . C83 ) by L677 , L659;
+thus L679: R1 in D82 by L678 , L676;
+end;
+thus L680:now
+let R1 being set;
+assume L681: R1 in D82;
+consider C84 being (Element of ( the_LeftOptions_of R17 )) such that L682: (R1 = ( D78 . C84 ) & ( the_LeftOptions_of R17 ) <> ( {} )) by L681;
+L683: (C84 in ( the_LeftOptions_of R17 ) & C84 is ConwayGame) by L682 , L204;
+L684: ( D78 . C84 ) = ( C80 . C84 ) by L683 , L659;
+thus L685: R1 in D81 by L684 , L682;
+end;
+end;
+L681: D81 = D82 by L673 , TARSKI:1;
+thus L682: ( D78 . R17 ) = left-right (# D80 , D82 #) by L681 , L656 , L658 , L672 , FUNCT_1:47;
+end;
+L683: (( D78 . R16 ) = ( - R16 ) & R16 in ( dom D78 )) by L655 , L606 , L654 , L324;
+thus L684: thesis by L683 , FUNCT_1:47;
+end;
+theorem
+L685: (for R14 being ConwayGame holds ((for R1 being set holds (R1 in ( the_LeftOptions_of ( - R14 ) ) iff (ex R20 being ConwayGame st (R20 in ( the_RightOptions_of R14 ) & R1 = ( - R20 ))))) & (for R1 being set holds (R1 in ( the_RightOptions_of ( - R14 ) ) iff (ex R19 being ConwayGame st (R19 in ( the_LeftOptions_of R14 ) & R1 = ( - R19 )))))))
+proof
+let R14 being ConwayGame;
+consider C85 being Function such that L686: (( dom C85 ) = ( the_Tree_of R14 ) & ( C85 . R14 ) = ( - R14 ) & (for R16 being ConwayGame holds (R16 in ( dom C85 ) implies ( C85 . R16 ) = left-right (# { ( C85 . B107 ) where B107 is (Element of ( the_RightOptions_of R16 )) : ( the_RightOptions_of R16 ) <> ( {} ) } , { ( C85 . B108 ) where B108 is (Element of ( the_LeftOptions_of R16 )) : ( the_LeftOptions_of R16 ) <> ( {} ) } #)))) by L606;
+L687: (for R18 being ConwayGame holds ((R18 in ( the_RightOptions_of R14 ) or R18 in ( the_LeftOptions_of R14 )) implies ( C85 . R18 ) = ( - R18 )))
+proof
+let R18 being ConwayGame;
+assume L688: (R18 in ( the_RightOptions_of R14 ) or R18 in ( the_LeftOptions_of R14 ));
+L689: (R18 in ( the_Options_of R14 ) & ( the_Options_of R14 ) c= ( the_Tree_of R14 )) by L688 , L428 , XBOOLE_0:def 3;
+thus L690: thesis by L689 , L651 , L686;
+end;
+set D83 = { ( C85 . B109 ) where B109 is (Element of ( the_RightOptions_of R14 )) : ( the_RightOptions_of R14 ) <> ( {} ) };
+set D84 = { ( C85 . B110 ) where B110 is (Element of ( the_LeftOptions_of R14 )) : ( the_LeftOptions_of R14 ) <> ( {} ) };
+L691: ( - R14 ) = left-right (# D83 , D84 #) by L686 , L324;
+L692: (( the_LeftOptions_of ( - R14 ) ) = D83 & ( the_RightOptions_of ( - R14 ) ) = D84) by L691 , L112 , L114;
+thus L693:now
+let R1 being set;
+thus L694:now
+assume L695: R1 in ( the_LeftOptions_of ( - R14 ) );
+consider C86 being (Element of ( the_RightOptions_of R14 )) such that L696: (R1 = ( C85 . C86 ) & ( the_RightOptions_of R14 ) <> ( {} )) by L695 , L692;
+reconsider D85 = C86 as ConwayGame by L204 , L696;
+take D86 = D85;
+thus L697: (D86 in ( the_RightOptions_of R14 ) & R1 = ( - D86 )) by L696 , L687;
+end;
+thus L698:now
+assume L699: (ex R20 being ConwayGame st (R20 in ( the_RightOptions_of R14 ) & R1 = ( - R20 )));
+consider R20 being ConwayGame such that L700: (R1 = ( - R20 ) & R20 in ( the_RightOptions_of R14 )) by L699;
+L701: ( C85 . R20 ) = ( - R20 ) by L687 , L700;
+thus L702: R1 in ( the_LeftOptions_of ( - R14 ) ) by L701 , L692 , L700;
+end;
+end;
+thus L699:now
+let R1 being set;
+thus L700:now
+assume L701: R1 in ( the_RightOptions_of ( - R14 ) );
+consider C87 being (Element of ( the_LeftOptions_of R14 )) such that L702: (R1 = ( C85 . C87 ) & ( the_LeftOptions_of R14 ) <> ( {} )) by L701 , L692;
+reconsider D87 = C87 as ConwayGame by L204 , L702;
+take D88 = D87;
+thus L703: (D88 in ( the_LeftOptions_of R14 ) & R1 = ( - D88 )) by L702 , L687;
+end;
+thus L704:now
+assume L705: (ex R19 being ConwayGame st (R19 in ( the_LeftOptions_of R14 ) & R1 = ( - R19 )));
+consider R19 being ConwayGame such that L706: (R1 = ( - R19 ) & R19 in ( the_LeftOptions_of R14 )) by L705;
+L707: ( C85 . R19 ) = ( - R19 ) by L687 , L706;
+thus L708: R1 in ( the_RightOptions_of ( - R14 ) ) by L707 , L692 , L706;
+end;
+end;
+end;
+theorem
+L700: (for R14 being ConwayGame holds ( - ( - R14 ) ) = R14)
+proof
+let R14 being ConwayGame;
+defpred S13[ ConwayGame ] means ( - ( - $1 ) ) <> $1;
+assume L701: (not thesis);
+L702: (ex R14 being ConwayGame st S13[ R14 ]) by L701;
+consider R14 being ConwayGame such that L703: (S13[ R14 ] & (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies (not S13[ R18 ])))) from ConwayGameMin(L702);
+L704:
+now
+thus L705:now
+let R1 being set;
+assume L706: R1 in ( the_LeftOptions_of ( - ( - R14 ) ) );
+consider R20 being ConwayGame such that L707: (R20 in ( the_RightOptions_of ( - R14 ) ) & R1 = ( - R20 )) by L706 , L685;
+consider R19 being ConwayGame such that L708: (R19 in ( the_LeftOptions_of R14 ) & R20 = ( - R19 )) by L685 , L707;
+L709: R19 in ( the_Options_of R14 ) by L708 , XBOOLE_0:def 3;
+thus L710: R1 in ( the_LeftOptions_of R14 ) by L709 , L703 , L707 , L708;
+end;
+thus L711:now
+let R1 being set;
+assume L712: R1 in ( the_LeftOptions_of R14 );
+reconsider D89 = R1 as ConwayGame by L204 , L712;
+L713: (( - D89 ) in ( the_RightOptions_of ( - R14 ) ) & D89 in ( the_Options_of R14 )) by L685 , L712 , XBOOLE_0:def 3;
+L714: (( - ( - D89 ) ) in ( the_LeftOptions_of ( - ( - R14 ) ) ) & ( - ( - D89 ) ) = D89) by L713 , L685 , L703;
+thus L715: R1 in ( the_LeftOptions_of ( - ( - R14 ) ) ) by L714;
+end;
+end;
+L712: ( the_LeftOptions_of ( - ( - R14 ) ) ) = ( the_LeftOptions_of R14 ) by L704 , TARSKI:1;
+L713:
+now
+thus L714:now
+let R1 being set;
+assume L715: R1 in ( the_RightOptions_of ( - ( - R14 ) ) );
+consider R19 being ConwayGame such that L716: (R19 in ( the_LeftOptions_of ( - R14 ) ) & R1 = ( - R19 )) by L715 , L685;
+consider R20 being ConwayGame such that L717: (R20 in ( the_RightOptions_of R14 ) & R19 = ( - R20 )) by L685 , L716;
+L718: R20 in ( the_Options_of R14 ) by L717 , XBOOLE_0:def 3;
+thus L719: R1 in ( the_RightOptions_of R14 ) by L718 , L703 , L716 , L717;
+end;
+thus L720:now
+let R1 being set;
+assume L721: R1 in ( the_RightOptions_of R14 );
+reconsider D90 = R1 as ConwayGame by L204 , L721;
+L722: (( - D90 ) in ( the_LeftOptions_of ( - R14 ) ) & D90 in ( the_Options_of R14 )) by L685 , L721 , XBOOLE_0:def 3;
+L723: (( - ( - D90 ) ) in ( the_RightOptions_of ( - ( - R14 ) ) ) & ( - ( - D90 ) ) = D90) by L722 , L685 , L703;
+thus L724: R1 in ( the_RightOptions_of ( - ( - R14 ) ) ) by L723;
+end;
+end;
+L721: ( the_RightOptions_of ( - ( - R14 ) ) ) = ( the_RightOptions_of R14 ) by L713 , TARSKI:1;
+thus L722: contradiction by L721 , L703 , L712 , L118;
+end;
+theorem
+L723: (for R14 being ConwayGame holds (for R18 being ConwayGame holds ((R18 in ( the_LeftOptions_of ( - R14 ) ) iff ( - R18 ) in ( the_RightOptions_of R14 )) & (R18 in ( the_LeftOptions_of R14 ) iff ( - R18 ) in ( the_RightOptions_of ( - R14 ) )) & (R18 in ( the_RightOptions_of ( - R14 ) ) iff ( - R18 ) in ( the_LeftOptions_of R14 )) & (R18 in ( the_RightOptions_of R14 ) iff ( - R18 ) in ( the_LeftOptions_of ( - R14 ) )))))
+proof
+let R14 being ConwayGame;
+let R18 being ConwayGame;
+L724: (R14 = ( - ( - R14 ) ) & R18 = ( - ( - R18 ) )) by L700;
+thus L725: thesis by L724 , L685;
+end;
+definition
+let R14 being ConwayGame;
+attr R14 is  nonnegative
+means
+:L726: (ex R7 being set st (R14 in R7 & (for R16 being ConwayGame holds (R16 in R7 implies (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R16 ) implies (ex R23 being ConwayGame st (R23 in ( the_LeftOptions_of R20 ) & R23 in R7))))))));
+end;
+definition
+let R14 being ConwayGame;
+attr R14 is  nonpositive
+means
+:L728: ( - R14 ) is  nonnegative;
+end;
+definition
+let R14 being ConwayGame;
+attr R14 is  zero
+means
+:L730: (R14 is  nonnegative & R14 is  nonpositive);
+attr R14 is  fuzzy
+means
+:L731: ((not R14 is  nonnegative) & (not R14 is  nonpositive));
+end;
+definition
+let R14 being ConwayGame;
+attr R14 is  positive
+means
+:L733: (R14 is  nonnegative & (not R14 is  zero));
+attr R14 is  negative
+means
+:L734: (R14 is  nonpositive & (not R14 is  zero));
+end;
+registration
+cluster  zero ->  nonnegative  nonpositive for ConwayGame;
+coherence by L730;
+cluster  nonpositive  nonnegative ->  zero for ConwayGame;
+coherence by L730;
+cluster  negative ->  nonpositive non  zero for ConwayGame;
+coherence by L734;
+cluster  nonpositive non  zero ->  negative for ConwayGame;
+coherence by L734;
+cluster  positive ->  nonnegative non  zero for ConwayGame;
+coherence by L733;
+cluster  nonnegative non  zero ->  positive for ConwayGame;
+coherence by L733;
+cluster  fuzzy -> non  nonnegative non  nonpositive for ConwayGame;
+coherence by L731;
+cluster non  nonnegative non  nonpositive ->  fuzzy for ConwayGame;
+coherence by L731;
+end;
+theorem
+L737: (for R14 being ConwayGame holds (R14 is  zero or R14 is  positive or R14 is  negative or R14 is  fuzzy))
+proof
+let R14 being ConwayGame;
+assume L738: R14 is non  zero non  positive non  negative;
+L739: R14 is non  nonnegative non  nonpositive by L738;
+thus L740: R14 is  fuzzy by L739;
+end;
+theorem
+L741: (for R14 being ConwayGame holds (R14 is  nonnegative iff (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (ex R23 being ConwayGame st (R23 in ( the_LeftOptions_of R20 ) & R23 is  nonnegative))))))
+proof
+let R14 being ConwayGame;
+defpred S14[ set ] means (for R14 being ConwayGame holds (R14 in $1 implies (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (ex R23 being ConwayGame st (R23 in ( the_LeftOptions_of R20 ) & R23 in $1))))));
+L742: (for R7 being set holds (for R8 being Ordinal holds (S14[ R7 ] implies S14[ ( R7 /\ ( ConwayDay R8 ) ) ])))
+proof
+let R7 being set;
+let R8 being Ordinal;
+assume L743: S14[ R7 ];
+let R14 being ConwayGame;
+assume L744: R14 in ( R7 /\ ( ConwayDay R8 ) );
+L745: (R14 in R7 & R14 in ( ConwayDay R8 )) by L744 , XBOOLE_0:def 4;
+let R20 being ConwayGame;
+assume L746: R20 in ( the_RightOptions_of R14 );
+consider R23 being ConwayGame such that L747: (R23 in ( the_LeftOptions_of R20 ) & R23 in R7) by L746 , L743 , L745;
+take R23;
+L748: R20 in ( ConwayDay R8 ) by L169 , L745 , L746;
+L749: R23 in ( ConwayDay R8 ) by L748 , L169 , L747;
+thus L750: thesis by L749 , L747 , XBOOLE_0:def 4;
+end;
+thus L751:now
+assume L752: R14 is  nonnegative;
+consider R7 being set such that L753: (R14 in R7 & S14[ R7 ]) by L752 , L726;
+let R20 being ConwayGame;
+assume L754: R20 in ( the_RightOptions_of R14 );
+consider R23 being ConwayGame such that L755: (R23 in ( the_LeftOptions_of R20 ) & R23 in R7) by L754 , L753;
+take D91 = R23;
+thus L756: D91 in ( the_LeftOptions_of R20 ) by L755;
+thus L757: D91 is  nonnegative
+proof
+take R7;
+thus L758: thesis by L753 , L755;
+end;
+
+end;
+thus L758:now
+assume L759: (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (ex R23 being ConwayGame st (R23 in ( the_LeftOptions_of R20 ) & R23 is  nonnegative))));
+consider R8 being Ordinal such that L760: R14 in ( ConwayDay R8 ) by L82;
+L761:
+now
+set D92 = { B111 where B111 is (Subset of ( ConwayDay R8 )) : S14[ B111 ] };
+take D93 = ( union D92 );
+L762: S14[ D93 ]
+proof
+let R16 being ConwayGame;
+assume L763: R16 in D93;
+consider C88 being set such that L764: (R16 in C88 & C88 in D92) by L763 , TARSKI:def 4;
+consider C89 being (Subset of ( ConwayDay R8 )) such that L765: (C89 = C88 & S14[ C89 ]) by L764;
+let R20 being ConwayGame;
+assume L766: R20 in ( the_RightOptions_of R16 );
+consider R23 being ConwayGame such that L767: (R23 in ( the_LeftOptions_of R20 ) & R23 in C89) by L766 , L764 , L765;
+take R23;
+L768: C88 c= D93 by L764 , ZFMISC_1:74;
+thus L769: thesis by L768 , L765 , L767;
+end;
+thus L770: R14 in D93
+proof
+L771:
+now
+let R1 being set;
+assume L772: R1 in D92;
+L773: (ex B112 being (Subset of ( ConwayDay R8 )) st (R1 = B112 & S14[ B112 ])) by L772;
+thus L774: R1 c= ( ConwayDay R8 ) by L773;
+end;
+L775: D93 c= ( ConwayDay R8 ) by L771 , ZFMISC_1:76;
+L776: { R14 } c= ( ConwayDay R8 ) by L760 , ZFMISC_1:31;
+reconsider D94 = ( D93 \/ { R14 } ) as (Subset of ( ConwayDay R8 )) by L776 , L775 , XBOOLE_1:8;
+L777: S14[ D94 ]
+proof
+let R16 being ConwayGame;
+assume that
+L778: R16 in D94;
+let R20 being ConwayGame;
+assume that
+L779: R20 in ( the_RightOptions_of R16 );
+per cases  by L778 , XBOOLE_0:def 3;
+suppose L780: R16 in D93;
+
+consider R23 being ConwayGame such that L781: (R23 in ( the_LeftOptions_of R20 ) & R23 in D93) by L780 , L762 , L779;
+take R23;
+thus L782: R23 in ( the_LeftOptions_of R20 ) by L781;
+L783: D93 c= D94 by XBOOLE_1:7;
+thus L784: R23 in D94 by L783 , L781;
+end;
+suppose L785: R16 in { R14 };
+
+L786: R16 = R14 by L785 , TARSKI:def 1;
+consider R23 being ConwayGame such that L787: (R23 in ( the_LeftOptions_of R20 ) & R23 is  nonnegative) by L786 , L759 , L779;
+consider C90 being set such that L788: (R23 in C90 & S14[ C90 ]) by L726 , L787;
+take R23;
+thus L789: R23 in ( the_LeftOptions_of R20 ) by L787;
+reconsider D95 = ( C90 /\ ( ConwayDay R8 ) ) as (Subset of ( ConwayDay R8 )) by XBOOLE_1:17;
+L790: S14[ D95 ] by L788 , L742;
+L791: D95 in D92 by L790;
+L792: D95 c= D93 by L791 , ZFMISC_1:74;
+L793: R20 in ( ConwayDay R8 ) by L778 , L779 , L169;
+L794: R23 in ( ConwayDay R8 ) by L793 , L787 , L169;
+L795: R23 in D95 by L794 , L788 , XBOOLE_0:def 4;
+thus L796: R23 in D94 by L795 , L792 , XBOOLE_0:def 3;
+end;
+end;
+L798: D94 in D92 by L777;
+L799: R14 in { R14 } by TARSKI:def 1;
+L800: R14 in D94 by L799 , XBOOLE_0:def 3;
+thus L801: R14 in D93 by L800 , L798 , TARSKI:def 4;
+end;
+
+thus L802: S14[ D93 ] by L762;
+end;
+thus L803: R14 is  nonnegative by L761 , L726;
+end;
+end;
+theorem
+L759: (for R14 being ConwayGame holds (R14 is  nonpositive iff (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (ex R22 being ConwayGame st (R22 in ( the_RightOptions_of R19 ) & R22 is  nonpositive))))))
+proof
+let R14 being ConwayGame;
+thus L760:now
+assume L761: R14 is  nonpositive;
+L762: ( - R14 ) is  nonnegative by L761 , L728;
+let R19 being ConwayGame;
+assume L763: R19 in ( the_LeftOptions_of R14 );
+L764: ( - R19 ) in ( the_RightOptions_of ( - R14 ) ) by L763 , L685;
+consider R23 being ConwayGame such that L765: (R23 in ( the_LeftOptions_of ( - R19 ) ) & R23 is  nonnegative) by L764 , L762 , L741;
+take D96 = ( - R23 );
+L766: (D96 in ( the_RightOptions_of ( - ( - R19 ) ) ) & ( - ( - R19 ) ) = R19 & ( - D96 ) = R23) by L765 , L685 , L700;
+thus L767: (D96 in ( the_RightOptions_of R19 ) & D96 is  nonpositive) by L766 , L728 , L765;
+end;
+assume L768: (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (ex R22 being ConwayGame st (R22 in ( the_RightOptions_of R19 ) & R22 is  nonpositive))));
+L769:
+now
+let R20 being ConwayGame;
+assume L770: R20 in ( the_RightOptions_of ( - R14 ) );
+L771: (( - R20 ) in ( the_LeftOptions_of ( - ( - R14 ) ) ) & ( - ( - R14 ) ) = R14) by L770 , L685 , L700;
+consider R22 being ConwayGame such that L772: (R22 in ( the_RightOptions_of ( - R20 ) ) & R22 is  nonpositive) by L771 , L768;
+take D97 = ( - R22 );
+L773: (D97 in ( the_LeftOptions_of ( - ( - R20 ) ) ) & ( - ( - R20 ) ) = R20) by L772 , L685 , L700;
+thus L774: (D97 in ( the_LeftOptions_of R20 ) & D97 is  nonnegative) by L773 , L772 , L728;
+end;
+L775: ( - R14 ) is  nonnegative by L769 , L741;
+thus L776: R14 is  nonpositive by L775 , L728;
+end;
+theorem
+L777: (for R14 being ConwayGame holds ((R14 is  nonnegative iff (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive)))) & (R14 is  nonpositive iff (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative))))))
+proof
+let R14 being ConwayGame;
+defpred S15[ ConwayGame ] means (($1 is  nonnegative iff (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of $1 ) implies (R20 is  fuzzy or R20 is  positive)))) & ($1 is  nonpositive iff (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of $1 ) implies (R19 is  fuzzy or R19 is  negative)))));
+L778: (for R14 being ConwayGame holds ((for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies S15[ R18 ])) implies S15[ R14 ]))
+proof
+let R14 being ConwayGame;
+assume L779: (for R18 being ConwayGame holds (R18 in ( the_Options_of R14 ) implies S15[ R18 ]));
+thus L780:now
+assume L781: R14 is  nonnegative;
+let R20 being ConwayGame;
+assume that
+L782: R20 in ( the_RightOptions_of R14 );
+consider R23 being ConwayGame such that L783: (R23 in ( the_LeftOptions_of R20 ) & R23 is  nonnegative) by L781 , L782 , L741;
+L784:
+now
+L785: R20 in ( the_Options_of R14 ) by L782 , XBOOLE_0:def 3;
+thus L786: S15[ R20 ] by L785 , L779;
+thus L787:now
+take D98 = R23;
+thus L788: D98 in ( the_LeftOptions_of R20 ) by L783;
+thus L789: D98 is non  fuzzy non  negative by L783;
+end;
+end;
+L788: R20 is non  negative non  zero by L784;
+thus L789: (R20 is  fuzzy or R20 is  positive) by L788 , L737;
+end;
+thus L790:now
+assume L791: (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive)));
+L792:
+now
+let R20 being ConwayGame;
+assume L793: R20 in ( the_RightOptions_of R14 );
+L794:
+now
+L795: R20 in ( the_Options_of R14 ) by L793 , XBOOLE_0:def 3;
+thus L796: S15[ R20 ] by L795 , L779;
+L797: (R20 is  fuzzy or R20 is  positive) by L791 , L793;
+thus L798: R20 is non  nonpositive by L797;
+end;
+consider R23 being ConwayGame such that L799: (R23 in ( the_LeftOptions_of R20 ) & R23 is non  fuzzy non  negative) by L794;
+take D99 = R23;
+L800: (D99 is  zero or D99 is  positive) by L799 , L737;
+thus L801: (D99 in ( the_LeftOptions_of R20 ) & D99 is  nonnegative) by L800 , L799;
+end;
+thus L802: R14 is  nonnegative by L792 , L741;
+end;
+thus L803:now
+assume L804: R14 is  nonpositive;
+let R19 being ConwayGame;
+assume that
+L805: R19 in ( the_LeftOptions_of R14 );
+consider R22 being ConwayGame such that L806: (R22 in ( the_RightOptions_of R19 ) & R22 is  nonpositive) by L804 , L805 , L759;
+L807:
+now
+L808: R19 in ( the_Options_of R14 ) by L805 , XBOOLE_0:def 3;
+thus L809: S15[ R19 ] by L808 , L779;
+thus L810:now
+take D100 = R22;
+thus L811: D100 in ( the_RightOptions_of R19 ) by L806;
+thus L812: D100 is non  fuzzy non  positive by L806;
+end;
+end;
+L811: R19 is non  positive non  zero by L807;
+thus L812: (R19 is  fuzzy or R19 is  negative) by L811 , L737;
+end;
+thus L813:now
+assume L814: (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative)));
+L815:
+now
+let R19 being ConwayGame;
+assume L816: R19 in ( the_LeftOptions_of R14 );
+L817:
+now
+L818: R19 in ( the_Options_of R14 ) by L816 , XBOOLE_0:def 3;
+thus L819: S15[ R19 ] by L818 , L779;
+L820: (R19 is  fuzzy or R19 is  negative) by L814 , L816;
+thus L821: R19 is non  nonnegative by L820;
+end;
+consider R22 being ConwayGame such that L822: (R22 in ( the_RightOptions_of R19 ) & R22 is non  fuzzy non  positive) by L817;
+take D101 = R22;
+L823: (D101 is  zero or D101 is  negative) by L822 , L737;
+thus L824: (D101 in ( the_RightOptions_of R19 ) & D101 is  nonpositive) by L823 , L822;
+end;
+thus L825: R14 is  nonpositive by L815 , L759;
+end;
+end;
+L814: (for R14 being ConwayGame holds S15[ R14 ]) from ConwayGameInd(L778);
+thus L815: thesis by L814;
+end;
+theorem
+L816: (for R14 being ConwayGame holds (R14 is  fuzzy iff ((ex R19 being ConwayGame st (R19 in ( the_LeftOptions_of R14 ) & R19 is  nonnegative)) & (ex R20 being ConwayGame st (R20 in ( the_RightOptions_of R14 ) & R20 is  nonpositive)))))
+proof
+let R14 being ConwayGame;
+thus L817:now
+assume L818: R14 is  fuzzy;
+thus L819:now
+consider R19 being ConwayGame such that L820: (R19 in ( the_LeftOptions_of R14 ) & (for R22 being ConwayGame holds (R22 in ( the_RightOptions_of R19 ) implies R22 is non  nonpositive))) by L818 , L759;
+take D102 = R19;
+thus L821: D102 in ( the_LeftOptions_of R14 ) by L820;
+L822:
+now
+let R22 being ConwayGame;
+assume L823: R22 in ( the_RightOptions_of D102 );
+L824: (R22 is non  negative & R22 is non  zero) by L823 , L820;
+thus L825: (R22 is  fuzzy or R22 is  positive) by L824 , L737;
+end;
+thus L826: D102 is  nonnegative by L822 , L777;
+end;
+thus L827:now
+consider R20 being ConwayGame such that L828: (R20 in ( the_RightOptions_of R14 ) & (for R23 being ConwayGame holds (R23 in ( the_LeftOptions_of R20 ) implies R23 is non  nonnegative))) by L818 , L741;
+take D103 = R20;
+thus L829: D103 in ( the_RightOptions_of R14 ) by L828;
+L830:
+now
+let R23 being ConwayGame;
+assume L831: R23 in ( the_LeftOptions_of D103 );
+L832: (R23 is non  positive & R23 is non  zero) by L831 , L828;
+thus L833: (R23 is  fuzzy or R23 is  negative) by L832 , L737;
+end;
+thus L834: D103 is  nonpositive by L830 , L777;
+end;
+end;
+thus L828:now
+assume L829: (ex R19 being ConwayGame st (R19 in ( the_LeftOptions_of R14 ) & R19 is  nonnegative));
+consider R19 being ConwayGame such that L830: (R19 in ( the_LeftOptions_of R14 ) & R19 is  nonnegative) by L829;
+assume L831: (ex R20 being ConwayGame st (R20 in ( the_RightOptions_of R14 ) & R20 is  nonpositive));
+consider R20 being ConwayGame such that L832: (R20 in ( the_RightOptions_of R14 ) & R20 is  nonpositive) by L831;
+L833: (R19 is non  fuzzy non  negative & R20 is non  fuzzy non  positive) by L830 , L832;
+L834: (R14 is non  nonpositive & R14 is non  nonnegative) by L833 , L777 , L830 , L832;
+thus L835: R14 is  fuzzy by L834;
+end;
+end;
+theorem
+L829: (for R14 being ConwayGame holds (R14 is  zero iff ((for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative))) & (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive))))))
+proof
+let R14 being ConwayGame;
+thus L830: (R14 is  zero implies ((for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative))) & (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive))))) by L777;
+assume L831: ((for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative))) & (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive))));
+L832: (R14 is  nonpositive & R14 is  nonnegative) by L831 , L777;
+thus L833: thesis by L832;
+end;
+theorem
+L834: (for R14 being ConwayGame holds (R14 is  positive iff ((for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive))) & (ex R19 being ConwayGame st (R19 in ( the_LeftOptions_of R14 ) & R19 is  nonnegative)))))
+proof
+let R14 being ConwayGame;
+thus L835:now
+assume L836: R14 is  positive;
+thus L837: (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive))) by L836 , L777;
+consider R19 being ConwayGame such that L838: (R19 in ( the_LeftOptions_of R14 ) & R19 is non  fuzzy non  negative) by L829 , L836 , L837;
+take D104 = R19;
+L839: (D104 is  zero or D104 is  positive) by L838 , L737;
+thus L840: (D104 in ( the_LeftOptions_of R14 ) & D104 is  nonnegative) by L839 , L838;
+end;
+thus L841:now
+assume L842: (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of R14 ) implies (R20 is  fuzzy or R20 is  positive)));
+L843: R14 is  nonnegative by L842 , L777;
+assume L844: (ex R19 being ConwayGame st (R19 in ( the_LeftOptions_of R14 ) & R19 is  nonnegative));
+consider R19 being ConwayGame such that L845: (R19 in ( the_LeftOptions_of R14 ) & R19 is  nonnegative) by L844;
+L846: R19 is non  fuzzy non  negative by L845;
+L847: (not R14 is  zero) by L846 , L829 , L845;
+thus L848: R14 is  positive by L847 , L843;
+end;
+end;
+theorem
+L842: (for R14 being ConwayGame holds (R14 is  negative iff ((for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative))) & (ex R20 being ConwayGame st (R20 in ( the_RightOptions_of R14 ) & R20 is  nonpositive)))))
+proof
+let R14 being ConwayGame;
+thus L843:now
+assume L844: R14 is  negative;
+thus L845: (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative))) by L844 , L777;
+consider R20 being ConwayGame such that L846: (R20 in ( the_RightOptions_of R14 ) & R20 is non  fuzzy non  positive) by L829 , L844 , L845;
+take D105 = R20;
+L847: (D105 is  zero or D105 is  negative) by L846 , L737;
+thus L848: (D105 in ( the_RightOptions_of R14 ) & D105 is  nonpositive) by L847 , L846;
+end;
+thus L849:now
+assume L850: (for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of R14 ) implies (R19 is  fuzzy or R19 is  negative)));
+L851: R14 is  nonpositive by L850 , L777;
+assume L852: (ex R20 being ConwayGame st (R20 in ( the_RightOptions_of R14 ) & R20 is  nonpositive));
+consider R20 being ConwayGame such that L853: (R20 in ( the_RightOptions_of R14 ) & R20 is  nonpositive) by L852;
+L854: R20 is non  fuzzy non  positive by L853;
+L855: (not R14 is  zero) by L854 , L829 , L853;
+thus L856: R14 is  negative by L855 , L851;
+end;
+end;
+registration
+cluster ( ConwayZero ) ->  zero;
+coherence
+proof
+L850: ((for R19 being ConwayGame holds (R19 in ( the_LeftOptions_of ( ConwayZero ) ) implies (R19 is  fuzzy or R19 is  negative))) & (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of ( ConwayZero ) ) implies (R20 is  fuzzy or R20 is  positive))));
+thus L851: thesis by L850 , L829;
+end;
+end;
+registration
+cluster ( ConwayOne ) ->  positive;
+coherence
+proof
+L853:
+now
+thus L854: (for R20 being ConwayGame holds (R20 in ( the_RightOptions_of ( ConwayOne ) ) implies (R20 is  fuzzy or R20 is  positive)));
+thus L855:now
+take D106 = ( ConwayZero );
+thus L856: D106 in ( the_LeftOptions_of ( ConwayOne ) ) by L130;
+thus L857: D106 is  nonnegative;
+end;
+end;
+thus L856: thesis by L853 , L834;
+end;
+cluster ( ConwayStar ) ->  fuzzy;
+coherence
+proof
+L857:
+now
+thus L858:now
+take D107 = ( ConwayZero );
+thus L859: D107 in ( the_LeftOptions_of ( ConwayStar ) ) by L133;
+thus L860: D107 is  nonnegative;
+end;
+thus L861:now
+take D108 = ( ConwayZero );
+thus L862: D108 in ( the_RightOptions_of ( ConwayStar ) ) by L133;
+thus L863: D108 is  nonpositive;
+end;
+end;
+thus L862: thesis by L857 , L816;
+end;
+end;
+registration
+cluster  zero for ConwayGame;
+existence
+proof
+take ( ConwayZero );
+thus L864: thesis;
+end;
+cluster  positive for ConwayGame;
+existence
+proof
+take ( ConwayOne );
+thus L865: thesis;
+end;
+cluster  fuzzy for ConwayGame;
+existence
+proof
+take ( ConwayStar );
+thus L866: thesis;
+end;
+end;
+registration
+let C91 being  nonpositive ConwayGame;
+cluster ( - C91 ) ->  nonnegative;
+coherence by L728;
+end;
+registration
+let C92 being  nonnegative ConwayGame;
+cluster ( - C92 ) ->  nonpositive;
+coherence
+proof
+L869: C92 = ( - ( - C92 ) ) by L700;
+thus L870: thesis by L869 , L728;
+end;
+end;
+registration
+let C93 being  positive ConwayGame;
+cluster ( - C93 ) ->  negative;
+coherence
+proof
+L872: C93 = ( - ( - C93 ) ) by L700;
+L873: ( - C93 ) is non  zero  nonpositive by L872;
+thus L874: thesis by L873;
+end;
+end;
+registration
+cluster  negative for ConwayGame;
+existence
+proof
+take ( - ( ConwayOne ) );
+thus L876: thesis;
+end;
+end;
+registration
+let C94 being  negative ConwayGame;
+cluster ( - C94 ) ->  positive;
+coherence
+proof
+L878: C94 = ( - ( - C94 ) ) by L700;
+L879: ( - C94 ) is non  zero  nonnegative by L878;
+thus L880: thesis by L879;
+end;
+end;
+registration
+let C95 being  fuzzy ConwayGame;
+cluster ( - C95 ) ->  fuzzy;
+coherence
+proof
+L882: C95 = ( - ( - C95 ) ) by L700;
+L883: ( - C95 ) is non  positive non  negative non  zero by L882;
+thus L884: thesis by L883 , L737;
+end;
+end;

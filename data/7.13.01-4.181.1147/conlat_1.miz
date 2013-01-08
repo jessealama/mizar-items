@@ -1,0 +1,2428 @@
+:: Introduction to Concept Lattices
+::  by Christoph Schwarzweller
+::
+:: Received October 2, 1998
+:: Copyright (c) 1998-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies STRUCT_0, XBOOLE_0, RELAT_1, CAT_1, SUBSET_1, TARSKI, FUNCT_1,
+      ZFMISC_1, MCART_1, YELLOW_1, LATTICE3, ORDERS_2, FILTER_1, WAYBEL_1,
+      WAYBEL_0, XXREAL_0, PBOOLE, EQREL_1, CLASSES2, BINOP_1, LATTICES,
+      QC_LANG1, REWRITE1, SETFAM_1, CONLAT_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, XTUPLE_0, MCART_1, RELAT_1,
+      FUNCT_1, RELSET_1, PARTFUN1, FUNCT_2, BINOP_1, STRUCT_0, LATTICES,
+      ORDERS_2, YELLOW_1, WAYBEL_1, LATTICE3, SETFAM_1, WAYBEL_0;
+ constructors BINOP_1, DOMAIN_1, LATTICE3, WAYBEL_1, RELSET_1, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, RELSET_1, FUNCT_2, STRUCT_0, LATTICES,
+      LATTICE3, YELLOW_1, XTUPLE_0;
+ requirements SUBSET, BOOLE;
+ definitions TARSKI, BINOP_1, XTUPLE_0;
+ theorems TARSKI, RELAT_1, FUNCT_1, FUNCT_2, ZFMISC_1, LATTICES, MCART_1,
+      LATTICE3, YELLOW_1, ORDERS_2, FILTER_1, VECTSP_8, SETFAM_1, WAYBEL_0,
+      RELSET_1, XBOOLE_0, XBOOLE_1, XTUPLE_0;
+ schemes BINOP_1;
+
+begin
+definition
+let C1 being 2-sorted;
+attr C1 is  quasi-empty
+means
+:L1: ((the carrier of C1) is  empty or (the carrier' of C1) is  empty);
+end;
+registration
+cluster  strict non  empty non  void for 2-sorted;
+existence
+proof
+L3: 2-sorted (# { ( {} ) } , { ( {} ) } #) is non  empty non  void;
+thus L4: thesis by L3;
+end;
+cluster  strict non  quasi-empty for 2-sorted;
+existence
+proof
+L5: 2-sorted (# { ( {} ) } , { ( {} ) } #) is non  quasi-empty by L1;
+thus L6: thesis by L5;
+end;
+end;
+registration
+cluster  strict  empty  void  quasi-empty for 2-sorted;
+existence
+proof
+L8: 2-sorted (# ( {} ) , ( {} ) #) is  empty  void  quasi-empty by L1;
+thus L9: thesis by L8;
+end;
+end;
+definition
+struct (2-sorted) ContextStr(# carrier , carrier' -> set , Information -> (Relation of the carrier , the carrier') #);
+end;
+registration
+cluster  strict non  empty for ContextStr;
+existence
+proof
+set D1 = the (Relation of { ( {} ) } , { ( {} ) });
+L12: ContextStr (# { ( {} ) } , { ( {} ) } , D1 #) is non  empty;
+thus L13: thesis by L12;
+end;
+cluster  strict non  quasi-empty for ContextStr;
+existence
+proof
+set D2 = the (Relation of { ( {} ) } , { ( {} ) });
+L14: ContextStr (# { ( {} ) } , { ( {} ) } , D2 #) is non  quasi-empty by L1;
+thus L15: thesis by L14;
+end;
+end;
+definition
+mode FormalContext
+ is non  quasi-empty ContextStr;
+end;
+definition
+let C2 being 2-sorted;
+mode Object of C2
+ is (Element of C2);
+mode Attribute of C2
+ is (Element of (the carrier' of C2));
+end;
+registration
+let C3 being non  quasi-empty 2-sorted;
+cluster (the carrier' of C3) -> non  empty;
+coherence by L1;
+cluster (the carrier of C3) -> non  empty;
+coherence by L1;
+end;
+registration
+let C4 being non  quasi-empty 2-sorted;
+cluster non  empty for (Subset of (the carrier of C4));
+existence
+proof
+take (the carrier of C4);
+L20: (the carrier of C4) c= (the carrier of C4);
+thus L21: thesis by L20;
+end;
+cluster non  empty for (Subset of (the carrier' of C4));
+existence
+proof
+take (the carrier' of C4);
+L22: (the carrier' of C4) c= (the carrier' of C4);
+thus L23: thesis by L22;
+end;
+end;
+definition
+let C5 being FormalContext;
+let C6 being (Object of C5);
+let C7 being (Attribute of C5);
+pred C6 is-connected-with C7
+means
+:L25: [ C6 , C7 ] in (the Information of C5)
+;end;
+notation
+let C8 being FormalContext;
+let C9 being (Object of C8);
+let C10 being (Attribute of C8);
+antonym C9 is-not-connected-with C10 for C9 is-connected-with C10;
+end;
+begin
+definition
+let C11 being FormalContext;
+func ObjectDerivation C11 -> (Function of ( bool (the carrier of C11) ) , ( bool (the carrier' of C11) )) means 
+:L28: (for B1 being (Subset of (the carrier of C11)) holds ( it . B1 ) = { B2 where B2 is (Attribute of C11) : (for B3 being (Object of C11) holds (B3 in B1 implies B3 is-connected-with B2)) });
+existence
+proof
+set D3 = { [ B4 , { B5 where B5 is (Attribute of C11) : (for B6 being (Object of C11) holds (B6 in B4 implies B6 is-connected-with B5)) } ] where B4 is (Subset of (the carrier of C11)) : (not contradiction) };
+L29: (for B7 being set holds (B7 in D3 implies (ex B8 , B9 being set st B7 = [ B8 , B9 ])))
+proof
+let C12 being set;
+assume L30: C12 in D3;
+L31: (ex B10 being (Subset of (the carrier of C11)) st C12 = [ B10 , { B11 where B11 is (Attribute of C11) : (for B12 being (Object of C11) holds (B12 in B10 implies B12 is-connected-with B11)) } ]) by L30;
+thus L32: thesis by L31;
+end;
+reconsider D4 = D3 as Relation by L29 , RELAT_1:def 1;
+L33: (for B13 , B14 , B15 being set holds (([ B13 , B14 ] in D4 & [ B13 , B15 ] in D4) implies B14 = B15))
+proof
+let C13 , C14 , C15 being set;
+assume that
+L34: [ C13 , C14 ] in D4
+and
+L35: [ C13 , C15 ] in D4;
+consider C16 being (Subset of (the carrier of C11)) such that L36: [ C13 , C14 ] = [ C16 , { B16 where B16 is (Attribute of C11) : (for B17 being (Object of C11) holds (B17 in C16 implies B17 is-connected-with B16)) } ] by L34;
+L37: C14 = ( [ C13 , C14 ] `2 )
+.= ( [ C16 , { B18 where B18 is (Attribute of C11) : (for B19 being (Object of C11) holds (B19 in C16 implies B19 is-connected-with B18)) } ] `2 ) by L36
+.= { B20 where B20 is (Attribute of C11) : (for B21 being (Object of C11) holds (B21 in C16 implies B21 is-connected-with B20)) };
+consider C17 being (Subset of (the carrier of C11)) such that L38: [ C13 , C15 ] = [ C17 , { B22 where B22 is (Attribute of C11) : (for B23 being (Object of C11) holds (B23 in C17 implies B23 is-connected-with B22)) } ] by L35;
+L39: C15 = ( [ C13 , C15 ] `2 )
+.= ( [ C17 , { B24 where B24 is (Attribute of C11) : (for B25 being (Object of C11) holds (B25 in C17 implies B25 is-connected-with B24)) } ] `2 ) by L38
+.= { B26 where B26 is (Attribute of C11) : (for B27 being (Object of C11) holds (B27 in C17 implies B27 is-connected-with B26)) };
+L40: C16 = ( [ C16 , { B28 where B28 is (Attribute of C11) : (for B29 being (Object of C11) holds (B29 in C16 implies B29 is-connected-with B28)) } ] `1 )
+.= ( [ C13 , C14 ] `1 ) by L36
+.= C13
+.= ( [ C13 , C15 ] `1 )
+.= ( [ C17 , { B30 where B30 is (Attribute of C11) : (for B31 being (Object of C11) holds (B31 in C17 implies B31 is-connected-with B30)) } ] `1 ) by L38
+.= C17;
+thus L41: thesis by L40 , L37 , L39;
+end;
+reconsider D5 = D4 as Function by L33 , FUNCT_1:def 1;
+L42: (for B32 being set holds (B32 in ( dom D5 ) implies B32 in ( bool (the carrier of C11) )))
+proof
+let C18 being set;
+assume L43: C18 in ( dom D5 );
+consider C19 being set such that L44: [ C18 , C19 ] in D5 by L43 , XTUPLE_0:def 12;
+consider C20 being (Subset of (the carrier of C11)) such that L45: [ C18 , C19 ] = [ C20 , { B33 where B33 is (Attribute of C11) : (for B34 being (Object of C11) holds (B34 in C20 implies B34 is-connected-with B33)) } ] by L44;
+L46: C18 = ( [ C18 , C19 ] `1 )
+.= ( [ C20 , { B35 where B35 is (Attribute of C11) : (for B36 being (Object of C11) holds (B36 in C20 implies B36 is-connected-with B35)) } ] `1 ) by L45
+.= C20;
+thus L47: thesis by L46;
+end;
+L48: (for B37 being set holds (B37 in ( bool (the carrier of C11) ) implies B37 in ( dom D5 )))
+proof
+let C21 being set;
+assume L49: C21 in ( bool (the carrier of C11) );
+reconsider D6 = C21 as (Subset of (the carrier of C11)) by L49;
+L50: [ D6 , { B38 where B38 is (Attribute of C11) : (for B39 being (Object of C11) holds (B39 in D6 implies B39 is-connected-with B38)) } ] in D5;
+thus L51: thesis by L50 , XTUPLE_0:def 12;
+end;
+L52: ( dom D5 ) = ( bool (the carrier of C11) ) by L48 , L42 , TARSKI:1;
+L53: ( rng D5 ) c= ( bool (the carrier' of C11) )
+proof
+let C22 being set;
+assume L54: C22 in ( rng D5 );
+consider C23 being set such that L55: [ C23 , C22 ] in D5 by L54 , XTUPLE_0:def 13;
+consider C24 being (Subset of (the carrier of C11)) such that L56: [ C23 , C22 ] = [ C24 , { B40 where B40 is (Attribute of C11) : (for B41 being (Object of C11) holds (B41 in C24 implies B41 is-connected-with B40)) } ] by L55;
+L57: { B42 where B42 is (Attribute of C11) : (for B43 being (Object of C11) holds (B43 in C24 implies B43 is-connected-with B42)) } c= (the carrier' of C11)
+proof
+let C25 being set;
+assume L58: C25 in { B44 where B44 is (Attribute of C11) : (for B45 being (Object of C11) holds (B45 in C24 implies B45 is-connected-with B44)) };
+L59: (ex B46 being (Attribute of C11) st (B46 = C25 & (for B47 being (Object of C11) holds (B47 in C24 implies B47 is-connected-with B46)))) by L58;
+thus L60: thesis by L59;
+end;
+L61: C22 = ( [ C23 , C22 ] `2 )
+.= ( [ C24 , { B48 where B48 is (Attribute of C11) : (for B49 being (Object of C11) holds (B49 in C24 implies B49 is-connected-with B48)) } ] `2 ) by L56
+.= { B50 where B50 is (Attribute of C11) : (for B51 being (Object of C11) holds (B51 in C24 implies B51 is-connected-with B50)) };
+thus L62: thesis by L61 , L57;
+end;
+reconsider D7 = D5 as (Function of ( bool (the carrier of C11) ) , ( bool (the carrier' of C11) )) by L53 , L52 , FUNCT_2:def 1 , RELSET_1:4;
+take D7;
+L63: (for B52 being (Subset of (the carrier of C11)) holds ( D7 . B52 ) = { B53 where B53 is (Attribute of C11) : (for B54 being (Object of C11) holds (B54 in B52 implies B54 is-connected-with B53)) })
+proof
+let C26 being (Subset of (the carrier of C11));
+consider C27 being set such that L64: [ C26 , C27 ] in D7 by L52 , XTUPLE_0:def 12;
+consider C28 being (Subset of (the carrier of C11)) such that L65: [ C26 , C27 ] = [ C28 , { B55 where B55 is (Attribute of C11) : (for B56 being (Object of C11) holds (B56 in C28 implies B56 is-connected-with B55)) } ] by L64;
+L66: C27 = ( [ C26 , C27 ] `2 )
+.= ( [ C28 , { B57 where B57 is (Attribute of C11) : (for B58 being (Object of C11) holds (B58 in C28 implies B58 is-connected-with B57)) } ] `2 ) by L65
+.= { B59 where B59 is (Attribute of C11) : (for B60 being (Object of C11) holds (B60 in C28 implies B60 is-connected-with B59)) };
+L67: C26 = ( [ C26 , C27 ] `1 )
+.= ( [ C28 , { B61 where B61 is (Attribute of C11) : (for B62 being (Object of C11) holds (B62 in C28 implies B62 is-connected-with B61)) } ] `1 ) by L65
+.= C28;
+thus L68: thesis by L67 , L52 , L64 , L66 , FUNCT_1:def 2;
+end;
+thus L69: thesis by L63;
+end;
+uniqueness
+proof
+let C29 , C30 being (Function of ( bool (the carrier of C11) ) , ( bool (the carrier' of C11) ));
+assume L70: (for B63 being (Subset of (the carrier of C11)) holds ( C29 . B63 ) = { B64 where B64 is (Attribute of C11) : (for B65 being (Object of C11) holds (B65 in B63 implies B65 is-connected-with B64)) });
+assume L71: (for B66 being (Subset of (the carrier of C11)) holds ( C30 . B66 ) = { B67 where B67 is (Attribute of C11) : (for B68 being (Object of C11) holds (B68 in B66 implies B68 is-connected-with B67)) });
+L72: (for B69 being set holds (B69 in ( bool (the carrier of C11) ) implies ( C29 . B69 ) = ( C30 . B69 )))
+proof
+let C31 being set;
+assume L73: C31 in ( bool (the carrier of C11) );
+reconsider D8 = C31 as (Subset of (the carrier of C11)) by L73;
+L74: ( C29 . D8 ) = { B70 where B70 is (Attribute of C11) : (for B71 being (Object of C11) holds (B71 in D8 implies B71 is-connected-with B70)) } by L70
+.= ( C30 . D8 ) by L71;
+thus L75: thesis by L74;
+end;
+L76: (( dom C29 ) = ( bool (the carrier of C11) ) & ( dom C30 ) = ( bool (the carrier of C11) )) by FUNCT_2:def 1;
+thus L77: thesis by L76 , L72 , FUNCT_1:2;
+end;
+end;
+definition
+let C32 being FormalContext;
+func AttributeDerivation C32 -> (Function of ( bool (the carrier' of C32) ) , ( bool (the carrier of C32) )) means 
+:L79: (for B72 being (Subset of (the carrier' of C32)) holds ( it . B72 ) = { B73 where B73 is (Object of C32) : (for B74 being (Attribute of C32) holds (B74 in B72 implies B73 is-connected-with B74)) });
+existence
+proof
+set D9 = { [ B75 , { B76 where B76 is (Object of C32) : (for B77 being (Attribute of C32) holds (B77 in B75 implies B76 is-connected-with B77)) } ] where B75 is (Subset of (the carrier' of C32)) : (not contradiction) };
+L80: (for B78 being set holds (B78 in D9 implies (ex B79 , B80 being set st B78 = [ B79 , B80 ])))
+proof
+let C33 being set;
+assume L81: C33 in D9;
+L82: (ex B81 being (Subset of (the carrier' of C32)) st C33 = [ B81 , { B82 where B82 is (Object of C32) : (for B83 being (Attribute of C32) holds (B83 in B81 implies B82 is-connected-with B83)) } ]) by L81;
+thus L83: thesis by L82;
+end;
+reconsider D10 = D9 as Relation by L80 , RELAT_1:def 1;
+L84: (for B84 , B85 , B86 being set holds (([ B84 , B85 ] in D10 & [ B84 , B86 ] in D10) implies B85 = B86))
+proof
+let C34 , C35 , C36 being set;
+assume that
+L85: [ C34 , C35 ] in D10
+and
+L86: [ C34 , C36 ] in D10;
+consider C37 being (Subset of (the carrier' of C32)) such that L87: [ C34 , C35 ] = [ C37 , { B87 where B87 is (Object of C32) : (for B88 being (Attribute of C32) holds (B88 in C37 implies B87 is-connected-with B88)) } ] by L85;
+L88: C35 = ( [ C34 , C35 ] `2 )
+.= ( [ C37 , { B89 where B89 is (Object of C32) : (for B90 being (Attribute of C32) holds (B90 in C37 implies B89 is-connected-with B90)) } ] `2 ) by L87
+.= { B91 where B91 is (Object of C32) : (for B92 being (Attribute of C32) holds (B92 in C37 implies B91 is-connected-with B92)) };
+consider C38 being (Subset of (the carrier' of C32)) such that L89: [ C34 , C36 ] = [ C38 , { B93 where B93 is (Object of C32) : (for B94 being (Attribute of C32) holds (B94 in C38 implies B93 is-connected-with B94)) } ] by L86;
+L90: C36 = ( [ C34 , C36 ] `2 )
+.= ( [ C38 , { B95 where B95 is (Object of C32) : (for B96 being (Attribute of C32) holds (B96 in C38 implies B95 is-connected-with B96)) } ] `2 ) by L89
+.= ( [ C38 , { B97 where B97 is (Object of C32) : (for B98 being (Attribute of C32) holds (B98 in C38 implies B97 is-connected-with B98)) } ] `2 )
+.= { B99 where B99 is (Object of C32) : (for B100 being (Attribute of C32) holds (B100 in C38 implies B99 is-connected-with B100)) };
+L91: C37 = ( [ C37 , { B101 where B101 is (Object of C32) : (for B102 being (Attribute of C32) holds (B102 in C37 implies B101 is-connected-with B102)) } ] `1 )
+.= ( [ C34 , C35 ] `1 ) by L87
+.= C34
+.= ( [ C34 , C36 ] `1 )
+.= ( [ C38 , { B103 where B103 is (Object of C32) : (for B104 being (Attribute of C32) holds (B104 in C38 implies B103 is-connected-with B104)) } ] `1 ) by L89
+.= C38;
+thus L92: thesis by L91 , L88 , L90;
+end;
+reconsider D11 = D10 as Function by L84 , FUNCT_1:def 1;
+L93: (for B105 being set holds (B105 in ( dom D11 ) implies B105 in ( bool (the carrier' of C32) )))
+proof
+let C39 being set;
+assume L94: C39 in ( dom D11 );
+consider C40 being set such that L95: [ C39 , C40 ] in D11 by L94 , XTUPLE_0:def 12;
+consider C41 being (Subset of (the carrier' of C32)) such that L96: [ C39 , C40 ] = [ C41 , { B106 where B106 is (Object of C32) : (for B107 being (Attribute of C32) holds (B107 in C41 implies B106 is-connected-with B107)) } ] by L95;
+L97: C39 = ( [ C39 , C40 ] `1 )
+.= ( [ C41 , { B108 where B108 is (Object of C32) : (for B109 being (Attribute of C32) holds (B109 in C41 implies B108 is-connected-with B109)) } ] `1 ) by L96
+.= C41;
+thus L98: thesis by L97;
+end;
+L99: (for B110 being set holds (B110 in ( bool (the carrier' of C32) ) implies B110 in ( dom D11 )))
+proof
+let C42 being set;
+assume L100: C42 in ( bool (the carrier' of C32) );
+reconsider D12 = C42 as (Subset of (the carrier' of C32)) by L100;
+L101: [ D12 , { B111 where B111 is (Object of C32) : (for B112 being (Attribute of C32) holds (B112 in D12 implies B111 is-connected-with B112)) } ] in D11;
+thus L102: thesis by L101 , XTUPLE_0:def 12;
+end;
+L103: ( dom D11 ) = ( bool (the carrier' of C32) ) by L99 , L93 , TARSKI:1;
+L104: ( rng D11 ) c= ( bool (the carrier of C32) )
+proof
+let C43 being set;
+assume L105: C43 in ( rng D11 );
+consider C44 being set such that L106: [ C44 , C43 ] in D11 by L105 , XTUPLE_0:def 13;
+consider C45 being (Subset of (the carrier' of C32)) such that L107: [ C44 , C43 ] = [ C45 , { B113 where B113 is (Object of C32) : (for B114 being (Attribute of C32) holds (B114 in C45 implies B113 is-connected-with B114)) } ] by L106;
+L108: { B115 where B115 is (Object of C32) : (for B116 being (Attribute of C32) holds (B116 in C45 implies B115 is-connected-with B116)) } c= (the carrier of C32)
+proof
+let C46 being set;
+assume L109: C46 in { B117 where B117 is (Object of C32) : (for B118 being (Attribute of C32) holds (B118 in C45 implies B117 is-connected-with B118)) };
+L110: (ex B119 being (Object of C32) st (B119 = C46 & (for B120 being (Attribute of C32) holds (B120 in C45 implies B119 is-connected-with B120)))) by L109;
+thus L111: thesis by L110;
+end;
+L112: C43 = ( [ C44 , C43 ] `2 )
+.= ( [ C45 , { B121 where B121 is (Object of C32) : (for B122 being (Attribute of C32) holds (B122 in C45 implies B121 is-connected-with B122)) } ] `2 ) by L107
+.= { B123 where B123 is (Object of C32) : (for B124 being (Attribute of C32) holds (B124 in C45 implies B123 is-connected-with B124)) };
+thus L113: thesis by L112 , L108;
+end;
+reconsider D13 = D11 as (Function of ( bool (the carrier' of C32) ) , ( bool (the carrier of C32) )) by L104 , L103 , FUNCT_2:def 1 , RELSET_1:4;
+take D13;
+L114: (for B125 being (Subset of (the carrier' of C32)) holds ( D13 . B125 ) = { B126 where B126 is (Object of C32) : (for B127 being (Attribute of C32) holds (B127 in B125 implies B126 is-connected-with B127)) })
+proof
+let C47 being (Subset of (the carrier' of C32));
+consider C48 being set such that L115: [ C47 , C48 ] in D13 by L103 , XTUPLE_0:def 12;
+consider C49 being (Subset of (the carrier' of C32)) such that L116: [ C47 , C48 ] = [ C49 , { B128 where B128 is (Object of C32) : (for B129 being (Attribute of C32) holds (B129 in C49 implies B128 is-connected-with B129)) } ] by L115;
+L117: C48 = ( [ C47 , C48 ] `2 )
+.= ( [ C49 , { B130 where B130 is (Object of C32) : (for B131 being (Attribute of C32) holds (B131 in C49 implies B130 is-connected-with B131)) } ] `2 ) by L116
+.= { B132 where B132 is (Object of C32) : (for B133 being (Attribute of C32) holds (B133 in C49 implies B132 is-connected-with B133)) };
+L118: C47 = ( [ C47 , C48 ] `1 )
+.= ( [ C49 , { B134 where B134 is (Object of C32) : (for B135 being (Attribute of C32) holds (B135 in C49 implies B134 is-connected-with B135)) } ] `1 ) by L116
+.= C49;
+thus L119: thesis by L118 , L103 , L115 , L117 , FUNCT_1:def 2;
+end;
+thus L120: thesis by L114;
+end;
+uniqueness
+proof
+let C50 , C51 being (Function of ( bool (the carrier' of C32) ) , ( bool (the carrier of C32) ));
+assume L121: (for B136 being (Subset of (the carrier' of C32)) holds ( C50 . B136 ) = { B137 where B137 is (Object of C32) : (for B138 being (Attribute of C32) holds (B138 in B136 implies B137 is-connected-with B138)) });
+assume L122: (for B139 being (Subset of (the carrier' of C32)) holds ( C51 . B139 ) = { B140 where B140 is (Object of C32) : (for B141 being (Attribute of C32) holds (B141 in B139 implies B140 is-connected-with B141)) });
+L123: (for B142 being set holds (B142 in ( bool (the carrier' of C32) ) implies ( C50 . B142 ) = ( C51 . B142 )))
+proof
+let C52 being set;
+assume L124: C52 in ( bool (the carrier' of C32) );
+reconsider D14 = C52 as (Subset of (the carrier' of C32)) by L124;
+L125: ( C50 . D14 ) = { B143 where B143 is (Object of C32) : (for B144 being (Attribute of C32) holds (B144 in D14 implies B143 is-connected-with B144)) } by L121
+.= ( C51 . D14 ) by L122;
+thus L126: thesis by L125;
+end;
+L127: (( dom C50 ) = ( bool (the carrier' of C32) ) & ( dom C51 ) = ( bool (the carrier' of C32) )) by FUNCT_2:def 1;
+thus L128: thesis by L127 , L123 , FUNCT_1:2;
+end;
+end;
+theorem
+L130: (for B145 being FormalContext holds (for B146 being (Object of B145) holds ( ( ObjectDerivation B145 ) . { B146 } ) = { B147 where B147 is (Attribute of B145) : B146 is-connected-with B147 }))
+proof
+let C53 being FormalContext;
+let C54 being (Object of C53);
+L131: { C54 } c= (the carrier of C53)
+proof
+let C55 being set;
+assume L132: C55 in { C54 };
+L133: C55 = C54 by L132 , TARSKI:def 1;
+thus L134: thesis by L133;
+end;
+reconsider D15 = { C54 } as (Subset of (the carrier of C53)) by L131;
+L135: (for B148 being set holds (B148 in { B149 where B149 is (Attribute of C53) : (for B150 being (Object of C53) holds (B150 in D15 implies B150 is-connected-with B149)) } implies B148 in { B151 where B151 is (Attribute of C53) : C54 is-connected-with B151 }))
+proof
+set D16 = the (Element of D15);
+let C56 being set;
+reconsider D17 = D16 as (Object of C53) by TARSKI:def 1;
+L136: D17 = C54 by TARSKI:def 1;
+assume L137: C56 in { B152 where B152 is (Attribute of C53) : (for B153 being (Object of C53) holds (B153 in D15 implies B153 is-connected-with B152)) };
+L138: (ex B154 being (Attribute of C53) st (B154 = C56 & (for B155 being (Object of C53) holds (B155 in D15 implies B155 is-connected-with B154)))) by L137;
+reconsider D18 = C56 as (Attribute of C53) by L138;
+L139: D17 is-connected-with D18 by L138;
+thus L140: thesis by L139 , L136;
+end;
+L141: (for B156 being set holds (B156 in { B157 where B157 is (Attribute of C53) : C54 is-connected-with B157 } implies B156 in { B158 where B158 is (Attribute of C53) : (for B159 being (Object of C53) holds (B159 in D15 implies B159 is-connected-with B158)) }))
+proof
+let C57 being set;
+assume L142: C57 in { B160 where B160 is (Attribute of C53) : C54 is-connected-with B160 };
+L143: (ex B161 being (Attribute of C53) st (B161 = C57 & C54 is-connected-with B161)) by L142;
+reconsider D19 = C57 as (Attribute of C53) by L143;
+L144: (for B162 being (Object of C53) holds (B162 in D15 implies B162 is-connected-with D19)) by L143 , TARSKI:def 1;
+thus L145: thesis by L144;
+end;
+L146: ( ( ObjectDerivation C53 ) . D15 ) = { B163 where B163 is (Attribute of C53) : (for B164 being (Object of C53) holds (B164 in D15 implies B164 is-connected-with B163)) } by L28;
+thus L147: thesis by L146 , L135 , L141 , TARSKI:1;
+end;
+theorem
+L148: (for B165 being FormalContext holds (for B166 being (Attribute of B165) holds ( ( AttributeDerivation B165 ) . { B166 } ) = { B167 where B167 is (Object of B165) : B167 is-connected-with B166 }))
+proof
+let C58 being FormalContext;
+let C59 being (Attribute of C58);
+L149: { C59 } c= (the carrier' of C58)
+proof
+let C60 being set;
+assume L150: C60 in { C59 };
+L151: C60 = C59 by L150 , TARSKI:def 1;
+thus L152: thesis by L151;
+end;
+reconsider D20 = { C59 } as (Subset of (the carrier' of C58)) by L149;
+L153: (for B168 being set holds (B168 in { B169 where B169 is (Object of C58) : (for B170 being (Attribute of C58) holds (B170 in D20 implies B169 is-connected-with B170)) } implies B168 in { B171 where B171 is (Object of C58) : B171 is-connected-with C59 }))
+proof
+set D21 = the (Element of D20);
+let C61 being set;
+reconsider D22 = D21 as (Attribute of C58) by TARSKI:def 1;
+L154: D22 = C59 by TARSKI:def 1;
+assume L155: C61 in { B172 where B172 is (Object of C58) : (for B173 being (Attribute of C58) holds (B173 in D20 implies B172 is-connected-with B173)) };
+L156: (ex B174 being (Object of C58) st (B174 = C61 & (for B175 being (Attribute of C58) holds (B175 in D20 implies B174 is-connected-with B175)))) by L155;
+reconsider D23 = C61 as (Object of C58) by L156;
+L157: D23 is-connected-with D22 by L156;
+thus L158: thesis by L157 , L154;
+end;
+L159: (for B176 being set holds (B176 in { B177 where B177 is (Object of C58) : B177 is-connected-with C59 } implies B176 in { B178 where B178 is (Object of C58) : (for B179 being (Attribute of C58) holds (B179 in D20 implies B178 is-connected-with B179)) }))
+proof
+let C62 being set;
+assume L160: C62 in { B180 where B180 is (Object of C58) : B180 is-connected-with C59 };
+L161: (ex B181 being (Object of C58) st (B181 = C62 & B181 is-connected-with C59)) by L160;
+reconsider D24 = C62 as (Object of C58) by L161;
+L162: (for B182 being (Attribute of C58) holds (B182 in D20 implies D24 is-connected-with B182)) by L161 , TARSKI:def 1;
+thus L163: thesis by L162;
+end;
+L164: ( ( AttributeDerivation C58 ) . D20 ) = { B183 where B183 is (Object of C58) : (for B184 being (Attribute of C58) holds (B184 in D20 implies B183 is-connected-with B184)) } by L79;
+thus L165: thesis by L164 , L153 , L159 , TARSKI:1;
+end;
+theorem
+L166: (for B185 being FormalContext holds (for B186 , B187 being (Subset of (the carrier of B185)) holds (B186 c= B187 implies ( ( ObjectDerivation B185 ) . B187 ) c= ( ( ObjectDerivation B185 ) . B186 ))))
+proof
+let C63 being FormalContext;
+let C64 , C65 being (Subset of (the carrier of C63));
+assume L167: C64 c= C65;
+let C66 being set;
+assume L168: C66 in ( ( ObjectDerivation C63 ) . C65 );
+L169: C66 in { B188 where B188 is (Attribute of C63) : (for B189 being (Object of C63) holds (B189 in C65 implies B189 is-connected-with B188)) } by L168 , L28;
+consider C67 being (Attribute of C63) such that L170: C67 = C66 and L171: (for B190 being (Object of C63) holds (B190 in C65 implies B190 is-connected-with C67)) by L169;
+L172: (for B191 being (Object of C63) holds (B191 in C64 implies B191 is-connected-with C67)) by L167 , L171;
+L173: C66 in { B192 where B192 is (Attribute of C63) : (for B193 being (Object of C63) holds (B193 in C64 implies B193 is-connected-with B192)) } by L172 , L170;
+thus L174: thesis by L173 , L28;
+end;
+theorem
+L175: (for B194 being FormalContext holds (for B195 , B196 being (Subset of (the carrier' of B194)) holds (B195 c= B196 implies ( ( AttributeDerivation B194 ) . B196 ) c= ( ( AttributeDerivation B194 ) . B195 ))))
+proof
+let C68 being FormalContext;
+let C69 , C70 being (Subset of (the carrier' of C68));
+assume L176: C69 c= C70;
+let C71 being set;
+assume L177: C71 in ( ( AttributeDerivation C68 ) . C70 );
+L178: C71 in { B197 where B197 is (Object of C68) : (for B198 being (Attribute of C68) holds (B198 in C70 implies B197 is-connected-with B198)) } by L177 , L79;
+consider C72 being (Object of C68) such that L179: C72 = C71 and L180: (for B199 being (Attribute of C68) holds (B199 in C70 implies C72 is-connected-with B199)) by L178;
+L181: (for B200 being (Attribute of C68) holds (B200 in C69 implies C72 is-connected-with B200)) by L176 , L180;
+L182: C71 in { B201 where B201 is (Object of C68) : (for B202 being (Attribute of C68) holds (B202 in C69 implies B201 is-connected-with B202)) } by L181 , L179;
+thus L183: thesis by L182 , L79;
+end;
+theorem
+L184: (for B203 being FormalContext holds (for B204 being (Subset of (the carrier of B203)) holds B204 c= ( ( AttributeDerivation B203 ) . ( ( ObjectDerivation B203 ) . B204 ) )))
+proof
+let C73 being FormalContext;
+let C74 being (Subset of (the carrier of C73));
+set D25 = { B205 where B205 is (Attribute of C73) : (for B206 being (Object of C73) holds (B206 in C74 implies B206 is-connected-with B205)) };
+L185: (for B207 being set holds (B207 in D25 implies B207 in (the carrier' of C73)))
+proof
+let C75 being set;
+assume L186: C75 in D25;
+L187: (ex B208 being (Attribute of C73) st (B208 = C75 & (for B209 being (Object of C73) holds (B209 in C74 implies B209 is-connected-with B208)))) by L186;
+thus L188: thesis by L187;
+end;
+reconsider D26 = D25 as (Subset of (the carrier' of C73)) by L185 , TARSKI:def 3;
+let C76 being set;
+assume L189: C76 in C74;
+reconsider D27 = C76 as (Object of C73) by L189;
+L190: (for B210 being (Attribute of C73) holds (B210 in D26 implies D27 is-connected-with B210))
+proof
+let C77 being (Attribute of C73);
+assume L191: C77 in D26;
+L192: (ex B211 being (Attribute of C73) st (B211 = C77 & (for B212 being (Object of C73) holds (B212 in C74 implies B212 is-connected-with B211)))) by L191;
+thus L193: thesis by L192 , L189;
+end;
+L194: ( ( AttributeDerivation C73 ) . D26 ) = { B213 where B213 is (Object of C73) : (for B214 being (Attribute of C73) holds (B214 in D26 implies B213 is-connected-with B214)) } by L79;
+L195: D27 in ( ( AttributeDerivation C73 ) . D26 ) by L194 , L190;
+thus L196: thesis by L195 , L28;
+end;
+theorem
+L197: (for B215 being FormalContext holds (for B216 being (Subset of (the carrier' of B215)) holds B216 c= ( ( ObjectDerivation B215 ) . ( ( AttributeDerivation B215 ) . B216 ) )))
+proof
+let C78 being FormalContext;
+let C79 being (Subset of (the carrier' of C78));
+set D28 = { B217 where B217 is (Object of C78) : (for B218 being (Attribute of C78) holds (B218 in C79 implies B217 is-connected-with B218)) };
+L198: (for B219 being set holds (B219 in D28 implies B219 in (the carrier of C78)))
+proof
+let C80 being set;
+assume L199: C80 in D28;
+L200: (ex B220 being (Object of C78) st (B220 = C80 & (for B221 being (Attribute of C78) holds (B221 in C79 implies B220 is-connected-with B221)))) by L199;
+thus L201: thesis by L200;
+end;
+reconsider D29 = D28 as (Subset of (the carrier of C78)) by L198 , TARSKI:def 3;
+let C81 being set;
+assume L202: C81 in C79;
+reconsider D30 = C81 as (Attribute of C78) by L202;
+L203: (for B222 being (Object of C78) holds (B222 in D29 implies B222 is-connected-with D30))
+proof
+let C82 being (Object of C78);
+assume L204: C82 in D29;
+L205: (ex B223 being (Object of C78) st (B223 = C82 & (for B224 being (Attribute of C78) holds (B224 in C79 implies B223 is-connected-with B224)))) by L204;
+thus L206: thesis by L205 , L202;
+end;
+L207: ( ( ObjectDerivation C78 ) . D29 ) = { B225 where B225 is (Attribute of C78) : (for B226 being (Object of C78) holds (B226 in D29 implies B226 is-connected-with B225)) } by L28;
+L208: D30 in ( ( ObjectDerivation C78 ) . D29 ) by L207 , L203;
+thus L209: thesis by L208 , L79;
+end;
+theorem
+L210: (for B227 being FormalContext holds (for B228 being (Subset of (the carrier of B227)) holds ( ( ObjectDerivation B227 ) . B228 ) = ( ( ObjectDerivation B227 ) . ( ( AttributeDerivation B227 ) . ( ( ObjectDerivation B227 ) . B228 ) ) )))
+proof
+let C83 being FormalContext;
+let C84 being (Subset of (the carrier of C83));
+set D31 = { B229 where B229 is (Attribute of C83) : (for B230 being (Object of C83) holds (B230 in C84 implies B230 is-connected-with B229)) };
+set D32 = { B231 where B231 is (Object of C83) : (for B232 being (Attribute of C83) holds (B232 in D31 implies B231 is-connected-with B232)) };
+set D33 = { B233 where B233 is (Attribute of C83) : (for B234 being (Object of C83) holds (B234 in D32 implies B234 is-connected-with B233)) };
+L211: (for B235 being set holds (B235 in D33 implies B235 in D31))
+proof
+let C85 being set;
+assume L212: C85 in D33;
+L213: (ex B236 being (Attribute of C83) st (B236 = C85 & (for B237 being (Object of C83) holds (B237 in D32 implies B237 is-connected-with B236)))) by L212;
+reconsider D34 = C85 as (Attribute of C83) by L213;
+L214: (for B238 being (Object of C83) holds (B238 in C84 implies B238 is-connected-with D34))
+proof
+let C86 being (Object of C83);
+assume L215: C86 in C84;
+L216:
+now
+per cases ;
+case L217: C86 in D32;
+thus L218: thesis by L217 , L213;
+end;
+case L219: (not C86 in D32);
+consider C87 being (Attribute of C83) such that L220: C87 in D31 and L221: (not C86 is-connected-with C87) by L219;
+L222: (ex B239 being (Attribute of C83) st (B239 = C87 & (for B240 being (Object of C83) holds (B240 in C84 implies B240 is-connected-with B239)))) by L220;
+thus L223: thesis by L222 , L215 , L221;
+end;
+end;
+thus L225: thesis by L216;
+end;
+thus L226: thesis by L214;
+end;
+L227: (for B241 being set holds (B241 in D31 implies B241 in D33))
+proof
+let C88 being set;
+assume L228: C88 in D31;
+L229: (ex B242 being (Attribute of C83) st (B242 = C88 & (for B243 being (Object of C83) holds (B243 in C84 implies B243 is-connected-with B242)))) by L228;
+reconsider D35 = C88 as (Attribute of C83) by L229;
+L230: (for B244 being (Object of C83) holds (B244 in D32 implies B244 is-connected-with D35))
+proof
+let C89 being (Object of C83);
+assume L231: C89 in D32;
+L232: (ex B245 being (Object of C83) st (B245 = C89 & (for B246 being (Attribute of C83) holds (B246 in D31 implies B245 is-connected-with B246)))) by L231;
+thus L233: thesis by L232 , L228;
+end;
+thus L234: thesis by L230;
+end;
+L235: D31 = D33 by L227 , L211 , TARSKI:1;
+L236: D31 c= (the carrier' of C83)
+proof
+let C90 being set;
+assume L237: C90 in D31;
+L238: (ex B247 being (Attribute of C83) st (B247 = C90 & (for B248 being (Object of C83) holds (B248 in C84 implies B248 is-connected-with B247)))) by L237;
+thus L239: thesis by L238;
+end;
+reconsider D36 = D31 as (Subset of (the carrier' of C83)) by L236;
+L240: D32 c= (the carrier of C83)
+proof
+let C91 being set;
+assume L241: C91 in D32;
+L242: (ex B249 being (Object of C83) st (B249 = C91 & (for B250 being (Attribute of C83) holds (B250 in D36 implies B249 is-connected-with B250)))) by L241;
+thus L243: thesis by L242;
+end;
+reconsider D37 = D32 as (Subset of (the carrier of C83)) by L240;
+L244: (D36 = ( ( ObjectDerivation C83 ) . C84 ) & D37 = ( ( AttributeDerivation C83 ) . D36 )) by L28 , L79;
+thus L245: thesis by L244 , L235 , L28;
+end;
+theorem
+L246: (for B251 being FormalContext holds (for B252 being (Subset of (the carrier' of B251)) holds ( ( AttributeDerivation B251 ) . B252 ) = ( ( AttributeDerivation B251 ) . ( ( ObjectDerivation B251 ) . ( ( AttributeDerivation B251 ) . B252 ) ) )))
+proof
+let C92 being FormalContext;
+let C93 being (Subset of (the carrier' of C92));
+set D38 = { B253 where B253 is (Object of C92) : (for B254 being (Attribute of C92) holds (B254 in C93 implies B253 is-connected-with B254)) };
+set D39 = { B255 where B255 is (Attribute of C92) : (for B256 being (Object of C92) holds (B256 in D38 implies B256 is-connected-with B255)) };
+set D40 = { B257 where B257 is (Object of C92) : (for B258 being (Attribute of C92) holds (B258 in D39 implies B257 is-connected-with B258)) };
+L247: (for B259 being set holds (B259 in D40 implies B259 in D38))
+proof
+let C94 being set;
+assume L248: C94 in D40;
+L249: (ex B260 being (Object of C92) st (B260 = C94 & (for B261 being (Attribute of C92) holds (B261 in D39 implies B260 is-connected-with B261)))) by L248;
+reconsider D41 = C94 as (Object of C92) by L249;
+L250: (for B262 being (Attribute of C92) holds (B262 in C93 implies D41 is-connected-with B262))
+proof
+let C95 being (Attribute of C92);
+assume L251: C95 in C93;
+L252:
+now
+per cases ;
+case L253: C95 in D39;
+thus L254: thesis by L253 , L249;
+end;
+case L255: (not C95 in D39);
+consider C96 being (Object of C92) such that L256: C96 in D38 and L257: (not C96 is-connected-with C95) by L255;
+L258: (ex B263 being (Object of C92) st (B263 = C96 & (for B264 being (Attribute of C92) holds (B264 in C93 implies B263 is-connected-with B264)))) by L256;
+thus L259: thesis by L258 , L251 , L257;
+end;
+end;
+thus L261: thesis by L252;
+end;
+thus L262: thesis by L250;
+end;
+L263: (for B265 being set holds (B265 in D38 implies B265 in D40))
+proof
+let C97 being set;
+assume L264: C97 in D38;
+L265: (ex B266 being (Object of C92) st (B266 = C97 & (for B267 being (Attribute of C92) holds (B267 in C93 implies B266 is-connected-with B267)))) by L264;
+reconsider D42 = C97 as (Object of C92) by L265;
+L266: (for B268 being (Attribute of C92) holds (B268 in D39 implies D42 is-connected-with B268))
+proof
+let C98 being (Attribute of C92);
+assume L267: C98 in D39;
+L268: (ex B269 being (Attribute of C92) st (B269 = C98 & (for B270 being (Object of C92) holds (B270 in D38 implies B270 is-connected-with B269)))) by L267;
+thus L269: thesis by L268 , L264;
+end;
+thus L270: thesis by L266;
+end;
+L271: D38 = D40 by L263 , L247 , TARSKI:1;
+L272: D38 c= (the carrier of C92)
+proof
+let C99 being set;
+assume L273: C99 in D38;
+L274: (ex B271 being (Object of C92) st (B271 = C99 & (for B272 being (Attribute of C92) holds (B272 in C93 implies B271 is-connected-with B272)))) by L273;
+thus L275: thesis by L274;
+end;
+reconsider D43 = D38 as (Subset of (the carrier of C92)) by L272;
+L276: D39 c= (the carrier' of C92)
+proof
+let C100 being set;
+assume L277: C100 in D39;
+L278: (ex B273 being (Attribute of C92) st (B273 = C100 & (for B274 being (Object of C92) holds (B274 in D43 implies B274 is-connected-with B273)))) by L277;
+thus L279: thesis by L278;
+end;
+reconsider D44 = D39 as (Subset of (the carrier' of C92)) by L276;
+L280: (D43 = ( ( AttributeDerivation C92 ) . C93 ) & D44 = ( ( ObjectDerivation C92 ) . D43 )) by L28 , L79;
+thus L281: thesis by L280 , L271 , L79;
+end;
+theorem
+L282: (for B275 being FormalContext holds (for B276 being (Subset of (the carrier of B275)) holds (for B277 being (Subset of (the carrier' of B275)) holds (B276 c= ( ( AttributeDerivation B275 ) . B277 ) iff [: B276 , B277 :] c= (the Information of B275)))))
+proof
+let C101 being FormalContext;
+let C102 being (Subset of (the carrier of C101));
+let C103 being (Subset of (the carrier' of C101));
+L283: ([: C102 , C103 :] c= (the Information of C101) implies C102 c= ( ( AttributeDerivation C101 ) . C103 ))
+proof
+assume L284: [: C102 , C103 :] c= (the Information of C101);
+let C104 being set;
+assume L285: C104 in C102;
+reconsider D45 = C104 as (Object of C101) by L285;
+L286: (for B278 being (Attribute of C101) holds (B278 in C103 implies D45 is-connected-with B278))
+proof
+let C105 being (Attribute of C101);
+consider C106 being set such that L287: C106 = [ D45 , C105 ];
+assume L288: C105 in C103;
+L289: C106 in [: C102 , C103 :] by L288 , L285 , L287 , ZFMISC_1:def 2;
+thus L290: thesis by L289 , L284 , L287 , L25;
+end;
+L291: D45 in { B279 where B279 is (Object of C101) : (for B280 being (Attribute of C101) holds (B280 in C103 implies B279 is-connected-with B280)) } by L286;
+thus L292: thesis by L291 , L79;
+end;
+L293: (C102 c= ( ( AttributeDerivation C101 ) . C103 ) implies [: C102 , C103 :] c= (the Information of C101))
+proof
+assume L294: C102 c= ( ( AttributeDerivation C101 ) . C103 );
+L295: C102 c= { B281 where B281 is (Object of C101) : (for B282 being (Attribute of C101) holds (B282 in C103 implies B281 is-connected-with B282)) } by L294 , L79;
+let C107 being set;
+assume L296: C107 in [: C102 , C103 :];
+consider C108 , C109 being set such that L297: C108 in C102 and L298: C109 in C103 and L299: C107 = [ C108 , C109 ] by L296 , ZFMISC_1:def 2;
+reconsider D46 = C109 as (Attribute of C101) by L298;
+reconsider D47 = C108 as (Object of C101) by L297;
+L300: D47 in { B283 where B283 is (Object of C101) : (for B284 being (Attribute of C101) holds (B284 in C103 implies B283 is-connected-with B284)) } by L295 , L297;
+L301: (ex B285 being (Object of C101) st (B285 = D47 & (for B286 being (Attribute of C101) holds (B286 in C103 implies B285 is-connected-with B286)))) by L300;
+L302: D47 is-connected-with D46 by L301 , L298;
+thus L303: thesis by L302 , L299 , L25;
+end;
+thus L304: thesis by L293 , L283;
+end;
+theorem
+L305: (for B287 being FormalContext holds (for B288 being (Subset of (the carrier of B287)) holds (for B289 being (Subset of (the carrier' of B287)) holds (B289 c= ( ( ObjectDerivation B287 ) . B288 ) iff [: B288 , B289 :] c= (the Information of B287)))))
+proof
+let C110 being FormalContext;
+let C111 being (Subset of (the carrier of C110));
+let C112 being (Subset of (the carrier' of C110));
+L306: ([: C111 , C112 :] c= (the Information of C110) implies C112 c= ( ( ObjectDerivation C110 ) . C111 ))
+proof
+assume L307: [: C111 , C112 :] c= (the Information of C110);
+let C113 being set;
+assume L308: C113 in C112;
+reconsider D48 = C113 as (Attribute of C110) by L308;
+L309: (for B290 being (Object of C110) holds (B290 in C111 implies B290 is-connected-with D48))
+proof
+let C114 being (Object of C110);
+consider C115 being set such that L310: C115 = [ C114 , D48 ];
+assume L311: C114 in C111;
+L312: C115 in [: C111 , C112 :] by L311 , L308 , L310 , ZFMISC_1:def 2;
+thus L313: thesis by L312 , L307 , L310 , L25;
+end;
+L314: D48 in { B291 where B291 is (Attribute of C110) : (for B292 being (Object of C110) holds (B292 in C111 implies B292 is-connected-with B291)) } by L309;
+thus L315: thesis by L314 , L28;
+end;
+L316: (C112 c= ( ( ObjectDerivation C110 ) . C111 ) implies [: C111 , C112 :] c= (the Information of C110))
+proof
+assume L317: C112 c= ( ( ObjectDerivation C110 ) . C111 );
+L318: C112 c= { B293 where B293 is (Attribute of C110) : (for B294 being (Object of C110) holds (B294 in C111 implies B294 is-connected-with B293)) } by L317 , L28;
+let C116 being set;
+assume L319: C116 in [: C111 , C112 :];
+consider C117 , C118 being set such that L320: C117 in C111 and L321: C118 in C112 and L322: C116 = [ C117 , C118 ] by L319 , ZFMISC_1:def 2;
+reconsider D49 = C118 as (Attribute of C110) by L321;
+reconsider D50 = C117 as (Object of C110) by L320;
+L323: D49 in { B295 where B295 is (Attribute of C110) : (for B296 being (Object of C110) holds (B296 in C111 implies B296 is-connected-with B295)) } by L318 , L321;
+L324: (ex B297 being (Attribute of C110) st (B297 = D49 & (for B298 being (Object of C110) holds (B298 in C111 implies B298 is-connected-with B297)))) by L323;
+L325: D50 is-connected-with D49 by L324 , L320;
+thus L326: thesis by L325 , L322 , L25;
+end;
+thus L327: thesis by L316 , L306;
+end;
+theorem
+L328: (for B299 being FormalContext holds (for B300 being (Subset of (the carrier of B299)) holds (for B301 being (Subset of (the carrier' of B299)) holds (B300 c= ( ( AttributeDerivation B299 ) . B301 ) iff B301 c= ( ( ObjectDerivation B299 ) . B300 )))))
+proof
+let C119 being FormalContext;
+let C120 being (Subset of (the carrier of C119));
+let C121 being (Subset of (the carrier' of C119));
+L329: (C120 c= ( ( AttributeDerivation C119 ) . C121 ) iff [: C120 , C121 :] c= (the Information of C119)) by L282;
+thus L330: thesis by L329 , L305;
+end;
+definition
+let C122 being FormalContext;
+func phi C122 -> (Function of ( BoolePoset (the carrier of C122) ) , ( BoolePoset (the carrier' of C122) )) equals 
+( ObjectDerivation C122 );
+coherence
+proof
+L331: ( rng ( ObjectDerivation C122 ) ) c= (the carrier of ( BoolePoset (the carrier' of C122) ))
+proof
+let C123 being set;
+assume L332: C123 in ( rng ( ObjectDerivation C122 ) );
+L333: C123 in ( bool (the carrier' of C122) ) by L332;
+L334: C123 in (the carrier of ( BooleLatt (the carrier' of C122) )) by L333 , LATTICE3:def 1;
+L335: ( LattPOSet ( BooleLatt (the carrier' of C122) ) ) = RelStr (# (the carrier of ( BooleLatt (the carrier' of C122) )) , ( LattRel ( BooleLatt (the carrier' of C122) ) ) #) by LATTICE3:def 2;
+thus L336: thesis by L335 , L334 , YELLOW_1:def 2;
+end;
+L337: ( LattPOSet ( BooleLatt (the carrier of C122) ) ) = RelStr (# (the carrier of ( BooleLatt (the carrier of C122) )) , ( LattRel ( BooleLatt (the carrier of C122) ) ) #) by LATTICE3:def 2;
+L338: (for B302 being set holds (B302 in (the carrier of ( BoolePoset (the carrier of C122) )) implies B302 in ( dom ( ObjectDerivation C122 ) )))
+proof
+let C124 being set;
+assume L339: C124 in (the carrier of ( BoolePoset (the carrier of C122) ));
+L340: C124 in (the carrier of ( LattPOSet ( BooleLatt (the carrier of C122) ) )) by L339 , YELLOW_1:def 2;
+L341: C124 in ( bool (the carrier of C122) ) by L340 , L337 , LATTICE3:def 1;
+thus L342: thesis by L341 , FUNCT_2:def 1;
+end;
+L343: (for B303 being set holds (B303 in ( dom ( ObjectDerivation C122 ) ) implies B303 in (the carrier of ( BoolePoset (the carrier of C122) ))))
+proof
+let C125 being set;
+assume L344: C125 in ( dom ( ObjectDerivation C122 ) );
+L345: C125 in ( bool (the carrier of C122) ) by L344;
+L346: C125 in (the carrier of ( BooleLatt (the carrier of C122) )) by L345 , LATTICE3:def 1;
+thus L347: thesis by L346 , L337 , YELLOW_1:def 2;
+end;
+L348: ( dom ( ObjectDerivation C122 ) ) = (the carrier of ( BoolePoset (the carrier of C122) )) by L343 , L338 , TARSKI:1;
+reconsider D51 = ( ObjectDerivation C122 ) as (Function of (the carrier of ( BoolePoset (the carrier of C122) )) , (the carrier of ( BoolePoset (the carrier' of C122) ))) by L348 , L331 , FUNCT_2:def 1 , RELSET_1:4;
+L349: D51 is (Function of ( BoolePoset (the carrier of C122) ) , ( BoolePoset (the carrier' of C122) ));
+thus L350: thesis by L349;
+end;
+end;
+definition
+let C126 being FormalContext;
+func psi C126 -> (Function of ( BoolePoset (the carrier' of C126) ) , ( BoolePoset (the carrier of C126) )) equals 
+( AttributeDerivation C126 );
+coherence
+proof
+L352: ( rng ( AttributeDerivation C126 ) ) c= (the carrier of ( BoolePoset (the carrier of C126) ))
+proof
+let C127 being set;
+assume L353: C127 in ( rng ( AttributeDerivation C126 ) );
+L354: C127 in ( bool (the carrier of C126) ) by L353;
+L355: C127 in (the carrier of ( BooleLatt (the carrier of C126) )) by L354 , LATTICE3:def 1;
+L356: ( LattPOSet ( BooleLatt (the carrier of C126) ) ) = RelStr (# (the carrier of ( BooleLatt (the carrier of C126) )) , ( LattRel ( BooleLatt (the carrier of C126) ) ) #) by LATTICE3:def 2;
+thus L357: thesis by L356 , L355 , YELLOW_1:def 2;
+end;
+L358: ( LattPOSet ( BooleLatt (the carrier' of C126) ) ) = RelStr (# (the carrier of ( BooleLatt (the carrier' of C126) )) , ( LattRel ( BooleLatt (the carrier' of C126) ) ) #) by LATTICE3:def 2;
+L359: (for B304 being set holds (B304 in (the carrier of ( BoolePoset (the carrier' of C126) )) implies B304 in ( dom ( AttributeDerivation C126 ) )))
+proof
+let C128 being set;
+assume L360: C128 in (the carrier of ( BoolePoset (the carrier' of C126) ));
+L361: C128 in (the carrier of ( LattPOSet ( BooleLatt (the carrier' of C126) ) )) by L360 , YELLOW_1:def 2;
+L362: C128 in ( bool (the carrier' of C126) ) by L361 , L358 , LATTICE3:def 1;
+thus L363: thesis by L362 , FUNCT_2:def 1;
+end;
+L364: (for B305 being set holds (B305 in ( dom ( AttributeDerivation C126 ) ) implies B305 in (the carrier of ( BoolePoset (the carrier' of C126) ))))
+proof
+let C129 being set;
+assume L365: C129 in ( dom ( AttributeDerivation C126 ) );
+L366: C129 in ( bool (the carrier' of C126) ) by L365;
+L367: C129 in (the carrier of ( BooleLatt (the carrier' of C126) )) by L366 , LATTICE3:def 1;
+thus L368: thesis by L367 , L358 , YELLOW_1:def 2;
+end;
+L369: ( dom ( AttributeDerivation C126 ) ) = (the carrier of ( BoolePoset (the carrier' of C126) )) by L364 , L359 , TARSKI:1;
+thus L370: thesis by L369 , L352 , FUNCT_2:def 1 , RELSET_1:4;
+end;
+end;
+definition
+let C130 , C131 being non  empty RelStr;
+let C132 being (Connection of C130 , C131);
+attr C132 is  co-Galois
+means
+:L372: (ex B306 being (Function of C130 , C131) st (ex B307 being (Function of C131 , C130) st (C132 = [ B306 , B307 ] & B306 is  antitone & B307 is  antitone & (for B308 , B309 being (Element of C130) holds (for B310 , B311 being (Element of C131) holds (B308 <= ( B307 . ( B306 . B308 ) ) & B310 <= ( B306 . ( B307 . B310 ) )))))));
+end;
+theorem
+L374: (for B312 , B313 being non  empty Poset holds (for B314 being (Connection of B312 , B313) holds (for B315 being (Function of B312 , B313) holds (for B316 being (Function of B313 , B312) holds (B314 = [ B315 , B316 ] implies (B314 is  co-Galois iff (for B317 being (Element of B312) holds (for B318 being (Element of B313) holds (B317 <= ( B316 . B318 ) iff B318 <= ( B315 . B317 ))))))))))
+proof
+let C133 , C134 being non  empty Poset;
+let C135 being (Connection of C133 , C134);
+let C136 being (Function of C133 , C134);
+let C137 being (Function of C134 , C133);
+assume L375: C135 = [ C136 , C137 ];
+L376:
+now
+assume L377: (for B319 being (Element of C133) holds (for B320 being (Element of C134) holds (B319 <= ( C137 . B320 ) iff B320 <= ( C136 . B319 ))));
+L378: (for B321 , B322 being (Element of C133) holds (B321 <= B322 implies (for B323 , B324 being (Element of C134) holds ((B323 = ( C136 . B321 ) & B324 = ( C136 . B322 )) implies B323 >= B324))))
+proof
+let C138 , C139 being (Element of C133);
+assume L379: C138 <= C139;
+let C140 , C141 being (Element of C134);
+assume L380: (C140 = ( C136 . C138 ) & C141 = ( C136 . C139 ));
+L381: C139 <= ( C137 . ( C136 . C139 ) ) by L377;
+L382: C138 <= ( C137 . ( C136 . C139 ) ) by L381 , L379 , ORDERS_2:3;
+thus L383: thesis by L382 , L377 , L380;
+end;
+L384: C136 is  antitone by L378 , WAYBEL_0:def 5;
+L385: (for B325 , B326 being (Element of C134) holds (B325 <= B326 implies (for B327 , B328 being (Element of C133) holds ((B327 = ( C137 . B325 ) & B328 = ( C137 . B326 )) implies B327 >= B328))))
+proof
+let C142 , C143 being (Element of C134);
+assume L386: C142 <= C143;
+let C144 , C145 being (Element of C133);
+assume L387: (C144 = ( C137 . C142 ) & C145 = ( C137 . C143 ));
+L388: C143 <= ( C136 . ( C137 . C143 ) ) by L377;
+L389: C142 <= ( C136 . ( C137 . C143 ) ) by L388 , L386 , ORDERS_2:3;
+thus L390: thesis by L389 , L377 , L387;
+end;
+L391: C137 is  antitone by L385 , WAYBEL_0:def 5;
+L392: (for B329 , B330 being (Element of C133) holds (for B331 , B332 being (Element of C134) holds (B329 <= ( C137 . ( C136 . B329 ) ) & B331 <= ( C136 . ( C137 . B331 ) )))) by L377;
+thus L393: C135 is  co-Galois by L392 , L375 , L384 , L391 , L372;
+end;
+L394:
+now
+assume L395: C135 is  co-Galois;
+consider C146 being (Function of C133 , C134), C147 being (Function of C134 , C133) such that L396: C135 = [ C146 , C147 ] and L397: C146 is  antitone and L398: C147 is  antitone and L399: (for B333 , B334 being (Element of C133) holds (for B335 , B336 being (Element of C134) holds (B333 <= ( C147 . ( C146 . B333 ) ) & B335 <= ( C146 . ( C147 . B335 ) )))) by L395 , L372;
+L400: C137 = ( [ C136 , C137 ] `2 )
+.= ( C135 `2 ) by L375
+.= ( [ C146 , C147 ] `2 ) by L396
+.= C147;
+L401: C136 = ( [ C136 , C137 ] `1 )
+.= ( C135 `1 ) by L375
+.= ( [ C146 , C147 ] `1 ) by L396
+.= C146;
+L402: (for B337 being (Element of C133) holds (for B338 being (Element of C134) holds (B338 <= ( C136 . B337 ) implies B337 <= ( C137 . B338 ))))
+proof
+let C148 being (Element of C133);
+let C149 being (Element of C134);
+assume L403: C149 <= ( C136 . C148 );
+L404: ( C137 . C149 ) >= ( C137 . ( C136 . C148 ) ) by L403 , L398 , L400 , WAYBEL_0:def 5;
+L405: C148 <= ( C137 . ( C136 . C148 ) ) by L399 , L401 , L400;
+thus L406: thesis by L405 , L404 , ORDERS_2:3;
+end;
+L407: (for B339 being (Element of C133) holds (for B340 being (Element of C134) holds (B339 <= ( C137 . B340 ) implies B340 <= ( C136 . B339 ))))
+proof
+let C150 being (Element of C133);
+let C151 being (Element of C134);
+assume L408: C150 <= ( C137 . C151 );
+L409: ( C136 . C150 ) >= ( C136 . ( C137 . C151 ) ) by L408 , L397 , L401 , WAYBEL_0:def 5;
+L410: C151 <= ( C136 . ( C137 . C151 ) ) by L399 , L401 , L400;
+thus L411: thesis by L410 , L409 , ORDERS_2:3;
+end;
+thus L412: (for B341 being (Element of C133) holds (for B342 being (Element of C134) holds (B341 <= ( C137 . B342 ) iff B342 <= ( C136 . B341 )))) by L407 , L402;
+end;
+thus L413: thesis by L394 , L376;
+end;
+theorem
+L414: (for B343 , B344 being non  empty Poset holds (for B345 being (Connection of B343 , B344) holds (B345 is  co-Galois implies (for B346 being (Function of B343 , B344) holds (for B347 being (Function of B344 , B343) holds (B345 = [ B346 , B347 ] implies (B346 = ( B346 * ( B347 * B346 ) ) & B347 = ( B347 * ( B346 * B347 ) ))))))))
+proof
+let C152 , C153 being non  empty Poset;
+let C154 being (Connection of C152 , C153);
+assume L415: C154 is  co-Galois;
+consider C155 being (Function of C152 , C153), C156 being (Function of C153 , C152) such that L416: C154 = [ C155 , C156 ] and L417: C155 is  antitone and L418: C156 is  antitone and L419: (for B348 , B349 being (Element of C152) holds (for B350 , B351 being (Element of C153) holds (B348 <= ( C156 . ( C155 . B348 ) ) & B350 <= ( C155 . ( C156 . B350 ) )))) by L415 , L372;
+let C157 being (Function of C152 , C153);
+let C158 being (Function of C153 , C152);
+assume L420: C154 = [ C157 , C158 ];
+L421: C157 = ( [ C157 , C158 ] `1 )
+.= ( C154 `1 ) by L420
+.= ( [ C155 , C156 ] `1 ) by L416
+.= C155;
+L422: C158 = ( [ C157 , C158 ] `2 )
+.= ( C154 `2 ) by L420
+.= ( [ C155 , C156 ] `2 ) by L416
+.= C156;
+L423: ( dom C158 ) = (the carrier of C153) by FUNCT_2:def 1;
+L424: ( dom C157 ) = (the carrier of C152) by FUNCT_2:def 1;
+L425: (for B352 being set holds (B352 in (the carrier of C152) implies ( C157 . B352 ) = ( ( C157 * ( C158 * C157 ) ) . B352 )))
+proof
+let C159 being set;
+assume L426: C159 in (the carrier of C152);
+reconsider D52 = C159 as (Element of C152) by L426;
+L427: D52 <= ( C158 . ( C157 . D52 ) ) by L419 , L421 , L422;
+L428: ( C157 . D52 ) >= ( C157 . ( C158 . ( C157 . D52 ) ) ) by L427 , L417 , L421 , WAYBEL_0:def 5;
+L429: ( C157 . D52 ) <= ( C157 . ( C158 . ( C157 . D52 ) ) ) by L419 , L421 , L422;
+L430: ( C157 . D52 ) = ( C157 . ( C158 . ( C157 . D52 ) ) ) by L429 , L428 , ORDERS_2:2;
+L431: ( C157 . D52 ) = ( C157 . ( ( C158 * C157 ) . D52 ) ) by L430 , L424 , FUNCT_1:13;
+L432: ( C157 . D52 ) is (Element of C153);
+L433: D52 in ( dom ( C158 * C157 ) ) by L432 , L424 , L423 , FUNCT_1:11;
+thus L434: thesis by L433 , L431 , FUNCT_1:13;
+end;
+L435: (for B353 being set holds (B353 in (the carrier of C153) implies ( C158 . B353 ) = ( ( C158 * ( C157 * C158 ) ) . B353 )))
+proof
+let C160 being set;
+assume L436: C160 in (the carrier of C153);
+reconsider D53 = C160 as (Element of C153) by L436;
+L437: D53 <= ( C157 . ( C158 . D53 ) ) by L419 , L421 , L422;
+L438: ( C158 . D53 ) >= ( C158 . ( C157 . ( C158 . D53 ) ) ) by L437 , L418 , L422 , WAYBEL_0:def 5;
+L439: ( C158 . D53 ) <= ( C158 . ( C157 . ( C158 . D53 ) ) ) by L419 , L421 , L422;
+L440: ( C158 . D53 ) = ( C158 . ( C157 . ( C158 . D53 ) ) ) by L439 , L438 , ORDERS_2:2;
+L441: ( C158 . D53 ) = ( C158 . ( ( C157 * C158 ) . D53 ) ) by L440 , L423 , FUNCT_1:13;
+L442: ( C158 . D53 ) is (Element of C152);
+L443: D53 in ( dom ( C157 * C158 ) ) by L442 , L424 , L423 , FUNCT_1:11;
+thus L444: thesis by L443 , L441 , FUNCT_1:13;
+end;
+L445: (( dom ( C157 * ( C158 * C157 ) ) ) = (the carrier of C152) & ( dom ( C158 * ( C157 * C158 ) ) ) = (the carrier of C153)) by FUNCT_2:def 1;
+thus L446: thesis by L445 , L424 , L423 , L425 , L435 , FUNCT_1:2;
+end;
+theorem
+L447: (for B354 being FormalContext holds [ ( phi B354 ) , ( psi B354 ) ] is  co-Galois)
+proof
+let C161 being FormalContext;
+L448: ( LattPOSet ( BooleLatt (the carrier' of C161) ) ) = RelStr (# (the carrier of ( BooleLatt (the carrier' of C161) )) , ( LattRel ( BooleLatt (the carrier' of C161) ) ) #) by LATTICE3:def 2;
+L449: ( LattPOSet ( BooleLatt (the carrier of C161) ) ) = RelStr (# (the carrier of ( BooleLatt (the carrier of C161) )) , ( LattRel ( BooleLatt (the carrier of C161) ) ) #) by LATTICE3:def 2;
+L450: (for B355 being (Element of ( BoolePoset (the carrier of C161) )) holds (for B356 being (Element of ( BoolePoset (the carrier' of C161) )) holds (B356 <= ( ( phi C161 ) . B355 ) implies B355 <= ( ( psi C161 ) . B356 ))))
+proof
+let C162 being (Element of ( BoolePoset (the carrier of C161) ));
+let C163 being (Element of ( BoolePoset (the carrier' of C161) ));
+assume L451: C163 <= ( ( phi C161 ) . C162 );
+L452: [ C163 , ( ( phi C161 ) . C162 ) ] in (the InternalRel of ( BoolePoset (the carrier' of C161) )) by L451 , ORDERS_2:def 5;
+L453: [ C163 , ( ( phi C161 ) . C162 ) ] in ( LattRel ( BooleLatt (the carrier' of C161) ) ) by L452 , L448 , YELLOW_1:def 2;
+reconsider D54 = ( ( phi C161 ) . C162 ) as (Element of ( BooleLatt (the carrier' of C161) )) by L448 , YELLOW_1:def 2;
+reconsider D55 = C162 as (Element of ( BooleLatt (the carrier of C161) )) by L449 , YELLOW_1:def 2;
+reconsider D56 = D55 as (Subset of (the carrier of C161)) by LATTICE3:def 1;
+reconsider D57 = C163 as (Element of ( BooleLatt (the carrier' of C161) )) by L448 , YELLOW_1:def 2;
+L454: D57 [= D54 by L453 , FILTER_1:31;
+L455: ( D57 "\/" D54 ) = D54 by L454 , LATTICES:def 3;
+reconsider D58 = D54 as (Subset of (the carrier' of C161)) by LATTICE3:def 1;
+reconsider D59 = D57 as (Subset of (the carrier' of C161)) by LATTICE3:def 1;
+L456: (for B357 being set holds (B357 in D59 implies B357 in D58)) by L455 , XBOOLE_0:def 3;
+L457: D59 c= D58 by L456 , TARSKI:def 3;
+L458: ( ( AttributeDerivation C161 ) . D58 ) c= ( ( AttributeDerivation C161 ) . D59 ) by L457 , L175;
+reconsider D60 = D59 as (Element of ( BoolePoset (the carrier' of C161) ));
+reconsider D61 = ( ( psi C161 ) . D60 ) as (Element of ( BooleLatt (the carrier of C161) )) by L449 , YELLOW_1:def 2;
+reconsider D62 = D61 as (Subset of (the carrier of C161)) by LATTICE3:def 1;
+reconsider D63 = D62 as (Element of ( BooleLatt (the carrier of C161) ));
+L459: D56 c= ( ( AttributeDerivation C161 ) . ( ( ObjectDerivation C161 ) . D56 ) ) by L184;
+reconsider D64 = D56 as (Subset of (the carrier of C161));
+reconsider D65 = D64 as (Element of ( BooleLatt (the carrier of C161) ));
+L460: ( D65 "\/" D63 ) = D63 by L458 , L459 , XBOOLE_1:1 , XBOOLE_1:12;
+L461: D65 [= D63 by L460 , LATTICES:def 3;
+L462: [ D65 , ( ( psi C161 ) . D60 ) ] in ( LattRel ( BooleLatt (the carrier of C161) ) ) by L461 , FILTER_1:31;
+L463: [ D65 , ( ( psi C161 ) . D60 ) ] in (the InternalRel of ( BoolePoset (the carrier of C161) )) by L462 , L449 , YELLOW_1:def 2;
+thus L464: thesis by L463 , ORDERS_2:def 5;
+end;
+L465: (for B358 being (Element of ( BoolePoset (the carrier of C161) )) holds (for B359 being (Element of ( BoolePoset (the carrier' of C161) )) holds (B358 <= ( ( psi C161 ) . B359 ) implies B359 <= ( ( phi C161 ) . B358 ))))
+proof
+let C164 being (Element of ( BoolePoset (the carrier of C161) ));
+let C165 being (Element of ( BoolePoset (the carrier' of C161) ));
+assume L466: C164 <= ( ( psi C161 ) . C165 );
+L467: [ C164 , ( ( psi C161 ) . C165 ) ] in (the InternalRel of ( BoolePoset (the carrier of C161) )) by L466 , ORDERS_2:def 5;
+L468: [ C164 , ( ( psi C161 ) . C165 ) ] in ( LattRel ( BooleLatt (the carrier of C161) ) ) by L467 , L449 , YELLOW_1:def 2;
+reconsider D66 = ( ( psi C161 ) . C165 ) as (Element of ( BooleLatt (the carrier of C161) )) by L449 , YELLOW_1:def 2;
+reconsider D67 = C165 as (Element of ( BooleLatt (the carrier' of C161) )) by L448 , YELLOW_1:def 2;
+reconsider D68 = D67 as (Subset of (the carrier' of C161)) by LATTICE3:def 1;
+reconsider D69 = C164 as (Element of ( BooleLatt (the carrier of C161) )) by L449 , YELLOW_1:def 2;
+L469: D69 [= D66 by L468 , FILTER_1:31;
+L470: ( D69 "\/" D66 ) = D66 by L469 , LATTICES:def 3;
+reconsider D70 = D66 as (Subset of (the carrier of C161)) by LATTICE3:def 1;
+reconsider D71 = D69 as (Subset of (the carrier of C161)) by LATTICE3:def 1;
+L471: (for B360 being set holds (B360 in D71 implies B360 in D70)) by L470 , XBOOLE_0:def 3;
+L472: D71 c= D70 by L471 , TARSKI:def 3;
+reconsider D72 = D71 , D73 = D70 as (Subset of (the carrier of C161));
+L473: ( ( ObjectDerivation C161 ) . D73 ) c= ( ( ObjectDerivation C161 ) . D72 ) by L472 , L166;
+reconsider D74 = D72 as (Element of ( BoolePoset (the carrier of C161) ));
+reconsider D75 = ( ( phi C161 ) . D74 ) as (Element of ( BooleLatt (the carrier' of C161) )) by L448 , YELLOW_1:def 2;
+reconsider D76 = D75 as (Subset of (the carrier' of C161)) by LATTICE3:def 1;
+reconsider D77 = D76 as (Element of ( BooleLatt (the carrier' of C161) ));
+L474: D68 c= ( ( ObjectDerivation C161 ) . ( ( AttributeDerivation C161 ) . D68 ) ) by L197;
+reconsider D78 = D68 as (Element of ( BooleLatt (the carrier' of C161) ));
+L475: ( D78 "\/" D77 ) = D77 by L473 , L474 , XBOOLE_1:1 , XBOOLE_1:12;
+L476: D78 [= D77 by L475 , LATTICES:def 3;
+L477: [ D78 , ( ( phi C161 ) . D74 ) ] in ( LattRel ( BooleLatt (the carrier' of C161) ) ) by L476 , FILTER_1:31;
+L478: [ D78 , ( ( phi C161 ) . D74 ) ] in (the InternalRel of ( BoolePoset (the carrier' of C161) )) by L477 , L448 , YELLOW_1:def 2;
+thus L479: thesis by L478 , ORDERS_2:def 5;
+end;
+thus L480: thesis by L465 , L450 , L374;
+end;
+theorem
+L481: (for B361 being FormalContext holds (for B362 , B363 being (Subset of (the carrier of B361)) holds ( ( ObjectDerivation B361 ) . ( B362 \/ B363 ) ) = ( ( ( ObjectDerivation B361 ) . B362 ) /\ ( ( ObjectDerivation B361 ) . B363 ) )))
+proof
+let C166 being FormalContext;
+let C167 , C168 being (Subset of (the carrier of C166));
+reconsider D79 = ( C167 \/ C168 ) as (Subset of (the carrier of C166));
+L482: (for B364 being set holds (B364 in ( ( ( ObjectDerivation C166 ) . C167 ) /\ ( ( ObjectDerivation C166 ) . C168 ) ) implies B364 in ( ( ObjectDerivation C166 ) . D79 )))
+proof
+let C169 being set;
+assume L483: C169 in ( ( ( ObjectDerivation C166 ) . C167 ) /\ ( ( ObjectDerivation C166 ) . C168 ) );
+L484: C169 in ( ( ObjectDerivation C166 ) . C167 ) by L483 , XBOOLE_0:def 4;
+L485: C169 in { B365 where B365 is (Attribute of C166) : (for B366 being (Object of C166) holds (B366 in C167 implies B366 is-connected-with B365)) } by L484 , L28;
+L486: (ex B367 being (Attribute of C166) st (B367 = C169 & (for B368 being (Object of C166) holds (B368 in C167 implies B368 is-connected-with B367)))) by L485;
+L487: C169 in ( ( ObjectDerivation C166 ) . C168 ) by L483 , XBOOLE_0:def 4;
+L488: C169 in { B369 where B369 is (Attribute of C166) : (for B370 being (Object of C166) holds (B370 in C168 implies B370 is-connected-with B369)) } by L487 , L28;
+L489: (ex B371 being (Attribute of C166) st (B371 = C169 & (for B372 being (Object of C166) holds (B372 in C168 implies B372 is-connected-with B371)))) by L488;
+reconsider D80 = C169 as (Attribute of C166) by L489;
+L490: (for B373 being (Object of C166) holds (B373 in ( C167 \/ C168 ) implies B373 is-connected-with D80))
+proof
+let C170 being (Object of C166);
+assume L491: C170 in ( C167 \/ C168 );
+L492:
+now
+per cases  by L491 , XBOOLE_0:def 3;
+case L493: C170 in C167;
+thus L494: thesis by L493 , L486;
+end;
+case L495: C170 in C168;
+thus L496: thesis by L495 , L489;
+end;
+end;
+thus L498: thesis by L492;
+end;
+L499: D80 in { B374 where B374 is (Attribute of C166) : (for B375 being (Object of C166) holds (B375 in D79 implies B375 is-connected-with B374)) } by L490;
+thus L500: thesis by L499 , L28;
+end;
+L501: (for B376 being set holds (B376 in ( ( ObjectDerivation C166 ) . ( C167 \/ C168 ) ) implies B376 in ( ( ( ObjectDerivation C166 ) . C167 ) /\ ( ( ObjectDerivation C166 ) . C168 ) )))
+proof
+let C171 being set;
+assume L502: C171 in ( ( ObjectDerivation C166 ) . ( C167 \/ C168 ) );
+L503: C171 in { B377 where B377 is (Attribute of C166) : (for B378 being (Object of C166) holds (B378 in D79 implies B378 is-connected-with B377)) } by L502 , L28;
+L504: (ex B379 being (Attribute of C166) st (B379 = C171 & (for B380 being (Object of C166) holds (B380 in D79 implies B380 is-connected-with B379)))) by L503;
+reconsider D81 = C171 as (Attribute of C166) by L504;
+L505: (for B381 being (Object of C166) holds (B381 in C168 implies B381 is-connected-with D81))
+proof
+let C172 being (Object of C166);
+assume L506: C172 in C168;
+L507: C172 in D79 by L506 , XBOOLE_0:def 3;
+thus L508: thesis by L507 , L504;
+end;
+L509: D81 in { B382 where B382 is (Attribute of C166) : (for B383 being (Object of C166) holds (B383 in C168 implies B383 is-connected-with B382)) } by L505;
+L510: D81 in ( ( ObjectDerivation C166 ) . C168 ) by L509 , L28;
+L511: (for B384 being (Object of C166) holds (B384 in C167 implies B384 is-connected-with D81))
+proof
+let C173 being (Object of C166);
+assume L512: C173 in C167;
+L513: C173 in D79 by L512 , XBOOLE_0:def 3;
+thus L514: thesis by L513 , L504;
+end;
+L515: D81 in { B385 where B385 is (Attribute of C166) : (for B386 being (Object of C166) holds (B386 in C167 implies B386 is-connected-with B385)) } by L511;
+L516: D81 in ( ( ObjectDerivation C166 ) . C167 ) by L515 , L28;
+thus L517: thesis by L516 , L510 , XBOOLE_0:def 4;
+end;
+thus L518: thesis by L501 , L482 , TARSKI:1;
+end;
+theorem
+L519: (for B387 being FormalContext holds (for B388 , B389 being (Subset of (the carrier' of B387)) holds ( ( AttributeDerivation B387 ) . ( B388 \/ B389 ) ) = ( ( ( AttributeDerivation B387 ) . B388 ) /\ ( ( AttributeDerivation B387 ) . B389 ) )))
+proof
+let C174 being FormalContext;
+let C175 , C176 being (Subset of (the carrier' of C174));
+reconsider D82 = ( C175 \/ C176 ) as (Subset of (the carrier' of C174));
+L520: (for B390 being set holds (B390 in ( ( ( AttributeDerivation C174 ) . C175 ) /\ ( ( AttributeDerivation C174 ) . C176 ) ) implies B390 in ( ( AttributeDerivation C174 ) . D82 )))
+proof
+let C177 being set;
+assume L521: C177 in ( ( ( AttributeDerivation C174 ) . C175 ) /\ ( ( AttributeDerivation C174 ) . C176 ) );
+L522: C177 in ( ( AttributeDerivation C174 ) . C175 ) by L521 , XBOOLE_0:def 4;
+L523: C177 in { B391 where B391 is (Object of C174) : (for B392 being (Attribute of C174) holds (B392 in C175 implies B391 is-connected-with B392)) } by L522 , L79;
+L524: (ex B393 being (Object of C174) st (B393 = C177 & (for B394 being (Attribute of C174) holds (B394 in C175 implies B393 is-connected-with B394)))) by L523;
+L525: C177 in ( ( AttributeDerivation C174 ) . C176 ) by L521 , XBOOLE_0:def 4;
+L526: C177 in { B395 where B395 is (Object of C174) : (for B396 being (Attribute of C174) holds (B396 in C176 implies B395 is-connected-with B396)) } by L525 , L79;
+L527: (ex B397 being (Object of C174) st (B397 = C177 & (for B398 being (Attribute of C174) holds (B398 in C176 implies B397 is-connected-with B398)))) by L526;
+reconsider D83 = C177 as (Object of C174) by L527;
+L528: (for B399 being (Attribute of C174) holds (B399 in ( C175 \/ C176 ) implies D83 is-connected-with B399))
+proof
+let C178 being (Attribute of C174);
+assume L529: C178 in ( C175 \/ C176 );
+L530:
+now
+per cases  by L529 , XBOOLE_0:def 3;
+case L531: C178 in C175;
+thus L532: thesis by L531 , L524;
+end;
+case L533: C178 in C176;
+thus L534: thesis by L533 , L527;
+end;
+end;
+thus L536: thesis by L530;
+end;
+L537: D83 in { B400 where B400 is (Object of C174) : (for B401 being (Attribute of C174) holds (B401 in D82 implies B400 is-connected-with B401)) } by L528;
+thus L538: thesis by L537 , L79;
+end;
+L539: (for B402 being set holds (B402 in ( ( AttributeDerivation C174 ) . ( C175 \/ C176 ) ) implies B402 in ( ( ( AttributeDerivation C174 ) . C175 ) /\ ( ( AttributeDerivation C174 ) . C176 ) )))
+proof
+let C179 being set;
+assume L540: C179 in ( ( AttributeDerivation C174 ) . ( C175 \/ C176 ) );
+L541: C179 in { B403 where B403 is (Object of C174) : (for B404 being (Attribute of C174) holds (B404 in D82 implies B403 is-connected-with B404)) } by L540 , L79;
+L542: (ex B405 being (Object of C174) st (B405 = C179 & (for B406 being (Attribute of C174) holds (B406 in D82 implies B405 is-connected-with B406)))) by L541;
+reconsider D84 = C179 as (Object of C174) by L542;
+L543: (for B407 being (Attribute of C174) holds (B407 in C176 implies D84 is-connected-with B407))
+proof
+let C180 being (Attribute of C174);
+assume L544: C180 in C176;
+L545: C180 in D82 by L544 , XBOOLE_0:def 3;
+thus L546: thesis by L545 , L542;
+end;
+L547: D84 in { B408 where B408 is (Object of C174) : (for B409 being (Attribute of C174) holds (B409 in C176 implies B408 is-connected-with B409)) } by L543;
+L548: D84 in ( ( AttributeDerivation C174 ) . C176 ) by L547 , L79;
+L549: (for B410 being (Attribute of C174) holds (B410 in C175 implies D84 is-connected-with B410))
+proof
+let C181 being (Attribute of C174);
+assume L550: C181 in C175;
+L551: C181 in D82 by L550 , XBOOLE_0:def 3;
+thus L552: thesis by L551 , L542;
+end;
+L553: D84 in { B411 where B411 is (Object of C174) : (for B412 being (Attribute of C174) holds (B412 in C175 implies B411 is-connected-with B412)) } by L549;
+L554: D84 in ( ( AttributeDerivation C174 ) . C175 ) by L553 , L79;
+thus L555: thesis by L554 , L548 , XBOOLE_0:def 4;
+end;
+thus L556: thesis by L539 , L520 , TARSKI:1;
+end;
+theorem
+L557: (for B413 being FormalContext holds ( ( ObjectDerivation B413 ) . ( {} ) ) = (the carrier' of B413))
+proof
+let C182 being FormalContext;
+reconsider D85 = ( {} ) as (Subset of (the carrier of C182)) by XBOOLE_1:2;
+set D86 = { B414 where B414 is (Attribute of C182) : (for B415 being (Object of C182) holds (B415 in D85 implies B415 is-connected-with B414)) };
+L558: (for B416 being set holds (B416 in D86 implies B416 in (the carrier' of C182)))
+proof
+let C183 being set;
+assume L559: C183 in D86;
+L560: (ex B417 being (Attribute of C182) st (B417 = C183 & (for B418 being (Object of C182) holds (B418 in D85 implies B418 is-connected-with B417)))) by L559;
+thus L561: thesis by L560;
+end;
+L562: (for B419 being set holds (B419 in (the carrier' of C182) implies B419 in D86))
+proof
+let C184 being set;
+assume L563: C184 in (the carrier' of C182);
+reconsider D87 = C184 as (Attribute of C182) by L563;
+L564: (for B420 being (Object of C182) holds (B420 in D85 implies B420 is-connected-with D87));
+thus L565: thesis by L564;
+end;
+L566: ( ( ObjectDerivation C182 ) . D85 ) = { B421 where B421 is (Attribute of C182) : (for B422 being (Object of C182) holds (B422 in D85 implies B422 is-connected-with B421)) } by L28;
+thus L567: thesis by L566 , L558 , L562 , TARSKI:1;
+end;
+theorem
+L568: (for B423 being FormalContext holds ( ( AttributeDerivation B423 ) . ( {} ) ) = (the carrier of B423))
+proof
+let C185 being FormalContext;
+reconsider D88 = ( {} ) as (Subset of (the carrier' of C185)) by XBOOLE_1:2;
+set D89 = { B424 where B424 is (Object of C185) : (for B425 being (Attribute of C185) holds (B425 in D88 implies B424 is-connected-with B425)) };
+L569: (for B426 being set holds (B426 in D89 implies B426 in (the carrier of C185)))
+proof
+let C186 being set;
+assume L570: C186 in D89;
+L571: (ex B427 being (Object of C185) st (B427 = C186 & (for B428 being (Attribute of C185) holds (B428 in D88 implies B427 is-connected-with B428)))) by L570;
+thus L572: thesis by L571;
+end;
+L573: (for B429 being set holds (B429 in (the carrier of C185) implies B429 in D89))
+proof
+let C187 being set;
+assume L574: C187 in (the carrier of C185);
+reconsider D90 = C187 as (Object of C185) by L574;
+L575: (for B430 being (Attribute of C185) holds (B430 in D88 implies D90 is-connected-with B430));
+thus L576: thesis by L575;
+end;
+L577: ( ( AttributeDerivation C185 ) . D88 ) = { B431 where B431 is (Object of C185) : (for B432 being (Attribute of C185) holds (B432 in D88 implies B431 is-connected-with B432)) } by L79;
+thus L578: thesis by L577 , L569 , L573 , TARSKI:1;
+end;
+begin
+definition
+let C188 being 2-sorted;
+struct ConceptStr over C188(# Extent -> (Subset of (the carrier of C188)) , Intent -> (Subset of (the carrier' of C188)) #);
+end;
+definition
+let C189 being 2-sorted;
+let C190 being ConceptStr over C189;
+attr C190 is  empty
+means
+:L580: ((the Extent of C190) is  empty & (the Intent of C190) is  empty);
+attr C190 is  quasi-empty
+means
+:L581: ((the Extent of C190) is  empty or (the Intent of C190) is  empty);
+end;
+registration
+let C191 being non  quasi-empty 2-sorted;
+cluster  strict non  empty for ConceptStr over C191;
+existence
+proof
+set D91 = the non  empty (Subset of (the carrier' of C191));
+set D92 = the non  empty (Subset of (the carrier of C191));
+L583: ConceptStr (# D92 , D91 #) is non  empty by L580;
+thus L584: thesis by L583;
+end;
+cluster  strict  quasi-empty for ConceptStr over C191;
+existence
+proof
+reconsider D93 = ( {} ) as (Subset of (the carrier' of C191)) by XBOOLE_1:2;
+reconsider D94 = ( {} ) as (Subset of (the carrier of C191)) by XBOOLE_1:2;
+L585: ConceptStr (# D94 , D93 #) is  quasi-empty by L581;
+thus L586: thesis by L585;
+end;
+end;
+registration
+let C192 being  empty  void 2-sorted;
+cluster  ->  empty for ConceptStr over C192;
+coherence
+proof
+let C193 being ConceptStr over C192;
+L588: ((the Extent of C193) is  empty & (the Intent of C193) is  empty);
+thus L589: thesis by L588 , L580;
+end;
+end;
+registration
+let C194 being  quasi-empty 2-sorted;
+cluster  ->  quasi-empty for ConceptStr over C194;
+coherence
+proof
+let C195 being ConceptStr over C194;
+L591: ((the Extent of C195) is  empty or (the Intent of C195) is  empty)
+proof
+set D95 = the (Element of (the Extent of C195));
+assume L592: (the Extent of C195) is non  empty;
+L593: D95 in (the Extent of C195) by L592;
+thus L594: (the Intent of C195) is  empty
+proof
+set D96 = the (Element of (the Intent of C195));
+assume L595: (the Intent of C195) is non  empty;
+L596: D96 in (the Intent of C195) by L595;
+thus L597: contradiction by L596 , L593 , L1;
+end;
+
+end;
+thus L595: thesis by L591 , L581;
+end;
+end;
+L597: (for B433 being FormalContext holds (for B434 being ConceptStr over B433 holds (( ( ObjectDerivation B433 ) . (the Extent of B434) ) = (the Intent of B434) implies B434 is non  empty)))
+proof
+let C196 being FormalContext;
+let C197 being ConceptStr over C196;
+assume L598: ( ( ObjectDerivation C196 ) . (the Extent of C197) ) = (the Intent of C197);
+L599:
+now
+per cases ;
+case L600: (the Extent of C197) is  empty;
+L601: (the Intent of C197) = (the carrier' of C196) by L600 , L598 , L557;
+thus L602: thesis by L601 , L580;
+end;
+case L603: (the Extent of C197) is non  empty;
+thus L604: thesis by L603 , L580;
+end;
+end;
+thus L606: thesis by L599;
+end;
+definition
+let C198 being FormalContext;
+let C199 being ConceptStr over C198;
+attr C199 is  concept-like
+means
+:L607: (( ( ObjectDerivation C198 ) . (the Extent of C199) ) = (the Intent of C199) & ( ( AttributeDerivation C198 ) . (the Intent of C199) ) = (the Extent of C199));
+end;
+registration
+let C200 being FormalContext;
+cluster  concept-like non  empty for ConceptStr over C200;
+existence
+proof
+set D97 = the (Object of C200);
+set D98 = ( ( ObjectDerivation C200 ) . { D97 } );
+L609: { D97 } c= (the carrier of C200)
+proof
+let C201 being set;
+assume L610: C201 in { D97 };
+L611: C201 = D97 by L610 , TARSKI:def 1;
+thus L612: thesis by L611;
+end;
+reconsider D99 = { D97 } as (Subset of (the carrier of C200)) by L609;
+L613: D98 c= (the carrier' of C200)
+proof
+let C202 being set;
+assume L614: C202 in D98;
+L615: C202 in { B435 where B435 is (Attribute of C200) : (for B436 being (Object of C200) holds (B436 in D99 implies B436 is-connected-with B435)) } by L614 , L28;
+L616: (ex B437 being (Attribute of C200) st (B437 = C202 & (for B438 being (Object of C200) holds (B438 in D99 implies B438 is-connected-with B437)))) by L615;
+thus L617: thesis by L616;
+end;
+reconsider D100 = D98 as (Subset of (the carrier' of C200)) by L613;
+set D101 = ( ( AttributeDerivation C200 ) . ( ( ObjectDerivation C200 ) . { D97 } ) );
+L618: D101 c= (the carrier of C200)
+proof
+let C203 being set;
+assume L619: C203 in D101;
+L620: C203 in { B439 where B439 is (Object of C200) : (for B440 being (Attribute of C200) holds (B440 in ( ( ObjectDerivation C200 ) . D99 ) implies B439 is-connected-with B440)) } by L619 , L79;
+L621: (ex B441 being (Object of C200) st (B441 = C203 & (for B442 being (Attribute of C200) holds (B442 in ( ( ObjectDerivation C200 ) . D99 ) implies B441 is-connected-with B442)))) by L620;
+thus L622: thesis by L621;
+end;
+reconsider D102 = D101 as (Subset of (the carrier of C200)) by L618;
+set D103 = ConceptStr (# D102 , D100 #);
+L623: (D97 in { D97 } & D99 c= ( ( AttributeDerivation C200 ) . ( ( ObjectDerivation C200 ) . D99 ) )) by L184 , TARSKI:def 1;
+reconsider D104 = D103 as non  empty ConceptStr over C200 by L623 , L580;
+L624: ( ( ObjectDerivation C200 ) . (the Extent of D104) ) = ( ( ObjectDerivation C200 ) . D99 ) by L210
+.= (the Intent of D104);
+L625: D104 is  concept-like by L624 , L607;
+thus L626: thesis by L625;
+end;
+end;
+definition
+let C204 being FormalContext;
+mode FormalConcept of C204
+ is  concept-like non  empty ConceptStr over C204;
+end;
+registration
+let C205 being FormalContext;
+cluster  strict for (FormalConcept of C205);
+existence
+proof
+set D105 = the (FormalConcept of C205);
+L629: (( ( ObjectDerivation C205 ) . (the Extent of D105) ) = (the Intent of D105) & ( ( AttributeDerivation C205 ) . (the Intent of D105) ) = (the Extent of D105)) by L607;
+L630: ((the Intent of D105) is non  empty or (the Extent of D105) is non  empty) by L580;
+L631: ( the ConceptStr of D105 ) is (FormalConcept of C205) by L630 , L629 , L580 , L607;
+thus L632: thesis by L631;
+end;
+end;
+theorem
+L634: (for B443 being FormalContext holds (for B444 being (Subset of (the carrier of B443)) holds (ConceptStr (# ( ( AttributeDerivation B443 ) . ( ( ObjectDerivation B443 ) . B444 ) ) , ( ( ObjectDerivation B443 ) . B444 ) #) is (FormalConcept of B443) & (for B445 being (Subset of (the carrier of B443)) holds (for B446 being (Subset of (the carrier' of B443)) holds ((ConceptStr (# B445 , B446 #) is (FormalConcept of B443) & B444 c= B445) implies ( ( AttributeDerivation B443 ) . ( ( ObjectDerivation B443 ) . B444 ) ) c= B445))))))
+proof
+let C206 being FormalContext;
+let C207 being (Subset of (the carrier of C206));
+L635: (for B447 being (Subset of (the carrier of C206)) holds (for B448 being (Subset of (the carrier' of C206)) holds ((ConceptStr (# B447 , B448 #) is (FormalConcept of C206) & C207 c= B447) implies ( ( AttributeDerivation C206 ) . ( ( ObjectDerivation C206 ) . C207 ) ) c= B447)))
+proof
+let C208 being (Subset of (the carrier of C206));
+let C209 being (Subset of (the carrier' of C206));
+assume that
+L636: ConceptStr (# C208 , C209 #) is (FormalConcept of C206)
+and
+L637: C207 c= C208;
+reconsider D106 = ConceptStr (# C208 , C209 #) as (FormalConcept of C206) by L636;
+L638: ( ( AttributeDerivation C206 ) . C209 ) = (the Extent of D106) by L607
+.= C208;
+L639: ( ( ObjectDerivation C206 ) . C208 ) = (the Intent of D106) by L607
+.= C209;
+L640: ( ( ObjectDerivation C206 ) . C208 ) c= ( ( ObjectDerivation C206 ) . C207 ) by L637 , L166;
+thus L641: thesis by L640 , L638 , L639 , L175;
+end;
+L642: ConceptStr (# ( ( AttributeDerivation C206 ) . ( ( ObjectDerivation C206 ) . C207 ) ) , ( ( ObjectDerivation C206 ) . C207 ) #) is (FormalConcept of C206)
+proof
+set D107 = ConceptStr (# ( ( AttributeDerivation C206 ) . ( ( ObjectDerivation C206 ) . C207 ) ) , ( ( ObjectDerivation C206 ) . C207 ) #);
+L643: ( ( ObjectDerivation C206 ) . (the Extent of D107) ) = (the Intent of D107) by L210;
+thus L644: thesis by L643 , L607 , L597;
+end;
+thus L645: thesis by L642 , L635;
+end;
+theorem
+L646: (for B449 being FormalContext holds (for B450 being (Subset of (the carrier of B449)) holds ((ex B451 being (Subset of (the carrier' of B449)) st ConceptStr (# B450 , B451 #) is (FormalConcept of B449)) iff ( ( AttributeDerivation B449 ) . ( ( ObjectDerivation B449 ) . B450 ) ) = B450)))
+proof
+let C210 being FormalContext;
+let C211 being (Subset of (the carrier of C210));
+L647:
+now
+L648: C211 c= ( ( AttributeDerivation C210 ) . ( ( ObjectDerivation C210 ) . C211 ) ) by L184;
+L649: (for B452 being set holds (B452 in C211 implies B452 in ( ( AttributeDerivation C210 ) . ( ( ObjectDerivation C210 ) . C211 ) ))) by L648;
+given C212 being (Subset of (the carrier' of C210)) such that
+L650: ConceptStr (# C211 , C212 #) is (FormalConcept of C210);
+
+L651: ( ( AttributeDerivation C210 ) . ( ( ObjectDerivation C210 ) . C211 ) ) c= C211 by L650 , L634;
+L652: (for B453 being set holds (B453 in ( ( AttributeDerivation C210 ) . ( ( ObjectDerivation C210 ) . C211 ) ) implies B453 in C211)) by L651;
+thus L653: ( ( AttributeDerivation C210 ) . ( ( ObjectDerivation C210 ) . C211 ) ) = C211 by L652 , L649 , TARSKI:1;
+end;
+L654:
+now
+reconsider D108 = ( ( ObjectDerivation C210 ) . C211 ) as (Subset of (the carrier' of C210));
+set D109 = ConceptStr (# C211 , D108 #);
+assume L655: ( ( AttributeDerivation C210 ) . ( ( ObjectDerivation C210 ) . C211 ) ) = C211;
+L656: D109 is (FormalConcept of C210) by L655 , L607 , L597;
+thus L657: (ex B454 being (Subset of (the carrier' of C210)) st ConceptStr (# C211 , B454 #) is (FormalConcept of C210)) by L656;
+end;
+thus L658: thesis by L654 , L647;
+end;
+theorem
+L659: (for B455 being FormalContext holds (for B456 being (Subset of (the carrier' of B455)) holds (ConceptStr (# ( ( AttributeDerivation B455 ) . B456 ) , ( ( ObjectDerivation B455 ) . ( ( AttributeDerivation B455 ) . B456 ) ) #) is (FormalConcept of B455) & (for B457 being (Subset of (the carrier of B455)) holds (for B458 being (Subset of (the carrier' of B455)) holds ((ConceptStr (# B457 , B458 #) is (FormalConcept of B455) & B456 c= B458) implies ( ( ObjectDerivation B455 ) . ( ( AttributeDerivation B455 ) . B456 ) ) c= B458))))))
+proof
+let C213 being FormalContext;
+let C214 being (Subset of (the carrier' of C213));
+L660: (for B459 being (Subset of (the carrier of C213)) holds (for B460 being (Subset of (the carrier' of C213)) holds ((ConceptStr (# B459 , B460 #) is (FormalConcept of C213) & C214 c= B460) implies ( ( ObjectDerivation C213 ) . ( ( AttributeDerivation C213 ) . C214 ) ) c= B460)))
+proof
+let C215 being (Subset of (the carrier of C213));
+let C216 being (Subset of (the carrier' of C213));
+assume that
+L661: ConceptStr (# C215 , C216 #) is (FormalConcept of C213)
+and
+L662: C214 c= C216;
+reconsider D110 = ConceptStr (# C215 , C216 #) as (FormalConcept of C213) by L661;
+L663: ( ( AttributeDerivation C213 ) . C216 ) = (the Extent of D110) by L607
+.= C215;
+L664: ( ( ObjectDerivation C213 ) . C215 ) = (the Intent of D110) by L607
+.= C216;
+L665: ( ( AttributeDerivation C213 ) . C216 ) c= ( ( AttributeDerivation C213 ) . C214 ) by L662 , L175;
+thus L666: thesis by L665 , L663 , L664 , L166;
+end;
+L667: ConceptStr (# ( ( AttributeDerivation C213 ) . C214 ) , ( ( ObjectDerivation C213 ) . ( ( AttributeDerivation C213 ) . C214 ) ) #) is (FormalConcept of C213)
+proof
+set D111 = ConceptStr (# ( ( AttributeDerivation C213 ) . C214 ) , ( ( ObjectDerivation C213 ) . ( ( AttributeDerivation C213 ) . C214 ) ) #);
+L668: ( ( AttributeDerivation C213 ) . (the Intent of D111) ) = (the Extent of D111) by L246;
+thus L669: thesis by L668 , L607 , L597;
+end;
+thus L670: thesis by L667 , L660;
+end;
+theorem
+L671: (for B461 being FormalContext holds (for B462 being (Subset of (the carrier' of B461)) holds ((ex B463 being (Subset of (the carrier of B461)) st ConceptStr (# B463 , B462 #) is (FormalConcept of B461)) iff ( ( ObjectDerivation B461 ) . ( ( AttributeDerivation B461 ) . B462 ) ) = B462)))
+proof
+let C217 being FormalContext;
+let C218 being (Subset of (the carrier' of C217));
+L672:
+now
+L673: C218 c= ( ( ObjectDerivation C217 ) . ( ( AttributeDerivation C217 ) . C218 ) ) by L197;
+L674: (for B464 being set holds (B464 in C218 implies B464 in ( ( ObjectDerivation C217 ) . ( ( AttributeDerivation C217 ) . C218 ) ))) by L673;
+given C219 being (Subset of (the carrier of C217)) such that
+L675: ConceptStr (# C219 , C218 #) is (FormalConcept of C217);
+
+L676: ( ( ObjectDerivation C217 ) . ( ( AttributeDerivation C217 ) . C218 ) ) c= C218 by L675 , L659;
+L677: (for B465 being set holds (B465 in ( ( ObjectDerivation C217 ) . ( ( AttributeDerivation C217 ) . C218 ) ) implies B465 in C218)) by L676;
+thus L678: ( ( ObjectDerivation C217 ) . ( ( AttributeDerivation C217 ) . C218 ) ) = C218 by L677 , L674 , TARSKI:1;
+end;
+L679:
+now
+reconsider D112 = ( ( AttributeDerivation C217 ) . C218 ) as (Subset of (the carrier of C217));
+set D113 = ConceptStr (# D112 , C218 #);
+assume L680: ( ( ObjectDerivation C217 ) . ( ( AttributeDerivation C217 ) . C218 ) ) = C218;
+L681: D113 is (FormalConcept of C217) by L680 , L607 , L597;
+thus L682: (ex B466 being (Subset of (the carrier of C217)) st ConceptStr (# B466 , C218 #) is (FormalConcept of C217)) by L681;
+end;
+thus L683: thesis by L679 , L672;
+end;
+definition
+let C220 being FormalContext;
+let C221 being ConceptStr over C220;
+attr C221 is  universal
+means
+:L684: (the Extent of C221) = (the carrier of C220);
+end;
+definition
+let C222 being FormalContext;
+let C223 being ConceptStr over C222;
+attr C223 is  co-universal
+means
+:L686: (the Intent of C223) = (the carrier' of C222);
+end;
+registration
+let C224 being FormalContext;
+cluster  strict  universal for (FormalConcept of C224);
+existence
+proof
+reconsider D114 = ( {} ) as (Subset of (the carrier' of C224)) by XBOOLE_1:2;
+reconsider D115 = ConceptStr (# ( ( AttributeDerivation C224 ) . D114 ) , ( ( ObjectDerivation C224 ) . ( ( AttributeDerivation C224 ) . D114 ) ) #) as (FormalConcept of C224) by L659;
+L688: ( ( AttributeDerivation C224 ) . ( {} ) ) = (the carrier of C224) by L568;
+L689: D115 is  universal by L688 , L684;
+thus L690: thesis by L689;
+end;
+cluster  strict  co-universal for (FormalConcept of C224);
+existence
+proof
+reconsider D116 = ( {} ) as (Subset of (the carrier of C224)) by XBOOLE_1:2;
+reconsider D117 = ConceptStr (# ( ( AttributeDerivation C224 ) . ( ( ObjectDerivation C224 ) . D116 ) ) , ( ( ObjectDerivation C224 ) . D116 ) #) as (FormalConcept of C224) by L634;
+L691: ( ( ObjectDerivation C224 ) . ( {} ) ) = (the carrier' of C224) by L557;
+L692: D117 is  co-universal by L691 , L686;
+thus L693: thesis by L692;
+end;
+end;
+definition
+let C225 being FormalContext;
+func Concept-with-all-Objects C225 ->  strict  universal (FormalConcept of C225) means 
+:L695: (ex B467 being (Subset of (the carrier of C225)) st (ex B468 being (Subset of (the carrier' of C225)) st (it = ConceptStr (# B467 , B468 #) & B467 = ( ( AttributeDerivation C225 ) . ( {} ) ) & B468 = ( ( ObjectDerivation C225 ) . ( ( AttributeDerivation C225 ) . ( {} ) ) ))));
+existence
+proof
+reconsider D118 = ( {} ) as (Subset of (the carrier' of C225)) by XBOOLE_1:2;
+reconsider D119 = ConceptStr (# ( ( AttributeDerivation C225 ) . D118 ) , ( ( ObjectDerivation C225 ) . ( ( AttributeDerivation C225 ) . D118 ) ) #) as (FormalConcept of C225) by L659;
+L696: ( ( AttributeDerivation C225 ) . ( {} ) ) = (the carrier of C225) by L568;
+L697: D119 is  universal by L696 , L684;
+thus L698: thesis by L697;
+end;
+uniqueness;
+end;
+definition
+let C226 being FormalContext;
+func Concept-with-all-Attributes C226 ->  strict  co-universal (FormalConcept of C226) means 
+:L700: (ex B469 being (Subset of (the carrier of C226)) st (ex B470 being (Subset of (the carrier' of C226)) st (it = ConceptStr (# B469 , B470 #) & B469 = ( ( AttributeDerivation C226 ) . ( ( ObjectDerivation C226 ) . ( {} ) ) ) & B470 = ( ( ObjectDerivation C226 ) . ( {} ) ))));
+existence
+proof
+reconsider D120 = ( {} ) as (Subset of (the carrier of C226)) by XBOOLE_1:2;
+reconsider D121 = ConceptStr (# ( ( AttributeDerivation C226 ) . ( ( ObjectDerivation C226 ) . D120 ) ) , ( ( ObjectDerivation C226 ) . D120 ) #) as (FormalConcept of C226) by L634;
+L701: ( ( ObjectDerivation C226 ) . ( {} ) ) = (the carrier' of C226) by L557;
+L702: D121 is  co-universal by L701 , L686;
+thus L703: thesis by L702;
+end;
+uniqueness;
+end;
+theorem
+L705: (for B471 being FormalContext holds ((the Extent of ( Concept-with-all-Objects B471 )) = (the carrier of B471) & (the Intent of ( Concept-with-all-Attributes B471 )) = (the carrier' of B471)))
+proof
+let C227 being FormalContext;
+L706: ((ex B472 being (Subset of (the carrier of C227)) st (ex B473 being (Subset of (the carrier' of C227)) st (( Concept-with-all-Objects C227 ) = ConceptStr (# B472 , B473 #) & B472 = ( ( AttributeDerivation C227 ) . ( {} ) ) & B473 = ( ( ObjectDerivation C227 ) . ( ( AttributeDerivation C227 ) . ( {} ) ) )))) & (ex B474 being (Subset of (the carrier of C227)) st (ex B475 being (Subset of (the carrier' of C227)) st (( Concept-with-all-Attributes C227 ) = ConceptStr (# B474 , B475 #) & B474 = ( ( AttributeDerivation C227 ) . ( ( ObjectDerivation C227 ) . ( {} ) ) ) & B475 = ( ( ObjectDerivation C227 ) . ( {} ) ))))) by L695 , L700;
+thus L707: thesis by L706 , L557 , L568;
+end;
+theorem
+L708: (for B476 being FormalContext holds (for B477 being (FormalConcept of B476) holds (((the Extent of B477) = ( {} ) implies B477 is  co-universal) & ((the Intent of B477) = ( {} ) implies B477 is  universal))))
+proof
+let C228 being FormalContext;
+let C229 being (FormalConcept of C228);
+L709: ( ( AttributeDerivation C228 ) . (the Intent of C229) ) = (the Extent of C229) by L607;
+L710:
+now
+assume L711: (the Intent of C229) = ( {} );
+L712: (the Extent of C229) = (the carrier of C228) by L711 , L709 , L568;
+thus L713: C229 is  universal by L712 , L684;
+end;
+L714: ( ( ObjectDerivation C228 ) . (the Extent of C229) ) = (the Intent of C229) by L607;
+L715:
+now
+assume L716: (the Extent of C229) = ( {} );
+L717: (the Intent of C229) = (the carrier' of C228) by L716 , L714 , L557;
+thus L718: C229 is  co-universal by L717 , L686;
+end;
+thus L719: thesis by L715 , L710;
+end;
+theorem
+L720: (for B478 being FormalContext holds (for B479 being  strict (FormalConcept of B478) holds (((the Extent of B479) = ( {} ) implies B479 = ( Concept-with-all-Attributes B478 )) & ((the Intent of B479) = ( {} ) implies B479 = ( Concept-with-all-Objects B478 )))))
+proof
+let C230 being FormalContext;
+let C231 being  strict (FormalConcept of C230);
+L721: ( ( AttributeDerivation C230 ) . (the Intent of C231) ) = (the Extent of C231) by L607;
+L722: ( ( ObjectDerivation C230 ) . (the Extent of C231) ) = (the Intent of C231) by L607;
+L723:
+now
+assume L724: (the Intent of C231) = ( {} );
+L725: (the Extent of C231) = (the carrier of C230) by L724 , L721 , L568;
+L726: C231 is  universal by L725 , L684;
+thus L727: C231 = ( Concept-with-all-Objects C230 ) by L726 , L722 , L721 , L724 , L695;
+end;
+L728:
+now
+assume L729: (the Extent of C231) = ( {} );
+L730: (the Intent of C231) = (the carrier' of C230) by L729 , L722 , L557;
+L731: C231 is  co-universal by L730 , L686;
+thus L732: C231 = ( Concept-with-all-Attributes C230 ) by L731 , L722 , L721 , L729 , L700;
+end;
+thus L733: thesis by L728 , L723;
+end;
+theorem
+L734: (for B480 being FormalContext holds (for B481 being  quasi-empty ConceptStr over B480 holds (B481 is (FormalConcept of B480) implies (B481 is  universal or B481 is  co-universal))))
+proof
+let C232 being FormalContext;
+let C233 being  quasi-empty ConceptStr over C232;
+assume L735: C233 is (FormalConcept of C232);
+reconsider D122 = C233 as (FormalConcept of C232) by L735;
+L736: ( ( AttributeDerivation C232 ) . (the Intent of D122) ) = (the Extent of D122) by L607;
+L737: ( ( ObjectDerivation C232 ) . (the Extent of D122) ) = (the Intent of D122) by L607;
+L738:
+now
+per cases  by L581;
+case L739: (the Intent of D122) is  empty;
+L740: (the Extent of D122) = (the carrier of C232) by L739 , L736 , L568;
+thus L741: D122 is  universal by L740 , L684;
+end;
+case L742: (the Extent of D122) is  empty;
+L743: (the Intent of D122) = (the carrier' of C232) by L742 , L737 , L557;
+thus L744: D122 is  co-universal by L743 , L686;
+end;
+end;
+thus L746: thesis by L738;
+end;
+theorem
+L747: (for B482 being FormalContext holds (for B483 being  quasi-empty ConceptStr over B482 holds (B483 is  strict  strict  strict  strict (FormalConcept of B482) implies (B483 = ( Concept-with-all-Objects B482 ) or B483 = ( Concept-with-all-Attributes B482 )))))
+proof
+let C234 being FormalContext;
+let C235 being  quasi-empty ConceptStr over C234;
+assume L748: C235 is  strict  strict  strict  strict (FormalConcept of C234);
+L749:
+now
+per cases  by L581;
+case L750: (the Intent of C235) is  empty;
+thus L751: C235 = ( Concept-with-all-Objects C234 ) by L750 , L748 , L720;
+end;
+case L752: (the Extent of C235) is  empty;
+thus L753: C235 = ( Concept-with-all-Attributes C234 ) by L752 , L748 , L720;
+end;
+end;
+thus L755: thesis by L749;
+end;
+definition
+let C236 being FormalContext;
+mode Set-of-FormalConcepts of C236
+ -> non  empty set
+means :L756: (for B484 being set holds (B484 in it implies B484 is (FormalConcept of C236)));
+existence
+proof
+set D123 = the (FormalConcept of C236);
+L757: (for B485 being set holds (B485 in { D123 } implies B485 is (FormalConcept of C236))) by TARSKI:def 1;
+thus L758: thesis by L757;
+end;
+end;
+definition
+let C237 being FormalContext;
+let C238 being (Set-of-FormalConcepts of C237);
+redefine mode Element of C238
+ -> (FormalConcept of C237);
+coherence by L756;
+end;
+definition
+let C239 being FormalContext;
+let C240 , C241 being (FormalConcept of C239);
+pred C240 is-SubConcept-of C241
+means
+:L761: (the Extent of C240) c= (the Extent of C241)
+;end;
+notation
+let C242 being FormalContext;
+let C243 , C244 being (FormalConcept of C242);
+synonym C244 is-SuperConcept-of C243 for C243 is-SubConcept-of C244;
+end;
+theorem
+L764: (for B486 being FormalContext holds (for B487 , B488 being (FormalConcept of B486) holds (B487 is-SubConcept-of B488 iff (the Intent of B488) c= (the Intent of B487))))
+proof
+let C245 being FormalContext;
+let C246 , C247 being (FormalConcept of C245);
+L765:
+now
+assume L766: (the Intent of C247) c= (the Intent of C246);
+L767: ( ( AttributeDerivation C245 ) . (the Intent of C246) ) c= ( ( AttributeDerivation C245 ) . (the Intent of C247) ) by L766 , L175;
+L768: (( ( AttributeDerivation C245 ) . (the Intent of C246) ) = (the Extent of C246) & ( ( AttributeDerivation C245 ) . (the Intent of C247) ) = (the Extent of C247)) by L607;
+thus L769: C246 is-SubConcept-of C247 by L768 , L767 , L761;
+end;
+L770:
+now
+assume L771: C246 is-SubConcept-of C247;
+L772: (the Extent of C246) c= (the Extent of C247) by L771 , L761;
+L773: (( ( ObjectDerivation C245 ) . (the Extent of C247) ) = (the Intent of C247) & ( ( ObjectDerivation C245 ) . (the Extent of C246) ) = (the Intent of C246)) by L607;
+thus L774: (the Intent of C247) c= (the Intent of C246) by L773 , L772 , L166;
+end;
+thus L775: thesis by L770 , L765;
+end;
+theorem
+L776: (for B489 being FormalContext holds (for B490 , B491 being (FormalConcept of B489) holds (B490 is-SuperConcept-of B491 iff (the Intent of B490) c= (the Intent of B491)))) by L764;
+theorem
+L777: (for B492 being FormalContext holds (for B493 being (FormalConcept of B492) holds (B493 is-SubConcept-of ( Concept-with-all-Objects B492 ) & ( Concept-with-all-Attributes B492 ) is-SubConcept-of B493)))
+proof
+let C248 being FormalContext;
+let C249 being (FormalConcept of C248);
+L778: ((the carrier' of C248) = (the Intent of ( Concept-with-all-Attributes C248 )) & (the Intent of C249) c= (the carrier' of C248)) by L705;
+L779: ((the carrier of C248) = (the Extent of ( Concept-with-all-Objects C248 )) & (the Extent of C249) c= (the carrier of C248)) by L705;
+thus L780: thesis by L779 , L778 , L761 , L764;
+end;
+begin
+definition
+let C250 being FormalContext;
+func B-carrier C250 -> non  empty set equals 
+{ ConceptStr (# B494 , B495 #) where B494 is (Subset of (the carrier of C250)) , B495 is (Subset of (the carrier' of C250)) : (ConceptStr (# B494 , B495 #) is non  empty & ( ( ObjectDerivation C250 ) . B494 ) = B495 & ( ( AttributeDerivation C250 ) . B495 ) = B494) };
+coherence
+proof
+set D124 = { ConceptStr (# B496 , B497 #) where B496 is (Subset of (the carrier of C250)) , B497 is (Subset of (the carrier' of C250)) : (ConceptStr (# B496 , B497 #) is non  empty & ( ( ObjectDerivation C250 ) . B496 ) = B497 & ( ( AttributeDerivation C250 ) . B497 ) = B496) };
+L781: D124 is non  empty
+proof
+set D125 = the (FormalConcept of C250);
+consider C251 being (Subset of (the carrier of C250)) such that L782: C251 = (the Extent of D125);
+consider C252 being (Subset of (the carrier' of C250)) such that L783: C252 = (the Intent of D125);
+L784: ( ( AttributeDerivation C250 ) . C252 ) = C251 by L782 , L783 , L607;
+L785: ( ( ObjectDerivation C250 ) . C251 ) = C252 by L782 , L783 , L607;
+L786: ConceptStr (# C251 , C252 #) is non  empty by L785 , L597;
+L787: ConceptStr (# C251 , C252 #) in D124 by L786 , L785 , L784;
+thus L788: thesis by L787;
+end;
+reconsider D126 = D124 as non  empty set by L781;
+L789: (for B498 being  strict non  empty ConceptStr over C250 holds (B498 in D126 iff (( ( ObjectDerivation C250 ) . (the Extent of B498) ) = (the Intent of B498) & ( ( AttributeDerivation C250 ) . (the Intent of B498) ) = (the Extent of B498))))
+proof
+let C253 being  strict non  empty ConceptStr over C250;
+L790:
+now
+assume L791: C253 in D126;
+L792: (ex B499 being (Subset of (the carrier of C250)) st (ex B500 being (Subset of (the carrier' of C250)) st (C253 = ConceptStr (# B499 , B500 #) & ConceptStr (# B499 , B500 #) is non  empty & ( ( ObjectDerivation C250 ) . B499 ) = B500 & ( ( AttributeDerivation C250 ) . B500 ) = B499))) by L791;
+thus L793: (( ( ObjectDerivation C250 ) . (the Extent of C253) ) = (the Intent of C253) & ( ( AttributeDerivation C250 ) . (the Intent of C253) ) = (the Extent of C253)) by L792;
+end;
+thus L794: thesis by L790;
+end;
+thus L795: thesis by L789;
+end;
+end;
+definition
+let C254 being FormalContext;
+redefine func B-carrier C254 -> (Set-of-FormalConcepts of C254);
+
+coherence
+proof
+L797: (for B501 being set holds (B501 in ( B-carrier C254 ) implies B501 is (FormalConcept of C254)))
+proof
+let C255 being set;
+assume L798: C255 in ( B-carrier C254 );
+L799: (ex B502 being (Subset of (the carrier of C254)) st (ex B503 being (Subset of (the carrier' of C254)) st (C255 = ConceptStr (# B502 , B503 #) & ConceptStr (# B502 , B503 #) is non  empty & ( ( ObjectDerivation C254 ) . B502 ) = B503 & ( ( AttributeDerivation C254 ) . B503 ) = B502))) by L798;
+thus L800: thesis by L799 , L607;
+end;
+thus L801: thesis by L797 , L756;
+end;
+end;
+registration
+let C256 being FormalContext;
+cluster ( B-carrier C256 ) -> non  empty;
+coherence;
+end;
+theorem
+L804: (for B504 being FormalContext holds (for B505 being set holds (B505 in ( B-carrier B504 ) iff B505 is  strict  strict  strict  strict (FormalConcept of B504))))
+proof
+let C257 being FormalContext;
+let C258 being set;
+L805: (C258 is  strict  strict  strict  strict (FormalConcept of C257) implies C258 in ( B-carrier C257 ))
+proof
+assume L806: C258 is  strict  strict  strict  strict (FormalConcept of C257);
+reconsider D127 = C258 as (FormalConcept of C257) by L806;
+set D128 = (the Intent of D127);
+set D129 = (the Extent of D127);
+L807: (( ( ObjectDerivation C257 ) . D129 ) = D128 & ( ( AttributeDerivation C257 ) . D128 ) = D129) by L607;
+thus L808: thesis by L807 , L806;
+end;
+L809: (C258 in ( B-carrier C257 ) implies C258 is  strict  strict  strict  strict (FormalConcept of C257))
+proof
+assume L810: C258 in ( B-carrier C257 );
+L811: (ex B506 being (Subset of (the carrier of C257)) st (ex B507 being (Subset of (the carrier' of C257)) st (C258 = ConceptStr (# B506 , B507 #) & ConceptStr (# B506 , B507 #) is non  empty & ( ( ObjectDerivation C257 ) . B506 ) = B507 & ( ( AttributeDerivation C257 ) . B507 ) = B506))) by L810;
+thus L812: thesis by L811 , L607;
+end;
+thus L813: thesis by L809 , L805;
+end;
+definition
+let C259 being FormalContext;
+func B-meet C259 -> (BinOp of ( B-carrier C259 )) means 
+:L814: (for B508 , B509 being  strict (FormalConcept of C259) holds (ex B510 being (Subset of (the carrier of C259)) st (ex B511 being (Subset of (the carrier' of C259)) st (( it . (B508 , B509) ) = ConceptStr (# B510 , B511 #) & B510 = ( (the Extent of B508) /\ (the Extent of B509) ) & B511 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of B508) \/ (the Intent of B509) ) ) )))));
+existence
+proof
+defpred S1[ (FormalConcept of C259) , (FormalConcept of C259) , set ] means (ex B512 being (Subset of (the carrier of C259)) st (ex B513 being (Subset of (the carrier' of C259)) st ($3 = ConceptStr (# B512 , B513 #) & B512 = ( (the Extent of $1) /\ (the Extent of $2) ) & B513 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of $1) \/ (the Intent of $2) ) ) ))));
+L815: (for B514 being (Element of ( B-carrier C259 )) holds (for B515 being (Element of ( B-carrier C259 )) holds (ex B516 being (Element of ( B-carrier C259 )) st S1[ B514 , B515 , B516 ])))
+proof
+let C260 being (Element of ( B-carrier C259 ));
+let C261 being (Element of ( B-carrier C259 ));
+set D130 = ( (the Extent of C260) /\ (the Extent of C261) );
+set D131 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of C260) \/ (the Intent of C261) ) ) );
+reconsider D132 = ( (the Intent of C260) \/ (the Intent of C261) ) as (Subset of (the carrier' of C259));
+set D133 = ConceptStr (# D130 , D131 #);
+L816: ( ( AttributeDerivation C259 ) . D131 ) = ( ( AttributeDerivation C259 ) . D132 ) by L246
+.= ( ( ( AttributeDerivation C259 ) . (the Intent of C260) ) /\ ( ( AttributeDerivation C259 ) . (the Intent of C261) ) ) by L519
+.= ( (the Extent of C260) /\ ( ( AttributeDerivation C259 ) . (the Intent of C261) ) ) by L607
+.= ( (the Extent of C260) /\ (the Extent of C261) ) by L607;
+L817: ( ( ObjectDerivation C259 ) . D130 ) = D131 by L816 , L210;
+L818: ConceptStr (# D130 , D131 #) is non  empty by L817 , L597;
+L819: D133 in { ConceptStr (# B517 , B518 #) where B517 is (Subset of (the carrier of C259)) , B518 is (Subset of (the carrier' of C259)) : (ConceptStr (# B517 , B518 #) is non  empty & ( ( ObjectDerivation C259 ) . B517 ) = B518 & ( ( AttributeDerivation C259 ) . B518 ) = B517) } by L818 , L816 , L817;
+thus L820: thesis by L819;
+end;
+consider C262 being (Function of [: ( B-carrier C259 ) , ( B-carrier C259 ) :] , ( B-carrier C259 )) such that L821: (for B519 being (Element of ( B-carrier C259 )) holds (for B520 being (Element of ( B-carrier C259 )) holds S1[ B519 , B520 , ( C262 . (B519 , B520) ) ])) from BINOP_1:sch 3(L815);
+reconsider D134 = C262 as (BinOp of ( B-carrier C259 ));
+take D134;
+L822: (for B521 , B522 being  strict (FormalConcept of C259) holds (ex B523 being (Subset of (the carrier of C259)) st (ex B524 being (Subset of (the carrier' of C259)) st (( D134 . (B521 , B522) ) = ConceptStr (# B523 , B524 #) & B523 = ( (the Extent of B521) /\ (the Extent of B522) ) & B524 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of B521) \/ (the Intent of B522) ) ) )))))
+proof
+let C263 , C264 being  strict (FormalConcept of C259);
+L823: (C263 is (Element of ( B-carrier C259 )) & C264 is (Element of ( B-carrier C259 ))) by L804;
+thus L824: thesis by L823 , L821;
+end;
+thus L825: thesis by L822;
+end;
+uniqueness
+proof
+let C265 , C266 being (BinOp of ( B-carrier C259 ));
+assume L826: (for B525 , B526 being  strict (FormalConcept of C259) holds (ex B527 being (Subset of (the carrier of C259)) st (ex B528 being (Subset of (the carrier' of C259)) st (( C265 . (B525 , B526) ) = ConceptStr (# B527 , B528 #) & B527 = ( (the Extent of B525) /\ (the Extent of B526) ) & B528 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of B525) \/ (the Intent of B526) ) ) )))));
+assume L827: (for B529 , B530 being  strict (FormalConcept of C259) holds (ex B531 being (Subset of (the carrier of C259)) st (ex B532 being (Subset of (the carrier' of C259)) st (( C266 . (B529 , B530) ) = ConceptStr (# B531 , B532 #) & B531 = ( (the Extent of B529) /\ (the Extent of B530) ) & B532 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of B529) \/ (the Intent of B530) ) ) )))));
+L828: (for B533 being set holds (B533 in [: ( B-carrier C259 ) , ( B-carrier C259 ) :] implies ( C265 . B533 ) = ( C266 . B533 )))
+proof
+let C267 being set;
+assume L829: C267 in [: ( B-carrier C259 ) , ( B-carrier C259 ) :];
+consider C268 , C269 being set such that L830: C268 in ( B-carrier C259 ) and L831: C269 in ( B-carrier C259 ) and L832: C267 = [ C268 , C269 ] by L829 , ZFMISC_1:def 2;
+reconsider D135 = C269 as  strict (FormalConcept of C259) by L831 , L804;
+reconsider D136 = C268 as  strict (FormalConcept of C259) by L830 , L804;
+L833: ((ex B534 being (Subset of (the carrier of C259)) st (ex B535 being (Subset of (the carrier' of C259)) st (( C265 . (D136 , D135) ) = ConceptStr (# B534 , B535 #) & B534 = ( (the Extent of D136) /\ (the Extent of D135) ) & B535 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of D136) \/ (the Intent of D135) ) ) )))) & (ex B536 being (Subset of (the carrier of C259)) st (ex B537 being (Subset of (the carrier' of C259)) st (( C266 . (D136 , D135) ) = ConceptStr (# B536 , B537 #) & B536 = ( (the Extent of D136) /\ (the Extent of D135) ) & B537 = ( ( ObjectDerivation C259 ) . ( ( AttributeDerivation C259 ) . ( (the Intent of D136) \/ (the Intent of D135) ) ) ))))) by L826 , L827;
+thus L834: thesis by L833 , L832;
+end;
+L835: (( dom C265 ) = [: ( B-carrier C259 ) , ( B-carrier C259 ) :] & ( dom C266 ) = [: ( B-carrier C259 ) , ( B-carrier C259 ) :]) by FUNCT_2:def 1;
+thus L836: thesis by L835 , L828 , FUNCT_1:2;
+end;
+end;
+definition
+let C270 being FormalContext;
+func B-join C270 -> (BinOp of ( B-carrier C270 )) means 
+:L838: (for B538 , B539 being  strict (FormalConcept of C270) holds (ex B540 being (Subset of (the carrier of C270)) st (ex B541 being (Subset of (the carrier' of C270)) st (( it . (B538 , B539) ) = ConceptStr (# B540 , B541 #) & B540 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of B538) \/ (the Extent of B539) ) ) ) & B541 = ( (the Intent of B538) /\ (the Intent of B539) )))));
+existence
+proof
+defpred S2[ (FormalConcept of C270) , (FormalConcept of C270) , set ] means (ex B542 being (Subset of (the carrier of C270)) st (ex B543 being (Subset of (the carrier' of C270)) st ($3 = ConceptStr (# B542 , B543 #) & B542 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of $1) \/ (the Extent of $2) ) ) ) & B543 = ( (the Intent of $1) /\ (the Intent of $2) ))));
+L839: (for B544 being (Element of ( B-carrier C270 )) holds (for B545 being (Element of ( B-carrier C270 )) holds (ex B546 being (Element of ( B-carrier C270 )) st S2[ B544 , B545 , B546 ])))
+proof
+let C271 being (Element of ( B-carrier C270 ));
+let C272 being (Element of ( B-carrier C270 ));
+set D137 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of C271) \/ (the Extent of C272) ) ) );
+set D138 = ( (the Intent of C271) /\ (the Intent of C272) );
+reconsider D139 = ( (the Extent of C271) \/ (the Extent of C272) ) as (Subset of (the carrier of C270));
+set D140 = ConceptStr (# D137 , D138 #);
+L840: ( ( ObjectDerivation C270 ) . D137 ) = ( ( ObjectDerivation C270 ) . D139 ) by L210
+.= ( ( ( ObjectDerivation C270 ) . (the Extent of C271) ) /\ ( ( ObjectDerivation C270 ) . (the Extent of C272) ) ) by L481
+.= ( (the Intent of C271) /\ ( ( ObjectDerivation C270 ) . (the Extent of C272) ) ) by L607
+.= ( (the Intent of C271) /\ (the Intent of C272) ) by L607;
+L841: (( ( AttributeDerivation C270 ) . D138 ) = D137 & ConceptStr (# D137 , D138 #) is non  empty) by L840 , L597 , L210;
+L842: D140 in { ConceptStr (# B547 , B548 #) where B547 is (Subset of (the carrier of C270)) , B548 is (Subset of (the carrier' of C270)) : (ConceptStr (# B547 , B548 #) is non  empty & ( ( ObjectDerivation C270 ) . B547 ) = B548 & ( ( AttributeDerivation C270 ) . B548 ) = B547) } by L841 , L840;
+thus L843: thesis by L842;
+end;
+consider C273 being (Function of [: ( B-carrier C270 ) , ( B-carrier C270 ) :] , ( B-carrier C270 )) such that L844: (for B549 being (Element of ( B-carrier C270 )) holds (for B550 being (Element of ( B-carrier C270 )) holds S2[ B549 , B550 , ( C273 . (B549 , B550) ) ])) from BINOP_1:sch 3(L839);
+reconsider D141 = C273 as (BinOp of ( B-carrier C270 ));
+take D141;
+L845: (for B551 , B552 being  strict (FormalConcept of C270) holds (ex B553 being (Subset of (the carrier of C270)) st (ex B554 being (Subset of (the carrier' of C270)) st (( D141 . (B551 , B552) ) = ConceptStr (# B553 , B554 #) & B553 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of B551) \/ (the Extent of B552) ) ) ) & B554 = ( (the Intent of B551) /\ (the Intent of B552) )))))
+proof
+let C274 , C275 being  strict (FormalConcept of C270);
+L846: (C274 is (Element of ( B-carrier C270 )) & C275 is (Element of ( B-carrier C270 ))) by L804;
+thus L847: thesis by L846 , L844;
+end;
+thus L848: thesis by L845;
+end;
+uniqueness
+proof
+let C276 , C277 being (BinOp of ( B-carrier C270 ));
+assume L849: (for B555 , B556 being  strict (FormalConcept of C270) holds (ex B557 being (Subset of (the carrier of C270)) st (ex B558 being (Subset of (the carrier' of C270)) st (( C276 . (B555 , B556) ) = ConceptStr (# B557 , B558 #) & B557 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of B555) \/ (the Extent of B556) ) ) ) & B558 = ( (the Intent of B555) /\ (the Intent of B556) )))));
+assume L850: (for B559 , B560 being  strict (FormalConcept of C270) holds (ex B561 being (Subset of (the carrier of C270)) st (ex B562 being (Subset of (the carrier' of C270)) st (( C277 . (B559 , B560) ) = ConceptStr (# B561 , B562 #) & B561 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of B559) \/ (the Extent of B560) ) ) ) & B562 = ( (the Intent of B559) /\ (the Intent of B560) )))));
+L851: (for B563 being set holds (B563 in [: ( B-carrier C270 ) , ( B-carrier C270 ) :] implies ( C276 . B563 ) = ( C277 . B563 )))
+proof
+let C278 being set;
+assume L852: C278 in [: ( B-carrier C270 ) , ( B-carrier C270 ) :];
+consider C279 , C280 being set such that L853: C279 in ( B-carrier C270 ) and L854: C280 in ( B-carrier C270 ) and L855: C278 = [ C279 , C280 ] by L852 , ZFMISC_1:def 2;
+reconsider D142 = C280 as  strict (FormalConcept of C270) by L854 , L804;
+reconsider D143 = C279 as  strict (FormalConcept of C270) by L853 , L804;
+L856: ((ex B564 being (Subset of (the carrier of C270)) st (ex B565 being (Subset of (the carrier' of C270)) st (( C276 . (D143 , D142) ) = ConceptStr (# B564 , B565 #) & B564 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of D143) \/ (the Extent of D142) ) ) ) & B565 = ( (the Intent of D143) /\ (the Intent of D142) )))) & (ex B566 being (Subset of (the carrier of C270)) st (ex B567 being (Subset of (the carrier' of C270)) st (( C277 . (D143 , D142) ) = ConceptStr (# B566 , B567 #) & B566 = ( ( AttributeDerivation C270 ) . ( ( ObjectDerivation C270 ) . ( (the Extent of D143) \/ (the Extent of D142) ) ) ) & B567 = ( (the Intent of D143) /\ (the Intent of D142) ))))) by L849 , L850;
+thus L857: thesis by L856 , L855;
+end;
+L858: (( dom C276 ) = [: ( B-carrier C270 ) , ( B-carrier C270 ) :] & ( dom C277 ) = [: ( B-carrier C270 ) , ( B-carrier C270 ) :]) by FUNCT_2:def 1;
+thus L859: thesis by L858 , L851 , FUNCT_1:2;
+end;
+end;
+L861: (for B568 being FormalContext holds (for B569 , B570 being  strict (FormalConcept of B568) holds ( ( B-meet B568 ) . (B569 , B570) ) in ( rng ( B-meet B568 ) )))
+proof
+let C281 being FormalContext;
+let C282 , C283 being  strict (FormalConcept of C281);
+L862: (C282 in ( B-carrier C281 ) & C283 in ( B-carrier C281 )) by L804;
+L863: [ C282 , C283 ] in [: ( B-carrier C281 ) , ( B-carrier C281 ) :] by L862 , ZFMISC_1:def 2;
+L864: [ C282 , C283 ] in ( dom ( B-meet C281 ) ) by L863 , FUNCT_2:def 1;
+thus L865: thesis by L864 , FUNCT_1:def 3;
+end;
+L866: (for B571 being FormalContext holds (for B572 , B573 being  strict (FormalConcept of B571) holds ( ( B-join B571 ) . (B572 , B573) ) in ( rng ( B-join B571 ) )))
+proof
+let C284 being FormalContext;
+let C285 , C286 being  strict (FormalConcept of C284);
+L867: (C285 in ( B-carrier C284 ) & C286 in ( B-carrier C284 )) by L804;
+L868: [ C285 , C286 ] in [: ( B-carrier C284 ) , ( B-carrier C284 ) :] by L867 , ZFMISC_1:def 2;
+L869: [ C285 , C286 ] in ( dom ( B-join C284 ) ) by L868 , FUNCT_2:def 1;
+thus L870: thesis by L869 , FUNCT_1:def 3;
+end;
+theorem
+L871: (for B574 being FormalContext holds (for B575 , B576 being  strict (FormalConcept of B574) holds ( ( B-meet B574 ) . (B575 , B576) ) = ( ( B-meet B574 ) . (B576 , B575) )))
+proof
+let C287 being FormalContext;
+let C288 , C289 being  strict (FormalConcept of C287);
+L872: ((ex B577 being (Subset of (the carrier of C287)) st (ex B578 being (Subset of (the carrier' of C287)) st (( ( B-meet C287 ) . (C288 , C289) ) = ConceptStr (# B577 , B578 #) & B577 = ( (the Extent of C288) /\ (the Extent of C289) ) & B578 = ( ( ObjectDerivation C287 ) . ( ( AttributeDerivation C287 ) . ( (the Intent of C288) \/ (the Intent of C289) ) ) )))) & (ex B579 being (Subset of (the carrier of C287)) st (ex B580 being (Subset of (the carrier' of C287)) st (( ( B-meet C287 ) . (C289 , C288) ) = ConceptStr (# B579 , B580 #) & B579 = ( (the Extent of C289) /\ (the Extent of C288) ) & B580 = ( ( ObjectDerivation C287 ) . ( ( AttributeDerivation C287 ) . ( (the Intent of C289) \/ (the Intent of C288) ) ) ))))) by L814;
+thus L873: thesis by L872;
+end;
+theorem
+L874: (for B581 being FormalContext holds (for B582 , B583 being  strict (FormalConcept of B581) holds ( ( B-join B581 ) . (B582 , B583) ) = ( ( B-join B581 ) . (B583 , B582) )))
+proof
+let C290 being FormalContext;
+let C291 , C292 being  strict (FormalConcept of C290);
+L875: ((ex B584 being (Subset of (the carrier of C290)) st (ex B585 being (Subset of (the carrier' of C290)) st (( ( B-join C290 ) . (C291 , C292) ) = ConceptStr (# B584 , B585 #) & B584 = ( ( AttributeDerivation C290 ) . ( ( ObjectDerivation C290 ) . ( (the Extent of C291) \/ (the Extent of C292) ) ) ) & B585 = ( (the Intent of C291) /\ (the Intent of C292) )))) & (ex B586 being (Subset of (the carrier of C290)) st (ex B587 being (Subset of (the carrier' of C290)) st (( ( B-join C290 ) . (C292 , C291) ) = ConceptStr (# B586 , B587 #) & B586 = ( ( AttributeDerivation C290 ) . ( ( ObjectDerivation C290 ) . ( (the Extent of C292) \/ (the Extent of C291) ) ) ) & B587 = ( (the Intent of C292) /\ (the Intent of C291) ))))) by L838;
+thus L876: thesis by L875;
+end;
+theorem
+L877: (for B588 being FormalContext holds (for B589 , B590 , B591 being  strict (FormalConcept of B588) holds ( ( B-meet B588 ) . (B589 , ( ( B-meet B588 ) . (B590 , B591) )) ) = ( ( B-meet B588 ) . (( ( B-meet B588 ) . (B589 , B590) ) , B591) )))
+proof
+let C293 being FormalContext;
+let C294 , C295 , C296 being  strict (FormalConcept of C293);
+L878: ( ( B-meet C293 ) . (C294 , C295) ) in ( rng ( B-meet C293 ) ) by L861;
+reconsider D144 = ( ( B-meet C293 ) . (C294 , C295) ) as  strict (FormalConcept of C293) by L878 , L804;
+L879: ((ex B592 being (Subset of (the carrier of C293)) st (ex B593 being (Subset of (the carrier' of C293)) st (( ( B-meet C293 ) . (C294 , C295) ) = ConceptStr (# B592 , B593 #) & B592 = ( (the Extent of C294) /\ (the Extent of C295) ) & B593 = ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C294) \/ (the Intent of C295) ) ) )))) & (ex B594 being (Subset of (the carrier of C293)) st (ex B595 being (Subset of (the carrier' of C293)) st (( ( B-meet C293 ) . (D144 , C296) ) = ConceptStr (# B594 , B595 #) & B594 = ( (the Extent of D144) /\ (the Extent of C296) ) & B595 = ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of D144) \/ (the Intent of C296) ) ) ))))) by L814;
+L880: ( ( B-meet C293 ) . (C295 , C296) ) in ( rng ( B-meet C293 ) ) by L861;
+reconsider D145 = ( ( B-meet C293 ) . (C295 , C296) ) as  strict (FormalConcept of C293) by L880 , L804;
+L881: ((ex B596 being (Subset of (the carrier of C293)) st (ex B597 being (Subset of (the carrier' of C293)) st (( ( B-meet C293 ) . (C295 , C296) ) = ConceptStr (# B596 , B597 #) & B596 = ( (the Extent of C295) /\ (the Extent of C296) ) & B597 = ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C295) \/ (the Intent of C296) ) ) )))) & (ex B598 being (Subset of (the carrier of C293)) st (ex B599 being (Subset of (the carrier' of C293)) st (( ( B-meet C293 ) . (C294 , D145) ) = ConceptStr (# B598 , B599 #) & B598 = ( (the Extent of C294) /\ (the Extent of D145) ) & B599 = ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C294) \/ (the Intent of D145) ) ) ))))) by L814;
+L882: ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C294) \/ ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C295) \/ (the Intent of C296) ) ) ) ) ) ) = ( ( ObjectDerivation C293 ) . ( ( ( AttributeDerivation C293 ) . (the Intent of C294) ) /\ ( ( AttributeDerivation C293 ) . ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C295) \/ (the Intent of C296) ) ) ) ) ) ) by L519
+.= ( ( ObjectDerivation C293 ) . ( ( ( AttributeDerivation C293 ) . (the Intent of C294) ) /\ ( ( AttributeDerivation C293 ) . ( (the Intent of C295) \/ (the Intent of C296) ) ) ) ) by L246
+.= ( ( ObjectDerivation C293 ) . ( ( ( AttributeDerivation C293 ) . (the Intent of C294) ) /\ ( ( ( AttributeDerivation C293 ) . (the Intent of C295) ) /\ ( ( AttributeDerivation C293 ) . (the Intent of C296) ) ) ) ) by L519
+.= ( ( ObjectDerivation C293 ) . ( ( ( ( AttributeDerivation C293 ) . (the Intent of C294) ) /\ ( ( AttributeDerivation C293 ) . (the Intent of C295) ) ) /\ ( ( AttributeDerivation C293 ) . (the Intent of C296) ) ) ) by XBOOLE_1:16
+.= ( ( ObjectDerivation C293 ) . ( ( ( AttributeDerivation C293 ) . ( (the Intent of C294) \/ (the Intent of C295) ) ) /\ ( ( AttributeDerivation C293 ) . (the Intent of C296) ) ) ) by L519
+.= ( ( ObjectDerivation C293 ) . ( ( ( AttributeDerivation C293 ) . ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C294) \/ (the Intent of C295) ) ) ) ) /\ ( ( AttributeDerivation C293 ) . (the Intent of C296) ) ) ) by L246
+.= ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( ( ( ObjectDerivation C293 ) . ( ( AttributeDerivation C293 ) . ( (the Intent of C294) \/ (the Intent of C295) ) ) ) \/ (the Intent of C296) ) ) ) by L519;
+thus L883: thesis by L882 , L879 , L881 , XBOOLE_1:16;
+end;
+theorem
+L884: (for B600 being FormalContext holds (for B601 , B602 , B603 being  strict (FormalConcept of B600) holds ( ( B-join B600 ) . (B601 , ( ( B-join B600 ) . (B602 , B603) )) ) = ( ( B-join B600 ) . (( ( B-join B600 ) . (B601 , B602) ) , B603) )))
+proof
+let C297 being FormalContext;
+let C298 , C299 , C300 being  strict (FormalConcept of C297);
+L885: ( ( B-join C297 ) . (C298 , C299) ) in ( rng ( B-join C297 ) ) by L866;
+reconsider D146 = ( ( B-join C297 ) . (C298 , C299) ) as  strict (FormalConcept of C297) by L885 , L804;
+L886: ((ex B604 being (Subset of (the carrier of C297)) st (ex B605 being (Subset of (the carrier' of C297)) st (( ( B-join C297 ) . (C298 , C299) ) = ConceptStr (# B604 , B605 #) & B604 = ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C298) \/ (the Extent of C299) ) ) ) & B605 = ( (the Intent of C298) /\ (the Intent of C299) )))) & (ex B606 being (Subset of (the carrier of C297)) st (ex B607 being (Subset of (the carrier' of C297)) st (( ( B-join C297 ) . (D146 , C300) ) = ConceptStr (# B606 , B607 #) & B606 = ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of D146) \/ (the Extent of C300) ) ) ) & B607 = ( (the Intent of D146) /\ (the Intent of C300) ))))) by L838;
+L887: ( ( B-join C297 ) . (C299 , C300) ) in ( rng ( B-join C297 ) ) by L866;
+reconsider D147 = ( ( B-join C297 ) . (C299 , C300) ) as  strict (FormalConcept of C297) by L887 , L804;
+L888: ((ex B608 being (Subset of (the carrier of C297)) st (ex B609 being (Subset of (the carrier' of C297)) st (( ( B-join C297 ) . (C299 , C300) ) = ConceptStr (# B608 , B609 #) & B608 = ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C299) \/ (the Extent of C300) ) ) ) & B609 = ( (the Intent of C299) /\ (the Intent of C300) )))) & (ex B610 being (Subset of (the carrier of C297)) st (ex B611 being (Subset of (the carrier' of C297)) st (( ( B-join C297 ) . (C298 , D147) ) = ConceptStr (# B610 , B611 #) & B610 = ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C298) \/ (the Extent of D147) ) ) ) & B611 = ( (the Intent of C298) /\ (the Intent of D147) ))))) by L838;
+L889: ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C298) \/ ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C299) \/ (the Extent of C300) ) ) ) ) ) ) = ( ( AttributeDerivation C297 ) . ( ( ( ObjectDerivation C297 ) . (the Extent of C298) ) /\ ( ( ObjectDerivation C297 ) . ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C299) \/ (the Extent of C300) ) ) ) ) ) ) by L481
+.= ( ( AttributeDerivation C297 ) . ( ( ( ObjectDerivation C297 ) . (the Extent of C298) ) /\ ( ( ObjectDerivation C297 ) . ( (the Extent of C299) \/ (the Extent of C300) ) ) ) ) by L210
+.= ( ( AttributeDerivation C297 ) . ( ( ( ObjectDerivation C297 ) . (the Extent of C298) ) /\ ( ( ( ObjectDerivation C297 ) . (the Extent of C299) ) /\ ( ( ObjectDerivation C297 ) . (the Extent of C300) ) ) ) ) by L481
+.= ( ( AttributeDerivation C297 ) . ( ( ( ( ObjectDerivation C297 ) . (the Extent of C298) ) /\ ( ( ObjectDerivation C297 ) . (the Extent of C299) ) ) /\ ( ( ObjectDerivation C297 ) . (the Extent of C300) ) ) ) by XBOOLE_1:16
+.= ( ( AttributeDerivation C297 ) . ( ( ( ObjectDerivation C297 ) . ( (the Extent of C298) \/ (the Extent of C299) ) ) /\ ( ( ObjectDerivation C297 ) . (the Extent of C300) ) ) ) by L481
+.= ( ( AttributeDerivation C297 ) . ( ( ( ObjectDerivation C297 ) . ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C298) \/ (the Extent of C299) ) ) ) ) /\ ( ( ObjectDerivation C297 ) . (the Extent of C300) ) ) ) by L210
+.= ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( ( ( AttributeDerivation C297 ) . ( ( ObjectDerivation C297 ) . ( (the Extent of C298) \/ (the Extent of C299) ) ) ) \/ (the Extent of C300) ) ) ) by L481;
+thus L890: thesis by L889 , L886 , L888 , XBOOLE_1:16;
+end;
+theorem
+L891: (for B612 being FormalContext holds (for B613 , B614 being  strict (FormalConcept of B612) holds ( ( B-join B612 ) . (( ( B-meet B612 ) . (B613 , B614) ) , B614) ) = B614))
+proof
+let C301 being FormalContext;
+let C302 , C303 being  strict (FormalConcept of C301);
+L892: ( (the Extent of C302) /\ (the Extent of C303) ) c= (the Extent of C303) by XBOOLE_1:17;
+L893: ( ( B-meet C301 ) . (C302 , C303) ) in ( rng ( B-meet C301 ) ) by L861;
+reconsider D148 = ( ( B-meet C301 ) . (C302 , C303) ) as  strict (FormalConcept of C301) by L893 , L804;
+L894: ((ex B615 being (Subset of (the carrier of C301)) st (ex B616 being (Subset of (the carrier' of C301)) st (( ( B-meet C301 ) . (C302 , C303) ) = ConceptStr (# B615 , B616 #) & B615 = ( (the Extent of C302) /\ (the Extent of C303) ) & B616 = ( ( ObjectDerivation C301 ) . ( ( AttributeDerivation C301 ) . ( (the Intent of C302) \/ (the Intent of C303) ) ) )))) & (ex B617 being (Subset of (the carrier of C301)) st (ex B618 being (Subset of (the carrier' of C301)) st (( ( B-join C301 ) . (D148 , C303) ) = ConceptStr (# B617 , B618 #) & B617 = ( ( AttributeDerivation C301 ) . ( ( ObjectDerivation C301 ) . ( (the Extent of D148) \/ (the Extent of C303) ) ) ) & B618 = ( (the Intent of D148) /\ (the Intent of C303) ))))) by L814 , L838;
+L895: ( ( AttributeDerivation C301 ) . ( ( ObjectDerivation C301 ) . ( ( (the Extent of C302) /\ (the Extent of C303) ) \/ (the Extent of C303) ) ) ) = ( ( AttributeDerivation C301 ) . ( ( ( ObjectDerivation C301 ) . ( (the Extent of C302) /\ (the Extent of C303) ) ) /\ ( ( ObjectDerivation C301 ) . (the Extent of C303) ) ) ) by L481;
+L896: ( ( AttributeDerivation C301 ) . ( ( ObjectDerivation C301 ) . ( ( (the Extent of C302) /\ (the Extent of C303) ) \/ (the Extent of C303) ) ) ) = ( ( AttributeDerivation C301 ) . ( ( ObjectDerivation C301 ) . (the Extent of C303) ) ) by L895 , L892 , L166 , XBOOLE_1:28
+.= ( ( AttributeDerivation C301 ) . (the Intent of C303) ) by L607
+.= (the Extent of C303) by L607;
+L897: ( ( ( ObjectDerivation C301 ) . ( ( AttributeDerivation C301 ) . ( (the Intent of C302) \/ (the Intent of C303) ) ) ) /\ (the Intent of C303) ) = ( ( ( ObjectDerivation C301 ) . ( ( ( AttributeDerivation C301 ) . (the Intent of C302) ) /\ ( ( AttributeDerivation C301 ) . (the Intent of C303) ) ) ) /\ (the Intent of C303) ) by L519
+.= ( ( ( ObjectDerivation C301 ) . ( (the Extent of C302) /\ ( ( AttributeDerivation C301 ) . (the Intent of C303) ) ) ) /\ (the Intent of C303) ) by L607
+.= ( ( ( ObjectDerivation C301 ) . ( (the Extent of C302) /\ (the Extent of C303) ) ) /\ (the Intent of C303) ) by L607
+.= ( ( ( ObjectDerivation C301 ) . ( (the Extent of C302) /\ (the Extent of C303) ) ) /\ ( ( ObjectDerivation C301 ) . (the Extent of C303) ) ) by L607
+.= ( ( ObjectDerivation C301 ) . (the Extent of C303) ) by L892 , L166 , XBOOLE_1:28
+.= (the Intent of C303) by L607;
+thus L898: thesis by L897 , L894 , L896;
+end;
+theorem
+L899: (for B619 being FormalContext holds (for B620 , B621 being  strict (FormalConcept of B619) holds ( ( B-meet B619 ) . (B620 , ( ( B-join B619 ) . (B620 , B621) )) ) = B620))
+proof
+let C304 being FormalContext;
+let C305 , C306 being  strict (FormalConcept of C304);
+L900: ( (the Intent of C305) /\ (the Intent of C306) ) c= (the Intent of C305) by XBOOLE_1:17;
+L901: ( ( B-join C304 ) . (C305 , C306) ) in ( rng ( B-join C304 ) ) by L866;
+reconsider D149 = ( ( B-join C304 ) . (C305 , C306) ) as  strict (FormalConcept of C304) by L901 , L804;
+L902: ((ex B622 being (Subset of (the carrier of C304)) st (ex B623 being (Subset of (the carrier' of C304)) st (( ( B-join C304 ) . (C305 , C306) ) = ConceptStr (# B622 , B623 #) & B622 = ( ( AttributeDerivation C304 ) . ( ( ObjectDerivation C304 ) . ( (the Extent of C305) \/ (the Extent of C306) ) ) ) & B623 = ( (the Intent of C305) /\ (the Intent of C306) )))) & (ex B624 being (Subset of (the carrier of C304)) st (ex B625 being (Subset of (the carrier' of C304)) st (( ( B-meet C304 ) . (C305 , D149) ) = ConceptStr (# B624 , B625 #) & B624 = ( (the Extent of C305) /\ (the Extent of D149) ) & B625 = ( ( ObjectDerivation C304 ) . ( ( AttributeDerivation C304 ) . ( (the Intent of C305) \/ (the Intent of D149) ) ) ))))) by L814 , L838;
+L903: ( ( ObjectDerivation C304 ) . ( ( AttributeDerivation C304 ) . ( (the Intent of C305) \/ ( (the Intent of C305) /\ (the Intent of C306) ) ) ) ) = ( ( ObjectDerivation C304 ) . ( ( ( AttributeDerivation C304 ) . (the Intent of C305) ) /\ ( ( AttributeDerivation C304 ) . ( (the Intent of C305) /\ (the Intent of C306) ) ) ) ) by L519;
+L904: ( ( ObjectDerivation C304 ) . ( ( AttributeDerivation C304 ) . ( (the Intent of C305) \/ ( (the Intent of C305) /\ (the Intent of C306) ) ) ) ) = ( ( ObjectDerivation C304 ) . ( ( AttributeDerivation C304 ) . (the Intent of C305) ) ) by L903 , L900 , L175 , XBOOLE_1:28
+.= ( ( ObjectDerivation C304 ) . (the Extent of C305) ) by L607
+.= (the Intent of C305) by L607;
+L905: ( (the Extent of C305) /\ ( ( AttributeDerivation C304 ) . ( ( ObjectDerivation C304 ) . ( (the Extent of C305) \/ (the Extent of C306) ) ) ) ) = ( (the Extent of C305) /\ ( ( AttributeDerivation C304 ) . ( ( ( ObjectDerivation C304 ) . (the Extent of C305) ) /\ ( ( ObjectDerivation C304 ) . (the Extent of C306) ) ) ) ) by L481
+.= ( (the Extent of C305) /\ ( ( AttributeDerivation C304 ) . ( (the Intent of C305) /\ ( ( ObjectDerivation C304 ) . (the Extent of C306) ) ) ) ) by L607
+.= ( (the Extent of C305) /\ ( ( AttributeDerivation C304 ) . ( (the Intent of C305) /\ (the Intent of C306) ) ) ) by L607
+.= ( ( ( AttributeDerivation C304 ) . (the Intent of C305) ) /\ ( ( AttributeDerivation C304 ) . ( (the Intent of C305) /\ (the Intent of C306) ) ) ) by L607
+.= ( ( AttributeDerivation C304 ) . (the Intent of C305) ) by L900 , L175 , XBOOLE_1:28
+.= (the Extent of C305) by L607;
+thus L906: thesis by L905 , L902 , L904;
+end;
+theorem
+L907: (for B626 being FormalContext holds (for B627 being  strict (FormalConcept of B626) holds ( ( B-meet B626 ) . (B627 , ( Concept-with-all-Objects B626 )) ) = B627))
+proof
+let C307 being FormalContext;
+let C308 being  strict (FormalConcept of C307);
+consider C309 being (Subset of (the carrier of C307)), C310 being (Subset of (the carrier' of C307)) such that L908: ( ( B-meet C307 ) . (C308 , ( Concept-with-all-Objects C307 )) ) = ConceptStr (# C309 , C310 #) and L909: C309 = ( (the Extent of C308) /\ (the Extent of ( Concept-with-all-Objects C307 )) ) and L910: C310 = ( ( ObjectDerivation C307 ) . ( ( AttributeDerivation C307 ) . ( (the Intent of C308) \/ (the Intent of ( Concept-with-all-Objects C307 )) ) ) ) by L814;
+L911: C309 = ( (the Extent of C308) /\ (the carrier of C307) ) by L909 , L705
+.= (the Extent of C308) by XBOOLE_1:28;
+L912: (the carrier of C307) c= (the carrier of C307);
+reconsider D150 = (the carrier of C307) as (Subset of (the carrier of C307)) by L912;
+L913: ( ( ( ObjectDerivation C307 ) . (the Extent of C308) ) \/ ( ( ObjectDerivation C307 ) . D150 ) ) = ( ( ObjectDerivation C307 ) . (the Extent of C308) ) by L166 , XBOOLE_1:12;
+L914: C310 = ( ( ObjectDerivation C307 ) . ( ( AttributeDerivation C307 ) . ( (the Intent of C308) \/ ( ( ObjectDerivation C307 ) . (the Extent of ( Concept-with-all-Objects C307 )) ) ) ) ) by L910 , L607
+.= ( ( ObjectDerivation C307 ) . ( ( AttributeDerivation C307 ) . ( (the Intent of C308) \/ ( ( ObjectDerivation C307 ) . (the carrier of C307) ) ) ) ) by L705
+.= ( ( ObjectDerivation C307 ) . ( ( AttributeDerivation C307 ) . ( ( ObjectDerivation C307 ) . (the Extent of C308) ) ) ) by L913 , L607
+.= ( ( ObjectDerivation C307 ) . (the Extent of C308) ) by L210
+.= (the Intent of C308) by L607;
+thus L915: thesis by L914 , L908 , L911;
+end;
+theorem
+L916: (for B628 being FormalContext holds (for B629 being  strict (FormalConcept of B628) holds ( ( B-join B628 ) . (B629 , ( Concept-with-all-Objects B628 )) ) = ( Concept-with-all-Objects B628 )))
+proof
+let C311 being FormalContext;
+let C312 being  strict (FormalConcept of C311);
+consider C313 being (Subset of (the carrier of C311)), C314 being (Subset of (the carrier' of C311)) such that L917: ( ( B-join C311 ) . (C312 , ( Concept-with-all-Objects C311 )) ) = ConceptStr (# C313 , C314 #) and L918: C313 = ( ( AttributeDerivation C311 ) . ( ( ObjectDerivation C311 ) . ( (the Extent of C312) \/ (the Extent of ( Concept-with-all-Objects C311 )) ) ) ) and L919: C314 = ( (the Intent of C312) /\ (the Intent of ( Concept-with-all-Objects C311 )) ) by L838;
+L920: C313 = ( ( AttributeDerivation C311 ) . ( ( ObjectDerivation C311 ) . ( (the Extent of C312) \/ (the carrier of C311) ) ) ) by L918 , L705
+.= ( ( AttributeDerivation C311 ) . ( ( ObjectDerivation C311 ) . (the carrier of C311) ) ) by XBOOLE_1:12
+.= ( ( AttributeDerivation C311 ) . ( ( ObjectDerivation C311 ) . (the Extent of ( Concept-with-all-Objects C311 )) ) ) by L705
+.= ( ( AttributeDerivation C311 ) . (the Intent of ( Concept-with-all-Objects C311 )) ) by L607
+.= (the Extent of ( Concept-with-all-Objects C311 )) by L607;
+L921: C314 = ( ( ( ObjectDerivation C311 ) . (the Extent of C312) ) /\ (the Intent of ( Concept-with-all-Objects C311 )) ) by L919 , L607
+.= ( ( ( ObjectDerivation C311 ) . (the Extent of C312) ) /\ ( ( ObjectDerivation C311 ) . (the Extent of ( Concept-with-all-Objects C311 )) ) ) by L607
+.= ( ( ObjectDerivation C311 ) . ( (the Extent of C312) \/ (the Extent of ( Concept-with-all-Objects C311 )) ) ) by L481
+.= ( ( ObjectDerivation C311 ) . ( (the Extent of C312) \/ (the carrier of C311) ) ) by L705
+.= ( ( ObjectDerivation C311 ) . (the carrier of C311) ) by XBOOLE_1:12
+.= ( ( ObjectDerivation C311 ) . (the Extent of ( Concept-with-all-Objects C311 )) ) by L705
+.= (the Intent of ( Concept-with-all-Objects C311 )) by L607;
+thus L922: thesis by L921 , L917 , L920;
+end;
+theorem
+L923: (for B630 being FormalContext holds (for B631 being  strict (FormalConcept of B630) holds ( ( B-join B630 ) . (B631 , ( Concept-with-all-Attributes B630 )) ) = B631))
+proof
+let C315 being FormalContext;
+let C316 being  strict (FormalConcept of C315);
+consider C317 being (Subset of (the carrier of C315)), C318 being (Subset of (the carrier' of C315)) such that L924: ( ( B-join C315 ) . (C316 , ( Concept-with-all-Attributes C315 )) ) = ConceptStr (# C317 , C318 #) and L925: C317 = ( ( AttributeDerivation C315 ) . ( ( ObjectDerivation C315 ) . ( (the Extent of C316) \/ (the Extent of ( Concept-with-all-Attributes C315 )) ) ) ) and L926: C318 = ( (the Intent of C316) /\ (the Intent of ( Concept-with-all-Attributes C315 )) ) by L838;
+L927: C318 = ( (the Intent of C316) /\ (the carrier' of C315) ) by L926 , L705
+.= (the Intent of C316) by XBOOLE_1:28;
+L928: (the carrier' of C315) c= (the carrier' of C315);
+reconsider D151 = (the carrier' of C315) as (Subset of (the carrier' of C315)) by L928;
+L929: ( ( ( AttributeDerivation C315 ) . (the Intent of C316) ) \/ ( ( AttributeDerivation C315 ) . D151 ) ) = ( ( AttributeDerivation C315 ) . (the Intent of C316) ) by L175 , XBOOLE_1:12;
+L930: C317 = ( ( AttributeDerivation C315 ) . ( ( ObjectDerivation C315 ) . ( (the Extent of C316) \/ ( ( AttributeDerivation C315 ) . (the Intent of ( Concept-with-all-Attributes C315 )) ) ) ) ) by L925 , L607
+.= ( ( AttributeDerivation C315 ) . ( ( ObjectDerivation C315 ) . ( (the Extent of C316) \/ ( ( AttributeDerivation C315 ) . (the carrier' of C315) ) ) ) ) by L705
+.= ( ( AttributeDerivation C315 ) . ( ( ObjectDerivation C315 ) . ( ( AttributeDerivation C315 ) . (the Intent of C316) ) ) ) by L929 , L607
+.= ( ( AttributeDerivation C315 ) . (the Intent of C316) ) by L246
+.= (the Extent of C316) by L607;
+thus L931: thesis by L930 , L924 , L927;
+end;
+theorem
+L932: (for B632 being FormalContext holds (for B633 being  strict (FormalConcept of B632) holds ( ( B-meet B632 ) . (B633 , ( Concept-with-all-Attributes B632 )) ) = ( Concept-with-all-Attributes B632 )))
+proof
+let C319 being FormalContext;
+let C320 being  strict (FormalConcept of C319);
+consider C321 being (Subset of (the carrier of C319)), C322 being (Subset of (the carrier' of C319)) such that L933: ( ( B-meet C319 ) . (C320 , ( Concept-with-all-Attributes C319 )) ) = ConceptStr (# C321 , C322 #) and L934: C321 = ( (the Extent of C320) /\ (the Extent of ( Concept-with-all-Attributes C319 )) ) and L935: C322 = ( ( ObjectDerivation C319 ) . ( ( AttributeDerivation C319 ) . ( (the Intent of C320) \/ (the Intent of ( Concept-with-all-Attributes C319 )) ) ) ) by L814;
+L936: C322 = ( ( ObjectDerivation C319 ) . ( ( AttributeDerivation C319 ) . ( (the Intent of C320) \/ (the carrier' of C319) ) ) ) by L935 , L705
+.= ( ( ObjectDerivation C319 ) . ( ( AttributeDerivation C319 ) . (the carrier' of C319) ) ) by XBOOLE_1:12
+.= ( ( ObjectDerivation C319 ) . ( ( AttributeDerivation C319 ) . (the Intent of ( Concept-with-all-Attributes C319 )) ) ) by L705
+.= ( ( ObjectDerivation C319 ) . (the Extent of ( Concept-with-all-Attributes C319 )) ) by L607
+.= (the Intent of ( Concept-with-all-Attributes C319 )) by L607;
+L937: C321 = ( ( ( AttributeDerivation C319 ) . (the Intent of C320) ) /\ (the Extent of ( Concept-with-all-Attributes C319 )) ) by L934 , L607
+.= ( ( ( AttributeDerivation C319 ) . (the Intent of C320) ) /\ ( ( AttributeDerivation C319 ) . (the Intent of ( Concept-with-all-Attributes C319 )) ) ) by L607
+.= ( ( AttributeDerivation C319 ) . ( (the Intent of C320) \/ (the Intent of ( Concept-with-all-Attributes C319 )) ) ) by L519
+.= ( ( AttributeDerivation C319 ) . ( (the Intent of C320) \/ (the carrier' of C319) ) ) by L705
+.= ( ( AttributeDerivation C319 ) . (the carrier' of C319) ) by XBOOLE_1:12
+.= ( ( AttributeDerivation C319 ) . (the Intent of ( Concept-with-all-Attributes C319 )) ) by L705
+.= (the Extent of ( Concept-with-all-Attributes C319 )) by L607;
+thus L938: thesis by L937 , L933 , L936;
+end;
+definition
+let C323 being FormalContext;
+func ConceptLattice C323 ->  strict non  empty LattStr equals 
+LattStr (# ( B-carrier C323 ) , ( B-join C323 ) , ( B-meet C323 ) #);
+coherence;
+end;
+theorem
+L940: (for B634 being FormalContext holds ( ConceptLattice B634 ) is Lattice)
+proof
+let C324 being FormalContext;
+set D152 = LattStr (# ( B-carrier C324 ) , ( B-join C324 ) , ( B-meet C324 ) #);
+reconsider D153 = D152 as  strict non  empty LattStr;
+L941: (for B635 , B636 , B637 being (Element of D153) holds ( B635 "\/" ( B636 "\/" B637 ) ) = ( ( B635 "\/" B636 ) "\/" B637 ))
+proof
+let C325 , C326 , C327 being (Element of D153);
+reconsider D154 = C326 , D155 = C327 as (Element of ( B-carrier C324 ));
+reconsider D156 = ( ( B-join C324 ) . (D154 , D155) ) as (Element of D153);
+reconsider D157 = D154 , D158 = D155 as (Element of D153);
+reconsider D159 = C325 , D160 = D157 as (Element of ( B-carrier C324 ));
+reconsider D161 = ( ( B-join C324 ) . (D159 , D160) ) as (Element of D153);
+reconsider D162 = D159 , D163 = D160 as (Element of D153);
+L942: ( D162 "\/" ( D163 "\/" D158 ) ) = ( D162 "\/" D156 ) by LATTICES:def 1
+.= ( ( B-join C324 ) . (D162 , ( ( B-join C324 ) . (D163 , D158) )) ) by LATTICES:def 1;
+L943: ( ( D162 "\/" D163 ) "\/" D158 ) = ( D161 "\/" D158 ) by LATTICES:def 1
+.= ( ( B-join C324 ) . (( ( B-join C324 ) . (D162 , D163) ) , D158) ) by LATTICES:def 1;
+reconsider D164 = D162 , D165 = D163 , D166 = D158 as  strict (FormalConcept of C324) by L804;
+L944: ( ( B-join C324 ) . (D164 , ( ( B-join C324 ) . (D165 , D166) )) ) = ( ( B-join C324 ) . (( ( B-join C324 ) . (D164 , D165) ) , D166) ) by L884;
+thus L945: thesis by L944 , L942 , L943;
+end;
+L946: (for B638 , B639 being (Element of D153) holds ( ( B638 "/\" B639 ) "\/" B639 ) = B639)
+proof
+let C328 , C329 being (Element of D153);
+reconsider D167 = C328 , D168 = C329 as (Element of ( B-carrier C324 ));
+reconsider D169 = ( ( B-meet C324 ) . (D167 , D168) ) as (Element of D153);
+reconsider D170 = D167 , D171 = D168 as (Element of D153);
+L947: ( ( D170 "/\" D171 ) "\/" D171 ) = ( D169 "\/" D171 ) by LATTICES:def 2
+.= ( ( B-join C324 ) . (( ( B-meet C324 ) . (D170 , D171) ) , D171) ) by LATTICES:def 1;
+reconsider D172 = D170 , D173 = D171 as  strict (FormalConcept of C324) by L804;
+L948: ( ( B-join C324 ) . (( ( B-meet C324 ) . (D172 , D173) ) , D173) ) = D173 by L891;
+thus L949: thesis by L948 , L947;
+end;
+L950: (for B640 , B641 , B642 being (Element of D153) holds ( B640 "/\" ( B641 "/\" B642 ) ) = ( ( B640 "/\" B641 ) "/\" B642 ))
+proof
+let C330 , C331 , C332 being (Element of D153);
+reconsider D174 = C331 , D175 = C332 as (Element of ( B-carrier C324 ));
+reconsider D176 = ( ( B-meet C324 ) . (D174 , D175) ) as (Element of D153);
+reconsider D177 = D174 , D178 = D175 as (Element of D153);
+L951: ( C330 "/\" ( D177 "/\" D178 ) ) = ( C330 "/\" D176 ) by LATTICES:def 2
+.= ( ( B-meet C324 ) . (C330 , ( ( B-meet C324 ) . (D177 , D178) )) ) by LATTICES:def 2;
+reconsider D179 = C330 , D180 = D177 as (Element of ( B-carrier C324 ));
+reconsider D181 = ( ( B-meet C324 ) . (D179 , D180) ) as (Element of D153);
+reconsider D182 = D179 , D183 = D180 as (Element of D153);
+L952: ( ( D182 "/\" D183 ) "/\" D178 ) = ( D181 "/\" D178 ) by LATTICES:def 2
+.= ( ( B-meet C324 ) . (( ( B-meet C324 ) . (D182 , D183) ) , D178) ) by LATTICES:def 2;
+reconsider D184 = D182 , D185 = D183 , D186 = D178 as  strict (FormalConcept of C324) by L804;
+L953: ( ( B-meet C324 ) . (D184 , ( ( B-meet C324 ) . (D185 , D186) )) ) = ( ( B-meet C324 ) . (( ( B-meet C324 ) . (D184 , D185) ) , D186) ) by L877;
+thus L954: thesis by L953 , L951 , L952;
+end;
+L955: (for B643 , B644 being (Element of D153) holds ( B643 "/\" B644 ) = ( B644 "/\" B643 ))
+proof
+let C333 , C334 being (Element of D153);
+L956: ( C334 "/\" C333 ) = ( ( B-meet C324 ) . (C334 , C333) ) by LATTICES:def 2;
+reconsider D187 = C333 , D188 = C334 as  strict (FormalConcept of C324) by L804;
+L957: ( ( B-meet C324 ) . (D187 , D188) ) = ( ( B-meet C324 ) . (D188 , D187) ) by L871;
+thus L958: thesis by L957 , L956 , LATTICES:def 2;
+end;
+L959: (for B645 , B646 being (Element of D153) holds ( B645 "/\" ( B645 "\/" B646 ) ) = B645)
+proof
+let C335 , C336 being (Element of D153);
+reconsider D189 = C335 , D190 = C336 as (Element of ( B-carrier C324 ));
+reconsider D191 = ( ( B-join C324 ) . (D189 , D190) ) as (Element of D153);
+reconsider D192 = D189 , D193 = D190 as (Element of D153);
+L960: ( D192 "/\" ( D192 "\/" D193 ) ) = ( D192 "/\" D191 ) by LATTICES:def 1
+.= ( ( B-meet C324 ) . (D192 , ( ( B-join C324 ) . (D192 , D193) )) ) by LATTICES:def 2;
+reconsider D194 = D192 , D195 = D193 as  strict (FormalConcept of C324) by L804;
+L961: ( ( B-meet C324 ) . (D194 , ( ( B-join C324 ) . (D194 , D195) )) ) = D194 by L899;
+thus L962: thesis by L961 , L960;
+end;
+L963: (for B647 , B648 being (Element of D153) holds ( B647 "\/" B648 ) = ( B648 "\/" B647 ))
+proof
+let C337 , C338 being (Element of D153);
+L964: ( C338 "\/" C337 ) = ( ( B-join C324 ) . (C338 , C337) ) by LATTICES:def 1;
+reconsider D196 = C337 , D197 = C338 as  strict (FormalConcept of C324) by L804;
+L965: ( ( B-join C324 ) . (D196 , D197) ) = ( ( B-join C324 ) . (D197 , D196) ) by L874;
+thus L966: thesis by L965 , L964 , LATTICES:def 1;
+end;
+L967: D153 is  join-commutative  join-associative  meet-absorbing  meet-commutative  meet-associative  join-absorbing by L963 , L941 , L946 , L955 , L950 , L959 , LATTICES:def 4 , LATTICES:def 5 , LATTICES:def 6 , LATTICES:def 7 , LATTICES:def 8 , LATTICES:def 9;
+thus L968: thesis by L967;
+end;
+registration
+let C339 being FormalContext;
+cluster ( ConceptLattice C339 ) ->  strict non  empty  Lattice-like;
+coherence by L940;
+end;
+definition
+let C340 being FormalContext;
+let C341 being non  empty (Subset of ( ConceptLattice C340 ));
+redefine mode Element of C341
+ -> (FormalConcept of C340);
+coherence
+proof
+let C342 being (Element of C341);
+L970: C342 is (Element of ( B-carrier C340 ));
+thus L971: thesis by L970;
+end;
+end;
+definition
+let C343 being FormalContext;
+let C344 being (Element of ( ConceptLattice C343 ));
+func C344 @ ->  strict (FormalConcept of C343) equals 
+C344;
+coherence by L804;
+end;
+theorem
+L974: (for B649 being FormalContext holds (for B650 , B651 being (Element of ( ConceptLattice B649 )) holds (B650 [= B651 iff ( B650 @ ) is-SubConcept-of ( B651 @ ))))
+proof
+let C345 being FormalContext;
+let C346 , C347 being (Element of ( ConceptLattice C345 ));
+set D198 = ( ConceptLattice C345 );
+L975:
+now
+assume L976: ( C346 @ ) is-SubConcept-of ( C347 @ );
+L977: (the Intent of ( C347 @ )) c= (the Intent of ( C346 @ )) by L976 , L764;
+L978: ( (the Intent of ( C346 @ )) /\ (the Intent of ( C347 @ )) ) = (the Intent of ( C347 @ )) by L977 , XBOOLE_1:28;
+consider C348 being (Subset of (the carrier of C345)), C349 being (Subset of (the carrier' of C345)) such that L979: ( ( B-join C345 ) . (( C346 @ ) , ( C347 @ )) ) = ConceptStr (# C348 , C349 #) and L980: C348 = ( ( AttributeDerivation C345 ) . ( ( ObjectDerivation C345 ) . ( (the Extent of ( C346 @ )) \/ (the Extent of ( C347 @ )) ) ) ) and L981: C349 = ( (the Intent of ( C346 @ )) /\ (the Intent of ( C347 @ )) ) by L838;
+L982: (the Extent of ( C346 @ )) c= (the Extent of ( C347 @ )) by L976 , L761;
+L983: ( (the Extent of ( C346 @ )) \/ (the Extent of ( C347 @ )) ) = (the Extent of ( C347 @ )) by L982 , XBOOLE_1:12;
+L984: C348 = ( ( AttributeDerivation C345 ) . (the Intent of ( C347 @ )) ) by L983 , L980 , L607
+.= (the Extent of ( C347 @ )) by L607;
+L985: ( C346 "\/" C347 ) = C347 by L984 , L978 , L979 , L981 , LATTICES:def 1;
+thus L986: C346 [= C347 by L985 , LATTICES:def 3;
+end;
+L987:
+now
+assume L988: C346 [= C347;
+L989: ( C346 "\/" C347 ) = C347 by L988 , LATTICES:def 3;
+L990: ( (the L_join of D198) . (C346 , C347) ) = C347 by L989 , LATTICES:def 1;
+L991: (ex B652 being (Subset of (the carrier of C345)) st (ex B653 being (Subset of (the carrier' of C345)) st (( ( B-join C345 ) . (( C346 @ ) , ( C347 @ )) ) = ConceptStr (# B652 , B653 #) & B652 = ( ( AttributeDerivation C345 ) . ( ( ObjectDerivation C345 ) . ( (the Extent of ( C346 @ )) \/ (the Extent of ( C347 @ )) ) ) ) & B653 = ( (the Intent of ( C346 @ )) /\ (the Intent of ( C347 @ )) )))) by L838;
+L992: (for B654 being set holds (B654 in (the Intent of ( C347 @ )) implies B654 in (the Intent of ( C346 @ )))) by L991 , L990 , XBOOLE_0:def 4;
+L993: (the Intent of ( C347 @ )) c= (the Intent of ( C346 @ )) by L992 , TARSKI:def 3;
+thus L994: ( C346 @ ) is-SubConcept-of ( C347 @ ) by L993 , L764;
+end;
+thus L995: thesis by L987 , L975;
+end;
+theorem
+L996: (for B655 being FormalContext holds ( ConceptLattice B655 ) is  complete  complete  complete  complete Lattice)
+proof
+let C350 being FormalContext;
+L997: (for B656 being (Subset of ( ConceptLattice C350 )) holds (ex B657 being (Element of ( ConceptLattice C350 )) st (B657 is_less_than B656 & (for B658 being (Element of ( ConceptLattice C350 )) holds (B658 is_less_than B656 implies B658 [= B657)))))
+proof
+let C351 being (Subset of ( ConceptLattice C350 ));
+per cases ;
+suppose L998: C351 = ( {} );
+
+L999: (for B659 being (Element of ( ConceptLattice C350 )) holds (B659 is_less_than C351 implies B659 [= ( Top ( ConceptLattice C350 ) )))
+proof
+let C352 being (Element of ( ConceptLattice C350 ));
+assume L1000: C352 is_less_than C351;
+L1001: (ex B660 being (Element of ( ConceptLattice C350 )) st (for B661 being (Element of ( ConceptLattice C350 )) holds (( B660 "\/" B661 ) = B660 & ( B661 "\/" B660 ) = B660)))
+proof
+reconsider D199 = ( Concept-with-all-Objects C350 ) as (Element of ( ConceptLattice C350 )) by L804;
+L1002: (for B662 being (Element of ( ConceptLattice C350 )) holds (( D199 "\/" B662 ) = D199 & ( B662 "\/" D199 ) = D199))
+proof
+let C353 being (Element of ( ConceptLattice C350 ));
+reconsider D200 = C353 as  strict (FormalConcept of C350) by L804;
+reconsider D201 = D199 as  strict (FormalConcept of C350);
+L1003: ( ( B-join C350 ) . (D201 , D200) ) = ( ( B-join C350 ) . (D200 , D201) ) by L874
+.= D201 by L916;
+thus L1004: thesis by L1003 , LATTICES:def 1;
+end;
+thus L1005: thesis by L1002;
+end;
+L1006: ( ConceptLattice C350 ) is  upper-bounded by L1001 , LATTICES:def 14;
+L1007: ( ( Top ( ConceptLattice C350 ) ) "\/" C352 ) = ( Top ( ConceptLattice C350 ) ) by L1006;
+thus L1008: thesis by L1007 , LATTICES:def 3;
+end;
+L1009: (for B663 being (Element of ( ConceptLattice C350 )) holds (B663 in C351 implies ( Top ( ConceptLattice C350 ) ) [= B663)) by L998;
+L1010: ( Top ( ConceptLattice C350 ) ) is_less_than C351 by L1009 , LATTICE3:def 16;
+thus L1011: thesis by L1010 , L999;
+end;
+suppose L1012: C351 <> ( {} );
+
+reconsider D202 = C351 as non  empty (Subset of ( ConceptLattice C350 )) by L1012;
+set D203 = { (the Extent of B664) where B664 is (Element of ( B-carrier C350 )) : B664 in D202 };
+L1013: (for B665 being (Element of D202) holds (the Extent of B665) in D203)
+proof
+let C354 being (Element of D202);
+L1014: C354 in D202;
+reconsider D204 = C354 as (Element of ( B-carrier C350 )) by L1014;
+L1015: (the Extent of D204) in D203;
+thus L1016: thesis by L1015;
+end;
+reconsider D205 = D203 as non  empty set by L1013;
+set D206 = ( meet D205 );
+L1017: (for B666 being (Object of C350) holds (B666 in D206 iff (for B667 being (Element of D202) holds B666 in (the Extent of B667))))
+proof
+let C355 being (Object of C350);
+L1018: ((for B668 being (Element of D202) holds C355 in (the Extent of B668)) implies C355 in D206)
+proof
+assume L1019: (for B669 being (Element of D202) holds C355 in (the Extent of B669));
+L1020: (for B670 being set holds (B670 in D205 implies C355 in B670))
+proof
+let C356 being set;
+assume L1021: C356 in D205;
+L1022: (ex B671 being (Element of ( B-carrier C350 )) st (C356 = (the Extent of B671) & B671 in D202)) by L1021;
+thus L1023: thesis by L1022 , L1019;
+end;
+thus L1024: thesis by L1020 , SETFAM_1:def 1;
+end;
+L1025: (C355 in D206 implies (for B672 being (Element of D202) holds C355 in (the Extent of B672)))
+proof
+assume L1026: C355 in D206;
+let C357 being (Element of D202);
+L1027: (the Extent of C357) in D205 by L1013;
+thus L1028: thesis by L1027 , L1026 , SETFAM_1:def 1;
+end;
+thus L1029: thesis by L1025 , L1018;
+end;
+L1030: D206 c= (the carrier of C350)
+proof
+set D207 = the (Element of D205);
+let C358 being set;
+L1031: D207 in D205;
+consider C359 being (Element of ( B-carrier C350 )) such that L1032: D207 = (the Extent of C359) and L1033: C359 in D202 by L1031;
+assume L1034: C358 in D206;
+L1035: C358 in (the Extent of C359) by L1034 , L1032 , SETFAM_1:def 1;
+thus L1036: thesis by L1035;
+end;
+consider C360 being (Subset of (the carrier of C350)) such that L1037: (for B673 being (Object of C350) holds (B673 in C360 iff (for B674 being (Element of D202) holds B673 in (the Extent of B674)))) by L1030 , L1017;
+set D208 = { (the Intent of B675) where B675 is (Element of ( B-carrier C350 )) : B675 in D202 };
+set D209 = ( union D208 );
+L1038: (for B676 being (Attribute of C350) holds (B676 in D209 iff (ex B677 being (Element of D202) st B676 in (the Intent of B677))))
+proof
+let C361 being (Attribute of C350);
+L1039: ((ex B678 being (Element of D202) st C361 in (the Intent of B678)) implies C361 in D209)
+proof
+assume L1040: (ex B679 being (Element of D202) st C361 in (the Intent of B679));
+L1041: (ex B680 being set st (C361 in B680 & B680 in D208))
+proof
+consider C362 being (Element of D202) such that L1042: C361 in (the Intent of C362) by L1040;
+L1043: C362 in D202;
+L1044: (the Intent of C362) in D208 by L1043;
+thus L1045: thesis by L1044 , L1042;
+end;
+thus L1046: thesis by L1041 , TARSKI:def 4;
+end;
+L1047: (C361 in D209 implies (ex B681 being (Element of D202) st C361 in (the Intent of B681)))
+proof
+assume L1048: C361 in D209;
+consider C363 being set such that L1049: C361 in C363 and L1050: C363 in D208 by L1048 , TARSKI:def 4;
+L1051: (ex B682 being (Element of ( B-carrier C350 )) st (C363 = (the Intent of B682) & B682 in D202)) by L1050;
+thus L1052: thesis by L1051 , L1049;
+end;
+thus L1053: thesis by L1047 , L1039;
+end;
+L1054: D209 c= (the carrier' of C350)
+proof
+let C364 being set;
+assume L1055: C364 in D209;
+consider C365 being set such that L1056: C364 in C365 and L1057: C365 in D208 by L1055 , TARSKI:def 4;
+L1058: (ex B683 being (Element of ( B-carrier C350 )) st (C365 = (the Intent of B683) & B683 in D202)) by L1057;
+thus L1059: thesis by L1058 , L1056;
+end;
+consider C366 being (Subset of (the carrier' of C350)) such that L1060: (for B684 being (Attribute of C350) holds (B684 in C366 iff (ex B685 being (Element of D202) st B684 in (the Intent of B685)))) by L1054 , L1038;
+L1061: (for B686 being (Object of C350) holds (B686 in C360 iff (for B687 being (Element of D202) holds B686 in ( ( AttributeDerivation C350 ) . (the Intent of B687) ))))
+proof
+let C367 being (Object of C350);
+L1062: ((for B688 being (Element of D202) holds C367 in ( ( AttributeDerivation C350 ) . (the Intent of B688) )) implies C367 in C360)
+proof
+assume L1063: (for B689 being (Element of D202) holds C367 in ( ( AttributeDerivation C350 ) . (the Intent of B689) ));
+L1064: (for B690 being (Element of D202) holds C367 in (the Extent of B690))
+proof
+let C368 being (Element of D202);
+L1065: C367 in ( ( AttributeDerivation C350 ) . (the Intent of C368) ) by L1063;
+thus L1066: thesis by L1065 , L607;
+end;
+thus L1067: thesis by L1064 , L1037;
+end;
+L1068: (C367 in C360 implies (for B691 being (Element of D202) holds C367 in ( ( AttributeDerivation C350 ) . (the Intent of B691) )))
+proof
+assume L1069: C367 in C360;
+L1070: (for B692 being (Element of D202) holds C367 in ( ( AttributeDerivation C350 ) . (the Intent of B692) ))
+proof
+let C369 being (Element of D202);
+L1071: C367 in (the Extent of C369) by L1037 , L1069;
+thus L1072: thesis by L1071 , L607;
+end;
+thus L1073: thesis by L1070;
+end;
+thus L1074: thesis by L1068 , L1062;
+end;
+L1075: (for B693 being set holds (B693 in ( ( AttributeDerivation C350 ) . C366 ) implies B693 in C360))
+proof
+let C370 being set;
+assume L1076: C370 in ( ( AttributeDerivation C350 ) . C366 );
+L1077: C370 in { B694 where B694 is (Object of C350) : (for B695 being (Attribute of C350) holds (B695 in C366 implies B694 is-connected-with B695)) } by L1076 , L79;
+consider C371 being (Object of C350) such that L1078: C371 = C370 and L1079: (for B696 being (Attribute of C350) holds (B696 in C366 implies C371 is-connected-with B696)) by L1077;
+L1080: (for B697 being (Element of D202) holds C371 in ( ( AttributeDerivation C350 ) . (the Intent of B697) ))
+proof
+let C372 being (Element of D202);
+L1081: (for B698 being (Attribute of C350) holds (B698 in (the Intent of C372) implies C371 is-connected-with B698))
+proof
+let C373 being (Attribute of C350);
+assume L1082: C373 in (the Intent of C372);
+L1083: C373 in C366 by L1082 , L1060;
+thus L1084: thesis by L1083 , L1079;
+end;
+L1085: C371 in { B699 where B699 is (Object of C350) : (for B700 being (Attribute of C350) holds (B700 in (the Intent of C372) implies B699 is-connected-with B700)) } by L1081;
+thus L1086: thesis by L1085 , L79;
+end;
+thus L1087: thesis by L1080 , L1061 , L1078;
+end;
+consider C374 being (Subset of (the carrier' of C350)) such that L1088: C374 = ( ( ObjectDerivation C350 ) . ( ( AttributeDerivation C350 ) . C366 ) );
+set D210 = ConceptStr (# C360 , C374 #);
+L1089: (for B701 being set holds (B701 in C360 implies B701 in ( ( AttributeDerivation C350 ) . C366 )))
+proof
+let C375 being set;
+assume L1090: C375 in C360;
+reconsider D211 = C375 as (Object of C350) by L1090;
+L1091: (for B702 being (Attribute of C350) holds (B702 in C366 implies D211 is-connected-with B702))
+proof
+let C376 being (Attribute of C350);
+assume L1092: C376 in C366;
+consider C377 being (Element of D202) such that L1093: C376 in (the Intent of C377) by L1092 , L1060;
+L1094: D211 in ( ( AttributeDerivation C350 ) . (the Intent of C377) ) by L1061 , L1090;
+L1095: D211 in { B703 where B703 is (Object of C350) : (for B704 being (Attribute of C350) holds (B704 in (the Intent of C377) implies B703 is-connected-with B704)) } by L1094 , L79;
+L1096: (ex B705 being (Object of C350) st (B705 = D211 & (for B706 being (Attribute of C350) holds (B706 in (the Intent of C377) implies B705 is-connected-with B706)))) by L1095;
+thus L1097: thesis by L1096 , L1093;
+end;
+L1098: D211 in { B707 where B707 is (Object of C350) : (for B708 being (Attribute of C350) holds (B708 in C366 implies B707 is-connected-with B708)) } by L1091;
+thus L1099: thesis by L1098 , L79;
+end;
+L1100: C360 = ( ( AttributeDerivation C350 ) . C366 ) by L1089 , L1075 , TARSKI:1;
+L1101: D210 is (FormalConcept of C350) by L1100 , L1088 , L659;
+reconsider D212 = D210 as (Element of ( ConceptLattice C350 )) by L1101 , L804;
+L1102: (for B709 being (Element of ( ConceptLattice C350 )) holds (B709 is_less_than D202 implies B709 [= D212))
+proof
+let C378 being (Element of ( ConceptLattice C350 ));
+assume L1103: C378 is_less_than D202;
+L1104: (the Extent of ( C378 @ )) c= (the Extent of ( D212 @ ))
+proof
+let C379 being set;
+assume L1105: C379 in (the Extent of ( C378 @ ));
+reconsider D213 = C379 as (Object of C350) by L1105;
+L1106: (for B710 being (Element of D202) holds D213 in (the Extent of B710))
+proof
+let C380 being (Element of D202);
+L1107: C380 in D202;
+reconsider D214 = C380 as (Element of ( ConceptLattice C350 )) by L1107;
+L1108: C378 [= D214 by L1103 , LATTICE3:def 16;
+L1109: ( C378 @ ) is-SubConcept-of ( D214 @ ) by L1108 , L974;
+L1110: (the Extent of ( C378 @ )) c= (the Extent of ( D214 @ )) by L1109 , L761;
+thus L1111: thesis by L1110 , L1105;
+end;
+thus L1112: thesis by L1106 , L1037;
+end;
+L1113: ( C378 @ ) is-SubConcept-of ( D212 @ ) by L1104 , L761;
+thus L1114: thesis by L1113 , L974;
+end;
+L1115: (for B711 being (Element of ( ConceptLattice C350 )) holds (B711 in D202 implies D212 [= B711))
+proof
+let C381 being (Element of ( ConceptLattice C350 ));
+assume L1116: C381 in D202;
+L1117: (the Extent of ( D212 @ )) c= (the Extent of ( C381 @ ))
+proof
+let C382 being set;
+assume L1118: C382 in (the Extent of ( D212 @ ));
+thus L1119: thesis by L1118 , L1037 , L1116;
+end;
+L1120: ( D212 @ ) is-SubConcept-of ( C381 @ ) by L1117 , L761;
+thus L1121: thesis by L1120 , L974;
+end;
+L1122: D212 is_less_than D202 by L1115 , LATTICE3:def 16;
+thus L1123: thesis by L1122 , L1102;
+end;
+end;
+thus L1125: thesis by L997 , VECTSP_8:def 6;
+end;
+registration
+let C383 being FormalContext;
+cluster ( ConceptLattice C383 ) ->  complete;
+coherence by L996;
+end;

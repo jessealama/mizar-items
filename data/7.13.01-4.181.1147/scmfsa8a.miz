@@ -1,0 +1,1293 @@
+:: Conditional branch macro instructions of SCM+FSA, Part I (preliminary)
+::  by Noriko Asamoto
+::
+:: Received August 27, 1996
+:: Copyright (c) 1996-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, SCMFSA_2, XBOOLE_0, FSM_1, RELAT_1, AMI_1,
+      GRAPHSP, XXREAL_0, CIRCUIT2, ARYTM_3, CARD_1, FUNCT_1, SCMFSA6B,
+      MSUALG_1, FUNCT_4, SCMFSA6A, FUNCOP_1, TARSKI, AMISTD_2, EXTPRO_1, AMI_3,
+      SCMFSA7B, VALUED_1, CAT_1, NAT_1, TURING_1, UNIALG_2, SCMFSA8A, PARTFUN1,
+      RELOC, SCMFSA6C, AFINSQ_1, FRECHET, ORDINAL1, PBOOLE, COMPOS_1, SCMPDS_4;
+ notations TARSKI, XBOOLE_0, SUBSET_1, CARD_1, NUMBERS, ORDINAL1, NAT_1,
+      FUNCOP_1, RELAT_1, FUNCT_1, PARTFUN1, AFINSQ_1, FUNCT_4, FUNCT_7,
+      FINSEQ_1, VALUED_1, PBOOLE, STRUCT_0, MEMSTR_0, COMPOS_0,
+      COMPOS_1, EXTPRO_1,
+      AMISTD_1, AMISTD_2, SCMFSA_2, SCMFSA10, SCMFSA_7, SCMFSA6A, SCMFSA6B,
+      SCMFSA6C, SCMFSA7B, XXREAL_0, SCMFSA_M;
+ constructors DOMAIN_1, XXREAL_0, SCMFSA_7, SCMFSA6A, SF_MASTR, SCMFSA6B,
+      SCMFSA6C, SCMFSA7B, AMISTD_2, RELSET_1, PRE_POLY, SCMFSA10, AMISTD_1,
+      PBOOLE, AMISTD_5, MEMSTR_0, SCMFSA_M, FUNCT_7;
+ registrations XBOOLE_0, SETFAM_1, FUNCT_1, FUNCOP_1, NUMBERS, XXREAL_0,
+      MEMBERED, SCMFSA_2, SCMFSA6A, SF_MASTR, AFINSQ_1, SCMFSA7B, FINSET_1,
+      FINSEQ_1, SCMFSA10, AMISTD_2, VALUED_1, SCMFSA_4, SCMFSA6C, COMPOS_1,
+      RELAT_1, EXTPRO_1, FUNCT_4, PBOOLE, ORDINAL1, STRUCT_0, MEMSTR_0,
+      AMI_3, COMPOS_0, SCMFSA_M;
+ requirements NUMERALS, REAL, BOOLE, SUBSET, ARITHM;
+ definitions FUNCOP_1, COMPOS_1, EXTPRO_1, SCMFSA6A, AMISTD_2, STRUCT_0,
+      MEMSTR_0, COMPOS_0, SCMFSA_M;
+ theorems TARSKI, FUNCOP_1, NAT_1, FUNCT_1, FUNCT_4, MEMSTR_0, RELAT_1,
+      SCMFSA_2, SCMFSA_4, SCMFSA6A, GRFUNC_1, SCMFSA6B, CARD_1, SCMFSA7B,
+      XBOOLE_0, XREAL_1, XXREAL_0, VALUED_1, AFINSQ_1, PARTFUN1, AMISTD_2,
+      SCMFSA10, COMPOS_1, AMISTD_1, EXTPRO_1, PBOOLE, STRUCT_0, COMPOS_0,
+      SCMFSA_M;
+ schemes NAT_1;
+
+begin
+set D1 = ( NAT );
+set D2 = ( Data-Locations ( SCM+FSA ) );
+set D3 = ( Start-At (( 0 ) , ( SCM+FSA )) );
+set D4 = ( ( intloc ( 0 ) ) .--> 1 );
+canceled 6;
+theorem
+L1: (for B1 being (preProgram of ( SCM+FSA )) holds (for B2 being (Element of ( NAT )) holds (for B3 being set holds (B3 in ( dom B1 ) implies ((( B1 . B3 ) = ( halt ( SCM+FSA ) ) implies ( ( Directed (B1 , B2) ) . B3 ) = ( goto B2 )) & (( B1 . B3 ) <> ( halt ( SCM+FSA ) ) implies ( ( Directed (B1 , B2) ) . B3 ) = ( B1 . B3 ))))))) by FUNCT_4:105 , FUNCT_4:106;
+theorem
+L2: (for B4 being (Instruction of ( SCM+FSA )) holds (for B5 being Int-Location holds (for B6 being (Element of ( NAT )) holds ((not B4 destroy B5) implies (not ( IncAddr (B4 , B6) ) destroy B5)))))
+proof
+let C1 being (Instruction of ( SCM+FSA ));
+let C2 being Int-Location;
+let C3 being (Element of ( NAT ));
+assume L3: (not C1 destroy C2);
+per cases  by NAT_1:36 , SCMFSA_2:16;
+suppose L4: ( InsCode C1 ) = ( 0 );
+
+L5: C1 = ( halt ( SCM+FSA ) ) by L4 , SCMFSA_2:95;
+L6: ( IncAddr (C1 , C3) ) = ( halt ( SCM+FSA ) ) by L5 , COMPOS_0:4;
+thus L7: thesis by L6 , SCMFSA7B:5;
+end;
+suppose L8: ( InsCode C1 ) = 1;
+
+L9: (ex B7 , B8 being Int-Location st C1 = ( B7 := B8 )) by L8 , SCMFSA_2:30;
+thus L10: thesis by L9 , L3 , COMPOS_0:4;
+end;
+suppose L11: ( InsCode C1 ) = 2;
+
+L12: (ex B9 , B10 being Int-Location st C1 = ( AddTo (B9 , B10) )) by L11 , SCMFSA_2:31;
+thus L13: thesis by L12 , L3 , COMPOS_0:4;
+end;
+suppose L14: ( InsCode C1 ) = 3;
+
+L15: (ex B11 , B12 being Int-Location st C1 = ( SubFrom (B11 , B12) )) by L14 , SCMFSA_2:32;
+thus L16: thesis by L15 , L3 , COMPOS_0:4;
+end;
+suppose L17: ( InsCode C1 ) = 4;
+
+L18: (ex B13 , B14 being Int-Location st C1 = ( MultBy (B13 , B14) )) by L17 , SCMFSA_2:33;
+thus L19: thesis by L18 , L3 , COMPOS_0:4;
+end;
+suppose L20: ( InsCode C1 ) = 5;
+
+L21: (ex B15 , B16 being Int-Location st C1 = ( Divide (B15 , B16) )) by L20 , SCMFSA_2:34;
+thus L22: thesis by L21 , L3 , COMPOS_0:4;
+end;
+suppose L23: ( InsCode C1 ) = 6;
+
+consider C4 being (Element of ( NAT )) such that L24: C1 = ( goto C4 ) by L23 , SCMFSA_2:35;
+L25: ( IncAddr (C1 , C3) ) = ( goto ( C4 + C3 ) ) by L24 , SCMFSA_4:1;
+thus L26: thesis by L25 , SCMFSA7B:11;
+end;
+suppose L27: ( InsCode C1 ) = 7;
+
+consider C5 being (Element of ( NAT )), C6 being Int-Location such that L28: C1 = ( C6 =0_goto C5 ) by L27 , SCMFSA_2:36;
+L29: ( IncAddr (C1 , C3) ) = ( C6 =0_goto ( C5 + C3 ) ) by L28 , SCMFSA_4:2;
+thus L30: thesis by L29 , SCMFSA7B:12;
+end;
+suppose L31: ( InsCode C1 ) = 8;
+
+consider C7 being (Element of ( NAT )), C8 being Int-Location such that L32: C1 = ( C8 >0_goto C7 ) by L31 , SCMFSA_2:37;
+L33: ( IncAddr (C1 , C3) ) = ( C8 >0_goto ( C7 + C3 ) ) by L32 , SCMFSA_4:3;
+thus L34: thesis by L33 , SCMFSA7B:13;
+end;
+suppose L35: ( InsCode C1 ) = 9;
+
+L36: (ex B17 , B18 being Int-Location st (ex B19 being FinSeq-Location st C1 = ( B18 := (B19 , B17) ))) by L35 , SCMFSA_2:38;
+thus L37: thesis by L36 , L3 , COMPOS_0:4;
+end;
+suppose L38: ( InsCode C1 ) = 10;
+
+L39: (ex B20 , B21 being Int-Location st (ex B22 being FinSeq-Location st C1 = ( (B22 , B20) := B21 ))) by L38 , SCMFSA_2:39;
+thus L40: thesis by L39 , L3 , COMPOS_0:4;
+end;
+suppose L41: ( InsCode C1 ) = 11;
+
+L42: (ex B23 being Int-Location st (ex B24 being FinSeq-Location st C1 = ( B23 :=len B24 ))) by L41 , SCMFSA_2:40;
+thus L43: thesis by L42 , L3 , COMPOS_0:4;
+end;
+suppose L44: ( InsCode C1 ) = 12;
+
+L45: (ex B25 being Int-Location st (ex B26 being FinSeq-Location st C1 = ( B26 :=<0,...,0> B25 ))) by L44 , SCMFSA_2:41;
+thus L46: thesis by L45 , L3 , COMPOS_0:4;
+end;
+end;
+theorem
+L48: (for B27 being (preProgram of ( SCM+FSA )) holds (for B28 being (Element of ( NAT )) holds (for B29 being Int-Location holds ((not B27 destroy B29) implies (not ( Reloc (B27 , B28) ) destroy B29)))))
+proof
+let C9 being (preProgram of ( SCM+FSA ));
+let C10 being (Element of ( NAT ));
+let C11 being Int-Location;
+L49: ( dom ( IncAddr (C9 , C10) ) ) = ( dom C9 ) by COMPOS_1:def 21;
+L50: ( dom ( Shift (( IncAddr (C9 , C10) ) , C10) ) ) = { ( R1 + C10 ) where R1 is (Element of ( NAT )) : R1 in ( dom ( IncAddr (C9 , C10) ) ) } by VALUED_1:def 12;
+assume L51: (not C9 destroy C11);
+L52:
+now
+let C12 being (Instruction of ( SCM+FSA ));
+assume L53: C12 in ( rng ( Reloc (C9 , C10) ) );
+consider C13 being set such that L54: C13 in ( dom ( Shift (( IncAddr (C9 , C10) ) , C10) ) ) and L55: C12 = ( ( Shift (( IncAddr (C9 , C10) ) , C10) ) . C13 ) by L53 , FUNCT_1:def 3;
+consider C14 being (Element of ( NAT )) such that L56: C13 = ( C14 + C10 ) and L57: C14 in ( dom ( IncAddr (C9 , C10) ) ) by L50 , L54;
+L58: ( C9 . C14 ) in ( rng C9 ) by L49 , L57 , FUNCT_1:def 3;
+L59: ( rng C9 ) c= (the InstructionsF of ( SCM+FSA )) by RELAT_1:def 19;
+reconsider D5 = ( C9 . C14 ) as (Instruction of ( SCM+FSA )) by L59 , L58;
+L60: (not D5 destroy C11) by L51 , L58 , SCMFSA7B:def 4;
+L61: C12 = ( ( IncAddr (C9 , C10) ) . C14 ) by L55 , L56 , L57 , VALUED_1:def 12
+.= ( IncAddr (( C9 /. C14 ) , C10) ) by L49 , L57 , COMPOS_1:def 21
+.= ( IncAddr (D5 , C10) ) by L49 , L57 , PARTFUN1:def 6;
+thus L62: (not C12 destroy C11) by L61 , L60 , L2;
+end;
+thus L63: thesis by L52 , SCMFSA7B:def 4;
+end;
+theorem
+L64: (for B30 being  good (preProgram of ( SCM+FSA )) holds (for B31 being (Element of ( NAT )) holds ( Reloc (B30 , B31) ) is  good))
+proof
+let C15 being  good (preProgram of ( SCM+FSA ));
+let C16 being (Element of ( NAT ));
+L65: (not C15 destroy ( intloc ( 0 ) )) by SCMFSA7B:def 5;
+L66: (not ( Reloc (C15 , C16) ) destroy ( intloc ( 0 ) )) by L65 , L48;
+thus L67: thesis by L66 , SCMFSA7B:def 5;
+end;
+theorem
+L68: (for B32 , B33 being (preProgram of ( SCM+FSA )) holds (for B34 being Int-Location holds (((not B32 destroy B34) & (not B33 destroy B34)) implies (not ( B32 +* B33 ) destroy B34))))
+proof
+let C17 , C18 being (preProgram of ( SCM+FSA ));
+let C19 being Int-Location;
+assume L69: (not C17 destroy C19);
+assume L70: (not C18 destroy C19);
+L71:
+now
+let C20 being (Instruction of ( SCM+FSA ));
+L72: ( rng ( C17 +* C18 ) ) c= ( ( rng C17 ) \/ ( rng C18 ) ) by FUNCT_4:17;
+assume L73: C20 in ( rng ( C17 +* C18 ) );
+per cases  by L73 , L72 , XBOOLE_0:def 3;
+suppose L74: C20 in ( rng C17 );
+
+thus L75: (not C20 destroy C19) by L74 , L69 , SCMFSA7B:def 4;
+end;
+suppose L76: C20 in ( rng C18 );
+
+thus L77: (not C20 destroy C19) by L76 , L70 , SCMFSA7B:def 4;
+end;
+end;
+thus L79: thesis by L71 , SCMFSA7B:def 4;
+end;
+theorem
+L80: (for B35 , B36 being  good (preProgram of ( SCM+FSA )) holds ( B35 +* B36 ) is  good)
+proof
+let C21 , C22 being  good (preProgram of ( SCM+FSA ));
+L81: ((not C21 destroy ( intloc ( 0 ) )) & (not C22 destroy ( intloc ( 0 ) ))) by SCMFSA7B:def 5;
+L82: (not ( C21 +* C22 ) destroy ( intloc ( 0 ) )) by L81 , L68;
+thus L83: thesis by L82 , SCMFSA7B:def 5;
+end;
+theorem
+L84: (for B37 being (preProgram of ( SCM+FSA )) holds (for B38 being (Element of ( NAT )) holds (for B39 being Int-Location holds ((not B37 destroy B39) implies (not ( Directed (B37 , B38) ) destroy B39)))))
+proof
+let C23 being (preProgram of ( SCM+FSA ));
+let C24 being (Element of ( NAT ));
+let C25 being Int-Location;
+assume L85: (not C23 destroy C25);
+L86:
+now
+let C26 being (Instruction of ( SCM+FSA ));
+L87: ( dom ( Directed (C23 , C24) ) ) = ( dom C23 ) by FUNCT_4:99;
+assume L88: C26 in ( rng ( Directed (C23 , C24) ) );
+consider C27 being set such that L89: C27 in ( dom ( Directed (C23 , C24) ) ) and L90: C26 = ( ( Directed (C23 , C24) ) . C27 ) by L88 , FUNCT_1:def 3;
+per cases ;
+suppose L91: ( C23 . C27 ) <> ( halt ( SCM+FSA ) );
+
+L92: C26 = ( C23 . C27 ) by L91 , L90 , FUNCT_4:105;
+L93: C26 in ( rng C23 ) by L92 , L89 , L87 , FUNCT_1:def 3;
+thus L94: (not C26 destroy C25) by L93 , L85 , SCMFSA7B:def 4;
+end;
+suppose L95: ( C23 . C27 ) = ( halt ( SCM+FSA ) );
+
+L96: C26 = ( goto C24 ) by L95 , L89 , L90 , L87 , FUNCT_4:106;
+thus L97: (not C26 destroy C25) by L96 , SCMFSA7B:11;
+end;
+end;
+thus L99: thesis by L86 , SCMFSA7B:def 4;
+end;
+registration
+let C28 being  good (preProgram of ( SCM+FSA ));
+let C29 being (Element of ( NAT ));
+cluster ( Directed (C28 , C29) ) ->  good;
+correctness
+proof
+L100: (not C28 destroy ( intloc ( 0 ) )) by SCMFSA7B:def 5;
+L101: (not ( Directed (C28 , C29) ) destroy ( intloc ( 0 ) )) by L100 , L84;
+thus L102: thesis by L101 , SCMFSA7B:def 5;
+end;
+end;
+registration
+let C30 being  good (Program of ( SCM+FSA ));
+cluster ( Directed C30 ) ->  good;
+correctness;
+end;
+registration
+let C31 being (Program of ( SCM+FSA ));
+let C32 being (Element of ( NAT ));
+cluster ( Directed (C31 , C32) ) ->  initial;
+correctness
+proof
+L105:
+now
+let C33 , C34 being Nat;
+assume L106: C34 in ( dom ( Directed (C31 , C32) ) );
+L107: C34 in ( dom C31 ) by L106 , FUNCT_4:99;
+assume L108: C33 < C34;
+L109: C33 in ( dom C31 ) by L108 , L107 , AFINSQ_1:def 12;
+thus L110: C33 in ( dom ( Directed (C31 , C32) ) ) by L109 , FUNCT_4:99;
+end;
+thus L111: thesis by L105 , AFINSQ_1:def 12;
+end;
+end;
+registration
+let C35 , C36 being  good (Program of ( SCM+FSA ));
+cluster ( C35 ";" C36 ) ->  good;
+coherence
+proof
+L113: ( Reloc (C36 , ( card C35 )) ) is  good by L64;
+thus L114: thesis by L113 , L80;
+end;
+end;
+L116: (for B40 being (Element of ( NAT )) holds (( dom ( ( 0 ) .--> ( goto B40 ) ) ) = { ( 0 ) } & ( 0 ) in ( dom ( ( 0 ) .--> ( goto B40 ) ) ) & ( ( ( 0 ) .--> ( goto B40 ) ) . ( 0 ) ) = ( goto B40 ) & ( card ( ( 0 ) .--> ( goto B40 ) ) ) = 1 & (not ( halt ( SCM+FSA ) ) in ( rng ( ( 0 ) .--> ( goto B40 ) ) ))))
+proof
+let C37 being (Element of ( NAT ));
+thus L117: ( dom ( ( 0 ) .--> ( goto C37 ) ) ) = { ( 0 ) } by FUNCOP_1:13;
+thus L118: ( 0 ) in ( dom ( ( 0 ) .--> ( goto C37 ) ) ) by L117 , TARSKI:def 1;
+thus L119: ( ( ( 0 ) .--> ( goto C37 ) ) . ( 0 ) ) = ( goto C37 ) by FUNCOP_1:72;
+thus L120: ( card ( ( 0 ) .--> ( goto C37 ) ) ) = ( card <% ( goto C37 ) %> ) by AFINSQ_1:def 1
+.= 1 by AFINSQ_1:34;
+L121:
+now
+L122: ( rng ( ( 0 ) .--> ( goto C37 ) ) ) = { ( goto C37 ) } by FUNCOP_1:8;
+assume L123: ( halt ( SCM+FSA ) ) in ( rng ( ( 0 ) .--> ( goto C37 ) ) );
+thus L124: contradiction by L123 , L122 , TARSKI:def 1;
+end;
+thus L125: thesis by L121;
+end;
+definition
+let C38 being (Element of ( NAT ));
+func Goto C38 -> (Program of ( SCM+FSA )) equals 
+( ( 0 ) .--> ( goto C38 ) );
+coherence
+proof
+L126: ( ( 0 ) .--> ( goto C38 ) ) = <% ( goto C38 ) %> by AFINSQ_1:def 1;
+reconsider D6 = ( ( 0 ) .--> ( goto C38 ) ) as (Program of ( SCM+FSA )) by L126;
+reconsider D7 = D6 as (Program of ( SCM+FSA ));
+L127:
+now
+let C39 being (Instruction of ( SCM+FSA ));
+L128: ( rng ( ( 0 ) .--> ( goto C38 ) ) ) = { ( goto C38 ) } by FUNCOP_1:8;
+assume L129: C39 in ( rng ( ( 0 ) .--> ( goto C38 ) ) );
+L130: C39 = ( goto C38 ) by L129 , L128 , TARSKI:def 1;
+thus L131: (not C39 destroy ( intloc ( 0 ) )) by L130 , SCMFSA7B:11;
+end;
+L132: (not D7 destroy ( intloc ( 0 ) )) by L127 , SCMFSA7B:def 4;
+thus L133: thesis by L132;
+end;
+end;
+registration
+let C40 being (Element of ( NAT ));
+cluster ( Goto C40 ) ->  halt-free  good;
+coherence
+proof
+L135: ( ( 0 ) .--> ( goto C40 ) ) = <% ( goto C40 ) %> by AFINSQ_1:def 1;
+reconsider D8 = ( ( 0 ) .--> ( goto C40 ) ) as (Program of ( SCM+FSA )) by L135;
+L136: (not ( halt ( SCM+FSA ) ) in ( rng D8 )) by L116;
+thus L137: ( Goto C40 ) is  halt-free by L136 , COMPOS_1:def 11;
+reconsider D9 = D8 as (Program of ( SCM+FSA ));
+L138:
+now
+let C41 being (Instruction of ( SCM+FSA ));
+L139: ( rng ( ( 0 ) .--> ( goto C40 ) ) ) = { ( goto C40 ) } by FUNCOP_1:8;
+assume L140: C41 in ( rng ( ( 0 ) .--> ( goto C40 ) ) );
+L141: C41 = ( goto C40 ) by L140 , L139 , TARSKI:def 1;
+thus L142: (not C41 destroy ( intloc ( 0 ) )) by L141 , SCMFSA7B:11;
+end;
+L143: (not D9 destroy ( intloc ( 0 ) )) by L138 , SCMFSA7B:def 4;
+thus L144: thesis by L143 , SCMFSA7B:def 5;
+end;
+end;
+registration
+cluster  halt-free  good for (Program of ( SCM+FSA ));
+existence
+proof
+take ( Goto ( 0 ) );
+thus L146: thesis;
+end;
+end;
+definition
+let C42 being (State of ( SCM+FSA ));
+let C43 being (Instruction-Sequence of ( SCM+FSA ));
+let C44 being  initial (Program of ( SCM+FSA ));
+pred C44 is_pseudo-closed_on C42 , C43
+means
+:L148: (ex B41 being (Element of ( NAT )) st (( IC ( Comput (( C43 +* C44 ) , ( Initialize C42 ) , B41) ) ) = ( card C44 ) & (for B42 being (Element of ( NAT )) holds (B42 < B41 implies ( IC ( Comput (( C43 +* C44 ) , ( Initialize C42 ) , B42) ) ) in ( dom C44 )))))
+;end;
+registration
+cluster  sequential for (Instruction of ( SCM+FSA ));
+existence
+proof
+take ( ( intloc ( 0 ) ) := ( intloc ( 0 ) ) );
+thus L150: thesis;
+end;
+end;
+definition
+canceled 1;
+let C45 being (State of ( SCM+FSA ));
+let C46 being (Instruction-Sequence of ( SCM+FSA ));
+let C47 being  initial (Program of ( SCM+FSA ));
+assume that
+L152: C47 is_pseudo-closed_on C45 , C46;
+func pseudo-LifeSpan (C45 , C46 , C47) -> (Element of ( NAT )) means 
+:L153: (( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , it) ) ) = ( card C47 ) & (for B43 being (Element of ( NAT )) holds ((not ( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , B43) ) ) in ( dom C47 )) implies it <= B43)));
+existence
+proof
+consider C48 being (Element of ( NAT )) such that L154: (( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , C48) ) ) = ( card C47 ) & (for B44 being (Element of ( NAT )) holds (B44 < C48 implies ( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , B44) ) ) in ( dom C47 )))) by L152 , L148;
+take C48;
+thus L155: thesis by L154;
+end;
+uniqueness
+proof
+reconsider D10 = C47 as  initial (preProgram of ( SCM+FSA ));
+let C49 , C50 being (Element of ( NAT ));
+assume that
+L156: ( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , C49) ) ) = ( card C47 )
+and
+L157: ((for B45 being (Element of ( NAT )) holds ((not ( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , B45) ) ) in ( dom C47 )) implies C49 <= B45)) & ( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , C50) ) ) = ( card C47 ))
+and
+L158: (for B46 being (Element of ( NAT )) holds ((not ( IC ( Comput (( C46 +* C47 ) , ( Initialize C45 ) , B46) ) ) in ( dom C47 )) implies C50 <= B46));
+L159:
+now
+assume L160: C50 < C49;
+L161: ( card D10 ) in ( dom D10 ) by L160 , L157;
+thus L162: contradiction by L161;
+end;
+L163:
+now
+assume L164: C49 < C50;
+L165: ( card D10 ) in ( dom D10 ) by L164 , L156 , L158;
+thus L166: contradiction by L165;
+end;
+thus L167: thesis by L163 , L159 , XXREAL_0:1;
+end;
+end;
+theorem
+L169: (for B47 , B48 being (Program of ( SCM+FSA )) holds (for B49 being set holds (B49 in ( dom B47 ) implies ( ( B47 ";" B48 ) . B49 ) = ( ( Directed B47 ) . B49 ))))
+proof
+let C51 , C52 being (Program of ( SCM+FSA ));
+let C53 being set;
+assume L170: C53 in ( dom C51 );
+L171: C53 in ( dom ( Directed C51 ) ) by L170 , FUNCT_4:99;
+L172: ( Directed C51 ) c= ( C51 ";" C52 ) by SCMFSA6A:16;
+thus L173: thesis by L172 , L171 , GRFUNC_1:2;
+end;
+theorem
+L174: (for B50 being (Element of ( NAT )) holds ( card ( Goto B50 ) ) = 1) by L116;
+theorem
+L175: (for B51 being (preProgram of ( SCM+FSA )) holds (for B52 being set holds (B52 in ( dom B51 ) implies ((( B51 . B52 ) = ( halt ( SCM+FSA ) ) implies ( ( Directed B51 ) . B52 ) = ( goto ( card B51 ) )) & (( B51 . B52 ) <> ( halt ( SCM+FSA ) ) implies ( ( Directed B51 ) . B52 ) = ( B51 . B52 )))))) by FUNCT_4:105 , FUNCT_4:106;
+theorem
+L176: (for B53 being (State of ( SCM+FSA )) holds (for B54 being (Instruction-Sequence of ( SCM+FSA )) holds (for B55 being  initial (Program of ( SCM+FSA )) holds (B55 is_pseudo-closed_on B53 , B54 implies (for B56 being (Element of ( NAT )) holds (B56 < ( pseudo-LifeSpan (B53 , B54 , B55) ) implies (( IC ( Comput (( B54 +* B55 ) , ( Initialize B53 ) , B56) ) ) in ( dom B55 ) & ( CurInstr (( B54 +* B55 ) , ( Comput (( B54 +* B55 ) , ( Initialize B53 ) , B56) )) ) <> ( halt ( SCM+FSA ) ))))))))
+proof
+let C54 being (State of ( SCM+FSA ));
+let C55 being (Instruction-Sequence of ( SCM+FSA ));
+let C56 being  initial (Program of ( SCM+FSA ));
+set D11 = ( pseudo-LifeSpan (C54 , C55 , C56) );
+assume L177: C56 is_pseudo-closed_on C54 , C55;
+L178: ( IC ( Comput (( C55 +* C56 ) , ( Initialize C54 ) , D11) ) ) = ( card C56 ) by L177 , L153;
+thus L179:now
+let C57 being (Element of ( NAT ));
+assume L180: C57 < D11;
+thus L181: ( IC ( Comput (( C55 +* C56 ) , ( Initialize C54 ) , C57) ) ) in ( dom C56 ) by L180 , L177 , L153;
+assume L182: ( CurInstr (( C55 +* C56 ) , ( Comput (( C55 +* C56 ) , ( Initialize C54 ) , C57) )) ) = ( halt ( SCM+FSA ) );
+L183: ( IC ( Comput (( C55 +* C56 ) , ( Initialize C54 ) , D11) ) ) = ( IC ( Comput (( C55 +* C56 ) , ( Initialize C54 ) , C57) ) ) by L182 , L180 , EXTPRO_1:5;
+thus L184: contradiction by L183 , L178 , L181;
+end;
+end;
+theorem
+L180: (for B57 being (State of ( SCM+FSA )) holds (for B58 being (Instruction-Sequence of ( SCM+FSA )) holds (for B59 , B60 being (Program of ( SCM+FSA )) holds (B59 is_pseudo-closed_on B57 , B58 implies (for B61 being (Element of ( NAT )) holds (B61 <= ( pseudo-LifeSpan (B57 , B58 , B59) ) implies ( Comput (( B58 +* B59 ) , ( Initialize B57 ) , B61) ) = ( Comput (( B58 +* ( B59 ";" B60 ) ) , ( Initialize B57 ) , B61) )))))))
+proof
+let C58 being (State of ( SCM+FSA ));
+let C59 being (Instruction-Sequence of ( SCM+FSA ));
+let C60 , C61 being (Program of ( SCM+FSA ));
+set D12 = ( Initialize C58 );
+set D13 = ( Initialize C58 );
+defpred S1[ Nat ] means ($1 <= ( pseudo-LifeSpan (C58 , C59 , C60) ) implies ( Comput (( C59 +* C60 ) , D12 , $1) ) = ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , $1) ));
+L181: ( dom ( C59 +* C60 ) ) = ( NAT ) by PARTFUN1:def 2;
+L182: ( dom ( C59 +* ( C60 ";" C61 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+assume L183: C60 is_pseudo-closed_on C58 , C59;
+L184:
+now
+let C62 being (Element of ( NAT ));
+assume L185: S1[ C62 ];
+thus L186: S1[ ( C62 + 1 ) ]
+proof
+L187: ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , ( C62 + 1 )) ) = ( Following (( C59 +* ( C60 ";" C61 ) ) , ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , C62) )) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (( C59 +* ( C60 ";" C61 ) ) , ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , C62) )) ) , ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , C62) )) );
+L188: ( Comput (( C59 +* C60 ) , D12 , ( C62 + 1 )) ) = ( Following (( C59 +* C60 ) , ( Comput (( C59 +* C60 ) , D12 , C62) )) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (( C59 +* C60 ) , ( Comput (( C59 +* C60 ) , D12 , C62) )) ) , ( Comput (( C59 +* C60 ) , D12 , C62) )) );
+L189: ( dom C60 ) c= ( dom ( C60 ";" C61 ) ) by SCMFSA6A:17;
+L190: ( C62 + ( 0 ) ) < ( C62 + 1 ) by XREAL_1:6;
+assume L191: ( C62 + 1 ) <= ( pseudo-LifeSpan (C58 , C59 , C60) );
+L192: C62 < ( pseudo-LifeSpan (C58 , C59 , C60) ) by L191 , L190 , XXREAL_0:2;
+L193: ( IC ( Comput (( C59 +* C60 ) , D12 , C62) ) ) in ( dom C60 ) by L192 , L183 , L176;
+L194: C60 c= ( C59 +* C60 ) by FUNCT_4:25;
+L195: ( C60 ";" C61 ) c= ( C59 +* ( C60 ";" C61 ) ) by FUNCT_4:25;
+L196: ( CurInstr (( C59 +* C60 ) , ( Comput (( C59 +* C60 ) , D12 , C62) )) ) = ( ( C59 +* C60 ) . ( IC ( Comput (( C59 +* C60 ) , D12 , C62) ) ) ) by L181 , PARTFUN1:def 6
+.= ( C60 . ( IC ( Comput (( C59 +* C60 ) , D12 , C62) ) ) ) by L193 , L194 , GRFUNC_1:2;
+L197: ( C60 . ( IC ( Comput (( C59 +* C60 ) , D12 , C62) ) ) ) <> ( halt ( SCM+FSA ) ) by L196 , L183 , L192 , L176;
+L198: ( CurInstr (( C59 +* C60 ) , ( Comput (( C59 +* C60 ) , D12 , C62) )) ) = ( ( C60 ";" C61 ) . ( IC ( Comput (( C59 +* C60 ) , D12 , C62) ) ) ) by L197 , L193 , L196 , SCMFSA6A:15
+.= ( ( C59 +* ( C60 ";" C61 ) ) . ( IC ( Comput (( C59 +* C60 ) , D12 , C62) ) ) ) by L193 , L189 , L195 , GRFUNC_1:2
+.= ( ( C59 +* ( C60 ";" C61 ) ) . ( IC ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , C62) ) ) ) by L185 , L191 , L190 , XXREAL_0:2
+.= ( CurInstr (( C59 +* ( C60 ";" C61 ) ) , ( Comput (( C59 +* ( C60 ";" C61 ) ) , D13 , C62) )) ) by L182 , PARTFUN1:def 6;
+thus L199: thesis by L198 , L185 , L191 , L190 , L188 , L187 , XXREAL_0:2;
+end;
+
+end;
+L187: S1[ ( 0 ) ];
+thus L188: (for B62 being (Element of ( NAT )) holds S1[ B62 ]) from NAT_1:sch 1(L187 , L184);
+end;
+theorem
+L189: (for B63 being (preProgram of ( SCM+FSA )) holds (for B64 being (Element of ( NAT )) holds ( card ( Directed (B63 , B64) ) ) = ( card B63 )))
+proof
+let C63 being (preProgram of ( SCM+FSA ));
+let C64 being (Element of ( NAT ));
+thus L190: ( card ( Directed (C63 , C64) ) ) = ( card ( dom ( Directed (C63 , C64) ) ) ) by CARD_1:62
+.= ( card ( dom C63 ) ) by FUNCT_4:99
+.= ( card C63 ) by CARD_1:62;
+end;
+theorem
+L191: (for B65 being (Program of ( SCM+FSA )) holds ( card ( Directed B65 ) ) = ( card B65 )) by L189;
+theorem
+L192: (for B66 being (State of ( SCM+FSA )) holds (for B67 being (Instruction-Sequence of ( SCM+FSA )) holds (for B68 being (Program of ( SCM+FSA )) holds ((B68 is_closed_on B66 , B67 & B68 is_halting_on B66 , B67) implies (for B69 being (Element of ( NAT )) holds (B69 <= ( LifeSpan (( B67 +* B68 ) , ( Initialize B66 )) ) implies (( Comput (( B67 +* B68 ) , ( Initialize B66 ) , B69) ) = ( Comput (( B67 +* ( Directed B68 ) ) , ( Initialize B66 ) , B69) ) & ( CurInstr (( B67 +* ( Directed B68 ) ) , ( Comput (( B67 +* ( Directed B68 ) ) , ( Initialize B66 ) , B69) )) ) <> ( halt ( SCM+FSA ) ))))))))
+proof
+let C65 being (State of ( SCM+FSA ));
+let C66 being (Instruction-Sequence of ( SCM+FSA ));
+let C67 being (Program of ( SCM+FSA ));
+assume that
+L193: C67 is_closed_on C65 , C66
+and
+L194: C67 is_halting_on C65 , C66;
+L195: ( dom ( C66 +* ( Directed C67 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L196: ( dom ( C66 +* C67 ) ) = ( NAT ) by PARTFUN1:def 2;
+set D14 = ( Initialize C65 );
+set D15 = ( Initialize C65 );
+defpred S2[ Nat ] means ($1 <= ( LifeSpan (( C66 +* C67 ) , D15) ) implies (( Comput (( C66 +* C67 ) , D15 , $1) ) = ( Comput (( C66 +* ( Directed C67 ) ) , D14 , $1) ) & ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , $1) )) ) <> ( halt ( SCM+FSA ) )));
+L197:
+now
+let C68 being (Element of ( NAT ));
+L198: ( dom ( Directed C67 ) ) = ( dom C67 ) by FUNCT_4:99;
+L199: ( IC ( Comput (( C66 +* C67 ) , D15 , C68) ) ) in ( dom ( Directed C67 ) ) by L198 , L193 , SCMFSA7B:def 6;
+L200: ( ( C66 +* ( Directed C67 ) ) /. ( IC ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C68) ) ) ) = ( ( C66 +* ( Directed C67 ) ) . ( IC ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C68) ) ) ) by L195 , PARTFUN1:def 6;
+L201: ( Directed C67 ) c= ( C66 +* ( Directed C67 ) ) by FUNCT_4:25;
+assume L202: ( Comput (( C66 +* C67 ) , D15 , C68) ) = ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C68) );
+L203: ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C68) )) ) = ( ( C66 +* ( Directed C67 ) ) . ( IC ( Comput (( C66 +* C67 ) , D15 , C68) ) ) ) by L202 , L200
+.= ( ( Directed C67 ) . ( IC ( Comput (( C66 +* C67 ) , D15 , C68) ) ) ) by L199 , L201 , GRFUNC_1:2;
+L204: ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C68) )) ) in ( rng ( Directed C67 ) ) by L203 , L199 , FUNCT_1:def 3;
+assume L205: ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C68) )) ) = ( halt ( SCM+FSA ) );
+thus L206: contradiction by L205 , L204 , SCMFSA6A:1;
+end;
+L207:
+now
+L208: ( C66 +* C67 ) halts_on D15 by L194 , SCMFSA7B:def 7;
+L209: ( dom C67 ) c= ( dom ( Directed C67 ) ) by FUNCT_4:99;
+let C69 being (Element of ( NAT ));
+assume L210: (C69 <= ( LifeSpan (( C66 +* C67 ) , D15) ) implies ( Comput (( C66 +* C67 ) , D15 , C69) ) = ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) ));
+L211: ( Comput (( C66 +* ( Directed C67 ) ) , D14 , ( C69 + 1 )) ) = ( Following (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) )) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) )) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) )) );
+L212: ( IC ( Comput (( C66 +* C67 ) , D15 , C69) ) ) in ( dom C67 ) by L193 , SCMFSA7B:def 6;
+L213: C67 c= ( C66 +* C67 ) by FUNCT_4:25;
+L214: ( CurInstr (( C66 +* C67 ) , ( Comput (( C66 +* C67 ) , D15 , C69) )) ) = ( ( C66 +* C67 ) . ( IC ( Comput (( C66 +* C67 ) , D15 , C69) ) ) ) by L196 , PARTFUN1:def 6
+.= ( C67 . ( IC ( Comput (( C66 +* C67 ) , D15 , C69) ) ) ) by L212 , L213 , GRFUNC_1:2;
+L215: ( C69 + ( 0 ) ) < ( C69 + 1 ) by XREAL_1:6;
+L216: ( ( C66 +* ( Directed C67 ) ) /. ( IC ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) ) ) ) = ( ( C66 +* ( Directed C67 ) ) . ( IC ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) ) ) ) by L195 , PARTFUN1:def 6;
+L217: ( Directed C67 ) c= ( C66 +* ( Directed C67 ) ) by FUNCT_4:25;
+assume L218: ( C69 + 1 ) <= ( LifeSpan (( C66 +* C67 ) , D15) );
+L219: C69 < ( LifeSpan (( C66 +* C67 ) , D15) ) by L218 , L215 , XXREAL_0:2;
+L220: ( C67 . ( IC ( Comput (( C66 +* C67 ) , D15 , C69) ) ) ) <> ( halt ( SCM+FSA ) ) by L219 , L214 , L208 , EXTPRO_1:def 15;
+L221: ( CurInstr (( C66 +* C67 ) , ( Comput (( C66 +* C67 ) , D15 , C69) )) ) = ( ( Directed C67 ) . ( IC ( Comput (( C66 +* C67 ) , D15 , C69) ) ) ) by L220 , L214 , FUNCT_4:105
+.= ( ( C66 +* ( Directed C67 ) ) . ( IC ( Comput (( C66 +* C67 ) , D15 , C69) ) ) ) by L212 , L209 , L217 , GRFUNC_1:2
+.= ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , C69) )) ) by L210 , L218 , L215 , L216 , XXREAL_0:2;
+L222: ( Comput (( C66 +* C67 ) , D15 , ( C69 + 1 )) ) = ( Following (( C66 +* C67 ) , ( Comput (( C66 +* C67 ) , D15 , C69) )) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (( C66 +* C67 ) , ( Comput (( C66 +* C67 ) , D15 , C69) )) ) , ( Comput (( C66 +* C67 ) , D15 , C69) )) );
+thus L223: ( Comput (( C66 +* C67 ) , D15 , ( C69 + 1 )) ) = ( Comput (( C66 +* ( Directed C67 ) ) , D14 , ( C69 + 1 )) ) by L222 , L210 , L218 , L215 , L221 , L211 , XXREAL_0:2;
+thus L224: ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , ( C69 + 1 )) )) ) <> ( halt ( SCM+FSA ) ) by L223 , L197;
+end;
+L225: (for B70 being (Element of ( NAT )) holds (S2[ B70 ] implies S2[ ( B70 + 1 ) ])) by L207;
+L226:
+now
+assume L227: ( 0 ) <= ( LifeSpan (( C66 +* C67 ) , D15) );
+thus L228: ( Comput (( C66 +* C67 ) , D15 , ( 0 )) ) = ( Comput (( C66 +* ( Directed C67 ) ) , D14 , ( 0 )) );
+thus L229: ( CurInstr (( C66 +* ( Directed C67 ) ) , ( Comput (( C66 +* ( Directed C67 ) ) , D14 , ( 0 )) )) ) <> ( halt ( SCM+FSA ) ) by L228 , L197;
+end;
+L230: S2[ ( 0 ) ] by L226;
+thus L231: (for B71 being (Element of ( NAT )) holds S2[ B71 ]) from NAT_1:sch 1(L230 , L225);
+end;
+theorem
+L232: (for B72 being (State of ( SCM+FSA )) holds (for B73 being (Instruction-Sequence of ( SCM+FSA )) holds (for B74 being (Program of ( SCM+FSA )) holds ((B74 is_closed_on B72 , B73 & B74 is_halting_on B72 , B73) implies (( IC ( Comput (( B73 +* ( Directed B74 ) ) , ( Initialize B72 ) , ( ( LifeSpan (( B73 +* B74 ) , ( Initialize B72 )) ) + 1 )) ) ) = ( card B74 ) & ( DataPart ( Comput (( B73 +* B74 ) , ( Initialize B72 ) , ( LifeSpan (( B73 +* B74 ) , ( Initialize B72 )) )) ) ) = ( DataPart ( Comput (( B73 +* ( Directed B74 ) ) , ( Initialize B72 ) , ( ( LifeSpan (( B73 +* B74 ) , ( Initialize B72 )) ) + 1 )) ) ))))))
+proof
+let C70 being (State of ( SCM+FSA ));
+let C71 being (Instruction-Sequence of ( SCM+FSA ));
+let C72 being (Program of ( SCM+FSA ));
+set D16 = ( Initialize C70 );
+set D17 = ( Initialize C70 );
+set D18 = ( LifeSpan (( C71 +* C72 ) , D16) );
+L233: ( dom ( C71 +* C72 ) ) = ( NAT ) by PARTFUN1:def 2;
+L234: ( dom ( C71 +* ( Directed C72 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+assume that
+L235: C72 is_closed_on C70 , C71
+and
+L236: C72 is_halting_on C70 , C71;
+L237: ( C71 +* C72 ) halts_on D16 by L236 , SCMFSA7B:def 7;
+set D19 = ( IC ( Comput (( C71 +* C72 ) , D16 , D18) ) );
+L238: D19 in ( dom C72 ) by L235 , SCMFSA7B:def 6;
+L239: ( Comput (( C71 +* C72 ) , ( Initialize C70 ) , D18) ) = ( Comput (( C71 +* ( Directed C72 ) ) , ( Initialize C70 ) , D18) ) by L235 , L236 , L192;
+L240: ( IC ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) ) in ( dom C72 ) by L239 , L238;
+L241: ( IC ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) ) in ( dom ( Directed C72 ) ) by L240 , FUNCT_4:99;
+L242: C72 c= ( C71 +* C72 ) by FUNCT_4:25;
+L243: ( C72 . D19 ) = ( ( C71 +* C72 ) . ( IC ( Comput (( C71 +* C72 ) , D16 , D18) ) ) ) by L242 , L238 , GRFUNC_1:2
+.= ( CurInstr (( C71 +* C72 ) , ( Comput (( C71 +* C72 ) , D16 , D18) )) ) by L233 , PARTFUN1:def 6
+.= ( halt ( SCM+FSA ) ) by L237 , EXTPRO_1:def 15;
+L244: D19 = ( IC ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) ) by L239;
+L245: ( ( C71 +* ( Directed C72 ) ) . D19 ) = ( ( Directed C72 ) . D19 ) by L244 , L241 , FUNCT_4:13
+.= ( goto ( card C72 ) ) by L238 , L243 , FUNCT_4:106;
+L246: ( CurInstr (( C71 +* ( Directed C72 ) ) , ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) )) ) = ( ( C71 +* ( Directed C72 ) ) . ( IC ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) ) ) by L234 , PARTFUN1:def 6
+.= ( goto ( card C72 ) ) by L245 , L239;
+L247: ( Comput (( C71 +* ( Directed C72 ) ) , D17 , ( D18 + 1 )) ) = ( Following (( C71 +* ( Directed C72 ) ) , ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) )) ) by EXTPRO_1:3
+.= ( Exec (( goto ( card C72 ) ) , ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) )) ) by L246;
+thus L248: ( IC ( Comput (( C71 +* ( Directed C72 ) ) , D17 , ( D18 + 1 )) ) ) = ( card C72 ) by L247 , SCMFSA_2:69;
+L249: ((for B75 being Int-Location holds ( ( Comput (( C71 +* ( Directed C72 ) ) , D17 , ( D18 + 1 )) ) . B75 ) = ( ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) . B75 )) & (for B76 being FinSeq-Location holds ( ( Comput (( C71 +* ( Directed C72 ) ) , D17 , ( D18 + 1 )) ) . B76 ) = ( ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) . B76 ))) by L247 , SCMFSA_2:69;
+L250: ( DataPart ( Comput (( C71 +* C72 ) , D16 , D18) ) ) = ( DataPart ( Comput (( C71 +* ( Directed C72 ) ) , D17 , D18) ) ) by L239;
+thus L251: thesis by L250 , L249 , SCMFSA_M:2;
+end;
+L252: (for B77 being (State of ( SCM+FSA )) holds (for B78 being (Instruction-Sequence of ( SCM+FSA )) holds (for B79 being (Program of ( SCM+FSA )) holds ((B79 is_closed_on B77 , B78 & B79 is_halting_on B77 , B78) implies (( Directed B79 ) is_pseudo-closed_on B77 , B78 & ( pseudo-LifeSpan (B77 , B78 , ( Directed B79 )) ) = ( ( LifeSpan (( B78 +* B79 ) , ( Initialize B77 )) ) + 1 ))))))
+proof
+let C73 being (State of ( SCM+FSA ));
+let C74 being (Instruction-Sequence of ( SCM+FSA ));
+let C75 being (Program of ( SCM+FSA ));
+set D20 = ( Initialize C73 );
+set D21 = ( Initialize C73 );
+set D22 = ( LifeSpan (( C74 +* C75 ) , D20) );
+assume that
+L253: C75 is_closed_on C73 , C74
+and
+L254: C75 is_halting_on C73 , C74;
+L255: ( dom C75 ) = ( dom ( Directed C75 ) ) by FUNCT_4:99;
+L256:
+now
+let C76 being (Element of ( NAT ));
+assume L257: C76 < ( D22 + 1 );
+L258: C76 <= D22 by L257 , NAT_1:13;
+L259: ( Comput (( C74 +* C75 ) , D20 , C76) ) = ( Comput (( C74 +* ( Directed C75 ) ) , D21 , C76) ) by L258 , L253 , L254 , L192;
+L260: ( IC ( Comput (( C74 +* C75 ) , D20 , C76) ) ) = ( IC ( Comput (( C74 +* ( Directed C75 ) ) , D21 , C76) ) ) by L259;
+thus L261: ( IC ( Comput (( C74 +* ( Directed C75 ) ) , D21 , C76) ) ) in ( dom ( Directed C75 ) ) by L260 , L253 , L255 , SCMFSA7B:def 6;
+end;
+L262: ( card C75 ) = ( card ( Directed C75 ) ) by L189;
+L263: ( IC ( Comput (( C74 +* ( Directed C75 ) ) , D21 , ( D22 + 1 )) ) ) = ( card ( Directed C75 ) ) by L262 , L253 , L254 , L232;
+thus L264: ( Directed C75 ) is_pseudo-closed_on C73 , C74 by L263 , L256 , L148;
+L265: (for B80 being (Element of ( NAT )) holds ((not ( IC ( Comput (( C74 +* ( Directed C75 ) ) , D21 , B80) ) ) in ( dom ( Directed C75 ) )) implies ( D22 + 1 ) <= B80)) by L256;
+thus L266: thesis by L265 , L263 , L264 , L153;
+end;
+theorem
+L267: (for B81 being (State of ( SCM+FSA )) holds (for B82 being (Instruction-Sequence of ( SCM+FSA )) holds (for B83 being (Program of ( SCM+FSA )) holds ((B83 is_closed_on B81 , B82 & B83 is_halting_on B81 , B82) implies ( Directed B83 ) is_pseudo-closed_on B81 , B82)))) by L252;
+theorem
+L268: (for B84 being (State of ( SCM+FSA )) holds (for B85 being (Instruction-Sequence of ( SCM+FSA )) holds (for B86 being (Program of ( SCM+FSA )) holds ((B86 is_closed_on B84 , B85 & B86 is_halting_on B84 , B85) implies ( pseudo-LifeSpan (B84 , B85 , ( Directed B86 )) ) = ( ( LifeSpan (( B85 +* B86 ) , ( Initialize B84 )) ) + 1 ))))) by L252;
+theorem
+L269: (for B87 , B88 being (Program of ( SCM+FSA )) holds ( ( Directed B87 ) ";" B88 ) = ( B87 ";" B88 ))
+proof
+let C77 , C78 being (Program of ( SCM+FSA ));
+thus L270: ( ( Directed C77 ) ";" C78 ) = ( ( Directed C77 ) +* ( Reloc (C78 , ( card ( Directed C77 ) )) ) ) by SCMFSA6A:22
+.= ( C77 ";" C78 ) by L189;
+end;
+theorem
+L271: (for B89 being (State of ( SCM+FSA )) holds (for B90 being (Instruction-Sequence of ( SCM+FSA )) holds (for B91 , B92 being (Program of ( SCM+FSA )) holds ((B91 is_closed_on B89 , B90 & B91 is_halting_on B89 , B90) implies ((for B93 being (Element of ( NAT )) holds (B93 <= ( LifeSpan (( B90 +* B91 ) , ( Initialize B89 )) ) implies (( IC ( Comput (( B90 +* ( Directed B91 ) ) , ( Initialize B89 ) , B93) ) ) = ( IC ( Comput (( B90 +* ( B91 ";" B92 ) ) , ( Initialize B89 ) , B93) ) ) & ( CurInstr (( B90 +* ( Directed B91 ) ) , ( Comput (( B90 +* ( Directed B91 ) ) , ( Initialize B89 ) , B93) )) ) = ( CurInstr (( B90 +* ( B91 ";" B92 ) ) , ( Comput (( B90 +* ( B91 ";" B92 ) ) , ( Initialize B89 ) , B93) )) )))) & ( DataPart ( Comput (( B90 +* ( Directed B91 ) ) , ( Initialize B89 ) , ( ( LifeSpan (( B90 +* B91 ) , ( Initialize B89 )) ) + 1 )) ) ) = ( DataPart ( Comput (( B90 +* ( B91 ";" B92 ) ) , ( Initialize B89 ) , ( ( LifeSpan (( B90 +* B91 ) , ( Initialize B89 )) ) + 1 )) ) ) & ( IC ( Comput (( B90 +* ( Directed B91 ) ) , ( Initialize B89 ) , ( ( LifeSpan (( B90 +* B91 ) , ( Initialize B89 )) ) + 1 )) ) ) = ( IC ( Comput (( B90 +* ( B91 ";" B92 ) ) , ( Initialize B89 ) , ( ( LifeSpan (( B90 +* B91 ) , ( Initialize B89 )) ) + 1 )) ) ))))))
+proof
+let C79 being (State of ( SCM+FSA ));
+let C80 being (Instruction-Sequence of ( SCM+FSA ));
+let C81 , C82 being (Program of ( SCM+FSA ));
+L272: ( dom ( C80 +* ( Directed C81 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L273: ( dom ( C80 +* ( C81 ";" C82 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+assume L274: C81 is_closed_on C79 , C80;
+set D23 = ( Initialize C79 );
+L275: ( ( Directed C81 ) ";" C82 ) = ( C81 ";" C82 ) by L269;
+set D24 = ( Initialize C79 );
+assume L276: C81 is_halting_on C79 , C80;
+L277: ( ( LifeSpan (( C80 +* C81 ) , D24) ) + 1 ) = ( pseudo-LifeSpan (C79 , C80 , ( Directed C81 )) ) by L276 , L274 , L252;
+L278: ( Directed C81 ) is_pseudo-closed_on C79 , C80 by L274 , L276 , L252;
+thus L279:now
+let C83 being (Element of ( NAT ));
+assume L280: C83 <= ( LifeSpan (( C80 +* C81 ) , D24) );
+L281: C83 < ( pseudo-LifeSpan (C79 , C80 , ( Directed C81 )) ) by L280 , L277 , NAT_1:13;
+L282: ( IC ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) ) ) in ( dom ( Directed C81 ) ) by L281 , L278 , L153;
+L283: ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) ) = ( Comput (( C80 +* ( C81 ";" C82 ) ) , D23 , C83) ) by L275 , L274 , L276 , L252 , L281 , L180;
+thus L284: ( IC ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) ) ) = ( IC ( Comput (( C80 +* ( C81 ";" C82 ) ) , D23 , C83) ) ) by L283;
+L285: ( Directed C81 ) c= ( C81 ";" C82 ) by SCMFSA6A:16;
+L286: ( dom ( Directed C81 ) ) c= ( dom ( C81 ";" C82 ) ) by L285 , GRFUNC_1:2;
+thus L287: ( CurInstr (( C80 +* ( Directed C81 ) ) , ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) )) ) = ( ( C80 +* ( Directed C81 ) ) . ( IC ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) ) ) ) by L272 , PARTFUN1:def 6
+.= ( ( Directed C81 ) . ( IC ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) ) ) ) by L282 , FUNCT_4:13
+.= ( ( C81 ";" C82 ) . ( IC ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , C83) ) ) ) by L282 , L285 , GRFUNC_1:2
+.= ( ( C80 +* ( C81 ";" C82 ) ) . ( IC ( Comput (( C80 +* ( C81 ";" C82 ) ) , D23 , C83) ) ) ) by L284 , L286 , L282 , FUNCT_4:13
+.= ( CurInstr (( C80 +* ( C81 ";" C82 ) ) , ( Comput (( C80 +* ( C81 ";" C82 ) ) , D23 , C83) )) ) by L273 , PARTFUN1:def 6;
+end;
+L288: ( Comput (( C80 +* ( Directed C81 ) ) , ( Initialize C79 ) , ( ( LifeSpan (( C80 +* C81 ) , D24) ) + 1 )) ) = ( Comput (( C80 +* ( C81 ";" C82 ) ) , D23 , ( ( LifeSpan (( C80 +* C81 ) , D24) ) + 1 )) ) by L274 , L276 , L275 , L277 , L252 , L180;
+thus L289: thesis by L288;
+end;
+theorem
+L290: (for B94 being (State of ( SCM+FSA )) holds (for B95 being (Instruction-Sequence of ( SCM+FSA )) holds (for B96 , B97 being (Program of ( SCM+FSA )) holds ((B96 is_closed_on ( Initialized B94 ) , B95 & B96 is_halting_on ( Initialized B94 ) , B95) implies ((for B98 being (Element of ( NAT )) holds (B98 <= ( LifeSpan (( B95 +* B96 ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) implies (( IC ( Comput (( B95 +* ( Directed B96 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B98) ) ) = ( IC ( Comput (( B95 +* ( B96 ";" B97 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B98) ) ) & ( CurInstr (( B95 +* ( Directed B96 ) ) , ( Comput (( B95 +* ( Directed B96 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B98) )) ) = ( CurInstr (( B95 +* ( B96 ";" B97 ) ) , ( Comput (( B95 +* ( B96 ";" B97 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B98) )) )))) & ( DataPart ( Comput (( B95 +* ( Directed B96 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B95 +* B96 ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) = ( DataPart ( Comput (( B95 +* ( B96 ";" B97 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B95 +* B96 ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) & ( IC ( Comput (( B95 +* ( Directed B96 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B95 +* B96 ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) = ( IC ( Comput (( B95 +* ( B96 ";" B97 ) ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B95 +* B96 ) , ( B94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ))))))
+proof
+let C84 being (State of ( SCM+FSA ));
+let C85 being (Instruction-Sequence of ( SCM+FSA ));
+let C86 , C87 being (Program of ( SCM+FSA ));
+L291: ( dom ( C85 +* ( C86 ";" C87 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L292: ( dom ( C85 +* ( Directed C86 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+assume L293: C86 is_closed_on ( Initialized C84 ) , C85;
+set D25 = ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+L294: (( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) = ( Initialize ( Initialized C84 ) ) & D25 = ( Initialize ( Initialized C84 ) )) by MEMSTR_0:44;
+L295: ( ( Directed C86 ) ";" C87 ) = ( C86 ";" C87 ) by L269;
+set D26 = ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+assume L296: C86 is_halting_on ( Initialized C84 ) , C85;
+L297: D26 = ( Initialize ( Initialized C84 ) ) by MEMSTR_0:44;
+L298: ( ( LifeSpan (( C85 +* C86 ) , D26) ) + 1 ) = ( pseudo-LifeSpan (( Initialized C84 ) , C85 , ( Directed C86 )) ) by L297 , L293 , L296 , L252;
+L299: ( Directed C86 ) is_pseudo-closed_on ( Initialized C84 ) , C85 by L293 , L296 , L252;
+thus L300:now
+let C88 being (Element of ( NAT ));
+assume L301: C88 <= ( LifeSpan (( C85 +* C86 ) , D26) );
+L302: C88 < ( pseudo-LifeSpan (( Initialized C84 ) , C85 , ( Directed C86 )) ) by L301 , L298 , NAT_1:13;
+L303: ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) ) = ( Comput (( C85 +* ( C86 ";" C87 ) ) , D25 , C88) ) by L302 , L294 , L295 , L293 , L296 , L252 , L180;
+thus L304: ( IC ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) ) ) = ( IC ( Comput (( C85 +* ( C86 ";" C87 ) ) , D25 , C88) ) ) by L303;
+L305: ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) = ( Initialize ( Initialized C84 ) ) by MEMSTR_0:44;
+L306: ( IC ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) ) ) in ( dom ( Directed C86 ) ) by L305 , L299 , L302 , L153;
+L307: ( Directed C86 ) c= ( C86 ";" C87 ) by SCMFSA6A:16;
+L308: ( dom ( Directed C86 ) ) c= ( dom ( C86 ";" C87 ) ) by L307 , GRFUNC_1:2;
+thus L309: ( CurInstr (( C85 +* ( Directed C86 ) ) , ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) )) ) = ( ( C85 +* ( Directed C86 ) ) . ( IC ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) ) ) ) by L292 , PARTFUN1:def 6
+.= ( ( Directed C86 ) . ( IC ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) ) ) ) by L306 , FUNCT_4:13
+.= ( ( C86 ";" C87 ) . ( IC ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C88) ) ) ) by L306 , L307 , GRFUNC_1:2
+.= ( ( C85 +* ( C86 ";" C87 ) ) . ( IC ( Comput (( C85 +* ( C86 ";" C87 ) ) , D25 , C88) ) ) ) by L304 , L308 , L306 , FUNCT_4:13
+.= ( CurInstr (( C85 +* ( C86 ";" C87 ) ) , ( Comput (( C85 +* ( C86 ";" C87 ) ) , D25 , C88) )) ) by L291 , PARTFUN1:def 6;
+end;
+L310: ( Comput (( C85 +* ( Directed C86 ) ) , ( C84 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( C85 +* C86 ) , D26) ) + 1 )) ) = ( Comput (( C85 +* ( C86 ";" C87 ) ) , D25 , ( ( LifeSpan (( C85 +* C86 ) , D26) ) + 1 )) ) by L293 , L296 , L294 , L295 , L298 , L252 , L180;
+thus L311: thesis by L310;
+end;
+theorem
+L312: (for B99 being (State of ( SCM+FSA )) holds (for B100 being (Instruction-Sequence of ( SCM+FSA )) holds (for B101 being (Program of ( SCM+FSA )) holds ((B101 is_closed_on ( Initialized B99 ) , B100 & B101 is_halting_on ( Initialized B99 ) , B100) implies (for B102 being (Element of ( NAT )) holds (B102 <= ( LifeSpan (( B100 +* B101 ) , ( B99 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) implies (( Comput (( B100 +* B101 ) , ( B99 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B102) ) = ( Comput (( B100 +* ( Directed B101 ) ) , ( B99 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B102) ) & ( CurInstr (( B100 +* ( Directed B101 ) ) , ( Comput (( B100 +* ( Directed B101 ) ) , ( B99 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B102) )) ) <> ( halt ( SCM+FSA ) ))))))))
+proof
+let C89 being (State of ( SCM+FSA ));
+let C90 being (Instruction-Sequence of ( SCM+FSA ));
+let C91 being (Program of ( SCM+FSA ));
+set D27 = ( C89 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+set D28 = ( C89 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+L313: ( dom ( C90 +* ( Directed C91 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L314: ( dom ( C90 +* C91 ) ) = ( NAT ) by PARTFUN1:def 2;
+L315: ( Directed C91 ) c= ( C90 +* ( Directed C91 ) ) by FUNCT_4:25;
+defpred S3[ Nat ] means ($1 <= ( LifeSpan (( C90 +* C91 ) , D27) ) implies (( Comput (( C90 +* C91 ) , D27 , $1) ) = ( Comput (( C90 +* ( Directed C91 ) ) , D28 , $1) ) & ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , $1) )) ) <> ( halt ( SCM+FSA ) )));
+L316: D27 = ( Initialize ( Initialized C89 ) ) by MEMSTR_0:44;
+assume L317: C91 is_closed_on ( Initialized C89 ) , C90;
+L318:
+now
+let C92 being (Element of ( NAT ));
+L319: ( dom ( Directed C91 ) ) = ( dom C91 ) by FUNCT_4:99;
+L320: ( IC ( Comput (( C90 +* C91 ) , D27 , C92) ) ) in ( dom ( Directed C91 ) ) by L319 , L317 , L316 , SCMFSA7B:def 6;
+L321: ( ( C90 +* ( Directed C91 ) ) /. ( IC ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C92) ) ) ) = ( ( C90 +* ( Directed C91 ) ) . ( IC ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C92) ) ) ) by L313 , PARTFUN1:def 6;
+assume L322: ( Comput (( C90 +* C91 ) , D27 , C92) ) = ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C92) );
+L323: ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C92) )) ) = ( ( C90 +* ( Directed C91 ) ) . ( IC ( Comput (( C90 +* C91 ) , D27 , C92) ) ) ) by L322 , L321
+.= ( ( Directed C91 ) . ( IC ( Comput (( C90 +* C91 ) , D27 , C92) ) ) ) by L320 , L315 , GRFUNC_1:2;
+L324: ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C92) )) ) in ( rng ( Directed C91 ) ) by L323 , L320 , FUNCT_1:def 3;
+assume L325: ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C92) )) ) = ( halt ( SCM+FSA ) );
+thus L326: contradiction by L325 , L324 , SCMFSA6A:1;
+end;
+assume L327: C91 is_halting_on ( Initialized C89 ) , C90;
+L328:
+now
+L329: ( C90 +* C91 ) halts_on D27 by L327 , L316 , SCMFSA7B:def 7;
+L330: ( dom C91 ) c= ( dom ( Directed C91 ) ) by FUNCT_4:99;
+let C93 being (Element of ( NAT ));
+assume L331: (C93 <= ( LifeSpan (( C90 +* C91 ) , D27) ) implies ( Comput (( C90 +* C91 ) , D27 , C93) ) = ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C93) ));
+L332: ( Comput (( C90 +* ( Directed C91 ) ) , D28 , ( C93 + 1 )) ) = ( Following (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C93) )) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C93) )) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C93) )) );
+L333: ( IC ( Comput (( C90 +* C91 ) , D27 , C93) ) ) in ( dom C91 ) by L317 , L316 , SCMFSA7B:def 6;
+L334: C91 c= ( C90 +* C91 ) by FUNCT_4:25;
+L335: ( CurInstr (( C90 +* C91 ) , ( Comput (( C90 +* C91 ) , D27 , C93) )) ) = ( ( C90 +* C91 ) . ( IC ( Comput (( C90 +* C91 ) , D27 , C93) ) ) ) by L314 , PARTFUN1:def 6
+.= ( C91 . ( IC ( Comput (( C90 +* C91 ) , D27 , C93) ) ) ) by L333 , L334 , GRFUNC_1:2;
+L336: ( C93 + ( 0 ) ) < ( C93 + 1 ) by XREAL_1:6;
+assume L337: ( C93 + 1 ) <= ( LifeSpan (( C90 +* C91 ) , D27) );
+L338: C93 < ( LifeSpan (( C90 +* C91 ) , D27) ) by L337 , L336 , XXREAL_0:2;
+L339: ( C91 . ( IC ( Comput (( C90 +* C91 ) , D27 , C93) ) ) ) <> ( halt ( SCM+FSA ) ) by L338 , L335 , L329 , EXTPRO_1:def 15;
+L340: ( CurInstr (( C90 +* C91 ) , ( Comput (( C90 +* C91 ) , D27 , C93) )) ) = ( ( Directed C91 ) . ( IC ( Comput (( C90 +* C91 ) , D27 , C93) ) ) ) by L339 , L335 , FUNCT_4:105
+.= ( ( C90 +* ( Directed C91 ) ) . ( IC ( Comput (( C90 +* C91 ) , D27 , C93) ) ) ) by L315 , L333 , L330 , GRFUNC_1:2
+.= ( ( C90 +* ( Directed C91 ) ) . ( IC ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C93) ) ) ) by L331 , L337 , L336 , XXREAL_0:2
+.= ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , C93) )) ) by L313 , PARTFUN1:def 6;
+L341: ( Comput (( C90 +* C91 ) , D27 , ( C93 + 1 )) ) = ( Following (( C90 +* C91 ) , ( Comput (( C90 +* C91 ) , D27 , C93) )) ) by EXTPRO_1:3
+.= ( Exec (( CurInstr (( C90 +* C91 ) , ( Comput (( C90 +* C91 ) , D27 , C93) )) ) , ( Comput (( C90 +* C91 ) , D27 , C93) )) );
+thus L342: ( Comput (( C90 +* C91 ) , D27 , ( C93 + 1 )) ) = ( Comput (( C90 +* ( Directed C91 ) ) , D28 , ( C93 + 1 )) ) by L341 , L331 , L337 , L336 , L340 , L332 , XXREAL_0:2;
+thus L343: ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , ( C93 + 1 )) )) ) <> ( halt ( SCM+FSA ) ) by L342 , L318;
+end;
+L344: (for B103 being (Element of ( NAT )) holds (S3[ B103 ] implies S3[ ( B103 + 1 ) ])) by L328;
+L345:
+now
+assume L346: ( 0 ) <= ( LifeSpan (( C90 +* C91 ) , D27) );
+thus L347: ( Comput (( C90 +* C91 ) , D27 , ( 0 )) ) = ( Comput (( C90 +* ( Directed C91 ) ) , D28 , ( 0 )) );
+thus L348: ( CurInstr (( C90 +* ( Directed C91 ) ) , ( Comput (( C90 +* ( Directed C91 ) ) , D28 , ( 0 )) )) ) <> ( halt ( SCM+FSA ) ) by L347 , L318;
+end;
+L349: S3[ ( 0 ) ] by L345;
+thus L350: (for B104 being (Element of ( NAT )) holds S3[ B104 ]) from NAT_1:sch 1(L349 , L344);
+end;
+theorem
+L351: (for B105 being (State of ( SCM+FSA )) holds (for B106 being (Instruction-Sequence of ( SCM+FSA )) holds (for B107 being (Program of ( SCM+FSA )) holds ((B107 is_closed_on ( Initialized B105 ) , B106 & B107 is_halting_on ( Initialized B105 ) , B106) implies (( IC ( Comput (( B106 +* ( Directed B107 ) ) , ( B105 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B106 +* B107 ) , ( B105 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) = ( card B107 ) & ( DataPart ( Comput (( B106 +* B107 ) , ( B105 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( LifeSpan (( B106 +* B107 ) , ( B105 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) )) ) ) = ( DataPart ( Comput (( B106 +* ( Directed B107 ) ) , ( B105 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B106 +* B107 ) , ( B105 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ))))))
+proof
+let C94 being (State of ( SCM+FSA ));
+let C95 being (Instruction-Sequence of ( SCM+FSA ));
+let C96 being (Program of ( SCM+FSA ));
+set D29 = ( C94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+set D30 = ( C94 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+set D31 = ( LifeSpan (( C95 +* C96 ) , D29) );
+L352: ( dom ( C95 +* C96 ) ) = ( NAT ) by PARTFUN1:def 2;
+L353: ( dom ( C95 +* ( Directed C96 ) ) ) = ( NAT ) by PARTFUN1:def 2;
+assume L354: C96 is_closed_on ( Initialized C94 ) , C95;
+set D32 = ( IC ( Comput (( C95 +* C96 ) , D29 , D31) ) );
+L355: D29 = ( Initialize ( Initialized C94 ) ) by MEMSTR_0:44;
+L356: D32 in ( dom C96 ) by L355 , L354 , SCMFSA7B:def 6;
+assume L357: C96 is_halting_on ( Initialized C94 ) , C95;
+L358: ( Comput (( C95 +* C96 ) , D29 , D31) ) = ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) by L357 , L354 , L312;
+L359: ( IC ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) ) in ( dom C96 ) by L358 , L356;
+L360: ( IC ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) ) in ( dom ( Directed C96 ) ) by L359 , FUNCT_4:99;
+L361: ( C95 +* C96 ) halts_on D29 by L357 , L355 , SCMFSA7B:def 7;
+L362: C96 c= ( C95 +* C96 ) by FUNCT_4:25;
+L363: ( C96 . D32 ) = ( ( C95 +* C96 ) . D32 ) by L356 , L362 , GRFUNC_1:2
+.= ( CurInstr (( C95 +* C96 ) , ( Comput (( C95 +* C96 ) , D29 , D31) )) ) by L352 , PARTFUN1:def 6
+.= ( halt ( SCM+FSA ) ) by L361 , EXTPRO_1:def 15;
+L364: D32 = ( IC ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) ) by L358;
+L365: ( ( C95 +* ( Directed C96 ) ) . D32 ) = ( ( Directed C96 ) . D32 ) by L364 , L360 , FUNCT_4:13
+.= ( goto ( card C96 ) ) by L356 , L363 , FUNCT_4:106;
+L366: ( ( C95 +* ( Directed C96 ) ) /. ( IC ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) ) ) = ( ( C95 +* ( Directed C96 ) ) . ( IC ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) ) ) by L353 , PARTFUN1:def 6;
+L367: ( Comput (( C95 +* ( Directed C96 ) ) , D30 , ( D31 + 1 )) ) = ( Following (( C95 +* ( Directed C96 ) ) , ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) )) ) by EXTPRO_1:3
+.= ( Exec (( goto ( card C96 ) ) , ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) )) ) by L365 , L366 , L358;
+thus L368: ( IC ( Comput (( C95 +* ( Directed C96 ) ) , D30 , ( D31 + 1 )) ) ) = ( card C96 ) by L367 , SCMFSA_2:69;
+L369: ((for B108 being Int-Location holds ( ( Comput (( C95 +* ( Directed C96 ) ) , D30 , ( D31 + 1 )) ) . B108 ) = ( ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) . B108 )) & (for B109 being FinSeq-Location holds ( ( Comput (( C95 +* ( Directed C96 ) ) , D30 , ( D31 + 1 )) ) . B109 ) = ( ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) . B109 ))) by L367 , SCMFSA_2:69;
+L370: ( DataPart ( Comput (( C95 +* C96 ) , D29 , D31) ) ) = ( DataPart ( Comput (( C95 +* ( Directed C96 ) ) , D30 , D31) ) ) by L358;
+thus L371: thesis by L370 , L369 , SCMFSA_M:2;
+end;
+L372: (for B110 being (Program of ( SCM+FSA )) holds (for B111 being (Instruction-Sequence of ( SCM+FSA )) holds (for B112 being (State of ( SCM+FSA )) holds ((B110 is_closed_on B112 , B111 & B110 is_halting_on B112 , B111) implies (( IC ( Comput (( B111 +* ( B110 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B112 ) , ( ( LifeSpan (( B111 +* B110 ) , ( Initialize B112 )) ) + 1 )) ) ) = ( card B110 ) & ( DataPart ( Comput (( B111 +* B110 ) , ( Initialize B112 ) , ( LifeSpan (( B111 +* B110 ) , ( Initialize B112 )) )) ) ) = ( DataPart ( Comput (( B111 +* ( B110 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B112 ) , ( ( LifeSpan (( B111 +* B110 ) , ( Initialize B112 )) ) + 1 )) ) ) & ( B111 +* ( B110 ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( Initialize B112 ) & ( LifeSpan (( B111 +* ( B110 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B112 )) ) = ( ( LifeSpan (( B111 +* B110 ) , ( Initialize B112 )) ) + 1 ) & ( B110 ";" ( Stop ( SCM+FSA ) ) ) is_closed_on B112 , B111 & ( B110 ";" ( Stop ( SCM+FSA ) ) ) is_halting_on B112 , B111)))))
+proof
+let C97 being (Program of ( SCM+FSA ));
+let C98 being (Instruction-Sequence of ( SCM+FSA ));
+let C99 being (State of ( SCM+FSA ));
+assume L373: C97 is_closed_on C99 , C98;
+L374: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L375: ( card ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) = ( ( card C97 ) + 1 ) by L374 , SCMFSA6A:21;
+L376: ( card C97 ) < ( card ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) by L375 , NAT_1:13;
+L377: ( card C97 ) in ( dom ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) by L376 , AFINSQ_1:66;
+L378: ( 0 ) in ( dom ( Stop ( SCM+FSA ) ) ) by COMPOS_1:3;
+L379: ( ( 0 ) + ( card C97 ) ) in { ( R1 + ( card C97 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom ( Stop ( SCM+FSA ) ) ) } by L378;
+L380: ( ( 0 ) + ( card C97 ) ) in ( dom ( Reloc (( Stop ( SCM+FSA ) ) , ( card C97 )) ) ) by L379 , COMPOS_1:33;
+set D33 = ( Initialize C99 );
+set D34 = ( Initialize C99 );
+L381: ( 0 ) in ( dom ( Stop ( SCM+FSA ) ) ) by COMPOS_1:3;
+L382: ( ( Stop ( SCM+FSA ) ) . ( 0 ) ) = ( halt ( SCM+FSA ) ) by AFINSQ_1:34;
+assume L383: C97 is_halting_on C99 , C98;
+L384: ( IC ( Comput (( C98 +* ( Directed C97 ) ) , ( Initialize C99 ) , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) = ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) by L383 , L373 , L271;
+L385: ( ( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) . ( card C97 ) ) = ( ( C97 ";" ( Stop ( SCM+FSA ) ) ) . ( card C97 ) ) by L377 , FUNCT_4:13
+.= ( ( Reloc (( Stop ( SCM+FSA ) ) , ( card C97 )) ) . ( ( 0 ) + ( card C97 ) ) ) by L380 , FUNCT_4:13
+.= ( IncAddr (( halt ( SCM+FSA ) ) , ( card C97 )) ) by L382 , L381 , COMPOS_1:35
+.= ( halt ( SCM+FSA ) ) by COMPOS_0:4;
+L386: ( DataPart ( Comput (( C98 +* ( Directed C97 ) ) , ( Initialize C99 ) , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) = ( DataPart ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) by L373 , L383 , L271;
+thus L387: (( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) = ( card C97 ) & ( DataPart ( Comput (( C98 +* C97 ) , D34 , ( LifeSpan (( C98 +* C97 ) , D34) )) ) ) = ( DataPart ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) )) by L386 , L373 , L383 , L384 , L232;
+L388: ( dom ( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L389: ( ( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) /. ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) ) = ( ( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) . ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) ) ) ) by L388 , PARTFUN1:def 6;
+L390: ( CurInstr (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 )) )) ) = ( halt ( SCM+FSA ) ) by L385 , L373 , L383 , L384 , L232 , L389;
+thus L391: ( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) halts_on D33 by L390 , EXTPRO_1:29;
+L392:
+now
+let C100 being (Element of ( NAT ));
+assume L393: C100 <= ( LifeSpan (( C98 +* C97 ) , D34) );
+L394: ( Comput (( C98 +* C97 ) , D34 , C100) ) = ( Comput (( C98 +* ( Directed C97 ) ) , ( Initialize C99 ) , C100) ) by L393 , L373 , L383 , L192;
+L395: ( IC ( Comput (( C98 +* C97 ) , D34 , C100) ) ) = ( IC ( Comput (( C98 +* ( Directed C97 ) ) , ( Initialize C99 ) , C100) ) ) by L394;
+L396: ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , C100) ) ) = ( IC ( Comput (( C98 +* C97 ) , D34 , C100) ) ) by L395 , L373 , L383 , L393 , L271;
+L397: ( IC ( Comput (( C98 +* C97 ) , D34 , C100) ) ) in ( dom C97 ) by L373 , SCMFSA7B:def 6;
+L398: ( dom C97 ) c= ( dom ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) by SCMFSA6A:17;
+thus L399: ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , C100) ) ) in ( dom ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) by L398 , L396 , L397;
+end;
+defpred S4[ Nat ] means ((( LifeSpan (( C98 +* C97 ) , D34) ) < $1 implies ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , $1) ) ) = ( card C97 )) & ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , $1) ) ) in ( dom ( C97 ";" ( Stop ( SCM+FSA ) ) ) ));
+L400: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L401: ( card ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) = ( ( card C97 ) + 1 ) by L400 , SCMFSA6A:21;
+L402: ( ( card C97 ) + ( 0 ) ) < ( card ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) by L401 , XREAL_1:6;
+L403: ( card C97 ) in ( dom ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) by L402 , AFINSQ_1:66;
+L404:
+now
+let C101 being (Element of ( NAT ));
+assume L405: S4[ C101 ];
+per cases  by XXREAL_0:1;
+suppose L406: C101 < ( LifeSpan (( C98 +* C97 ) , D34) );
+
+L407: ( C101 + 1 ) <= ( LifeSpan (( C98 +* C97 ) , D34) ) by L406 , NAT_1:13;
+thus L408: S4[ ( C101 + 1 ) ] by L407 , L392;
+end;
+suppose L409: C101 = ( LifeSpan (( C98 +* C97 ) , D34) );
+
+thus L410: S4[ ( C101 + 1 ) ] by L409 , L373 , L383 , L384 , L403 , L232;
+end;
+suppose L411: C101 > ( LifeSpan (( C98 +* C97 ) , D34) );
+
+L412:
+now
+assume L413: ( C101 + 1 ) > ( LifeSpan (( C98 +* C97 ) , D34) );
+L414: ( dom ( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L415: ( CurInstr (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , C101) )) ) = ( halt ( SCM+FSA ) ) by L385 , L405 , L411 , L414 , PARTFUN1:def 6;
+thus L416: ( IC ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , ( C101 + 1 )) ) ) = ( IC ( Following (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , C101) )) ) ) by EXTPRO_1:3
+.= ( card C97 ) by L405 , L411 , L415 , EXTPRO_1:def 3;
+end;
+L417: ( C101 + 1 ) > ( C101 + ( 0 ) ) by XREAL_1:6;
+thus L418: S4[ ( C101 + 1 ) ] by L417 , L402 , L411 , L412 , AFINSQ_1:66 , XXREAL_0:2;
+end;
+end;
+L420:
+now
+let C102 being (Element of ( NAT ));
+assume L421: C102 < ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 );
+L422: C102 <= ( LifeSpan (( C98 +* C97 ) , D34) ) by L421 , NAT_1:13;
+L423: ( CurInstr (( C98 +* ( Directed C97 ) ) , ( Comput (( C98 +* ( Directed C97 ) ) , ( Initialize C99 ) , C102) )) ) <> ( halt ( SCM+FSA ) ) by L422 , L373 , L383 , L192;
+thus L424: ( CurInstr (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , C102) )) ) <> ( halt ( SCM+FSA ) ) by L423 , L373 , L383 , L422 , L271;
+end;
+L425: (for B113 being (Element of ( NAT )) holds (( CurInstr (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33 , B113) )) ) = ( halt ( SCM+FSA ) ) implies ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 ) <= B113)) by L420;
+thus L426: ( LifeSpan (( C98 +* ( C97 ";" ( Stop ( SCM+FSA ) ) ) ) , D33) ) = ( ( LifeSpan (( C98 +* C97 ) , D34) ) + 1 ) by L425 , L390 , L391 , EXTPRO_1:def 15;
+L427: S4[ ( 0 ) ] by L392 , NAT_1:2;
+L428: (for B114 being (Element of ( NAT )) holds S4[ B114 ]) from NAT_1:sch 1(L427 , L404);
+thus L429: ( C97 ";" ( Stop ( SCM+FSA ) ) ) is_closed_on C99 , C98 by L428 , SCMFSA7B:def 6;
+thus L430: thesis by L391 , SCMFSA7B:def 7;
+end;
+theorem
+L431: (for B115 being (Program of ( SCM+FSA )) holds (for B116 being (Instruction-Sequence of ( SCM+FSA )) holds (for B117 being (State of ( SCM+FSA )) holds ((B115 is_closed_on B117 , B116 & B115 is_halting_on B117 , B116) implies (( B115 ";" ( Stop ( SCM+FSA ) ) ) is_closed_on B117 , B116 & ( B115 ";" ( Stop ( SCM+FSA ) ) ) is_halting_on B117 , B116))))) by L372;
+theorem
+L432: (for B118 being (Element of ( NAT )) holds (( 0 ) in ( dom ( Goto B118 ) ) & ( ( Goto B118 ) . ( 0 ) ) = ( goto B118 ))) by L116;
+L433: (for B119 being (Program of ( SCM+FSA )) holds (for B120 being (State of ( SCM+FSA )) holds (for B121 being (Instruction-Sequence of ( SCM+FSA )) holds ((B119 is_closed_on ( Initialized B120 ) , B121 & B119 is_halting_on ( Initialized B120 ) , B121) implies (( IC ( Comput (( B121 +* ( B119 ";" ( Stop ( SCM+FSA ) ) ) ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B121 +* B119 ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) = ( card B119 ) & ( DataPart ( Comput (( B121 +* B119 ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( LifeSpan (( B121 +* B119 ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) )) ) ) = ( DataPart ( Comput (( B121 +* ( B119 ";" ( Stop ( SCM+FSA ) ) ) ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B121 +* B119 ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) & ( B121 +* ( B119 ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) & ( LifeSpan (( B121 +* ( B119 ";" ( Stop ( SCM+FSA ) ) ) ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) = ( ( LifeSpan (( B121 +* B119 ) , ( B120 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 ))))))
+proof
+let C103 being (Program of ( SCM+FSA ));
+let C104 being (State of ( SCM+FSA ));
+let C105 being (Instruction-Sequence of ( SCM+FSA ));
+assume L434: C103 is_closed_on ( Initialized C104 ) , C105;
+L435: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L436: ( card ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) = ( ( card C103 ) + 1 ) by L435 , SCMFSA6A:21;
+L437: ( card C103 ) < ( card ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) by L436 , NAT_1:13;
+L438: ( card C103 ) in ( dom ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) by L437 , AFINSQ_1:66;
+L439: ( 0 ) in ( dom ( Stop ( SCM+FSA ) ) ) by COMPOS_1:3;
+L440: ( ( 0 ) + ( card C103 ) ) in { ( R1 + ( card C103 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom ( Stop ( SCM+FSA ) ) ) } by L439;
+L441: ( ( 0 ) + ( card C103 ) ) in ( dom ( Reloc (( Stop ( SCM+FSA ) ) , ( card C103 )) ) ) by L440 , COMPOS_1:33;
+set D35 = ( C104 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+set D36 = ( C104 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+assume L442: C103 is_halting_on ( Initialized C104 ) , C105;
+L443: ( IC ( Comput (( C105 +* ( Directed C103 ) ) , ( C104 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) = ( IC ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) by L442 , L434 , L290;
+L444: ( 0 ) in ( dom ( Stop ( SCM+FSA ) ) ) by COMPOS_1:3;
+L445: ( ( Stop ( SCM+FSA ) ) . ( 0 ) ) = ( halt ( SCM+FSA ) ) by AFINSQ_1:34;
+L446: ( ( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) . ( card C103 ) ) = ( ( C103 ";" ( Stop ( SCM+FSA ) ) ) . ( card C103 ) ) by L438 , FUNCT_4:13
+.= ( ( Reloc (( Stop ( SCM+FSA ) ) , ( card C103 )) ) . ( ( 0 ) + ( card C103 ) ) ) by L441 , FUNCT_4:13
+.= ( IncAddr (( halt ( SCM+FSA ) ) , ( card C103 )) ) by L445 , L444 , COMPOS_1:35
+.= ( halt ( SCM+FSA ) ) by COMPOS_0:4;
+L447: ( DataPart ( Comput (( C105 +* ( Directed C103 ) ) , ( C104 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) = ( DataPart ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) by L434 , L442 , L290;
+thus L448: (( IC ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) = ( card C103 ) & ( DataPart ( Comput (( C105 +* C103 ) , D36 , ( LifeSpan (( C105 +* C103 ) , D36) )) ) ) = ( DataPart ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) )) by L447 , L434 , L442 , L443 , L351;
+L449: ( dom ( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) ) = ( NAT ) by PARTFUN1:def 2;
+L450: ( ( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) /. ( IC ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) ) = ( ( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) . ( IC ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) ) ) ) by L449 , PARTFUN1:def 6;
+L451: ( CurInstr (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 )) )) ) = ( halt ( SCM+FSA ) ) by L446 , L434 , L442 , L443 , L351 , L450;
+thus L452: ( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) halts_on D35 by L451 , EXTPRO_1:29;
+L453:
+now
+let C106 being (Element of ( NAT ));
+assume L454: C106 < ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 );
+L455: C106 <= ( LifeSpan (( C105 +* C103 ) , D36) ) by L454 , NAT_1:13;
+L456: ( CurInstr (( C105 +* ( Directed C103 ) ) , ( Comput (( C105 +* ( Directed C103 ) ) , ( C104 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C106) )) ) <> ( halt ( SCM+FSA ) ) by L455 , L434 , L442 , L312;
+thus L457: ( CurInstr (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , C106) )) ) <> ( halt ( SCM+FSA ) ) by L456 , L434 , L442 , L455 , L290;
+end;
+L458: (for B122 being (Element of ( NAT )) holds (( CurInstr (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( C105 +* ( C103 ";" ( Stop ( SCM+FSA ) ) ) ) , D35 , B122) )) ) = ( halt ( SCM+FSA ) ) implies ( ( LifeSpan (( C105 +* C103 ) , D36) ) + 1 ) <= B122)) by L453;
+thus L459: thesis by L458 , L451 , L452 , EXTPRO_1:def 15;
+end;
+theorem
+L460: (for B123 being (Program of ( SCM+FSA )) holds (for B124 being (State of ( SCM+FSA )) holds (for B125 being (Instruction-Sequence of ( SCM+FSA )) holds ((B123 is_closed_on ( Initialized B124 ) , B125 & B123 is_halting_on ( Initialized B124 ) , B125) implies ( IC ( Comput (( B125 +* ( B123 ";" ( Stop ( SCM+FSA ) ) ) ) , ( B124 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B125 +* B123 ) , ( B124 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) = ( card B123 ))))) by L433;
+theorem
+L461: (for B126 being (Program of ( SCM+FSA )) holds (for B127 being (State of ( SCM+FSA )) holds (for B128 being (Instruction-Sequence of ( SCM+FSA )) holds ((B126 is_closed_on ( Initialized B127 ) , B128 & B126 is_halting_on ( Initialized B127 ) , B128) implies ( DataPart ( Comput (( B128 +* B126 ) , ( B127 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( LifeSpan (( B128 +* B126 ) , ( B127 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) )) ) ) = ( DataPart ( Comput (( B128 +* ( B126 ";" ( Stop ( SCM+FSA ) ) ) ) , ( B127 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( B128 +* B126 ) , ( B127 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ))))) by L433;
+theorem
+L462: (for B129 being (Program of ( SCM+FSA )) holds (for B130 being (State of ( SCM+FSA )) holds (for B131 being (Instruction-Sequence of ( SCM+FSA )) holds ((B129 is_closed_on ( Initialized B130 ) , B131 & B129 is_halting_on ( Initialized B130 ) , B131) implies ( B131 +* ( B129 ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( B130 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ))))) by L433;
+theorem
+L463: (for B132 being (Program of ( SCM+FSA )) holds (for B133 being (State of ( SCM+FSA )) holds (for B134 being (Instruction-Sequence of ( SCM+FSA )) holds ((B132 is_closed_on ( Initialized B133 ) , B134 & B132 is_halting_on ( Initialized B133 ) , B134) implies ( LifeSpan (( B134 +* ( B132 ";" ( Stop ( SCM+FSA ) ) ) ) , ( B133 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) = ( ( LifeSpan (( B134 +* B132 ) , ( B133 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 ))))) by L433;
+theorem
+L464: (for B135 being (State of ( SCM+FSA )) holds (for B136 being (Instruction-Sequence of ( SCM+FSA )) holds (for B137 being (Program of ( SCM+FSA )) holds ((B137 is_closed_on ( Initialized B135 ) , B136 & B137 is_halting_on ( Initialized B135 ) , B136) implies ( IExec (( B137 ";" ( Stop ( SCM+FSA ) ) ) , B136 , B135) ) = ( ( IExec (B137 , B136 , B135) ) +* ( Start-At (( card B137 ) , ( SCM+FSA )) ) )))))
+proof
+let C107 being (State of ( SCM+FSA ));
+let C108 being (Instruction-Sequence of ( SCM+FSA ));
+let C109 being (Program of ( SCM+FSA ));
+assume L465: C109 is_closed_on ( Initialized C107 ) , C108;
+set D37 = ( Initialized C107 );
+assume L466: C109 is_halting_on ( Initialized C107 ) , C108;
+L467: D37 = ( Initialize ( Initialized C107 ) ) by MEMSTR_0:44;
+L468: ( C108 +* C109 ) halts_on D37 by L467 , L466 , SCMFSA7B:def 7;
+L469: (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) halts_on D37 & ( LifeSpan (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) = ( ( LifeSpan (( C108 +* C109 ) , D37) ) + 1 )) by L465 , L466 , L433;
+L470: ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) = ( Comput (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37 , ( ( LifeSpan (( C108 +* C109 ) , D37) ) + 1 )) ) by L469 , EXTPRO_1:23;
+L471: ( DataPart ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) ) = ( DataPart ( Comput (( C108 +* C109 ) , D37 , ( LifeSpan (( C108 +* C109 ) , D37) )) ) ) by L470 , L465 , L466 , L433;
+L472: ( DataPart ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) ) = ( DataPart ( Result (( C108 +* C109 ) , D37) ) ) by L471 , L468 , EXTPRO_1:23
+.= ( DataPart ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) ) ) by MEMSTR_0:79;
+L473: ( IC ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) ) = ( card C109 ) by L465 , L466 , L470 , L433
+.= ( IC ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) ) ) by FUNCT_4:113;
+L474: ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) = ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) ) by L473 , L472 , MEMSTR_0:78;
+L475: ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) = ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) ) by L474;
+thus L476: ( IExec (( C109 ";" ( Stop ( SCM+FSA ) ) ) , C108 , C107) ) = ( Result (( C108 +* ( C109 ";" ( Stop ( SCM+FSA ) ) ) ) , D37) ) by SCMFSA6B:def 1
+.= ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) ) by L475
+.= ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) )
+.= ( ( Result (( C108 +* C109 ) , D37) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) )
+.= ( ( IExec (C109 , C108 , C107) ) +* ( Start-At (( card C109 ) , ( SCM+FSA )) ) ) by SCMFSA6B:def 1;
+end;
+L477: (for R2 being (Instruction-Sequence of ( SCM+FSA )) holds (for B138 , B139 being (Program of ( SCM+FSA )) holds (for B140 being (State of ( SCM+FSA )) holds ((B138 is_closed_on B140 , R2 & B138 is_halting_on B140 , R2) implies (( IC ( Comput (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B140 ) , ( ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) ) + 2 )) ) ) = ( ( ( card B138 ) + ( card B139 ) ) + 1 ) & ( DataPart ( Comput (( R2 +* B138 ) , ( Initialize B140 ) , ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) )) ) ) = ( DataPart ( Comput (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B140 ) , ( ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) ) + 2 )) ) ) & (for B141 being (Element of ( NAT )) holds (B141 < ( ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) ) + 2 ) implies ( CurInstr (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B140 ) , B141) )) ) <> ( halt ( SCM+FSA ) ))) & (for B142 being (Element of ( NAT )) holds (B142 <= ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) ) implies ( IC ( Comput (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B140 ) , B142) ) ) = ( IC ( Comput (( R2 +* B138 ) , ( Initialize B140 ) , B142) ) ))) & ( IC ( Comput (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B140 ) , ( ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) ) + 1 )) ) ) = ( card B138 ) & ( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( Initialize B140 ) & ( LifeSpan (( R2 +* ( ( ( B138 ";" ( Goto ( ( card B139 ) + 1 ) ) ) ";" B139 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Initialize B140 )) ) = ( ( LifeSpan (( R2 +* B138 ) , ( Initialize B140 )) ) + 2 ))))))
+proof
+let R2 being (Instruction-Sequence of ( SCM+FSA ));
+let C110 , C111 being (Program of ( SCM+FSA ));
+let C112 being (State of ( SCM+FSA ));
+assume L478: C110 is_closed_on C112 , R2;
+L479: ( card ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ) = ( ( card ( Goto ( ( card C111 ) + 1 ) ) ) + ( card C111 ) ) by SCMFSA6A:21
+.= ( 1 + ( card C111 ) ) by L116;
+L480: ( card ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ) = ( ( card ( Goto ( ( card C111 ) + 1 ) ) ) + ( card C111 ) ) by SCMFSA6A:21
+.= ( ( card C111 ) + 1 ) by L116;
+L481: ( ( ( card C110 ) + ( card C111 ) ) + 1 ) = ( ( ( card C111 ) + 1 ) + ( card C110 ) );
+L482: ( 0 ) in ( dom ( Stop ( SCM+FSA ) ) ) by COMPOS_1:3;
+set D38 = ( ( Goto ( ( card C111 ) + 1 ) ) ";" ( C111 ";" ( Stop ( SCM+FSA ) ) ) );
+set D39 = ( Initialize C112 );
+set D40 = ( R2 +* ( ( ( C110 ";" ( Goto ( ( card C111 ) + 1 ) ) ) ";" C111 ) ";" ( Stop ( SCM+FSA ) ) ) );
+set D41 = ( Initialize C112 );
+assume L483: C110 is_halting_on C112 , R2;
+L484: ( dom ( Reloc (( Stop ( SCM+FSA ) ) , ( ( card C111 ) + 1 )) ) ) = { ( R1 + ( ( card C111 ) + 1 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom ( Stop ( SCM+FSA ) ) ) } by COMPOS_1:33;
+L485: ( ( 0 ) + ( ( card C111 ) + 1 ) ) in ( dom ( Reloc (( Stop ( SCM+FSA ) ) , ( ( card C111 ) + 1 )) ) ) by L484 , L482;
+L486: ( dom ( Goto ( ( card C111 ) + 1 ) ) ) c= ( dom ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ) by SCMFSA6A:17;
+L487: ( 0 ) in ( dom ( Goto ( ( card C111 ) + 1 ) ) ) by L116;
+L488: ( D38 . ( 0 ) ) = ( ( ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ";" ( Stop ( SCM+FSA ) ) ) . ( 0 ) ) by SCMFSA6A:25
+.= ( ( Directed ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ) . ( 0 ) ) by L487 , L486 , L169
+.= ( ( ( Goto ( ( card C111 ) + 1 ) ) ";" ( Directed C111 ) ) . ( 0 ) ) by SCMFSA6A:24
+.= ( ( Directed ( Goto ( ( card C111 ) + 1 ) ) ) . ( 0 ) ) by L487 , L169
+.= ( ( Goto ( ( card C111 ) + 1 ) ) . ( 0 ) ) by SCMFSA6A:22
+.= ( goto ( ( card C111 ) + 1 ) ) by L116;
+L489: ( ( ( C110 ";" ( Goto ( ( card C111 ) + 1 ) ) ) ";" C111 ) ";" ( Stop ( SCM+FSA ) ) ) = ( ( C110 ";" ( Goto ( ( card C111 ) + 1 ) ) ) ";" ( C111 ";" ( Stop ( SCM+FSA ) ) ) ) by SCMFSA6A:25
+.= ( C110 ";" D38 ) by SCMFSA6A:25;
+L490: ( DataPart ( Comput (( R2 +* ( Directed C110 ) ) , ( Initialize C112 ) , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) = ( DataPart ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) by L489 , L478 , L483 , L271;
+L491: ( card D38 ) = ( ( card ( Goto ( ( card C111 ) + 1 ) ) ) + ( card ( C111 ";" ( Stop ( SCM+FSA ) ) ) ) ) by SCMFSA6A:21
+.= ( 1 + ( card ( C111 ";" ( Stop ( SCM+FSA ) ) ) ) ) by L116;
+L492: ( ( 0 ) + 1 ) <= ( card D38 ) by L491 , NAT_1:11;
+L493: ( card ( C110 ";" D38 ) ) = ( ( card C110 ) + ( card D38 ) ) by SCMFSA6A:21;
+L494: ( ( card C110 ) + ( 0 ) ) < ( card ( C110 ";" D38 ) ) by L493 , L492 , XREAL_1:6;
+L495: ( card C110 ) in ( dom ( C110 ";" D38 ) ) by L494 , AFINSQ_1:66;
+L496: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L497: ( card ( C110 ";" D38 ) ) = ( ( card C110 ) + ( card ( ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ";" ( Stop ( SCM+FSA ) ) ) ) ) by L493 , SCMFSA6A:25
+.= ( ( card C110 ) + ( ( ( card C111 ) + 1 ) + 1 ) ) by L480 , L496 , SCMFSA6A:21
+.= ( ( ( ( card C110 ) + ( card C111 ) ) + 1 ) + 1 );
+L498: ( ( ( card C110 ) + ( card C111 ) ) + 1 ) < ( card ( C110 ";" D38 ) ) by L497 , NAT_1:13;
+L499: ( ( ( card C110 ) + ( card C111 ) ) + 1 ) in ( dom ( C110 ";" D38 ) ) by L498 , AFINSQ_1:66;
+L500: ( 0 ) in ( dom D38 ) by L492 , AFINSQ_1:66;
+L501: ( ( 0 ) + ( card C110 ) ) in { ( R1 + ( card C110 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom D38 ) } by L500;
+L502: ( ( 0 ) + ( card C110 ) ) in ( dom ( Reloc (D38 , ( card C110 )) ) ) by L501 , COMPOS_1:33;
+L503: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L504: ( ( Stop ( SCM+FSA ) ) . ( 0 ) ) = ( halt ( SCM+FSA ) ) by AFINSQ_1:34;
+L505: ( card D38 ) = ( 1 + ( ( card C111 ) + ( card ( Stop ( SCM+FSA ) ) ) ) ) by L491 , SCMFSA6A:21
+.= ( ( card C111 ) + ( 1 + ( card ( Stop ( SCM+FSA ) ) ) ) );
+L506: ( ( card C111 ) + 1 ) < ( card D38 ) by L505 , L503 , XREAL_1:6;
+L507: ( ( card C111 ) + 1 ) in ( dom D38 ) by L506 , AFINSQ_1:66;
+L508: ( D38 . ( ( card C111 ) + 1 ) ) = ( ( ( ( Goto ( ( card C111 ) + 1 ) ) ";" C111 ) ";" ( Stop ( SCM+FSA ) ) ) . ( ( card C111 ) + 1 ) ) by SCMFSA6A:25
+.= ( ( Reloc (( Stop ( SCM+FSA ) ) , ( ( card C111 ) + 1 )) ) . ( ( 0 ) + ( ( card C111 ) + 1 ) ) ) by L479 , L485 , FUNCT_4:13
+.= ( IncAddr (( halt ( SCM+FSA ) ) , ( ( card C111 ) + 1 )) ) by L482 , L504 , COMPOS_1:35
+.= ( halt ( SCM+FSA ) ) by COMPOS_0:4;
+L509: ( dom ( Reloc (D38 , ( card C110 )) ) ) = { ( R1 + ( card C110 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom D38 ) } by COMPOS_1:33;
+L510: ( ( ( card C110 ) + ( card C111 ) ) + 1 ) in ( dom ( Reloc (D38 , ( card C110 )) ) ) by L509 , L507 , L481;
+L511: ( IC ( Comput (( R2 +* ( Directed C110 ) ) , ( Initialize C112 ) , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) = ( IC ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) by L478 , L483 , L489 , L271;
+L512: ( CurInstr (D40 , ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) )) ) = ( D40 . ( IC ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) ) by PBOOLE:143
+.= ( D40 . ( IC ( Comput (( R2 +* ( Directed C110 ) ) , ( Initialize C112 ) , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) ) by L478 , L483 , L489 , L271
+.= ( D40 . ( card C110 ) ) by L478 , L483 , L232
+.= ( ( C110 ";" D38 ) . ( card C110 ) ) by L489 , L495 , FUNCT_4:13
+.= ( ( Reloc (D38 , ( card C110 )) ) . ( ( 0 ) + ( card C110 ) ) ) by L502 , FUNCT_4:13
+.= ( IncAddr (( goto ( ( card C111 ) + 1 ) ) , ( card C110 )) ) by L500 , L488 , COMPOS_1:35
+.= ( goto ( ( ( card C111 ) + 1 ) + ( card C110 ) ) ) by SCMFSA_4:1
+.= ( goto ( ( ( card C110 ) + ( card C111 ) ) + 1 ) );
+L513:
+now
+let C113 being FinSeq-Location;
+thus L514: ( ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + ( 1 + 1 ) )) ) . C113 ) = ( ( Comput (D40 , D39 , ( ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 ) + 1 )) ) . C113 )
+.= ( ( Following (D40 , ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) )) ) . C113 ) by EXTPRO_1:3
+.= ( ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) . C113 ) by L512 , SCMFSA_2:69;
+end;
+thus L515: ( IC ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 2 )) ) ) = ( IC ( Comput (D40 , D39 , ( ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 ) + 1 )) ) )
+.= ( IC ( Following (D40 , ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) )) ) ) by EXTPRO_1:3
+.= ( ( ( card C110 ) + ( card C111 ) ) + 1 ) by L512 , SCMFSA_2:69;
+L516: ( CurInstr (D40 , ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 2 )) )) ) = ( D40 . ( ( ( card C110 ) + ( card C111 ) ) + 1 ) ) by L515 , PBOOLE:143
+.= ( ( C110 ";" D38 ) . ( ( ( card C110 ) + ( card C111 ) ) + 1 ) ) by L489 , L499 , FUNCT_4:13
+.= ( ( Reloc (D38 , ( card C110 )) ) . ( ( ( card C111 ) + 1 ) + ( card C110 ) ) ) by L510 , FUNCT_4:13
+.= ( IncAddr (( halt ( SCM+FSA ) ) , ( card C110 )) ) by L507 , L508 , COMPOS_1:35
+.= ( halt ( SCM+FSA ) ) by COMPOS_0:4;
+L517:
+now
+let C114 being Int-Location;
+thus L518: ( ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + ( 1 + 1 ) )) ) . C114 ) = ( ( Comput (D40 , D39 , ( ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 ) + 1 )) ) . C114 )
+.= ( ( Following (D40 , ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) )) ) . C114 ) by EXTPRO_1:3
+.= ( ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) . C114 ) by L512 , SCMFSA_2:69;
+end;
+L519: ( DataPart ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) = ( DataPart ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 2 )) ) ) by L517 , L513 , SCMFSA_M:2;
+thus L520: ( DataPart ( Comput (( R2 +* C110 ) , D41 , ( LifeSpan (( R2 +* C110 ) , D41) )) ) ) = ( DataPart ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 2 )) ) ) by L519 , L478 , L483 , L490 , L232;
+thus L521:now
+let C115 being (Element of ( NAT ));
+assume L522: C115 < ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 2 );
+per cases ;
+suppose L523: C115 <= ( LifeSpan (( R2 +* C110 ) , D41) );
+
+L524: ( CurInstr (( R2 +* ( Directed C110 ) ) , ( Comput (( R2 +* ( Directed C110 ) ) , ( Initialize C112 ) , C115) )) ) <> ( halt ( SCM+FSA ) ) by L523 , L478 , L483 , L192;
+thus L525: ( CurInstr (D40 , ( Comput (D40 , D39 , C115) )) ) <> ( halt ( SCM+FSA ) ) by L524 , L478 , L483 , L489 , L523 , L271;
+end;
+suppose L526: ( LifeSpan (( R2 +* C110 ) , D41) ) < C115;
+
+L527: C115 < ( ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 ) + 1 ) by L522;
+L528: C115 <= ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 ) by L527 , NAT_1:13;
+L529: ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 ) <= C115 by L526 , NAT_1:13;
+thus L530: ( CurInstr (D40 , ( Comput (D40 , D39 , C115) )) ) <> ( halt ( SCM+FSA ) ) by L529 , L512 , L528 , XXREAL_0:1;
+end;
+end;
+thus L532:now
+let C116 being (Element of ( NAT ));
+assume L533: C116 <= ( LifeSpan (( R2 +* C110 ) , D41) );
+L534: ( Comput (( R2 +* C110 ) , D41 , C116) ) = ( Comput (( R2 +* ( Directed C110 ) ) , ( Initialize C112 ) , C116) ) by L533 , L478 , L483 , L192;
+L535: ( IC ( Comput (( R2 +* C110 ) , D41 , C116) ) ) = ( IC ( Comput (( R2 +* ( Directed C110 ) ) , ( Initialize C112 ) , C116) ) ) by L534;
+thus L536: ( IC ( Comput (D40 , D39 , C116) ) ) = ( IC ( Comput (( R2 +* C110 ) , D41 , C116) ) ) by L535 , L478 , L483 , L489 , L533 , L271;
+end;
+thus L537: ( IC ( Comput (D40 , D39 , ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 1 )) ) ) = ( card C110 ) by L478 , L483 , L511 , L232;
+thus L538: D40 halts_on D39 by L516 , EXTPRO_1:29;
+L539: (for B143 being (Element of ( NAT )) holds (( CurInstr (D40 , ( Comput (D40 , D39 , B143) )) ) = ( halt ( SCM+FSA ) ) implies ( ( LifeSpan (( R2 +* C110 ) , D41) ) + 2 ) <= B143)) by L521;
+thus L540: thesis by L539 , L516 , L538 , EXTPRO_1:def 15;
+end;
+theorem
+L541: (for R2 being (Instruction-Sequence of ( SCM+FSA )) holds (for B144 , B145 being (Program of ( SCM+FSA )) holds (for B146 being (State of ( SCM+FSA )) holds ((B144 is_closed_on B146 , R2 & B144 is_halting_on B146 , R2) implies (( ( ( B144 ";" ( Goto ( ( card B145 ) + 1 ) ) ) ";" B145 ) ";" ( Stop ( SCM+FSA ) ) ) is_closed_on B146 , R2 & ( ( ( B144 ";" ( Goto ( ( card B145 ) + 1 ) ) ) ";" B145 ) ";" ( Stop ( SCM+FSA ) ) ) is_halting_on B146 , R2)))))
+proof
+let R2 being (Instruction-Sequence of ( SCM+FSA ));
+let C117 , C118 being (Program of ( SCM+FSA ));
+let C119 being (State of ( SCM+FSA ));
+set D42 = ( ( ( C117 ";" ( Goto ( ( card C118 ) + 1 ) ) ) ";" C118 ) ";" ( Stop ( SCM+FSA ) ) );
+assume L542: C117 is_closed_on C119 , R2;
+set D43 = ( Initialize C119 );
+set D44 = ( Initialize C119 );
+set D45 = ( R2 +* D42 );
+assume L543: C117 is_halting_on C119 , R2;
+L544: D45 halts_on D44 by L543 , L542 , L477;
+L545: ( LifeSpan (D45 , D44) ) = ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 2 ) by L542 , L543 , L477;
+L546:
+now
+let C120 being (Element of ( NAT ));
+L547: (C120 <= ( LifeSpan (( R2 +* C117 ) , D43) ) or C120 >= ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 1 )) by NAT_1:13;
+L548: (C120 <= ( LifeSpan (( R2 +* C117 ) , D43) ) or C120 = ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 1 ) or C120 > ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 1 )) by L547 , XXREAL_0:1;
+L549: (C120 <= ( LifeSpan (( R2 +* C117 ) , D43) ) or C120 = ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 1 ) or C120 >= ( ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 1 ) + 1 )) by L548 , NAT_1:13;
+L550: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L551: ( card D42 ) = ( ( card ( ( C117 ";" ( Goto ( ( card C118 ) + 1 ) ) ) ";" C118 ) ) + 1 ) by L550 , SCMFSA6A:21
+.= ( ( ( card ( C117 ";" ( Goto ( ( card C118 ) + 1 ) ) ) ) + ( card C118 ) ) + 1 ) by SCMFSA6A:21
+.= ( ( ( ( card C117 ) + ( card ( Goto ( ( card C118 ) + 1 ) ) ) ) + ( card C118 ) ) + 1 ) by SCMFSA6A:21
+.= ( ( ( ( card C117 ) + 1 ) + ( card C118 ) ) + 1 ) by L116
+.= ( ( card C117 ) + ( ( ( card C118 ) + 1 ) + 1 ) );
+L552: ( 0 ) <= ( ( card C118 ) + 1 ) by NAT_1:2;
+L553: ( ( 0 ) + ( 0 ) ) < ( ( ( card C118 ) + 1 ) + 1 ) by L552 , XREAL_1:8;
+L554: ( ( card C117 ) + ( 0 ) ) < ( card D42 ) by L553 , L551 , XREAL_1:6;
+per cases  by L549;
+suppose L555: C120 <= ( LifeSpan (( R2 +* C117 ) , D43) );
+
+reconsider D46 = ( IC ( Comput (D45 , D44 , C120) ) ) as (Element of ( NAT ));
+L556: ( IC ( Comput (D45 , D44 , C120) ) ) = ( IC ( Comput (( R2 +* C117 ) , D43 , C120) ) ) by L542 , L543 , L555 , L477;
+L557: ( IC ( Comput (D45 , D44 , C120) ) ) in ( dom C117 ) by L556 , L542 , SCMFSA7B:def 6;
+L558: D46 < ( card C117 ) by L557 , AFINSQ_1:66;
+L559: D46 < ( card D42 ) by L558 , L554 , XXREAL_0:2;
+thus L560: ( IC ( Comput (D45 , D44 , C120) ) ) in ( dom D42 ) by L559 , AFINSQ_1:66;
+end;
+suppose L561: C120 = ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 1 );
+
+L562: ( IC ( Comput (D45 , D44 , C120) ) ) = ( card C117 ) by L561 , L542 , L543 , L477;
+thus L563: ( IC ( Comput (D45 , D44 , C120) ) ) in ( dom D42 ) by L562 , L554 , AFINSQ_1:66;
+end;
+suppose L564: C120 >= ( ( LifeSpan (( R2 +* C117 ) , D43) ) + 2 );
+
+L565: ( card D42 ) = ( ( ( ( card C117 ) + ( card C118 ) ) + 1 ) + 1 ) by L551;
+L566: ( ( ( ( card C117 ) + ( card C118 ) ) + 1 ) + ( 0 ) ) < ( card D42 ) by L565 , XREAL_1:6;
+L567: C120 >= ( LifeSpan (D45 , D44) ) by L542 , L543 , L564 , L477;
+L568: ( IC ( Comput (D45 , D44 , C120) ) ) = ( IC ( Comput (D45 , D44 , ( LifeSpan (D45 , D44) )) ) ) by L567 , L544 , EXTPRO_1:25
+.= ( ( ( card C117 ) + ( card C118 ) ) + 1 ) by L542 , L543 , L545 , L477;
+thus L569: ( IC ( Comput (D45 , D44 , C120) ) ) in ( dom D42 ) by L568 , L566 , AFINSQ_1:66;
+end;
+end;
+thus L571: D42 is_closed_on C119 , R2 by L546 , SCMFSA7B:def 6;
+thus L572: thesis by L544 , SCMFSA7B:def 7;
+end;
+theorem
+L573: (for B147 , B148 being (Program of ( SCM+FSA )) holds (for B149 being (State of ( SCM+FSA )) holds (for B150 being (Instruction-Sequence of ( SCM+FSA )) holds ((B147 is_closed_on B149 , B150 & B147 is_halting_on B149 , B150) implies ( B150 +* ( ( ( B147 ";" ( Goto ( ( card B148 ) + 1 ) ) ) ";" B148 ) ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( Initialize B149 ))))) by L477;
+L574: (for R2 being (Instruction-Sequence of ( SCM+FSA )) holds (for B151 , B152 being (Program of ( SCM+FSA )) holds (for B153 being (State of ( SCM+FSA )) holds ((B151 is_closed_on ( Initialized B153 ) , R2 & B151 is_halting_on ( Initialized B153 ) , R2) implies (( IC ( Comput (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 2 )) ) ) = ( ( ( card B151 ) + ( card B152 ) ) + 1 ) & ( DataPart ( Comput (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) )) ) ) = ( DataPart ( Comput (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 2 )) ) ) & (for B154 being (Element of ( NAT )) holds (B154 < ( ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 2 ) implies ( CurInstr (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( Comput (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B154) )) ) <> ( halt ( SCM+FSA ) ))) & (for B155 being (Element of ( NAT )) holds (B155 <= ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) implies ( IC ( Comput (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B155) ) ) = ( IC ( Comput (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , B155) ) ))) & ( IC ( Comput (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 1 )) ) ) = ( card B151 ) & ( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) & ( LifeSpan (( R2 +* ( ( ( B151 ";" ( Goto ( ( card B152 ) + 1 ) ) ) ";" B152 ) ";" ( Stop ( SCM+FSA ) ) ) ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) = ( ( LifeSpan (( R2 +* B151 ) , ( B153 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) )) ) + 2 ))))))
+proof
+let R2 being (Instruction-Sequence of ( SCM+FSA ));
+let C121 , C122 being (Program of ( SCM+FSA ));
+let C123 being (State of ( SCM+FSA ));
+assume L575: C121 is_closed_on ( Initialized C123 ) , R2;
+L576: ( card ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ) = ( ( card ( Goto ( ( card C122 ) + 1 ) ) ) + ( card C122 ) ) by SCMFSA6A:21
+.= ( 1 + ( card C122 ) ) by L116;
+L577: ( card ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ) = ( ( card ( Goto ( ( card C122 ) + 1 ) ) ) + ( card C122 ) ) by SCMFSA6A:21
+.= ( ( card C122 ) + 1 ) by L116;
+L578: ( ( ( card C121 ) + ( card C122 ) ) + 1 ) = ( ( ( card C122 ) + 1 ) + ( card C121 ) );
+L579: ( 0 ) in ( dom ( Stop ( SCM+FSA ) ) ) by COMPOS_1:3;
+set D47 = ( ( Goto ( ( card C122 ) + 1 ) ) ";" ( C122 ";" ( Stop ( SCM+FSA ) ) ) );
+set D48 = ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+set D49 = ( R2 +* ( ( ( C121 ";" ( Goto ( ( card C122 ) + 1 ) ) ) ";" C122 ) ";" ( Stop ( SCM+FSA ) ) ) );
+set D50 = ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) );
+assume L580: C121 is_halting_on ( Initialized C123 ) , R2;
+L581: ( dom ( Reloc (( Stop ( SCM+FSA ) ) , ( ( card C122 ) + 1 )) ) ) = { ( R1 + ( ( card C122 ) + 1 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom ( Stop ( SCM+FSA ) ) ) } by COMPOS_1:33;
+L582: ( ( 0 ) + ( ( card C122 ) + 1 ) ) in ( dom ( Reloc (( Stop ( SCM+FSA ) ) , ( ( card C122 ) + 1 )) ) ) by L581 , L579;
+L583: ( dom ( Goto ( ( card C122 ) + 1 ) ) ) c= ( dom ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ) by SCMFSA6A:17;
+L584: ( 0 ) in ( dom ( Goto ( ( card C122 ) + 1 ) ) ) by L116;
+L585: ( D47 . ( 0 ) ) = ( ( ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ";" ( Stop ( SCM+FSA ) ) ) . ( 0 ) ) by SCMFSA6A:25
+.= ( ( Directed ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ) . ( 0 ) ) by L584 , L583 , L169
+.= ( ( ( Goto ( ( card C122 ) + 1 ) ) ";" ( Directed C122 ) ) . ( 0 ) ) by SCMFSA6A:24
+.= ( ( Directed ( Goto ( ( card C122 ) + 1 ) ) ) . ( 0 ) ) by L584 , L169
+.= ( ( Goto ( ( card C122 ) + 1 ) ) . ( 0 ) ) by SCMFSA6A:22
+.= ( goto ( ( card C122 ) + 1 ) ) by L116;
+L586: ( ( ( C121 ";" ( Goto ( ( card C122 ) + 1 ) ) ) ";" C122 ) ";" ( Stop ( SCM+FSA ) ) ) = ( ( C121 ";" ( Goto ( ( card C122 ) + 1 ) ) ) ";" ( C122 ";" ( Stop ( SCM+FSA ) ) ) ) by SCMFSA6A:25
+.= ( C121 ";" D47 ) by SCMFSA6A:25;
+L587: ( DataPart ( Comput (( R2 +* ( Directed C121 ) ) , ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) = ( DataPart ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) by L586 , L575 , L580 , L290;
+L588: ( card D47 ) = ( ( card ( Goto ( ( card C122 ) + 1 ) ) ) + ( card ( C122 ";" ( Stop ( SCM+FSA ) ) ) ) ) by SCMFSA6A:21
+.= ( 1 + ( card ( C122 ";" ( Stop ( SCM+FSA ) ) ) ) ) by L116;
+L589: ( ( 0 ) + 1 ) <= ( card D47 ) by L588 , NAT_1:11;
+L590: ( card ( C121 ";" D47 ) ) = ( ( card C121 ) + ( card D47 ) ) by SCMFSA6A:21;
+L591: ( ( card C121 ) + ( 0 ) ) < ( card ( C121 ";" D47 ) ) by L590 , L589 , XREAL_1:6;
+L592: ( card C121 ) in ( dom ( C121 ";" D47 ) ) by L591 , AFINSQ_1:66;
+L593: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L594: ( card ( C121 ";" D47 ) ) = ( ( card C121 ) + ( card ( ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ";" ( Stop ( SCM+FSA ) ) ) ) ) by L590 , SCMFSA6A:25
+.= ( ( card C121 ) + ( ( ( card C122 ) + 1 ) + 1 ) ) by L577 , L593 , SCMFSA6A:21
+.= ( ( ( ( card C121 ) + ( card C122 ) ) + 1 ) + 1 );
+L595: ( ( ( card C121 ) + ( card C122 ) ) + 1 ) < ( card ( C121 ";" D47 ) ) by L594 , NAT_1:13;
+L596: ( ( ( card C121 ) + ( card C122 ) ) + 1 ) in ( dom ( C121 ";" D47 ) ) by L595 , AFINSQ_1:66;
+L597: ( 0 ) in ( dom D47 ) by L589 , AFINSQ_1:66;
+L598: ( ( 0 ) + ( card C121 ) ) in { ( R1 + ( card C121 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom D47 ) } by L597;
+L599: ( ( 0 ) + ( card C121 ) ) in ( dom ( Reloc (D47 , ( card C121 )) ) ) by L598 , COMPOS_1:33;
+L600: ( card ( Stop ( SCM+FSA ) ) ) = 1 by COMPOS_1:4;
+L601: ( ( Stop ( SCM+FSA ) ) . ( 0 ) ) = ( halt ( SCM+FSA ) ) by AFINSQ_1:34;
+L602: ( card D47 ) = ( 1 + ( ( card C122 ) + ( card ( Stop ( SCM+FSA ) ) ) ) ) by L588 , SCMFSA6A:21
+.= ( ( card C122 ) + ( 1 + ( card ( Stop ( SCM+FSA ) ) ) ) );
+L603: ( ( card C122 ) + 1 ) < ( card D47 ) by L602 , L600 , XREAL_1:6;
+L604: ( ( card C122 ) + 1 ) in ( dom D47 ) by L603 , AFINSQ_1:66;
+L605: ( D49 /. ( IC ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) ) = ( D49 . ( IC ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) ) by PBOOLE:143;
+L606: ( D47 . ( ( card C122 ) + 1 ) ) = ( ( ( ( Goto ( ( card C122 ) + 1 ) ) ";" C122 ) ";" ( Stop ( SCM+FSA ) ) ) . ( ( card C122 ) + 1 ) ) by SCMFSA6A:25
+.= ( ( Reloc (( Stop ( SCM+FSA ) ) , ( ( card C122 ) + 1 )) ) . ( ( 0 ) + ( ( card C122 ) + 1 ) ) ) by L576 , L582 , FUNCT_4:13
+.= ( IncAddr (( halt ( SCM+FSA ) ) , ( ( card C122 ) + 1 )) ) by L579 , L601 , COMPOS_1:35
+.= ( halt ( SCM+FSA ) ) by COMPOS_0:4;
+L607: ( dom ( Reloc (D47 , ( card C121 )) ) ) = { ( R1 + ( card C121 ) ) where R1 is (Element of ( NAT )) : R1 in ( dom D47 ) } by COMPOS_1:33;
+L608: ( ( ( card C121 ) + ( card C122 ) ) + 1 ) in ( dom ( Reloc (D47 , ( card C121 )) ) ) by L607 , L604 , L578;
+L609: ( IC ( Comput (( R2 +* ( Directed C121 ) ) , ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) = ( IC ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) by L575 , L580 , L586 , L290;
+L610: ( CurInstr (D49 , ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) )) ) = ( D49 . ( card C121 ) ) by L609 , L575 , L580 , L351 , L605
+.= ( ( C121 ";" D47 ) . ( card C121 ) ) by L586 , L592 , FUNCT_4:13
+.= ( ( Reloc (D47 , ( card C121 )) ) . ( ( 0 ) + ( card C121 ) ) ) by L599 , FUNCT_4:13
+.= ( IncAddr (( goto ( ( card C122 ) + 1 ) ) , ( card C121 )) ) by L597 , L585 , COMPOS_1:35
+.= ( goto ( ( ( card C122 ) + 1 ) + ( card C121 ) ) ) by SCMFSA_4:1
+.= ( goto ( ( ( card C121 ) + ( card C122 ) ) + 1 ) );
+L611:
+now
+let C124 being FinSeq-Location;
+thus L612: ( ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + ( 1 + 1 ) )) ) . C124 ) = ( ( Comput (D49 , D48 , ( ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 ) + 1 )) ) . C124 )
+.= ( ( Following (D49 , ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) )) ) . C124 ) by EXTPRO_1:3
+.= ( ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) . C124 ) by L610 , SCMFSA_2:69;
+end;
+thus L613: ( IC ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 2 )) ) ) = ( IC ( Comput (D49 , D48 , ( ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 ) + 1 )) ) )
+.= ( IC ( Following (D49 , ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) )) ) ) by EXTPRO_1:3
+.= ( ( ( card C121 ) + ( card C122 ) ) + 1 ) by L610 , SCMFSA_2:69;
+L614: ( CurInstr (D49 , ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 2 )) )) ) = ( D49 . ( ( ( card C121 ) + ( card C122 ) ) + 1 ) ) by L613 , PBOOLE:143
+.= ( ( C121 ";" D47 ) . ( ( ( card C121 ) + ( card C122 ) ) + 1 ) ) by L586 , L596 , FUNCT_4:13
+.= ( ( Reloc (D47 , ( card C121 )) ) . ( ( ( card C122 ) + 1 ) + ( card C121 ) ) ) by L608 , FUNCT_4:13
+.= ( IncAddr (( halt ( SCM+FSA ) ) , ( card C121 )) ) by L604 , L606 , COMPOS_1:35
+.= ( halt ( SCM+FSA ) ) by COMPOS_0:4;
+L615:
+now
+let C125 being Int-Location;
+thus L616: ( ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + ( 1 + 1 ) )) ) . C125 ) = ( ( Comput (D49 , D48 , ( ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 ) + 1 )) ) . C125 )
+.= ( ( Following (D49 , ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) )) ) . C125 ) by EXTPRO_1:3
+.= ( ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) . C125 ) by L610 , SCMFSA_2:69;
+end;
+L617: ( DataPart ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) = ( DataPart ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 2 )) ) ) by L615 , L611 , SCMFSA_M:2;
+thus L618: ( DataPart ( Comput (( R2 +* C121 ) , D50 , ( LifeSpan (( R2 +* C121 ) , D50) )) ) ) = ( DataPart ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 2 )) ) ) by L617 , L575 , L580 , L587 , L351;
+thus L619:now
+let C126 being (Element of ( NAT ));
+assume L620: C126 < ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 2 );
+per cases ;
+suppose L621: C126 <= ( LifeSpan (( R2 +* C121 ) , D50) );
+
+L622: ( CurInstr (( R2 +* ( Directed C121 ) ) , ( Comput (( R2 +* ( Directed C121 ) ) , ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C126) )) ) <> ( halt ( SCM+FSA ) ) by L621 , L575 , L580 , L312;
+thus L623: ( CurInstr (D49 , ( Comput (D49 , D48 , C126) )) ) <> ( halt ( SCM+FSA ) ) by L622 , L575 , L580 , L586 , L621 , L290;
+end;
+suppose L624: ( LifeSpan (( R2 +* C121 ) , D50) ) < C126;
+
+L625: C126 < ( ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 ) + 1 ) by L620;
+L626: C126 <= ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 ) by L625 , NAT_1:13;
+L627: ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 ) <= C126 by L624 , NAT_1:13;
+thus L628: ( CurInstr (D49 , ( Comput (D49 , D48 , C126) )) ) <> ( halt ( SCM+FSA ) ) by L627 , L610 , L626 , XXREAL_0:1;
+end;
+end;
+thus L630:now
+let C127 being (Element of ( NAT ));
+assume L631: C127 <= ( LifeSpan (( R2 +* C121 ) , D50) );
+L632: ( Comput (( R2 +* C121 ) , D50 , C127) ) = ( Comput (( R2 +* ( Directed C121 ) ) , ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C127) ) by L631 , L575 , L580 , L312;
+L633: ( IC ( Comput (( R2 +* C121 ) , D50 , C127) ) ) = ( IC ( Comput (( R2 +* ( Directed C121 ) ) , ( C123 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ) , C127) ) ) by L632;
+thus L634: ( IC ( Comput (D49 , D48 , C127) ) ) = ( IC ( Comput (( R2 +* C121 ) , D50 , C127) ) ) by L633 , L575 , L580 , L586 , L631 , L290;
+end;
+thus L635: ( IC ( Comput (D49 , D48 , ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 1 )) ) ) = ( card C121 ) by L575 , L580 , L609 , L351;
+thus L636: D49 halts_on D48 by L614 , EXTPRO_1:29;
+L637: (for B156 being (Element of ( NAT )) holds (( CurInstr (D49 , ( Comput (D49 , D48 , B156) )) ) = ( halt ( SCM+FSA ) ) implies ( ( LifeSpan (( R2 +* C121 ) , D50) ) + 2 ) <= B156)) by L619;
+thus L638: thesis by L637 , L614 , L636 , EXTPRO_1:def 15;
+end;
+theorem
+L639: (for R2 being (Instruction-Sequence of ( SCM+FSA )) holds (for B157 , B158 being (Program of ( SCM+FSA )) holds (for B159 being (State of ( SCM+FSA )) holds ((B157 is_closed_on ( Initialized B159 ) , R2 & B157 is_halting_on ( Initialized B159 ) , R2) implies ( R2 +* ( ( ( B157 ";" ( Goto ( ( card B158 ) + 1 ) ) ) ";" B158 ) ";" ( Stop ( SCM+FSA ) ) ) ) halts_on ( B159 +* ( Initialize ( ( intloc ( 0 ) ) .--> 1 ) ) ))))) by L574;
+theorem
+L640: (for R2 being (Instruction-Sequence of ( SCM+FSA )) holds (for B160 , B161 being (Program of ( SCM+FSA )) holds (for B162 being (State of ( SCM+FSA )) holds ((B160 is_closed_on ( Initialized B162 ) , R2 & B160 is_halting_on ( Initialized B162 ) , R2) implies ( IC ( IExec (( ( ( B160 ";" ( Goto ( ( card B161 ) + 1 ) ) ) ";" B161 ) ";" ( Stop ( SCM+FSA ) ) ) , R2 , B162) ) ) = ( ( ( card B160 ) + ( card B161 ) ) + 1 )))))
+proof
+let R2 being (Instruction-Sequence of ( SCM+FSA ));
+let C128 , C129 being (Program of ( SCM+FSA ));
+let C130 being (State of ( SCM+FSA ));
+set D51 = ( Initialized C130 );
+set D52 = ( R2 +* ( ( ( C128 ";" ( Goto ( ( card C129 ) + 1 ) ) ) ";" C129 ) ";" ( Stop ( SCM+FSA ) ) ) );
+assume L641: (C128 is_closed_on ( Initialized C130 ) , R2 & C128 is_halting_on ( Initialized C130 ) , R2);
+L642: (D52 halts_on D51 & ( LifeSpan (D52 , D51) ) = ( ( LifeSpan (( R2 +* C128 ) , D51) ) + 2 )) by L641 , L574;
+L643: ( IC ( Result (D52 , D51) ) ) = ( IC ( Comput (D52 , D51 , ( ( LifeSpan (( R2 +* C128 ) , D51) ) + 2 )) ) ) by L642 , EXTPRO_1:23
+.= ( ( ( card C128 ) + ( card C129 ) ) + 1 ) by L641 , L574;
+thus L644: thesis by L643 , SCMFSA6B:def 1;
+end;
+theorem
+L645: (for R2 being (Instruction-Sequence of ( SCM+FSA )) holds (for B163 , B164 being (Program of ( SCM+FSA )) holds (for B165 being (State of ( SCM+FSA )) holds ((B163 is_closed_on ( Initialized B165 ) , R2 & B163 is_halting_on ( Initialized B165 ) , R2) implies ( IExec (( ( ( B163 ";" ( Goto ( ( card B164 ) + 1 ) ) ) ";" B164 ) ";" ( Stop ( SCM+FSA ) ) ) , R2 , B165) ) = ( ( IExec (B163 , R2 , B165) ) +* ( Start-At (( ( ( card B163 ) + ( card B164 ) ) + 1 ) , ( SCM+FSA )) ) )))))
+proof
+let R2 being (Instruction-Sequence of ( SCM+FSA ));
+let C131 , C132 being (Program of ( SCM+FSA ));
+let C133 being (State of ( SCM+FSA ));
+set D53 = ( Initialized C133 );
+set D54 = ( R2 +* ( ( ( C131 ";" ( Goto ( ( card C132 ) + 1 ) ) ) ";" C132 ) ";" ( Stop ( SCM+FSA ) ) ) );
+assume that
+L646: C131 is_closed_on ( Initialized C133 ) , R2
+and
+L647: C131 is_halting_on ( Initialized C133 ) , R2;
+L648: D53 = ( Initialize ( Initialized C133 ) ) by MEMSTR_0:44;
+L649: ( R2 +* C131 ) halts_on D53 by L648 , L647 , SCMFSA7B:def 7;
+L650: (D54 halts_on D53 & ( LifeSpan (D54 , D53) ) = ( ( LifeSpan (( R2 +* C131 ) , D53) ) + 2 )) by L646 , L647 , L574;
+L651: ( Result (D54 , D53) ) = ( Comput (D54 , D53 , ( ( LifeSpan (( R2 +* C131 ) , D53) ) + 2 )) ) by L650 , EXTPRO_1:23;
+L652: ( DataPart ( Result (D54 , D53) ) ) = ( DataPart ( Comput (( R2 +* C131 ) , D53 , ( LifeSpan (( R2 +* C131 ) , D53) )) ) ) by L651 , L646 , L647 , L574;
+L653: ( DataPart ( Result (D54 , D53) ) ) = ( DataPart ( Result (( R2 +* C131 ) , D53) ) ) by L652 , L649 , EXTPRO_1:23
+.= ( DataPart ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) ) ) by MEMSTR_0:79;
+L654: ( IC ( Result (D54 , D53) ) ) = ( ( ( card C131 ) + ( card C132 ) ) + 1 ) by L646 , L647 , L651 , L574
+.= ( IC ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) ) ) by FUNCT_4:113;
+L655: ( Result (D54 , D53) ) = ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) ) by L654 , L653 , MEMSTR_0:78;
+L656: ( Result (D54 , D53) ) = ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) ) by L655;
+thus L657: ( IExec (( ( ( C131 ";" ( Goto ( ( card C132 ) + 1 ) ) ) ";" C132 ) ";" ( Stop ( SCM+FSA ) ) ) , R2 , C133) ) = ( Result (D54 , D53) ) by SCMFSA6B:def 1
+.= ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) ) by L656
+.= ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) )
+.= ( ( Result (( R2 +* C131 ) , D53) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) )
+.= ( ( IExec (C131 , R2 , C133) ) +* ( Start-At (( ( ( card C131 ) + ( card C132 ) ) + 1 ) , ( SCM+FSA )) ) ) by SCMFSA6B:def 1;
+end;

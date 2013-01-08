@@ -1,0 +1,858 @@
+:: Some Remarks on Simple Concrete Model of Computer
+::  by Andrzej Trybulec and Yatsuka Nakamura
+::
+:: Received October 8, 1993
+:: Copyright (c) 1993-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, STRUCT_0, AMI_1, AMI_2, FUNCT_7, XBOOLE_0,
+      RELAT_1, TARSKI, CAT_1, FSM_1, FUNCT_1, INT_1, NAT_1, GRAPHSP, FINSEQ_1,
+      CARD_1, ORDINAL1, ARYTM_3, ARYTM_1, FUNCOP_1, XXREAL_0, GLIB_000,
+      FUNCT_4, AMI_3, RECDEF_2, QUANTAL1, XCMPLX_0, MEMSTR_0, GOBRD13;
+ notations TARSKI, XBOOLE_0, ENUMSET1,
+      XTUPLE_0, SUBSET_1, ORDINAL1, XCMPLX_0, RELAT_1,
+      FUNCT_1, XXREAL_0, INT_1, FUNCOP_1, CARD_1, FUNCT_4, FUNCT_7,
+      FINSEQ_1, RECDEF_2, NUMBERS, MEASURE6, STRUCT_0, MEMSTR_0, COMPOS_0,
+      COMPOS_1, EXTPRO_1, SCM_INST, AMI_2;
+ constructors DOMAIN_1, FINSEQ_4, CAT_2, AMI_2, RELSET_1, EXTPRO_1, FUNCT_7,
+      MEASURE6, XTUPLE_0;
+ registrations XBOOLE_0, SETFAM_1, ORDINAL1, FUNCOP_1, XREAL_0, INT_1, CARD_3,
+      AMI_2, XXREAL_0, FUNCT_1, FINSEQ_1, EXTPRO_1, FUNCT_4, MEMSTR_0,
+      MEASURE6, RELAT_1, COMPOS_0, SCM_INST, XTUPLE_0;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions TARSKI, COMPOS_1, EXTPRO_1, FUNCOP_1, AMI_2, CARD_1, NAT_1,
+      STRUCT_0, MEMSTR_0, COMPOS_0, SCM_INST, XTUPLE_0;
+ theorems TARSKI, ZFMISC_1, ENUMSET1, AMI_2, FUNCOP_1, FUNCT_4, CARD_3, INT_1,
+      STRUCT_0, ORDINAL1, XBOOLE_0, XBOOLE_1, FUNCT_7, XXREAL_0, NAT_1,
+      RELAT_1, FUNCT_1, PARTFUN1, RECDEF_2, EXTPRO_1, MEMSTR_0, ORDINAL3,
+      SCM_INST, XTUPLE_0;
+
+begin
+registration
+cluster  ->  with_zero for non  zero non  zero non  zero non  zero Nat;
+coherence
+proof
+let C1 being non  zero Nat;
+L1: ( {} ) in C1 by ORDINAL3:8;
+thus L2: thesis by L1;
+end;
+end;
+definition
+func SCM ->  strict AMI-Struct over 2 equals 
+AMI-Struct (# ( SCM-Memory ) , ( In (( NAT ) , ( SCM-Memory )) ) , ( SCM-Instr ) , ( SCM-OK ) , ( SCM-VAL ) , ( SCM-Exec ) #);
+coherence;
+end;
+registration
+cluster ( SCM ) -> non  empty;
+coherence by STRUCT_0:def 1;
+end;
+L6: ( the_Values_of ( SCM ) ) = ( (the ValuesF of ( SCM )) * (the Object-Kind of ( SCM )) )
+.= ( ( SCM-VAL ) * ( SCM-OK ) );
+registration
+cluster ( SCM ) ->  with_non-empty_values;
+coherence
+proof
+thus L7: ( the_Values_of ( SCM ) ) is  non-empty;
+end;
+end;
+registration
+cluster ( SCM ) ->  IC-Ins-separated;
+coherence
+proof
+L9: ( IC ( SCM ) ) = ( NAT ) by AMI_2:22 , FUNCT_7:def 1;
+L10: ( Values ( IC ( SCM ) ) ) = ( NAT ) by L9 , AMI_2:6;
+thus L11: ( SCM ) is  IC-Ins-separated by L10 , MEMSTR_0:def 6;
+end;
+end;
+registration
+cluster  Int-like for (Object of ( SCM ));
+existence
+proof
+reconsider D1 = the (Element of ( SCM-Data-Loc )) as (Object of ( SCM ));
+take D1;
+thus L13: thesis by AMI_2:def 16;
+end;
+end;
+definition
+mode Data-Location
+ is  Int-like (Object of ( SCM ));
+end;
+registration
+let C2 being (State of ( SCM ));
+let C3 being Data-Location;
+cluster ( C2 . C3 ) ->  integer;
+coherence
+proof
+reconsider D2 = C3 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D3 = C2 as SCM-State by CARD_3:107;
+L16: ( D3 . D2 ) = ( C2 . C3 );
+thus L17: thesis by L16;
+end;
+end;
+definition
+canceled 1;
+let R17 being Data-Location;
+let R18 being Data-Location;
+func R17 := R18 -> (Instruction of ( SCM )) equals 
+[ 1 , ( {} ) , <* R17 , R18 *> ];
+correctness
+proof
+reconsider D4 = R17 , D5 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L19: 1 in { 1 , 2 , 3 , 4 , 5 } by ENUMSET1:def 3;
+L20: [ 1 , ( {} ) , <* D4 , D5 *> ] in ( SCM-Instr ) by L19 , SCM_INST:4;
+thus L21: thesis by L20;
+end;
+func AddTo (R17 , R18) -> (Instruction of ( SCM )) equals 
+[ 2 , ( {} ) , <* R17 , R18 *> ];
+correctness
+proof
+reconsider D6 = R17 , D7 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L22: 2 in { 1 , 2 , 3 , 4 , 5 } by ENUMSET1:def 3;
+L23: [ 2 , ( {} ) , <* D6 , D7 *> ] in ( SCM-Instr ) by L22 , SCM_INST:4;
+thus L24: thesis by L23;
+end;
+func SubFrom (R17 , R18) -> (Instruction of ( SCM )) equals 
+[ 3 , ( {} ) , <* R17 , R18 *> ];
+correctness
+proof
+reconsider D8 = R17 , D9 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L25: 3 in { 1 , 2 , 3 , 4 , 5 } by ENUMSET1:def 3;
+L26: [ 3 , ( {} ) , <* D8 , D9 *> ] in ( SCM-Instr ) by L25 , SCM_INST:4;
+thus L27: thesis by L26;
+end;
+func MultBy (R17 , R18) -> (Instruction of ( SCM )) equals 
+[ 4 , ( {} ) , <* R17 , R18 *> ];
+correctness
+proof
+reconsider D10 = R17 , D11 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L28: 4 in { 1 , 2 , 3 , 4 , 5 } by ENUMSET1:def 3;
+L29: [ 4 , ( {} ) , <* D10 , D11 *> ] in ( SCM-Instr ) by L28 , SCM_INST:4;
+thus L30: thesis by L29;
+end;
+func Divide (R17 , R18) -> (Instruction of ( SCM )) equals 
+[ 5 , ( {} ) , <* R17 , R18 *> ];
+correctness
+proof
+reconsider D12 = R17 , D13 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+L31: 5 in { 1 , 2 , 3 , 4 , 5 } by ENUMSET1:def 3;
+L32: [ 5 , ( {} ) , <* D12 , D13 *> ] in ( SCM-Instr ) by L31 , SCM_INST:4;
+thus L33: thesis by L32;
+end;
+end;
+definition
+let R20 being Nat;
+func SCM-goto R20 -> (Instruction of ( SCM )) equals 
+[ 6 , <* R20 *> , ( {} ) ];
+correctness
+proof
+L35: R20 in ( NAT ) by ORDINAL1:def 12;
+thus L36: thesis by L35 , SCM_INST:2;
+end;
+let R17 being Data-Location;
+func R17 =0_goto R20 -> (Instruction of ( SCM )) equals 
+[ 7 , <* R20 *> , <* R17 *> ];
+correctness
+proof
+reconsider D14 = R17 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D15 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+L37: 7 in { 7 , 8 } by TARSKI:def 2;
+L38: [ 7 , <* D15 *> , <* D14 *> ] in ( SCM-Instr ) by L37 , SCM_INST:3;
+thus L39: thesis by L38;
+end;
+func R17 >0_goto R20 -> (Instruction of ( SCM )) equals 
+[ 8 , <* R20 *> , <* R17 *> ];
+correctness
+proof
+reconsider D16 = R17 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D17 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+L40: 8 in { 7 , 8 } by TARSKI:def 2;
+L41: [ 8 , <* D17 *> , <* D16 *> ] in ( SCM-Instr ) by L40 , SCM_INST:3;
+thus L42: thesis by L41;
+end;
+end;
+theorem
+L44: ( IC ( SCM ) ) = ( NAT ) by AMI_2:22 , FUNCT_7:def 1;
+begin
+theorem
+L45: (for R17 being Data-Location holds (for R18 being Data-Location holds (for R22 being (State of ( SCM )) holds (( ( Exec (( R17 := R18 ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) & ( ( Exec (( R17 := R18 ) , R22) ) . R17 ) = ( R22 . R18 ) & (for R19 being Data-Location holds (R19 <> R17 implies ( ( Exec (( R17 := R18 ) , R22) ) . R19 ) = ( R22 . R19 )))))))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+let R22 being (State of ( SCM ));
+reconsider D18 = R22 as SCM-State by CARD_3:107;
+reconsider D19 = R17 , D20 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D21 = ( R17 := R18 ) as (Element of ( SCM-Instr ));
+set D22 = ( SCM-Chg (D18 , ( D21 address_1 ) , ( D18 . ( D21 address_2 ) )) );
+reconsider D23 = 1 as (Element of ( Segm 9 )) by NAT_1:44;
+L46: D21 = [ D23 , ( {} ) , <* D19 , D20 *> ];
+L47: ( D21 address_1 ) = D19 by L46 , SCM_INST:5;
+L48: ( D21 address_2 ) = D20 by L46 , SCM_INST:5;
+L49: ( Exec (( R17 := R18 ) , R22) ) = ( SCM-Exec-Res (D21 , D18) ) by AMI_2:def 15
+.= ( SCM-Chg (D22 , ( succ ( IC D18 ) )) ) by L46 , AMI_2:def 14;
+thus L50: ( ( Exec (( R17 := R18 ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) by L49 , L44 , AMI_2:11;
+thus L51: ( ( Exec (( R17 := R18 ) , R22) ) . R17 ) = ( D22 . D19 ) by L49 , AMI_2:12
+.= ( R22 . R18 ) by L47 , L48 , AMI_2:15;
+let R19 being Data-Location;
+reconsider D24 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume L52: R19 <> R17;
+thus L53: ( ( Exec (( R17 := R18 ) , R22) ) . R19 ) = ( D22 . D24 ) by L49 , AMI_2:12
+.= ( R22 . R19 ) by L47 , L52 , AMI_2:16;
+end;
+theorem
+L54: (for R17 being Data-Location holds (for R18 being Data-Location holds (for R22 being (State of ( SCM )) holds (( ( Exec (( AddTo (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) & ( ( Exec (( AddTo (R17 , R18) ) , R22) ) . R17 ) = ( ( R22 . R17 ) + ( R22 . R18 ) ) & (for R19 being Data-Location holds (R19 <> R17 implies ( ( Exec (( AddTo (R17 , R18) ) , R22) ) . R19 ) = ( R22 . R19 )))))))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+let R22 being (State of ( SCM ));
+reconsider D25 = R22 as SCM-State by CARD_3:107;
+reconsider D26 = R17 , D27 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D28 = ( AddTo (R17 , R18) ) as (Element of ( SCM-Instr ));
+set D29 = ( SCM-Chg (D25 , ( D28 address_1 ) , ( ( D25 . ( D28 address_1 ) ) + ( D25 . ( D28 address_2 ) ) )) );
+reconsider D30 = 2 as (Element of ( Segm 9 )) by NAT_1:44;
+L55: D28 = [ D30 , ( {} ) , <* D26 , D27 *> ];
+L56: ( D28 address_1 ) = D26 by L55 , SCM_INST:5;
+L57: ( D28 address_2 ) = D27 by L55 , SCM_INST:5;
+L58: ( Exec (( AddTo (R17 , R18) ) , R22) ) = ( SCM-Exec-Res (D28 , D25) ) by AMI_2:def 15
+.= ( SCM-Chg (D29 , ( succ ( IC D25 ) )) ) by L55 , AMI_2:def 14;
+thus L59: ( ( Exec (( AddTo (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) by L58 , L44 , AMI_2:11;
+thus L60: ( ( Exec (( AddTo (R17 , R18) ) , R22) ) . R17 ) = ( D29 . D26 ) by L58 , AMI_2:12
+.= ( ( R22 . R17 ) + ( R22 . R18 ) ) by L56 , L57 , AMI_2:15;
+let R19 being Data-Location;
+reconsider D31 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume L61: R19 <> R17;
+thus L62: ( ( Exec (( AddTo (R17 , R18) ) , R22) ) . R19 ) = ( D29 . D31 ) by L58 , AMI_2:12
+.= ( R22 . R19 ) by L56 , L61 , AMI_2:16;
+end;
+theorem
+L63: (for R17 being Data-Location holds (for R18 being Data-Location holds (for R22 being (State of ( SCM )) holds (( ( Exec (( SubFrom (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) & ( ( Exec (( SubFrom (R17 , R18) ) , R22) ) . R17 ) = ( ( R22 . R17 ) - ( R22 . R18 ) ) & (for R19 being Data-Location holds (R19 <> R17 implies ( ( Exec (( SubFrom (R17 , R18) ) , R22) ) . R19 ) = ( R22 . R19 )))))))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+let R22 being (State of ( SCM ));
+reconsider D32 = R22 as SCM-State by CARD_3:107;
+reconsider D33 = R17 , D34 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D35 = ( SubFrom (R17 , R18) ) as (Element of ( SCM-Instr ));
+set D36 = ( SCM-Chg (D32 , ( D35 address_1 ) , ( ( D32 . ( D35 address_1 ) ) - ( D32 . ( D35 address_2 ) ) )) );
+reconsider D37 = 3 as (Element of ( Segm 9 )) by NAT_1:44;
+L64: D35 = [ D37 , ( {} ) , <* D33 , D34 *> ];
+L65: ( D35 address_1 ) = D33 by L64 , SCM_INST:5;
+L66: ( D35 address_2 ) = D34 by L64 , SCM_INST:5;
+L67: ( Exec (( SubFrom (R17 , R18) ) , R22) ) = ( SCM-Exec-Res (D35 , D32) ) by AMI_2:def 15
+.= ( SCM-Chg (D36 , ( succ ( IC D32 ) )) ) by L64 , AMI_2:def 14;
+thus L68: ( ( Exec (( SubFrom (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) by L67 , L44 , AMI_2:11;
+thus L69: ( ( Exec (( SubFrom (R17 , R18) ) , R22) ) . R17 ) = ( D36 . D33 ) by L67 , AMI_2:12
+.= ( ( R22 . R17 ) - ( R22 . R18 ) ) by L65 , L66 , AMI_2:15;
+let R19 being Data-Location;
+reconsider D38 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume L70: R19 <> R17;
+thus L71: ( ( Exec (( SubFrom (R17 , R18) ) , R22) ) . R19 ) = ( D36 . D38 ) by L67 , AMI_2:12
+.= ( R22 . R19 ) by L65 , L70 , AMI_2:16;
+end;
+theorem
+L72: (for R17 being Data-Location holds (for R18 being Data-Location holds (for R22 being (State of ( SCM )) holds (( ( Exec (( MultBy (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) & ( ( Exec (( MultBy (R17 , R18) ) , R22) ) . R17 ) = ( ( R22 . R17 ) * ( R22 . R18 ) ) & (for R19 being Data-Location holds (R19 <> R17 implies ( ( Exec (( MultBy (R17 , R18) ) , R22) ) . R19 ) = ( R22 . R19 )))))))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+let R22 being (State of ( SCM ));
+reconsider D39 = R22 as SCM-State by CARD_3:107;
+reconsider D40 = R17 , D41 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D42 = ( MultBy (R17 , R18) ) as (Element of ( SCM-Instr ));
+set D43 = ( SCM-Chg (D39 , ( D42 address_1 ) , ( ( D39 . ( D42 address_1 ) ) * ( D39 . ( D42 address_2 ) ) )) );
+reconsider D44 = 4 as (Element of ( Segm 9 )) by NAT_1:44;
+L73: D42 = [ D44 , ( {} ) , <* D40 , D41 *> ];
+L74: ( D42 address_1 ) = D40 by L73 , SCM_INST:5;
+L75: ( D42 address_2 ) = D41 by L73 , SCM_INST:5;
+L76: ( Exec (( MultBy (R17 , R18) ) , R22) ) = ( SCM-Exec-Res (D42 , D39) ) by AMI_2:def 15
+.= ( SCM-Chg (D43 , ( succ ( IC D39 ) )) ) by L73 , AMI_2:def 14;
+thus L77: ( ( Exec (( MultBy (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) by L76 , L44 , AMI_2:11;
+thus L78: ( ( Exec (( MultBy (R17 , R18) ) , R22) ) . R17 ) = ( D43 . D40 ) by L76 , AMI_2:12
+.= ( ( R22 . R17 ) * ( R22 . R18 ) ) by L74 , L75 , AMI_2:15;
+let R19 being Data-Location;
+reconsider D45 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume L79: R19 <> R17;
+thus L80: ( ( Exec (( MultBy (R17 , R18) ) , R22) ) . R19 ) = ( D43 . D45 ) by L76 , AMI_2:12
+.= ( R22 . R19 ) by L74 , L79 , AMI_2:16;
+end;
+theorem
+L81: (for R17 being Data-Location holds (for R18 being Data-Location holds (for R22 being (State of ( SCM )) holds (( ( Exec (( Divide (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) & (R17 <> R18 implies ( ( Exec (( Divide (R17 , R18) ) , R22) ) . R17 ) = ( ( R22 . R17 ) div ( R22 . R18 ) )) & ( ( Exec (( Divide (R17 , R18) ) , R22) ) . R18 ) = ( ( R22 . R17 ) mod ( R22 . R18 ) ) & (for R19 being Data-Location holds ((R19 <> R17 & R19 <> R18) implies ( ( Exec (( Divide (R17 , R18) ) , R22) ) . R19 ) = ( R22 . R19 )))))))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+let R22 being (State of ( SCM ));
+reconsider D46 = R22 as SCM-State by CARD_3:107;
+reconsider D47 = R17 , D48 = R18 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D49 = ( Divide (R17 , R18) ) as (Element of ( SCM-Instr ));
+set D50 = ( SCM-Chg (D46 , ( D49 address_1 ) , ( ( D46 . ( D49 address_1 ) ) div ( D46 . ( D49 address_2 ) ) )) );
+set D51 = ( SCM-Chg (D50 , ( D49 address_2 ) , ( ( D46 . ( D49 address_1 ) ) mod ( D46 . ( D49 address_2 ) ) )) );
+reconsider D52 = 5 as (Element of ( Segm 9 )) by NAT_1:44;
+L82: D49 = [ D52 , ( {} ) , <* D47 , D48 *> ];
+L83: ( D49 address_1 ) = D47 by L82 , SCM_INST:5;
+L84: ( Exec (( Divide (R17 , R18) ) , R22) ) = ( SCM-Exec-Res (D49 , D46) ) by AMI_2:def 15
+.= ( SCM-Chg (D51 , ( succ ( IC D46 ) )) ) by L82 , AMI_2:def 14;
+thus L85: ( ( Exec (( Divide (R17 , R18) ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ) by L84 , L44 , AMI_2:11;
+L86: ( D49 address_2 ) = D48 by L82 , SCM_INST:5;
+thus L87:now
+assume L88: R17 <> R18;
+thus L89: ( ( Exec (( Divide (R17 , R18) ) , R22) ) . R17 ) = ( D51 . D47 ) by L84 , AMI_2:12
+.= ( D50 . D47 ) by L86 , L88 , AMI_2:16
+.= ( ( R22 . R17 ) div ( R22 . R18 ) ) by L83 , L86 , AMI_2:15;
+end;
+thus L90: ( ( Exec (( Divide (R17 , R18) ) , R22) ) . R18 ) = ( D51 . D48 ) by L84 , AMI_2:12
+.= ( ( R22 . R17 ) mod ( R22 . R18 ) ) by L83 , L86 , AMI_2:15;
+let R19 being Data-Location;
+reconsider D53 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+assume that
+L91: R19 <> R17
+and
+L92: R19 <> R18;
+thus L93: ( ( Exec (( Divide (R17 , R18) ) , R22) ) . R19 ) = ( D51 . D53 ) by L84 , AMI_2:12
+.= ( D50 . D53 ) by L86 , L92 , AMI_2:16
+.= ( R22 . R19 ) by L83 , L91 , AMI_2:16;
+end;
+theorem
+L94: (for R19 being Data-Location holds (for R20 being Nat holds (for R22 being (State of ( SCM )) holds (( ( Exec (( SCM-goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = R20 & ( ( Exec (( SCM-goto R20 ) , R22) ) . R19 ) = ( R22 . R19 )))))
+proof
+let R19 being Data-Location;
+let R20 being Nat;
+let R22 being (State of ( SCM ));
+reconsider D54 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D55 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+reconsider D56 = ( SCM-goto R20 ) as (Element of ( SCM-Instr ));
+reconsider D57 = R22 as SCM-State by CARD_3:107;
+reconsider D58 = 6 as (Element of ( Segm 9 )) by NAT_1:44;
+L95: D56 = [ D58 , <* D55 *> , ( {} ) ];
+L96: ( Exec (( SCM-goto R20 ) , R22) ) = ( SCM-Exec-Res (D56 , D57) ) by AMI_2:def 15
+.= ( SCM-Chg (D57 , ( D56 jump_address )) ) by L95 , AMI_2:def 14;
+L97: ( D56 jump_address ) = D55 by L95 , SCM_INST:6;
+thus L98: ( ( Exec (( SCM-goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = R20 by L97 , L96 , L44 , AMI_2:11;
+thus L99: ( ( Exec (( SCM-goto R20 ) , R22) ) . R19 ) = ( D57 . D54 ) by L96 , AMI_2:12
+.= ( R22 . R19 );
+end;
+theorem
+L100: (for R17 being Data-Location holds (for R19 being Data-Location holds (for R20 being Nat holds (for R22 being (State of ( SCM )) holds ((( R22 . R17 ) = ( 0 ) implies ( ( Exec (( R17 =0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = R20) & (( R22 . R17 ) <> ( 0 ) implies ( ( Exec (( R17 =0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) )) & ( ( Exec (( R17 =0_goto R20 ) , R22) ) . R19 ) = ( R22 . R19 ))))))
+proof
+let R17 being Data-Location;
+let R19 being Data-Location;
+let R20 being Nat;
+let R22 being (State of ( SCM ));
+reconsider D59 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D60 = ( R17 =0_goto R20 ) as (Element of ( SCM-Instr ));
+reconsider D61 = R22 as SCM-State by CARD_3:107;
+reconsider D62 = 7 as (Element of ( Segm 9 )) by NAT_1:44;
+reconsider D63 = R17 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D64 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+L101: D60 = [ D62 , <* D64 *> , <* D63 *> ];
+L102: ( Exec (( R17 =0_goto R20 ) , R22) ) = ( SCM-Exec-Res (D60 , D61) ) by AMI_2:def 15
+.= ( SCM-Chg (D61 , ( IFEQ (( D61 . ( D60 cond_address ) ) , ( 0 ) , ( D60 cjump_address ) , ( succ ( IC D61 ) )) )) ) by L101 , AMI_2:def 14;
+thus L103: (( R22 . R17 ) = ( 0 ) implies ( ( Exec (( R17 =0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = R20)
+proof
+assume L104: ( R22 . R17 ) = ( 0 );
+L105: ( D61 . ( D60 cond_address ) ) = ( 0 ) by L104 , L101 , SCM_INST:7;
+thus L106: ( ( Exec (( R17 =0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( IFEQ (( D61 . ( D60 cond_address ) ) , ( 0 ) , ( D60 cjump_address ) , ( succ ( IC D61 ) )) ) by L102 , L44 , AMI_2:11
+.= ( D60 cjump_address ) by L105 , FUNCOP_1:def 8
+.= R20 by L101 , SCM_INST:7;
+end;
+
+thus L107: (( R22 . R17 ) <> ( 0 ) implies ( ( Exec (( R17 =0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ))
+proof
+assume L108: ( R22 . R17 ) <> ( 0 );
+L109: ( D61 . ( D60 cond_address ) ) <> ( 0 ) by L108 , L101 , SCM_INST:7;
+thus L110: ( ( Exec (( R17 =0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( IFEQ (( D61 . ( D60 cond_address ) ) , ( 0 ) , ( D60 cjump_address ) , ( succ ( IC D61 ) )) ) by L102 , L44 , AMI_2:11
+.= ( succ ( IC R22 ) ) by L109 , L44 , FUNCOP_1:def 8;
+end;
+
+thus L111: ( ( Exec (( R17 =0_goto R20 ) , R22) ) . R19 ) = ( D61 . D59 ) by L102 , AMI_2:12
+.= ( R22 . R19 );
+end;
+theorem
+L112: (for R17 being Data-Location holds (for R19 being Data-Location holds (for R20 being Nat holds (for R22 being (State of ( SCM )) holds ((( R22 . R17 ) > ( 0 ) implies ( ( Exec (( R17 >0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = R20) & (( R22 . R17 ) <= ( 0 ) implies ( ( Exec (( R17 >0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) )) & ( ( Exec (( R17 >0_goto R20 ) , R22) ) . R19 ) = ( R22 . R19 ))))))
+proof
+let R17 being Data-Location;
+let R19 being Data-Location;
+let R20 being Nat;
+let R22 being (State of ( SCM ));
+reconsider D65 = R19 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D66 = ( R17 >0_goto R20 ) as (Element of ( SCM-Instr ));
+reconsider D67 = R22 as SCM-State by CARD_3:107;
+reconsider D68 = 8 as (Element of ( Segm 9 )) by NAT_1:44;
+reconsider D69 = R17 as (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+reconsider D70 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+L113: D66 = [ D68 , <* D70 *> , <* D69 *> ];
+L114: ( Exec (( R17 >0_goto R20 ) , R22) ) = ( SCM-Exec-Res (D66 , D67) ) by AMI_2:def 15
+.= ( SCM-Chg (D67 , ( IFGT (( D67 . ( D66 cond_address ) ) , ( 0 ) , ( D66 cjump_address ) , ( succ ( IC D67 ) )) )) ) by L113 , AMI_2:def 14;
+thus L115: (( R22 . R17 ) > ( 0 ) implies ( ( Exec (( R17 >0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = R20)
+proof
+assume L116: ( R22 . R17 ) > ( 0 );
+L117: ( D67 . ( D66 cond_address ) ) > ( 0 ) by L116 , L113 , SCM_INST:7;
+thus L118: ( ( Exec (( R17 >0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( IFGT (( D67 . ( D66 cond_address ) ) , ( 0 ) , ( D66 cjump_address ) , ( succ ( IC D67 ) )) ) by L114 , L44 , AMI_2:11
+.= ( D66 cjump_address ) by L117 , XXREAL_0:def 11
+.= R20 by L113 , SCM_INST:7;
+end;
+
+thus L119: (( R22 . R17 ) <= ( 0 ) implies ( ( Exec (( R17 >0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) ))
+proof
+assume L120: ( R22 . R17 ) <= ( 0 );
+L121: ( D67 . ( D66 cond_address ) ) <= ( 0 ) by L120 , L113 , SCM_INST:7;
+thus L122: ( ( Exec (( R17 >0_goto R20 ) , R22) ) . ( IC ( SCM ) ) ) = ( IFGT (( D67 . ( D66 cond_address ) ) , ( 0 ) , ( D66 cjump_address ) , ( succ ( IC D67 ) )) ) by L114 , L44 , AMI_2:11
+.= ( succ ( IC R22 ) ) by L121 , L44 , XXREAL_0:def 11;
+end;
+
+thus L123: ( ( Exec (( R17 >0_goto R20 ) , R22) ) . R19 ) = ( D67 . D65 ) by L114 , AMI_2:12
+.= ( R22 . R19 );
+end;
+L124: (for B1 being (Instruction of ( SCM )) holds ((ex R22 being (State of ( SCM )) st ( ( Exec (B1 , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) )) implies B1 is non  halting))
+proof
+let C4 being (Instruction of ( SCM ));
+given R22 being (State of ( SCM )) such that
+L125: ( ( Exec (C4 , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) );
+
+assume L126: C4 is  halting;
+L127: ( ( Exec (C4 , R22) ) . ( IC ( SCM ) ) ) = ( R22 . ( NAT ) ) by L126 , L44 , EXTPRO_1:def 3;
+thus L128: contradiction by L127 , L125 , L44;
+L129: ( IC R22 ) = ( R22 . ( NAT ) ) by AMI_2:22 , FUNCT_7:def 1;
+reconsider D71 = ( R22 . ( NAT ) ) as (Element of ( NAT )) by L129;
+end;
+L131: (for B2 being (Instruction of ( SCM )) holds (B2 = [ ( 0 ) , ( {} ) , ( {} ) ] implies B2 is  halting))
+proof
+let C5 being (Instruction of ( SCM ));
+assume L132: C5 = [ ( 0 ) , ( {} ) , ( {} ) ];
+L133: ( C5 `3_3 ) = ( {} ) by L132 , RECDEF_2:def 3;
+L134: ((not (ex B3 , B4 being (Element of ( SCM-Data-Loc )) st C5 = [ 1 , ( {} ) , <* B3 , B4 *> ])) & (not (ex B5 , B6 being (Element of ( SCM-Data-Loc )) st C5 = [ 2 , ( {} ) , <* B5 , B6 *> ]))) by L133 , RECDEF_2:def 3;
+L135: ((not (ex B7 being (Element of ( NAT )) st (ex B8 being (Element of ( SCM-Data-Loc )) st C5 = [ 7 , <* B7 *> , <* B8 *> ]))) & (not (ex B9 being (Element of ( NAT )) st (ex B10 being (Element of ( SCM-Data-Loc )) st C5 = [ 8 , <* B9 *> , <* B10 *> ])))) by L133 , RECDEF_2:def 3;
+L136: ( C5 `2_3 ) = ( {} ) by L132 , RECDEF_2:def 2;
+L137: ((not (ex B11 , B12 being (Element of ( SCM-Data-Loc )) st C5 = [ 5 , ( {} ) , <* B11 , B12 *> ])) & (not (ex B13 being (Element of ( NAT )) st C5 = [ 6 , <* B13 *> , ( {} ) ]))) by L136 , L133 , RECDEF_2:def 2 , RECDEF_2:def 3;
+reconsider D72 = C5 as (Element of ( SCM-Instr ));
+let C6 being (State of ( SCM ));
+reconsider D73 = C6 as SCM-State by CARD_3:107;
+L138: ((not (ex B14 , B15 being (Element of ( SCM-Data-Loc )) st C5 = [ 3 , ( {} ) , <* B14 , B15 *> ])) & (not (ex B16 , B17 being (Element of ( SCM-Data-Loc )) st C5 = [ 4 , ( {} ) , <* B16 , B17 *> ]))) by L133 , RECDEF_2:def 3;
+thus L139: ( Exec (C5 , C6) ) = ( SCM-Exec-Res (D72 , D73) ) by AMI_2:def 15
+.= C6 by L134 , L138 , L137 , L135 , AMI_2:def 14;
+end;
+L140: (for R17 being Data-Location holds (for R18 being Data-Location holds ( R17 := R18 ) is non  halting))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+set D74 = the (State of ( SCM ));
+L141: ( ( Exec (( R17 := R18 ) , D74) ) . ( IC ( SCM ) ) ) = ( succ ( IC D74 ) ) by L45;
+thus L142: thesis by L141 , L124;
+end;
+L143: (for R17 being Data-Location holds (for R18 being Data-Location holds ( AddTo (R17 , R18) ) is non  halting))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+set D75 = the (State of ( SCM ));
+L144: ( ( Exec (( AddTo (R17 , R18) ) , D75) ) . ( IC ( SCM ) ) ) = ( succ ( IC D75 ) ) by L54;
+thus L145: thesis by L144 , L124;
+end;
+L146: (for R17 being Data-Location holds (for R18 being Data-Location holds ( SubFrom (R17 , R18) ) is non  halting))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+set D76 = the (State of ( SCM ));
+L147: ( ( Exec (( SubFrom (R17 , R18) ) , D76) ) . ( IC ( SCM ) ) ) = ( succ ( IC D76 ) ) by L63;
+thus L148: thesis by L147 , L124;
+end;
+L149: (for R17 being Data-Location holds (for R18 being Data-Location holds ( MultBy (R17 , R18) ) is non  halting))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+set D77 = the (State of ( SCM ));
+L150: ( ( Exec (( MultBy (R17 , R18) ) , D77) ) . ( IC ( SCM ) ) ) = ( succ ( IC D77 ) ) by L72;
+thus L151: thesis by L150 , L124;
+end;
+L152: (for R17 being Data-Location holds (for R18 being Data-Location holds ( Divide (R17 , R18) ) is non  halting))
+proof
+let R17 being Data-Location;
+let R18 being Data-Location;
+set D78 = the (State of ( SCM ));
+L153: ( ( Exec (( Divide (R17 , R18) ) , D78) ) . ( IC ( SCM ) ) ) = ( succ ( IC D78 ) ) by L81;
+thus L154: thesis by L153 , L124;
+end;
+L155: (for R20 being Nat holds ( SCM-goto R20 ) is non  halting)
+proof
+let R20 being Nat;
+set D79 = ( the_Values_of ( SCM ) );
+set D80 = the SCM-State;
+assume L156: ( SCM-goto R20 ) is  halting;
+reconsider D81 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+reconsider D82 = ( SCM-goto R20 ) as (Element of ( SCM-Instr ));
+set D83 = ( D80 +* ( ( NAT ) .--> ( succ D81 ) ) );
+L157: ( dom D80 ) = (the carrier of ( SCM )) by AMI_2:28;
+L158: ( dom ( ( NAT ) .--> ( succ D81 ) ) ) = { ( NAT ) } by FUNCOP_1:13;
+L159: ( NAT ) in ( dom ( ( NAT ) .--> ( succ D81 ) ) ) by L158 , TARSKI:def 1;
+L160: ( D83 . ( NAT ) ) = ( ( ( NAT ) .--> ( succ D81 ) ) . ( NAT ) ) by L159 , FUNCT_4:13
+.= ( succ D81 ) by FUNCOP_1:72;
+L161: (for B18 being set holds (B18 in ( dom D79 ) implies ( D83 . B18 ) in ( D79 . B18 )))
+proof
+let C7 being set;
+assume that
+L162: C7 in ( dom D79 );
+per cases ;
+suppose L163: C7 = ( NAT );
+
+L164: ( D79 . C7 ) = ( NAT ) by L163 , AMI_2:6;
+thus L165: thesis by L164 , L160 , L163;
+end;
+suppose L166: C7 <> ( NAT );
+
+L167: (not C7 in ( dom ( ( NAT ) .--> ( succ D81 ) ) )) by L166 , L158 , TARSKI:def 1;
+L168: ( D83 . C7 ) = ( D80 . C7 ) by L167 , FUNCT_4:11;
+thus L169: thesis by L168 , L162 , CARD_3:9;
+end;
+end;
+L171: { ( NAT ) } c= ( SCM-Memory ) by AMI_2:22 , ZFMISC_1:31;
+L172: ( dom D83 ) = ( ( dom D80 ) \/ ( dom ( ( NAT ) .--> ( succ D81 ) ) ) ) by FUNCT_4:def 1
+.= ( ( SCM-Memory ) \/ ( dom ( ( NAT ) .--> ( succ D81 ) ) ) ) by L157
+.= ( ( SCM-Memory ) \/ { ( NAT ) } ) by FUNCOP_1:13
+.= ( SCM-Memory ) by L171 , XBOOLE_1:12;
+L173: ( dom D79 ) = ( SCM-Memory ) by AMI_2:27;
+reconsider D84 = D83 as (State of ( SCM )) by L173 , L172 , L161 , FUNCT_1:def 14 , PARTFUN1:def 2 , RELAT_1:def 18;
+reconsider D85 = D84 as SCM-State by CARD_3:107;
+L174: ( dom ( ( NAT ) .--> R20 ) ) = { ( NAT ) } by FUNCOP_1:13;
+L175: ( NAT ) in ( dom ( ( NAT ) .--> R20 ) ) by L174 , TARSKI:def 1;
+L176: ( ( D85 +* ( ( NAT ) .--> R20 ) ) . ( NAT ) ) = ( ( ( NAT ) .--> R20 ) . ( NAT ) ) by L175 , FUNCT_4:13
+.= R20 by FUNCOP_1:72;
+L177: 6 is (Element of ( Segm 9 )) by NAT_1:44;
+L178: ( D85 +* ( ( NAT ) .--> R20 ) ) = ( SCM-Chg (D85 , ( D82 jump_address )) ) by L177 , SCM_INST:6
+.= ( SCM-Exec-Res (D82 , D85) ) by AMI_2:def 14
+.= ( Exec (( SCM-goto R20 ) , D84) ) by AMI_2:def 15
+.= D84 by L156 , EXTPRO_1:def 3;
+thus L179: contradiction by L178 , L160 , L176;
+end;
+L180: (for R17 being Data-Location holds (for R20 being Nat holds ( R17 =0_goto R20 ) is non  halting))
+proof
+let R17 being Data-Location;
+let R20 being Nat;
+set D86 = ( the_Values_of ( SCM ) );
+set D87 = the SCM-State;
+reconsider D88 = ( R17 =0_goto R20 ) as (Element of ( SCM-Instr ));
+reconsider D89 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+set D90 = ( D87 +* ( ( NAT ) .--> ( succ D89 ) ) );
+L181: { ( NAT ) } c= ( SCM-Memory ) by AMI_2:22 , ZFMISC_1:31;
+L182: ( dom D87 ) = (the carrier of ( SCM )) by AMI_2:28;
+L183: ( dom D90 ) = ( ( dom D87 ) \/ ( dom ( ( NAT ) .--> ( succ D89 ) ) ) ) by FUNCT_4:def 1
+.= ( ( SCM-Memory ) \/ ( dom ( ( NAT ) .--> ( succ D89 ) ) ) ) by L182
+.= ( ( SCM-Memory ) \/ { ( NAT ) } ) by FUNCOP_1:13
+.= ( SCM-Memory ) by L181 , XBOOLE_1:12;
+L184: 7 is (Element of ( Segm 9 )) by NAT_1:44;
+L185: ( dom ( ( NAT ) .--> ( succ D89 ) ) ) = { ( NAT ) } by FUNCOP_1:13;
+L186: ( NAT ) in ( dom ( ( NAT ) .--> ( succ D89 ) ) ) by L185 , TARSKI:def 1;
+L187: ( D90 . ( NAT ) ) = ( ( ( NAT ) .--> ( succ D89 ) ) . ( NAT ) ) by L186 , FUNCT_4:13
+.= ( succ D89 ) by FUNCOP_1:72;
+L188: (for B19 being set holds (B19 in ( dom D86 ) implies ( D90 . B19 ) in ( D86 . B19 )))
+proof
+let C8 being set;
+assume that
+L189: C8 in ( dom D86 );
+per cases ;
+suppose L190: C8 = ( NAT );
+
+L191: ( D86 . C8 ) = ( NAT ) by L190 , AMI_2:6;
+thus L192: thesis by L191 , L187 , L190;
+end;
+suppose L193: C8 <> ( NAT );
+
+L194: (not C8 in ( dom ( ( NAT ) .--> ( succ D89 ) ) )) by L193 , L185 , TARSKI:def 1;
+L195: ( D90 . C8 ) = ( D87 . C8 ) by L194 , FUNCT_4:11;
+thus L196: thesis by L195 , L189 , CARD_3:9;
+end;
+end;
+L198: ( dom D86 ) = ( SCM-Memory ) by AMI_2:27;
+reconsider D91 = D90 as (State of ( SCM )) by L198 , L183 , L188 , FUNCT_1:def 14 , PARTFUN1:def 2 , RELAT_1:def 18;
+reconsider D92 = D91 as SCM-State by CARD_3:107;
+L199: ( dom ( ( NAT ) .--> R20 ) ) = { ( NAT ) } by FUNCOP_1:13;
+L200: ( NAT ) in ( dom ( ( NAT ) .--> R20 ) ) by L199 , TARSKI:def 1;
+L201: ( ( D92 +* ( ( NAT ) .--> R20 ) ) . ( NAT ) ) = ( ( ( NAT ) .--> R20 ) . ( NAT ) ) by L200 , FUNCT_4:13
+.= R20 by FUNCOP_1:72;
+assume L202: ( R17 =0_goto R20 ) is  halting;
+L203: R17 is (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+per cases ;
+suppose L204: ( D92 . ( D88 cond_address ) ) <> ( 0 );
+
+L205: ( IC D92 ) = ( D92 . ( NAT ) );
+reconsider D93 = ( D92 . ( NAT ) ) as (Element of ( NAT )) by L205;
+L206: (( IC D91 ) = ( IC D92 ) & ( D91 . R17 ) <> ( 0 )) by L184 , L203 , L204 , AMI_2:22 , FUNCT_7:def 1 , SCM_INST:7;
+L207: ( ( Exec (( R17 =0_goto R20 ) , D91) ) . ( IC ( SCM ) ) ) = ( succ D93 ) by L206 , L100;
+L208: ( ( Exec (( R17 =0_goto R20 ) , D91) ) . ( IC ( SCM ) ) ) = ( D92 . ( NAT ) ) by L202 , L44 , EXTPRO_1:def 3;
+thus L209: contradiction by L208 , L207;
+end;
+suppose L210: ( D92 . ( D88 cond_address ) ) = ( 0 );
+
+L211: ( IFEQ (( D92 . ( D88 cond_address ) ) , ( 0 ) , ( D88 cjump_address ) , ( succ ( IC D92 ) )) ) = ( D88 cjump_address ) by L210 , FUNCOP_1:def 8;
+L212: ( D92 +* ( ( NAT ) .--> R20 ) ) = ( SCM-Chg (D92 , ( IFEQ (( D92 . ( D88 cond_address ) ) , ( 0 ) , ( D88 cjump_address ) , ( succ ( IC D92 ) )) )) ) by L211 , L184 , L203 , SCM_INST:7
+.= ( SCM-Exec-Res (D88 , D92) ) by L203 , AMI_2:def 14
+.= ( Exec (( R17 =0_goto R20 ) , D91) ) by AMI_2:def 15
+.= D91 by L202 , EXTPRO_1:def 3;
+thus L213: contradiction by L212 , L187 , L201;
+end;
+end;
+L215: (for R17 being Data-Location holds (for R20 being Nat holds ( R17 >0_goto R20 ) is non  halting))
+proof
+let R17 being Data-Location;
+let R20 being Nat;
+set D94 = ( the_Values_of ( SCM ) );
+set D95 = the SCM-State;
+reconsider D96 = ( R17 >0_goto R20 ) as (Element of ( SCM-Instr ));
+reconsider D97 = R20 as (Element of ( NAT )) by ORDINAL1:def 12;
+set D98 = ( D95 +* ( ( NAT ) .--> ( succ D97 ) ) );
+L216: { ( NAT ) } c= ( SCM-Memory ) by AMI_2:22 , ZFMISC_1:31;
+L217: ( dom D95 ) = (the carrier of ( SCM )) by AMI_2:28;
+L218: ( dom D98 ) = ( ( dom D95 ) \/ ( dom ( ( NAT ) .--> ( succ D97 ) ) ) ) by FUNCT_4:def 1
+.= ( ( SCM-Memory ) \/ ( dom ( ( NAT ) .--> ( succ D97 ) ) ) ) by L217
+.= ( ( SCM-Memory ) \/ { ( NAT ) } ) by FUNCOP_1:13
+.= ( SCM-Memory ) by L216 , XBOOLE_1:12;
+L219: 8 is (Element of ( Segm 9 )) by NAT_1:44;
+L220: ( dom ( ( NAT ) .--> ( succ D97 ) ) ) = { ( NAT ) } by FUNCOP_1:13;
+L221: ( NAT ) in ( dom ( ( NAT ) .--> ( succ D97 ) ) ) by L220 , TARSKI:def 1;
+L222: ( D98 . ( NAT ) ) = ( ( ( NAT ) .--> ( succ D97 ) ) . ( NAT ) ) by L221 , FUNCT_4:13
+.= ( succ D97 ) by FUNCOP_1:72;
+L223: (for B20 being set holds (B20 in ( dom D94 ) implies ( D98 . B20 ) in ( D94 . B20 )))
+proof
+let C9 being set;
+assume that
+L224: C9 in ( dom D94 );
+per cases ;
+suppose L225: C9 = ( NAT );
+
+L226: ( D94 . C9 ) = ( NAT ) by L225 , AMI_2:6;
+thus L227: thesis by L226 , L222 , L225;
+end;
+suppose L228: C9 <> ( NAT );
+
+L229: (not C9 in ( dom ( ( NAT ) .--> ( succ D97 ) ) )) by L228 , L220 , TARSKI:def 1;
+L230: ( D98 . C9 ) = ( D95 . C9 ) by L229 , FUNCT_4:11;
+thus L231: thesis by L230 , L224 , CARD_3:9;
+end;
+end;
+L233: ( dom D94 ) = ( SCM-Memory ) by AMI_2:27;
+reconsider D99 = D98 as (State of ( SCM )) by L233 , L218 , L223 , FUNCT_1:def 14 , PARTFUN1:def 2 , RELAT_1:def 18;
+reconsider D100 = D99 as SCM-State by CARD_3:107;
+L234: ( dom ( ( NAT ) .--> R20 ) ) = { ( NAT ) } by FUNCOP_1:13;
+L235: ( NAT ) in ( dom ( ( NAT ) .--> R20 ) ) by L234 , TARSKI:def 1;
+L236: ( ( D100 +* ( ( NAT ) .--> R20 ) ) . ( NAT ) ) = ( ( ( NAT ) .--> R20 ) . ( NAT ) ) by L235 , FUNCT_4:13
+.= R20 by FUNCOP_1:72;
+assume L237: ( R17 >0_goto R20 ) is  halting;
+L238: R17 is (Element of ( SCM-Data-Loc )) by AMI_2:def 16;
+per cases ;
+suppose L239: ( D100 . ( D96 cond_address ) ) <= ( 0 );
+
+L240: ( IC D100 ) = ( D100 . ( NAT ) );
+reconsider D101 = ( D100 . ( NAT ) ) as (Element of ( NAT )) by L240;
+L241: (( IC D99 ) = ( IC D100 ) & ( D99 . R17 ) <= ( 0 )) by L219 , L238 , L239 , AMI_2:22 , FUNCT_7:def 1 , SCM_INST:7;
+L242: ( ( Exec (( R17 >0_goto R20 ) , D99) ) . ( IC ( SCM ) ) ) = ( succ D101 ) by L241 , L112;
+L243: ( ( Exec (( R17 >0_goto R20 ) , D99) ) . ( IC ( SCM ) ) ) = ( D100 . ( NAT ) ) by L237 , L44 , EXTPRO_1:def 3;
+thus L244: contradiction by L243 , L242;
+end;
+suppose L245: ( D100 . ( D96 cond_address ) ) > ( 0 );
+
+L246: ( IFGT (( D100 . ( D96 cond_address ) ) , ( 0 ) , ( D96 cjump_address ) , ( succ ( IC D100 ) )) ) = ( D96 cjump_address ) by L245 , XXREAL_0:def 11;
+L247: ( D100 +* ( ( NAT ) .--> R20 ) ) = ( SCM-Chg (D100 , ( IFGT (( D100 . ( D96 cond_address ) ) , ( 0 ) , ( D96 cjump_address ) , ( succ ( IC D100 ) )) )) ) by L246 , L219 , L238 , SCM_INST:7
+.= ( SCM-Exec-Res (D96 , D100) ) by L238 , AMI_2:def 14
+.= ( Exec (( R17 >0_goto R20 ) , D99) ) by AMI_2:def 15
+.= D99 by L237 , EXTPRO_1:def 3;
+thus L248: contradiction by L247 , L222 , L236;
+end;
+end;
+L250: (for B21 being set holds (B21 is (Instruction of ( SCM )) iff (B21 = [ ( 0 ) , ( {} ) , ( {} ) ] or (ex R17 being Data-Location st (ex R18 being Data-Location st B21 = ( R17 := R18 ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B21 = ( AddTo (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B21 = ( SubFrom (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B21 = ( MultBy (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B21 = ( Divide (R17 , R18) ))) or (ex R20 being Nat st B21 = ( SCM-goto R20 )) or (ex R17 being Data-Location st (ex R20 being Nat st B21 = ( R17 =0_goto R20 ))) or (ex R17 being Data-Location st (ex R20 being Nat st B21 = ( R17 >0_goto R20 ))))))
+proof
+let C10 being set;
+thus L251: (C10 is (Instruction of ( SCM )) implies (C10 = [ ( 0 ) , ( {} ) , ( {} ) ] or (ex R17 being Data-Location st (ex R18 being Data-Location st C10 = ( R17 := R18 ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st C10 = ( AddTo (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st C10 = ( SubFrom (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st C10 = ( MultBy (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st C10 = ( Divide (R17 , R18) ))) or (ex R20 being Nat st C10 = ( SCM-goto R20 )) or (ex R17 being Data-Location st (ex R20 being Nat st C10 = ( R17 =0_goto R20 ))) or (ex R17 being Data-Location st (ex R20 being Nat st C10 = ( R17 >0_goto R20 )))))
+proof
+assume L252: C10 is (Instruction of ( SCM ));
+L253: (C10 in ( ( { [ ( SCM-Halt ) , ( {} ) , ( {} ) ] } \/ { [ R23 , <* R28 *> , ( {} ) ] where R23 is (Element of ( Segm 9 )) , R28 is (Element of ( NAT )) : R23 = 6 } ) \/ { [ R24 , <* R26 *> , <* R29 *> ] where R24 is (Element of ( Segm 9 )) , R26 is (Element of ( NAT )) , R29 is (Element of ( SCM-Data-Loc )) : R24 in { 7 , 8 } } ) or C10 in { [ R25 , ( {} ) , <* R32 , R33 *> ] where R25 is (Element of ( Segm 9 )) , R32 is (Element of ( SCM-Data-Loc )) , R33 is (Element of ( SCM-Data-Loc )) : R25 in { 1 , 2 , 3 , 4 , 5 } }) by L252 , XBOOLE_0:def 3;
+L254: (C10 in ( { [ ( SCM-Halt ) , ( {} ) , ( {} ) ] } \/ { [ R23 , <* R28 *> , ( {} ) ] where R23 is (Element of ( Segm 9 )) , R28 is (Element of ( NAT )) : R23 = 6 } ) or C10 in { [ R24 , <* R26 *> , <* R29 *> ] where R24 is (Element of ( Segm 9 )) , R26 is (Element of ( NAT )) , R29 is (Element of ( SCM-Data-Loc )) : R24 in { 7 , 8 } } or C10 in { [ R25 , ( {} ) , <* R32 , R33 *> ] where R25 is (Element of ( Segm 9 )) , R32 is (Element of ( SCM-Data-Loc )) , R33 is (Element of ( SCM-Data-Loc )) : R25 in { 1 , 2 , 3 , 4 , 5 } }) by L253 , XBOOLE_0:def 3;
+per cases  by L254 , XBOOLE_0:def 3;
+suppose L255: C10 in { [ ( SCM-Halt ) , ( {} ) , ( {} ) ] };
+
+thus L256: thesis by L255 , TARSKI:def 1;
+end;
+suppose L257: C10 in { [ R23 , <* R28 *> , ( {} ) ] where R23 is (Element of ( Segm 9 )) , R28 is (Element of ( NAT )) : R23 = 6 };
+
+consider R23 being (Element of ( Segm 9 )), R28 being (Element of ( NAT )) such that L258: (C10 = [ R23 , <* R28 *> , ( {} ) ] & R23 = 6) by L257;
+L259: C10 = ( SCM-goto R28 ) by L258;
+thus L260: thesis by L259;
+end;
+suppose L261: C10 in { [ R24 , <* R26 *> , <* R29 *> ] where R24 is (Element of ( Segm 9 )) , R26 is (Element of ( NAT )) , R29 is (Element of ( SCM-Data-Loc )) : R24 in { 7 , 8 } };
+
+consider R24 being (Element of ( Segm 9 )), R26 being (Element of ( NAT )), R29 being (Element of ( SCM-Data-Loc )) such that L262: (C10 = [ R24 , <* R26 *> , <* R29 *> ] & R24 in { 7 , 8 }) by L261;
+reconsider D102 = R29 as Data-Location by AMI_2:def 16;
+reconsider D103 = R26 as (Element of ( NAT ));
+L263: (C10 = ( D102 =0_goto R26 ) or C10 = ( D102 >0_goto R26 )) by L262 , TARSKI:def 2;
+thus L264: thesis by L263;
+end;
+suppose L265: C10 in { [ R25 , ( {} ) , <* R32 , R33 *> ] where R25 is (Element of ( Segm 9 )) , R32 is (Element of ( SCM-Data-Loc )) , R33 is (Element of ( SCM-Data-Loc )) : R25 in { 1 , 2 , 3 , 4 , 5 } };
+
+consider R25 being (Element of ( Segm 9 )), R32 being (Element of ( SCM-Data-Loc )), R33 being (Element of ( SCM-Data-Loc )) such that L266: (C10 = [ R25 , ( {} ) , <* R32 , R33 *> ] & R25 in { 1 , 2 , 3 , 4 , 5 }) by L265;
+reconsider D104 = R32 , D105 = R33 as Data-Location by AMI_2:def 16;
+L267: (C10 = ( D104 := D105 ) or C10 = ( AddTo (D104 , D105) ) or C10 = ( SubFrom (D104 , D105) ) or C10 = ( MultBy (D104 , D105) ) or C10 = ( Divide (D104 , D105) )) by L266 , ENUMSET1:def 3;
+thus L268: thesis by L267;
+end;
+end;
+
+thus L270: thesis by SCM_INST:1;
+end;
+L271: (for B22 being (Instruction of ( SCM )) holds (B22 is  halting implies B22 = [ ( 0 ) , ( {} ) , ( {} ) ]))
+proof
+set D106 = [ ( 0 ) , ( {} ) , ( {} ) ];
+let C11 being (Instruction of ( SCM ));
+assume that
+L272: C11 is  halting;
+assume L273: D106 <> C11;
+per cases  by L250;
+suppose L274: C11 = [ ( 0 ) , ( {} ) , ( {} ) ];
+
+thus L275: thesis by L274 , L273;
+end;
+suppose L276: (ex R17 being Data-Location st (ex R18 being Data-Location st C11 = ( R17 := R18 )));
+
+thus L277: thesis by L276 , L272 , L140;
+end;
+suppose L278: (ex R17 being Data-Location st (ex R18 being Data-Location st C11 = ( AddTo (R17 , R18) )));
+
+thus L279: thesis by L278 , L272 , L143;
+end;
+suppose L280: (ex R17 being Data-Location st (ex R18 being Data-Location st C11 = ( SubFrom (R17 , R18) )));
+
+thus L281: thesis by L280 , L272 , L146;
+end;
+suppose L282: (ex R17 being Data-Location st (ex R18 being Data-Location st C11 = ( MultBy (R17 , R18) )));
+
+thus L283: thesis by L282 , L272 , L149;
+end;
+suppose L284: (ex R17 being Data-Location st (ex R18 being Data-Location st C11 = ( Divide (R17 , R18) )));
+
+thus L285: thesis by L284 , L272 , L152;
+end;
+suppose L286: (ex R20 being Nat st C11 = ( SCM-goto R20 ));
+
+thus L287: thesis by L286 , L272 , L155;
+end;
+suppose L288: (ex R17 being Data-Location st (ex R20 being Nat st C11 = ( R17 =0_goto R20 )));
+
+thus L289: thesis by L288 , L272 , L180;
+end;
+suppose L290: (ex R17 being Data-Location st (ex R20 being Nat st C11 = ( R17 >0_goto R20 )));
+
+thus L291: thesis by L290 , L272 , L215;
+end;
+end;
+registration
+cluster ( SCM ) ->  halting;
+coherence
+proof
+thus L293: ( halt ( SCM ) ) is  halting by L131;
+end;
+end;
+begin
+definition
+let C12 being Nat;
+func dl. C12 -> Data-Location equals 
+[ 1 , C12 ];
+coherence
+proof
+reconsider D107 = C12 as (Element of ( NAT )) by ORDINAL1:def 12;
+L295: 1 in { 1 } by TARSKI:def 1;
+L296: [ 1 , D107 ] in ( SCM-Data-Loc ) by L295 , ZFMISC_1:87;
+thus L297: thesis by L296 , AMI_2:def 16;
+end;
+end;
+theorem
+L299: (for R34 being Nat holds (for R35 being Nat holds (R34 <> R35 implies ( dl. R34 ) <> ( dl. R35 )))) by XTUPLE_0:1;
+theorem
+L300: (for B23 being Data-Location holds ( Values B23 ) = ( INT ))
+proof
+let C13 being Data-Location;
+L301: C13 in ( SCM-Data-Loc ) by AMI_2:def 16;
+thus L302: thesis by L301 , AMI_2:7;
+end;
+definition
+let C14 being Data-Location;
+let C15 being Integer;
+redefine func C14 .--> C15 -> (PartState of ( SCM ));
+
+coherence
+proof
+L303: (C15 is (Element of ( INT )) & ( Values C14 ) = ( INT )) by L300 , INT_1:def 2;
+reconsider D108 = C15 as (Element of ( ( the_Values_of ( SCM ) ) . C14 )) by L303;
+L304: ( C14 .--> D108 ) is (PartState of ( SCM )) by L303;
+thus L305: thesis by L304;
+end;
+end;
+definition
+let C16 , C17 being Data-Location;
+let C18 , C19 being Integer;
+redefine func (C16 , C17) --> (C18 , C19) -> (PartState of ( SCM ));
+
+coherence
+proof
+L307: (C18 is (Element of ( INT )) & C19 is (Element of ( INT ))) by INT_1:def 2;
+L308: (( Values C16 ) = ( INT ) & ( Values C17 ) = ( INT )) by L300;
+reconsider D109 = C18 as (Element of ( Values C16 )) by L308 , L307;
+reconsider D110 = C19 as (Element of ( Values C17 )) by L307 , L308;
+L309: ( (C16 , C17) --> (D109 , D110) ) is (PartState of ( SCM ));
+thus L310: thesis by L309;
+end;
+end;
+theorem
+L312: (for R34 being Nat holds (for R35 being Nat holds ( dl. R34 ) <> R35));
+theorem
+L313: (for R34 being Nat holds (( IC ( SCM ) ) <> ( dl. R34 ) & ( IC ( SCM ) ) <> R34))
+proof
+let R34 being Nat;
+thus L314: ( IC ( SCM ) ) <> ( dl. R34 ) by L44;
+assume L315: ( IC ( SCM ) ) = R34;
+L316: ( IC ( SCM ) ) in ( NAT ) by L315 , ORDINAL1:def 12;
+thus L317: contradiction by L316 , L44;
+end;
+begin
+theorem
+L318: (for B24 being (Instruction of ( SCM )) holds ((ex R22 being (State of ( SCM )) st ( ( Exec (B24 , R22) ) . ( IC ( SCM ) ) ) = ( succ ( IC R22 ) )) implies B24 is non  halting)) by L124;
+theorem
+L319: (for B25 being (Instruction of ( SCM )) holds (B25 = [ ( 0 ) , ( {} ) , ( {} ) ] implies B25 is  halting)) by L131;
+theorem
+L320: (for R17 being Data-Location holds (for R18 being Data-Location holds ( R17 := R18 ) is non  halting)) by L140;
+theorem
+L321: (for R17 being Data-Location holds (for R18 being Data-Location holds ( AddTo (R17 , R18) ) is non  halting)) by L143;
+theorem
+L322: (for R17 being Data-Location holds (for R18 being Data-Location holds ( SubFrom (R17 , R18) ) is non  halting)) by L146;
+theorem
+L323: (for R17 being Data-Location holds (for R18 being Data-Location holds ( MultBy (R17 , R18) ) is non  halting)) by L149;
+theorem
+L324: (for R17 being Data-Location holds (for R18 being Data-Location holds ( Divide (R17 , R18) ) is non  halting)) by L152;
+theorem
+L325: (for R20 being Nat holds ( SCM-goto R20 ) is non  halting) by L155;
+theorem
+L326: (for R17 being Data-Location holds (for R20 being Nat holds ( R17 =0_goto R20 ) is non  halting)) by L180;
+theorem
+L327: (for R17 being Data-Location holds (for R20 being Nat holds ( R17 >0_goto R20 ) is non  halting)) by L215;
+theorem
+L328: (for B26 being set holds (B26 is (Instruction of ( SCM )) iff (B26 = [ ( 0 ) , ( {} ) , ( {} ) ] or (ex R17 being Data-Location st (ex R18 being Data-Location st B26 = ( R17 := R18 ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B26 = ( AddTo (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B26 = ( SubFrom (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B26 = ( MultBy (R17 , R18) ))) or (ex R17 being Data-Location st (ex R18 being Data-Location st B26 = ( Divide (R17 , R18) ))) or (ex R20 being Nat st B26 = ( SCM-goto R20 )) or (ex R17 being Data-Location st (ex R20 being Nat st B26 = ( R17 =0_goto R20 ))) or (ex R17 being Data-Location st (ex R20 being Nat st B26 = ( R17 >0_goto R20 )))))) by L250;
+theorem
+L329: (for B27 being (Instruction of ( SCM )) holds (B27 is  halting implies B27 = ( halt ( SCM ) ))) by L271;
+theorem
+L330: ( halt ( SCM ) ) = [ ( 0 ) , ( {} ) , ( {} ) ];
+theorem
+L331: ( Data-Locations ( SCM ) ) = ( SCM-Data-Loc )
+proof
+L332: ( SCM-Data-Loc ) misses { ( NAT ) } by AMI_2:20 , ZFMISC_1:50;
+L333: ( SCM-Data-Loc ) misses { ( NAT ) } by L332;
+thus L334: ( Data-Locations ( SCM ) ) = ( ( { ( NAT ) } \/ ( SCM-Data-Loc ) ) \ { ( NAT ) } ) by AMI_2:22 , FUNCT_7:def 1
+.= ( ( ( SCM-Data-Loc ) \/ { ( NAT ) } ) \ { ( NAT ) } )
+.= ( ( SCM-Data-Loc ) \ { ( NAT ) } ) by XBOOLE_1:40
+.= ( SCM-Data-Loc ) by L333 , XBOOLE_1:83;
+end;
+theorem
+L335: (for B28 being Data-Location holds B28 in ( Data-Locations ( SCM ) )) by L331 , AMI_2:def 16;
+theorem
+L336: (for B29 being SCM-State holds B29 is (State of ( SCM ))) by L6;
+theorem
+L337: (for B30 being (Element of ( SCM-Instr )) holds ( InsCode B30 ) <= 8) by SCM_INST:10;

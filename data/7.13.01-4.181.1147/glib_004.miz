@@ -1,0 +1,3951 @@
+:: Proof of Dijkstra's Shortest Path Algorithm & Prim's Minimum Spanning
+:: Tree Algorithm
+::  by Gilbert Lee and Piotr Rudnicki
+::
+:: Received February 22, 2005
+:: Copyright (c) 2005-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, FUNCT_1, RELAT_1, FUNCT_4, FUNCOP_1, XBOOLE_0, PRE_POLY,
+      TARSKI, CARD_1, UPROOTS, CARD_3, ARYTM_3, FINSEQ_1, NAT_1, XXREAL_0,
+      FINSET_1, SUBSET_1, FINSEQ_2, XREAL_0, ORDINAL1, ARYTM_1, GLIB_003,
+      TREES_1, GLIB_000, GLIB_001, REAL_1, PBOOLE, ZFMISC_1, FUNCT_2, ABIAN,
+      PARTFUN1, MCART_1, GLIB_002, WAYBEL_0, RELAT_2, RCOMP_1, GRAPH_1,
+      GLIB_004;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, ENUMSET1,
+      XTUPLE_0, CARD_1, NUMBERS, SUBSET_1,
+      DOMAIN_1, MCART_1, XCMPLX_0, XXREAL_0, XREAL_0, REAL_1, RELAT_1,
+      RELSET_1, PARTFUN1, FUNCT_1, FINSEQ_1, FINSEQ_2, SEQ_1, PBOOLE, FUNCT_2,
+      RVSUM_1, ABIAN, ORDINAL1, UPROOTS, FINSET_1, NAT_1, FUNCOP_1, FUNCT_4,
+      GLIB_000, GLIB_001, GLIB_002, GLIB_003, RFUNCT_3, PRE_POLY;
+ constructors DOMAIN_1, BINOP_2, FINSOP_1, RVSUM_1, GRAPH_2, RFUNCT_3, UPROOTS,
+      GLIB_002, GLIB_003, SEQ_1, XXREAL_2, RELSET_1, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, PARTFUN1, FRAENKEL, FUNCT_1,
+      ORDINAL1, FUNCOP_1, FINSET_1, NUMBERS, XXREAL_0, XREAL_0, NAT_1, CARD_1,
+      UPROOTS, GLIB_000, ABIAN, GLIB_001, GLIB_002, GLIB_003, VALUED_0,
+      RELSET_1, PRE_POLY, INT_1, XTUPLE_0;
+ requirements ARITHM, BOOLE, NUMERALS, REAL, SUBSET;
+ definitions TARSKI, GLIB_000, GLIB_003, RVSUM_1, FUNCOP_1, XTUPLE_0;
+ theorems CARD_1, CARD_2, FUNCOP_1, ENUMSET1, FINSEQ_1, FINSEQ_2, FINSEQ_3,
+      FINSET_1, FUNCT_1, FUNCT_2, FUNCT_4, GLIB_000, GLIB_001, GLIB_002,
+      GLIB_003, ABIAN, INT_1, JORDAN12, NAT_1, PARTFUN1, PBOOLE, RELAT_1,
+      RVSUM_1, TARSKI, TREES_1, UPROOTS, XBOOLE_0, XBOOLE_1, XREAL_0, ZFMISC_1,
+      XREAL_1, XXREAL_0, ORDINAL1, FINSOP_1, FUNCT_7, MCART_1, RELSET_1,
+      PRE_POLY;
+ schemes NAT_1, SUBSET_1, RECDEF_1, GRAPH_5, CQC_SIM1, PBOOLE;
+
+begin
+L1: (for B1 being Function holds (for B2 , B3 being set holds ( dom ( B1 +* ( B2 .--> B3 ) ) ) = ( ( dom B1 ) \/ { B2 } )))
+proof
+let C1 being Function;
+let C2 , C3 being set;
+thus L2: ( dom ( C1 +* ( C2 .--> C3 ) ) ) = ( ( dom C1 ) \/ ( dom ( C2 .--> C3 ) ) ) by FUNCT_4:def 1
+.= ( ( dom C1 ) \/ { C2 } ) by FUNCOP_1:13;
+end;
+L3: (for B4 being Function holds (for B5 , B6 , B7 being set holds ((B7 in ( dom ( B4 +* ( B5 .--> B6 ) ) ) & (not B7 in ( dom B4 ))) implies B5 = B7)))
+proof
+let C4 being Function;
+let C5 , C6 , C7 being set;
+assume that
+L4: C7 in ( dom ( C4 +* ( C5 .--> C6 ) ) )
+and
+L5: (not C7 in ( dom C4 ));
+L6: ( dom ( C5 .--> C6 ) ) = { C5 } by FUNCOP_1:13;
+L7: C7 in ( ( dom C4 ) \/ { C5 } ) by L6 , L4 , FUNCT_4:def 1;
+L8: C7 in { C5 } by L7 , L5 , XBOOLE_0:def 3;
+thus L9: thesis by L8 , TARSKI:def 1;
+end;
+theorem
+L10: (for B8 , B9 being Function holds ( support ( B8 +* B9 ) ) c= ( ( support B8 ) \/ ( support B9 ) ))
+proof
+let C8 , C9 being Function;
+let C10 being set;
+assume L11: C10 in ( support ( C8 +* C9 ) );
+L12: ( ( C8 +* C9 ) . C10 ) <> ( 0 ) by L11 , PRE_POLY:def 7;
+assume L13: (not C10 in ( ( support C8 ) \/ ( support C9 ) ));
+L14: (not C10 in ( support C8 )) by L13 , XBOOLE_0:def 3;
+L15: ( C8 . C10 ) = ( 0 ) by L14 , PRE_POLY:def 7;
+L16: (not C10 in ( support C9 )) by L13 , XBOOLE_0:def 3;
+L17: ( C9 . C10 ) = ( 0 ) by L16 , PRE_POLY:def 7;
+L18: (C10 in ( dom C9 ) or (not C10 in ( dom C9 )));
+thus L19: contradiction by L18 , L12 , L15 , L17 , FUNCT_4:11 , FUNCT_4:13;
+end;
+theorem
+L20: (for B10 being Function holds (for B11 , B12 being set holds ( support ( B10 +* ( B11 .--> B12 ) ) ) c= ( ( support B10 ) \/ { B11 } )))
+proof
+let C11 being Function;
+let C12 , C13 being set;
+let C14 being set;
+assume L21: C14 in ( support ( C11 +* ( C12 .--> C13 ) ) );
+L22: ( ( C11 +* ( C12 .--> C13 ) ) . C14 ) <> ( 0 ) by L21 , PRE_POLY:def 7;
+per cases ;
+suppose L23: C14 = C12;
+
+L24: C14 in { C12 } by L23 , TARSKI:def 1;
+thus L25: thesis by L24 , XBOOLE_0:def 3;
+end;
+suppose L26: C14 <> C12;
+
+L27: ( ( C11 +* ( C12 .--> C13 ) ) . C14 ) = ( C11 . C14 ) by L26 , FUNCT_4:83;
+L28: C14 in ( support C11 ) by L27 , L22 , PRE_POLY:def 7;
+thus L29: thesis by L28 , XBOOLE_0:def 3;
+end;
+end;
+theorem
+L31: (for B13 , B14 being set holds (for B15 being (Rbag of B13) holds (for B16 being (Rbag of B14) holds (for B17 being (Rbag of ( B13 \ B14 )) holds (B15 = ( B16 +* B17 ) implies ( Sum B15 ) = ( ( Sum B16 ) + ( Sum B17 ) ))))))
+proof
+let C15 , C16 being set;
+let C17 being (Rbag of C15);
+let C18 being (Rbag of C16);
+let C19 being (Rbag of ( C15 \ C16 ));
+assume that
+L32: C17 = ( C18 +* C19 );
+L33: ( dom C17 ) = ( ( dom C18 ) \/ ( dom C19 ) ) by L32 , FUNCT_4:def 1;
+L34: ( dom C18 ) c= ( dom C17 ) by L33 , XBOOLE_1:7;
+L35: C16 c= ( dom C17 ) by L34 , PARTFUN1:def 2;
+L36: C16 c= C15 by L35 , PARTFUN1:def 2;
+set D1 = ( ( EmptyBag C15 ) +* C18 );
+L37: ( dom D1 ) = ( ( dom ( EmptyBag C15 ) ) \/ ( dom C18 ) ) by FUNCT_4:def 1
+.= ( C15 \/ ( dom C18 ) ) by PARTFUN1:def 2
+.= ( C15 \/ C16 ) by PARTFUN1:def 2
+.= C15 by L36 , XBOOLE_1:12;
+L38: ( support D1 ) c= ( ( support ( EmptyBag C15 ) ) \/ ( support C18 ) ) by L10;
+reconsider D2 = D1 as (Rbag of C15) by L38 , L37 , PARTFUN1:def 2 , PRE_POLY:def 8 , RELAT_1:def 18;
+set D3 = ( ( EmptyBag C15 ) +* C19 );
+L39: ( dom D3 ) = ( ( dom ( EmptyBag C15 ) ) \/ ( dom C19 ) ) by FUNCT_4:def 1
+.= ( C15 \/ ( dom C19 ) ) by PARTFUN1:def 2
+.= ( C15 \/ ( C15 \ C16 ) ) by PARTFUN1:def 2
+.= C15 by XBOOLE_1:12;
+L40: ( support D3 ) c= ( ( support ( EmptyBag C15 ) ) \/ ( support C19 ) ) by L10;
+reconsider D4 = D3 as (Rbag of C15) by L40 , L39 , PARTFUN1:def 2 , PRE_POLY:def 8 , RELAT_1:def 18;
+L41:
+now
+let C20 being set;
+assume L42: C20 in C15;
+L43: ( dom C18 ) = C16 by PARTFUN1:def 2;
+L44: ( dom C19 ) = ( C15 \ C16 ) by PARTFUN1:def 2;
+per cases ;
+suppose L45: C20 in C16;
+
+L46: ( D2 . C20 ) = ( C18 . C20 ) by L45 , L43 , FUNCT_4:13;
+L47: (not C20 in ( dom C19 )) by L45 , XBOOLE_0:def 5;
+L48: ( D4 . C20 ) = ( ( EmptyBag C15 ) . C20 ) by L47 , FUNCT_4:11
+.= ( 0 ) by PRE_POLY:52;
+thus L49: ( C17 . C20 ) = ( ( D2 . C20 ) + ( D4 . C20 ) ) by L48 , L32 , L47 , L46 , FUNCT_4:11
+.= ( ( D2 + D4 ) . C20 ) by PRE_POLY:def 5;
+end;
+suppose L50: (not C20 in C16);
+
+L51: ( D2 . C20 ) = ( ( EmptyBag C15 ) . C20 ) by L50 , L43 , FUNCT_4:11
+.= ( 0 ) by PRE_POLY:52;
+L52: C20 in ( dom C19 ) by L42 , L44 , L50 , XBOOLE_0:def 5;
+L53: ( D4 . C20 ) = ( C19 . C20 ) by L52 , FUNCT_4:13;
+thus L54: ( C17 . C20 ) = ( ( D2 . C20 ) + ( D4 . C20 ) ) by L53 , L32 , L51 , L52 , FUNCT_4:13
+.= ( ( D2 + D4 ) . C20 ) by PRE_POLY:def 5;
+end;
+end;
+consider C21 being (FinSequence of ( REAL )) such that L56: ( Sum D4 ) = ( Sum C21 ) and L57: C21 = ( D4 * ( canFS ( support D4 ) ) ) by UPROOTS:def 3;
+L58: (( rng ( canFS ( support D4 ) ) ) = ( support D4 ) & ( support D4 ) c= ( dom D4 )) by FUNCT_2:def 3 , PRE_POLY:37;
+L59: ( dom C21 ) = ( dom ( canFS ( support D4 ) ) ) by L58 , L57 , RELAT_1:27;
+consider C22 being (FinSequence of ( REAL )) such that L60: ( Sum D2 ) = ( Sum C22 ) and L61: C22 = ( D2 * ( canFS ( support D2 ) ) ) by UPROOTS:def 3;
+consider C23 being (FinSequence of ( REAL )) such that L62: ( Sum C18 ) = ( Sum C23 ) and L63: C23 = ( C18 * ( canFS ( support C18 ) ) ) by UPROOTS:def 3;
+L64: (( rng ( canFS ( support C18 ) ) ) = ( support C18 ) & ( support C18 ) c= ( dom C18 )) by FUNCT_2:def 3 , PRE_POLY:37;
+L65: ( dom C23 ) = ( dom ( canFS ( support C18 ) ) ) by L64 , L63 , RELAT_1:27;
+L66:
+now
+let C24 being set;
+thus L67:now
+assume L68: C24 in ( support C18 );
+L69: ( C18 . C24 ) <> ( 0 ) by L68 , PRE_POLY:def 7;
+L70: ( support C18 ) c= ( dom C18 ) by PRE_POLY:37;
+L71: ( D2 . C24 ) = ( C18 . C24 ) by L70 , L68 , FUNCT_4:13;
+thus L72: C24 in ( support D2 ) by L71 , L69 , PRE_POLY:def 7;
+end;
+assume L73: C24 in ( support D2 );
+L74: ( D2 . C24 ) <> ( 0 ) by L73 , PRE_POLY:def 7;
+per cases ;
+suppose L75: (not C24 in ( dom C18 ));
+
+L76: ( D2 . C24 ) = ( ( EmptyBag C15 ) . C24 ) by L75 , FUNCT_4:11
+.= ( 0 ) by PRE_POLY:52;
+thus L77: C24 in ( support C18 ) by L76 , L73 , PRE_POLY:def 7;
+end;
+suppose L78: C24 in ( dom C18 );
+
+L79: ( D2 . C24 ) = ( C18 . C24 ) by L78 , FUNCT_4:13;
+thus L80: C24 in ( support C18 ) by L79 , L74 , PRE_POLY:def 7;
+end;
+end;
+L82: ( support C18 ) = ( support D2 ) by L66 , TARSKI:1;
+L83:
+now
+let C25 being Nat;
+assume that
+L84: C25 in ( dom C23 );
+L85: ( ( canFS ( support C18 ) ) . C25 ) in ( rng ( canFS ( support C18 ) ) ) by L65 , L84 , FUNCT_1:3;
+thus L86: ( C23 . C25 ) = ( C18 . ( ( canFS ( support C18 ) ) . C25 ) ) by L63 , L65 , L84 , FUNCT_1:13
+.= ( D2 . ( ( canFS ( support C18 ) ) . C25 ) ) by L64 , L85 , FUNCT_4:13
+.= ( C22 . C25 ) by L61 , L65 , L82 , L84 , FUNCT_1:13;
+end;
+L87: (( rng ( canFS ( support D2 ) ) ) = ( support D2 ) & ( support D2 ) c= ( dom D2 )) by FUNCT_2:def 3 , PRE_POLY:37;
+L88: ( dom C22 ) = ( dom ( canFS ( support D2 ) ) ) by L87 , L61 , RELAT_1:27;
+L89: ( dom C23 ) = ( dom C22 ) by L88 , L65 , L66 , TARSKI:1;
+L90: ( Sum D2 ) = ( Sum C18 ) by L89 , L62 , L60 , L83 , FINSEQ_1:13;
+consider C26 being (FinSequence of ( REAL )) such that L91: ( Sum C19 ) = ( Sum C26 ) and L92: C26 = ( C19 * ( canFS ( support C19 ) ) ) by UPROOTS:def 3;
+L93: (( rng ( canFS ( support C19 ) ) ) = ( support C19 ) & ( support C19 ) c= ( dom C19 )) by FUNCT_2:def 3 , PRE_POLY:37;
+L94: ( dom C26 ) = ( dom ( canFS ( support C19 ) ) ) by L93 , L92 , RELAT_1:27;
+L95:
+now
+let C27 being set;
+thus L96:now
+assume L97: C27 in ( support C19 );
+L98: ( C19 . C27 ) <> ( 0 ) by L97 , PRE_POLY:def 7;
+L99: ( support C19 ) c= ( dom C19 ) by PRE_POLY:37;
+L100: ( D4 . C27 ) = ( C19 . C27 ) by L99 , L97 , FUNCT_4:13;
+thus L101: C27 in ( support D4 ) by L100 , L98 , PRE_POLY:def 7;
+end;
+assume L102: C27 in ( support D4 );
+L103: ( D4 . C27 ) <> ( 0 ) by L102 , PRE_POLY:def 7;
+per cases ;
+suppose L104: (not C27 in ( dom C19 ));
+
+L105: ( D4 . C27 ) = ( ( EmptyBag C15 ) . C27 ) by L104 , FUNCT_4:11
+.= ( 0 ) by PRE_POLY:52;
+thus L106: C27 in ( support C19 ) by L105 , L102 , PRE_POLY:def 7;
+end;
+suppose L107: C27 in ( dom C19 );
+
+L108: ( D4 . C27 ) = ( C19 . C27 ) by L107 , FUNCT_4:13;
+thus L109: C27 in ( support C19 ) by L108 , L103 , PRE_POLY:def 7;
+end;
+end;
+L111: ( support C19 ) = ( support D4 ) by L95 , TARSKI:1;
+L112:
+now
+let C28 being Nat;
+assume that
+L113: C28 in ( dom C26 );
+L114: ( ( canFS ( support C19 ) ) . C28 ) in ( rng ( canFS ( support C19 ) ) ) by L94 , L113 , FUNCT_1:3;
+thus L115: ( C26 . C28 ) = ( C19 . ( ( canFS ( support C19 ) ) . C28 ) ) by L92 , L94 , L113 , FUNCT_1:13
+.= ( D4 . ( ( canFS ( support C19 ) ) . C28 ) ) by L93 , L114 , FUNCT_4:13
+.= ( C21 . C28 ) by L57 , L94 , L111 , L113 , FUNCT_1:13;
+end;
+L116: ( Sum D4 ) = ( Sum C19 ) by L112 , L91 , L92 , L56 , L93 , L59 , L111 , FINSEQ_1:13 , RELAT_1:27;
+thus L117: thesis by L116 , L90 , L41 , PBOOLE:3 , UPROOTS:15;
+end;
+theorem
+L118: (for B18 , B19 being set holds (for B20 being (Rbag of B18) holds (( dom B20 ) = { B19 } implies ( Sum B20 ) = ( B20 . B19 ))))
+proof
+let C29 , C30 being set;
+let C31 being (Rbag of C29);
+assume L119: ( dom C31 ) = { C30 };
+L120: C30 in ( dom C31 ) by L119 , TARSKI:def 1;
+L121: (( support C31 ) c= { C30 } & { C30 } c= C29) by L119 , PRE_POLY:37;
+consider C32 being (FinSequence of ( REAL )) such that L122: C32 = ( C31 * ( canFS { C30 } ) ) and L123: ( Sum C31 ) = ( Sum C32 ) by L121 , UPROOTS:14;
+L124: C32 = ( C31 * <* C30 *> ) by L122 , UPROOTS:4;
+L125: C32 = <* ( C31 . C30 ) *> by L124 , L120 , FINSEQ_2:34;
+thus L126: thesis by L125 , L123 , FINSOP_1:11;
+end;
+theorem
+L127: (for B21 being set holds (for B22 , B23 being (Rbag of B21) holds ((for B24 being set holds (B24 in B21 implies ( B22 . B24 ) <= ( B23 . B24 ))) implies ( Sum B22 ) <= ( Sum B23 ))))
+proof
+let C33 being set;
+let C34 , C35 being (Rbag of C33);
+assume that
+L128: (for B25 being set holds (B25 in C33 implies ( C34 . B25 ) <= ( C35 . B25 )));
+set D5 = ( ( support C34 ) \/ ( support C35 ) );
+L129: ( dom C35 ) = C33 by PARTFUN1:def 2;
+L130: ( support C35 ) c= C33 by L129 , PRE_POLY:37;
+L131: ( dom C34 ) = C33 by PARTFUN1:def 2;
+L132: ( support C34 ) c= C33 by L131 , PRE_POLY:37;
+reconsider D6 = D5 as  finite (Subset of C33) by L132 , L130 , XBOOLE_1:8;
+consider C36 being (FinSequence of ( REAL )) such that L133: C36 = ( C34 * ( canFS D6 ) ) and L134: ( Sum C34 ) = ( Sum C36 ) by UPROOTS:14 , XBOOLE_1:7;
+consider C37 being (FinSequence of ( REAL )) such that L135: C37 = ( C35 * ( canFS D6 ) ) and L136: ( Sum C35 ) = ( Sum C37 ) by UPROOTS:14 , XBOOLE_1:7;
+L137: ( rng ( canFS D6 ) ) = D6 by FUNCT_2:def 3;
+L138: ( dom C36 ) = ( dom ( canFS D6 ) ) by L137 , L131 , L133 , RELAT_1:27;
+L139:
+now
+let C38 being Nat;
+assume L140: C38 in ( Seg ( len C36 ) );
+L141: C38 in ( dom C36 ) by L140 , FINSEQ_1:def 3;
+L142: ( ( canFS D6 ) . C38 ) in D6 by L141 , L137 , L138 , FUNCT_1:3;
+L143: (( C36 . C38 ) = ( C34 . ( ( canFS D6 ) . C38 ) ) & ( C37 . C38 ) = ( C35 . ( ( canFS D6 ) . C38 ) )) by L133 , L135 , L138 , L141 , FUNCT_1:13;
+thus L144: ( C36 . C38 ) <= ( C37 . C38 ) by L143 , L128 , L142;
+end;
+L145: ( dom C37 ) = ( dom ( canFS D6 ) ) by L129 , L135 , L137 , RELAT_1:27;
+L146: ( len C36 ) = ( len C37 ) by L145 , L138 , FINSEQ_3:29;
+L147: (C36 is (Element of ( ( len C36 ) -tuples_on ( REAL ) )) & C37 is (Element of ( ( len C37 ) -tuples_on ( REAL ) ))) by FINSEQ_2:92;
+thus L148: thesis by L147 , L134 , L136 , L146 , L139 , RVSUM_1:82;
+end;
+theorem
+L149: (for B26 being set holds (for B27 , B28 being (Rbag of B26) holds ((for B29 being set holds (B29 in B26 implies ( B27 . B29 ) = ( B28 . B29 ))) implies ( Sum B27 ) = ( Sum B28 ))))
+proof
+let C39 being set;
+let C40 , C41 being (Rbag of C39);
+assume L150: (for B30 being set holds (B30 in C39 implies ( C40 . B30 ) = ( C41 . B30 )));
+L151: (for B31 being set holds (B31 in C39 implies ( C41 . B31 ) <= ( C40 . B31 ))) by L150;
+L152: ( Sum C41 ) <= ( Sum C40 ) by L151 , L127;
+L153: (for B32 being set holds (B32 in C39 implies ( C40 . B32 ) <= ( C41 . B32 ))) by L150;
+L154: ( Sum C40 ) <= ( Sum C41 ) by L153 , L127;
+thus L155: thesis by L154 , L152 , XXREAL_0:1;
+end;
+theorem
+L156: (for B33 , B34 being set holds (for B35 being (Rbag of B33) holds (for B36 being (Rbag of B34) holds (B35 = B36 implies ( Sum B35 ) = ( Sum B36 )))))
+proof
+let C42 , C43 being set;
+let C44 being (Rbag of C42);
+let C45 being (Rbag of C43);
+assume L157: C44 = C45;
+L158: (ex B37 being (FinSequence of ( REAL )) st (( Sum C44 ) = ( Sum B37 ) & B37 = ( C45 * ( canFS ( support C45 ) ) ))) by L157 , UPROOTS:def 3;
+thus L159: thesis by L158 , UPROOTS:def 3;
+end;
+theorem
+L160: (for B38 , B39 being set holds (for B40 being (Rbag of B38) holds (for B41 being  real number holds (B40 = ( ( EmptyBag B38 ) +* ( B39 .--> B41 ) ) implies ( Sum B40 ) = B41))))
+proof
+let C46 , C47 being set;
+let C48 being (Rbag of C46);
+let C49 being  real number;
+assume that
+L161: C48 = ( ( EmptyBag C46 ) +* ( C47 .--> C49 ) );
+L162: (( dom ( C47 .--> C49 ) ) = { C47 } & ( dom C48 ) = ( ( dom ( EmptyBag C46 ) ) \/ ( dom ( C47 .--> C49 ) ) )) by L161 , FUNCOP_1:13 , FUNCT_4:def 1;
+L163: { C47 } c= ( dom C48 ) by L162 , XBOOLE_1:7;
+reconsider D7 = { C47 } as  finite (Subset of C46) by L163 , PARTFUN1:def 2;
+L164: ( support C48 ) c= D7
+proof
+let C50 being set;
+assume L165: C50 in ( support C48 );
+L166: ( C48 . C50 ) <> ( 0 ) by L165 , PRE_POLY:def 7;
+assume L167: (not C50 in D7);
+L168: C50 <> C47 by L167 , TARSKI:def 1;
+L169: ( C48 . C50 ) = ( ( EmptyBag C46 ) . C50 ) by L168 , L161 , FUNCT_4:83;
+thus L170: contradiction by L169 , L166 , PRE_POLY:52;
+end;
+consider C51 being (FinSequence of ( REAL )) such that L171: C51 = ( C48 * ( canFS D7 ) ) and L172: ( Sum C48 ) = ( Sum C51 ) by L164 , UPROOTS:14;
+L173: { C47 } c= C46 by L163 , PARTFUN1:def 2;
+L174: C47 in C46 by L173 , ZFMISC_1:31;
+L175: (( canFS D7 ) = <* C47 *> & C47 in ( dom C48 )) by L174 , PARTFUN1:def 2 , UPROOTS:4;
+L176: C51 = <* ( C48 . C47 ) *> by L175 , L171 , FINSEQ_2:34;
+thus L177: ( Sum C48 ) = ( C48 . C47 ) by L176 , L172 , FINSOP_1:11
+.= C49 by L161 , FUNCT_7:94;
+end;
+theorem
+L178: (for B42 , B43 being set holds (for B44 , B45 being (Rbag of B42) holds (for B46 being  real number holds (B45 = ( B44 +* ( B43 .--> B46 ) ) implies ( Sum B45 ) = ( ( ( Sum B44 ) + B46 ) - ( B44 . B43 ) )))))
+proof
+let C52 , C53 being set;
+let C54 , C55 being (Rbag of C52);
+let C56 being  real number;
+assume that
+L179: C55 = ( C54 +* ( C53 .--> C56 ) );
+L180: (( dom ( C53 .--> C56 ) ) = { C53 } & ( dom C55 ) = ( ( dom C54 ) \/ ( dom ( C53 .--> C56 ) ) )) by L179 , FUNCOP_1:13 , FUNCT_4:def 1;
+L181: { C53 } c= ( dom C55 ) by L180 , XBOOLE_1:7;
+L182: { C53 } c= C52 by L181 , PARTFUN1:def 2;
+L183: C53 in C52 by L182 , ZFMISC_1:31;
+set D8 = ( ( EmptyBag C52 ) +* ( C53 .--> C56 ) );
+L184: ( dom D8 ) = ( ( dom ( EmptyBag C52 ) ) \/ ( dom ( C53 .--> C56 ) ) ) by FUNCT_4:def 1
+.= ( C52 \/ ( dom ( C53 .--> C56 ) ) ) by PARTFUN1:def 2
+.= ( C52 \/ { C53 } ) by FUNCOP_1:13
+.= C52 by L183 , ZFMISC_1:40;
+set D9 = ( C54 +* ( C53 .--> ( 0 ) ) );
+L185: ( dom D9 ) = ( ( dom C54 ) \/ ( dom ( C53 .--> ( 0 ) ) ) ) by FUNCT_4:def 1
+.= ( C52 \/ ( dom ( C53 .--> ( 0 ) ) ) ) by PARTFUN1:def 2
+.= ( C52 \/ { C53 } ) by FUNCOP_1:13
+.= C52 by L183 , ZFMISC_1:40;
+set D10 = ( ( EmptyBag C52 ) +* ( C53 .--> ( C54 . C53 ) ) );
+L186: ( dom D10 ) = ( ( dom ( EmptyBag C52 ) ) \/ ( dom ( C53 .--> ( C54 . C53 ) ) ) ) by FUNCT_4:def 1
+.= ( C52 \/ ( dom ( C53 .--> ( C54 . C53 ) ) ) ) by PARTFUN1:def 2
+.= ( C52 \/ { C53 } ) by FUNCOP_1:13
+.= C52 by L183 , ZFMISC_1:40;
+L187: ( support D10 ) c= ( ( support ( EmptyBag C52 ) ) \/ { C53 } ) by L20;
+reconsider D11 = D10 as (Rbag of C52) by L187 , L186 , PARTFUN1:def 2 , PRE_POLY:def 8 , RELAT_1:def 18;
+L188: ( support D9 ) c= ( ( support C54 ) \/ { C53 } ) by L20;
+reconsider D12 = D9 as (Rbag of C52) by L188 , L185 , PARTFUN1:def 2 , PRE_POLY:def 8 , RELAT_1:def 18;
+L189: ( support D8 ) c= ( ( support ( EmptyBag C52 ) ) \/ { C53 } ) by L20;
+reconsider D13 = D8 as (Rbag of C52) by L189 , L184 , PARTFUN1:def 2 , PRE_POLY:def 8 , RELAT_1:def 18;
+L190:
+now
+let C57 being set;
+assume L191: C57 in C52;
+L192: ( ( EmptyBag C52 ) . C57 ) = ( 0 ) by PRE_POLY:52;
+per cases ;
+suppose L193: C57 = C53;
+
+thus L194: ( ( D12 + D11 ) . C57 ) = ( ( D12 . C57 ) + ( D11 . C57 ) ) by PRE_POLY:def 5
+.= ( (( 0 ) qua Nat) + ( D11 . C57 ) ) by L193 , FUNCT_7:94
+.= ( C54 . C57 ) by L193 , FUNCT_7:94;
+end;
+suppose L195: C57 <> C53;
+
+thus L196: ( ( D12 + D11 ) . C57 ) = ( ( D12 . C57 ) + ( D11 . C57 ) ) by PRE_POLY:def 5
+.= ( ( C54 . C57 ) + ( D11 . C57 ) ) by L195 , FUNCT_4:83
+.= ( ( C54 . C57 ) + (( 0 ) qua Nat) ) by L192 , L195 , FUNCT_4:83
+.= ( C54 . C57 );
+end;
+end;
+L198: ( ( Sum C54 ) - ( Sum D11 ) ) = ( ( ( Sum D12 ) + ( Sum D11 ) ) - ( Sum D11 ) ) by L190 , PBOOLE:3 , UPROOTS:15;
+L199: (( Sum D13 ) = C56 & ( Sum D11 ) = ( C54 . C53 )) by L160;
+L200:
+now
+let C58 being set;
+assume L201: C58 in C52;
+L202: ( ( EmptyBag C52 ) . C58 ) = ( 0 ) by PRE_POLY:52;
+per cases ;
+suppose L203: C58 = C53;
+
+thus L204: ( C55 . C58 ) = C56 by L203 , L179 , FUNCT_7:94
+.= ( (( 0 ) qua Nat) + ( D13 . C58 ) ) by L203 , FUNCT_7:94
+.= ( ( D12 . C58 ) + ( D13 . C58 ) ) by L203 , FUNCT_7:94
+.= ( ( D12 + D13 ) . C58 ) by PRE_POLY:def 5;
+end;
+suppose L205: C58 <> C53;
+
+L206: ( D13 . C58 ) = ( 0 ) by L205 , L202 , FUNCT_4:83;
+thus L207: ( C55 . C58 ) = ( C54 . C58 ) by L179 , L205 , FUNCT_4:83
+.= ( ( D12 . C58 ) + ( D13 . C58 ) ) by L205 , L206 , FUNCT_4:83
+.= ( ( D12 + D13 ) . C58 ) by PRE_POLY:def 5;
+end;
+end;
+thus L209: ( Sum C55 ) = ( ( ( Sum C54 ) - ( Sum D11 ) ) + ( Sum D13 ) ) by L200 , L198 , PBOOLE:3 , UPROOTS:15
+.= ( ( ( Sum C54 ) + C56 ) - ( C54 . C53 ) ) by L199;
+end;
+begin
+definition
+let C59 being  real-weighted WGraph;
+let C60 being (WSubgraph of C59);
+let C61 being set;
+pred C60 is_mincost_DTree_rooted_at C61
+means
+:L210: (C60 is  Tree-like & (for B47 being (Vertex of C60) holds (ex B48 being (DPath of C60) st (B48 is_Walk_from C61 , B47 & (for B49 being (DPath of C59) holds (B49 is_Walk_from C61 , B47 implies ( B48 .cost() ) <= ( B49 .cost() )))))))
+;end;
+definition
+let C62 being  real-weighted WGraph;
+let C63 being (DPath of C62);
+let C64 , C65 being set;
+pred C63 is_mincost_DPath_from C64 , C65
+means
+:L212: (C63 is_Walk_from C64 , C65 & (for B50 being (DPath of C62) holds (B50 is_Walk_from C64 , C65 implies ( C63 .cost() ) <= ( B50 .cost() ))))
+;end;
+definition
+let C66 being  finite  real-weighted WGraph;
+let C67 , C68 being set;
+func C66 .min_DPath_cost (C67 , C68) -> Real means 
+:L214: (ex B51 being (DPath of C66) st (B51 is_mincost_DPath_from C67 , C68 & it = ( B51 .cost() ))) if (ex B52 being (DWalk of C66) st B52 is_Walk_from C67 , C68) otherwise it = ( 0 );
+existence
+proof
+set D14 = { B53 where B53 is (DPath of C66) : B53 is_Walk_from C67 , C68 };
+L215:
+now
+let C69 being set;
+assume L216: C69 in D14;
+L217: (ex B54 being (DPath of C66) st (C69 = B54 & B54 is_Walk_from C67 , C68)) by L216;
+L218: C69 in { B55 where B55 is (DPath of C66) : (not contradiction) } by L217;
+thus L219: C69 in ( C66 .allDPaths() ) by L218 , GLIB_001:def 38;
+end;
+reconsider D15 = D14 as  finite (Subset of ( C66 .allDPaths() )) by L215 , TARSKI:def 3;
+thus L220:now
+assume L221: (ex B56 being (DWalk of C66) st B56 is_Walk_from C67 , C68);
+consider C70 being (DWalk of C66) such that L222: C70 is_Walk_from C67 , C68 by L221;
+set D16 = the (DPath of C70);
+L223: D16 is_Walk_from C67 , C68 by L222 , GLIB_001:160;
+L224: D16 in D15 by L223;
+reconsider D17 = D15 as non  empty  finite (Subset of ( C66 .allDPaths() )) by L224;
+deffunc H1((Element of D17)) = ( $1 .cost() );
+consider C71 being (Element of D17) such that L225: (for B57 being (Element of D17) holds H1(C71) <= H1(B57)) from GRAPH_5:sch 2;
+L226: C71 in D17;
+consider C72 being (DPath of C66) such that L227: C72 = C71 and L228: C72 is_Walk_from C67 , C68 by L226;
+L229:
+now
+let C73 being (DPath of C66);
+assume L230: C73 is_Walk_from C67 , C68;
+L231: C73 in D17 by L230;
+reconsider D18 = C73 as (Element of D17) by L231;
+L232: H1(C71) <= H1(D18) by L225;
+thus L233: ( C72 .cost() ) <= ( C73 .cost() ) by L232 , L227;
+end;
+reconsider D19 = C72 as (DPath of C66);
+set D20 = ( D19 .cost() );
+take D21 = D20;
+take D22 = D19;
+thus L234: D22 is_mincost_DPath_from C67 , C68 by L228 , L229 , L212;
+thus L235: D21 = ( D22 .cost() );
+end;
+thus L236: thesis;
+end;
+uniqueness
+proof
+let C74 , C75 being Real;
+thus L237:now
+assume L238: (ex B58 being (DWalk of C66) st B58 is_Walk_from C67 , C68);
+given C76 being (DPath of C66) such that
+L239: C76 is_mincost_DPath_from C67 , C68
+and
+L240: C74 = ( C76 .cost() );
+
+given C77 being (DPath of C66) such that
+L241: C77 is_mincost_DPath_from C67 , C68
+and
+L242: C75 = ( C77 .cost() );
+
+L243: C77 is_Walk_from C67 , C68 by L241 , L212;
+L244: C74 <= C75 by L243 , L239 , L240 , L242 , L212;
+L245: C76 is_Walk_from C67 , C68 by L239 , L212;
+L246: C75 <= C74 by L245 , L240 , L241 , L242 , L212;
+thus L247: C74 = C75 by L246 , L244 , XXREAL_0:1;
+end;
+thus L248: thesis;
+end;
+consistency;
+end;
+definition
+func WGraphSelectors -> non  empty  finite (Subset of ( NAT )) equals 
+{ ( VertexSelector ) , ( EdgeSelector ) , ( SourceSelector ) , ( TargetSelector ) , ( WeightSelector ) };
+coherence;
+end;
+L251: (for B59 being WGraph holds ( WGraphSelectors ) c= ( dom B59 ))
+proof
+let C78 being WGraph;
+L252:
+now
+let C79 being set;
+assume L253: C79 in ( WGraphSelectors );
+L254: (C79 = ( VertexSelector ) or C79 = ( EdgeSelector ) or C79 = ( SourceSelector ) or C79 = ( TargetSelector ) or C79 = ( WeightSelector )) by L253 , ENUMSET1:def 3;
+thus L255: C79 in ( dom C78 ) by L254 , GLIB_000:def 10 , GLIB_003:def 4;
+end;
+thus L256: thesis by L252 , TARSKI:def 3;
+end;
+registration
+let C80 being WGraph;
+cluster ( C80 | ( WGraphSelectors ) ) ->  [Graph-like]  [Weighted];
+coherence
+proof
+set D23 = ( C80 | ( WGraphSelectors ) );
+L257: ( VertexSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L258: ( TargetSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L259: ( the_Target_of D23 ) = ( the_Target_of C80 ) by L258 , FUNCT_1:49;
+L260: ( SourceSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L261: ( the_Source_of D23 ) = ( the_Source_of C80 ) by L260 , FUNCT_1:49;
+L262: ( EdgeSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L263: ( the_Edges_of D23 ) = ( the_Edges_of C80 ) by L262 , FUNCT_1:49;
+L264: ( dom D23 ) = ( ( dom C80 ) /\ ( WGraphSelectors ) ) by RELAT_1:61
+.= ( WGraphSelectors ) by L251 , XBOOLE_1:28;
+L265: (for B60 being set holds (B60 in ( _GraphSelectors ) implies B60 in ( dom D23 ))) by L264 , L257 , L262 , L260 , L258 , ENUMSET1:def 2;
+L266: ( _GraphSelectors ) c= ( dom D23 ) by L265 , TARSKI:def 3;
+L267: ( the_Vertices_of D23 ) = ( the_Vertices_of C80 ) by L257 , FUNCT_1:49;
+thus L268: D23 is  [Graph-like] by L267 , L263 , L261 , L259 , L266 , GLIB_000:5;
+L269: ( WeightSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L270: ( D23 . ( WeightSelector ) ) = ( C80 . ( WeightSelector ) ) by L269 , FUNCT_1:49;
+L271: ( D23 . ( WeightSelector ) ) is (ManySortedSet of ( the_Edges_of D23 )) by L270 , L263 , GLIB_003:def 4;
+thus L272: thesis by L271 , L264 , L269 , GLIB_003:def 4;
+end;
+end;
+L274: (for B61 being WGraph holds (B61 == ( B61 | ( WGraphSelectors ) ) & ( the_Weight_of B61 ) = ( the_Weight_of ( B61 | ( WGraphSelectors ) ) )))
+proof
+let C81 being WGraph;
+set D24 = ( C81 | ( WGraphSelectors ) );
+L275: ( EdgeSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L276: ( the_Edges_of D24 ) = ( the_Edges_of C81 ) by L275 , FUNCT_1:49;
+L277: ( SourceSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L278: ( the_Source_of D24 ) = ( the_Source_of C81 ) by L277 , FUNCT_1:49;
+L279: ( TargetSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L280: ( the_Target_of D24 ) = ( the_Target_of C81 ) by L279 , FUNCT_1:49;
+L281: ( VertexSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+L282: ( the_Vertices_of D24 ) = ( the_Vertices_of C81 ) by L281 , FUNCT_1:49;
+thus L283: C81 == D24 by L282 , L276 , L278 , L280 , GLIB_000:def 34;
+L284: ( WeightSelector ) in ( WGraphSelectors ) by ENUMSET1:def 3;
+thus L285: thesis by L284 , FUNCT_1:49;
+end;
+L286: (for B62 being WGraph holds ( dom ( B62 | ( WGraphSelectors ) ) ) = ( WGraphSelectors ))
+proof
+let C82 being WGraph;
+L287: ( WGraphSelectors ) c= ( dom C82 ) by L251;
+thus L288: thesis by L287 , RELAT_1:62;
+end;
+definition
+let C83 being WGraph;
+func C83 .allWSubgraphs() -> non  empty set means 
+:L289: (for B63 being set holds (B63 in it iff (ex B64 being (WSubgraph of C83) st (B63 = B64 & ( dom B64 ) = ( WGraphSelectors )))));
+existence
+proof
+set D25 = ( C83 | ( WGraphSelectors ) );
+L290: C83 == D25 by L274;
+L291: ( the_Weight_of C83 ) = ( the_Weight_of D25 ) by L274;
+reconsider D26 = D25 as  [Weighted] (Subgraph of C83) by L290 , GLIB_000:87;
+L292: ( dom ( the_Weight_of C83 ) ) = ( the_Edges_of D26 ) by L291 , PARTFUN1:def 2;
+L293: ( the_Weight_of D26 ) = ( ( the_Weight_of C83 ) | ( the_Edges_of D26 ) ) by L292 , L291 , RELAT_1:69;
+reconsider D27 = D26 as (WSubgraph of C83) by L293 , GLIB_003:def 10;
+set D28 = { ( bool ( the_Vertices_of C83 ) ) , ( bool ( the_Edges_of C83 ) ) , ( bool ( the_Source_of C83 ) ) , ( bool ( the_Target_of C83 ) ) , ( bool ( the_Weight_of C83 ) ) };
+set D29 = ( union D28 );
+set D30 = ( Funcs (( WGraphSelectors ) , D29) );
+defpred S1[ set ] means $1 is (WSubgraph of C83);
+consider C84 being (Subset of D30) such that L294: (for B65 being set holds (B65 in C84 iff (B65 in D30 & S1[ B65 ]))) from SUBSET_1:sch 1;
+L295:
+now
+let C85 being (WSubgraph of C83);
+assume L296: ( dom C85 ) = ( WGraphSelectors );
+L297:
+now
+let C86 being set;
+assume L298: C86 in ( rng C85 );
+consider C87 being set such that L299: C87 in ( WGraphSelectors ) and L300: ( C85 . C87 ) = C86 by L298 , L296 , FUNCT_1:def 3;
+L301:
+now
+per cases  by L299 , ENUMSET1:def 3;
+suppose L302: C87 = ( VertexSelector );
+
+L303: ( bool ( the_Vertices_of C83 ) ) in D28 by ENUMSET1:def 3;
+L304: C86 = ( the_Vertices_of C85 ) by L300 , L302;
+thus L305: C86 in D29 by L304 , L303 , TARSKI:def 4;
+end;
+suppose L306: C87 = ( EdgeSelector );
+
+L307: ( bool ( the_Edges_of C83 ) ) in D28 by ENUMSET1:def 3;
+L308: C86 = ( the_Edges_of C85 ) by L300 , L306;
+thus L309: C86 in D29 by L308 , L307 , TARSKI:def 4;
+end;
+suppose L310: C87 = ( SourceSelector );
+
+L311: C86 = ( the_Source_of C85 ) by L310 , L300;
+L312: C86 = ( ( the_Source_of C83 ) | ( the_Edges_of C85 ) ) by L311 , GLIB_000:45;
+L313: C86 c= ( the_Source_of C83 ) by L312 , RELAT_1:59;
+L314: ( bool ( the_Source_of C83 ) ) in D28 by ENUMSET1:def 3;
+thus L315: C86 in D29 by L314 , L313 , TARSKI:def 4;
+end;
+suppose L316: C87 = ( TargetSelector );
+
+L317: C86 = ( the_Target_of C85 ) by L316 , L300;
+L318: C86 = ( ( the_Target_of C83 ) | ( the_Edges_of C85 ) ) by L317 , GLIB_000:45;
+L319: C86 c= ( the_Target_of C83 ) by L318 , RELAT_1:59;
+L320: ( bool ( the_Target_of C83 ) ) in D28 by ENUMSET1:def 3;
+thus L321: C86 in D29 by L320 , L319 , TARSKI:def 4;
+end;
+suppose L322: C87 = ( WeightSelector );
+
+L323: C86 = ( the_Weight_of C85 ) by L322 , L300;
+L324: C86 = ( ( the_Weight_of C83 ) | ( the_Edges_of C85 ) ) by L323 , GLIB_003:def 10;
+L325: C86 c= ( the_Weight_of C83 ) by L324 , RELAT_1:59;
+L326: ( bool ( the_Weight_of C83 ) ) in D28 by ENUMSET1:def 3;
+thus L327: C86 in D29 by L326 , L325 , TARSKI:def 4;
+end;
+end;
+thus L329: C86 in D29 by L301;
+end;
+thus L330: ( rng C85 ) c= D29 by L297 , TARSKI:def 3;
+end;
+L331: ( dom D27 ) = ( WGraphSelectors ) by L286;
+L332: ( rng D27 ) c= D29 by L331 , L295;
+L333: D27 in D30 by L332 , L331 , FUNCT_2:def 2;
+reconsider D31 = C84 as non  empty set by L333 , L294;
+take D31;
+let C88 being set;
+thus L334:now
+assume L335: C88 in D31;
+reconsider D32 = C88 as (WSubgraph of C83) by L335 , L294;
+take D33 = D32;
+thus L336: D33 = C88;
+L337: (ex B66 being Function st (B66 = C88 & ( dom B66 ) = ( WGraphSelectors ) & ( rng B66 ) c= D29)) by L335 , FUNCT_2:def 2;
+thus L338: ( dom D33 ) = ( WGraphSelectors ) by L337;
+end;
+given C89 being (WSubgraph of C83) such that
+L339: C89 = C88
+and
+L340: ( dom C89 ) = ( WGraphSelectors );
+
+L341: ( rng C89 ) c= D29 by L295 , L340;
+L342: C88 in D30 by L341 , L339 , L340 , FUNCT_2:def 2;
+thus L343: thesis by L342 , L294 , L339;
+end;
+uniqueness
+proof
+let C90 , C91 being non  empty set;
+assume that
+L344: (for B67 being set holds (B67 in C90 iff (ex B68 being (WSubgraph of C83) st (B67 = B68 & ( dom B68 ) = ( WGraphSelectors )))))
+and
+L345: (for B69 being set holds (B69 in C91 iff (ex B70 being (WSubgraph of C83) st (B69 = B70 & ( dom B70 ) = ( WGraphSelectors )))));
+L346:
+now
+let C92 being set;
+L347: (C92 in C90 iff (ex B71 being (WSubgraph of C83) st (C92 = B71 & ( dom B71 ) = ( WGraphSelectors )))) by L344;
+thus L348: (C92 in C90 iff C92 in C91) by L347 , L345;
+end;
+thus L349: thesis by L346 , TARSKI:1;
+end;
+end;
+registration
+let C93 being  finite WGraph;
+cluster ( C93 .allWSubgraphs() ) ->  finite;
+coherence
+proof
+set D34 = { ( bool ( the_Vertices_of C93 ) ) , ( bool ( the_Edges_of C93 ) ) , ( bool ( the_Source_of C93 ) ) , ( bool ( the_Target_of C93 ) ) , ( bool ( the_Weight_of C93 ) ) };
+set D35 = ( union D34 );
+L351: (for B72 being set holds (B72 in D34 implies B72 is  finite)) by ENUMSET1:def 3;
+reconsider D36 = D35 as  finite set by L351 , FINSET_1:7;
+set D37 = ( Funcs (( WGraphSelectors ) , D36) );
+L352:
+now
+let C94 being set;
+assume L353: C94 in ( C93 .allWSubgraphs() );
+consider C95 being (WSubgraph of C93) such that L354: C94 = C95 and L355: ( dom C95 ) = ( WGraphSelectors ) by L353 , L289;
+L356:
+now
+let C96 being set;
+assume L357: C96 in ( rng C95 );
+consider C97 being set such that L358: C97 in ( WGraphSelectors ) and L359: ( C95 . C97 ) = C96 by L357 , L355 , FUNCT_1:def 3;
+L360:
+now
+per cases  by L358 , ENUMSET1:def 3;
+suppose L361: C97 = ( VertexSelector );
+
+L362: ( bool ( the_Vertices_of C93 ) ) in D34 by ENUMSET1:def 3;
+L363: C96 = ( the_Vertices_of C95 ) by L359 , L361;
+thus L364: C96 in D36 by L363 , L362 , TARSKI:def 4;
+end;
+suppose L365: C97 = ( EdgeSelector );
+
+L366: ( bool ( the_Edges_of C93 ) ) in D34 by ENUMSET1:def 3;
+L367: C96 = ( the_Edges_of C95 ) by L359 , L365;
+thus L368: C96 in D36 by L367 , L366 , TARSKI:def 4;
+end;
+suppose L369: C97 = ( SourceSelector );
+
+L370: C96 = ( the_Source_of C95 ) by L369 , L359;
+L371: C96 = ( ( the_Source_of C93 ) | ( the_Edges_of C95 ) ) by L370 , GLIB_000:45;
+L372: C96 c= ( the_Source_of C93 ) by L371 , RELAT_1:59;
+L373: ( bool ( the_Source_of C93 ) ) in D34 by ENUMSET1:def 3;
+thus L374: C96 in D36 by L373 , L372 , TARSKI:def 4;
+end;
+suppose L375: C97 = ( TargetSelector );
+
+L376: C96 = ( the_Target_of C95 ) by L375 , L359;
+L377: C96 = ( ( the_Target_of C93 ) | ( the_Edges_of C95 ) ) by L376 , GLIB_000:45;
+L378: C96 c= ( the_Target_of C93 ) by L377 , RELAT_1:59;
+L379: ( bool ( the_Target_of C93 ) ) in D34 by ENUMSET1:def 3;
+thus L380: C96 in D36 by L379 , L378 , TARSKI:def 4;
+end;
+suppose L381: C97 = ( WeightSelector );
+
+L382: C96 = ( the_Weight_of C95 ) by L381 , L359;
+L383: C96 = ( ( the_Weight_of C93 ) | ( the_Edges_of C95 ) ) by L382 , GLIB_003:def 10;
+L384: C96 c= ( the_Weight_of C93 ) by L383 , RELAT_1:59;
+L385: ( bool ( the_Weight_of C93 ) ) in D34 by ENUMSET1:def 3;
+thus L386: C96 in D36 by L385 , L384 , TARSKI:def 4;
+end;
+end;
+thus L388: C96 in D36 by L360;
+end;
+L389: ( rng C95 ) c= D36 by L356 , TARSKI:def 3;
+thus L390: C94 in D37 by L389 , L354 , L355 , FUNCT_2:def 2;
+end;
+L391: ( C93 .allWSubgraphs() ) c= D37 by L352 , TARSKI:def 3;
+thus L392: thesis by L391;
+end;
+end;
+definition
+let C98 being WGraph;
+let C99 being non  empty (Subset of ( C98 .allWSubgraphs() ));
+redefine mode Element of C99
+ -> (WSubgraph of C98);
+coherence
+proof
+let C100 being (Element of C99);
+L394: (ex B73 being (WSubgraph of C98) st (B73 = C100 & ( dom B73 ) = ( WGraphSelectors ))) by L289;
+thus L395: thesis by L394;
+end;
+end;
+definition
+let C101 being  finite  real-weighted WGraph;
+func C101 .cost() -> Real equals 
+( Sum ( the_Weight_of C101 ) );
+coherence by XREAL_0:def 1;
+end;
+theorem
+L398: (for B74 being  finite  real-weighted WGraph holds (for B75 being set holds (for B76 being  weight-inheriting  [Weighted] (removeEdge of B74 , B75) holds (B75 in ( the_Edges_of B74 ) implies ( B74 .cost() ) = ( ( B76 .cost() ) + ( ( the_Weight_of B74 ) . B75 ) )))))
+proof
+let C102 being  finite  real-weighted WGraph;
+let C103 being set;
+let C104 being  weight-inheriting  [Weighted] (removeEdge of C102 , C103);
+set D38 = ( the_Edges_of C102 );
+set D39 = ( the_Edges_of C104 );
+assume L399: C103 in D38;
+L400: ( dom ( the_Weight_of C102 ) ) = D38 by PARTFUN1:def 2;
+set D40 = ( C103 .--> ( ( the_Weight_of C102 ) . C103 ) );
+L401: ( dom D40 ) = { C103 } by FUNCOP_1:13;
+L402: D39 = ( D38 \ { C103 } ) by GLIB_000:51;
+L403: ( D38 \ D39 ) = ( D38 /\ { C103 } ) by L402 , XBOOLE_1:48
+.= { C103 } by L399 , ZFMISC_1:46;
+reconsider D41 = D40 as (ManySortedSet of ( D38 \ D39 )) by L403;
+reconsider D42 = D41 as (Rbag of ( D38 \ D39 ));
+L404: ( the_Weight_of C104 ) = ( ( the_Weight_of C102 ) | D39 ) by GLIB_003:def 10;
+L405:
+now
+let C105 being set;
+assume L406: C105 in ( dom ( the_Weight_of C102 ) );
+L407: C105 in D38 by L406;
+L408:
+now
+per cases ;
+suppose L409: C105 in { C103 };
+
+L410: C105 = C103 by L409 , TARSKI:def 1;
+thus L411: ( ( ( the_Weight_of C104 ) +* D42 ) . C105 ) = ( D42 . C103 ) by L410 , L401 , L409 , FUNCT_4:13
+.= ( ( the_Weight_of C102 ) . C105 ) by L410 , FUNCOP_1:72;
+end;
+suppose L412: (not C105 in { C103 });
+
+L413: (( ( ( the_Weight_of C104 ) +* D42 ) . C105 ) = ( ( the_Weight_of C104 ) . C105 ) & C105 in ( D38 \ { C103 } )) by L412 , L401 , L407 , FUNCT_4:11 , XBOOLE_0:def 5;
+thus L414: ( ( ( the_Weight_of C104 ) +* D42 ) . C105 ) = ( ( the_Weight_of C102 ) . C105 ) by L413 , L402 , L404 , FUNCT_1:49;
+end;
+end;
+thus L416: ( ( the_Weight_of C102 ) . C105 ) = ( ( ( the_Weight_of C104 ) +* D42 ) . C105 ) by L408;
+end;
+L417: ( dom ( ( the_Weight_of C104 ) +* D42 ) ) = ( ( dom ( the_Weight_of C104 ) ) \/ { C103 } ) by L401 , FUNCT_4:def 1
+.= ( ( D38 \ { C103 } ) \/ { C103 } ) by L402 , PARTFUN1:def 2
+.= ( D38 \/ { C103 } ) by XBOOLE_1:39
+.= D38 by L399 , ZFMISC_1:40;
+thus L418: ( C102 .cost() ) = ( ( C104 .cost() ) + ( Sum D42 ) ) by L417 , L400 , L405 , L31 , FUNCT_1:2
+.= ( ( C104 .cost() ) + ( D42 . C103 ) ) by L401 , L118
+.= ( ( C104 .cost() ) + ( ( the_Weight_of C102 ) . C103 ) ) by FUNCOP_1:72;
+end;
+theorem
+L419: (for B77 being  finite  real-weighted WGraph holds (for B78 being non  empty (Subset of ( the_Vertices_of B77 )) holds (for B79 being (Subset of ( B77 .edgesBetween B78 )) holds (for B80 being (inducedWSubgraph of B77 , B78 , B79) holds (for B81 being set holds (for B82 being (inducedWSubgraph of B77 , B78 , ( B79 \/ { B81 } )) holds (((not B81 in B79) & B81 in ( B77 .edgesBetween B78 )) implies ( ( B80 .cost() ) + ( ( the_Weight_of B77 ) . B81 ) ) = ( B82 .cost() ))))))))
+proof
+let C106 being  finite  real-weighted WGraph;
+let C107 being non  empty (Subset of ( the_Vertices_of C106 ));
+let C108 being (Subset of ( C106 .edgesBetween C107 ));
+let C109 being (inducedWSubgraph of C106 , C107 , C108);
+let C110 being set;
+let C111 being (inducedWSubgraph of C106 , C107 , ( C108 \/ { C110 } ));
+assume that
+L420: (not C110 in C108)
+and
+L421: C110 in ( C106 .edgesBetween C107 );
+L422: { C110 } c= ( C106 .edgesBetween C107 ) by L421 , ZFMISC_1:31;
+L423: ( C108 \/ { C110 } ) c= ( C106 .edgesBetween C107 ) by L422 , XBOOLE_1:8;
+L424: ( the_Edges_of C111 ) = ( C108 \/ { C110 } ) by L423 , GLIB_000:def 37;
+L425: ( dom ( the_Weight_of C111 ) ) = ( C108 \/ { C110 } ) by L424 , PARTFUN1:def 2;
+set D43 = ( C110 .--> ( ( the_Weight_of C106 ) . C110 ) );
+L426: ( dom D43 ) = { C110 } by FUNCOP_1:13;
+L427: ( the_Edges_of C109 ) = C108 by GLIB_000:def 37;
+L428: ( ( the_Edges_of C111 ) \ ( the_Edges_of C109 ) ) = ( { C110 } \ C108 ) by L427 , L424 , XBOOLE_1:40
+.= { C110 } by L420 , ZFMISC_1:59;
+reconsider D44 = D43 as (ManySortedSet of ( ( the_Edges_of C111 ) \ ( the_Edges_of C109 ) )) by L428;
+reconsider D45 = D44 as (Rbag of ( ( the_Edges_of C111 ) \ ( the_Edges_of C109 ) ));
+L429: ( the_Weight_of C109 ) = ( ( the_Weight_of C106 ) | C108 ) by L427 , GLIB_003:def 10;
+L430:
+now
+let C112 being set;
+assume L431: C112 in ( dom ( the_Weight_of C111 ) );
+L432: C112 in ( C108 \/ { C110 } ) by L431 , L424;
+L433: ( the_Weight_of C111 ) = ( ( the_Weight_of C106 ) | ( C108 \/ { C110 } ) ) by L424 , GLIB_003:def 10;
+L434: ( ( the_Weight_of C111 ) . C112 ) = ( ( the_Weight_of C106 ) . C112 ) by L433 , L432 , FUNCT_1:49;
+L435:
+now
+per cases ;
+suppose L436: (not C112 in ( dom D45 ));
+
+L437: (( ( ( the_Weight_of C109 ) +* D45 ) . C112 ) = ( ( the_Weight_of C109 ) . C112 ) & C112 in C108) by L436 , L426 , L432 , FUNCT_4:11 , XBOOLE_0:def 3;
+thus L438: ( ( ( the_Weight_of C109 ) +* D45 ) . C112 ) = ( ( the_Weight_of C111 ) . C112 ) by L437 , L429 , L434 , FUNCT_1:49;
+end;
+suppose L439: C112 in ( dom D45 );
+
+L440: C112 = C110 by L439 , L426 , TARSKI:def 1;
+L441: ( ( ( the_Weight_of C109 ) +* D45 ) . C112 ) = ( D45 . C112 ) by L439 , FUNCT_4:13
+.= ( ( the_Weight_of C106 ) . C110 ) by L440 , FUNCOP_1:72;
+thus L442: ( ( ( the_Weight_of C109 ) +* D45 ) . C112 ) = ( ( the_Weight_of C111 ) . C112 ) by L441 , L426 , L434 , L439 , TARSKI:def 1;
+end;
+end;
+thus L444: ( ( the_Weight_of C111 ) . C112 ) = ( ( ( the_Weight_of C109 ) +* D45 ) . C112 ) by L435;
+end;
+L445: ( dom D45 ) = { C110 } by FUNCOP_1:13;
+L446: ( Sum D45 ) = ( D45 . C110 ) by L445 , L118
+.= ( ( the_Weight_of C106 ) . C110 ) by FUNCOP_1:72;
+L447: ( dom ( ( the_Weight_of C109 ) +* D45 ) ) = ( ( dom ( the_Weight_of C109 ) ) \/ ( dom D45 ) ) by FUNCT_4:def 1
+.= ( C108 \/ { C110 } ) by L427 , L426 , PARTFUN1:def 2;
+thus L448: thesis by L447 , L425 , L430 , L446 , L31 , FUNCT_1:2;
+end;
+theorem
+L449: (for B83 being  finite  nonnegative-weighted WGraph holds (for B84 being (DPath of B83) holds (for B85 , B86 being set holds (for B87 , B88 being (Element of ( NAT )) holds (B84 is_mincost_DPath_from B85 , B86 implies ( B84 .cut (B87 , B88) ) is_mincost_DPath_from ( ( B84 .cut (B87 , B88) ) .first() ) , ( ( B84 .cut (B87 , B88) ) .last() ))))))
+proof
+let C113 being  finite  nonnegative-weighted WGraph;
+let C114 being (DPath of C113);
+let C115 , C116 being set;
+let C117 , C118 being (Element of ( NAT ));
+set D46 = ( C114 .cut (C117 , C118) );
+L450: D46 is_Walk_from ( D46 .first() ) , ( D46 .last() ) by GLIB_001:def 23;
+assume L451: C114 is_mincost_DPath_from C115 , C116;
+L452: C114 is_Walk_from C115 , C116 by L451 , L212;
+L453: (( C114 . 1 ) = C115 & ( C114 . ( len C114 ) ) = C116) by L452 , GLIB_001:17;
+L454:
+now
+per cases ;
+suppose L455: (C117 is  odd & C118 is  odd & C117 <= C118 & C118 <= ( len C114 ));
+
+set D47 = ( C114 .cut (1 , C117) );
+set D48 = ( C114 .cut (C118 , ( len C114 )) );
+L456: 1 <= C118 by L455 , ABIAN:12;
+L457: ( ( C114 .cut (1 , C118) ) .append D48 ) = ( C114 .cut (1 , ( len C114 )) ) by L456 , L455 , GLIB_001:38 , JORDAN12:2
+.= C114 by GLIB_001:39;
+L458: ( ( C114 .cut (1 , C118) ) .last() ) = ( C114 . C118 ) by L455 , L456 , GLIB_001:37 , JORDAN12:2
+.= ( D48 .first() ) by L455 , GLIB_001:37;
+L459: ( C114 .cost() ) = ( ( ( C114 .cut (1 , C118) ) .cost() ) + ( D48 .cost() ) ) by L458 , L457 , GLIB_003:24;
+L460: 1 <= C117 by L455 , ABIAN:12;
+L461: ( D47 .append D46 ) = ( C114 .cut (1 , C118) ) by L460 , L455 , GLIB_001:38 , JORDAN12:2;
+L462: C117 <= ( len C114 ) by L455 , XXREAL_0:2;
+L463: ( D47 .last() ) = ( C114 . C117 ) by L462 , L455 , L460 , GLIB_001:37 , JORDAN12:2
+.= ( D46 .first() ) by L455 , GLIB_001:37;
+L464: ( ( C114 .cut (1 , C118) ) .cost() ) = ( ( D47 .cost() ) + ( D46 .cost() ) ) by L463 , L461 , GLIB_003:24;
+L465: ( C114 .cost() ) = ( ( D46 .cost() ) + ( ( D47 .cost() ) + ( D48 .cost() ) ) ) by L464 , L459;
+L466: D48 is_Walk_from ( C114 . C118 ) , ( C114 . ( len C114 ) ) by L455 , GLIB_001:37;
+L467: D47 is_Walk_from ( C114 . 1 ) , ( C114 . C117 ) by L455 , L460 , L462 , GLIB_001:37 , JORDAN12:2;
+L468:
+now
+assume L469: (not D46 is_mincost_DPath_from ( D46 .first() ) , ( D46 .last() ));
+consider C119 being (DPath of C113) such that L470: C119 is_Walk_from ( D46 .first() ) , ( D46 .last() ) and L471: ( C119 .cost() ) < ( D46 .cost() ) by L469 , L450 , L212;
+set D49 = ( D47 .append C119 );
+set D50 = ( D49 .append D48 );
+set D51 = the (DPath of D50);
+L472: ( D46 .last() ) = ( C114 . C118 ) by L455 , GLIB_001:37;
+L473: ( D46 .first() ) = ( C114 . C117 ) by L455 , GLIB_001:37;
+L474: D49 is_Walk_from ( C114 . 1 ) , ( C114 . C118 ) by L473 , L467 , L470 , L472 , GLIB_001:31;
+L475: D50 is_Walk_from C115 , C116 by L474 , L453 , L466 , GLIB_001:31;
+L476: D51 is_Walk_from C115 , C116 by L475 , GLIB_001:160;
+L477: ( C119 .first() ) = ( C114 . C117 ) by L470 , L473 , GLIB_001:def 23;
+L478: ( D47 .last() ) = ( C119 .first() ) by L477 , L455 , L460 , L462 , GLIB_001:37 , JORDAN12:2;
+L479: ( D49 .cost() ) = ( ( D47 .cost() ) + ( C119 .cost() ) ) by L478 , GLIB_003:24;
+L480: ( C119 .last() ) = ( C114 . C118 ) by L470 , L472 , GLIB_001:def 23;
+L481: ( D48 .first() ) = ( C119 .last() ) by L480 , L455 , GLIB_001:37
+.= ( D49 .last() ) by L478 , GLIB_001:30;
+L482: ( D50 .cost() ) = ( ( ( D47 .cost() ) + ( C119 .cost() ) ) + ( D48 .cost() ) ) by L481 , L479 , GLIB_003:24
+.= ( ( C119 .cost() ) + ( ( D47 .cost() ) + ( D48 .cost() ) ) );
+L483: ( D50 .cost() ) < ( C114 .cost() ) by L482 , L465 , L471 , XREAL_1:8;
+L484: ( D51 .cost() ) <= ( D50 .cost() ) by GLIB_003:30;
+L485: ( D51 .cost() ) < ( C114 .cost() ) by L484 , L483 , XXREAL_0:2;
+thus L486: contradiction by L485 , L451 , L476 , L212;
+end;
+thus L487: thesis by L468;
+end;
+suppose L488: (not (C117 is  odd & C118 is  odd & C117 <= C118 & C118 <= ( len C114 )));
+
+L489: D46 = C114 by L488 , GLIB_001:def 11;
+L490: ( D46 .first() ) = C115 by L489 , L452 , GLIB_001:def 23;
+thus L491: thesis by L490 , L451 , L452 , L489 , GLIB_001:def 23;
+end;
+end;
+thus L493: thesis by L454;
+end;
+theorem
+L494: (for B89 being  finite  real-weighted WGraph holds (for B90 , B91 being (DPath of B89) holds (for B92 , B93 being set holds ((B90 is_mincost_DPath_from B92 , B93 & B91 is_mincost_DPath_from B92 , B93) implies ( B90 .cost() ) = ( B91 .cost() )))))
+proof
+let C120 being  finite  real-weighted WGraph;
+let C121 , C122 being (DPath of C120);
+let C123 , C124 being set;
+assume that
+L495: C121 is_mincost_DPath_from C123 , C124
+and
+L496: C122 is_mincost_DPath_from C123 , C124;
+L497: C122 is_Walk_from C123 , C124 by L496 , L212;
+L498: ( C121 .cost() ) <= ( C122 .cost() ) by L497 , L495 , L212;
+L499: C121 is_Walk_from C123 , C124 by L495 , L212;
+L500: ( C122 .cost() ) <= ( C121 .cost() ) by L499 , L496 , L212;
+thus L501: thesis by L500 , L498 , XXREAL_0:1;
+end;
+theorem
+L502: (for B94 being  finite  real-weighted WGraph holds (for B95 being (DPath of B94) holds (for B96 , B97 being set holds (B95 is_mincost_DPath_from B96 , B97 implies ( B94 .min_DPath_cost (B96 , B97) ) = ( B95 .cost() )))))
+proof
+let C125 being  finite  real-weighted WGraph;
+let C126 being (DPath of C125);
+let C127 , C128 being set;
+assume L503: C126 is_mincost_DPath_from C127 , C128;
+L504: C126 is_Walk_from C127 , C128 by L503 , L212;
+thus L505: thesis by L504 , L503 , L214;
+end;
+begin
+definition
+let C129 being _Graph;
+mode DIJK:Labeling of C129
+ is (Element of [: ( PFuncs (( the_Vertices_of C129 ) , ( REAL )) ) , ( bool ( the_Edges_of C129 ) ) :]);
+end;
+definition
+let C130 , C131 being set;
+let C132 being non  empty set;
+let C133 being (Element of [: ( PFuncs (C130 , C131) ) , C132 :]);
+redefine func C133 `1 -> (Element of ( PFuncs (C130 , C131) ));
+
+coherence by MCART_1:10;
+end;
+registration
+let C134 being  finite _Graph;
+let C135 being (DIJK:Labeling of C134);
+cluster ( C135 `1 ) ->  finite;
+coherence
+proof
+L508: ( dom ( C135 `1 ) ) c= ( the_Vertices_of C134 );
+thus L509: thesis by L508 , FINSET_1:10;
+end;
+cluster ( C135 `2 ) ->  finite;
+coherence
+proof
+thus L510: thesis;
+end;
+end;
+definition
+let C136 being  real-weighted WGraph;
+let C137 being (DIJK:Labeling of C136);
+func DIJK:NextBestEdges C137 -> (Subset of ( the_Edges_of C136 )) means 
+:L512: (for B98 being set holds (B98 in it iff (B98 DSJoins ( dom ( C137 `1 ) ) , ( ( the_Vertices_of C136 ) \ ( dom ( C137 `1 ) ) ) , C136 & (for B99 being set holds (B99 DSJoins ( dom ( C137 `1 ) ) , ( ( the_Vertices_of C136 ) \ ( dom ( C137 `1 ) ) ) , C136 implies ( ( ( C137 `1 ) . ( ( the_Source_of C136 ) . B98 ) ) + ( ( the_Weight_of C136 ) . B98 ) ) <= ( ( ( C137 `1 ) . ( ( the_Source_of C136 ) . B99 ) ) + ( ( the_Weight_of C136 ) . B99 ) ))))));
+existence
+proof
+defpred S2[ set ] means ($1 DSJoins ( dom ( C137 `1 ) ) , ( ( the_Vertices_of C136 ) \ ( dom ( C137 `1 ) ) ) , C136 & (for B100 being set holds (B100 DSJoins ( dom ( C137 `1 ) ) , ( ( the_Vertices_of C136 ) \ ( dom ( C137 `1 ) ) ) , C136 implies ( ( ( C137 `1 ) . ( ( the_Source_of C136 ) . $1 ) ) + ( ( the_Weight_of C136 ) . $1 ) ) <= ( ( ( C137 `1 ) . ( ( the_Source_of C136 ) . B100 ) ) + ( ( the_Weight_of C136 ) . B100 ) ))));
+consider C138 being (Subset of ( the_Edges_of C136 )) such that L513: (for B101 being set holds (B101 in C138 iff (B101 in ( the_Edges_of C136 ) & S2[ B101 ]))) from SUBSET_1:sch 1;
+take C138;
+L514:
+now
+let C139 being set;
+thus L515: (C139 in C138 implies S2[ C139 ]) by L513;
+assume L516: S2[ C139 ];
+L517: C139 in ( the_Edges_of C136 ) by L516 , GLIB_000:def 16;
+thus L518: C139 in C138 by L517 , L513 , L516;
+end;
+thus L519: thesis by L514;
+end;
+uniqueness
+proof
+defpred S3[ set ] means ($1 DSJoins ( dom ( C137 `1 ) ) , ( ( the_Vertices_of C136 ) \ ( dom ( C137 `1 ) ) ) , C136 & (for B102 being set holds (B102 DSJoins ( dom ( C137 `1 ) ) , ( ( the_Vertices_of C136 ) \ ( dom ( C137 `1 ) ) ) , C136 implies ( ( ( C137 `1 ) . ( ( the_Source_of C136 ) . $1 ) ) + ( ( the_Weight_of C136 ) . $1 ) ) <= ( ( ( C137 `1 ) . ( ( the_Source_of C136 ) . B102 ) ) + ( ( the_Weight_of C136 ) . B102 ) ))));
+let C140 , C141 being (Subset of ( the_Edges_of C136 ));
+assume that
+L520: (for B103 being set holds (B103 in C140 iff S3[ B103 ]))
+and
+L521: (for B104 being set holds (B104 in C141 iff S3[ B104 ]));
+L522:
+now
+let C142 being set;
+thus L523:now
+assume L524: C142 in C140;
+L525: S3[ C142 ] by L524 , L520;
+thus L526: C142 in C141 by L525 , L521;
+end;
+assume L527: C142 in C141;
+L528: S3[ C142 ] by L527 , L521;
+thus L529: C142 in C140 by L528 , L520;
+end;
+thus L530: thesis by L522 , TARSKI:1;
+end;
+end;
+definition
+let C143 being  real-weighted WGraph;
+let C144 being (DIJK:Labeling of C143);
+func DIJK:Step C144 -> (DIJK:Labeling of C143) equals 
+:L532: C144 if ( DIJK:NextBestEdges C144 ) = ( {} ) otherwise [ ( ( C144 `1 ) +* ( ( ( the_Target_of C143 ) . ( choose ( DIJK:NextBestEdges C144 ) ) ) .--> ( ( ( C144 `1 ) . ( ( the_Source_of C143 ) . ( choose ( DIJK:NextBestEdges C144 ) ) ) ) + ( ( the_Weight_of C143 ) . ( choose ( DIJK:NextBestEdges C144 ) ) ) ) ) ) , ( ( C144 `2 ) \/ { ( choose ( DIJK:NextBestEdges C144 ) ) } ) ];
+coherence
+proof
+set D52 = ( the_Vertices_of C143 );
+set D53 = ( the_Edges_of C143 );
+set D54 = ( DIJK:NextBestEdges C144 );
+set D55 = ( choose D54 );
+set D56 = ( ( C144 `2 ) \/ { D55 } );
+set D57 = ( ( the_Source_of C143 ) . D55 );
+set D58 = ( ( the_Target_of C143 ) . D55 );
+set D59 = ( ( ( C144 `1 ) . D57 ) + ( ( the_Weight_of C143 ) . D55 ) );
+L533:
+now
+assume L534: D54 <> ( {} );
+L535: D55 in D54 by L534;
+reconsider D60 = D55 as (Element of D53) by L535;
+L536: D55 in D54 by L534;
+reconsider D61 = D58 as (Element of D52) by L536 , FUNCT_2:5;
+L537: (( C144 `2 ) in ( bool D53 ) & { D60 } c= D53) by L536 , ZFMISC_1:31;
+L538: D56 c= D53 by L537 , XBOOLE_1:8;
+L539: ({ D61 } c= D52 & ( dom ( ( C144 `1 ) +* ( D58 .--> D59 ) ) ) = ( ( dom ( C144 `1 ) ) \/ { D58 } )) by L1;
+L540: ( dom ( ( C144 `1 ) +* ( D58 .--> D59 ) ) ) c= D52 by L539 , XBOOLE_1:8;
+L541: ( rng ( ( C144 `1 ) +* ( D58 .--> D59 ) ) ) c= ( REAL );
+L542: ( ( C144 `1 ) +* ( D58 .--> D59 ) ) in ( PFuncs (D52 , ( REAL )) ) by L541 , L540 , PARTFUN1:def 3;
+thus L543: [ ( ( C144 `1 ) +* ( D58 .--> D59 ) ) , D56 ] is (DIJK:Labeling of C143) by L542 , L538 , ZFMISC_1:def 2;
+end;
+thus L544: thesis by L533;
+end;
+consistency;
+end;
+definition
+let C145 being  real-weighted WGraph;
+let C146 being (Vertex of C145);
+func DIJK:Init C146 -> (DIJK:Labeling of C145) equals 
+[ ( C146 .--> ( 0 ) ) , ( {} ) ];
+coherence
+proof
+set D62 = ( C146 .--> ( 0 ) );
+L546: (( dom D62 ) = { C146 } & ( rng D62 ) = { ( 0 ) }) by FUNCOP_1:8 , FUNCOP_1:13;
+L547: D62 in ( PFuncs (( the_Vertices_of C145 ) , ( REAL )) ) by L546 , PARTFUN1:def 3;
+L548: ( {} ) c= ( the_Edges_of C145 ) by XBOOLE_1:2;
+thus L549: thesis by L548 , L547 , ZFMISC_1:def 2;
+end;
+end;
+definition
+let C147 being  real-weighted WGraph;
+mode DIJK:LabelingSeq of C147
+ -> (ManySortedSet of ( NAT ))
+means :L551: (for B105 being Nat holds ( it . B105 ) is (DIJK:Labeling of C147));
+existence
+proof
+defpred S4[ set , set ] means $2 is (DIJK:Labeling of C147);
+L552:
+now
+let C148 being set;
+assume L553: C148 in ( NAT );
+take D63 = [ ( {} ) , ( {} ) ];
+L554: ( {} ) is (PartFunc of ( the_Vertices_of C147 ) , ( REAL )) by RELSET_1:12;
+L555: ( {} ) in ( PFuncs (( the_Vertices_of C147 ) , ( REAL )) ) by L554 , PARTFUN1:45;
+L556: ( {} ) c= ( the_Edges_of C147 ) by XBOOLE_1:2;
+thus L557: S4[ C148 , D63 ] by L556 , L555 , ZFMISC_1:def 2;
+end;
+consider C149 being (ManySortedSet of ( NAT )) such that L558: (for B106 being set holds (B106 in ( NAT ) implies S4[ B106 , ( C149 . B106 ) ])) from PBOOLE:sch 3(L552);
+take C149;
+let C150 being Nat;
+L559: C150 in ( NAT ) by ORDINAL1:def 12;
+thus L560: thesis by L559 , L558;
+end;
+end;
+definition
+let C151 being  real-weighted WGraph;
+let C152 being (DIJK:LabelingSeq of C151);
+let C153 being Nat;
+redefine func C152 . C153 -> (DIJK:Labeling of C151);
+
+coherence by L551;
+end;
+definition
+let C154 being  real-weighted WGraph;
+let C155 being (Vertex of C154);
+func DIJK:CompSeq C155 -> (DIJK:LabelingSeq of C154) means 
+:L563: (( it . ( 0 ) ) = ( DIJK:Init C155 ) & (for B107 being Nat holds ( it . ( B107 + 1 ) ) = ( DIJK:Step ( it . B107 ) )));
+existence
+proof
+defpred S5[ set , set , set ] means (($2 is (DIJK:Labeling of C154) & (ex B108 , B109 being (DIJK:Labeling of C154) st ($2 = B108 & $3 = B109 & B109 = ( DIJK:Step B108 )))) or ((not $2 is (DIJK:Labeling of C154)) & $2 = $3));
+L564:
+now
+let C156 , C157 being set;
+L565:
+now
+per cases ;
+suppose L566: C157 is (DIJK:Labeling of C154);
+
+reconsider D64 = C157 as (DIJK:Labeling of C154) by L566;
+L567: S5[ C156 , C157 , ( DIJK:Step D64 ) ];
+thus L568: (ex B110 being set st S5[ C156 , C157 , B110 ]) by L567;
+end;
+suppose L569: (not C157 is (DIJK:Labeling of C154));
+
+thus L570: (ex B111 being set st S5[ C156 , C157 , B111 ]) by L569;
+end;
+end;
+thus L572: (ex B112 being set st S5[ C156 , C157 , B112 ]) by L565;
+end;
+L573: (for B113 being (Element of ( NAT )) holds (for B114 being set holds (ex B115 being set st S5[ B113 , B114 , B115 ]))) by L564;
+consider C158 being Function such that L574: (( dom C158 ) = ( NAT ) & ( C158 . ( 0 ) ) = ( DIJK:Init C155 ) & (for B116 being (Element of ( NAT )) holds S5[ B116 , ( C158 . B116 ) , ( C158 . ( B116 + 1 ) ) ])) from RECDEF_1:sch 1(L573);
+reconsider D65 = C158 as (ManySortedSet of ( NAT )) by L574 , PARTFUN1:def 2 , RELAT_1:def 18;
+defpred S6[ Nat ] means ( D65 . $1 ) is (DIJK:Labeling of C154);
+L575:
+now
+let C159 being Nat;
+assume L576: S6[ C159 ];
+L577: C159 in ( NAT ) by ORDINAL1:def 12;
+L578: (ex B117 , B118 being (DIJK:Labeling of C154) st (( D65 . C159 ) = B117 & ( D65 . ( C159 + 1 ) ) = B118 & B118 = ( DIJK:Step B117 ))) by L577 , L574 , L576;
+thus L579: S6[ ( C159 + 1 ) ] by L578;
+end;
+L580: S6[ ( 0 ) ] by L574;
+L581: (for B119 being Nat holds S6[ B119 ]) from NAT_1:sch 2(L580 , L575);
+reconsider D66 = D65 as (DIJK:LabelingSeq of C154) by L581 , L551;
+reconsider D67 = D66 as (DIJK:LabelingSeq of C154);
+take D67;
+thus L582: ( D67 . ( 0 ) ) = ( DIJK:Init C155 ) by L574;
+let C160 being Nat;
+reconsider D68 = C160 as (Element of ( NAT )) by ORDINAL1:def 12;
+L583: (ex B120 , B121 being (DIJK:Labeling of C154) st (( D67 . D68 ) = B120 & ( D67 . ( C160 + 1 ) ) = B121 & B121 = ( DIJK:Step B120 ))) by L574;
+thus L584: thesis by L583;
+end;
+uniqueness
+proof
+let C161 , C162 being (DIJK:LabelingSeq of C154);
+assume that
+L585: ( C161 . ( 0 ) ) = ( DIJK:Init C155 )
+and
+L586: (for B122 being Nat holds ( C161 . ( B122 + 1 ) ) = ( DIJK:Step ( C161 . B122 ) ))
+and
+L587: ( C162 . ( 0 ) ) = ( DIJK:Init C155 )
+and
+L588: (for B123 being Nat holds ( C162 . ( B123 + 1 ) ) = ( DIJK:Step ( C162 . B123 ) ));
+defpred S7[ Nat ] means ( C161 . $1 ) = ( C162 . $1 );
+L589:
+now
+let C163 being (Element of ( NAT ));
+assume L590: S7[ C163 ];
+L591: ( C161 . ( C163 + 1 ) ) = ( DIJK:Step ( C162 . C163 ) ) by L590 , L586
+.= ( C162 . ( C163 + 1 ) ) by L588;
+thus L592: S7[ ( C163 + 1 ) ] by L591;
+end;
+L593: (for B124 being (Element of ( NAT )) holds (S7[ B124 ] implies S7[ ( B124 + 1 ) ])) by L589;
+L594: S7[ ( 0 ) ] by L585 , L587;
+L595: (for B125 being (Element of ( NAT )) holds S7[ B125 ]) from NAT_1:sch 1(L594 , L593);
+L596: (for B126 being set holds (B126 in ( NAT ) implies ( C161 . B126 ) = ( C162 . B126 ))) by L595;
+thus L597: C161 = C162 by L596 , PBOOLE:3;
+end;
+end;
+definition
+let C164 being  real-weighted WGraph;
+let C165 being (Vertex of C164);
+func DIJK:SSSP (C164 , C165) -> (DIJK:Labeling of C164) equals 
+( ( DIJK:CompSeq C165 ) .Result() );
+coherence
+proof
+set D69 = ( DIJK:CompSeq C165 );
+L599: ( D69 .Result() ) = ( D69 . ( D69 .Lifespan() ) );
+thus L600: thesis by L599;
+end;
+end;
+begin
+theorem
+L602: (for B127 being  finite  real-weighted WGraph holds (for B128 being (DIJK:Labeling of B127) holds ((( card ( dom ( ( DIJK:Step B128 ) `1 ) ) ) = ( card ( dom ( B128 `1 ) ) ) iff ( DIJK:NextBestEdges B128 ) = ( {} )) & (( card ( dom ( ( DIJK:Step B128 ) `1 ) ) ) = ( ( card ( dom ( B128 `1 ) ) ) + 1 ) iff ( DIJK:NextBestEdges B128 ) <> ( {} )))))
+proof
+let C166 being  finite  real-weighted WGraph;
+let C167 being (DIJK:Labeling of C166);
+set D70 = ( DIJK:NextBestEdges C167 );
+set D71 = ( choose D70 );
+set D72 = ( ( C167 `2 ) \/ { D71 } );
+set D73 = ( DIJK:Step C167 );
+set D74 = ( ( the_Source_of C166 ) . D71 );
+set D75 = ( ( the_Target_of C166 ) . D71 );
+set D76 = ( ( ( C167 `1 ) . D74 ) + ( ( the_Weight_of C166 ) . D71 ) );
+thus L603:now
+assume L604: ( card ( dom ( D73 `1 ) ) ) = ( card ( dom ( C167 `1 ) ) );
+L605:
+now
+assume L606: D70 <> ( {} );
+L607: D73 = [ ( ( C167 `1 ) +* ( D75 .--> D76 ) ) , D72 ] by L606 , L532;
+L608: ( D73 `1 ) = ( ( C167 `1 ) +* ( D75 .--> D76 ) ) by L607 , MCART_1:7;
+L609: ( dom ( D73 `1 ) ) = ( ( dom ( C167 `1 ) ) \/ { D75 } ) by L608 , L1;
+L610: D71 in D70 by L606;
+reconsider D77 = D75 as (Vertex of C166) by L610 , FUNCT_2:5;
+L611: D71 DSJoins ( dom ( C167 `1 ) ) , ( ( the_Vertices_of C166 ) \ ( dom ( C167 `1 ) ) ) , C166 by L606 , L512;
+L612: D77 in ( ( the_Vertices_of C166 ) \ ( dom ( C167 `1 ) ) ) by L611 , GLIB_000:def 16;
+L613: (not D77 in ( dom ( C167 `1 ) )) by L612 , XBOOLE_0:def 5;
+L614: ( card ( dom ( D73 `1 ) ) ) = ( ( card ( dom ( C167 `1 ) ) ) + 1 ) by L613 , L609 , CARD_2:41;
+thus L615: contradiction by L614 , L604;
+end;
+thus L616: D70 = ( {} ) by L605;
+end;
+thus L617: (D70 = ( {} ) implies ( card ( dom ( D73 `1 ) ) ) = ( card ( dom ( C167 `1 ) ) )) by L532;
+thus L618:now
+assume L619: ( card ( dom ( D73 `1 ) ) ) = ( ( card ( dom ( C167 `1 ) ) ) + 1 );
+L620:
+now
+assume L621: D70 = ( {} );
+L622: ( ( 0 ) + ( card ( dom ( C167 `1 ) ) ) ) = ( ( card ( dom ( C167 `1 ) ) ) + 1 ) by L621 , L619 , L532;
+thus L623: contradiction by L622;
+end;
+thus L624: D70 <> ( {} ) by L620;
+end;
+assume L625: D70 <> ( {} );
+L626: D73 = [ ( ( C167 `1 ) +* ( D75 .--> D76 ) ) , D72 ] by L625 , L532;
+L627: ( D73 `1 ) = ( ( C167 `1 ) +* ( D75 .--> D76 ) ) by L626 , MCART_1:7;
+L628: ( dom ( D73 `1 ) ) = ( ( dom ( C167 `1 ) ) \/ { D75 } ) by L627 , L1;
+L629: D71 in D70 by L625;
+reconsider D78 = D75 as (Vertex of C166) by L629 , FUNCT_2:5;
+L630: D71 DSJoins ( dom ( C167 `1 ) ) , ( ( the_Vertices_of C166 ) \ ( dom ( C167 `1 ) ) ) , C166 by L625 , L512;
+L631: D78 in ( ( the_Vertices_of C166 ) \ ( dom ( C167 `1 ) ) ) by L630 , GLIB_000:def 16;
+L632: (not D78 in ( dom ( C167 `1 ) )) by L631 , XBOOLE_0:def 5;
+thus L633: thesis by L632 , L628 , CARD_2:41;
+end;
+theorem
+L634: (for B129 being  real-weighted WGraph holds (for B130 being (DIJK:Labeling of B129) holds (( dom ( B130 `1 ) ) c= ( dom ( ( DIJK:Step B130 ) `1 ) ) & ( B130 `2 ) c= ( ( DIJK:Step B130 ) `2 ))))
+proof
+let C168 being  real-weighted WGraph;
+let C169 being (DIJK:Labeling of C168);
+set D79 = ( DIJK:Step C169 );
+set D80 = ( DIJK:NextBestEdges C169 );
+set D81 = ( choose D80 );
+set D82 = ( ( C169 `2 ) \/ { D81 } );
+set D83 = ( ( the_Target_of C168 ) . D81 );
+set D84 = ( ( ( C169 `1 ) . ( ( the_Source_of C168 ) . D81 ) ) + ( ( the_Weight_of C168 ) . D81 ) );
+L635:
+now
+per cases ;
+suppose L636: D80 = ( {} );
+
+thus L637: thesis by L636 , L532;
+end;
+suppose L638: D80 <> ( {} );
+
+L639: D79 = [ ( ( C169 `1 ) +* ( D83 .--> D84 ) ) , D82 ] by L638 , L532;
+L640: ( D79 `1 ) = ( ( C169 `1 ) +* ( D83 .--> D84 ) ) by L639 , MCART_1:7;
+L641: ( dom ( D79 `1 ) ) = ( ( dom ( C169 `1 ) ) \/ { D83 } ) by L640 , L1;
+L642:
+now
+let C170 being set;
+assume L643: C170 in ( dom ( C169 `1 ) );
+L644: ( dom ( C169 `1 ) ) c= ( dom ( D79 `1 ) ) by L641 , XBOOLE_1:7;
+thus L645: C170 in ( dom ( D79 `1 ) ) by L644 , L643;
+end;
+thus L646: ( dom ( C169 `1 ) ) c= ( dom ( D79 `1 ) ) by L642 , TARSKI:def 3;
+L647:
+now
+let C171 being set;
+assume L648: C171 in ( C169 `2 );
+L649: (( C169 `2 ) c= D82 & D82 = ( D79 `2 )) by L639 , MCART_1:7 , XBOOLE_1:7;
+thus L650: C171 in ( D79 `2 ) by L649 , L648;
+end;
+thus L651: ( C169 `2 ) c= ( D79 `2 ) by L647 , TARSKI:def 3;
+end;
+end;
+thus L653: thesis by L635;
+end;
+theorem
+L654: (for B131 being  real-weighted WGraph holds (for B132 being (Vertex of B131) holds ( dom ( ( DIJK:Init B132 ) `1 ) ) = { B132 }))
+proof
+let C172 being  real-weighted WGraph;
+let C173 being (Vertex of C172);
+set D85 = ( DIJK:Init C173 );
+L655: ( D85 `1 ) = ( C173 .--> ( 0 ) ) by MCART_1:7;
+thus L656: thesis by L655 , FUNCOP_1:13;
+end;
+theorem
+L657: (for B133 being  real-weighted WGraph holds (for B134 being (Vertex of B133) holds (for B135 , B136 being Nat holds (B135 <= B136 implies (( dom ( ( ( DIJK:CompSeq B134 ) . B135 ) `1 ) ) c= ( dom ( ( ( DIJK:CompSeq B134 ) . B136 ) `1 ) ) & ( ( ( DIJK:CompSeq B134 ) . B135 ) `2 ) c= ( ( ( DIJK:CompSeq B134 ) . B136 ) `2 ))))))
+proof
+let C174 being  real-weighted WGraph;
+let C175 being (Vertex of C174);
+let C176 , C177 being Nat;
+set D86 = ( DIJK:CompSeq C175 );
+set D87 = ( dom ( ( D86 . C176 ) `1 ) );
+set D88 = ( ( D86 . C176 ) `2 );
+defpred S8[ Nat ] means (D87 c= ( dom ( ( D86 . ( C176 + $1 ) ) `1 ) ) & D88 c= ( ( D86 . ( C176 + $1 ) ) `2 ));
+assume L658: C176 <= C177;
+L659: (ex B137 being Nat st C177 = ( C176 + B137 )) by L658 , NAT_1:10;
+L660:
+now
+let C178 being Nat;
+L661: ( D86 . ( ( C176 + C178 ) + 1 ) ) = ( DIJK:Step ( D86 . ( C176 + C178 ) ) ) by L563;
+L662: (( dom ( ( D86 . ( C176 + C178 ) ) `1 ) ) c= ( dom ( ( D86 . ( ( C176 + C178 ) + 1 ) ) `1 ) ) & ( ( D86 . ( C176 + C178 ) ) `2 ) c= ( ( D86 . ( ( C176 + C178 ) + 1 ) ) `2 )) by L661 , L634;
+assume L663: (D87 c= ( dom ( ( D86 . ( C176 + C178 ) ) `1 ) ) & D88 c= ( ( D86 . ( C176 + C178 ) ) `2 ));
+thus L664: (D87 c= ( dom ( ( D86 . ( C176 + ( C178 + 1 ) ) ) `1 ) ) & D88 c= ( ( D86 . ( C176 + ( C178 + 1 ) ) ) `2 )) by L663 , L662 , XBOOLE_1:1;
+end;
+L665: (for B138 being Nat holds (S8[ B138 ] implies S8[ ( B138 + 1 ) ])) by L660;
+L666: S8[ ( 0 ) ];
+L667: (for B139 being Nat holds S8[ B139 ]) from NAT_1:sch 2(L666 , L665);
+thus L668: thesis by L667 , L659;
+end;
+theorem
+L669: (for B140 being  finite  real-weighted WGraph holds (for B141 being (Vertex of B140) holds (for B142 being Nat holds ( dom ( ( ( DIJK:CompSeq B141 ) . B142 ) `1 ) ) c= ( B140 .reachableDFrom B141 ))))
+proof
+let C179 being  finite  real-weighted WGraph;
+let C180 being (Vertex of C179);
+set D89 = ( DIJK:CompSeq C180 );
+defpred S9[ Nat ] means ( dom ( ( D89 . $1 ) `1 ) ) c= ( C179 .reachableDFrom C180 );
+L670: ( D89 . ( 0 ) ) = ( DIJK:Init C180 ) by L563;
+L671: ( dom ( ( D89 . ( 0 ) ) `1 ) ) = { C180 } by L670 , L654;
+L672:
+now
+let C181 being Nat;
+assume that
+L673: ( dom ( ( D89 . C181 ) `1 ) ) c= ( C179 .reachableDFrom C180 );
+set D90 = ( D89 . C181 );
+set D91 = ( D89 . ( C181 + 1 ) );
+set D92 = ( DIJK:NextBestEdges D90 );
+set D93 = ( choose D92 );
+set D94 = ( ( D90 `2 ) \/ { D93 } );
+set D95 = ( ( the_Source_of C179 ) . D93 );
+set D96 = ( ( the_Target_of C179 ) . D93 );
+set D97 = ( ( D90 `1 ) . D95 );
+set D98 = ( ( the_Weight_of C179 ) . D93 );
+L674: D91 = ( DIJK:Step D90 ) by L563;
+L675:
+now
+let C182 being set;
+assume L676: C182 in ( dom ( ( D89 . ( C181 + 1 ) ) `1 ) );
+L677:
+now
+per cases ;
+suppose L678: D92 = ( {} );
+
+L679: D90 = D91 by L678 , L674 , L532;
+thus L680: C182 in ( C179 .reachableDFrom C180 ) by L679 , L673 , L676;
+end;
+suppose L681: D92 <> ( {} );
+
+set D99 = C182;
+reconsider D100 = D99 as (Vertex of C179) by L676;
+L682: D93 DSJoins ( dom ( D90 `1 ) ) , ( ( the_Vertices_of C179 ) \ ( dom ( D90 `1 ) ) ) , C179 by L681 , L512;
+L683: D95 in ( dom ( D90 `1 ) ) by L682 , GLIB_000:def 16;
+reconsider D101 = D95 as (Vertex of C179) by L683;
+L684: D91 = [ ( ( D90 `1 ) +* ( D96 .--> ( D97 + D98 ) ) ) , D94 ] by L674 , L681 , L532;
+L685: ( D91 `1 ) = ( ( D90 `1 ) +* ( D96 .--> ( D97 + D98 ) ) ) by L684 , MCART_1:7;
+L686:
+now
+per cases ;
+suppose L687: D100 in ( dom ( D90 `1 ) );
+
+thus L688: D100 in ( C179 .reachableDFrom C180 ) by L687 , L673;
+end;
+suppose L689: (not D100 in ( dom ( D90 `1 ) ));
+
+L690: D93 in D92 by L681;
+L691: ( ( the_Target_of C179 ) . D93 ) = D100 by L676 , L685 , L689 , L3;
+L692: D93 DJoins D101 , D100 , C179 by L691 , L690 , GLIB_000:def 14;
+thus L693: D100 in ( C179 .reachableDFrom C180 ) by L692 , L673 , L683 , GLIB_002:19;
+end;
+end;
+thus L695: C182 in ( C179 .reachableDFrom C180 ) by L686;
+end;
+end;
+thus L697: C182 in ( C179 .reachableDFrom C180 ) by L677;
+end;
+thus L698: ( dom ( ( D89 . ( C181 + 1 ) ) `1 ) ) c= ( C179 .reachableDFrom C180 ) by L675 , TARSKI:def 3;
+end;
+L699: (for B143 being Nat holds (S9[ B143 ] implies S9[ ( B143 + 1 ) ])) by L672;
+L700: C180 in ( C179 .reachableDFrom C180 ) by GLIB_002:18;
+L701: S9[ ( 0 ) ] by L700 , L671 , ZFMISC_1:31;
+L702: (for B144 being Nat holds S9[ B144 ]) from NAT_1:sch 2(L701 , L699);
+thus L703: thesis by L702;
+end;
+theorem
+L704: (for B145 being  finite  real-weighted WGraph holds (for B146 being (Vertex of B145) holds (for B147 being Nat holds (( DIJK:NextBestEdges ( ( DIJK:CompSeq B146 ) . B147 ) ) = ( {} ) iff ( dom ( ( ( DIJK:CompSeq B146 ) . B147 ) `1 ) ) = ( B145 .reachableDFrom B146 )))))
+proof
+let C183 being  finite  real-weighted WGraph;
+let C184 being (Vertex of C183);
+let C185 being Nat;
+set D102 = ( DIJK:CompSeq C184 );
+set D103 = ( C183 .reachableDFrom C184 );
+set D104 = ( D102 . C185 );
+set D105 = ( D102 . ( C185 + 1 ) );
+set D106 = ( DIJK:NextBestEdges D104 );
+set D107 = ( the_Source_of C183 );
+set D108 = ( the_Target_of C183 );
+thus L705:now
+assume L706: D106 = ( {} );
+L707:
+now
+defpred S10[ set ] means (( D107 . $1 ) in ( dom ( D104 `1 ) ) & (not ( D108 . $1 ) in ( dom ( D104 `1 ) )));
+assume L708: ( dom ( D104 `1 ) ) <> D103;
+consider C186 being (Subset of ( the_Edges_of C183 )) such that L709: (for B148 being set holds (B148 in C186 iff (B148 in ( the_Edges_of C183 ) & S10[ B148 ]))) from SUBSET_1:sch 1;
+L710: ( dom ( D104 `1 ) ) c= D103 by L669;
+L711: ( dom ( D104 `1 ) ) c< D103 by L710 , L708 , XBOOLE_0:def 8;
+L712:
+now
+L713: ( D102 . ( 0 ) ) = ( DIJK:Init C184 ) by L563;
+L714: ( dom ( ( D102 . ( 0 ) ) `1 ) ) = { C184 } by L713 , L654;
+L715: C184 in ( dom ( ( D102 . ( 0 ) ) `1 ) ) by L714 , TARSKI:def 1;
+assume L716: C186 = ( {} );
+consider C187 being set such that L717: C187 in D103 and L718: (not C187 in ( dom ( D104 `1 ) )) by L711 , XBOOLE_0:6;
+reconsider D109 = C187 as (Vertex of C183) by L717;
+consider C188 being  directed (Walk of C183) such that L719: C188 is_Walk_from C184 , D109 by L717 , GLIB_002:def 6;
+defpred S11[ Nat ] means ($1 is  odd & $1 <= ( len C188 ) & (not ( C188 . $1 ) in ( dom ( D104 `1 ) )));
+L720: ( C188 . ( len C188 ) ) = ( C188 .last() ) by GLIB_001:def 7
+.= D109 by L719 , GLIB_001:def 23;
+L721: (ex B149 being Nat st S11[ B149 ]) by L720 , L718;
+consider C189 being Nat such that L722: (S11[ C189 ] & (for B150 being Nat holds (S11[ B150 ] implies C189 <= B150))) from NAT_1:sch 5(L721);
+L723: ( dom ( ( D102 . ( 0 ) ) `1 ) ) c= ( dom ( D104 `1 ) ) by L657;
+L724:
+now
+per cases ;
+suppose L725: C189 = 1;
+
+L726: ( C188 . C189 ) = ( C188 .first() ) by L725 , GLIB_001:def 6
+.= C184 by L719 , GLIB_001:def 23;
+thus L727: contradiction by L726 , L715 , L723 , L722;
+end;
+suppose L728: C189 <> 1;
+
+reconsider D110 = C189 as  odd (Element of ( NAT )) by L722 , ORDINAL1:def 12;
+L729: 1 <= C189 by L722 , ABIAN:12;
+L730: 1 < C189 by L729 , L728 , XXREAL_0:1;
+L731: ( 1 + 1 ) < ( C189 + 1 ) by L730 , XREAL_1:8;
+L732: ( 2 * 1 ) <= C189 by L731 , NAT_1:13;
+reconsider D111 = ( D110 - ( 2 * 1 ) ) as  odd (Element of ( NAT )) by L732 , INT_1:5;
+set D112 = ( C188 . ( D111 + 1 ) );
+L733: ( C189 - 2 ) < ( ( len C188 ) - ( 0 ) ) by L722 , XREAL_1:15;
+L734: D112 DJoins ( C188 . D111 ) , ( C188 . ( D111 + 2 ) ) , C183 by L733 , GLIB_001:122;
+L735: ( ( the_Target_of C183 ) . D112 ) = ( C188 . ( D111 + 2 ) ) by L734 , GLIB_000:def 14;
+L736: D111 < ( C189 - ( 0 ) ) by XREAL_1:15;
+L737: ( C188 . D111 ) in ( dom ( D104 `1 ) ) by L736 , L722 , L733;
+L738: (D112 in ( the_Edges_of C183 ) & ( ( the_Source_of C183 ) . D112 ) = ( C188 . D111 )) by L734 , GLIB_000:def 14;
+thus L739: contradiction by L738 , L709 , L716 , L722 , L737 , L735;
+end;
+end;
+thus L741: contradiction by L724;
+end;
+reconsider D113 = C186 as non  empty  finite set by L712;
+deffunc H2((Element of D113)) = ( ( ( D104 `1 ) . ( ( the_Source_of C183 ) . $1 ) ) + ( ( the_Weight_of C183 ) . $1 ) );
+consider C190 being (Element of D113) such that L742: (for B151 being (Element of D113) holds H2(C190) <= H2(B151)) from GRAPH_5:sch 2;
+L743: (not ( D108 . C190 ) in ( dom ( D104 `1 ) )) by L709;
+L744: C190 in ( the_Edges_of C183 ) by L709;
+L745: ( D108 . C190 ) in ( the_Vertices_of C183 ) by L744 , FUNCT_2:5;
+L746: ( D108 . C190 ) in ( ( the_Vertices_of C183 ) \ ( dom ( D104 `1 ) ) ) by L745 , L743 , XBOOLE_0:def 5;
+L747:
+now
+let C191 being set;
+assume L748: C191 DSJoins ( dom ( D104 `1 ) ) , ( ( the_Vertices_of C183 ) \ ( dom ( D104 `1 ) ) ) , C183;
+L749: ( D108 . C191 ) in ( ( the_Vertices_of C183 ) \ ( dom ( D104 `1 ) ) ) by L748 , GLIB_000:def 16;
+L750: (not ( D108 . C191 ) in ( dom ( D104 `1 ) )) by L749 , XBOOLE_0:def 5;
+L751: (C191 in ( the_Edges_of C183 ) & ( D107 . C191 ) in ( dom ( D104 `1 ) )) by L748 , GLIB_000:def 16;
+L752: C191 in D113 by L751 , L709 , L750;
+thus L753: ( ( ( D104 `1 ) . ( ( the_Source_of C183 ) . C190 ) ) + ( ( the_Weight_of C183 ) . C190 ) ) <= ( ( ( D104 `1 ) . ( ( the_Source_of C183 ) . C191 ) ) + ( ( the_Weight_of C183 ) . C191 ) ) by L752 , L742;
+end;
+L754: ( D107 . C190 ) in ( dom ( D104 `1 ) ) by L709;
+L755: C190 DSJoins ( dom ( D104 `1 ) ) , ( ( the_Vertices_of C183 ) \ ( dom ( D104 `1 ) ) ) , C183 by L754 , L744 , L746 , GLIB_000:def 16;
+thus L756: contradiction by L755 , L706 , L747 , L512;
+end;
+thus L757: ( dom ( ( D102 . C185 ) `1 ) ) = D103 by L707;
+end;
+assume L758: ( dom ( ( D102 . C185 ) `1 ) ) = D103;
+L759: D105 = ( DIJK:Step D104 ) by L563;
+L760:
+now
+assume L761: D106 <> ( {} );
+L762: ( card ( dom ( D105 `1 ) ) ) = ( ( card D103 ) + 1 ) by L761 , L759 , L758 , L602;
+L763: ( card ( dom ( D105 `1 ) ) ) c= ( card D103 ) by L669 , CARD_1:11;
+L764: ( ( card D103 ) + 1 ) <= ( ( card D103 ) + ( 0 ) ) by L763 , L762 , NAT_1:39;
+thus L765: contradiction by L764 , XREAL_1:6;
+end;
+thus L766: thesis by L760;
+end;
+theorem
+L767: (for B152 being  finite  real-weighted WGraph holds (for B153 being (Vertex of B152) holds (for B154 being Nat holds ( card ( dom ( ( ( DIJK:CompSeq B153 ) . B154 ) `1 ) ) ) = ( min (( B154 + 1 ) , ( card ( B152 .reachableDFrom B153 ) )) ))))
+proof
+let C192 being  finite  real-weighted WGraph;
+let C193 being (Vertex of C192);
+set D114 = ( DIJK:CompSeq C193 );
+set D115 = ( dom ( ( D114 . ( 0 ) ) `1 ) );
+set D116 = ( C192 .reachableDFrom C193 );
+defpred S12[ Nat ] means ( card ( dom ( ( D114 . $1 ) `1 ) ) ) = ( min (( $1 + 1 ) , ( card D116 )) );
+L768: C193 in D116 by GLIB_002:18;
+L769: { C193 } c= D116 by L768 , ZFMISC_1:31;
+L770: ( card { C193 } ) <= ( card D116 ) by L769 , NAT_1:43;
+L771: ( ( 0 ) + 1 ) <= ( card D116 ) by L770 , CARD_1:30;
+L772:
+now
+let C194 being Nat;
+assume that
+L773: ( card ( dom ( ( D114 . C194 ) `1 ) ) ) = ( min (( C194 + 1 ) , ( card D116 )) );
+set D117 = ( D114 . C194 );
+set D118 = ( D114 . ( C194 + 1 ) );
+set D119 = ( DIJK:NextBestEdges D117 );
+L774: ( D114 . ( C194 + 1 ) ) = ( DIJK:Step ( D114 . C194 ) ) by L563;
+L775:
+now
+per cases ;
+suppose L776: D119 = ( {} );
+
+L777: ( card ( dom ( D117 `1 ) ) ) = ( card D116 ) by L776 , L704;
+L778: ( card D116 ) <= ( C194 + 1 ) by L777 , L773 , XXREAL_0:def 9;
+L779: ( card D116 ) <= ( ( C194 + 1 ) + 1 ) by L778 , NAT_1:12;
+L780: ( card ( dom ( D118 `1 ) ) ) = ( card ( dom ( D117 `1 ) ) ) by L774 , L776 , L602;
+L781: ( card ( dom ( D118 `1 ) ) ) = ( card D116 ) by L780 , L776 , L704;
+thus L782: ( card ( dom ( D118 `1 ) ) ) = ( min (( ( C194 + 1 ) + 1 ) , ( card D116 )) ) by L781 , L779 , XXREAL_0:def 9;
+end;
+suppose L783: D119 <> ( {} );
+
+L784: ( dom ( D117 `1 ) ) <> D116 by L783 , L704;
+L785:
+now
+L786: ( dom ( D117 `1 ) ) c= D116 by L669;
+L787: ( dom ( D117 `1 ) ) c< D116 by L786 , L784 , XBOOLE_0:def 8;
+assume L788: ( card ( dom ( D117 `1 ) ) ) = ( card D116 );
+thus L789: contradiction by L788 , L787 , CARD_2:48;
+end;
+L790: ( C194 + 1 ) <= ( card D116 ) by L785 , L773 , XXREAL_0:def 9;
+L791: ( ( C194 + 1 ) + 1 ) <= ( ( card D116 ) + 1 ) by L790 , XREAL_1:6;
+L792: ( ( C194 + 1 ) + 1 ) <> ( ( card D116 ) + 1 ) by L773 , L785;
+L793: ( ( C194 + 1 ) + 1 ) < ( ( card D116 ) + 1 ) by L792 , L791 , XXREAL_0:1;
+L794: ( ( C194 + 1 ) + 1 ) <= ( card D116 ) by L793 , NAT_1:13;
+L795: ( card ( dom ( D118 `1 ) ) ) = ( ( card ( dom ( D117 `1 ) ) ) + 1 ) by L774 , L783 , L602;
+L796: ( card ( dom ( D118 `1 ) ) ) = ( ( C194 + 1 ) + 1 ) by L795 , L773 , L785 , XXREAL_0:15;
+thus L797: ( card ( dom ( D118 `1 ) ) ) = ( min (( ( C194 + 1 ) + 1 ) , ( card D116 )) ) by L796 , L794 , XXREAL_0:def 9;
+end;
+end;
+thus L799: ( card ( dom ( ( D114 . ( C194 + 1 ) ) `1 ) ) ) = ( min (( ( C194 + 1 ) + 1 ) , ( card D116 )) ) by L775;
+end;
+L800: (for B155 being Nat holds (S12[ B155 ] implies S12[ ( B155 + 1 ) ])) by L772;
+L801: ( D114 . ( 0 ) ) = ( DIJK:Init C193 ) by L563;
+L802: ( card D115 ) = ( card { C193 } ) by L801 , L654
+.= 1 by CARD_1:30;
+L803: S12[ ( 0 ) ] by L802 , L771 , XXREAL_0:def 9;
+L804: (for B156 being Nat holds S12[ B156 ]) from NAT_1:sch 2(L803 , L800);
+thus L805: thesis by L804;
+end;
+theorem
+L806: (for B157 being  finite  real-weighted WGraph holds (for B158 being (Vertex of B157) holds (for B159 being Nat holds ( ( ( DIJK:CompSeq B158 ) . B159 ) `2 ) c= ( B157 .edgesBetween ( dom ( ( ( DIJK:CompSeq B158 ) . B159 ) `1 ) ) ))))
+proof
+let C195 being  finite  real-weighted WGraph;
+let C196 being (Vertex of C195);
+set D120 = ( DIJK:CompSeq C196 );
+set D121 = ( D120 . ( 0 ) );
+defpred S13[ Nat ] means ( ( D120 . $1 ) `2 ) c= ( C195 .edgesBetween ( dom ( ( D120 . $1 ) `1 ) ) );
+L807:
+now
+let C197 being Nat;
+set D122 = ( D120 . C197 );
+set D123 = ( D120 . ( C197 + 1 ) );
+set D124 = ( DIJK:NextBestEdges D122 );
+set D125 = ( choose D124 );
+set D126 = ( ( the_Target_of C195 ) . D125 );
+set D127 = ( ( ( D122 `1 ) . ( ( the_Source_of C195 ) . D125 ) ) + ( ( the_Weight_of C195 ) . D125 ) );
+set D128 = ( ( D122 `2 ) \/ { D125 } );
+assume L808: ( D122 `2 ) c= ( C195 .edgesBetween ( dom ( D122 `1 ) ) );
+L809: D123 = ( DIJK:Step D122 ) by L563;
+L810:
+now
+let C198 being set;
+L811: C197 <= ( C197 + 1 ) by NAT_1:12;
+L812: ( dom ( D122 `1 ) ) c= ( dom ( D123 `1 ) ) by L811 , L657;
+assume L813: C198 in ( D123 `2 );
+L814:
+now
+per cases ;
+suppose L815: D124 = ( {} );
+
+L816: D123 = D122 by L815 , L809 , L532;
+thus L817: C198 in ( C195 .edgesBetween ( dom ( D123 `1 ) ) ) by L816 , L808 , L813;
+end;
+suppose L818: D124 <> ( {} );
+
+L819: D123 = [ ( ( D122 `1 ) +* ( D126 .--> D127 ) ) , D128 ] by L818 , L809 , L532;
+L820: ( D123 `2 ) = D128 by L819 , MCART_1:7;
+L821: ( D123 `1 ) = ( ( D122 `1 ) +* ( D126 .--> D127 ) ) by L819 , MCART_1:7;
+L822: ( dom ( D123 `1 ) ) = ( ( dom ( D122 `1 ) ) \/ { D126 } ) by L821 , L1;
+L823: D125 in D124 by L818;
+L824:
+now
+per cases  by L813 , L820 , XBOOLE_0:def 3;
+suppose L825: C198 in ( D122 `2 );
+
+L826: (( ( the_Source_of C195 ) . C198 ) in ( dom ( D122 `1 ) ) & ( ( the_Target_of C195 ) . C198 ) in ( dom ( D122 `1 ) )) by L808 , L825 , GLIB_000:31;
+thus L827: C198 in ( C195 .edgesBetween ( dom ( D123 `1 ) ) ) by L826 , L812 , L825 , GLIB_000:31;
+end;
+suppose L828: C198 in { D125 };
+
+L829: C198 = D125 by L828 , TARSKI:def 1;
+L830: ( ( the_Target_of C195 ) . C198 ) in { D126 } by L829 , TARSKI:def 1;
+L831: ( ( the_Target_of C195 ) . C198 ) in ( dom ( D123 `1 ) ) by L830 , L822 , XBOOLE_0:def 3;
+L832: D125 DSJoins ( dom ( D122 `1 ) ) , ( ( the_Vertices_of C195 ) \ ( dom ( D122 `1 ) ) ) , C195 by L818 , L512;
+L833: ( ( the_Source_of C195 ) . C198 ) in ( dom ( D122 `1 ) ) by L832 , L829 , GLIB_000:def 16;
+thus L834: C198 in ( C195 .edgesBetween ( dom ( D123 `1 ) ) ) by L833 , L812 , L823 , L829 , L831 , GLIB_000:31;
+end;
+end;
+thus L836: C198 in ( C195 .edgesBetween ( dom ( D123 `1 ) ) ) by L824;
+end;
+end;
+thus L838: C198 in ( C195 .edgesBetween ( dom ( D123 `1 ) ) ) by L814;
+end;
+thus L839: ( D123 `2 ) c= ( C195 .edgesBetween ( dom ( D123 `1 ) ) ) by L810 , TARSKI:def 3;
+end;
+L840: (for B160 being Nat holds (S13[ B160 ] implies S13[ ( B160 + 1 ) ])) by L807;
+L841: D121 = ( DIJK:Init C196 ) by L563;
+L842: (for B161 being set holds (B161 in ( D121 `2 ) implies B161 in ( C195 .edgesBetween ( dom ( D121 `1 ) ) ))) by L841 , MCART_1:7;
+L843: S13[ ( 0 ) ] by L842 , TARSKI:def 3;
+L844: (for B162 being Nat holds S13[ B162 ]) from NAT_1:sch 2(L843 , L840);
+thus L845: thesis by L844;
+end;
+theorem
+L846: (for B163 being  finite  nonnegative-weighted WGraph holds (for B164 being (Vertex of B163) holds (for B165 being Nat holds (for B166 being (inducedWSubgraph of B163 , ( dom ( ( ( DIJK:CompSeq B164 ) . B165 ) `1 ) ) , ( ( ( DIJK:CompSeq B164 ) . B165 ) `2 )) holds (B166 is_mincost_DTree_rooted_at B164 & (for B167 being (Vertex of B163) holds (B167 in ( dom ( ( ( DIJK:CompSeq B164 ) . B165 ) `1 ) ) implies ( B163 .min_DPath_cost (B164 , B167) ) = ( ( ( ( DIJK:CompSeq B164 ) . B165 ) `1 ) . B167 ))))))))
+proof
+let C199 being  finite  nonnegative-weighted WGraph;
+let C200 being (Vertex of C199);
+set D129 = ( DIJK:CompSeq C200 );
+set D130 = ( D129 . ( 0 ) );
+defpred S14[ Nat ] means (for B168 being (inducedWSubgraph of C199 , ( dom ( ( D129 . $1 ) `1 ) ) , ( ( D129 . $1 ) `2 )) holds (B168 is_mincost_DTree_rooted_at C200 & (for B169 being (Vertex of C199) holds (B169 in ( dom ( ( D129 . $1 ) `1 ) ) implies ( C199 .min_DPath_cost (C200 , B169) ) = ( ( ( D129 . $1 ) `1 ) . B169 )))));
+L847: D130 = ( DIJK:Init C200 ) by L563;
+L848: ( D130 `1 ) = ( C200 .--> ( 0 ) ) by L847 , MCART_1:7;
+L849: ( dom ( D130 `1 ) ) = { C200 } by L848 , FUNCOP_1:13;
+L850:
+now
+let C201 being Nat;
+set D131 = ( D129 . C201 );
+set D132 = ( D129 . ( C201 + 1 ) );
+set D133 = ( DIJK:NextBestEdges D131 );
+set D134 = ( choose D133 );
+set D135 = ( ( the_Source_of C199 ) . D134 );
+set D136 = ( ( the_Target_of C199 ) . D134 );
+set D137 = ( ( D131 `2 ) \/ { D134 } );
+set D138 = ( ( D131 `1 ) . D135 );
+set D139 = ( ( the_Weight_of C199 ) . D134 );
+set D140 = the (inducedWSubgraph of C199 , ( dom ( D131 `1 ) ) , ( D131 `2 ));
+L851: D132 = ( DIJK:Step D131 ) by L563;
+assume L852: S14[ C201 ];
+L853: D140 is_mincost_DTree_rooted_at C200 by L852;
+L854: D140 is  Tree-like by L853 , L210;
+let C202 being (inducedWSubgraph of C199 , ( dom ( D132 `1 ) ) , ( D132 `2 ));
+L855: (C200 in ( dom ( D130 `1 ) ) & ( dom ( D130 `1 ) ) c= ( dom ( D131 `1 ) )) by L849 , L657 , TARSKI:def 1;
+L856: ( D131 `2 ) c= ( C199 .edgesBetween ( dom ( D131 `1 ) ) ) by L806;
+L857: ( card ( D131 `2 ) ) = ( D140 .size() ) by L856 , L855 , GLIB_000:def 37;
+L858: ( D131 `2 ) c= ( C199 .edgesBetween ( dom ( D131 `1 ) ) ) by L806;
+L859: ( the_Vertices_of D140 ) = ( dom ( D131 `1 ) ) by L858 , L855 , GLIB_000:def 37;
+L860: ( the_Edges_of D140 ) = ( D131 `2 ) by L855 , L858 , GLIB_000:def 37;
+L861: ( card ( dom ( D131 `1 ) ) ) = ( D140 .order() ) by L855 , L856 , GLIB_000:def 37;
+L862:
+now
+per cases ;
+suppose L863: D133 = ( {} );
+
+L864: D132 = D131 by L863 , L851 , L532;
+thus L865: (C202 is_mincost_DTree_rooted_at C200 & (for B170 being (Vertex of C199) holds (B170 in ( dom ( D132 `1 ) ) implies ( C199 .min_DPath_cost (C200 , B170) ) = ( ( D132 `1 ) . B170 )))) by L864 , L852;
+end;
+suppose L866: D133 <> ( {} );
+
+set D141 = ( C199 .min_DPath_cost (C200 , D136) );
+L867: ( the_Weight_of C202 ) = ( ( the_Weight_of C199 ) | ( the_Edges_of C202 ) ) by GLIB_003:def 10;
+L868: D134 DSJoins ( dom ( D131 `1 ) ) , ( ( the_Vertices_of C199 ) \ ( dom ( D131 `1 ) ) ) , C199 by L866 , L512;
+L869: D136 in ( ( the_Vertices_of C199 ) \ ( dom ( D131 `1 ) ) ) by L868 , GLIB_000:def 16;
+L870: C200 <> D136 by L869 , L855 , XBOOLE_0:def 5;
+L871: (not D136 in ( dom ( D131 `1 ) )) by L869 , XBOOLE_0:def 5;
+L872: ( card ( ( dom ( D131 `1 ) ) \/ { D136 } ) ) = ( ( card ( dom ( D131 `1 ) ) ) + 1 ) by L871 , CARD_2:41;
+L873: D135 in ( dom ( D131 `1 ) ) by L868 , GLIB_000:def 16;
+L874: D132 = [ ( ( D131 `1 ) +* ( D136 .--> ( D138 + D139 ) ) ) , D137 ] by L851 , L866 , L532;
+L875: ( D132 `1 ) = ( ( D131 `1 ) +* ( D136 .--> ( D138 + D139 ) ) ) by L874 , MCART_1:7;
+L876: ( dom ( D132 `1 ) ) = ( ( dom ( D131 `1 ) ) \/ { D136 } ) by L875 , L1;
+L877: ( D132 `2 ) c= ( C199 .edgesBetween ( dom ( D132 `1 ) ) ) by L806;
+L878: ( the_Vertices_of C202 ) = ( ( dom ( D131 `1 ) ) \/ { D136 } ) by L877 , L876 , GLIB_000:def 37;
+L879: ( D132 `2 ) = D137 by L874 , MCART_1:7;
+L880: ( the_Edges_of C202 ) = ( ( D131 `2 ) \/ { D134 } ) by L879 , L876 , L877 , GLIB_000:def 37;
+L881:
+now
+thus L882: (( the_Vertices_of D140 ) c= ( the_Vertices_of C202 ) & ( the_Edges_of D140 ) c= ( the_Edges_of C202 )) by L859 , L860 , L878 , L880 , XBOOLE_1:7;
+let C203 being set;
+assume L883: C203 in ( the_Edges_of D140 );
+L884: ( ( the_Target_of D140 ) . C203 ) = ( ( the_Target_of C199 ) . C203 ) by L883 , GLIB_000:def 32;
+L885: (C203 in ( the_Edges_of C202 ) & ( ( the_Source_of D140 ) . C203 ) = ( ( the_Source_of C199 ) . C203 )) by L860 , L880 , L883 , GLIB_000:def 32 , XBOOLE_0:def 3;
+thus L886: (( ( the_Source_of D140 ) . C203 ) = ( ( the_Source_of C202 ) . C203 ) & ( ( the_Target_of D140 ) . C203 ) = ( ( the_Target_of C202 ) . C203 )) by L885 , L884 , GLIB_000:def 32;
+end;
+reconsider D142 = D140 as  [Weighted] (Subgraph of C202) by L881 , GLIB_000:def 32;
+L887: D134 in { D134 } by TARSKI:def 1;
+L888: D134 in ( the_Edges_of C202 ) by L887 , L880 , XBOOLE_0:def 3;
+L889: D134 in D133 by L866;
+L890: D134 DJoins D135 , D136 , C199 by L889 , GLIB_000:def 14;
+L891: D134 DJoins D135 , D136 , C202 by L890 , L888 , GLIB_000:73;
+L892: D134 Joins D135 , D136 , C202 by L891 , GLIB_000:16;
+L893: ( the_Weight_of D142 ) = ( ( the_Weight_of C199 ) | ( the_Edges_of D140 ) ) by GLIB_003:def 10;
+L894:
+now
+let C204 being set;
+assume L895: C204 in ( dom ( the_Weight_of D142 ) );
+L896: C204 in ( the_Edges_of D140 ) by L895;
+thus L897: ( ( the_Weight_of D142 ) . C204 ) = ( ( the_Weight_of C199 ) . C204 ) by L896 , L893 , FUNCT_1:49
+.= ( ( the_Weight_of C202 ) . C204 ) by L881 , L867 , L896 , FUNCT_1:49;
+end;
+L898: ( dom ( the_Weight_of C202 ) ) = ( the_Edges_of C202 ) by PARTFUN1:def 2;
+L899: ( ( dom ( the_Weight_of C202 ) ) /\ ( the_Edges_of D140 ) ) = ( the_Edges_of D140 ) by L898 , L881 , XBOOLE_1:28;
+L900: ( dom ( the_Weight_of D142 ) ) = ( ( dom ( the_Weight_of C202 ) ) /\ ( the_Edges_of D140 ) ) by L899 , PARTFUN1:def 2;
+L901: ( the_Weight_of D142 ) = ( ( the_Weight_of C202 ) | ( the_Edges_of D140 ) ) by L900 , L894 , FUNCT_1:46;
+L902: D140 is (WSubgraph of C202) by L901 , GLIB_003:def 10;
+L903: D140 is (Subgraph of C202) by L881 , GLIB_000:def 32;
+L904:
+now
+let C205 , C206 being (Vertex of C202);
+L905:
+now
+let C207 , C208 being set;
+assume L906: (C207 in ( dom ( D131 `1 ) ) & C208 in ( dom ( D131 `1 ) ));
+reconsider D143 = C207 , D144 = C208 as (Vertex of D140) by L906 , L858 , GLIB_000:def 37;
+consider C209 being (Walk of D140) such that L907: C209 is_Walk_from D143 , D144 by L854 , GLIB_002:def 1;
+reconsider D145 = C209 as (Walk of C202) by L903 , GLIB_001:167;
+L908: D145 is_Walk_from C207 , C208 by L907 , GLIB_001:19;
+thus L909: (ex B171 being (Walk of C202) st B171 is_Walk_from C207 , C208) by L908;
+end;
+L910:
+now
+per cases  by L878 , XBOOLE_0:def 3;
+suppose L911: (C205 in ( dom ( D131 `1 ) ) & C206 in ( dom ( D131 `1 ) ));
+
+thus L912: (ex B172 being (Walk of C202) st B172 is_Walk_from C205 , C206) by L911 , L905;
+end;
+suppose L913: (C205 in ( dom ( D131 `1 ) ) & C206 in { D136 });
+
+L914: C206 = D136 by L913 , TARSKI:def 1;
+consider C210 being (Walk of C202) such that L915: C210 is_Walk_from C205 , D135 by L873 , L905 , L913;
+L916: ( C210 .addEdge D134 ) is_Walk_from C205 , D136 by L892 , L915 , GLIB_001:66;
+thus L917: (ex B173 being (Walk of C202) st B173 is_Walk_from C205 , C206) by L916 , L914;
+end;
+suppose L918: (C205 in { D136 } & C206 in ( dom ( D131 `1 ) ));
+
+consider C211 being (Walk of C202) such that L919: C211 is_Walk_from C206 , D135 by L918 , L873 , L905;
+L920: ( C211 .addEdge D134 ) is_Walk_from C206 , D136 by L892 , L919 , GLIB_001:66;
+L921: ( C211 .addEdge D134 ) is_Walk_from C206 , C205 by L920 , L918 , TARSKI:def 1;
+L922: ( ( C211 .addEdge D134 ) .reverse() ) is_Walk_from C205 , C206 by L921 , GLIB_001:23;
+thus L923: (ex B174 being (Walk of C202) st B174 is_Walk_from C205 , C206) by L922;
+end;
+suppose L924: (C205 in { D136 } & C206 in { D136 });
+
+take D146 = ( C202 .walkOf C205 );
+L925: (C205 = D136 & C206 = D136) by L924 , TARSKI:def 1;
+thus L926: D146 is_Walk_from C205 , C206 by L925 , GLIB_001:13;
+end;
+end;
+thus L928: (ex B175 being (Walk of C202) st B175 is_Walk_from C205 , C206) by L910;
+end;
+L929: C202 is  connected by L904 , GLIB_002:def 1;
+L930: (not D134 in ( D131 `2 )) by L856 , L871 , GLIB_000:31;
+L931: ( C202 .size() ) = ( ( D140 .size() ) + 1 ) by L930 , L857 , L880 , CARD_2:41;
+L932: ( C202 .order() ) = ( ( C202 .size() ) + 1 ) by L931 , L861 , L854 , L878 , L872 , GLIB_002:47;
+L933: C202 is  Tree-like by L932 , L929 , GLIB_002:47;
+L934:
+now
+consider C212 being (DPath of D140) such that L935: C212 is_Walk_from C200 , D135 and L936: (for B176 being (DPath of C199) holds (B176 is_Walk_from C200 , D135 implies ( C212 .cost() ) <= ( B176 .cost() ))) by L859 , L853 , L873 , L210;
+reconsider D147 = C212 as (DPath of C202) by L903 , GLIB_001:175;
+set D148 = ( D147 .addEdge D134 );
+L937: D147 is_Walk_from C200 , D135 by L935 , GLIB_001:19;
+reconsider D149 = D148 as (DWalk of C202) by L937 , L891 , GLIB_001:123;
+L938:
+now
+L939: D136 in { D136 } by TARSKI:def 1;
+thus L940: D136 is (Vertex of C202) by L939 , L878 , XBOOLE_0:def 3;
+thus L941: D134 Joins ( D147 .last() ) , D136 , C202 by L892 , L937 , GLIB_001:def 23;
+L942: ((not D134 in ( the_Edges_of D140 )) & ( C212 .edges() ) = ( D147 .edges() )) by L855 , L856 , L930 , GLIB_000:def 37 , GLIB_001:110;
+thus L943: (not D134 in ( D147 .edges() )) by L942;
+L944:
+now
+assume L945: D147 is non  trivial;
+L946:
+now
+assume L947: D147 is  closed;
+L948: D147 is  Cycle-like by L947 , L945 , GLIB_001:def 31;
+thus L949: contradiction by L948 , L933 , GLIB_002:def 2;
+end;
+thus L950: D147 is  open by L946;
+end;
+thus L951: (D147 is  trivial or D147 is  open) by L944;
+let C213 being  odd (Element of ( NAT ));
+assume that
+L952: 1 < C213
+and
+L953: C213 <= ( len D147 );
+L954: ( D147 .vertices() ) = ( C212 .vertices() ) by GLIB_001:98;
+L955: (not D136 in ( D147 .vertices() )) by L954 , L859 , L869 , XBOOLE_0:def 5;
+thus L956: ( D147 . C213 ) <> D136 by L955 , L953 , GLIB_001:87;
+end;
+reconsider D150 = D149 as (DPath of C202) by L938 , GLIB_001:150;
+take D151 = D150;
+thus L957: D151 is_Walk_from C200 , D136 by L892 , L937 , GLIB_001:66;
+L958:
+now
+L959: (( D147 .last() ) = D135 & ( ( the_Source_of C202 ) . D134 ) = D135) by L891 , L937 , GLIB_000:def 14 , GLIB_001:def 23;
+thus L960: D134 in ( ( D147 .last() ) .edgesInOut() ) by L959 , L888 , GLIB_000:61;
+reconsider D152 = C212 as (DPath of C199) by GLIB_001:175;
+L961: D152 is_Walk_from C200 , D135 by L935 , GLIB_001:19;
+L962: ( ( the_Weight_of C202 ) . D134 ) = ( ( ( the_Weight_of C199 ) | ( the_Edges_of C202 ) ) . D134 ) by GLIB_003:def 10;
+thus L963: D139 = ( ( the_Weight_of C202 ) . D134 ) by L962 , L888 , FUNCT_1:49;
+L964: D138 = ( C199 .min_DPath_cost (C200 , D135) ) by L852 , L873;
+consider C214 being (DPath of C199) such that L965: C214 is_mincost_DPath_from C200 , D135 and L966: D138 = ( C214 .cost() ) by L964 , L961 , L214;
+L967: C214 is_Walk_from C200 , D135 by L965 , L212;
+L968: ( C212 .cost() ) <= D138 by L967 , L936 , L966;
+L969: ( D147 .cost() ) <= D138 by L968 , L902 , GLIB_003:27;
+L970: D138 <= ( D152 .cost() ) by L961 , L965 , L966 , L212;
+L971: D138 <= ( D147 .cost() ) by L970 , GLIB_003:27;
+thus L972: ( D147 .cost() ) = D138 by L971 , L969 , XXREAL_0:1;
+end;
+thus L973: ( D151 .cost() ) = ( D138 + D139 ) by L958 , GLIB_003:25;
+end;
+consider C215 being (DPath of C202) such that L974: C215 is_Walk_from C200 , D136 and L975: ( C215 .cost() ) = ( D138 + D139 ) by L934;
+reconsider D153 = C215 as (DPath of C199) by GLIB_001:175;
+L976: D153 is_Walk_from C200 , D136 by L974 , GLIB_001:19;
+L977: ( D153 .cost() ) = ( D138 + D139 ) by L975 , GLIB_003:27;
+L978:
+now
+consider C216 being (DPath of C199) such that L979: C216 is_mincost_DPath_from C200 , D136 and L980: D141 = ( C216 .cost() ) by L976 , L214;
+thus L981: D141 <= ( D138 + D139 ) by L976 , L977 , L979 , L980 , L212;
+L982: C216 is_Walk_from C200 , D136 by L979 , L212;
+reconsider D154 = D136 as (Vertex of C199) by L982 , GLIB_001:18;
+L983: (( C216 .first() ) = C200 & ( C216 .last() ) = D136) by L982 , GLIB_001:def 23;
+consider C217 being  odd (Element of ( NAT )) such that L984: C217 = ( ( len C216 ) - 2 ) and L985: ( ( C216 .cut (1 , C217) ) .addEdge ( C216 . ( C217 + 1 ) ) ) = C216 by L983 , L870 , GLIB_001:127 , GLIB_001:133;
+L986: C217 < ( ( len C216 ) - ( 0 ) ) by L984 , XREAL_1:15;
+set D155 = ( C216 . C217 );
+set D156 = ( C216 . ( C217 + 1 ) );
+set D157 = ( C216 .cut (1 , C217) );
+L987: 1 <= C217 by ABIAN:12;
+L988: ( C216 . 1 ) = ( C216 .first() ) by GLIB_001:def 6
+.= C200 by L982 , GLIB_001:def 23;
+L989: D157 is_Walk_from C200 , D155 by L988 , L987 , L986 , GLIB_001:37 , JORDAN12:2;
+reconsider D158 = D155 as (Vertex of C199) by L989 , GLIB_001:18;
+L990: D156 DJoins D158 , ( C216 . ( C217 + 2 ) ) , C199 by L986 , GLIB_001:122;
+L991: D156 DJoins D158 , ( C216 .last() ) , C199 by L990 , L984 , GLIB_001:def 7;
+L992: D156 DJoins D158 , D136 , C199 by L991 , L982 , GLIB_001:def 23;
+L993: D156 Joins D158 , D154 , C199 by L992 , GLIB_000:16;
+L994: D156 in ( D158 .edgesInOut() ) by L993 , GLIB_000:62;
+L995: D156 in ( ( D157 .last() ) .edgesInOut() ) by L994 , L987 , L986 , GLIB_001:37 , JORDAN12:2;
+L996: D141 = ( ( D157 .cost() ) + ( ( the_Weight_of C199 ) . D156 ) ) by L995 , L980 , L985 , GLIB_003:25;
+reconsider D159 = D157 as (DPath of C199);
+L997: ( D159 .first() ) = C200 by L987 , L986 , L988 , GLIB_001:37 , JORDAN12:2;
+L998: ( D159 .last() ) = D158 by L987 , L986 , GLIB_001:37 , JORDAN12:2;
+L999: D159 is_mincost_DPath_from C200 , D158 by L998 , L979 , L997 , L449;
+L1000: D156 DJoins D158 , D136 , C199 by L982 , L991 , GLIB_001:def 23;
+L1001: ( D159 .cost() ) = ( C199 .min_DPath_cost (C200 , D158) ) by L979 , L997 , L998 , L449 , L502;
+L1002:
+now
+defpred S15[ Nat ] means ($1 is  odd & $1 <= ( len D159 ) & (not ( D159 . $1 ) in ( dom ( D131 `1 ) )));
+L1003: ( ( the_Source_of C199 ) . D156 ) = D158 by L990 , GLIB_000:def 14;
+assume L1004: D141 < ( D138 + D139 );
+L1005:
+now
+assume L1006: (not D158 in ( dom ( D131 `1 ) ));
+L1007: D158 = ( D159 .last() ) by L987 , L986 , GLIB_001:37 , JORDAN12:2
+.= ( D159 . ( len D159 ) ) by GLIB_001:def 7;
+L1008: (ex B177 being Nat st S15[ B177 ]) by L1007 , L1006;
+consider C218 being Nat such that L1009: (S15[ C218 ] & (for B178 being Nat holds (S15[ B178 ] implies C218 <= B178))) from NAT_1:sch 5(L1008);
+reconsider D160 = C218 as  odd (Element of ( NAT )) by L1009 , ORDINAL1:def 12;
+L1010: 1 <= D160 by ABIAN:12;
+L1011: ( D159 . 1 ) = ( D159 .first() ) by GLIB_001:def 6
+.= C200 by L987 , L986 , L988 , GLIB_001:37 , JORDAN12:2;
+L1012: D160 <> 1 by L1011 , L855 , L1009;
+L1013: 1 < D160 by L1012 , L1010 , XXREAL_0:1;
+L1014: ( 1 + 1 ) < ( D160 + 1 ) by L1013 , XREAL_1:8;
+L1015: 2 <= D160 by L1014 , NAT_1:13;
+reconsider D161 = ( D160 - ( 2 * 1 ) ) as  odd (Element of ( NAT )) by L1015 , INT_1:5;
+set D162 = ( D159 . D161 );
+set D163 = ( D159 . ( D161 + 1 ) );
+set D164 = ( D159 . D160 );
+L1016: D161 < ( ( len D159 ) - ( 0 ) ) by L1009 , XREAL_1:15;
+set D165 = ( D159 .cut (1 , D160) );
+set D166 = ( D159 .cut (D160 , ( len D159 )) );
+set D167 = ( D159 .cut (1 , D161) );
+reconsider D168 = D167 , D169 = D165 , D170 = D166 as (DPath of C199);
+L1017: 1 <= D160 by ABIAN:12;
+L1018: ( D169 .append D170 ) = ( D159 .cut (1 , ( len D159 )) ) by L1017 , L1009 , GLIB_001:38 , JORDAN12:2
+.= D159 by GLIB_001:39;
+L1019: D161 < ( D160 - ( 0 ) ) by XREAL_1:15;
+L1020: D162 in ( dom ( D131 `1 ) ) by L1019 , L1009 , L1016;
+reconsider D171 = D162 as (Vertex of C199) by L1020;
+L1021: 1 <= D161 by ABIAN:12;
+L1022: ( D168 .last() ) = D171 by L1021 , L1016 , GLIB_001:37 , JORDAN12:2;
+L1023: ( D168 .first() ) = ( D159 . 1 ) by L1021 , L1016 , GLIB_001:37 , JORDAN12:2;
+L1024: D168 is_mincost_DPath_from ( D159 . 1 ) , D171 by L1023 , L999 , L1022 , L449;
+L1025: D168 is_mincost_DPath_from ( D159 .first() ) , D171 by L1024 , GLIB_001:def 6;
+L1026: ( C199 .min_DPath_cost (C200 , D171) ) = ( D168 .cost() ) by L1025 , L997 , L502;
+L1027: ( ( D131 `1 ) . D171 ) = ( D168 .cost() ) by L1026 , L852 , L1009 , L1016 , L1019;
+reconsider D172 = D164 as (Vertex of C199) by L1009 , GLIB_001:7;
+L1028: D172 in ( ( the_Vertices_of C199 ) \ ( dom ( D131 `1 ) ) ) by L1009 , XBOOLE_0:def 5;
+L1029: D172 = ( D159 . ( D161 + 2 ) );
+L1030: D163 DJoins D171 , D172 , C199 by L1029 , L1016 , GLIB_001:122;
+L1031: ( ( the_Source_of C199 ) . D163 ) = D171 by L1030 , GLIB_000:def 14;
+L1032: ( D170 .first() ) = ( D159 . D160 ) by L1009 , GLIB_001:37
+.= ( D169 .last() ) by L1009 , L1017 , GLIB_001:37 , JORDAN12:2;
+L1033: ( D159 .cost() ) = ( ( D169 .cost() ) + ( D170 .cost() ) ) by L1032 , L1018 , GLIB_003:24;
+L1034: ( 0 ) <= ( D170 .cost() ) by GLIB_003:29;
+L1035: ( (( 0 ) qua Nat) + ( D169 .cost() ) ) <= ( D159 .cost() ) by L1034 , L1033 , XREAL_1:7;
+L1036: D156 in ( the_Edges_of C199 ) by L990 , GLIB_000:def 14;
+L1037: ( 0 ) <= ( ( the_Weight_of C199 ) . D156 ) by L1036 , GLIB_003:31;
+L1038: (D163 in ( the_Edges_of C199 ) & ( ( the_Target_of C199 ) . D163 ) = D172) by L1030 , GLIB_000:def 14;
+L1039: D163 DSJoins ( dom ( D131 `1 ) ) , ( ( the_Vertices_of C199 ) \ ( dom ( D131 `1 ) ) ) , C199 by L1038 , L1020 , L1031 , L1028 , GLIB_000:def 16;
+L1040: ( D138 + D139 ) <= ( ( D168 .cost() ) + ( ( the_Weight_of C199 ) . D163 ) ) by L1039 , L866 , L1031 , L1027 , L512;
+L1041: (D163 in ( the_Edges_of C199 ) & ( ( the_Source_of C199 ) . D163 ) = D171) by L1030 , GLIB_000:def 14;
+L1042: D163 in ( D171 .edgesInOut() ) by L1041 , GLIB_000:61;
+L1043: ( D161 + 2 ) = D160;
+L1044: ( D168 .addEdge D163 ) = D169 by L1043 , L1016 , ABIAN:12 , GLIB_001:41 , JORDAN12:2;
+L1045: ( D138 + D139 ) <= ( D169 .cost() ) by L1044 , L1022 , L1040 , L1042 , GLIB_003:25;
+L1046: ( D138 + D139 ) <= ( D159 .cost() ) by L1045 , L1035 , XXREAL_0:2;
+L1047: ( ( D138 + D139 ) + (( 0 ) qua Nat) ) <= ( ( D159 .cost() ) + ( ( the_Weight_of C199 ) . D156 ) ) by L1046 , L1037 , XREAL_1:7;
+thus L1048: contradiction by L1047 , L980 , L985 , L995 , L1004 , GLIB_003:25;
+end;
+L1049: ( D159 .cost() ) = ( ( D131 `1 ) . D158 ) by L1005 , L852 , L1001;
+L1050: (D156 in ( the_Edges_of C199 ) & ( ( the_Target_of C199 ) . D156 ) = D136) by L1000 , GLIB_000:def 14;
+L1051: D156 DSJoins ( dom ( D131 `1 ) ) , ( ( the_Vertices_of C199 ) \ ( dom ( D131 `1 ) ) ) , C199 by L1050 , L869 , L1005 , L1003 , GLIB_000:def 16;
+thus L1052: contradiction by L1051 , L866 , L996 , L1004 , L1049 , L1003 , L512;
+end;
+thus L1053: D141 >= ( D138 + D139 ) by L1002;
+end;
+L1054: ( C199 .min_DPath_cost (C200 , D136) ) = ( D138 + D139 ) by L978 , XXREAL_0:1;
+L1055:
+now
+let C219 being (Vertex of C202);
+L1056:
+now
+per cases  by L878 , XBOOLE_0:def 3;
+suppose L1057: C219 in ( dom ( D131 `1 ) );
+
+reconsider D173 = C219 as (Vertex of D140) by L1057 , L858 , GLIB_000:def 37;
+L1058: D140 is_mincost_DTree_rooted_at C200 by L852;
+consider C220 being (DPath of D140) such that L1059: C220 is_Walk_from C200 , D173 and L1060: (for B179 being (DPath of C199) holds (B179 is_Walk_from C200 , D173 implies ( C220 .cost() ) <= ( B179 .cost() ))) by L1058 , L210;
+reconsider D174 = C220 as (DPath of C202) by L903 , GLIB_001:175;
+take D175 = D174;
+thus L1061: D175 is_Walk_from C200 , C219 by L1059 , GLIB_001:19;
+let C221 being (DPath of C199);
+assume L1062: C221 is_Walk_from C200 , C219;
+L1063: ( C220 .cost() ) <= ( C221 .cost() ) by L1062 , L1060;
+thus L1064: ( D175 .cost() ) <= ( C221 .cost() ) by L1063 , L902 , GLIB_003:27;
+end;
+suppose L1065: C219 in { D136 };
+
+take D176 = C215;
+thus L1066: D176 is_Walk_from C200 , C219 by L974 , L1065 , TARSKI:def 1;
+let C222 being (DPath of C199);
+assume L1067: C222 is_Walk_from C200 , C219;
+L1068: C219 = D136 by L1065 , TARSKI:def 1;
+L1069: (ex B180 being (DPath of C199) st (B180 is_mincost_DPath_from C200 , D136 & ( B180 .cost() ) = ( D176 .cost() ))) by L975 , L976 , L1054 , L214;
+thus L1070: ( D176 .cost() ) <= ( C222 .cost() ) by L1069 , L1068 , L1067 , L212;
+end;
+end;
+thus L1072: (ex B181 being (DPath of C202) st (B181 is_Walk_from C200 , C219 & (for B182 being (DPath of C199) holds (B182 is_Walk_from C200 , C219 implies ( B181 .cost() ) <= ( B182 .cost() ))))) by L1056;
+end;
+thus L1073: C202 is_mincost_DTree_rooted_at C200 by L1055 , L933 , L210;
+let C223 being (Vertex of C199);
+assume L1074: C223 in ( dom ( D132 `1 ) );
+L1075:
+now
+per cases  by L876 , L1074 , XBOOLE_0:def 3;
+suppose L1076: C223 in ( dom ( D131 `1 ) );
+
+L1077: ( C199 .min_DPath_cost (C200 , C223) ) = ( ( D131 `1 ) . C223 ) by L1076 , L852;
+L1078: ( D132 `1 ) = ( ( D131 `1 ) +* ( D136 .--> ( D138 + D139 ) ) ) by L874 , MCART_1:7;
+L1079: ( dom ( D136 .--> ( D138 + D139 ) ) ) = { D136 } by FUNCOP_1:13;
+L1080: (not C223 in ( dom ( D136 .--> ( D138 + D139 ) ) )) by L871 , L1076 , TARSKI:def 1;
+thus L1081: ( C199 .min_DPath_cost (C200 , C223) ) = ( ( D132 `1 ) . C223 ) by L1080 , L876 , L1074 , L1077 , L1078 , L1079 , FUNCT_4:def 1;
+end;
+suppose L1082: C223 in { D136 };
+
+L1083: (( D132 `1 ) = ( ( D131 `1 ) +* ( D136 .--> ( D138 + D139 ) ) ) & ( dom ( D136 .--> ( D138 + D139 ) ) ) = { D136 }) by L874 , FUNCOP_1:13 , MCART_1:7;
+L1084: ( ( D132 `1 ) . C223 ) = ( ( D136 .--> ( D138 + D139 ) ) . C223 ) by L1083 , L1082 , FUNCT_4:13;
+L1085: C223 = D136 by L1082 , TARSKI:def 1;
+thus L1086: ( C199 .min_DPath_cost (C200 , C223) ) = ( ( D132 `1 ) . C223 ) by L1085 , L1054 , L1084 , FUNCOP_1:72;
+end;
+end;
+thus L1088: ( C199 .min_DPath_cost (C200 , C223) ) = ( ( D132 `1 ) . C223 ) by L1075;
+end;
+end;
+thus L1090: (C202 is_mincost_DTree_rooted_at C200 & (for B183 being (Vertex of C199) holds (B183 in ( dom ( D132 `1 ) ) implies ( C199 .min_DPath_cost (C200 , B183) ) = ( ( D132 `1 ) . B183 )))) by L862;
+end;
+L1091: (for B184 being Nat holds (S14[ B184 ] implies S14[ ( B184 + 1 ) ])) by L850;
+L1092: ( D130 `2 ) = ( {} ) by L847 , MCART_1:7;
+L1093:
+now
+let C224 being (inducedWSubgraph of C199 , ( dom ( D130 `1 ) ) , ( D130 `2 ));
+L1094: ( {} ) c= ( C199 .edgesBetween ( dom ( D130 `1 ) ) ) by XBOOLE_1:2;
+L1095: ( the_Vertices_of C224 ) = { C200 } by L1094 , L849 , L1092 , GLIB_000:def 37;
+L1096: ( card ( the_Vertices_of C224 ) ) = 1 by L1095 , CARD_1:30;
+L1097: C224 is  trivial by L1096 , GLIB_000:def 19;
+L1098:
+now
+let C225 being (Vertex of C224);
+set D177 = ( C224 .walkOf C225 );
+take D178 = D177;
+L1099: C225 = C200 by L1095 , TARSKI:def 1;
+thus L1100: D178 is_Walk_from C200 , C225 by L1099 , GLIB_001:13;
+let C226 being (DPath of C199);
+assume L1101: C226 is_Walk_from C200 , C225;
+L1102: ( 0 ) <= ( C226 .cost() ) by GLIB_003:29;
+thus L1103: ( D178 .cost() ) <= ( C226 .cost() ) by L1102 , GLIB_003:21;
+end;
+L1104: ( the_Edges_of C224 ) = ( {} ) by L848 , L1092 , L1094 , GLIB_000:def 37;
+L1105: ( C224 .order() ) = ( ( C224 .size() ) + 1 ) by L1104 , L1095 , CARD_1:27 , CARD_1:30;
+L1106: C224 is  Tree-like by L1105 , L1097 , GLIB_002:47;
+thus L1107: C224 is_mincost_DTree_rooted_at C200 by L1106 , L1098 , L210;
+let C227 being (Vertex of C199);
+assume L1108: C227 in ( dom ( D130 `1 ) );
+L1109: C227 = C200 by L1108 , L849 , TARSKI:def 1;
+L1110:
+now
+set D179 = ( C199 .walkOf C227 );
+L1111: D179 is_Walk_from C200 , C227 by L1109 , GLIB_001:13;
+consider C228 being (DPath of C199) such that L1112: C228 is_mincost_DPath_from C200 , C227 and L1113: ( C199 .min_DPath_cost (C200 , C227) ) = ( C228 .cost() ) by L1111 , L214;
+L1114: ( D179 .cost() ) = ( 0 ) by GLIB_003:21;
+L1115: ( C228 .cost() ) <= ( 0 ) by L1114 , L1111 , L1112 , L212;
+thus L1116: ( C199 .min_DPath_cost (C200 , C227) ) = ( 0 ) by L1115 , L1113 , GLIB_003:29;
+end;
+L1117: ( ( D130 `1 ) . C200 ) = ( 0 ) by L848 , FUNCOP_1:72;
+thus L1118: ( C199 .min_DPath_cost (C200 , C227) ) = ( ( D130 `1 ) . C227 ) by L1117 , L849 , L1108 , L1110 , TARSKI:def 1;
+end;
+L1119: S14[ ( 0 ) ] by L1093;
+L1120: (for B185 being Nat holds S14[ B185 ]) from NAT_1:sch 2(L1119 , L1091);
+thus L1121: thesis by L1120;
+end;
+theorem
+L1122: (for B186 being  finite  real-weighted WGraph holds (for B187 being (Vertex of B186) holds ( DIJK:CompSeq B187 ) is  halting))
+proof
+let C229 being  finite  real-weighted WGraph;
+let C230 being (Vertex of C229);
+set D180 = ( DIJK:CompSeq C230 );
+L1123:
+now
+set D181 = ( card ( C229 .reachableDFrom C230 ) );
+take D182 = ( card ( C229 .reachableDFrom C230 ) );
+set D183 = ( D180 . D182 );
+set D184 = ( D180 . ( D182 + 1 ) );
+set D185 = ( DIJK:NextBestEdges D183 );
+L1124: D184 = ( DIJK:Step D183 ) by L563;
+L1125:
+now
+per cases ;
+suppose L1126: D185 = ( {} );
+
+thus L1127: ( D180 . D182 ) = ( D180 . ( D182 + 1 ) ) by L1126 , L1124 , L532;
+end;
+suppose L1128: D185 <> ( {} );
+
+L1129: (( card ( dom ( ( D180 . D182 ) `1 ) ) ) = ( min (( D182 + 1 ) , D181) ) & D181 <= ( D181 + 1 )) by L767 , NAT_1:11;
+L1130: ( card ( dom ( D183 `1 ) ) ) = D181 by L1129 , XXREAL_0:def 9;
+L1131: (( D181 + 1 ) <= ( ( D181 + 1 ) + 1 ) & D181 <= ( D181 + 1 )) by NAT_1:11;
+L1132: D181 <= ( ( D182 + 1 ) + 1 ) by L1131 , XXREAL_0:2;
+L1133: ( card ( dom ( D184 `1 ) ) ) = ( min (( ( D182 + 1 ) + 1 ) , D181) ) by L767
+.= D181 by L1132 , XXREAL_0:def 9;
+L1134: ( card ( dom ( ( DIJK:Step D183 ) `1 ) ) ) = ( ( card ( dom ( D183 `1 ) ) ) + 1 ) by L1128 , L602;
+thus L1135: ( D180 . D182 ) = ( D180 . ( D182 + 1 ) ) by L1134 , L1130 , L1133 , L563;
+end;
+end;
+thus L1137: ( D180 . D182 ) = ( D180 . ( D182 + 1 ) ) by L1125;
+end;
+thus L1138: thesis by L1123 , GLIB_000:def 54;
+end;
+registration
+let C231 being  finite  real-weighted WGraph;
+let C232 being (Vertex of C231);
+cluster ( DIJK:CompSeq C232 ) ->  halting;
+coherence by L1122;
+end;
+theorem
+L1140: (for B188 being  finite  real-weighted WGraph holds (for B189 being (Vertex of B188) holds ( ( ( DIJK:CompSeq B189 ) .Lifespan() ) + 1 ) = ( card ( B188 .reachableDFrom B189 ) )))
+proof
+let C233 being  finite  real-weighted WGraph;
+let C234 being (Vertex of C233);
+set D186 = ( DIJK:CompSeq C234 );
+set D187 = ( C233 .reachableDFrom C234 );
+consider C235 being Nat such that L1141: ( card D187 ) = ( C235 + 1 ) by NAT_1:6;
+reconsider D188 = C235 as (Element of ( NAT )) by ORDINAL1:def 12;
+L1142:
+now
+let C236 being Nat;
+set D189 = ( D186 . C236 );
+set D190 = ( D186 . ( C236 + 1 ) );
+assume L1143: ( D186 . C236 ) = ( D186 . ( C236 + 1 ) );
+L1144:
+now
+assume L1145: C236 < D188;
+L1146: ( C236 + 1 ) < ( card D187 ) by L1145 , L1141 , XREAL_1:8;
+L1147: ( ( C236 + 1 ) + 1 ) <= ( card D187 ) by L1146 , NAT_1:13;
+L1148: ( card ( dom ( D189 `1 ) ) ) = ( min (( C236 + 1 ) , ( card D187 )) ) by L767;
+L1149: ( card ( dom ( D189 `1 ) ) ) = ( C236 + 1 ) by L1148 , L1146 , XXREAL_0:def 9;
+L1150: ( card ( dom ( D190 `1 ) ) ) = ( min (( ( C236 + 1 ) + 1 ) , ( card D187 )) ) by L767;
+L1151: ( ( 0 ) + ( C236 + 1 ) ) = ( 1 + ( C236 + 1 ) ) by L1150 , L1143 , L1149 , L1147 , XXREAL_0:def 9;
+thus L1152: contradiction by L1151;
+end;
+thus L1153: D188 <= C236 by L1144;
+end;
+set D191 = ( D186 . D188 );
+set D192 = ( D186 . ( D188 + 1 ) );
+L1154: ( card D187 ) <= ( ( card D187 ) + 1 ) by NAT_1:11;
+L1155: D192 = ( DIJK:Step D191 ) by L563;
+L1156: (( card ( dom ( D192 `1 ) ) ) = ( min (( ( card D187 ) + 1 ) , ( card D187 )) ) & ( card ( dom ( D191 `1 ) ) ) = ( min (( card D187 ) , ( card D187 )) )) by L1141 , L767;
+L1157: ( card ( dom ( D192 `1 ) ) ) = ( card ( dom ( D191 `1 ) ) ) by L1156 , L1154 , XXREAL_0:def 9;
+L1158: ( DIJK:NextBestEdges D191 ) = ( {} ) by L1157 , L1155 , L602;
+L1159: ( D186 . D188 ) = ( D186 . ( D188 + 1 ) ) by L1158 , L1155 , L532;
+thus L1160: thesis by L1159 , L1141 , L1142 , GLIB_000:def 55;
+end;
+theorem
+L1161: (for B190 being  finite  real-weighted WGraph holds (for B191 being (Vertex of B190) holds ( dom ( ( DIJK:SSSP (B190 , B191) ) `1 ) ) = ( B190 .reachableDFrom B191 )))
+proof
+let C237 being  finite  real-weighted WGraph;
+let C238 being (Vertex of C237);
+set D193 = ( DIJK:SSSP (C237 , C238) );
+set D194 = ( C237 .reachableDFrom C238 );
+set D195 = ( DIJK:CompSeq C238 );
+set D196 = ( D195 .Lifespan() );
+L1162: ( card ( dom ( D193 `1 ) ) ) = ( min (( D196 + 1 ) , ( card D194 )) ) by L767
+.= ( min (( card D194 ) , ( card D194 )) ) by L1140
+.= ( card D194 );
+L1163:
+now
+assume L1164: ( dom ( D193 `1 ) ) <> D194;
+L1165: ( dom ( D193 `1 ) ) c= D194 by L669;
+L1166: ( dom ( D193 `1 ) ) c< D194 by L1165 , L1164 , XBOOLE_0:def 8;
+thus L1167: contradiction by L1166 , L1162 , TREES_1:6;
+end;
+thus L1168: thesis by L1163;
+end;
+::$N Dijkstra's shortest path algorithm
+theorem
+L1169: (for B192 being  finite  nonnegative-weighted WGraph holds (for B193 being (Vertex of B192) holds (for B194 being (inducedWSubgraph of B192 , ( dom ( ( DIJK:SSSP (B192 , B193) ) `1 ) ) , ( ( DIJK:SSSP (B192 , B193) ) `2 )) holds (B194 is_mincost_DTree_rooted_at B193 & (for B195 being (Vertex of B192) holds (B195 in ( B192 .reachableDFrom B193 ) implies (B195 in ( the_Vertices_of B194 ) & ( B192 .min_DPath_cost (B193 , B195) ) = ( ( ( DIJK:SSSP (B192 , B193) ) `1 ) . B195 ))))))))
+proof
+let C239 being  finite  nonnegative-weighted WGraph;
+let C240 being (Vertex of C239);
+let C241 being (inducedWSubgraph of C239 , ( dom ( ( DIJK:SSSP (C239 , C240) ) `1 ) ) , ( ( DIJK:SSSP (C239 , C240) ) `2 ));
+set D197 = ( DIJK:SSSP (C239 , C240) );
+set D198 = ( dom ( D197 `1 ) );
+thus L1170: C241 is_mincost_DTree_rooted_at C240 by L846;
+let C242 being (Vertex of C239);
+assume L1171: C242 in ( C239 .reachableDFrom C240 );
+L1172: C242 in D198 by L1171 , L1161;
+L1173: ( D197 `2 ) c= ( C239 .edgesBetween D198 ) by L806;
+thus L1174: C242 in ( the_Vertices_of C241 ) by L1173 , L1172 , GLIB_000:def 37;
+thus L1175: thesis by L1172 , L846;
+end;
+begin
+definition
+let C243 being _Graph;
+mode PRIM:Labeling of C243
+ is (Element of [: ( bool ( the_Vertices_of C243 ) ) , ( bool ( the_Edges_of C243 ) ) :]);
+end;
+registration
+let C244 being  finite _Graph;
+let C245 being (PRIM:Labeling of C244);
+cluster ( C245 `1 ) ->  finite;
+coherence
+proof
+thus L1177: thesis;
+end;
+cluster ( C245 `2 ) ->  finite;
+coherence
+proof
+thus L1178: thesis;
+end;
+end;
+definition
+let C246 being  real-weighted WGraph;
+let C247 being (PRIM:Labeling of C246);
+func PRIM:NextBestEdges C247 -> (Subset of ( the_Edges_of C246 )) means 
+:L1180: (for B196 being set holds (B196 in it iff (B196 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 & (for B197 being set holds (B197 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 implies ( ( the_Weight_of C246 ) . B196 ) <= ( ( the_Weight_of C246 ) . B197 ))))));
+existence
+proof
+defpred S16[ set ] means ($1 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 & (for B198 being set holds (B198 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 implies ( ( the_Weight_of C246 ) . $1 ) <= ( ( the_Weight_of C246 ) . B198 ))));
+consider C248 being (Subset of ( the_Edges_of C246 )) such that L1181: (for B199 being set holds (B199 in C248 iff (B199 in ( the_Edges_of C246 ) & S16[ B199 ]))) from SUBSET_1:sch 1;
+take C248;
+let C249 being set;
+thus L1182: (C249 in C248 implies S16[ C249 ]) by L1181;
+assume L1183: S16[ C249 ];
+L1184: C249 in ( the_Edges_of C246 ) by L1183 , GLIB_000:def 15;
+thus L1185: thesis by L1184 , L1181 , L1183;
+end;
+uniqueness
+proof
+defpred S17[ set ] means ($1 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 & (for B200 being set holds (B200 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 implies ( ( the_Weight_of C246 ) . $1 ) <= ( ( the_Weight_of C246 ) . B200 ))));
+let C250 , C251 being (Subset of ( the_Edges_of C246 ));
+assume that
+L1186: (for B201 being set holds (B201 in C250 iff (B201 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 & (for B202 being set holds (B202 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 implies ( ( the_Weight_of C246 ) . B201 ) <= ( ( the_Weight_of C246 ) . B202 ))))))
+and
+L1187: (for B203 being set holds (B203 in C251 iff (B203 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 & (for B204 being set holds (B204 SJoins ( C247 `1 ) , ( ( the_Vertices_of C246 ) \ ( C247 `1 ) ) , C246 implies ( ( the_Weight_of C246 ) . B203 ) <= ( ( the_Weight_of C246 ) . B204 ))))));
+L1188:
+now
+let C252 being set;
+thus L1189:now
+assume L1190: C252 in C250;
+L1191: S17[ C252 ] by L1190 , L1186;
+thus L1192: C252 in C251 by L1191 , L1187;
+end;
+assume L1193: C252 in C251;
+L1194: S17[ C252 ] by L1193 , L1187;
+thus L1195: C252 in C250 by L1194 , L1186;
+end;
+thus L1196: thesis by L1188 , TARSKI:1;
+end;
+end;
+definition
+let C253 being  real-weighted WGraph;
+func PRIM:Init C253 -> (PRIM:Labeling of C253) equals 
+[ { ( choose ( the_Vertices_of C253 ) ) } , ( {} ) ];
+coherence
+proof
+L1198: ( {} ) c= ( the_Edges_of C253 ) by XBOOLE_1:2;
+thus L1199: thesis by L1198 , ZFMISC_1:def 2;
+end;
+end;
+definition
+let C254 being  real-weighted WGraph;
+let C255 being (PRIM:Labeling of C254);
+func PRIM:Step C255 -> (PRIM:Labeling of C254) equals 
+:L1201: C255 if ( PRIM:NextBestEdges C255 ) = ( {} ) , [ ( ( C255 `1 ) \/ { ( ( the_Target_of C254 ) . ( choose ( PRIM:NextBestEdges C255 ) ) ) } ) , ( ( C255 `2 ) \/ { ( choose ( PRIM:NextBestEdges C255 ) ) } ) ] if (( PRIM:NextBestEdges C255 ) <> ( {} ) & ( ( the_Source_of C254 ) . ( choose ( PRIM:NextBestEdges C255 ) ) ) in ( C255 `1 )) otherwise [ ( ( C255 `1 ) \/ { ( ( the_Source_of C254 ) . ( choose ( PRIM:NextBestEdges C255 ) ) ) } ) , ( ( C255 `2 ) \/ { ( choose ( PRIM:NextBestEdges C255 ) ) } ) ];
+coherence
+proof
+set D199 = ( the_Vertices_of C254 );
+set D200 = ( the_Edges_of C254 );
+set D201 = ( PRIM:NextBestEdges C255 );
+set D202 = ( choose D201 );
+set D203 = ( ( the_Source_of C254 ) . D202 );
+set D204 = ( ( the_Target_of C254 ) . D202 );
+L1202:
+now
+assume that
+L1203: D201 <> ( {} )
+and
+L1204: (not ( ( the_Source_of C254 ) . D202 ) in ( C255 `1 ));
+L1205: D202 in D201 by L1203;
+reconsider D205 = D203 as (Element of D199) by L1205 , FUNCT_2:5;
+L1206: ( ( C255 `1 ) \/ { D205 } ) c= D199;
+L1207: { D202 } c= D200
+proof
+let C256 being set;
+assume L1208: C256 in { D202 };
+L1209: C256 = D202 by L1208 , TARSKI:def 1;
+L1210: C256 in D201 by L1209 , L1203;
+thus L1211: thesis by L1210;
+end;
+L1212: ( ( C255 `2 ) \/ { D202 } ) c= D200 by L1207 , XBOOLE_1:8;
+thus L1213: [ ( ( C255 `1 ) \/ { D203 } ) , ( ( C255 `2 ) \/ { D202 } ) ] is (PRIM:Labeling of C254) by L1212 , L1206 , ZFMISC_1:def 2;
+end;
+L1214:
+now
+assume that
+L1215: D201 <> ( {} )
+and
+L1216: ( ( the_Source_of C254 ) . D202 ) in ( C255 `1 );
+L1217: D202 in D201 by L1215;
+reconsider D206 = D204 as (Element of D199) by L1217 , FUNCT_2:5;
+L1218: ( ( C255 `1 ) \/ { D206 } ) c= D199;
+L1219: { D202 } c= D200
+proof
+let C257 being set;
+assume L1220: C257 in { D202 };
+L1221: C257 = D202 by L1220 , TARSKI:def 1;
+L1222: C257 in D201 by L1221 , L1215;
+thus L1223: thesis by L1222;
+end;
+L1224: ( ( C255 `2 ) \/ { D202 } ) c= D200 by L1219 , XBOOLE_1:8;
+thus L1225: [ ( ( C255 `1 ) \/ { D204 } ) , ( ( C255 `2 ) \/ { D202 } ) ] is (PRIM:Labeling of C254) by L1224 , L1218 , ZFMISC_1:def 2;
+end;
+thus L1226: thesis by L1214 , L1202;
+end;
+consistency;
+end;
+definition
+let C258 being  real-weighted WGraph;
+mode PRIM:LabelingSeq of C258
+ -> (ManySortedSet of ( NAT ))
+means :L1228: (for B205 being Nat holds ( it . B205 ) is (PRIM:Labeling of C258));
+existence
+proof
+defpred S18[ set , set ] means $2 is (PRIM:Labeling of C258);
+L1229:
+now
+let C259 being set;
+assume L1230: C259 in ( NAT );
+take D207 = [ ( {} ) , ( {} ) ];
+L1231: (( {} ) c= ( the_Vertices_of C258 ) & ( {} ) c= ( the_Edges_of C258 )) by XBOOLE_1:2;
+thus L1232: S18[ C259 , D207 ] by L1231 , ZFMISC_1:def 2;
+end;
+consider C260 being (ManySortedSet of ( NAT )) such that L1233: (for B206 being set holds (B206 in ( NAT ) implies S18[ B206 , ( C260 . B206 ) ])) from PBOOLE:sch 3(L1229);
+take C260;
+let C261 being Nat;
+L1234: C261 in ( NAT ) by ORDINAL1:def 12;
+thus L1235: thesis by L1234 , L1233;
+end;
+end;
+definition
+let C262 being  real-weighted WGraph;
+let C263 being (PRIM:LabelingSeq of C262);
+let C264 being Nat;
+redefine func C263 . C264 -> (PRIM:Labeling of C262);
+
+coherence by L1228;
+end;
+definition
+let C265 being  real-weighted WGraph;
+func PRIM:CompSeq C265 -> (PRIM:LabelingSeq of C265) means 
+:L1238: (( it . ( 0 ) ) = ( PRIM:Init C265 ) & (for B207 being Nat holds ( it . ( B207 + 1 ) ) = ( PRIM:Step ( it . B207 ) )));
+existence
+proof
+defpred S19[ set , set , set ] means (($2 is (PRIM:Labeling of C265) & (ex B208 , B209 being (PRIM:Labeling of C265) st ($2 = B208 & $3 = B209 & B209 = ( PRIM:Step B208 )))) or ((not $2 is (PRIM:Labeling of C265)) & $2 = $3));
+L1239:
+now
+let C266 being (Element of ( NAT ));
+let C267 being set;
+L1240:
+now
+per cases ;
+suppose L1241: C267 is (PRIM:Labeling of C265);
+
+reconsider D208 = C267 as (PRIM:Labeling of C265) by L1241;
+L1242: S19[ C266 , C267 , ( PRIM:Step D208 ) ];
+thus L1243: (ex B210 being set st S19[ C266 , C267 , B210 ]) by L1242;
+end;
+suppose L1244: (not C267 is (PRIM:Labeling of C265));
+
+thus L1245: (ex B211 being set st S19[ C266 , C267 , B211 ]) by L1244;
+end;
+end;
+thus L1247: (ex B212 being set st S19[ C266 , C267 , B212 ]) by L1240;
+end;
+L1248: (for B213 being (Element of ( NAT )) holds (for B214 being set holds (ex B215 being set st S19[ B213 , B214 , B215 ]))) by L1239;
+consider C268 being Function such that L1249: (( dom C268 ) = ( NAT ) & ( C268 . ( 0 ) ) = ( PRIM:Init C265 ) & (for B216 being (Element of ( NAT )) holds S19[ B216 , ( C268 . B216 ) , ( C268 . ( B216 + 1 ) ) ])) from RECDEF_1:sch 1(L1248);
+reconsider D209 = C268 as (ManySortedSet of ( NAT )) by L1249 , PARTFUN1:def 2 , RELAT_1:def 18;
+defpred S20[ Nat ] means ( D209 . $1 ) is (PRIM:Labeling of C265);
+L1250:
+now
+let C269 being Nat;
+reconsider D210 = C269 as (Element of ( NAT )) by ORDINAL1:def 12;
+assume L1251: S20[ C269 ];
+L1252: (ex B217 , B218 being (PRIM:Labeling of C265) st (( D209 . D210 ) = B217 & ( D209 . ( C269 + 1 ) ) = B218 & B218 = ( PRIM:Step B217 ))) by L1251 , L1249;
+thus L1253: S20[ ( C269 + 1 ) ] by L1252;
+end;
+L1254: S20[ ( 0 ) ] by L1249;
+L1255: (for B219 being Nat holds S20[ B219 ]) from NAT_1:sch 2(L1254 , L1250);
+reconsider D211 = D209 as (PRIM:LabelingSeq of C265) by L1255 , L1228;
+take D211;
+thus L1256: ( D211 . ( 0 ) ) = ( PRIM:Init C265 ) by L1249;
+let C270 being Nat;
+reconsider D212 = C270 as (Element of ( NAT )) by ORDINAL1:def 12;
+L1257: (ex B220 , B221 being (PRIM:Labeling of C265) st (( D211 . D212 ) = B220 & ( D211 . ( C270 + 1 ) ) = B221 & B221 = ( PRIM:Step B220 ))) by L1249;
+thus L1258: thesis by L1257;
+end;
+uniqueness
+proof
+let C271 , C272 being (PRIM:LabelingSeq of C265);
+assume that
+L1259: ( C271 . ( 0 ) ) = ( PRIM:Init C265 )
+and
+L1260: (for B222 being Nat holds ( C271 . ( B222 + 1 ) ) = ( PRIM:Step ( C271 . B222 ) ))
+and
+L1261: ( C272 . ( 0 ) ) = ( PRIM:Init C265 )
+and
+L1262: (for B223 being Nat holds ( C272 . ( B223 + 1 ) ) = ( PRIM:Step ( C272 . B223 ) ));
+defpred S21[ Nat ] means ( C271 . $1 ) = ( C272 . $1 );
+L1263:
+now
+let C273 being Nat;
+assume L1264: S21[ C273 ];
+L1265: ( C271 . ( C273 + 1 ) ) = ( PRIM:Step ( C272 . C273 ) ) by L1264 , L1260
+.= ( C272 . ( C273 + 1 ) ) by L1262;
+thus L1266: S21[ ( C273 + 1 ) ] by L1265;
+end;
+L1267: (for B224 being Nat holds (S21[ B224 ] implies S21[ ( B224 + 1 ) ])) by L1263;
+L1268: S21[ ( 0 ) ] by L1259 , L1261;
+L1269: (for B225 being Nat holds S21[ B225 ]) from NAT_1:sch 2(L1268 , L1267);
+L1270: (for B226 being set holds (B226 in ( NAT ) implies ( C271 . B226 ) = ( C272 . B226 ))) by L1269;
+thus L1271: C271 = C272 by L1270 , PBOOLE:3;
+end;
+end;
+definition
+let C274 being  real-weighted WGraph;
+func PRIM:MST C274 -> (PRIM:Labeling of C274) equals 
+( ( PRIM:CompSeq C274 ) .Result() );
+coherence
+proof
+set D213 = ( PRIM:CompSeq C274 );
+L1273: ( D213 .Result() ) = ( D213 . ( D213 .Lifespan() ) );
+thus L1274: thesis by L1273;
+end;
+end;
+theorem
+L1276: (for B227 being  real-weighted WGraph holds (for B228 being (PRIM:Labeling of B227) holds (( PRIM:NextBestEdges B228 ) <> ( {} ) implies (ex B229 being (Vertex of B227) st ((not B229 in ( B228 `1 )) & ( PRIM:Step B228 ) = [ ( ( B228 `1 ) \/ { B229 } ) , ( ( B228 `2 ) \/ { ( choose ( PRIM:NextBestEdges B228 ) ) } ) ])))))
+proof
+let C275 being  real-weighted WGraph;
+let C276 being (PRIM:Labeling of C275);
+set D214 = ( PRIM:Step C276 );
+set D215 = ( choose ( PRIM:NextBestEdges C276 ) );
+set D216 = ( ( the_Source_of C275 ) . D215 );
+set D217 = ( ( the_Target_of C275 ) . D215 );
+assume L1277: ( PRIM:NextBestEdges C276 ) <> ( {} );
+L1278: D215 in ( PRIM:NextBestEdges C276 ) by L1277;
+reconsider D218 = D216 , D219 = D217 as (Vertex of C275) by L1278 , FUNCT_2:5;
+L1279: D215 SJoins ( C276 `1 ) , ( ( the_Vertices_of C275 ) \ ( C276 `1 ) ) , C275 by L1277 , L1180;
+L1280:
+now
+per cases ;
+suppose L1281: D218 in ( C276 `1 );
+
+take D220 = D219;
+L1282: (not D218 in ( ( the_Vertices_of C275 ) \ ( C276 `1 ) )) by L1281 , XBOOLE_0:def 5;
+L1283: D220 in ( ( the_Vertices_of C275 ) \ ( C276 `1 ) ) by L1282 , L1279 , GLIB_000:def 15;
+thus L1284: (not D220 in ( C276 `1 )) by L1283 , XBOOLE_0:def 5;
+thus L1285: D214 = [ ( ( C276 `1 ) \/ { D220 } ) , ( ( C276 `2 ) \/ { D215 } ) ] by L1277 , L1281 , L1201;
+end;
+suppose L1286: (not D218 in ( C276 `1 ));
+
+take D221 = D218;
+thus L1287: (not D221 in ( C276 `1 )) by L1286;
+thus L1288: D214 = [ ( ( C276 `1 ) \/ { D221 } ) , ( ( C276 `2 ) \/ { D215 } ) ] by L1277 , L1286 , L1201;
+end;
+end;
+thus L1290: thesis by L1280;
+end;
+theorem
+L1291: (for B230 being  real-weighted WGraph holds (for B231 being (PRIM:Labeling of B230) holds (( B231 `1 ) c= ( ( PRIM:Step B231 ) `1 ) & ( B231 `2 ) c= ( ( PRIM:Step B231 ) `2 ))))
+proof
+let C277 being  real-weighted WGraph;
+let C278 being (PRIM:Labeling of C277);
+set D222 = ( PRIM:Step C278 );
+set D223 = ( PRIM:NextBestEdges C278 );
+set D224 = ( choose D223 );
+L1292:
+now
+per cases ;
+suppose L1293: D223 = ( {} );
+
+thus L1294: thesis by L1293 , L1201;
+end;
+suppose L1295: D223 <> ( {} );
+
+consider C279 being (Vertex of C277) such that L1296: (not C279 in ( C278 `1 )) and L1297: D222 = [ ( ( C278 `1 ) \/ { C279 } ) , ( ( C278 `2 ) \/ { D224 } ) ] by L1295 , L1276;
+L1298: ( D222 `1 ) = ( ( C278 `1 ) \/ { C279 } ) by L1297 , MCART_1:7;
+thus L1299: ( C278 `1 ) c= ( D222 `1 ) by L1298 , XBOOLE_1:7;
+L1300: ( D222 `2 ) = ( ( C278 `2 ) \/ { D224 } ) by L1297 , MCART_1:7;
+thus L1301: ( C278 `2 ) c= ( D222 `2 ) by L1300 , XBOOLE_1:7;
+end;
+end;
+thus L1303: thesis by L1292;
+end;
+theorem
+L1304: (for B232 being  finite  real-weighted WGraph holds (for B233 being Nat holds (( ( ( PRIM:CompSeq B232 ) . B233 ) `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of B232 )) & ( ( ( PRIM:CompSeq B232 ) . B233 ) `2 ) c= ( B232 .edgesBetween ( ( ( PRIM:CompSeq B232 ) . B233 ) `1 ) ))))
+proof
+let C280 being  finite  real-weighted WGraph;
+set D225 = ( PRIM:CompSeq C280 );
+defpred S22[ Nat ] means (( ( D225 . $1 ) `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C280 )) & ( ( D225 . $1 ) `2 ) c= ( C280 .edgesBetween ( ( D225 . $1 ) `1 ) ));
+L1305: ( ( D225 . ( 0 ) ) `2 ) = ( ( PRIM:Init C280 ) `2 ) by L1238
+.= ( {} ) by MCART_1:7;
+L1306:
+now
+let C281 being Nat;
+assume L1307: S22[ C281 ];
+set D226 = ( D225 . C281 );
+set D227 = ( D225 . ( C281 + 1 ) );
+set D228 = ( PRIM:NextBestEdges D226 );
+set D229 = ( choose D228 );
+L1308: D227 = ( PRIM:Step D226 ) by L1238;
+L1309:
+now
+per cases ;
+suppose L1310: D228 = ( {} );
+
+L1311: D227 = D226 by L1310 , L1308 , L1201;
+thus L1312: S22[ ( C281 + 1 ) ] by L1311 , L1307;
+end;
+suppose L1313: D228 <> ( {} );
+
+set D230 = ( ( the_Source_of C280 ) . D229 );
+set D231 = ( ( the_Target_of C280 ) . D229 );
+L1314: D229 in D228 by L1313;
+L1315: D229 SJoins ( D226 `1 ) , ( ( the_Vertices_of C280 ) \ ( D226 `1 ) ) , C280 by L1313 , L1180;
+L1316:
+now
+per cases ;
+suppose L1317: ( ( the_Source_of C280 ) . D229 ) in ( D226 `1 );
+
+L1318: D227 = [ ( ( D226 `1 ) \/ { D231 } ) , ( ( D226 `2 ) \/ { D229 } ) ] by L1317 , L1308 , L1313 , L1201;
+L1319: ( D227 `1 ) = ( ( D226 `1 ) \/ { D231 } ) by L1318 , MCART_1:7;
+L1320: ( C280 .edgesBetween ( D226 `1 ) ) c= ( C280 .edgesBetween ( D227 `1 ) ) by L1319 , GLIB_000:36 , XBOOLE_1:7;
+thus L1321: ( D227 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C280 )) by L1318 , MCART_1:7;
+L1322: ( D227 `2 ) = ( ( D226 `2 ) \/ { D229 } ) by L1318 , MCART_1:7;
+L1323: ( D226 `1 ) c= ( D227 `1 ) by L1319 , XBOOLE_1:7;
+L1324:
+now
+let C282 being set;
+assume L1325: C282 in ( D227 `2 );
+L1326:
+now
+per cases  by L1322 , L1325 , XBOOLE_0:def 3;
+suppose L1327: C282 in ( D226 `2 );
+
+L1328: C282 in ( C280 .edgesBetween ( D226 `1 ) ) by L1327 , L1307;
+thus L1329: C282 in ( C280 .edgesBetween ( D227 `1 ) ) by L1328 , L1320;
+end;
+suppose L1330: C282 in { D229 };
+
+L1331: C282 = D229 by L1330 , TARSKI:def 1;
+L1332: ( ( the_Target_of C280 ) . C282 ) in { D231 } by L1331 , TARSKI:def 1;
+L1333: ( ( the_Target_of C280 ) . C282 ) in ( D227 `1 ) by L1332 , L1319 , XBOOLE_0:def 3;
+thus L1334: C282 in ( C280 .edgesBetween ( D227 `1 ) ) by L1333 , L1314 , L1317 , L1323 , L1331 , GLIB_000:31;
+end;
+end;
+thus L1336: C282 in ( C280 .edgesBetween ( D227 `1 ) ) by L1326;
+end;
+thus L1337: ( D227 `2 ) c= ( C280 .edgesBetween ( D227 `1 ) ) by L1324 , TARSKI:def 3;
+end;
+suppose L1338: (not ( ( the_Source_of C280 ) . D229 ) in ( D226 `1 ));
+
+L1339: D231 in ( D226 `1 ) by L1338 , L1315 , GLIB_000:def 15;
+L1340: D227 = [ ( ( D226 `1 ) \/ { ( ( the_Source_of C280 ) . D229 ) } ) , ( ( D226 `2 ) \/ { D229 } ) ] by L1308 , L1313 , L1338 , L1201;
+L1341: ( D227 `1 ) = ( ( D226 `1 ) \/ { D230 } ) by L1340 , MCART_1:7;
+L1342: ( C280 .edgesBetween ( D226 `1 ) ) c= ( C280 .edgesBetween ( D227 `1 ) ) by L1341 , GLIB_000:36 , XBOOLE_1:7;
+thus L1343: ( D227 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C280 )) by L1340 , MCART_1:7;
+L1344: ( D227 `2 ) = ( ( D226 `2 ) \/ { D229 } ) by L1340 , MCART_1:7;
+L1345: ( D226 `1 ) c= ( D227 `1 ) by L1341 , XBOOLE_1:7;
+L1346:
+now
+let C283 being set;
+assume L1347: C283 in ( D227 `2 );
+L1348:
+now
+per cases  by L1344 , L1347 , XBOOLE_0:def 3;
+suppose L1349: C283 in ( D226 `2 );
+
+L1350: C283 in ( C280 .edgesBetween ( D226 `1 ) ) by L1349 , L1307;
+thus L1351: C283 in ( C280 .edgesBetween ( D227 `1 ) ) by L1350 , L1342;
+end;
+suppose L1352: C283 in { D229 };
+
+L1353: C283 = D229 by L1352 , TARSKI:def 1;
+L1354: ( ( the_Source_of C280 ) . C283 ) in { D230 } by L1353 , TARSKI:def 1;
+L1355: ( ( the_Source_of C280 ) . C283 ) in ( D227 `1 ) by L1354 , L1341 , XBOOLE_0:def 3;
+thus L1356: C283 in ( C280 .edgesBetween ( D227 `1 ) ) by L1355 , L1314 , L1345 , L1339 , L1353 , GLIB_000:31;
+end;
+end;
+thus L1358: C283 in ( C280 .edgesBetween ( D227 `1 ) ) by L1348;
+end;
+thus L1359: ( D227 `2 ) c= ( C280 .edgesBetween ( D227 `1 ) ) by L1346 , TARSKI:def 3;
+end;
+end;
+thus L1361: S22[ ( C281 + 1 ) ] by L1316;
+end;
+end;
+thus L1363: S22[ ( C281 + 1 ) ] by L1309;
+end;
+L1364: (for B234 being Nat holds (S22[ B234 ] implies S22[ ( B234 + 1 ) ])) by L1306;
+L1365: ( ( D225 . ( 0 ) ) `1 ) = ( ( PRIM:Init C280 ) `1 ) by L1238
+.= { ( choose ( the_Vertices_of C280 ) ) } by MCART_1:7;
+L1366: S22[ ( 0 ) ] by L1365 , L1305 , XBOOLE_1:2;
+L1367: (for B235 being Nat holds S22[ B235 ]) from NAT_1:sch 2(L1366 , L1364);
+thus L1368: thesis by L1367;
+end;
+theorem
+L1369: (for B236 being  finite  real-weighted WGraph holds (for B237 being Nat holds (for B238 being (inducedSubgraph of B236 , ( ( ( PRIM:CompSeq B236 ) . B237 ) `1 ) , ( ( ( PRIM:CompSeq B236 ) . B237 ) `2 )) holds B238 is  connected)))
+proof
+let C284 being  finite  real-weighted WGraph;
+defpred S23[ Nat ] means (for B239 being (inducedSubgraph of C284 , ( ( ( PRIM:CompSeq C284 ) . $1 ) `1 ) , ( ( ( PRIM:CompSeq C284 ) . $1 ) `2 )) holds B239 is  connected);
+set D232 = ( ( PRIM:CompSeq C284 ) . ( 0 ) );
+set D233 = ( choose ( the_Vertices_of C284 ) );
+L1370:
+now
+let C285 being Nat;
+assume L1371: S23[ C285 ];
+set D234 = ( ( PRIM:CompSeq C284 ) . C285 );
+set D235 = ( ( PRIM:CompSeq C284 ) . ( C285 + 1 ) );
+set D236 = ( choose ( PRIM:NextBestEdges D234 ) );
+set D237 = ( ( the_Target_of C284 ) . D236 );
+set D238 = ( ( the_Source_of C284 ) . D236 );
+L1372: D235 = ( PRIM:Step D234 ) by L1238;
+L1373:
+now
+let C286 being (inducedSubgraph of C284 , ( D235 `1 ) , ( D235 `2 ));
+L1374: (( D235 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C284 )) & ( D235 `2 ) c= ( C284 .edgesBetween ( D235 `1 ) )) by L1304;
+L1375: ( the_Vertices_of C286 ) = ( D235 `1 ) by L1374 , GLIB_000:def 37;
+L1376: ( the_Edges_of C286 ) = ( D235 `2 ) by L1374 , GLIB_000:def 37;
+L1377:
+now
+per cases ;
+suppose L1378: ( PRIM:NextBestEdges D234 ) = ( {} );
+
+L1379: D235 = D234 by L1378 , L1372 , L1201;
+thus L1380: C286 is  connected by L1379 , L1371;
+end;
+suppose L1381: (( PRIM:NextBestEdges D234 ) <> ( {} ) & D238 in ( D234 `1 ));
+
+L1382: D235 = [ ( ( D234 `1 ) \/ { D237 } ) , ( ( D234 `2 ) \/ { D236 } ) ] by L1381 , L1372 , L1201;
+L1383: ( D235 `2 ) = ( ( D234 `2 ) \/ { D236 } ) by L1382 , MCART_1:7;
+L1384: D236 in ( PRIM:NextBestEdges D234 ) by L1381;
+reconsider D239 = D237 as (Vertex of C284) by L1384 , FUNCT_2:5;
+L1385: D236 Joins D238 , D239 , C284 by L1384 , GLIB_000:def 13;
+set D240 = the (inducedSubgraph of C284 , ( D234 `1 ) , ( D234 `2 ));
+L1386: D240 is  connected by L1371;
+L1387: (( D234 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C284 )) & ( D234 `2 ) c= ( C284 .edgesBetween ( D234 `1 ) )) by L1304;
+L1388: ( the_Vertices_of D240 ) = ( D234 `1 ) by L1387 , GLIB_000:def 37;
+L1389: ( D235 `1 ) = ( ( D234 `1 ) \/ { D239 } ) by L1382 , MCART_1:7;
+L1390: ( the_Vertices_of D240 ) c= ( the_Vertices_of C286 ) by L1389 , L1375 , L1388 , XBOOLE_1:7;
+L1391: ( the_Edges_of D240 ) = ( D234 `2 ) by L1387 , GLIB_000:def 37;
+reconsider D241 = D240 as (Subgraph of C286) by L1391 , L1376 , L1383 , L1390 , GLIB_000:44 , XBOOLE_1:7;
+set D242 = the (Vertex of D241);
+reconsider D243 = D242 as (Vertex of C286) by GLIB_000:42;
+L1392: D236 in { D236 } by TARSKI:def 1;
+L1393: D236 in ( the_Edges_of C286 ) by L1392 , L1376 , L1383 , XBOOLE_0:def 3;
+L1394: D236 Joins D238 , D239 , C286 by L1393 , L1385 , GLIB_000:73;
+L1395:
+now
+let C287 being (Vertex of C286);
+L1396:
+now
+per cases ;
+suppose L1397: C287 = D239;
+
+reconsider D244 = D238 as (Vertex of D241) by L1381 , L1387 , GLIB_000:def 37;
+consider C288 being (Walk of D241) such that L1398: C288 is_Walk_from D242 , D244 by L1386 , GLIB_002:def 1;
+reconsider D245 = C288 as (Walk of C286) by GLIB_001:167;
+L1399: D245 is_Walk_from D243 , D238 by L1398 , GLIB_001:19;
+L1400: ( D245 .addEdge D236 ) is_Walk_from D243 , C287 by L1399 , L1394 , L1397 , GLIB_001:66;
+thus L1401: (ex B240 being (Walk of C286) st B240 is_Walk_from D243 , C287) by L1400;
+end;
+suppose L1402: C287 <> D239;
+
+L1403: (not C287 in { D239 }) by L1402 , TARSKI:def 1;
+reconsider D246 = C287 as (Vertex of D241) by L1403 , L1375 , L1389 , L1388 , XBOOLE_0:def 3;
+consider C289 being (Walk of D241) such that L1404: C289 is_Walk_from D242 , D246 by L1386 , GLIB_002:def 1;
+reconsider D247 = C289 as (Walk of C286) by GLIB_001:167;
+L1405: D247 is_Walk_from D243 , C287 by L1404 , GLIB_001:19;
+thus L1406: (ex B241 being (Walk of C286) st B241 is_Walk_from D243 , C287) by L1405;
+end;
+end;
+thus L1408: (ex B242 being (Walk of C286) st B242 is_Walk_from D243 , C287) by L1396;
+end;
+thus L1409: C286 is  connected by L1395 , GLIB_002:6;
+end;
+suppose L1410: (( PRIM:NextBestEdges D234 ) <> ( {} ) & (not D238 in ( D234 `1 )));
+
+L1411: D235 = [ ( ( D234 `1 ) \/ { D238 } ) , ( ( D234 `2 ) \/ { D236 } ) ] by L1410 , L1372 , L1201;
+L1412: ( D235 `2 ) = ( ( D234 `2 ) \/ { D236 } ) by L1411 , MCART_1:7;
+L1413: D236 SJoins ( D234 `1 ) , ( ( the_Vertices_of C284 ) \ ( D234 `1 ) ) , C284 by L1410 , L1180;
+L1414: D236 in ( the_Edges_of C284 ) by L1413 , GLIB_000:def 15;
+reconsider D248 = D238 as (Vertex of C284) by L1414 , FUNCT_2:5;
+L1415: D236 Joins D237 , D248 , C284 by L1414 , GLIB_000:def 13;
+L1416: D236 in { D236 } by TARSKI:def 1;
+L1417: D236 in ( the_Edges_of C286 ) by L1416 , L1376 , L1412 , XBOOLE_0:def 3;
+L1418: D236 Joins D237 , D248 , C286 by L1417 , L1415 , GLIB_000:73;
+set D249 = the (inducedSubgraph of C284 , ( D234 `1 ) , ( D234 `2 ));
+L1419: D249 is  connected by L1371;
+L1420: (( D234 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C284 )) & ( D234 `2 ) c= ( C284 .edgesBetween ( D234 `1 ) )) by L1304;
+L1421: ( the_Vertices_of D249 ) = ( D234 `1 ) by L1420 , GLIB_000:def 37;
+L1422: ( D235 `1 ) = ( ( D234 `1 ) \/ { D248 } ) by L1411 , MCART_1:7;
+L1423: ( the_Vertices_of D249 ) c= ( the_Vertices_of C286 ) by L1422 , L1375 , L1421 , XBOOLE_1:7;
+L1424: ( the_Edges_of D249 ) = ( D234 `2 ) by L1420 , GLIB_000:def 37;
+reconsider D250 = D249 as (Subgraph of C286) by L1424 , L1376 , L1412 , L1423 , GLIB_000:44 , XBOOLE_1:7;
+set D251 = the (Vertex of D250);
+reconsider D252 = D251 as (Vertex of C286) by GLIB_000:42;
+L1425: D237 in ( D234 `1 ) by L1410 , L1413 , GLIB_000:def 15;
+L1426:
+now
+let C290 being (Vertex of C286);
+L1427:
+now
+per cases ;
+suppose L1428: C290 = D248;
+
+reconsider D253 = D237 as (Vertex of D250) by L1425 , L1420 , GLIB_000:def 37;
+consider C291 being (Walk of D250) such that L1429: C291 is_Walk_from D251 , D253 by L1419 , GLIB_002:def 1;
+reconsider D254 = C291 as (Walk of C286) by GLIB_001:167;
+L1430: D254 is_Walk_from D252 , D237 by L1429 , GLIB_001:19;
+L1431: ( D254 .addEdge D236 ) is_Walk_from D252 , C290 by L1430 , L1418 , L1428 , GLIB_001:66;
+thus L1432: (ex B243 being (Walk of C286) st B243 is_Walk_from D252 , C290) by L1431;
+end;
+suppose L1433: C290 <> D248;
+
+L1434: (not C290 in { D248 }) by L1433 , TARSKI:def 1;
+reconsider D255 = C290 as (Vertex of D250) by L1434 , L1375 , L1422 , L1421 , XBOOLE_0:def 3;
+consider C292 being (Walk of D250) such that L1435: C292 is_Walk_from D251 , D255 by L1419 , GLIB_002:def 1;
+reconsider D256 = C292 as (Walk of C286) by GLIB_001:167;
+L1436: D256 is_Walk_from D252 , C290 by L1435 , GLIB_001:19;
+thus L1437: (ex B244 being (Walk of C286) st B244 is_Walk_from D252 , C290) by L1436;
+end;
+end;
+thus L1439: (ex B245 being (Walk of C286) st B245 is_Walk_from D252 , C290) by L1427;
+end;
+thus L1440: C286 is  connected by L1426 , GLIB_002:6;
+end;
+end;
+thus L1442: C286 is  connected by L1377;
+end;
+thus L1443: S23[ ( C285 + 1 ) ] by L1373;
+end;
+L1444: (for B246 being Nat holds (S23[ B246 ] implies S23[ ( B246 + 1 ) ])) by L1370;
+L1445:
+now
+let C293 being (inducedSubgraph of C284 , ( D232 `1 ) , ( D232 `2 ));
+L1446: D232 = ( PRIM:Init C284 ) by L1238;
+L1447: ( D232 `1 ) = { D233 } by L1446 , MCART_1:7;
+reconsider D257 = C293 as (inducedSubgraph of C284 , { D233 } , ( {} )) by L1447 , L1446 , MCART_1:7;
+L1448: D257 is  connected;
+thus L1449: C293 is  connected by L1448;
+end;
+L1450: S23[ ( 0 ) ] by L1445;
+L1451: (for B247 being Nat holds S23[ B247 ]) from NAT_1:sch 2(L1450 , L1444);
+thus L1452: thesis by L1451;
+end;
+theorem
+L1453: (for B248 being  finite  real-weighted WGraph holds (for B249 being Nat holds (for B250 being (inducedSubgraph of B248 , ( ( ( PRIM:CompSeq B248 ) . B249 ) `1 )) holds B250 is  connected)))
+proof
+let C294 being  finite  real-weighted WGraph;
+let C295 being Nat;
+set D258 = ( ( ( PRIM:CompSeq C294 ) . C295 ) `1 );
+let C296 being (inducedSubgraph of C294 , D258);
+reconsider D259 = D258 as non  empty (Subset of ( the_Vertices_of C294 )) by L1304;
+set D260 = ( ( ( PRIM:CompSeq C294 ) . C295 ) `2 );
+reconsider D261 = D260 as (Subset of ( C294 .edgesBetween D259 )) by L1304;
+set D262 = the (inducedSubgraph of C294 , D259 , D261);
+L1454: (( the_Vertices_of D262 ) = D259 & ( the_Vertices_of C296 ) = D259) by GLIB_000:def 37;
+L1455: (( the_Edges_of D262 ) = D261 & ( the_Edges_of C296 ) = ( C294 .edgesBetween D259 )) by GLIB_000:def 37;
+reconsider D263 = D262 as (Subgraph of C296) by L1455 , L1454 , GLIB_000:44;
+L1456: D263 is  spanning by L1454 , GLIB_000:def 33;
+L1457: D263 is  connected by L1369;
+thus L1458: thesis by L1457 , L1456 , GLIB_002:23;
+end;
+registration
+let C297 being  finite  real-weighted WGraph;
+let C298 being Nat;
+cluster  ->  connected for (inducedSubgraph of C297 , ( ( ( PRIM:CompSeq C297 ) . C298 ) `1 ));
+coherence by L1453;
+end;
+registration
+let C299 being  finite  real-weighted WGraph;
+let C300 being Nat;
+cluster  ->  connected for (inducedSubgraph of C299 , ( ( ( PRIM:CompSeq C299 ) . C300 ) `1 ) , ( ( ( PRIM:CompSeq C299 ) . C300 ) `2 ));
+coherence by L1369;
+end;
+theorem
+L1461: (for B251 being  finite  real-weighted WGraph holds (for B252 being Nat holds ( ( ( PRIM:CompSeq B251 ) . B252 ) `1 ) c= ( B251 .reachableFrom ( choose ( the_Vertices_of B251 ) ) )))
+proof
+let C301 being  finite  real-weighted WGraph;
+set D264 = ( choose ( the_Vertices_of C301 ) );
+defpred S24[ Nat ] means ( ( ( PRIM:CompSeq C301 ) . $1 ) `1 ) c= ( C301 .reachableFrom ( choose ( the_Vertices_of C301 ) ) );
+set D265 = ( ( PRIM:CompSeq C301 ) . ( 0 ) );
+L1462: D265 = ( PRIM:Init C301 ) by L1238;
+L1463: ( D265 `1 ) = { D264 } by L1462 , MCART_1:7;
+L1464:
+now
+let C302 being Nat;
+assume L1465: S24[ C302 ];
+set D266 = ( ( PRIM:CompSeq C301 ) . C302 );
+set D267 = ( ( PRIM:CompSeq C301 ) . ( C302 + 1 ) );
+set D268 = ( PRIM:NextBestEdges D266 );
+set D269 = ( choose D268 );
+set D270 = ( ( the_Source_of C301 ) . D269 );
+set D271 = ( ( the_Target_of C301 ) . D269 );
+L1466: D267 = ( PRIM:Step D266 ) by L1238;
+L1467:
+now
+per cases ;
+suppose L1468: D268 = ( {} );
+
+thus L1469: S24[ ( C302 + 1 ) ] by L1468 , L1465 , L1466 , L1201;
+end;
+suppose L1470: (D268 <> ( {} ) & D270 in ( D266 `1 ));
+
+L1471: D267 = [ ( ( D266 `1 ) \/ { D271 } ) , ( ( D266 `2 ) \/ { D269 } ) ] by L1470 , L1466 , L1201;
+L1472: ( D267 `1 ) = ( ( D266 `1 ) \/ { D271 } ) by L1471 , MCART_1:7;
+L1473: D269 in D268 by L1470;
+L1474:
+now
+let C303 being set;
+assume L1475: C303 in ( D267 `1 );
+L1476:
+now
+per cases  by L1472 , L1475 , XBOOLE_0:def 3;
+suppose L1477: C303 in ( D266 `1 );
+
+thus L1478: C303 in ( C301 .reachableFrom D264 ) by L1477 , L1465;
+end;
+suppose L1479: C303 in { D271 };
+
+L1480: C303 = D271 by L1479 , TARSKI:def 1;
+L1481: D269 Joins D270 , C303 , C301 by L1480 , L1473 , GLIB_000:def 13;
+thus L1482: C303 in ( C301 .reachableFrom D264 ) by L1481 , L1465 , L1470 , GLIB_002:10;
+end;
+end;
+thus L1484: C303 in ( C301 .reachableFrom D264 ) by L1476;
+end;
+thus L1485: S24[ ( C302 + 1 ) ] by L1474 , TARSKI:def 3;
+end;
+suppose L1486: (D268 <> ( {} ) & (not D270 in ( D266 `1 )));
+
+L1487: D267 = [ ( ( D266 `1 ) \/ { D270 } ) , ( ( D266 `2 ) \/ { D269 } ) ] by L1486 , L1466 , L1201;
+L1488: ( D267 `1 ) = ( ( D266 `1 ) \/ { D270 } ) by L1487 , MCART_1:7;
+L1489: D269 SJoins ( D266 `1 ) , ( ( the_Vertices_of C301 ) \ ( D266 `1 ) ) , C301 by L1486 , L1180;
+L1490: D269 in ( the_Edges_of C301 ) by L1489 , GLIB_000:def 15;
+L1491: D271 in ( D266 `1 ) by L1486 , L1489 , GLIB_000:def 15;
+L1492:
+now
+let C304 being set;
+assume L1493: C304 in ( D267 `1 );
+L1494:
+now
+per cases  by L1488 , L1493 , XBOOLE_0:def 3;
+suppose L1495: C304 in ( D266 `1 );
+
+thus L1496: C304 in ( C301 .reachableFrom D264 ) by L1495 , L1465;
+end;
+suppose L1497: C304 in { D270 };
+
+L1498: C304 = D270 by L1497 , TARSKI:def 1;
+L1499: D269 Joins D271 , C304 , C301 by L1498 , L1490 , GLIB_000:def 13;
+thus L1500: C304 in ( C301 .reachableFrom D264 ) by L1499 , L1465 , L1491 , GLIB_002:10;
+end;
+end;
+thus L1502: C304 in ( C301 .reachableFrom D264 ) by L1494;
+end;
+thus L1503: S24[ ( C302 + 1 ) ] by L1492 , TARSKI:def 3;
+end;
+end;
+thus L1505: S24[ ( C302 + 1 ) ] by L1467;
+end;
+L1506: D264 in ( C301 .reachableFrom D264 ) by GLIB_002:9;
+L1507: S24[ ( 0 ) ] by L1506 , L1463 , ZFMISC_1:31;
+L1508: (for B253 being Nat holds S24[ B253 ]) from NAT_1:sch 2(L1507 , L1464);
+thus L1509: thesis by L1508;
+end;
+theorem
+L1510: (for B254 being  finite  real-weighted WGraph holds (for B255 , B256 being Nat holds (B255 <= B256 implies (( ( ( PRIM:CompSeq B254 ) . B255 ) `1 ) c= ( ( ( PRIM:CompSeq B254 ) . B256 ) `1 ) & ( ( ( PRIM:CompSeq B254 ) . B255 ) `2 ) c= ( ( ( PRIM:CompSeq B254 ) . B256 ) `2 )))))
+proof
+let C305 being  finite  real-weighted WGraph;
+let C306 , C307 being Nat;
+set D272 = ( PRIM:CompSeq C305 );
+set D273 = ( ( D272 . C306 ) `1 );
+set D274 = ( ( D272 . C306 ) `2 );
+defpred S25[ Nat ] means (D273 c= ( ( D272 . ( C306 + $1 ) ) `1 ) & D274 c= ( ( D272 . ( C306 + $1 ) ) `2 ));
+assume L1511: C306 <= C307;
+L1512: (ex B257 being Nat st C307 = ( C306 + B257 )) by L1511 , NAT_1:10;
+L1513:
+now
+let C308 being Nat;
+L1514: ( D272 . ( ( C306 + C308 ) + 1 ) ) = ( PRIM:Step ( D272 . ( C306 + C308 ) ) ) by L1238;
+L1515: (( ( D272 . ( C306 + C308 ) ) `1 ) c= ( ( D272 . ( ( C306 + C308 ) + 1 ) ) `1 ) & ( ( D272 . ( C306 + C308 ) ) `2 ) c= ( ( D272 . ( ( C306 + C308 ) + 1 ) ) `2 )) by L1514 , L1291;
+assume L1516: (D273 c= ( ( D272 . ( C306 + C308 ) ) `1 ) & D274 c= ( ( D272 . ( C306 + C308 ) ) `2 ));
+thus L1517: (D273 c= ( ( D272 . ( C306 + ( C308 + 1 ) ) ) `1 ) & D274 c= ( ( D272 . ( C306 + ( C308 + 1 ) ) ) `2 )) by L1516 , L1515 , XBOOLE_1:1;
+end;
+L1518: (for B258 being Nat holds (S25[ B258 ] implies S25[ ( B258 + 1 ) ])) by L1513;
+L1519: S25[ ( 0 ) ];
+L1520: (for B259 being Nat holds S25[ B259 ]) from NAT_1:sch 2(L1519 , L1518);
+thus L1521: thesis by L1520 , L1512;
+end;
+theorem
+L1522: (for B260 being  finite  real-weighted WGraph holds (for B261 being Nat holds (( PRIM:NextBestEdges ( ( PRIM:CompSeq B260 ) . B261 ) ) = ( {} ) iff ( ( ( PRIM:CompSeq B260 ) . B261 ) `1 ) = ( B260 .reachableFrom ( choose ( the_Vertices_of B260 ) ) ))))
+proof
+let C309 being  finite  real-weighted WGraph;
+let C310 being Nat;
+set D275 = ( choose ( the_Vertices_of C309 ) );
+set D276 = ( PRIM:CompSeq C309 );
+set D277 = ( C309 .reachableFrom D275 );
+set D278 = ( D276 . C310 );
+set D279 = ( the_Edges_of C309 );
+set D280 = ( PRIM:NextBestEdges D278 );
+set D281 = ( D278 `1 );
+set D282 = ( ( the_Vertices_of C309 ) \ D281 );
+set D283 = ( choose D280 );
+thus L1523:now
+assume L1524: D280 = ( {} );
+L1525:
+now
+defpred S26[ set ] means $1 SJoins D281 , D282 , C309;
+assume L1526: D281 <> D277;
+consider C311 being (Subset of D279) such that L1527: (for B262 being set holds (B262 in C311 iff (B262 in D279 & S26[ B262 ]))) from SUBSET_1:sch 1;
+L1528: D281 c= D277 by L1461;
+L1529: D281 c< D277 by L1528 , L1526 , XBOOLE_0:def 8;
+L1530:
+now
+L1531: D275 in { D275 } by TARSKI:def 1;
+L1532: D275 in ( ( PRIM:Init C309 ) `1 ) by L1531 , MCART_1:7;
+L1533: D275 in ( ( D276 . ( 0 ) ) `1 ) by L1532 , L1238;
+assume L1534: C311 = ( {} );
+consider C312 being set such that L1535: C312 in D277 and L1536: (not C312 in ( D278 `1 )) by L1529 , XBOOLE_0:6;
+reconsider D284 = C312 as (Vertex of C309) by L1535;
+consider C313 being (Walk of C309) such that L1537: C313 is_Walk_from D275 , D284 by L1535 , GLIB_002:def 5;
+defpred S27[ Nat ] means ($1 is  odd & $1 <= ( len C313 ) & (not ( C313 . $1 ) in D281));
+L1538: ( C313 . ( len C313 ) ) = ( C313 .last() ) by GLIB_001:def 7
+.= D284 by L1537 , GLIB_001:def 23;
+L1539: (ex B263 being Nat st S27[ B263 ]) by L1538 , L1536;
+consider C314 being Nat such that L1540: (S27[ C314 ] & (for B264 being Nat holds (S27[ B264 ] implies C314 <= B264))) from NAT_1:sch 5(L1539);
+L1541: ( ( D276 . ( 0 ) ) `1 ) c= ( D278 `1 ) by L1510;
+L1542:
+now
+per cases ;
+suppose L1543: C314 = 1;
+
+L1544: ( C313 . C314 ) = ( C313 .first() ) by L1543 , GLIB_001:def 6
+.= D275 by L1537 , GLIB_001:def 23;
+thus L1545: contradiction by L1544 , L1533 , L1541 , L1540;
+end;
+suppose L1546: C314 <> 1;
+
+reconsider D285 = C314 as  odd (Element of ( NAT )) by L1540 , ORDINAL1:def 12;
+L1547: 1 <= C314 by L1540 , ABIAN:12;
+L1548: 1 < C314 by L1547 , L1546 , XXREAL_0:1;
+L1549: ( 1 + 1 ) <= C314 by L1548 , NAT_1:13;
+reconsider D286 = ( D285 - ( 2 * 1 ) ) as  odd (Element of ( NAT )) by L1549 , INT_1:5;
+set D287 = ( C313 . ( D286 + 1 ) );
+L1550: ( C314 - 2 ) < ( ( len C313 ) - ( 0 ) ) by L1540 , XREAL_1:15;
+L1551: D287 Joins ( C313 . D286 ) , ( C313 . ( D286 + 2 ) ) , C309 by L1550 , GLIB_001:def 3;
+L1552: D287 in D279 by L1551 , GLIB_000:def 13;
+L1553: D286 < ( C314 - ( 0 ) ) by XREAL_1:15;
+L1554: ( C313 . D286 ) in D281 by L1553 , L1540 , L1550;
+L1555: ( C313 . C314 ) in ( the_Vertices_of C309 ) by L1551 , GLIB_000:13;
+L1556: ( C313 . C314 ) in D282 by L1555 , L1540 , XBOOLE_0:def 5;
+L1557: S26[ D287 ] by L1556 , L1554 , L1551 , GLIB_000:17;
+thus L1558: contradiction by L1557 , L1527 , L1534 , L1552;
+end;
+end;
+thus L1560: contradiction by L1542;
+end;
+reconsider D288 = C311 as non  empty  finite set by L1530;
+deffunc H3((Element of D288)) = ( ( the_Weight_of C309 ) . $1 );
+consider C315 being (Element of D288) such that L1561: (for B265 being (Element of D288) holds H3(C315) <= H3(B265)) from GRAPH_5:sch 2;
+L1562:
+now
+let C316 being set;
+assume L1563: C316 SJoins D281 , D282 , C309;
+L1564: C316 in D279 by L1563 , GLIB_000:def 15;
+reconsider D289 = C316 as (Element of D288) by L1564 , L1527 , L1563;
+L1565: ( ( the_Weight_of C309 ) . C315 ) <= ( ( the_Weight_of C309 ) . D289 ) by L1561;
+thus L1566: ( ( the_Weight_of C309 ) . C315 ) <= ( ( the_Weight_of C309 ) . C316 ) by L1565;
+end;
+L1567: C315 SJoins D281 , D282 , C309 by L1527;
+thus L1568: contradiction by L1567 , L1524 , L1562 , L1180;
+end;
+thus L1569: D281 = D277 by L1525;
+end;
+assume L1570: D281 = D277;
+L1571:
+now
+assume L1572: D280 <> ( {} );
+L1573: D283 SJoins D281 , D282 , C309 by L1572 , L1180;
+L1574: D283 in D279 by L1573 , GLIB_000:def 15;
+L1575:
+now
+per cases  by L1573 , GLIB_000:def 15;
+suppose L1576: (( ( the_Source_of C309 ) . D283 ) in D281 & ( ( the_Target_of C309 ) . D283 ) in D282);
+
+L1577: D283 Joins ( ( the_Source_of C309 ) . D283 ) , ( ( the_Target_of C309 ) . D283 ) , C309 by L1574 , GLIB_000:def 13;
+L1578: (not ( ( the_Target_of C309 ) . D283 ) in D281) by L1576 , XBOOLE_0:def 5;
+thus L1579: contradiction by L1578 , L1570 , L1576 , L1577 , GLIB_002:10;
+end;
+suppose L1580: (( ( the_Source_of C309 ) . D283 ) in D282 & ( ( the_Target_of C309 ) . D283 ) in D281);
+
+L1581: D283 Joins ( ( the_Target_of C309 ) . D283 ) , ( ( the_Source_of C309 ) . D283 ) , C309 by L1574 , GLIB_000:def 13;
+L1582: (not ( ( the_Source_of C309 ) . D283 ) in D281) by L1580 , XBOOLE_0:def 5;
+thus L1583: contradiction by L1582 , L1570 , L1580 , L1581 , GLIB_002:10;
+end;
+end;
+thus L1585: contradiction by L1575;
+end;
+thus L1586: thesis by L1571;
+end;
+theorem
+L1587: (for B266 being  finite  real-weighted WGraph holds (for B267 being Nat holds ( card ( ( ( PRIM:CompSeq B266 ) . B267 ) `1 ) ) = ( min (( B267 + 1 ) , ( card ( B266 .reachableFrom ( choose ( the_Vertices_of B266 ) ) ) )) )))
+proof
+let C317 being  finite  real-weighted WGraph;
+set D290 = ( PRIM:CompSeq C317 );
+set D291 = ( choose ( the_Vertices_of C317 ) );
+defpred S28[ Nat ] means ( card ( ( ( PRIM:CompSeq C317 ) . $1 ) `1 ) ) = ( min (( $1 + 1 ) , ( card ( C317 .reachableFrom D291 ) )) );
+set D292 = ( D290 . ( 0 ) );
+L1588: D291 in ( C317 .reachableFrom D291 ) by GLIB_002:9;
+L1589: { D291 } c= ( C317 .reachableFrom D291 ) by L1588 , ZFMISC_1:31;
+L1590: ( card { D291 } ) <= ( card ( C317 .reachableFrom D291 ) ) by L1589 , NAT_1:43;
+L1591: ( ( 0 ) + 1 ) <= ( card ( C317 .reachableFrom D291 ) ) by L1590 , CARD_1:30;
+L1592:
+now
+let C318 being Nat;
+assume L1593: S28[ C318 ];
+set D293 = ( ( PRIM:CompSeq C317 ) . C318 );
+set D294 = ( ( PRIM:CompSeq C317 ) . ( C318 + 1 ) );
+set D295 = ( choose ( PRIM:NextBestEdges D293 ) );
+L1594: D294 = ( PRIM:Step D293 ) by L1238;
+L1595:
+now
+per cases ;
+suppose L1596: ( PRIM:NextBestEdges D293 ) = ( {} );
+
+L1597: ( card ( D293 `1 ) ) = ( card ( C317 .reachableFrom D291 ) ) by L1596 , L1522;
+L1598: ( card ( C317 .reachableFrom D291 ) ) <= ( C318 + 1 ) by L1597 , L1593 , XXREAL_0:def 9;
+L1599: ( card ( C317 .reachableFrom D291 ) ) <= ( ( C318 + 1 ) + 1 ) by L1598 , NAT_1:12;
+L1600: ( card ( D294 `1 ) ) = ( min (( C318 + 1 ) , ( card ( C317 .reachableFrom D291 ) )) ) by L1593 , L1594 , L1596 , L1201;
+thus L1601: S28[ ( C318 + 1 ) ] by L1600 , L1593 , L1597 , L1599 , XXREAL_0:def 9;
+end;
+suppose L1602: ( PRIM:NextBestEdges D293 ) <> ( {} );
+
+L1603: ( D293 `1 ) c= ( C317 .reachableFrom D291 ) by L1461;
+L1604: ( D293 `1 ) <> ( C317 .reachableFrom D291 ) by L1602 , L1522;
+L1605:
+now
+assume L1606: ( card ( D293 `1 ) ) = ( card ( C317 .reachableFrom D291 ) );
+L1607: ( D293 `1 ) c< ( C317 .reachableFrom D291 ) by L1604 , L1603 , XBOOLE_0:def 8;
+thus L1608: contradiction by L1607 , L1606 , CARD_2:48;
+end;
+L1609: ( card ( D293 `1 ) ) = ( C318 + 1 ) by L1605 , L1593 , XXREAL_0:15;
+consider C319 being (Vertex of C317) such that L1610: (not C319 in ( D293 `1 )) and L1611: D294 = [ ( ( D293 `1 ) \/ { C319 } ) , ( ( D293 `2 ) \/ { D295 } ) ] by L1594 , L1602 , L1276;
+L1612: ( card ( D294 `1 ) ) = ( card ( ( D293 `1 ) \/ { C319 } ) ) by L1611 , MCART_1:7
+.= ( ( card ( D293 `1 ) ) + 1 ) by L1610 , CARD_2:41;
+L1613: ( card ( D293 `1 ) ) <= ( card ( C317 .reachableFrom D291 ) ) by L1461 , NAT_1:43;
+L1614: ( C318 + 1 ) < ( card ( C317 .reachableFrom D291 ) ) by L1613 , L1605 , L1609 , XXREAL_0:1;
+L1615: ( ( C318 + 1 ) + 1 ) <= ( card ( C317 .reachableFrom D291 ) ) by L1614 , NAT_1:13;
+thus L1616: S28[ ( C318 + 1 ) ] by L1615 , L1612 , L1609 , XXREAL_0:def 9;
+end;
+end;
+thus L1618: S28[ ( C318 + 1 ) ] by L1595;
+end;
+L1619: D292 = ( PRIM:Init C317 ) by L1238;
+L1620: { D291 } = ( D292 `1 ) by L1619 , MCART_1:7;
+L1621: ( card ( D292 `1 ) ) = 1 by L1620 , CARD_1:30;
+L1622: S28[ ( 0 ) ] by L1621 , L1591 , XXREAL_0:def 9;
+L1623: (for B268 being Nat holds S28[ B268 ]) from NAT_1:sch 2(L1622 , L1592);
+thus L1624: thesis by L1623;
+end;
+theorem
+L1625: (for B269 being  finite  real-weighted WGraph holds (( PRIM:CompSeq B269 ) is  halting & ( ( ( PRIM:CompSeq B269 ) .Lifespan() ) + 1 ) = ( card ( B269 .reachableFrom ( choose ( the_Vertices_of B269 ) ) ) )))
+proof
+let C320 being  finite  real-weighted WGraph;
+set D296 = ( PRIM:CompSeq C320 );
+set D297 = ( choose ( the_Vertices_of C320 ) );
+set D298 = ( C320 .reachableFrom D297 );
+consider C321 being Nat such that L1626: ( C321 + 1 ) = ( card D298 ) by NAT_1:6;
+reconsider D299 = C321 as (Element of ( NAT )) by ORDINAL1:def 12;
+set D300 = ( D296 . D299 );
+set D301 = ( D296 . ( D299 + 1 ) );
+L1627: ( card D298 ) <= ( ( card D298 ) + 1 ) by NAT_1:11;
+L1628: ( card ( D301 `1 ) ) = ( min (( ( card D298 ) + 1 ) , ( card D298 )) ) by L1626 , L1587
+.= ( card D298 ) by L1627 , XXREAL_0:def 9;
+set D302 = ( choose ( PRIM:NextBestEdges D300 ) );
+L1629: ( card ( D300 `1 ) ) = ( min (( card D298 ) , ( card D298 )) ) by L1626 , L1587
+.= ( card D298 );
+L1630: D301 = ( PRIM:Step D300 ) by L1238;
+L1631: ( D300 `1 ) c= ( D301 `1 ) by L1630 , L1291;
+L1632:
+now
+assume L1633: ( D300 `1 ) <> ( D301 `1 );
+L1634: ( D300 `1 ) c< ( D301 `1 ) by L1633 , L1631 , XBOOLE_0:def 8;
+thus L1635: contradiction by L1634 , L1629 , L1628 , CARD_2:48;
+end;
+L1636:
+now
+assume L1637: ( PRIM:NextBestEdges D300 ) <> ( {} );
+consider C322 being (Vertex of C320) such that L1638: (not C322 in ( D300 `1 )) and L1639: D301 = [ ( ( D300 `1 ) \/ { C322 } ) , ( ( D300 `2 ) \/ { D302 } ) ] by L1637 , L1630 , L1276;
+L1640: C322 in { C322 } by TARSKI:def 1;
+L1641: ( D301 `1 ) = ( ( D300 `1 ) \/ { C322 } ) by L1639 , MCART_1:7;
+thus L1642: contradiction by L1641 , L1632 , L1638 , L1640 , XBOOLE_0:def 3;
+end;
+L1643: D301 = D300 by L1636 , L1630 , L1201;
+thus L1644: D296 is  halting by L1643 , GLIB_000:def 54;
+L1645:
+now
+let C323 being Nat;
+set D303 = ( D296 . C323 );
+assume L1646: ( D296 . C323 ) = ( D296 . ( C323 + 1 ) );
+L1647:
+now
+assume L1648: C323 < D299;
+L1649: ( C323 + 1 ) <= D299 by L1648 , NAT_1:13;
+L1650: ( D299 + ( 0 ) ) < ( card D298 ) by L1626 , XREAL_1:8;
+L1651: ( C323 + 1 ) < ( card D298 ) by L1650 , L1649 , XXREAL_0:2;
+L1652: ( ( C323 + 1 ) + 1 ) <= ( card D298 ) by L1651 , NAT_1:13;
+L1653: ( card ( D303 `1 ) ) = ( min (( C323 + 1 ) , ( card D298 )) ) by L1587
+.= ( C323 + 1 ) by L1651 , XXREAL_0:def 9;
+L1654: ( card ( D303 `1 ) ) = ( min (( ( C323 + 1 ) + 1 ) , ( card D298 )) ) by L1646 , L1587
+.= ( ( C323 + 1 ) + 1 ) by L1652 , XXREAL_0:def 9;
+thus L1655: contradiction by L1654 , L1653;
+end;
+thus L1656: D299 <= C323 by L1647;
+end;
+thus L1657: thesis by L1645 , L1626 , L1643 , L1644 , GLIB_000:def 55;
+end;
+theorem
+L1658: (for B270 being  finite  real-weighted WGraph holds (for B271 being Nat holds (for B272 being (inducedSubgraph of B270 , ( ( ( PRIM:CompSeq B270 ) . B271 ) `1 ) , ( ( ( PRIM:CompSeq B270 ) . B271 ) `2 )) holds B272 is  Tree-like)))
+proof
+let C324 being  finite  real-weighted WGraph;
+set D304 = ( PRIM:CompSeq C324 );
+defpred S29[ Nat ] means (for B273 being (inducedSubgraph of C324 , ( ( D304 . $1 ) `1 ) , ( ( D304 . $1 ) `2 )) holds B273 is  Tree-like);
+set D305 = ( D304 . ( 0 ) );
+set D306 = ( choose ( the_Vertices_of C324 ) );
+L1659:
+now
+let C325 being Nat;
+set D307 = ( D304 . C325 );
+set D308 = ( D304 . ( C325 + 1 ) );
+set D309 = ( PRIM:NextBestEdges D307 );
+set D310 = ( choose D309 );
+set D311 = the (inducedSubgraph of C324 , ( D307 `1 ) , ( D307 `2 ));
+L1660: D308 = ( PRIM:Step D307 ) by L1238;
+L1661: ( D307 `2 ) c= ( C324 .edgesBetween ( D307 `1 ) ) by L1304;
+L1662: ( D307 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C324 )) by L1304;
+L1663: (( the_Vertices_of D311 ) = ( D307 `1 ) & ( the_Edges_of D311 ) = ( D307 `2 )) by L1662 , L1661 , GLIB_000:def 37;
+assume L1664: S29[ C325 ];
+L1665: D311 is  Tree-like by L1664;
+L1666:
+now
+L1667: ( D311 .order() ) = ( ( D311 .size() ) + 1 ) by L1665 , GLIB_002:46;
+let C326 being (inducedSubgraph of C324 , ( D308 `1 ) , ( D308 `2 ));
+L1668: ( D308 `2 ) c= ( C324 .edgesBetween ( D308 `1 ) ) by L1304;
+L1669: ( D308 `1 ) is non  empty non  empty non  empty non  empty (Subset of ( the_Vertices_of C324 )) by L1304;
+L1670: ( the_Vertices_of C326 ) = ( D308 `1 ) by L1669 , L1668 , GLIB_000:def 37;
+L1671:
+now
+per cases ;
+suppose L1672: D309 = ( {} );
+
+L1673: D307 = D308 by L1672 , L1660 , L1201;
+thus L1674: C326 is  Tree-like by L1673 , L1664;
+end;
+suppose L1675: D309 <> ( {} );
+
+set D312 = ( D307 `1 );
+set D313 = ( ( the_Vertices_of C324 ) \ D312 );
+L1676: D310 SJoins D312 , D313 , C324 by L1675 , L1180;
+L1677:
+now
+assume L1678: D310 in ( D307 `2 );
+L1679: ( ( the_Target_of C324 ) . D310 ) in D312 by L1678 , L1661 , GLIB_000:31;
+L1680: (not ( ( the_Target_of C324 ) . D310 ) in D313) by L1679 , XBOOLE_0:def 5;
+L1681: ( ( the_Source_of C324 ) . D310 ) in D312 by L1661 , L1678 , GLIB_000:31;
+L1682: (not ( ( the_Source_of C324 ) . D310 ) in D313) by L1681 , XBOOLE_0:def 5;
+thus L1683: contradiction by L1682 , L1676 , L1680 , GLIB_000:def 15;
+end;
+consider C327 being (Vertex of C324) such that L1684: (not C327 in ( D307 `1 )) and L1685: D308 = [ ( ( D307 `1 ) \/ { C327 } ) , ( ( D307 `2 ) \/ { D310 } ) ] by L1660 , L1675 , L1276;
+L1686: ( card ( D308 `1 ) ) = ( card ( ( D307 `1 ) \/ { C327 } ) ) by L1685 , MCART_1:7
+.= ( ( card ( D307 `1 ) ) + 1 ) by L1684 , CARD_2:41;
+L1687: ( card ( D308 `2 ) ) = ( card ( ( D307 `2 ) \/ { D310 } ) ) by L1685 , MCART_1:7
+.= ( ( card ( D307 `2 ) ) + 1 ) by L1677 , CARD_2:41;
+L1688: ( C326 .order() ) = ( ( C326 .size() ) + 1 ) by L1687 , L1663 , L1668 , L1670 , L1667 , L1686 , GLIB_000:def 37;
+thus L1689: C326 is  Tree-like by L1688 , GLIB_002:47;
+end;
+end;
+thus L1691: C326 is  Tree-like by L1671;
+end;
+thus L1692: S29[ ( C325 + 1 ) ] by L1666;
+end;
+L1693: (for B274 being Nat holds (S29[ B274 ] implies S29[ ( B274 + 1 ) ])) by L1659;
+L1694: D305 = ( PRIM:Init C324 ) by L1238;
+L1695: (( D305 `1 ) = { D306 } & ( D305 `2 ) = ( {} )) by L1694 , MCART_1:7;
+L1696: S29[ ( 0 ) ] by L1695;
+L1697: (for B275 being Nat holds S29[ B275 ]) from NAT_1:sch 2(L1696 , L1693);
+thus L1698: thesis by L1697;
+end;
+theorem
+L1699: (for B276 being  finite  connected  real-weighted WGraph holds ( ( PRIM:MST B276 ) `1 ) = ( the_Vertices_of B276 ))
+proof
+let C328 being  finite  connected  real-weighted WGraph;
+set D314 = ( PRIM:MST C328 );
+set D315 = ( PRIM:CompSeq C328 );
+set D316 = ( D314 `1 );
+set D317 = ( choose ( the_Vertices_of C328 ) );
+set D318 = ( C328 .reachableFrom D317 );
+L1700: ( ( D315 .Lifespan() ) + 1 ) = ( card D318 ) by L1625;
+L1701: ( card D316 ) = ( min (( card D318 ) , ( card D318 )) ) by L1700 , L1587;
+L1702: D316 c= D318 by L1461;
+L1703:
+now
+assume L1704: D316 <> D318;
+L1705: D316 c< D318 by L1704 , L1702 , XBOOLE_0:def 8;
+thus L1706: contradiction by L1705 , L1701 , CARD_2:48;
+end;
+thus L1707: thesis by L1703 , GLIB_002:16;
+end;
+registration
+let C329 being  finite  connected  real-weighted WGraph;
+cluster  spanning  Tree-like for (WSubgraph of C329);
+existence
+proof
+set D319 = ( PRIM:CompSeq C329 );
+set D320 = ( D319 .Lifespan() );
+set D321 = the (inducedWSubgraph of C329 , ( ( D319 . D320 ) `1 ) , ( ( D319 . D320 ) `2 ));
+take D321;
+L1708: ( PRIM:MST C329 ) = ( D319 . D320 );
+L1709: ( ( D319 . D320 ) `1 ) = ( the_Vertices_of C329 ) by L1708 , L1699;
+thus L1710: D321 is  spanning by L1709;
+thus L1711: thesis by L1658;
+end;
+end;
+definition
+let C330 being  finite  connected  real-weighted WGraph;
+let C331 being  spanning  Tree-like (WSubgraph of C330);
+attr C331 is  min-cost
+means
+:L1713: (for B277 being  spanning  Tree-like (WSubgraph of C330) holds ( C331 .cost() ) <= ( B277 .cost() ));
+end;
+registration
+let C332 being  finite  connected  real-weighted WGraph;
+cluster  min-cost for  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like (WSubgraph of C332);
+existence
+proof
+set D322 = the  spanning  Tree-like (WSubgraph of C332);
+set D323 = ( D322 | ( WGraphSelectors ) );
+L1715: D323 == D322 by L274;
+L1716: ( the_Weight_of D323 ) = ( the_Weight_of D322 ) by L274;
+reconsider D324 = D323 as (WSubgraph of C332) by L1716 , L1715 , GLIB_003:8;
+L1717: ( the_Vertices_of D324 ) = ( the_Vertices_of D322 ) by L1715 , GLIB_000:def 34
+.= ( the_Vertices_of C332 ) by GLIB_000:def 33;
+reconsider D325 = D324 as  spanning  Tree-like (WSubgraph of C332) by L1717 , L1715 , GLIB_000:def 33 , GLIB_002:48;
+set D326 = { B278 where B278 is (Element of ( C332 .allWSubgraphs() )) : B278 is  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like (WSubgraph of C332) };
+L1718:
+now
+let C333 being set;
+assume L1719: C333 in D326;
+L1720: (ex B279 being (Element of ( C332 .allWSubgraphs() )) st (C333 = B279 & B279 is  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like (WSubgraph of C332))) by L1719;
+thus L1721: C333 in ( C332 .allWSubgraphs() ) by L1720;
+end;
+reconsider D327 = D326 as  finite (Subset of ( C332 .allWSubgraphs() )) by L1718 , TARSKI:def 3;
+deffunc H4( finite  real-weighted WGraph) = ( $1 .cost() );
+L1722: ( dom D325 ) = ( WGraphSelectors ) by L286;
+L1723: D325 in ( C332 .allWSubgraphs() ) by L1722 , L289;
+L1724: D325 in D327 by L1723;
+reconsider D328 = D327 as  finite non  empty (Subset of ( C332 .allWSubgraphs() )) by L1724;
+consider C334 being (Element of D328) such that L1725: (for B280 being (Element of D328) holds H4(C334) <= H4(B280)) from GRAPH_5:sch 2;
+L1726: C334 in D328;
+L1727: (ex B281 being (Element of ( C332 .allWSubgraphs() )) st (C334 = B281 & B281 is  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like  spanning  Tree-like (WSubgraph of C332))) by L1726;
+reconsider D329 = C334 as  spanning  Tree-like (WSubgraph of C332) by L1727;
+take D329;
+L1728:
+now
+let C335 being  spanning  Tree-like (WSubgraph of C332);
+set D330 = ( C335 | ( WGraphSelectors ) );
+L1729: D330 == C335 by L274;
+L1730: ( the_Weight_of D330 ) = ( the_Weight_of C335 ) by L274;
+reconsider D331 = D330 as (WSubgraph of C332) by L1730 , L1729 , GLIB_003:8;
+L1731: ( the_Vertices_of D331 ) = ( the_Vertices_of C335 ) by L1729 , GLIB_000:def 34
+.= ( the_Vertices_of C332 ) by GLIB_000:def 33;
+reconsider D332 = D331 as  spanning  Tree-like (WSubgraph of C332) by L1731 , L1729 , GLIB_000:def 33 , GLIB_002:48;
+L1732: ( dom D332 ) = ( WGraphSelectors ) by L286;
+L1733: D332 in ( C332 .allWSubgraphs() ) by L1732 , L289;
+L1734: D332 in D328 by L1733;
+L1735: ( D329 .cost() ) <= ( D332 .cost() ) by L1734 , L1725;
+thus L1736: ( D329 .cost() ) <= ( C335 .cost() ) by L1735 , L1729 , L1730 , GLIB_000:def 34;
+end;
+thus L1737: thesis by L1728 , L1713;
+end;
+end;
+definition
+let C336 being  finite  connected  real-weighted WGraph;
+mode minimumSpanningTree of C336
+ is  min-cost  spanning  Tree-like (WSubgraph of C336);
+end;
+begin
+theorem
+L1740: (for B282 , B283 being  finite  connected  real-weighted WGraph holds (for B284 being (WSubgraph of B282) holds ((B284 is (minimumSpanningTree of B282) & B282 == B283 & ( the_Weight_of B282 ) = ( the_Weight_of B283 )) implies B284 is (minimumSpanningTree of B283))))
+proof
+let C337 , C338 being  finite  connected  real-weighted WGraph;
+let C339 being (WSubgraph of C337);
+assume that
+L1741: C339 is (minimumSpanningTree of C337)
+and
+L1742: C337 == C338
+and
+L1743: ( the_Weight_of C337 ) = ( the_Weight_of C338 );
+set D333 = C339;
+reconsider D334 = D333 as  Tree-like (WSubgraph of C338) by L1741 , L1742 , L1743 , GLIB_003:10;
+L1744: ( the_Vertices_of C339 ) = ( the_Vertices_of C337 ) by L1741 , GLIB_000:def 33
+.= ( the_Vertices_of C338 ) by L1742 , GLIB_000:def 34;
+reconsider D335 = D334 as  spanning  Tree-like (WSubgraph of C338) by L1744 , GLIB_000:def 33;
+L1745:
+now
+let C340 being  spanning  Tree-like (WSubgraph of C338);
+reconsider D336 = C340 as  Tree-like (WSubgraph of C337) by L1742 , L1743 , GLIB_003:10;
+L1746: ( the_Vertices_of C340 ) = ( the_Vertices_of C338 ) by GLIB_000:def 33
+.= ( the_Vertices_of C337 ) by L1742 , GLIB_000:def 34;
+L1747: D336 is  spanning by L1746 , GLIB_000:def 33;
+thus L1748: ( C339 .cost() ) <= ( C340 .cost() ) by L1747 , L1741 , L1713;
+end;
+L1749: D335 is  min-cost by L1745 , L1713;
+thus L1750: thesis by L1749;
+end;
+theorem
+L1751: (for B285 being  finite  connected  real-weighted WGraph holds (for B286 being (minimumSpanningTree of B285) holds (for B287 being WGraph holds ((B286 == B287 & ( the_Weight_of B286 ) = ( the_Weight_of B287 )) implies B287 is (minimumSpanningTree of B285)))))
+proof
+let C341 being  finite  connected  real-weighted WGraph;
+let C342 being (minimumSpanningTree of C341);
+let C343 being WGraph;
+assume that
+L1752: C342 == C343
+and
+L1753: ( the_Weight_of C342 ) = ( the_Weight_of C343 );
+reconsider D337 = C343 as (WSubgraph of C341) by L1752 , L1753 , GLIB_003:8;
+L1754: ( the_Vertices_of C343 ) = ( the_Vertices_of C342 ) by L1752 , GLIB_000:def 34
+.= ( the_Vertices_of C341 ) by GLIB_000:def 33;
+reconsider D338 = D337 as  spanning  Tree-like (WSubgraph of C341) by L1754 , L1752 , GLIB_000:def 33 , GLIB_002:48;
+L1755:
+now
+let C344 being  spanning  Tree-like (WSubgraph of C341);
+L1756: ( C342 .cost() ) <= ( C344 .cost() ) by L1713;
+thus L1757: ( D338 .cost() ) <= ( C344 .cost() ) by L1756 , L1752 , L1753 , GLIB_000:def 34;
+end;
+thus L1758: thesis by L1755 , L1713;
+end;
+theorem
+L1759: (for B288 being  finite  connected  real-weighted WGraph holds (for B289 being Nat holds ( ( ( PRIM:CompSeq B288 ) . B289 ) `2 ) c= ( ( PRIM:MST B288 ) `2 )))
+proof
+let C345 being  finite  connected  real-weighted WGraph;
+let C346 being Nat;
+set D339 = ( PRIM:CompSeq C345 );
+defpred S30[ Nat ] means ( D339 . ( ( D339 .Lifespan() ) + $1 ) ) = ( PRIM:MST C345 );
+L1760:
+now
+set D340 = ( D339 .Lifespan() );
+let C347 being Nat;
+set D341 = ( D339 . ( D340 + C347 ) );
+set D342 = ( D339 . ( ( D340 + C347 ) + 1 ) );
+set D343 = ( PRIM:NextBestEdges D341 );
+set D344 = ( choose D343 );
+L1761: D342 = ( PRIM:Step D341 ) by L1238;
+assume L1762: S30[ C347 ];
+L1763: ( D341 `1 ) = ( the_Vertices_of C345 ) by L1762 , L1699;
+L1764:
+now
+assume L1765: D343 <> ( {} );
+L1766: (ex B290 being (Vertex of C345) st ((not B290 in ( D341 `1 )) & D342 = [ ( ( D341 `1 ) \/ { B290 } ) , ( ( D341 `2 ) \/ { D344 } ) ])) by L1765 , L1761 , L1276;
+thus L1767: contradiction by L1766 , L1763;
+end;
+thus L1768: S30[ ( C347 + 1 ) ] by L1764 , L1762 , L1761 , L1201;
+end;
+L1769: S30[ ( 0 ) ];
+L1770: (for B291 being Nat holds S30[ B291 ]) from NAT_1:sch 2(L1769 , L1760);
+L1771:
+now
+per cases ;
+suppose L1772: C346 <= ( D339 .Lifespan() );
+
+thus L1773: thesis by L1772 , L1510;
+end;
+suppose L1774: ( D339 .Lifespan() ) < C346;
+
+L1775: (ex B292 being Nat st C346 = ( ( D339 .Lifespan() ) + B292 )) by L1774 , NAT_1:10;
+thus L1776: thesis by L1775 , L1770;
+end;
+end;
+thus L1778: thesis by L1771;
+end;
+::$N Prim's Minimum Spanning Tree Algorithm
+theorem
+L1779: (for B293 being  finite  connected  real-weighted WGraph holds (for B294 being (inducedWSubgraph of B293 , ( ( PRIM:MST B293 ) `1 ) , ( ( PRIM:MST B293 ) `2 )) holds B294 is (minimumSpanningTree of B293)))
+proof
+let C348 being  finite  connected  real-weighted WGraph;
+set D345 = ( PRIM:MST C348 );
+let C349 being (inducedWSubgraph of C348 , ( D345 `1 ) , ( D345 `2 ));
+reconsider D346 = C349 as  Tree-like _Graph by L1658;
+set D347 = ( the_Vertices_of C348 );
+set D348 = ( the_Edges_of C348 );
+set D349 = ( the_Weight_of C348 );
+set D350 = ( PRIM:CompSeq C348 );
+L1780: ( D345 `1 ) = D347 by L1699;
+L1781: ( D345 `2 ) c= D348;
+L1782: ( D345 `2 ) c= ( C348 .edgesBetween ( D345 `1 ) ) by L1781 , L1780 , GLIB_000:34;
+L1783: ( the_Vertices_of C349 ) = D347 by L1780 , L1782 , GLIB_000:def 37;
+L1784: ( the_Edges_of C349 ) = ( D345 `2 ) by L1780 , L1782 , GLIB_000:def 37;
+L1785: C349 is  Tree-like by L1658;
+L1786:
+now
+set D351 = { B295 where B295 is (Element of ( C348 .allWSubgraphs() )) : B295 is (minimumSpanningTree of C348) };
+L1787:
+now
+let C350 being set;
+assume L1788: C350 in D351;
+L1789: (ex B296 being (Element of ( C348 .allWSubgraphs() )) st (C350 = B296 & B296 is (minimumSpanningTree of C348))) by L1788;
+thus L1790: C350 in ( C348 .allWSubgraphs() ) by L1789;
+end;
+reconsider D352 = D351 as  finite (Subset of ( C348 .allWSubgraphs() )) by L1787 , TARSKI:def 3;
+defpred S31[  finite _Graph , Nat ] means ((not ( ( D350 . ( $2 + 1 ) ) `2 ) c= ( the_Edges_of $1 )) & (for B297 being Nat holds (B297 <= $2 implies ( ( D350 . B297 ) `2 ) c= ( the_Edges_of $1 ))));
+defpred S32[  finite _Graph ,  finite _Graph ] means (( card ( ( the_Edges_of $1 ) /\ ( the_Edges_of C349 ) ) ) > ( card ( ( the_Edges_of $2 ) /\ ( the_Edges_of C349 ) ) ) or (( card ( ( the_Edges_of $1 ) /\ ( the_Edges_of C349 ) ) ) = ( card ( ( the_Edges_of $2 ) /\ ( the_Edges_of C349 ) ) ) & (for B298 , B299 being Nat holds ((S31[ $1 , B298 ] & S31[ $2 , B299 ]) implies B298 >= B299))));
+L1791: ( C348 .edgesBetween D347 ) = D348 by GLIB_000:34;
+L1792:
+now
+set D353 = the (minimumSpanningTree of C348);
+set D354 = ( D353 | ( WGraphSelectors ) );
+L1793: (D354 == D353 & ( the_Weight_of D354 ) = ( the_Weight_of D353 )) by L274;
+reconsider D355 = D354 as (minimumSpanningTree of C348) by L1793 , L1751;
+L1794: ( dom D355 ) = ( WGraphSelectors ) by L286;
+L1795: D355 in ( C348 .allWSubgraphs() ) by L1794 , L289;
+L1796: D355 in D352 by L1795;
+thus L1797: D352 <> ( {} ) by L1796;
+end;
+reconsider D356 = D352 as non  empty  finite (Subset of ( C348 .allWSubgraphs() )) by L1792;
+assume L1798: (not C349 is (minimumSpanningTree of C348));
+L1799:
+now
+let C351 being (Element of D356);
+L1800: C351 in D356;
+L1801: (ex B300 being (Element of ( C348 .allWSubgraphs() )) st (C351 = B300 & B300 is (minimumSpanningTree of C348))) by L1800;
+reconsider D357 = C351 as (minimumSpanningTree of C348) by L1801;
+defpred S33[ Nat ] means (not ( ( D350 . $1 ) `2 ) c= ( the_Edges_of D357 ));
+L1802: ( the_Vertices_of C349 ) = ( the_Vertices_of D357 ) by L1783 , GLIB_000:def 33;
+L1803:
+now
+assume L1804: ( the_Edges_of C349 ) = ( the_Edges_of D357 );
+L1805: ( the_Weight_of C349 ) = ( D349 | ( the_Edges_of C349 ) ) by GLIB_003:def 10
+.= ( the_Weight_of D357 ) by L1804 , GLIB_003:def 10;
+thus L1806: contradiction by L1805 , L1798 , L1802 , L1804 , L1751 , GLIB_000:86;
+end;
+L1807:
+now
+assume L1808: ( the_Edges_of C349 ) c= ( the_Edges_of D357 );
+L1809: ( the_Edges_of C349 ) c< ( the_Edges_of D357 ) by L1808 , L1803 , XBOOLE_0:def 8;
+L1810: ( ( C349 .size() ) + 1 ) < ( ( D357 .size() ) + 1 ) by L1809 , CARD_2:48 , XREAL_1:8;
+L1811: ( C349 .order() ) < ( ( D357 .size() ) + 1 ) by L1810 , L1785 , GLIB_002:46;
+L1812: ( C349 .order() ) = ( D357 .order() ) by L1783 , GLIB_000:def 33;
+thus L1813: contradiction by L1812 , L1811 , GLIB_002:46;
+end;
+L1814: (ex B301 being Nat st S33[ B301 ]) by L1807 , L1784;
+consider C352 being Nat such that L1815: (S33[ C352 ] & (for B302 being Nat holds (S33[ B302 ] implies C352 <= B302))) from NAT_1:sch 5(L1814);
+L1816:
+now
+assume L1817: C352 = ( 0 );
+L1818: (not ( ( PRIM:Init C348 ) `2 ) c= ( the_Edges_of D357 )) by L1817 , L1815 , L1238;
+L1819: ( ( PRIM:Init C348 ) `2 ) = ( {} ) by MCART_1:7;
+thus L1820: contradiction by L1819 , L1818 , XBOOLE_1:2;
+end;
+consider C353 being Nat such that L1821: ( C353 + 1 ) = C352 by L1816 , NAT_1:6;
+L1822: ( ( C353 + 1 ) - 1 ) < ( C352 - ( 0 ) ) by L1821 , XREAL_1:15;
+L1823: ( ( D350 . C353 ) `2 ) c= ( the_Edges_of D357 ) by L1822 , L1815;
+L1824:
+now
+let C354 being Nat;
+assume L1825: C354 <= C353;
+L1826: ( ( D350 . C354 ) `2 ) c= ( ( D350 . C353 ) `2 ) by L1825 , L1510;
+thus L1827: ( ( D350 . C354 ) `2 ) c= ( the_Edges_of D357 ) by L1826 , L1823 , XBOOLE_1:1;
+end;
+thus L1828: (ex B303 being Nat st S31[ C351 , B303 ]) by L1824 , L1815 , L1821;
+end;
+L1829:
+now
+let C355 , C356 , C357 being (Element of D356);
+assume that
+L1830: S32[ C355 , C356 ]
+and
+L1831: S32[ C356 , C357 ];
+L1832: C356 in D356;
+consider C358 being (WSubgraph of C348) such that L1833: C358 = C356 and L1834: ( dom C358 ) = ( WGraphSelectors ) by L1832 , L289;
+set D358 = ( card ( ( the_Edges_of C358 ) /\ ( the_Edges_of C349 ) ) );
+L1835: C355 in D356;
+consider C359 being (WSubgraph of C348) such that L1836: C359 = C355 and L1837: ( dom C359 ) = ( WGraphSelectors ) by L1835 , L289;
+L1838: C357 in D356;
+consider C360 being (WSubgraph of C348) such that L1839: C360 = C357 and L1840: ( dom C360 ) = ( WGraphSelectors ) by L1838 , L289;
+set D359 = ( card ( ( the_Edges_of C360 ) /\ ( the_Edges_of C349 ) ) );
+set D360 = ( card ( ( the_Edges_of C359 ) /\ ( the_Edges_of C349 ) ) );
+L1841:
+now
+per cases  by L1830 , L1836 , L1833;
+suppose L1842: D360 > D358;
+
+L1843:
+now
+per cases  by L1831 , L1833 , L1839;
+suppose L1844: D358 > D359;
+
+thus L1845: S32[ C355 , C357 ] by L1844 , L1836 , L1839 , L1842 , XXREAL_0:2;
+end;
+suppose L1846: (D358 = D359 & (for B304 , B305 being Nat holds ((S31[ C358 , B304 ] & S31[ C360 , B305 ]) implies B304 >= B305)));
+
+thus L1847: S32[ C355 , C357 ] by L1846 , L1836 , L1839 , L1842;
+end;
+end;
+thus L1849: S32[ C355 , C357 ] by L1843;
+end;
+suppose L1850: (D360 = D358 & (for B306 , B307 being Nat holds ((S31[ C359 , B306 ] & S31[ C358 , B307 ]) implies B306 >= B307)));
+
+L1851:
+now
+per cases  by L1831 , L1833 , L1839;
+suppose L1852: D358 > D359;
+
+thus L1853: S32[ C355 , C357 ] by L1852 , L1836 , L1839 , L1850;
+end;
+suppose L1854: (D358 = D359 & (for B308 , B309 being Nat holds ((S31[ C358 , B308 ] & S31[ C360 , B309 ]) implies B308 >= B309)));
+
+consider C361 being Nat such that L1855: S31[ C356 , C361 ] by L1799;
+L1856:
+now
+let C362 , C363 being Nat;
+assume L1857: (S31[ C359 , C362 ] & S31[ C360 , C363 ]);
+L1858: (C362 >= C361 & C361 >= C363) by L1857 , L1833 , L1850 , L1854 , L1855;
+thus L1859: C362 >= C363 by L1858 , XXREAL_0:2;
+end;
+thus L1860: S32[ C355 , C357 ] by L1856 , L1836 , L1839 , L1850 , L1854;
+end;
+end;
+thus L1862: S32[ C355 , C357 ] by L1851;
+end;
+end;
+thus L1864: S32[ C355 , C357 ] by L1841;
+end;
+L1865: (for B310 , B311 , B312 being (Element of D356) holds ((S32[ B310 , B311 ] & S32[ B311 , B312 ]) implies S32[ B310 , B312 ])) by L1829;
+L1866:
+now
+let C364 being (Element of D356);
+let C365 , C366 being Nat;
+assume L1867: (S31[ C364 , C365 ] & S31[ C364 , C366 ]);
+L1868: ( C366 + 1 ) > C365 by L1867;
+L1869: C366 >= C365 by L1868 , NAT_1:13;
+L1870: ( C365 + 1 ) > C366 by L1867;
+L1871: C365 >= C366 by L1870 , NAT_1:13;
+thus L1872: C365 = C366 by L1871 , L1869 , XXREAL_0:1;
+end;
+L1873:
+now
+let C367 , C368 being (Element of D356);
+L1874: C367 in D356;
+consider C369 being (WSubgraph of C348) such that L1875: C369 = C367 and L1876: ( dom C369 ) = ( WGraphSelectors ) by L1874 , L289;
+set D361 = ( card ( ( the_Edges_of C369 ) /\ ( the_Edges_of C349 ) ) );
+L1877: C368 in D356;
+consider C370 being (WSubgraph of C348) such that L1878: C370 = C368 and L1879: ( dom C370 ) = ( WGraphSelectors ) by L1877 , L289;
+set D362 = ( card ( ( the_Edges_of C370 ) /\ ( the_Edges_of C349 ) ) );
+L1880:
+now
+per cases  by XXREAL_0:1;
+suppose L1881: D361 < D362;
+
+thus L1882: (S32[ C367 , C368 ] or S32[ C368 , C367 ]) by L1881 , L1875 , L1878;
+end;
+suppose L1883: D362 = D361;
+
+consider C371 being Nat such that L1884: S31[ C367 , C371 ] by L1799;
+consider C372 being Nat such that L1885: S31[ C368 , C372 ] by L1799;
+L1886:
+now
+per cases ;
+suppose L1887: C371 >= C372;
+
+L1888:
+now
+let C373 , C374 being Nat;
+assume that
+L1889: S31[ C367 , C373 ]
+and
+L1890: S31[ C368 , C374 ];
+L1891: C373 = C371 by L1866 , L1884 , L1889;
+thus L1892: C373 >= C374 by L1891 , L1866 , L1885 , L1887 , L1890;
+end;
+thus L1893: (S32[ C367 , C368 ] or S32[ C368 , C367 ]) by L1888 , L1875 , L1878 , L1883;
+end;
+suppose L1894: C371 < C372;
+
+L1895:
+now
+let C375 , C376 being Nat;
+assume that
+L1896: S31[ C367 , C375 ]
+and
+L1897: S31[ C368 , C376 ];
+L1898: C375 = C371 by L1866 , L1884 , L1896;
+thus L1899: C375 <= C376 by L1898 , L1866 , L1885 , L1894 , L1897;
+end;
+thus L1900: (S32[ C367 , C368 ] or S32[ C368 , C367 ]) by L1895 , L1875 , L1878 , L1883;
+end;
+end;
+thus L1902: (S32[ C367 , C368 ] or S32[ C368 , C367 ]) by L1886;
+end;
+suppose L1903: D361 > D362;
+
+thus L1904: (S32[ C367 , C368 ] or S32[ C368 , C367 ]) by L1903 , L1875 , L1878;
+end;
+end;
+thus L1906: (S32[ C367 , C368 ] or S32[ C368 , C367 ]) by L1880;
+end;
+L1907: (for B313 , B314 being (Element of D356) holds (S32[ B313 , B314 ] or S32[ B314 , B313 ])) by L1873;
+L1908: (D356 is  finite & D356 <> ( {} ) & D356 c= D356);
+consider C377 being (Element of D356) such that L1909: (C377 in D356 & (for B315 being (Element of D356) holds (B315 in D356 implies S32[ C377 , B315 ]))) from CQC_SIM1:sch 4(L1908 , L1907 , L1865);
+L1910: (ex B316 being (Element of ( C348 .allWSubgraphs() )) st (C377 = B316 & B316 is (minimumSpanningTree of C348))) by L1909;
+reconsider D363 = C377 as (minimumSpanningTree of C348) by L1910;
+defpred S34[ Nat ] means (not ( ( D350 . $1 ) `2 ) c= ( the_Edges_of D363 ));
+L1911: ( the_Vertices_of C349 ) = ( the_Vertices_of D363 ) by L1783 , GLIB_000:def 33;
+L1912:
+now
+assume L1913: ( the_Edges_of C349 ) = ( the_Edges_of D363 );
+L1914: ( the_Weight_of C349 ) = ( D349 | ( the_Edges_of C349 ) ) by GLIB_003:def 10
+.= ( the_Weight_of D363 ) by L1913 , GLIB_003:def 10;
+thus L1915: contradiction by L1914 , L1798 , L1911 , L1913 , L1751 , GLIB_000:86;
+end;
+L1916:
+now
+assume L1917: ( the_Edges_of C349 ) c= ( the_Edges_of D363 );
+L1918: ( the_Edges_of C349 ) c< ( the_Edges_of D363 ) by L1917 , L1912 , XBOOLE_0:def 8;
+L1919: ( ( C349 .size() ) + 1 ) < ( ( D363 .size() ) + 1 ) by L1918 , CARD_2:48 , XREAL_1:8;
+L1920: ( C349 .order() ) < ( ( D363 .size() ) + 1 ) by L1919 , L1785 , GLIB_002:46;
+L1921: ( C349 .order() ) = ( D363 .order() ) by L1783 , GLIB_000:def 33;
+thus L1922: contradiction by L1921 , L1920 , GLIB_002:46;
+end;
+L1923: (ex B317 being Nat st S34[ B317 ]) by L1916 , L1784;
+consider C378 being Nat such that L1924: (S34[ C378 ] & (for B318 being Nat holds (S34[ B318 ] implies C378 <= B318))) from NAT_1:sch 5(L1923);
+L1925:
+now
+assume L1926: C378 = ( 0 );
+L1927: (not ( ( PRIM:Init C348 ) `2 ) c= ( the_Edges_of D363 )) by L1926 , L1924 , L1238;
+L1928: ( ( PRIM:Init C348 ) `2 ) = ( {} ) by MCART_1:7;
+thus L1929: contradiction by L1928 , L1927 , XBOOLE_1:2;
+end;
+consider C379 being Nat such that L1930: C378 = ( C379 + 1 ) by L1925 , NAT_1:6;
+set D364 = ( D350 . C379 );
+set D365 = ( D350 . C378 );
+L1931: ( ( C379 + 1 ) - 1 ) < ( C378 - ( 0 ) ) by L1930 , XREAL_1:15;
+L1932: ( D364 `2 ) c= ( the_Edges_of D363 ) by L1931 , L1924;
+set D366 = ( PRIM:NextBestEdges D364 );
+set D367 = ( choose D366 );
+L1933: D365 = ( PRIM:Step D364 ) by L1930 , L1238;
+L1934: D366 <> ( {} ) by L1933 , L1924 , L1932 , L1201;
+L1935: D367 SJoins ( D364 `1 ) , ( D347 \ ( D364 `1 ) ) , C348 by L1934 , L1180;
+L1936: (ex B319 being (Vertex of C348) st ((not B319 in ( D364 `1 )) & D365 = [ ( ( D364 `1 ) \/ { B319 } ) , ( ( D364 `2 ) \/ { D367 } ) ])) by L1933 , L1934 , L1276;
+L1937: ( D365 `2 ) = ( ( D364 `2 ) \/ { D367 } ) by L1936 , MCART_1:7;
+L1938: (not { D367 } c= ( the_Edges_of D363 )) by L1937 , L1924 , L1932 , XBOOLE_1:8;
+L1939: (not D367 in ( the_Edges_of D363 )) by L1938 , ZFMISC_1:31;
+set D368 = the (inducedWSubgraph of C348 , D347 , ( ( the_Edges_of D363 ) \/ { D367 } ));
+L1940: D367 in D366 by L1934;
+L1941: { D367 } c= D348 by L1940 , ZFMISC_1:31;
+L1942: ( ( the_Edges_of D363 ) \/ { D367 } ) c= D348 by L1941 , XBOOLE_1:8;
+L1943: (D347 c= D347 & ( ( the_Edges_of D363 ) \/ { D367 } ) c= ( C348 .edgesBetween D347 )) by L1942 , GLIB_000:34;
+L1944: ( the_Vertices_of D368 ) = D347 by L1943 , GLIB_000:def 37;
+L1945: D347 = ( the_Vertices_of D363 ) by GLIB_000:def 33;
+L1946: (D347 c= D347 & D363 is (inducedWSubgraph of C348 , D347 , ( the_Edges_of D363 ))) by L1945 , L1791 , GLIB_000:def 37;
+L1947: ( D368 .cost() ) = ( ( D363 .cost() ) + ( D349 . D367 ) ) by L1946 , L1940 , L1939 , L1791 , L419;
+set D369 = ( ( the_Edges_of D363 ) /\ ( the_Edges_of C349 ) );
+L1948: ( D365 `2 ) c= ( D345 `2 ) by L1759;
+L1949: D367 in { D367 } by TARSKI:def 1;
+L1950: D367 in ( D365 `2 ) by L1949 , L1937 , XBOOLE_0:def 3;
+L1951: ( { D367 } /\ ( the_Edges_of C349 ) ) = { D367 } by L1950 , L1784 , L1948 , ZFMISC_1:46;
+L1952:
+now
+assume L1953: ( D369 /\ { D367 } ) <> ( {} );
+consider C380 being set such that L1954: C380 in ( D369 /\ { D367 } ) by L1953 , XBOOLE_0:def 1;
+L1955: C380 in { D367 } by L1954 , XBOOLE_0:def 4;
+L1956: C380 = D367 by L1955 , TARSKI:def 1;
+L1957: C380 in D369 by L1954 , XBOOLE_0:def 4;
+L1958: C380 in ( the_Edges_of D363 ) by L1957 , XBOOLE_0:def 4;
+thus L1959: contradiction by L1958 , L1938 , L1956 , ZFMISC_1:31;
+end;
+L1960: D369 misses { D367 } by L1952 , XBOOLE_0:def 7;
+set D370 = ( ( the_Source_of D368 ) . D367 );
+set D371 = ( ( the_Target_of D368 ) . D367 );
+set D372 = ( D364 `1 );
+L1961: ( the_Weight_of D368 ) = ( D349 | ( the_Edges_of D368 ) ) by GLIB_003:def 10;
+L1962: D347 = ( the_Vertices_of D363 ) by GLIB_000:def 33;
+reconsider D373 = D372 as non  empty (Subset of ( the_Vertices_of D363 )) by L1962 , L1304;
+L1963: ( the_Edges_of D368 ) = ( ( the_Edges_of D363 ) \/ { D367 } ) by L1943 , GLIB_000:def 37;
+L1964: ( the_Vertices_of D363 ) c= ( the_Vertices_of D368 ) by L1944;
+reconsider D374 = D363 as  connected (Subgraph of D368) by L1964 , L1963 , GLIB_000:44 , XBOOLE_1:7;
+L1965: D367 in { D367 } by TARSKI:def 1;
+L1966: D367 in ( the_Edges_of D368 ) by L1965 , L1963 , XBOOLE_0:def 3;
+L1967: ( the_Vertices_of D368 ) = ( the_Vertices_of D363 ) by L1944 , GLIB_000:def 33;
+reconsider D375 = D370 , D376 = D371 as (Vertex of D363) by L1967 , L1966 , FUNCT_2:5;
+consider C381 being (Walk of D374) such that L1968: C381 is_Walk_from D376 , D375 by GLIB_002:def 1;
+set D377 = the (Path of C381);
+reconsider D378 = D377 as (Path of D368) by GLIB_001:175;
+L1969: D377 is_Walk_from D376 , D375 by L1968 , GLIB_001:160;
+L1970: D378 is_Walk_from D376 , D375 by L1969 , GLIB_001:19;
+L1971:
+now
+reconsider D379 = D378 as (Walk of D363);
+let C382 being  odd (Element of ( NAT ));
+assume that
+L1972: (1 < C382 & C382 <= ( len D378 ))
+and
+L1973: ( D378 . C382 ) = D376;
+L1974: D376 = ( D378 .first() ) by L1970 , GLIB_001:def 23
+.= ( D378 . ( ( 2 * ( 0 ) ) + 1 ) ) by GLIB_001:def 6;
+L1975: C382 = ( len D378 ) by L1974 , L1972 , L1973 , GLIB_001:def 28;
+L1976: ( D378 .last() ) = D376 by L1975 , L1973 , GLIB_001:def 7
+.= ( D378 .first() ) by L1970 , GLIB_001:def 23;
+L1977: D378 is  closed by L1976 , GLIB_001:def 24;
+L1978: D379 is  closed by L1977 , GLIB_001:176;
+L1979: D379 is non  trivial by L1972 , GLIB_001:126;
+L1980: D379 is  Cycle-like by L1979 , L1978 , GLIB_001:def 31;
+thus L1981: contradiction by L1980 , GLIB_002:def 2;
+end;
+L1982: D367 Joins D375 , D376 , D368 by L1966 , GLIB_000:def 13;
+L1983: D367 Joins ( D378 .last() ) , D376 , D368 by L1982 , L1970 , GLIB_001:def 23;
+L1984: D367 Joins D375 , D376 , C348 by L1982 , GLIB_000:72;
+L1985: D367 Joins D375 , D376 , D346 by L1984 , L1784 , L1950 , L1948 , GLIB_000:73;
+L1986: ((( ( the_Source_of C349 ) . D367 ) = D375 & ( ( the_Target_of C349 ) . D367 ) = D376) or (( ( the_Target_of C349 ) . D367 ) = D375 & ( ( the_Source_of C349 ) . D367 ) = D376)) by L1985 , GLIB_000:def 13;
+L1987: D375 <> D376 by L1986 , L1784 , L1950 , L1948 , L1985 , GLIB_000:def 18;
+L1988: D375 <> ( D378 .first() ) by L1987 , L1970 , GLIB_001:def 23;
+L1989: ( D378 .last() ) <> ( D378 .first() ) by L1988 , L1970 , GLIB_001:def 23;
+L1990: D378 is  open by L1989 , GLIB_001:def 24;
+L1991: ( D377 .edges() ) c= ( the_Edges_of D363 );
+L1992: ( D378 .edges() ) c= ( the_Edges_of D363 ) by L1991 , GLIB_001:110;
+L1993: (not D367 in ( D378 .edges() )) by L1992 , L1938 , ZFMISC_1:31;
+L1994: ( D378 .addEdge D367 ) is  Path-like by L1993 , L1990 , L1983 , L1971 , GLIB_001:150;
+L1995: ( D378 .addEdge D367 ) is_Walk_from D376 , D376 by L1970 , L1982 , GLIB_001:66;
+L1996: ( D378 .addEdge D367 ) is  closed by L1995 , GLIB_001:119;
+L1997: ( the_Vertices_of D363 ) c= ( the_Vertices_of D368 ) by L1944;
+reconsider D380 = D363 as  connected (Subgraph of D368) by L1997 , L1963 , GLIB_000:44 , XBOOLE_1:7;
+L1998: ( the_Vertices_of D380 ) = ( the_Vertices_of D368 ) by L1944 , GLIB_000:def 33;
+L1999: D380 is  spanning by L1998 , GLIB_000:def 33;
+L2000: D368 is  connected by L1999 , GLIB_002:23;
+L2001: D376 = ( D378 . 1 ) by L1969 , GLIB_001:17;
+set D381 = ( D378 .addEdge D367 );
+L2002: D375 = ( D378 . ( len D378 ) ) by L1969 , GLIB_001:17;
+L2003: (( ( the_Source_of C348 ) . D367 ) = D375 & ( ( the_Target_of C348 ) . D367 ) = D376) by L1966 , GLIB_000:def 32;
+L2004:
+now
+per cases  by L1935 , L2003 , GLIB_000:def 15;
+suppose L2005: (D375 in ( D364 `1 ) & D376 in ( D347 \ ( D364 `1 ) ));
+
+L2006: (( len D381 ) = ( ( len D378 ) + 2 ) & ( D381 . ( ( len D378 ) + 1 ) ) = D367) by L1983 , GLIB_001:64 , GLIB_001:65;
+defpred S35[ Nat ] means ($1 is  odd & $1 <= ( len D378 ) & ( D378 . $1 ) in ( D364 `1 ));
+L2007: (ex B320 being Nat st S35[ B320 ]) by L2002 , L2005;
+consider C383 being Nat such that L2008: (S35[ C383 ] & (for B321 being Nat holds (S35[ B321 ] implies C383 <= B321))) from NAT_1:sch 5(L2007);
+reconsider D382 = C383 as  odd (Element of ( NAT )) by L2008 , ORDINAL1:def 12;
+L2009: (1 <= D382 & D382 <> 1) by L2001 , L2005 , L2008 , ABIAN:12 , XBOOLE_0:def 5;
+L2010: 1 < D382 by L2009 , XXREAL_0:1;
+L2011: ( 1 + 1 ) <= D382 by L2010 , NAT_1:13;
+reconsider D383 = ( D382 - ( 2 * 1 ) ) as  odd (Element of ( NAT )) by L2011 , INT_1:5;
+L2012: D383 < ( D382 - ( 0 ) ) by XREAL_1:15;
+L2013: D383 < ( len D378 ) by L2012 , L2008 , XXREAL_0:2;
+L2014: (not ( D378 . D383 ) in ( D364 `1 )) by L2013 , L2008 , L2012;
+set D384 = ( D378 . ( D383 + 1 ) );
+L2015: D384 in ( D378 .edges() ) by L2013 , GLIB_001:100;
+consider C384 being  even (Element of ( NAT )) such that L2016: 1 <= C384 and L2017: C384 <= ( len D378 ) and L2018: ( D378 . C384 ) = D384 by L2015 , GLIB_001:99;
+L2019: C384 in ( dom D378 ) by L2016 , L2017 , FINSEQ_3:25;
+L2020: ( D381 . C384 ) = D384 by L2019 , L1983 , L2018 , GLIB_001:65;
+take D385 = D384;
+L2021: ( D381 .edges() ) = ( ( D378 .edges() ) \/ { D367 } ) by L1983 , GLIB_001:111;
+thus L2022: D385 in ( D381 .edges() ) by L2021 , L2015 , XBOOLE_0:def 3;
+L2023: ( ( len D378 ) + 1 ) <= ( ( len D378 ) + 2 ) by XREAL_1:7;
+L2024: ( ( len D378 ) + ( 0 ) ) < ( ( len D378 ) + 1 ) by XREAL_1:8;
+L2025: C384 < ( ( len D378 ) + 1 ) by L2024 , L2017 , XXREAL_0:2;
+thus L2026: D385 <> D367 by L2025 , L1994 , L2016 , L2020 , L2006 , L2023 , GLIB_001:138;
+L2027: ( D383 + 2 ) = D382;
+L2028: D385 Joins ( D377 . D383 ) , ( D377 . D382 ) , D363 by L2027 , L2013 , GLIB_001:def 3;
+L2029: ( D377 . D383 ) in ( the_Vertices_of D363 ) by L2028 , GLIB_000:13;
+L2030: ( D377 . D383 ) in ( ( the_Vertices_of D363 ) \ ( D364 `1 ) ) by L2029 , L2014 , XBOOLE_0:def 5;
+thus L2031: D385 SJoins D373 , ( ( the_Vertices_of D363 ) \ D373 ) , D363 by L2030 , L2008 , L2028 , GLIB_000:17;
+end;
+suppose L2032: (D376 in ( D364 `1 ) & D375 in ( D347 \ ( D364 `1 ) ));
+
+L2033: (( len D381 ) = ( ( len D378 ) + 2 ) & ( D381 . ( ( len D378 ) + 1 ) ) = D367) by L1983 , GLIB_001:64 , GLIB_001:65;
+defpred S36[ Nat ] means ($1 is  odd & $1 <= ( len D378 ) & ( D378 . $1 ) in ( D347 \ ( D364 `1 ) ));
+L2034: (ex B322 being Nat st S36[ B322 ]) by L2002 , L2032;
+consider C385 being Nat such that L2035: (S36[ C385 ] & (for B323 being Nat holds (S36[ B323 ] implies C385 <= B323))) from NAT_1:sch 5(L2034);
+reconsider D386 = C385 as  odd (Element of ( NAT )) by L2035 , ORDINAL1:def 12;
+L2036: (1 <= D386 & D386 <> 1) by L2001 , L2032 , L2035 , ABIAN:12 , XBOOLE_0:def 5;
+L2037: 1 < D386 by L2036 , XXREAL_0:1;
+L2038: ( 1 + 1 ) <= D386 by L2037 , NAT_1:13;
+reconsider D387 = ( D386 - ( 2 * 1 ) ) as  odd (Element of ( NAT )) by L2038 , INT_1:5;
+L2039: D387 < ( D386 - ( 0 ) ) by XREAL_1:15;
+L2040: D387 < ( len D378 ) by L2039 , L2035 , XXREAL_0:2;
+L2041:
+now
+assume L2042: (not ( D378 . D387 ) in ( D364 `1 ));
+L2043: ( D378 . D387 ) in D347 by L1962 , L2040 , GLIB_001:7;
+L2044: ( D378 . D387 ) in ( D347 \ ( D364 `1 ) ) by L2043 , L2042 , XBOOLE_0:def 5;
+thus L2045: contradiction by L2044 , L2035 , L2039 , L2040;
+end;
+set D388 = ( D378 . ( D387 + 1 ) );
+L2046: D388 in ( D378 .edges() ) by L2040 , GLIB_001:100;
+consider C386 being  even (Element of ( NAT )) such that L2047: 1 <= C386 and L2048: C386 <= ( len D378 ) and L2049: ( D378 . C386 ) = D388 by L2046 , GLIB_001:99;
+L2050: C386 in ( dom D378 ) by L2047 , L2048 , FINSEQ_3:25;
+L2051: ( D381 . C386 ) = D388 by L2050 , L1983 , L2049 , GLIB_001:65;
+take D389 = D388;
+L2052: ( D381 .edges() ) = ( ( D378 .edges() ) \/ { D367 } ) by L1983 , GLIB_001:111;
+thus L2053: D389 in ( D381 .edges() ) by L2052 , L2046 , XBOOLE_0:def 3;
+L2054: ( ( len D378 ) + 1 ) <= ( ( len D378 ) + 2 ) by XREAL_1:7;
+L2055: ( ( len D378 ) + ( 0 ) ) < ( ( len D378 ) + 1 ) by XREAL_1:8;
+L2056: C386 < ( ( len D378 ) + 1 ) by L2055 , L2048 , XXREAL_0:2;
+thus L2057: D389 <> D367 by L2056 , L1994 , L2047 , L2051 , L2033 , L2054 , GLIB_001:138;
+L2058: ( D387 + 2 ) = D386;
+L2059: D389 Joins ( D377 . D387 ) , ( D377 . D386 ) , D363 by L2058 , L2040 , GLIB_001:def 3;
+thus L2060: D389 SJoins D373 , ( ( the_Vertices_of D363 ) \ D373 ) , D363 by L2059 , L1962 , L2035 , L2041 , GLIB_000:17;
+end;
+end;
+consider C387 being set such that L2062: C387 in ( D381 .edges() ) and L2063: C387 <> D367 and L2064: C387 SJoins D373 , ( ( the_Vertices_of D363 ) \ D373 ) , D363 by L2004;
+set D390 = the  weight-inheriting  [Weighted] (removeEdge of D368 , C387);
+reconsider D391 = D390 as (WSubgraph of C348) by GLIB_003:9;
+L2065: ( D391 .order() ) = ( card D347 ) by L1944 , GLIB_000:53
+.= ( D363 .order() ) by GLIB_000:def 33;
+L2066: C387 SJoins D373 , ( D347 \ D373 ) , C348 by L1962 , L2064 , GLIB_000:72;
+L2067: ( D349 . D367 ) <= ( D349 . C387 ) by L2066 , L1934 , L1180;
+set D392 = ( D391 | ( WGraphSelectors ) );
+L2068: D392 == D391 by L274;
+L2069: ( the_Edges_of D391 ) = ( ( ( the_Edges_of D363 ) \/ { D367 } ) \ { C387 } ) by L1963 , GLIB_000:51;
+L2070: ( the_Edges_of D392 ) = ( ( ( the_Edges_of D363 ) \/ { D367 } ) \ { C387 } ) by L2069 , L2068 , GLIB_000:def 34;
+L2071: { C387 } c= ( ( the_Edges_of D363 ) \/ { D367 } ) by L1963 , L2062 , ZFMISC_1:31;
+L2072: ( D391 .size() ) = ( ( card ( ( the_Edges_of D363 ) \/ { D367 } ) ) - ( card { C387 } ) ) by L2071 , L2069 , CARD_2:44
+.= ( ( card ( ( the_Edges_of D363 ) \/ { D367 } ) ) - 1 ) by CARD_1:30
+.= ( ( ( card ( the_Edges_of D363 ) ) + 1 ) - 1 ) by L1939 , CARD_2:41
+.= ( D363 .size() );
+L2073: ( D391 .order() ) = ( ( D391 .size() ) + 1 ) by L2072 , L2065 , GLIB_002:46;
+L2074: ( the_Weight_of D392 ) = ( the_Weight_of D391 ) by L274;
+reconsider D393 = D392 as (WSubgraph of C348) by L2074 , L2068 , GLIB_003:8;
+L2075: ( the_Vertices_of D393 ) = ( the_Vertices_of D391 ) by L2068 , GLIB_000:def 34
+.= D347 by L1944 , GLIB_000:53;
+L2076: ( D378 .addEdge D367 ) is non  trivial by L1983 , GLIB_001:132;
+L2077: D381 is  Cycle-like by L2076 , L1994 , L1996 , GLIB_001:def 31;
+L2078: D391 is  connected by L2077 , L2062 , L2000 , GLIB_002:5;
+L2079: D391 is  Tree-like by L2078 , L2073 , GLIB_002:47;
+L2080: D393 is  Tree-like by L2079 , L274 , GLIB_002:48;
+reconsider D394 = D393 as  spanning  Tree-like (WSubgraph of C348) by L2080 , L2075 , GLIB_000:def 33;
+L2081: ( ( D391 .cost() ) + ( ( the_Weight_of D368 ) . C387 ) ) = ( D368 .cost() ) by L2062 , L398;
+L2082: ( D391 .cost() ) = ( ( D368 .cost() ) - ( ( the_Weight_of D368 ) . C387 ) ) by L2081;
+L2083: ( D391 .cost() ) = ( ( ( D363 .cost() ) + ( D349 . D367 ) ) - ( D349 . C387 ) ) by L2082 , L2062 , L1947 , L1961 , FUNCT_1:49;
+L2084: ( D394 .cost() ) = ( ( ( D363 .cost() ) + ( D349 . D367 ) ) - ( D349 . C387 ) ) by L2083 , L2068 , L2074 , GLIB_000:def 34;
+L2085: ( ( ( D394 .cost() ) + ( D349 . C387 ) ) - ( D349 . C387 ) ) <= ( ( ( D363 .cost() ) + ( D349 . D367 ) ) - ( D349 . D367 ) ) by L2084 , L2067 , XREAL_1:13;
+L2086:
+now
+let C388 being  spanning  Tree-like (WSubgraph of C348);
+L2087: ( D363 .cost() ) <= ( C388 .cost() ) by L1713;
+thus L2088: ( D394 .cost() ) <= ( C388 .cost() ) by L2087 , L2085 , XXREAL_0:2;
+end;
+reconsider D395 = D394 as (minimumSpanningTree of C348) by L2086 , L1713;
+set D396 = ( ( the_Edges_of D395 ) /\ ( the_Edges_of C349 ) );
+L2089: D396 = ( ( ( ( the_Edges_of D363 ) \/ { D367 } ) /\ ( the_Edges_of C349 ) ) \ ( { C387 } /\ ( the_Edges_of C349 ) ) ) by L2070 , XBOOLE_1:50;
+L2090: ( dom D395 ) = ( WGraphSelectors ) by L286;
+L2091: D395 in ( C348 .allWSubgraphs() ) by L2090 , L289;
+L2092: D395 in D356 by L2091;
+L2093:
+now
+thus L2094: (not ( ( D350 . ( C379 + 1 ) ) `2 ) c= ( the_Edges_of D363 )) by L1924 , L1930;
+let C389 being Nat;
+assume L2095: C389 <= C379;
+L2096: ( ( D350 . C389 ) `2 ) c= ( D364 `2 ) by L2095 , L1510;
+thus L2097: ( ( D350 . C389 ) `2 ) c= ( the_Edges_of D363 ) by L2096 , L1932 , XBOOLE_1:1;
+end;
+L2098:
+now
+consider C390 being Nat such that L2099: S31[ D395 , C390 ] by L1799 , L2092;
+L2100:
+now
+set D397 = ( D347 \ D373 );
+assume L2101: C387 in ( D364 `2 );
+L2102: ( D364 `2 ) c= ( C348 .edgesBetween ( D364 `1 ) ) by L1304;
+L2103: ( ( the_Target_of C348 ) . C387 ) in ( D364 `1 ) by L2102 , L2101 , GLIB_000:31;
+L2104: (not ( ( the_Target_of C348 ) . C387 ) in D397) by L2103 , XBOOLE_0:def 5;
+L2105: ( ( the_Source_of C348 ) . C387 ) in ( D364 `1 ) by L2101 , L2102 , GLIB_000:31;
+L2106: (not ( ( the_Source_of C348 ) . C387 ) in D397) by L2105 , XBOOLE_0:def 5;
+thus L2107: contradiction by L2106 , L2066 , L2104 , GLIB_000:def 15;
+end;
+L2108:
+now
+let C391 being set;
+assume L2109: C391 in ( D365 `2 );
+L2110:
+now
+per cases  by L1937 , L2109 , XBOOLE_0:def 3;
+suppose L2111: C391 in ( D364 `2 );
+
+L2112: (C391 in ( ( the_Edges_of D363 ) \/ { D367 } ) & (not C391 in { C387 })) by L2111 , L1932 , L2100 , TARSKI:def 1 , XBOOLE_0:def 3;
+thus L2113: C391 in ( the_Edges_of D395 ) by L2112 , L2070 , XBOOLE_0:def 5;
+end;
+suppose L2114: C391 in { D367 };
+
+L2115: C391 = D367 by L2114 , TARSKI:def 1;
+L2116: (not C391 in { C387 }) by L2115 , L2063 , TARSKI:def 1;
+L2117: C391 in ( ( the_Edges_of D363 ) \/ { D367 } ) by L2114 , XBOOLE_0:def 3;
+thus L2118: C391 in ( the_Edges_of D395 ) by L2117 , L2070 , L2116 , XBOOLE_0:def 5;
+end;
+end;
+thus L2120: C391 in ( the_Edges_of D395 ) by L2110;
+end;
+L2121: ( D365 `2 ) c= ( the_Edges_of D395 ) by L2108 , TARSKI:def 3;
+L2122:
+now
+assume L2123: C390 < C378;
+L2124: ( C390 + 1 ) <= C378 by L2123 , NAT_1:13;
+L2125: ( ( D350 . ( C390 + 1 ) ) `2 ) c= ( D365 `2 ) by L2124 , L1510;
+thus L2126: contradiction by L2125 , L2099 , L2121 , XBOOLE_1:1;
+end;
+assume L2127: C387 in ( the_Edges_of C349 );
+L2128:
+now
+let C392 being set;
+assume L2129: C392 in { C387 };
+L2130: C392 = C387 by L2129 , TARSKI:def 1;
+thus L2131: C392 in ( ( ( the_Edges_of D363 ) \/ { D367 } ) /\ ( the_Edges_of C349 ) ) by L2130 , L1963 , L2062 , L2127 , XBOOLE_0:def 4;
+end;
+L2132: { C387 } c= ( ( ( the_Edges_of D363 ) \/ { D367 } ) /\ ( the_Edges_of C349 ) ) by L2128 , TARSKI:def 3;
+L2133: D396 = ( ( ( ( the_Edges_of D363 ) \/ { D367 } ) /\ ( the_Edges_of C349 ) ) \ { C387 } ) by L2089 , L2127 , ZFMISC_1:46;
+L2134: ( card D396 ) = ( ( card ( ( the_Edges_of D368 ) /\ ( the_Edges_of C349 ) ) ) - ( card { C387 } ) ) by L2133 , L1963 , L2132 , CARD_2:44
+.= ( ( card ( ( the_Edges_of D368 ) /\ ( the_Edges_of C349 ) ) ) - 1 ) by CARD_1:30
+.= ( ( card ( D369 \/ { D367 } ) ) - 1 ) by L1963 , L1951 , XBOOLE_1:23
+.= ( ( ( card D369 ) + ( card { D367 } ) ) - 1 ) by L1960 , CARD_2:40
+.= ( ( ( card D369 ) + 1 ) - 1 ) by CARD_1:30
+.= ( card D369 );
+L2135: C379 >= C390 by L2134 , L1909 , L2092 , L2093 , L2099;
+L2136: ( ( C379 + 1 ) - 1 ) < ( C378 - ( 0 ) ) by L1930 , XREAL_1:15;
+thus L2137: contradiction by L2136 , L2122 , L2135 , XXREAL_0:2;
+end;
+L2138:
+now
+assume L2139: ( { C387 } /\ ( the_Edges_of C349 ) ) <> ( {} );
+consider C393 being set such that L2140: C393 in ( { C387 } /\ ( the_Edges_of C349 ) ) by L2139 , XBOOLE_0:def 1;
+L2141: (C393 in { C387 } & C393 in ( the_Edges_of C349 )) by L2140 , XBOOLE_0:def 4;
+thus L2142: contradiction by L2141 , L2098 , TARSKI:def 1;
+end;
+L2143: D396 = ( D369 \/ ( { D367 } /\ ( the_Edges_of C349 ) ) ) by L2138 , L2089 , XBOOLE_1:23;
+L2144:
+now
+assume L2145: ( D369 /\ { D367 } ) <> ( {} );
+consider C394 being set such that L2146: C394 in ( D369 /\ { D367 } ) by L2145 , XBOOLE_0:def 1;
+L2147: C394 in { D367 } by L2146 , XBOOLE_0:def 4;
+L2148: C394 = D367 by L2147 , TARSKI:def 1;
+L2149: C394 in D369 by L2146 , XBOOLE_0:def 4;
+L2150: C394 in ( the_Edges_of D363 ) by L2149 , XBOOLE_0:def 4;
+thus L2151: contradiction by L2150 , L1938 , L2148 , ZFMISC_1:31;
+end;
+L2152: D369 misses { D367 } by L2144 , XBOOLE_0:def 7;
+L2153: ( card D396 ) = ( ( card D369 ) + ( card { D367 } ) ) by L2152 , L1951 , L2143 , CARD_2:40
+.= ( ( card D369 ) + 1 ) by CARD_1:30;
+L2154: ( ( card D369 ) + ( 0 ) ) >= ( ( card D369 ) + 1 ) by L2153 , L1909 , L2092;
+thus L2155: contradiction by L2154 , XREAL_1:6;
+end;
+thus L2156: thesis by L1786;
+end;

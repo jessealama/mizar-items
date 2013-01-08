@@ -1,0 +1,1016 @@
+:: Context-Free Grammar - Part 1
+::  by Patricia L. Carlson and Grzegorz Bancerek
+::
+:: Received February 21, 1992
+:: Copyright (c) 1992-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, STRUCT_0, RELAT_1, XBOOLE_0, SUBSET_1, FINSEQ_1,
+      TDGROUP, TARSKI, ORDINAL4, ARYTM_3, CARD_1, FUNCT_1, XXREAL_0, NAT_1,
+      ZFMISC_1, ORDINAL1, FINSET_1, LANG1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, ORDINAL1, NUMBERS, NAT_1,
+      DOMAIN_1, RELAT_1, STRUCT_0, FUNCT_1, FINSEQ_1, FINSET_1, RELSET_1,
+      PARTFUN1, FUNCT_2, FINSEQ_2, XXREAL_0, PRE_POLY;
+ constructors PARTFUN1, DOMAIN_1, XXREAL_0, XREAL_0, NAT_1, FINSEQ_2, STRUCT_0,
+      RELSET_1, PRE_POLY;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_1, FUNCT_2, FINSET_1,
+      XXREAL_0, XREAL_0, FINSEQ_1, STRUCT_0, ORDINAL1, CARD_1, RELSET_1;
+ requirements NUMERALS, REAL, BOOLE, SUBSET, ARITHM;
+ definitions XBOOLE_0, TARSKI, RELAT_1, STRUCT_0, ORDINAL1;
+ theorems TARSKI, ZFMISC_1, RELAT_1, FINSEQ_1, NAT_1, RELSET_1, TREES_2,
+      FUNCT_2, FINSEQ_3, XBOOLE_0, XBOOLE_1, XREAL_1, XXREAL_0, ORDINAL1,
+      XTUPLE_0;
+ schemes NAT_1, FUNCT_2;
+
+begin
+definition
+struct (1-sorted) DTConstrStr(# carrier -> set , Rules -> (Relation of the carrier , ( the carrier * )) #);
+end;
+registration
+cluster non  empty  strict for DTConstrStr;
+existence
+proof
+set D1 = the non  empty set;
+set D2 = the (Relation of D1 , ( D1 * ));
+take DTConstrStr (# D1 , D2 #);
+thus L2: (the carrier of DTConstrStr (# D1 , D2 #)) is non  empty;
+thus L3: thesis;
+end;
+end;
+definition
+struct (DTConstrStr) GrammarStr(# carrier -> set , InitialSym -> (Element of the carrier) , Rules -> (Relation of the carrier , ( the carrier * )) #);
+end;
+registration
+cluster non  empty for GrammarStr;
+existence
+proof
+set D3 = the non  empty set;
+set D4 = the (Relation of D3 , ( D3 * ));
+set D5 = the (Element of D3);
+take GrammarStr (# D3 , D5 , D4 #);
+thus L6: (the carrier of GrammarStr (# D3 , D5 , D4 #)) is non  empty;
+end;
+end;
+definition
+let C1 being DTConstrStr;
+mode Symbol of C1
+ is (Element of C1);
+mode String of C1
+ is (Element of ( (the carrier of C1) * ));
+end;
+definition
+let R1 being non  empty DTConstrStr;
+let R2 being (Symbol of R1);
+let C2 being FinSequence;
+pred R2 ==> C2
+means
+:L9: [ R2 , C2 ] in (the Rules of R1)
+;end;
+definition
+let R1 being non  empty DTConstrStr;
+func Terminals R1 equals 
+{ R2 where R2 is (Symbol of R1) : (not (ex B1 being FinSequence st R2 ==> B1)) };
+coherence;
+func NonTerminals R1 equals 
+{ R2 where R2 is (Symbol of R1) : (ex B2 being FinSequence st R2 ==> B2) };
+coherence;
+end;
+theorem
+L12: (for R1 being non  empty DTConstrStr holds ( ( Terminals R1 ) \/ ( NonTerminals R1 ) ) = (the carrier of R1))
+proof
+let R1 being non  empty DTConstrStr;
+thus L13: ( ( Terminals R1 ) \/ ( NonTerminals R1 ) ) c= (the carrier of R1)
+proof
+let C3 being set;
+assume L14: C3 in ( ( Terminals R1 ) \/ ( NonTerminals R1 ) );
+L15: (C3 in ( Terminals R1 ) or C3 in ( NonTerminals R1 )) by L14 , XBOOLE_0:def 3;
+L16: ((ex R2 being (Symbol of R1) st (C3 = R2 & (not (ex B3 being FinSequence st R2 ==> B3)))) or (ex R2 being (Symbol of R1) st (C3 = R2 & (ex B4 being FinSequence st R2 ==> B4)))) by L15;
+thus L17: thesis by L16;
+end;
+
+let C4 being set;
+assume L18: C4 in (the carrier of R1);
+reconsider D6 = C4 as (Symbol of R1) by L18;
+L19: ((not (ex B5 being FinSequence st D6 ==> B5)) or (ex B6 being FinSequence st D6 ==> B6));
+L20: (C4 in ( Terminals R1 ) or C4 in ( NonTerminals R1 )) by L19;
+thus L21: thesis by L20 , XBOOLE_0:def 3;
+end;
+definition
+let R1 being non  empty DTConstrStr;
+let R3 being (String of R1);
+let R4 being (String of R1);
+pred R3 ==> R4
+means
+(ex B7 , B8 , B9 being (String of R1) st (ex R2 being (Symbol of R1) st (R3 = ( ( B7 ^ <* R2 *> ) ^ B8 ) & R4 = ( ( B7 ^ B9 ) ^ B8 ) & R2 ==> B9)))
+;end;
+theorem
+L23: (for R1 being non  empty DTConstrStr holds (for R2 being (Symbol of R1) holds (for R3 being (String of R1) holds (for R5 being (String of R1) holds (for R6 being (String of R1) holds (R2 ==> R3 implies ( ( R5 ^ <* R2 *> ) ^ R6 ) ==> ( ( R5 ^ R3 ) ^ R6 )))))))
+proof
+let R1 being non  empty DTConstrStr;
+let R2 being (Symbol of R1);
+let R3 being (String of R1);
+let R5 being (String of R1);
+let R6 being (String of R1);
+assume L24: R2 ==> R3;
+take R5;
+take R6;
+take R3;
+take R2;
+thus L25: thesis by L24;
+end;
+theorem
+L26: (for R1 being non  empty DTConstrStr holds (for R2 being (Symbol of R1) holds (for R3 being (String of R1) holds (R2 ==> R3 implies <* R2 *> ==> R3))))
+proof
+let R1 being non  empty DTConstrStr;
+let R2 being (Symbol of R1);
+let R3 being (String of R1);
+assume L27: R2 ==> R3;
+take D7 = ( <*> (the carrier of R1) );
+take D8 = ( <*> (the carrier of R1) );
+take D9 = R3;
+take R2;
+thus L28: <* R2 *> = ( D7 ^ <* R2 *> ) by FINSEQ_1:34
+.= ( ( D7 ^ <* R2 *> ) ^ D8 ) by FINSEQ_1:34;
+thus L29: R3 = ( D7 ^ D9 ) by FINSEQ_1:34
+.= ( ( D7 ^ D9 ) ^ D8 ) by FINSEQ_1:34;
+thus L30: thesis by L27;
+end;
+theorem
+L31: (for R1 being non  empty DTConstrStr holds (for R2 being (Symbol of R1) holds (for R3 being (String of R1) holds (<* R2 *> ==> R3 implies R2 ==> R3))))
+proof
+let R1 being non  empty DTConstrStr;
+let R2 being (Symbol of R1);
+let R3 being (String of R1);
+given C5 , C6 , C7 being (String of R1) , C8 being (Symbol of R1) such that
+L32: <* R2 *> = ( ( C5 ^ <* C8 *> ) ^ C6 )
+and
+L33: R3 = ( ( C5 ^ C7 ) ^ C6 )
+and
+L34: C8 ==> C7;
+
+L35: ( len <* C8 *> ) = 1 by FINSEQ_1:40;
+L36: ( len ( C5 ^ <* C8 *> ) ) = ( ( len C5 ) + ( len <* C8 *> ) ) by FINSEQ_1:22;
+L37: ( len <* R2 *> ) = ( ( len ( C5 ^ <* C8 *> ) ) + ( len C6 ) ) by L32 , FINSEQ_1:22;
+L38: ( 1 + ( 0 ) ) = ( 1 + ( ( len C5 ) + ( len C6 ) ) ) by L37 , L35 , L36 , FINSEQ_1:40;
+L39: C6 = ( {} ) by L38 , NAT_1:7;
+L40: ( C7 ^ ( {} ) ) = C7 by FINSEQ_1:34;
+L41: ( ( {} ) ^ C7 ) = C7 by FINSEQ_1:34;
+L42: ( <* R2 *> . 1 ) = R2 by FINSEQ_1:40;
+L43: ( <* C8 *> ^ ( {} ) ) = <* C8 *> by FINSEQ_1:34;
+L44: ( ( {} ) ^ <* C8 *> ) = <* C8 *> by FINSEQ_1:34;
+L45: C5 = ( {} ) by L38 , NAT_1:7;
+thus L46: thesis by L45 , L32 , L33 , L34 , L39 , L44 , L43 , L41 , L40 , L42 , FINSEQ_1:40;
+end;
+theorem
+L47: (for R1 being non  empty DTConstrStr holds (for R3 being (String of R1) holds (for R5 being (String of R1) holds (for R6 being (String of R1) holds (R5 ==> R6 implies (( R3 ^ R5 ) ==> ( R3 ^ R6 ) & ( R5 ^ R3 ) ==> ( R6 ^ R3 )))))))
+proof
+let R1 being non  empty DTConstrStr;
+let R3 being (String of R1);
+let R5 being (String of R1);
+let R6 being (String of R1);
+given C9 , C10 , C11 being (String of R1) , C12 being (Symbol of R1) such that
+L48: R5 = ( ( C9 ^ <* C12 *> ) ^ C10 )
+and
+L49: R6 = ( ( C9 ^ C11 ) ^ C10 )
+and
+L50: C12 ==> C11;
+
+thus L51: ( R3 ^ R5 ) ==> ( R3 ^ R6 )
+proof
+take ( R3 ^ C9 );
+take C10;
+take C11;
+take C12;
+thus L52: ( R3 ^ R5 ) = ( ( R3 ^ ( C9 ^ <* C12 *> ) ) ^ C10 ) by L48 , FINSEQ_1:32
+.= ( ( ( R3 ^ C9 ) ^ <* C12 *> ) ^ C10 ) by FINSEQ_1:32;
+thus L53: ( R3 ^ R6 ) = ( ( R3 ^ ( C9 ^ C11 ) ) ^ C10 ) by L49 , FINSEQ_1:32
+.= ( ( ( R3 ^ C9 ) ^ C11 ) ^ C10 ) by FINSEQ_1:32;
+thus L54: thesis by L50;
+end;
+
+take C9;
+take ( C10 ^ R3 );
+take C11;
+take C12;
+thus L55: thesis by L48 , L49 , L50 , FINSEQ_1:32;
+end;
+definition
+let R1 being non  empty DTConstrStr;
+let R3 being (String of R1);
+let R4 being (String of R1);
+pred R4 is_derivable_from R3
+means
+:L56: (ex B10 being FinSequence st (( len B10 ) >= 1 & ( B10 . 1 ) = R3 & ( B10 . ( len B10 ) ) = R4 & (for B11 being (Element of ( NAT )) holds ((B11 >= 1 & B11 < ( len B10 )) implies (ex B12 , B13 being (String of R1) st (( B10 . B11 ) = B12 & ( B10 . ( B11 + 1 ) ) = B13 & B12 ==> B13))))))
+;end;
+theorem
+L58: (for R1 being non  empty DTConstrStr holds (for R3 being (String of R1) holds R3 is_derivable_from R3))
+proof
+let R1 being non  empty DTConstrStr;
+let R3 being (String of R1);
+take D10 = <* R3 *>;
+L59: ( len D10 ) = 1 by FINSEQ_1:40;
+thus L60: (( len D10 ) >= 1 & ( D10 . 1 ) = R3 & ( D10 . ( len D10 ) ) = R3) by L59 , FINSEQ_1:40;
+let C13 being (Element of ( NAT ));
+assume that
+L61: C13 >= 1
+and
+L62: C13 < ( len D10 );
+thus L63: thesis by L61 , L62 , FINSEQ_1:40;
+end;
+theorem
+L64: (for R1 being non  empty DTConstrStr holds (for R3 being (String of R1) holds (for R4 being (String of R1) holds (R3 ==> R4 implies R4 is_derivable_from R3))))
+proof
+let R1 being non  empty DTConstrStr;
+let R3 being (String of R1);
+let R4 being (String of R1);
+assume L65: R3 ==> R4;
+take D11 = <* R3 , R4 *>;
+L66: ( len D11 ) = 2 by FINSEQ_1:44;
+thus L67: (( len D11 ) >= 1 & ( D11 . 1 ) = R3 & ( D11 . ( len D11 ) ) = R4) by L66 , FINSEQ_1:44;
+let C14 being (Element of ( NAT ));
+assume that
+L68: C14 >= 1
+and
+L69: C14 < ( len D11 );
+take D12 = R3;
+take D13 = R4;
+L70: 2 = ( 1 + 1 );
+L71: C14 <= 1 by L70 , L66 , L69 , NAT_1:13;
+L72: C14 = 1 by L71 , L68 , XXREAL_0:1;
+thus L73: ( D11 . C14 ) = D12 by L72 , FINSEQ_1:44;
+thus L74: ( D11 . ( C14 + 1 ) ) = D13 by L72 , FINSEQ_1:44;
+thus L75: thesis by L65;
+end;
+theorem
+L76: (for R1 being non  empty DTConstrStr holds (for R5 being (String of R1) holds (for R6 being (String of R1) holds (for R7 being (String of R1) holds ((R5 is_derivable_from R6 & R6 is_derivable_from R7) implies R5 is_derivable_from R7)))))
+proof
+let R1 being non  empty DTConstrStr;
+let R5 being (String of R1);
+let R6 being (String of R1);
+let R7 being (String of R1);
+given C15 being FinSequence such that
+L77: ( len C15 ) >= 1
+and
+L78: ( C15 . 1 ) = R6
+and
+L79: ( C15 . ( len C15 ) ) = R5
+and
+L80: (for B14 being (Element of ( NAT )) holds ((B14 >= 1 & B14 < ( len C15 )) implies (ex B15 , B16 being (String of R1) st (( C15 . B14 ) = B15 & ( C15 . ( B14 + 1 ) ) = B16 & B15 ==> B16))));
+
+given C16 being FinSequence such that
+L81: ( len C16 ) >= 1
+and
+L82: ( C16 . 1 ) = R7
+and
+L83: ( C16 . ( len C16 ) ) = R6
+and
+L84: (for B17 being (Element of ( NAT )) holds ((B17 >= 1 & B17 < ( len C16 )) implies (ex B18 , B19 being (String of R1) st (( C16 . B17 ) = B18 & ( C16 . ( B17 + 1 ) ) = B19 & B18 ==> B19))));
+
+L85: C16 <> ( {} ) by L81;
+consider C17 being FinSequence, C18 being set such that L86: C16 = ( C17 ^ <* C18 *> ) by L85 , FINSEQ_1:46;
+take D14 = ( C17 ^ C15 );
+L87: ( 1 + ( len C17 ) ) >= 1 by NAT_1:11;
+L88: ( len D14 ) = ( ( len C17 ) + ( len C15 ) ) by FINSEQ_1:22;
+L89: ( len D14 ) >= ( 1 + ( len C17 ) ) by L88 , L77 , XREAL_1:7;
+thus L90: ( len D14 ) >= 1 by L89 , L87 , XXREAL_0:2;
+L91:
+now
+per cases ;
+suppose L92: C17 = ( {} );
+
+L93: D14 = C15 by L92 , FINSEQ_1:34;
+L94: C16 = <* C18 *> by L86 , L92 , FINSEQ_1:34;
+thus L95: ( D14 . 1 ) = R7 by L94 , L78 , L82 , L83 , L93 , FINSEQ_1:40;
+end;
+suppose L96: C17 <> ( {} );
+
+L97: ( ( 0 ) + 1 ) = 1;
+L98: ( len C17 ) > ( 0 ) by L96 , NAT_1:2;
+L99: ( len C17 ) >= 1 by L98 , L97 , NAT_1:13;
+L100: 1 in ( dom C17 ) by L99 , FINSEQ_3:25;
+L101: ( D14 . 1 ) = ( C17 . 1 ) by L100 , FINSEQ_1:def 7;
+thus L102: ( D14 . 1 ) = R7 by L101 , L82 , L86 , L100 , FINSEQ_1:def 7;
+end;
+end;
+thus L104: ( D14 . 1 ) = R7 by L91;
+L105: ( len C15 ) in ( dom C15 ) by L77 , FINSEQ_3:25;
+thus L106: ( D14 . ( len D14 ) ) = R5 by L105 , L79 , L88 , FINSEQ_1:def 7;
+let C19 being (Element of ( NAT ));
+assume that
+L107: C19 >= 1
+and
+L108: C19 < ( len D14 );
+L109: ( len <* C18 *> ) = 1 by FINSEQ_1:40;
+L110: ( len C16 ) = ( ( len C17 ) + 1 ) by L109 , L86 , FINSEQ_1:22;
+L111:
+now
+per cases  by XXREAL_0:1;
+suppose L112: ( C19 + 1 ) = ( len C16 );
+
+L113: 1 in ( dom C15 ) by L77 , FINSEQ_3:25;
+L114: C19 < ( len C16 ) by L112 , NAT_1:13;
+consider C20 , C21 being (String of R1) such that L115: ( C16 . C19 ) = C20 and L116: ( C16 . ( C19 + 1 ) ) = C21 and L117: C20 ==> C21 by L114 , L84 , L107;
+take D15 = C20;
+take D16 = C21;
+L118: C19 in ( dom C17 ) by L110 , L107 , L112 , FINSEQ_3:25;
+L119: ( C16 . C19 ) = ( C17 . C19 ) by L118 , L86 , FINSEQ_1:def 7;
+thus L120: (( D14 . C19 ) = D15 & ( D14 . ( C19 + 1 ) ) = D16 & D15 ==> D16) by L119 , L78 , L83 , L110 , L112 , L115 , L116 , L117 , L113 , L118 , FINSEQ_1:def 7;
+end;
+suppose L121: ( C19 + 1 ) > ( len C16 );
+
+L122: C19 >= ( len C16 ) by L121 , NAT_1:13;
+consider C22 being Nat such that L123: C19 = ( ( len C16 ) + C22 ) by L122 , NAT_1:10;
+reconsider D17 = C22 as (Element of ( NAT )) by ORDINAL1:def 12;
+L124: C19 = ( ( len C17 ) + ( 1 + D17 ) ) by L110 , L123;
+L125: ( 1 + D17 ) < ( len C15 ) by L124 , L88 , L108 , XREAL_1:6;
+consider C23 , C24 being (String of R1) such that L126: ( C15 . ( 1 + D17 ) ) = C23 and L127: ( C15 . ( ( 1 + D17 ) + 1 ) ) = C24 and L128: C23 ==> C24 by L125 , L80 , NAT_1:11;
+take D18 = C23;
+take D19 = C24;
+L129: ( ( 1 + D17 ) + 1 ) >= 1 by NAT_1:11;
+L130: ( 1 + D17 ) >= 1 by NAT_1:11;
+L131: ( 1 + D17 ) in ( dom C15 ) by L130 , L125 , FINSEQ_3:25;
+L132: ( ( 1 + D17 ) + 1 ) <= ( len C15 ) by L125 , NAT_1:13;
+L133: ( ( 1 + D17 ) + 1 ) in ( dom C15 ) by L132 , L129 , FINSEQ_3:25;
+L134: ( C19 + 1 ) = ( ( len C17 ) + ( ( 1 + D17 ) + 1 ) ) by L110 , L123;
+thus L135: (( D14 . C19 ) = D18 & ( D14 . ( C19 + 1 ) ) = D19 & D18 ==> D19) by L134 , L124 , L126 , L127 , L128 , L131 , L133 , FINSEQ_1:def 7;
+end;
+suppose L136: ( C19 + 1 ) < ( len C16 );
+
+L137: 1 <= ( 1 + C19 ) by NAT_1:11;
+L138: ( C19 + 1 ) <= ( len C17 ) by L110 , L136 , NAT_1:13;
+L139: ( C19 + 1 ) in ( dom C17 ) by L138 , L137 , FINSEQ_3:25;
+L140: ( D14 . ( C19 + 1 ) ) = ( C17 . ( C19 + 1 ) ) by L139 , FINSEQ_1:def 7;
+L141: C19 < ( len C16 ) by L136 , NAT_1:13;
+consider C25 , C26 being (String of R1) such that L142: ( C16 . C19 ) = C25 and L143: ( C16 . ( C19 + 1 ) ) = C26 and L144: C25 ==> C26 by L141 , L84 , L107;
+take D20 = C25;
+take D21 = C26;
+L145: C19 <= ( len C17 ) by L110 , L136 , XREAL_1:6;
+L146: C19 in ( dom C17 ) by L145 , L107 , FINSEQ_3:25;
+L147: ( D14 . C19 ) = ( C17 . C19 ) by L146 , FINSEQ_1:def 7;
+thus L148: (( D14 . C19 ) = D20 & ( D14 . ( C19 + 1 ) ) = D21 & D20 ==> D21) by L147 , L86 , L142 , L143 , L144 , L146 , L139 , L140 , FINSEQ_1:def 7;
+end;
+end;
+thus L150: thesis by L111;
+end;
+definition
+let C27 being non  empty GrammarStr;
+func Lang C27 equals 
+{ B20 where B20 is (Element of ( (the carrier of C27) * )) : (( rng B20 ) c= ( Terminals C27 ) & B20 is_derivable_from <* (the InitialSym of C27) *>) };
+coherence;
+end;
+theorem
+L152: (for B21 being non  empty GrammarStr holds (for B22 being (String of B21) holds (B22 in ( Lang B21 ) iff (( rng B22 ) c= ( Terminals B21 ) & B22 is_derivable_from <* (the InitialSym of B21) *>))))
+proof
+let C28 being non  empty GrammarStr;
+let C29 being (String of C28);
+L153:
+now
+assume L154: C29 in ( Lang C28 );
+L155: (ex B23 being (Element of ( (the carrier of C28) * )) st (C29 = B23 & ( rng B23 ) c= ( Terminals C28 ) & B23 is_derivable_from <* (the InitialSym of C28) *>)) by L154;
+thus L156: (( rng C29 ) c= ( Terminals C28 ) & C29 is_derivable_from <* (the InitialSym of C28) *>) by L155;
+end;
+thus L157: thesis by L153;
+end;
+definition
+let C30 , C31 being non  empty set;
+let C32 being (Element of [: C30 , C31 :]);
+redefine func {C32 } -> (Relation of C30 , C31);
+
+coherence
+proof
+L158: { C32 } c= [: C30 , C31 :];
+thus L159: thesis by L158;
+end;
+let C33 being (Element of [: C30 , C31 :]);
+redefine func {C32 , C33 } -> (Relation of C30 , C31);
+
+coherence
+proof
+L160: { C32 , C33 } c= [: C30 , C31 :];
+thus L161: thesis by L160;
+end;
+end;
+definition
+let C34 being set;
+func EmptyGrammar C34 ->  strict GrammarStr means 
+:L163: ((the carrier of it) = { C34 } & (the Rules of it) = { [ C34 , ( {} ) ] });
+existence
+proof
+reconsider D22 = C34 as (Element of { C34 }) by TARSKI:def 1;
+take GrammarStr (# { C34 } , D22 , { [ D22 , ( <*> { C34 } ) ] } #);
+thus L164: thesis;
+end;
+uniqueness
+proof
+let C35 , C36 being  strict GrammarStr;
+assume that
+L165: (the carrier of C35) = { C34 }
+and
+L166: (the Rules of C35) = { [ C34 , ( {} ) ] }
+and
+L167: (the carrier of C36) = { C34 }
+and
+L168: (the Rules of C36) = { [ C34 , ( {} ) ] };
+L169: (the InitialSym of C35) = C34 by L165 , TARSKI:def 1;
+thus L170: thesis by L169 , L165 , L166 , L167 , L168 , TARSKI:def 1;
+end;
+let C37 being set;
+func SingleGrammar (C34 , C37) ->  strict GrammarStr means 
+:L171: ((the carrier of it) = { C34 , C37 } & (the InitialSym of it) = C34 & (the Rules of it) = { [ C34 , <* C37 *> ] });
+existence
+proof
+reconsider D23 = C34 , D24 = C37 as (Element of { C34 , C37 }) by TARSKI:def 2;
+take GrammarStr (# { C34 , C37 } , D23 , { [ D23 , <* D24 *> ] } #);
+thus L172: thesis;
+end;
+uniqueness;
+func IterGrammar (C34 , C37) ->  strict GrammarStr means 
+:L173: ((the carrier of it) = { C34 , C37 } & (the InitialSym of it) = C34 & (the Rules of it) = { [ C34 , <* C37 , C34 *> ] , [ C34 , ( {} ) ] });
+existence
+proof
+reconsider D25 = C34 , D26 = C37 as (Element of { C34 , C37 }) by TARSKI:def 2;
+take GrammarStr (# { C34 , C37 } , D25 , { [ D25 , <* D26 , D25 *> ] , [ D25 , ( <*> { C34 , C37 } ) ] } #);
+thus L174: thesis;
+end;
+uniqueness;
+end;
+registration
+let C38 being set;
+cluster ( EmptyGrammar C38 ) -> non  empty;
+coherence
+proof
+L176: (the carrier of ( EmptyGrammar C38 )) = { C38 } by L163;
+thus L177: (the carrier of ( EmptyGrammar C38 )) is non  empty by L176;
+end;
+let C39 being set;
+cluster ( SingleGrammar (C38 , C39) ) -> non  empty;
+coherence
+proof
+L178: (the carrier of ( SingleGrammar (C38 , C39) )) = { C38 , C39 } by L171;
+thus L179: (the carrier of ( SingleGrammar (C38 , C39) )) is non  empty by L178;
+end;
+cluster ( IterGrammar (C38 , C39) ) -> non  empty;
+coherence
+proof
+L180: (the carrier of ( IterGrammar (C38 , C39) )) = { C38 , C39 } by L173;
+thus L181: (the carrier of ( IterGrammar (C38 , C39) )) is non  empty by L180;
+end;
+end;
+definition
+let C40 being non  empty set;
+func TotalGrammar C40 ->  strict GrammarStr means 
+:L183: ((the carrier of it) = ( succ C40 ) & (the InitialSym of it) = C40 & (the Rules of it) = ( { [ C40 , <* B24 , C40 *> ] where B24 is (Element of C40) : B24 = B24 } \/ { [ C40 , ( {} ) ] } ));
+existence
+proof
+reconsider D27 = ( succ C40 ) as non  empty set;
+L184: C40 in { C40 } by TARSKI:def 1;
+reconsider D28 = C40 as (Element of D27) by L184 , XBOOLE_0:def 3;
+set D29 = { [ D28 , <* B25 , D28 *> ] where B25 is (Element of C40) : B25 = B25 };
+L185: D29 c= [: D27 , ( D27 * ) :]
+proof
+let C41 being set;
+assume L186: C41 in D29;
+consider C42 being (Element of C40) such that L187: C41 = [ D28 , <* C42 , D28 *> ] and L188: C42 = C42 by L186;
+reconsider D30 = C42 as (Element of D27) by XBOOLE_0:def 3;
+L189: C41 = [ D28 , <* D30 , D28 *> ] by L187;
+thus L190: thesis by L189;
+end;
+reconsider D31 = D29 as (Relation of D27 , ( D27 * )) by L185;
+take GrammarStr (# D27 , D28 , ( D31 \/ { [ D28 , ( <*> D27 ) ] } ) #);
+thus L191: thesis;
+end;
+uniqueness;
+end;
+registration
+let C43 being non  empty set;
+cluster ( TotalGrammar C43 ) -> non  empty;
+coherence
+proof
+L193: (the carrier of ( TotalGrammar C43 )) = ( succ C43 ) by L183;
+thus L194: (the carrier of ( TotalGrammar C43 )) is non  empty by L193;
+end;
+end;
+theorem
+L196: (for R8 being set holds ( Terminals ( EmptyGrammar R8 ) ) = ( {} ))
+proof
+let R8 being set;
+set D32 = ( EmptyGrammar R8 );
+set D33 = the (Element of ( Terminals D32 ));
+L197: (the Rules of D32) = { [ R8 , ( {} ) ] } by L163;
+L198: [ R8 , ( {} ) ] in (the Rules of D32) by L197 , TARSKI:def 1;
+assume L199: (not thesis);
+L200: D33 in ( Terminals D32 ) by L199;
+consider C44 being (Symbol of D32) such that L201: D33 = C44 and L202: (not (ex B26 being FinSequence st C44 ==> B26)) by L200;
+L203: (the carrier of D32) = { R8 } by L163;
+L204: C44 = R8 by L203 , TARSKI:def 1;
+L205: C44 ==> ( <*> (the carrier of D32) ) by L204 , L198 , L9;
+thus L206: contradiction by L205 , L202;
+end;
+theorem
+L207: (for R8 being set holds ( Lang ( EmptyGrammar R8 ) ) = { ( {} ) })
+proof
+let R8 being set;
+set D34 = ( EmptyGrammar R8 );
+L208: ( Terminals D34 ) = ( {} ) by L196;
+thus L209: ( Lang D34 ) c= { ( {} ) }
+proof
+let R9 being set;
+assume L210: R9 in ( Lang D34 );
+L211: (ex B27 being (String of D34) st (R9 = B27 & ( rng B27 ) c= ( Terminals D34 ) & B27 is_derivable_from <* (the InitialSym of D34) *>)) by L210;
+L212: R9 = ( {} ) by L211 , L208;
+thus L213: thesis by L212 , TARSKI:def 1;
+end;
+
+let R9 being set;
+assume L214: R9 in { ( {} ) };
+L215: R9 = ( {} ) by L214 , TARSKI:def 1;
+L216: (the Rules of D34) = { [ R8 , ( {} ) ] } by L163;
+L217: [ R8 , ( {} ) ] in (the Rules of D34) by L216 , TARSKI:def 1;
+L218: (the carrier of D34) = { R8 } by L163;
+L219: R8 = (the InitialSym of D34) by L218 , TARSKI:def 1;
+L220: (the InitialSym of D34) ==> ( <*> (the carrier of D34) ) by L219 , L217 , L9;
+L221: ( <*> (the carrier of D34) ) is_derivable_from <* (the InitialSym of D34) *> by L220 , L26 , L64;
+L222: ( rng ( {} ) ) = ( {} );
+thus L223: thesis by L222 , L208 , L215 , L221;
+end;
+theorem
+L224: (for R8 being set holds (for R9 being set holds (R8 <> R9 implies ( Terminals ( SingleGrammar (R8 , R9) ) ) = { R9 })))
+proof
+let R8 being set;
+let R9 being set;
+set D35 = ( SingleGrammar (R8 , R9) );
+L225: (the Rules of D35) = { [ R8 , <* R9 *> ] } by L171;
+L226: (the carrier of D35) = { R8 , R9 } by L171;
+reconsider D36 = R8 , D37 = R9 as (Symbol of D35) by L226 , TARSKI:def 2;
+assume L227: R8 <> R9;
+L228:
+now
+let C45 being FinSequence;
+assume L229: D37 ==> C45;
+L230: [ D37 , C45 ] in { [ R8 , <* R9 *> ] } by L229 , L225 , L9;
+L231: [ D37 , C45 ] = [ R8 , <* R9 *> ] by L230 , TARSKI:def 1;
+thus L232: contradiction by L231 , L227 , XTUPLE_0:1;
+end;
+L233: [ D36 , <* D37 *> ] in (the Rules of D35) by L225 , TARSKI:def 1;
+L234: D36 ==> <* D37 *> by L233 , L9;
+thus L235: ( Terminals D35 ) c= { R9 }
+proof
+let R10 being set;
+assume L236: R10 in ( Terminals D35 );
+consider C46 being (Symbol of D35) such that L237: R10 = C46 and L238: (not (ex B28 being FinSequence st C46 ==> B28)) by L236;
+L239: C46 <> D36 by L234 , L238;
+L240: R10 = R9 by L239 , L226 , L237 , TARSKI:def 2;
+thus L241: thesis by L240 , TARSKI:def 1;
+end;
+
+let R10 being set;
+assume L242: R10 in { R9 };
+L243: R10 = R9 by L242 , TARSKI:def 1;
+thus L244: thesis by L243 , L228;
+end;
+theorem
+L245: (for R8 being set holds (for R9 being set holds (R8 <> R9 implies ( Lang ( SingleGrammar (R8 , R9) ) ) = { <* R9 *> })))
+proof
+let R8 being set;
+let R9 being set;
+set D38 = ( SingleGrammar (R8 , R9) );
+L246: (the InitialSym of D38) = R8 by L171;
+L247: (the carrier of D38) = { R8 , R9 } by L171;
+reconsider D39 = R8 , D40 = R9 as (Symbol of D38) by L247 , TARSKI:def 2;
+L248: (the Rules of D38) = { [ R8 , <* R9 *> ] } by L171;
+L249: [ R8 , <* R9 *> ] in (the Rules of D38) by L248 , TARSKI:def 1;
+L250: (the InitialSym of D38) ==> <* D40 *> by L249 , L246 , L9;
+L251: <* D40 *> is_derivable_from <* (the InitialSym of D38) *> by L250 , L26 , L64;
+assume L252: R8 <> R9;
+L253: ( Terminals D38 ) = { R9 } by L252 , L224;
+thus L254: ( Lang D38 ) c= { <* R9 *> }
+proof
+let R10 being set;
+assume L255: R10 in ( Lang D38 );
+consider C47 being (String of D38) such that L256: R10 = C47 and L257: ( rng C47 ) c= ( Terminals D38 ) and L258: C47 is_derivable_from <* (the InitialSym of D38) *> by L255;
+consider C48 being FinSequence such that L259: ( len C48 ) >= 1 and L260: ( C48 . 1 ) = <* (the InitialSym of D38) *> and L261: ( C48 . ( len C48 ) ) = C47 and L262: (for B29 being (Element of ( NAT )) holds ((B29 >= 1 & B29 < ( len C48 )) implies (ex B30 , B31 being (String of D38) st (( C48 . B29 ) = B30 & ( C48 . ( B29 + 1 ) ) = B31 & B30 ==> B31)))) by L258 , L56;
+L263:
+now
+assume L264: C47 = <* D39 *>;
+L265: ( rng C47 ) = { D39 } by L264 , FINSEQ_1:38;
+L266: D39 in ( rng C47 ) by L265 , TARSKI:def 1;
+thus L267: contradiction by L266 , L252 , L253 , L257 , TARSKI:def 1;
+end;
+L268: ( len C48 ) > 1 by L263 , L246 , L259 , L260 , L261 , XXREAL_0:1;
+consider C49 , C50 being (String of D38) such that L269: ( C48 . 1 ) = C49 and L270: ( C48 . ( 1 + 1 ) ) = C50 and L271: C49 ==> C50 by L268 , L262;
+L272: D39 ==> C50 by L246 , L260 , L269 , L271 , L31;
+L273: [ D39 , C50 ] in { [ R8 , <* R9 *> ] } by L272 , L248 , L9;
+L274: [ D39 , C50 ] = [ R8 , <* R9 *> ] by L273 , TARSKI:def 1;
+L275: C50 = <* R9 *> by L274 , XTUPLE_0:1;
+L276:
+now
+assume L277: 2 < ( len C48 );
+consider C51 , C52 being (String of D38) such that L278: ( C48 . 2 ) = C51 and L279: ( C48 . ( 2 + 1 ) ) = C52 and L280: C51 ==> C52 by L277 , L262;
+L281: D40 ==> C52 by L270 , L275 , L278 , L280 , L31;
+L282: [ D40 , C52 ] in { [ R8 , <* R9 *> ] } by L281 , L248 , L9;
+L283: [ D40 , C52 ] = [ R8 , <* R9 *> ] by L282 , TARSKI:def 1;
+thus L284: contradiction by L283 , L252 , XTUPLE_0:1;
+end;
+L285: ( len C48 ) >= ( 1 + 1 ) by L268 , NAT_1:13;
+L286: R10 = <* R9 *> by L285 , L256 , L261 , L270 , L275 , L276 , XXREAL_0:1;
+thus L287: thesis by L286 , TARSKI:def 1;
+end;
+
+let R10 being set;
+assume L288: R10 in { <* R9 *> };
+L289: R10 = <* R9 *> by L288 , TARSKI:def 1;
+L290: ( rng <* R9 *> ) = { R9 } by FINSEQ_1:38;
+thus L291: thesis by L290 , L253 , L289 , L251;
+end;
+theorem
+L292: (for R8 being set holds (for R9 being set holds (R8 <> R9 implies ( Terminals ( IterGrammar (R8 , R9) ) ) = { R9 })))
+proof
+let R8 being set;
+let R9 being set;
+set D41 = ( IterGrammar (R8 , R9) );
+assume L293: R8 <> R9;
+L294: (the carrier of D41) = { R8 , R9 } by L173;
+reconsider D42 = R8 , D43 = R9 as (Symbol of D41) by L294 , TARSKI:def 2;
+L295: (the Rules of D41) = { [ R8 , <* R9 , R8 *> ] , [ R8 , ( {} ) ] } by L173;
+thus L296: ( Terminals D41 ) c= { R9 }
+proof
+let R10 being set;
+assume L297: R10 in ( Terminals D41 );
+consider C53 being (Symbol of D41) such that L298: R10 = C53 and L299: (not (ex B32 being FinSequence st C53 ==> B32)) by L297;
+L300: [ R8 , <* R9 , R8 *> ] in (the Rules of D41) by L295 , TARSKI:def 2;
+L301: D42 ==> <* D43 , D42 *> by L300 , L9;
+L302: C53 <> D42 by L301 , L299;
+L303: R10 = R9 by L302 , L294 , L298 , TARSKI:def 2;
+thus L304: thesis by L303 , TARSKI:def 1;
+end;
+
+let R10 being set;
+assume L305: R10 in { R9 };
+L306: R9 = R10 by L305 , TARSKI:def 1;
+assume L307: (not thesis);
+consider C54 being FinSequence such that L308: D43 ==> C54 by L307 , L306;
+L309: [ R8 , ( {} ) ] <> [ R9 , C54 ] by L293 , XTUPLE_0:1;
+L310: [ R8 , <* R9 , R8 *> ] <> [ R9 , C54 ] by L293 , XTUPLE_0:1;
+L311: (not [ R9 , C54 ] in { [ R8 , <* R9 , R8 *> ] , [ R8 , ( {} ) ] }) by L310 , L309 , TARSKI:def 2;
+thus L312: thesis by L311 , L295 , L308 , L9;
+end;
+theorem
+L313: (for R8 being set holds (for R9 being set holds (R8 <> R9 implies ( Lang ( IterGrammar (R8 , R9) ) ) = ( { R9 } * ))))
+proof
+let R8 being set;
+let R9 being set;
+set D44 = ( IterGrammar (R8 , R9) );
+set D45 = <* (the InitialSym of D44) *>;
+defpred S1[ (Element of ( NAT )) ] means (for B33 being (String of D44) holds ((( len B33 ) = $1 & B33 in ( { R9 } * )) implies ( B33 ^ D45 ) is_derivable_from D45));
+L314: (the carrier of D44) = { R8 , R9 } by L173;
+assume L315: R8 <> R9;
+L316: ( Terminals D44 ) = { R9 } by L315 , L292;
+thus L317: ( Lang D44 ) c= ( { R9 } * )
+proof
+let R8 being set;
+assume L318: R8 in ( Lang D44 );
+consider C55 being (String of D44) such that L319: R8 = C55 and L320: ( rng C55 ) c= ( Terminals D44 ) and L321: C55 is_derivable_from <* (the InitialSym of D44) *> by L318;
+L322: C55 is (FinSequence of { R9 }) by L316 , L320 , FINSEQ_1:def 4;
+thus L323: thesis by L322 , L319 , FINSEQ_1:def 11;
+end;
+
+L324: (the InitialSym of D44) = R8 by L173;
+L325: (the Rules of D44) = { [ R8 , <* R9 , R8 *> ] , [ R8 , ( {} ) ] } by L173;
+L326: [ R8 , ( {} ) ] in (the Rules of D44) by L325 , TARSKI:def 2;
+L327: (the InitialSym of D44) ==> ( <*> (the carrier of D44) ) by L326 , L324 , L9;
+L328: D45 ==> ( <*> (the carrier of D44) ) by L327 , L26;
+L329: (for B34 being (Element of ( NAT )) holds (S1[ B34 ] implies S1[ ( B34 + 1 ) ]))
+proof
+let C56 being (Element of ( NAT ));
+assume that
+L330: (for B35 being (String of D44) holds ((( len B35 ) = C56 & B35 in ( { R9 } * )) implies ( B35 ^ D45 ) is_derivable_from D45));
+let C57 being (String of D44);
+assume that
+L331: ( len C57 ) = ( C56 + 1 )
+and
+L332: C57 in ( { R9 } * );
+consider C58 being FinSequence, R10 being set such that L333: C57 = ( C58 ^ <* R10 *> ) and L334: ( len C58 ) = C56 by L331 , TREES_2:3;
+L335: ( rng <* R10 *> ) = { R10 } by FINSEQ_1:38;
+L336: C57 is (FinSequence of { R9 }) by L332 , FINSEQ_1:def 11;
+L337: C58 is (FinSequence of { R9 }) by L336 , L333 , FINSEQ_1:36;
+L338: <* R10 *> is (FinSequence of (the carrier of D44)) by L333 , FINSEQ_1:36;
+L339: { R10 } c= (the carrier of D44) by L338 , L335 , FINSEQ_1:def 4;
+L340: <* R10 *> is (FinSequence of { R9 }) by L333 , L336 , FINSEQ_1:36;
+L341: { R10 } c= { R9 } by L340 , L335 , FINSEQ_1:def 4;
+reconsider D46 = R10 as (Element of { R9 }) by L341 , ZFMISC_1:31;
+reconsider D47 = D46 as (Symbol of D44) by L339 , ZFMISC_1:31;
+L342: C58 is (FinSequence of (the carrier of D44)) by L333 , FINSEQ_1:36;
+L343: [ R8 , <* R9 , R8 *> ] in (the Rules of D44) by L325 , TARSKI:def 2;
+reconsider D48 = C58 as (String of D44) by L342 , FINSEQ_1:def 11;
+L344: D46 = R9 by TARSKI:def 1;
+L345: (the InitialSym of D44) ==> <* D47 , (the InitialSym of D44) *> by L344 , L324 , L343 , L9;
+L346: D45 ==> <* D47 , (the InitialSym of D44) *> by L345 , L26;
+L347: ( D48 ^ D45 ) ==> ( D48 ^ <* D47 , (the InitialSym of D44) *> ) by L346 , L47;
+L348: <* D47 , (the InitialSym of D44) *> = ( <* D47 *> ^ D45 ) by FINSEQ_1:def 9;
+L349: ( D48 ^ D45 ) ==> ( C57 ^ D45 ) by L348 , L333 , L347 , FINSEQ_1:32;
+L350: ( C57 ^ D45 ) is_derivable_from ( D48 ^ D45 ) by L349 , L64;
+L351: D48 in ( { R9 } * ) by L337 , FINSEQ_1:def 11;
+L352: ( D48 ^ D45 ) is_derivable_from D45 by L351 , L330 , L334;
+thus L353: thesis by L352 , L350 , L76;
+end;
+let R10 being set;
+assume L354: R10 in ( { R9 } * );
+reconsider D49 = R10 as (FinSequence of { R9 }) by L354 , FINSEQ_1:def 11;
+L355: { R9 } c= { R8 , R9 } by ZFMISC_1:7;
+L356: ( rng D49 ) c= { R8 , R9 } by L355 , XBOOLE_1:1;
+L357: D49 is (FinSequence of (the carrier of D44)) by L356 , L314 , FINSEQ_1:def 4;
+reconsider D50 = D49 as (String of D44) by L357 , FINSEQ_1:def 11;
+L358: ( D50 ^ ( {} ) ) = D50 by FINSEQ_1:34;
+L359: ( D50 ^ D45 ) ==> D50 by L358 , L328 , L47;
+L360: D50 is_derivable_from ( D50 ^ D45 ) by L359 , L64;
+L361: S1[ ( 0 ) ]
+proof
+let C59 being (String of D44);
+assume L362: ( len C59 ) = ( 0 );
+L363: C59 = ( {} ) by L362;
+L364: ( C59 ^ D45 ) = D45 by L363 , FINSEQ_1:34;
+thus L365: thesis by L364 , L58;
+end;
+L366: (for B36 being (Element of ( NAT )) holds S1[ B36 ]) from NAT_1:sch 1(L361 , L329);
+L367: ( len D50 ) = ( len D50 );
+L368: ( D50 ^ D45 ) is_derivable_from D45 by L367 , L366 , L354;
+L369: D50 is_derivable_from D45 by L368 , L360 , L76;
+L370: ( rng D49 ) c= { R9 };
+thus L371: thesis by L370 , L316 , L369;
+end;
+theorem
+L372: (for R11 being non  empty set holds ( Terminals ( TotalGrammar R11 ) ) = R11)
+proof
+let R11 being non  empty set;
+set D51 = ( TotalGrammar R11 );
+L373: (the Rules of D51) = ( { [ R11 , <* B37 , R11 *> ] where B37 is (Element of R11) : B37 = B37 } \/ { [ R11 , ( {} ) ] } ) by L183;
+L374: (the carrier of D51) = ( succ R11 ) by L183;
+thus L375: ( Terminals D51 ) c= R11
+proof
+reconsider D52 = R11 as (Symbol of D51) by L183;
+let R8 being set;
+assume L376: R8 in ( Terminals D51 );
+consider C60 being (Symbol of D51) such that L377: R8 = C60 and L378: (not (ex B38 being FinSequence st C60 ==> B38)) by L376;
+L379: [ R11 , ( {} ) ] in { [ R11 , ( {} ) ] } by TARSKI:def 1;
+L380: [ R11 , ( {} ) ] in (the Rules of D51) by L379 , L373 , XBOOLE_0:def 3;
+L381: D52 ==> ( <*> (the carrier of D51) ) by L380 , L9;
+L382: C60 <> R11 by L381 , L378;
+L383: (not C60 in { R11 }) by L382 , TARSKI:def 1;
+thus L384: thesis by L383 , L374 , L377 , XBOOLE_0:def 3;
+end;
+
+let R8 being set;
+assume L385: R8 in R11;
+reconsider D53 = R8 as (Element of R11) by L385;
+reconsider D54 = D53 as (Symbol of D51) by L374 , XBOOLE_0:def 3;
+assume L386: (not thesis);
+consider C61 being FinSequence such that L387: D54 ==> C61 by L386;
+L388: (not D53 in D53);
+L389: D53 <> R11 by L388;
+L390: [ D53 , C61 ] <> [ R11 , ( {} ) ] by L389 , XTUPLE_0:1;
+L391: (not [ D53 , C61 ] in { [ R11 , ( {} ) ] }) by L390 , TARSKI:def 1;
+L392: [ D53 , C61 ] in (the Rules of D51) by L387 , L9;
+L393: [ D53 , C61 ] in { [ R11 , <* R12 , R11 *> ] where R12 is (Element of R11) : R12 = R12 } by L392 , L373 , L391 , XBOOLE_0:def 3;
+L394: (ex R12 being (Element of R11) st ([ D53 , C61 ] = [ R11 , <* R12 , R11 *> ] & R12 = R12)) by L393;
+L395: D53 = R11 by L394 , XTUPLE_0:1;
+thus L396: thesis by L395 , L388;
+end;
+theorem
+L397: (for R11 being non  empty set holds ( Lang ( TotalGrammar R11 ) ) = ( R11 * ))
+proof
+let R11 being non  empty set;
+set D55 = ( TotalGrammar R11 );
+set D56 = <* (the InitialSym of D55) *>;
+defpred S2[ (Element of ( NAT )) ] means (for B39 being (String of D55) holds ((( len B39 ) = $1 & B39 in ( R11 * )) implies ( B39 ^ D56 ) is_derivable_from D56));
+L398: R11 c= ( succ R11 ) by XBOOLE_1:7;
+L399: (the Rules of D55) = ( { [ R11 , <* B40 , R11 *> ] where B40 is (Element of R11) : B40 = B40 } \/ { [ R11 , ( {} ) ] } ) by L183;
+L400: (the InitialSym of D55) = R11 by L183;
+L401: (for B41 being (Element of ( NAT )) holds (S2[ B41 ] implies S2[ ( B41 + 1 ) ]))
+proof
+let C62 being (Element of ( NAT ));
+assume that
+L402: (for B42 being (String of D55) holds ((( len B42 ) = C62 & B42 in ( R11 * )) implies ( B42 ^ D56 ) is_derivable_from D56));
+let C63 being (String of D55);
+assume that
+L403: ( len C63 ) = ( C62 + 1 )
+and
+L404: C63 in ( R11 * );
+consider C64 being FinSequence, R8 being set such that L405: C63 = ( C64 ^ <* R8 *> ) and L406: ( len C64 ) = C62 by L403 , TREES_2:3;
+L407: ( rng <* R8 *> ) = { R8 } by FINSEQ_1:38;
+L408: <* R8 *> is (FinSequence of (the carrier of D55)) by L405 , FINSEQ_1:36;
+L409: { R8 } c= (the carrier of D55) by L408 , L407 , FINSEQ_1:def 4;
+L410: C64 is (FinSequence of (the carrier of D55)) by L405 , FINSEQ_1:36;
+L411: C63 is (FinSequence of R11) by L404 , FINSEQ_1:def 11;
+L412: C64 is (FinSequence of R11) by L411 , L405 , FINSEQ_1:36;
+L413: <* R8 *> is (FinSequence of R11) by L405 , L411 , FINSEQ_1:36;
+L414: { R8 } c= R11 by L413 , L407 , FINSEQ_1:def 4;
+reconsider D57 = C64 as (String of D55) by L410 , FINSEQ_1:def 11;
+reconsider D58 = R8 as (Element of R11) by L414 , ZFMISC_1:31;
+reconsider D59 = D58 as (Symbol of D55) by L409 , ZFMISC_1:31;
+L415: [ R11 , <* D58 , R11 *> ] in { [ R11 , <* R12 , R11 *> ] where R12 is (Element of R11) : R12 = R12 };
+L416: [ R11 , <* D58 , R11 *> ] in (the Rules of D55) by L415 , L399 , XBOOLE_0:def 3;
+L417: (the InitialSym of D55) ==> <* D59 , (the InitialSym of D55) *> by L416 , L400 , L9;
+L418: D56 ==> <* D59 , (the InitialSym of D55) *> by L417 , L26;
+L419: ( D57 ^ D56 ) ==> ( D57 ^ <* D59 , (the InitialSym of D55) *> ) by L418 , L47;
+L420: <* D59 , (the InitialSym of D55) *> = ( <* D59 *> ^ D56 ) by FINSEQ_1:def 9;
+L421: ( D57 ^ D56 ) ==> ( C63 ^ D56 ) by L420 , L405 , L419 , FINSEQ_1:32;
+L422: ( C63 ^ D56 ) is_derivable_from ( D57 ^ D56 ) by L421 , L64;
+L423: D57 in ( R11 * ) by L412 , FINSEQ_1:def 11;
+L424: ( D57 ^ D56 ) is_derivable_from D56 by L423 , L402 , L406;
+thus L425: thesis by L424 , L422 , L76;
+end;
+L426: [ R11 , ( {} ) ] in { [ R11 , ( {} ) ] } by TARSKI:def 1;
+L427: [ R11 , ( {} ) ] in (the Rules of D55) by L426 , L399 , XBOOLE_0:def 3;
+L428: (the InitialSym of D55) ==> ( <*> (the carrier of D55) ) by L427 , L400 , L9;
+L429: D56 ==> ( <*> (the carrier of D55) ) by L428 , L26;
+L430: ( Terminals D55 ) = R11 by L372;
+thus L431: ( Lang D55 ) c= ( R11 * )
+proof
+let R8 being set;
+assume L432: R8 in ( Lang D55 );
+consider C65 being (String of D55) such that L433: R8 = C65 and L434: ( rng C65 ) c= ( Terminals D55 ) and L435: C65 is_derivable_from <* (the InitialSym of D55) *> by L432;
+L436: C65 is (FinSequence of R11) by L430 , L434 , FINSEQ_1:def 4;
+thus L437: thesis by L436 , L433 , FINSEQ_1:def 11;
+end;
+
+let R8 being set;
+assume L438: R8 in ( R11 * );
+reconsider D60 = R8 as (FinSequence of R11) by L438 , FINSEQ_1:def 11;
+L439: (the carrier of D55) = ( succ R11 ) by L183;
+L440: ( rng D60 ) c= (the carrier of D55) by L439 , L398 , XBOOLE_1:1;
+L441: D60 is (FinSequence of (the carrier of D55)) by L440 , FINSEQ_1:def 4;
+reconsider D61 = D60 as (String of D55) by L441 , FINSEQ_1:def 11;
+L442: ( D61 ^ ( {} ) ) = D61 by FINSEQ_1:34;
+L443: ( D61 ^ D56 ) ==> D61 by L442 , L429 , L47;
+L444: D61 is_derivable_from ( D61 ^ D56 ) by L443 , L64;
+L445: S2[ ( 0 ) ]
+proof
+let C66 being (String of D55);
+assume L446: ( len C66 ) = ( 0 );
+L447: C66 = ( {} ) by L446;
+L448: ( C66 ^ D56 ) = D56 by L447 , FINSEQ_1:34;
+thus L449: thesis by L448 , L58;
+end;
+L450: (for B43 being (Element of ( NAT )) holds S2[ B43 ]) from NAT_1:sch 1(L445 , L401);
+L451: ( len D61 ) = ( len D61 );
+L452: ( D61 ^ D56 ) is_derivable_from D56 by L451 , L450 , L438;
+L453: D61 is_derivable_from D56 by L452 , L444 , L76;
+L454: ( rng D60 ) c= R11;
+thus L455: thesis by L454 , L430 , L453;
+end;
+definition
+let C67 being non  empty GrammarStr;
+attr C67 is  efective
+means
+:L456: (( Lang C67 ) is non  empty & (the InitialSym of C67) in ( NonTerminals C67 ) & (for B44 being (Symbol of C67) holds (B44 in ( Terminals C67 ) implies (ex B45 being (String of C67) st (B45 in ( Lang C67 ) & B44 in ( rng B45 ))))));
+end;
+definition
+let C68 being GrammarStr;
+attr C68 is  finite
+means
+(the Rules of C68) is  finite;
+end;
+registration
+cluster  efective  finite for non  empty non  empty non  empty non  empty GrammarStr;
+existence
+proof
+take D62 = ( EmptyGrammar ( 0 ) );
+L459: (the Rules of D62) = { [ ( 0 ) , ( {} ) ] } by L163;
+L460: (the carrier of D62) = { ( 0 ) } by L163;
+L461: (the InitialSym of D62) = ( 0 ) by L460 , TARSKI:def 1;
+L462: [ ( 0 ) , ( {} ) ] in { [ ( 0 ) , ( {} ) ] } by TARSKI:def 1;
+L463: (the InitialSym of D62) ==> ( <*> (the carrier of D62) ) by L462 , L459 , L461 , L9;
+L464: (the InitialSym of D62) in ( NonTerminals D62 ) by L463;
+L465: (for B46 being (Symbol of D62) holds (B46 in ( Terminals D62 ) implies (ex B47 being (String of D62) st (B47 in ( Lang D62 ) & B46 in ( rng B47 ))))) by L196;
+L466: ( Lang D62 ) is non  empty by L207;
+thus L467: D62 is  efective by L466 , L464 , L465 , L456;
+thus L468: (the Rules of D62) is  finite by L459;
+end;
+end;
+definition
+let C69 being  efective non  empty GrammarStr;
+redefine func NonTerminals C69 -> non  empty (Subset of C69);
+
+coherence
+proof
+L470: ( NonTerminals C69 ) c= (the carrier of C69)
+proof
+let C70 being set;
+assume L471: C70 in ( NonTerminals C69 );
+L472: (ex B48 being (Symbol of C69) st (C70 = B48 & (ex B49 being FinSequence st B48 ==> B49))) by L471;
+thus L473: thesis by L472;
+end;
+thus L474: thesis by L470 , L456;
+end;
+end;
+definition
+let C71 , C72 being non  empty set;
+let C73 being (FinSequence of C71);
+let C74 being (Function of C71 , C72);
+redefine func C74 * C73 -> (Element of ( C72 * ));
+
+coherence
+proof
+L476: ( rng C73 ) c= C71;
+reconsider D63 = C73 as (Function of ( dom C73 ) , C71) by L476 , FUNCT_2:def 1 , RELSET_1:4;
+L477: ( rng ( C74 * D63 ) ) c= C72;
+L478: ( dom C73 ) = ( Seg ( len C73 ) ) by FINSEQ_1:def 3;
+L479: ( dom ( C74 * D63 ) ) = ( dom C73 ) by FUNCT_2:def 1;
+L480: ( C74 * D63 ) is FinSequence by L479 , L478 , FINSEQ_1:def 2;
+L481: ( C74 * D63 ) is (FinSequence of C72) by L480 , L477 , FINSEQ_1:def 4;
+thus L482: thesis by L481 , FINSEQ_1:def 11;
+end;
+end;
+definition
+let C75 , C76 being non  empty set;
+let C77 being (Function of C75 , C76);
+func C77 * -> (Function of ( C75 * ) , ( C76 * )) means 
+(for B50 being (Element of ( C75 * )) holds ( it . B50 ) = ( C77 * B50 ));
+existence
+proof
+deffunc H1((Element of ( C75 * ))) = ( C77 * $1 );
+consider C78 being (Function of ( C75 * ) , ( C76 * )) such that L484: (for B51 being (Element of ( C75 * )) holds ( C78 . B51 ) = H1(B51)) from FUNCT_2:sch 4;
+take C78;
+thus L485: thesis by L484;
+end;
+uniqueness
+proof
+let C79 , C80 being (Function of ( C75 * ) , ( C76 * ));
+assume that
+L486: (for B52 being (Element of ( C75 * )) holds ( C79 . B52 ) = ( C77 * B52 ))
+and
+L487: (for B53 being (Element of ( C75 * )) holds ( C80 . B53 ) = ( C77 * B53 ));
+L488:
+now
+let C81 being (Element of ( C75 * ));
+thus L489: ( C79 . C81 ) = ( C77 * C81 ) by L486
+.= ( C80 . C81 ) by L487;
+end;
+thus L490: thesis by L488 , FUNCT_2:63;
+end;
+end;
+theorem
+L492: (for R13 being Relation holds R13 c= ( R13 [*] ))
+proof
+let R13 being Relation;
+let R14 being set;
+let R15 being set;
+L493: ( len <* R14 , R15 *> ) = 2 by FINSEQ_1:44;
+L494: ( <* R14 , R15 *> . 2 ) = R15 by FINSEQ_1:44;
+assume L495: [ R14 , R15 ] in R13;
+L496: R15 in ( field R13 ) by L495 , RELAT_1:15;
+L497: ( <* R14 , R15 *> . 1 ) = R14 by FINSEQ_1:44;
+L498:
+now
+let C82 being Nat;
+assume that
+L499: C82 >= 1
+and
+L500: C82 < 2;
+L501: ( 1 + 1 ) = 2;
+L502: C82 <= 1 by L501 , L500 , NAT_1:13;
+L503: C82 = 1 by L502 , L499 , XXREAL_0:1;
+thus L504: [ ( <* R14 , R15 *> . C82 ) , ( <* R14 , R15 *> . ( C82 + 1 ) ) ] in R13 by L503 , L495 , L497 , FINSEQ_1:44;
+end;
+L505: R14 in ( field R13 ) by L495 , RELAT_1:15;
+thus L506: thesis by L505 , L496 , L493 , L497 , L494 , L498 , FINSEQ_1:def 16;
+end;
+definition
+let C83 being non  empty set;
+let C84 being (Relation of C83);
+redefine func C84 [*] -> (Relation of C83);
+
+coherence
+proof
+L507: [: C83 , C83 :] c= [: C83 , C83 :];
+reconsider D64 = [: C83 , C83 :] as (Relation of C83) by L507;
+L508: ( C84 [*] ) c= D64
+proof
+let R14 being set;
+let R15 being set;
+L509: ( field C84 ) c= ( C83 \/ C83 ) by RELSET_1:8;
+assume L510: [ R14 , R15 ] in ( C84 [*] );
+L511: R15 in ( field C84 ) by L510 , FINSEQ_1:def 16;
+L512: R14 in ( field C84 ) by L510 , FINSEQ_1:def 16;
+thus L513: thesis by L512 , L511 , L509 , ZFMISC_1:87;
+end;
+thus L514: thesis by L508;
+end;
+end;
+definition
+let C85 being non  empty GrammarStr;
+let C86 being non  empty set;
+let C87 being (Function of (the carrier of C85) , C86);
+func C85 . C87 ->  strict GrammarStr equals 
+GrammarStr (# C86 , ( C87 . (the InitialSym of C85) ) , ( ( ( C87 ~ ) * (the Rules of C85) ) * ( C87 * ) ) #);
+correctness;
+end;

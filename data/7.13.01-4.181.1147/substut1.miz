@@ -1,0 +1,2443 @@
+:: Substitution in First-Order Formulas: Elementary Properties
+::  by Patrick Braselmann and Peter Koepke
+::
+:: Received September 25, 2004
+:: Copyright (c) 2004-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, SUBSET_1, QC_LANG1, CQC_LANG, FINSEQ_1, PARTFUN1,
+      XBOOLE_0, FUNCT_1, RELAT_1, XXREAL_0, NAT_1, TARSKI, FINSET_1, ZFMISC_1,
+      ZF_LANG, CLASSES2, CARD_1, BVFUNC_2, ORDINAL4, REALSET1, XBOOLEAN,
+      MARGREL1, MCART_1, ARYTM_3, SUBSTUT1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1,
+      XTUPLE_0, SUBSET_1, RELAT_1, FUNCT_1, CARD_1,
+      NUMBERS, FINSEQ_1, NAT_1, QC_LANG1, QC_LANG3, PARTFUN1, SEQ_4, CQC_LANG,
+      FINSET_1, RELSET_1, FUNCT_2, DOMAIN_1, MCART_1, XXREAL_0, ORDINAL1,
+      CARD_3;
+ constructors PARTFUN1, DOMAIN_1, XXREAL_0, NAT_1, SEQ_4, QC_LANG3, CQC_SIM1,
+      RELSET_1, ORDINAL1, CARD_3, ORDERS_1, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, FUNCT_1, ORDINAL1, RELSET_1, PARTFUN1,
+      FINSET_1, MEMBERED, FINSEQ_1, RFINSEQ, QC_LANG1, CQC_LANG, XXREAL_0,
+      CARD_1, CARD_3, XTUPLE_0;
+ requirements REAL, NUMERALS, SUBSET, BOOLE;
+ definitions TARSKI, FUNCT_1, QC_LANG1, QC_LANG3, XTUPLE_0;
+ theorems TARSKI, FINSEQ_1, FUNCT_1, MCART_1, CQC_SIM1, XBOOLE_0, CQC_LANG,
+      QC_LANG1, ZFMISC_1, RELAT_1, XBOOLE_1, CARD_3, FUNCT_2, PARTFUN1,
+      RELSET_1, NAT_1, QC_LANG2, FINSEQ_3, CARD_1, XXREAL_0, ORDINAL1,
+      XTUPLE_0;
+ schemes FUNCT_1, FUNCT_2, QC_LANG1, QC_LANG3, NAT_1, XBOOLE_0, FRAENKEL,
+      FINSEQ_1, CLASSES1;
+
+begin
+definition
+let R1 being QC-alphabet;
+func vSUB R1 equals 
+( PFuncs (( bound_QC-variables R1 ) , ( bound_QC-variables R1 )) );
+coherence;
+end;
+registration
+let R1 being QC-alphabet;
+cluster ( vSUB R1 ) -> non  empty;
+coherence;
+end;
+definition
+let R1 being QC-alphabet;
+mode CQC_Substitution of R1
+ is (Element of ( vSUB R1 ));
+end;
+registration
+let R1 being QC-alphabet;
+cluster ( vSUB R1 ) ->  functional;
+coherence;
+end;
+definition
+let R1 being QC-alphabet;
+let R23 being (CQC_Substitution of R1);
+func @ R23 -> (PartFunc of ( bound_QC-variables R1 ) , ( bound_QC-variables R1 )) equals 
+R23;
+coherence by PARTFUN1:47;
+end;
+theorem
+L6: (for R1 being QC-alphabet holds (for R2 being set holds (for R23 being (CQC_Substitution of R1) holds (R2 in ( dom R23 ) implies ( R23 . R2 ) in ( bound_QC-variables R1 )))))
+proof
+let R1 being QC-alphabet;
+let R2 being set;
+let R23 being (CQC_Substitution of R1);
+assume L7: R2 in ( dom R23 );
+L8: R2 in ( dom ( @ R23 ) ) by L7;
+thus L9: thesis by L8 , PARTFUN1:4;
+end;
+definition
+let R1 being QC-alphabet;
+let C1 being (FinSequence of ( QC-variables R1 ));
+let R23 being (CQC_Substitution of R1);
+func CQC_Subst (C1 , R23) -> (FinSequence of ( QC-variables R1 )) means 
+:L10: (( len it ) = ( len C1 ) & (for R10 being (Element of ( NAT )) holds ((1 <= R10 & R10 <= ( len C1 )) implies ((( C1 . R10 ) in ( dom R23 ) implies ( it . R10 ) = ( R23 . ( C1 . R10 ) )) & ((not ( C1 . R10 ) in ( dom R23 )) implies ( it . R10 ) = ( C1 . R10 ))))));
+existence
+proof
+defpred S1[ set , set ] means ((( C1 . $1 ) in ( dom R23 ) implies $2 = ( R23 . ( C1 . $1 ) )) & ((not ( C1 . $1 ) in ( dom R23 )) implies $2 = ( C1 . $1 )));
+L11: (for B1 being Nat holds (B1 in ( Seg ( len C1 ) ) implies (ex B2 being set st S1[ B1 , B2 ])))
+proof
+let C2 being Nat;
+assume L12: C2 in ( Seg ( len C1 ) );
+L13: (( C1 . C2 ) in ( dom R23 ) implies thesis);
+thus L14: thesis by L13;
+end;
+consider C3 being FinSequence such that L15: ( dom C3 ) = ( Seg ( len C1 ) ) and L16: (for B3 being Nat holds (B3 in ( Seg ( len C1 ) ) implies S1[ B3 , ( C3 . B3 ) ])) from FINSEQ_1:sch 1(L11);
+L17: ( rng C3 ) c= ( QC-variables R1 )
+proof
+let C4 being set;
+assume L18: C4 in ( rng C3 );
+consider C5 being set such that L19: C5 in ( dom C3 ) and L20: ( C3 . C5 ) = C4 by L18 , FUNCT_1:def 3;
+reconsider D1 = C5 as (Element of ( NAT )) by L19;
+L21:
+now
+per cases ;
+case L22: ( C1 . D1 ) in ( dom R23 );
+L23: ( C3 . D1 ) = ( R23 . ( C1 . D1 ) ) by L22 , L15 , L16 , L19;
+thus L24: ( C3 . D1 ) in ( bound_QC-variables R1 ) by L23 , L22 , L6;
+end;
+case L25: (not ( C1 . D1 ) in ( dom R23 ));
+L26: D1 in ( dom C1 ) by L15 , L19 , FINSEQ_1:def 3;
+L27: ( C1 . D1 ) in ( rng C1 ) by L26 , FUNCT_1:3;
+L28: ( C3 . D1 ) = ( C1 . D1 ) by L15 , L16 , L19 , L25;
+thus L29: ( C3 . D1 ) in ( QC-variables R1 ) by L28 , L27;
+end;
+end;
+thus L31: thesis by L21 , L20;
+end;
+reconsider D2 = C3 as (FinSequence of ( QC-variables R1 )) by L17 , FINSEQ_1:def 4;
+take D2;
+thus L32: ( len D2 ) = ( len C1 ) by L15 , FINSEQ_1:def 3;
+thus L33: (for R10 being (Element of ( NAT )) holds ((1 <= R10 & R10 <= ( len C1 )) implies ((( C1 . R10 ) in ( dom R23 ) implies ( D2 . R10 ) = ( R23 . ( C1 . R10 ) )) & ((not ( C1 . R10 ) in ( dom R23 )) implies ( D2 . R10 ) = ( C1 . R10 )))))
+proof
+let R10 being (Element of ( NAT ));
+assume L34: (1 <= R10 & R10 <= ( len C1 ));
+L35: R10 in ( dom C1 ) by L34 , FINSEQ_3:25;
+L36: R10 in ( Seg ( len C1 ) ) by L35 , FINSEQ_1:def 3;
+thus L37: thesis by L36 , L16;
+end;
+
+end;
+uniqueness
+proof
+let R18 being (FinSequence of ( QC-variables R1 ));
+let R19 being (FinSequence of ( QC-variables R1 ));
+assume that
+L34: ( len R18 ) = ( len C1 )
+and
+L35: (for R10 being (Element of ( NAT )) holds ((1 <= R10 & R10 <= ( len C1 )) implies ((( C1 . R10 ) in ( dom R23 ) implies ( R18 . R10 ) = ( R23 . ( C1 . R10 ) )) & ((not ( C1 . R10 ) in ( dom R23 )) implies ( R18 . R10 ) = ( C1 . R10 )))))
+and
+L36: ( len R19 ) = ( len C1 )
+and
+L37: (for R10 being (Element of ( NAT )) holds ((1 <= R10 & R10 <= ( len C1 )) implies ((( C1 . R10 ) in ( dom R23 ) implies ( R19 . R10 ) = ( R23 . ( C1 . R10 ) )) & ((not ( C1 . R10 ) in ( dom R23 )) implies ( R19 . R10 ) = ( C1 . R10 )))));
+L38:
+now
+let C6 being Nat;
+assume L39: (1 <= C6 & C6 <= ( len C1 ));
+L40: C6 in ( NAT ) by ORDINAL1:def 12;
+L41: ((not ( C1 . C6 ) in ( dom R23 )) implies ( R18 . C6 ) = ( C1 . C6 )) by L40 , L35 , L39;
+L42: (( C1 . C6 ) in ( dom R23 ) implies ( R18 . C6 ) = ( R23 . ( C1 . C6 ) )) by L35 , L40 , L39;
+thus L43: ( R18 . C6 ) = ( R19 . C6 ) by L42 , L37 , L40 , L39 , L41;
+end;
+thus L44: thesis by L38 , L34 , L36 , FINSEQ_1:14;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let C7 being (FinSequence of ( bound_QC-variables R1 ));
+func @ C7 -> (FinSequence of ( QC-variables R1 )) equals 
+C7;
+coherence
+proof
+L46: ( rng C7 ) c= ( QC-variables R1 ) by XBOOLE_1:1;
+thus L47: thesis by L46 , FINSEQ_1:def 4;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let C8 being (FinSequence of ( bound_QC-variables R1 ));
+let R23 being (CQC_Substitution of R1);
+func CQC_Subst (C8 , R23) -> (FinSequence of ( bound_QC-variables R1 )) equals 
+( CQC_Subst (( @ C8 ) , R23) );
+coherence
+proof
+L49: ( len ( CQC_Subst (( @ C8 ) , R23) ) ) = ( len ( @ C8 ) ) by L10;
+L50: ( dom ( CQC_Subst (( @ C8 ) , R23) ) ) = ( Seg ( len ( @ C8 ) ) ) by L49 , FINSEQ_1:def 3;
+L51: (for R10 being (Element of ( NAT )) holds (R10 in ( Seg ( len ( @ C8 ) ) ) implies ((( ( @ C8 ) . R10 ) in ( dom R23 ) implies ( ( CQC_Subst (( @ C8 ) , R23) ) . R10 ) = ( R23 . ( ( @ C8 ) . R10 ) )) & ((not ( ( @ C8 ) . R10 ) in ( dom R23 )) implies ( ( CQC_Subst (( @ C8 ) , R23) ) . R10 ) = ( ( @ C8 ) . R10 )))))
+proof
+let R10 being (Element of ( NAT ));
+assume L52: R10 in ( Seg ( len ( @ C8 ) ) );
+L53: (1 <= R10 & R10 <= ( len ( @ C8 ) )) by L52 , FINSEQ_1:1;
+thus L54: thesis by L53 , L10;
+end;
+L55: ( rng ( CQC_Subst (( @ C8 ) , R23) ) ) c= ( bound_QC-variables R1 )
+proof
+let C9 being set;
+assume L56: C9 in ( rng ( CQC_Subst (( @ C8 ) , R23) ) );
+consider C10 being set such that L57: C10 in ( dom ( CQC_Subst (( @ C8 ) , R23) ) ) and L58: ( ( CQC_Subst (( @ C8 ) , R23) ) . C10 ) = C9 by L56 , FUNCT_1:def 3;
+reconsider D3 = C10 as (Element of ( NAT )) by L57;
+L59:
+now
+per cases ;
+case L60: ( ( @ C8 ) . D3 ) in ( dom R23 );
+L61: ( ( CQC_Subst (( @ C8 ) , R23) ) . D3 ) = ( R23 . ( ( @ C8 ) . D3 ) ) by L60 , L50 , L51 , L57;
+thus L62: ( ( CQC_Subst (( @ C8 ) , R23) ) . D3 ) in ( bound_QC-variables R1 ) by L61 , L60 , L6;
+end;
+case L63: (not ( ( @ C8 ) . D3 ) in ( dom R23 ));
+L64: ( rng C8 ) c= ( bound_QC-variables R1 );
+L65: D3 in ( dom ( @ C8 ) ) by L50 , L57 , FINSEQ_1:def 3;
+L66: ( ( @ C8 ) . D3 ) in ( rng ( @ C8 ) ) by L65 , FUNCT_1:3;
+L67: ( ( CQC_Subst (( @ C8 ) , R23) ) . D3 ) = ( ( @ C8 ) . D3 ) by L50 , L51 , L57 , L63;
+thus L68: ( ( CQC_Subst (( @ C8 ) , R23) ) . D3 ) in ( bound_QC-variables R1 ) by L67 , L66 , L64;
+end;
+end;
+thus L70: thesis by L59 , L58;
+end;
+thus L71: thesis by L55 , FINSEQ_1:def 4;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R23 being (CQC_Substitution of R1);
+let C11 being set;
+redefine func R23 | C11 -> (CQC_Substitution of R1);
+
+coherence
+proof
+L73: ( R23 | C11 ) = ( ( @ R23 ) | C11 );
+thus L74: thesis by L73 , PARTFUN1:45;
+end;
+end;
+registration
+let R1 being QC-alphabet;
+cluster  finite for (CQC_Substitution of R1);
+existence
+proof
+take D4 = ( {} );
+L76: D4 is (PartFunc of ( bound_QC-variables R1 ) , ( bound_QC-variables R1 )) by RELSET_1:12;
+thus L77: D4 is (CQC_Substitution of R1) by L76 , PARTFUN1:45;
+thus L78: thesis;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R12 being (bound_QC-variable of R1);
+let R20 being (QC-formula of R1);
+let R23 being (CQC_Substitution of R1);
+func RestrictSub (R12 , R20 , R23) ->  finite (CQC_Substitution of R1) equals 
+( R23 | { R13 where R13 is (bound_QC-variable of R1) : (R13 in ( still_not-bound_in R20 ) & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )) } );
+coherence
+proof
+set D5 = { R13 where R13 is (bound_QC-variable of R1) : (R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )) };
+set D6 = { R13 where R13 is (bound_QC-variable of R1) : (R13 in ( still_not-bound_in R20 ) & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )) };
+reconsider D7 = ( still_not-bound_in R20 ) as  finite set by CQC_SIM1:19;
+L80: (for R2 being set holds (R2 in D6 iff R2 in ( D7 /\ D5 )))
+proof
+let R2 being set;
+thus L81: (R2 in D6 implies R2 in ( D7 /\ D5 ))
+proof
+assume L82: R2 in D6;
+consider R13 being (bound_QC-variable of R1) such that L83: (R2 = R13 & R13 in ( still_not-bound_in R20 )) and L84: (R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )) by L82;
+L85: R13 in D5 by L84;
+thus L86: thesis by L85 , L83 , XBOOLE_0:def 4;
+end;
+
+thus L87: (R2 in ( D7 /\ D5 ) implies R2 in D6)
+proof
+assume L88: R2 in ( D7 /\ D5 );
+L89: R2 in D5 by L88 , XBOOLE_0:def 4;
+L90: (ex R13 being (bound_QC-variable of R1) st (R2 = R13 & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 ))) by L89;
+L91: R2 in D7 by L88 , XBOOLE_0:def 4;
+thus L92: thesis by L91 , L90;
+end;
+
+end;
+reconsider D8 = D6 as  finite set by L80 , TARSKI:1;
+L88: ( R23 | D8 ) is  finite;
+thus L89: thesis by L88;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R18 being (FinSequence of ( QC-variables R1 ));
+func Bound_Vars R18 -> (Subset of ( bound_QC-variables R1 )) equals 
+{ ( R18 . R10 ) where R10 is (Element of ( NAT )) : (1 <= R10 & R10 <= ( len R18 ) & ( R18 . R10 ) in ( bound_QC-variables R1 )) };
+coherence
+proof
+set D9 = { ( R18 . R10 ) where R10 is (Element of ( NAT )) : (1 <= R10 & R10 <= ( len R18 ) & ( R18 . R10 ) in ( bound_QC-variables R1 )) };
+L91: D9 c= ( bound_QC-variables R1 )
+proof
+let C12 being set;
+assume L92: C12 in D9;
+L93: (ex R10 being (Element of ( NAT )) st (( R18 . R10 ) = C12 & 1 <= R10 & R10 <= ( len R18 ) & ( R18 . R10 ) in ( bound_QC-variables R1 ))) by L92;
+thus L94: thesis by L93;
+end;
+thus L95: thesis by L91;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R20 being (QC-formula of R1);
+func Bound_Vars R20 -> (Subset of ( bound_QC-variables R1 )) means 
+:L97: (ex B4 being (Function of ( QC-WFF R1 ) , ( bool ( bound_QC-variables R1 ) )) st (it = ( B4 . R20 ) & (for B5 being (Element of ( QC-WFF R1 )) holds (for B6 , B7 being (Subset of ( bound_QC-variables R1 )) holds ((B5 = ( VERUM R1 ) implies ( B4 . B5 ) = ( {} ( bound_QC-variables R1 ) )) & (B5 is  atomic implies ( B4 . B5 ) = ( Bound_Vars ( the_arguments_of B5 ) )) & ((B5 is  negative & B6 = ( B4 . ( the_argument_of B5 ) )) implies ( B4 . B5 ) = B6) & ((B5 is  conjunctive & B6 = ( B4 . ( the_left_argument_of B5 ) ) & B7 = ( B4 . ( the_right_argument_of B5 ) )) implies ( B4 . B5 ) = ( B6 \/ B7 )) & ((B5 is  universal & B6 = ( B4 . ( the_scope_of B5 ) )) implies ( B4 . B5 ) = ( B6 \/ { ( bound_in B5 ) } )))))));
+correctness
+proof
+deffunc H1((Element of ( QC-WFF R1 ))) = ( Bound_Vars ( the_arguments_of $1 ) );
+set D10 = ( bound_QC-variables R1 );
+deffunc H2((Subset of D10)) = $1;
+deffunc H3((Subset of D10) , (Subset of D10)) = ( $1 \/ $2 );
+deffunc H4((Element of ( QC-WFF R1 )) , (Subset of D10)) = ( $2 \/ { ( bound_in $1 ) } );
+thus L98: ((ex B8 being (Subset of D10) st (ex B9 being (Function of ( QC-WFF R1 ) , ( bool D10 )) st (B8 = ( B9 . R20 ) & (for B10 being (Element of ( QC-WFF R1 )) holds (for B11 , B12 being (Subset of D10) holds ((B10 = ( VERUM R1 ) implies ( B9 . B10 ) = ( {} D10 )) & (B10 is  atomic implies ( B9 . B10 ) = H1(B10)) & ((B10 is  negative & B11 = ( B9 . ( the_argument_of B10 ) )) implies ( B9 . B10 ) = H2(B11)) & ((B10 is  conjunctive & B11 = ( B9 . ( the_left_argument_of B10 ) ) & B12 = ( B9 . ( the_right_argument_of B10 ) )) implies ( B9 . B10 ) = H3(B11 , B12)) & ((B10 is  universal & B11 = ( B9 . ( the_scope_of B10 ) )) implies ( B9 . B10 ) = H4(B10 , B11)))))))) & (for B13 , B14 being (Subset of D10) holds (((ex B15 being (Function of ( QC-WFF R1 ) , ( bool D10 )) st (B13 = ( B15 . R20 ) & (for B16 being (Element of ( QC-WFF R1 )) holds (for B17 , B18 being (Subset of D10) holds ((B16 = ( VERUM R1 ) implies ( B15 . B16 ) = ( {} D10 )) & (B16 is  atomic implies ( B15 . B16 ) = H1(B16)) & ((B16 is  negative & B17 = ( B15 . ( the_argument_of B16 ) )) implies ( B15 . B16 ) = H2(B17)) & ((B16 is  conjunctive & B17 = ( B15 . ( the_left_argument_of B16 ) ) & B18 = ( B15 . ( the_right_argument_of B16 ) )) implies ( B15 . B16 ) = H3(B17 , B18)) & ((B16 is  universal & B17 = ( B15 . ( the_scope_of B16 ) )) implies ( B15 . B16 ) = H4(B16 , B17))))))) & (ex B19 being (Function of ( QC-WFF R1 ) , ( bool D10 )) st (B14 = ( B19 . R20 ) & (for B20 being (Element of ( QC-WFF R1 )) holds (for B21 , B22 being (Subset of D10) holds ((B20 = ( VERUM R1 ) implies ( B19 . B20 ) = ( {} D10 )) & (B20 is  atomic implies ( B19 . B20 ) = H1(B20)) & ((B20 is  negative & B21 = ( B19 . ( the_argument_of B20 ) )) implies ( B19 . B20 ) = H2(B21)) & ((B20 is  conjunctive & B21 = ( B19 . ( the_left_argument_of B20 ) ) & B22 = ( B19 . ( the_right_argument_of B20 ) )) implies ( B19 . B20 ) = H3(B21 , B22)) & ((B20 is  universal & B21 = ( B19 . ( the_scope_of B20 ) )) implies ( B19 . B20 ) = H4(B20 , B21)))))))) implies B13 = B14))) from QC_LANG3:sch 2;
+end;
+end;
+L100: (for R1 being QC-alphabet holds (for R20 being (QC-formula of R1) holds (( Bound_Vars ( VERUM R1 ) ) = ( {} ( bound_QC-variables R1 ) ) & (R20 is  atomic implies ( Bound_Vars R20 ) = ( Bound_Vars ( the_arguments_of R20 ) )) & (R20 is  negative implies ( Bound_Vars R20 ) = ( Bound_Vars ( the_argument_of R20 ) )) & (R20 is  conjunctive implies ( Bound_Vars R20 ) = ( ( Bound_Vars ( the_left_argument_of R20 ) ) \/ ( Bound_Vars ( the_right_argument_of R20 ) ) )) & (R20 is  universal implies ( Bound_Vars R20 ) = ( ( Bound_Vars ( the_scope_of R20 ) ) \/ { ( bound_in R20 ) } )))))
+proof
+let R1 being QC-alphabet;
+let R20 being (QC-formula of R1);
+deffunc H5((Element of ( QC-WFF R1 ))) = ( Bound_Vars ( the_arguments_of $1 ) );
+deffunc H6((Element of ( QC-WFF R1 ))) = ( Bound_Vars $1 );
+set D11 = ( bound_QC-variables R1 );
+deffunc H7((Subset of D11)) = $1;
+deffunc H8((Subset of D11) , (Subset of D11)) = ( $1 \/ $2 );
+deffunc H9((Element of ( QC-WFF R1 )) , (Subset of D11)) = ( $2 \/ { ( bound_in $1 ) } );
+L101: (for B23 being (QC-formula of R1) holds (for B24 being (Subset of D11) holds (B24 = H6(B23) iff (ex B25 being (Function of ( QC-WFF R1 ) , ( bool D11 )) st (B24 = ( B25 . B23 ) & (for B26 being (Element of ( QC-WFF R1 )) holds (for B27 , B28 being (Subset of ( bound_QC-variables R1 )) holds ((B26 = ( VERUM R1 ) implies ( B25 . B26 ) = ( {} D11 )) & (B26 is  atomic implies ( B25 . B26 ) = H5(B26)) & ((B26 is  negative & B27 = ( B25 . ( the_argument_of B26 ) )) implies ( B25 . B26 ) = H7(B27)) & ((B26 is  conjunctive & B27 = ( B25 . ( the_left_argument_of B26 ) ) & B28 = ( B25 . ( the_right_argument_of B26 ) )) implies ( B25 . B26 ) = H8(B27 , B28)) & ((B26 is  universal & B27 = ( B25 . ( the_scope_of B26 ) )) implies ( B25 . B26 ) = H9(B26 , B27)))))))))) by L97;
+L102: H6(( VERUM R1 )) = ( {} D11 ) from QC_LANG3:sch 3(L101)
+.= ( {} );
+thus L103: ( Bound_Vars ( VERUM R1 ) ) = ( {} ( bound_QC-variables R1 ) ) by L102;
+thus L104: (R20 is  atomic implies ( Bound_Vars R20 ) = ( Bound_Vars ( the_arguments_of R20 ) ))
+proof
+assume L105: R20 is  atomic;
+thus L106: H6(R20) = H5(R20) from QC_LANG3:sch 4(L101 , L105);
+end;
+
+thus L107: (R20 is  negative implies ( Bound_Vars R20 ) = ( Bound_Vars ( the_argument_of R20 ) ))
+proof
+assume L108: R20 is  negative;
+thus L109: H6(R20) = H7(H6(( the_argument_of R20 ))) from QC_LANG3:sch 5(L101 , L108);
+end;
+
+thus L110: (R20 is  conjunctive implies ( Bound_Vars R20 ) = ( ( Bound_Vars ( the_left_argument_of R20 ) ) \/ ( Bound_Vars ( the_right_argument_of R20 ) ) ))
+proof
+assume L111: R20 is  conjunctive;
+L112: (for B29 , B30 being (Subset of D11) holds ((B29 = H6(( the_left_argument_of R20 )) & B30 = H6(( the_right_argument_of R20 ))) implies H6(R20) = H8(B29 , B30))) from QC_LANG3:sch 6(L101 , L111);
+thus L113: thesis by L112;
+end;
+
+thus L114: (R20 is  universal implies ( Bound_Vars R20 ) = ( ( Bound_Vars ( the_scope_of R20 ) ) \/ { ( bound_in R20 ) } ))
+proof
+assume L115: R20 is  universal;
+thus L116: H6(R20) = H9(R20 , H6(( the_scope_of R20 ))) from QC_LANG3:sch 7(L101 , L115);
+end;
+
+end;
+theorem
+L115: (for R1 being QC-alphabet holds ( Bound_Vars ( VERUM R1 ) ) = ( {} ))
+proof
+let R1 being QC-alphabet;
+L116: ( Bound_Vars ( VERUM R1 ) ) = ( {} ( bound_QC-variables R1 ) ) by L100;
+thus L117: ( Bound_Vars ( VERUM R1 ) ) = ( {} ) by L116;
+end;
+theorem
+L118: (for R1 being QC-alphabet holds (for B31 being (QC-formula of R1) holds (B31 is  atomic implies ( Bound_Vars B31 ) = ( Bound_Vars ( the_arguments_of B31 ) )))) by L100;
+theorem
+L119: (for R1 being QC-alphabet holds (for B32 being (QC-formula of R1) holds (B32 is  negative implies ( Bound_Vars B32 ) = ( Bound_Vars ( the_argument_of B32 ) )))) by L100;
+theorem
+L120: (for R1 being QC-alphabet holds (for B33 being (QC-formula of R1) holds (B33 is  conjunctive implies ( Bound_Vars B33 ) = ( ( Bound_Vars ( the_left_argument_of B33 ) ) \/ ( Bound_Vars ( the_right_argument_of B33 ) ) )))) by L100;
+theorem
+L121: (for R1 being QC-alphabet holds (for B34 being (QC-formula of R1) holds (B34 is  universal implies ( Bound_Vars B34 ) = ( ( Bound_Vars ( the_scope_of B34 ) ) \/ { ( bound_in B34 ) } )))) by L100;
+registration
+let R1 being QC-alphabet;
+let R20 being (QC-formula of R1);
+cluster ( Bound_Vars R20 ) ->  finite;
+coherence
+proof
+defpred S2[ (Element of ( QC-WFF R1 )) ] means ( Bound_Vars $1 ) is  finite;
+L122: (for B35 being (Element of ( QC-WFF R1 )) holds ((B35 is  atomic implies S2[ B35 ]) & S2[ ( VERUM R1 ) ] & ((B35 is  negative & S2[ ( the_argument_of B35 ) ]) implies S2[ B35 ]) & ((B35 is  conjunctive & S2[ ( the_left_argument_of B35 ) ] & S2[ ( the_right_argument_of B35 ) ]) implies S2[ B35 ]) & ((B35 is  universal & S2[ ( the_scope_of B35 ) ]) implies S2[ B35 ])))
+proof
+let C13 being (Element of ( QC-WFF R1 ));
+thus L123: (C13 is  atomic implies ( Bound_Vars C13 ) is  finite)
+proof
+deffunc H10(set) = ( ( the_arguments_of C13 ) . $1 );
+defpred S3[ (Element of ( NAT )) ] means (1 <= $1 & $1 <= ( len ( the_arguments_of C13 ) ));
+defpred S4[ (Element of ( NAT )) ] means (1 <= $1 & $1 <= ( len ( the_arguments_of C13 ) ) & ( ( the_arguments_of C13 ) . $1 ) in ( bound_QC-variables R1 ));
+L124: (for R10 being (Element of ( NAT )) holds (S4[ R10 ] implies S3[ R10 ]));
+L125: { H10(R10) where R10 is (Element of ( NAT )) : S4[ R10 ] } c= { H10(R11) where R11 is (Element of ( NAT )) : S3[ R11 ] } from FRAENKEL:sch 1(L124);
+assume L126: C13 is  atomic;
+L127: ( Bound_Vars C13 ) = ( Bound_Vars ( the_arguments_of C13 ) ) by L126 , L100
+.= { ( ( the_arguments_of C13 ) . R10 ) where R10 is (Element of ( NAT )) : (1 <= R10 & R10 <= ( len ( the_arguments_of C13 ) ) & ( ( the_arguments_of C13 ) . R10 ) in ( bound_QC-variables R1 )) };
+L128: ( Bound_Vars C13 ) c= ( rng ( the_arguments_of C13 ) ) by L127 , L125 , CQC_SIM1:9;
+thus L129: thesis by L128;
+end;
+
+thus L130: ( Bound_Vars ( VERUM R1 ) ) is  finite by L115;
+thus L131: ((C13 is  negative & ( Bound_Vars ( the_argument_of C13 ) ) is  finite) implies ( Bound_Vars C13 ) is  finite) by L100;
+thus L132: ((C13 is  conjunctive & ( Bound_Vars ( the_left_argument_of C13 ) ) is  finite & ( Bound_Vars ( the_right_argument_of C13 ) ) is  finite) implies ( Bound_Vars C13 ) is  finite)
+proof
+assume that
+L133: C13 is  conjunctive
+and
+L134: (( Bound_Vars ( the_left_argument_of C13 ) ) is  finite & ( Bound_Vars ( the_right_argument_of C13 ) ) is  finite);
+L135: ( Bound_Vars C13 ) = ( ( Bound_Vars ( the_left_argument_of C13 ) ) \/ ( Bound_Vars ( the_right_argument_of C13 ) ) ) by L133 , L100;
+thus L136: thesis by L135 , L134;
+end;
+
+assume that
+L137: C13 is  universal
+and
+L138: ( Bound_Vars ( the_scope_of C13 ) ) is  finite;
+L139: ( Bound_Vars C13 ) = ( ( Bound_Vars ( the_scope_of C13 ) ) \/ { ( bound_in C13 ) } ) by L137 , L100;
+thus L140: thesis by L139 , L138;
+end;
+L141: (for B36 being (Element of ( QC-WFF R1 )) holds S2[ B36 ]) from QC_LANG1:sch 2(L122);
+thus L142: thesis by L141;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R20 being (QC-formula of R1);
+func Dom_Bound_Vars R20 ->  finite (Subset of ( QC-symbols R1 )) equals 
+{ R21 where R21 is (QC-symbol of R1) : ( x. R21 ) in ( Bound_Vars R20 ) };
+coherence
+proof
+defpred S5[ set , set ] means (ex R21 being (QC-symbol of R1) st (R21 = $1 & $2 = ( x. R21 )));
+set D12 = { R21 where R21 is (QC-symbol of R1) : ( x. R21 ) in ( Bound_Vars R20 ) };
+L144: D12 c= ( QC-symbols R1 )
+proof
+let R2 being set;
+assume L145: R2 in D12;
+L146: (ex R21 being (QC-symbol of R1) st (R2 = R21 & ( x. R21 ) in ( Bound_Vars R20 ))) by L145;
+thus L147: thesis by L146;
+end;
+L148: (for R2 being set holds (R2 in ( QC-symbols R1 ) implies (ex R3 being set st S5[ R2 , R3 ])))
+proof
+let R2 being set;
+assume L149: R2 in ( QC-symbols R1 );
+reconsider D13 = R2 as (QC-symbol of R1) by L149;
+take ( x. D13 );
+take D13;
+thus L150: thesis;
+end;
+consider C14 being Function such that L151: (( dom C14 ) = ( QC-symbols R1 ) & (for R2 being set holds (R2 in ( QC-symbols R1 ) implies S5[ R2 , ( C14 . R2 ) ]))) from CLASSES1:sch 1(L148);
+L152: ( rng ( C14 | D12 ) ) c= ( Bound_Vars R20 )
+proof
+let R3 being set;
+assume L153: R3 in ( rng ( C14 | D12 ) );
+consider R2 being set such that L154: R2 in ( dom ( C14 | D12 ) ) and L155: R3 = ( ( C14 | D12 ) . R2 ) by L153 , FUNCT_1:def 3;
+L156: R2 in D12 by L154 , RELAT_1:57;
+L157: (ex R21 being (QC-symbol of R1) st (R2 = R21 & ( x. R21 ) in ( Bound_Vars R20 ))) by L156;
+L158: (R3 = ( C14 . R2 ) & R2 in ( dom C14 )) by L154 , L155 , FUNCT_1:47 , RELAT_1:57;
+L159: (ex R21 being (QC-symbol of R1) st (R21 = R2 & R3 = ( x. R21 ))) by L158 , L151;
+thus L160: thesis by L159 , L157;
+end;
+L161: C14 is  one-to-one
+proof
+let C15 , C16 being set;
+assume that
+L162: (C15 in ( dom C14 ) & C16 in ( dom C14 ))
+and
+L163: ( C14 . C15 ) = ( C14 . C16 );
+L164: ((ex R21 being (QC-symbol of R1) st (R21 = C15 & ( C14 . C15 ) = ( x. R21 ))) & (ex R22 being (QC-symbol of R1) st (R22 = C16 & ( C14 . C16 ) = ( x. R22 )))) by L151 , L162;
+thus L165: thesis by L164 , L163 , XTUPLE_0:1;
+end;
+L166: ( C14 | D12 ) is  one-to-one by L161 , FUNCT_1:52;
+L167: ( dom ( C14 | D12 ) ) is  finite by L166 , L152 , CARD_1:59;
+reconsider D14 = D12 as (Subset of ( QC-symbols R1 )) by L144;
+L168: (for R2 being set holds (R2 in ( dom ( C14 | D14 ) ) iff (R2 in D14 & R2 in ( dom C14 )))) by RELAT_1:57;
+L169: ( dom ( C14 | D14 ) ) = ( D14 /\ ( QC-symbols R1 ) ) by L168 , L151 , XBOOLE_0:def 4;
+thus L170: thesis by L169 , L167 , XBOOLE_1:28;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R24 being  finite (CQC_Substitution of R1);
+func Sub_Var R24 ->  finite (Subset of ( QC-symbols R1 )) equals 
+{ R21 where R21 is (QC-symbol of R1) : ( x. R21 ) in ( rng R24 ) };
+coherence
+proof
+defpred S6[ set , set ] means (ex R21 being (QC-symbol of R1) st (R21 = $1 & $2 = ( x. R21 )));
+set D15 = { R21 where R21 is (QC-symbol of R1) : ( x. R21 ) in ( rng R24 ) };
+L172: D15 c= ( QC-symbols R1 )
+proof
+let R2 being set;
+assume L173: R2 in D15;
+L174: (ex R21 being (QC-symbol of R1) st (R2 = R21 & ( x. R21 ) in ( rng R24 ))) by L173;
+thus L175: thesis by L174;
+end;
+L176: (for R2 being set holds (R2 in ( QC-symbols R1 ) implies (ex R3 being set st S6[ R2 , R3 ])))
+proof
+let R2 being set;
+assume L177: R2 in ( QC-symbols R1 );
+reconsider D16 = R2 as (QC-symbol of R1) by L177;
+take ( x. D16 );
+take D16;
+thus L178: thesis;
+end;
+consider C17 being Function such that L179: (( dom C17 ) = ( QC-symbols R1 ) & (for R2 being set holds (R2 in ( QC-symbols R1 ) implies S6[ R2 , ( C17 . R2 ) ]))) from CLASSES1:sch 1(L176);
+L180: ( rng ( C17 | D15 ) ) c= ( rng R24 )
+proof
+let R3 being set;
+assume L181: R3 in ( rng ( C17 | D15 ) );
+consider R2 being set such that L182: R2 in ( dom ( C17 | D15 ) ) and L183: R3 = ( ( C17 | D15 ) . R2 ) by L181 , FUNCT_1:def 3;
+L184: R2 in D15 by L182 , RELAT_1:57;
+L185: (ex R21 being (QC-symbol of R1) st (R2 = R21 & ( x. R21 ) in ( rng R24 ))) by L184;
+L186: (R3 = ( C17 . R2 ) & R2 in ( dom C17 )) by L182 , L183 , FUNCT_1:47 , RELAT_1:57;
+L187: (ex R21 being (QC-symbol of R1) st (R21 = R2 & R3 = ( x. R21 ))) by L186 , L179;
+thus L188: thesis by L187 , L185;
+end;
+L189: C17 is  one-to-one
+proof
+let C18 , C19 being set;
+assume that
+L190: (C18 in ( dom C17 ) & C19 in ( dom C17 ))
+and
+L191: ( C17 . C18 ) = ( C17 . C19 );
+L192: ((ex R21 being (QC-symbol of R1) st (R21 = C18 & ( C17 . C18 ) = ( x. R21 ))) & (ex R22 being (QC-symbol of R1) st (R22 = C19 & ( C17 . C19 ) = ( x. R22 )))) by L179 , L190;
+thus L193: thesis by L192 , L191 , XTUPLE_0:1;
+end;
+L194: ( C17 | D15 ) is  one-to-one by L189 , FUNCT_1:52;
+L195: ( dom ( C17 | D15 ) ) is  finite by L194 , L180 , CARD_1:59;
+reconsider D17 = D15 as (Subset of ( QC-symbols R1 )) by L172;
+L196: (for R2 being set holds (R2 in ( dom ( C17 | D17 ) ) iff (R2 in D17 & R2 in ( dom C17 )))) by RELAT_1:57;
+L197: ( dom ( C17 | D17 ) ) = ( D17 /\ ( QC-symbols R1 ) ) by L196 , L179 , XBOOLE_0:def 4;
+thus L198: thesis by L197 , L195 , XBOOLE_1:28;
+end;
+end;
+L200: (for B37 , B38 being set holds (( card B37 ) in ( card B38 ) implies ( B38 \ B37 ) <> ( {} )))
+proof
+let C20 , C21 being set;
+assume that
+L201: ( card C20 ) in ( card C21 )
+and
+L202: ( C21 \ C20 ) = ( {} );
+L203: C21 c= C20 by L202 , XBOOLE_1:37;
+L204: ( card C21 ) c= ( card C20 ) by L203 , CARD_1:11;
+thus L205: contradiction by L204 , L201 , CARD_1:4;
+end;
+definition
+let R1 being QC-alphabet;
+let R20 being (QC-formula of R1);
+let R24 being  finite (CQC_Substitution of R1);
+func NSub (R20 , R24) -> non  empty (Subset of ( QC-symbols R1 )) equals 
+( ( NAT ) \ ( ( Dom_Bound_Vars R20 ) \/ ( Sub_Var R24 ) ) );
+coherence
+proof
+set D18 = ( ( Dom_Bound_Vars R20 ) \/ ( Sub_Var R24 ) );
+L206: ( card ( ( Dom_Bound_Vars R20 ) \/ ( Sub_Var R24 ) ) ) in ( card ( NAT ) ) by CARD_3:42;
+thus L207: ( ( NAT ) \ ( ( Dom_Bound_Vars R20 ) \/ ( Sub_Var R24 ) ) ) is non  empty non  empty non  empty non  empty (Subset of ( QC-symbols R1 )) by L206 , L200 , QC_LANG1:3 , XBOOLE_1:109;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R24 being  finite (CQC_Substitution of R1);
+let R20 being (QC-formula of R1);
+func upVar (R24 , R20) -> (QC-symbol of R1) equals 
+the (Element of ( NSub (R20 , R24) ));
+coherence;
+end;
+definition
+let R1 being QC-alphabet;
+let R12 being (bound_QC-variable of R1);
+let R20 being (QC-formula of R1);
+let R24 being  finite (CQC_Substitution of R1);
+assume L210: (ex R23 being (CQC_Substitution of R1) st R24 = ( RestrictSub (R12 , ( All (R12 , R20) ) , R23) ));
+func ExpandSub (R12 , R20 , R24) -> (CQC_Substitution of R1) equals 
+( R24 \/ { [ R12 , ( x. ( upVar (R24 , R20) ) ) ] } ) if R12 in ( rng R24 ) otherwise ( R24 \/ { [ R12 , R12 ] } );
+coherence
+proof
+L211:
+now
+reconsider D19 = { [ R12 , R12 ] } as  Relation-like set;
+assume L212: (not R12 in ( rng R24 ));
+L213:
+now
+consider R23 being (CQC_Substitution of R1) such that L214: R24 = ( RestrictSub (R12 , ( All (R12 , R20) ) , R23) ) by L210;
+set D20 = { R13 where R13 is (bound_QC-variable of R1) : (R13 in ( still_not-bound_in ( All (R12 , R20) ) ) & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )) };
+L215: ( dom R24 ) c= D20 by L214 , RELAT_1:58;
+given R2 being set such that
+L216: R2 in ( ( dom R24 ) /\ ( dom D19 ) );
+
+L217: R2 in ( dom R24 ) by L216 , XBOOLE_0:def 4;
+L218: R2 in D20 by L217 , L215;
+L219: (( dom D19 ) = { R12 } & (ex R13 being (bound_QC-variable of R1) st (R2 = R13 & R13 in ( still_not-bound_in ( All (R12 , R20) ) ) & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )))) by L218 , RELAT_1:9;
+L220: R2 in ( dom D19 ) by L216 , XBOOLE_0:def 4;
+thus L221: contradiction by L220 , L219 , TARSKI:def 1;
+end;
+reconsider D21 = D19 as Function;
+L222: (for R2 being set holds (R2 in ( ( dom ( @ R24 ) ) /\ ( dom D21 ) ) implies ( ( @ R24 ) . R2 ) = ( D21 . R2 ))) by L213;
+consider C22 being Function such that L223: ( ( @ R24 ) \/ D21 ) = C22 by L222 , PARTFUN1:1;
+reconsider D22 = D21 as (Relation of ( bound_QC-variables R1 ) , ( bound_QC-variables R1 ));
+L224: ( ( @ R24 ) \/ D22 ) = C22 by L223;
+thus L225: ( R24 \/ { [ R12 , R12 ] } ) is (CQC_Substitution of R1) by L224 , PARTFUN1:45;
+end;
+L226:
+now
+reconsider D23 = { [ R12 , ( x. ( upVar (R24 , R20) ) ) ] } as  Relation-like set;
+assume L227: R12 in ( rng R24 );
+L228:
+now
+consider R23 being (CQC_Substitution of R1) such that L229: R24 = ( RestrictSub (R12 , ( All (R12 , R20) ) , R23) ) by L210;
+set D24 = { R13 where R13 is (bound_QC-variable of R1) : (R13 in ( still_not-bound_in ( All (R12 , R20) ) ) & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )) };
+L230: ( dom R24 ) c= D24 by L229 , RELAT_1:58;
+given R2 being set such that
+L231: R2 in ( ( dom R24 ) /\ ( dom D23 ) );
+
+L232: R2 in ( dom R24 ) by L231 , XBOOLE_0:def 4;
+L233: R2 in D24 by L232 , L230;
+L234: (( dom D23 ) = { R12 } & (ex R13 being (bound_QC-variable of R1) st (R2 = R13 & R13 in ( still_not-bound_in ( All (R12 , R20) ) ) & R13 is (Element of ( dom R23 )) & R13 <> R12 & R13 <> ( R23 . R13 )))) by L233 , RELAT_1:9;
+L235: R2 in ( dom D23 ) by L231 , XBOOLE_0:def 4;
+thus L236: contradiction by L235 , L234 , TARSKI:def 1;
+end;
+reconsider D25 = D23 as Function;
+L237: (for R2 being set holds (R2 in ( ( dom ( @ R24 ) ) /\ ( dom D25 ) ) implies ( ( @ R24 ) . R2 ) = ( D25 . R2 ))) by L228;
+consider C23 being Function such that L238: ( ( @ R24 ) \/ D25 ) = C23 by L237 , PARTFUN1:1;
+reconsider D26 = D25 as (Relation of ( bound_QC-variables R1 ) , ( bound_QC-variables R1 ));
+L239: ( ( @ R24 ) \/ D26 ) = C23 by L238;
+thus L240: ( R24 \/ { [ R12 , ( x. ( upVar (R24 , R20) ) ) ] } ) is (CQC_Substitution of R1) by L239 , PARTFUN1:45;
+end;
+thus L241: thesis by L226 , L211;
+end;
+consistency;
+end;
+definition
+let R1 being QC-alphabet;
+let R20 being (QC-formula of R1);
+let R23 being (CQC_Substitution of R1);
+let R3 being set;
+pred R20 , R23 PQSub R3
+means
+:L243: ((R20 is  universal implies R3 = ( ExpandSub (( bound_in R20 ) , ( the_scope_of R20 ) , ( RestrictSub (( bound_in R20 ) , R20 , R23) )) )) & ((not R20 is  universal) implies R3 = ( {} )))
+;end;
+definition
+let R1 being QC-alphabet;
+func QSub R1 -> Function means 
+(for R2 being set holds (R2 in it iff (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (ex R3 being set st (R2 = [ [ R20 , R23 ] , R3 ] & R20 , R23 PQSub R3))))));
+existence
+proof
+defpred S7[ set , set ] means (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st ($1 = [ R20 , R23 ] & R20 , R23 PQSub $2)));
+L245: (for R2 being set holds (for R4 being set holds (for R5 being set holds ((S7[ R2 , R4 ] & S7[ R2 , R5 ]) implies R4 = R5))))
+proof
+let R2 being set;
+let R4 being set;
+let R5 being set;
+assume that
+L246: (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (R2 = [ R20 , R23 ] & R20 , R23 PQSub R4)))
+and
+L247: (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (R2 = [ R20 , R23 ] & R20 , R23 PQSub R5)));
+consider C24 being (QC-formula of R1), C25 being (CQC_Substitution of R1) such that L248: R2 = [ C24 , C25 ] and L249: C24 , C25 PQSub R4 by L246;
+consider C26 being (QC-formula of R1), C27 being (CQC_Substitution of R1) such that L250: R2 = [ C26 , C27 ] and L251: C26 , C27 PQSub R5 by L247;
+L252: C24 = C26 by L248 , L250 , XTUPLE_0:1;
+L253: C25 = C27 by L248 , L250 , XTUPLE_0:1;
+per cases ;
+suppose L254: C24 is  universal;
+
+L255: R4 = ( ExpandSub (( bound_in C24 ) , ( the_scope_of C24 ) , ( RestrictSub (( bound_in C24 ) , C24 , C25) )) ) by L254 , L249 , L243;
+thus L256: thesis by L255 , L251 , L252 , L253 , L254 , L243;
+end;
+suppose L257: (not C24 is  universal);
+
+L258: R4 = ( {} ) by L257 , L249 , L243;
+thus L259: thesis by L258 , L251 , L252 , L257 , L243;
+end;
+end;
+consider C28 being Function such that L261: (for R2 being set holds (for R3 being set holds ([ R2 , R3 ] in C28 iff (R2 in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] & S7[ R2 , R3 ])))) from FUNCT_1:sch 1(L245);
+take C28;
+L262: (for R6 being set holds (R6 in C28 iff (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (ex R3 being set st (R6 = [ [ R20 , R23 ] , R3 ] & R20 , R23 PQSub R3))))))
+proof
+let R6 being set;
+thus L263: (R6 in C28 implies (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (ex R3 being set st (R6 = [ [ R20 , R23 ] , R3 ] & R20 , R23 PQSub R3)))))
+proof
+assume L264: R6 in C28;
+consider R2 being set, R3 being set such that L265: R6 = [ R2 , R3 ] by L264 , RELAT_1:def 1;
+L266: (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (R2 = [ R20 , R23 ] & R20 , R23 PQSub R3))) by L261 , L264 , L265;
+thus L267: thesis by L266 , L265;
+end;
+
+thus L268: thesis by L261;
+end;
+thus L269: thesis by L262;
+end;
+uniqueness
+proof
+let C29 , C30 being Function;
+assume that
+L270: (for R2 being set holds (R2 in C29 iff (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (ex R3 being set st (R2 = [ [ R20 , R23 ] , R3 ] & R20 , R23 PQSub R3))))))
+and
+L271: (for R2 being set holds (R2 in C30 iff (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (ex R3 being set st (R2 = [ [ R20 , R23 ] , R3 ] & R20 , R23 PQSub R3))))));
+L272:
+now
+let R2 being set;
+L273: (R2 in C29 iff (ex R20 being (QC-formula of R1) st (ex R23 being (CQC_Substitution of R1) st (ex R3 being set st (R2 = [ [ R20 , R23 ] , R3 ] & R20 , R23 PQSub R3))))) by L270;
+thus L274: (R2 in C29 iff R2 in C30) by L273 , L271;
+end;
+thus L275: thesis by L272 , TARSKI:1;
+end;
+end;
+begin
+theorem
+L277: (for R1 being QC-alphabet holds ([: ( QC-WFF R1 ) , ( vSUB R1 ) :] is (Subset of [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]) & (for B39 being (Element of ( NAT )) holds (for B40 being (QC-pred_symbol of B39 , R1) holds (for B41 being (QC-variable_list of B39 , R1) holds (for B42 being (Element of ( vSUB R1 )) holds [ ( <* B40 *> ^ B41 ) , B42 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :])))) & (for B43 being (Element of ( vSUB R1 )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , B43 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) & (for B44 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B45 being (Element of ( vSUB R1 )) holds ([ B44 , B45 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( <* [ 1 , ( 0 ) ] *> ^ B44 ) , B45 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))) & (for B46 , B47 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B48 being (Element of ( vSUB R1 )) holds (([ B46 , B48 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] & [ B47 , B48 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B46 ) ^ B47 ) , B48 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))) & (for B49 being (bound_QC-variable of R1) holds (for B50 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B51 being (Element of ( vSUB R1 )) holds ([ B50 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B49 *> ) ^ B50 ) , B51 ] ) ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B49 *> ) ^ B50 ) , B51 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))))))
+proof
+let R1 being QC-alphabet;
+L278: ( QC-WFF R1 ) is R1 -closed by QC_LANG1:7;
+L279: ( QC-WFF R1 ) is (Subset of ( [: ( NAT ) , ( QC-symbols R1 ) :] * )) by L278 , QC_LANG1:def 10;
+thus L280: [: ( QC-WFF R1 ) , ( vSUB R1 ) :] is (Subset of [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]) by L279 , ZFMISC_1:95;
+thus L281: (for B52 being (Element of ( NAT )) holds (for B53 being (QC-pred_symbol of B52 , R1) holds (for B54 being (QC-variable_list of B52 , R1) holds (for B55 being (Element of ( vSUB R1 )) holds [ ( <* B53 *> ^ B54 ) , B55 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))))
+proof
+let C31 being (Element of ( NAT ));
+let C32 being (QC-pred_symbol of C31 , R1);
+let C33 being (QC-variable_list of C31 , R1);
+let C34 being (Element of ( vSUB R1 ));
+L282: ( C32 ! C33 ) = ( <* C32 *> ^ C33 ) by QC_LANG1:8;
+thus L283: thesis by L282 , ZFMISC_1:def 2;
+end;
+
+L284: ( VERUM R1 ) in ( QC-WFF R1 );
+thus L285: (for B56 being (Element of ( vSUB R1 )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , B56 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) by L284 , ZFMISC_1:def 2;
+thus L286: (for B57 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B58 being (Element of ( vSUB R1 )) holds ([ B57 , B58 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( <* [ 1 , ( 0 ) ] *> ^ B57 ) , B58 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :])))
+proof
+let C35 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+let C36 being (Element of ( vSUB R1 ));
+assume L287: [ C35 , C36 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :];
+L288: (ex R2 being set st (ex R3 being set st (R2 in ( QC-WFF R1 ) & R3 in ( vSUB R1 ) & [ C35 , C36 ] = [ R2 , R3 ]))) by L287 , ZFMISC_1:def 2;
+reconsider D27 = C35 as (Element of ( QC-WFF R1 )) by L288 , XTUPLE_0:1;
+L289: ( 'not' D27 ) = ( <* [ 1 , ( 0 ) ] *> ^ ( @ D27 ) );
+thus L290: thesis by L289 , ZFMISC_1:def 2;
+end;
+
+thus L291: (for B59 , B60 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B61 being (Element of ( vSUB R1 )) holds (([ B59 , B61 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] & [ B60 , B61 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B59 ) ^ B60 ) , B61 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :])))
+proof
+let C37 , C38 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+let C39 being (Element of ( vSUB R1 ));
+assume that
+L292: [ C37 , C39 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]
+and
+L293: [ C38 , C39 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :];
+L294: (ex R6 being set st (ex R7 being set st (R6 in ( QC-WFF R1 ) & R7 in ( vSUB R1 ) & [ C38 , C39 ] = [ R6 , R7 ]))) by L293 , ZFMISC_1:def 2;
+reconsider D28 = C38 as (Element of ( QC-WFF R1 )) by L294 , XTUPLE_0:1;
+L295: (ex R2 being set st (ex R3 being set st (R2 in ( QC-WFF R1 ) & R3 in ( vSUB R1 ) & [ C37 , C39 ] = [ R2 , R3 ]))) by L292 , ZFMISC_1:def 2;
+reconsider D29 = C37 as (Element of ( QC-WFF R1 )) by L295 , XTUPLE_0:1;
+L296: ( D29 '&' D28 ) = ( ( <* [ 2 , ( 0 ) ] *> ^ ( @ D29 ) ) ^ ( @ D28 ) );
+thus L297: thesis by L296 , ZFMISC_1:def 2;
+end;
+
+thus L298: (for B62 being (bound_QC-variable of R1) holds (for B63 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B64 being (Element of ( vSUB R1 )) holds ([ B63 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B62 *> ) ^ B63 ) , B64 ] ) ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B62 *> ) ^ B63 ) , B64 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))))
+proof
+let C40 being (bound_QC-variable of R1);
+let C41 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+let C42 being (Element of ( vSUB R1 ));
+assume L299: [ C41 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C40 *> ) ^ C41 ) , C42 ] ) ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :];
+L300: (ex R2 being set st (ex R3 being set st (R2 in ( QC-WFF R1 ) & R3 in ( vSUB R1 ) & [ C41 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C40 *> ) ^ C41 ) , C42 ] ) ] = [ R2 , R3 ]))) by L299 , ZFMISC_1:def 2;
+reconsider D30 = C41 as (Element of ( QC-WFF R1 )) by L300 , XTUPLE_0:1;
+L301: ( All (C40 , D30) ) = ( ( <* [ 3 , ( 0 ) ] *> ^ <* C40 *> ) ^ ( @ D30 ) );
+thus L302: thesis by L301 , ZFMISC_1:def 2;
+end;
+
+end;
+definition
+let R1 being QC-alphabet;
+let C43 being set;
+attr C43 is R1 -Sub-closed
+means
+:L299: (C43 is (Subset of [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]) & (for B65 being (Element of ( NAT )) holds (for B66 being (QC-pred_symbol of B65 , R1) holds (for B67 being (QC-variable_list of B65 , R1) holds (for B68 being (Element of ( vSUB R1 )) holds [ ( <* B66 *> ^ B67 ) , B68 ] in C43)))) & (for B69 being (Element of ( vSUB R1 )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , B69 ] in C43) & (for B70 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B71 being (Element of ( vSUB R1 )) holds ([ B70 , B71 ] in C43 implies [ ( <* [ 1 , ( 0 ) ] *> ^ B70 ) , B71 ] in C43))) & (for B72 , B73 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B74 being (Element of ( vSUB R1 )) holds (([ B72 , B74 ] in C43 & [ B73 , B74 ] in C43) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B72 ) ^ B73 ) , B74 ] in C43))) & (for B75 being (bound_QC-variable of R1) holds (for B76 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B77 being (Element of ( vSUB R1 )) holds ([ B76 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B75 *> ) ^ B76 ) , B77 ] ) ] in C43 implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B75 *> ) ^ B76 ) , B77 ] in C43)))));
+end;
+registration
+let R1 being QC-alphabet;
+cluster R1 -Sub-closed non  empty for set;
+existence
+proof
+take [: ( QC-WFF R1 ) , ( vSUB R1 ) :];
+L301: ([: ( QC-WFF R1 ) , ( vSUB R1 ) :] is (Subset of [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]) & (for B78 being (Element of ( NAT )) holds (for B79 being (QC-pred_symbol of B78 , R1) holds (for B80 being (QC-variable_list of B78 , R1) holds (for B81 being (Element of ( vSUB R1 )) holds [ ( <* B79 *> ^ B80 ) , B81 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :])))) & (for B82 being (Element of ( vSUB R1 )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , B82 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) & (for B83 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B84 being (Element of ( vSUB R1 )) holds ([ B83 , B84 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( <* [ 1 , ( 0 ) ] *> ^ B83 ) , B84 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))) & (for B85 , B86 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B87 being (Element of ( vSUB R1 )) holds (([ B85 , B87 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] & [ B86 , B87 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B85 ) ^ B86 ) , B87 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))) & (for B88 being (bound_QC-variable of R1) holds (for B89 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B90 being (Element of ( vSUB R1 )) holds ([ B89 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B88 *> ) ^ B89 ) , B90 ] ) ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B88 *> ) ^ B89 ) , B90 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))))) by L277;
+thus L302: thesis by L301 , L299;
+end;
+end;
+L304: (for R1 being QC-alphabet holds (for B91 being (bound_QC-variable of R1) holds (for B92 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds ( ( <* [ 3 , ( 0 ) ] *> ^ <* B91 *> ) ^ B92 ) is (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]))))
+proof
+let R1 being QC-alphabet;
+L305: ( 0 ) in ( QC-symbols R1 ) by QC_LANG1:3;
+L306: [ 3 , ( 0 ) ] in [: ( NAT ) , ( QC-symbols R1 ) :] by L305 , ZFMISC_1:87;
+L307: (( rng <* [ 3 , ( 0 ) ] *> ) = { [ 3 , ( 0 ) ] } & { [ 3 , ( 0 ) ] } c= [: ( NAT ) , ( QC-symbols R1 ) :]) by L306 , FINSEQ_1:39 , ZFMISC_1:31;
+reconsider D31 = <* [ 3 , ( 0 ) ] *> as (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) by L307 , FINSEQ_1:def 4;
+let C44 being (bound_QC-variable of R1);
+let C45 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+L308: ( QC-variables R1 ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by QC_LANG1:4;
+L309: ( bound_QC-variables R1 ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L308 , XBOOLE_1:1;
+L310: ( rng <* C44 *> ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L309 , XBOOLE_1:1;
+reconsider D32 = <* C44 *> as (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) by L310 , FINSEQ_1:def 4;
+L311: ( ( D31 ^ D32 ) ^ C45 ) is (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+thus L312: thesis by L311;
+end;
+L313: (for R1 being QC-alphabet holds (for B93 being (Element of ( NAT )) holds (for B94 being (QC-symbol of R1) holds (for B95 being (Element of ( vSUB R1 )) holds [ <* [ B93 , B94 ] *> , B95 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]))))
+proof
+let R1 being QC-alphabet;
+let C46 being (Element of ( NAT ));
+let C47 being (QC-symbol of R1);
+let R25 being (Element of ( vSUB R1 ));
+L314: <* [ C46 , C47 ] *> in ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) by FINSEQ_1:def 11;
+thus L315: thesis by L314 , ZFMISC_1:def 2;
+end;
+L316: (for R1 being QC-alphabet holds (for B96 being (Element of ( NAT )) holds (for B97 being (QC-pred_symbol of B96 , R1) holds (for B98 being (QC-variable_list of B96 , R1) holds (for B99 being (Element of ( vSUB R1 )) holds [ ( <* B97 *> ^ B98 ) , B99 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :])))))
+proof
+let R1 being QC-alphabet;
+let C48 being (Element of ( NAT ));
+let C49 being (QC-pred_symbol of C48 , R1);
+let C50 being (QC-variable_list of C48 , R1);
+L317: ( QC-pred_symbols R1 ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by QC_LANG1:6;
+L318: ( C48 -ary_QC-pred_symbols R1 ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L317 , XBOOLE_1:1;
+L319: ( rng <* C49 *> ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L318 , XBOOLE_1:1;
+L320: ( QC-variables R1 ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by QC_LANG1:4;
+L321: ( rng C50 ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L320 , XBOOLE_1:1;
+L322: ( ( rng <* C49 *> ) \/ ( rng C50 ) ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L321 , L319 , XBOOLE_1:8;
+L323: ( rng ( <* C49 *> ^ C50 ) ) c= [: ( NAT ) , ( QC-symbols R1 ) :] by L322 , FINSEQ_1:31;
+L324: ( <* C49 *> ^ C50 ) is (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) by L323 , FINSEQ_1:def 4;
+L325: ( <* C49 *> ^ C50 ) in ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) by L324 , FINSEQ_1:def 11;
+thus L326: thesis by L325 , ZFMISC_1:def 2;
+end;
+definition
+let R1 being QC-alphabet;
+func QC-Sub-WFF R1 -> non  empty set means 
+:L327: (it is R1 -Sub-closed & (for B100 being non  empty set holds (B100 is R1 -Sub-closed implies it c= B100)));
+existence
+proof
+set D33 = the (Element of ( vSUB R1 ));
+defpred S8[ set ] means (for B101 being non  empty set holds (B101 is R1 -Sub-closed implies $1 in B101));
+consider C51 being set such that L328: (for B102 being set holds (B102 in C51 iff (B102 in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] & S8[ B102 ]))) from XBOOLE_0:sch 1;
+L329: ( 0 ) in ( QC-symbols R1 ) by QC_LANG1:3;
+L330: ([ <* [ ( 0 ) , ( 0 ) ] *> , D33 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] & (for B103 being non  empty set holds (B103 is R1 -Sub-closed implies [ <* [ ( 0 ) , ( 0 ) ] *> , D33 ] in B103))) by L329 , L299 , L313;
+reconsider D34 = C51 as non  empty set by L330 , L328;
+take D34;
+L331: D34 c= [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]
+proof
+let C52 being set;
+thus L332: thesis by L328;
+end;
+thus L333: D34 is (Subset of [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]) by L331;
+thus L334: (for B104 being (Element of ( NAT )) holds (for B105 being (QC-pred_symbol of B104 , R1) holds (for B106 being (QC-variable_list of B104 , R1) holds (for B107 being (Element of ( vSUB R1 )) holds [ ( <* B105 *> ^ B106 ) , B107 ] in D34))))
+proof
+let C53 being (Element of ( NAT ));
+let C54 being (QC-pred_symbol of C53 , R1);
+let C55 being (QC-variable_list of C53 , R1);
+let C56 being (Element of ( vSUB R1 ));
+L335: ([ ( <* C54 *> ^ C55 ) , C56 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] & (for B108 being non  empty set holds (B108 is R1 -Sub-closed implies [ ( <* C54 *> ^ C55 ) , C56 ] in B108))) by L299 , L316;
+thus L336: thesis by L335 , L328;
+end;
+
+thus L337: (for R25 being (Element of ( vSUB R1 )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , R25 ] in D34)
+proof
+let R25 being (Element of ( vSUB R1 ));
+L338: ( 0 ) in ( QC-symbols R1 ) by QC_LANG1:3;
+L339: ([ <* [ ( 0 ) , ( 0 ) ] *> , R25 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] & (for B109 being non  empty set holds (B109 is R1 -Sub-closed implies [ <* [ ( 0 ) , ( 0 ) ] *> , R25 ] in B109))) by L338 , L299 , L313;
+thus L340: thesis by L339 , L328;
+end;
+
+thus L341: (for B110 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B111 being (Element of ( vSUB R1 )) holds ([ B110 , B111 ] in D34 implies [ ( <* [ 1 , ( 0 ) ] *> ^ B110 ) , B111 ] in D34)))
+proof
+let C57 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+let C58 being (Element of ( vSUB R1 ));
+assume L342: [ C57 , C58 ] in D34;
+L343: (for B112 being non  empty set holds (B112 is R1 -Sub-closed implies [ ( <* [ 1 , ( 0 ) ] *> ^ C57 ) , C58 ] in B112))
+proof
+let C59 being non  empty set;
+assume L344: C59 is R1 -Sub-closed;
+L345: [ C57 , C58 ] in C59 by L344 , L328 , L342;
+thus L346: thesis by L345 , L344 , L299;
+end;
+L347: ( 0 ) in ( QC-symbols R1 ) by QC_LANG1:3;
+L348: [ 1 , ( 0 ) ] in [: ( NAT ) , ( QC-symbols R1 ) :] by L347 , ZFMISC_1:87;
+L349: (( rng <* [ 1 , ( 0 ) ] *> ) = { [ 1 , ( 0 ) ] } & { [ 1 , ( 0 ) ] } c= [: ( NAT ) , ( QC-symbols R1 ) :]) by L348 , FINSEQ_1:39 , ZFMISC_1:31;
+reconsider D35 = <* [ 1 , ( 0 ) ] *> as (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) by L349 , FINSEQ_1:def 4;
+L350: ( D35 ^ C57 ) is (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+L351: ( <* [ 1 , ( 0 ) ] *> ^ C57 ) in ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) by L350 , FINSEQ_1:def 11;
+L352: [ ( <* [ 1 , ( 0 ) ] *> ^ C57 ) , C58 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] by L351 , ZFMISC_1:def 2;
+thus L353: thesis by L352 , L328 , L343;
+end;
+
+thus L354: (for B113 , B114 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B115 being (Element of ( vSUB R1 )) holds (([ B113 , B115 ] in D34 & [ B114 , B115 ] in D34) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B113 ) ^ B114 ) , B115 ] in D34)))
+proof
+let C60 , C61 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+let C62 being (Element of ( vSUB R1 ));
+assume that
+L355: ([ C60 , C62 ] in D34 & [ C61 , C62 ] in D34);
+L356: (for B116 being non  empty set holds (B116 is R1 -Sub-closed implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ C60 ) ^ C61 ) , C62 ] in B116))
+proof
+let C63 being non  empty set;
+assume L357: C63 is R1 -Sub-closed;
+L358: ([ C60 , C62 ] in C63 & [ C61 , C62 ] in C63) by L357 , L328 , L355;
+thus L359: thesis by L358 , L357 , L299;
+end;
+L360: ( 0 ) in ( QC-symbols R1 ) by QC_LANG1:3;
+L361: [ 2 , ( 0 ) ] in [: ( NAT ) , ( QC-symbols R1 ) :] by L360 , ZFMISC_1:87;
+L362: (( rng <* [ 2 , ( 0 ) ] *> ) = { [ 2 , ( 0 ) ] } & { [ 2 , ( 0 ) ] } c= [: ( NAT ) , ( QC-symbols R1 ) :]) by L361 , FINSEQ_1:39 , ZFMISC_1:31;
+reconsider D36 = <* [ 2 , ( 0 ) ] *> as (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) by L362 , FINSEQ_1:def 4;
+L363: ( ( D36 ^ C60 ) ^ C61 ) is (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+L364: ( ( <* [ 2 , ( 0 ) ] *> ^ C60 ) ^ C61 ) in ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) by L363 , FINSEQ_1:def 11;
+L365: [ ( ( <* [ 2 , ( 0 ) ] *> ^ C60 ) ^ C61 ) , C62 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] by L364 , ZFMISC_1:def 2;
+thus L366: thesis by L365 , L328 , L356;
+end;
+
+thus L367: (for B117 being (bound_QC-variable of R1) holds (for B118 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B119 being (Element of ( vSUB R1 )) holds ([ B118 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B117 *> ) ^ B118 ) , B119 ] ) ] in D34 implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B117 *> ) ^ B118 ) , B119 ] in D34))))
+proof
+let C64 being (bound_QC-variable of R1);
+let C65 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]);
+let C66 being (Element of ( vSUB R1 ));
+assume L368: [ C65 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C64 *> ) ^ C65 ) , C66 ] ) ] in D34;
+L369: (for B120 being non  empty set holds (B120 is R1 -Sub-closed implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C64 *> ) ^ C65 ) , C66 ] in B120))
+proof
+let C67 being non  empty set;
+assume L370: C67 is R1 -Sub-closed;
+L371: [ C65 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C64 *> ) ^ C65 ) , C66 ] ) ] in C67 by L370 , L328 , L368;
+thus L372: thesis by L371 , L370 , L299;
+end;
+L373: ( ( <* [ 3 , ( 0 ) ] *> ^ <* C64 *> ) ^ C65 ) is (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) by L304;
+L374: ( ( <* [ 3 , ( 0 ) ] *> ^ <* C64 *> ) ^ C65 ) in ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) by L373 , FINSEQ_1:def 11;
+L375: [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C64 *> ) ^ C65 ) , C66 ] in [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :] by L374 , ZFMISC_1:def 2;
+thus L376: thesis by L375 , L328 , L369;
+end;
+
+let C68 being non  empty set;
+assume that
+L377: C68 is R1 -Sub-closed;
+let C69 being set;
+assume L378: C69 in D34;
+thus L379: thesis by L378 , L328 , L377;
+end;
+uniqueness
+proof
+let C70 , C71 being non  empty set;
+assume L380: (C70 is R1 -Sub-closed & (for B121 being non  empty set holds (B121 is R1 -Sub-closed implies C70 c= B121)) & C71 is R1 -Sub-closed & (for B122 being non  empty set holds (B122 is R1 -Sub-closed implies C71 c= B122)));
+L381: (C70 c= C71 & C71 c= C70) by L380;
+thus L382: thesis by L381 , XBOOLE_0:def 10;
+end;
+end;
+theorem
+L384: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (ex R20 being (QC-formula of R1) st (ex R25 being (Element of ( vSUB R1 )) st R26 = [ R20 , R25 ]))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+L385: ([: ( QC-WFF R1 ) , ( vSUB R1 ) :] is (Subset of [: ( [: ( NAT ) , ( QC-symbols R1 ) :] * ) , ( vSUB R1 ) :]) & (for B123 being (Element of ( NAT )) holds (for B124 being (QC-pred_symbol of B123 , R1) holds (for B125 being (QC-variable_list of B123 , R1) holds (for B126 being (Element of ( vSUB R1 )) holds [ ( <* B124 *> ^ B125 ) , B126 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :])))) & (for B127 being (Element of ( vSUB R1 )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , B127 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) & (for B128 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B129 being (Element of ( vSUB R1 )) holds ([ B128 , B129 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( <* [ 1 , ( 0 ) ] *> ^ B128 ) , B129 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))) & (for B130 , B131 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B132 being (Element of ( vSUB R1 )) holds (([ B130 , B132 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] & [ B131 , B132 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B130 ) ^ B131 ) , B132 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))) & (for B133 being (bound_QC-variable of R1) holds (for B134 being (FinSequence of [: ( NAT ) , ( QC-symbols R1 ) :]) holds (for B135 being (Element of ( vSUB R1 )) holds ([ B134 , ( ( QSub R1 ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B133 *> ) ^ B134 ) , B135 ] ) ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B133 *> ) ^ B134 ) , B135 ] in [: ( QC-WFF R1 ) , ( vSUB R1 ) :]))))) by L277;
+L386: [: ( QC-WFF R1 ) , ( vSUB R1 ) :] is R1 -Sub-closed by L385 , L299;
+L387: ( QC-Sub-WFF R1 ) c= [: ( QC-WFF R1 ) , ( vSUB R1 ) :] by L386 , L327;
+L388: R26 in [: ( QC-WFF R1 ) , ( vSUB R1 ) :] by L387 , TARSKI:def 3;
+consider R2 being set, R3 being set such that L389: R2 in ( QC-WFF R1 ) and L390: R3 in ( vSUB R1 ) and L391: R26 = [ R2 , R3 ] by L388 , ZFMISC_1:def 2;
+reconsider D37 = R3 as (Element of ( vSUB R1 )) by L390;
+reconsider D38 = R2 as (Element of ( QC-WFF R1 )) by L389;
+take D38;
+take D37;
+thus L392: thesis by L391;
+end;
+registration
+let R1 being QC-alphabet;
+cluster ( QC-Sub-WFF R1 ) -> R1 -Sub-closed;
+coherence by L327;
+end;
+definition
+let R1 being QC-alphabet;
+let C72 being (QC-pred_symbol of R1);
+let C73 being (FinSequence of ( QC-variables R1 ));
+let R25 being (Element of ( vSUB R1 ));
+assume L394: ( the_arity_of C72 ) = ( len C73 );
+func Sub_P (C72 , C73 , R25) -> (Element of ( QC-Sub-WFF R1 )) equals 
+:L395: [ ( C72 ! C73 ) , R25 ];
+coherence
+proof
+set D39 = ( len C73 );
+set D40 = { B136 where B136 is (QC-pred_symbol of R1) : ( the_arity_of B136 ) = D39 };
+L396: C72 in D40 by L394;
+reconsider D41 = C72 as (QC-pred_symbol of D39 , R1) by L396;
+reconsider D42 = C73 as (QC-variable_list of D39 , R1) by CARD_1:def 7;
+L397: ( D41 ! D42 ) = ( <* D41 *> ^ D42 ) by QC_LANG1:8;
+thus L398: thesis by L397 , L299;
+end;
+end;
+theorem
+L400: (for R1 being QC-alphabet holds (for R25 being (Element of ( vSUB R1 )) holds (for B137 being (Element of ( NAT )) holds (for B138 being (QC-pred_symbol of B137 , R1) holds (for B139 being (QC-variable_list of B137 , R1) holds ( Sub_P (B138 , B139 , R25) ) = [ ( B138 ! B139 ) , R25 ])))))
+proof
+let R1 being QC-alphabet;
+let R25 being (Element of ( vSUB R1 ));
+let C74 being (Element of ( NAT ));
+let C75 being (QC-pred_symbol of C74 , R1);
+let C76 being (QC-variable_list of C74 , R1);
+set D43 = { B140 where B140 is (QC-pred_symbol of R1) : ( the_arity_of B140 ) = C74 };
+L401: C75 in D43;
+L402: (ex B141 being (QC-pred_symbol of R1) st (C75 = B141 & ( the_arity_of B141 ) = C74)) by L401;
+L403: ( len C76 ) = C74 by CARD_1:def 7;
+thus L404: thesis by L403 , L402 , L395;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+attr R26 is R1 -Sub_VERUM
+means
+:L405: (ex R25 being (Element of ( vSUB R1 )) st R26 = [ ( VERUM R1 ) , R25 ]);
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+redefine func R26 `1 -> (Element of ( QC-WFF R1 ));
+
+coherence
+proof
+L407: (ex R20 being (QC-formula of R1) st (ex R25 being (Element of ( vSUB R1 )) st R26 = [ R20 , R25 ])) by L384;
+thus L408: thesis by L407 , MCART_1:7;
+end;
+redefine func R26 `2 -> (Element of ( vSUB R1 ));
+
+coherence
+proof
+L409: (ex R20 being (QC-formula of R1) st (ex R25 being (Element of ( vSUB R1 )) st R26 = [ R20 , R25 ])) by L384;
+thus L410: thesis by L409 , MCART_1:7;
+end;
+end;
+theorem
+L412: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds R26 = [ ( R26 `1 ) , ( R26 `2 ) ]))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+L413: (ex R20 being (QC-formula of R1) st (ex R25 being (Element of ( vSUB R1 )) st R26 = [ R20 , R25 ])) by L384;
+thus L414: thesis by L413 , MCART_1:8;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+func Sub_not R26 -> (Element of ( QC-Sub-WFF R1 )) equals 
+[ ( 'not' ( R26 `1 ) ) , ( R26 `2 ) ];
+coherence
+proof
+L415: [ ( R26 `1 ) , ( R26 `2 ) ] is (Element of ( QC-Sub-WFF R1 )) by L412;
+thus L416: thesis by L415 , L299;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+let R27 being (Element of ( QC-Sub-WFF R1 ));
+assume L418: ( R26 `2 ) = ( R27 `2 );
+func Sub_& (R26 , R27) -> (Element of ( QC-Sub-WFF R1 )) equals 
+:L419: [ ( ( R26 `1 ) '&' ( R27 `1 ) ) , ( R26 `2 ) ];
+coherence
+proof
+L420: ([ ( R26 `1 ) , ( R26 `2 ) ] is (Element of ( QC-Sub-WFF R1 )) & [ ( R27 `1 ) , ( R27 `2 ) ] is (Element of ( QC-Sub-WFF R1 ))) by L412;
+thus L421: thesis by L420 , L418 , L299;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+redefine func R34 `1 -> (Element of ( QC-Sub-WFF R1 ));
+
+coherence by MCART_1:10;
+redefine func R34 `2 -> (Element of ( bound_QC-variables R1 ));
+
+coherence by MCART_1:10;
+end;
+definition
+let R1 being QC-alphabet;
+let R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+attr R34 is  quantifiable
+means
+:L424: (ex R25 being (Element of ( vSUB R1 )) st ( ( R34 `1 ) `2 ) = ( ( QSub R1 ) . [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , R25 ] ));
+end;
+definition
+let R1 being QC-alphabet;
+let R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+assume L426: R34 is  quantifiable;
+mode second_Q_comp of R34
+ -> (Element of ( vSUB R1 ))
+means :L427: ( ( R34 `1 ) `2 ) = ( ( QSub R1 ) . [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , it ] );
+existence by L426 , L424;
+end;
+definition
+let R1 being QC-alphabet;
+let R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+let R35 being (second_Q_comp of R34);
+assume L429: R34 is  quantifiable;
+func Sub_All (R34 , R35) -> (Element of ( QC-Sub-WFF R1 )) equals 
+:L430: [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , R35 ];
+coherence
+proof
+L431: ( ( R34 `1 ) `2 ) = ( ( QSub R1 ) . [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , R35 ] ) by L429 , L427;
+L432: ( R34 `1 ) = [ ( ( R34 `1 ) `1 ) , ( ( QSub R1 ) . [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , R35 ] ) ] by L431 , L412;
+thus L433: thesis by L432 , L299;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+let R12 being (bound_QC-variable of R1);
+redefine func [R26 , R12 ] -> (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+
+coherence
+proof
+L435: [ R26 , R12 ] in [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :];
+thus L436: thesis by L435;
+end;
+end;
+scheme SubQCInd { F1() -> QC-alphabet , P1[(Element of ( QC-Sub-WFF F1() ))] } : (for B142 being (Element of ( QC-Sub-WFF F1() )) holds P1[ B142 ])
+provided
+L438: (for B143 being (Element of ( NAT )) holds (for B144 being (QC-pred_symbol of B143 , F1()) holds (for B145 being (QC-variable_list of B143 , F1()) holds (for B146 being (Element of ( vSUB F1() )) holds P1[ ( Sub_P (B144 , B145 , B146) ) ]))))
+and
+L439: (for B147 being (Element of ( QC-Sub-WFF F1() )) holds (B147 is F1() -Sub_VERUM implies P1[ B147 ]))
+and
+L440: (for B148 being (Element of ( QC-Sub-WFF F1() )) holds (P1[ B148 ] implies P1[ ( Sub_not B148 ) ]))
+and
+L441: (for B149 , B150 being (Element of ( QC-Sub-WFF F1() )) holds ((( B149 `2 ) = ( B150 `2 ) & P1[ B149 ] & P1[ B150 ]) implies P1[ ( Sub_& (B149 , B150) ) ]))
+and
+L442: (for B151 being (bound_QC-variable of F1()) holds (for B152 being (Element of ( QC-Sub-WFF F1() )) holds (for B153 being (second_Q_comp of [ B152 , B151 ]) holds (([ B152 , B151 ] is  quantifiable & P1[ B152 ]) implies P1[ ( Sub_All ([ B152 , B151 ] , B153) ) ]))))
+proof
+set D44 = { B154 where B154 is (Element of ( QC-Sub-WFF F1() )) : P1[ B154 ] };
+L443: D44 is non  empty
+proof
+set D45 = the (Element of ( vSUB F1() ));
+reconsider D46 = [ ( VERUM F1() ) , D45 ] as (Element of ( QC-Sub-WFF F1() )) by L299;
+L444: D46 is F1() -Sub_VERUM by L405;
+L445: P1[ D46 ] by L444 , L439;
+L446: D46 in D44 by L445;
+thus L447: thesis by L446;
+end;
+reconsider D47 = D44 as non  empty set by L443;
+L448: (for B155 being (Element of ( vSUB F1() )) holds [ ( VERUM F1() ) , B155 ] in D47)
+proof
+let C77 being (Element of ( vSUB F1() ));
+reconsider D48 = [ ( VERUM F1() ) , C77 ] as (Element of ( QC-Sub-WFF F1() )) by L299;
+L449: D48 is F1() -Sub_VERUM by L405;
+L450: P1[ D48 ] by L449 , L439;
+thus L451: thesis by L450;
+end;
+L452: (for B156 being (Element of ( vSUB F1() )) holds [ <* [ ( 0 ) , ( 0 ) ] *> , B156 ] in D47) by L448;
+L453: (for B157 being (FinSequence of [: ( NAT ) , ( QC-symbols F1() ) :]) holds (for B158 being (Element of ( vSUB F1() )) holds ([ B157 , B158 ] in D47 implies [ ( <* [ 1 , ( 0 ) ] *> ^ B157 ) , B158 ] in D47)))
+proof
+let C78 being (FinSequence of [: ( NAT ) , ( QC-symbols F1() ) :]);
+let C79 being (Element of ( vSUB F1() ));
+assume L454: [ C78 , C79 ] in D47;
+consider C80 being (Element of ( QC-Sub-WFF F1() )) such that L455: C80 = [ C78 , C79 ] and L456: P1[ C80 ] by L454;
+L457: P1[ ( Sub_not C80 ) ] by L440 , L456;
+L458: ( Sub_not C80 ) in D47 by L457;
+consider C81 being (Element of ( QC-WFF F1() )), C82 being (Element of ( vSUB F1() )) such that L459: C80 = [ C81 , C82 ] by L384;
+L460: ( C80 `1 ) = C81 by L459 , MCART_1:7;
+L461: C78 = C81 by L455 , L459 , XTUPLE_0:1;
+thus L462: thesis by L461 , L455 , L458 , L460 , MCART_1:7;
+end;
+L463: (for B159 being (bound_QC-variable of F1()) holds (for B160 being (FinSequence of [: ( NAT ) , ( QC-symbols F1() ) :]) holds (for B161 being (Element of ( vSUB F1() )) holds ([ B160 , ( ( QSub F1() ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B159 *> ) ^ B160 ) , B161 ] ) ] in D47 implies [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* B159 *> ) ^ B160 ) , B161 ] in D47))))
+proof
+let C83 being (bound_QC-variable of F1());
+let C84 being (FinSequence of [: ( NAT ) , ( QC-symbols F1() ) :]);
+let C85 being (Element of ( vSUB F1() ));
+assume L464: [ C84 , ( ( QSub F1() ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C83 *> ) ^ C84 ) , C85 ] ) ] in D47;
+consider C86 being (Element of ( QC-Sub-WFF F1() )) such that L465: C86 = [ C84 , ( ( QSub F1() ) . [ ( ( <* [ 3 , ( 0 ) ] *> ^ <* C83 *> ) ^ C84 ) , C85 ] ) ] and L466: P1[ C86 ] by L464;
+consider C87 being set such that L467: C87 = [ C86 , C83 ];
+reconsider D49 = C87 as (Element of [: ( QC-Sub-WFF F1() ) , ( bound_QC-variables F1() ) :]) by L467;
+L468: (( D49 `1 ) = C86 & ( D49 `2 ) = C83) by L467 , MCART_1:7;
+L469: ( C86 `1 ) = C84 by L465 , MCART_1:7;
+L470: ( C86 `2 ) = ( ( QSub F1() ) . [ ( All (C83 , ( C86 `1 )) ) , C85 ] ) by L469 , L465 , MCART_1:7;
+L471: D49 is  quantifiable by L470 , L468 , L424;
+reconsider D50 = C85 as (second_Q_comp of D49) by L471 , L470 , L468 , L427;
+L472: P1[ ( Sub_All (D49 , D50) ) ] by L442 , L466 , L467 , L471;
+L473: ( Sub_All (D49 , D50) ) in D47 by L472;
+L474: [ ( All (( D49 `2 ) , ( ( D49 `1 ) `1 )) ) , D50 ] in D47 by L473 , L471 , L430;
+thus L475: thesis by L474 , L465 , L468 , MCART_1:7;
+end;
+let C88 being (Element of ( QC-Sub-WFF F1() ));
+L476: D47 c= [: ( [: ( NAT ) , ( QC-symbols F1() ) :] * ) , ( vSUB F1() ) :]
+proof
+let C89 being set;
+assume L477: C89 in D47;
+L478: (ex B162 being (Element of ( QC-Sub-WFF F1() )) st (C89 = B162 & P1[ B162 ])) by L477;
+consider C90 being (Element of ( QC-WFF F1() )), C91 being (Element of ( vSUB F1() )) such that L479: C89 = [ C90 , C91 ] by L478 , L384;
+L480: C90 = ( @ C90 );
+L481: C90 in ( [: ( NAT ) , ( QC-symbols F1() ) :] * ) by L480 , FINSEQ_1:def 11;
+thus L482: thesis by L481 , L479 , ZFMISC_1:def 2;
+end;
+L483: (for B163 , B164 being (FinSequence of [: ( NAT ) , ( QC-symbols F1() ) :]) holds (for B165 being (Element of ( vSUB F1() )) holds (([ B163 , B165 ] in D47 & [ B164 , B165 ] in D47) implies [ ( ( <* [ 2 , ( 0 ) ] *> ^ B163 ) ^ B164 ) , B165 ] in D47)))
+proof
+let C92 , C93 being (FinSequence of [: ( NAT ) , ( QC-symbols F1() ) :]);
+let C94 being (Element of ( vSUB F1() ));
+assume L484: [ C92 , C94 ] in D47;
+consider C95 being (Element of ( QC-Sub-WFF F1() )) such that L485: C95 = [ C92 , C94 ] and L486: P1[ C95 ] by L484;
+assume L487: [ C93 , C94 ] in D47;
+consider C96 being (Element of ( QC-Sub-WFF F1() )) such that L488: C96 = [ C93 , C94 ] and L489: P1[ C96 ] by L487;
+consider C97 being (Element of ( QC-WFF F1() )), C98 being (Element of ( vSUB F1() )) such that L490: [ C92 , C94 ] = [ C97 , C98 ] by L485 , L384;
+L491: C94 = C98 by L490 , XTUPLE_0:1;
+L492: ( C95 `2 ) = C98 by L485 , L490 , MCART_1:7;
+L493: ( C95 `2 ) = ( C96 `2 ) by L492 , L488 , L491 , MCART_1:7;
+L494: P1[ ( Sub_& (C95 , C96) ) ] by L493 , L441 , L486 , L489;
+L495: ( Sub_& (C95 , C96) ) in D47 by L494;
+L496: [ ( ( C95 `1 ) '&' ( C96 `1 ) ) , ( C95 `2 ) ] in D47 by L495 , L493 , L419;
+L497: C92 = C97 by L490 , XTUPLE_0:1;
+L498: ( C95 `1 ) = C97 by L485 , L490 , MCART_1:7;
+thus L499: thesis by L498 , L488 , L497 , L491 , L492 , L496 , MCART_1:7;
+end;
+L500: (for B166 being (Element of ( NAT )) holds (for B167 being (QC-pred_symbol of B166 , F1()) holds (for B168 being (QC-variable_list of B166 , F1()) holds (for B169 being (Element of ( vSUB F1() )) holds [ ( <* B167 *> ^ B168 ) , B169 ] in D47))))
+proof
+let C99 being (Element of ( NAT ));
+let C100 being (QC-pred_symbol of C99 , F1());
+let C101 being (QC-variable_list of C99 , F1());
+let C102 being (Element of ( vSUB F1() ));
+L501: (P1[ ( Sub_P (C100 , C101 , C102) ) ] & [ ( C100 ! C101 ) , C102 ] = ( Sub_P (C100 , C101 , C102) )) by L438 , L400;
+L502: [ ( C100 ! C101 ) , C102 ] in D47 by L501;
+thus L503: thesis by L502 , QC_LANG1:8;
+end;
+L504: D47 is F1() -Sub-closed by L500 , L476 , L452 , L453 , L483 , L463 , L299;
+L505: ( QC-Sub-WFF F1() ) c= D47 by L504 , L327;
+L506: C88 in D47 by L505 , TARSKI:def 3;
+L507: (ex B170 being (Element of ( QC-Sub-WFF F1() )) st (B170 = C88 & P1[ B170 ])) by L506;
+thus L508: thesis by L507;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+attr R26 is  Sub_atomic
+means
+:L509: (ex B171 being (Element of ( NAT )) st (ex B172 being (QC-pred_symbol of B171 , R1) st (ex B173 being (QC-variable_list of B171 , R1) st (ex B174 being (Element of ( vSUB R1 )) st R26 = ( Sub_P (B172 , B173 , B174) )))));
+end;
+theorem
+L511: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_atomic implies ( R26 `1 ) is  atomic)))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume L512: R26 is  Sub_atomic;
+consider C103 being (Element of ( NAT )), C104 being (QC-pred_symbol of C103 , R1), C105 being (QC-variable_list of C103 , R1), C106 being (Element of ( vSUB R1 )) such that L513: R26 = ( Sub_P (C104 , C105 , C106) ) by L512 , L509;
+L514: R26 = [ ( C104 ! C105 ) , C106 ] by L513 , L400;
+L515: ( R26 `1 ) = ( C104 ! C105 ) by L514 , MCART_1:7;
+thus L516: thesis by L515 , QC_LANG1:def 18;
+end;
+registration
+let R1 being QC-alphabet;
+let C107 being (Element of ( NAT ));
+let C108 being (QC-pred_symbol of C107 , R1);
+let C109 being (QC-variable_list of C107 , R1);
+let C110 being (Element of ( vSUB R1 ));
+cluster ( Sub_P (C108 , C109 , C110) ) ->  Sub_atomic;
+coherence by L509;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+attr R26 is  Sub_negative
+means
+:L518: (ex R27 being (Element of ( QC-Sub-WFF R1 )) st R26 = ( Sub_not R27 ));
+attr R26 is  Sub_conjunctive
+means
+:L519: (ex R28 being (Element of ( QC-Sub-WFF R1 )) st (ex R29 being (Element of ( QC-Sub-WFF R1 )) st (R26 = ( Sub_& (R28 , R29) ) & ( R28 `2 ) = ( R29 `2 ))));
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+attr R26 is  Sub_universal
+means
+:L521: (ex R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) st (ex R35 being (second_Q_comp of R34) st (R26 = ( Sub_All (R34 , R35) ) & R34 is  quantifiable)));
+end;
+theorem
+L523: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is R1 -Sub_VERUM or R26 is  Sub_atomic or R26 is  Sub_negative or R26 is  Sub_conjunctive or R26 is  Sub_universal)))
+proof
+let R1 being QC-alphabet;
+defpred S9[ (Element of ( QC-Sub-WFF R1 )) ] means ($1 is R1 -Sub_VERUM or $1 is  Sub_atomic or $1 is  Sub_negative or $1 is  Sub_conjunctive or $1 is  Sub_universal);
+L524: (for B175 being (Element of ( NAT )) holds (for B176 being (QC-pred_symbol of B175 , R1) holds (for B177 being (QC-variable_list of B175 , R1) holds (for B178 being (Element of ( vSUB R1 )) holds S9[ ( Sub_P (B176 , B177 , B178) ) ]))));
+L525: (for B179 being (Element of ( QC-Sub-WFF R1 )) holds (B179 is R1 -Sub_VERUM implies S9[ B179 ]));
+L526: (for B180 being (bound_QC-variable of R1) holds (for B181 being (Element of ( QC-Sub-WFF R1 )) holds (for B182 being (second_Q_comp of [ B181 , B180 ]) holds (([ B181 , B180 ] is  quantifiable & S9[ B181 ]) implies S9[ ( Sub_All ([ B181 , B180 ] , B182) ) ])))) by L521;
+L527: (for B183 , B184 being (Element of ( QC-Sub-WFF R1 )) holds ((( B183 `2 ) = ( B184 `2 ) & S9[ B183 ] & S9[ B184 ]) implies S9[ ( Sub_& (B183 , B184) ) ])) by L519;
+L528: (for B185 being (Element of ( QC-Sub-WFF R1 )) holds (S9[ B185 ] implies S9[ ( Sub_not B185 ) ])) by L518;
+thus L529: (for B186 being (Element of ( QC-Sub-WFF R1 )) holds S9[ B186 ]) from SubQCInd(L524 , L525 , L528 , L527 , L526);
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L530: R26 is  Sub_atomic;
+func Sub_the_arguments_of R26 -> (FinSequence of ( QC-variables R1 )) means 
+:L531: (ex B187 being (Element of ( NAT )) st (ex B188 being (QC-pred_symbol of B187 , R1) st (ex B189 being (QC-variable_list of B187 , R1) st (ex B190 being (Element of ( vSUB R1 )) st (it = B189 & R26 = ( Sub_P (B188 , B189 , B190) ))))));
+existence
+proof
+consider C111 being (Element of ( NAT )), C112 being (QC-pred_symbol of C111 , R1), C113 being (QC-variable_list of C111 , R1), C114 being (Element of ( vSUB R1 )) such that L532: R26 = ( Sub_P (C112 , C113 , C114) ) by L530 , L509;
+reconsider D51 = C113 as (FinSequence of ( QC-variables R1 ));
+take D51;
+thus L533: thesis by L532;
+end;
+uniqueness
+proof
+let C115 , C116 being (FinSequence of ( QC-variables R1 ));
+given C117 being (Element of ( NAT )) , C118 being (QC-pred_symbol of C117 , R1) , C119 being (QC-variable_list of C117 , R1) , C120 being (Element of ( vSUB R1 )) such that
+L534: C115 = C119
+and
+L535: R26 = ( Sub_P (C118 , C119 , C120) );
+
+L536: R26 = [ ( C118 ! C119 ) , C120 ] by L535 , L400;
+given C121 being (Element of ( NAT )) , C122 being (QC-pred_symbol of C121 , R1) , C123 being (QC-variable_list of C121 , R1) , C124 being (Element of ( vSUB R1 )) such that
+L537: C116 = C123
+and
+L538: R26 = ( Sub_P (C122 , C123 , C124) );
+
+L539: ( <* C118 *> ^ C119 ) = ( C118 ! C119 ) by QC_LANG1:8;
+L540: (( <* C122 *> ^ C123 ) = ( C122 ! C123 ) & ( R26 `1 ) = ( <* C118 *> ^ C119 )) by L539 , L536 , MCART_1:7 , QC_LANG1:8;
+L541: ( R26 `1 ) is  atomic by L530 , L511;
+L542: R26 = [ ( C122 ! C123 ) , C124 ] by L538 , L400;
+L543: ( R26 `1 ) = ( C122 ! C123 ) by L542 , MCART_1:7;
+L544: ( R26 `1 ) = ( C118 ! C119 ) by L536 , MCART_1:7;
+L545: C118 = ( the_pred_symbol_of ( R26 `1 ) ) by L544 , L541 , QC_LANG1:def 22
+.= C122 by L543 , L541 , QC_LANG1:def 22;
+thus L546: C115 = C116 by L545 , L534 , L537 , L542 , L540 , FINSEQ_1:33 , MCART_1:7;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L548: R26 is  Sub_negative;
+func Sub_the_argument_of R26 -> (Element of ( QC-Sub-WFF R1 )) means 
+:L549: R26 = ( Sub_not it );
+existence by L548 , L518;
+uniqueness
+proof
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+L550: (R28 = [ ( R28 `1 ) , ( R28 `2 ) ] & R29 = [ ( R29 `1 ) , ( R29 `2 ) ]) by L412;
+assume L551: (R26 = ( Sub_not R28 ) & R26 = ( Sub_not R29 ));
+L552: ( 'not' ( R28 `1 ) ) = ( 'not' ( R29 `1 ) ) by L551 , XTUPLE_0:1;
+L553: ( R28 `1 ) = ( R29 `1 ) by L552 , FINSEQ_1:33;
+thus L554: thesis by L553 , L551 , L550 , XTUPLE_0:1;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L556: R26 is  Sub_conjunctive;
+func Sub_the_left_argument_of R26 -> (Element of ( QC-Sub-WFF R1 )) means 
+:L557: (ex R27 being (Element of ( QC-Sub-WFF R1 )) st (R26 = ( Sub_& (it , R27) ) & ( it `2 ) = ( R27 `2 )));
+existence by L556 , L519;
+uniqueness
+proof
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+given C125 being (Element of ( QC-Sub-WFF R1 )) such that
+L558: (R26 = ( Sub_& (R28 , C125) ) & ( R28 `2 ) = ( C125 `2 ));
+
+given C126 being (Element of ( QC-Sub-WFF R1 )) such that
+L559: (R26 = ( Sub_& (R29 , C126) ) & ( R29 `2 ) = ( C126 `2 ));
+
+L560: (( len ( @ ( R28 `1 ) ) ) <= ( len ( @ ( R29 `1 ) ) ) or ( len ( @ ( R29 `1 ) ) ) <= ( len ( @ ( R28 `1 ) ) ));
+L561: R26 = [ ( ( R29 `1 ) '&' ( C126 `1 ) ) , ( R29 `2 ) ] by L559 , L419;
+L562: R26 = [ ( ( R28 `1 ) '&' ( C125 `1 ) ) , ( R28 `2 ) ] by L558 , L419;
+L563: ( ( R28 `1 ) '&' ( C125 `1 ) ) = ( ( R29 `1 ) '&' ( C126 `1 ) ) by L562 , L561 , XTUPLE_0:1;
+L564: ( <* [ 2 , ( 0 ) ] *> ^ ( ( @ ( R28 `1 ) ) ^ ( @ ( C125 `1 ) ) ) ) = ( ( R29 `1 ) '&' ( C126 `1 ) ) by L563 , FINSEQ_1:32
+.= ( <* [ 2 , ( 0 ) ] *> ^ ( ( @ ( R29 `1 ) ) ^ ( @ ( C126 `1 ) ) ) ) by FINSEQ_1:32;
+L565: ( ( @ ( R28 `1 ) ) ^ ( @ ( C125 `1 ) ) ) = ( ( @ ( R29 `1 ) ) ^ ( @ ( C126 `1 ) ) ) by L564 , FINSEQ_1:33;
+consider C127 , C128 , C129 , C130 being FinSequence such that L566: ((C127 = ( @ ( R28 `1 ) ) & C128 = ( @ ( R29 `1 ) )) or (C127 = ( @ ( R29 `1 ) ) & C128 = ( @ ( R28 `1 ) ))) and L567: (( len C127 ) <= ( len C128 ) & ( C127 ^ C129 ) = ( C128 ^ C130 )) by L565 , L560;
+L568: (R28 = [ ( R28 `1 ) , ( R28 `2 ) ] & R29 = [ ( R29 `1 ) , ( R29 `2 ) ]) by L412;
+L569: (ex B191 being FinSequence st ( C127 ^ B191 ) = C128) by L567 , FINSEQ_1:47;
+L570: ( R28 `1 ) = ( R29 `1 ) by L569 , L566 , QC_LANG1:13;
+thus L571: thesis by L570 , L562 , L561 , L568 , XTUPLE_0:1;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L573: R26 is  Sub_conjunctive;
+func Sub_the_right_argument_of R26 -> (Element of ( QC-Sub-WFF R1 )) means 
+:L574: (ex R27 being (Element of ( QC-Sub-WFF R1 )) st (R26 = ( Sub_& (R27 , it) ) & ( R27 `2 ) = ( it `2 )));
+existence
+proof
+consider R28 being (Element of ( QC-Sub-WFF R1 )), R29 being (Element of ( QC-Sub-WFF R1 )) such that L575: (R26 = ( Sub_& (R28 , R29) ) & ( R28 `2 ) = ( R29 `2 )) by L573 , L519;
+take R29;
+thus L576: thesis by L575;
+end;
+uniqueness
+proof
+let R32 being (Element of ( QC-Sub-WFF R1 ));
+let R33 being (Element of ( QC-Sub-WFF R1 ));
+given C131 being (Element of ( QC-Sub-WFF R1 )) such that
+L577: (R26 = ( Sub_& (C131 , R32) ) & ( C131 `2 ) = ( R32 `2 ));
+
+L578: (R32 = [ ( R32 `1 ) , ( R32 `2 ) ] & R33 = [ ( R33 `1 ) , ( R33 `2 ) ]) by L412;
+given C132 being (Element of ( QC-Sub-WFF R1 )) such that
+L579: (R26 = ( Sub_& (C132 , R33) ) & ( C132 `2 ) = ( R33 `2 ));
+
+L580: R26 = [ ( ( C131 `1 ) '&' ( R32 `1 ) ) , ( R32 `2 ) ] by L577 , L419;
+L581: R26 = [ ( ( C132 `1 ) '&' ( R33 `1 ) ) , ( R33 `2 ) ] by L579 , L419;
+L582: ( ( C131 `1 ) '&' ( R32 `1 ) ) = ( ( C132 `1 ) '&' ( R33 `1 ) ) by L581 , L580 , XTUPLE_0:1;
+L583: ( <* [ 2 , ( 0 ) ] *> ^ ( ( @ ( C131 `1 ) ) ^ ( @ ( R32 `1 ) ) ) ) = ( ( C132 `1 ) '&' ( R33 `1 ) ) by L582 , FINSEQ_1:32
+.= ( <* [ 2 , ( 0 ) ] *> ^ ( ( @ ( C132 `1 ) ) ^ ( @ ( R33 `1 ) ) ) ) by FINSEQ_1:32;
+L584: ( ( @ ( C131 `1 ) ) ^ ( @ ( R32 `1 ) ) ) = ( ( @ ( C132 `1 ) ) ^ ( @ ( R33 `1 ) ) ) by L583 , FINSEQ_1:33;
+L585: C131 = ( Sub_the_left_argument_of R26 ) by L573 , L577 , L557
+.= C132 by L573 , L579 , L557;
+L586: ( @ ( R32 `1 ) ) = ( @ ( R33 `1 ) ) by L585 , L584 , FINSEQ_1:33;
+thus L587: thesis by L586 , L580 , L581 , L578 , XTUPLE_0:1;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L589: R26 is  Sub_universal;
+func Sub_the_bound_of R26 -> (bound_QC-variable of R1) means 
+(ex R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) st (ex R35 being (second_Q_comp of R34) st (R26 = ( Sub_All (R34 , R35) ) & ( R34 `2 ) = it & R34 is  quantifiable)));
+existence
+proof
+consider R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]), R35 being (second_Q_comp of R34) such that L590: (R26 = ( Sub_All (R34 , R35) ) & R34 is  quantifiable) by L589 , L521;
+take ( R34 `2 );
+thus L591: thesis by L590;
+end;
+uniqueness
+proof
+let R14 being (bound_QC-variable of R1);
+let R15 being (bound_QC-variable of R1);
+assume that
+L592: (ex R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) st (ex R35 being (second_Q_comp of R34) st (R26 = ( Sub_All (R34 , R35) ) & ( R34 `2 ) = R14 & R34 is  quantifiable)))
+and
+L593: (ex R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) st (ex R35 being (second_Q_comp of R34) st (R26 = ( Sub_All (R34 , R35) ) & ( R34 `2 ) = R15 & R34 is  quantifiable)));
+consider C133 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]), C134 being (second_Q_comp of C133) such that L594: R26 = ( Sub_All (C133 , C134) ) and L595: ( C133 `2 ) = R14 and L596: C133 is  quantifiable by L592;
+consider C135 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]), C136 being (second_Q_comp of C135) such that L597: R26 = ( Sub_All (C135 , C136) ) and L598: ( C135 `2 ) = R15 and L599: C135 is  quantifiable by L593;
+L600: [ ( All (( C135 `2 ) , ( ( C135 `1 ) `1 )) ) , C136 ] = R26 by L597 , L599 , L430;
+L601: [ ( All (( C133 `2 ) , ( ( C133 `1 ) `1 )) ) , C134 ] = R26 by L594 , L596 , L430;
+L602: ( All (( C133 `2 ) , ( ( C133 `1 ) `1 )) ) = ( All (( C135 `2 ) , ( ( C135 `1 ) `1 )) ) by L601 , L600 , XTUPLE_0:1;
+thus L603: thesis by L602 , L595 , L598 , QC_LANG2:5;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let C137 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L605: C137 is  Sub_universal;
+func Sub_the_scope_of C137 -> (Element of ( QC-Sub-WFF R1 )) means 
+:L606: (ex R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) st (ex R35 being (second_Q_comp of R34) st (C137 = ( Sub_All (R34 , R35) ) & ( R34 `1 ) = it & R34 is  quantifiable)));
+existence
+proof
+consider R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]), R35 being (second_Q_comp of R34) such that L607: (C137 = ( Sub_All (R34 , R35) ) & R34 is  quantifiable) by L605 , L521;
+take ( R34 `1 );
+thus L608: thesis by L607;
+end;
+uniqueness
+proof
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+given C138 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) , C139 being (second_Q_comp of C138) such that
+L609: C137 = ( Sub_All (C138 , C139) )
+and
+L610: ( C138 `1 ) = R28
+and
+L611: C138 is  quantifiable;
+
+L612: C137 = [ ( All (( C138 `2 ) , ( ( C138 `1 ) `1 )) ) , C139 ] by L609 , L611 , L430;
+L613: ( ( C138 `1 ) `2 ) = ( ( QSub R1 ) . [ ( All (( C138 `2 ) , ( ( C138 `1 ) `1 )) ) , C139 ] ) by L611 , L427;
+given C140 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) , C141 being (second_Q_comp of C140) such that
+L614: C137 = ( Sub_All (C140 , C141) )
+and
+L615: ( C140 `1 ) = R29
+and
+L616: C140 is  quantifiable;
+
+L617: (( C138 `1 ) = [ ( ( C138 `1 ) `1 ) , ( ( C138 `1 ) `2 ) ] & ( C140 `1 ) = [ ( ( C140 `1 ) `1 ) , ( ( C140 `1 ) `2 ) ]) by L412;
+L618: C137 = [ ( All (( C140 `2 ) , ( ( C140 `1 ) `1 )) ) , C141 ] by L614 , L616 , L430;
+L619: ( All (( C138 `2 ) , ( ( C138 `1 ) `1 )) ) = ( All (( C140 `2 ) , ( ( C140 `1 ) `1 )) ) by L618 , L612 , XTUPLE_0:1;
+L620: ( ( C138 `1 ) `1 ) = ( ( C140 `1 ) `1 ) by L619 , QC_LANG2:5;
+thus L621: thesis by L620 , L610 , L615 , L616 , L612 , L618 , L613 , L617 , L427;
+end;
+end;
+registration
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+cluster ( Sub_not R26 ) ->  Sub_negative;
+coherence
+proof
+take R26;
+thus L623: thesis;
+end;
+end;
+theorem
+L625: (for R1 being QC-alphabet holds (for R28 being (Element of ( QC-Sub-WFF R1 )) holds (for R29 being (Element of ( QC-Sub-WFF R1 )) holds (( R28 `2 ) = ( R29 `2 ) implies ( Sub_& (R28 , R29) ) is  Sub_conjunctive))))
+proof
+let R1 being QC-alphabet;
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+assume L626: ( R28 `2 ) = ( R29 `2 );
+take R28;
+take R29;
+thus L627: thesis by L626;
+end;
+theorem
+L628: (for R1 being QC-alphabet holds (for R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) holds (for R35 being (second_Q_comp of R34) holds (R34 is  quantifiable implies ( Sub_All (R34 , R35) ) is  Sub_universal))))
+proof
+let R1 being QC-alphabet;
+let R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+let R35 being (second_Q_comp of R34);
+assume L629: R34 is  quantifiable;
+take R34;
+take R35;
+thus L630: thesis by L629;
+end;
+theorem
+L631: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (for R27 being (Element of ( QC-Sub-WFF R1 )) holds (( Sub_not R26 ) = ( Sub_not R27 ) implies R26 = R27))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+let R27 being (Element of ( QC-Sub-WFF R1 ));
+assume L632: ( Sub_not R26 ) = ( Sub_not R27 );
+L633: (( 'not' ( R26 `1 ) ) = ( 'not' ( R27 `1 ) ) & ( R26 `2 ) = ( R27 `2 )) by L632 , XTUPLE_0:1;
+L634: (R26 = [ ( R26 `1 ) , ( R26 `2 ) ] & R27 = [ ( R27 `1 ) , ( R27 `2 ) ]) by L412;
+thus L635: thesis by L634 , L633 , FINSEQ_1:33;
+end;
+theorem
+L636: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds ( Sub_the_argument_of ( Sub_not R26 ) ) = R26)) by L549;
+theorem
+L637: (for R1 being QC-alphabet holds (for R28 being (Element of ( QC-Sub-WFF R1 )) holds (for R29 being (Element of ( QC-Sub-WFF R1 )) holds (for R30 being (Element of ( QC-Sub-WFF R1 )) holds (for R31 being (Element of ( QC-Sub-WFF R1 )) holds ((( R28 `2 ) = ( R29 `2 ) & ( R30 `2 ) = ( R31 `2 ) & ( Sub_& (R28 , R29) ) = ( Sub_& (R30 , R31) )) implies (R28 = R30 & R29 = R31)))))))
+proof
+let R1 being QC-alphabet;
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+let R30 being (Element of ( QC-Sub-WFF R1 ));
+let R31 being (Element of ( QC-Sub-WFF R1 ));
+assume that
+L638: ( R28 `2 ) = ( R29 `2 )
+and
+L639: ( R30 `2 ) = ( R31 `2 )
+and
+L640: ( Sub_& (R28 , R29) ) = ( Sub_& (R30 , R31) );
+L641: ( Sub_& (R28 , R29) ) = [ ( ( R28 `1 ) '&' ( R29 `1 ) ) , ( R28 `2 ) ] by L638 , L419;
+L642: [ ( ( R28 `1 ) '&' ( R29 `1 ) ) , ( R28 `2 ) ] = [ ( ( R30 `1 ) '&' ( R31 `1 ) ) , ( R30 `2 ) ] by L641 , L639 , L640 , L419;
+L643: (( ( R28 `1 ) '&' ( R29 `1 ) ) = ( ( R30 `1 ) '&' ( R31 `1 ) ) & ( R28 `2 ) = ( R30 `2 )) by L642 , XTUPLE_0:1;
+L644: (R29 = [ ( R29 `1 ) , ( R29 `2 ) ] & R31 = [ ( R31 `1 ) , ( R31 `2 ) ]) by L412;
+L645: (R28 = [ ( R28 `1 ) , ( R28 `2 ) ] & R30 = [ ( R30 `1 ) , ( R30 `2 ) ]) by L412;
+thus L646: thesis by L645 , L638 , L639 , L643 , L644 , QC_LANG2:2;
+end;
+theorem
+L647: (for R1 being QC-alphabet holds (for R28 being (Element of ( QC-Sub-WFF R1 )) holds (for R29 being (Element of ( QC-Sub-WFF R1 )) holds (( R28 `2 ) = ( R29 `2 ) implies ( Sub_the_left_argument_of ( Sub_& (R28 , R29) ) ) = R28))))
+proof
+let R1 being QC-alphabet;
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+assume L648: ( R28 `2 ) = ( R29 `2 );
+L649: ( Sub_& (R28 , R29) ) is  Sub_conjunctive by L648 , L625;
+thus L650: thesis by L649 , L648 , L557;
+end;
+theorem
+L651: (for R1 being QC-alphabet holds (for R28 being (Element of ( QC-Sub-WFF R1 )) holds (for R29 being (Element of ( QC-Sub-WFF R1 )) holds (( R28 `2 ) = ( R29 `2 ) implies ( Sub_the_right_argument_of ( Sub_& (R28 , R29) ) ) = R29))))
+proof
+let R1 being QC-alphabet;
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+assume L652: ( R28 `2 ) = ( R29 `2 );
+L653: ( Sub_& (R28 , R29) ) is  Sub_conjunctive by L652 , L625;
+thus L654: thesis by L653 , L652 , L574;
+end;
+theorem
+L655: (for R1 being QC-alphabet holds (for B192 , B193 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) holds (for B194 being (second_Q_comp of B192) holds (for B195 being (second_Q_comp of B193) holds ((B192 is  quantifiable & B193 is  quantifiable & ( Sub_All (B192 , B194) ) = ( Sub_All (B193 , B195) )) implies B192 = B193)))))
+proof
+let R1 being QC-alphabet;
+let C142 , C143 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+let C144 being (second_Q_comp of C142);
+let C145 being (second_Q_comp of C143);
+assume that
+L656: C142 is  quantifiable
+and
+L657: C143 is  quantifiable
+and
+L658: ( Sub_All (C142 , C144) ) = ( Sub_All (C143 , C145) );
+L659: (( Sub_All (C142 , C144) ) = [ ( All (( C142 `2 ) , ( ( C142 `1 ) `1 )) ) , C144 ] & ( Sub_All (C143 , C145) ) = [ ( All (( C143 `2 ) , ( ( C143 `1 ) `1 )) ) , C145 ]) by L656 , L657 , L430;
+L660: ( All (( C142 `2 ) , ( ( C142 `1 ) `1 )) ) = ( All (( C143 `2 ) , ( ( C143 `1 ) `1 )) ) by L659 , L658 , XTUPLE_0:1;
+L661: (( C142 `2 ) = ( C143 `2 ) & ( ( C142 `1 ) `1 ) = ( ( C143 `1 ) `1 )) by L660 , QC_LANG2:5;
+L662: (ex R2 being set st (ex R3 being set st (R2 in ( QC-Sub-WFF R1 ) & R3 in ( bound_QC-variables R1 ) & C143 = [ R2 , R3 ]))) by ZFMISC_1:def 2;
+L663: C143 = [ ( C143 `1 ) , ( C143 `2 ) ] by L662 , MCART_1:8;
+L664: (ex R2 being set st (ex R3 being set st (R2 in ( QC-Sub-WFF R1 ) & R3 in ( bound_QC-variables R1 ) & C142 = [ R2 , R3 ]))) by ZFMISC_1:def 2;
+L665: C142 = [ ( C142 `1 ) , ( C142 `2 ) ] by L664 , MCART_1:8;
+L666: (( C142 `1 ) = [ ( ( C142 `1 ) `1 ) , ( ( C142 `1 ) `2 ) ] & ( C143 `1 ) = [ ( ( C143 `1 ) `1 ) , ( ( C143 `1 ) `2 ) ]) by L412;
+L667: ( ( C142 `1 ) `2 ) = ( ( QSub R1 ) . [ ( All (( C142 `2 ) , ( ( C142 `1 ) `1 )) ) , C144 ] ) by L656 , L427;
+thus L668: thesis by L667 , L657 , L658 , L659 , L661 , L666 , L665 , L663 , L427;
+end;
+theorem
+L669: (for R1 being QC-alphabet holds (for R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]) holds (for R35 being (second_Q_comp of R34) holds (R34 is  quantifiable implies ( Sub_the_scope_of ( Sub_All (R34 , R35) ) ) = ( R34 `1 )))))
+proof
+let R1 being QC-alphabet;
+let R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]);
+let R35 being (second_Q_comp of R34);
+assume L670: R34 is  quantifiable;
+L671: ( Sub_All (R34 , R35) ) is  Sub_universal by L670 , L628;
+thus L672: thesis by L671 , L670 , L606;
+end;
+scheme SubQCInd2 { F2() -> QC-alphabet , P2[(Element of ( QC-Sub-WFF F2() ))] } : (for B196 being (Element of ( QC-Sub-WFF F2() )) holds P2[ B196 ])
+provided
+L673: (for B197 being (Element of ( QC-Sub-WFF F2() )) holds ((B197 is  Sub_atomic implies P2[ B197 ]) & (B197 is F2() -Sub_VERUM implies P2[ B197 ]) & ((B197 is  Sub_negative & P2[ ( Sub_the_argument_of B197 ) ]) implies P2[ B197 ]) & ((B197 is  Sub_conjunctive & P2[ ( Sub_the_left_argument_of B197 ) ] & P2[ ( Sub_the_right_argument_of B197 ) ]) implies P2[ B197 ]) & ((B197 is  Sub_universal & P2[ ( Sub_the_scope_of B197 ) ]) implies P2[ B197 ])))
+proof
+L674:
+now
+let C146 being (bound_QC-variable of F2());
+let C147 being (Element of ( QC-Sub-WFF F2() ));
+let C148 being (second_Q_comp of [ C147 , C146 ]);
+assume that
+L675: [ C147 , C146 ] is  quantifiable
+and
+L676: P2[ C147 ];
+L677: ( [ C147 , C146 ] `1 ) = ( Sub_the_scope_of ( Sub_All ([ C147 , C146 ] , C148) ) ) by L675 , L669;
+L678: C147 = ( Sub_the_scope_of ( Sub_All ([ C147 , C146 ] , C148) ) ) by L677;
+L679: ( Sub_All ([ C147 , C146 ] , C148) ) is  Sub_universal by L675 , L628;
+thus L680: P2[ ( Sub_All ([ C147 , C146 ] , C148) ) ] by L679 , L673 , L676 , L678;
+end;
+L681:
+now
+let C149 , C150 being (Element of ( QC-Sub-WFF F2() ));
+assume that
+L682: ( C149 `2 ) = ( C150 `2 )
+and
+L683: (P2[ C149 ] & P2[ C150 ]);
+L684: C150 = ( Sub_the_right_argument_of ( Sub_& (C149 , C150) ) ) by L682 , L651;
+L685: (( Sub_& (C149 , C150) ) is  Sub_conjunctive & C149 = ( Sub_the_left_argument_of ( Sub_& (C149 , C150) ) )) by L682 , L625 , L647;
+thus L686: P2[ ( Sub_& (C149 , C150) ) ] by L685 , L673 , L683 , L684;
+end;
+L687:
+now
+let C151 being (Element of ( QC-Sub-WFF F2() ));
+assume that
+L688: P2[ C151 ];
+L689: C151 = ( Sub_the_argument_of ( Sub_not C151 ) ) by L549;
+thus L690: P2[ ( Sub_not C151 ) ] by L689 , L673 , L688;
+end;
+L691: (for B198 being (Element of ( QC-Sub-WFF F2() )) holds (B198 is F2() -Sub_VERUM implies P2[ B198 ])) by L673;
+L692: (for B199 being (Element of ( NAT )) holds (for B200 being (QC-pred_symbol of B199 , F2()) holds (for B201 being (QC-variable_list of B199 , F2()) holds (for B202 being (Element of ( vSUB F2() )) holds P2[ ( Sub_P (B200 , B201 , B202) ) ])))) by L673;
+thus L693: thesis from SubQCInd(L692 , L691 , L687 , L681 , L674);
+end;
+theorem
+L694: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_negative implies ( len ( @ ( ( Sub_the_argument_of R26 ) `1 ) ) ) < ( len ( @ ( R26 `1 ) ) ))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume L695: R26 is  Sub_negative;
+consider R27 being (Element of ( QC-Sub-WFF R1 )) such that L696: R26 = ( Sub_not R27 ) by L695 , L518;
+L697: ( 'not' ( R27 `1 ) ) is  negative by QC_LANG1:def 19;
+L698: ( R26 `1 ) = ( 'not' ( R27 `1 ) ) by L696 , MCART_1:7;
+L699: ( len ( @ ( the_argument_of ( 'not' ( R27 `1 ) ) ) ) ) < ( len ( @ ( R26 `1 ) ) ) by L698 , L697 , QC_LANG1:14;
+L700: ( ( Sub_the_argument_of R26 ) `1 ) = ( R27 `1 ) by L696 , L549;
+thus L701: thesis by L700 , L699 , QC_LANG2:1;
+end;
+theorem
+L702: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_conjunctive implies (( len ( @ ( ( Sub_the_left_argument_of R26 ) `1 ) ) ) < ( len ( @ ( R26 `1 ) ) ) & ( len ( @ ( ( Sub_the_right_argument_of R26 ) `1 ) ) ) < ( len ( @ ( R26 `1 ) ) )))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume L703: R26 is  Sub_conjunctive;
+consider R28 being (Element of ( QC-Sub-WFF R1 )), R29 being (Element of ( QC-Sub-WFF R1 )) such that L704: (R26 = ( Sub_& (R28 , R29) ) & ( R28 `2 ) = ( R29 `2 )) by L703 , L519;
+L705: R26 = [ ( ( R28 `1 ) '&' ( R29 `1 ) ) , ( R28 `2 ) ] by L704 , L419;
+L706: ( R26 `1 ) = ( ( R28 `1 ) '&' ( R29 `1 ) ) by L705 , MCART_1:7;
+L707: ( ( R28 `1 ) '&' ( R29 `1 ) ) is  conjunctive by QC_LANG1:def 20;
+L708: (( len ( @ ( the_left_argument_of ( ( R28 `1 ) '&' ( R29 `1 ) ) ) ) ) < ( len ( @ ( R26 `1 ) ) ) & ( len ( @ ( the_right_argument_of ( ( R28 `1 ) '&' ( R29 `1 ) ) ) ) ) < ( len ( @ ( R26 `1 ) ) )) by L707 , L706 , QC_LANG1:15;
+L709: (( ( Sub_the_right_argument_of R26 ) `1 ) = ( R29 `1 ) & ( ( Sub_the_left_argument_of R26 ) `1 ) = ( R28 `1 )) by L704 , L647 , L651;
+thus L710: thesis by L709 , L708 , QC_LANG2:4;
+end;
+theorem
+L711: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_universal implies ( len ( @ ( ( Sub_the_scope_of R26 ) `1 ) ) ) < ( len ( @ ( R26 `1 ) ) ))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume L712: R26 is  Sub_universal;
+consider R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]), R35 being (second_Q_comp of R34) such that L713: (R26 = ( Sub_All (R34 , R35) ) & R34 is  quantifiable) by L712 , L521;
+L714: R26 = [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , R35 ] by L713 , L430;
+L715: ( R26 `1 ) = ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) by L714 , MCART_1:7;
+L716: ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) is  universal by QC_LANG1:def 21;
+L717: ( len ( @ ( the_scope_of ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) ) ) ) < ( len ( @ ( R26 `1 ) ) ) by L716 , L715 , QC_LANG1:16;
+L718: ( ( Sub_the_scope_of R26 ) `1 ) = ( ( R34 `1 ) `1 ) by L713 , L669;
+thus L719: thesis by L718 , L717 , QC_LANG2:7;
+end;
+theorem
+L720: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds ((R26 is R1 -Sub_VERUM implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = ( 0 )) & (R26 is  Sub_atomic implies (ex B203 being (Element of ( NAT )) st ( ( @ ( R26 `1 ) ) . 1 ) is (QC-pred_symbol of B203 , R1))) & (R26 is  Sub_negative implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 1) & (R26 is  Sub_conjunctive implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 2) & (R26 is  Sub_universal implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 3))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+thus L721: (R26 is R1 -Sub_VERUM implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = ( 0 ))
+proof
+assume L722: R26 is R1 -Sub_VERUM;
+L723: (ex R25 being (Element of ( vSUB R1 )) st R26 = [ ( VERUM R1 ) , R25 ]) by L722 , L405;
+L724: ( R26 `1 ) = ( VERUM R1 ) by L723 , MCART_1:7;
+thus L725: ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = ( [ ( 0 ) , ( 0 ) ] `1 ) by L724 , FINSEQ_1:def 8
+.= ( 0 );
+end;
+
+thus L726: (R26 is  Sub_atomic implies (ex B204 being (Element of ( NAT )) st ( ( @ ( R26 `1 ) ) . 1 ) is (QC-pred_symbol of B204 , R1)))
+proof
+assume L727: R26 is  Sub_atomic;
+consider C152 being (Element of ( NAT )), C153 being (QC-pred_symbol of C152 , R1), C154 being (QC-variable_list of C152 , R1), C155 being (Element of ( vSUB R1 )) such that L728: R26 = ( Sub_P (C153 , C154 , C155) ) by L727 , L509;
+L729: R26 = [ ( C153 ! C154 ) , C155 ] by L728 , L400;
+L730: ( R26 `1 ) = ( C153 ! C154 ) by L729 , MCART_1:7;
+L731: ( @ ( R26 `1 ) ) = ( <* C153 *> ^ C154 ) by L730 , QC_LANG1:8;
+L732: ( ( @ ( R26 `1 ) ) . 1 ) = C153 by L731 , FINSEQ_1:41;
+thus L733: thesis by L732;
+end;
+
+thus L734: (R26 is  Sub_negative implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 1)
+proof
+assume L735: R26 is  Sub_negative;
+consider R27 being (Element of ( QC-Sub-WFF R1 )) such that L736: R26 = ( Sub_not R27 ) by L735 , L518;
+L737: ( R26 `1 ) = ( 'not' ( R27 `1 ) ) by L736 , MCART_1:7;
+L738: ( ( @ ( R26 `1 ) ) . 1 ) = [ 1 , ( 0 ) ] by L737 , FINSEQ_1:41;
+thus L739: thesis by L738 , MCART_1:7;
+end;
+
+thus L740: (R26 is  Sub_conjunctive implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 2)
+proof
+assume L741: R26 is  Sub_conjunctive;
+consider R28 being (Element of ( QC-Sub-WFF R1 )), R29 being (Element of ( QC-Sub-WFF R1 )) such that L742: (R26 = ( Sub_& (R28 , R29) ) & ( R28 `2 ) = ( R29 `2 )) by L741 , L519;
+L743: R26 = [ ( ( R28 `1 ) '&' ( R29 `1 ) ) , ( R28 `2 ) ] by L742 , L419;
+L744: ( R26 `1 ) = ( ( R28 `1 ) '&' ( R29 `1 ) ) by L743 , MCART_1:7;
+L745: ( @ ( R26 `1 ) ) = ( <* [ 2 , ( 0 ) ] *> ^ ( ( @ ( R28 `1 ) ) ^ ( @ ( R29 `1 ) ) ) ) by L744 , FINSEQ_1:32;
+L746: ( ( @ ( R26 `1 ) ) . 1 ) = [ 2 , ( 0 ) ] by L745 , FINSEQ_1:41;
+thus L747: thesis by L746 , MCART_1:7;
+end;
+
+thus L748: (R26 is  Sub_universal implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 3)
+proof
+assume L749: R26 is  Sub_universal;
+consider R34 being (Element of [: ( QC-Sub-WFF R1 ) , ( bound_QC-variables R1 ) :]), R35 being (second_Q_comp of R34) such that L750: (R26 = ( Sub_All (R34 , R35) ) & R34 is  quantifiable) by L749 , L521;
+L751: R26 = [ ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) , R35 ] by L750 , L430;
+L752: ( R26 `1 ) = ( All (( R34 `2 ) , ( ( R34 `1 ) `1 )) ) by L751 , MCART_1:7;
+L753: ( @ ( R26 `1 ) ) = ( <* [ 3 , ( 0 ) ] *> ^ ( <* ( R34 `2 ) *> ^ ( @ ( ( R34 `1 ) `1 ) ) ) ) by L752 , FINSEQ_1:32;
+L754: ( ( @ ( R26 `1 ) ) . 1 ) = [ 3 , ( 0 ) ] by L753 , FINSEQ_1:41;
+thus L755: thesis by L754 , MCART_1:7;
+end;
+
+end;
+theorem
+L749: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_atomic implies (( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) <> ( 0 ) & ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) <> 1 & ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) <> 2 & ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) <> 3))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume L750: R26 is  Sub_atomic;
+L751: (ex B205 being (Element of ( NAT )) st ( ( @ ( R26 `1 ) ) . 1 ) is (QC-pred_symbol of B205 , R1)) by L750 , L720;
+thus L752: thesis by L751 , QC_LANG1:17;
+end;
+theorem
+L753: (for R1 being QC-alphabet holds (not (ex R26 being (Element of ( QC-Sub-WFF R1 )) st (R26 is  Sub_atomic  Sub_negative or R26 is  Sub_atomic  Sub_conjunctive or R26 is  Sub_atomic  Sub_universal or R26 is  Sub_negative  Sub_conjunctive or R26 is  Sub_negative  Sub_universal or R26 is  Sub_conjunctive  Sub_universal or R26 is R1 -Sub_VERUM  Sub_atomic or R26 is R1 -Sub_VERUM  Sub_negative or R26 is R1 -Sub_VERUM  Sub_conjunctive or R26 is R1 -Sub_VERUM  Sub_universal))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+L754: (R26 is  Sub_negative implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 1) by L720;
+L755: (R26 is  Sub_conjunctive implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 2) by L720;
+L756: (R26 is  Sub_universal implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = 3) by L720;
+L757: (R26 is R1 -Sub_VERUM implies ( ( ( @ ( R26 `1 ) ) . 1 ) `1 ) = ( 0 )) by L720;
+thus L758: thesis by L757 , L754 , L755 , L756 , L749;
+end;
+scheme SubFuncEx { F3() -> QC-alphabet , F4() -> non  empty set , F5() -> (Element of F4()) , F6((Element of ( QC-Sub-WFF F3() ))) -> (Element of F4()) , F7((Element of F4())) -> (Element of F4()) , F8((Element of F4()) , (Element of F4())) -> (Element of F4()) , F9(set , (Element of ( QC-Sub-WFF F3() )) , (Element of F4())) -> (Element of F4()) } : (ex B206 being (Function of ( QC-Sub-WFF F3() ) , F4()) st (for B207 being (Element of ( QC-Sub-WFF F3() )) holds (for B208 , B209 being (Element of F4()) holds ((B207 is F3() -Sub_VERUM implies ( B206 . B207 ) = F5()) & (B207 is  Sub_atomic implies ( B206 . B207 ) = F6(B207)) & ((B207 is  Sub_negative & B208 = ( B206 . ( Sub_the_argument_of B207 ) )) implies ( B206 . B207 ) = F7(B208)) & ((B207 is  Sub_conjunctive & B208 = ( B206 . ( Sub_the_left_argument_of B207 ) ) & B209 = ( B206 . ( Sub_the_right_argument_of B207 ) )) implies ( B206 . B207 ) = F8(B208 , B209)) & ((B207 is  Sub_universal & B208 = ( B206 . ( Sub_the_scope_of B207 ) )) implies ( B206 . B207 ) = F9(F3() , B207 , B208))))))
+proof
+defpred S10[ (Function of ( QC-Sub-WFF F3() ) , F4()) , (Element of ( NAT )) ] means (for B210 being (Element of ( QC-Sub-WFF F3() )) holds (( len ( @ ( B210 `1 ) ) ) <= $2 implies ((B210 is F3() -Sub_VERUM implies ( $1 . B210 ) = F5()) & (B210 is  Sub_atomic implies ( $1 . B210 ) = F6(B210)) & (B210 is  Sub_negative implies ( $1 . B210 ) = F7(( $1 . ( Sub_the_argument_of B210 ) ))) & (B210 is  Sub_conjunctive implies ( $1 . B210 ) = F8(( $1 . ( Sub_the_left_argument_of B210 ) ) , ( $1 . ( Sub_the_right_argument_of B210 ) ))) & (B210 is  Sub_universal implies ( $1 . B210 ) = F9(F3() , B210 , ( $1 . ( Sub_the_scope_of B210 ) ))))));
+defpred S11[ (Element of F4()) , (Function of ( QC-Sub-WFF F3() ) , F4()) , (Element of ( QC-Sub-WFF F3() )) ] means (($3 is F3() -Sub_VERUM implies $1 = F5()) & ($3 is  Sub_atomic implies $1 = F6($3)) & ($3 is  Sub_negative implies $1 = F7(( $2 . ( Sub_the_argument_of $3 ) ))) & ($3 is  Sub_conjunctive implies $1 = F8(( $2 . ( Sub_the_left_argument_of $3 ) ) , ( $2 . ( Sub_the_right_argument_of $3 ) ))) & ($3 is  Sub_universal implies $1 = F9(F3() , $3 , ( $2 . ( Sub_the_scope_of $3 ) ))));
+defpred S12[ (Element of ( NAT )) ] means (ex B211 being (Function of ( QC-Sub-WFF F3() ) , F4()) st S10[ B211 , $1 ]);
+defpred S13[ set , set ] means (ex B212 being (Element of ( QC-Sub-WFF F3() )) st (B212 = $1 & (for B213 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B213 , (( len ( @ ( B212 `1 ) ) ) qua (Element of ( NAT ))) ] implies $2 = ( B213 . B212 )))));
+L759: (for B214 being (Element of ( NAT )) holds (S12[ B214 ] implies S12[ ( B214 + 1 ) ]))
+proof
+let C156 being (Element of ( NAT ));
+given C157 being (Function of ( QC-Sub-WFF F3() ) , F4()) such that
+L760: S10[ C157 , C156 ];
+
+defpred S14[ (Element of ( QC-Sub-WFF F3() )) , (Element of F4()) ] means ((( len ( @ ( $1 `1 ) ) ) <> ( C156 + 1 ) implies $2 = ( C157 . $1 )) & (( len ( @ ( $1 `1 ) ) ) = ( C156 + 1 ) implies S11[ $2 , C157 , $1 ]));
+L761: (for B215 being (Element of ( QC-Sub-WFF F3() )) holds (ex B216 being (Element of F4()) st S14[ B215 , B216 ]))
+proof
+let C158 being (Element of ( QC-Sub-WFF F3() ));
+L762:
+now
+per cases  by L523;
+case L763: ( len ( @ ( C158 `1 ) ) ) <> ( C156 + 1 );
+take D52 = ( C157 . C158 );
+thus L764: D52 = ( C157 . C158 );
+end;
+case L765: (( len ( @ ( C158 `1 ) ) ) = ( C156 + 1 ) & C158 is F3() -Sub_VERUM);
+take D53 = F5();
+thus L766: S11[ D53 , C157 , C158 ] by L765 , L753;
+end;
+case L767: (( len ( @ ( C158 `1 ) ) ) = ( C156 + 1 ) & C158 is  Sub_atomic);
+take D54 = F6(C158);
+thus L768: S11[ D54 , C157 , C158 ] by L767 , L753;
+end;
+case L769: (( len ( @ ( C158 `1 ) ) ) = ( C156 + 1 ) & C158 is  Sub_negative);
+take D55 = F7(( C157 . ( Sub_the_argument_of C158 ) ));
+thus L770: S11[ D55 , C157 , C158 ] by L769 , L753;
+end;
+case L771: (( len ( @ ( C158 `1 ) ) ) = ( C156 + 1 ) & C158 is  Sub_conjunctive);
+take D56 = F8(( C157 . ( Sub_the_left_argument_of C158 ) ) , ( C157 . ( Sub_the_right_argument_of C158 ) ));
+thus L772: S11[ D56 , C157 , C158 ] by L771 , L753;
+end;
+case L773: (( len ( @ ( C158 `1 ) ) ) = ( C156 + 1 ) & C158 is  Sub_universal);
+take D57 = F9(F3() , C158 , ( C157 . ( Sub_the_scope_of C158 ) ));
+thus L774: S11[ D57 , C157 , C158 ] by L773 , L753;
+end;
+end;
+thus L776: thesis by L762;
+end;
+consider C159 being (Function of ( QC-Sub-WFF F3() ) , F4()) such that L777: (for B217 being (Element of ( QC-Sub-WFF F3() )) holds S14[ B217 , ( C159 . B217 ) ]) from FUNCT_2:sch 3(L761);
+take D58 = C159;
+thus L778: S10[ D58 , ( C156 + 1 ) ]
+proof
+let C160 being (Element of ( QC-Sub-WFF F3() ));
+assume that
+L779: ( len ( @ ( C160 `1 ) ) ) <= ( C156 + 1 );
+thus L780: (C160 is F3() -Sub_VERUM implies ( D58 . C160 ) = F5())
+proof
+L781:
+now
+per cases ;
+suppose L782: ( len ( @ ( C160 `1 ) ) ) <> ( C156 + 1 );
+
+L783: (( len ( @ ( C160 `1 ) ) ) <= C156 & ( D58 . C160 ) = ( C157 . C160 )) by L782 , L777 , L779 , NAT_1:8;
+thus L784: thesis by L783 , L760;
+end;
+suppose L785: ( len ( @ ( C160 `1 ) ) ) = ( C156 + 1 );
+
+thus L786: thesis by L785 , L777;
+end;
+end;
+thus L788: thesis by L781;
+end;
+
+thus L789: (C160 is  Sub_atomic implies ( D58 . C160 ) = F6(C160))
+proof
+L790:
+now
+per cases ;
+suppose L791: ( len ( @ ( C160 `1 ) ) ) <> ( C156 + 1 );
+
+L792: (( len ( @ ( C160 `1 ) ) ) <= C156 & ( D58 . C160 ) = ( C157 . C160 )) by L791 , L777 , L779 , NAT_1:8;
+thus L793: thesis by L792 , L760;
+end;
+suppose L794: ( len ( @ ( C160 `1 ) ) ) = ( C156 + 1 );
+
+thus L795: thesis by L794 , L777;
+end;
+end;
+thus L797: thesis by L790;
+end;
+
+thus L798: (C160 is  Sub_negative implies ( D58 . C160 ) = F7(( D58 . ( Sub_the_argument_of C160 ) )))
+proof
+assume L799: C160 is  Sub_negative;
+L800: ( len ( @ ( ( Sub_the_argument_of C160 ) `1 ) ) ) <> ( C156 + 1 ) by L799 , L779 , L694;
+L801: ( D58 . ( Sub_the_argument_of C160 ) ) = ( C157 . ( Sub_the_argument_of C160 ) ) by L800 , L777;
+L802:
+now
+per cases ;
+suppose L803: ( len ( @ ( C160 `1 ) ) ) <> ( C156 + 1 );
+
+L804: (( len ( @ ( C160 `1 ) ) ) <= C156 & ( D58 . C160 ) = ( C157 . C160 )) by L803 , L777 , L779 , NAT_1:8;
+thus L805: thesis by L804 , L760 , L799 , L801;
+end;
+suppose L806: ( len ( @ ( C160 `1 ) ) ) = ( C156 + 1 );
+
+thus L807: thesis by L806 , L777 , L799 , L801;
+end;
+end;
+thus L809: thesis by L802;
+end;
+
+thus L810: (C160 is  Sub_conjunctive implies ( D58 . C160 ) = F8(( D58 . ( Sub_the_left_argument_of C160 ) ) , ( D58 . ( Sub_the_right_argument_of C160 ) )))
+proof
+assume L811: C160 is  Sub_conjunctive;
+L812: ( len ( @ ( ( Sub_the_right_argument_of C160 ) `1 ) ) ) <> ( C156 + 1 ) by L811 , L779 , L702;
+L813: ( D58 . ( Sub_the_right_argument_of C160 ) ) = ( C157 . ( Sub_the_right_argument_of C160 ) ) by L812 , L777;
+L814: ( len ( @ ( ( Sub_the_left_argument_of C160 ) `1 ) ) ) <> ( C156 + 1 ) by L779 , L811 , L702;
+L815: ( D58 . ( Sub_the_left_argument_of C160 ) ) = ( C157 . ( Sub_the_left_argument_of C160 ) ) by L814 , L777;
+L816:
+now
+per cases ;
+suppose L817: ( len ( @ ( C160 `1 ) ) ) <> ( C156 + 1 );
+
+L818: (( len ( @ ( C160 `1 ) ) ) <= C156 & ( D58 . C160 ) = ( C157 . C160 )) by L817 , L777 , L779 , NAT_1:8;
+thus L819: thesis by L818 , L760 , L811 , L815 , L813;
+end;
+suppose L820: ( len ( @ ( C160 `1 ) ) ) = ( C156 + 1 );
+
+thus L821: thesis by L820 , L777 , L811 , L815 , L813;
+end;
+end;
+thus L823: thesis by L816;
+end;
+
+thus L824: (C160 is  Sub_universal implies ( D58 . C160 ) = F9(F3() , C160 , ( D58 . ( Sub_the_scope_of C160 ) )))
+proof
+assume L825: C160 is  Sub_universal;
+L826: ( len ( @ ( ( Sub_the_scope_of C160 ) `1 ) ) ) <> ( C156 + 1 ) by L825 , L779 , L711;
+L827: ( D58 . ( Sub_the_scope_of C160 ) ) = ( C157 . ( Sub_the_scope_of C160 ) ) by L826 , L777;
+L828:
+now
+per cases ;
+suppose L829: ( len ( @ ( C160 `1 ) ) ) <> ( C156 + 1 );
+
+L830: (( len ( @ ( C160 `1 ) ) ) <= C156 & ( D58 . C160 ) = ( C157 . C160 )) by L829 , L777 , L779 , NAT_1:8;
+thus L831: thesis by L830 , L760 , L825 , L827;
+end;
+suppose L832: ( len ( @ ( C160 `1 ) ) ) = ( C156 + 1 );
+
+thus L833: thesis by L832 , L777 , L825 , L827;
+end;
+end;
+thus L835: thesis by L828;
+end;
+
+end;
+
+end;
+L779: S12[ ( 0 ) ]
+proof
+set D59 = the (Function of ( QC-Sub-WFF F3() ) , F4());
+take D59;
+let C161 being (Element of ( QC-Sub-WFF F3() ));
+assume L780: ( len ( @ ( C161 `1 ) ) ) <= ( 0 );
+thus L781: thesis by L780 , QC_LANG1:10;
+end;
+L782: (for B218 being (Element of ( NAT )) holds S12[ B218 ]) from NAT_1:sch 1(L779 , L759);
+L783: (for B219 being set holds (B219 in ( QC-Sub-WFF F3() ) implies (ex B220 being set st S13[ B219 , B220 ])))
+proof
+let C162 being set;
+assume L784: C162 in ( QC-Sub-WFF F3() );
+reconsider D60 = C162 as (Element of ( QC-Sub-WFF F3() )) by L784;
+consider C163 being (Function of ( QC-Sub-WFF F3() ) , F4()) such that L785: S10[ C163 , (( len ( @ ( D60 `1 ) ) ) qua (Element of ( NAT ))) ] by L782;
+take ( C163 . C162 );
+take D60;
+thus L786: D60 = C162;
+let C164 being (Function of ( QC-Sub-WFF F3() ) , F4());
+assume that
+L787: S10[ C164 , (( len ( @ ( D60 `1 ) ) ) qua (Element of ( NAT ))) ];
+defpred S15[ (Element of ( QC-Sub-WFF F3() )) ] means (( len ( @ ( $1 `1 ) ) ) <= ( len ( @ ( D60 `1 ) ) ) implies ( C163 . $1 ) = ( C164 . $1 ));
+L788:
+now
+let C165 being (Element of ( QC-Sub-WFF F3() ));
+thus L789: (C165 is  Sub_atomic implies S15[ C165 ])
+proof
+assume L790: (C165 is  Sub_atomic & ( len ( @ ( C165 `1 ) ) ) <= ( len ( @ ( D60 `1 ) ) ));
+thus L791: ( C163 . C165 ) = F6(C165) by L790 , L785
+.= ( C164 . C165 ) by L787 , L790;
+end;
+
+thus L792: (C165 is F3() -Sub_VERUM implies S15[ C165 ])
+proof
+assume L793: (C165 is F3() -Sub_VERUM & ( len ( @ ( C165 `1 ) ) ) <= ( len ( @ ( D60 `1 ) ) ));
+thus L794: ( C163 . C165 ) = F5() by L793 , L785
+.= ( C164 . C165 ) by L787 , L793;
+end;
+
+thus L795: ((C165 is  Sub_negative & S15[ ( Sub_the_argument_of C165 ) ]) implies S15[ C165 ])
+proof
+assume that
+L796: C165 is  Sub_negative
+and
+L797: S15[ ( Sub_the_argument_of C165 ) ]
+and
+L798: ( len ( @ ( C165 `1 ) ) ) <= ( len ( @ ( D60 `1 ) ) );
+L799: ( len ( @ ( ( Sub_the_argument_of C165 ) `1 ) ) ) < ( len ( @ ( C165 `1 ) ) ) by L796 , L694;
+thus L800: ( C163 . C165 ) = F7(( C164 . ( Sub_the_argument_of C165 ) )) by L799 , L785 , L796 , L797 , L798 , XXREAL_0:2
+.= ( C164 . C165 ) by L787 , L796 , L798;
+end;
+
+thus L801: ((C165 is  Sub_conjunctive & S15[ ( Sub_the_left_argument_of C165 ) ] & S15[ ( Sub_the_right_argument_of C165 ) ]) implies S15[ C165 ])
+proof
+assume that
+L802: C165 is  Sub_conjunctive
+and
+L803: (S15[ ( Sub_the_left_argument_of C165 ) ] & S15[ ( Sub_the_right_argument_of C165 ) ])
+and
+L804: ( len ( @ ( C165 `1 ) ) ) <= ( len ( @ ( D60 `1 ) ) );
+L805: (( len ( @ ( ( Sub_the_left_argument_of C165 ) `1 ) ) ) < ( len ( @ ( C165 `1 ) ) ) & ( len ( @ ( ( Sub_the_right_argument_of C165 ) `1 ) ) ) < ( len ( @ ( C165 `1 ) ) )) by L802 , L702;
+thus L806: ( C163 . C165 ) = F8(( C164 . ( Sub_the_left_argument_of C165 ) ) , ( C164 . ( Sub_the_right_argument_of C165 ) )) by L805 , L785 , L802 , L803 , L804 , XXREAL_0:2
+.= ( C164 . C165 ) by L787 , L802 , L804;
+end;
+
+thus L807: ((C165 is  Sub_universal & S15[ ( Sub_the_scope_of C165 ) ]) implies S15[ C165 ])
+proof
+assume that
+L808: C165 is  Sub_universal
+and
+L809: S15[ ( Sub_the_scope_of C165 ) ]
+and
+L810: ( len ( @ ( C165 `1 ) ) ) <= ( len ( @ ( D60 `1 ) ) );
+L811: ( len ( @ ( ( Sub_the_scope_of C165 ) `1 ) ) ) < ( len ( @ ( C165 `1 ) ) ) by L808 , L711;
+thus L812: ( C163 . C165 ) = F9(F3() , C165 , ( C164 . ( Sub_the_scope_of C165 ) )) by L811 , L785 , L808 , L809 , L810 , XXREAL_0:2
+.= ( C164 . C165 ) by L787 , L808 , L810;
+end;
+
+end;
+L808: (for B221 being (Element of ( QC-Sub-WFF F3() )) holds S15[ B221 ]) from SubQCInd2(L788);
+thus L809: thesis by L808;
+end;
+consider C166 being Function such that L810: ( dom C166 ) = ( QC-Sub-WFF F3() ) and L811: (for B222 being set holds (B222 in ( QC-Sub-WFF F3() ) implies S13[ B222 , ( C166 . B222 ) ])) from CLASSES1:sch 1(L783);
+L812: ( rng C166 ) c= F4()
+proof
+let C167 being set;
+assume L813: C167 in ( rng C166 );
+consider C168 being set such that L814: (C168 in ( QC-Sub-WFF F3() ) & C167 = ( C166 . C168 )) by L813 , L810 , FUNCT_1:def 3;
+consider C169 being (Element of ( QC-Sub-WFF F3() )) such that L815: C169 = C168 and L816: (for B223 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B223 , (( len ( @ ( C169 `1 ) ) ) qua (Element of ( NAT ))) ] implies C167 = ( B223 . C169 ))) by L811 , L814;
+consider C170 being (Function of ( QC-Sub-WFF F3() ) , F4()) such that L817: S10[ C170 , (( len ( @ ( C169 `1 ) ) ) qua (Element of ( NAT ))) ] by L782;
+L818: C167 = ( C170 . C169 ) by L816 , L817;
+thus L819: thesis by L818;
+end;
+reconsider D61 = C166 as (Function of ( QC-Sub-WFF F3() ) , F4()) by L812 , L810 , FUNCT_2:def 1 , RELSET_1:4;
+take D61;
+let C171 being (Element of ( QC-Sub-WFF F3() ));
+consider C172 being (Element of ( QC-Sub-WFF F3() )) such that L820: C172 = C171 and L821: (for B224 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B224 , (( len ( @ ( C172 `1 ) ) ) qua (Element of ( NAT ))) ] implies ( D61 . C171 ) = ( B224 . C172 ))) by L811;
+let C173 , C174 being (Element of F4());
+consider C175 being (Function of ( QC-Sub-WFF F3() ) , F4()) such that L822: S10[ C175 , (( len ( @ ( C172 `1 ) ) ) qua (Element of ( NAT ))) ] by L782;
+set D62 = ( Sub_the_scope_of C171 );
+L823: (ex B225 being (Element of ( QC-Sub-WFF F3() )) st (B225 = D62 & (for B226 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B226 , (( len ( @ ( B225 `1 ) ) ) qua (Element of ( NAT ))) ] implies ( D61 . D62 ) = ( B226 . B225 ))))) by L811;
+L824: ( D61 . C171 ) = ( C175 . C171 ) by L820 , L821 , L822;
+thus L825: (C171 is F3() -Sub_VERUM implies ( D61 . C171 ) = F5()) by L824 , L820 , L822;
+thus L826: (C171 is  Sub_atomic implies ( D61 . C171 ) = F6(C171)) by L820 , L822 , L824;
+L827: (for B227 being (Element of ( NAT )) holds (B227 < ( len ( @ ( C171 `1 ) ) ) implies S10[ C175 , B227 ]))
+proof
+let C176 being (Element of ( NAT ));
+assume L828: C176 < ( len ( @ ( C171 `1 ) ) );
+let C177 being (Element of ( QC-Sub-WFF F3() ));
+assume L829: ( len ( @ ( C177 `1 ) ) ) <= C176;
+L830: ( len ( @ ( C177 `1 ) ) ) <= ( len ( @ ( C171 `1 ) ) ) by L829 , L828 , XXREAL_0:2;
+thus L831: thesis by L830 , L820 , L822;
+end;
+thus L832: ((C171 is  Sub_negative & C173 = ( D61 . ( Sub_the_argument_of C171 ) )) implies ( D61 . C171 ) = F7(C173))
+proof
+set D63 = ( Sub_the_argument_of C171 );
+set D64 = ( len ( @ ( D63 `1 ) ) );
+L833: (ex B228 being (Element of ( QC-Sub-WFF F3() )) st (B228 = D63 & (for B229 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B229 , (( len ( @ ( B228 `1 ) ) ) qua (Element of ( NAT ))) ] implies ( D61 . D63 ) = ( B229 . B228 ))))) by L811;
+assume L834: C171 is  Sub_negative;
+L835: D64 < ( len ( @ ( C171 `1 ) ) ) by L834 , L694;
+L836: S10[ C175 , (D64 qua (Element of ( NAT ))) ] by L835 , L827;
+L837: ( D61 . D63 ) = ( C175 . D63 ) by L836 , L833;
+thus L838: thesis by L837 , L820 , L822 , L824 , L834;
+end;
+
+thus L839: ((C171 is  Sub_conjunctive & C173 = ( D61 . ( Sub_the_left_argument_of C171 ) ) & C174 = ( D61 . ( Sub_the_right_argument_of C171 ) )) implies ( D61 . C171 ) = F8(C173 , C174))
+proof
+set D65 = ( Sub_the_right_argument_of C171 );
+set D66 = ( Sub_the_left_argument_of C171 );
+set D67 = ( len ( @ ( D66 `1 ) ) );
+set D68 = ( len ( @ ( D65 `1 ) ) );
+L840: (ex B230 being (Element of ( QC-Sub-WFF F3() )) st (B230 = D65 & (for B231 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B231 , (( len ( @ ( B230 `1 ) ) ) qua (Element of ( NAT ))) ] implies ( D61 . D65 ) = ( B231 . B230 ))))) by L811;
+assume L841: C171 is  Sub_conjunctive;
+L842: D67 < ( len ( @ ( C171 `1 ) ) ) by L841 , L702;
+L843: S10[ C175 , (D67 qua (Element of ( NAT ))) ] by L842 , L827;
+L844: D68 < ( len ( @ ( C171 `1 ) ) ) by L841 , L702;
+L845: S10[ C175 , (D68 qua (Element of ( NAT ))) ] by L844 , L827;
+L846: ( D61 . D65 ) = ( C175 . D65 ) by L845 , L840;
+L847: (ex B232 being (Element of ( QC-Sub-WFF F3() )) st (B232 = D66 & (for B233 being (Function of ( QC-Sub-WFF F3() ) , F4()) holds (S10[ B233 , (( len ( @ ( B232 `1 ) ) ) qua (Element of ( NAT ))) ] implies ( D61 . D66 ) = ( B233 . B232 ))))) by L811;
+L848: ( D61 . D66 ) = ( C175 . D66 ) by L847 , L843;
+thus L849: thesis by L848 , L820 , L822 , L824 , L841 , L846;
+end;
+
+set D69 = ( len ( @ ( D62 `1 ) ) );
+assume L850: C171 is  Sub_universal;
+L851: D69 < ( len ( @ ( C171 `1 ) ) ) by L850 , L711;
+L852: S10[ C175 , (D69 qua (Element of ( NAT ))) ] by L851 , L827;
+L853: ( D61 . D62 ) = ( C175 . D62 ) by L852 , L823;
+thus L854: thesis by L853 , L820 , L822 , L824 , L850;
+end;
+scheme SubQCFuncUniq { F10() -> QC-alphabet , F11() -> non  empty set , F12() -> (Function of ( QC-Sub-WFF F10() ) , F11()) , F13() -> (Function of ( QC-Sub-WFF F10() ) , F11()) , F14() -> (Element of F11()) , F15(set) -> (Element of F11()) , F16(set) -> (Element of F11()) , F17(set , set) -> (Element of F11()) , F18(set , set , set) -> (Element of F11()) } : F12() = F13()
+provided
+L855: (for B234 being (Element of ( QC-Sub-WFF F10() )) holds (for B235 , B236 being (Element of F11()) holds ((B234 is F10() -Sub_VERUM implies ( F12() . B234 ) = F14()) & (B234 is  Sub_atomic implies ( F12() . B234 ) = F15(B234)) & ((B234 is  Sub_negative & B235 = ( F12() . ( Sub_the_argument_of B234 ) )) implies ( F12() . B234 ) = F16(B235)) & ((B234 is  Sub_conjunctive & B235 = ( F12() . ( Sub_the_left_argument_of B234 ) ) & B236 = ( F12() . ( Sub_the_right_argument_of B234 ) )) implies ( F12() . B234 ) = F17(B235 , B236)) & ((B234 is  Sub_universal & B235 = ( F12() . ( Sub_the_scope_of B234 ) )) implies ( F12() . B234 ) = F18(F10() , B234 , B235)))))
+and
+L856: (for B237 being (Element of ( QC-Sub-WFF F10() )) holds (for B238 , B239 being (Element of F11()) holds ((B237 is F10() -Sub_VERUM implies ( F13() . B237 ) = F14()) & (B237 is  Sub_atomic implies ( F13() . B237 ) = F15(B237)) & ((B237 is  Sub_negative & B238 = ( F13() . ( Sub_the_argument_of B237 ) )) implies ( F13() . B237 ) = F16(B238)) & ((B237 is  Sub_conjunctive & B238 = ( F13() . ( Sub_the_left_argument_of B237 ) ) & B239 = ( F13() . ( Sub_the_right_argument_of B237 ) )) implies ( F13() . B237 ) = F17(B238 , B239)) & ((B237 is  Sub_universal & B238 = ( F13() . ( Sub_the_scope_of B237 ) )) implies ( F13() . B237 ) = F18(F10() , B237 , B238)))))
+proof
+defpred S16[ (Element of ( QC-Sub-WFF F10() )) ] means ( F12() . $1 ) = ( F13() . $1 );
+L857: (for R10 being (Element of ( NAT )) holds (for B240 being (QC-pred_symbol of R10 , F10()) holds (for B241 being (QC-variable_list of R10 , F10()) holds (for B242 being (Element of ( vSUB F10() )) holds S16[ ( Sub_P (B240 , B241 , B242) ) ]))))
+proof
+let R10 being (Element of ( NAT ));
+let C178 being (QC-pred_symbol of R10 , F10());
+let C179 being (QC-variable_list of R10 , F10());
+let C180 being (Element of ( vSUB F10() ));
+thus L858: ( F12() . ( Sub_P (C178 , C179 , C180) ) ) = F15(( Sub_P (C178 , C179 , C180) )) by L855
+.= ( F13() . ( Sub_P (C178 , C179 , C180) ) ) by L856;
+end;
+L859: (for B243 being (bound_QC-variable of F10()) holds (for B244 being (Element of ( QC-Sub-WFF F10() )) holds (for B245 being (second_Q_comp of [ B244 , B243 ]) holds (([ B244 , B243 ] is  quantifiable & S16[ B244 ]) implies S16[ ( Sub_All ([ B244 , B243 ] , B245) ) ]))))
+proof
+let C181 being (bound_QC-variable of F10());
+let C182 being (Element of ( QC-Sub-WFF F10() ));
+let C183 being (second_Q_comp of [ C182 , C181 ]);
+assume that
+L860: [ C182 , C181 ] is  quantifiable
+and
+L861: ( F12() . C182 ) = ( F13() . C182 );
+L862: ( Sub_All ([ C182 , C181 ] , C183) ) is  Sub_universal by L860 , L628;
+L863: ( Sub_the_scope_of ( Sub_All ([ C182 , C181 ] , C183) ) ) = ( [ C182 , C181 ] `1 ) by L860 , L669;
+L864: ( Sub_the_scope_of ( Sub_All ([ C182 , C181 ] , C183) ) ) = C182 by L863;
+thus L865: ( F12() . ( Sub_All ([ C182 , C181 ] , C183) ) ) = F18(F10() , ( Sub_All ([ C182 , C181 ] , C183) ) , ( F13() . ( Sub_the_scope_of ( Sub_All ([ C182 , C181 ] , C183) ) ) )) by L864 , L855 , L861 , L862
+.= ( F13() . ( Sub_All ([ C182 , C181 ] , C183) ) ) by L856 , L862;
+end;
+L866: (for B246 being (Element of ( QC-Sub-WFF F10() )) holds (B246 is F10() -Sub_VERUM implies S16[ B246 ]))
+proof
+let C184 being (Element of ( QC-Sub-WFF F10() ));
+assume L867: C184 is F10() -Sub_VERUM;
+L868: ( F12() . C184 ) = F14() by L867 , L855;
+thus L869: thesis by L868 , L856 , L867;
+end;
+L870: (for B247 , B248 being (Element of ( QC-Sub-WFF F10() )) holds ((( B247 `2 ) = ( B248 `2 ) & S16[ B247 ] & S16[ B248 ]) implies S16[ ( Sub_& (B247 , B248) ) ]))
+proof
+let C185 , C186 being (Element of ( QC-Sub-WFF F10() ));
+assume that
+L871: ( C185 `2 ) = ( C186 `2 )
+and
+L872: (( F12() . C185 ) = ( F13() . C185 ) & ( F12() . C186 ) = ( F13() . C186 ));
+L873: ( Sub_the_right_argument_of ( Sub_& (C185 , C186) ) ) = C186 by L871 , L651;
+L874: (( Sub_& (C185 , C186) ) is  Sub_conjunctive & ( Sub_the_left_argument_of ( Sub_& (C185 , C186) ) ) = C185) by L871 , L625 , L647;
+thus L875: ( F12() . ( Sub_& (C185 , C186) ) ) = F17(( F13() . C185 ) , ( F13() . C186 )) by L874 , L855 , L872 , L873
+.= ( F13() . ( Sub_& (C185 , C186) ) ) by L856 , L874 , L873;
+end;
+L876: (for B249 being (Element of ( QC-Sub-WFF F10() )) holds (S16[ B249 ] implies S16[ ( Sub_not B249 ) ]))
+proof
+let C187 being (Element of ( QC-Sub-WFF F10() ));
+assume that
+L877: ( F12() . C187 ) = ( F13() . C187 );
+L878: ( Sub_the_argument_of ( Sub_not C187 ) ) = C187 by L549;
+thus L879: ( F12() . ( Sub_not C187 ) ) = F16(( F13() . C187 )) by L878 , L855 , L877
+.= ( F13() . ( Sub_not C187 ) ) by L856 , L878;
+end;
+L880: (for B250 being (Element of ( QC-Sub-WFF F10() )) holds S16[ B250 ]) from SubQCInd(L857 , L866 , L876 , L870 , L859);
+thus L881: thesis by L880 , FUNCT_2:63;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+func @ R26 -> (Element of [: ( QC-WFF R1 ) , ( vSUB R1 ) :]) equals 
+R26;
+coherence
+proof
+L882: (ex R20 being (QC-formula of R1) st (ex R25 being (Element of ( vSUB R1 )) st R26 = [ R20 , R25 ])) by L384;
+thus L883: thesis by L882;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R36 being (Element of [: ( QC-WFF R1 ) , ( vSUB R1 ) :]);
+redefine func R36 `1 -> (Element of ( QC-WFF R1 ));
+
+coherence
+proof
+L885: (ex R2 being set st (ex R3 being set st (R2 in ( QC-WFF R1 ) & R3 in ( vSUB R1 ) & [ R2 , R3 ] = R36))) by ZFMISC_1:def 2;
+thus L886: thesis by L885 , MCART_1:7;
+end;
+redefine func R36 `2 -> (CQC_Substitution of R1);
+
+coherence
+proof
+L887: (ex R2 being set st (ex R3 being set st (R2 in ( QC-WFF R1 ) & R3 in ( vSUB R1 ) & [ R2 , R3 ] = R36))) by ZFMISC_1:def 2;
+thus L888: thesis by L887 , MCART_1:7;
+end;
+end;
+definition
+let R1 being QC-alphabet;
+let R36 being (Element of [: ( QC-WFF R1 ) , ( vSUB R1 ) :]);
+func S_Bound R36 -> (bound_QC-variable of R1) equals 
+( x. ( upVar (( RestrictSub (( bound_in ( R36 `1 ) ) , ( R36 `1 ) , ( R36 `2 )) ) , ( the_scope_of ( R36 `1 ) )) ) ) if ( bound_in ( R36 `1 ) ) in ( rng ( RestrictSub (( bound_in ( R36 `1 ) ) , ( R36 `1 ) , ( R36 `2 )) ) ) otherwise ( bound_in ( R36 `1 ) );
+coherence;
+consistency;
+end;
+definition
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+let R20 being (QC-formula of R1);
+func Quant (R26 , R20) -> (Element of ( QC-WFF R1 )) equals 
+( All (( S_Bound ( @ R26 ) ) , R20) );
+coherence;
+end;
+L892: (for R1 being QC-alphabet holds (for B251 , B252 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) holds (((for B253 being (Element of ( QC-Sub-WFF R1 )) holds ((B253 is R1 -Sub_VERUM implies ( B251 . B253 ) = ( VERUM R1 )) & (B253 is  Sub_atomic implies ( B251 . B253 ) = ( ( the_pred_symbol_of ( B253 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B253 ) , ( B253 `2 )) ) )) & (B253 is  Sub_negative implies ( B251 . B253 ) = ( 'not' ( B251 . ( Sub_the_argument_of B253 ) ) )) & (B253 is  Sub_conjunctive implies ( B251 . B253 ) = ( ( B251 . ( Sub_the_left_argument_of B253 ) ) '&' ( B251 . ( Sub_the_right_argument_of B253 ) ) )) & (B253 is  Sub_universal implies ( B251 . B253 ) = ( Quant (B253 , ( B251 . ( Sub_the_scope_of B253 ) )) )))) & (for B254 being (Element of ( QC-Sub-WFF R1 )) holds ((B254 is R1 -Sub_VERUM implies ( B252 . B254 ) = ( VERUM R1 )) & (B254 is  Sub_atomic implies ( B252 . B254 ) = ( ( the_pred_symbol_of ( B254 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B254 ) , ( B254 `2 )) ) )) & (B254 is  Sub_negative implies ( B252 . B254 ) = ( 'not' ( B252 . ( Sub_the_argument_of B254 ) ) )) & (B254 is  Sub_conjunctive implies ( B252 . B254 ) = ( ( B252 . ( Sub_the_left_argument_of B254 ) ) '&' ( B252 . ( Sub_the_right_argument_of B254 ) ) )) & (B254 is  Sub_universal implies ( B252 . B254 ) = ( Quant (B254 , ( B252 . ( Sub_the_scope_of B254 ) )) ))))) implies B251 = B252)))
+proof
+let R1 being QC-alphabet;
+let C188 , C189 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 ));
+deffunc H11((Element of ( QC-WFF R1 )) , (Element of ( QC-WFF R1 ))) = ( $1 '&' $2 );
+deffunc H12((Element of ( QC-WFF R1 ))) = ( 'not' $1 );
+deffunc H13((Element of ( QC-Sub-WFF R1 ))) = ( ( the_pred_symbol_of ( $1 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of $1 ) , ( $1 `2 )) ) );
+assume L893: (for B255 being (Element of ( QC-Sub-WFF R1 )) holds ((B255 is R1 -Sub_VERUM implies ( C188 . B255 ) = ( VERUM R1 )) & (B255 is  Sub_atomic implies ( C188 . B255 ) = H13(B255)) & (B255 is  Sub_negative implies ( C188 . B255 ) = H12(( C188 . ( Sub_the_argument_of B255 ) ))) & (B255 is  Sub_conjunctive implies ( C188 . B255 ) = H11(( C188 . ( Sub_the_left_argument_of B255 ) ) , ( C188 . ( Sub_the_right_argument_of B255 ) ))) & (B255 is  Sub_universal implies ( C188 . B255 ) = ( Quant (B255 , ( C188 . ( Sub_the_scope_of B255 ) )) ))));
+L894: (for B256 being (Element of ( QC-Sub-WFF R1 )) holds (for B257 , B258 being (Element of ( QC-WFF R1 )) holds ((B256 is R1 -Sub_VERUM implies ( C188 . B256 ) = ( VERUM R1 )) & (B256 is  Sub_atomic implies ( C188 . B256 ) = H13(B256)) & ((B256 is  Sub_negative & B257 = ( C188 . ( Sub_the_argument_of B256 ) )) implies ( C188 . B256 ) = H12(B257)) & ((B256 is  Sub_conjunctive & B257 = ( C188 . ( Sub_the_left_argument_of B256 ) ) & B258 = ( C188 . ( Sub_the_right_argument_of B256 ) )) implies ( C188 . B256 ) = H11(B257 , B258)) & ((B256 is  Sub_universal & B257 = ( C188 . ( Sub_the_scope_of B256 ) )) implies ( C188 . B256 ) = ( Quant (B256 , B257) ))))) by L893;
+assume L895: (for B259 being (Element of ( QC-Sub-WFF R1 )) holds ((B259 is R1 -Sub_VERUM implies ( C189 . B259 ) = ( VERUM R1 )) & (B259 is  Sub_atomic implies ( C189 . B259 ) = H13(B259)) & (B259 is  Sub_negative implies ( C189 . B259 ) = H12(( C189 . ( Sub_the_argument_of B259 ) ))) & (B259 is  Sub_conjunctive implies ( C189 . B259 ) = H11(( C189 . ( Sub_the_left_argument_of B259 ) ) , ( C189 . ( Sub_the_right_argument_of B259 ) ))) & (B259 is  Sub_universal implies ( C189 . B259 ) = ( Quant (B259 , ( C189 . ( Sub_the_scope_of B259 ) )) ))));
+L896: (for B260 being (Element of ( QC-Sub-WFF R1 )) holds (for B261 , B262 being (Element of ( QC-WFF R1 )) holds ((B260 is R1 -Sub_VERUM implies ( C189 . B260 ) = ( VERUM R1 )) & (B260 is  Sub_atomic implies ( C189 . B260 ) = H13(B260)) & ((B260 is  Sub_negative & B261 = ( C189 . ( Sub_the_argument_of B260 ) )) implies ( C189 . B260 ) = H12(B261)) & ((B260 is  Sub_conjunctive & B261 = ( C189 . ( Sub_the_left_argument_of B260 ) ) & B262 = ( C189 . ( Sub_the_right_argument_of B260 ) )) implies ( C189 . B260 ) = H11(B261 , B262)) & ((B260 is  Sub_universal & B261 = ( C189 . ( Sub_the_scope_of B260 ) )) implies ( C189 . B260 ) = ( Quant (B260 , B261) ))))) by L895;
+thus L897: C188 = C189 from SubQCFuncUniq(L894 , L896);
+end;
+begin
+definition
+let R1 being QC-alphabet;
+let C190 being (Element of ( QC-Sub-WFF R1 ));
+func CQC_Sub C190 -> (Element of ( QC-WFF R1 )) means 
+:L898: (ex B263 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) st (it = ( B263 . C190 ) & (for B264 being (Element of ( QC-Sub-WFF R1 )) holds ((B264 is R1 -Sub_VERUM implies ( B263 . B264 ) = ( VERUM R1 )) & (B264 is  Sub_atomic implies ( B263 . B264 ) = ( ( the_pred_symbol_of ( B264 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B264 ) , ( B264 `2 )) ) )) & (B264 is  Sub_negative implies ( B263 . B264 ) = ( 'not' ( B263 . ( Sub_the_argument_of B264 ) ) )) & (B264 is  Sub_conjunctive implies ( B263 . B264 ) = ( ( B263 . ( Sub_the_left_argument_of B264 ) ) '&' ( B263 . ( Sub_the_right_argument_of B264 ) ) )) & (B264 is  Sub_universal implies ( B263 . B264 ) = ( Quant (B264 , ( B263 . ( Sub_the_scope_of B264 ) )) ))))));
+existence
+proof
+deffunc H14((Element of ( QC-WFF R1 )) , (Element of ( QC-WFF R1 ))) = ( $1 '&' $2 );
+deffunc H15((Element of ( QC-WFF R1 ))) = ( 'not' $1 );
+deffunc H16((Element of ( QC-Sub-WFF R1 ))) = ( ( the_pred_symbol_of ( $1 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of $1 ) , ( $1 `2 )) ) );
+consider C191 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L899: (for B265 being (Element of ( QC-Sub-WFF R1 )) holds (for B266 , B267 being (Element of ( QC-WFF R1 )) holds ((B265 is R1 -Sub_VERUM implies ( C191 . B265 ) = ( VERUM R1 )) & (B265 is  Sub_atomic implies ( C191 . B265 ) = H16(B265)) & ((B265 is  Sub_negative & B266 = ( C191 . ( Sub_the_argument_of B265 ) )) implies ( C191 . B265 ) = H15(B266)) & ((B265 is  Sub_conjunctive & B266 = ( C191 . ( Sub_the_left_argument_of B265 ) ) & B267 = ( C191 . ( Sub_the_right_argument_of B265 ) )) implies ( C191 . B265 ) = H14(B266 , B267)) & ((B265 is  Sub_universal & B266 = ( C191 . ( Sub_the_scope_of B265 ) )) implies ( C191 . B265 ) = ( Quant (B265 , B266) ))))) from SubFuncEx;
+take ( C191 . C190 );
+take C191;
+thus L900: ( C191 . C190 ) = ( C191 . C190 );
+thus L901: thesis by L899;
+end;
+uniqueness by L892;
+end;
+theorem
+L903: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_negative implies ( CQC_Sub R26 ) = ( 'not' ( CQC_Sub ( Sub_the_argument_of R26 ) ) ))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+consider C192 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L904: ( CQC_Sub R26 ) = ( C192 . R26 ) and L905: (for B268 being (Element of ( QC-Sub-WFF R1 )) holds ((B268 is R1 -Sub_VERUM implies ( C192 . B268 ) = ( VERUM R1 )) & (B268 is  Sub_atomic implies ( C192 . B268 ) = ( ( the_pred_symbol_of ( B268 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B268 ) , ( B268 `2 )) ) )) & (B268 is  Sub_negative implies ( C192 . B268 ) = ( 'not' ( C192 . ( Sub_the_argument_of B268 ) ) )) & (B268 is  Sub_conjunctive implies ( C192 . B268 ) = ( ( C192 . ( Sub_the_left_argument_of B268 ) ) '&' ( C192 . ( Sub_the_right_argument_of B268 ) ) )) & (B268 is  Sub_universal implies ( C192 . B268 ) = ( Quant (B268 , ( C192 . ( Sub_the_scope_of B268 ) )) )))) by L898;
+consider C193 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L906: ( CQC_Sub ( Sub_the_argument_of R26 ) ) = ( C193 . ( Sub_the_argument_of R26 ) ) and L907: (for B269 being (Element of ( QC-Sub-WFF R1 )) holds ((B269 is R1 -Sub_VERUM implies ( C193 . B269 ) = ( VERUM R1 )) & (B269 is  Sub_atomic implies ( C193 . B269 ) = ( ( the_pred_symbol_of ( B269 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B269 ) , ( B269 `2 )) ) )) & (B269 is  Sub_negative implies ( C193 . B269 ) = ( 'not' ( C193 . ( Sub_the_argument_of B269 ) ) )) & (B269 is  Sub_conjunctive implies ( C193 . B269 ) = ( ( C193 . ( Sub_the_left_argument_of B269 ) ) '&' ( C193 . ( Sub_the_right_argument_of B269 ) ) )) & (B269 is  Sub_universal implies ( C193 . B269 ) = ( Quant (B269 , ( C193 . ( Sub_the_scope_of B269 ) )) )))) by L898;
+L908: C192 = C193 by L905 , L907 , L892;
+thus L909: thesis by L908 , L904 , L905 , L906;
+end;
+theorem
+L910: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds ( CQC_Sub ( Sub_not R26 ) ) = ( 'not' ( CQC_Sub R26 ) )))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+set D70 = ( Sub_not R26 );
+L911: ( Sub_the_argument_of D70 ) = R26 by L549;
+thus L912: thesis by L911 , L903;
+end;
+theorem
+L913: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_conjunctive implies ( CQC_Sub R26 ) = ( ( CQC_Sub ( Sub_the_left_argument_of R26 ) ) '&' ( CQC_Sub ( Sub_the_right_argument_of R26 ) ) ))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+consider C194 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L914: ( CQC_Sub R26 ) = ( C194 . R26 ) and L915: (for B270 being (Element of ( QC-Sub-WFF R1 )) holds ((B270 is R1 -Sub_VERUM implies ( C194 . B270 ) = ( VERUM R1 )) & (B270 is  Sub_atomic implies ( C194 . B270 ) = ( ( the_pred_symbol_of ( B270 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B270 ) , ( B270 `2 )) ) )) & (B270 is  Sub_negative implies ( C194 . B270 ) = ( 'not' ( C194 . ( Sub_the_argument_of B270 ) ) )) & (B270 is  Sub_conjunctive implies ( C194 . B270 ) = ( ( C194 . ( Sub_the_left_argument_of B270 ) ) '&' ( C194 . ( Sub_the_right_argument_of B270 ) ) )) & (B270 is  Sub_universal implies ( C194 . B270 ) = ( Quant (B270 , ( C194 . ( Sub_the_scope_of B270 ) )) )))) by L898;
+consider C195 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L916: ( CQC_Sub ( Sub_the_right_argument_of R26 ) ) = ( C195 . ( Sub_the_right_argument_of R26 ) ) and L917: (for B271 being (Element of ( QC-Sub-WFF R1 )) holds ((B271 is R1 -Sub_VERUM implies ( C195 . B271 ) = ( VERUM R1 )) & (B271 is  Sub_atomic implies ( C195 . B271 ) = ( ( the_pred_symbol_of ( B271 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B271 ) , ( B271 `2 )) ) )) & (B271 is  Sub_negative implies ( C195 . B271 ) = ( 'not' ( C195 . ( Sub_the_argument_of B271 ) ) )) & (B271 is  Sub_conjunctive implies ( C195 . B271 ) = ( ( C195 . ( Sub_the_left_argument_of B271 ) ) '&' ( C195 . ( Sub_the_right_argument_of B271 ) ) )) & (B271 is  Sub_universal implies ( C195 . B271 ) = ( Quant (B271 , ( C195 . ( Sub_the_scope_of B271 ) )) )))) by L898;
+L918: C195 = C194 by L915 , L917 , L892;
+consider C196 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L919: ( CQC_Sub ( Sub_the_left_argument_of R26 ) ) = ( C196 . ( Sub_the_left_argument_of R26 ) ) and L920: (for B272 being (Element of ( QC-Sub-WFF R1 )) holds ((B272 is R1 -Sub_VERUM implies ( C196 . B272 ) = ( VERUM R1 )) & (B272 is  Sub_atomic implies ( C196 . B272 ) = ( ( the_pred_symbol_of ( B272 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B272 ) , ( B272 `2 )) ) )) & (B272 is  Sub_negative implies ( C196 . B272 ) = ( 'not' ( C196 . ( Sub_the_argument_of B272 ) ) )) & (B272 is  Sub_conjunctive implies ( C196 . B272 ) = ( ( C196 . ( Sub_the_left_argument_of B272 ) ) '&' ( C196 . ( Sub_the_right_argument_of B272 ) ) )) & (B272 is  Sub_universal implies ( C196 . B272 ) = ( Quant (B272 , ( C196 . ( Sub_the_scope_of B272 ) )) )))) by L898;
+L921: C196 = C194 by L915 , L920 , L892;
+thus L922: thesis by L921 , L914 , L915 , L919 , L916 , L918;
+end;
+theorem
+L923: (for R1 being QC-alphabet holds (for R28 being (Element of ( QC-Sub-WFF R1 )) holds (for R29 being (Element of ( QC-Sub-WFF R1 )) holds (( R28 `2 ) = ( R29 `2 ) implies ( CQC_Sub ( Sub_& (R28 , R29) ) ) = ( ( CQC_Sub R28 ) '&' ( CQC_Sub R29 ) )))))
+proof
+let R1 being QC-alphabet;
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+set D71 = ( Sub_& (R28 , R29) );
+assume L924: ( R28 `2 ) = ( R29 `2 );
+L925: (( Sub_the_left_argument_of D71 ) = R28 & ( Sub_the_right_argument_of D71 ) = R29) by L924 , L647 , L651;
+thus L926: thesis by L925 , L924 , L625 , L913;
+end;
+theorem
+L927: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is  Sub_universal implies ( CQC_Sub R26 ) = ( Quant (R26 , ( CQC_Sub ( Sub_the_scope_of R26 ) )) ))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+consider C197 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L928: ( CQC_Sub R26 ) = ( C197 . R26 ) and L929: (for B273 being (Element of ( QC-Sub-WFF R1 )) holds ((B273 is R1 -Sub_VERUM implies ( C197 . B273 ) = ( VERUM R1 )) & (B273 is  Sub_atomic implies ( C197 . B273 ) = ( ( the_pred_symbol_of ( B273 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B273 ) , ( B273 `2 )) ) )) & (B273 is  Sub_negative implies ( C197 . B273 ) = ( 'not' ( C197 . ( Sub_the_argument_of B273 ) ) )) & (B273 is  Sub_conjunctive implies ( C197 . B273 ) = ( ( C197 . ( Sub_the_left_argument_of B273 ) ) '&' ( C197 . ( Sub_the_right_argument_of B273 ) ) )) & (B273 is  Sub_universal implies ( C197 . B273 ) = ( Quant (B273 , ( C197 . ( Sub_the_scope_of B273 ) )) )))) by L898;
+consider C198 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) such that L930: ( CQC_Sub ( Sub_the_scope_of R26 ) ) = ( C198 . ( Sub_the_scope_of R26 ) ) and L931: (for B274 being (Element of ( QC-Sub-WFF R1 )) holds ((B274 is R1 -Sub_VERUM implies ( C198 . B274 ) = ( VERUM R1 )) & (B274 is  Sub_atomic implies ( C198 . B274 ) = ( ( the_pred_symbol_of ( B274 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B274 ) , ( B274 `2 )) ) )) & (B274 is  Sub_negative implies ( C198 . B274 ) = ( 'not' ( C198 . ( Sub_the_argument_of B274 ) ) )) & (B274 is  Sub_conjunctive implies ( C198 . B274 ) = ( ( C198 . ( Sub_the_left_argument_of B274 ) ) '&' ( C198 . ( Sub_the_right_argument_of B274 ) ) )) & (B274 is  Sub_universal implies ( C198 . B274 ) = ( Quant (B274 , ( C198 . ( Sub_the_scope_of B274 ) )) )))) by L898;
+L932: C197 = C198 by L929 , L931 , L892;
+thus L933: thesis by L932 , L928 , L929 , L930;
+end;
+definition
+let R1 being QC-alphabet;
+func CQC-Sub-WFF R1 -> (Subset of ( QC-Sub-WFF R1 )) equals 
+{ R26 where R26 is (Element of ( QC-Sub-WFF R1 )) : ( R26 `1 ) is (Element of ( CQC-WFF R1 )) };
+coherence
+proof
+set D72 = { R26 where R26 is (Element of ( QC-Sub-WFF R1 )) : ( R26 `1 ) is (Element of ( CQC-WFF R1 )) };
+L934: D72 c= ( QC-Sub-WFF R1 )
+proof
+let R2 being set;
+assume L935: R2 in D72;
+L936: (ex R26 being (Element of ( QC-Sub-WFF R1 )) st (R2 = R26 & ( R26 `1 ) is (Element of ( CQC-WFF R1 )))) by L935;
+thus L937: thesis by L936;
+end;
+thus L938: thesis by L934;
+end;
+end;
+registration
+let R1 being QC-alphabet;
+cluster ( CQC-Sub-WFF R1 ) -> non  empty;
+coherence
+proof
+set D73 = the (Element of ( vSUB R1 ));
+reconsider D74 = [ ( VERUM R1 ) , D73 ] as (Element of ( QC-Sub-WFF R1 )) by L299;
+L940: ( D74 `1 ) = ( VERUM R1 ) by MCART_1:7;
+L941: [ ( VERUM R1 ) , D73 ] in ( CQC-Sub-WFF R1 ) by L940;
+thus L942: thesis by L941;
+end;
+end;
+theorem
+L944: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (R26 is R1 -Sub_VERUM implies ( CQC_Sub R26 ) is (Element of ( CQC-WFF R1 )))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+assume L945: R26 is R1 -Sub_VERUM;
+L946: (ex B275 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) st (( CQC_Sub R26 ) = ( B275 . R26 ) & (for B276 being (Element of ( QC-Sub-WFF R1 )) holds ((B276 is R1 -Sub_VERUM implies ( B275 . B276 ) = ( VERUM R1 )) & (B276 is  Sub_atomic implies ( B275 . B276 ) = ( ( the_pred_symbol_of ( B276 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B276 ) , ( B276 `2 )) ) )) & (B276 is  Sub_negative implies ( B275 . B276 ) = ( 'not' ( B275 . ( Sub_the_argument_of B276 ) ) )) & (B276 is  Sub_conjunctive implies ( B275 . B276 ) = ( ( B275 . ( Sub_the_left_argument_of B276 ) ) '&' ( B275 . ( Sub_the_right_argument_of B276 ) ) )) & (B276 is  Sub_universal implies ( B275 . B276 ) = ( Quant (B276 , ( B275 . ( Sub_the_scope_of B276 ) )) )))))) by L898;
+thus L947: thesis by L946 , L945;
+end;
+L948: (for R1 being QC-alphabet holds (for R10 being (Element of ( NAT )) holds (for R16 being (QC-pred_symbol of R10 , R1) holds (for R17 being (CQC-variable_list of R10 , R1) holds ( the_pred_symbol_of ( R16 ! R17 ) ) = R16))))
+proof
+let R1 being QC-alphabet;
+let R10 being (Element of ( NAT ));
+let R16 being (QC-pred_symbol of R10 , R1);
+let R17 being (CQC-variable_list of R10 , R1);
+L949: ( ( <* R16 *> ^ R17 ) . 1 ) = R16 by FINSEQ_1:41;
+L950: ( R16 ! R17 ) is  atomic by QC_LANG1:def 18;
+consider C199 being (Element of ( NAT )), C200 being (QC-variable_list of C199 , R1), C201 being (QC-pred_symbol of C199 , R1) such that L951: (( the_pred_symbol_of ( R16 ! R17 ) ) = C201 & ( R16 ! R17 ) = ( C201 ! C200 )) by L950 , QC_LANG1:def 22;
+L952: (( R16 ! R17 ) = ( <* R16 *> ^ R17 ) & ( C201 ! C200 ) = ( <* C201 *> ^ C200 )) by QC_LANG1:8;
+thus L953: thesis by L952 , L951 , L949 , FINSEQ_1:41;
+end;
+theorem
+L954: (for R1 being QC-alphabet holds (for R10 being (Element of ( NAT )) holds (for B277 being FinSequence holds (B277 is (CQC-variable_list of R10 , R1) iff (B277 is (FinSequence of ( bound_QC-variables R1 )) & ( len B277 ) = R10)))))
+proof
+let R1 being QC-alphabet;
+let R10 being (Element of ( NAT ));
+let C202 being FinSequence;
+thus L955: (C202 is (CQC-variable_list of R10 , R1) implies (C202 is (FinSequence of ( bound_QC-variables R1 )) & ( len C202 ) = R10))
+proof
+assume L956: C202 is (CQC-variable_list of R10 , R1);
+L957: ( rng C202 ) c= ( bound_QC-variables R1 ) by L956 , RELAT_1:def 19;
+thus L958: C202 is (FinSequence of ( bound_QC-variables R1 )) by L957 , FINSEQ_1:def 4;
+thus L959: thesis by L956 , CARD_1:def 7;
+end;
+
+thus L960: ((C202 is (FinSequence of ( bound_QC-variables R1 )) & ( len C202 ) = R10) implies C202 is (CQC-variable_list of R10 , R1))
+proof
+assume that
+L961: C202 is (FinSequence of ( bound_QC-variables R1 ))
+and
+L962: ( len C202 ) = R10;
+L963: ( rng C202 ) c= ( bound_QC-variables R1 ) by L961 , FINSEQ_1:def 4;
+L964: ( rng C202 ) c= ( QC-variables R1 ) by L963 , XBOOLE_1:1;
+thus L965: thesis by L964 , L961 , L962 , CARD_1:def 7 , FINSEQ_1:def 4;
+end;
+
+end;
+theorem
+L961: (for R1 being QC-alphabet holds (for R10 being (Element of ( NAT )) holds (for R16 being (QC-pred_symbol of R10 , R1) holds (for R17 being (CQC-variable_list of R10 , R1) holds (for R25 being (Element of ( vSUB R1 )) holds ( CQC_Sub ( Sub_P (R16 , R17 , R25) ) ) is (Element of ( CQC-WFF R1 )))))))
+proof
+let R1 being QC-alphabet;
+let R10 being (Element of ( NAT ));
+let R16 being (QC-pred_symbol of R10 , R1);
+let R17 being (CQC-variable_list of R10 , R1);
+let R25 being (Element of ( vSUB R1 ));
+set D75 = ( Sub_the_arguments_of ( Sub_P (R16 , R17 , R25) ) );
+L962: D75 is (CQC-variable_list of R10 , R1) by L531;
+reconsider D76 = D75 as (FinSequence of ( bound_QC-variables R1 )) by L962 , L954;
+reconsider D77 = ( CQC_Subst (D76 , ( ( Sub_P (R16 , R17 , R25) ) `2 )) ) as (FinSequence of ( bound_QC-variables R1 ));
+L963: ( len D76 ) = R10 by L962 , CARD_1:def 7;
+L964: ( len D77 ) = R10 by L963 , L10;
+L965: ( Sub_P (R16 , R17 , R25) ) = [ ( R16 ! R17 ) , R25 ] by L400;
+L966: ( ( Sub_P (R16 , R17 , R25) ) `1 ) = ( R16 ! R17 ) by L965 , MCART_1:7;
+reconsider D78 = ( the_pred_symbol_of ( ( Sub_P (R16 , R17 , R25) ) `1 ) ) as (QC-pred_symbol of R10 , R1) by L966 , L948;
+reconsider D79 = D77 as (CQC-variable_list of R10 , R1) by L964 , L954;
+L967: (ex B278 being (Function of ( QC-Sub-WFF R1 ) , ( QC-WFF R1 )) st (( CQC_Sub ( Sub_P (R16 , R17 , R25) ) ) = ( B278 . ( Sub_P (R16 , R17 , R25) ) ) & (for B279 being (Element of ( QC-Sub-WFF R1 )) holds ((B279 is R1 -Sub_VERUM implies ( B278 . B279 ) = ( VERUM R1 )) & (B279 is  Sub_atomic implies ( B278 . B279 ) = ( ( the_pred_symbol_of ( B279 `1 ) ) ! ( CQC_Subst (( Sub_the_arguments_of B279 ) , ( B279 `2 )) ) )) & (B279 is  Sub_negative implies ( B278 . B279 ) = ( 'not' ( B278 . ( Sub_the_argument_of B279 ) ) )) & (B279 is  Sub_conjunctive implies ( B278 . B279 ) = ( ( B278 . ( Sub_the_left_argument_of B279 ) ) '&' ( B278 . ( Sub_the_right_argument_of B279 ) ) )) & (B279 is  Sub_universal implies ( B278 . B279 ) = ( Quant (B279 , ( B278 . ( Sub_the_scope_of B279 ) )) )))))) by L898;
+L968: ( CQC_Sub ( Sub_P (R16 , R17 , R25) ) ) = ( D78 ! D79 ) by L967;
+thus L969: thesis by L968;
+end;
+theorem
+L970: (for R1 being QC-alphabet holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (( CQC_Sub R26 ) is (Element of ( CQC-WFF R1 )) implies ( CQC_Sub ( Sub_not R26 ) ) is (Element of ( CQC-WFF R1 )))))
+proof
+let R1 being QC-alphabet;
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+set D80 = ( Sub_not R26 );
+assume L971: ( CQC_Sub R26 ) is (Element of ( CQC-WFF R1 ));
+L972: ( CQC_Sub D80 ) = ( 'not' ( CQC_Sub R26 ) ) by L910;
+thus L973: thesis by L972 , L971 , CQC_LANG:8;
+end;
+theorem
+L974: (for R1 being QC-alphabet holds (for R28 being (Element of ( QC-Sub-WFF R1 )) holds (for R29 being (Element of ( QC-Sub-WFF R1 )) holds ((( R28 `2 ) = ( R29 `2 ) & ( CQC_Sub R28 ) is (Element of ( CQC-WFF R1 )) & ( CQC_Sub R29 ) is (Element of ( CQC-WFF R1 ))) implies ( CQC_Sub ( Sub_& (R28 , R29) ) ) is (Element of ( CQC-WFF R1 ))))))
+proof
+let R1 being QC-alphabet;
+let R28 being (Element of ( QC-Sub-WFF R1 ));
+let R29 being (Element of ( QC-Sub-WFF R1 ));
+assume L975: (( R28 `2 ) = ( R29 `2 ) & ( CQC_Sub R28 ) is (Element of ( CQC-WFF R1 )) & ( CQC_Sub R29 ) is (Element of ( CQC-WFF R1 )));
+L976: (( R28 `2 ) = ( R29 `2 ) implies ( CQC_Sub ( Sub_& (R28 , R29) ) ) = ( ( CQC_Sub R28 ) '&' ( CQC_Sub R29 ) )) by L923;
+thus L977: thesis by L976 , L975 , CQC_LANG:9;
+end;
+theorem
+L978: (for R1 being QC-alphabet holds (for R12 being (bound_QC-variable of R1) holds (for R26 being (Element of ( QC-Sub-WFF R1 )) holds (for R37 being (second_Q_comp of [ R26 , R12 ]) holds ((( CQC_Sub R26 ) is (Element of ( CQC-WFF R1 )) & [ R26 , R12 ] is  quantifiable) implies ( CQC_Sub ( Sub_All ([ R26 , R12 ] , R37) ) ) is (Element of ( CQC-WFF R1 )))))))
+proof
+let R1 being QC-alphabet;
+let R12 being (bound_QC-variable of R1);
+let R26 being (Element of ( QC-Sub-WFF R1 ));
+let R37 being (second_Q_comp of [ R26 , R12 ]);
+set D81 = ( Sub_All ([ R26 , R12 ] , R37) );
+assume that
+L979: ( CQC_Sub R26 ) is (Element of ( CQC-WFF R1 ))
+and
+L980: [ R26 , R12 ] is  quantifiable;
+L981: ( Sub_the_scope_of D81 ) = ( [ R26 , R12 ] `1 ) by L980 , L669;
+L982: ( Quant (D81 , ( CQC_Sub ( Sub_the_scope_of D81 ) )) ) = ( All (( S_Bound ( @ D81 ) ) , ( CQC_Sub R26 )) ) by L981;
+L983: ( Quant (D81 , ( CQC_Sub ( Sub_the_scope_of D81 ) )) ) is (Element of ( CQC-WFF R1 )) by L982 , L979 , CQC_LANG:13;
+thus L984: thesis by L983 , L980 , L628 , L927;
+end;
+scheme SubCQCInd { F19() -> QC-alphabet , P3[set] } : (for B280 being (Element of ( CQC-Sub-WFF F19() )) holds P3[ B280 ])
+provided
+L985: (for B281 , B282 being (Element of ( CQC-Sub-WFF F19() )) holds (for B283 being (bound_QC-variable of F19()) holds (for B284 being (second_Q_comp of [ B281 , B283 ]) holds (for B285 being (Element of ( NAT )) holds (for B286 being (CQC-variable_list of B285 , F19()) holds (for B287 being (QC-pred_symbol of B285 , F19()) holds (for B288 being (Element of ( vSUB F19() )) holds (P3[ ( Sub_P (B287 , B286 , B288) ) ] & (B281 is F19() -Sub_VERUM implies P3[ B281 ]) & (P3[ B281 ] implies P3[ ( Sub_not B281 ) ]) & ((( B281 `2 ) = ( B282 `2 ) & P3[ B281 ] & P3[ B282 ]) implies P3[ ( Sub_& (B281 , B282) ) ]) & (([ B281 , B283 ] is  quantifiable & P3[ B281 ]) implies P3[ ( Sub_All ([ B281 , B283 ] , B284) ) ])))))))))
+proof
+defpred S17[ (Element of ( QC-Sub-WFF F19() )) ] means ($1 is (Element of ( CQC-Sub-WFF F19() )) implies P3[ $1 ]);
+L986: (for B289 being (Element of ( QC-Sub-WFF F19() )) holds (S17[ B289 ] implies S17[ ( Sub_not B289 ) ]))
+proof
+let C203 being (Element of ( QC-Sub-WFF F19() ));
+assume L987: S17[ C203 ];
+assume L988: ( Sub_not C203 ) is (Element of ( CQC-Sub-WFF F19() ));
+L989: ( Sub_not C203 ) in ( CQC-Sub-WFF F19() ) by L988;
+consider C204 being (Element of ( QC-Sub-WFF F19() )) such that L990: ( Sub_not C203 ) = C204 and L991: ( C204 `1 ) is (Element of ( CQC-WFF F19() )) by L989;
+L992: ( C204 `1 ) = ( 'not' ( C203 `1 ) ) by L990 , MCART_1:7;
+L993: ( C203 `1 ) is (Element of ( CQC-WFF F19() )) by L992 , L991 , CQC_LANG:8;
+L994: C203 in ( CQC-Sub-WFF F19() ) by L993;
+thus L995: thesis by L994 , L985 , L987;
+end;
+L996: (for B290 being (Element of ( NAT )) holds (for B291 being (QC-pred_symbol of B290 , F19()) holds (for B292 being (QC-variable_list of B290 , F19()) holds (for B293 being (Element of ( vSUB F19() )) holds S17[ ( Sub_P (B291 , B292 , B293) ) ]))))
+proof
+let C205 being (Element of ( NAT ));
+let C206 being (QC-pred_symbol of C205 , F19());
+let C207 being (QC-variable_list of C205 , F19());
+let C208 being (Element of ( vSUB F19() ));
+assume L997: ( Sub_P (C206 , C207 , C208) ) is (Element of ( CQC-Sub-WFF F19() ));
+L998: ( Sub_P (C206 , C207 , C208) ) in ( CQC-Sub-WFF F19() ) by L997;
+L999: (ex B294 being (Element of ( QC-Sub-WFF F19() )) st (( Sub_P (C206 , C207 , C208) ) = B294 & ( B294 `1 ) is (Element of ( CQC-WFF F19() )))) by L998;
+L1000: ( Sub_P (C206 , C207 , C208) ) = [ ( C206 ! C207 ) , C208 ] by L400;
+L1001: ( C206 ! C207 ) is (Element of ( CQC-WFF F19() )) by L1000 , L999 , MCART_1:7;
+L1002: { ( C207 . R9 ) where R9 is (Element of ( NAT )) : (1 <= R9 & R9 <= ( len C207 ) & ( C207 . R9 ) in ( fixed_QC-variables F19() )) } = ( {} ) by L1001 , CQC_LANG:7;
+L1003: { ( C207 . R8 ) where R8 is (Element of ( NAT )) : (1 <= R8 & R8 <= ( len C207 ) & ( C207 . R8 ) in ( free_QC-variables F19() )) } = ( {} ) by L1001 , CQC_LANG:7;
+L1004: C207 is (CQC-variable_list of C205 , F19()) by L1003 , L1002 , CQC_LANG:5;
+thus L1005: thesis by L1004 , L985;
+end;
+L1006: (for B295 , B296 being (Element of ( QC-Sub-WFF F19() )) holds ((( B295 `2 ) = ( B296 `2 ) & S17[ B295 ] & S17[ B296 ]) implies S17[ ( Sub_& (B295 , B296) ) ]))
+proof
+let C209 , C210 being (Element of ( QC-Sub-WFF F19() ));
+assume that
+L1007: ( C209 `2 ) = ( C210 `2 )
+and
+L1008: (S17[ C209 ] & S17[ C210 ]);
+assume L1009: ( Sub_& (C209 , C210) ) is (Element of ( CQC-Sub-WFF F19() ));
+L1010: ( Sub_& (C209 , C210) ) in ( CQC-Sub-WFF F19() ) by L1009;
+consider C211 being (Element of ( QC-Sub-WFF F19() )) such that L1011: ( Sub_& (C209 , C210) ) = C211 and L1012: ( C211 `1 ) is (Element of ( CQC-WFF F19() )) by L1010;
+L1013: ( Sub_& (C209 , C210) ) = [ ( ( C209 `1 ) '&' ( C210 `1 ) ) , ( C209 `2 ) ] by L1007 , L419;
+L1014: ( C211 `1 ) = ( ( C209 `1 ) '&' ( C210 `1 ) ) by L1013 , L1011 , MCART_1:7;
+L1015: ( C210 `1 ) is (Element of ( CQC-WFF F19() )) by L1014 , L1012 , CQC_LANG:9;
+L1016: C210 in ( CQC-Sub-WFF F19() ) by L1015;
+L1017: ( C209 `1 ) is (Element of ( CQC-WFF F19() )) by L1012 , L1014 , CQC_LANG:9;
+L1018: C209 in ( CQC-Sub-WFF F19() ) by L1017;
+thus L1019: thesis by L1018 , L985 , L1007 , L1008 , L1016;
+end;
+L1020: (for B297 being (bound_QC-variable of F19()) holds (for B298 being (Element of ( QC-Sub-WFF F19() )) holds (for B299 being (second_Q_comp of [ B298 , B297 ]) holds (([ B298 , B297 ] is  quantifiable & S17[ B298 ]) implies S17[ ( Sub_All ([ B298 , B297 ] , B299) ) ]))))
+proof
+let C212 being (bound_QC-variable of F19());
+let C213 being (Element of ( QC-Sub-WFF F19() ));
+let C214 being (second_Q_comp of [ C213 , C212 ]);
+assume that
+L1021: [ C213 , C212 ] is  quantifiable
+and
+L1022: S17[ C213 ];
+assume L1023: ( Sub_All ([ C213 , C212 ] , C214) ) is (Element of ( CQC-Sub-WFF F19() ));
+L1024: ( Sub_All ([ C213 , C212 ] , C214) ) in ( CQC-Sub-WFF F19() ) by L1023;
+consider C215 being (Element of ( QC-Sub-WFF F19() )) such that L1025: ( Sub_All ([ C213 , C212 ] , C214) ) = C215 and L1026: ( C215 `1 ) is (Element of ( CQC-WFF F19() )) by L1024;
+L1027: ( Sub_All ([ C213 , C212 ] , C214) ) = [ ( All (( [ C213 , C212 ] `2 ) , ( ( [ C213 , C212 ] `1 ) `1 )) ) , C214 ] by L1021 , L430;
+L1028: ( C215 `1 ) = ( All (( [ C213 , C212 ] `2 ) , ( ( [ C213 , C212 ] `1 ) `1 )) ) by L1027 , L1025 , MCART_1:7;
+L1029: ( ( [ C213 , C212 ] `1 ) `1 ) is (Element of ( CQC-WFF F19() )) by L1028 , L1026 , CQC_LANG:13;
+L1030: C213 in ( CQC-Sub-WFF F19() ) by L1029;
+thus L1031: thesis by L1030 , L985 , L1021 , L1022;
+end;
+L1032: (for B300 being (Element of ( QC-Sub-WFF F19() )) holds (B300 is F19() -Sub_VERUM implies S17[ B300 ])) by L985;
+L1033: (for B301 being (Element of ( QC-Sub-WFF F19() )) holds S17[ B301 ]) from SubQCInd(L996 , L1032 , L986 , L1006 , L1020);
+thus L1034: thesis by L1033;
+end;
+definition
+let R1 being QC-alphabet;
+let R38 being (Element of ( CQC-Sub-WFF R1 ));
+redefine func CQC_Sub R38 -> (Element of ( CQC-WFF R1 ));
+
+coherence
+proof
+defpred S18[ (Element of ( QC-Sub-WFF R1 )) ] means ( CQC_Sub $1 ) is (Element of ( CQC-WFF R1 ));
+L1035: (for B302 , B303 being (Element of ( CQC-Sub-WFF R1 )) holds (for B304 being (bound_QC-variable of R1) holds (for B305 being (second_Q_comp of [ B302 , B304 ]) holds (for B306 being (Element of ( NAT )) holds (for B307 being (CQC-variable_list of B306 , R1) holds (for B308 being (QC-pred_symbol of B306 , R1) holds (for B309 being (Element of ( vSUB R1 )) holds (S18[ ( Sub_P (B308 , B307 , B309) ) ] & (B302 is R1 -Sub_VERUM implies S18[ B302 ]) & (S18[ B302 ] implies S18[ ( Sub_not B302 ) ]) & ((( B302 `2 ) = ( B303 `2 ) & S18[ B302 ] & S18[ B303 ]) implies S18[ ( Sub_& (B302 , B303) ) ]) & (([ B302 , B304 ] is  quantifiable & S18[ B302 ]) implies S18[ ( Sub_All ([ B302 , B304 ] , B305) ) ]))))))))) by L944 , L961 , L970 , L974 , L978;
+L1036: (for R38 being (Element of ( CQC-Sub-WFF R1 )) holds S18[ R38 ]) from SubCQCInd(L1035);
+thus L1037: thesis by L1036;
+end;
+end;
+theorem
+L1039: (for R1 being QC-alphabet holds (for R23 being (CQC_Substitution of R1) holds ( rng ( @ R23 ) ) c= ( bound_QC-variables R1 )));

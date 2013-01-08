@@ -1,0 +1,2627 @@
+:: A Theory of Boolean Valued Functions and Partitions
+::  by Shunichi Kobayashi and Kui Jia
+::
+:: Received October 22, 1998
+:: Copyright (c) 1998-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, XBOOLEAN, XXREAL_0, CARD_1, XBOOLE_0, SUBSET_1, FUNCT_2,
+      MARGREL1, FUNCT_1, RELAT_1, TARSKI, FUNCOP_1, PARTIT1, EQREL_1, ZFMISC_1,
+      SETFAM_1, BVFUNC_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, XBOOLEAN, MARGREL1, RELAT_1,
+      FUNCT_1, FUNCT_2, SETFAM_1, EQREL_1, NUMBERS, PARTIT1, XXREAL_0;
+ constructors SETFAM_1, XXREAL_0, XREAL_0, PARTIT1, BINARITH, RELSET_1;
+ registrations SUBSET_1, XREAL_0, XBOOLEAN, EQREL_1, MARGREL1, FUNCT_1,
+      FUNCT_2, RELSET_1;
+ requirements REAL, SUBSET, BOOLE, ARITHM;
+ definitions TARSKI, XBOOLE_0, MARGREL1, XBOOLEAN, FUNCT_2;
+ theorems TARSKI, FUNCT_1, FUNCT_2, MARGREL1, EQREL_1, SETFAM_1, PARTIT1,
+      XBOOLE_0, FUNCOP_1, XBOOLEAN, RELAT_1, PARTFUN1;
+ schemes DOMAIN_1, FUNCT_2, FUNCT_1;
+
+begin
+definition
+let C1 , C2 being  boolean set;
+redefine pred C1 <= C2
+means
+:L1: ( C1 => C2 ) = ( TRUE )
+;compatibility
+proof
+L2: (C2 = ( 0 ) or C2 = 1) by XBOOLEAN:def 3;
+L3: (C1 = ( 0 ) or C1 = 1) by XBOOLEAN:def 3;
+thus L4: thesis by L3 , L2;
+end;
+end;
+begin
+scheme BVFUniq1 { F1() -> non  empty set , F2(set) -> set } : (for B1 , B2 being (Function of F1() , ( BOOLEAN )) holds (((for B3 being (Element of F1()) holds ( B1 . B3 ) = F2(B3)) & (for B4 being (Element of F1()) holds ( B2 . B4 ) = F2(B4))) implies B1 = B2))
+proof
+let C3 , C4 being (Function of F1() , ( BOOLEAN ));
+assume that
+L6: (for B5 being (Element of F1()) holds ( C3 . B5 ) = F2(B5))
+and
+L7: (for B6 being (Element of F1()) holds ( C4 . B6 ) = F2(B6));
+let C5 being (Element of F1());
+thus L8: ( C4 . C5 ) = F2(C5) by L7
+.= ( C3 . C5 ) by L6;
+end;
+definition
+let R1 being non  empty set;
+let C6 being (Function of R1 , ( BOOLEAN ));
+redefine func 'not' C6 -> (Function of R1 , ( BOOLEAN ));
+
+coherence
+proof
+reconsider D1 = C6 as (Function of R1 , ( BOOLEAN ));
+L9: ( 'not' D1 ) is (Function of R1 , ( BOOLEAN ));
+thus L10: thesis by L9;
+end;
+let C7 being (Function of R1 , ( BOOLEAN ));
+redefine func C6 '&' C7 -> (Function of R1 , ( BOOLEAN ));
+
+coherence
+proof
+reconsider D2 = C6 , D3 = C7 as (Function of R1 , ( BOOLEAN ));
+L11: ( D2 '&' D3 ) is (Function of R1 , ( BOOLEAN ));
+thus L12: thesis by L11;
+end;
+end;
+definition
+let C8 , C9 being  boolean-valued Function;
+func C8 'or' C9 ->  boolean-valued Function means 
+:L14: (( dom it ) = ( ( dom C8 ) /\ ( dom C9 ) ) & (for B7 being set holds (B7 in ( dom it ) implies ( it . B7 ) = ( ( C8 . B7 ) 'or' ( C9 . B7 ) ))));
+existence
+proof
+deffunc H1(set) = ( ( C8 . $1 ) 'or' ( C9 . $1 ) );
+consider C10 being Function such that L15: (( dom C10 ) = ( ( dom C8 ) /\ ( dom C9 ) ) & (for B8 being set holds (B8 in ( ( dom C8 ) /\ ( dom C9 ) ) implies ( C10 . B8 ) = H1(B8)))) from FUNCT_1:sch 3;
+L16: C10 is  boolean-valued
+proof
+let C11 being set;
+assume L17: C11 in ( rng C10 );
+consider C12 being set such that L18: (C12 in ( dom C10 ) & C11 = ( C10 . C12 )) by L17 , FUNCT_1:def 3;
+L19: C11 = ( ( C8 . C12 ) 'or' ( C9 . C12 ) ) by L15 , L18;
+L20: (C11 = ( FALSE ) or C11 = ( TRUE )) by L19 , XBOOLEAN:def 3;
+thus L21: thesis by L20;
+end;
+thus L22: thesis by L16 , L15;
+end;
+uniqueness
+proof
+let C13 , C14 being  boolean-valued Function;
+assume that
+L23: ( dom C13 ) = ( ( dom C8 ) /\ ( dom C9 ) )
+and
+L24: (for B9 being set holds (B9 in ( dom C13 ) implies ( C13 . B9 ) = ( ( C8 . B9 ) 'or' ( C9 . B9 ) )))
+and
+L25: ( dom C14 ) = ( ( dom C8 ) /\ ( dom C9 ) )
+and
+L26: (for B10 being set holds (B10 in ( dom C14 ) implies ( C14 . B10 ) = ( ( C8 . B10 ) 'or' ( C9 . B10 ) )));
+L27: (for B11 being set holds (B11 in ( dom C13 ) implies ( C13 . B11 ) = ( C14 . B11 )))
+proof
+let C15 being set;
+assume L28: C15 in ( dom C13 );
+L29: ( C13 . C15 ) = ( ( C8 . C15 ) 'or' ( C9 . C15 ) ) by L28 , L24;
+thus L30: thesis by L29 , L23 , L25 , L26 , L28;
+end;
+thus L31: thesis by L27 , L23 , L25 , FUNCT_1:2;
+end;
+commutativity
+;
+idempotence
+;
+func C8 'xor' C9 -> Function means 
+:L32: (( dom it ) = ( ( dom C8 ) /\ ( dom C9 ) ) & (for B12 being set holds (B12 in ( dom it ) implies ( it . B12 ) = ( ( C8 . B12 ) 'xor' ( C9 . B12 ) ))));
+existence
+proof
+deffunc H2(set) = ( ( C8 . $1 ) 'xor' ( C9 . $1 ) );
+consider C16 being Function such that L33: (( dom C16 ) = ( ( dom C8 ) /\ ( dom C9 ) ) & (for B13 being set holds (B13 in ( ( dom C8 ) /\ ( dom C9 ) ) implies ( C16 . B13 ) = H2(B13)))) from FUNCT_1:sch 3;
+take C16;
+thus L34: thesis by L33;
+end;
+uniqueness
+proof
+let C17 , C18 being Function;
+assume that
+L35: ( dom C17 ) = ( ( dom C8 ) /\ ( dom C9 ) )
+and
+L36: (for B14 being set holds (B14 in ( dom C17 ) implies ( C17 . B14 ) = ( ( C8 . B14 ) 'xor' ( C9 . B14 ) )))
+and
+L37: ( dom C18 ) = ( ( dom C8 ) /\ ( dom C9 ) )
+and
+L38: (for B15 being set holds (B15 in ( dom C18 ) implies ( C18 . B15 ) = ( ( C8 . B15 ) 'xor' ( C9 . B15 ) )));
+L39: (for B16 being set holds (B16 in ( dom C17 ) implies ( C17 . B16 ) = ( C18 . B16 )))
+proof
+let C19 being set;
+assume L40: C19 in ( dom C17 );
+L41: ( C17 . C19 ) = ( ( C8 . C19 ) 'xor' ( C9 . C19 ) ) by L40 , L36;
+thus L42: thesis by L41 , L35 , L37 , L38 , L40;
+end;
+thus L43: thesis by L39 , L35 , L37 , FUNCT_1:2;
+end;
+commutativity
+;
+end;
+registration
+let C20 , C21 being  boolean-valued Function;
+cluster ( C20 'xor' C21 ) ->  boolean-valued;
+coherence
+proof
+let C22 being set;
+assume L45: C22 in ( rng ( C20 'xor' C21 ) );
+consider C23 being set such that L46: (C23 in ( dom ( C20 'xor' C21 ) ) & C22 = ( ( C20 'xor' C21 ) . C23 )) by L45 , FUNCT_1:def 3;
+L47: C22 = ( ( C20 . C23 ) 'xor' ( C21 . C23 ) ) by L46 , L32;
+L48: (C22 = ( FALSE ) or C22 = ( TRUE )) by L47 , XBOOLEAN:def 3;
+thus L49: thesis by L48;
+end;
+end;
+definition
+let C24 being non  empty set;
+let C25 , C26 being (Function of C24 , ( BOOLEAN ));
+redefine func C25 'or' C26 -> (Function of C24 , ( BOOLEAN )) means 
+:L51: (for B17 being (Element of C24) holds ( it . B17 ) = ( ( C25 . B17 ) 'or' ( C26 . B17 ) ));
+coherence
+proof
+L52: (( dom C25 ) = C24 & ( dom C26 ) = C24) by PARTFUN1:def 2;
+L53: ( dom ( C25 'or' C26 ) ) = ( C24 /\ C24 ) by L52 , L14
+.= C24;
+L54: ( rng ( C25 'or' C26 ) ) c= ( BOOLEAN ) by MARGREL1:def 16;
+thus L55: thesis by L54 , L53 , FUNCT_2:2;
+end;
+compatibility
+proof
+let C27 being (Function of C24 , ( BOOLEAN ));
+L56: ( dom C27 ) = C24 by FUNCT_2:def 1;
+thus L57:now
+assume L58: C27 = ( C25 'or' C26 );
+let C28 being (Element of C24);
+L59: (( dom C25 ) = C24 & ( dom C26 ) = C24) by FUNCT_2:def 1;
+L60: ( dom ( C25 'or' C26 ) ) = ( C24 /\ C24 ) by L59 , L14
+.= C24;
+thus L61: ( C27 . C28 ) = ( ( C25 . C28 ) 'or' ( C26 . C28 ) ) by L60 , L58 , L14;
+end;
+L62: ( dom C26 ) = C24 by FUNCT_2:def 1;
+L63: ( dom C27 ) = ( C24 /\ C24 ) by FUNCT_2:def 1
+.= ( ( dom C25 ) /\ ( dom C26 ) ) by L62 , FUNCT_2:def 1;
+assume L64: (for B18 being (Element of C24) holds ( C27 . B18 ) = ( ( C25 . B18 ) 'or' ( C26 . B18 ) ));
+L65: (for B19 being set holds (B19 in ( dom C27 ) implies ( C27 . B19 ) = ( ( C25 . B19 ) 'or' ( C26 . B19 ) ))) by L64 , L56;
+thus L66: thesis by L65 , L63 , L14;
+end;
+redefine func C25 'xor' C26 -> (Function of C24 , ( BOOLEAN )) means 
+(for B20 being (Element of C24) holds ( it . B20 ) = ( ( C25 . B20 ) 'xor' ( C26 . B20 ) ));
+coherence
+proof
+L67: (( dom C25 ) = C24 & ( dom C26 ) = C24) by PARTFUN1:def 2;
+L68: ( dom ( C25 'xor' C26 ) ) = ( C24 /\ C24 ) by L67 , L32
+.= C24;
+L69: ( rng ( C25 'xor' C26 ) ) c= ( BOOLEAN ) by MARGREL1:def 16;
+thus L70: thesis by L69 , L68 , FUNCT_2:2;
+end;
+compatibility
+proof
+let C29 being (Function of C24 , ( BOOLEAN ));
+L71: ( dom C29 ) = C24 by FUNCT_2:def 1;
+thus L72:now
+assume L73: C29 = ( C25 'xor' C26 );
+let C30 being (Element of C24);
+L74: (( dom C25 ) = C24 & ( dom C26 ) = C24) by FUNCT_2:def 1;
+L75: ( dom ( C25 'xor' C26 ) ) = ( C24 /\ C24 ) by L74 , L32
+.= C24;
+thus L76: ( C29 . C30 ) = ( ( C25 . C30 ) 'xor' ( C26 . C30 ) ) by L75 , L73 , L32;
+end;
+L77: ( dom C26 ) = C24 by FUNCT_2:def 1;
+L78: ( dom C29 ) = ( C24 /\ C24 ) by FUNCT_2:def 1
+.= ( ( dom C25 ) /\ ( dom C26 ) ) by L77 , FUNCT_2:def 1;
+assume L79: (for B21 being (Element of C24) holds ( C29 . B21 ) = ( ( C25 . B21 ) 'xor' ( C26 . B21 ) ));
+L80: (for B22 being set holds (B22 in ( dom C29 ) implies ( C29 . B22 ) = ( ( C25 . B22 ) 'xor' ( C26 . B22 ) ))) by L79 , L71;
+thus L81: thesis by L80 , L78 , L32;
+end;
+end;
+definition
+let C31 , C32 being  boolean-valued Function;
+func C31 'imp' C32 -> Function means 
+:L83: (( dom it ) = ( ( dom C31 ) /\ ( dom C32 ) ) & (for B23 being set holds (B23 in ( dom it ) implies ( it . B23 ) = ( ( C31 . B23 ) => ( C32 . B23 ) ))));
+existence
+proof
+deffunc H3(set) = ( ( C31 . $1 ) => ( C32 . $1 ) );
+consider C33 being Function such that L84: (( dom C33 ) = ( ( dom C31 ) /\ ( dom C32 ) ) & (for B24 being set holds (B24 in ( ( dom C31 ) /\ ( dom C32 ) ) implies ( C33 . B24 ) = H3(B24)))) from FUNCT_1:sch 3;
+take C33;
+thus L85: thesis by L84;
+end;
+uniqueness
+proof
+let C34 , C35 being Function;
+assume that
+L86: ( dom C34 ) = ( ( dom C31 ) /\ ( dom C32 ) )
+and
+L87: (for B25 being set holds (B25 in ( dom C34 ) implies ( C34 . B25 ) = ( ( C31 . B25 ) => ( C32 . B25 ) )))
+and
+L88: ( dom C35 ) = ( ( dom C31 ) /\ ( dom C32 ) )
+and
+L89: (for B26 being set holds (B26 in ( dom C35 ) implies ( C35 . B26 ) = ( ( C31 . B26 ) => ( C32 . B26 ) )));
+L90: (for B27 being set holds (B27 in ( dom C34 ) implies ( C34 . B27 ) = ( C35 . B27 )))
+proof
+let C36 being set;
+assume L91: C36 in ( dom C34 );
+L92: ( C34 . C36 ) = ( ( C31 . C36 ) => ( C32 . C36 ) ) by L91 , L87;
+thus L93: thesis by L92 , L86 , L88 , L89 , L91;
+end;
+thus L94: thesis by L90 , L86 , L88 , FUNCT_1:2;
+end;
+func C31 'eqv' C32 -> Function means 
+:L95: (( dom it ) = ( ( dom C31 ) /\ ( dom C32 ) ) & (for B28 being set holds (B28 in ( dom it ) implies ( it . B28 ) = ( ( C31 . B28 ) <=> ( C32 . B28 ) ))));
+existence
+proof
+deffunc H4(set) = ( ( C31 . $1 ) <=> ( C32 . $1 ) );
+consider C37 being Function such that L96: (( dom C37 ) = ( ( dom C31 ) /\ ( dom C32 ) ) & (for B29 being set holds (B29 in ( ( dom C31 ) /\ ( dom C32 ) ) implies ( C37 . B29 ) = H4(B29)))) from FUNCT_1:sch 3;
+take C37;
+thus L97: thesis by L96;
+end;
+uniqueness
+proof
+let C38 , C39 being Function;
+assume that
+L98: ( dom C38 ) = ( ( dom C31 ) /\ ( dom C32 ) )
+and
+L99: (for B30 being set holds (B30 in ( dom C38 ) implies ( C38 . B30 ) = ( ( C31 . B30 ) <=> ( C32 . B30 ) )))
+and
+L100: ( dom C39 ) = ( ( dom C31 ) /\ ( dom C32 ) )
+and
+L101: (for B31 being set holds (B31 in ( dom C39 ) implies ( C39 . B31 ) = ( ( C31 . B31 ) <=> ( C32 . B31 ) )));
+L102: (for B32 being set holds (B32 in ( dom C38 ) implies ( C38 . B32 ) = ( C39 . B32 )))
+proof
+let C40 being set;
+assume L103: C40 in ( dom C38 );
+L104: ( C38 . C40 ) = ( ( C31 . C40 ) <=> ( C32 . C40 ) ) by L103 , L99;
+thus L105: thesis by L104 , L98 , L100 , L101 , L103;
+end;
+thus L106: thesis by L102 , L98 , L100 , FUNCT_1:2;
+end;
+commutativity
+;
+end;
+registration
+let C41 , C42 being  boolean-valued Function;
+cluster ( C41 'imp' C42 ) ->  boolean-valued;
+coherence
+proof
+let C43 being set;
+assume L108: C43 in ( rng ( C41 'imp' C42 ) );
+consider C44 being set such that L109: (C44 in ( dom ( C41 'imp' C42 ) ) & C43 = ( ( C41 'imp' C42 ) . C44 )) by L108 , FUNCT_1:def 3;
+L110: C43 = ( ( C41 . C44 ) => ( C42 . C44 ) ) by L109 , L83
+.= ( ( 'not' ( C41 . C44 ) ) 'or' ( C42 . C44 ) );
+L111: (C43 = ( FALSE ) or C43 = ( TRUE )) by L110 , XBOOLEAN:def 3;
+thus L112: thesis by L111;
+end;
+cluster ( C41 'eqv' C42 ) ->  boolean-valued;
+coherence
+proof
+let C45 being set;
+assume L113: C45 in ( rng ( C41 'eqv' C42 ) );
+consider C46 being set such that L114: (C46 in ( dom ( C41 'eqv' C42 ) ) & C45 = ( ( C41 'eqv' C42 ) . C46 )) by L113 , FUNCT_1:def 3;
+L115: C45 = ( 'not' ( ( C41 . C46 ) 'xor' ( C42 . C46 ) ) ) by L114 , L95;
+L116: (C45 = ( FALSE ) or C45 = ( TRUE )) by L115 , XBOOLEAN:def 3;
+thus L117: thesis by L116;
+end;
+end;
+definition
+let C47 being non  empty set;
+let C48 , C49 being (Function of C47 , ( BOOLEAN ));
+redefine func C48 'imp' C49 -> (Function of C47 , ( BOOLEAN )) means 
+:L119: (for B33 being (Element of C47) holds ( it . B33 ) = ( ( 'not' ( C48 . B33 ) ) 'or' ( C49 . B33 ) ));
+coherence
+proof
+L120: (( dom C48 ) = C47 & ( dom C49 ) = C47) by PARTFUN1:def 2;
+L121: ( dom ( C48 'imp' C49 ) ) = ( C47 /\ C47 ) by L120 , L83
+.= C47;
+L122: ( rng ( C48 'imp' C49 ) ) c= ( BOOLEAN ) by MARGREL1:def 16;
+thus L123: thesis by L122 , L121 , FUNCT_2:2;
+end;
+compatibility
+proof
+let C50 being (Function of C47 , ( BOOLEAN ));
+L124: ( dom C49 ) = C47 by FUNCT_2:def 1;
+thus L125:now
+assume L126: C50 = ( C48 'imp' C49 );
+let C51 being (Element of C47);
+L127: (( dom C48 ) = C47 & ( dom C49 ) = C47) by FUNCT_2:def 1;
+L128: ( dom ( C48 'imp' C49 ) ) = ( C47 /\ C47 ) by L127 , L83
+.= C47;
+thus L129: ( C50 . C51 ) = ( ( C48 . C51 ) => ( C49 . C51 ) ) by L128 , L126 , L83
+.= ( ( 'not' ( C48 . C51 ) ) 'or' ( C49 . C51 ) );
+end;
+assume L130: (for B34 being (Element of C47) holds ( C50 . B34 ) = ( ( 'not' ( C48 . B34 ) ) 'or' ( C49 . B34 ) ));
+L131: (for B35 being set holds (B35 in ( dom C50 ) implies ( C50 . B35 ) = ( ( C48 . B35 ) => ( C49 . B35 ) )))
+proof
+let C52 being set;
+assume L132: C52 in ( dom C50 );
+reconsider D4 = C52 as (Element of C47) by L132 , FUNCT_2:def 1;
+L133: ( C50 . D4 ) = ( ( 'not' ( C48 . D4 ) ) 'or' ( C49 . D4 ) ) by L130;
+thus L134: thesis by L133;
+end;
+L135: ( dom C50 ) = ( C47 /\ C47 ) by FUNCT_2:def 1
+.= ( ( dom C48 ) /\ ( dom C49 ) ) by L124 , FUNCT_2:def 1;
+thus L136: thesis by L135 , L131 , L83;
+end;
+redefine func C48 'eqv' C49 -> (Function of C47 , ( BOOLEAN )) means 
+:L137: (for B36 being (Element of C47) holds ( it . B36 ) = ( 'not' ( ( C48 . B36 ) 'xor' ( C49 . B36 ) ) ));
+coherence
+proof
+L138: (( dom C48 ) = C47 & ( dom C49 ) = C47) by PARTFUN1:def 2;
+L139: ( dom ( C48 'eqv' C49 ) ) = ( C47 /\ C47 ) by L138 , L95
+.= C47;
+L140: ( rng ( C48 'eqv' C49 ) ) c= ( BOOLEAN ) by MARGREL1:def 16;
+thus L141: thesis by L140 , L139 , FUNCT_2:2;
+end;
+compatibility
+proof
+let C53 being (Function of C47 , ( BOOLEAN ));
+L142: ( dom C49 ) = C47 by FUNCT_2:def 1;
+thus L143:now
+assume L144: C53 = ( C48 'eqv' C49 );
+let C54 being (Element of C47);
+L145: (( dom C48 ) = C47 & ( dom C49 ) = C47) by FUNCT_2:def 1;
+L146: ( dom ( C48 'eqv' C49 ) ) = ( C47 /\ C47 ) by L145 , L95
+.= C47;
+thus L147: ( C53 . C54 ) = ( 'not' ( ( C48 . C54 ) 'xor' ( C49 . C54 ) ) ) by L146 , L144 , L95;
+end;
+assume L148: (for B37 being (Element of C47) holds ( C53 . B37 ) = ( 'not' ( ( C48 . B37 ) 'xor' ( C49 . B37 ) ) ));
+L149: (for B38 being set holds (B38 in ( dom C53 ) implies ( C53 . B38 ) = ( ( C48 . B38 ) <=> ( C49 . B38 ) )))
+proof
+let C55 being set;
+assume L150: C55 in ( dom C53 );
+reconsider D5 = C55 as (Element of C47) by L150 , FUNCT_2:def 1;
+L151: ( C53 . D5 ) = ( 'not' ( ( C48 . D5 ) 'xor' ( C49 . D5 ) ) ) by L148;
+thus L152: thesis by L151;
+end;
+L153: ( dom C53 ) = ( C47 /\ C47 ) by FUNCT_2:def 1
+.= ( ( dom C48 ) /\ ( dom C49 ) ) by L142 , FUNCT_2:def 1;
+thus L154: thesis by L153 , L149 , L95;
+end;
+end;
+definition
+let R1 being non  empty set;
+func O_el R1 -> (Function of R1 , ( BOOLEAN )) means 
+:L156: (for B39 being (Element of R1) holds ( it . B39 ) = ( FALSE ));
+existence
+proof
+reconsider D6 = ( R1 --> ( FALSE ) ) as (Function of R1 , ( BOOLEAN ));
+reconsider D7 = D6 as (Function of R1 , ( BOOLEAN ));
+take D7;
+let C56 being (Element of R1);
+thus L157: thesis by FUNCOP_1:7;
+end;
+uniqueness
+proof
+deffunc H5(set) = ( FALSE );
+thus L158: (for B40 , B41 being (Function of R1 , ( BOOLEAN )) holds (((for B42 being (Element of R1) holds ( B40 . B42 ) = H5(B42)) & (for B43 being (Element of R1) holds ( B41 . B43 ) = H5(B43))) implies B40 = B41)) from BVFUniq1;
+end;
+end;
+definition
+let R1 being non  empty set;
+func I_el R1 -> (Function of R1 , ( BOOLEAN )) means 
+:L160: (for B44 being (Element of R1) holds ( it . B44 ) = ( TRUE ));
+existence
+proof
+reconsider D8 = ( R1 --> ( TRUE ) ) as (Function of R1 , ( BOOLEAN ));
+reconsider D9 = D8 as (Function of R1 , ( BOOLEAN ));
+take D9;
+let C57 being (Element of R1);
+thus L161: thesis by FUNCOP_1:7;
+end;
+uniqueness
+proof
+deffunc H6(set) = ( TRUE );
+thus L162: (for B45 , B46 being (Function of R1 , ( BOOLEAN )) holds (((for B47 being (Element of R1) holds ( B45 . B47 ) = H6(B47)) & (for B48 being (Element of R1) holds ( B46 . B48 ) = H6(B48))) implies B45 = B46)) from BVFUniq1;
+end;
+end;
+canceled 1;
+theorem
+L164: (for R1 being non  empty set holds (( 'not' ( I_el R1 ) ) = ( O_el R1 ) & ( 'not' ( O_el R1 ) ) = ( I_el R1 )))
+proof
+let R1 being non  empty set;
+L165: (for B49 being (Element of R1) holds ( ( 'not' ( O_el R1 ) ) . B49 ) = ( TRUE ))
+proof
+let C58 being (Element of R1);
+L166: (( ( 'not' ( O_el R1 ) ) . C58 ) = ( 'not' ( ( O_el R1 ) . C58 ) ) & ( ( O_el R1 ) . C58 ) = ( FALSE )) by L156 , MARGREL1:def 19;
+thus L167: thesis by L166;
+end;
+L168: (for B50 being (Element of R1) holds ( ( 'not' ( I_el R1 ) ) . B50 ) = ( FALSE ))
+proof
+let C59 being (Element of R1);
+L169: (( ( 'not' ( I_el R1 ) ) . C59 ) = ( 'not' ( ( I_el R1 ) . C59 ) ) & ( ( I_el R1 ) . C59 ) = ( TRUE )) by L160 , MARGREL1:def 19;
+thus L170: thesis by L169;
+end;
+thus L171: thesis by L168 , L165 , L156 , L160;
+end;
+theorem
+L172: (for R1 being non  empty set holds (for B51 , B52 being (Function of R1 , ( BOOLEAN )) holds ( B51 '&' B51 ) = B51));
+theorem
+L173: (for R1 being non  empty set holds (for B53 , B54 , B55 being (Function of R1 , ( BOOLEAN )) holds ( ( B53 '&' B54 ) '&' B55 ) = ( B53 '&' ( B54 '&' B55 ) )))
+proof
+let R1 being non  empty set;
+let C60 , C61 , C62 being (Function of R1 , ( BOOLEAN ));
+let C63 being (Element of R1);
+thus L174: ( ( ( C60 '&' C61 ) '&' C62 ) . C63 ) = ( ( ( C60 '&' C61 ) . C63 ) '&' ( C62 . C63 ) ) by MARGREL1:def 20
+.= ( ( ( C60 . C63 ) '&' ( C61 . C63 ) ) '&' ( C62 . C63 ) ) by MARGREL1:def 20
+.= ( ( C60 . C63 ) '&' ( ( C61 . C63 ) '&' ( C62 . C63 ) ) )
+.= ( ( C60 . C63 ) '&' ( ( C61 '&' C62 ) . C63 ) ) by MARGREL1:def 20
+.= ( ( C60 '&' ( C61 '&' C62 ) ) . C63 ) by MARGREL1:def 20;
+end;
+theorem
+L175: (for R1 being non  empty set holds (for B56 being (Function of R1 , ( BOOLEAN )) holds ( B56 '&' ( O_el R1 ) ) = ( O_el R1 )))
+proof
+let R1 being non  empty set;
+let C64 being (Function of R1 , ( BOOLEAN ));
+let C65 being (Element of R1);
+thus L176: ( ( C64 '&' ( O_el R1 ) ) . C65 ) = ( ( C64 . C65 ) '&' ( ( O_el R1 ) . C65 ) ) by MARGREL1:def 20
+.= ( ( C64 . C65 ) '&' ( FALSE ) ) by L156
+.= ( ( O_el R1 ) . C65 ) by L156;
+end;
+theorem
+L177: (for R1 being non  empty set holds (for B57 being (Function of R1 , ( BOOLEAN )) holds ( B57 '&' ( I_el R1 ) ) = B57))
+proof
+let R1 being non  empty set;
+let C66 being (Function of R1 , ( BOOLEAN ));
+let C67 being (Element of R1);
+thus L178: ( ( C66 '&' ( I_el R1 ) ) . C67 ) = ( ( C66 . C67 ) '&' ( ( I_el R1 ) . C67 ) ) by MARGREL1:def 20
+.= ( ( C66 . C67 ) '&' ( TRUE ) ) by L160
+.= ( C66 . C67 );
+end;
+theorem
+L179: (for R1 being non  empty set holds (for B58 being (Function of R1 , ( BOOLEAN )) holds ( B58 'or' B58 ) = B58));
+theorem
+L180: (for R1 being non  empty set holds (for B59 , B60 , B61 being (Function of R1 , ( BOOLEAN )) holds ( ( B59 'or' B60 ) 'or' B61 ) = ( B59 'or' ( B60 'or' B61 ) )))
+proof
+let R1 being non  empty set;
+let C68 , C69 , C70 being (Function of R1 , ( BOOLEAN ));
+let C71 being (Element of R1);
+thus L181: ( ( ( C68 'or' C69 ) 'or' C70 ) . C71 ) = ( ( ( C68 'or' C69 ) . C71 ) 'or' ( C70 . C71 ) ) by L51
+.= ( ( ( C68 . C71 ) 'or' ( C69 . C71 ) ) 'or' ( C70 . C71 ) ) by L51
+.= ( ( C68 . C71 ) 'or' ( ( C69 . C71 ) 'or' ( C70 . C71 ) ) )
+.= ( ( C68 . C71 ) 'or' ( ( C69 'or' C70 ) . C71 ) ) by L51
+.= ( ( C68 'or' ( C69 'or' C70 ) ) . C71 ) by L51;
+end;
+theorem
+L182: (for R1 being non  empty set holds (for B62 being (Function of R1 , ( BOOLEAN )) holds ( B62 'or' ( O_el R1 ) ) = B62))
+proof
+let R1 being non  empty set;
+let C72 being (Function of R1 , ( BOOLEAN ));
+let C73 being (Element of R1);
+thus L183: ( ( C72 'or' ( O_el R1 ) ) . C73 ) = ( ( C72 . C73 ) 'or' ( ( O_el R1 ) . C73 ) ) by L51
+.= ( ( C72 . C73 ) 'or' ( FALSE ) ) by L156
+.= ( C72 . C73 );
+end;
+theorem
+L184: (for R1 being non  empty set holds (for B63 being (Function of R1 , ( BOOLEAN )) holds ( B63 'or' ( I_el R1 ) ) = ( I_el R1 )))
+proof
+let R1 being non  empty set;
+let C74 being (Function of R1 , ( BOOLEAN ));
+let C75 being (Element of R1);
+thus L185: ( ( C74 'or' ( I_el R1 ) ) . C75 ) = ( ( C74 . C75 ) 'or' ( ( I_el R1 ) . C75 ) ) by L51
+.= ( ( C74 . C75 ) 'or' ( TRUE ) ) by L160
+.= ( ( I_el R1 ) . C75 ) by L160;
+end;
+theorem
+L186: (for R1 being non  empty set holds (for B64 , B65 , B66 being (Function of R1 , ( BOOLEAN )) holds ( ( B64 '&' B65 ) 'or' B66 ) = ( ( B64 'or' B66 ) '&' ( B65 'or' B66 ) )))
+proof
+let R1 being non  empty set;
+let C76 , C77 , C78 being (Function of R1 , ( BOOLEAN ));
+let C79 being (Element of R1);
+thus L187: ( ( ( C76 '&' C77 ) 'or' C78 ) . C79 ) = ( ( ( C76 '&' C77 ) . C79 ) 'or' ( C78 . C79 ) ) by L51
+.= ( ( ( C76 . C79 ) '&' ( C77 . C79 ) ) 'or' ( C78 . C79 ) ) by MARGREL1:def 20
+.= ( ( ( C76 . C79 ) 'or' ( C78 . C79 ) ) '&' ( ( C77 . C79 ) 'or' ( C78 . C79 ) ) ) by XBOOLEAN:9
+.= ( ( ( C76 . C79 ) 'or' ( C78 . C79 ) ) '&' ( ( C77 'or' C78 ) . C79 ) ) by L51
+.= ( ( ( C76 'or' C78 ) . C79 ) '&' ( ( C77 'or' C78 ) . C79 ) ) by L51
+.= ( ( ( C76 'or' C78 ) '&' ( C77 'or' C78 ) ) . C79 ) by MARGREL1:def 20;
+end;
+theorem
+L188: (for R1 being non  empty set holds (for B67 , B68 , B69 being (Function of R1 , ( BOOLEAN )) holds ( ( B67 'or' B68 ) '&' B69 ) = ( ( B67 '&' B69 ) 'or' ( B68 '&' B69 ) )))
+proof
+let R1 being non  empty set;
+let C80 , C81 , C82 being (Function of R1 , ( BOOLEAN ));
+let C83 being (Element of R1);
+thus L189: ( ( ( C80 'or' C81 ) '&' C82 ) . C83 ) = ( ( ( C80 'or' C81 ) . C83 ) '&' ( C82 . C83 ) ) by MARGREL1:def 20
+.= ( ( ( C80 . C83 ) 'or' ( C81 . C83 ) ) '&' ( C82 . C83 ) ) by L51
+.= ( ( ( C80 . C83 ) '&' ( C82 . C83 ) ) 'or' ( ( C81 . C83 ) '&' ( C82 . C83 ) ) ) by XBOOLEAN:8
+.= ( ( ( C80 . C83 ) '&' ( C82 . C83 ) ) 'or' ( ( C81 '&' C82 ) . C83 ) ) by MARGREL1:def 20
+.= ( ( ( C80 '&' C82 ) . C83 ) 'or' ( ( C81 '&' C82 ) . C83 ) ) by MARGREL1:def 20
+.= ( ( ( C80 '&' C82 ) 'or' ( C81 '&' C82 ) ) . C83 ) by L51;
+end;
+theorem
+L190: (for R1 being non  empty set holds (for B70 , B71 being (Function of R1 , ( BOOLEAN )) holds ( 'not' ( B70 'or' B71 ) ) = ( ( 'not' B70 ) '&' ( 'not' B71 ) )))
+proof
+let R1 being non  empty set;
+let C84 , C85 being (Function of R1 , ( BOOLEAN ));
+let C86 being (Element of R1);
+thus L191: ( ( 'not' ( C84 'or' C85 ) ) . C86 ) = ( 'not' ( ( C84 'or' C85 ) . C86 ) ) by MARGREL1:def 19
+.= ( 'not' ( ( C84 . C86 ) 'or' ( C85 . C86 ) ) ) by L51
+.= ( ( ( 'not' C84 ) . C86 ) '&' ( 'not' ( C85 . C86 ) ) ) by MARGREL1:def 19
+.= ( ( ( 'not' C84 ) . C86 ) '&' ( ( 'not' C85 ) . C86 ) ) by MARGREL1:def 19
+.= ( ( ( 'not' C84 ) '&' ( 'not' C85 ) ) . C86 ) by MARGREL1:def 20;
+end;
+theorem
+L192: (for R1 being non  empty set holds (for B72 , B73 being (Function of R1 , ( BOOLEAN )) holds ( 'not' ( B72 '&' B73 ) ) = ( ( 'not' B72 ) 'or' ( 'not' B73 ) )))
+proof
+let R1 being non  empty set;
+let C87 , C88 being (Function of R1 , ( BOOLEAN ));
+let C89 being (Element of R1);
+thus L193: ( ( 'not' ( C87 '&' C88 ) ) . C89 ) = ( 'not' ( ( C87 '&' C88 ) . C89 ) ) by MARGREL1:def 19
+.= ( ( 'not' ( C87 . C89 ) ) 'or' ( 'not' ( C88 . C89 ) ) ) by MARGREL1:def 20
+.= ( ( 'not' ( C87 . C89 ) ) 'or' ( ( 'not' C88 ) . C89 ) ) by MARGREL1:def 19
+.= ( ( ( 'not' C87 ) . C89 ) 'or' ( ( 'not' C88 ) . C89 ) ) by MARGREL1:def 19
+.= ( ( ( 'not' C87 ) 'or' ( 'not' C88 ) ) . C89 ) by L51;
+end;
+definition
+let R1 being non  empty set;
+let C90 , C91 being (Function of R1 , ( BOOLEAN ));
+pred C90 '<' C91
+means
+:L194: (for B74 being (Element of R1) holds (( C90 . B74 ) = ( TRUE ) implies ( C91 . B74 ) = ( TRUE )))
+;reflexivity
+;
+end;
+theorem
+L196: (for R1 being non  empty set holds (for B75 , B76 , B77 being (Function of R1 , ( BOOLEAN )) holds (((B75 '<' B76 & B76 '<' B75) implies B75 = B76) & ((B75 '<' B76 & B76 '<' B77) implies B75 '<' B77))))
+proof
+let R1 being non  empty set;
+let C92 , C93 , C94 being (Function of R1 , ( BOOLEAN ));
+L197: (for B78 , B79 , B80 being (Function of R1 , ( BOOLEAN )) holds ((B78 '<' B79 & B79 '<' B78) implies B78 = B79))
+proof
+let C95 , C96 , C97 being (Function of R1 , ( BOOLEAN ));
+assume L198: (C95 '<' C96 & C96 '<' C95);
+let C98 being (Element of R1);
+L199: ((( C95 . C98 ) = ( FALSE ) & ( C96 . C98 ) = ( FALSE )) or (( C95 . C98 ) = ( FALSE ) & ( C96 . C98 ) = ( TRUE )) or (( C95 . C98 ) = ( TRUE ) & ( C96 . C98 ) = ( FALSE )) or (( C95 . C98 ) = ( TRUE ) & ( C96 . C98 ) = ( TRUE ))) by XBOOLEAN:def 3;
+thus L200: thesis by L199 , L198 , L194;
+end;
+L201: (for B81 , B82 , B83 being (Function of R1 , ( BOOLEAN )) holds ((B81 '<' B82 & B82 '<' B83) implies B81 '<' B83))
+proof
+let C99 , C100 , C101 being (Function of R1 , ( BOOLEAN ));
+assume that
+L202: C99 '<' C100
+and
+L203: C100 '<' C101;
+L204: (for B84 being (Element of R1) holds (( C99 . B84 ) = ( TRUE ) implies ( C101 . B84 ) = ( TRUE )))
+proof
+let C102 being (Element of R1);
+L205: (( C100 . C102 ) = ( TRUE ) implies ( C101 . C102 ) = ( TRUE )) by L203 , L194;
+thus L206: thesis by L205 , L202 , L194;
+end;
+thus L207: thesis by L204 , L194;
+end;
+thus L208: thesis by L201 , L197;
+end;
+theorem
+L209: (for R1 being non  empty set holds (for B85 , B86 being (Function of R1 , ( BOOLEAN )) holds (( B85 'imp' B86 ) = ( I_el R1 ) iff B85 '<' B86)))
+proof
+let R1 being non  empty set;
+let C103 , C104 being (Function of R1 , ( BOOLEAN ));
+L210: (for B87 , B88 being (Function of R1 , ( BOOLEAN )) holds (B87 '<' B88 implies ( B87 'imp' B88 ) = ( I_el R1 )))
+proof
+let C105 , C106 being (Function of R1 , ( BOOLEAN ));
+assume L211: C105 '<' C106;
+L212: (for B89 being (Element of R1) holds ( ( 'not' ( C105 . B89 ) ) 'or' ( C106 . B89 ) ) = ( TRUE ))
+proof
+let C107 being (Element of R1);
+L213: ((( C105 . C107 ) = ( FALSE ) & ( C106 . C107 ) = ( FALSE )) or (( C105 . C107 ) = ( FALSE ) & ( C106 . C107 ) = ( TRUE )) or (( C105 . C107 ) = ( TRUE ) & ( C106 . C107 ) = ( TRUE ))) by L211 , L194 , XBOOLEAN:def 3;
+thus L214: thesis by L213;
+end;
+let C108 being (Element of R1);
+L215: (( ( C105 'imp' C106 ) . C108 ) = ( ( 'not' ( C105 . C108 ) ) 'or' ( C106 . C108 ) ) & ( ( I_el R1 ) . C108 ) = ( TRUE )) by L119 , L160;
+thus L216: thesis by L215 , L212;
+end;
+L217: (for B90 , B91 being (Function of R1 , ( BOOLEAN )) holds (( B90 'imp' B91 ) = ( I_el R1 ) implies B90 '<' B91))
+proof
+let C109 , C110 being (Function of R1 , ( BOOLEAN ));
+assume L218: ( C109 'imp' C110 ) = ( I_el R1 );
+L219: (for B92 being (Element of R1) holds ( ( 'not' ( C109 . B92 ) ) 'or' ( C110 . B92 ) ) = ( TRUE ))
+proof
+let C111 being (Element of R1);
+L220: ( ( C109 'imp' C110 ) . C111 ) = ( ( 'not' ( C109 . C111 ) ) 'or' ( C110 . C111 ) ) by L119;
+thus L221: thesis by L220 , L218 , L160;
+end;
+L222: (for B93 being (Element of R1) holds ((( C109 . B93 ) = ( FALSE ) & ( C110 . B93 ) = ( FALSE )) or (( C109 . B93 ) = ( FALSE ) & ( C110 . B93 ) = ( TRUE )) or (( C109 . B93 ) = ( TRUE ) & ( C110 . B93 ) = ( TRUE ))))
+proof
+let C112 being (Element of R1);
+L223: ((( 'not' ( C109 . C112 ) ) = ( TRUE ) & ( C110 . C112 ) = ( FALSE )) or (( 'not' ( C109 . C112 ) ) = ( TRUE ) & ( C110 . C112 ) = ( TRUE )) or (( 'not' ( C109 . C112 ) ) = ( FALSE ) & ( C110 . C112 ) = ( FALSE )) or (( 'not' ( C109 . C112 ) ) = ( FALSE ) & ( C110 . C112 ) = ( TRUE ))) by XBOOLEAN:def 3;
+L224: ( ( 'not' ( C109 . C112 ) ) 'or' ( C110 . C112 ) ) = ( TRUE ) by L219;
+thus L225: thesis by L224 , L223;
+end;
+L226: (for B94 being (Element of R1) holds (( C109 . B94 ) = ( TRUE ) implies ( C110 . B94 ) = ( TRUE ))) by L222;
+thus L227: thesis by L226 , L194;
+end;
+thus L228: thesis by L217 , L210;
+end;
+theorem
+L229: (for R1 being non  empty set holds (for B95 , B96 being (Function of R1 , ( BOOLEAN )) holds (( B95 'eqv' B96 ) = ( I_el R1 ) iff B95 = B96)))
+proof
+let R1 being non  empty set;
+let C113 , C114 being (Function of R1 , ( BOOLEAN ));
+L230: (for B97 , B98 being (Function of R1 , ( BOOLEAN )) holds (( B97 'eqv' B98 ) = ( I_el R1 ) implies B97 = B98))
+proof
+let C115 , C116 being (Function of R1 , ( BOOLEAN ));
+assume L231: ( C115 'eqv' C116 ) = ( I_el R1 );
+L232: (for B99 being (Element of R1) holds ( ( ( 'not' ( C115 . B99 ) ) '&' ( C116 . B99 ) ) 'or' ( ( C115 . B99 ) '&' ( 'not' ( C116 . B99 ) ) ) ) = ( FALSE ))
+proof
+let C117 being (Element of R1);
+L233: ( ( C115 'eqv' C116 ) . C117 ) = ( 'not' ( ( C115 . C117 ) 'xor' ( C116 . C117 ) ) ) by L137;
+L234: ( 'not' ( ( C115 . C117 ) 'xor' ( C116 . C117 ) ) ) = ( TRUE ) by L233 , L231 , L160;
+thus L235: thesis by L234;
+end;
+L236: (for B100 being (Element of R1) holds (( ( 'not' ( C115 . B100 ) ) '&' ( C116 . B100 ) ) = ( FALSE ) & ( ( C115 . B100 ) '&' ( 'not' ( C116 . B100 ) ) ) = ( FALSE )))
+proof
+let C118 being (Element of R1);
+L237: (( ( C115 . C118 ) '&' ( 'not' ( C116 . C118 ) ) ) = ( TRUE ) or ( ( C115 . C118 ) '&' ( 'not' ( C116 . C118 ) ) ) = ( FALSE )) by XBOOLEAN:def 3;
+L238: ( ( ( 'not' ( C115 . C118 ) ) '&' ( C116 . C118 ) ) 'or' ( ( C115 . C118 ) '&' ( 'not' ( C116 . C118 ) ) ) ) = ( FALSE ) by L232;
+thus L239: thesis by L238 , L237;
+end;
+let C119 being (Element of R1);
+L240: ( ( 'not' ( C115 . C119 ) ) '&' ( C116 . C119 ) ) = ( FALSE ) by L236;
+L241: ((( 'not' ( C115 . C119 ) ) = ( TRUE ) & ( C116 . C119 ) = ( FALSE )) or (( 'not' ( C115 . C119 ) ) = ( FALSE ) & ( C116 . C119 ) = ( FALSE )) or (( 'not' ( C115 . C119 ) ) = ( FALSE ) & ( C116 . C119 ) = ( TRUE ))) by L240 , MARGREL1:12 , XBOOLEAN:def 3;
+L242: ( ( C115 . C119 ) '&' ( 'not' ( C116 . C119 ) ) ) = ( FALSE ) by L236;
+thus L243: thesis by L242 , L241;
+end;
+L244: (for B101 , B102 being (Function of R1 , ( BOOLEAN )) holds (B101 = B102 implies ( B101 'eqv' B102 ) = ( I_el R1 )))
+proof
+let C120 , C121 being (Function of R1 , ( BOOLEAN ));
+assume L245: C120 = C121;
+L246: (for B103 being (Element of R1) holds (( ( 'not' ( C120 . B103 ) ) '&' ( C121 . B103 ) ) = ( FALSE ) & ( ( C120 . B103 ) '&' ( 'not' ( C121 . B103 ) ) ) = ( FALSE )))
+proof
+let C122 being (Element of R1);
+L247: (( C121 . C122 ) = ( TRUE ) iff ( 'not' ( C121 . C122 ) ) = ( FALSE ));
+L248: ((( C120 . C122 ) = ( FALSE ) & ( 'not' ( C121 . C122 ) ) = ( TRUE )) or (( C120 . C122 ) = ( TRUE ) & ( 'not' ( C121 . C122 ) ) = ( FALSE ))) by L247 , L245 , XBOOLEAN:def 3;
+thus L249: thesis by L248;
+end;
+let C123 being (Element of R1);
+L250: ( ( C120 . C123 ) '&' ( 'not' ( C121 . C123 ) ) ) = ( FALSE ) by L246;
+L251: ( 'not' ( ( C120 . C123 ) 'xor' ( C121 . C123 ) ) ) = ( TRUE ) by L250 , L246;
+L252: ( ( C120 'eqv' C121 ) . C123 ) = ( TRUE ) by L251 , L137;
+thus L253: thesis by L252 , L160;
+end;
+thus L254: thesis by L244 , L230;
+end;
+theorem
+L255: (for R1 being non  empty set holds (for B104 being (Function of R1 , ( BOOLEAN )) holds (( O_el R1 ) '<' B104 & B104 '<' ( I_el R1 ))))
+proof
+let R1 being non  empty set;
+let C124 being (Function of R1 , ( BOOLEAN ));
+L256: ( ( O_el R1 ) 'imp' C124 ) = ( I_el R1 )
+proof
+let C125 being (Element of R1);
+L257: ( ( ( O_el R1 ) 'imp' C124 ) . C125 ) = ( ( 'not' ( ( O_el R1 ) . C125 ) ) 'or' ( C124 . C125 ) ) by L119;
+L258: ( ( ( O_el R1 ) 'imp' C124 ) . C125 ) = ( ( TRUE ) 'or' ( C124 . C125 ) ) by L257 , L156;
+thus L259: thesis by L258 , L160;
+end;
+L260: ( C124 'imp' ( I_el R1 ) ) = ( I_el R1 )
+proof
+let C126 being (Element of R1);
+L261: ( ( C124 'imp' ( I_el R1 ) ) . C126 ) = ( ( 'not' ( C124 . C126 ) ) 'or' ( ( I_el R1 ) . C126 ) ) by L119;
+L262: ( ( C124 'imp' ( I_el R1 ) ) . C126 ) = ( ( 'not' ( C124 . C126 ) ) 'or' ( TRUE ) ) by L261 , L160;
+thus L263: thesis by L262 , L160;
+end;
+thus L264: thesis by L260 , L256 , L209;
+end;
+begin
+definition
+let R1 being non  empty set;
+let C127 being (Function of R1 , ( BOOLEAN ));
+func B_INF C127 -> (Function of R1 , ( BOOLEAN )) equals 
+:L265: ( I_el R1 ) if (for B105 being (Element of R1) holds ( C127 . B105 ) = ( TRUE )) otherwise ( O_el R1 );
+correctness;
+func B_SUP C127 -> (Function of R1 , ( BOOLEAN )) equals 
+:L266: ( O_el R1 ) if (for B106 being (Element of R1) holds ( C127 . B106 ) = ( FALSE )) otherwise ( I_el R1 );
+correctness;
+end;
+theorem
+L268: (for R1 being non  empty set holds (for B107 being (Function of R1 , ( BOOLEAN )) holds (( 'not' ( B_INF B107 ) ) = ( B_SUP ( 'not' B107 ) ) & ( 'not' ( B_SUP B107 ) ) = ( B_INF ( 'not' B107 ) ))))
+proof
+let R1 being non  empty set;
+let C128 being (Function of R1 , ( BOOLEAN ));
+L269: ((for B108 being (Element of R1) holds ( ( 'not' C128 ) . B108 ) = ( TRUE )) implies (for B109 being (Element of R1) holds ( C128 . B109 ) = ( FALSE )))
+proof
+assume L270: (for B110 being (Element of R1) holds ( ( 'not' C128 ) . B110 ) = ( TRUE ));
+let C129 being (Element of R1);
+L271: ( ( 'not' C128 ) . C129 ) = ( TRUE ) by L270;
+L272: ( 'not' ( C128 . C129 ) ) = ( TRUE ) by L271 , MARGREL1:def 19;
+thus L273: thesis by L272;
+end;
+L274: ((for B111 being (Element of R1) holds ( ( 'not' C128 ) . B111 ) = ( FALSE )) implies (for B112 being (Element of R1) holds ( C128 . B112 ) = ( TRUE )))
+proof
+assume L275: (for B113 being (Element of R1) holds ( ( 'not' C128 ) . B113 ) = ( FALSE ));
+let C130 being (Element of R1);
+L276: ( ( 'not' C128 ) . C130 ) = ( FALSE ) by L275;
+L277: ( 'not' ( C128 . C130 ) ) = ( FALSE ) by L276 , MARGREL1:def 19;
+thus L278: thesis by L277;
+end;
+L279:
+now
+assume L280: ((for B114 being (Element of R1) holds ( C128 . B114 ) = ( TRUE )) or (for B115 being (Element of R1) holds ( C128 . B115 ) = ( FALSE )));
+L281:
+now
+per cases  by L280;
+case L282: ((for B116 being (Element of R1) holds ( C128 . B116 ) = ( TRUE )) & (not (for B117 being (Element of R1) holds ( C128 . B117 ) = ( FALSE ))));
+L283: (for B118 being (Element of R1) holds ( ( 'not' C128 ) . B118 ) = ( FALSE ))
+proof
+let C131 being (Element of R1);
+L284: ( 'not' ( TRUE ) ) = ( FALSE );
+L285: ( 'not' ( C128 . C131 ) ) = ( FALSE ) by L284 , L282;
+thus L286: thesis by L285 , MARGREL1:def 19;
+end;
+L287: ( B_INF C128 ) = ( I_el R1 ) by L282 , L265;
+L288: ( 'not' ( B_INF C128 ) ) = ( O_el R1 ) by L287 , L164;
+L289: (( B_INF ( 'not' C128 ) ) = ( O_el R1 ) & ( 'not' ( B_SUP C128 ) ) = ( 'not' ( I_el R1 ) )) by L269 , L282 , L265 , L266;
+thus L290: thesis by L289 , L288 , L283 , L266 , L164;
+end;
+case L291: ((for B119 being (Element of R1) holds ( C128 . B119 ) = ( FALSE )) & (not (for B120 being (Element of R1) holds ( C128 . B120 ) = ( TRUE ))));
+L292: (for B121 being (Element of R1) holds ( ( 'not' C128 ) . B121 ) = ( TRUE ))
+proof
+let C132 being (Element of R1);
+L293: ( 'not' ( FALSE ) ) = ( TRUE );
+L294: ( 'not' ( C128 . C132 ) ) = ( TRUE ) by L293 , L291;
+thus L295: thesis by L294 , MARGREL1:def 19;
+end;
+L296: ( 'not' ( B_SUP C128 ) ) = ( 'not' ( O_el R1 ) ) by L291 , L266;
+L297: ( 'not' ( B_SUP C128 ) ) = ( I_el R1 ) by L296 , L164;
+L298: (( B_SUP ( 'not' C128 ) ) = ( I_el R1 ) & ( 'not' ( B_INF C128 ) ) = ( 'not' ( O_el R1 ) )) by L274 , L291 , L265 , L266;
+thus L299: thesis by L298 , L297 , L292 , L265 , L164;
+end;
+case L300: ((for B122 being (Element of R1) holds ( C128 . B122 ) = ( TRUE )) & (for B123 being (Element of R1) holds ( C128 . B123 ) = ( FALSE )));
+let C133 being (Element of R1);
+L301: ( C128 . C133 ) = ( TRUE ) by L300;
+thus L302: thesis by L301 , L300;
+end;
+end;
+thus L304: thesis by L281;
+end;
+L305:
+now
+assume that
+L306: (not (for B124 being (Element of R1) holds ( C128 . B124 ) = ( TRUE )))
+and
+L307: (not (for B125 being (Element of R1) holds ( C128 . B125 ) = ( FALSE )));
+L308: ( 'not' ( B_INF C128 ) ) = ( 'not' ( O_el R1 ) ) by L306 , L265;
+L309: ( 'not' ( B_INF C128 ) ) = ( I_el R1 ) by L308 , L164;
+L310: (( 'not' ( B_SUP C128 ) ) = ( 'not' ( I_el R1 ) ) & ( B_INF ( 'not' C128 ) ) = ( O_el R1 )) by L269 , L307 , L265 , L266;
+thus L311: thesis by L310 , L274 , L306 , L309 , L266 , L164;
+end;
+thus L312: thesis by L305 , L279;
+end;
+theorem
+L313: (for R1 being non  empty set holds (( B_INF ( O_el R1 ) ) = ( O_el R1 ) & ( B_INF ( I_el R1 ) ) = ( I_el R1 ) & ( B_SUP ( O_el R1 ) ) = ( O_el R1 ) & ( B_SUP ( I_el R1 ) ) = ( I_el R1 )))
+proof
+let R1 being non  empty set;
+L314: (not (for B126 being (Element of R1) holds ( ( O_el R1 ) . B126 ) = ( TRUE )))
+proof
+L315:
+now
+assume L316: (for B127 being (Element of R1) holds ( ( O_el R1 ) . B127 ) = ( TRUE ));
+let C134 being (Element of R1);
+L317: ( ( O_el R1 ) . C134 ) = ( FALSE ) by L156;
+thus L318: thesis by L317;
+end;
+thus L319: thesis by L315;
+end;
+L320: (not (for B128 being (Element of R1) holds ( ( I_el R1 ) . B128 ) = ( FALSE )))
+proof
+L321:
+now
+assume L322: (for B129 being (Element of R1) holds ( ( I_el R1 ) . B129 ) = ( FALSE ));
+let C135 being (Element of R1);
+L323: ( ( I_el R1 ) . C135 ) = ( FALSE ) by L322;
+thus L324: thesis by L323 , L160;
+end;
+thus L325: thesis by L321;
+end;
+L326: ((for B130 being (Element of R1) holds ( ( O_el R1 ) . B130 ) = ( FALSE )) & (for B131 being (Element of R1) holds ( ( I_el R1 ) . B131 ) = ( TRUE ))) by L156 , L160;
+thus L327: thesis by L326 , L314 , L320 , L265 , L266;
+end;
+registration
+let R1 being non  empty set;
+cluster ( O_el R1 ) ->  constant;
+coherence
+proof
+L328: (for B132 , B133 being set holds ((B132 in ( dom ( O_el R1 ) ) & B133 in ( dom ( O_el R1 ) )) implies ( ( O_el R1 ) . B132 ) = ( ( O_el R1 ) . B133 )))
+proof
+let C136 , C137 being set;
+assume L329: (C136 in ( dom ( O_el R1 ) ) & C137 in ( dom ( O_el R1 ) ));
+reconsider D10 = C136 , D11 = C137 as (Element of R1) by L329 , PARTFUN1:def 2;
+L330: (( ( O_el R1 ) . D11 ) = ( FALSE ) & ( ( O_el R1 ) . D10 ) = ( ( O_el R1 ) . D10 )) by L156;
+thus L331: thesis by L330 , L156;
+end;
+thus L332: thesis by L328 , FUNCT_1:def 10;
+end;
+end;
+registration
+let R1 being non  empty set;
+cluster ( I_el R1 ) ->  constant;
+coherence
+proof
+thus L334: ( I_el R1 ) is  constant
+proof
+L335: (for B134 , B135 being set holds ((B134 in ( dom ( I_el R1 ) ) & B135 in ( dom ( I_el R1 ) )) implies ( ( I_el R1 ) . B134 ) = ( ( I_el R1 ) . B135 )))
+proof
+let C138 , C139 being set;
+assume L336: (C138 in ( dom ( I_el R1 ) ) & C139 in ( dom ( I_el R1 ) ));
+reconsider D12 = C138 , D13 = C139 as (Element of R1) by L336 , PARTFUN1:def 2;
+L337: (( ( I_el R1 ) . D13 ) = ( TRUE ) & ( ( I_el R1 ) . D12 ) = ( ( I_el R1 ) . D12 )) by L160;
+thus L338: thesis by L337 , L160;
+end;
+thus L339: thesis by L335 , FUNCT_1:def 10;
+end;
+
+end;
+end;
+registration
+let C140 being non  empty set;
+cluster  constant for (Function of C140 , ( BOOLEAN ));
+existence
+proof
+take ( O_el C140 );
+thus L336: thesis;
+end;
+end;
+theorem
+L338: (for R1 being non  empty set holds (for B136 being  constant (Function of R1 , ( BOOLEAN )) holds (B136 = ( O_el R1 ) or B136 = ( I_el R1 ))))
+proof
+let R1 being non  empty set;
+let C141 being  constant (Function of R1 , ( BOOLEAN ));
+L339: ((for B137 , B138 being set holds ((B137 in R1 & B138 in R1) implies ( C141 . B137 ) = ( C141 . B138 ))) implies ((for B139 being (Element of R1) holds ( C141 . B139 ) = ( TRUE )) or (for B140 being (Element of R1) holds ( C141 . B140 ) = ( FALSE ))))
+proof
+assume L340: (for B141 , B142 being set holds ((B141 in R1 & B142 in R1) implies ( C141 . B141 ) = ( C141 . B142 )));
+L341:
+now
+assume that
+L342: (not (for B143 being (Element of R1) holds ( C141 . B143 ) = ( TRUE )))
+and
+L343: (not (for B144 being (Element of R1) holds ( C141 . B144 ) = ( FALSE )));
+consider C142 being (Element of R1) such that L344: ( C141 . C142 ) <> ( TRUE ) by L342;
+L345: ( C141 . C142 ) = ( FALSE ) by L344 , XBOOLEAN:def 3;
+thus L346: contradiction by L345 , L340 , L343;
+end;
+thus L347: thesis by L341;
+end;
+L348: ( dom C141 ) = R1 by PARTFUN1:def 2;
+thus L349: thesis by L348 , L339 , L156 , L160 , FUNCT_1:def 10;
+end;
+theorem
+L350: (for R1 being non  empty set holds (for B145 being  constant (Function of R1 , ( BOOLEAN )) holds (( B_INF B145 ) = B145 & ( B_SUP B145 ) = B145)))
+proof
+let R1 being non  empty set;
+let C143 being  constant (Function of R1 , ( BOOLEAN ));
+L351:
+now
+assume L352: ((for B146 being (Element of R1) holds ( C143 . B146 ) = ( TRUE )) or (for B147 being (Element of R1) holds ( C143 . B147 ) = ( FALSE )));
+L353:
+now
+per cases  by L352;
+case L354: ((for B148 being (Element of R1) holds ( C143 . B148 ) = ( TRUE )) & (not (for B149 being (Element of R1) holds ( C143 . B149 ) = ( FALSE ))));
+L355: C143 = ( I_el R1 ) by L354 , L160;
+thus L356: thesis by L355 , L354 , L265 , L266;
+end;
+case L357: ((for B150 being (Element of R1) holds ( C143 . B150 ) = ( FALSE )) & (not (for B151 being (Element of R1) holds ( C143 . B151 ) = ( TRUE ))));
+L358: C143 = ( O_el R1 ) by L357 , L156;
+thus L359: thesis by L358 , L357 , L265 , L266;
+end;
+case L360: ((for B152 being (Element of R1) holds ( C143 . B152 ) = ( TRUE )) & (for B153 being (Element of R1) holds ( C143 . B153 ) = ( FALSE )));
+let C144 being (Element of R1);
+L361: ( C143 . C144 ) = ( TRUE ) by L360;
+thus L362: thesis by L361 , L360;
+end;
+end;
+thus L364: thesis by L353;
+end;
+L365:
+now
+assume that
+L366: (not (for B154 being (Element of R1) holds ( C143 . B154 ) = ( TRUE )))
+and
+L367: (not (for B155 being (Element of R1) holds ( C143 . B155 ) = ( FALSE )));
+L368:
+now
+per cases  by L338;
+case L369: C143 = ( O_el R1 );
+thus L370: thesis by L369 , L367 , L156;
+end;
+case L371: C143 = ( I_el R1 );
+thus L372: thesis by L371 , L366 , L160;
+end;
+end;
+thus L374: thesis by L368;
+end;
+thus L375: thesis by L365 , L351;
+end;
+theorem
+L376: (for R1 being non  empty set holds (for B156 , B157 being (Function of R1 , ( BOOLEAN )) holds (( B_INF ( B156 '&' B157 ) ) = ( ( B_INF B156 ) '&' ( B_INF B157 ) ) & ( B_SUP ( B156 'or' B157 ) ) = ( ( B_SUP B156 ) 'or' ( B_SUP B157 ) ))))
+proof
+let R1 being non  empty set;
+let C145 , C146 being (Function of R1 , ( BOOLEAN ));
+L377:
+now
+assume L378: (for B158 being (Element of R1) holds ( ( C145 '&' C146 ) . B158 ) = ( TRUE ));
+L379: (for B159 being (Element of R1) holds ( C145 . B159 ) = ( TRUE ))
+proof
+let C147 being (Element of R1);
+L380: ( ( C145 '&' C146 ) . C147 ) = ( ( C145 . C147 ) '&' ( C146 . C147 ) ) by MARGREL1:def 20;
+L381: ( ( C145 . C147 ) '&' ( C146 . C147 ) ) = ( TRUE ) by L380 , L378;
+thus L382: thesis by L381 , XBOOLEAN:101;
+end;
+L383: (not (for B160 being (Element of R1) holds ( C145 . B160 ) = ( FALSE )))
+proof
+L384:
+now
+assume L385: (for B161 being (Element of R1) holds ( C145 . B161 ) = ( FALSE ));
+let C148 being (Element of R1);
+L386: ( C145 . C148 ) = ( TRUE ) by L379;
+thus L387: thesis by L386;
+end;
+thus L388: thesis by L384;
+end;
+L389: ( B_SUP C145 ) = ( I_el R1 ) by L383 , L266;
+L390: (for B162 being (Element of R1) holds ( C146 . B162 ) = ( TRUE ))
+proof
+let C149 being (Element of R1);
+L391: ( ( C145 '&' C146 ) . C149 ) = ( TRUE ) by L378;
+L392: ( ( C145 . C149 ) '&' ( C146 . C149 ) ) = ( TRUE ) by L391 , MARGREL1:def 20;
+thus L393: thesis by L392 , XBOOLEAN:101;
+end;
+L394: (not (for B163 being (Element of R1) holds ( C146 . B163 ) = ( FALSE )))
+proof
+L395:
+now
+assume L396: (for B164 being (Element of R1) holds ( C146 . B164 ) = ( FALSE ));
+let C150 being (Element of R1);
+L397: ( C146 . C150 ) = ( TRUE ) by L390;
+thus L398: thesis by L397;
+end;
+thus L399: thesis by L395;
+end;
+L400: ( ( B_SUP C145 ) 'or' ( B_SUP C146 ) ) = ( ( I_el R1 ) 'or' ( I_el R1 ) ) by L394 , L389 , L266;
+L401: (not (for B165 being (Element of R1) holds ( ( C145 'or' C146 ) . B165 ) = ( FALSE )))
+proof
+L402:
+now
+assume L403: (for B166 being (Element of R1) holds ( ( C145 'or' C146 ) . B166 ) = ( FALSE ));
+let C151 being (Element of R1);
+L404: (( ( C145 'or' C146 ) . C151 ) = ( ( C145 . C151 ) 'or' ( C146 . C151 ) ) & ( C145 . C151 ) = ( TRUE )) by L379 , L51;
+thus L405: thesis by L404;
+end;
+thus L406: thesis by L402;
+end;
+L407: ( ( B_INF C145 ) '&' ( B_INF C146 ) ) = ( ( B_INF C145 ) '&' ( I_el R1 ) ) by L390 , L265
+.= ( ( I_el R1 ) '&' ( I_el R1 ) ) by L379 , L265;
+thus L408: thesis by L407 , L378 , L401 , L400 , L265 , L266;
+end;
+L409:
+now
+assume L410: (for B167 being (Element of R1) holds ( ( C145 'or' C146 ) . B167 ) = ( FALSE ));
+L411: (for B168 being (Element of R1) holds ( C145 . B168 ) = ( FALSE ))
+proof
+let C152 being (Element of R1);
+L412: ( ( C145 'or' C146 ) . C152 ) = ( FALSE ) by L410;
+L413: ( ( C145 . C152 ) 'or' ( C146 . C152 ) ) = ( FALSE ) by L412 , L51;
+L414: (( C145 . C152 ) = ( TRUE ) or ( C145 . C152 ) = ( FALSE )) by XBOOLEAN:def 3;
+thus L415: thesis by L414 , L413;
+end;
+L416: (not (for B169 being (Element of R1) holds ( ( C145 '&' C146 ) . B169 ) = ( TRUE )))
+proof
+L417:
+now
+assume L418: (for B170 being (Element of R1) holds ( ( C145 '&' C146 ) . B170 ) = ( TRUE ));
+let C153 being (Element of R1);
+L419: (( ( C145 '&' C146 ) . C153 ) = ( ( C145 . C153 ) '&' ( C146 . C153 ) ) & ( C145 . C153 ) = ( FALSE )) by L411 , MARGREL1:def 20;
+thus L420: thesis by L419;
+end;
+thus L421: thesis by L417;
+end;
+L422: (for B171 being (Element of R1) holds ( C146 . B171 ) = ( FALSE ))
+proof
+let C154 being (Element of R1);
+L423: ( ( C145 'or' C146 ) . C154 ) = ( FALSE ) by L410;
+L424: ( ( C145 . C154 ) 'or' ( C146 . C154 ) ) = ( FALSE ) by L423 , L51;
+L425: (( C146 . C154 ) = ( TRUE ) or ( C146 . C154 ) = ( FALSE )) by XBOOLEAN:def 3;
+thus L426: thesis by L425 , L424;
+end;
+L427: ( B_SUP C146 ) = ( O_el R1 ) by L422 , L266;
+L428: ( ( B_SUP C145 ) 'or' ( B_SUP C146 ) ) = ( ( O_el R1 ) 'or' ( O_el R1 ) ) by L427 , L411 , L266;
+L429: (not (for B172 being (Element of R1) holds ( C145 . B172 ) = ( TRUE )))
+proof
+L430:
+now
+assume L431: (for B173 being (Element of R1) holds ( C145 . B173 ) = ( TRUE ));
+let C155 being (Element of R1);
+L432: ( C145 . C155 ) = ( FALSE ) by L411;
+thus L433: thesis by L432;
+end;
+thus L434: thesis by L430;
+end;
+L435: ( B_INF C145 ) = ( O_el R1 ) by L429 , L265;
+L436: (not (for B174 being (Element of R1) holds ( C146 . B174 ) = ( TRUE )))
+proof
+L437:
+now
+assume L438: (for B175 being (Element of R1) holds ( C146 . B175 ) = ( TRUE ));
+let C156 being (Element of R1);
+L439: ( C146 . C156 ) = ( FALSE ) by L422;
+thus L440: thesis by L439;
+end;
+thus L441: thesis by L437;
+end;
+L442: ( ( B_INF C145 ) '&' ( B_INF C146 ) ) = ( ( O_el R1 ) '&' ( O_el R1 ) ) by L436 , L435 , L265;
+thus L443: thesis by L442 , L410 , L428 , L416 , L265 , L266;
+end;
+L444:
+now
+assume that
+L445: (not (for B176 being (Element of R1) holds ( ( C145 '&' C146 ) . B176 ) = ( TRUE )))
+and
+L446: (not (for B177 being (Element of R1) holds ( ( C145 'or' C146 ) . B177 ) = ( FALSE )));
+L447: (((for B178 being (Element of R1) holds ( C145 . B178 ) = ( FALSE )) & (for B179 being (Element of R1) holds ( C146 . B179 ) = ( FALSE ))) implies (for B180 being (Element of R1) holds ( ( C145 'or' C146 ) . B180 ) = ( FALSE )))
+proof
+assume that
+L448: (for B181 being (Element of R1) holds ( C145 . B181 ) = ( FALSE ))
+and
+L449: (for B182 being (Element of R1) holds ( C146 . B182 ) = ( FALSE ));
+let C157 being (Element of R1);
+L450: ( C145 . C157 ) = ( FALSE ) by L448;
+L451: ( ( C145 . C157 ) 'or' ( C146 . C157 ) ) = ( FALSE ) by L450 , L449;
+thus L452: thesis by L451 , L51;
+end;
+L453: (( B_SUP C145 ) = ( I_el R1 ) or ( B_SUP C146 ) = ( I_el R1 )) by L447 , L446 , L266;
+L454: ( ( B_SUP C145 ) 'or' ( B_SUP C146 ) ) = ( I_el R1 ) by L453 , L184;
+L455: (((for B183 being (Element of R1) holds ( C145 . B183 ) = ( TRUE )) & (for B184 being (Element of R1) holds ( C146 . B184 ) = ( TRUE ))) implies (for B185 being (Element of R1) holds ( ( C145 '&' C146 ) . B185 ) = ( TRUE )))
+proof
+assume that
+L456: (for B186 being (Element of R1) holds ( C145 . B186 ) = ( TRUE ))
+and
+L457: (for B187 being (Element of R1) holds ( C146 . B187 ) = ( TRUE ));
+let C158 being (Element of R1);
+L458: ( C145 . C158 ) = ( TRUE ) by L456;
+L459: ( ( C145 . C158 ) '&' ( C146 . C158 ) ) = ( TRUE ) by L458 , L457;
+thus L460: thesis by L459 , MARGREL1:def 20;
+end;
+L461: (( B_INF C145 ) = ( O_el R1 ) or ( B_INF C146 ) = ( O_el R1 )) by L455 , L445 , L265;
+L462: ( ( B_INF C145 ) '&' ( B_INF C146 ) ) = ( O_el R1 ) by L461 , L175;
+thus L463: thesis by L462 , L445 , L446 , L454 , L265 , L266;
+end;
+thus L464: thesis by L444 , L377 , L409;
+end;
+theorem
+L465: (for R1 being non  empty set holds (for B188 being (Function of R1 , ( BOOLEAN )) holds (for B189 being  constant (Function of R1 , ( BOOLEAN )) holds (( B_INF ( B189 'imp' B188 ) ) = ( B189 'imp' ( B_INF B188 ) ) & ( B_INF ( B188 'imp' B189 ) ) = ( ( B_SUP B188 ) 'imp' B189 )))))
+proof
+let R1 being non  empty set;
+let C159 being (Function of R1 , ( BOOLEAN ));
+let C160 being  constant (Function of R1 , ( BOOLEAN ));
+L466: ( ( I_el R1 ) 'imp' ( I_el R1 ) ) = ( I_el R1 )
+proof
+let C161 being (Element of R1);
+L467: ( ( I_el R1 ) . C161 ) = ( TRUE ) by L160;
+L468: ( ( ( I_el R1 ) 'imp' ( I_el R1 ) ) . C161 ) = ( ( 'not' ( TRUE ) ) 'or' ( TRUE ) ) by L467 , L119;
+thus L469: thesis by L468 , L160;
+end;
+L470: ( ( B_SUP C159 ) 'imp' C160 ) = ( ( B_SUP C159 ) 'imp' ( B_INF C160 ) ) by L350;
+L471: ( B_INF C160 ) = C160 by L350;
+L472: ( ( O_el R1 ) 'imp' ( I_el R1 ) ) = ( I_el R1 )
+proof
+let C162 being (Element of R1);
+L473: (( ( ( O_el R1 ) 'imp' ( I_el R1 ) ) . C162 ) = ( ( 'not' ( ( O_el R1 ) . C162 ) ) 'or' ( ( I_el R1 ) . C162 ) ) & ( ( I_el R1 ) . C162 ) = ( TRUE )) by L119 , L160;
+thus L474: thesis by L473;
+end;
+L475: ( ( I_el R1 ) 'imp' ( O_el R1 ) ) = ( O_el R1 )
+proof
+let C163 being (Element of R1);
+L476: ( ( O_el R1 ) . C163 ) = ( FALSE ) by L156;
+L477: ( ( 'not' ( ( I_el R1 ) . C163 ) ) 'or' ( ( O_el R1 ) . C163 ) ) = ( ( 'not' ( TRUE ) ) 'or' ( FALSE ) ) by L476 , L160;
+L478: ( ( ( I_el R1 ) 'imp' ( O_el R1 ) ) . C163 ) = ( ( 'not' ( ( I_el R1 ) . C163 ) ) 'or' ( ( O_el R1 ) . C163 ) ) by L119;
+thus L479: thesis by L478 , L477 , L156;
+end;
+L480: ( ( O_el R1 ) 'imp' ( O_el R1 ) ) = ( I_el R1 )
+proof
+let C164 being (Element of R1);
+L481: ( ( O_el R1 ) . C164 ) = ( FALSE ) by L156;
+L482: ( ( ( O_el R1 ) 'imp' ( O_el R1 ) ) . C164 ) = ( ( TRUE ) 'or' ( FALSE ) ) by L481 , L119;
+thus L483: thesis by L482 , L160;
+end;
+L484: ( C160 'imp' ( B_INF C159 ) ) = ( ( B_INF C160 ) 'imp' ( B_INF C159 ) ) by L350;
+L485: ( ( B_SUP C159 ) 'imp' C160 ) = ( ( B_SUP C159 ) 'imp' ( B_SUP C160 ) ) by L350;
+L486:
+now
+assume L487: ((for B190 being (Element of R1) holds ( C160 . B190 ) = ( TRUE )) or (for B191 being (Element of R1) holds ( C160 . B191 ) = ( FALSE )));
+L488:
+now
+per cases  by L487;
+case L489: ((for B192 being (Element of R1) holds ( C160 . B192 ) = ( TRUE )) & (not (for B193 being (Element of R1) holds ( C160 . B193 ) = ( FALSE ))));
+L490:
+now
+assume L491: ((for B194 being (Element of R1) holds ( C159 . B194 ) = ( TRUE )) or (for B195 being (Element of R1) holds ( C159 . B195 ) = ( FALSE )));
+L492:
+now
+per cases  by L491;
+case L493: ((for B196 being (Element of R1) holds ( C159 . B196 ) = ( TRUE )) & (not (for B197 being (Element of R1) holds ( C159 . B197 ) = ( FALSE ))));
+L494: (for B198 being (Element of R1) holds ( ( C159 'imp' C160 ) . B198 ) = ( TRUE ))
+proof
+let C165 being (Element of R1);
+L495: (( C160 . C165 ) = ( TRUE ) & ( C159 . C165 ) = ( TRUE )) by L489 , L493;
+L496: ( ( C159 'imp' C160 ) . C165 ) = ( ( 'not' ( TRUE ) ) 'or' ( TRUE ) ) by L495 , L119;
+thus L497: thesis by L496;
+end;
+L498: (for B199 being (Element of R1) holds ( ( C160 'imp' C159 ) . B199 ) = ( TRUE ))
+proof
+let C166 being (Element of R1);
+L499: (( C160 . C166 ) = ( TRUE ) & ( C159 . C166 ) = ( TRUE )) by L489 , L493;
+L500: ( ( C160 'imp' C159 ) . C166 ) = ( ( 'not' ( TRUE ) ) 'or' ( TRUE ) ) by L499 , L119;
+thus L501: thesis by L500;
+end;
+L502: ( B_INF C159 ) = ( I_el R1 ) by L493 , L265;
+L503: ( C160 'imp' ( B_INF C159 ) ) = ( I_el R1 ) by L502 , L484 , L466 , L489 , L265;
+L504: ( B_SUP C159 ) = ( I_el R1 ) by L493 , L266;
+L505: ( B_SUP C160 ) = ( I_el R1 ) by L489 , L266;
+thus L506: thesis by L505 , L485 , L466 , L498 , L494 , L504 , L503 , L265;
+end;
+case L507: ((for B200 being (Element of R1) holds ( C159 . B200 ) = ( FALSE )) & (not (for B201 being (Element of R1) holds ( C159 . B201 ) = ( TRUE ))));
+L508: (for B202 being (Element of R1) holds ( ( C160 'imp' C159 ) . B202 ) = ( FALSE ))
+proof
+let C167 being (Element of R1);
+L509: (( ( C160 'imp' C159 ) . C167 ) = ( ( 'not' ( C160 . C167 ) ) 'or' ( C159 . C167 ) ) & ( C160 . C167 ) = ( TRUE )) by L489 , L119;
+thus L510: thesis by L509 , L507;
+end;
+L511:
+now
+assume L512: (for B203 being (Element of R1) holds ( ( C160 'imp' C159 ) . B203 ) = ( TRUE ));
+let C168 being (Element of R1);
+L513: ( ( C160 'imp' C159 ) . C168 ) = ( TRUE ) by L512;
+thus L514: contradiction by L513 , L508;
+end;
+L515: (for B204 being (Element of R1) holds ( ( C159 'imp' C160 ) . B204 ) = ( TRUE ))
+proof
+let C169 being (Element of R1);
+L516: (( C160 . C169 ) = ( TRUE ) & ( C159 . C169 ) = ( FALSE )) by L489 , L507;
+L517: ( ( C159 'imp' C160 ) . C169 ) = ( ( 'not' ( FALSE ) ) 'or' ( TRUE ) ) by L516 , L119;
+thus L518: thesis by L517;
+end;
+L519: ( B_SUP C159 ) = ( O_el R1 ) by L507 , L266;
+L520: ( B_SUP C160 ) = ( I_el R1 ) by L489 , L266;
+L521: ( ( B_SUP C159 ) 'imp' C160 ) = ( I_el R1 ) by L520 , L472 , L519 , L350;
+L522: ( B_INF C159 ) = ( O_el R1 ) by L507 , L265;
+L523: ( B_INF C160 ) = ( I_el R1 ) by L489 , L265;
+thus L524: thesis by L523 , L484 , L475 , L511 , L515 , L522 , L521 , L265;
+end;
+case L525: ((for B205 being (Element of R1) holds ( C159 . B205 ) = ( FALSE )) & (for B206 being (Element of R1) holds ( C159 . B206 ) = ( TRUE )));
+L526: (for B207 being (Element of R1) holds ( ( C160 'imp' C159 ) . B207 ) = ( TRUE ))
+proof
+let C170 being (Element of R1);
+L527: (( ( C160 'imp' C159 ) . C170 ) = ( ( 'not' ( C160 . C170 ) ) 'or' ( C159 . C170 ) ) & ( C159 . C170 ) = ( TRUE )) by L525 , L119;
+thus L528: thesis by L527;
+end;
+L529: ( B_INF C160 ) = ( I_el R1 ) by L489 , L265;
+L530: (for B208 being (Element of R1) holds ( ( C159 'imp' C160 ) . B208 ) = ( TRUE ))
+proof
+let C171 being (Element of R1);
+L531: (( ( C159 'imp' C160 ) . C171 ) = ( ( 'not' ( C159 . C171 ) ) 'or' ( C160 . C171 ) ) & ( C160 . C171 ) = ( TRUE )) by L489 , L119;
+thus L532: thesis by L531;
+end;
+L533: (( B_INF C159 ) = ( I_el R1 ) & ( B_SUP C159 ) = ( O_el R1 )) by L525 , L265 , L266;
+thus L534: thesis by L533 , L484 , L470 , L466 , L472 , L526 , L530 , L529 , L265;
+end;
+end;
+thus L536: thesis by L492;
+end;
+L537:
+now
+L538: (for B209 being (Element of R1) holds ( ( C159 'imp' C160 ) . B209 ) = ( TRUE ))
+proof
+let C172 being (Element of R1);
+L539: ( ( 'not' ( C159 . C172 ) ) 'or' ( C160 . C172 ) ) = ( ( ( 'not' C159 ) . C172 ) 'or' ( C160 . C172 ) ) by MARGREL1:def 19;
+L540: ( ( 'not' ( C159 . C172 ) ) 'or' ( C160 . C172 ) ) = ( ( ( 'not' C159 ) 'or' C160 ) . C172 ) by L539 , L51;
+L541: ( ( 'not' ( C159 . C172 ) ) 'or' ( C160 . C172 ) ) = ( ( ( 'not' C159 ) 'or' ( I_el R1 ) ) . C172 ) by L540 , L471 , L489 , L265;
+L542: ( ( C159 'imp' C160 ) . C172 ) = ( ( 'not' ( C159 . C172 ) ) 'or' ( C160 . C172 ) ) by L119;
+thus L543: thesis by L542 , L184 , L160 , L541;
+end;
+L544: ( B_INF C160 ) = ( I_el R1 ) by L489 , L265;
+assume that
+L545: (not (for B210 being (Element of R1) holds ( C159 . B210 ) = ( TRUE )))
+and
+L546: (not (for B211 being (Element of R1) holds ( C159 . B211 ) = ( FALSE )));
+L547: ( B_INF C159 ) = ( O_el R1 ) by L545 , L265;
+L548: ( B_SUP C159 ) = ( I_el R1 ) by L546 , L266;
+L549: ( ( B_SUP C159 ) 'imp' C160 ) = ( I_el R1 ) by L548 , L466 , L544 , L350;
+L550: ( C160 'imp' C159 ) = C159
+proof
+let C173 being (Element of R1);
+L551: ( ( 'not' ( C160 . C173 ) ) 'or' ( C159 . C173 ) ) = ( ( ( 'not' C160 ) . C173 ) 'or' ( C159 . C173 ) ) by MARGREL1:def 19;
+L552: ( ( 'not' ( C160 . C173 ) ) 'or' ( C159 . C173 ) ) = ( ( ( 'not' C160 ) 'or' C159 ) . C173 ) by L551 , L51;
+L553: ( ( 'not' ( C160 . C173 ) ) 'or' ( C159 . C173 ) ) = ( ( ( 'not' ( I_el R1 ) ) 'or' C159 ) . C173 ) by L552 , L471 , L489 , L265;
+L554: ( ( 'not' ( C160 . C173 ) ) 'or' ( C159 . C173 ) ) = ( ( ( O_el R1 ) 'or' C159 ) . C173 ) by L553 , L164;
+L555: ( ( C160 'imp' C159 ) . C173 ) = ( ( 'not' ( C160 . C173 ) ) 'or' ( C159 . C173 ) ) by L119;
+thus L556: thesis by L555 , L554 , L182;
+end;
+thus L557: thesis by L550 , L484 , L475 , L489 , L265 , L547 , L538 , L549;
+end;
+thus L558: thesis by L537 , L490;
+end;
+case L559: ((for B212 being (Element of R1) holds ( C160 . B212 ) = ( FALSE )) & (not (for B213 being (Element of R1) holds ( C160 . B213 ) = ( TRUE ))));
+L560:
+now
+assume L561: ((for B214 being (Element of R1) holds ( C159 . B214 ) = ( TRUE )) or (for B215 being (Element of R1) holds ( C159 . B215 ) = ( FALSE )));
+L562:
+now
+per cases  by L561;
+case L563: ((for B216 being (Element of R1) holds ( C159 . B216 ) = ( TRUE )) & (not (for B217 being (Element of R1) holds ( C159 . B217 ) = ( FALSE ))));
+L564: (for B218 being (Element of R1) holds ( ( C159 'imp' C160 ) . B218 ) = ( FALSE ))
+proof
+let C174 being (Element of R1);
+L565: (( C160 . C174 ) = ( FALSE ) & ( C159 . C174 ) = ( TRUE )) by L559 , L563;
+L566: ( ( C159 'imp' C160 ) . C174 ) = ( ( 'not' ( TRUE ) ) 'or' ( FALSE ) ) by L565 , L119;
+thus L567: thesis by L566;
+end;
+L568:
+now
+assume L569: (for B219 being (Element of R1) holds ( ( C159 'imp' C160 ) . B219 ) = ( TRUE ));
+let C175 being (Element of R1);
+L570: ( ( C159 'imp' C160 ) . C175 ) = ( TRUE ) by L569;
+thus L571: contradiction by L570 , L564;
+end;
+L572: (for B220 being (Element of R1) holds ( ( C160 'imp' C159 ) . B220 ) = ( TRUE ))
+proof
+let C176 being (Element of R1);
+L573: (( C160 . C176 ) = ( FALSE ) & ( C159 . C176 ) = ( TRUE )) by L559 , L563;
+L574: ( ( C160 'imp' C159 ) . C176 ) = ( ( 'not' ( FALSE ) ) 'or' ( TRUE ) ) by L573 , L119;
+thus L575: thesis by L574;
+end;
+L576: ( B_SUP C159 ) = ( I_el R1 ) by L563 , L266;
+L577: ( B_SUP C160 ) = ( O_el R1 ) by L559 , L266;
+L578: ( ( B_SUP C159 ) 'imp' C160 ) = ( O_el R1 ) by L577 , L475 , L576 , L350;
+L579: ( B_INF C159 ) = ( I_el R1 ) by L563 , L265;
+L580: ( B_INF C160 ) = ( O_el R1 ) by L559 , L265;
+thus L581: thesis by L580 , L484 , L472 , L572 , L568 , L579 , L578 , L265;
+end;
+case L582: ((for B221 being (Element of R1) holds ( C159 . B221 ) = ( FALSE )) & (not (for B222 being (Element of R1) holds ( C159 . B222 ) = ( TRUE ))));
+L583: (for B223 being (Element of R1) holds ( ( C160 'imp' C159 ) . B223 ) = ( TRUE ))
+proof
+let C177 being (Element of R1);
+L584: (( C160 . C177 ) = ( FALSE ) & ( C159 . C177 ) = ( FALSE )) by L559 , L582;
+L585: ( ( C160 'imp' C159 ) . C177 ) = ( ( 'not' ( FALSE ) ) 'or' ( FALSE ) ) by L584 , L119;
+thus L586: thesis by L585;
+end;
+L587: ( B_INF C160 ) = ( O_el R1 ) by L559 , L265;
+L588: (for B224 being (Element of R1) holds ( ( C159 'imp' C160 ) . B224 ) = ( TRUE ))
+proof
+let C178 being (Element of R1);
+L589: (( ( C159 'imp' C160 ) . C178 ) = ( ( 'not' ( C159 . C178 ) ) 'or' ( C160 . C178 ) ) & ( C159 . C178 ) = ( FALSE )) by L582 , L119;
+thus L590: thesis by L589;
+end;
+L591: (( B_INF C159 ) = ( O_el R1 ) & ( B_SUP C159 ) = ( O_el R1 )) by L582 , L265 , L266;
+thus L592: thesis by L591 , L484 , L470 , L480 , L583 , L588 , L587 , L265;
+end;
+case L593: ((for B225 being (Element of R1) holds ( C159 . B225 ) = ( FALSE )) & (for B226 being (Element of R1) holds ( C159 . B226 ) = ( TRUE )));
+L594: (for B227 being (Element of R1) holds ( ( C159 'imp' C160 ) . B227 ) = ( TRUE ))
+proof
+let C179 being (Element of R1);
+L595: (( ( C159 'imp' C160 ) . C179 ) = ( ( 'not' ( C159 . C179 ) ) 'or' ( C160 . C179 ) ) & ( C159 . C179 ) = ( FALSE )) by L593 , L119;
+thus L596: thesis by L595;
+end;
+L597: (for B228 being (Element of R1) holds ( ( C160 'imp' C159 ) . B228 ) = ( TRUE ))
+proof
+let C180 being (Element of R1);
+L598: (( ( C160 'imp' C159 ) . C180 ) = ( ( 'not' ( C160 . C180 ) ) 'or' ( C159 . C180 ) ) & ( C159 . C180 ) = ( TRUE )) by L593 , L119;
+thus L599: thesis by L598;
+end;
+L600: ( B_INF C160 ) = ( O_el R1 ) by L559 , L265;
+L601: ( B_SUP C159 ) = ( O_el R1 ) by L593 , L266;
+L602: ( ( B_SUP C159 ) 'imp' C160 ) = ( I_el R1 ) by L601 , L480 , L600 , L350;
+L603: ( B_INF C159 ) = ( I_el R1 ) by L593 , L265;
+thus L604: thesis by L603 , L484 , L472 , L597 , L594 , L600 , L602 , L265;
+end;
+end;
+thus L606: thesis by L562;
+end;
+L607:
+now
+L608: ( B_INF C160 ) = ( O_el R1 ) by L559 , L265;
+L609: (for B229 being (Element of R1) holds ( ( C160 'imp' C159 ) . B229 ) = ( TRUE ))
+proof
+let C181 being (Element of R1);
+L610: ( ( 'not' ( C160 . C181 ) ) 'or' ( C159 . C181 ) ) = ( ( ( 'not' C160 ) . C181 ) 'or' ( C159 . C181 ) ) by MARGREL1:def 19;
+L611: ( ( 'not' ( C160 . C181 ) ) 'or' ( C159 . C181 ) ) = ( ( ( 'not' ( O_el R1 ) ) 'or' C159 ) . C181 ) by L610 , L471 , L608 , L51;
+L612: ( ( 'not' ( C160 . C181 ) ) 'or' ( C159 . C181 ) ) = ( ( ( I_el R1 ) 'or' C159 ) . C181 ) by L611 , L164;
+L613: ( ( 'not' ( C160 . C181 ) ) 'or' ( C159 . C181 ) ) = ( TRUE ) by L612 , L160 , L184;
+thus L614: thesis by L613 , L119;
+end;
+L615: ( C159 'imp' C160 ) = ( 'not' C159 )
+proof
+let C182 being (Element of R1);
+L616: ( ( 'not' ( C159 . C182 ) ) 'or' ( C160 . C182 ) ) = ( ( ( 'not' C159 ) . C182 ) 'or' ( C160 . C182 ) ) by MARGREL1:def 19;
+L617: ( ( 'not' ( C159 . C182 ) ) 'or' ( C160 . C182 ) ) = ( ( ( 'not' C159 ) 'or' C160 ) . C182 ) by L616 , L51;
+L618: ( ( 'not' ( C159 . C182 ) ) 'or' ( C160 . C182 ) ) = ( ( 'not' C159 ) . C182 ) by L617 , L471 , L608 , L182;
+thus L619: thesis by L618 , L119;
+end;
+L620: ( B_INF ( C159 'imp' C160 ) ) = ( 'not' ( B_SUP C159 ) ) by L615 , L268;
+assume L621: ((not (for B230 being (Element of R1) holds ( C159 . B230 ) = ( TRUE ))) & (not (for B231 being (Element of R1) holds ( C159 . B231 ) = ( FALSE ))));
+L622: (( B_INF C159 ) = ( O_el R1 ) & ( B_SUP C159 ) = ( I_el R1 )) by L621 , L265 , L266;
+L623: ( B_INF C160 ) = ( O_el R1 ) by L559 , L265;
+thus L624: thesis by L623 , L484 , L470 , L475 , L480 , L609 , L620 , L622 , L265 , L164;
+end;
+thus L625: thesis by L607 , L560;
+end;
+case L626: ((for B232 being (Element of R1) holds ( C160 . B232 ) = ( TRUE )) & (for B233 being (Element of R1) holds ( C160 . B233 ) = ( FALSE )));
+let C183 being (Element of R1);
+L627: ( C160 . C183 ) = ( FALSE ) by L626;
+thus L628: thesis by L627 , L626;
+end;
+end;
+thus L630: thesis by L488;
+end;
+L631:
+now
+assume that
+L632: (not (for B234 being (Element of R1) holds ( C160 . B234 ) = ( TRUE )))
+and
+L633: (not (for B235 being (Element of R1) holds ( C160 . B235 ) = ( FALSE )));
+L634:
+now
+per cases  by L338;
+case L635: C160 = ( O_el R1 );
+thus L636: thesis by L635 , L633 , L156;
+end;
+case L637: C160 = ( I_el R1 );
+thus L638: thesis by L637 , L632 , L160;
+end;
+end;
+thus L640: thesis by L634;
+end;
+thus L641: thesis by L631 , L486;
+end;
+theorem
+L642: (for R1 being non  empty set holds (for B236 being (Function of R1 , ( BOOLEAN )) holds (for B237 being  constant (Function of R1 , ( BOOLEAN )) holds (( B_INF ( B237 'or' B236 ) ) = ( B237 'or' ( B_INF B236 ) ) & ( B_SUP ( B237 '&' B236 ) ) = ( B237 '&' ( B_SUP B236 ) ) & ( B_SUP ( B236 '&' B237 ) ) = ( ( B_SUP B236 ) '&' B237 )))))
+proof
+let R1 being non  empty set;
+let C184 being (Function of R1 , ( BOOLEAN ));
+let C185 being  constant (Function of R1 , ( BOOLEAN ));
+L643: ( C185 'or' ( B_INF C184 ) ) = ( ( B_INF C185 ) 'or' ( B_INF C184 ) ) by L350;
+L644: ( C185 '&' ( B_SUP C184 ) ) = ( ( B_SUP C185 ) '&' ( B_SUP C184 ) ) by L350;
+L645: ( B_INF C185 ) = C185 by L350;
+L646:
+now
+assume L647: ((for B238 being (Element of R1) holds ( C185 . B238 ) = ( TRUE )) or (for B239 being (Element of R1) holds ( C185 . B239 ) = ( FALSE )));
+L648:
+now
+per cases  by L647;
+case L649: ((for B240 being (Element of R1) holds ( C185 . B240 ) = ( TRUE )) & (not (for B241 being (Element of R1) holds ( C185 . B241 ) = ( FALSE ))));
+L650:
+now
+assume L651: ((for B242 being (Element of R1) holds ( C184 . B242 ) = ( TRUE )) or (for B243 being (Element of R1) holds ( C184 . B243 ) = ( FALSE )));
+L652:
+now
+per cases  by L651;
+case L653: ((for B244 being (Element of R1) holds ( C184 . B244 ) = ( TRUE )) & (not (for B245 being (Element of R1) holds ( C184 . B245 ) = ( FALSE ))));
+L654: (for B246 being (Element of R1) holds ( ( C185 '&' C184 ) . B246 ) = ( TRUE ))
+proof
+let C186 being (Element of R1);
+L655: (( C185 . C186 ) = ( TRUE ) & ( C184 . C186 ) = ( TRUE )) by L649 , L653;
+L656: ( ( C185 '&' C184 ) . C186 ) = ( ( TRUE ) '&' ( TRUE ) ) by L655 , MARGREL1:def 20;
+thus L657: thesis by L656;
+end;
+L658:
+now
+assume L659: (for B247 being (Element of R1) holds ( ( C185 '&' C184 ) . B247 ) = ( FALSE ));
+let C187 being (Element of R1);
+L660: ( ( C185 '&' C184 ) . C187 ) = ( TRUE ) by L654;
+thus L661: contradiction by L660 , L659;
+end;
+L662: (for B248 being (Element of R1) holds ( ( C185 'or' C184 ) . B248 ) = ( TRUE ))
+proof
+let C188 being (Element of R1);
+L663: (( ( C185 'or' C184 ) . C188 ) = ( ( C185 . C188 ) 'or' ( C184 . C188 ) ) & ( C184 . C188 ) = ( TRUE )) by L653 , L51;
+thus L664: thesis by L663;
+end;
+L665: (( B_INF C184 ) = ( I_el R1 ) & ( B_SUP C184 ) = ( I_el R1 )) by L653 , L265 , L266;
+L666: (( B_INF C185 ) = ( I_el R1 ) & ( B_SUP C185 ) = ( I_el R1 )) by L649 , L265 , L266;
+thus L667: thesis by L666 , L643 , L644 , L662 , L658 , L665 , L265 , L266;
+end;
+case L668: ((for B249 being (Element of R1) holds ( C184 . B249 ) = ( FALSE )) & (not (for B250 being (Element of R1) holds ( C184 . B250 ) = ( TRUE ))));
+L669: (for B251 being (Element of R1) holds ( ( C185 '&' C184 ) . B251 ) = ( FALSE ))
+proof
+let C189 being (Element of R1);
+L670: (( ( C185 '&' C184 ) . C189 ) = ( ( C185 . C189 ) '&' ( C184 . C189 ) ) & ( C184 . C189 ) = ( FALSE )) by L668 , MARGREL1:def 20;
+thus L671: thesis by L670;
+end;
+L672: (for B252 being (Element of R1) holds ( ( C185 'or' C184 ) . B252 ) = ( TRUE ))
+proof
+let C190 being (Element of R1);
+L673: (( ( C185 'or' C184 ) . C190 ) = ( ( C185 . C190 ) 'or' ( C184 . C190 ) ) & ( C185 . C190 ) = ( TRUE )) by L649 , L51;
+thus L674: thesis by L673;
+end;
+L675: ( B_SUP C184 ) = ( O_el R1 ) by L668 , L266;
+L676: ( C185 '&' ( B_SUP C184 ) ) = ( O_el R1 ) by L675 , L175;
+L677: ( B_INF C184 ) = ( O_el R1 ) by L668 , L265;
+L678: ( B_INF C185 ) = ( I_el R1 ) by L649 , L265;
+L679: ( C185 'or' ( B_INF C184 ) ) = ( I_el R1 ) by L678 , L643 , L677 , L182;
+thus L680: thesis by L679 , L672 , L669 , L676 , L265 , L266;
+end;
+case L681: ((for B253 being (Element of R1) holds ( C184 . B253 ) = ( FALSE )) & (for B254 being (Element of R1) holds ( C184 . B254 ) = ( TRUE )));
+L682: (for B255 being (Element of R1) holds ( ( C185 '&' C184 ) . B255 ) = ( FALSE ))
+proof
+let C191 being (Element of R1);
+L683: (( C185 . C191 ) = ( TRUE ) & ( C184 . C191 ) = ( FALSE )) by L649 , L681;
+L684: ( ( C185 '&' C184 ) . C191 ) = ( ( TRUE ) '&' ( FALSE ) ) by L683 , MARGREL1:def 20;
+thus L685: thesis by L684;
+end;
+L686: (for B256 being (Element of R1) holds ( ( C185 'or' C184 ) . B256 ) = ( TRUE ))
+proof
+let C192 being (Element of R1);
+L687: (( C185 . C192 ) = ( TRUE ) & ( C184 . C192 ) = ( FALSE )) by L649 , L681;
+L688: ( ( C185 'or' C184 ) . C192 ) = ( ( TRUE ) 'or' ( FALSE ) ) by L687 , L51;
+thus L689: thesis by L688;
+end;
+L690: ( B_SUP C184 ) = ( O_el R1 ) by L681 , L266;
+L691: ( C185 '&' ( B_SUP C184 ) ) = ( O_el R1 ) by L690 , L175;
+L692: ( B_INF C185 ) = ( I_el R1 ) by L649 , L265;
+L693: ( C185 'or' ( B_INF C184 ) ) = ( I_el R1 ) by L692 , L643 , L184;
+thus L694: thesis by L693 , L686 , L682 , L691 , L265 , L266;
+end;
+end;
+thus L696: thesis by L652;
+end;
+L697:
+now
+assume that
+L698: (not (for B257 being (Element of R1) holds ( C184 . B257 ) = ( TRUE )))
+and
+L699: (not (for B258 being (Element of R1) holds ( C184 . B258 ) = ( FALSE )));
+L700: ( B_INF C184 ) = ( O_el R1 ) by L698 , L265;
+L701: ( B_INF C185 ) = ( I_el R1 ) by L649 , L265;
+L702: ( C185 'or' ( B_INF C184 ) ) = ( I_el R1 ) by L701 , L643 , L700 , L182;
+L703: C185 = ( I_el R1 ) by L645 , L649 , L265;
+L704: (for B259 being (Element of R1) holds ( ( C185 'or' C184 ) . B259 ) = ( TRUE )) by L703 , L184 , L160;
+L705: ( C185 '&' C184 ) = C184
+proof
+let C193 being (Element of R1);
+L706: ( ( C185 '&' C184 ) . C193 ) = ( ( ( I_el R1 ) . C193 ) '&' ( C184 . C193 ) ) by L703 , MARGREL1:def 20;
+L707: ( ( C185 '&' C184 ) . C193 ) = ( ( TRUE ) '&' ( C184 . C193 ) ) by L706 , L160;
+thus L708: thesis by L707;
+end;
+L709: ( B_SUP C185 ) = ( I_el R1 ) by L649 , L266;
+thus L710: thesis by L709 , L644 , L704 , L705 , L702 , L265 , L177;
+end;
+thus L711: thesis by L697 , L650;
+end;
+case L712: ((for B260 being (Element of R1) holds ( C185 . B260 ) = ( FALSE )) & (not (for B261 being (Element of R1) holds ( C185 . B261 ) = ( TRUE ))));
+L713:
+now
+assume L714: ((for B262 being (Element of R1) holds ( C184 . B262 ) = ( TRUE )) or (for B263 being (Element of R1) holds ( C184 . B263 ) = ( FALSE )));
+L715:
+now
+per cases  by L714;
+case L716: ((for B264 being (Element of R1) holds ( C184 . B264 ) = ( TRUE )) & (not (for B265 being (Element of R1) holds ( C184 . B265 ) = ( FALSE ))));
+L717: (for B266 being (Element of R1) holds ( ( C185 'or' C184 ) . B266 ) = ( TRUE ))
+proof
+let C194 being (Element of R1);
+L718: (( ( C185 'or' C184 ) . C194 ) = ( ( C185 . C194 ) 'or' ( C184 . C194 ) ) & ( C185 . C194 ) = ( FALSE )) by L712 , L51;
+thus L719: thesis by L718 , L716;
+end;
+L720: ( B_SUP C185 ) = ( O_el R1 ) by L712 , L266;
+L721: ( C185 '&' ( B_SUP C184 ) ) = ( O_el R1 ) by L720 , L644 , L175;
+L722: (for B267 being (Element of R1) holds ( ( C185 '&' C184 ) . B267 ) = ( FALSE ))
+proof
+let C195 being (Element of R1);
+L723: (( ( C185 '&' C184 ) . C195 ) = ( ( C185 . C195 ) '&' ( C184 . C195 ) ) & ( C185 . C195 ) = ( FALSE )) by L712 , MARGREL1:def 20;
+thus L724: thesis by L723;
+end;
+L725: ( B_INF C184 ) = ( I_el R1 ) by L716 , L265;
+L726: ( B_INF C185 ) = ( O_el R1 ) by L712 , L265;
+L727: ( C185 'or' ( B_INF C184 ) ) = ( I_el R1 ) by L726 , L643 , L725 , L182;
+thus L728: thesis by L727 , L717 , L722 , L721 , L265 , L266;
+end;
+case L729: ((for B268 being (Element of R1) holds ( C184 . B268 ) = ( FALSE )) & (not (for B269 being (Element of R1) holds ( C184 . B269 ) = ( TRUE ))));
+L730: (for B270 being (Element of R1) holds ( ( C185 'or' C184 ) . B270 ) = ( FALSE ))
+proof
+let C196 being (Element of R1);
+L731: (( C185 . C196 ) = ( FALSE ) & ( C184 . C196 ) = ( FALSE )) by L712 , L729;
+L732: ( ( C185 'or' C184 ) . C196 ) = ( ( FALSE ) 'or' ( FALSE ) ) by L731 , L51;
+thus L733: thesis by L732;
+end;
+L734:
+now
+assume L735: (for B271 being (Element of R1) holds ( ( C185 'or' C184 ) . B271 ) = ( TRUE ));
+let C197 being (Element of R1);
+L736: ( ( C185 'or' C184 ) . C197 ) = ( FALSE ) by L730;
+thus L737: contradiction by L736 , L735;
+end;
+L738: ( B_SUP C185 ) = ( O_el R1 ) by L712 , L266;
+L739: ( C185 '&' ( B_SUP C184 ) ) = ( O_el R1 ) by L738 , L644 , L175;
+L740: (for B272 being (Element of R1) holds ( ( C185 '&' C184 ) . B272 ) = ( FALSE ))
+proof
+let C198 being (Element of R1);
+L741: (( C185 . C198 ) = ( FALSE ) & ( C184 . C198 ) = ( FALSE )) by L712 , L729;
+L742: ( ( C185 '&' C184 ) . C198 ) = ( ( FALSE ) '&' ( FALSE ) ) by L741 , MARGREL1:def 20;
+thus L743: thesis by L742;
+end;
+L744: ( B_INF C184 ) = ( O_el R1 ) by L729 , L265;
+L745: ( B_INF C185 ) = ( O_el R1 ) by L712 , L265;
+thus L746: thesis by L745 , L643 , L734 , L740 , L744 , L739 , L265 , L266;
+end;
+case L747: ((for B273 being (Element of R1) holds ( C184 . B273 ) = ( FALSE )) & (for B274 being (Element of R1) holds ( C184 . B274 ) = ( TRUE )));
+L748: (for B275 being (Element of R1) holds ( ( C185 'or' C184 ) . B275 ) = ( TRUE ))
+proof
+let C199 being (Element of R1);
+L749: (( C185 . C199 ) = ( FALSE ) & ( C184 . C199 ) = ( TRUE )) by L712 , L747;
+L750: ( ( C185 'or' C184 ) . C199 ) = ( ( FALSE ) 'or' ( TRUE ) ) by L749 , L51;
+thus L751: thesis by L750;
+end;
+L752: ( B_SUP C185 ) = ( O_el R1 ) by L712 , L266;
+L753: ( C185 '&' ( B_SUP C184 ) ) = ( O_el R1 ) by L752 , L644 , L175;
+L754: (for B276 being (Element of R1) holds ( ( C185 '&' C184 ) . B276 ) = ( FALSE ))
+proof
+let C200 being (Element of R1);
+L755: (( C185 . C200 ) = ( FALSE ) & ( C184 . C200 ) = ( TRUE )) by L712 , L747;
+L756: ( ( C185 '&' C184 ) . C200 ) = ( ( FALSE ) '&' ( TRUE ) ) by L755 , MARGREL1:def 20;
+thus L757: thesis by L756;
+end;
+L758: ( B_INF C184 ) = ( I_el R1 ) by L747 , L265;
+L759: ( B_INF C185 ) = ( O_el R1 ) by L712 , L265;
+L760: ( C185 'or' ( B_INF C184 ) ) = ( I_el R1 ) by L759 , L643 , L758 , L182;
+thus L761: thesis by L760 , L748 , L754 , L753 , L265 , L266;
+end;
+end;
+thus L763: thesis by L715;
+end;
+L764:
+now
+L765: (for B277 being (Element of R1) holds ( ( C185 '&' C184 ) . B277 ) = ( FALSE ))
+proof
+let C201 being (Element of R1);
+L766: ( ( C185 '&' C184 ) . C201 ) = ( ( ( O_el R1 ) '&' C184 ) . C201 ) by L645 , L712 , L265;
+thus L767: thesis by L766 , L156 , L175;
+end;
+L768: ( B_SUP ( C185 '&' C184 ) ) = ( O_el R1 ) by L765 , L266;
+assume that
+L769: (not (for B278 being (Element of R1) holds ( C184 . B278 ) = ( TRUE )))
+and
+L770: (not (for B279 being (Element of R1) holds ( C184 . B279 ) = ( FALSE )));
+L771: ( B_INF C185 ) = ( O_el R1 ) by L712 , L265;
+L772: ( C185 'or' ( B_INF C184 ) ) = ( ( O_el R1 ) 'or' ( O_el R1 ) ) by L771 , L643 , L769 , L265;
+L773: ( C185 'or' C184 ) = C184
+proof
+let C202 being (Element of R1);
+L774: ( ( C185 'or' C184 ) . C202 ) = ( ( C185 . C202 ) 'or' ( C184 . C202 ) ) by L51;
+L775: ( ( C185 'or' C184 ) . C202 ) = ( ( FALSE ) 'or' ( C184 . C202 ) ) by L774 , L712;
+thus L776: thesis by L775;
+end;
+L777: ( B_SUP C185 ) = ( O_el R1 ) by L712 , L266;
+thus L778: thesis by L777 , L644 , L769 , L773 , L768 , L772 , L265 , L175;
+end;
+thus L779: thesis by L764 , L713;
+end;
+case L780: ((for B280 being (Element of R1) holds ( C185 . B280 ) = ( TRUE )) & (for B281 being (Element of R1) holds ( C185 . B281 ) = ( FALSE )));
+let C203 being (Element of R1);
+L781: ( C185 . C203 ) = ( FALSE ) by L780;
+thus L782: thesis by L781 , L780;
+end;
+end;
+thus L784: thesis by L648;
+end;
+L785:
+now
+assume that
+L786: (not (for B282 being (Element of R1) holds ( C185 . B282 ) = ( TRUE )))
+and
+L787: (not (for B283 being (Element of R1) holds ( C185 . B283 ) = ( FALSE )));
+L788:
+now
+per cases  by L338;
+case L789: C185 = ( O_el R1 );
+thus L790: thesis by L789 , L787 , L156;
+end;
+case L791: C185 = ( I_el R1 );
+thus L792: thesis by L791 , L786 , L160;
+end;
+end;
+thus L794: thesis by L788;
+end;
+thus L795: thesis by L785 , L646;
+end;
+theorem
+L796: (for R1 being non  empty set holds (for B284 being (Function of R1 , ( BOOLEAN )) holds (for B285 being (Element of R1) holds ( ( B_INF B284 ) . B285 ) <= ( B284 . B285 ))))
+proof
+let R1 being non  empty set;
+let C204 being (Function of R1 , ( BOOLEAN ));
+let C205 being (Element of R1);
+L797:
+now
+assume L798: (not (for B286 being (Element of R1) holds ( C204 . B286 ) = ( TRUE )));
+L799: ( B_INF C204 ) = ( O_el R1 ) by L798 , L265;
+L800: ( ( B_INF C204 ) . C205 ) = ( FALSE ) by L799 , L156;
+L801: ( ( ( B_INF C204 ) . C205 ) => ( C204 . C205 ) ) = ( TRUE ) by L800;
+thus L802: thesis by L801 , L1;
+end;
+L803:
+now
+assume L804: (for B287 being (Element of R1) holds ( C204 . B287 ) = ( TRUE ));
+L805: ( C204 . C205 ) = ( TRUE ) by L804;
+L806: ( ( ( B_INF C204 ) . C205 ) => ( C204 . C205 ) ) = ( TRUE ) by L805;
+thus L807: thesis by L806 , L1;
+end;
+thus L808: thesis by L803 , L797;
+end;
+theorem
+L809: (for R1 being non  empty set holds (for B288 being (Function of R1 , ( BOOLEAN )) holds (for B289 being (Element of R1) holds ( B288 . B289 ) <= ( ( B_SUP B288 ) . B289 ))))
+proof
+let R1 being non  empty set;
+let C206 being (Function of R1 , ( BOOLEAN ));
+let C207 being (Element of R1);
+L810:
+now
+assume L811: (not (for B290 being (Element of R1) holds ( C206 . B290 ) = ( FALSE )));
+L812: ( B_SUP C206 ) = ( I_el R1 ) by L811 , L266;
+L813: ( ( B_SUP C206 ) . C207 ) = ( TRUE ) by L812 , L160;
+L814: ( ( C206 . C207 ) => ( ( B_SUP C206 ) . C207 ) ) = ( TRUE ) by L813;
+thus L815: thesis by L814 , L1;
+end;
+L816:
+now
+assume L817: (for B291 being (Element of R1) holds ( C206 . B291 ) = ( FALSE ));
+L818: ( C206 . C207 ) = ( FALSE ) by L817;
+L819: ( ( C206 . C207 ) => ( ( B_SUP C206 ) . C207 ) ) = ( TRUE ) by L818;
+thus L820: thesis by L819 , L1;
+end;
+thus L821: thesis by L816 , L810;
+end;
+begin
+definition
+let R1 being non  empty set;
+let C208 being (Function of R1 , ( BOOLEAN ));
+let C209 being (a_partition of R1);
+pred C208 is_dependent_of C209
+means
+:L822: (for B292 being set holds (B292 in C209 implies (for B293 , B294 being set holds ((B293 in B292 & B294 in B292) implies ( C208 . B293 ) = ( C208 . B294 )))))
+;end;
+theorem
+L824: (for R1 being non  empty set holds (for B295 being (Function of R1 , ( BOOLEAN )) holds B295 is_dependent_of ( %I R1 )))
+proof
+let R1 being non  empty set;
+let C210 being (Function of R1 , ( BOOLEAN ));
+L825: (for B296 being set holds (B296 in ( %I R1 ) implies (for B297 , B298 being set holds ((B297 in B296 & B298 in B296) implies ( C210 . B297 ) = ( C210 . B298 )))))
+proof
+let C211 being set;
+assume L826: C211 in ( %I R1 );
+L827: C211 in { R2 where R2 is (Subset of R1) : (ex B299 being set st (R2 = { B299 } & B299 in R1)) } by L826 , PARTIT1:31;
+L828: (ex R2 being (Subset of R1) st (C211 = R2 & (ex B300 being set st (R2 = { B300 } & B300 in R1)))) by L827;
+consider C212 being set such that L829: C211 = { C212 } and L830: C212 in R1 by L828;
+let C213 , C214 being set;
+assume that
+L831: C213 in C211
+and
+L832: C214 in C211;
+L833: C213 = C212 by L829 , L831 , TARSKI:def 1;
+thus L834: thesis by L833 , L829 , L832 , TARSKI:def 1;
+end;
+thus L835: thesis by L825 , L822;
+end;
+theorem
+L836: (for R1 being non  empty set holds (for B301 being  constant (Function of R1 , ( BOOLEAN )) holds B301 is_dependent_of ( %O R1 )))
+proof
+let R1 being non  empty set;
+let C215 being  constant (Function of R1 , ( BOOLEAN ));
+L837: (for B302 being set holds (B302 in ( %O R1 ) implies (for B303 , B304 being set holds ((B303 in B302 & B304 in B302) implies ( C215 . B303 ) = ( C215 . B304 )))))
+proof
+let C216 being set;
+L838: (for B305 , B306 being (Element of R1) holds ( C215 . B305 ) = ( C215 . B306 ))
+proof
+let C217 , C218 being (Element of R1);
+per cases  by L338;
+suppose L839: C215 = ( O_el R1 );
+
+L840: ( C215 . C217 ) = ( FALSE ) by L839 , L156;
+thus L841: thesis by L840 , L839 , L156;
+end;
+suppose L842: C215 = ( I_el R1 );
+
+L843: ( C215 . C217 ) = ( TRUE ) by L842 , L160;
+thus L844: thesis by L843 , L842 , L160;
+end;
+end;
+thus L846: thesis by L838;
+end;
+thus L847: thesis by L837 , L822;
+end;
+definition
+let R1 being non  empty set;
+let C219 being (a_partition of R1);
+redefine mode Element of C219
+ -> (Subset of R1);
+coherence
+proof
+let C220 being (Element of C219);
+thus L848: thesis;
+end;
+end;
+definition
+let R1 being non  empty set;
+let C221 being (Element of R1);
+let C222 being (a_partition of R1);
+redefine func EqClass (C221 , C222) -> (Element of C222);
+
+coherence by EQREL_1:def 6;
+end;
+definition
+let R1 being non  empty set;
+let C223 being (Function of R1 , ( BOOLEAN ));
+let C224 being (a_partition of R1);
+func B_INF (C223 , C224) -> (Function of R1 , ( BOOLEAN )) means 
+:L851: (for B307 being (Element of R1) holds (((for B308 being (Element of R1) holds (B308 in ( EqClass (B307 , C224) ) implies ( C223 . B308 ) = ( TRUE ))) implies ( it . B307 ) = ( TRUE )) & ((not (for B309 being (Element of R1) holds (B309 in ( EqClass (B307 , C224) ) implies ( C223 . B309 ) = ( TRUE )))) implies ( it . B307 ) = ( FALSE ))));
+existence
+proof
+defpred S1[ (Element of R1) , set ] means (((for B310 being (Element of R1) holds (B310 in ( EqClass ($1 , C224) ) implies ( C223 . B310 ) = ( TRUE ))) implies $2 = ( TRUE )) & ((not (for B311 being (Element of R1) holds (B311 in ( EqClass ($1 , C224) ) implies ( C223 . B311 ) = ( TRUE )))) implies $2 = ( FALSE )));
+L852: (for B312 being (Element of R1) holds (ex B313 being (Element of ( BOOLEAN )) st S1[ B312 , B313 ]))
+proof
+let C225 being (Element of R1);
+per cases ;
+suppose L853: (for B314 being (Element of R1) holds (B314 in ( EqClass (C225 , C224) ) implies ( C223 . B314 ) = ( TRUE )));
+
+thus L854: thesis by L853;
+end;
+suppose L855: (not (for B315 being (Element of R1) holds (B315 in ( EqClass (C225 , C224) ) implies ( C223 . B315 ) = ( TRUE ))));
+
+thus L856: thesis by L855;
+end;
+end;
+consider C226 being (Function of R1 , ( BOOLEAN )) such that L858: (for B316 being (Element of R1) holds S1[ B316 , ( C226 . B316 ) ]) from FUNCT_2:sch 3(L852);
+reconsider D14 = C226 as (Function of R1 , ( BOOLEAN ));
+reconsider D15 = D14 as (Function of R1 , ( BOOLEAN ));
+take D15;
+thus L859: thesis by L858;
+end;
+uniqueness
+proof
+let C227 , C228 being (Function of R1 , ( BOOLEAN ));
+assume that
+L860: (for B317 being (Element of R1) holds (((for B318 being (Element of R1) holds (B318 in ( EqClass (B317 , C224) ) implies ( C223 . B318 ) = ( TRUE ))) implies ( C227 . B317 ) = ( TRUE )) & ((not (for B319 being (Element of R1) holds (B319 in ( EqClass (B317 , C224) ) implies ( C223 . B319 ) = ( TRUE )))) implies ( C227 . B317 ) = ( FALSE ))))
+and
+L861: (for B320 being (Element of R1) holds (((for B321 being (Element of R1) holds (B321 in ( EqClass (B320 , C224) ) implies ( C223 . B321 ) = ( TRUE ))) implies ( C228 . B320 ) = ( TRUE )) & ((not (for B322 being (Element of R1) holds (B322 in ( EqClass (B320 , C224) ) implies ( C223 . B322 ) = ( TRUE )))) implies ( C228 . B320 ) = ( FALSE ))));
+let C229 being (Element of R1);
+L862:
+now
+assume L863: (not (for B323 being (Element of R1) holds (B323 in ( EqClass (C229 , C224) ) implies ( C223 . B323 ) = ( TRUE ))));
+L864: ( C228 . C229 ) = ( FALSE ) by L863 , L861;
+thus L865: thesis by L864 , L860 , L863;
+end;
+L866:
+now
+assume L867: (for B324 being (Element of R1) holds (B324 in ( EqClass (C229 , C224) ) implies ( C223 . B324 ) = ( TRUE )));
+L868: ( C228 . C229 ) = ( TRUE ) by L867 , L861;
+thus L869: thesis by L868 , L860 , L867;
+end;
+thus L870: thesis by L866 , L862;
+end;
+end;
+definition
+let R1 being non  empty set;
+let C230 being (Function of R1 , ( BOOLEAN ));
+let C231 being (a_partition of R1);
+func B_SUP (C230 , C231) -> (Function of R1 , ( BOOLEAN )) means 
+:L872: (for B325 being (Element of R1) holds (((ex B326 being (Element of R1) st (B326 in ( EqClass (B325 , C231) ) & ( C230 . B326 ) = ( TRUE ))) implies ( it . B325 ) = ( TRUE )) & ((not (ex B327 being (Element of R1) st (B327 in ( EqClass (B325 , C231) ) & ( C230 . B327 ) = ( TRUE )))) implies ( it . B325 ) = ( FALSE ))));
+existence
+proof
+defpred S2[ (Element of R1) , set ] means (((ex B328 being (Element of R1) st (B328 in ( EqClass ($1 , C231) ) & ( C230 . B328 ) = ( TRUE ))) implies $2 = ( TRUE )) & ((not (ex B329 being (Element of R1) st (B329 in ( EqClass ($1 , C231) ) & ( C230 . B329 ) = ( TRUE )))) implies $2 = ( FALSE )));
+L873: (for B330 being (Element of R1) holds (ex B331 being (Element of ( BOOLEAN )) st S2[ B330 , B331 ]))
+proof
+let C232 being (Element of R1);
+per cases ;
+suppose L874: (ex B332 being (Element of R1) st (B332 in ( EqClass (C232 , C231) ) & ( C230 . B332 ) = ( TRUE )));
+
+thus L875: thesis by L874;
+end;
+suppose L876: (not (ex B333 being (Element of R1) st (B333 in ( EqClass (C232 , C231) ) & ( C230 . B333 ) = ( TRUE ))));
+
+thus L877: thesis by L876;
+end;
+end;
+consider C233 being (Function of R1 , ( BOOLEAN )) such that L879: (for B334 being (Element of R1) holds S2[ B334 , ( C233 . B334 ) ]) from FUNCT_2:sch 3(L873);
+reconsider D16 = C233 as (Function of R1 , ( BOOLEAN ));
+reconsider D17 = D16 as (Function of R1 , ( BOOLEAN ));
+take D17;
+thus L880: thesis by L879;
+end;
+uniqueness
+proof
+let C234 , C235 being (Function of R1 , ( BOOLEAN ));
+assume that
+L881: (for B335 being (Element of R1) holds (((ex B336 being (Element of R1) st (B336 in ( EqClass (B335 , C231) ) & ( C230 . B336 ) = ( TRUE ))) implies ( C234 . B335 ) = ( TRUE )) & ((not (ex B337 being (Element of R1) st (B337 in ( EqClass (B335 , C231) ) & ( C230 . B337 ) = ( TRUE )))) implies ( C234 . B335 ) = ( FALSE ))))
+and
+L882: (for B338 being (Element of R1) holds (((ex B339 being (Element of R1) st (B339 in ( EqClass (B338 , C231) ) & ( C230 . B339 ) = ( TRUE ))) implies ( C235 . B338 ) = ( TRUE )) & ((not (ex B340 being (Element of R1) st (B340 in ( EqClass (B338 , C231) ) & ( C230 . B340 ) = ( TRUE )))) implies ( C235 . B338 ) = ( FALSE ))));
+let C236 being (Element of R1);
+L883:
+now
+assume L884: (not (ex B341 being (Element of R1) st (B341 in ( EqClass (C236 , C231) ) & ( C230 . B341 ) = ( TRUE ))));
+L885: ( C235 . C236 ) = ( FALSE ) by L884 , L882;
+thus L886: thesis by L885 , L881 , L884;
+end;
+L887:
+now
+assume L888: (ex B342 being (Element of R1) st (B342 in ( EqClass (C236 , C231) ) & ( C230 . B342 ) = ( TRUE )));
+L889: ( C235 . C236 ) = ( TRUE ) by L888 , L882;
+thus L890: thesis by L889 , L881 , L888;
+end;
+thus L891: thesis by L887 , L883;
+end;
+end;
+theorem
+L893: (for R1 being non  empty set holds (for B343 being (Function of R1 , ( BOOLEAN )) holds (for B344 being (a_partition of R1) holds ( B_INF (B343 , B344) ) is_dependent_of B344)))
+proof
+let R1 being non  empty set;
+let C237 being (Function of R1 , ( BOOLEAN ));
+let C238 being (a_partition of R1);
+L894: (for B345 being set holds (B345 in C238 implies (for B346 , B347 being set holds ((B346 in B345 & B347 in B345) implies ( ( B_INF (C237 , C238) ) . B346 ) = ( ( B_INF (C237 , C238) ) . B347 )))))
+proof
+let C239 being set;
+assume L895: C239 in C238;
+let C240 , C241 being set;
+assume that
+L896: C240 in C239
+and
+L897: C241 in C239;
+reconsider D18 = C240 as (Element of R1) by L895 , L896;
+L898: (( EqClass (D18 , C238) ) = C239 or ( EqClass (D18 , C238) ) misses C239) by L895 , EQREL_1:def 4;
+reconsider D19 = C241 as (Element of R1) by L895 , L897;
+L899: (D18 in ( EqClass (D18 , C238) ) & ( EqClass (D19 , C238) ) = C239) by L895 , EQREL_1:def 6 , L897;
+per cases ;
+suppose L900: (for B348 being (Element of R1) holds (B348 in ( EqClass (D18 , C238) ) implies ( C237 . B348 ) = ( TRUE )));
+
+L901: ( ( B_INF (C237 , C238) ) . D18 ) = ( TRUE ) by L900 , L851;
+thus L902: thesis by L901 , L896 , L898 , L899 , L900 , L851 , XBOOLE_0:3;
+end;
+suppose L903: (not (for B349 being (Element of R1) holds (B349 in ( EqClass (D18 , C238) ) implies ( C237 . B349 ) = ( TRUE ))));
+
+L904: ( ( B_INF (C237 , C238) ) . D18 ) = ( FALSE ) by L903 , L851;
+thus L905: thesis by L904 , L896 , L898 , L899 , L903 , L851 , XBOOLE_0:3;
+end;
+end;
+thus L907: thesis by L894 , L822;
+end;
+theorem
+L908: (for R1 being non  empty set holds (for B350 being (Function of R1 , ( BOOLEAN )) holds (for B351 being (a_partition of R1) holds ( B_SUP (B350 , B351) ) is_dependent_of B351)))
+proof
+let R1 being non  empty set;
+let C242 being (Function of R1 , ( BOOLEAN ));
+let C243 being (a_partition of R1);
+L909: (for B352 being set holds (B352 in C243 implies (for B353 , B354 being set holds ((B353 in B352 & B354 in B352) implies ( ( B_SUP (C242 , C243) ) . B353 ) = ( ( B_SUP (C242 , C243) ) . B354 )))))
+proof
+let C244 being set;
+assume L910: C244 in C243;
+let C245 , C246 being set;
+assume L911: (C245 in C244 & C246 in C244);
+reconsider D20 = C245 , D21 = C246 as (Element of R1) by L911 , L910;
+L912: D20 in ( EqClass (D20 , C243) ) by EQREL_1:def 6;
+L913: (( EqClass (D20 , C243) ) = C244 or ( EqClass (D20 , C243) ) misses C244) by L910 , EQREL_1:def 4;
+L914: ( EqClass (D21 , C243) ) = ( EqClass (D20 , C243) ) by L913 , L911 , L912 , EQREL_1:def 6 , XBOOLE_0:3;
+per cases ;
+suppose L915: (ex B355 being (Element of R1) st (B355 in ( EqClass (D20 , C243) ) & ( C242 . B355 ) = ( TRUE )));
+
+L916: ( ( B_SUP (C242 , C243) ) . D20 ) = ( TRUE ) by L915 , L872;
+thus L917: thesis by L916 , L914 , L915 , L872;
+end;
+suppose L918: (not (ex B356 being (Element of R1) st (B356 in ( EqClass (D20 , C243) ) & ( C242 . B356 ) = ( TRUE ))));
+
+L919: ( ( B_SUP (C242 , C243) ) . D20 ) = ( FALSE ) by L918 , L872;
+thus L920: thesis by L919 , L914 , L918 , L872;
+end;
+end;
+thus L922: thesis by L909 , L822;
+end;
+theorem
+L923: (for R1 being non  empty set holds (for B357 being (Function of R1 , ( BOOLEAN )) holds (for B358 being (a_partition of R1) holds ( B_INF (B357 , B358) ) '<' B357)))
+proof
+let R1 being non  empty set;
+let C247 being (Function of R1 , ( BOOLEAN ));
+let C248 being (a_partition of R1);
+L924: ( ( B_INF (C247 , C248) ) 'imp' C247 ) = ( I_el R1 )
+proof
+let C249 being (Element of R1);
+per cases ;
+suppose L925: (for B359 being (Element of R1) holds (B359 in ( EqClass (C249 , C248) ) implies ( C247 . B359 ) = ( TRUE )));
+
+L926: ( C247 . C249 ) = ( TRUE ) by L925 , EQREL_1:def 6;
+L927: ( 'not' ( ( B_INF (C247 , C248) ) . C249 ) ) = ( ( 'not' ( B_INF (C247 , C248) ) ) . C249 ) by MARGREL1:def 19;
+L928: ( ( 'not' ( ( B_INF (C247 , C248) ) . C249 ) ) 'or' ( C247 . C249 ) ) = ( ( ( 'not' ( B_INF (C247 , C248) ) ) . C249 ) 'or' ( ( I_el R1 ) . C249 ) ) by L927 , L926 , L160
+.= ( ( ( 'not' ( B_INF (C247 , C248) ) ) 'or' ( I_el R1 ) ) . C249 ) by L51
+.= ( ( I_el R1 ) . C249 ) by L184;
+thus L929: thesis by L928 , L119;
+end;
+suppose L930: (not (for B360 being (Element of R1) holds (B360 in ( EqClass (C249 , C248) ) implies ( C247 . B360 ) = ( TRUE ))));
+
+L931: ( ( B_INF (C247 , C248) ) . C249 ) = ( FALSE ) by L930 , L851;
+L932: ( ( 'not' ( ( B_INF (C247 , C248) ) . C249 ) ) 'or' ( C247 . C249 ) ) = ( ( ( I_el R1 ) . C249 ) 'or' ( C247 . C249 ) ) by L931 , L160
+.= ( ( ( I_el R1 ) 'or' C247 ) . C249 ) by L51
+.= ( ( I_el R1 ) . C249 ) by L184;
+thus L933: thesis by L932 , L119;
+end;
+end;
+thus L935: thesis by L924 , L209;
+end;
+theorem
+L936: (for R1 being non  empty set holds (for B361 being (Function of R1 , ( BOOLEAN )) holds (for B362 being (a_partition of R1) holds B361 '<' ( B_SUP (B361 , B362) ))))
+proof
+let R1 being non  empty set;
+let C250 being (Function of R1 , ( BOOLEAN ));
+let C251 being (a_partition of R1);
+L937: ( C250 'imp' ( B_SUP (C250 , C251) ) ) = ( I_el R1 )
+proof
+let C252 being (Element of R1);
+per cases ;
+suppose L938: (ex B363 being (Element of R1) st (B363 in ( EqClass (C252 , C251) ) & ( C250 . B363 ) = ( TRUE )));
+
+L939: ( ( B_SUP (C250 , C251) ) . C252 ) = ( TRUE ) by L938 , L872;
+L940: ( ( B_SUP (C250 , C251) ) . C252 ) = ( ( I_el R1 ) . C252 ) by L939 , L160;
+L941: ( ( 'not' ( C250 . C252 ) ) 'or' ( ( B_SUP (C250 , C251) ) . C252 ) ) = ( ( ( 'not' C250 ) . C252 ) 'or' ( ( I_el R1 ) . C252 ) ) by L940 , MARGREL1:def 19
+.= ( ( ( 'not' C250 ) 'or' ( I_el R1 ) ) . C252 ) by L51
+.= ( ( I_el R1 ) . C252 ) by L184;
+thus L942: thesis by L941 , L119;
+end;
+suppose L943: (not (ex B364 being (Element of R1) st (B364 in ( EqClass (C252 , C251) ) & ( C250 . B364 ) = ( TRUE ))));
+
+L944: ( C250 . C252 ) <> ( TRUE ) by L943 , EQREL_1:def 6;
+L945: ( C250 . C252 ) = ( FALSE ) by L944 , XBOOLEAN:def 3;
+L946: ( ( 'not' ( C250 . C252 ) ) 'or' ( ( B_SUP (C250 , C251) ) . C252 ) ) = ( ( ( I_el R1 ) . C252 ) 'or' ( ( B_SUP (C250 , C251) ) . C252 ) ) by L945 , L160
+.= ( ( ( I_el R1 ) 'or' ( B_SUP (C250 , C251) ) ) . C252 ) by L51
+.= ( ( I_el R1 ) . C252 ) by L184;
+thus L947: thesis by L946 , L119;
+end;
+end;
+thus L949: thesis by L937 , L209;
+end;
+theorem
+L950: (for R1 being non  empty set holds (for B365 being (Function of R1 , ( BOOLEAN )) holds (for B366 being (a_partition of R1) holds ( 'not' ( B_INF (B365 , B366) ) ) = ( B_SUP (( 'not' B365 ) , B366) ))))
+proof
+let R1 being non  empty set;
+let C253 being (Function of R1 , ( BOOLEAN ));
+let C254 being (a_partition of R1);
+let C255 being (Element of R1);
+L951:
+now
+assume that
+L952: (for B367 being (Element of R1) holds (B367 in ( EqClass (C255 , C254) ) implies ( C253 . B367 ) = ( TRUE )))
+and
+L953: (ex B368 being (Element of R1) st (B368 in ( EqClass (C255 , C254) ) & ( ( 'not' C253 ) . B368 ) = ( TRUE )));
+consider C256 being (Element of R1) such that L954: C256 in ( EqClass (C255 , C254) ) and L955: ( ( 'not' C253 ) . C256 ) = ( TRUE ) by L953;
+L956: ( ( 'not' ( 'not' C253 ) ) . C256 ) = ( 'not' ( TRUE ) ) by L955 , MARGREL1:def 19;
+thus L957: contradiction by L956 , L952 , L954;
+end;
+L958:
+now
+assume that
+L959: (not (for B369 being (Element of R1) holds (B369 in ( EqClass (C255 , C254) ) implies ( C253 . B369 ) = ( TRUE ))))
+and
+L960: (not (ex B370 being (Element of R1) st (B370 in ( EqClass (C255 , C254) ) & ( ( 'not' C253 ) . B370 ) = ( TRUE ))));
+consider C257 being (Element of R1) such that L961: C257 in ( EqClass (C255 , C254) ) and L962: ( C253 . C257 ) <> ( TRUE ) by L959;
+L963: ( C253 . C257 ) = ( FALSE ) by L962 , XBOOLEAN:def 3;
+L964: ( ( 'not' C253 ) . C257 ) = ( 'not' ( FALSE ) ) by L963 , MARGREL1:def 19;
+thus L965: contradiction by L964 , L960 , L961;
+end;
+L966:
+now
+assume that
+L967: (not (for B371 being (Element of R1) holds (B371 in ( EqClass (C255 , C254) ) implies ( C253 . B371 ) = ( TRUE ))))
+and
+L968: (ex B372 being (Element of R1) st (B372 in ( EqClass (C255 , C254) ) & ( ( 'not' C253 ) . B372 ) = ( TRUE )));
+L969: ( ( B_INF (C253 , C254) ) . C255 ) = ( FALSE ) by L967 , L851;
+L970: ( ( 'not' ( B_INF (C253 , C254) ) ) . C255 ) = ( 'not' ( FALSE ) ) by L969 , MARGREL1:def 19;
+thus L971: thesis by L970 , L968 , L872;
+end;
+L972:
+now
+assume that
+L973: (for B373 being (Element of R1) holds (B373 in ( EqClass (C255 , C254) ) implies ( C253 . B373 ) = ( TRUE )))
+and
+L974: (not (ex B374 being (Element of R1) st (B374 in ( EqClass (C255 , C254) ) & ( ( 'not' C253 ) . B374 ) = ( TRUE ))));
+L975: ( ( B_INF (C253 , C254) ) . C255 ) = ( TRUE ) by L973 , L851;
+L976: ( ( 'not' ( B_INF (C253 , C254) ) ) . C255 ) = ( 'not' ( TRUE ) ) by L975 , MARGREL1:def 19;
+thus L977: thesis by L976 , L974 , L872;
+end;
+thus L978: thesis by L972 , L951 , L966 , L958;
+end;
+theorem
+L979: (for R1 being non  empty set holds (for B375 being (Function of R1 , ( BOOLEAN )) holds ( B_INF (B375 , ( %O R1 )) ) = ( B_INF B375 )))
+proof
+let R1 being non  empty set;
+let C258 being (Function of R1 , ( BOOLEAN ));
+let C259 being (Element of R1);
+L980:
+now
+L981: ( EqClass (C259 , ( %O R1 )) ) in ( %O R1 );
+L982: ( EqClass (C259 , ( %O R1 )) ) in { R1 } by L981 , PARTIT1:def 8;
+L983: ( EqClass (C259 , ( %O R1 )) ) = R1 by L982 , TARSKI:def 1;
+assume L984: ((not (for B376 being (Element of R1) holds ( C258 . B376 ) = ( TRUE ))) & (for B377 being (Element of R1) holds (B377 in ( EqClass (C259 , ( %O R1 )) ) implies ( C258 . B377 ) = ( TRUE ))));
+thus L985: contradiction by L984 , L983;
+end;
+L986:
+now
+assume that
+L987: (not (for B378 being (Element of R1) holds ( C258 . B378 ) = ( TRUE )))
+and
+L988: (not (for B379 being (Element of R1) holds (B379 in ( EqClass (C259 , ( %O R1 )) ) implies ( C258 . B379 ) = ( TRUE ))));
+L989: ( B_INF C258 ) = ( O_el R1 ) by L987 , L265;
+L990: ( ( B_INF C258 ) . C259 ) = ( FALSE ) by L989 , L156;
+thus L991: thesis by L990 , L988 , L851;
+end;
+L992:
+now
+assume that
+L993: (for B380 being (Element of R1) holds ( C258 . B380 ) = ( TRUE ))
+and
+L994: (for B381 being (Element of R1) holds (B381 in ( EqClass (C259 , ( %O R1 )) ) implies ( C258 . B381 ) = ( TRUE )));
+L995: ( B_INF C258 ) = ( I_el R1 ) by L993 , L265;
+L996: ( ( B_INF C258 ) . C259 ) = ( TRUE ) by L995 , L160;
+thus L997: thesis by L996 , L994 , L851;
+end;
+thus L998: thesis by L992 , L980 , L986;
+end;
+theorem
+L999: (for R1 being non  empty set holds (for B382 being (Function of R1 , ( BOOLEAN )) holds ( B_SUP (B382 , ( %O R1 )) ) = ( B_SUP B382 )))
+proof
+let R1 being non  empty set;
+let C260 being (Function of R1 , ( BOOLEAN ));
+let C261 being (Element of R1);
+L1000: ( EqClass (C261 , ( %O R1 )) ) in ( %O R1 );
+L1001: ( EqClass (C261 , ( %O R1 )) ) in { R1 } by L1000 , PARTIT1:def 8;
+L1002: ( EqClass (C261 , ( %O R1 )) ) = R1 by L1001 , TARSKI:def 1;
+L1003:
+now
+assume that
+L1004: (not (ex B383 being (Element of R1) st (B383 in ( EqClass (C261 , ( %O R1 )) ) & ( C260 . B383 ) = ( TRUE ))))
+and
+L1005: (for B384 being (Element of R1) holds ( C260 . B384 ) = ( FALSE ));
+L1006: ( B_SUP C260 ) = ( O_el R1 ) by L1005 , L266;
+L1007: ( ( B_SUP C260 ) . C261 ) = ( FALSE ) by L1006 , L156;
+thus L1008: thesis by L1007 , L1004 , L872;
+end;
+L1009:
+now
+assume that
+L1010: (ex B385 being (Element of R1) st (B385 in ( EqClass (C261 , ( %O R1 )) ) & ( C260 . B385 ) = ( TRUE )))
+and
+L1011: (not (for B386 being (Element of R1) holds ( C260 . B386 ) = ( FALSE )));
+L1012: ( B_SUP C260 ) = ( I_el R1 ) by L1010 , L266;
+L1013: ( ( B_SUP C260 ) . C261 ) = ( TRUE ) by L1012 , L160;
+thus L1014: thesis by L1013 , L1010 , L872;
+end;
+thus L1015: thesis by L1009 , L1003 , L1002 , XBOOLEAN:def 3;
+end;
+theorem
+L1016: (for R1 being non  empty set holds (for B387 being (Function of R1 , ( BOOLEAN )) holds ( B_INF (B387 , ( %I R1 )) ) = B387))
+proof
+let R1 being non  empty set;
+let C262 being (Function of R1 , ( BOOLEAN ));
+let C263 being (Element of R1);
+L1017:
+now
+L1018: ( EqClass (C263 , ( %I R1 )) ) in ( %I R1 );
+L1019: ( EqClass (C263 , ( %I R1 )) ) in { R2 where R2 is (Subset of R1) : (ex B388 being set st (R2 = { B388 } & B388 in R1)) } by L1018 , PARTIT1:31;
+L1020: (ex R2 being (Subset of R1) st (( EqClass (C263 , ( %I R1 )) ) = R2 & (ex B389 being set st (R2 = { B389 } & B389 in R1)))) by L1019;
+consider C264 being set such that L1021: ( EqClass (C263 , ( %I R1 )) ) = { C264 } and L1022: C264 in R1 by L1020;
+L1023: C263 in { C264 } by L1021 , EQREL_1:def 6;
+assume that
+L1024: (not (for B390 being (Element of R1) holds (B390 in ( EqClass (C263 , ( %I R1 )) ) implies ( C262 . B390 ) = ( TRUE ))))
+and
+L1025: ( C262 . C263 ) = ( TRUE );
+consider C265 being (Element of R1) such that L1026: C265 in ( EqClass (C263 , ( %I R1 )) ) and L1027: ( C262 . C265 ) <> ( TRUE ) by L1024;
+L1028: C265 = C264 by L1026 , L1021 , TARSKI:def 1;
+thus L1029: contradiction by L1028 , L1025 , L1027 , L1023 , TARSKI:def 1;
+end;
+L1030:
+now
+assume L1031: (for B391 being (Element of R1) holds (B391 in ( EqClass (C263 , ( %I R1 )) ) implies ( C262 . B391 ) = ( TRUE )));
+L1032: ( C262 . C263 ) = ( TRUE ) by L1031 , EQREL_1:def 6;
+thus L1033: thesis by L1032 , L1031 , L851;
+end;
+L1034:
+now
+assume that
+L1035: (not (for B392 being (Element of R1) holds (B392 in ( EqClass (C263 , ( %I R1 )) ) implies ( C262 . B392 ) = ( TRUE ))))
+and
+L1036: ( C262 . C263 ) <> ( TRUE );
+L1037: ( C262 . C263 ) = ( FALSE ) by L1036 , XBOOLEAN:def 3;
+thus L1038: thesis by L1037 , L1035 , L851;
+end;
+thus L1039: thesis by L1034 , L1030 , L1017;
+end;
+theorem
+L1040: (for R1 being non  empty set holds (for B393 being (Function of R1 , ( BOOLEAN )) holds ( B_SUP (B393 , ( %I R1 )) ) = B393))
+proof
+let R1 being non  empty set;
+let C266 being (Function of R1 , ( BOOLEAN ));
+let C267 being (Element of R1);
+L1041:
+now
+L1042: ( EqClass (C267 , ( %I R1 )) ) in ( %I R1 );
+L1043: ( EqClass (C267 , ( %I R1 )) ) in { R2 where R2 is (Subset of R1) : (ex B394 being set st (R2 = { B394 } & B394 in R1)) } by L1042 , PARTIT1:31;
+L1044: (ex R2 being (Subset of R1) st (( EqClass (C267 , ( %I R1 )) ) = R2 & (ex B395 being set st (R2 = { B395 } & B395 in R1)))) by L1043;
+consider C268 being set such that L1045: ( EqClass (C267 , ( %I R1 )) ) = { C268 } and L1046: C268 in R1 by L1044;
+L1047: C267 in { C268 } by L1045 , EQREL_1:def 6;
+assume that
+L1048: (ex B396 being (Element of R1) st (B396 in ( EqClass (C267 , ( %I R1 )) ) & ( C266 . B396 ) = ( TRUE )))
+and
+L1049: ( C266 . C267 ) <> ( TRUE );
+consider C269 being (Element of R1) such that L1050: C269 in ( EqClass (C267 , ( %I R1 )) ) and L1051: ( C266 . C269 ) = ( TRUE ) by L1048;
+L1052: C269 = C268 by L1050 , L1045 , TARSKI:def 1;
+thus L1053: contradiction by L1052 , L1049 , L1051 , L1047 , TARSKI:def 1;
+end;
+L1054:
+now
+assume that
+L1055: (not (ex B397 being (Element of R1) st (B397 in ( EqClass (C267 , ( %I R1 )) ) & ( C266 . B397 ) = ( TRUE ))))
+and
+L1056: ( C266 . C267 ) <> ( TRUE );
+L1057: ( C266 . C267 ) = ( FALSE ) by L1056 , XBOOLEAN:def 3;
+thus L1058: thesis by L1057 , L1055 , L872;
+end;
+L1059: C267 in ( EqClass (C267 , ( %I R1 )) ) by EQREL_1:def 6;
+thus L1060: thesis by L1059 , L1041 , L1054 , L872;
+end;
+theorem
+L1061: (for R1 being non  empty set holds (for B398 , B399 being (Function of R1 , ( BOOLEAN )) holds (for B400 being (a_partition of R1) holds ( B_INF (( B398 '&' B399 ) , B400) ) = ( ( B_INF (B398 , B400) ) '&' ( B_INF (B399 , B400) ) ))))
+proof
+let R1 being non  empty set;
+let C270 , C271 being (Function of R1 , ( BOOLEAN ));
+let C272 being (a_partition of R1);
+let C273 being (Element of R1);
+L1062:
+now
+assume that
+L1063: (for B401 being (Element of R1) holds (B401 in ( EqClass (C273 , C272) ) implies ( C270 . B401 ) = ( TRUE )))
+and
+L1064: (not (for B402 being (Element of R1) holds (B402 in ( EqClass (C273 , C272) ) implies ( C271 . B402 ) = ( TRUE ))));
+L1065: ( ( B_INF (C271 , C272) ) . C273 ) = ( FALSE ) by L1064 , L851;
+L1066: ( ( ( B_INF (C270 , C272) ) . C273 ) '&' ( ( B_INF (C271 , C272) ) . C273 ) ) = ( FALSE ) by L1065;
+L1067: ( ( ( B_INF (C270 , C272) ) '&' ( B_INF (C271 , C272) ) ) . C273 ) = ( FALSE ) by L1066 , MARGREL1:def 20;
+consider C274 being (Element of R1) such that L1068: C274 in ( EqClass (C273 , C272) ) and L1069: ( C271 . C274 ) <> ( TRUE ) by L1064;
+L1070: ( C271 . C274 ) = ( FALSE ) by L1069 , XBOOLEAN:def 3;
+L1071: ( ( C270 . C274 ) '&' ( C271 . C274 ) ) = ( FALSE ) by L1070;
+L1072: ( ( C270 '&' C271 ) . C274 ) <> ( TRUE ) by L1071 , MARGREL1:def 20;
+thus L1073: thesis by L1072 , L1068 , L1067 , L851;
+end;
+L1074:
+now
+assume that
+L1075: (not (for B403 being (Element of R1) holds (B403 in ( EqClass (C273 , C272) ) implies ( C270 . B403 ) = ( TRUE ))))
+and
+L1076: (not (for B404 being (Element of R1) holds (B404 in ( EqClass (C273 , C272) ) implies ( C271 . B404 ) = ( TRUE ))));
+L1077: ( ( B_INF (C271 , C272) ) . C273 ) = ( FALSE ) by L1076 , L851;
+L1078: ( ( ( B_INF (C270 , C272) ) . C273 ) '&' ( ( B_INF (C271 , C272) ) . C273 ) ) = ( FALSE ) by L1077;
+L1079: ( ( ( B_INF (C270 , C272) ) '&' ( B_INF (C271 , C272) ) ) . C273 ) = ( FALSE ) by L1078 , MARGREL1:def 20;
+consider C275 being (Element of R1) such that L1080: C275 in ( EqClass (C273 , C272) ) and L1081: ( C270 . C275 ) <> ( TRUE ) by L1075;
+L1082: ( C270 . C275 ) = ( FALSE ) by L1081 , XBOOLEAN:def 3;
+L1083: ( ( C270 . C275 ) '&' ( C271 . C275 ) ) = ( FALSE ) by L1082;
+L1084: ( ( C270 '&' C271 ) . C275 ) <> ( TRUE ) by L1083 , MARGREL1:def 20;
+thus L1085: thesis by L1084 , L1080 , L1079 , L851;
+end;
+L1086:
+now
+assume that
+L1087: (for B405 being (Element of R1) holds (B405 in ( EqClass (C273 , C272) ) implies ( C270 . B405 ) = ( TRUE )))
+and
+L1088: (for B406 being (Element of R1) holds (B406 in ( EqClass (C273 , C272) ) implies ( C271 . B406 ) = ( TRUE )));
+L1089: (for B407 being (Element of R1) holds (B407 in ( EqClass (C273 , C272) ) implies ( ( C270 '&' C271 ) . B407 ) = ( TRUE )))
+proof
+let C276 being (Element of R1);
+assume L1090: C276 in ( EqClass (C273 , C272) );
+L1091: ( C271 . C276 ) = ( TRUE ) by L1090 , L1088;
+L1092: ( ( C270 . C276 ) '&' ( C271 . C276 ) ) = ( ( TRUE ) '&' ( TRUE ) ) by L1091 , L1087 , L1090;
+thus L1093: thesis by L1092 , MARGREL1:def 20;
+end;
+L1094: ( ( B_INF (C271 , C272) ) . C273 ) = ( TRUE ) by L1088 , L851;
+L1095: ( ( ( B_INF (C270 , C272) ) . C273 ) '&' ( ( B_INF (C271 , C272) ) . C273 ) ) = ( ( TRUE ) '&' ( TRUE ) ) by L1094 , L1087 , L851;
+L1096: ( ( ( B_INF (C270 , C272) ) '&' ( B_INF (C271 , C272) ) ) . C273 ) = ( TRUE ) by L1095 , MARGREL1:def 20;
+thus L1097: thesis by L1096 , L1089 , L851;
+end;
+L1098:
+now
+assume that
+L1099: (not (for B408 being (Element of R1) holds (B408 in ( EqClass (C273 , C272) ) implies ( C270 . B408 ) = ( TRUE ))))
+and
+L1100: (for B409 being (Element of R1) holds (B409 in ( EqClass (C273 , C272) ) implies ( C271 . B409 ) = ( TRUE )));
+L1101: ( ( B_INF (C271 , C272) ) . C273 ) = ( TRUE ) by L1100 , L851;
+L1102: ( ( ( B_INF (C270 , C272) ) . C273 ) '&' ( ( B_INF (C271 , C272) ) . C273 ) ) = ( ( FALSE ) '&' ( TRUE ) ) by L1101 , L1099 , L851;
+L1103: ( ( ( B_INF (C270 , C272) ) '&' ( B_INF (C271 , C272) ) ) . C273 ) = ( FALSE ) by L1102 , MARGREL1:def 20;
+consider C277 being (Element of R1) such that L1104: C277 in ( EqClass (C273 , C272) ) and L1105: ( C270 . C277 ) <> ( TRUE ) by L1099;
+L1106: ( C270 . C277 ) = ( FALSE ) by L1105 , XBOOLEAN:def 3;
+L1107: ( ( C270 . C277 ) '&' ( C271 . C277 ) ) = ( FALSE ) by L1106;
+L1108: ( ( C270 '&' C271 ) . C277 ) <> ( TRUE ) by L1107 , MARGREL1:def 20;
+thus L1109: thesis by L1108 , L1104 , L1103 , L851;
+end;
+thus L1110: thesis by L1098 , L1086 , L1062 , L1074;
+end;
+theorem
+L1111: (for R1 being non  empty set holds (for B410 , B411 being (Function of R1 , ( BOOLEAN )) holds (for B412 being (a_partition of R1) holds ( B_SUP (( B410 'or' B411 ) , B412) ) = ( ( B_SUP (B410 , B412) ) 'or' ( B_SUP (B411 , B412) ) ))))
+proof
+let R1 being non  empty set;
+let C278 , C279 being (Function of R1 , ( BOOLEAN ));
+let C280 being (a_partition of R1);
+let C281 being (Element of R1);
+L1112:
+now
+assume L1113: (ex B413 being (Element of R1) st (B413 in ( EqClass (C281 , C280) ) & ( ( C278 'or' C279 ) . B413 ) = ( TRUE )));
+consider C282 being (Element of R1) such that L1114: C282 in ( EqClass (C281 , C280) ) and L1115: ( ( C278 'or' C279 ) . C282 ) = ( TRUE ) by L1113;
+L1116: ((( C278 . C282 ) = ( FALSE ) & ( C279 . C282 ) = ( FALSE )) or (( C278 . C282 ) = ( FALSE ) & ( C279 . C282 ) = ( TRUE )) or (( C278 . C282 ) = ( TRUE ) & ( C279 . C282 ) = ( FALSE )) or (( C278 . C282 ) = ( TRUE ) & ( C279 . C282 ) = ( TRUE ))) by XBOOLEAN:def 3;
+L1117: ( ( C278 . C282 ) 'or' ( C279 . C282 ) ) = ( TRUE ) by L1115 , L51;
+L1118:
+now
+per cases  by L1117 , L1116;
+case L1119: (( C278 . C282 ) = ( FALSE ) & ( C279 . C282 ) = ( TRUE ));
+L1120: ( ( B_SUP (C279 , C280) ) . C281 ) = ( TRUE ) by L1119 , L1114 , L872;
+L1121: ( ( ( B_SUP (C278 , C280) ) . C281 ) 'or' ( ( B_SUP (C279 , C280) ) . C281 ) ) = ( TRUE ) by L1120;
+L1122: ( ( ( B_SUP (C278 , C280) ) 'or' ( B_SUP (C279 , C280) ) ) . C281 ) = ( TRUE ) by L1121 , L51;
+thus L1123: thesis by L1122 , L1113 , L872;
+end;
+case L1124: (( C278 . C282 ) = ( TRUE ) & ( C279 . C282 ) = ( FALSE ));
+L1125: ( ( B_SUP (C278 , C280) ) . C281 ) = ( TRUE ) by L1124 , L1114 , L872;
+L1126: ( ( ( B_SUP (C278 , C280) ) . C281 ) 'or' ( ( B_SUP (C279 , C280) ) . C281 ) ) = ( TRUE ) by L1125;
+L1127: ( ( ( B_SUP (C278 , C280) ) 'or' ( B_SUP (C279 , C280) ) ) . C281 ) = ( TRUE ) by L1126 , L51;
+thus L1128: thesis by L1127 , L1113 , L872;
+end;
+case L1129: (( C278 . C282 ) = ( TRUE ) & ( C279 . C282 ) = ( TRUE ));
+L1130: ( ( B_SUP (C279 , C280) ) . C281 ) = ( TRUE ) by L1129 , L1114 , L872;
+L1131: ( ( ( B_SUP (C278 , C280) ) . C281 ) 'or' ( ( B_SUP (C279 , C280) ) . C281 ) ) = ( TRUE ) by L1130;
+L1132: ( ( ( B_SUP (C278 , C280) ) 'or' ( B_SUP (C279 , C280) ) ) . C281 ) = ( TRUE ) by L1131 , L51;
+thus L1133: thesis by L1132 , L1113 , L872;
+end;
+end;
+thus L1135: thesis by L1118;
+end;
+L1136:
+now
+assume L1137: (not (ex B414 being (Element of R1) st (B414 in ( EqClass (C281 , C280) ) & ( ( C278 'or' C279 ) . B414 ) = ( TRUE ))));
+L1138:
+now
+assume L1139: (ex B415 being (Element of R1) st (B415 in ( EqClass (C281 , C280) ) & ( C279 . B415 ) = ( TRUE )));
+consider C283 being (Element of R1) such that L1140: C283 in ( EqClass (C281 , C280) ) and L1141: ( C279 . C283 ) = ( TRUE ) by L1139;
+L1142: ( ( C278 . C283 ) 'or' ( C279 . C283 ) ) = ( TRUE ) by L1141;
+L1143: ( ( C278 'or' C279 ) . C283 ) = ( TRUE ) by L1142 , L51;
+thus L1144: contradiction by L1143 , L1137 , L1140;
+end;
+L1145: ( ( B_SUP (C279 , C280) ) . C281 ) = ( FALSE ) by L1138 , L872;
+L1146:
+now
+assume L1147: (ex B416 being (Element of R1) st (B416 in ( EqClass (C281 , C280) ) & ( C278 . B416 ) = ( TRUE )));
+consider C284 being (Element of R1) such that L1148: C284 in ( EqClass (C281 , C280) ) and L1149: ( C278 . C284 ) = ( TRUE ) by L1147;
+L1150: ( ( C278 . C284 ) 'or' ( C279 . C284 ) ) = ( TRUE ) by L1149;
+L1151: ( ( C278 'or' C279 ) . C284 ) = ( TRUE ) by L1150 , L51;
+thus L1152: contradiction by L1151 , L1137 , L1148;
+end;
+L1153: ( ( ( B_SUP (C278 , C280) ) . C281 ) 'or' ( ( B_SUP (C279 , C280) ) . C281 ) ) = ( ( FALSE ) 'or' ( FALSE ) ) by L1146 , L1145 , L872;
+L1154: ( ( ( B_SUP (C278 , C280) ) 'or' ( B_SUP (C279 , C280) ) ) . C281 ) = ( FALSE ) by L1153 , L51;
+thus L1155: thesis by L1154 , L1137 , L872;
+end;
+thus L1156: thesis by L1136 , L1112;
+end;
+definition
+let R1 being non  empty set;
+let C285 being (Function of R1 , ( BOOLEAN ));
+func GPart C285 -> (a_partition of R1) equals 
+( { { B417 where B417 is (Element of R1) : ( C285 . B417 ) = ( TRUE ) } , { B418 where B418 is (Element of R1) : ( C285 . B418 ) = ( FALSE ) } } \ { ( {} ) } );
+correctness
+proof
+defpred S3[ set ] means ( C285 . $1 ) = ( TRUE );
+reconsider D22 = { B419 where B419 is (Element of R1) : S3[ B419 ] } as (Subset of R1) from DOMAIN_1:sch 7;
+defpred S4[ set ] means ( C285 . $1 ) = ( FALSE );
+reconsider D23 = { B420 where B420 is (Element of R1) : S4[ B420 ] } as (Subset of R1) from DOMAIN_1:sch 7;
+L1157: ( union ( { D22 , D23 } \ { ( {} ) } ) ) = R1
+proof
+thus L1158: ( union ( { D22 , D23 } \ { ( {} ) } ) ) c= R1
+proof
+let C286 being set;
+assume L1159: C286 in ( union ( { D22 , D23 } \ { ( {} ) } ) );
+L1160: (ex B421 being set st (C286 in B421 & B421 in ( { D22 , D23 } \ { ( {} ) } ))) by L1159 , TARSKI:def 4;
+L1161: (C286 in D22 or C286 in D23) by L1160 , TARSKI:def 2;
+thus L1162: thesis by L1161;
+end;
+
+let C287 being set;
+L1163: D22 in { D22 , D23 } by TARSKI:def 2;
+assume L1164: C287 in R1;
+reconsider D24 = C287 as (Element of R1) by L1164;
+L1165: (( C285 . D24 ) = ( TRUE ) or ( C285 . D24 ) = ( FALSE )) by TARSKI:def 2;
+L1166: D23 in { D22 , D23 } by TARSKI:def 2;
+per cases  by L1165;
+suppose L1167: D24 in D22;
+
+L1168: (not D22 in { ( {} ) }) by L1167 , TARSKI:def 1;
+L1169: D22 in ( { D22 , D23 } \ { ( {} ) } ) by L1168 , L1163 , XBOOLE_0:def 5;
+thus L1170: thesis by L1169 , L1167 , TARSKI:def 4;
+end;
+suppose L1171: D24 in D23;
+
+L1172: (not D23 in { ( {} ) }) by L1171 , TARSKI:def 1;
+L1173: D23 in ( { D22 , D23 } \ { ( {} ) } ) by L1172 , L1166 , XBOOLE_0:def 5;
+thus L1174: thesis by L1173 , L1171 , TARSKI:def 4;
+end;
+end;
+L1176: (for B422 being (Subset of R1) holds (B422 in ( { D22 , D23 } \ { ( {} ) } ) implies (B422 <> ( {} ) & (for B423 being (Subset of R1) holds (B423 in ( { D22 , D23 } \ { ( {} ) } ) implies (B422 = B423 or B422 misses B423))))))
+proof
+let C288 being (Subset of R1);
+L1177:
+now
+given C289 being set such that
+L1178: (C289 in D22 & C289 in D23);
+
+L1179:
+now
+assume L1180: C289 in D22;
+L1181: (ex B424 being (Element of R1) st (C289 = B424 & ( C285 . B424 ) = ( TRUE ))) by L1180;
+L1182:
+now
+assume L1183: C289 in D23;
+L1184: (ex B425 being (Element of R1) st (C289 = B425 & ( C285 . B425 ) = ( FALSE ))) by L1183;
+thus L1185: contradiction by L1184 , L1181;
+end;
+thus L1186: (not C289 in D23) by L1182;
+end;
+thus L1187: contradiction by L1179 , L1178;
+end;
+assume L1188: C288 in ( { D22 , D23 } \ { ( {} ) } );
+L1189: (not C288 in { ( {} ) }) by L1188 , XBOOLE_0:def 5;
+thus L1190: C288 <> ( {} ) by L1189 , TARSKI:def 1;
+let C290 being (Subset of R1);
+assume L1191: C290 in ( { D22 , D23 } \ { ( {} ) } );
+per cases  by L1188 , L1191 , TARSKI:def 2;
+suppose L1192: (C288 = D22 & C290 = D22);
+
+thus L1193: thesis by L1192;
+end;
+suppose L1194: (C288 = D23 & C290 = D23);
+
+thus L1195: thesis by L1194;
+end;
+suppose L1196: (C288 = D22 & C290 = D23);
+
+thus L1197: thesis by L1196 , L1177 , XBOOLE_0:3;
+end;
+suppose L1198: (C288 = D23 & C290 = D22);
+
+thus L1199: thesis by L1198 , L1177 , XBOOLE_0:3;
+end;
+end;
+L1201: ( { D22 , D23 } \ { ( {} ) } ) c= ( bool R1 )
+proof
+let C291 being set;
+assume L1202: C291 in ( { D22 , D23 } \ { ( {} ) } );
+L1203: (C291 = D22 or C291 = D23) by L1202 , TARSKI:def 2;
+thus L1204: thesis by L1203;
+end;
+thus L1205: thesis by L1201 , L1157 , L1176 , EQREL_1:def 4;
+end;
+end;
+theorem
+L1207: (for R1 being non  empty set holds (for B426 being (Function of R1 , ( BOOLEAN )) holds B426 is_dependent_of ( GPart B426 )))
+proof
+let R1 being non  empty set;
+let C292 being (Function of R1 , ( BOOLEAN ));
+defpred S5[ set ] means ( C292 . $1 ) = ( TRUE );
+reconsider D25 = { B427 where B427 is (Element of R1) : S5[ B427 ] } as (Subset of R1) from DOMAIN_1:sch 7;
+defpred S6[ set ] means ( C292 . $1 ) = ( FALSE );
+reconsider D26 = { B428 where B428 is (Element of R1) : S6[ B428 ] } as (Subset of R1) from DOMAIN_1:sch 7;
+L1208: (for B429 being set holds (B429 in ( GPart C292 ) implies (for B430 , B431 being set holds ((B430 in B429 & B431 in B429) implies ( C292 . B430 ) = ( C292 . B431 )))))
+proof
+let C293 being set;
+assume L1209: C293 in ( GPart C292 );
+thus L1210: (for B432 , B433 being set holds ((B432 in C293 & B433 in C293) implies ( C292 . B432 ) = ( C292 . B433 )))
+proof
+let C294 , C295 being set;
+assume L1211: (C294 in C293 & C295 in C293);
+reconsider D27 = C294 , D28 = C295 as (Element of R1) by L1211 , L1209;
+L1212:
+now
+per cases  by L1209 , TARSKI:def 2;
+case L1213: C293 = D25;
+L1214: ((ex B434 being (Element of R1) st (B434 = D27 & ( C292 . B434 ) = ( TRUE ))) & (ex B435 being (Element of R1) st (B435 = D28 & ( C292 . B435 ) = ( TRUE )))) by L1213 , L1211;
+thus L1215: thesis by L1214;
+end;
+case L1216: C293 = D26;
+L1217: ((ex B436 being (Element of R1) st (B436 = D27 & ( C292 . B436 ) = ( FALSE ))) & (ex B437 being (Element of R1) st (B437 = D28 & ( C292 . B437 ) = ( FALSE )))) by L1216 , L1211;
+thus L1218: thesis by L1217;
+end;
+end;
+thus L1220: thesis by L1212;
+end;
+
+end;
+thus L1211: thesis by L1208 , L822;
+end;
+theorem
+L1212: (for R1 being non  empty set holds (for B438 being (Function of R1 , ( BOOLEAN )) holds (for B439 being (a_partition of R1) holds (B438 is_dependent_of B439 implies B439 is_finer_than ( GPart B438 )))))
+proof
+let R1 being non  empty set;
+let C296 being (Function of R1 , ( BOOLEAN ));
+let C297 being (a_partition of R1);
+defpred S7[ set ] means ( C296 . $1 ) = ( TRUE );
+reconsider D29 = { B440 where B440 is (Element of R1) : S7[ B440 ] } as (Subset of R1) from DOMAIN_1:sch 7;
+defpred S8[ set ] means ( C296 . $1 ) = ( FALSE );
+reconsider D30 = { B441 where B441 is (Element of R1) : S8[ B441 ] } as (Subset of R1) from DOMAIN_1:sch 7;
+assume L1213: C296 is_dependent_of C297;
+L1214: (for B442 being set holds (B442 in C297 implies (ex B443 being set st (B443 in ( GPart C296 ) & B442 c= B443))))
+proof
+let C298 being set;
+set D31 = the (Element of C298);
+assume L1215: C298 in C297;
+L1216: C298 <> ( {} ) by L1215 , EQREL_1:def 4;
+L1217: D31 in C298 by L1216;
+reconsider D32 = D31 as (Element of R1) by L1217 , L1215;
+L1218: (for B444 being set holds (B444 in C298 implies (( C296 . B444 ) = ( TRUE ) or ( C296 . B444 ) = ( FALSE ))))
+proof
+let C299 being set;
+assume L1219: C299 in C298;
+reconsider D33 = C299 as (Element of R1) by L1219 , L1215;
+L1220: ( C296 . D33 ) in ( BOOLEAN );
+thus L1221: thesis by L1220 , TARSKI:def 2;
+end;
+L1222:
+now
+per cases  by L1216 , L1218;
+case L1223: ( C296 . D32 ) = ( TRUE );
+L1224: C298 c= D29
+proof
+let C300 being set;
+assume L1225: C300 in C298;
+reconsider D34 = C300 as (Element of R1) by L1225 , L1215;
+L1226:
+now
+per cases  by L1218 , L1225;
+case L1227: ( C296 . D34 ) = ( TRUE );
+thus L1228: thesis by L1227;
+end;
+case L1229: ( C296 . D34 ) = ( FALSE );
+thus L1230: contradiction by L1229 , L1213 , L1215 , L1223 , L1225 , L822;
+end;
+end;
+thus L1232: thesis by L1226;
+end;
+L1233: D32 in D29 by L1223;
+L1234: (not D29 in { ( {} ) }) by L1233 , TARSKI:def 1;
+L1235: D29 in { D29 , D30 } by TARSKI:def 2;
+L1236: D29 in ( { D29 , D30 } \ { ( {} ) } ) by L1235 , L1234 , XBOOLE_0:def 5;
+thus L1237: thesis by L1236 , L1224;
+end;
+case L1238: ( C296 . D32 ) = ( FALSE );
+L1239: C298 c= D30
+proof
+let C301 being set;
+assume L1240: C301 in C298;
+reconsider D35 = C301 as (Element of R1) by L1240 , L1215;
+L1241:
+now
+per cases  by L1218 , L1240;
+case L1242: ( C296 . D35 ) = ( TRUE );
+thus L1243: contradiction by L1242 , L1213 , L1215 , L1238 , L1240 , L822;
+end;
+case L1244: ( C296 . D35 ) = ( FALSE );
+thus L1245: thesis by L1244;
+end;
+end;
+thus L1247: thesis by L1241;
+end;
+L1248: D32 in D30 by L1238;
+L1249: (not D30 in { ( {} ) }) by L1248 , TARSKI:def 1;
+L1250: D30 in { D29 , D30 } by TARSKI:def 2;
+L1251: D30 in ( { D29 , D30 } \ { ( {} ) } ) by L1250 , L1249 , XBOOLE_0:def 5;
+thus L1252: thesis by L1251 , L1239;
+end;
+end;
+thus L1254: thesis by L1222;
+end;
+thus L1255: thesis by L1214 , SETFAM_1:def 2;
+end;
+begin
+definition
+let C302 , C303 being (Element of ( BOOLEAN ));
+redefine func C302 'nand' C303 -> (Element of ( BOOLEAN ));
+
+correctness
+proof
+L1256: (( C302 'nand' C303 ) = ( FALSE ) or ( C302 'nand' C303 ) = ( TRUE )) by XBOOLEAN:def 3;
+thus L1257: thesis by L1256;
+end;
+end;
+definition
+let C304 , C305 being (Element of ( BOOLEAN ));
+redefine func C304 'nor' C305 -> (Element of ( BOOLEAN ));
+
+correctness
+proof
+L1259: (( C304 'nor' C305 ) = ( FALSE ) or ( C304 'nor' C305 ) = ( TRUE )) by XBOOLEAN:def 3;
+thus L1260: thesis by L1259;
+end;
+end;
+definition
+let C306 , C307 being  boolean set;
+redefine func C306 <=> C307 equals 
+( 'not' ( C306 'xor' C307 ) );
+correctness;
+end;
+definition
+let C308 , C309 being (Element of ( BOOLEAN ));
+redefine func C308 <=> C309 -> (Element of ( BOOLEAN ));
+
+correctness
+proof
+L1263: (( C308 <=> C309 ) = ( FALSE ) or ( C308 <=> C309 ) = ( TRUE )) by XBOOLEAN:def 3;
+thus L1264: thesis by L1263;
+end;
+end;
+theorem
+L1266: (for R3 being  boolean set holds ( ( TRUE ) 'nand' R3 ) = ( 'not' R3 ));
+theorem
+L1267: (for R3 being  boolean set holds ( ( FALSE ) 'nand' R3 ) = ( TRUE ));
+theorem
+L1268: (for R3 being  boolean set holds (( R3 'nand' R3 ) = ( 'not' R3 ) & ( 'not' ( R3 'nand' R3 ) ) = R3));
+theorem
+L1269: (for R3 being  boolean set holds (for R4 being  boolean set holds ( 'not' ( R3 'nand' R4 ) ) = ( R3 '&' R4 )));
+theorem
+L1270: (for R3 being  boolean set holds (( R3 'nand' ( 'not' R3 ) ) = ( TRUE ) & ( 'not' ( R3 'nand' ( 'not' R3 ) ) ) = ( FALSE ))) by XBOOLEAN:135 , XBOOLEAN:138;
+theorem
+L1271: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds ( R3 'nand' ( R4 '&' R5 ) ) = ( 'not' ( ( R3 '&' R4 ) '&' R5 ) ))));
+theorem
+L1272: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds ( R3 'nand' ( R4 '&' R5 ) ) = ( ( R3 '&' R4 ) 'nand' R5 ))));
+theorem
+L1273: (for R3 being  boolean set holds ( ( TRUE ) 'nor' R3 ) = ( FALSE ));
+theorem
+L1274: (for R3 being  boolean set holds ( ( FALSE ) 'nor' R3 ) = ( 'not' R3 ));
+theorem
+L1275: (for R3 being  boolean set holds (( R3 'nor' R3 ) = ( 'not' R3 ) & ( 'not' ( R3 'nor' R3 ) ) = R3));
+theorem
+L1276: (for R3 being  boolean set holds (for R4 being  boolean set holds ( 'not' ( R3 'nor' R4 ) ) = ( R3 'or' R4 )));
+theorem
+L1277: (for R3 being  boolean set holds (( R3 'nor' ( 'not' R3 ) ) = ( FALSE ) & ( 'not' ( R3 'nor' ( 'not' R3 ) ) ) = ( TRUE ))) by XBOOLEAN:134 , XBOOLEAN:138;
+theorem
+L1278: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds ( R3 'nor' ( R4 'or' R5 ) ) = ( 'not' ( ( R3 'or' R4 ) 'or' R5 ) ))));
+theorem
+L1279: (for R3 being  boolean set holds ( ( TRUE ) <=> R3 ) = R3);
+theorem
+L1280: (for R3 being  boolean set holds ( ( FALSE ) <=> R3 ) = ( 'not' R3 ));
+theorem
+L1281: (for R3 being  boolean set holds (( R3 <=> R3 ) = ( TRUE ) & ( 'not' ( R3 <=> R3 ) ) = ( FALSE ))) by XBOOLEAN:125 , XBOOLEAN:143;
+theorem
+L1282: (for R3 being  boolean set holds (for R4 being  boolean set holds ( 'not' ( R3 <=> R4 ) ) = ( R3 'xor' R4 )));
+theorem
+L1283: (for R3 being  boolean set holds (( R3 <=> ( 'not' R3 ) ) = ( FALSE ) & ( 'not' ( R3 <=> ( 'not' R3 ) ) ) = ( TRUE ))) by XBOOLEAN:129 , XBOOLEAN:142;
+theorem
+L1284: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds (R3 <= ( R4 => R5 ) iff ( R3 '&' R4 ) <= R5))))
+proof
+let R3 being  boolean set;
+let R4 being  boolean set;
+let R5 being  boolean set;
+thus L1285: (R3 <= ( R4 => R5 ) implies ( R3 '&' R4 ) <= R5)
+proof
+assume L1286: R3 <= ( R4 => R5 );
+L1287: ( R3 => ( R4 => R5 ) ) = ( TRUE ) by L1286 , L1;
+L1288: ( R3 => ( R4 => R5 ) ) = ( ( R3 '&' R4 ) => R5 );
+thus L1289: thesis by L1288 , L1287 , L1;
+end;
+
+assume L1290: ( R3 '&' R4 ) <= R5;
+L1291: ( ( R3 '&' R4 ) => R5 ) = ( TRUE ) by L1290 , L1;
+L1292: ( ( R3 '&' R4 ) => R5 ) = ( R3 => ( R4 => R5 ) );
+thus L1293: thesis by L1292 , L1291 , L1;
+end;
+theorem
+L1294: (for R3 being  boolean set holds (for R4 being  boolean set holds ( R3 <=> R4 ) = ( ( R3 => R4 ) '&' ( R4 => R3 ) )));
+theorem
+L1295: (for R3 being  boolean set holds (for R4 being  boolean set holds ( R3 => R4 ) = ( ( 'not' R4 ) => ( 'not' R3 ) )));
+theorem
+L1296: (for R3 being  boolean set holds (for R4 being  boolean set holds ( R3 <=> R4 ) = ( ( 'not' R3 ) <=> ( 'not' R4 ) )));
+theorem
+L1297: (for R3 being  boolean set holds (for R4 being  boolean set holds ((R3 = ( TRUE ) & ( R3 => R4 ) = ( TRUE )) implies R4 = ( TRUE ))));
+theorem
+L1298: (for R3 being  boolean set holds (for R4 being  boolean set holds (R4 = ( TRUE ) implies ( R3 => R4 ) = ( TRUE ))));
+theorem
+L1299: (for R3 being  boolean set holds (for R4 being  boolean set holds (( 'not' R3 ) = ( TRUE ) implies ( R3 => R4 ) = ( TRUE ))));
+theorem
+L1300: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds (( R5 => ( R4 => R3 ) ) = ( TRUE ) implies ( R4 => ( R5 => R3 ) ) = ( TRUE )))));
+theorem
+L1301: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds ((( R5 => ( R4 => R3 ) ) = ( TRUE ) & R4 = ( TRUE )) implies ( R5 => R3 ) = ( TRUE )))));
+theorem
+L1302: (for R3 being  boolean set holds (for R4 being  boolean set holds (for R5 being  boolean set holds ((( R5 => ( R4 => R3 ) ) = ( TRUE ) & R4 = ( TRUE ) & R5 = ( TRUE )) implies R3 = ( TRUE )))));

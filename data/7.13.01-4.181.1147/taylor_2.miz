@@ -1,0 +1,1116 @@
+:: The {M}aclaurin Expansions
+::  by Akira Nishino and Yasunari Shidama
+::
+:: Received July 6, 2005
+:: Copyright (c) 2005-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, RCOMP_1, SUBSET_1, REAL_1, COMPLEX1, NEWTON, ARYTM_3,
+      RELAT_1, CARD_1, PARTFUN1, XREAL_0, ORDINAL1, SEQ_1, TAYLOR_1, XXREAL_1,
+      ARYTM_1, TARSKI, FDIFF_1, FUNCT_1, SERIES_1, REALSET1, XBOOLE_0, SIN_COS,
+      XXREAL_0, VALUED_0, VALUED_1, SEQ_2, ORDINAL2, CARD_3, ABIAN, TAYLOR_2;
+ notations TARSKI, SUBSET_1, RELAT_1, PARTFUN1, RFUNCT_2, RCOMP_1, XXREAL_0,
+      XREAL_0, ORDINAL1, NUMBERS, COMPLEX1, REAL_1, NAT_1, FUNCT_2, VALUED_1,
+      SEQ_1, COMSEQ_2, SEQ_2, SERIES_1, FDIFF_1, SEQFUNC, NEWTON, SIN_COS,
+      TAYLOR_1, ABIAN;
+ constructors ARYTM_0, REAL_1, NAT_1, SEQ_2, RCOMP_1, RFUNCT_2, LIMFUNC1,
+      FDIFF_1, COMSEQ_3, SIN_COS, ABIAN, TAYLOR_1, SEQ_1, SEQFUNC, SERIES_1,
+      VALUED_1, RELSET_1, COMSEQ_2;
+ registrations RELSET_1, NUMBERS, XXREAL_0, XREAL_0, NAT_1, MEMBERED, RCOMP_1,
+      XBOOLE_0, VALUED_0, VALUED_1, FUNCT_2, COMSEQ_2;
+ requirements SUBSET, REAL, BOOLE, NUMERALS, ARITHM;
+ definitions TAYLOR_1, VALUED_1, SUBSET_1;
+ theorems XBOOLE_1, ABSVALUE, PARTFUN1, XCMPLX_1, RELAT_1, RCOMP_1, SEQ_1,
+      SEQ_2, SIN_COS, SERIES_1, FUNCT_1, RFUNCT_2, NAT_1, NEWTON, POWER,
+      FDIFF_1, FDIFF_2, TAYLOR_1, SIN_COS2, XREAL_1, RFUNCT_1, ABIAN, COMPLEX1,
+      XXREAL_0, VALUED_1, FUNCT_2;
+ schemes NAT_1;
+
+begin
+theorem
+L1: (for B1 being Real holds (for B2 being (Element of ( NAT )) holds ( abs ( B1 |^ B2 ) ) = ( ( abs B1 ) |^ B2 )))
+proof
+let C1 being Real;
+let C2 being (Element of ( NAT ));
+defpred S1[ (Element of ( NAT )) ] means ( abs ( C1 |^ $1 ) ) = ( ( abs C1 ) |^ $1 );
+L2: (for B3 being (Element of ( NAT )) holds (S1[ B3 ] implies S1[ ( B3 + 1 ) ]))
+proof
+let C3 being (Element of ( NAT ));
+assume that
+L3: S1[ C3 ];
+L4: ( abs ( C1 |^ ( C3 + 1 ) ) ) = ( abs ( C1 * ( C1 |^ C3 ) ) ) by NEWTON:6
+.= ( ( abs C1 ) * ( abs ( C1 |^ C3 ) ) ) by COMPLEX1:65
+.= ( ( abs C1 ) |^ ( C3 + 1 ) ) by L3 , NEWTON:6;
+thus L5: thesis by L4;
+end;
+L6: ( abs ( C1 |^ ( 0 ) ) ) = ( abs 1 ) by NEWTON:4
+.= 1 by ABSVALUE:def 1;
+L7: S1[ ( 0 ) ] by L6 , NEWTON:4;
+L8: (for B4 being (Element of ( NAT )) holds S1[ B4 ]) from NAT_1:sch 1(L7 , L2);
+thus L9: thesis by L8;
+end;
+definition
+let C4 being (PartFunc of ( REAL ) , ( REAL ));
+let C5 being (Subset of ( REAL ));
+let C6 being  real number;
+func Maclaurin (C4 , C5 , C6) -> Real_Sequence equals 
+( Taylor (C4 , C5 , ( 0 ) , C6) );
+coherence;
+end;
+theorem
+L11: (for B5 being (Element of ( NAT )) holds (for B6 being (PartFunc of ( REAL ) , ( REAL )) holds (for B7 being Real holds ((( 0 ) < B7 & ]. ( - B7 ) , B7 .[ c= ( dom B6 ) & B6 is_differentiable_on ( B5 + 1 ) , ]. ( - B7 ) , B7 .[) implies (for B8 being Real holds (B8 in ]. ( - B7 ) , B7 .[ implies (ex B9 being Real st (( 0 ) < B9 & B9 < 1 & ( B6 . B8 ) = ( ( ( Partial_Sums ( Maclaurin (B6 , ]. ( - B7 ) , B7 .[ , B8) ) ) . B5 ) + ( ( ( ( ( diff (B6 , ]. ( - B7 ) , B7 .[) ) . ( B5 + 1 ) ) . ( B9 * B8 ) ) * ( B8 |^ ( B5 + 1 ) ) ) / ( ( B5 + 1 ) ! ) ) )))))))))
+proof
+let C7 being (Element of ( NAT ));
+let C8 being (PartFunc of ( REAL ) , ( REAL ));
+let C9 being Real;
+assume that
+L12: (( 0 ) < C9 & ]. ( - C9 ) , C9 .[ c= ( dom C8 ) & C8 is_differentiable_on ( C7 + 1 ) , ]. ( - C9 ) , C9 .[);
+let C10 being Real;
+assume L13: C10 in ]. ( - C9 ) , C9 .[;
+consider C11 being Real such that L14: (( 0 ) < C11 & C11 < 1 & ( C8 . C10 ) = ( ( ( Partial_Sums ( Taylor (C8 , ]. ( ( 0 ) - C9 ) , ( ( 0 ) + C9 ) .[ , ( 0 ) , C10) ) ) . C7 ) + ( ( ( ( ( diff (C8 , ]. ( ( 0 ) - C9 ) , ( ( 0 ) + C9 ) .[) ) . ( C7 + 1 ) ) . ( ( 0 ) + ( C11 * ( C10 - ( 0 ) ) ) ) ) * ( ( C10 - ( 0 ) ) |^ ( C7 + 1 ) ) ) / ( ( C7 + 1 ) ! ) ) )) by L13 , L12 , TAYLOR_1:33;
+take C11;
+thus L15: thesis by L14;
+end;
+theorem
+L16: (for B10 being (Element of ( NAT )) holds (for B11 being (PartFunc of ( REAL ) , ( REAL )) holds (for B12 , B13 being Real holds ((( 0 ) < B13 & ]. ( B12 - B13 ) , ( B12 + B13 ) .[ c= ( dom B11 ) & B11 is_differentiable_on ( B10 + 1 ) , ]. ( B12 - B13 ) , ( B12 + B13 ) .[) implies (for B14 being Real holds (B14 in ]. ( B12 - B13 ) , ( B12 + B13 ) .[ implies (ex B15 being Real st (( 0 ) < B15 & B15 < 1 & ( abs ( ( B11 . B14 ) - ( ( Partial_Sums ( Taylor (B11 , ]. ( B12 - B13 ) , ( B12 + B13 ) .[ , B12 , B14) ) ) . B10 ) ) ) = ( abs ( ( ( ( ( diff (B11 , ]. ( B12 - B13 ) , ( B12 + B13 ) .[) ) . ( B10 + 1 ) ) . ( B12 + ( B15 * ( B14 - B12 ) ) ) ) * ( ( B14 - B12 ) |^ ( B10 + 1 ) ) ) / ( ( B10 + 1 ) ! ) ) )))))))))
+proof
+let C12 being (Element of ( NAT ));
+let C13 being (PartFunc of ( REAL ) , ( REAL ));
+let C14 , C15 being Real;
+assume that
+L17: (( 0 ) < C15 & ]. ( C14 - C15 ) , ( C14 + C15 ) .[ c= ( dom C13 ) & C13 is_differentiable_on ( C12 + 1 ) , ]. ( C14 - C15 ) , ( C14 + C15 ) .[);
+let C16 being Real;
+assume L18: C16 in ]. ( C14 - C15 ) , ( C14 + C15 ) .[;
+L19: (ex B16 being Real st (( 0 ) < B16 & B16 < 1 & ( C13 . C16 ) = ( ( ( Partial_Sums ( Taylor (C13 , ]. ( C14 - C15 ) , ( C14 + C15 ) .[ , C14 , C16) ) ) . C12 ) + ( ( ( ( ( diff (C13 , ]. ( C14 - C15 ) , ( C14 + C15 ) .[) ) . ( C12 + 1 ) ) . ( C14 + ( B16 * ( C16 - C14 ) ) ) ) * ( ( C16 - C14 ) |^ ( C12 + 1 ) ) ) / ( ( C12 + 1 ) ! ) ) ))) by L18 , L17 , TAYLOR_1:33;
+thus L20: thesis by L19;
+end;
+theorem
+L21: (for B17 being (Element of ( NAT )) holds (for B18 being (PartFunc of ( REAL ) , ( REAL )) holds (for B19 being Real holds ((( 0 ) < B19 & ]. ( - B19 ) , B19 .[ c= ( dom B18 ) & B18 is_differentiable_on ( B17 + 1 ) , ]. ( - B19 ) , B19 .[) implies (for B20 being Real holds (B20 in ]. ( - B19 ) , B19 .[ implies (ex B21 being Real st (( 0 ) < B21 & B21 < 1 & ( abs ( ( B18 . B20 ) - ( ( Partial_Sums ( Maclaurin (B18 , ]. ( - B19 ) , B19 .[ , B20) ) ) . B17 ) ) ) = ( abs ( ( ( ( ( diff (B18 , ]. ( - B19 ) , B19 .[) ) . ( B17 + 1 ) ) . ( B21 * B20 ) ) * ( B20 |^ ( B17 + 1 ) ) ) / ( ( B17 + 1 ) ! ) ) )))))))))
+proof
+let C17 being (Element of ( NAT ));
+let C18 being (PartFunc of ( REAL ) , ( REAL ));
+let C19 being Real;
+assume that
+L22: (( 0 ) < C19 & ]. ( - C19 ) , C19 .[ c= ( dom C18 ) & C18 is_differentiable_on ( C17 + 1 ) , ]. ( - C19 ) , C19 .[);
+let C20 being Real;
+assume L23: C20 in ]. ( - C19 ) , C19 .[;
+L24: (ex B22 being Real st (( 0 ) < B22 & B22 < 1 & ( C18 . C20 ) = ( ( ( Partial_Sums ( Maclaurin (C18 , ]. ( - C19 ) , C19 .[ , C20) ) ) . C17 ) + ( ( ( ( ( diff (C18 , ]. ( - C19 ) , C19 .[) ) . ( C17 + 1 ) ) . ( B22 * C20 ) ) * ( C20 |^ ( C17 + 1 ) ) ) / ( ( C17 + 1 ) ! ) ) ))) by L23 , L22 , L11;
+thus L25: thesis by L24;
+end;
+L26: (for R1 being  open (Subset of ( REAL )) holds (for B23 being (Function of ( REAL ) , ( REAL )) holds ( dom ( B23 | R1 ) ) = R1))
+proof
+let R1 being  open (Subset of ( REAL ));
+let C21 being (Function of ( REAL ) , ( REAL ));
+L27: ( dom C21 ) = ( REAL ) by FUNCT_2:def 1;
+thus L28: ( dom ( C21 | R1 ) ) = ( ( dom C21 ) /\ R1 ) by RELAT_1:61
+.= R1 by L27 , XBOOLE_1:28;
+end;
+theorem
+L29: (for R1 being  open (Subset of ( REAL )) holds (( ( exp_R ) `| R1 ) = ( ( exp_R ) | R1 ) & ( dom ( ( exp_R ) | R1 ) ) = R1))
+proof
+let R1 being  open (Subset of ( REAL ));
+L30: ( exp_R ) is_differentiable_on R1 by FDIFF_1:26 , TAYLOR_1:16;
+L31: ( dom ( ( exp_R ) | R1 ) ) = R1 by L26;
+L32: (for B24 being Real holds (B24 in R1 implies ( ( ( exp_R ) `| R1 ) . B24 ) = ( ( ( exp_R ) | R1 ) . B24 )))
+proof
+let C22 being Real;
+assume that
+L33: C22 in R1;
+thus L34: ( ( ( exp_R ) `| R1 ) . C22 ) = ( diff (( exp_R ) , C22) ) by L30 , L33 , FDIFF_1:def 7
+.= ( ( exp_R ) . C22 ) by TAYLOR_1:16
+.= ( ( ( exp_R ) | R1 ) . C22 ) by L31 , L33 , FUNCT_1:47;
+end;
+L35: ( dom ( ( exp_R ) `| R1 ) ) = R1 by L30 , FDIFF_1:def 7;
+thus L36: thesis by L35 , L31 , L32 , PARTFUN1:5;
+end;
+theorem
+L37: (for R1 being  open (Subset of ( REAL )) holds (for B25 being (Element of ( NAT )) holds ( ( diff (( exp_R ) , R1) ) . B25 ) = ( ( exp_R ) | R1 )))
+proof
+let R1 being  open (Subset of ( REAL ));
+let C23 being (Element of ( NAT ));
+defpred S2[ (Element of ( NAT )) ] means ( ( diff (( exp_R ) , R1) ) . $1 ) = ( ( exp_R ) | R1 );
+L38: (for B26 being (Element of ( NAT )) holds (S2[ B26 ] implies S2[ ( B26 + 1 ) ]))
+proof
+let C24 being (Element of ( NAT ));
+assume that
+L39: S2[ C24 ];
+L40: ( exp_R ) is_differentiable_on R1 by FDIFF_1:26 , TAYLOR_1:16;
+L41: ( ( diff (( exp_R ) , R1) ) . ( C24 + 1 ) ) = ( ( ( diff (( exp_R ) , R1) ) . C24 ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( exp_R ) `| R1 ) by L39 , L40 , FDIFF_2:16
+.= ( ( exp_R ) | R1 ) by L29;
+thus L42: thesis by L41;
+end;
+L43: S2[ ( 0 ) ] by TAYLOR_1:def 5;
+L44: (for B27 being (Element of ( NAT )) holds S2[ B27 ]) from NAT_1:sch 1(L43 , L38);
+thus L45: thesis by L44;
+end;
+theorem
+L46: (for R1 being  open (Subset of ( REAL )) holds (for B28 being (Element of ( NAT )) holds (for B29 being Real holds (B29 in R1 implies ( ( ( diff (( exp_R ) , R1) ) . B28 ) . B29 ) = ( ( exp_R ) . B29 )))))
+proof
+let R1 being  open (Subset of ( REAL ));
+let C25 being (Element of ( NAT ));
+let C26 being Real;
+assume L47: C26 in R1;
+L48: C26 in ( dom ( ( exp_R ) | R1 ) ) by L47 , L29;
+L49: ( ( ( diff (( exp_R ) , R1) ) . C25 ) . C26 ) = ( ( ( exp_R ) | R1 ) . C26 ) by L37
+.= ( ( exp_R ) . C26 ) by L48 , FUNCT_1:47;
+thus L50: thesis by L49;
+end;
+theorem
+L51: (for B30 being (Element of ( NAT )) holds (for B31 , B32 being Real holds (( 0 ) < B31 implies ( ( Maclaurin (( exp_R ) , ]. ( - B31 ) , B31 .[ , B32) ) . B30 ) = ( ( B32 |^ B30 ) / ( B30 ! ) ))))
+proof
+let C27 being (Element of ( NAT ));
+L52: ( abs ( ( 0 ) - ( 0 ) ) ) = ( 0 ) by ABSVALUE:2;
+let C28 , C29 being Real;
+assume L53: C28 > ( 0 );
+L54: ( 0 ) in ]. ( ( 0 ) - C28 ) , ( ( 0 ) + C28 ) .[ by L53 , L52 , RCOMP_1:1;
+L55: ( 0 ) in ( dom ( ( exp_R ) | ]. ( - C28 ) , C28 .[ ) ) by L54 , L29;
+L56: ( ( Maclaurin (( exp_R ) , ]. ( - C28 ) , C28 .[ , C29) ) . C27 ) = ( ( ( ( ( diff (( exp_R ) , ]. ( - C28 ) , C28 .[) ) . C27 ) . ( 0 ) ) * ( ( C29 - ( 0 ) ) |^ C27 ) ) / ( C27 ! ) ) by TAYLOR_1:def 7
+.= ( ( ( ( ( exp_R ) | ]. ( - C28 ) , C28 .[ ) . ( 0 ) ) * ( C29 |^ C27 ) ) / ( C27 ! ) ) by L37
+.= ( ( ( ( exp_R ) . ( 0 ) ) * ( C29 |^ C27 ) ) / ( C27 ! ) ) by L55 , FUNCT_1:47
+.= ( ( C29 |^ C27 ) / ( C27 ! ) ) by SIN_COS2:13;
+thus L57: thesis by L56;
+end;
+theorem
+L58: (for B33 being (Element of ( NAT )) holds (for B34 , B35 , B36 being Real holds ((B35 in ]. ( - B34 ) , B34 .[ & ( 0 ) < B36 & B36 < 1) implies ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - B34 ) , B34 .[) ) . ( B33 + 1 ) ) . ( B36 * B35 ) ) * ( B35 |^ ( B33 + 1 ) ) ) / ( ( B33 + 1 ) ! ) ) ) <= ( ( ( abs ( ( exp_R ) . ( B36 * B35 ) ) ) * ( ( abs B35 ) |^ ( B33 + 1 ) ) ) / ( ( B33 + 1 ) ! ) ))))
+proof
+let C30 being (Element of ( NAT ));
+let C31 , C32 , C33 being Real;
+assume that
+L59: C32 in ]. ( - C31 ) , C31 .[
+and
+L60: ( 0 ) < C33
+and
+L61: C33 < 1;
+L62: ( abs ( ( C33 * C32 ) - ( 0 ) ) ) = ( ( abs C33 ) * ( abs C32 ) ) by COMPLEX1:65
+.= ( C33 * ( abs C32 ) ) by L60 , ABSVALUE:def 1;
+L63: C32 in ]. ( ( 0 ) - C31 ) , ( ( 0 ) + C31 ) .[ by L59;
+L64: ( abs ( C32 - ( 0 ) ) ) < C31 by L63 , RCOMP_1:1;
+L65: ( abs C32 ) >= ( 0 ) by COMPLEX1:46;
+L66: ( ( abs C32 ) * C33 ) < ( C31 * 1 ) by L65 , L60 , L61 , L64 , XREAL_1:97;
+L67: ( C33 * C32 ) in ]. ( ( 0 ) - C31 ) , ( ( 0 ) + C31 ) .[ by L66 , L62 , RCOMP_1:1;
+L68: ( C33 * C32 ) in ( dom ( ( exp_R ) | ]. ( - C31 ) , C31 .[ ) ) by L67 , L29;
+L69: ( ( C30 + 1 ) ! ) > ( 0 ) by NEWTON:17;
+L70: ( abs ( ( C30 + 1 ) ! ) ) = ( ( C30 + 1 ) ! ) by L69 , ABSVALUE:def 1;
+L71: ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C31 ) , C31 .[) ) . ( C30 + 1 ) ) . ( C33 * C32 ) ) * ( C32 |^ ( C30 + 1 ) ) ) / ( ( C30 + 1 ) ! ) ) ) = ( abs ( ( ( ( ( exp_R ) | ]. ( - C31 ) , C31 .[ ) . ( C33 * C32 ) ) * ( C32 |^ ( C30 + 1 ) ) ) / ( ( C30 + 1 ) ! ) ) ) by L37
+.= ( abs ( ( ( ( exp_R ) . ( C33 * C32 ) ) * ( C32 |^ ( C30 + 1 ) ) ) / ( ( C30 + 1 ) ! ) ) ) by L68 , FUNCT_1:47
+.= ( ( abs ( ( ( exp_R ) . ( C33 * C32 ) ) * ( C32 |^ ( C30 + 1 ) ) ) ) / ( abs ( ( C30 + 1 ) ! ) ) ) by COMPLEX1:67
+.= ( ( ( abs ( ( exp_R ) . ( C33 * C32 ) ) ) * ( abs ( C32 |^ ( C30 + 1 ) ) ) ) / ( ( C30 + 1 ) ! ) ) by L70 , COMPLEX1:65;
+thus L72: thesis by L71 , L1;
+end;
+theorem
+L73: (for R1 being  open (Subset of ( REAL )) holds (for B37 being (Element of ( NAT )) holds ( exp_R ) is_differentiable_on B37 , R1))
+proof
+let R1 being  open (Subset of ( REAL ));
+let C34 being (Element of ( NAT ));
+let C35 being (Element of ( NAT ));
+assume that
+L74: C35 <= ( C34 - 1 );
+reconsider D1 = C35 as (Element of ( NAT ));
+L75: (for B38 being Real holds (B38 in R1 implies ( ( ( diff (( exp_R ) , R1) ) . D1 ) | R1 ) is_differentiable_in B38))
+proof
+L76: ( ( ( diff (( exp_R ) , R1) ) . D1 ) | R1 ) = ( ( ( exp_R ) | R1 ) | R1 ) by L37
+.= ( ( exp_R ) | R1 ) by FUNCT_1:51;
+L77: ( exp_R ) is_differentiable_on R1 by FDIFF_1:26 , TAYLOR_1:16;
+let C36 being Real;
+assume L78: C36 in R1;
+thus L79: thesis by L78 , L76 , L77 , FDIFF_1:def 6;
+end;
+L80: ( dom ( ( diff (( exp_R ) , R1) ) . D1 ) ) = ( dom ( ( exp_R ) | R1 ) ) by L37
+.= R1 by L29;
+thus L81: thesis by L80 , L75 , FDIFF_1:def 6;
+end;
+theorem
+L82: (for B39 being Real holds (( 0 ) < B39 implies (ex B40 , B41 being Real st (( 0 ) <= B40 & ( 0 ) <= B41 & (for B42 being (Element of ( NAT )) holds (for B43 , B44 being Real holds ((B43 in ]. ( - B39 ) , B39 .[ & ( 0 ) < B44 & B44 < 1) implies ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - B39 ) , B39 .[) ) . B42 ) . ( B44 * B43 ) ) * ( B43 |^ B42 ) ) / ( B42 ! ) ) ) <= ( ( B40 * ( B41 |^ B42 ) ) / ( B42 ! ) ))))))))
+proof
+let C37 being Real;
+assume that
+L83: C37 > ( 0 );
+take D2 = ( ( exp_R ) . C37 );
+take D3 = C37;
+L84:
+now
+let C38 being (Element of ( NAT ));
+L85:
+now
+L86: (for B45 , B46 being Real holds ((( 0 ) <= B45 & B45 <= B46) implies (for B47 being (Element of ( NAT )) holds (( 0 ) <= ( B45 |^ B47 ) & ( B45 |^ B47 ) <= ( B46 |^ B47 )))))
+proof
+let C39 , C40 being Real;
+assume that
+L87: ( 0 ) <= C39
+and
+L88: C39 <= C40;
+defpred S3[ (Element of ( NAT )) ] means (( 0 ) <= ( C39 |^ $1 ) & ( C39 |^ $1 ) <= ( C40 |^ $1 ));
+L89: (for B48 being (Element of ( NAT )) holds (S3[ B48 ] implies S3[ ( B48 + 1 ) ]))
+proof
+let C41 being (Element of ( NAT ));
+assume that
+L90: S3[ C41 ];
+L91: ( ( 0 ) * C39 ) <= ( ( C39 |^ C41 ) * C39 ) by L87 , L90;
+thus L92: ( C39 |^ ( C41 + 1 ) ) >= ( 0 ) by L91 , NEWTON:6;
+L93: (( C40 |^ ( C41 + 1 ) ) = ( ( C40 |^ C41 ) * C40 ) & ( ( C39 |^ C41 ) * C39 ) <= ( ( C40 |^ C41 ) * C40 )) by L87 , L88 , L90 , NEWTON:6 , XREAL_1:66;
+thus L94: thesis by L93 , NEWTON:6;
+end;
+L95: ( C40 |^ ( 0 ) ) = 1 by NEWTON:4;
+L96: S3[ ( 0 ) ] by L95 , NEWTON:4;
+L97: (for B49 being (Element of ( NAT )) holds S3[ B49 ]) from NAT_1:sch 1(L96 , L89);
+thus L98: thesis by L97;
+end;
+let C42 , C43 being Real;
+assume that
+L99: C42 in ]. ( - C37 ) , C37 .[
+and
+L100: ( 0 ) < C43
+and
+L101: C43 < 1;
+L102: C42 in ]. ( ( 0 ) - C37 ) , ( ( 0 ) + C37 ) .[ by L99;
+L103: ( abs ( C42 - ( 0 ) ) ) < C37 by L102 , RCOMP_1:1;
+L104: ( abs C42 ) >= ( 0 ) by COMPLEX1:46;
+L105: ( ( abs C42 ) |^ C38 ) <= ( D3 |^ C38 ) by L104 , L103 , L86;
+L106: ( C38 ! ) > ( 0 ) by NEWTON:17;
+L107: ( abs C42 ) >= ( 0 ) by COMPLEX1:46;
+L108: ( C43 * ( abs C42 ) ) < ( 1 * C37 ) by L107 , L100 , L101 , L103 , XREAL_1:97;
+L109: ( ( abs C43 ) * ( abs C42 ) ) < C37 by L108 , L100 , ABSVALUE:def 1;
+L110: ( abs ( ( C43 * C42 ) - ( 0 ) ) ) < C37 by L109 , COMPLEX1:65;
+L111: ( C43 * C42 ) in ]. ( ( 0 ) - C37 ) , ( ( 0 ) + C37 ) .[ by L110 , RCOMP_1:1;
+L112: ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C37 ) , C37 .[) ) . C38 ) . ( C43 * C42 ) ) * ( C42 |^ C38 ) ) / ( C38 ! ) ) ) = ( abs ( ( ( ( exp_R ) . ( C43 * C42 ) ) * ( C42 |^ C38 ) ) / ( C38 ! ) ) ) by L111 , L46
+.= ( abs ( ( ( exp_R ) . ( C43 * C42 ) ) * ( ( C42 |^ C38 ) / ( C38 ! ) ) ) ) by XCMPLX_1:74
+.= ( ( abs ( ( exp_R ) . ( C43 * C42 ) ) ) * ( abs ( ( C42 |^ C38 ) / ( C38 ! ) ) ) ) by COMPLEX1:65;
+L113: ( ( exp_R ) . ( C43 * C42 ) ) >= ( 0 ) by SIN_COS:54;
+L114: (C37 in ( ( [#] ( REAL ) ) /\ ( dom ( exp_R ) ) ) & ( abs ( ( exp_R ) . ( C43 * C42 ) ) ) = ( ( exp_R ) . ( C43 * C42 ) )) by L113 , ABSVALUE:def 1 , TAYLOR_1:16;
+L115: (for B50 being Real holds ( 0 ) <= ( diff (( exp_R ) , B50) )) by TAYLOR_1:16;
+L116: ( ( exp_R ) | ( [#] ( REAL ) ) ) is  non-decreasing by L115 , FDIFF_2:39 , TAYLOR_1:16;
+L117: ( abs ( ( C42 |^ C38 ) / ( C38 ! ) ) ) = ( ( abs ( C42 |^ C38 ) ) / ( abs ( C38 ! ) ) ) by COMPLEX1:67
+.= ( ( abs ( C42 |^ C38 ) ) / ( C38 ! ) ) by L106 , ABSVALUE:def 1
+.= ( ( ( abs C42 ) |^ C38 ) / ( C38 ! ) ) by L1;
+L118: ( abs ( ( C42 |^ C38 ) / ( C38 ! ) ) ) <= ( ( D3 |^ C38 ) / ( C38 ! ) ) by L117 , L106 , L105 , XREAL_1:72;
+L119: (( abs ( ( exp_R ) . ( C43 * C42 ) ) ) >= ( 0 ) & ( abs ( ( C42 |^ C38 ) / ( C38 ! ) ) ) >= ( 0 )) by COMPLEX1:46;
+L120: ( C43 * C42 ) in { B51 where B51 is Real : (( - C37 ) < B51 & B51 < C37) } by L111 , RCOMP_1:def 2;
+L121: (ex B52 being Real st (B52 = ( C43 * C42 ) & ( - C37 ) < B52 & B52 < C37)) by L120;
+L122: ( abs ( ( exp_R ) . ( C43 * C42 ) ) ) <= D2 by L121 , L116 , L114 , RFUNCT_2:24 , TAYLOR_1:16;
+L123: ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C37 ) , C37 .[) ) . C38 ) . ( C43 * C42 ) ) * ( C42 |^ C38 ) ) / ( C38 ! ) ) ) <= ( D2 * ( ( D3 |^ C38 ) / ( C38 ! ) ) ) by L122 , L119 , L118 , L112 , XREAL_1:66;
+thus L124: ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C37 ) , C37 .[) ) . C38 ) . ( C43 * C42 ) ) * ( C42 |^ C38 ) ) / ( C38 ! ) ) ) <= ( ( D2 * ( D3 |^ C38 ) ) / ( C38 ! ) ) by L123 , XCMPLX_1:74;
+end;
+thus L125: (for B53 , B54 being Real holds ((B53 in ]. ( - C37 ) , C37 .[ & ( 0 ) < B54 & B54 < 1) implies ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C37 ) , C37 .[) ) . C38 ) . ( B54 * B53 ) ) * ( B53 |^ C38 ) ) / ( C38 ! ) ) ) <= ( ( D2 * ( D3 |^ C38 ) ) / ( C38 ! ) ))) by L85;
+end;
+thus L126: thesis by L84 , L83 , SIN_COS:54;
+end;
+theorem
+L127: (for B55 , B56 being Real holds ((B55 >= ( 0 ) & B56 >= ( 0 )) implies (for B57 being Real holds (B57 > ( 0 ) implies (ex B58 being (Element of ( NAT )) st (for B59 being (Element of ( NAT )) holds (B58 <= B59 implies ( ( B55 * ( B56 |^ B59 ) ) / ( B59 ! ) ) < B57)))))))
+proof
+let C44 , C45 being Real;
+assume that
+L128: C44 >= ( 0 )
+and
+L129: C45 >= ( 0 );
+L130: ( C45 rExpSeq ) is  summable by SIN_COS:45;
+L131: ( C44 (#) ( C45 rExpSeq ) ) is  convergent by L130 , SEQ_2:7 , SERIES_1:4;
+L132: ( lim ( C45 rExpSeq ) ) = ( 0 ) by L130 , SERIES_1:4;
+L133: ( lim ( C44 (#) ( C45 rExpSeq ) ) ) = ( C44 * ( 0 ) ) by L132 , L130 , SEQ_2:8 , SERIES_1:4;
+let C46 being Real;
+assume L134: C46 > ( 0 );
+consider C47 being (Element of ( NAT )) such that L135: (for B60 being (Element of ( NAT )) holds (C47 <= B60 implies ( abs ( ( ( C44 (#) ( C45 rExpSeq ) ) . B60 ) - ( 0 ) ) ) < C46)) by L134 , L131 , L133 , SEQ_2:def 7;
+take C47;
+L136: (for B61 being (Element of ( NAT )) holds ( C44 * ( ( C45 |^ B61 ) / ( B61 ! ) ) ) = ( ( C44 (#) ( C45 rExpSeq ) ) . B61 ))
+proof
+let C48 being (Element of ( NAT ));
+L137: ( C44 * ( ( C45 |^ C48 ) / ( C48 ! ) ) ) = ( C44 * ( ( C45 rExpSeq ) . C48 ) ) by SIN_COS:def 5
+.= ( ( C44 (#) ( C45 rExpSeq ) ) . C48 ) by SEQ_1:9;
+thus L138: thesis by L137;
+end;
+L139:
+now
+let C49 being (Element of ( NAT ));
+assume that
+L140: C47 <= C49;
+L141: (( C45 |^ C49 ) >= ( 0 ) & ( C49 ! ) > ( 0 )) by L129 , NEWTON:17 , POWER:3;
+L142: ( abs ( ( ( C44 (#) ( C45 rExpSeq ) ) . C49 ) - ( 0 ) ) ) = ( abs ( C44 * ( ( C45 |^ C49 ) / ( C49 ! ) ) ) ) by L136
+.= ( ( abs C44 ) * ( abs ( ( C45 |^ C49 ) / ( C49 ! ) ) ) ) by COMPLEX1:65
+.= ( C44 * ( abs ( ( C45 |^ C49 ) / ( C49 ! ) ) ) ) by L128 , ABSVALUE:def 1
+.= ( C44 * ( ( C45 |^ C49 ) / ( C49 ! ) ) ) by L141 , ABSVALUE:def 1
+.= ( ( C44 * ( C45 |^ C49 ) ) / ( C49 ! ) ) by XCMPLX_1:74;
+thus L143: ( ( C44 * ( C45 |^ C49 ) ) / ( C49 ! ) ) < C46 by L142 , L135 , L140;
+end;
+thus L144: thesis by L139;
+end;
+theorem
+L145: (for B62 , B63 being Real holds ((( 0 ) < B62 & ( 0 ) < B63) implies (ex B64 being (Element of ( NAT )) st (for B65 being (Element of ( NAT )) holds (B64 <= B65 implies (for B66 , B67 being Real holds ((B66 in ]. ( - B62 ) , B62 .[ & ( 0 ) < B67 & B67 < 1) implies ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - B62 ) , B62 .[) ) . B65 ) . ( B67 * B66 ) ) * ( B66 |^ B65 ) ) / ( B65 ! ) ) ) < B63)))))))
+proof
+let C50 , C51 being Real;
+assume that
+L146: ( 0 ) < C50
+and
+L147: ( 0 ) < C51;
+consider C52 , C53 being Real such that L148: (C52 >= ( 0 ) & C53 >= ( 0 )) and L149: (for B68 being (Element of ( NAT )) holds (for B69 , B70 being Real holds ((B69 in ]. ( - C50 ) , C50 .[ & ( 0 ) < B70 & B70 < 1) implies ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C50 ) , C50 .[) ) . B68 ) . ( B70 * B69 ) ) * ( B69 |^ B68 ) ) / ( B68 ! ) ) ) <= ( ( C52 * ( C53 |^ B68 ) ) / ( B68 ! ) )))) by L146 , L82;
+consider C54 being (Element of ( NAT )) such that L150: (for B71 being (Element of ( NAT )) holds (C54 <= B71 implies ( ( C52 * ( C53 |^ B71 ) ) / ( B71 ! ) ) < C51)) by L147 , L148 , L127;
+take C54;
+let C55 being (Element of ( NAT ));
+assume L151: C54 <= C55;
+L152: ( ( C52 * ( C53 |^ C55 ) ) / ( C55 ! ) ) < C51 by L151 , L150;
+let C56 , C57 being Real;
+assume L153: (C56 in ]. ( - C50 ) , C50 .[ & ( 0 ) < C57 & C57 < 1);
+L154: ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C50 ) , C50 .[) ) . C55 ) . ( C57 * C56 ) ) * ( C56 |^ C55 ) ) / ( C55 ! ) ) ) <= ( ( C52 * ( C53 |^ C55 ) ) / ( C55 ! ) ) by L153 , L149;
+thus L155: thesis by L154 , L152 , XXREAL_0:2;
+end;
+theorem
+L156: (for B72 , B73 being Real holds ((( 0 ) < B72 & ( 0 ) < B73) implies (ex B74 being (Element of ( NAT )) st (for B75 being (Element of ( NAT )) holds (B74 <= B75 implies (for B76 being  real number holds (B76 in ]. ( - B72 ) , B72 .[ implies ( abs ( ( ( exp_R ) . B76 ) - ( ( Partial_Sums ( Maclaurin (( exp_R ) , ]. ( - B72 ) , B72 .[ , B76) ) ) . B75 ) ) ) < B73)))))))
+proof
+let C58 , C59 being Real;
+assume that
+L157: C58 > ( 0 )
+and
+L158: C59 > ( 0 );
+consider C60 being (Element of ( NAT )) such that L159: (for B77 being (Element of ( NAT )) holds (C60 <= B77 implies (for B78 , B79 being Real holds ((B78 in ]. ( - C58 ) , C58 .[ & ( 0 ) < B79 & B79 < 1) implies ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C58 ) , C58 .[) ) . B77 ) . ( B79 * B78 ) ) * ( B78 |^ B77 ) ) / ( B77 ! ) ) ) < C59)))) by L157 , L158 , L145;
+take C60;
+let C61 being (Element of ( NAT ));
+assume that
+L160: C60 <= C61;
+L161:
+now
+L162: C61 <= ( C61 + 1 ) by NAT_1:11;
+L163: C60 <= ( C61 + 1 ) by L162 , L160 , XXREAL_0:2;
+let C62 being Real;
+assume that
+L164: C62 in ]. ( - C58 ) , C58 .[;
+L165: (ex B80 being Real st (( 0 ) < B80 & B80 < 1 & ( abs ( ( ( exp_R ) . C62 ) - ( ( Partial_Sums ( Maclaurin (( exp_R ) , ]. ( - C58 ) , C58 .[ , C62) ) ) . C61 ) ) ) = ( abs ( ( ( ( ( diff (( exp_R ) , ]. ( - C58 ) , C58 .[) ) . ( C61 + 1 ) ) . ( B80 * C62 ) ) * ( C62 |^ ( C61 + 1 ) ) ) / ( ( C61 + 1 ) ! ) ) ))) by L157 , L164 , L21 , L73 , SIN_COS:47;
+thus L166: ( abs ( ( ( exp_R ) . C62 ) - ( ( Partial_Sums ( Maclaurin (( exp_R ) , ]. ( - C58 ) , C58 .[ , C62) ) ) . C61 ) ) ) < C59 by L165 , L159 , L164 , L163;
+end;
+thus L167: thesis by L161;
+end;
+theorem
+L168: (for B81 being Real holds ( B81 rExpSeq ) is  absolutely_summable)
+proof
+let C63 being Real;
+L169: (for B82 being (Element of ( NAT )) holds ( abs ( ( C63 rExpSeq ) . B82 ) ) = ( ( ( abs C63 ) rExpSeq ) . B82 ))
+proof
+let C64 being (Element of ( NAT ));
+L170: ( C64 ! ) > ( 0 ) by NEWTON:17;
+L171: ( abs ( ( C63 rExpSeq ) . C64 ) ) = ( abs ( ( C63 |^ C64 ) / ( C64 ! ) ) ) by SIN_COS:def 5
+.= ( ( abs ( C63 |^ C64 ) ) / ( abs ( C64 ! ) ) ) by COMPLEX1:67
+.= ( ( abs ( C63 |^ C64 ) ) / ( C64 ! ) ) by L170 , ABSVALUE:def 1
+.= ( ( ( abs C63 ) |^ C64 ) / ( C64 ! ) ) by L1
+.= ( ( ( abs C63 ) rExpSeq ) . C64 ) by SIN_COS:def 5;
+thus L172: thesis by L171;
+end;
+L173: ( ( abs C63 ) rExpSeq ) = ( abs ( C63 rExpSeq ) ) by L169 , SEQ_1:12;
+L174: ( abs ( C63 rExpSeq ) ) is  summable by L173 , SIN_COS:45;
+thus L175: thesis by L174 , SERIES_1:def 4;
+end;
+theorem
+L176: (for B83 , B84 being Real holds (( 0 ) < B83 implies (( Maclaurin (( exp_R ) , ]. ( - B83 ) , B83 .[ , B84) ) = ( B84 rExpSeq ) & ( Maclaurin (( exp_R ) , ]. ( - B83 ) , B83 .[ , B84) ) is  absolutely_summable & ( ( exp_R ) . B84 ) = ( Sum ( Maclaurin (( exp_R ) , ]. ( - B83 ) , B83 .[ , B84) ) ))))
+proof
+L177: ( abs ( ( 0 ) - ( 0 ) ) ) = ( 0 ) by ABSVALUE:2;
+let C65 , C66 being Real;
+assume L178: C65 > ( 0 );
+L179: ( 0 ) in ]. ( ( 0 ) - C65 ) , ( ( 0 ) + C65 ) .[ by L178 , L177 , RCOMP_1:1;
+L180: ( 0 ) in ( dom ( ( exp_R ) | ]. ( - C65 ) , C65 .[ ) ) by L179 , L29;
+L181:
+now
+let C67 being set;
+assume L182: C67 in ( NAT );
+reconsider D4 = C67 as (Element of ( NAT )) by L182;
+thus L183: ( ( Maclaurin (( exp_R ) , ]. ( - C65 ) , C65 .[ , C66) ) . C67 ) = ( ( ( ( ( diff (( exp_R ) , ]. ( - C65 ) , C65 .[) ) . D4 ) . ( 0 ) ) * ( ( C66 - ( 0 ) ) |^ D4 ) ) / ( D4 ! ) ) by TAYLOR_1:def 7
+.= ( ( ( ( ( exp_R ) | ]. ( - C65 ) , C65 .[ ) . ( 0 ) ) * ( C66 |^ D4 ) ) / ( D4 ! ) ) by L37
+.= ( ( ( ( exp_R ) . ( 0 ) ) * ( C66 |^ D4 ) ) / ( D4 ! ) ) by L180 , FUNCT_1:47
+.= ( ( C66 rExpSeq ) . C67 ) by SIN_COS:def 5 , SIN_COS2:13;
+end;
+L184: ( Maclaurin (( exp_R ) , ]. ( - C65 ) , C65 .[ , C66) ) = ( C66 rExpSeq ) by L181 , FUNCT_2:12;
+thus L185: thesis by L184 , L168 , SIN_COS:def 22;
+end;
+theorem
+L186: (for R1 being  open (Subset of ( REAL )) holds (( ( sin ) `| R1 ) = ( ( cos ) | R1 ) & ( ( cos ) `| R1 ) = ( ( - ( sin ) ) | R1 ) & ( dom ( ( sin ) | R1 ) ) = R1 & ( dom ( ( cos ) | R1 ) ) = R1))
+proof
+let R1 being  open (Subset of ( REAL ));
+L187: ( dom ( ( sin ) | R1 ) ) = ( ( dom ( sin ) ) /\ R1 ) by RELAT_1:61
+.= R1 by SIN_COS:24 , XBOOLE_1:28;
+L188: ( dom ( ( cos ) | R1 ) ) = ( ( dom ( cos ) ) /\ R1 ) by RELAT_1:61
+.= R1 by SIN_COS:24 , XBOOLE_1:28;
+L189: ( sin ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:68;
+L190: (for B85 being Real holds (B85 in R1 implies ( ( ( sin ) `| R1 ) . B85 ) = ( ( ( cos ) | R1 ) . B85 )))
+proof
+let C68 being Real;
+assume that
+L191: C68 in R1;
+L192: ( ( ( sin ) `| R1 ) . C68 ) = ( diff (( sin ) , C68) ) by L189 , L191 , FDIFF_1:def 7
+.= ( ( cos ) . C68 ) by SIN_COS:64
+.= ( ( ( cos ) | R1 ) . C68 ) by L188 , L191 , FUNCT_1:47;
+thus L193: thesis by L192;
+end;
+L194: ( cos ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:67;
+L195: ( dom ( ( cos ) `| R1 ) ) = R1 by L194 , FDIFF_1:def 7;
+L196: ( dom ( ( - ( sin ) ) | R1 ) ) = ( ( dom ( ( - 1 ) (#) ( sin ) ) ) /\ R1 ) by RELAT_1:61
+.= ( ( dom ( sin ) ) /\ R1 ) by VALUED_1:def 5
+.= R1 by SIN_COS:24 , XBOOLE_1:28;
+L197: (for B86 being Real holds (B86 in R1 implies ( ( ( cos ) `| R1 ) . B86 ) = ( ( ( - ( sin ) ) | R1 ) . B86 )))
+proof
+let C69 being Real;
+assume that
+L198: C69 in R1;
+L199: C69 in ( dom ( sin ) ) by SIN_COS:24;
+L200: C69 in ( dom ( ( - 1 ) (#) ( sin ) ) ) by L199 , VALUED_1:def 5;
+L201: ( ( ( cos ) `| R1 ) . C69 ) = ( diff (( cos ) , C69) ) by L194 , L198 , FDIFF_1:def 7
+.= ( - ( ( sin ) . C69 ) ) by SIN_COS:63
+.= ( ( - 1 ) * ( ( sin ) . C69 ) )
+.= ( ( - ( sin ) ) . C69 ) by L200 , VALUED_1:def 5
+.= ( ( ( - ( sin ) ) | R1 ) . C69 ) by L196 , L198 , FUNCT_1:47;
+thus L202: thesis by L201;
+end;
+L203: ( dom ( ( sin ) `| R1 ) ) = R1 by L189 , FDIFF_1:def 7;
+thus L204: thesis by L203 , L196 , L187 , L188 , L190 , L195 , L197 , PARTFUN1:5;
+end;
+theorem
+L205: (for B87 being (PartFunc of ( REAL ) , ( REAL )) holds (for B88 being (Subset of ( REAL )) holds (B87 is_differentiable_on B88 implies ( ( - B87 ) `| B88 ) = ( - ( B87 `| B88 ) ))))
+proof
+let C70 being (PartFunc of ( REAL ) , ( REAL ));
+let C71 being (Subset of ( REAL ));
+assume that
+L206: C70 is_differentiable_on C71;
+L207: C71 is  open  open  open  open (Subset of ( REAL )) by L206 , FDIFF_1:10;
+L208: ( ( - C70 ) `| C71 ) = ( ( - 1 ) (#) ( C70 `| C71 ) ) by L207 , L206 , FDIFF_2:19
+.= ( - ( C70 `| C71 ) );
+thus L209: thesis by L208;
+end;
+theorem
+L210: (for R1 being  open (Subset of ( REAL )) holds (for B89 being (Element of ( NAT )) holds (( ( diff (( sin ) , R1) ) . ( 2 * B89 ) ) = ( ( ( - 1 ) |^ B89 ) (#) ( ( sin ) | R1 ) ) & ( ( diff (( sin ) , R1) ) . ( ( 2 * B89 ) + 1 ) ) = ( ( ( - 1 ) |^ B89 ) (#) ( ( cos ) | R1 ) ) & ( ( diff (( cos ) , R1) ) . ( 2 * B89 ) ) = ( ( ( - 1 ) |^ B89 ) (#) ( ( cos ) | R1 ) ) & ( ( diff (( cos ) , R1) ) . ( ( 2 * B89 ) + 1 ) ) = ( ( ( - 1 ) |^ ( B89 + 1 ) ) (#) ( ( sin ) | R1 ) ))))
+proof
+let R1 being  open (Subset of ( REAL ));
+let C72 being (Element of ( NAT ));
+L211: ( cos ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:67;
+defpred S4[ (Element of ( NAT )) ] means (( ( diff (( sin ) , R1) ) . ( 2 * $1 ) ) = ( ( ( - 1 ) |^ $1 ) (#) ( ( sin ) | R1 ) ) & ( ( diff (( sin ) , R1) ) . ( ( 2 * $1 ) + 1 ) ) = ( ( ( - 1 ) |^ $1 ) (#) ( ( cos ) | R1 ) ) & ( ( diff (( cos ) , R1) ) . ( 2 * $1 ) ) = ( ( ( - 1 ) |^ $1 ) (#) ( ( cos ) | R1 ) ) & ( ( diff (( cos ) , R1) ) . ( ( 2 * $1 ) + 1 ) ) = ( ( ( - 1 ) |^ ( $1 + 1 ) ) (#) ( ( sin ) | R1 ) ));
+L212: ( sin ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:68;
+L213: (for B90 being (Element of ( NAT )) holds (S4[ B90 ] implies S4[ ( B90 + 1 ) ]))
+proof
+let C73 being (Element of ( NAT ));
+assume that
+L214: S4[ C73 ];
+L215: ( ( cos ) | R1 ) is_differentiable_on R1 by L211 , FDIFF_2:16;
+L216: ( ( diff (( sin ) , R1) ) . ( 2 * ( C73 + 1 ) ) ) = ( ( diff (( sin ) , R1) ) . ( ( ( 2 * C73 ) + 1 ) + 1 ) )
+.= ( ( ( diff (( sin ) , R1) ) . ( ( 2 * C73 ) + 1 ) ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( ( - 1 ) |^ C73 ) (#) ( ( ( cos ) | R1 ) `| R1 ) ) by L214 , L215 , FDIFF_2:19
+.= ( ( ( - 1 ) |^ C73 ) (#) ( ( cos ) `| R1 ) ) by L211 , FDIFF_2:16
+.= ( ( ( - 1 ) |^ C73 ) (#) ( ( ( - 1 ) (#) ( sin ) ) | R1 ) ) by L186
+.= ( ( ( - 1 ) |^ C73 ) (#) ( ( - 1 ) (#) ( ( sin ) | R1 ) ) ) by RFUNCT_1:49
+.= ( ( ( ( - 1 ) |^ C73 ) * ( - 1 ) ) (#) ( ( sin ) | R1 ) ) by RFUNCT_1:17
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( sin ) | R1 ) ) by NEWTON:6;
+L217: ( ( sin ) | R1 ) is_differentiable_on R1 by L212 , FDIFF_2:16;
+L218: ( ( diff (( cos ) , R1) ) . ( 2 * ( C73 + 1 ) ) ) = ( ( diff (( cos ) , R1) ) . ( ( ( 2 * C73 ) + 1 ) + 1 ) )
+.= ( ( ( diff (( cos ) , R1) ) . ( ( 2 * C73 ) + 1 ) ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( ( sin ) | R1 ) `| R1 ) ) by L214 , L217 , FDIFF_2:19
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( sin ) `| R1 ) ) by L212 , FDIFF_2:16
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( cos ) | R1 ) ) by L186;
+L219: ( ( diff (( cos ) , R1) ) . ( ( 2 * ( C73 + 1 ) ) + 1 ) ) = ( ( ( diff (( cos ) , R1) ) . ( 2 * ( C73 + 1 ) ) ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( ( cos ) | R1 ) `| R1 ) ) by L215 , L218 , FDIFF_2:19
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( cos ) `| R1 ) ) by L211 , FDIFF_2:16
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( ( - 1 ) (#) ( sin ) ) | R1 ) ) by L186
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( - 1 ) (#) ( ( sin ) | R1 ) ) ) by RFUNCT_1:49
+.= ( ( ( ( - 1 ) |^ ( C73 + 1 ) ) * ( - 1 ) ) (#) ( ( sin ) | R1 ) ) by RFUNCT_1:17
+.= ( ( ( - 1 ) |^ ( ( C73 + 1 ) + 1 ) ) (#) ( ( sin ) | R1 ) ) by NEWTON:6;
+L220: ( ( diff (( sin ) , R1) ) . ( ( 2 * ( C73 + 1 ) ) + 1 ) ) = ( ( ( diff (( sin ) , R1) ) . ( 2 * ( C73 + 1 ) ) ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( ( sin ) | R1 ) `| R1 ) ) by L217 , L216 , FDIFF_2:19
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( sin ) `| R1 ) ) by L212 , FDIFF_2:16
+.= ( ( ( - 1 ) |^ ( C73 + 1 ) ) (#) ( ( cos ) | R1 ) ) by L186;
+thus L221: thesis by L220 , L216 , L218 , L219;
+end;
+L222: ( ( diff (( cos ) , R1) ) . ( ( 2 * ( 0 ) ) + 1 ) ) = ( ( ( diff (( cos ) , R1) ) . ( 0 ) ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( ( cos ) | R1 ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( cos ) `| R1 ) by L211 , FDIFF_2:16
+.= ( ( - ( sin ) ) | R1 ) by L186
+.= ( 1 (#) ( ( - ( sin ) ) | R1 ) ) by RFUNCT_1:21
+.= ( ( ( - 1 ) |^ ( 0 ) ) (#) ( ( ( - 1 ) (#) ( sin ) ) | R1 ) ) by NEWTON:4
+.= ( ( ( - 1 ) |^ ( 0 ) ) (#) ( ( - 1 ) (#) ( ( sin ) | R1 ) ) ) by RFUNCT_1:49
+.= ( ( ( ( - 1 ) |^ ( 0 ) ) * ( - 1 ) ) (#) ( ( sin ) | R1 ) ) by RFUNCT_1:17
+.= ( ( ( - 1 ) |^ ( ( 0 ) + 1 ) ) (#) ( ( sin ) | R1 ) ) by NEWTON:6;
+L223: ( ( diff (( sin ) , R1) ) . ( 2 * ( 0 ) ) ) = ( ( sin ) | R1 ) by TAYLOR_1:def 5
+.= ( 1 (#) ( ( sin ) | R1 ) ) by RFUNCT_1:21
+.= ( ( ( - 1 ) |^ ( 0 ) ) (#) ( ( sin ) | R1 ) ) by NEWTON:4;
+L224: ( ( diff (( cos ) , R1) ) . ( 2 * ( 0 ) ) ) = ( ( cos ) | R1 ) by TAYLOR_1:def 5
+.= ( 1 (#) ( ( cos ) | R1 ) ) by RFUNCT_1:21
+.= ( ( ( - 1 ) |^ ( 0 ) ) (#) ( ( cos ) | R1 ) ) by NEWTON:4;
+L225: ( ( diff (( sin ) , R1) ) . ( ( 2 * ( 0 ) ) + 1 ) ) = ( ( ( diff (( sin ) , R1) ) . ( 0 ) ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( ( sin ) | R1 ) `| R1 ) by TAYLOR_1:def 5
+.= ( ( sin ) `| R1 ) by L212 , FDIFF_2:16
+.= ( ( cos ) | R1 ) by L186
+.= ( 1 (#) ( ( cos ) | R1 ) ) by RFUNCT_1:21
+.= ( ( ( - 1 ) |^ ( 0 ) ) (#) ( ( cos ) | R1 ) ) by NEWTON:4;
+L226: S4[ ( 0 ) ] by L225 , L223 , L224 , L222;
+L227: (for B91 being (Element of ( NAT )) holds S4[ B91 ]) from NAT_1:sch 1(L226 , L213);
+thus L228: thesis by L227;
+end;
+theorem
+L229: (for B92 being (Element of ( NAT )) holds (for B93 , B94 being Real holds (B93 > ( 0 ) implies (( ( Maclaurin (( sin ) , ]. ( - B93 ) , B93 .[ , B94) ) . ( 2 * B92 ) ) = ( 0 ) & ( ( Maclaurin (( sin ) , ]. ( - B93 ) , B93 .[ , B94) ) . ( ( 2 * B92 ) + 1 ) ) = ( ( ( ( - 1 ) |^ B92 ) * ( B94 |^ ( ( 2 * B92 ) + 1 ) ) ) / ( ( ( 2 * B92 ) + 1 ) ! ) ) & ( ( Maclaurin (( cos ) , ]. ( - B93 ) , B93 .[ , B94) ) . ( 2 * B92 ) ) = ( ( ( ( - 1 ) |^ B92 ) * ( B94 |^ ( 2 * B92 ) ) ) / ( ( 2 * B92 ) ! ) ) & ( ( Maclaurin (( cos ) , ]. ( - B93 ) , B93 .[ , B94) ) . ( ( 2 * B92 ) + 1 ) ) = ( 0 )))))
+proof
+L230: ( abs ( ( 0 ) - ( 0 ) ) ) = ( 0 ) by ABSVALUE:2;
+let C74 being (Element of ( NAT ));
+let C75 , C76 being Real;
+assume L231: C75 > ( 0 );
+L232: ( 0 ) in ]. ( ( 0 ) - C75 ) , ( ( 0 ) + C75 ) .[ by L231 , L230 , RCOMP_1:1;
+L233: ( 0 ) in ( dom ( ( cos ) | ]. ( - C75 ) , C75 .[ ) ) by L232 , L186;
+L234: ( dom ( ( ( - 1 ) |^ C74 ) (#) ( ( cos ) | ]. ( - C75 ) , C75 .[ ) ) ) = ( dom ( ( cos ) | ]. ( - C75 ) , C75 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C75 ) , C75 .[ by L186;
+L235: ( ( Maclaurin (( sin ) , ]. ( - C75 ) , C75 .[ , C76) ) . ( ( 2 * C74 ) + 1 ) ) = ( ( ( ( ( diff (( sin ) , ]. ( - C75 ) , C75 .[) ) . ( ( 2 * C74 ) + 1 ) ) . ( 0 ) ) * ( ( C76 - ( 0 ) ) |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by TAYLOR_1:def 7
+.= ( ( ( ( ( ( - 1 ) |^ C74 ) (#) ( ( cos ) | ]. ( - C75 ) , C75 .[ ) ) . ( 0 ) ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by L210
+.= ( ( ( ( ( - 1 ) |^ C74 ) * ( ( ( cos ) | ]. ( - C75 ) , C75 .[ ) . ( 0 ) ) ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by L232 , L234 , VALUED_1:def 5
+.= ( ( ( ( ( - 1 ) |^ C74 ) * ( ( cos ) . ( 0 ) ) ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by L233 , FUNCT_1:47
+.= ( ( ( ( - 1 ) |^ C74 ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by SIN_COS:30;
+L236: ( dom ( ( ( - 1 ) |^ C74 ) (#) ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) ) = ( dom ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C75 ) , C75 .[ by L186;
+L237: ( 0 ) in ( dom ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) by L232 , L186;
+L238: ( ( Maclaurin (( cos ) , ]. ( - C75 ) , C75 .[ , C76) ) . ( 2 * C74 ) ) = ( ( ( ( ( diff (( cos ) , ]. ( - C75 ) , C75 .[) ) . ( 2 * C74 ) ) . ( 0 ) ) * ( ( C76 - ( 0 ) ) |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by TAYLOR_1:def 7
+.= ( ( ( ( ( ( - 1 ) |^ C74 ) (#) ( ( cos ) | ]. ( - C75 ) , C75 .[ ) ) . ( 0 ) ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by L210
+.= ( ( ( ( ( - 1 ) |^ C74 ) * ( ( ( cos ) | ]. ( - C75 ) , C75 .[ ) . ( 0 ) ) ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by L232 , L234 , VALUED_1:def 5
+.= ( ( ( ( ( - 1 ) |^ C74 ) * ( ( cos ) . ( 0 ) ) ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by L233 , FUNCT_1:47
+.= ( ( ( ( - 1 ) |^ C74 ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by SIN_COS:30;
+L239: ( dom ( ( ( - 1 ) |^ ( C74 + 1 ) ) (#) ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) ) = ( dom ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C75 ) , C75 .[ by L186;
+L240: ( ( Maclaurin (( cos ) , ]. ( - C75 ) , C75 .[ , C76) ) . ( ( 2 * C74 ) + 1 ) ) = ( ( ( ( ( diff (( cos ) , ]. ( - C75 ) , C75 .[) ) . ( ( 2 * C74 ) + 1 ) ) . ( 0 ) ) * ( ( C76 - ( 0 ) ) |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by TAYLOR_1:def 7
+.= ( ( ( ( ( ( - 1 ) |^ ( C74 + 1 ) ) (#) ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) . ( 0 ) ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by L210
+.= ( ( ( ( ( - 1 ) |^ ( C74 + 1 ) ) * ( ( ( sin ) | ]. ( - C75 ) , C75 .[ ) . ( 0 ) ) ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by L232 , L239 , VALUED_1:def 5
+.= ( ( ( ( ( - 1 ) |^ ( C74 + 1 ) ) * ( ( sin ) . ( 0 ) ) ) * ( C76 |^ ( ( 2 * C74 ) + 1 ) ) ) / ( ( ( 2 * C74 ) + 1 ) ! ) ) by L237 , FUNCT_1:47
+.= ( 0 ) by SIN_COS:30;
+L241: ( ( Maclaurin (( sin ) , ]. ( - C75 ) , C75 .[ , C76) ) . ( 2 * C74 ) ) = ( ( ( ( ( diff (( sin ) , ]. ( - C75 ) , C75 .[) ) . ( 2 * C74 ) ) . ( 0 ) ) * ( ( C76 - ( 0 ) ) |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by TAYLOR_1:def 7
+.= ( ( ( ( ( ( - 1 ) |^ C74 ) (#) ( ( sin ) | ]. ( - C75 ) , C75 .[ ) ) . ( 0 ) ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by L210
+.= ( ( ( ( ( - 1 ) |^ C74 ) * ( ( ( sin ) | ]. ( - C75 ) , C75 .[ ) . ( 0 ) ) ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by L232 , L236 , VALUED_1:def 5
+.= ( ( ( ( ( - 1 ) |^ C74 ) * ( ( sin ) . ( 0 ) ) ) * ( C76 |^ ( 2 * C74 ) ) ) / ( ( 2 * C74 ) ! ) ) by L237 , FUNCT_1:47
+.= ( 0 ) by SIN_COS:30;
+thus L242: thesis by L241 , L235 , L238 , L240;
+end;
+theorem
+L243: (for R1 being  open (Subset of ( REAL )) holds (for B95 being (Element of ( NAT )) holds (( sin ) is_differentiable_on B95 , R1 & ( cos ) is_differentiable_on B95 , R1)))
+proof
+let R1 being  open (Subset of ( REAL ));
+let C77 being (Element of ( NAT ));
+L244:
+now
+let C78 being (Element of ( NAT ));
+assume that
+L245: C78 <= ( C77 - 1 );
+L246:
+now
+per cases ;
+suppose L247: C78 is  even;
+
+consider C79 being (Element of ( NAT )) such that L248: C78 = ( 2 * C79 ) by L247 , ABIAN:def 2;
+thus L249: ( dom ( ( diff (( sin ) , R1) ) . C78 ) ) = ( dom ( ( ( - 1 ) |^ C79 ) (#) ( ( sin ) | R1 ) ) ) by L248 , L210
+.= ( dom ( ( sin ) | R1 ) ) by VALUED_1:def 5
+.= R1 by L186;
+end;
+suppose L250: C78 is  odd;
+
+consider C80 being (Element of ( NAT )) such that L251: C78 = ( ( 2 * C80 ) + 1 ) by L250 , ABIAN:9;
+thus L252: ( dom ( ( diff (( sin ) , R1) ) . C78 ) ) = ( dom ( ( ( - 1 ) |^ C80 ) (#) ( ( cos ) | R1 ) ) ) by L251 , L210
+.= ( dom ( ( cos ) | R1 ) ) by VALUED_1:def 5
+.= R1 by L186;
+end;
+end;
+L254: (for B96 being Real holds (B96 in R1 implies ( ( ( diff (( sin ) , R1) ) . C78 ) | R1 ) is_differentiable_in B96))
+proof
+let C81 being Real;
+assume that
+L255: C81 in R1;
+L256:
+now
+per cases ;
+suppose L257: C78 is  even;
+
+consider C82 being (Element of ( NAT )) such that L258: C78 = ( 2 * C82 ) by L257 , ABIAN:def 2;
+L259: ( sin ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:68;
+L260: ( ( sin ) | R1 ) is_differentiable_in C81 by L259 , L255 , FDIFF_1:def 6;
+L261: ( ( diff (( sin ) , R1) ) . C78 ) = ( ( ( - 1 ) |^ C82 ) (#) ( ( sin ) | R1 ) ) by L258 , L210;
+thus L262: ( ( diff (( sin ) , R1) ) . C78 ) is_differentiable_in C81 by L261 , L260 , FDIFF_1:15;
+end;
+suppose L263: C78 is  odd;
+
+consider C83 being (Element of ( NAT )) such that L264: C78 = ( ( 2 * C83 ) + 1 ) by L263 , ABIAN:9;
+L265: ( cos ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:67;
+L266: ( ( cos ) | R1 ) is_differentiable_in C81 by L265 , L255 , FDIFF_1:def 6;
+L267: ( ( diff (( sin ) , R1) ) . C78 ) = ( ( ( - 1 ) |^ C83 ) (#) ( ( cos ) | R1 ) ) by L264 , L210;
+thus L268: ( ( diff (( sin ) , R1) ) . C78 ) is_differentiable_in C81 by L267 , L266 , FDIFF_1:15;
+end;
+end;
+thus L270: thesis by L256 , L246 , RELAT_1:68;
+end;
+thus L271: ( ( diff (( sin ) , R1) ) . C78 ) is_differentiable_on R1 by L254 , L246 , FDIFF_1:def 6;
+end;
+thus L272: ( sin ) is_differentiable_on C77 , R1 by L244 , TAYLOR_1:def 6;
+L273:
+now
+let C84 being (Element of ( NAT ));
+assume that
+L274: C84 <= ( C77 - 1 );
+L275:
+now
+per cases ;
+suppose L276: C84 is  even;
+
+consider C85 being (Element of ( NAT )) such that L277: C84 = ( 2 * C85 ) by L276 , ABIAN:def 2;
+thus L278: ( dom ( ( diff (( cos ) , R1) ) . C84 ) ) = ( dom ( ( ( - 1 ) |^ C85 ) (#) ( ( cos ) | R1 ) ) ) by L277 , L210
+.= ( dom ( ( cos ) | R1 ) ) by VALUED_1:def 5
+.= R1 by L186;
+end;
+suppose L279: C84 is  odd;
+
+consider C86 being (Element of ( NAT )) such that L280: C84 = ( ( 2 * C86 ) + 1 ) by L279 , ABIAN:9;
+thus L281: ( dom ( ( diff (( cos ) , R1) ) . C84 ) ) = ( dom ( ( ( - 1 ) |^ ( C86 + 1 ) ) (#) ( ( sin ) | R1 ) ) ) by L280 , L210
+.= ( dom ( ( sin ) | R1 ) ) by VALUED_1:def 5
+.= R1 by L186;
+end;
+end;
+L283: (for B97 being Real holds (B97 in R1 implies ( ( ( diff (( cos ) , R1) ) . C84 ) | R1 ) is_differentiable_in B97))
+proof
+let C87 being Real;
+assume that
+L284: C87 in R1;
+L285:
+now
+per cases ;
+suppose L286: C84 is  even;
+
+consider C88 being (Element of ( NAT )) such that L287: C84 = ( 2 * C88 ) by L286 , ABIAN:def 2;
+L288: ( cos ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:67;
+L289: ( ( cos ) | R1 ) is_differentiable_in C87 by L288 , L284 , FDIFF_1:def 6;
+L290: ( ( diff (( cos ) , R1) ) . C84 ) = ( ( ( - 1 ) |^ C88 ) (#) ( ( cos ) | R1 ) ) by L287 , L210;
+thus L291: ( ( diff (( cos ) , R1) ) . C84 ) is_differentiable_in C87 by L290 , L289 , FDIFF_1:15;
+end;
+suppose L292: C84 is  odd;
+
+consider C89 being (Element of ( NAT )) such that L293: C84 = ( ( 2 * C89 ) + 1 ) by L292 , ABIAN:9;
+L294: ( sin ) is_differentiable_on R1 by FDIFF_1:26 , SIN_COS:68;
+L295: ( ( sin ) | R1 ) is_differentiable_in C87 by L294 , L284 , FDIFF_1:def 6;
+L296: ( ( diff (( cos ) , R1) ) . C84 ) = ( ( ( - 1 ) |^ ( C89 + 1 ) ) (#) ( ( sin ) | R1 ) ) by L293 , L210;
+thus L297: ( ( diff (( cos ) , R1) ) . C84 ) is_differentiable_in C87 by L296 , L295 , FDIFF_1:15;
+end;
+end;
+thus L299: thesis by L285 , L275 , RELAT_1:68;
+end;
+thus L300: ( ( diff (( cos ) , R1) ) . C84 ) is_differentiable_on R1 by L283 , L275 , FDIFF_1:def 6;
+end;
+thus L301: thesis by L273 , TAYLOR_1:def 6;
+end;
+theorem
+L302: (for B98 being Real holds (B98 > ( 0 ) implies (ex B99 , B100 being Real st (B99 >= ( 0 ) & B100 >= ( 0 ) & (for B101 being (Element of ( NAT )) holds (for B102 , B103 being Real holds ((B102 in ]. ( - B98 ) , B98 .[ & ( 0 ) < B103 & B103 < 1) implies (( abs ( ( ( ( ( diff (( sin ) , ]. ( - B98 ) , B98 .[) ) . B101 ) . ( B103 * B102 ) ) * ( B102 |^ B101 ) ) / ( B101 ! ) ) ) <= ( ( B99 * ( B100 |^ B101 ) ) / ( B101 ! ) ) & ( abs ( ( ( ( ( diff (( cos ) , ]. ( - B98 ) , B98 .[) ) . B101 ) . ( B103 * B102 ) ) * ( B102 |^ B101 ) ) / ( B101 ! ) ) ) <= ( ( B99 * ( B100 |^ B101 ) ) / ( B101 ! ) )))))))))
+proof
+let C90 being Real;
+assume that
+L303: C90 > ( 0 );
+take D5 = 1;
+take D6 = C90;
+L304:
+now
+let C91 being (Element of ( NAT ));
+let C92 , C93 being Real;
+assume that
+L305: C92 in ]. ( - C90 ) , C90 .[
+and
+L306: C93 > ( 0 )
+and
+L307: C93 < 1;
+L308: C92 in ]. ( ( 0 ) - C90 ) , ( ( 0 ) + C90 ) .[ by L305;
+L309: ( abs ( C92 - ( 0 ) ) ) < C90 by L308 , RCOMP_1:1;
+L310: ( ( ( abs C92 ) |^ C91 ) / ( C91 ! ) ) <= ( ( D6 |^ C91 ) / ( C91 ! ) )
+proof
+defpred S5[ (Element of ( NAT )) ] means ( ( ( abs C92 ) |^ $1 ) / ( $1 ! ) ) <= ( ( D6 |^ $1 ) / ( $1 ! ) );
+L311: (for B104 being (Element of ( NAT )) holds (S5[ B104 ] implies S5[ ( B104 + 1 ) ]))
+proof
+let C94 being (Element of ( NAT ));
+assume that
+L312: S5[ C94 ];
+L313: ( ( ( abs C92 ) |^ ( C94 + 1 ) ) / ( ( C94 + 1 ) ! ) ) = ( ( ( ( abs C92 ) |^ C94 ) * ( abs C92 ) ) / ( ( C94 + 1 ) ! ) ) by NEWTON:6
+.= ( ( ( ( abs C92 ) |^ C94 ) * ( abs C92 ) ) / ( ( C94 ! ) * ( C94 + 1 ) ) ) by NEWTON:15
+.= ( ( ( abs C92 ) |^ C94 ) * ( ( abs C92 ) / ( ( C94 ! ) * ( C94 + 1 ) ) ) ) by XCMPLX_1:74
+.= ( ( ( abs C92 ) |^ C94 ) * ( ( ( abs C92 ) / ( C94 ! ) ) / ( C94 + 1 ) ) ) by XCMPLX_1:78
+.= ( ( ( abs C92 ) |^ C94 ) * ( ( 1 / ( ( C94 ! ) / ( abs C92 ) ) ) / ( C94 + 1 ) ) ) by XCMPLX_1:57
+.= ( ( ( abs C92 ) |^ C94 ) * ( ( ( 1 / ( C94 ! ) ) * ( abs C92 ) ) / ( C94 + 1 ) ) ) by XCMPLX_1:82
+.= ( ( ( ( abs C92 ) |^ C94 ) * ( ( 1 / ( C94 ! ) ) * ( abs C92 ) ) ) / ( C94 + 1 ) ) by XCMPLX_1:74
+.= ( ( ( ( ( abs C92 ) |^ C94 ) * ( 1 / ( C94 ! ) ) ) * ( abs C92 ) ) / ( C94 + 1 ) )
+.= ( ( ( ( ( ( abs C92 ) |^ C94 ) * 1 ) / ( C94 ! ) ) * ( abs C92 ) ) / ( C94 + 1 ) ) by XCMPLX_1:74
+.= ( ( ( ( ( abs C92 ) |^ C94 ) / ( C94 ! ) ) * ( abs C92 ) ) / ( C94 + 1 ) );
+L314: ( C94 ! ) > ( 0 ) by NEWTON:17;
+L315: ( ( ( abs C92 ) |^ C94 ) / ( C94 ! ) ) = ( ( abs ( C92 |^ C94 ) ) / ( C94 ! ) ) by L1
+.= ( ( abs ( C92 |^ C94 ) ) / ( abs ( C94 ! ) ) ) by L314 , ABSVALUE:def 1
+.= ( abs ( ( C92 |^ C94 ) / ( C94 ! ) ) ) by COMPLEX1:67;
+L316: ( ( ( abs C92 ) |^ C94 ) / ( C94 ! ) ) >= ( 0 ) by L315 , COMPLEX1:46;
+L317: ( ( D6 |^ ( C94 + 1 ) ) / ( ( C94 + 1 ) ! ) ) = ( ( ( D6 |^ C94 ) * D6 ) / ( ( C94 + 1 ) ! ) ) by NEWTON:6
+.= ( ( ( D6 |^ C94 ) * D6 ) / ( ( C94 ! ) * ( C94 + 1 ) ) ) by NEWTON:15
+.= ( ( D6 |^ C94 ) * ( D6 / ( ( C94 ! ) * ( C94 + 1 ) ) ) ) by XCMPLX_1:74
+.= ( ( D6 |^ C94 ) * ( ( D6 / ( C94 ! ) ) / ( C94 + 1 ) ) ) by XCMPLX_1:78
+.= ( ( D6 |^ C94 ) * ( ( 1 / ( ( C94 ! ) / D6 ) ) / ( C94 + 1 ) ) ) by XCMPLX_1:57
+.= ( ( D6 |^ C94 ) * ( ( ( 1 / ( C94 ! ) ) * D6 ) / ( C94 + 1 ) ) ) by XCMPLX_1:82
+.= ( ( ( D6 |^ C94 ) * ( ( 1 / ( C94 ! ) ) * D6 ) ) / ( C94 + 1 ) ) by XCMPLX_1:74
+.= ( ( ( ( D6 |^ C94 ) * ( 1 / ( C94 ! ) ) ) * D6 ) / ( C94 + 1 ) )
+.= ( ( ( ( ( D6 |^ C94 ) * 1 ) / ( C94 ! ) ) * D6 ) / ( C94 + 1 ) ) by XCMPLX_1:74
+.= ( ( ( ( D6 |^ C94 ) / ( C94 ! ) ) * D6 ) / ( C94 + 1 ) );
+L318: ( abs C92 ) >= ( 0 ) by COMPLEX1:46;
+L319: ( ( ( ( abs C92 ) |^ C94 ) / ( C94 ! ) ) * ( abs C92 ) ) <= ( ( ( D6 |^ C94 ) / ( C94 ! ) ) * D6 ) by L318 , L309 , L312 , L316 , XREAL_1:66;
+thus L320: thesis by L319 , L313 , L317 , XREAL_1:72;
+end;
+L321: ( ( ( abs C92 ) |^ ( 0 ) ) / ( ( 0 ) ! ) ) = ( 1 / ( ( 0 ) ! ) ) by NEWTON:4
+.= ( ( D6 |^ ( 0 ) ) / ( ( 0 ) ! ) ) by NEWTON:4;
+L322: S5[ ( 0 ) ] by L321;
+L323: (for B105 being (Element of ( NAT )) holds S5[ B105 ]) from NAT_1:sch 1(L322 , L311);
+thus L324: thesis by L323;
+end;
+L325: ( abs C92 ) >= ( 0 ) by COMPLEX1:46;
+L326: ( C93 * ( abs C92 ) ) < ( 1 * C90 ) by L325 , L306 , L307 , L309 , XREAL_1:97;
+L327: ( ( abs C93 ) * ( abs C92 ) ) < C90 by L326 , L306 , ABSVALUE:def 1;
+L328: ( abs ( ( C93 * C92 ) - ( 0 ) ) ) < C90 by L327 , COMPLEX1:65;
+L329: ( C93 * C92 ) in ]. ( ( 0 ) - C90 ) , ( ( 0 ) + C90 ) .[ by L328 , RCOMP_1:1;
+L330: (for B106 being (Element of ( NAT )) holds ( abs ( ( - 1 ) |^ B106 ) ) = 1)
+proof
+let C95 being (Element of ( NAT ));
+per cases ;
+suppose L331: C95 is  even;
+
+consider C96 being (Element of ( NAT )) such that L332: C95 = ( 2 * C96 ) by L331 , ABIAN:def 2;
+thus L333: ( abs ( ( - 1 ) |^ C95 ) ) = ( abs ( ( ( - 1 ) |^ ( 1 + 1 ) ) |^ C96 ) ) by L332 , NEWTON:9
+.= ( abs ( ( ( ( - 1 ) |^ 1 ) * ( - 1 ) ) |^ C96 ) ) by NEWTON:6
+.= ( abs ( ( ( - 1 ) * ( - 1 ) ) |^ C96 ) ) by NEWTON:5
+.= ( abs 1 ) by NEWTON:10
+.= 1 by ABSVALUE:def 1;
+end;
+suppose L334: C95 is  odd;
+
+consider C97 being (Element of ( NAT )) such that L335: C95 = ( ( 2 * C97 ) + 1 ) by L334 , ABIAN:9;
+thus L336: ( abs ( ( - 1 ) |^ C95 ) ) = ( abs ( ( ( - 1 ) |^ ( 2 * C97 ) ) * ( - 1 ) ) ) by L335 , NEWTON:6
+.= ( abs ( ( ( ( - 1 ) |^ ( 1 + 1 ) ) |^ C97 ) * ( - 1 ) ) ) by NEWTON:9
+.= ( abs ( ( ( ( ( - 1 ) |^ 1 ) * ( - 1 ) ) |^ C97 ) * ( - 1 ) ) ) by NEWTON:6
+.= ( abs ( ( ( ( - 1 ) * ( - 1 ) ) |^ C97 ) * ( - 1 ) ) ) by NEWTON:5
+.= ( abs ( 1 * ( - 1 ) ) ) by NEWTON:10
+.= ( abs 1 ) by COMPLEX1:52
+.= 1 by ABSVALUE:def 1;
+end;
+end;
+L338: ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) <= D5
+proof
+per cases ;
+suppose L339: C91 is  even;
+
+consider C98 being (Element of ( NAT )) such that L340: C91 = ( 2 * C98 ) by L339 , ABIAN:def 2;
+L341: ( dom ( ( ( - 1 ) |^ C98 ) (#) ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) ) = ( dom ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C90 ) , C90 .[ by L186;
+L342: ( C93 * C92 ) in ( dom ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) by L329 , L186;
+L343: ( abs ( sin ( C93 * C92 ) ) ) <= 1 by SIN_COS:27;
+L344: ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) = ( abs ( ( ( ( - 1 ) |^ C98 ) (#) ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) . ( C93 * C92 ) ) ) by L340 , L210
+.= ( abs ( ( ( - 1 ) |^ C98 ) * ( ( ( sin ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L329 , L341 , VALUED_1:def 5
+.= ( ( abs ( ( - 1 ) |^ C98 ) ) * ( abs ( ( ( sin ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by COMPLEX1:65
+.= ( 1 * ( abs ( ( ( sin ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L330
+.= ( abs ( ( sin ) . ( C93 * C92 ) ) ) by L342 , FUNCT_1:47;
+thus L345: thesis by L344 , L343 , SIN_COS:def 17;
+end;
+suppose L346: C91 is  odd;
+
+consider C99 being (Element of ( NAT )) such that L347: C91 = ( ( 2 * C99 ) + 1 ) by L346 , ABIAN:9;
+L348: ( dom ( ( ( - 1 ) |^ C99 ) (#) ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) ) = ( dom ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C90 ) , C90 .[ by L186;
+L349: ( C93 * C92 ) in ( dom ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) by L329 , L186;
+L350: ( abs ( cos ( C93 * C92 ) ) ) <= 1 by SIN_COS:27;
+L351: ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) = ( abs ( ( ( ( - 1 ) |^ C99 ) (#) ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) . ( C93 * C92 ) ) ) by L347 , L210
+.= ( abs ( ( ( - 1 ) |^ C99 ) * ( ( ( cos ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L329 , L348 , VALUED_1:def 5
+.= ( ( abs ( ( - 1 ) |^ C99 ) ) * ( abs ( ( ( cos ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by COMPLEX1:65
+.= ( 1 * ( abs ( ( ( cos ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L330
+.= ( abs ( ( cos ) . ( C93 * C92 ) ) ) by L349 , FUNCT_1:47;
+thus L352: thesis by L351 , L350 , SIN_COS:def 19;
+end;
+end;
+L354: ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) <= D5
+proof
+per cases ;
+suppose L355: C91 is  even;
+
+consider C100 being (Element of ( NAT )) such that L356: C91 = ( 2 * C100 ) by L355 , ABIAN:def 2;
+L357: ( dom ( ( ( - 1 ) |^ C100 ) (#) ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) ) = ( dom ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C90 ) , C90 .[ by L186;
+L358: ( C93 * C92 ) in ( dom ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) by L329 , L186;
+L359: ( abs ( cos ( C93 * C92 ) ) ) <= 1 by SIN_COS:27;
+L360: ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) = ( abs ( ( ( ( - 1 ) |^ C100 ) (#) ( ( cos ) | ]. ( - C90 ) , C90 .[ ) ) . ( C93 * C92 ) ) ) by L356 , L210
+.= ( abs ( ( ( - 1 ) |^ C100 ) * ( ( ( cos ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L329 , L357 , VALUED_1:def 5
+.= ( ( abs ( ( - 1 ) |^ C100 ) ) * ( abs ( ( ( cos ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by COMPLEX1:65
+.= ( 1 * ( abs ( ( ( cos ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L330
+.= ( abs ( ( cos ) . ( C93 * C92 ) ) ) by L358 , FUNCT_1:47;
+thus L361: thesis by L360 , L359 , SIN_COS:def 19;
+end;
+suppose L362: C91 is  odd;
+
+consider C101 being (Element of ( NAT )) such that L363: C91 = ( ( 2 * C101 ) + 1 ) by L362 , ABIAN:9;
+L364: ( dom ( ( ( - 1 ) |^ ( C101 + 1 ) ) (#) ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) ) = ( dom ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) by VALUED_1:def 5
+.= ]. ( - C90 ) , C90 .[ by L186;
+L365: ( C93 * C92 ) in ( dom ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) by L329 , L186;
+L366: ( abs ( sin ( C93 * C92 ) ) ) <= 1 by SIN_COS:27;
+L367: ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) = ( abs ( ( ( ( - 1 ) |^ ( C101 + 1 ) ) (#) ( ( sin ) | ]. ( - C90 ) , C90 .[ ) ) . ( C93 * C92 ) ) ) by L363 , L210
+.= ( abs ( ( ( - 1 ) |^ ( C101 + 1 ) ) * ( ( ( sin ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L329 , L364 , VALUED_1:def 5
+.= ( ( abs ( ( - 1 ) |^ ( C101 + 1 ) ) ) * ( abs ( ( ( sin ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by COMPLEX1:65
+.= ( 1 * ( abs ( ( ( sin ) | ]. ( - C90 ) , C90 .[ ) . ( C93 * C92 ) ) ) ) by L330
+.= ( abs ( ( sin ) . ( C93 * C92 ) ) ) by L365 , FUNCT_1:47;
+thus L368: thesis by L367 , L366 , SIN_COS:def 17;
+end;
+end;
+L370: ( C91 ! ) > ( 0 ) by NEWTON:17;
+L371: ( abs ( ( C92 |^ C91 ) / ( C91 ! ) ) ) = ( ( abs ( C92 |^ C91 ) ) / ( abs ( C91 ! ) ) ) by COMPLEX1:67
+.= ( ( abs ( C92 |^ C91 ) ) / ( C91 ! ) ) by L370 , ABSVALUE:def 1
+.= ( ( ( abs C92 ) |^ C91 ) / ( C91 ! ) ) by L1;
+L372: ( ( ( abs C92 ) |^ C91 ) / ( C91 ! ) ) >= ( 0 ) by L371 , COMPLEX1:46;
+L373: ( abs ( ( ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) * ( C92 |^ C91 ) ) / ( C91 ! ) ) ) = ( abs ( ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) * ( ( C92 |^ C91 ) / ( C91 ! ) ) ) ) by XCMPLX_1:74
+.= ( ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) * ( abs ( ( C92 |^ C91 ) / ( C91 ! ) ) ) ) by COMPLEX1:65
+.= ( ( ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) * ( ( abs C92 ) |^ C91 ) ) / ( C91 ! ) ) by L371 , XCMPLX_1:74;
+L374: ( abs ( ( ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) * ( C92 |^ C91 ) ) / ( C91 ! ) ) ) = ( abs ( ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) * ( ( C92 |^ C91 ) / ( C91 ! ) ) ) ) by XCMPLX_1:74
+.= ( ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) * ( abs ( ( C92 |^ C91 ) / ( C91 ! ) ) ) ) by COMPLEX1:65
+.= ( ( ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) * ( ( abs C92 ) |^ C91 ) ) / ( C91 ! ) ) by L371 , XCMPLX_1:74;
+L375: ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) >= ( 0 ) by COMPLEX1:46;
+L376: ( ( abs ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) * ( ( ( abs C92 ) |^ C91 ) / ( C91 ! ) ) ) <= ( D5 * ( ( D6 |^ C91 ) / ( C91 ! ) ) ) by L375 , L372 , L354 , L310 , XREAL_1:66;
+L377: ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) >= ( 0 ) by COMPLEX1:46;
+L378: ( ( abs ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) ) * ( ( ( abs C92 ) |^ C91 ) / ( C91 ! ) ) ) <= ( D5 * ( ( D6 |^ C91 ) / ( C91 ! ) ) ) by L377 , L372 , L338 , L310 , XREAL_1:66;
+thus L379: (( abs ( ( ( ( ( diff (( sin ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) * ( C92 |^ C91 ) ) / ( C91 ! ) ) ) <= ( ( D5 * ( D6 |^ C91 ) ) / ( C91 ! ) ) & ( abs ( ( ( ( ( diff (( cos ) , ]. ( - C90 ) , C90 .[) ) . C91 ) . ( C93 * C92 ) ) * ( C92 |^ C91 ) ) / ( C91 ! ) ) ) <= ( ( D5 * ( D6 |^ C91 ) ) / ( C91 ! ) )) by L378 , L374 , L373 , L376 , XCMPLX_1:74;
+end;
+thus L380: thesis by L304 , L303;
+end;
+theorem
+L381: (for B107 , B108 being Real holds ((( 0 ) < B107 & ( 0 ) < B108) implies (ex B109 being (Element of ( NAT )) st (for B110 being (Element of ( NAT )) holds (B109 <= B110 implies (for B111 , B112 being Real holds ((B111 in ]. ( - B107 ) , B107 .[ & ( 0 ) < B112 & B112 < 1) implies (( abs ( ( ( ( ( diff (( sin ) , ]. ( - B107 ) , B107 .[) ) . B110 ) . ( B112 * B111 ) ) * ( B111 |^ B110 ) ) / ( B110 ! ) ) ) < B108 & ( abs ( ( ( ( ( diff (( cos ) , ]. ( - B107 ) , B107 .[) ) . B110 ) . ( B112 * B111 ) ) * ( B111 |^ B110 ) ) / ( B110 ! ) ) ) < B108))))))))
+proof
+let C102 , C103 being Real;
+assume that
+L382: C102 > ( 0 )
+and
+L383: C103 > ( 0 );
+consider C104 , C105 being Real such that L384: (C104 >= ( 0 ) & C105 >= ( 0 )) and L385: (for B113 being (Element of ( NAT )) holds (for B114 , B115 being Real holds ((B114 in ]. ( - C102 ) , C102 .[ & ( 0 ) < B115 & B115 < 1) implies (( abs ( ( ( ( ( diff (( sin ) , ]. ( - C102 ) , C102 .[) ) . B113 ) . ( B115 * B114 ) ) * ( B114 |^ B113 ) ) / ( B113 ! ) ) ) <= ( ( C104 * ( C105 |^ B113 ) ) / ( B113 ! ) ) & ( abs ( ( ( ( ( diff (( cos ) , ]. ( - C102 ) , C102 .[) ) . B113 ) . ( B115 * B114 ) ) * ( B114 |^ B113 ) ) / ( B113 ! ) ) ) <= ( ( C104 * ( C105 |^ B113 ) ) / ( B113 ! ) ))))) by L382 , L302;
+consider C106 being (Element of ( NAT )) such that L386: (for B116 being (Element of ( NAT )) holds (C106 <= B116 implies ( ( C104 * ( C105 |^ B116 ) ) / ( B116 ! ) ) < C103)) by L383 , L384 , L127;
+take C106;
+let C107 being (Element of ( NAT ));
+assume L387: C106 <= C107;
+L388: ( ( C104 * ( C105 |^ C107 ) ) / ( C107 ! ) ) < C103 by L387 , L386;
+let C108 , C109 being Real;
+assume L389: (C108 in ]. ( - C102 ) , C102 .[ & ( 0 ) < C109 & C109 < 1);
+L390: (( abs ( ( ( ( ( diff (( sin ) , ]. ( - C102 ) , C102 .[) ) . C107 ) . ( C109 * C108 ) ) * ( C108 |^ C107 ) ) / ( C107 ! ) ) ) <= ( ( C104 * ( C105 |^ C107 ) ) / ( C107 ! ) ) & ( abs ( ( ( ( ( diff (( cos ) , ]. ( - C102 ) , C102 .[) ) . C107 ) . ( C109 * C108 ) ) * ( C108 |^ C107 ) ) / ( C107 ! ) ) ) <= ( ( C104 * ( C105 |^ C107 ) ) / ( C107 ! ) )) by L389 , L385;
+thus L391: thesis by L390 , L388 , XXREAL_0:2;
+end;
+theorem
+L392: (for B117 , B118 being Real holds ((( 0 ) < B117 & ( 0 ) < B118) implies (ex B119 being (Element of ( NAT )) st (for B120 being (Element of ( NAT )) holds (B119 <= B120 implies (for B121 being  real number holds (B121 in ]. ( - B117 ) , B117 .[ implies (( abs ( ( ( sin ) . B121 ) - ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - B117 ) , B117 .[ , B121) ) ) . B120 ) ) ) < B118 & ( abs ( ( ( cos ) . B121 ) - ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - B117 ) , B117 .[ , B121) ) ) . B120 ) ) ) < B118))))))))
+proof
+let C110 , C111 being Real;
+assume that
+L393: C110 > ( 0 )
+and
+L394: C111 > ( 0 );
+consider C112 being (Element of ( NAT )) such that L395: (for B122 being (Element of ( NAT )) holds (C112 <= B122 implies (for B123 , B124 being Real holds ((B123 in ]. ( - C110 ) , C110 .[ & ( 0 ) < B124 & B124 < 1) implies (( abs ( ( ( ( ( diff (( sin ) , ]. ( - C110 ) , C110 .[) ) . B122 ) . ( B124 * B123 ) ) * ( B123 |^ B122 ) ) / ( B122 ! ) ) ) < C111 & ( abs ( ( ( ( ( diff (( cos ) , ]. ( - C110 ) , C110 .[) ) . B122 ) . ( B124 * B123 ) ) * ( B123 |^ B122 ) ) / ( B122 ! ) ) ) < C111))))) by L393 , L394 , L381;
+take C112;
+let C113 being (Element of ( NAT ));
+assume that
+L396: C112 <= C113;
+L397: (( cos ) is_differentiable_on ( C113 + 1 ) , ]. ( - C110 ) , C110 .[ & ( dom ( cos ) ) = ( REAL )) by L243 , FUNCT_2:def 1;
+L398: (( sin ) is_differentiable_on ( C113 + 1 ) , ]. ( - C110 ) , C110 .[ & ( dom ( sin ) ) = ( REAL )) by L243 , FUNCT_2:def 1;
+L399:
+now
+L400: C113 <= ( C113 + 1 ) by NAT_1:11;
+L401: C112 <= ( C113 + 1 ) by L400 , L396 , XXREAL_0:2;
+let C114 being Real;
+assume that
+L402: C114 in ]. ( - C110 ) , C110 .[;
+L403: (ex B125 being Real st (( 0 ) < B125 & B125 < 1 & ( abs ( ( ( sin ) . C114 ) - ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C110 ) , C110 .[ , C114) ) ) . C113 ) ) ) = ( abs ( ( ( ( ( diff (( sin ) , ]. ( - C110 ) , C110 .[) ) . ( C113 + 1 ) ) . ( B125 * C114 ) ) * ( C114 |^ ( C113 + 1 ) ) ) / ( ( C113 + 1 ) ! ) ) ))) by L393 , L398 , L402 , L21;
+thus L404: ( abs ( ( ( sin ) . C114 ) - ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C110 ) , C110 .[ , C114) ) ) . C113 ) ) ) < C111 by L403 , L395 , L402 , L401;
+L405: (ex B126 being Real st (( 0 ) < B126 & B126 < 1 & ( abs ( ( ( cos ) . C114 ) - ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C110 ) , C110 .[ , C114) ) ) . C113 ) ) ) = ( abs ( ( ( ( ( diff (( cos ) , ]. ( - C110 ) , C110 .[) ) . ( C113 + 1 ) ) . ( B126 * C114 ) ) * ( C114 |^ ( C113 + 1 ) ) ) / ( ( C113 + 1 ) ! ) ) ))) by L393 , L397 , L402 , L21;
+thus L406: ( abs ( ( ( cos ) . C114 ) - ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C110 ) , C110 .[ , C114) ) ) . C113 ) ) ) < C111 by L405 , L395 , L402 , L401;
+end;
+thus L407: thesis by L399;
+end;
+theorem
+L408: (for B127 , B128 being Real holds (for B129 being (Element of ( NAT )) holds (( 0 ) < B127 implies (( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - B127 ) , B127 .[ , B128) ) ) . ( ( 2 * B129 ) + 1 ) ) = ( ( Partial_Sums ( B128 P_sin ) ) . B129 ) & ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - B127 ) , B127 .[ , B128) ) ) . ( ( 2 * B129 ) + 1 ) ) = ( ( Partial_Sums ( B128 P_cos ) ) . B129 )))))
+proof
+let C115 , C116 being Real;
+let C117 being (Element of ( NAT ));
+assume that
+L409: C115 > ( 0 );
+thus L410: ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C117 ) + 1 ) ) = ( ( Partial_Sums ( C116 P_sin ) ) . C117 )
+proof
+defpred S6[ (Element of ( NAT )) ] means ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * $1 ) + 1 ) ) = ( ( Partial_Sums ( C116 P_sin ) ) . $1 );
+L411: (for B130 being (Element of ( NAT )) holds (S6[ B130 ] implies S6[ ( B130 + 1 ) ]))
+proof
+let C118 being (Element of ( NAT ));
+assume that
+L412: S6[ C118 ];
+L413: ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * ( C118 + 1 ) ) + 1 ) ) = ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C118 ) + 2 ) ) + ( ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * C118 ) + 3 ) ) ) by SERIES_1:def 1
+.= ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C118 ) + 2 ) ) + ( ( ( ( - 1 ) |^ ( C118 + 1 ) ) * ( C116 |^ ( ( 2 * ( C118 + 1 ) ) + 1 ) ) ) / ( ( ( 2 * ( C118 + 1 ) ) + 1 ) ! ) ) ) by L409 , L229
+.= ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( ( 2 * C118 ) + 1 ) + 1 ) ) + ( ( C116 P_sin ) . ( C118 + 1 ) ) ) by SIN_COS:def 20
+.= ( ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C118 ) + 1 ) ) + ( ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( 2 * ( C118 + 1 ) ) ) ) + ( ( C116 P_sin ) . ( C118 + 1 ) ) ) by SERIES_1:def 1
+.= ( ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C118 ) + 1 ) ) + ( 0 ) ) + ( ( C116 P_sin ) . ( C118 + 1 ) ) ) by L409 , L229
+.= ( ( Partial_Sums ( C116 P_sin ) ) . ( C118 + 1 ) ) by L412 , SERIES_1:def 1;
+thus L414: thesis by L413;
+end;
+L415: ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * ( 0 ) ) + 1 ) ) = ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( 2 * ( 0 ) ) ) + ( ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * ( 0 ) ) + 1 ) ) ) by SERIES_1:def 1
+.= ( ( ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( 2 * ( 0 ) ) ) + ( ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * ( 0 ) ) + 1 ) ) ) by SERIES_1:def 1
+.= ( ( 0 ) + ( ( Maclaurin (( sin ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * ( 0 ) ) + 1 ) ) ) by L409 , L229
+.= ( ( ( ( - 1 ) |^ ( 0 ) ) * ( C116 |^ ( ( 2 * ( 0 ) ) + 1 ) ) ) / ( ( ( 2 * ( 0 ) ) + 1 ) ! ) ) by L409 , L229
+.= ( ( C116 P_sin ) . ( 0 ) ) by SIN_COS:def 20
+.= ( ( Partial_Sums ( C116 P_sin ) ) . ( 0 ) ) by SERIES_1:def 1;
+L416: S6[ ( 0 ) ] by L415;
+L417: (for B131 being (Element of ( NAT )) holds S6[ B131 ]) from NAT_1:sch 1(L416 , L411);
+thus L418: thesis by L417;
+end;
+
+defpred S7[ (Element of ( NAT )) ] means ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * $1 ) + 1 ) ) = ( ( Partial_Sums ( C116 P_cos ) ) . $1 );
+L419: (for B132 being (Element of ( NAT )) holds (S7[ B132 ] implies S7[ ( B132 + 1 ) ]))
+proof
+let C119 being (Element of ( NAT ));
+assume that
+L420: S7[ C119 ];
+L421: ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * ( C119 + 1 ) ) + 1 ) ) = ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C119 ) + 2 ) ) + ( ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * ( C119 + 1 ) ) + 1 ) ) ) by SERIES_1:def 1
+.= ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C119 ) + 2 ) ) + ( 0 ) ) by L409 , L229
+.= ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( ( 2 * C119 ) + 1 ) + 1 ) )
+.= ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * C119 ) + 1 ) ) + ( ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * C119 ) + 2 ) ) ) by SERIES_1:def 1
+.= ( ( ( Partial_Sums ( C116 P_cos ) ) . C119 ) + ( ( ( ( - 1 ) |^ ( C119 + 1 ) ) * ( C116 |^ ( 2 * ( C119 + 1 ) ) ) ) / ( ( 2 * ( C119 + 1 ) ) ! ) ) ) by L409 , L420 , L229
+.= ( ( ( Partial_Sums ( C116 P_cos ) ) . C119 ) + ( ( C116 P_cos ) . ( C119 + 1 ) ) ) by SIN_COS:def 21
+.= ( ( Partial_Sums ( C116 P_cos ) ) . ( C119 + 1 ) ) by SERIES_1:def 1;
+thus L422: thesis by L421;
+end;
+L423: ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( ( 2 * ( 0 ) ) + 1 ) ) = ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) ) . ( 2 * ( 0 ) ) ) + ( ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * ( 0 ) ) + 1 ) ) ) by SERIES_1:def 1
+.= ( ( ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( 2 * ( 0 ) ) ) + ( ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( ( 2 * ( 0 ) ) + 1 ) ) ) by SERIES_1:def 1
+.= ( ( ( Maclaurin (( cos ) , ]. ( - C115 ) , C115 .[ , C116) ) . ( 2 * ( 0 ) ) ) + ( 0 ) ) by L409 , L229
+.= ( ( ( ( - 1 ) |^ ( 0 ) ) * ( C116 |^ ( 2 * ( 0 ) ) ) ) / ( ( 2 * ( 0 ) ) ! ) ) by L409 , L229
+.= ( ( C116 P_cos ) . ( 0 ) ) by SIN_COS:def 21
+.= ( ( Partial_Sums ( C116 P_cos ) ) . ( 0 ) ) by SERIES_1:def 1;
+L424: S7[ ( 0 ) ] by L423;
+L425: (for B133 being (Element of ( NAT )) holds S7[ B133 ]) from NAT_1:sch 1(L424 , L419);
+thus L426: thesis by L425;
+end;
+theorem
+L427: (for B134 , B135 being Real holds (for B136 being (Element of ( NAT )) holds ((( 0 ) < B134 & B136 > ( 0 )) implies (( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - B134 ) , B134 .[ , B135) ) ) . ( 2 * B136 ) ) = ( ( Partial_Sums ( B135 P_sin ) ) . ( B136 - 1 ) ) & ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - B134 ) , B134 .[ , B135) ) ) . ( 2 * B136 ) ) = ( ( Partial_Sums ( B135 P_cos ) ) . B136 )))))
+proof
+let C120 , C121 being Real;
+let C122 being (Element of ( NAT ));
+assume that
+L428: C120 > ( 0 )
+and
+L429: C122 > ( 0 );
+L430: ( C122 - 1 ) is (Element of ( NAT )) by L429 , NAT_1:20;
+L431: ( 2 * C122 ) > ( 2 * ( 0 ) ) by L429 , XREAL_1:68;
+L432: ( ( 2 * C122 ) - 1 ) is (Element of ( NAT )) by L431 , NAT_1:20;
+L433: ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( 2 * C122 ) ) = ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( ( 2 * C122 ) - 1 ) ) + ( ( Maclaurin (( sin ) , ]. ( - C120 ) , C120 .[ , C121) ) . ( ( ( 2 * C122 ) - 1 ) + 1 ) ) ) by L432 , SERIES_1:def 1
+.= ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( ( 2 * C122 ) - 1 ) ) + ( 0 ) ) by L428 , L229
+.= ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( ( 2 * ( C122 - 1 ) ) + 1 ) )
+.= ( ( Partial_Sums ( C121 P_sin ) ) . ( C122 - 1 ) ) by L428 , L430 , L408;
+L434: ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( 2 * C122 ) ) = ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( ( 2 * C122 ) - 1 ) ) + ( ( Maclaurin (( cos ) , ]. ( - C120 ) , C120 .[ , C121) ) . ( ( ( 2 * C122 ) - 1 ) + 1 ) ) ) by L432 , SERIES_1:def 1
+.= ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( ( 2 * C122 ) - 1 ) ) + ( ( ( ( - 1 ) |^ C122 ) * ( C121 |^ ( 2 * C122 ) ) ) / ( ( 2 * C122 ) ! ) ) ) by L428 , L229
+.= ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C120 ) , C120 .[ , C121) ) ) . ( ( 2 * ( C122 - 1 ) ) + 1 ) ) + ( ( C121 P_cos ) . C122 ) ) by SIN_COS:def 21
+.= ( ( ( Partial_Sums ( C121 P_cos ) ) . ( C122 - 1 ) ) + ( ( C121 P_cos ) . ( ( C122 - 1 ) + 1 ) ) ) by L428 , L430 , L408
+.= ( ( Partial_Sums ( C121 P_cos ) ) . C122 ) by L430 , SERIES_1:def 1;
+thus L435: thesis by L434 , L433;
+end;
+theorem
+L436: (for B137 , B138 being Real holds (for B139 being (Element of ( NAT )) holds (( 0 ) < B137 implies ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - B137 ) , B137 .[ , B138) ) ) . ( 2 * B139 ) ) = ( ( Partial_Sums ( B138 P_cos ) ) . B139 ))))
+proof
+let C123 , C124 being Real;
+let C125 being (Element of ( NAT ));
+assume that
+L437: C123 > ( 0 );
+defpred S8[ (Element of ( NAT )) ] means ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) ) . ( 2 * $1 ) ) = ( ( Partial_Sums ( C124 P_cos ) ) . $1 );
+L438: (for B140 being (Element of ( NAT )) holds (S8[ B140 ] implies S8[ ( B140 + 1 ) ]))
+proof
+let C126 being (Element of ( NAT ));
+assume that
+L439: S8[ C126 ];
+thus L440: ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) ) . ( 2 * ( C126 + 1 ) ) ) = ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) ) . ( ( 2 * C126 ) + 1 ) ) + ( ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) . ( ( ( 2 * C126 ) + 1 ) + 1 ) ) ) by SERIES_1:def 1
+.= ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) ) . ( ( 2 * C126 ) + 1 ) ) + ( ( ( ( - 1 ) |^ ( C126 + 1 ) ) * ( C124 |^ ( 2 * ( C126 + 1 ) ) ) ) / ( ( 2 * ( C126 + 1 ) ) ! ) ) ) by L437 , L229
+.= ( ( ( Partial_Sums ( C124 P_cos ) ) . C126 ) + ( ( ( ( - 1 ) |^ ( C126 + 1 ) ) * ( C124 |^ ( 2 * ( C126 + 1 ) ) ) ) / ( ( 2 * ( C126 + 1 ) ) ! ) ) ) by L437 , L408
+.= ( ( ( Partial_Sums ( C124 P_cos ) ) . C126 ) + ( ( C124 P_cos ) . ( C126 + 1 ) ) ) by SIN_COS:def 21
+.= ( ( Partial_Sums ( C124 P_cos ) ) . ( C126 + 1 ) ) by SERIES_1:def 1;
+end;
+L441: ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) ) . ( 2 * ( 0 ) ) ) = ( ( Maclaurin (( cos ) , ]. ( - C123 ) , C123 .[ , C124) ) . ( 2 * ( 0 ) ) ) by SERIES_1:def 1
+.= ( ( ( ( - 1 ) |^ ( 0 ) ) * ( C124 |^ ( 2 * ( 0 ) ) ) ) / ( ( 2 * ( 0 ) ) ! ) ) by L437 , L229
+.= ( ( C124 P_cos ) . ( 0 ) ) by SIN_COS:def 21
+.= ( ( Partial_Sums ( C124 P_cos ) ) . ( 0 ) ) by SERIES_1:def 1;
+L442: S8[ ( 0 ) ] by L441;
+L443: (for B141 being (Element of ( NAT )) holds S8[ B141 ]) from NAT_1:sch 1(L442 , L438);
+thus L444: thesis by L443;
+end;
+theorem
+L445: (for B142 , B143 being Real holds (B142 > ( 0 ) implies (( Partial_Sums ( Maclaurin (( sin ) , ]. ( - B142 ) , B142 .[ , B143) ) ) is  convergent & ( ( sin ) . B143 ) = ( Sum ( Maclaurin (( sin ) , ]. ( - B142 ) , B142 .[ , B143) ) ) & ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - B142 ) , B142 .[ , B143) ) ) is  convergent & ( ( cos ) . B143 ) = ( Sum ( Maclaurin (( cos ) , ]. ( - B142 ) , B142 .[ , B143) ) ))))
+proof
+let C127 , C128 being Real;
+assume that
+L446: C127 > ( 0 );
+set D7 = ( ( sin ) . C128 );
+L447: ( Sum ( C128 P_sin ) ) = ( ( sin ) . C128 ) by SIN_COS:37;
+L448: ( lim ( Partial_Sums ( C128 P_sin ) ) ) = ( ( sin ) . C128 ) by L447 , SERIES_1:def 3;
+L449: ( Partial_Sums ( C128 P_sin ) ) is  convergent by SIN_COS:36;
+L450: (for B144 being  real number holds (B144 > ( 0 ) implies (ex B145 being (Element of ( NAT )) st (for B146 being (Element of ( NAT )) holds (B146 >= B145 implies ( abs ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C127 ) , C127 .[ , C128) ) ) . B146 ) - D7 ) ) < B144)))))
+proof
+let C129 being  real number;
+assume L451: C129 > ( 0 );
+consider C130 being (Element of ( NAT )) such that L452: (for B147 being (Element of ( NAT )) holds (C130 <= B147 implies ( abs ( ( ( Partial_Sums ( C128 P_sin ) ) . B147 ) - D7 ) ) < C129)) by L451 , L448 , L449 , SEQ_2:def 7;
+set D8 = ( ( 2 * C130 ) + 2 );
+L453: (for B148 being (Element of ( NAT )) holds (B148 >= D8 implies ( abs ( ( ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C127 ) , C127 .[ , C128) ) ) . B148 ) - D7 ) ) < C129))
+proof
+let C131 being (Element of ( NAT ));
+assume that
+L454: C131 >= D8;
+per cases ;
+suppose L455: C131 is  even;
+
+consider C132 being (Element of ( NAT )) such that L456: C131 = ( 2 * C132 ) by L455 , ABIAN:def 2;
+L457: ( ( ( C130 + 1 ) * 2 ) / 2 ) <= ( ( C132 * 2 ) / 2 ) by L454 , L456 , XREAL_1:72;
+L458: ( ( C130 + 1 ) - 1 ) <= ( C132 - 1 ) by L457 , XREAL_1:9;
+L459: ( C130 + 1 ) >= ( ( 0 ) + 1 ) by XREAL_1:6;
+L460: ( C132 - 1 ) is (Element of ( NAT )) by L459 , L457 , NAT_1:20;
+L461: ( abs ( ( ( Partial_Sums ( C128 P_sin ) ) . ( C132 - 1 ) ) - D7 ) ) < C129 by L460 , L452 , L458;
+thus L462: thesis by L461 , L446 , L456 , L457 , L427;
+end;
+suppose L463: C131 is  odd;
+
+consider C133 being (Element of ( NAT )) such that L464: C131 = ( ( 2 * C133 ) + 1 ) by L463 , ABIAN:9;
+L465: (( ( C130 * 2 ) + ( 0 ) ) <= ( ( C130 * 2 ) + 1 ) & ( ( ( C130 * 2 ) + 2 ) - 1 ) <= ( ( ( 2 * C133 ) + 1 ) - 1 )) by L454 , L464 , XREAL_1:6 , XREAL_1:9;
+L466: ( C130 * 2 ) <= ( C133 * 2 ) by L465 , XXREAL_0:2;
+L467: ( ( C130 * 2 ) / 2 ) <= ( ( C133 * 2 ) / 2 ) by L466 , XREAL_1:72;
+L468: ( abs ( ( ( Partial_Sums ( C128 P_sin ) ) . C133 ) - D7 ) ) < C129 by L467 , L452;
+thus L469: thesis by L468 , L446 , L464 , L408;
+end;
+end;
+thus L471: thesis by L453;
+end;
+L472: ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C127 ) , C127 .[ , C128) ) ) is  convergent by L450 , SEQ_2:def 6;
+L473: ( lim ( Partial_Sums ( Maclaurin (( sin ) , ]. ( - C127 ) , C127 .[ , C128) ) ) ) = ( ( sin ) . C128 ) by L472 , L450 , SEQ_2:def 7;
+L474: ( Sum ( C128 P_cos ) ) = ( ( cos ) . C128 ) by SIN_COS:37;
+L475: ( lim ( Partial_Sums ( C128 P_cos ) ) ) = ( ( cos ) . C128 ) by L474 , SERIES_1:def 3;
+set D9 = ( ( cos ) . C128 );
+L476: ( Partial_Sums ( C128 P_cos ) ) is  convergent by SIN_COS:36;
+L477: (for B149 being  real number holds (B149 > ( 0 ) implies (ex B150 being (Element of ( NAT )) st (for B151 being (Element of ( NAT )) holds (B151 >= B150 implies ( abs ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C127 ) , C127 .[ , C128) ) ) . B151 ) - D9 ) ) < B149)))))
+proof
+let C134 being  real number;
+assume L478: C134 > ( 0 );
+consider C135 being (Element of ( NAT )) such that L479: (for B152 being (Element of ( NAT )) holds (C135 <= B152 implies ( abs ( ( ( Partial_Sums ( C128 P_cos ) ) . B152 ) - D9 ) ) < C134)) by L478 , L475 , L476 , SEQ_2:def 7;
+set D10 = ( ( 2 * C135 ) + 1 );
+L480: (for B153 being (Element of ( NAT )) holds (B153 >= D10 implies ( abs ( ( ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C127 ) , C127 .[ , C128) ) ) . B153 ) - D9 ) ) < C134))
+proof
+let C136 being (Element of ( NAT ));
+assume that
+L481: C136 >= D10;
+per cases ;
+suppose L482: C136 is  even;
+
+consider C137 being (Element of ( NAT )) such that L483: C136 = ( 2 * C137 ) by L482 , ABIAN:def 2;
+L484: ( ( C135 * 2 ) + 1 ) >= ( C135 * 2 ) by XREAL_1:29;
+L485: ( C135 * 2 ) <= ( C137 * 2 ) by L484 , L481 , L483 , XXREAL_0:2;
+L486: ( ( C135 * 2 ) / 2 ) <= ( ( C137 * 2 ) / 2 ) by L485 , XREAL_1:72;
+L487: ( abs ( ( ( Partial_Sums ( C128 P_cos ) ) . C137 ) - D9 ) ) < C134 by L486 , L479;
+thus L488: thesis by L487 , L446 , L483 , L436;
+end;
+suppose L489: C136 is  odd;
+
+consider C138 being (Element of ( NAT )) such that L490: C136 = ( ( 2 * C138 ) + 1 ) by L489 , ABIAN:9;
+L491: ( ( ( C135 * 2 ) + 1 ) - 1 ) <= ( ( ( C138 * 2 ) + 1 ) - 1 ) by L481 , L490 , XREAL_1:9;
+L492: ( ( C135 * 2 ) / 2 ) <= ( ( C138 * 2 ) / 2 ) by L491 , XREAL_1:72;
+L493: ( abs ( ( ( Partial_Sums ( C128 P_cos ) ) . C138 ) - D9 ) ) < C134 by L492 , L479;
+thus L494: thesis by L493 , L446 , L490 , L408;
+end;
+end;
+thus L496: thesis by L480;
+end;
+L497: ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C127 ) , C127 .[ , C128) ) ) is  convergent by L477 , SEQ_2:def 6;
+L498: ( lim ( Partial_Sums ( Maclaurin (( cos ) , ]. ( - C127 ) , C127 .[ , C128) ) ) ) = ( ( cos ) . C128 ) by L497 , L477 , SEQ_2:def 7;
+thus L499: thesis by L498 , L450 , L473 , L477 , SEQ_2:def 6 , SERIES_1:def 3;
+end;

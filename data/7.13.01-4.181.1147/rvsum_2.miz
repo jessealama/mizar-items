@@ -1,0 +1,987 @@
+:: The Sum and Product of Finite Sequences of Complex Numbers
+::  by Keiichi Miyajima and Takahiro Kato
+::
+:: Received January 12, 2010
+:: Copyright (c) 2010-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies FINSEQ_1, FINSEQ_2, ARYTM_1, FUNCT_1, RELAT_1, BINOP_1, SETWISEO,
+      SQUARE_1, FUNCOP_1, RVSUM_1, RVSUM_2, CARD_3, XBOOLE_0, COMPLEX1,
+      XCMPLX_0, VALUED_0, BINOP_2, ZFMISC_1, NUMBERS, SUBSET_1, NAT_1, TARSKI,
+      ORDINAL4, ORDINAL1, ARYTM_3, CARD_1, VALUED_1, XREAL_0;
+ notations TARSKI, SUBSET_1, ZFMISC_1, ORDINAL1, CARD_1, NUMBERS, VALUED_0,
+      XBOOLE_0, XCMPLX_0, XREAL_0, COMPLEX1, NAT_1, SQUARE_1, RELAT_1, FUNCT_1,
+      PARTFUN1, BINOP_2, FUNCT_2, BINOP_1, FUNCOP_1, FINSEQ_1, FINSEQ_2,
+      VALUED_1, SEQ_4, FINSEQOP, SETWOP_2, RVSUM_1;
+ constructors BINOP_1, COMPLEX1, SETWISEO, SQUARE_1, BINOP_2, FINSEQOP,
+      FINSOP_1, RELSET_1, RVSUM_1, SEQ_4, CARD_1, CARD_3;
+ registrations FUNCT_1, FUNCT_2, FUNCOP_1, NUMBERS, XREAL_0, BINOP_2, MEMBERED,
+      FINSEQ_1, FINSEQ_2, VALUED_0, VALUED_1, RELAT_1, RVSUM_1, NEWTON, CARD_1;
+ requirements NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions BINOP_1, FINSEQOP, FINSEQ_1, SQUARE_1, FINSEQ_2, TARSKI, VALUED_1,
+      XCMPLX_0, RVSUM_1, COMPLEX1, XBOOLE_0, SEQ_4, CARD_1;
+ theorems FUNCT_1, FUNCT_2, FINSEQ_1, FUNCOP_1, FINSEQ_2, FINSEQOP, SETWOP_2,
+      RELAT_1, FINSOP_1, ZFMISC_1, XCMPLX_0, BINOP_2, FINSEQ_3, VALUED_0,
+      VALUED_1, RFUNCT_1, RVSUM_1, SEQ_4, CARD_1;
+ schemes NAT_1, FUNCT_2;
+
+begin
+definition
+let C1 being  complex-valued Relation;
+redefine func rng C1 -> (Subset of ( COMPLEX ));
+
+coherence by VALUED_0:def 1;
+end;
+registration
+let C2 being non  empty set;
+let C3 being (Function of ( COMPLEX ) , C2);
+let C4 being  complex-valued FinSequence;
+cluster ( C3 * C4 ) ->  FinSequence-like;
+coherence
+proof
+consider C5 being Nat such that L2: ( dom C4 ) = ( Seg C5 ) by FINSEQ_1:def 2;
+take C5;
+L3: (( dom C3 ) = ( COMPLEX ) & ( rng C4 ) c= ( COMPLEX )) by FUNCT_2:def 1;
+thus L4: thesis by L3 , L2 , RELAT_1:27;
+end;
+end;
+definition
+func sqrcomplex -> (UnOp of ( COMPLEX )) means 
+:L6: (for R7 being  complex number holds ( it . R7 ) = ( R7 ^2 ));
+existence
+proof
+deffunc H1((Element of ( COMPLEX ))) = ( $1 ^2 );
+consider C6 being (Function of ( COMPLEX ) , ( COMPLEX )) such that L7: (for B1 being (Element of ( COMPLEX )) holds ( C6 . B1 ) = H1(B1)) from FUNCT_2:sch 4;
+take C6;
+let R7 being  complex number;
+L8: R7 in ( COMPLEX ) by XCMPLX_0:def 2;
+thus L9: thesis by L8 , L7;
+end;
+uniqueness
+proof
+let C7 , C8 being (UnOp of ( COMPLEX ));
+assume that
+L10: (for R7 being  complex number holds ( C7 . R7 ) = ( R7 ^2 ))
+and
+L11: (for R7 being  complex number holds ( C8 . R7 ) = ( R7 ^2 ));
+L12:
+now
+let R4 being (Element of ( COMPLEX ));
+L13: ( C7 . R4 ) = ( R4 ^2 ) by L10;
+thus L14: ( C7 . R4 ) = ( C8 . R4 ) by L13 , L11;
+end;
+thus L15: thesis by L12 , FUNCT_2:63;
+end;
+end;
+theorem
+L17: ( sqrcomplex ) is_distributive_wrt ( multcomplex )
+proof
+let R5 being (Element of ( COMPLEX ));
+let R6 being (Element of ( COMPLEX ));
+thus L18: ( ( sqrcomplex ) . ( ( multcomplex ) . (R5 , R6) ) ) = ( ( sqrcomplex ) . ( R5 * R6 ) ) by BINOP_2:def 5
+.= ( ( R5 * R6 ) ^2 ) by L6
+.= ( ( R5 ^2 ) * ( R6 ^2 ) )
+.= ( ( multcomplex ) . (( R5 ^2 ) , ( R6 ^2 )) ) by BINOP_2:def 5
+.= ( ( multcomplex ) . (( ( sqrcomplex ) . R5 ) , ( R6 ^2 )) ) by L6
+.= ( ( multcomplex ) . (( ( sqrcomplex ) . R5 ) , ( ( sqrcomplex ) . R6 )) ) by L6;
+end;
+L19: (for R7 being  complex number holds (for R8 being  complex number holds ( ( ( multcomplex ) [;] (R7 , ( id ( COMPLEX ) )) ) . R8 ) = ( R7 * R8 )))
+proof
+let R7 being  complex number;
+let R8 being  complex number;
+reconsider D1 = R7 , D2 = R8 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+thus L20: ( ( ( multcomplex ) [;] (R7 , ( id ( COMPLEX ) )) ) . R8 ) = ( ( multcomplex ) . (D1 , ( ( id ( COMPLEX ) ) . D2 )) ) by FUNCOP_1:53
+.= ( ( multcomplex ) . (D1 , D2) ) by FUNCT_1:18
+.= ( R7 * R8 ) by BINOP_2:def 5;
+end;
+theorem
+L21: (for R7 being  complex number holds ( R7 multcomplex ) is_distributive_wrt ( addcomplex ))
+proof
+let R7 being  complex number;
+L22: R7 in ( COMPLEX ) by XCMPLX_0:def 2;
+thus L23: thesis by L22 , FINSEQOP:54 , SEQ_4:54;
+end;
+begin
+L24: (for R11 being  complex-valued FinSequence holds R11 is (FinSequence of ( COMPLEX )))
+proof
+let R11 being  complex-valued FinSequence;
+thus L25: ( rng R11 ) c= ( COMPLEX );
+end;
+definition
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+redefine func R12 + R13 -> (FinSequence of ( COMPLEX )) equals 
+( ( addcomplex ) .: (R12 , R13) );
+coherence by L24;
+compatibility
+proof
+reconsider D3 = R12 , D4 = R13 as (FinSequence of ( COMPLEX )) by L24;
+let C9 being (FinSequence of ( COMPLEX ));
+L26: ( dom ( addcomplex ) ) = [: ( COMPLEX ) , ( COMPLEX ) :] by FUNCT_2:def 1;
+L27: [: ( rng D3 ) , ( rng D4 ) :] c= ( dom ( addcomplex ) ) by L26 , ZFMISC_1:96;
+L28: ( dom ( ( addcomplex ) .: (R12 , R13) ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by L27 , FUNCOP_1:69;
+L29: ( dom ( R12 + R13 ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by VALUED_1:def 1;
+thus L30: (C9 = ( R12 + R13 ) implies C9 = ( ( addcomplex ) .: (R12 , R13) ))
+proof
+assume L31: C9 = ( R12 + R13 );
+L32: (for B2 being set holds (B2 in ( dom ( ( addcomplex ) .: (R12 , R13) ) ) implies ( C9 . B2 ) = ( ( addcomplex ) . (( R12 . B2 ) , ( R13 . B2 )) )))
+proof
+let C10 being set;
+assume L33: C10 in ( dom ( ( addcomplex ) .: (R12 , R13) ) );
+thus L34: ( C9 . C10 ) = ( ( R12 . C10 ) + ( R13 . C10 ) ) by L33 , L29 , L28 , L31 , VALUED_1:def 1
+.= ( ( addcomplex ) . (( R12 . C10 ) , ( R13 . C10 )) ) by BINOP_2:def 3;
+end;
+thus L35: thesis by L32 , L29 , L28 , L31 , FUNCOP_1:21;
+end;
+
+assume L36: C9 = ( ( addcomplex ) .: (R12 , R13) );
+L37:
+now
+let C11 being set;
+assume L38: C11 in ( dom C9 );
+thus L39: ( C9 . C11 ) = ( ( addcomplex ) . (( R12 . C11 ) , ( R13 . C11 )) ) by L38 , L36 , FUNCOP_1:22
+.= ( ( R12 . C11 ) + ( R13 . C11 ) ) by BINOP_2:def 3;
+end;
+thus L40: thesis by L37 , L28 , L36 , VALUED_1:def 1;
+end;
+commutativity
+proof
+let C12 being (FinSequence of ( COMPLEX ));
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+assume L41: C12 = ( ( addcomplex ) .: (R12 , R13) );
+reconsider D5 = R12 , D6 = R13 as (FinSequence of ( COMPLEX )) by L24;
+L42: ( dom ( addcomplex ) ) = [: ( COMPLEX ) , ( COMPLEX ) :] by FUNCT_2:def 1;
+L43: [: ( rng D6 ) , ( rng D5 ) :] c= ( dom ( addcomplex ) ) by L42 , ZFMISC_1:96;
+L44: [: ( rng D5 ) , ( rng D6 ) :] c= ( dom ( addcomplex ) ) by L42 , ZFMISC_1:96;
+L45: ( dom ( ( addcomplex ) .: (D5 , D6) ) ) = ( ( dom D5 ) /\ ( dom D6 ) ) by L44 , FUNCOP_1:69
+.= ( dom ( ( addcomplex ) .: (D6 , D5) ) ) by L43 , FUNCOP_1:69;
+L46: (for B3 being set holds (B3 in ( dom ( ( addcomplex ) .: (D6 , D5) ) ) implies ( C12 . B3 ) = ( ( addcomplex ) . (( D6 . B3 ) , ( D5 . B3 )) )))
+proof
+let C13 being set;
+assume L47: C13 in ( dom ( ( addcomplex ) .: (D6 , D5) ) );
+thus L48: ( C12 . C13 ) = ( ( addcomplex ) . (( D5 . C13 ) , ( D6 . C13 )) ) by L47 , L41 , L45 , FUNCOP_1:22
+.= ( ( D5 . C13 ) + ( D6 . C13 ) ) by BINOP_2:def 3
+.= ( ( addcomplex ) . (( D6 . C13 ) , ( D5 . C13 )) ) by BINOP_2:def 3;
+end;
+thus L49: thesis by L46 , L41 , L45 , FUNCOP_1:21;
+end;
+end;
+definition
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+redefine func R15 + R16 -> (Element of ( R2 -tuples_on ( COMPLEX ) ));
+
+coherence by FINSEQ_2:120;
+end;
+theorem
+L52: (for R1 being set holds (for R2 being Nat holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds ( ( R15 + R16 ) . R1 ) = ( ( R15 . R1 ) + ( R16 . R1 ) )))))
+proof
+let R1 being set;
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+per cases ;
+suppose L53: (not R1 in ( Seg R2 ));
+
+L54: (not R1 in ( dom R16 )) by L53 , FINSEQ_2:124;
+L55: (not R1 in ( dom R15 )) by L53 , FINSEQ_2:124;
+L56: (not R1 in ( dom ( R15 + R16 ) )) by L53 , FINSEQ_2:124;
+thus L57: ( ( R15 + R16 ) . R1 ) = ( ( 0 ) + ( 0 ) ) by L56 , FUNCT_1:def 2
+.= ( ( R15 . R1 ) + ( 0 ) ) by L55 , FUNCT_1:def 2
+.= ( ( R15 . R1 ) + ( R16 . R1 ) ) by L54 , FUNCT_1:def 2;
+end;
+suppose L58: R1 in ( Seg R2 );
+
+L59: R1 in ( dom ( R15 + R16 ) ) by L58 , FINSEQ_2:124;
+thus L60: thesis by L59 , VALUED_1:def 1;
+end;
+end;
+theorem
+L62: (for R11 being  complex-valued FinSequence holds ( ( <*> ( COMPLEX ) ) + R11 ) = ( <*> ( COMPLEX ) ))
+proof
+let R11 being  complex-valued FinSequence;
+L63: R11 is (FinSequence of ( COMPLEX )) by L24;
+thus L64: thesis by L63 , FINSEQ_2:73;
+end;
+theorem
+L65: (for R8 being  complex number holds (for R9 being  complex number holds ( <* R8 *> + <* R9 *> ) = <* ( R8 + R9 ) *>))
+proof
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D7 = R8 , D8 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L66: ( <* D7 *> + <* D8 *> ) = <* ( ( addcomplex ) . (D7 , D8) ) *> by FINSEQ_2:74
+.= <* ( R8 + R9 ) *> by BINOP_2:def 3;
+thus L67: thesis by L66;
+end;
+theorem
+L68: (for R2 being Nat holds (for R8 being  complex number holds (for R9 being  complex number holds ( ( R2 |-> R8 ) + ( R2 |-> R9 ) ) = ( R2 |-> ( R8 + R9 ) ))))
+proof
+let R2 being Nat;
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D9 = R8 , D10 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L69: ( ( R2 |-> D9 ) + ( R2 |-> D10 ) ) = ( R2 |-> ( ( addcomplex ) . (D9 , D10) ) ) by FINSEQOP:17
+.= ( R2 |-> ( R8 + R9 ) ) by BINOP_2:def 3;
+thus L70: thesis by L69;
+end;
+definition
+let R11 being  complex-valued FinSequence;
+redefine func - R11 -> (FinSequence of ( COMPLEX )) equals 
+( ( compcomplex ) * R11 );
+coherence by L24;
+compatibility
+proof
+let C14 being (FinSequence of ( COMPLEX ));
+L71: ( dom ( - R11 ) ) = ( dom R11 ) by VALUED_1:8;
+L72: (( rng R11 ) c= ( COMPLEX ) & ( dom ( compcomplex ) ) = ( COMPLEX )) by FUNCT_2:def 1;
+L73: ( dom ( ( compcomplex ) * R11 ) ) = ( dom R11 ) by L72 , RELAT_1:27;
+thus L74: (C14 = ( - R11 ) implies C14 = ( ( compcomplex ) * R11 ))
+proof
+assume L75: C14 = ( - R11 );
+L76:
+now
+let C15 being set;
+assume L77: C15 in ( dom C14 );
+thus L78: ( C14 . C15 ) = ( - ( R11 . C15 ) ) by L75 , VALUED_1:8
+.= ( ( compcomplex ) . ( R11 . C15 ) ) by BINOP_2:def 1
+.= ( ( ( compcomplex ) * R11 ) . C15 ) by L71 , L75 , L77 , FUNCT_1:13;
+end;
+thus L79: thesis by L76 , L73 , L75 , FUNCT_1:2 , VALUED_1:8;
+end;
+
+assume L80: C14 = ( ( compcomplex ) * R11 );
+L81:
+now
+let C16 being set;
+assume L82: C16 in ( dom C14 );
+thus L83: ( ( - R11 ) . C16 ) = ( - ( R11 . C16 ) ) by VALUED_1:8
+.= ( ( compcomplex ) . ( R11 . C16 ) ) by BINOP_2:def 1
+.= ( ( ( compcomplex ) * R11 ) . C16 ) by L80 , L82 , FUNCT_1:12;
+end;
+thus L84: thesis by L81 , L71 , L72 , L80 , FUNCT_1:2 , RELAT_1:27;
+end;
+end;
+definition
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+redefine func - R14 -> (Element of ( R2 -tuples_on ( COMPLEX ) ));
+
+coherence by FINSEQ_2:113;
+end;
+theorem
+L87: (for R7 being  complex number holds ( - <* R7 *> ) = <* ( - R7 ) *>)
+proof
+let R7 being  complex number;
+reconsider D11 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L88: ( - <* D11 *> ) = <* ( ( compcomplex ) . D11 ) *> by FINSEQ_2:35
+.= <* ( - R7 ) *> by BINOP_2:def 1;
+thus L89: thesis by L88;
+end;
+theorem
+L90: (for R2 being Nat holds (for R7 being  complex number holds ( - ( R2 |-> R7 ) ) = ( R2 |-> ( - R7 ) )))
+proof
+let R2 being Nat;
+let R7 being  complex number;
+reconsider D12 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L91: ( - ( R2 |-> D12 ) ) = ( R2 |-> ( ( compcomplex ) . D12 ) ) by FINSEQOP:16
+.= ( R2 |-> ( - R7 ) ) by BINOP_2:def 1;
+thus L92: thesis by L91;
+end;
+theorem
+L93: (for R2 being Nat holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds (( R15 + R14 ) = ( R16 + R14 ) implies R15 = R16)))))
+proof
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+assume L94: ( R15 + R14 ) = ( R16 + R14 );
+L95: ( R15 + ( R14 + ( - R14 ) ) ) = ( ( R16 + R14 ) + ( - R14 ) ) by L94 , FINSEQOP:28;
+L96: ( R15 + ( R14 + ( - R14 ) ) ) = ( R16 + ( R14 + ( - R14 ) ) ) by L95 , FINSEQOP:28;
+L97: ( R14 + ( - R14 ) ) = ( R2 |-> ( 0c ) ) by BINOP_2:1 , FINSEQOP:73 , SEQ_4:51 , SEQ_4:52;
+L98: R15 = ( R16 + ( R2 |-> ( 0c ) ) ) by L97 , L96 , BINOP_2:1 , FINSEQOP:56;
+thus L99: thesis by L98 , BINOP_2:1 , FINSEQOP:56;
+end;
+theorem
+L100: (for R12 being  complex-valued FinSequence holds (for R13 being  complex-valued FinSequence holds ( - ( R12 + R13 ) ) = ( ( - R12 ) + ( - R13 ) )))
+proof
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+L101: ( dom ( - ( R12 + R13 ) ) ) = ( dom ( R12 + R13 ) ) by VALUED_1:8;
+L102: ( dom ( R12 + R13 ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by VALUED_1:def 1;
+L103: ( dom ( ( - R12 ) + ( - R13 ) ) ) = ( ( dom ( - R12 ) ) /\ ( dom ( - R13 ) ) ) by VALUED_1:def 1
+.= ( ( dom R12 ) /\ ( dom ( - R13 ) ) ) by VALUED_1:8
+.= ( ( dom R12 ) /\ ( dom R13 ) ) by VALUED_1:8;
+L104:
+now
+let R2 being Nat;
+assume L105: R2 in ( dom ( - ( R12 + R13 ) ) );
+thus L106: ( ( - ( R12 + R13 ) ) . R2 ) = ( - ( ( R12 + R13 ) . R2 ) ) by VALUED_1:8
+.= ( - ( ( R12 . R2 ) + ( R13 . R2 ) ) ) by L101 , L105 , VALUED_1:def 1
+.= ( ( - ( R12 . R2 ) ) + ( - ( R13 . R2 ) ) )
+.= ( ( - ( R12 . R2 ) ) + ( ( - R13 ) . R2 ) ) by VALUED_1:8
+.= ( ( ( - R12 ) . R2 ) + ( ( - R13 ) . R2 ) ) by VALUED_1:8
+.= ( ( ( - R12 ) + ( - R13 ) ) . R2 ) by L101 , L102 , L103 , L105 , VALUED_1:def 1;
+end;
+thus L107: thesis by L104 , L102 , L103 , FINSEQ_1:13 , VALUED_1:8;
+end;
+definition
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+redefine func R12 - R13 -> (FinSequence of ( COMPLEX )) equals 
+( ( diffcomplex ) .: (R12 , R13) );
+coherence by L24;
+compatibility
+proof
+reconsider D13 = R12 , D14 = R13 as (FinSequence of ( COMPLEX )) by L24;
+let C17 being (FinSequence of ( COMPLEX ));
+L108: ( dom ( R12 - R13 ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by VALUED_1:12;
+L109: ( dom ( diffcomplex ) ) = [: ( COMPLEX ) , ( COMPLEX ) :] by FUNCT_2:def 1;
+L110: [: ( rng D13 ) , ( rng D14 ) :] c= ( dom ( diffcomplex ) ) by L109 , ZFMISC_1:96;
+L111: ( dom ( ( diffcomplex ) .: (R12 , R13) ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by L110 , FUNCOP_1:69;
+thus L112: (C17 = ( R12 - R13 ) implies C17 = ( ( diffcomplex ) .: (R12 , R13) ))
+proof
+assume L113: C17 = ( R12 - R13 );
+L114: (for B4 being set holds (B4 in ( dom ( ( diffcomplex ) .: (R12 , R13) ) ) implies ( C17 . B4 ) = ( ( diffcomplex ) . (( R12 . B4 ) , ( R13 . B4 )) )))
+proof
+let C18 being set;
+assume L115: C18 in ( dom ( ( diffcomplex ) .: (R12 , R13) ) );
+thus L116: ( C17 . C18 ) = ( ( R12 . C18 ) - ( R13 . C18 ) ) by L115 , L108 , L111 , L113 , VALUED_1:13
+.= ( ( diffcomplex ) . (( R12 . C18 ) , ( R13 . C18 )) ) by BINOP_2:def 4;
+end;
+thus L117: thesis by L114 , L108 , L111 , L113 , FUNCOP_1:21;
+end;
+
+assume L118: C17 = ( ( diffcomplex ) .: (R12 , R13) );
+L119:
+now
+let C19 being set;
+assume L120: C19 in ( dom C17 );
+thus L121: ( C17 . C19 ) = ( ( diffcomplex ) . (( R12 . C19 ) , ( R13 . C19 )) ) by L120 , L118 , FUNCOP_1:22
+.= ( ( R12 . C19 ) - ( R13 . C19 ) ) by BINOP_2:def 4;
+end;
+thus L122: thesis by L119 , L108 , L110 , L118 , FUNCOP_1:69 , VALUED_1:14;
+end;
+end;
+definition
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+redefine func R15 - R16 -> (Element of ( R2 -tuples_on ( COMPLEX ) ));
+
+coherence by FINSEQ_2:120;
+end;
+theorem
+L125: (for R1 being set holds (for R2 being Nat holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds ( ( R15 - R16 ) . R1 ) = ( ( R15 . R1 ) - ( R16 . R1 ) )))))
+proof
+let R1 being set;
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+per cases ;
+suppose L126: (not R1 in ( Seg R2 ));
+
+L127: (not R1 in ( dom R16 )) by L126 , FINSEQ_2:124;
+L128: (not R1 in ( dom R15 )) by L126 , FINSEQ_2:124;
+L129: (not R1 in ( dom ( R15 - R16 ) )) by L126 , FINSEQ_2:124;
+thus L130: ( ( R15 - R16 ) . R1 ) = ( ( 0 ) - ( 0 ) ) by L129 , FUNCT_1:def 2
+.= ( ( R15 . R1 ) - ( 0 ) ) by L128 , FUNCT_1:def 2
+.= ( ( R15 . R1 ) - ( R16 . R1 ) ) by L127 , FUNCT_1:def 2;
+end;
+suppose L131: R1 in ( Seg R2 );
+
+L132: R1 in ( dom ( R15 - R16 ) ) by L131 , FINSEQ_2:124;
+thus L133: thesis by L132 , VALUED_1:13;
+end;
+end;
+theorem
+L135: (for R11 being  complex-valued FinSequence holds (( ( <*> ( COMPLEX ) ) - R11 ) = ( <*> ( COMPLEX ) ) & ( R11 - ( <*> ( COMPLEX ) ) ) = ( <*> ( COMPLEX ) )))
+proof
+let R11 being  complex-valued FinSequence;
+L136: R11 is (FinSequence of ( COMPLEX )) by L24;
+thus L137: thesis by L136 , FINSEQ_2:73;
+end;
+theorem
+L138: (for R8 being  complex number holds (for R9 being  complex number holds ( <* R8 *> - <* R9 *> ) = <* ( R8 - R9 ) *>))
+proof
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D15 = R8 , D16 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L139: ( <* D15 *> - <* D16 *> ) = <* ( ( diffcomplex ) . (D15 , D16) ) *> by FINSEQ_2:74
+.= <* ( R8 - R9 ) *> by BINOP_2:def 4;
+thus L140: thesis by L139;
+end;
+theorem
+L141: (for R2 being Nat holds (for R8 being  complex number holds (for R9 being  complex number holds ( ( R2 |-> R8 ) - ( R2 |-> R9 ) ) = ( R2 |-> ( R8 - R9 ) ))))
+proof
+let R2 being Nat;
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D17 = R8 , D18 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L142: ( ( R2 |-> D17 ) - ( R2 |-> D18 ) ) = ( R2 |-> ( ( diffcomplex ) . (D17 , D18) ) ) by FINSEQOP:17
+.= ( R2 |-> ( R8 - R9 ) ) by BINOP_2:def 4;
+thus L143: thesis by L142;
+end;
+theorem
+L144: (for R2 being Nat holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds ( R14 - ( R2 |-> ( 0c ) ) ) = R14))
+proof
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+thus L145: ( R14 - ( R2 |-> ( 0c ) ) ) = ( R14 + ( R2 |-> ( - ( 0 ) ) ) ) by L90
+.= R14 by BINOP_2:1 , FINSEQOP:56;
+end;
+theorem
+L146: (for R12 being  complex-valued FinSequence holds (for R13 being  complex-valued FinSequence holds ( - ( R12 - R13 ) ) = ( R13 - R12 )))
+proof
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+thus L147: ( - ( R12 - R13 ) ) = ( ( - R12 ) + ( - ( - R13 ) ) ) by L100
+.= ( R13 - R12 );
+end;
+theorem
+L148: (for R12 being  complex-valued FinSequence holds (for R13 being  complex-valued FinSequence holds ( - ( R12 - R13 ) ) = ( ( - R12 ) + R13 )))
+proof
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+thus L149: ( - ( R12 - R13 ) ) = ( ( - R12 ) + ( - ( - R13 ) ) ) by L100
+.= ( ( - R12 ) + R13 );
+end;
+theorem
+L150: (for R2 being Nat holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds (( R15 - R16 ) = ( R2 |-> ( 0c ) ) implies R15 = R16))))
+proof
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+assume L151: ( R15 - R16 ) = ( R2 |-> ( 0c ) );
+L152: R15 = ( - ( - R16 ) ) by L151 , BINOP_2:1 , FINSEQOP:74 , SEQ_4:51 , SEQ_4:52;
+thus L153: thesis by L152;
+end;
+theorem
+L154: (for R2 being Nat holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds R15 = ( ( R15 + R14 ) - R14 ))))
+proof
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+thus L155: R15 = ( R15 + ( R2 |-> ( 0c ) ) ) by BINOP_2:1 , FINSEQOP:56
+.= ( R15 + ( R14 - R14 ) ) by BINOP_2:1 , FINSEQOP:73 , SEQ_4:51 , SEQ_4:52
+.= ( ( R15 + R14 ) - R14 ) by RFUNCT_1:23;
+end;
+theorem
+L156: (for R2 being Nat holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds R15 = ( ( R15 - R14 ) + R14 ))))
+proof
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+thus L157: R15 = ( R15 + ( R2 |-> ( 0c ) ) ) by BINOP_2:1 , FINSEQOP:56
+.= ( R15 + ( ( - R14 ) + R14 ) ) by BINOP_2:1 , FINSEQOP:73 , SEQ_4:51 , SEQ_4:52
+.= ( ( R15 - R14 ) + R14 ) by FINSEQOP:28;
+end;
+notation
+let R11 being  complex-valued FinSequence;
+let R7 being  complex number;
+synonym R7 * R11 for R7 (#) R11;
+end;
+definition
+let R11 being  complex-valued FinSequence;
+let R7 being  complex number;
+redefine func R7 * R11 -> (FinSequence of ( COMPLEX )) equals 
+( ( R7 multcomplex ) * R11 );
+coherence by L24;
+compatibility
+proof
+let C20 being (FinSequence of ( COMPLEX ));
+L159: ( dom ( R7 * R11 ) ) = ( dom R11 ) by VALUED_1:def 5;
+L160: (( rng R11 ) c= ( COMPLEX ) & ( dom ( R7 multcomplex ) ) = ( COMPLEX )) by FUNCT_2:def 1;
+L161: ( dom ( ( R7 multcomplex ) * R11 ) ) = ( dom R11 ) by L160 , RELAT_1:27;
+thus L162: (C20 = ( R7 * R11 ) implies C20 = ( ( R7 multcomplex ) * R11 ))
+proof
+assume L163: C20 = ( R7 * R11 );
+L164:
+now
+let R1 being set;
+assume L165: R1 in ( dom C20 );
+thus L166: ( C20 . R1 ) = ( R7 * ( R11 . R1 ) ) by L165 , L163 , VALUED_1:def 5
+.= ( ( R7 multcomplex ) . ( R11 . R1 ) ) by L19
+.= ( ( ( R7 multcomplex ) * R11 ) . R1 ) by L159 , L163 , L165 , FUNCT_1:13;
+end;
+thus L167: thesis by L164 , L159 , L161 , L163 , FUNCT_1:2;
+end;
+
+assume L168: C20 = ( ( R7 multcomplex ) * R11 );
+L169:
+now
+let R1 being set;
+assume L170: R1 in ( dom C20 );
+thus L171: ( ( R7 * R11 ) . R1 ) = ( R7 * ( R11 . R1 ) ) by VALUED_1:6
+.= ( ( R7 multcomplex ) . ( R11 . R1 ) ) by L19
+.= ( ( ( R7 multcomplex ) * R11 ) . R1 ) by L168 , L170 , FUNCT_1:12;
+end;
+thus L172: thesis by L169 , L159 , L160 , L168 , FUNCT_1:2 , RELAT_1:27;
+end;
+end;
+definition
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+let R7 being  complex number;
+redefine func R7 * R14 -> (Element of ( R2 -tuples_on ( COMPLEX ) ));
+
+coherence by FINSEQ_2:113;
+end;
+theorem
+L175: (for R7 being  complex number holds (for R8 being  complex number holds ( R7 * <* R8 *> ) = <* ( R7 * R8 ) *>))
+proof
+let R7 being  complex number;
+let R8 being  complex number;
+reconsider D19 = R7 , D20 = R8 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L176: ( D19 * <* D20 *> ) = <* ( ( ( multcomplex ) [;] (D19 , ( id ( COMPLEX ) )) ) . D20 ) *> by FINSEQ_2:35
+.= <* ( R7 * R8 ) *> by L19;
+thus L177: thesis by L176;
+end;
+theorem
+L178: (for R2 being Nat holds (for R8 being  complex number holds (for R9 being  complex number holds ( R8 * ( R2 |-> R9 ) ) = ( R2 |-> ( R8 * R9 ) ))))
+proof
+let R2 being Nat;
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D21 = R8 , D22 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L179: ( D21 * ( R2 |-> D22 ) ) = ( R2 |-> ( ( ( multcomplex ) [;] (D21 , ( id ( COMPLEX ) )) ) . D22 ) ) by FINSEQOP:16
+.= ( R2 |-> ( R8 * R9 ) ) by L19;
+thus L180: thesis by L179;
+end;
+theorem
+L181: (for R8 being  complex number holds (for R9 being  complex number holds (for R11 being  complex-valued FinSequence holds ( ( R8 + R9 ) * R11 ) = ( ( R8 * R11 ) + ( R9 * R11 ) ))))
+proof
+let R8 being  complex number;
+let R9 being  complex number;
+let R11 being  complex-valued FinSequence;
+L182: ( dom ( ( R8 + R9 ) * R11 ) ) = ( dom R11 ) by VALUED_1:def 5;
+L183: ( dom ( ( R8 * R11 ) + ( R9 * R11 ) ) ) = ( ( dom ( R8 * R11 ) ) /\ ( dom ( R9 * R11 ) ) ) by VALUED_1:def 1;
+L184: ( dom ( R8 * R11 ) ) = ( dom R11 ) by VALUED_1:def 5;
+L185: ( dom ( R9 * R11 ) ) = ( dom R11 ) by VALUED_1:def 5;
+L186:
+now
+let R2 being Nat;
+assume L187: R2 in ( dom ( ( R8 + R9 ) * R11 ) );
+thus L188: ( ( ( R8 + R9 ) * R11 ) . R2 ) = ( ( R8 + R9 ) * ( R11 . R2 ) ) by VALUED_1:6
+.= ( ( R8 * ( R11 . R2 ) ) + ( R9 * ( R11 . R2 ) ) )
+.= ( ( R8 * ( R11 . R2 ) ) + ( ( R9 * R11 ) . R2 ) ) by VALUED_1:6
+.= ( ( ( R8 * R11 ) . R2 ) + ( ( R9 * R11 ) . R2 ) ) by VALUED_1:6
+.= ( ( ( R8 * R11 ) + ( R9 * R11 ) ) . R2 ) by L182 , L183 , L184 , L185 , L187 , VALUED_1:def 1;
+end;
+thus L189: thesis by L186 , L182 , L183 , L184 , L185 , FINSEQ_1:13;
+end;
+theorem
+L190: (for R2 being Nat holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds ( ( 0c ) * R14 ) = ( R2 |-> ( 0c ) )))
+proof
+let R2 being Nat;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+L191: ( rng R14 ) c= ( COMPLEX );
+thus L192: ( ( 0c ) * R14 ) = ( ( multcomplex ) [;] (( 0c ) , ( ( id ( COMPLEX ) ) * R14 )) ) by FUNCOP_1:34
+.= ( ( multcomplex ) [;] (( 0c ) , R14) ) by L191 , RELAT_1:53
+.= ( R2 |-> ( 0c ) ) by BINOP_2:1 , FINSEQOP:76 , SEQ_4:51 , SEQ_4:54;
+end;
+notation
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+synonym mlt (R12 , R13) for R12 (#) R13;
+end;
+definition
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+redefine func mlt (R12 , R13) -> (FinSequence of ( COMPLEX )) equals 
+( ( multcomplex ) .: (R12 , R13) );
+coherence by L24;
+compatibility
+proof
+reconsider D23 = R12 , D24 = R13 as (FinSequence of ( COMPLEX )) by L24;
+let C21 being (FinSequence of ( COMPLEX ));
+L194: ( dom ( multcomplex ) ) = [: ( COMPLEX ) , ( COMPLEX ) :] by FUNCT_2:def 1;
+L195: [: ( rng D23 ) , ( rng D24 ) :] c= ( dom ( multcomplex ) ) by L194 , ZFMISC_1:96;
+L196: ( dom ( ( multcomplex ) .: (R12 , R13) ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by L195 , FUNCOP_1:69;
+L197: ( dom ( mlt (R12 , R13) ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by VALUED_1:def 4;
+thus L198: (C21 = ( mlt (R12 , R13) ) implies C21 = ( ( multcomplex ) .: (R12 , R13) ))
+proof
+assume L199: C21 = ( mlt (R12 , R13) );
+L200: (for B5 being set holds (B5 in ( dom ( ( multcomplex ) .: (R12 , R13) ) ) implies ( C21 . B5 ) = ( ( multcomplex ) . (( R12 . B5 ) , ( R13 . B5 )) )))
+proof
+let C22 being set;
+assume L201: C22 in ( dom ( ( multcomplex ) .: (R12 , R13) ) );
+thus L202: ( C21 . C22 ) = ( ( R12 . C22 ) * ( R13 . C22 ) ) by L199 , VALUED_1:5
+.= ( ( multcomplex ) . (( R12 . C22 ) , ( R13 . C22 )) ) by BINOP_2:def 5;
+end;
+thus L203: thesis by L200 , L196 , L197 , L199 , FUNCOP_1:21;
+end;
+
+assume L204: C21 = ( ( multcomplex ) .: (R12 , R13) );
+L205:
+now
+let C23 being set;
+assume L206: C23 in ( dom C21 );
+thus L207: ( C21 . C23 ) = ( ( multcomplex ) . (( R12 . C23 ) , ( R13 . C23 )) ) by L206 , L204 , FUNCOP_1:22
+.= ( ( R12 . C23 ) * ( R13 . C23 ) ) by BINOP_2:def 5;
+end;
+thus L208: thesis by L205 , L196 , L204 , VALUED_1:def 4;
+end;
+commutativity
+proof
+let C24 being (FinSequence of ( COMPLEX ));
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+reconsider D25 = R12 , D26 = R13 as (FinSequence of ( COMPLEX )) by L24;
+L209: ( dom ( multcomplex ) ) = [: ( COMPLEX ) , ( COMPLEX ) :] by FUNCT_2:def 1;
+L210: [: ( rng D26 ) , ( rng D25 ) :] c= ( dom ( multcomplex ) ) by L209 , ZFMISC_1:96;
+L211: [: ( rng D25 ) , ( rng D26 ) :] c= ( dom ( multcomplex ) ) by L209 , ZFMISC_1:96;
+L212: ( dom ( ( multcomplex ) .: (R12 , R13) ) ) = ( ( dom R12 ) /\ ( dom R13 ) ) by L211 , FUNCOP_1:69
+.= ( dom ( ( multcomplex ) .: (R13 , R12) ) ) by L210 , FUNCOP_1:69;
+assume L213: C24 = ( ( multcomplex ) .: (R12 , R13) );
+L214: (for B6 being set holds (B6 in ( dom ( ( multcomplex ) .: (R13 , R12) ) ) implies ( C24 . B6 ) = ( ( multcomplex ) . (( R13 . B6 ) , ( R12 . B6 )) )))
+proof
+let C25 being set;
+assume that
+L215: C25 in ( dom ( ( multcomplex ) .: (R13 , R12) ) );
+set D27 = ( R12 . C25 );
+set D28 = ( R13 . C25 );
+thus L216: ( C24 . C25 ) = ( ( multcomplex ) . (( R12 . C25 ) , ( R13 . C25 )) ) by L213 , L212 , L215 , FUNCOP_1:22
+.= ( D27 * D28 ) by BINOP_2:def 5
+.= ( ( multcomplex ) . (( R13 . C25 ) , ( R12 . C25 )) ) by BINOP_2:def 5;
+end;
+thus L217: thesis by L214 , L213 , L212 , FUNCOP_1:21;
+end;
+end;
+definition
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+redefine func mlt (R15 , R16) -> (Element of ( R2 -tuples_on ( COMPLEX ) ));
+
+coherence by FINSEQ_2:120;
+end;
+theorem
+L220: (for R11 being  complex-valued FinSequence holds ( mlt (( <*> ( COMPLEX ) ) , R11) ) = ( <*> ( COMPLEX ) ))
+proof
+let R11 being  complex-valued FinSequence;
+L221: R11 is (FinSequence of ( COMPLEX )) by L24;
+thus L222: thesis by L221 , FINSEQ_2:73;
+end;
+theorem
+L223: (for R8 being  complex number holds (for R9 being  complex number holds ( mlt (<* R8 *> , <* R9 *>) ) = <* ( R8 * R9 ) *>))
+proof
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D29 = R8 , D30 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L224: ( mlt (<* D29 *> , <* D30 *>) ) = <* ( ( multcomplex ) . (D29 , D30) ) *> by FINSEQ_2:74
+.= <* ( R8 * R9 ) *> by BINOP_2:def 5;
+thus L225: thesis by L224;
+end;
+theorem
+L226: (for R2 being Nat holds (for R7 being  complex number holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds ( mlt (( R2 |-> R7 ) , R14) ) = ( R7 * R14 ))))
+proof
+let R2 being Nat;
+let R7 being  complex number;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+reconsider D31 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L227: ( mlt (( R2 |-> D31 ) , R14) ) = ( ( multcomplex ) [;] (D31 , R14) ) by FINSEQOP:20
+.= ( R7 * R14 ) by FINSEQOP:22;
+thus L228: thesis by L227;
+end;
+theorem
+L229: (for R2 being Nat holds (for R8 being  complex number holds (for R9 being  complex number holds ( mlt (( R2 |-> R8 ) , ( R2 |-> R9 )) ) = ( R2 |-> ( R8 * R9 ) ))))
+proof
+let R2 being Nat;
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D32 = R8 , D33 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L230: ( mlt (( R2 |-> D32 ) , ( R2 |-> D33 )) ) = ( D32 * ( R2 |-> D33 ) ) by L226
+.= ( R2 |-> ( R8 * R9 ) ) by L178;
+thus L231: thesis by L230;
+end;
+begin
+theorem
+L232: ( Sum ( <*> ( COMPLEX ) ) ) = ( 0c ) by BINOP_2:1 , FINSOP_1:10;
+theorem
+L233: (for R7 being  complex number holds ( Sum <* R7 *> ) = R7)
+proof
+let R7 being  complex number;
+reconsider D34 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L234: ( Sum <* D34 *> ) = D34 by FINSOP_1:11;
+thus L235: thesis by L234;
+end;
+theorem
+L236: (for R7 being  complex number holds (for R11 being  complex-valued FinSequence holds ( Sum ( R11 ^ <* R7 *> ) ) = ( ( Sum R11 ) + R7 )))
+proof
+let R7 being  complex number;
+let R11 being  complex-valued FinSequence;
+reconsider D35 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+reconsider D36 = R11 as (FinSequence of ( COMPLEX )) by L24;
+thus L237: ( Sum ( R11 ^ <* R7 *> ) ) = ( Sum ( D36 ^ <* D35 *> ) )
+.= ( ( addcomplex ) . (( ( addcomplex ) $$ D36 ) , D35) ) by FINSOP_1:4
+.= ( ( Sum D36 ) + R7 ) by BINOP_2:def 3
+.= ( ( Sum R11 ) + R7 );
+end;
+theorem
+L238: (for R12 being  complex-valued FinSequence holds (for R13 being  complex-valued FinSequence holds ( Sum ( R12 ^ R13 ) ) = ( ( Sum R12 ) + ( Sum R13 ) )))
+proof
+let R12 being  complex-valued FinSequence;
+let R13 being  complex-valued FinSequence;
+reconsider D37 = R12 , D38 = R13 as (FinSequence of ( COMPLEX )) by L24;
+thus L239: ( Sum ( R12 ^ R13 ) ) = ( Sum ( D37 ^ D38 ) )
+.= ( ( addcomplex ) . (( ( addcomplex ) $$ D37 ) , ( ( addcomplex ) $$ D38 )) ) by FINSOP_1:5
+.= ( ( Sum D37 ) + ( Sum D38 ) ) by BINOP_2:def 3
+.= ( ( Sum R12 ) + ( Sum R13 ) );
+end;
+theorem
+L240: (for R7 being  complex number holds (for R11 being  complex-valued FinSequence holds ( Sum ( <* R7 *> ^ R11 ) ) = ( R7 + ( Sum R11 ) )))
+proof
+let R7 being  complex number;
+let R11 being  complex-valued FinSequence;
+reconsider D39 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+thus L241: ( Sum ( <* R7 *> ^ R11 ) ) = ( ( Sum <* D39 *> ) + ( Sum R11 ) ) by L238
+.= ( R7 + ( Sum R11 ) ) by FINSOP_1:11;
+end;
+theorem
+L242: (for R8 being  complex number holds (for R9 being  complex number holds ( Sum <* R8 , R9 *> ) = ( R8 + R9 )))
+proof
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D40 = R8 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+thus L243: ( Sum <* R8 , R9 *> ) = ( ( Sum <* D40 *> ) + R9 ) by L236
+.= ( R8 + R9 ) by FINSOP_1:11;
+end;
+theorem
+L244: (for R8 being  complex number holds (for R9 being  complex number holds (for R10 being  complex number holds ( Sum <* R8 , R9 , R10 *> ) = ( ( R8 + R9 ) + R10 ))))
+proof
+let R8 being  complex number;
+let R9 being  complex number;
+let R10 being  complex number;
+thus L245: ( Sum <* R8 , R9 , R10 *> ) = ( ( Sum <* R8 , R9 *> ) + R10 ) by L236
+.= ( ( R8 + R9 ) + R10 ) by L242;
+end;
+theorem
+L246: (for R2 being Nat holds (for R7 being  complex number holds ( Sum ( R2 |-> R7 ) ) = ( R2 * R7 )))
+proof
+let R2 being Nat;
+let R7 being  complex number;
+reconsider D41 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+defpred S1[ Nat ] means ( Sum ( $1 |-> D41 ) ) = ( $1 * D41 );
+L247: (for R2 being Nat holds (S1[ R2 ] implies S1[ ( R2 + 1 ) ]))
+proof
+let R2 being Nat;
+assume that
+L248: ( Sum ( R2 |-> D41 ) ) = ( R2 * D41 );
+thus L249: ( Sum ( ( R2 + 1 ) |-> D41 ) ) = ( Sum ( ( R2 |-> D41 ) ^ <* D41 *> ) ) by FINSEQ_2:60
+.= ( ( R2 * D41 ) + ( 1 * D41 ) ) by L248 , L236
+.= ( ( R2 + 1 ) * D41 );
+end;
+L250: S1[ ( 0 ) ] by L232;
+L251: (for R2 being Nat holds S1[ R2 ]) from NAT_1:sch 2(L250 , L247);
+thus L252: thesis by L251;
+end;
+theorem
+L253: (for R2 being Nat holds ( Sum ( R2 |-> ( 0c ) ) ) = ( 0c ))
+proof
+let R2 being Nat;
+thus L254: ( Sum ( R2 |-> ( 0c ) ) ) = ( R2 * ( 0 ) ) by L246
+.= ( 0c );
+end;
+theorem
+L255: (for R7 being  complex number holds (for R11 being  complex-valued FinSequence holds ( Sum ( R7 * R11 ) ) = ( R7 * ( Sum R11 ) )))
+proof
+let R7 being  complex number;
+let R11 being  complex-valued FinSequence;
+reconsider D42 = R11 as (FinSequence of ( COMPLEX )) by L24;
+reconsider D43 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+set D44 = ( ( multcomplex ) [;] (D43 , ( id ( COMPLEX ) )) );
+thus L256: ( Sum ( R7 * R11 ) ) = ( D44 . ( ( addcomplex ) $$ D42 ) ) by SEQ_4:51 , SEQ_4:54 , SETWOP_2:30
+.= ( R7 * ( Sum D42 ) ) by L19
+.= ( R7 * ( Sum R11 ) );
+end;
+theorem
+L257: (for R11 being  complex-valued FinSequence holds ( Sum ( - R11 ) ) = ( - ( Sum R11 ) ))
+proof
+let R11 being  complex-valued FinSequence;
+reconsider D45 = R11 as (FinSequence of ( COMPLEX )) by L24;
+thus L258: ( Sum ( - R11 ) ) = ( ( compcomplex ) . ( ( addcomplex ) $$ D45 ) ) by SEQ_4:51 , SEQ_4:52 , SETWOP_2:31
+.= ( - ( Sum D45 ) ) by BINOP_2:def 1
+.= ( - ( Sum R11 ) );
+end;
+theorem
+L259: (for R2 being Nat holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds ( Sum ( R15 + R16 ) ) = ( ( Sum R15 ) + ( Sum R16 ) ))))
+proof
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+reconsider D46 = R15 , D47 = R16 as (Element of ( R2 -tuples_on ( COMPLEX ) )) by FINSEQ_2:131;
+thus L260: ( Sum ( R15 + R16 ) ) = ( ( addcomplex ) . (( ( addcomplex ) $$ D46 ) , ( ( addcomplex ) $$ D47 )) ) by SETWOP_2:35
+.= ( ( Sum R15 ) + ( Sum R16 ) ) by BINOP_2:def 3;
+end;
+theorem
+L261: (for R2 being Nat holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds ( Sum ( R15 - R16 ) ) = ( ( Sum R15 ) - ( Sum R16 ) ))))
+proof
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+thus L262: ( Sum ( R15 - R16 ) ) = ( ( Sum R15 ) + ( Sum ( - R16 ) ) ) by L259
+.= ( ( Sum R15 ) - ( Sum R16 ) ) by L257;
+end;
+begin
+L263: (for B7 being  empty FinSequence holds ( Product B7 ) = 1)
+proof
+L264: ( Product ( <*> ( COMPLEX ) ) ) = 1 by BINOP_2:6 , FINSOP_1:10;
+thus L265: thesis by L264;
+end;
+theorem
+L266: ( Product ( <*> ( COMPLEX ) ) ) = 1 by L263;
+theorem
+L267: (for R7 being  complex number holds (for R11 being  complex-valued FinSequence holds ( Product ( <* R7 *> ^ R11 ) ) = ( R7 * ( Product R11 ) )))
+proof
+let R7 being  complex number;
+let R11 being  complex-valued FinSequence;
+thus L268: ( Product ( <* R7 *> ^ R11 ) ) = ( ( Product <* R7 *> ) * ( Product R11 ) ) by RVSUM_1:97
+.= ( R7 * ( Product R11 ) ) by RVSUM_1:95;
+end;
+theorem
+L269: (for B8 being (Element of ( ( 0 ) -tuples_on ( COMPLEX ) )) holds ( Product B8 ) = 1) by L263;
+theorem
+L270: (for R2 being Nat holds (for R3 being Nat holds (for R7 being  complex number holds ( Product ( ( R2 + R3 ) |-> R7 ) ) = ( ( Product ( R2 |-> R7 ) ) * ( Product ( R3 |-> R7 ) ) ))))
+proof
+let R2 being Nat;
+let R3 being Nat;
+let R7 being  complex number;
+reconsider D48 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L271: ( Product ( ( R2 + R3 ) |-> D48 ) ) = ( ( multcomplex ) . (( ( multcomplex ) $$ ( R2 |-> D48 ) ) , ( ( multcomplex ) $$ ( R3 |-> D48 ) )) ) by SETWOP_2:26
+.= ( ( Product ( R2 |-> D48 ) ) * ( Product ( R3 |-> D48 ) ) ) by BINOP_2:def 5;
+thus L272: thesis by L271;
+end;
+theorem
+L273: (for R2 being Nat holds (for R3 being Nat holds (for R7 being  complex number holds ( Product ( ( R2 * R3 ) |-> R7 ) ) = ( Product ( R3 |-> ( Product ( R2 |-> R7 ) ) ) ))))
+proof
+let R2 being Nat;
+let R3 being Nat;
+let R7 being  complex number;
+reconsider D49 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L274: ( Product ( ( R2 * R3 ) |-> D49 ) ) = ( Product ( R3 |-> ( Product ( R2 |-> D49 ) ) ) ) by SETWOP_2:27;
+thus L275: thesis by L274;
+end;
+theorem
+L276: (for R2 being Nat holds (for R8 being  complex number holds (for R9 being  complex number holds ( Product ( R2 |-> ( R8 * R9 ) ) ) = ( ( Product ( R2 |-> R8 ) ) * ( Product ( R2 |-> R9 ) ) ))))
+proof
+let R2 being Nat;
+let R8 being  complex number;
+let R9 being  complex number;
+reconsider D50 = R8 , D51 = R9 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+L277: ( Product ( R2 |-> ( D50 * D51 ) ) ) = ( ( multcomplex ) $$ ( R2 |-> ( ( multcomplex ) . (D50 , D51) ) ) ) by BINOP_2:def 5
+.= ( ( multcomplex ) . (( ( multcomplex ) $$ ( R2 |-> D50 ) ) , ( ( multcomplex ) $$ ( R2 |-> D51 ) )) ) by SETWOP_2:36
+.= ( ( Product ( R2 |-> D50 ) ) * ( Product ( R2 |-> D51 ) ) ) by BINOP_2:def 5;
+thus L278: thesis by L277;
+end;
+theorem
+L279: (for R2 being Nat holds (for R15 being R2 -element (FinSequence of ( COMPLEX )) holds (for R16 being R2 -element (FinSequence of ( COMPLEX )) holds ( Product ( mlt (R15 , R16) ) ) = ( ( Product R15 ) * ( Product R16 ) ))))
+proof
+let R2 being Nat;
+let R15 being R2 -element (FinSequence of ( COMPLEX ));
+let R16 being R2 -element (FinSequence of ( COMPLEX ));
+reconsider D52 = R15 , D53 = R16 as (Element of ( R2 -tuples_on ( COMPLEX ) )) by FINSEQ_2:131;
+thus L280: ( Product ( mlt (R15 , R16) ) ) = ( ( multcomplex ) . (( ( multcomplex ) $$ D52 ) , ( ( multcomplex ) $$ D53 )) ) by SETWOP_2:35
+.= ( ( Product R15 ) * ( Product R16 ) ) by BINOP_2:def 5;
+end;
+theorem
+L281: (for R2 being Nat holds (for R7 being  complex number holds (for R14 being R2 -element (FinSequence of ( COMPLEX )) holds ( Product ( R7 * R14 ) ) = ( ( Product ( R2 |-> R7 ) ) * ( Product R14 ) ))))
+proof
+let R2 being Nat;
+let R7 being  complex number;
+let R14 being R2 -element (FinSequence of ( COMPLEX ));
+reconsider D54 = R7 as (Element of ( COMPLEX )) by XCMPLX_0:def 2;
+thus L282: ( Product ( R7 * R14 ) ) = ( Product ( mlt (( R2 |-> D54 ) , R14) ) ) by L226
+.= ( ( Product ( R2 |-> R7 ) ) * ( Product R14 ) ) by L279;
+end;
+begin
+theorem
+L283: (for B9 being  complex-valued FinSequence holds ( len ( - B9 ) ) = ( len B9 ))
+proof
+let C26 being  complex-valued FinSequence;
+L284: ( dom ( - C26 ) ) = ( dom C26 ) by VALUED_1:8;
+thus L285: thesis by L284 , FINSEQ_3:29;
+end;
+theorem
+L286: (for B10 , B11 being  complex-valued FinSequence holds (( len B10 ) = ( len B11 ) implies ( len ( B10 + B11 ) ) = ( len B10 )))
+proof
+let C27 , C28 being  complex-valued FinSequence;
+set D55 = ( len C27 );
+L287: C28 is (FinSequence of ( COMPLEX )) by L24;
+L288: C27 is (FinSequence of ( COMPLEX )) by L24;
+reconsider D56 = C27 as (Element of ( ( len C27 ) -tuples_on ( COMPLEX ) )) by L288 , FINSEQ_2:92;
+assume L289: ( len C27 ) = ( len C28 );
+reconsider D57 = C28 as (Element of ( D55 -tuples_on ( COMPLEX ) )) by L289 , L287 , FINSEQ_2:92;
+L290: ( dom ( D56 + D57 ) ) = ( Seg D55 ) by FINSEQ_2:124;
+thus L291: thesis by L290 , FINSEQ_1:def 3;
+end;
+theorem
+L292: (for B12 , B13 being  complex-valued FinSequence holds (( len B12 ) = ( len B13 ) implies ( len ( B12 - B13 ) ) = ( len B12 )))
+proof
+let C29 , C30 being  complex-valued FinSequence;
+set D58 = ( len C29 );
+L293: C30 is (FinSequence of ( COMPLEX )) by L24;
+L294: C29 is (FinSequence of ( COMPLEX )) by L24;
+reconsider D59 = C29 as (Element of ( ( len C29 ) -tuples_on ( COMPLEX ) )) by L294 , FINSEQ_2:92;
+assume L295: ( len C29 ) = ( len C30 );
+reconsider D60 = C30 as (Element of ( D58 -tuples_on ( COMPLEX ) )) by L295 , L293 , FINSEQ_2:92;
+L296: ( dom ( D59 - D60 ) ) = ( Seg D58 ) by FINSEQ_2:124;
+thus L297: thesis by L296 , FINSEQ_1:def 3;
+end;
+theorem
+L298: (for B14 being  real number holds (for B15 being  complex-valued FinSequence holds ( len ( B14 * B15 ) ) = ( len B15 )))
+proof
+let C31 being  real number;
+let C32 being  complex-valued FinSequence;
+set D61 = ( len C32 );
+L299: C32 is (FinSequence of ( COMPLEX )) by L24;
+reconsider D62 = C32 as (Element of ( D61 -tuples_on ( COMPLEX ) )) by L299 , FINSEQ_2:92;
+L300: ( len ( C31 * D62 ) ) = D61 by CARD_1:def 7;
+thus L301: thesis by L300;
+end;
+theorem
+L302: (for B16 , B17 , B18 being  complex-valued FinSequence holds ((( len B16 ) = ( len B17 ) & ( len B17 ) = ( len B18 )) implies ( mlt (( B16 + B17 ) , B18) ) = ( ( mlt (B16 , B18) ) + ( mlt (B17 , B18) ) )))
+proof
+let C33 , C34 , C35 being  complex-valued FinSequence;
+L303: (C33 is (FinSequence of ( COMPLEX )) & C34 is (FinSequence of ( COMPLEX )) & C35 is (FinSequence of ( COMPLEX ))) by L24;
+assume L304: (( len C33 ) = ( len C34 ) & ( len C34 ) = ( len C35 ));
+reconsider D63 = C33 , D64 = C34 , D65 = C35 as (Element of ( ( len C33 ) -tuples_on ( COMPLEX ) )) by L304 , L303 , FINSEQ_2:92;
+L305: ( dom ( mlt (( C33 + C34 ) , C35) ) ) = ( Seg ( len ( mlt (( D63 + D64 ) , D65) ) ) ) by FINSEQ_1:def 3
+.= ( Seg ( len C33 ) ) by CARD_1:def 7
+.= ( Seg ( len ( ( mlt (D63 , D65) ) + ( mlt (D64 , D65) ) ) ) ) by CARD_1:def 7
+.= ( dom ( ( mlt (D63 , D65) ) + ( mlt (D64 , D65) ) ) ) by FINSEQ_1:def 3;
+L306: ( dom ( mlt (C33 , C35) ) ) = ( Seg ( len ( mlt (D63 , D65) ) ) ) by FINSEQ_1:def 3
+.= ( Seg ( len C33 ) ) by CARD_1:def 7
+.= ( Seg ( len ( ( mlt (D63 , D65) ) + ( mlt (D64 , D65) ) ) ) ) by CARD_1:def 7
+.= ( dom ( ( mlt (D63 , D65) ) + ( mlt (D64 , D65) ) ) ) by FINSEQ_1:def 3;
+L307: (for B19 being Nat holds (B19 in ( dom ( mlt (( C33 + C34 ) , C35) ) ) implies ( ( mlt (( C33 + C34 ) , C35) ) . B19 ) = ( ( ( mlt (C33 , C35) ) + ( mlt (C34 , C35) ) ) . B19 )))
+proof
+let C36 being Nat;
+assume L308: C36 in ( dom ( mlt (( C33 + C34 ) , C35) ) );
+set D66 = ( C33 . C36 );
+set D67 = ( C34 . C36 );
+set D68 = ( ( C33 + C34 ) . C36 );
+set D69 = ( C35 . C36 );
+L309: ( len ( D63 + D64 ) ) = ( len C33 ) by CARD_1:def 7;
+L310: ( dom ( D63 + D64 ) ) = ( Seg ( len C33 ) ) by L309 , FINSEQ_1:def 3
+.= ( Seg ( len ( mlt (D63 , D65) ) ) ) by CARD_1:def 7
+.= ( dom ( mlt (C33 , C35) ) ) by FINSEQ_1:def 3;
+L311: D68 = ( D66 + D67 ) by L310 , L305 , L306 , L308 , VALUED_1:def 1;
+thus L312: ( ( mlt (( C33 + C34 ) , C35) ) . C36 ) = ( D68 * D69 ) by VALUED_1:5
+.= ( ( D66 * D69 ) + ( D67 * D69 ) ) by L311
+.= ( ( ( mlt (C33 , C35) ) . C36 ) + ( D67 * D69 ) ) by VALUED_1:5
+.= ( ( ( mlt (C33 , C35) ) . C36 ) + ( ( mlt (C34 , C35) ) . C36 ) ) by VALUED_1:5
+.= ( ( ( mlt (C33 , C35) ) + ( mlt (C34 , C35) ) ) . C36 ) by L305 , L308 , VALUED_1:def 1;
+end;
+thus L313: thesis by L307 , L305 , FINSEQ_1:13;
+end;

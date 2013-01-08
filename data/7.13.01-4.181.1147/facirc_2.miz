@@ -1,0 +1,1438 @@
+:: Full Adder Circuit. Part { II }
+::  by Grzegorz Bancerek , Shin'nosuke Yamaguchi and Katsumi Wasaki
+::
+:: Received March 22, 2002
+:: Copyright (c) 2002-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, XBOOLE_0, FINSEQ_1, RELAT_1, CLASSES1, STRUCT_0,
+      CIRCCOMB, MSUALG_1, FUNCT_1, LATTICES, FUNCOP_1, MARGREL1, PARTFUN1,
+      FUNCT_4, TARSKI, CARD_1, NAT_1, FINSEQ_2, XBOOLEAN, PBOOLE, ARYTM_3,
+      FACIRC_1, SUBSET_1, CIRCUIT1, MSAFREE2, ORDINAL4, XXREAL_0, MCART_1,
+      FSM_1, CIRCUIT2, GLIB_000, FACIRC_2;
+ notations TARSKI, XBOOLE_0, ENUMSET1,
+      XTUPLE_0, SUBSET_1, CARD_1, NUMBERS, ORDINAL1,
+      NAT_1, MCART_1, RELAT_1, STRUCT_0, FUNCT_1, FUNCT_2, FINSEQ_1, FINSEQ_2,
+      FUNCOP_1, FUNCT_4, PBOOLE, MARGREL1, BINARITH, CLASSES1, PARTFUN1,
+      MSUALG_1, MSAFREE2, CIRCUIT1, CIRCUIT2, CIRCCOMB, FACIRC_1, XXREAL_0;
+ constructors ENUMSET1, XXREAL_0, CLASSES1, BINARITH, CIRCUIT1, CIRCUIT2,
+      FACIRC_1, NAT_1, RELSET_1, BINOP_1, WELLORD1, XTUPLE_0;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_1, ORDINAL1, XXREAL_0,
+      XREAL_0, NAT_1, FINSEQ_1, MARGREL1, FINSEQ_2, CARD_3, STRUCT_0, MSUALG_1,
+      CIRCCOMB, FACIRC_1, CIRCCMB2, CARD_1, RELSET_1, MSAFREE2, FINSET_1,
+      FUNCT_4, XTUPLE_0;
+ requirements NUMERALS, REAL, BOOLE, SUBSET, ARITHM;
+ definitions STRUCT_0, TARSKI, CIRCUIT2, CIRCCOMB, FACIRC_1, XBOOLE_0,
+      MSAFREE2, MARGREL1, XTUPLE_0;
+ theorems TARSKI, ZFMISC_1, ENUMSET1, MCART_1, NAT_1, ORDINAL1,
+      FUNCT_1, FUNCT_2, FINSEQ_1, PARTFUN1, FUNCT_4, FINSEQ_6, PBOOLE,
+      CIRCUIT2, CIRCCOMB, FACIRC_1, CIRCCMB2, CIRCUIT1, FUNCOP_1, XBOOLE_0,
+      XBOOLE_1, FINSEQ_2, XREAL_1, CLASSES1, CARD_1, XTUPLE_0, XREGULAR;
+ schemes NAT_1, CIRCCMB2, PBOOLE, PARTFUN1;
+
+begin
+theorem
+L1: (for B1 , B2 , B3 being set holds ((B1 <> B3 & B2 <> B3) implies ( { B1 , B2 } \ { B3 } ) = { B1 , B2 }))
+proof
+let C1 , C2 , C3 being set;
+assume that
+L2: C1 <> C3
+and
+L3: C2 <> C3;
+L4: (for B4 being set holds (B4 in { C1 , C2 } implies (not B4 in { C3 })))
+proof
+let C4 being set;
+assume L5: C4 in { C1 , C2 };
+L6: C4 <> C3 by L5 , L2 , L3 , TARSKI:def 2;
+thus L7: thesis by L6 , TARSKI:def 1;
+end;
+L8: { C1 , C2 } misses { C3 } by L4 , XBOOLE_0:3;
+thus L9: thesis by L8 , XBOOLE_1:83;
+end;
+theorem
+L10: (for B5 , B6 , B7 being set holds (B5 <> [ <* B5 , B6 *> , B7 ] & B6 <> [ <* B5 , B6 *> , B7 ]))
+proof
+let C5 , C6 , C7 being set;
+L11: ( rng <* C5 , C6 *> ) = { C5 , C6 } by FINSEQ_2:127;
+L12: C5 in ( rng <* C5 , C6 *> ) by L11 , TARSKI:def 2;
+L13: C6 in ( rng <* C5 , C6 *> ) by L11 , TARSKI:def 2;
+L14: ( the_rank_of C5 ) in ( the_rank_of [ <* C5 , C6 *> , C7 ] ) by L12 , CLASSES1:82;
+L15: ( the_rank_of C6 ) in ( the_rank_of [ <* C5 , C6 *> , C7 ] ) by L13 , CLASSES1:82;
+thus L16: thesis by L15 , L14;
+end;
+registration
+cluster  void ->  unsplit  gate`1=arity  gate`2isBoolean for ManySortedSign;
+coherence
+proof
+let C8 being ManySortedSign;
+assume L17: (the carrier' of C8) is  empty;
+thus L18: (the ResultSort of C8) = ( {} ) by L17
+.= ( id (the carrier' of C8) ) by L17;
+thus L19: C8 is  gate`1=arity
+proof
+let C9 being set;
+thus L20: thesis by L17;
+end;
+
+let C10 being set;
+thus L21: thesis by L17;
+end;
+end;
+registration
+cluster  strict  void for ManySortedSign;
+existence
+proof
+set D1 = the  strict  void ManySortedSign;
+take D1;
+thus L23: thesis;
+end;
+end;
+definition
+let C11 being set;
+func SingleMSS C11 ->  strict  void ManySortedSign means 
+:L25: (the carrier of it) = { C11 };
+existence
+proof
+set D2 = the (Function of ( {} ) , ( { C11 } * ));
+set D3 = the (Function of ( {} ) , { C11 });
+reconsider D4 = ManySortedSign (# { C11 } , ( {} ) , D2 , D3 #) as  void  strict ManySortedSign;
+take D4;
+thus L26: thesis;
+end;
+uniqueness
+proof
+let C12 , C13 being  strict  void ManySortedSign;
+assume that
+L27: (the carrier of C12) = { C11 }
+and
+L28: (the carrier of C13) = { C11 };
+L29: (the Arity of C12) = (the Arity of C13);
+thus L30: thesis by L29 , L27 , L28;
+end;
+end;
+registration
+let C14 being set;
+cluster ( SingleMSS C14 ) -> non  empty;
+coherence
+proof
+L32: (the carrier of ( SingleMSS C14 )) = { C14 } by L25;
+thus L33: (the carrier of ( SingleMSS C14 )) is non  empty by L32;
+end;
+end;
+definition
+let C15 being set;
+func SingleMSA C15 ->  Boolean  strict MSAlgebra over ( SingleMSS C15 ) means 
+(not contradiction);
+existence;
+uniqueness
+proof
+set D5 = ( SingleMSS C15 );
+let C16 , C17 being  Boolean  strict MSAlgebra over D5;
+L35: (the Sorts of C16) = ( (the carrier of D5) --> ( BOOLEAN ) ) by CIRCCOMB:57;
+L36: (the Charact of C16) = ( {} );
+L37: (the Charact of C17) = ( {} );
+thus L38: thesis by L37 , L35 , L36 , CIRCCOMB:57;
+end;
+end;
+theorem
+L40: (for B8 being set holds (for B9 being ManySortedSign holds ( SingleMSS B8 ) tolerates B9))
+proof
+let C18 being set;
+let C19 being ManySortedSign;
+thus L41: ((the Arity of ( SingleMSS C18 )) tolerates (the Arity of C19) & (the ResultSort of ( SingleMSS C18 )) tolerates (the ResultSort of C19)) by PARTFUN1:59;
+end;
+theorem
+L42: (for B10 being set holds (for B11 being non  empty ManySortedSign holds (B10 in (the carrier of B11) implies ( ( SingleMSS B10 ) +* B11 ) = ( the ManySortedSign of B11 ))))
+proof
+let C20 being set;
+let C21 being non  empty ManySortedSign;
+set D6 = ( ( SingleMSS C20 ) +* C21 );
+assume L43: C20 in (the carrier of C21);
+L44: { C20 } c= (the carrier of C21) by L43 , ZFMISC_1:31;
+L45: ( { C20 } \/ (the carrier of C21) ) = (the carrier of C21) by L44 , XBOOLE_1:12;
+L46: ( ( {} ) \/ (the carrier' of C21) ) = (the carrier' of C21);
+L47: (the carrier of ( SingleMSS C20 )) = { C20 } by L25;
+L48: (the ResultSort of ( SingleMSS C20 )) = ( {} );
+L49: (the Arity of ( SingleMSS C20 )) = ( {} );
+L50: ( ( {} ) +* (the ResultSort of C21) ) = (the ResultSort of C21);
+L51: ( ( {} ) +* (the Arity of C21) ) = (the Arity of C21);
+L52: (the carrier of D6) = (the carrier of C21) by L45 , L47 , CIRCCOMB:def 2;
+L53: (the carrier' of D6) = (the carrier' of C21) by L46 , L48 , CIRCCOMB:def 2;
+L54: (the ResultSort of D6) = (the ResultSort of C21) by L48 , L50 , CIRCCOMB:def 2;
+thus L55: thesis by L54 , L49 , L51 , L52 , L53 , CIRCCOMB:def 2;
+end;
+theorem
+L56: (for B12 being set holds (for B13 being non  empty  strict ManySortedSign holds (for B14 being  Boolean MSAlgebra over B13 holds (B12 in (the carrier of B13) implies ( ( SingleMSA B12 ) +* B14 ) = ( the MSAlgebra of B14 )))))
+proof
+let C22 being set;
+let C23 being non  empty  strict ManySortedSign;
+let C24 being  Boolean MSAlgebra over C23;
+set D7 = ( SingleMSS C22 );
+set D8 = ( SingleMSA C22 );
+assume L57: C22 in (the carrier of C23);
+L58: ( D7 +* C23 ) = C23 by L57 , L42;
+L59: { C22 } c= (the carrier of C23) by L57 , ZFMISC_1:31;
+L60: (the carrier of D7) = { C22 } by L25;
+L61: (the Sorts of C24) = ( (the carrier of C23) --> ( BOOLEAN ) ) by CIRCCOMB:57;
+L62: (the Sorts of D8) = ( (the carrier of D7) --> ( BOOLEAN ) ) by CIRCCOMB:57;
+L63: (the Sorts of D8) tolerates (the Sorts of C24) by L62 , L61 , FUNCOP_1:87;
+L64: (the Charact of C24) = ( (the Charact of D8) +* (the Charact of C24) );
+L65: (the Sorts of ( D8 +* C24 )) = ( (the Sorts of D8) +* (the Sorts of C24) ) by L63 , CIRCCOMB:def 4;
+L66: (the Charact of C24) = (the Charact of ( D8 +* C24 )) by L63 , L64 , CIRCCOMB:def 4;
+L67: ( dom (the Sorts of D8) ) = (the carrier of D7) by PARTFUN1:def 2;
+L68: ( dom (the Sorts of C24) ) = (the carrier of C23) by PARTFUN1:def 2;
+thus L69: thesis by L68 , L58 , L59 , L60 , L65 , L66 , L67 , FUNCT_4:19;
+end;
+notation
+synonym <*> for {};
+end;
+definition
+let C25 being Nat;
+let C26 , C27 being FinSequence;
+L71: ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) is  unsplit  gate`1=arity  gate`2isBoolean non  void non  empty  strict;
+func C25 -BitAdderStr (C26 , C27) ->  unsplit  gate`1=arity  gate`2isBoolean non  void  strict non  empty ManySortedSign means 
+:L72: (ex B15 , B16 being (ManySortedSet of ( NAT )) st (it = ( B15 . C25 ) & ( B15 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B16 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B17 being Nat holds (for B18 being non  empty ManySortedSign holds (for B19 being set holds ((B18 = ( B15 . B17 ) & B19 = ( B16 . B17 )) implies (( B15 . ( B17 + 1 ) ) = ( B18 +* ( BitAdderWithOverflowStr (( C26 . ( B17 + 1 ) ) , ( C27 . ( B17 + 1 ) ) , B19) ) ) & ( B16 . ( B17 + 1 ) ) = ( MajorityOutput (( C26 . ( B17 + 1 ) ) , ( C27 . ( B17 + 1 ) ) , B19) ))))))));
+uniqueness
+proof
+reconsider D9 = C25 as (Element of ( NAT )) by ORDINAL1:def 12;
+deffunc H1(set , Nat) = ( MajorityOutput (( C26 . ( $2 + 1 ) ) , ( C27 . ( $2 + 1 ) ) , $1) );
+deffunc H2(non  empty ManySortedSign , set , Nat) = ( $1 +* ( BitAdderWithOverflowStr (( C26 . ( $3 + 1 ) ) , ( C27 . ( $3 + 1 ) ) , $2) ) );
+L73: (for B20 , B21 being  unsplit  gate`1=arity  gate`2isBoolean non  void non  empty  strict non  empty ManySortedSign holds (((ex B22 , B23 being (ManySortedSet of ( NAT )) st (B20 = ( B22 . D9 ) & ( B22 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B23 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B24 being Nat holds (for B25 being non  empty ManySortedSign holds (for B26 being set holds ((B25 = ( B22 . B24 ) & B26 = ( B23 . B24 )) implies (( B22 . ( B24 + 1 ) ) = H2(B25 , B26 , B24) & ( B23 . ( B24 + 1 ) ) = H1(B26 , B24)))))))) & (ex B27 , B28 being (ManySortedSet of ( NAT )) st (B21 = ( B27 . D9 ) & ( B27 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B28 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B29 being Nat holds (for B30 being non  empty ManySortedSign holds (for B31 being set holds ((B30 = ( B27 . B29 ) & B31 = ( B28 . B29 )) implies (( B27 . ( B29 + 1 ) ) = H2(B30 , B31 , B29) & ( B28 . ( B29 + 1 ) ) = H1(B31 , B29))))))))) implies B20 = B21)) from CIRCCMB2:sch 9;
+thus L74: thesis by L73;
+end;
+existence
+proof
+reconsider D10 = C25 as (Element of ( NAT )) by ORDINAL1:def 12;
+deffunc H3(set , Nat) = ( MajorityOutput (( C26 . ( $2 + 1 ) ) , ( C27 . ( $2 + 1 ) ) , $1) );
+deffunc H4(set , Nat) = ( BitAdderWithOverflowStr (( C26 . ( $2 + 1 ) ) , ( C27 . ( $2 + 1 ) ) , $1) );
+L75: (ex B32 being  unsplit  gate`1=arity  gate`2isBoolean non  void non  empty non  empty  strict ManySortedSign st (ex B33 , B34 being (ManySortedSet of ( NAT )) st (B32 = ( B33 . D10 ) & ( B33 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B34 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B35 being Nat holds (for B36 being non  empty ManySortedSign holds (for B37 being set holds ((B36 = ( B33 . B35 ) & B37 = ( B34 . B35 )) implies (( B33 . ( B35 + 1 ) ) = ( B36 +* H4(B37 , B35) ) & ( B34 . ( B35 + 1 ) ) = H3(B37 , B35))))))))) from CIRCCMB2:sch 8(L71);
+thus L76: thesis by L75;
+end;
+end;
+definition
+let C28 being Nat;
+let C29 , C30 being FinSequence;
+func C28 -BitAdderCirc (C29 , C30) ->  Boolean  gate`2=den  strict (Circuit of ( C28 -BitAdderStr (C29 , C30) )) means 
+:L78: (ex B38 , B39 , B40 being (ManySortedSet of ( NAT )) st (( C28 -BitAdderStr (C29 , C30) ) = ( B38 . C28 ) & it = ( B39 . C28 ) & ( B38 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B39 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B40 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B41 being Nat holds (for B42 being non  empty ManySortedSign holds (for B43 being  non-empty MSAlgebra over B42 holds (for B44 being set holds ((B42 = ( B38 . B41 ) & B43 = ( B39 . B41 ) & B44 = ( B40 . B41 )) implies (( B38 . ( B41 + 1 ) ) = ( B42 +* ( BitAdderWithOverflowStr (( C29 . ( B41 + 1 ) ) , ( C30 . ( B41 + 1 ) ) , B44) ) ) & ( B39 . ( B41 + 1 ) ) = ( B43 +* ( BitAdderWithOverflowCirc (( C29 . ( B41 + 1 ) ) , ( C30 . ( B41 + 1 ) ) , B44) ) ) & ( B40 . ( B41 + 1 ) ) = ( MajorityOutput (( C29 . ( B41 + 1 ) ) , ( C30 . ( B41 + 1 ) ) , B44) )))))))));
+uniqueness
+proof
+set D11 = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) );
+set D12 = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) );
+set D13 = ( C28 -BitAdderStr (C29 , C30) );
+set D14 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+deffunc H5(set , Nat) = ( MajorityOutput (( C29 . ( $2 + 1 ) ) , ( C30 . ( $2 + 1 ) ) , $1) );
+deffunc H6(non  empty ManySortedSign , set , Nat) = ( $1 +* ( BitAdderWithOverflowStr (( C29 . ( $3 + 1 ) ) , ( C30 . ( $3 + 1 ) ) , $2) ) );
+deffunc H7(non  empty ManySortedSign ,  non-empty MSAlgebra over $1 , set , Nat) = ( $2 +* ( BitAdderWithOverflowCirc (( C29 . ( $4 + 1 ) ) , ( C30 . ( $4 + 1 ) ) , $3) ) );
+L79: (for B45 being non  empty ManySortedSign holds (for B46 being  non-empty MSAlgebra over B45 holds (for B47 being set holds (for B48 being Nat holds H7(B45 , B46 , B47 , B48) is  non-empty  non-empty  non-empty  non-empty MSAlgebra over H6(B45 , B47 , B48)))));
+thus L80: (for B49 , B50 being  Boolean  gate`2=den  strict (Circuit of ( C28 -BitAdderStr (C29 , C30) )) holds (((ex B51 , B52 , B53 being (ManySortedSet of ( NAT )) st (D13 = ( B51 . C28 ) & B49 = ( B52 . C28 ) & ( B51 . ( 0 ) ) = D11 & ( B52 . ( 0 ) ) = D12 & ( B53 . ( 0 ) ) = D14 & (for B54 being Nat holds (for B55 being non  empty ManySortedSign holds (for B56 being  non-empty MSAlgebra over B55 holds (for B57 being set holds ((B55 = ( B51 . B54 ) & B56 = ( B52 . B54 ) & B57 = ( B53 . B54 )) implies (( B51 . ( B54 + 1 ) ) = H6(B55 , B57 , B54) & ( B52 . ( B54 + 1 ) ) = H7(B55 , B56 , B57 , B54) & ( B53 . ( B54 + 1 ) ) = H5(B57 , B54))))))))) & (ex B58 , B59 , B60 being (ManySortedSet of ( NAT )) st (D13 = ( B58 . C28 ) & B50 = ( B59 . C28 ) & ( B58 . ( 0 ) ) = D11 & ( B59 . ( 0 ) ) = D12 & ( B60 . ( 0 ) ) = D14 & (for B61 being Nat holds (for B62 being non  empty ManySortedSign holds (for B63 being  non-empty MSAlgebra over B62 holds (for B64 being set holds ((B62 = ( B58 . B61 ) & B63 = ( B59 . B61 ) & B64 = ( B60 . B61 )) implies (( B58 . ( B61 + 1 ) ) = H6(B62 , B64 , B61) & ( B59 . ( B61 + 1 ) ) = H7(B62 , B63 , B64 , B61) & ( B60 . ( B61 + 1 ) ) = H5(B64 , B61)))))))))) implies B49 = B50)) from CIRCCMB2:sch 21(L79);
+end;
+existence
+proof
+set D15 = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) );
+set D16 = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) );
+set D17 = ( C28 -BitAdderStr (C29 , C30) );
+set D18 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+deffunc H8(set , Nat) = ( MajorityOutput (( C29 . ( $2 + 1 ) ) , ( C30 . ( $2 + 1 ) ) , $1) );
+deffunc H9(non  empty ManySortedSign , set , Nat) = ( $1 +* ( BitAdderWithOverflowStr (( C29 . ( $3 + 1 ) ) , ( C30 . ( $3 + 1 ) ) , $2) ) );
+deffunc H10(non  empty ManySortedSign ,  non-empty MSAlgebra over $1 , set , Nat) = ( $2 +* ( BitAdderWithOverflowCirc (( C29 . ( $4 + 1 ) ) , ( C30 . ( $4 + 1 ) ) , $3) ) );
+L81: (for B65 being  unsplit  gate`1=arity  gate`2isBoolean non  void  strict non  empty ManySortedSign holds (for B66 being set holds (for B67 being Nat holds H9(B65 , B66 , B67) is  unsplit  gate`1=arity  gate`2isBoolean non  void  strict)));
+L82: (for B68 , B69 being  unsplit  gate`1=arity  gate`2isBoolean non  void  strict non  empty ManySortedSign holds (for B70 being  Boolean  gate`2=den  strict (Circuit of B68) holds (for B71 being set holds (for B72 being Nat holds (B69 = H9(B68 , B71 , B72) implies H10(B68 , B70 , B71 , B72) is  Boolean  gate`2=den  strict  Boolean  gate`2=den  strict  Boolean  gate`2=den  strict  Boolean  gate`2=den  strict (Circuit of B69))))));
+L83: (for B73 being non  empty ManySortedSign holds (for B74 being  non-empty MSAlgebra over B73 holds (for B75 being set holds (for B76 being Nat holds H10(B73 , B74 , B75 , B76) is  non-empty  non-empty  non-empty  non-empty MSAlgebra over H9(B73 , B75 , B76)))));
+L84: (ex B77 , B78 being (ManySortedSet of ( NAT )) st (D17 = ( B77 . C28 ) & ( B77 . ( 0 ) ) = D15 & ( B78 . ( 0 ) ) = D18 & (for B79 being Nat holds (for B80 being non  empty ManySortedSign holds (for B81 being set holds ((B80 = ( B77 . B79 ) & B81 = ( B78 . B79 )) implies (( B77 . ( B79 + 1 ) ) = H9(B80 , B81 , B79) & ( B78 . ( B79 + 1 ) ) = H8(B81 , B79)))))))) by L72;
+thus L85: (ex B82 being  Boolean  gate`2=den  strict (Circuit of D17) st (ex B83 , B84 , B85 being (ManySortedSet of ( NAT )) st (D17 = ( B83 . C28 ) & B82 = ( B84 . C28 ) & ( B83 . ( 0 ) ) = D15 & ( B84 . ( 0 ) ) = D16 & ( B85 . ( 0 ) ) = D18 & (for B86 being Nat holds (for B87 being non  empty ManySortedSign holds (for B88 being  non-empty MSAlgebra over B87 holds (for B89 being set holds ((B87 = ( B83 . B86 ) & B88 = ( B84 . B86 ) & B89 = ( B85 . B86 )) implies (( B83 . ( B86 + 1 ) ) = H9(B87 , B89 , B86) & ( B84 . ( B86 + 1 ) ) = H10(B87 , B88 , B89 , B86) & ( B85 . ( B86 + 1 ) ) = H8(B89 , B86)))))))))) from CIRCCMB2:sch 19(L81 , L84 , L83 , L82);
+end;
+end;
+definition
+let C31 being Nat;
+let C32 , C33 being FinSequence;
+set D19 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+func C31 -BitMajorityOutput (C32 , C33) -> (Element of ( InnerVertices ( C31 -BitAdderStr (C32 , C33) ) )) means 
+:L87: (ex B90 being (ManySortedSet of ( NAT )) st (it = ( B90 . C31 ) & ( B90 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B91 being Nat holds (for B92 being set holds (B92 = ( B90 . B91 ) implies ( B90 . ( B91 + 1 ) ) = ( MajorityOutput (( C32 . ( B91 + 1 ) ) , ( C33 . ( B91 + 1 ) ) , B92) ))))));
+uniqueness
+proof
+let C34 , C35 being (Element of ( InnerVertices ( C31 -BitAdderStr (C32 , C33) ) ));
+given C36 being (ManySortedSet of ( NAT )) such that
+L88: C34 = ( C36 . C31 )
+and
+L89: ( C36 . ( 0 ) ) = D19
+and
+L90: (for B93 being Nat holds (for B94 being set holds (B94 = ( C36 . B93 ) implies ( C36 . ( B93 + 1 ) ) = ( MajorityOutput (( C32 . ( B93 + 1 ) ) , ( C33 . ( B93 + 1 ) ) , B94) ))));
+
+given C37 being (ManySortedSet of ( NAT )) such that
+L91: C35 = ( C37 . C31 )
+and
+L92: ( C37 . ( 0 ) ) = D19
+and
+L93: (for B95 being Nat holds (for B96 being set holds (B96 = ( C37 . B95 ) implies ( C37 . ( B95 + 1 ) ) = ( MajorityOutput (( C32 . ( B95 + 1 ) ) , ( C33 . ( B95 + 1 ) ) , B96) ))));
+
+deffunc H11(Nat , set) = ( MajorityOutput (( C32 . ( $1 + 1 ) ) , ( C33 . ( $1 + 1 ) ) , $2) );
+L94: ( dom C36 ) = ( NAT ) by PARTFUN1:def 2;
+L95: ( C36 . ( 0 ) ) = D19 by L89;
+L96: (for B97 being Nat holds ( C36 . ( B97 + 1 ) ) = H11(B97 , ( C36 . B97 ))) by L90;
+L97: ( dom C37 ) = ( NAT ) by PARTFUN1:def 2;
+L98: ( C37 . ( 0 ) ) = D19 by L92;
+L99: (for B98 being Nat holds ( C37 . ( B98 + 1 ) ) = H11(B98 , ( C37 . B98 ))) by L93;
+L100: C36 = C37 from NAT_1:sch 15(L94 , L95 , L96 , L97 , L98 , L99);
+thus L101: thesis by L100 , L88 , L91;
+end;
+existence
+proof
+defpred S1[ set , set , set ] means (not contradiction);
+deffunc H12(non  empty ManySortedSign , set , Nat) = ( $1 +* ( BitAdderWithOverflowStr (( C32 . ( $3 + 1 ) ) , ( C33 . ( $3 + 1 ) ) , $2) ) );
+deffunc H13(set , Nat) = ( MajorityOutput (( C32 . ( $2 + 1 ) ) , ( C33 . ( $2 + 1 ) ) , $1) );
+consider C38 , C39 being (ManySortedSet of ( NAT )) such that L102: ( C31 -BitAdderStr (C32 , C33) ) = ( C38 . C31 ) and L103: ( C38 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L104: ( C39 . ( 0 ) ) = D19 and L105: (for B99 being Nat holds (for B100 being non  empty ManySortedSign holds (for B101 being set holds ((B100 = ( C38 . B99 ) & B101 = ( C39 . B99 )) implies (( C38 . ( B99 + 1 ) ) = H12(B100 , B101 , B99) & ( C39 . ( B99 + 1 ) ) = H13(B101 , B99)))))) by L72;
+defpred S2[ (Element of ( NAT )) ] means (ex B102 being non  empty ManySortedSign st (B102 = ( C38 . $1 ) & ( C39 . $1 ) in ( InnerVertices B102 )));
+L106: ( InnerVertices ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) ) = { D19 } by CIRCCOMB:42;
+L107: D19 in ( InnerVertices ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) ) by L106 , TARSKI:def 1;
+L108: S2[ ( 0 ) ] by L107 , L103 , L104;
+L109: (for B103 being (Element of ( NAT )) holds (S2[ B103 ] implies S2[ ( B103 + 1 ) ]))
+proof
+let C40 being (Element of ( NAT ));
+assume that
+L110: (ex B104 being non  empty ManySortedSign st (B104 = ( C38 . C40 ) & ( C39 . C40 ) in ( InnerVertices B104 )))
+and
+L111: (for B105 being non  empty ManySortedSign holds (B105 = ( C38 . ( C40 + 1 ) ) implies (not ( C39 . ( C40 + 1 ) ) in ( InnerVertices B105 ))));
+consider C41 being non  empty ManySortedSign such that L112: C41 = ( C38 . C40 ) and L113: ( C39 . C40 ) in ( InnerVertices C41 ) by L110;
+L114: ( MajorityOutput (( C32 . ( C40 + 1 ) ) , ( C33 . ( C40 + 1 ) ) , ( C39 . C40 )) ) in ( InnerVertices ( BitAdderWithOverflowStr (( C32 . ( C40 + 1 ) ) , ( C33 . ( C40 + 1 ) ) , ( C39 . C40 )) ) ) by FACIRC_1:90;
+L115: ( MajorityOutput (( C32 . ( C40 + 1 ) ) , ( C33 . ( C40 + 1 ) ) , ( C39 . C40 )) ) in ( InnerVertices ( C41 +* ( BitAdderWithOverflowStr (( C32 . ( C40 + 1 ) ) , ( C33 . ( C40 + 1 ) ) , ( C39 . C40 )) ) ) ) by L114 , FACIRC_1:22;
+L116: ( C38 . ( C40 + 1 ) ) = ( C41 +* ( BitAdderWithOverflowStr (( C32 . ( C40 + 1 ) ) , ( C33 . ( C40 + 1 ) ) , ( C39 . C40 )) ) ) by L105 , L112;
+L117: ( C39 . ( C40 + 1 ) ) = ( MajorityOutput (( C32 . ( C40 + 1 ) ) , ( C33 . ( C40 + 1 ) ) , ( C39 . C40 )) ) by L105 , L112;
+thus L118: contradiction by L117 , L111 , L115 , L116;
+end;
+reconsider D20 = C31 as (Element of ( NAT )) by ORDINAL1:def 12;
+L119: (for B106 being (Element of ( NAT )) holds S2[ B106 ]) from NAT_1:sch 1(L108 , L109);
+L120: (ex B107 being non  empty ManySortedSign st (B107 = ( C38 . D20 ) & ( C39 . C31 ) in ( InnerVertices B107 ))) by L119;
+reconsider D21 = ( C39 . D20 ) as (Element of ( InnerVertices ( C31 -BitAdderStr (C32 , C33) ) )) by L120 , L102;
+take D21;
+take C39;
+thus L121: (D21 = ( C39 . C31 ) & ( C39 . ( 0 ) ) = D19) by L104;
+let C42 being Nat;
+L122: (ex B108 being non  empty ManySortedSign st (ex B109 being set st (B108 = ( C38 . ( 0 ) ) & B109 = ( C39 . ( 0 ) ) & S1[ B108 , B109 , ( 0 ) ]))) by L103;
+L123: (for B110 being Nat holds (for B111 being non  empty ManySortedSign holds (for B112 being set holds ((B111 = ( C38 . B110 ) & B112 = ( C39 . B110 ) & S1[ B111 , B112 , B110 ]) implies S1[ H12(B111 , B112 , B110) , H13(B112 , B110) , ( B110 + 1 ) ]))));
+L124: (for B113 being Nat holds (ex B114 being non  empty ManySortedSign st (B114 = ( C38 . B113 ) & S1[ B114 , ( C39 . B113 ) , B113 ]))) from CIRCCMB2:sch 2(L122 , L105 , L123);
+L125: (ex B115 being non  empty ManySortedSign st B115 = ( C38 . C42 )) by L124;
+thus L126: thesis by L125 , L105;
+end;
+end;
+theorem
+L128: (for B116 , B117 being FinSequence holds (for B118 , B119 , B120 being (ManySortedSet of ( NAT )) holds ((( B118 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B119 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B120 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B121 being Nat holds (for B122 being non  empty ManySortedSign holds (for B123 being  non-empty MSAlgebra over B122 holds (for B124 being set holds ((B122 = ( B118 . B121 ) & B123 = ( B119 . B121 ) & B124 = ( B120 . B121 )) implies (( B118 . ( B121 + 1 ) ) = ( B122 +* ( BitAdderWithOverflowStr (( B116 . ( B121 + 1 ) ) , ( B117 . ( B121 + 1 ) ) , B124) ) ) & ( B119 . ( B121 + 1 ) ) = ( B123 +* ( BitAdderWithOverflowCirc (( B116 . ( B121 + 1 ) ) , ( B117 . ( B121 + 1 ) ) , B124) ) ) & ( B120 . ( B121 + 1 ) ) = ( MajorityOutput (( B116 . ( B121 + 1 ) ) , ( B117 . ( B121 + 1 ) ) , B124) )))))))) implies (for B125 being Nat holds (( B125 -BitAdderStr (B116 , B117) ) = ( B118 . B125 ) & ( B125 -BitAdderCirc (B116 , B117) ) = ( B119 . B125 ) & ( B125 -BitMajorityOutput (B116 , B117) ) = ( B120 . B125 ))))))
+proof
+let C43 , C44 being FinSequence;
+let C45 , C46 , C47 being (ManySortedSet of ( NAT ));
+deffunc H14(set , Nat) = ( MajorityOutput (( C43 . ( $2 + 1 ) ) , ( C44 . ( $2 + 1 ) ) , $1) );
+deffunc H15(Nat , set) = ( MajorityOutput (( C43 . ( $1 + 1 ) ) , ( C44 . ( $1 + 1 ) ) , $2) );
+deffunc H16(non  empty ManySortedSign , set , Nat) = ( $1 +* ( BitAdderWithOverflowStr (( C43 . ( $3 + 1 ) ) , ( C44 . ( $3 + 1 ) ) , $2) ) );
+deffunc H17(non  empty ManySortedSign ,  non-empty MSAlgebra over $1 , set , Nat) = ( $2 +* ( BitAdderWithOverflowCirc (( C43 . ( $4 + 1 ) ) , ( C44 . ( $4 + 1 ) ) , $3) ) );
+assume that
+L129: (( C45 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( C46 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ))
+and
+L130: ( C47 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ]
+and
+L131: (for B126 being Nat holds (for B127 being non  empty ManySortedSign holds (for B128 being  non-empty MSAlgebra over B127 holds (for B129 being set holds ((B127 = ( C45 . B126 ) & B128 = ( C46 . B126 ) & B129 = ( C47 . B126 )) implies (( C45 . ( B126 + 1 ) ) = H16(B127 , B129 , B126) & ( C46 . ( B126 + 1 ) ) = H17(B127 , B128 , B129 , B126) & ( C47 . ( B126 + 1 ) ) = H14(B129 , B126)))))));
+let C48 being Nat;
+consider C49 , C50 , C51 being (ManySortedSet of ( NAT )) such that L132: ( C48 -BitAdderStr (C43 , C44) ) = ( C49 . C48 ) and L133: ( C48 -BitAdderCirc (C43 , C44) ) = ( C50 . C48 ) and L134: ( C49 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L135: ( C50 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L136: ( C51 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] and L137: (for B130 being Nat holds (for B131 being non  empty ManySortedSign holds (for B132 being  non-empty MSAlgebra over B131 holds (for B133 being set holds ((B131 = ( C49 . B130 ) & B132 = ( C50 . B130 ) & B133 = ( C51 . B130 )) implies (( C49 . ( B130 + 1 ) ) = H16(B131 , B133 , B130) & ( C50 . ( B130 + 1 ) ) = H17(B131 , B132 , B133 , B130) & ( C51 . ( B130 + 1 ) ) = H14(B133 , B130))))))) by L78;
+L138: (ex B134 being non  empty ManySortedSign st (ex B135 being  non-empty MSAlgebra over B134 st (B134 = ( C45 . ( 0 ) ) & B135 = ( C46 . ( 0 ) )))) by L129;
+L139: (( C45 . ( 0 ) ) = ( C49 . ( 0 ) ) & ( C46 . ( 0 ) ) = ( C50 . ( 0 ) ) & ( C47 . ( 0 ) ) = ( C51 . ( 0 ) )) by L129 , L130 , L134 , L135 , L136;
+L140: (for B136 being non  empty ManySortedSign holds (for B137 being  non-empty MSAlgebra over B136 holds (for B138 being set holds (for B139 being Nat holds H17(B136 , B137 , B138 , B139) is  non-empty  non-empty  non-empty  non-empty MSAlgebra over H16(B136 , B138 , B139)))));
+L141: (C45 = C49 & C46 = C50 & C47 = C51) from CIRCCMB2:sch 14(L138 , L139 , L131 , L137 , L140);
+thus L142: (( C48 -BitAdderStr (C43 , C44) ) = ( C45 . C48 ) & ( C48 -BitAdderCirc (C43 , C44) ) = ( C46 . C48 )) by L141 , L132 , L133;
+L143: (for B140 being Nat holds (for B141 being non  empty ManySortedSign holds (for B142 being set holds ((B141 = ( C45 . B140 ) & B142 = ( C47 . B140 )) implies (( C45 . ( B140 + 1 ) ) = H16(B141 , B142 , B140) & ( C47 . ( B140 + 1 ) ) = H14(B142 , B140)))))) from CIRCCMB2:sch 15(L129 , L131 , L140);
+L144: ( C45 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) by L129;
+L145: (for B143 being Nat holds (for B144 being set holds (B144 = ( C47 . B143 ) implies ( C47 . ( B143 + 1 ) ) = H14(B144 , B143)))) from CIRCCMB2:sch 3(L144 , L143);
+L146: ( dom C47 ) = ( NAT ) by PARTFUN1:def 2;
+L147: ( C47 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] by L130;
+L148: (for B145 being Nat holds ( C47 . ( B145 + 1 ) ) = H15(B145 , ( C47 . B145 ))) by L145;
+consider C52 being (ManySortedSet of ( NAT )) such that L149: ( C48 -BitMajorityOutput (C43 , C44) ) = ( C52 . C48 ) and L150: ( C52 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] and L151: (for B146 being Nat holds (for B147 being set holds (B147 = ( C52 . B146 ) implies ( C52 . ( B146 + 1 ) ) = ( MajorityOutput (( C43 . ( B146 + 1 ) ) , ( C44 . ( B146 + 1 ) ) , B147) )))) by L87;
+L152: ( dom C52 ) = ( NAT ) by PARTFUN1:def 2;
+L153: ( C52 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] by L150;
+L154: (for B148 being Nat holds ( C52 . ( B148 + 1 ) ) = H15(B148 , ( C52 . B148 ))) by L151;
+L155: C47 = C52 from NAT_1:sch 15(L146 , L147 , L148 , L152 , L153 , L154);
+thus L156: thesis by L155 , L149;
+end;
+theorem
+L157: (for B149 , B150 being FinSequence holds (( ( 0 ) -BitAdderStr (B149 , B150) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( ( 0 ) -BitAdderCirc (B149 , B150) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( ( 0 ) -BitMajorityOutput (B149 , B150) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ]))
+proof
+let C53 , C54 being FinSequence;
+L158: (ex B151 , B152 , B153 being (ManySortedSet of ( NAT )) st (( ( 0 ) -BitAdderStr (C53 , C54) ) = ( B151 . ( 0 ) ) & ( ( 0 ) -BitAdderCirc (C53 , C54) ) = ( B152 . ( 0 ) ) & ( B151 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B152 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) & ( B153 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B154 being Nat holds (for B155 being non  empty ManySortedSign holds (for B156 being  non-empty MSAlgebra over B155 holds (for B157 being set holds ((B155 = ( B151 . B154 ) & B156 = ( B152 . B154 ) & B157 = ( B153 . B154 )) implies (( B151 . ( B154 + 1 ) ) = ( B155 +* ( BitAdderWithOverflowStr (( C53 . ( B154 + 1 ) ) , ( C54 . ( B154 + 1 ) ) , B157) ) ) & ( B152 . ( B154 + 1 ) ) = ( B156 +* ( BitAdderWithOverflowCirc (( C53 . ( B154 + 1 ) ) , ( C54 . ( B154 + 1 ) ) , B157) ) ) & ( B153 . ( B154 + 1 ) ) = ( MajorityOutput (( C53 . ( B154 + 1 ) ) , ( C54 . ( B154 + 1 ) ) , B157) ))))))))) by L78;
+thus L159: ( ( 0 ) -BitAdderStr (C53 , C54) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) by L158;
+thus L160: ( ( 0 ) -BitAdderCirc (C53 , C54) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) by L158;
+L161: ( InnerVertices ( ( 0 ) -BitAdderStr (C53 , C54) ) ) = { [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] } by L158 , CIRCCOMB:42;
+thus L162: thesis by L161 , TARSKI:def 1;
+end;
+theorem
+L163: (for B158 , B159 being FinSequence holds (for B160 being set holds (B160 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] implies (( 1 -BitAdderStr (B158 , B159) ) = ( ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) +* ( BitAdderWithOverflowStr (( B158 . 1 ) , ( B159 . 1 ) , B160) ) ) & ( 1 -BitAdderCirc (B158 , B159) ) = ( ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) +* ( BitAdderWithOverflowCirc (( B158 . 1 ) , ( B159 . 1 ) , B160) ) ) & ( 1 -BitMajorityOutput (B158 , B159) ) = ( MajorityOutput (( B158 . 1 ) , ( B159 . 1 ) , B160) )))))
+proof
+let C55 , C56 being FinSequence;
+let C57 being set;
+assume that
+L164: C57 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+consider C58 , C59 , C60 being (ManySortedSet of ( NAT )) such that L165: ( 1 -BitAdderStr (C55 , C56) ) = ( C58 . 1 ) and L166: ( 1 -BitAdderCirc (C55 , C56) ) = ( C59 . 1 ) and L167: ( C58 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L168: ( C59 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L169: ( C60 . ( 0 ) ) = C57 and L170: (for B161 being Nat holds (for B162 being non  empty ManySortedSign holds (for B163 being  non-empty MSAlgebra over B162 holds (for B164 being set holds ((B162 = ( C58 . B161 ) & B163 = ( C59 . B161 ) & B164 = ( C60 . B161 )) implies (( C58 . ( B161 + 1 ) ) = ( B162 +* ( BitAdderWithOverflowStr (( C55 . ( B161 + 1 ) ) , ( C56 . ( B161 + 1 ) ) , B164) ) ) & ( C59 . ( B161 + 1 ) ) = ( B163 +* ( BitAdderWithOverflowCirc (( C55 . ( B161 + 1 ) ) , ( C56 . ( B161 + 1 ) ) , B164) ) ) & ( C60 . ( B161 + 1 ) ) = ( MajorityOutput (( C55 . ( B161 + 1 ) ) , ( C56 . ( B161 + 1 ) ) , B164) ))))))) by L164 , L78;
+L171: ( 1 -BitMajorityOutput (C55 , C56) ) = ( C60 . ( ( 0 ) + 1 ) ) by L164 , L167 , L168 , L169 , L170 , L128;
+thus L172: thesis by L171 , L165 , L166 , L167 , L168 , L169 , L170;
+end;
+theorem
+L173: (for B165 , B166 , B167 being set holds (B167 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] implies (( 1 -BitAdderStr (<* B165 *> , <* B166 *>) ) = ( ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) +* ( BitAdderWithOverflowStr (B165 , B166 , B167) ) ) & ( 1 -BitAdderCirc (<* B165 *> , <* B166 *>) ) = ( ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) +* ( BitAdderWithOverflowCirc (B165 , B166 , B167) ) ) & ( 1 -BitMajorityOutput (<* B165 *> , <* B166 *>) ) = ( MajorityOutput (B165 , B166 , B167) ))))
+proof
+let C61 , C62 being set;
+L174: ( <* C61 *> . 1 ) = C61 by FINSEQ_1:40;
+L175: ( <* C62 *> . 1 ) = C62 by FINSEQ_1:40;
+thus L176: thesis by L175 , L174 , L163;
+end;
+theorem
+L177: (for B168 being (Element of ( NAT )) holds (for B169 , B170 being (FinSeqLen of B168) holds (for B171 , B172 , B173 , B174 being FinSequence holds (( B168 -BitAdderStr (( B169 ^ B171 ) , ( B170 ^ B173 )) ) = ( B168 -BitAdderStr (( B169 ^ B172 ) , ( B170 ^ B174 )) ) & ( B168 -BitAdderCirc (( B169 ^ B171 ) , ( B170 ^ B173 )) ) = ( B168 -BitAdderCirc (( B169 ^ B172 ) , ( B170 ^ B174 )) ) & ( B168 -BitMajorityOutput (( B169 ^ B171 ) , ( B170 ^ B173 )) ) = ( B168 -BitMajorityOutput (( B169 ^ B172 ) , ( B170 ^ B174 )) )))))
+proof
+let C63 being (Element of ( NAT ));
+set D22 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+let C64 , C65 being (FinSeqLen of C63);
+let C66 , C67 , C68 , C69 being FinSequence;
+deffunc H18(set , Nat) = ( MajorityOutput (( ( C64 ^ C66 ) . ( $2 + 1 ) ) , ( ( C65 ^ C68 ) . ( $2 + 1 ) ) , $1) );
+deffunc H19(non  empty ManySortedSign , set , Nat) = ( $1 +* ( BitAdderWithOverflowStr (( ( C64 ^ C66 ) . ( $3 + 1 ) ) , ( ( C65 ^ C68 ) . ( $3 + 1 ) ) , $2) ) );
+deffunc H20(non  empty ManySortedSign ,  non-empty MSAlgebra over $1 , set , Nat) = ( $2 +* ( BitAdderWithOverflowCirc (( ( C64 ^ C66 ) . ( $4 + 1 ) ) , ( ( C65 ^ C68 ) . ( $4 + 1 ) ) , $3) ) );
+consider C70 , C71 , C72 being (ManySortedSet of ( NAT )) such that L178: ( C63 -BitAdderStr (( C64 ^ C66 ) , ( C65 ^ C68 )) ) = ( C70 . C63 ) and L179: ( C63 -BitAdderCirc (( C64 ^ C66 ) , ( C65 ^ C68 )) ) = ( C71 . C63 ) and L180: ( C70 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L181: ( C71 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L182: ( C72 . ( 0 ) ) = D22 and L183: (for B175 being Nat holds (for B176 being non  empty ManySortedSign holds (for B177 being  non-empty MSAlgebra over B176 holds (for B178 being set holds ((B176 = ( C70 . B175 ) & B177 = ( C71 . B175 ) & B178 = ( C72 . B175 )) implies (( C70 . ( B175 + 1 ) ) = H19(B176 , B178 , B175) & ( C71 . ( B175 + 1 ) ) = H20(B176 , B177 , B178 , B175) & ( C72 . ( B175 + 1 ) ) = H18(B178 , B175))))))) by L78;
+consider C73 , C74 , C75 being (ManySortedSet of ( NAT )) such that L184: ( C63 -BitAdderStr (( C64 ^ C67 ) , ( C65 ^ C69 )) ) = ( C73 . C63 ) and L185: ( C63 -BitAdderCirc (( C64 ^ C67 ) , ( C65 ^ C69 )) ) = ( C74 . C63 ) and L186: ( C73 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L187: ( C74 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L188: ( C75 . ( 0 ) ) = D22 and L189: (for B179 being Nat holds (for B180 being non  empty ManySortedSign holds (for B181 being  non-empty MSAlgebra over B180 holds (for B182 being set holds ((B180 = ( C73 . B179 ) & B181 = ( C74 . B179 ) & B182 = ( C75 . B179 )) implies (( C73 . ( B179 + 1 ) ) = ( B180 +* ( BitAdderWithOverflowStr (( ( C64 ^ C67 ) . ( B179 + 1 ) ) , ( ( C65 ^ C69 ) . ( B179 + 1 ) ) , B182) ) ) & ( C74 . ( B179 + 1 ) ) = ( B181 +* ( BitAdderWithOverflowCirc (( ( C64 ^ C67 ) . ( B179 + 1 ) ) , ( ( C65 ^ C69 ) . ( B179 + 1 ) ) , B182) ) ) & ( C75 . ( B179 + 1 ) ) = ( MajorityOutput (( ( C64 ^ C67 ) . ( B179 + 1 ) ) , ( ( C65 ^ C69 ) . ( B179 + 1 ) ) , B182) ))))))) by L78;
+defpred S3[ Nat ] means ($1 <= C63 implies (( C72 . $1 ) = ( C75 . $1 ) & ( C70 . $1 ) = ( C73 . $1 ) & ( C71 . $1 ) = ( C74 . $1 )));
+L190: S3[ ( 0 ) ] by L180 , L181 , L182 , L186 , L187 , L188;
+L191: (for B183 being Nat holds (S3[ B183 ] implies S3[ ( B183 + 1 ) ]))
+proof
+let C76 being Nat;
+assume that
+L192: (C76 <= C63 implies (( C72 . C76 ) = ( C75 . C76 ) & ( C70 . C76 ) = ( C73 . C76 ) & ( C71 . C76 ) = ( C74 . C76 )))
+and
+L193: ( C76 + 1 ) <= C63;
+L194: ( len C64 ) = C63 by CARD_1:def 7;
+L195: ( len C65 ) = C63 by CARD_1:def 7;
+L196: ( dom C64 ) = ( Seg C63 ) by L194 , FINSEQ_1:def 3;
+L197: ( dom C65 ) = ( Seg C63 ) by L195 , FINSEQ_1:def 3;
+L198: ( ( 0 ) + 1 ) <= ( C76 + 1 ) by XREAL_1:6;
+L199: ( C76 + 1 ) in ( Seg C63 ) by L198 , L193 , FINSEQ_1:1;
+L200: ( ( C64 ^ C66 ) . ( C76 + 1 ) ) = ( C64 . ( C76 + 1 ) ) by L199 , L196 , FINSEQ_1:def 7;
+L201: ( ( C64 ^ C67 ) . ( C76 + 1 ) ) = ( C64 . ( C76 + 1 ) ) by L196 , L199 , FINSEQ_1:def 7;
+L202: ( ( C65 ^ C68 ) . ( C76 + 1 ) ) = ( C65 . ( C76 + 1 ) ) by L197 , L199 , FINSEQ_1:def 7;
+L203: ( ( C65 ^ C69 ) . ( C76 + 1 ) ) = ( C65 . ( C76 + 1 ) ) by L197 , L199 , FINSEQ_1:def 7;
+defpred S4[ set , set , set , set ] means (not contradiction);
+L204: (ex B184 being non  empty ManySortedSign st (ex B185 being  non-empty MSAlgebra over B184 st (ex B186 being set st (B184 = ( C70 . ( 0 ) ) & B185 = ( C71 . ( 0 ) ) & B186 = ( C72 . ( 0 ) ) & S4[ B184 , B185 , B186 , ( 0 ) ])))) by L180 , L181;
+L205: (for B187 being Nat holds (for B188 being non  empty ManySortedSign holds (for B189 being  non-empty MSAlgebra over B188 holds (for B190 being set holds ((B188 = ( C70 . B187 ) & B189 = ( C71 . B187 ) & B190 = ( C72 . B187 ) & S4[ B188 , B189 , B190 , B187 ]) implies S4[ H19(B188 , B190 , B187) , H20(B188 , B189 , B190 , B187) , H18(B190 , B187) , ( B187 + 1 ) ])))));
+L206: (for B191 being non  empty ManySortedSign holds (for B192 being  non-empty MSAlgebra over B191 holds (for B193 being set holds (for B194 being Nat holds H20(B191 , B192 , B193 , B194) is  non-empty  non-empty  non-empty  non-empty MSAlgebra over H19(B191 , B193 , B194)))));
+L207: (for B195 being Nat holds (ex B196 being non  empty ManySortedSign st (ex B197 being  non-empty MSAlgebra over B196 st (B196 = ( C70 . B195 ) & B197 = ( C71 . B195 ) & S4[ B196 , B197 , ( C72 . B195 ) , B195 ])))) from CIRCCMB2:sch 13(L204 , L183 , L205 , L206);
+consider C77 being non  empty ManySortedSign, C78 being  non-empty MSAlgebra over C77 such that L208: C77 = ( C70 . C76 ) and L209: C78 = ( C71 . C76 ) by L207;
+thus L210: ( C72 . ( C76 + 1 ) ) = ( MajorityOutput (( ( C64 ^ C67 ) . ( C76 + 1 ) ) , ( ( C65 ^ C69 ) . ( C76 + 1 ) ) , ( C75 . C76 )) ) by L183 , L192 , L193 , L200 , L201 , L202 , L203 , L208 , L209 , NAT_1:13
+.= ( C75 . ( C76 + 1 ) ) by L189 , L192 , L193 , L208 , L209 , NAT_1:13;
+thus L211: ( C70 . ( C76 + 1 ) ) = ( C77 +* ( BitAdderWithOverflowStr (( ( C64 ^ C67 ) . ( C76 + 1 ) ) , ( ( C65 ^ C69 ) . ( C76 + 1 ) ) , ( C75 . C76 )) ) ) by L183 , L192 , L193 , L200 , L201 , L202 , L203 , L208 , L209 , NAT_1:13
+.= ( C73 . ( C76 + 1 ) ) by L189 , L192 , L193 , L208 , L209 , NAT_1:13;
+thus L212: ( C71 . ( C76 + 1 ) ) = ( C78 +* ( BitAdderWithOverflowCirc (( ( C64 ^ C67 ) . ( C76 + 1 ) ) , ( ( C65 ^ C69 ) . ( C76 + 1 ) ) , ( C75 . C76 )) ) ) by L183 , L192 , L193 , L200 , L201 , L202 , L203 , L208 , L209 , NAT_1:13
+.= ( C74 . ( C76 + 1 ) ) by L189 , L192 , L193 , L208 , L209 , NAT_1:13;
+end;
+L213: (for B198 being Nat holds S3[ B198 ]) from NAT_1:sch 2(L190 , L191);
+thus L214: (( C63 -BitAdderStr (( C64 ^ C66 ) , ( C65 ^ C68 )) ) = ( C63 -BitAdderStr (( C64 ^ C67 ) , ( C65 ^ C69 )) ) & ( C63 -BitAdderCirc (( C64 ^ C66 ) , ( C65 ^ C68 )) ) = ( C63 -BitAdderCirc (( C64 ^ C67 ) , ( C65 ^ C69 )) )) by L213 , L178 , L179 , L184 , L185;
+L215: ( C63 -BitMajorityOutput (( C64 ^ C66 ) , ( C65 ^ C68 )) ) = ( C72 . C63 ) by L180 , L181 , L182 , L183 , L128;
+L216: ( C63 -BitMajorityOutput (( C64 ^ C67 ) , ( C65 ^ C69 )) ) = ( C75 . C63 ) by L186 , L187 , L188 , L189 , L128;
+thus L217: thesis by L216 , L213 , L215;
+end;
+theorem
+L218: (for B199 being (Element of ( NAT )) holds (for B200 , B201 being (FinSeqLen of B199) holds (for B202 , B203 being set holds (( ( B199 + 1 ) -BitAdderStr (( B200 ^ <* B202 *> ) , ( B201 ^ <* B203 *> )) ) = ( ( B199 -BitAdderStr (B200 , B201) ) +* ( BitAdderWithOverflowStr (B202 , B203 , ( B199 -BitMajorityOutput (B200 , B201) )) ) ) & ( ( B199 + 1 ) -BitAdderCirc (( B200 ^ <* B202 *> ) , ( B201 ^ <* B203 *> )) ) = ( ( B199 -BitAdderCirc (B200 , B201) ) +* ( BitAdderWithOverflowCirc (B202 , B203 , ( B199 -BitMajorityOutput (B200 , B201) )) ) ) & ( ( B199 + 1 ) -BitMajorityOutput (( B200 ^ <* B202 *> ) , ( B201 ^ <* B203 *> )) ) = ( MajorityOutput (B202 , B203 , ( B199 -BitMajorityOutput (B200 , B201) )) )))))
+proof
+let C79 being (Element of ( NAT ));
+set D23 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+let C80 , C81 being (FinSeqLen of C79);
+let C82 , C83 being set;
+set D24 = ( C80 ^ <* C82 *> );
+set D25 = ( C81 ^ <* C83 *> );
+consider C84 , C85 , C86 being (ManySortedSet of ( NAT )) such that L219: ( C79 -BitAdderStr (D24 , D25) ) = ( C84 . C79 ) and L220: ( C79 -BitAdderCirc (D24 , D25) ) = ( C85 . C79 ) and L221: ( C84 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L222: ( C85 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L223: ( C86 . ( 0 ) ) = D23 and L224: (for B204 being Nat holds (for B205 being non  empty ManySortedSign holds (for B206 being  non-empty MSAlgebra over B205 holds (for B207 being set holds ((B205 = ( C84 . B204 ) & B206 = ( C85 . B204 ) & B207 = ( C86 . B204 )) implies (( C84 . ( B204 + 1 ) ) = ( B205 +* ( BitAdderWithOverflowStr (( D24 . ( B204 + 1 ) ) , ( D25 . ( B204 + 1 ) ) , B207) ) ) & ( C85 . ( B204 + 1 ) ) = ( B206 +* ( BitAdderWithOverflowCirc (( D24 . ( B204 + 1 ) ) , ( D25 . ( B204 + 1 ) ) , B207) ) ) & ( C86 . ( B204 + 1 ) ) = ( MajorityOutput (( D24 . ( B204 + 1 ) ) , ( D25 . ( B204 + 1 ) ) , B207) ))))))) by L78;
+L225: ( C79 -BitMajorityOutput (( C80 ^ <* C82 *> ) , ( C81 ^ <* C83 *> )) ) = ( C86 . C79 ) by L221 , L222 , L223 , L224 , L128;
+L226: ( ( C79 + 1 ) -BitAdderStr (( C80 ^ <* C82 *> ) , ( C81 ^ <* C83 *> )) ) = ( C84 . ( C79 + 1 ) ) by L221 , L222 , L223 , L224 , L128;
+L227: ( ( C79 + 1 ) -BitAdderCirc (( C80 ^ <* C82 *> ) , ( C81 ^ <* C83 *> )) ) = ( C85 . ( C79 + 1 ) ) by L221 , L222 , L223 , L224 , L128;
+L228: ( ( C79 + 1 ) -BitMajorityOutput (( C80 ^ <* C82 *> ) , ( C81 ^ <* C83 *> )) ) = ( C86 . ( C79 + 1 ) ) by L221 , L222 , L223 , L224 , L128;
+L229: ( len C80 ) = C79 by CARD_1:def 7;
+L230: ( len C81 ) = C79 by CARD_1:def 7;
+L231: ( D24 . ( C79 + 1 ) ) = C82 by L229 , FINSEQ_1:42;
+L232: ( D25 . ( C79 + 1 ) ) = C83 by L230 , FINSEQ_1:42;
+L233: ( C80 ^ ( <*> ) ) = C80 by FINSEQ_1:34;
+L234: ( C81 ^ ( <*> ) ) = C81 by FINSEQ_1:34;
+L235: ( C79 -BitAdderStr (D24 , D25) ) = ( C79 -BitAdderStr (C80 , C81) ) by L234 , L233 , L177;
+L236: ( C79 -BitAdderCirc (D24 , D25) ) = ( C79 -BitAdderCirc (C80 , C81) ) by L233 , L234 , L177;
+L237: ( C79 -BitMajorityOutput (D24 , D25) ) = ( C79 -BitMajorityOutput (C80 , C81) ) by L233 , L234 , L177;
+thus L238: thesis by L237 , L219 , L220 , L224 , L225 , L226 , L227 , L228 , L231 , L232 , L235 , L236;
+end;
+theorem
+L239: (for B208 being (Element of ( NAT )) holds (for B209 , B210 being FinSequence holds (( ( B208 + 1 ) -BitAdderStr (B209 , B210) ) = ( ( B208 -BitAdderStr (B209 , B210) ) +* ( BitAdderWithOverflowStr (( B209 . ( B208 + 1 ) ) , ( B210 . ( B208 + 1 ) ) , ( B208 -BitMajorityOutput (B209 , B210) )) ) ) & ( ( B208 + 1 ) -BitAdderCirc (B209 , B210) ) = ( ( B208 -BitAdderCirc (B209 , B210) ) +* ( BitAdderWithOverflowCirc (( B209 . ( B208 + 1 ) ) , ( B210 . ( B208 + 1 ) ) , ( B208 -BitMajorityOutput (B209 , B210) )) ) ) & ( ( B208 + 1 ) -BitMajorityOutput (B209 , B210) ) = ( MajorityOutput (( B209 . ( B208 + 1 ) ) , ( B210 . ( B208 + 1 ) ) , ( B208 -BitMajorityOutput (B209 , B210) )) ))))
+proof
+let C87 being (Element of ( NAT ));
+let C88 , C89 being FinSequence;
+set D26 = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ];
+consider C90 , C91 , C92 being (ManySortedSet of ( NAT )) such that L240: ( C87 -BitAdderStr (C88 , C89) ) = ( C90 . C87 ) and L241: ( C87 -BitAdderCirc (C88 , C89) ) = ( C91 . C87 ) and L242: ( C90 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L243: ( C91 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L244: ( C92 . ( 0 ) ) = D26 and L245: (for B211 being Nat holds (for B212 being non  empty ManySortedSign holds (for B213 being  non-empty MSAlgebra over B212 holds (for B214 being set holds ((B212 = ( C90 . B211 ) & B213 = ( C91 . B211 ) & B214 = ( C92 . B211 )) implies (( C90 . ( B211 + 1 ) ) = ( B212 +* ( BitAdderWithOverflowStr (( C88 . ( B211 + 1 ) ) , ( C89 . ( B211 + 1 ) ) , B214) ) ) & ( C91 . ( B211 + 1 ) ) = ( B213 +* ( BitAdderWithOverflowCirc (( C88 . ( B211 + 1 ) ) , ( C89 . ( B211 + 1 ) ) , B214) ) ) & ( C92 . ( B211 + 1 ) ) = ( MajorityOutput (( C88 . ( B211 + 1 ) ) , ( C89 . ( B211 + 1 ) ) , B214) ))))))) by L78;
+L246: ( C87 -BitMajorityOutput (C88 , C89) ) = ( C92 . C87 ) by L242 , L243 , L244 , L245 , L128;
+L247: ( ( C87 + 1 ) -BitAdderStr (C88 , C89) ) = ( C90 . ( C87 + 1 ) ) by L242 , L243 , L244 , L245 , L128;
+L248: ( ( C87 + 1 ) -BitAdderCirc (C88 , C89) ) = ( C91 . ( C87 + 1 ) ) by L242 , L243 , L244 , L245 , L128;
+L249: ( ( C87 + 1 ) -BitMajorityOutput (C88 , C89) ) = ( C92 . ( C87 + 1 ) ) by L242 , L243 , L244 , L245 , L128;
+thus L250: thesis by L249 , L240 , L241 , L245 , L246 , L247 , L248;
+end;
+theorem
+L251: (for B215 , B216 being (Element of ( NAT )) holds (B215 <= B216 implies (for B217 , B218 being FinSequence holds ( InnerVertices ( B215 -BitAdderStr (B217 , B218) ) ) c= ( InnerVertices ( B216 -BitAdderStr (B217 , B218) ) ))))
+proof
+let C93 , C94 being (Element of ( NAT ));
+assume that
+L252: C93 <= C94;
+let C95 , C96 being FinSequence;
+consider C97 being Nat such that L253: C94 = ( C93 + C97 ) by L252 , NAT_1:10;
+reconsider D27 = C97 as (Element of ( NAT )) by ORDINAL1:def 12;
+L254: C94 = ( C93 + D27 ) by L253;
+defpred S5[ (Element of ( NAT )) ] means ( InnerVertices ( C93 -BitAdderStr (C95 , C96) ) ) c= ( InnerVertices ( ( C93 + $1 ) -BitAdderStr (C95 , C96) ) );
+L255: S5[ ( 0 ) ];
+L256: (for B219 being (Element of ( NAT )) holds (S5[ B219 ] implies S5[ ( B219 + 1 ) ]))
+proof
+let C98 being (Element of ( NAT ));
+assume L257: ( InnerVertices ( C93 -BitAdderStr (C95 , C96) ) ) c= ( InnerVertices ( ( C93 + C98 ) -BitAdderStr (C95 , C96) ) );
+L258: ( ( ( C93 + C98 ) + 1 ) -BitAdderStr (C95 , C96) ) = ( ( ( C93 + C98 ) -BitAdderStr (C95 , C96) ) +* ( BitAdderWithOverflowStr (( C95 . ( ( C93 + C98 ) + 1 ) ) , ( C96 . ( ( C93 + C98 ) + 1 ) ) , ( ( C93 + C98 ) -BitMajorityOutput (C95 , C96) )) ) ) by L239;
+L259: ( InnerVertices ( ( ( C93 + C98 ) -BitAdderStr (C95 , C96) ) +* ( BitAdderWithOverflowStr (( C95 . ( ( C93 + C98 ) + 1 ) ) , ( C96 . ( ( C93 + C98 ) + 1 ) ) , ( ( C93 + C98 ) -BitMajorityOutput (C95 , C96) )) ) ) ) = ( ( InnerVertices ( ( C93 + C98 ) -BitAdderStr (C95 , C96) ) ) \/ ( InnerVertices ( BitAdderWithOverflowStr (( C95 . ( ( C93 + C98 ) + 1 ) ) , ( C96 . ( ( C93 + C98 ) + 1 ) ) , ( ( C93 + C98 ) -BitMajorityOutput (C95 , C96) )) ) ) ) by FACIRC_1:27;
+L260: ( InnerVertices ( C93 -BitAdderStr (C95 , C96) ) ) c= ( ( InnerVertices ( C93 -BitAdderStr (C95 , C96) ) ) \/ ( InnerVertices ( BitAdderWithOverflowStr (( C95 . ( ( C93 + C98 ) + 1 ) ) , ( C96 . ( ( C93 + C98 ) + 1 ) ) , ( ( C93 + C98 ) -BitMajorityOutput (C95 , C96) )) ) ) ) by XBOOLE_1:7;
+L261: ( ( InnerVertices ( C93 -BitAdderStr (C95 , C96) ) ) \/ ( InnerVertices ( BitAdderWithOverflowStr (( C95 . ( ( C93 + C98 ) + 1 ) ) , ( C96 . ( ( C93 + C98 ) + 1 ) ) , ( ( C93 + C98 ) -BitMajorityOutput (C95 , C96) )) ) ) ) c= ( ( InnerVertices ( ( C93 + C98 ) -BitAdderStr (C95 , C96) ) ) \/ ( InnerVertices ( BitAdderWithOverflowStr (( C95 . ( ( C93 + C98 ) + 1 ) ) , ( C96 . ( ( C93 + C98 ) + 1 ) ) , ( ( C93 + C98 ) -BitMajorityOutput (C95 , C96) )) ) ) ) by L257 , XBOOLE_1:9;
+thus L262: thesis by L261 , L258 , L259 , L260 , XBOOLE_1:1;
+end;
+L263: (for B220 being (Element of ( NAT )) holds S5[ B220 ]) from NAT_1:sch 1(L255 , L256);
+thus L264: thesis by L263 , L254;
+end;
+theorem
+L265: (for B221 being (Element of ( NAT )) holds (for B222 , B223 being FinSequence holds ( InnerVertices ( ( B221 + 1 ) -BitAdderStr (B222 , B223) ) ) = ( ( InnerVertices ( B221 -BitAdderStr (B222 , B223) ) ) \/ ( InnerVertices ( BitAdderWithOverflowStr (( B222 . ( B221 + 1 ) ) , ( B223 . ( B221 + 1 ) ) , ( B221 -BitMajorityOutput (B222 , B223) )) ) ) )))
+proof
+let C99 being (Element of ( NAT ));
+let C100 , C101 being FinSequence;
+L266: ( ( C99 + 1 ) -BitAdderStr (C100 , C101) ) = ( ( C99 -BitAdderStr (C100 , C101) ) +* ( BitAdderWithOverflowStr (( C100 . ( C99 + 1 ) ) , ( C101 . ( C99 + 1 ) ) , ( C99 -BitMajorityOutput (C100 , C101) )) ) ) by L239;
+thus L267: thesis by L266 , FACIRC_1:27;
+end;
+definition
+let C102 , C103 being Nat;
+assume that
+L268: C102 >= 1
+and
+L269: C102 <= C103;
+let C104 , C105 being FinSequence;
+func (C102 , C103) -BitAdderOutput (C104 , C105) -> (Element of ( InnerVertices ( C103 -BitAdderStr (C104 , C105) ) )) means 
+:L270: (ex B224 being (Element of ( NAT )) st (C102 = ( B224 + 1 ) & it = ( BitAdderOutput (( C104 . C102 ) , ( C105 . C102 ) , ( B224 -BitMajorityOutput (C104 , C105) )) )));
+uniqueness;
+existence
+proof
+consider C106 being Nat such that L271: C102 = ( 1 + C106 ) by L268 , NAT_1:10;
+reconsider D28 = C103 , D29 = C102 , D30 = C106 as (Element of ( NAT )) by ORDINAL1:def 12;
+set D31 = ( BitAdderOutput (( C104 . C102 ) , ( C105 . C102 ) , ( D30 -BitMajorityOutput (C104 , C105) )) );
+L272: ( InnerVertices ( D29 -BitAdderStr (C104 , C105) ) ) c= ( InnerVertices ( D28 -BitAdderStr (C104 , C105) ) ) by L269 , L251;
+L273: D31 in ( InnerVertices ( BitAdderWithOverflowStr (( C104 . ( D30 + 1 ) ) , ( C105 . ( D30 + 1 ) ) , ( D30 -BitMajorityOutput (C104 , C105) )) ) ) by L271 , FACIRC_1:90;
+L274: ( C102 -BitAdderStr (C104 , C105) ) = ( ( D30 -BitAdderStr (C104 , C105) ) +* ( BitAdderWithOverflowStr (( C104 . ( D30 + 1 ) ) , ( C105 . ( D30 + 1 ) ) , ( D30 -BitMajorityOutput (C104 , C105) )) ) ) by L271 , L239;
+reconsider D32 = D31 as (Element of ( BitAdderWithOverflowStr (( C104 . ( D30 + 1 ) ) , ( C105 . ( D30 + 1 ) ) , ( D30 -BitMajorityOutput (C104 , C105) )) )) by L273;
+L275: ( (the carrier of ( BitAdderWithOverflowStr (( C104 . ( D30 + 1 ) ) , ( C105 . ( D30 + 1 ) ) , ( D30 -BitMajorityOutput (C104 , C105) )) )) \/ (the carrier of ( D30 -BitAdderStr (C104 , C105) )) ) = (the carrier of ( C102 -BitAdderStr (C104 , C105) )) by L274 , CIRCCOMB:def 2;
+L276: D32 in (the carrier of ( C102 -BitAdderStr (C104 , C105) )) by L275 , XBOOLE_0:def 3;
+L277: D32 in ( InnerVertices ( C102 -BitAdderStr (C104 , C105) ) ) by L276 , L273 , L274 , CIRCCOMB:15;
+thus L278: thesis by L277 , L271 , L272;
+end;
+end;
+theorem
+L280: (for B225 , B226 being (Element of ( NAT )) holds (B226 < B225 implies (for B227 , B228 being FinSequence holds ( (( B226 + 1 ) , B225) -BitAdderOutput (B227 , B228) ) = ( BitAdderOutput (( B227 . ( B226 + 1 ) ) , ( B228 . ( B226 + 1 ) ) , ( B226 -BitMajorityOutput (B227 , B228) )) ))))
+proof
+let C107 , C108 being (Element of ( NAT ));
+assume that
+L281: C108 < C107;
+let C109 , C110 being FinSequence;
+L282: ( C108 + 1 ) >= 1 by NAT_1:11;
+L283: ( C108 + 1 ) <= C107 by L281 , NAT_1:13;
+L284: (ex B229 being (Element of ( NAT )) st (( C108 + 1 ) = ( B229 + 1 ) & ( (( C108 + 1 ) , C107) -BitAdderOutput (C109 , C110) ) = ( BitAdderOutput (( C109 . ( C108 + 1 ) ) , ( C110 . ( C108 + 1 ) ) , ( B229 -BitMajorityOutput (C109 , C110) )) ))) by L283 , L282 , L270;
+thus L285: thesis by L284;
+end;
+L286:
+now
+let C111 being (Element of ( NAT ));
+let C112 being (FinSeqLen of ( C111 + 1 ));
+L287: ( len C112 ) = ( C111 + 1 ) by CARD_1:def 7;
+L288: C112 <> ( <*> ) by L287;
+consider C113 being FinSequence, C114 being set such that L289: C112 = ( C113 ^ <* C114 *> ) by L288 , FINSEQ_1:46;
+L290: ( len <* C114 *> ) = 1 by FINSEQ_1:40;
+L291: ( C111 + 1 ) = ( ( len C113 ) + 1 ) by L290 , L287 , L289 , FINSEQ_1:22;
+reconsider D33 = C113 as (FinSeqLen of C111) by L291 , CARD_1:def 7;
+take D34 = D33;
+take D35 = C114;
+thus L292: C112 = ( D34 ^ <* D35 *> ) by L289;
+end;
+L293:
+now
+let C115 being (Element of ( NAT ));
+let C116 being  nonpair-yielding (FinSeqLen of ( C115 + 1 ));
+consider C117 being (FinSeqLen of C115), C118 being set such that L294: C116 = ( C117 ^ <* C118 *> ) by L286;
+L295: ( dom C117 ) c= ( dom C116 ) by L294 , FINSEQ_1:26;
+L296: C117 = ( C116 | ( dom C117 ) ) by L294 , FINSEQ_1:21;
+L297: C117 is  nonpair-yielding
+proof
+let C119 being set;
+assume L298: C119 in ( dom C117 );
+L299: ( C117 . C119 ) = ( C116 . C119 ) by L298 , L296 , FUNCT_1:47;
+thus L300: thesis by L299 , L295 , L298 , FACIRC_1:def 3;
+end;
+reconsider D36 = C117 as  nonpair-yielding (FinSeqLen of C115) by L297;
+L301: ( C115 + 1 ) in ( Seg ( C115 + 1 ) ) by FINSEQ_1:4;
+L302: ( dom C116 ) = ( Seg ( len C116 ) ) by FINSEQ_1:def 3;
+L303: ( C115 + 1 ) in ( dom C116 ) by L302 , L301 , CARD_1:def 7;
+L304: ( C116 . ( ( len D36 ) + 1 ) ) = C118 by L294 , FINSEQ_1:42;
+L305: ( len D36 ) = C115 by CARD_1:def 7;
+reconsider D37 = C118 as non  pair set by L305 , L303 , L304 , FACIRC_1:def 3;
+take D38 = D36;
+take D39 = D37;
+thus L306: C116 = ( D38 ^ <* D39 *> ) by L294;
+end;
+theorem
+L307: (for B230 being (Element of ( NAT )) holds (for B231 , B232 being FinSequence holds ( InnerVertices ( B230 -BitAdderStr (B231 , B232) ) ) is Relation))
+proof
+let C120 being (Element of ( NAT ));
+let C121 , C122 being FinSequence;
+defpred S6[ (Element of ( NAT )) ] means ( InnerVertices ( $1 -BitAdderStr (C121 , C122) ) ) is Relation;
+L308: ( ( 0 ) -BitAdderStr (C121 , C122) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) by L157;
+L309: S6[ ( 0 ) ] by L308 , FACIRC_1:38;
+L310: (for B233 being (Element of ( NAT )) holds (S6[ B233 ] implies S6[ ( B233 + 1 ) ]))
+proof
+let C123 being (Element of ( NAT ));
+assume L311: ( InnerVertices ( C123 -BitAdderStr (C121 , C122) ) ) is Relation;
+L312: ( ( C123 + 1 ) -BitAdderStr (C121 , C122) ) = ( ( C123 -BitAdderStr (C121 , C122) ) +* ( BitAdderWithOverflowStr (( C121 . ( C123 + 1 ) ) , ( C122 . ( C123 + 1 ) ) , ( C123 -BitMajorityOutput (C121 , C122) )) ) ) by L239;
+L313: ( InnerVertices ( BitAdderWithOverflowStr (( C121 . ( C123 + 1 ) ) , ( C122 . ( C123 + 1 ) ) , ( C123 -BitMajorityOutput (C121 , C122) )) ) ) is Relation by FACIRC_1:88;
+thus L314: thesis by L313 , L311 , L312 , FACIRC_1:3;
+end;
+L315: (for B234 being (Element of ( NAT )) holds S6[ B234 ]) from NAT_1:sch 1(L309 , L310);
+thus L316: thesis by L315;
+end;
+theorem
+L317: (for B235 , B236 , B237 being set holds ( InnerVertices ( MajorityIStr (B235 , B236 , B237) ) ) = { [ <* B235 , B236 *> , ( '&' ) ] , [ <* B236 , B237 *> , ( '&' ) ] , [ <* B237 , B235 *> , ( '&' ) ] })
+proof
+let C124 , C125 , C126 being set;
+L318: ( ( 1GateCircStr (<* C124 , C125 *> , ( '&' )) ) +* ( 1GateCircStr (<* C125 , C126 *> , ( '&' )) ) ) tolerates ( 1GateCircStr (<* C126 , C124 *> , ( '&' )) ) by CIRCCOMB:47;
+L319: ( 1GateCircStr (<* C124 , C125 *> , ( '&' )) ) tolerates ( 1GateCircStr (<* C125 , C126 *> , ( '&' )) ) by CIRCCOMB:47;
+L320: ( InnerVertices ( MajorityIStr (C124 , C125 , C126) ) ) = ( ( InnerVertices ( ( 1GateCircStr (<* C124 , C125 *> , ( '&' )) ) +* ( 1GateCircStr (<* C125 , C126 *> , ( '&' )) ) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C126 , C124 *> , ( '&' )) ) ) ) by L318 , CIRCCOMB:11
+.= ( ( ( InnerVertices ( 1GateCircStr (<* C124 , C125 *> , ( '&' )) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C125 , C126 *> , ( '&' )) ) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C126 , C124 *> , ( '&' )) ) ) ) by L319 , CIRCCOMB:11
+.= ( ( { [ <* C124 , C125 *> , ( '&' ) ] } \/ ( InnerVertices ( 1GateCircStr (<* C125 , C126 *> , ( '&' )) ) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C126 , C124 *> , ( '&' )) ) ) ) by CIRCCOMB:42
+.= ( ( { [ <* C124 , C125 *> , ( '&' ) ] } \/ { [ <* C125 , C126 *> , ( '&' ) ] } ) \/ ( InnerVertices ( 1GateCircStr (<* C126 , C124 *> , ( '&' )) ) ) ) by CIRCCOMB:42
+.= ( ( { [ <* C124 , C125 *> , ( '&' ) ] } \/ { [ <* C125 , C126 *> , ( '&' ) ] } ) \/ { [ <* C126 , C124 *> , ( '&' ) ] } ) by CIRCCOMB:42
+.= ( { [ <* C124 , C125 *> , ( '&' ) ] , [ <* C125 , C126 *> , ( '&' ) ] } \/ { [ <* C126 , C124 *> , ( '&' ) ] } ) by ENUMSET1:1
+.= { [ <* C124 , C125 *> , ( '&' ) ] , [ <* C125 , C126 *> , ( '&' ) ] , [ <* C126 , C124 *> , ( '&' ) ] } by ENUMSET1:3;
+thus L321: thesis by L320;
+end;
+theorem
+L322: (for B238 , B239 , B240 being set holds ((B238 <> [ <* B239 , B240 *> , ( '&' ) ] & B239 <> [ <* B240 , B238 *> , ( '&' ) ] & B240 <> [ <* B238 , B239 *> , ( '&' ) ]) implies ( InputVertices ( MajorityIStr (B238 , B239 , B240) ) ) = { B238 , B239 , B240 }))
+proof
+let C127 , C128 , C129 being set;
+assume that
+L323: C127 <> [ <* C128 , C129 *> , ( '&' ) ]
+and
+L324: C128 <> [ <* C129 , C127 *> , ( '&' ) ]
+and
+L325: C129 <> [ <* C127 , C128 *> , ( '&' ) ];
+L326: ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) tolerates ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) by CIRCCOMB:47;
+L327: C128 in { 1 , C128 } by TARSKI:def 2;
+L328: C128 in { 2 , C128 } by TARSKI:def 2;
+L329: { 1 , C128 } in [ 1 , C128 ] by TARSKI:def 2;
+L330: { 2 , C128 } in [ 2 , C128 ] by TARSKI:def 2;
+L331: <* C128 , C129 *> = ( <* C128 *> ^ <* C129 *> ) by FINSEQ_1:def 9;
+L332: <* C128 *> c= <* C128 , C129 *> by L331 , FINSEQ_6:10;
+L333: <* C128 *> = { [ 1 , C128 ] } by FINSEQ_1:def 5;
+L334: [ 1 , C128 ] in <* C128 *> by L333 , TARSKI:def 1;
+L335: <* C128 , C129 *> in { <* C128 , C129 *> } by TARSKI:def 1;
+L336: { <* C128 , C129 *> } in [ <* C128 , C129 *> , ( '&' ) ] by TARSKI:def 2;
+L337: C128 <> [ <* C128 , C129 *> , ( '&' ) ] by L336 , L327 , L329 , L332 , L334 , L335 , XREGULAR:9;
+L338: C129 in { 2 , C129 } by TARSKI:def 2;
+L339: { 2 , C129 } in [ 2 , C129 ] by TARSKI:def 2;
+L340: ( dom <* C128 , C129 *> ) = ( Seg 2 ) by FINSEQ_1:89;
+L341: 2 in ( dom <* C128 , C129 *> ) by L340 , FINSEQ_1:1;
+L342: ( <* C128 , C129 *> . 2 ) = C129 by FINSEQ_1:44;
+L343: [ 2 , C129 ] in <* C128 , C129 *> by L342 , L341 , FUNCT_1:1;
+L344: C129 <> [ <* C128 , C129 *> , ( '&' ) ] by L343 , L335 , L336 , L338 , L339 , XREGULAR:9;
+L345: ( dom <* C127 , C128 *> ) = ( Seg 2 ) by FINSEQ_1:89;
+L346: 2 in ( dom <* C127 , C128 *> ) by L345 , FINSEQ_1:1;
+L347: ( <* C127 , C128 *> . 2 ) = C128 by FINSEQ_1:44;
+L348: [ 2 , C128 ] in <* C127 , C128 *> by L347 , L346 , FUNCT_1:1;
+L349: <* C127 , C128 *> in { <* C127 , C128 *> } by TARSKI:def 1;
+L350: { <* C127 , C128 *> } in [ <* C127 , C128 *> , ( '&' ) ] by TARSKI:def 2;
+L351: C128 <> [ <* C127 , C128 *> , ( '&' ) ] by L350 , L328 , L330 , L348 , L349 , XREGULAR:9;
+L352: (not [ <* C127 , C128 *> , ( '&' ) ] in { C128 , C129 }) by L351 , L325 , TARSKI:def 2;
+L353: C127 in { 1 , C127 } by TARSKI:def 2;
+L354: { 1 , C127 } in [ 1 , C127 ] by TARSKI:def 2;
+L355: <* C127 , C128 *> = ( <* C127 *> ^ <* C128 *> ) by FINSEQ_1:def 9;
+L356: <* C127 *> c= <* C127 , C128 *> by L355 , FINSEQ_6:10;
+L357: <* C127 *> = { [ 1 , C127 ] } by FINSEQ_1:def 5;
+L358: [ 1 , C127 ] in <* C127 *> by L357 , TARSKI:def 1;
+L359: <* C127 , C128 *> in { <* C127 , C128 *> } by TARSKI:def 1;
+L360: { <* C127 , C128 *> } in [ <* C127 , C128 *> , ( '&' ) ] by TARSKI:def 2;
+L361: C127 <> [ <* C127 , C128 *> , ( '&' ) ] by L360 , L353 , L354 , L356 , L358 , L359 , XREGULAR:9;
+L362: (not C129 in { [ <* C127 , C128 *> , ( '&' ) ] , [ <* C128 , C129 *> , ( '&' ) ] }) by L325 , L344 , TARSKI:def 2;
+L363: (not C127 in { [ <* C127 , C128 *> , ( '&' ) ] , [ <* C128 , C129 *> , ( '&' ) ] }) by L323 , L361 , TARSKI:def 2;
+L364: C127 in { 2 , C127 } by TARSKI:def 2;
+L365: { 2 , C127 } in [ 2 , C127 ] by TARSKI:def 2;
+L366: ( dom <* C129 , C127 *> ) = ( Seg 2 ) by FINSEQ_1:89;
+L367: 2 in ( dom <* C129 , C127 *> ) by L366 , FINSEQ_1:1;
+L368: ( <* C129 , C127 *> . 2 ) = C127 by FINSEQ_1:44;
+L369: [ 2 , C127 ] in <* C129 , C127 *> by L368 , L367 , FUNCT_1:1;
+L370: <* C129 , C127 *> in { <* C129 , C127 *> } by TARSKI:def 1;
+L371: { <* C129 , C127 *> } in [ <* C129 , C127 *> , ( '&' ) ] by TARSKI:def 2;
+L372: C127 <> [ <* C129 , C127 *> , ( '&' ) ] by L371 , L364 , L365 , L369 , L370 , XREGULAR:9;
+L373: C129 in { 1 , C129 } by TARSKI:def 2;
+L374: { 1 , C129 } in [ 1 , C129 ] by TARSKI:def 2;
+L375: <* C129 , C127 *> = ( <* C129 *> ^ <* C127 *> ) by FINSEQ_1:def 9;
+L376: <* C129 *> c= <* C129 , C127 *> by L375 , FINSEQ_6:10;
+L377: <* C129 *> = { [ 1 , C129 ] } by FINSEQ_1:def 5;
+L378: [ 1 , C129 ] in <* C129 *> by L377 , TARSKI:def 1;
+L379: <* C129 , C127 *> in { <* C129 , C127 *> } by TARSKI:def 1;
+L380: { <* C129 , C127 *> } in [ <* C129 , C127 *> , ( '&' ) ] by TARSKI:def 2;
+L381: C129 <> [ <* C129 , C127 *> , ( '&' ) ] by L380 , L373 , L374 , L376 , L378 , L379 , XREGULAR:9;
+L382: (not [ <* C129 , C127 *> , ( '&' ) ] in { C127 , C128 , C129 }) by L381 , L324 , L372 , ENUMSET1:def 1;
+L383: ( InputVertices ( MajorityIStr (C127 , C128 , C129) ) ) = ( ( ( InputVertices ( ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) +* ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) \ ( InnerVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( InnerVertices ( ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) +* ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by CIRCCMB2:5 , CIRCCOMB:47
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) ) ) \ ( InnerVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( InnerVertices ( ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) +* ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by CIRCCMB2:5 , CIRCCOMB:47
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) ) ) \ ( InnerVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by L326 , CIRCCOMB:11
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) ) ) \ ( InnerVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by CIRCCOMB:42
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ ( InnerVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by CIRCCOMB:42
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( ( InnerVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \/ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by CIRCCOMB:42
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( { [ <* C127 , C128 *> , ( '&' ) ] } \/ ( InnerVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) ) ) ) by CIRCCOMB:42
+.= ( ( ( ( ( InputVertices ( 1GateCircStr (<* C127 , C128 *> , ( '&' )) ) ) \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( { [ <* C127 , C128 *> , ( '&' ) ] } \/ { [ <* C128 , C129 *> , ( '&' ) ] } ) ) ) by CIRCCOMB:42
+.= ( ( ( ( { C127 , C128 } \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C128 , C129 *> , ( '&' )) ) ) \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( { [ <* C127 , C128 *> , ( '&' ) ] } \/ { [ <* C128 , C129 *> , ( '&' ) ] } ) ) ) by FACIRC_1:40
+.= ( ( ( ( { C127 , C128 } \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( { C128 , C129 } \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( ( InputVertices ( 1GateCircStr (<* C129 , C127 *> , ( '&' )) ) ) \ ( { [ <* C127 , C128 *> , ( '&' ) ] } \/ { [ <* C128 , C129 *> , ( '&' ) ] } ) ) ) by FACIRC_1:40
+.= ( ( ( ( { C127 , C128 } \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( { C128 , C129 } \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( { C129 , C127 } \ ( { [ <* C127 , C128 *> , ( '&' ) ] } \/ { [ <* C128 , C129 *> , ( '&' ) ] } ) ) ) by FACIRC_1:40
+.= ( ( ( ( { C127 , C128 } \ { [ <* C128 , C129 *> , ( '&' ) ] } ) \/ ( { C128 , C129 } \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( { C129 , C127 } \ { [ <* C127 , C128 *> , ( '&' ) ] , [ <* C128 , C129 *> , ( '&' ) ] } ) ) by ENUMSET1:1
+.= ( ( ( { C127 , C128 } \/ ( { C128 , C129 } \ { [ <* C127 , C128 *> , ( '&' ) ] } ) ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( { C129 , C127 } \ { [ <* C127 , C128 *> , ( '&' ) ] , [ <* C128 , C129 *> , ( '&' ) ] } ) ) by L323 , L337 , L1
+.= ( ( ( { C127 , C128 } \/ { C128 , C129 } ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ ( { C129 , C127 } \ { [ <* C127 , C128 *> , ( '&' ) ] , [ <* C128 , C129 *> , ( '&' ) ] } ) ) by L352 , ZFMISC_1:57
+.= ( ( ( { C127 , C128 } \/ { C128 , C129 } ) \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ { C129 , C127 } ) by L362 , L363 , ZFMISC_1:63
+.= ( ( { C127 , C128 , C128 , C129 } \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ { C129 , C127 } ) by ENUMSET1:5
+.= ( ( { C128 , C128 , C127 , C129 } \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ { C129 , C127 } ) by ENUMSET1:67
+.= ( ( { C128 , C127 , C129 } \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ { C129 , C127 } ) by ENUMSET1:31
+.= ( ( { C127 , C128 , C129 } \ { [ <* C129 , C127 *> , ( '&' ) ] } ) \/ { C129 , C127 } ) by ENUMSET1:58
+.= ( { C127 , C128 , C129 } \/ { C129 , C127 } ) by L382 , ZFMISC_1:57
+.= { C127 , C128 , C129 , C129 , C127 } by ENUMSET1:9
+.= ( { C127 , C128 , C129 , C129 } \/ { C127 } ) by ENUMSET1:10
+.= ( { C129 , C129 , C127 , C128 } \/ { C127 } ) by ENUMSET1:73
+.= ( { C129 , C127 , C128 } \/ { C127 } ) by ENUMSET1:31
+.= { C129 , C127 , C128 , C127 } by ENUMSET1:6
+.= { C127 , C127 , C128 , C129 } by ENUMSET1:70
+.= { C127 , C128 , C129 } by ENUMSET1:31;
+thus L384: thesis by L383;
+end;
+theorem
+L385: (for B241 , B242 , B243 being set holds ( InnerVertices ( MajorityStr (B241 , B242 , B243) ) ) = ( { [ <* B241 , B242 *> , ( '&' ) ] , [ <* B242 , B243 *> , ( '&' ) ] , [ <* B243 , B241 *> , ( '&' ) ] } \/ { ( MajorityOutput (B241 , B242 , B243) ) } ))
+proof
+let C130 , C131 , C132 being set;
+set D40 = [ <* C130 , C131 *> , ( '&' ) ];
+set D41 = [ <* C131 , C132 *> , ( '&' ) ];
+set D42 = [ <* C132 , C130 *> , ( '&' ) ];
+set D43 = ( 1GateCircStr (<* C130 , C131 *> , ( '&' )) );
+set D44 = ( 1GateCircStr (<* C131 , C132 *> , ( '&' )) );
+set D45 = ( 1GateCircStr (<* C132 , C130 *> , ( '&' )) );
+set D46 = ( 1GateCircStr (<* [ <* C130 , C131 *> , ( '&' ) ] , [ <* C131 , C132 *> , ( '&' ) ] , [ <* C132 , C130 *> , ( '&' ) ] *> , ( or3 )) );
+L386: D43 tolerates ( ( D44 +* D45 ) +* D46 ) by CIRCCOMB:47;
+L387: D44 tolerates ( D45 +* D46 ) by CIRCCOMB:47;
+L388: D45 tolerates D46 by CIRCCOMB:47;
+L389: ( InnerVertices ( D44 +* ( D45 +* D46 ) ) ) = ( ( InnerVertices D44 ) \/ ( InnerVertices ( D45 +* D46 ) ) ) by L387 , CIRCCOMB:11;
+L390: ( InnerVertices ( D45 +* D46 ) ) = ( ( InnerVertices D45 ) \/ ( InnerVertices D46 ) ) by L388 , CIRCCOMB:11;
+thus L391: ( InnerVertices ( MajorityStr (C130 , C131 , C132) ) ) = ( InnerVertices ( ( D43 +* ( D44 +* D45 ) ) +* D46 ) ) by CIRCCOMB:6
+.= ( InnerVertices ( D43 +* ( ( D44 +* D45 ) +* D46 ) ) ) by CIRCCOMB:6
+.= ( ( InnerVertices D43 ) \/ ( InnerVertices ( ( D44 +* D45 ) +* D46 ) ) ) by L386 , CIRCCOMB:11
+.= ( ( InnerVertices D43 ) \/ ( InnerVertices ( D44 +* ( D45 +* D46 ) ) ) ) by CIRCCOMB:6
+.= ( ( ( InnerVertices D43 ) \/ ( InnerVertices D44 ) ) \/ ( ( InnerVertices D45 ) \/ ( InnerVertices D46 ) ) ) by L389 , L390 , XBOOLE_1:4
+.= ( ( ( ( InnerVertices D43 ) \/ ( InnerVertices D44 ) ) \/ ( InnerVertices D45 ) ) \/ ( InnerVertices D46 ) ) by XBOOLE_1:4
+.= ( ( ( { D40 } \/ ( InnerVertices D44 ) ) \/ ( InnerVertices D45 ) ) \/ ( InnerVertices D46 ) ) by CIRCCOMB:42
+.= ( ( ( { D40 } \/ { D41 } ) \/ ( InnerVertices D45 ) ) \/ ( InnerVertices D46 ) ) by CIRCCOMB:42
+.= ( ( ( { D40 } \/ { D41 } ) \/ { D42 } ) \/ ( InnerVertices D46 ) ) by CIRCCOMB:42
+.= ( ( { D40 , D41 } \/ { D42 } ) \/ ( InnerVertices D46 ) ) by ENUMSET1:1
+.= ( { D40 , D41 , D42 } \/ ( InnerVertices D46 ) ) by ENUMSET1:3
+.= ( { D40 , D41 , D42 } \/ { ( MajorityOutput (C130 , C131 , C132) ) } ) by CIRCCOMB:42;
+end;
+theorem
+L392: (for B244 , B245 , B246 being set holds ((B244 <> [ <* B245 , B246 *> , ( '&' ) ] & B245 <> [ <* B246 , B244 *> , ( '&' ) ] & B246 <> [ <* B244 , B245 *> , ( '&' ) ]) implies ( InputVertices ( MajorityStr (B244 , B245 , B246) ) ) = { B244 , B245 , B246 }))
+proof
+let C133 , C134 , C135 being set;
+set D47 = [ <* C133 , C134 *> , ( '&' ) ];
+set D48 = [ <* C134 , C135 *> , ( '&' ) ];
+set D49 = [ <* C135 , C133 *> , ( '&' ) ];
+set D50 = ( 1GateCircStr (<* D47 , D48 , D49 *> , ( or3 )) );
+L393: ( InnerVertices D50 ) = { [ <* D47 , D48 , D49 *> , ( or3 ) ] } by CIRCCOMB:42;
+L394: ( InputVertices D50 ) = ( rng <* D47 , D48 , D49 *> ) by CIRCCOMB:42
+.= { D47 , D48 , D49 } by FINSEQ_2:128;
+set D51 = ( MajorityIStr (C133 , C134 , C135) );
+assume that
+L395: C133 <> D48
+and
+L396: C134 <> D49
+and
+L397: C135 <> D47;
+L398: ( rng <* C135 , C133 *> ) = { C135 , C133 } by FINSEQ_2:127;
+L399: C133 in ( rng <* C135 , C133 *> ) by L398 , TARSKI:def 2;
+L400: ( len <* D47 , D48 , D49 *> ) = 3 by FINSEQ_1:45;
+L401: ( Seg 3 ) = ( dom <* D47 , D48 , D49 *> ) by L400 , FINSEQ_1:def 3;
+L402: 3 in ( dom <* D47 , D48 , D49 *> ) by L401 , FINSEQ_1:1;
+L403: ( <* D47 , D48 , D49 *> . 3 ) = D49 by FINSEQ_1:45;
+L404: [ 3 , D49 ] in <* D47 , D48 , D49 *> by L403 , L402 , FUNCT_1:1;
+L405: D49 in ( rng <* D47 , D48 , D49 *> ) by L404 , XTUPLE_0:def 13;
+L406: ( the_rank_of D49 ) in ( the_rank_of [ <* D47 , D48 , D49 *> , ( or3 ) ] ) by L405 , CLASSES1:82;
+L407: ( rng <* C133 , C134 *> ) = { C133 , C134 } by FINSEQ_2:127;
+L408: C134 in ( rng <* C133 , C134 *> ) by L407 , TARSKI:def 2;
+L409: 1 in ( dom <* D47 , D48 , D49 *> ) by L401 , FINSEQ_1:1;
+L410: ( <* D47 , D48 , D49 *> . 1 ) = D47 by FINSEQ_1:45;
+L411: [ 1 , D47 ] in <* D47 , D48 , D49 *> by L410 , L409 , FUNCT_1:1;
+L412: D47 in ( rng <* D47 , D48 , D49 *> ) by L411 , XTUPLE_0:def 13;
+L413: ( the_rank_of D47 ) in ( the_rank_of [ <* D47 , D48 , D49 *> , ( or3 ) ] ) by L412 , CLASSES1:82;
+L414: ( rng <* C134 , C135 *> ) = { C134 , C135 } by FINSEQ_2:127;
+L415: C135 in ( rng <* C134 , C135 *> ) by L414 , TARSKI:def 2;
+L416: 2 in ( dom <* D47 , D48 , D49 *> ) by L401 , FINSEQ_1:1;
+L417: ( <* D47 , D48 , D49 *> . 2 ) = D48 by FINSEQ_1:45;
+L418: [ 2 , D48 ] in <* D47 , D48 , D49 *> by L417 , L416 , FUNCT_1:1;
+L419: D48 in ( rng <* D47 , D48 , D49 *> ) by L418 , XTUPLE_0:def 13;
+L420: ( the_rank_of D48 ) in ( the_rank_of [ <* D47 , D48 , D49 *> , ( or3 ) ] ) by L419 , CLASSES1:82;
+L421: ( { D47 , D48 , D49 } \ { D47 , D48 , D49 } ) = ( {} ) by XBOOLE_1:37;
+L422: ( { C133 , C134 , C135 } \ { [ <* D47 , D48 , D49 *> , ( or3 ) ] } ) = { C133 , C134 , C135 }
+proof
+thus L423: ( { C133 , C134 , C135 } \ { [ <* D47 , D48 , D49 *> , ( or3 ) ] } ) c= { C133 , C134 , C135 };
+let C136 being set;
+assume L424: C136 in { C133 , C134 , C135 };
+L425: (C136 = C133 or C136 = C134 or C136 = C135) by L424 , ENUMSET1:def 1;
+L426: C136 <> [ <* D47 , D48 , D49 *> , ( or3 ) ] by L425 , L399 , L406 , L408 , L413 , L415 , L420 , CLASSES1:82;
+L427: (not C136 in { [ <* D47 , D48 , D49 *> , ( or3 ) ] }) by L426 , TARSKI:def 1;
+thus L428: thesis by L427 , L424 , XBOOLE_0:def 5;
+end;
+thus L429: ( InputVertices ( MajorityStr (C133 , C134 , C135) ) ) = ( ( ( InputVertices D51 ) \ ( InnerVertices D50 ) ) \/ ( ( InputVertices D50 ) \ ( InnerVertices D51 ) ) ) by CIRCCMB2:5 , CIRCCOMB:47
+.= ( { C133 , C134 , C135 } \/ ( { D47 , D48 , D49 } \ ( InnerVertices D51 ) ) ) by L393 , L394 , L395 , L396 , L397 , L422 , L322
+.= ( { C133 , C134 , C135 } \/ ( {} ) ) by L421 , L317
+.= { C133 , C134 , C135 };
+end;
+theorem
+L430: (for B247 , B248 being non  empty ManySortedSign holds ((B247 tolerates B248 & ( InputVertices B247 ) = ( InputVertices B248 )) implies ( InputVertices ( B247 +* B248 ) ) = ( InputVertices B247 )))
+proof
+let C137 , C138 being non  empty ManySortedSign;
+assume that
+L431: C137 tolerates C138
+and
+L432: ( InputVertices C137 ) = ( InputVertices C138 );
+L433: ( InnerVertices C137 ) misses ( InputVertices C137 ) by XBOOLE_1:79;
+L434: ( InnerVertices C138 ) misses ( InputVertices C138 ) by XBOOLE_1:79;
+thus L435: ( InputVertices ( C137 +* C138 ) ) = ( ( ( InputVertices C137 ) \ ( InnerVertices C138 ) ) \/ ( ( InputVertices C138 ) \ ( InnerVertices C137 ) ) ) by L431 , CIRCCMB2:5
+.= ( ( InputVertices C137 ) \/ ( ( InputVertices C138 ) \ ( InnerVertices C137 ) ) ) by L432 , L434 , XBOOLE_1:83
+.= ( ( InputVertices C137 ) \/ ( InputVertices C138 ) ) by L432 , L433 , XBOOLE_1:83
+.= ( InputVertices C137 ) by L432;
+end;
+theorem
+L436: (for B249 , B250 , B251 being set holds ((B249 <> [ <* B250 , B251 *> , ( '&' ) ] & B250 <> [ <* B251 , B249 *> , ( '&' ) ] & B251 <> [ <* B249 , B250 *> , ( '&' ) ] & B251 <> [ <* B249 , B250 *> , ( 'xor' ) ]) implies ( InputVertices ( BitAdderWithOverflowStr (B249 , B250 , B251) ) ) = { B249 , B250 , B251 }))
+proof
+let C139 , C140 , C141 being set;
+assume that
+L437: C139 <> [ <* C140 , C141 *> , ( '&' ) ]
+and
+L438: C140 <> [ <* C141 , C139 *> , ( '&' ) ]
+and
+L439: C141 <> [ <* C139 , C140 *> , ( '&' ) ]
+and
+L440: C141 <> [ <* C139 , C140 *> , ( 'xor' ) ];
+L441: ( InputVertices ( 2GatesCircStr (C139 , C140 , C141 , ( 'xor' )) ) ) = { C139 , C140 , C141 } by L440 , FACIRC_1:57;
+L442: ( InputVertices ( MajorityStr (C139 , C140 , C141) ) ) = { C139 , C140 , C141 } by L437 , L438 , L439 , L392;
+thus L443: thesis by L442 , L441 , L430 , CIRCCOMB:47;
+end;
+theorem
+L444: (for B252 , B253 , B254 being set holds ( InnerVertices ( BitAdderWithOverflowStr (B252 , B253 , B254) ) ) = ( ( { [ <* B252 , B253 *> , ( 'xor' ) ] , ( 2GatesCircOutput (B252 , B253 , B254 , ( 'xor' )) ) } \/ { [ <* B252 , B253 *> , ( '&' ) ] , [ <* B253 , B254 *> , ( '&' ) ] , [ <* B254 , B252 *> , ( '&' ) ] } ) \/ { ( MajorityOutput (B252 , B253 , B254) ) } ))
+proof
+let C142 , C143 , C144 being set;
+L445: ( 2GatesCircStr (C142 , C143 , C144 , ( 'xor' )) ) tolerates ( MajorityStr (C142 , C143 , C144) ) by CIRCCOMB:47;
+L446: ( InnerVertices ( BitAdderWithOverflowStr (C142 , C143 , C144) ) ) = ( ( InnerVertices ( 2GatesCircStr (C142 , C143 , C144 , ( 'xor' )) ) ) \/ ( InnerVertices ( MajorityStr (C142 , C143 , C144) ) ) ) by L445 , CIRCCOMB:11
+.= ( { [ <* C142 , C143 *> , ( 'xor' ) ] , ( 2GatesCircOutput (C142 , C143 , C144 , ( 'xor' )) ) } \/ ( InnerVertices ( MajorityStr (C142 , C143 , C144) ) ) ) by FACIRC_1:56
+.= ( { [ <* C142 , C143 *> , ( 'xor' ) ] , ( 2GatesCircOutput (C142 , C143 , C144 , ( 'xor' )) ) } \/ ( { [ <* C142 , C143 *> , ( '&' ) ] , [ <* C143 , C144 *> , ( '&' ) ] , [ <* C144 , C142 *> , ( '&' ) ] } \/ { ( MajorityOutput (C142 , C143 , C144) ) } ) ) by L385
+.= ( ( { [ <* C142 , C143 *> , ( 'xor' ) ] , ( 2GatesCircOutput (C142 , C143 , C144 , ( 'xor' )) ) } \/ { [ <* C142 , C143 *> , ( '&' ) ] , [ <* C143 , C144 *> , ( '&' ) ] , [ <* C144 , C142 *> , ( '&' ) ] } ) \/ { ( MajorityOutput (C142 , C143 , C144) ) } ) by XBOOLE_1:4;
+thus L447: thesis by L446;
+end;
+registration
+cluster  empty -> non  pair for set;
+coherence;
+end;
+registration
+cluster  empty ->  nonpair-yielding for Function;
+coherence
+proof
+let C145 being Function;
+assume that
+L449: C145 is  empty;
+let C146 being set;
+assume L450: C146 in ( dom C145 );
+thus L451: thesis by L449;
+end;
+let C147 being  nonpair-yielding Function;
+let C148 being set;
+cluster ( C147 . C148 ) -> non  pair;
+coherence
+proof
+per cases ;
+suppose L452: C148 in ( dom C147 );
+
+thus L453: thesis by L452 , FACIRC_1:def 3;
+end;
+suppose L454: (not C148 in ( dom C147 ));
+
+thus L455: thesis by L454 , FUNCT_1:def 2;
+end;
+end;
+end;
+registration
+let C149 being (Element of ( NAT ));
+let C150 , C151 being FinSequence;
+cluster ( C149 -BitMajorityOutput (C150 , C151) ) ->  pair;
+coherence
+proof
+L458: (ex B255 being (ManySortedSet of ( NAT )) st (( ( 0 ) -BitMajorityOutput (C150 , C151) ) = ( B255 . ( 0 ) ) & ( B255 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] & (for B256 being Nat holds (for B257 being set holds (B257 = ( B255 . B256 ) implies ( B255 . ( B256 + 1 ) ) = ( MajorityOutput (( C150 . ( B256 + 1 ) ) , ( C151 . ( B256 + 1 ) ) , B257) )))))) by L87;
+defpred S7[ (Element of ( NAT )) ] means ( $1 -BitMajorityOutput (C150 , C151) ) is  pair;
+L459: S7[ ( 0 ) ] by L458;
+L460: (for B258 being (Element of ( NAT )) holds (S7[ B258 ] implies S7[ ( B258 + 1 ) ]))
+proof
+let C152 being (Element of ( NAT ));
+L461: ( ( C152 + 1 ) -BitMajorityOutput (C150 , C151) ) = ( MajorityOutput (( C150 . ( C152 + 1 ) ) , ( C151 . ( C152 + 1 ) ) , ( C152 -BitMajorityOutput (C150 , C151) )) ) by L239
+.= [ <* [ <* ( C150 . ( C152 + 1 ) ) , ( C151 . ( C152 + 1 ) ) *> , ( '&' ) ] , [ <* ( C151 . ( C152 + 1 ) ) , ( C152 -BitMajorityOutput (C150 , C151) ) *> , ( '&' ) ] , [ <* ( C152 -BitMajorityOutput (C150 , C151) ) , ( C150 . ( C152 + 1 ) ) *> , ( '&' ) ] *> , ( or3 ) ];
+thus L462: thesis by L461;
+end;
+L463: (for B259 being (Element of ( NAT )) holds S7[ B259 ]) from NAT_1:sch 1(L459 , L460);
+thus L464: thesis by L463;
+end;
+end;
+theorem
+L466: (for B260 , B261 being FinSequence holds (for B262 being (Element of ( NAT )) holds ((( ( B262 -BitMajorityOutput (B260 , B261) ) `1 ) = ( <*> ) & ( ( B262 -BitMajorityOutput (B260 , B261) ) `2 ) = ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) & ( proj1 ( ( B262 -BitMajorityOutput (B260 , B261) ) `2 ) ) = ( ( 0 ) -tuples_on ( BOOLEAN ) )) or (( card ( ( B262 -BitMajorityOutput (B260 , B261) ) `1 ) ) = 3 & ( ( B262 -BitMajorityOutput (B260 , B261) ) `2 ) = ( or3 ) & ( proj1 ( ( B262 -BitMajorityOutput (B260 , B261) ) `2 ) ) = ( 3 -tuples_on ( BOOLEAN ) )))))
+proof
+let C153 , C154 being FinSequence;
+defpred S8[ (Element of ( NAT )) ] means ((( ( $1 -BitMajorityOutput (C153 , C154) ) `1 ) = ( <*> ) & ( ( $1 -BitMajorityOutput (C153 , C154) ) `2 ) = ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) & ( proj1 ( ( $1 -BitMajorityOutput (C153 , C154) ) `2 ) ) = ( ( 0 ) -tuples_on ( BOOLEAN ) )) or (( card ( ( $1 -BitMajorityOutput (C153 , C154) ) `1 ) ) = 3 & ( ( $1 -BitMajorityOutput (C153 , C154) ) `2 ) = ( or3 ) & ( proj1 ( ( $1 -BitMajorityOutput (C153 , C154) ) `2 ) ) = ( 3 -tuples_on ( BOOLEAN ) )));
+L467: ( dom ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ) = ( ( 0 ) -tuples_on ( BOOLEAN ) ) by FUNCOP_1:13;
+L468: ( ( 0 ) -BitMajorityOutput (C153 , C154) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] by L157;
+L469: S8[ ( 0 ) ] by L468 , L467 , MCART_1:7;
+L470:
+now
+let C155 being (Element of ( NAT ));
+assume L471: S8[ C155 ];
+set D52 = ( C155 -BitMajorityOutput (C153 , C154) );
+L472: ( ( C155 + 1 ) -BitMajorityOutput (C153 , C154) ) = ( MajorityOutput (( C153 . ( C155 + 1 ) ) , ( C154 . ( C155 + 1 ) ) , D52) ) by L239
+.= [ <* [ <* ( C153 . ( C155 + 1 ) ) , ( C154 . ( C155 + 1 ) ) *> , ( '&' ) ] , [ <* ( C154 . ( C155 + 1 ) ) , D52 *> , ( '&' ) ] , [ <* D52 , ( C153 . ( C155 + 1 ) ) *> , ( '&' ) ] *> , ( or3 ) ];
+L473: ( dom ( or3 ) ) = ( 3 -tuples_on ( BOOLEAN ) ) by FUNCT_2:def 1;
+L474: ( ( ( C155 + 1 ) -BitMajorityOutput (C153 , C154) ) `1 ) = <* [ <* ( C153 . ( C155 + 1 ) ) , ( C154 . ( C155 + 1 ) ) *> , ( '&' ) ] , [ <* ( C154 . ( C155 + 1 ) ) , D52 *> , ( '&' ) ] , [ <* D52 , ( C153 . ( C155 + 1 ) ) *> , ( '&' ) ] *> by L472 , MCART_1:7;
+thus L475: S8[ ( C155 + 1 ) ] by L474 , L472 , L473 , FINSEQ_1:45 , MCART_1:7;
+end;
+thus L476: (for B263 being (Element of ( NAT )) holds S8[ B263 ]) from NAT_1:sch 1(L469 , L470);
+end;
+theorem
+L477: (for B264 being (Element of ( NAT )) holds (for B265 , B266 being FinSequence holds (for B267 being set holds (( B264 -BitMajorityOutput (B265 , B266) ) <> [ B267 , ( '&' ) ] & ( B264 -BitMajorityOutput (B265 , B266) ) <> [ B267 , ( 'xor' ) ]))))
+proof
+let C156 being (Element of ( NAT ));
+let C157 , C158 being FinSequence;
+let C159 being set;
+L478: ( dom ( '&' ) ) = ( 2 -tuples_on ( BOOLEAN ) ) by FUNCT_2:def 1;
+L479: ( dom ( 'xor' ) ) = ( 2 -tuples_on ( BOOLEAN ) ) by FUNCT_2:def 1;
+L480: ( proj1 ( [ C159 , ( '&' ) ] `2 ) ) = ( 2 -tuples_on ( BOOLEAN ) ) by L478;
+L481: ( proj1 ( [ C159 , ( 'xor' ) ] `2 ) ) = ( 2 -tuples_on ( BOOLEAN ) ) by L479;
+L482: (( proj1 ( ( C156 -BitMajorityOutput (C157 , C158) ) `2 ) ) = ( ( 0 ) -tuples_on ( BOOLEAN ) ) or ( proj1 ( ( C156 -BitMajorityOutput (C157 , C158) ) `2 ) ) = ( 3 -tuples_on ( BOOLEAN ) )) by L466;
+thus L483: thesis by L482 , L480 , L481 , FINSEQ_2:110;
+end;
+theorem
+L484: (for B268 , B269 being  nonpair-yielding FinSequence holds (for B270 being (Element of ( NAT )) holds (( InputVertices ( ( B270 + 1 ) -BitAdderStr (B268 , B269) ) ) = ( ( InputVertices ( B270 -BitAdderStr (B268 , B269) ) ) \/ ( ( InputVertices ( BitAdderWithOverflowStr (( B268 . ( B270 + 1 ) ) , ( B269 . ( B270 + 1 ) ) , ( B270 -BitMajorityOutput (B268 , B269) )) ) ) \ { ( B270 -BitMajorityOutput (B268 , B269) ) } ) ) & ( InnerVertices ( B270 -BitAdderStr (B268 , B269) ) ) is Relation & ( InputVertices ( B270 -BitAdderStr (B268 , B269) ) ) is  without_pairs)))
+proof
+let C160 , C161 being  nonpair-yielding FinSequence;
+deffunc H21(Nat) = ( $1 -BitAdderStr (C160 , C161) );
+deffunc H22(set , Nat) = ( BitAdderWithOverflowStr (( C160 . ( $2 + 1 ) ) , ( C161 . ( $2 + 1 ) ) , $1) );
+deffunc H23(Nat) = ( $1 -BitMajorityOutput (C160 , C161) );
+consider C162 being (ManySortedSet of ( NAT )) such that L485: (for B271 being (Element of ( NAT )) holds ( C162 . B271 ) = H23(B271)) from PBOOLE:sch 5;
+deffunc H24(Nat) = ( C162 . $1 );
+deffunc H25(set , Nat) = ( MajorityOutput (( C160 . ( $2 + 1 ) ) , ( C161 . ( $2 + 1 ) ) , $1) );
+set D53 = ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) );
+L486: ( ( 0 ) -BitAdderStr (C160 , C161) ) = ( 1GateCircStr (( <*> ) , D53) ) by L157;
+L487: ( InnerVertices H21(( 0 )) ) is Relation by L486 , FACIRC_1:38;
+L488: ( InputVertices H21(( 0 )) ) is  without_pairs by L486 , FACIRC_1:39;
+L489: H24(( 0 )) = ( ( 0 ) -BitMajorityOutput (C160 , C161) ) by L485;
+L490: ( C162 . ( 0 ) ) in ( InnerVertices H21(( 0 )) ) by L489;
+L491: (for B272 being Nat holds (for B273 being set holds ( InnerVertices H22(B273 , B272) ) is Relation)) by FACIRC_1:88;
+L492:
+now
+let C163 being Nat;
+let C164 being set;
+assume that
+L493: C164 = H24(C163);
+L494: C163 in ( NAT ) by ORDINAL1:def 12;
+L495: H24(C163) = ( C163 -BitMajorityOutput (C160 , C161) ) by L494 , L485;
+L496: C164 <> [ <* ( C160 . ( C163 + 1 ) ) , ( C161 . ( C163 + 1 ) ) *> , ( '&' ) ] by L495 , L493 , L494 , L477;
+L497: C164 <> [ <* ( C160 . ( C163 + 1 ) ) , ( C161 . ( C163 + 1 ) ) *> , ( 'xor' ) ] by L493 , L494 , L495 , L477;
+thus L498: ( InputVertices H22(C164 , C163) ) = { ( C160 . ( C163 + 1 ) ) , ( C161 . ( C163 + 1 ) ) , C164 } by L497 , L496 , L436;
+end;
+L499: (for B274 being Nat holds (for B275 being set holds (B275 = ( C162 . B274 ) implies ( ( InputVertices H22(B275 , B274) ) \ { B275 } ) is  without_pairs)))
+proof
+let C165 being Nat;
+let C166 being set;
+assume L500: C166 = H24(C165);
+L501: ( InputVertices H22(C166 , C165) ) = { ( C160 . ( C165 + 1 ) ) , ( C161 . ( C165 + 1 ) ) , C166 } by L500 , L492;
+thus L502: ( ( InputVertices H22(C166 , C165) ) \ { C166 } ) is  without_pairs
+proof
+let C167 being  pair set;
+assume L503: C167 in ( ( InputVertices H22(C166 , C165) ) \ { C166 } );
+L504: C167 in ( InputVertices H22(C166 , C165) ) by L503 , XBOOLE_0:def 5;
+L505: (C167 = ( C160 . ( C165 + 1 ) ) or C167 = ( C161 . ( C165 + 1 ) ) or C167 = C166) by L504 , L501 , ENUMSET1:def 1;
+L506: (not C167 in { C166 }) by L503 , XBOOLE_0:def 5;
+thus L507: contradiction by L506 , L505 , TARSKI:def 1;
+end;
+
+end;
+L503:
+now
+let C168 being Nat;
+let C169 being non  empty ManySortedSign;
+let C170 being set;
+L504: C168 in ( NAT ) by ORDINAL1:def 12;
+assume that
+L505: C169 = H21(C168)
+and
+L506: C170 = ( C162 . C168 );
+L507: C170 = ( C168 -BitMajorityOutput (C160 , C161) ) by L485 , L504 , L506;
+L508: H24(( C168 + 1 )) = ( ( C168 + 1 ) -BitMajorityOutput (C160 , C161) ) by L485;
+thus L509: H21(( C168 + 1 )) = ( C169 +* H22(C170 , C168) ) by L504 , L505 , L507 , L239;
+thus L510: ( C162 . ( C168 + 1 ) ) = H25(C170 , C168) by L504 , L507 , L508 , L239;
+L511: ( InputVertices H22(C170 , C168) ) = { ( C160 . ( C168 + 1 ) ) , ( C161 . ( C168 + 1 ) ) , C170 } by L492 , L506;
+thus L512: C170 in ( InputVertices H22(C170 , C168) ) by L511 , ENUMSET1:def 1;
+L513: ( InnerVertices H22(C170 , C168) ) = ( ( { [ <* ( C160 . ( C168 + 1 ) ) , ( C161 . ( C168 + 1 ) ) *> , ( 'xor' ) ] , ( 2GatesCircOutput (( C160 . ( C168 + 1 ) ) , ( C161 . ( C168 + 1 ) ) , C170 , ( 'xor' )) ) } \/ { [ <* ( C160 . ( C168 + 1 ) ) , ( C161 . ( C168 + 1 ) ) *> , ( '&' ) ] , [ <* ( C161 . ( C168 + 1 ) ) , C170 *> , ( '&' ) ] , [ <* C170 , ( C160 . ( C168 + 1 ) ) *> , ( '&' ) ] } ) \/ { ( MajorityOutput (( C160 . ( C168 + 1 ) ) , ( C161 . ( C168 + 1 ) ) , C170) ) } ) by L444;
+L514: H25(C170 , C168) in { H25(C170 , C168) } by TARSKI:def 1;
+thus L515: H25(C170 , C168) in ( InnerVertices H22(C170 , C168) ) by L514 , L513 , XBOOLE_0:def 3;
+end;
+L516: (for B276 being Nat holds (( InputVertices H21(( B276 + 1 )) ) = ( ( InputVertices H21(B276) ) \/ ( ( InputVertices H22(( C162 . B276 ) , B276) ) \ { ( C162 . B276 ) } ) ) & ( InnerVertices H21(B276) ) is Relation & ( InputVertices H21(B276) ) is  without_pairs)) from CIRCCMB2:sch 11(L487 , L488 , L490 , L491 , L499 , L503);
+let C171 being (Element of ( NAT ));
+L517: ( C162 . C171 ) = ( C171 -BitMajorityOutput (C160 , C161) ) by L485;
+thus L518: thesis by L517 , L516;
+end;
+theorem
+L519: (for B277 being (Element of ( NAT )) holds (for B278 , B279 being  nonpair-yielding (FinSeqLen of B277) holds ( InputVertices ( B277 -BitAdderStr (B278 , B279) ) ) = ( ( rng B278 ) \/ ( rng B279 ) )))
+proof
+defpred S9[ (Element of ( NAT )) ] means (for B280 , B281 being  nonpair-yielding (FinSeqLen of $1) holds ( InputVertices ( $1 -BitAdderStr (B280 , B281) ) ) = ( ( rng B280 ) \/ ( rng B281 ) ));
+L520: S9[ ( 0 ) ]
+proof
+let C172 , C173 being  nonpair-yielding (FinSeqLen of ( 0 ));
+set D54 = ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) );
+L521: ( ( 0 ) -BitAdderStr (C172 , C173) ) = ( 1GateCircStr (( <*> ) , D54) ) by L157;
+thus L522: thesis by L521 , CIRCCOMB:42;
+end;
+L523: (for B282 being (Element of ( NAT )) holds (S9[ B282 ] implies S9[ ( B282 + 1 ) ]))
+proof
+let C174 being (Element of ( NAT ));
+assume that
+L524: S9[ C174 ];
+let C175 , C176 being  nonpair-yielding (FinSeqLen of ( C174 + 1 ));
+consider C177 being  nonpair-yielding (FinSeqLen of C174), C178 being non  pair set such that L525: C175 = ( C177 ^ <* C178 *> ) by L293;
+consider C179 being  nonpair-yielding (FinSeqLen of C174), C180 being non  pair set such that L526: C176 = ( C179 ^ <* C180 *> ) by L293;
+set D55 = ( ( C174 + 1 ) -BitAdderStr (C175 , C176) );
+L527: 1 in ( Seg 1 ) by FINSEQ_1:1;
+L528: ( dom <* C178 *> ) = ( Seg 1 ) by FINSEQ_1:def 8;
+L529: ( <* C178 *> . 1 ) = C178 by FINSEQ_1:def 8;
+L530: ( len C177 ) = C174 by CARD_1:def 7;
+L531: ( C175 . ( C174 + 1 ) ) = C178 by L530 , L525 , L527 , L528 , L529 , FINSEQ_1:def 7;
+L532: ( dom <* C180 *> ) = ( Seg 1 ) by FINSEQ_1:def 8;
+L533: ( <* C180 *> . 1 ) = C180 by FINSEQ_1:def 8;
+L534: ( len C179 ) = C174 by CARD_1:def 7;
+L535: ( C176 . ( C174 + 1 ) ) = C180 by L534 , L526 , L527 , L532 , L533 , FINSEQ_1:def 7;
+L536: { C178 , C180 , ( C174 -BitMajorityOutput (C175 , C176) ) } = { ( C174 -BitMajorityOutput (C175 , C176) ) , C178 , C180 } by ENUMSET1:59;
+L537: ( rng C175 ) = ( ( rng C177 ) \/ ( rng <* C178 *> ) ) by L525 , FINSEQ_1:31
+.= ( ( rng C177 ) \/ { C178 } ) by FINSEQ_1:38;
+L538: ( rng C176 ) = ( ( rng C179 ) \/ ( rng <* C180 *> ) ) by L526 , FINSEQ_1:31
+.= ( ( rng C179 ) \/ { C180 } ) by FINSEQ_1:38;
+L539: ( C174 -BitMajorityOutput (C175 , C176) ) <> [ <* C178 , C180 *> , ( '&' ) ] by L477;
+L540: ( C174 -BitMajorityOutput (C175 , C176) ) <> [ <* C178 , C180 *> , ( 'xor' ) ] by L477;
+L541: C177 = ( C177 ^ ( {} ) ) by FINSEQ_1:34;
+L542: C179 = ( C179 ^ ( {} ) ) by FINSEQ_1:34;
+L543: ( C174 -BitAdderStr (C175 , C176) ) = ( C174 -BitAdderStr (C177 , C179) ) by L542 , L525 , L526 , L541 , L177;
+thus L544: ( InputVertices D55 ) = ( ( InputVertices ( C174 -BitAdderStr (C177 , C179) ) ) \/ ( ( InputVertices ( BitAdderWithOverflowStr (C178 , C180 , ( C174 -BitMajorityOutput (C175 , C176) )) ) ) \ { ( C174 -BitMajorityOutput (C175 , C176) ) } ) ) by L543 , L531 , L535 , L484
+.= ( ( ( rng C177 ) \/ ( rng C179 ) ) \/ ( ( InputVertices ( BitAdderWithOverflowStr (C178 , C180 , ( C174 -BitMajorityOutput (C175 , C176) )) ) ) \ { ( C174 -BitMajorityOutput (C175 , C176) ) } ) ) by L524
+.= ( ( ( rng C177 ) \/ ( rng C179 ) ) \/ ( { C178 , C180 , ( C174 -BitMajorityOutput (C175 , C176) ) } \ { ( C174 -BitMajorityOutput (C175 , C176) ) } ) ) by L539 , L540 , L436
+.= ( ( ( rng C177 ) \/ ( rng C179 ) ) \/ { C178 , C180 } ) by L536 , ENUMSET1:86
+.= ( ( ( rng C177 ) \/ ( rng C179 ) ) \/ ( { C178 } \/ { C180 } ) ) by ENUMSET1:1
+.= ( ( ( ( rng C177 ) \/ ( rng C179 ) ) \/ { C178 } ) \/ { C180 } ) by XBOOLE_1:4
+.= ( ( ( ( rng C177 ) \/ { C178 } ) \/ ( rng C179 ) ) \/ { C180 } ) by XBOOLE_1:4
+.= ( ( rng C175 ) \/ ( rng C176 ) ) by L537 , L538 , XBOOLE_1:4;
+end;
+thus L545: (for B283 being (Element of ( NAT )) holds S9[ B283 ]) from NAT_1:sch 1(L520 , L523);
+end;
+L546: (for B284 , B285 , B286 being set holds (for B287 being (State of ( MajorityCirc (B284 , B285 , B286) )) holds (for B288 , B289 , B290 being (Element of ( BOOLEAN )) holds ((B288 = ( B287 . B284 ) & B289 = ( B287 . B285 ) & B290 = ( B287 . B286 )) implies (( ( Following B287 ) . [ <* B284 , B285 *> , ( '&' ) ] ) = ( B288 '&' B289 ) & ( ( Following B287 ) . [ <* B285 , B286 *> , ( '&' ) ] ) = ( B289 '&' B290 ) & ( ( Following B287 ) . [ <* B286 , B284 *> , ( '&' ) ] ) = ( B290 '&' B288 ))))))
+proof
+let C181 , C182 , C183 being set;
+let C184 being (State of ( MajorityCirc (C181 , C182 , C183) ));
+let C185 , C186 , C187 being (Element of ( BOOLEAN ));
+assume that
+L547: C185 = ( C184 . C181 )
+and
+L548: C186 = ( C184 . C182 )
+and
+L549: C187 = ( C184 . C183 );
+set D56 = ( MajorityStr (C181 , C182 , C183) );
+L550: ( InnerVertices D56 ) = (the carrier' of D56) by FACIRC_1:37;
+L551: ( dom C184 ) = (the carrier of D56) by CIRCUIT1:3;
+L552: C181 in (the carrier of D56) by FACIRC_1:72;
+L553: C182 in (the carrier of D56) by FACIRC_1:72;
+L554: C183 in (the carrier of D56) by FACIRC_1:72;
+L555: [ <* C181 , C182 *> , ( '&' ) ] in ( InnerVertices ( MajorityStr (C181 , C182 , C183) ) ) by FACIRC_1:73;
+thus L556: ( ( Following C184 ) . [ <* C181 , C182 *> , ( '&' ) ] ) = ( ( '&' ) . ( C184 * <* C181 , C182 *> ) ) by L555 , L550 , FACIRC_1:35
+.= ( ( '&' ) . <* C185 , C186 *> ) by L547 , L548 , L551 , L552 , L553 , FINSEQ_2:125
+.= ( C185 '&' C186 ) by FACIRC_1:def 6;
+L557: [ <* C182 , C183 *> , ( '&' ) ] in ( InnerVertices ( MajorityStr (C181 , C182 , C183) ) ) by FACIRC_1:73;
+thus L558: ( ( Following C184 ) . [ <* C182 , C183 *> , ( '&' ) ] ) = ( ( '&' ) . ( C184 * <* C182 , C183 *> ) ) by L557 , L550 , FACIRC_1:35
+.= ( ( '&' ) . <* C186 , C187 *> ) by L548 , L549 , L551 , L553 , L554 , FINSEQ_2:125
+.= ( C186 '&' C187 ) by FACIRC_1:def 6;
+L559: [ <* C183 , C181 *> , ( '&' ) ] in ( InnerVertices ( MajorityStr (C181 , C182 , C183) ) ) by FACIRC_1:73;
+thus L560: ( ( Following C184 ) . [ <* C183 , C181 *> , ( '&' ) ] ) = ( ( '&' ) . ( C184 * <* C183 , C181 *> ) ) by L559 , L550 , FACIRC_1:35
+.= ( ( '&' ) . <* C187 , C185 *> ) by L547 , L549 , L551 , L552 , L554 , FINSEQ_2:125
+.= ( C187 '&' C185 ) by FACIRC_1:def 6;
+end;
+theorem
+L561: (for B291 , B292 , B293 being set holds (for B294 being (State of ( MajorityCirc (B291 , B292 , B293) )) holds (for B295 , B296 , B297 being (Element of ( BOOLEAN )) holds ((B295 = ( B294 . [ <* B291 , B292 *> , ( '&' ) ] ) & B296 = ( B294 . [ <* B292 , B293 *> , ( '&' ) ] ) & B297 = ( B294 . [ <* B293 , B291 *> , ( '&' ) ] )) implies ( ( Following B294 ) . ( MajorityOutput (B291 , B292 , B293) ) ) = ( ( B295 'or' B296 ) 'or' B297 )))))
+proof
+let C188 , C189 , C190 being set;
+let C191 being (State of ( MajorityCirc (C188 , C189 , C190) ));
+let C192 , C193 , C194 being (Element of ( BOOLEAN ));
+assume that
+L562: C192 = ( C191 . [ <* C188 , C189 *> , ( '&' ) ] )
+and
+L563: C193 = ( C191 . [ <* C189 , C190 *> , ( '&' ) ] )
+and
+L564: C194 = ( C191 . [ <* C190 , C188 *> , ( '&' ) ] );
+set D57 = [ <* C188 , C189 *> , ( '&' ) ];
+set D58 = [ <* C189 , C190 *> , ( '&' ) ];
+set D59 = [ <* C190 , C188 *> , ( '&' ) ];
+set D60 = ( MajorityStr (C188 , C189 , C190) );
+L565: ( InnerVertices D60 ) = (the carrier' of D60) by FACIRC_1:37;
+L566: ( dom C191 ) = (the carrier of D60) by CIRCUIT1:3;
+reconsider D61 = D57 , D62 = D58 , D63 = D59 as (Element of ( InnerVertices D60 )) by FACIRC_1:73;
+thus L567: ( ( Following C191 ) . ( MajorityOutput (C188 , C189 , C190) ) ) = ( ( or3 ) . ( C191 * <* D61 , D62 , D63 *> ) ) by L565 , FACIRC_1:35
+.= ( ( or3 ) . <* C192 , C193 , C194 *> ) by L562 , L563 , L564 , L566 , FINSEQ_2:126
+.= ( ( C192 'or' C193 ) 'or' C194 ) by FACIRC_1:def 7;
+end;
+L568: (for B298 , B299 , B300 being set holds ((B298 <> [ <* B299 , B300 *> , ( '&' ) ] & B299 <> [ <* B300 , B298 *> , ( '&' ) ] & B300 <> [ <* B298 , B299 *> , ( '&' ) ]) implies (for B301 being (State of ( MajorityCirc (B298 , B299 , B300) )) holds (for B302 , B303 , B304 being (Element of ( BOOLEAN )) holds ((B302 = ( B301 . B298 ) & B303 = ( B301 . B299 ) & B304 = ( B301 . B300 )) implies (( ( Following (B301 , 2) ) . ( MajorityOutput (B298 , B299 , B300) ) ) = ( ( ( B302 '&' B303 ) 'or' ( B303 '&' B304 ) ) 'or' ( B304 '&' B302 ) ) & ( ( Following (B301 , 2) ) . [ <* B298 , B299 *> , ( '&' ) ] ) = ( B302 '&' B303 ) & ( ( Following (B301 , 2) ) . [ <* B299 , B300 *> , ( '&' ) ] ) = ( B303 '&' B304 ) & ( ( Following (B301 , 2) ) . [ <* B300 , B298 *> , ( '&' ) ] ) = ( B304 '&' B302 )))))))
+proof
+let C195 , C196 , C197 being set;
+assume that
+L569: C195 <> [ <* C196 , C197 *> , ( '&' ) ]
+and
+L570: C196 <> [ <* C197 , C195 *> , ( '&' ) ]
+and
+L571: C197 <> [ <* C195 , C196 *> , ( '&' ) ];
+let C198 being (State of ( MajorityCirc (C195 , C196 , C197) ));
+let C199 , C200 , C201 being (Element of ( BOOLEAN ));
+assume that
+L572: C199 = ( C198 . C195 )
+and
+L573: C200 = ( C198 . C196 )
+and
+L574: C201 = ( C198 . C197 );
+set D64 = [ <* C195 , C196 *> , ( '&' ) ];
+set D65 = [ <* C196 , C197 *> , ( '&' ) ];
+set D66 = [ <* C197 , C195 *> , ( '&' ) ];
+set D67 = ( MajorityStr (C195 , C196 , C197) );
+reconsider D68 = C195 , D69 = C196 , D70 = C197 as (Vertex of D67) by FACIRC_1:72;
+L575: ( InputVertices D67 ) = { C195 , C196 , C197 } by L569 , L570 , L571 , L392;
+L576: C195 in ( InputVertices D67 ) by L575 , ENUMSET1:def 1;
+L577: C196 in ( InputVertices D67 ) by L575 , ENUMSET1:def 1;
+L578: C197 in ( InputVertices D67 ) by L575 , ENUMSET1:def 1;
+L579: ( ( Following C198 ) . D68 ) = ( C198 . C195 ) by L576 , CIRCUIT2:def 5;
+L580: ( ( Following C198 ) . D69 ) = ( C198 . C196 ) by L577 , CIRCUIT2:def 5;
+L581: ( ( Following C198 ) . D70 ) = ( C198 . C197 ) by L578 , CIRCUIT2:def 5;
+L582: ( Following (C198 , 2) ) = ( Following ( Following C198 ) ) by FACIRC_1:15;
+L583: ( ( Following C198 ) . D64 ) = ( C199 '&' C200 ) by L572 , L573 , L574 , L546;
+L584: ( ( Following C198 ) . D65 ) = ( C200 '&' C201 ) by L572 , L573 , L574 , L546;
+L585: ( ( Following C198 ) . D66 ) = ( C201 '&' C199 ) by L572 , L573 , L574 , L546;
+thus L586: ( ( Following (C198 , 2) ) . ( MajorityOutput (C195 , C196 , C197) ) ) = ( ( ( C199 '&' C200 ) 'or' ( C200 '&' C201 ) ) 'or' ( C201 '&' C199 ) ) by L585 , L582 , L583 , L584 , L561;
+thus L587: thesis by L572 , L573 , L574 , L579 , L580 , L581 , L582 , L546;
+end;
+theorem
+L588: (for B305 , B306 , B307 being set holds ((B305 <> [ <* B306 , B307 *> , ( '&' ) ] & B306 <> [ <* B307 , B305 *> , ( '&' ) ] & B307 <> [ <* B305 , B306 *> , ( '&' ) ]) implies (for B308 being (State of ( MajorityCirc (B305 , B306 , B307) )) holds ( Following (B308 , 2) ) is  stable)))
+proof
+let C202 , C203 , C204 being set;
+set D71 = ( MajorityStr (C202 , C203 , C204) );
+assume that
+L589: C202 <> [ <* C203 , C204 *> , ( '&' ) ]
+and
+L590: C203 <> [ <* C204 , C202 *> , ( '&' ) ]
+and
+L591: C204 <> [ <* C202 , C203 *> , ( '&' ) ];
+let C205 being (State of ( MajorityCirc (C202 , C203 , C204) ));
+L592: ( dom ( Following ( Following (C205 , 2) ) ) ) = (the carrier of D71) by CIRCUIT1:3;
+L593: ( dom ( Following (C205 , 2) ) ) = (the carrier of D71) by CIRCUIT1:3;
+reconsider D72 = C202 , D73 = C203 , D74 = C204 as (Vertex of D71) by FACIRC_1:72;
+set D75 = ( C205 . D72 );
+set D76 = ( C205 . D73 );
+set D77 = ( C205 . D74 );
+set D78 = ( Following (C205 , 2) );
+set D79 = ( Following D78 );
+L594: D75 = ( C205 . C202 );
+L595: D76 = ( C205 . C203 );
+L596: D77 = ( C205 . C204 );
+L597: ( D78 . ( MajorityOutput (C202 , C203 , C204) ) ) = ( ( ( D75 '&' D76 ) 'or' ( D76 '&' D77 ) ) 'or' ( D77 '&' D75 ) ) by L589 , L590 , L591 , L568;
+L598: ( D78 . [ <* C202 , C203 *> , ( '&' ) ] ) = ( D75 '&' D76 ) by L589 , L590 , L591 , L596 , L568;
+L599: ( D78 . [ <* C203 , C204 *> , ( '&' ) ] ) = ( D76 '&' D77 ) by L589 , L590 , L591 , L594 , L568;
+L600: ( D78 . [ <* C204 , C202 *> , ( '&' ) ] ) = ( D77 '&' D75 ) by L589 , L590 , L591 , L595 , L568;
+L601: D78 = ( Following ( Following C205 ) ) by FACIRC_1:15;
+L602: ( InputVertices D71 ) = { C202 , C203 , C204 } by L589 , L590 , L591 , L392;
+L603: C202 in ( InputVertices D71 ) by L602 , ENUMSET1:def 1;
+L604: C203 in ( InputVertices D71 ) by L602 , ENUMSET1:def 1;
+L605: C204 in ( InputVertices D71 ) by L602 , ENUMSET1:def 1;
+L606: ( ( Following C205 ) . C202 ) = D75 by L603 , CIRCUIT2:def 5;
+L607: ( ( Following C205 ) . C203 ) = D76 by L604 , CIRCUIT2:def 5;
+L608: ( ( Following C205 ) . C204 ) = D77 by L605 , CIRCUIT2:def 5;
+L609: ( D78 . C202 ) = D75 by L601 , L603 , L606 , CIRCUIT2:def 5;
+L610: ( D78 . C203 ) = D76 by L601 , L604 , L607 , CIRCUIT2:def 5;
+L611: ( D78 . C204 ) = D77 by L601 , L605 , L608 , CIRCUIT2:def 5;
+L612:
+now
+let C206 being set;
+assume L613: C206 in (the carrier of D71);
+reconsider D80 = C206 as (Vertex of D71) by L613;
+L614: D80 in ( ( InputVertices D71 ) \/ ( InnerVertices D71 ) ) by L613 , XBOOLE_1:45;
+thus L615: ( D78 . C206 ) = ( D79 . C206 )
+proof
+per cases  by L614 , XBOOLE_0:def 3;
+suppose L616: D80 in ( InputVertices D71 );
+
+thus L617: thesis by L616 , CIRCUIT2:def 5;
+end;
+suppose L618: D80 in ( InnerVertices D71 );
+
+L619: D80 in ( { [ <* C202 , C203 *> , ( '&' ) ] , [ <* C203 , C204 *> , ( '&' ) ] , [ <* C204 , C202 *> , ( '&' ) ] } \/ { ( MajorityOutput (C202 , C203 , C204) ) } ) by L618 , L385;
+L620: (D80 in { [ <* C202 , C203 *> , ( '&' ) ] , [ <* C203 , C204 *> , ( '&' ) ] , [ <* C204 , C202 *> , ( '&' ) ] } or D80 in { ( MajorityOutput (C202 , C203 , C204) ) }) by L619 , XBOOLE_0:def 3;
+L621: (D80 = [ <* C202 , C203 *> , ( '&' ) ] or D80 = [ <* C203 , C204 *> , ( '&' ) ] or D80 = [ <* C204 , C202 *> , ( '&' ) ] or D80 = ( MajorityOutput (C202 , C203 , C204) )) by L620 , ENUMSET1:def 1 , TARSKI:def 1;
+thus L622: thesis by L621 , L597 , L598 , L599 , L600 , L609 , L610 , L611 , L546 , L561;
+end;
+end;
+
+end;
+thus L616: D78 = D79 by L612 , L592 , L593 , FUNCT_1:2;
+end;
+theorem
+L617: (for B309 , B310 , B311 being set holds ((B309 <> [ <* B310 , B311 *> , ( '&' ) ] & B310 <> [ <* B311 , B309 *> , ( '&' ) ] & B311 <> [ <* B309 , B310 *> , ( '&' ) ] & B311 <> [ <* B309 , B310 *> , ( 'xor' ) ]) implies (for B312 being (State of ( BitAdderWithOverflowCirc (B309 , B310 , B311) )) holds (for B313 , B314 , B315 being (Element of ( BOOLEAN )) holds ((B313 = ( B312 . B309 ) & B314 = ( B312 . B310 ) & B315 = ( B312 . B311 )) implies (( ( Following (B312 , 2) ) . ( BitAdderOutput (B309 , B310 , B311) ) ) = ( ( B313 'xor' B314 ) 'xor' B315 ) & ( ( Following (B312 , 2) ) . ( MajorityOutput (B309 , B310 , B311) ) ) = ( ( ( B313 '&' B314 ) 'or' ( B314 '&' B315 ) ) 'or' ( B315 '&' B313 ) )))))))
+proof
+let C207 , C208 , C209 being set;
+assume that
+L618: C207 <> [ <* C208 , C209 *> , ( '&' ) ]
+and
+L619: C208 <> [ <* C209 , C207 *> , ( '&' ) ]
+and
+L620: C209 <> [ <* C207 , C208 *> , ( '&' ) ]
+and
+L621: C209 <> [ <* C207 , C208 *> , ( 'xor' ) ];
+set D81 = ( 'xor' );
+set D82 = ( 2GatesCircStr (C207 , C208 , C209 , ( 'xor' )) );
+set D83 = ( MajorityStr (C207 , C208 , C209) );
+set D84 = ( BitAdderWithOverflowCirc (C207 , C208 , C209) );
+set D85 = ( BitAdderCirc (C207 , C208 , C209) );
+set D86 = ( MajorityCirc (C207 , C208 , C209) );
+let C210 being (State of D84);
+let C211 , C212 , C213 being (Element of ( BOOLEAN ));
+assume that
+L622: C211 = ( C210 . C207 )
+and
+L623: C212 = ( C210 . C208 )
+and
+L624: C213 = ( C210 . C209 );
+L625: C207 in (the carrier of D82) by FACIRC_1:60;
+L626: C208 in (the carrier of D82) by FACIRC_1:60;
+L627: C209 in (the carrier of D82) by FACIRC_1:60;
+L628: C207 in (the carrier of D83) by FACIRC_1:72;
+L629: C208 in (the carrier of D83) by FACIRC_1:72;
+L630: C209 in (the carrier of D83) by FACIRC_1:72;
+reconsider D87 = ( C210 | (the carrier of D82) ) as (State of D85) by FACIRC_1:26;
+reconsider D88 = ( C210 | (the carrier of D83) ) as (State of D86) by FACIRC_1:26;
+reconsider D89 = C210 as (State of ( D85 +* D86 ));
+L631: ( InputVertices D82 ) = { C207 , C208 , C209 } by L621 , FACIRC_1:57;
+L632: ( InputVertices D82 ) = ( InputVertices D83 ) by L631 , L618 , L619 , L620 , L392;
+L633: ( InnerVertices D82 ) misses ( InputVertices D82 ) by XBOOLE_1:79;
+L634: ( InnerVertices D83 ) misses ( InputVertices D83 ) by XBOOLE_1:79;
+L635: ( dom D87 ) = (the carrier of D82) by CIRCUIT1:3;
+L636: C211 = ( D87 . C207 ) by L635 , L622 , L625 , FUNCT_1:47;
+L637: C212 = ( D87 . C208 ) by L623 , L626 , L635 , FUNCT_1:47;
+L638: C213 = ( D87 . C209 ) by L624 , L627 , L635 , FUNCT_1:47;
+L639: ( ( Following (D89 , 2) ) . ( 2GatesCircOutput (C207 , C208 , C209 , D81) ) ) = ( ( Following (D87 , 2) ) . ( 2GatesCircOutput (C207 , C208 , C209 , D81) ) ) by L632 , L634 , FACIRC_1:32;
+thus L640: ( ( Following (C210 , 2) ) . ( BitAdderOutput (C207 , C208 , C209) ) ) = ( ( C211 'xor' C212 ) 'xor' C213 ) by L639 , L621 , L636 , L637 , L638 , FACIRC_1:64;
+L641: ( dom D88 ) = (the carrier of D83) by CIRCUIT1:3;
+L642: C211 = ( D88 . C207 ) by L641 , L622 , L628 , FUNCT_1:47;
+L643: C212 = ( D88 . C208 ) by L623 , L629 , L641 , FUNCT_1:47;
+L644: C213 = ( D88 . C209 ) by L624 , L630 , L641 , FUNCT_1:47;
+L645: ( ( Following (D89 , 2) ) . ( MajorityOutput (C207 , C208 , C209) ) ) = ( ( Following (D88 , 2) ) . ( MajorityOutput (C207 , C208 , C209) ) ) by L632 , L633 , FACIRC_1:33;
+thus L646: thesis by L645 , L618 , L619 , L620 , L642 , L643 , L644 , L568;
+end;
+theorem
+L647: (for B316 , B317 , B318 being set holds ((B316 <> [ <* B317 , B318 *> , ( '&' ) ] & B317 <> [ <* B318 , B316 *> , ( '&' ) ] & B318 <> [ <* B316 , B317 *> , ( '&' ) ] & B318 <> [ <* B316 , B317 *> , ( 'xor' ) ]) implies (for B319 being (State of ( BitAdderWithOverflowCirc (B316 , B317 , B318) )) holds ( Following (B319 , 2) ) is  stable)))
+proof
+let C214 , C215 , C216 being set;
+assume that
+L648: C214 <> [ <* C215 , C216 *> , ( '&' ) ]
+and
+L649: C215 <> [ <* C216 , C214 *> , ( '&' ) ]
+and
+L650: C216 <> [ <* C214 , C215 *> , ( '&' ) ]
+and
+L651: C216 <> [ <* C214 , C215 *> , ( 'xor' ) ];
+set D90 = ( BitAdderWithOverflowStr (C214 , C215 , C216) );
+set D91 = ( 2GatesCircStr (C214 , C215 , C216 , ( 'xor' )) );
+set D92 = ( MajorityStr (C214 , C215 , C216) );
+set D93 = ( BitAdderWithOverflowCirc (C214 , C215 , C216) );
+set D94 = ( BitAdderCirc (C214 , C215 , C216) );
+set D95 = ( MajorityCirc (C214 , C215 , C216) );
+let C217 being (State of D93);
+reconsider D96 = ( C217 | (the carrier of D91) ) as (State of D94) by FACIRC_1:26;
+reconsider D97 = ( C217 | (the carrier of D92) ) as (State of D95) by FACIRC_1:26;
+reconsider D98 = C217 as (State of ( D94 +* D95 ));
+L652: ( InputVertices D91 ) = { C214 , C215 , C216 } by L651 , FACIRC_1:57;
+L653: ( InputVertices D91 ) = ( InputVertices D92 ) by L652 , L648 , L649 , L650 , L392;
+L654: ( InnerVertices D91 ) misses ( InputVertices D91 ) by XBOOLE_1:79;
+L655: ( InnerVertices D92 ) misses ( InputVertices D92 ) by XBOOLE_1:79;
+L656: ( Following (D96 , 2) ) = ( ( Following (D98 , 2) ) | (the carrier of D91) ) by L655 , L653 , FACIRC_1:30;
+L657: ( Following (D96 , 3) ) = ( ( Following (D98 , 3) ) | (the carrier of D91) ) by L653 , L655 , FACIRC_1:30;
+L658: ( Following (D97 , 2) ) = ( ( Following (D98 , 2) ) | (the carrier of D92) ) by L653 , L654 , FACIRC_1:31;
+L659: ( Following (D97 , 3) ) = ( ( Following (D98 , 3) ) | (the carrier of D92) ) by L653 , L654 , FACIRC_1:31;
+L660: ( Following (D96 , 2) ) is  stable by L651 , FACIRC_1:63;
+L661: ( Following (D96 , 2) ) = ( Following ( Following (D96 , 2) ) ) by L660 , CIRCUIT2:def 6
+.= ( Following (D96 , ( 2 + 1 )) ) by FACIRC_1:12;
+L662: ( Following (D97 , 2) ) is  stable by L648 , L649 , L650 , L588;
+L663: ( Following (D97 , 2) ) = ( Following ( Following (D97 , 2) ) ) by L662 , CIRCUIT2:def 6
+.= ( Following (D97 , ( 2 + 1 )) ) by FACIRC_1:12;
+L664: ( Following (C217 , ( 2 + 1 )) ) = ( Following ( Following (C217 , 2) ) ) by FACIRC_1:12;
+L665: ( dom ( Following (C217 , 2) ) ) = (the carrier of D90) by CIRCUIT1:3;
+L666: ( dom ( Following (C217 , 3) ) ) = (the carrier of D90) by CIRCUIT1:3;
+L667: ( dom ( Following (D96 , 2) ) ) = (the carrier of D91) by CIRCUIT1:3;
+L668: ( dom ( Following (D97 , 2) ) ) = (the carrier of D92) by CIRCUIT1:3;
+L669: (the carrier of D90) = ( (the carrier of D91) \/ (the carrier of D92) ) by CIRCCOMB:def 2;
+L670:
+now
+let C218 being set;
+assume L671: C218 in (the carrier of D90);
+L672: (C218 in (the carrier of D91) or C218 in (the carrier of D92)) by L671 , L669 , XBOOLE_0:def 3;
+L673: ((( ( Following (C217 , 2) ) . C218 ) = ( ( Following (D96 , 2) ) . C218 ) & ( ( Following (C217 , 3) ) . C218 ) = ( ( Following (D96 , 3) ) . C218 )) or (( ( Following (C217 , 2) ) . C218 ) = ( ( Following (D97 , 2) ) . C218 ) & ( ( Following (C217 , 3) ) . C218 ) = ( ( Following (D97 , 3) ) . C218 ))) by L672 , L656 , L657 , L658 , L659 , L661 , L663 , L667 , L668 , FUNCT_1:47;
+thus L674: ( ( Following (C217 , 2) ) . C218 ) = ( ( Following ( Following (C217 , 2) ) ) . C218 ) by L673 , L661 , L663 , FACIRC_1:12;
+end;
+thus L675: ( Following (C217 , 2) ) = ( Following ( Following (C217 , 2) ) ) by L670 , L664 , L665 , L666 , FUNCT_1:2;
+end;
+L676: (for B320 being (Element of ( NAT )) holds (ex B321 being (Function of ( NAT ) , ( NAT )) st (( B321 . ( 0 ) ) = 1 & ( B321 . 1 ) = 2 & ( B321 . 2 ) = B320)))
+proof
+let C219 being (Element of ( NAT ));
+defpred S10[ set ] means $1 = ( 0 );
+deffunc H26(set) = 1;
+deffunc H27(set) = 2;
+consider C220 being Function such that L677: ( dom C220 ) = ( NAT ) and L678: (for B322 being set holds (B322 in ( NAT ) implies ((S10[ B322 ] implies ( C220 . B322 ) = H26(B322)) & ((not S10[ B322 ]) implies ( C220 . B322 ) = H27(B322))))) from PARTFUN1:sch 1;
+defpred S11[ set ] means $1 <> 2;
+deffunc H28(set) = ( C220 . $1 );
+deffunc H29(set) = C219;
+consider C221 being Function such that L679: ( dom C221 ) = ( NAT ) and L680: (for B323 being set holds (B323 in ( NAT ) implies ((S11[ B323 ] implies ( C221 . B323 ) = H28(B323)) & ((not S11[ B323 ]) implies ( C221 . B323 ) = H29(B323))))) from PARTFUN1:sch 1;
+L681: ( rng C221 ) c= ( NAT )
+proof
+let C222 being set;
+assume L682: C222 in ( rng C221 );
+consider C223 being set such that L683: C223 in ( dom C221 ) and L684: C222 = ( C221 . C223 ) by L682 , FUNCT_1:def 3;
+reconsider D99 = C223 as (Element of ( NAT )) by L679 , L683;
+L685: (C222 = C219 or (C222 = ( C220 . D99 ) & (D99 = ( 0 ) or D99 <> ( 0 )))) by L680 , L684;
+L686: (C222 = C219 or C222 = 1 or C222 = 2) by L685 , L678;
+thus L687: thesis by L686;
+end;
+reconsider D100 = C221 as (Function of ( NAT ) , ( NAT )) by L681 , L679 , FUNCT_2:2;
+take D100;
+L688: ( D100 . ( 0 ) ) = ( C220 . ( 0 ) ) by L680;
+L689: ( C220 . 1 ) = ( D100 . 1 ) by L680;
+thus L690: (( D100 . ( 0 ) ) = 1 & ( D100 . 1 ) = 2) by L689 , L678 , L688;
+thus L691: thesis by L680;
+end;
+theorem
+L692: (for B324 being (Element of ( NAT )) holds (for B325 , B326 being  nonpair-yielding (FinSeqLen of B324) holds (for B327 being (State of ( B324 -BitAdderCirc (B325 , B326) )) holds ( Following (B327 , ( 1 + ( 2 * B324 ) )) ) is  stable)))
+proof
+let C224 being (Element of ( NAT ));
+let C225 , C226 being  nonpair-yielding (FinSeqLen of C224);
+deffunc H30(set , Nat) = ( BitAdderWithOverflowStr (( C225 . ( $2 + 1 ) ) , ( C226 . ( $2 + 1 ) ) , $1) );
+deffunc H31(set , Nat) = ( BitAdderWithOverflowCirc (( C225 . ( $2 + 1 ) ) , ( C226 . ( $2 + 1 ) ) , $1) );
+deffunc H32(set , Nat) = ( MajorityOutput (( C225 . ( $2 + 1 ) ) , ( C226 . ( $2 + 1 ) ) , $1) );
+set D101 = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) );
+set D102 = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) );
+consider C227 being (Function of ( NAT ) , ( NAT )) such that L693: ( C227 . ( 0 ) ) = 1 and L694: ( C227 . 1 ) = 2 and L695: ( C227 . 2 ) = C224 by L676;
+deffunc H33((Element of ( NAT ))) = ( C227 . $1 );
+L696: (for B328 being set holds (for B329 being Nat holds H31(B328 , B329) is  Boolean  gate`2=den  strict  Boolean  gate`2=den  strict  Boolean  gate`2=den  strict  Boolean  gate`2=den  strict (Circuit of H30(B328 , B329))));
+L697:
+now
+let C228 being (State of D102);
+L698: ( Following (C228 , 1) ) = ( Following C228 ) by FACIRC_1:14;
+thus L699: ( Following (C228 , H33(( 0 ))) ) is  stable by L698 , L693 , CIRCCMB2:2;
+end;
+deffunc H34((Element of ( NAT ))) = ( $1 -BitMajorityOutput (C225 , C226) );
+consider C229 being (ManySortedSet of ( NAT )) such that L700: (for B330 being (Element of ( NAT )) holds ( C229 . B330 ) = H34(B330)) from PBOOLE:sch 5;
+L701: (for B331 being Nat holds (for B332 being set holds (for B333 being  non-empty (Circuit of H30(B332 , B331)) holds ((B332 = ( C229 . B331 ) & B333 = H31(B332 , B331)) implies (for B334 being (State of B333) holds ( Following (B334 , H33(1)) ) is  stable)))))
+proof
+let C230 being Nat;
+let C231 being set;
+let C232 being  non-empty (Circuit of H30(C231 , C230));
+L702: C230 in ( NAT ) by ORDINAL1:def 12;
+assume L703: C231 = ( C229 . C230 );
+L704: C231 = ( C230 -BitMajorityOutput (C225 , C226) ) by L703 , L700 , L702;
+L705: C231 <> [ <* ( C225 . ( C230 + 1 ) ) , ( C226 . ( C230 + 1 ) ) *> , ( '&' ) ] by L704 , L702 , L477;
+L706: C231 <> [ <* ( C225 . ( C230 + 1 ) ) , ( C226 . ( C230 + 1 ) ) *> , ( 'xor' ) ] by L702 , L704 , L477;
+thus L707: thesis by L706 , L694 , L705 , L647;
+end;
+set D103 = ( C224 -BitAdderStr (C225 , C226) );
+set D104 = ( C224 -BitAdderCirc (C225 , C226) );
+set D105 = ( ( 0 ) -BitMajorityOutput (C225 , C226) );
+consider C233 , C234 , C235 being (ManySortedSet of ( NAT )) such that L708: ( C224 -BitAdderStr (C225 , C226) ) = ( C233 . C224 ) and L709: ( C224 -BitAdderCirc (C225 , C226) ) = ( C234 . C224 ) and L710: ( C233 . ( 0 ) ) = ( 1GateCircStr (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L711: ( C234 . ( 0 ) ) = ( 1GateCircuit (( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) )) ) and L712: ( C235 . ( 0 ) ) = [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] and L713: (for B335 being Nat holds (for B336 being non  empty ManySortedSign holds (for B337 being  non-empty MSAlgebra over B336 holds (for B338 being set holds ((B336 = ( C233 . B335 ) & B337 = ( C234 . B335 ) & B338 = ( C235 . B335 )) implies (( C233 . ( B335 + 1 ) ) = ( B336 +* ( BitAdderWithOverflowStr (( C225 . ( B335 + 1 ) ) , ( C226 . ( B335 + 1 ) ) , B338) ) ) & ( C234 . ( B335 + 1 ) ) = ( B337 +* ( BitAdderWithOverflowCirc (( C225 . ( B335 + 1 ) ) , ( C226 . ( B335 + 1 ) ) , B338) ) ) & ( C235 . ( B335 + 1 ) ) = ( MajorityOutput (( C225 . ( B335 + 1 ) ) , ( C226 . ( B335 + 1 ) ) , B338) ))))))) by L78;
+L714:
+now
+let C236 being set;
+assume L715: C236 in ( NAT );
+reconsider D106 = C236 as (Element of ( NAT )) by L715;
+thus L716: ( C235 . C236 ) = ( D106 -BitMajorityOutput (C225 , C226) ) by L710 , L711 , L712 , L713 , L128
+.= ( C229 . C236 ) by L700;
+end;
+L717: C235 = C229 by L714 , PBOOLE:3;
+L718: (ex B339 , B340 being (ManySortedSet of ( NAT )) st (D103 = ( B339 . H33(2) ) & D104 = ( B340 . H33(2) ) & ( B339 . ( 0 ) ) = D101 & ( B340 . ( 0 ) ) = D102 & ( C229 . ( 0 ) ) = D105 & (for B341 being Nat holds (for B342 being non  empty ManySortedSign holds (for B343 being  non-empty MSAlgebra over B342 holds (for B344 being set holds (for B345 being  non-empty MSAlgebra over H30(B344 , B341) holds ((B342 = ( B339 . B341 ) & B343 = ( B340 . B341 ) & B344 = ( C229 . B341 ) & B345 = H31(B344 , B341)) implies (( B339 . ( B341 + 1 ) ) = ( B342 +* H30(B344 , B341) ) & ( B340 . ( B341 + 1 ) ) = ( B343 +* B345 ) & ( C229 . ( B341 + 1 ) ) = H32(B344 , B341))))))))))
+proof
+take C233;
+take C234;
+thus L719: thesis by L695 , L700 , L708 , L709 , L710 , L711 , L713 , L717;
+end;
+L720: (( InnerVertices D101 ) is Relation & ( InputVertices D101 ) is  without_pairs) by FACIRC_1:38 , FACIRC_1:39;
+L721: [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] = D105 by L157;
+L722: ( InnerVertices D101 ) = { [ ( <*> ) , ( ( ( 0 ) -tuples_on ( BOOLEAN ) ) --> ( FALSE ) ) ] } by CIRCCOMB:42;
+L723: (( C229 . ( 0 ) ) = D105 & D105 in ( InnerVertices D101 )) by L722 , L700 , L721 , TARSKI:def 1;
+L724: (for B346 being Nat holds (for B347 being set holds ( InnerVertices H30(B347 , B346) ) is Relation)) by FACIRC_1:88;
+L725: (for B348 being Nat holds (for B349 being set holds (B349 = ( C229 . B348 ) implies ( ( InputVertices H30(B349 , B348) ) \ { B349 } ) is  without_pairs)))
+proof
+let C237 being Nat;
+let C238 being set;
+assume that
+L726: C238 = ( C229 . C237 );
+L727: C237 in ( NAT ) by ORDINAL1:def 12;
+L728: C238 = ( C237 -BitMajorityOutput (C225 , C226) ) by L727 , L700 , L726;
+L729: C238 <> [ <* ( C225 . ( C237 + 1 ) ) , ( C226 . ( C237 + 1 ) ) *> , ( '&' ) ] by L728 , L727 , L477;
+L730: C238 <> [ <* ( C225 . ( C237 + 1 ) ) , ( C226 . ( C237 + 1 ) ) *> , ( 'xor' ) ] by L727 , L728 , L477;
+L731: ( InputVertices H30(C238 , C237) ) = { ( C225 . ( C237 + 1 ) ) , ( C226 . ( C237 + 1 ) ) , C238 } by L730 , L729 , L436;
+let C239 being  pair set;
+assume L732: C239 in ( ( InputVertices H30(C238 , C237) ) \ { C238 } );
+L733: C239 in { ( C225 . ( C237 + 1 ) ) , ( C226 . ( C237 + 1 ) ) , C238 } by L732 , L731 , XBOOLE_0:def 5;
+L734: (not C239 in { C238 }) by L732 , XBOOLE_0:def 5;
+L735: (C239 = ( C225 . ( C237 + 1 ) ) or C239 = ( C226 . ( C237 + 1 ) ) or C239 = C238) by L733 , ENUMSET1:def 1;
+thus L736: thesis by L735 , L734 , TARSKI:def 1;
+end;
+L737: (for B350 being Nat holds (for B351 being set holds (B351 = ( C229 . B350 ) implies (( C229 . ( B350 + 1 ) ) = H32(B351 , B350) & B351 in ( InputVertices H30(B351 , B350) ) & H32(B351 , B350) in ( InnerVertices H30(B351 , B350) )))))
+proof
+let C240 being Nat;
+let C241 being set;
+assume that
+L738: C241 = ( C229 . C240 );
+L739: C240 in ( NAT ) by ORDINAL1:def 12;
+L740: C241 = ( C240 -BitMajorityOutput (C225 , C226) ) by L739 , L700 , L738;
+L741: ( C229 . ( C240 + 1 ) ) = ( ( C240 + 1 ) -BitMajorityOutput (C225 , C226) ) by L700;
+thus L742: ( C229 . ( C240 + 1 ) ) = H32(C241 , C240) by L741 , L739 , L740 , L239;
+L743: C241 <> [ <* ( C225 . ( C240 + 1 ) ) , ( C226 . ( C240 + 1 ) ) *> , ( '&' ) ] by L739 , L740 , L477;
+L744: C241 <> [ <* ( C225 . ( C240 + 1 ) ) , ( C226 . ( C240 + 1 ) ) *> , ( 'xor' ) ] by L739 , L740 , L477;
+L745: ( InputVertices H30(C241 , C240) ) = { ( C225 . ( C240 + 1 ) ) , ( C226 . ( C240 + 1 ) ) , C241 } by L744 , L743 , L436;
+thus L746: C241 in ( InputVertices H30(C241 , C240) ) by L745 , ENUMSET1:def 1;
+set D107 = ( C225 . ( C240 + 1 ) );
+set D108 = ( C226 . ( C240 + 1 ) );
+L747: H32(C241 , C240) in { H32(C241 , C240) } by TARSKI:def 1;
+L748: ( InnerVertices H30(C241 , C240) ) = ( ( { [ <* D107 , D108 *> , ( 'xor' ) ] , ( 2GatesCircOutput (D107 , D108 , C241 , ( 'xor' )) ) } \/ { [ <* D107 , D108 *> , ( '&' ) ] , [ <* D108 , C241 *> , ( '&' ) ] , [ <* C241 , D107 *> , ( '&' ) ] } ) \/ { ( MajorityOutput (D107 , D108 , C241) ) } ) by L444;
+thus L749: thesis by L748 , L747 , XBOOLE_0:def 3;
+end;
+L750: (for B352 being (State of D104) holds ( Following (B352 , ( H33(( 0 )) + ( H33(2) * H33(1) ) )) ) is  stable) from CIRCCMB2:sch 22(L696 , L697 , L701 , L718 , L720 , L723 , L724 , L725 , L737);
+thus L751: thesis by L750 , L693 , L694 , L695;
+end;
+theorem
+L752: (for B353 being (Element of ( NAT )) holds (for B354 being (FinSeqLen of ( B353 + 1 )) holds (ex B355 being (FinSeqLen of B353) st (ex B356 being set st B354 = ( B355 ^ <* B356 *> ))))) by L286;
+theorem
+L753: (for B357 being (Element of ( NAT )) holds (for B358 being  nonpair-yielding (FinSeqLen of ( B357 + 1 )) holds (ex B359 being  nonpair-yielding (FinSeqLen of B357) st (ex B360 being non  pair set st B358 = ( B359 ^ <* B360 *> ))))) by L293;
+theorem
+L754: (for B361 being (Element of ( NAT )) holds (ex B362 being (Function of ( NAT ) , ( NAT )) st (( B362 . ( 0 ) ) = 1 & ( B362 . 1 ) = 2 & ( B362 . 2 ) = B361))) by L676;

@@ -1,0 +1,1953 @@
+:: Bounds in Posets and Relational Substructures
+::  by Grzegorz Bancerek
+::
+:: Received September 10, 1996
+:: Copyright (c) 1996-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies XBOOLE_0, STRUCT_0, ORDERS_2, SUBSET_1, XXREAL_0, RELAT_1,
+      RELAT_2, REWRITE1, LATTICE3, ZFMISC_1, ORDERS_1, ARYTM_3, TARSKI,
+      LATTICES, XXREAL_2, EQREL_1, FILTER_0, PBOOLE, ORDINAL2, FINSET_1, CAT_1,
+      WELLORD1, YELLOW_0, CARD_1;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELAT_2, RELSET_1, FINSET_1,
+      TOLER_1, ORDERS_1, DOMAIN_1, CARD_1, STRUCT_0, LATTICES, ORDERS_2,
+      LATTICE3;
+ constructors TOLER_1, REALSET2, LATTICE3;
+ registrations XBOOLE_0, RELSET_1, FINSET_1, STRUCT_0, ORDERS_2, LATTICE3,
+      CARD_1, ORDINAL1;
+ requirements BOOLE, SUBSET, NUMERALS;
+ definitions STRUCT_0, RELAT_2, ORDERS_2, LATTICE3, WELLORD1;
+ theorems TARSKI, ZFMISC_1, RELAT_2, ORDERS_2, LATTICE3, XBOOLE_0, XBOOLE_1,
+      STRUCT_0;
+ schemes FINSET_1, RELSET_1;
+
+begin
+scheme RelStrEx { F1() -> non  empty set , P1[set , set] } : (ex B1 being non  empty  strict RelStr st ((the carrier of B1) = F1() & (for B2 , B3 being (Element of B1) holds (B2 <= B3 iff P1[ B2 , B3 ]))))
+proof
+consider C1 being (Relation of F1()) such that L1: (for B4 , B5 being (Element of F1()) holds ([ B4 , B5 ] in C1 iff P1[ B4 , B5 ])) from RELSET_1:sch 2;
+take D1 = RelStr (# F1() , C1 #);
+thus L2: (the carrier of D1) = F1();
+let C2 , C3 being (Element of D1);
+L3: (C2 <= C3 iff [ C2 , C3 ] in C1) by ORDERS_2:def 5;
+thus L4: thesis by L3 , L1;
+end;
+definition
+let C4 being non  empty RelStr;
+redefine attr C4 is  reflexive
+means
+(for B6 being (Element of C4) holds B6 <= B6);
+compatibility
+proof
+thus L5: (C4 is  reflexive implies (for B7 being (Element of C4) holds B7 <= B7)) by ORDERS_2:1;
+assume L6: (for B8 being (Element of C4) holds B8 <= B8);
+let C5 being set;
+assume L7: C5 in (the carrier of C4);
+reconsider D2 = C5 as (Element of C4) by L7;
+L8: D2 <= D2 by L6;
+thus L9: thesis by L8 , ORDERS_2:def 5;
+end;
+end;
+definition
+let C6 being RelStr;
+redefine attr C6 is  transitive
+means
+(for B9 , B10 , B11 being (Element of C6) holds ((B9 <= B10 & B10 <= B11) implies B9 <= B11));
+compatibility
+proof
+thus L11: (C6 is  transitive implies (for B12 , B13 , B14 being (Element of C6) holds ((B12 <= B13 & B13 <= B14) implies B12 <= B14))) by ORDERS_2:3;
+assume L12: (for B15 , B16 , B17 being (Element of C6) holds ((B15 <= B16 & B16 <= B17) implies B15 <= B17));
+let C7 , C8 , C9 being set;
+assume L13: (C7 in (the carrier of C6) & C8 in (the carrier of C6) & C9 in (the carrier of C6));
+assume L14: ([ C7 , C8 ] in (the InternalRel of C6) & [ C8 , C9 ] in (the InternalRel of C6));
+reconsider D3 = C7 , D4 = C8 , D5 = C9 as (Element of C6) by L13;
+L15: (D3 <= D4 & D4 <= D5) by L14 , ORDERS_2:def 5;
+L16: D3 <= D5 by L15 , L12;
+thus L17: thesis by L16 , ORDERS_2:def 5;
+end;
+redefine attr C6 is  antisymmetric
+means
+(for B18 , B19 being (Element of C6) holds ((B18 <= B19 & B19 <= B18) implies B18 = B19));
+compatibility
+proof
+thus L18: (C6 is  antisymmetric implies (for B20 , B21 being (Element of C6) holds ((B20 <= B21 & B21 <= B20) implies B20 = B21))) by ORDERS_2:2;
+assume L19: (for B22 , B23 being (Element of C6) holds ((B22 <= B23 & B23 <= B22) implies B22 = B23));
+let C10 , C11 being set;
+assume L20: (C10 in (the carrier of C6) & C11 in (the carrier of C6));
+assume L21: ([ C10 , C11 ] in (the InternalRel of C6) & [ C11 , C10 ] in (the InternalRel of C6));
+reconsider D6 = C10 , D7 = C11 as (Element of C6) by L20;
+L22: (D6 <= D7 & D7 <= D6) by L21 , ORDERS_2:def 5;
+thus L23: thesis by L22 , L19;
+end;
+end;
+registration
+cluster  complete ->  with_suprema  with_infima for non  empty non  empty non  empty non  empty RelStr;
+coherence by LATTICE3:12;
+cluster  ->  complete  transitive  antisymmetric for 1 -element  reflexive 1 -element  reflexive 1 -element  reflexive 1 -element  reflexive RelStr;
+coherence
+proof
+let C12 being 1 -element  reflexive RelStr;
+set D8 = the (Element of C12);
+L25: (for B24 , B25 being (Element of C12) holds B24 = B25) by STRUCT_0:def 10;
+thus L26: C12 is  complete
+proof
+let C13 being set;
+take D8;
+thus L27: (for B26 being (Element of C12) holds (B26 in C13 implies B26 <= D8)) by L25;
+let C14 being (Element of C12);
+L28: C14 = D8 by L25;
+thus L29: thesis by L28 , ORDERS_2:1;
+end;
+
+thus L30: C12 is  transitive
+proof
+let C15 , C16 , C17 being (Element of C12);
+thus L31: thesis by L25;
+end;
+
+let C18 being (Element of C12);
+thus L32: thesis by L25;
+end;
+end;
+registration
+let C19 being set;
+let C20 being (Relation of { C19 });
+cluster RelStr (# { C19 } , C20 #) -> 1 -element;
+coherence
+proof
+thus L34: (the carrier of RelStr (# { C19 } , C20 #)) is 1 -element;
+end;
+end;
+registration
+cluster  strict 1 -element  reflexive for RelStr;
+existence
+proof
+set D9 = the (Order of { ( {} ) });
+take RelStr (# { ( {} ) } , D9 #);
+thus L36: thesis;
+end;
+end;
+theorem
+L38: (for B27 , B28 being RelStr holds (( the RelStr of B27 ) = ( the RelStr of B28 ) implies (for B29 , B30 being (Element of B27) holds (for B31 , B32 being (Element of B28) holds ((B29 = B31 & B30 = B32) implies ((B29 <= B30 implies B31 <= B32) & (B29 < B30 implies B31 < B32)))))))
+proof
+let C21 , C22 being RelStr;
+assume that
+L39: ( the RelStr of C21 ) = ( the RelStr of C22 );
+let C23 , C24 being (Element of C21);
+let C25 , C26 being (Element of C22);
+L40: (C25 <= C26 iff [ C25 , C26 ] in (the InternalRel of C22)) by ORDERS_2:def 5;
+L41: (C23 <= C24 iff [ C23 , C24 ] in (the InternalRel of C21)) by ORDERS_2:def 5;
+thus L42: thesis by L41 , L39 , L40 , ORDERS_2:def 6;
+end;
+theorem
+L43: (for B33 , B34 being RelStr holds (( the RelStr of B33 ) = ( the RelStr of B34 ) implies (for B35 being set holds (for B36 being (Element of B33) holds (for B37 being (Element of B34) holds (B36 = B37 implies ((B35 is_<=_than B36 implies B35 is_<=_than B37) & (B35 is_>=_than B36 implies B35 is_>=_than B37))))))))
+proof
+let C27 , C28 being RelStr;
+assume that
+L44: ( the RelStr of C27 ) = ( the RelStr of C28 );
+let C29 being set;
+let C30 being (Element of C27);
+let C31 being (Element of C28);
+assume that
+L45: C30 = C31;
+thus L46: (C29 is_<=_than C30 implies C29 is_<=_than C31)
+proof
+assume L47: (for B38 being (Element of C27) holds (B38 in C29 implies B38 <= C30));
+let C32 being (Element of C28);
+assume L48: C32 in C29;
+thus L49: thesis by L48 , L44 , L45 , L47 , L38;
+end;
+
+assume L50: (for B39 being (Element of C27) holds (B39 in C29 implies C30 <= B39));
+let C33 being (Element of C28);
+assume L51: C33 in C29;
+thus L52: thesis by L51 , L44 , L45 , L50 , L38;
+end;
+theorem
+L53: (for B40 , B41 being RelStr holds ((( the RelStr of B40 ) = ( the RelStr of B41 ) & B40 is  complete) implies B41 is  complete))
+proof
+let C34 , C35 being RelStr;
+assume that
+L54: ( the RelStr of C34 ) = ( the RelStr of C35 )
+and
+L55: (for B42 being set holds (ex B43 being (Element of C34) st (B42 is_<=_than B43 & (for B44 being (Element of C34) holds (B42 is_<=_than B44 implies B43 <= B44)))));
+let C36 being set;
+consider C37 being (Element of C34) such that L56: C36 is_<=_than C37 and L57: (for B45 being (Element of C34) holds (C36 is_<=_than B45 implies C37 <= B45)) by L55;
+reconsider D10 = C37 as (Element of C35) by L54;
+take D10;
+thus L58: C36 is_<=_than D10 by L54 , L56 , L43;
+let C38 being (Element of C35);
+reconsider D11 = C38 as (Element of C34) by L54;
+assume L59: C36 is_<=_than C38;
+L60: C37 <= D11 by L59 , L54 , L57 , L43;
+thus L61: thesis by L60 , L54 , L38;
+end;
+theorem
+L62: (for B46 being  transitive RelStr holds (for B47 , B48 being (Element of B46) holds (B47 <= B48 implies (for B49 being set holds ((B48 is_<=_than B49 implies B47 is_<=_than B49) & (B47 is_>=_than B49 implies B48 is_>=_than B49))))))
+proof
+let C39 being  transitive RelStr;
+let C40 , C41 being (Element of C39);
+assume L63: C40 <= C41;
+let C42 being set;
+thus L64:now
+assume L65: C41 is_<=_than C42;
+thus L66: C40 is_<=_than C42
+proof
+let C43 being (Element of C39);
+assume L67: C43 in C42;
+L68: C43 >= C41 by L67 , L65 , LATTICE3:def 8;
+thus L69: thesis by L68 , L63 , ORDERS_2:3;
+end;
+
+end;
+assume L67: C40 is_>=_than C42;
+let C44 being (Element of C39);
+assume L68: C44 in C42;
+L69: C40 >= C44 by L68 , L67 , LATTICE3:def 9;
+thus L70: thesis by L69 , L63 , ORDERS_2:3;
+end;
+theorem
+L71: (for B50 being non  empty RelStr holds (for B51 being set holds (for B52 being (Element of B50) holds ((B52 is_>=_than B51 iff B52 is_>=_than ( B51 /\ (the carrier of B50) )) & (B52 is_<=_than B51 iff B52 is_<=_than ( B51 /\ (the carrier of B50) ))))))
+proof
+let C45 being non  empty RelStr;
+let C46 being set;
+let C47 being (Element of C45);
+set D12 = ( C46 /\ (the carrier of C45) );
+thus L72: (C46 is_<=_than C47 implies D12 is_<=_than C47)
+proof
+assume L73: (for B53 being (Element of C45) holds (B53 in C46 implies B53 <= C47));
+let C48 being (Element of C45);
+assume L74: C48 in D12;
+L75: C48 in C46 by L74 , XBOOLE_0:def 4;
+thus L76: thesis by L75 , L73;
+end;
+
+thus L77: (D12 is_<=_than C47 implies C46 is_<=_than C47)
+proof
+assume L78: (for B54 being (Element of C45) holds (B54 in D12 implies B54 <= C47));
+let C49 being (Element of C45);
+assume L79: C49 in C46;
+L80: C49 in D12 by L79 , XBOOLE_0:def 4;
+thus L81: thesis by L80 , L78;
+end;
+
+thus L82: (C46 is_>=_than C47 implies D12 is_>=_than C47)
+proof
+assume L83: (for B55 being (Element of C45) holds (B55 in C46 implies B55 >= C47));
+let C50 being (Element of C45);
+assume L84: C50 in D12;
+L85: C50 in C46 by L84 , XBOOLE_0:def 4;
+thus L86: thesis by L85 , L83;
+end;
+
+thus L87: (D12 is_>=_than C47 implies C46 is_>=_than C47)
+proof
+assume L88: (for B56 being (Element of C45) holds (B56 in D12 implies B56 >= C47));
+let C51 being (Element of C45);
+assume L89: C51 in C46;
+L90: C51 in D12 by L89 , XBOOLE_0:def 4;
+thus L91: thesis by L90 , L88;
+end;
+
+end;
+theorem
+L88: (for B57 being RelStr holds (for B58 being (Element of B57) holds (( {} ) is_<=_than B58 & ( {} ) is_>=_than B58)))
+proof
+let C52 being RelStr;
+let C53 being (Element of C52);
+thus L89: ( {} ) is_<=_than C53
+proof
+let C54 being (Element of C52);
+thus L90: thesis;
+end;
+
+let C55 being (Element of C52);
+thus L91: thesis;
+end;
+theorem
+L92: (for B59 being RelStr holds (for B60 , B61 being (Element of B59) holds ((B60 is_<=_than { B61 } iff B60 <= B61) & (B60 is_>=_than { B61 } iff B61 <= B60))))
+proof
+let C56 being RelStr;
+let C57 , C58 being (Element of C56);
+L93: C58 in { C58 } by TARSKI:def 1;
+thus L94: (C57 is_<=_than { C58 } implies C57 <= C58) by L93 , LATTICE3:def 8;
+thus L95:now
+assume L96: C57 <= C58;
+thus L97: C57 is_<=_than { C58 }
+proof
+let C59 being (Element of C56);
+thus L98: thesis by L96 , TARSKI:def 1;
+end;
+
+end;
+thus L98: (C57 is_>=_than { C58 } implies C57 >= C58) by L93 , LATTICE3:def 9;
+assume L99: C57 >= C58;
+let C60 being (Element of C56);
+thus L100: thesis by L99 , TARSKI:def 1;
+end;
+theorem
+L101: (for B62 being RelStr holds (for B63 , B64 , B65 being (Element of B62) holds ((B63 is_<=_than { B64 , B65 } iff (B63 <= B64 & B63 <= B65)) & (B63 is_>=_than { B64 , B65 } iff (B64 <= B63 & B65 <= B63)))))
+proof
+let C61 being RelStr;
+let C62 , C63 , C64 being (Element of C61);
+L102: (C63 in { C63 , C64 } & C64 in { C63 , C64 }) by TARSKI:def 2;
+thus L103: (C62 is_<=_than { C63 , C64 } implies (C62 <= C63 & C62 <= C64)) by L102 , LATTICE3:def 8;
+thus L104:now
+assume L105: (C62 <= C63 & C62 <= C64);
+thus L106: C62 is_<=_than { C63 , C64 }
+proof
+let C65 being (Element of C61);
+thus L107: thesis by L105 , TARSKI:def 2;
+end;
+
+end;
+thus L107: (C62 is_>=_than { C63 , C64 } implies (C62 >= C63 & C62 >= C64)) by L102 , LATTICE3:def 9;
+assume L108: (C62 >= C63 & C62 >= C64);
+let C66 being (Element of C61);
+thus L109: thesis by L108 , TARSKI:def 2;
+end;
+theorem
+L110: (for B66 being RelStr holds (for B67 , B68 being set holds (B67 c= B68 implies (for B69 being (Element of B66) holds ((B69 is_<=_than B68 implies B69 is_<=_than B67) & (B69 is_>=_than B68 implies B69 is_>=_than B67))))))
+proof
+let C67 being RelStr;
+let C68 , C69 being set;
+assume that
+L111: C68 c= C69;
+let C70 being (Element of C67);
+thus L112: (C70 is_<=_than C69 implies C70 is_<=_than C68)
+proof
+assume L113: (for B70 being (Element of C67) holds (B70 in C69 implies B70 >= C70));
+let C71 being (Element of C67);
+thus L114: thesis by L111 , L113;
+end;
+
+assume L115: (for B71 being (Element of C67) holds (B71 in C69 implies B71 <= C70));
+let C72 being (Element of C67);
+thus L116: thesis by L111 , L115;
+end;
+theorem
+L117: (for B72 being RelStr holds (for B73 , B74 being set holds (for B75 being (Element of B72) holds (((B75 is_<=_than B73 & B75 is_<=_than B74) implies B75 is_<=_than ( B73 \/ B74 )) & ((B75 is_>=_than B73 & B75 is_>=_than B74) implies B75 is_>=_than ( B73 \/ B74 ))))))
+proof
+let C73 being RelStr;
+let C74 , C75 being set;
+let C76 being (Element of C73);
+thus L118: ((C76 is_<=_than C74 & C76 is_<=_than C75) implies C76 is_<=_than ( C74 \/ C75 ))
+proof
+assume L119: ((for B76 being (Element of C73) holds (B76 in C74 implies B76 >= C76)) & (for B77 being (Element of C73) holds (B77 in C75 implies B77 >= C76)));
+let C77 being (Element of C73);
+L120: (C77 in ( C74 \/ C75 ) implies (C77 in C74 or C77 in C75)) by XBOOLE_0:def 3;
+thus L121: thesis by L120 , L119;
+end;
+
+assume L122: ((for B78 being (Element of C73) holds (B78 in C74 implies B78 <= C76)) & (for B79 being (Element of C73) holds (B79 in C75 implies B79 <= C76)));
+let C78 being (Element of C73);
+L123: (C78 in ( C74 \/ C75 ) implies (C78 in C74 or C78 in C75)) by XBOOLE_0:def 3;
+thus L124: thesis by L123 , L122;
+end;
+theorem
+L125: (for B80 being  transitive RelStr holds (for B81 being set holds (for B82 , B83 being (Element of B80) holds ((B81 is_<=_than B82 & B82 <= B83) implies B81 is_<=_than B83))))
+proof
+let C79 being  transitive RelStr;
+let C80 being set;
+let C81 , C82 being (Element of C79);
+assume that
+L126: (for B84 being (Element of C79) holds (B84 in C80 implies B84 <= C81))
+and
+L127: C81 <= C82;
+let C83 being (Element of C79);
+assume L128: C83 in C80;
+L129: C83 <= C81 by L128 , L126;
+thus L130: thesis by L129 , L127 , ORDERS_2:3;
+end;
+theorem
+L131: (for B85 being  transitive RelStr holds (for B86 being set holds (for B87 , B88 being (Element of B85) holds ((B86 is_>=_than B87 & B87 >= B88) implies B86 is_>=_than B88))))
+proof
+let C84 being  transitive RelStr;
+let C85 being set;
+let C86 , C87 being (Element of C84);
+assume that
+L132: (for B89 being (Element of C84) holds (B89 in C85 implies B89 >= C86))
+and
+L133: C86 >= C87;
+let C88 being (Element of C84);
+assume L134: C88 in C85;
+L135: C88 >= C86 by L134 , L132;
+thus L136: thesis by L135 , L133 , ORDERS_2:3;
+end;
+registration
+let C89 being non  empty RelStr;
+cluster ( [#] C89 ) -> non  empty;
+coherence;
+end;
+begin
+definition
+let C90 being RelStr;
+attr C90 is  lower-bounded
+means
+:L138: (ex B90 being (Element of C90) st B90 is_<=_than (the carrier of C90));
+attr C90 is  upper-bounded
+means
+:L139: (ex B91 being (Element of C90) st B91 is_>=_than (the carrier of C90));
+end;
+definition
+let C91 being RelStr;
+attr C91 is  bounded
+means
+C91 is  lower-bounded  upper-bounded;
+end;
+theorem
+L142: (for B92 , B93 being RelStr holds (( the RelStr of B92 ) = ( the RelStr of B93 ) implies ((B92 is  lower-bounded implies B93 is  lower-bounded) & (B92 is  upper-bounded implies B93 is  upper-bounded))))
+proof
+let C92 , C93 being RelStr;
+assume that
+L143: ( the RelStr of C92 ) = ( the RelStr of C93 );
+thus L144: (C92 is  lower-bounded implies C93 is  lower-bounded)
+proof
+given C94 being (Element of C92) such that
+L145: C94 is_<=_than (the carrier of C92);
+
+reconsider D13 = C94 as (Element of C93) by L143;
+take D13;
+thus L146: thesis by L143 , L145 , L43;
+end;
+
+given C95 being (Element of C92) such that
+L147: C95 is_>=_than (the carrier of C92);
+
+reconsider D14 = C95 as (Element of C93) by L143;
+take D14;
+thus L148: thesis by L143 , L147 , L43;
+end;
+registration
+cluster  complete ->  bounded for non  empty non  empty non  empty non  empty RelStr;
+coherence
+proof
+let C96 being non  empty RelStr;
+assume L149: (for B94 being set holds (ex B95 being (Element of C96) st (B94 is_<=_than B95 & (for B96 being (Element of C96) holds (B94 is_<=_than B96 implies B95 <= B96)))));
+consider C97 being (Element of C96) such that L150: ( {} ) is_<=_than C97 and L151: (for B97 being (Element of C96) holds (( {} ) is_<=_than B97 implies C97 <= B97)) by L149;
+consider C98 being (Element of C96) such that L152: (the carrier of C96) is_<=_than C98 and L153: (for B98 being (Element of C96) holds ((the carrier of C96) is_<=_than B98 implies C98 <= B98)) by L149;
+reconsider D15 = C97 , D16 = C98 as (Element of C96);
+thus L154:now
+take D17 = D15;
+thus L155: D17 is_<=_than (the carrier of C96)
+proof
+let C99 being (Element of C96);
+thus L156: thesis by L151 , L88;
+end;
+
+end;
+take D16;
+thus L156: thesis by L152;
+end;
+cluster  bounded ->  lower-bounded  upper-bounded for RelStr;
+coherence
+proof
+let C100 being RelStr;
+assume L157: C100 is  lower-bounded  upper-bounded;
+thus L158: thesis by L157;
+end;
+cluster  lower-bounded  upper-bounded ->  bounded for RelStr;
+coherence
+proof
+let C101 being RelStr;
+assume L159: C101 is  lower-bounded  upper-bounded;
+thus L160: C101 is  lower-bounded  upper-bounded by L159;
+end;
+end;
+registration
+cluster  complete for non  empty non  empty non  empty non  empty Poset;
+existence
+proof
+set D18 = the  complete non  empty Poset;
+take D18;
+thus L162: thesis;
+end;
+end;
+definition
+let C102 being RelStr;
+let C103 being set;
+pred  ex_sup_of C103 , C102
+means
+:L164: (ex B99 being (Element of C102) st (C103 is_<=_than B99 & (for B100 being (Element of C102) holds (C103 is_<=_than B100 implies B100 >= B99)) & (for B101 being (Element of C102) holds ((C103 is_<=_than B101 & (for B102 being (Element of C102) holds (C103 is_<=_than B102 implies B102 >= B101))) implies B101 = B99))))
+;pred  ex_inf_of C103 , C102
+means
+:L165: (ex B103 being (Element of C102) st (C103 is_>=_than B103 & (for B104 being (Element of C102) holds (C103 is_>=_than B104 implies B104 <= B103)) & (for B105 being (Element of C102) holds ((C103 is_>=_than B105 & (for B106 being (Element of C102) holds (C103 is_>=_than B106 implies B106 <= B105))) implies B105 = B103))))
+;end;
+theorem
+L167: (for B107 , B108 being RelStr holds (( the RelStr of B107 ) = ( the RelStr of B108 ) implies (for B109 being set holds (( ex_sup_of B109 , B107 implies  ex_sup_of B109 , B108) & ( ex_inf_of B109 , B107 implies  ex_inf_of B109 , B108)))))
+proof
+let C104 , C105 being RelStr;
+assume that
+L168: ( the RelStr of C104 ) = ( the RelStr of C105 );
+let C106 being set;
+thus L169: ( ex_sup_of C106 , C104 implies  ex_sup_of C106 , C105)
+proof
+given C107 being (Element of C104) such that
+L170: C106 is_<=_than C107
+and
+L171: (for B110 being (Element of C104) holds (C106 is_<=_than B110 implies B110 >= C107))
+and
+L172: (for B111 being (Element of C104) holds ((C106 is_<=_than B111 & (for B112 being (Element of C104) holds (C106 is_<=_than B112 implies B112 >= B111))) implies B111 = C107));
+
+reconsider D19 = C107 as (Element of C105) by L168;
+take D19;
+thus L173: C106 is_<=_than D19 by L168 , L170 , L43;
+thus L174:now
+let C108 being (Element of C105);
+reconsider D20 = C108 as (Element of C104) by L168;
+assume L175: C106 is_<=_than C108;
+L176: D20 >= C107 by L175 , L168 , L171 , L43;
+thus L177: C108 >= D19 by L176 , L168 , L38;
+end;
+let C109 being (Element of C105);
+reconsider D21 = C109 as (Element of C104) by L168;
+assume L178: C106 is_<=_than C109;
+L179: C106 is_<=_than D21 by L178 , L168 , L43;
+assume L180: (for B113 being (Element of C105) holds (C106 is_<=_than B113 implies B113 >= C109));
+L181:
+now
+let C110 being (Element of C104);
+reconsider D22 = C110 as (Element of C105) by L168;
+assume L182: C106 is_<=_than C110;
+L183: D22 >= C109 by L182 , L168 , L180 , L43;
+thus L184: C110 >= D21 by L183 , L168 , L38;
+end;
+thus L185: thesis by L181 , L172 , L179;
+end;
+
+given C111 being (Element of C104) such that
+L186: C106 is_>=_than C111
+and
+L187: (for B114 being (Element of C104) holds (C106 is_>=_than B114 implies B114 <= C111))
+and
+L188: (for B115 being (Element of C104) holds ((C106 is_>=_than B115 & (for B116 being (Element of C104) holds (C106 is_>=_than B116 implies B116 <= B115))) implies B115 = C111));
+
+reconsider D23 = C111 as (Element of C105) by L168;
+take D23;
+thus L189: C106 is_>=_than D23 by L168 , L186 , L43;
+thus L190:now
+let C112 being (Element of C105);
+reconsider D24 = C112 as (Element of C104) by L168;
+assume L191: C106 is_>=_than C112;
+L192: D24 <= C111 by L191 , L168 , L187 , L43;
+thus L193: C112 <= D23 by L192 , L168 , L38;
+end;
+let C113 being (Element of C105);
+reconsider D25 = C113 as (Element of C104) by L168;
+assume L194: C106 is_>=_than C113;
+assume L195: (for B117 being (Element of C105) holds (C106 is_>=_than B117 implies B117 <= C113));
+L196:
+now
+let C114 being (Element of C104);
+reconsider D26 = C114 as (Element of C105) by L168;
+assume L197: C106 is_>=_than C114;
+L198: D26 <= C113 by L197 , L168 , L195 , L43;
+thus L199: C114 <= D25 by L198 , L168 , L38;
+end;
+L200: C106 is_>=_than D25 by L168 , L194 , L43;
+thus L201: thesis by L200 , L188 , L196;
+end;
+theorem
+L202: (for B118 being  antisymmetric RelStr holds (for B119 being set holds ( ex_sup_of B119 , B118 iff (ex B120 being (Element of B118) st (B119 is_<=_than B120 & (for B121 being (Element of B118) holds (B119 is_<=_than B121 implies B120 <= B121)))))))
+proof
+let C115 being  antisymmetric RelStr;
+let C116 being set;
+thus L203:now
+assume L204:  ex_sup_of C116 , C115;
+L205: (ex B122 being (Element of C115) st (C116 is_<=_than B122 & (for B123 being (Element of C115) holds (C116 is_<=_than B123 implies B123 >= B122)) & (for B124 being (Element of C115) holds ((C116 is_<=_than B124 & (for B125 being (Element of C115) holds (C116 is_<=_than B125 implies B125 >= B124))) implies B124 = B122)))) by L204 , L164;
+thus L206: (ex B126 being (Element of C115) st (C116 is_<=_than B126 & (for B127 being (Element of C115) holds (C116 is_<=_than B127 implies B126 <= B127)))) by L205;
+end;
+given C117 being (Element of C115) such that
+L207: (C116 is_<=_than C117 & (for B128 being (Element of C115) holds (C116 is_<=_than B128 implies C117 <= B128)));
+
+take C117;
+thus L208: (C116 is_<=_than C117 & (for B129 being (Element of C115) holds (C116 is_<=_than B129 implies B129 >= C117))) by L207;
+let C118 being (Element of C115);
+assume L209: (C116 is_<=_than C118 & (for B130 being (Element of C115) holds (C116 is_<=_than B130 implies B130 >= C118)));
+L210: (C117 <= C118 & C118 <= C117) by L209 , L207;
+thus L211: thesis by L210 , ORDERS_2:2;
+end;
+theorem
+L212: (for B131 being  antisymmetric RelStr holds (for B132 being set holds ( ex_inf_of B132 , B131 iff (ex B133 being (Element of B131) st (B132 is_>=_than B133 & (for B134 being (Element of B131) holds (B132 is_>=_than B134 implies B133 >= B134)))))))
+proof
+let C119 being  antisymmetric RelStr;
+let C120 being set;
+thus L213:now
+assume L214:  ex_inf_of C120 , C119;
+L215: (ex B135 being (Element of C119) st (C120 is_>=_than B135 & (for B136 being (Element of C119) holds (C120 is_>=_than B136 implies B136 <= B135)) & (for B137 being (Element of C119) holds ((C120 is_>=_than B137 & (for B138 being (Element of C119) holds (C120 is_>=_than B138 implies B138 <= B137))) implies B137 = B135)))) by L214 , L165;
+thus L216: (ex B139 being (Element of C119) st (C120 is_>=_than B139 & (for B140 being (Element of C119) holds (C120 is_>=_than B140 implies B139 >= B140)))) by L215;
+end;
+given C121 being (Element of C119) such that
+L217: (C120 is_>=_than C121 & (for B141 being (Element of C119) holds (C120 is_>=_than B141 implies C121 >= B141)));
+
+take C121;
+thus L218: (C120 is_>=_than C121 & (for B142 being (Element of C119) holds (C120 is_>=_than B142 implies C121 >= B142))) by L217;
+let C122 being (Element of C119);
+assume L219: (C120 is_>=_than C122 & (for B143 being (Element of C119) holds (C120 is_>=_than B143 implies C122 >= B143)));
+L220: (C121 <= C122 & C122 <= C121) by L219 , L217;
+thus L221: thesis by L220 , ORDERS_2:2;
+end;
+theorem
+L222: (for B144 being  complete non  empty  antisymmetric RelStr holds (for B145 being set holds ( ex_sup_of B145 , B144 &  ex_inf_of B145 , B144)))
+proof
+let C123 being  complete non  empty  antisymmetric RelStr;
+let C124 being set;
+set D27 = { B146 where B146 is (Element of C123) : B146 is_<=_than C124 };
+consider C125 being (Element of C123) such that L223: D27 is_<=_than C125 and L224: (for B147 being (Element of C123) holds (D27 is_<=_than B147 implies C125 <= B147)) by LATTICE3:def 12;
+L225: (ex B148 being (Element of C123) st (C124 is_<=_than B148 & (for B149 being (Element of C123) holds (C124 is_<=_than B149 implies B148 <= B149)))) by LATTICE3:def 12;
+thus L226:  ex_sup_of C124 , C123 by L225 , L202;
+L227:
+now
+take D28 = C125;
+thus L228: D28 is_<=_than C124
+proof
+let C126 being (Element of C123);
+assume L229: C126 in C124;
+L230: D27 is_<=_than C126
+proof
+let C127 being (Element of C123);
+assume L231: C127 in D27;
+L232: (ex B150 being (Element of C123) st (C127 = B150 & B150 is_<=_than C124)) by L231;
+thus L233: thesis by L232 , L229 , LATTICE3:def 8;
+end;
+thus L234: thesis by L230 , L224;
+end;
+
+let C128 being (Element of C123);
+assume L235: C128 is_<=_than C124;
+L236: C128 in D27 by L235;
+thus L237: C128 <= D28 by L236 , L223 , LATTICE3:def 9;
+end;
+thus L238: thesis by L227 , L212;
+end;
+theorem
+L239: (for B151 being  antisymmetric RelStr holds (for B152 , B153 , B154 being (Element of B151) holds ((B154 = ( B152 "\/" B153 ) &  ex_sup_of { B152 , B153 } , B151) iff (B154 >= B152 & B154 >= B153 & (for B155 being (Element of B151) holds ((B155 >= B152 & B155 >= B153) implies B154 <= B155))))))
+proof
+let C129 being  antisymmetric RelStr;
+let C130 , C131 , C132 being (Element of C129);
+thus L240:now
+assume that
+L241: C132 = ( C130 "\/" C131 )
+and
+L242:  ex_sup_of { C130 , C131 } , C129;
+consider C133 being (Element of C129) such that L243: { C130 , C131 } is_<=_than C133 and L244: (for B156 being (Element of C129) holds ({ C130 , C131 } is_<=_than B156 implies C133 <= B156)) by L242 , L202;
+L245:
+now
+let C134 being (Element of C129);
+assume L246: (C130 <= C134 & C131 <= C134);
+L247: { C130 , C131 } is_<=_than C134 by L246 , L101;
+thus L248: C133 <= C134 by L247 , L244;
+end;
+L249: (C130 <= C133 & C131 <= C133) by L243 , L101;
+thus L250: (C132 >= C130 & C132 >= C131 & (for B157 being (Element of C129) holds ((B157 >= C130 & B157 >= C131) implies C132 <= B157))) by L249 , L241 , L245 , LATTICE3:def 13;
+end;
+assume that
+L251: (C132 >= C130 & C132 >= C131)
+and
+L252: (for B158 being (Element of C129) holds ((B158 >= C130 & B158 >= C131) implies C132 <= B158));
+thus L253: C132 = ( C130 "\/" C131 ) by L251 , L252 , LATTICE3:def 13;
+L254:
+now
+take D29 = C132;
+thus L255: D29 is_>=_than { C130 , C131 } by L251 , L101;
+let C135 being (Element of C129);
+assume L256: C135 is_>=_than { C130 , C131 };
+L257: (C135 >= C130 & C135 >= C131) by L256 , L101;
+thus L258: D29 <= C135 by L257 , L252;
+end;
+thus L259: thesis by L254 , L202;
+end;
+theorem
+L260: (for B159 being  antisymmetric RelStr holds (for B160 , B161 , B162 being (Element of B159) holds ((B162 = ( B160 "/\" B161 ) &  ex_inf_of { B160 , B161 } , B159) iff (B162 <= B160 & B162 <= B161 & (for B163 being (Element of B159) holds ((B163 <= B160 & B163 <= B161) implies B162 >= B163))))))
+proof
+let C136 being  antisymmetric RelStr;
+let C137 , C138 , C139 being (Element of C136);
+thus L261:now
+assume that
+L262: C139 = ( C137 "/\" C138 )
+and
+L263:  ex_inf_of { C137 , C138 } , C136;
+consider C140 being (Element of C136) such that L264: { C137 , C138 } is_>=_than C140 and L265: (for B164 being (Element of C136) holds ({ C137 , C138 } is_>=_than B164 implies C140 >= B164)) by L263 , L212;
+L266:
+now
+let C141 being (Element of C136);
+assume L267: (C137 >= C141 & C138 >= C141);
+L268: { C137 , C138 } is_>=_than C141 by L267 , L101;
+thus L269: C140 >= C141 by L268 , L265;
+end;
+L270: (C137 >= C140 & C138 >= C140) by L264 , L101;
+thus L271: (C139 <= C137 & C139 <= C138 & (for B165 being (Element of C136) holds ((B165 <= C137 & B165 <= C138) implies C139 >= B165))) by L270 , L262 , L266 , LATTICE3:def 14;
+end;
+assume that
+L272: (C139 <= C137 & C139 <= C138)
+and
+L273: (for B166 being (Element of C136) holds ((B166 <= C137 & B166 <= C138) implies C139 >= B166));
+thus L274: C139 = ( C137 "/\" C138 ) by L272 , L273 , LATTICE3:def 14;
+L275:
+now
+take D30 = C139;
+thus L276: D30 is_<=_than { C137 , C138 } by L272 , L101;
+let C142 being (Element of C136);
+assume L277: C142 is_<=_than { C137 , C138 };
+L278: (C142 <= C137 & C142 <= C138) by L277 , L101;
+thus L279: D30 >= C142 by L278 , L273;
+end;
+thus L280: thesis by L275 , L212;
+end;
+theorem
+L281: (for B167 being  antisymmetric RelStr holds (B167 is  with_suprema iff (for B168 , B169 being (Element of B167) holds  ex_sup_of { B168 , B169 } , B167)))
+proof
+let C143 being  antisymmetric RelStr;
+thus L282:now
+assume L283: C143 is  with_suprema;
+let C144 , C145 being (Element of C143);
+L284: (ex B170 being (Element of C143) st (C144 <= B170 & C145 <= B170 & (for B171 being (Element of C143) holds ((C144 <= B171 & C145 <= B171) implies B170 <= B171)))) by L283 , LATTICE3:def 10;
+thus L285:  ex_sup_of { C144 , C145 } , C143 by L284 , L239;
+end;
+assume L286: (for B172 , B173 being (Element of C143) holds  ex_sup_of { B172 , B173 } , C143);
+let C146 , C147 being (Element of C143);
+take ( C146 "\/" C147 );
+L287:  ex_sup_of { C146 , C147 } , C143 by L286;
+thus L288: thesis by L287 , L239;
+end;
+theorem
+L289: (for B174 being  antisymmetric RelStr holds (B174 is  with_infima iff (for B175 , B176 being (Element of B174) holds  ex_inf_of { B175 , B176 } , B174)))
+proof
+let C148 being  antisymmetric RelStr;
+thus L290:now
+assume L291: C148 is  with_infima;
+let C149 , C150 being (Element of C148);
+L292: (ex B177 being (Element of C148) st (C149 >= B177 & C150 >= B177 & (for B178 being (Element of C148) holds ((C149 >= B178 & C150 >= B178) implies B177 >= B178)))) by L291 , LATTICE3:def 11;
+thus L293:  ex_inf_of { C149 , C150 } , C148 by L292 , L260;
+end;
+assume L294: (for B179 , B180 being (Element of C148) holds  ex_inf_of { B179 , B180 } , C148);
+let C151 , C152 being (Element of C148);
+take ( C151 "/\" C152 );
+L295:  ex_inf_of { C151 , C152 } , C148 by L294;
+thus L296: thesis by L295 , L260;
+end;
+theorem
+L297: (for B181 being  antisymmetric  with_suprema RelStr holds (for B182 , B183 , B184 being (Element of B181) holds (B184 = ( B182 "\/" B183 ) iff (B184 >= B182 & B184 >= B183 & (for B185 being (Element of B181) holds ((B185 >= B182 & B185 >= B183) implies B184 <= B185))))))
+proof
+let C153 being  antisymmetric  with_suprema RelStr;
+let C154 , C155 being (Element of C153);
+L298: (ex B186 being (Element of C153) st (C154 <= B186 & C155 <= B186 & (for B187 being (Element of C153) holds ((C154 <= B187 & C155 <= B187) implies B186 <= B187)))) by LATTICE3:def 10;
+thus L299: thesis by L298 , LATTICE3:def 13;
+end;
+theorem
+L300: (for B188 being  antisymmetric  with_infima RelStr holds (for B189 , B190 , B191 being (Element of B188) holds (B191 = ( B189 "/\" B190 ) iff (B191 <= B189 & B191 <= B190 & (for B192 being (Element of B188) holds ((B192 <= B189 & B192 <= B190) implies B191 >= B192))))))
+proof
+let C156 being  antisymmetric  with_infima RelStr;
+let C157 , C158 being (Element of C156);
+L301: (ex B193 being (Element of C156) st (C157 >= B193 & C158 >= B193 & (for B194 being (Element of C156) holds ((C157 >= B194 & C158 >= B194) implies B193 >= B194)))) by LATTICE3:def 11;
+thus L302: thesis by L301 , LATTICE3:def 14;
+end;
+theorem
+L303: (for B195 being  antisymmetric  reflexive  with_suprema RelStr holds (for B196 , B197 being (Element of B195) holds (B196 = ( B196 "\/" B197 ) iff B196 >= B197)))
+proof
+let C159 being  antisymmetric  reflexive  with_suprema RelStr;
+let C160 , C161 being (Element of C159);
+L304: (C160 <= C160 & (for B198 being (Element of C159) holds ((B198 >= C160 & B198 >= C161) implies C160 <= B198)));
+thus L305: thesis by L304 , L297;
+end;
+theorem
+L306: (for B199 being  antisymmetric  reflexive  with_infima RelStr holds (for B200 , B201 being (Element of B199) holds (B200 = ( B200 "/\" B201 ) iff B200 <= B201)))
+proof
+let C162 being  antisymmetric  reflexive  with_infima RelStr;
+let C163 , C164 being (Element of C162);
+L307: (C163 <= C163 & (for B202 being (Element of C162) holds ((B202 <= C163 & B202 <= C164) implies C163 >= B202)));
+thus L308: thesis by L307 , L300;
+end;
+definition
+let C165 being RelStr;
+let C166 being set;
+func "\/" (C166 , C165) -> (Element of C165) means 
+:L309: (C166 is_<=_than it & (for B203 being (Element of C165) holds (C166 is_<=_than B203 implies it <= B203))) if  ex_sup_of C166 , C165;
+uniqueness
+proof
+let C167 , C168 being (Element of C165);
+given C169 being (Element of C165) such that
+L310: C166 is_<=_than C169
+and
+L311: (for B204 being (Element of C165) holds (C166 is_<=_than B204 implies B204 >= C169))
+and
+L312: (for B205 being (Element of C165) holds ((C166 is_<=_than B205 & (for B206 being (Element of C165) holds (C166 is_<=_than B206 implies B206 >= B205))) implies B205 = C169));
+
+assume L313: (not thesis);
+L314: C167 = C169 by L313 , L312;
+thus L315: contradiction by L314 , L312 , L313;
+end;
+existence
+proof
+L316: ( ex_sup_of C166 , C165 implies (ex B207 being (Element of C165) st (C166 is_<=_than B207 & (for B208 being (Element of C165) holds (C166 is_<=_than B208 implies B208 >= B207)) & (for B209 being (Element of C165) holds ((C166 is_<=_than B209 & (for B210 being (Element of C165) holds (C166 is_<=_than B210 implies B210 >= B209))) implies B209 = B207))))) by L164;
+thus L317: thesis by L316;
+end;
+correctness;
+func "/\" (C166 , C165) -> (Element of C165) means 
+:L318: (C166 is_>=_than it & (for B211 being (Element of C165) holds (C166 is_>=_than B211 implies B211 <= it))) if  ex_inf_of C166 , C165;
+uniqueness
+proof
+let C170 , C171 being (Element of C165);
+given C172 being (Element of C165) such that
+L319: C166 is_>=_than C172
+and
+L320: (for B212 being (Element of C165) holds (C166 is_>=_than B212 implies B212 <= C172))
+and
+L321: (for B213 being (Element of C165) holds ((C166 is_>=_than B213 & (for B214 being (Element of C165) holds (C166 is_>=_than B214 implies B214 <= B213))) implies B213 = C172));
+
+assume L322: (not thesis);
+L323: C170 = C172 by L322 , L321;
+thus L324: contradiction by L323 , L321 , L322;
+end;
+existence
+proof
+L325: ( ex_inf_of C166 , C165 implies (ex B215 being (Element of C165) st (C166 is_>=_than B215 & (for B216 being (Element of C165) holds (C166 is_>=_than B216 implies B216 <= B215)) & (for B217 being (Element of C165) holds ((C166 is_>=_than B217 & (for B218 being (Element of C165) holds (C166 is_>=_than B218 implies B218 <= B217))) implies B217 = B215))))) by L165;
+thus L326: thesis by L325;
+end;
+correctness;
+end;
+theorem
+L328: (for B219 , B220 being RelStr holds (( the RelStr of B219 ) = ( the RelStr of B220 ) implies (for B221 being set holds ( ex_sup_of B221 , B219 implies ( "\/" (B221 , B219) ) = ( "\/" (B221 , B220) )))))
+proof
+let C173 , C174 being RelStr;
+assume that
+L329: ( the RelStr of C173 ) = ( the RelStr of C174 );
+let C175 being set;
+reconsider D31 = ( "\/" (C175 , C173) ) as (Element of C174) by L329;
+assume L330:  ex_sup_of C175 , C173;
+L331: C175 is_<=_than ( "\/" (C175 , C173) ) by L330 , L309;
+L332: C175 is_<=_than D31 by L331 , L329 , L43;
+L333:
+now
+let C176 being (Element of C174);
+reconsider D32 = C176 as (Element of C173) by L329;
+assume L334: C175 is_<=_than C176;
+L335: C175 is_<=_than D32 by L334 , L329 , L43;
+L336: D32 >= ( "\/" (C175 , C173) ) by L335 , L330 , L309;
+thus L337: C176 >= D31 by L336 , L329 , L38;
+end;
+L338:  ex_sup_of C175 , C174 by L329 , L330 , L167;
+thus L339: thesis by L338 , L332 , L333 , L309;
+end;
+theorem
+L340: (for B222 , B223 being RelStr holds (( the RelStr of B222 ) = ( the RelStr of B223 ) implies (for B224 being set holds ( ex_inf_of B224 , B222 implies ( "/\" (B224 , B222) ) = ( "/\" (B224 , B223) )))))
+proof
+let C177 , C178 being RelStr;
+assume that
+L341: ( the RelStr of C177 ) = ( the RelStr of C178 );
+let C179 being set;
+reconsider D33 = ( "/\" (C179 , C177) ) as (Element of C178) by L341;
+assume L342:  ex_inf_of C179 , C177;
+L343: C179 is_>=_than ( "/\" (C179 , C177) ) by L342 , L318;
+L344: C179 is_>=_than D33 by L343 , L341 , L43;
+L345:
+now
+let C180 being (Element of C178);
+reconsider D34 = C180 as (Element of C177) by L341;
+assume L346: C179 is_>=_than C180;
+L347: C179 is_>=_than D34 by L346 , L341 , L43;
+L348: D34 <= ( "/\" (C179 , C177) ) by L347 , L342 , L318;
+thus L349: C180 <= D33 by L348 , L341 , L38;
+end;
+L350:  ex_inf_of C179 , C178 by L341 , L342 , L167;
+thus L351: thesis by L350 , L344 , L345 , L318;
+end;
+theorem
+L352: (for B225 being  complete non  empty Poset holds (for B226 being set holds (( "\/" (B226 , B225) ) = ( "\/" (B226 , ( latt B225 )) ) & ( "/\" (B226 , B225) ) = ( "/\" (B226 , ( latt B225 )) ))))
+proof
+let C181 being  complete non  empty Poset;
+let C182 being set;
+L353: ( the RelStr of C181 ) = ( LattPOSet ( latt C181 ) ) by LATTICE3:def 15;
+reconsider D35 = ( "\/" (C182 , C181) ) as (Element of ( LattPOSet ( latt C181 ) )) by L353;
+reconsider D36 = ( "/\" (C182 , ( latt C181 )) ) as (Element of C181) by L353;
+L354:
+now
+let C183 being (Element of C181);
+reconsider D37 = C183 as (Element of ( LattPOSet ( latt C181 ) )) by L353;
+assume L355: C183 is_<=_than C182;
+L356: D37 is_<=_than C182 by L355 , L353 , L43;
+L357: ( % D37 ) is_less_than C182 by L356 , LATTICE3:29;
+L358: ( % D37 ) [= ( "/\" (C182 , ( latt C181 )) ) by L357 , LATTICE3:34;
+L359: ( ( % D37 ) % ) = ( % D37 );
+L360: D37 <= ( ( "/\" (C182 , ( latt C181 )) ) % ) by L359 , L358 , LATTICE3:7;
+thus L361: C183 <= D36 by L360 , L353 , L38;
+end;
+L362: (ex B227 being (Element of C181) st (C182 is_<=_than B227 & (for B228 being (Element of C181) holds (C182 is_<=_than B228 implies B227 <= B228)))) by LATTICE3:def 12;
+L363:  ex_sup_of C182 , C181 by L362 , L202;
+L364:
+now
+let C184 being (Element of ( latt C181 ));
+reconsider D38 = ( C184 % ) as (Element of C181) by L353;
+assume L365: C182 is_less_than C184;
+L366: C182 is_<=_than ( C184 % ) by L365 , LATTICE3:30;
+L367: C182 is_<=_than D38 by L366 , L353 , L43;
+L368: ( "\/" (C182 , C181) ) <= D38 by L367 , L363 , L309;
+L369: D35 <= ( C184 % ) by L368 , L353 , L38;
+L370: ( ( % D35 ) % ) = ( % D35 );
+thus L371: ( % D35 ) [= C184 by L370 , L369 , LATTICE3:7;
+end;
+L372: C182 is_<=_than ( "\/" (C182 , C181) ) by L363 , L309;
+L373: C182 is_<=_than D35 by L372 , L353 , L43;
+L374: C182 is_less_than ( % D35 ) by L373 , LATTICE3:31;
+thus L375: ( "\/" (C182 , C181) ) = ( "\/" (C182 , ( latt C181 )) ) by L374 , L364 , LATTICE3:def 21;
+L376: ( "/\" (C182 , ( latt C181 )) ) is_less_than C182 by LATTICE3:34;
+L377: ( ( "/\" (C182 , ( latt C181 )) ) % ) is_<=_than C182 by L376 , LATTICE3:28;
+L378: D36 is_<=_than C182 by L377 , L353 , L43;
+L379:  ex_inf_of C182 , C181 by L378 , L354 , L212;
+thus L380: thesis by L379 , L378 , L354 , L318;
+end;
+theorem
+L381: (for B229 being  complete Lattice holds (for B230 being set holds (( "\/" (B230 , B229) ) = ( "\/" (B230 , ( LattPOSet B229 )) ) & ( "/\" (B230 , B229) ) = ( "/\" (B230 , ( LattPOSet B229 )) ))))
+proof
+let C185 being  complete Lattice;
+let C186 being set;
+L382:
+now
+let C187 being (Element of ( LattPOSet C185 ));
+assume L383: C186 is_<=_than C187;
+L384: C186 is_less_than ( % C187 ) by L383 , LATTICE3:31;
+L385: ( "\/" (C186 , C185) ) [= ( % C187 ) by L384 , LATTICE3:def 21;
+L386: ( ( % C187 ) % ) = ( % C187 );
+thus L387: ( ( "\/" (C186 , C185) ) % ) <= C187 by L386 , L385 , LATTICE3:7;
+end;
+L388: C186 is_less_than ( "\/" (C186 , C185) ) by LATTICE3:def 21;
+L389: C186 is_<=_than ( ( "\/" (C186 , C185) ) % ) by L388 , LATTICE3:30;
+L390:  ex_sup_of C186 , ( LattPOSet C185 ) by L389 , L382 , L202;
+thus L391: ( "\/" (C186 , C185) ) = ( "\/" (C186 , ( LattPOSet C185 )) ) by L390 , L389 , L382 , L309;
+L392:
+now
+let C188 being (Element of ( LattPOSet C185 ));
+assume L393: C186 is_>=_than C188;
+L394: C186 is_greater_than ( % C188 ) by L393 , LATTICE3:29;
+L395: ( % C188 ) [= ( "/\" (C186 , C185) ) by L394 , LATTICE3:34;
+L396: ( ( % C188 ) % ) = ( % C188 );
+thus L397: ( ( "/\" (C186 , C185) ) % ) >= C188 by L396 , L395 , LATTICE3:7;
+end;
+L398: C186 is_greater_than ( "/\" (C186 , C185) ) by LATTICE3:34;
+L399: C186 is_>=_than ( ( "/\" (C186 , C185) ) % ) by L398 , LATTICE3:28;
+L400:  ex_inf_of C186 , ( LattPOSet C185 ) by L399 , L392 , L212;
+thus L401: thesis by L400 , L399 , L392 , L318;
+end;
+theorem
+L402: (for B231 being  antisymmetric RelStr holds (for B232 being (Element of B231) holds (for B233 being set holds ((B232 = ( "\/" (B233 , B231) ) &  ex_sup_of B233 , B231) iff (B232 is_>=_than B233 & (for B234 being (Element of B231) holds (B234 is_>=_than B233 implies B232 <= B234)))))))
+proof
+let C189 being  antisymmetric RelStr;
+let C190 being (Element of C189);
+let C191 being set;
+L403: ((C190 is_>=_than C191 & (for B235 being (Element of C189) holds (B235 is_>=_than C191 implies C190 <= B235))) implies  ex_sup_of C191 , C189) by L202;
+thus L404: thesis by L403 , L309;
+end;
+theorem
+L405: (for B236 being  antisymmetric RelStr holds (for B237 being (Element of B236) holds (for B238 being set holds ((B237 = ( "/\" (B238 , B236) ) &  ex_inf_of B238 , B236) iff (B237 is_<=_than B238 & (for B239 being (Element of B236) holds (B239 is_<=_than B238 implies B237 >= B239)))))))
+proof
+let C192 being  antisymmetric RelStr;
+let C193 being (Element of C192);
+let C194 being set;
+L406: ((C193 is_<=_than C194 & (for B240 being (Element of C192) holds (B240 is_<=_than C194 implies C193 >= B240))) implies  ex_inf_of C194 , C192) by L212;
+thus L407: thesis by L406 , L318;
+end;
+theorem
+L408: (for B241 being  complete  antisymmetric non  empty RelStr holds (for B242 being (Element of B241) holds (for B243 being set holds (B242 = ( "\/" (B243 , B241) ) iff (B242 is_>=_than B243 & (for B244 being (Element of B241) holds (B244 is_>=_than B243 implies B242 <= B244)))))))
+proof
+let C195 being  complete  antisymmetric non  empty RelStr;
+let C196 being (Element of C195);
+let C197 being set;
+L409:  ex_sup_of C197 , C195 by L222;
+thus L410: thesis by L409 , L402;
+end;
+theorem
+L411: (for B245 being  complete  antisymmetric non  empty RelStr holds (for B246 being (Element of B245) holds (for B247 being set holds (B246 = ( "/\" (B247 , B245) ) iff (B246 is_<=_than B247 & (for B248 being (Element of B245) holds (B248 is_<=_than B247 implies B246 >= B248)))))))
+proof
+let C198 being  complete non  empty  antisymmetric RelStr;
+let C199 being (Element of C198);
+let C200 being set;
+L412:  ex_inf_of C200 , C198 by L222;
+thus L413: thesis by L412 , L405;
+end;
+theorem
+L414: (for B249 being RelStr holds (for B250 , B251 being set holds ((B250 c= B251 &  ex_sup_of B250 , B249 &  ex_sup_of B251 , B249) implies ( "\/" (B250 , B249) ) <= ( "\/" (B251 , B249) ))))
+proof
+let C201 being RelStr;
+let C202 , C203 being set;
+assume that
+L415: C202 c= C203
+and
+L416:  ex_sup_of C202 , C201
+and
+L417:  ex_sup_of C203 , C201;
+L418: ( "\/" (C203 , C201) ) is_>=_than C202
+proof
+let C204 being (Element of C201);
+assume L419: C204 in C202;
+L420: ( "\/" (C203 , C201) ) is_>=_than C203 by L417 , L309;
+thus L421: thesis by L420 , L415 , L419 , LATTICE3:def 9;
+end;
+thus L422: thesis by L418 , L416 , L309;
+end;
+theorem
+L423: (for B252 being RelStr holds (for B253 , B254 being set holds ((B253 c= B254 &  ex_inf_of B253 , B252 &  ex_inf_of B254 , B252) implies ( "/\" (B253 , B252) ) >= ( "/\" (B254 , B252) ))))
+proof
+let C205 being RelStr;
+let C206 , C207 being set;
+assume that
+L424: C206 c= C207
+and
+L425:  ex_inf_of C206 , C205
+and
+L426:  ex_inf_of C207 , C205;
+L427: ( "/\" (C207 , C205) ) is_<=_than C206
+proof
+let C208 being (Element of C205);
+assume L428: C208 in C206;
+L429: ( "/\" (C207 , C205) ) is_<=_than C207 by L426 , L318;
+thus L430: thesis by L429 , L424 , L428 , LATTICE3:def 8;
+end;
+thus L431: thesis by L427 , L425 , L318;
+end;
+theorem
+L432: (for B255 being  antisymmetric  transitive RelStr holds (for B256 , B257 being set holds (( ex_sup_of B256 , B255 &  ex_sup_of B257 , B255 &  ex_sup_of ( B256 \/ B257 ) , B255) implies ( "\/" (( B256 \/ B257 ) , B255) ) = ( ( "\/" (B256 , B255) ) "\/" ( "\/" (B257 , B255) ) ))))
+proof
+let C209 being  antisymmetric  transitive RelStr;
+let C210 , C211 being set;
+assume that
+L433: ( ex_sup_of C210 , C209 &  ex_sup_of C211 , C209)
+and
+L434:  ex_sup_of ( C210 \/ C211 ) , C209;
+set D39 = ( "\/" (C210 , C209) );
+set D40 = ( "\/" (C211 , C209) );
+set D41 = ( "\/" (( C210 \/ C211 ) , C209) );
+L435: (D39 is_>=_than C210 & D40 is_>=_than C211) by L433 , L402;
+L436:
+now
+let C212 being (Element of C209);
+assume L437: (C212 >= D39 & C212 >= D40);
+L438: (C212 is_>=_than C210 & C212 is_>=_than C211) by L437 , L435 , L62;
+L439: C212 is_>=_than ( C210 \/ C211 ) by L438 , L117;
+thus L440: D41 <= C212 by L439 , L434 , L402;
+end;
+L441: (D41 >= D39 & D41 >= D40) by L433 , L434 , L414 , XBOOLE_1:7;
+thus L442: thesis by L441 , L436 , L239;
+end;
+theorem
+L443: (for B258 being  antisymmetric  transitive RelStr holds (for B259 , B260 being set holds (( ex_inf_of B259 , B258 &  ex_inf_of B260 , B258 &  ex_inf_of ( B259 \/ B260 ) , B258) implies ( "/\" (( B259 \/ B260 ) , B258) ) = ( ( "/\" (B259 , B258) ) "/\" ( "/\" (B260 , B258) ) ))))
+proof
+let C213 being  antisymmetric  transitive RelStr;
+let C214 , C215 being set;
+assume that
+L444: ( ex_inf_of C214 , C213 &  ex_inf_of C215 , C213)
+and
+L445:  ex_inf_of ( C214 \/ C215 ) , C213;
+set D42 = ( "/\" (C214 , C213) );
+set D43 = ( "/\" (C215 , C213) );
+set D44 = ( "/\" (( C214 \/ C215 ) , C213) );
+L446: (D42 is_<=_than C214 & D43 is_<=_than C215) by L444 , L405;
+L447:
+now
+let C216 being (Element of C213);
+assume L448: (C216 <= D42 & C216 <= D43);
+L449: (C216 is_<=_than C214 & C216 is_<=_than C215) by L448 , L446 , L62;
+L450: C216 is_<=_than ( C214 \/ C215 ) by L449 , L117;
+thus L451: D44 >= C216 by L450 , L445 , L405;
+end;
+L452: (D44 <= D42 & D44 <= D43) by L444 , L445 , L423 , XBOOLE_1:7;
+thus L453: thesis by L452 , L447 , L260;
+end;
+notation
+let C217 being RelStr;
+let C218 being (Subset of C217);
+synonym sup C218 for "\/" (C218 , C217);
+synonym inf C218 for "/\" (C218 , C217);
+end;
+theorem
+L455: (for B261 being non  empty  reflexive  antisymmetric RelStr holds (for B262 being (Element of B261) holds ( ex_sup_of { B262 } , B261 &  ex_inf_of { B262 } , B261)))
+proof
+let C219 being non  empty  reflexive  antisymmetric RelStr;
+let C220 being (Element of C219);
+L456: (for B263 being (Element of C219) holds (B263 is_>=_than { C220 } implies B263 >= C220)) by L92;
+L457: C220 <= C220;
+L458: C220 is_>=_than { C220 } by L457 , L92;
+thus L459:  ex_sup_of { C220 } , C219 by L458 , L456 , L202;
+L460: (for B264 being (Element of C219) holds (B264 is_<=_than { C220 } implies B264 <= C220)) by L92;
+L461: C220 is_<=_than { C220 } by L457 , L92;
+thus L462: thesis by L461 , L460 , L212;
+end;
+theorem
+L463: (for B265 being non  empty  reflexive  antisymmetric RelStr holds (for B266 being (Element of B265) holds (( sup { B266 } ) = B266 & ( inf { B266 } ) = B266)))
+proof
+let C221 being non  empty  reflexive  antisymmetric RelStr;
+let C222 being (Element of C221);
+L464: (for B267 being (Element of C221) holds (B267 is_>=_than { C222 } implies B267 >= C222)) by L92;
+L465: C222 <= C222;
+L466: C222 is_>=_than { C222 } by L465 , L92;
+thus L467: ( sup { C222 } ) = C222 by L466 , L464 , L402;
+L468: (for B268 being (Element of C221) holds (B268 is_<=_than { C222 } implies B268 <= C222)) by L92;
+L469: C222 is_<=_than { C222 } by L465 , L92;
+thus L470: thesis by L469 , L468 , L405;
+end;
+theorem
+L471: (for B269 being  with_infima Poset holds (for B270 , B271 being (Element of B269) holds ( inf { B270 , B271 } ) = ( B270 "/\" B271 )))
+proof
+let C223 being  with_infima Poset;
+let C224 , C225 being (Element of C223);
+L472:
+now
+let C226 being (Element of C223);
+assume L473: C226 is_<=_than { C224 , C225 };
+L474: (C226 <= C224 & C226 <= C225) by L473 , L101;
+thus L475: C226 <= ( C224 "/\" C225 ) by L474 , L300;
+end;
+L476: (( C224 "/\" C225 ) <= C224 & ( C224 "/\" C225 ) <= C225) by L300;
+L477: ( C224 "/\" C225 ) is_<=_than { C224 , C225 } by L476 , L101;
+L478:  ex_inf_of { C224 , C225 } , C223 by L477 , L472 , L212;
+thus L479: thesis by L478 , L477 , L472 , L318;
+end;
+theorem
+L480: (for B272 being  with_suprema Poset holds (for B273 , B274 being (Element of B272) holds ( sup { B273 , B274 } ) = ( B273 "\/" B274 )))
+proof
+let C227 being  with_suprema Poset;
+let C228 , C229 being (Element of C227);
+L481:
+now
+let C230 being (Element of C227);
+assume L482: C230 is_>=_than { C228 , C229 };
+L483: (C230 >= C228 & C230 >= C229) by L482 , L101;
+thus L484: C230 >= ( C228 "\/" C229 ) by L483 , L297;
+end;
+L485: (( C228 "\/" C229 ) >= C228 & ( C228 "\/" C229 ) >= C229) by L297;
+L486: ( C228 "\/" C229 ) is_>=_than { C228 , C229 } by L485 , L101;
+L487:  ex_sup_of { C228 , C229 } , C227 by L486 , L481 , L202;
+thus L488: thesis by L487 , L486 , L481 , L309;
+end;
+theorem
+L489: (for B275 being  lower-bounded  antisymmetric non  empty RelStr holds ( ex_sup_of ( {} ) , B275 &  ex_inf_of (the carrier of B275) , B275))
+proof
+let C231 being  lower-bounded  antisymmetric non  empty RelStr;
+consider C232 being (Element of C231) such that L490: C232 is_<=_than (the carrier of C231) by L138;
+L491:
+now
+take D45 = C232;
+thus L492: D45 is_>=_than ( {} ) by L88;
+thus L493: (for B276 being (Element of C231) holds (B276 is_>=_than ( {} ) implies D45 <= B276)) by L490 , LATTICE3:def 8;
+end;
+thus L494:  ex_sup_of ( {} ) , C231 by L491 , L202;
+L495: (for B277 being (Element of C231) holds ((the carrier of C231) is_>=_than B277 implies C232 >= B277)) by LATTICE3:def 8;
+thus L496: thesis by L495 , L490 , L212;
+end;
+theorem
+L497: (for B278 being  upper-bounded  antisymmetric non  empty RelStr holds ( ex_inf_of ( {} ) , B278 &  ex_sup_of (the carrier of B278) , B278))
+proof
+let C233 being  upper-bounded  antisymmetric non  empty RelStr;
+consider C234 being (Element of C233) such that L498: C234 is_>=_than (the carrier of C233) by L139;
+L499:
+now
+take D46 = C234;
+thus L500: D46 is_<=_than ( {} ) by L88;
+thus L501: (for B279 being (Element of C233) holds (B279 is_<=_than ( {} ) implies D46 >= B279)) by L498 , LATTICE3:def 9;
+end;
+thus L502:  ex_inf_of ( {} ) , C233 by L499 , L212;
+L503: (for B280 being (Element of C233) holds ((the carrier of C233) is_<=_than B280 implies C234 <= B280)) by LATTICE3:def 9;
+thus L504: thesis by L503 , L498 , L202;
+end;
+definition
+let C235 being RelStr;
+func Bottom C235 -> (Element of C235) equals 
+( "\/" (( {} ) , C235) );
+correctness;
+func Top C235 -> (Element of C235) equals 
+( "/\" (( {} ) , C235) );
+correctness;
+end;
+theorem
+L506: (for B281 being  lower-bounded  antisymmetric non  empty RelStr holds (for B282 being (Element of B281) holds ( Bottom B281 ) <= B282))
+proof
+let C236 being  lower-bounded  antisymmetric non  empty RelStr;
+let C237 being (Element of C236);
+L507: (( {} ) is_<=_than C237 &  ex_sup_of ( {} ) , C236) by L88 , L489;
+thus L508: thesis by L507 , L402;
+end;
+theorem
+L509: (for B283 being  upper-bounded  antisymmetric non  empty RelStr holds (for B284 being (Element of B283) holds B284 <= ( Top B283 )))
+proof
+let C238 being  upper-bounded non  empty  antisymmetric RelStr;
+let C239 being (Element of C238);
+L510: (( {} ) is_>=_than C239 &  ex_inf_of ( {} ) , C238) by L88 , L497;
+thus L511: thesis by L510 , L405;
+end;
+theorem
+L512: (for B285 being non  empty RelStr holds (for B286 , B287 being set holds ((for B288 being (Element of B285) holds (B288 is_>=_than B286 iff B288 is_>=_than B287)) implies ( ex_sup_of B286 , B285 implies  ex_sup_of B287 , B285))))
+proof
+let C240 being non  empty RelStr;
+let C241 , C242 being set;
+assume that
+L513: (for B289 being (Element of C240) holds (B289 is_>=_than C241 iff B289 is_>=_than C242));
+given C243 being (Element of C240) such that
+L514: C241 is_<=_than C243
+and
+L515: (for B290 being (Element of C240) holds (C241 is_<=_than B290 implies C243 <= B290))
+and
+L516: (for B291 being (Element of C240) holds ((C241 is_<=_than B291 & (for B292 being (Element of C240) holds (C241 is_<=_than B292 implies B291 <= B292))) implies B291 = C243));
+
+take C243;
+thus L517: C242 is_<=_than C243 by L513 , L514;
+thus L518:now
+let C244 being (Element of C240);
+assume L519: C242 is_<=_than C244;
+L520: C241 is_<=_than C244 by L519 , L513;
+thus L521: C243 <= C244 by L520 , L515;
+end;
+let C245 being (Element of C240);
+assume L522: C242 is_<=_than C245;
+assume L523: (for B293 being (Element of C240) holds (C242 is_<=_than B293 implies C245 <= B293));
+L524:
+now
+let C246 being (Element of C240);
+assume L525: C241 is_<=_than C246;
+L526: C242 is_<=_than C246 by L525 , L513;
+thus L527: C245 <= C246 by L526 , L523;
+end;
+L528: C241 is_<=_than C245 by L513 , L522;
+thus L529: thesis by L528 , L516 , L524;
+end;
+theorem
+L530: (for B294 being non  empty RelStr holds (for B295 , B296 being set holds (( ex_sup_of B295 , B294 & (for B297 being (Element of B294) holds (B297 is_>=_than B295 iff B297 is_>=_than B296))) implies ( "\/" (B295 , B294) ) = ( "\/" (B296 , B294) ))))
+proof
+let C247 being non  empty RelStr;
+let C248 , C249 being set;
+assume L531:  ex_sup_of C248 , C247;
+assume L532: (for B298 being (Element of C247) holds (B298 is_>=_than C248 iff B298 is_>=_than C249));
+L533:
+now
+let C250 being (Element of C247);
+assume L534: C249 is_<=_than C250;
+L535: C248 is_<=_than C250 by L534 , L532;
+thus L536: ( "\/" (C248 , C247) ) <= C250 by L535 , L531 , L309;
+end;
+L537: C248 is_<=_than ( "\/" (C248 , C247) ) by L531 , L309;
+L538: C249 is_<=_than ( "\/" (C248 , C247) ) by L537 , L532;
+L539:  ex_sup_of C249 , C247 by L531 , L532 , L512;
+thus L540: thesis by L539 , L538 , L533 , L309;
+end;
+theorem
+L541: (for B299 being non  empty RelStr holds (for B300 , B301 being set holds ((for B302 being (Element of B299) holds (B302 is_<=_than B300 iff B302 is_<=_than B301)) implies ( ex_inf_of B300 , B299 implies  ex_inf_of B301 , B299))))
+proof
+let C251 being non  empty RelStr;
+let C252 , C253 being set;
+assume that
+L542: (for B303 being (Element of C251) holds (B303 is_<=_than C252 iff B303 is_<=_than C253));
+given C254 being (Element of C251) such that
+L543: C252 is_>=_than C254
+and
+L544: (for B304 being (Element of C251) holds (C252 is_>=_than B304 implies C254 >= B304))
+and
+L545: (for B305 being (Element of C251) holds ((C252 is_>=_than B305 & (for B306 being (Element of C251) holds (C252 is_>=_than B306 implies B305 >= B306))) implies B305 = C254));
+
+take C254;
+thus L546: C253 is_>=_than C254 by L542 , L543;
+thus L547:now
+let C255 being (Element of C251);
+assume L548: C253 is_>=_than C255;
+L549: C252 is_>=_than C255 by L548 , L542;
+thus L550: C254 >= C255 by L549 , L544;
+end;
+let C256 being (Element of C251);
+assume L551: C253 is_>=_than C256;
+assume L552: (for B307 being (Element of C251) holds (C253 is_>=_than B307 implies C256 >= B307));
+L553:
+now
+let C257 being (Element of C251);
+assume L554: C252 is_>=_than C257;
+L555: C253 is_>=_than C257 by L554 , L542;
+thus L556: C256 >= C257 by L555 , L552;
+end;
+L557: C252 is_>=_than C256 by L542 , L551;
+thus L558: thesis by L557 , L545 , L553;
+end;
+theorem
+L559: (for B308 being non  empty RelStr holds (for B309 , B310 being set holds (( ex_inf_of B309 , B308 & (for B311 being (Element of B308) holds (B311 is_<=_than B309 iff B311 is_<=_than B310))) implies ( "/\" (B309 , B308) ) = ( "/\" (B310 , B308) ))))
+proof
+let C258 being non  empty RelStr;
+let C259 , C260 being set;
+assume L560:  ex_inf_of C259 , C258;
+assume L561: (for B312 being (Element of C258) holds (B312 is_<=_than C259 iff B312 is_<=_than C260));
+L562:
+now
+let C261 being (Element of C258);
+assume L563: C260 is_>=_than C261;
+L564: C259 is_>=_than C261 by L563 , L561;
+thus L565: ( "/\" (C259 , C258) ) >= C261 by L564 , L560 , L318;
+end;
+L566: C259 is_>=_than ( "/\" (C259 , C258) ) by L560 , L318;
+L567: C260 is_>=_than ( "/\" (C259 , C258) ) by L566 , L561;
+L568:  ex_inf_of C260 , C258 by L560 , L561 , L541;
+thus L569: thesis by L568 , L567 , L562 , L318;
+end;
+theorem
+L570: (for B313 being non  empty RelStr holds (for B314 being set holds (( ex_sup_of B314 , B313 iff  ex_sup_of ( B314 /\ (the carrier of B313) ) , B313) & ( ex_inf_of B314 , B313 iff  ex_inf_of ( B314 /\ (the carrier of B313) ) , B313))))
+proof
+let C262 being non  empty RelStr;
+let C263 being set;
+set D47 = ( C263 /\ (the carrier of C262) );
+L571: ((for B315 being (Element of C262) holds (B315 is_<=_than C263 iff B315 is_<=_than D47)) & (for B316 being (Element of C262) holds (B316 is_>=_than C263 iff B316 is_>=_than D47))) by L71;
+thus L572: thesis by L571 , L512 , L541;
+end;
+theorem
+L573: (for B317 being non  empty RelStr holds (for B318 being set holds (( ex_sup_of B318 , B317 or  ex_sup_of ( B318 /\ (the carrier of B317) ) , B317) implies ( "\/" (B318 , B317) ) = ( "\/" (( B318 /\ (the carrier of B317) ) , B317) ))))
+proof
+let C264 being non  empty RelStr;
+let C265 being set;
+set D48 = ( C265 /\ (the carrier of C264) );
+assume L574: ( ex_sup_of C265 , C264 or  ex_sup_of D48 , C264);
+L575: (for B319 being (Element of C264) holds (B319 is_>=_than C265 iff B319 is_>=_than D48)) by L71;
+thus L576: thesis by L575 , L574 , L530;
+end;
+theorem
+L577: (for B320 being non  empty RelStr holds (for B321 being set holds (( ex_inf_of B321 , B320 or  ex_inf_of ( B321 /\ (the carrier of B320) ) , B320) implies ( "/\" (B321 , B320) ) = ( "/\" (( B321 /\ (the carrier of B320) ) , B320) ))))
+proof
+let C266 being non  empty RelStr;
+let C267 being set;
+set D49 = ( C267 /\ (the carrier of C266) );
+assume L578: ( ex_inf_of C267 , C266 or  ex_inf_of D49 , C266);
+L579: (for B322 being (Element of C266) holds (B322 is_<=_than C267 iff B322 is_<=_than D49)) by L71;
+thus L580: thesis by L579 , L578 , L559;
+end;
+theorem
+L581: (for B323 being non  empty RelStr holds ((for B324 being (Subset of B323) holds  ex_sup_of B324 , B323) implies B323 is  complete))
+proof
+let C268 being non  empty RelStr;
+assume that
+L582: (for B325 being (Subset of C268) holds  ex_sup_of B325 , C268);
+let C269 being set;
+take ( "\/" (C269 , C268) );
+reconsider D50 = ( C269 /\ (the carrier of C268) ) as (Subset of C268) by XBOOLE_1:17;
+L583:  ex_sup_of D50 , C268 by L582;
+L584:  ex_sup_of C269 , C268 by L583 , L570;
+thus L585: thesis by L584 , L309;
+end;
+theorem
+L586: (for B326 being non  empty Poset holds (B326 is  with_suprema iff (for B327 being  finite non  empty (Subset of B326) holds  ex_sup_of B327 , B326)))
+proof
+let C270 being non  empty Poset;
+thus L587:now
+defpred S1[ set ] means ($1 is non  empty implies  ex_sup_of $1 , C270);
+assume L588: C270 is  with_suprema;
+let C271 being  finite non  empty (Subset of C270);
+L589: (for B328 , B329 being set holds ((B328 in C271 & B329 c= C271 & S1[ B329 ]) implies S1[ ( B329 \/ { B328 } ) ]))
+proof
+let C272 , C273 being set;
+assume that
+L590: C272 in C271
+and
+L591: C273 c= C271
+and
+L592: (C273 is non  empty implies  ex_sup_of C273 , C270);
+reconsider D51 = C272 as (Element of C270) by L590;
+assume L593: ( C273 \/ { C272 } ) is non  empty;
+per cases ;
+suppose L594: C273 is  empty;
+
+L595: ( C273 \/ { C272 } ) = { D51 } by L594;
+thus L596: thesis by L595 , L455;
+end;
+suppose L597: C273 is non  empty;
+
+thus L598:  ex_sup_of ( C273 \/ { C272 } ) , C270
+proof
+take D52 = ( ( "\/" (C273 , C270) ) "\/" D51 );
+L599: C273 is_<=_than ( "\/" (C273 , C270) ) by L592 , L597 , L309;
+L600:  ex_sup_of { ( "\/" (C273 , C270) ) , D51 } , C270 by L588 , L281;
+L601: D51 <= D52 by L600 , L239;
+L602: { C272 } is_<=_than D52 by L601 , L92;
+L603: ( "\/" (C273 , C270) ) <= D52 by L600 , L239;
+L604: C273 is_<=_than D52 by L603 , L599 , L125;
+thus L605: ( C273 \/ { C272 } ) is_<=_than D52 by L604 , L602 , L117;
+thus L606:now
+let C274 being (Element of C270);
+assume L607: ( C273 \/ { C272 } ) is_<=_than C274;
+L608: C273 c= ( C273 \/ { C272 } ) by XBOOLE_1:7;
+L609: C273 is_<=_than C274 by L608 , L607 , L110;
+L610: ( "\/" (C273 , C270) ) <= C274 by L609 , L592 , L597 , L309;
+L611: D51 in { C272 } by TARSKI:def 1;
+L612: D51 in ( C273 \/ { C272 } ) by L611 , XBOOLE_0:def 3;
+L613: D51 <= C274 by L612 , L607 , LATTICE3:def 9;
+thus L614: C274 >= D52 by L613 , L600 , L610 , L239;
+end;
+let C275 being (Element of C270);
+assume that
+L615: ( C273 \/ { C272 } ) is_<=_than C275
+and
+L616: (for B330 being (Element of C270) holds (( C273 \/ { C272 } ) is_<=_than B330 implies B330 >= C275));
+L617: C273 c= ( C273 \/ { C272 } ) by XBOOLE_1:7;
+L618: C273 is_<=_than C275 by L617 , L615 , L110;
+L619: ( "\/" (C273 , C270) ) <= C275 by L618 , L592 , L597 , L309;
+L620: D51 in { C272 } by TARSKI:def 1;
+L621: D51 in ( C273 \/ { C272 } ) by L620 , XBOOLE_0:def 3;
+L622: D51 <= C275 by L621 , L615 , LATTICE3:def 9;
+L623: C275 >= D52 by L622 , L600 , L619 , L239;
+L624: D52 >= C275 by L604 , L602 , L616 , L117;
+thus L625: thesis by L624 , L623 , ORDERS_2:2;
+end;
+
+end;
+end;
+L600: S1[ ( {} ) ];
+L601: C271 is  finite;
+L602: S1[ C271 ] from FINSET_1:sch 2(L601 , L600 , L589);
+thus L603:  ex_sup_of C271 , C270 by L602;
+end;
+assume L604: (for B331 being  finite non  empty (Subset of C270) holds  ex_sup_of B331 , C270);
+L605: (for B332 , B333 being (Element of C270) holds  ex_sup_of { B332 , B333 } , C270) by L604;
+thus L606: thesis by L605 , L281;
+end;
+theorem
+L607: (for B334 being non  empty Poset holds (B334 is  with_infima iff (for B335 being  finite non  empty (Subset of B334) holds  ex_inf_of B335 , B334)))
+proof
+let C276 being non  empty Poset;
+thus L608:now
+defpred S2[ set ] means ($1 is non  empty implies  ex_inf_of $1 , C276);
+assume L609: C276 is  with_infima;
+let C277 being  finite non  empty (Subset of C276);
+L610: (for B336 , B337 being set holds ((B336 in C277 & B337 c= C277 & S2[ B337 ]) implies S2[ ( B337 \/ { B336 } ) ]))
+proof
+let C278 , C279 being set;
+assume that
+L611: C278 in C277
+and
+L612: C279 c= C277
+and
+L613: (C279 is non  empty implies  ex_inf_of C279 , C276);
+reconsider D53 = C278 as (Element of C276) by L611;
+assume L614: ( C279 \/ { C278 } ) is non  empty;
+per cases ;
+suppose L615: C279 is  empty;
+
+L616: ( C279 \/ { C278 } ) = { D53 } by L615;
+thus L617: thesis by L616 , L455;
+end;
+suppose L618: C279 is non  empty;
+
+thus L619:  ex_inf_of ( C279 \/ { C278 } ) , C276
+proof
+take D54 = ( ( "/\" (C279 , C276) ) "/\" D53 );
+L620: C279 is_>=_than ( "/\" (C279 , C276) ) by L613 , L618 , L318;
+L621:  ex_inf_of { ( "/\" (C279 , C276) ) , D53 } , C276 by L609 , L289;
+L622: D53 >= D54 by L621 , L260;
+L623: { C278 } is_>=_than D54 by L622 , L92;
+L624: ( "/\" (C279 , C276) ) >= D54 by L621 , L260;
+L625: C279 is_>=_than D54 by L624 , L620 , L131;
+thus L626: ( C279 \/ { C278 } ) is_>=_than D54 by L625 , L623 , L117;
+thus L627:now
+let C280 being (Element of C276);
+assume L628: ( C279 \/ { C278 } ) is_>=_than C280;
+L629: C279 c= ( C279 \/ { C278 } ) by XBOOLE_1:7;
+L630: C279 is_>=_than C280 by L629 , L628 , L110;
+L631: ( "/\" (C279 , C276) ) >= C280 by L630 , L613 , L618 , L318;
+L632: D53 in { C278 } by TARSKI:def 1;
+L633: D53 in ( C279 \/ { C278 } ) by L632 , XBOOLE_0:def 3;
+L634: D53 >= C280 by L633 , L628 , LATTICE3:def 8;
+thus L635: C280 <= D54 by L634 , L621 , L631 , L260;
+end;
+let C281 being (Element of C276);
+assume that
+L636: ( C279 \/ { C278 } ) is_>=_than C281
+and
+L637: (for B338 being (Element of C276) holds (( C279 \/ { C278 } ) is_>=_than B338 implies B338 <= C281));
+L638: C279 c= ( C279 \/ { C278 } ) by XBOOLE_1:7;
+L639: C279 is_>=_than C281 by L638 , L636 , L110;
+L640: ( "/\" (C279 , C276) ) >= C281 by L639 , L613 , L618 , L318;
+L641: D53 in { C278 } by TARSKI:def 1;
+L642: D53 in ( C279 \/ { C278 } ) by L641 , XBOOLE_0:def 3;
+L643: D53 >= C281 by L642 , L636 , LATTICE3:def 8;
+L644: C281 <= D54 by L643 , L621 , L640 , L260;
+L645: D54 <= C281 by L625 , L623 , L637 , L117;
+thus L646: thesis by L645 , L644 , ORDERS_2:2;
+end;
+
+end;
+end;
+L621: S2[ ( {} ) ];
+L622: C277 is  finite;
+L623: S2[ C277 ] from FINSET_1:sch 2(L622 , L621 , L610);
+thus L624:  ex_inf_of C277 , C276 by L623;
+end;
+assume L625: (for B339 being  finite non  empty (Subset of C276) holds  ex_inf_of B339 , C276);
+L626: (for B340 , B341 being (Element of C276) holds  ex_inf_of { B340 , B341 } , C276) by L625;
+thus L627: thesis by L626 , L289;
+end;
+begin
+definition
+let C282 being RelStr;
+mode SubRelStr of C282
+ -> RelStr
+means :L628: ((the carrier of it) c= (the carrier of C282) & (the InternalRel of it) c= (the InternalRel of C282));
+existence;
+end;
+definition
+let C283 being RelStr;
+let C284 being (SubRelStr of C283);
+attr C284 is  full
+means
+:L630: (the InternalRel of C284) = ( (the InternalRel of C283) |_2 (the carrier of C284) );
+end;
+registration
+let C285 being RelStr;
+cluster  strict  full for (SubRelStr of C285);
+existence
+proof
+set D55 = RelStr (# (the carrier of C285) , (the InternalRel of C285) #);
+reconsider D56 = D55 as (SubRelStr of C285) by L628;
+take D56;
+thus L632: D56 is  strict;
+thus L633: (the InternalRel of D56) = ( (the InternalRel of C285) |_2 (the carrier of D56) ) by XBOOLE_1:28;
+end;
+end;
+registration
+let C286 being non  empty RelStr;
+cluster non  empty  full  strict for (SubRelStr of C286);
+existence
+proof
+set D57 = RelStr (# (the carrier of C286) , (the InternalRel of C286) #);
+reconsider D58 = D57 as (SubRelStr of C286) by L628;
+take D58;
+thus L635: (the carrier of D58) is non  empty;
+thus L636: (the InternalRel of D58) = ( (the InternalRel of C286) |_2 (the carrier of D58) ) by XBOOLE_1:28;
+thus L637: thesis;
+end;
+end;
+theorem
+L639: (for B342 being RelStr holds (for B343 being (Subset of B342) holds RelStr (# B343 , ( (the InternalRel of B342) |_2 B343 ) #) is  full  full  full  full (SubRelStr of B342)))
+proof
+let C287 being RelStr;
+let C288 being (Subset of C287);
+set D59 = RelStr (# C288 , ( (the InternalRel of C287) |_2 C288 ) #);
+L640: (the InternalRel of D59) c= (the InternalRel of C287) by XBOOLE_1:17;
+reconsider D60 = D59 as (SubRelStr of C287) by L640 , L628;
+L641: D60 is  full by L630;
+thus L642: thesis by L641;
+end;
+theorem
+L643: (for B344 being RelStr holds (for B345 , B346 being  full (SubRelStr of B344) holds ((the carrier of B345) = (the carrier of B346) implies ( the RelStr of B345 ) = ( the RelStr of B346 ))))
+proof
+let C289 being RelStr;
+let C290 , C291 being  full (SubRelStr of C289);
+L644: (the InternalRel of C290) = ( (the InternalRel of C289) |_2 (the carrier of C290) ) by L630;
+thus L645: thesis by L644 , L630;
+end;
+definition
+let C292 being RelStr;
+let C293 being (Subset of C292);
+func subrelstr C293 ->  full  strict (SubRelStr of C292) means 
+(the carrier of it) = C293;
+uniqueness by L643;
+existence
+proof
+L646: RelStr (# C293 , ( (the InternalRel of C292) |_2 C293 ) #) is  full  full  full  full (SubRelStr of C292) by L639;
+thus L647: thesis by L646;
+end;
+end;
+theorem
+L649: (for B347 being non  empty RelStr holds (for B348 being non  empty (SubRelStr of B347) holds (for B349 being (Element of B348) holds B349 is (Element of B347))))
+proof
+let C294 being non  empty RelStr;
+let C295 being non  empty (SubRelStr of C294);
+let C296 being (Element of C295);
+L650: (C296 in (the carrier of C295) & (the carrier of C295) c= (the carrier of C294)) by L628;
+thus L651: thesis by L650;
+end;
+theorem
+L652: (for B350 being RelStr holds (for B351 being (SubRelStr of B350) holds (for B352 , B353 being (Element of B350) holds (for B354 , B355 being (Element of B351) holds ((B354 = B352 & B355 = B353 & B354 <= B355) implies B352 <= B353)))))
+proof
+let C297 being RelStr;
+let C298 being (SubRelStr of C297);
+let C299 , C300 being (Element of C297);
+let C301 , C302 being (Element of C298);
+assume that
+L653: (C301 = C299 & C302 = C300);
+L654: (the InternalRel of C298) c= (the InternalRel of C297) by L628;
+assume L655: [ C301 , C302 ] in (the InternalRel of C298);
+thus L656: [ C299 , C300 ] in (the InternalRel of C297) by L655 , L653 , L654;
+end;
+theorem
+L657: (for B356 being RelStr holds (for B357 being  full (SubRelStr of B356) holds (for B358 , B359 being (Element of B356) holds (for B360 , B361 being (Element of B357) holds ((B360 = B358 & B361 = B359 & B358 <= B359 & B360 in (the carrier of B357)) implies B360 <= B361)))))
+proof
+let C303 being RelStr;
+let C304 being  full (SubRelStr of C303);
+let C305 , C306 being (Element of C303);
+let C307 , C308 being (Element of C304);
+assume that
+L658: (C307 = C305 & C308 = C306);
+assume L659: [ C305 , C306 ] in (the InternalRel of C303);
+L660: (the InternalRel of C304) = ( (the InternalRel of C303) |_2 (the carrier of C304) ) by L630;
+assume L661: C307 in (the carrier of C304);
+L662: [ C307 , C308 ] in [: (the carrier of C304) , (the carrier of C304) :] by L661 , ZFMISC_1:87;
+thus L663: [ C307 , C308 ] in (the InternalRel of C304) by L662 , L658 , L660 , L659 , XBOOLE_0:def 4;
+end;
+theorem
+L664: (for B362 being non  empty RelStr holds (for B363 being non  empty  full (SubRelStr of B362) holds (for B364 being set holds (for B365 being (Element of B362) holds (for B366 being (Element of B363) holds (B366 = B365 implies ((B365 is_<=_than B364 implies B366 is_<=_than B364) & (B365 is_>=_than B364 implies B366 is_>=_than B364))))))))
+proof
+let C309 being non  empty RelStr;
+let C310 being non  empty  full (SubRelStr of C309);
+let C311 being set;
+let C312 being (Element of C309);
+let C313 being (Element of C310);
+assume L665: C313 = C312;
+thus L666:now
+assume L667: C312 is_<=_than C311;
+thus L668: C313 is_<=_than C311
+proof
+let C314 being (Element of C310);
+reconsider D61 = C314 as (Element of C309) by L649;
+assume L669: C314 in C311;
+L670: C312 <= D61 by L669 , L667 , LATTICE3:def 8;
+thus L671: thesis by L670 , L665 , L657;
+end;
+
+end;
+assume L669: C312 is_>=_than C311;
+let C315 being (Element of C310);
+reconsider D62 = C315 as (Element of C309) by L649;
+assume L670: C315 in C311;
+L671: C312 >= D62 by L670 , L669 , LATTICE3:def 9;
+thus L672: thesis by L671 , L665 , L657;
+end;
+theorem
+L673: (for B367 being non  empty RelStr holds (for B368 being non  empty (SubRelStr of B367) holds (for B369 being (Subset of B368) holds (for B370 being (Element of B367) holds (for B371 being (Element of B368) holds (B371 = B370 implies ((B371 is_<=_than B369 implies B370 is_<=_than B369) & (B371 is_>=_than B369 implies B370 is_>=_than B369))))))))
+proof
+let C316 being non  empty RelStr;
+let C317 being non  empty (SubRelStr of C316);
+let C318 being (Subset of C317);
+let C319 being (Element of C316);
+let C320 being (Element of C317);
+assume L674: C320 = C319;
+thus L675:now
+assume L676: C320 is_<=_than C318;
+thus L677: C319 is_<=_than C318
+proof
+let C321 being (Element of C316);
+assume L678: C321 in C318;
+reconsider D63 = C321 as (Element of C317) by L678;
+L679: C320 <= D63 by L676 , L678 , LATTICE3:def 8;
+thus L680: thesis by L679 , L674 , L652;
+end;
+
+end;
+assume L678: C320 is_>=_than C318;
+let C322 being (Element of C316);
+assume L679: C322 in C318;
+reconsider D64 = C322 as (Element of C317) by L679;
+L680: C320 >= D64 by L678 , L679 , LATTICE3:def 9;
+thus L681: thesis by L680 , L674 , L652;
+end;
+registration
+let C323 being  reflexive RelStr;
+cluster  ->  reflexive for  full  full  full  full (SubRelStr of C323);
+coherence
+proof
+let C324 being  full (SubRelStr of C323);
+let C325 being set;
+assume L682: C325 in (the carrier of C324);
+L683: [ C325 , C325 ] in [: (the carrier of C324) , (the carrier of C324) :] by L682 , ZFMISC_1:87;
+L684: ((the carrier of C324) c= (the carrier of C323) & (the InternalRel of C323) is_reflexive_in (the carrier of C323)) by L628 , ORDERS_2:def 2;
+L685: [ C325 , C325 ] in (the InternalRel of C323) by L684 , L682 , RELAT_2:def 1;
+L686: (the InternalRel of C324) = ( (the InternalRel of C323) |_2 (the carrier of C324) ) by L630;
+thus L687: thesis by L686 , L683 , L685 , XBOOLE_0:def 4;
+end;
+end;
+registration
+let C326 being  transitive RelStr;
+cluster  ->  transitive for  full  full  full  full (SubRelStr of C326);
+coherence
+proof
+let C327 being  full (SubRelStr of C326);
+let C328 , C329 , C330 being (Element of C327);
+assume that
+L689: C328 <= C329
+and
+L690: C329 <= C330;
+L691: (the carrier of C327) c= (the carrier of C326) by L628;
+L692: [ C329 , C330 ] in (the InternalRel of C327) by L690 , ORDERS_2:def 5;
+L693: C330 in (the carrier of C327) by L692 , ZFMISC_1:87;
+L694: [ C328 , C329 ] in (the InternalRel of C327) by L689 , ORDERS_2:def 5;
+L695: C328 in (the carrier of C327) by L694 , ZFMISC_1:87;
+L696: C329 in (the carrier of C327) by L694 , ZFMISC_1:87;
+reconsider D65 = C328 , D66 = C329 , D67 = C330 as (Element of C326) by L696 , L695 , L693 , L691;
+L697: (D65 <= D66 & D66 <= D67) by L689 , L690 , L652;
+thus L698: thesis by L697 , L695 , L657 , ORDERS_2:3;
+end;
+end;
+registration
+let C331 being  antisymmetric RelStr;
+cluster  ->  antisymmetric for  full  full  full  full (SubRelStr of C331);
+coherence
+proof
+let C332 being  full (SubRelStr of C331);
+let C333 , C334 being (Element of C332);
+assume that
+L700: C333 <= C334
+and
+L701: C334 <= C333;
+L702: (the carrier of C332) c= (the carrier of C331) by L628;
+L703: [ C333 , C334 ] in (the InternalRel of C332) by L700 , ORDERS_2:def 5;
+L704: (C333 in (the carrier of C332) & C334 in (the carrier of C332)) by L703 , ZFMISC_1:87;
+reconsider D68 = C333 , D69 = C334 as (Element of C331) by L704 , L702;
+L705: (D68 <= D69 & D69 <= D68) by L700 , L701 , L652;
+thus L706: thesis by L705 , ORDERS_2:2;
+end;
+end;
+definition
+let C335 being non  empty RelStr;
+let C336 being (SubRelStr of C335);
+attr C336 is  meet-inheriting
+means
+:L708: (for B372 , B373 being (Element of C335) holds ((B372 in (the carrier of C336) & B373 in (the carrier of C336) &  ex_inf_of { B372 , B373 } , C335) implies ( inf { B372 , B373 } ) in (the carrier of C336)));
+attr C336 is  join-inheriting
+means
+:L709: (for B374 , B375 being (Element of C335) holds ((B374 in (the carrier of C336) & B375 in (the carrier of C336) &  ex_sup_of { B374 , B375 } , C335) implies ( sup { B374 , B375 } ) in (the carrier of C336)));
+end;
+definition
+let C337 being non  empty RelStr;
+let C338 being (SubRelStr of C337);
+attr C338 is  infs-inheriting
+means
+(for B376 being (Subset of C338) holds ( ex_inf_of B376 , C337 implies ( "/\" (B376 , C337) ) in (the carrier of C338)));
+attr C338 is  sups-inheriting
+means
+(for B377 being (Subset of C338) holds ( ex_sup_of B377 , C337 implies ( "\/" (B377 , C337) ) in (the carrier of C338)));
+end;
+registration
+let C339 being non  empty RelStr;
+cluster  infs-inheriting ->  meet-inheriting for (SubRelStr of C339);
+coherence
+proof
+let C340 being (SubRelStr of C339);
+assume L712: (for B378 being (Subset of C340) holds ( ex_inf_of B378 , C339 implies ( "/\" (B378 , C339) ) in (the carrier of C340)));
+let C341 , C342 being (Element of C339);
+assume L713: (C341 in (the carrier of C340) & C342 in (the carrier of C340));
+L714: { C341 , C342 } c= (the carrier of C340) by L713 , ZFMISC_1:32;
+thus L715: thesis by L714 , L712;
+end;
+cluster  sups-inheriting ->  join-inheriting for (SubRelStr of C339);
+coherence
+proof
+let C343 being (SubRelStr of C339);
+assume L716: (for B379 being (Subset of C343) holds ( ex_sup_of B379 , C339 implies ( "\/" (B379 , C339) ) in (the carrier of C343)));
+let C344 , C345 being (Element of C339);
+assume L717: (C344 in (the carrier of C343) & C345 in (the carrier of C343));
+L718: { C344 , C345 } c= (the carrier of C343) by L717 , ZFMISC_1:32;
+thus L719: thesis by L718 , L716;
+end;
+end;
+registration
+let C346 being non  empty RelStr;
+cluster  infs-inheriting  sups-inheriting non  empty  full  strict for (SubRelStr of C346);
+existence
+proof
+L721: ((the carrier of C346) c= (the carrier of C346) & ( (the InternalRel of C346) |_2 (the carrier of C346) ) = (the InternalRel of C346)) by XBOOLE_1:28;
+reconsider D70 = RelStr (# (the carrier of C346) , (the InternalRel of C346) #) as non  empty  full  strict (SubRelStr of C346) by L721 , L639;
+take D70;
+thus L722: D70 is  infs-inheriting
+proof
+let C347 being (Subset of D70);
+thus L723: thesis;
+end;
+
+thus L724: D70 is  sups-inheriting
+proof
+let C348 being (Subset of D70);
+thus L725: thesis;
+end;
+
+thus L726: thesis;
+end;
+end;
+theorem
+L728: (for B380 being non  empty  transitive RelStr holds (for B381 being non  empty  full (SubRelStr of B380) holds (for B382 being (Subset of B381) holds (( ex_inf_of B382 , B380 & ( "/\" (B382 , B380) ) in (the carrier of B381)) implies ( ex_inf_of B382 , B381 & ( "/\" (B382 , B381) ) = ( "/\" (B382 , B380) ))))))
+proof
+let C349 being non  empty  transitive RelStr;
+let C350 being non  empty  full (SubRelStr of C349);
+let C351 being (Subset of C350);
+assume that
+L729:  ex_inf_of C351 , C349
+and
+L730: ( "/\" (C351 , C349) ) in (the carrier of C350);
+reconsider D71 = ( "/\" (C351 , C349) ) as (Element of C350) by L730;
+L731:
+now
+L732: ( "/\" (C351 , C349) ) is_<=_than C351 by L729 , L318;
+thus L733: D71 is_<=_than C351 by L732 , L664;
+let C352 being (Element of C350);
+reconsider D72 = C352 as (Element of C349) by L649;
+assume L734: C352 is_<=_than C351;
+L735: D72 is_<=_than C351 by L734 , L673;
+L736: D72 <= ( "/\" (C351 , C349) ) by L735 , L729 , L318;
+thus L737: C352 <= D71 by L736 , L657;
+end;
+consider C353 being (Element of C349) such that L738: C351 is_>=_than C353 and L739: (for B383 being (Element of C349) holds (C351 is_>=_than B383 implies B383 <= C353)) and L740: (for B384 being (Element of C349) holds ((C351 is_>=_than B384 & (for B385 being (Element of C349) holds (C351 is_>=_than B385 implies B385 <= B384))) implies B384 = C353)) by L729 , L165;
+L741: C353 = ( "/\" (C351 , C349) ) by L729 , L738 , L739 , L318;
+thus L742:  ex_inf_of C351 , C350
+proof
+take D71;
+thus L743: (D71 is_<=_than C351 & (for B386 being (Element of C350) holds (B386 is_<=_than C351 implies B386 <= D71))) by L731;
+let C354 being (Element of C350);
+reconsider D73 = C354 as (Element of C349) by L649;
+assume L744: C351 is_>=_than C354;
+L745: C351 is_>=_than D73 by L744 , L673;
+assume L746: (for B387 being (Element of C350) holds (C351 is_>=_than B387 implies B387 <= C354));
+L747: D71 <= C354 by L746 , L731;
+L748:
+now
+let C355 being (Element of C349);
+assume L749: C351 is_>=_than C355;
+L750: C355 <= C353 by L749 , L739;
+L751: C353 <= D73 by L741 , L747 , L652;
+thus L752: C355 <= D73 by L751 , L750 , ORDERS_2:3;
+end;
+thus L753: thesis by L748 , L729 , L745 , L318;
+end;
+
+thus L754: thesis by L742 , L731 , L318;
+end;
+theorem
+L755: (for B388 being non  empty  transitive RelStr holds (for B389 being non  empty  full (SubRelStr of B388) holds (for B390 being (Subset of B389) holds (( ex_sup_of B390 , B388 & ( "\/" (B390 , B388) ) in (the carrier of B389)) implies ( ex_sup_of B390 , B389 & ( "\/" (B390 , B389) ) = ( "\/" (B390 , B388) ))))))
+proof
+let C356 being non  empty  transitive RelStr;
+let C357 being non  empty  full (SubRelStr of C356);
+let C358 being (Subset of C357);
+assume that
+L756:  ex_sup_of C358 , C356
+and
+L757: ( "\/" (C358 , C356) ) in (the carrier of C357);
+reconsider D74 = ( "\/" (C358 , C356) ) as (Element of C357) by L757;
+L758:
+now
+L759: ( "\/" (C358 , C356) ) is_>=_than C358 by L756 , L309;
+thus L760: D74 is_>=_than C358 by L759 , L664;
+let C359 being (Element of C357);
+reconsider D75 = C359 as (Element of C356) by L649;
+assume L761: C359 is_>=_than C358;
+L762: D75 is_>=_than C358 by L761 , L673;
+L763: D75 >= ( "\/" (C358 , C356) ) by L762 , L756 , L309;
+thus L764: C359 >= D74 by L763 , L657;
+end;
+consider C360 being (Element of C356) such that L765: C358 is_<=_than C360 and L766: (for B391 being (Element of C356) holds (C358 is_<=_than B391 implies B391 >= C360)) and L767: (for B392 being (Element of C356) holds ((C358 is_<=_than B392 & (for B393 being (Element of C356) holds (C358 is_<=_than B393 implies B393 >= B392))) implies B392 = C360)) by L756 , L164;
+L768: C360 = ( "\/" (C358 , C356) ) by L756 , L765 , L766 , L309;
+thus L769:  ex_sup_of C358 , C357
+proof
+take D74;
+thus L770: (D74 is_>=_than C358 & (for B394 being (Element of C357) holds (B394 is_>=_than C358 implies B394 >= D74))) by L758;
+let C361 being (Element of C357);
+reconsider D76 = C361 as (Element of C356) by L649;
+assume L771: C358 is_<=_than C361;
+L772: C358 is_<=_than D76 by L771 , L673;
+assume L773: (for B395 being (Element of C357) holds (C358 is_<=_than B395 implies B395 >= C361));
+L774: D74 >= C361 by L773 , L758;
+L775:
+now
+let C362 being (Element of C356);
+assume L776: C358 is_<=_than C362;
+L777: C362 >= C360 by L776 , L766;
+L778: C360 >= D76 by L768 , L774 , L652;
+thus L779: C362 >= D76 by L778 , L777 , ORDERS_2:3;
+end;
+thus L780: thesis by L775 , L756 , L772 , L309;
+end;
+
+thus L781: thesis by L769 , L758 , L309;
+end;
+theorem
+L782: (for B396 being non  empty  transitive RelStr holds (for B397 being non  empty  full (SubRelStr of B396) holds (for B398 , B399 being (Element of B397) holds (( ex_inf_of { B398 , B399 } , B396 & ( "/\" ({ B398 , B399 } , B396) ) in (the carrier of B397)) implies ( ex_inf_of { B398 , B399 } , B397 & ( "/\" ({ B398 , B399 } , B397) ) = ( "/\" ({ B398 , B399 } , B396) )))))) by L728;
+theorem
+L783: (for B400 being non  empty  transitive RelStr holds (for B401 being non  empty  full (SubRelStr of B400) holds (for B402 , B403 being (Element of B401) holds (( ex_sup_of { B402 , B403 } , B400 & ( "\/" ({ B402 , B403 } , B400) ) in (the carrier of B401)) implies ( ex_sup_of { B402 , B403 } , B401 & ( "\/" ({ B402 , B403 } , B401) ) = ( "\/" ({ B402 , B403 } , B400) )))))) by L755;
+registration
+let C363 being  with_infima  antisymmetric  transitive RelStr;
+cluster  ->  with_infima for non  empty  meet-inheriting  full non  empty  meet-inheriting  full non  empty  meet-inheriting  full non  empty  meet-inheriting  full (SubRelStr of C363);
+coherence
+proof
+let C364 being non  empty  meet-inheriting  full (SubRelStr of C363);
+L784:
+now
+let C365 , C366 being (Element of C364);
+reconsider D77 = C365 , D78 = C366 as (Element of C363) by L649;
+L785:  ex_inf_of { D77 , D78 } , C363 by L289;
+L786: ( "/\" ({ D77 , D78 } , C363) ) in (the carrier of C364) by L785 , L708;
+thus L787:  ex_inf_of { C365 , C366 } , C364 by L786 , L785 , L728;
+end;
+thus L788: thesis by L784 , L289;
+end;
+end;
+registration
+let C367 being  with_suprema  antisymmetric  transitive RelStr;
+cluster  ->  with_suprema for non  empty  join-inheriting  full non  empty  join-inheriting  full non  empty  join-inheriting  full non  empty  join-inheriting  full (SubRelStr of C367);
+coherence
+proof
+let C368 being non  empty  join-inheriting  full (SubRelStr of C367);
+L790:
+now
+let C369 , C370 being (Element of C368);
+reconsider D79 = C369 , D80 = C370 as (Element of C367) by L649;
+L791:  ex_sup_of { D79 , D80 } , C367 by L281;
+L792: ( "\/" ({ D79 , D80 } , C367) ) in (the carrier of C368) by L791 , L709;
+thus L793:  ex_sup_of { C369 , C370 } , C368 by L792 , L791 , L755;
+end;
+thus L794: thesis by L790 , L281;
+end;
+end;
+theorem
+L796: (for B404 being  complete non  empty Poset holds (for B405 being non  empty  full (SubRelStr of B404) holds (for B406 being (Subset of B405) holds (( "/\" (B406 , B404) ) in (the carrier of B405) implies ( "/\" (B406 , B405) ) = ( "/\" (B406 , B404) )))))
+proof
+let C371 being  complete non  empty Poset;
+let C372 being non  empty  full (SubRelStr of C371);
+let C373 being (Subset of C372);
+assume that
+L797: ( "/\" (C373 , C371) ) in (the carrier of C372);
+L798:  ex_inf_of C373 , C371 by L222;
+thus L799: thesis by L798 , L797 , L728;
+end;
+theorem
+L800: (for B407 being  complete non  empty Poset holds (for B408 being non  empty  full (SubRelStr of B407) holds (for B409 being (Subset of B408) holds (( "\/" (B409 , B407) ) in (the carrier of B408) implies ( "\/" (B409 , B408) ) = ( "\/" (B409 , B407) )))))
+proof
+let C374 being  complete non  empty Poset;
+let C375 being non  empty  full (SubRelStr of C374);
+let C376 being (Subset of C375);
+assume that
+L801: ( "\/" (C376 , C374) ) in (the carrier of C375);
+L802:  ex_sup_of C376 , C374 by L222;
+thus L803: thesis by L802 , L801 , L755;
+end;
+theorem
+L804: (for B410 being  with_infima Poset holds (for B411 being  meet-inheriting non  empty  full (SubRelStr of B410) holds (for B412 , B413 being (Element of B411) holds (for B414 , B415 being (Element of B410) holds ((B414 = B412 & B415 = B413) implies ( B412 "/\" B413 ) = ( B414 "/\" B415 ))))))
+proof
+let C377 being  with_infima Poset;
+let C378 being  meet-inheriting non  empty  full (SubRelStr of C377);
+let C379 , C380 being (Element of C378);
+let C381 , C382 being (Element of C377);
+assume that
+L805: (C381 = C379 & C382 = C380);
+L806:  ex_inf_of { C381 , C382 } , C377 by L289;
+L807: ( "/\" ({ C379 , C380 } , C377) ) in (the carrier of C378) by L806 , L805 , L708;
+L808: ( "/\" ({ C379 , C380 } , C378) ) = ( "/\" ({ C379 , C380 } , C377) ) by L807 , L805 , L806 , L728;
+L809: ( C381 "/\" C382 ) = ( inf { C381 , C382 } ) by L471;
+thus L810: thesis by L809 , L805 , L808 , L471;
+end;
+theorem
+L811: (for B416 being  with_suprema Poset holds (for B417 being  join-inheriting non  empty  full (SubRelStr of B416) holds (for B418 , B419 being (Element of B417) holds (for B420 , B421 being (Element of B416) holds ((B420 = B418 & B421 = B419) implies ( B418 "\/" B419 ) = ( B420 "\/" B421 ))))))
+proof
+let C383 being  with_suprema Poset;
+let C384 being  join-inheriting non  empty  full (SubRelStr of C383);
+let C385 , C386 being (Element of C384);
+let C387 , C388 being (Element of C383);
+assume that
+L812: (C387 = C385 & C388 = C386);
+L813:  ex_sup_of { C387 , C388 } , C383 by L281;
+L814: ( "\/" ({ C385 , C386 } , C383) ) in (the carrier of C384) by L813 , L812 , L709;
+L815: ( "\/" ({ C385 , C386 } , C384) ) = ( "\/" ({ C385 , C386 } , C383) ) by L814 , L812 , L813 , L755;
+L816: ( C387 "\/" C388 ) = ( sup { C387 , C388 } ) by L480;
+thus L817: thesis by L816 , L812 , L815 , L480;
+end;

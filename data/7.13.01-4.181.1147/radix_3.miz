@@ -1,0 +1,884 @@
+:: Improvement of Radix-$2^k$ Signed-Digit Number for High Speed Circuit
+::  by Masaaki Niimura and Yasushi Fuwa
+::
+:: Received January 3, 2003
+:: Copyright (c) 2003-2012 Association of Mizar Users
+::           (Stowarzyszenie Uzytkownikow Mizara, Bialystok, Poland).
+:: This code can be distributed under the GNU General Public Licence
+:: version 3.0 or later, or the Creative Commons Attribution-ShareAlike
+:: License version 3.0 or later, subject to the binding interpretation
+:: detailed in file COPYING.interpretation.
+:: See COPYING.GPL and COPYING.CC-BY-SA for the full text of these
+:: licenses, or see http://www.gnu.org/licenses/gpl.html and
+:: http://creativecommons.org/licenses/by-sa/3.0/.
+
+environ
+
+ vocabularies NUMBERS, NAT_1, INT_1, XXREAL_0, RADIX_1, ARYTM_1, ARYTM_3,
+      POWER, RELAT_1, CARD_1, FINSEQ_1, NEWTON, SUBSET_1, TARSKI, XBOOLE_0,
+      FINSEQ_2, FUNCT_1, PARTFUN1, CARD_3, ORDINAL4, RADIX_3;
+ notations TARSKI, XBOOLE_0, SUBSET_1, NUMBERS, XCMPLX_0, XXREAL_0, INT_1,
+      ORDINAL1, NAT_D, FUNCT_1, PARTFUN1, NEWTON, POWER, FINSEQ_1, FINSEQ_2,
+      GR_CY_1, RADIX_1;
+ constructors REAL_1, NAT_D, NEWTON, POWER, BINARITH, GR_CY_1, RADIX_1,
+      RELSET_1;
+ registrations RELSET_1, NUMBERS, XXREAL_0, XREAL_0, NAT_1, INT_1, MEMBERED,
+      NEWTON, XBOOLE_0, VALUED_0, FINSEQ_2, CARD_1;
+ requirements REAL, NUMERALS, SUBSET, BOOLE, ARITHM;
+ definitions TARSKI, RADIX_1;
+ theorems RADIX_1, POWER, NAT_1, INT_1, FUNCT_1, FINSEQ_1, FINSEQ_2, PRE_FF,
+      NEWTON, RVSUM_1, PREPOWER, JORDAN12, FINSEQ_3, RADIX_2, XREAL_1,
+      XXREAL_0, NAT_D, ORDINAL1, PARTFUN1, XREAL_0, CARD_1;
+ schemes NAT_1, FINSEQ_2;
+
+begin
+L1: (for R4 being Nat holds (1 <= R4 implies ( Radix R4 ) = ( ( Radix ( R4 -' 1 ) ) + ( Radix ( R4 -' 1 ) ) )))
+proof
+let R4 being Nat;
+assume L2: 1 <= R4;
+L3: ( Radix R4 ) = ( 2 to_power ( ( R4 -' 1 ) + 1 ) ) by L2 , XREAL_1:235
+.= ( ( 2 to_power 1 ) * ( 2 to_power ( R4 -' 1 ) ) ) by POWER:27
+.= ( 2 * ( Radix ( R4 -' 1 ) ) ) by POWER:25
+.= ( ( Radix ( R4 -' 1 ) ) + ( Radix ( R4 -' 1 ) ) );
+thus L4: thesis by L3;
+end;
+L5: (for R4 being Nat holds (1 <= R4 implies ( ( Radix R4 ) - ( Radix ( R4 -' 1 ) ) ) = ( Radix ( R4 -' 1 ) )))
+proof
+let R4 being Nat;
+assume L6: 1 <= R4;
+L7: ( ( Radix R4 ) + ( 0 ) ) = ( ( Radix ( R4 -' 1 ) ) + ( Radix ( R4 -' 1 ) ) ) by L6 , L1;
+thus L8: thesis by L7;
+end;
+L9: (for R4 being Nat holds (1 <= R4 implies ( ( - ( Radix R4 ) ) + ( Radix ( R4 -' 1 ) ) ) = ( - ( Radix ( R4 -' 1 ) ) )))
+proof
+let R4 being Nat;
+assume L10: 1 <= R4;
+L11: ( - ( ( Radix R4 ) - ( Radix ( R4 -' 1 ) ) ) ) = ( - ( Radix ( R4 -' 1 ) ) ) by L10 , L5;
+thus L12: thesis by L11;
+end;
+L13: (for B1 being Nat holds (1 <= B1 implies 2 <= ( Radix B1 )))
+proof
+defpred S1[ Nat ] means 2 <= ( Radix $1 );
+let R4 being Nat;
+assume L14: 1 <= R4;
+L15: (for B2 being Nat holds ((B2 >= 1 & S1[ B2 ]) implies S1[ ( B2 + 1 ) ]))
+proof
+let C1 being Nat;
+assume that
+L16: 1 <= C1
+and
+L17: 2 <= ( Radix C1 );
+L18: ( Radix ( C1 + 1 ) ) = ( ( 2 to_power 1 ) * ( 2 to_power C1 ) ) by POWER:27
+.= ( 2 * ( Radix C1 ) ) by POWER:25;
+L19: ( Radix C1 ) > 1 by L17 , XXREAL_0:2;
+thus L20: thesis by L19 , L18 , XREAL_1:155;
+end;
+L21: S1[ 1 ] by POWER:25;
+L22: (for B3 being Nat holds (1 <= B3 implies S1[ B3 ])) from NAT_1:sch 8(L21 , L15);
+thus L23: thesis by L22 , L14;
+end;
+L24: (for R2 being Nat holds (for R3 being Nat holds (for R4 being Nat holds (for R1 being Nat holds (R1 in ( Seg R2 ) implies ( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , R1) ) = ( DigA (( DecSD (( R3 mod ( ( Radix R4 ) |^ R2 ) ) , R2 , R4) ) , R1) ))))))
+proof
+let R2 being Nat;
+let R3 being Nat;
+let R4 being Nat;
+let R1 being Nat;
+assume L25: R1 in ( Seg R2 );
+L26: R1 <= R2 by L25 , FINSEQ_1:1;
+L27: R1 <= ( R2 + 1 ) by L26 , NAT_1:12;
+L28: 1 <= R1 by L25 , FINSEQ_1:1;
+L29: R1 in ( Seg ( R2 + 1 ) ) by L28 , L27 , FINSEQ_1:1;
+L30: ( ( Radix R4 ) |^ R1 ) divides ( ( Radix R4 ) |^ R2 ) by L26 , NEWTON:89;
+consider C2 being Nat such that L31: ( ( Radix R4 ) |^ R2 ) = ( ( ( Radix R4 ) |^ R1 ) * C2 ) by L30 , NAT_D:def 3;
+L32: ( Radix R4 ) <> ( 0 ) by POWER:34;
+L33: C2 <> ( 0 ) by L32 , L31 , PREPOWER:5;
+L34: ( DigA (( DecSD (( R3 mod ( ( Radix R4 ) |^ R2 ) ) , R2 , R4) ) , R1) ) = ( DigitDC (( R3 mod ( ( Radix R4 ) |^ R2 ) ) , R1 , R4) ) by L25 , RADIX_1:def 9
+.= ( DigitDC (R3 , R1 , R4) ) by L31 , L33 , RADIX_1:3
+.= ( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , R1) ) by L29 , RADIX_1:def 9;
+thus L35: thesis by L34;
+end;
+definition
+let R4 being Nat;
+func R4 -SD_Sub_S equals 
+{ B4 where B4 is (Element of ( INT )) : (B4 >= ( - ( Radix ( R4 -' 1 ) ) ) & B4 <= ( ( Radix ( R4 -' 1 ) ) - 1 )) };
+correctness;
+func R4 -SD_Sub equals 
+{ B5 where B5 is (Element of ( INT )) : (B5 >= ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) & B5 <= ( Radix ( R4 -' 1 ) )) };
+correctness;
+end;
+theorem
+L37: (for R4 being Nat holds (for R6 being Integer holds (R6 in ( R4 -SD_Sub ) implies (( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) <= R6 & R6 <= ( Radix ( R4 -' 1 ) )))))
+proof
+let R4 being Nat;
+let R6 being Integer;
+assume L38: R6 in ( R4 -SD_Sub );
+L39: (ex B6 being (Element of ( INT )) st (B6 = R6 & ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) <= B6 & B6 <= ( Radix ( R4 -' 1 ) ))) by L38;
+thus L40: thesis by L39;
+end;
+theorem
+L41: (for R4 being Nat holds ( R4 -SD_Sub_S ) c= ( R4 -SD_Sub ))
+proof
+let R4 being Nat;
+let C3 being set;
+assume L42: C3 in ( R4 -SD_Sub_S );
+consider C4 being (Element of ( INT )) such that L43: C3 = C4 and L44: C4 >= ( - ( Radix ( R4 -' 1 ) ) ) and L45: C4 <= ( ( Radix ( R4 -' 1 ) ) - 1 ) by L42;
+L46: ( ( Radix ( R4 -' 1 ) ) + 1 ) >= ( ( Radix ( R4 -' 1 ) ) + ( 0 ) ) by XREAL_1:7;
+L47: ( - ( Radix ( R4 -' 1 ) ) ) >= ( - ( ( Radix ( R4 -' 1 ) ) + 1 ) ) by L46 , XREAL_1:24;
+L48: C4 >= ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) by L47 , L44 , XXREAL_0:2;
+L49: ( ( Radix ( R4 -' 1 ) ) + ( 0 ) ) >= ( ( Radix ( R4 -' 1 ) ) + ( - 1 ) ) by XREAL_1:7;
+L50: ( Radix ( R4 -' 1 ) ) >= C4 by L49 , L45 , XXREAL_0:2;
+thus L51: thesis by L50 , L43 , L48;
+end;
+theorem
+L52: (for R4 being Nat holds ( R4 -SD_Sub_S ) c= ( ( R4 + 1 ) -SD_Sub_S ))
+proof
+let R4 being Nat;
+let C5 being set;
+assume L53: C5 in ( R4 -SD_Sub_S );
+consider C6 being (Element of ( INT )) such that L54: C5 = C6 and L55: C6 >= ( - ( Radix ( R4 -' 1 ) ) ) and L56: C6 <= ( ( Radix ( R4 -' 1 ) ) - 1 ) by L53;
+L57: ( R4 -' 1 ) <= R4 by NAT_D:44;
+L58: ( 2 to_power ( R4 -' 1 ) ) <= ( 2 to_power R4 ) by L57 , PRE_FF:8;
+L59: ( ( Radix ( R4 -' 1 ) ) - 1 ) <= ( ( Radix R4 ) - 1 ) by L58 , XREAL_1:9;
+L60: ( ( Radix ( R4 -' 1 ) ) - 1 ) <= ( ( Radix ( ( R4 + 1 ) -' 1 ) ) - 1 ) by L59 , NAT_D:34;
+L61: C6 <= ( ( Radix ( ( R4 + 1 ) -' 1 ) ) - 1 ) by L60 , L56 , XXREAL_0:2;
+L62: ( - ( Radix ( R4 -' 1 ) ) ) >= ( - ( Radix R4 ) ) by L58 , XREAL_1:24;
+L63: ( - ( Radix ( R4 -' 1 ) ) ) >= ( - ( Radix ( ( R4 + 1 ) -' 1 ) ) ) by L62 , NAT_D:34;
+L64: C6 >= ( - ( Radix ( ( R4 + 1 ) -' 1 ) ) ) by L63 , L55 , XXREAL_0:2;
+thus L65: thesis by L64 , L54 , L61;
+end;
+theorem
+L66: (for R4 being Nat holds (2 <= R4 implies ( R4 -SD_Sub ) c= ( R4 -SD )))
+proof
+let R4 being Nat;
+assume L67: 2 <= R4;
+L68: ( 1 + 1 ) <= R4 by L67;
+L69: 1 <= ( R4 -' 1 ) by L68 , NAT_D:55;
+L70: ( Radix ( R4 -' 1 ) ) >= 2 by L69 , L13;
+L71: ( Radix ( R4 -' 1 ) ) >= 1 by L70 , XXREAL_0:2;
+L72: ( - ( Radix ( R4 -' 1 ) ) ) <= ( - 1 ) by L71 , XREAL_1:24;
+L73: ( ( Radix R4 ) + ( - ( Radix ( R4 -' 1 ) ) ) ) <= ( ( Radix R4 ) + ( - 1 ) ) by L72 , XREAL_1:7;
+let C7 being set;
+assume L74: C7 in ( R4 -SD_Sub );
+consider C8 being (Element of ( INT )) such that L75: C7 = C8 and L76: C8 >= ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) and L77: C8 <= ( Radix ( R4 -' 1 ) ) by L74;
+L78: ( ( Radix ( R4 -' 1 ) ) + ( Radix ( R4 -' 1 ) ) ) >= ( ( Radix ( R4 -' 1 ) ) + 2 ) by L70 , XREAL_1:6;
+L79: ( ( Radix R4 ) + ( 0 ) ) >= ( ( ( Radix ( R4 -' 1 ) ) + 1 ) + 1 ) by L78 , L67 , L1 , XXREAL_0:2;
+L80: ( ( Radix R4 ) - 1 ) >= ( ( ( Radix ( R4 -' 1 ) ) + 1 ) - ( 0 ) ) by L79 , XREAL_1:21;
+L81: ( - ( ( Radix ( R4 -' 1 ) ) + 1 ) ) >= ( - ( ( Radix R4 ) - 1 ) ) by L80 , XREAL_1:24;
+L82: C8 >= ( ( - ( Radix R4 ) ) + 1 ) by L81 , L76 , XXREAL_0:2;
+L83: ( ( Radix R4 ) + ( 0 ) ) = ( ( Radix ( R4 -' 1 ) ) + ( Radix ( R4 -' 1 ) ) ) by L67 , L1 , XXREAL_0:2;
+L84: C8 <= ( ( Radix R4 ) - 1 ) by L83 , L77 , L73 , XXREAL_0:2;
+thus L85: thesis by L84 , L75 , L82;
+end;
+theorem
+L86: ( 0 ) in ( ( 0 ) -SD_Sub_S )
+proof
+reconsider D1 = ( 0 ) as Integer;
+L87: ( 0 ) > ( ( 0 ) - 1 );
+L88: ( ( 0 ) -' 1 ) = ( 0 ) by L87 , XREAL_0:def 2;
+L89: ( Radix ( ( 0 ) -' 1 ) ) = 1 by L88 , POWER:24;
+L90: D1 is (Element of ( INT )) by INT_1:def 2;
+thus L91: thesis by L90 , L89;
+end;
+theorem
+L92: (for R4 being Nat holds ( 0 ) in ( R4 -SD_Sub_S ))
+proof
+let R4 being Nat;
+defpred S2[ Nat ] means ( 0 ) in ( $1 -SD_Sub_S );
+L93: (for B7 being Nat holds (S2[ B7 ] implies S2[ ( B7 + 1 ) ]))
+proof
+let C9 being Nat;
+assume L94: ( 0 ) in ( C9 -SD_Sub_S );
+L95: ( C9 -SD_Sub_S ) c= ( ( C9 + 1 ) -SD_Sub_S ) by L52;
+thus L96: thesis by L95 , L94;
+end;
+L97: S2[ ( 0 ) ] by L86;
+L98: (for B8 being Nat holds S2[ B8 ]) from NAT_1:sch 2(L97 , L93);
+thus L99: thesis by L98;
+end;
+theorem
+L100: (for R4 being Nat holds ( 0 ) in ( R4 -SD_Sub ))
+proof
+let R4 being Nat;
+L101: (( 0 ) in ( R4 -SD_Sub_S ) & ( R4 -SD_Sub_S ) c= ( R4 -SD_Sub )) by L41 , L92;
+thus L102: thesis by L101;
+end;
+theorem
+L103: (for R4 being Nat holds (for B9 being set holds (B9 in ( R4 -SD_Sub ) implies B9 is Integer)))
+proof
+let R4 being Nat;
+let C10 being set;
+assume L104: C10 in ( R4 -SD_Sub );
+L105: (ex B10 being (Element of ( INT )) st (C10 = B10 & B10 >= ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) & B10 <= ( Radix ( R4 -' 1 ) ))) by L104;
+thus L106: thesis by L105;
+end;
+theorem
+L107: (for R4 being Nat holds ( R4 -SD_Sub ) c= ( INT ))
+proof
+let R4 being Nat;
+let C11 being set;
+assume L108: C11 in ( R4 -SD_Sub );
+L109: C11 is Integer by L108 , L103;
+thus L110: thesis by L109 , INT_1:def 2;
+end;
+theorem
+L111: (for R4 being Nat holds ( R4 -SD_Sub_S ) c= ( INT ))
+proof
+let R4 being Nat;
+let C12 being set;
+assume L112: C12 in ( R4 -SD_Sub_S );
+L113: ( R4 -SD_Sub_S ) c= ( R4 -SD_Sub ) by L41;
+L114: C12 is Integer by L113 , L112 , L103;
+thus L115: thesis by L114 , INT_1:def 2;
+end;
+registration
+let R4 being Nat;
+cluster ( R4 -SD_Sub_S ) -> non  empty;
+coherence by L92;
+cluster ( R4 -SD_Sub ) -> non  empty;
+coherence by L100;
+end;
+definition
+let R4 being Nat;
+redefine func R4 -SD_Sub_S -> non  empty (Subset of ( INT ));
+
+coherence by L111;
+end;
+definition
+let R4 being Nat;
+redefine func R4 -SD_Sub -> non  empty (Subset of ( INT ));
+
+coherence by L107;
+end;
+theorem
+L119: (for R1 being Nat holds (for R2 being Nat holds (for R4 being Nat holds (for R9 being (Tuple of R2 , ( R4 -SD_Sub )) holds (R1 in ( Seg R2 ) implies ( R9 . R1 ) is (Element of ( R4 -SD_Sub )))))))
+proof
+let R1 being Nat;
+let R2 being Nat;
+let R4 being Nat;
+let R9 being (Tuple of R2 , ( R4 -SD_Sub ));
+L120: ( len R9 ) = R2 by CARD_1:def 7;
+assume L121: R1 in ( Seg R2 );
+L122: R1 in ( dom R9 ) by L121 , L120 , FINSEQ_1:def 3;
+L123: ( R9 . R1 ) in ( rng R9 ) by L122 , FUNCT_1:def 3;
+L124: ( rng R9 ) c= ( R4 -SD_Sub ) by FINSEQ_1:def 4;
+thus L125: thesis by L124 , L123;
+end;
+begin
+definition
+let C13 being Integer;
+let C14 being Nat;
+func SDSub_Add_Carry (C13 , C14) -> Integer equals 
+:L126: 1 if ( Radix ( C14 -' 1 ) ) <= C13 , ( - 1 ) if C13 < ( - ( Radix ( C14 -' 1 ) ) ) otherwise ( 0 );
+coherence;
+consistency;
+end;
+definition
+let C15 being Integer;
+let C16 being Nat;
+func SDSub_Add_Data (C15 , C16) -> Integer equals 
+( C15 - ( ( Radix C16 ) * ( SDSub_Add_Carry (C15 , C16) ) ) );
+coherence;
+end;
+theorem
+L129: (for B11 being Integer holds (for B12 being Nat holds (( - 1 ) <= ( SDSub_Add_Carry (B11 , B12) ) & ( SDSub_Add_Carry (B11 , B12) ) <= 1)))
+proof
+let C17 being Integer;
+let C18 being Nat;
+per cases ;
+suppose L130: C17 < ( - ( Radix ( C18 -' 1 ) ) );
+
+thus L131: thesis by L130 , L126;
+end;
+suppose L132: (( - ( Radix ( C18 -' 1 ) ) ) <= C17 & C17 < ( Radix ( C18 -' 1 ) ));
+
+thus L133: thesis by L132 , L126;
+end;
+suppose L134: C17 >= ( Radix ( C18 -' 1 ) );
+
+thus L135: thesis by L134 , L126;
+end;
+end;
+theorem
+L137: (for R4 being Nat holds (for R6 being Integer holds ((2 <= R4 & R6 in ( R4 -SD )) implies (( SDSub_Add_Data (R6 , R4) ) >= ( - ( Radix ( R4 -' 1 ) ) ) & ( SDSub_Add_Data (R6 , R4) ) <= ( ( Radix ( R4 -' 1 ) ) - 1 )))))
+proof
+let R4 being Nat;
+let R6 being Integer;
+assume that
+L138: 2 <= R4
+and
+L139: R6 in ( R4 -SD );
+L140: (( ( - ( Radix R4 ) ) + 1 ) <= R6 & 1 <= R4) by L138 , L139 , RADIX_1:13 , XXREAL_0:2;
+L141:
+now
+per cases ;
+case L142: R6 < ( - ( Radix ( R4 -' 1 ) ) );
+L143: ( R6 + 1 ) <= ( - ( Radix ( R4 -' 1 ) ) ) by L142 , INT_1:7;
+L144: R6 <= ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) by L143 , XREAL_1:19;
+L145: ( R6 + ( Radix R4 ) ) <= ( ( Radix R4 ) + ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) ) by L144 , XREAL_1:7;
+L146: ( R6 + ( Radix R4 ) ) <= ( ( ( Radix R4 ) - ( Radix ( R4 -' 1 ) ) ) - 1 ) by L145;
+L147: ( SDSub_Add_Carry (R6 , R4) ) = ( - 1 ) by L142 , L126;
+thus L148: thesis by L147 , L140 , L146 , L5 , XREAL_1:19;
+end;
+case L149: (( - ( Radix ( R4 -' 1 ) ) ) <= R6 & R6 < ( Radix ( R4 -' 1 ) ));
+L150: (( SDSub_Add_Carry (R6 , R4) ) = ( 0 ) & ( R6 + 1 ) <= ( Radix ( R4 -' 1 ) )) by L149 , L126 , INT_1:7;
+thus L151: thesis by L150 , L149 , XREAL_1:19;
+end;
+case L152: ( Radix ( R4 -' 1 ) ) <= R6;
+L153: R6 <= ( ( Radix R4 ) + ( - 1 ) ) by L139 , RADIX_1:13;
+L154: (( ( 0 ) - 1 ) <= ( ( Radix ( R4 -' 1 ) ) - 1 ) & ( R6 - ( Radix R4 ) ) <= ( - 1 )) by L153 , XREAL_1:9 , XREAL_1:20;
+L155: (( SDSub_Add_Carry (R6 , R4) ) = 1 & ( ( Radix ( R4 -' 1 ) ) + ( - ( Radix R4 ) ) ) <= ( R6 + ( - ( Radix R4 ) ) )) by L152 , L126 , XREAL_1:6;
+thus L156: thesis by L155 , L138 , L154 , L9 , XXREAL_0:2;
+end;
+end;
+thus L158: thesis by L141;
+end;
+theorem
+L159: (for B13 being Integer holds (for B14 being Nat holds (2 <= B14 implies ( SDSub_Add_Carry (B13 , B14) ) in ( B14 -SD_Sub_S ))))
+proof
+let C19 being Integer;
+let C20 being Nat;
+L160: ( SDSub_Add_Carry (C19 , C20) ) <= 1 by L129;
+assume L161: C20 >= 2;
+L162: C20 > 1 by L161 , XXREAL_0:2;
+L163: ( C20 - 1 ) > ( 1 - 1 ) by L162 , XREAL_1:14;
+L164: ( C20 -' 1 ) > ( 0 ) by L163 , XREAL_0:def 2;
+L165: ( 2 to_power ( C20 -' 1 ) ) > 1 by L164 , POWER:35;
+L166: ( - ( Radix ( C20 -' 1 ) ) ) <= ( - 1 ) by L165 , XREAL_1:24;
+L167: ( - 1 ) <= ( SDSub_Add_Carry (C19 , C20) ) by L129;
+L168: ( SDSub_Add_Carry (C19 , C20) ) >= ( - ( Radix ( C20 -' 1 ) ) ) by L167 , L166 , XXREAL_0:2;
+L169: ( ( Radix ( C20 -' 1 ) ) - 1 ) >= 1 by L164 , INT_1:52 , POWER:35;
+L170: ( SDSub_Add_Carry (C19 , C20) ) <= ( ( Radix ( C20 -' 1 ) ) - 1 ) by L169 , L160 , XXREAL_0:2;
+L171: ( SDSub_Add_Carry (C19 , C20) ) is (Element of ( INT )) by INT_1:def 2;
+thus L172: thesis by L171 , L170 , L168;
+end;
+theorem
+L173: (for R4 being Nat holds (for R6 being Integer holds (for R7 being Integer holds ((2 <= R4 & R6 in ( R4 -SD )) implies ( ( SDSub_Add_Data (R6 , R4) ) + ( SDSub_Add_Carry (R7 , R4) ) ) in ( R4 -SD_Sub )))))
+proof
+let R4 being Nat;
+let R6 being Integer;
+let R7 being Integer;
+L174: ( SDSub_Add_Carry (R7 , R4) ) >= ( - 1 ) by L129;
+assume L175: (2 <= R4 & R6 in ( R4 -SD ));
+L176: ( SDSub_Add_Data (R6 , R4) ) >= ( - ( Radix ( R4 -' 1 ) ) ) by L175 , L137;
+L177: ( ( SDSub_Add_Data (R6 , R4) ) + ( SDSub_Add_Carry (R7 , R4) ) ) >= ( ( - ( Radix ( R4 -' 1 ) ) ) + ( - 1 ) ) by L176 , L174 , XREAL_1:7;
+L178: ( SDSub_Add_Carry (R7 , R4) ) <= 1 by L129;
+L179: ( SDSub_Add_Data (R6 , R4) ) <= ( ( Radix ( R4 -' 1 ) ) - 1 ) by L175 , L137;
+L180: ( ( SDSub_Add_Data (R6 , R4) ) + ( SDSub_Add_Carry (R7 , R4) ) ) <= ( ( ( Radix ( R4 -' 1 ) ) - 1 ) + 1 ) by L179 , L178 , XREAL_1:7;
+L181: ( ( SDSub_Add_Data (R6 , R4) ) + ( SDSub_Add_Carry (R7 , R4) ) ) is (Element of ( INT )) by INT_1:def 2;
+thus L182: thesis by L181 , L177 , L180;
+end;
+theorem
+L183: (for R4 being Nat holds ( SDSub_Add_Carry (( 0 ) , R4) ) = ( 0 ))
+proof
+let R4 being Nat;
+set D2 = ( 0 );
+L184: (( Radix ( R4 -' 1 ) ) <> D2 & ( - ( Radix ( R4 -' 1 ) ) ) <= ( ( 0 ) - ( 0 ) )) by POWER:34;
+thus L185: thesis by L184 , L126;
+end;
+begin
+definition
+let C21 , C22 , C23 being Nat;
+let C24 being (Tuple of C23 , ( C22 -SD_Sub ));
+func DigA_SDSub (C24 , C21) -> Integer equals 
+:L186: ( C24 . C21 ) if C21 in ( Seg C23 ) , ( 0 ) if C21 = ( 0 );
+coherence by INT_1:def 2;
+consistency by FINSEQ_1:1;
+end;
+definition
+let C25 , C26 , C27 being Nat;
+let C28 being (Tuple of C27 , ( C26 -SD ));
+func SD2SDSubDigit (C28 , C25 , C26) -> Integer equals 
+:L188: ( ( SDSub_Add_Data (( DigA (C28 , C25) ) , C26) ) + ( SDSub_Add_Carry (( DigA (C28 , ( C25 -' 1 )) ) , C26) ) ) if C25 in ( Seg C27 ) , ( SDSub_Add_Carry (( DigA (C28 , ( C25 -' 1 )) ) , C26) ) if C25 = ( C27 + 1 ) otherwise ( 0 );
+coherence;
+consistency
+proof
+L189: (C25 in ( Seg C27 ) implies (not C25 = ( C27 + 1 )))
+proof
+assume L190: C25 in ( Seg C27 );
+L191: C25 <= C27 by L190 , FINSEQ_1:1;
+assume L192: C25 = ( C27 + 1 );
+thus L193: contradiction by L192 , L191 , NAT_1:13;
+end;
+thus L194: thesis by L189;
+end;
+end;
+theorem
+L196: (for R1 being Nat holds (for R2 being Nat holds (for R4 being Nat holds (for R8 being (Tuple of R2 , ( R4 -SD )) holds ((2 <= R4 & R1 in ( Seg ( R2 + 1 ) )) implies ( SD2SDSubDigit (R8 , R1 , R4) ) is (Element of ( R4 -SD_Sub )))))))
+proof
+let R1 being Nat;
+let R2 being Nat;
+let R4 being Nat;
+let R8 being (Tuple of R2 , ( R4 -SD ));
+assume that
+L197: 2 <= R4
+and
+L198: R1 in ( Seg ( R2 + 1 ) );
+set D3 = ( ( SDSub_Add_Data (( DigA (R8 , R1) ) , R4) ) + ( SDSub_Add_Carry (( DigA (R8 , ( R1 -' 1 )) ) , R4) ) );
+set D4 = ( SDSub_Add_Carry (( DigA (R8 , ( R1 -' 1 )) ) , R4) );
+L199:
+now
+per cases  by L198 , FINSEQ_2:7;
+suppose L200: R1 in ( Seg R2 );
+
+L201: D3 in ( R4 -SD_Sub )
+proof
+L202: ( DigA (R8 , R1) ) is (Element of ( R4 -SD )) by L200 , RADIX_1:16;
+thus L203: thesis by L202 , L197 , L173;
+end;
+thus L204: ( SD2SDSubDigit (R8 , R1 , R4) ) in ( R4 -SD_Sub ) by L201 , L200 , L188;
+end;
+suppose L205: R1 = ( R2 + 1 );
+
+L206: (( SDSub_Add_Carry (( DigA (R8 , ( R1 -' 1 )) ) , R4) ) in ( R4 -SD_Sub_S ) & ( R4 -SD_Sub_S ) c= ( R4 -SD_Sub )) by L197 , L41 , L159;
+L207: D4 in ( R4 -SD_Sub ) by L206;
+thus L208: ( SD2SDSubDigit (R8 , R1 , R4) ) in ( R4 -SD_Sub ) by L207 , L205 , L188;
+end;
+end;
+thus L210: thesis by L199;
+end;
+definition
+let C29 , C30 , C31 being Nat;
+let C32 being (Tuple of C31 , ( C30 -SD ));
+assume L211: (2 <= C30 & C29 in ( Seg ( C31 + 1 ) ));
+func SD2SDSubDigitS (C32 , C29 , C30) -> (Element of ( C30 -SD_Sub )) equals 
+:L212: ( SD2SDSubDigit (C32 , C29 , C30) );
+coherence by L211 , L196;
+end;
+definition
+let C33 , C34 being Nat;
+let C35 being (Tuple of C33 , ( C34 -SD ));
+func SD2SDSub C35 -> (Tuple of ( C33 + 1 ) , ( C34 -SD_Sub )) means 
+:L214: (for B15 being Nat holds (B15 in ( Seg ( C33 + 1 ) ) implies ( DigA_SDSub (it , B15) ) = ( SD2SDSubDigitS (C35 , B15 , C34) )));
+existence
+proof
+deffunc H1(Nat) = ( SD2SDSubDigitS (C35 , $1 , C34) );
+consider C36 being (FinSequence of ( C34 -SD_Sub )) such that L215: ( len C36 ) = ( C33 + 1 ) and L216: (for B16 being Nat holds (B16 in ( dom C36 ) implies ( C36 . B16 ) = H1(B16))) from FINSEQ_2:sch 1;
+L217: ( dom C36 ) = ( Seg ( C33 + 1 ) ) by L215 , FINSEQ_1:def 3;
+L218: C36 is (Element of ( ( C33 + 1 ) -tuples_on ( C34 -SD_Sub ) )) by L215 , FINSEQ_2:92;
+reconsider D5 = C36 as (Tuple of ( C33 + 1 ) , ( C34 -SD_Sub )) by L218;
+take D5;
+let R1 being Nat;
+assume L219: R1 in ( Seg ( C33 + 1 ) );
+thus L220: ( DigA_SDSub (D5 , R1) ) = ( D5 . R1 ) by L219 , L186
+.= ( SD2SDSubDigitS (C35 , R1 , C34) ) by L216 , L217 , L219;
+end;
+uniqueness
+proof
+let C37 , C38 being (Tuple of ( C33 + 1 ) , ( C34 -SD_Sub ));
+assume that
+L221: (for B17 being Nat holds (B17 in ( Seg ( C33 + 1 ) ) implies ( DigA_SDSub (C37 , B17) ) = ( SD2SDSubDigitS (C35 , B17 , C34) )))
+and
+L222: (for B18 being Nat holds (B18 in ( Seg ( C33 + 1 ) ) implies ( DigA_SDSub (C38 , B18) ) = ( SD2SDSubDigitS (C35 , B18 , C34) )));
+L223: ( len C37 ) = ( C33 + 1 ) by CARD_1:def 7;
+L224: ( dom C37 ) = ( Seg ( C33 + 1 ) ) by L223 , FINSEQ_1:def 3;
+L225:
+now
+let C39 being Nat;
+assume L226: C39 in ( dom C37 );
+L227: ( C37 . C39 ) = ( DigA_SDSub (C37 , C39) ) by L226 , L224 , L186
+.= ( SD2SDSubDigitS (C35 , C39 , C34) ) by L221 , L224 , L226
+.= ( DigA_SDSub (C38 , C39) ) by L222 , L224 , L226
+.= ( C38 . C39 ) by L224 , L226 , L186;
+thus L228: ( C37 . C39 ) = ( C38 . C39 ) by L227;
+end;
+L229: ( len C38 ) = ( C33 + 1 ) by CARD_1:def 7;
+thus L230: thesis by L229 , L223 , L225 , FINSEQ_2:9;
+end;
+end;
+theorem
+L232: (for R1 being Nat holds (for R2 being Nat holds (for R4 being Nat holds (for R9 being (Tuple of R2 , ( R4 -SD_Sub )) holds (R1 in ( Seg R2 ) implies ( DigA_SDSub (R9 , R1) ) is (Element of ( R4 -SD_Sub )))))))
+proof
+let R1 being Nat;
+let R2 being Nat;
+let R4 being Nat;
+let R9 being (Tuple of R2 , ( R4 -SD_Sub ));
+assume L233: R1 in ( Seg R2 );
+L234: ( R9 . R1 ) = ( DigA_SDSub (R9 , R1) ) by L233 , L186;
+thus L235: thesis by L234 , L233 , L119;
+end;
+theorem
+L236: (for R4 being Nat holds (for R6 being Integer holds (for R7 being Integer holds ((2 <= R4 & R6 in ( R4 -SD ) & R7 in ( R4 -SD_Sub )) implies ( SDSub_Add_Data (( R6 + R7 ) , R4) ) in ( R4 -SD_Sub_S )))))
+proof
+let R4 being Nat;
+let R6 being Integer;
+let R7 being Integer;
+assume that
+L237: 2 <= R4
+and
+L238: (R6 in ( R4 -SD ) & R7 in ( R4 -SD_Sub ));
+set D6 = ( R6 + R7 );
+L239: (R6 <= ( ( Radix R4 ) - 1 ) & R7 <= ( Radix ( R4 -' 1 ) )) by L238 , L37 , RADIX_1:13;
+L240: D6 <= ( ( ( Radix R4 ) - 1 ) + ( Radix ( R4 -' 1 ) ) ) by L239 , XREAL_1:7;
+L241: (( ( - ( Radix R4 ) ) + 1 ) <= R6 & ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) <= R7) by L238 , L37 , RADIX_1:13;
+L242: ( ( ( - ( Radix R4 ) ) + 1 ) + ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) ) <= D6 by L241 , XREAL_1:7;
+L243: (( SDSub_Add_Data (D6 , R4) ) >= ( - ( Radix ( R4 -' 1 ) ) ) & ( SDSub_Add_Data (D6 , R4) ) <= ( ( Radix ( R4 -' 1 ) ) - 1 ))
+proof
+L244:
+now
+per cases ;
+case L245: D6 < ( - ( Radix ( R4 -' 1 ) ) );
+L246: ( D6 + 1 ) <= ( - ( Radix ( R4 -' 1 ) ) ) by L245 , INT_1:7;
+L247: D6 <= ( ( - ( Radix ( R4 -' 1 ) ) ) - 1 ) by L246 , XREAL_1:19;
+L248: D6 <= ( ( - ( Radix ( R4 -' 1 ) ) ) + ( - 1 ) ) by L247;
+L249: D6 <= ( ( ( - ( Radix R4 ) ) + ( Radix ( R4 -' 1 ) ) ) + ( - 1 ) ) by L248 , L237 , L9 , XXREAL_0:2;
+L250: D6 <= ( ( - ( Radix R4 ) ) + ( ( Radix ( R4 -' 1 ) ) + ( - 1 ) ) ) by L249;
+L251: ( ( - ( Radix ( R4 -' 1 ) ) ) + ( - ( Radix R4 ) ) ) <= ( D6 + ( 0 ) ) by L242;
+L252: ( ( - ( Radix ( R4 -' 1 ) ) ) - ( 0 ) ) <= ( D6 - ( - ( Radix R4 ) ) ) by L251 , XREAL_1:21;
+L253: ( SDSub_Add_Carry (D6 , R4) ) = ( - 1 ) by L245 , L126;
+thus L254: thesis by L253 , L252 , L250 , XREAL_1:20;
+end;
+case L255: (( - ( Radix ( R4 -' 1 ) ) ) <= D6 & D6 < ( Radix ( R4 -' 1 ) ));
+L256: (( SDSub_Add_Carry (D6 , R4) ) = ( 0 ) & ( D6 + 1 ) <= ( Radix ( R4 -' 1 ) )) by L255 , L126 , INT_1:7;
+thus L257: thesis by L256 , L255 , XREAL_1:19;
+end;
+case L258: ( Radix ( R4 -' 1 ) ) <= D6;
+L259: ( ( Radix R4 ) - ( Radix ( R4 -' 1 ) ) ) <= D6 by L258 , L237 , L5 , XXREAL_0:2;
+L260: ( ( Radix R4 ) + ( - ( Radix ( R4 -' 1 ) ) ) ) <= D6 by L259;
+L261: D6 <= ( ( Radix R4 ) + ( ( Radix ( R4 -' 1 ) ) - 1 ) ) by L240;
+L262: ( SDSub_Add_Carry (D6 , R4) ) = 1 by L258 , L126;
+thus L263: thesis by L262 , L260 , L261 , XREAL_1:19 , XREAL_1:20;
+end;
+end;
+thus L265: thesis by L244;
+end;
+L266: ( SDSub_Add_Data (D6 , R4) ) is (Element of ( INT )) by INT_1:def 2;
+thus L267: thesis by L266 , L243;
+end;
+begin
+definition
+let C40 , C41 , C42 being Nat;
+let C43 being (Tuple of C42 , ( C41 -SD_Sub ));
+func DigB_SDSub (C43 , C40) -> (Element of ( INT )) equals 
+( DigA_SDSub (C43 , C40) );
+coherence by INT_1:def 2;
+end;
+definition
+let C44 , C45 , C46 being Nat;
+let C47 being (Tuple of C46 , ( C45 -SD_Sub ));
+func SDSub2INTDigit (C47 , C44 , C45) -> (Element of ( INT )) equals 
+( ( ( Radix C45 ) |^ ( C44 -' 1 ) ) * ( DigB_SDSub (C47 , C44) ) );
+coherence by INT_1:def 2;
+end;
+definition
+let C48 , C49 being Nat;
+let C50 being (Tuple of C48 , ( C49 -SD_Sub ));
+func SDSub2INT C50 -> (Tuple of C48 , ( INT )) means 
+:L270: (for B19 being Nat holds (B19 in ( Seg C48 ) implies ( it /. B19 ) = ( SDSub2INTDigit (C50 , B19 , C49) )));
+existence
+proof
+deffunc H2(Nat) = ( SDSub2INTDigit (C50 , $1 , C49) );
+consider C51 being (FinSequence of ( INT )) such that L271: ( len C51 ) = C48 and L272: (for B20 being Nat holds (B20 in ( dom C51 ) implies ( C51 . B20 ) = H2(B20))) from FINSEQ_2:sch 1;
+L273: ( dom C51 ) = ( Seg C48 ) by L271 , FINSEQ_1:def 3;
+L274: C51 is (Element of ( C48 -tuples_on ( INT ) )) by L271 , FINSEQ_2:92;
+reconsider D7 = C51 as (Tuple of C48 , ( INT )) by L274;
+take D7;
+let R1 being Nat;
+assume L275: R1 in ( Seg C48 );
+L276: R1 in ( dom D7 ) by L275 , L271 , FINSEQ_1:def 3;
+thus L277: ( D7 /. R1 ) = ( D7 . R1 ) by L276 , PARTFUN1:def 6
+.= ( SDSub2INTDigit (C50 , R1 , C49) ) by L272 , L273 , L275;
+end;
+uniqueness
+proof
+let C52 , C53 being (Tuple of C48 , ( INT ));
+assume that
+L278: (for B21 being Nat holds (B21 in ( Seg C48 ) implies ( C52 /. B21 ) = ( SDSub2INTDigit (C50 , B21 , C49) )))
+and
+L279: (for B22 being Nat holds (B22 in ( Seg C48 ) implies ( C53 /. B22 ) = ( SDSub2INTDigit (C50 , B22 , C49) )));
+L280: ( len C52 ) = C48 by CARD_1:def 7;
+L281: ( dom C52 ) = ( Seg C48 ) by L280 , FINSEQ_1:def 3;
+L282: ( len C53 ) = C48 by CARD_1:def 7;
+L283:
+now
+let C54 being Nat;
+assume L284: C54 in ( dom C52 );
+L285: C54 in ( dom C53 ) by L284 , L282 , L281 , FINSEQ_1:def 3;
+L286: ( C52 . C54 ) = ( C52 /. C54 ) by L284 , PARTFUN1:def 6
+.= ( SDSub2INTDigit (C50 , C54 , C49) ) by L278 , L281 , L284
+.= ( C53 /. C54 ) by L279 , L281 , L284
+.= ( C53 . C54 ) by L285 , PARTFUN1:def 6;
+thus L287: ( C52 . C54 ) = ( C53 . C54 ) by L286;
+end;
+thus L288: thesis by L283 , L280 , L282 , FINSEQ_2:9;
+end;
+end;
+definition
+let C55 , C56 being Nat;
+let C57 being (Tuple of C55 , ( C56 -SD_Sub ));
+func SDSub2IntOut C57 -> Integer equals 
+( Sum ( SDSub2INT C57 ) );
+coherence;
+end;
+theorem
+L291: (for R2 being Nat holds (for R3 being Nat holds (for R4 being Nat holds (for R1 being Nat holds (R1 in ( Seg R2 ) implies (2 <= R4 implies ( DigA_SDSub (( SD2SDSub ( DecSD (R3 , ( R2 + 1 ) , R4) ) ) , R1) ) = ( DigA_SDSub (( SD2SDSub ( DecSD (( R3 mod ( ( Radix R4 ) |^ R2 ) ) , R2 , R4) ) ) , R1) )))))))
+proof
+let R2 being Nat;
+let R3 being Nat;
+let R4 being Nat;
+let R1 being Nat;
+assume L292: R1 in ( Seg R2 );
+reconsider D8 = R1 as (Element of ( NAT )) by ORDINAL1:def 12;
+L293: 1 <= D8 by L292 , FINSEQ_1:1;
+L294: D8 <= R2 by L292 , FINSEQ_1:1;
+L295: D8 <= ( R2 + 1 ) by L294 , NAT_1:12;
+L296: D8 in ( Seg ( R2 + 1 ) ) by L295 , L293 , FINSEQ_1:1;
+L297: D8 <= ( ( R2 + 1 ) + 1 ) by L295 , NAT_1:12;
+L298: D8 in ( Seg ( ( R2 + 1 ) + 1 ) ) by L297 , L293 , FINSEQ_1:1;
+set D9 = ( R3 mod ( ( Radix R4 ) |^ R2 ) );
+assume L299: 2 <= R4;
+L300: ( DigA_SDSub (( SD2SDSub ( DecSD (D9 , R2 , R4) ) ) , D8) ) = ( SD2SDSubDigitS (( DecSD (D9 , R2 , R4) ) , D8 , R4) ) by L296 , L214
+.= ( SD2SDSubDigit (( DecSD (D9 , R2 , R4) ) , D8 , R4) ) by L299 , L296 , L212
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (D9 , R2 , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( DigA (( DecSD (D9 , R2 , R4) ) , ( D8 -' 1 )) ) , R4) ) ) by L292 , L188
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( DigA (( DecSD (D9 , R2 , R4) ) , ( D8 -' 1 )) ) , R4) ) ) by L292 , L24;
+L301:
+now
+per cases ;
+suppose L302: D8 = 1;
+
+L303: ( DigA_SDSub (( SD2SDSub ( DecSD (D9 , R2 , R4) ) ) , D8) ) = ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( DigA (( DecSD (D9 , R2 , R4) ) , ( 0 )) ) , R4) ) ) by L302 , L300 , XREAL_1:232
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( 0 ) , R4) ) ) by RADIX_1:def 3
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( 0 ) ) by L183;
+L304: ( DigA_SDSub (( SD2SDSub ( DecSD (R3 , ( R2 + 1 ) , R4) ) ) , D8) ) = ( SD2SDSubDigitS (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8 , R4) ) by L298 , L214
+.= ( SD2SDSubDigit (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8 , R4) ) by L299 , L298 , L212
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , ( D8 -' 1 )) ) , R4) ) ) by L296 , L188
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , ( 0 )) ) , R4) ) ) by L302 , XREAL_1:232
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( 0 ) , R4) ) ) by RADIX_1:def 3
+.= ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( 0 ) ) by L183;
+thus L305: thesis by L304 , L303;
+end;
+suppose L306: D8 <> 1;
+
+L307: D8 <= R2 by L292 , FINSEQ_1:1;
+L308: ( D8 -' 1 ) <= R2 by L307 , NAT_D:44;
+L309: 1 < D8 by L293 , L306 , XXREAL_0:1;
+L310: ( ( 0 ) + 1 ) <= ( D8 -' 1 ) by L309 , INT_1:7 , JORDAN12:1;
+L311: ( D8 -' 1 ) in ( Seg R2 ) by L310 , L308 , FINSEQ_1:1;
+L312: ( DigA_SDSub (( SD2SDSub ( DecSD (D9 , R2 , R4) ) ) , D8) ) = ( ( SDSub_Add_Data (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8) ) , R4) ) + ( SDSub_Add_Carry (( DigA (( DecSD (R3 , ( R2 + 1 ) , R4) ) , ( D8 -' 1 )) ) , R4) ) ) by L311 , L300 , L24
+.= ( SD2SDSubDigit (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8 , R4) ) by L296 , L188
+.= ( SD2SDSubDigitS (( DecSD (R3 , ( R2 + 1 ) , R4) ) , D8 , R4) ) by L299 , L298 , L212
+.= ( DigA_SDSub (( SD2SDSub ( DecSD (R3 , ( R2 + 1 ) , R4) ) ) , D8) ) by L298 , L214;
+thus L313: thesis by L312;
+end;
+end;
+thus L315: thesis by L301;
+end;
+theorem
+L316: (for R2 being Nat holds (R2 >= 1 implies (for R4 being Nat holds (for R5 being Nat holds ((R4 >= 2 & R5 is_represented_by R2 , R4) implies R5 = ( SDSub2IntOut ( SD2SDSub ( DecSD (R5 , R2 , R4) ) ) ))))))
+proof
+defpred S3[ Nat ] means (for B23 , B24 being Nat holds ((B23 >= 2 & B24 is_represented_by $1 , B23) implies B24 = ( SDSub2IntOut ( SD2SDSub ( DecSD (B24 , $1 , B23) ) ) )));
+let R2 being Nat;
+assume L317: R2 >= 1;
+L318: (for B25 being Nat holds ((B25 >= 1 & S3[ B25 ]) implies S3[ ( B25 + 1 ) ]))
+proof
+let C58 being Nat;
+assume that
+L319: C58 >= 1
+and
+L320: S3[ C58 ];
+L321: C58 in ( Seg C58 ) by L319 , FINSEQ_1:3;
+let C59 , C60 being Nat;
+assume that
+L322: C59 >= 2
+and
+L323: C60 is_represented_by ( C58 + 1 ) , C59;
+reconsider D10 = C59 as (Element of ( NAT )) by ORDINAL1:def 12;
+set D11 = ( C60 mod ( ( Radix D10 ) |^ C58 ) );
+set D12 = ( ( Radix D10 ) |^ ( C58 + 1 ) );
+set D13 = ( ( Radix D10 ) |^ C58 );
+L324: ( ( C58 + 1 ) + 1 ) in ( Seg ( ( C58 + 1 ) + 1 ) ) by FINSEQ_1:3;
+L325: ( SDSub2INTDigit (( SD2SDSub ( DecSD (C60 , ( C58 + 1 ) , D10) ) ) , ( ( C58 + 1 ) + 1 ) , D10) ) = ( D12 * ( DigB_SDSub (( SD2SDSub ( DecSD (C60 , ( C58 + 1 ) , D10) ) ) , ( ( C58 + 1 ) + 1 )) ) ) by NAT_D:34
+.= ( D12 * ( SD2SDSubDigitS (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( ( C58 + 1 ) + 1 ) , D10) ) ) by L324 , L214
+.= ( D12 * ( SD2SDSubDigit (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( ( C58 + 1 ) + 1 ) , D10) ) ) by L322 , L324 , L212
+.= ( D12 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( ( ( C58 + 1 ) + 1 ) -' 1 )) ) , D10) ) ) by L188
+.= ( D12 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) , D10) ) ) by NAT_D:34;
+set D14 = ( SD2SDSub ( DecSD (D11 , C58 , D10) ) );
+set D15 = ( SD2SDSub ( DecSD (C60 , ( C58 + 1 ) , D10) ) );
+deffunc H3(Nat) = ( SDSub2INTDigit (D15 , $1 , D10) );
+consider C61 being (FinSequence of ( INT )) such that L326: ( len C61 ) = ( C58 + 1 ) and L327: (for B26 being Nat holds (B26 in ( dom C61 ) implies ( C61 . B26 ) = H3(B26))) from FINSEQ_2:sch 1;
+L328: ( dom C61 ) = ( Seg ( C58 + 1 ) ) by L326 , FINSEQ_1:def 3;
+L329: ( len ( SDSub2INT D15 ) ) = ( ( C58 + 1 ) + 1 ) by CARD_1:def 7;
+L330: (for B27 being Nat holds ((1 <= B27 & B27 <= ( len ( SDSub2INT D15 ) )) implies ( ( SDSub2INT D15 ) . B27 ) = ( ( C61 ^ <* ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) *> ) . B27 )))
+proof
+let C62 being Nat;
+assume that
+L331: 1 <= C62
+and
+L332: C62 <= ( len ( SDSub2INT D15 ) );
+L333: C62 <= ( ( C58 + 1 ) + 1 ) by L332 , CARD_1:def 7;
+L334: C62 in ( Seg ( ( C58 + 1 ) + 1 ) ) by L333 , L331 , FINSEQ_1:1;
+L335: C62 in ( dom ( SDSub2INT D15 ) ) by L331 , L332 , FINSEQ_3:25;
+L336:
+now
+per cases  by L334 , FINSEQ_2:7;
+suppose L337: C62 in ( Seg ( C58 + 1 ) );
+
+L338: C62 in ( dom C61 ) by L337 , L326 , FINSEQ_1:def 3;
+L339: ( ( C61 ^ <* ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) *> ) . C62 ) = ( C61 . C62 ) by L338 , FINSEQ_1:def 7
+.= ( SDSub2INTDigit (D15 , C62 , D10) ) by L327 , L328 , L337
+.= ( ( SDSub2INT D15 ) /. C62 ) by L334 , L270
+.= ( ( SDSub2INT D15 ) . C62 ) by L335 , PARTFUN1:def 6;
+thus L340: thesis by L339;
+end;
+suppose L341: C62 = ( ( C58 + 1 ) + 1 );
+
+L342: C62 in ( dom ( SDSub2INT D15 ) ) by L329 , L334 , FINSEQ_1:def 3;
+L343: ( ( C61 ^ <* ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) *> ) . C62 ) = ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) by L326 , L341 , FINSEQ_1:42
+.= ( ( SDSub2INT D15 ) /. ( ( C58 + 1 ) + 1 ) ) by L334 , L341 , L270
+.= ( ( SDSub2INT D15 ) . C62 ) by L341 , L342 , PARTFUN1:def 6;
+thus L344: thesis by L343;
+end;
+end;
+thus L346: thesis by L336;
+end;
+L347: ( Radix D10 ) > ( 0 ) by RADIX_2:6;
+L348: D11 < ( ( Radix D10 ) |^ C58 ) by L347 , NAT_D:1 , PREPOWER:6;
+L349: D11 is_represented_by C58 , D10 by L348 , RADIX_1:def 12;
+L350: D11 = ( SDSub2IntOut ( SD2SDSub ( DecSD (D11 , C58 , D10) ) ) ) by L349 , L320 , L322
+.= ( Sum ( SDSub2INT ( SD2SDSub ( DecSD (D11 , C58 , D10) ) ) ) );
+L351: ( C58 + 1 ) in ( Seg ( C58 + 1 ) ) by FINSEQ_1:3;
+L352: ( C58 + 1 ) in ( Seg ( ( C58 + 1 ) + 1 ) ) by L351 , FINSEQ_2:8;
+consider C63 being (FinSequence of ( INT )) such that L353: ( len C63 ) = C58 and L354: (for B28 being Nat holds (B28 in ( dom C63 ) implies ( C63 . B28 ) = H3(B28))) from FINSEQ_2:sch 1;
+L355: ( dom C63 ) = ( Seg C58 ) by L353 , FINSEQ_1:def 3;
+L356: (for B29 being Nat holds ((1 <= B29 & B29 <= ( len C61 )) implies ( C61 . B29 ) = ( ( C63 ^ <* ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) *> ) . B29 )))
+proof
+let C64 being Nat;
+assume L357: (1 <= C64 & C64 <= ( len C61 ));
+L358: C64 in ( Seg ( C58 + 1 ) ) by L357 , L326 , FINSEQ_1:1;
+L359:
+now
+per cases  by L358 , FINSEQ_2:7;
+suppose L360: C64 in ( Seg C58 );
+
+L361: C64 in ( dom C63 ) by L360 , L353 , FINSEQ_1:def 3;
+L362: ( ( C63 ^ <* ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) *> ) . C64 ) = ( C63 . C64 ) by L361 , FINSEQ_1:def 7
+.= ( SDSub2INTDigit (D15 , C64 , D10) ) by L354 , L355 , L360
+.= ( C61 . C64 ) by L327 , L328 , L358;
+thus L363: thesis by L362;
+end;
+suppose L364: C64 = ( C58 + 1 );
+
+L365: ( ( C63 ^ <* ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) *> ) . C64 ) = ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) by L364 , L353 , FINSEQ_1:42
+.= ( C61 . C64 ) by L327 , L328 , L358 , L364;
+thus L366: thesis by L365;
+end;
+end;
+thus L368: thesis by L359;
+end;
+deffunc H4(Nat) = ( SDSub2INTDigit (D14 , $1 , D10) );
+consider C65 being (FinSequence of ( INT )) such that L369: ( len C65 ) = C58 and L370: (for B30 being Nat holds (B30 in ( dom C65 ) implies ( C65 . B30 ) = H4(B30))) from FINSEQ_2:sch 1;
+L371: ( dom C65 ) = ( Seg C58 ) by L369 , FINSEQ_1:def 3;
+L372: (for B31 being Nat holds ((1 <= B31 & B31 <= ( len C65 )) implies ( C65 . B31 ) = ( C63 . B31 )))
+proof
+let C66 being Nat;
+assume L373: (1 <= C66 & C66 <= ( len C65 ));
+L374: C66 in ( Seg C58 ) by L373 , L369 , FINSEQ_1:1;
+L375: ( C63 . C66 ) = ( SDSub2INTDigit (D15 , C66 , D10) ) by L374 , L354 , L355
+.= ( SDSub2INTDigit (D14 , C66 , D10) ) by L322 , L374 , L291
+.= ( C65 . C66 ) by L370 , L371 , L374;
+thus L376: thesis by L375;
+end;
+L377: C63 = C65 by L372 , L353 , L369 , FINSEQ_1:14;
+L378: ( len ( SDSub2INT D14 ) ) = ( C58 + 1 ) by CARD_1:def 7;
+L379: (for B32 being Nat holds ((1 <= B32 & B32 <= ( len ( SDSub2INT D14 ) )) implies ( ( SDSub2INT D14 ) . B32 ) = ( ( C65 ^ <* ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) *> ) . B32 )))
+proof
+let C67 being Nat;
+assume L380: (1 <= C67 & C67 <= ( len ( SDSub2INT D14 ) ));
+L381: C67 in ( Seg ( C58 + 1 ) ) by L380 , L378 , FINSEQ_1:1;
+L382: C67 in ( dom ( SDSub2INT D14 ) ) by L380 , FINSEQ_3:25;
+L383:
+now
+per cases  by L381 , FINSEQ_2:7;
+suppose L384: C67 in ( Seg C58 );
+
+L385: C67 in ( dom C65 ) by L384 , L369 , FINSEQ_1:def 3;
+L386: ( ( C65 ^ <* ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) *> ) . C67 ) = ( C65 . C67 ) by L385 , FINSEQ_1:def 7
+.= ( SDSub2INTDigit (D14 , C67 , D10) ) by L370 , L371 , L384
+.= ( ( SDSub2INT D14 ) /. C67 ) by L381 , L270
+.= ( ( SDSub2INT D14 ) . C67 ) by L382 , PARTFUN1:def 6;
+thus L387: thesis by L386;
+end;
+suppose L388: C67 = ( C58 + 1 );
+
+L389: C67 in ( dom ( SDSub2INT D14 ) ) by L378 , L381 , FINSEQ_1:def 3;
+L390: ( ( C65 ^ <* ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) *> ) . C67 ) = ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) by L369 , L388 , FINSEQ_1:42
+.= ( ( SDSub2INT D14 ) /. ( C58 + 1 ) ) by L381 , L388 , L270
+.= ( ( SDSub2INT D14 ) . C67 ) by L388 , L389 , PARTFUN1:def 6;
+thus L391: thesis by L390;
+end;
+end;
+thus L393: thesis by L383;
+end;
+L394: ( len C61 ) = ( len ( C63 ^ <* ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) *> ) ) by L326 , L353 , FINSEQ_2:16;
+L395: C61 = ( C63 ^ <* ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) *> ) by L394 , L356 , FINSEQ_1:14;
+L396: ( len ( C61 ^ <* ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) *> ) ) = ( ( C58 + 1 ) + 1 ) by L326 , FINSEQ_2:16;
+L397: ( len ( SDSub2INT D15 ) ) = ( len ( C61 ^ <* ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) *> ) ) by L396 , CARD_1:def 7;
+L398: ( SDSub2INT D15 ) = ( C61 ^ <* ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) *> ) by L397 , L330 , FINSEQ_1:14;
+L399: ( Sum ( SDSub2INT D15 ) ) = ( ( Sum C61 ) + ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) ) by L398 , RVSUM_1:74
+.= ( ( ( Sum C65 ) + ( SDSub2INTDigit (D15 , ( C58 + 1 ) , D10) ) ) + ( SDSub2INTDigit (D15 , ( ( C58 + 1 ) + 1 ) , D10) ) ) by L395 , L377 , RVSUM_1:74;
+set D16 = ( D13 * ( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) );
+set D17 = ( D13 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , C58) ) , D10) ) );
+L400: ( Radix D10 ) > ( 0 ) by RADIX_2:6;
+L401: ( len ( C65 ^ <* ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) *> ) ) = ( C58 + 1 ) by L369 , FINSEQ_2:16;
+L402: ( SDSub2INT D14 ) = ( C65 ^ <* ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) *> ) by L401 , L378 , L379 , FINSEQ_1:14;
+L403: ( D11 + ( 0 ) ) = ( ( Sum C65 ) + ( SDSub2INTDigit (D14 , ( C58 + 1 ) , D10) ) ) by L402 , L350 , RVSUM_1:74;
+L404: ( SDSub2INTDigit (( SD2SDSub ( DecSD (C60 , ( C58 + 1 ) , D10) ) ) , ( C58 + 1 ) , D10) ) = ( ( ( Radix D10 ) |^ C58 ) * ( DigB_SDSub (( SD2SDSub ( DecSD (C60 , ( C58 + 1 ) , D10) ) ) , ( C58 + 1 )) ) ) by NAT_D:34
+.= ( D13 * ( SD2SDSubDigitS (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 ) , D10) ) ) by L352 , L214
+.= ( D13 * ( SD2SDSubDigit (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 ) , D10) ) ) by L322 , L352 , L212
+.= ( D13 * ( ( SDSub_Add_Data (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) , D10) ) + ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( ( C58 + 1 ) -' 1 )) ) , D10) ) ) ) by L351 , L188
+.= ( D13 * ( ( SDSub_Add_Data (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) , D10) ) + ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , C58) ) , D10) ) ) ) by NAT_D:34
+.= ( ( ( D13 * ( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) ) - ( ( D13 * ( Radix D10 ) ) * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) , D10) ) ) ) + ( D13 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , C58) ) , D10) ) ) )
+.= ( ( ( D13 * ( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) ) - ( D12 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , ( C58 + 1 )) ) , D10) ) ) ) + ( D13 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , C58) ) , D10) ) ) ) by NEWTON:6;
+L405: ( SDSub2INTDigit (( SD2SDSub ( DecSD (D11 , C58 , D10) ) ) , ( C58 + 1 ) , D10) ) = ( ( ( Radix D10 ) |^ C58 ) * ( DigB_SDSub (( SD2SDSub ( DecSD (D11 , C58 , D10) ) ) , ( C58 + 1 )) ) ) by NAT_D:34
+.= ( D13 * ( SD2SDSubDigitS (( DecSD (D11 , C58 , D10) ) , ( C58 + 1 ) , D10) ) ) by L351 , L214
+.= ( D13 * ( SD2SDSubDigit (( DecSD (D11 , C58 , D10) ) , ( C58 + 1 ) , D10) ) ) by L351 , L322 , L212
+.= ( D13 * ( SDSub_Add_Carry (( DigA (( DecSD (D11 , C58 , D10) ) , ( ( C58 + 1 ) -' 1 )) ) , D10) ) ) by L188
+.= ( D13 * ( SDSub_Add_Carry (( DigA (( DecSD (D11 , C58 , D10) ) , C58) ) , D10) ) ) by NAT_D:34
+.= ( D13 * ( SDSub_Add_Carry (( DigA (( DecSD (C60 , ( C58 + 1 ) , D10) ) , C58) ) , D10) ) ) by L321 , L24;
+L406: ( Sum ( SDSub2INT D15 ) ) = ( ( ( D11 + D16 ) - D17 ) + D17 ) by L405 , L399 , L403 , L404 , L325
+.= ( D11 + ( D13 * ( C60 div D13 ) ) ) by L323 , RADIX_1:24;
+thus L407: thesis by L406 , L400 , NAT_D:2 , PREPOWER:6;
+end;
+L408: S3[ 1 ]
+proof
+L409: 1 in ( Seg 1 ) by FINSEQ_1:1;
+L410: ( 2 - 1 ) = 1;
+L411: ( 2 -' 1 ) = 1 by L410 , XREAL_0:def 2;
+let C68 , C69 being Nat;
+assume that
+L412: C68 >= 2
+and
+L413: C69 is_represented_by 1 , C68;
+set D18 = ( DecSD (C69 , 1 , C68) );
+reconsider D19 = ( ( Radix C68 ) * ( SDSub_Add_Carry (( DigA (D18 , 1) ) , C68) ) ) as Integer;
+reconsider D20 = D19 as (Element of ( INT )) by INT_1:def 2;
+reconsider D21 = ( ( DigA (D18 , 1) ) - D19 ) as (Element of ( INT )) by INT_1:def 2;
+L414: 1 in ( Seg ( 1 + 1 ) ) by FINSEQ_1:1;
+L415: ( len ( SDSub2INT ( SD2SDSub D18 ) ) ) = ( 1 + 1 ) by CARD_1:def 7;
+L416: 1 in ( dom ( SDSub2INT ( SD2SDSub D18 ) ) ) by L415 , L414 , FINSEQ_1:def 3;
+L417: 2 in ( Seg ( 1 + 1 ) ) by FINSEQ_1:1;
+L418: 2 in ( dom ( SDSub2INT ( SD2SDSub D18 ) ) ) by L417 , L415 , FINSEQ_1:def 3;
+L419: ( ( SDSub2INT ( SD2SDSub D18 ) ) /. 2 ) = ( SDSub2INTDigit (( SD2SDSub D18 ) , 2 , C68) ) by L417 , L270
+.= ( ( Radix C68 ) * ( DigB_SDSub (( SD2SDSub D18 ) , 2) ) ) by L411 , NEWTON:5
+.= ( ( Radix C68 ) * ( SD2SDSubDigitS (D18 , 2 , C68) ) ) by L417 , L214
+.= ( ( Radix C68 ) * ( SD2SDSubDigit (D18 , 2 , C68) ) ) by L412 , L417 , L212
+.= ( ( Radix C68 ) * ( SDSub_Add_Carry (( DigA (D18 , 1) ) , C68) ) ) by L411 , L417 , L188;
+L420: ( ( SDSub2INT ( SD2SDSub D18 ) ) . 2 ) = D19 by L419 , L418 , PARTFUN1:def 6;
+L421: ( ( SDSub2INT ( SD2SDSub D18 ) ) /. 1 ) = ( SDSub2INTDigit (( SD2SDSub D18 ) , 1 , C68) ) by L414 , L270
+.= ( ( ( Radix C68 ) |^ ( 0 ) ) * ( DigB_SDSub (( SD2SDSub D18 ) , 1) ) ) by XREAL_1:232
+.= ( 1 * ( DigB_SDSub (( SD2SDSub D18 ) , 1) ) ) by NEWTON:4
+.= ( SD2SDSubDigitS (D18 , 1 , C68) ) by L414 , L214
+.= ( SD2SDSubDigit (D18 , 1 , C68) ) by L412 , L414 , L212
+.= ( ( SDSub_Add_Data (( DigA (D18 , 1) ) , C68) ) + ( SDSub_Add_Carry (( DigA (D18 , ( 1 -' 1 )) ) , C68) ) ) by L409 , L188
+.= ( ( SDSub_Add_Data (( DigA (D18 , 1) ) , C68) ) + ( SDSub_Add_Carry (( DigA (D18 , ( 0 )) ) , C68) ) ) by XREAL_1:232
+.= ( ( SDSub_Add_Data (( DigA (D18 , 1) ) , C68) ) + ( SDSub_Add_Carry (( 0 ) , C68) ) ) by RADIX_1:def 3
+.= ( ( SDSub_Add_Data (( DigA (D18 , 1) ) , C68) ) + ( 0 ) ) by L183
+.= ( ( DigA (D18 , 1) ) - ( ( Radix C68 ) * ( SDSub_Add_Carry (( DigA (D18 , 1) ) , C68) ) ) );
+L422: ( ( SDSub2INT ( SD2SDSub D18 ) ) . 1 ) = ( ( DigA (D18 , 1) ) - D19 ) by L421 , L416 , PARTFUN1:def 6;
+L423: ( SDSub2INT ( SD2SDSub D18 ) ) = <* D21 , D20 *> by L422 , L415 , L420 , FINSEQ_1:44;
+L424: ( Sum ( SDSub2INT ( SD2SDSub D18 ) ) ) = ( D21 + D20 ) by L423 , RVSUM_1:77
+.= C69 by L413 , RADIX_1:21;
+thus L425: thesis by L424;
+end;
+L426: (for B33 being Nat holds (B33 >= 1 implies S3[ B33 ])) from NAT_1:sch 8(L408 , L318);
+thus L427: thesis by L426 , L317;
+end;
