@@ -3311,7 +3311,7 @@ sub explicitly_qualify_fraenkel {
 sub reserved_variable_type {
     my $variable = shift;
     my $spelling = $variable->getAttribute ('spelling');
-    (my $earlier_reservation) = $variable->findnodes ('preceding::Item[@kind = "Reservation" and Variables/Variable[@spelling = "' . $spelling . '"]]');
+    (my $earlier_reservation) = $variable->findnodes ('preceding::Item[@kind = "Reservation" and Variables/Variable[@spelling = "' . $spelling . '"][1]]');
     if (! defined $earlier_reservation) {
 	confess 'We found no previous reservation for ', $spelling;
     }
