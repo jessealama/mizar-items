@@ -18,6 +18,14 @@ Readonly my $LF => "\N{LF}";
 
 XML::LibXSLT->max_depth ($RECURSION_DEPTH);
 
+sub print_message {
+    my $msg = shift;
+    warn $msg;
+    return;
+}
+
+XML::LibXSLT->debug_callback (\&print_message);
+
 my $xml_parser = XML::LibXML->new ();
 
 my %parsed_stylesheet_table = ();
