@@ -57,8 +57,8 @@ sub apply_stylesheet {
     if ($document =~ /[\N{LF}]/m) {
 	# this isn't a file
 	my $doc = $xml_parser->load_xml (string => $document);
-	$results = eval {$parsed_stylesheet->transform ($doc,
-							%parameters) };
+	$results = eval { $parsed_stylesheet->transform ($doc,
+							 %parameters) };
 	$err = $!;
     } elsif (-e $document && -r $document) {
 	$results = eval { $parsed_stylesheet->transform_file ($document,
