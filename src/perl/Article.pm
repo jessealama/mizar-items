@@ -2550,7 +2550,7 @@ sub itemize {
 
     print 'done.', "\n";
 
-    print 'Split ', $article_basename, ': ';
+    print 'Split: ';
     apply_stylesheet ($split_stylesheet,
 		      $article_wsx_in_target_dir,
 		      $article_wsx_in_target_dir)
