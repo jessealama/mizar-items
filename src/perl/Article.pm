@@ -2559,7 +2559,7 @@ sub itemize {
 
     print 'done.', "\n";
 
-    print 'Factor proofs';
+    print 'Factor proofs: ';
     apply_stylesheet ($factor_proofs_stylesheet,
 		      $article_wsx_in_target_dir,
 		      $article_wsx_in_target_dir);
