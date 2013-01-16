@@ -3451,6 +3451,7 @@ sub without_reservations {
 				     { 'suppress-environment' => '1' });
 
     $self->mglue ();
+    $self->wsmparser ();
 
     return 1;
 
