@@ -12,5 +12,5 @@ check:
 	for dir in $(subdirs); do make -C $$dir check; done
 
 clean:
-	for dir in $(subdirs); do make -C $$dir clean; done
+	+for dir in $(subdirs); do make -C $$dir clean; done
 	rm -f $(emacs-backups)
