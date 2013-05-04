@@ -1,37 +1,44 @@
 stylesheet "1.0";
 import "utils/die.xsl";
-output method="xml" indent="yes";
+output method="text";
 
 tpl [*] {
-  $n = `name (.)`;
-  <$n {
-    for-each [@*] { copy-of `.`; }
-    apply [*];
-  }
+  apply [*];
 }
 
 tpl [/] {
   if [Text-Proper] {
     apply [Text-Proper];
   } else {
-    die (#message = "The Text-Proper document node is missing.");
+    apply [.] (#message = "The Text-Proper document node is missing.") mode="die";
   }
 }
 
-tpl [Text-Proper] {
-  if [Item[@kind = "Reservation"]] {
-    die (#message = "We found a reservation.");
-  }
-  if [descendant::Item[@kind = "Implicitly-Qualified-Segment"]] {
-    die (#message = "We found an implicitly qualified segment.");
-  }
-  for-each [descendant::Item[@kind = "Correctness-Condition"]] {
-    if [Block[@kind = "Proof"]] {
-      die (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.");
-    }
-    if [not(count(Straightforward-Justification/*) = 1)] {
-      die (#message = "Every correctness condition with a Straightforward-Justification should have at most 1 justification element.");
-    }
-  }
-  msg "ok";
+tpl [Item[@kind = "Reservation"]] {
+  apply [.] (#message = "We found a reservation.") mode="die";
+}
+
+tpl [Item[@kind = "Implicitly-Qualified-Segment"]] {
+  apply [.] (#message = "We found an implicitly qualified segment.") mode="die";
+}
+
+tpl [Item[    @kind = "Correctness-Condition"
+          and not(count(Straightforward-Justification/*) = 1)]] {
+  $condition = `@condition`;
+  $message = `concat ("Every correctness condition with a Straightforward-Justification should have exactly 1 justification element.  We encountered a ", $condition, " condition that does not have this property.")`;
+  apply [.] (#message = $message) mode="die";
+}
+
+tpl [Item[    @kind = "Correctness-Condition"
+          and Block[@kind = "Proof"]]] {
+  apply [.] (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.") mode="die";
+}
+
+tpl [Block[    @kind = "Definitional-Block"
+           and count(Item[   @kind = "Functor-Definition"
+                          or @kind = "Predicate-Definition"
+                          or @kind = "Attribute-Definition"
+                          or @kind = "Mode-Definition"
+                          or @kind = "Structure-Definition"]) > 1]] {
+  apply [.] (#message = "We found a definitional block that defines more than one thing.") mode="die";
 }
