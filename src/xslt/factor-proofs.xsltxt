@@ -1308,6 +1308,71 @@ tpl
   [
         @kind      = "Correctness-Condition"
     and @condition = "coherence"
+    and parent::Block
+        [
+            @kind = "Registration-Block"
+        ]
+    and preceding-sibling::Item
+        [
+                @kind = "Cluster"
+            and Functorial-Registration
+        ]
+  ]
+]
+{
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CoherenceLemma"; }
+      for-each [ancestor::Block[@kind = "Registration-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Cluster"]/Functorial-Registration[1]`;
+        $formula    = `$fd/*[1]`;
+        $type       = `$fd/*[position() = last()]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-coherence (#segments   = $segments,
+                                             #formula    = $formula,
+                                             #type       = $type);
+      }
+    }
+
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Registration-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Cluster"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "coherence"
     and preceding-sibling::Item
         [
               @kind  = "Functor-Definition"
@@ -1418,6 +1483,68 @@ tpl
           }
         }
         apply [*[position() = last()]];
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+    @kind = "Definition-Item"
+    and Block
+        [
+          @kind = "Registration-Block"
+          and Item
+              [
+                      @kind = "Cluster"
+                  and Functorial-Registration
+              ]
+        ]
+  ]
+]
+{
+  for-each [Block[@kind = "Registration-Block"]] {
+    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+
+      choose {
+        when [self::Item[@kind = "Correctness-Condition"]] {
+          $c = `@condition`;
+          msg `concat ("working on condition ", $c, " inside a cluster")`;
+        }
+        when [self::Item[@kind = "Property"]] {
+          $p = `@property`;
+          msg `concat ("working on property ", $p, " inside a cluster")`;
+        }
+        when [self::Item[@kind = "Correctness"]] {
+          msg "working on correctness inside a cluster";
+        }
+      }
+
+      apply [.];
+      msg "done.";
+    }
+  }
+
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    for-each [Block[@kind = "Registration-Block"]] {
+      <Block {
+        for-each [@*] { copy-of `.`; }
+        for-each [*] {
+          choose {
+            when [self::Item[@kind = "Correctness-Condition"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            when [self::Item[@kind = "Property"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            otherwise {
+              apply [.];
+            }
+          }
+        }
       }
     }
   }
