@@ -1,0 +1,162 @@
+stylesheet "1.0";
+output method="xml" indent="yes";
+
+// Mark whether toplevel unexported theorems (lemmas) are exportable
+
+// By default, copy and recurse
+tpl [*] {
+  $element = `local-name ()`;
+  <$element {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl bad-term-hunting (#candidates) {
+  if [$candidates] {
+    $candidate = `$candidates[1]`;
+    if [not($candidate/@spelling)] {
+      die (#message = "To determine whether there is a bad term in the current item, we require that all terms have a spelling, but we just found a term that lacks one.");
+    }
+    $spelling = `$candidate/@spelling`;
+    $n = `local-name ($candidate)`;
+    choose {
+      when [$n = "Schematic-Variable"] {
+        "1";
+      }
+      when [starts-with ($spelling, "D")] {
+        "1";
+      }
+      when [starts-with ($spelling, "C")] {
+        "1";
+      }
+      otherwise {
+        bad-term-hunting (#candidates = `$candidates[position() > 1]`);
+      }
+    }
+  } else {
+    "0";
+  }
+}
+
+tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and @shape = "Compact-Statement"]] {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    for-each [Proposition] {
+      $bad = bad-term-hunting (#candidates = `descendant::Simple-Term`);
+      if [$bad = "1"
+          or descendant::Private-Functor-Term
+          or descendant::Private-Predicate-Formula] {
+        @exportable = "no";
+      } else {
+        @exportable = "yes";
+      }
+    }
+    apply [*];
+  }
+}
+
+tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and not(@shape = "Compact-Statement")]] {
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    @exportable = "no";
+    apply [*];
+  }
+}
+
+tpl emit-type-changing-equations (#equations, #type) {
+  if [$equations] {
+    $equation = `$equations[1]`;
+    for-each [$equation] {
+      if [count ($equations) = 1] {
+        <Attributive-Formula {
+          apply [*[position() = last ()]]; // term
+          apply [$type]; // type
+        }
+      } else {
+        <Conjunctive-Formula {
+          <Attributive-Formula {
+            apply [*[position() = last ()]]; // term
+            apply [$type]; // type
+          }
+          emit-type-changing-equations (#equations = `$equations[position() > 1]`,
+	  			        #type = $type);
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]] {
+  $equations = `Equality`;
+  $bad = bad-term-hunting (#candidates = `descendant::Simple-Term[ancestor::Equality]`);
+  // msg `concat ("type changing statement: bad = ", $bad)`;
+  <Item {
+    if [$bad = "1"] {
+      @kind = "Regular-Statement";
+      @shape = "Compact-Statement";
+      @exportable = "no";
+    } else {
+      @kind = "Theorem-Item";
+      @exportable = "yes";
+    }
+    @type-changing-lemma = "yes";
+    for-each [Equality[position() = last()]] {
+      $type = `following-sibling::*[1]`;
+      <Proposition {
+        emit-type-changing-equations (#equations = $equations, #type = $type);
+      }
+    }
+    apply [*[position() = last()]]; // justification
+  }
+
+  copy-of `.`;
+}
+
+tpl emit-conjunction-stripping-labels (#propositions) {
+  if [$propositions] {
+    $proposition = `$propositions[1]`;
+    for-each [$proposition] {
+      if [count ($propositions) = 1] {
+        <Proposition {
+          apply [*[position() = last ()]];
+        }
+      } else {
+        <Conjunctive-Formula {
+          <Proposition {
+            apply [*[position() = last()]];
+          }
+          emit-conjunction-stripping-labels (#propositions = `$propositions[position() > 1]`);
+        }
+      }
+    }
+  }
+}
+
+tpl [Item[parent::Text-Proper
+          and @kind = "Choice-Statement"
+          and Explicitly-Qualified-Segment]] {
+  $variables = `Explicitly-Qualified-Segment/Variables/Variable`;
+  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
+
+  <Item {
+
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    @exportable = "no";
+    @choice-statement-lemma = "yes";
+
+    <Proposition {
+      <Existential-Quantifier-Formula {
+        copy-of `Explicitly-Qualified-Segment`;
+        emit-conjunction-stripping-labels (#propositions = `Conditions/*`);
+      }
+    }
+
+    copy-of `*[position() = last()]`; // justification
+
+  }
+
+  copy-of `.`;
+
+}
