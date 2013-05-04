@@ -11,58 +11,12 @@ tpl [*] {
   }
 }
 
-tpl [Text-Proper/Item[@kind = "Reservation" and not(Variables)]] {
-  apply [.] (#message = "We require that a Reservation item have a Variables child!") mode="die";
+tpl [Item[@kind = "Reservation"]] {
+  die (#message = "The split stylesheet assumes that there are no reservations.");
 }
 
-tpl [Text-Proper/Item[@kind = "Reservation"]] {
-  $context = `.`;
-  $type = `*[position() = last()]`;
-  // sanity check: all Variable descendants have an idnr attribute
-  for-each [Variables/Variable[not(@idnr)]] {
-    die (#message = "We found a variable that lacks an idnr attribute; unable to proceed.");
-  }
-  for-each [Variables/Variable] {
-    <Item {
-      for-each [$context/@*] { copy-of `.`; }
-      @idnr = `@idnr`;
-      <Variables {
-        apply [.];
-      }
-      apply [$type];
-    }
-  }
-}
-
-tpl [Item[@kind = "Loci-Declaration" and Explicitly-Qualified-Segment]] {
-  $loci = `.`;
-  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
-  for-each [Explicitly-Qualified-Segment/Variables/Variable] {
-    $pos = `position ()`;
-    <Item {
-      for-each [$loci/@*] { copy-of `.`; }
-      @idnr = `@idnr`;
-      <Explicitly-Qualified-Segment {
-        <Variables {
-          apply [.]; // variable
-        }
-        apply [$type]; // the type of the variable
-      }
-    }
-  }
-}
-
-tpl [Item[@kind = "Loci-Declaration" and Implicitly-Qualified-Segment]] {
-  $loci = `.`;
-  $variable = `Implicitly-Qualified-Segment/Variable[1]`;
-  $variable-idnr = `$variable/@idnr`;
-  <Item {
-    for-each [$loci/@*] { copy-of `.`; }
-    @idnr = $variable-idnr;
-    <Implicitly-Qualified-Segment {
-      apply [$variable];
-    }
-  }
+tpl [Implicitly-Qualified-Segment] {
+  die (#message = "The split stylesheet assumes that there are no implicitly qualified segments.");
 }
 
 tpl [Item[@kind="Definition-Item"]] {
@@ -81,23 +35,27 @@ tpl [Block[@kind="Definitional-Block"]] (#context, #definitions) {
     <Item {
       for-each [$context/@*] { copy-of `.`; }
       @kind = "Definition-Item";
-      <Block {
-        @kind = "Definitional-Block";
-        for-each [preceding-sibling::Item[@kind = "Loci-Declaration"
-                                          or @kind = "Assumption"
-                                          or @kind = "Existential-Assumption"
-                                          or @kind = "Constant-Definition"
-                                          or @kind = "Regular-Statement"
-                                          or @kind = "Choice-Statement"
-                                          or @kind = "Private-Functor-Definition"
-                                          or @kind = "Private-Predicate-Definition"]] {
-          apply [.];
+      if [@kind = "Canceled-Pragma"] {
+        apply [.];
+      } else {
+        <Block {
+          @kind = "Definitional-Block";
+          for-each [preceding-sibling::Item[@kind = "Loci-Declaration"
+                                            or @kind = "Assumption"
+                                            or @kind = "Existential-Assumption"
+                                            or @kind = "Constant-Definition"
+                                            or @kind = "Regular-Statement"
+                                            or @kind = "Choice-Statement"
+                                            or @kind = "Private-Functor-Definition"
+                                            or @kind = "Private-Predicate-Definition"]] {
+            apply [.];
+          }
+          <Item {
+            for-each [@*] { copy-of `.`; }
+            apply [*];
+          }
+          correctness-conditions (#candidates = `following-sibling::*`, #definitions = $definitions);
         }
-        <Item {
-          for-each [@*] { copy-of `.`; }
-          apply [*];
-        }
-        correctness-conditions (#candidates = `following-sibling::*`, #definitions = $definitions);
       }
     }
   }
@@ -232,7 +190,7 @@ tpl [Block[@kind = "Proof"]](#definitions) {
   }
 }
 
-tpl [Item[@kind = "Pred-Synonym"
+tpl [Item[   @kind = "Pred-Synonym"
           or @kind = "Pred-Antonym"
           or @kind = "Attr-Synonym"
           or @kind = "Attr-Antonym"
@@ -257,226 +215,6 @@ tpl [Item[@kind = "Pred-Synonym"
     }
   }
 }
-
-tpl split-explicitly-qualified-segment (#variables, #type) {
-  if [$variables] {
-    $variable = `$variables[1]`;
-    <Explicitly-Qualified-Segment {
-      <Variables {
-        apply [$variable];
-      }
-      apply [$type];
-    }
-    split-explicitly-qualified-segment (#variables = `$variables[position() > 1]`,
-                                        #type = $type);
-  }
-}
-
-tpl [Item[@kind = "Generalization" and Explicitly-Qualified-Segment]] {
-  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
-  for-each [Explicitly-Qualified-Segment/Variables/Variable] {
-    <Item {
-      for-each [@*] { copy-of `.`; }
-      @kind = "Generalization";
-      <Explicitly-Qualified-Segment {
-        <Variables {
-          apply [.];
-        }
-        apply [$type];
-      }
-    }
-  }
-}
-
-tpl [Explicitly-Qualified-Segment[not(parent::Item[@kind = "Choice-Statement"])]] {
-  split-explicitly-qualified-segment (#variables = `Variables/Variable`,
-                                      #type = `*[position() = last()]`);
-}
-
-// don't break up explicitly qualified segments inside universal formulas...yet
-tpl [Universal-Quantifier-Formula/Explicitly-Qualified-Segment] {
-  <Explicitly-Qualified-Segment {
-    apply [*];
-  }
-}
-
-tpl [Existential-Quantifier-Formula/Explicitly-Qualified-Segment] {
-  <Explicitly-Qualified-Segment {
-    apply [*];
-  }
-}
-
-tpl [Item[@kind = "Canceled-Pragma" and not(@number)]] {
-  die (#message = "Don't know how to deal with a 'canceled' pragma that lacks a number! ");
-}
-
-tpl emit-canceled-theorem (#times, #line, #col) {
-  if [$times > "0"] {
-    <Item {
-      @kind = "Canceled-Pragma";
-      @line = `@line`;
-      @col = `@col`;
-      @"number" = "1";
-    }
-    emit-canceled-theorem (#times = `$times - 1`,
-                           #line = $line,
-                           #col = $col);
-  }
-}
-
-tpl [Item[@kind = "Canceled-Pragma" and @number]] {
-  emit-canceled-theorem (#times = `@number`,
-                         #line = `@line`,
-                         #col = `@col`);
-}
-
-// Mark whether a toplevel unexported theorem is exportable
-
-tpl bad-term-hunting (#candidates) {
-  if [$candidates] {
-    $candidate = `$candidates[1]`;
-    if [not($candidate/@spelling)] {
-      die (#message = "To determine whether there is a bad term in the current item, we require that all terms have a spelling, but we just found a term that lacks one.");
-    }
-    $spelling = `$candidate/@spelling`;
-    $n = `local-name ($candidate)`;
-    choose {
-      when [$n = "Schematic-Variable"] {
-        "1";
-      }
-      when [starts-with ($spelling, "D")] {
-        "1";
-      }
-      when [starts-with ($spelling, "C")] {
-        "1";
-      }
-      otherwise {
-        bad-term-hunting (#candidates = `$candidates[position() > 1]`);
-      }
-    }
-  } else {
-    "0";
-  }
-}
-
-tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and @shape = "Compact-Statement"]] {
-  <Item {
-    for-each [@*] { copy-of `.`; }
-    for-each [Proposition] {
-      $bad = bad-term-hunting (#candidates = `descendant::Simple-Term`);
-      if [$bad = "1"
-          or descendant::Private-Functor-Term
-          or descendant::Private-Predicate-Formula] {
-        @exportable = "no";
-      } else {
-        @exportable = "yes";
-      }
-    }
-    apply [*];
-  }
-}
-
-tpl [Item[parent::Text-Proper and @kind = "Regular-Statement" and not(@shape = "Compact-Statement")]] {
-  <Item {
-    for-each [@*] { copy-of `.`; }
-    @exportable = "no";
-    apply [*];
-  }
-}
-
-tpl emit-type-changing-equations (#equations, #type) {
-  if [$equations] {
-    $equation = `$equations[1]`;
-    for-each [$equation] {
-      if [count ($equations) = 1] {
-        <Attributive-Formula {
-          apply [*[position() = last ()]]; // term
-          apply [$type]; // type
-        }
-      } else {
-        <Conjunctive-Formula {
-          <Attributive-Formula {
-            apply [*[position() = last ()]]; // term
-            apply [$type]; // type
-          }
-          emit-type-changing-equations (#equations = `$equations[position() > 1]`,
-	  			        #type = $type);
-        }
-      }
-    }
-  }
-}
-
-tpl [Item[parent::Text-Proper and @kind = "Type-Changing-Statement"]] {
-  $equations = `Equality`;
-  $bad = bad-term-hunting (#candidates = `descendant::Simple-Term[ancestor::Equality]`);
-  // msg `concat ("type changing statement: bad = ", $bad)`;
-  <Item {
-    if [$bad = "1"] {
-      @kind = "Regular-Statement";
-      @shape = "Compact-Statement";
-      @exportable = "no";
-    } else {
-      @kind = "Theorem-Item";
-      @exportable = "yes";
-    }
-    @type-changing-lemma = "yes";
-    for-each [Equality[position() = last()]] {
-      $type = `following-sibling::*[1]`;
-      <Proposition {
-        emit-type-changing-equations (#equations = $equations, #type = $type);
-      }
-    }
-    apply [*[position() = last()]]; // justification
-  }
-
-  copy-of `.`;
-}
-
-tpl emit-conjunction-stripping-labels (#propositions) {
-  if [$propositions] {
-    $proposition = `$propositions[1]`;
-    for-each [$proposition] {
-      if [count ($propositions) = 1] {
-        <Proposition {
-          apply [*[position() = last ()]];
-        }
-      } else {
-        <Conjunctive-Formula {
-          <Proposition {
-            apply [*[position() = last()]];
-          }
-          emit-conjunction-stripping-labels (#propositions = `$propositions[position() > 1]`);
-        }
-      }
-    }
-  }
-}
-
-tpl [Item[parent::Text-Proper
-          and @kind = "Choice-Statement"
-          and Explicitly-Qualified-Segment]] {
-  $variables = `Explicitly-Qualified-Segment/Variables/Variable`;
-  $type = `Explicitly-Qualified-Segment/*[position() = last()]`;
-
-  <Item {
-
-    @kind = "Regular-Statement";
-    @shape = "Compact-Statement";
-    @exportable = "no";
-    @choice-statement-lemma = "yes";
-
-    <Proposition {
-      <Existential-Quantifier-Formula {
-        copy-of `Explicitly-Qualified-Segment`;
-        emit-conjunction-stripping-labels (#propositions = `Conditions/*`);
-      }
-    }
-
-    copy-of `*[position() = last()]`; // justification
-
-  }
-
-  copy-of `.`;
-
+tpl [Item[@kind = "Canceled-Pragma" and @number and @number > 1]] {
+  die (#message = "We encountered a canceled pragma that cancels more than one thing.  Did you apply the expand-canceled stylesheet first?");
 }
