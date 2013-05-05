@@ -233,6 +233,353 @@ tpl
   <Straightforward-Justification { <Local-Reference { @spelling = "Existence"; } }
 }
 
+tpl universally-bind-conditional-registration (#cluster-1,
+                                               #cluster-2,
+                                               #it,
+                                               #type,
+                                               #segments) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable {
+            @spelling = $it;
+          }
+        }
+        apply [$type];
+      }
+      <Conditional-Formula {
+        <Attributive-Formula {
+          <Simple-Term {
+            @spelling = $it;
+          }
+          apply [$cluster-1];
+        }
+        <Attributive-Formula {
+          <Simple-Term {
+            @spelling = $it;
+          }
+          apply [$cluster-2];
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-conditional-registration (#segments  = $rest,
+                                                 #type      = $type,
+                                                 #it        = $it,
+                                                 #cluster-1 = $cluster-1,
+                                                 #cluster-2 = $cluster-2);
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind = "Definition-Item"
+    and Block
+        [
+              @kind = "Registration-Block"
+          and Item
+              [
+                    @kind = "Cluster"
+                and Conditional-Registration
+              ]
+          and Item
+              [
+                    @kind = "Correctness-Condition"
+                and Block[@kind = "Proof"]
+              ]
+        ]
+ ]
+] {
+  // Emit a lemma before the condition
+  $fresh-variable = fresh-variable (#prefix = "Z");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "Conditional"; }
+      for-each [Block[@kind = "Registration-Block"]] {
+        $locus = `Item[@kind = "Loci-Declaration"]`;
+        $segments = `$locus/Explicitly-Qualified-Segment`;
+        $cluster = `Item[@kind = "Cluster"]`;
+        $condreg = `$cluster/Conditional-Registration`;
+        $cluster-1 = `$condreg/Adjective-Cluster[1]`;
+        $cluster-2 = `$condreg/Adjective-Cluster[2]`;
+        $type = `$condreg/*[position() = last()]`;
+        universally-bind-conditional-registration
+          (#segments  = $segments,
+           #cluster-1 = $cluster-1,
+           #cluster-2 = $cluster-2,
+           #type      = $type,
+           #it        = $fresh-variable);
+      }
+    }
+    for-each [Block[@kind = "Registration-Block"]] {
+      for-each [Item[@kind = "Correctness-Condition"]] {
+        for-each [Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Registration-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Cluster"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind = "Definition-Item"
+    and Block
+        [
+              @kind = "Registration-Block"
+          and Item
+              [
+                    @kind = "Cluster"
+                and Conditional-Registration
+              ]
+          and Item
+              [
+                    @kind = "Correctness-Condition"
+                and Straightforward-Justification
+              ]
+        ]
+ ]
+] {
+  // Emit a lemma before the condition
+  $fresh-variable = fresh-variable (#prefix = "Z");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "Conditional"; }
+      for-each [Block[@kind = "Registration-Block"]] {
+        $locus = `Item[@kind = "Loci-Declaration"]`;
+        $segments = `$locus/Explicitly-Qualified-Segment`;
+        $cluster = `Item[@kind = "Cluster"]`;
+        $condreg = `$cluster/Conditional-Registration`;
+        $cluster-1 = `$condreg/Adjective-Cluster[1]`;
+        $cluster-2 = `$condreg/Adjective-Cluster[2]`;
+        $type = `$condreg/*[position() = last()]`;
+        universally-bind-conditional-registration
+          (#segments  = $segments,
+           #cluster-1 = $cluster-1,
+           #cluster-2 = $cluster-2,
+           #type      = $type,
+           #it        = $fresh-variable);
+      }
+    }
+    <Straightforward-Justification {
+      for-each [Straightforward-Justification] {
+        apply [*];
+      }
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl
+[
+  Block
+  [
+        @kind = "Proof"
+    and parent::Item
+        [
+              @kind      = "Correctness-Condition"
+          and @condition = "coherence"
+          and preceding-sibling::Item
+              [
+                      @kind = "Cluster"
+                  and Conditional-Registration
+              ]
+          and parent::Block
+              [
+                    @kind = "Registration-Block"
+                and parent::Item
+                    [
+                          @kind = "Definition-Item"
+                      and parent::Text-Proper
+                    ]
+              ]
+        ]
+  ]
+]
+{
+  <Straightforward-Justification { <Local-Reference { @spelling = "Conditional"; } }
+}
+
+tpl
+[
+  Straightforward-Justification
+  [
+      parent::Item
+      [
+            @kind      = "Correctness-Condition"
+        and @condition = "coherence"
+        and preceding-sibling::Item
+            [
+                    @kind = "Cluster"
+                and Conditional-Registration
+            ]
+        and parent::Block
+            [
+                  @kind = "Registration-Block"
+              and parent::Item
+                  [
+                        @kind = "Definition-Item"
+                    and parent::Text-Proper
+                  ]
+            ]
+      ]
+  ]
+]
+{
+  <Straightforward-Justification { <Local-Reference { @spelling = "Conditional"; } }
+}
+
+tpl universally-bind-reduction (#segments, #lhs, #rhs) {
+  if [count ($segments) = 0] {
+    <Predicative-Formula {
+      @spelling = "=";
+      <Arguments {
+        apply [$lhs];
+      }
+      <Arguments {
+        apply [$rhs];
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-reduction (#segments = $rest,
+                                  #lhs      = $lhs,
+                                  #rhs      = $rhs);
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind = "Definition-Item"
+    and Block
+        [
+              @kind = "Registration-Block"
+          and Item
+              [
+                    @kind = "Reduction"
+              ]
+          and Item
+              [
+                    @kind = "Correctness-Condition"
+                and Block[@kind = "Proof"]
+              ]
+        ]
+ ]
+] {
+  // Emit a lemma before the condition
+  $fresh-variable = fresh-variable (#prefix = "Z");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "Reducibility"; }
+      for-each [Block[@kind = "Registration-Block"]] {
+        $locus = `Item[@kind = "Loci-Declaration"]`;
+        $segments = `$locus/Explicitly-Qualified-Segment`;
+        $reduction = `Item[@kind = "Reduction"]`;
+        $lhs = `$reduction/*[1]`;
+        $rhs = `$reduction/*[2]`;
+        universally-bind-reduction (#segments = $segments,
+                                    #lhs      = $lhs,
+                                    #rhs      = $rhs);
+      }
+    }
+    for-each [Block[@kind = "Registration-Block"]] {
+      for-each [Item[@kind = "Correctness-Condition"]] {
+        for-each [Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Registration-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Reduction"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl
+[
+  Block
+  [
+        @kind = "Proof"
+    and parent::Item
+        [
+              @kind      = "Correctness-Condition"
+          and @condition = "reducibility"
+          and parent::Block
+              [
+                    @kind = "Registration-Block"
+                and parent::Item
+                    [
+                          @kind = "Definition-Item"
+                      and parent::Text-Proper
+                    ]
+              ]
+        ]
+  ]
+]
+{
+  <Straightforward-Justification { <Local-Reference { @spelling = "Reducibility"; } }}
+
+
 tpl universally-bind-segments-existence (#segments,
                                          #it,
                                          #formula,
