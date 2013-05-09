@@ -23,6 +23,8 @@ $symmetry-lemma       = "SymmetryLemma";
 $asymmetry-lemma      = "AsymmetryLemma";
 $connectedness-lemma  = "ConnectednessLemma";
 
+// mode properties
+$sethood-lemma = "SethoodLemma";
 
 tpl try-fresh-variable (#prefix, #try) {
   $trial-name = `concat ($prefix, $try)`;
@@ -241,24 +243,23 @@ tpl universally-bind-conditional-registration (#cluster-1,
   if [count ($segments) = 0] {
     <Universal-Quantifier-Formula {
       <Explicitly-Qualified-Segment {
-        <Variables {
-          <Variable {
-            @spelling = $it;
-          }
-        }
+        <Variables { <Variable { @spelling = $it; } }
         apply [$type];
       }
-      <Conditional-Formula {
-        <Attributive-Formula {
-          <Simple-Term {
-            @spelling = $it;
+      if [count ($cluster-1/*) > 0] {
+        <Conditional-Formula {
+          <Attributive-Formula {
+            <Simple-Term { @spelling = $it; }
+            apply [$cluster-1];
           }
-          apply [$cluster-1];
+          <Attributive-Formula {
+            <Simple-Term { @spelling = $it; }
+            apply [$cluster-2];
+          }
         }
+      } else {
         <Attributive-Formula {
-          <Simple-Term {
-            @spelling = $it;
-          }
+          <Simple-Term { @spelling = $it; }
           apply [$cluster-2];
         }
       }
@@ -395,8 +396,12 @@ tpl
       }
     }
     <Straightforward-Justification {
-      for-each [Straightforward-Justification] {
-        apply [*];
+      for-each [Block[@kind = "Registration-Block"]] {
+        for-each [Item[@kind = "Correctness-Condition"]] {
+          for-each [Straightforward-Justification] {
+            apply [*];
+          }
+        }
       }
     }
   }
@@ -503,6 +508,61 @@ tpl
           and Item
               [
                     @kind = "Correctness-Condition"
+                and @condition = "reducibility"
+                and Straightforward-Justification
+              ]
+        ]
+ ]
+] {
+  // Emit a lemma before the condition
+  $fresh-variable = fresh-variable (#prefix = "Z");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "Reducibility"; }
+      for-each [Block[@kind = "Registration-Block"]] {
+        $locus = `Item[@kind = "Loci-Declaration"]`;
+        $segments = `$locus/Explicitly-Qualified-Segment`;
+        $reduction = `Item[@kind = "Reduction"]`;
+        $lhs = `$reduction/*[2]`;
+        $rhs = `$reduction/*[1]`;
+        universally-bind-reduction (#segments = $segments,
+                                    #lhs      = $lhs,
+                                    #rhs      = $rhs);
+      }
+    }
+    for-each [Block[@kind = "Registration-Block"]] {
+      for-each [Item[@kind = "Correctness-Condition"]] {
+        for-each [Straightforward-Justification] {
+          <Straightforward-Justification {
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind = "Definition-Item"
+    and Block
+        [
+              @kind = "Registration-Block"
+          and Item
+              [
+                    @kind = "Reduction"
+              ]
+          and Item
+              [
+                    @kind = "Correctness-Condition"
                 and Block[@kind = "Proof"]
               ]
         ]
@@ -519,8 +579,8 @@ tpl
         $locus = `Item[@kind = "Loci-Declaration"]`;
         $segments = `$locus/Explicitly-Qualified-Segment`;
         $reduction = `Item[@kind = "Reduction"]`;
-        $lhs = `$reduction/*[1]`;
-        $rhs = `$reduction/*[2]`;
+        $lhs = `$reduction/*[2]`;
+        $rhs = `$reduction/*[1]`;
         universally-bind-reduction (#segments = $segments,
                                     #lhs      = $lhs,
                                     #rhs      = $rhs);
@@ -577,8 +637,35 @@ tpl
   ]
 ]
 {
-  <Straightforward-Justification { <Local-Reference { @spelling = "Reducibility"; } }}
+  <Straightforward-Justification { <Local-Reference { @spelling = "Reducibility"; } }
+}
 
+tpl
+[
+  Straightforward-Justification
+  [
+      parent::Item
+      [
+            @kind      = "Correctness-Condition"
+        and @condition = "reducibility"
+        and parent::Block
+            [
+                  @kind = "Registration-Block"
+              and parent::Item
+                  [
+                        @kind = "Definition-Item"
+                    and parent::Text-Proper
+                  ]
+            ]
+      ]
+  ]
+]
+{
+  <Straightforward-Justification {
+    <Local-Reference { @spelling = "Reducibility"; }
+    apply [*];
+  }
+}
 
 tpl universally-bind-segments-existence (#segments,
                                          #it,
@@ -622,17 +709,15 @@ tpl universally-bind-segments-existence (#segments,
       for-each [$formula] {
         if [Partial-Definiens] {
           $alternative-val = `*[position() = last()]`;
-          <Conjunctive-Formula {
-            for-each [Partial-Definiens] {
+          for-each [Partial-Definiens] {
+            <Conjunctive-Formula {
               $val = `*[1]`;
               $condition = `*[position() = last()]`;
               <Conditional-Formula {
                 apply [$condition];
                 <Existential-Quantifier-Formula {
                   <Explicitly-Qualified-Segment {
-                    <Variables {
-                      <Variable { @spelling = $it; }
-                    }
+                    <Variables { <Variable { @spelling = $it; } }
                     if [$type] {
                       apply [$type];
                     } else {
@@ -643,14 +728,10 @@ tpl universally-bind-segments-existence (#segments,
                 }
               }
               <Conditional-Formula {
-                <Negated-Formula {
-                  apply [$condition];
-                }
+                <Negated-Formula { apply [$condition]; }
                 <Existential-Quantifier-Formula {
                   <Explicitly-Qualified-Segment {
-                    <Variables {
-                      <Variable { @spelling = $it; }
-                    }
+                    <Variables { <Variable { @spelling = $it; } }
                     if [$type] {
                       apply [$type];
                     } else {
@@ -661,31 +742,28 @@ tpl universally-bind-segments-existence (#segments,
                 }
               }
             }
-
           }
         } else {
           for-each [*[position() = last()]] {
             <Existential-Quantifier-Formula {
-              <Explicitly-Qualified-Segment {
+                <Explicitly-Qualified-Segment {
 
-                <Variables {
-                  <Variable { @spelling = $it; }
+                  <Variables { <Variable { @spelling = $it; } }
+
+                  if [$type] {
+                    apply [$type];
+                  } else {
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+
                 }
 
-                if [$type] {
-                  apply [$type];
-                } else {
-                  <Standard-Type { @nr = "1"; @spelling = "set"; }
-                }
-
+                apply [.] (#it = $it) mode="replace-it-term";
               }
-
-              apply [.] (#it = $it) mode="replace-it-term";
             }
           }
         }
       }
-    }
   } else {
     $segment = `$segments[1]`;
     $rest = `$segments[position() > 1]`;
@@ -1009,6 +1087,91 @@ tpl universally-bind-segments-commutativity (#segments,
   }
 }
 
+tpl universally-bind-segments-projectivity (#segments,
+                                             #formula,
+                                             #type,
+                                             #it,
+                                             #shape,
+                                             #arg,
+                                             #arg-type) {
+  if [count ($segments) = 0] {
+    choose {
+      when [$shape = "Means"] {
+        <Universal-Quantifier-Formula {
+
+          <Explicitly-Qualified-Segment {
+            <Variables { <Variable { @spelling = $it; } }
+
+            if [$type] {
+              apply [$type];
+            } else {
+              <Standard-Type { @nr = "1"; @spelling = "set"; }
+            }
+
+          }
+
+          <Universal-Quantifier-Formula {
+            <Explicitly-Qualified-Segment {
+              <Variables { <Variable { @spelling = $arg; } }
+
+              if [$arg-type] {
+                apply [$arg-type];
+              } else {
+                <Standard-Type { @nr = "1"; @spelling = "set"; }
+              }
+
+            }
+
+            <Conditional-Formula {
+              apply [$formula] (#it = $it) mode="replace-it-term";
+              apply [$formula] (#it = $arg) mode="replace-it-term";
+            }
+          }
+        }
+      }
+      when [$shape = "Equals"] {
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable { @spelling = `$arg`; }
+            }
+
+            if [$arg-type] {
+              apply [$arg-type];
+            } else {
+              <Standard-Type { @nr = "1"; @spelling = "set"; }
+            }
+
+          }
+
+          <Predicative-Formula {
+             @spelling = "=";
+             <Arguments {
+               apply [$formula] (#it = $it) mode="replace-it-term";
+             }
+             <Arguments {
+               apply [$formula] (#it = $arg);
+            }
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-projectivity (#segments = $rest,
+                                               #formula  = $formula,
+                                               #type     = $type,
+                                               #it       = $it,
+                                               #shape    = $shape,
+                                               #arg-type = $arg-type,
+                                               #arg      = $arg);
+    }
+  }
+}
+
 tpl universally-bind-segments-coherence (#segments,
                                          #formula,
                                          #type)
@@ -1031,6 +1194,44 @@ tpl universally-bind-segments-coherence (#segments,
       universally-bind-segments-coherence (#segments = $rest,
                                            #formula  = $formula,
                                            #type     = $type);
+    }
+  }
+}
+
+tpl universally-bind-segments-conditional-coherence (#segments,
+                                                     #formula,
+                                                     #adjective,
+                                                     #type)
+{
+  if [count ($segments) = 0] {
+    $fresh = fresh-variable ();
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable {
+            @spelling = $fresh;
+          }
+        }
+        if [$type] {
+          apply [$type];
+        } else {
+          <Standard-Type { @nr = "1"; @spelling = "set"; }
+        }
+      }
+      <Attributive-Formula {
+        apply [$formula];
+        apply [$adjective];
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-conditional-coherence (#segments  = $rest,
+                                                       #formula   = $formula,
+                                                       #adjective = $adjective,
+                                                       #type      = $type);
     }
   }
 }
@@ -1663,6 +1864,79 @@ tpl
         [
                 @kind = "Cluster"
             and Functorial-Registration
+                [
+                  count (*) = 3
+                ]
+        ]
+  ]
+]
+{
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CoherenceLemma"; }
+      for-each [ancestor::Block[@kind = "Registration-Block"]] {
+
+        $locus     = `Item[@kind = "Loci-Declaration"]`;
+        $fd        = `Item[@kind = "Cluster"]/Functorial-Registration[1]`;
+        $formula   = `$fd/*[1]`;
+        $adjective = `$fd/*[2]`;
+        $type      = `$fd/*[3]`;
+        $segments  = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-conditional-coherence (#segments  = $segments,
+                                                         #formula   = $formula,
+                                                         #adjective = $adjective,
+                                                         #type      = $type);
+      }
+    }
+
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Registration-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Cluster"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "coherence"
+    and parent::Block
+        [
+            @kind = "Registration-Block"
+        ]
+    and preceding-sibling::Item
+        [
+                @kind = "Cluster"
+            and Functorial-Registration
+                [
+                  count (*) = 2
+                ]
         ]
   ]
 ]
@@ -2179,6 +2453,11 @@ tpl [*] mode="straightforward-correctness" {
     for-each [@*] { copy-of `.`; }
     apply [*] mode="straightforward-correctness";
   }
+}
+
+tpl [Item[@kind = "Property" and @property = "sethood"]] mode="local-reference"
+{
+  <Local-Reference { @spelling = $sethood-lemma; }
 }
 
 tpl [Item[@kind = "Property" and @property = "reflexivity"]] mode="local-reference"
@@ -2718,6 +2997,88 @@ tpl
                    #arg-type = $arg-type,
                    #arg-1    = $arg-1-spelling,
                    #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "projectivity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $projectivity-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus   = `Item[@kind = "Loci-Declaration"]`;
+        $fd      = `Item[@kind = "Functor-Definition"]`;
+        $formula = `$fd/Definiens/*[position() = last()]`;
+        $type    = `$fd/Type-Specification/*[1]`;
+        $pattern = `$fd/Operation-Functor-Pattern`;
+        $shape   = `$fd/@shape`;
+        for-each [$pattern] {
+          $arg = `descendant::Locus[1]/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `*[position() = last()]`;
+                universally-bind-segments-projectivity
+                  (#segments = $segments,
+                   #formula  = $formula,
+                   #shape    = $shape,
+                   #type     = $type,
+                   #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg      = $arg);
               }
             }
           }
@@ -3384,4 +3745,691 @@ tpl
     <Straightforward-Justification;
 
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Modes
+//////////////////////////////////////////////////////////////////////
+
+tpl
+[
+  Item
+  [
+    @kind = "Definition-Item"
+    and Block
+        [
+          @kind = "Definitional-Block"
+          and Item
+              [
+                    @kind = "Mode-Definition"
+                and not(Redefine)
+              ]
+        ]
+  ]
+]
+{
+  for-each [Block[@kind = "Definitional-Block"]] {
+    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+
+      choose {
+        when [self::Item[@kind = "Correctness-Condition"]] {
+          $c = `@condition`;
+          msg `concat ("working on condition ", $c)`;
+        }
+        when [self::Item[@kind = "Property"]] {
+          $p = `@property`;
+          msg `concat ("working on property ", $p)`;
+        }
+        when [self::Item[@kind = "Correctness"]] {
+          msg "working on correctness";
+        }
+      }
+
+      apply [.];
+      msg "done.";
+    }
+  }
+
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    for-each [Block[@kind = "Definitional-Block"]] {
+      <Block {
+        for-each [@*] { copy-of `.`; }
+        for-each [*] {
+          choose {
+            when [self::Item[@kind = "Correctness-Condition"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            when [self::Item[@kind = "Property"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            otherwise {
+              apply [.];
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Mode-Definition"
+          and Standard-Mode
+         ]
+  ]
+]
+{
+  $existential-variable = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      $fd = `preceding-sibling::Item[@kind = "Mode-Definition"]/Standard-Mode`;
+      $definiens = `$fd/Definiens`;
+      $type-specification = `$fd/Type-Specification`;
+      $type = `$type-specification/*[1]`;
+      universally-bind-segments-mode-existence (#segments   = $segments,
+                                                #formula    = $definiens,
+                                                #type       = $type,
+                                                #it         = $existential-variable);
+    }
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Mode-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "sethood"
+    and preceding-sibling::Item
+        [
+              @kind  = "Mode-Definition"
+          and Standard-Mode
+         ]
+  ]
+]
+{
+  $existential-variable = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $sethood-lemma; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      $fd = `preceding-sibling::Item[@kind = "Mode-Definition"]/Standard-Mode`;
+      $definiens = `$fd/Definiens`;
+      $type-specification = `$fd/Type-Specification`;
+      $type = `$type-specification/*[1]`;
+      universally-bind-segments-mode-sethood (#segments   = $segments,
+                                              #formula    = $definiens,
+                                              #type       = $type,
+                                              #it         = $existential-variable);
+    }
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Mode-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl universally-bind-segments-mode-sethood (#segments,
+                                            #it,
+                                            #formula,
+                                            #type) {
+  if [count ($segments) = 0] {
+    for-each [$formula] {
+      if [Partial-Definiens] {
+        $alternative-val = `*[position() = last()]`;
+        <Disjunctive-Formula {
+          for-each [Partial-Definiens] {
+            $val = `*[1]`;
+            $condition = `*[position() = last()]`;
+            <Conjunctive-Formula {
+              apply [$condition];
+              <Existential-Quantifier-Formula {
+                <Explicitly-Qualified-Segment {
+                  <Variables { <Variable { @spelling = $it; } }
+                  if [$type] {
+                    apply [$type];
+                  } else {
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+                }
+                <Universal-Quantifier-Formula {
+                  <Explicitly-Qualified-Segment {
+                    <Variables { <Variable { @spelling = `concat ($it, "1")`; } }
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+                  <Conditional-Formula {
+                    apply [$val] (#it = `concat ($it, "1")`) mode="replace-it-term";
+                    <Predicative-Formula {
+                      @spelling = "in";
+                      <Arguments {
+                        <Simple-Term {
+                          @spelling = `concat ($it, "1")`;
+                        }
+                      }
+                      <Arguments {
+                        <Simple-Term {
+                          @spelling = $it;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            <Conjunctive-Formula {
+              <Negated-Formula { apply [$condition]; }
+              <Existential-Quantifier-Formula {
+                <Explicitly-Qualified-Segment {
+                  <Variables { <Variable { @spelling = $it; } }
+                  if [$type] {
+                    apply [$type];
+                  } else {
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+                }
+
+                <Universal-Quantifier-Formula {
+                  <Explicitly-Qualified-Segment {
+                    <Variables { <Variable { @spelling = `concat ($it, "1")`; } }
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+                  <Conditional-Formula {
+                    apply [$alternative-val] (#it = `concat ($it, "1")`) mode="replace-it-term";
+                    <Predicative-Formula {
+                      @spelling = "in";
+                      <Arguments {
+                        <Simple-Term {
+                          @spelling = `concat ($it, "1")`;
+                        }
+                      }
+                      <Arguments {
+                        <Simple-Term {
+                          @spelling = $it;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        for-each [*[position() = last()]] {
+          <Existential-Quantifier-Formula {
+            <Explicitly-Qualified-Segment {
+               <Variables { <Variable { @spelling = $it; } }
+               if [$type] {
+                apply [$type];
+              } else {
+                <Standard-Type { @nr = "1"; @spelling = "set"; }
+              }
+            }
+            apply [.] (#it = $it) mode="replace-it-term";
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-mode-sethood (#segments   = $rest,
+                                              #it         = $it,
+                                              #formula    = $formula,
+                                              #type       = $type);
+    }
+  }}
+
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind  = "Mode-Definition"
+          and Standard-Mode
+         ]
+  ]
+]
+{
+  $definiens = `preceding-sibling::Item[@kind = "Mode-Definition"]/Definiens`;
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $consistency-lemma; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      universally-bind-segments-mode-consistency (#segments   = $segments);
+    }
+    <Straightforward-Justification;
+  }
+}
+
+tpl universally-bind-segments-mode-existence (#segments,
+                                              #it,
+                                              #formula,
+                                              #type,
+                                              #assumption) {
+  if [count ($segments) = 0] {
+    for-each [$formula] {
+      if [Partial-Definiens] {
+        $alternative-val = `*[position() = last()]`;
+        <Conjunctive-Formula {
+          for-each [Partial-Definiens] {
+            $val = `*[1]`;
+            $condition = `*[position() = last()]`;
+            <Conditional-Formula {
+              apply [$condition];
+              <Existential-Quantifier-Formula {
+                <Explicitly-Qualified-Segment {
+                  <Variables { <Variable { @spelling = $it; } }
+                  if [$type] {
+                    apply [$type];
+                  } else {
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+                }
+                apply [$val] (#it = $it) mode="replace-it-term";
+              }
+            }
+            <Conditional-Formula {
+              <Negated-Formula { apply [$condition]; }
+              <Existential-Quantifier-Formula {
+                <Explicitly-Qualified-Segment {
+                  <Variables { <Variable { @spelling = $it; } }
+                  if [$type] {
+                    apply [$type];
+                  } else {
+                    <Standard-Type { @nr = "1"; @spelling = "set"; }
+                  }
+                }
+                apply [$alternative-val] (#it = $it) mode="replace-it-term";
+              }
+            }
+          }
+        }
+      } else {
+        for-each [*[position() = last()]] {
+          <Existential-Quantifier-Formula {
+            <Explicitly-Qualified-Segment {
+               <Variables { <Variable { @spelling = $it; } }
+               if [$type] {
+                apply [$type];
+              } else {
+                <Standard-Type { @nr = "1"; @spelling = "set"; }
+              }
+            }
+            apply [.] (#it = $it) mode="replace-it-term";
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-mode-existence (#segments   = $rest,
+                                                #it         = $it,
+                                                #formula    = $formula,
+                                                #type       = $type);
+    }
+  }
+}
+
+tpl universally-bind-segments-mode-consistency (#segments) {
+  if [count ($segments) = 0] {
+    <Negated-Formula { <Contradiction; }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-mode-consistency (#segments = $rest);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Attributes
+//////////////////////////////////////////////////////////////////////
+
+tpl
+[
+  Item
+  [
+    @kind = "Definition-Item"
+    and Block
+        [
+          @kind = "Definitional-Block"
+          and Item
+              [
+                    @kind = "Attribute-Definition"
+                and not(Redefine)
+              ]
+        ]
+  ]
+]
+{
+  for-each [Block[@kind = "Definitional-Block"]] {
+    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+
+      choose {
+        when [self::Item[@kind = "Correctness-Condition"]] {
+          $c = `@condition`;
+          msg `concat ("working on condition ", $c)`;
+        }
+        when [self::Item[@kind = "Property"]] {
+          $p = `@property`;
+          msg `concat ("working on property ", $p)`;
+        }
+        when [self::Item[@kind = "Correctness"]] {
+          msg "working on correctness";
+        }
+      }
+
+      apply [.];
+      msg "done.";
+    }
+  }
+
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    for-each [Block[@kind = "Definitional-Block"]] {
+      <Block {
+        for-each [@*] { copy-of `.`; }
+        for-each [*] {
+          choose {
+            when [self::Item[@kind = "Correctness-Condition"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            when [self::Item[@kind = "Property"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            otherwise {
+              apply [.];
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind  = "Attribute-Definition"
+          and Definiens
+        ]
+  ]
+]
+{
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $consistency-lemma; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      // mode consistency works as well for attribute consistency (for now)
+      universally-bind-segments-mode-consistency (#segments = $segments);
+    }
+    <Straightforward-Justification;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Predicates
+//////////////////////////////////////////////////////////////////////
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and Definiens
+        ]
+  ]
+]
+{
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $consistency-lemma; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      // mode consistency works as well for predicate consistency (for now)
+      universally-bind-segments-mode-consistency (#segments = $segments);
+    }
+    <Straightforward-Justification;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Identifications
+//////////////////////////////////////////////////////////////////////
+
+tpl
+[
+  Item
+  [
+        @kind = "Definition-Item"
+    and Block
+        [
+              @kind = "Registration-Block"
+          and Item
+              [
+                    @kind = "Identify"
+              ]
+          and Item
+              [
+                    @kind = "Correctness-Condition"
+                and @condition = "compatibility"
+              ]
+        ]
+ ]
+] {
+  // Emit a lemma before the condition
+  $fresh-variable = fresh-variable (#prefix = "Z");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "Compatibility"; }
+      for-each [Block[@kind = "Registration-Block"]] {
+        $locus = `Item[@kind = "Loci-Declaration"]`;
+        $segments = `$locus/Explicitly-Qualified-Segment`;
+        $identification = `Item[@kind = "Identify"]`;
+        $lhs = `$identification/*[1]`;
+        $rhs = `$identification/*[2]`;
+        $condition = `$identification/*[3]`;
+        universally-bind-identification (#segments  = $segments,
+                                         #lhs       = $lhs,
+                                         #rhs       = $rhs,
+                                         #condition = $condition);
+      }
+    }
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Identify"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+  <Item {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl universally-bind-identification (#segments,
+                                     #lhs,
+                                     #rhs,
+                                     #condition) {
+  if [count ($segments) = 0] {
+    <Conditional-Formula {
+      apply [$condition];
+      <Predicative-Formula {
+        @spelling = "=";
+        <Arguments {
+          apply [$lhs];
+        }
+        <Arguments {
+          apply [$rhs];
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-identification (#segments = $rest,
+                                       #lhs = $lhs,
+                                       #rhs = $rhs,
+                                       #condition = $condition);
+    }
+  }
+}
+
+tpl
+[
+  Block
+  [
+        @kind = "Proof"
+    and parent::Item
+        [
+              @kind      = "Correctness-Condition"
+          and @condition = "compatibility"
+          and parent::Block
+              [
+                    @kind = "Registration-Block"
+                and parent::Item
+                    [
+                          @kind = "Definition-Item"
+                      and parent::Text-Proper
+                    ]
+              ]
+        ]
+  ]
+]
+{
+  <Straightforward-Justification { <Local-Reference { @spelling = "Compatibility"; } }
+}
+
+tpl
+[
+  Straightforward-Justification
+  [
+      parent::Item
+      [
+            @kind      = "Correctness-Condition"
+        and @condition = "compatibility"
+        and parent::Block
+            [
+                  @kind = "Registration-Block"
+              and parent::Item
+                  [
+                        @kind = "Definition-Item"
+                    and parent::Text-Proper
+                  ]
+            ]
+      ]
+  ]
+]
+{
+  <Straightforward-Justification { <Local-Reference { @spelling = "Compatibility"; } }
 }
