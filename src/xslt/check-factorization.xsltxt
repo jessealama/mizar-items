@@ -23,13 +23,16 @@ tpl [Item[@kind = "Implicitly-Qualified-Segment"]] {
 }
 
 tpl [Item[    @kind = "Correctness-Condition"
-          and not(count(Straightforward-Justification/*) = 1)]] {
+          and not(preceding-sibling::*/Redefine)
+          and Straightforward-Justification
+          and count(Straightforward-Justification/*) < 1]] {
   $condition = `@condition`;
-  $message = `concat ("Every correctness condition with a Straightforward-Justification should have exactly 1 justification element.  We encountered a ", $condition, " condition that does not have this property.")`;
+  $message = `concat ("Every correctness condition with a Straightforward-Justification should have at least 1 justification element.  We encountered a ", $condition, " condition that does not have this property.")`;
   apply [.] (#message = $message) mode="die";
 }
 
 tpl [Item[    @kind = "Correctness-Condition"
+          and not(preceding-sibling::*/Redefine)
           and Block[@kind = "Proof"]]] {
   apply [.] (#message = "Every correctness condition should have a Straightforward-Justification child, rather than a Proof block child.") mode="die";
 }
