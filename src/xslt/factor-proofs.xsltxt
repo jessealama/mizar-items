@@ -667,6 +667,58 @@ tpl
   }
 }
 
+tpl universally-bind-segments-existential-assumption-existence (#segments,
+                                                                #it,
+                                                                #formula,
+                                                                #type,
+                                                                #assumption) {
+  if [count ($segments) = 0] {
+    <Conditional-Formula {
+      for-each [$assumption] {
+        <Existential-Quantifier-Formula {
+          apply [Explicitly-Qualified-Segment];
+          for-each [Conditions] {
+            for-each [Proposition] {
+              apply [*[position() = last()]];
+            }
+          }
+        }
+      }
+      <Existential-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+           <Variables { <Variable { @spelling = $it; } }
+
+          if [$type] {
+            apply [$type];
+          } else {
+            <Standard-Type { @nr = "1"; @spelling = "set"; }
+          }
+
+         }
+
+         for-each [$formula] {
+          if [Partial-Definiens] {
+            die (#message = "We do not yet handle partial definientia made under an assumption.");
+          } else {
+            apply [.] (#it = $it) mode="replace-it-term";
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-existential-assumption-existence (#segments   = $rest,
+                                                                  #it         = $it,
+                                                                  #formula    = $formula,
+                                                                  #type       = $type,
+                                                                  #assumption = $assumption);
+    }
+  }
+}
+
 tpl universally-bind-segments-existence (#segments,
                                          #it,
                                          #formula,
@@ -2547,9 +2599,10 @@ mode="straightforward-correctness"
     apply [parent::Item[@kind = "Property"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
       for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
-        <Local-Reference {
-          @spelling = `@spelling`;
-        }
+        <Local-Reference { @spelling = `@spelling`; }
+      }
+      for-each [Item[@kind = "Existential-Assumption"]/Conditions/Proposition/Label] {
+        <Local-Reference { @spelling = `@spelling`; }
       }
     }
   }
@@ -2571,6 +2624,11 @@ mode="straightforward-correctness"
     apply [parent::Item[@kind = "Property"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
       for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
+      for-each [Item[@kind = "Existential-Assumption"]/Conditions/Proposition/Label] {
         <Local-Reference {
           @spelling = `@spelling`;
         }
@@ -2619,7 +2677,22 @@ mode="straightforward-correctness"
   <Straightforward-Justification {
     apply [parent::Item[@kind = "Correctness-Condition"]] mode="local-reference";
     for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label | Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label | Item[@kind = "Assumption"]/Collective-Assumption/Conditions/Proposition/Label] {
+      for-each [Item[@kind = "Choice-Statement"]/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
+      for-each [Item[@kind = "Assumption"]/Single-Assumption/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
+      for-each [Item[@kind = "Assumption"]/Collective-Assumption/Conditions/Proposition/Label] {
+        <Local-Reference {
+          @spelling = `@spelling`;
+        }
+      }
+      for-each [Item[@kind = "Existential-Assumption"]/Conditions/Proposition/Label] {
         <Local-Reference {
           @spelling = `@spelling`;
         }
@@ -2657,6 +2730,7 @@ tpl
               @kind  = "Functor-Definition"
           and @shape = "Means"
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (preceding-sibling::Item[@kind = "Existential-Assumption"]) = 0
          ]
   ]
 ]
@@ -2791,6 +2865,82 @@ tpl
   Item
   [
         @kind      = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Existential-Assumption"]) = 1
+         ]
+  ]
+]
+{
+  $locus      = `preceding-sibling::Item[@kind = "Loci-Declaration"]`;
+  $segments   = `$locus/Explicitly-Qualified-Segment`;
+  $fd = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]`;
+  $definiens = `$fd/Definiens`;
+  $pattern = `$fd/Operation-Functor-Pattern`;
+  $type-specification = `$fd/Type-Specification`;
+  $type = `$type-specification/*[1]`;
+  $formula = `$definiens/*[position() = last()]`;
+  $assumption = `preceding-sibling::Item[@kind = "Existential-Assumption"]`;
+  $existential-variable = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Label { @spelling = $existence-lemma; }
+    <Proposition {
+      universally-bind-segments-existential-assumption-existence (#formula = $formula,
+                                                                  #segments = $segments,
+                                                                  #assumption = $assumption,
+                                                                  #it = $existential-variable,
+                                                                  #type = $type);
+    }
+
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          <Straightforward-Justification {
+            for-each [*] {
+              if [@spelling = preceding::Item[@kind = "Existential-Assumption"]/Conditions/Proposition/Label/@spelling] {
+                // ignore: this is a reference to the existential assumption
+              } else {
+                apply [.];
+              }
+            }
+          }
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
     and @condition = "uniqueness"
     and preceding-sibling::Item
         [
@@ -2836,13 +2986,16 @@ tpl
             for-each [@*] { copy-of `.`; }
             for-each [ancestor::Block[@kind = "Definitional-Block"]] {
               for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
-                if [self::Item[@kind = "Loci-Declaration"]] {
-                  <Item {
-                    @kind = "Generalization";
-                    apply [*];
+                choose {
+                  when [self::Item[@kind = "Loci-Declaration"]] {
+                    <Item { @kind = "Generalization"; apply [*]; }
                   }
-                } else {
-                  apply [.];
+                  when [self::Item[@kind = "Existential-Assumption"]] {
+                    // ignore
+                  }
+                  otherwise {
+                    apply [.];
+                  }
                 }
               }
             }
