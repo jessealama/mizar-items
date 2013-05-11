@@ -1288,6 +1288,83 @@ tpl universally-bind-segments-conditional-coherence (#segments,
   }
 }
 
+tpl type-or-set (#type) {
+  if [$type] {
+    apply [$type];
+  } else {
+    <Standard-Type { @nr = "1"; @spelling = "set"; }
+  }
+}
+
+tpl conjunction-of-negated-partial-definientia (#definientia) {
+  if [count ($definientia) > 0] {
+    $partial-definiens = `$definientia[1]`;
+    $condition = `$partial-definiens/*[2]`;
+    if [count ($definientia) > 1] {
+      <Conjunctive-Formula {
+        <Negated-Formula { apply [$condition]; }
+        conjunction-of-negated-partial-definientia (#definientia = `$definientia[position() > 1]`);
+      }
+    } else {
+      <Negated-Formula { apply [$condition]; }
+    }
+  }
+}
+
+tpl universally-bind-segments-coherence-partial-function-definiens (#segments,
+                                                                    #default,
+                                                                    #original-definientia,
+                                                                    #definientia,
+                                                                    #type)
+{
+  if [count ($segments) = 0] {
+    if [count ($definientia) = 0] {
+      msg terminate="yes" "Error: arrived at an unexpected state computing coherence.";
+    } else {
+      $partial-definiens = `$definientia[1]`;
+      $case = `$partial-definiens/*[2]`;
+      $val = `$partial-definiens/*[1]`;
+      <Conjunctive-Formula {
+        <Conditional-Formula {
+          apply [$case];
+          <Attributive-Formula {
+            apply [$val];
+            type-or-set (#type = $type);
+          }
+        }
+        if [count ($definientia) > 1] {
+          universally-bind-segments-coherence-partial-function-definiens
+            (#segments = $segments,
+             #default = $default,
+             #original-definientia = $original-definientia,
+             #definientia = `$definientia[position() > 1]`,
+             #type = $type);
+        } else {
+          <Conditional-Formula {
+            conjunction-of-negated-partial-definientia (#definientia = $original-definientia);
+            <Attributive-Formula {
+              apply [$default];
+              type-or-set (#type = $type);
+            }
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-coherence-partial-function-definiens
+        (#segments = $rest,
+         #default = $default,
+         #original-definientia = $original-definientia,
+         #definientia = $definientia,
+         #type = $type);
+    }
+  }
+}
+
 tpl universally-bind-segments-involutiveness (#segments,
                                               #formula,
                                               #type,
@@ -2068,6 +2145,77 @@ tpl
         universally-bind-segments-coherence (#segments   = $segments,
                                              #formula    = $formula,
                                              #type       = $type);
+      }
+    }
+
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "coherence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Equals"
+          and not(Redefine)
+          and count(preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and Definiens/Partial-Definiens
+        ]
+  ]
+]
+{
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CoherenceLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus               = `Item[@kind = "Loci-Declaration"]`;
+        $fd                  = `Item[@kind = "Functor-Definition"]`;
+        $definiens           = `$fd/Definiens`;
+        $formula             = `$fd/Definiens/*[position() = last()]`;
+        $ts                  = `$fd/Type-Specification`;
+        $type                = `$ts/*[1]`;
+        $segments            = `$locus/Explicitly-Qualified-Segment`;
+        $partial-definientia = `$definiens/Partial-Definiens`;
+        $default             = `$definiens/*[not(self::Partial-Definiens) and count(preceding-sibling::Partial-Definiens) > 0]`;
+        universally-bind-segments-coherence-partial-function-definiens
+          (#segments  = $segments,
+           #definientia = $partial-definientia,
+           #original-definientia = $partial-definientia,
+           #default = $default,
+           #type      = $type);
       }
     }
 
