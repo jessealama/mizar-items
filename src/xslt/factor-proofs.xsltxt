@@ -4017,9 +4017,85 @@ tpl
   }
 }
 
+tpl universally-bind-segments-consistency-means (#segments,
+                                                  #it,
+                                                  #partial-definientia,
+                                                  #type)
+{
+  if [count ($segments) = 0] {
+    choose {
+      when [count ($partial-definientia) < 2] {
+        // nothing more to do
+      }
+      when [count ($partial-definientia) = 2] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $definiens-2 = `$partial-definientia[2]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $value-2 = `$definiens-2/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        $condition-2 = `$definiens-2/*[2]`;
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            apply [$condition-1] (#it = $it) mode="replace-it-term";
+            apply [$condition-2] (#it = $it) mode="replace-it-term";
+          }
+          <Biconditional-Formula {
+            apply [$value-1] (#it = $it) mode="replace-it-term";
+            apply [$value-2] (#it = $it) mode="replace-it-term";
+          }
+        }
+      }
+      when [count ($partial-definientia) > 2] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $rest = `$partial-definientia[position() > 1]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        <Conjunctive-Formula {
+          for-each [$rest] {
+            $definiens-2 = `.`;
+            universally-bind-segments-consistency-means (#segments = $segments,
+                                                         #type     = $type,
+                                                         #it       = $it,
+                                                         #partial-definientia = `$definiens-1 | $definiens-2`);
+          }
+          universally-bind-segments-consistency-means (#segments = $segments,
+                                                       #type     = $type,
+                                                       #it       = $it,
+                                                       #partial-definientia = $rest);
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      if [count ($rest) = 0] {
+        $fresh = fresh-variable ();
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable { @spelling = $fresh; }
+            }
+            type-or-set (#type = $type);
+          }
+          universally-bind-segments-consistency-means (#segments = $rest,
+                                                       #type     = $type,
+                                                       #it       = $fresh,
+                                                       #partial-definientia = $partial-definientia);
+        }
+      } else {
+        universally-bind-segments-consistency-means (#segments  = $rest,
+                                                     #type = $type,
+                                                     #partial-definientia = $partial-definientia);
+      }
+    }
+  }
+}
+
 tpl universally-bind-segments-consistency-equals (#segments,
-                                                  #type,
-                                                  #partial-definientia)
+                                                 #type,
+                                                 #partial-definientia)
 {
   if [count ($segments) = 0] {
     choose {
@@ -4092,24 +4168,6 @@ tpl
     and preceding-sibling::Item
         [
               @kind = "Functor-Definition"
-          and @shape = "Means"
-          and count (Definiens/Partial-Definiens) > 1
-        ]
-  ]
-]
-{
-  msg terminate="yes" "Error: don't know how to handle consistency for functions defined by a formula.";
-}
-
-tpl
-[
-  Item
-  [
-        @kind      = "Correctness-Condition"
-    and @condition = "consistency"
-    and preceding-sibling::Item
-        [
-              @kind = "Functor-Definition"
           and @shape = "Equals"
           and count (Definiens/Partial-Definiens) > 0
         ]
@@ -4131,6 +4189,68 @@ tpl
         universally-bind-segments-consistency-equals (#segments = $segments,
                                                       #type = $type,
                                                       #partial-definientia = $partial-definientia);
+      }
+      for-each [$context] {
+        for-each [*[position() = last()]] {
+          choose {
+            when [self::Straightforward-Justification] {
+              apply [.];
+            }
+            when [self::Block[@kind = "Proof"]] {
+              <Block {
+                for-each [@*] { copy-of `.`; }
+                for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+                  for-each [*[following-sibling::Item[@kind = "Mode-Definition"]]] {
+                    if [self::Item[@kind = "Loci-Declaration"]] {
+                      <Item {
+                        @kind = "Generalization";
+                        apply [*];
+                      }
+                    } else {
+                      apply [.];
+                    }
+                  }
+                }
+                apply [*];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $context = `.`;
+  $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+  for-each [preceding-sibling::Item[@kind = "Functor-Definition"]] {
+    $ts = `Type-Specification`;
+    $type = `$ts/*[1]`;
+    $definiens = `Definiens`;
+    $partial-definientia = `$definiens/Partial-Definiens`;
+    <Item {
+      @kind = "Regular-Statement";
+      @shape = "Compact-Statement";
+      <Proposition {
+        <Label { @spelling = $consistency-lemma; }
+        universally-bind-segments-consistency-means (#segments = $segments,
+                                                     #type = $type,
+                                                     #partial-definientia = $partial-definientia);
       }
       for-each [$context] {
         for-each [*[position() = last()]] {
