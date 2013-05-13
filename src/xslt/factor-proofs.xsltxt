@@ -4017,6 +4017,72 @@ tpl
   }
 }
 
+tpl universally-bind-segments-consistency-equals (#segments,
+                                                  #type,
+                                                  #partial-definientia)
+{
+  if [count ($segments) = 0] {
+    choose {
+      when [count ($partial-definientia) > 2] {
+        msg terminate="yes" "Error: unable to handle more than 2 partial definientia for a consistency lemma";
+      }
+      when [count ($partial-definientia) < 2] {
+        <Negated-Formula { <Contradiction; }
+      }
+      when [count ($partial-definientia) = 2] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $definiens-2 = `$partial-definientia[2]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $value-2 = `$definiens-2/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        $condition-2 = `$definiens-2/*[2]`;
+        $fresh = fresh-variable ();
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables { <Variable { @spelling = $fresh; } }
+            type-or-set (#type = $type);
+          }
+          <Conditional-Formula {
+            <Conjunctive-Formula {
+              apply [$condition-1];
+              apply [$condition-2];
+            }
+            <Biconditional-Formula {
+              <Predicative-Formula {
+                @spelling = "=";
+                <Arguments {
+                  <Simple-Term { @spelling = $fresh; }
+                }
+                <Arguments {
+                  apply [$value-1];
+                }
+              }
+              <Predicative-Formula {
+                @spelling = "=";
+                <Arguments {
+                  <Simple-Term { @spelling = $fresh; }
+                }
+                <Arguments {
+                  apply [$value-2];
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-consistency-equals (#segments  = $rest,
+                                                    #type = $type,
+                                                    #partial-definientia = $partial-definientia);
+    }
+  }
+}
+
 tpl
 [
   Item
@@ -4025,7 +4091,88 @@ tpl
     and @condition = "consistency"
     and preceding-sibling::Item
         [
-          @kind  = "Functor-Definition"
+              @kind = "Functor-Definition"
+          and @shape = "Means"
+          and count (Definiens/Partial-Definiens) > 1
+        ]
+  ]
+]
+{
+  msg terminate="yes" "Error: don't know how to handle consistency for functions defined by a formula.";
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and @shape = "Equals"
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $context = `.`;
+  $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+  for-each [preceding-sibling::Item[@kind = "Functor-Definition"]] {
+    $ts = `Type-Specification`;
+    $type = `$ts/*[1]`;
+    $definiens = `Definiens`;
+    $partial-definientia = `$definiens/Partial-Definiens`;
+    <Item {
+      @kind = "Regular-Statement";
+      @shape = "Compact-Statement";
+      <Proposition {
+        <Label { @spelling = $consistency-lemma; }
+        universally-bind-segments-consistency-equals (#segments = $segments,
+                                                      #type = $type,
+                                                      #partial-definientia = $partial-definientia);
+      }
+      for-each [$context] {
+        for-each [*[position() = last()]] {
+          choose {
+            when [self::Straightforward-Justification] {
+              apply [.];
+            }
+            when [self::Block[@kind = "Proof"]] {
+              <Block {
+                for-each [@*] { copy-of `.`; }
+                for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+                  for-each [*[following-sibling::Item[@kind = "Mode-Definition"]]] {
+                    if [self::Item[@kind = "Loci-Declaration"]] {
+                      <Item {
+                        @kind = "Generalization";
+                        apply [*];
+                      }
+                    } else {
+                      apply [.];
+                    }
+                  }
+                }
+                apply [*];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind = "Functor-Definition"
+          and count (Definiens/Partial-Definiens) <= 1
         ]
   ]
 ]
@@ -4037,14 +4184,10 @@ tpl
       <Label { @spelling = $consistency-lemma; }
       <Universal-Quantifier-Formula {
         <Explicitly-Qualified-Segment {
-          <Variables {
-            <Variable { @spelling = "x"; }
-          }
+          <Variables { <Variable { @spelling = "x"; } }
           <Standard-Type { @nr = "1"; @spelling = "set"; }
         }
-        <Negated-Formula {
-          <Contradiction;
-        }
+        <Negated-Formula { <Contradiction; }
       }
     }
 
