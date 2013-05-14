@@ -798,6 +798,98 @@ tpl universally-bind-segments-function-means-existence-partial (#segments,
   }
 }
 
+tpl universally-bind-segments-function-means-uniqueness-partial (#segments,
+                                                                 #default,
+                                                                 #partial-definientia,
+                                                                 #original-definientia,
+                                                                 #variable-1,
+                                                                 #variable-2,
+                                                                 #type) {
+  if [count ($segments) = 0] {
+    choose {
+      when [count ($partial-definientia) = 0] {
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            conjunction-of-negated-partial-definientia (#definientia = $original-definientia);
+            <Conjunctive-Formula {
+              apply [$default] (#it = $variable-1) mode="replace-it-term";
+              apply [$default] (#it = $variable-2) mode="replace-it-term";
+            }
+          }
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments { <Simple-Term { @spelling = $variable-1; } }
+            <Arguments { <Simple-Term { @spelling = $variable-2; } }
+          }
+        }
+      }
+      when [count ($partial-definientia) > 0] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        <Conjunctive-Formula {
+          <Conditional-Formula {
+            <Conjunctive-Formula {
+              apply [$condition-1];
+              <Conjunctive-Formula {
+                apply [$value-1] (#it = $variable-1) mode="replace-it-term";
+                apply [$value-1] (#it = $variable-2) mode="replace-it-term";
+              }
+            }
+            <Predicative-Formula {
+              @spelling = "=";
+              <Arguments { <Simple-Term { @spelling = $variable-1; } }
+              <Arguments { <Simple-Term { @spelling = $variable-2; } }
+            }
+          }
+          universally-bind-segments-function-means-uniqueness-partial
+            (#segments             = $segments,
+             #partial-definientia  = `$partial-definientia[position() > 1]`,
+             #original-definientia = $original-definientia,
+             #variable-1           = $variable-1,
+             #variable-2           = $variable-2,
+             #default              = $default,
+             #type                 = $type);
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      if [count ($rest) = 0] {
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable { @spelling = $variable-1; }
+              <Variable { @spelling = $variable-2; }
+            }
+            type-or-set (#type = $type);
+          }
+          universally-bind-segments-function-means-uniqueness-partial
+            (#segments             = $rest,
+             #type                 = $type,
+             #partial-definientia  = $partial-definientia,
+             #original-definientia = $original-definientia,
+             #variable-1           = $variable-1,
+             #variable-2           = $variable-2,
+             #default              = $default);
+        }
+      } else {
+        universally-bind-segments-function-means-uniqueness-partial
+          (#segments             = $rest,
+           #type                 = $type,
+           #partial-definientia  = $partial-definientia,
+           #original-definientia = $original-definientia,
+           #variable-1           = $variable-1,
+           #variable-2           = $variable-2,
+           #default              = $default);
+      }
+    }
+  }
+}
+
 tpl universally-bind-segments-existence (#segments,
                                          #it,
                                          #formula,
@@ -3233,6 +3325,7 @@ tpl
               @kind  = "Functor-Definition"
           and @shape = "Means"
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
         ]
   ]
 ]
@@ -3258,6 +3351,83 @@ tpl
            #variable-2 = $uniqueness-variable-2,
            #formula    = $formula,
            #type       = $type);
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                choose {
+                  when [self::Item[@kind = "Loci-Declaration"]] {
+                    <Item { @kind = "Generalization"; apply [*]; }
+                  }
+                  when [self::Item[@kind = "Existential-Assumption"]] {
+                    // ignore
+                  }
+                  otherwise {
+                    apply [.];
+                  }
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "uniqueness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
+  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "UniquenessLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $definiens = `$fd/Definiens`;
+        $partial-definientia = `$definiens/Partial-Definiens`;
+        $default = `$definiens/*[position() = last()]`;
+        $type       = `$fd/Type-Specification/*[1]`;
+
+        universally-bind-segments-function-means-uniqueness-partial
+          (#segments             = $segments,
+           #variable-1           = $uniqueness-variable-1,
+           #variable-2           = $uniqueness-variable-2,
+           #default              = $default,
+           #original-definientia = $partial-definientia,
+           #partial-definientia  = $partial-definientia,
+           #type                 = $type);
       }
     }
 
