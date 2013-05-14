@@ -719,6 +719,85 @@ tpl universally-bind-segments-existential-assumption-existence (#segments,
   }
 }
 
+tpl universally-bind-segments-function-means-existence-partial (#segments,
+                                                                #default,
+                                                                #partial-definientia,
+                                                                #original-definientia,
+                                                                #type) {
+  if [count ($segments) = 0] {
+    choose {
+      when [count ($partial-definientia) < 1] {
+        // nothing to do
+      }
+      when [count ($partial-definientia) = 1] {
+        $fresh = fresh-variable ();
+        $definiens-1 = `$partial-definientia[1]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        <Conjunctive-Formula {
+          <Conditional-Formula {
+            apply [$condition-1];
+            <Existential-Quantifier-Formula {
+              <Explicitly-Qualified-Segment {
+                <Variables { <Variable { @spelling = $fresh; } }
+                type-or-set (#type = $type);
+              }
+              apply [$value-1] (#it = $fresh) mode="replace-it-term";
+            }
+          }
+          <Conditional-Formula {
+            conjunction-of-negated-partial-definientia (#definientia = $original-definientia);
+            <Existential-Quantifier-Formula {
+              <Explicitly-Qualified-Segment {
+                <Variables { <Variable { @spelling = $fresh; } }
+                type-or-set (#type = $type);
+              }
+              apply [$default] (#it = $fresh) mode="replace-it-term";
+            }
+          }
+        }
+      }
+      when [count ($partial-definientia) > 1] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $more-partial-definientia = `$partial-definientia[position() > 1]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        $fresh = fresh-variable ();
+        <Conjunctive-Formula {
+          <Conditional-Formula {
+            apply [$condition-1];
+            <Existential-Quantifier-Formula {
+              <Explicitly-Qualified-Segment {
+                <Variables { <Variable { @spelling = $fresh; } }
+                type-or-set (#type = $type);
+              }
+              apply [$value-1] (#it = $fresh) mode="replace-it-term";
+            }
+          }
+          universally-bind-segments-function-means-existence-partial
+            (#partial-definientia  = $more-partial-definientia,
+             #original-definientia = $original-definientia,
+             #type                 = $type,
+             #default              = $default,
+             #segments             = $segments);
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-function-means-existence-partial
+        (#segments             = $rest,
+         #type                 = $type,
+         #partial-definientia  = $partial-definientia,
+         #original-definientia = $original-definientia,
+         #default              = $default);
+    }
+  }
+}
+
 tpl universally-bind-segments-existence (#segments,
                                          #it,
                                          #formula,
@@ -2883,6 +2962,73 @@ tpl
           and @shape = "Means"
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
           and count (preceding-sibling::Item[@kind = "Existential-Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+         ]
+  ]
+]
+{
+  $fd = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]`;
+  $loci = `preceding-sibling::Item[@kind = "Loci-Declaration"]`;
+  $segments = `$loci/Explicitly-Qualified-Segment`;
+  $definiens = `$fd/Definiens`;
+  $type-specification = `$fd/Type-Specification`;
+  $type = `$type-specification/*[1]`;
+  $default = `$definiens/*[position() = last()]`;
+  $partial-definientia = `$definiens/Partial-Definiens`;
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      universally-bind-segments-function-means-existence-partial
+        (#segments             = $segments,
+         #default              = $default,
+         #partial-definientia  = $partial-definientia,
+         #original-definientia = $partial-definientia,
+         #type                 = $type);
+
+    }
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "existence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (preceding-sibling::Item[@kind = "Existential-Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
          ]
   ]
 ]
