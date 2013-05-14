@@ -1617,6 +1617,99 @@ tpl universally-bind-segments-involutiveness (#segments,
   }
 }
 
+tpl conjunction-of-replaced-partial-definientia (#partial-definientia,
+                                                 #original-definientia,
+                                                 #default,
+                                                 #x,
+                                                 #y,
+                                                 #it)
+{
+  if [count ($partial-definientia) = 0] {
+    <Conditional-Formula {
+      <Conjunctive-Formula {
+        for-each [$original-definientia] {
+          $condition = `*[2]`;
+          <Negated-Formula {
+            apply [$condition] (#x = $x,
+                                #y = $y,
+                                #it = $it) mode="replace";
+          }
+        }
+      }
+      apply [$default] (#x = $x,
+                        #y = $y,
+                        #it = $it) mode="replace";
+    }
+  } else {
+    $definiens = `$partial-definientia[1]`;
+    $condition = `$definiens/*[2]`;
+    $val = `$definiens/*[1]`;
+    <Conjunctive-Formula {
+      <Conditional-Formula {
+        apply [$condition] (#x = $x, #y = $y, #it = $it) mode="replace";
+        apply [$val] (#x = $x, #y = $y, #it = $it) mode="replace";
+      }
+      conjunction-of-replaced-partial-definientia
+        (#partial-definientia  = `$partial-definientia[position() > 1]`,
+         #original-definientia = $original-definientia,
+         #default = $default,
+         #x = $x,
+         #y = $y,
+         #it = $it);
+    }
+  }
+}
+
+tpl universally-bind-segments-involutiveness-means-partial (#segments,
+                                                            #partial-definientia,
+                                                            #default,
+                                                            #type,
+                                                            #arg-type,
+                                                            #arg-1) {
+  if [count ($segments) = 0] {
+    $value-1 = fresh-variable (#prefix = "u");
+    $value-2 = fresh-variable (#prefix = "v");
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = $value-1; }
+          <Variable { @spelling = $value-2; }
+        }
+        type-or-set (#type = $arg-type);
+      }
+      <Conditional-Formula {
+        conjunction-of-replaced-partial-definientia
+          (#partial-definientia  = $partial-definientia,
+           #original-definientia = $partial-definientia,
+           #default              = $default,
+           #x                    = $arg-1,
+           #y                    = $value-2,
+           #it                   = $value-1);
+        conjunction-of-replaced-partial-definientia
+          (#partial-definientia          = $partial-definientia,
+           #original-definientia = $partial-definientia,
+           #default              = $default,
+           #x                    = $arg-1,
+           #y                    = $value-1,
+           #it                   = $value-2);
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-involutiveness-means-partial
+        (#segments = $rest,
+         #partial-definientia = $partial-definientia,
+         #default = $default,
+         #type = $type,
+         #arg-type = $arg-type,
+         #arg-1 = $arg-1);
+    }
+  }
+}
+
 tpl universally-bind-segments-idempotence (#segments,
                                            #formula,
                                            #type,
@@ -1769,6 +1862,88 @@ tpl universally-bind-segments-connectedness (#segments,
   }
 }
 
+tpl universally-bind-segments-connectedness-partial (#segments,
+                                                     #partial-definientia,
+                                                     #default,
+                                                     #arg-type,
+                                                     #arg-1,
+                                                     #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = `$arg-1`; }
+          <Variable { @spelling = `$arg-2`; }
+        }
+        type-or-set (#type = $arg-type);
+      }
+      <Conditional-Formula {
+        <Disjunctive-Formula {
+          for-each [$partial-definientia] {
+            $condition = `*[2]`;
+            $val       = `*[1]`;
+            <Conjunctive-Formula {
+              apply [$condition];
+              <Negated-Formula {
+                apply [$val];
+              }
+            }
+          }
+          <Conjunctive-Formula {
+            <Conjunctive-Formula {
+              for-each [$partial-definientia] {
+                $condition = `*[2]`;
+                $val       = `*[1]`;
+                <Negated-Formula {
+                  apply [$condition];
+                }
+              }
+            }
+            <Negated-Formula {
+              apply [$default];
+            }
+          }
+        }
+        <Conjunctive-Formula {
+          for-each [$partial-definientia] {
+            $condition = `*[2]`;
+            $val       = `*[1]`;
+            <Conditional-Formula {
+              apply [$condition] (#x = $arg-1, #y = $arg-2) mode="swap";
+              apply [$val] (#x = $arg-1, #y = $arg-2) mode="swap";
+            }
+          }
+          <Conditional-Formula {
+            <Conjunctive-Formula {
+              for-each [$partial-definientia] {
+                $condition = `*[2]`;
+                $val       = `*[1]`;
+                <Negated-Formula {
+                  apply [$condition] (#x = $arg-1, #y = $arg-2) mode="swap";
+                }
+              }
+            }
+            apply [$default] (#x = $arg-1, #y = $arg-2) mode="swap";
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-connectedness-partial
+        (#segments            = $rest,
+         #partial-definientia = $partial-definientia,
+         #default             = $default,
+         #arg-type            = $arg-type,
+         #arg-1               = $arg-1,
+         #arg-2               = $arg-2);
+    }
+  }
+}
+
 tpl universally-bind-segments-asymmetry (#segments,
                                          #formula,
                                          #it,
@@ -1894,6 +2069,64 @@ tpl universally-bind-segments-reflexivity (#segments,
                                              #arg-type = $arg-type,
                                              #arg-1    = $arg-1,
                                              #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-reflexivity-partial (#segments,
+                                                   #partial-definientia,
+                                                   #default,
+                                                   #arg-type,
+                                                   #arg-1,
+                                                   #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables { <Variable { @spelling = `$arg-1`; } }
+        type-or-set (#type = $arg-type);
+      }
+      <Conjunctive-Formula {
+        for-each [$partial-definientia] {
+          $condition = `*[2]`;
+          $val = `*[1]`;
+          <Conditional-Formula {
+            apply [$condition] (#x  = $arg-2,
+                                #y  = $arg-1,
+                                #it = $arg-1) mode="replace";
+            apply [$val] (#x  = $arg-2,
+                          #y  = $arg-1,
+                          #it = $arg-1) mode="replace";
+          }
+        }
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            for-each [$partial-definientia] {
+              $condition = `*[2]`;
+              <Negated-Formula {
+                apply [$condition] (#x  = $arg-2,
+                                    #y  = $arg-1,
+                                    #it = $arg-1) mode="replace";
+              }
+            }
+          }
+          apply [$default] (#x  = $arg-2,
+                            #y  = $arg-1,
+                            #it = $arg-1) mode="replace";
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-reflexivity-partial
+        (#segments            = $rest,
+         #partial-definientia = $partial-definientia,
+         #default             = $default,
+         #arg-type            = $arg-type,
+         #arg-1               = $arg-1,
+         #arg-2               = $arg-2);
     }
   }
 }
@@ -3823,6 +4056,7 @@ tpl
         [
               @kind  = "Functor-Definition"
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
         ]
   ]
 ]
@@ -3885,6 +4119,112 @@ tpl
                   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
                     if [self::Item[@kind = "Loci-Declaration"]] {
                       if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $loci/@spelling] {
+                        // ignore
+                      } else {
+                        <Item {
+                          @kind = "Generalization";
+                          apply [*];
+                        }
+                      }
+                    } else {
+                      apply [.];
+                    }
+                  }
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "involutiveness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Equals"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  msg terminate="yes" "Don't know how to handle involutiveness for functions defined via multiple equations.";
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "involutiveness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Means"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $loci                = `preceding-sibling::Item[@kind = "Loci-Declaration"]`;
+  $fd                  = `preceding-sibling::Item[@kind = "Functor-Definition"]`;
+  $definiens           = `$fd/Definiens`;
+  $partial-definientia = `$definiens/Partial-Definiens`;
+  $default             = `$definiens/*[position() = last()]`;
+  $type                = `$fd/Type-Specification/*[1]`;
+  $pattern             = `$fd/Operation-Functor-Pattern`;
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $involutiveness-lemma; }
+      for-each [$pattern] {
+        $arg-1 = `descendant::Locus[1]`;
+        $arg-1-spelling = `$arg-1/@spelling`;
+        $segments = `$loci/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling])]`;
+        for-each [$loci/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+          for-each [ancestor::Explicitly-Qualified-Segment] {
+            $arg-type = `*[position() = last()]`;
+            universally-bind-segments-involutiveness-means-partial
+              (#segments = $segments,
+               #default  = $default,
+               #partial-definientia = $partial-definientia,
+               #type     = $type,
+               #arg-type = $arg-type,
+               #arg-1    = $arg-1-spelling);
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              $block = `.`;
+              for-each [$pattern] {
+                $all-loci = `descendant::Locus`;
+                for-each [$block] {
+                  for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                    if [self::Item[@kind = "Loci-Declaration"]] {
+                      if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $all-loci/@spelling] {
                         // ignore
                       } else {
                         <Item {
@@ -4166,6 +4506,7 @@ tpl
         [
               @kind  = "Predicate-Definition"
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
         ]
   ]
 ]
@@ -4243,12 +4584,98 @@ tpl
   Item
   [
         @kind      = "Property"
+    and @property = "reflexivity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $reflexivity-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus               = `Item[@kind = "Loci-Declaration"]`;
+        $fd                  = `Item[@kind = "Predicate-Definition"]`;
+        $definiens           = `$fd/Definiens`;
+        $partial-definientia = `$definiens/Partial-Definiens`;
+        $default             = `$definiens/*[position() = last()]`;
+        $pattern             = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `.`;
+                universally-bind-segments-reflexivity-partial
+                  (#segments = $segments,
+                   #partial-definientia = $partial-definientia,
+                   #default = $default,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
     and @property = "connectedness"
     and preceding-sibling::Item
         [
               @kind  = "Predicate-Definition"
           and not(Redefine and not(Definiens))
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
         ]
   ]
 ]
@@ -4284,6 +4711,92 @@ tpl
                    #arg-type = $arg-type,
                    #arg-1    = $arg-1-spelling,
                    #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "connectedness"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and not(Redefine and not(Definiens))
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $connectedness-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $definiens  = `$fd/Definiens`;
+        $partial-definientia = `$definiens/Partial-Definiens`;
+        $default             = `$definiens/*[position() = last()]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `.`;
+                universally-bind-segments-connectedness-partial
+                  (#segments            = $segments,
+                   #partial-definientia = $partial-definientia,
+                   #default             = $default,
+                   #arg-type            = $arg-type,
+                   #arg-1               = $arg-1-spelling,
+                   #arg-2               = $arg-2-spelling);
               }
             }
           }
@@ -5135,6 +5648,7 @@ tpl
         [
               @kind  = "Predicate-Definition"
           and Definiens
+          and count (Definiens/Partial-Definiens) = 0
         ]
   ]
 ]
@@ -5149,6 +5663,143 @@ tpl
       universally-bind-segments-mode-consistency (#segments = $segments);
     }
     <Straightforward-Justification;
+  }
+}
+
+tpl universally-bind-segments-predicate-consistency (#segments,
+                                                     #it,
+                                                     #partial-definientia,
+                                                     #type)
+{
+  if [count ($segments) = 0] {
+    choose {
+      when [count ($partial-definientia) < 2] {
+        // nothing more to do
+      }
+      when [count ($partial-definientia) = 2] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $definiens-2 = `$partial-definientia[2]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $value-2 = `$definiens-2/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        $condition-2 = `$definiens-2/*[2]`;
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            apply [$condition-1] (#it = $it) mode="replace-it-term";
+            apply [$condition-2] (#it = $it) mode="replace-it-term";
+          }
+          <Biconditional-Formula {
+            apply [$value-1] (#it = $it) mode="replace-it-term";
+            apply [$value-2] (#it = $it) mode="replace-it-term";
+          }
+        }
+      }
+      when [count ($partial-definientia) > 2] {
+        $definiens-1 = `$partial-definientia[1]`;
+        $rest = `$partial-definientia[position() > 1]`;
+        $value-1 = `$definiens-1/*[1]`;
+        $condition-1 = `$definiens-1/*[2]`;
+        <Conjunctive-Formula {
+          for-each [$rest] {
+            $definiens-2 = `.`;
+            universally-bind-segments-predicate-consistency (#segments = $segments,
+                                                             #type     = $type,
+                                                             #it       = $it,
+                                                             #partial-definientia = `$definiens-1 | $definiens-2`);
+          }
+          universally-bind-segments-predicate-consistency (#segments = $segments,
+                                                           #type     = $type,
+                                                           #it       = $it,
+                                                           #partial-definientia = $rest);
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      if [count ($rest) = 0] {
+        $fresh = fresh-variable ();
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables { <Variable { @spelling = $fresh; } }
+            type-or-set (#type = $type);
+          }
+          universally-bind-segments-predicate-consistency (#segments = $rest,
+                                                           #type     = $type,
+                                                           #it       = $fresh,
+                                                           #partial-definientia = $partial-definientia);
+        }
+      } else {
+        universally-bind-segments-predicate-consistency (#segments  = $rest,
+                                                         #type = $type,
+                                                         #partial-definientia = $partial-definientia);
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "consistency"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and Definiens
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $context = `.`;
+  $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+  for-each [preceding-sibling::Item[@kind = "Predicate-Definition"]] {
+    $ts = `Type-Specification`;
+    $type = `$ts/*[1]`;
+    $definiens = `Definiens`;
+    $partial-definientia = `$definiens/Partial-Definiens`;
+    <Item {
+      @kind = "Regular-Statement";
+      @shape = "Compact-Statement";
+      <Proposition {
+        <Label { @spelling = $consistency-lemma; }
+        universally-bind-segments-predicate-consistency
+          (#segments = $segments,
+           #type = $type,
+           #partial-definientia = $partial-definientia);
+      }
+      for-each [$context] {
+        for-each [*[position() = last()]] {
+          choose {
+            when [self::Straightforward-Justification] {
+              apply [.];
+            }
+            when [self::Block[@kind = "Proof"]] {
+              <Block {
+                for-each [@*] { copy-of `.`; }
+                for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+                  for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+                    if [self::Item[@kind = "Loci-Declaration"]] {
+                      <Item {
+                        @kind = "Generalization";
+                        apply [*];
+                      }
+                    } else {
+                      apply [.];
+                    }
+                  }
+                }
+                apply [*];
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 
