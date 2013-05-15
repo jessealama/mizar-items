@@ -4434,14 +4434,26 @@ tpl
           <Block {
             for-each [@*] { copy-of `.`; }
             for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
-                if [self::Item[@kind = "Loci-Declaration"]] {
-                  <Item {
-                    @kind = "Generalization";
-                    apply [*];
+              $fd      = `Item[@kind = "Functor-Definition"]`;
+              $pattern = `$fd/Operation-Functor-Pattern`;
+              $block = `.`;
+              for-each [$pattern] {
+                $loci = `descendant::Locus`;
+                for-each [$block] {
+                  for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                    if [self::Item[@kind = "Loci-Declaration"]] {
+                      if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $loci/@spelling] {
+                        // ignore
+                      } else {
+                        <Item {
+                          @kind = "Generalization";
+                          apply [*];
+                        }
+                      }
+                    } else {
+                      apply [.];
+                    }
                   }
-                } else {
-                  apply [.];
                 }
               }
             }
