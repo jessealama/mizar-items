@@ -1889,28 +1889,14 @@ tpl universally-bind-segments-idempotence (#segments,
     choose {
       when [$shape = "Means"] {
         <Universal-Quantifier-Formula {
-
           <Explicitly-Qualified-Segment {
             <Variables { <Variable { @spelling = $it; } }
-
-            if [$arg-type] {
-              apply [$arg-type];
-            } else {
-              <Standard-Type { @nr = "1"; @spelling = "set"; }
-            }
-
+            type-or-set (#type = $type);
           }
-
           <Universal-Quantifier-Formula {
             <Explicitly-Qualified-Segment {
               <Variables { <Variable { @spelling = `$arg-1`; } }
-
-              if [$arg-type] {
-                apply [$arg-type];
-              } else {
-                <Standard-Type { @nr = "1"; @spelling = "set"; }
-              }
-
+              type-or-set (#type = $arg-type);
             }
             apply [$formula] (#x  = $arg-2,
                               #y  = $arg-1,
@@ -1919,7 +1905,23 @@ tpl universally-bind-segments-idempotence (#segments,
         }
       }
       when [$shape = "Equals"] {
-        die (#message = "We don't yet handle idempotence for functors defined by an equation.");
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables { <Variable { @spelling = `$arg-1`; } }
+            type-or-set (#type = $arg-type);
+          }
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments {
+              <Simple-Term { @spelling = $arg-1; }
+            }
+            <Arguments {
+              apply [$formula] (#x  = $arg-2,
+                                #y  = $arg-1,
+                                #it = $arg-1) mode="replace";
+            }
+          }
+        }
       }
     }
   } else {
@@ -4421,7 +4423,6 @@ tpl
       }
 
     }
-
 
     // justification
     for-each [*[position() = last()]] {
