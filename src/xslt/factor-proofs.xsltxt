@@ -1298,6 +1298,173 @@ tpl universally-bind-segments-commutativity (#segments,
   }
 }
 
+tpl universally-bind-segments-commutativity-partial (#segments,
+                                                     #partial-definientia,
+                                                     #default,
+                                                     #type,
+                                                     #it,
+                                                     #shape,
+                                                     #arg-type,
+                                                     #arg-1,
+                                                     #arg-2) {
+  if [count ($segments) = 0] {
+    choose {
+      when [$shape = "Means"] {
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            <Conjunctive-Formula {
+              for-each [$partial-definientia] {
+                $condition = `*[2]`;
+                $val       = `*[1]`;
+                <Conditional-Formula {
+                  apply [$condition] (#it = $it) mode="replace-it-term";
+                  apply [$val] (#it = $it) mode="replace-it-term";
+                }
+              }
+            }
+            <Conditional-Formula {
+              <Conjunctive-Formula {
+                for-each [$partial-definientia] {
+                  $condition = `*[2]`;
+                  $val       = `*[1]`;
+                  <Negated-Formula {
+                    apply [$condition] (#it = $it) mode="replace-it-term";
+                  }
+                }
+              }
+              apply [$default] (#it = $it) mode="replace-it-term";
+            }
+          }
+          <Conjunctive-Formula {
+            <Conjunctive-Formula {
+              for-each [$partial-definientia] {
+                $condition = `*[2]`;
+                $val       = `*[1]`;
+                <Conditional-Formula {
+                  apply [$condition] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                  apply [$val] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                }
+              }
+            }
+            <Conditional-Formula {
+              <Conjunctive-Formula {
+                for-each [$partial-definientia] {
+                  $condition = `*[2]`;
+                  $val       = `*[1]`;
+                  <Negated-Formula {
+                    apply [$condition] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                  }
+                }
+              }
+              apply [$default] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+            }
+          }
+        }
+      }
+      when [$shape = "Equals"] {
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            <Conjunctive-Formula {
+              for-each [$partial-definientia] {
+                $condition = `*[2]`;
+                $val       = `*[1]`;
+                <Conditional-Formula {
+                  apply [$condition] (#it = $it) mode="replace-it-term";
+                  <Predicative-Formula {
+                    @spelling = "=";
+                    <Arguments {
+                      <Simple-Term { @spelling = $it; }
+                    }
+                    <Arguments {
+                      apply [$val];
+                    }
+                  }
+                }
+              }
+            }
+            <Conditional-Formula {
+              <Conjunctive-Formula {
+                for-each [$partial-definientia] {
+                  $condition = `*[2]`;
+                  $val       = `*[1]`;
+                  <Negated-Formula {
+                    apply [$condition] (#it = $it) mode="replace-it-term";
+                  }
+                }
+              }
+              <Predicative-Formula {
+                @spelling = "=";
+                <Arguments {
+                  <Simple-Term { @spelling = $it; }
+                }
+                <Arguments {
+                  apply [$default];
+                }
+              }
+            }
+          }
+          <Conjunctive-Formula {
+            <Conjunctive-Formula {
+              for-each [$partial-definientia] {
+                $condition = `*[2]`;
+                $val       = `*[1]`;
+                <Conditional-Formula {
+                  apply [$condition] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                  <Predicative-Formula {
+                    @spelling = "=";
+                    <Arguments {
+                      <Simple-Term { @spelling = $it; }
+                    }
+                    <Arguments {
+                      apply [$val] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                    }
+                  }
+                }
+              }
+            }
+            <Conditional-Formula {
+              <Conjunctive-Formula {
+                for-each [$partial-definientia] {
+                  $condition = `*[2]`;
+                  $val       = `*[1]`;
+                  <Negated-Formula {
+                    apply [$condition] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                  }
+                }
+              }
+              <Predicative-Formula {
+                @spelling = "=";
+                <Arguments {
+                  <Simple-Term { @spelling = $it; }
+                }
+                <Arguments {
+                  apply [$default] (#x = $arg-1, #y = $arg-2, #it = $it) mode="swap";
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-commutativity-partial
+        (#segments            = $rest,
+         #partial-definientia = $partial-definientia,
+         #default             = $default,
+         #it                  = $fresh,
+         #type                = $type,
+         #shape               = $shape,
+         #arg-type            = $arg-type,
+         #arg-1               = $arg-1,
+         #arg-2               = $arg-2);
+    }
+  }
+}
+
 tpl universally-bind-segments-projectivity (#segments,
                                              #formula,
                                              #type,
@@ -3801,6 +3968,7 @@ tpl
               @kind  = "Functor-Definition"
           and not(Redefine)
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
         ]
   ]
 ]
@@ -3839,6 +4007,111 @@ tpl
                  #arg-type = $arg-type,
                  #arg-1    = $arg-1-spelling,
                  #arg-2    = $arg-2-spelling);
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "commutativity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and not(Redefine)
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) > 0
+        ]
+  ]
+]
+{
+  $it = fresh-variable ();
+  <Item {
+    @kind = "Regular-Statement";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $commutativity-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus   = `Item[@kind = "Loci-Declaration"]`;
+        $fd      = `Item[@kind = "Functor-Definition"]`;
+        $definiens = `$fd/Definiens`;
+        $partial-definientia = `$definiens/Partial-Definiens`;
+        $default = `$definiens/*[position() = last()]`;
+        $type    = `$fd/Type-Specification/*[1]`;
+        $pattern = `$fd/Operation-Functor-Pattern`;
+        $shape   = `$fd/@shape`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              $arg-type = `*[position() = last()]`;
+              $fresh = fresh-variable ();
+              <Universal-Quantifier-Formula {
+                <Explicitly-Qualified-Segment {
+                  <Variables { <Variable { @spelling = $fresh; } }
+                  type-or-set (#type = $type);
+                }
+                <Universal-Quantifier-Formula {
+                  <Explicitly-Qualified-Segment {
+                    <Variables {
+                      <Variable { @spelling = `$arg-1-spelling`; }
+                      <Variable { @spelling = `$arg-2-spelling`; }
+                    }
+                    type-or-set (#type = $arg-type);
+                  }
+                  universally-bind-segments-commutativity-partial
+                    (#segments            = $segments,
+                     #partial-definientia = $partial-definientia,
+                     #default             = $default,
+                     #it                  = $fresh,
+                     #shape               = $shape,
+                     #type                = $type,
+                     #arg-type            = $arg-type,
+                     #arg-1               = $arg-1-spelling,
+                     #arg-2               = $arg-2-spelling);
+                }
+              }
             }
           }
         }
