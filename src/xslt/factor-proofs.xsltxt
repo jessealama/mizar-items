@@ -4722,17 +4722,26 @@ tpl
                 $all-loci = `descendant::Locus`;
                 for-each [$block] {
                   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
-                    if [self::Item[@kind = "Loci-Declaration"]] {
-                      if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $all-loci/@spelling] {
-                        // ignore
-                      } else {
-                        <Item {
-                          @kind = "Generalization";
-                          apply [*];
+                    choose {
+                      when [self::Item[@kind = "Loci-Declaration"]] {
+                        if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $all-loci/@spelling] {
+                          // ignore
+                        } else {
+                          <Item {
+                            @kind = "Generalization";
+                            apply [*];
+                          }
                         }
                       }
-                    } else {
-                      apply [.];
+                      when [self::Item[@kind = "Choice-Statement"]] {
+                        // ignore
+                      }
+                      when [self:: Item[@kind = "Regular-Statement"]] {
+                        // ignore
+                      }
+                      otherwise {
+                        apply [.];
+                      }
                     }
                   }
                 }
