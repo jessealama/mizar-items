@@ -4623,17 +4623,23 @@ tpl
                 $loci = `descendant::Locus`;
                 for-each [$block] {
                   for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
-                    if [self::Item[@kind = "Loci-Declaration"]] {
-                      if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $loci/@spelling] {
-                        // ignore
-                      } else {
-                        <Item {
-                          @kind = "Generalization";
-                          apply [*];
+                    choose {
+                      when [self::Item[@kind = "Loci-Declaration"]] {
+                        if [Explicitly-Qualified-Segment/Variables/Variable/@spelling = $loci/@spelling] {
+                          // ignore
+                        } else {
+                          <Item {
+                            @kind = "Generalization";
+                            apply [*];
+                          }
                         }
                       }
-                    } else {
-                      apply [.];
+                      when [self::Item[@kind = "Private-Functor-Definition"]] {
+                        // ignore
+                      }
+                      otherwise {
+                        apply [.];
+                      }
                     }
                   }
                 }
@@ -6350,18 +6356,18 @@ tpl
     @kind = "Regular-Statement";
     @shape = "Compact-Statement";
     <Proposition {
-      <Label { @spelling = "Compatibility"; }
+      <Label { @spelling = $compatibility-lemma; }
       for-each [Block[@kind = "Registration-Block"]] {
         $locus = `Item[@kind = "Loci-Declaration"]`;
         $segments = `$locus/Explicitly-Qualified-Segment`;
         $identification = `Item[@kind = "Identify"]`;
         $lhs = `$identification/*[2]`;
         $rhs = `$identification/*[1]`;
-        $condition = `$identification/*[3]`;
+        $conditions = `$identification/*[position() > 2]`;
         universally-bind-identification (#segments  = $segments,
                                          #lhs       = $lhs,
                                          #rhs       = $rhs,
-                                         #condition = $condition);
+                                         #conditions = $conditions);
       }
     }
     for-each [Block[@kind = "Registration-Block"]] {
@@ -6369,6 +6375,9 @@ tpl
         for-each [*[position() = last()]] {
           choose {
             when [self::Straightforward-Justification] {
+              apply [.];
+            }
+            when [self::Scheme-Justification] {
               apply [.];
             }
             when [self::Block[@kind = "Proof"]] {
@@ -6396,17 +6405,21 @@ tpl
   }
   <Item {
     for-each [@*] { copy-of `.`; }
-    apply [*];
+    for-each [*] {
+      apply [.] mode="straightforward-correctness";
+    }
   }
 }
 
 tpl universally-bind-identification (#segments,
                                      #lhs,
                                      #rhs,
-                                     #condition) {
+                                     #conditions) {
   if [count ($segments) = 0] {
     <Conditional-Formula {
-      apply [$condition];
+      <Conjunctive-Formula {
+        apply [$conditions];
+      }
       <Predicative-Formula {
         @spelling = "=";
         <Arguments {
@@ -6425,7 +6438,7 @@ tpl universally-bind-identification (#segments,
       universally-bind-identification (#segments = $rest,
                                        #lhs = $lhs,
                                        #rhs = $rhs,
-                                       #condition = $condition);
+                                       #conditions = $conditions);
     }
   }
 }
@@ -6452,29 +6465,29 @@ tpl
   ]
 ]
 {
-  <Straightforward-Justification { <Local-Reference { @spelling = "Compatibility"; } }
+  <Straightforward-Justification { <Local-Reference { @spelling = $compatibility-lemma; } }
 }
 
-tpl
-[
-  Straightforward-Justification
-  [
-      parent::Item
-      [
-            @kind      = "Correctness-Condition"
-        and @condition = "compatibility"
-        and parent::Block
-            [
-                  @kind = "Registration-Block"
-              and parent::Item
-                  [
-                        @kind = "Definition-Item"
-                    and parent::Text-Proper
-                  ]
-            ]
-      ]
-  ]
-]
-{
-  <Straightforward-Justification { <Local-Reference { @spelling = "Compatibility"; } }
-}
+// tpl
+// [
+//   Straightforward-Justification
+//   [
+//       parent::Item
+//       [
+//             @kind      = "Correctness-Condition"
+//         and @condition = "compatibility"
+//         and parent::Block
+//             [
+//                   @kind = "Registration-Block"
+//               and parent::Item
+//                   [
+//                         @kind = "Definition-Item"
+//                     and parent::Text-Proper
+//                   ]
+//             ]
+//       ]
+//   ]
+// ]
+// {
+//   <Straightforward-Justification { <Local-Reference { @spelling = "Compatibility"; } }
+// }
