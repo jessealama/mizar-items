@@ -6364,27 +6364,31 @@ tpl
                                          #condition = $condition);
       }
     }
-    for-each [*[position() = last()]] {
-      choose {
-        when [self::Straightforward-Justification] {
-          apply [.];
-        }
-        when [self::Block[@kind = "Proof"]] {
-          <Block {
-            for-each [@*] { copy-of `.`; }
-            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-              for-each [*[following-sibling::Item[@kind = "Identify"]]] {
-                if [self::Item[@kind = "Loci-Declaration"]] {
-                  <Item {
-                    @kind = "Generalization";
-                    apply [*];
+    for-each [Block[@kind = "Registration-Block"]] {
+      for-each [Item[@kind = "Correctness-Condition" and @condition = "compatibility"]] {
+        for-each [*[position() = last()]] {
+          choose {
+            when [self::Straightforward-Justification] {
+              apply [.];
+            }
+            when [self::Block[@kind = "Proof"]] {
+              <Block {
+                for-each [@*] { copy-of `.`; }
+                for-each [ancestor::Block[@kind = "Registration-Block"]] {
+                  for-each [*[following-sibling::Item[@kind = "Identify"]]] {
+                    if [self::Item[@kind = "Loci-Declaration"]] {
+                      <Item {
+                        @kind = "Generalization";
+                        apply [*];
+                      }
+                    } else {
+                      apply [.];
+                    }
                   }
-                } else {
-                  apply [.];
                 }
+                apply [*];
               }
             }
-            apply [*];
           }
         }
       }
