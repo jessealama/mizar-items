@@ -3,12 +3,12 @@
 (in-package :mizar)
 
 (define-constant +mizar-system-version+
-    "7.13.01"
+    "8.1.02"
   :test #'string=
   :documentation "The system version of the Mizar that we currently support.")
 
 (define-constant +mml-version+
-    "4.181.1147"
+    "5.15.1174"
   :test #'string=
   :documentation "The MML version that we support.")
 
