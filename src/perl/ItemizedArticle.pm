@@ -8,6 +8,7 @@ use File::Basename qw(basename);
 use Regexp::DefaultFlags;
 use XML::LibXML;
 use charnames qw(:full);
+use Readonly;
 
 # Local stuff
 use Utils qw(strip_extension ensure_readable_file);
