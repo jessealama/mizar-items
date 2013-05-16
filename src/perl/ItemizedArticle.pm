@@ -1191,34 +1191,40 @@ sub dependencies {
 	    my $fragment_miz = "${text_dir}/${fragment_basename}.miz";
 	    my $fragment_abs_xml = "${text_dir}/${fragment_basename}.xml1";
 
-	    if (-e $fragment_miz && -e $fragment_abs_xml) {
+	    if (-e $fragment_miz) {
 
-		my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
+                if (-e $fragment_abs_xml) {
 
-		if (! defined $fragment_doc) {
-		    croak ('Error: the XML document at ', $fragment_abs_xml, '.');
-		}
+                    my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
 
-		my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
+                    if (! defined $fragment_doc) {
+                        croak ('Error: the XML document at ', $fragment_abs_xml, '.');
+                    }
 
-		my %deps = ();
-		foreach my $dep (@fragment_deps) {
-		    if ($dep =~ /\A ckb ${fragment_number} [:] /) {
-			warn 'Throwing out a self-dependency...';
-		    } else {
-			my $resolved_dep = $self->resolve_local_item ($dep);
-			if (defined $resolved_dep) {
-			    $deps{$resolved_dep} = 0;
-			}
-		    }
-		}
+                    my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
 
-		my @deps_array = keys %deps;
+                    my %deps = ();
+                    foreach my $dep (@fragment_deps) {
+                        if ($dep =~ /\A ckb ${fragment_number} [:] /) {
+                            warn 'Throwing out a self-dependency...';
+                        } else {
+                            my $resolved_dep = $self->resolve_local_item ($dep);
+                            if (defined $resolved_dep) {
+                                $deps{$resolved_dep} = 0;
+                            }
+                        }
+                    }
 
-		$dependencies{$item} = \@deps_array;
+                    my @deps_array = keys %deps;
+
+                    $dependencies{$item} = \@deps_array;
+
+                } else {
+                    carp ('Warning: the fragment \'', $fragment, '\' does not exist in the local database: we failed to find', $LF, $LF, $fragment_abs_xml, $LF, $LF, 'Is this a case of a redefined constructor?');
+                }
 
 	    } else {
-		# carp ('Warning: the fragment \'', $fragment, '\' does not exist in the local database.  Is this a case of a redefined constructor?');
+		carp ('Warning: the fragment \'', $fragment, '\' does not exist in the local database.  We failed to find', $LF, $LF, '  ', $fragment_miz, $LF, $LF, 'Is this a case of a redefined constructor?');
 	    }
 	} else {
 	    croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
