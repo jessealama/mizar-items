@@ -3,12 +3,14 @@
 pp-srcdir = /Users/alama/sources/mizar/parsing
 mizar-items-srcdir = /Users/alama/sources/mizar/mizar-items
 mizar-items-xsldir = $(mizar-items-srcdir)/src/xslt
+
 pp-stylesheet = $(pp-srcdir)/pp.xsl
 wrm-stylesheet = $(mizar-items-xsldir)/wrm.xsl
 expand-canceled-stylesheet = $(mizar-items-xsldir)/expand-canceled.xsl
 split-stylesheet = $(mizar-items-xsldir)/split.xsl
 factor-proofs-stylesheet = $(mizar-items-xsldir)/factor-proofs.xsl
 check-factorization-stylesheet = $(mizar-items-xsldir)/check-factorization.xsl
+itemize-stylesheet = $(mizar-items-xsldir)/itemize.xsl
 
 run-mizar-utility = ($1 -q -l $2 > /dev/null 2>&1) && (test -e $2.err) && (test ! -s $2.err)
 run-mizar-utility-ignoring-err = ($1 -q -l $2 > /dev/null 2>&1); echo > $2.err; true
@@ -85,3 +87,10 @@ all:
 
 %.factored : %.factored.xml $(pp-stylesheet)
 	$(call xsltproc,$<,$(pp-stylesheet),$@)
+
+%.itemized.xml : %.factored %.tpr $(itemize-stylesheet)
+	cp $*.factored $*.tpr
+	$(call mglue,$*)
+	$(call accom,$*)
+	$(call analyzer,$*)
+	$(call xsltproc,$*.msx,$(itemize-stylesheet),$@)
