@@ -78,10 +78,12 @@ e.g., constructor environment, notation environment, etc."))
 
 (defun write-nodes (indices-to-keep path)
   (let ((indices-token-string (tokenize (mapcar #'1+ indices-to-keep))))
-    (apply-stylesheet *keep-elements-stylesheet*
-		      path
-		      (list (cons "to-keep" indices-token-string))
-		      path)))
+    (write-string-into-file (apply-stylesheet *keep-elements-stylesheet*
+                                              path
+                                              (list (cons "to-keep" indices-token-string))
+                                              nil)
+                            path
+                            :if-exists :supersede)))
 
 (defgeneric nodes-equal? (node-1 node-2))
 
