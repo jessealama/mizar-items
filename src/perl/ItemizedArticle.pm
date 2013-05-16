@@ -1159,6 +1159,9 @@ sub dependencies {
     my $article_name = $self->get_article_name ();
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
     my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
+
+    $self->absolutize ();
+
     my @items = @{$self->get_all_items ()};
 
     # warn 'Item-to-fragment table is:', "\n", Dumper (%item_to_fragment_table);
