@@ -30,7 +30,7 @@ mglue = $(call run-mizar-utility,mglue,$1)
 edtfile = $(call run-mizar-utility-ignoring-err,edtfile,$1)
 unhereby = $(call run-mizar-utility-ignoring-err,unhereby,$1)
 
-xsltproc = (xsltproc --output $3 $2 $1) || (test -e $3 && rm -f $3; false)
+xsltproc = (test -e $1 && test -e $2 && xsltproc --output $3 $2 $1) || (test -e $3 && rm -f $3; false)
 
 all:
 	# nothing to do
