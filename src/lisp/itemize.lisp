@@ -57,10 +57,13 @@
 			    :location itemization-directory
 			    :article article))
 	 (article-in-db (copy-to-db article db))
-	 (split-wsx (file-with-extension article-in-db "wsx.split"))
-	 (itemized-wsx (file-with-extension article-in-db "wsx.split.itemized")))
-    (apply-stylesheet *split-stylesheet* article-in-db nil split-wsx)
-    (apply-stylesheet *itemize-stylesheet* split-wsx nil itemized-wsx)))
+	 (msx (file-with-extension article-in-db "msx"))
+	 (itemized-msx (file-with-extension article-in-db "itemized.xml")))
+    (unless (file-exists-p msx)
+      (accom article-in-db)
+      (analyzer article-in-db))
+    (let ((itemized (apply-stylesheet *itemize-stylesheet* msx nil nil)))
+      (write-string-into-file itemized itemized-msx))))
 
 (defmethod itemize ((article article))
   (let* ((path (path article))
@@ -71,10 +74,10 @@
 			    :location itemization-directory
 			    :article article))
 	 (article-in-db (copy-to-db article db))
-	 (itemized-wsx (file-with-extension article-in-db "wsx.split.itemized"))
+	 (itemized-msx (file-with-extension article-in-db "itemized.xml"))
 	 (article-evl (file-with-extension article-in-db "evl"))
 	 (text-subdir (text-subdirectory db))
-	 (itemized-xml-doc (cxml:parse-file itemized-wsx *dom-builder*))
+	 (itemized-xml-doc (cxml:parse-file itemized-msx *dom-builder*))
 	 (text-proper-nodes (remove-if #'dom:text-node-p
 				       (dom:child-nodes
 					(dom:document-element itemized-xml-doc))))
@@ -83,27 +86,27 @@
     (loop
        for text-proper-node across text-proper-nodes
        for i from 1 upto num-fragments
-       for ckb-wsx = (merge-pathnames (format nil "ckb~d.wsx" i) text-subdir)
-       for wsx-doc = (cxml-dom:create-document text-proper-node)
+       for ckb-msx = (merge-pathnames (format nil "ckb~d.msx" i) text-subdir)
+       for msx-doc = (cxml-dom:create-document text-proper-node)
        do
-	 (with-open-file (ckb ckb-wsx
+	 (with-open-file (ckb ckb-msx
 			      :direction :output
 			      :element-type '(unsigned-byte 8)
 			      :if-exists :error)
-	   (dom:map-document (cxml:make-octet-stream-sink ckb) wsx-doc)))
+	   (dom:map-document (cxml:make-octet-stream-sink ckb) msx-doc)))
 
     ;; make the .tpr files for the fragments
     (loop
        for i from 1 upto num-fragments
-       for ckb-wsx = (merge-pathnames (format nil "ckb~d.wsx" i) text-subdir)
+       for ckb-msx = (merge-pathnames (format nil "ckb~d.msx" i) text-subdir)
        for ckb-tpr = (merge-pathnames (format nil "ckb~d.tpr" i) text-subdir)
        do
-	 (apply-stylesheet *wsm-stylesheet* ckb-wsx nil ckb-tpr))
+	 (apply-stylesheet *pp-stylesheet* ckb-msx nil ckb-tpr))
 
     ;; create the new .evl, new .evd, then the new .miz; verify; repeat.
     (loop
        for i from 1 upto num-fragments
-       for ckb-wsx = (merge-pathnames (format nil "ckb~d.wsx" i) text-subdir)
+       for ckb-msx = (merge-pathnames (format nil "ckb~d.msx" i) text-subdir)
        for ckb-tpr = (merge-pathnames (format nil "ckb~d.tpr" i) text-subdir)
        for ckb-evd = (merge-pathnames (format nil "ckb~d.evd" i) text-subdir)
        for ckb-evl = (merge-pathnames (format nil "ckb~d.evl" i) text-subdir)
@@ -119,6 +122,8 @@
        for registrations = (mapcar #'pathname-name (registration-files db))
        for constructors = (mapcar #'pathname-name (constructor-files db))
        for requirements = (mapcar #'pathname-name (requirement-files db))
+       for equalities = (mapcar #'pathname-name (definition-files db))
+       for expansions = (mapcar #'pathname-name (definition-files db))
        for extend-evl-parameters = (list
 				    (cons "vocabularies" (tokenize (mapcar #'uppercase vocabularies)))
 				    (cons "notations" (tokenize (mapcar #'uppercase notations)))
@@ -127,17 +132,24 @@
 				    (cons "registrations" (tokenize (mapcar #'uppercase registrations)))
 				    (cons "constructors" (tokenize (mapcar #'uppercase constructors)))
 				    (cons "requirements" (tokenize (mapcar #'uppercase requirements)))
-				    (cons "schemes" (tokenize (mapcar #'uppercase schemes))))
+				    (cons "schemes" (tokenize (mapcar #'uppercase schemes)))
+                                    (cons "equalities" (tokenize (mapcar #'uppercase equalities)))
+                                    (cons "expansions" (tokenize (mapcar #'uppercase equalities))))
        do
-	 (apply-stylesheet *wsm-stylesheet* ckb-wsx nil ckb-tpr)
-	 (apply-stylesheet *extend-evl-stylesheet*
-			   article-evl
-			   extend-evl-parameters
-			   ckb-evl)
-	 (apply-stylesheet *print-evl-stylesheet*
-			   ckb-evl
-			   nil
-			   ckb-evd)
+         (format t "working on fragment ~d~%" i)
+         (write-string-into-file (apply-stylesheet *pp-stylesheet* ckb-msx nil nil)
+                                 ckb-tpr)
+         (write-string-into-file (apply-stylesheet *extend-evl-stylesheet*
+                                                   article-evl
+                                                   extend-evl-parameters
+                                                   nil)
+                                 ckb-evl)
+	 (write-string-into-file (apply-stylesheet *print-evl-stylesheet*
+                                                   ckb-evl
+                                                   nil
+                                                   nil)
+                                 ckb-evd)
+
 	 (stop-if-nil
 	   (mglue ckb-basename)
 	   (accom ckb-miz)
