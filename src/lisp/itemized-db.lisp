@@ -41,8 +41,16 @@
       (mapc #'minimize articles)
 
       t)
-    #-ccl
-    (error "We don't support non-CCL environments.  Sorry.")
+    #+sbcl
+    (let ((cwd (sb-posix:getcwd)))
+      (unwind-protect
+           (progn
+             (sb-posix:chdir location)
+             (mapc #'minimize articles)
+             t)
+        (sb-posix:chdir cwd)))
+    #-(or ccl sbcl)
+    (error "We support only CCL and SBCL; sorry.")
     ))
 
 (defun minimize-itemized-db (dirname)
