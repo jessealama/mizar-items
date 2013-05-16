@@ -143,7 +143,7 @@ e.g., constructor environment, notation environment, etc."))
 		nil)))))))
 
 (defun equivalent-miz-xmls? (xml-path-1 xml-path-2)
-  (let* ((path-1 (native-namestring native-translated-namestring xml-path-1))
+  (let* ((path-1 (native-namestring xml-path-1))
 	 (path-2 (native-namestring xml-path-2))
 	 (error-output (make-string-output-stream))
 	 (equiv-proc (run-program "/Users/alama/sources/mizar/mizar-items/perl/bin/equivalent-miz-xml.pl"
