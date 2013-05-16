@@ -190,7 +190,7 @@ e.g., constructor environment, notation environment, etc."))
 				file-to-minimize
 				:if-to-exists :supersede
 				:finish-output t)
-		     (copy-file analyzer-xml-orig
+                     (copy-file analyzer-xml-orig
 				analyzer-xml
 				:if-to-exists :supersede
 				:finish-output t)
