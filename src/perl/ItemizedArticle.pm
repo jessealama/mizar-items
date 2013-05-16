@@ -107,6 +107,8 @@ has 'script_home' => (
     required => 1,
 );
 
+Readonly my $LF => "\N{LF}";
+
 sub ensure_appropriate_directory_structure {
     my $dir = shift;
     return LocalDatabase::dir_has_local_db_structure ($dir);
