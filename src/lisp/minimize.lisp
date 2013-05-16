@@ -168,10 +168,18 @@ e.g., constructor environment, notation environment, etc."))
 	 (file-to-minimize-copy (file-with-extension article (format nil "~a.orig" extension))))
     (unless (file-exists-p analyzer-xml)
       (error "The .xml for ~a is missing." (name article)))
-    (apply-stylesheet *uninteresting-attributes-stylesheet*
-		      analyzer-xml-orig
-		      nil
-		      analyzer-xml-orig-trimmed-path)
+    (unless (file-exists-p analyzer-xml-orig)
+      (error "The .xml.orig for ~a is missing." (name article)))
+    (copy-file analyzer-xml-orig
+               analyzer-xml
+               :if-to-exists :supersede
+               :finish-output t)
+    (write-string-into-file (apply-stylesheet *uninteresting-attributes-stylesheet*
+                                              analyzer-xml-orig
+                                              nil
+                                              nil)
+                            analyzer-xml-orig-trimmed-path
+                            :if-exists :supersede)
     (if (file-exists-p file-to-minimize)
 	(let* ((doc (cxml:parse-file file-to-minimize (cxml-dom:make-dom-builder)))
 	       (document-element (dom:document-element doc))
@@ -210,14 +218,16 @@ e.g., constructor environment, notation environment, etc."))
 		       (prog1
 			   (cond (analyzer-ok?
 				  (let ((new-trimmed-xml-path (file-with-extension article "xml.trimmed")))
-				    (apply-stylesheet *uninteresting-attributes-stylesheet*
-						      analyzer-xml
-						      nil
-						      new-trimmed-xml-path)
+				    (write-string-into-file (apply-stylesheet *uninteresting-attributes-stylesheet*
+                                                                              analyzer-xml
+                                                                              nil
+                                                                              nil)
+                                                            new-trimmed-xml-path
+                                                            :if-exists :supersede)
 				    (let ((new-sha1 (ironclad:digest-file :sha1 new-trimmed-xml-path)))
 				      (cond ((mismatch analyzer-xml-orig-sha1
 						     new-sha1)
-					   (break "Different XMLs, after stripping uninteresting attributes:~%~%  ~a~%~%  ~a~%" (namestring analyzer-xml-orig) (namestring analyzer-xml))
+                                             (break "Different XMLs, after stripping uninteresting attributes:~%~%  ~a~%~%  ~a~%" (namestring analyzer-xml-orig) (namestring analyzer-xml))
 					   nil)
 					  (t
 					 ;; (format t "Analyzable, but XML changed.~%")
