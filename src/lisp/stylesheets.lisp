@@ -120,7 +120,7 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 					 :wait t))
 		  (exit-code (process-exit-code xsltproc)))
 	     (if (zerop exit-code)
-		 (get-output-stream-string xsltproc-output)
+                 (get-output-stream-string xsltproc-output)
 		 (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~a~%" stylesheet-name document-name exit-code (get-output-stream-string xsltproc-error))))
 	(close xsltproc-output)
 	(close xsltproc-error)))))
