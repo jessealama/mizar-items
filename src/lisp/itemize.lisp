@@ -6,6 +6,7 @@
 (defparameter *itemize-stylesheet* (path-for-stylesheet "itemize"))
 (defparameter *extend-evl-stylesheet* (path-for-stylesheet "extend-evl"))
 (defparameter *wsm-stylesheet* (path-for-stylesheet "wsm"))
+(defparameter *pp-stylesheet* (path-for-stylesheet "pp"))
 (defparameter *print-evl-stylesheet* (path-for-stylesheet "print-evl"))
 
 (defparameter *dom-builder* (cxml-dom:make-dom-builder))
