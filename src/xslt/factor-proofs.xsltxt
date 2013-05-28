@@ -3139,6 +3139,7 @@ tpl
       }
     }
   }
+  apply [.] mode="deftheorem";
 }
 
 tpl
@@ -3246,6 +3247,7 @@ tpl
     for-each [@*] { copy-of `.`; }
     apply [*] mode="straightforward-correctness";
   }
+  apply [.] mode="deftheorem";
 }
 
 tpl
@@ -6166,6 +6168,7 @@ tpl
       }
     }
   }
+  apply [.] mode="deftheorem";
 }
 
 tpl
@@ -6548,5 +6551,281 @@ tpl [Item[    parent::Text-Proper
     <Item {
         @kind = "Theorem-Item";
         apply [*];
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+// Definitional theorems
+//////////////////////////////////////////////////////////////////////
+
+tpl [*] mode="deftheorem"
+{
+    apply [.] (#message = "Unhandled node in deftheorem mode.") mode="die";
+}
+
+tpl emit-attribute-deftheorem (#loci, #definiens, #pattern)
+{
+    if [count ($loci) = 0] {
+        <Biconditional-Formula {
+            <Attributive-Formula {
+                for-each [$pattern] {
+                    <Simple-Term { for-each [Locus] { @spelling = `@spelling`; } }
+                    <Adjective-Cluster { <Adjective { @spelling = `@spelling`; } }
+                }
+            }
+            apply [$definiens];
+        }
+    } else {
+        <Universal-Quantifier-Formula {
+          apply [$loci[1]];
+          emit-attribute-deftheorem (#loci      = `$loci[position() > 1]`,
+                                     #definiens = $definiens,
+                                     #pattern   = $pattern);
+        }
+    }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind = "Attribute-Definition"
+                             and Definiens
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item {
+        @kind      = "Regular-Statement";
+        @shape     = "Compact-Statement";
+        $block     = `Block[@kind = "Definitional-Block"]`;
+        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+        $def       = `$block/Item[@kind = "Attribute-Definition"]`;
+        $pattern   = `$def/Attribute-Pattern`;
+        $definiens = `$def/Definiens`;
+        $formula   = `$definiens/*[position() = last()]`;
+        <Proposition {
+            emit-attribute-deftheorem (#loci      = $loci,
+                                       #definiens = $formula,
+                                       #pattern   = $pattern);
+        }
+        <SkippedProof;
+    }
+}
+
+tpl emit-functor-equational-deftheorem (#loci, #definiens, #pattern)
+{
+    if [count ($loci) = 0] {
+        <Predicative-Formula {
+            @spelling = "=";
+            <Arguments {
+                for-each [$pattern] {
+                    <Infix-Term {
+                        @spelling = `@spelling`;
+                        <Arguments {
+                            apply [Loci[1]];
+                        }
+                        <Arguments {
+                            apply [Loci[2]];
+                        }
+                    }
+                }
+            }
+            <Arguments {
+                apply [$definiens];
+            }
+        }
+    } else {
+        <Universal-Quantifier-Formula {
+          apply [$loci[1]];
+          emit-functor-equational-deftheorem (#loci      = `$loci[position() > 1]`,
+                                              #definiens = $definiens,
+                                              #pattern   = $pattern);
+        }
+    }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind  = "Functor-Definition"
+                             and @shape = "Equals"
+                             and Definiens
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item {
+        @kind      = "Regular-Statement";
+        @shape     = "Compact-Statement";
+        $block     = `Block[@kind = "Definitional-Block"]`;
+        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+        $def       = `$block/Item[@kind = "Functor-Definition"]`;
+        $pattern   = `$def/Operation-Functor-Pattern`;
+        $definiens = `$def/Definiens`;
+        $term      = `$definiens/*[position() = last()]`;
+        <Proposition {
+            emit-functor-equational-deftheorem (#loci      = $loci,
+                                                #definiens = $term,
+                                                #pattern   = $pattern);
+        }
+        <SkippedProof;
+    }
+}
+
+tpl emit-functor-means-deftheorem (#loci, #definiens, #pattern, #type)
+{
+    if [count ($loci) = 0] {
+        $fresh = fresh-variable ();
+        <Universal-Quantifier-Formula {
+            <Explicitly-Qualified-Segment {
+                <Variables { <Variable { @spelling = $fresh; } }
+                apply [$type];
+            }
+            <Biconditional-Formula {
+                <Predicative-Formula {
+                    @spelling = "=";
+                    <Arguments { <Simple-Term { @spelling = $fresh; } }
+                    <Arguments {
+                        <Infix-Term {
+                            for-each [$pattern] {
+                                @spelling = `@spelling`;
+                                <Arguments {
+                                  for-each [Loci[1]] {
+                                      for-each [Locus] {
+                                          <Simple-Term { @spelling = `@spelling`; }
+                                      }
+                                  }
+                              }
+                              <Arguments {
+                                  for-each [Loci[2]] {
+                                      for-each [Locus] {
+                                          <Simple-Term { @spelling = `@spelling`; }
+                                      }
+                                  }
+                              }
+                            }
+                        }
+                    }
+                }
+                apply [$definiens] (#it = $fresh) mode="replace-it-term";
+            }
+        }
+    } else {
+        <Universal-Quantifier-Formula {
+          apply [$loci[1]];
+          emit-functor-means-deftheorem (#loci      = `$loci[position() > 1]`,
+                                         #definiens = $definiens,
+                                         #pattern   = $pattern,
+                                         #type      = $type);
+        }
+    }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind  = "Functor-Definition"
+                             and @shape = "Means"
+                             and Definiens
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item {
+        @kind      = "Regular-Statement";
+        @shape     = "Compact-Statement";
+        $block     = `Block[@kind = "Definitional-Block"]`;
+        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+        $def       = `$block/Item[@kind = "Functor-Definition"]`;
+        $pattern   = `$def/Operation-Functor-Pattern`;
+        $definiens = `$def/Definiens`;
+        $formula   = `$definiens/*[position() = last()]`;
+        $ts        = `$def/Type-Specification`;
+        $type      = `$ts/*[1]`;
+        <Proposition {
+            emit-functor-means-deftheorem (#loci      = $loci,
+                                           #definiens = $formula,
+                                           #pattern   = $pattern,
+                                           #type      = $type);
+        }
+        <SkippedProof;
+    }
+}
+
+tpl emit-predicate-deftheorem (#loci, #definiens, #pattern)
+{
+    if [count ($loci) = 0] {
+        <Biconditional-Formula {
+            <Predicative-Formula {
+                for-each [$pattern] {
+                    @spelling = `@spelling`;
+                    <Arguments {
+                        for-each [Loci[1]] {
+                            for-each [Locus] {
+                                <Simple-Term { @spelling = `@spelling`; }
+                            }
+                        }
+                    }
+                    <Arguments {
+                        for-each [Loci[2]] {
+                            for-each [Locus] {
+                                <Simple-Term { @spelling = `@spelling`; }
+                            }
+                        }
+                    }
+                }
+            }
+            apply [$definiens];
+        }
+    } else {
+        <Universal-Quantifier-Formula {
+          apply [$loci[1]];
+          emit-predicate-deftheorem (#loci      = `$loci[position() > 1]`,
+                                     #definiens = $definiens,
+                                     #pattern   = $pattern);
+        }
+    }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind  = "Predicate-Definition"
+                             and Definiens
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item {
+        @kind      = "Regular-Statement";
+        @shape     = "Compact-Statement";
+        $block     = `Block[@kind = "Definitional-Block"]`;
+        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+        $def       = `$block/Item[@kind = "Predicate-Definition"]`;
+        $pattern   = `$def/Predicate-Pattern`;
+        $definiens = `$def/Definiens`;
+        $formula      = `$definiens/*[position() = last()]`;
+        <Proposition {
+            emit-predicate-deftheorem (#loci      = $loci,
+                                       #definiens = $formula,
+                                       #pattern   = $pattern);
+        }
+        <SkippedProof;
     }
 }
