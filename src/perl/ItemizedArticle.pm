@@ -174,6 +174,8 @@ sub BUILD {
 
     $self->_set_article_name ();
 
+    $self->absolutize ();
+
     my %fragment_to_constructor_table = ();
     $self->_set_fragment_to_constructor_table (\%fragment_to_constructor_table);
 
