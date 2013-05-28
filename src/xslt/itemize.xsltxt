@@ -33,14 +33,17 @@ tpl [Text-Proper[not(@articleid)]] {
 }
 
 tpl [Text-Proper[@articleid]] {
-  $num-items = `count (Item)`;
+  $num-items = `count (*[not(self::Item[@kind = "Pragma"])])`;
   // msg `concat ("Number of items: ", $num-items)`;
   <Fragments {
     @articleid = `@articleid`;
-    for-each [*] {
+    for-each [*[not(self::Item[@kind = "Pragma"])]] {
       <Text-Proper {
-        @fragment-number = `count (preceding-sibling::*) + 1`;
+        @fragment-number = position-in-text ();
         <Item { @kind = "Section-Pragma"; }
+        if [preceding-sibling::*[1][self::Item[@kind = "Pragma"]]] {
+          apply [preceding-sibling::*[1]];
+        }
         apply [.];
       }
     }
@@ -61,8 +64,7 @@ tpl [Scheme-Justification[@idnr and @nr = "0"]] {
   for-each [ancestor::Item[parent::Text-Proper]] {
     if [$idnr = preceding-sibling::Item[@kind = "Scheme-Block-Item"]/Block[@kind = "Scheme-Block"]/Item[@kind = "Scheme-Head"]/Scheme[@idnr]/@idnr] {
       for-each [preceding-sibling::Item[@kind = "Scheme-Block-Item" and descendant::Scheme[@idnr = $idnr]][1]] {
-        $num-previous = `count (preceding-sibling::Item)`;
-        $position = `$num-previous + 1`;
+        $position = position-in-text ();
         $spelling = `concat ("CKB", $position)`;
         <Scheme-Justification {
           @spelling = $spelling;
@@ -80,7 +82,7 @@ tpl [Scheme-Justification[@idnr and @nr = "0"]] {
 
 tpl [Theorem-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Changing-Statement" and preceding-sibling::Item[1][@promotable = "yes"]]]] {
   for-each [ancestor::Item[parent::Text-Proper]] {
-    $num-previous = `count (preceding-sibling::Item)`;
+    $num-previous = position-in-text ();
     $new_spelling = `concat ("CKB", $num-previous)`;
     <Theorem-Reference {
       @spelling = $new_spelling;
@@ -92,7 +94,7 @@ tpl [Theorem-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Chan
 
 tpl [Scheme-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Changing-Statement" and preceding-sibling::Item[1][@promotable = "yes"]]]] {
   for-each [ancestor::Item[parent::Text-Proper]] {
-    $num-previous = `count (preceding-sibling::Item)`;
+    $num-previous = position-in-text ();
     $new_spelling = `concat ("CKB", $num-previous)`;
     <Theorem-Reference {
       @spelling = $new_spelling;
@@ -104,7 +106,7 @@ tpl [Scheme-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Chang
 
 tpl [Definition-Reference[ancestor::Item[parent::Text-Proper and @kind = "Type-Changing-Statement" and preceding-sibling::Item[1][@promotable = "yes"]]]] {
   for-each [ancestor::Item[parent::Text-Proper]] {
-    $num-previous = `count (preceding-sibling::Item)`;
+    $num-previous = position-in-text ();
     $new_spelling = `concat ("CKB", $num-previous)`;
     <Theorem-Reference {
       @spelling = $new_spelling;
@@ -122,8 +124,8 @@ tpl [Local-Reference[@idnr = preceding::*[parent::Text-Proper]/Proposition/Label
 {
   $idnr = `@idnr`;
   for-each [ancestor::*[parent::Text-Proper]] {
-    for-each [preceding-sibling::*[Proposition/Label[@idnr = $idnr]]] {
-      $pos = `count (preceding-sibling::*) + 1`;
+    for-each [preceding-sibling::*[Proposition/Label[@idnr = $idnr]][1]] {
+      $pos = position-in-text ();
       <Theorem-Reference {
         @spelling = `concat ("CKB", $pos)`;
         @"number" = "1";
@@ -136,8 +138,8 @@ tpl [Local-Reference[@idnr = preceding::*[parent::Text-Proper]/Block/Item/Defini
 {
   $idnr = `@idnr`;
   for-each [ancestor::*[parent::Text-Proper]] {
-    for-each [preceding-sibling::Item[Block/Item/Definiens/Label[@idnr = $idnr]]] {
-      $pos = `count (preceding-sibling::*) + 1`;
+    for-each [preceding-sibling::Item[Block/Item/Definiens/Label[@idnr = $idnr]][1]] {
+      $pos = position-in-text ();
       <Definition-Reference {
         @spelling = `concat ("CKB", $pos)`;
         @"number" = "1";
