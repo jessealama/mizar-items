@@ -1,5 +1,7 @@
 .SECONDARY:
 
+.PHONY: all
+
 include config.makefile mizar.makefile xslt.makefile
 
 all:
