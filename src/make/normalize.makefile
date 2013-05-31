@@ -1,8 +1,6 @@
 .SECONDARY:
 
-include config.makefile
-include mizar.makefile
-include xslt.makefile
+include config.makefile mizar.makefile xslt.makefile
 
 all:
 	# nothing to do
