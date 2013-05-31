@@ -33,15 +33,18 @@ tpl [Text-Proper[not(@articleid)]] {
 }
 
 tpl [Text-Proper[@articleid]] {
-  $num-items = `count (*[not(self::Item[@kind = "Pragma"])])`;
+  $num-items = `count (*[not(self::Item[@kind = "Pragma" or @kind = "Section-Pragma"])])`;
   // msg `concat ("Number of items: ", $num-items)`;
   <Fragments {
     @articleid = `@articleid`;
-    for-each [*[not(self::Item[@kind = "Pragma"])]] {
+    for-each [*[not(self::Item[@kind = "Pragma" or @kind = "Section-Pragma"])]] {
       <Text-Proper {
         @fragment-number = position-in-text ();
         <Item { @kind = "Section-Pragma"; }
         if [preceding-sibling::*[1][self::Item[@kind = "Pragma"]]] {
+          if [preceding-sibling::*[2][self::Item[@kind = "Pragma"]]] {
+            apply [preceding-sibling::*[2]];
+          }
           apply [preceding-sibling::*[1]];
         }
         apply [.];
