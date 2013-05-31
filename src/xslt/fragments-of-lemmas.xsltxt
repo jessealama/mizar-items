@@ -44,16 +44,18 @@ tpl [Text-Proper] {
   }
 }
 
-tpl [Item[@kind = "Regular-Statement" and @lemma-number]] (#position) {
-  `@lemma-number`; " "; $position; "\n";
+tpl [Item[    @kind = "Regular-Statement"
+          and not(preceding-sibling::Item[    @kind = "Pragma"
+                                          and (   @spelling = "$C induced"
+                                               or @spelling = "$C deftheorem")])]] (#position)
+{
+  $lemma-pos = count-preceding-lemmas ();
+  `$lemma-pos`; " "; $position; "\n";
 }
 
-tpl [Item[@kind = "Theorem-Item" and @lemma-number]] (#position) {
-  `@lemma-number`; " "; $position; "\n";
-}
-
-tpl [Item[@kind = "Choice-Statement"]] (#position) {
-  for-each [Conditions/Proposition[@lemma-number]] {
-    `@lemma-number`; " "; $position; "\n";
-  }
+tpl [Item[    @kind = "Theorem-Item"
+          and preceding-sibling::Item[@kind = "Pragma" and @spelling = "$C promoted lemma"]]] (#position)
+{
+  $lemma-pos = count-preceding-lemmas ();
+  `$lemma-pos`; " "; $position; "\n";
 }
