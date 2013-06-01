@@ -859,50 +859,68 @@ sub write_element_table {
 sub prune_theorems_and_schemes {
     my $self = shift;
 
-    my $refx_path = $self->file_with_extension ('refx');
-    my $refx_doc = eval { $xml_parser->parse_file ($refx_path) };
+    my $ref_path = $self->file_with_extension ('ref');
 
-    if (! defined $refx_doc) {
-	croak ('Error: the .refx file of ', $self->name (), ' is not well-formed XML.');
+    if (! -e $ref_path) {
+        croak 'Error: the .ref does not exist; unable to prune theorems and schemes.';
     }
+
+    if (! -r $ref_path) {
+        croak 'Error: the .ref is not readable.';
+    }
+
+    my $ref_content = `cat $ref_path`;
+    chomp $ref_content;
 
     my %schemes = ();
     my %theorems = ();
     my %definitions = ();
 
-    my @initial_sy_three_dots = $refx_doc->findnodes ('Parser/syThreeDots[not(preceding-sibling::sySemiColon)]');
-    foreach my $sy_three_dots (@initial_sy_three_dots) {
-	my $aid = $sy_three_dots->findvalue ('following-sibling::Int[1]/@x');
-	my $nr = $sy_three_dots->findvalue ('following-sibling::Int[2]/@x');
-	unless (defined $aid && defined $nr) {
-	    print 'Error: we failed to extract either the first or the second Int following an syThreeDots element!', "\n";
-	    exit 1;
-	}
-	$schemes{"$aid:$nr"} = 0;
-    }
+    if ($ref_content =~ /\A (.*) [;] (.*) [;] (.*) [;] \z/) {
+        my ($schemes_ref_content,$theorems_ref_content, $definitions_ref_content)
+            = ($1, $2, $3);
+        my @schemes = split ("\N{LF}", $schemes_ref_content);
+        my @theorems = split ("\N{LF}", $theorems_ref_content);
+        my @definitions = split ("\N{LF}", $definitions_ref_content);
 
-    my @middle_sy_three_dots = $refx_doc->findnodes ('Parser/syThreeDots[preceding-sibling::sySemiColon and following-sibling::sySemiColon[2]]');
+        # Schemes are a special case: the .ref file always starts with
+        # a bogus '.0 0 0' line
+        shift @schemes;
 
-    foreach my $sy_three_dots (@middle_sy_three_dots) {
-	my $aid = $sy_three_dots->findvalue ('following-sibling::Int[1]/@x');
-	my $nr = $sy_three_dots->findvalue ('following-sibling::Int[2]/@x');
-	unless (defined $aid && defined $nr) {
-	    print 'Error: we failed to extract either the first or the second Int following an syThreeDots element!', "\n";
-	    exit 1;
-	}
-	$theorems{"$aid:$nr"} = 0;
-    }
-    my @final_sy_three_dots = $refx_doc->findnodes ('Parser/syThreeDots[preceding-sibling::sySemiColon and following-sibling::sySemiColon[1] and not(following-sibling::sySemiColon[2])]');
-    # DEBUG
-    # print 'In the final sySemiColon segment, there are ', scalar @final_sy_three_dots, ' syThreeDots elements.', "\n";
-    foreach my $sy_three_dots (@final_sy_three_dots) {
-	my $aid = $sy_three_dots->findvalue ('following-sibling::Int[1]/@x');
-	my $nr = $sy_three_dots->findvalue ('following-sibling::Int[2]/@x');
-	unless (defined $aid && defined $nr) {
-	    print 'Error: we failed to extract either the first or the second Int following an syThreeDots element!', "\n";
-	    exit 1;
-	}
-	$definitions{"$aid:$nr"} = 0;
+        chomp @schemes;
+        chomp @theorems;
+        chomp @definitions;
+
+        foreach my $scheme (@schemes) {
+            if ($scheme =~ /\A [.] ([[:digit:]]+) [\N{SPACE}] ([[:digit:]]+) [\N{SPACE}] ([[:digit:]]+) /) {
+                my ($aid, $nr) = ($1, $2);
+                $schemes{"$aid:$nr"} = 0;
+            } else {
+                croak 'Error: cannot make sense of the .ref line', $LF, $LF, $scheme, $LF, $LF, 'of length ', (length $scheme);
+            }
+        }
+
+        foreach my $theorem (@theorems) {
+            if ($theorem =~ /\A [.] ([[:digit:]]+) [\N{SPACE}] ([[:digit:]]+) [\N{SPACE}] ([[:digit:]]+) /) {
+                my ($aid, $nr) = ($1, $2);
+                $theorems{"$aid:$nr"} = 0;
+            } else {
+                croak 'Error: cannot make sense of the .ref line', $LF, $LF, $theorem, $LF, $LF, 'of length ', (length $theorem);
+            }
+        }
+
+
+        foreach my $definition (@definitions) {
+            if ($definition =~ /\A [.] ([[:digit:]]+) [\N{SPACE}] ([[:digit:]]+) [\N{SPACE}] ([[:digit:]]+) /) {
+                my ($aid, $nr) = ($1, $2);
+                $definitions{"$aid:$nr"} = 0;
+            } else {
+                croak 'Error: cannot make sense of the .ref line', $LF, $LF, $definition, $LF, $LF, 'of length ', (length $definition);
+            }
+        }
+
+    } else {
+        croak 'Error: unable to make sense of the .ref file', $ref_content;
     }
 
     my $eth_file = $self->file_with_extension ('eth');
