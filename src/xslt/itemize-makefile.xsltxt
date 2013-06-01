@@ -125,10 +125,14 @@ tpl [/] {
 
 tpl [Fragments[@articleid]] {
 
-    $articleid = lc (#s = `@articleid`);
-    $num-fragments = `count (*)`;
+  $articleid = lc (#s = `@articleid`);
+  $num-fragments = `count (*)`;
 
-  "all:";
+  // PHONY targets
+  "PHONY: all"; "\n";
+
+  // default target
+  "all :";
   for-each [Text-Proper] {
     $fragment-number = `position ()`;
     $xml = fragment-with-extension (#fragment-number = $fragment-number,
@@ -137,9 +141,6 @@ tpl [Fragments[@articleid]] {
     " "; $xml-in-text-dir;
   }
   "\n";
-
-  `concat ("numbers = $(shell seq ", $num-fragments, ")")`; "\n";
-  "earlier-prels = $(foreach i,$(wordlist 1,$(1),$(numbers)),$(wildcard prel/ckb${i}.*))"; "\n";
 
   for-each [Text-Proper] {
 
@@ -163,32 +164,17 @@ tpl [Fragments[@articleid]] {
     $evl-in-text-dir = file-in-text-subdir (#file = $evl);
     $miz-in-text-dir = file-in-text-subdir (#file = $miz);
 
-     // tpr should already exist
-    $tpr-in-text-dir; " : "; "\n";
-
-    // .xml
-    $xml-in-text-dir; " : "; $miz-in-text-dir; "\n";
-    "\t"; accom (#article = $miz-in-text-dir); "\n";
-    "\t"; verifier (#article = $miz-in-text-dir); "\n";
-
-    // .miz
-    $miz-in-text-dir; " : "; $tpr-in-text-dir; " "; $evd-in-text-dir; "\n";
-    "\t"; mglue (#article = $base-in-text-dir); "\n";
-
-    // .evd
-    $original-evl = `concat ($articleid, ".evl")`;
-    $evd-in-text-dir; " : "; earlier-prels (#fragment-number = $fragment-number); "\n";
-    "\t"; cp (#source = $original-evl, #target = $evl-in-text-dir); "\n";
-    "\t"; "extend-evl "; $evl-in-text-dir; " $(call earlier-prels,"; $fragment-number; ") > "; $evd-in-text-dir; "\n";
-
-    // export stuff
-    prel-targets-in-text-dir (#fragment-number = $fragment-number); " : "; $xml-in-text-dir; "\n";
-    "\t"; exporter (#article = $base-in-text-dir); "\n";
-
-     // stuff in prel depends on everything prior
-    prel-targets-in-prel-dir (#fragment-number = $fragment-number); " : ";     prel-targets-in-text-dir (#fragment-number = $fragment-number); "\n";
-
-    "\t"; transfer (#article = $base-in-text-dir); "\n";
-
+    // .xml depends on all earlier xmls
+    $xml-in-text-dir; " :";
+    for-each [preceding-sibling::Text-Proper] {
+      $earlier-pos = `count (preceding-sibling::Text-Proper) + 1`;
+      $earlier-xml = fragment-with-extension (#fragment-number = $earlier-pos,
+      	   	      	                      #extension = "xml");
+      $earlier-xml-in-text-dir = file-in-text-subdir (#file = $earlier-xml);
+      " "; `$earlier-xml-in-text-dir`;
+    }
+    "\n";
+    "\t"; `concat ("$(call exporter,",$base-in-text-dir,")")`; "\n";
+    "\t"; `concat ("$(call transfer,",$base-in-text-dir,")")`; "\n";
   }
 }
