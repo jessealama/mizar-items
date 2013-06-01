@@ -11,3 +11,11 @@ split-stylesheet = $(mizar-items-xsldir)/split.xsl
 factor-proofs-stylesheet = $(mizar-items-xsldir)/factor-proofs.xsl
 check-factorization-stylesheet = $(mizar-items-xsldir)/check-factorization.xsl
 itemize-stylesheet = $(mizar-items-xsldir)/itemize.xsl
+itemize-makefile-stylesheet = $(mizar-items-xsldir)/itemize-makefile.xsl
+
+# makefiles
+normalize-makefile = $(mizar-items-makedir)/normalize.makefile
+itemize-makefile = $(mizar-items-makedir)/itemize.makefile
+
+# scripts
+itemized-article-dependencies = $(mizar-items-bindir)/itemized-article-dependencies.pl
