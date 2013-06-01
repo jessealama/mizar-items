@@ -1,6 +1,8 @@
 pp-srcdir = /Users/alama/sources/mizar/parsing
 mizar-items-srcdir = /Users/alama/sources/mizar/mizar-items
 mizar-items-xsldir = $(mizar-items-srcdir)/src/xslt
+mizar-items-makedir = $(mizar-items-srcdir)/src/make
+mizar-items-bindir = $(mizar-items-srcdir)/bin
 
 pp-stylesheet = $(pp-srcdir)/pp.xsl
 wrm-stylesheet = $(mizar-items-xsldir)/wrm.xsl
