@@ -26,6 +26,9 @@ $connectedness-lemma  = "ConnectednessLemma";
 // mode properties
 $sethood-lemma = "SethoodLemma";
 
+// structure properties
+$abstractness-lemma = "AbstractnessLemma";
+
 tpl try-fresh-variable (#prefix, #try) {
   $trial-name = `concat ($prefix, $try)`;
   $next-try = `$try + 1`;
@@ -1911,6 +1914,64 @@ tpl
     and @condition = "compatibility"
     and preceding-sibling::Item
         [
+              @kind = "Attribute-Definition"
+          and Redefine]]] {
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = "CompatibilityLemma"; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+       $locus = `Item[@kind = "Loci-Declaration"]`;
+       $segments = `$locus/Explicitly-Qualified-Segment`;
+       $pd = `Item[@kind = "Attribute-Definition"]`;
+       $original-formula = `$pd/Attribute-Pattern`;
+       $new-formula = `$pd/Definiens/*[position() = last()]`;
+       universally-bind-segments-compatibility
+         (#segments         = $segments,
+          #original-formula = $original-formula,
+          #new-formula      = $new-formula);
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Attribute-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "compatibility"
+    and preceding-sibling::Item
+        [
               @kind = "Functor-Definition"
           and Redefine
 	  and count(preceding-sibling::Item[@kind = "Assumption"]) = 0
@@ -1991,7 +2052,7 @@ tpl
   $it = fresh-variable ();
   <Item {
     @kind = "Regular-Statement";
-    @shape = "Diffuse-Statement";
+    @shape = "Compact-Statement";
     <Label { @spelling = $compatibility-lemma; }
     <Block {
       @kind = "Now-Reasoning";
@@ -2231,6 +2292,7 @@ tpl
     and preceding-sibling::Item
         [
               @kind  = "Functor-Definition"
+          and Definiens
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 1
          ]
   ]
@@ -2911,6 +2973,50 @@ tpl
   }
 }
 
+tpl universally-bind-segments-function-means-existence-assumption (#assumption,
+                                                                   #segments,
+                                                                   #definiens,
+                                                                   #type)
+{
+  if [count ($segments) = 0] {
+    $fresh = fresh-variable ();
+    <Conditional-Formula {
+      for-each [$assumption] {
+        choose {
+          when [Single-Assumption] {
+            for-each [Single-Assumption] {
+              for-each [Proposition] {
+                apply [*[position() = last()]];
+              }
+            }
+          }
+          otherwise {
+            apply [.] (#message = "Error: don't know how to handle function existence for functors defined with multiple assumptions.") mode="die";
+          }
+        }
+      }
+      <Existential-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = $fresh; }
+          }
+          type-or-set (#type = $type);
+        }
+        apply [$definiens] (#it = $fresh) mode="replace-it-term";
+      }
+    }
+  } else {
+    <Universal-Quantifier-Formula {
+      apply [$segments[1]];
+      universally-bind-segments-function-means-existence-assumption
+        (#assumption = $assumption,
+         #segments   = `$segments[position() > 1]`,
+         #definiens  = $definiens,
+         #type       = $type);
+    }
+  }
+}
+
 tpl
 [
   Item
@@ -2926,50 +3032,54 @@ tpl
   ]
 ]
 {
-  $definiens = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]/Definiens/*[position() = last()]`;
-  $existential-variable = fresh-variable ();
+  $loci = `preceding-sibling::Item[@kind = "Loci-Declaration"]`;
+  $segments = `$loci/Explicitly-Qualified-Segment`;
+  $def = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]`;
+  $definiens = `$def/Definiens/*[position() = last()]`;
+  $type = `$def/Type-Specification/*[1]`;
+  $assumption = `preceding-sibling::Item[@kind = "Assumption"]`;
   <Item {
-    @kind = "Regular-Statement";
-    @shape = "Diffuse-Statement";
-    <Label { @spelling = $existence-lemma; }
-    <Block {
-      @kind = "Now-Reasoning";
-      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-        for-each [Item[@kind = "Loci-Declaration" or @kind = "Choice-Statement" or @kind = "Assumption"]] {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      universally-bind-segments-function-means-existence-assumption
+        (#assumption = $assumption,
+         #segments   = $segments,
+         #type       = $type,
+         #definiens  = $definiens);
+    }
+    if [preceding-sibling::Item[@kind = "Choice-Statement"]] {
+      <Block {
+        @kind = "Proof";
+        for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+          for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+            apply [.];
+          }
+        }
+        for-each [*[position() = last()]] {
           choose {
-            when [self::Item[@kind = "Loci-Declaration"]] {
-              <Item { @kind = "Generalization"; apply [*]; }
+            when [self::Block[@kind = "Proof"]] {
+              apply [*];
+            }
+            when [self::Straightforward-Justification or self::Scheme-Justification] {
+              <Item {
+                @kind = "Conclusion";
+                @shape = "Compact-Statement";
+                <Proposition {
+                  <Thesis;
+                }
+                apply [.];
+              }
             }
             otherwise {
-              // nothing special to do; apply the default template
-              apply [.];
+              apply [.] (#message = "Error: don't know how to handle this function existence.") mode="die";
             }
           }
         }
       }
-      <Item {
-        @kind = "Conclusion";
-        @shape = "Compact-Statement";
-        $fd = `preceding-sibling::Item[@kind = "Functor-Definition"]`;
-        $formula = `$fd/Definiens/*[position() = last()]`;
-        $type = `$fd/Type-Specification/*[1]`;
-        <Proposition {
-          <Existential-Quantifier-Formula {
-            <Explicitly-Qualified-Segment {
-              <Variables {
-                <Variable { @spelling = $existential-variable; }
-              }
-              if [$type] {
-                apply [$type];
-              } else {
-                <Standard-Type { @nr = "1"; @spelling = "set"; }
-              }
-            }
-            apply [$formula] (#it = $existential-variable) mode="replace-it-term";
-          }
-        }
-        apply [*[position() = last()]];
-      }
+    } else {
+      apply [*[position() = last()]];
     }
   }
 }
@@ -3224,6 +3334,66 @@ tpl
   }
 }
 
+tpl universally-bind-segments-function-means-uniqueness-assumption (#assumption,
+                                                                   #segments,
+                                                                   #definiens,
+                                                                   #type)
+{
+  if [count ($segments) = 0] {
+    $fresh-1 = fresh-variable (#prefix = "A");
+    $fresh-2 = fresh-variable (#prefix = "B");
+    <Conditional-Formula {
+      for-each [$assumption] {
+        choose {
+          when [Single-Assumption] {
+            for-each [Single-Assumption] {
+              for-each [Proposition] {
+                apply [*[position() = last()]];
+              }
+            }
+          }
+          otherwise {
+            apply [.] (#message = "Error: don't know how to handle function uniqueness for functors defined with multiple assumptions.") mode="die";
+          }
+        }
+      }
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = $fresh-1; }
+            <Variable { @spelling = $fresh-2; }
+          }
+          type-or-set (#type = $type);
+        }
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            apply [$definiens] (#it = $fresh-1) mode="replace-it-term";
+            apply [$definiens] (#it = $fresh-2) mode="replace-it-term";
+          }
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments {
+              <Simple-Term { @spelling = $fresh-1; }
+            }
+            <Arguments {
+              <Simple-Term { @spelling = $fresh-2; }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    <Universal-Quantifier-Formula {
+      apply [$segments[1]];
+      universally-bind-segments-function-means-uniqueness-assumption
+        (#assumption = $assumption,
+         #segments   = `$segments[position() > 1]`,
+         #definiens  = $definiens,
+         #type       = $type);
+    }
+  }
+}
+
 tpl
 [
   Item
@@ -3235,66 +3405,58 @@ tpl
               @kind  = "Functor-Definition"
           and @shape = "Means"
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 1
-        ]
+         ]
   ]
 ]
 {
-  $uniqueness-variable-1 = fresh-variable (#prefix = "A");
-  $uniqueness-variable-2 = fresh-variable (#prefix = "B");
+  $loci = `preceding-sibling::Item[@kind = "Loci-Declaration"]`;
+  $segments = `$loci/Explicitly-Qualified-Segment`;
+  $def = `preceding-sibling::Item[@kind = "Functor-Definition" and @shape = "Means"]`;
+  $definiens = `$def/Definiens/*[position() = last()]`;
+  $type = `$def/Type-Specification/*[1]`;
+  $assumption = `preceding-sibling::Item[@kind = "Assumption"]`;
   <Item {
-    @kind = "Regular-Statement";
-    @shape = "Diffuse-Statement";
-    <Label { @spelling = "UniquenessLemma"; }
-    <Block {
-      @kind = "Now-Reasoning";
-      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-        for-each [Item[@kind = "Loci-Declaration" or @kind = "Choice-Statement" or @kind = "Assumption"]] {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $uniqueness-lemma; }
+      universally-bind-segments-function-means-uniqueness-assumption
+        (#assumption = $assumption,
+         #segments   = $segments,
+         #type       = $type,
+         #definiens  = $definiens);
+    }
+    if [preceding-sibling::Item[@kind = "Choice-Statement"]] {
+      <Block {
+        @kind = "Proof";
+        for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+          for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+            apply [.];
+          }
+        }
+        for-each [*[position() = last()]] {
           choose {
-            when [self::Item[@kind = "Loci-Declaration"]] {
-              <Item { @kind = "Generalization"; apply [*]; }
-
+            when [self::Block[@kind = "Proof"]] {
+              apply [*];
+            }
+            when [self::Straightforward-Justification or self::Scheme-Justification] {
+              <Item {
+                @kind = "Conclusion";
+                @shape = "Compact-Statement";
+                <Proposition {
+                  <Thesis;
+                }
+                apply [.];
+              }
             }
             otherwise {
-              // nothing special to do; apply the default template
-              apply [.];
+              apply [.] (#message = "Error: don't know how to handle this function uniqueness.") mode="die";
             }
           }
         }
       }
-      <Item {
-        @kind = "Conclusion";
-        @shape = "Compact-Statement";
-        $fd = `preceding-sibling::Item[@kind = "Functor-Definition"]`;
-        $formula = `$fd/Definiens/*[position() = last()]`;
-        $type = `$fd/Type-Specification/*[1]`;
-        <Proposition {
-          <Universal-Quantifier-Formula {
-            <Explicitly-Qualified-Segment {
-              <Variables {
-                <Variable { @spelling = $uniqueness-variable-1; }
-                <Variable { @spelling = $uniqueness-variable-2; }
-              }
-              if [$type] {
-                apply [$type];
-              } else {
-                <Standard-Type { @nr = "1"; @spelling = "set"; }
-              }
-            }
-            <Conditional-Formula {
-              <Conjunctive-Formula {
-                apply [$formula] (#it = $uniqueness-variable-1) mode="replace-it-term";
-                apply [$formula] (#it = $uniqueness-variable-2) mode="replace-it-term";
-              }
-              <Predicative-Formula {
-               @spelling = "=";
-                <Arguments { <Simple-Term { @spelling = $uniqueness-variable-1; } }
-                <Arguments { <Simple-Term { @spelling = $uniqueness-variable-2; } }
-              }
-            }
-          }
-        }
-        apply [*[position() = last()]];
-      }
+    } else {
+      apply [*[position() = last()]];
     }
   }
 }
@@ -4958,6 +5120,7 @@ tpl
       }
     }
   }
+  apply [.] mode="deftheorem";
 }
 
 tpl
@@ -5320,7 +5483,6 @@ tpl
           and Item
               [
                     @kind = "Attribute-Definition"
-                and not(Redefine)
               ]
         ]
   ]
@@ -5667,22 +5829,46 @@ tpl emit-functor-equational-deftheorem (#loci, #definiens, #pattern)
         <Predicative-Formula {
             @spelling = "=";
             <Arguments {
-                for-each [$pattern] {
+              for-each [$pattern] {
+                choose {
+                  when [self::Operation-Functor-Pattern] {
                     <Infix-Term {
-                        @spelling = `@spelling`;
-                        <Arguments {
-                            apply [Loci[1]];
+                      @spelling = `@spelling`;
+                      <Arguments {
+                        for-each [Loci[1]] {
+                          apply [*];
                         }
-                        <Arguments {
-                            apply [Loci[2]];
+                      }
+                      <Arguments {
+                        for-each [Loci[2]] {
+                          apply [*];
                         }
+                      }
                     }
+                  }
+                  when [self::Bracket-Functor-Pattern] {
+                    <Circumfix-Term {
+                      @spelling = `@spelling`;
+                      apply [Right-Circumflex-Symbol];
+                      <Arguments {
+                        for-each [Loci] {
+                          for-each [Locus] {
+                            <Simple-Term { @spelling = `@spelling`; }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  otherwise {
+                    apply [.] (#message = "Error: unable to generate a deftheorem for a functor defined by an equation: its pattern is neither an Operation-Functor-Pattern nor a Bracket-Functor-Pattern") mode="die";
+                  }
                 }
+              }
             }
             <Arguments {
-                apply [$definiens];
+              apply [$definiens];
             }
-        }
+      }
     } else {
         <Universal-Quantifier-Formula {
           apply [$loci[1]];
@@ -5713,7 +5899,7 @@ mode="deftheorem"
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
         $def       = `$block/Item[@kind = "Functor-Definition"]`;
-        $pattern   = `$def/Operation-Functor-Pattern`;
+        $pattern   = `$def/Operation-Functor-Pattern | $def/Bracket-Functor-Pattern`;
         $definiens = `$def/Definiens`;
         $term      = `$definiens/*[position() = last()]`;
         <Proposition {
@@ -5739,24 +5925,44 @@ tpl emit-functor-means-deftheorem (#loci, #definiens, #pattern, #type)
                     @spelling = "=";
                     <Arguments { <Simple-Term { @spelling = $fresh; } }
                     <Arguments {
-                        <Infix-Term {
-                            for-each [$pattern] {
-                                @spelling = `@spelling`;
-                                <Arguments {
-                                  for-each [Loci[1]] {
-                                      for-each [Locus] {
-                                          <Simple-Term { @spelling = `@spelling`; }
+                        for-each [$pattern] {
+                          choose {
+                            when [self::Operation-Functor-Pattern] {
+                                <Infix-Term {
+                                    @spelling = `@spelling`;
+                                    <Arguments {
+                                      for-each [Loci[1]] {
+                                          for-each [Locus] {
+                                              <Simple-Term { @spelling = `@spelling`; }
+                                          }
                                       }
-                                  }
-                              }
-                              <Arguments {
-                                  for-each [Loci[2]] {
-                                      for-each [Locus] {
-                                          <Simple-Term { @spelling = `@spelling`; }
-                                      }
-                                  }
-                              }
+                                    }
+                                    <Arguments {
+                                        for-each [Loci[2]] {
+                                            for-each [Locus] {
+                                                <Simple-Term { @spelling = `@spelling`; }
+                                            }
+                                        }
+                                    }
+                                }
                             }
+                            when [self::Bracket-Functor-Pattern] {
+                                <Circumfix-Term {
+                                    @spelling = `@spelling`;
+                                    for-each [Right-Circumflex-Symbol] { apply [.] ; }
+                                    <Arguments {
+                                      for-each [Loci[1]] {
+                                          for-each [Locus] {
+                                              <Simple-Term { @spelling = `@spelling`; }
+                                          }
+                                      }
+                                    }
+                                }
+                            }
+                            otherwise {
+                              apply [.] (#message = "Don't know how to deal with a functor definition whose pattern is neither a Bracket-Functor-Pattern nor a Operation-Functor-Pattern.") mode="die";
+                            }
+                          }
                         }
                     }
                 }
@@ -5794,7 +6000,7 @@ mode="deftheorem"
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
         $def       = `$block/Item[@kind = "Functor-Definition"]`;
-        $pattern   = `$def/Operation-Functor-Pattern`;
+        $pattern   = `$def/Operation-Functor-Pattern | $def/Bracket-Functor-Pattern`;
         $definiens = `$def/Definiens`;
         $formula   = `$definiens/*[position() = last()]`;
         $ts        = `$def/Type-Specification`;
@@ -5872,5 +6078,270 @@ mode="deftheorem"
                                        #pattern   = $pattern);
         }
         <SkippedProof;
+    }
+}
+
+tpl emit-mode-deftheorem (#loci, #definiens, #pattern, #supertype)
+{
+    if [count ($loci) = 0] {
+        $fresh = fresh-variable ();
+        <Universal-Quantifier-Formula {
+          <Explicitly-Qualified-Segment {
+            <Variables {
+              <Variable { @spelling = $fresh; }
+            }
+            type-or-set (#type = $supertype);
+          }
+          for-each [$definiens] {
+            $n = `local-name (.)`;
+            msg `concat ("name of definiens element: ", $n)`;
+            if [Partial-Definiens] {
+              msg "partial definiens";
+              <Conjunctive-Formula {
+                for-each [Partial-Definiens] {
+                  // a check for evenness is better, but I don't know
+                  // how to do that.  This should cover everything in
+                  // the MML, but of course doesn't cover all possible
+                  // valid Mizar articles
+                  for-each [*[   count(preceding-sibling::*) = 0
+                              or count(preceding-sibling::*) = 2
+                              or count(preceding-sibling::*) = 4
+                              or count(preceding-sibling::*) = 6]] {
+                    msg "mode deftheorem case";
+                    <Biconditional-Formula {
+                      <Qualifying-Formula {
+                        <Simple-Term { @spelling = $fresh; }
+                        for-each [$pattern] {
+                          <Standard-Type {
+                            @spelling = `@spelling`;
+                            for-each [Loci] {
+                              for-each [Locus] {
+                                <Simple-Term { @spelling = `@spelling`; }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      apply [.] (#it = $fresh) mode="replace-it-term";
+                    }
+                  }
+                  <Conditional-Formula {
+                    <Conjunctive-Formula {
+                      for-each [*[   count(preceding-sibling::*) = 1
+                                  or count(preceding-sibling::*) = 3
+                                  or count(preceding-sibling::*) = 5
+                                  or count(preceding-sibling::*) = 7]] {
+                        <Negated-Formula {
+                          apply [.] (#it = $fresh) mode="replace-it-term";
+                        }
+                      }
+                    }
+                    msg "mode deftheorem default case";
+                    <Biconditional-Formula {
+                      <Qualifying-Formula {
+                        <Simple-Term { @spelling = $fresh; }
+                        for-each [$pattern] {
+                          <Standard-Type {
+                            @spelling = `@spelling`;
+                            for-each [Loci] {
+                              for-each [Locus] {
+                                <Simple-Term { @spelling = `@spelling`; }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      apply [following-sibling::*[1]] (#it = $fresh) mode="replace-it-term";
+                    }
+                  }
+                }
+              }
+            } else {
+              msg "not a partial definiens";
+              <Biconditional-Formula {
+                <Attributive-Formula {
+                  <Simple-Term { @spelling = $fresh; }
+                  for-each [$pattern] {
+                    <Adjective-Cluster {
+                      @spelling = `@spelling`;
+                      for-each [Loci] {
+                        for-each [Locus] {
+                          <Adjective { @spelling = `@spelling`; }
+                        }
+                      }
+                    }
+                  }
+                }
+                apply [.] (#it = $fresh) mode="replace-it-term";
+              }
+            }
+          }
+        }
+    } else {
+        <Universal-Quantifier-Formula {
+          apply [$loci[1]];
+          emit-mode-deftheorem (#loci      = `$loci[position() > 1]`,
+                                #definiens = $definiens,
+                                #supertype = $supertype,
+                                #pattern   = $pattern);
+        }
+    }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind  = "Mode-Definition"
+                             and Standard-Mode
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item {
+        @kind      = "Regular-Statement";
+        @shape     = "Compact-Statement";
+        $block     = `Block[@kind = "Definitional-Block"]`;
+        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+        $def       = `$block/Item[@kind = "Mode-Definition"]`;
+        $sm        = `$def/Standard-Mode`;
+        $supertype = `$sm/Type-Specification`;
+        $pattern   = `$def/Mode-Pattern`;
+        $definiens = `$sm/Definiens`;
+        <Proposition {
+            emit-mode-deftheorem (#loci      = $loci,
+                                  #supertype = $supertype,
+                                  #definiens = $definiens,
+                                  #pattern   = $pattern);
+        }
+        <SkippedProof;
+    }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind  = "Mode-Definition"
+                             and Expandable-Mode
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+  msg "Definitional theorems are not generated for expandable modes.";
+}
+
+//////////////////////////////////////////////////////////////////////
+// Structures
+//////////////////////////////////////////////////////////////////////
+
+tpl
+[
+  Item
+  [
+    @kind = "Definition-Item"
+    and Block
+        [
+          @kind = "Definitional-Block"
+          and Item
+              [
+                    @kind = "Structure-Definition"
+              ]
+        ]
+  ]
+]
+{
+  apply [.] mode="copy";
+  apply [.] mode="abstractness";
+}
+
+tpl [*] mode="abstractness"
+{
+    apply [.] (#message = "Unhandled node in abstractness mode.") mode="die";
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[
+                                @kind = "Structure-Definition"
+                            ]
+                   ]
+         ]
+    ]
+mode="abstractness"
+{
+    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item {
+        @kind      = "Regular-Statement";
+        @shape     = "Compact-Statement";
+        $block     = `Block[@kind = "Definitional-Block"]`;
+        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+        $def       = `$block/Item[@kind = "Structure-Definition"]`;
+        $pattern   = `$def/Structure-Pattern`;
+        <Proposition {
+            <Label { @spelling = $abstractness-lemma; }
+            emit-abstractness-theorem (#loci      = $loci,
+                                       #pattern   = $pattern);
+        }
+        <SkippedProof;
+    }
+}
+
+tpl emit-abstractness-theorem (#loci, #pattern)
+{
+    if [count ($loci) = 0] {
+       $fresh = fresh-variable ();
+       <Universal-Quantifier-Formula {
+           <Explicitly-Qualified-Segment {
+               <Variables {
+                   <Variable { @spelling = $fresh; }
+               }
+               <Struct-Type {
+                   for-each [$pattern] { @spelling = `@spelling`; }
+               }
+           }
+           <Conditional-Formula {
+               <Attributive-Formula {
+                   <Simple-Term { @spelling = $fresh; }
+                   <Adjective-Cluster {
+                       <Adjective { @spelling = "strict"; }
+                   }
+               }
+               <Predicative-Formula {
+                   @spelling = "=";
+                   <Arguments {
+                       <Simple-Term { @spelling = $fresh; }
+                   }
+                   <Arguments {
+                       for-each [$pattern] {
+                           <Aggregate-Term {
+                               @spelling = `@spelling`;
+                               for-each [Field-Segment] {
+                                   for-each [Selector] {
+                                       <Selector-Term {
+                                           @spelling = `@spelling`;
+                                           <Simple-Term { @spelling = $fresh; }
+                                       }
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+       }
+    } else {
+        <Universal-Quantifier-Formula {
+          apply [$loci[1]];
+          emit-abstractness-theorem (#loci    = `$loci[position() > 1]`,
+                                     #pattern = $pattern);
+        }
     }
 }
