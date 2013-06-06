@@ -412,6 +412,10 @@ sub property_xml_element_name {
         return 'Symmetry';
     } elsif ($property eq 'asymmetry') {
         return 'Antisymmetry';
+    } elsif ($property eq 'abstractness') {
+        return 'Abstractness';
+    } elsif ($property eq 'sethood') {
+        return 'Sethood';
     } else {
         croak 'Unknown property \'', $property, '\'.';
     }
