@@ -745,8 +745,10 @@ sub load_correctness_conditions {
     my $self = shift;
 
     $self->load_existence_conditions ();
-    $self->load_function_uniqueness_conditions ();
-    $self->load_constructor_coherence_conditions ();
+    $self->load_uniqueness_conditions ();
+    $self->load_coherence_conditions ();
+
+    # Redefinitions
     # $self->load_redefined_constructor_compatibility_conditions ();
 
 }
@@ -901,7 +903,7 @@ sub load_existence_conditions {
 
 }
 
-sub load_function_uniqueness_conditions {
+sub load_uniqueness_conditions {
     my $self = shift;
 
     my $article_name = $self->get_article_name ();
@@ -1025,7 +1027,7 @@ sub load_function_uniqueness_conditions {
 
 }
 
-sub load_constructor_coherence_conditions {
+sub load_coherence_conditions {
     my $self = shift;
 
     my $article_name = $self->get_article_name ();
