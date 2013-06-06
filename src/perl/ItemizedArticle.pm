@@ -400,6 +400,8 @@ sub property_xml_element_name {
 
     if ($property eq 'commutativity') {
         return 'Commutativity';
+    } elsif ($property eq 'involutiveness') {
+        return 'Involutiveness';
     } elsif ($property eq 'idempotence') {
         return 'Idempotence';
     } elsif ($property eq 'reflexivity') {
