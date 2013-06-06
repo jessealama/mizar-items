@@ -2119,7 +2119,7 @@ sub minimize_environment_with_suggestions {
     my %suggestions = defined $suggestions_ref ? %{$suggestions_ref} : ();
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
-    my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfs', 'eid', 'ecl');
+    my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfe', 'dfs', 'eid', 'ecl');
 
     if (defined $parameters{'fast-theorems-and-schemes'}) {
 	$self->prune_theorems_and_schemes ();
