@@ -4,10 +4,12 @@ use base qw(Exporter);
 use warnings;
 use strict;
 use Regexp::DefaultFlags;
-use Carp qw(croak);
+use Carp qw(croak confess);
 use charnames qw(:full);
+use XML::LibXML;
 
 our @EXPORT_OK = qw(delete_space
+                    parse_xml_file
 		    ensure_readable_file
 		    ensure_directory
 		    ensure_executable
@@ -17,6 +19,8 @@ our @EXPORT_OK = qw(delete_space
 	            slurp
 		    ensure_valid_xml_file);
 
+my $xml_parser = XML::LibXML->new (suppress_warnings => 1, # quiet, please
+				   suppress_errors => 1);
 sub ensure_readable_file {
   my $file = shift;
   (-e $file && ! -d $file && -r $file) ? return 1
@@ -111,6 +115,19 @@ sub ensure_valid_xml_file {
   my $xml_path = shift;
   my $xml_parser = XML::LibXML->new ();
   return (defined eval { $xml_parser->parse_file ($xml_path) });
+}
+
+sub parse_xml_file {
+    my $path = shift;
+    if (! ensure_readable_file ($path)) {
+        confess 'Error: ', $path, ' does not exist (or is unreadable).';
+    }
+    my $doc = eval { $xml_parser->parse_file ($path) };
+    if (defined $doc) {
+        return $doc;
+    } else {
+        confess 'Error: ', $path, ' ought to be a valid XML file, but it isn\'t.';
+    }
 }
 
 1;
