@@ -1749,6 +1749,66 @@ tpl universally-bind-segments-irreflexivity (#segments,
   }
 }
 
+tpl universally-bind-segments-irreflexivity-redefinition (#segments,
+                                                          #pattern,
+                                                          #arg-type,
+                                                          #arg-1,
+                                                          #arg-2) {
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables { <Variable { @spelling = `$arg-1`; } }
+        type-or-set (#type = $arg-type);
+      }
+      <Negated-Formula {
+        for-each [$pattern] {
+          <Predicative-Formula {
+            @spelling = `@spelling`;
+            <Arguments {
+              for-each [Loci[1]] {
+                for-each [Locus] {
+                  <Simple-Term {
+                    if [@spelling = $arg-2] {
+                      @spelling = $arg-1;
+                    } else {
+                      @spelling = `@spelling`;
+                    }
+                  }
+                }
+              }
+            }
+            <Arguments {
+              for-each [Loci[2]] {
+                for-each [Locus] {
+                  <Simple-Term {
+                    if [@spelling = $arg-2] {
+                      @spelling = $arg-1;
+                    } else {
+                      @spelling = `@spelling`;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-irreflexivity-redefinition (#segments = $rest,
+                                                            #arg-type = $arg-type,
+                                                            #pattern  = $pattern,
+                                                            #arg-1    = $arg-1,
+                                                            #arg-2    = $arg-2);
+    }
+  }
+}
+
 tpl universally-bind-segments-reflexivity (#segments,
                                            #formula,
                                            #it,
@@ -1786,6 +1846,64 @@ tpl universally-bind-segments-reflexivity (#segments,
                                              #arg-type = $arg-type,
                                              #arg-1    = $arg-1,
                                              #arg-2    = $arg-2);
+    }
+  }
+}
+
+tpl universally-bind-segments-reflexivity-redefinition (#segments,
+                                                        #pattern,
+                                                        #arg-type,
+                                                        #arg-1,
+                                                        #arg-2)
+{
+  if [count ($segments) = 0] {
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables { <Variable { @spelling = `$arg-1`; } }
+        type-or-set (#type = $arg-type);
+      }
+      for-each [$pattern] {
+        <Predicative-Formula {
+          @spelling = `@spelling`;
+          <Arguments {
+            for-each [Loci[1]] {
+              for-each [Locus] {
+                <Simple-Term {
+                  if [@spelling = $arg-2] {
+                    @spelling = $arg-1;
+                  } else {
+                    @spelling = `@spelling`;
+                  }
+                }
+              }
+            }
+          }
+          <Arguments {
+            for-each [Loci[2]] {
+              for-each [Locus] {
+                <Simple-Term {
+                  if [@spelling = $arg-2] {
+                    @spelling = $arg-1;
+                  } else {
+                    @spelling = `@spelling`;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-reflexivity-redefinition (#segments = $rest,
+                                                          #pattern  = $pattern,
+                                                          #arg-type = $arg-type,
+                                                          #arg-1    = $arg-1,
+                                                          #arg-2    = $arg-2);
     }
   }
 }
@@ -2126,24 +2244,24 @@ tpl
   }
 }
 
-tpl
-[
-  Item
-  [
-        @kind = "Property"
-    and (   @property = "reflexivity"
-         or @property = "irreflexivity"
-         or @property = "symmetry"
-         or @property = "asymmetry"
-         or @property = "connectedness")
-    and preceding-sibling::Item
-        [
-              @kind = "Predicate-Definition"
-          and Redefine
-	  and not(Definiens)]]] {
-  $p = `@property`;
-  msg `concat ("Unsupported property ", $p, " of a redefined predicate.")`;
-}
+// tpl
+// [
+//   Item
+//   [
+//         @kind = "Property"
+//     and (   @property = "reflexivity"
+//          or @property = "irreflexivity"
+//          or @property = "symmetry"
+//          or @property = "asymmetry"
+//          or @property = "connectedness")
+//     and preceding-sibling::Item
+//         [
+//               @kind = "Predicate-Definition"
+//           and Redefine
+// 	  and not(Definiens)]]] {
+//   $p = `@property`;
+//   msg `concat ("Unsupported property ", $p, " of a redefined predicate.")`;
+// }
 
 tpl
 [
@@ -2495,7 +2613,6 @@ tpl
           and Item
               [
                     @kind = "Predicate-Definition"
-                and not(Redefine and not(Definiens))
               ]
         ]
   ]
@@ -2511,28 +2628,6 @@ tpl
     apply [*] mode="straightforward-correctness";
   }
   apply [.] mode="deftheorem";
-}
-
-tpl
-[
-  Item
-  [
-    @kind = "Definition-Item"
-    and Block
-        [
-          @kind = "Definitional-Block"
-          and Item
-              [
-                    @kind = "Predicate-Definition"
-                and Redefine
-		and not(Definiens)
-              ]
-        ]
-  ]
-]
-{
-  msg "Warning: don't know how to handle a redefined predicate that lacks a definiens.";
-  apply [.] mode="copy";
 }
 
 tpl [*] (#it) mode="replace-it-term" {
@@ -4417,10 +4512,93 @@ tpl
   Item
   [
         @kind      = "Property"
+    and @property = "irreflexivity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and Redefine
+          and Predicate-Pattern
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+        ]
+  ]
+]
+{
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $irreflexivity-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `.`;
+                universally-bind-segments-irreflexivity-redefinition
+                  (#segments = $segments,
+                   #pattern  = $pattern,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
     and @property = "reflexivity"
     and preceding-sibling::Item
         [
               @kind  = "Predicate-Definition"
+          and Definiens
           and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
           and count (Definiens/Partial-Definiens) = 0
         ]
@@ -4456,6 +4634,89 @@ tpl
                   (#segments = $segments,
                    #formula  = $formula,
                    #it       = $it,
+                   #arg-type = $arg-type,
+                   #arg-1    = $arg-1-spelling,
+                   #arg-2    = $arg-2-spelling);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // justification
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            // for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+            //   for-each [*[following-sibling::Item[@kind = "Predicate-Definition"]]] {
+            //     if [self::Item[@kind = "Loci-Declaration"]] {
+            //       <Item {
+            //         @kind = "Generalization";
+            //         apply [*];
+            //       }
+            //     } else {
+            //       apply [.];
+            //     }
+            //   }
+            // }
+            apply [*];
+          }
+        }
+      }
+    }
+
+  }
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Property"
+    and @property = "reflexivity"
+    and preceding-sibling::Item
+        [
+              @kind  = "Predicate-Definition"
+          and Redefine
+          and Predicate-Pattern
+          and count (preceding-sibling::Item[@kind = "Assumption"]) = 0
+          and count (Definiens/Partial-Definiens) = 0
+        ]
+  ]
+]
+{
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $reflexivity-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Predicate-Definition"]`;
+        $pattern    = `$fd/Predicate-Pattern`;
+        for-each [$pattern] {
+          $arg-1 = `descendant::Locus[1]`;
+          $arg-2 = `descendant::Locus[2]`;
+          $arg-1-spelling = `$arg-1/@spelling`;
+          $arg-2-spelling = `$arg-2/@spelling`;
+
+          $segments   = `$locus/Explicitly-Qualified-Segment[not(Variables/Variable[@spelling = $arg-1-spelling or @spelling = $arg-2-spelling])]`;
+
+          for-each [$locus/Explicitly-Qualified-Segment/Variables/Variable[@spelling = $arg-1-spelling]] {
+            for-each [ancestor::Explicitly-Qualified-Segment] {
+              for-each [*[position() = last()]] {
+                $arg-type = `.`;
+                universally-bind-segments-reflexivity-redefinition
+                  (#segments = $segments,
+                   #pattern  = $pattern,
                    #arg-type = $arg-type,
                    #arg-1    = $arg-1-spelling,
                    #arg-2    = $arg-2-spelling);
@@ -5121,6 +5382,95 @@ tpl
     }
   }
   apply [.] mode="deftheorem";
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "coherence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Mode-Definition"
+          and Mode-Pattern
+          and Standard-Mode
+         ]
+  ]
+]
+{
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      $segments = `preceding-sibling::Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+      $fd = `preceding-sibling::Item[@kind = "Mode-Definition"]/Standard-Mode`;
+      $pattern = `preceding-sibling::Item[@kind = "Mode-Definition"]/Mode-Pattern`;
+      $definiens = `$fd/Definiens`;
+      $type-specification = `$fd/Type-Specification`;
+      $type = `$type-specification/*[1]`;
+      universally-bind-segments-mode-coherence (#segments   = $segments,
+                                                #pattern = $pattern,
+                                                #type    = $type);
+    }
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Mode-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+}
+
+tpl universally-bind-segments-mode-coherence (#segments,
+                                              #pattern,
+                                              #type)
+{
+  if [count ($segments) = 0] {
+    $fresh = fresh-variable ();
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = $fresh; }
+        }
+        type-or-set (#type = $pattern);
+      }
+      <Qualifying-Formula {
+        <Simple-Term { @spelling = $fresh; }
+        type-or-set (#type = $type);
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-mode-coherence (#segments = $rest,
+                                                #pattern  = $pattern,
+                                                #type     = $type);
+    }
+  }
 }
 
 tpl
@@ -6079,6 +6429,21 @@ mode="deftheorem"
         }
         <SkippedProof;
     }
+}
+
+tpl [Item[
+              @kind = "Definition-Item"
+          and Block[
+                        @kind = "Definitional-Block"
+                    and Item[    @kind  = "Predicate-Definition"
+                             and not(Definiens)
+                            ]
+                   ]
+         ]
+    ]
+mode="deftheorem"
+{
+  msg "In deftheorem mode, skipping a predicate definition that lacks a definiens.";
 }
 
 tpl emit-mode-deftheorem (#loci, #definiens, #pattern, #supertype)
