@@ -11,7 +11,7 @@ use charnames qw(:full);
 use Readonly;
 
 # Local stuff
-use Utils qw(strip_extension ensure_readable_file);
+use Utils qw(strip_extension ensure_readable_file parse_xml_file);
 use Mizar;
 use Xsltproc qw(apply_stylesheet);
 use LocalDatabase;
@@ -443,24 +443,9 @@ sub load_properties_of_constructors_of_kind {
 	my $dco = $sorted_dcos[$i - 1];
 	my $fragment_number = fragment_number ($dco);
         my $fragment_abs_xml = "${text_subdir}/ckb${fragment_number}.xml1";
-
-        if (! -e $fragment_abs_xml) {
-            croak 'Error: the absolutized XML for fragment ', $fragment_number, ' does not exist at the expected location', $LF, $LF, '  ', $fragment_abs_xml, $LF;
-        }
-
 	my $fragment = "${article_name}:fragment:${fragment_number}";
 	my $dco_path = "${prel_subdir}/${dco}.dco";
-
-	if (! ensure_readable_file ($dco_path)) {
-	    croak ('Error: the dco file ', $dco, ' does not exist at the expected location (', $dco_path, '), or is unreadable.');
-	}
-
-	my $dco_doc = eval { $xml_parser->parse_file ($dco_path) };
-
-	if (! defined $dco_doc) {
-	    croak ('Error: the .dco file at ', $dco_path, ' is not a well-formed XML file.');
-	}
-
+        my $dco_doc = parse_xml_file ($dco_path);
 	my $xpath = '/Constructors/Constructor[@kind = "' . $kind_uc . '"]/Properties/*';
 	my @property_nodes = $dco_doc->findnodes ($xpath);
 	foreach my $property_node (@property_nodes) {
@@ -474,14 +459,9 @@ sub load_properties_of_constructors_of_kind {
 
 	    my $property_code = $code_of_property{$property};
 
-            my $xml_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
-
-            if (! defined $xml_doc) {
-                croak 'Error: the .msx file', $LF, $LF, '  ', $fragment_abs_xml, $LF, $LF, 'does not seem to be a valid XML file.';
-            }
+            my $xml_doc = parse_xml_file ($fragment_abs_xml);
 
             if ($property eq 'abstractness') {
-                carp 'DUDE';
                 my $next_fragment_number = $fragment_number + 1;
                 $item_to_fragment_table{$item}
                     = "${article_name}:fragment:${next_fragment_number}";
@@ -495,12 +475,7 @@ sub load_properties_of_constructors_of_kind {
                     croak 'Error: looking for an abstractness lemma, we expect to find a lemma at', $LF, $LF, '  ', $next_fragment_msx, $LF, $LF, 'but there is no file there.';
                 }
 
-                my $next_fragment_doc = eval { $xml_parser->parse_file ($next_fragment_msx) };
-
-                if (! defined $next_fragment_doc) {
-                    croak 'Error: ', $next_fragment_msx, ' does not seem to be a valid XML file.';
-                }
-
+                my $next_fragment_doc = parse_xml_file ($next_fragment_msx);
                 my $next_fragment_root = $next_fragment_doc->documentElement ();
 
                 my $label_xpath = 'Item[@kind = "Regular-Statement"]/Proposition/Label[@spelling = "AbstractnessLemma"]';
@@ -512,47 +487,61 @@ sub load_properties_of_constructors_of_kind {
             }
 
             my $property_xml_element_name = property_xml_element_name ($property);
-
             my $redefined_xpath = 'descendant::Definition[@redefinition = "true"]';
+            my $coherence_xpath = 'descendant::Coherence';
+            my $property_xpath = "/Article/DefinitionBlock/Definition/JustifiedProperty[${property_xml_element_name}]";
 
-            if ($xml_doc->exists ($redefined_xpath)) {
+            if ($xml_doc->exists ($redefined_xpath)
+                    && $xml_doc->exists ($coherence_xpath)) {
+                carp 'Encountered a redefined constructor with a coherence node.  Punting...';
                 $item_to_fragment_table{$item} = $fragment;
                 next;
             }
 
-            my $property_xpath = "/Article/DefinitionBlock/Definition/JustifiedProperty[${property_xml_element_name}]";
+            if (! $xml_doc->exists ($property_xpath)) {
+                if ($xml_doc->exists ($redefined_xpath)) {
+                    carp 'Handling ', $item, ' in ', $fragment_abs_xml, ' we find that there is no property node, but this is a redefinition.  Punting...';
+                    $item_to_fragment_table{$item} = $fragment;
+                    next;
+                } else {
+                    confess 'While handling ', $property, ' for ', $item, ' in', $LF, $LF, '  ', $fragment_abs_xml, $LF, $LF, 'we find that there is no property node in the XML in question, nor does the definition appear to be a redefinition.';
+                }
+            }
 
             (my $property_node) = $xml_doc->findnodes ($property_xpath);
 
-            if (! defined $property_node) {
-                croak 'Error: we did not find a property node for ', $property, '.  The XPath expression we used was', $LF, $LF, '  ', $property_xpath, $LF, $LF, 'and we looked for this in the file', $LF, $LF, '  ', $fragment_abs_xml, $LF;
-            }
+            if (defined $property_node) {
 
-            (my $justification) = $property_node->findnodes ('*[position() = last()]');
+                (my $justification) = $property_node->findnodes ('*[position() = last()]');
 
-            if (! defined $justification) {
-                croak 'Error: justification node for a(n) ', $property_xml_element_name, ' not found';
-            }
+                if (! defined $justification) {
+                    croak 'Error: justification node for a(n) ', $property_xml_element_name, ' not found';
+                }
 
-            (my $ref_node) = $justification->findnodes ('Ref[1]');
+                (my $ref_node) = $justification->findnodes ('Ref[1]');
 
-            if (! defined $ref_node) {
-                croak 'Error: we failed to find a Ref node beneath the justification node for a ', $property, ' property.', $LF, 'We consulted the file', $LF, $LF, '  ', $fragment_abs_xml, $LF;
-            }
+                if (! defined $ref_node) {
+                    croak 'Error: we failed to find a Ref node beneath the justification node for a ', $property, ' property.', $LF, 'We consulted the file', $LF, $LF, '  ', $fragment_abs_xml, $LF;
+                }
 
-            my $aid = $ref_node->hasAttribute ('aid') ? $ref_node->getAttribute ('aid') : undef;
+                my $aid = $ref_node->hasAttribute ('aid') ? $ref_node->getAttribute ('aid') : undef;
 
-            if (! defined $aid) {
-                croak 'Error: a ref node lacks an aid attribute!  We are investigating the ', $property, ' property in', $LF, $LF, '  ', $fragment_abs_xml, $LF;
-            }
+                if (! defined $aid) {
+                    croak 'Error: a ref node lacks an aid attribute!  We are investigating the ', $property, ' property in', $LF, $LF, '  ', $fragment_abs_xml, $LF;
+                }
 
-	    if ($aid =~ /CKB([[:digit:]]+)/) {
-                my $fragment_number = $1;
-                my $dependent_fragment = "${article_name}:fragment:${fragment_number}";
-		$item_to_fragment_table{$item} = $dependent_fragment;
+                if ($aid =~ / CKB (\d+) /) {
+                    my $fragment_number = $1;
+                    my $dependent_fragment = "${article_name}:fragment:${fragment_number}";
+                    $item_to_fragment_table{$item} = $dependent_fragment;
 	    } else {
 		croak ('Error: what is the short form of \'', $property, '\'?');
 	    }
+
+
+            } else {
+                croak 'Error: we did not find a property node for ', $property, '.  The XPath expression we used was', $LF, $LF, '  ', $property_xpath, $LF, $LF, 'and we looked for this in the file', $LF, $LF, '  ', $fragment_abs_xml, $LF;
+            }
 
 	}
     }
@@ -1620,6 +1609,15 @@ sub constructor_kind {
     }
 }
 
+sub constructor_number {
+    my $item = shift;
+    if ($item =~ /\A [^:]+ [:] [a-z] constructor [:] (\d+) \z/) {
+        return $1;
+    } else {
+        croak 'Error: we assumed that', $LF, $LF, '  ', $item, $LF, $LF, 'is a constructor item, but it seems not to be.';
+    }
+}
+
 sub is_pattern_item {
     my $item = shift;
     if ($item =~ /\A [^:]+ [:] [a-z] pattern [:] \d+ \z/) {
@@ -1769,7 +1767,9 @@ sub constructor_dependencies {
     my $self = shift;
     my $constructor_item = shift;
 
+    my $article_name = $self->get_article_name ();
     my $constructor_kind = constructor_kind ($constructor_item);
+    my $constructor_number = constructor_number ($constructor_item);
 
     my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
 
@@ -1847,15 +1847,32 @@ sub constructor_dependencies {
         }
     } else {
         my $definiens_xpath = 'descendant::Definiens[@constrkind = "' . $constructor_kind_uc . '"]';
+        my $constructor_xpath = 'descendant::Constructor[@kind = "' . $constructor_kind_uc . '"]';
+        my $redefinition_xpath = 'descendant::Definition[@redefinition = "true"]';
+        my $coherence_xpath = 'descendant::Coherence';
+        (my $constructor_node) = $fragment_root->findnodes ($constructor_xpath);
         (my $definiens_node) = $fragment_root->findnodes ($definiens_xpath);
+        (my $redefinition_node) = $fragment_root->findnodes ($redefinition_xpath);
+        (my $coherence_node) = $fragment_root->findnodes ($coherence_xpath);
 
-        if (! defined $definiens_node) {
+        if (defined $definiens_node) {
+            my @constructors = constructors_under_node ($definiens_node);
+            my @resolved_constructors = map { $self->resolve_local_item ($_) } @constructors;
+            return @resolved_constructors;
+        } elsif (defined $redefinition_node) {
+            if (defined $coherence_node) {
+                my @deps = ("${article_name}:${constructor_kind}constructor:${constructor_number}");
+                return @deps;
+            } elsif (defined $constructor_node) {
+                my @constructors = constructors_under_node ($constructor_node);
+                return @constructors;
+            } else {
+                carp 'Warning: what are the constructor dependencies for', $LF, $LF, '  ', $constructor_item, $LF, $LF, '?';
+                return;
+            }
+        } else {
             croak 'Error: computing the constructor dependencies for', $LF, $LF, '  ', $constructor_item, $LF, $LF, 'we did not find a suitable constructor node in', $LF, $LF, '  ', $fragment_abs_xml, $LF, $LF, 'The XPath expression we used was:', $LF, $LF, '  ', $definiens_xpath;
         }
-
-        my @constructors = constructors_under_node ($definiens_node);
-        my @resolved_constructors = map { $self->resolve_local_item ($_) } @constructors;
-        return @resolved_constructors;
     }
 
 }
