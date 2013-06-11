@@ -400,6 +400,98 @@ tpl universally-bind-segments-existence (#segments,
   }
 }
 
+tpl universally-bind-segments-function-equals-existence (#segments,
+                                                         #formula,
+                                                         #type)
+{
+  if [count ($segments) = 0] {
+    $fresh = fresh-variable ();
+    <Existential-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+         <Variables { <Variable { @spelling = $fresh; } }
+         type-or-set (#type = $type);
+      }
+      <Predicative-Formula {
+        @spelling = "=";
+        <Arguments {
+          <Simple-Term { @spelling = $fresh; }
+        }
+        <Arguments {
+          apply [$formula];
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-function-equals-existence (#segments   = $rest,
+                                                           #formula    = $formula,
+                                                           #type       = $type);
+    }
+  }
+}
+
+tpl universally-bind-segments-function-equals-uniqueness (#segments,
+                                                          #formula,
+                                                          #type)
+{
+  if [count ($segments) = 0] {
+    $fresh-1 = fresh-variable (#prefix = "A");
+    $fresh-2 = fresh-variable (#prefix = "B");
+    <Universal-Quantifier-Formula {
+      <Explicitly-Qualified-Segment {
+        <Variables {
+          <Variable { @spelling = $fresh-1; }
+          <Variable { @spelling = $fresh-2; }
+        }
+        type-or-set (#type = $type);
+      }
+      <Conditional-Formula {
+        <Conjunctive-Formula {
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments {
+              <Simple-Term { @spelling = $fresh-1; }
+            }
+            <Arguments {
+              apply [$formula];
+            }
+          }
+          <Predicative-Formula {
+            @spelling = "=";
+            <Arguments {
+              <Simple-Term { @spelling = $fresh-2; }
+            }
+            <Arguments {
+              apply [$formula];
+            }
+          }
+        }
+        <Predicative-Formula {
+          @spelling = "=";
+          <Arguments {
+            <Simple-Term { @spelling = $fresh-1; }
+          }
+          <Arguments {
+            <Simple-Term { @spelling = $fresh-2; }
+          }
+        }
+      }
+    }
+  } else {
+    $segment = `$segments[1]`;
+    $rest = `$segments[position() > 1]`;
+    <Universal-Quantifier-Formula {
+      apply [$segment];
+      universally-bind-segments-function-equals-uniqueness (#segments = $rest,
+                                                            #formula  = $formula,
+                                                            #type     = $type);
+    }
+  }
+}
+
 tpl equality-of-terms (#spelling-1, #spelling-2) {
   <Predicative-Formula {
     @spelling = "=";
@@ -2285,7 +2377,7 @@ tpl
     @kind = "Theorem-Item";
     @shape = "Compact-Statement";
     <Proposition {
-      <Label { @spelling = "CoherenceLemma"; }
+      <Label { @spelling = $coherence-lemma; }
       for-each [ancestor::Block[@kind = "Definitional-Block"]] {
 
         $locus      = `Item[@kind = "Loci-Declaration"]`;
@@ -2325,6 +2417,82 @@ tpl
         }
       }
     }
+  }
+
+  // formulate also existence and uniqueness conditions existence is
+  // justified by the coherence lemma; uniqueness ought to be obvious
+
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-function-equals-existence (#segments = $segments,
+                                                             #formula  = $formula,
+                                                             #type     = $type);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [ancestor::Block[@kind = "Definitional-Block"]/Item[@kind = "Loci-Declaration"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Exemplification";
+        for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+          for-each [Item[@kind = "Functor-Definition"]] {
+            for-each [Definiens] {
+              apply [*[position() = last()]];
+            }
+          }
+        }
+      }
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        <Proposition {
+          <Thesis;
+        }
+        <Straightforward-Justification {
+          <Local-Reference {
+            @spelling = $coherence-lemma;
+          }
+        }
+      }
+    }
+  }
+
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $uniqueness-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-function-equals-uniqueness (#segments = $segments,
+                                                              #formula  = $formula,
+                                                              #type     = $type);
+      }
+    }
+
+    <Straightforward-Justification; // ought to be obvious
+
   }
 
 }
