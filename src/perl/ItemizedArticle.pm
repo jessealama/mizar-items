@@ -108,6 +108,8 @@ has 'script_home' => (
 );
 
 Readonly my $LF => "\N{LF}";
+Readonly my $PREFIX_LC => lc 'ckb';
+Readonly my $PREFIX_UC => uc $PREFIX_LC;
 
 sub ensure_appropriate_directory_structure {
     my $dir = shift;
