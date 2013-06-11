@@ -493,22 +493,22 @@ sub load_properties_of_constructors_of_kind {
             my $coherence_xpath = 'descendant::Coherence';
             my $property_xpath = "/Article/DefinitionBlock/Definition/JustifiedProperty[${property_xml_element_name}]";
 
-            if ($xml_doc->exists ($redefined_xpath)
-                    && $xml_doc->exists ($coherence_xpath)) {
-                carp 'Encountered a redefined constructor with a coherence node.  Punting...';
-                $item_to_fragment_table{$item} = $fragment;
-                next;
-            }
+            # if ($xml_doc->exists ($redefined_xpath)
+            #         && $xml_doc->exists ($coherence_xpath)) {
+            #     carp 'Encountered a redefined constructor with a coherence node.  Punting...';
+            #     $item_to_fragment_table{$item} = $fragment;
+            #     next;
+            # }
 
-            if (! $xml_doc->exists ($property_xpath)) {
-                if ($xml_doc->exists ($redefined_xpath)) {
-                    carp 'Handling ', $item, ' in ', $fragment_abs_xml, ' we find that there is no property node, but this is a redefinition.  Punting...';
-                    $item_to_fragment_table{$item} = $fragment;
-                    next;
-                } else {
-                    confess 'While handling ', $property, ' for ', $item, ' in', $LF, $LF, '  ', $fragment_abs_xml, $LF, $LF, 'we find that there is no property node in the XML in question, nor does the definition appear to be a redefinition.';
-                }
-            }
+            # if (! $xml_doc->exists ($property_xpath)) {
+            #     if ($xml_doc->exists ($redefined_xpath)) {
+            #         carp 'Handling ', $item, ' in ', $fragment_abs_xml, ' we find that there is no property node, but this is a redefinition.  Punting...';
+            #         $item_to_fragment_table{$item} = $fragment;
+            #         next;
+            #     } else {
+            #         confess 'While handling ', $property, ' for ', $item, ' in', $LF, $LF, '  ', $fragment_abs_xml, $LF, $LF, 'we find that there is no property node in the XML in question, nor does the definition appear to be a redefinition.';
+            #     }
+            # }
 
             (my $property_node) = $xml_doc->findnodes ($property_xpath);
 
@@ -542,7 +542,7 @@ sub load_properties_of_constructors_of_kind {
 
 
             } else {
-                croak 'Error: we did not find a property node for ', $property, '.  The XPath expression we used was', $LF, $LF, '  ', $property_xpath, $LF, $LF, 'and we looked for this in the file', $LF, $LF, '  ', $fragment_abs_xml, $LF;
+                carp 'Warning: we did not find a property node for ', $property, '.  The XPath expression we used was', $LF, $LF, '  ', $property_xpath, $LF, $LF, 'and we looked for this in the file', $LF, $LF, '  ', $fragment_abs_xml, $LF;
             }
 
 	}
@@ -833,23 +833,19 @@ sub load_existence_conditions {
 
                     while ((! defined $matching_fragment)
                                && $next_fragment_index < $num_articles) {
-                        my $next_fragment_abs_xml = "${local_db_text_subdir}/ckb${next_fragment_index}.xml1";
-
-                        if (! -e $next_fragment_abs_xml) {
-                            croak 'Error: the absolutized XML does not exist at', $LF, $LF, '  ', $next_fragment_abs_xml, $LF, $LF, 'as expected (we are trying to find the fragment for which fragment ', $fragment_number, ' is the existence condition).';
-                        }
-
-                        my $next_fragment_doc = eval { $xml_parser->parse_file ($next_fragment_abs_xml) };
-
-                        if (! defined $next_fragment_doc) {
-                            croak 'Error: the absolutized XML ', $next_fragment_abs_xml, ' does not seem to be a valid XML file.';
-                        }
-
-                        my $next_fragment_root = $next_fragment_doc->documentElement ();
-
+                        my $next_fragment_abs_xml = "${local_db_text_subdir}/${PREFIX_LC}${next_fragment_index}.xml1";
+                        my $next_fragment_msx = "${local_db_text_subdir}/${PREFIX_LC}${next_fragment_index}.msx";
+                        my $next_fragment_xml_doc = parse_xml_file ($next_fragment_abs_xml);
+                        my $next_fragment_xml_root = $next_fragment_xml_doc->documentElement ();
+                        my $next_fragment_msx_doc = parse_xml_file ($next_fragment_msx);
+                        my $next_fragment_msx_root = $next_fragment_msx_doc->documentElement ();
                         my $xpath = 'descendant::Ref[@aid = "CKB' . $fragment_number . '"]';
 
-                        if ($next_fragment_root->exists ($xpath)) {
+                        if ($next_fragment_xml_root->exists ($xpath)) {
+                            $matching_fragment = $next_fragment_index;
+                        }
+
+                        if ($next_fragment_msx_root->exists ('descendant::Item[@kind = "Functor-Definition" and @shape = "Equals" and following-sibling::Item[@kind = "Correctness-Condition" and @condition = "coherence"]]')) {
                             $matching_fragment = $next_fragment_index;
                         }
 
@@ -950,30 +946,26 @@ sub load_uniqueness_conditions {
 
                 if ($label eq 'UniquenessLemma') {
                     # things look promising.  Now find the fragment
-                    # for which this fragment is the existence condition
+                    # for which this fragment is the uniqueness condition
 
                     my $matching_fragment = undef;
                     my $next_fragment_index = $fragment_number + 1;
 
-                    while ((! defined $matching_fragment)
+                                        while ((! defined $matching_fragment)
                                && $next_fragment_index < $num_articles) {
-                        my $next_fragment_abs_xml = "${local_db_text_subdir}/ckb${next_fragment_index}.xml1";
-
-                        if (! -e $next_fragment_abs_xml) {
-                            croak 'Error: the absolutized XML does not exist at', $LF, $LF, '  ', $next_fragment_abs_xml, $LF, $LF, 'as expected (we are trying to find the fragment for which fragment ', $fragment_number, ' is the existence condition).';
-                        }
-
-                        my $next_fragment_doc = eval { $xml_parser->parse_file ($next_fragment_abs_xml) };
-
-                        if (! defined $next_fragment_doc) {
-                            croak 'Error: the absolutized XML ', $next_fragment_abs_xml, ' does not seem to be a valid XML file.';
-                        }
-
-                        my $next_fragment_root = $next_fragment_doc->documentElement ();
-
+                        my $next_fragment_abs_xml = "${local_db_text_subdir}/${PREFIX_LC}${next_fragment_index}.xml1";
+                        my $next_fragment_msx = "${local_db_text_subdir}/${PREFIX_LC}${next_fragment_index}.msx";
+                        my $next_fragment_xml_doc = parse_xml_file ($next_fragment_abs_xml);
+                        my $next_fragment_xml_root = $next_fragment_xml_doc->documentElement ();
+                        my $next_fragment_msx_doc = parse_xml_file ($next_fragment_msx);
+                        my $next_fragment_msx_root = $next_fragment_msx_doc->documentElement ();
                         my $xpath = 'descendant::Ref[@aid = "CKB' . $fragment_number . '"]';
 
-                        if ($next_fragment_root->exists ($xpath)) {
+                        if ($next_fragment_xml_root->exists ($xpath)) {
+                            $matching_fragment = $next_fragment_index;
+                        }
+
+                        if ($next_fragment_msx_root->exists ('descendant::Item[@kind = "Functor-Definition" and @shape = "Equals" and following-sibling::Item[@kind = "Correctness-Condition" and @condition = "coherence"]]')) {
                             $matching_fragment = $next_fragment_index;
                         }
 
@@ -982,7 +974,7 @@ sub load_uniqueness_conditions {
                     }
 
                     if (! defined $matching_fragment) {
-                        croak 'Error: we could not find a fragment for which fragment ', $fragment_number, ' is the existence condition.';
+                        croak 'Error: we could not find a fragment for which fragment ', $fragment_number, ' is the uniqueness condition.';
                     }
 
                     my $constructors_ref = $fragment_to_constructor_table{$matching_fragment};
@@ -1033,107 +1025,90 @@ sub load_coherence_conditions {
     @articles = map { basename ($_, '.miz') } @articles;
 
     foreach my $article (@articles) {
+        my $fragment_number;
 	if ($article =~ /ckb ([0-9]+) \z/) {
-	    my $fragment_number = $1;
+            $fragment_number = $1;
+        } else {
+            confess 'Unable to make sense of \'', $article, '\'.';
+        }
 
-            my $msx = "${local_db_text_subdir}/ckb${fragment_number}.msx";
+        my $msx = "${local_db_text_subdir}/ckb${fragment_number}.msx";
+        my $msx_doc = parse_xml_file ($msx);
+        my $msx_root = $msx_doc->documentElement ();
 
-            if (! -e $msx) {
-                croak 'Error: ', $msx, ' does not exist.';
+        (my $final_node) = $msx_root->findnodes ('*[position() = last()]');
+
+        if ($final_node->exists ('self::Item[@kind = "Theorem-Item"]')) {
+
+            (my $proposition_node) = $final_node->findnodes ('Proposition');
+
+            if (! defined $proposition_node) {
+                croak 'Error: Proposition child under the Theorem-Item item not found in ', $msx;
             }
 
-            my $msx_doc = eval { $xml_parser->parse_file ($msx) };
+            (my $label_node) = $proposition_node->findnodes ('Label');
 
-            if (! defined $msx_doc) {
-                croak 'Error: ', $msx, ' does not seem to be a valid XML file.';
+            if (! defined $label_node) {
+                croak 'Error: Label child not found under the Proposition node under the Theorem-Item item of ', $msx;
             }
 
-            my $msx_root = $msx_doc->documentElement ();
+            my $label = $label_node->getAttribute ('spelling');
 
-            (my $final_node) = $msx_root->findnodes ('*[position() = last()]');
-
-            if ($final_node->exists ('self::Item[@kind = "Theorem-Item"]')) {
-
-                (my $proposition_node) = $final_node->findnodes ('Proposition');
-
-                if (! defined $proposition_node) {
-                    croak 'Error: Proposition child under the Theorem-Item item not found in ', $msx;
-                }
-
-                (my $label_node) = $proposition_node->findnodes ('Label');
-
-                if (! defined $label_node) {
-                    croak 'Error: Label child not found under the Proposition node under the Theorem-Item item of ', $msx;
-                }
-
-                my $label = $label_node->getAttribute ('spelling');
-
-                if (! defined $label) {
-                    croak 'Error: unable to extract the label from the Label node under the Proposition node under the Theorem-Item node of ', $msx;
-                }
-
-                if ($label eq 'CoherenceLemma') {
-                    # things look promising.  Now find the fragment
-                    # for which this fragment is the coherence condition
-
-                    my $matching_fragment = undef;
-                    my $next_fragment_index = $fragment_number + 1;
-
-                    while ((! defined $matching_fragment)
-                               && $next_fragment_index < $num_articles) {
-                        my $next_fragment_abs_xml = "${local_db_text_subdir}/ckb${next_fragment_index}.xml1";
-
-                        if (! -e $next_fragment_abs_xml) {
-                            croak 'Error: the absolutized XML does not exist at', $LF, $LF, '  ', $next_fragment_abs_xml, $LF, $LF, 'as expected (we are trying to find the fragment for which fragment ', $fragment_number, ' is the existence condition).';
-                        }
-
-                        my $next_fragment_doc = eval { $xml_parser->parse_file ($next_fragment_abs_xml) };
-
-                        if (! defined $next_fragment_doc) {
-                            croak 'Error: the absolutized XML ', $next_fragment_abs_xml, ' does not seem to be a valid XML file.';
-                        }
-
-                        my $next_fragment_root = $next_fragment_doc->documentElement ();
-
-                        my $xpath = 'descendant::Ref[@aid = "CKB' . $fragment_number . '"]';
-
-                        if ($next_fragment_root->exists ($xpath)) {
-                            $matching_fragment = $next_fragment_index;
-                        }
-
-                        $next_fragment_index++;
-
-                    }
-
-                    if (! defined $matching_fragment) {
-                        croak 'Error: we could not find a fragment for which fragment ', $fragment_number, ' is the existence condition.';
-                    }
-
-                    my $constructors_ref = $fragment_to_constructor_table{$matching_fragment};
-
-                    if (! defined $constructors_ref) {
-                        croak ('Error: we know of no constructors generated by fragment ', $fragment_number);
-                    }
-
-                    my @generated_constructors = @{$constructors_ref};
-
-                    my @coherence_constructors
-                        = grep { / : . constructor  : [0-9]+ \z/ } @generated_constructors;
-
-                    if (scalar @coherence_constructors == 0) {
-                        carp ('Warning: fragment ', $fragment_number, ' generated no mode constructors and no functor constructors.  How is it possible that there is an existence pseudo-fragment associated with this fragment?');
-                    }
-
-                    foreach my $constructor (@coherence_constructors) {
-                        my $item = "${constructor}[coherence]";
-                        my $pseudo_fragment = "${article_name}:fragment:${fragment_number}";
-                        $item_to_fragment_table{$item} = $pseudo_fragment;
-                    }
-
-                }
+            if (! defined $label) {
+                croak 'Error: unable to extract the label from the Label node under the Proposition node under the Theorem-Item node of ', $msx;
             }
 
-	}
+            if ($label eq 'CoherenceLemma') {
+                # things look promising.  Now find the fragment
+                # for which this fragment is the coherence condition
+
+                my $matching_fragment = undef;
+                my $next_fragment_index = $fragment_number + 1;
+
+                while ((! defined $matching_fragment)
+                           && $next_fragment_index < $num_articles) {
+                    my $next_fragment_abs_xml = "${local_db_text_subdir}/ckb${next_fragment_index}.xml1";
+                    my $next_fragment_doc = parse_xml_file ($next_fragment_abs_xml);
+                    my $next_fragment_root = $next_fragment_doc->documentElement ();
+
+                    my $xpath = 'descendant::Ref[@aid = "CKB' . $fragment_number . '" and ancestor::Coherence]';
+
+                    if ($next_fragment_root->exists ($xpath)) {
+                        $matching_fragment = $next_fragment_index;
+                    }
+
+                    $next_fragment_index++;
+
+                }
+
+                if (! defined $matching_fragment) {
+                    croak 'Error: we could not find a fragment for which fragment ', $fragment_number, ' is the existence condition.';
+                }
+
+                my $constructors_ref = $fragment_to_constructor_table{$matching_fragment};
+
+                if (! defined $constructors_ref) {
+                    croak ('Error: we know of no constructors generated by fragment ', $fragment_number);
+                }
+
+                my @generated_constructors = @{$constructors_ref};
+
+                my @coherence_constructors
+                    = grep { / : . constructor  : [0-9]+ \z/ } @generated_constructors;
+
+                if (scalar @coherence_constructors == 0) {
+                    carp ('Warning: fragment ', $fragment_number, ' generated no mode constructors and no functor constructors.  How is it possible that there is an existence pseudo-fragment associated with this fragment?');
+                }
+
+                foreach my $constructor (@coherence_constructors) {
+                    my $item = "${constructor}[coherence]";
+                    my $pseudo_fragment = "${article_name}:fragment:${fragment_number}";
+                    $item_to_fragment_table{$item} = $pseudo_fragment;
+                }
+
+            }
+        }
+
     }
 
     $self->_set_item_to_fragment_table (\%item_to_fragment_table);
@@ -1533,7 +1508,8 @@ sub resolve_local_item {
                     $fragment
                         = $item_to_fragment_table{$resolved_constructor_property_item};
                 } else {
-                    croak 'Error: unable to resolve \'', $item, '\', which seems to be ', $constructor_kind, ' constructor number ', $pos, '.  The item we looked for in the item-to-fragment table is:', $LF, $LF, '  ', $resolved_constructor_property_item, $LF, $LF, 'The fragment-to-item table looks like:', "\n", Dumper (%fragment_to_item_table), "\n", 'and the item-to-fragment table looks like', "\n", Dumper (%item_to_fragment_table);
+                    carp 'Warning: unable to resolve \'', $item, '\', which seems to be ', $constructor_kind, ' constructor number ', $pos, '.  The item we looked for in the item-to-fragment table is:', $LF, $LF, '  ', $resolved_constructor_property_item;
+                    return $resolved_constructor_property_item
                 }
             } else {
                 carp 'Warning: resolving', $LF, $LF, '  ', $item, ' ,', $LF, $LF, 'which is tagged, we do not seem to know what to do.';
@@ -1572,6 +1548,12 @@ sub resolve_local_item {
 
 	    # Lemma case
 	    if ($generated_item =~ / : lemma : /) {
+		return $generated_item;
+	    }
+
+            # Coherence case
+	    if ($generated_item =~ / [[] coherence []] \z /) {
+                carp 'COHERENCE';
 		return $generated_item;
 	    }
 	}
@@ -1781,8 +1763,6 @@ sub constructor_dependencies {
         croak 'Error: unable to find the constructor', $LF, $LF, '  ', $constructor_item, $LF, $LF, 'in the item-to-constructor table, which looks like this:', $LF, $LF, Dumper (%item_to_fragment_table);
     }
 
-    carp 'Constructor item ', $constructor_item, ' comes from fragment ', $fragment;
-
     my $fragment_number;
     if ($fragment =~ /\A [a-z0-9_]+ [:] fragment [:] (\d+) [[] [a-z]{2} []] \z/) {
         $fragment_number = $1;
@@ -1893,8 +1873,6 @@ sub pattern_dependencies {
         croak 'Error: unable to find the pattern', $LF, $LF, '  ', $pattern_item, $LF, $LF, 'in the item-to-pattern table, which looks like this:', $LF, $LF, Dumper (%item_to_fragment_table);
     }
 
-    carp 'Pattern item ', $pattern_item, ' comes from fragment ', $fragment;
-
     my $fragment_number;
     if ($fragment =~ /\A [a-z0-9_]+ [:] fragment [:] (\d+) [[] [a-z]{2} []] \z/) {
         $fragment_number = $1;
@@ -1947,95 +1925,204 @@ sub dependencies {
     my $local_db = $self->get_local_database ();
     my $location = $local_db->get_location ();
     my $text_dir = $local_db->get_text_subdir ();
+    my $prel_dir = $local_db->get_prel_subdir ();
     my $article_name = $self->get_article_name ();
-    my %item_to_fragment_table = %{$self->get_item_to_fragment_table ()};
-    my %fragment_to_item_table = %{$self->get_fragment_to_item_table ()};
 
-    my @items = @{$self->get_all_items ()};
-
-    # warn 'Item-to-fragment table is:', "\n", Dumper (%item_to_fragment_table);
-    # warn 'Fragment-to-item table is:', "\n", Dumper (%fragment_to_item_table);
-
+    my @prel_files = glob "${prel_dir}/*" ;
+    @prel_files = sort { $self->fragment_less_than ($a, $b) } @prel_files;
     my %dependencies = ();
 
-    foreach my $item (@items) {
+    # state of the enumeration
+    my %enumeration = (
+        'ccluster' => 1,
+        'fcluster' => 1,
+        'rcluster' => 1,
+        'theorem' => 1,
+        'scheme' => 1,
+        'lemma' => 1,
+        'kconstructor' => 1,
+        'mconstructor' => 1,
+        'rconstructor' => 1,
+        'vconstructor' => 1,
+        'kdefiniens' => 1,
+        'mdefiniens' => 1,
+        'vdefiniens' => 1,
+        'kpattern' => 1,
+        'mpattern' => 1,
+        'rpattern' => 1,
+        'vpattern' => 1,
+    );
 
-	if (! defined $item_to_fragment_table{$item}) {
-	    croak ('Error: ', $item, ' is not present in the item-to-fragment table.');
-	}
+    foreach my $prel_file (@prel_files) {
 
-        if (is_constructor_item ($item)) {
-            carp 'Constructor item: ', $item;
-            my @constructor_deps = $self->constructor_dependencies ($item);
-            $dependencies{$item} = \@constructor_deps;
-            next;
-        }
-
-        if (is_pattern_item ($item)) {
-            carp 'Pattern item: ', $item;
-            my @pattern_deps = $self->pattern_dependencies ($item);
-            $dependencies{$item} = \@pattern_deps;
-            next;
-        }
-
-	my $fragment = $item_to_fragment_table{$item};
-
-	# Pseudo fragments like 'ckb5[ch]' need to be changed: dump
-	# their brackets '[' and ']' to recover the basename of the
-	# .miz we are now after
-
-	# warn 'In ItemizedArticle, getting dependencies of fragment ', $fragment, ', which comes from ', $item;
-
-        (my $fragment_number, my $tag);
-
-	if ($fragment =~ /\A ${article_name} [:] fragment [:] ([0-9]+) ([[] ([a-z]{2}) []])? /) {
-	    ($fragment_number, $tag) = ($1, $3);
+        my $fragment_number;
+        if ($prel_file =~ / ${PREFIX_LC} (\d+) [.] [a-z]{3} \z/) {
+            $fragment_number = $1;
         } else {
-            croak ('Error: unable to make sense of the fragment \'', $fragment, '\'.');
+            confess 'Error: unable to make sense of the prel file', $LF, $LF, '  ', $prel_file;
         }
 
-        my $fragment_basename
-            = defined $tag ? "ckb${fragment_number}${tag}"
-                : "ckb${fragment_number}";
+        my $fragment = "${PREFIX_LC}${fragment_number}";
+        my $fragment_msx = "${text_dir}/${fragment}.msx";
+        my $fragment_xml = "${text_dir}/${fragment}.xml1";
+        my $prel_doc = parse_xml_file ($prel_file);
+        my $prel_root = $prel_doc->documentElement ();
+        my $fragment_msx_doc = parse_xml_file ($fragment_msx);
+        my $fragment_msx_root = $fragment_msx_doc->documentElement ();
+        my $fragment_xml_doc = parse_xml_file ($fragment_xml);
+        my $fragment_xml_root = $fragment_xml_doc->documentElement ();
 
-        my $fragment_miz = "${text_dir}/${fragment_basename}.miz";
-        my $fragment_abs_xml = "${text_dir}/${fragment_basename}.xml1";
+        my $item;
+        my @deps;
 
-        if (-e $fragment_miz) {
-
-            if (-e $fragment_abs_xml) {
-
-                my $fragment_doc = eval { $xml_parser->parse_file ($fragment_abs_xml) };
-
-                if (! defined $fragment_doc) {
-                    croak ('Error: the XML document at ', $fragment_abs_xml, '.');
+        if ($prel_file =~ / [.] dcl \z/) {
+            my @ccluster_nodes = $fragment_xml_root->findnodes ('descendant::CCluster');
+            my @fcluster_nodes = $fragment_xml_root->findnodes ('descendant::FCluster');
+            my @rcluster_nodes = $fragment_xml_root->findnodes ('descendant::RCluster');
+            foreach my $cluster_node (@ccluster_nodes, @fcluster_nodes, @rcluster_nodes) {
+                my $kind;
+                if ($cluster_node->exists ('self::CCluster')) {
+                    $kind = 'c';
+                } elsif ($cluster_node->exists ('self::FCluster')) {
+                    $kind = 'f';
+                } elsif ($cluster_node->exists ('self::RCluster')) {
+                    $kind = 'r';
+                } else {
+                    confess 'Error: unhandled cluster node in', $LF, $LF, '  ', $fragment_xml, $LF;
                 }
+                my $key = "${kind}cluster";
+                my $index = $enumeration{$key};
+                if (! defined $index) {
+                    confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
+                }
+                $item = "${article_name}:${kind}cluster:${index}";
+                $enumeration{$key} = $index + 1;
+                @deps = $local_db->dependencies_of ($fragment);
+                $dependencies{$item} = \@deps;
+            }
+        } elsif ($prel_file =~ /[.] the \z/) {
+            if ($fragment_msx_root->exists ('descendant::Item[@kind = "Pragma" and @spelling = "$C induced"]')) {
+                # this is correctness condition or constructor
+                # property, taken care of elsewhere
+            } else {
+                my $key = 'theorem';
+                my $index = $enumeration{$key};
+                if (! defined $index) {
+                    confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
+                }
+                $item = "${article_name}:theorem:${index}";
+                $enumeration{$key} = $index + 1;
+                @deps = $local_db->dependencies_of ($fragment);
+                $dependencies{$item} = \@deps;
+            }
+        } elsif ($prel_file =~ / [.] sch \z/) {
+            my $key = 'scheme';
+            my $index = $enumeration{$key};
+            if (! defined $index) {
+                confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
+            }
+            $item = "${article_name}:scheme:${index}";
+            $enumeration{$key} = $index + 1;
+            @deps = $local_db->dependencies_of ($fragment);
+            $dependencies{$item} = \@deps;
+        } elsif ($prel_file =~ / [.] dco \z/) {
+            my @constructor_nodes = $fragment_xml_root->findnodes ('descendant::Constructor');
+            foreach my $constructor_node (@constructor_nodes) {
+                my $kind = $constructor_node->getAttribute ('kind');
+                if (! defined $kind) {
+                    confess 'Error: constructor node in', $LF, $LF, '  ', $prel_file, $LF, $LF, 'lacks a kind attribute.';
+                }
+                $kind = lc $kind;
+                my $key = "${kind}constructor";
+                my $index = $enumeration{$key};
+                if (! defined $index) {
+                    confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
+                }
+                $item = "${article_name}:${kind}constructor:${index}";
+                $enumeration{$key} = $index + 1;
+                @deps = constructors_under_node ($constructor_node);
+                $dependencies{$item} = \@deps;
 
-                my @fragment_deps = @{$local_db->dependencies_of ($fragment_basename)};
-
-                my %deps = ();
-                foreach my $dep (@fragment_deps) {
-                    if ($dep =~ /\A ckb ${fragment_number} [:] /) {
-                        warn 'Throwing out a self-dependency...';
-                    } else {
-                        # $deps{$dep} = 0;
-                        my $resolved_dep = $self->resolve_local_item ($dep);
-                        if (defined $resolved_dep) {
-                            $deps{$resolved_dep} = 0;
+                # Constructor properties
+                carp 'loading constructor properties...';
+                if (($constructor_node->exists ('Properties')) || ($kind eq 'k')) {
+                    my @properties = $constructor_node->findnodes ('Properties/*');
+                    @properties = map { $_->nodeName () } @properties;
+                    if ($kind eq 'k') {
+                        push (@properties, 'Existence', 'Uniqueness');
+                    }
+                    foreach my $property (@properties) {
+                        my $target_fragment_index = undef;
+                        my $i = $fragment_number - 1;
+                        while (($i > 0)
+                                   && (! defined $target_fragment_index)) {
+                            my $earlier_fragment_msx = "${text_dir}/${PREFIX_LC}${i}.msx";
+                            my $earlier_fragment_doc = parse_xml_file ($earlier_fragment_msx);
+                            my $earlier_fragment_root = $earlier_fragment_doc->documentElement ();
+                            my $lemma_name = "${property}Lemma";
+                            my $pragma_xpath = 'Item[@kind = "Pragma" and @spelling = "$C induced"]';
+                            my $label_xpath = 'Item[@kind = "Theorem-Item"]/Proposition/Label[@spelling = "' . $lemma_name . '"]';
+                            if ($earlier_fragment_root->exists ($pragma_xpath)) {
+                                if ($earlier_fragment_root->exists ($label_xpath)) {
+                                    $target_fragment_index = $i;
+                                }
+                            }
+                            $i--;
+                        }
+                        my $property_lc = lc $property;
+                        my $condition_or_property = "${article_name}:${kind}constructor:${index}[${property_lc}]";
+                        if (defined $target_fragment_index) {
+                            my $property_fragment = "${PREFIX_LC}${target_fragment_index}";
+                            my @condition_or_property_deps = $local_db->dependencies_of ($property_fragment);
+                            $dependencies{$condition_or_property}
+                                = \@condition_or_property_deps;
                         }
                     }
                 }
-
-                my @deps_array = keys %deps;
-
-                $dependencies{$item} = \@deps_array;
-
-            } else {
-                carp ('Warning: the fragment \'', $fragment, '\' does not exist in the local database: we failed to find', $LF, $LF, $fragment_abs_xml, $LF, $LF, 'Is this a case of a redefined constructor?');
+                carp 'done loading constructor properties...';
             }
+        } elsif ($prel_file =~ / [.] def \z/) {
+            my @definiens_nodes
+                = $fragment_xml_root->findnodes ('descendant::Definiens');
+            foreach my $definiens_node (@definiens_nodes) {
+                my $kind = $definiens_node->getAttribute ('constrkind');
+                if (! defined $kind) {
+                    confess 'Error: definiens node in', $LF, $LF, '  ', $prel_file, $LF, $LF, 'lacks a kind attribute.';
+                }
+                $kind = lc $kind;
+                my $key = "${kind}definiens";
+                my $index = $enumeration{$key};
+                if (! defined $index) {
+                    confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
+                }
+                $item = "${article_name}:${kind}definiens:${index}";
+                $enumeration{$key} = $index + 1;
+                @deps = $local_db->dependencies_of ($fragment);
+                $dependencies{$item} = \@deps;
+            }
+        } elsif ($prel_file =~ / [.] dfr \z/) {
+            # ignore
+        } elsif ($prel_file =~ / [.] dno \z/) {
 
+            my @pattern_nodes = $fragment_xml_root->findnodes ('descendant::Pattern');
+            foreach my $pattern_node (@pattern_nodes) {
+                my $kind = $pattern_node->getAttribute ('kind');
+                if (! defined $kind) {
+                    confess 'Error: pattern node in', $LF, $LF, '  ', $prel_file, $LF, $LF, 'lacks a kind attribute.';
+                }
+                $kind = lc $kind;
+                my $key = "${kind}pattern";
+                my $index = $enumeration{$key};
+                if (! defined $index) {
+                    confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
+                }
+                $item = "${article_name}:${kind}pattern:${index}";
+                $enumeration{$key} = $index + 1;
+                @deps = constructors_under_node ($pattern_node);
+                $dependencies{$item} = \@deps;
+            }
         } else {
-            carp ('Warning: the fragment \'', $fragment, '\' does not exist in the local database.  We failed to find', $LF, $LF, '  ', $fragment_miz, $LF, $LF, 'Is this a case of a redefined constructor?');
+            confess 'Error: unable to make sense of the prel file', $LF, $LF, '  ', $prel_file, $LF;
         }
 
     }
