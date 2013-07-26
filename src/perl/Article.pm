@@ -32,7 +32,7 @@ use Xsltproc qw(apply_stylesheet);
 # Mizar article name (these have to be at most 8 characters long).
 Readonly my $MAX_FRAGMENTS => 999;
 
-Readonly my $NUM_REQUIREMENTS => 32; # the number of requirements declared in builtin.pas
+Readonly my $NUM_REQUIREMENTS => 35; # the number of requirements declared in builtin.pas
 
 Readonly my %REQUIREMENTS_CONSTRUCTORS =>
     ( 1 => 'hidden:mconstructor:1',    # rqAny
