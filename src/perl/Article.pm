@@ -261,7 +261,7 @@ sub absolutize_extension {
 sub absolutize_environment {
     my $self = shift;
 
-    foreach my $extension ('eno', 'dfs', 'ecl', 'eid', 'epr', 'erd', 'esh', 'eth') {
+    foreach my $extension ('eno', 'dfe', 'dfx', 'dfs', 'ecl', 'eid', 'epr', 'erd', 'esh', 'eth') {
 	my $file = $self->file_with_extension ($extension);
 	if (-e $file) {
 	    $self->absolutize_extension ($extension);
@@ -2146,7 +2146,7 @@ sub minimize_environment {
 
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
-    my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfs', 'eid', 'ecl');
+    my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfe', 'dfs', 'dfx', 'eid', 'ecl');
 
     if (defined $parameters{'fast-theorems-and-schemes'}) {
 	$self->prune_theorems_and_schemes ();
