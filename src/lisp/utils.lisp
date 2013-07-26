@@ -549,7 +549,7 @@ EXTENSION can optionally begin with a full-stop '.'.  This utility does not chec
 
 (defun parse-xml-file (path)
   (let ((doc (cxml:parse-file path (cxml-dom:make-dom-builder))))
-    (dom:child-nodes (dom:document-element doc))))
+    (dom:document-element doc)))
 
 (defun xpath (xpath-expression context-node)
   (xpath:all-nodes (xpath:evaluate xpath-expression context-node)))
