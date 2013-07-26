@@ -2159,6 +2159,8 @@ sub minimize_environment {
 	$self->minimize_extension ($extension, \%parameters);
     }
 
+    $self->absolutize_environment ();
+
 }
 
 sub write_ere_table {
