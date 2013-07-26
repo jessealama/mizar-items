@@ -62,6 +62,31 @@
 (defun value-of-schemenr-attribute (node)
   (integer-value-of-attribute node "schemenr"))
 
+(defgeneric get-attribute (attribute-name x))
+
+(defmethod get-attribute ((attribute t) (x t))
+  (error "Don't know how to get attribute '~a' from '~a'." attribute x))
+
+(defmethod get-attribute :around ((attribute string) (x dom:element))
+  (if (dom:has-attribute x attribute)
+      (call-next-method)
+      (error "Element node ought to have a(n) ~a attribute, but does not." attribute)))
+
+(defmethod get-attribute ((attribute string) (x dom:element))
+  (dom:get-attribute x attribute))
+
+(defmethod line ((x dom:element))
+  (get-attribute "line" x))
+
+(defmethod col ((x dom:element))
+  (get-attribute "col" x))
+
+(defmethod nr ((x dom:element))
+  (get-attribute "nr" x))
+
+(defmethod spelling ((x dom:element))
+  (get-attribute "spelling" x))
+
 (defun line-and-column (line-and-column-node)
   (values (value-of-line-attribute line-and-column-node)
 	  (value-of-col-attribute line-and-column-node)))
@@ -205,5 +230,8 @@ next (non-text) node really is a By or From node.  Return nil otherwise."
 
 (defun reservation-nodes (toplevel-node)
   (xpath:all-nodes (xpath:evaluate "Article/Reservation" toplevel-node)))
+
+(defun xpath (expression context-node)
+  (xpath:all-nodes (xpath:evaluate expression context-node)))
 
 ;;; xml-utils.lisp ends here
