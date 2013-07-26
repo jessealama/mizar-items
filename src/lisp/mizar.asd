@@ -65,4 +65,6 @@
 	       (:file "site-paths")
 	       (:file "site")
 	       (:file "minimize")
-	       (:file "ivy-nd")))
+	       (:file "ivy-nd")
+               (:file "parse")
+               (:file "descheme")))
