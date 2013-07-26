@@ -2499,6 +2499,153 @@ tpl
 
 tpl
 [
+  Correctness
+  [
+        @condition = "coherence"
+    and ancestor::Item
+        [    @kind = "Correctness"
+         and @condition = "correctness"
+         and preceding-sibling::Item
+             [
+                  @kind  = "Functor-Definition"
+              and @shape = "Equals"
+              and not(Redefine)
+              and count(preceding-sibling::Item[@kind = "Assumption"]) = 0
+              and not(Definiens/Partial-Definiens)
+             ]
+        ]
+  ]
+]
+{
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $coherence-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-coherence (#segments   = $segments,
+                                             #formula    = $formula,
+                                             #type       = $type);
+      }
+    }
+
+    for-each [ancestor::Item[@kind = "Correctness"]] {
+      for-each [*[position() = last()]] {
+        choose {
+          when [self::Straightforward-Justification] {
+            apply [.];
+          }
+          when [self::Block[@kind = "Proof"]] {
+            <Block {
+              for-each [@*] { copy-of `.`; }
+              for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+                for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                  if [self::Item[@kind = "Loci-Declaration"]] {
+                    <Item {
+                      @kind = "Generalization";
+                      apply [*];
+                    }
+                  } else {
+                    apply [.];
+                  }
+                }
+              }
+              apply [*];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // formulate also existence and uniqueness conditions existence is
+  // justified by the coherence lemma; uniqueness ought to be obvious
+
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-function-equals-existence (#segments = $segments,
+                                                             #formula  = $formula,
+                                                             #type     = $type);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [ancestor::Block[@kind = "Definitional-Block"]/Item[@kind = "Loci-Declaration"]] {
+        apply [.];
+      }
+      <Item {
+        @kind = "Exemplification";
+        for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+          for-each [Item[@kind = "Functor-Definition"]] {
+            for-each [Definiens] {
+              apply [*[position() = last()]];
+            }
+          }
+        }
+      }
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        <Proposition {
+          <Thesis;
+        }
+        <Straightforward-Justification {
+          <Local-Reference {
+            @spelling = $coherence-lemma;
+          }
+        }
+      }
+    }
+  }
+
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $uniqueness-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        universally-bind-segments-function-equals-uniqueness (#segments = $segments,
+                                                              #formula  = $formula,
+                                                              #type     = $type);
+      }
+    }
+
+    <Straightforward-Justification; // ought to be obvious
+
+  }
+
+}
+
+tpl
+[
   Item
   [
         @kind      = "Correctness-Condition"
@@ -2628,6 +2775,14 @@ tpl
   }
 }
 
+tpl [Item[@kind = "Correctness" and @condition = "correctness"]] {
+  for-each [Conditions] {
+    for-each [Correctness] {
+      apply [.];
+    }
+  }
+}
+
 tpl
 [
   Item
@@ -2645,7 +2800,7 @@ tpl
 ]
 {
   for-each [Block[@kind = "Definitional-Block"]] {
-    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property"]] {
+    for-each [Item[@kind = "Correctness-Condition" or @kind = "Property" or @kind = "Correctness"]] {
 
       choose {
         when [self::Item[@kind = "Correctness-Condition"]] {
@@ -2674,6 +2829,9 @@ tpl
         for-each [*] {
           choose {
             when [self::Item[@kind = "Correctness-Condition"]] {
+              apply [.] mode="straightforward-correctness";
+            }
+            when [self::Item[@kind = "Correctness"]] {
               apply [.] mode="straightforward-correctness";
             }
             when [self::Item[@kind = "Property"]] {
@@ -6446,8 +6604,9 @@ tpl [Item[
 mode="deftheorem"
 {
     <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item { @kind = "Pragma"; @spelling = "$P-"; }
     <Item {
-        @kind      = "Regular-Statement";
+        @kind      = "Theorem-Item";
         @shape     = "Compact-Statement";
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
@@ -6462,6 +6621,7 @@ mode="deftheorem"
         }
         <SkippedProof;
     }
+    <Item { @kind = "Pragma"; @spelling = "$P+"; }
 }
 
 tpl emit-functor-equational-deftheorem (#loci, #definiens, #pattern)
@@ -6534,8 +6694,9 @@ tpl [Item[
 mode="deftheorem"
 {
     <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item { @kind = "Pragma"; @spelling = "$P-"; }
     <Item {
-        @kind      = "Regular-Statement";
+        @kind      = "Theorem-Item";
         @shape     = "Compact-Statement";
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
@@ -6548,8 +6709,17 @@ mode="deftheorem"
                                                 #definiens = $term,
                                                 #pattern   = $pattern);
         }
-        <SkippedProof;
     }
+    <Block {
+      @kind = "Proof";
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        <Proposition { <Thesis; }
+      }
+      <Straightforward-Justification;
+    }
+    <Item { @kind = "Pragma"; @spelling = "$P+"; }
 }
 
 tpl emit-functor-means-deftheorem (#loci, #definiens, #pattern, #type)
@@ -6635,8 +6805,9 @@ tpl [Item[
 mode="deftheorem"
 {
     <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item { @kind = "Pragma"; @spelling = "$P-"; }
     <Item {
-        @kind      = "Regular-Statement";
+        @kind      = "Theorem-Item";
         @shape     = "Compact-Statement";
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
@@ -6652,8 +6823,17 @@ mode="deftheorem"
                                            #pattern   = $pattern,
                                            #type      = $type);
         }
-        <SkippedProof;
     }
+    <Block {
+      @kind = "Proof";
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        <Proposition { <Thesis; }
+      }
+      <Straightforward-Justification;
+    }
+    <Item { @kind = "Pragma"; @spelling = "$P+"; }
 }
 
 tpl emit-predicate-deftheorem (#loci, #definiens, #pattern)
@@ -6703,23 +6883,33 @@ tpl [Item[
     ]
 mode="deftheorem"
 {
-    <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
-    <Item {
-        @kind      = "Regular-Statement";
-        @shape     = "Compact-Statement";
-        $block     = `Block[@kind = "Definitional-Block"]`;
-        $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
-        $def       = `$block/Item[@kind = "Predicate-Definition"]`;
-        $pattern   = `$def/Predicate-Pattern`;
-        $definiens = `$def/Definiens`;
-        $formula      = `$definiens/*[position() = last()]`;
-        <Proposition {
-            emit-predicate-deftheorem (#loci      = $loci,
-                                       #definiens = $formula,
-                                       #pattern   = $pattern);
-        }
-        <SkippedProof;
+  <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+  <Item { @kind = "Pragma"; @spelling = "$P-"; }
+  <Item {
+    @kind      = "Theorem-Item";
+    @shape     = "Compact-Statement";
+    $block     = `Block[@kind = "Definitional-Block"]`;
+    $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
+    $def       = `$block/Item[@kind = "Predicate-Definition"]`;
+    $pattern   = `$def/Predicate-Pattern`;
+    $definiens = `$def/Definiens`;
+    $formula      = `$definiens/*[position() = last()]`;
+    <Proposition {
+        emit-predicate-deftheorem (#loci      = $loci,
+                                   #definiens = $formula,
+                                   #pattern   = $pattern);
     }
+  }
+  <Block {
+    @kind = "Proof";
+    <Item {
+      @kind = "Conclusion";
+      @shape = "Compact-Statement";
+      <Proposition { <Thesis; }
+    }
+    <Straightforward-Justification;
+  }
+  <Item { @kind = "Pragma"; @spelling = "$P+"; }
 }
 
 tpl [Item[
@@ -6857,8 +7047,9 @@ tpl [Item[
 mode="deftheorem"
 {
     <Item { @kind = "Pragma"; @spelling = "$C deftheorem"; }
+    <Item { @kind = "Pragma"; @spelling = "$P-"; }
     <Item {
-        @kind      = "Regular-Statement";
+        @kind      = "Theorem-Item";
         @shape     = "Compact-Statement";
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
@@ -6873,8 +7064,19 @@ mode="deftheorem"
                                   #definiens = $definiens,
                                   #pattern   = $pattern);
         }
-        <SkippedProof;
     }
+    <Block {
+      @kind = "Proof";
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        <Proposition {
+          <Thesis;
+        }
+      }
+      <Straightforward-Justification;
+    }
+    <Item { @kind = "Pragma"; @spelling = "$P+"; }
 }
 
 tpl [Item[
@@ -6934,8 +7136,9 @@ tpl [Item[
 mode="abstractness"
 {
     <Item { @kind = "Pragma"; @spelling = "$C abstractness"; }
+    <Item { @kind = "Pragma"; @spelling = "$P-"; }
     <Item {
-        @kind      = "Regular-Statement";
+        @kind      = "Theorem-Item";
         @shape     = "Compact-Statement";
         $block     = `Block[@kind = "Definitional-Block"]`;
         $loci      = `$block/Item[@kind = "Loci-Declaration"]/Explicitly-Qualified-Segment`;
@@ -6946,8 +7149,19 @@ mode="abstractness"
             emit-abstractness-theorem (#loci      = $loci,
                                        #pattern   = $pattern);
         }
-        <SkippedProof;
     }
+    <Block {
+      @kind = "Proof";
+      <Item {
+        @kind = "Conclusion";
+        @shape = "Compact-Statement";
+        <Proposition {
+          <Thesis;
+        }
+      }
+      <Straightforward-Justification;
+    }
+    <Item { @kind = "Pragma"; @spelling = "$P+"; }
 }
 
 tpl emit-abstractness-theorem (#loci, #pattern)
