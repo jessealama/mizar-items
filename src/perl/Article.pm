@@ -1689,26 +1689,26 @@ sub minimize_extension {
     }
 
     my $article_with_extension = $self->file_with_extension ($extension_to_minimize);
-    my $article_xml = $self->file_with_extension ('xml');
-    my $article_xml_saved = $self->file_with_extension ('xml.reference');
-    File::Copy::copy ($article_xml, $article_xml_saved);
-
-    # Strip 'uninteresting' attributes so that we can later compare
-    # quickly whether the semantics of the article changes if we mess
-    # around with the environment
-    my $article_xml_stripped = $self->file_with_extension ('xml.stripped');
-
-    my $uninteresting_attributes_stylesheet
-	= $self->path_for_stylesheet ('uninteresting-attributes');
-
-    apply_stylesheet ($uninteresting_attributes_stylesheet,
-		      $article_xml,
-		      $article_xml_stripped,
-		      undef);
-
-    my $article_xml_md5 = md5sum_for_file ($article_xml_stripped);
 
     if (-e $article_with_extension) {
+        my $article_xml = $self->file_with_extension ('xml');
+        my $article_xml_saved = $self->file_with_extension ('xml.reference');
+        File::Copy::copy ($article_xml, $article_xml_saved);
+
+        # Strip 'uninteresting' attributes so that we can later compare
+        # quickly whether the semantics of the article changes if we mess
+        # around with the environment
+        my $article_xml_stripped = $self->file_with_extension ('xml.stripped');
+
+        my $uninteresting_attributes_stylesheet
+            = $self->path_for_stylesheet ('uninteresting-attributes');
+
+        apply_stylesheet ($uninteresting_attributes_stylesheet,
+                          $article_xml,
+                          $article_xml_stripped,
+                          undef);
+
+        my $article_xml_md5 = md5sum_for_file ($article_xml_stripped);
 	my $xml_doc = eval { $xml_parser->parse_file ($article_with_extension) };
 	if (! defined $xml_doc) {
 	    croak ('Error: the .', $extension_to_minimize, ' file of ', $self->name (), ' is not well-formed XML.');
