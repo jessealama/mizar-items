@@ -133,11 +133,32 @@
 (defgeneric wsmparser (article))
 (defgeneric msmprocessor (article))
 (defgeneric msplit (article))
+(defgeneric edtfile (article))
+(defgeneric unhereby (article))
+(defgeneric dellink (article))
 (defgeneric mglue (article))
 (defgeneric analyzer (article))
 (defgeneric verifier (article))
 (defgeneric exporter (article))
 (defgeneric transfer (article))
+
+(defmethod edtfile ((article article))
+  (edtfile (path article)))
+
+(defmethod edtfile ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "edtfile" article-path))
+
+(defmethod unhereby ((article article))
+  (unhereby (path article)))
+
+(defmethod unhereby ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "unhereby" article-path))
+
+(defmethod dellink ((article article))
+  (dellink (path article)))
+
+(defmethod dellink ((article-path pathname))
+  (run-mizar-tool-with-standard-flags "dellink" article-path))
 
 (defmethod accom ((article article))
   (accom (path article)))
