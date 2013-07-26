@@ -272,6 +272,8 @@ sub absolutize_environment {
 }
 
 my %extension_to_element_table = ('eno' => 'Notations',
+                                  'dfe' => 'Definientia',
+                                  'dfx' => 'Definientia',
 				  'erd' => 'ReductionRegistrations',
 				  'epr' => 'PropertyRegistration',
 				  'dfs' => 'Definientia',
@@ -389,6 +391,21 @@ sub needed_non_constructors {
 				);
 	    push (@needed, @needed_for_extension);
 	}
+    }
+
+    my @definientia = ('dfe', 'dfx');
+    foreach my $x (@definientia) {
+        my $extension = "${x}1";
+        my $xml_to_inspect = $self->file_with_extension ($extension);
+        if (-e $xml_to_inspect) {
+            my @needed_for_extension
+                = apply_stylesheet ($dependencies_stylesheet,
+                                    $xml_to_inspect,
+                                    undef,
+                                    { 'item-kind' => 'definiens' }
+                                );
+            push (@needed, @needed_for_extension);
+        }
     }
 
     @needed = map { lc ($_) } @needed;
@@ -522,6 +539,18 @@ sub needed_constructors {
     my %constructors;
 
     foreach my $extension (%ITEM_KINDS_BY_EXTENSION) {
+	my $xml_to_inspect = $self->file_with_extension ($extension);
+	if (-e $xml_to_inspect) {
+	    my $doc = $xml_parser->parse_file ($xml_to_inspect);
+	    my $root = $doc->documentElement ();
+	    my @more_constructors = find_all_constructors ($root);
+	    foreach my $constructor (@more_constructors) {
+		$constructors{$constructor} = 0;
+	    }
+	}
+    }
+
+    foreach my $extension ('dfe1', 'dfx1') {
 	my $xml_to_inspect = $self->file_with_extension ($extension);
 	if (-e $xml_to_inspect) {
 	    my $doc = $xml_parser->parse_file ($xml_to_inspect);
