@@ -2223,7 +2223,7 @@ sub minimize_by_requirement {
 	# Save the table to disk
 	$self->write_ere_table (\%table, \%original_requirements);
 
-	my $deletable = $self->verify (\%parameters);
+	my $deletable = $self->check (\%parameters);
 
 	if (! $deletable) {
 
@@ -2243,7 +2243,7 @@ sub minimize_by_requirement {
 	delete $table{$begin};
 	$self->write_ere_table (\%table, \%original_requirements);
 
-	my $begin_deletable = $self->verify (\%parameters);
+	my $begin_deletable = $self->check (\%parameters);
 
 	if (! $begin_deletable) {
 
@@ -2259,13 +2259,13 @@ sub minimize_by_requirement {
 
 	$self->write_ere_table (\%table, \%original_requirements);
 
-	my $end_deletable = $self->verify (\%parameters);
+	my $end_deletable = $self->check (\%parameters);
 
 	if (! $end_deletable) {
 
-	    # warn 'We cannot dump requirement #', $begin, '; errors:', "\n", `cat $err_path`;
+	    # warn 'We cannot dump requirement #', $end, '; errors:', "\n", `cat $err_path`;
 
-	    $table{$begin} = 0;
+	    $table{$end} = 0;
 	    $self->write_ere_table (\%table, \%original_requirements);
 	} else {
 	    # warn 'We can dump requirement #', $end;
@@ -2287,7 +2287,7 @@ sub minimize_by_requirement {
 	$self->write_ere_table (\%table, \%original_requirements);
 
 	# Check that deleting the lower half is safe
-	my $lower_half_safe = $self->verify (\%parameters);
+	my $lower_half_safe = $self->check (\%parameters);
 
 	if ($lower_half_safe) {
 
