@@ -2406,11 +2406,17 @@ sub minimize_requirements {
 					    $NUM_REQUIREMENTS - 1,
 					    \%parameters)};
 
-    # foreach my $needed_index (keys %minimal_needed) {
-    # 	warn 'We really need requirement #', $needed_index;
-    # }
-
-    # warn 'After minimizing requirements, the ere file looks like:', "\n", `cat $ere`;
+    my $extension_to_minimize = 'ere';
+    print {*STDERR} $self->name (), '.', $extension_to_minimize, ' : ';
+    print {*STDERR} '[';
+    foreach my $i (1 .. $NUM_REQUIREMENTS) {
+        if (defined $minimal_needed{$i}) {
+            print {*STDERR} '+';
+        } else {
+            print {*STDERR} '-';
+        }
+    }
+    print {*STDERR} ']', "\n";
 
     return 1;
 
