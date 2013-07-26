@@ -6,7 +6,7 @@ output method="xml" indent="yes";
 tpl count-previous ()
 {
   for-each [ancestor-or-self::*[parent::Text-Proper]] {
-    `count (preceding-sibling::*[not(self::Item[@kind = "Pragma" or @kind = "Section-Pragma"])])`;
+    `count (preceding-sibling::*[not(self::Item[(@kind = "Pragma" and not(@spelling = "$CT")) or @kind = "Section-Pragma"])])`;
   }
 }
 
@@ -33,21 +33,24 @@ tpl [Text-Proper[not(@articleid)]] {
 }
 
 tpl [Text-Proper[@articleid]] {
-  $num-items = `count (*[not(self::Item[@kind = "Pragma" or @kind = "Section-Pragma"])])`;
+  $num-items = `count (*[not(self::Item[(@kind = "Pragma" and not(@spelling = "$CT")) or @kind = "Section-Pragma"])])`;
   // msg `concat ("Number of items: ", $num-items)`;
   <Fragments {
     @articleid = `@articleid`;
-    for-each [*[not(self::Item[@kind = "Pragma" or @kind = "Section-Pragma"])]] {
+    for-each [*[not(self::Item[(@kind = "Pragma" and not(@spelling = "$CT")) or @kind = "Section-Pragma"])]] {
       <Text-Proper {
         @fragment-number = position-in-text ();
         <Item { @kind = "Section-Pragma"; }
-        if [preceding-sibling::*[1][self::Item[@kind = "Pragma"]]] {
-          if [preceding-sibling::*[2][self::Item[@kind = "Pragma"]]] {
+        if [preceding-sibling::*[1][self::Item[@kind = "Pragma" and not(@spelling = "$CT")]]] {
+          if [preceding-sibling::*[2][self::Item[@kind = "Pragma" and not(@spelling = "$CT")]]] {
             apply [preceding-sibling::*[2]];
           }
           apply [preceding-sibling::*[1]];
         }
         apply [.];
+        if [following-sibling::*[1][self::Item[@kind = "Pragma" and @spelling = "$P+"]]] {
+          apply [following-sibling::*[1]];
+        }
       }
     }
   }
