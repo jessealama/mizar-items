@@ -23,6 +23,7 @@ use Utils qw(ensure_readable_file ensure_directory ensure_executable);
 
 our @EXPORT_OK = qw(accom
 		    verifier
+                    checker
 		    ensure_sensible_mizar_environment
 		    path_for_stylesheet);
 
@@ -150,6 +151,14 @@ sub verifier {
     my $article_name = shift;
     my $parameters_ref = shift;
     return (run_mizar_tool ('verifier', $article_name, $parameters_ref));
+}
+
+sub checker {
+    my $article_name = shift;
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    $parameters{'checker-only'} = 0;
+    return (run_mizar_tool ('verifier', $article_name, \%parameters));
 }
 
 sub exporter {
