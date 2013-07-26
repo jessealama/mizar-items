@@ -22,6 +22,7 @@
   (:import-from :xuriella
 		#:parse-stylesheet)
   (:import-from :alexandria
+                #:sequence-of-length-p
 		#:starts-with-subseq
 		#:define-constant
 		#:set-equal
