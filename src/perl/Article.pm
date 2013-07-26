@@ -719,6 +719,20 @@ sub verify {
 			    \%parameters);
 }
 
+sub check {
+    my $self = shift;
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+
+    # Ugh
+    delete $parameters{'fast-theorems-and-schemes'};
+    delete $parameters{'randomize'};
+    delete $parameters{'debug'};
+
+    return Mizar::checker ($self->get_path (),
+			    \%parameters);
+}
+
 sub analyze {
     my $self = shift;
     my $parameters_ref = shift;
