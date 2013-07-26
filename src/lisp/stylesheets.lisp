@@ -119,8 +119,12 @@ If XML-DOCUMENT is the empty string, nothing will be done, and XML-DOCUMENT (viz
 					 :error xsltproc-error
 					 :wait t))
 		  (exit-code (process-exit-code xsltproc)))
-	     (if (zerop exit-code)
-                 (get-output-stream-string xsltproc-output)
-		 (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~a~%" stylesheet-name document-name exit-code (get-output-stream-string xsltproc-error))))
+             (cond ((zerop exit-code)
+                    (let ((results (get-output-stream-string xsltproc-output)))
+                      (when output
+                        (write-string-into-file results output :if-exists :supersede))
+                      results))
+                   (t
+                    (error "xsltproc did not exit cleanly when called on~%~%  ~a~%~%and~%~%  ~a;~%~%the exit code was ~a.~%~%Here is the content of the standard error stream:~%~%~a~%" stylesheet-name document-name exit-code (get-output-stream-string xsltproc-error)))))
 	(close xsltproc-output)
 	(close xsltproc-error)))))
