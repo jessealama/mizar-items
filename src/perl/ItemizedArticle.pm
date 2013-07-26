@@ -2053,6 +2053,9 @@ sub dependencies {
                     if ($kind eq 'k') {
                         push (@properties, 'Existence', 'Uniqueness');
                     }
+                    if ($fragment_msx_root->exists ('descendant::Item[@kind = "Correctness-Condition" and @condition = "coherence"]')) {
+                        push (@properties, 'Coherence');
+                    }
                     foreach my $property (@properties) {
                         my $target_fragment_index = undef;
                         my $i = $fragment_number - 1;
