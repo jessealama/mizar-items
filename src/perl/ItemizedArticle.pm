@@ -418,6 +418,8 @@ sub property_xml_element_name {
         return 'Abstractness';
     } elsif ($property eq 'sethood') {
         return 'Sethood';
+    } elsif ($property eq 'connectedness') {
+        return 'Connectedness';
     } else {
         croak 'Unknown property \'', $property, '\'.';
     }
