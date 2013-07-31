@@ -54,10 +54,12 @@ if (-d $wrm_makefile) {
 
 unless (-e $wrm_makefile) {
     say {*STDERR} 'Error: the WRM makefile does not exist.';
+    exit 1;
 }
 
 unless (-r $wrm_makefile) {
     say {*STDERR} 'Error: the WRM makefile is not readable.';
+    exit 1;
 }
 
 my $article_arg = $ARGV[0];
