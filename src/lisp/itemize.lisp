@@ -139,17 +139,20 @@
        do
          (format t "working on fragment ~d~%" i)
          (write-string-into-file (apply-stylesheet *pp-stylesheet* ckb-msx nil nil)
-                                 ckb-tpr)
+                                 ckb-tpr
+                                 :if-exists :supersede)
          (write-string-into-file (apply-stylesheet *extend-evl-stylesheet*
                                                    article-evl
                                                    extend-evl-parameters
                                                    nil)
-                                 ckb-evl)
+                                 ckb-evl
+                                 :if-exists :supersede)
 	 (write-string-into-file (apply-stylesheet *print-evl-stylesheet*
                                                    ckb-evl
                                                    nil
                                                    nil)
-                                 ckb-evd)
+                                 ckb-evd
+                                 :if-exists :supersede)
 
 	 (stop-if-nil
 	   (mglue ckb-basename)
