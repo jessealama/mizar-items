@@ -1461,14 +1461,321 @@ foreach my $item (keys %resolved_dependencies) {
     print "\N{LF}";
 }
 
-sub has_semantic_content {
+sub is_scheme_item {
     my $item = shift;
-    return 0;
+    if ($item =~ / [:] scheme [:] (\d+) \z /) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
-sub render_tptp {
+sub is_requirement_item {
+    my $item = shift;
+    if ($item =~ /\A requirement [:] \d+ \z/) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+sub is_definiens_item {
+    my $item = shift;
+    return ($item =~ / [:] . definiens [:] /);
+}
+
+sub is_theorem_item {
+    my $item = shift;
+    return ($item =~ / [:] theorem [:] /)
+}
+
+sub is_cluster_item {
+    my $item = shift;
+    return ($item =~ / [:] . cluster [:] /);
+}
+
+sub is_deftheorem_item {
+    my $item = shift;
+    return ($item =~ / [:] deftheorem [:] /)
+}
+
+sub is_constructor_property_item {
+    my $item = shift;
+    return ($item =~ / [:] . constructor [:] \d+ [[] [a-z]+ []] \z/);
+}
+
+sub has_semantic_content {
+    my $item = shift;
+    if (is_requirement_item ($item)) {
+        return 1;
+    } elsif (is_deftheorem_item ($item)) {
+        return 1;
+    } elsif (is_theorem_item ($item)) {
+        return 1;
+    } elsif (is_cluster_item ($item)) {
+        return 1;
+    } elsif (is_deftheorem_item ($item)) {
+        return 1;
+    } elsif (is_constructor_property_item ($item)) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+sub render_semantic_content {
     my $node = shift;
-    return 'false';
+    my $name = $node->nodeName ();
+    my $aid = $node->getAttribute ('aid');
+    my $kind = $node->getAttribute ('kind');
+    my $nr = $node->getAttribute ('nr');
+    my $kind_lc = defined $kind ? lc $kind : undef;
+    my $aid_lc = defined $aid ? lc $aid : undef;
+    if ($name eq 'Pred' || $name eq 'Func') {
+        if (! defined $aid) {
+            confess 'aid attribute missing';
+        }
+        if (! defined $nr) {
+            confess 'nr attribute missing.';
+        }
+        if (! defined $kind) {
+            confess 'kind attribute missing';
+        }
+        my @children = $node->findnodes ('*');
+        my $answer = "${kind_lc}${nr}_${aid_lc}";
+        if (scalar @children == 0) {
+            return $answer;
+        } else {
+            my $num_children = scalar @children;
+            $answer .= '(';
+            foreach my $i (1 .. $num_children) {
+                my $child = $children[$i - 1];
+                my $rendered_child = render_semantic_content ($child);
+                $answer .= $rendered_child;
+                if ($i < $num_children) {
+                    $answer .= ', ';
+                }
+            }
+            $answer .= ')';
+            return $answer;
+        }
+    } elsif ($name eq 'For') {
+        (my $typ) = $node->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'Typ node not found under a universal quantifier.';
+        }
+        my $nesting = $node->findvalue ('count (ancestor::For) + 1');
+        my $var_name = "X${nesting}";
+        my $typ_rendered = render_semantic_content ($typ);
+        (my $matrix) = $node->findnodes ('*[position() = last()]');
+        my $rendered_matrix = render_semantic_content ($matrix);
+        return "(! [${var_name}] : (${typ_rendered}(${var_name}) => ${rendered_matrix})";
+    } elsif ($name eq 'Typ') {
+        return "${kind_lc}${nr}_${aid_lc}";
+    } elsif ($name eq 'Var') {
+        return "X${nr}";
+    } elsif ($name eq 'And') {
+        (my $lhs) = $node->findnodes ('*[1]');
+        (my $rhs) = $node->findnodes ('*[2]');
+        if (! defined $lhs) {
+            confess 'Left-hand side of an And node missing.';
+        }
+        if (! defined $rhs) {
+            confess 'Right-hand side of an And node missing.';
+        }
+        my $lhs_rendered = render_semantic_content ($lhs);
+        my $rhs_rendered = render_semantic_content ($rhs);
+        return "(${lhs_rendered} & ${rhs_rendered})";
+    } elsif ($name eq 'Not') {
+        (my $arg) = $node->findnodes ('*[1]');
+        if (! defined $arg) {
+            confess 'Not node lacks a child!';
+        }
+        my $rendered_arg = render_semantic_content ($arg);
+        return "(~ ${rendered_arg})";
+    } else {
+        confess 'Unable to generate a rendering for nodes of kind \'', $name, '\'.';
+    }
+}
+
+sub render_proposition {
+    my $proposition_node = shift;
+    (my $content) = $proposition_node->findnodes ('*[position() = last()]');
+    return render_semantic_content ($content);
+}
+
+sub render_justified_theorem {
+    my $justified_theorem_node = shift;
+    (my $proposition_node) = $justified_theorem_node->findnodes ('Proposition[1]');
+    if (! defined $proposition_node) {
+        confess 'Proposition node not found under a justified theorem node';
+    }
+    return render_proposition ($proposition_node);
+}
+
+sub render_deftheorem {
+    my $deftheorem_node = shift;
+    (my $proposition_node) = $deftheorem_node->findnodes ('Proposition[1]');
+    if (! defined $proposition_node) {
+        confess 'Proposition node not found under a definitional theorem node';
+    }
+    return render_proposition ($proposition_node);
+}
+
+sub article_of_item {
+    my $item = shift;
+    if ($item =~ /\A ([a-z0-9_]+) [:] /) {
+        return $1;
+    } else {
+        confess 'Cannot extract article for \'', $item, '\'.';
+    }
+}
+
+sub kind_of_item {
+    my $item = shift;
+    if ($item =~ /\A [a-z0-9_]+ [:] ([^:]+) [:] /) {
+        return $1;
+    } else {
+        confess 'Cannot extract item kind for \'', $item, '\'.';
+    }
+}
+
+sub property_for_constructor {
+    my $constructor_item = shift;
+    if ($constructor_item =~ / [:] . constructor [:] \d+ [[] ([a-z]+) []] \z/) {
+        return $1;
+    } else {
+        confess 'Cannot extract constructor property for \'', $constructor_item, '\'.';
+    }
+}
+
+sub constructor_of_constructor_property {
+    my $item = shift;
+    if ($item =~ / ([a-z0-9_]+) [:] (.) constructor [:] (\d+) [[] [a-z]+ []] \z/) {
+        return "${1}:${2}constructor:${3}";
+    } else {
+        confess 'Cannot extract constructor from \'', $item, '\'.';
+    }
+}
+
+sub constructor_kind {
+    my $constructor_item = shift;
+    if ($constructor_item =~ / [:] (.) constructor [:] /) {
+        return $1;
+    } else {
+        confess 'Cannot extract constructor kind from \'', $constructor_item, '\'.';
+    }
+}
+
+sub cluster_kind {
+    my $cluster_item = shift;
+    if ($cluster_item =~ / [:] (.) cluster [:] /) {
+        return $1;
+    } else {
+        confess 'Cannot extract cluster kind from \'', $cluster_item, '\'.';
+    }
+}
+
+sub nr_of_item {
+    my $item = shift;
+    if ($item =~ / [:] (\d+) \z/) {
+        return $1;
+    } elsif ($item =~ / \A requirement [:] (\d+) \z/ ) {
+        return $1;
+    } else {
+        confess 'Cannot extract nr from \'', $item, '\'.';
+    }
+}
+
+sub tptp_name_for_item {
+    my $item = shift;
+    if (is_constructor_property_item ($item)) {
+        my $constructor = constructor_of_constructor_property ($item);
+        my $property = property_for_constructor ($item);
+        my $article = article_of_item ($constructor);
+        my $kind = constructor_kind ($constructor);
+        my $nr = nr_of_item ($constructor);
+        return "${property}_${kind}${nr}_${article}";
+    } elsif (is_requirement_item ($item)) {
+        my $req_nr = nr_of_item ($item);
+        return "requirement_${req_nr}";
+    } else {
+        my $article = article_of_item ($item);
+        my $kind = kind_of_item ($item);
+        my $nr = nr_of_item ($item);
+        if ($kind eq 'theorem') {
+            return "t${nr}_${article}";
+        } elsif ($kind eq 'deftheorem') {
+            return "dt${nr}_${article}";
+        } elsif ($kind =~ / \A (.) cluster \z /) {
+            return "${1}c_${article}";
+        } else {
+            confess 'How to make a TPTP name for \'', $item, '\'?';
+        }
+    }
+}
+
+sub render_local_item {
+    my $item = shift;
+    my $tptp_name = tptp_name_for_item ($item);
+    my $source = source_of_item ($item);
+    # warn 'source of ', $item, ' is ', $source;
+    my $fragment_number = fragment_number ($source);
+    my $fragment_xml = "${text_dir}/${PREFIX_LC}${fragment_number}.xml1";
+    my $fragment_doc = parse_xml_file ($fragment_xml);
+    my $fragment_root = $fragment_doc->documentElement ();
+    if (is_theorem_item ($item)) {
+        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem[1]');
+        if (! defined $theorem_node) {
+            confess 'Theorem node not found in ', $fragment_xml;
+        }
+        my $content = render_justified_theorem ($theorem_node);
+        return "fof(${tptp_name},theorem,${content}).";
+    } elsif (is_deftheorem_item ($item)) {
+        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem[1]');
+        if (! defined $theorem_node) {
+            confess 'JustifiedTheorem node not found in ', $fragment_xml;
+        }
+        my $content = render_justified_theorem ($theorem_node);
+        return "fof(${tptp_name},definition,${content}).";
+    } elsif (is_cluster_item ($item)) {
+        my $article = article_of_item ($item);
+        my $kind = cluster_kind ($item);
+        if ($kind eq 'f') {
+            (my $coherence_node) = $fragment_root->findnodes ('descendant::Coherence[1]');
+            if (! defined $coherence_node) {
+                confess 'Coherence node missing for a cluster at ', $fragment_xml;
+            }
+            (my $proposition_node) = $coherence_node->findnodes ('Proposition[1]');
+            if (! defined $proposition_node) {
+                confess 'No Proposition node found under the Coherence node in ', $fragment_xml;
+            }
+            my $rendered_proposition = render_proposition ($proposition_node);
+            return "fof(${kind}c_${article},theorem,${rendered_proposition}).";
+        } else {
+            confess 'How to handle clusters of kind \'', $kind, '\'?';
+        }
+    } elsif (is_constructor_property_item ($item)) {
+        my $constructor = constructor_of_constructor_property ($item);
+        my $article = article_of_item ($constructor);
+        my $nr = nr_of_item ($constructor);
+        my $constr_kind = constructor_kind ($constructor);
+        my $property = property_for_constructor ($item);
+        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem[1]');
+        if (! defined $theorem_node) {
+            confess 'JustifiedTheorem node not found in ', $fragment_xml;
+        }
+        my $content = render_justified_theorem ($theorem_node);
+        return "fof(${tptp_name},theorem,${content}).";
+    } else {
+        confess 'How to render the local item \'', $item, '\'?';
+    }
+}
+
+sub render_non_local_item {
+    my $item = shift;
+    my $tptp_name = tptp_name_for_item ($item);
+    return "fof(${tptp_name},axiom,\$false).";
 }
 
 # Make the problems
@@ -1491,16 +1798,14 @@ foreach my $item (keys %resolved_dependencies) {
             if (! defined $proposition_node) {
                 confess 'Error: where is the Proposition node in ', $fragment_xml, '?';
             }
-            (my $theorem_content) = $proposition_node->findnodes ('*[1]');
-            if (! defined $theorem_content) {
-                confess 'Error: what is the content of the theorem in ', $fragment_xml, '?';
-            }
-            my $theorem_rendering = render_tptp ($theorem_content);
+            my $theorem_rendering = render_proposition ($proposition_node);
             my @problem = ("fof(${article_name}_t${theorem_number},conjecture,${theorem_rendering}).");
             my @deps = @{$resolved_dependencies{$item}};
             foreach my $dep (@deps) {
-                if (has_semantic_content ($dep)) {
-                    if ($dep =~ / \A ${article_name} [:] \z/) {
+                if (is_scheme_item ($dep)) {
+                    # todo
+                } elsif (has_semantic_content ($dep)) {
+                    if ($dep =~ / \A ${article_name} [:] /) {
                         my $rendered = render_local_item ($dep);
                         push (@problem, $rendered);
                     } else {
