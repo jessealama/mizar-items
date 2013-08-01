@@ -910,6 +910,9 @@ foreach my $prel_file (@prel_files) {
                     push (@properties, 'Coherence');
                 }
                 foreach my $property (@properties) {
+                    if ($property eq 'Antisymmetry') {
+                        $property = 'Asymmetry';
+                    }
                     my $target_fragment_index = undef;
                     my $i = $fragment_number - 1;
                     while (($i > 0)
@@ -1335,6 +1338,9 @@ foreach my $item (keys %dependencies) {
             my @property_nodes = $constructor_node->findnodes ('Properties/*');
             foreach my $property_node (@property_nodes) {
                 my $property = $property_node->nodeName ();
+                if ($property eq 'Antisymmetry') {
+                    $property = 'Asymmetry';
+                }
                 my $property_lc = lc $property;
                 my $item = "${PREFIX_LC}${fragment_number}";
                 my $constructor_item = "${article}:${kind}constructor:${nr}";
