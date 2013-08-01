@@ -940,9 +940,9 @@ foreach my $prel_file (@prel_files) {
                             = \@condition_or_property_deps;
                         my $local_name = "${PREFIX_LC}${target_fragment_index}:theorem:1";
                         $local_item_table{$local_name} = $condition_or_property;
-                        carp 'registering ', $condition_or_property, ' under ', $local_name;
+                        # carp 'registering ', $condition_or_property, ' under ', $local_name;
                     } else {
-                        warn 'could not find property ', $property, ' for ', $kind, 'constructor ', $index;
+                        # warn 'could not find property ', $property, ' for ', $kind, 'constructor ', $index;
                     }
                 }
             }
@@ -1059,7 +1059,7 @@ foreach my $prel_file (@prel_files) {
 
 }
 
-warn 'OK, the table now looks like this:', $LF, Dumper (%local_item_table);
+# warn 'OK, the table now looks like this:', $LF, Dumper (%local_item_table);
 
 # Now take care of all induced theorems
 
@@ -1103,7 +1103,7 @@ foreach my $prel_file (@prel_files) {
             $property = lc $property;
             # Now find the item that uses this one
             my $this_fragment = "${PREFIX_UC}${fragment_number}";
-            warn 'working on property ', $property, ' of fragment ', $this_fragment;
+            # warn 'working on property ', $property, ' of fragment ', $this_fragment;
             my $target_fragment_index = undef;
             my $i = $fragment_number + 1;
             while ((! defined $target_fragment_index) && ($i < $num_fragments)) {
@@ -1117,7 +1117,7 @@ foreach my $prel_file (@prel_files) {
                 $i++;
             }
             if (defined $target_fragment_index) {
-                warn 'target fragment index is: ', $target_fragment_index;
+                # warn 'target fragment index is: ', $target_fragment_index;
                 if ($property eq 'compatibility') {
                     my $local_item = "${PREFIX_LC}${fragment_number}:theorem:1";
                     my $other_local_item = "${PREFIX_LC}${target_fragment_index}:deftheorem:1";
@@ -1135,7 +1135,6 @@ foreach my $prel_file (@prel_files) {
                     # Try looking for a function for which this is the
                     # coherence/correctness condition
                     # What is the next functor constructor?
-                    warn 'HEY';
                     my $target_fragment_index = undef;
                     my $j = $fragment_number + 1;
                     while ((! defined $target_fragment_index) && ($j < $num_fragments)) {
@@ -1155,7 +1154,6 @@ foreach my $prel_file (@prel_files) {
                     if (! defined $target_fragment_index) {
                         confess 'Error: unable to find a functor definition with a coherence correctness condition after fragment ', $fragment_number, ', so we are unable to deal with the existence/uniqueness condition it contains.';
                     }
-                    warn 'next target fragment index: ', $target_fragment_index;
                     my $constructor_item = "${PREFIX_LC}${target_fragment_index}:kconstructor:1";
                     my $resolved_item = $local_item_table{$constructor_item};
                     if (! defined $resolved_item) {
@@ -1164,7 +1162,7 @@ foreach my $prel_file (@prel_files) {
                     my $item = "${resolved_item}[${property}]";
                     my $local_item = "${PREFIX_LC}${fragment_number}:theorem:1";
                     $local_item_table{$local_item} = $item;
-                    warn 'HEY again: registering ', $local_item, ' under ', $item;
+                    # warn 'HEY again: registering ', $local_item, ' under ', $item;
                     my @deps = article_dependencies ($fragment_miz);
                     $dependencies{$item} = \@deps;
                     next;
@@ -1184,17 +1182,17 @@ foreach my $prel_file (@prel_files) {
                     confess 'Error: we found multiple items coming from fragment ', $target_fragment_index, ':', $LF, $LF, Dumper (@candidate_items), $LF, 'Which one should we choose to deal with property ', $property, '?';
                 } else {
                     my $other_item = $candidate_items[0];
-                    warn 'the item coming from fragment ', $target_fragment_index, ' is ', $other_item;
+                    # warn 'the item coming from fragment ', $target_fragment_index, ' is ', $other_item;
                     if ($other_item =~ / [[] [a-z]+ []] \z/) {
                         my $item = $other_item;
                         my $local_item = "${PREFIX_LC}${target_fragment_index}:theorem:1";
                         $local_item_table{$local_item} = $item;
-                        warn 'Part 2: registering ', $item, ' under ', $local_item;
+                        # warn 'Part 2: registering ', $item, ' under ', $local_item;
                     } else {
                         my $item = "${other_item}[${property}]";
                         my $local_item = "${PREFIX_LC}${fragment_number}:theorem:1";
                         $local_item_table{$local_item} = $item;
-                        warn 'Part 2: registering ', $item, ' under ', $local_item;
+                        # warn 'Part 2: registering ', $item, ' under ', $local_item;
                     }
                 }
             } elsif (($property eq 'existence') || ($property eq 'uniqueness')) {
@@ -1266,7 +1264,7 @@ foreach my $prel_file (@prel_files) {
     }
 }
 
-warn 'After dealing with constructor properties, the table now looks like this:', $LF, Dumper (%local_item_table);
+# warn 'After dealing with constructor properties, the table now looks like this:', $LF, Dumper (%local_item_table);
 
 # deftheorems
 my $deftheorem_index = 1;
