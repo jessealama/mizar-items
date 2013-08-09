@@ -1902,34 +1902,58 @@ sub render_semantic_content {
     }
 }
 
+sub constants_under_node {
+    my $node = shift;
+    my @all_constants = $node->findnodes ('descendant::Const');
+    my %constants = ();
+    foreach my $const (@all_constants) {
+        my $nr = get_nr_attribute ($const);
+        $constants{$nr} = $const;
+    }
+    my @constants_no_dups = values %constants;
+    return @constants_no_dups;
+}
+
+sub type_for_constant {
+    my $constant = shift;
+    my $vid = get_vid_attribute ($constant);
+    my $binder_xpath = "preceding::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
+    (my $binder) = $constant->findnodes ($binder_xpath);
+    if (defined $binder) {
+        my $binder_name = $binder->nodeName ();
+        if ($binder_name eq 'For') {
+            (my $typ) = $binder->findnodes ('Typ');
+            if (! defined $typ) {
+                confess 'For node lacks a Typ child.';
+            }
+            return $typ;
+        } elsif ($binder_name eq 'Typ') {
+            return $binder;
+        } else {
+            confess 'What kind of binder is', $LF, $binder->toString (), $LF, '?';
+        }
+    } else {
+        confess 'Could find no binder for a constant with vid = ', $vid, ' using the XPath expression', $LF, $LF, '  ', $binder_xpath;
+    }
+}
+
 sub render_proposition {
     my $proposition_node = shift;
-    my @arg_types = @_;
     (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
-    my $content = render_semantic_content ($content_node, @arg_types);
-    if ($content_node->exists ('descendant::Const')) {
-        my @constants = $content_node->findnodes ('descendant::Const');
-        my $max_const_nr = 1;
-        while ($content_node->exists ("descendant::Const[\@nr = \"${max_const_nr}\"]")) {
-            $max_const_nr++;
+    my $content = render_semantic_content ($content_node);
+    my @constants = constants_under_node ($proposition_node);
+    foreach my $constant (@constants) {
+        my $typ = type_for_constant ($constant);
+        my $var_name = undef;
+        if ($typ->hasAttribute ('vid')) {
+            my $vid = $typ->getAttribute ('vid');
+            $var_name = "X${vid}";
+        } else {
+            my $vid = $typ->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+            $var_name = "Y${vid}";
         }
-        $max_const_nr--;
-        if ($max_const_nr != scalar @arg_types) {
-            confess 'There are ', $max_const_nr, ' distinct Const nodes under a Proposition node, but we were given ', scalar @arg_types, ' different argument types.';
-        }
-        my $num_arg_types = scalar @arg_types;
-        foreach my $i (1 .. $num_arg_types) {
-            my $typ = $arg_types[$num_arg_types - $i];
-            my $var_name = undef;
-            if ($typ->hasAttribute ('vid')) {
-                my $vid = $typ->getAttribute ('vid');
-                $var_name = "X${vid}";
-            } else {
-                $var_name = "X${i}";
-            }
-            my $guard = render_guard ($var_name, $typ);
-            $content = "(! [${var_name}] : (${guard} => ${content}))";
-        }
+        my $guard = render_guard ($var_name, $typ);
+        $content = "(! [${var_name}] : (${guard} => ${content}))";
     }
     return $content;
 }
@@ -2612,32 +2636,7 @@ sub render_non_local_item {
 
 sub render_scheme_instance {
     my $proposition = shift;
-    my @constants = $proposition->findnodes ('descendant::Const');
-    my %constants = ();
-    foreach my $constant (@constants) {
-        my $vid = $constant->getAttribute ('vid');
-        if (! defined $vid) {
-            confess 'Const node lacks a vid attribute.';
-        }
-        $constants{$vid} = 0;
-    }
-    my @constant_vids = keys %constants;
-    @constant_vids = sort { $a < $b } @constant_vids;
-    my @arg_types = ();
-    foreach my $vid (@constant_vids) {
-        my $constant_idx = first_index { $_->getAttribute('vid') == $vid } @constants;
-        if ($constant_idx < 0) {
-            confess 'Unable to find a constant with vid ', $vid;
-        }
-        my $constant = $constants[$constant_idx];
-        my $typ_xpath = "preceding::Let/Typ[\@vid = \"${vid}\"]";
-        (my $typ) = $constant->findnodes ($typ_xpath);
-        if (! defined $typ) {
-            confess 'Unable to find a type for the constant with vid = ', $vid;
-        }
-        push (@arg_types, $typ);
-    }
-    return render_proposition ($proposition, @arg_types);
+    return render_proposition ($proposition);
 }
 
 sub extract_schemes {
