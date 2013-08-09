@@ -1718,9 +1718,8 @@ sub render_semantic_content {
         }
         my $term = $children[0];
         my $type = $children[1];
-        my $type_rendered = render_semantic_content ($type, @arguments);
         my $term_rendered = render_semantic_content ($term, @arguments);
-        return "${type_rendered}(${term_rendered})";
+        return render_guard ($term_rendered, $type);
     } elsif ($name eq 'For') {
         (my $typ) = $node->findnodes ('Typ');
         if (! defined $typ) {
@@ -1736,65 +1735,32 @@ sub render_semantic_content {
         }
         (my $matrix) = $node->findnodes ('*[position() = last()]');
         my $rendered_matrix = render_semantic_content ($matrix, @arguments);
-        my $typ_rendered = render_semantic_content ($typ, @arguments);
-        my $guard = undef;
-        if ($typ->exists ('Cluster')) {
-            (my $cluster_node) = $typ->findnodes ('Cluster');
-            my @adjectives = $cluster_node->findnodes ('Adjective');
-            if (scalar @adjectives == 0) {
-                my $guard = "${typ_rendered}(${var_name})";
-                return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
-            } else {
-                my $guard = '(';
-                $guard .= "${typ_rendered}(${var_name})";
-                my $num_adjectives = scalar @adjectives;
-                foreach my $i (1 .. $num_adjectives) {
-                    my $adjective = $adjectives[$i - 1];
-                    my $adj_aid = $adjective->getAttribute ('aid');
-                    my $adj_nr = $adjective->getAttribute ('nr');
-                    if (! defined $adj_aid) {
-                        confess 'Adjective lacks an aid attribute.';
-                    }
-                    if (! defined $adj_nr) {
-                        confess 'Adjective lacks an nr attribute.';
-                    }
-                    my $adj_aid_lc = lc $adj_aid;
-                    my $bare_adj = "v${adj_nr}_${adj_aid_lc}";
-                    if ($adjective->hasAttribute ('value') && $adjective->getAttribute ('value') eq 'false') {
-                        $guard .= " & (~ ${bare_adj}(${var_name}))";
-                    } else {
-                        $guard .= " & ${bare_adj}(${var_name})";
-                    }
-                }
-                $guard .= ')';
-                return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
-            }
-        } else {
-            my $guard = "${typ_rendered}(${var_name})";
-            return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
-        }
+        my $guard = render_guard ($var_name, $typ);
+        return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
     } elsif ($name eq 'Typ') {
-        return "${kind_lc}${nr}_${aid_lc}";
+        confess 'We do not render bare Typ nodes!';
     } elsif ($name eq 'Var') {
-        if (scalar @arguments < $nr) {
-            my @quantifiers = $node->findnodes ('ancestor::For');
-            my $num_quantifiers = scalar @quantifiers;
-            if ($num_quantifiers < $nr) {
-                confess 'To render a Var with nr = ', $nr, ' we need at least that many quantifiers; but we found only ', $num_quantifiers;
-            }
-            my $quantifier = $quantifiers[$nr - 1];
+        my @quantifiers = $node->findnodes ('ancestor::For');
+        my $num_quantifiers = scalar @quantifiers;
+        if ($num_quantifiers < $nr) {
+            confess 'To render a Var with nr = ', $nr, ' we need at least that many quantifiers; but we found only ', $num_quantifiers;
+        }
+        my $quantifier = $quantifiers[$nr - 1];
+        my $var_name = undef;
+        if ($quantifier->hasAttribute ('vid')) {
             my $vid = $quantifier->getAttribute ('vid');
-            if (defined $vid) {
-                return "X${vid}";
-            } else {
-                my $vid = $quantifier->findvalue ('count (ancestor::For[not(@vid)]) + 1');
-                return "Y${vid}";
-            }
+            $var_name = "X${vid}";
+        } else {
+            my $vid = $quantifier->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+            $var_name = "Y${vid}";
+        }
+        if (scalar @arguments < $nr) {
+            return $var_name;
         } else {
             # We are substituting
             # carp 'we are substituting';
             my $val = $arguments[$nr - 1];
-            return render_semantic_content ($val, @arguments);
+            return render_guard ($var_name, $val);
         }
     } elsif ($name eq 'And') {
         my @children = $node->findnodes ('*');
@@ -1873,10 +1839,10 @@ sub render_semantic_content {
                 my $vid = $for->findvalue ('count (ancestor::For[not(@vid)]) + 1');
                 $var_name = "Y${vid}";
             }
-            my $typ_rendered = render_semantic_content ($typ, @arguments);
+            my $guard = render_guard ($var_name, $typ);
             (my $matrix) = $for->findnodes ('Not/*[1]');
             my $rendered_matrix = render_semantic_content ($matrix, @arguments);
-            return "(? [${var_name}] : (${typ_rendered}(${var_name}) & ${rendered_matrix}))";
+            return "(? [${var_name}] : (${guard} & ${rendered_matrix}))";
         } elsif ($node->exists ('For')) {
             (my $for) = $node->findnodes ('For');
             (my $typ) = $for->findnodes ('Typ');
@@ -1891,10 +1857,10 @@ sub render_semantic_content {
                 my $vid = $for->findvalue ('count (ancestor::For[not(@vid)]) + 1');
                 $var_name = "Y${vid}";
             }
-            my $typ_rendered = render_semantic_content ($typ, @arguments);
+            my $guard = render_guard ($var_name, $typ);
             (my $matrix) = $for->findnodes ('*[position() = last()]');
             my $rendered_matrix = render_semantic_content ($matrix, @arguments);
-            return "(? [${var_name}] : (${typ_rendered}(${var_name}) & (~ ${rendered_matrix})))";
+            return "(? [${var_name}] : (${guard} & (~ ${rendered_matrix})))";
         } elsif ($node->exists ('And[count(*) = 2]/Not')) {
             (my $conjunction) = $node->findnodes ('And');
             (my $lhs) = $conjunction->findnodes ('*[1]');
@@ -1956,9 +1922,8 @@ sub render_proposition {
             } else {
                 $var_name = "X${i}";
             }
-
-            my $typ_rendered = render_semantic_content ($typ);
-            $content = "(! [${var_name}] : (${typ_rendered}(${var_name}) => ${content}))";
+            my $guard = render_guard ($var_name, $typ);
+            $content = "(! [${var_name}] : (${guard} => ${content}))";
         }
     }
     return $content;
@@ -2177,7 +2142,12 @@ sub render_choice_term {
     if (! defined $typ) {
         confess 'Choice node lacks a Typ child.';
     }
-    my $typ_rendered = render_semantic_content ($typ);
+    my $typ_aid = get_aid_attribute ($typ);
+    my $typ_nr = get_nr_attribute ($typ);
+    my $typ_kind = get_kind_attribute ($typ);
+    my $typ_aid_lc = lc $typ_aid;
+    my $typ_kind_lc = lc $typ_kind;
+    my $typ_rendered = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
     return "epsilon_${typ_rendered}";
 }
 
@@ -2198,31 +2168,9 @@ sub render_choices {
             }
             my $choice_term = render_choice_term ($choice_node);
             # the choice term belongs to the type and has the adjectives
-            my $typ_rendered = render_semantic_content ($typ);
             my @statements = ();
-            push (@statements, "${typ_rendered}(${choice_term})");
-            my @adjectives = $cluster->findnodes ('Adjective');
-            foreach my $adjective (@adjectives) {
-                my $aid = $adjective->getAttribute ('aid');
-                my $nr = $adjective->getAttribute ('absnr');
-                my $kind = $adjective->getAttribute ('kind');
-                if (! defined $aid) {
-                    confess 'Adjective lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Adjective lacks an absnr attribute.';
-                }
-                if (! defined $kind) {
-                    confess 'Adjective lacks a kind attribute.';
-                }
-                my $kind_lc = lc $kind;
-                my $aid_lc = lc $aid;
-                if ($adjective->exists ('@value = "false"')) {
-                    push (@statements, "(~ ${kind_lc}${nr}_${aid_lc}(${choice_term}))");
-                } else {
-                    push (@statements, "${kind_lc}${nr}_${aid_lc}(${choice_term})");
-                }
-            }
+            my $guard = render_guard ($choice_term, $typ);
+            push (@statements, $guard);
             my $answer = '(';
             my $num_statements = scalar @statements;
             foreach my $i (1 .. $num_statements) {
@@ -2313,10 +2261,10 @@ sub render_idempotence {
     if (scalar @arg_types != 2) {
         confess 'How to render idempotence for a constructor that does not accept exactly 2 arguments?';
     }
-    my $typ_1 = $arg_types[0];
     my $var_1 = 'X1';
-    my $typ_1_rendered = render_semantic_content ($typ_1);
-    return "(! [${var_1}] : (${typ_1_rendered}(${var_1}) => (${constructor_name}(${var_1},${var_1}) = ${var_1})))";
+    my $typ_1 = $arg_types[0];
+    my $guard = render_guard ($var_1, $typ_1);
+    return "(! [${var_1}] : (${guard} => (${constructor_name}(${var_1},${var_1}) = ${var_1})))";
 }
 
 sub render_commutativity {
@@ -2334,9 +2282,9 @@ sub render_commutativity {
     my $typ_2 = $arg_types[1];
     my $var_1 = 'X1';
     my $var_2 = 'X2';
-    my $typ_1_rendered = render_semantic_content ($typ_1);
-    my $typ_2_rendered = render_semantic_content ($typ_2);
-    return "(! [${var_1},${var_2}] : ((${typ_1_rendered}(${var_1}) & ${typ_2_rendered}(${var_2})) => (${constructor_name}(${var_1},${var_2}) = ${constructor_name}(${var_2},${var_1}))))";
+    my $guard_1 = render_guard ($var_1, $typ_1);
+    my $guard_2 = render_guard ($var_2, $typ_2);
+    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) = ${constructor_name}(${var_2},${var_1}))))";
 }
 
 sub render_existence {
@@ -2389,9 +2337,9 @@ sub render_symmetry {
     my $typ_2 = $arg_types[1];
     my $var_1 = 'X1';
     my $var_2 = 'X2';
-    my $typ_1_rendered = render_semantic_content ($typ_1);
-    my $typ_2_rendered = render_semantic_content ($typ_2);
-    return "(! [${var_1},${var_2}] : ((${typ_1_rendered}(${var_1}) & ${typ_2_rendered}(${var_2})) => (${constructor_name}(${var_1},${var_2}) <=> ${constructor_name}(${var_2},${var_1}))))";
+    my $guard_1 = render_guard ($var_1, $typ_1);
+    my $guard_2 = render_guard ($var_2, $typ_2);
+    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) <=> ${constructor_name}(${var_2},${var_1}))))";
 }
 
 sub render_asymmetry {
@@ -2409,9 +2357,9 @@ sub render_asymmetry {
     my $typ_2 = $arg_types[1];
     my $var_1 = 'X1';
     my $var_2 = 'X2';
-    my $typ_1_rendered = render_semantic_content ($typ_1);
-    my $typ_2_rendered = render_semantic_content ($typ_2);
-    return "(! [${var_1},${var_2}] : ((${typ_1_rendered}(${var_1}) & ${typ_2_rendered}(${var_2})) => (${constructor_name}(${var_1},${var_2}) <=> (~ ${constructor_name}(${var_2},${var_1})))))";
+    my $guard_1 = render_guard ($var_1, $typ_1);
+    my $guard_2 = render_guard ($var_2, $typ_2);
+    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) <=> (~ ${constructor_name}(${var_2},${var_1})))))";
 }
 
 sub render_reflexivity {
@@ -2427,8 +2375,8 @@ sub render_reflexivity {
     }
     my $typ_1 = $arg_types[0];
     my $var_1 = 'X1';
-    my $typ_1_rendered = render_semantic_content ($typ_1);
-    return "(! [${var_1}] : (${typ_1_rendered}(${var_1}) => (${constructor_name}(${var_1},${var_1}))))";
+    my $guard_1 = render_guard ($var_1, $typ_1);
+    return "(! [${var_1}] : (${guard_1} => (${constructor_name}(${var_1},${var_1}))))";
 }
 
 sub render_irreflexivity {
@@ -2444,8 +2392,8 @@ sub render_irreflexivity {
     }
     my $typ_1 = $arg_types[0];
     my $var_1 = 'X1';
-    my $typ_1_rendered = render_semantic_content ($typ_1);
-    return "(! [${var_1}] : (${typ_1_rendered}(${var_1}) => (~ ${constructor_name}(${var_1},${var_1}))))";
+    my $guard = render_guard ($var_1, $typ_1);
+    return "(! [${var_1}] : (${guard} => (~ ${constructor_name}(${var_1},${var_1}))))";
 }
 
 sub formulate_property_for_constructor {
