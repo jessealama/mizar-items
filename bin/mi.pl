@@ -1765,7 +1765,7 @@ sub render_semantic_content {
             # We are substituting
             # carp 'we are substituting';
             my $val = $arguments[$nr - 1];
-            return render_guard ($var_name, $val);
+            return render_semantic_content ($val);
         }
     } elsif ($name eq 'And') {
         my @children = $node->findnodes ('*');
