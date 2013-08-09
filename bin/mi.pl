@@ -2364,7 +2364,7 @@ sub render_asymmetry {
     my $var_2 = 'X2';
     my $guard_1 = render_guard ($var_1, $typ_1);
     my $guard_2 = render_guard ($var_2, $typ_2);
-    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) <=> (~ ${constructor_name}(${var_2},${var_1})))))";
+    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) => (~ ${constructor_name}(${var_2},${var_1})))))";
 }
 
 sub render_reflexivity {
