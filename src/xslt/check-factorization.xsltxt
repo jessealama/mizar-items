@@ -47,30 +47,3 @@ tpl [Block[    @kind = "Definitional-Block"
                           or @kind = "Structure-Definition"]) > 1]] {
   apply [.] (#message = "We found a definitional block that defines more than one thing.") mode="die";
 }
-
-tpl [Scheme-Justification] {
-  $context = `.`;
-  for-each [ancestor::*[parent::Text-Proper]] {
-    choose {
-      when [self::Item[@kind = "Scheme-Block-Item"]] {
-        // ok
-      }
-      when [self::Item[@kind = "Regular-Statement" and @shape = "Compact-Statement"]] {
-        if [count (preceding-sibling::*) = 0] {
-          apply [$context] (#message = "We found a Scheme-Justification within a non-scheme.") mode="die";
-        } else {
-          for-each [preceding-sibling::*[1]] {
-            if [self::Item[@kind = "Pragma" and @spelling = "$C scheme instance"]] {
-              // ok
-            } else {
-              apply [$context] (#message = "We found a Scheme-Justification within a non-scheme.") mode="die";
-            }
-          }
-        }
-      }
-      otherwise {
-        apply [$context] (#message = "We found a Scheme-Justification within a non-scheme.") mode="die";
-      }
-    }
-  }
-}
