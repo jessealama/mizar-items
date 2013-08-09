@@ -3,12 +3,13 @@
 use warnings;
 use strict;
 use File::Basename qw(basename);
+use File::Path qw(rmtree);
 use Getopt::Long;
 use Pod::Usage;
 use File::Temp qw(tempfile);
 use Carp qw(croak carp confess);
 use XML::LibXML;
-use List::MoreUtils qw(none);
+use List::MoreUtils qw(none first_index);
 use Regexp::DefaultFlags;
 use IPC::Run qw(run start);
 use charnames qw( :full ); # for referring to characters in regular expressions
@@ -16,6 +17,7 @@ use Readonly;
 use FindBin qw($RealBin);
 use lib "$RealBin/../src/perl/";
 use Data::Dumper;
+use List::MoreUtils qw(any);
 
 use Utils qw(parse_xml_file);
 
@@ -118,6 +120,17 @@ sub constructors_in_file {
     return @constructors;
 }
 
+sub get_attribute {
+    my $node = shift;
+    my $attr = shift;
+    if ($node->hasAttribute ($attr)) {
+        return $node->getAttribute ($attr);
+    } else {
+        my $name = $node->nodeName ();
+        confess '', $name, ' node lacks a(n) ', $attr, ' attribute.';
+    }
+}
+
 sub article_dependencies {
     my $article_path = shift;
 
@@ -154,18 +167,11 @@ sub article_dependencies {
                     $cluster_kind = 'f';
                 } elsif ($cluster->exists ('self::RCluster')) {
                     $cluster_kind = 'r';
+                } else {
+                    confess 'What kind of cluster is contained in ', $file, '?';
                 }
-                if (! defined $cluster_kind) {
-                    confess 'Unable to make sense of a cluster in ', $file;
-                }
-                my $aid = $cluster->getAttribute ('aid');
-                my $nr = $cluster->getAttribute ('nr');
-                if (! defined $aid) {
-                    confess 'Cluster node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Cluster node in ', $file, ' lacks an nr attribute.';
-                }
+                my $aid = get_attribute ($cluster, 'aid');
+                my $nr = get_attribute ($cluster, 'nr');
                 my $aid_lc = lc $aid;
                 my $item = "${aid_lc}:${cluster_kind}cluster:${nr}";
                 $deps{$item} = 0;
@@ -192,17 +198,12 @@ sub article_dependencies {
             my $dfs_root = $dfs_doc->documentElement ();
             my @definientia = $dfs_root->findnodes ('descendant::Definiens');
             foreach my $definiens (@definientia) {
-                my $definiens_kind = $definiens->getAttribute ('constrkind');
-                my $aid = $definiens->getAttribute ('aid');
-                my $nr = $definiens->getAttribute ('absconstrnr');
-                if (! defined $definiens_kind) {
-                    confess 'Unable to make sense of a definiens in ', $file;
-                }
-                if (! defined $aid) {
-                    confess 'Definiens node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Definiens node in ', $file, ' lacks an nr attribute.';
+                my $definiens_kind = get_attribute ($definiens, 'constrkind');
+                my $aid = get_attribute ($definiens, 'aid');
+                my $constraid = get_attribute ($definiens, 'constraid');
+                my $nr = get_attribute ($definiens, 'absconstrnr');
+                if ($aid ne $constraid) {
+                    $nr = get_attribute ($definiens, 'defnr');
                 }
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
@@ -227,7 +228,9 @@ sub article_dependencies {
             foreach my $definiens (@definientia) {
                 my $definiens_kind = $definiens->getAttribute ('constrkind');
                 my $aid = $definiens->getAttribute ('aid');
+                my $constraid = $definiens->getAttribute ('constraid');
                 my $nr = $definiens->getAttribute ('absconstrnr');
+                my $defnr = $definiens->getAttribute ('defnr');
                 if (! defined $definiens_kind) {
                     confess 'Unable to make sense of a definiens in ', $file;
                 }
@@ -237,10 +240,42 @@ sub article_dependencies {
                 if (! defined $nr) {
                     confess 'Definiens node in ', $file, ' lacks an nr attribute.';
                 }
+                if (! defined $defnr) {
+                    confess 'Definiens node in ', $file, ' lacks a defnr attribute.';
+                }
+                if (! defined $constraid) {
+                    confess 'Definiens node in ', $file, ' lacks a constraid attribute.';
+                }
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
-                my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
-                $deps{$item} = 0;
+                if ($constraid eq $aid) {
+                    my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
+                    $deps{$item} = 0;
+                } else {
+                    my $mizfiles = $ENV{'MIZFILES'};
+                    if (! defined $mizfiles) {
+                        confess 'MIZFILES environment variable not defined.';
+                    }
+                    my $miztmp_dir = "${mizfiles}/miztmp";
+                    if (! -d $miztmp_dir) {
+                        confess 'miztmp dir missing under ', $mizfiles;
+                    }
+                    my $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
+                    if (! -e $item_xml) {
+                        confess 'Absolutized XML for ', $aid_lc, ' missing under ', $miztmp_dir;
+                    }
+                    my $item_xml_doc = parse_xml_file ($item_xml);
+                    my $item_xml_root = $item_xml_doc->documentElement ();
+                    my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                    (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
+                    if (! defined $definiens_node) {
+                        confess 'No Definiens node found in ', $item_xml, ' matching', $LF, $LF, '  ', $definiens_xpath;
+                    }
+                    my $count_xpath = "count (preceding::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                    my $count = $definiens_node->findvalue ($count_xpath);
+                    my $item = "${aid_lc}:${kind_lc}definiens:${count}";
+                    $deps{$item} = 0;
+                }
             }
             # Record constructor dependencies
             my @constructors = constructors_in_file ($file);
@@ -256,20 +291,54 @@ sub article_dependencies {
             foreach my $definiens (@definientia) {
                 my $definiens_kind = $definiens->getAttribute ('constrkind');
                 my $aid = $definiens->getAttribute ('aid');
+                my $constraid = $definiens->getAttribute ('constraid');
                 my $nr = $definiens->getAttribute ('absconstrnr');
+                my $defnr = $definiens->getAttribute ('defnr');
                 if (! defined $definiens_kind) {
                     confess 'Unable to make sense of a definiens in ', $file;
                 }
                 if (! defined $aid) {
                     confess 'Definiens node in ', $file, ' lacks an aid attribute.';
                 }
+                if (! defined $constraid) {
+                    confess 'Definiens node in ', $file, ' lacks a constraid attribute.';
+                }
                 if (! defined $nr) {
                     confess 'Definiens node in ', $file, ' lacks an nr attribute.';
                 }
+                if (! defined $defnr) {
+                    confess 'Definiens node in ', $file, ' lacks a defnr attribute.';
+                }
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
-                my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
-                $deps{$item} = 0;
+                if ($aid eq $constraid) {
+                    my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
+                    $deps{$item} = 0;
+                } else {
+                    my $mizfiles = $ENV{'MIZFILES'};
+                    if (! defined $mizfiles) {
+                        confess 'MIZFILES environment variable not defined.';
+                    }
+                    my $miztmp_dir = "${mizfiles}/miztmp";
+                    if (! -d $miztmp_dir) {
+                        confess 'miztmp dir missing under ', $mizfiles;
+                    }
+                    my $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
+                    if (! -e $item_xml) {
+                        confess 'Absolutized XML for ', $aid_lc, ' missing under ', $miztmp_dir;
+                    }
+                    my $item_xml_doc = parse_xml_file ($item_xml);
+                    my $item_xml_root = $item_xml_doc->documentElement ();
+                    my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                    (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
+                    if (! defined $definiens_node) {
+                        confess 'No Definiens node found in ', $item_xml, ' matching', $LF, $LF, '  ', $definiens_xpath;
+                    }
+                    my $count_xpath = "count (preceding::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                    my $count = $definiens_node->findvalue ($count_xpath);
+                    my $item = "${aid_lc}:${kind_lc}definiens:${count}";
+                    $deps{$item} = 0;
+                }
             }
             # Record constructor dependencies
             my @constructors = constructors_in_file ($file);
@@ -399,8 +468,8 @@ sub article_dependencies {
         } elsif ($file =~ / [.] ere \z /) {
             my @ere_lines = `cat $file`;
             chomp @ere_lines;
-            foreach my $i (1 .. scalar @ere_lines) {
-                my $ere_line = $ere_lines[$i - 1];
+            foreach my $i (0 .. scalar @ere_lines - 1) {
+                my $ere_line = $ere_lines[$i];
                 if ($ere_line !~ /\A 0 [\N{SPACE}]* \z / ) {
                     my $requirement_item = "requirement:${i}";
                     $deps{$requirement_item} = 0;
@@ -734,22 +803,21 @@ sub resolve_local_item {
             } else {
                 confess 'Error: could not resolve \'', $underlying_item, '\'.', $LF, 'The local item table looks like:', $LF, Dumper (%local_item_table);
             }
-        } else {
-            my $resolved = $local_item_table{$item};
-            if (defined $resolved) {
-                return $resolved;
-            } elsif ($item =~ / [:] theorem [:] [1] \z/) {
-                # is this actually a deftheorem in disguise?
-                my $deftheorem_item = "${PREFIX_LC}${fragment_number}:deftheorem:1";
-                my $resolved_deftheorem = $local_item_table{$deftheorem_item};
-                if (defined $resolved_deftheorem) {
-                    return $resolved_deftheorem;
-                } else {
-                    confess 'Error: could not resolve the theorem item \'', $item, '\'.', $LF, 'The local item table looks like:', $LF, Dumper (%local_item_table);
-                }
+        } elsif ($item =~ / [:] theorem [:] [1] \z/) {
+            # is this actually a deftheorem or a lemma in disguise?
+            my $deftheorem_item = "${PREFIX_LC}${fragment_number}:deftheorem:1";
+            my $lemma_item = "${PREFIX_LC}${fragment_number}:lemma:1";
+            my $resolved_deftheorem = $local_item_table{$deftheorem_item};
+            my $resolved_lemma = $local_item_table{$lemma_item};
+            if (defined $resolved_deftheorem) {
+                return $resolved_deftheorem;
+            } elsif (defined $resolved_lemma) {
+                return $resolved_lemma;
             } else {
-                confess 'Error: could not resolve \'', $item, '\'.', $LF, 'The local item table looks like:', $LF, Dumper (%local_item_table);
+                confess 'Error: could not resolve the theorem item \'', $item, '\'.', $LF, 'The local item table looks like:', $LF, Dumper (%local_item_table);
             }
+        } else {
+            confess 'Error: could not resolve \'', $item, '\'.', $LF, 'The local item table looks like:', $LF, Dumper (%local_item_table);
         }
     } else {
         return $item;
@@ -820,7 +888,12 @@ foreach my $prel_file (@prel_files) {
         } elsif ($prel_doc->exists ('count (descendant::Theorem) > 1')) {
             confess 'Too many theorems in ', $prel_doc, '; we assume there is exactly 1.';
         } elsif ($prel_doc->exists ('descendant::Theorem[@kind = "T"]')) {
-            my $key = 'theorem';
+            my $key = undef;
+            if ($fragment_msx_root->exists ('descendant::Item[@kind = "Pragma" and @spelling = "$C promoted lemma"]')) {
+                $key = 'lemma';
+            } else {
+                $key = 'theorem';
+            }
             my $index = $enumeration{$key};
             if (! defined $index) {
                 confess 'Error: somehow the key', $LF, $LF, '  ', $key, $LF, $LF, 'is missing from the enmeration table, which looks like:', $LF, Dumper (%enumeration);
@@ -1404,70 +1477,82 @@ sub source_of_item {
     }
 }
 
-# Sanity checks
-# Warn about items that depend on nothing
-foreach my $item (keys %resolved_dependencies) {
-    my @deps = @{$resolved_dependencies{$item}};
-    my $num_deps = scalar @deps;
-    if ($num_deps == 0) {
-        my $source_item = source_of_item ($item);
-        carp $item, ' (coming from ', $source_item, ') depends on nothing.';
-    }
+# # Sanity checks
+# # Warn about items that depend on nothing
+# foreach my $item (keys %resolved_dependencies) {
+#     my @deps = @{$resolved_dependencies{$item}};
+#     my $num_deps = scalar @deps;
+#     if ($num_deps == 0) {
+#         my $source_item = source_of_item ($item);
+#         carp $item, ' (coming from ', $source_item, ') depends on nothing.';
+#     }
 
+# }
+
+# # Every local item appearing as needed is "defined"
+# my %needed = ();
+# foreach my $item (keys %resolved_dependencies) {
+#     my @deps = @{$resolved_dependencies{$item}};
+#     foreach my $dep (@deps) {
+#         if ($dep =~ / \A ${article_name} [:] /) {
+#             $needed{$dep} = 0;
+#         }
+#     }
+# }
+# foreach my $item (keys %needed) {
+#     if (! defined $resolved_dependencies{$item}) {
+#         carp $item, ' appears as a dependency, but it is not "defined" in the current table.';
+#     }
+# }
+
+# # Every fragment yields an item that appears in the local item table
+# my @local_items = keys %local_item_table;
+# my @miz_files = glob "${text_dir}/${PREFIX_LC}*.miz";
+# foreach my $miz_file (@miz_files) {
+#     my $fragment_number = fragment_number ($miz_file);
+#     if (none { $_ =~ / \A ${PREFIX_LC}${fragment_number} [:] / } @local_items) {
+#         carp 'Fragment ', $fragment_number, ' produced nothing that was registered in the local item table.';
+#     }
+# }
+
+# # Warn about unused items
+# foreach my $item (keys %resolved_dependencies) {
+#     if (! (defined $needed{$item})) {
+#         my $source = source_of_item ($item);
+#         carp $item, ' (coming from ', $source, ') is never used.';
+#     }
+# }
+
+my $fragment_item_path = "${article_dir}/${article_name}.map";
+
+# Save the fragment-item table
+open (my $fragment_fh, '>', $fragment_item_path)
+    or confess 'Cannot open an output filehandle for ', $fragment_item_path;
+foreach my $local_item (keys %local_item_table) {
+    my $item = $local_item_table{$local_item};
+    say {$fragment_fh} "${local_item} ${item}";
 }
+close $fragment_fh
+    or confess 'Cannot close the output filehandle for ', $fragment_item_path;
 
-# Every local item appearing as needed is "defined"
-my %needed = ();
+my $deps_path = "${article_dir}/${article_name}.deps";
+
+open (my $deps_fh, '>', $deps_path)
+    or confess 'Cannot open an output filehandle for ', $deps_path;
 foreach my $item (keys %resolved_dependencies) {
     my @deps = @{$resolved_dependencies{$item}};
+    print {$deps_fh} $item;
     foreach my $dep (@deps) {
-        if ($dep =~ / \A ${article_name} [:] /) {
-            $needed{$dep} = 0;
-        }
+        print {$deps_fh} ' ', $dep;
     }
+    print {$deps_fh} $LF;
 }
-foreach my $item (keys %needed) {
-    if (! defined $resolved_dependencies{$item}) {
-        carp $item, ' appears as a dependency, but it is not "defined" in the current table.';
-    }
-}
-
-# Every fragment yields an item that appears in the local item table
-my @local_items = keys %local_item_table;
-my @miz_files = glob "${text_dir}/${PREFIX_LC}*.miz";
-foreach my $miz_file (@miz_files) {
-    my $fragment_number = fragment_number ($miz_file);
-    if (none { $_ =~ / \A ${PREFIX_LC}${fragment_number} [:] / } @local_items) {
-        carp 'Fragment ', $fragment_number, ' produced nothing that was registered in the local item table.';
-    }
-}
-
-# Warn about unused items
-foreach my $item (keys %resolved_dependencies) {
-    if (! (defined $needed{$item})) {
-        my $source = source_of_item ($item);
-        carp $item, ' (coming from ', $source, ') is never used.';
-    }
-}
-
-# Dump the table
-print Dumper (%local_item_table);
-foreach my $item (keys %resolved_dependencies) {
-    my @deps = @{$resolved_dependencies{$item}};
-    print $item;
-    foreach my $dep (@deps) {
-        print ' ', $dep;
-    }
-    print "\N{LF}";
-}
+close $deps_fh
+    or confess 'Cannot close output filehandle for ', $deps_path;
 
 sub is_scheme_item {
     my $item = shift;
-    if ($item =~ / [:] scheme [:] (\d+) \z /) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return ($item =~ / [:] scheme [:] \d+ \z /);
 }
 
 sub is_requirement_item {
@@ -1489,6 +1574,11 @@ sub is_theorem_item {
     return ($item =~ / [:] theorem [:] /)
 }
 
+sub is_lemma_item {
+    my $item = shift;
+    return ($item =~ / [:] lemma [:] /)
+}
+
 sub is_cluster_item {
     my $item = shift;
     return ($item =~ / [:] . cluster [:] /);
@@ -1506,15 +1596,21 @@ sub is_constructor_property_item {
 
 sub has_semantic_content {
     my $item = shift;
-    if (is_requirement_item ($item)) {
+    if (is_scheme_item ($item)) {
+        return 1;
+    } elsif (is_requirement_item ($item)) {
         return 1;
     } elsif (is_deftheorem_item ($item)) {
         return 1;
     } elsif (is_theorem_item ($item)) {
         return 1;
+    } elsif (is_lemma_item ($item)) {
+        return 1;
     } elsif (is_cluster_item ($item)) {
         return 1;
     } elsif (is_deftheorem_item ($item)) {
+        return 1;
+    } elsif (is_definiens_item ($item)) {
         return 1;
     } elsif (is_constructor_property_item ($item)) {
         return 1;
@@ -1525,6 +1621,7 @@ sub has_semantic_content {
 
 sub render_semantic_content {
     my $node = shift;
+    my @arguments = @_;
     my $name = $node->nodeName ();
     my $aid = $node->getAttribute ('aid');
     my $kind = $node->getAttribute ('kind');
@@ -1533,24 +1630,40 @@ sub render_semantic_content {
     my $aid_lc = defined $aid ? lc $aid : undef;
     if ($name eq 'Pred' || $name eq 'Func') {
         if (! defined $aid) {
-            confess 'aid attribute missing';
-        }
-        if (! defined $nr) {
-            confess 'nr attribute missing.';
+            confess 'aid attribute missing from a Pred/Func';
         }
         if (! defined $kind) {
-            confess 'kind attribute missing';
+            confess 'kind attribute missing from a Pred/Func';
+        }
+        my $absnr = $node->getAttribute ('absnr');
+        if (! defined $absnr) {
+            confess 'absnr attribute missing from a Pred/Func.';
+        }
+        if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+            my $local_item = "${aid_lc}:${kind_lc}constructor:${absnr}";
+            my $item = $local_item_table{$local_item};
+            if (! defined $item) {
+                confess 'Could not find ', $local_item, ' in the local item table.';
+            }
+            $absnr = nr_of_item ($item);
+            $aid_lc = $article_name;
         }
         my @children = $node->findnodes ('*');
-        my $answer = "${kind_lc}${nr}_${aid_lc}";
+        my $answer = "${kind_lc}${absnr}_${aid_lc}";
         if (scalar @children == 0) {
             return $answer;
+        } elsif ($aid_lc eq 'hidden' && $kind_lc eq 'r' && $absnr eq '1') {
+            (my $lhs) = $node->findnodes ('*[1]');
+            (my $rhs) = $node->findnodes ('*[2]');
+            my $rendered_lhs = render_semantic_content ($lhs, @arguments);
+            my $rendered_rhs = render_semantic_content ($rhs, @arguments);
+            return "(${rendered_lhs} = ${rendered_rhs})";
         } else {
             my $num_children = scalar @children;
             $answer .= '(';
             foreach my $i (1 .. $num_children) {
                 my $child = $children[$i - 1];
-                my $rendered_child = render_semantic_content ($child);
+                my $rendered_child = render_semantic_content ($child, @arguments);
                 $answer .= $rendered_child;
                 if ($i < $num_children) {
                     $answer .= ', ';
@@ -1559,40 +1672,239 @@ sub render_semantic_content {
             $answer .= ')';
             return $answer;
         }
+    } elsif ($name eq 'Choice') {
+        # quite incomplete
+        return render_choice_term ($node);
+    } elsif ($name eq 'LocusVar') {
+        return "X${nr}";
+    } elsif ($name eq 'Verum') {
+        return '$true';
+    } elsif ($name eq 'PrivPred') {
+        my $nr = $node->getAttribute ('nr');
+        if (! defined $nr) {
+            confess 'PrivPred node lacks an nr attribute.';
+        }
+        my @values = $node->findnodes ('*[preceding-sibling::*[1][self::Var]]');
+        if (scalar @values != 1) {
+            confess 'How to deal with a PrivPred that has more than 1 value?';
+        }
+        my $value = $values[0];
+        return render_semantic_content ($value);
+    } elsif ($name eq 'Is') {
+        my @children = $node->findnodes ('*');
+        if (scalar @children != 2) {
+            confess 'Is node does not have exactly 2 children.';
+        }
+        my $term = $children[0];
+        my $type = $children[1];
+        my $type_rendered = render_semantic_content ($type, @arguments);
+        my $term_rendered = render_semantic_content ($term, @arguments);
+        return "${type_rendered}(${term_rendered})";
     } elsif ($name eq 'For') {
         (my $typ) = $node->findnodes ('Typ');
         if (! defined $typ) {
             confess 'Typ node not found under a universal quantifier.';
         }
-        my $nesting = $node->findvalue ('count (ancestor::For) + 1');
-        my $var_name = "X${nesting}";
-        my $typ_rendered = render_semantic_content ($typ);
+        my $vid = $node->getAttribute ('vid');
+        my $var_name = undef;
+        if (defined $vid) {
+            $var_name = "X${vid}";
+        } else {
+            my $vid = $node->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+            $var_name = "Y${vid}";
+        }
         (my $matrix) = $node->findnodes ('*[position() = last()]');
-        my $rendered_matrix = render_semantic_content ($matrix);
-        return "(! [${var_name}] : (${typ_rendered}(${var_name}) => ${rendered_matrix})";
+        my $rendered_matrix = render_semantic_content ($matrix, @arguments);
+        my $typ_rendered = render_semantic_content ($typ, @arguments);
+        my $guard = undef;
+        if ($typ->exists ('Cluster')) {
+            (my $cluster_node) = $typ->findnodes ('Cluster');
+            my @adjectives = $cluster_node->findnodes ('Adjective');
+            if (scalar @adjectives == 0) {
+                my $guard = "${typ_rendered}(${var_name})";
+                return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
+            } else {
+                my $guard = '(';
+                $guard .= "${typ_rendered}(${var_name})";
+                my $num_adjectives = scalar @adjectives;
+                foreach my $i (1 .. $num_adjectives) {
+                    my $adjective = $adjectives[$i - 1];
+                    my $adj_aid = $adjective->getAttribute ('aid');
+                    my $adj_nr = $adjective->getAttribute ('nr');
+                    if (! defined $adj_aid) {
+                        confess 'Adjective lacks an aid attribute.';
+                    }
+                    if (! defined $adj_nr) {
+                        confess 'Adjective lacks an nr attribute.';
+                    }
+                    my $adj_aid_lc = lc $adj_aid;
+                    my $bare_adj = "v${adj_nr}_${adj_aid_lc}";
+                    if ($adjective->hasAttribute ('value') && $adjective->getAttribute ('value') eq 'false') {
+                        $guard .= " & (~ ${bare_adj}(${var_name}))";
+                    } else {
+                        $guard .= " & ${bare_adj}(${var_name})";
+                    }
+                }
+                $guard .= ')';
+                return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
+            }
+        } else {
+            my $guard = "${typ_rendered}(${var_name})";
+            return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
+        }
     } elsif ($name eq 'Typ') {
         return "${kind_lc}${nr}_${aid_lc}";
     } elsif ($name eq 'Var') {
-        return "X${nr}";
+        if (scalar @arguments < $nr) {
+            my @quantifiers = $node->findnodes ('ancestor::For');
+            my $num_quantifiers = scalar @quantifiers;
+            if ($num_quantifiers < $nr) {
+                confess 'To render a Var with nr = ', $nr, ' we need at least that many quantifiers; but we found only ', $num_quantifiers;
+            }
+            my $quantifier = $quantifiers[$nr - 1];
+            my $vid = $quantifier->getAttribute ('vid');
+            if (defined $vid) {
+                return "X${vid}";
+            } else {
+                my $vid = $quantifier->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+                return "Y${vid}";
+            }
+        } else {
+            # We are substituting
+            # carp 'we are substituting';
+            my $val = $arguments[$nr - 1];
+            return render_semantic_content ($val, @arguments);
+        }
     } elsif ($name eq 'And') {
-        (my $lhs) = $node->findnodes ('*[1]');
-        (my $rhs) = $node->findnodes ('*[2]');
-        if (! defined $lhs) {
-            confess 'Left-hand side of an And node missing.';
+        my @children = $node->findnodes ('*');
+        if (scalar @children == 1) {
+            my $child = $children[0];
+            return render_semantic_content ($child, @arguments);
+        } elsif (scalar @children == 2) {
+            my $lhs = $children[0];
+            my $rhs = $children[1];
+            my $lhs_rendered = render_semantic_content ($lhs, @arguments);
+            my $rhs_rendered = render_semantic_content ($rhs, @arguments);
+            if ($rhs_rendered eq '0') {
+                confess 'wtf? rhs node as string:', $LF, $rhs->toString;
+            }
+            # is this an equivalence?
+            if ($lhs->exists ('self::Not') && $rhs->exists ('self::Not')) {
+                (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
+                (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
+                if ($lhs_unnegated->exists ('self::And') && $rhs_unnegated->exists ('self::And')) {
+                    (my $lhs_unnegated_lhs) = $lhs_unnegated->findnodes ('*[1]');
+                    (my $lhs_unnegated_rhs) = $lhs_unnegated->findnodes ('*[2]');
+                    (my $rhs_unnegated_lhs) = $rhs_unnegated->findnodes ('*[1]');
+                    (my $rhs_unnegated_rhs) = $rhs_unnegated->findnodes ('*[2]');
+                    if ($lhs_unnegated_rhs->exists ('self::Not') && $rhs_unnegated_rhs->exists ('self::Not')) {
+                        (my $lhs_unnegated_rhs_unnegated) = $lhs_unnegated_rhs->findnodes ('*[1]');
+                        (my $rhs_unnegated_rhs_unnegated) = $rhs_unnegated_rhs->findnodes ('*[1]');
+                        my $p1 = render_semantic_content ($lhs_unnegated_lhs, @arguments);
+                        my $q1 = render_semantic_content ($lhs_unnegated_rhs_unnegated, @arguments);
+                        my $q2 = render_semantic_content ($rhs_unnegated_lhs, @arguments);
+                        my $p2 = render_semantic_content ($rhs_unnegated_rhs_unnegated, @arguments);
+                        if ($p1 eq $p2 && $q1 eq $q2) {
+                            return "(${p1} <=> ${q1})";
+                        } else {
+                            return "(${lhs_rendered} & ${rhs_rendered})";
+                        }
+                    } else {
+                        return "(${lhs_rendered} & ${rhs_rendered})";
+                    }
+                } else {
+                    return "(${lhs_rendered} & ${rhs_rendered})";
+                }
+            } else {
+                return "(${lhs_rendered} & ${rhs_rendered})";
+            }
+        } else {
+            my $answer = '(';
+            my $num_children = scalar @children;
+            foreach my $i (1 .. $num_children) {
+                my $child = $children[$i - 1];
+                my $child_rendered = render_semantic_content ($child, @arguments);
+                $answer .= $child_rendered;
+                if ($i < $num_children) {
+                    $answer .= ' & ';
+                }
+            }
+            $answer .= ')';
+            return $answer;
         }
-        if (! defined $rhs) {
-            confess 'Right-hand side of an And node missing.';
-        }
-        my $lhs_rendered = render_semantic_content ($lhs);
-        my $rhs_rendered = render_semantic_content ($rhs);
-        return "(${lhs_rendered} & ${rhs_rendered})";
     } elsif ($name eq 'Not') {
         (my $arg) = $node->findnodes ('*[1]');
         if (! defined $arg) {
             confess 'Not node lacks a child!';
         }
-        my $rendered_arg = render_semantic_content ($arg);
-        return "(~ ${rendered_arg})";
+        my $rendered_arg = render_semantic_content ($arg, @arguments);
+        if ($node->exists ('For/Not')) {
+            (my $for) = $node->findnodes ('For');
+            (my $typ) = $for->findnodes ('Typ');
+            if (! defined $typ) {
+                confess 'Typ node not found under a universal quantifier.';
+            }
+            my $var_name = undef;
+            if ($for->hasAttribute ('vid')) {
+                my $vid = $for->getAttribute ('vid');
+                $var_name = "X${vid}";
+            } else {
+                my $vid = $for->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+                $var_name = "Y${vid}";
+            }
+            my $typ_rendered = render_semantic_content ($typ, @arguments);
+            (my $matrix) = $for->findnodes ('Not/*[1]');
+            my $rendered_matrix = render_semantic_content ($matrix, @arguments);
+            return "(? [${var_name}] : (${typ_rendered}(${var_name}) & ${rendered_matrix}))";
+        } elsif ($node->exists ('For')) {
+            (my $for) = $node->findnodes ('For');
+            (my $typ) = $for->findnodes ('Typ');
+            if (! defined $typ) {
+                confess 'Typ node not found under a universal quantifier.';
+            }
+            my $vid = $for->getAttribute ('vid');
+            my $var_name = undef;
+            if (defined $vid) {
+                $var_name = "X${vid}";
+            } else {
+                my $vid = $for->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+                $var_name = "Y${vid}";
+            }
+            my $typ_rendered = render_semantic_content ($typ, @arguments);
+            (my $matrix) = $for->findnodes ('*[position() = last()]');
+            my $rendered_matrix = render_semantic_content ($matrix, @arguments);
+            return "(? [${var_name}] : (${typ_rendered}(${var_name}) & (~ ${rendered_matrix})))";
+        } elsif ($node->exists ('And[count(*) = 2]/Not')) {
+            (my $conjunction) = $node->findnodes ('And');
+            (my $lhs) = $conjunction->findnodes ('*[1]');
+            (my $rhs) = $conjunction->findnodes ('*[2]');
+            if ($lhs->exists ('self::Not') && $rhs->exists ('self::Not')) {
+                (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
+                (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
+                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, @arguments);
+                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, @arguments);
+                return "(${lhs_unnegated_rendered} | ${rhs_unnegated_rendered})";
+            } elsif ($lhs->exists ('self::Not')) {
+                (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
+                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, @arguments);
+                my $rhs_rendered = render_semantic_content ($rhs, @arguments);
+                return "(${rhs_rendered} => ${lhs_unnegated_rendered})";
+            } elsif ($rhs->exists ('self::Not')) {
+                (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
+                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, @arguments);
+                my $lhs_rendered = render_semantic_content ($lhs, @arguments);
+                return "(${lhs_rendered} => ${rhs_unnegated_rendered})";
+            } else {
+                my $answer = '(~ ' . $rendered_arg . ')';
+                return $answer;
+            }
+        } else {
+            my $answer = '(~ ' . $rendered_arg . ')';
+            return $answer;
+        }
+    } elsif ($name eq 'Const') {
+        my $vid = get_attribute ($node, 'vid');
+        return "X${vid}";
     } else {
         confess 'Unable to generate a rendering for nodes of kind \'', $name, '\'.';
     }
@@ -1600,8 +1912,35 @@ sub render_semantic_content {
 
 sub render_proposition {
     my $proposition_node = shift;
-    (my $content) = $proposition_node->findnodes ('*[position() = last()]');
-    return render_semantic_content ($content);
+    my @arg_types = @_;
+    (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
+    my $content = render_semantic_content ($content_node, @arg_types);
+    if ($content_node->exists ('descendant::Const')) {
+        my @constants = $content_node->findnodes ('descendant::Const');
+        my $max_const_nr = 1;
+        while ($content_node->exists ("descendant::Const[\@nr = \"${max_const_nr}\"]")) {
+            $max_const_nr++;
+        }
+        $max_const_nr--;
+        if ($max_const_nr != scalar @arg_types) {
+            confess 'There are ', $max_const_nr, ' distinct Const nodes under a Proposition node, but we were given ', scalar @arg_types, ' different argument types.';
+        }
+        my $num_arg_types = scalar @arg_types;
+        foreach my $i (1 .. $num_arg_types) {
+            my $typ = $arg_types[$num_arg_types - $i];
+            my $var_name = undef;
+            if ($typ->hasAttribute ('vid')) {
+                my $vid = $typ->getAttribute ('vid');
+                $var_name = "X${vid}";
+            } else {
+                $var_name = "X${i}";
+            }
+
+            my $typ_rendered = render_semantic_content ($typ);
+            $content = "(! [${var_name}] : (${typ_rendered}(${var_name}) => ${content}))";
+        }
+    }
+    return $content;
 }
 
 sub render_justified_theorem {
@@ -1619,6 +1958,12 @@ sub render_deftheorem {
     if (! defined $proposition_node) {
         confess 'Proposition node not found under a definitional theorem node';
     }
+    return render_proposition ($proposition_node);
+}
+
+sub render_defmeaning {
+    my $defmeaning_node = shift;
+    (my $proposition_node) = $defmeaning_node->findnodes ('*[1]');
     return render_proposition ($proposition_node);
 }
 
@@ -1676,14 +2021,94 @@ sub cluster_kind {
     }
 }
 
+sub definiens_kind {
+    my $definiens_item = shift;
+    if ($definiens_item =~ / [:] (.) definiens [:] /) {
+        return $1;
+    } else {
+        confess 'Cannot extract definiens kind from \'', $definiens_item, '\'.';
+    }
+}
+
 sub nr_of_item {
     my $item = shift;
     if ($item =~ / [:] (\d+) \z/) {
         return $1;
     } elsif ($item =~ / \A requirement [:] (\d+) \z/ ) {
         return $1;
+    } elsif (is_constructor_property_item ($item)) {
+        my $constructor = constructor_of_constructor_property ($item);
+        return nr_of_item ($constructor);
     } else {
         confess 'Cannot extract nr from \'', $item, '\'.';
+    }
+}
+
+sub deftheorem_from_definiens {
+    my $item = shift;
+    if ($item =~ / \A ${article_name} [:] . definiens [:] /) {
+        # local item
+        my $source = source_of_item ($item);
+        my $fragment_number = fragment_number ($source);
+        my $target_deftheorem = undef;
+        foreach my $x (keys %local_item_table) {
+            my $y = $local_item_table{$x};
+            if ($x =~ /\A ${PREFIX_LC}${fragment_number} [:] /) {
+                if ($y =~ / [:] deftheorem [:] (\d+) \z/) {
+                    $target_deftheorem = $y;
+                    last;
+                }
+            }
+        }
+        if (! defined $target_deftheorem) {
+            confess 'To what deftheorem does ', $item, ' correspond?';
+        }
+        return $target_deftheorem;
+    } else {
+        # non-local definiens
+        my $mizfiles = $ENV{'MIZFILES'};
+        if (! defined $mizfiles) {
+            confess 'MIZFILES environment variable not defined.';
+        }
+        my $miztmp_dir = "${mizfiles}/miztmp";
+        if (! -d $miztmp_dir) {
+            confess 'miztmp dir missing under ', $mizfiles;
+        }
+        my $article = article_of_item ($item);
+        my $item_xml = "${miztmp_dir}/${article}.xml1";
+        if (! -e $item_xml) {
+            confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+        }
+        my $item_xml_doc = parse_xml_file ($item_xml);
+        my $item_xml_root = $item_xml_doc->documentElement ();
+        my $kind = definiens_kind ($item);
+        my $kind_uc = uc $kind;
+        my $nr = nr_of_item ($item);
+        my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${kind_uc}\" and count (preceding::Definiens[\@constrkind = \"${kind_uc}\"]) + 1 = ${nr}]";
+        (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
+        if (! defined $definiens_node) {
+            confess 'No suitable Definiens node found in ', $item_xml, ' using the XPath', $LF, $LF, '  ', $definiens_xpath;
+        }
+        my $nr_from_definiens = $definiens_node->getAttribute ('nr');
+        if (! defined $nr_from_definiens) {
+            confess 'nr missing from a Definiens node.';
+        }
+        return "${article}:deftheorem:${nr_from_definiens}";
+    }
+}
+
+sub is_compatibility_item {
+    my $item = shift;
+    return ($item =~ / [[] compatibility []] \z/);
+}
+
+sub deftheorem_of_compatibility_item {
+    my $compatibility_item = shift;
+    if ($compatibility_item =~ / \A ([a-z0-9_]+) [:] deftheorem [:] (\d+) [[] compatibility []] \z/) {
+        (my $article, my $nr) = ($1, $2);
+        return "${article}:deftheorem:${nr}";
+    } else {
+        confess 'Cannot make sense of compatibility item \'', $compatibility_item, '\'.';
     }
 }
 
@@ -1696,6 +2121,11 @@ sub tptp_name_for_item {
         my $kind = constructor_kind ($constructor);
         my $nr = nr_of_item ($constructor);
         return "${property}_${kind}${nr}_${article}";
+    } elsif (is_compatibility_item ($item)) {
+        my $dt = deftheorem_of_compatibility_item ($item);
+        my $nr = nr_of_item ($dt);
+        my $aid = article_of_item ($dt);
+        return "compatibility_d${nr}_${aid}";
     } elsif (is_requirement_item ($item)) {
         my $req_nr = nr_of_item ($item);
         return "requirement_${req_nr}";
@@ -1705,124 +2135,630 @@ sub tptp_name_for_item {
         my $nr = nr_of_item ($item);
         if ($kind eq 'theorem') {
             return "t${nr}_${article}";
+        } elsif ($kind eq 'lemma') {
+            return "l${nr}_${article}";
         } elsif ($kind eq 'deftheorem') {
-            return "dt${nr}_${article}";
+            return "d${nr}_${article}";
         } elsif ($kind =~ / \A (.) cluster \z /) {
-            return "${1}c_${article}";
+            return "${1}c${nr}_${article}";
+        } elsif ($kind =~ /\A . definiens \z/) {
+            my $target_deftheorem = deftheorem_from_definiens ($item);
+            return tptp_name_for_item ($target_deftheorem);
         } else {
             confess 'How to make a TPTP name for \'', $item, '\'?';
         }
     }
 }
 
-sub render_local_item {
-    my $item = shift;
-    my $tptp_name = tptp_name_for_item ($item);
-    my $source = source_of_item ($item);
-    # warn 'source of ', $item, ' is ', $source;
-    my $fragment_number = fragment_number ($source);
-    my $fragment_xml = "${text_dir}/${PREFIX_LC}${fragment_number}.xml1";
-    my $fragment_doc = parse_xml_file ($fragment_xml);
-    my $fragment_root = $fragment_doc->documentElement ();
-    if (is_theorem_item ($item)) {
-        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem[1]');
-        if (! defined $theorem_node) {
-            confess 'Theorem node not found in ', $fragment_xml;
-        }
-        my $content = render_justified_theorem ($theorem_node);
-        return "fof(${tptp_name},theorem,${content}).";
-    } elsif (is_deftheorem_item ($item)) {
-        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem[1]');
-        if (! defined $theorem_node) {
-            confess 'JustifiedTheorem node not found in ', $fragment_xml;
-        }
-        my $content = render_justified_theorem ($theorem_node);
-        return "fof(${tptp_name},definition,${content}).";
-    } elsif (is_cluster_item ($item)) {
-        my $article = article_of_item ($item);
-        my $kind = cluster_kind ($item);
-        if ($kind eq 'f') {
-            (my $coherence_node) = $fragment_root->findnodes ('descendant::Coherence[1]');
-            if (! defined $coherence_node) {
-                confess 'Coherence node missing for a cluster at ', $fragment_xml;
-            }
-            (my $proposition_node) = $coherence_node->findnodes ('Proposition[1]');
-            if (! defined $proposition_node) {
-                confess 'No Proposition node found under the Coherence node in ', $fragment_xml;
-            }
-            my $rendered_proposition = render_proposition ($proposition_node);
-            return "fof(${kind}c_${article},theorem,${rendered_proposition}).";
-        } else {
-            confess 'How to handle clusters of kind \'', $kind, '\'?';
-        }
-    } elsif (is_constructor_property_item ($item)) {
-        my $constructor = constructor_of_constructor_property ($item);
-        my $article = article_of_item ($constructor);
-        my $nr = nr_of_item ($constructor);
-        my $constr_kind = constructor_kind ($constructor);
-        my $property = property_for_constructor ($item);
-        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem[1]');
-        if (! defined $theorem_node) {
-            confess 'JustifiedTheorem node not found in ', $fragment_xml;
-        }
-        my $content = render_justified_theorem ($theorem_node);
-        return "fof(${tptp_name},theorem,${content}).";
-    } else {
-        confess 'How to render the local item \'', $item, '\'?';
+sub render_choice_term {
+    my $node = shift;
+    (my $typ) = $node->findnodes ('Typ');
+    if (! defined $typ) {
+        confess 'Choice node lacks a Typ child.';
     }
+    my $typ_rendered = render_semantic_content ($typ);
+    return "epsilon_${typ_rendered}";
+}
+
+sub render_choices {
+    my $node = shift;
+    my $choice_xpath = 'descendant::Choice';
+    my @choices = ();
+    if ($node->exists ($choice_xpath)) {
+        my @choice_nodes = $node->findnodes ($choice_xpath);
+        foreach my $choice_node (@choice_nodes) {
+            (my $typ) = $choice_node->findnodes ('Typ');
+            if (! defined $typ) {
+                confess 'Choice lacks a Typ child.';
+            }
+            (my $cluster) = $typ->findnodes ('Cluster');
+            if (! defined $cluster) {
+                confess 'Typ node lacks a Cluster child.';
+            }
+            my $choice_term = render_choice_term ($choice_node);
+            # the choice term belongs to the type and has the adjectives
+            my $typ_rendered = render_semantic_content ($typ);
+            my @statements = ();
+            push (@statements, "${typ_rendered}(${choice_term})");
+            my @adjectives = $cluster->findnodes ('Adjective');
+            foreach my $adjective (@adjectives) {
+                my $aid = $adjective->getAttribute ('aid');
+                my $nr = $adjective->getAttribute ('absnr');
+                my $kind = $adjective->getAttribute ('kind');
+                if (! defined $aid) {
+                    confess 'Adjective lacks an aid attribute.';
+                }
+                if (! defined $nr) {
+                    confess 'Adjective lacks an absnr attribute.';
+                }
+                if (! defined $kind) {
+                    confess 'Adjective lacks a kind attribute.';
+                }
+                my $kind_lc = lc $kind;
+                my $aid_lc = lc $aid;
+                if ($adjective->exists ('@value = "false"')) {
+                    push (@statements, "(~ ${kind_lc}${nr}_${aid_lc}(${choice_term}))");
+                } else {
+                    push (@statements, "${kind_lc}${nr}_${aid_lc}(${choice_term})");
+                }
+            }
+            my $answer = '(';
+            my $num_statements = scalar @statements;
+            foreach my $i (1 .. $num_statements) {
+                my $statement = $statements[$i - 1];
+                $answer .= $statement;
+                if ($i < $num_statements) {
+                    $answer .= ' & ';
+                }
+            }
+            $answer .= ')';
+            push (@choices, "fof(dt_${choice_term},axiom,(${answer})).");
+        }
+    } else {
+        return;
+    }
+    return @choices;
+}
+
+Readonly my %CONSTRUCTOR_PROPERTY_MAKERS =>
+    (
+        'commutativity' => \&render_commutativity,
+        'idempotence' => \&render_idempotence,
+        'symmetry' => \&render_symmetry,
+        'asymmetry' => \&render_asymmetry,
+        'reflexivity' => \&render_reflexivity,
+        'irreflexivity' => \&render_irreflexivity,
+        'existence' => \&render_existence,
+        'uniqueness' => \&render_uniqueness,
+        'coherence' => \&render_coherence,
+    );
+
+sub render_tptp_constructor {
+    my $constructor = shift;
+    my $kind = $constructor->getAttribute ('kind');
+    my $aid = $constructor->getAttribute ('aid');
+    my $nr = $constructor->getAttribute ('nr');
+    if (! defined $kind) {
+        confess 'Constructor node lacks a kind attribute.';
+    }
+    if (! defined $aid) {
+        confess 'Constructor node lacks an aid attribute.';
+    }
+    if (! defined $nr) {
+        confess 'Constructor node lacks a nr attribute.';
+    }
+    my $aid_lc = lc $aid;
+    my $kind_lc = lc $kind;
+    return "${kind_lc}${nr}_${aid_lc}";
+}
+
+sub render_idempotence {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    if (scalar @arg_types != 2) {
+        confess 'How to render idempotence for a constructor that does not accept exactly 2 arguments?';
+    }
+    my $typ_1 = $arg_types[0];
+    my $var_1 = 'X1';
+    my $typ_1_rendered = render_semantic_content ($typ_1);
+    return "(! [${var_1}] : (${typ_1_rendered}(${var_1}) => (${constructor_name}(${var_1},${var_1}) = ${var_1})))";
+}
+
+sub render_commutativity {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    if (scalar @arg_types != 2) {
+        confess 'How to render commutativity for a constructor that does not accept exactly 2 arguments?';
+    }
+    my $typ_1 = $arg_types[0];
+    my $typ_2 = $arg_types[1];
+    my $var_1 = 'X1';
+    my $var_2 = 'X2';
+    my $typ_1_rendered = render_semantic_content ($typ_1);
+    my $typ_2_rendered = render_semantic_content ($typ_2);
+    return "(! [${var_1},${var_2}] : ((${typ_1_rendered}(${var_1}) & ${typ_2_rendered}(${var_2})) => (${constructor_name}(${var_1},${var_2}) = ${constructor_name}(${var_2},${var_1}))))";
+}
+
+sub render_existence {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    (my $result_type) = $constructor->findnodes ('*[position() = last()]');
+    return '$true';
+}
+
+sub render_uniqueness {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    (my $result_type) = $constructor->findnodes ('*[position() = last()]');
+    return '$true';
+}
+
+sub render_coherence {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    return '$true';
+}
+
+sub render_symmetry {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    if (scalar @arg_types != 2) {
+        confess 'How to render symmetry for a constructor that does not accept exactly 2 arguments?';
+    }
+    my $typ_1 = $arg_types[0];
+    my $typ_2 = $arg_types[1];
+    my $var_1 = 'X1';
+    my $var_2 = 'X2';
+    my $typ_1_rendered = render_semantic_content ($typ_1);
+    my $typ_2_rendered = render_semantic_content ($typ_2);
+    return "(! [${var_1},${var_2}] : ((${typ_1_rendered}(${var_1}) & ${typ_2_rendered}(${var_2})) => (${constructor_name}(${var_1},${var_2}) <=> ${constructor_name}(${var_2},${var_1}))))";
+}
+
+sub render_asymmetry {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    if (scalar @arg_types != 2) {
+        confess 'How to render asymmetry for a constructor that does not accept exactly 2 arguments?';
+    }
+    my $typ_1 = $arg_types[0];
+    my $typ_2 = $arg_types[1];
+    my $var_1 = 'X1';
+    my $var_2 = 'X2';
+    my $typ_1_rendered = render_semantic_content ($typ_1);
+    my $typ_2_rendered = render_semantic_content ($typ_2);
+    return "(! [${var_1},${var_2}] : ((${typ_1_rendered}(${var_1}) & ${typ_2_rendered}(${var_2})) => (${constructor_name}(${var_1},${var_2}) <=> (~ ${constructor_name}(${var_2},${var_1})))))";
+}
+
+sub render_reflexivity {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    if (scalar @arg_types != 2) {
+        confess 'How to render reflexivity for a constructor that does not accept exactly 2 arguments?';
+    }
+    my $typ_1 = $arg_types[0];
+    my $var_1 = 'X1';
+    my $typ_1_rendered = render_semantic_content ($typ_1);
+    return "(! [${var_1}] : (${typ_1_rendered}(${var_1}) => (${constructor_name}(${var_1},${var_1}))))";
+}
+
+sub render_irreflexivity {
+    my $constructor = shift;
+    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    if (scalar @arg_types != 2) {
+        confess 'How to render reflexivity for a constructor that does not accept exactly 2 arguments?';
+    }
+    my $typ_1 = $arg_types[0];
+    my $var_1 = 'X1';
+    my $typ_1_rendered = render_semantic_content ($typ_1);
+    return "(! [${var_1}] : (${typ_1_rendered}(${var_1}) => (~ ${constructor_name}(${var_1},${var_1}))))";
+}
+
+sub formulate_property_for_constructor {
+    my $constructor = shift;
+    my $property = shift;
+    my $ref = $CONSTRUCTOR_PROPERTY_MAKERS{$property};
+    if (! defined $ref) {
+        confess 'How to render the constructor property \'', $property, '\'?';
+    }
+    my $content = $ref->($constructor);
+    return $content;
+}
+
+Readonly my %REQUIREMENT_CONTENTS =>
+    (
+        1 => ['(! [X] : (m1_hidden(X)))',
+              '(! [X] : (m2_hidden(X)))'],
+        2 => ['(! [X] : (m1_hidden(X) => m2_hidden(X)))'],
+        3 => ['(! [X,Y] : ((m2_hidden(X) & m2_hidden(Y) & (! [Z] : (r2_hidden(Z,X) <=> r2_hidden(Z,Y)))) => X = Y))'],
+        4 => ['(! [X,Y] : (r2_hidden(X,Y) => (~ r2_hidden(Y,X))))',
+              '(! [X] : (~r2_hidden(X,X)))'],
+        5 => ['v1_xboole_0(k1_xboole_0)',
+              '(! [X] : (v1_xboole_0(X) => X = k1_xboole_0))',
+              '(! [X] : (v1_xboole_0(X) <=> (! [Y] : (~ r2_hidden(Y,X)))))'],
+        6 => ['(! [X] : (~ r2_hidden(X,k1_xboole_0)))',
+              '(! [X] : ((! [Y] : (~r2_hidden(Y,X))) => (X = k1_xboole_0)))'],
+        17 => ['(! [X] : (k2_xboole_0(X,k1_xboole_0) = X))',
+               '(! [X] : (k2_xboole_0(k1_xboole_0,X) = X))',
+               '(! [X] : (k3_xboole_0(X,k1_xboole_0) = X))',
+               '(! [X] : (k4_xboole_0(X,k1_xboole_0) = X))',
+               '(! [X] : (k4_xboole_0(k1_xboole_0,X) = X))',
+               '(! [X] : (k5_xboole_0(X,X) = k1_xboole_0))'],
+        18 => ['(! [X] : (k3_xboole_0(X,k1_xboole_0) = k1_xboole_0))'],
+        19 => ['(! [X] : (k4_xboole_0(X,k1_xboole_0) = X))',
+               '(! [X] : (k4_xboole_0(k1_xboole_0,X) = k1_xboole_0))'],
+    );
+
+sub render_requirement {
+    my $nr = shift;
+    my @results = ();
+    if (defined $REQUIREMENT_CONTENTS{$nr}) {
+        my @contents = @{$REQUIREMENT_CONTENTS{$nr}};
+        push (@results, @contents);
+    } else {
+        confess 'What is requirement ', $nr, '?';
+    }
+    my @named_results = ();
+    foreach my $i (1 .. @results) {
+        my $formula = $results[$i - 1];
+        push (@named_results, "fof(requirement_${nr}_${i},axiom,${formula}).");
+    }
+    return @named_results;
 }
 
 sub render_non_local_item {
     my $item = shift;
+    my $article = article_of_item ($item);
+    my $nr = nr_of_item ($item);
     my $tptp_name = tptp_name_for_item ($item);
-    return "fof(${tptp_name},axiom,\$false).";
+    my @results = ();
+    if ($item eq 'hidden:rconstructor:1[symmetry]') {
+        push (@results, "fof(${tptp_name},axiom,(! [X,Y] : (X = Y => Y = X))).");
+    } elsif ($item eq 'hidden:rconstructor:1[reflexivity]') {
+        push (@results, "fof(${tptp_name},axiom,(! [X] : (X = X))).");
+    } elsif (is_requirement_item ($item)) {
+        my @requirements = render_requirement ($nr);
+        push (@results, @requirements);
+    } else {
+        my $mizfiles = $ENV{'MIZFILES'};
+        if (! defined $mizfiles) {
+            confess 'MIZFILES environment variable not defined.';
+        }
+        my $miztmp_dir = "${mizfiles}/miztmp";
+        if (! -d $miztmp_dir) {
+            confess 'miztmp dir missing under ', $mizfiles;
+        }
+        my $item_xml = "${miztmp_dir}/${article}.xml1";
+        if (! -e $item_xml) {
+            confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+        }
+        my $item_xml_doc = parse_xml_file ($item_xml);
+        my $item_xml_root = $item_xml_doc->documentElement ();
+        if (is_theorem_item ($item)) {
+            my $xpath = "descendant::JustifiedTheorem[${nr}]";
+            (my $theorem_node) = $item_xml_root->findnodes ($xpath);
+            if (! defined $theorem_node) {
+                confess 'Could not find theorem ', $nr, ' in ', $item_xml;
+            }
+            my $content = render_justified_theorem ($theorem_node);
+            push (@results, "fof(${tptp_name},theorem,${content}).");
+            (my $proposition_node) = $theorem_node->findnodes ('Proposition[1]');
+            if (! defined $proposition_node) {
+                confess 'No Proposition node found under the Coherence node in ', $item_xml;
+            }
+            my @choices = render_choices ($proposition_node);
+            push (@results, @choices);
+        } elsif (is_lemma_item ($item)) {
+            my $xpath = "Proposition[count (preceding-sibling::Proposition) + 1 = ${nr}]";
+            (my $proposition_node) = $item_xml_root->findnodes ($xpath);
+            if (! defined $proposition_node) {
+                confess 'Could not find lemma ', $nr, ' in ', $item_xml;
+            }
+            my $content = render_proposition ($proposition_node);
+            push (@results, "fof(${tptp_name},lemma,${content}).");
+            my @choices = render_choices ($proposition_node);
+            push (@results, @choices);
+        } elsif (is_deftheorem_item ($item)) {
+            my $xpath = "descendant::DefTheorem[${nr}]";
+            (my $deftheorem_node) = $item_xml_root->findnodes ($xpath);
+            if (! defined $deftheorem_node) {
+                confess 'Could not find theorem ', $nr, ' in ', $item_xml;
+            }
+            my $content = render_deftheorem ($deftheorem_node);
+            push (@results, "fof(${tptp_name},definition,${content}).");
+            (my $proposition_node) = $deftheorem_node->findnodes ('Proposition[1]');
+            if (! defined $proposition_node) {
+                confess 'No Proposition node found under the Coherence node in ', $item_xml;
+            }
+            my @choices = render_choices ($proposition_node);
+            push (@results, @choices);
+        } elsif (is_definiens_item ($item)) {
+            my $kind = definiens_kind ($item);
+            my $kind_uc = uc $kind;
+            my $nr = nr_of_item ($item);
+            my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${kind_uc}\" and count (preceding::Definiens[\@constrkind = \"${kind_uc}\"]) + 1 = ${nr}]";
+            (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
+            if (! defined $definiens_node) {
+                confess 'No suitable Definiens node found in ', $item_xml, ' using the XPath', $LF, $LF, '  ', $definiens_xpath;
+            }
+            my $constrnr = $definiens_node->getAttribute ('constrnr');
+            my $deftheorem_xpath = "following-sibling::DefTheorem[\@constrkind = \"${kind_uc}\" and \@constrnr = \"${constrnr}\"]";
+            (my $deftheorem_node) = $definiens_node->findnodes ($deftheorem_xpath);
+            if (! defined $deftheorem_node) {
+                confess 'No DefTheorem node found following the Definiens node for ', $item_xml;
+            }
+            my $content = render_deftheorem ($deftheorem_node);
+            push (@results, "fof(${tptp_name},definition,${content}).");
+            (my $proposition_node) = $deftheorem_node->findnodes ('Proposition[1]');
+            if (! defined $proposition_node) {
+                confess 'No Proposition node found under the Coherence node in ', $item_xml;
+            }
+            my @choices = render_choices ($proposition_node);
+            push (@results, @choices);
+        } elsif (is_cluster_item ($item)) {
+            my $kind = cluster_kind ($item);
+            if ($kind eq 'f') {
+                my $cluster_xpath = "descendant::FCluster[${nr}]";
+                (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
+                if (! defined $cluster_node) {
+                    confess 'FCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
+                }
+                (my $registration_node) = $cluster_node->findnodes ('ancestor::Registration');
+                my @arg_types = $registration_node->findnodes ('preceding-sibling::Let/*');
+                warn '', scalar @arg_types, ' arg types for an fcluster';
+                (my $coherence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Coherence]');
+                if (! defined $coherence_node) {
+                    confess 'Coherence node missing for a cluster at ', $item_xml;
+                }
+                (my $proposition_node) = $coherence_node->findnodes ('Proposition[1]');
+                if (! defined $proposition_node) {
+                    confess 'No Proposition node found under the Coherence node in ', $item_xml;
+                }
+                my $rendered_proposition = render_proposition ($proposition_node, @arg_types);
+                push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
+                my @choices = render_choices ($proposition_node);
+                push (@results, @choices);
+            } elsif ($kind eq 'r') {
+                my $cluster_xpath = "descendant::RCluster[\@nr = \"${nr}\"]";
+                (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
+                if (! defined $cluster_node) {
+                    confess 'RCluster not found in ', $item_xml;
+                }
+                (my $existence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Existence]');
+                if (! defined $existence_node) {
+                    confess 'Existence node missing for a cluster at ', $item_xml;
+                }
+                (my $proposition_node) = $existence_node->findnodes ('Proposition[1]');
+                if (! defined $proposition_node) {
+                    confess 'No Proposition node found under the Existence node in ', $item_xml;
+                }
+                my $rendered_proposition = render_proposition ($proposition_node);
+                push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
+                my @choices = render_choices ($proposition_node);
+                push (@results, @choices);
+            } else {
+                confess 'How to handle clusters of kind \'', $kind, '\'?';
+            }
+
+        } elsif (is_constructor_property_item ($item)) {
+            # are these always found in the same article?
+            my $constructor = constructor_of_constructor_property ($item);
+            my $kind = constructor_kind ($constructor);
+            my $kind_uc = uc $kind;
+            my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\" and \@nr = \"${nr}\"]";
+            (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+            if (! defined $constructor_node) {
+                confess 'We failed to find a constructor node in ', $item_xml, ' matching the XPath expression', $LF, $LF, '  ', $constructor_xpath;
+            }
+            my $property = property_for_constructor ($item);
+            my $content = formulate_property_for_constructor ($constructor_node, $property);
+            push (@results, "fof(${tptp_name},theorem,${content}).");
+            # it seems we don't need to worry about choice nodes in this case
+            # my @choices = render_choices ($proposition_node);
+            # push (@results, @choices);
+        } else {
+            confess 'How to extract ', $item, '?';
+        }
+    }
+    return @results;
 }
 
-# Make the problems
-my $problem_dir = "${article_dir}/problems";
-if (! -d $problem_dir) {
-    mkdir $problem_dir
-        or confess 'Cannot make the directory ', $problem_dir, ' .';
-}
-foreach my $item (keys %resolved_dependencies) {
-    if ($item =~ /\A ${article_name} [:] theorem [:] (\d+) \z /) {
-        my $theorem_number = $1;
-        my $source = source_of_item ($item);
-        my $fragment_number = fragment_number ($source);
-        my $fragment_xml = "${text_dir}/${PREFIX_LC}${fragment_number}.xml1";
-        my $fragment_doc = parse_xml_file ($fragment_xml);
-        my $fragment_root = $fragment_doc->documentElement ();
-        (my $theorem_node) = $fragment_root->findnodes ('descendant::JustifiedTheorem');
-        if (defined $theorem_node) {
-            (my $proposition_node) = $theorem_node->findnodes ('Proposition');
-            if (! defined $proposition_node) {
-                confess 'Error: where is the Proposition node in ', $fragment_xml, '?';
-            }
-            my $theorem_rendering = render_proposition ($proposition_node);
-            my @problem = ("fof(${article_name}_t${theorem_number},conjecture,${theorem_rendering}).");
-            my @deps = @{$resolved_dependencies{$item}};
-            foreach my $dep (@deps) {
-                if (is_scheme_item ($dep)) {
-                    # todo
-                } elsif (has_semantic_content ($dep)) {
-                    if ($dep =~ / \A ${article_name} [:] /) {
-                        my $rendered = render_local_item ($dep);
-                        push (@problem, $rendered);
-                    } else {
-                        my $rendered = render_non_local_item ($dep);
-                        push (@problem, $rendered);
-                    }
-                }
-            }
-            my $theorem_file = "${problem_dir}/t${theorem_number}";
-            open (my $theorem_fh, '>', $theorem_file)
-                or confess 'Unable to open output filehandle at ', $theorem_file;
-            foreach my $formula (@problem) {
-                say {$theorem_fh} $formula;
-            }
-            close $theorem_fh
-                or confess 'Unable to close output filehandle for ', $theorem_file;
+sub render_scheme_instance {
+    my $proposition = shift;
+    my @constants = $proposition->findnodes ('descendant::Const');
+    my %constants = ();
+    foreach my $constant (@constants) {
+        my $vid = $constant->getAttribute ('vid');
+        if (! defined $vid) {
+            confess 'Const node lacks a vid attribute.';
         }
+        $constants{$vid} = 0;
+    }
+    my @constant_vids = keys %constants;
+    @constant_vids = sort { $a < $b } @constant_vids;
+    my @arg_types = ();
+    foreach my $vid (@constant_vids) {
+        my $constant_idx = first_index { $_->getAttribute('vid') == $vid } @constants;
+        if ($constant_idx < 0) {
+            confess 'Unable to find a constant with vid ', $vid;
+        }
+        my $constant = $constants[$constant_idx];
+        my $typ_xpath = "preceding::Let/Typ[\@vid = \"${vid}\"]";
+        (my $typ) = $constant->findnodes ($typ_xpath);
+        if (! defined $typ) {
+            confess 'Unable to find a type for the constant with vid = ', $vid;
+        }
+        push (@arg_types, $typ);
+    }
+    return render_proposition ($proposition, @arg_types);
+}
+
+sub extract_schemes {
+    my $node = shift;
+    my @formulas = ();
+    my @from_nodes = $node->findnodes ('descendant::From');
+    my @proposition_nodes = $node->findnodes ('descendant::Proposition[following-sibling::*[1][self::From]]');
+    my %schemes_by_article = ();
+    my $num_scheme_instances = scalar @proposition_nodes;
+    if (scalar @from_nodes != scalar @proposition_nodes) {
+        confess 'There are ', scalar @from_nodes, ' From node(s) but ', scalar @proposition_nodes, ' scheme-justified Proposition nodes.';
+    }
+    foreach my $i (1 .. scalar @proposition_nodes) {
+        my $proposition_node = $proposition_nodes[$i - 1];
+        my $from_node = $from_nodes[$i - 1];
+        my $aid = $from_node->getAttribute ('aid');
+        my $aid_lc = lc $aid;
+        my $nr = $from_node->getAttribute ('absnr');
+        if (! defined $schemes_by_article{$aid}) {
+            $schemes_by_article{$aid} = 1;
+        }
+        my $instance_nr = $schemes_by_article{$aid};
+        $schemes_by_article{$aid} = $instance_nr + 1;
+        my $content = render_scheme_instance ($proposition_node);
+        my $formula = "fof(${aid_lc}_s${nr}_${instance_nr},theorem,${content}).";
+        push (@formulas, $formula);
+    }
+    return @formulas;
+}
+
+sub conjecturify_formula_in_problem {
+    my $formula_name = shift;
+    my @formulas = @_;
+    my @new_problem = ();
+    my $encountered = 0;
+    foreach my $formula (@formulas) {
+        if ($formula =~ / \A fof [(] ${formula_name} [,] [a-z]+ [,] (.+) [)] [.] \z/) {
+            my $content = $1;
+            my $new_formula = "fof(${formula_name},conjecture,${content}).";
+            push (@new_problem, $new_formula);
+            $encountered = 1;
+        } else {
+            push (@new_problem, $formula);
+        }
+    }
+    if (! $encountered) {
+        confess 'We were asked to turn', $LF, $LF, '  ', $formula_name, $LF, $LF, 'into a conjecture, but that formula does not occur in the given list of formulas:', $LF, $LF, Dumper (@formulas);
+    }
+    return @new_problem;
+}
+
+sub problem_for_item {
+    my $item = shift;
+    my $source = source_of_item ($item);
+    my $fragment_number = fragment_number ($source);
+    my $fragment_xml = "${text_dir}/${PREFIX_LC}${fragment_number}.xml1";
+    my $fragment_doc = parse_xml_file ($fragment_xml);
+    my $fragment_root = $fragment_doc->documentElement ();
+    my $item_label = tptp_name_for_item ($item);
+    my @problem = render_non_local_item ($item);
+    @problem = conjecturify_formula_in_problem ($item_label, @problem);
+    my @deps = @{$resolved_dependencies{$item}};
+    my @scheme_deps = ();
+    foreach my $dep (@deps) {
+        if (is_scheme_item ($dep)) {
+            push (@scheme_deps, $dep);
+        } elsif (has_semantic_content ($dep)) {
+            my @rendered = render_non_local_item ($dep);
+            push (@problem, @rendered);
+        }
+    }
+    my @formulas_from_schemes = extract_schemes ($fragment_root);
+    push (@problem, @formulas_from_schemes);
+    # remove any potential duplicates
+    my %formulas = ();
+    foreach my $formula (@problem) {
+        if ($formula =~ /\A fof [(] ([^,]+) [,] /) {
+            my $name = $1;
+            $formulas{$name} = $formula;
+        } else {
+            confess 'Cannot make sense of TPTP formula \'', $formula, '\'.';
+        }
+    }
+    return values %formulas;
+}
+
+sub is_problematic_item {
+    my $item = shift;
+    if (has_semantic_content ($item)) {
+        if (is_scheme_item ($item)) {
+            return 0;
+        } elsif (is_deftheorem_item ($item)) {
+            return 0;
+        } elsif (is_definiens_item ($item)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    } else {
+        return 0;
+    }
+}
+
+# Make the problems.  Trash it if it already exists.
+my $problem_dir = "${article_dir}/problems";
+if (-d $problem_dir) {
+    rmtree ($problem_dir)
+        or confess 'Cannot delete ', $problem_dir;
+}
+mkdir $problem_dir
+    or confess 'Cannot make the directory ', $problem_dir, ' .';
+
+foreach my $item (keys %resolved_dependencies) {
+    if (is_problematic_item ($item)) {
+        my @problem = problem_for_item ($item);
+        my $item_label = tptp_name_for_item ($item);
+        my $problem_file = "${problem_dir}/${item_label}";
+        open (my $problem_fh, '>', $problem_file)
+            or confess 'Unable to open output filehandle at ', $problem_file;
+        foreach my $formula (@problem) {
+            say {$problem_fh} $formula;
+        }
+        close $problem_fh
+            or confess 'Unable to close output filehandle for ', $problem_file;
     }
 }
 
