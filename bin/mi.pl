@@ -131,6 +131,21 @@ sub get_attribute {
     }
 }
 
+sub get_aid_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'aid');
+}
+
+sub get_nr_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'nr');
+}
+
+sub get_kind_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'kind');
+}
+
 sub article_dependencies {
     my $article_path = shift;
 
