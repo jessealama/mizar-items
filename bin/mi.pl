@@ -122,7 +122,13 @@ sub constructors_in_file {
 
 sub get_attribute {
     my $node = shift;
+    if (! defined $node) {
+        confess 'First argument (an XML node) missing.';
+    }
     my $attr = shift;
+    if (! defined $attr) {
+        confess 'Second argument (an attribute name) missing.';
+    }
     if ($node->hasAttribute ($attr)) {
         return $node->getAttribute ($attr);
     } else {
