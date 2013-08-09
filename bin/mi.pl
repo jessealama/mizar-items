@@ -2654,6 +2654,9 @@ sub extract_schemes {
         my $from_node = $from_nodes[$i - 1];
         my $aid = $from_node->getAttribute ('aid');
         my $aid_lc = lc $aid;
+        if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+            $aid_lc = $article_name;
+        }
         my $nr = $from_node->getAttribute ('absnr');
         if (! defined $schemes_by_article{$aid}) {
             $schemes_by_article{$aid} = 1;
