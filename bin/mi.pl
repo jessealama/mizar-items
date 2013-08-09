@@ -2614,6 +2614,8 @@ sub render_non_local_item {
         } elsif (is_constructor_property_item ($item)) {
             # are these always found in the same article?
             my $constructor = constructor_of_constructor_property ($item);
+            my $constructor_nr = nr_of_item ($constructor);
+            my $constructor_aid = article_of_item ($constructor);
             my $kind = constructor_kind ($constructor);
             my $kind_uc = uc $kind;
             my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\" and \@nr = \"${nr}\"]";
@@ -2624,6 +2626,17 @@ sub render_non_local_item {
             my $property = property_for_constructor ($item);
             my $content = formulate_property_for_constructor ($constructor_node, $property);
             push (@results, "fof(${tptp_name},theorem,${content}).");
+
+            # We may need to add the definition of the constructor
+            my $deftheorem_xpath = "descendant::DefTheorem[\@constrkind = \"${kind_uc}\"][${constructor_nr}]";
+            (my $deftheorem_node) = $item_xml_root->findnodes ($deftheorem_xpath);
+            if (! defined $deftheorem_node) {
+                confess 'No DefTheorem node for constructor ', $kind_uc, $constructor_nr, ' in ', $item_xml;
+            }
+            my $deftheorem_content = render_deftheorem ($deftheorem_node);
+            my $deftheorem = "fof(d${constructor_nr}_${constructor_aid},definition,${deftheorem_content}).";
+            push (@results, $deftheorem);
+
             # it seems we don't need to worry about choice nodes in this case
             # my @choices = render_choices ($proposition_node);
             # push (@results, @choices);
