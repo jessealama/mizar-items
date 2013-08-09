@@ -2252,6 +2252,35 @@ sub render_tptp_constructor {
     return "${kind_lc}${nr}_${aid_lc}";
 }
 
+sub render_guard {
+    my $variable = shift;
+    my $type = shift;
+    my $type_aid = get_aid_attribute ($type);
+    my $type_nr = get_nr_attribute ($type);
+    my $type_kind = get_kind_attribute ($type);
+    my $type_kind_lc = lc $type_kind;
+    my $type_aid_lc = lc $type_aid;
+    my $type_rendered = "${type_kind_lc}${type_nr}_${type_aid_lc}";
+    my $guard = "(${type_rendered}(${variable})";
+    (my $cluster_node) = $type->findnodes ('Cluster'); # the lower cluster
+    my @adjectives = $cluster_node->findnodes ('Adjective');
+    my $num_adjectives = scalar @adjectives;
+    foreach my $i (1 .. $num_adjectives) {
+        my $adjective = $adjectives[$i - 1];
+        my $adj_aid = get_aid_attribute ($adjective);
+        my $adj_nr = get_nr_attribute ($adjective);
+        my $adj_aid_lc = lc $adj_aid;
+        my $bare_adj = "v${adj_nr}_${adj_aid_lc}";
+        if (($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false')) {
+            $guard .= " & (~ ${bare_adj}(${variable}))";
+        } else {
+            $guard .= " & ${bare_adj}(${variable})";
+        }
+    }
+    $guard .= ')';
+    return $guard;
+}
+
 sub render_idempotence {
     my $constructor = shift;
     my $constructor_name = render_tptp_constructor ($constructor);
