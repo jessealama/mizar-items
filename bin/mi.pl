@@ -152,6 +152,11 @@ sub get_kind_attribute {
     return get_attribute ($node, 'kind');
 }
 
+sub get_vid_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'vid');
+}
+
 sub article_dependencies {
     my $article_path = shift;
 
