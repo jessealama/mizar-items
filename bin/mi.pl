@@ -1949,7 +1949,6 @@ sub type_for_constant {
     if (defined $ancestor_binder) {
         return type_from_binder ($ancestor_binder);
     } else {
-        warn 'need to go hunting for Const with vid = ', $vid;
         my $preceding_binder_xpath = "preceding::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
         my $toplevel_xpath = 'ancestor::*[parent::Article]';
         (my $toplevel_node) = $constant->findnodes ($toplevel_xpath);
