@@ -1939,23 +1939,31 @@ sub document_from_node {
 sub type_for_constant {
     my $constant = shift;
     my $vid = get_vid_attribute ($constant);
-    my $binder_xpath = "preceding::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
-    (my $binder) = $constant->findnodes ($binder_xpath);
-    if (defined $binder) {
-        my $binder_name = $binder->nodeName ();
-        if ($binder_name eq 'For') {
-            (my $typ) = $binder->findnodes ('Typ');
-            if (! defined $typ) {
-                confess 'For node lacks a Typ child.';
-            }
-            return $typ;
-        } elsif ($binder_name eq 'Typ') {
-            return $binder;
-        } else {
-            confess 'What kind of binder is', $LF, $binder->toString (), $LF, '?';
-        }
+    my $ancestor_binder_xpath = "ancestor::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
+    (my $ancestor_binder) = $constant->findnodes ($ancestor_binder_xpath);
+    if (defined $ancestor_binder) {
+        return type_from_binder ($ancestor_binder);
     } else {
-        confess 'Could find no binder for a constant with vid = ', $vid, ' using the XPath expression', $LF, $LF, '  ', $binder_xpath;
+        warn 'need to go hunting for Const with vid = ', $vid;
+        my $preceding_binder_xpath = "preceding::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
+        my $toplevel_xpath = 'ancestor::*[parent::Article]';
+        (my $toplevel_node) = $constant->findnodes ($toplevel_xpath);
+        if (! defined $toplevel_node) {
+            confess 'Toplevel node not found.';
+        }
+        my $restricted_doc = document_from_node ($toplevel_node);
+        my $restricted_root = $restricted_doc->documentElement ();
+        my $const_xpath = "descendant::Const[\@vid = \"${vid}\"]";
+        (my $const_in_new_doc) = $restricted_root->findnodes ($const_xpath);
+        if (! defined $const_in_new_doc) {
+            confess 'Cannot find Const with vid = ', $vid, ' in the new document.';
+        }
+        (my $preceding_binder) = $const_in_new_doc->findnodes ($preceding_binder_xpath);
+        if (defined $preceding_binder) {
+            return type_from_binder ($preceding_binder);
+        } else {
+            confess 'Could find no binder for a constant with vid = ', $vid, '.';
+        }
     }
 }
 
