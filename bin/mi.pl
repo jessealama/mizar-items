@@ -2624,9 +2624,6 @@ sub render_non_local_item {
                 if (! defined $cluster_node) {
                     confess 'FCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
                 }
-                (my $registration_node) = $cluster_node->findnodes ('ancestor::Registration');
-                my @arg_types = $registration_node->findnodes ('preceding-sibling::Let/*');
-                warn '', scalar @arg_types, ' arg types for an fcluster';
                 (my $coherence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Coherence]');
                 if (! defined $coherence_node) {
                     confess 'Coherence node missing for a cluster at ', $item_xml;
