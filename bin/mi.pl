@@ -1195,9 +1195,8 @@ foreach my $prel_file (@prel_files) {
             my $property = undef;
             if ($label =~ / \A (.+)Lemma \z/) {
                 $property = $1;
-            }
-            if (! defined $property) {
-                confess 'To what property does \'', $label, '\' correspond?';
+            } else {
+                confess 'To what property does \'', $label, '\' correspond? We are working on ', $fragment_msx;
             }
             $property = lc $property;
             # Now find the item that uses this one
