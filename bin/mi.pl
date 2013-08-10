@@ -1913,6 +1913,29 @@ sub constants_under_node {
     return @constants_no_dups;
 }
 
+sub type_from_binder {
+    my $binder = shift;
+    my $binder_name = $binder->nodeName ();
+    if ($binder_name eq 'For') {
+        (my $typ) = $binder->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'For node lacks a Typ child.';
+        }
+        return $typ;
+    } elsif ($binder_name eq 'Typ') {
+        return $binder;
+    } else {
+        confess 'What kind of binder is', $LF, $binder->toString (), $LF, '?';
+    }
+}
+
+sub document_from_node {
+    my $node = shift;
+    my $restricted_doc = XML::LibXML::Document->createDocument ();
+    $restricted_doc->setDocumentElement ($node->cloneNode (1));
+    return $restricted_doc;
+}
+
 sub type_for_constant {
     my $constant = shift;
     my $vid = get_vid_attribute ($constant);
