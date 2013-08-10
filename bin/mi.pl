@@ -2615,7 +2615,7 @@ sub render_non_local_item {
                 if (! defined $proposition_node) {
                     confess 'No Proposition node found under the Coherence node in ', $item_xml;
                 }
-                my $rendered_proposition = render_proposition ($proposition_node, @arg_types);
+                my $rendered_proposition = render_proposition ($proposition_node);
                 push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
                 my @choices = render_choices ($proposition_node);
                 push (@results, @choices);
