@@ -2517,6 +2517,8 @@ sub render_non_local_item {
         push (@results, "fof(${tptp_name},axiom,(! [X,Y] : (X = Y => Y = X))).");
     } elsif ($item eq 'hidden:rconstructor:1[reflexivity]') {
         push (@results, "fof(${tptp_name},axiom,(! [X] : (X = X))).");
+    } elsif ($item eq 'hidden:rconstructor:2[asymmetry]') {
+        push (@results, "fof(${tptp_name},axiom,(! [X,Y] : (r2_hidden(X,Y) => (~ r2_hidden(Y,X))))).");
     } elsif (is_requirement_item ($item)) {
         my @requirements = render_requirement ($nr);
         push (@results, @requirements);
