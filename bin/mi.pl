@@ -2600,7 +2600,25 @@ sub render_non_local_item {
             push (@results, @choices);
         } elsif (is_cluster_item ($item)) {
             my $kind = cluster_kind ($item);
-            if ($kind eq 'f') {
+            if ($kind eq 'c') {
+                my $cluster_xpath = "descendant::CCluster[${nr}]";
+                (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
+                if (! defined $cluster_node) {
+                    confess 'CCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
+                }
+                (my $coherence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Coherence]');
+                if (! defined $coherence_node) {
+                    confess 'Coherence node missing for a cluster at ', $item_xml;
+                }
+                (my $proposition_node) = $coherence_node->findnodes ('Proposition[1]');
+                if (! defined $proposition_node) {
+                    confess 'No Proposition node found under the Coherence node in ', $item_xml;
+                }
+                my $rendered_proposition = render_proposition ($proposition_node);
+                push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
+                my @choices = render_choices ($proposition_node);
+                push (@results, @choices);
+            } elsif ($kind eq 'f') {
                 my $cluster_xpath = "descendant::FCluster[${nr}]";
                 (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
                 if (! defined $cluster_node) {
