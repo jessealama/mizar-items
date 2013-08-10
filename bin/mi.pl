@@ -2300,7 +2300,7 @@ sub render_guard {
     foreach my $i (1 .. $num_adjectives) {
         my $adjective = $adjectives[$i - 1];
         my $adj_aid = get_aid_attribute ($adjective);
-        my $adj_nr = get_nr_attribute ($adjective);
+        my $adj_nr = get_absnr_attribute ($adjective);
         my $adj_aid_lc = lc $adj_aid;
         my $bare_adj = "v${adj_nr}_${adj_aid_lc}";
         if (($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false')) {
