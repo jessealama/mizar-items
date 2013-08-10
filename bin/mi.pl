@@ -147,6 +147,11 @@ sub get_nr_attribute {
     return get_attribute ($node, 'nr');
 }
 
+sub get_absnr_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'absnr');
+}
+
 sub get_kind_attribute {
     my $node = shift;
     return get_attribute ($node, 'kind');
