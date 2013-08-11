@@ -2732,11 +2732,14 @@ sub render_non_local_item {
             my @choices = render_choices ($proposition_node);
             push (@results, @choices);
         } elsif (is_deftheorem_item ($item)) {
-            my $xpath = "descendant::*[self::DefTheorem or self::Compatibility][${nr}]";
-            (my $deftheorem_node) = $item_xml_root->findnodes ($xpath);
+            my $direct_xpath = "descendant::DefTheorem[\@nr = \"${nr}\"]";
+            my $indirect_xpath = "descendant::*[self::DefTheorem or self::Compatibility][${nr}]";
+            (my $deftheorem_node) = $item_xml_root->findnodes ($direct_xpath);
             if (! defined $deftheorem_node) {
-                my $num_deftheorems = $item_xml_root->findvalue ('count (descendant::DefTheorem)');
-                confess 'Could not find deftheorem ', $nr, ' in ', $item_xml, '.  There are (is) only ', $num_deftheorems, ' DefTheorem node(s).';
+                ($deftheorem_node) = $item_xml_root->findnodes ($indirect_xpath);
+                if (! defined $deftheorem_node) {
+                    confess 'Could not find deftheorem ', $nr, ' in ', $item_xml, '.';
+                }
             }
             my $content = render_deftheorem ($deftheorem_node);
             push (@results, "fof(${tptp_name},definition,${content}).");
