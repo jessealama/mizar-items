@@ -2360,16 +2360,80 @@ sub render_commutativity {
     return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) = ${constructor_name}(${var_2},${var_1}))))";
 }
 
-sub render_existence {
-    my $constructor = shift;
-    my $constructor_name = render_tptp_constructor ($constructor);
-    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+sub arg_types_of_constructor {
+    my $constructor_node = shift;
+    (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
     if (! defined $arg_types_node) {
-        confess 'ArgTypes node missing under a constructor.';
+        confess 'ArgTypes node not found under a Constructor node:', $LF, $constructor_node->toString;
     }
     my @arg_types = $arg_types_node->findnodes ('*');
-    (my $result_type) = $constructor->findnodes ('*[position() = last()]');
-    return '$true';
+    return @arg_types;
+}
+
+sub render_existence {
+    my $constructor = shift;
+    (my $existence_node) = $constructor->findnodes ('preceding-sibling::Existence');
+    if (defined $existence_node) {
+        (my $proposition) = $existence_node->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition child not found under an Existence node.';
+        }
+        return render_proposition ($proposition);
+    } else {
+        my $kind = get_kind_attribute ($constructor);
+        if ($kind eq 'K') {
+            my $nr = get_nr_attribute ($constructor);
+            (my $block) = $constructor->findnodes ('ancestor::DefinitionBlock');
+            if (! defined $block) {
+                confess 'Unable to find the enclosing DefinitionBlock of a Constructor node.';
+            }
+            (my $definiens) = $block->findnodes ('following-sibling::*[1][self::Definiens]');
+            if (! defined $definiens) {
+                confess 'Definiens node not found immediately following a DefinitionBlock.';
+            }
+            my @arg_typs = $definiens->findnodes ('Typ[position() < last()]');
+            (my $result_typ) = $definiens->findnodes ('Typ[position() = last()]');
+            (my $def_meaning) = $definiens->findnodes ('DefMeaning[@kind = "e"]');
+            if (! defined $def_meaning) {
+                confess 'Expandable DefMeaning node not found under a Definiens node.';
+            }
+            (my $def_meaning_content) = $def_meaning->findnodes ('*[1]');
+            my $answer = '';
+            my $num_args = scalar @arg_typs;
+            if ($num_args > 0) {
+                $answer .= '(! [';
+                foreach my $i (1 .. $num_args) {
+                    my $var = "X${i}";
+                    $answer .= $var;
+                    if ($i < $num_args) {
+                        $answer .= ', ';
+                    }
+                }
+                $answer .= '] : ((';
+                foreach my $i (1 .. $num_args) {
+                    my $var = "X${i}";
+                    my $typ = $arg_typs[$i - 1];
+                    my $guard = render_guard ($var, $typ);
+                    $answer .= $guard;
+                    if ($i < $num_args) {
+                        $answer .= ' & ';
+                    }
+                }
+                $answer .= ') => ';
+            }
+            my $num_args_plus_one = $num_args + 1;
+            my $existence_var = "X${num_args_plus_one}";
+            my $existence_guard = render_guard ($existence_var, $result_typ);
+            my $rendered_value = render_semantic_content ($def_meaning_content);
+            $answer .= "(? [${existence_var}] : (${existence_guard} & ${existence_var} = ${rendered_value}))";
+            if ($num_args > 0) {
+                $answer .= '))';
+            }
+            return $answer;
+        } else {
+            confess 'How to formulate existence for constructors of kind \'', $kind, '\'?';
+        }
+    }
 }
 
 sub render_uniqueness {
