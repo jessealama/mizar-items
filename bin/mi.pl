@@ -2318,12 +2318,12 @@ sub render_guard {
             $adj_guard = '~' . $adj_guard;
         }
         $adj_guard .= '(';
-        $adj_guard .= "${variable}";
         my @adj_children = $adjective->findnodes ('*');
         foreach my $adj_child (@adj_children) {
             my $rendered_adj_child = render_semantic_content ($adj_child);
-            $adj_guard .= ",${rendered_adj_child}";
+            $adj_guard .= "${rendered_adj_child},";
         }
+        $adj_guard .= "${variable}";
         $adj_guard .= ')';
         $guard .= " & ${adj_guard}";
     }
