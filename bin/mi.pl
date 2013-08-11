@@ -1717,16 +1717,8 @@ sub render_semantic_content {
     } elsif ($name eq 'Verum') {
         return '$true';
     } elsif ($name eq 'PrivPred') {
-        my $nr = $node->getAttribute ('nr');
-        if (! defined $nr) {
-            confess 'PrivPred node lacks an nr attribute.';
-        }
-        my @values = $node->findnodes ('*[preceding-sibling::*[1][self::Var]]');
-        if (scalar @values != 1) {
-            confess 'How to deal with a PrivPred that has more than 1 value?';
-        }
-        my $value = $values[0];
-        return render_semantic_content ($value);
+        (my $val) = $node->findnodes ('*[position() = last()]');
+        return render_semantic_content ($val);
     } elsif ($name eq 'Is') {
         my @children = $node->findnodes ('*');
         if (scalar @children != 2) {
