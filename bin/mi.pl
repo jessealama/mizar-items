@@ -2312,12 +2312,20 @@ sub render_guard {
         my $adj_aid = get_aid_attribute ($adjective);
         my $adj_nr = get_absnr_attribute ($adjective);
         my $adj_aid_lc = lc $adj_aid;
-        my $bare_adj = "v${adj_nr}_${adj_aid_lc}";
-        if (($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false')) {
-            $guard .= " & (~ ${bare_adj}(${variable}))";
-        } else {
-            $guard .= " & ${bare_adj}(${variable})";
+        my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
+        my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
+        if ($adj_is_negated) {
+            $adj_guard = '~' . $adj_guard;
         }
+        $adj_guard .= '(';
+        $adj_guard .= "${variable}";
+        my @adj_children = $adjective->findnodes ('*');
+        foreach my $adj_child (@adj_children) {
+            my $rendered_adj_child = render_semantic_content ($adj_child);
+            $adj_guard .= ",${rendered_adj_child}";
+        }
+        $adj_guard .= ')';
+        $guard .= " & ${adj_guard}";
     }
     $guard .= ')';
     return $guard;
