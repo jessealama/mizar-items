@@ -2305,8 +2305,7 @@ sub render_guard {
     my $type_aid_lc = lc $type_aid;
     my $type_rendered = "${type_kind_lc}${type_nr}_${type_aid_lc}";
     my $guard = "(${type_rendered}(${variable})";
-    (my $cluster_node) = $type->findnodes ('Cluster'); # the lower cluster
-    my @adjectives = $cluster_node->findnodes ('Adjective');
+    my @adjectives = $type->findnodes ('Cluster/Adjective');
     my $num_adjectives = scalar @adjectives;
     foreach my $i (1 .. $num_adjectives) {
         my $adjective = $adjectives[$i - 1];
