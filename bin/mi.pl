@@ -2270,6 +2270,7 @@ Readonly my %CONSTRUCTOR_PROPERTY_MAKERS =>
         'asymmetry' => \&render_asymmetry,
         'reflexivity' => \&render_reflexivity,
         'irreflexivity' => \&render_irreflexivity,
+        'connectedness' => \&render_connectedness,
         'existence' => \&render_existence,
         'uniqueness' => \&render_uniqueness,
         'coherence' => \&render_coherence,
@@ -2590,6 +2591,25 @@ sub render_irreflexivity {
     my $var_1 = 'X1';
     my $guard = render_guard ($var_1, $typ_1);
     return "(! [${var_1}] : (${guard} => (~ ${constructor_name}(${var_1},${var_1}))))";
+}
+
+sub render_connectedness_node {
+    my $connectedness_node = shift;
+    (my $proposition) = $connectedness_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found immediately following πa Connectedness node.';
+    }
+    return render_proposition ($proposition);
+}
+
+sub render_connectedness {
+    my $constructor = shift;
+    (my $connectedness_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Connectedness');
+    if (defined $connectedness_node) {
+        return render_connectedness_node ($connectedness_node);
+    } else {
+        confess 'How to render the connectedness property without a Connectedness node?';
+    }
 }
 
 sub formulate_property_for_constructor {
