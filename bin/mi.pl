@@ -2850,6 +2850,21 @@ sub render_non_local_item {
             # it seems we don't need to worry about choice nodes in this case
             # my @choices = render_choices ($proposition_node);
             # push (@results, @choices);
+        } elsif (is_reduction_item ($item)) {
+            my $reducibility_xpath = "descendant::Reducibility[${nr}]";
+            (my $reducibility_node) = $item_xml_root->findnodes ($reducibility_xpath);
+            if (! defined $reducibility_node) {
+                confess 'Unable to find reduction #', $nr, ' in ', $item_xml;
+            }
+            my $content = render_reduction ($reducibility_node);
+            my $formula = "fof(x${nr}_${article},theorem,${content}).";
+            push (@results, $formula);
+            (my $proposition_node) = $reducibility_node->findnodes ('Proposition');
+            if (! defined $proposition_node) {
+                confess 'Reduction node nr ', $nr, ' lacks a Proposition child in ', $item_xml;
+            }
+            my @choices = render_choices ($proposition_node);
+            push (@results, @choices);
         } else {
             confess 'How to extract ', $item, '?';
         }
