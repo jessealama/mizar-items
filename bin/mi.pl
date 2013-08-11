@@ -1624,6 +1624,11 @@ sub is_constructor_property_item {
     return ($item =~ / [:] . constructor [:] \d+ [[] [a-z]+ []] \z/);
 }
 
+sub is_reduction_item {
+    my $item = shift;
+    return ($item =~ / [:] reduction [:] /);
+}
+
 sub has_semantic_content {
     my $item = shift;
     if (is_scheme_item ($item)) {
