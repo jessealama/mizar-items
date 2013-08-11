@@ -1649,6 +1649,8 @@ sub has_semantic_content {
         return 1;
     } elsif (is_constructor_property_item ($item)) {
         return 1;
+    } elsif (is_reduction_item ($item)) {
+        return 1;
     } else {
         return 0;
     }
