@@ -2009,6 +2009,15 @@ sub render_deftheorem {
     return render_proposition ($proposition_node);
 }
 
+sub render_reduction {
+    my $reduction_node = shift;
+    (my $proposition_node) = $reduction_node->findnodes ('Proposition');
+    if (! defined $proposition_node) {
+        confess 'Reduction node lacks a Proposition child.';
+    }
+    return render_proposition ($proposition_node);
+}
+
 sub render_defmeaning {
     my $defmeaning_node = shift;
     (my $proposition_node) = $defmeaning_node->findnodes ('*[1]');
