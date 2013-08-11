@@ -2438,14 +2438,70 @@ sub render_existence {
 
 sub render_uniqueness {
     my $constructor = shift;
-    my $constructor_name = render_tptp_constructor ($constructor);
-    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
-    if (! defined $arg_types_node) {
-        confess 'ArgTypes node missing under a constructor.';
+    (my $uniqueness_node) = $constructor->findnodes ('preceding-sibling::Uniqueness');
+    if (defined $uniqueness_node) {
+        (my $proposition) = $uniqueness_node->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition child not found under a Uniqueness node.';
+        }
+        return render_proposition ($proposition);
+    } else {
+        my $kind = get_kind_attribute ($constructor);
+        if ($kind eq 'K') {
+            my $nr = get_nr_attribute ($constructor);
+            (my $block) = $constructor->findnodes ('ancestor::DefinitionBlock');
+            if (! defined $block) {
+                confess 'Unable to find the enclosing DefinitionBlock of a Constructor node.';
+            }
+            (my $definiens) = $block->findnodes ('following-sibling::*[1][self::Definiens]');
+            if (! defined $definiens) {
+                confess 'Definiens node not found immediately following a DefinitionBlock.';
+            }
+            my @arg_typs = $definiens->findnodes ('Typ[position() < last()]');
+            my $num_args = scalar @arg_typs;
+            (my $result_typ) = $definiens->findnodes ('Typ[position() = last()]');
+            (my $def_meaning) = $definiens->findnodes ('DefMeaning[@kind = "e"]');
+            if (! defined $def_meaning) {
+                confess 'Expandable DefMeaning node not found under a Definiens node.';
+            }
+            (my $def_meaning_content) = $def_meaning->findnodes ('*[1]');
+            my $answer = '';
+            if ($num_args > 0) {
+                $answer = '(! [';
+                foreach my $i (1 .. $num_args) {
+                    my $var = "X${i}";
+                    $answer .= $var;
+                    if ($i < $num_args) {
+                        $answer .= ', ';
+                    }
+                }
+                $answer .= '] : ((';
+                foreach my $i (1 .. $num_args) {
+                    my $var = "X${i}";
+                    my $typ = $arg_typs[$i - 1];
+                    my $guard = render_guard ($var, $typ);
+                    $answer .= $guard;
+                    if ($i < $num_args) {
+                        $answer .= ' & ';
+                    }
+                }
+                $answer .= ') => ';
+            }
+            my $num_args_plus_one = $num_args + 1;
+            my $uniqueness_var_1 = 'U';
+            my $uniqueness_var_2 = 'V';
+            my $uniqueness_guard_1 = render_guard ($uniqueness_var_1, $result_typ);
+            my $uniqueness_guard_2 = render_guard ($uniqueness_var_2, $result_typ);
+            my $rendered_value = render_semantic_content ($def_meaning_content);
+            $answer .= "(! [${uniqueness_var_1},${uniqueness_var_2}] : ((${uniqueness_guard_1} & ${uniqueness_guard_2}) => (((${uniqueness_var_1} = ${rendered_value}) & (${uniqueness_var_2} = ${rendered_value})) => (${uniqueness_var_1} = ${uniqueness_var_2}))))";
+            if ($num_args > 0) {
+                $answer .= '))';
+            }
+            return $answer;
+        } else {
+            confess 'How to formulate uniqueness for constructors of kind \'', $kind, '\'?';
+        }
     }
-    my @arg_types = $arg_types_node->findnodes ('*');
-    (my $result_type) = $constructor->findnodes ('*[position() = last()]');
-    return '$true';
 }
 
 sub render_coherence {
