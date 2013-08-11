@@ -2201,6 +2201,8 @@ sub tptp_name_for_item {
         } elsif ($kind =~ /\A . definiens \z/) {
             my $target_deftheorem = deftheorem_from_definiens ($item);
             return tptp_name_for_item ($target_deftheorem);
+        } elsif ($kind eq 'reduction') {
+            return "x${nr}_${article}";
         } else {
             confess 'How to make a TPTP name for \'', $item, '\'?';
         }
