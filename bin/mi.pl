@@ -2506,13 +2506,16 @@ sub render_uniqueness {
 
 sub render_coherence {
     my $constructor = shift;
-    my $constructor_name = render_tptp_constructor ($constructor);
-    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
-    if (! defined $arg_types_node) {
-        confess 'ArgTypes node missing under a constructor.';
+    (my $coherence_node) = $constructor->findnodes ('preceding-sibling::Coherence');
+    if (defined $coherence_node) {
+        (my $proposition) = $coherence_node->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition child not found under a Coherence node.';
+        }
+        return render_proposition ($proposition);
+    } else {
+        confess 'How to render coherence?';
     }
-    my @arg_types = $arg_types_node->findnodes ('*');
-    return '$true';
 }
 
 sub render_symmetry {
