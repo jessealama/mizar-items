@@ -2305,8 +2305,9 @@ sub render_guard {
     my $type_aid_lc = lc $type_aid;
     my $type_rendered = "${type_kind_lc}${type_nr}_${type_aid_lc}";
     my $guard = "(${type_rendered}(${variable})";
-    my @adjectives = $type->findnodes ('Cluster/Adjective');
+    my @adjectives = $type->findnodes ('Cluster[1]/Adjective');
     my $num_adjectives = scalar @adjectives;
+    my %rendered = ();
     foreach my $i (1 .. $num_adjectives) {
         my $adjective = $adjectives[$i - 1];
         my $adj_aid = get_aid_attribute ($adjective);
