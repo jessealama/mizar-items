@@ -2681,6 +2681,46 @@ sub render_requirement {
     return @named_results;
 }
 
+sub render_adjective_guards {
+    my $term = shift;
+    my @adjectives = @_;
+    my $num_adjectives = scalar @adjectives;
+    if ($num_adjectives == 0) {
+        return '$true';
+    } else {
+        my %rendered = ();
+        my $guard = '(';
+        foreach my $i (1 .. $num_adjectives) {
+            my $adjective = $adjectives[$i - 1];
+            my $adj_aid = get_aid_attribute ($adjective);
+            my $adj_nr = get_absnr_attribute ($adjective);
+            my $adj_aid_lc = lc $adj_aid;
+            my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
+            my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
+            if ($adj_is_negated) {
+                $adj_guard = '~' . $adj_guard;
+            }
+            $adj_guard .= '(';
+            my @adj_children = $adjective->findnodes ('*');
+            foreach my $adj_child (@adj_children) {
+                my $rendered_adj_child = render_semantic_content ($adj_child);
+                $adj_guard .= "${rendered_adj_child},";
+            }
+            $adj_guard .= "${term}";
+            $adj_guard .= ')';
+            if (! defined $rendered{$adj_guard}) {
+                $rendered{$adj_guard} = 0;
+                if ($i > 1) {
+                    $guard .= ' & ';
+                }
+                $guard .= "${adj_guard}";
+            }
+        }
+        $guard .= ')';
+        return $guard;
+    }
+}
+
 sub render_non_local_item {
     my $item = shift;
     my $article = article_of_item ($item);
