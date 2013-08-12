@@ -2326,7 +2326,10 @@ sub render_guard {
         }
         $adj_guard .= "${variable}";
         $adj_guard .= ')';
-        $guard .= " & ${adj_guard}";
+        if (! defined $rendered{$adj_guard}) {
+            $rendered{$adj_guard} = 0;
+            $guard .= " & ${adj_guard}";
+        }
     }
     $guard .= ')';
     return $guard;
