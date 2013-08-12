@@ -2304,8 +2304,12 @@ sub render_guard {
     my $type_kind_lc = lc $type_kind;
     my $type_aid_lc = lc $type_aid;
     my $type_rendered = "${type_kind_lc}${type_nr}_${type_aid_lc}";
+    (my $upper_cluster) = $type->findnodes ('Cluster[1]');
+    (my $lower_cluster) = $type->findnodes ('Cluster[2]');
+    my @adjectives = $upper_cluster->findnodes ('Adjective');
+    my @type_parameters = $lower_cluster->findnodes ('following-sibling::*');
+    my $num_parameters = scalar @type_parameters;
     my $guard = "(${type_rendered}(${variable})";
-    my @adjectives = $type->findnodes ('Cluster[1]/Adjective');
     my $num_adjectives = scalar @adjectives;
     my %rendered = ();
     foreach my $i (1 .. $num_adjectives) {
