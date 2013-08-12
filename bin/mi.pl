@@ -2299,7 +2299,7 @@ sub render_guard {
     my $variable = shift;
     my $type = shift;
     my $type_aid = get_aid_attribute ($type);
-    my $type_nr = get_nr_attribute ($type);
+    my $type_nr = get_absnr_attribute ($type);
     my $type_kind = get_kind_attribute ($type);
     my $type_kind_lc = lc $type_kind;
     my $type_aid_lc = lc $type_aid;
