@@ -2842,17 +2842,26 @@ sub render_non_local_item {
                 if (! defined $cluster_node) {
                     confess 'FCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
                 }
-                (my $coherence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Coherence]');
-                if (! defined $coherence_node) {
-                    confess 'Coherence node missing for a cluster at ', $item_xml;
+                # rendering the coherence node is not what we need
+                (my $arg_types_node) = $cluster_node->findnodes ('ArgTypes');
+                if (! defined $arg_types_node) {
+                    confess 'ArgTypes node not found under an FCluster node.';
                 }
-                (my $proposition_node) = $coherence_node->findnodes ('Proposition[1]');
-                if (! defined $proposition_node) {
-                    confess 'No Proposition node found under the Coherence node in ', $item_xml;
+                my @arg_types = $arg_types_node->findnodes ('*');
+                my $num_arg_types = scalar @arg_types;
+                (my $func_node) = $arg_types_node->findnodes ('following-sibling::*[1]');
+                my @adjectives = $cluster_node->findnodes ('Cluster[1]/*');
+                my $term_rendered = render_semantic_content ($func_node);
+                my $cluster_result = render_adjective_guards ($term_rendered, @adjectives);
+                foreach my $i (1 .. $num_arg_types) {
+                    my $arg_number = $num_arg_types - $i + 1;
+                    my $arg_typ = $arg_types[$arg_number - 1];
+                    my $var_name = "X${arg_number}";
+                    my $guard = render_guard ($var_name, $arg_typ);
+                    $cluster_result = "(! [${var_name}] : (${guard} => ${cluster_result}))";
                 }
-                my $rendered_proposition = render_proposition ($proposition_node);
-                push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
-                my @choices = render_choices ($proposition_node);
+                push (@results, "fof(${kind}c${nr}_${article},theorem,${cluster_result}).");
+                my @choices = render_choices ($cluster_node);
                 push (@results, @choices);
             } elsif ($kind eq 'r') {
                 my $cluster_xpath = "descendant::RCluster[\@nr = \"${nr}\"]";
