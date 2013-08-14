@@ -1452,7 +1452,10 @@ foreach my $item (keys %dependencies) {
     foreach my $dep (@deps) {
         if ($dep =~ / \A ([a-z0-9_]+) [:] ([a-z]) constructor [:] (\d+) \z /) {
             (my $article, my $kind, my $nr) = ($1, $2, $3);
-
+            # ignore structure constructors
+            if (($kind eq 'g') || ($kind eq 'l')) {
+                next;
+            }
             my $article_uc = uc $article;
             my $kind_uc = uc $kind;
             my $xpath = 'descendant::Constructor[@aid = "' . $article_uc . '" and @kind = "' . $kind_uc . '" and @nr = "' . $nr . '"]';
