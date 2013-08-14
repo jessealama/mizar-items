@@ -283,17 +283,22 @@ sub article_dependencies {
                     my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
                     $deps{$item} = 0;
                 } else {
-                    my $mizfiles = $ENV{'MIZFILES'};
-                    if (! defined $mizfiles) {
-                        confess 'MIZFILES environment variable not defined.';
+                    my $item_xml = undef;
+                    if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+                        $item_xml = "${text_dir}/${aid_lc}.xml1";
+                    } else {
+                        my $mizfiles = $ENV{'MIZFILES'};
+                        if (! defined $mizfiles) {
+                            confess 'MIZFILES environment variable not defined.';
+                        }
+                        my $miztmp_dir = "${mizfiles}/miztmp";
+                        if (! -d $miztmp_dir) {
+                            confess 'miztmp dir missing under ', $mizfiles;
+                        }
+                        $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
                     }
-                    my $miztmp_dir = "${mizfiles}/miztmp";
-                    if (! -d $miztmp_dir) {
-                        confess 'miztmp dir missing under ', $mizfiles;
-                    }
-                    my $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
                     if (! -e $item_xml) {
-                        confess 'Absolutized XML for ', $aid_lc, ' missing under ', $miztmp_dir;
+                        confess 'Absolutized XML for ', $aid_lc, ' not found at ', $item_xml;
                     }
                     my $item_xml_doc = parse_xml_file ($item_xml);
                     my $item_xml_root = $item_xml_doc->documentElement ();
@@ -346,17 +351,22 @@ sub article_dependencies {
                     my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
                     $deps{$item} = 0;
                 } else {
-                    my $mizfiles = $ENV{'MIZFILES'};
-                    if (! defined $mizfiles) {
-                        confess 'MIZFILES environment variable not defined.';
+                    my $item_xml = undef;
+                    if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+                        $item_xml = "${text_dir}/${aid_lc}.xml1";
+                    } else {
+                        my $mizfiles = $ENV{'MIZFILES'};
+                        if (! defined $mizfiles) {
+                            confess 'MIZFILES environment variable not defined.';
+                        }
+                        my $miztmp_dir = "${mizfiles}/miztmp";
+                        if (! -d $miztmp_dir) {
+                            confess 'miztmp dir missing under ', $mizfiles;
+                        }
+                        $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
                     }
-                    my $miztmp_dir = "${mizfiles}/miztmp";
-                    if (! -d $miztmp_dir) {
-                        confess 'miztmp dir missing under ', $mizfiles;
-                    }
-                    my $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
                     if (! -e $item_xml) {
-                        confess 'Absolutized XML for ', $aid_lc, ' missing under ', $miztmp_dir;
+                        confess 'Absolutized XML for ', $aid_lc, ' not found at ', $item_xml;
                     }
                     my $item_xml_doc = parse_xml_file ($item_xml);
                     my $item_xml_root = $item_xml_doc->documentElement ();
