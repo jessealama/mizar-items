@@ -1873,7 +1873,7 @@ sub render_semantic_content {
             my $guard = render_guard ($var_name, $typ);
             (my $matrix) = $for->findnodes ('*[position() = last()]');
             my $rendered_matrix = render_semantic_content ($matrix, @arguments);
-            return "(? [${var_name}] : (${guard} & (~ ${rendered_matrix})))";
+            return "~(! [${var_name}] : (${guard} => ${rendered_matrix}))";
         } elsif ($node->exists ('And[count(*) = 2]/Not')) {
             (my $conjunction) = $node->findnodes ('And');
             (my $lhs) = $conjunction->findnodes ('*[1]');
