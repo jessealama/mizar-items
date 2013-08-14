@@ -1619,6 +1619,11 @@ sub is_deftheorem_item {
     return ($item =~ / [:] deftheorem [:] /)
 }
 
+sub is_constructor_item {
+    my $item = shift;
+    return ($item =~ / [:] . constructor [:] \d+ \z /);
+}
+
 sub is_constructor_property_item {
     my $item = shift;
     return ($item =~ / [:] . constructor [:] \d+ [[] [a-z]+ []] \z/);
