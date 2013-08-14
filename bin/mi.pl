@@ -3080,6 +3080,168 @@ sub conjecturify_formula_in_problem {
     return @new_problem;
 }
 
+my %redefined = ();
+
+sub is_redefined_constructor {
+    my $item = shift;
+    if (defined $redefined{$item}) {
+        return $redefined{$item};
+    }
+    my $answer = undef;
+    if (is_constructor_item ($item)) {
+        my $article = article_of_item ($item);
+        my $nr = nr_of_item ($item);
+        my $kind = constructor_kind ($item);
+        my $mizfiles = $ENV{'MIZFILES'};
+        if (! defined $mizfiles) {
+            confess 'MIZFILES environment variable not defined.';
+        }
+        my $miztmp_dir = "${mizfiles}/miztmp";
+        my $item_xml = "${miztmp_dir}/${article}.xml1";
+        if (! -e $item_xml) {
+            confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+        }
+        my $item_xml_doc = parse_xml_file ($item_xml);
+        my $item_xml_root = $item_xml_doc->documentElement ();
+        my $kind_uc = uc $kind;
+        my $article_uc = uc $article;
+        my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\"][${nr}]";
+        (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+        if (! defined $constructor_node) {
+            confess 'Constructor not found in ', $item_xml, '.';
+        }
+        $answer = $constructor_node->hasAttribute ('redefnr');
+    } else {
+        $answer = 0;
+    }
+    $redefined{$item} = $answer;
+    return $answer;
+}
+
+sub definition_for_constructor {
+    my $constructor_item = shift;
+    my $article = article_of_item ($constructor_item);
+    my $nr = nr_of_item ($constructor_item);
+    my $kind = constructor_kind ($constructor_item);
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
+    }
+    my $miztmp_dir = "${mizfiles}/miztmp";
+    my $item_xml = "${miztmp_dir}/${article}.xml1";
+    if (! -e $item_xml) {
+        confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+    }
+    my $item_xml_doc = parse_xml_file ($item_xml);
+    my $item_xml_root = $item_xml_doc->documentElement ();
+    my $kind_uc = uc $kind;
+    my $article_uc = uc $article;
+    my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\"][${nr}]";
+    (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+    if (! defined $constructor_node) {
+        confess 'Constructor not found in ', $item_xml, '.';
+    }
+    (my $block_node) = $constructor_node->findnodes ('ancestor::DefinitionBlock');
+    if (! defined $block_node) {
+        confess 'DefinitionBlock ancestor node not found in ', $item_xml;
+    }
+    (my $deftheorem_node) = $item_xml_root->findnodes ("DefTheorem[\@constrkind = \"${kind_uc}\"][${nr}]");
+    (my $compatibility_node) = $constructor_node->findnodes ('ancestor::Definition/Coherence');
+    if (defined $deftheorem_node) {
+        my $def_nr = $deftheorem_node->findvalue ('count (preceding::DefTheorem) + 1');
+        my $content = render_deftheorem ($deftheorem_node);
+        my $tptp_name = "d${def_nr}_${article}";
+        my $formula = "fof(${tptp_name},definition,${content}).";
+        return $formula;
+    } elsif (defined $compatibility_node) {
+        (my $proposition_node) = $compatibility_node->findnodes ('Proposition');
+        if (! defined $proposition_node) {
+            confess 'No Proposition node under a Compatibility node in ', $item_xml, '.';
+        }
+        my $content = render_proposition ($proposition_node);
+        my $tptp_name = "coherence_${kind}${nr}_${article}";
+        my $formula = "fof(${tptp_name},theorem,${content}).";
+        return $formula;
+    } else {
+        # carp 'Unable to find a definition for ', $constructor_item, '.';
+        return;
+    }
+}
+
+sub compatibility_for_constructor {
+    my $constructor_item = shift;
+    my $article = article_of_item ($constructor_item);
+    my $nr = nr_of_item ($constructor_item);
+    my $kind = constructor_kind ($constructor_item);
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
+    }
+    my $miztmp_dir = "${mizfiles}/miztmp";
+    my $item_xml = "${miztmp_dir}/${article}.xml1";
+    if (! -e $item_xml) {
+        confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+    }
+    my $item_xml_doc = parse_xml_file ($item_xml);
+    my $item_xml_root = $item_xml_doc->documentElement ();
+    my $kind_uc = uc $kind;
+    my $article_uc = uc $article;
+    my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\"][${nr}]";
+    (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+    if (! defined $constructor_node) {
+        confess 'Constructor not found in ', $item_xml, '.';
+    }
+    (my $compatibility_node) = $constructor_node->findnodes ('preceding-sibling::Compatibility');
+    if (! defined $compatibility_node) {
+        return;
+    }
+    (my $proposition_node) = $compatibility_node->findnodes ('Proposition');
+    if (! defined $proposition_node) {
+        confess 'No Proposition node under a Compatibility node in ', $item_xml, '.';
+    }
+    my $content = render_proposition ($proposition_node);
+    my $tptp_name = "compatibility_${kind}${nr}_${article}";
+    my $formula = "fof(${tptp_name},theorem,${content}).";
+    return $formula;
+}
+
+sub coherence_for_constructor {
+    my $constructor_item = shift;
+    my $article = article_of_item ($constructor_item);
+    my $nr = nr_of_item ($constructor_item);
+    my $kind = constructor_kind ($constructor_item);
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
+    }
+    my $miztmp_dir = "${mizfiles}/miztmp";
+    my $item_xml = "${miztmp_dir}/${article}.xml1";
+    if (! -e $item_xml) {
+        confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+    }
+    my $item_xml_doc = parse_xml_file ($item_xml);
+    my $item_xml_root = $item_xml_doc->documentElement ();
+    my $kind_uc = uc $kind;
+    my $article_uc = uc $article;
+    my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\"][${nr}]";
+    (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+    if (! defined $constructor_node) {
+        confess 'Constructor not found in ', $item_xml, '.';
+    }
+    (my $coherence_node) = $constructor_node->findnodes ('preceding-sibling::Coherence');
+    if (! defined $coherence_node) {
+        return;
+    }
+    (my $proposition_node) = $coherence_node->findnodes ('Proposition');
+    if (! defined $proposition_node) {
+        confess 'No Proposition node under a Coherence node in ', $item_xml, '.';
+    }
+    my $content = render_proposition ($proposition_node);
+    my $tptp_name = "coherence_${kind}${nr}_${article}";
+    my $formula = "fof(${tptp_name},theorem,${content}).";
+    return $formula;
+}
+
 sub problem_for_item {
     my $item = shift;
     my $source = source_of_item ($item);
