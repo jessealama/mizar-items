@@ -3260,6 +3260,25 @@ sub problem_for_item {
         } elsif (has_semantic_content ($dep)) {
             my @rendered = render_non_local_item ($dep);
             push (@problem, @rendered);
+        } elsif (is_constructor_item ($dep)) {
+            if (is_redefined_constructor ($dep)) {
+                my $def = definition_for_constructor ($dep);
+                if (defined $def) {
+                    push (@problem, $def);
+                }
+                warn $dep, ' is a redefined constructor.';
+                my $compat = compatibility_for_constructor ($dep);
+                if (defined $compat) {
+                    push (@problem, $compat);
+                }
+                my $coherence = coherence_for_constructor ($dep);
+                if (defined $coherence) {
+                    push (@problem, $coherence);
+                }
+                if ((! defined $compat) && (! defined $coherence)) {
+                    carp 'Neither a compatibility nor a coherence condition was found for ', $dep;
+                }
+            }
         }
     }
     my @formulas_from_schemes = extract_schemes ($fragment_root);
