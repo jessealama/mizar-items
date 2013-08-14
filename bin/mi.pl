@@ -1638,6 +1638,11 @@ sub is_constructor_item {
     return ($item =~ / [:] . constructor [:] \d+ \z /);
 }
 
+sub is_functor_constructor {
+    my $item = shift;
+    return ($item =~ / [:] k constructor [:] \d+ \z /);
+}
+
 sub is_constructor_property_item {
     my $item = shift;
     return ($item =~ / [:] . constructor [:] \d+ [[] [a-z]+ []] \z/);
