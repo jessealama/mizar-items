@@ -2322,6 +2322,15 @@ sub render_guard {
         my $adj_aid = get_aid_attribute ($adjective);
         my $adj_nr = get_absnr_attribute ($adjective);
         my $adj_aid_lc = lc $adj_aid;
+        if ($adj_aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+            my $local_item = "${adj_aid_lc}:vconstructor:${adj_nr}";
+            my $item = $local_item_table{$local_item};
+            if (! defined $item) {
+                confess 'Could not find ', $local_item, ' in the local item table.';
+            }
+            $adj_nr = nr_of_item ($item);
+            $adj_aid_lc = $article_name;
+        }
         my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
         my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
         if ($adj_is_negated) {
