@@ -747,14 +747,14 @@ sub constructors_under_node {
 
     foreach my $field (@all_fields) {
         my $aid = $field->getAttribute ('aid');
-        my $nr = $field->getAttribute ('nr');
+        my $nr = $field->getAttribute ('absnr');
 
         if (! defined $aid) {
             croak 'Error: field node lacks an aid field!';
         }
 
         if (! defined $nr) {
-            croak 'Error: field node lacks an nr field!';
+            croak 'Error: field node lacks an absnr field!';
         }
 
         $aid = lc $aid;
