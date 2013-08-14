@@ -2314,7 +2314,17 @@ sub render_guard {
     my @adjectives = $upper_cluster->findnodes ('Adjective');
     my @type_parameters = $lower_cluster->findnodes ('following-sibling::*');
     my $num_parameters = scalar @type_parameters;
-    my $guard = "(${type_rendered}(${variable})";
+    my $guard = '(';
+    # render the type itself
+    $guard .= "${type_rendered}(";
+    if ($num_parameters > 0) {
+        foreach my $param (@type_parameters) {
+            my $param_rendered = render_semantic_content ($param);
+            $guard .= "${param_rendered},";
+        }
+    }
+    $guard .= "${variable})";
+    # now render any adjectives, if present
     my $num_adjectives = scalar @adjectives;
     my %rendered = ();
     foreach my $i (1 .. $num_adjectives) {
