@@ -1001,10 +1001,7 @@ foreach my $prel_file (@prel_files) {
             'vconstructor' => 1,
         );
         foreach my $constructor_node (@constructor_nodes) {
-            my $kind = $constructor_node->getAttribute ('kind');
-            if (! defined $kind) {
-                confess 'Error: constructor node in', $LF, $LF, '  ', $prel_file, $LF, $LF, 'lacks a kind attribute.';
-            }
+            my $kind = get_kind_attribute ($constructor_node);
             $kind = lc $kind;
             my $key = "${kind}constructor";
             my $index = $enumeration{$key};
