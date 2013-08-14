@@ -3187,6 +3187,69 @@ sub definition_for_constructor {
     }
 }
 
+sub value_type_for_constructor {
+    my $constructor_item = shift;
+    my $article = article_of_item ($constructor_item);
+    my $nr = nr_of_item ($constructor_item);
+    my $kind = constructor_kind ($constructor_item);
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
+    }
+    my $miztmp_dir = "${mizfiles}/miztmp";
+    my $item_xml = "${miztmp_dir}/${article}.xml1";
+    if (! -e $item_xml) {
+        confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+    }
+    my $item_xml_doc = parse_xml_file ($item_xml);
+    my $item_xml_root = $item_xml_doc->documentElement ();
+    my $kind_uc = uc $kind;
+    my $article_uc = uc $article;
+    my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\"][${nr}]";
+    (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+    if (! defined $constructor_node) {
+        confess 'Constructor not found in ', $item_xml, '.';
+    }
+    (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node not found under a Constructor in ', $item_xml;
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    (my $value_typ_node) = $arg_types_node->findnodes ('following-sibling::*[1][self::Typ]');
+    if (! defined $value_typ_node) {
+        confess 'Value type not found where we expect under a Constructor node in ', $item_xml, '.';
+    }
+    my $constructor_kind = get_kind_attribute ($constructor_node);
+    my $constructor_aid = get_aid_attribute ($constructor_node);
+    my $constructor_kind_lc = lc $constructor_kind;
+    my $constructor_aid_lc = lc $constructor_aid;
+    my $constructor_tptp = "${constructor_kind_lc}${nr}_${constructor_aid_lc}";
+    my $tptp_name = "dt_${constructor_tptp}";
+    my $generic_term = $constructor_tptp;
+    if ($num_arg_types > 0) {
+        $generic_term .= '(';
+        foreach my $i (1 .. $num_arg_types) {
+            $generic_term .= "X${i}";
+            if ($i < $num_arg_types) {
+                $generic_term .= ',';
+            }
+        }
+        $generic_term .= ')';
+    }
+    my $content = render_guard ($generic_term, $value_typ_node);
+    # now generalize the content using the arg types
+    foreach my $i (1 .. $num_arg_types) {
+        my $arg_number = $num_arg_types - $i + 1;
+        my $arg_typ = $arg_types[$arg_number - 1];
+        my $var_name = "X${arg_number}";
+        my $guard = render_guard ($var_name, $arg_typ);
+        $content = "(! [${var_name}] : (${guard} => ${content}))";
+    }
+    my $formula = "fof(${tptp_name},theorem,${content}).";
+    return $formula;
+}
+
 sub compatibility_for_constructor {
     my $constructor_item = shift;
     my $article = article_of_item ($constructor_item);
