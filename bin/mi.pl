@@ -2782,19 +2782,45 @@ sub render_non_local_item {
         my $item_xml_doc = parse_xml_file ($item_xml);
         my $item_xml_root = $item_xml_doc->documentElement ();
         if (is_theorem_item ($item)) {
-            my $xpath = "descendant::JustifiedTheorem[${nr}]";
-            (my $theorem_node) = $item_xml_root->findnodes ($xpath);
-            if (! defined $theorem_node) {
-                confess 'Could not find theorem ', $nr, ' in ', $item_xml;
+            my $item_msx = "${miztmp_dir}/${article}.msx.canceled";
+            if (! -e $item_msx) {
+                confess '.msx.canceled for ', $article, ' missing under ', $miztmp_dir;
             }
-            my $content = render_justified_theorem ($theorem_node);
-            push (@results, "fof(${tptp_name},theorem,${content}).");
-            (my $proposition_node) = $theorem_node->findnodes ('Proposition[1]');
-            if (! defined $proposition_node) {
-                confess 'No Proposition node found under the Coherence node in ', $item_xml;
+            my $item_msx_doc = parse_xml_file ($item_msx);
+            my $item_msx_root = $item_msx_doc->documentElement ();
+            my $all_theorems_xpath = 'Item[((@kind = "Theorem-Item") or (@kind = "Pragma" and @spelling = "$CT"))]';
+            my @all_theorems = $item_msx_root->findnodes ($all_theorems_xpath);
+            # warn 'there are ', scalar @all_theorems, ' total theorems in ', $item_msx, '.';
+            my $target_theorem = $all_theorems[$nr - 1];
+            if (! defined $target_theorem) {
+                confess 'Cannot find the right theorem in ', $item_msx, '.';
             }
-            my @choices = render_choices ($proposition_node);
-            push (@results, @choices);
+            my $target_theorem_kind = $target_theorem->getAttribute ('kind');
+            if ($target_theorem_kind eq 'Pragma') {
+                my $content = '$true';
+                my $formula = "fof(${tptp_name},theorem,${content}).";
+                push (@results, $formula);
+            } elsif ($target_theorem_kind eq 'Theorem-Item') {
+                my $target_theorem_nr = $target_theorem->findvalue ('count (preceding-sibling::Item[@kind = "Theorem-Item"]) + 1');
+                if ($nr != $target_theorem_nr) {
+                    # warn $item, ' is really theorem #', $target_theorem_nr;
+                }
+                my $xpath = "descendant::JustifiedTheorem[${target_theorem_nr}]";
+                (my $theorem_node) = $item_xml_root->findnodes ($xpath);
+                if (! defined $theorem_node) {
+                    confess 'Could not find theorem ', $target_theorem_nr, ' in ', $item_xml, '.', $LF, 'The underlying XML node:', $LF, $target_theorem->toString;
+                }
+                my $content = render_justified_theorem ($theorem_node);
+                push (@results, "fof(${tptp_name},theorem,${content}).");
+                (my $proposition_node) = $theorem_node->findnodes ('Proposition[1]');
+                if (! defined $proposition_node) {
+                    confess 'No Proposition node found under the Coherence node in ', $item_xml;
+                }
+                my @choices = render_choices ($proposition_node);
+                push (@results, @choices);
+            } else {
+                confess 'What kind of theorem kind is \'', $target_theorem_kind, '\'?';
+            }
         } elsif (is_lemma_item ($item)) {
             my $xpath = "Proposition[count (preceding-sibling::Proposition) + 1 = ${nr}]";
             (my $proposition_node) = $item_xml_root->findnodes ($xpath);
