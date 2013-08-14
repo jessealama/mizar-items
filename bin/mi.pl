@@ -3343,6 +3343,13 @@ sub problem_for_item {
             my @rendered = render_non_local_item ($dep);
             push (@problem, @rendered);
         } elsif (is_constructor_item ($dep)) {
+            if (is_functor_constructor ($dep)) {
+                my $typing = value_type_for_constructor ($dep);
+                if (defined $typing) {
+                    warn 'value type: ', $typing;
+                    push (@problem, $typing);
+                }
+            }
             if (is_redefined_constructor ($dep)) {
                 my $def = definition_for_constructor ($dep);
                 if (defined $def) {
