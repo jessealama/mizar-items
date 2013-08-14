@@ -2876,21 +2876,40 @@ sub render_non_local_item {
             my $kind = cluster_kind ($item);
             if ($kind eq 'c') {
                 my $cluster_xpath = "descendant::CCluster[${nr}]";
-                (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
+                (my $ccluster_node) = $item_xml_root->findnodes ($cluster_xpath);
+                if (! defined $ccluster_node) {
+                    confess 'CCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath;
+                }
+                (my $arg_types_node) = $ccluster_node->findnodes ('ArgTypes');
+                if (! defined $arg_types_node) {
+                    confess 'ArgTypes node not found under an FCluster node.';
+                }
+                my @arg_types = $arg_types_node->findnodes ('*');
+                my $num_arg_types = scalar @arg_types;
+                (my $cluster_node) = $arg_types_node->findnodes ('following-sibling::*[1][self::Cluster]');
                 if (! defined $cluster_node) {
-                    confess 'CCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
+                    confess 'Cluster node not found immediately following an ArgTypes node in a CCluster.';
                 }
-                (my $coherence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Coherence]');
-                if (! defined $coherence_node) {
-                    confess 'Coherence node missing for a cluster at ', $item_xml;
+                (my $typ_node) = $arg_types_node->findnodes ('following-sibling::Typ');
+                if (! defined $typ_node) {
+                    confess 'Typ node missing from a CCluster.';
                 }
-                (my $proposition_node) = $coherence_node->findnodes ('Proposition[1]');
-                if (! defined $proposition_node) {
-                    confess 'No Proposition node found under the Coherence node in ', $item_xml;
+                my @adjectives = $ccluster_node->findnodes ('Cluster[position() = last()]/*');
+                my $var_name = 'X' . ($num_arg_types + 1);
+                my $main_guard = render_guard ($var_name, $typ_node);
+                my @first_adjectives = $cluster_node->findnodes ('Adjective');
+                my $secondary_guard = render_adjective_guards ($var_name, @first_adjectives);
+                my $cluster_result = render_adjective_guards ($var_name, @adjectives);
+                $cluster_result = "(! [${var_name}] : ((${main_guard} & ${secondary_guard}) => ${cluster_result}))";
+                foreach my $i (1 .. $num_arg_types) {
+                    my $arg_number = $num_arg_types - $i + 1;
+                    my $arg_typ = $arg_types[$arg_number - 1];
+                    my $var_name = "X${arg_number}";
+                    my $guard = render_guard ($var_name, $arg_typ);
+                    $cluster_result = "(! [${var_name}] : (${guard} => ${cluster_result}))";
                 }
-                my $rendered_proposition = render_proposition ($proposition_node);
-                push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
-                my @choices = render_choices ($proposition_node);
+                push (@results, "fof(${kind}c${nr}_${article},theorem,${cluster_result}).");
+                my @choices = render_choices ($ccluster_node);
                 push (@results, @choices);
             } elsif ($kind eq 'f') {
                 my $cluster_xpath = "descendant::FCluster[${nr}]";
