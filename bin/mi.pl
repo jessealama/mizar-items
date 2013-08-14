@@ -2966,7 +2966,19 @@ sub render_non_local_item {
             my $deftheorem_content = render_deftheorem ($deftheorem_node);
             my $deftheorem = "fof(d${constructor_nr}_${constructor_aid},definition,${deftheorem_content}).";
             push (@results, $deftheorem);
-
+            # is this a redefinition?  We may need to use the compatibility
+            my $compatibility_xpath = 'preceding-sibling::Compatibility';
+            if ($constructor_node->exists ($compatibility_xpath)) {
+                warn 'adding a compatibility for property ', $property;
+                (my $compatibility_node) = $constructor_node->findnodes ($compatibility_xpath);
+                (my $compatibility_proposition) = $compatibility_node->findnodes ('Proposition');
+                if (! defined $compatibility_proposition) {
+                    confess 'Proposition child not found under a Compatibility node.';
+                }
+                my $compatibility_content = render_proposition ($compatibility_proposition);
+                my $compatibility = "fof(compatibility_d${constructor_nr}_${constructor_aid},theorem,${compatibility_content}).";
+                push (@results, $compatibility);
+            }
             # it seems we don't need to worry about choice nodes in this case
             # my @choices = render_choices ($proposition_node);
             # push (@results, @choices);
