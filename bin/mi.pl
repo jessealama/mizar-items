@@ -800,17 +800,24 @@ my %enumeration = (
     'theorem' => 1,
     'scheme' => 1,
     'lemma' => 1,
+    'gconstructor' => 1,
     'kconstructor' => 1,
+    'lconstructor' => 1,
     'mconstructor' => 1,
     'rconstructor' => 1,
+    'uconstructor' => 1,
     'vconstructor' => 1,
     'kdefiniens' => 1,
     'mdefiniens' => 1,
     'rdefiniens' => 1,
     'vdefiniens' => 1,
+    'gpattern' => 1,
+    'jpattern' => 1,
     'kpattern' => 1,
+    'lpattern' => 1,
     'mpattern' => 1,
     'rpattern' => 1,
+    'upattern' => 1,
     'vpattern' => 1,
     'reduction' => 1,
     'sethood' => 1,
@@ -976,8 +983,11 @@ foreach my $prel_file (@prel_files) {
     } elsif ($prel_file =~ / [.] dco \z/) {
         my @constructor_nodes = $fragment_xml_root->findnodes ('descendant::Constructor');
         my %local_enumeration = (
+            'gconstructor' => 1,
             'kconstructor' => 1,
+            'lconstructor' => 1,
             'rconstructor' => 1,
+            'uconstructor' => 1,
             'vconstructor' => 1,
         );
         foreach my $constructor_node (@constructor_nodes) {
@@ -1093,9 +1103,13 @@ foreach my $prel_file (@prel_files) {
 
         my @pattern_nodes = $fragment_xml_root->findnodes ('descendant::Pattern');
         my %local_enumeration = (
+            'gpattern' => 1,
+            'jpattern' => 1,
             'kpattern' => 1,
+            'lpattern' => 1,
             'mpattern' => 1,
             'rpattern' => 1,
+            'upattern' => 1,
             'vpattern' => 1,
         );
         foreach my $pattern_node (@pattern_nodes) {
