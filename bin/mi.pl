@@ -3547,6 +3547,10 @@ sub is_problematic_item {
         } elsif (is_deftheorem_item ($item)) {
             return 0;
         } elsif (is_definiens_item ($item)) {
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
             return 0;
         } else {
             return 1;
