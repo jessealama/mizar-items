@@ -2865,6 +2865,11 @@ sub free_for_constructor {
         18 => ['(! [X] : (k3_xboole_0(X,k1_xboole_0) = k1_xboole_0))'],
         19 => ['(! [X] : (k4_xboole_0(X,k1_xboole_0) = X))',
                '(! [X] : (k4_xboole_0(k1_xboole_0,X) = k1_xboole_0))'],
+        32 => ['(! [X] : (r2_hidden(X,k4_ordinal1) => v7_ordinal1(X)))',
+               '(! [X] : (r2_hidden(X,k4_ordinal1) => v1_card_1(X)))',
+               '(! [X] : (v7_ordinal1(X) => r2_hidden(X,k4_ordinal1)))'],
+        33 => ['0 = k1_xboole_0',
+               '0 = k5_ordinal1'],
     );
 
 sub render_requirement {
@@ -3535,6 +3540,26 @@ sub problem_for_item {
         } else {
             confess 'Cannot make sense of TPTP formula \'', $formula, '\'.';
         }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
     }
     return values %formulas;
 }
@@ -3558,6 +3583,10 @@ sub is_problematic_item {
     } else {
         return 0;
     }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
 }
 
 # Make the problems.  Trash it if it already exists.
