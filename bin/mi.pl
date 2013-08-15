@@ -2708,6 +2708,142 @@ Readonly my %REQUIREMENT_CONTENTS =>
         4 => ['$true'],
         5 => ['v1_xboole_0(k1_xboole_0)',
               '(! [X] : (v1_xboole_0(X) => X = k1_xboole_0))',
+sub render_abstractness {
+    my $vconstructor = shift;
+    my $vconstructor_kind = get_kind_attribute ($vconstructor);
+    if ($vconstructor_kind ne 'V') {
+        confess 'We assume that abstractness is formulated only for attribute constructors.';
+    }
+    my $vconstructor_aid = get_aid_attribute ($vconstructor);
+    my $vconstructor_nr = get_nr_attribute ($vconstructor);
+    my $vconstructor_aid_lc = lc $vconstructor_aid;
+    (my $lconstructor) = $vconstructor->findnodes ('following-sibling::Constructor[@kind = "L"]');
+    if (! defined $lconstructor) {
+        confess 'Where is the L constructor following a V constructor?';
+    }
+    my $l_nr = get_nr_attribute ($lconstructor);
+    my $l_aid = get_aid_attribute ($lconstructor);
+    my $l_aid_lc = lc $l_aid;
+    (my $gconstructor) = $vconstructor->findnodes ('following-sibling::Constructor[@kind = "G"]');
+    if (! defined $gconstructor) {
+        confess 'Where is the G constructor following a V constructor?';
+    }
+    (my $fields) = $lconstructor->findnodes ('Fields');
+    if (! defined $fields) {
+        confess 'Fields node not found under an L constructor node.';
+    }
+    my @fields = $fields->findnodes ('Field');
+    my $var = 'X';
+    my $l_guard = "l${l_nr}_${l_aid}(${var})";
+    my $v_guard = "v${vconstructor_nr}_${vconstructor_aid_lc}(${var})";
+    my $g_nr = get_nr_attribute ($gconstructor);
+    my $g_aid = get_aid_attribute ($gconstructor);
+    my $g_aid_lc = lc $g_aid;
+    my $num_fields = scalar @fields;
+    my $g_tptp = "g${g_nr}_${g_aid_lc}";
+    if ($num_fields > 0) {
+        $g_tptp .= '(';
+        foreach my $i (1 .. $num_fields) {
+            my $field = $fields[$i - 1];
+            my $field_nr = get_nr_attribute ($field);
+            my $field_aid = get_aid_attribute ($field);
+            my $field_aid_lc = lc $field_aid;
+            my $field_tptp = "u${field_nr}_${field_aid_lc}(${var})";
+            $g_tptp .= $field_tptp;
+            if ($i < $num_fields) {
+                $g_tptp .= ',';
+            }
+        }
+        $g_tptp .= ')';
+    }
+    my $equation = "${var} = ${g_tptp}";
+    my $content = "(! [${var}] : (${l_guard} => (${v_guard} => ${equation})))";
+    my $tptp_name = "abstractness_v${vconstructor_nr}_${vconstructor_aid_lc}";
+    my $formula = "fof(${tptp_name},axiom,${content}).";
+    return $formula;
+}
+
+sub constructor_node_of_constructor_item {
+    my $constructor_item = shift;
+    my $article = article_of_item ($constructor_item);
+    my $nr = nr_of_item ($constructor_item);
+    my $kind = constructor_kind ($constructor_item);
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
+    }
+    my $miztmp_dir = "${mizfiles}/miztmp";
+    my $item_xml = "${miztmp_dir}/${article}.xml1";
+    if (! -e $item_xml) {
+        confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+    }
+    my $item_xml_doc = parse_xml_file ($item_xml);
+    my $item_xml_root = $item_xml_doc->documentElement ();
+    my $kind_uc = uc $kind;
+    my $article_uc = uc $article;
+    my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\"][${nr}]";
+    (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
+    if (! defined $constructor_node) {
+        confess 'Constructor not found in ', $item_xml, '.';
+    }
+    return $constructor_node;
+}
+
+sub free_for_constructor {
+    my $constructor_item = shift;
+    my $gconstructor = constructor_node_of_constructor_item ($constructor_item);
+    my $gconstructor_kind = get_kind_attribute ($gconstructor);
+    if ($gconstructor_kind ne 'G') {
+        confess 'We assume that freeness is formulated only for G constructors.';
+    }
+    my $g_nr = get_nr_attribute ($gconstructor);
+    my $g_aid = get_aid_attribute ($gconstructor);
+    my $g_aid_lc = lc $g_aid;
+    (my $fields) = $gconstructor->findnodes ('Fields');
+    if (! defined $fields) {
+        confess 'Fields node not found in a G constructor node.';
+    }
+    my $num_fields = $fields->findvalue ('count (Field)');
+    my $var_prefix_1 = 'A';
+    my $var_prefix_2 = 'B';
+    my $lhs_equation_lhs = "g${g_nr}_${g_aid_lc}";
+    my $lhs_equation_rhs = "g${g_nr}_${g_aid_lc}";
+    if ($num_fields > 0) {
+        my @var_1_list = map { "${var_prefix_1}${_}" } (1 .. $num_fields);
+        my @var_2_list = map { "${var_prefix_2}${_}" } (1 .. $num_fields);
+        my $var_1_list = join ',', @var_1_list;
+        my $var_2_list = join ',', @var_2_list;
+        $lhs_equation_lhs = "${lhs_equation_lhs}(${var_1_list})";
+        $lhs_equation_rhs = "${lhs_equation_rhs}(${var_2_list})";
+    }
+    my $lhs_equation = "${lhs_equation_lhs} = ${lhs_equation_rhs}";
+    my $rhs = undef;
+    if ($num_fields == 0) {
+        $rhs = '$true';
+    } else {
+        $rhs = '(';
+        foreach my $i (1 .. $num_fields) {
+            my $equation = "${var_prefix_1}${i} = ${var_prefix_2}${i}";
+            $rhs .= $equation;
+            if ($i < $num_fields) {
+                $rhs .= ' & ';
+            }
+        }
+        $rhs .= ')';
+    }
+    my $content = "(${lhs_equation} = ${rhs})";
+    # now generalize
+    (my $arg_types_node) = $gconstructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node not found under a G constructor node.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('Typ');
+    my $num_arg_types = scalar @arg_types;
+    my $tptp_name = "free_g${g_nr}_${g_aid_lc}";
+    my $formula = "fof(${tptp_name},axiom,${content}).";
+    return $formula;
+}
+
               '(! [X] : (v1_xboole_0(X) <=> (! [Y] : (~ r2_hidden(Y,X)))))'],
         6 => ['(! [X] : (~ r2_hidden(X,k1_xboole_0)))',
               '(! [X] : ((! [Y] : (~r2_hidden(Y,X))) => (X = k1_xboole_0)))'],
