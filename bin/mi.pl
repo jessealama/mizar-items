@@ -1939,6 +1939,9 @@ sub render_semantic_content {
     } elsif ($name eq 'Const') {
         my $vid = get_attribute ($node, 'vid');
         return "X${vid}";
+    } elsif ($name eq 'Num') {
+        # uh oh
+        return get_nr_attribute ($node);
     } else {
         confess 'Unable to generate a rendering for nodes of kind \'', $name, '\'.';
     }
