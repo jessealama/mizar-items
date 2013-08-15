@@ -2872,6 +2872,17 @@ sub free_for_constructor {
     }
     my @arg_types = $arg_types_node->findnodes ('Typ');
     my $num_arg_types = scalar @arg_types;
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var_1 = "${var_prefix_1}${var_index}";
+        my $var_2 = "${var_prefix_2}${var_index}";
+        my $guard_1 = render_guard ($var_1, $typ);
+        my $guard_2 = render_guard ($var_2, $typ);
+        $guard_1 =~ s/X${i}/${var_prefix_1}${i}/g;
+        $guard_2 =~ s/X${i}/${var_prefix_2}${i}/g;
+        $content = "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => ${content}))";
+    }
     my $tptp_name = "free_g${g_nr}_${g_aid_lc}";
     my $formula = "fof(${tptp_name},axiom,${content}).";
     return $formula;
