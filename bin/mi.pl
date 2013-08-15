@@ -2012,6 +2012,20 @@ sub type_for_constant {
     }
 }
 
+sub constant_less_than_constant {
+    my $const_a = shift;
+    my $const_b = shift;
+    my $a_nr = get_nr_attribute ($const_a);
+    my $b_nr = get_nr_attribute ($const_b);
+    if ($a_nr < $b_nr) {
+        return -1;
+    } elsif ($a_nr > $b_nr) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 sub render_proposition {
     my $proposition_node = shift;
     (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
