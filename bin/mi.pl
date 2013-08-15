@@ -2316,6 +2316,7 @@ Readonly my %CONSTRUCTOR_PROPERTY_MAKERS =>
         'existence' => \&render_existence,
         'uniqueness' => \&render_uniqueness,
         'coherence' => \&render_coherence,
+        'abstractness' => \&render_abstractness,
     );
 
 sub render_tptp_constructor {
