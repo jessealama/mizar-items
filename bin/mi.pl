@@ -2656,19 +2656,37 @@ sub render_reflexivity_node {
 
 sub render_reflexivity {
     my $constructor = shift;
-    if ($constructor->hasAttribute ('redefaid')) {
-        (my $compatibility_node) = $constructor->findnodes ('preceding-sibling::Compatibility');
-        if (! defined $compatibility_node) {
-            confess 'Dealing with a redefined constructor, we do not find a Compatibility node.';
-        }
-        return render_compatibility_node ($compatibility_node);
+    (my $reflexivity_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Reflexivity');
+    if (defined $reflexivity_node) {
+        return render_reflexivity_node ($reflexivity_node);
     } else {
-        (my $reflexivity_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Reflexivity');
-        if (defined $reflexivity_node) {
-            return render_reflexivity_node ($reflexivity_node);
-        } else {
-            confess 'How to render the reflexivity property without a Reflexivity node?';
+        my $nr = get_nr_attribute ($constructor);
+        my $aid = get_aid_attribute ($constructor);
+        my $aid_lc = lc $aid;
+        my $kind = get_kind_attribute ($constructor);
+        my $kind_lc = lc $kind;
+        (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+        if (! defined $arg_types_node) {
+            confess 'ArgTypes node missing under a Constructor.';
         }
+        my @arg_types = $arg_types_node->findnodes ('*');
+        my $num_arg_types = scalar @arg_types;
+        if ($num_arg_types < 2) {
+            confess 'How to deal with reflexivity for a constructor that takes fewer than 2 arguments?';
+        }
+        my $last_var = 'X' . ($num_arg_types - 1);
+        my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
+        my $reflexivity_content = "${constructor_tptp}(${last_var},${last_var})";
+        foreach my $i (1 .. $num_arg_types - 1) {
+            my $var_index = $num_arg_types - 1 - $i;
+            my $var = "X${var_index}";
+            my $typ = $arg_types[$var_index];
+            my $guard = render_guard ($var, $typ);
+            $reflexivity_content = "(! [${var}] : (${guard} => ${reflexivity_content}))";
+        }
+        my $tptp_name = "reflexivity_${constructor_tptp}";
+        my $formula = "fof(${tptp_name},theorem,${reflexivity_content}).";
+        return $formula;
     }
 }
 
