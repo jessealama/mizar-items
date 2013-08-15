@@ -2031,6 +2031,8 @@ sub render_proposition {
     (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
     my $content = render_semantic_content ($content_node);
     my @constants = constants_under_node ($proposition_node);
+    @constants = sort { constant_less_than_constant ($a, $b) } @constants;
+    @constants = reverse @constants;
     foreach my $constant (@constants) {
         my $typ = type_for_constant ($constant);
         my $var_name = undef;
