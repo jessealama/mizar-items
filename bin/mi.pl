@@ -2610,15 +2610,14 @@ sub render_uniqueness {
 sub render_coherence {
     my $constructor = shift;
     (my $coherence_node) = $constructor->findnodes ('preceding-sibling::Coherence');
-    if (defined $coherence_node) {
-        (my $proposition) = $coherence_node->findnodes ('Proposition');
-        if (! defined $proposition) {
-            confess 'Proposition child not found under a Coherence node.';
-        }
-        return render_proposition ($proposition);
-    } else {
+    if (! defined $coherence_node) {
         confess 'How to render coherence?';
     }
+    (my $proposition) = $coherence_node->findnodes ('Proposition');
+    if (! defined $proposition) {
+        confess 'Proposition child not found under a Coherence node.';
+    }
+    return render_proposition ($proposition);
 }
 
 sub render_symmetry {
