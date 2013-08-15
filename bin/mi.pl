@@ -3161,21 +3161,47 @@ sub render_non_local_item {
                     confess 'RCluster not found in ', $item_xml;
                 }
                 (my $existence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Existence]');
-                if (! defined $existence_node) {
-                    confess 'Existence node missing for a cluster at ', $item_xml;
+                if (defined $existence_node) {
+                    (my $proposition_node) = $existence_node->findnodes ('Proposition[1]');
+                    if (! defined $proposition_node) {
+                        confess 'No Proposition node found under the Existence node in ', $item_xml;
+                    }
+                    my $rendered_proposition = render_proposition ($proposition_node);
+                    push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
+                    my @choices = render_choices ($proposition_node);
+                    push (@results, @choices);
+                } else {
+                    my $nr = get_nr_attribute ($cluster_node);
+                    my $aid = get_aid_attribute ($cluster_node);
+                    my $aid_lc = lc $aid;
+                    (my $arg_types) = $cluster_node->findnodes ('ArgTypes');
+                    if (! defined $arg_types) {
+                        confess 'ArgTypes node not found under an RCluster node.';
+                    }
+                    my @arg_types = $arg_types->findnodes ('*');
+                    if (scalar @arg_types != 0) {
+                        confess 'How to deal with an RCluster node having a non-zero number of arguments?';
+                    }
+                    (my $typ) = $cluster_node->findnodes ('Typ');
+                    if (! defined $typ) {
+                        confess 'Typ node not found under an RCluster node.';
+                    }
+                    (my $cluster) = $cluster_node->findnodes ('Cluster[position() = last()]');
+                    if (! defined $cluster) {
+                        confess 'Cluster not found under an RCluster node.';
+                    }
+                    my @adjectives = $cluster->findnodes ('Adjective');
+                    my $var = 'X';
+                    my $typ_guard = render_guard ($var, $typ);
+                    my $adj_guard = render_adjective_guards ($var, @adjectives);
+                    my $content = "(? [${var}] : (${typ_guard} & ${adj_guard}))";
+                    my $tptp_name = "rc${nr}_${aid_lc}";
+                    my $formula = "fof(${tptp_name},axiom,${content}).";
+                    push (@results, $formula);
                 }
-                (my $proposition_node) = $existence_node->findnodes ('Proposition[1]');
-                if (! defined $proposition_node) {
-                    confess 'No Proposition node found under the Existence node in ', $item_xml;
-                }
-                my $rendered_proposition = render_proposition ($proposition_node);
-                push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
-                my @choices = render_choices ($proposition_node);
-                push (@results, @choices);
             } else {
                 confess 'How to handle clusters of kind \'', $kind, '\'?';
             }
-
         } elsif (is_constructor_property_item ($item)) {
             # are these always found in the same article?
             my $constructor = constructor_of_constructor_property ($item);
