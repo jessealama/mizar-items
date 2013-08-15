@@ -2864,7 +2864,7 @@ sub free_for_constructor {
         }
         $rhs .= ')';
     }
-    my $content = "(${lhs_equation} = ${rhs})";
+    my $content = "(${lhs_equation} => ${rhs})";
     # now generalize
     (my $arg_types_node) = $gconstructor->findnodes ('ArgTypes');
     if (! defined $arg_types_node) {
