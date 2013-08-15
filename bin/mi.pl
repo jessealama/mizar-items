@@ -2051,6 +2051,15 @@ sub render_deftheorem {
     return render_proposition ($proposition_node);
 }
 
+sub render_compatibility_node {
+    my $compatibility_node = shift;
+    (my $proposition_node) = $compatibility_node->findnodes ('Proposition[1]');
+    if (! defined $proposition_node) {
+        confess 'Proposition node not found under a Compatibility node';
+    }
+    return render_proposition ($proposition_node);
+}
+
 sub render_reduction {
     my $reduction_node = shift;
     (my $proposition_node) = $reduction_node->findnodes ('Proposition');
@@ -2636,21 +2645,31 @@ sub render_asymmetry {
     return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) => (~ ${constructor_name}(${var_2},${var_1})))))";
 }
 
+sub render_reflexivity_node {
+    my $reflexivity_node = shift;
+    (my $proposition) = $reflexivity_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found immediately following πa Reflexivity node.';
+    }
+    return render_proposition ($proposition);
+}
+
 sub render_reflexivity {
     my $constructor = shift;
-    my $constructor_name = render_tptp_constructor ($constructor);
-    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
-    if (! defined $arg_types_node) {
-        confess 'ArgTypes node missing under a constructor.';
+    if ($constructor->hasAttribute ('redefaid')) {
+        (my $compatibility_node) = $constructor->findnodes ('preceding-sibling::Compatibility');
+        if (! defined $compatibility_node) {
+            confess 'Dealing with a redefined constructor, we do not find a Compatibility node.';
+        }
+        return render_compatibility_node ($compatibility_node);
+    } else {
+        (my $reflexivity_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Reflexivity');
+        if (defined $reflexivity_node) {
+            return render_reflexivity_node ($reflexivity_node);
+        } else {
+            confess 'How to render the reflexivity property without a Reflexivity node?';
+        }
     }
-    my @arg_types = $arg_types_node->findnodes ('*');
-    if (scalar @arg_types != 2) {
-        confess 'How to render reflexivity for a constructor that does not accept exactly 2 arguments?';
-    }
-    my $typ_1 = $arg_types[0];
-    my $var_1 = 'X1';
-    my $guard_1 = render_guard ($var_1, $typ_1);
-    return "(! [${var_1}] : (${guard_1} => (${constructor_name}(${var_1},${var_1}))))";
 }
 
 sub render_irreflexivity {
@@ -2689,26 +2708,6 @@ sub render_connectedness {
     }
 }
 
-sub formulate_property_for_constructor {
-    my $constructor = shift;
-    my $property = shift;
-    my $ref = $CONSTRUCTOR_PROPERTY_MAKERS{$property};
-    if (! defined $ref) {
-        confess 'How to render the constructor property \'', $property, '\'?';
-    }
-    my $content = $ref->($constructor);
-    return $content;
-}
-
-Readonly my %REQUIREMENT_CONTENTS =>
-    (
-        1 => ['(! [X] : (m1_hidden(X)))',
-              '(! [X] : (m2_hidden(X)))'],
-        2 => ['(! [X] : (m1_hidden(X) => m2_hidden(X)))'],
-        3 => ['(! [X,Y] : ((m2_hidden(X) & m2_hidden(Y) & (! [Z] : (r2_hidden(Z,X) <=> r2_hidden(Z,Y)))) => X = Y))'],
-        4 => ['$true'],
-        5 => ['v1_xboole_0(k1_xboole_0)',
-              '(! [X] : (v1_xboole_0(X) => X = k1_xboole_0))',
 sub render_abstractness {
     my $vconstructor = shift;
     my $vconstructor_kind = get_kind_attribute ($vconstructor);
@@ -2845,6 +2844,26 @@ sub free_for_constructor {
     return $formula;
 }
 
+sub formulate_property_for_constructor {
+    my $constructor = shift;
+    my $property = shift;
+    my $ref = $CONSTRUCTOR_PROPERTY_MAKERS{$property};
+    if (! defined $ref) {
+        confess 'How to render the constructor property \'', $property, '\'?';
+    }
+    my $content = $ref->($constructor);
+    return $content;
+}
+
+Readonly my %REQUIREMENT_CONTENTS =>
+    (
+        1 => ['(! [X] : (m1_hidden(X)))',
+              '(! [X] : (m2_hidden(X)))'],
+        2 => ['(! [X] : (m1_hidden(X) => m2_hidden(X)))'],
+        3 => ['(! [X,Y] : ((m2_hidden(X) & m2_hidden(Y) & (! [Z] : (r2_hidden(Z,X) <=> r2_hidden(Z,Y)))) => X = Y))'],
+        4 => ['$true'],
+        5 => ['v1_xboole_0(k1_xboole_0)',
+              '(! [X] : (v1_xboole_0(X) => X = k1_xboole_0))',
               '(! [X] : (v1_xboole_0(X) <=> (! [Y] : (~ r2_hidden(Y,X)))))'],
         6 => ['(! [X] : (~ r2_hidden(X,k1_xboole_0)))',
               '(! [X] : ((! [Y] : (~r2_hidden(Y,X))) => (X = k1_xboole_0)))'],
@@ -3528,6 +3547,10 @@ sub problem_for_item {
                     carp 'Neither a compatibility nor a coherence condition was found for ', $dep;
                 }
             }
+            if (is_structure_constructor ($dep)) {
+                my $free = free_for_constructor ($dep);
+                push (@problem, $free);
+            }
         }
     }
     my @formulas_from_schemes = extract_schemes ($fragment_root);
@@ -3541,26 +3564,6 @@ sub problem_for_item {
         } else {
             confess 'Cannot make sense of TPTP formula \'', $formula, '\'.';
         }
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
     }
     return values %formulas;
 }
@@ -3573,10 +3576,6 @@ sub is_problematic_item {
         } elsif (is_deftheorem_item ($item)) {
             return 0;
         } elsif (is_definiens_item ($item)) {
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
             return 0;
         } else {
             return 1;
@@ -3584,10 +3583,6 @@ sub is_problematic_item {
     } else {
         return 0;
     }
-            if (is_structure_constructor ($dep)) {
-                my $free = free_for_constructor ($dep);
-                push (@problem, $free);
-            }
 }
 
 # Make the problems.  Trash it if it already exists.
