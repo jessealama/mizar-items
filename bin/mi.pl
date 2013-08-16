@@ -2878,10 +2878,8 @@ sub free_for_constructor {
         my $typ = $arg_types[$var_index - 1];
         my $var_1 = "${var_prefix_1}${var_index}";
         my $var_2 = "${var_prefix_2}${var_index}";
-        my $guard_1 = render_guard ($var_1, $typ);
-        my $guard_2 = render_guard ($var_2, $typ);
-        $guard_1 =~ s/X${i}/${var_prefix_1}${i}/g;
-        $guard_2 =~ s/X${i}/${var_prefix_2}${i}/g;
+        my $guard_1 = render_guard ($var_1, $typ, { 'const-prefix' => $var_prefix_1 });
+        my $guard_2 = render_guard ($var_2, $typ, { 'const-prefix' => $var_prefix_2 });
         $content = "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => ${content}))";
     }
     my $tptp_name = "free_g${g_nr}_${g_aid_lc}";
