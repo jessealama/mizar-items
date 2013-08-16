@@ -2494,13 +2494,15 @@ sub render_existence {
         return render_proposition ($proposition);
     } else {
         my $kind = get_kind_attribute ($constructor);
+        my $nr = get_nr_attribute ($constructor);
         if ($kind eq 'K') {
             my $nr = get_nr_attribute ($constructor);
             (my $block) = $constructor->findnodes ('ancestor::DefinitionBlock');
             if (! defined $block) {
                 confess 'Unable to find the enclosing DefinitionBlock of a Constructor node.';
             }
-            (my $definiens) = $block->findnodes ('following-sibling::*[1][self::Definiens]');
+            my $definiens_xpath = "following-sibling::Definiens[\@constrkind = \"K\" and \@absconstrnr = \"${nr}\"]";
+            (my $definiens) = $block->findnodes ($definiens_xpath);
             if (! defined $definiens) {
                 confess 'Definiens node not found immediately following a DefinitionBlock.';
             }
@@ -2566,7 +2568,8 @@ sub render_uniqueness {
             if (! defined $block) {
                 confess 'Unable to find the enclosing DefinitionBlock of a Constructor node.';
             }
-            (my $definiens) = $block->findnodes ('following-sibling::*[1][self::Definiens]');
+            my $definiens_xpath = "following-sibling::Definiens[\@constrkind = \"K\" and \@absconstrnr = \"${nr}\"]";
+            (my $definiens) = $block->findnodes ($definiens_xpath);
             if (! defined $definiens) {
                 confess 'Definiens node not found immediately following a DefinitionBlock.';
             }
