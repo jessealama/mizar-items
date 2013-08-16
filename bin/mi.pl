@@ -2694,9 +2694,9 @@ sub render_reflexivity {
         my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
         my $reflexivity_content = "${constructor_tptp}(${last_var},${last_var})";
         foreach my $i (1 .. $num_arg_types - 1) {
-            my $var_index = $num_arg_types - 1 - $i;
+            my $var_index = $num_arg_types - $i;
             my $var = "X${var_index}";
-            my $typ = $arg_types[$var_index];
+            my $typ = $arg_types[$var_index - 1];
             my $guard = render_guard ($var, $typ);
             $reflexivity_content = "(! [${var}] : (${guard} => ${reflexivity_content}))";
         }
