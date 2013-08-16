@@ -2790,9 +2790,7 @@ sub render_abstractness {
     }
     my $equation = "${var} = ${g_tptp}";
     my $content = "(! [${var}] : (${l_guard} => (${v_guard} => ${equation})))";
-    my $tptp_name = "abstractness_v${vconstructor_nr}_${vconstructor_aid_lc}";
-    my $formula = "fof(${tptp_name},axiom,${content}).";
-    return $formula;
+    return $content;
 }
 
 sub constructor_node_of_constructor_item {
