@@ -2959,11 +2959,21 @@ sub widening_for_structure_constructor {
     my $var = 'X';
     my $new = "${new_constructor}(${var})";
     my $old = undef;
-    (my $typ) = $lconstructor->findnodes ('Typ');
-    if (defined $typ) {
-        $old = render_guard ($var, $typ);
-    } else {
+    my @typs = $lconstructor->findnodes ('Typ');
+    my $num_typs = scalar @typs;
+    if ($num_typs == 0) {
         $old = '$true';
+    } else {
+        $old = '(';
+        foreach my $i (1 .. $num_typs) {
+            my $typ = $typs[$i - 1];
+            my $guard = render_guard ($var, $typ);
+            $old .= $guard;
+            if ($i < $num_typs) {
+                $old .= ' & ';
+            }
+        }
+        $old .= ')';
     }
     my $content = "(! [${var}] : (${new} => ${old}))";
     my $formula = "fof(${tptp_name},axiom,${content}).";
