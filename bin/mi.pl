@@ -2766,7 +2766,7 @@ sub render_abstractness {
     }
     my @fields = $fields->findnodes ('Field');
     my $var = 'X';
-    my $l_guard = "l${l_nr}_${l_aid}(${var})";
+    my $l_guard = "l${l_nr}_${l_aid_lc}(${var})";
     my $v_guard = "v${vconstructor_nr}_${vconstructor_aid_lc}(${var})";
     my $g_nr = get_nr_attribute ($gconstructor);
     my $g_aid = get_aid_attribute ($gconstructor);
