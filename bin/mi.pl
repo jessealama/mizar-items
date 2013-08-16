@@ -2700,9 +2700,7 @@ sub render_reflexivity {
             my $guard = render_guard ($var, $typ);
             $reflexivity_content = "(! [${var}] : (${guard} => ${reflexivity_content}))";
         }
-        my $tptp_name = "reflexivity_${constructor_tptp}";
-        my $formula = "fof(${tptp_name},theorem,${reflexivity_content}).";
-        return $formula;
+        return $reflexivity_content;
     }
 }
 
