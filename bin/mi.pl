@@ -3245,31 +3245,7 @@ sub render_non_local_item {
                     my @choices = render_choices ($proposition_node);
                     push (@results, @choices);
                 } else {
-                    my $nr = get_nr_attribute ($cluster_node);
-                    my $aid = get_aid_attribute ($cluster_node);
-                    my $aid_lc = lc $aid;
-                    (my $arg_types) = $cluster_node->findnodes ('ArgTypes');
-                    if (! defined $arg_types) {
-                        confess 'ArgTypes node not found under an RCluster node.';
-                    }
-                    my @arg_types = $arg_types->findnodes ('*');
-                    if (scalar @arg_types != 0) {
-                        confess 'How to deal with an RCluster node having a non-zero number of arguments?';
-                    }
-                    (my $typ) = $cluster_node->findnodes ('Typ');
-                    if (! defined $typ) {
-                        confess 'Typ node not found under an RCluster node.';
-                    }
-                    (my $cluster) = $cluster_node->findnodes ('Cluster[position() = last()]');
-                    if (! defined $cluster) {
-                        confess 'Cluster not found under an RCluster node.';
-                    }
-                    my @adjectives = $cluster->findnodes ('Adjective');
-                    my $var = 'X';
-                    my $typ_guard = render_guard ($var, $typ);
-                    my $adj_guard = render_adjective_guards ($var, @adjectives);
-                    my $content = "(? [${var}] : (${typ_guard} & ${adj_guard}))";
-                    my $tptp_name = "rc${nr}_${aid_lc}";
+                    my $content = render_rcluster ($cluster_node);
                     my $formula = "fof(${tptp_name},axiom,${content}).";
                     push (@results, $formula);
                 }
@@ -3462,24 +3438,61 @@ sub definition_for_constructor {
         confess 'DefinitionBlock ancestor node not found in ', $item_xml;
     }
     (my $deftheorem_node) = $item_xml_root->findnodes ("DefTheorem[\@constrkind = \"${kind_uc}\"][${nr}]");
-    (my $compatibility_node) = $constructor_node->findnodes ('ancestor::Definition/Coherence');
     if (defined $deftheorem_node) {
         my $def_nr = $deftheorem_node->findvalue ('count (preceding::DefTheorem) + 1');
         my $content = render_deftheorem ($deftheorem_node);
         my $tptp_name = "d${def_nr}_${article}";
         my $formula = "fof(${tptp_name},definition,${content}).";
         return $formula;
-    } elsif (defined $compatibility_node) {
-        (my $proposition_node) = $compatibility_node->findnodes ('Proposition');
-        if (! defined $proposition_node) {
-            confess 'No Proposition node under a Compatibility node in ', $item_xml, '.';
+    } elsif ($constructor_node->exists ('preceding-sibling::Coherence')) {
+        (my $coherence_node) = $constructor_node->findnodes ('preceding-sibling::Coherence[1]');
+        (my $definition_node) = $coherence_node->findnodes ('ancestor::Definition');
+        if (! defined $definition_node) {
+            confess 'Definition ancestor not found for a Coherence node.';
         }
-        my $content = render_proposition ($proposition_node);
-        my $tptp_name = "coherence_${kind}${nr}_${article}";
-        my $formula = "fof(${tptp_name},theorem,${content}).";
-        return $formula;
+        if (($definition_node->hasAttribute ('redefinition')) && ($definition_node->getAttribute ('redefinition') eq 'true')) {
+            (my $proposition_node) = $coherence_node->findnodes ('Proposition');
+            if (! defined $proposition_node) {
+                confess 'Coherence node lacks a Proposition child.';
+            }
+            (my $is_node) = $proposition_node->findnodes ('Is');
+            if (! defined $is_node) {
+                confess 'Is node not found under a Coherence node.';
+            }
+            (my $original_term) = $is_node->findnodes ('*[1]');
+            my $original_aid = get_aid_attribute ($original_term);
+            my $original_nr = get_absnr_attribute ($original_term);
+            my $original_aid_lc = lc $original_aid;
+            my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
+            my $new_tptp = "${kind}${nr}_${article}";
+            if ($kind eq 'k') {
+                my $lhs = render_semantic_content ($original_term);
+                my $rhs = render_semantic_content ($original_term);
+                $rhs =~ s/${original_tptp}/${new_tptp}/;
+                my $equation = "${lhs} = ${rhs}";
+                # now generalize
+                my @let_nodes = $definition_node->findnodes ('preceding-sibling::Let');
+                my $num_let_nodes = scalar @let_nodes;
+                foreach my $i (1 .. $num_let_nodes) {
+                    my $let_node = $let_nodes[$num_let_nodes - $i];
+                    (my $typ_node) = $let_node->findnodes ('Typ');
+                    if (! defined $typ_node) {
+                        confess 'Let node lacks a Typ child.';
+                    }
+                    my $vid = get_vid_attribute ($typ_node);
+                    my $var = "X${vid}";
+                    my $guard = render_guard ($var, $typ_node);
+                    $equation = "(! [${var}] : (${guard} => ${equation}))";
+                }
+                my $tptp_name = "redefinition_${new_tptp}";
+                my $formula = "fof(${tptp_name},definition,${equation}).";
+            } else {
+                confess 'How to deal with redefinitions for constructors of kind \'', $kind, '\'?';
+            }
+        } else {
+            confess 'How to extract a definition for a constructor that lacks a DefTheorem, and is not a redefinition?';
+        }
     } else {
-        # carp 'Unable to find a definition for ', $constructor_item, '.';
         return;
     }
 }
@@ -3643,16 +3656,17 @@ sub problem_for_item {
             if ((is_functor_constructor ($dep)) || (is_structure_constructor ($dep))) {
                 my $typing = value_type_for_constructor ($dep);
                 if (defined $typing) {
-                    warn 'value type: ', $typing;
                     push (@problem, $typing);
                 }
             }
             if (is_redefined_constructor ($dep)) {
+                warn $dep, ' is a redefined constructor.';
                 my $def = definition_for_constructor ($dep);
                 if (defined $def) {
                     push (@problem, $def);
+                } else {
+                    warn 'no defintion found for ', $dep;
                 }
-                warn $dep, ' is a redefined constructor.';
                 my $compat = compatibility_for_constructor ($dep);
                 if (defined $compat) {
                     push (@problem, $compat);
