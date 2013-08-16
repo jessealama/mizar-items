@@ -1697,7 +1697,8 @@ sub has_semantic_content {
 
 sub render_semantic_content {
     my $node = shift;
-    my @arguments = @_;
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
     my $name = $node->nodeName ();
     my $aid = $node->getAttribute ('aid');
     my $kind = $node->getAttribute ('kind');
@@ -1731,15 +1732,15 @@ sub render_semantic_content {
         } elsif ($aid_lc eq 'hidden' && $kind_lc eq 'r' && $absnr eq '1') {
             (my $lhs) = $node->findnodes ('*[1]');
             (my $rhs) = $node->findnodes ('*[2]');
-            my $rendered_lhs = render_semantic_content ($lhs, @arguments);
-            my $rendered_rhs = render_semantic_content ($rhs, @arguments);
+            my $rendered_lhs = render_semantic_content ($lhs, \%parameters);
+            my $rendered_rhs = render_semantic_content ($rhs, \%parameters);
             return "(${rendered_lhs} = ${rendered_rhs})";
         } else {
             my $num_children = scalar @children;
             $answer .= '(';
             foreach my $i (1 .. $num_children) {
                 my $child = $children[$i - 1];
-                my $rendered_child = render_semantic_content ($child, @arguments);
+                my $rendered_child = render_semantic_content ($child, \%parameters);
                 $answer .= $rendered_child;
                 if ($i < $num_children) {
                     $answer .= ', ';
@@ -1752,12 +1753,17 @@ sub render_semantic_content {
         # quite incomplete
         return render_choice_term ($node);
     } elsif ($name eq 'LocusVar') {
-        return "X${nr}";
+        if (defined $parameters{'const-prefix'}) {
+            my $prefix = $parameters{'const-prefix'};
+            return "${prefix}${nr}";
+        } else {
+            return "X${nr}";
+        }
     } elsif ($name eq 'Verum') {
         return '$true';
     } elsif ($name eq 'PrivPred') {
         (my $val) = $node->findnodes ('*[position() = last()]');
-        return render_semantic_content ($val);
+        return render_semantic_content ($val, \%parameters);
     } elsif ($name eq 'Is') {
         my @children = $node->findnodes ('*');
         if (scalar @children != 2) {
@@ -1765,7 +1771,7 @@ sub render_semantic_content {
         }
         my $term = $children[0];
         my $type = $children[1];
-        my $term_rendered = render_semantic_content ($term, @arguments);
+        my $term_rendered = render_semantic_content ($term, \%parameters);
         return render_guard ($term_rendered, $type);
     } elsif ($name eq 'For') {
         (my $typ) = $node->findnodes ('Typ');
@@ -1781,7 +1787,7 @@ sub render_semantic_content {
             $var_name = "Y${vid}";
         }
         (my $matrix) = $node->findnodes ('*[position() = last()]');
-        my $rendered_matrix = render_semantic_content ($matrix, @arguments);
+        my $rendered_matrix = render_semantic_content ($matrix, \%parameters);
         my $guard = render_guard ($var_name, $typ);
         return "(! [${var_name}] : (${guard} => ${rendered_matrix}))";
     } elsif ($name eq 'Typ') {
@@ -1806,12 +1812,12 @@ sub render_semantic_content {
         my @children = $node->findnodes ('*');
         if (scalar @children == 1) {
             my $child = $children[0];
-            return render_semantic_content ($child, @arguments);
+            return render_semantic_content ($child, \%parameters);
         } elsif (scalar @children == 2) {
             my $lhs = $children[0];
             my $rhs = $children[1];
-            my $lhs_rendered = render_semantic_content ($lhs, @arguments);
-            my $rhs_rendered = render_semantic_content ($rhs, @arguments);
+            my $lhs_rendered = render_semantic_content ($lhs, \%parameters);
+            my $rhs_rendered = render_semantic_content ($rhs, \%parameters);
             if ($rhs_rendered eq '0') {
                 confess 'wtf? rhs node as string:', $LF, $rhs->toString;
             }
@@ -1827,10 +1833,10 @@ sub render_semantic_content {
                     if ($lhs_unnegated_rhs->exists ('self::Not') && $rhs_unnegated_rhs->exists ('self::Not')) {
                         (my $lhs_unnegated_rhs_unnegated) = $lhs_unnegated_rhs->findnodes ('*[1]');
                         (my $rhs_unnegated_rhs_unnegated) = $rhs_unnegated_rhs->findnodes ('*[1]');
-                        my $p1 = render_semantic_content ($lhs_unnegated_lhs, @arguments);
-                        my $q1 = render_semantic_content ($lhs_unnegated_rhs_unnegated, @arguments);
-                        my $q2 = render_semantic_content ($rhs_unnegated_lhs, @arguments);
-                        my $p2 = render_semantic_content ($rhs_unnegated_rhs_unnegated, @arguments);
+                        my $p1 = render_semantic_content ($lhs_unnegated_lhs, \%parameters);
+                        my $q1 = render_semantic_content ($lhs_unnegated_rhs_unnegated, \%parameters);
+                        my $q2 = render_semantic_content ($rhs_unnegated_lhs, \%parameters);
+                        my $p2 = render_semantic_content ($rhs_unnegated_rhs_unnegated, \%parameters);
                         if ($p1 eq $p2 && $q1 eq $q2) {
                             return "(${p1} <=> ${q1})";
                         } else {
@@ -1850,7 +1856,7 @@ sub render_semantic_content {
             my $num_children = scalar @children;
             foreach my $i (1 .. $num_children) {
                 my $child = $children[$i - 1];
-                my $child_rendered = render_semantic_content ($child, @arguments);
+                my $child_rendered = render_semantic_content ($child, \%parameters);
                 $answer .= $child_rendered;
                 if ($i < $num_children) {
                     $answer .= ' & ';
@@ -1864,7 +1870,7 @@ sub render_semantic_content {
         if (! defined $arg) {
             confess 'Not node lacks a child!';
         }
-        my $rendered_arg = render_semantic_content ($arg, @arguments);
+        my $rendered_arg = render_semantic_content ($arg, \%parameters);
         if ($node->exists ('For/Not')) {
             (my $for) = $node->findnodes ('For');
             (my $typ) = $for->findnodes ('Typ');
@@ -1881,7 +1887,7 @@ sub render_semantic_content {
             }
             my $guard = render_guard ($var_name, $typ);
             (my $matrix) = $for->findnodes ('Not/*[1]');
-            my $rendered_matrix = render_semantic_content ($matrix, @arguments);
+            my $rendered_matrix = render_semantic_content ($matrix, \%parameters);
             return "(? [${var_name}] : (${guard} & ${rendered_matrix}))";
         } elsif ($node->exists ('For')) {
             (my $for) = $node->findnodes ('For');
@@ -1899,7 +1905,7 @@ sub render_semantic_content {
             }
             my $guard = render_guard ($var_name, $typ);
             (my $matrix) = $for->findnodes ('*[position() = last()]');
-            my $rendered_matrix = render_semantic_content ($matrix, @arguments);
+            my $rendered_matrix = render_semantic_content ($matrix, \%parameters);
             return "~(! [${var_name}] : (${guard} => ${rendered_matrix}))";
         } elsif ($node->exists ('And[count(*) = 2]/Not')) {
             (my $conjunction) = $node->findnodes ('And');
@@ -1908,18 +1914,18 @@ sub render_semantic_content {
             if ($lhs->exists ('self::Not') && $rhs->exists ('self::Not')) {
                 (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
                 (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
-                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, @arguments);
-                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, @arguments);
+                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, \%parameters);
+                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, \%parameters);
                 return "(${lhs_unnegated_rendered} | ${rhs_unnegated_rendered})";
             } elsif ($lhs->exists ('self::Not')) {
                 (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
-                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, @arguments);
-                my $rhs_rendered = render_semantic_content ($rhs, @arguments);
+                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, \%parameters);
+                my $rhs_rendered = render_semantic_content ($rhs, \%parameters);
                 return "(${rhs_rendered} => ${lhs_unnegated_rendered})";
             } elsif ($rhs->exists ('self::Not')) {
                 (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
-                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, @arguments);
-                my $lhs_rendered = render_semantic_content ($lhs, @arguments);
+                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, \%parameters);
+                my $lhs_rendered = render_semantic_content ($lhs, \%parameters);
                 return "(${lhs_rendered} => ${rhs_unnegated_rendered})";
             } else {
                 my $answer = '(~ ' . $rendered_arg . ')';
@@ -2359,6 +2365,8 @@ sub render_tptp_constructor {
 sub render_guard {
     my $variable = shift;
     my $type = shift;
+    my $parameters_ref = shift;
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
     my $type_aid = get_aid_attribute ($type);
     my $type_nr = get_absnr_attribute ($type);
     my $type_kind = get_kind_attribute ($type);
@@ -2375,7 +2383,7 @@ sub render_guard {
     $guard .= "${type_rendered}(";
     if ($num_parameters > 0) {
         foreach my $param (@type_parameters) {
-            my $param_rendered = render_semantic_content ($param);
+            my $param_rendered = render_semantic_content ($param, \%parameters);
             $guard .= "${param_rendered},";
         }
     }
@@ -2405,7 +2413,7 @@ sub render_guard {
         $adj_guard .= '(';
         my @adj_children = $adjective->findnodes ('*');
         foreach my $adj_child (@adj_children) {
-            my $rendered_adj_child = render_semantic_content ($adj_child);
+            my $rendered_adj_child = render_semantic_content ($adj_child, \%parameters);
             $adj_guard .= "${rendered_adj_child},";
         }
         $adj_guard .= "${variable}";
