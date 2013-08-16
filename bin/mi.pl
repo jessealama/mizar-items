@@ -2988,6 +2988,32 @@ sub widening_for_structure_constructor {
     return $formula;
 }
 
+sub existence_for_mode {
+    my $mode_constructor_item = shift;
+    if ($mode_constructor_item eq 'hidden:mconstructor:1') {
+        return 'fof(existence_m1_hidden,axiom,(? [X] : m1_hidden(X))).'
+    } elsif ($mode_constructor_item eq 'hidden:mconstructor:2') {
+        return 'fof(existence_m1_hidden,axiom,(? [X] : m2_hidden(X))).'
+    } else {
+        my $mconstructor = constructor_node_of_constructor_item ($mode_constructor_item);
+        (my $existence) = $mconstructor->findnodes ('preceding-sibling::Existence');
+        if (! defined $existence) {
+            confess 'Existence node not found preceding a mode constructor.';
+        }
+        (my $proposition) = $existence->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'RCluster node not founder under a Registration node.';
+        }
+        my $mode_nr = get_nr_attribute ($mconstructor);
+        my $mode_aid = get_aid_attribute ($mconstructor);
+        my $mode_aid_lc = lc $mode_aid;
+        my $tptp_name = "existence_m${mode_nr}_${mode_aid_lc}";
+        my $content = render_proposition ($proposition);
+        my $formula = "fof(${tptp_name},theorem,${content}).";
+        return $formula;
+    }
+}
+
 sub formulate_property_for_constructor {
     my $constructor = shift;
     my $property = shift;
