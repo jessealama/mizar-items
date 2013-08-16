@@ -3783,6 +3783,10 @@ sub problem_for_item {
                 my $widening = widening_for_structure_constructor ($dep);
                 push (@problem, $free, $rcluster, $widening);
             }
+            if (is_mode_constructor ($dep)) {
+                my $existence = existence_for_mode ($dep);
+                push (@problem, $existence);
+            }
         }
     }
     my @formulas_from_schemes = extract_schemes ($fragment_root);
