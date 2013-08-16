@@ -1653,6 +1653,11 @@ sub is_functor_constructor {
     return ($item =~ / [:] k constructor [:] \d+ \z /);
 }
 
+sub is_mode_constructor {
+    my $item = shift;
+    return ($item =~ / [:] m constructor [:] \d+ \z /);
+}
+
 sub is_structure_constructor {
     my $item = shift;
     return ($item =~ / [:] g constructor [:] \d+ \z /);
