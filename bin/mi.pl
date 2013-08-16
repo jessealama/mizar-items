@@ -2883,6 +2883,59 @@ sub free_for_constructor {
     return $formula;
 }
 
+sub render_rcluster {
+    my $cluster_node = shift;
+    my $nr = get_nr_attribute ($cluster_node);
+    my $aid = get_aid_attribute ($cluster_node);
+    my $aid_lc = lc $aid;
+    (my $arg_types) = $cluster_node->findnodes ('ArgTypes');
+    if (! defined $arg_types) {
+        confess 'ArgTypes node not found under an RCluster node.';
+    }
+    my @arg_types = $arg_types->findnodes ('*');
+    if (scalar @arg_types != 0) {
+        confess 'How to deal with an RCluster node having a non-zero number of arguments?';
+    }
+    (my $typ) = $cluster_node->findnodes ('Typ');
+    if (! defined $typ) {
+        confess 'Typ node not found under an RCluster node.';
+    }
+    (my $cluster) = $cluster_node->findnodes ('Cluster[position() = last()]');
+    if (! defined $cluster) {
+        confess 'Cluster not found under an RCluster node.';
+    }
+    my @adjectives = $cluster->findnodes ('Adjective');
+    my $var = 'X';
+    my $typ_guard = render_guard ($var, $typ);
+    my $adj_guard = render_adjective_guards ($var, @adjectives);
+    my $content = "(? [${var}] : (${typ_guard} & ${adj_guard}))";
+    return $content;
+}
+
+sub rcluster_for_structure_constructor {
+    my $constructor_item = shift;
+    my $gconstructor = constructor_node_of_constructor_item ($constructor_item);
+    my $g_kind = get_kind_attribute ($gconstructor);
+    if ($g_kind ne 'G') {
+        confess 'I thought we were working with a G constructor?';
+    }
+    (my $registration) = $gconstructor->findnodes ('following-sibling::Registration');
+    if (! defined $registration) {
+        confess 'Registration node not found following a constructor.';
+    }
+    (my $rcluster) = $registration->findnodes ('RCluster');
+    if (! defined $rcluster) {
+        confess 'RCluster node not founder under a Registration node.';
+    }
+    my $rcluster_nr = get_nr_attribute ($rcluster);
+    my $rcluster_aid = get_aid_attribute ($rcluster);
+    my $rcluster_aid_lc = lc $rcluster_aid;
+    my $tptp_name = "r${rcluster_nr}_${rcluster_aid_lc}";
+    my $content = render_rcluster ($rcluster);
+    my $formula = "fof(${tptp_name},axiom,${content}).";
+    return $formula;
+}
+
 sub formulate_property_for_constructor {
     my $constructor = shift;
     my $property = shift;
@@ -3614,7 +3667,8 @@ sub problem_for_item {
             }
             if (is_structure_constructor ($dep)) {
                 my $free = free_for_constructor ($dep);
-                push (@problem, $free);
+                my $rcluster = rcluster_for_structure_constructor ($dep);
+                push (@problem, $free, $rcluster);
             }
         }
     }
