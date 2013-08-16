@@ -2370,6 +2370,10 @@ sub render_guard {
     my $type_aid = get_aid_attribute ($type);
     my $type_nr = get_absnr_attribute ($type);
     my $type_kind = get_kind_attribute ($type);
+    # structure case
+    if ($type_kind eq 'G') {
+        $type_kind = 'L';
+    }
     my $type_kind_lc = lc $type_kind;
     my $type_aid_lc = lc $type_aid;
     my $type_rendered = "${type_kind_lc}${type_nr}_${type_aid_lc}";
