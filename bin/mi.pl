@@ -1801,14 +1801,7 @@ sub render_semantic_content {
             my $vid = $quantifier->findvalue ('count (ancestor::For[not(@vid)]) + 1');
             $var_name = "Y${vid}";
         }
-        if (scalar @arguments < $nr) {
-            return $var_name;
-        } else {
-            # We are substituting
-            # carp 'we are substituting';
-            my $val = $arguments[$nr - 1];
-            return render_semantic_content ($val);
-        }
+        return $var_name;
     } elsif ($name eq 'And') {
         my @children = $node->findnodes ('*');
         if (scalar @children == 1) {
