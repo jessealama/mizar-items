@@ -3466,13 +3466,33 @@ sub definition_for_constructor {
             my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
             my $new_tptp = "${kind}${nr}_${article}";
             if ($kind eq 'k') {
-                my $lhs = render_semantic_content ($original_term);
                 my $rhs = render_semantic_content ($original_term);
-                $rhs =~ s/${original_tptp}/${new_tptp}/;
-                my $equation = "${lhs} = ${rhs}";
-                # now generalize
+                (my $arg_types) = $constructor_node->findnodes ('ArgTypes');
+                if (! defined $arg_types) {
+                    confess 'ArgTypes node missing under a constructor node.';
+                }
                 my @let_nodes = $definition_node->findnodes ('preceding-sibling::Let');
                 my $num_let_nodes = scalar @let_nodes;
+                my $lhs = $new_tptp;
+                if ($num_let_nodes > 0) {
+                    $lhs .= '(';
+                    foreach my $i (1 .. $num_let_nodes) {
+                        my $let_node = $let_nodes[$i - 1];
+                        (my $typ_node) = $let_node->findnodes ('Typ');
+                        if (! defined $typ_node) {
+                            confess 'Let node lacks a Typ child.';
+                        }
+                        my $vid = get_vid_attribute ($typ_node);
+                        my $var = "X${vid}";
+                        $lhs .= $var;
+                        if ($i < $num_let_nodes) {
+                            $lhs .= ',';
+                        }
+                    }
+                    $lhs .= ')';
+                }
+                my $equation = "${lhs} = ${rhs}";
+                # now generalize
                 foreach my $i (1 .. $num_let_nodes) {
                     my $let_node = $let_nodes[$num_let_nodes - $i];
                     (my $typ_node) = $let_node->findnodes ('Typ');
