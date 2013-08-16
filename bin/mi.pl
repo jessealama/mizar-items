@@ -2940,6 +2940,36 @@ sub rcluster_for_structure_constructor {
     return $formula;
 }
 
+sub widening_for_structure_constructor {
+    my $constructor_item = shift;
+    my $gconstructor = constructor_node_of_constructor_item ($constructor_item);
+    my $g_kind = get_kind_attribute ($gconstructor);
+    if ($g_kind ne 'G') {
+        confess 'I thought we were working with a G constructor?';
+    }
+    (my $lconstructor) = $gconstructor->findnodes ('preceding-sibling::Constructor[@kind = "L"]');
+    if (! defined $lconstructor) {
+        confess 'L Constructor node not found following a G constructor.';
+    }
+    my $l_nr = get_nr_attribute ($lconstructor);
+    my $l_aid = get_aid_attribute ($lconstructor);
+    my $l_aid_lc = lc $l_aid;
+    my $new_constructor = "l${l_nr}_${l_aid_lc}";
+    my $tptp_name = "widening_${new_constructor}";
+    my $var = 'X';
+    my $new = "${new_constructor}(${var})";
+    my $old = undef;
+    (my $typ) = $lconstructor->findnodes ('Typ');
+    if (defined $typ) {
+        $old = render_guard ($var, $typ);
+    } else {
+        $old = '$true';
+    }
+    my $content = "(! [${var}] : (${new} => ${old}))";
+    my $formula = "fof(${tptp_name},axiom,${content}).";
+    return $formula;
+}
+
 sub formulate_property_for_constructor {
     my $constructor = shift;
     my $property = shift;
@@ -3706,7 +3736,8 @@ sub problem_for_item {
             if (is_structure_constructor ($dep)) {
                 my $free = free_for_constructor ($dep);
                 my $rcluster = rcluster_for_structure_constructor ($dep);
-                push (@problem, $free, $rcluster);
+                my $widening = widening_for_structure_constructor ($dep);
+                push (@problem, $free, $rcluster, $widening);
             }
         }
     }
