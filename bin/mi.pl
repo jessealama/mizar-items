@@ -3684,13 +3684,13 @@ sub problem_for_item {
                 }
             }
             if (is_redefined_constructor ($dep)) {
-                warn $dep, ' is a redefined constructor.';
                 my $def = definition_for_constructor ($dep);
                 if (defined $def) {
                     push (@problem, $def);
                 } else {
                     warn 'no defintion found for ', $dep;
                 }
+                # warn $dep, ' is a redefined constructor.';
                 my $compat = compatibility_for_constructor ($dep);
                 if (defined $compat) {
                     push (@problem, $compat);
