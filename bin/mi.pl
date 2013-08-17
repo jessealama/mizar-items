@@ -3060,19 +3060,39 @@ sub existence_for_mode {
         return 'fof(existence_m2_hidden,axiom,(? [X] : m2_hidden(X))).';
     } else {
         my $mconstructor = constructor_node_of_constructor_item ($mode_constructor_item);
-        (my $existence) = $mconstructor->findnodes ('preceding-sibling::Existence');
-        if (! defined $existence) {
-            confess 'Existence node not found preceding a mode constructor.';
-        }
-        (my $proposition) = $existence->findnodes ('Proposition');
-        if (! defined $proposition) {
-            confess 'RCluster node not founder under a Registration node.';
-        }
         my $mode_nr = get_nr_attribute ($mconstructor);
         my $mode_aid = get_aid_attribute ($mconstructor);
         my $mode_aid_lc = lc $mode_aid;
-        my $tptp_name = "existence_m${mode_nr}_${mode_aid_lc}";
-        my $content = render_proposition ($proposition);
+        my $tptp_constructor = "m${mode_nr}_${mode_aid_lc}";
+        my $tptp_name = "existence_${tptp_constructor}";
+        (my $arg_types_node) = $mconstructor->findnodes ('ArgTypes');
+        if (! defined $arg_types_node) {
+            confess 'ArgTypes node not found under an M constructor node.';
+        }
+        my @arg_types = $arg_types_node->findnodes ('*');
+        my $num_arg_types = scalar @arg_types;
+        my $var_prefix = 'X';
+        my $var = "${var_prefix}";
+        my $generic_mconstructor = "${tptp_constructor}";
+        $generic_mconstructor .= '(';
+        if ($num_arg_types > 0) {
+            foreach my $i (1 .. $num_arg_types) {
+                my $var = "${var_prefix}${i}";
+                $generic_mconstructor .= "${var},";
+            }
+        }
+        $generic_mconstructor .= "${var}";
+        $generic_mconstructor .= ')';
+        my $content = "(? [${var}] : ${generic_mconstructor})";
+        if ($num_arg_types > 0) {
+            foreach my $i (1 .. $num_arg_types) {
+                my $var_index = $num_arg_types - $i + 1;
+                my $typ = $arg_types[$var_index - 1];
+                my $var = "X${var_index}";
+                my $guard = render_guard ($var, $typ);
+                $content = "(! [${var}] : (${guard} => ${content}))";
+            }
+        }
         my $formula = "fof(${tptp_name},theorem,${content}).";
         return $formula;
     }
