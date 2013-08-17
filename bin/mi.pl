@@ -2942,7 +2942,7 @@ sub rcluster_for_structure_constructor {
     my $rcluster_nr = get_nr_attribute ($rcluster);
     my $rcluster_aid = get_aid_attribute ($rcluster);
     my $rcluster_aid_lc = lc $rcluster_aid;
-    my $tptp_name = "r${rcluster_nr}_${rcluster_aid_lc}";
+    my $tptp_name = "rc${rcluster_nr}_${rcluster_aid_lc}";
     my $content = render_rcluster ($rcluster);
     my $formula = "fof(${tptp_name},axiom,${content}).";
     return $formula;
