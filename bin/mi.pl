@@ -3868,7 +3868,9 @@ sub problem_for_item {
                 my $free = free_for_constructor ($dep);
                 my $rcluster = rcluster_for_structure_constructor ($dep);
                 my $widening = widening_for_structure_constructor ($dep);
+                my @projections = projections_for_structure_constructor ($dep);
                 push (@problem, $free, $rcluster, $widening);
+                push (@problem, @projections);
             }
             if (is_mode_constructor ($dep)) {
                 my $existence = existence_for_mode ($dep);
