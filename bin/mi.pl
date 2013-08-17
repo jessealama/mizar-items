@@ -3055,7 +3055,7 @@ sub widening_for_structure_constructor {
 sub existence_for_mode {
     my $mode_constructor_item = shift;
     if ($mode_constructor_item eq 'hidden:mconstructor:1') {
-        return 'fof(existence_m1_hidden,axiom,(? [X] : m1_hidden(X))).'
+        return 'fof(existence_m1_hidden,axiom,(? [X] : m1_hidden(X))).';
     } elsif ($mode_constructor_item eq 'hidden:mconstructor:2') {
         return 'fof(existence_m2_hidden,axiom,(? [X] : m2_hidden(X))).';
     } else {
