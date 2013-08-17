@@ -3285,7 +3285,7 @@ sub render_non_local_item {
             my $kind = definiens_kind ($item);
             my $kind_uc = uc $kind;
             my $nr = nr_of_item ($item);
-            my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${kind_uc}\" and count (preceding::Definiens[\@constrkind = \"${kind_uc}\"]) + 1 = ${nr}]";
+            my $definiens_xpath = "Definiens[\@constrkind = \"${kind_uc}\"][${nr}]";
             (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
             if (! defined $definiens_node) {
                 confess 'No suitable Definiens node found in ', $item_xml, ' using the XPath', $LF, $LF, '  ', $definiens_xpath;
