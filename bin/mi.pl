@@ -3431,15 +3431,17 @@ sub render_non_local_item {
             my $content = formulate_property_for_constructor ($constructor_node, $property);
             push (@results, "fof(${tptp_name},theorem,${content}).");
 
-            # We may need to add the definition of the constructor
-            my $deftheorem_xpath = "descendant::DefTheorem[\@constrkind = \"${kind_uc}\"][${constructor_nr}]";
-            (my $deftheorem_node) = $item_xml_root->findnodes ($deftheorem_xpath);
-            if (! defined $deftheorem_node) {
-                confess 'No DefTheorem node for constructor ', $kind_uc, $constructor_nr, ' in ', $item_xml;
+            if ($property ne 'abstractness') {
+                # We may need to add the definition of the constructor
+                my $deftheorem_xpath = "descendant::DefTheorem[\@constrkind = \"${kind_uc}\"][${constructor_nr}]";
+                (my $deftheorem_node) = $item_xml_root->findnodes ($deftheorem_xpath);
+                if (! defined $deftheorem_node) {
+                    confess 'No DefTheorem node for constructor ', $kind_uc, $constructor_nr, ' in ', $item_xml;
+                }
+                my $deftheorem_content = render_deftheorem ($deftheorem_node);
+                my $deftheorem = "fof(d${constructor_nr}_${constructor_aid},definition,${deftheorem_content}).";
+                push (@results, $deftheorem);
             }
-            my $deftheorem_content = render_deftheorem ($deftheorem_node);
-            my $deftheorem = "fof(d${constructor_nr}_${constructor_aid},definition,${deftheorem_content}).";
-            push (@results, $deftheorem);
             # is this a redefinition?  We may need to use the compatibility
             my $compatibility_xpath = 'preceding-sibling::Compatibility';
             if ($constructor_node->exists ($compatibility_xpath)) {
