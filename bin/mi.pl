@@ -3897,6 +3897,11 @@ sub problem_for_item {
             }
         }
     }
+    # we may want to add further dependencies, depending on whether natural numbers and structues are present.  For example, there are problems where, e.g.,
+    #
+    # (! [X,Y] : (0 != g5_struct_0(X,Y)))
+    #
+    # is what makes all the difference.
     my @formulas_from_schemes = extract_schemes ($fragment_root);
     push (@problem, @formulas_from_schemes);
     # remove any potential duplicates
