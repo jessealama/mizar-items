@@ -2900,6 +2900,65 @@ sub free_for_constructor {
     return $formula;
 }
 
+sub projections_for_structure_constructor {
+    my $constructor_item = shift;
+    my @projections = ();
+    my $gconstructor = constructor_node_of_constructor_item ($constructor_item);
+    my $gconstructor_kind = get_kind_attribute ($gconstructor);
+    if ($gconstructor_kind ne 'G') {
+        confess 'We assume that projections are formulated only for G constructors.';
+    }
+    my $g_nr = get_nr_attribute ($gconstructor);
+    my $g_aid = get_aid_attribute ($gconstructor);
+    my $g_aid_lc = lc $g_aid;
+    my $gconstructor_tptp = "g${g_nr}_${g_aid_lc}";
+    (my $arg_types_node) = $gconstructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node not found under a G constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    my $generic_gconstructor = "${gconstructor_tptp}";
+    my $var_prefix = 'X';
+    if ($num_arg_types > 0) {
+        $generic_gconstructor .= '(';
+        foreach my $i (1 .. $num_arg_types) {
+            my $var = "${var_prefix}${i}";
+            $generic_gconstructor .= "${var}";
+            if ($i < $num_arg_types) {
+                $generic_gconstructor .= ',';
+            }
+        }
+        $generic_gconstructor .= ')';
+    }
+    (my $fields_node) = $gconstructor->findnodes ('Fields');
+    if (! defined $fields_node) {
+        confess 'Fields node not found in a G constructor node.';
+    }
+    my @fields = $fields_node->findnodes ('*');
+    my $num_fields = scalar @fields;
+    foreach my $i (1 .. $num_fields) {
+        my $field  = $fields[$i - 1];
+        my $field_aid = get_aid_attribute ($field);
+        my $field_nr = get_absnr_attribute ($field);
+        my $field_aid_lc = lc $field_aid;
+        my $field_tptp = "u${field_nr}_${field_aid_lc}";
+        my $var = "${var_prefix}${i}";
+        my $content = "(${field_tptp}(${generic_gconstructor}) = ${var})";
+        foreach my $i (1 .. $num_arg_types) {
+            my $var_index = $num_arg_types - $i + 1;
+            my $typ = $arg_types[$var_index - 1];
+            my $var = "${var_prefix}${var_index}";
+            my $guard = render_guard ($var, $typ);
+            $content = "(! [${var}] : (${guard} => ${content}))";
+        }
+        my $tptp_name = "projection_${i}_g${g_nr}_${g_aid_lc}";
+        my $formula = "fof(${tptp_name},axiom,${content}).";
+        push (@projections, $formula);
+    }
+    return @projections;
+}
+
 sub render_rcluster {
     my $cluster_node = shift;
     my $nr = get_nr_attribute ($cluster_node);
