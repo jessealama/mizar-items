@@ -3205,6 +3205,8 @@ sub render_adjective_guards {
 
 sub render_non_local_item {
     my $item = shift;
+    my $params_ref = shift;
+    my %params = defined $params_ref ? %{$params_ref} : ();
     my $article = article_of_item ($item);
     my $nr = nr_of_item ($item);
     my $tptp_name = tptp_name_for_item ($item);
@@ -3370,27 +3372,43 @@ sub render_non_local_item {
                 if (! defined $cluster_node) {
                     confess 'FCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
                 }
-                # rendering the coherence node is not what we need
-                (my $arg_types_node) = $cluster_node->findnodes ('ArgTypes');
-                if (! defined $arg_types_node) {
-                    confess 'ArgTypes node not found under an FCluster node.';
+                if ((defined $params{'conjecture'}) && $params{'conjecture'}) {
+                    # as a conjecture, an fcluster is identified with
+                    # its coherence condition
+                    (my $coherence_node) = $cluster_node->findnodes ('following-sibling::Coherence');
+                    if (! defined $coherence_node) {
+                        confess 'Coherence node not found following an FCluster.';
+                    }
+                    (my $proposition) = $coherence_node->findnodes ('Proposition');
+                    if (! defined $proposition) {
+                        confess 'Proposition node not found under a Coherence node.';
+                    }
+                    my $content = render_proposition ($proposition);
+                    my $formula = "fof(${tptp_name},conjecture,${content}).";
+                    push (@results, $formula);
+                } else {
+                    # rendering the coherence node is not what we need
+                    (my $arg_types_node) = $cluster_node->findnodes ('ArgTypes');
+                    if (! defined $arg_types_node) {
+                        confess 'ArgTypes node not found under an FCluster node.';
+                    }
+                    my @arg_types = $arg_types_node->findnodes ('*');
+                    my $num_arg_types = scalar @arg_types;
+                    (my $func_node) = $arg_types_node->findnodes ('following-sibling::*[1]');
+                    my @adjectives = $cluster_node->findnodes ('Cluster[1]/*');
+                    my $term_rendered = render_semantic_content ($func_node);
+                    my $cluster_result = render_adjective_guards ($term_rendered, @adjectives);
+                    foreach my $i (1 .. $num_arg_types) {
+                        my $arg_number = $num_arg_types - $i + 1;
+                        my $arg_typ = $arg_types[$arg_number - 1];
+                        my $var_name = "X${arg_number}";
+                        my $guard = render_guard ($var_name, $arg_typ);
+                        $cluster_result = "(! [${var_name}] : (${guard} => ${cluster_result}))";
+                    }
+                    push (@results, "fof(${kind}c${nr}_${article},theorem,${cluster_result}).");
+                    my @choices = render_choices ($cluster_node);
+                    push (@results, @choices);
                 }
-                my @arg_types = $arg_types_node->findnodes ('*');
-                my $num_arg_types = scalar @arg_types;
-                (my $func_node) = $arg_types_node->findnodes ('following-sibling::*[1]');
-                my @adjectives = $cluster_node->findnodes ('Cluster[1]/*');
-                my $term_rendered = render_semantic_content ($func_node);
-                my $cluster_result = render_adjective_guards ($term_rendered, @adjectives);
-                foreach my $i (1 .. $num_arg_types) {
-                    my $arg_number = $num_arg_types - $i + 1;
-                    my $arg_typ = $arg_types[$arg_number - 1];
-                    my $var_name = "X${arg_number}";
-                    my $guard = render_guard ($var_name, $arg_typ);
-                    $cluster_result = "(! [${var_name}] : (${guard} => ${cluster_result}))";
-                }
-                push (@results, "fof(${kind}c${nr}_${article},theorem,${cluster_result}).");
-                my @choices = render_choices ($cluster_node);
-                push (@results, @choices);
             } elsif ($kind eq 'r') {
                 my $cluster_xpath = "descendant::RCluster[\@nr = \"${nr}\"]";
                 (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
@@ -3827,7 +3845,7 @@ sub problem_for_item {
     my $fragment_doc = parse_xml_file ($fragment_xml);
     my $fragment_root = $fragment_doc->documentElement ();
     my $item_label = tptp_name_for_item ($item);
-    my @problem = render_non_local_item ($item);
+    my @problem = render_non_local_item ($item, { 'conjecture' => 1 });
     @problem = conjecturify_formula_in_problem ($item_label, @problem);
     my @deps = @{$resolved_dependencies{$item}};
     my @scheme_deps = ();
