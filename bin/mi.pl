@@ -3057,7 +3057,7 @@ sub existence_for_mode {
     if ($mode_constructor_item eq 'hidden:mconstructor:1') {
         return 'fof(existence_m1_hidden,axiom,(? [X] : m1_hidden(X))).'
     } elsif ($mode_constructor_item eq 'hidden:mconstructor:2') {
-        return 'fof(existence_m1_hidden,axiom,(? [X] : m2_hidden(X))).'
+        return 'fof(existence_m2_hidden,axiom,(? [X] : m2_hidden(X))).';
     } else {
         my $mconstructor = constructor_node_of_constructor_item ($mode_constructor_item);
         (my $existence) = $mconstructor->findnodes ('preceding-sibling::Existence');
