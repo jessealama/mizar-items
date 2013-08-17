@@ -1663,6 +1663,11 @@ sub is_structure_constructor {
     return ($item =~ / [:] g constructor [:] \d+ \z /);
 }
 
+sub is_structure_field {
+    my $item = shift;
+    return ($item =~ / [:] u constructor [:] \d+ \z /);
+}
+
 sub is_constructor_property_item {
     my $item = shift;
     return ($item =~ / [:] . constructor [:] \d+ [[] [a-z]+ []] \z/);
@@ -3751,7 +3756,9 @@ sub problem_for_item {
             my @rendered = render_non_local_item ($dep);
             push (@problem, @rendered);
         } elsif (is_constructor_item ($dep)) {
-            if ((is_functor_constructor ($dep)) || (is_structure_constructor ($dep))) {
+            if ((is_functor_constructor ($dep))
+                    || (is_structure_constructor ($dep))
+                        || (is_structure_field($dep))) {
                 my $typing = value_type_for_constructor ($dep);
                 if (defined $typing) {
                     push (@problem, $typing);
