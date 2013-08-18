@@ -143,6 +143,11 @@ sub get_aid_attribute {
     return get_attribute ($node, 'aid');
 }
 
+sub get_name_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'name');
+}
+
 sub get_nr_attribute {
     my $node = shift;
     return get_attribute ($node, 'nr');
