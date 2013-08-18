@@ -2152,6 +2152,8 @@ sub constructor_kind {
     my $constructor_item = shift;
     if ($constructor_item =~ / [:] (.) constructor [:] /) {
         return $1;
+    } elsif ($constructor_item =~ /\A (.) \d+ [_] [a-z0-9_]+ \z/) {
+        return $1;
     } else {
         confess 'Cannot extract constructor kind from \'', $constructor_item, '\'.';
     }
@@ -2178,6 +2180,8 @@ sub definiens_kind {
 sub nr_of_item {
     my $item = shift;
     if ($item =~ / [:] (\d+) \z/) {
+        return $1;
+    } elsif ($item =~ /\A . (\d+) [_] [a-z0-9_]+ \z/) {
         return $1;
     } elsif ($item =~ / \A requirement [:] (\d+) \z/ ) {
         return $1;
