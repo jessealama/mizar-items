@@ -3842,6 +3842,72 @@ sub coherence_for_constructor {
     return $formula;
 }
 
+sub numerals_in_tptp_formula {
+    my $kind = shift;
+    my $tptp_formula = shift;
+    # save the formula to a temp file
+    my $fh = File::Temp->new ();
+    say {$fh} "${tptp_formula}"
+        or confess 'Cannot write a TPTP formula to a tempfile.';
+    my $path = $fh->filename ();
+    my $formula_as_xml_str = `tptp4X -fxml -umachine ${path}`;
+    my $formula_doc = XML::LibXML->load_xml (string => "${formula_as_xml_str}");
+    my @all_numerals = $formula_doc->findnodes ('descendant::number');
+    my %numerals = ();
+    foreach my $numeral (@all_numerals) {
+        my $n = get_name_attribute ($numeral);
+        $numerals{$n} = 0;
+    }
+    return keys %numerals;
+}
+
+sub numerals_in_problem {
+    my $kind = shift;
+    my @problem = @_;
+    my %numerals = ();
+    foreach my $formula (@problem) {
+        my @numerals = numerals_in_tptp_formula ($kind, $formula);
+        foreach my $numeral (@numerals) {
+            $numerals{$numeral} = 0;
+        }
+    }
+    return keys %numerals;
+}
+
+sub constructors_of_kind_in_tptp_formula {
+    my $kind = shift;
+    my $tptp_formula = shift;
+    # save the formula to a temp file
+    my $fh = File::Temp->new ();
+    say {$fh} "${tptp_formula}"
+        or confess 'Cannot write a TPTP formula to a tempfile.';
+    my $path = $fh->filename ();
+    my $formula_as_xml_str = `tptp4X -fxml -umachine ${path}`;
+    my $formula_doc = XML::LibXML->load_xml (string => "${formula_as_xml_str}");
+    my @all_function_terms = $formula_doc->findnodes ('descendant::function');
+    my %constructors = ();
+    foreach my $term (@all_function_terms) {
+        my $n = get_name_attribute ($term);
+        if ($n =~ /\A ${kind} \d+ [_] /) {
+            $constructors{$n} = 0;
+        }
+    }
+    return keys %constructors;
+}
+
+sub constructors_of_kind_in_problem {
+    my $kind = shift;
+    my @problem = @_;
+    my %constructors = ();
+    foreach my $formula (@problem) {
+        my @constructors = constructors_of_kind_in_tptp_formula ($kind, $formula);
+        foreach my $constructor (@constructors) {
+            $constructors{$constructor} = 0;
+        }
+    }
+    return keys %constructors;
+}
+
 sub problem_for_item {
     my $item = shift;
     my $source = source_of_item ($item);
