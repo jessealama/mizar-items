@@ -3600,7 +3600,7 @@ sub is_redefined_constructor {
         if (! defined $constructor_node) {
             confess 'Constructor not found in ', $item_xml, '.';
         }
-        $answer = $constructor_node->hasAttribute ('redefnr');
+        $answer = ($constructor_node->hasAttribute ('redefnr')) ? 1 : 0;
     } else {
         $answer = 0;
     }
