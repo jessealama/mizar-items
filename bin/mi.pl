@@ -3928,7 +3928,6 @@ sub problem_for_item {
     my $fragment_root = $fragment_doc->documentElement ();
     my $item_label = tptp_name_for_item ($item);
     my @problem = render_non_local_item ($item, { 'conjecture' => 1 });
-    @problem = conjecturify_formula_in_problem ($item_label, @problem);
     my @deps = @{$resolved_dependencies{$item}};
     my @scheme_deps = ();
     foreach my $dep (@deps) {
@@ -3967,11 +3966,12 @@ sub problem_for_item {
             }
             if (is_structure_constructor ($dep)) {
                 my $free = free_for_constructor ($dep);
-                my $rcluster = rcluster_for_structure_constructor ($dep);
                 my $widening = widening_for_structure_constructor ($dep);
                 my @projections = projections_for_structure_constructor ($dep);
-                push (@problem, $free, $rcluster, $widening);
+                push (@problem, $free, $widening);
                 push (@problem, @projections);
+                my $rcluster = rcluster_for_structure_constructor ($dep);
+                push (@problem, $rcluster);
             }
             if (is_mode_constructor ($dep)) {
                 my $existence = existence_for_mode ($dep);
@@ -4039,7 +4039,10 @@ sub problem_for_item {
             confess 'Cannot make sense of TPTP formula \'', $formula, '\'.';
         }
     }
-    return values %formulas;
+
+    @problem = values %formulas;
+    @problem = conjecturify_formula_in_problem ($item_label, @problem);
+    return @problem;
 }
 
 sub is_problematic_item {
