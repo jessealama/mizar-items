@@ -3068,6 +3068,22 @@ sub widening_for_structure_constructor {
     return $formula;
 }
 
+sub formula_name {
+    my $formula = shift;
+    if ($formula =~ /\A fof [(] ([a-z_0-9]+) [,] /) {
+        return $1;
+    } else {
+        confess 'Cannot make sense of TPTP formula \'', $formula, '\'.';
+    }
+}
+
+sub widening_present_in_problem {
+    my $lconstructor = shift;
+    my @problem = @_;
+    my $formula_name = "widening_${lconstructor}";
+    return ((any { formula_name ($_) eq $formula_name } @problem) ? 1 : 0)
+}
+
 sub existence_for_mode {
     my $mode_constructor_item = shift;
     if ($mode_constructor_item eq 'hidden:mconstructor:1') {
@@ -4026,6 +4042,22 @@ sub problem_for_item {
     # (! [X,Y] : (0 != g5_struct_0(X,Y)))
     #
     # is what makes all the difference.
+    # throw in all possible widenings for structures
+    my @lconstructors_in_problem = constructors_of_kind_in_problem ('l', @problem);
+    my $idx_of_first_missing_widening
+        = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
+    until ($idx_of_first_missing_widening < 0) {
+        my $missing_lconstructor = $lconstructors_in_problem[$idx_of_first_missing_widening];
+        my $missing_article = article_of_item ($missing_lconstructor);
+        my $missing_nr = nr_of_item ($missing_lconstructor);
+        my $gconstructor = "g${missing_nr}_${missing_article}";
+        my $widening = widening_for_structure_constructor ($gconstructor);
+        push (@problem, $widening);
+        @lconstructors_in_problem = constructors_of_kind_in_problem ('l', @problem);
+        $idx_of_first_missing_widening
+            = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
+    }
+
     my @formulas_from_schemes = extract_schemes ($fragment_root);
     push (@problem, @formulas_from_schemes);
     # remove any potential duplicates
