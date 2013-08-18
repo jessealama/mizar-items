@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use File::Basename qw(basename);
 use File::Path qw(rmtree);
+use File::Temp;
 use Getopt::Long;
 use Pod::Usage;
 use File::Temp qw(tempfile);
