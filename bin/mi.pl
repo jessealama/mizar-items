@@ -3635,7 +3635,8 @@ sub definition_for_constructor {
     if (! defined $block_node) {
         confess 'DefinitionBlock ancestor node not found in ', $item_xml;
     }
-    (my $deftheorem_node) = $item_xml_root->findnodes ("DefTheorem[\@constrkind = \"${kind_uc}\"][${nr}]");
+    my $relnr = get_relnr_attribute ($constructor_node);
+    (my $deftheorem_node) = $item_xml_root->findnodes ("DefTheorem[\@constrkind = \"${kind_uc}\" and \@constrnr = \"${relnr}\"]");
     if (defined $deftheorem_node) {
         my $def_nr = $deftheorem_node->findvalue ('count (preceding::DefTheorem) + 1');
         my $content = render_deftheorem ($deftheorem_node);
