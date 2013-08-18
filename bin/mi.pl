@@ -2725,7 +2725,14 @@ sub render_reflexivity {
         }
         my $last_var = 'X' . ($num_arg_types - 1);
         my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
-        my $reflexivity_content = "${constructor_tptp}(${last_var},${last_var})";
+        my $reflexivity_content = "${constructor_tptp}";
+        $reflexivity_content .= '(';
+        foreach my $i (1 .. $num_arg_types - 2) {
+            my $var = "X${i}";
+            $reflexivity_content .= "${var},";
+        }
+        $reflexivity_content .= "${last_var},${last_var}";
+        $reflexivity_content .= ')';
         foreach my $i (1 .. $num_arg_types - 1) {
             my $var_index = $num_arg_types - $i;
             my $var = "X${var_index}";
