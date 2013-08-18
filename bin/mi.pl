@@ -142,6 +142,11 @@ sub get_aid_attribute {
     return get_attribute ($node, 'aid');
 }
 
+sub get_relnr_attribute {
+    my $node = shift;
+    return get_attribute ($node, 'relnr');
+}
+
 sub get_name_attribute {
     my $node = shift;
     return get_attribute ($node, 'name');
