@@ -3895,9 +3895,9 @@ sub constructors_of_kind_in_tptp_formula {
     my $path = $fh->filename ();
     my $formula_as_xml_str = `tptp4X -fxml -umachine ${path}`;
     my $formula_doc = XML::LibXML->load_xml (string => "${formula_as_xml_str}");
-    my @all_function_terms = $formula_doc->findnodes ('descendant::function');
+    my @all_terms = $formula_doc->findnodes ('descendant::function | descendant::predicate');
     my %constructors = ();
-    foreach my $term (@all_function_terms) {
+    foreach my $term (@all_terms) {
         my $n = get_name_attribute ($term);
         if ($n =~ /\A ${kind} \d+ [_] /) {
             $constructors{$n} = 0;
