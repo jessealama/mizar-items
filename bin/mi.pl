@@ -3979,6 +3979,7 @@ sub problem_for_item {
             }
         }
     }
+    # postulate that numbers aren't structures
     my @gconstructors = constructors_of_kind_in_problem ('g', @problem);
     my @numerals = numerals_in_problem (@problem);
     foreach my $numeral (@numerals) {
