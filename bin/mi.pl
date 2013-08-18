@@ -2114,6 +2114,8 @@ sub article_of_item {
     my $item = shift;
     if ($item =~ /\A ([a-z0-9_]+) [:] /) {
         return $1;
+    } elsif ($item =~ / [_] ([a-z0-9_]+) \z /) {
+        return $1;
     } else {
         confess 'Cannot extract article for \'', $item, '\'.';
     }
