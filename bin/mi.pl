@@ -3469,7 +3469,6 @@ sub render_non_local_item {
             # is this a redefinition?  We may need to use the compatibility
             my $compatibility_xpath = 'preceding-sibling::Compatibility';
             if ($constructor_node->exists ($compatibility_xpath)) {
-                warn 'adding a compatibility for property ', $property;
                 (my $compatibility_node) = $constructor_node->findnodes ($compatibility_xpath);
                 (my $compatibility_proposition) = $compatibility_node->findnodes ('Proposition');
                 if (! defined $compatibility_proposition) {
