@@ -3968,6 +3968,49 @@ sub problem_for_item {
             }
         }
     }
+    my @gconstructors = constructors_of_kind_in_problem ('g', @problem);
+    my @numerals = numerals_in_problem (@problem);
+    foreach my $numeral (@numerals) {
+        foreach my $gconstructor (@gconstructors) {
+            if ($gconstructor =~ /\A g (\d+) [_] ([a-z0-9_]+) \z/) {
+                (my $g_nr, my $g_aid_lc) = ($1, $2);
+                my $tptp_name = "${gconstructor}_is_not_${numeral}";
+                my $item_name = "${g_aid_lc}:gconstructor:${g_nr}";
+                my $gconstructor_node = constructor_node_of_constructor_item ($item_name);
+                (my $arg_types_node) = $gconstructor_node->findnodes ('ArgTypes');
+                if (! defined $arg_types_node) {
+                    confess 'ArgTypes node not found under a G constructor.';
+                }
+                my @arg_types = $arg_types_node->findnodes ('*');
+                my $num_arg_types = scalar @arg_types;
+                my $generic_tptp_constructor = "${gconstructor}";
+                if ($num_arg_types > 0) {
+                    $generic_tptp_constructor .= '(';
+                    foreach my $i (1 .. $num_arg_types) {
+                        my $var = "X${i}";
+                        $generic_tptp_constructor .= "${var}";
+                        if ($i < $num_arg_types) {
+                            $generic_tptp_constructor .= ',';
+                        }
+                    }
+                    $generic_tptp_constructor .= ')';
+                }
+                my $disequation = "${numeral} != ${generic_tptp_constructor}";
+                # now generalize
+                foreach my $i (1 .. $num_arg_types) {
+                    my $var_index = $num_arg_types - $i + 1;
+                    my $typ = $arg_types[$var_index - 1];
+                    my $var = "X${var_index}";
+                    my $guard = render_guard ($var, $typ);
+                    $disequation = "(! [${var}] : (${guard} => ${disequation}))";
+                }
+                my $formula = "fof(${tptp_name},axiom,${disequation}).";
+                push (@problem, $formula);
+            } else {
+                confess 'Cannot make sense of TPTP constructor \'', $gconstructor, '\'.';
+            }
+        }
+    }
     # we may want to add further dependencies, depending on whether natural numbers and structues are present.  For example, there are problems where, e.g.,
     #
     # (! [X,Y] : (0 != g5_struct_0(X,Y)))
