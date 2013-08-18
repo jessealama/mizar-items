@@ -10,7 +10,7 @@ use Pod::Usage;
 use File::Temp qw(tempfile);
 use Carp qw(croak carp confess);
 use XML::LibXML;
-use List::MoreUtils qw(none first_index);
+use List::MoreUtils qw(none first_index all any);
 use Regexp::DefaultFlags;
 use IPC::Run qw(run start);
 use charnames qw( :full ); # for referring to characters in regular expressions
@@ -18,7 +18,6 @@ use Readonly;
 use FindBin qw($RealBin);
 use lib "$RealBin/../src/perl/";
 use Data::Dumper;
-use List::MoreUtils qw(any);
 
 use Utils qw(parse_xml_file);
 
