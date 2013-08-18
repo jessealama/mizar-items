@@ -3949,8 +3949,6 @@ sub problem_for_item {
                 my $def = definition_for_constructor ($dep);
                 if (defined $def) {
                     push (@problem, $def);
-                } else {
-                    warn 'no definition found for ', $dep;
                 }
                 my $compat = compatibility_for_constructor ($dep);
                 if (defined $compat) {
