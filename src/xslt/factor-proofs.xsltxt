@@ -402,22 +402,59 @@ tpl universally-bind-segments-existence (#segments,
 
 tpl universally-bind-segments-function-equals-existence (#segments,
                                                          #formula,
-                                                         #type)
+                                                         #type,
+                                                         #assumption)
 {
   if [count ($segments) = 0] {
-    $fresh = fresh-variable ();
-    <Existential-Quantifier-Formula {
-      <Explicitly-Qualified-Segment {
-         <Variables { <Variable { @spelling = $fresh; } }
-         type-or-set (#type = $type);
-      }
-      <Predicative-Formula {
-        @spelling = "=";
-        <Arguments {
-          <Simple-Term { @spelling = $fresh; }
+    if [$assumption] {
+      <Conditional-Formula {
+        for-each [$assumption] {
+          choose {
+            when [Single-Assumption] {
+              for-each [Single-Assumption] {
+                if [not(Proposition)] {
+                  die (#message = "No Proposition under a Single-Assumption.");
+                }
+                for-each [Proposition] {
+                  apply [*[position() = last()]];
+                }
+              }
+            }
+            when [Collective-Assumption] {
+              for-each [Collective-Assumption] {
+                <Conjunctive-Formula {
+                  for-each [Conditions] {
+                    for-each [Proposition] {
+                      apply [*[position() = last()]];
+                    }
+                  }
+                }
+              }
+            }
+            otherwise {
+              die (#message = "Neither a Single-Assumption nor a Collective-Assumption was found.");
+            }
+          }
         }
-        <Arguments {
-          apply [$formula];
+        universally-bind-segments-function-equals-existence (#segments   = $segments,
+                                                             #formula    = $formula,
+                                                             #type       = $type);
+      }
+    } else {
+      $fresh = fresh-variable ();
+      <Existential-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+           <Variables { <Variable { @spelling = $fresh; } }
+           type-or-set (#type = $type);
+        }
+        <Predicative-Formula {
+          @spelling = "=";
+          <Arguments {
+            <Simple-Term { @spelling = $fresh; }
+          }
+          <Arguments {
+            apply [$formula];
+          }
         }
       }
     }
@@ -428,54 +465,92 @@ tpl universally-bind-segments-function-equals-existence (#segments,
       apply [$segment];
       universally-bind-segments-function-equals-existence (#segments   = $rest,
                                                            #formula    = $formula,
-                                                           #type       = $type);
+                                                           #type       = $type,
+                                                           #assumption = $assumption);
     }
   }
 }
 
 tpl universally-bind-segments-function-equals-uniqueness (#segments,
                                                           #formula,
-                                                          #type)
+                                                          #type,
+                                                          #assumption)
 {
   if [count ($segments) = 0] {
-    $fresh-1 = fresh-variable (#prefix = "A");
-    $fresh-2 = fresh-variable (#prefix = "B");
-    <Universal-Quantifier-Formula {
-      <Explicitly-Qualified-Segment {
-        <Variables {
-          <Variable { @spelling = $fresh-1; }
-          <Variable { @spelling = $fresh-2; }
-        }
-        type-or-set (#type = $type);
-      }
+    if [$assumption] {
       <Conditional-Formula {
-        <Conjunctive-Formula {
+        for-each [$assumption] {
+          choose {
+            when [Single-Assumption] {
+              for-each [Single-Assumption] {
+                if [not(Proposition)] {
+                  die (#message = "No Proposition under a Single-Assumption.");
+                }
+                for-each [Proposition] {
+                  apply [*[position() = last()]];
+                }
+              }
+            }
+            when [Collective-Assumption] {
+              for-each [Collective-Assumption] {
+                <Conjunctive-Formula {
+                  for-each [Conditions] {
+                    for-each [Proposition] {
+                      apply [*[position() = last()]];
+                    }
+                  }
+                }
+              }
+            }
+            otherwise {
+              die (#message = "Neither a Single-Assumption nor a Collective-Assumption was found.");
+            }
+          }
+        }
+        universally-bind-segments-function-equals-uniqueness (#segments = $segments,
+                                                              #formula  = $formula,
+                                                              #type     = $type);
+      }
+    } else {
+      $fresh-1 = fresh-variable (#prefix = "A");
+      $fresh-2 = fresh-variable (#prefix = "B");
+      <Universal-Quantifier-Formula {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            <Variable { @spelling = $fresh-1; }
+            <Variable { @spelling = $fresh-2; }
+          }
+          type-or-set (#type = $type);
+        }
+        <Conditional-Formula {
+          <Conjunctive-Formula {
+            <Predicative-Formula {
+              @spelling = "=";
+              <Arguments {
+                <Simple-Term { @spelling = $fresh-1; }
+              }
+              <Arguments {
+                apply [$formula];
+              }
+            }
+            <Predicative-Formula {
+              @spelling = "=";
+              <Arguments {
+                <Simple-Term { @spelling = $fresh-2; }
+              }
+              <Arguments {
+                apply [$formula];
+              }
+            }
+          }
           <Predicative-Formula {
             @spelling = "=";
             <Arguments {
               <Simple-Term { @spelling = $fresh-1; }
             }
             <Arguments {
-              apply [$formula];
-            }
-          }
-          <Predicative-Formula {
-            @spelling = "=";
-            <Arguments {
               <Simple-Term { @spelling = $fresh-2; }
             }
-            <Arguments {
-              apply [$formula];
-            }
-          }
-        }
-        <Predicative-Formula {
-          @spelling = "=";
-          <Arguments {
-            <Simple-Term { @spelling = $fresh-1; }
-          }
-          <Arguments {
-            <Simple-Term { @spelling = $fresh-2; }
           }
         }
       }
@@ -1055,16 +1130,48 @@ tpl universally-bind-segments-projectivity (#segments,
 
 tpl universally-bind-segments-coherence (#segments,
                                          #formula,
-                                         #type)
+                                         #type,
+                                         #assumption)
 {
   if [count ($segments) = 0] {
-    <Attributive-Formula {
-      apply [$formula];
-
-      if [$type] {
-        apply [$type];
-      } else {
-        <Standard-Type { @nr = "1"; @spelling = "set"; }
+    if [$assumption] {
+      <Conditional-Formula {
+        for-each [$assumption] {
+          choose {
+            when [Single-Assumption] {
+              for-each [Single-Assumption] {
+                if [not(Proposition)] {
+                  die (#message = "No Proposition under a Single-Assumption.");
+                }
+                for-each [Proposition] {
+                  apply [*[position() = last()]];
+                }
+              }
+            }
+            when [Collective-Assumption] {
+              for-each [Collective-Assumption] {
+                <Conjunctive-Formula {
+                  for-each [Conditions] {
+                    for-each [Proposition] {
+                      apply [*[position() = last()]];
+                    }
+                  }
+                }
+              }
+            }
+            otherwise {
+              die (#message = "Neither a Single-Assumption nor a Collective-Assumption was found.");
+            }
+          }
+        }
+        universally-bind-segments-coherence (#segments   = $segments,
+                                             #formula    = $formula,
+                                             #type       = $type);
+      }
+    } else {
+      <Attributive-Formula {
+        apply [$formula];
+        type-or-set (#type = $type);
       }
     }
   } else {
@@ -1072,9 +1179,10 @@ tpl universally-bind-segments-coherence (#segments,
     $rest = `$segments[position() > 1]`;
     <Universal-Quantifier-Formula {
       apply [$segment];
-      universally-bind-segments-coherence (#segments = $rest,
-                                           #formula  = $formula,
-                                           #type     = $type);
+      universally-bind-segments-coherence (#segments   = $rest,
+                                           #formula    = $formula,
+                                           #type       = $type,
+                                           #assumption = $assumption);
     }
   }
 }
@@ -2443,29 +2551,59 @@ tpl
     }
     <Block {
       @kind = "Proof";
-      for-each [ancestor::Block[@kind = "Definitional-Block"]/Item[@kind = "Loci-Declaration"]] {
+      for-each [ancestor::Block[@kind = "Definitional-Block"]/Item[@kind = "Loci-Declaration" or @kind = "Assumption"]] {
         apply [.];
       }
-      <Item {
-        @kind = "Exemplification";
-        for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-          for-each [Item[@kind = "Functor-Definition"]] {
-            for-each [Definiens] {
-              apply [*[position() = last()]];
+      $fresh = fresh-variable ();
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        <Item {
+          @kind = "Regular-Statement";
+          @shape = "Compact-Statement";
+          <Proposition {
+            <Attributive-Formula {
+              apply [$formula];
+              type-or-set (#type = $type);
+            }
+          }
+          <Straightforward-Justification {
+            <Local-Reference {
+              @spelling = $coherence-lemma;
             }
           }
         }
-      }
-      <Item {
-        @kind = "Conclusion";
-        @shape = "Compact-Statement";
-        <Proposition {
-          <Thesis;
-        }
-        <Straightforward-Justification {
-          <Local-Reference {
-            @spelling = $coherence-lemma;
+        <Item {
+          @kind = "Type-Changing-Statement";
+          <Equality {
+            <Variable {
+              @spelling = $fresh;
+            }
+            apply [$formula];
           }
+          type-or-set (#type = $type);
+          <Straightforward-Justification {
+            <Link;
+          }
+        }
+        <Item {
+          @kind = "Exemplification";
+          <Simple-Term {
+            @spelling = $fresh;
+          }
+        }
+        <Item {
+          @kind = "Conclusion";
+          @shape = "Compact-Statement";
+          <Proposition {
+            <Thesis;
+          }
+          <Straightforward-Justification;
         }
       }
     }
@@ -2488,6 +2626,220 @@ tpl
         universally-bind-segments-function-equals-uniqueness (#segments = $segments,
                                                               #formula  = $formula,
                                                               #type     = $type);
+      }
+    }
+
+    <Straightforward-Justification; // ought to be obvious
+
+  }
+
+}
+
+tpl
+[
+  Item
+  [
+        @kind      = "Correctness-Condition"
+    and @condition = "coherence"
+    and preceding-sibling::Item
+        [
+              @kind  = "Functor-Definition"
+          and @shape = "Equals"
+          and not(Redefine)
+          and count(preceding-sibling::Item[@kind = "Assumption"]) = 1
+          and not(Definiens/Partial-Definiens)
+        ]
+  ]
+]
+{
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $coherence-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        $assumption = `Item[@kind = "Assumption"]`;
+        universally-bind-segments-coherence (#segments   = $segments,
+                                             #formula    = $formula,
+                                             #type       = $type,
+                                             #assumption = $assumption);
+      }
+    }
+
+    for-each [*[position() = last()]] {
+      choose {
+        when [self::Straightforward-Justification] {
+          apply [.];
+        }
+        when [self::Block[@kind = "Proof"]] {
+          <Block {
+            for-each [@*] { copy-of `.`; }
+            for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+              for-each [*[following-sibling::Item[@kind = "Functor-Definition"]]] {
+                if [self::Item[@kind = "Loci-Declaration"]] {
+                  <Item {
+                    @kind = "Generalization";
+                    apply [*];
+                  }
+                } else {
+                  apply [.];
+                }
+              }
+            }
+            apply [*];
+          }
+        }
+      }
+    }
+  }
+
+  // formulate also existence and uniqueness conditions existence is
+  // justified by the coherence lemma; uniqueness ought to be obvious
+
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $existence-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        $assumption = `Item[@kind = "Assumption"]`;
+        universally-bind-segments-function-equals-existence (#segments = $segments,
+                                                             #formula  = $formula,
+                                                             #type     = $type,
+                                                             #assumption = $assumption);
+      }
+    }
+    <Block {
+      @kind = "Proof";
+      for-each [ancestor::Block[@kind = "Definitional-Block"]/Item[@kind = "Loci-Declaration" or @kind = "Assumption"]] {
+        apply [.];
+      }
+      $fresh = fresh-variable ();
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        $assumption = `Item[@kind = "Assumption"]`;
+        <Item {
+          @kind = "Regular-Statement";
+          @shape = "Compact-Statement";
+          <Proposition {
+            <Attributive-Formula {
+              apply [$formula];
+              type-or-set (#type = $type);
+            }
+          }
+          <Straightforward-Justification {
+            <Local-Reference {
+              @spelling = $coherence-lemma;
+            }
+            for-each [$assumption] {
+              choose {
+                when [Single-Assumption] {
+                  for-each [Single-Assumption] {
+                    for-each [Proposition] {
+                      if [Label] {
+                        for-each [Label] {
+                          <Local-Reference {
+                            @spelling = `@spelling`;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                when [Collective-Assumption] {
+                  for-each [Collective-Assumption] {
+                    for-each [Conditions] {
+                      for-each [Proposition] {
+                        if [Label] {
+                          for-each [Label] {
+                            <Local-Reference {
+                              @spelling = `@spelling`;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                otherwise {
+                  die (#message = "What kind of assumption is this?");
+                }
+              }
+            }
+          }
+        }
+        <Item {
+          @kind = "Type-Changing-Statement";
+          <Equality {
+            <Variable {
+              @spelling = $fresh;
+            }
+            apply [$formula];
+          }
+          type-or-set (#type = $type);
+          <Straightforward-Justification {
+            <Link;
+          }
+        }
+        <Item {
+          @kind = "Exemplification";
+          <Simple-Term {
+            @spelling = $fresh;
+          }
+        }
+        <Item {
+          @kind = "Conclusion";
+          @shape = "Compact-Statement";
+          <Proposition {
+            <Thesis;
+          }
+          <Straightforward-Justification;
+        }
+      }
+    }
+  }
+
+  <Item { @kind = "Pragma"; @spelling = "$C induced"; }
+  <Item {
+    @kind = "Theorem-Item";
+    @shape = "Compact-Statement";
+    <Proposition {
+      <Label { @spelling = $uniqueness-lemma; }
+      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
+
+        $locus      = `Item[@kind = "Loci-Declaration"]`;
+        $fd         = `Item[@kind = "Functor-Definition"]`;
+        $formula    = `$fd/Definiens/*[position() = last()]`;
+        $ts         = `$fd/Type-Specification`;
+        $type       = `$ts/*[1]`;
+        $segments   = `$locus/Explicitly-Qualified-Segment`;
+        $assumption = `Item[@kind = "Assumption"]`;
+        universally-bind-segments-function-equals-uniqueness (#segments = $segments,
+                                                              #formula  = $formula,
+                                                              #type     = $type,
+                                                              #assumption = $assumption);
       }
     }
 
@@ -2714,63 +3066,6 @@ tpl
     }
   }
 
-}
-
-tpl
-[
-  Item
-  [
-        @kind      = "Correctness-Condition"
-    and @condition = "coherence"
-    and preceding-sibling::Item
-        [
-              @kind  = "Functor-Definition"
-          and Definiens
-          and count (preceding-sibling::Item[@kind = "Assumption"]) = 1
-         ]
-  ]
-]
-{
-  <Item {
-    @kind = "Regular-Statement";
-    @shape = "Diffuse-Statement";
-    <Label { @spelling = $coherence-lemma; }
-    <Block {
-      @kind = "Now-Reasoning";
-      for-each [ancestor::Block[@kind = "Definitional-Block"]] {
-        for-each [Item[@kind = "Loci-Declaration" or @kind = "Choice-Statement" or @kind = "Assumption"]] {
-          choose {
-            when [self::Item[@kind = "Loci-Declaration"]] {
-              <Item { @kind = "Generalization"; apply [*]; }
-            }
-            otherwise {
-              // nothing special to do; apply the default template
-              apply [.];
-            }
-          }
-        }
-      }
-      <Item {
-        @kind = "Conclusion";
-        @shape = "Compact-Statement";
-        $fd = `preceding-sibling::Item[@kind = "Functor-Definition"]`;
-        $formula = `$fd/Definiens/*[position() = last()]`;
-        $type = `$fd/Type-Specification/*[1]`;
-        <Proposition {
-	  <Attributive-Formula {
-            apply [$formula];
-            if [$type] {
-              apply [$type];
-            } else {
-              <Standard-Type { @nr = "1"; @spelling = "set"; }
-            }
-
-          }
-        }
-        apply [*[position() = last()]];
-      }
-    }
-  }
 }
 
 tpl [Item[@kind = "Correctness" and @condition = "correctness"]] {
