@@ -362,32 +362,49 @@ sub article_dependencies {
                     $deps{$item} = 0;
                 } else {
                     my $item_xml = undef;
+                    my $mizfiles = $ENV{'MIZFILES'};
+                    if (! defined $mizfiles) {
+                        confess 'MIZFILES environment variable not defined.';
+                    }
+                    my $miztmp_dir = "${mizfiles}/miztmp";
+                    if (! -d $miztmp_dir) {
+                        confess 'miztmp dir missing under ', $mizfiles;
+                    }
+                    my $prel_def = undef;
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        $item_xml = "${text_dir}/${aid_lc}.xml1";
+                        my $prel_dir = "${article_dir}/prel";
+                        if (! -d $prel_dir) {
+                            confess 'No prel dir under ', $article_dir;
+                        }
+                        $prel_def = "${prel_dir}/${aid_lc}.def";
                     } else {
-                        my $mizfiles = $ENV{'MIZFILES'};
-                        if (! defined $mizfiles) {
-                            confess 'MIZFILES environment variable not defined.';
+                        my $prel_dir = "${mizfiles}/prel";
+                        if (! -d $prel_dir) {
+                            confess 'prel directory missing.';
                         }
-                        my $miztmp_dir = "${mizfiles}/miztmp";
-                        if (! -d $miztmp_dir) {
-                            confess 'miztmp dir missing under ', $mizfiles;
+                        my $first_letter = undef;
+                        if ($aid_lc =~ /\A (.) /) {
+                            $first_letter = $1;
+                        } else {
+                            confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
                         }
-                        $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
+                        my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
+                        if (! -d $prel_first_letter_dir) {
+                            confess $first_letter, ' directory missing under ', $prel_dir;
+                        }
+                        $prel_def = "${prel_first_letter_dir}/${aid_lc}.def";
                     }
-                    if (! -e $item_xml) {
-                        confess 'Absolutized XML for ', $aid_lc, ' not found at ', $item_xml;
+                    if (! -e $prel_def) {
+                        confess $prel_def, ' missing.';
                     }
-                    my $item_xml_doc = parse_xml_file ($item_xml);
-                    my $item_xml_root = $item_xml_doc->documentElement ();
-                    my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
-                    (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
-                    if (! defined $definiens_node) {
-                        confess 'No Definiens node found in ', $item_xml, ' matching', $LF, $LF, '  ', $definiens_xpath;
+                    my $prel_def_doc = parse_xml_file ($prel_def);
+                    my $prel_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                    (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
+                    if (! defined $prel_item) {
+                        confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
                     }
-                    my $count_xpath = "count (preceding::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
-                    my $count = $definiens_node->findvalue ($count_xpath);
-                    my $item = "${aid_lc}:${kind_lc}definiens:${count}";
+                    my $prel_item_pos = $prel_item->findvalue ('count (preceding-sibling::Definiens) + 1');
+                    my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
                     $deps{$item} = 0;
                 }
             }
