@@ -768,7 +768,7 @@ sub constructors_under_node {
         }
 
         $aid = lc $aid;
-        $fields{"${aid}:lconstructor:${nr}"} = 0;
+        $fields{"${aid}:uconstructor:${nr}"} = 0;
     }
 
     foreach my $numeral (@all_numerals) {
@@ -1460,7 +1460,7 @@ foreach my $item (keys %dependencies) {
         if ($dep =~ / \A ([a-z0-9_]+) [:] ([a-z]) constructor [:] (\d+) \z /) {
             (my $article, my $kind, my $nr) = ($1, $2, $3);
             # ignore structure constructors
-            if (($kind eq 'g') || ($kind eq 'l')) {
+            if (($kind eq 'g') || ($kind eq 'l') || ($kind eq 'u')) {
                 next;
             }
             my $article_uc = uc $article;
