@@ -2723,14 +2723,43 @@ sub render_uniqueness {
 sub render_coherence {
     my $constructor = shift;
     (my $coherence_node) = $constructor->findnodes ('preceding-sibling::Coherence');
-    if (! defined $coherence_node) {
-        confess 'How to render coherence?';
-    }
-    (my $proposition) = $coherence_node->findnodes ('Proposition');
-    if (! defined $proposition) {
-        confess 'Proposition child not found under a Coherence node.';
-    }
+    (my $correctness_node) = $constructor->findnodes ('preceding-sibling::Correctness');
+    if (defined $coherence_node) {
+        (my $proposition) = $coherence_node->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition child not found under a Coherence node.';
+        }
     return render_proposition ($proposition);
+    } elsif (defined $correctness_node) {
+        (my $coherence_node) = $correctness_node->findnodes ('Coherence');
+        if (! defined $coherence_node) {
+            confess 'Coherence node not found under a Correctness node.';
+        }
+        (my $content_node) = $coherence_node->findnodes ('*[position() = last()]');
+        my $content = render_semantic_content ($content_node);
+        # now generalize
+        my @constants = constants_under_node ($content_node);
+        (my $definition_node) = $constructor->findnodes ('ancestor::Definition');
+        if (! defined $definition_node) {
+            confess 'Definition node not found as an ancestor of a constructor node.';
+        }
+        my $num_constants = scalar @constants;
+        foreach my $i (1 .. $num_constants) {
+            my $constant = $constants[$num_constants - $i];
+            my $vid = get_vid_attribute ($constant);
+            my $let_xpath = "preceding-sibling::Let/Typ[\@vid = \"${vid}\"]";
+            (my $typ) = $definition_node->findnodes ($let_xpath);
+            if (! defined $typ) {
+                confess 'Unable to find the type for constant with vid = ', $vid;
+            }
+            my $var = "X${vid}";
+            my $guard = render_guard ($var, $typ);
+            $content = "(! [${var}] : (${guard} => ${content}))";
+        }
+        return $content;
+    } else {
+        confess 'How to render coherence? Neither a Coherence nor a Correctness node could be found.';
+    }
 }
 
 sub render_symmetry {
