@@ -3346,6 +3346,7 @@ Readonly my %REQUIREMENT_CONTENTS =>
                '(! [X] : (v7_ordinal1(X) => r2_hidden(X,k4_ordinal1)))'],
         33 => ['0 = k1_xboole_0',
                '0 = k5_ordinal1'],
+        34 => ['(m1_subset_1(k4_ordinal1,k1_xboole_0))'],
     );
 
 sub render_requirement {
