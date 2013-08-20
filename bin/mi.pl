@@ -1864,6 +1864,9 @@ sub render_semantic_content {
     } elsif ($name eq 'PrivPred') {
         (my $val) = $node->findnodes ('*[position() = last()]');
         return render_semantic_content ($val, \%parameters);
+    } elsif ($name eq 'PrivFunc') {
+        (my $val) = $node->findnodes ('*[1]');
+        return render_semantic_content ($val, \%parameters);
     } elsif ($name eq 'Is') {
         my @children = $node->findnodes ('*');
         if (scalar @children != 2) {
