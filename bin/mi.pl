@@ -2996,14 +2996,14 @@ sub free_for_constructor {
     }
     my $lhs_equation = "${lhs_equation_lhs} = ${lhs_equation_rhs}";
     my $rhs = undef;
-    if ($num_fields == 0) {
+    if ($num_arg_types == 0) {
         $rhs = '$true';
     } else {
         $rhs = '(';
-        foreach my $i (1 .. $num_fields) {
+        foreach my $i (1 .. $num_arg_types) {
             my $equation = "${var_prefix_1}${i} = ${var_prefix_2}${i}";
             $rhs .= $equation;
-            if ($i < $num_fields) {
+            if ($i < $num_arg_types) {
                 $rhs .= ' & ';
             }
         }
