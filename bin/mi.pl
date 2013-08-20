@@ -3837,17 +3837,17 @@ sub definition_for_constructor {
             if (! defined $proposition_node) {
                 confess 'Coherence node lacks a Proposition child.';
             }
-            (my $is_node) = $proposition_node->findnodes ('Is');
-            if (! defined $is_node) {
-                confess 'Is node not found under a Coherence node.';
-            }
-            (my $original_term) = $is_node->findnodes ('*[1]');
-            my $original_aid = get_aid_attribute ($original_term);
-            my $original_nr = get_absnr_attribute ($original_term);
-            my $original_aid_lc = lc $original_aid;
-            my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
             my $new_tptp = "${kind}${nr}_${article}";
             if ($kind eq 'k') {
+                (my $is_node) = $proposition_node->findnodes ('Is');
+                if (! defined $is_node) {
+                    confess 'Is node not found under a Coherence node.';
+                }
+                (my $original_term) = $is_node->findnodes ('*[1]');
+                my $original_aid = get_aid_attribute ($original_term);
+                my $original_nr = get_absnr_attribute ($original_term);
+                my $original_aid_lc = lc $original_aid;
+                my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
                 my $rhs = render_semantic_content ($original_term);
                 (my $arg_types) = $constructor_node->findnodes ('ArgTypes');
                 if (! defined $arg_types) {
@@ -3888,6 +3888,63 @@ sub definition_for_constructor {
                 }
                 my $tptp_name = "redefinition_${new_tptp}";
                 my $formula = "fof(${tptp_name},definition,${equation}).";
+                return $formula;
+            } elsif ($kind eq 'm') {
+                (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
+                if (! defined $arg_types_node) {
+                    confess 'ArgTypes node not found under a constructor node.';
+                }
+                my @arg_types = $arg_types_node->findnodes ('*');
+                my $num_arg_types = scalar @arg_types;
+                (my $result_type) = $constructor_node->findnodes ('Typ');
+                if (! defined $result_type) {
+                    confess 'Result type not found for a mode constructor.';
+                }
+                my $original_aid = $constructor_node->getAttribute ('redefaid');
+                my $original_nr = $constructor_node->getAttribute ('absredefnr');
+                if (! defined $original_aid) {
+                    confess 'Redefined mode constructor lacks a redefaid attribute.';
+                }
+                if (! defined $original_nr) {
+                    confess 'Redefined mode constructor lacks an absredefnr attribute.';
+                }
+                my $original_aid_lc = lc $original_aid;
+                my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
+                my @let_nodes = $definition_node->findnodes ('preceding-sibling::Let');
+                my $num_let_nodes = scalar @let_nodes;
+                if ($num_let_nodes != $num_arg_types) {
+                    confess 'Different number of Let nodes compared to the number of arguments for a mode constructor.  Why?';
+                }
+                my $lhs = "${new_tptp}";
+                my $rhs = "${original_tptp}";
+                my $var_prefix = 'X';
+                my $value_var = 'Y';
+                $lhs .= '(';
+                $rhs .= '(';
+                foreach my $i (1 .. $num_let_nodes) {
+                    my $var = "${var_prefix}${i}";
+                    $lhs .= "${var},";
+                    $rhs .= "${var},";
+                }
+                $lhs .= "${value_var}";
+                $rhs .= "${value_var}";
+                $lhs .= ')';
+                $rhs .= ')';
+                my $value_guard = render_guard ($value_var, $result_type);
+                my $equivalence = "(${lhs} <=> ${rhs})";
+                $equivalence = "(! [${value_var}] : (${value_guard} => ${equivalence}))";
+                # now generalize
+                foreach my $i (1 .. $num_let_nodes) {
+                    my $var_index = $num_let_nodes - $i + 1;
+                    my $let_node = $let_nodes[$var_index - 1];
+                    (my $typ_node) = $let_node->findnodes ('Typ');
+                    my $var = "${var_prefix}${var_index}";
+                    my $guard = render_guard ($var, $typ_node);
+                    $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
+                }
+                my $tptp_name = "redefinition_${new_tptp}";
+                my $formula = "fof(${tptp_name},definition,${equivalence}).";
+                return $formula;
             } else {
                 confess 'How to deal with redefinitions for constructors of kind \'', $kind, '\'?';
             }
