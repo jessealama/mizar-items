@@ -3006,18 +3006,19 @@ sub free_for_constructor {
     my $g_nr = get_nr_attribute ($gconstructor);
     my $g_aid = get_aid_attribute ($gconstructor);
     my $g_aid_lc = lc $g_aid;
-    (my $fields) = $gconstructor->findnodes ('Fields');
-    if (! defined $fields) {
-        confess 'Fields node not found in a G constructor node.';
+    (my $arg_types_node) = $gconstructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a G cosntructor.';
     }
-    my $num_fields = $fields->findvalue ('count (Field)');
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
     my $var_prefix_1 = 'A';
     my $var_prefix_2 = 'B';
     my $lhs_equation_lhs = "g${g_nr}_${g_aid_lc}";
     my $lhs_equation_rhs = "g${g_nr}_${g_aid_lc}";
-    if ($num_fields > 0) {
-        my @var_1_list = map { "${var_prefix_1}${_}" } (1 .. $num_fields);
-        my @var_2_list = map { "${var_prefix_2}${_}" } (1 .. $num_fields);
+    if ($num_arg_types > 0) {
+        my @var_1_list = map { "${var_prefix_1}${_}" } (1 .. $num_arg_types);
+        my @var_2_list = map { "${var_prefix_2}${_}" } (1 .. $num_arg_types);
         my $var_1_list = join ',', @var_1_list;
         my $var_2_list = join ',', @var_2_list;
         $lhs_equation_lhs = "${lhs_equation_lhs}(${var_1_list})";
@@ -3188,8 +3189,22 @@ sub widening_for_structure_constructor {
     my $l_aid_lc = lc $l_aid;
     my $new_constructor = "l${l_nr}_${l_aid_lc}";
     my $tptp_name = "widening_${new_constructor}";
-    my $var = 'X';
-    my $new = "${new_constructor}(${var})";
+    (my $arg_types_node) = $lconstructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under an L constructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    my $var_prefix = 'X';
+    my $var = "${var_prefix}";
+    my $new = "${new_constructor}";
+    $new .= '(';
+    foreach my $i (1 .. $num_arg_types) {
+        my $var = "${var_prefix}${i}";
+        $new .= "${var},";
+    }
+    $new .= "${var}";
+    $new .= ')';
     my $old = undef;
     my @typs = $lconstructor->findnodes ('Typ');
     my $num_typs = scalar @typs;
@@ -3208,6 +3223,14 @@ sub widening_for_structure_constructor {
         $old .= ')';
     }
     my $content = "(! [${var}] : (${new} => ${old}))";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $var = "X${i}";
+        my $typ = $arg_types[$var_index - 1];
+        my $guard = render_guard ($var, $typ);
+        $content = "(! [${var}] : (${guard} => ${content}))";
+    }
     my $formula = "fof(${tptp_name},axiom,${content}).";
     return $formula;
 }
