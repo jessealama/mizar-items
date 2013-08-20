@@ -239,17 +239,79 @@ sub article_dependencies {
             my $dfs_root = $dfs_doc->documentElement ();
             my @definientia = $dfs_root->findnodes ('descendant::Definiens');
             foreach my $definiens (@definientia) {
-                my $definiens_kind = get_attribute ($definiens, 'constrkind');
-                my $aid = get_attribute ($definiens, 'aid');
-                my $constraid = get_attribute ($definiens, 'constraid');
-                my $nr = get_attribute ($definiens, 'absconstrnr');
-                if ($aid ne $constraid) {
-                    $nr = get_attribute ($definiens, 'defnr');
+                my $definiens_kind = $definiens->getAttribute ('constrkind');
+                my $aid = $definiens->getAttribute ('aid');
+                my $constraid = $definiens->getAttribute ('constraid');
+                my $nr = $definiens->getAttribute ('absconstrnr');
+                my $defnr = $definiens->getAttribute ('defnr');
+                if (! defined $definiens_kind) {
+                    confess 'Unable to make sense of a definiens in ', $file;
+                }
+                if (! defined $aid) {
+                    confess 'Definiens node in ', $file, ' lacks an aid attribute.';
+                }
+                if (! defined $constraid) {
+                    confess 'Definiens node in ', $file, ' lacks a constraid attribute.';
+                }
+                if (! defined $nr) {
+                    confess 'Definiens node in ', $file, ' lacks an nr attribute.';
+                }
+                if (! defined $defnr) {
+                    confess 'Definiens node in ', $file, ' lacks a defnr attribute.';
                 }
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
-                my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
-                $deps{$item} = 0;
+                if ($aid eq $constraid) {
+                    my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
+                    $deps{$item} = 0;
+                } else {
+                    my $item_xml = undef;
+                    my $mizfiles = $ENV{'MIZFILES'};
+                    if (! defined $mizfiles) {
+                        confess 'MIZFILES environment variable not defined.';
+                    }
+                    my $miztmp_dir = "${mizfiles}/miztmp";
+                    if (! -d $miztmp_dir) {
+                        confess 'miztmp dir missing under ', $mizfiles;
+                    }
+                    my $prel_def = undef;
+                    if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+                        my $prel_dir = "${article_dir}/prel";
+                        if (! -d $prel_dir) {
+                            confess 'No prel dir under ', $article_dir;
+                        }
+                        $prel_def = "${prel_dir}/${aid_lc}.def";
+                    } else {
+                        my $prel_dir = "${mizfiles}/prel";
+                        if (! -d $prel_dir) {
+                            confess 'prel directory missing.';
+                        }
+                        my $first_letter = undef;
+                        if ($aid_lc =~ /\A (.) /) {
+                            $first_letter = $1;
+                        } else {
+                            confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
+                        }
+                        my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
+                        if (! -d $prel_first_letter_dir) {
+                            confess $first_letter, ' directory missing under ', $prel_dir;
+                        }
+                        $prel_def = "${prel_first_letter_dir}/${aid_lc}.def";
+                    }
+                    if (! -e $prel_def) {
+                        confess $prel_def, ' missing.';
+                    }
+                    my $prel_def_doc = parse_xml_file ($prel_def);
+                    my $prel_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                    (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
+                    if (! defined $prel_item) {
+                        confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
+                    }
+                    my $count_xpath = "count (preceding-sibling::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                    my $prel_item_pos = $prel_item->findvalue ($count_xpath);
+                    my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
+                    $deps{$item} = 0;
+                }
             }
             # Record constructor dependencies
             my @constructors = constructors_in_file ($file);
