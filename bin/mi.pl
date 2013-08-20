@@ -3187,6 +3187,12 @@ sub rcluster_for_structure_constructor {
 
 sub widening_for_structure_constructor {
     my $constructor_item = shift;
+    if ($constructor_item =~ /\A [g] (\d+) [_] ${PREFIX_LC} (\d+) /) {
+        (my $g_nr, my $ckb_nr) = ($1, $2);
+        my $local_item = "ckb${ckb_nr}:gconstructor:${g_nr}";
+        my $resolved = resolve_local_item ($local_item);
+        return widening_for_structure_constructor ($resolved);
+    }
     my $gconstructor = constructor_node_of_constructor_item ($constructor_item);
     my $g_kind = get_kind_attribute ($gconstructor);
     if ($g_kind ne 'G') {
