@@ -2054,7 +2054,8 @@ sub constants_under_node {
         $constants{$nr} = $const;
     }
     my @constants_no_dups = values %constants;
-    return @constants_no_dups;
+    my @sorted_constants = sort { constant_less_than_constant ($a, $b) } @constants_no_dups;
+    return @sorted_constants;
 }
 
 sub type_from_binder {
