@@ -465,7 +465,8 @@ sub article_dependencies {
                     if (! defined $prel_item) {
                         confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
                     }
-                    my $prel_item_pos = $prel_item->findvalue ('count (preceding-sibling::Definiens) + 1');
+                    my $count_xpath = "count (preceding-sibling::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                    my $prel_item_pos = $prel_item->findvalue ($count_xpath);
                     my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
                     $deps{$item} = 0;
                 }
