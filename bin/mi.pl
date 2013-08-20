@@ -4164,7 +4164,8 @@ sub constructors_of_kind_in_problem {
             $constructors{$constructor} = 0;
         }
     }
-    return keys %constructors;
+    my @constructors = keys %constructors;
+    return @constructors;
 }
 
 sub problem_for_item {
