@@ -3011,12 +3011,6 @@ sub free_for_constructor {
     }
     my $content = "(${lhs_equation} => ${rhs})";
     # now generalize
-    (my $arg_types_node) = $gconstructor->findnodes ('ArgTypes');
-    if (! defined $arg_types_node) {
-        confess 'ArgTypes node not found under a G constructor node.';
-    }
-    my @arg_types = $arg_types_node->findnodes ('Typ');
-    my $num_arg_types = scalar @arg_types;
     foreach my $i (1 .. $num_arg_types) {
         my $var_index = $num_arg_types - $i + 1;
         my $typ = $arg_types[$var_index - 1];
@@ -3100,9 +3094,7 @@ sub render_rcluster {
         confess 'ArgTypes node not found under an RCluster node.';
     }
     my @arg_types = $arg_types->findnodes ('*');
-    if (scalar @arg_types != 0) {
-        confess 'How to deal with an RCluster node having a non-zero number of arguments?';
-    }
+    my $num_arg_types = scalar @arg_types;
     (my $typ) = $cluster_node->findnodes ('Typ');
     if (! defined $typ) {
         confess 'Typ node not found under an RCluster node.';
@@ -3116,6 +3108,14 @@ sub render_rcluster {
     my $typ_guard = render_guard ($var, $typ);
     my $adj_guard = render_adjective_guards ($var, @adjectives);
     my $content = "(? [${var}] : (${typ_guard} & ${adj_guard}))";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $var = "X${var_index}";
+        my $typ = $arg_types[$var_index - 1];
+        my $guard = render_guard ($var, $typ);
+        $content = "(! [${var}] : (${guard} => ${content}))";
+    }
     return $content;
 }
 
