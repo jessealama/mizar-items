@@ -3869,41 +3869,29 @@ sub definition_for_constructor {
                 my $original_aid_lc = lc $original_aid;
                 my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
                 my $rhs = render_semantic_content ($original_term);
-                (my $arg_types) = $constructor_node->findnodes ('ArgTypes');
-                if (! defined $arg_types) {
-                    confess 'ArgTypes node missing under a constructor node.';
-                }
-                my @let_nodes = $definition_node->findnodes ('preceding-sibling::Let');
-                my $num_let_nodes = scalar @let_nodes;
-                my $lhs = $new_tptp;
-                if ($num_let_nodes > 0) {
+                my @original_arguments = $original_term->findnodes ('*');
+                my @original_arguments_rendered = map { render_semantic_content ($_) } @original_arguments;
+                my $lhs = "${new_tptp}";
+                if (scalar @original_arguments > 0) {
                     $lhs .= '(';
-                    foreach my $i (1 .. $num_let_nodes) {
-                        my $let_node = $let_nodes[$i - 1];
-                        (my $typ_node) = $let_node->findnodes ('Typ');
-                        if (! defined $typ_node) {
-                            confess 'Let node lacks a Typ child.';
-                        }
-                        my $vid = get_vid_attribute ($typ_node);
-                        my $var = "X${vid}";
-                        $lhs .= $var;
-                        if ($i < $num_let_nodes) {
-                            $lhs .= ',';
-                        }
-                    }
+                    my $args = join (',', @original_arguments_rendered);
+                    $lhs .= $args;
                     $lhs .= ')';
                 }
-                my $equation = "${lhs} = ${rhs}";
+                my $equation = "(${lhs} = ${rhs})";
+                (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
+                if (! defined $arg_types_node) {
+                    confess 'ArgTypes node missing under a constructor node.';
+                }
                 # now generalize
-                foreach my $i (1 .. $num_let_nodes) {
-                    my $let_node = $let_nodes[$num_let_nodes - $i];
-                    (my $typ_node) = $let_node->findnodes ('Typ');
-                    if (! defined $typ_node) {
-                        confess 'Let node lacks a Typ child.';
-                    }
-                    my $vid = get_vid_attribute ($typ_node);
-                    my $var = "X${vid}";
-                    my $guard = render_guard ($var, $typ_node);
+                my @constants = constants_under_node ($proposition_node);
+                my $num_constants = scalar @constants;
+                foreach my $i (1 .. $num_constants) {
+                    my $constant = $constants[$num_constants - $i];
+                    my $typ = type_for_constant ($constant);
+                    my $vid = get_vid_attribute ($constant);
+                    my $var= "X${vid}";
+                    my $guard = render_guard ($var, $typ);
                     $equation = "(! [${var}] : (${guard} => ${equation}))";
                 }
                 my $tptp_name = "redefinition_${new_tptp}";
