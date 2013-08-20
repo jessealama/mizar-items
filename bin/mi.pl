@@ -2482,6 +2482,15 @@ sub render_guard {
     my $type_aid = get_aid_attribute ($type);
     my $type_nr = get_absnr_attribute ($type);
     my $type_kind = get_kind_attribute ($type);
+    # is this a local item?
+    if ($type_aid =~ /\A ${PREFIX_UC} (\d+) \z/) {
+        my $fragment_number = $1;
+        my $type_kind_lc = lc $type_kind;
+        my $local_item = "${PREFIX_LC}${fragment_number}:${type_kind_lc}constructor:${type_nr}";
+        my $resolved = resolve_local_item ($local_item);
+        $type_aid = article_of_item ($resolved);
+        $type_nr = nr_of_item ($resolved);
+    }
     # structure case
     if ($type_kind eq 'G') {
         $type_kind = 'L';
