@@ -3650,11 +3650,12 @@ sub render_non_local_item {
             }
             my $property = property_for_constructor ($item);
             my $content = formulate_property_for_constructor ($constructor_node, $property);
+            my $relnr = get_relnr_attribute ($constructor_node);
             push (@results, "fof(${tptp_name},theorem,${content}).");
 
             if ($property ne 'abstractness') {
                 # We may need to add the definition of the constructor
-                my $deftheorem_xpath = "descendant::DefTheorem[\@constrkind = \"${kind_uc}\"][${constructor_nr}]";
+                my $deftheorem_xpath = "descendant::DefTheorem[\@constrkind = \"${kind_uc}\" and \@constrnr = \"${relnr}\"]";
                 (my $deftheorem_node) = $item_xml_root->findnodes ($deftheorem_xpath);
                 if (! defined $deftheorem_node) {
                     confess 'No DefTheorem node for constructor ', $kind_uc, $constructor_nr, ' in ', $item_xml;
