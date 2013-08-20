@@ -2966,7 +2966,6 @@ sub constructor_node_of_constructor_item {
     }
     return $constructor_node;
 }
-
 sub free_for_constructor {
     my $constructor_item = shift;
     my $gconstructor = constructor_node_of_constructor_item ($constructor_item);
