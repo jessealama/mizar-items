@@ -2437,6 +2437,8 @@ Readonly my %CONSTRUCTOR_PROPERTY_MAKERS =>
     (
         'commutativity' => \&render_commutativity,
         'idempotence' => \&render_idempotence,
+        'involutiveness' => \&render_involutiveness,
+        'projectivity' => \&render_projectivity,
         'symmetry' => \&render_symmetry,
         'asymmetry' => \&render_asymmetry,
         'reflexivity' => \&render_reflexivity,
@@ -2551,6 +2553,32 @@ sub render_idempotence {
     my $typ_1 = $arg_types[0];
     my $guard = render_guard ($var_1, $typ_1);
     return "(! [${var_1}] : (${guard} => (${constructor_name}(${var_1},${var_1}) = ${var_1})))";
+}
+
+sub render_involutiveness {
+    my $constructor = shift;
+    (my $involutiveness_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Involutiveness');
+    if (! defined $involutiveness_node) {
+        confess 'Where is the involutiveness node?';
+    }
+    (my $proposition) = $involutiveness_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found under a Involutiveness node.';
+    }
+    return render_proposition ($proposition);
+}
+
+sub render_projectivity {
+    my $constructor = shift;
+    (my $projectivity_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Projectivity');
+    if (! defined $projectivity_node) {
+        confess 'Where is the projectivity node?';
+    }
+    (my $proposition) = $projectivity_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found under a Projectivity node.';
+    }
+    return render_proposition ($proposition);
 }
 
 sub render_commutativity {
