@@ -3734,14 +3734,10 @@ sub render_non_local_item {
 
             if ($property ne 'abstractness') {
                 # We may need to add the definition of the constructor
-                my $deftheorem_xpath = "descendant::DefTheorem[\@constrkind = \"${kind_uc}\" and \@constrnr = \"${relnr}\"]";
-                (my $deftheorem_node) = $item_xml_root->findnodes ($deftheorem_xpath);
-                if (! defined $deftheorem_node) {
-                    confess 'No DefTheorem node for constructor ', $kind_uc, $constructor_nr, ' in ', $item_xml;
+                my $def = definition_for_constructor ($constructor);
+                if (defined $def) {
+                    push (@results, $def);
                 }
-                my $deftheorem_content = render_deftheorem ($deftheorem_node);
-                my $deftheorem = "fof(d${constructor_nr}_${constructor_aid},definition,${deftheorem_content}).";
-                push (@results, $deftheorem);
             }
             # is this a redefinition?  We may need to use the compatibility
             my $compatibility_xpath = 'preceding-sibling::Compatibility';
