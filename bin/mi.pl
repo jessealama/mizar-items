@@ -3348,6 +3348,10 @@ Readonly my %REQUIREMENT_CONTENTS =>
         9 => ['(! [X,Y] : ((m2_hidden(X) & m2_hidden(Y)) => (r2_hidden(X,k1_zfmisc_1(Y)) <=> r1_tarski(X,Y))))',
               '(! [X,Y] : (r1_tarski(X,Y) <=> (! [Z] : (r2_hidden(Z,X) => r2_hidden(Z,Y)))))'],
         13 => ['(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => (xcmplx_2(X,k5_numbers) = X)))'],
+        15 => [
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & r1_xxreal_0(Y,X)) => X = Y)))', # REAL:lemma 1
+            '(! [X,Y,Z] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y) & m2_hidden(Z) & v1_xreal_0(Z)) => ((r1_xxreal_0(X,Y) & r1_xxreal_0(Y,Z)) => r1_xxreal_0(X,Z))))', # REAL:lemma 2
+        ],
         17 => ['(! [X] : (k2_xboole_0(X,k1_xboole_0) = X))',
                '(! [X] : (k2_xboole_0(k1_xboole_0,X) = X))',
                '(! [X] : (k3_xboole_0(X,k1_xboole_0) = X))',
