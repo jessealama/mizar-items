@@ -3347,6 +3347,7 @@ Readonly my %REQUIREMENT_CONTENTS =>
         8 => ['(! [X,Y] : ((m2_hidden(X) & m2_hidden(Y)) => (r2_hidden(X,k1_zfmisc_1(Y)) <=> r1_tarski(X,Y))))'],
         9 => ['(! [X,Y] : ((m2_hidden(X) & m2_hidden(Y)) => (r2_hidden(X,k1_zfmisc_1(Y)) <=> r1_tarski(X,Y))))',
               '(! [X,Y] : (r1_tarski(X,Y) <=> (! [Z] : (r2_hidden(Z,X) => r2_hidden(Z,Y)))))'],
+        13 => ['(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => (xcmplx_2(X,k5_numbers) = X)))'],
         17 => ['(! [X] : (k2_xboole_0(X,k1_xboole_0) = X))',
                '(! [X] : (k2_xboole_0(k1_xboole_0,X) = X))',
                '(! [X] : (k3_xboole_0(X,k1_xboole_0) = X))',
