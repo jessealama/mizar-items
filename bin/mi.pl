@@ -4158,13 +4158,20 @@ sub coherence_for_constructor {
 sub numerals_in_tptp_formula {
     my $kind = shift;
     my $tptp_formula = shift;
-    # save the formula to a temp file
-    my $fh = File::Temp->new ();
-    say {$fh} "${tptp_formula}"
-        or confess 'Cannot write a TPTP formula to a tempfile.';
-    my $path = $fh->filename ();
-    my $formula_as_xml_str = `tptp4X -fxml -umachine ${path}`;
-    my $formula_doc = XML::LibXML->load_xml (string => "${formula_as_xml_str}");
+    my $original_tptp_formula = "${tptp_formula}";
+    my @tptp4X_cmd = ('tptp4X', '-umachine', '-fxml', '--');
+    my $tptp4X_out = '';
+    my $tptp4X_err = '';
+    my $tptp4X_harness = start (\@tptp4X_cmd,
+                               '<', \$tptp_formula,
+                               '>', \$tptp4X_out,
+                               '2>', \$tptp4X_err);
+    $tptp4X_harness->finish ();
+    my $exit_code = $tptp4X_harness->full_result ();
+    if ($exit_code != 0) {
+        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original_tptp_formula, $LF;
+    }
+    my $formula_doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
     my @all_numerals = $formula_doc->findnodes ('descendant::number');
     my %numerals = ();
     foreach my $numeral (@all_numerals) {
@@ -4190,13 +4197,20 @@ sub numerals_in_problem {
 sub constructors_of_kind_in_tptp_formula {
     my $kind = shift;
     my $tptp_formula = shift;
-    # save the formula to a temp file
-    my $fh = File::Temp->new ();
-    say {$fh} "${tptp_formula}"
-        or confess 'Cannot write a TPTP formula to a tempfile.';
-    my $path = $fh->filename ();
-    my $formula_as_xml_str = `tptp4X -fxml -umachine ${path}`;
-    my $formula_doc = XML::LibXML->load_xml (string => "${formula_as_xml_str}");
+    my $original_tptp_formula = "${tptp_formula}";
+    my @tptp4X_cmd = ('tptp4X', '-umachine', '-fxml', '--');
+    my $tptp4X_out = '';
+    my $tptp4X_err = '';
+    my $tptp4X_harness = start (\@tptp4X_cmd,
+                               '<', \$tptp_formula,
+                               '>', \$tptp4X_out,
+                               '2>', \$tptp4X_err);
+    $tptp4X_harness->finish ();
+    my $exit_code = $tptp4X_harness->full_result ();
+    if ($exit_code != 0) {
+        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original_tptp_formula, $LF;
+    }
+    my $formula_doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
     my @all_terms = $formula_doc->findnodes ('descendant::function | descendant::predicate');
     my %constructors = ();
     foreach my $term (@all_terms) {
