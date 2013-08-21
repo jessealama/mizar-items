@@ -3357,6 +3357,22 @@ Readonly my %REQUIREMENT_CONTENTS =>
         18 => ['(! [X] : (k3_xboole_0(X,k1_xboole_0) = k1_xboole_0))'],
         19 => ['(! [X] : (k4_xboole_0(X,k1_xboole_0) = X))',
                '(! [X] : (k4_xboole_0(k1_xboole_0,X) = k1_xboole_0))'],
+        27 => [
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & v2_xxreal_0(X)) => v2_xxreal_0(Y))))', # REAL:1
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v2_xxreal_0(Y))) => (~ v2_xxreal_0(X)))))', # REAL:4
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => (((~ r1_xxreal_0(X,Y)) & (~ v2_xxreal_0(X))) => (~ v3_xxreal_0(Y)))))', # REAL: 7
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => (((~ r1_xxreal_0(X,Y)) & (~ v3_xxreal_0(Y))) => (~ v2_xxreal_0(X)))))', # REAL:8
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v8_ordinal1(Y)) & (~ v3_xxreal_0(X))) => (~ v2_xxreal_0(Y)))))', # REAL:5
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v8_ordinal1(X)) & (~ v2_xxreal_0(Y))) => (~ v3_xxreal_0(X)))))' # REAL:6
+           ],
+        28 => [
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & v3_xxreal_0(Y)) => v3_xxreal_0(X))))', # REAL:2
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v3_xxreal_0(X))) => (~ v3_xxreal_0(Y)))))', # REAL:3
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => (((~ r1_xxreal_0(X,Y)) & (~ v2_xxreal_0(X))) => (~ v3_xxreal_0(Y)))))', # REAL:7
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => (((~ r1_xxreal_0(X,Y)) & (~ v3_xxreal_0(Y))) => (~ v2_xxreal_0(X)))))', # REAL:8
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v8_ordinal1(Y)) & (~ v3_xxreal_0(X))) => (~ v2_xxreal_0(Y)))))', # REAL:5
+            '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v8_ordinal1(X)) & (~ v2_xxreal_0(Y))) => (~ v3_xxreal_0(X)))))' # REAL:6
+        ],
         32 => ['(! [X] : (r2_hidden(X,k4_ordinal1) => v7_ordinal1(X)))',
                '(! [X] : (r2_hidden(X,k4_ordinal1) => v1_card_1(X)))',
                '(! [X] : (v7_ordinal1(X) => r2_hidden(X,k4_ordinal1)))'],
