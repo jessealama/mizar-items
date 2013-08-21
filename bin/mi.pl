@@ -2121,20 +2121,28 @@ sub render_proposition {
     (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
     my $content = render_semantic_content ($content_node);
     my @constants = constants_under_node ($proposition_node);
-    @constants = sort { constant_less_than_constant ($a, $b) } @constants;
-    @constants = reverse @constants;
-    foreach my $constant (@constants) {
+    my %handled_constants = ();
+    until (scalar @constants == 0) {
+        my $constant = pop @constants;
+        my $vid = get_vid_attribute ($constant);
         my $typ = type_for_constant ($constant);
-        my $var_name = undef;
-        if ($typ->hasAttribute ('vid')) {
-            my $vid = $typ->getAttribute ('vid');
-            $var_name = "X${vid}";
-        } else {
-            my $vid = $typ->findvalue ('count (ancestor::For[not(@vid)]) + 1');
-            $var_name = "Y${vid}";
-        }
+        my $var_name = "X${vid}";
         my $guard = render_guard ($var_name, $typ);
         $content = "(! [${var_name}] : (${guard} => ${content}))";
+        $handled_constants{$vid} = 0;
+        # are there any new constants under the type?
+        my @constants_under_typ = constants_under_node ($typ);
+        foreach my $c (@constants_under_typ) {
+            my $vid = get_vid_attribute ($c);
+            if (! defined $handled_constants{$vid}) {
+                # we haven't seen it yet
+                if (none { $vid == get_vid_attribute ($_) } @constants) {
+                    # we wouldn't normally encounter it
+                    push (@constants, $c);
+                }
+            }
+        }
+        @constants = sort { constant_less_than_constant ($a, $b) } @constants;
     }
     return $content;
 }
