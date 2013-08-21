@@ -3978,18 +3978,13 @@ sub definition_for_constructor {
                 }
                 my $original_aid_lc = lc $original_aid;
                 my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
-                my @let_nodes = $definition_node->findnodes ('preceding-sibling::Let');
-                my $num_let_nodes = scalar @let_nodes;
-                if ($num_let_nodes != $num_arg_types) {
-                    confess 'Different number of Let nodes compared to the number of arguments for a mode constructor.  Why?';
-                }
                 my $lhs = "${new_tptp}";
                 my $rhs = "${original_tptp}";
                 my $var_prefix = 'X';
                 my $value_var = 'Y';
                 $lhs .= '(';
                 $rhs .= '(';
-                foreach my $i (1 .. $num_let_nodes) {
+                foreach my $i (1 .. $num_arg_types) {
                     my $var = "${var_prefix}${i}";
                     $lhs .= "${var},";
                     $rhs .= "${var},";
@@ -4002,10 +3997,9 @@ sub definition_for_constructor {
                 my $equivalence = "(${lhs} <=> ${rhs})";
                 $equivalence = "(! [${value_var}] : (${value_guard} => ${equivalence}))";
                 # now generalize
-                foreach my $i (1 .. $num_let_nodes) {
-                    my $var_index = $num_let_nodes - $i + 1;
-                    my $let_node = $let_nodes[$var_index - 1];
-                    (my $typ_node) = $let_node->findnodes ('Typ');
+                foreach my $i (1 .. $num_arg_types) {
+                    my $var_index = $num_arg_types - $i + 1;
+                    my $typ_node = $arg_types[$var_index - 1];
                     my $var = "${var_prefix}${var_index}";
                     my $guard = render_guard ($var, $typ_node);
                     $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
