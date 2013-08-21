@@ -3415,6 +3415,9 @@ Readonly my %REQUIREMENT_CONTENTS =>
             '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v8_ordinal1(Y)) & (~ v3_xxreal_0(X))) => (~ v2_xxreal_0(Y)))))', # REAL:5
             '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v8_ordinal1(X)) & (~ v2_xxreal_0(Y))) => (~ v3_xxreal_0(X)))))' # REAL:6
         ],
+        31 => [
+            'r1_tarski(k1_numbers,k2_numbers)',
+        ],
         32 => ['(! [X] : (r2_hidden(X,k4_ordinal1) => v7_ordinal1(X)))',
                '(! [X] : (r2_hidden(X,k4_ordinal1) => v1_card_1(X)))',
                '(! [X] : (v7_ordinal1(X) => r2_hidden(X,k4_ordinal1)))'],
