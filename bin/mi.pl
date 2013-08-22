@@ -4178,35 +4178,67 @@ sub definition_for_constructor {
             }
             my $new_tptp = "${kind}${nr}_${article}";
             if ($kind eq 'k') {
-                (my $is_node) = $proposition_node->findnodes ('Is');
-                if (! defined $is_node) {
-                    confess 'Is node not found under a Coherence node.';
-                }
-                (my $original_term) = $is_node->findnodes ('*[1]');
-                my $original_aid = get_aid_attribute ($original_term);
-                my $original_nr = get_absnr_attribute ($original_term);
-                my $original_aid_lc = lc $original_aid;
-                my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
-                my $rhs = render_semantic_content ($original_term);
-                my @original_arguments = $original_term->findnodes ('*');
-                my @original_arguments_rendered = map { render_semantic_content ($_) } @original_arguments;
-                my $lhs = "${new_tptp}";
-                if (scalar @original_arguments > 0) {
-                    $lhs .= '(';
-                    my $args = join (',', @original_arguments_rendered);
-                    $lhs .= $args;
-                    $lhs .= ')';
-                }
-                my $equation = "(${lhs} = ${rhs})";
                 (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
                 if (! defined $arg_types_node) {
-                    confess 'ArgTypes node missing under a constructor node.';
+                    confess 'ArgTypes node not found under a constructor node.';
                 }
+                my @arg_types = $arg_types_node->findnodes ('*');
+                my $num_arg_types = scalar @arg_types;
+                (my $result_type) = $constructor_node->findnodes ('Typ');
+                if (! defined $result_type) {
+                    confess 'Result type not found for a functor constructor.';
+                }
+                my $original_aid = $constructor_node->getAttribute ('redefaid');
+                my $original_nr = $constructor_node->getAttribute ('absredefnr');
+                if (! defined $original_aid) {
+                    confess 'Redefined mode constructor lacks a redefaid attribute.';
+                }
+                if (! defined $original_nr) {
+                    confess 'Redefined mode constructor lacks an absredefnr attribute.';
+                }
+                my $original_aid_lc = lc $original_aid;
+                my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
+                my $original_constructor = constructor_node_of_constructor_item ($original_tptp);
+                my @original_arg_types = arg_types_of_constructor ($original_constructor);
+                my $num_original_arg_types = scalar @original_arg_types;
+                my $lhs = "${new_tptp}";
+                my $rhs = "${original_tptp}";
+                my $var_prefix = 'X';
+                if ($num_arg_types > 0) {
+                    $lhs .= '(';
+                    if ($num_original_arg_types > 0) {
+                        $rhs .= '(';
+                    }
+                    foreach my $i (1 .. $num_arg_types) {
+                        my $var = "${var_prefix}${i}";
+                        my $offset = $num_arg_types - $num_original_arg_types - $i;
+                        $lhs .= "${var}";
+                        if ($offset < 0) {
+                            $rhs .= "${var}";
+                        }
+                        if ($i < $num_arg_types) {
+                            $lhs .= ',';
+                        }
+                        if (($offset < 0) && ($i < $num_arg_types)) {
+                            $rhs .= ',';
+                        }
+                    }
+                    $lhs .= ')';
+                    if ($num_original_arg_types > 0) {
+                        $rhs .= ')';
+                    }
+                }
+                my $equation = "(${lhs} = ${rhs})";
                 # now generalize
-                my @constants = constants_under_node ($proposition_node);
-                my $generalized = generalize_formula_from_constants ($equation, @constants);
+                foreach my $i (1 .. $num_arg_types) {
+                    my $var_index = $num_arg_types - $i + 1;
+                    my $typ_node = $arg_types[$var_index - 1];
+                    my $var = "${var_prefix}${var_index}";
+                    my $guard = render_guard ($var, $typ_node);
+                    $equation = "(! [${var}] : (${guard} => ${equation}))";
+                }
                 my $tptp_name = "redefinition_${new_tptp}";
-                my $formula = "fof(${tptp_name},definition,${generalized}).";
+                my $formula = "fof(${tptp_name},definition,${equation}).";
                 return $formula;
             } elsif ($kind eq 'm') {
                 (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
@@ -4229,6 +4261,9 @@ sub definition_for_constructor {
                 }
                 my $original_aid_lc = lc $original_aid;
                 my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
+                my $original_constructor = constructor_node_of_constructor_item ($original_tptp);
+                my @original_arg_types = arg_types_of_constructor ($original_constructor);
+                my $num_original_arg_types = scalar @original_arg_types;
                 my $lhs = "${new_tptp}";
                 my $rhs = "${original_tptp}";
                 my $var_prefix = 'X';
@@ -4237,8 +4272,11 @@ sub definition_for_constructor {
                 $rhs .= '(';
                 foreach my $i (1 .. $num_arg_types) {
                     my $var = "${var_prefix}${i}";
+                    my $offset = $num_arg_types - $num_original_arg_types - $i;
                     $lhs .= "${var},";
-                    $rhs .= "${var},";
+                    if ($offset < 0) {
+                        $rhs .= "${var},";
+                    }
                 }
                 $lhs .= "${value_var}";
                 $rhs .= "${value_var}";
