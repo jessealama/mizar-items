@@ -3628,13 +3628,13 @@ sub render_non_local_item {
         }
         my $item_xml_doc = parse_xml_file ($item_xml);
         my $item_xml_root = $item_xml_doc->documentElement ();
+        my $item_msx = "${miztmp_dir}/${article}.msx.canceled";
+        if (! -e $item_msx) {
+            confess '.msx.canceled for ', $article, ' missing under ', $miztmp_dir;
+        }
+        my $item_msx_doc = parse_xml_file ($item_msx);
+        my $item_msx_root = $item_msx_doc->documentElement ();
         if (is_theorem_item ($item)) {
-            my $item_msx = "${miztmp_dir}/${article}.msx.canceled";
-            if (! -e $item_msx) {
-                confess '.msx.canceled for ', $article, ' missing under ', $miztmp_dir;
-            }
-            my $item_msx_doc = parse_xml_file ($item_msx);
-            my $item_msx_root = $item_msx_doc->documentElement ();
             my $all_theorems_xpath = 'Item[((@kind = "Theorem-Item") or (@kind = "Pragma" and @spelling = "$CT"))]';
             my @all_theorems = $item_msx_root->findnodes ($all_theorems_xpath);
             # warn 'there are ', scalar @all_theorems, ' total theorems in ', $item_msx, '.';
@@ -3679,13 +3679,43 @@ sub render_non_local_item {
             my @choices = render_choices ($proposition_node);
             push (@results, @choices);
         } elsif (is_deftheorem_item ($item)) {
-            my $direct_xpath = "descendant::DefTheorem[\@nr = \"${nr}\"]";
-            my $indirect_xpath = "descendant::*[self::DefTheorem or self::Compatibility][${nr}]";
+
+            my $prel_dir = "${mizfiles}/prel";
+            if (! -d $prel_dir) {
+                confess 'prel directory missing.';
+            }
+            my $first_letter = undef;
+            if ($article =~ /\A (.) /) {
+                $first_letter = $1;
+            } else {
+                confess 'Cannot make sense of article name \'', $article, '\'.';
+            }
+            my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
+            if (! -d $prel_first_letter_dir) {
+                confess $first_letter, ' directory missing under ', $prel_dir;
+            }
+            my $prel_the = "${prel_first_letter_dir}/${article}.the";
+            if (! -e $prel_the) {
+                confess $prel_the, ' missing.';
+            }
+            my $prel_the_doc = parse_xml_file ($prel_the);
+            my $prel_xpath = "descendant::Theorem[\@kind = \"D\"][$nr]";
+            (my $prel_item) = $prel_the_doc->findnodes ($prel_xpath);
+            if (! defined $prel_item) {
+                confess 'No item in ', $prel_the, ' found matching', $LF, $LF, $prel_xpath;
+            }
+            my $count_xpath = "count (preceding-sibling::Theorem[\@kind = \"D\" and not(Verum)]) + 1";
+            my $prel_item_pos = $prel_item->findvalue ($count_xpath);
+            if ($prel_item_pos != $nr) {
+                carp 'deftheorem ', $nr, ' of ', $article, ' is actually deftheorem #', $prel_item_pos;
+            }
+            my $direct_xpath = "descendant::DefTheorem[\@nr = \"${prel_item_pos}\"]";
+            my $indirect_xpath = "descendant::*[self::DefTheorem or self::Compatibility][${prel_item_pos}]";
             (my $deftheorem_node) = $item_xml_root->findnodes ($direct_xpath);
             if (! defined $deftheorem_node) {
                 ($deftheorem_node) = $item_xml_root->findnodes ($indirect_xpath);
                 if (! defined $deftheorem_node) {
-                    confess 'Could not find deftheorem ', $nr, ' in ', $item_xml, '.';
+                    confess 'Could not find deftheorem ', $prel_item_pos, ' in ', $item_xml, '.';
                 }
             }
             my $content = render_deftheorem ($deftheorem_node);
