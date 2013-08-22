@@ -2600,17 +2600,68 @@ sub render_involutiveness {
     return render_proposition ($proposition);
 }
 
+sub render_projectivity_node {
+    my $projectivity_node = shift;
+    (my $proposition) = $projectivity_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found immediately following a Projectivity node.';
+    }
+    return render_proposition ($proposition);
+}
+
 sub render_projectivity {
     my $constructor = shift;
     (my $projectivity_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Projectivity');
-    if (! defined $projectivity_node) {
-        confess 'Where is the projectivity node?';
+    if (defined $projectivity_node) {
+        return render_projectivity_node ($projectivity_node);
     }
-    (my $proposition) = $projectivity_node->findnodes ('following-sibling::*[1][self::Proposition]');
-    if (! defined $proposition) {
-        confess 'Proposition child not found under a Projectivity node.';
+    my $nr = get_nr_attribute ($constructor);
+    my $aid = get_aid_attribute ($constructor);
+    my $aid_lc = lc $aid;
+    my $kind = get_kind_attribute ($constructor);
+    my $kind_lc = lc $kind;
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a Constructor.';
     }
-    return render_proposition ($proposition);
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    if ($num_arg_types < 2) {
+        confess 'How to deal with projectivity for a constructor that takes fewer than 2 arguments?';
+    }
+    my $var_prefix = 'X';
+    my $final_var = 'X';
+    my $value_var = 'Y';
+    my $last_var = "${var_prefix}" . ($num_arg_types);
+    my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
+    my $lhs = "${constructor_tptp}";
+    $lhs .= '(';
+    foreach my $i (1 .. $num_arg_types - 1) {
+        my $var = "X${i}";
+        $lhs .= "${var},";
+    }
+    $lhs .= "${final_var}";
+    $lhs .= ')';
+    my $left_equation = "(${lhs} = ${value_var})";
+    my $rhs = "${constructor_tptp}";
+    $rhs .= '(';
+    foreach my $i (1 .. $num_arg_types - 1) {
+        my $var = "X${i}";
+        $rhs .= "${var},";
+    }
+    $rhs .= "${value_var}";
+    $rhs .= ')';
+    my $right_equation = "${rhs} = ${lhs}";
+    my $implication = "(${left_equation} => ${right_equation})";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var = "X${var_index}";
+        my $guard = render_guard ($var, $typ);
+        $implication = "(! [${var}] : (${guard} => ${implication}))";
+    }
+    return $implication;
 }
 
 sub render_commutativity_node {
