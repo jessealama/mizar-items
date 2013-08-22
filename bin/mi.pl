@@ -3349,9 +3349,22 @@ sub projections_for_structure_constructor {
         my $field_aid = get_aid_attribute ($field);
         my $field_nr = get_absnr_attribute ($field);
         my $field_aid_lc = lc $field_aid;
+        my $uconstructor_name = "u${field_nr}_${field_aid_lc}";
+        my $uconstructor = constructor_node_of_constructor_item ($uconstructor_name);
+        my @field_arg_types = arg_types_of_constructor ($uconstructor);
+        my $num_field_arg_types = scalar @field_arg_types;
         my $field_tptp = "u${field_nr}_${field_aid_lc}";
         my $var = "${var_prefix}${i}";
-        my $content = "(${field_tptp}(${generic_gconstructor}) = ${var})";
+        my $rhs = "${var}";
+        my $lhs = "${field_tptp}";
+        $lhs .= '(';
+        foreach my $j (1 .. $num_field_arg_types - 1) {
+            my $var = "${var_prefix}${j}";
+            $lhs .= "${var},";
+        }
+        $lhs .= "${generic_gconstructor}";
+        $lhs .= ')';
+        my $content = "(${lhs} = ${rhs})";
         foreach my $i (1 .. $num_arg_types) {
             my $var_index = $num_arg_types - $i + 1;
             my $typ = $arg_types[$var_index - 1];
