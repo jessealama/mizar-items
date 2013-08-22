@@ -2626,8 +2626,8 @@ sub render_projectivity {
     }
     my @arg_types = $arg_types_node->findnodes ('*');
     my $num_arg_types = scalar @arg_types;
-    if ($num_arg_types < 2) {
-        confess 'How to deal with projectivity for a constructor that takes fewer than 2 arguments?';
+    if ($num_arg_types < 1) {
+        confess 'How to deal with projectivity for a constructor that takes no arguments?';
     }
     my $var_prefix = 'X';
     my $final_var = 'X';
