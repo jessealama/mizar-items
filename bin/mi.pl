@@ -2126,11 +2126,11 @@ sub constant_less_than_constant {
     }
 }
 
-sub render_proposition {
-    my $proposition_node = shift;
-    (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
-    my $content = render_semantic_content ($content_node);
-    my @constants = constants_under_node ($proposition_node);
+sub generalize_formula_from_constants {
+    my $formula = shift;
+    my @constants = @_;
+    @constants = sort { constant_less_than_constant ($a, $b) } @constants;
+    my $new_formula = "${formula}";
     my %handled_constants = ();
     until (scalar @constants == 0) {
         my $constant = pop @constants;
@@ -2138,7 +2138,7 @@ sub render_proposition {
         my $typ = type_for_constant ($constant);
         my $var_name = "X${vid}";
         my $guard = render_guard ($var_name, $typ);
-        $content = "(! [${var_name}] : (${guard} => ${content}))";
+        $new_formula = "(! [${var_name}] : (${guard} => ${new_formula}))";
         $handled_constants{$vid} = 0;
         # are there any new constants under the type?
         my @constants_under_typ = constants_under_node ($typ);
@@ -2154,7 +2154,15 @@ sub render_proposition {
         }
         @constants = sort { constant_less_than_constant ($a, $b) } @constants;
     }
-    return $content;
+    return $new_formula;
+}
+
+sub render_proposition {
+    my $proposition_node = shift;
+    (my $content_node) = $proposition_node->findnodes ('*[position() = last()]');
+    my $content = render_semantic_content ($content_node);
+    my @constants = constants_under_node ($proposition_node);
+    return generalize_formula_from_constants ($content, @constants);
 }
 
 sub render_justified_theorem {
