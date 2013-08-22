@@ -2653,6 +2653,12 @@ sub render_projectivity {
     $rhs .= ')';
     my $right_equation = "${rhs} = ${lhs}";
     my $implication = "(${left_equation} => ${right_equation})";
+    (my $value_typ) = $constructor->findnodes ('Typ');
+    if (! defined $value_typ) {
+        confess 'Value Typ not found under a constructor node.';
+    }
+    my $value_guard = render_guard ($value_var, $value_typ);
+    $implication = "(! [${value_var}] : (${value_guard} => ${implication}))";
     # now generalize
     foreach my $i (1 .. $num_arg_types) {
         my $var_index = $num_arg_types - $i + 1;
