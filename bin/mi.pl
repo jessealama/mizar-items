@@ -4357,24 +4357,36 @@ sub coherence_for_constructor {
     return $formula;
 }
 
-sub numerals_in_tptp_formula {
-    my $kind = shift;
-    my $tptp_formula = shift;
-    my $original_tptp_formula = "${tptp_formula}";
+my %tptp_xml = ();
+
+sub xml_of_tptp_str {
+    my $str = shift;
+    if (defined $tptp_xml{$str}) {
+        return $tptp_xml{$str};
+    }
+    my $original = "${str}";
     my @tptp4X_cmd = ('tptp4X', '-umachine', '-fxml', '--');
     my $tptp4X_out = '';
     my $tptp4X_err = '';
     my $tptp4X_harness = start (\@tptp4X_cmd,
-                               '<', \$tptp_formula,
+                               '<', \$str,
                                '>', \$tptp4X_out,
                                '2>', \$tptp4X_err);
     $tptp4X_harness->finish ();
     my $exit_code = $tptp4X_harness->full_result ();
     if ($exit_code != 0) {
-        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original_tptp_formula, $LF;
+        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original, $LF;
     }
-    my $formula_doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
-    my @all_numerals = $formula_doc->findnodes ('descendant::number');
+    my $doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
+    $tptp_xm{$str} = $doc;
+    return $doc;
+}
+
+sub numerals_in_tptp_formula {
+    my $kind = shift;
+    my $tptp_formula = shift;
+    my $xml = xml_of_tptp_str ($tptp_formula);
+    my @all_numerals = $xml->findnodes ('descendant::number');
     my %numerals = ();
     foreach my $numeral (@all_numerals) {
         my $n = get_name_attribute ($numeral);
@@ -4399,22 +4411,9 @@ sub numerals_in_problem {
 sub fraenkels_in_tptp_formula {
     my $kind = shift;
     my $tptp_formula = shift;
-    my $original_tptp_formula = "${tptp_formula}";
-    my @tptp4X_cmd = ('tptp4X', '-umachine', '-fxml', '--');
-    my $tptp4X_out = '';
-    my $tptp4X_err = '';
-    my $tptp4X_harness = start (\@tptp4X_cmd,
-                               '<', \$tptp_formula,
-                               '>', \$tptp4X_out,
-                               '2>', \$tptp4X_err);
-    $tptp4X_harness->finish ();
-    my $exit_code = $tptp4X_harness->full_result ();
-    if ($exit_code != 0) {
-        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original_tptp_formula, $LF;
-    }
-    my $formula_doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
+    my $xml = xml_of_tptp_str ($tptp_formula);
     my $fraenkel_xpath = 'descendant::function[count(*) = 0 and starts-with (@name, "fraenkel_")]';
-    my @fraenkel_terms = $formula_doc->findnodes ($fraenkel_xpath);
+    my @fraenkel_terms = $xml->findnodes ($fraenkel_xpath);
     my %fraenkels = ();
     foreach my $fraenkel (@fraenkel_terms) {
         my $n = get_name_attribute ($fraenkel);
@@ -4488,21 +4487,8 @@ sub render_fraenkel_item {
 sub constructors_of_kind_in_tptp_formula {
     my $kind = shift;
     my $tptp_formula = shift;
-    my $original_tptp_formula = "${tptp_formula}";
-    my @tptp4X_cmd = ('tptp4X', '-umachine', '-fxml', '--');
-    my $tptp4X_out = '';
-    my $tptp4X_err = '';
-    my $tptp4X_harness = start (\@tptp4X_cmd,
-                               '<', \$tptp_formula,
-                               '>', \$tptp4X_out,
-                               '2>', \$tptp4X_err);
-    $tptp4X_harness->finish ();
-    my $exit_code = $tptp4X_harness->full_result ();
-    if ($exit_code != 0) {
-        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original_tptp_formula, $LF;
-    }
-    my $formula_doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
-    my @all_terms = $formula_doc->findnodes ('descendant::function | descendant::predicate');
+    my $xml = xml_of_tptp_str ($tptp_formula);
+    my @all_terms = $xml->findnodes ('descendant::function | descendant::predicate');
     my %constructors = ();
     foreach my $term (@all_terms) {
         my $n = get_name_attribute ($term);
