@@ -10,6 +10,7 @@ use Pod::Usage;
 use File::Temp qw(tempfile);
 use Carp qw(croak carp confess);
 use XML::LibXML;
+use List::Util qw(shuffle);
 use List::MoreUtils qw(none first_index all any);
 use Regexp::DefaultFlags;
 use IPC::Run qw(run start);
@@ -18,12 +19,16 @@ use Readonly;
 use FindBin qw($RealBin);
 use lib "$RealBin/../src/perl/";
 use Data::Dumper;
+use Parallel::Loops;
 
 use Utils qw(parse_xml_file);
 
 Readonly my $LF => "\N{LF}";
 Readonly my $PREFIX_LC => lc 'ckb';
 Readonly my $PREFIX_UC => uc $PREFIX_LC;
+
+Readonly my $MAX_PROCESSES => 3;
+my $pl = Parallel::Loops->new ($MAX_PROCESSES);
 
 my $article_dir = $ARGV[0];
 
@@ -4694,6 +4699,9 @@ foreach my $item (keys %resolved_dependencies) {
             or confess 'Unable to close output filehandle for ', $problem_file;
     }
 }
+
+my @shuffled_items = shuffle @items;
+$pl->foreach (\@shuffled_items, sub { export_problem_for_item ($_) });
 
 exit 0;
 
