@@ -3849,7 +3849,8 @@ sub render_non_local_item {
                 confess 'No suitable Definiens node found in ', $item_xml, ' using the XPath', $LF, $LF, '  ', $definiens_xpath;
             }
             my $constrnr = $definiens_node->getAttribute ('constrnr');
-            my $deftheorem_xpath = "following-sibling::DefTheorem[\@constrkind = \"${kind_uc}\" and \@constrnr = \"${constrnr}\"][1]";
+            my $defnr = get_attribute ($definiens_node, 'defnr');
+            my $deftheorem_xpath = "following-sibling::DefTheorem[\@constrkind = \"${kind_uc}\" and \@nr = \"${defnr}\"][1]";
             (my $deftheorem_node) = $definiens_node->findnodes ($deftheorem_xpath);
             if (! defined $deftheorem_node) {
                 confess 'No DefTheorem node found following the Definiens node for ', $item_xml;
