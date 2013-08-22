@@ -4090,17 +4090,9 @@ sub definition_for_constructor {
                 }
                 # now generalize
                 my @constants = constants_under_node ($proposition_node);
-                my $num_constants = scalar @constants;
-                foreach my $i (1 .. $num_constants) {
-                    my $constant = $constants[$num_constants - $i];
-                    my $typ = type_for_constant ($constant);
-                    my $vid = get_vid_attribute ($constant);
-                    my $var= "X${vid}";
-                    my $guard = render_guard ($var, $typ);
-                    $equation = "(! [${var}] : (${guard} => ${equation}))";
-                }
+                my $generalized = generalize_formula_from_constants ($equation, @constants);
                 my $tptp_name = "redefinition_${new_tptp}";
-                my $formula = "fof(${tptp_name},definition,${equation}).";
+                my $formula = "fof(${tptp_name},definition,${generalized}).";
                 return $formula;
             } elsif ($kind eq 'm') {
                 (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
