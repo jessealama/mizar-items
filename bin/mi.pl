@@ -1906,21 +1906,34 @@ sub render_semantic_content {
     } elsif ($name eq 'Typ') {
         confess 'We do not render bare Typ nodes!';
     } elsif ($name eq 'Var') {
-        my @quantifiers = $node->findnodes ('ancestor::For');
-        my $num_quantifiers = scalar @quantifiers;
-        if ($num_quantifiers < $nr) {
-            confess 'To render a Var with nr = ', $nr, ' we need at least that many quantifiers; but we found only ', $num_quantifiers;
-        }
-        my $quantifier = $quantifiers[$nr - 1];
-        my $var_name = undef;
-        if ($quantifier->hasAttribute ('vid')) {
-            my $vid = $quantifier->getAttribute ('vid');
-            $var_name = "X${vid}";
+        my $nr = get_nr_attribute ($node);
+        if (defined $parameters{'var'}) {
+            my $var_table_ref = $parameters{'var'};
+            my %var_table = %{$var_table_ref};
+            if (defined $var_table{$nr}) {
+                return $var_table{$nr};
+            } else {
+                my %trimmed_parameters = %parameters;
+                delete $trimmed_parameters{'var'};
+                return render_semantic_content ($node, \%trimmed_parameters);
+            }
         } else {
-            my $vid = $quantifier->findvalue ('count (ancestor::For[not(@vid)]) + 1');
-            $var_name = "Y${vid}";
+            my @quantifiers = $node->findnodes ('ancestor::For');
+            my $num_quantifiers = scalar @quantifiers;
+            if ($num_quantifiers < $nr) {
+                confess 'To render a Var with nr = ', $nr, ' we need at least that many quantifiers; but we found only ', $num_quantifiers;
+            }
+            my $quantifier = $quantifiers[$nr - 1];
+            my $var_name = undef;
+            if ($quantifier->hasAttribute ('vid')) {
+                my $vid = $quantifier->getAttribute ('vid');
+                $var_name = "X${vid}";
+            } else {
+                my $vid = $quantifier->findvalue ('count (ancestor::For[not(@vid)]) + 1');
+                $var_name = "Y${vid}";
+            }
+            return $var_name;
         }
-        return $var_name;
     } elsif ($name eq 'And') {
         my @children = $node->findnodes ('*');
         if (scalar @children == 1) {
