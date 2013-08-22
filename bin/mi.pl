@@ -3509,6 +3509,9 @@ Readonly my %REQUIREMENT_CONTENTS =>
         22 => [
             '(k4_xcmplx_0(k5_numbers) = k5_numbers)',
         ],
+        23 => [
+            '(k4_xcmplx_0(k5_numbers) = k5_numbers)', # ARITHM:Lm 1
+        ],
         24 => [
             '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => (k6_xcmplx_0(X,k5_numbers) = X)))', # ARITHM:4
         ],
