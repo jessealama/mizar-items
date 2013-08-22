@@ -2310,55 +2310,41 @@ sub nr_of_item {
 
 sub deftheorem_from_definiens {
     my $item = shift;
-    if ($item =~ / \A ${article_name} [:] . definiens [:] /) {
-        # local item
-        my $source = source_of_item ($item);
-        my $fragment_number = fragment_number ($source);
-        my $target_deftheorem = undef;
-        foreach my $x (keys %local_item_table) {
-            my $y = $local_item_table{$x};
-            if ($x =~ /\A ${PREFIX_LC}${fragment_number} [:] /) {
-                if ($y =~ / [:] deftheorem [:] (\d+) \z/) {
-                    $target_deftheorem = $y;
-                    last;
-                }
-            }
-        }
-        if (! defined $target_deftheorem) {
-            confess 'To what deftheorem does ', $item, ' correspond?';
-        }
-        return $target_deftheorem;
-    } else {
-        # non-local definiens
-        my $mizfiles = $ENV{'MIZFILES'};
-        if (! defined $mizfiles) {
-            confess 'MIZFILES environment variable not defined.';
-        }
-        my $miztmp_dir = "${mizfiles}/miztmp";
-        if (! -d $miztmp_dir) {
-            confess 'miztmp dir missing under ', $mizfiles;
-        }
-        my $article = article_of_item ($item);
-        my $item_xml = "${miztmp_dir}/${article}.xml1";
-        if (! -e $item_xml) {
-            confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
-        }
-        my $item_xml_doc = parse_xml_file ($item_xml);
-        my $item_xml_root = $item_xml_doc->documentElement ();
-        my $kind = definiens_kind ($item);
-        my $kind_uc = uc $kind;
-        my $nr = nr_of_item ($item);
-        my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${kind_uc}\" and count (preceding::Definiens[\@constrkind = \"${kind_uc}\"]) + 1 = ${nr}]";
-        (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
-        if (! defined $definiens_node) {
-            confess 'No suitable Definiens node found in ', $item_xml, ' using the XPath', $LF, $LF, '  ', $definiens_xpath;
-        }
-        my $nr_from_definiens = $definiens_node->getAttribute ('nr');
-        if (! defined $nr_from_definiens) {
-            confess 'nr missing from a Definiens node.';
-        }
-        return "${article}:deftheorem:${nr_from_definiens}";
+    my $article = article_of_item ($item);
+    my $kind = definiens_kind ($item);
+    my $kind_uc = uc $kind;
+    my $nr = nr_of_item ($item);
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
     }
+    my $prel_dir = "${mizfiles}/prel";
+    if (! -d $prel_dir) {
+        confess 'prel directory missing.';
+    }
+    my $first_letter = undef;
+    if ($article =~ /\A (.) /) {
+        $first_letter = $1;
+    } else {
+        confess 'Cannot make sense of article name \'', $article, '\'.';
+    }
+    my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
+    if (! -d $prel_first_letter_dir) {
+        confess $first_letter, ' directory missing under ', $prel_dir;
+    }
+    my $prel_def = "${prel_first_letter_dir}/${article}.def";
+    if (! -e $prel_def) {
+        confess $prel_def, ' missing.';
+    }
+    my $prel_def_doc = parse_xml_file ($prel_def);
+    my $prel_xpath = "descendant::Definiens[\@constrkind = \"${kind_uc}\"][${nr}]";
+    (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
+    if (! defined $prel_item) {
+        confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath, $LF;
+    }
+    my $count_xpath = "count (preceding-sibling::Definiens) + 1";
+    my $nr_from_definiens = $prel_item->findvalue ($count_xpath);
+    return "${article}:deftheorem:${nr_from_definiens}";
 }
 
 sub is_compatibility_item {
