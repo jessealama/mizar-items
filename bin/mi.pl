@@ -2640,7 +2640,7 @@ sub render_projectivity {
         my $var = "X${i}";
         $lhs .= "${var},";
     }
-    $lhs .= "${final_var}";
+    $lhs .= "${last_var}";
     $lhs .= ')';
     my $left_equation = "(${lhs} = ${value_var})";
     my $rhs = "${constructor_tptp}";
