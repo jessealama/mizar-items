@@ -2846,44 +2846,120 @@ sub render_coherence {
     }
 }
 
+sub render_symmetry_node {
+    my $symmetry_node = shift;
+    (my $proposition) = $symmetry_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found immediately following a Symmetry node.';
+    }
+    return render_proposition ($proposition);
+}
+
 sub render_symmetry {
     my $constructor = shift;
-    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $symmetry_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Symmetry');
+    if (defined $symmetry_node) {
+        return render_symmetry_node ($symmetry_node);
+    }
+    my $nr = get_nr_attribute ($constructor);
+    my $aid = get_aid_attribute ($constructor);
+    my $aid_lc = lc $aid;
+    my $kind = get_kind_attribute ($constructor);
+    my $kind_lc = lc $kind;
     (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
     if (! defined $arg_types_node) {
-        confess 'ArgTypes node missing under a constructor.';
+        confess 'ArgTypes node missing under a Constructor.';
     }
     my @arg_types = $arg_types_node->findnodes ('*');
-    if (scalar @arg_types != 2) {
-        confess 'How to render symmetry for a constructor that does not accept exactly 2 arguments?';
+    my $num_arg_types = scalar @arg_types;
+    if ($num_arg_types < 2) {
+        confess 'How to deal with symmetry for a constructor that takes fewer than 2 arguments?';
     }
-    my $typ_1 = $arg_types[0];
-    my $typ_2 = $arg_types[1];
-    my $var_1 = 'X1';
-    my $var_2 = 'X2';
-    my $guard_1 = render_guard ($var_1, $typ_1);
-    my $guard_2 = render_guard ($var_2, $typ_2);
-    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) <=> ${constructor_name}(${var_2},${var_1}))))";
+    my $var_prefix = 'X';
+    my $last_var_1 = "${var_prefix}" . ($num_arg_types - 1);
+    my $last_var_2 = "${var_prefix}" . ($num_arg_types);
+    my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
+    my $lhs = "${constructor_tptp}";
+    my $rhs = "${constructor_tptp}";
+    $lhs .= '(';
+    $rhs .= '(';
+    foreach my $i (1 .. $num_arg_types - 2) {
+        my $var = "X${i}";
+        $lhs .= "${var},";
+        $rhs .= "${var},";
+    }
+    $lhs .= "${last_var_1},${last_var_2}";
+    $rhs .= "${last_var_2},${last_var_1}";
+    $lhs .= ')';
+    $rhs .= ')';
+    my $equivalence = "(${lhs} => ${rhs})";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var = "X${var_index}";
+        my $guard = render_guard ($var, $typ);
+        $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
+    }
+    return $equivalence;
+}
+
+sub render_asymmetry_node {
+    my $asymmetry_node = shift;
+    (my $proposition) = $asymmetry_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found immediately following a Asymmetry node.';
+    }
+    return render_proposition ($proposition);
 }
 
 sub render_asymmetry {
     my $constructor = shift;
-    my $constructor_name = render_tptp_constructor ($constructor);
+    (my $asymmetry_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Asymmetry');
+    if (defined $asymmetry_node) {
+        return render_asymmetry_node ($asymmetry_node);
+    }
+    my $nr = get_nr_attribute ($constructor);
+    my $aid = get_aid_attribute ($constructor);
+    my $aid_lc = lc $aid;
+    my $kind = get_kind_attribute ($constructor);
+    my $kind_lc = lc $kind;
     (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
     if (! defined $arg_types_node) {
-        confess 'ArgTypes node missing under a constructor.';
+        confess 'ArgTypes node missing under a Constructor.';
     }
     my @arg_types = $arg_types_node->findnodes ('*');
-    if (scalar @arg_types != 2) {
-        confess 'How to render asymmetry for a constructor that does not accept exactly 2 arguments?';
+    my $num_arg_types = scalar @arg_types;
+    if ($num_arg_types < 2) {
+        confess 'How to deal with asymmetry for a constructor that takes fewer than 2 arguments?';
     }
-    my $typ_1 = $arg_types[0];
-    my $typ_2 = $arg_types[1];
-    my $var_1 = 'X1';
-    my $var_2 = 'X2';
-    my $guard_1 = render_guard ($var_1, $typ_1);
-    my $guard_2 = render_guard ($var_2, $typ_2);
-    return "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => (${constructor_name}(${var_1},${var_2}) => (~ ${constructor_name}(${var_2},${var_1})))))";
+    my $var_prefix = 'X';
+    my $last_var_1 = "${var_prefix}" . ($num_arg_types - 1);
+    my $last_var_2 = "${var_prefix}" . ($num_arg_types);
+    my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
+    my $lhs = "${constructor_tptp}";
+    my $rhs = "${constructor_tptp}";
+    $lhs .= '(';
+    $rhs .= '(';
+    foreach my $i (1 .. $num_arg_types - 2) {
+        my $var = "X${i}";
+        $lhs .= "${var},";
+        $rhs .= "${var},";
+    }
+    $lhs .= "${last_var_1},${last_var_2}";
+    $rhs .= "${last_var_2},${last_var_1}";
+    $lhs .= ')';
+    $rhs .= ')';
+    my $equivalence = "(${lhs} => (~ ${rhs}))";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var = "X${var_index}";
+        my $guard = render_guard ($var, $typ);
+        $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
+    }
+    return $equivalence;
 }
 
 sub render_reflexivity_node {
