@@ -1867,6 +1867,16 @@ sub render_semantic_content {
     } elsif ($name eq 'PrivFunc') {
         (my $val) = $node->findnodes ('*[1]');
         return render_semantic_content ($val, \%parameters);
+    } elsif ($name eq 'Fraenkel') {
+        my $fraenkel_position = $node->findvalue ('count (preceding::Fraenkel) + 1');
+        (my $root) = $node->findnodes ('ancestor::Article');
+        if (! defined $root) {
+            confess 'Article root not found.';
+        }
+        my $aid = get_aid_attribute ($root);
+        my $aid_lc = lc $aid;
+        my $tptp_name = "fraenkel_${fraenkel_position}_${aid_lc}";
+        return $tptp_name; # later we render the content of the Fraenkel
     } elsif ($name eq 'Is') {
         my @children = $node->findnodes ('*');
         if (scalar @children != 2) {
@@ -4192,6 +4202,95 @@ sub numerals_in_problem {
     return keys %numerals;
 }
 
+sub fraenkels_in_tptp_formula {
+    my $kind = shift;
+    my $tptp_formula = shift;
+    my $original_tptp_formula = "${tptp_formula}";
+    my @tptp4X_cmd = ('tptp4X', '-umachine', '-fxml', '--');
+    my $tptp4X_out = '';
+    my $tptp4X_err = '';
+    my $tptp4X_harness = start (\@tptp4X_cmd,
+                               '<', \$tptp_formula,
+                               '>', \$tptp4X_out,
+                               '2>', \$tptp4X_err);
+    $tptp4X_harness->finish ();
+    my $exit_code = $tptp4X_harness->full_result ();
+    if ($exit_code != 0) {
+        confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original_tptp_formula, $LF;
+    }
+    my $formula_doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
+    my $fraenkel_xpath = 'descendant::function[count(*) = 0 and starts-with (@name, "fraenkel_")]';
+    my @fraenkel_terms = $formula_doc->findnodes ($fraenkel_xpath);
+    my %fraenkels = ();
+    foreach my $fraenkel (@fraenkel_terms) {
+        my $n = get_name_attribute ($fraenkel);
+        $fraenkels{$n} = 0;
+    }
+    return keys %fraenkels;
+}
+
+sub fraenkels_in_problem {
+    my $kind = shift;
+    my @problem = @_;
+    my %fraenkels = ();
+    foreach my $formula (@problem) {
+        my @fraenkels = fraenkels_in_tptp_formula ($kind, $formula);
+        foreach my $fraenkel (@fraenkels) {
+            $fraenkels{$fraenkel} = 0;
+        }
+    }
+    return keys %fraenkels;
+}
+
+sub render_fraenkel_item {
+    my $fraenkel_item = shift;
+    my $fraenkel_pos = undef;
+    my $fraenkel_aid = undef;
+    if ($fraenkel_item =~ /\A fraenkel [_] (\d+) [_] ([a-z0-9_]+) \z/) {
+        ($fraenkel_pos, $fraenkel_aid) = ($1, $2);
+    } else {
+        confess 'Unable to make sense of a Fraenkel item: ', $fraenkel_item;
+    }
+    my $mizfiles = $ENV{'MIZFILES'};
+    if (! defined $mizfiles) {
+        confess 'MIZFILES environment variable not defined.';
+    }
+    my $miztmp_dir = "${mizfiles}/miztmp";
+    my $item_xml = "${miztmp_dir}/${fraenkel_aid}.xml1";
+    if (! -e $item_xml) {
+        confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+    }
+    my $item_xml_doc = parse_xml_file ($item_xml);
+    my $item_xml_root = $item_xml_doc->documentElement ();
+    my $fraenkel_xpath = "descendant::Fraenkel[${fraenkel_pos}]";
+    (my $fraenkel_node) = $item_xml_root->findnodes ($fraenkel_xpath);
+    if (! defined $fraenkel_node) {
+        confess 'Fraenkel #', $fraenkel_pos, ' not found in ', $item_xml;
+    }
+    my $num_children = $fraenkel_node->findvalue ('count (*)');
+    if ($num_children != 3) {
+        confess 'How to deal with a Frankel term that does not have exactly 3 children?';
+    }
+    (my $typ) = $fraenkel_node->findnodes ('Typ');
+    (my $formula) = $fraenkel_node->findnodes ('*[position() = last()]');
+    if (! defined $typ) {
+        confess 'Frankel lacks a Typ child.';
+    }
+    (my $var_node) = $fraenkel_node->findnodes ('Var');
+    if (! defined $var_node) {
+        confess 'Var node missing under a Fraenkel.';
+    }
+    my $var_nr = get_nr_attribute ($var_node);
+    my $var = 'X';
+    my $guard = render_guard ($var, $typ);
+    my $membership = "r2_hidden(${var},${fraenkel_item})";
+    my $definition = render_semantic_content ($formula, { 'var' => { $var_nr => $var }});
+    my $tptp_name = "definition_${fraenkel_item}";
+    my $content = "(! [${var}] : (m2_hidden(${var}) => (${membership} <=> ${guard})))";
+    my $result_formula = "fof(${tptp_name},definition,${content}).";
+    return $result_formula;
+}
+
 sub constructors_of_kind_in_tptp_formula {
     my $kind = shift;
     my $tptp_formula = shift;
@@ -4353,7 +4452,12 @@ sub problem_for_item {
         $idx_of_first_missing_widening
             = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
     }
-
+    # Fraenkel terms
+    my @fraenkels = fraenkels_in_problem (@problem);
+    foreach my $fraenkel (@fraenkels) {
+        my $fraenkel_formula = render_fraenkel_item ($fraenkel);
+        push (@problem, $fraenkel_formula);
+    }
     # remove any potential duplicates
     my %formulas = ();
     foreach my $formula (@problem) {
