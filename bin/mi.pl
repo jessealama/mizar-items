@@ -3493,10 +3493,16 @@ sub render_adjective_guards {
     }
 }
 
+my %renderings = ();
+
 sub render_non_local_item {
     my $item = shift;
     my $params_ref = shift;
     my %params = defined $params_ref ? %{$params_ref} : ();
+    if ((scalar keys %params == 0) && (defined $renderings{$item})) {
+        my @earlier_answer = @{$renderings{$item}};
+        return @earlier_answer;
+    }
     my $article = article_of_item ($item);
     my $nr = nr_of_item ($item);
     my $tptp_name = tptp_name_for_item ($item);
@@ -3780,6 +3786,10 @@ sub render_non_local_item {
         } else {
             confess 'How to extract ', $item, '?';
         }
+    }
+    # save for later
+    if (scalar keys %params == 0) {
+        $renderings{$item} = \@results;
     }
     return @results;
 }
