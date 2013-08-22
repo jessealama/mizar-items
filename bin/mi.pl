@@ -4722,7 +4722,10 @@ if (-d $problem_dir) {
 mkdir $problem_dir
     or confess 'Cannot make the directory ', $problem_dir, ' .';
 
-foreach my $item (keys %resolved_dependencies) {
+my @items = keys %resolved_dependencies;
+
+sub export_problem_for_item {
+    my $item = shift;
     if (is_problematic_item ($item)) {
         my @problem = problem_for_item ($item);
         my $item_label = tptp_name_for_item ($item);
