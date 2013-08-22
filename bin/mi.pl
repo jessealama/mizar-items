@@ -267,7 +267,7 @@ sub article_dependencies {
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
                 if ($aid eq $constraid) {
-                    my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
+                    my $item = "${aid_lc}:${kind_lc}definiens:${defnr}";
                     $deps{$item} = 0;
                 } else {
                     my $item_xml = undef;
