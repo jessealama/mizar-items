@@ -4747,6 +4747,8 @@ sub export_problem_for_item {
     }
 }
 
+warn (scalar @items), ' to consider.';
+
 my @shuffled_items = shuffle @items;
 $pl->foreach (\@shuffled_items, sub { export_problem_for_item ($_) });
 
