@@ -2651,8 +2651,8 @@ sub render_commutativity {
         confess 'How to deal with commutativity for a constructor that takes fewer than 2 arguments?';
     }
     my $var_prefix = 'X';
-    my $last_var_1 = "${var_prefix}" . ($num_arg_types - 2);
-    my $last_var_2 = "${var_prefix}" . ($num_arg_types - 1);
+    my $last_var_1 = "${var_prefix}" . ($num_arg_types - 1);
+    my $last_var_2 = "${var_prefix}" . ($num_arg_types);
     my $constructor_tptp = "${kind_lc}${nr}_${aid_lc}";
     my $lhs = "${constructor_tptp}";
     my $rhs = "${constructor_tptp}";
@@ -2668,10 +2668,11 @@ sub render_commutativity {
     $lhs .= ')';
     $rhs .= ')';
     my $equation = "(${lhs} = ${rhs})";
-    foreach my $i (1 .. $num_arg_types - 1) {
-        my $var_index = $num_arg_types - $i;
-        my $var = "X${var_index}";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
         my $typ = $arg_types[$var_index - 1];
+        my $var = "X${var_index}";
         my $guard = render_guard ($var, $typ);
         $equation = "(! [${var}] : (${guard} => ${equation}))";
     }
