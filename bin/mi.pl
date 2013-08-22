@@ -3515,6 +3515,10 @@ Readonly my %REQUIREMENT_CONTENTS =>
         24 => [
             '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => (k6_xcmplx_0(X,k5_numbers) = X)))', # ARITHM:4
         ],
+        25 => [
+            '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => k7_xcmplx_0(k5_numbers,X) = k5_numbers))', # ARITHM:5
+            '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => k7_xcmplx_0(X,1) = X))', # ARITHM:6
+        ],
         27 => [
             '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & v2_xxreal_0(X)) => v2_xxreal_0(Y))))', # REAL:1
             '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & (~ v2_xxreal_0(Y))) => (~ v2_xxreal_0(X)))))', # REAL:4
