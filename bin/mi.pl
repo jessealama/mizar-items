@@ -4378,7 +4378,7 @@ sub xml_of_tptp_str {
         confess 'tptp4X did not exit cleanly working with the formula', $LF, $LF, '  ', $original, $LF;
     }
     my $doc = XML::LibXML->load_xml (string => "${tptp4X_out}");
-    $tptp_xm{$str} = $doc;
+    $tptp_xml{$str} = $doc;
     return $doc;
 }
 
