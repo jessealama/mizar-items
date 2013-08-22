@@ -2479,6 +2479,7 @@ Readonly my %CONSTRUCTOR_PROPERTY_MAKERS =>
         'uniqueness' => \&render_uniqueness,
         'coherence' => \&render_coherence,
         'abstractness' => \&render_abstractness,
+        'sethood' => \&render_sethood,
     );
 
 sub render_tptp_constructor {
@@ -3120,6 +3121,57 @@ sub render_abstractness {
     }
     my $equation = "${var} = ${g_tptp}";
     my $content = "(! [${var}] : (${l_guard} => (${v_guard} => ${equation})))";
+    return $content;
+}
+
+sub render_sethood_node {
+    my $sethood_node = shift;
+    (my $proposition) = $sethood_node->findnodes ('following-sibling::*[1][self::Proposition]');
+    if (! defined $proposition) {
+        confess 'Proposition child not found immediately following πa Sethood node.';
+    }
+    return render_proposition ($proposition);
+}
+
+sub render_sethood {
+    my $constructor = shift;
+    (my $sethood_node) = $constructor->findnodes ('preceding-sibling::JustifiedProperty/Sethood');
+    if (defined $sethood_node) {
+        return render_sethood_node ($sethood_node);
+    }
+    my $mode_nr = get_nr_attribute ($constructor);
+    my $mode_aid = get_aid_attribute ($constructor);
+    my $mode_aid_lc = lc $mode_aid;
+    my $tptp_constructor = "m${mode_nr}_${mode_aid_lc}";
+    (my $arg_types_node) = $constructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node not found under an M constructor node.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    my $var_prefix = 'X';
+    my $var = "${var_prefix}";
+    my $other_var = 'Y';
+    my $generic_mconstructor = "${tptp_constructor}";
+    $generic_mconstructor .= '(';
+    if ($num_arg_types > 0) {
+        foreach my $i (1 .. $num_arg_types) {
+            my $var = "${var_prefix}${i}";
+            $generic_mconstructor .= "${var},";
+        }
+    }
+    $generic_mconstructor .= "${var}";
+    $generic_mconstructor .= ')';
+    my $content = "(? [${other_var}] : (m2_hidden(${other_var}) & (! [${var}] : (r2_hidden(${var},${other_var}) <=> ${generic_mconstructor}))))";
+    if ($num_arg_types > 0) {
+        foreach my $i (1 .. $num_arg_types) {
+            my $var_index = $num_arg_types - $i + 1;
+            my $typ = $arg_types[$var_index - 1];
+            my $var = "X${var_index}";
+            my $guard = render_guard ($var, $typ);
+            $content = "(! [${var}] : (${guard} => ${content}))";
+        }
+    }
     return $content;
 }
 
