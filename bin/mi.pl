@@ -4715,6 +4715,19 @@ sub problem_for_item {
             }
         }
     }
+    # if rqOmega is present, postulate that all natural numbers
+    # appearing in the problem are elements of omega
+    if (any { formula_name ($_) =~ /\A requirement [_] 32 [_] / } @problem) {
+        foreach my $numeral (@numerals) {
+            if ($numeral =~ /\A \d+ \z/) { # looks like a natural number
+                warn 'asserting that ', $numeral, ' is in omega.';
+                my $tptp_name = "omega_contains_${numeral}";
+                my $content = "r2_hidden(${numeral},k4_ordinal1)";
+                my $formula = "fof(${tptp_name},theorem,${content}).";
+                push (@problem, $formula);
+            }
+        }
+    }
     my @formulas_from_schemes = extract_schemes ($fragment_root);
     push (@problem, @formulas_from_schemes);
     # throw in all possible widenings for structures
