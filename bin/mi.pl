@@ -3627,6 +3627,7 @@ Readonly my %REQUIREMENT_CONTENTS =>
         ],
         24 => [
             '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => (k6_xcmplx_0(X,k5_numbers) = X)))', # ARITHM:4
+            '(! [X,Y] : ((m2_hidden(X) & v1_xcmplx_0(X) & m2_hidden(Y) & v1_xcmplx_0(Y)) => ((k6_xcmplx_0(X,Y) = k5_numbers) => X = Y)))',
         ],
         25 => [
             '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => k7_xcmplx_0(k5_numbers,X) = k5_numbers))', # ARITHM:5
