@@ -117,13 +117,40 @@ sub ensure_valid_xml_file {
   return (defined eval { $xml_parser->parse_file ($xml_path) });
 }
 
+my %parsed = ();
+my $xml_caching = 0;
+
+sub enable_xml_caching {
+    $xml_caching = 1;
+    return;
+}
+
+sub disable_xml_caching {
+    $xml_caching = 0;
+    return;
+}
+
+sub flush_xml_cache {
+    my @keys = keys %parsed;
+    foreach my $key (@keys) {
+        delete $parsed{$key};
+    }
+    return;
+}
+
 sub parse_xml_file {
     my $path = shift;
+    if (($xml_caching) && defined $parsed{$path}) {
+        return $parsed{$path};
+    }
     if (! ensure_readable_file ($path)) {
         confess 'Error: ', $path, ' does not exist (or is unreadable).';
     }
     my $doc = eval { $xml_parser->parse_file ($path) };
     if (defined $doc) {
+        if ($xml_caching) {
+            $parsed{$path} = $doc;
+        }
         return $doc;
     } else {
         confess 'Error: ', $path, ' ought to be a valid XML file, but it isn\'t.';
