@@ -3605,6 +3605,7 @@ Readonly my %REQUIREMENT_CONTENTS =>
             '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => k3_xcmplx_0(X,k5_numbers) = k5_numbers))', # ARITHM:2
             '(! [X] : ((m2_hidden(X) & v1_xcmplx_0(X)) => k3_xcmplx_0(1,X) = X))', # ARITHM:3
             '(! [X,Y,Z] : ((m2_hidden(X) & v1_xcmplx_0(X) & m2_hidden(Y) & v1_xcmplx_0(Y) & m2_hidden(Z) & v1_xcmplx_0(Z)) => k3_xcmplx_0(X,k3_xcmplx_0(Y,Z)) = k3_xcmplx_0(k3_xcmplx_0(X,Y),Z)))', # XCMPLX_0:Lm 5
+            '(! [X,Y] : ((m2_hidden(X) & v1_xcmplx_0(X) & m2_hidden(Y) & v1_xcmplx_0(Y)) => k3_xcmplx_0(X,Y) = k3_xcmplx_0(Y,X)))', # I'd rather not postulate this...
         ],
         15 => [
             '(! [X,Y] : ((m2_hidden(X) & v1_xreal_0(X) & m2_hidden(Y) & v1_xreal_0(Y)) => ((r1_xxreal_0(X,Y) & r1_xxreal_0(Y,X)) => X = Y)))', # REAL:lemma 1
