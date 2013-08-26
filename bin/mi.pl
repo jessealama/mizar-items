@@ -38,7 +38,6 @@ my $text_dir = "${article_dir}/text";
 # Set up an XML parser that we might use
 my $xml_parser = XML::LibXML->new ();
 
-my $script_home = $RealBin;
 my $verbose = 0;
 my $man = 0;
 my $help = 0;
