@@ -238,26 +238,11 @@ sub article_dependencies {
             my $dfs_root = $dfs_doc->documentElement ();
             my @definientia = $dfs_root->findnodes ('descendant::Definiens');
             foreach my $definiens (@definientia) {
-                my $definiens_kind = $definiens->getAttribute ('constrkind');
-                my $aid = $definiens->getAttribute ('aid');
-                my $constraid = $definiens->getAttribute ('constraid');
-                my $nr = $definiens->getAttribute ('absconstrnr');
-                my $defnr = $definiens->getAttribute ('defnr');
-                if (! defined $definiens_kind) {
-                    confess 'Unable to make sense of a definiens in ', $file;
-                }
-                if (! defined $aid) {
-                    confess 'Definiens node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $constraid) {
-                    confess 'Definiens node in ', $file, ' lacks a constraid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Definiens node in ', $file, ' lacks an nr attribute.';
-                }
-                if (! defined $defnr) {
-                    confess 'Definiens node in ', $file, ' lacks a defnr attribute.';
-                }
+                my $definiens_kind = get_attribute ($definiens, 'constrkind');
+                my $aid = get_aid_attribute ($definiens);
+                my $constraid = get_attribute ($definiens, 'constraid');
+                my $nr = get_attribute ($definiens, 'absconstrnr');
+                my $defnr = get_attribute ($definiens, 'defnr');
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
                 if ($aid eq $constraid) {
