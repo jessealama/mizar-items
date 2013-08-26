@@ -35,9 +35,6 @@ ensure_local_db_structure ($article_dir);
 my $prel_dir = "${article_dir}/prel";
 my $text_dir = "${article_dir}/text";
 
-# Set up an XML parser that we might use
-my $xml_parser = XML::LibXML->new ();
-
 my $verbose = 0;
 my $man = 0;
 my $help = 0;
