@@ -10,6 +10,9 @@ use XML::LibXML;
 
 our @EXPORT_OK = qw(delete_space
                     parse_xml_file
+                    enable_xml_caching
+                    disable_xml_caching
+                    flush_xml_cache
 		    ensure_readable_file
 		    ensure_directory
 		    ensure_executable
