@@ -4181,6 +4181,27 @@ sub constructors_of_kind_in_problem {
     return @constructors;
 }
 
+sub widenings_for_problem {
+    my @problem = @_;
+    my @widenings = shift;
+    my @lconstructors_in_problem = constructors_of_kind_in_problem ('l', @problem);
+    my $idx_of_first_missing_widening
+        = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
+    until ($idx_of_first_missing_widening < 0) {
+        my $missing_lconstructor = $lconstructors_in_problem[$idx_of_first_missing_widening];
+        my $missing_article = article_of_item ($missing_lconstructor);
+        my $missing_nr = nr_of_item ($missing_lconstructor);
+        my $gconstructor = "g${missing_nr}_${missing_article}";
+        my $widening = widening_for_structure_constructor ($gconstructor);
+        push (@problem, $widening);
+        push (@widenings, $widening);
+        @lconstructors_in_problem = constructors_of_kind_in_problem ('l', @problem);
+        $idx_of_first_missing_widening
+            = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
+    }
+    return @widenings;
+}
+
 sub problem_for_item {
     my $item = shift;
     my $source = source_of_item ($item);
@@ -4292,20 +4313,8 @@ sub problem_for_item {
     my @formulas_from_schemes = extract_schemes ($fragment_root);
     push (@problem, @formulas_from_schemes);
     # throw in all possible widenings for structures
-    my @lconstructors_in_problem = constructors_of_kind_in_problem ('l', @problem);
-    my $idx_of_first_missing_widening
-        = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
-    until ($idx_of_first_missing_widening < 0) {
-        my $missing_lconstructor = $lconstructors_in_problem[$idx_of_first_missing_widening];
-        my $missing_article = article_of_item ($missing_lconstructor);
-        my $missing_nr = nr_of_item ($missing_lconstructor);
-        my $gconstructor = "g${missing_nr}_${missing_article}";
-        my $widening = widening_for_structure_constructor ($gconstructor);
-        push (@problem, $widening);
-        @lconstructors_in_problem = constructors_of_kind_in_problem ('l', @problem);
-        $idx_of_first_missing_widening
-            = first_index { ! widening_present_in_problem ($_, @problem) } @lconstructors_in_problem;
-    }
+    my @widenings = widenings_for_problem (@problem);
+    push (@problem, @widenings);
     # Fraenkel terms
     my @fraenkels = fraenkels_in_problem (@problem);
     foreach my $fraenkel (@fraenkels) {
