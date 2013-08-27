@@ -1838,13 +1838,6 @@ sub type_from_binder {
     }
 }
 
-sub document_from_node {
-    my $node = shift;
-    my $restricted_doc = XML::LibXML::Document->createDocument ();
-    $restricted_doc->setDocumentElement ($node->cloneNode (1));
-    return $restricted_doc;
-}
-
 sub type_for_constant {
     my $constant = shift;
     my $vid = get_vid_attribute ($constant);
