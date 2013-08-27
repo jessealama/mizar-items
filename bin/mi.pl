@@ -2115,6 +2115,13 @@ sub render_choice_term {
     return "epsilon_${typ_rendered}";
 }
 
+sub tptp_formula {
+    my $name = shift;
+    my $role = shift;
+    my $content = shift;
+    return "fof(${name},${role},${content})."
+}
+
 sub render_choices {
     my $node = shift;
     my $choice_xpath = 'descendant::Choice';
