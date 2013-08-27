@@ -19,7 +19,7 @@ use lib "$RealBin/../src/perl/";
 use Data::Dumper;
 use Parallel::Loops;
 
-use Utils qw(parse_xml_file);
+use Utils qw(parse_xml_file enable_xml_caching);
 
 Readonly my $LF => "\N{LF}";
 Readonly my $PREFIX_LC => lc 'ckb';
