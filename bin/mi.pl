@@ -1779,9 +1779,6 @@ sub render_semantic_content {
             my $rhs = $children[1];
             my $lhs_rendered = render_semantic_content ($lhs, \%parameters);
             my $rhs_rendered = render_semantic_content ($rhs, \%parameters);
-            if ($rhs_rendered eq '0') {
-                confess 'wtf? rhs node as string:', $LF, $rhs->toString;
-            }
             # is this an equivalence?
             if ($lhs->exists ('self::Not') && $rhs->exists ('self::Not')) {
                 (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
