@@ -57,10 +57,17 @@ sub ensure_sensible_commandline {
     return;
 }
 
+my $mizfiles = undef;
+my $miztmp_dir = undef;
+
 sub ensure_sensible_environment {
-    my $mizfiles = $ENV{'MIZFILES'};
+    $mizfiles = $ENV{'MIZFILES'};
     if (! defined $mizfiles) {
         confess 'Error: MIZFILES is not set.';
+    }
+    $miztmp_dir = "${mizfiles}/miztmp";
+    if (! -d $miztmp_dir) {
+        confess 'miztmp dir missing under ', $mizfiles;
     }
     return 1;
 }
@@ -250,14 +257,6 @@ sub article_dependencies {
                     $deps{$item} = 0;
                 } else {
                     my $item_xml = undef;
-                    my $mizfiles = $ENV{'MIZFILES'};
-                    if (! defined $mizfiles) {
-                        confess 'MIZFILES environment variable not defined.';
-                    }
-                    my $miztmp_dir = "${mizfiles}/miztmp";
-                    if (! -d $miztmp_dir) {
-                        confess 'miztmp dir missing under ', $mizfiles;
-                    }
                     my $prel_def = undef;
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
                         my $prel_dir = "${article_dir}/prel";
@@ -328,14 +327,6 @@ sub article_dependencies {
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
                         $item_xml = "${text_dir}/${aid_lc}.xml1";
                     } else {
-                        my $mizfiles = $ENV{'MIZFILES'};
-                        if (! defined $mizfiles) {
-                            confess 'MIZFILES environment variable not defined.';
-                        }
-                        my $miztmp_dir = "${mizfiles}/miztmp";
-                        if (! -d $miztmp_dir) {
-                            confess 'miztmp dir missing under ', $mizfiles;
-                        }
                         $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
                     }
                     if (! -e $item_xml) {
@@ -378,14 +369,6 @@ sub article_dependencies {
                     $deps{$item} = 0;
                 } else {
                     my $item_xml = undef;
-                    my $mizfiles = $ENV{'MIZFILES'};
-                    if (! defined $mizfiles) {
-                        confess 'MIZFILES environment variable not defined.';
-                    }
-                    my $miztmp_dir = "${mizfiles}/miztmp";
-                    if (! -d $miztmp_dir) {
-                        confess 'miztmp dir missing under ', $mizfiles;
-                    }
                     my $prel_def = undef;
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
                         my $prel_dir = "${article_dir}/prel";
@@ -2953,11 +2936,6 @@ sub constructor_node_of_constructor_item {
     my $article = article_of_item ($constructor_item);
     my $nr = nr_of_item ($constructor_item);
     my $kind = constructor_kind ($constructor_item);
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
-    my $miztmp_dir = "${mizfiles}/miztmp";
     my $item_xml = "${miztmp_dir}/${article}.xml1";
     if (! -e $item_xml) {
         confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -3467,14 +3445,6 @@ sub render_non_local_item {
         my @requirements = render_requirement ($nr);
         push (@results, @requirements);
     } else {
-        my $mizfiles = $ENV{'MIZFILES'};
-        if (! defined $mizfiles) {
-            confess 'MIZFILES environment variable not defined.';
-        }
-        my $miztmp_dir = "${mizfiles}/miztmp";
-        if (! -d $miztmp_dir) {
-            confess 'miztmp dir missing under ', $mizfiles;
-        }
         my $item_xml = "${miztmp_dir}/${article}.xml1";
         if (! -e $item_xml) {
             confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -3844,11 +3814,6 @@ sub is_redefined_constructor {
         my $article = article_of_item ($item);
         my $nr = nr_of_item ($item);
         my $kind = constructor_kind ($item);
-        my $mizfiles = $ENV{'MIZFILES'};
-        if (! defined $mizfiles) {
-            confess 'MIZFILES environment variable not defined.';
-        }
-        my $miztmp_dir = "${mizfiles}/miztmp";
         my $item_xml = "${miztmp_dir}/${article}.xml1";
         if (! -e $item_xml) {
             confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -3875,11 +3840,6 @@ sub definition_for_constructor {
     my $article = article_of_item ($constructor_item);
     my $nr = nr_of_item ($constructor_item);
     my $kind = constructor_kind ($constructor_item);
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
-    my $miztmp_dir = "${mizfiles}/miztmp";
     my $item_xml = "${miztmp_dir}/${article}.xml1";
     if (! -e $item_xml) {
         confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -4052,11 +4012,6 @@ sub value_type_for_constructor {
     my $article = article_of_item ($constructor_item);
     my $nr = nr_of_item ($constructor_item);
     my $kind = constructor_kind ($constructor_item);
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
-    my $miztmp_dir = "${mizfiles}/miztmp";
     my $item_xml = "${miztmp_dir}/${article}.xml1";
     if (! -e $item_xml) {
         confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -4115,11 +4070,6 @@ sub compatibility_for_constructor {
     my $article = article_of_item ($constructor_item);
     my $nr = nr_of_item ($constructor_item);
     my $kind = constructor_kind ($constructor_item);
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
-    my $miztmp_dir = "${mizfiles}/miztmp";
     my $item_xml = "${miztmp_dir}/${article}.xml1";
     if (! -e $item_xml) {
         confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -4152,11 +4102,6 @@ sub coherence_for_constructor {
     my $article = article_of_item ($constructor_item);
     my $nr = nr_of_item ($constructor_item);
     my $kind = constructor_kind ($constructor_item);
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
-    my $miztmp_dir = "${mizfiles}/miztmp";
     my $item_xml = "${miztmp_dir}/${article}.xml1";
     if (! -e $item_xml) {
         confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
@@ -4271,11 +4216,6 @@ sub render_fraenkel_item {
     } else {
         confess 'Unable to make sense of a Fraenkel item: ', $fraenkel_item;
     }
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
-    my $miztmp_dir = "${mizfiles}/miztmp";
     my $item_xml = "${miztmp_dir}/${fraenkel_aid}.xml1";
     if (! -e $item_xml) {
         confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
