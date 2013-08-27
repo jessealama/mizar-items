@@ -638,20 +638,13 @@ sub constructors_under_node {
     my @all_fields = $node->findnodes ('descendant::Field');
     my @all_numerals = $node->findnodes ('descendant::Num');
 
-    my %modes = ();
-    my %predicates = ();
-    my %functions = ();
-    my %attributes = ();
-    my %fields = ();
-    my %numerals = ();
-
     foreach my $mode (@all_modes) {
         my $kind = get_kind_attribute ($mode);
         my $aid = get_aid_attribute ($mode);
         my $nr = get_absnr_attribute ($mode);
         $kind = lc $kind;
         $aid = lc $aid;
-        $modes{"${aid}:${kind}constructor:${nr}"} = 0;
+        $constructors{"${aid}:${kind}constructor:${nr}"} = 0;
     }
 
     foreach my $predicate (@all_predicates) {
@@ -660,7 +653,7 @@ sub constructors_under_node {
         my $nr = get_absnr_attribute ($predicate);
         $kind = lc $kind;
         $aid = lc $aid;
-        $predicates{"${aid}:${kind}constructor:${nr}"} = 0;
+        $constructors{"${aid}:${kind}constructor:${nr}"} = 0;
     }
 
     foreach my $function (@all_functions) {
@@ -669,38 +662,29 @@ sub constructors_under_node {
         my $nr = get_absnr_attribute ($function);
         $kind = lc $kind;
         $aid = lc $aid;
-        $functions{"${aid}:${kind}constructor:${nr}"} = 0;
+        $constructors{"${aid}:${kind}constructor:${nr}"} = 0;
     }
 
     foreach my $attribute (@all_attributes) {
         my $aid = get_aid_attribute ($attribute);
         my $nr = get_nr_attribute ($attribute);
         $aid = lc $aid;
-        $attributes{"${aid}:vconstructor:${nr}"} = 0;
+        $constructors{"${aid}:vconstructor:${nr}"} = 0;
     }
 
     foreach my $field (@all_fields) {
         my $aid = get_aid_attribute ($field);
         my $nr = get_absnr_attribute ($field);
         $aid = lc $aid;
-        $fields{"${aid}:uconstructor:${nr}"} = 0;
+        $constructors{"${aid}:uconstructor:${nr}"} = 0;
     }
 
     foreach my $numeral (@all_numerals) {
         my $nr = get_nr_attribute ($numeral);
-        $modes{"numeral:${nr}"} = 0;
+        $constructors{"numeral:${nr}"} = 0;
     }
 
-    my @modes= keys %modes;
-    my @predicates = keys %predicates;
-    my @functions = keys %functions;
-    my @attributes = keys %attributes;
-    my @fields = keys %fields;
-    my @numerals = keys %numerals;
-
-    my @everything = (@modes, @predicates, @functions, @attributes, @fields, @numerals);
-
-    return @everything;
+    return keys %constructors;
 
 }
 
