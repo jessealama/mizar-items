@@ -992,10 +992,7 @@ foreach my $prel_file (@prel_files) {
         my @definiens_nodes
             = $fragment_xml_root->findnodes ('descendant::Definiens');
         foreach my $definiens_node (@definiens_nodes) {
-            my $kind = $definiens_node->getAttribute ('constrkind');
-            if (! defined $kind) {
-                confess 'Error: definiens node in', $LF, $LF, '  ', $prel_file, $LF, $LF, 'lacks a kind attribute.';
-            }
+            my $kind = get_attribute ($definiens_node, 'constrkind');
             $kind = lc $kind;
             my $key = "${kind}definiens";
             my $index = $enumeration{$key};
@@ -1040,10 +1037,7 @@ foreach my $prel_file (@prel_files) {
             'vpattern' => 1,
         );
         foreach my $pattern_node (@pattern_nodes) {
-            my $kind = $pattern_node->getAttribute ('kind');
-            if (! defined $kind) {
-                confess 'Error: pattern node in', $LF, $LF, '  ', $prel_file, $LF, $LF, 'lacks a kind attribute.';
-            }
+            my $kind = get_kind_attribute ($pattern_node);
             $kind = lc $kind;
             my $key = "${kind}pattern";
             my $index = $enumeration{$key};
@@ -1066,7 +1060,7 @@ foreach my $prel_file (@prel_files) {
         my @property_nodes
             = $fragment_xml_root->findnodes ('descendant::Property');
         foreach my $property_node (@property_nodes) {
-            my $x = $property_node->getAttribute ('x');
+            my $x = get_attribute ($property_node, 'x');
             if ($x ne '12') {
                 confess 'Error: we assume that Property nodes always have the value \'12\' for their x attribute.';
             }
@@ -1134,10 +1128,7 @@ foreach my $prel_file (@prel_files) {
             if (! defined $label_node) {
                 confess 'We are inspecting the Proposition node for an induced theorem in', $LF, $LF, $fragment_msx, $LF, $LF, 'but the node somehow lacks a Label child.';
             }
-            my $label = $label_node->getAttribute ('spelling');
-            if (! defined $label) {
-                confess 'Missing label for a theorem!';
-            }
+            my $label = get_attribute ($label_node, 'spelling');
             my $property = undef;
             if ($label =~ / \A (.+)Lemma \z/) {
                 $property = $1;
@@ -1632,9 +1623,9 @@ sub render_semantic_content {
     my $parameters_ref = shift;
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
     my $name = $node->nodeName ();
-    my $aid = get_kind_attribute ($node);
-    my $kind = get_kind_attribute ($node);
-    my $nr = $node->getAttribute ('nr');
+    my $aid = $node->getAttribute ('aid');
+    my $kind = $node->getAttribute ('kind');
+    my $nr = get_nr_attribute ($node);
     my $kind_lc = defined $kind ? lc $kind : undef;
     my $aid_lc = defined $aid ? lc $aid : undef;
     if ($name eq 'Pred' || $name eq 'Func') {
