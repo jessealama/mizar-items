@@ -366,26 +366,11 @@ sub article_dependencies {
             my $dfs_root = $dfs_doc->documentElement ();
             my @definientia = $dfs_root->findnodes ('descendant::Definiens');
             foreach my $definiens (@definientia) {
-                my $definiens_kind = $definiens->getAttribute ('constrkind');
-                my $aid = $definiens->getAttribute ('aid');
-                my $constraid = $definiens->getAttribute ('constraid');
-                my $nr = $definiens->getAttribute ('absconstrnr');
-                my $defnr = $definiens->getAttribute ('defnr');
-                if (! defined $definiens_kind) {
-                    confess 'Unable to make sense of a definiens in ', $file;
-                }
-                if (! defined $aid) {
-                    confess 'Definiens node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $constraid) {
-                    confess 'Definiens node in ', $file, ' lacks a constraid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Definiens node in ', $file, ' lacks an nr attribute.';
-                }
-                if (! defined $defnr) {
-                    confess 'Definiens node in ', $file, ' lacks a defnr attribute.';
-                }
+                my $definiens_kind = get_attribute ($definiens, 'constrkind');
+                my $aid = get_aid_attribute ($definiens);
+                my $constraid = get_attribute ($definiens, 'constraid');
+                my $nr = get_attribute ($definiens, 'absconstrnr');
+                my $defnr = get_attribute ($definiens, 'defnr');
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
                 if ($aid eq $constraid) {
@@ -456,18 +441,9 @@ sub article_dependencies {
             my $did_root = $did_doc->documentElement ();
             my @identifications = $did_root->findnodes ('descendant::Identify');
             foreach my $identification (@identifications) {
-                my $identification_kind = $identification->getAttribute ('constrkind');
-                my $aid = $identification->getAttribute ('aid');
-                my $nr = $identification->getAttribute ('nr');
-                if (! defined $identification_kind) {
-                    confess 'Unable to make sense of an identification in ', $file;
-                }
-                if (! defined $aid) {
-                    confess 'Identification node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Identification node in ', $file, ' lacks an nr attribute.';
-                }
+                my $identification_kind = get_attribute ($identification, 'constrkind');
+                my $aid = get_aid_attribute ($identification);
+                my $nr = get_nr_attribute ($identification);
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $identification_kind;
                 my $item = "${aid_lc}:${kind_lc}identification:${nr}";
@@ -485,18 +461,9 @@ sub article_dependencies {
             my $eno_root = $eno_doc->documentElement ();
             my @patterns = $eno_root->findnodes ('descendant::Pattern');
             foreach my $pattern (@patterns) {
-                my $pattern_kind = $pattern->getAttribute ('kind');
-                my $aid = $pattern->getAttribute ('aid');
-                my $nr = $pattern->getAttribute ('nr');
-                if (! defined $pattern_kind) {
-                    confess 'Unable to make sense of a pattern in ', $file;
-                }
-                if (! defined $aid) {
-                    confess 'Pattern node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Pattern node in ', $file, ' lacks an nr attribute.';
-                }
+                my $pattern_kind = get_kind_attribute ($pattern);
+                my $aid = get_aid_attribute ($pattern);
+                my $nr = get_nr_attribute ($pattern);
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $pattern_kind;
                 my $item = "${aid_lc}:${kind_lc}pattern:${nr}";
@@ -514,18 +481,9 @@ sub article_dependencies {
             my $epr_root = $epr_doc->documentElement ();
             my @properties = $epr_root->findnodes ('descendant::Property');
             foreach my $property (@properties) {
-                my $aid = $property->getAttribute ('aid');
-                my $nr = $property->getAttribute ('nr');
-                my $x = $property->getAttribute ('x');
-                if (! defined $aid) {
-                    confess 'Property node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Property node in ', $file, ' lacks an nr attribute.';
-                }
-                if (! defined $x) {
-                    confess 'Property node in ', $file, ' lacks an x attribute.';
-                }
+                my $aid = get_aid_attribute ($property);
+                my $nr = get_nr_attribute ($property);
+                my $x = get_attribute ($property, 'x');
                 # special case: only sethood (x = 12) is handled
                 if ($x != 12) {
                     confess 'Error: we assume that the value of the x attribute in a Property node is always \'12\'.';
@@ -546,14 +504,8 @@ sub article_dependencies {
             my $erd_root = $erd_doc->documentElement ();
             my @reductions = $erd_root->findnodes ('descendant::Reduction');
             foreach my $reduction (@reductions) {
-                my $aid = $reduction->getAttribute ('aid');
-                my $nr = $reduction->getAttribute ('nr');
-                if (! defined $aid) {
-                    confess 'Reduction node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Reduction node in ', $file, ' lacks an nr attribute.';
-                }
+                my $aid = get_aid_attribute ($reduction);
+                my $nr = get_nr_attribute ($reduction);
                 my $aid_lc = lc $aid;
                 my $item = "${aid_lc}:reduction:${nr}";
                 $deps{$item} = 0;
@@ -582,14 +534,8 @@ sub article_dependencies {
             my $esh_root = $esh_doc->documentElement ();
             my @schemes = $esh_root->findnodes ('descendant::Scheme');
             foreach my $scheme (@schemes) {
-                my $aid = $scheme->getAttribute ('aid');
-                my $nr = $scheme->getAttribute ('nr');
-                if (! defined $aid) {
-                    confess 'Scheme node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Scheme node in ', $file, ' lacks an nr attribute.';
-                }
+                my $aid = get_aid_attribute ($scheme);
+                my $nr = get_nr_attribute ($scheme);
                 my $aid_lc = lc $aid;
                 my $item = "${aid_lc}:scheme:${nr}";
                 $deps{$item} = 0;
@@ -606,18 +552,9 @@ sub article_dependencies {
             my $eth_root = $eth_doc->documentElement ();
             my @theorems = $eth_root->findnodes ('descendant::Theorem');
             foreach my $theorem (@theorems) {
-                my $kind = $theorem->getAttribute ('kind');
-                my $aid = $theorem->getAttribute ('aid');
-                my $nr = $theorem->getAttribute ('nr');
-                if (! defined $kind) {
-                    confess 'Theorem node in ', $file, ' lacks a kind attribute.';
-                }
-                if (! defined $aid) {
-                    confess 'Theorem node in ', $file, ' lacks an aid attribute.';
-                }
-                if (! defined $nr) {
-                    confess 'Theorem node in ', $file, ' lacks an nr attribute.';
-                }
+                my $kind = get_kind_attribute ($theorem);
+                my $aid = get_aid_attribute ($theorem);
+                my $nr = get_nr_attribute ($theorem);
                 my $aid_lc = lc $aid;
                 my $item;
                 if ($kind eq 'T') {
@@ -723,110 +660,48 @@ sub constructors_under_node {
     my %numerals = ();
 
     foreach my $mode (@all_modes) {
-        my $kind = $mode->getAttribute ('kind');
-        my $aid = $mode->getAttribute ('aid');
-        my $nr = $mode->getAttribute ('absnr');
-
-        if (! defined $kind) {
-            croak 'Error: mode node lacks a kind attribute.';
-        }
-
-        if (! defined $aid) {
-            croak 'Error: mode node lacks an aid attribute!';
-        }
-
-        if (! defined $nr) {
-            croak 'Error: mode node lacks an absnr attribute!';
-        }
-
+        my $kind = get_kind_attribute ($mode);
+        my $aid = get_aid_attribute ($mode);
+        my $nr = get_absnr_attribute ($mode);
         $kind = lc $kind;
         $aid = lc $aid;
         $modes{"${aid}:${kind}constructor:${nr}"} = 0;
     }
 
     foreach my $predicate (@all_predicates) {
-        my $kind = $predicate->getAttribute ('kind');
-        my $aid = $predicate->getAttribute ('aid');
-        my $nr = $predicate->getAttribute ('absnr');
-
-        if (! defined $kind) {
-            croak 'Error: predicate node lacks a kind attribute.';
-        }
-
-        if (! defined $aid) {
-            croak 'Error: predicate node lacks an aid attribute!';
-        }
-
-        if (! defined $nr) {
-            croak 'Error: predicate node lacks an absnr attribute!';
-        }
-
+        my $kind = get_kind_attribute ($predicate);
+        my $aid = get_aid_attribute ($predicate);
+        my $nr = get_absnr_attribute ($predicate);
         $kind = lc $kind;
         $aid = lc $aid;
         $predicates{"${aid}:${kind}constructor:${nr}"} = 0;
     }
 
     foreach my $function (@all_functions) {
-        my $kind = $function->getAttribute ('kind');
-        my $aid = $function->getAttribute ('aid');
-        my $nr = $function->getAttribute ('absnr');
-
-        if (! defined $kind) {
-            croak 'Error: function node lacks a kind attribute!';
-        }
-
-        if (! defined $aid) {
-            croak 'Error: function node lacks an aid attribute!';
-        }
-
-        if (! defined $nr) {
-            croak 'Error: function node lacks an absnr attribute!';
-        }
-
+        my $kind = get_kind_attribute ($function);
+        my $aid = get_aid_attribute ($function);
+        my $nr = get_absnr_attribute ($function);
         $kind = lc $kind;
         $aid = lc $aid;
         $functions{"${aid}:${kind}constructor:${nr}"} = 0;
     }
 
     foreach my $attribute (@all_attributes) {
-        my $aid = $attribute->getAttribute ('aid');
-        my $nr = $attribute->getAttribute ('nr');
-
-        if (! defined $aid) {
-            croak 'Error: attribute node lacks an aid attribute!';
-        }
-
-        if (! defined $nr) {
-            croak 'Error: attribute node lacks an nr attribute!';
-        }
-
+        my $aid = get_aid_attribute ($attribute);
+        my $nr = get_nr_attribute ($attribute);
         $aid = lc $aid;
         $attributes{"${aid}:vconstructor:${nr}"} = 0;
     }
 
     foreach my $field (@all_fields) {
-        my $aid = $field->getAttribute ('aid');
-        my $nr = $field->getAttribute ('absnr');
-
-        if (! defined $aid) {
-            croak 'Error: field node lacks an aid field!';
-        }
-
-        if (! defined $nr) {
-            croak 'Error: field node lacks an absnr field!';
-        }
-
+        my $aid = get_aid_attribute ($field);
+        my $nr = get_absnr_attribute ($field);
         $aid = lc $aid;
         $fields{"${aid}:uconstructor:${nr}"} = 0;
     }
 
     foreach my $numeral (@all_numerals) {
-        my $nr = $numeral->getAttribute ('nr');
-
-        if (! defined $nr) {
-            croak 'Error: numeral node lacks an nr attribute!';
-        }
-
+        my $nr = get_nr_attribute ($numeral);
         $modes{"numeral:${nr}"} = 0;
     }
 
