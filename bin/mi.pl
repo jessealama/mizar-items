@@ -2152,7 +2152,7 @@ sub render_choices {
                 }
             }
             $answer .= ')';
-            push (@choices, "fof(dt_${choice_term},axiom,(${answer})).");
+            push (@choices, tptp_formula ("dt_${choice_term}", 'axiom', "(${answer})");
         }
     } else {
         return;
@@ -2962,8 +2962,7 @@ sub free_for_constructor {
         $content = "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => ${content}))";
     }
     my $tptp_name = "free_g${g_nr}_${g_aid_lc}";
-    my $formula = "fof(${tptp_name},axiom,${content}).";
-    return $formula;
+    return tptp_name ($tptp_name, 'axiom', $content);
 }
 
 sub projections_for_structure_constructor {
@@ -3032,7 +3031,7 @@ sub projections_for_structure_constructor {
             $content = "(! [${var}] : (${guard} => ${content}))";
         }
         my $tptp_name = "projection_${i}_g${g_nr}_${g_aid_lc}";
-        my $formula = "fof(${tptp_name},axiom,${content}).";
+        my $formula = tptp_formula ($tptp_name, 'axiom', $content);
         push (@projections, $formula);
     }
     return @projections;
@@ -3085,7 +3084,7 @@ sub rcluster_for_structure_constructor {
     my $rcluster_aid_lc = lc $rcluster_aid;
     my $tptp_name = "rc${rcluster_nr}_${rcluster_aid_lc}";
     my $content = render_rcluster ($rcluster);
-    my $formula = "fof(${tptp_name},axiom,${content}).";
+    my $formula = tptp_formula ($tptp_name, 'axiom', $content);
     return $formula;
 }
 
@@ -3146,7 +3145,7 @@ sub widening_for_structure_constructor {
     }
     my $content = "(! [${var}] : (${new} => ${old}))";
     my $generalized = generalize_formula_from_arg_types ($content, @arg_types);
-    my $formula = "fof(${tptp_name},axiom,${generalized}).";
+    my $formula = tptp_formula ($tptp_name, 'axiom', $generalized);
     return $formula;
 }
 
@@ -3207,7 +3206,7 @@ sub existence_for_mode {
                 $content = "(! [${var}] : (${guard} => ${content}))";
             }
         }
-        my $formula = "fof(${tptp_name},theorem,${content}).";
+        my $formula = tptp_formula ($tptp_name, 'theorem', $content);
         return $formula;
     }
 }
@@ -3317,7 +3316,7 @@ sub render_requirement {
     my @named_results = ();
     foreach my $i (1 .. @results) {
         my $formula = $results[$i - 1];
-        push (@named_results, "fof(requirement_${nr}_${i},axiom,${formula}).");
+        push (@named_results, tptp_formula ("requirement_${nr}_${i}", 'axiom', $formula));
     }
     return @named_results;
 }
@@ -3377,11 +3376,11 @@ sub render_non_local_item {
     my $tptp_name = tptp_name_for_item ($item);
     my @results = ();
     if ($item eq 'hidden:rconstructor:1[symmetry]') {
-        push (@results, "fof(${tptp_name},axiom,(! [X,Y] : (X = Y => Y = X))).");
+        push (@results, tptp_formula ($tptp_name, 'axiom', '(! [X,Y] : (X = Y => Y = X))'));
     } elsif ($item eq 'hidden:rconstructor:1[reflexivity]') {
-        push (@results, "fof(${tptp_name},axiom,(! [X] : (X = X))).");
+        push (@results, tptp_formula ($tptp_name, 'axiom', '(! [X] : (X = X))'));
     } elsif ($item eq 'hidden:rconstructor:2[asymmetry]') {
-        push (@results, "fof(${tptp_name},axiom,(! [X,Y] : (r2_hidden(X,Y) => (~ r2_hidden(Y,X))))).");
+        push (@results, tptp_formula ($tptp_name, 'axiom', '(! [X,Y] : (r2_hidden(X,Y) => (~ r2_hidden(Y,X))))'));
     } elsif (is_requirement_item ($item)) {
         my @requirements = render_requirement ($nr);
         push (@results, @requirements);
@@ -3409,7 +3408,7 @@ sub render_non_local_item {
             my $target_theorem_kind = $target_theorem->getAttribute ('kind');
             if ($target_theorem_kind eq 'Pragma') {
                 my $content = '$true';
-                my $formula = "fof(${tptp_name},theorem,${content}).";
+                my $formula = tptp_formula ($tptp_name, 'theorem', $content);
                 push (@results, $formula);
             } elsif ($target_theorem_kind eq 'Theorem-Item') {
                 my $target_theorem_nr = $target_theorem->findvalue ('count (preceding-sibling::Item[@kind = "Theorem-Item"]) + 1');
