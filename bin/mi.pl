@@ -4375,7 +4375,6 @@ sub export_problem_for_item {
 warn ('', (scalar @items), ' to consider.');
 
 my @shuffled_items = shuffle @items;
-enable_xml_caching ();
 $pl->foreach (\@shuffled_items, sub { export_problem_for_item ($_) });
 
 __END__
