@@ -4406,8 +4406,8 @@ sub is_problematic_item {
     }
 }
 
-# Make the problems.  Trash it if it already exists.
-my $problem_dir = "${article_dir}/problems";
+# Make the problems.  Trash any earlier versions.
+my $problem_dir = catdir ($article_dir, 'problems');
 if (-d $problem_dir) {
     rmtree ($problem_dir)
         or confess 'Cannot delete ', $problem_dir;
