@@ -1644,22 +1644,13 @@ sub render_semantic_content {
     my $parameters_ref = shift;
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
     my $name = $node->nodeName ();
-    my $aid = $node->getAttribute ('aid');
-    my $kind = $node->getAttribute ('kind');
+    my $aid = get_kind_attribute ($node);
+    my $kind = get_kind_attribute ($node);
     my $nr = $node->getAttribute ('nr');
     my $kind_lc = defined $kind ? lc $kind : undef;
     my $aid_lc = defined $aid ? lc $aid : undef;
     if ($name eq 'Pred' || $name eq 'Func') {
-        if (! defined $aid) {
-            confess 'aid attribute missing from a Pred/Func';
-        }
-        if (! defined $kind) {
-            confess 'kind attribute missing from a Pred/Func';
-        }
-        my $absnr = $node->getAttribute ('absnr');
-        if (! defined $absnr) {
-            confess 'absnr attribute missing from a Pred/Func.';
-        }
+        my $absnr = get_absnr_attribute ($node);
         if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
             my $local_item = "${aid_lc}:${kind_lc}constructor:${absnr}";
             my $item = $local_item_table{$local_item};
