@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use File::Basename qw(basename);
 use File::Path qw(rmtree);
+use File::Spec::Functions qw(catfile catdir);
 use Getopt::Long;
 use Pod::Usage;
 use Carp qw(croak carp confess);
@@ -15,7 +16,7 @@ use IPC::Run qw(run start);
 use charnames qw( :full ); # for referring to characters in regular expressions
 use Readonly;
 use FindBin qw($RealBin);
-use lib "$RealBin/../src/perl/";
+use lib catdir ($RealBin, '..', 'src', 'perl');
 use Data::Dumper;
 use Parallel::Loops;
 
@@ -32,8 +33,8 @@ my $article_dir = $ARGV[0];
 
 ensure_local_db_structure ($article_dir);
 
-my $prel_dir = "${article_dir}/prel";
-my $text_dir = "${article_dir}/text";
+my $prel_dir = catdir ($article_dir, 'prel');
+my $text_dir = catdir ($article_dir, 'text');
 
 my $verbose = 0;
 my $man = 0;
@@ -68,7 +69,7 @@ sub ensure_sensible_environment {
     if (! defined $mizfiles) {
         confess 'Error: MIZFILES is not set.';
     }
-    $miztmp_dir = "${mizfiles}/miztmp";
+    $miztmp_dir = catdir ($mizfiles, 'miztmp');
     if (! -d $miztmp_dir) {
         confess 'miztmp dir missing under ', $mizfiles;
     }
@@ -81,8 +82,8 @@ ensure_sensible_environment ();
 sub ensure_local_db_structure
 {
     my $dir = shift;
-    my $prel = "${dir}/prel";
-    my $text = "${dir}/text";
+    my $prel = catdir ($dir, 'prel');
+    my $text = catdir ($dir, 'text');
     if (! -d $prel) {
         confess 'Error: the prel subdirectory is missing from ', $dir, '.';
     }
@@ -185,7 +186,7 @@ sub article_dependencies {
     my $article_path = shift;
 
     my $article_basename = basename ($article_path, '.miz');
-    my $article_xml_path = "${text_dir}/${article_basename}.xml";
+    my $article_xml_path = catfile ($text_dir, "${article_basename}.xml");
 
     my %deps = ();
     my @article_files = glob "${text_dir}/${article_basename}.*";
@@ -262,13 +263,13 @@ sub article_dependencies {
                     my $item_xml = undef;
                     my $prel_def = undef;
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        my $prel_dir = "${article_dir}/prel";
+                        my $prel_dir = catdir ($article_dir, 'prel');
                         if (! -d $prel_dir) {
                             confess 'No prel dir under ', $article_dir;
                         }
-                        $prel_def = "${prel_dir}/${aid_lc}.def";
+                        $prel_def = catfile ($prel_dir, "${aid_lc}.def");
                     } else {
-                        my $prel_dir = "${mizfiles}/prel";
+                        my $prel_dir = catdir ($mizfiles, 'prel');
                         if (! -d $prel_dir) {
                             confess 'prel directory missing.';
                         }
@@ -278,11 +279,11 @@ sub article_dependencies {
                         } else {
                             confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
                         }
-                        my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
+                        my $prel_first_letter_dir = catdir ($prel_dir, $first_letter);
                         if (! -d $prel_first_letter_dir) {
                             confess $first_letter, ' directory missing under ', $prel_dir;
                         }
-                        $prel_def = "${prel_first_letter_dir}/${aid_lc}.def";
+                        $prel_def = catfile ($prel_first_letter_dir, "${aid_lc}.def");
                     }
                     if (! -e $prel_def) {
                         confess $prel_def, ' missing.';
@@ -328,9 +329,9 @@ sub article_dependencies {
                 } else {
                     my $item_xml = undef;
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        $item_xml = "${text_dir}/${aid_lc}.xml1";
+                        $item_xml = catfile ($text_dir, "${aid_lc}.xml1");
                     } else {
-                        $item_xml = "${miztmp_dir}/${aid_lc}.xml1";
+                        $item_xml = catfile ($miztmp_dir, "${aid_lc}.xml1");
                     }
                     if (! -e $item_xml) {
                         confess 'Absolutized XML for ', $aid_lc, ' not found at ', $item_xml;
@@ -374,13 +375,13 @@ sub article_dependencies {
                     my $item_xml = undef;
                     my $prel_def = undef;
                     if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        my $prel_dir = "${article_dir}/prel";
+                        my $prel_dir = catdir ($article_dir, 'prel');
                         if (! -d $prel_dir) {
                             confess 'No prel dir under ', $article_dir;
                         }
-                        $prel_def = "${prel_dir}/${aid_lc}.def";
+                        $prel_def = catfile ($prel_dir, "${aid_lc}.def");
                     } else {
-                        my $prel_dir = "${mizfiles}/prel";
+                        my $prel_dir = catdir ($mizfiles, 'prel');
                         if (! -d $prel_dir) {
                             confess 'prel directory missing.';
                         }
@@ -390,11 +391,11 @@ sub article_dependencies {
                         } else {
                             confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
                         }
-                        my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
+                        my $prel_first_letter_dir = catdir ($prel_dir, $first_letter);
                         if (! -d $prel_first_letter_dir) {
                             confess $first_letter, ' directory missing under ', $prel_dir;
                         }
-                        $prel_def = "${prel_first_letter_dir}/${aid_lc}.def";
+                        $prel_def = catfile ($prel_first_letter_dir, "/${aid_lc}.def");
                     }
                     if (! -e $prel_def) {
                         confess $prel_def, ' missing.';
