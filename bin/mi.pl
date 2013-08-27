@@ -1426,7 +1426,6 @@ sub source_of_item {
     }
 }
 
-# # Sanity checks
 if ($opt_paranoid) {
     # Warn about items that depend on nothing
     foreach my $item (keys %resolved_dependencies) {
