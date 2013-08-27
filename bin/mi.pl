@@ -1796,74 +1796,8 @@ sub render_semantic_content {
         }
     } elsif ($name eq 'Not') {
         (my $arg) = $node->findnodes ('*[1]');
-        if (! defined $arg) {
-            confess 'Not node lacks a child!';
-        }
         my $rendered_arg = render_semantic_content ($arg, \%parameters);
-        if ($node->exists ('For/Not')) {
-            (my $for) = $node->findnodes ('For');
-            (my $typ) = $for->findnodes ('Typ');
-            if (! defined $typ) {
-                confess 'Typ node not found under a universal quantifier.';
-            }
-            my $var_name = undef;
-            if ($for->hasAttribute ('vid')) {
-                my $vid = $for->getAttribute ('vid');
-                $var_name = "X${vid}";
-            } else {
-                my $vid = $for->findvalue ('count (ancestor::For[not(@vid)]) + 1');
-                $var_name = "Y${vid}";
-            }
-            my $guard = render_guard ($var_name, $typ);
-            (my $matrix) = $for->findnodes ('Not/*[1]');
-            my $rendered_matrix = render_semantic_content ($matrix, \%parameters);
-            return "(? [${var_name}] : (${guard} & ${rendered_matrix}))";
-        } elsif ($node->exists ('For')) {
-            (my $for) = $node->findnodes ('For');
-            (my $typ) = $for->findnodes ('Typ');
-            if (! defined $typ) {
-                confess 'Typ node not found under a universal quantifier.';
-            }
-            my $vid = $for->getAttribute ('vid');
-            my $var_name = undef;
-            if (defined $vid) {
-                $var_name = "X${vid}";
-            } else {
-                my $vid = $for->findvalue ('count (ancestor::For[not(@vid)]) + 1');
-                $var_name = "Y${vid}";
-            }
-            my $guard = render_guard ($var_name, $typ);
-            (my $matrix) = $for->findnodes ('*[position() = last()]');
-            my $rendered_matrix = render_semantic_content ($matrix, \%parameters);
-            return "~(! [${var_name}] : (${guard} => ${rendered_matrix}))";
-        } elsif ($node->exists ('And[count(*) = 2]/Not')) {
-            (my $conjunction) = $node->findnodes ('And');
-            (my $lhs) = $conjunction->findnodes ('*[1]');
-            (my $rhs) = $conjunction->findnodes ('*[2]');
-            if ($lhs->exists ('self::Not') && $rhs->exists ('self::Not')) {
-                (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
-                (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
-                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, \%parameters);
-                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, \%parameters);
-                return "(${lhs_unnegated_rendered} | ${rhs_unnegated_rendered})";
-            } elsif ($lhs->exists ('self::Not')) {
-                (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
-                my $lhs_unnegated_rendered = render_semantic_content ($lhs_unnegated, \%parameters);
-                my $rhs_rendered = render_semantic_content ($rhs, \%parameters);
-                return "(${rhs_rendered} => ${lhs_unnegated_rendered})";
-            } elsif ($rhs->exists ('self::Not')) {
-                (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
-                my $rhs_unnegated_rendered = render_semantic_content ($rhs_unnegated, \%parameters);
-                my $lhs_rendered = render_semantic_content ($lhs, \%parameters);
-                return "(${lhs_rendered} => ${rhs_unnegated_rendered})";
-            } else {
-                my $answer = '(~ ' . $rendered_arg . ')';
-                return $answer;
-            }
-        } else {
-            my $answer = '(~ ' . $rendered_arg . ')';
-            return $answer;
-        }
+        return "(~ ${rendered_arg})";
     } elsif ($name eq 'Const') {
         my $vid = get_attribute ($node, 'vid');
         return "X${vid}";
