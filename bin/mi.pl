@@ -38,11 +38,14 @@ my $text_dir = "${article_dir}/text";
 my $verbose = 0;
 my $man = 0;
 my $help = 0;
+my $opt_paranoid = 0;
 
-GetOptions('help|?' => \$help,
-           'man' => \$man,
-           'verbose'  => \$verbose)
-    or pod2usage(2);
+GetOptions(
+    'help|?' => \$help,
+    'man' => \$man,
+    'verbose'  => \$verbose,
+    'paranoid' => \$opt_paranoid,
+) or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage(-exitstatus => 0, -verbose => 2) if $man;
 
@@ -1449,50 +1452,52 @@ sub source_of_item {
 }
 
 # # Sanity checks
-# # Warn about items that depend on nothing
-# foreach my $item (keys %resolved_dependencies) {
-#     my @deps = @{$resolved_dependencies{$item}};
-#     my $num_deps = scalar @deps;
-#     if ($num_deps == 0) {
-#         my $source_item = source_of_item ($item);
-#         carp $item, ' (coming from ', $source_item, ') depends on nothing.';
-#     }
+if ($opt_paranoid) {
+    # Warn about items that depend on nothing
+    foreach my $item (keys %resolved_dependencies) {
+        my @deps = @{$resolved_dependencies{$item}};
+        my $num_deps = scalar @deps;
+        if ($num_deps == 0) {
+            my $source_item = source_of_item ($item);
+            carp $item, ' (coming from ', $source_item, ') depends on nothing.';
+        }
 
-# }
+    }
 
-# # Every local item appearing as needed is "defined"
-# my %needed = ();
-# foreach my $item (keys %resolved_dependencies) {
-#     my @deps = @{$resolved_dependencies{$item}};
-#     foreach my $dep (@deps) {
-#         if ($dep =~ / \A ${article_name} [:] /) {
-#             $needed{$dep} = 0;
-#         }
-#     }
-# }
-# foreach my $item (keys %needed) {
-#     if (! defined $resolved_dependencies{$item}) {
-#         carp $item, ' appears as a dependency, but it is not "defined" in the current table.';
-#     }
-# }
+    # Every local item appearing as needed is "defined"
+    my %needed = ();
+    foreach my $item (keys %resolved_dependencies) {
+        my @deps = @{$resolved_dependencies{$item}};
+        foreach my $dep (@deps) {
+            if ($dep =~ / \A ${article_name} [:] /) {
+                $needed{$dep} = 0;
+            }
+        }
+    }
+    foreach my $item (keys %needed) {
+        if (! defined $resolved_dependencies{$item}) {
+            carp $item, ' appears as a dependency, but it is not "defined" in the current table.';
+        }
+    }
 
-# # Every fragment yields an item that appears in the local item table
-# my @local_items = keys %local_item_table;
-# my @miz_files = glob "${text_dir}/${PREFIX_LC}*.miz";
-# foreach my $miz_file (@miz_files) {
-#     my $fragment_number = fragment_number ($miz_file);
-#     if (none { $_ =~ / \A ${PREFIX_LC}${fragment_number} [:] / } @local_items) {
-#         carp 'Fragment ', $fragment_number, ' produced nothing that was registered in the local item table.';
-#     }
-# }
+    # Every fragment yields an item that appears in the local item table
+    my @local_items = keys %local_item_table;
+    my @miz_files = glob "${text_dir}/${PREFIX_LC}*.miz";
+    foreach my $miz_file (@miz_files) {
+        my $fragment_number = fragment_number ($miz_file);
+        if (none { $_ =~ / \A ${PREFIX_LC}${fragment_number} [:] / } @local_items) {
+            carp 'Fragment ', $fragment_number, ' produced nothing that was registered in the local item table.';
+        }
+    }
 
-# # Warn about unused items
-# foreach my $item (keys %resolved_dependencies) {
-#     if (! (defined $needed{$item})) {
-#         my $source = source_of_item ($item);
-#         carp $item, ' (coming from ', $source, ') is never used.';
-#     }
-# }
+    # Warn about unused items
+    foreach my $item (keys %resolved_dependencies) {
+        if (! (defined $needed{$item})) {
+            my $source = source_of_item ($item);
+            carp $item, ' (coming from ', $source, ') is never used.';
+        }
+    }
+}
 
 my $fragment_item_path = "${article_dir}/${article_name}.map";
 
