@@ -2348,15 +2348,7 @@ sub render_projectivity {
     }
     my $value_guard = render_guard ($value_var, $value_typ);
     $implication = "(! [${value_var}] : (${value_guard} => ${implication}))";
-    # now generalize
-    foreach my $i (1 .. $num_arg_types) {
-        my $var_index = $num_arg_types - $i + 1;
-        my $typ = $arg_types[$var_index - 1];
-        my $var = "X${var_index}";
-        my $guard = render_guard ($var, $typ);
-        $implication = "(! [${var}] : (${guard} => ${implication}))";
-    }
-    return $implication;
+    return generalize_formula_from_arg_types ($implication, @arg_types);
 }
 
 sub render_commutativity_node {
@@ -2406,15 +2398,7 @@ sub render_commutativity {
     $lhs .= ')';
     $rhs .= ')';
     my $equation = "(${lhs} = ${rhs})";
-    # now generalize
-    foreach my $i (1 .. $num_arg_types) {
-        my $var_index = $num_arg_types - $i + 1;
-        my $typ = $arg_types[$var_index - 1];
-        my $var = "X${var_index}";
-        my $guard = render_guard ($var, $typ);
-        $equation = "(! [${var}] : (${guard} => ${equation}))";
-    }
-    return $equation;
+    return generalize_formula_from_arg_types ($equation, @arg_types);
 }
 
 sub arg_types_of_constructor {
@@ -2653,15 +2637,7 @@ sub render_symmetry {
     $lhs .= ')';
     $rhs .= ')';
     my $equivalence = "(${lhs} => ${rhs})";
-    # now generalize
-    foreach my $i (1 .. $num_arg_types) {
-        my $var_index = $num_arg_types - $i + 1;
-        my $typ = $arg_types[$var_index - 1];
-        my $var = "X${var_index}";
-        my $guard = render_guard ($var, $typ);
-        $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
-    }
-    return $equivalence;
+    return generalize_formula_from_arg_types ($equivalence, @arg_types);
 }
 
 sub render_asymmetry_node {
@@ -2711,15 +2687,7 @@ sub render_asymmetry {
     $lhs .= ')';
     $rhs .= ')';
     my $equivalence = "(${lhs} => (~ ${rhs}))";
-    # now generalize
-    foreach my $i (1 .. $num_arg_types) {
-        my $var_index = $num_arg_types - $i + 1;
-        my $typ = $arg_types[$var_index - 1];
-        my $var = "X${var_index}";
-        my $guard = render_guard ($var, $typ);
-        $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
-    }
-    return $equivalence;
+    return generalize_formula_from_arg_types ($equivalence, @arg_types);
 }
 
 sub render_reflexivity_node {
@@ -3087,15 +3055,7 @@ sub render_rcluster {
     my $typ_guard = render_guard ($var, $typ);
     my $adj_guard = render_adjective_guards ($var, @adjectives);
     my $content = "(? [${var}] : (${typ_guard} & ${adj_guard}))";
-    # now generalize
-    foreach my $i (1 .. $num_arg_types) {
-        my $var_index = $num_arg_types - $i + 1;
-        my $var = "X${var_index}";
-        my $typ = $arg_types[$var_index - 1];
-        my $guard = render_guard ($var, $typ);
-        $content = "(! [${var}] : (${guard} => ${content}))";
-    }
-    return $content;
+    return generalize_formula_from_arg_types ($content, @arg_types);
 }
 
 sub rcluster_for_structure_constructor {
@@ -3178,15 +3138,8 @@ sub widening_for_structure_constructor {
         $old .= ')';
     }
     my $content = "(! [${var}] : (${new} => ${old}))";
-    # now generalize
-    foreach my $i (1 .. $num_arg_types) {
-        my $var_index = $num_arg_types - $i + 1;
-        my $var = "X${i}";
-        my $typ = $arg_types[$var_index - 1];
-        my $guard = render_guard ($var, $typ);
-        $content = "(! [${var}] : (${guard} => ${content}))";
-    }
-    my $formula = "fof(${tptp_name},axiom,${content}).";
+    my $generalized = generalize_formula_from_arg_types ($content, @arg_types);
+    my $formula = "fof(${tptp_name},axiom,${generalized}).";
     return $formula;
 }
 
@@ -3904,16 +3857,9 @@ sub definition_for_constructor {
                     }
                 }
                 my $equation = "(${lhs} = ${rhs})";
-                # now generalize
-                foreach my $i (1 .. $num_arg_types) {
-                    my $var_index = $num_arg_types - $i + 1;
-                    my $typ_node = $arg_types[$var_index - 1];
-                    my $var = "${var_prefix}${var_index}";
-                    my $guard = render_guard ($var, $typ_node);
-                    $equation = "(! [${var}] : (${guard} => ${equation}))";
-                }
+                my $generalized = generalize_formula_from_arg_types ($equation, @arg_types);
                 my $tptp_name = "redefinition_${new_tptp}";
-                my $formula = "fof(${tptp_name},definition,${equation}).";
+                my $formula = "fof(${tptp_name},definition,${generalized}).";
                 return $formula;
             } elsif ($kind eq 'm') {
                 (my $arg_types_node) = $constructor_node->findnodes ('ArgTypes');
@@ -3954,16 +3900,9 @@ sub definition_for_constructor {
                 my $value_guard = render_guard ($value_var, $result_type);
                 my $equivalence = "(${lhs} <=> ${rhs})";
                 $equivalence = "(! [${value_var}] : (${value_guard} => ${equivalence}))";
-                # now generalize
-                foreach my $i (1 .. $num_arg_types) {
-                    my $var_index = $num_arg_types - $i + 1;
-                    my $typ_node = $arg_types[$var_index - 1];
-                    my $var = "${var_prefix}${var_index}";
-                    my $guard = render_guard ($var, $typ_node);
-                    $equivalence = "(! [${var}] : (${guard} => ${equivalence}))";
-                }
+                my $generalized = generalize_formula_from_arg_types ($equivalence, @arg_types);
                 my $tptp_name = "redefinition_${new_tptp}";
-                my $formula = "fof(${tptp_name},definition,${equivalence}).";
+                my $formula = "fof(${tptp_name},definition,${generalized}).";
                 return $formula;
             } else {
                 confess 'How to deal with redefinitions for constructors of kind \'', $kind, '\'?';
@@ -4022,15 +3961,8 @@ sub value_type_for_constructor {
         $generic_term .= ')';
     }
     my $content = render_guard ($generic_term, $value_typ_node);
-    # now generalize the content using the arg types
-    foreach my $i (1 .. $num_arg_types) {
-        my $arg_number = $num_arg_types - $i + 1;
-        my $arg_typ = $arg_types[$arg_number - 1];
-        my $var_name = "X${arg_number}";
-        my $guard = render_guard ($var_name, $arg_typ);
-        $content = "(! [${var_name}] : (${guard} => ${content}))";
-    }
-    my $formula = "fof(${tptp_name},theorem,${content}).";
+    my $generalized = generalize_formula_from_arg_types ($content, @arg_types);
+    my $formula = "fof(${tptp_name},theorem,${generalized}).";
     return $formula;
 }
 
@@ -4336,15 +4268,8 @@ sub problem_for_item {
                     $generic_tptp_constructor .= ')';
                 }
                 my $disequation = "${numeral} != ${generic_tptp_constructor}";
-                # now generalize
-                foreach my $i (1 .. $num_arg_types) {
-                    my $var_index = $num_arg_types - $i + 1;
-                    my $typ = $arg_types[$var_index - 1];
-                    my $var = "X${var_index}";
-                    my $guard = render_guard ($var, $typ);
-                    $disequation = "(! [${var}] : (${guard} => ${disequation}))";
-                }
-                my $formula = "fof(${tptp_name},axiom,${disequation}).";
+                my $generalized = generalize_formula_from_arg_types ($disequation, @arg_types);
+                my $formula = "fof(${tptp_name},axiom,${generalized}).";
                 push (@problem, $formula);
             } else {
                 confess 'Cannot make sense of TPTP constructor \'', $gconstructor, '\'.';
