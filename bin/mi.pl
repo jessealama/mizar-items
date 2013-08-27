@@ -2179,18 +2179,9 @@ Readonly my %CONSTRUCTOR_PROPERTY_MAKERS =>
 
 sub render_tptp_constructor {
     my $constructor = shift;
-    my $kind = $constructor->getAttribute ('kind');
-    my $aid = $constructor->getAttribute ('aid');
-    my $nr = $constructor->getAttribute ('nr');
-    if (! defined $kind) {
-        confess 'Constructor node lacks a kind attribute.';
-    }
-    if (! defined $aid) {
-        confess 'Constructor node lacks an aid attribute.';
-    }
-    if (! defined $nr) {
-        confess 'Constructor node lacks a nr attribute.';
-    }
+    my $kind = get_kind_attribute ($constructor);
+    my $aid = get_aid_attribute ($constructor);
+    my $nr = get_nr_attribute ($constructor);
     my $aid_lc = lc $aid;
     my $kind_lc = lc $kind;
     return "${kind_lc}${nr}_${aid_lc}";
@@ -3884,14 +3875,8 @@ sub definition_for_constructor {
                 if (! defined $result_type) {
                     confess 'Result type not found for a functor constructor.';
                 }
-                my $original_aid = $constructor_node->getAttribute ('redefaid');
-                my $original_nr = $constructor_node->getAttribute ('absredefnr');
-                if (! defined $original_aid) {
-                    confess 'Redefined mode constructor lacks a redefaid attribute.';
-                }
-                if (! defined $original_nr) {
-                    confess 'Redefined mode constructor lacks an absredefnr attribute.';
-                }
+                my $original_aid = get_attribute ($constructor_node, 'redefaid');
+                my $original_nr = get_attribute ($constructor_node, 'absredefnr');
                 my $original_aid_lc = lc $original_aid;
                 my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
                 my $original_constructor = constructor_node_of_constructor_item ($original_tptp);
@@ -3947,14 +3932,8 @@ sub definition_for_constructor {
                 if (! defined $result_type) {
                     confess 'Result type not found for a mode constructor.';
                 }
-                my $original_aid = $constructor_node->getAttribute ('redefaid');
-                my $original_nr = $constructor_node->getAttribute ('absredefnr');
-                if (! defined $original_aid) {
-                    confess 'Redefined mode constructor lacks a redefaid attribute.';
-                }
-                if (! defined $original_nr) {
-                    confess 'Redefined mode constructor lacks an absredefnr attribute.';
-                }
+                my $original_aid = get_attribute ($constructor_node, 'redefaid');
+                my $original_nr = get_attribute ($constructor_node, 'absredefnr');
                 my $original_aid_lc = lc $original_aid;
                 my $original_tptp = "${kind}${original_nr}_${original_aid_lc}";
                 my $original_constructor = constructor_node_of_constructor_item ($original_tptp);
