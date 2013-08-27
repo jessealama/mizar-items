@@ -1779,36 +1779,7 @@ sub render_semantic_content {
             my $rhs = $children[1];
             my $lhs_rendered = render_semantic_content ($lhs, \%parameters);
             my $rhs_rendered = render_semantic_content ($rhs, \%parameters);
-            # is this an equivalence?
-            if ($lhs->exists ('self::Not') && $rhs->exists ('self::Not')) {
-                (my $lhs_unnegated) = $lhs->findnodes ('*[1]');
-                (my $rhs_unnegated) = $rhs->findnodes ('*[1]');
-                if ($lhs_unnegated->exists ('self::And') && $rhs_unnegated->exists ('self::And')) {
-                    (my $lhs_unnegated_lhs) = $lhs_unnegated->findnodes ('*[1]');
-                    (my $lhs_unnegated_rhs) = $lhs_unnegated->findnodes ('*[2]');
-                    (my $rhs_unnegated_lhs) = $rhs_unnegated->findnodes ('*[1]');
-                    (my $rhs_unnegated_rhs) = $rhs_unnegated->findnodes ('*[2]');
-                    if ($lhs_unnegated_rhs->exists ('self::Not') && $rhs_unnegated_rhs->exists ('self::Not')) {
-                        (my $lhs_unnegated_rhs_unnegated) = $lhs_unnegated_rhs->findnodes ('*[1]');
-                        (my $rhs_unnegated_rhs_unnegated) = $rhs_unnegated_rhs->findnodes ('*[1]');
-                        my $p1 = render_semantic_content ($lhs_unnegated_lhs, \%parameters);
-                        my $q1 = render_semantic_content ($lhs_unnegated_rhs_unnegated, \%parameters);
-                        my $q2 = render_semantic_content ($rhs_unnegated_lhs, \%parameters);
-                        my $p2 = render_semantic_content ($rhs_unnegated_rhs_unnegated, \%parameters);
-                        if ($p1 eq $p2 && $q1 eq $q2) {
-                            return "(${p1} <=> ${q1})";
-                        } else {
-                            return "(${lhs_rendered} & ${rhs_rendered})";
-                        }
-                    } else {
-                        return "(${lhs_rendered} & ${rhs_rendered})";
-                    }
-                } else {
-                    return "(${lhs_rendered} & ${rhs_rendered})";
-                }
-            } else {
-                return "(${lhs_rendered} & ${rhs_rendered})";
-            }
+            return "(${lhs_rendered} & ${rhs_rendered})";
         } else {
             my $answer = '(';
             my $num_children = scalar @children;
