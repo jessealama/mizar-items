@@ -4422,7 +4422,7 @@ sub export_problem_for_item {
     if (is_problematic_item ($item)) {
         my @problem = problem_for_item ($item);
         my $item_label = tptp_name_for_item ($item);
-        my $problem_file = "${problem_dir}/${item_label}";
+        my $problem_file = catfile ($problem_dir, $item_label);
         open (my $problem_fh, '>', $problem_file)
             or confess 'Unable to open output filehandle at ', $problem_file;
         foreach my $formula (@problem) {
