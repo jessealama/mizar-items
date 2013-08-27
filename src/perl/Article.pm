@@ -2619,7 +2619,7 @@ sub itemize {
 
     print 'done.', "\n";
 
-    print 'Split ', $article_basename, ': ';
+    print 'Split: ';
     apply_stylesheet ($split_stylesheet,
 		      $article_wsx_in_target_dir,
 		      $article_wsx_in_target_dir)
@@ -2628,7 +2628,7 @@ sub itemize {
 
     print 'done.', "\n";
 
-    print 'Factor proofs';
+    print 'Factor proofs: ';
     apply_stylesheet ($factor_proofs_stylesheet,
 		      $article_wsx_in_target_dir,
 		      $article_wsx_in_target_dir);
@@ -3520,6 +3520,7 @@ sub without_reservations {
 				     { 'suppress-environment' => '1' });
 
     $self->mglue ();
+    $self->wsmparser ();
 
     return 1;
 

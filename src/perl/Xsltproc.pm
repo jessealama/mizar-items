@@ -18,6 +18,14 @@ Readonly my $LF => "\N{LF}";
 
 XML::LibXSLT->max_depth ($RECURSION_DEPTH);
 
+sub print_message {
+    my $msg = shift;
+    warn $msg;
+    return;
+}
+
+XML::LibXSLT->debug_callback (\&print_message);
+
 my $xml_parser = XML::LibXML->new ();
 
 my %parsed_stylesheet_table = ();
@@ -49,8 +57,8 @@ sub apply_stylesheet {
     if ($document =~ /[\N{LF}]/m) {
 	# this isn't a file
 	my $doc = $xml_parser->load_xml (string => $document);
-	$results = eval {$parsed_stylesheet->transform ($doc,
-							%parameters) };
+	$results = eval { $parsed_stylesheet->transform ($doc,
+							 %parameters) };
 	$err = $!;
     } elsif (-e $document && -r $document) {
 	$results = eval { $parsed_stylesheet->transform_file ($document,
