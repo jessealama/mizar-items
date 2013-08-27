@@ -1832,6 +1832,20 @@ sub constant_less_than_constant {
     }
 }
 
+sub generalize_formula_from_arg_types {
+    my $formula = shift;
+    my @arg_types = @_;
+    my $num_arg_types = scalar @arg_types;
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var = "X${var_index}";
+        my $guard = render_guard ($var, $typ);
+        $formula = "(! [${var}] : (${guard} => ${formula}))";
+    }
+    return $formula;
+}
+
 sub generalize_formula_from_constants {
     my $formula = shift;
     my @constants = @_;
