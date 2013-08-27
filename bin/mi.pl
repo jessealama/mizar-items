@@ -2022,10 +2022,6 @@ sub deftheorem_from_definiens {
     my $kind = definiens_kind ($item);
     my $kind_uc = uc $kind;
     my $nr = nr_of_item ($item);
-    my $mizfiles = $ENV{'MIZFILES'};
-    if (! defined $mizfiles) {
-        confess 'MIZFILES environment variable not defined.';
-    }
     my $prel_dir = "${mizfiles}/prel";
     if (! -d $prel_dir) {
         confess 'prel directory missing.';
