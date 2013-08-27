@@ -4215,7 +4215,7 @@ sub problem_for_item {
     my @scheme_deps = ();
     foreach my $dep (@deps) {
         if (is_scheme_item ($dep)) {
-            push (@scheme_deps, $dep);
+            push (@scheme_deps, $dep); # we will deal with these later
         } elsif (has_semantic_content ($dep)) {
             my @rendered = render_non_local_item ($dep);
             push (@problem, @rendered);
