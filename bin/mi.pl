@@ -2963,7 +2963,7 @@ sub free_for_constructor {
         $content = "(! [${var_1},${var_2}] : ((${guard_1} & ${guard_2}) => ${content}))";
     }
     my $tptp_name = "free_g${g_nr}_${g_aid_lc}";
-    return tptp_name ($tptp_name, 'axiom', $content);
+    return tptp_formula ($tptp_name, 'axiom', $content);
 }
 
 sub projections_for_structure_constructor {
