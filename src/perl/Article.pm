@@ -1789,10 +1789,10 @@ sub minimize_extension {
                       undef);
 
     my $md5_now = md5sum_for_file ($article_xml_stripped);
+
     if ($md5_now ne $article_xml_md5) {
         croak 'Error: the MD5 sum for ', $self->name (), ' changed between whole-article minimization.';
     }
-
 
     my %minimized_table
         = %{$self->minimize_elements (\@elements,
