@@ -2152,7 +2152,7 @@ sub render_choices {
                 }
             }
             $answer .= ')';
-            push (@choices, tptp_formula ("dt_${choice_term}", 'axiom', "(${answer})");
+            push (@choices, tptp_formula ("dt_${choice_term}", 'axiom', "(${answer})"));
         }
     } else {
         return;
