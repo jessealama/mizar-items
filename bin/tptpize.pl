@@ -928,8 +928,11 @@ sub render_item {
             if (! defined $coherence_node) {
                 confess 'Coherence node not found under a Correctness node following a CCluster node.';
             }
-            (my $content) = $coherence_node->findnodes ('*[position() = last()]');
-            return render_semantic_content ($content);
+            (my $proposition) = $coherence_node->findnodes ('following-sibling::*[1][self::Proposition]');
+            if (! defined $proposition) {
+                confess 'Proposition node not found where expected:', $LF, $LF, $coherence_node->toString;
+            }
+            return render_proposition ($proposition);
         }
     } elsif ($name eq 'RCluster') {
         (my $existence_node) = $item->findnodes ('following-sibling::*[1][self::Existence]');
@@ -948,8 +951,11 @@ sub render_item {
             if (! defined $existence_node) {
                 confess 'Existence node not found under a Correctness node immediately following an RCluster node.';
             }
-            (my $content) = $existence_node->findnodes ('*[position() = last()]');
-            return render_semantic_content ($content);
+            (my $proposition) = $existence_node->findnodes ('following-sibling::*[1][self::Proposition]');
+            if (! defined $proposition) {
+                confess 'Proposition node not found where expected:', $LF, $LF, $existence_node->toString;
+            }
+            return render_proposition ($proposition);
         }
     } elsif ($name eq 'FCluster') {
         (my $coherence_node) = $item->findnodes ('following-sibling::Coherence');
@@ -960,7 +966,7 @@ sub render_item {
             }
             return render_proposition ($proposition);
         } else {
-            (my $correctness_node) = $item->findnodes ('following-sibling::Correctness');
+            (my $correctness_node) = $item->findnodes ('following-sibling::*[1][self::Correctness]');
             if (! defined $correctness_node) {
                 confess 'Neither a Coherence nor a Correctness node was found following an FCluster node.';
             }
@@ -968,19 +974,32 @@ sub render_item {
             if (! defined $coherence_node) {
                 confess 'Coherence node not found under a Correctness node following an FCluster node.';
             }
-            (my $content) = $coherence_node->findnodes ('*[position() = last()]');
-            return render_semantic_content ($content);
+            (my $proposition) = $coherence_node->findnodes ('following-sibling::*[1][self::Proposition]');
+            if (! defined $proposition) {
+                confess 'Proposition node not found where expected.';
+            }
+            return render_proposition ($proposition);
         }
     } elsif ($name eq 'Identify') {
         (my $compatibility_node) = $item->findnodes ('following-sibling::Compatibility');
-        if (! defined $compatibility_node) {
-            confess 'Compatibility node not found following an Identify.';
+        if (defined $compatibility_node) {
+            (my $proposition) = $compatibility_node->findnodes ('Proposition');
+            if (! defined $proposition) {
+                confess 'Proposition node not found under a Compatibility node.';
+            }
+            return render_proposition ($proposition);
+        } else {
+            (my $correctness_node) = $item->findnodes ('following-sibling::Correctness');
+            if (! defined $correctness_node) {
+                confess 'Neither a Compatibility nor a Correctness node was found immediately following an Identify node.';
+            }
+            (my $compatibility_node) = $correctness_node->findnodes ('Compatibility');
+            if (! defined $compatibility_node) {
+                confess 'Compatibility node not found under a Correctness node immediately following an Identify node.';
+            }
+            return render_proposition ($compatibility_node);
         }
-        (my $proposition) = $compatibility_node->findnodes ('Proposition');
-        if (! defined $proposition) {
-            confess 'Proposition node not found under a Compatibility node.';
-        }
-        return render_proposition ($proposition);
+
     } elsif ($name eq 'Reduction') {
         (my $reducibility_node) = $item->findnodes ('following-sibling::Reducibility');
         if (! defined $reducibility_node) {
@@ -1059,6 +1078,34 @@ sub render_item {
         return render_sethood ($constructor);
     } elsif ($name eq 'DefTheorem') {
         return render_deftheorem ($item);
+    } elsif ($name eq 'Coherence') {
+        if ($item->exists ('parent::Correctness')) {
+            return render_proposition ($item);
+        } else {
+            (my $proposition) = $item->findnodes ('Proposition');
+            if (! defined $proposition) {
+                confess 'Proposition node not found under a Coherence node.';
+            }
+            return render_proposition ($proposition);
+        }
+    } elsif ($name eq 'Existence') {
+        (my $proposition) = $item->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition node not found under an Existence node.';
+        }
+        return render_proposition ($proposition);
+    } elsif ($name eq 'Uniqueness') {
+        (my $proposition) = $item->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition node not found under a Uniqueness node.';
+        }
+        return render_proposition ($proposition);
+    } elsif ($name eq 'Compatibility') {
+        (my $proposition) = $item->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition node not found under a Compatibility node.';
+        }
+        return render_proposition ($proposition);
     } else {
         confess 'How to render items of kind \'', $name, '\'?';
     }
@@ -1068,17 +1115,20 @@ sub type_for_constant {
     my $constant = shift;
     my $vid = get_vid_attribute ($constant);
     my $nr = get_nr_attribute ($constant);
-    my $ancestor_binder_xpath = "ancestor::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
-    (my $ancestor_binder) = $constant->findnodes ($ancestor_binder_xpath);
-    if (defined $ancestor_binder) {
-        return type_from_binder ($ancestor_binder);
+    my $node = $constant;
+    my $preceding_sibling_binder_xpath = "preceding-sibling::*[(self::Typ[\@vid = \"${vid}\"]) or ((self::Let or self::Reconsider or self::Consider or self::Given or self::TakeAsVar) and Typ[\@vid = \"${vid}\"])]";
+    my $binder = undef;
+    until ((! defined $node) || (defined $binder)) {
+        if ($node->exists ($preceding_sibling_binder_xpath)) {
+            ($binder) = $node->findnodes ($preceding_sibling_binder_xpath);
+        } else {
+            $node = $node->parentNode;
+        }
     }
-    my $preceding_binder_xpath = "preceding::*[\@vid = \"${vid}\" and (self::For or self::Typ)][1]";
-    (my $preceding_binder) = $constant->findnodes ($preceding_binder_xpath);
-    if (! defined $preceding_binder) {
-        confess 'Could find no binder for a constant with vid = ', $vid, '.';
+    if (! defined $binder) {
+        confess 'We failed to find a binder for ', $constant->toString;
     }
-    return type_from_binder ($preceding_binder);
+    return type_from_binder ($binder);
 }
 
 sub type_from_binder {
@@ -1092,6 +1142,36 @@ sub type_from_binder {
         return $typ;
     } elsif ($binder_name eq 'Typ') {
         return $binder;
+    } elsif ($binder_name eq 'Let') {
+        (my $typ) = $binder->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'Let node lacks a Typ child.';
+        }
+        return $typ;
+    } elsif ($binder_name eq 'Reconsider') {
+        (my $typ) = $binder->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'Reconsider node lacks a Typ child.';
+        }
+        return $typ;
+    } elsif ($binder_name eq 'Consider') {
+        (my $typ) = $binder->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'Reconsider node lacks a Typ child.';
+        }
+        return $typ;
+    } elsif ($binder_name eq 'Given') {
+        (my $typ) = $binder->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'Given node lacks a Typ child.';
+        }
+        return $typ;
+    } elsif ($binder_name eq 'TakeAsVar') {
+        (my $typ) = $binder->findnodes ('Typ');
+        if (! defined $typ) {
+            confess 'TakeAsVar node lacks a Typ child.';
+        }
+        return $typ;
     } else {
         confess 'What kind of binder is', $LF, $binder->toString (), $LF, '?';
     }
@@ -1113,6 +1193,22 @@ sub render_proposition {
     my $content = render_semantic_content ($content_node);
     my @constants = constants_under_node ($content_node);
     return generalize_formula_from_constants ($content, @constants);
+}
+
+sub tptp_name_for_existence {
+    my $kconstructor = shift;
+    my $k_nr = get_nr_attribute ($kconstructor);
+    my $k_aid = get_aid_attribute ($kconstructor);
+    my $k_aid_lc = lc $k_aid;
+    return "existence_k${k_nr}_${k_aid_lc}";
+}
+
+sub tptp_name_for_uniqueness {
+    my $kconstructor = shift;
+    my $k_nr = get_nr_attribute ($kconstructor);
+    my $k_aid = get_aid_attribute ($kconstructor);
+    my $k_aid_lc = lc $k_aid;
+    return "uniqueness_k${k_nr}_${k_aid_lc}";
 }
 
 sub tptp_name_for_free {
@@ -1179,6 +1275,98 @@ sub free_for_constructor {
     return $content;
 }
 
+sub existence_for_constructor {
+    my $kconstructor = shift;
+    my $relnr = get_relnr_attribute ($kconstructor);
+    (my $block) = $kconstructor->findnodes ('ancestor::DefinitionBlock');
+    if (! defined $block) {
+        confess 'Where is the enclosing DefinitionBlock for a K constructor?', $LF, $kconstructor->toString;
+    }
+    my $definiens_xpath = "following-sibling::Definiens[\@constrkind = \"K\" and \@constrnr = \"${relnr}\"]";
+    (my $definiens) = $block->findnodes ($definiens_xpath);
+    if (! defined $definiens) {
+        confess 'Where is the Definiens matching the XPath instruction', $LF, $LF, '  ', $definiens_xpath, $LF, $LF, 'following the constructor', $LF, $LF, $kconstructor->toString, $LF, $LF, '?';
+    }
+    (my $defmeaning) = $definiens->findnodes ('DefMeaning[@kind = "e"]');
+    if (! defined $defmeaning) {
+        confess 'We expect to find an expandable DefMeaning in the Definiens node', $LF, $LF, $definiens->toString;
+    }
+    (my $content) = $defmeaning->findnodes ('*[position() = last()]');
+    (my $result_typ) = $kconstructor->findnodes ('*[position() = last()]');
+    my $existential_var = 'Y';
+    my $k_nr = get_nr_attribute ($kconstructor);
+    my $k_aid = get_aid_attribute ($kconstructor);
+    my $k_aid_lc = lc $k_aid;
+    (my $arg_types_node) = $kconstructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a K cosntructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    my $var_prefix = 'X';
+    my $lhs = "${existential_var}";
+    my $rhs = render_semantic_content ($content);
+    my $equation = "(${lhs} = ${rhs})";
+    my $existential_guard = render_guard ($existential_var, $result_typ);
+    my $existential = "(? [${existential_var}] : (${existential_guard} & ${equation}))";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var = "${var_prefix}${var_index}";
+        my $guard = render_guard ($var, $typ);
+        $existential = "(! [${var}] : (${guard} => ${existential}))";
+    }
+    return $existential;
+}
+
+sub uniqueness_for_constructor {
+    my $kconstructor = shift;
+    my $relnr = get_relnr_attribute ($kconstructor);
+    (my $block) = $kconstructor->findnodes ('ancestor::DefinitionBlock');
+    if (! defined $block) {
+        confess 'Where is the enclosing DefinitionBlock for a K constructor?', $LF, $kconstructor->toString;
+    }
+    my $definiens_xpath = "following-sibling::Definiens[\@constrkind = \"K\" and \@constrnr = \"${relnr}\"]";
+    (my $definiens) = $block->findnodes ($definiens_xpath);
+    if (! defined $definiens) {
+        confess 'Where is the Definiens matching the XPath instruction', $LF, $LF, '  ', $definiens_xpath, $LF, $LF, 'following the constructor', $LF, $LF, $kconstructor->toString, $LF, $LF, '?';
+    }
+    (my $defmeaning) = $definiens->findnodes ('DefMeaning[@kind = "e"]');
+    if (! defined $defmeaning) {
+        confess 'We expect to find an expandable DefMeaning in the Definiens node', $LF, $LF, $definiens->toString;
+    }
+    (my $content) = $defmeaning->findnodes ('*[position() = last()]');
+    (my $result_typ) = $kconstructor->findnodes ('*[position() = last()]');
+    my $uniqueness_var_1 = 'A';
+    my $uniqueness_var_2 = 'B';
+    my $k_nr = get_nr_attribute ($kconstructor);
+    my $k_aid = get_aid_attribute ($kconstructor);
+    my $k_aid_lc = lc $k_aid;
+    (my $arg_types_node) = $kconstructor->findnodes ('ArgTypes');
+    if (! defined $arg_types_node) {
+        confess 'ArgTypes node missing under a K cosntructor.';
+    }
+    my @arg_types = $arg_types_node->findnodes ('*');
+    my $num_arg_types = scalar @arg_types;
+    my $var_prefix = 'X';
+    my $term = render_semantic_content ($content);
+    my $equation = "(${uniqueness_var_1} = ${uniqueness_var_2})";
+    my $uniquess_guard_1 = render_guard ($uniqueness_var_1, $result_typ);
+    my $uniquess_guard_2 = render_guard ($uniqueness_var_2, $result_typ);
+    my $implication = "(((${uniqueness_var_1} = ${term}) & (${uniqueness_var_2} = ${term})) => ${equation})";
+    $implication = "(! [${uniqueness_var_1},${uniqueness_var_2}] : ((${uniquess_guard_1} & ${uniquess_guard_2}) => ${implication}))";
+    # now generalize
+    foreach my $i (1 .. $num_arg_types) {
+        my $var_index = $num_arg_types - $i + 1;
+        my $typ = $arg_types[$var_index - 1];
+        my $var = "${var_prefix}${var_index}";
+        my $guard = render_guard ($var, $typ);
+        $implication = "(! [${var}] : (${guard} => ${implication}))";
+    }
+    return $implication;
+}
+
 sub ensure_same_toplevel_origin {
     my $node_1 = shift;
     my $node_2 = shift;
@@ -1208,20 +1396,24 @@ sub generalize_formula_from_constants {
     until (scalar @constants == 0) {
         my $constant = pop @constants;
         my $vid = get_vid_attribute ($constant);
+        my $nr = get_nr_attribute ($constant);
         my $typ = type_for_constant ($constant);
+        # warn 'type for constant ', $constant->toString, ' is ', $LF, $typ->toString;
         # ensure_same_toplevel_origin ($typ, $constant);
         my $var_name = "X${vid}";
         my $guard = render_guard ($var_name, $typ);
         $new_formula = "(! [${var_name}] : (${guard} => ${new_formula}))";
-        $handled_constants{$vid} = 0;
+        $handled_constants{$nr} = 0;
         # are there any new constants under the type?
         my @constants_under_typ = constants_under_node ($typ);
         foreach my $c (@constants_under_typ) {
             my $vid = get_vid_attribute ($c);
-            if (! defined $handled_constants{$vid}) {
+            my $nr = get_nr_attribute ($c);
+            if (! defined $handled_constants{$nr}) {
                 # we haven't seen it yet
-                if (none { $vid == get_vid_attribute ($_) } @constants) {
+                if (none { get_nr_attribute ($_) eq "${nr}" } @constants) {
                     # we wouldn't normally encounter it
+                    # warn 'NEW CONSTANT: ', $c->toString;
                     push (@constants, $c);
                 }
             }
@@ -1356,6 +1548,24 @@ sub tptp_name_for_item {
         my $pos_xpath = "preceding::From[not(ancestor::SchemeBlock) and \@aid = \"${from_aid}\" and \@absnr = \"${from_nr}\"]";
         my $pos = $from->findvalue ("count (${pos_xpath}) + 1");
         return "${from_aid_lc}_s${from_nr}_${article}_${pos}";
+    } elsif (($name eq 'Existence') || ($name eq 'Uniqueness') || ($name eq 'Coherence')) {
+        $name = lc $name;
+        (my $constructor) = $item->findnodes ('following-sibling::Constructor');
+        if (! defined $constructor) {
+            if ($item->exists ('parent::Correctness')) {
+                (my $correctness) = $item->findnodes ('parent::Correctness');
+                ($constructor) = $correctness->findnodes ('following-sibling::Constructor');
+                if (! defined $constructor) {
+                    confess 'How to extract a constructor?';
+                }
+            }
+        }
+        my $aid = get_aid_attribute ($constructor);
+        my $nr = get_nr_attribute ($constructor);
+        my $kind = get_kind_attribute ($constructor);
+        $aid = lc $aid;
+        $kind = lc $kind;
+        return "${name}_${kind}${nr}_${aid}";
     } else {
         my $pos = item_position ($item);
         if ($name eq 'JustifiedTheorem') {
@@ -1650,6 +1860,10 @@ my @xpaths = (
     'RegistrationBlock/IdentifyRegistration/Identify',
     'RegistrationBlock/ReductionRegistration/Reduction',
     'DefinitionBlock/Definition/Constructor/Properties/*',
+    'DefinitionBlock/Definition[not(@redefinition = "true")]/Existence',
+    'DefinitionBlock/Definition[not(@redefinition = "true")]/Uniqueness',
+    'DefinitionBlock/Definition[not(@redefinition = "true")]/Coherence',
+    'DefinitionBlock/Definition[not(@redefinition = "true")]/Correctness/Coherence',
     'DefTheorem',
     'descendant::Proposition[following-sibling::*[1][self::From[not(ancestor::SchemeBlock)]]]',
 );
@@ -1734,7 +1948,7 @@ foreach my $item (@items) {
                 my $const_typ_aid_lc = lc $const_typ_aid;
                 my $const_typ_kind_lc = lc $const_typ_kind;
                 my $const_typ_nr = get_absnr_attribute ($const_typ);
-                my $const_typ_tptp = "${const_typ_kind}${const_typ_nr}_${const_typ_aid_lc}";
+                my $const_typ_tptp = "${const_typ_kind_lc}${const_typ_nr}_${const_typ_aid_lc}";
                 $typ_rendered .= "__${const_typ_tptp}";
             }
             $typ_rendered .= "_${adj_guard}";
@@ -1789,6 +2003,24 @@ $pl->foreach (\@gconstructors,
                         my $name = formula_name ($projection);
                         my $content = formula_content ($projection);
                         $items{$name} = $content;
+                    }
+                    return;
+                }
+          );
+
+# Functors that don't have existence or uniqueness conditions
+my @kconstructors = $article_root->findnodes ('descendant::Constructor[@kind = "K" and not(preceding-sibling::Existence) and not(preceding-sibling::Uniqueness) and not(parent::Definition[@redefinition = "true"]) and not(preceding-sibling::Correctness)]');
+$pl->foreach (\@kconstructors,
+              sub { my $constructor = $_;
+                    my $tptp_existence_name = tptp_name_for_existence ($constructor);
+                    my $tptp_uniqueness_name = tptp_name_for_uniqueness ($constructor);
+                    my $existence_content = existence_for_constructor ($constructor);
+                    my $uniqueness_content = uniqueness_for_constructor ($constructor);
+                    if (defined $existence_content) {
+                        $items{$tptp_existence_name} = $existence_content;
+                    }
+                    if (defined $uniqueness_content) {
+                        $items{$tptp_uniqueness_name} = $uniqueness_content;
                     }
                     return;
                 }
