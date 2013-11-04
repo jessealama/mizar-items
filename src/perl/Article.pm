@@ -1690,135 +1690,134 @@ sub minimize_extension {
 
     my $article_with_extension = $self->file_with_extension ($extension_to_minimize);
 
-    if (-e $article_with_extension) {
-        my $article_xml = $self->file_with_extension ('xml');
-        my $article_xml_saved = $self->file_with_extension ('xml.reference');
-        File::Copy::copy ($article_xml, $article_xml_saved);
-
-        # Strip 'uninteresting' attributes so that we can later compare
-        # quickly whether the semantics of the article changes if we mess
-        # around with the environment
-        my $article_xml_stripped = $self->file_with_extension ('xml.stripped');
-
-        my $uninteresting_attributes_stylesheet
-            = $self->path_for_stylesheet ('uninteresting-attributes');
-
-        apply_stylesheet ($uninteresting_attributes_stylesheet,
-                          $article_xml,
-                          $article_xml_stripped,
-                          undef);
-
-        my $article_xml_md5 = md5sum_for_file ($article_xml_stripped);
-	my $xml_doc = eval { $xml_parser->parse_file ($article_with_extension) };
-	if (! defined $xml_doc) {
-	    croak ('Error: the .', $extension_to_minimize, ' file of ', $self->name (), ' is not well-formed XML.');
-	}
-
-	my @elements = $xml_doc->findnodes ("/${root_element_name}/*");
-
-	my %initial_table = ();
-
-	# Initially, everything is needed.
-	foreach my $i (0 .. scalar @elements - 1) {
-	    $initial_table{$i} = 0;
-	}
-
-	# Try to remove whole articles, i.e., remove all imported items
-	# from a given article
-
-	# First, harvest the articles that generated items in the current environment
-	my %seen_articles = ();
-	foreach my $element (@elements) {
-	    my $aid = aid_for_element ($element);
-
-	    if (! defined $aid) {
-		croak ('Error: we found an element that lacks an aid attribute!');
-	    }
-
-	    $seen_articles{$aid} = 0;
-	}
-
-	my @articles = keys %seen_articles;
-
-	my $num_initial_elements = scalar keys %initial_table;
-
-	my %minimized_by_article_table
-	    = %{$self->minimize_by_article (\@elements,
-					    \@articles,
-					    \%initial_table,
-					    $article_with_extension,
-					    $root_element_name,
-					    0,
-					    scalar @articles - 1,
-					    $article_xml_md5,
-					    \%parameters)};
-
-	if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
-
-	    # Randomize the order of the elements
-	    my %minimized_by_article_table_shuffled = ();
-	    my %shuffled_index = ();
-	    my @elements_shuffled = shuffle @elements;
-	    foreach my $i (0 .. scalar @elements - 1) {
-		my $element = $elements[$i];
-		my $shuffled_idx = first_index { $_ == $element } @elements_shuffled;
-		if ($shuffled_idx < 0) {
-		    croak 'We failed to find element', $SPACE, $i, $SPACE, 'in the shuffled list.';
-		}
-		$shuffled_index{$i} = $shuffled_idx;
-	    }
-
-	    foreach my $index (keys %minimized_by_article_table) {
-		my $shuffled_index = $shuffled_index{$index};
-		$minimized_by_article_table_shuffled{$shuffled_index} = 0;
-	    }
-
-	    @elements = @elements_shuffled;
-	    %minimized_by_article_table = %minimized_by_article_table_shuffled;
-
-	    carp 'Elements are shuffled.';
-
-	}
-
-	apply_stylesheet ($uninteresting_attributes_stylesheet,
-			  $article_xml,
-			  $article_xml_stripped,
-			  undef);
-
-	my $md5_now = md5sum_for_file ($article_xml_stripped);
-	if ($md5_now ne $article_xml_md5) {
-	    croak 'Error: the MD5 sum for ', $self->name (), ' changed between whole-article minimization.';
-	}
-
-
-	my %minimized_table
-	    = %{$self->minimize_elements (\@elements,
-					  \%minimized_by_article_table,
-					  $article_with_extension, $root_element_name,
-					  0,
-					  scalar @elements - 1,
-					  $article_xml_md5,
-					  \%parameters)};
-
-	# # Restore
-	# $self->verify (\%parameters);
-
-	print {*STDERR} $self->name (), '.', $extension_to_minimize, ' : ';
-	print {*STDERR} '[';
-	foreach my $i (0 .. scalar @elements - 1) {
-	    if (defined $minimized_table{$i}) {
-		print {*STDERR} '+';
-	    } else {
-		print {*STDERR} '-';
-	    }
-	}
-	print {*STDERR} ']', "\n";
-
-	return keys %minimized_table;
-
-    } else {
-	return ();
+    if (! -e $article_with_extension) {
+        return; # nothing to minimize
     }
+
+    my $article_xml = $self->file_with_extension ('xml');
+    my $article_xml_saved = $self->file_with_extension ('xml.reference');
+    File::Copy::copy ($article_xml, $article_xml_saved);
+
+    # Strip 'uninteresting' attributes so that we can later compare
+    # quickly whether the semantics of the article changes if we mess
+    # around with the environment
+    my $article_xml_stripped = $self->file_with_extension ('xml.stripped');
+
+    my $uninteresting_attributes_stylesheet
+        = $self->path_for_stylesheet ('uninteresting-attributes');
+
+    apply_stylesheet ($uninteresting_attributes_stylesheet,
+                      $article_xml,
+                      $article_xml_stripped,
+                      undef);
+
+    my $article_xml_md5 = md5sum_for_file ($article_xml_stripped);
+    my $xml_doc = eval { $xml_parser->parse_file ($article_with_extension) };
+    if (! defined $xml_doc) {
+        croak ('Error: the .', $extension_to_minimize, ' file of ', $self->name (), ' is not well-formed XML.');
+    }
+
+    my @elements = $xml_doc->findnodes ("/${root_element_name}/*");
+
+    my %initial_table = ();
+
+    # Initially, everything is needed.
+    foreach my $i (0 .. scalar @elements - 1) {
+        $initial_table{$i} = 0;
+    }
+
+    # Try to remove whole articles, i.e., remove all imported items
+    # from a given article
+
+    # First, harvest the articles that generated items in the current environment
+    my %seen_articles = ();
+    foreach my $element (@elements) {
+        my $aid = aid_for_element ($element);
+
+        if (! defined $aid) {
+            croak ('Error: we found an element that lacks an aid attribute!');
+        }
+
+        $seen_articles{$aid} = 0;
+    }
+
+    my @articles = keys %seen_articles;
+
+    my $num_initial_elements = scalar keys %initial_table;
+
+    my %minimized_by_article_table
+        = %{$self->minimize_by_article (\@elements,
+                                        \@articles,
+                                        \%initial_table,
+                                        $article_with_extension,
+                                        $root_element_name,
+                                        0,
+                                        scalar @articles - 1,
+                                        $article_xml_md5,
+                                        \%parameters)};
+
+    if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
+
+        # Randomize the order of the elements
+        my %minimized_by_article_table_shuffled = ();
+        my %shuffled_index = ();
+        my @elements_shuffled = shuffle @elements;
+        foreach my $i (0 .. scalar @elements - 1) {
+            my $element = $elements[$i];
+            my $shuffled_idx = first_index { $_ == $element } @elements_shuffled;
+            if ($shuffled_idx < 0) {
+                croak 'We failed to find element', $SPACE, $i, $SPACE, 'in the shuffled list.';
+            }
+            $shuffled_index{$i} = $shuffled_idx;
+        }
+
+        foreach my $index (keys %minimized_by_article_table) {
+            my $shuffled_index = $shuffled_index{$index};
+            $minimized_by_article_table_shuffled{$shuffled_index} = 0;
+        }
+
+        @elements = @elements_shuffled;
+        %minimized_by_article_table = %minimized_by_article_table_shuffled;
+
+        carp 'Elements are shuffled.';
+
+    }
+
+    apply_stylesheet ($uninteresting_attributes_stylesheet,
+                      $article_xml,
+                      $article_xml_stripped,
+                      undef);
+
+    my $md5_now = md5sum_for_file ($article_xml_stripped);
+    if ($md5_now ne $article_xml_md5) {
+        croak 'Error: the MD5 sum for ', $self->name (), ' changed between whole-article minimization.';
+    }
+
+
+    my %minimized_table
+        = %{$self->minimize_elements (\@elements,
+                                      \%minimized_by_article_table,
+                                      $article_with_extension, $root_element_name,
+                                      0,
+                                      scalar @elements - 1,
+                                      $article_xml_md5,
+                                      \%parameters)};
+
+    # # Restore
+    # $self->verify (\%parameters);
+
+    print {*STDERR} $self->name (), '.', $extension_to_minimize, ' : ';
+    print {*STDERR} '[';
+    foreach my $i (0 .. scalar @elements - 1) {
+        if (defined $minimized_table{$i}) {
+            print {*STDERR} '+';
+        } else {
+            print {*STDERR} '-';
+        }
+    }
+    print {*STDERR} ']', "\n";
+
+    return keys %minimized_table;
 }
 
 sub element_to_item {
