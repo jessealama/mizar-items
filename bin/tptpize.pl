@@ -27,7 +27,7 @@ Readonly my $LF => "\N{LF}";
 Readonly my $PREFIX_LC => lc 'ckb';
 Readonly my $PREFIX_UC => uc $PREFIX_LC;
 
-Readonly my $MAX_PROCESSES => 4;
+Readonly my $MAX_PROCESSES => 1;
 my $pl = Parallel::Loops->new ($MAX_PROCESSES);
 
 my $opt_verbose = 0;
