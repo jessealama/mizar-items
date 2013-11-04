@@ -3212,17 +3212,6 @@ sub existence_for_mode {
     }
 }
 
-sub formulate_property_for_constructor {
-    my $constructor = shift;
-    my $property = shift;
-    my $ref = $CONSTRUCTOR_PROPERTY_MAKERS{$property};
-    if (! defined $ref) {
-        confess 'How to render the constructor property \'', $property, '\'?';
-    }
-    my $content = $ref->($constructor);
-    return $content;
-}
-
 Readonly my %REQUIREMENT_CONTENTS =>
     (
         1 => ['(! [X] : (m1_hidden(X)))',
@@ -3363,327 +3352,51 @@ sub render_adjective_guards {
 }
 
 my %renderings = ();
+my %article_contents = ();
 
 sub render_non_local_item {
     my $item = shift;
     my $params_ref = shift;
     my %params = defined $params_ref ? %{$params_ref} : ();
-    if ((scalar keys %params == 0) && (defined $renderings{$item})) {
-        my @earlier_answer = @{$renderings{$item}};
-        return @earlier_answer;
+    my $tptp = tptp_name_for_item ($item);
+    if (is_requirement_item ($item)) {
+        my $nr = nr_of_item ($item);
+        return render_requirement ($nr);
     }
     my $article = article_of_item ($item);
-    my $nr = nr_of_item ($item);
-    my $tptp_name = tptp_name_for_item ($item);
-    my @results = ();
-    if ($item eq 'hidden:rconstructor:1[symmetry]') {
-        push (@results, tptp_formula ($tptp_name, 'axiom', '(! [X,Y] : (X = Y => Y = X))'));
-    } elsif ($item eq 'hidden:rconstructor:1[reflexivity]') {
-        push (@results, tptp_formula ($tptp_name, 'axiom', '(! [X] : (X = X))'));
-    } elsif ($item eq 'hidden:rconstructor:2[asymmetry]') {
-        push (@results, tptp_formula ($tptp_name, 'axiom', '(! [X,Y] : (r2_hidden(X,Y) => (~ r2_hidden(Y,X))))'));
-    } elsif (is_requirement_item ($item)) {
-        my @requirements = render_requirement ($nr);
-        push (@results, @requirements);
+    if (defined $article_contents{$article}) {
+        my %formulas = %{$article_contents{$article}};
+        my $rendered = $formulas{$tptp};
+        if (! defined $rendered) {
+            confess 'No know rendering for ', $tptp, '.';
+        }
+        return $rendered;
     } else {
-        my $item_xml = "${miztmp_dir}/${article}.xml1";
-        if (! -e $item_xml) {
-            confess 'Absolutized XML for ', $article, ' missing under ', $miztmp_dir;
+        my $article_contents_file = catfile ($miztmp_dir, "${article}.p");
+        if (! -e $article_contents_file) {
+            confess 'Error: where is the .p file at ', $article_contents_file, '?';
         }
-        my $item_xml_doc = parse_xml_file ($item_xml);
-        my $item_xml_root = $item_xml_doc->documentElement ();
-        my $item_msx = "${miztmp_dir}/${article}.msx.canceled";
-        if (! -e $item_msx) {
-            confess '.msx.canceled for ', $article, ' missing under ', $miztmp_dir;
+        open (my $fh, '<', $article_contents_file)
+            or confess 'Cannot open an input filehandle for ', $article_contents_file, ': ', $!;
+        my %cached = ();
+        while (defined (my $line = <$fh>)) {
+            chomp $line;
+            if ($line =~ /\A fof [(] ([a-z0-9_]+) [,] [a-z]+ [,] .+ [)] [.] \z/) {
+                $cached{$1} = $line;
+            } else {
+                confess 'Unable to make sense of', $LF, $LF, $line;
+            }
         }
-        my $item_msx_doc = parse_xml_file ($item_msx);
-        my $item_msx_root = $item_msx_doc->documentElement ();
-        if (is_theorem_item ($item)) {
-            my $all_theorems_xpath = 'Item[((@kind = "Theorem-Item") or (@kind = "Pragma" and @spelling = "$CT"))]';
-            my @all_theorems = $item_msx_root->findnodes ($all_theorems_xpath);
-            # warn 'there are ', scalar @all_theorems, ' total theorems in ', $item_msx, '.';
-            my $target_theorem = $all_theorems[$nr - 1];
-            if (! defined $target_theorem) {
-                confess 'Cannot find the right theorem in ', $item_msx, '.';
-            }
-            my $target_theorem_kind = $target_theorem->getAttribute ('kind');
-            if ($target_theorem_kind eq 'Pragma') {
-                my $content = '$true';
-                my $formula = tptp_formula ($tptp_name, 'theorem', $content);
-                push (@results, $formula);
-            } elsif ($target_theorem_kind eq 'Theorem-Item') {
-                my $target_theorem_nr = $target_theorem->findvalue ('count (preceding-sibling::Item[@kind = "Theorem-Item"]) + 1');
-                if ($nr != $target_theorem_nr) {
-                    # warn $item, ' is really theorem #', $target_theorem_nr;
-                }
-                my $xpath = "descendant::JustifiedTheorem[${target_theorem_nr}]";
-                (my $theorem_node) = $item_xml_root->findnodes ($xpath);
-                if (! defined $theorem_node) {
-                    confess 'Could not find theorem ', $target_theorem_nr, ' in ', $item_xml, '.', $LF, 'The underlying XML node:', $LF, $target_theorem->toString;
-                }
-                my $content = render_justified_theorem ($theorem_node);
-                push (@results, "fof(${tptp_name},theorem,${content}).");
-                (my $proposition_node) = $theorem_node->findnodes ('Proposition[1]');
-                if (! defined $proposition_node) {
-                    confess 'No Proposition node found under the Coherence node in ', $item_xml;
-                }
-                my @choices = render_choices ($proposition_node);
-                push (@results, @choices);
-            } else {
-                confess 'What kind of theorem kind is \'', $target_theorem_kind, '\'?';
-            }
-        } elsif (is_lemma_item ($item)) {
-            my $xpath = "Proposition[count (preceding-sibling::Proposition) + 1 = ${nr}]";
-            (my $proposition_node) = $item_xml_root->findnodes ($xpath);
-            if (! defined $proposition_node) {
-                confess 'Could not find lemma ', $nr, ' in ', $item_xml;
-            }
-            my $content = render_proposition ($proposition_node);
-            push (@results, "fof(${tptp_name},lemma,${content}).");
-            my @choices = render_choices ($proposition_node);
-            push (@results, @choices);
-        } elsif (is_deftheorem_item ($item)) {
-
-            my $prel_dir = "${mizfiles}/prel";
-            if (! -d $prel_dir) {
-                confess 'prel directory missing.';
-            }
-            my $first_letter = undef;
-            if ($article =~ /\A (.) /) {
-                $first_letter = $1;
-            } else {
-                confess 'Cannot make sense of article name \'', $article, '\'.';
-            }
-            my $prel_first_letter_dir = "${prel_dir}/${first_letter}";
-            if (! -d $prel_first_letter_dir) {
-                confess $first_letter, ' directory missing under ', $prel_dir;
-            }
-            my $prel_the = "${prel_first_letter_dir}/${article}.the";
-            if (! -e $prel_the) {
-                confess $prel_the, ' missing.';
-            }
-            my $prel_the_doc = parse_xml_file ($prel_the);
-            my $prel_xpath = "descendant::Theorem[\@kind = \"D\"][$nr]";
-            (my $prel_item) = $prel_the_doc->findnodes ($prel_xpath);
-            if (! defined $prel_item) {
-                confess 'No item in ', $prel_the, ' found matching', $LF, $LF, $prel_xpath;
-            }
-            my $count_xpath = "count (preceding-sibling::Theorem[\@kind = \"D\" and not(Verum)]) + 1";
-            my $prel_item_pos = $prel_item->findvalue ($count_xpath);
-            if ($prel_item_pos != $nr) {
-                carp 'deftheorem ', $nr, ' of ', $article, ' is actually deftheorem #', $prel_item_pos;
-            }
-            my $direct_xpath = "descendant::DefTheorem[\@nr = \"${prel_item_pos}\"]";
-            my $indirect_xpath = "descendant::*[self::DefTheorem or self::Compatibility][${prel_item_pos}]";
-            (my $deftheorem_node) = $item_xml_root->findnodes ($direct_xpath);
-            if (! defined $deftheorem_node) {
-                ($deftheorem_node) = $item_xml_root->findnodes ($indirect_xpath);
-                if (! defined $deftheorem_node) {
-                    confess 'Could not find deftheorem ', $prel_item_pos, ' in ', $item_xml, '.';
-                }
-            }
-            my $content = render_deftheorem ($deftheorem_node);
-            push (@results, "fof(${tptp_name},definition,${content}).");
-            (my $proposition_node) = $deftheorem_node->findnodes ('Proposition[1]');
-            if (! defined $proposition_node) {
-                confess 'No Proposition node found under the Coherence node in ', $item_xml;
-            }
-            my @choices = render_choices ($proposition_node);
-            push (@results, @choices);
-        } elsif (is_definiens_item ($item)) {
-            my $kind = definiens_kind ($item);
-            my $kind_uc = uc $kind;
-            my $nr = nr_of_item ($item);
-            my $definiens_xpath = "Definiens[\@constrkind = \"${kind_uc}\"][${nr}]";
-            (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
-            if (! defined $definiens_node) {
-                confess 'No suitable Definiens node found in ', $item_xml, ' using the XPath', $LF, $LF, '  ', $definiens_xpath;
-            }
-            my $constrnr = $definiens_node->getAttribute ('constrnr');
-            my $defnr = get_attribute ($definiens_node, 'defnr');
-            my $deftheorem_xpath = "following-sibling::DefTheorem[\@constrkind = \"${kind_uc}\" and \@nr = \"${defnr}\"][1]";
-            (my $deftheorem_node) = $definiens_node->findnodes ($deftheorem_xpath);
-            if (! defined $deftheorem_node) {
-                confess 'No DefTheorem node found following the Definiens node for ', $item_xml;
-            }
-            my $deftheorem_nr = $deftheorem_node->findvalue ('count (preceding-sibling::DefTheorem) + 1');
-            my $content = render_deftheorem ($deftheorem_node);
-            push (@results, "fof(${tptp_name},definition,${content}).");
-            (my $proposition_node) = $deftheorem_node->findnodes ('Proposition[1]');
-            if (! defined $proposition_node) {
-                confess 'No Proposition node found under the Coherence node in ', $item_xml;
-            }
-            my @choices = render_choices ($proposition_node);
-            push (@results, @choices);
-        } elsif (is_cluster_item ($item)) {
-            my $kind = cluster_kind ($item);
-            if ($kind eq 'c') {
-                my $cluster_xpath = "descendant::CCluster[${nr}]";
-                (my $ccluster_node) = $item_xml_root->findnodes ($cluster_xpath);
-                if (! defined $ccluster_node) {
-                    confess 'CCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath;
-                }
-                (my $arg_types_node) = $ccluster_node->findnodes ('ArgTypes');
-                if (! defined $arg_types_node) {
-                    confess 'ArgTypes node not found under an FCluster node.';
-                }
-                my @arg_types = $arg_types_node->findnodes ('*');
-                my $num_arg_types = scalar @arg_types;
-                (my $cluster_node) = $arg_types_node->findnodes ('following-sibling::*[1][self::Cluster]');
-                if (! defined $cluster_node) {
-                    confess 'Cluster node not found immediately following an ArgTypes node in a CCluster.';
-                }
-                (my $typ_node) = $arg_types_node->findnodes ('following-sibling::Typ');
-                if (! defined $typ_node) {
-                    confess 'Typ node missing from a CCluster.';
-                }
-                my @adjectives = $ccluster_node->findnodes ('Cluster[position() = last()]/*');
-                my $var_name = 'X' . ($num_arg_types + 1);
-                my $main_guard = render_guard ($var_name, $typ_node);
-                my @first_adjectives = $cluster_node->findnodes ('Adjective');
-                my $secondary_guard = render_adjective_guards ($var_name, @first_adjectives);
-                my $cluster_result = render_adjective_guards ($var_name, @adjectives);
-                $cluster_result = "(! [${var_name}] : ((${main_guard} & ${secondary_guard}) => ${cluster_result}))";
-                foreach my $i (1 .. $num_arg_types) {
-                    my $arg_number = $num_arg_types - $i + 1;
-                    my $arg_typ = $arg_types[$arg_number - 1];
-                    my $var_name = "X${arg_number}";
-                    my $guard = render_guard ($var_name, $arg_typ);
-                    $cluster_result = "(! [${var_name}] : (${guard} => ${cluster_result}))";
-                }
-                push (@results, "fof(${kind}c${nr}_${article},theorem,${cluster_result}).");
-                my @choices = render_choices ($ccluster_node);
-                push (@results, @choices);
-            } elsif ($kind eq 'f') {
-                my $cluster_xpath = "descendant::FCluster[${nr}]";
-                (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
-                if (! defined $cluster_node) {
-                    confess 'FCluster not found in ', $item_xml, $LF, $LF, '  ', $cluster_xpath
-                }
-                if ((defined $params{'conjecture'}) && $params{'conjecture'}) {
-                    # as a conjecture, an fcluster is identified with
-                    # its coherence condition
-                    (my $coherence_node) = $cluster_node->findnodes ('following-sibling::Coherence');
-                    if (! defined $coherence_node) {
-                        confess 'Coherence node not found following an FCluster.';
-                    }
-                    (my $proposition) = $coherence_node->findnodes ('Proposition');
-                    if (! defined $proposition) {
-                        confess 'Proposition node not found under a Coherence node.';
-                    }
-                    my $content = render_proposition ($proposition);
-                    my $formula = "fof(${tptp_name},conjecture,${content}).";
-                    push (@results, $formula);
-                } else {
-                    # rendering the coherence node is not what we need
-                    (my $arg_types_node) = $cluster_node->findnodes ('ArgTypes');
-                    if (! defined $arg_types_node) {
-                        confess 'ArgTypes node not found under an FCluster node.';
-                    }
-                    my @arg_types = $arg_types_node->findnodes ('*');
-                    my $num_arg_types = scalar @arg_types;
-                    (my $func_node) = $arg_types_node->findnodes ('following-sibling::*[1]');
-                    my @adjectives = $cluster_node->findnodes ('Cluster[1]/*');
-                    my $term_rendered = render_semantic_content ($func_node);
-                    my $cluster_result = render_adjective_guards ($term_rendered, @adjectives);
-                    foreach my $i (1 .. $num_arg_types) {
-                        my $arg_number = $num_arg_types - $i + 1;
-                        my $arg_typ = $arg_types[$arg_number - 1];
-                        my $var_name = "X${arg_number}";
-                        my $guard = render_guard ($var_name, $arg_typ);
-                        $cluster_result = "(! [${var_name}] : (${guard} => ${cluster_result}))";
-                    }
-                    push (@results, "fof(${kind}c${nr}_${article},theorem,${cluster_result}).");
-                    my @choices = render_choices ($cluster_node);
-                    push (@results, @choices);
-                }
-            } elsif ($kind eq 'r') {
-                my $cluster_xpath = "descendant::RCluster[\@nr = \"${nr}\"]";
-                (my $cluster_node) = $item_xml_root->findnodes ($cluster_xpath);
-                if (! defined $cluster_node) {
-                    confess 'RCluster not found in ', $item_xml;
-                }
-                (my $existence_node) = $cluster_node->findnodes ('following-sibling::*[1][self::Existence]');
-                if (defined $existence_node) {
-                    (my $proposition_node) = $existence_node->findnodes ('Proposition[1]');
-                    if (! defined $proposition_node) {
-                        confess 'No Proposition node found under the Existence node in ', $item_xml;
-                    }
-                    my $rendered_proposition = render_proposition ($proposition_node);
-                    push (@results, "fof(${kind}c${nr}_${article},theorem,${rendered_proposition}).");
-                    my @choices = render_choices ($proposition_node);
-                    push (@results, @choices);
-                } else {
-                    my $content = render_rcluster ($cluster_node);
-                    my $formula = "fof(${tptp_name},axiom,${content}).";
-                    push (@results, $formula);
-                }
-            } else {
-                confess 'How to handle clusters of kind \'', $kind, '\'?';
-            }
-        } elsif (is_constructor_property_item ($item)) {
-            # are these always found in the same article?
-            my $constructor = constructor_of_constructor_property ($item);
-            my $constructor_nr = nr_of_item ($constructor);
-            my $constructor_aid = article_of_item ($constructor);
-            my $kind = constructor_kind ($constructor);
-            my $kind_uc = uc $kind;
-            my $constructor_xpath = "descendant::Constructor[\@kind = \"${kind_uc}\" and \@nr = \"${nr}\"]";
-            (my $constructor_node) = $item_xml_root->findnodes ($constructor_xpath);
-            if (! defined $constructor_node) {
-                confess 'We failed to find a constructor node in ', $item_xml, ' matching the XPath expression', $LF, $LF, '  ', $constructor_xpath;
-            }
-            my $property = property_for_constructor ($item);
-            my $content = formulate_property_for_constructor ($constructor_node, $property);
-            my $relnr = get_relnr_attribute ($constructor_node);
-            push (@results, "fof(${tptp_name},theorem,${content}).");
-
-            if ($property ne 'abstractness') {
-                # We may need to add the definition of the constructor
-                my $def = definition_for_constructor ($constructor);
-                if (defined $def) {
-                    push (@results, $def);
-                }
-            }
-            # is this a redefinition?  We may need to use the compatibility
-            my $compatibility_xpath = 'preceding-sibling::Compatibility';
-            if ($constructor_node->exists ($compatibility_xpath)) {
-                (my $compatibility_node) = $constructor_node->findnodes ($compatibility_xpath);
-                (my $compatibility_proposition) = $compatibility_node->findnodes ('Proposition');
-                if (! defined $compatibility_proposition) {
-                    confess 'Proposition child not found under a Compatibility node.';
-                }
-                my $compatibility_content = render_proposition ($compatibility_proposition);
-                my $compatibility = "fof(compatibility_d${constructor_nr}_${constructor_aid},theorem,${compatibility_content}).";
-                push (@results, $compatibility);
-            }
-            # it seems we don't need to worry about choice nodes in this case
-            # my @choices = render_choices ($proposition_node);
-            # push (@results, @choices);
-        } elsif (is_reduction_item ($item)) {
-            my $reducibility_xpath = "descendant::Reducibility[${nr}]";
-            (my $reducibility_node) = $item_xml_root->findnodes ($reducibility_xpath);
-            if (! defined $reducibility_node) {
-                confess 'Unable to find reduction #', $nr, ' in ', $item_xml;
-            }
-            my $content = render_reduction ($reducibility_node);
-            my $formula = "fof(x${nr}_${article},theorem,${content}).";
-            push (@results, $formula);
-            (my $proposition_node) = $reducibility_node->findnodes ('Proposition');
-            if (! defined $proposition_node) {
-                confess 'Reduction node nr ', $nr, ' lacks a Proposition child in ', $item_xml;
-            }
-            my @choices = render_choices ($proposition_node);
-            push (@results, @choices);
+        close $fh or confess 'Cannot close input filehandle for', $article_contents_file, ': ', $!;
+        $article_contents{$article} = \%cached;
+        my $answer = $cached{$tptp};
+        if (defined $answer) {
+            return $answer;
         } else {
-            confess 'How to extract ', $item, '?';
+            carp 'We did not find ', $item, ' (TPTP name: ', $tptp, ') in ', $article_contents_file, '.';
+            return;
         }
     }
-    # save for later
-    if (scalar keys %params == 0) {
-        $renderings{$item} = \@results;
-    }
-    return @results;
 }
 
 sub render_scheme_instance {
