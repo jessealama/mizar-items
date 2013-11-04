@@ -1,0 +1,66 @@
+stylesheet "1.0";
+import "utils/die.xsl";
+output method="xml" indent="yes";
+
+tpl [/] {
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    msg terminate="yes" "Error: the Text-Proper document element is missing.";
+  }
+}
+
+// By default, copy
+tpl [*] {
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [*] (#variables, #encountered) mode="maybe-qualify" {
+  msg "hey";
+  $node = `.`;
+  if [count ($variables) > 0] {
+    $variable = `$variables[1]`;
+    $more-variables = `$variables[position() > 1]`;
+    $idnr = `$variable/@idnr`;
+    $spelling = `$variable/@spelling`;
+    $token = `concat (":", $spelling, ":")`;
+    if [contains ($encountered, $token)] {
+      apply [.] (#variables = $more-variables,
+     	         #encountered = $encountered) mode="maybe-qualify";
+    } else {
+      for-each [(preceding::Item[@kind = "Reservation"]/Variables/Variable[@idnr = $idnr])[1]] {
+        <Explicitly-Qualified-Segment {
+          <Variables {
+            apply [.];
+          }
+          for-each [ancestor::Item[@kind = "Reservation"]] {
+            apply [*[position() = last()]];
+          }
+        }
+      }
+      apply [.] (#variables = $more-variables,
+	           #encountered = `concat ($token, $encountered)`) mode="maybe-qualify";
+     }
+   } else {
+    apply [.];
+  }
+}
+
+tpl [Fraenkel-Term[count(*) = 2 and not(Fraenkel-Term)]] {
+  $fraenkel = `.`;
+  <Fraenkel-Term {
+    for-each [@*] { copy-of `.`; }
+
+    for-each [*[1]] {
+      $vars = `descendant-or-self::Simple-Term[@idnr and starts-with (@spelling, "R")]`;
+      apply [.] (#variables = $vars, #encountered = "") mode="maybe-qualify";
+    }
+
+    apply [*[2]];
+
+  }
+}

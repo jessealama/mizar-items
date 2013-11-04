@@ -1,0 +1,172 @@
+stylesheet "1.0";
+import "utils/die.xsl";
+output method="xml" indent="yes";
+
+$scheme-instance-spelling = "SchemeInstance";
+
+tpl [*]
+{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [*] mode="copy"
+{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="copy";
+  }
+}
+
+tpl [/]
+{
+  if [Text-Proper] {
+    apply [Text-Proper];
+  } else {
+    msg terminate="yes" "Error: the Text-Proper document element is missing.";
+  }
+}
+
+tpl [*[    parent::Text-Proper
+       and descendant::Scheme-Justification
+       and not(self::Item[@kind = "Scheme-Block-Item"])]]
+{
+  for-each [descendant::Scheme-Justification] {
+    for-each [parent::*] {
+      <Item {
+        @kind = "Pragma";
+        @spelling = "$C scheme instance";
+      }
+      <Item {
+        @kind = "Regular-Statement";
+        @shape = "Compact-Statement";
+        choose {
+          when [self::Item[@kind = "Choice-Statement"]] {
+            <Proposition {
+              <Label { @spelling = $scheme-instance-spelling; }
+              <Existential-Quantifier-Formula {
+                apply [Explicitly-Qualified-Segment];
+                <Conjunctive-Formula {
+                  for-each [Conditions] {
+                    for-each [Proposition] {
+                      msg "wtf";
+                      apply [*[position() = last()]] mode="expand-defpred";
+                    }
+                  }
+                }
+              }
+            }
+            <Block {
+              @kind = "Proof";
+              for-each [preceding-sibling::*] {
+                apply [.] mode="copy";
+              }
+              apply [.] mode="copy";
+              <Item {
+                @kind = "Exemplification";
+                for-each [Explicitly-Qualified-Segment] {
+                  for-each [Variables] {
+                    for-each [*] {
+                      <Simple-Term {
+                        @spelling = `@spelling`;
+                      }
+                    }
+                  }
+                }
+              }
+              <Item {
+                @kind = "Conclusion";
+                @shape = "Compact-Statement";
+                <Proposition {
+                  <Thesis;
+                }
+                <Straightforward-Justification {
+                  for-each [Conditions] {
+                    for-each [Proposition] {
+                      for-each [Label] {
+                        <Local-Reference {
+                          @spelling = `@spelling`;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          when [self::Item[@kind = "Conclusion" and @shape = "Compact-Statement"]] {
+            <Proposition {
+              <Label { @spelling = $scheme-instance-spelling; }
+              for-each [Proposition] {
+                apply [*[position() = last()]];
+              }
+            }
+            <Straightforward-Justification;
+          }
+          otherwise {
+            apply [.] (#message = "How should this scheme justification be handled?") mode="die";
+          }
+        }
+      }
+    }
+  }
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*];
+  }
+}
+
+tpl [Scheme-Justification[not(ancestor::Item[@kind = "Scheme-Block-Item"])]]
+{
+  <Straightforward-Justification {
+    <Local-Reference { @spelling = $scheme-instance-spelling; }
+    apply [*];
+  }
+}
+
+tpl [*] mode="expand-defpred"
+{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] mode="expand-defpred";
+  }
+}
+
+tpl [*] (#args) mode="replace-placeholders"
+{
+  $n = `name (.)`;
+  <$n {
+    for-each [@*] { copy-of `.`; }
+    apply [*] (#args = $args) mode="replace-placeholders";
+  }
+}
+
+tpl [Placeholder-Term] (#args) mode="replace-placeholders"
+{
+  $nr = `@nr`;
+  if [count ($args) < $nr] {
+    apply [.] (#message = "Error: not enough arguments to fill this placeholder term.") mode="die";
+  }
+  for-each [$args[position() = $nr]] {
+    apply [.] mode="copy";
+  }
+}
+
+tpl [Private-Predicate-Formula[@idnr]] mode="expand-defpred" {
+  $idnr = `@idnr`;
+  $context = `.`;
+  $args = `*`;
+  msg "doing it";
+  for-each [preceding::Item[@kind = "Private-Predicate-Definition" and Variable[@idnr = $idnr]]] {
+    msg "in it";
+    for-each [*[position() = last()]] {
+      apply [.] (#args = $args) mode="replace-placeholders";
+    }
+  }
+}

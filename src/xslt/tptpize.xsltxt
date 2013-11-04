@@ -1,0 +1,290 @@
+stylesheet "1.0";
+import "utils/strings.xsl";
+import "utils/token-strings.xsl";
+output method="text";
+
+tpl [*]
+{
+    apply [*];
+}
+
+tpl [/]
+{
+    if [Article]
+    {
+        apply [Article];
+    }
+    else
+    {
+        msg terminate="yes" "Error: where is the toplevel Article element?";
+    }
+}
+
+tpl [Reservation]
+{
+    // ignore
+}
+
+tpl [SchemeBlock]
+{
+    // ignore
+}
+
+tpl [Pattern]
+{
+    // ignore
+}
+
+tpl [Definiens]
+{
+    // ignore
+}
+
+tpl make-fof (#n, #role, #content)
+{
+  `concat ("fof(", $n, ",", $role, ",", $content, ").")`;
+}
+
+tpl [DefTheorem]
+{
+    $tptp-name = tptp-name (#node = `.`);
+    $content = render-proposition (#node = `Proposition`);
+    make-fof (#n = $tptp-name,
+              #role = "definition",
+              #content = $content); "\n";
+}
+
+tpl tptp-name (#node)
+{
+    for-each [$node]
+    {
+        choose
+        {
+            when [self::DefTheorem]
+            {
+                $pos = `count (preceding-sibling::DefTheorem) + 1`;
+                $aid-uc = `ancestor::Article/@aid`;
+                $aid-lc = lc (#s = $aid-uc);
+                `concat ("d", $pos, "_", $aid-lc)`;
+            }
+            otherwise
+            {
+                $n = `name (.)`;
+                $message = `concat ("Error: how to generate a TPTP name for nodes of kind '", $n, "'?")`;
+                msg terminate="yes" $message;
+            }
+        }
+
+    }
+}
+
+tpl render-choice-term (#node)
+{
+     for-each [Typ[@kind and @absnr and @aid]]
+     {
+         $kind-uc = `@kind`;
+         $absnr = `@absnr`;
+         $aid-uc = `@aid`;
+         $kind-lc = lc (#s = $kind-uc);
+         $aid-lc = lc (#s = $aid-uc);
+         $type-rendered = `concat ($kind-lc, $absnr, "_", $aid-lc)`;
+         $base-choice = `concat ("epsilon_", $type-rendered)`;
+         $upper-cluster = `Cluster[1]`;
+         $lower-cluster = `Cluster[2]`;
+         $adjectives = `$upper-cluster/Adjective`;
+         `$base-choice`;
+         if [count ($adjectives) > 0]
+         {
+             for-each [$adjectives]
+             {
+                 $adj-aid-uc = `@aid`;
+                 $adj-absnr = `@absnr`;
+                 $adj-kind-uc = `@kind`;
+                 $adj-aid-lc = lc (#s = $adj-aid-uc);
+                 $adj-kind-lc = lc (#s = $adj-kind-uc);
+                 `concat ("__", $adj-kind-lc, $adj-absnr, "_", $adj-aid-lc)`;
+             }
+         }
+     }
+}
+
+tpl render-semantic-content (#node)
+{
+   for-each [$node]
+   {
+       choose
+       {
+           when [self::For[@vid]]
+           {
+               $vid = `@vid`;
+               $var = `concat ("X", $vid)`;
+               $type = `Typ`;
+               $rendered-matrix = render-semantic-content (#node = `*[position() = last()]`);
+               guard-formula (#formula = $rendered-matrix, #var = $var, #type = `$type`);
+
+           }
+           when [self::For[not(@vid)]]
+           {
+               $vid = `count (ancestor::For[not(@vid)]) + 1`;
+               $var = `concat ("Y", $vid)`;
+               $type = `Typ`;
+               $rendered-matrix = render-semantic-content (#node = `*[position() = last()]`);
+               guard-formula (#formula = $rendered-matrix, #var = $var, #type = `$type`);
+           }
+           when [self::And[count(*) = 2]]
+           {
+             $lhs = render-semantic-content (#node = `*[1]`);
+             $rhs = render-semantic-content (#node = `*[2]`);
+             `concat ("(", $lhs, " & ", $rhs, ")")`;
+           }
+           when [self::And[count(*) > 2]]
+           {
+               "(";
+               for-each [*] {
+                 render-semantic-content (#node = `.`);
+                 if [position() < last()]
+                 {
+                     " & ";
+                 }
+               }
+               ")";
+           }
+           when [self::Not]
+           {
+             $arg = render-semantic-content (#node = `*[1]`);
+             `concat ("(~ ", $arg, ")")`;
+           }
+           when [self::Pred[@kind and @absnr and @aid]]
+           {
+               $kind-uc = `@kind`;
+               $absnr = `@absnr`;
+               $aid-uc = `@aid`;
+               $kind-lc = lc (#s = $kind-uc);
+               $aid-lc = lc (#s = $aid-uc);
+               `concat ($kind-lc, $absnr, "_", $aid-lc)`;
+               if [count (*) > 0]
+               {
+                   "(";
+                   for-each [*]
+                   {
+                       render-semantic-content (#node = `.`);
+                       if [position() < last()]
+                       {
+                           ",";
+                       }
+                   }
+                   ")";
+               }
+           }
+           when [self::Func[@kind and @absnr and @aid]]
+           {
+               $kind-uc = `@kind`;
+               $absnr = `@absnr`;
+               $aid-uc = `@aid`;
+               $kind-lc = lc (#s = $kind-uc);
+               $aid-lc = lc (#s = $aid-uc);
+               `concat ($kind-lc, $absnr, "_", $aid-lc)`;
+               if [count (*) > 0]
+               {
+                   "(";
+                   for-each [*]
+                   {
+                       render-semantic-content (#node = `.`);
+                       if [position() < last()]
+                       {
+                           ",";
+                       }
+                   }
+                   ")";
+               }
+           }
+           when [self::Choice]
+           {
+               render-choice-term (#node = $node);
+           }
+           when [self::Var[@nr]]
+           {
+               $nr = `@nr`;
+               $depth = `count (ancestor::For)`;
+               for-each [ancestor::For[$depth - $nr + 1]]
+               {
+                   if [@vid]
+                   {
+                      $vid = `@vid`;
+                      `concat ("X", $vid)`;
+                   }
+                   else
+                   {
+                       $vid = `count (ancestor::For[not(@vid)]) + 1`;
+                       `concat ("Y", $vid)`;
+                   }
+               }
+           }
+           otherwise
+           {
+               $n = `name (.)`;
+               $message = `concat ("Error: how to render semantic content for nodes of type '", $n, "'?")`;
+               msg terminate="yes" $message;
+           }
+       }
+   }
+}
+
+tpl render-proposition (#node)
+{
+    for-each [$node]
+    {
+        $rendered = render-semantic-content (#node = `*[position() = last()]`);
+        generalize-by-constants (#formula   = $rendered,
+                                 #constants = `descendant::Const`,
+                                 #handled   = ",,");
+    }
+}
+
+tpl guard-formula (#formula, #var, #type)
+{
+    for-each [$type]
+    {
+      $upper-cluster = `Cluster[1]`;
+      $lower-cluster = `Cluster[2]`;
+      $kind-uc = `@kind`;
+      $absnr = `@absnr`;
+      $aid-uc = `@aid`;
+      $kind-lc = lc (#s = $kind-uc);
+      $aid-lc = lc (#s = $aid-uc);
+      $adjectives = `$upper-cluster/Adjective`;
+      if [count ($adjectives) = 0]
+      {
+          $type-rendered = `concat ($kind-lc, $absnr, "_", $aid-lc, "(", $var, ")")`;
+          `concat ("(! [", $var, "] : (", $type-rendered, " => ", $formula, "))")`;
+      }
+      else
+      {
+          msg terminate="yes" "Error: how to handle this guy?";
+      }
+    }
+}
+
+tpl generalize-by-constants (#formula, #constants, #handled)
+{
+    if [count ($constants) = 0]
+    {
+      `$formula`;
+    }
+    else
+    {
+        $newest-constant = newest-constant (#constants = `$constants`);
+        $type = type-for-constant (#constant = $newest-constant);
+        $vid = `$newest-constant/@vid`;
+        $var = `concat ("X", $vid)`;
+        $guarded = guard-formula (#formula = $formula, #var = $var, #type = $type);
+        $new-handled = add-to-token-string (#item = $vid, #token-string = $handled);
+        for-each [$type]
+        {
+            $new-constants = `descendant::Const`;
+            generalize-by-constants (#formula = $guarded,
+                                     #constants = `$constants[not(@vid = $vid)] | $new-constants`,
+                                     #handled = $new-handled);
+        }
+    }
+}
