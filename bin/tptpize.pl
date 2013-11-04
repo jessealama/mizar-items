@@ -920,7 +920,7 @@ sub render_item {
             }
             return render_proposition ($proposition);
         } else {
-            (my $correctness_node) = $item->findnodes ('following-sibling::Correctness');
+            (my $correctness_node) = $item->findnodes ('following-sibling::*[1][self::Correctness]');
             if (! defined $correctness_node) {
                 confess 'Neither a Coherence nor a Correctness node was found following a CCluster node.';
             }
