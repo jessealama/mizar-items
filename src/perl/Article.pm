@@ -1803,9 +1803,7 @@ sub minimize_extension {
                                       $article_xml_md5,
                                       \%parameters)};
 
-    # # Restore
-    # $self->verify (\%parameters);
-
+    # print the results
     print {*STDERR} $self->name (), '.', $extension_to_minimize, ' : ';
     print {*STDERR} '[';
     foreach my $i (0 .. scalar @elements - 1) {
