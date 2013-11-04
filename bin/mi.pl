@@ -1609,7 +1609,7 @@ sub render_semantic_content {
     my $name = $node->nodeName ();
     my $aid = $node->getAttribute ('aid');
     my $kind = $node->getAttribute ('kind');
-    my $nr = get_nr_attribute ($node);
+    my $nr = $node->getAttribute ('nr');
     my $kind_lc = defined $kind ? lc $kind : undef;
     my $aid_lc = defined $aid ? lc $aid : undef;
     if ($name eq 'Pred' || $name eq 'Func') {
