@@ -1307,6 +1307,74 @@ sub minimize_elements {
     }
 }
 
+sub minimize_heuristically {
+    my $self = shift;
+    my @elements = @{shift ()};
+    my %table = %{shift ()};
+    my $path = shift;
+    my $root_element_name = shift;
+    my $original_md5 = shift;
+    my $parameters_ref = shift;
+
+    my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
+    my $article_xml = $self->file_with_extension ('xml');
+    my $article_xml_saved = $self->file_with_extension ('xml.reference');
+
+    # if there are fewer than 10 elemements, first try trashing all of them
+
+    if (scalar @elements < 10) {
+        carp 'Heuristic applies';
+        foreach my $i (1 .. 10) {
+            delete $table{$i};
+        }
+
+        # write to disk
+	$self->write_element_table (\@elements,
+				    \%table,
+				    $path,
+				    $root_element_name);
+
+        # try the analyzer
+	my $analyzable = $self->analyze (\%parameters);
+
+	if ($analyzable) {
+	    if ($self->stripped_xml_has_md5sum ($original_md5)) {
+                carp 'Heuristic worked!';
+	    } else {
+                carp 'Heuristic did not work.';
+		# Semantics have changed
+		File::Copy::copy ($article_xml_saved, $article_xml);
+                foreach my $i (1 .. 10) {
+                    $table{$i} = 0;
+                }
+		$self->write_element_table (\@elements,
+					    \%table,
+					    $path,
+					    $root_element_name);
+	    }
+	} else {
+            carp 'Heuristic did not work.';
+	    File::Copy::copy ($article_xml_saved, $article_xml);
+            foreach my $i (1 .. 10) {
+                $table{$i} = 0;
+            }
+	    $self->write_element_table (\@elements,
+					\%table,
+					$path,
+					$root_element_name);
+	}
+	return \%table;
+    } else {
+        # carp 'Simple heuristic does not apply (too many elements).';
+        # # divide the elements into groups of 5.  Try dumping each of the 5 in turn.
+        # foreach my $i (1 .. 5) {
+
+        # }
+        return \%table;
+    }
+
+}
+
 sub minimize_by_article {
     my $self = shift;
     my @elements = @{shift ()};
@@ -1745,43 +1813,43 @@ sub minimize_extension {
 
     my $num_initial_elements = scalar keys %initial_table;
 
-    my %minimized_by_article_table
-        = %{$self->minimize_by_article (\@elements,
-                                        \@articles,
-                                        \%initial_table,
-                                        $article_with_extension,
-                                        $root_element_name,
-                                        0,
-                                        scalar @articles - 1,
-                                        $article_xml_md5,
-                                        \%parameters)};
+    # my %minimized_by_article_table
+    #     = %{$self->minimize_by_article (\@elements,
+    #                                     \@articles,
+    #                                     \%initial_table,
+    #                                     $article_with_extension,
+    #                                     $root_element_name,
+    #                                     0,
+    #                                     scalar @articles - 1,
+    #                                     $article_xml_md5,
+    #                                     \%parameters)};
 
-    if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
+    # if (defined $parameters{'randomize'} && $parameters{'randomize'}) {
 
-        # Randomize the order of the elements
-        my %minimized_by_article_table_shuffled = ();
-        my %shuffled_index = ();
-        my @elements_shuffled = shuffle @elements;
-        foreach my $i (0 .. scalar @elements - 1) {
-            my $element = $elements[$i];
-            my $shuffled_idx = first_index { $_ == $element } @elements_shuffled;
-            if ($shuffled_idx < 0) {
-                croak 'We failed to find element', $SPACE, $i, $SPACE, 'in the shuffled list.';
-            }
-            $shuffled_index{$i} = $shuffled_idx;
-        }
+    #     # Randomize the order of the elements
+    #     my %minimized_by_article_table_shuffled = ();
+    #     my %shuffled_index = ();
+    #     my @elements_shuffled = shuffle @elements;
+    #     foreach my $i (0 .. scalar @elements - 1) {
+    #         my $element = $elements[$i];
+    #         my $shuffled_idx = first_index { $_ == $element } @elements_shuffled;
+    #         if ($shuffled_idx < 0) {
+    #             croak 'We failed to find element', $SPACE, $i, $SPACE, 'in the shuffled list.';
+    #         }
+    #         $shuffled_index{$i} = $shuffled_idx;
+    #     }
 
-        foreach my $index (keys %minimized_by_article_table) {
-            my $shuffled_index = $shuffled_index{$index};
-            $minimized_by_article_table_shuffled{$shuffled_index} = 0;
-        }
+    #     foreach my $index (keys %minimized_by_article_table) {
+    #         my $shuffled_index = $shuffled_index{$index};
+    #         $minimized_by_article_table_shuffled{$shuffled_index} = 0;
+    #     }
 
-        @elements = @elements_shuffled;
-        %minimized_by_article_table = %minimized_by_article_table_shuffled;
+    #     @elements = @elements_shuffled;
+    #     %minimized_by_article_table = %minimized_by_article_table_shuffled;
 
-        carp 'Elements are shuffled.';
+    #     carp 'Elements are shuffled.';
 
-    }
+    # }
 
     apply_stylesheet ($uninteresting_attributes_stylesheet,
                       $article_xml,
