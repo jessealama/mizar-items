@@ -1862,9 +1862,16 @@ sub minimize_extension {
         croak 'Error: the MD5 sum for ', $self->name (), ' changed between whole-article minimization.';
     }
 
+    # my %minimized_heuristically_table
+    #     = %{$self->minimize_heuristically (\@elements,
+    #                                       \%minimized_by_article_table,
+    #                                        $article_with_extension, $root_element_name,
+    #                                        $article_xml_md5,
+    #                                        \%parameters)};
+
     my %minimized_table
         = %{$self->minimize_elements (\@elements,
-                                      \%minimized_by_article_table,
+                                      \%initial_table,
                                       $article_with_extension, $root_element_name,
                                       0,
                                       scalar @elements - 1,
