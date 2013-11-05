@@ -1291,7 +1291,6 @@ sub existence_for_constructor {
     if (! defined $defmeaning) {
         confess 'We expect to find an expandable DefMeaning in the Definiens node', $LF, $LF, $definiens->toString;
     }
-    (my $content) = $defmeaning->findnodes ('*[position() = last()]');
     (my $result_typ) = $kconstructor->findnodes ('*[position() = last()]');
     my $existential_var = 'Y';
     my $k_nr = get_nr_attribute ($kconstructor);
@@ -1304,11 +1303,35 @@ sub existence_for_constructor {
     my @arg_types = $arg_types_node->findnodes ('*');
     my $num_arg_types = scalar @arg_types;
     my $var_prefix = 'X';
-    my $lhs = "${existential_var}";
-    my $rhs = render_semantic_content ($content);
-    my $equation = "(${lhs} = ${rhs})";
+    my $formula = undef;
+    if ($defmeaning->exists ('PartialDef')) {
+        my $rhs = '(';
+        my @partial_defs = $defmeaning->findnodes ('PartialDef');
+        my $num_partial_defs = scalar @partial_defs;
+        foreach my $i (1 .. $num_partial_defs) {
+            my $partial_def = $partial_defs[$i - 1];
+            (my $val_node) = $partial_def->findnodes ('*[1]');
+            (my $condition_node) = $partial_def->findnodes ('*[2]');
+            my $rendered_condition = render_semantic_content ($condition_node);
+            my $rendered_value = render_semantic_content ($val_node);
+            my $equation = "(${existential_var} = ${rendered_value})";
+            my $guarded = "(${rendered_condition} => ${equation})";
+            $rhs .= $guarded;
+            if ($i < $num_partial_defs) {
+                $rhs .= ' & ';
+            }
+        }
+        $rhs .= ')';
+        $formula = $rhs;
+    } else {
+        (my $content) = $defmeaning->findnodes ('*[position() = last()]');
+        my $rhs = render_semantic_content ($content);
+        my $lhs = "${existential_var}";
+        my $equation = "(${lhs} = ${rhs})";
+        $formula = $equation;
+    }
     my $existential_guard = render_guard ($existential_var, $result_typ);
-    my $existential = "(? [${existential_var}] : (${existential_guard} & ${equation}))";
+    my $existential = "(? [${existential_var}] : (${existential_guard} & ${formula}))";
     # now generalize
     foreach my $i (1 .. $num_arg_types) {
         my $var_index = $num_arg_types - $i + 1;
@@ -1336,10 +1359,11 @@ sub uniqueness_for_constructor {
     if (! defined $defmeaning) {
         confess 'We expect to find an expandable DefMeaning in the Definiens node', $LF, $LF, $definiens->toString;
     }
-    (my $content) = $defmeaning->findnodes ('*[position() = last()]');
     (my $result_typ) = $kconstructor->findnodes ('*[position() = last()]');
-    my $uniqueness_var_1 = 'A';
-    my $uniqueness_var_2 = 'B';
+    my $uniqueness_prefix_1 = 'A';
+    my $uniqueness_prefix_2 = 'B';
+    my $uniqueness_var_1 = "${uniqueness_prefix_1}1";
+    my $uniqueness_var_2 = "${uniqueness_prefix_2}1";
     my $k_nr = get_nr_attribute ($kconstructor);
     my $k_aid = get_aid_attribute ($kconstructor);
     my $k_aid_lc = lc $k_aid;
@@ -1350,12 +1374,22 @@ sub uniqueness_for_constructor {
     my @arg_types = $arg_types_node->findnodes ('*');
     my $num_arg_types = scalar @arg_types;
     my $var_prefix = 'X';
-    my $term = render_semantic_content ($content);
     my $equation = "(${uniqueness_var_1} = ${uniqueness_var_2})";
     my $uniquess_guard_1 = render_guard ($uniqueness_var_1, $result_typ);
     my $uniquess_guard_2 = render_guard ($uniqueness_var_2, $result_typ);
-    my $implication = "(((${uniqueness_var_1} = ${term}) & (${uniqueness_var_2} = ${term})) => ${equation})";
+    my $implication = undef;
+    if ($defmeaning->exists ('PartialDef')) {
+        $implication = '$true'; #punting for now; too weird to
+                                #formulate uniqueness for partial
+                                #definitions
+    } else {
+        (my $content) = $defmeaning->findnodes ('*[position() = last()]');
+        my $term = render_semantic_content ($content);
+        $implication = "(((${uniqueness_var_1} = ${term}) & (${uniqueness_var_2} = ${term})) => ${equation})";
+    }
+
     $implication = "(! [${uniqueness_var_1},${uniqueness_var_2}] : ((${uniquess_guard_1} & ${uniquess_guard_2}) => ${implication}))";
+
     # now generalize
     foreach my $i (1 .. $num_arg_types) {
         my $var_index = $num_arg_types - $i + 1;
