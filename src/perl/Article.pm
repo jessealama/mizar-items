@@ -2254,7 +2254,7 @@ sub minimize_environment {
 
     my %parameters = defined $parameters_ref ? %{$parameters_ref} : ();
 
-    my @extensions_to_minimize = ('eno', 'erd', 'epr', 'dfe', 'dfs', 'dfx', 'eid', 'ecl');
+    my @extensions_to_minimize = ('erd', 'epr', 'dfe', 'dfs', 'dfx', 'eid', 'ecl');
 
     if (defined $parameters{'fast-theorems-and-schemes'}) {
 	$self->prune_theorems_and_schemes ();
