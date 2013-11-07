@@ -25,7 +25,7 @@ sub print_message {
     return;
 }
 
-XML::LibXSLT->debug_callback (\&print_message);
+# XML::LibXSLT->debug_callback (\&print_message);
 
 my $xml_parser = XML::LibXML->new ();
 
