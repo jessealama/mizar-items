@@ -247,7 +247,8 @@ sub absolutize_extension {
     my $xml_path = $self->file_with_extension ($extension);
     my $abs_xml_path = $self->file_with_extension ("${extension}1");
 
-    if (-e $xml_path) {
+    if ((-e $xml_path) && (! -e $abs_xml_path)) {
+        carp 'absolutizing ', $xml_path, ' into ', $abs_xml_path;
 	my $absrefs_stylesheet = $self->path_for_stylesheet ('addabsrefs');
 
 	apply_stylesheet ($absrefs_stylesheet,
