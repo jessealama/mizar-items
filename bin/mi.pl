@@ -1753,7 +1753,13 @@ sub render_semantic_content {
         # uh oh
         return get_nr_attribute ($node);
     } else {
-        confess 'Unable to generate a rendering for nodes of kind \'', $name, '\'.';
+        if ($node->exists ('parent::*')) {
+            (my $parent) = $node->findnodes ('parent::*');
+            confess 'Unable to generate a rendering for nodes of kind \'', $name, '\'.  The node is:', $LF, $node->toString, $LF, 'The parent node:', $LF, $parent->toString;
+        } else {
+            confess 'Unable to generate a rendering for nodes of kind \'', $name, '\'.  This node has no parent.  The node is:', $LF, $node->toString;
+        }
+
     }
 }
 
