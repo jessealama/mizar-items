@@ -3364,6 +3364,9 @@ sub render_non_local_item {
         my $nr = nr_of_item ($item);
         return render_requirement ($nr);
     }
+    if ($item eq 'hidden:rconstructor:2[asymmetry]') {
+        return 'fof(asymmetry_r2_hidden,axiom,(! [X,Y] : (r2_hidden(X,Y) => ~r2_hidden(Y,X)))).';
+    }
     my $article = article_of_item ($item);
     if (defined $article_contents{$article}) {
         my %formulas = %{$article_contents{$article}};
