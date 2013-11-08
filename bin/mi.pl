@@ -256,49 +256,44 @@ sub article_dependencies {
                 my $defnr = get_attribute ($definiens, 'defnr');
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
-                if ($aid eq $constraid) {
-                    my $item = "${aid_lc}:${kind_lc}definiens:${defnr}";
-                    $deps{$item} = 0;
+                my $item_xml = undef;
+                my $prel_def = undef;
+                if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+                    my $prel_dir = catdir ($article_dir, 'prel');
+                    if (! -d $prel_dir) {
+                        confess 'No prel dir under ', $article_dir;
+                    }
+                    $prel_def = catfile ($prel_dir, "${aid_lc}.def");
                 } else {
-                    my $item_xml = undef;
-                    my $prel_def = undef;
-                    if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        my $prel_dir = catdir ($article_dir, 'prel');
-                        if (! -d $prel_dir) {
-                            confess 'No prel dir under ', $article_dir;
-                        }
-                        $prel_def = catfile ($prel_dir, "${aid_lc}.def");
+                    my $prel_dir = catdir ($mizfiles, 'prel');
+                    if (! -d $prel_dir) {
+                        confess 'prel directory missing.';
+                    }
+                    my $first_letter = undef;
+                    if ($aid_lc =~ /\A (.) /) {
+                        $first_letter = $1;
                     } else {
-                        my $prel_dir = catdir ($mizfiles, 'prel');
-                        if (! -d $prel_dir) {
-                            confess 'prel directory missing.';
-                        }
-                        my $first_letter = undef;
-                        if ($aid_lc =~ /\A (.) /) {
-                            $first_letter = $1;
-                        } else {
-                            confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
-                        }
-                        my $prel_first_letter_dir = catdir ($prel_dir, $first_letter);
-                        if (! -d $prel_first_letter_dir) {
-                            confess $first_letter, ' directory missing under ', $prel_dir;
-                        }
-                        $prel_def = catfile ($prel_first_letter_dir, "${aid_lc}.def");
+                        confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
                     }
-                    if (! -e $prel_def) {
-                        confess $prel_def, ' missing.';
+                    my $prel_first_letter_dir = catdir ($prel_dir, $first_letter);
+                    if (! -d $prel_first_letter_dir) {
+                        confess $first_letter, ' directory missing under ', $prel_dir;
                     }
-                    my $prel_def_doc = parse_xml_file ($prel_def);
-                    my $prel_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
-                    (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
-                    if (! defined $prel_item) {
-                        confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
-                    }
-                    my $count_xpath = "count (preceding-sibling::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
-                    my $prel_item_pos = $prel_item->findvalue ($count_xpath);
-                    my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
-                    $deps{$item} = 0;
+                    $prel_def = catfile ($prel_first_letter_dir, "${aid_lc}.def");
                 }
+                if (! -e $prel_def) {
+                    confess $prel_def, ' missing.';
+                }
+                my $prel_def_doc = parse_xml_file ($prel_def);
+                my $prel_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
+                if (! defined $prel_item) {
+                    confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
+                }
+                my $count_xpath = "count (preceding-sibling::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                my $prel_item_pos = $prel_item->findvalue ($count_xpath);
+                my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
+                $deps{$item} = 0;
             }
             # Record constructor dependencies
             my @constructors = constructors_in_file ($file);
@@ -323,31 +318,26 @@ sub article_dependencies {
                 my $defnr = get_attribute ($definiens, 'defnr');
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
-                if ($constraid eq $aid) {
-                    my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
-                    $deps{$item} = 0;
+                my $item_xml = undef;
+                if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+                    $item_xml = catfile ($text_dir, "${aid_lc}.xml1");
                 } else {
-                    my $item_xml = undef;
-                    if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        $item_xml = catfile ($text_dir, "${aid_lc}.xml1");
-                    } else {
-                        $item_xml = catfile ($miztmp_dir, "${aid_lc}.xml1");
-                    }
-                    if (! -e $item_xml) {
-                        confess 'Absolutized XML for ', $aid_lc, ' not found at ', $item_xml;
-                    }
-                    my $item_xml_doc = parse_xml_file ($item_xml);
-                    my $item_xml_root = $item_xml_doc->documentElement ();
-                    my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
-                    (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
-                    if (! defined $definiens_node) {
-                        confess 'No Definiens node found in ', $item_xml, ' matching', $LF, $LF, '  ', $definiens_xpath;
-                    }
-                    my $count_xpath = "count (preceding::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
-                    my $count = $definiens_node->findvalue ($count_xpath);
-                    my $item = "${aid_lc}:${kind_lc}definiens:${count}";
-                    $deps{$item} = 0;
+                    $item_xml = catfile ($miztmp_dir, "${aid_lc}.xml1");
                 }
+                if (! -e $item_xml) {
+                    confess 'Absolutized XML for ', $aid_lc, ' not found at ', $item_xml;
+                }
+                my $item_xml_doc = parse_xml_file ($item_xml);
+                my $item_xml_root = $item_xml_doc->documentElement ();
+                my $definiens_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                (my $definiens_node) = $item_xml_root->findnodes ($definiens_xpath);
+                if (! defined $definiens_node) {
+                    confess 'No Definiens node found in ', $item_xml, ' matching', $LF, $LF, '  ', $definiens_xpath;
+                }
+                my $count_xpath = "count (preceding::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                my $count = $definiens_node->findvalue ($count_xpath);
+                my $item = "${aid_lc}:${kind_lc}definiens:${count}";
+                $deps{$item} = 0;
             }
             # Record constructor dependencies
             my @constructors = constructors_in_file ($file);
@@ -368,49 +358,44 @@ sub article_dependencies {
                 my $defnr = get_attribute ($definiens, 'defnr');
                 my $aid_lc = lc $aid;
                 my $kind_lc = lc $definiens_kind;
-                if ($aid eq $constraid) {
-                    my $item = "${aid_lc}:${kind_lc}definiens:${nr}";
-                    $deps{$item} = 0;
+                my $item_xml = undef;
+                my $prel_def = undef;
+                if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
+                    my $prel_dir = catdir ($article_dir, 'prel');
+                    if (! -d $prel_dir) {
+                        confess 'No prel dir under ', $article_dir;
+                    }
+                    $prel_def = catfile ($prel_dir, "${aid_lc}.def");
                 } else {
-                    my $item_xml = undef;
-                    my $prel_def = undef;
-                    if ($aid_lc =~ /\A ${PREFIX_LC} \d+ \z/) {
-                        my $prel_dir = catdir ($article_dir, 'prel');
-                        if (! -d $prel_dir) {
-                            confess 'No prel dir under ', $article_dir;
-                        }
-                        $prel_def = catfile ($prel_dir, "${aid_lc}.def");
+                    my $prel_dir = catdir ($mizfiles, 'prel');
+                    if (! -d $prel_dir) {
+                        confess 'prel directory missing.';
+                    }
+                    my $first_letter = undef;
+                    if ($aid_lc =~ /\A (.) /) {
+                        $first_letter = $1;
                     } else {
-                        my $prel_dir = catdir ($mizfiles, 'prel');
-                        if (! -d $prel_dir) {
-                            confess 'prel directory missing.';
-                        }
-                        my $first_letter = undef;
-                        if ($aid_lc =~ /\A (.) /) {
-                            $first_letter = $1;
-                        } else {
-                            confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
-                        }
-                        my $prel_first_letter_dir = catdir ($prel_dir, $first_letter);
-                        if (! -d $prel_first_letter_dir) {
-                            confess $first_letter, ' directory missing under ', $prel_dir;
-                        }
-                        $prel_def = catfile ($prel_first_letter_dir, "/${aid_lc}.def");
+                        confess 'Cannot make sense of aid \'', $aid_lc, '\'.';
                     }
-                    if (! -e $prel_def) {
-                        confess $prel_def, ' missing.';
+                    my $prel_first_letter_dir = catdir ($prel_dir, $first_letter);
+                    if (! -d $prel_first_letter_dir) {
+                        confess $first_letter, ' directory missing under ', $prel_dir;
                     }
-                    my $prel_def_doc = parse_xml_file ($prel_def);
-                    my $prel_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
-                    (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
-                    if (! defined $prel_item) {
-                        confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
-                    }
-                    my $count_xpath = "count (preceding-sibling::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
-                    my $prel_item_pos = $prel_item->findvalue ($count_xpath);
-                    my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
-                    $deps{$item} = 0;
+                    $prel_def = catfile ($prel_first_letter_dir, "/${aid_lc}.def");
                 }
+                if (! -e $prel_def) {
+                    confess $prel_def, ' missing.';
+                }
+                my $prel_def_doc = parse_xml_file ($prel_def);
+                my $prel_xpath = "descendant::Definiens[\@constrkind = \"${definiens_kind}\" and \@defnr = \"${defnr}\"]";
+                (my $prel_item) = $prel_def_doc->findnodes ($prel_xpath);
+                if (! defined $prel_item) {
+                    confess 'No item in ', $prel_def, ' found matching', $LF, $LF, $prel_xpath;
+                }
+                my $count_xpath = "count (preceding-sibling::Definiens[\@constrkind = \"${definiens_kind}\"]) + 1";
+                my $prel_item_pos = $prel_item->findvalue ($count_xpath);
+                my $item = "${aid_lc}:${kind_lc}definiens:${prel_item_pos}";
+                $deps{$item} = 0;
             }
             # Record constructor dependencies
             my @constructors = constructors_in_file ($file);
