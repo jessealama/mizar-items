@@ -31,6 +31,7 @@ my $timeout = 600; # seconds
 my $suggested_clusters = undef;
 my $clusters_only = 0;
 my $opt_randomize = 0;
+my $opt_only_requirements = 0;
 
 GetOptions(
     'help|?' => \$help,
@@ -48,6 +49,7 @@ GetOptions(
     'suggested-clusters=s' => \$suggested_clusters,
     'clusters-only' => \$clusters_only,
     'randomize' => \$opt_randomize,
+    'only-requirements' => \$opt_only_requirements,
 ) or pod2usage(2);
 
 pod2usage(1) if $help;
@@ -83,6 +85,14 @@ if (defined $suggested_clusters) {
 		'debug' => $opt_debug,
 		'verbose' => $opt_verbose} );
     }
+} elsif ($opt_only_requirements) {
+    $a->minimize_requirements (
+	{ 'checker-only' => $checker_only,
+	  'fast-theorems-and-schemes' => ($fast_theorems && $fast_schemes),
+	  'randomize' => $opt_randomize,
+	  'debug' => $opt_debug,
+      }
+    );
 } else {
     $a->minimize (
 	{ 'checker-only' => $checker_only,
