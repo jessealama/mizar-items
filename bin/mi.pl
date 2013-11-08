@@ -3372,7 +3372,7 @@ sub render_non_local_item {
         my %formulas = %{$article_contents{$article}};
         my $rendered = $formulas{$tptp};
         if (! defined $rendered) {
-            confess 'No know rendering for ', $tptp, '.';
+            confess 'No known rendering for ', $tptp, '.';
         }
         return $rendered;
     } else {
