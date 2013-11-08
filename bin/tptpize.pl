@@ -1683,6 +1683,23 @@ sub value_type_for_constructor {
     return generalize_formula_from_arg_types ($content, @arg_types);
 }
 
+sub tptp_name_for_rcluster {
+    my $gconstructor = shift;
+    (my $rcluster) = $gconstructor->findnodes ('following-sibling::Registration[1]/RCluster');
+    if (! defined $rcluster) {
+        confess 'RCluster node not found following a G constructor:', $LF, $gconstructor->toString;
+    }
+    my $nr = get_nr_attribute ($rcluster);
+    my $aid = get_aid_attribute ($rcluster);
+    my $aid_lc = lc $aid;
+    return "rc${nr}_${aid_lc}";
+}
+
+sub rcluster_for_gconstructor {
+    my $gconstructor = shift;
+    return '$true'; # punting
+}
+
 sub tptp_name_for_widening {
     my $gconstructor = shift;
     (my $lconstructor) = $gconstructor->findnodes ('preceding-sibling::Constructor[@kind = "L"]');
@@ -2022,7 +2039,7 @@ foreach my $item (@items) {
     }
 }
 
-# Structures: freeness, projections, widenings
+# Structures: freeness, projections, widenings, axiomatic rclusters
 
 my @gconstructors = $article_root->findnodes ('descendant::Constructor[@kind = "G"]');
 $pl->foreach (\@gconstructors,
@@ -2056,6 +2073,15 @@ $pl->foreach (\@gconstructors,
           );
 
 # Functors that don't have existence or uniqueness conditions
+$pl->foreach (\@gconstructors,
+              sub { my $constructor = $_;
+                    my $tptp_rcluster_name = tptp_name_for_rcluster ($constructor);
+                    my $rcluster_content = rcluster_for_gconstructor ($constructor);
+                    $items{$tptp_rcluster_name} = $rcluster_content;
+                    return;
+                }
+          );
+
 my @kconstructors = $article_root->findnodes ('descendant::Constructor[@kind = "K" and not(preceding-sibling::Existence) and not(preceding-sibling::Uniqueness) and not(parent::Definition[@redefinition = "true"]) and not(preceding-sibling::Correctness)]');
 $pl->foreach (\@kconstructors,
               sub { my $constructor = $_;
