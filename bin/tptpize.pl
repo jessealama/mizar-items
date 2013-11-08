@@ -1106,6 +1106,14 @@ sub render_item {
             confess 'Proposition node not found under a Compatibility node.';
         }
         return render_proposition ($proposition);
+    } elsif (($name eq 'Canceled') && ($item->getAttribute ('kind') eq 'T')) {
+        return '$true';
+    } elsif ($name eq 'Reducibility') {
+        (my $proposition) = $item->findnodes ('Proposition');
+        if (! defined $proposition) {
+            confess 'Proposition node not found under a Reducibility node.';
+        }
+        return render_proposition ($proposition);
     } else {
         confess 'How to render items of kind \'', $name, '\'?';
     }
@@ -1538,8 +1546,8 @@ sub first_letter {
 sub item_position {
     my $item = shift;
     my $name = $item->nodeName;
-    if ($name eq 'JustifiedTheorem') {
-        $item->findvalue ('count (preceding-sibling::JustifiedTheorem) + 1');
+    if (($name eq 'JustifiedTheorem') || (($name eq 'Canceled') && ($item->getAttribute ('kind') eq 'T'))) {
+        $item->findvalue ('count (preceding-sibling::JustifiedTheorem | preceding-sibling::Canceled[@kind = "T"]) + 1');
     } elsif ($name eq 'Proposition') {
         $item->findvalue ('count (preceding-sibling::Proposition) + 1');
     } elsif ($name eq 'CCluster') {
@@ -1554,6 +1562,8 @@ sub item_position {
         $item->findvalue ('count (preceding::Reduction) + 1');
     } elsif ($name eq 'DefTheorem') {
         $item->findvalue ('count (preceding-sibling::DefTheorem) + 1');
+    } elsif ($name eq 'Reducibility') {
+        $item->findvalue ('count (preceding::Reducibility) + 1');
     } else {
         confess 'How to find the position of nodes like \'', $name, '\'?';
     }
@@ -1602,7 +1612,7 @@ sub tptp_name_for_item {
         return "${name}_${kind}${nr}_${aid}";
     } else {
         my $pos = item_position ($item);
-        if ($name eq 'JustifiedTheorem') {
+        if (($name eq 'JustifiedTheorem') || (($name eq 'Canceled') && ($item->getAttribute ('kind') eq 'T'))) {
             return "t${pos}_${article}";
         } elsif ($name eq 'Proposition') {
             return "l${pos}_${article}";
@@ -1616,6 +1626,8 @@ sub tptp_name_for_item {
             return "red${pos}_${article}";
         } elsif ($name eq 'DefTheorem') {
             return "d${pos}_${article}";
+        } elsif ($name eq 'Reducibility') {
+            return "x${pos}_${article}";
         } else {
             confess 'How to make a TPTP name for items of kind \'', $name, '\'?';
         }
@@ -1892,7 +1904,7 @@ my @xpaths = (
     'Proposition',
     'RegistrationBlock/Registration/*[self::CCluster or self::FCluster or self::RCluster]',
     'RegistrationBlock/IdentifyRegistration/Identify',
-    'RegistrationBlock/ReductionRegistration/Reduction',
+    'RegistrationBlock/ReductionRegistration/Reducibility',
     'DefinitionBlock/Definition/Constructor/Properties/*',
     'DefinitionBlock/Definition[not(@redefinition = "true")]/Existence',
     'DefinitionBlock/Definition[not(@redefinition = "true")]/Uniqueness',
@@ -1900,6 +1912,7 @@ my @xpaths = (
     'DefinitionBlock/Definition[not(@redefinition = "true")]/Correctness/Coherence',
     'DefTheorem',
     'descendant::Proposition[following-sibling::*[1][self::From[not(ancestor::SchemeBlock)]]]',
+    'Canceled',
 );
 
 my $xpath = join (' | ', @xpaths);
