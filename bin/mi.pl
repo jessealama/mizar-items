@@ -1363,8 +1363,6 @@ foreach my $item (keys %dependencies) {
     }
 }
 
-
-
 # Resolve all dependencies
 my %resolved_dependencies = ();
 
