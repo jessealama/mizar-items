@@ -3496,6 +3496,18 @@ sub is_redefined_constructor {
 
 sub definition_for_constructor {
     my $constructor_item = shift;
+    if ($constructor_item eq 'hidden:rconstructor:1') {
+        return 'fof(r1_hidden,definition,$true).';
+    }
+    if ($constructor_item eq 'hidden:rconstructor:2') {
+        return 'fof(r2_hidden,definition,$true).';
+    }
+    if ($constructor_item eq 'hidden:mconstructor:1') {
+        return 'fof(m1_hidden,definition,$true).';
+    }
+    if ($constructor_item eq 'hidden:mconstructor:2') {
+        return 'fof(m2_hidden,definition,$true).';
+    }
     my $article = article_of_item ($constructor_item);
     my $nr = nr_of_item ($constructor_item);
     my $kind = constructor_kind ($constructor_item);
