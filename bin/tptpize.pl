@@ -1046,6 +1046,12 @@ sub render_item {
             confess 'No ancestor constructor for property ', $name, '.';
         }
         return render_asymmetry ($constructor);
+    } elsif ($name eq 'Asymmetry') {
+        (my $constructor) = $item->findnodes ('ancestor::Constructor');
+        if (! defined $constructor) {
+            confess 'No ancestor constructor for property ', $name, '.';
+        }
+        return render_asymmetry ($constructor);
     } elsif ($name eq 'Connectedness') {
         (my $constructor) = $item->findnodes ('ancestor::Constructor');
         if (! defined $constructor) {
