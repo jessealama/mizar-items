@@ -3965,11 +3965,11 @@ sub problem_for_item {
                     push (@problem, $typing);
                 }
             }
+            my $def = definition_for_constructor ($dep);
+            if (defined $def) {
+                push (@problem, $def);
+            }
             if (is_redefined_constructor ($dep)) {
-                my $def = definition_for_constructor ($dep);
-                if (defined $def) {
-                    push (@problem, $def);
-                }
                 my $compat = compatibility_for_constructor ($dep);
                 if (defined $compat) {
                     push (@problem, $compat);
