@@ -3464,6 +3464,9 @@ sub is_redefined_constructor {
     if (defined $redefined{$item}) {
         return $redefined{$item};
     }
+    if ($item =~ /\A hidden [:] . constructor [:] \d+ \z/) {
+        return 0;
+    }
     my $answer = undef;
     if (is_constructor_item ($item)) {
         my $article = article_of_item ($item);
