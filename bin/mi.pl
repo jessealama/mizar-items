@@ -3358,6 +3358,12 @@ sub render_non_local_item {
     if ($item eq 'hidden:rconstructor:2[asymmetry]') {
         return 'fof(asymmetry_r2_hidden,axiom,(! [X,Y] : (r2_hidden(X,Y) => ~r2_hidden(Y,X)))).';
     }
+    if ($item eq 'hidden:rconstructor:1[symmetry]') {
+        return 'fof(symmetry_r1_hidden,axiom,(! [X,Y] : (r1_hidden(X,Y) => r1_hidden(Y,X)))).';
+    }
+    if ($item eq 'hidden:rconstructor:1[reflexivity]') {
+        return 'fof(reflexivity_r1_hidden,axiom,(! [X] : r1_hidden(X,X))).';
+    }
     my $article = article_of_item ($item);
     if (defined $article_contents{$article}) {
         my %formulas = %{$article_contents{$article}};
