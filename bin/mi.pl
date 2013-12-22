@@ -23,6 +23,10 @@ use Parallel::Loops;
 use Utils qw(parse_xml_file enable_xml_caching);
 
 Readonly my $LF => "\N{LF}";
+Readonly my $SP => ' '; # single space
+Readonly my $LLF => ($LF x 2);
+Readonly my $SSP => ($SP x 2);
+Readonly my $FLUSH => "${LLF}${SSP}";
 Readonly my $PREFIX_LC => lc 'ckb';
 Readonly my $PREFIX_UC => uc $PREFIX_LC;
 
