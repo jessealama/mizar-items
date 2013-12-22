@@ -3452,7 +3452,7 @@ sub conjecturify_formula_in_problem {
         }
     }
     if (! $encountered) {
-        confess 'We were asked to turn', $LF, $LF, '  ', $formula_name, $LF, $LF, 'into a conjecture, but that formula does not occur in the given list of formulas:', $LF, $LF, Dumper (@formulas);
+        confess 'We were asked to turn', $LF, $LF, '  ', $formula_name, $LF, $LF, 'into a conjecture, but that formula does not occur in the given list of formulas:', $LF, $LF, Dumper (@formulas), $LF;
     }
     return @new_problem;
 }
