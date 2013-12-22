@@ -942,7 +942,8 @@ foreach my $prel_file (@prel_files) {
                         $i--;
                     }
                     my $property_lc = lc $property;
-                    my $condition_or_property = "${article_name}:${kind}constructor:${index}[${property_lc}]";
+                    my $item = "${article_name}:${kind}constructor:${index}";
+                    my $condition_or_property = "${item}[${property_lc}]";
                     if (defined $target_fragment_index) {
                         my $property_fragment = "${PREFIX_LC}${target_fragment_index}";
                         my $property_fragment_miz = "${text_dir}/${property_fragment}.miz";
@@ -1342,14 +1343,14 @@ foreach my $item (keys %dependencies) {
                 confess 'We failed to find a constructor node in ', $fragment_atr, ' matching', $LF, $LF, '  ', $xpath, $LF, $LF, 'Yet somehow we believe that ', $item, ' (source: ', $source, ') depends on ', $dep, '.';
             }
             my @property_nodes = $constructor_node->findnodes ('Properties/*');
+            my $constructor_item = "${article}:${kind}constructor:${nr}";
+            my $item = "${PREFIX_LC}${fragment_number}";
             foreach my $property_node (@property_nodes) {
                 my $property = $property_node->nodeName ();
                 if ($property eq 'Antisymmetry') {
                     $property = 'Asymmetry';
                 }
                 my $property_lc = lc $property;
-                my $item = "${PREFIX_LC}${fragment_number}";
-                my $constructor_item = "${article}:${kind}constructor:${nr}";
                 my $property_item = "${constructor_item}[${property_lc}]";
                 push (@deps, $property_item);
             }
