@@ -2078,7 +2078,6 @@ $pl->foreach (\@gconstructors,
                 }
           );
 
-# Functors that don't have existence or uniqueness conditions
 $pl->foreach (\@gconstructors,
               sub { my $constructor = $_;
                     my $tptp_rcluster_name = tptp_name_for_rcluster ($constructor);
@@ -2088,7 +2087,8 @@ $pl->foreach (\@gconstructors,
                 }
           );
 
-my @kconstructors = $article_root->findnodes ('descendant::Constructor[@kind = "K" and not(preceding-sibling::Existence) and not(preceding-sibling::Uniqueness) and not(parent::Definition[@redefinition = "true"]) and not(preceding-sibling::Correctness)]');
+# Functors that don't have existence or uniqueness conditions
+my @kconstructors = $article_root->findnodes ('descendant::Constructor[@kind = "K" and not(preceding-sibling::Existence) and not(preceding-sibling::Uniqueness) and not(parent::Definition[@redefinition = "true"])]');
 $pl->foreach (\@kconstructors,
               sub { my $constructor = $_;
                     my $tptp_existence_name = tptp_name_for_existence ($constructor);
