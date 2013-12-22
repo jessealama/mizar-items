@@ -3394,7 +3394,7 @@ sub render_non_local_item {
         if (defined $answer) {
             return $answer;
         } else {
-            carp 'We did not find ', $item, ' (TPTP name: ', $tptp, ') in ', $article_contents_file, '.';
+            confess 'We did not find ', $item, ' (TPTP name: ', $tptp, ') in ', $article_contents_file, '.';
             return;
         }
     }
