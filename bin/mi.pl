@@ -3891,6 +3891,45 @@ sub render_fraenkel_item {
     return $result_formula;
 }
 
+sub choices_in_tptp_formula {
+    my $kind = shift;
+    my $tptp_formula = shift;
+    my $xml = xml_of_tptp_str ($tptp_formula);
+    my $choice_xpath = 'descendant::function[count(*) = 0 and starts-with (@name, "epsilon_")]';
+    my @choice_terms = $xml->findnodes ($choice_xpath);
+    my %choices = ();
+    foreach my $choice (@choice_terms) {
+        my $n = get_name_attribute ($choice);
+        $choices{$n} = 0;
+    }
+    return keys %choices;
+}
+
+sub choices_in_problem {
+    my $kind = shift;
+    my @problem = @_;
+    my %choices = ();
+    foreach my $formula (@problem) {
+        my @choices = choices_in_tptp_formula ($kind, $formula);
+        foreach my $choice (@choices) {
+            $choices{$choice} = 0;
+        }
+    }
+    return keys %choices;
+}
+
+sub render_choice_item {
+    my $choice_item = shift;
+    if ($choice_item =~ /\A epsilon [_] /) {
+        my $tptp_name = "${choice_item}";
+        my $content = '$true';
+        my $result_formula = "fof(${tptp_name},hypothesis,${content}).";
+        return $result_formula;
+    } else {
+        confess 'Unable to make sense of the choice item \'', $choice_item, '\'.';
+    }
+}
+
 sub constructors_of_kind_in_tptp_formula {
     my $kind = shift;
     my $tptp_formula = shift;
@@ -4060,6 +4099,24 @@ sub problem_for_item {
         my $fraenkel_formula = render_fraenkel_item ($fraenkel);
         push (@problem, $fraenkel_formula);
     }
+
+    # Constructor properties may depend on the definition of the underlying constructor
+    if ($item =~ /\A ([a-z0-9_]+) [:] (.) constructor [:] (\d+) [[] [a-z]+ []] \z/) {
+        my $constructor = constructor_of_constructor_property ($item);
+        my $def = definition_for_constructor ($constructor);
+        my @deps = @{$dependencies{$item}};
+        push (@problem, $def);
+        carp 'Declaring that ', $item, ' depends on ', $def;
+    }
+
+    # Choice/epislon terms
+    my @choices = choices_in_problem (@problem);
+    foreach my $choice (@choices) {
+        my $choice_formula = render_choice_item ($choice);
+        carp 'Postulating choice formula', $FLUSH, $choice_formula;
+        push (@problem, $choice_formula);
+    }
+
     # remove any potential duplicates
     my %formulas = ();
     foreach my $formula (@problem) {
