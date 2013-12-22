@@ -8,7 +8,7 @@
   :documentation "The system version of the Mizar that we currently support.")
 
 (define-constant +mml-version+
-    "5.15.1174"
+    "5.22.1191"
   :test #'string=
   :documentation "The MML version that we support.")
 
