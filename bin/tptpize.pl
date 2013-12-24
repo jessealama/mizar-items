@@ -1873,49 +1873,43 @@ sub projections_for_structure_constructor {
     return @projections;
 }
 
+sub fetch_first_node_matching {
+    my $node = shift;
+    my $xpath = shift;
+    my $name = $node->nodeName;
+    (my $target) = $node->findnodes ($xpath);
+    if (defined $target) {
+        return $target;
+    } else {
+        confess 'Error: from a ', $name, ' node we could not find a node matching the XPath expression', $FLUSH, $xpath;
+    }
+}
+
 sub render_choice_term {
     my $node = shift;
-    (my $typ) = $node->findnodes ('Typ');
-    if (! defined $typ) {
-        confess 'Choice node lacks a Typ child.';
-    }
-    my $typ_aid = get_aid_attribute ($typ);
+    my $typ = fetch_first_node_matching ($node, 'Typ');
     my $typ_nr = get_nr_attribute ($typ);
-    my $typ_kind = get_kind_attribute ($typ);
+    my $typ_aid = get_aid_attribute ($typ);
     my $typ_aid_lc = lc $typ_aid;
+    my $typ_kind = get_kind_attribute ($typ);
     my $typ_kind_lc = lc $typ_kind;
-    my $typ_rendered = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
-    # now render any adjectives, if present
-    my @adjectives = $typ->findnodes ('Cluster[1]/Adjective');
-    # # if there are any constants in the adjectives, die
-    # if (any { $_->exists ('descendant::Const') } @adjectives) {
-    #     confess 'How to deal with choice terms that have constants in some adjective? The choice term is:', $LF, $node->toString, $LF, $LF, 'The toplevel ancestor is:', $LF, $LF, $toplevel_ancestor->toString;
-    # }
-    my $num_adjectives = scalar @adjectives;
-    foreach my $i (1 .. $num_adjectives) {
-        my $adjective = $adjectives[$i - 1];
-        my @constants = $adjective->findnodes ('descendant::Const');
-        my $adj_aid = get_aid_attribute ($adjective);
+    my $cluster = fetch_first_node_matching ($typ, 'Cluster');
+    my @adjectives = $cluster->findnodes ('*');
+    my $term = "the";
+    foreach my $adjective (@adjectives) {
         my $adj_nr = get_absnr_attribute ($adjective);
+        my $adj_aid = get_aid_attribute ($adjective);
+        my $adj_kind = get_kind_attribute ($adjective);
         my $adj_aid_lc = lc $adj_aid;
-        my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
-        my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
-        if ($adj_is_negated) {
-            $adj_guard = 'non_' . $adj_guard;
+        my $adj_kind_lc = lc $adj_kind;
+        if ($adjective->exists ('@value="false"')) {
+            $term .= "__non_${adj_kind_lc}${adj_nr}_${adj_aid_lc}";
+        } else {
+            $term .= "__${adj_kind_lc}${adj_nr}_${adj_aid_lc}";
         }
-        foreach my $constant (@constants) {
-            my $const_typ = type_for_constant ($constant);
-            my $const_typ_aid = get_aid_attribute ($const_typ);
-            my $const_typ_kind = get_kind_attribute ($const_typ);
-            my $const_typ_aid_lc = lc $const_typ_aid;
-            my $const_typ_kind_lc = lc $const_typ_kind;
-            my $const_typ_nr = get_absnr_attribute ($const_typ);
-            my $const_typ_tptp = "${const_typ_kind_lc}${const_typ_nr}_${const_typ_aid_lc}";
-            $typ_rendered .= "__${const_typ_tptp}";
-        }
-        $typ_rendered .= "_${adj_guard}";
     }
-    return "epsilon_${typ_rendered}";
+    $term .= "__${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
+    return $term;
 }
 
 ensure_sensible_environment ();
@@ -1983,70 +1977,67 @@ sub content_node {
 }
 
 # Value types of choice terms
-foreach my $item (@items) {
-    my $content_node = content_node ($item);
-    my @choice_terms = $content_node->findnodes ('descendant::Choice');
-    foreach my $choice (@choice_terms) {
-        (my $typ) = $choice->findnodes ('Typ');
-        if (! defined $typ) {
-            confess 'Choice node lacks a Typ child.';
+my @choice_terms = $article_root->findnodes ('descendant::Choice');
+foreach my $choice (@choice_terms) {
+    (my $typ) = $choice->findnodes ('Typ');
+    if (! defined $typ) {
+        confess 'Choice node lacks a Typ child.';
+    }
+    my $typ_aid = get_aid_attribute ($typ);
+    my $typ_nr = get_nr_attribute ($typ);
+    my $typ_kind = get_kind_attribute ($typ);
+    my $typ_aid_lc = lc $typ_aid;
+    my $typ_kind_lc = lc $typ_kind;
+    my $typ_rendered = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
+    # now render any adjectives, if present
+    my @adjectives = $typ->findnodes ('Cluster[1]/Adjective');
+    # if there are any constants in the adjectives, die
+    # if (any { $_->exists ('descendant::Const') } @adjectives) {
+    #     confess 'How to deal with choice terms that have constants in some adjective?', $LF, $choice->toString, $LF, 'The item is:', $LF, $item->toString;
+    # }
+    my $num_adjectives = scalar @adjectives;
+    foreach my $i (1 .. $num_adjectives) {
+        my $adjective = $adjectives[$i - 1];
+        my @constants = $adjective->findnodes ('descendant::Const');
+        my $adj_aid = get_aid_attribute ($adjective);
+        my $adj_nr = get_absnr_attribute ($adjective);
+        my $adj_aid_lc = lc $adj_aid;
+        my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
+        my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
+        if ($adj_is_negated) {
+            $adj_guard = 'non_' . $adj_guard;
         }
-        my $typ_aid = get_aid_attribute ($typ);
-        my $typ_nr = get_nr_attribute ($typ);
-        my $typ_kind = get_kind_attribute ($typ);
-        my $typ_aid_lc = lc $typ_aid;
-        my $typ_kind_lc = lc $typ_kind;
-        my $typ_rendered = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
-        # now render any adjectives, if present
-        my @adjectives = $typ->findnodes ('Cluster[1]/Adjective');
-        # if there are any constants in the adjectives, die
-        # if (any { $_->exists ('descendant::Const') } @adjectives) {
-        #     confess 'How to deal with choice terms that have constants in some adjective?', $LF, $choice->toString, $LF, 'The item is:', $LF, $item->toString;
-        # }
-        my $num_adjectives = scalar @adjectives;
+        foreach my $constant (@constants) {
+            my $const_typ = type_for_constant ($constant);
+            my $const_typ_aid = get_aid_attribute ($const_typ);
+            my $const_typ_kind = get_kind_attribute ($const_typ);
+            my $const_typ_aid_lc = lc $const_typ_aid;
+            my $const_typ_kind_lc = lc $const_typ_kind;
+            my $const_typ_nr = get_absnr_attribute ($const_typ);
+            my $const_typ_tptp = "${const_typ_kind_lc}${const_typ_nr}_${const_typ_aid_lc}";
+            $typ_rendered .= "__${const_typ_tptp}";
+        }
+        $typ_rendered .= "_${adj_guard}";
+    }
+    my $choice_term = render_choice_term ($choice);
+    my $content = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}(${choice_term})";
+    if ($num_adjectives > 0) {
         foreach my $i (1 .. $num_adjectives) {
             my $adjective = $adjectives[$i - 1];
-            my @constants = $adjective->findnodes ('descendant::Const');
             my $adj_aid = get_aid_attribute ($adjective);
             my $adj_nr = get_absnr_attribute ($adjective);
             my $adj_aid_lc = lc $adj_aid;
             my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
             my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
             if ($adj_is_negated) {
-                $adj_guard = 'non_' . $adj_guard;
+                $adj_guard = '~' . $adj_guard;
             }
-            foreach my $constant (@constants) {
-                my $const_typ = type_for_constant ($constant);
-                my $const_typ_aid = get_aid_attribute ($const_typ);
-                my $const_typ_kind = get_kind_attribute ($const_typ);
-                my $const_typ_aid_lc = lc $const_typ_aid;
-                my $const_typ_kind_lc = lc $const_typ_kind;
-                my $const_typ_nr = get_absnr_attribute ($const_typ);
-                my $const_typ_tptp = "${const_typ_kind_lc}${const_typ_nr}_${const_typ_aid_lc}";
-                $typ_rendered .= "__${const_typ_tptp}";
-            }
-            $typ_rendered .= "_${adj_guard}";
+            $content .= " & ${adj_guard}(${choice_term})";
         }
-        my $choice_term = "epsilon_${typ_rendered}";
-        my $content = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}(${choice_term})";
-        if ($num_adjectives > 0) {
-            foreach my $i (1 .. $num_adjectives) {
-                my $adjective = $adjectives[$i - 1];
-                my $adj_aid = get_aid_attribute ($adjective);
-                my $adj_nr = get_absnr_attribute ($adjective);
-                my $adj_aid_lc = lc $adj_aid;
-                my $adj_guard = "v${adj_nr}_${adj_aid_lc}";
-                my $adj_is_negated = ($adjective->hasAttribute ('value')) && ($adjective->getAttribute ('value') eq 'false');
-                if ($adj_is_negated) {
-                    $adj_guard = '~' . $adj_guard;
-                }
-                $content .= " & ${adj_guard}(${choice_term})";
-            }
-        }
-        $content = "(${content})";
-        my $tptp_name = "dt_${choice_term}";
-        $items{$tptp_name} = $content;
     }
+    $content = "(${content})";
+    my $tptp_name = "dt_${choice_term}";
+    $items{$tptp_name} = $content;
 }
 
 # Structures: freeness, projections, widenings, axiomatic rclusters
