@@ -4170,7 +4170,7 @@ sub problem_for_item {
         carp 'Declaring that ', $item, ' depends on ', $def;
     }
 
-    # Choice/epislon terms
+    # Choice/epsilon terms
     my @choices = choices_in_problem (@problem);
     foreach my $choice (@choices) {
         my $choice_formula = render_choice_item ($choice);
