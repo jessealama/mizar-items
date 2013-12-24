@@ -2096,17 +2096,41 @@ sub tptp_name_for_item {
 
 sub render_choice_term {
     my $node = shift;
-    (my $typ) = $node->findnodes ('Typ');
-    if (! defined $typ) {
-        confess 'Choice node lacks a Typ child.';
-    }
-    my $typ_aid = get_aid_attribute ($typ);
+    my $typ = fetch_first_node_matching ($node, 'Typ');
     my $typ_nr = get_nr_attribute ($typ);
-    my $typ_kind = get_kind_attribute ($typ);
+    my $typ_aid = get_aid_attribute ($typ);
     my $typ_aid_lc = lc $typ_aid;
+    my $typ_kind = get_kind_attribute ($typ);
     my $typ_kind_lc = lc $typ_kind;
-    my $typ_rendered = "${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
-    return "epsilon_${typ_rendered}";
+    my $cluster = fetch_first_node_matching ($typ, 'Cluster');
+    my @adjectives = $cluster->findnodes ('*');
+    my $term = "the";
+    foreach my $adjective (@adjectives) {
+        my $adj_nr = get_absnr_attribute ($adjective);
+        my $adj_aid = get_aid_attribute ($adjective);
+        my $adj_kind = get_kind_attribute ($adjective);
+        my $adj_aid_lc = lc $adj_aid;
+        my $adj_kind_lc = lc $adj_kind;
+        if ($adjective->exists ('@value="false"')) {
+            $term .= "__non_${adj_kind_lc}${adj_nr}_${adj_aid_lc}";
+        } else {
+            $term .= "__${adj_kind_lc}${adj_nr}_${adj_aid_lc}";
+        }
+    }
+    $term .= "__${typ_kind_lc}${typ_nr}_${typ_aid_lc}";
+    return $term;
+}
+
+sub fetch_first_node_matching {
+    my $node = shift;
+    my $xpath = shift;
+    my $name = $node->nodeName;
+    (my $target) = $node->findnodes ($xpath);
+    if (defined $target) {
+        return $target;
+    } else {
+        confess 'Error: from a ', $name, ' node we could not find a node matching the XPath expression', $FLUSH, $xpath;
+    }
 }
 
 sub tptp_formula {
@@ -3892,25 +3916,25 @@ sub render_fraenkel_item {
 }
 
 sub choices_in_tptp_formula {
-    my $kind = shift;
     my $tptp_formula = shift;
     my $xml = xml_of_tptp_str ($tptp_formula);
-    my $choice_xpath = 'descendant::function[count(*) = 0 and starts-with (@name, "epsilon_")]';
+    my $choice_xpath = 'descendant::function[starts-with (@name, "the__")]';
     my @choice_terms = $xml->findnodes ($choice_xpath);
     my %choices = ();
     foreach my $choice (@choice_terms) {
-        my $n = get_name_attribute ($choice);
-        $choices{$n} = 0;
+        my $name = $choice->getAttribute ('name');
+        $choices{$name} = 0;
     }
-    return keys %choices;
+    my @choices = keys %choices;
+    carp 'Choices in', $FLUSH, $tptp_formula, $LLF, 'are:', $LLF, Dumper (@choices);
+    return @choices;
 }
 
 sub choices_in_problem {
-    my $kind = shift;
     my @problem = @_;
     my %choices = ();
     foreach my $formula (@problem) {
-        my @choices = choices_in_tptp_formula ($kind, $formula);
+        my @choices = choices_in_tptp_formula ($formula);
         foreach my $choice (@choices) {
             $choices{$choice} = 0;
         }
@@ -3920,13 +3944,50 @@ sub choices_in_problem {
 
 sub render_choice_item {
     my $choice_item = shift;
-    if ($choice_item =~ /\A epsilon [_] /) {
-        my $tptp_name = "${choice_item}";
-        my $content = '$true';
-        my $result_formula = "fof(${tptp_name},hypothesis,${content}).";
-        return $result_formula;
+    if ($choice_item =~ /\A the (.*) [_] [_] ([a-z]) (\d+) [_] ([a-z0-9_]+) \z/) {
+        my ($adjectives, $radix_kind, $radix_nr, $radix_aid)
+            = ($1, $2, $3, $4);
+        my $tptp_name = "dt_${choice_item}";
+        my $radix_kind_uc = uc $radix_kind;
+        my $radix_aid_uc = uc $radix_aid;
+        my $radix_xml = catfile ($miztmp_dir, "${radix_aid}.xml1");
+        my $content = undef;
+        if ($radix_aid eq 'hidden') {
+            my $pred = "${radix_kind}${radix_nr}_${radix_aid}";
+            $content = "${pred}(${choice_item})";
+        } else {
+            if (! -e $radix_xml) {
+                confess 'Cannot render the choice item', $FLUSH, $choice_item, $LLF, 'because', $FLUSH, $radix_xml, $LLF, 'does not exist.';
+            }
+            my $radix_xml_doc = parse_xml_file ($radix_xml);
+            my $radix_xml_root = $radix_xml_doc->documentElement ();
+            my $radix_xpath = "descendant::Constructor[\@kind = \"${radix_kind_uc}\"][${radix_nr}]";
+            (my $radix_node) = $radix_xml_root->findnodes ($radix_xpath);
+            if (! defined $radix_node) {
+                confess 'Cannot render choice item', $FLUSH, $choice_item, $LLF, 'because in', $FLUSH, $radix_xml, $LLF, 'we cannot find a node matching', $FLUSH, $radix_xpath;
+            }
+            (my $arg_types) = $radix_node->findnodes ('ArgTypes');
+            if (! defined $arg_types) {
+                confess 'Cannot render choice item', $FLUSH, $choice_item, $LLF, 'because an ArgTypes child missing for the radix node.';
+            }
+            my $num_arg_types = $arg_types->findvalue ('count (*)');
+            if ($num_arg_types > 0) {
+                confess 'Unable to render the choice item', $FLUSH, $choice_item, $LLF, 'because the radix type takes arguments.';
+            }
+            my $pred = "${radix_kind}${radix_nr}_${radix_aid}";
+            $content = "${pred}(${choice_item})";
+        }
+        if ($adjectives =~ /\A [_] [_] (.+)/) {
+            my $trimmed_adjectives = $1;
+            my @adjectives = split ('__', $trimmed_adjectives);
+            foreach my $adj (@adjectives) {
+                $content .= " & ${adj}(${choice_item})";
+            }
+        }
+        my $fof = "fof(${tptp_name},axiom,(${content})).";
+        return $fof;
     } else {
-        confess 'Unable to make sense of the choice item \'', $choice_item, '\'.';
+        confess 'How to render', $FLUSH, $choice_item, $LLF, '?';
     }
 }
 
